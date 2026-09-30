@@ -1,0 +1,52 @@
+# Docker ignore file for Ruum monorepo
+# Files and directories that should not be copied to the Docker image
+
+# Git
+**/.git
+**/.gitignore
+
+# Node.js - Ignorar node_modules en todas partes
+**/node_modules
+**/npm-debug.log*
+
+# Next.js
+**/.next
+**/build
+**/dist
+**/.cache
+
+# IDE
+**/.vscode
+**/.idea
+**/.classpath
+**/.project
+**/.settings
+**/.toolstarget
+**/.vs
+**/*.*proj.user
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+**/logs
+**/*.log
+
+# Environment files (but keep .env.example for reference)
+**/.env
+**/.env.*
+!**/.env.example
+
+# Test coverage
+**/coverage
+
+# Temporary files
+tmp
+*~
+
+# Docker development files
+Dockerfile.dev
+docker-compose.dev.yml
+.docker

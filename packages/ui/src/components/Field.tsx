@@ -1,0 +1,128 @@
+"use client";
+
+import { forwardRef, useId, useState } from "react";
+import type { InputHTMLAttributes, ReactNode } from "react";
+
+export interface FieldProps extends InputHTMLAttributes<HTMLInputElement> {
+  etiqueta: string;
+  etiquetaClassName?: string;
+  passwordToggleClassName?: string;
+  error?: string | undefined;
+  ayuda?: ReactNode;
+}
+
+/** Campo con etiqueta visible, ayuda asociada y estado de error anunciado. */
+export const Field = forwardRef<HTMLInputElement, FieldProps>(function Field({
+  etiqueta,
+  etiquetaClassName = "",
+  passwordToggleClassName = "",
+  error,
+  ayuda,
+  id,
+  className = "",
+  type,
+  ...props
+}: FieldProps, ref) {
+  const reactId = useId();
+  const inputId = id ?? props.name ?? `field-${reactId}`;
+  const helpId = ayuda ? `${inputId}-help` : undefined;
+  const errorId = error ? `${inputId}-error` : undefined;
+  const describedBy = [helpId, errorId].filter(Boolean).join(" ") || undefined;
+  const [passwordVisible, setPasswordVisible] = useState(false);
+  const esPassword = type === "password";
+  const inputType = esPassword && passwordVisible ? "text" : type;
+  const inputClassName = [
+    "w-full min-h-12 rounded-[10px] border bg-surface px-3.5 py-2.5 font-body text-base text-text-primary shadow-[inset_0_1px_0_rgba(26,31,46,0.02)]",
+    esPassword ? "pr-11" : "",
+    "placeholder:text-text-tertiary transition-[border-color,box-shadow,background-color] duration-150",
+    "hover:border-border-strong focus:border-route-action focus:outline-none focus:ring-[3px] focus:ring-route-action/20",
+    error ? "border-danger-action bg-danger-soft focus:border-danger-action focus:ring-danger-action/15" : "border-border-strong",
+    "disabled:cursor-not-allowed disabled:border-border disabled:bg-surface-elevated disabled:text-text-disabled",
+    className
+  ].join(" ");
+
+  return (
+    <div className="flex flex-col gap-1.5">
+      <label htmlFor={inputId} className={`font-body text-sm font-semibold text-text-primary ${etiquetaClassName}`}>
+        {etiqueta}
+        {props.required ? <span className="ml-1 text-danger-action" aria-hidden> *</span> : null}
+      </label>
+      {esPassword ? (
+        <div className="relative flex items-center w-full">
+          <input
+            ref={ref}
+            id={inputId}
+            type={inputType}
+            className={inputClassName}
+            aria-invalid={Boolean(error)}
+            aria-describedby={describedBy}
+            data-ruum-label={etiqueta}
+            {...props}
+          />
+          <button
+            type="button"
+            onClick={() => setPasswordVisible((visible) => !visible)}
+            className={`absolute right-1.5 inset-y-0 my-auto flex h-9 w-9 items-center justify-center rounded-lg p-0 m-0 text-text-secondary transition-colors hover:bg-surface-elevated hover:text-text-primary focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-1 focus-visible:outline-route-action disabled:cursor-not-allowed disabled:text-text-disabled ${passwordToggleClassName}`}
+            aria-label={passwordVisible ? "Ocultar contraseña" : "Mostrar contraseña"}
+            disabled={props.disabled}
+          >
+            {passwordVisible ? <IconoOjoCerrado /> : <IconoOjo />}
+          </button>
+        </div>
+      ) : (
+        <input
+          ref={ref}
+          id={inputId}
+          type={inputType}
+          className={inputClassName}
+          aria-invalid={Boolean(error)}
+          aria-describedby={describedBy}
+          data-ruum-label={etiqueta}
+          {...props}
+        />
+      )}
+      {ayuda ? (
+        <p id={helpId} className="font-body text-sm leading-5 text-text-secondary">
+          {ayuda}
+        </p>
+      ) : null}
+      {error ? (
+        <p id={errorId} role="alert" className="font-body text-sm font-medium leading-5 text-danger-action">
+          {error}
+        </p>
+      ) : null}
+    </div>
+  );
+});
+
+function IconoOjo() {
+  return (
+    <svg viewBox="0 0 20 20" className="size-4" width={16} height={16} aria-hidden>
+      <path
+        d="M2.5 10s2.7-5 7.5-5 7.5 5 7.5 5-2.7 5-7.5 5-7.5-5-7.5-5Z"
+        fill="none"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth="1.8"
+      />
+      <circle cx="10" cy="10" r="2.2" fill="none" stroke="currentColor" strokeWidth="1.8" />
+    </svg>
+  );
+}
+
+function IconoOjoCerrado() {
+  return (
+    <svg viewBox="0 0 20 20" className="size-4" width={16} height={16} aria-hidden>
+      <path d="M3 3 17 17" fill="none" stroke="currentColor" strokeLinecap="round" strokeWidth="1.8" />
+      <path
+        d="M7.4 5.5A7.2 7.2 0 0 1 10 5c4.8 0 7.5 5 7.5 5a11.2 11.2 0 0 1-2.2 2.7M12.2 14.6A7.4 7.4 0 0 1 10 15c-4.8 0-7.5-5-7.5-5a11 11 0 0 1 2.4-2.9"
+        fill="none"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth="1.8"
+      />
+    </svg>
+  );
+}

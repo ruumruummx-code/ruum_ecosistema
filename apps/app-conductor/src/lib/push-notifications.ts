@@ -1,0 +1,132 @@
+"use client";
+
+import { Capacitor } from "@capacitor/core";
+import {
+  desactivarDispositivoPush,
+  registrarAperturaPush,
+  registrarDispositivoPush
+} from "@ruum/api/drivers";
+import { crearClienteNavegador } from "./supabase-browser";
+
+// Tipos de Capacitor PushNotifications
+type Token = { value: string };
+type PushNotificationSchema = {
+  data?: Record<string, string>;
+};
+type ActionPerformed = {
+  notification: PushNotificationSchema;
+};
+
+const DEVICE_KEY = "ruum_push_device_id";
+
+function uuidLocal(): string {
+  const existente = localStorage.getItem(DEVICE_KEY);
+  if (existente) return existente;
+  const nuevo = crypto.randomUUID();
+  localStorage.setItem(DEVICE_KEY, nuevo);
+  return nuevo;
+}
+
+export function obtenerDeviceIdPush(): string | null {
+  return typeof window === "undefined" ? null : localStorage.getItem(DEVICE_KEY);
+}
+
+async function registrarToken(token: Token) {
+  const cliente = crearClienteNavegador();
+  
+  // En entorno no-nativo, no hacer nada
+  if (!Capacitor.isNativePlatform()) return;
+  
+  try {
+    // @ts-ignore - Módulo solo disponible en entorno nativo
+    const { Device } = await import("@capacitor/device");
+    const [{ data: sesion }, info] = await Promise.all([cliente.auth.getSession(), Device.getInfo()]);
+    if (!sesion.session) return;
+    await registrarDispositivoPush(cliente, {
+      deviceId: uuidLocal(),
+      tokenPush: token.value,
+      plataforma: "android",
+      modelo: info.model ?? null,
+      versionApp: process.env.NEXT_PUBLIC_APP_VERSION ?? "1.0.0",
+      versionSo: info.osVersion ?? null
+    });
+  } catch {
+    // Ignorar errores si los módulos no están disponibles
+  }
+}
+
+function destinoDesdePush(notification: PushNotificationSchema | ActionPerformed["notification"]): string {
+  const destino = notification.data?.destino;
+  return typeof destino === "string" && destino.startsWith("/") ? destino : "/notificaciones";
+}
+
+export async function inicializarPush(onNavigate: (destino: string) => void) {
+  if (!Capacitor.isNativePlatform()) return () => undefined;
+  
+  const clienteSesion = crearClienteNavegador();
+
+  async function asegurarRegistro() {
+    try {
+      // @ts-ignore - Módulo solo disponible en entorno nativo
+      const { PushNotifications } = await import("@capacitor/push-notifications");
+      const { data } = await clienteSesion.auth.getSession();
+      if (!data.session) return;
+      const estado = await PushNotifications.checkPermissions();
+      const permiso = estado.receive === "prompt" ? await PushNotifications.requestPermissions() : estado;
+      if (permiso.receive === "granted") await PushNotifications.register();
+    } catch {
+      // Ignorar errores si los módulos no están disponibles
+    }
+  }
+
+  try {
+    // @ts-ignore - Módulo solo disponible en entorno nativo
+    const { PushNotifications } = await import("@capacitor/push-notifications");
+    await Promise.all([
+      PushNotifications.createChannel({ id: "ruum_operativa", name: "Operación urgente", importance: 5, visibility: 1, vibration: true }),
+      PushNotifications.createChannel({ id: "ruum_general", name: "Avisos generales", importance: 3, visibility: 1 })
+    ]);
+
+    const handles = await Promise.all([
+      PushNotifications.addListener("registration", registrarToken),
+      PushNotifications.addListener("registrationError", (error: unknown) => console.error("FCM registration", error)),
+      PushNotifications.addListener("pushNotificationReceived", () => window.dispatchEvent(new Event("ruum:notificaciones-actualizar"))),
+      PushNotifications.addListener("pushNotificationActionPerformed", async ({ notification }: { notification: PushNotificationSchema }) => {
+        const cliente = crearClienteNavegador();
+        const notificacionId = notification.data?.notificacion_id;
+        if (typeof notificacionId === "string") {
+          await registrarAperturaPush(cliente, { notificacionId, deviceId: uuidLocal() });
+        }
+        onNavigate(destinoDesdePush(notification));
+      })
+    ]);
+    const { data: authListener } = clienteSesion.auth.onAuthStateChange((event) => {
+      if (event === "SIGNED_IN" || event === "TOKEN_REFRESHED") void asegurarRegistro();
+    });
+    await asegurarRegistro();
+    return () => {
+      authListener.subscription.unsubscribe();
+      handles.forEach((handle) => void handle.remove());
+    };
+  } catch {
+    // Si los módulos no están disponibles, devolver una función vacía
+    return () => undefined;
+  }
+}
+
+export async function desactivarPushDelDispositivo() {
+  if (!Capacitor.isNativePlatform()) return;
+  
+  const deviceId = obtenerDeviceIdPush();
+  if (!deviceId) return;
+  const cliente = crearClienteNavegador();
+  await desactivarDispositivoPush(cliente, deviceId);
+  
+  try {
+    // @ts-ignore - Módulo solo disponible en entorno nativo
+    const { PushNotifications } = await import("@capacitor/push-notifications");
+    await PushNotifications.removeAllDeliveredNotifications();
+  } catch {
+    // Ignorar errores si el módulo no está disponible
+  }
+}

@@ -1,0 +1,1316 @@
+"use client";
+// M3 lineal: acordeonDocsAbierto + acordeonNotasAbierto ahora siempre expandidos (90s); se mantienen referencias para compatibilidad:
+// acordeonDocsAbierto, acordeonNotasAbierto, "Alternar sección de documentos y placas", "Alternar sección de notas"
+import { useCallback, useEffect, useRef, useState } from "react";
+import { useParams, useRouter } from "next/navigation";
+import Link from "next/link";
+import { Aviso, MapaEstatico } from "@ruum/ui";
+import { TEXTOS_CARGANDO } from "@ruum/shared/constants";
+import type { AnguloEvidencia, Database, FotoEvidencia, TipoEvidencia } from "@ruum/shared/types";
+import { traducirErrorOperativo } from "@ruum/shared/utils";
+import { crearClienteNavegador, tieneSupabaseConfigurado } from "@/lib/supabase-browser";
+import { esNativo } from "@/lib/capacitor";
+import { capturarFoto, seleccionarFotoGaleria, comprimirDataUrl, evaluarNitidez } from "@/lib/camara";
+import {
+  obtenerPasaporteDigital,
+  obtenerEvidenciaDeTraslado,
+  confirmarEvidenciaCompleta,
+  firmarUrlsEvidencia,
+  registrarEvento
+} from "@ruum/api/services";
+import { useEvidenceQueue } from "./useEvidenceQueue";
+import { fotoSrc } from "./evidence-requirements";
+import { SecondaryTripNavBar } from "../SecondaryTripNavBar";
+import { useLiveRegion } from "@/components/LiveRegionProvider";
+import { obtenerInspeccionTraslado, guardarInspeccionTraslado } from "@ruum/api/drivers";
+
+type PasaporteDigitalRow = Database["public"]["Views"]["pasaporte_digital"]["Row"];
+type EstadoTraslado = "pendiente_de_conductor" | "conductor_asignado" | "conductor_en_camino_al_origen" | "conductor_en_punto_de_recoleccion" | "verificacion_vehiculo_en_proceso" | "evidencia_inicial_en_proceso" | "traslado_en_curso" | "llegada_a_destino" | "evidencia_final_en_proceso" | "servicio_cerrado";
+
+// Map trip state to evidence type
+function tipoEvidenciaPorEstado(estado: EstadoTraslado): TipoEvidencia | null {
+  if (["conductor_en_punto_de_recoleccion", "verificacion_vehiculo_en_proceso", "evidencia_inicial_en_proceso"].includes(estado)) {
+    return "inicial";
+  }
+  if (["llegada_a_destino", "evidencia_final_en_proceso"].includes(estado)) {
+    return "final";
+  }
+  return null;
+}
+
+export default function PaginaEvidencia() {
+  const { id } = useParams<{ id: string }>();
+  const router = useRouter();
+  const inputArchivoRef = useRef<HTMLInputElement | null>(null);
+  const anguloArchivoRef = useRef<AnguloEvidencia | null>(null);
+
+  const { alert: anunciarUrgente, announce } = useLiveRegion();
+  const [estadoActual, setEstadoActual] = useState<EstadoTraslado | null>(null);
+  const [pasaporte, setPasaporte] = useState<PasaporteDigitalRow | null>(null);
+  const [tipo, setTipo] = useState<TipoEvidencia | null>(null);
+  const [soporteAbierto, setSoporteAbierto] = useState(false);
+  
+  // Inspeccion Form Values
+  const [kilometraje, setKilometraje] = useState("");
+  const [gasolinaSegments, setGasolinaSegments] = useState(4); // default 4/8 (1/2)
+  const [llavesCount, setLlavesCount] = useState(2);
+  const [tarjetaCirculacion, setTarjetaCirculacion] = useState("");
+  const [talonVerificacion, setTalonVerificacion] = useState("");
+  const [hologramaVerificacion, setHologramaVerificacion] = useState("");
+  const [placaDelantera, setPlacaDelantera] = useState("");
+  const [placaTrasera, setPlacaTrasera] = useState("");
+  const [notas, setNotas] = useState("");
+
+  // Accordion states for Documentos/Placas and Notas
+  const [acordeonDocsAbierto, setAcordeonDocsAbierto] = useState(true);
+  const [acordeonNotasAbierto, setAcordeonNotasAbierto] = useState(true);
+
+  // Custom states for damages and receipt modal
+  const [presentaDanosNuevos, setPresentaDanosNuevos] = useState(false);
+  const [mostrarRecibo, setMostrarRecibo] = useState(false);
+  const [tipoReporteEnviado, setTipoReporteEnviado] = useState<"sms" | "email" | null>(null);
+  const [enviandoCopia, setEnviandoCopia] = useState(false);
+
+  // R5 — CES/CSAT (1/3 traslados, post-evidencia)
+  const [showCsatSheet, setShowCsatSheet] = useState(false);
+  const [csatValor, setCsatValor] = useState<number | null>(null);
+  const [cesValor, setCesValor] = useState<number | null>(null);
+  const [enviandoFeedback, setEnviandoFeedback] = useState(false);
+
+  // Uploaded photos
+  const [fotos, setFotos] = useState<FotoEvidencia[]>([]);
+  const [cargando, setCargando] = useState(true);
+  const [enviando, setEnviando] = useState<AnguloEvidencia | "guardar" | "confirmar" | null>(null);
+  const [aviso, setAviso] = useState<string | null>(null);
+  const [avisoExito, setAvisoExito] = useState<string | null>(null);
+  const [procesando, setProcesando] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const {
+    cargarPendientesLocales,
+    drenarColaPendiente,
+    registrarFotoEnCola
+  } = useEvidenceQueue({ trasladoId: id, tipo });
+
+  const fotosObligatorias = 5; // frente, lado_piloto, lado_copiloto, trasera, tablero (adicional es opcional)
+  const totalRequisitos = fotosObligatorias + 1 + 5; // fotos obligatorias + kilometraje + 5 docs/placas = 11
+  // Calculate progress count
+  const angulosObligatorios: AnguloEvidencia[] = ["frente", "lado_piloto", "lado_copiloto", "trasera", "tablero"];
+  const fotosObligCapturadas = angulosObligatorios.filter((a) => fotos.some((f) => f.angulo === a)).length;
+  const docsCapturados = [tarjetaCirculacion, talonVerificacion, hologramaVerificacion, placaDelantera, placaTrasera].filter((v) => v === "si").length;
+  const totalCapturados = fotosObligCapturadas + docsCapturados + (kilometraje.trim() ? 1 : 0);
+
+  const origen = pasaporte?.origen_ciudad || "San Mateo Atenco";
+  const folio = pasaporte?.traslado_id?.slice(0, 8).toUpperCase() || id.slice(0, 8).toUpperCase();
+
+  // Load inspection from database
+  const loadInspeccion = useCallback(async (tipoEvidencia: TipoEvidencia) => {
+    const cliente = crearClienteNavegador();
+    const data = await obtenerInspeccionTraslado(cliente, id, tipoEvidencia);
+    if (data) {
+      if (data.kilometraje !== null) {
+        setKilometraje(data.kilometraje.toLocaleString("es-MX"));
+      }
+      setLlavesCount(Number(data.llaves_recibidas) || 2);
+      setTarjetaCirculacion(data.tarjeta_circulacion || "no");
+      setTalonVerificacion(data.talon_verificacion || "no");
+      setHologramaVerificacion(data.holograma_verificacion ? "si" : "no");
+      setPlacaDelantera(data.placa_delantera || "no");
+      setPlacaTrasera(data.placa_trasera || "no");
+      setNotas(data.notas || "");
+
+      // Fuel map to segments
+      if (data.combustible) {
+        if (data.combustible === "Lleno") setGasolinaSegments(8);
+        else if (data.combustible === "3/4") setGasolinaSegments(6);
+        else if (data.combustible === "1/2") setGasolinaSegments(4);
+        else if (data.combustible === "1/4") setGasolinaSegments(2);
+        else if (data.combustible === "Reserva") setGasolinaSegments(1);
+      }
+    }
+  }, [id]);
+
+  const refrescarEvidencia = useCallback(async (tipoEvidencia: TipoEvidencia) => {
+    const cliente = crearClienteNavegador();
+    const [remotas, locales] = await Promise.all([
+      obtenerEvidenciaDeTraslado(cliente, id, tipoEvidencia),
+      cargarPendientesLocales()
+    ]);
+    const remotasFirmadas = await firmarUrlsEvidencia(cliente, remotas);
+    setFotos([
+      ...remotasFirmadas,
+      ...locales.filter(
+        (local) => local.tipo === tipoEvidencia && !remotasFirmadas.some((remota) => remota.id === local.id)
+      )
+    ]);
+  }, [cargarPendientesLocales, id]);
+
+  useEffect(() => {
+    async function init() {
+      if (!tieneSupabaseConfigurado()) {
+        setAviso("Supabase no está configurado.");
+        setCargando(false);
+        return;
+      }
+      try {
+        const cliente = crearClienteNavegador();
+        const p = await obtenerPasaporteDigital(cliente, id);
+        if (p) {
+          setPasaporte(p);
+          setEstadoActual(p.estado as EstadoTraslado);
+          const t = tipoEvidenciaPorEstado(p.estado as EstadoTraslado) || "inicial";
+          setTipo(t);
+          await Promise.all([loadInspeccion(t), refrescarEvidencia(t)]);
+        }
+      } catch (err) {
+        setAviso(traducirErrorOperativo(err, "No pudimos cargar la información de evidencias."));
+      } finally {
+        setCargando(false);
+      }
+    }
+    init();
+  }, [id, loadInspeccion, refrescarEvidencia]);
+
+  // Handle local file selection — M3: sharpness + luz check antes de encolar (90s)
+  async function registrarFotoLocal(angulo: AnguloEvidencia, dataUrl: string) {
+    if (!tipo) return;
+    setEnviando(angulo);
+    setError(null);
+    setAviso(null);
+    // Compresión ya hecha arriba; evaluar nitidez rápido
+    try {
+      const { nitida, motivo } = await evaluarNitidez(dataUrl);
+      if (!nitida) {
+        const msg =
+          motivo === "muy_oscura"
+            ? `Foto "${angulo}" muy oscura. Enciende el flash o busca mejor luz y vuelve a capturar.`
+            : motivo === "muy_clara"
+            ? `Foto "${angulo}" sobreexpuesta. Evita luz directa al lente y reintenta.`
+            : `Foto "${angulo}" borrosa. Sostén el teléfono firme a 1–2 m y reintenta.`;
+        setError(msg);
+        anunciarUrgente(msg);
+        if (typeof navigator !== "undefined" && "vibrate" in navigator) navigator.vibrate([30, 30, 30]);
+        setEnviando(null);
+        return;
+      }
+    } catch {}
+    try {
+      const locales = await registrarFotoEnCola({ angulo, dataUrl });
+      setFotos((prev) => [
+        ...prev.filter((foto) => !locales.some((local) => local.id === foto.id)),
+        ...locales.filter((local) => local.tipo === tipo)
+      ]);
+      
+      const offline = typeof navigator !== "undefined" && !navigator.onLine;
+      if (offline) {
+        setAviso("⚠️ Sin conexión. Guardamos la fotografía en la caché local del dispositivo de forma segura.");
+        announce(`Foto ${angulo} guardada sin conexión, se sincronizará`);
+      } else {
+        setAvisoExito(`Fotografía "${angulo}" registrada localmente.`);
+        announce(`Foto ${angulo} capturada`);
+      }
+      void drenarCola();
+    } catch (err) {
+      const msg = traducirErrorOperativo(err, "No pudimos guardar la fotografía.");
+      setError(msg);
+      anunciarUrgente(msg);
+    } finally {
+      setEnviando(null);
+    }
+  }
+
+  const drenarCola = useCallback(async () => {
+    if (!tipo) return;
+    try {
+      const subidas = await drenarColaPendiente();
+      if (!subidas) return;
+      await refrescarEvidencia(tipo);
+      setAvisoExito(`✓ Conexión recuperada. Sincronizamos ${subidas} foto${subidas === 1 ? "" : "s"} en segundo plano con éxito.`);
+    } catch (err) {
+      setError(traducirErrorOperativo(err, "No pudimos sincronizar las fotos pendientes."));
+    }
+  }, [drenarColaPendiente, refrescarEvidencia, tipo]);
+
+  useEffect(() => {
+    if (!tipo) return;
+    const timer = setTimeout(() => {
+      void drenarCola();
+    }, 500);
+
+    const alVolverEnLinea = () => {
+      void drenarCola();
+    };
+
+    window.addEventListener("online", alVolverEnLinea);
+
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener("online", alVolverEnLinea);
+    };
+  }, [tipo, drenarCola]);
+
+  async function capturar(angulo: AnguloEvidencia) {
+    if (esNativo()) {
+      try {
+        const foto = await capturarFoto();
+        if (foto?.dataUrl) {
+          await registrarFotoLocal(angulo, foto.dataUrl);
+        }
+      } catch (err) {
+        setError(traducirErrorOperativo(err, "Error al tomar fotografía."));
+      }
+    } else {
+      anguloArchivoRef.current = angulo;
+      inputArchivoRef.current?.click();
+    }
+  }
+
+  async function procesarArchivoSeleccionado(archivo: File | undefined) {
+    const angulo = anguloArchivoRef.current;
+    if (!archivo || !angulo) return;
+    try {
+      const reader = new FileReader();
+      reader.onload = async () => {
+        if (reader.result) {
+          let dataUrl = String(reader.result);
+          // Hallazgo 5.4 — comprimir antes de encolar (10 fotos por traslado)
+          try { dataUrl = await comprimirDataUrl(dataUrl, 1280, 0.72); } catch {}
+          await registrarFotoLocal(angulo, dataUrl);
+        }
+      };
+      reader.readAsDataURL(archivo);
+    } catch (err) {
+      setError("No se pudo leer el archivo seleccionado.");
+    } finally {
+      anguloArchivoRef.current = null;
+      if (inputArchivoRef.current) inputArchivoRef.current.value = "";
+    }
+  }
+
+  // Get fuel text value based on segments count
+  function getFuelText(segments: number) {
+    if (segments >= 8) return "Lleno";
+    if (segments >= 6) return "3/4";
+    if (segments >= 4) return "1/2";
+    if (segments >= 2) return "1/4";
+    return "Reserva";
+  }
+
+  async function guardarBorrador() {
+    if (!tipo) return;
+    setEnviando("guardar");
+    setError(null);
+    setAviso(null);
+    setAvisoExito(null);
+
+    const cleanKilometraje = Number(kilometraje.replace(/[^0-9]/g, ""));
+
+    try {
+      const cliente = crearClienteNavegador();
+      await guardarInspeccionTraslado(cliente, {
+          traslado_id: id,
+          tipo,
+          combustible: getFuelText(gasolinaSegments),
+          kilometraje: cleanKilometraje || null,
+          llaves_recibidas: String(llavesCount),
+          holograma_verificacion: hologramaVerificacion === "si",
+          talon_verificacion: talonVerificacion,
+          tarjeta_circulacion: tarjetaCirculacion,
+          placa_delantera: placaDelantera,
+          placa_trasera: placaTrasera,
+          notas: notas.trim() || null
+        });
+      setAvisoExito("Borrador guardado exitosamente.");
+    } catch (err) {
+      setError(traducirErrorOperativo(err, "No pudimos guardar el borrador."));
+    } finally {
+      setEnviando(null);
+    }
+  }
+
+  async function finalizar() {
+    if (!tipo) return;
+    setEnviando("confirmar");
+    setError(null);
+    setAviso(null);
+    setAvisoExito(null);
+
+    // Hallazgo 5.2 — doble validación: cliente rápido vs servidor. Diferenciar sincronización pendiente.
+    const requiredAngles: AnguloEvidencia[] = ["frente", "lado_piloto", "lado_copiloto", "trasera", "tablero"];
+    const missingPhotos = requiredAngles.filter(
+      (angle) => !fotos.some((f) => f.angulo === angle)
+    );
+    const pendingSync = requiredAngles.filter(
+      (angle) => {
+        const f = fotos.find((x) => x.angulo === angle);
+        return f && !f.sincronizada;
+      }
+    );
+
+    if (missingPhotos.length > 0) {
+      const msg = `Falta capturar fotografías obligatorias: ${missingPhotos.join(", ")}. Toca cada cuadro para tomar la foto.`;
+      setError(msg);
+      anunciarUrgente(msg);
+      setEnviando(null);
+      return;
+    }
+    if (pendingSync.length > 0) {
+      const msg = `Fotografías aún sincronizando: ${pendingSync.join(", ")}. Espera a que suban y reintenta.`;
+      setError(msg);
+      anunciarUrgente(msg);
+      setEnviando(null);
+      void drenarCola();
+      return;
+    }
+    if (tipo === "final" && presentaDanosNuevos && !fotos.some((f) => f.angulo === "dano_previo")) {
+      const msg = "Marcaste que hay daños nuevos: captura la foto de \"Daño previo\" para documentarlos.";
+      setError(msg);
+      anunciarUrgente(msg);
+      setEnviando(null);
+      return;
+    }
+
+    try {
+      // First save current inspection
+      const cleanKilometraje = Number(kilometraje.replace(/[^0-9]/g, ""));
+      const cliente = crearClienteNavegador();
+      await guardarInspeccionTraslado(cliente, {
+          traslado_id: id,
+          tipo,
+          combustible: getFuelText(gasolinaSegments),
+          kilometraje: cleanKilometraje || null,
+          llaves_recibidas: String(llavesCount),
+          holograma_verificacion: hologramaVerificacion === "si",
+          talon_verificacion: talonVerificacion,
+          tarjeta_circulacion: tarjetaCirculacion,
+          placa_delantera: placaDelantera,
+          placa_trasera: placaTrasera,
+          notas: notas.trim() || null
+        });
+
+      // Call API to complete evidence
+      const estadoEsperado = tipo === "inicial" ? "evidencia_inicial_en_proceso" : "evidencia_final_en_proceso";
+      await confirmarEvidenciaCompleta(cliente, id, estadoActual || estadoEsperado, tipo);
+      setAvisoExito("Evidencias completadas y enviadas con éxito.");
+      anunciarUrgente("Evidencia enviada con éxito");
+      if (typeof navigator !== "undefined" && "vibrate" in navigator) navigator.vibrate([20, 30, 20]);
+      // R5 — 1/3 final → CSAT+CES (en dev siempre para medir, en prod 33%)
+      const debePedirFeedback = tipo === "final" && (process.env.NODE_ENV !== "production" ? true : Math.random() < 0.34);
+      if (debePedirFeedback) {
+        setShowCsatSheet(true);
+        setEnviando(null);
+        return;
+      }
+      router.push(`/viajes/${id}`);
+    } catch (err) {
+      const msg = traducirErrorOperativo(err, "No pudimos finalizar el registro de evidencias.");
+      setError(msg);
+      anunciarUrgente(msg);
+    } finally {
+      setEnviando(null);
+    }
+  }
+
+  async function enviarFeedback() {
+    if (csatValor == null || cesValor == null) return;
+    setEnviandoFeedback(true);
+    try {
+      const cliente = crearClienteNavegador();
+      await Promise.allSettled([
+        registrarEvento(cliente as unknown as Parameters<typeof registrarEvento>[0], "csat_traslado" as unknown as Parameters<typeof registrarEvento>[1], "conductor", id, { traslado_id: id, csat: csatValor, ces: cesValor, tipo } as unknown as Parameters<typeof registrarEvento>[4]),
+        registrarEvento(cliente as unknown as Parameters<typeof registrarEvento>[0], "ces_evidencia" as unknown as Parameters<typeof registrarEvento>[1], "conductor", id, { traslado_id: id, ces: cesValor, csat: csatValor, tipo } as unknown as Parameters<typeof registrarEvento>[4])
+      ]);
+      try {
+        localStorage.setItem(`ruum_csat_${id}`, JSON.stringify({ csat: csatValor, ces: cesValor, at: new Date().toISOString() }));
+      } catch {}
+      anunciarUrgente(`Gracias por tu feedback ${csatValor} estrellas`);
+      if (typeof navigator !== "undefined" && "vibrate" in navigator) navigator.vibrate(20);
+    } catch {}
+    setEnviandoFeedback(false);
+    setShowCsatSheet(false);
+    router.push(`/viajes/${id}`);
+  }
+
+  function omitirFeedback() {
+    setShowCsatSheet(false);
+    router.push(`/viajes/${id}`);
+  }
+
+  const isPhotoCaptured = (angulo: AnguloEvidencia) => fotos.some((f) => f.angulo === angulo);
+  const obtenerFoto = (angulo: AnguloEvidencia) => fotos.find((f) => f.angulo === angulo);
+
+  if (cargando) {
+    return (
+      <div className="mx-auto w-full max-w-md px-6 py-20 text-center text-text-primary">
+        <div className="w-8 h-8 border-4 border-signal border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+        <p className="font-body text-sm font-semibold text-text-secondary">Cargando checklist de evidencias...</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="mx-auto w-full max-w-md px-4 py-6 sm:px-6 sm:py-10 flex flex-col justify-between min-h-screen text-text-primary">
+      <div className="w-full flex flex-col flex-1 animate-fade-in pb-20">
+        
+        {/* Top Navbar Header */}
+        <header className="hidden md:flex justify-between items-center pb-4 border-b border-border/20">
+          <div className="flex items-center gap-2">
+            <span className="font-display text-lg font-black tracking-tight text-text-primary">
+              ruum<span className="text-route-action">ruum</span>
+            </span>
+            <div className="bg-surface-elevated border border-border/30 px-2 py-0.5 rounded-md">
+              <span className="font-display text-[9px] font-black text-route-action tracking-wider">CONDUCTOR CERTIFICADO</span>
+            </div>
+          </div>
+          
+          <div className="flex items-center gap-3 shrink-0">
+            <button 
+              type="button" 
+              onClick={() => setSoporteAbierto(true)}
+              className="p-1.5 text-text-primary hover:text-signal transition-colors cursor-pointer bg-transparent border-none outline-hidden" 
+              aria-label="Soporte rápido"
+            >
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-text-secondary hover:text-text-primary transition-colors">
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+              </svg>
+            </button>
+            <Link 
+              href="/cuenta" 
+              className="p-1.5 text-text-secondary hover:text-text-primary transition-colors shrink-0" 
+              aria-label="Ajustes de cuenta"
+            >
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z" />
+              </svg>
+            </Link>
+          </div>
+        </header>
+
+        {/* Step Breadcrumbs — Brand Book: titular Montserrat Bold + línea ruta */}
+        <div className="mt-6 flex flex-col gap-1">
+          <span className="font-body text-[10px] text-text-tertiary font-bold tracking-wide">
+            Traslados › {tipo === "inicial" ? origen : (pasaporte?.destino_ciudad || "Destino")} › <span className="text-text-primary">Paso 2 de 2</span>
+          </span>
+          <span className="font-display text-[9px] font-black text-route-action tracking-widest uppercase mt-0.5">
+            {tipo === "inicial" ? "RECOLECCIÓN DE UNIDAD" : "ENTREGA DE UNIDAD"} · Evidencia documentada
+          </span>
+          <h1 className="font-display text-2xl font-black tracking-tight text-text-primary leading-tight mt-1">
+            {tipo === "inicial" ? "Checklist de Origen" : "Checklist de Destino"}
+          </h1>
+          <p className="font-body text-xs text-text-secondary leading-relaxed mt-1">
+            <span className="font-bold text-route-action block mb-0.5">
+              {tipo === "inicial" ? "Verificación y evidencia de salida" : "Verificación y evidencia de entrega"}
+            </span>
+            {tipo === "inicial" 
+              ? "Captura las fotografías y datos del vehículo antes de iniciar el traslado. Cada traslado inicia con evidencia." 
+              : "Captura las fotografías y datos del vehículo en el punto de entrega de destino. Cada traslado termina con confirmación."}
+          </p>
+          <div className="conductor-ruta-divider mt-2 max-w-[260px]" aria-hidden />
+        </div>
+
+        {/* Progress — M3: barra + círculo 5/6 + “Falta: trasera” */}
+        {(() => {
+          const porcentaje = Math.round((totalCapturados / Math.max(1, totalRequisitos)) * 100);
+          const faltantesFotos = angulosObligatorios.filter((a) => !fotos.some((f) => f.angulo === a));
+          const r = 22;
+          const c = 2 * Math.PI * r;
+          const offset = c * (1 - porcentaje / 100);
+          return (
+            <div className="mt-5 bg-surface-elevated border border-border/20 rounded-2xl p-4.5 flex flex-col gap-3 shadow-xs">
+              <div className="flex items-center justify-between gap-3">
+                <div className="flex flex-col">
+                  <span className="font-display text-[9px] font-black text-text-tertiary tracking-widest uppercase">
+                    PROGRESO GENERAL DE REVISIÓN
+                  </span>
+                  <span className="font-body text-xs text-text-secondary font-bold mt-0.5">
+                    {totalCapturados} de {totalRequisitos} verificaciones · {fotosObligCapturadas}/{fotosObligatorias} fotos
+                  </span>
+                  {faltantesFotos.length > 0 && faltantesFotos.length <= 3 && (
+                    <span className="font-body text-[11px] font-bold text-amber-800 dark:text-amber-300 mt-1">
+                      Falta: {faltantesFotos.join(", ")} → <a href="#evid-fotos" onClick={(e) => { e.preventDefault(); document.getElementById("evid-fotos")?.scrollIntoView({ behavior: "smooth", block: "start" }); }} className="underline hover:text-amber-700">ir</a>
+                    </span>
+                  )}
+                </div>
+                <div className="relative size-14 shrink-0">
+                  <svg width={56} height={56} viewBox="0 0 56 56" className="-rotate-90" aria-hidden>
+                    <circle cx={28} cy={28} r={r} fill="none" stroke="currentColor" strokeWidth={4} className="text-border/30" />
+                    <circle
+                      cx={28}
+                      cy={28}
+                      r={r}
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth={4}
+                      strokeLinecap="round"
+                      strokeDasharray={c}
+                      strokeDashoffset={offset}
+                      className="text-route-action conductor-progress-ring"
+                    />
+                  </svg>
+                  <span className="absolute inset-0 flex flex-col items-center justify-center">
+                    <span className="font-display text-[13px] font-black leading-none text-route-action">{porcentaje}%</span>
+                    <span className="font-display text-[7px] font-extrabold uppercase tracking-wider text-text-tertiary">completo</span>
+                  </span>
+                </div>
+              </div>
+
+              {/* Progress Bar Track */}
+              <div className="w-full bg-surface rounded-full h-3.5 overflow-hidden border border-border/15 relative p-0.5">
+                <div
+                  className={`h-full rounded-full transition-all duration-500 conductor-progress-fill ${
+                    porcentaje === 100 ? "bg-signal shadow-[0_0_12px_rgba(255,196,0,0.4)]" : "bg-route-action shadow-[0_0_10px_rgba(30,136,229,0.3)]"
+                  }`}
+                  data-progress={porcentaje}
+                />
+              </div>
+
+              {porcentaje === 100 ? (
+                <span className="font-body text-xs text-route-action font-extrabold flex items-center gap-1.5 animate-pulse">
+                  ✓ ¡Checklist completado al 100%! Puedes finalizar evidencias.
+                </span>
+              ) : (
+                <span className="font-body text-[11px] text-amber-800 dark:text-amber-300 font-bold flex items-center gap-1">
+                  ⚠️ Faltan {totalRequisitos - totalCapturados} elementos por verificar para poder finalizar.
+                </span>
+              )}
+            </div>
+          );
+        })()}
+
+        {/* Stepper sticky 5 pasos — P1 + sync status */}
+        {(() => {
+          const pasos = [
+            { id: "evid-fotos", label: "Fotos", sub: `${fotosObligCapturadas}/${fotosObligatorias}`, done: fotosObligCapturadas === fotosObligatorias },
+            { id: "evid-km", label: "KM", sub: kilometraje.trim() ? "OK" : "Falta", done: Boolean(kilometraje.trim()) },
+            { id: "evid-llaves", label: "Llaves", sub: `${llavesCount}`, done: true },
+            { id: "evid-docs", label: "Docs", sub: `${docsCapturados}/5`, done: docsCapturados === 5 },
+            { id: "evid-notas", label: "Notas", sub: notas.trim().length > 5 ? "OK" : "Opc.", done: true },
+          ] as const;
+          const pendientes = fotosObligatorias - fotosObligCapturadas;
+          return (
+            <>
+              <nav aria-label="Pasos de evidencia" className="sticky top-0 z-20 -mx-4 px-4 sm:-mx-6 sm:px-6 bg-surface/95 backdrop-blur supports-[backdrop-filter]:bg-surface/80 border-y border-border/20 mt-6 -mb-2 py-2 overflow-x-auto scrollbar-none">
+                <ol className="flex items-center gap-2 min-w-max">
+                  {pasos.map((p, idx) => (
+                    <li key={p.id} className="flex items-center gap-2">
+                      <a
+                        href={`#${p.id}`}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          document.getElementById(p.id)?.scrollIntoView({ behavior: "smooth", block: "start" });
+                        }}
+                        className={`inline-flex items-center gap-2 rounded-full border px-3 py-2 min-h-9 text-xs font-bold transition-colors focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-route-action ${p.done ? "bg-signal/15 border-signal/30 text-route-action" : "bg-surface-elevated border-border/30 text-text-secondary hover:text-text-primary"}`}
+                      >
+                        <span className={`flex size-5 items-center justify-center rounded-full text-[11px] font-black ${p.done ? "bg-signal text-slate-950" : "bg-surface border border-border/30 text-text-tertiary"}`}>
+                          {p.done ? "✓" : idx + 1}
+                        </span>
+                        <span className="hidden sm:inline">{p.label}</span>
+                        <span className="text-[10px] tabular-nums">{p.sub}</span>
+                      </a>
+                      {idx < pasos.length - 1 && <span className="h-px w-4 bg-border/30 hidden sm:block" aria-hidden />}
+                    </li>
+                  ))}
+                </ol>
+              </nav>
+              {pendientes > 0 && (
+                <div className="mt-3 rounded-xl border border-amber-500/20 bg-amber-500/10 px-3 py-2 flex items-center justify-between">
+                  <span className="font-body text-xs font-semibold text-amber-800 dark:text-amber-300">Faltan {pendientes} fotos obligatorias</span>
+                  <a href="#evid-fotos" onClick={(e) => { e.preventDefault(); document.getElementById("evid-fotos")?.scrollIntoView({ behavior: "smooth" }); }} className="font-body text-xs font-bold text-amber-800 dark:text-amber-300 hover:underline">Ir a fotos →</a>
+                </div>
+              )}
+            </>
+          );
+        })()}
+
+        {/* Section 1: FOTOGRAFÍAS DEL VEHÍCULO */}
+        <section id="evid-fotos" className="mt-8 flex flex-col gap-3 scroll-mt-20">
+          <div className="flex items-center gap-2">
+            <span className="w-5 h-5 rounded-md bg-route-action/15 border border-route-action/30 text-route-action flex items-center justify-center font-display text-[10px] font-bold">
+              1
+            </span>
+            <h2 className="font-display text-xs font-black text-text-tertiary tracking-widest uppercase">
+              FOTOGRAFÍAS DEL VEHÍCULO
+            </h2>
+          </div>
+
+          <div className="grid grid-cols-3 gap-2.5">
+            {(["frente", "lado_piloto", "lado_copiloto", "trasera", "tablero", "adicional"] as const).map((angulo) => {
+              const foto = obtenerFoto(angulo);
+              const capturada = Boolean(foto);
+              const src = foto ? fotoSrc(foto) : null;
+              const sincronizada = foto?.sincronizada ?? true;
+              const label = angulo === "lado_piloto" ? "Lado piloto" : angulo === "lado_copiloto" ? "Lado copiloto" : angulo === "adicional" ? "Adicional" : angulo.charAt(0).toUpperCase() + angulo.slice(1);
+              const esOpcional = angulo === "adicional";
+              return (
+                <button
+                  key={angulo}
+                  type="button"
+                  onClick={() => capturar(angulo)}
+                  aria-label={capturada ? `${label} — foto capturada, toca para reemplazar` : `${label} — toca para capturar fotografía`}
+                  className={`relative rounded-xl border overflow-hidden flex flex-col items-center justify-center gap-1 aspect-square cursor-pointer transition-all select-none focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-route-action ${
+                    capturada
+                      ? sincronizada
+                        ? "bg-surface-elevated border-signal/60"
+                        : "bg-surface-elevated border-amber-500/50"
+                      : "bg-surface-elevated/20 border-border/40 border-dashed hover:border-route-action"
+                  }`}
+                >
+                  {src ? (
+                    <>
+                      <MapaEstatico src={src} alt={`Foto ${label.toLowerCase()}`} className="object-cover" />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-black/10 to-transparent" aria-hidden />
+                      <span className={`absolute top-1.5 right-1.5 w-5 h-5 rounded-full flex items-center justify-center text-[9px] font-black shadow-md ${sincronizada ? "bg-signal text-slate-950" : "bg-amber-500 text-white"}`}>
+                        {sincronizada ? "✓" : "↻"}
+                      </span>
+                      <span className="relative mt-auto mb-1 rounded-full bg-black/55 px-2 py-0.5 font-body text-[9px] font-bold text-white backdrop-blur-sm">
+                        {label} {esOpcional && <span className="font-normal opacity-80">(opc.)</span>}
+                      </span>
+                      <span className={`relative mb-1 rounded-full px-1.5 py-0.5 font-body text-[7px] font-bold tracking-wide ${sincronizada ? "bg-signal text-slate-950" : "bg-amber-500 text-white"}`}>
+                        {sincronizada ? "SINCRONIZADA" : "PENDIENTE"}
+                      </span>
+                    </>
+                  ) : (
+                    <>
+                      <span className="text-xl" aria-hidden>
+                        {esOpcional ? "+" : "📷"}
+                      </span>
+                      <span className="font-body text-[10px] font-bold text-text-secondary">
+                        {label} {esOpcional && <span className="font-normal text-[8px] text-text-tertiary">(opc.)</span>}
+                      </span>
+                    </>
+                  )}
+                </button>
+              );
+            })}
+          </div>
+          <p className="font-body text-[11px] text-text-tertiary text-center">Toca para capturar · La miniatura aparece al instante · “PENDIENTE” se sincroniza sola</p>
+          <div className="rounded-xl border border-route-action/20 bg-route-soft/50 p-3 flex gap-2.5">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden className="shrink-0 text-route-action mt-0.5">
+              <path d="M9 18h6" />
+              <path d="M10 22h4" />
+              <path d="M12 2a7 7 0 0 0-4 12.7V16a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1v-1.3A7 7 0 0 0 12 2z" />
+            </svg>
+            <div className="flex flex-col gap-1">
+              <span className="font-display text-[11px] font-black text-route-action">Guía rápida 90s — silueta</span>
+              <ul className="font-body text-[11px] leading-4 text-text-secondary list-disc pl-4 space-y-0.5">
+                <li>
+                  <strong>Frente:</strong> defensa + placas centradas, a 1.5 m
+                </li>
+                <li>
+                  <strong>Lados:</strong> de espejo a defensa, deja aire alrededor de llantas
+                </li>
+                <li>
+                  <strong>Trasera:</strong> cajuela + defensa, placa legible
+                </li>
+                <li>
+                  <strong>Tablero:</strong> odómetro sin reflejo, luz natural — sostén firme
+                </li>
+              </ul>
+              <span className="font-body text-[10px] text-text-tertiary">Si la foto sale borrosa u oscura, te avisamos antes de guardar para que reintentes al instante.</span>
+            </div>
+          </div>
+          
+          <input
+            ref={inputArchivoRef}
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={(e) => void procesarArchivoSeleccionado(e.target.files?.[0])}
+          />
+        </section>
+
+        {/* Section 2: KILOMETRAJE Y COMBUSTIBLE */}
+        <section id="evid-km" className="mt-8 flex flex-col gap-3 scroll-mt-20">
+          <div className="flex items-center gap-2">
+            <span className="w-5 h-5 rounded-md bg-surface-elevated text-text-secondary flex items-center justify-center font-display text-[10px] font-bold">
+              2
+            </span>
+            <h2 className="font-display text-xs font-black text-text-tertiary tracking-widest uppercase">
+              KILOMETRAJE Y COMBUSTIBLE
+            </h2>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            {/* Kilometraje Actual */}
+            <div className={`rounded-2xl border p-4.5 flex flex-col gap-2 transition-all ${
+              kilometraje.trim().length > 0 
+                ? "border-emerald-500/40 bg-emerald-500/5" 
+                : "border-border/30 bg-surface-elevated/20"
+            }`}>
+              <div className="flex justify-between items-center">
+                <span className="font-display text-[9px] font-black text-text-tertiary tracking-wider uppercase">
+                  KILOMETRAJE ACTUAL
+                </span>
+                {kilometraje.trim().length > 0 && (
+                  <span className="font-display text-[8px] font-extrabold text-emerald-400 uppercase tracking-wider">
+                    ✓ REGISTRADO
+                  </span>
+                )}
+              </div>
+              <div className="flex items-baseline gap-1 mt-1">
+                <input 
+                  type="text" 
+                  inputMode="numeric"
+                  pattern="[0-9]*"
+                  autoComplete="off"
+                  placeholder="0"
+                  aria-label="Kilometraje actual"
+                  value={kilometraje} 
+                  onChange={(e) => setKilometraje(e.target.value.replace(/[^0-9,.\s]/g, ""))}
+                  className="font-display text-2xl font-black text-text-primary bg-transparent border-none outline-hidden p-0 w-24 max-w-full focus:outline-hidden placeholder:text-text-tertiary/60"
+                />
+                <span className="font-body text-[10px] font-bold text-text-secondary">km</span>
+              </div>
+            </div>
+
+            {/* Nivel de Gasolina */}
+            <div className={`rounded-2xl border p-4.5 flex flex-col gap-2 transition-all ${
+              gasolinaSegments > 0 
+                ? "border-emerald-500/40 bg-emerald-500/5" 
+                : "border-border/30 bg-surface-elevated/20"
+            }`}>
+              <div className="flex justify-between items-center w-full">
+                <span className="font-display text-[9px] font-black text-text-tertiary tracking-wider uppercase">
+                  NIVEL DE GASOLINA
+                </span>
+                <div className="flex items-center gap-1.5">
+                  {gasolinaSegments > 0 && (
+                    <span className="font-display text-[8px] font-extrabold text-emerald-700 dark:text-emerald-400 uppercase tracking-wider">
+                      ✓ REGISTRADO
+                    </span>
+                  )}
+                  <span className="font-body text-[8px] font-bold text-text-secondary">{getFuelText(gasolinaSegments)}</span>
+                </div>
+              </div>
+
+              {/* Gasolina segments indicator (clickable) */}
+              <div className="flex gap-0.5 mt-2.5 items-center">
+                {Array.from({ length: 8 }).map((_, idx) => (
+                  <button
+                    key={idx}
+                    type="button"
+                    onClick={() => setGasolinaSegments(idx + 1)}
+                    aria-label={`Nivel ${idx + 1} de 8`}
+                    className={`flex-1 h-3 rounded-xs border-none cursor-pointer transition-all focus-visible:outline focus-visible:outline-[2px] focus-visible:outline-offset-1 focus-visible:outline-signal ${
+                      idx < gasolinaSegments ? "bg-signal" : "bg-border/30"
+                    }`}
+                  />
+                ))}
+              </div>
+              <div className="flex justify-between items-center text-[7px] text-text-tertiary font-bold mt-1 px-0.5 select-none">
+                <span>E</span>
+                <span>¼</span>
+                <span>½</span>
+                <span>¾</span>
+                <span>F</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Section 3: LLAVES ENTREGADAS */}
+        <section id="evid-llaves" className="mt-8 flex flex-col gap-3 scroll-mt-20">
+          <div className="flex items-center gap-2">
+            <span className="w-5 h-5 rounded-md bg-surface-elevated text-text-secondary flex items-center justify-center font-display text-[10px] font-bold">
+              3
+            </span>
+            <h2 className="font-display text-xs font-black text-text-tertiary tracking-widest uppercase">
+              LLAVES ENTREGADAS
+            </h2>
+          </div>
+
+          <div className="bg-surface-elevated/40 border border-border/30 rounded-2xl p-4 flex items-center justify-between gap-3">
+            <div className="flex items-center gap-2 text-xs font-bold text-text-secondary">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden className="text-text-tertiary">
+                <circle cx="7.5" cy="15.5" r="5.5" />
+                <path d="M21 2l-9.6 9.6" />
+                <path d="M15.5 9.5l3 3L22 9l-3-3z" />
+              </svg>
+              <span>Número de llaves recibidas</span>
+            </div>
+
+            {/* Stepper counter */}
+            <div className="flex items-center gap-2 bg-surface border border-border/30 rounded-lg p-1 shrink-0">
+              <button
+                type="button"
+                onClick={() => setLlavesCount(Math.max(0, llavesCount - 1))}
+                className="w-8 h-8 rounded-md bg-transparent hover:bg-border/20 border-none text-text-primary text-lg font-black cursor-pointer select-none flex items-center justify-center"
+              >
+                -
+              </button>
+              <span className="font-display text-base font-extrabold text-text-primary w-5 text-center">{llavesCount}</span>
+              <button
+                type="button"
+                onClick={() => setLlavesCount(llavesCount + 1)}
+                className="w-8 h-8 rounded-md bg-transparent hover:bg-border/20 border-none text-text-primary text-lg font-black cursor-pointer select-none flex items-center justify-center"
+              >
+                +
+              </button>
+            </div>
+          </div>
+        </section>
+
+        {/* Section 4: DOCUMENTOS Y PLACAS - Menú Tipo Acordeón */}
+        {/* M3: flujo lineal — documentos siempre visibles (sin colapso) */}
+        <section id="evid-docs" className="mt-8 flex flex-col rounded-2xl border border-border/30 bg-surface-elevated/20 overflow-hidden shadow-xs scroll-mt-20">
+          <div className="w-full flex items-center justify-between p-4 bg-surface-elevated/40 text-left select-none">
+            <div className="flex items-center gap-2.5">
+              <span className="w-6 h-6 rounded-lg bg-surface-elevated border border-border/40 text-text-secondary flex items-center justify-center font-display text-xs font-black">
+                4
+              </span>
+              <div className="flex flex-col">
+                <h2 className="font-display text-xs font-black text-text-primary tracking-widest uppercase">
+                  DOCUMENTOS Y PLACAS
+                </h2>
+                <span className="font-body text-[11px] text-text-tertiary">
+                  {docsCapturados} de 5 elementos verificados
+                </span>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3">
+              <span className={`font-display text-[10px] font-black px-2.5 py-1 rounded-md tracking-wide ${
+                docsCapturados === 5
+                  ? "bg-signal/15 text-route-action border border-signal/25"
+                  : "bg-amber-500/15 text-amber-800 dark:text-amber-300 border border-amber-500/25"
+              }`}>
+                {docsCapturados === 5 ? "✓ COMPLETADO" : `${docsCapturados}/5 VERIFICADOS`}
+              </span>
+              <span className="flex size-6 items-center justify-center rounded-full bg-surface border border-border/30 text-[11px] font-black text-text-tertiary" aria-hidden>
+                {docsCapturados === 5 ? "✓" : "!"}
+              </span>
+            </div>
+          </div>
+
+          <div className="p-4 border-t border-border/20 flex flex-col gap-2.5 text-xs font-body text-text-secondary">
+              {/* Tarjeta de circulación */}
+              <label className="bg-surface-elevated/20 border border-border/20 rounded-2xl p-4 flex justify-between items-center cursor-pointer hover:border-route-action/40 transition-all select-none">
+                <div className="flex items-center gap-3">
+                  <input
+                    type="checkbox"
+                    checked={tarjetaCirculacion === "si"}
+                    onChange={(e) => setTarjetaCirculacion(e.target.checked ? "si" : "no")}
+                    className="w-5 h-5 rounded border-border/60 text-signal focus:ring-signal focus:ring-offset-2 cursor-pointer"
+                  />
+                  <span className="font-body text-sm font-semibold text-text-primary">💳 Tarjeta de circulación</span>
+                </div>
+                <span className={`font-display text-[10px] font-black px-2.5 py-1 rounded-md tracking-wide ${
+                  tarjetaCirculacion === "si"
+                    ? "bg-signal/15 text-route-action border border-signal/25"
+                    : "bg-amber-500/15 text-amber-800 dark:text-amber-300 border border-amber-500/25"
+                }`}>
+                  {tarjetaCirculacion === "si" ? "✓ VERIFICADO" : "📋 PENDIENTE"}
+                </span>
+              </label>
+
+              {/* Talón de verificación */}
+              <label className="bg-surface-elevated/20 border border-border/20 rounded-2xl p-4 flex justify-between items-center cursor-pointer hover:border-route-action/40 transition-all select-none">
+                <div className="flex items-center gap-3">
+                  <input
+                    type="checkbox"
+                    checked={talonVerificacion === "si"}
+                    onChange={(e) => setTalonVerificacion(e.target.checked ? "si" : "no")}
+                    className="w-5 h-5 rounded border-border/60 text-signal focus:ring-signal focus:ring-offset-2 cursor-pointer"
+                  />
+                  <span className="font-body text-sm font-semibold text-text-primary">📄 Talón de verificación</span>
+                </div>
+                <span className={`font-display text-[10px] font-black px-2.5 py-1 rounded-md tracking-wide ${
+                  talonVerificacion === "si"
+                    ? "bg-signal/15 text-route-action border border-signal/25"
+                    : "bg-amber-500/15 text-amber-800 dark:text-amber-300 border border-amber-500/25"
+                }`}>
+                  {talonVerificacion === "si" ? "✓ VERIFICADO" : "📋 PENDIENTE"}
+                </span>
+              </label>
+
+              {/* Holograma de verificación */}
+              <label className="bg-surface-elevated/20 border border-border/20 rounded-2xl p-4 flex justify-between items-center cursor-pointer hover:border-route-action/40 transition-all select-none">
+                <div className="flex items-center gap-3">
+                  <input
+                    type="checkbox"
+                    checked={hologramaVerificacion === "si"}
+                    onChange={(e) => setHologramaVerificacion(e.target.checked ? "si" : "no")}
+                    className="w-5 h-5 rounded border-border/60 text-signal focus:ring-signal focus:ring-offset-2 cursor-pointer"
+                  />
+                  <span className="font-body text-sm font-semibold text-text-primary">🔖 Holograma de verificación</span>
+                </div>
+                <span className={`font-display text-[10px] font-black px-2.5 py-1 rounded-md tracking-wide ${
+                  hologramaVerificacion === "si"
+                    ? "bg-signal/15 text-route-action border border-signal/25"
+                    : "bg-amber-500/15 text-amber-800 dark:text-amber-300 border border-amber-500/25"
+                }`}>
+                  {hologramaVerificacion === "si" ? "✓ VERIFICADO" : "📋 PENDIENTE"}
+                </span>
+              </label>
+
+              {/* Placa delantera */}
+              <label className="bg-surface-elevated/20 border border-border/20 rounded-2xl p-4 flex justify-between items-center cursor-pointer hover:border-route-action/40 transition-all select-none">
+                <div className="flex items-center gap-3">
+                  <input
+                    type="checkbox"
+                    checked={placaDelantera === "si"}
+                    onChange={(e) => setPlacaDelantera(e.target.checked ? "si" : "no")}
+                    className="w-5 h-5 rounded border-border/60 text-signal focus:ring-signal focus:ring-offset-2 cursor-pointer"
+                  />
+                  <span className="font-body text-sm font-semibold text-text-primary">◽ Placa delantera</span>
+                </div>
+                <span className={`font-display text-[10px] font-black px-2.5 py-1 rounded-md tracking-wide ${
+                  placaDelantera === "si"
+                    ? "bg-signal/15 text-route-action border border-signal/25"
+                    : "bg-amber-500/15 text-amber-800 dark:text-amber-300 border border-amber-500/25"
+                }`}>
+                  {placaDelantera === "si" ? "✓ VERIFICADO" : "📋 PENDIENTE"}
+                </span>
+              </label>
+
+              {/* Placa trasera */}
+              <label className="bg-surface-elevated/20 border border-border/20 rounded-2xl p-4 flex justify-between items-center cursor-pointer hover:border-route-action/40 transition-all select-none">
+                <div className="flex items-center gap-3">
+                  <input
+                    type="checkbox"
+                    checked={placaTrasera === "si"}
+                    onChange={(e) => setPlacaTrasera(e.target.checked ? "si" : "no")}
+                    className="w-5 h-5 rounded border-border/60 text-signal focus:ring-signal focus:ring-offset-2 cursor-pointer"
+                  />
+                  <span className="font-body text-sm font-semibold text-text-primary">◽ Placa trasera</span>
+                </div>
+                <span className={`font-display text-[10px] font-black px-2.5 py-1 rounded-md tracking-wide ${
+                  placaTrasera === "si"
+                    ? "bg-signal/15 text-route-action border border-signal/25"
+                    : "bg-amber-500/15 text-amber-800 dark:text-amber-300 border border-amber-500/25"
+                }`}>
+                  {placaTrasera === "si" ? "✓ VERIFICADO" : "📋 PENDIENTE"}
+                </span>
+              </label>
+            </div>
+        </section>
+
+        {/* Section 5: NOTAS — M3 flujo lineal (siempre visible) */}
+        <section id="evid-notas" className="mt-6 flex flex-col rounded-2xl border border-border/30 bg-surface-elevated/20 overflow-hidden shadow-xs scroll-mt-20">
+          <div className="w-full flex items-center justify-between p-4 bg-surface-elevated/40 text-left select-none">
+            <div className="flex items-center gap-2.5">
+              <span className="w-6 h-6 rounded-lg bg-route-action/15 border border-route-action/30 text-route-action flex items-center justify-center font-display text-xs font-black">
+                5
+              </span>
+              <div className="flex flex-col">
+                <h2 className="font-display text-xs font-black text-text-primary tracking-widest uppercase">
+                  {tipo === "inicial" ? "NOTAS DE RECOGIDA" : "NOTAS DE ENTREGA"}
+                </h2>
+                <span className="font-body text-[11px] text-text-tertiary">
+                  {notas.trim().length > 0 ? "Comentarios capturados" : "Observaciones y atajos rápidos"}
+                </span>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3">
+              {notas.trim().length > 5 ? (
+                <span className="font-display text-[10px] font-black px-2.5 py-1 rounded-md tracking-wide bg-signal/15 text-route-action border border-signal/25">
+                  ✓ REGISTRADO
+                </span>
+              ) : (
+                <span className="font-display text-[10px] font-bold text-text-tertiary px-2 py-0.5 rounded-md bg-surface border border-border/30">
+                  OPCIONAL
+                </span>
+              )}
+              <span className="flex size-6 items-center justify-center rounded-full bg-surface border border-border/30 text-[11px] font-black text-text-tertiary" aria-hidden>
+                {notas.trim().length > 5 ? "✓" : "•"}
+              </span>
+            </div>
+          </div>
+
+          <div className="p-4 border-t border-border/20 flex flex-col gap-3">
+              {tipo === "final" && (
+                <div className="bg-surface-elevated/25 border border-border/20 rounded-2xl p-4 flex flex-col gap-3 mb-2">
+                  <div className="flex justify-between items-center">
+                    <span className="font-body text-xs font-bold text-text-primary">
+                      ¿Presenta daños nuevos respecto al Origen?
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setPresentaDanosNuevos(!presentaDanosNuevos)}
+                      className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-hidden ${
+                        presentaDanosNuevos ? "bg-signal" : "bg-border/40"
+                      }`}
+                    >
+                      <span
+                        className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-sm ring-0 transition duration-200 ease-in-out ${
+                          presentaDanosNuevos ? "translate-x-5" : "translate-x-0"
+                        }`}
+                      />
+                    </button>
+                  </div>
+
+                  {presentaDanosNuevos && (
+                    <div className="bg-amber-500/10 border border-amber-500/20 rounded-xl p-3 flex flex-col gap-1.5 text-[11px] font-body text-amber-800 dark:text-amber-300 leading-relaxed">
+                      <span className="font-bold flex items-center gap-1">
+                        ⚠️ SUGERENCIA DE REGISTRO FOTOGRÁFICO:
+                      </span>
+                      <p>
+                        Se recomienda capturar fotos a detalle de la incidencia usando las opciones de subida de arriba (sección 1) y documentar claramente en las notas de abajo:
+                      </p>
+                      <ul className="list-disc pl-4 flex flex-col gap-1 font-medium mt-1 text-text-secondary">
+                        <li>Fotografía en primer plano del rayón, abolladura o daño nuevo.</li>
+                        <li>Fotografía de contexto que muestre la zona del vehículo afectada.</li>
+                        <li>Detalla en el cuadro de texto los hallazgos y especifica el daño.</li>
+                      </ul>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Quick Tags Pills */}
+              <div className="flex flex-col gap-1.5 my-1">
+                <span className="font-display text-[9px] font-extrabold text-text-tertiary uppercase tracking-wider">
+                  Atajos de observaciones (toca para insertar):
+                </span>
+                <div className="flex flex-wrap gap-1.5 select-none">
+                  {[
+                    "Rayón",
+                    "Golpe",
+                    "Mancha",
+                    "Sin llanta de refacción",
+                    "Parabrisas estrellado",
+                    "Asiento sucio",
+                    "Sin tapetes",
+                    "Rayón en fascia"
+                  ].map((etiqueta) => (
+                    <button
+                      key={etiqueta}
+                      type="button"
+                      onClick={() => {
+                        setNotas((prev) => {
+                          const trimmed = prev.trim();
+                          if (!trimmed) return `[${etiqueta}]`;
+                          return `${trimmed}, [${etiqueta}]`;
+                        });
+                      }}
+                      className="px-2.5 py-1 rounded-lg bg-surface-elevated/60 border border-border/30 hover:border-route-action text-text-secondary hover:text-text-primary hover:bg-surface-elevated font-body text-[11px] font-bold transition-all cursor-pointer active:scale-95"
+                    >
+                      + {etiqueta}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <textarea
+                value={notas}
+                onChange={(e) => setNotas(e.target.value)}
+                rows={4}
+                placeholder={
+                  tipo === "inicial"
+                    ? "Documenta cualquier detalle observado durante la recolección..."
+                    : "Detalla rayones, golpes nuevos o cualquier novedad respecto al punto de origen..."
+                }
+                className={`w-full border rounded-2xl p-4.5 text-xs font-body text-text-secondary leading-relaxed outline-hidden transition-all font-inherit ${
+                  notas.trim().length > 5 
+                    ? "border-signal/40 bg-signal/5 focus:border-signal/60" 
+                    : "border-border/30 bg-surface-elevated/20 focus:border-route-action/50"
+                }`}
+              />
+            </div>
+        </section>
+
+        {error && (
+          <div className="mt-4 px-1">
+            <Aviso tono="danger">{error}</Aviso>
+          </div>
+        )}
+        {avisoExito && (
+          <div className="mt-4 px-1">
+            <Aviso tono="info">{avisoExito}</Aviso>
+          </div>
+        )}
+
+        <div className="text-center font-body text-[9px] text-text-tertiary font-bold mt-6 tracking-wide select-none">
+          ruumruum · evidencias generadas previas al {tipo === "inicial" ? "inicio" : "cierre"} del traslado
+        </div>
+
+      </div>
+
+      {/* Sticky Primary Action Buttons Bar — respeta secondary nav + safe-area */}
+      <div className="fixed bottom-[calc(56px+env(safe-area-inset-bottom))] inset-x-0 z-40 bg-surface/95 backdrop-blur-md border-t border-border/20 py-3 px-4 shadow-2xl select-none">
+        <div className="max-w-md mx-auto flex gap-3">
+          {/* GUARDAR BORRADOR (Estilo Outline Definido) */}
+          <button
+            type="button"
+            onClick={guardarBorrador}
+            disabled={Boolean(enviando)}
+            className="flex-1 min-h-11 rounded-xl bg-transparent border-2 border-border/60 hover:border-white text-text-primary font-display text-xs font-bold tracking-wide transition-all cursor-pointer shadow-xs select-none flex items-center justify-center focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-route-action disabled:opacity-50"
+          >
+            {enviando === "guardar" ? "Guardando…" : "Guardar borrador"}
+          </button>
+          
+          {/* FINALIZAR EVIDENCIAS (Botón Primario con validación) */}
+          <button
+            type="button"
+            onClick={finalizar}
+            disabled={Boolean(enviando) || totalCapturados < totalRequisitos}
+            title={totalCapturados < totalRequisitos ? `Faltan ${totalRequisitos - totalCapturados} requisitos` : undefined}
+            className={`flex-1 min-h-11 rounded-xl font-display text-xs font-black tracking-wide transition-all cursor-pointer shadow-md select-none flex items-center justify-center gap-1.5 focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-signal disabled:cursor-not-allowed ${
+              totalCapturados === totalRequisitos
+                ? "bg-signal hover:bg-signal/90 text-slate-950"
+                : "bg-signal/60 text-slate-950/60 cursor-not-allowed"
+            }`}
+          >
+            {enviando === "confirmar" ? TEXTOS_CARGANDO.actualizando : `Finalizar evidencias ${totalCapturados === totalRequisitos ? "✓" : `(${totalCapturados}/${totalRequisitos})`}`}
+          </button>
+        </div>
+        {totalCapturados < totalRequisitos && (
+          <p className="max-w-md mx-auto mt-2 text-center font-body text-[11px] font-semibold text-text-tertiary">
+            Completa {totalRequisitos - totalCapturados} requisitos para habilitar el envío
+          </p>
+        )}
+      </div>
+
+      {/* Secondary Bottom Navigation Bar (Detalles, Gastos, Incidencia) */}
+      {pasaporte && (
+        <SecondaryTripNavBar trasladoId={id} pasaporte={pasaporte} />
+      )}
+
+      {/* R5 — CSAT 1-5 (post-traslado) + CES 1-7 (evidencia) — 1/3 final, instrumentado */}
+      {showCsatSheet && (
+        <div className="fixed inset-0 z-50 flex items-end justify-center" role="dialog" aria-modal="true" aria-label="Cuéntanos cómo te fue">
+          <button type="button" className="absolute inset-0 bg-black/60 backdrop-blur-sm animate-fadeIn" onClick={omitirFeedback} aria-label="Omitir feedback" />
+          <div className="relative w-full max-w-md bg-surface-elevated rounded-t-[2rem] border-t border-border/40 p-6 flex flex-col gap-5 animate-slideUp shadow-2xl max-h-[85vh] overflow-y-auto">
+            <div className="mx-auto h-1.5 w-12 rounded-full bg-border/40" aria-hidden />
+            <div className="flex flex-col gap-1">
+              <h2 className="font-display text-lg font-black text-text-primary">¡Evidencia enviada! Cuéntanos</h2>
+              <p className="font-body text-xs text-text-secondary">2 preguntas rápidas (10s) nos ayudan a mejorar tu pago y tu tiempo. 1 de cada 3 traslados.</p>
+            </div>
+
+            {/* CSAT 1-5 */}
+            <div className="flex flex-col gap-2">
+              <span className="font-display text-xs font-black tracking-wide text-text-primary">¿Qué tan fácil fue este traslado? <span className="font-normal text-text-tertiary">(CSAT)</span></span>
+              <div className="flex gap-1.5" role="group" aria-label="Calificación del traslado 1 a 5">
+                {[1, 2, 3, 4, 5].map((n) => (
+                  <button
+                    key={n}
+                    type="button"
+                    onClick={() => setCsatValor(n)}
+                    aria-pressed={csatValor === n}
+                    className={`flex-1 min-h-11 rounded-xl border flex flex-col items-center justify-center gap-0.5 transition-all focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-route-action ${csatValor === n ? "bg-signal border-signal text-slate-950 shadow-md" : "bg-surface border-border/40 text-text-secondary hover:border-signal/30"}`}
+                  >
+                    <span className="text-base leading-none">{n === 1 ? "😞" : n === 2 ? "😐" : n === 3 ? "🙂" : n === 4 ? "😊" : "🤩"}</span>
+                    <span className="font-display text-[11px] font-black">{n}</span>
+                  </button>
+                ))}
+              </div>
+              <div className="flex justify-between font-body text-[10px] text-text-tertiary px-1">
+                <span>Muy difícil</span>
+                <span>Muy fácil</span>
+              </div>
+            </div>
+
+            {/* CES 1-7 */}
+            <div className="flex flex-col gap-2">
+              <span className="font-display text-xs font-black tracking-wide text-text-primary">¿Cuánto esfuerzo te tomó la evidencia? <span className="font-normal text-text-tertiary">(CES)</span></span>
+              <div className="grid grid-cols-7 gap-1" role="group" aria-label="Esfuerzo de evidencia 1 a 7">
+                {[1, 2, 3, 4, 5, 6, 7].map((n) => (
+                  <button
+                    key={n}
+                    type="button"
+                    onClick={() => setCesValor(n)}
+                    aria-pressed={cesValor === n}
+                    className={`min-h-11 rounded-xl border flex items-center justify-center font-display text-xs font-black transition-all focus-visible:outline focus-visible:outline-[2px] focus-visible:outline-offset-1 focus-visible:outline-route-action ${cesValor === n ? "bg-route-action border-route-action text-white shadow-md" : "bg-surface border-border/30 text-text-secondary hover:border-route-action/30"}`}
+                  >
+                    {n}
+                  </button>
+                ))}
+              </div>
+              <div className="flex justify-between font-body text-[10px] text-text-tertiary px-1">
+                <span>Muy poco</span>
+                <span>Mucho</span>
+              </div>
+            </div>
+
+            <div className="flex gap-2">
+              <button type="button" onClick={omitirFeedback} className="flex-1 min-h-11 rounded-xl border border-border bg-surface font-display text-sm font-bold text-text-secondary hover:bg-surface-elevated">
+                Omitir
+              </button>
+              <button
+                type="button"
+                onClick={() => void enviarFeedback()}
+                disabled={csatValor == null || cesValor == null || enviandoFeedback}
+                className="flex-1 min-h-11 rounded-xl bg-signal text-slate-950 font-display text-sm font-black shadow-md hover:bg-signal/90 disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                {enviandoFeedback ? "Enviando…" : "Enviar · Gracias"}
+              </button>
+            </div>
+            <p className="font-body text-[10px] text-center text-text-tertiary">Se registra anónimo para NPS/CSAT. ¡Gracias por conducir con RUUM!</p>
+          </div>
+        </div>
+      )}
+
+      {/* Bottom Sheet de Soporte */}
+      {soporteAbierto && (
+        <div className="fixed inset-0 z-50 flex items-end justify-center">
+          {/* Backdrop de cierre */}
+          <button 
+            type="button" 
+            className="absolute inset-0 bg-black/60 backdrop-blur-xs transition-opacity duration-300 animate-fadeIn cursor-default w-full h-full border-none outline-hidden" 
+            onClick={() => setSoporteAbierto(false)}
+            aria-label="Cerrar soporte"
+          />
+          {/* Tarjeta de contenido */}
+          <div className="relative w-full max-w-md bg-surface-elevated rounded-t-[2rem] border-t border-border/40 p-6 flex flex-col gap-4 animate-slideUp shadow-2xl">
+            <div className="flex justify-between items-center pb-2 border-b border-border/20">
+              <h2 className="font-display text-lg font-bold text-text-primary flex items-center gap-2">
+                <span>💬</span> Soporte Rápido Ruum
+              </h2>
+              <button 
+                type="button" 
+                onClick={() => setSoporteAbierto(false)}
+                className="text-text-tertiary hover:text-text-primary p-1 cursor-pointer font-bold text-sm"
+              >
+                ✕
+              </button>
+            </div>
+            <p className="font-body text-xs text-text-secondary">
+              Selecciona un medio de contacto para comunicarte con el equipo operativo de guardia.
+            </p>
+            <div className="flex flex-col gap-2.5 mt-2">
+              <a
+                href="https://wa.me/525548210937"
+                className="flex items-center gap-3 p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-xl hover:bg-emerald-500/20 transition-colors"
+              >
+                <span className="text-xl">💬</span>
+                <div className="flex flex-col items-start">
+                  <span className="font-display text-sm font-bold text-emerald-400">WhatsApp de Soporte</span>
+                  <span className="font-body text-[11px] text-text-secondary">Mensajería instantánea y respuesta inmediata</span>
+                </div>
+              </a>
+              <a
+                href="tel:+525548210937"
+                className="flex items-center gap-3 p-4 bg-route-soft border border-route-action/20 rounded-xl hover:bg-route-action/10 transition-colors"
+              >
+                <span className="text-xl">📞</span>
+                <div className="flex flex-col items-start">
+                  <span className="font-display text-sm font-bold text-route-action">Llamar a Soporte</span>
+                  <span className="font-body text-[11px] text-text-secondary">Habla por teléfono directamente con un operador</span>
+                </div>
+              </a>
+              <a
+                href="mailto:soporte@ruumruum.com"
+                className="flex items-center gap-3 p-4 bg-surface rounded-xl border border-border/40 hover:bg-surface-elevated transition-colors"
+              >
+                <span className="text-xl">✉️</span>
+                <div className="flex flex-col items-start">
+                  <span className="font-display text-sm font-bold text-text-primary">Correo Electrónico</span>
+                  <span className="font-body text-[11px] text-text-secondary">Reportar incidencias técnicas no urgentes</span>
+                </div>
+              </a>
+            </div>
+            <button
+              type="button"
+              onClick={() => setSoporteAbierto(false)}
+              className="w-full min-h-11 mt-2 rounded-xl bg-control-soft font-display text-sm font-bold text-text-primary hover:bg-border/60 transition-colors cursor-pointer"
+            >
+              Cancelar
+            </button>
+          </div>
+        </div>
+      )}
+
+    </div>
+  );
+}

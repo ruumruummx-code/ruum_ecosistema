@@ -1,0 +1,42 @@
+# Dockerfile para DESARROLLO - con hot-reload para Next.js
+# Este archivo está optimizado para desarrollo local con volúmenes montados
+# Usa el layout aislado de pnpm para mantener las dependencias por workspace
+# syntax=docker/dockerfile:1
+
+ARG NODE_VERSION=24
+ARG PNPM_VERSION=10.0.0
+
+################################################################################
+# Stage: Desarrollo
+################################################################################
+FROM node:${NODE_VERSION}-alpine AS dev
+
+ARG PNPM_VERSION=10.0.0
+
+WORKDIR /app
+
+# Configurar pnpm
+RUN --mount=type=cache,target=/root/.npm \
+    npm install -g pnpm@${PNPM_VERSION}
+
+# Copiar archivos de configuración del workspace
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+
+# Copiar TODOS los package.json de apps y packages
+COPY apps/ ./apps/
+COPY packages/ ./packages/
+COPY scripts/ ./scripts/
+
+# Instalar TODAS las dependencias del monorepo
+# pnpm conserva las dependencias por workspace en el layout aislado
+RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
+    pnpm install --frozen-lockfile
+
+# Copiar archivos de configuración adicionales
+COPY turbo.json tsconfig.json deno.json deno.lock ./
+
+# Exponer puertos
+EXPOSE 3000 3001 3002
+
+# Comando por defecto (se sobrescribe en docker-compose)
+CMD ["pnpm", "run", "dev"]

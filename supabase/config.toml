@@ -1,0 +1,119 @@
+[api]
+enabled = true
+port = 54321
+schemas = ["public", "storage", "graphql_public"]
+extra_search_path = ["public", "extensions"]
+max_rows = 1000
+
+[db]
+port = 54322
+shadow_port = 54320
+major_version = 15
+
+[studio]
+enabled = true
+port = 54323
+
+[local_smtp]
+enabled = true
+port = 54324
+
+[auth]
+enabled = true
+site_url = "http://localhost:3000"
+additional_redirect_urls = [
+  "http://localhost:3001",
+  "http://localhost:3002",
+  "https://www.concer.ruumruum-moviliax.online",
+  "https://concer.ruumruum-moviliax.online",
+  "https://www.usuario.ruumruum-moviliax.online",
+  "https://usuario.ruumruum-moviliax.online"
+]
+jwt_expiry = 3600
+enable_refresh_token_rotation = true
+
+# NOTA OPERATIVA — Alcance de Redirect URLs en Proyectos Alojados (Staging / Producción):
+# `additional_redirect_urls` en config.toml configura el entorno local Supabase CLI.
+# En el Dashboard de Supabase para proyectos hospedados en Staging y Producción,
+# SE DEBEN CONFIGURAR EXPLÍCITAMENTE en Authentication → URL Configuration:
+#   - Site URL: https://www.usuario.ruumruum-moviliax.online (o el dominio principal)
+#   - Redirect URLs:
+#       * https://www.usuario.ruumruum-moviliax.online/auth/callback
+#       * https://usuario.ruumruum-moviliax.online/auth/callback
+#       * https://www.concer.ruumruum-moviliax.online/auth/callback
+#       * https://www.concer.ruumruum-moviliax.online/nueva-password
+#       * https://concer.ruumruum-moviliax.online/auth/callback
+#       * https://concer.ruumruum-moviliax.online/nueva-password
+# Sin esta alta en el Dashboard, resetPasswordForEmail rechaza el parámetro `redirectTo`
+# en producción y arroja error de enlace inválido/expirado.
+# M3 — Política de contraseñas del lado del servidor. La validación de la UI
+# (mín. 8 + fortaleza) es defensa en profundidad, pero un signUp() directo por
+# API puede saltársela; estas dos líneas la hacen valer en el propio Auth para
+# TODOS los caminos. `password_requirements` exige al menos una minúscula, una
+# mayúscula y un dígito (mismo criterio que fortalezaPassword nivel>=2 en la UI).
+minimum_password_length = 8
+password_requirements = "lower_upper_letters_digits"
+
+# NOTA — Protección contra contraseñas filtradas (HaveIBeenPwned):
+# NO es una clave de config.toml. Se activa en el Dashboard del proyecto
+# alojado → Authentication → Password Protection → "Prevent use of leaked
+# passwords" (requiere plan Pro o superior). Debe habilitarse manualmente en
+# staging y en producción como parte del despliegue de este PR.
+
+# CAPTCHA (Info severidad) — config.toml local no lo refleja para producción.
+# El proyecto Supabase en Dashboard → Authentication → Security → CAPTCHA
+# debe tener habilitado hCaptcha / Turnstile si se desea mitigar bots en
+# signUp/recuperación. Estado local: deshabilitado (desarrollo). Verificar en
+# producción que esté activo y que site_key/secret estén configurados.
+# Para启用 local, descomentar:
+# [auth.captcha]
+# enabled = true
+# provider = "hcaptcha" # o "turnstile"
+# site_key = ""
+# secret = ""
+
+[auth.email]
+enable_signup = true
+double_confirm_changes = true
+enable_confirmations = true  
+
+[auth.email.template.confirmation]
+subject = "Confirma tu correo"
+content_path = "./supabase/templates/confirmation.html"
+
+[auth.email.template.recovery]
+subject = "🔐 Restablece tu contraseña — Ruum Ruum"
+content_path = "./supabase/templates/recovery.html"
+
+[storage]
+enabled = true
+
+[functions.crear-payment-intent]
+verify_jwt = false
+
+# Stripe llama a este endpoint directamente desde sus servidores — nunca
+# manda un JWT de Supabase, manda su propia firma (Stripe-Signature), que
+# la función ya valida internamente con stripe.webhooks.constructEventAsync.
+# Sin esto, el gateway de Supabase rechaza la llamada antes de que la
+# función corra (confirmado en producción: 401 "Missing authorization
+# header" al llamar la función sin sesión, igual que rechazaría a Stripe).
+[functions.stripe-webhook]
+verify_jwt = false
+
+# El preflight multipart del navegador no porta JWT. El handler valida
+# Authorization con auth.getUser() antes de leer o almacenar el archivo.
+[functions.validar-documento-conductor]
+verify_jwt = false
+
+[functions.validar-documento-identidad]
+verify_jwt = false
+
+# El handler valida manualmente el JWT de Supabase; mantener el gateway sin
+# esta barrera permite que el preflight del navegador llegue a la función.
+[functions.iniciar-verificacion-didit]
+verify_jwt = false
+
+# Didit autentica este endpoint con X-Signature-V2/X-Signature-Simple, no con
+# un JWT de Supabase.
+[functions.webhook-didit]
+verify_jwt = false

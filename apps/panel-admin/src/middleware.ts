@@ -1,0 +1,198 @@
+import { type NextRequest, NextResponse } from "next/server";
+import { crearClienteServidor } from "@ruum/api/supabase";
+import {
+  buildCspPanel,
+  HSTS_HEADER,
+  PERMISSIONS_POLICY,
+} from "./lib/csp";
+import {
+  obtenerAdminSesion,
+  registrarAccesoDenegado,
+  verificarPermisoRuta
+} from "@ruum/api/operations";
+import { normalizarRolAdmin, puedeVerRuta, obtenerCapacidadParaRuta } from "./lib/roles-admin";
+
+/**
+ * Auditoría H-2 — Guard de autorización del panel-admin.
+ *
+ * Antes este middleware SOLO refrescaba el token de sesión (patrón estándar de
+ * @supabase/ssr) y no bloqueaba nada: cualquier cuenta de Supabase Auth válida
+ * —incluida la de un usuario final o un conductor, que viven en el MISMO
+ * proyecto Auth— podía entrar a la Torre de Control. La única barrera eran las
+ * policies `admin_acceso_total_*` (es_admin()); es decir, la autorización
+ * dependía 100% de RLS. Esto añade la barrera que faltaba en la capa de la app:
+ *
+ *   1. Se conserva el refresh de sesión (getUser) — necesario para que no
+ *      expire a media navegación.
+ *   2. Rutas públicas (/login y assets de Next) pasan sin comprobación.
+ *   3. En cualquier otra ruta: sin sesión -> /login; con sesión pero sin fila
+ *      en `admins` -> /login?error=no_autorizado. Solo un admin real entra.
+ *
+ * Si Supabase no está configurado (modo demo), se conserva el comportamiento
+ * anterior: no hay sesión que refrescar ni autorización que exigir.
+ */
+
+const RUTAS_PUBLICAS = ["/login", "/theme-init.js"];
+
+/**
+ * Aplica CSP con nonce + HSTS + headers de seguridad a la respuesta.
+ * Fuente: @ruum/shared/seguridad vía ./lib/csp (SEC-002).
+ */
+function applySecurityHeadersPanel(res: NextResponse, nonce: string): NextResponse {
+  const isProd = process.env.NODE_ENV === "production";
+  const isStaging = process.env.NEXT_PUBLIC_RUUM_AMBIENTE === "staging";
+  res.headers.set("Content-Security-Policy", buildCspPanel(nonce, isProd));
+  if (isStaging) {
+    res.headers.set(
+      "Content-Security-Policy-Report-Only",
+      `${buildCspPanel(nonce, isProd)}; report-uri /api/csp-report; report-to csp-endpoint`,
+    );
+  }
+  res.headers.set("x-nonce", nonce);
+  res.headers.set("X-Frame-Options", "DENY");
+  res.headers.set("X-Content-Type-Options", "nosniff");
+  res.headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
+  res.headers.set("Permissions-Policy", PERMISSIONS_POLICY);
+  if (isProd) {
+    res.headers.set("Strict-Transport-Security", HSTS_HEADER);
+  }
+  return res;
+}
+
+function esRutaPublica(pathname: string): boolean {
+  return RUTAS_PUBLICAS.some((ruta) => pathname === ruta || pathname.startsWith(`${ruta}/`));
+}
+
+export async function middleware(request: NextRequest) {
+  const nonce = Buffer.from(crypto.randomUUID()).toString("base64");
+  const requestHeaders = new Headers(request.headers);
+  requestHeaders.set("x-nonce", nonce);
+  // Next extrae el nonce de la CSP de la petición para sus scripts de hidratación.
+  requestHeaders.set("Content-Security-Policy", buildCspPanel(nonce, process.env.NODE_ENV === "production"));
+  let response = NextResponse.next({ request: { headers: requestHeaders } });
+  response.headers.set("x-nonce", nonce);
+
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+  const esProduccion = process.env.NODE_ENV === "production";
+  const modoDemo = process.env.NEXT_PUBLIC_PANEL_ADMIN_DEMO === "true";
+
+  // Fail closed: producción nunca puede continuar con demo o configuración incompleta.
+  if (esProduccion && (modoDemo || !url || !anonKey)) {
+    console.error("[security] panel-admin bloqueado por configuración insegura", {
+      pathname: request.nextUrl.pathname,
+      modoDemo,
+      supabaseConfigurado: Boolean(url && anonKey)
+    });
+    return applySecurityHeadersPanel(new NextResponse("Configuración de producción incompleta", { status: 503 }), nonce);
+  }
+
+  // Demo solo se permite explícitamente fuera de producción.
+  if (!url || !anonKey) {
+    if (!modoDemo) return applySecurityHeadersPanel(new NextResponse("Supabase no está configurado", { status: 503 }), nonce);
+    return applySecurityHeadersPanel(response, nonce);
+  }
+
+  const supabase = crearClienteServidor(url, anonKey, {
+    getAll() {
+      return request.cookies.getAll();
+    },
+    setAll(cookiesToSet) {
+      cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
+      // Conservar CSP/nonce y propagar también las cookies recién renovadas.
+      requestHeaders.set("cookie", request.cookies.toString());
+      response = NextResponse.next({ request: { headers: requestHeaders } });
+      response.headers.set("x-nonce", nonce);
+      cookiesToSet.forEach(({ name, value, options }) => response.cookies.set(name, value, options));
+    }
+  });
+
+  // Refresca la sesión Y obtiene el usuario en una sola llamada (getUser valida
+  // el token contra el servidor de Auth, a diferencia de getSession).
+  const {
+    data: { user }
+  } = await supabase.auth.getUser();
+
+  const { pathname } = request.nextUrl;
+
+  // Rutas públicas: no exigen sesión. Si un admin ya autenticado abre /login,
+  // se le manda al dashboard para no mostrarle el formulario de nuevo.
+  if (esRutaPublica(pathname)) {
+    if (user) {
+      const adminSesion = await obtenerAdminSesion(supabase, user.id).catch(() => null);
+      if (adminSesion) {
+        return applySecurityHeadersPanel(NextResponse.redirect(new URL("/", request.url)), nonce);
+      }
+    }
+    return applySecurityHeadersPanel(response, nonce);
+  }
+
+  // Ruta protegida sin sesión -> a login.
+  if (!user) {
+    return applySecurityHeadersPanel(NextResponse.redirect(new URL("/login", request.url)), nonce);
+  }
+
+  // Ruta protegida con sesión pero SIN fila en admins -> no autorizado.
+  let admin: { id: string; rol_operativo: string | null } | null;
+  try {
+    admin = await obtenerAdminSesion(supabase, user.id);
+  } catch {
+    admin = null;
+  }
+
+  if (!admin) {
+    // Cerrar la sesión no-admin para no dejarla colgando en el panel.
+    await supabase.auth.signOut();
+    const destino = new URL("/login", request.url);
+    destino.searchParams.set("error", "no_autorizado");
+    return applySecurityHeadersPanel(NextResponse.redirect(destino), nonce);
+  }
+
+  const rol = normalizarRolAdmin(admin.rol_operativo);
+  if (!puedeVerRuta(rol, pathname)) {
+    console.warn("[security] acceso administrativo denegado", {
+      adminId: admin.id,
+      rol,
+      pathname,
+      metodo: request.method
+    });
+    await registrarAccesoDenegado(supabase, {
+      ruta: pathname,
+      metodo: request.method,
+      motivo: "ruta_no_permitida"
+    }).catch(() => undefined);
+    const destino = new URL("/sin-permiso", request.url);
+    destino.searchParams.set("ruta", pathname);
+    return applySecurityHeadersPanel(NextResponse.redirect(destino), nonce);
+  }
+
+  // Verificación de capacidad efectiva (incluye overrides de admin_capacidades)
+  const permisoRequerido = obtenerCapacidadParaRuta(pathname);
+  if (permisoRequerido) {
+    const tienePermiso = await verificarPermisoRuta(supabase, permisoRequerido).catch(() => false);
+    if (tienePermiso !== true) {
+      console.warn("[security] capacidad insuficiente para ruta", {
+        adminId: admin.id,
+        rol,
+        pathname,
+        permisoRequerido,
+        metodo: request.method
+      });
+      await registrarAccesoDenegado(supabase, {
+        ruta: pathname,
+        metodo: request.method,
+        motivo: `capacidad_insuficiente:${permisoRequerido}`
+      }).catch(() => undefined);
+      const destino = new URL("/sin-permiso", request.url);
+      destino.searchParams.set("ruta", pathname);
+      return applySecurityHeadersPanel(NextResponse.redirect(destino), nonce);
+    }
+  }
+
+  return applySecurityHeadersPanel(response, nonce);
+}
+
+export const config = {
+  matcher: ["/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)"]
+};

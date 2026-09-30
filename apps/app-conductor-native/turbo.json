@@ -1,0 +1,8 @@
+{
+  "extends": ["//"],
+  "tasks": {
+    "build": { "outputs": ["app/build/outputs/**"] },
+    "lint": { "outputs": ["app/build/reports/lint-results-debug.html"] },
+    "test": { "outputs": ["app/build/reports/tests/**", "app/build/test-results/**"] }
+  }
+}

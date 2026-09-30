@@ -1,0 +1,25 @@
+{
+  "$schema": "https://v2-10-5.turborepo.dev/schema.json",
+  "ui": "tui",
+  "tasks": {
+    "build": {
+      "dependsOn": ["^build"],
+      "outputs": [".next/**", "!.next/cache/**"],
+      "env": [
+        "NODE_ENV",
+        "VERCEL*",
+        "CI",
+        "NEXT_PUBLIC_*",
+        "SENTRY_*",
+        "CSP_STRICT_STYLES"
+      ]
+    },
+    "dev": {
+      "cache": false,
+      "persistent": true
+    },
+    "lint": {},
+    "typecheck": {},
+    "test": {}
+  }
+}

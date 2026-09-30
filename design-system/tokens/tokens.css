@@ -1,0 +1,165 @@
+/**
+ * Ruum Ruum — design tokens (CSS custom properties)
+ * Fuente única: Libro de Marca v2.0, capítulos 26 (Design tokens) y 27 (Modo oscuro).
+ * No edites valores aquí sin actualizar también el Libro de Marca.
+ *
+ * Activación de modo oscuro:
+ *  - Automática por `prefers-color-scheme: dark` (media query abajo).
+ *  - Manual con `<html data-theme="dark">` — el toggle manual siempre prevalece
+ *    sobre la preferencia del sistema (aplícalo después de leer localStorage).
+ */
+
+:root {
+  /* Color — superficie y texto */
+  --bg: #E8EEF4;
+  --surface: #FFFFFF;
+  --surface-elevated: #FFFFFF;
+  --border: #E6F0FF;
+  --border-input: #7A8DAE;
+  --text-primary: #0A2342;
+  --text-secondary: #566889;
+
+  /* Color — marca */
+  --navy: #0A2342;
+  --teal: #00D1D1;
+  --teal-deep: #008B8B;
+  --action: #0066FF;
+  --action-hover: #3D7FFF;
+
+  /* Color — estado semántico */
+  --neutral-bg: #EEF2F8;
+  --neutral-text: #566889;
+  --action-bg: #E8F0FE;
+  --action-text: #1461E0;
+  --warning-bg: #FFF4D6;
+  --warning-text: #7A4F00;
+  --success-bg: #E6F6EE;
+  --success-text: #0F6B48;
+  --error-bg: #FDECEF;
+  --error-text: #C23648;
+  --incident-text: #B3261E;
+  --emergency: #B3261E;
+
+  /* Gradientes */
+  --gradient-cta: linear-gradient(90deg, #008B8B 0%, #0066FF 100%);
+  --gradient-route: linear-gradient(90deg, #00D1D1 0%, #0066FF 100%);
+
+  /* Elevación */
+  --shadow-1: 0 2px 10px rgba(13, 43, 94, .05);
+  --shadow-2: 0 8px 24px rgba(13, 43, 94, .10);
+
+  /* Tipografía */
+  --font-base: 'Inter', Arial, Calibri, sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
+  --fs-display: 40px;
+  --fs-h1: 32px;
+  --fs-h2: 24px;
+  --fs-h3: 18px;
+  --fs-body: 16px;
+  --fs-small: 14px;
+  --fs-caption: 12px;
+  --fw-regular: 400;
+  --fw-medium: 500;
+  --fw-semibold: 600;
+  --fw-bold: 700;
+  --fw-extrabold: 800;
+
+  /* Espaciado */
+  --space-1: 4px; --space-2: 8px; --space-3: 12px; --space-4: 16px;
+  --space-5: 20px; --space-6: 24px; --space-7: 32px; --space-8: 40px; --space-9: 48px;
+
+  /* Radio */
+  --radius-sm: 8px; --radius-md: 12px; --radius-lg: 16px; --radius-xl: 24px; --radius-full: 999px;
+
+  /* Tamaño de toque y movimiento */
+  --size-touch: 44px;
+  --size-touch-street: 56px;
+  --motion-micro: 150ms;
+  --motion-transition: 250ms;
+  --motion-easing: ease-out;
+
+  color-scheme: light;
+}
+
+/* Modo oscuro — activación automática por preferencia del sistema */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #061529;
+    --surface: #0A2342;
+    --surface-elevated: #0F2D52;
+    --border: #1A3A5C;
+    --border-input: #2D4F73;
+    --text-primary: #F6F8FB;
+    --text-secondary: #A8B5CC;
+
+    --navy: #0A2342;
+    --teal: #00D1D1;
+    --teal-deep: #00B3B3;
+    --action: #4D94FF;
+    --action-hover: #6BA8FF;
+
+    --neutral-bg: #1A2E4A;
+    --neutral-text: #A8B5CC;
+    --action-bg: #0F2D52;
+    --action-text: #6BA8FF;
+    --warning-bg: #3D2E00;
+    --warning-text: #FFC933;
+    --success-bg: #0A2E1F;
+    --success-text: #4DD9A3;
+    --error-bg: #3D0F1A;
+    --error-text: #FF6B7A;
+    --incident-text: #FF5C4D;
+    --emergency: #FF4D3D;
+
+    --gradient-cta: linear-gradient(90deg, #00B3B3 0%, #4D94FF 100%);
+    --gradient-route: linear-gradient(90deg, #00D1D1 0%, #4D94FF 100%);
+
+    --shadow-1: 0 2px 10px rgba(0, 0, 0, .3);
+    --shadow-2: 0 8px 24px rgba(0, 0, 0, .4);
+
+    color-scheme: dark;
+  }
+}
+
+/* Modo oscuro — toggle manual (prevalece sobre el sistema) */
+:root[data-theme="dark"] {
+  --bg: #061529;
+  --surface: #0A2342;
+  --surface-elevated: #0F2D52;
+  --border: #1A3A5C;
+  --border-input: #2D4F73;
+  --text-primary: #F6F8FB;
+  --text-secondary: #A8B5CC;
+
+  --navy: #0A2342;
+  --teal: #00D1D1;
+  --teal-deep: #00B3B3;
+  --action: #4D94FF;
+  --action-hover: #6BA8FF;
+
+  --neutral-bg: #1A2E4A;
+  --neutral-text: #A8B5CC;
+  --action-bg: #0F2D52;
+  --action-text: #6BA8FF;
+  --warning-bg: #3D2E00;
+  --warning-text: #FFC933;
+  --success-bg: #0A2E1F;
+  --success-text: #4DD9A3;
+  --error-bg: #3D0F1A;
+  --error-text: #FF6B7A;
+  --incident-text: #FF5C4D;
+  --emergency: #FF4D3D;
+
+  --gradient-cta: linear-gradient(90deg, #00B3B3 0%, #4D94FF 100%);
+  --gradient-route: linear-gradient(90deg, #00D1D1 0%, #4D94FF 100%);
+
+  --shadow-1: 0 2px 10px rgba(0, 0, 0, .3);
+  --shadow-2: 0 8px 24px rgba(0, 0, 0, .4);
+
+  color-scheme: dark;
+}
+
+/* Modo calle — refuerzo nocturno (app-conductor) */
+[data-street-mode="true"] {
+  --size-touch: var(--size-touch-street);
+}

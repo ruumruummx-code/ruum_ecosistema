@@ -1,0 +1,119 @@
+"use client";
+
+import { Suspense, useEffect, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Button, Field, Aviso, LogoMarca } from "@ruum/ui";
+import { traducirErrorAuth, validarDestinoSeguro } from "@ruum/shared/utils";
+import { crearClienteNavegador, tieneSupabaseConfigurado } from "../../lib/supabase-browser";
+import { SelectorTemaAdmin } from "../TemaAdmin";
+
+function errorInicialDesdeUrl(): string | null {
+  if (typeof window === "undefined") return null;
+  const params = new URLSearchParams(window.location.search);
+  // Auditoría H-2 — si el middleware rechazó una sesión no-admin, muestra el
+  // motivo en vez de un formulario en blanco.
+  return params.get("error") === "no_autorizado"
+    ? "Esta cuenta no tiene acceso a la Torre de Control."
+    : null;
+}
+
+/** Pantalla de acceso para el equipo interno de operación. */
+function FormularioLoginAdmin() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const destinoPostLogin = validarDestinoSeguro(searchParams.get("next"), "/");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [enviando, setEnviando] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    setError(errorInicialDesdeUrl());
+  }, []);
+
+  async function iniciarSesion(e: React.FormEvent) {
+    e.preventDefault();
+    setEnviando(true);
+    setError(null);
+
+    try {
+      const cliente = crearClienteNavegador();
+      const { error: errorAuth } = await cliente.auth.signInWithPassword({ email, password });
+      if (errorAuth) throw errorAuth;
+      router.push(destinoPostLogin);
+      router.refresh();
+    } catch (err) {
+      setError(traducirErrorAuth(err));
+    } finally {
+      setEnviando(false);
+    }
+  }
+
+  return (
+    <main className="admin-auth-shell relative flex items-center justify-center px-4 py-10 sm:px-6">
+      <div className="absolute right-4 top-4 sm:right-6 sm:top-6">
+        <SelectorTemaAdmin />
+      </div>
+      <section className="admin-auth-card p-6 sm:p-8" aria-labelledby="titulo-acceso-admin">
+        <div className="flex items-center gap-3">
+          <LogoMarca tamano={34} color="signal" />
+          <div>
+            <p className="font-display text-lg font-extrabold tracking-tight text-ink">
+              ruum<span className="text-signal">ruum</span>
+            </p>
+            <p className="font-mono-ruum text-admin-secundario uppercase tracking-[0.14em] text-text-tertiary">Torre de Control</p>
+          </div>
+        </div>
+
+        <h1 id="titulo-acceso-admin" className="mt-8 font-display text-2xl font-bold text-ink">Acceso operativo</h1>
+        <p className="mt-2 font-body text-sm leading-6 text-text-secondary">Traslados, documentación, pagos, incidencias y alertas de la operación.</p>
+
+        {!tieneSupabaseConfigurado() ? (
+          <div className="mt-6 space-y-3">
+            <span className="inline-flex items-center gap-2 rounded-full border border-status-warning/35 bg-status-warning-soft px-3 py-1 font-body text-admin-secundario font-semibold text-status-warning">
+              Modo demo
+            </span>
+            <Aviso tono="info">Supabase no está configurado todavía. El panel está disponible en modo demo con datos simulados.</Aviso>
+          </div>
+        ) : (
+          <form className="mt-7 grid gap-4" onSubmit={iniciarSesion}>
+            <Field
+              etiqueta="Correo"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              autoComplete="email"
+            />
+            <Field
+              etiqueta="Contraseña"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              autoComplete="current-password"
+            />
+
+            {error && (
+              <div role="status" aria-live="polite" aria-atomic="true">
+                <Aviso tono="danger">{error}</Aviso>
+              </div>
+            )}
+
+            <Button type="submit" disabled={enviando} className="admin-button admin-button-primary mt-2 w-full">
+              {enviando ? "Entrando…" : "Entrar a la Torre de Control"}
+            </Button>
+          </form>
+        )}
+      </section>
+    </main>
+  );
+}
+
+export default function PaginaLogin() {
+  return (
+    <Suspense fallback={<div className="admin-auth-shell flex items-center justify-center p-8 text-text-tertiary">Cargando acceso...</div>}>
+      <FormularioLoginAdmin />
+    </Suspense>
+  );
+}

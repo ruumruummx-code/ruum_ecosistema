@@ -1,0 +1,755 @@
+import type { SupabaseClient } from "@supabase/supabase-js";
+import type { Database, Json } from "@ruum/shared/types";
+import { registrarEvento } from "./auditoria";
+
+type Cliente = SupabaseClient<Database>;
+type ConductorRow = Database["public"]["Tables"]["conductores"]["Row"];
+type PayoutRow = Database["public"]["Tables"]["payouts_conductor"]["Row"];
+type DatosBancariosRow = Database["public"]["Tables"]["datos_bancarios_conductor"]["Row"];
+type DocumentoConductorRow = Database["public"]["Tables"]["documentos_conductor"]["Row"];
+type SolicitudConductorRow = Database["public"]["Tables"]["solicitudes_conductor"]["Row"];
+type PreferenciasConductorRow = Database["public"]["Tables"]["preferencias_conductor"]["Row"];
+type PasaporteRow = Database["public"]["Views"]["pasaporte_digital"]["Row"];
+export type DisponibilidadOperativaConductor = "disponible" | "no_disponible";
+
+export type TipoDocumentoConductor =
+  | "licencia_frente"
+  | "licencia_reverso"
+  | "identificacion_oficial"
+  | "constancia_situacion_fiscal"
+  | "documento_operativo";
+
+export const TAMANO_MAX_DOCUMENTO_BYTES = 10 * 1024 * 1024;
+export const EXTENSIONES_DOCUMENTO_PERMITIDAS = new Set(["jpg", "jpeg", "png", "webp", "pdf"]);
+export const TIPOS_MIME_DOCUMENTO_PERMITIDOS = new Set(["image/jpeg", "image/png", "image/webp", "application/pdf"]);
+export const TAMANO_MAX_FOTO_PERFIL_BYTES = 5 * 1024 * 1024;
+export const EXTENSIONES_FOTO_PERFIL_PERMITIDAS = new Set(["jpg", "jpeg", "png", "webp"]);
+export const TIPOS_MIME_FOTO_PERFIL_PERMITIDOS = new Set(["image/jpeg", "image/png", "image/webp"]);
+
+export function extensionArchivo(nombre: string) {
+  return nombre.split(".").pop()?.toLowerCase() ?? "";
+}
+
+export function validarArchivoDocumentoConductor(archivo: File) {
+  if (archivo.size > TAMANO_MAX_DOCUMENTO_BYTES) {
+    throw new Error("El archivo debe pesar máximo 10 MB.");
+  }
+
+  const extension = extensionArchivo(archivo.name);
+  if (!EXTENSIONES_DOCUMENTO_PERMITIDAS.has(extension) || !TIPOS_MIME_DOCUMENTO_PERMITIDOS.has(archivo.type)) {
+    throw new Error("El documento debe ser una imagen JPG, PNG, WEBP o un PDF.");
+  }
+}
+
+export function validarFotoPerfilConductor(archivo: File) {
+  if (archivo.size > TAMANO_MAX_FOTO_PERFIL_BYTES) {
+    throw new Error("La fotografía debe pesar máximo 5 MB.");
+  }
+
+  const extension = extensionArchivo(archivo.name);
+  const esExtensionValida = EXTENSIONES_FOTO_PERFIL_PERMITIDAS.has(extension);
+  const esMimeValido = !archivo.type || archivo.type === "application/octet-stream" || TIPOS_MIME_FOTO_PERFIL_PERMITIDOS.has(archivo.type);
+  if (!esExtensionValida || !esMimeValido) {
+    throw new Error("La fotografía debe ser JPG, PNG o WEBP.");
+  }
+}
+
+export function textoONull(valor: string | null | undefined) {
+  const limpio = valor?.trim() ?? "";
+  return limpio ? limpio : null;
+}
+
+export function telefonoONull(valor: string | null | undefined) {
+  const telefono = valor?.trim() ?? "";
+  if (!telefono) return null;
+  return (telefono.startsWith("+") ? telefono : `+${telefono}`).replace(/\s+/g, "");
+}
+
+/** Conductor asociado a la sesión de Supabase Auth actual, si existe. */
+export async function obtenerConductorActual(cliente: Cliente): Promise<ConductorRow | null> {
+  const { data: sesion } = await cliente.auth.getUser();
+  if (!sesion.user) return null;
+
+  const { data, error } = await cliente
+    .from("conductores")
+    .select("*")
+    .eq("auth_user_id", sesion.user.id)
+    .maybeSingle();
+
+  if (error) throw error;
+  return data;
+}
+
+/** Solicitud más reciente de la sesión, incluida una ya enviada o rechazada. */
+export async function obtenerSolicitudConductorActual(cliente: Cliente): Promise<SolicitudConductorRow | null> {
+  const { data: sesion } = await cliente.auth.getUser();
+  if (!sesion.user) return null;
+
+  const { data, error } = await cliente
+    .from("solicitudes_conductor")
+    .select("*")
+    .eq("auth_user_id", sesion.user.id)
+    .order("actualizado_en",{ascending:false})
+    .limit(1)
+    .maybeSingle();
+
+  if (error) throw error;
+  return data;
+}
+
+export interface ExpedienteSolicitudConductorV2 {
+  datosPersonales: Json;
+  domicilio: Json;
+  licencia: Json;
+  contactoEmergencia: Json;
+}
+
+export type TipoConsentimientoConductor =
+  | "terminos_servicio"
+  | "aviso_privacidad"
+  | "autorizacion_antecedentes"
+  | "declaracion_suspensiones";
+
+export interface ConsentimientoConductor {
+  tipoDocumento: TipoConsentimientoConductor;
+  version: number;
+}
+
+export interface ResultadoSolicitudConductor {
+  solicitudId: string | null;
+  conductorId: string | null;
+  estado: Database["public"]["Enums"]["estado_expediente_conductor"] | null;
+  pasoActual: number;
+}
+
+function mapearResultadoSolicitud(
+  fila: {
+    solicitud_id: string | null;
+    conductor_id: string | null;
+    estado: Database["public"]["Enums"]["estado_expediente_conductor"] | null;
+    paso_actual: number | null;
+  } | undefined
+): ResultadoSolicitudConductor {
+  if (!fila) throw new Error("La operación no devolvió el expediente.");
+  return {
+    solicitudId: fila.solicitud_id,
+    conductorId: fila.conductor_id,
+    estado: fila.estado,
+    pasoActual: fila.paso_actual ?? 0
+  };
+}
+
+export async function iniciarSolicitudConductor(cliente: Cliente) {
+  const { data, error } = await cliente.rpc("iniciar_solicitud_conductor");
+  if (error) throw error;
+  return mapearResultadoSolicitud(data?.[0]);
+}
+
+export async function guardarBorradorConductor(
+  cliente: Cliente,
+  expediente: ExpedienteSolicitudConductorV2,
+  pasoActual: number
+) {
+  const { data, error } = await cliente.rpc("guardar_borrador_conductor", {
+    p_paso_actual: pasoActual,
+    p_datos_personales: expediente.datosPersonales,
+    p_domicilio: expediente.domicilio,
+    p_licencia: expediente.licencia,
+    p_contacto_emergencia: expediente.contactoEmergencia
+  });
+  if (error) throw error;
+  return mapearResultadoSolicitud(data?.[0]);
+}
+
+export async function registrarConsentimientosConductor(
+  cliente: Cliente,
+  solicitudId: string,
+  consentimientos: ConsentimientoConductor[],
+  canal: "web" | "android" | "ios",
+  versionApp: string
+) {
+  const { data, error } = await cliente.rpc("registrar_consentimientos_conductor", {
+    p_solicitud_id: solicitudId,
+    p_consentimientos: consentimientos.map((consentimiento) => ({
+      tipo_documento: consentimiento.tipoDocumento,
+      version: consentimiento.version
+    })),
+    p_canal: canal,
+    p_version_app: versionApp
+  });
+  if (error) throw error;
+  return data;
+}
+
+export async function enviarSolicitudConductor(cliente: Cliente) {
+  const { data, error } = await cliente.rpc("enviar_solicitud_conductor");
+  if (error) throw error;
+  return mapearResultadoSolicitud(data?.[0]);
+}
+
+export type EventoRegistroConductor =
+  | "registro_iniciado"
+  | "paso_visto"
+  | "paso_completado"
+  | "otp_error"
+  | "rpc_error"
+  | "documento_fallo"
+  | "solicitud_enviada"
+  | "didit_iniciado"
+  | "didit_completado"
+  | "didit_error";
+
+export interface DatosEventoRegistroConductor {
+  sesionId: string;
+  evento: EventoRegistroConductor;
+  paso?: number;
+  codigo?: string;
+  duracionMs?: number;
+  zona?: string;
+  fuente?: string;
+  empresaId?: string;
+}
+
+/**
+ * RT-27 — envía únicamente telemetría operativa acotada. El servidor toma
+ * auth_user_id y solicitud_id de la sesión; el cliente nunca los decide.
+ */
+export async function registrarEventoRegistroConductor(
+  cliente: Cliente,
+  datos: DatosEventoRegistroConductor
+) {
+  const { data, error } = await cliente.rpc("registrar_evento_registro_conductor_v2" as never, {
+    p_sesion_id: datos.sesionId,
+    p_evento: datos.evento,
+    ...(datos.paso !== undefined ? { p_paso: datos.paso } : {}),
+    ...(datos.codigo !== undefined ? { p_codigo: datos.codigo } : {}),
+    ...(datos.duracionMs !== undefined ? { p_duracion_ms: datos.duracionMs } : {}),
+    ...(datos.zona !== undefined ? { p_zona: datos.zona } : {}),
+    ...(datos.fuente !== undefined ? { p_fuente: datos.fuente } : {}),
+    ...(datos.empresaId !== undefined ? { p_empresa_id: datos.empresaId } : {})
+  } as never);
+  if (error) throw error;
+  return data;
+}
+
+/** Persiste PII después de autenticar; nunca usa `user_metadata`. */
+export async function completarSolicitudConductorV2(
+  cliente: Cliente,
+  expediente: ExpedienteSolicitudConductorV2
+) {
+  const { data, error } = await cliente.rpc("completar_solicitud_conductor_v2", {
+    p_datos_personales: expediente.datosPersonales,
+    p_domicilio: expediente.domicilio,
+    p_licencia: expediente.licencia,
+    p_contacto_emergencia: expediente.contactoEmergencia
+  });
+  if (error) throw error;
+  return data;
+}
+
+async function obtenerConductorIdActual(cliente: Cliente): Promise<string> {
+  const conductor = await obtenerConductorActual(cliente);
+  if (!conductor) throw new Error("No se encontró el conductor autenticado.");
+  return conductor.id;
+}
+
+function rutaFotoPerfilConductor(valor: string, conductorId: string): string | null {
+  const rutaEsperada = new RegExp(`^${conductorId}/perfil\\.(?:jpe?g|png|webp)$`, "i");
+  if (rutaEsperada.test(valor)) return valor;
+  try {
+    const url = new URL(valor);
+    const prefijos = [
+      `/storage/v1/object/public/fotos-perfil-conductor/${conductorId}/`,
+      `/storage/v1/object/sign/fotos-perfil-conductor/${conductorId}/`,
+    ];
+    const prefijo = prefijos.find((valorPrefijo) => url.pathname.startsWith(valorPrefijo));
+    if (!prefijo) return null;
+    const nombre = url.pathname.slice(prefijo.length);
+    return /^[^/]+\.(?:jpe?g|png|webp)$/i.test(nombre) ? `${conductorId}/${nombre}` : null;
+  } catch {
+    return null;
+  }
+}
+
+export async function obtenerUrlFotoPerfilConductor(
+  cliente: Cliente,
+  conductorId: string,
+  valor: string | null | undefined,
+  expiracionSegundos = 1800,
+): Promise<string | null> {
+  const actual = await obtenerConductorIdActual(cliente);
+  if (actual !== conductorId || !valor) return null;
+  const ruta = rutaFotoPerfilConductor(valor, conductorId);
+  if (!ruta) return null;
+  const { data, error } = await cliente.storage.from("fotos-perfil-conductor").createSignedUrl(ruta, expiracionSegundos);
+  if (error) throw error;
+  return data.signedUrl;
+}
+
+type TrasladoRow = Database["public"]["Tables"]["traslados"]["Row"];
+type VehiculoRow = Database["public"]["Tables"]["vehiculos"]["Row"];
+
+export type TrasladoConductorGanancia = TrasladoRow & {
+  cerrado_en?: string | null;
+  payout_id?: string | null;
+  vehiculos?: Pick<VehiculoRow, "marca" | "modelo" | "anio"> | null;
+};
+
+export interface DatosGananciasConductor {
+  datosBancarios: DatosBancariosRow | null;
+  payouts: PayoutRow[];
+  traslados: TrasladoConductorGanancia[];
+}
+
+export async function obtenerGananciasConductor(cliente: Cliente, conductorId: string): Promise<DatosGananciasConductor> {
+  const [datosBancarios, payouts, traslados] = await Promise.all([
+    cliente.from("datos_bancarios_conductor").select("*").eq("conductor_id", conductorId).maybeSingle(),
+    cliente.from("payouts_conductor").select("*").eq("conductor_id", conductorId).order("periodo_inicio", { ascending: false }),
+    cliente.from("traslados").select("*, vehiculos(marca, modelo, anio)").eq("conductor_id", conductorId).order("creado_en", { ascending: false })
+  ]);
+
+  if (datosBancarios.error) throw datosBancarios.error;
+  if (payouts.error) throw payouts.error;
+  if (traslados.error) throw traslados.error;
+
+  return {
+    datosBancarios: datosBancarios.data ?? null,
+    payouts: payouts.data ?? [],
+    traslados: (traslados.data ?? []) as TrasladoConductorGanancia[]
+  };
+}
+
+export interface DatosBancariosConductorInput {
+  titularCuenta: string;
+  banco: string;
+  clabe: string;
+  numeroTarjeta?: string | null;
+}
+
+export async function guardarDatosBancariosConductor(
+  cliente: Cliente,
+  datos: DatosBancariosConductorInput
+): Promise<DatosBancariosRow> {
+  const { data, error } = await (cliente as unknown as { rpc: (n: string, a: Record<string, unknown>) => Promise<{ data: unknown; error: unknown }> }).rpc("conductor_guarda_datos_bancarios", {
+    p_titular_cuenta: datos.titularCuenta.trim(),
+    p_banco: datos.banco.trim(),
+    p_clabe: datos.clabe.replace(/\D/g, ""),
+    p_numero_tarjeta: datos.numeroTarjeta && datos.numeroTarjeta.trim().length > 0 ? datos.numeroTarjeta.trim() : null
+  }) as unknown as { data: DatosBancariosRow | null; error: unknown };
+
+  if (error) throw error;
+  if (!data) throw new Error("No se pudieron guardar los datos bancarios.");
+  return data;
+}
+
+export interface DatosConfiguracionConductor {
+  conductor: ConductorRow;
+  documentos: DocumentoConductorRow[];
+  preferencias: PreferenciasConductorRow | null;
+  historial: PasaporteRow[];
+}
+
+export async function obtenerConfiguracionConductor(cliente: Cliente, conductorId: string): Promise<DatosConfiguracionConductor> {
+  const [conductor, documentos, preferencias, historial] = await Promise.all([
+    cliente.from("conductores").select("*").eq("id", conductorId).maybeSingle(),
+    cliente.from("documentos_conductor").select("*").eq("conductor_id", conductorId).order("creado_en", { ascending: false }),
+    cliente.from("preferencias_conductor").select("*").eq("conductor_id", conductorId).maybeSingle(),
+    listarHistorialTrasladosConductor(cliente, conductorId)
+  ]);
+
+  if (conductor.error) throw conductor.error;
+  if (documentos.error) throw documentos.error;
+  if (preferencias.error) throw preferencias.error;
+  if (!conductor.data) throw new Error("No se encontró el conductor.");
+
+  return {
+    conductor: conductor.data,
+    documentos: documentos.data ?? [],
+    preferencias: preferencias.data ?? null,
+    historial
+  };
+}
+
+export async function listarHistorialTrasladosConductor(cliente: Cliente, conductorId: string): Promise<PasaporteRow[]> {
+  const conductorAutenticado = await obtenerConductorIdActual(cliente);
+  if (conductorAutenticado !== conductorId) {
+    throw new Error("No puedes consultar el historial de otro conductor.");
+  }
+
+  const { data, error } = await cliente
+    .from("pasaporte_digital")
+    .select("*")
+    .eq("conductor_id", conductorId)
+    .order("actualizado_en", { ascending: false })
+    .limit(12);
+
+  if (error) throw error;
+  return data ?? [];
+}
+
+export type PreferenciasConductorInput = Omit<PreferenciasConductorRow, "conductor_id" | "actualizado_en">;
+
+export async function guardarPreferenciasConductor(
+  cliente: Cliente,
+  conductorId: string,
+  preferencias: PreferenciasConductorInput
+) {
+  const { error } = await cliente
+    .from("preferencias_conductor")
+    .upsert({ conductor_id: conductorId, ...preferencias }, { onConflict: "conductor_id" });
+
+  if (error) throw error;
+
+  await registrarEvento(cliente, "modificacion_traslado_activo", "conductor", conductorId, {
+    accion: "actualizacion_preferencias_conductor"
+  });
+}
+
+export async function obtenerDisponibilidadConductor(
+  cliente: Cliente,
+  conductorId: string
+): Promise<DisponibilidadOperativaConductor> {
+  const { data, error } = await cliente
+    .from("preferencias_conductor")
+    .select("modo_no_molestar")
+    .eq("conductor_id", conductorId)
+    .maybeSingle();
+
+  if (error) throw error;
+  return data?.modo_no_molestar ? "no_disponible" : "disponible";
+}
+
+export async function guardarDisponibilidadConductor(
+  cliente: Cliente,
+  conductorId: string,
+  disponibilidad: DisponibilidadOperativaConductor
+) {
+  const conductorAutenticado = await obtenerConductorIdActual(cliente);
+  if (conductorAutenticado !== conductorId) {
+    throw new Error("No puedes modificar la disponibilidad de otro conductor.");
+  }
+
+  const { error } = await cliente
+    .from("preferencias_conductor")
+    .upsert(
+      {
+        conductor_id: conductorId,
+        modo_no_molestar: disponibilidad === "no_disponible"
+      },
+      { onConflict: "conductor_id" }
+    );
+
+  if (error) throw error;
+
+  await registrarEvento(cliente, "modificacion_traslado_activo", "conductor", conductorId, {
+    accion: "actualizacion_disponibilidad_conductor",
+    disponibilidad
+  });
+}
+
+async function subirDocumentoValidado(
+  cliente: Cliente,
+  objetivoId: string,
+  tipo: TipoDocumentoConductor,
+  archivo: File,
+  documentoAnteriorId?: string
+) {
+  validarArchivoDocumentoConductor(archivo);
+  const formulario = new FormData();
+  formulario.set("objetivo_id", objetivoId);
+  formulario.set("tipo", tipo);
+  formulario.set("archivo", archivo);
+  if (documentoAnteriorId) formulario.set("documento_anterior_id", documentoAnteriorId);
+  const { data, error } = await cliente.functions.invoke("validar-documento-conductor", { body: formulario });
+  if (error) {
+    let mensaje = error.message;
+    const contexto = "context" in error ? error.context : null;
+    if (contexto instanceof Response) {
+      try {
+        const detalle = (await contexto.clone().json()) as { error?: string };
+        mensaje = detalle.error ?? mensaje;
+      } catch {
+        // Conserva el mensaje de transporte cuando el servidor no devolvió JSON.
+      }
+    }
+    throw new Error(mensaje);
+  }
+  return data as { documento_id: string; ruta: string };
+}
+
+export async function subirDocumentoConductor(
+  cliente: Cliente,
+  conductorId: string,
+  tipo: TipoDocumentoConductor,
+  archivo: File,
+  documentoAnteriorId?: string
+) {
+  const conductorAutenticado = await obtenerConductorIdActual(cliente);
+  if (conductorAutenticado !== conductorId) {
+    throw new Error("No puedes cargar documentos para otro conductor.");
+  }
+  return subirDocumentoValidado(cliente, conductorId, tipo, archivo, documentoAnteriorId);
+}
+
+export async function subirDocumentoSolicitudConductor(
+  cliente: Cliente,
+  solicitudId: string,
+  tipo: TipoDocumentoConductor,
+  archivo: File,
+  documentoAnteriorId?: string
+) {
+  const { data: sesion } = await cliente.auth.getUser();
+  if (!sesion.user) throw new Error("Inicia sesión para subir documentos.");
+  const { data: solicitud, error } = await cliente.from("solicitudes_conductor")
+    .select("id").eq("id", solicitudId).eq("auth_user_id", sesion.user.id).maybeSingle();
+  if (error || !solicitud) throw new Error("No puedes cargar documentos para otra solicitud.");
+  return subirDocumentoValidado(cliente, solicitudId, tipo, archivo, documentoAnteriorId);
+}
+
+/**
+ * Inicia una sesión de verificación de identidad (Didit: OCR + liveness + face match)
+ * para una solicitud de conductor en estado `en_revision`. Devuelve la URL del flujo
+ * hospedado por Didit, que el frontend debe abrir (redirección de página completa).
+ */
+export async function iniciarVerificacionDidit(cliente: Cliente, solicitudId: string) {
+  const { data: sesion } = await cliente.auth.getUser();
+  if (!sesion.user) throw new Error("Inicia sesión para continuar con la verificación.");
+  const { data: solicitud, error: errorSolicitud } = await cliente
+    .from("solicitudes_conductor")
+    .select("id")
+    .eq("id", solicitudId)
+    .eq("auth_user_id", sesion.user.id)
+    .maybeSingle();
+  if (errorSolicitud || !solicitud) throw new Error("No puedes iniciar la verificación de otra solicitud.");
+
+  const { data, error } = await cliente.functions.invoke("iniciar-verificacion-didit", {
+    body: { solicitud_id: solicitudId }
+  });
+  if (error) {
+    let mensaje = error.message;
+    const contexto = "context" in error ? error.context : null;
+    if (contexto instanceof Response) {
+      try {
+        const detalle = (await contexto.clone().json()) as { error?: string };
+        mensaje = detalle.error ?? mensaje;
+      } catch {
+        // Conserva el mensaje de transporte cuando el servidor no devolvió JSON.
+      }
+    }
+    throw new Error(mensaje);
+  }
+  const respuesta = data as { url?: string; session_url?: string; session_id?: string } | null;
+  const urlFinal = respuesta?.url ?? respuesta?.session_url;
+  if (!urlFinal || typeof urlFinal !== "string" || !urlFinal.startsWith("https://")) {
+    throw new Error("No se recibió una URL válida del servicio de verificación de identidad.");
+  }
+  return { url: urlFinal, sessionId: respuesta?.session_id };
+}
+
+export type PerfilConductorActualizable = {
+  nombre: string;
+  telefono: string;
+  curp?: string;
+  licencia_numero?: string;
+  licencia_tipo?: string;
+  licencia_vigencia?: string;
+  codigo_postal?: string;
+  estado_residencia?: string;
+  ciudad_municipio?: string;
+  colonia?: string;
+  calle?: string;
+  numero?: string;
+  referencias?: string;
+  contacto_emergencia_nombre?: string;
+  contacto_emergencia_telefono?: string;
+};
+
+export type ResultadoSolicitudCambio = {
+  solicitud_id: string | null;
+  estado: string;
+  tipo: string;
+  mensaje: string;
+};
+
+export type SolicitudCambioConductorRow = {
+  id: string;
+  conductor_id: string;
+  tipo: string;
+  payload_anterior: Record<string, unknown>;
+  payload_propuesto: Record<string, unknown>;
+  estado: "pendiente" | "aprobado" | "rechazado" | "cancelado";
+  creado_en: string;
+  actualizado_en: string;
+  revisado_en: string | null;
+  revisado_por: string | null;
+  motivo_rechazo: string | null;
+};
+
+/**
+ * PR-03/PR-04 — La API no actualiza conductores directamente. La RPC del
+ * servidor aplica la allowlist: telefono, domicilio y contacto de emergencia
+ * son cambios normales; identidad, CURP, licencia, vigencia, foto y legal
+ * requieren revisión; empresa_id y campos operativos son rechazados.
+ */
+export async function solicitarCambioExpedienteConductor(
+  cliente: Cliente,
+  cambios: Record<string, unknown>
+): Promise<ResultadoSolicitudCambio> {
+  const { data, error } = await cliente.rpc("solicitar_cambio_expediente_conductor" as never, {
+    p_cambios: cambios,
+  } as never);
+  if (error) throw error;
+  const res = data as unknown as ResultadoSolicitudCambio;
+  if (!res || !res.mensaje) throw new Error("Respuesta inválida de solicitar_cambio_expediente_conductor");
+  return res;
+}
+
+/**
+ * Compatibilidad: actualizarPerfilConductor ahora delega en solicitarCambioExpedienteConductor
+ * para garantizar revisión real de campos sensibles (curp, licencia, vigencia, etc.).
+ * Retorna el resultado del RPC para que la UI distinga "Cambios guardados" vs "enviados a revisión".
+ */
+export async function actualizarPerfilConductor(
+  cliente: Cliente,
+  conductorId: string,
+  datos: PerfilConductorActualizable
+): Promise<ResultadoSolicitudCambio> {
+  const conductorAutenticado = await obtenerConductorIdActual(cliente);
+  if (conductorAutenticado !== conductorId) {
+    throw new Error("No puedes modificar el perfil de otro conductor.");
+  }
+
+  // Construir cambios solo con campos presentes (trim normalizado)
+  const cambios: Record<string, unknown> = {};
+  const asignar = (clave: string, valor: unknown) => {
+    if (valor === undefined) return;
+    if (typeof valor === "string") {
+      const limpio = valor.trim();
+      cambios[clave] = limpio === "" ? null : limpio;
+    } else {
+      cambios[clave] = valor;
+    }
+  };
+  asignar("nombre", datos.nombre);
+  asignar("telefono", telefonoONull(datos.telefono));
+  asignar("curp", datos.curp ? datos.curp.trim().toUpperCase() : datos.curp);
+  asignar("licencia_numero", datos.licencia_numero);
+  asignar("licencia_tipo", datos.licencia_tipo);
+  asignar("licencia_vigencia", datos.licencia_vigencia);
+  asignar("codigo_postal", datos.codigo_postal);
+  asignar("estado_residencia", datos.estado_residencia);
+  asignar("ciudad_municipio", datos.ciudad_municipio);
+  asignar("colonia", datos.colonia);
+  asignar("calle", datos.calle);
+  asignar("numero", datos.numero);
+  asignar("referencias", datos.referencias);
+  asignar("contacto_emergencia_nombre", datos.contacto_emergencia_nombre);
+  asignar("contacto_emergencia_telefono", datos.contacto_emergencia_telefono ? telefonoONull(datos.contacto_emergencia_telefono) : datos.contacto_emergencia_telefono);
+
+  return solicitarCambioExpedienteConductor(cliente, cambios);
+}
+
+export async function listarSolicitudesCambioConductor(cliente: Cliente, conductorId: string): Promise<SolicitudCambioConductorRow[]> {
+  const conductorAutenticado = await obtenerConductorIdActual(cliente);
+  if (conductorAutenticado !== conductorId) throw new Error("No puedes consultar solicitudes de otro conductor.");
+  const { data, error } = await cliente
+    .from("solicitudes_cambio_conductor" as never)
+    .select("*")
+    .eq("conductor_id", conductorId)
+    .order("creado_en", { ascending: false } as never);
+  if (error) throw error;
+  return (data as unknown as SolicitudCambioConductorRow[]) ?? [];
+}
+
+export async function cancelarSolicitudCambioConductor(cliente: Cliente, solicitudId: string): Promise<void> {
+  const { error } = await cliente.rpc("cancelar_solicitud_cambio_conductor" as never, {
+    p_solicitud_id: solicitudId,
+  } as never);
+  if (error) throw error;
+}
+
+// --- Admin: bandeja de solicitudes de cambio ---
+
+export async function listarSolicitudesCambioConductorAdmin(cliente: Cliente): Promise<SolicitudCambioConductorRow[]> {
+  const { data, error } = await cliente
+    .from("solicitudes_cambio_conductor" as never)
+    .select("*")
+    .order("creado_en", { ascending: false } as never);
+  if (error) throw error;
+  return (data as unknown as SolicitudCambioConductorRow[]) ?? [];
+}
+
+export async function aprobarSolicitudCambioConductorAdmin(
+  cliente: Cliente,
+  solicitudId: string
+): Promise<ResultadoSolicitudCambio> {
+  const { data, error } = await cliente.rpc("aprobar_solicitud_cambio_conductor" as never, {
+    p_solicitud_id: solicitudId,
+  } as never);
+  if (error) throw error;
+  return data as unknown as ResultadoSolicitudCambio;
+}
+
+export async function rechazarSolicitudCambioConductorAdmin(
+  cliente: Cliente,
+  solicitudId: string,
+  motivo: string
+): Promise<ResultadoSolicitudCambio> {
+  const { data, error } = await cliente.rpc("rechazar_solicitud_cambio_conductor" as never, {
+    p_solicitud_id: solicitudId,
+    p_motivo: motivo,
+  } as never);
+  if (error) throw error;
+  return data as unknown as ResultadoSolicitudCambio;
+}
+
+export async function subirFotoPerfilConductor(cliente: Cliente, conductorId: string, archivo: File): Promise<string> {
+  const conductorAutenticado = await obtenerConductorIdActual(cliente);
+  if (conductorAutenticado !== conductorId) {
+    throw new Error("No puedes modificar el perfil de otro conductor.");
+  }
+
+  validarFotoPerfilConductor(archivo);
+  const extension = extensionArchivo(archivo.name) || "jpg";
+  const path = `${conductorId}/perfil.${extension}`;
+
+  const mimeMap: Record<string, string> = {
+    jpg: "image/jpeg",
+    jpeg: "image/jpeg",
+    png: "image/png",
+    webp: "image/webp"
+  };
+  const contentType = (archivo.type && archivo.type !== "application/octet-stream")
+    ? archivo.type
+    : (mimeMap[extension] ?? "image/jpeg");
+
+  const { error: errorSubida } = await cliente.storage.from("fotos-perfil-conductor").upload(path, archivo, {
+    upsert: true,
+    contentType
+  });
+
+  if (errorSubida) throw errorSubida;
+
+  const { data: fotoFirmada, error: errorUrl } = await cliente.storage
+    .from("fotos-perfil-conductor")
+    .createSignedUrl(path, 1800);
+  if (errorUrl) throw errorUrl;
+  const fotoUrl = fotoFirmada.signedUrl;
+  // PR-04: foto es dato sensible (identidad) — requiere revisión operativa
+  // Se sube a storage pero la URL no se persiste en conductores hasta aprobación.
+  // Crear solicitud pendiente y devolver URL para preview; UI debe mostrar mensaje de revisión.
+  const resultado = await solicitarCambioExpedienteConductor(cliente, { foto_perfil_url: path });
+  if (resultado.estado === "pendiente") {
+    // Lanzamos error controlado que la UI interpretará como "enviado a revisión" (mantiene foto aprobada intacta)
+    const err = new Error(resultado.mensaje + " La fotografía será visible tras aprobación operativa.");
+    (err as unknown as Record<string, unknown>).name = "SolicitudPendiente";
+    (err as unknown as Record<string, unknown>).solicitudId = resultado.solicitud_id;
+    throw err;
+  }
+  return fotoUrl;
+}
+
+/** Helper para UI que necesita distinguir si la foto quedó pendiente */
+export function esErrorSolicitudPendiente(error: unknown): boolean {
+  return error instanceof Error && (error as unknown as Record<string, unknown>).name === "SolicitudPendiente";
+}

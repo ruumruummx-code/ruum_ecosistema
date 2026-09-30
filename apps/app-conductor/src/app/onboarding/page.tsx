@@ -1,0 +1,234 @@
+"use client";
+
+import { useCallback, useRef, useState } from "react";
+import Image from "next/image";
+import { useRouter } from "next/navigation";
+import { Button, LogoMarca } from "@ruum/ui";
+import { marcarOnboardingVisto } from "../../lib/onboarding-visto";
+
+/**
+ * Recorrido de bienvenida del conductor — 3 pantallas antes de pedir
+ * registro o documentos. Presenta la promesa central de la app:
+ * 1) panel semanal, 2) aceptación de Traslados en ruta, 3) registro
+ * operativa que respalda pagos claros y a tiempo.
+ *
+ * Las tres ilustraciones comparten la estética nocturna neón
+ * (ruta azul + trazo lima); los CTAs conservan el dorado de marca
+ * (signal) para acciones de alta intención.
+ */
+
+interface Paso {
+  tag: string;
+  titulo: React.ReactNode;
+  descripcion: string;
+  hero: React.ReactNode;
+}
+
+const PASOS: Paso[] = [
+  {
+    tag: "Seguridad · Evidencia · Trazabilidad",
+    titulo: (
+      <>
+        No entregues tu auto a ciegas. <span className="text-signal">Un traslado serio deja evidencia.</span>
+      </>
+    ),
+    descripcion:
+      "Ruum Ruum es traslado vehicular con conductores certificados. Cada viaje inicia con evidencia, continúa con seguimiento y termina con confirmación.",
+      hero: (
+        <Image
+          src="/imagenes/onboarding-paso1.webp"
+          alt="Teléfono con el panel del conductor sobre un mapa con ruta iluminada"
+          width={860}
+          height={860}
+          priority
+          sizes="(max-width: 640px) 90vw, 430px"
+          className="max-h-full w-auto rounded-3xl object-contain"
+        />
+      )
+  },
+  {
+    tag: "Conductores certificados · Pago promedio $680",
+    titulo: (
+      <>
+        No cualquiera mueve un <span className="text-signal">Ruum Ruum.</span>
+      </>
+    ),
+    descripcion:
+      "Cada conductor cumple validación, identidad y protocolo operativo. Gana en promedio $680 por traslado —hasta $1,200 en rutas largas— con pagos trazables y bitácora de principio a fin.",
+    hero: (
+      <Image
+        src="/imagenes/onboarding-paso2.webp"
+        alt="Vista nocturna desde el volante con navegación proyectada sobre la carretera"
+        width={1200}
+        height={675}
+        sizes="(max-width: 640px) 90vw, 400px"
+        priority={false}
+        className="w-full rounded-3xl object-cover shadow-[0_24px_60px_-24px_rgba(30,136,229,0.25)]"
+      />
+    )
+  },
+  {
+    tag: "Evidencia documentada · Pago protegido",
+    titulo: (
+      <>
+        Cada viaje se <span className="text-signal">documenta.</span>
+      </>
+    ),
+    descripcion:
+      "Kilometraje, carrocería, placas y entrega final con evidencia fotográfica. Tu pago se libera con evidencia validada — trazabilidad que protege tu ingreso.",
+    hero: (
+      <Image
+        src="/imagenes/onboarding-paso3.webp"
+        alt="Vehículo con puntos de registro fotográfico verificados alrededor"
+        width={860}
+        height={860}
+        sizes="(max-width: 640px) 90vw, 430px"
+        className="max-h-full w-auto rounded-3xl object-contain"
+      />
+    )
+  }
+];
+
+export default function PaginaOnboarding() {
+  const router = useRouter();
+  const [paso, setPaso] = useState(0);
+  const touchX = useRef<number | null>(null);
+  const esUltimo = paso === PASOS.length - 1;
+  const actual = PASOS[paso];
+
+  const finalizar = useCallback(
+    async (destino: "/registro" | "/login") => {
+      await marcarOnboardingVisto();
+      router.replace(destino);
+    },
+    [router]
+  );
+
+  function avanzar() {
+    if (esUltimo) void finalizar("/registro");
+    else setPaso((p) => p + 1);
+  }
+
+  function onTouchStart(e: React.TouchEvent) {
+    touchX.current = e.touches[0].clientX;
+  }
+  function onTouchEnd(e: React.TouchEvent) {
+    if (touchX.current === null) return;
+    const delta = e.changedTouches[0].clientX - touchX.current;
+    touchX.current = null;
+    if (delta < -48 && !esUltimo) setPaso((p) => p + 1);
+    if (delta > 48 && paso > 0) setPaso((p) => p - 1);
+  }
+
+  return (
+    <div
+      className="flex min-h-dvh flex-col text-text-primary conductor-onboarding-shell"
+      onTouchStart={onTouchStart}
+      onTouchEnd={onTouchEnd}
+    >
+      {/* encabezado — Brand Book p.9-11 */}
+      <header className="flex items-center justify-between px-5 pb-2 pt-5">
+        <div className="flex items-center gap-2.5">
+          <LogoMarca tamano={30} color="signal" mostrarDescriptor mostrarRespaldo={false} subtitulo="Conductor" />
+        </div>
+        <button
+          type="button"
+          onClick={() => void finalizar("/login")}
+          className="inline-flex min-h-11 items-center rounded-lg px-3 py-2 font-display text-xs font-semibold text-text-secondary transition hover:text-text-primary"
+          aria-label="Omitir recorrido de bienvenida e ir a iniciar sesión"
+        >
+          Omitir
+        </button>
+      </header>
+
+      {/* hero */}
+      <div className="flex min-h-0 flex-1 items-center justify-center px-6 py-2">
+        <div className="relative flex h-full max-h-[46dvh] w-full max-w-sm items-center justify-center">
+          <span className="absolute left-0 top-1 z-10 rounded-full border border-signal/30 bg-surface-elevated px-3 py-1.5 font-body text-xs font-semibold text-text-secondary backdrop-blur">
+            <span className="inline-block size-1.5 rounded-full bg-signal mr-1.5 align-middle" aria-hidden="true" /> Paso {paso + 1} de {PASOS.length}
+          </span>
+          {actual.hero}
+        </div>
+      </div>
+
+      {/* M6 — Social proof + beneficio económico siempre visible — R4 SVG */}
+      <div className="mx-auto flex w-full max-w-md items-center justify-center gap-2 px-6 py-2">
+        <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/20 bg-emerald-500/10 px-3 py-1.5 font-body text-[11px] font-bold text-emerald-700 dark:text-emerald-400">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+            <circle cx="9" cy="7" r="4" />
+            <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+            <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+          </svg>
+          1,200 activos hoy · 4.8★
+        </span>
+        <span className="inline-flex items-center gap-1.5 rounded-full border border-signal/30 bg-signal/10 px-3 py-1.5 font-body text-[11px] font-black text-amber-800 dark:text-signal">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <line x1="12" y1="1" x2="12" y2="23" />
+            <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+          </svg>
+          Hasta $1,200/traslado
+        </span>
+      </div>
+
+      {/* contenido */}
+      <section
+        aria-live="polite"
+        aria-label="Recorrido de bienvenida del conductor"
+        className="mx-auto flex w-full max-w-md flex-col items-center px-6 pb-7 pt-4 text-center"
+      >
+        <div className="mb-5 flex items-center gap-1.5" role="tablist" aria-label="Progreso del recorrido">
+          {PASOS.map((_, i) => (
+            <button
+              key={i}
+              type="button"
+              role="tab"
+              aria-selected={i === paso}
+              aria-label={`Paso ${i + 1} de ${PASOS.length}: ${PASOS[i].tag}`}
+              aria-controls={`panel-paso-${i}`}
+              onClick={() => setPaso(i)}
+              id={`tab-paso-${i}`}
+              className="inline-flex min-h-11 min-w-11 items-center justify-center p-2 rounded-lg focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-route-action"
+            >
+              <span
+                className={
+                  i === paso
+                    ? "h-1.5 w-6 rounded-full bg-signal transition-all"
+                    : "h-1.5 w-1.5 rounded-full bg-text-tertiary transition-all"
+                }
+                aria-hidden="true"
+              />
+            </button>
+          ))}
+        </div>
+
+        {PASOS.map((pasoInfo, i) => (
+          <div
+            key={pasoInfo.tag}
+            id={`panel-paso-${i}`}
+            role="tabpanel"
+            aria-labelledby={`tab-paso-${i}`}
+            hidden={i !== paso}
+          >
+            <p className="font-body text-sm font-semibold text-text-tertiary">{pasoInfo.tag}</p>
+            <h1 className="mt-2 max-w-[320px] font-display text-[23px] font-bold leading-tight">{pasoInfo.titulo}</h1>
+            <p className="mt-3 max-w-[300px] font-body text-[13px] leading-6 text-text-secondary">{pasoInfo.descripcion}</p>
+          </div>
+        ))}
+
+        <div className="mt-7 flex w-full flex-col gap-2.5">
+          <Button variant="primary" className="w-full" onClick={avanzar}>
+            {esUltimo ? "Crear mi cuenta" : "Comenzar →"}
+          </Button>
+          <button
+            type="button"
+            onClick={() => void finalizar("/login")}
+            className="min-h-12 w-full rounded-xl px-5 py-3 font-display text-sm font-semibold text-text-secondary transition hover:bg-surface-elevated hover:text-text-primary focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-route-action"
+          >
+            Ya tengo una cuenta
+          </button>
+        </div>
+      </section>
+    </div>
+  );
+}

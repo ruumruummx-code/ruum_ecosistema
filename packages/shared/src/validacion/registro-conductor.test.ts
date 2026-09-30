@@ -1,0 +1,138 @@
+import { describe, expect, it } from "vitest";
+import {
+  DIAS_ADVERTENCIA_VIGENCIA_LICENCIA,
+  diasParaVencerLicencia,
+  estadoVigenciaLicencia,
+  tipoDocumentoUsaVigenciaLicencia,
+  validarCampoRegistroConductor,
+  validarRegistroConductor,
+  vencimientoDocumentoDesdeLicencia
+} from "./registro-conductor";
+
+function fechaIsoConOffset(dias: number) {
+  const fecha = new Date();
+  fecha.setHours(0, 0, 0, 0);
+  fecha.setDate(fecha.getDate() + dias);
+  return fecha.toISOString().slice(0, 10);
+}
+
+describe("validarCampoRegistroConductor", () => {
+  it("acepta una CURP válida sin importar mayúsculas/minúsculas", () => {
+    expect(validarCampoRegistroConductor("curp", "GOMC900101HDFRRL09")).toBe("");
+    expect(validarCampoRegistroConductor("curp", "gomc900101hdfrrl09")).toBe("");
+  });
+
+  it("rechaza CURP incompleta o con estructura inválida", () => {
+    expect(validarCampoRegistroConductor("curp", "GOMC900101")).not.toBe("");
+    expect(validarCampoRegistroConductor("curp", "1234567890123456789")).not.toBe("");
+  });
+
+  it("exige teléfono nacional de exactamente 10 dígitos", () => {
+    expect(validarCampoRegistroConductor("telefono", "5512345678")).toBe("");
+    expect(validarCampoRegistroConductor("telefono", "551234567")).not.toBe("");
+    expect(validarCampoRegistroConductor("telefono", "55 1234 5678")).not.toBe("");
+  });
+
+  it("rechaza contraseñas de solo minúsculas aunque sean largas", () => {
+    expect(validarCampoRegistroConductor("password", "puroschidos")).not.toBe("");
+    expect(validarCampoRegistroConductor("password", "corta1A")).not.toBe("");
+    // BUGFIX: "carretera2026" no tiene mayúscula, así que el servidor de
+    // Supabase Auth la rechaza (password_requirements = lower_upper_letters_digits).
+    // Antes este mismo test la daba por válida — contradecía su propio título.
+    expect(validarCampoRegistroConductor("password", "carretera2026")).not.toBe("");
+  });
+
+  it("acepta contraseñas con minúscula, mayúscula y número", () => {
+    expect(validarCampoRegistroConductor("password", "Carretera2026")).toBe("");
+  });
+
+  it("normaliza espacios en textos requeridos", () => {
+    expect(validarCampoRegistroConductor("nombre", "  Juan   Manuel  ")).toBe("");
+    expect(validarCampoRegistroConductor("nombre", "   J   ")).not.toBe("");
+  });
+
+  it("rechaza licencia vencida y acepta la que vence hoy o después", () => {
+    expect(validarCampoRegistroConductor("vigenciaLicencia", fechaIsoConOffset(-1))).not.toBe("");
+    expect(validarCampoRegistroConductor("vigenciaLicencia", fechaIsoConOffset(0))).toBe("");
+    expect(validarCampoRegistroConductor("vigenciaLicencia", fechaIsoConOffset(45))).toBe("");
+  });
+
+  it("exige una vigencia con fecha ISO real", () => {
+    expect(validarCampoRegistroConductor("vigenciaLicencia", "15/07/2027")).toContain("AAAA-MM-DD");
+    expect(validarCampoRegistroConductor("vigenciaLicencia", "2027-99-99")).toContain("AAAA-MM-DD");
+  });
+});
+
+describe("diasParaVencerLicencia", () => {
+  it("calcula días desde la medianoche local", () => {
+    expect(diasParaVencerLicencia(fechaIsoConOffset(0))).toBe(0);
+    expect(diasParaVencerLicencia(fechaIsoConOffset(30))).toBe(30);
+    expect(diasParaVencerLicencia(fechaIsoConOffset(-2))).toBe(-2);
+  });
+
+  it("clasifica la vigencia de licencia con el umbral compartido", () => {
+    const referencia = new Date("2026-07-17T18:00:00");
+
+    expect(estadoVigenciaLicencia(null, referencia)).toBe("sin_vigencia");
+    expect(estadoVigenciaLicencia("2026-07-16", referencia)).toBe("vencida");
+    expect(estadoVigenciaLicencia("2026-08-16", referencia)).toBe("por_vencer");
+    expect(estadoVigenciaLicencia("2026-08-17", referencia)).toBe("vigente");
+    expect(DIAS_ADVERTENCIA_VIGENCIA_LICENCIA).toBe(30);
+  });
+
+  it("aplica la vigencia de licencia solo a documentos de licencia", () => {
+    expect(tipoDocumentoUsaVigenciaLicencia("licencia_frente")).toBe(true);
+    expect(tipoDocumentoUsaVigenciaLicencia("licencia_reverso")).toBe(true);
+    expect(tipoDocumentoUsaVigenciaLicencia("identificacion_oficial")).toBe(false);
+
+    expect(vencimientoDocumentoDesdeLicencia("licencia_frente", "2027-01-01")).toBe("2027-01-01");
+    expect(vencimientoDocumentoDesdeLicencia("documento_operativo", "2027-01-01")).toBeNull();
+  });
+});
+
+describe("validarRegistroConductor", () => {
+  const E2E_DUMMY_PASSWORD = "E2E_DUMMY_Pass2026";
+  const datosValidos = {
+    nombre: "Juan",
+    apellidos: "Gómez Cruz",
+    curp: "GOMC900101HDFRRL09",
+    telefono: "5512345678",
+    email: "juan@example.com",
+    password: E2E_DUMMY_PASSWORD,
+    codigoPostal: "52104",
+    estado: "México",
+    ciudad: "San Mateo Atenco",
+    colonia: "Centro",
+    calle: "Av. Juárez",
+    numero: "12",
+    referencias: "Portón azul",
+    numeroLicencia: "LIC-998877",
+    tipoLicencia: "Tipo B - Chofer",
+    vigenciaLicencia: fechaIsoConOffset(180),
+    contactoEmergenciaNombre: "María Gómez",
+    contactoEmergenciaTelefono: "7221234567"
+  };
+
+  it("devuelve objeto vacío cuando todo es válido", () => {
+    expect(validarRegistroConductor(datosValidos)).toEqual({});
+  });
+
+  it("reporta solo los campos inválidos, con su mensaje", () => {
+    const errores = validarRegistroConductor({ ...datosValidos, curp: "XX", telefono: "12" });
+    expect(Object.keys(errores).sort()).toEqual(["curp", "telefono"]);
+    expect(errores.telefono).toContain("10 dígitos");
+  });
+
+  it("rechaza contraseñas de menos de 8 caracteres según política supabase/config.toml", () => {
+    const erroresCorto = validarRegistroConductor({ ...datosValidos, password: "Abc1" });
+    expect(erroresCorto.password).toContain("al menos 8 caracteres");
+
+    const errores7Chars = validarRegistroConductor({ ...datosValidos, password: "Abc1234" });
+    expect(errores7Chars.password).toContain("al menos 8 caracteres");
+  });
+
+  it("acepta contraseñas dummy de validación que cumplen longitud >= 8 (ej: Temporal77)", () => {
+    const errores = validarRegistroConductor({ ...datosValidos, password: "Temporal77" });
+    expect(errores.password).toBeUndefined();
+  });
+});

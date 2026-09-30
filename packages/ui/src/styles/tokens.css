@@ -1,0 +1,770 @@
+/*
+ * Ruum Ruum — Sistema visual compartido · DESIGN SYSTEM V1.0 (Septiembre 2026)
+ * Fuente: design-system/tokens/tokens.json — Libro de Marca V2.1 cap. 13/26.
+ *
+ * Paleta oficial V1.0:
+ *   Navy #0A2342 · Teal #00D1D1 · Teal Deep #008B8B · Action #0066FF
+ *   Surface #E8EEF4 · White #FFFFFF · Muted #566889 · Border-Input #7A8DAE
+ *   Warning #F5B400 · Success #16805A · Error #C23648 · Emergency #B3261E
+ * Tipografía: Inter (Display, UI, Cuerpo). Respaldo Arial/Calibri.
+ * Concepto: Orden + Seguridad + Evidencia + Trazabilidad + Conductor certificado.
+ */
+
+/* El tema explícito de producto vive en data-theme; no debe depender del OS. */
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
+@theme {
+  --color-navy: #0a2342;
+  --color-teal-deep: #008b8b;
+  --color-ink: #0a2342;
+  --color-ink-soft: #566889;
+  --color-asphalt: #0a2342;
+  --color-steel: #566889;
+  --color-mist: #ffffff;
+  --color-mist-dim: #e8eef4;
+  --color-signal: #00d1d1;
+  --color-signal-soft: #e8f0fe;
+  --color-route: #0066ff;
+  --color-route-dark: #0043a8;
+  --color-route-soft: #e8f0fe;
+  --color-control: #16805a;
+  --color-control-soft: #e6f6ee;
+  --color-warn: #f5b400;
+  --color-warn-soft: #fff4d6;
+  --color-danger: #c23648;
+  --color-danger-soft: #fdecef;
+
+  /* Tokens semánticos Tailwind V2. */
+  --color-primary: var(--ruum-text-primary);
+  --color-secondary: var(--ruum-text-secondary);
+  --color-tertiary: var(--ruum-text-tertiary);
+  --color-disabled: var(--ruum-text-disabled);
+  --color-text-primary: var(--ruum-text-primary);
+  --color-text-secondary: var(--ruum-text-secondary);
+  --color-text-tertiary: var(--ruum-text-tertiary);
+  --color-text-disabled: var(--ruum-text-disabled);
+  --color-surface: var(--ruum-surface);
+  --color-surface-elevated: var(--ruum-surface-elevated);
+  --color-border: var(--ruum-border);
+  --color-border-strong: var(--ruum-border-strong);
+  --color-action-primary: var(--ruum-action-primary);
+  --color-action-primary-hover: var(--ruum-action-primary-hover);
+  --color-action-primary-active: var(--ruum-action-primary-active);
+  --color-route-action: var(--ruum-route);
+  --color-route-action-hover: var(--ruum-route-hover);
+  --color-route-action-active: var(--ruum-route-active);
+  --color-success: var(--ruum-success);
+  --color-warning: var(--ruum-warning);
+  --color-danger-action: var(--ruum-danger);
+  --color-danger-action-hover: var(--ruum-danger-hover);
+  --color-danger-action-active: var(--ruum-danger-active);
+  --color-on-primary: var(--ruum-on-primary);
+  --color-on-danger: var(--ruum-on-danger);
+  --color-surface-muted: var(--ruum-surface-subtle);
+  --color-overlay: var(--ruum-overlay);
+  --color-focus: var(--ruum-focus);
+
+  /* Alias de compatibilidad para componentes ya escritos. */
+  --color-paper: var(--color-mist);
+  --color-paper-dim: var(--color-mist-dim);
+  --color-evidence: var(--color-mist-dim);
+  --color-ok: var(--color-control);
+  --color-ok-soft: var(--color-control-soft);
+
+  --font-display: var(--font-body-loaded), "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-body: var(--font-body-loaded), "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-mono-ruum: var(--font-mono-loaded), "IBM Plex Mono", ui-monospace, monospace;
+
+  --radius-card: 1rem;
+
+  --shadow-1: 0 1px 2px rgba(13, 43, 94, 0.04);
+  --shadow-2: 0 4px 12px rgba(13, 43, 94, 0.06);
+  --shadow-3: 0 10px 28px rgba(13, 43, 94, 0.10);
+  --shadow-4: 0 20px 48px rgba(13, 43, 94, 0.14);
+}
+
+/* Clase estable para botones compartidos: evita depender de que Tailwind
+   escanee utilidades arbitrarias dentro de un paquete workspace.
+   Spec cap. 19: h 52px, radio 14-16px, degradado CTA, texto blanco Semibold 16. */
+.ruum-button-primary {
+  border-color: transparent;
+  background: var(--ruum-gradient-cta);
+  color: var(--ruum-on-primary);
+  min-height: var(--ruum-button-height);
+  border-radius: var(--ruum-radius-button, 14px);
+}
+
+.ruum-button-primary:disabled {
+  background: var(--ruum-surface-elevated);
+  color: var(--ruum-text-disabled);
+}
+
+/* Modo calle (conductor en traslado activo): botones ≥56px, texto ≥17px. */
+.ruum-street,
+[data-street="true"] {
+  --ruum-button-height: var(--ruum-button-height-street);
+  font-size: 17px;
+}
+
+.ruum-street .ruum-button-primary,
+.ruum-street button[data-variant="primary"],
+[data-street="true"] .ruum-button-primary {
+  min-height: var(--ruum-button-height-street);
+  font-size: 17px;
+}
+
+.ruum-street :is(button, a, input, select, [role="button"]) {
+  min-height: var(--ruum-touch-street);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ruum-button-primary,
+  .ruum-card-interactive {
+    transition-duration: 0.01ms !important;
+  }
+}
+
+:root,
+[data-theme="light"] {
+  color-scheme: light;
+
+  /* Design System v1.0 — Libro de Marca V2.1 cap. 13/26. Fuente: design-system/tokens/tokens.json */
+  --ruum-navy: #0a2342;
+  --ruum-teal: #00d1d1;
+  --ruum-teal-deep: #008b8b;
+  --ruum-blue: #0066ff;
+  --ruum-muted: #566889;
+  --ruum-neutral-bg: #eef2f8;
+  --ruum-neutral-text: #566889;
+  --ruum-action-bg: #e8f0fe;
+  --ruum-action-text: #1461e0;
+  --ruum-warning-bg: #fff4d6;
+  --ruum-warning-text: #7a4f00;
+  --ruum-success-bg: #e6f6ee;
+  --ruum-success-text: #0f6b48;
+  --ruum-error-bg: #fdecef;
+  --ruum-error-text: #c23648;
+  --ruum-emergency-bg: #fdecef;
+  --ruum-emergency-text: #b3261e;
+  --ruum-safety-button-bg: #b3261e;
+  --ruum-safety-button-text: #ffffff;
+  --ruum-gradient-cta: linear-gradient(90deg, #008b8b 0%, #0066ff 100%);
+  --ruum-gradient-route: linear-gradient(90deg, #00d1d1 0%, #0066ff 100%);
+  --ruum-font-family: "Inter", Arial, Calibri, sans-serif;
+  --ruum-font-display: 40px;
+  --ruum-font-h1: 32px;
+  --ruum-font-h2: 24px;
+  --ruum-font-h3: 18px;
+  --ruum-font-body-size: 16px;
+  --ruum-font-small: 14px;
+  --ruum-font-caption: 12px;
+  --ruum-space-4: 4px;
+  --ruum-space-8: 8px;
+  --ruum-space-12: 12px;
+  --ruum-space-16: 16px;
+  --ruum-space-20: 20px;
+  --ruum-space-24: 24px;
+  --ruum-space-32: 32px;
+  --ruum-space-40: 40px;
+  --ruum-space-48: 48px;
+  --ruum-elevation-1: 0 2px 10px rgba(13, 43, 94, 0.05);
+  --ruum-elevation-2: 0 8px 24px rgba(13, 43, 94, 0.1);
+  --ruum-touch: 44px;
+  --ruum-touch-street: 56px;
+  --ruum-button-height: 52px;
+  --ruum-button-height-street: 56px;
+  --ruum-input-height: 48px;
+  --ruum-motion-micro: 150ms;
+  --ruum-motion-transition: 250ms;
+  --ruum-motion-easing: ease-out;
+
+  /* Brand V2.1 (mapeo semántico — compat) */
+  --ruum-primary: #0a2342;
+  --ruum-brand: #00d1d1;
+  --ruum-brand-dark: #008b8b;
+  --ruum-brand-soft: #e6f6ee;
+  --ruum-action: #0066ff;
+  --ruum-action-hover: #0052cc;
+  --ruum-action-active: #0043a8;
+
+  /* Surfaces V2.1 */
+  --ruum-canvas: #ffffff;
+  --ruum-surface: #ffffff;
+  --ruum-surface-elevated: #e8eef4;
+  --ruum-surface-subtle: #eef2f8;
+  --ruum-surface-strong: #0a2342;
+  --ruum-border: #e6f0ff;
+  --ruum-border-strong: #7a8dae;
+  --ruum-border-input: #7a8dae;
+
+  /* Text V2.1 */
+  --ruum-text-primary: #0a2342;
+  --ruum-text: #0a2342;
+  --ruum-text-secondary: #566889;
+  --ruum-text-tertiary: #566889;
+  --ruum-text-disabled: #7a8dae;
+  --ruum-dark-text-secondary: #c9cfda;
+  --ruum-dark-text-tertiary: #9aa2b5;
+
+  /* Focus */
+  --ruum-focus: #0066ff;
+  --ruum-focus-ring: rgba(0, 102, 255, 0.24);
+
+  /* Actions & Gradient V2.1 */
+  --ruum-action-primary: #0066ff;
+  --ruum-on-primary: #ffffff;
+  --ruum-on-danger: #ffffff;
+  --ruum-overlay: rgba(10, 35, 66, 0.6);
+  --ruum-action-primary-hover: #0052cc;
+  --ruum-action-primary-active: #0043a8;
+  --ruum-gradient-action: var(--ruum-gradient-cta);
+
+  /* Route & Status V2.1 */
+  --ruum-route: #0066ff;
+  --ruum-route-contrast: #0043a8;
+  --ruum-route-hover: #0052cc;
+  --ruum-route-active: #0043a8;
+  --ruum-success: #16805a;
+  --ruum-warning: #f5b400;
+  --ruum-danger: #c23648;
+  --ruum-danger-hover: #a32c3c;
+  --ruum-danger-active: #86232f;
+  --ruum-error: #c23648;
+  --ruum-emergency: #b3261e;
+
+  /* Pulse para estados activos de viaje */
+  --ruum-pulse: #00d1d1;
+  --ruum-pulse-soft: #e8f0fe;
+  --ruum-pulse-ink: #008b8b;
+
+  /* Logotipo (cap. 10–12): RR navy sobre fondo claro */
+  --ruum-logo-rr: #0a2342;
+  --ruum-logo-bg: #ffffff;
+  --ruum-logo-text: #0a2342;
+  --ruum-logo-descriptor: #008b8b;
+
+  /* Radios V2.1 */
+  --ruum-radius-sm: 8px;
+  --ruum-radius-md: 12px;
+  --ruum-radius-lg: 16px;
+  --ruum-radius-xl: 24px;
+  --ruum-radius-2xl: 24px;
+  --ruum-radius-full: 999px;
+  --ruum-radius-button: 14px;
+  --ruum-radius-field: 12px;
+  --ruum-radius-card: 20px;
+  --ruum-radius-modal: 20px;
+
+  /* Shadows V2.1 (una sola capa) */
+  --ruum-shadow-xs: var(--ruum-elevation-1);
+  --ruum-shadow-sm: var(--ruum-elevation-1);
+  --ruum-shadow-md: var(--ruum-elevation-2);
+  --ruum-shadow-1: var(--ruum-elevation-1);
+  --ruum-shadow-2: var(--ruum-elevation-2);
+  --ruum-shadow-3: var(--ruum-elevation-2);
+  --ruum-shadow-4: 0 20px 48px rgba(13, 43, 94, 0.14);
+}
+
+[data-theme="dark"] {
+  color-scheme: dark;
+
+  /* Ruum Ruum — Dark Mode v1.0 (Extensión §2). Base navy profunda #061529, nunca negro puro.
+   * Documentos operativos siempre claros: usar .ruum-force-light. */
+  --ruum-navy: #0a2342;
+  --ruum-teal: #00d1d1;
+  --ruum-teal-deep: #00b3b3;
+  --ruum-blue: #4d94ff;
+  --ruum-action: #4d94ff;
+  --ruum-action-hover: #6ba8ff;
+  --ruum-action-active: #6ba8ff;
+  --ruum-surface-brand: #0a2342;
+  --ruum-muted: #a8b5cc;
+  --ruum-border-input: #2d4f73;
+  --ruum-border: #1a3a5c;
+
+  --ruum-neutral-bg: #1a2e4a;
+  --ruum-neutral-text: #a8b5cc;
+  --ruum-action-bg: #0f2d52;
+  --ruum-action-text: #6ba8ff;
+  --ruum-warning: #ffc933;
+  --ruum-warning-bg: #3d2e00;
+  --ruum-warning-text: #ffc933;
+  --ruum-success: #4dd9a3;
+  --ruum-success-bg: #0a2e1f;
+  --ruum-success-text: #4dd9a3;
+  --ruum-error: #ff6b7a;
+  --ruum-error-bg: #3d0f1a;
+  --ruum-error-text: #ff6b7a;
+  --ruum-emergency: #ff4d3d;
+  --ruum-emergency-bg: #3d0a05;
+  --ruum-emergency-text: #ff4d3d;
+  --ruum-safety-button-bg: #ff4d3d;
+  --ruum-safety-button-text: #061529;
+
+  --ruum-gradient-cta: linear-gradient(90deg, #00b3b3 0%, #4d94ff 100%);
+  --ruum-gradient-route: linear-gradient(90deg, #00d1d1 0%, #4d94ff 100%);
+
+  --ruum-canvas: #061529;
+  --ruum-surface: #0a2342;
+  --ruum-surface-raised: #0f2d52;
+  --ruum-surface-soft: #0f2d52;
+  --ruum-surface-elevated: #0f2d52;
+  --ruum-surface-subtle: #0f2d52;
+  --ruum-surface-strong: #0a2342;
+
+  --ruum-text: #f6f8fb;
+  --ruum-text-primary: #f6f8fb;
+  --ruum-text-secondary: #a8b5cc;
+  --ruum-text-tertiary: #a8b5cc;
+  --ruum-text-muted: #8293b0;
+  --ruum-text-disabled: #6b7a99;
+  --ruum-muted: #a8b5cc;
+  --ruum-dark-text-secondary: #a8b5cc;
+  --ruum-dark-text-tertiary: #6b7a99;
+
+  --ruum-border-strong: #2d4f73;
+
+  --ruum-brand: #00d1d1;
+  --ruum-brand-dark: #00b3b3;
+  --ruum-brand-soft: #0f2d52;
+
+  --ruum-action-primary: #4d94ff;
+  --ruum-action-primary-hover: #6ba8ff;
+  --ruum-action-primary-active: #6ba8ff;
+  --ruum-on-primary: #061529;
+  --ruum-on-danger: #ffffff;
+
+  --ruum-primary: #f6f8fb;
+
+  --ruum-focus: #4d94ff;
+  --ruum-focus-ring: rgba(77, 148, 255, 0.35);
+
+  --ruum-route: #4d94ff;
+  --ruum-route-contrast: #6ba8ff;
+  --ruum-route-hover: #6ba8ff;
+  --ruum-route-active: #6ba8ff;
+
+  --ruum-danger: #ff6b7a;
+  --ruum-danger-hover: #ff6b7a;
+  --ruum-danger-active: #ff6b7a;
+  --ruum-info: #6ba8ff;
+
+  --ruum-gradient-action: var(--ruum-gradient-cta);
+  --ruum-gradient-highlight: linear-gradient(135deg, rgba(0, 209, 209, 0.10), rgba(77, 148, 255, 0.08));
+
+  --ruum-pulse: #00d1d1;
+  --ruum-pulse-soft: #0f2d52;
+  --ruum-pulse-ink: #a8b5cc;
+
+  /* Logotipo en oscuro: versión sobre navy (cap. 12) */
+  --ruum-logo-rr: #ffffff;
+  --ruum-logo-bg: #0a2342;
+  --ruum-logo-text: #ffffff;
+  --ruum-logo-descriptor: #00d1d1;
+
+  --ruum-overlay: rgba(0, 0, 0, 0.7);
+
+  /* Sombras Dark Mode v1.0 (apoyo sutil, sin glow pesado) */
+  --ruum-shadow-xs: 0 2px 10px rgba(0, 0, 0, 0.3);
+  --ruum-shadow-sm: 0 2px 10px rgba(0, 0, 0, 0.3);
+  --ruum-shadow-md: 0 8px 24px rgba(0, 0, 0, 0.4);
+  --ruum-shadow-1: 0 2px 10px rgba(0, 0, 0, 0.3);
+  --ruum-shadow-2: 0 8px 24px rgba(0, 0, 0, 0.4);
+  --ruum-shadow-3: 0 8px 24px rgba(0, 0, 0, 0.4);
+  --ruum-shadow-4: 0 16px 36px rgba(0, 0, 0, 0.45);
+
+  /* Aliases de compatibilidad para estilos Tailwind */
+  --color-ink: #f6f8fb;
+  --color-ink-soft: #a8b5cc;
+  --color-asphalt: #0a2342;
+  --color-steel: #a8b5cc;
+  --color-mist: #0a2342;
+  --color-mist-dim: #061529;
+  --color-signal: #00d1d1;
+  --color-signal-soft: #0f2d52;
+  --color-route: #4d94ff;
+  --color-route-dark: #6ba8ff;
+  --color-route-soft: #0f2d52;
+  --color-control: #4dd9a3;
+  --color-control-soft: #0a2e1f;
+  --color-warn: #ffc933;
+  --color-warn-soft: #3d2e00;
+  --color-danger: #ff6b7a;
+  --color-danger-soft: #3d0f1a;
+}
+
+/* Documentos operativos: siempre claros, por legibilidad e impresión. */
+.ruum-force-light {
+  color-scheme: light;
+  --ruum-canvas: #ffffff;
+  --ruum-muted: #566889;
+  --ruum-surface: #ffffff;
+  --ruum-surface-elevated: #e8eef4;
+  --ruum-surface-subtle: #eef2f8;
+  --ruum-surface-strong: #0a2342;
+  --ruum-text: #0a2342;
+  --ruum-text-primary: #0a2342;
+  --ruum-text-secondary: #566889;
+  --ruum-text-tertiary: #566889;
+  --ruum-text-disabled: #7a8dae;
+  --ruum-border: #e6f0ff;
+  --ruum-border-input: #7a8dae;
+  --ruum-neutral-bg: #eef2f8;
+  --ruum-neutral-text: #566889;
+  --ruum-action: #0066ff;
+  --ruum-action-bg: #e8f0fe;
+  --ruum-action-text: #1461e0;
+  --ruum-warning-bg: #fff4d6;
+  --ruum-warning-text: #7a4f00;
+  --ruum-success-bg: #e6f6ee;
+  --ruum-success-text: #0f6b48;
+  --ruum-error-bg: #fdecef;
+  --ruum-error-text: #c23648;
+  --ruum-emergency-bg: #fdecef;
+  --ruum-emergency-text: #b3261e;
+  --ruum-safety-button-bg: #b3261e;
+  --ruum-safety-button-text: #ffffff;
+  --ruum-teal-deep: #008b8b;
+  --ruum-focus: #0066ff;
+  --ruum-gradient-cta: linear-gradient(90deg, #008b8b 0%, #0066ff 100%);
+  --ruum-gradient-action: var(--ruum-gradient-cta);
+  --ruum-overlay: rgba(10, 35, 66, 0.6);
+}
+
+@media print {
+  :root {
+    color-scheme: light;
+  }
+}
+
+/* Modo calle nocturno (dark + street): refuerzo de contraste; brillo cálido opcional. */
+[data-theme="dark"] .ruum-street,
+[data-theme="dark"][data-street="true"] {
+  --ruum-focus-ring: rgba(77, 148, 255, 0.45);
+}
+
+.ruum-street-dim {
+  filter: brightness(0.8);
+}
+
+@media (prefers-contrast: more) {
+  :root,
+  [data-theme="light"] {
+    --ruum-text-secondary: #3d4f6b;
+    --ruum-border-strong: #566889;
+  }
+  [data-theme="dark"] {
+    --ruum-text-secondary: #c9d5e8;
+    --ruum-text-muted: #a8b5cc;
+    --ruum-border: #2d4f73;
+    --ruum-border-input: #4a6b8f;
+  }
+}
+
+html {
+  min-width: 320px;
+  background: var(--ruum-canvas);
+  scroll-behavior: smooth;
+}
+
+body {
+  min-width: 320px;
+  margin: 0;
+  background: var(--ruum-canvas);
+  color: var(--ruum-text);
+  font-family: var(--font-body);
+  text-rendering: optimizeLegibility;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-display);
+  letter-spacing: -0.015em;
+}
+
+* {
+  box-sizing: border-box;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+::selection {
+  background: var(--ruum-action);
+  color: var(--ruum-on-primary);
+}
+
+a {
+  transition: color 160ms ease, background-color 160ms ease, border-color 160ms ease, box-shadow 160ms ease,
+    transform 160ms ease;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+[data-theme="light"] input,
+[data-theme="light"] select,
+[data-theme="light"] textarea {
+  color-scheme: light;
+}
+
+[data-theme="dark"] input,
+[data-theme="dark"] select,
+[data-theme="dark"] textarea {
+  color-scheme: dark;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: var(--ruum-text-tertiary);
+  opacity: 1;
+}
+
+:focus-visible {
+  outline: 3px solid var(--ruum-focus);
+  outline-offset: 2px;
+}
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+summary:focus-visible {
+  outline: 3px solid var(--ruum-focus);
+  outline-offset: 2px;
+}
+
+input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),
+select,
+textarea {
+  min-height: 48px;
+  border-radius: var(--ruum-radius-field);
+  border: 1px solid var(--ruum-border-input);
+  background: var(--ruum-surface);
+  color: var(--ruum-text);
+  transition: border-color 160ms ease, box-shadow 160ms ease;
+}
+
+input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):focus,
+select:focus,
+textarea:focus {
+  border-color: var(--ruum-action);
+  box-shadow: 0 0 0 3px var(--ruum-focus-ring);
+  outline: none;
+}
+
+textarea {
+  min-height: 112px;
+}
+
+input[type="checkbox"],
+input[type="radio"] {
+  accent-color: var(--ruum-focus);
+}
+
+/* Utilidades agnósticas a cualquier app. */
+.ruum-skip-link {
+  position: fixed;
+  z-index: 100;
+  top: 12px;
+  left: 12px;
+  transform: translateY(-180%);
+  border-radius: 10px;
+  background: var(--ruum-surface-strong);
+  color: #ffffff;
+  padding: 10px 14px;
+  box-shadow: var(--ruum-shadow-3);
+  transition: transform 160ms ease;
+}
+
+.ruum-skip-link:focus {
+  transform: translateY(0);
+}
+
+.ruum-page {
+  min-height: 100vh;
+  background: var(--ruum-canvas);
+}
+
+.ruum-container {
+  width: min(100% - 32px, 1200px);
+  margin-inline: auto;
+}
+
+.ruum-content {
+  width: min(100% - 32px, 1200px);
+  margin-inline: auto;
+  padding-block: 32px 48px;
+}
+
+/* Cards V2: Estándar (16px) y Destacada (20-24px) */
+.ruum-card {
+  border: 1px solid var(--ruum-border);
+  border-radius: var(--ruum-radius-card);
+  background: var(--ruum-surface);
+  box-shadow: var(--ruum-shadow-sm);
+}
+
+.ruum-card-raised {
+  border: 1px solid var(--ruum-border-strong);
+  border-radius: var(--ruum-radius-xl, 20px);
+  background: var(--ruum-surface-raised);
+  box-shadow: var(--ruum-shadow-md);
+}
+
+.ruum-card-interactive {
+  transition: transform 180ms ease, border-color 180ms ease, box-shadow 180ms ease, background-color 180ms ease;
+}
+
+.ruum-card-interactive:hover {
+  transform: translateY(-2px);
+  border-color: var(--ruum-focus);
+  box-shadow: var(--ruum-shadow-md);
+}
+
+/* Línea de ruta — elemento de firma visual.
+   Conecta origen/destino en tarjetas de viaje; en estado "live" se anima
+   y cambia a --ruum-pulse para señalar un traslado en curso. */
+.ruum-route-line {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ruum-route-line .ruum-route-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--ruum-route);
+  flex-shrink: 0;
+}
+
+.ruum-route-line .ruum-route-dot.is-end {
+  background: var(--ruum-action-primary);
+}
+
+.ruum-route-line .ruum-route-dash {
+  flex: 1;
+  height: 2px;
+  background-image: linear-gradient(90deg, var(--ruum-route) 0 6px, transparent 6px 12px);
+  background-size: 12px 2px;
+  background-repeat: repeat-x;
+}
+
+.ruum-route-line.is-live .ruum-route-dot {
+  background: var(--ruum-pulse);
+}
+
+.ruum-route-line.is-live .ruum-route-dash {
+  background-image: linear-gradient(90deg, var(--ruum-pulse) 0 6px, transparent 6px 12px);
+  animation: ruum-route-dash-move 900ms linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ruum-route-line.is-live .ruum-route-dash {
+    animation: none;
+  }
+}
+
+@keyframes ruum-route-dash-move {
+  to {
+    background-position-x: -12px;
+  }
+}
+
+/* Variante vertical — para itinerarios y líneas de tiempo. */
+.ruum-route-line.is-vertical {
+  flex-direction: column;
+  align-items: center;
+  width: 8px;
+  height: 100%;
+  gap: 6px;
+}
+
+.ruum-route-line.is-vertical .ruum-route-dash {
+  width: 2px;
+  flex: 1;
+  background-image: linear-gradient(180deg, var(--ruum-route) 0 6px, transparent 6px 12px);
+  background-size: 2px 12px;
+  background-repeat: repeat-y;
+}
+
+.ruum-route-line.is-vertical.is-live .ruum-route-dash {
+  background-image: linear-gradient(180deg, var(--ruum-pulse) 0 6px, transparent 6px 12px);
+  animation: ruum-route-dash-move-y 900ms linear infinite;
+}
+
+@keyframes ruum-route-dash-move-y {
+  to {
+    background-position-y: -12px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ruum-route-line.is-vertical.is-live .ruum-route-dash {
+    animation: none;
+  }
+}
+
+.ruum-auth-page {
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at top right, rgba(0, 209, 209, 0.14), transparent 32%),
+    var(--ruum-surface-strong);
+  color: #ffffff;
+}
+
+.ruum-auth-card {
+  border: 1px solid var(--ruum-border);
+  border-radius: var(--ruum-radius-modal);
+  background: var(--ruum-surface);
+  color: var(--ruum-text);
+  box-shadow: var(--ruum-shadow-4);
+}
+
+[data-theme="dark"] .ruum-auth-card {
+  border-color: var(--ruum-border);
+}
+
+/* Logotipo theme-aware (cap. 10–12): PNG navy en claro, versión blanca en oscuro. */
+.ruum-logo-dark {
+  display: none;
+}
+
+[data-theme="dark"] .ruum-logo-light {
+  display: none;
+}
+
+[data-theme="dark"] .ruum-logo-dark {
+  display: block;
+}
+
+@media (min-width: 640px) {
+  .ruum-container,
+  .ruum-content {
+    width: min(100% - 48px, 1200px);
+  }
+
+  .ruum-content {
+    padding-block: 40px 64px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}

@@ -1,0 +1,73 @@
+# Docker Compose configuration for Ruum monorepo
+# This configuration runs all three Next.js applications
+#
+# For DEVELOPMENT with hot-reload, use:
+#   docker compose -f docker-compose.yml -f docker-compose.dev.yml up
+#
+# For PRODUCTION, use:
+#   docker compose -f docker-compose.yml -f docker-compose.prod.yml up
+#
+# Or simply: docker compose up (uses production by default)
+
+services:
+  # App Conductor - Port 3001
+  app-conductor:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ruum-app-conductor
+    ports:
+      - "3001:3001"
+    environment:
+      - NODE_ENV=production
+      # Compose local usa HTTP deliberadamente; no habilitar esta excepción en producción real.
+      - RUUM_LOCAL_PRODUCTION=true
+      - PORT=3001
+      - NEXT_PUBLIC_APP_URL=${APP_CONDUCTOR_URL:-http://localhost:3001}
+      - NEXT_TELEMETRY_DISABLED=1
+    command: ["pnpm", "--filter", "@ruum/app-conductor", "start"]
+    restart: unless-stopped
+    networks:
+      - ruum-network
+
+  # App Usuario - Port 3000
+  app-usuario:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ruum-app-usuario
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - RUUM_LOCAL_PRODUCTION=true
+      - PORT=3000
+      - NEXT_PUBLIC_APP_URL=${APP_USUARIO_URL:-http://localhost:3000}
+      - NEXT_TELEMETRY_DISABLED=1
+    command: ["pnpm", "--filter", "@ruum/app-usuario", "start"]
+    restart: unless-stopped
+    networks:
+      - ruum-network
+
+  # Panel Admin - Port 3002
+  panel-admin:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ruum-panel-admin
+    ports:
+      - "3002:3002"
+    environment:
+      - NODE_ENV=production
+      - RUUM_LOCAL_PRODUCTION=true
+      - PORT=3002
+      - NEXT_PUBLIC_APP_URL=${PANEL_ADMIN_URL:-http://localhost:3002}
+      - NEXT_TELEMETRY_DISABLED=1
+    command: ["pnpm", "--filter", "@ruum/panel-admin", "start"]
+    restart: unless-stopped
+    networks:
+      - ruum-network
+
+networks:
+  ruum-network:
+    driver: bridge

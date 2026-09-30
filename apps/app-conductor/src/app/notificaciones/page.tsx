@@ -1,0 +1,258 @@
+"use client";
+
+import { useCallback, useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { Button, Card } from "@ruum/ui";
+import {
+  contarNotificacionesNoLeidas,
+  listarNotificacionesConductor,
+  marcarNotificacionLeida,
+  type NotificacionConductor
+} from "@ruum/api/drivers";
+import { crearClienteNavegador } from "../../lib/supabase-browser";
+
+type Notificacion = NotificacionConductor;
+
+type FiltroTab = "todas" | "no_leidas" | "leidas";
+
+function obtenerEstiloCategoria(tipo: string): { etiqueta: string; clase: string } {
+  const t = tipo.toLowerCase();
+  if (t.includes("seguridad") || t.includes("emergencia") || t.includes("alerta")) {
+    return { etiqueta: "Seguridad", clase: "conductor-feedback conductor-feedback-error" };
+  }
+  if (t.includes("pago") || t.includes("ganancia") || t.includes("deposito")) {
+    return { etiqueta: "Ganancias", clase: "conductor-feedback conductor-feedback-success" };
+  }
+  if (t.includes("viaje") || t.includes("traslado") || t.includes("asignaci")) {
+    return { etiqueta: "Operativo", clase: "conductor-feedback conductor-feedback-info" };
+  }
+  if (t.includes("docu") || t.includes("expediente") || t.includes("licencia")) {
+    return { etiqueta: "Documentos", clase: "conductor-feedback conductor-feedback-warning" };
+  }
+  return { etiqueta: "Aviso", clase: "conductor-feedback conductor-feedback-info" };
+}
+
+export default function CentroNotificaciones() {
+  const [items, setItems] = useState<Notificacion[]>([]);
+  const [cargando, setCargando] = useState(true);
+  const [filtro, setFiltro] = useState<FiltroTab>("todas");
+  const [procesandoBulk, setProcesandoBulk] = useState(false);
+  const router = useRouter();
+
+  const cargar = useCallback(async () => {
+    try {
+      setItems(await listarNotificacionesConductor(crearClienteNavegador(), 100));
+    } catch {
+      /* conservar lo último cargado ante fallos transitorios */
+    }
+    setCargando(false);
+  }, []);
+
+  useEffect(() => {
+    void cargar();
+    const actualizar = () => void cargar();
+    window.addEventListener("ruum:notificaciones-actualizar", actualizar);
+    return () => window.removeEventListener("ruum:notificaciones-actualizar", actualizar);
+  }, [cargar]);
+
+  async function abrir(item: Notificacion) {
+    try {
+      await marcarNotificacionLeida(crearClienteNavegador(), item.id);
+    } catch {
+      /* el acuse reintentará en la próxima carga */
+    }
+    setItems((actuales) =>
+      actuales.map((n) => (n.id === item.id ? { ...n, leida_en: n.leida_en ?? new Date().toISOString() } : n))
+    );
+    router.push(item.destino);
+  }
+
+  async function marcarTodasComoLeidas() {
+    const sinLeer = items.filter((item) => !item.leida_en);
+    if (sinLeer.length === 0) return;
+    setProcesandoBulk(true);
+    try {
+      const cliente = crearClienteNavegador();
+      for (const item of sinLeer) {
+        await marcarNotificacionLeida(cliente, item.id);
+      }
+      const ahora = new Date().toISOString();
+      setItems((actuales) => actuales.map((n) => ({ ...n, leida_en: n.leida_en ?? ahora })));
+    } catch {
+      /* ignorar fallos transitorios */
+    } finally {
+      setProcesandoBulk(false);
+    }
+  }
+
+  const noLeidas = items.filter((item) => !item.leida_en);
+  const leidas = items.filter((item) => Boolean(item.leida_en));
+
+  const itemsFiltrados = items.filter((item) => {
+    if (filtro === "no_leidas") return !item.leida_en;
+    if (filtro === "leidas") return Boolean(item.leida_en);
+    return true;
+  });
+
+  return (
+    <div className="mx-auto grid w-full max-w-3xl gap-6 px-4 py-8 sm:px-6 sm:py-12">
+      {/* Encabezado — Brand Book p.22: título Montserrat Bold, subtítulo Inter, línea ruta */}
+      <header className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <p className="font-body text-xs font-bold uppercase tracking-widest text-text-tertiary">
+            Ruum Ruum · Seguridad · Evidencia · Trazabilidad
+          </p>
+          <h1 className="mt-1 font-display text-2xl font-bold tracking-tight text-text-primary sm:text-3xl">
+            Notificaciones y Avisos
+          </h1>
+          <p className="mt-1 font-body text-sm text-text-secondary">
+            Tus avisos y alertas operativas permanecen guardados en este centro.
+          </p>
+          <div className="conductor-ruta-divider mt-3 max-w-[280px]" aria-hidden />
+        </div>
+
+        {/* 3. Acciones Globales en Bloque */}
+        {noLeidas.length > 0 && (
+          <button
+            type="button"
+            onClick={() => void marcarTodasComoLeidas()}
+            disabled={procesandoBulk}
+            className="inline-flex shrink-0 items-center justify-center gap-1.5 rounded-xl border border-border bg-surface px-4 py-2.5 font-display text-xs font-bold text-text-primary shadow-xs transition hover:border-signal hover:bg-surface-elevated active:scale-95 disabled:opacity-50"
+          >
+            ✓ {procesandoBulk ? "Actualizando..." : "Marcar todas como leídas"}
+          </button>
+        )}
+      </header>
+
+      {/* 2. Pestañas de Filtro (Tabs) y Contadores Dinámicos */}
+      <div className="border-b border-border/40">
+        <nav className="-mb-px flex space-x-2 sm:space-x-6" aria-label="Filtro de notificaciones">
+          {[
+            { id: "todas" as FiltroTab, etiqueta: "Todas", contador: items.length },
+            { id: "no_leidas" as FiltroTab, etiqueta: "Sin leer", contador: noLeidas.length, destacada: noLeidas.length > 0 },
+            { id: "leidas" as FiltroTab, etiqueta: "Leídas", contador: leidas.length }
+          ].map((tab) => {
+            const activa = filtro === tab.id;
+            return (
+              <button
+                key={tab.id}
+                type="button"
+                onClick={() => setFiltro(tab.id)}
+                className={[
+                  "inline-flex items-center gap-2 border-b-2 px-3 py-3 font-display text-sm font-bold transition-all",
+                  activa
+                    ? "border-route-action text-route-action"
+                    : "border-transparent text-text-tertiary hover:border-border hover:text-text-primary"
+                ].join(" ")}
+              >
+                {tab.etiqueta}
+                <span
+                  className={[
+                    "inline-flex items-center justify-center rounded-full px-2 py-0.5 font-mono-ruum text-xs font-bold transition-colors",
+                    tab.destacada
+                      ? "motion-safe:animate-pulse"
+                      : activa
+                      ? "bg-surface-elevated text-text-primary border border-border"
+                      : "bg-surface-elevated/50 text-text-tertiary"
+                  ].join(" ")}
+                  style={tab.destacada ? { background: "var(--ruum-gradient-cta)", color: "var(--ruum-on-primary, #061529)" } : undefined}
+                >
+                  {tab.contador}
+                </span>
+              </button>
+            );
+          })}
+        </nav>
+      </div>
+
+      {/* Contenido Principal */}
+      {cargando ? (
+        <div className="py-12 text-center font-body text-sm text-text-tertiary">
+          Cargando tus notificaciones...
+        </div>
+      ) : itemsFiltrados.length === 0 ? (
+        /* 1. Estado Vacío Cálido y Visual (Empty State) */
+        <div className="flex flex-col items-center justify-center py-16 px-4 text-center">
+          <div className="flex size-20 items-center justify-center rounded-full border border-border/60 bg-surface-elevated font-display text-4xl shadow-sm mb-4">
+            ✨
+          </div>
+          <h2 className="font-display text-xl font-bold text-text-primary">
+            ¡Todo al día!
+          </h2>
+          <p className="mt-2 max-w-sm font-body text-sm leading-6 text-text-tertiary">
+            {filtro === "no_leidas"
+              ? "No tienes avisos pendientes por leer. Puedes consultar tu historial en la pestaña 'Leídas'."
+              : "Aquí aparecerán tus próximos avisos de servicio, ganancias y alertas operativas."}
+          </p>
+        </div>
+      ) : (
+        /* Lista de Tarjetas con Categorización Visual Anticipada */
+        <section className="grid gap-3.5" aria-label="Lista de notificaciones">
+          {itemsFiltrados.map((item) => {
+            const estiloCat = obtenerEstiloCategoria(item.tipo);
+            const esNoLeida = !item.leida_en;
+
+            return (
+              <Card
+                key={item.id}
+                className={[
+                  "transition-all duration-150 hover:border-signal/80",
+                  esNoLeida ? "border-border bg-surface shadow-sm" : "border-border/60 bg-surface/80"
+                ].join(" ")}
+              >
+                <div className="flex items-start justify-between gap-4">
+                  <div className="flex items-start gap-3.5 min-w-0">
+                    {/* Categoría visual: inicial + etiqueta (sin emoji, tokenizado) */}
+                    <div aria-hidden="true" className="flex size-10 shrink-0 items-center justify-center rounded-xl border border-border bg-surface-elevated font-display text-sm font-bold text-text-primary shadow-2xs">
+                      {estiloCat.etiqueta.slice(0, 1)}
+                    </div>
+
+                    <div className="min-w-0">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className="font-body text-xs font-bold uppercase tracking-wider text-text-tertiary">
+                          {estiloCat.etiqueta} • {new Date(item.creado_en).toLocaleString("es-MX", { dateStyle: "short", timeStyle: "short" })}
+                        </span>
+                        {esNoLeida && (
+                          <span style={{ color: "var(--ruum-on-primary, #061529)" }} className="rounded-full bg-signal px-2 py-0.5 font-body text-xs font-extrabold uppercase tracking-wider">
+                            Nueva
+                          </span>
+                        )}
+                      </div>
+
+                      <h3 className="mt-1 font-display text-base font-bold text-text-primary">
+                        {item.titulo}
+                      </h3>
+                      <p className="mt-1.5 font-body text-sm leading-6 text-text-secondary">
+                        {item.cuerpo}
+                      </p>
+                      <p className={`mt-2 rounded-lg px-2 py-1 font-body text-xs ${estiloCat.clase}`}>
+                        {estiloCat.etiqueta}
+                      </p>
+
+                      {item.entidad_tipo && (
+                        <p className="mt-2 font-mono-ruum text-xs text-text-tertiary">
+                          {item.entidad_tipo}
+                          {item.entidad_id ? ` · ${item.entidad_id.slice(0, 8)}` : ""}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+
+                  {esNoLeida && (
+                    <span role="status" aria-label="No leída" className="mt-1 h-3 w-3 shrink-0 rounded-full bg-signal shadow-xs motion-safe:animate-pulse" />
+                  )}
+                </div>
+
+                <div className="mt-4 flex justify-end">
+                  <Button variant="secondary" onClick={() => void abrir(item)}>
+                    Abrir aviso →
+                  </Button>
+                </div>
+              </Card>
+            );
+          })}
+        </section>
+      )}
+    </div>
+  );
+}

@@ -1,0 +1,493 @@
+import type { SupabaseClient } from "@supabase/supabase-js";
+import type { Database, SolicitudAsignacionResultado } from "@ruum/shared/types";
+import { TRANSICIONES } from "@ruum/shared/states";
+import { calcularCargoCancelacion } from "@ruum/shared/rules";
+import { esquemaPayloadCrearTraslado } from "@ruum/shared/validacion";
+import { registrarEvento } from "./auditoria";
+
+type Cliente = SupabaseClient<Database>;
+type PasaporteRow = Database["public"]["Views"]["pasaporte_digital"]["Row"];
+type TipoPago = Database["public"]["Enums"]["tipo_pago"];
+type EstadoTraslado = Database["public"]["Enums"]["estado_traslado"];
+type EventoConductorTraslado =
+  | "conductor_en_camino"
+  | "llegada_origen"
+  | "iniciar_verificacion"
+  | "iniciar_evidencia_inicial"
+  | "vehiculo_recibido"
+  | "iniciar_traslado"
+  | "llegada_destino"
+  | "iniciar_evidencia_final"
+  | "confirmar_entrega"
+  | "cerrar_viaje";
+
+async function obtenerUsuarioIdActual(cliente: Cliente): Promise<string> {
+  const { data: sesion } = await cliente.auth.getUser();
+  if (!sesion.user) {
+    throw new Error("No hay sesión de usuario para registrar la acción.");
+  }
+
+  const { data, error } = await cliente.from("usuarios").select("id").eq("auth_user_id", sesion.user.id).maybeSingle();
+  if (error) throw error;
+  if (!data) throw new Error("No se encontró el usuario autenticado.");
+  return data.id;
+}
+
+export interface DatosNuevoTraslado {
+  contacto_entrega_nombre: string;
+  contacto_entrega_telefono: string;
+  contacto_recepcion_nombre: string;
+  contacto_recepcion_telefono: string;
+  origen_lat: number | null;
+  origen_lng: number | null;
+  origen_direccion: string;
+  origen_ciudad: string;
+  destino_lat: number | null;
+  destino_lng: number | null;
+  destino_direccion: string;
+  destino_ciudad: string;
+  origen_referencias?: string | null;
+  destino_referencias?: string | null;
+  instrucciones_especiales?: string | null;
+  modalidad_programacion?: string | null;
+  fecha_hora_programada?: string | null;
+  tipo_ruta?: string | null;
+  ventana_recoleccion?: string | null;
+  ventana_entrega?: string | null;
+  tipo_servicio?: string | null;
+  motivo_servicio?: string | null;
+  presupuesto_usuario?: number | null;
+  distancia_km?: number | null;
+  tiempo_estimado_horas?: number | null;
+}
+
+export interface TrasladoCreado {
+  id: string;
+  tipo_pago: TipoPago;
+  /** RT-13 -- presente cuando el vehículo estaba en el catálogo de
+   * autoclasificación y el sistema pudo calcular la tarifa de una vez.
+   * Ausente (undefined/null) cuando la solicitud requiere una política
+   * tarifaria aplicable antes de cotizar. */
+  precio_cotizado?: number | null;
+}
+
+export interface DatosVehiculoNuevo {
+  tipo: Database["public"]["Enums"]["tipo_vehiculo"];
+  transmision: "manual" | "automatica" | "electrica";
+  marca: string;
+  modelo: string;
+  anio: number;
+  color: string;
+  placas: string;
+  vin: string;
+  condicion?: Database["public"]["Enums"]["condicion_vehiculo"];
+  estado_general_declarado: string;
+  tiene_tarjeta_circulacion: boolean;
+  tiene_verificacion: boolean;
+  tiene_placas: boolean;
+  puede_circular_rodando: boolean;
+}
+
+export type DatosVehiculoParaTraslado = { vehiculoId: string } | { vehiculo: DatosVehiculoNuevo };
+
+export interface DatosParadaParaTraslado {
+  tipo: "escala" | "tarea";
+  calle: string; numero: string; colonia: string; codigo_postal: string; estado: string; ciudad: string;
+  direccion: string; referencias?: string | null;
+  lat: number | null; lng: number | null;
+  tipo_tarea?: string | null; contacto_nombre?: string | null; contacto_telefono?: string | null;
+  instrucciones?: string | null; requiere_evidencia?: boolean; tiempo_espera_min?: number | null;
+}
+
+/**
+ * PRD §4.1 — crea la solicitud de traslado (estado inicial: solicitud_creada).
+ *
+ * Desde la migración 20260711000118 esto es una sola RPC transaccional
+ * (usuario_crea_traslado) en vez de dos inserts sueltos desde el cliente:
+ * evita el vehículo huérfano si el insert del traslado fallaba después del
+ * de vehículo, y valida en la base que un vehiculoId reutilizado sea del
+ * usuario autenticado (antes solo se filtraba por RLS de SELECT al listarlo,
+ * pero nada impedía mandar un UUID ajeno directo al insert de traslados).
+ */
+export async function crearTraslado(cliente: Cliente, vehiculo: DatosVehiculoParaTraslado, traslado: DatosNuevoTraslado, claveIdempotencia: string, paradas: DatosParadaParaTraslado[] = []) {
+  const validacion = esquemaPayloadCrearTraslado.safeParse({
+    claveIdempotencia,
+    vehiculo,
+    traslado,
+    paradas
+  });
+
+  if (!validacion.success) {
+    const errorMsg = validacion.error.issues.map((i) => i.message).join(" ");
+    throw new Error(`Datos de traslado inválidos: ${errorMsg}`);
+  }
+
+  const { data, error } = await cliente.rpc("usuario_crea_traslado", {
+    p_vehiculo_id: ("vehiculoId" in vehiculo ? vehiculo.vehiculoId : null) as never,
+    p_vehiculo: ("vehiculo" in vehiculo ? vehiculo.vehiculo : null) as never,
+    p_traslado: traslado as never,
+    p_clave_idempotencia: claveIdempotencia,
+    p_paradas: paradas as never
+  });
+
+  if (error) throw error;
+  const resultado = data as unknown as TrasladoCreado;
+  if (!resultado?.id || !resultado?.tipo_pago) {
+    throw new Error("La respuesta del servidor al crear el traslado es inválida.");
+  }
+  return resultado;
+}
+
+export async function aceptarCotizacionUsuario(cliente: Cliente, trasladoId: string) {
+  const { data, error } = await cliente.rpc("usuario_acepta_cotizacion", { p_traslado_id: trasladoId });
+  if (error) throw error;
+  return data;
+}
+
+/** PRD §5.1 — el Pasaporte Digital de Traslado completo, para la pantalla de seguimiento. */
+export async function obtenerPasaporteDigital(cliente: Cliente, trasladoId: string): Promise<PasaporteRow | null> {
+  const { data, error } = await cliente
+    .from("pasaporte_digital")
+    .select("*")
+    .eq("traslado_id", trasladoId)
+    .maybeSingle();
+
+  if (error) throw error;
+  return data;
+}
+
+/** Lista los traslados de un usuario, más recientes primero (para el dashboard). */
+export async function listarTrasladosDeUsuario(cliente: Cliente, usuarioId: string): Promise<PasaporteRow[]> {
+  const { data, error } = await cliente
+    .from("pasaporte_digital")
+    .select("*")
+    .eq("usuario_id", usuarioId)
+    .order("creado_en", { ascending: false });
+
+  if (error) throw error;
+  return data ?? [];
+}
+
+/** PRD §4.1 — historial empresarial visible para el titular de la empresa. */
+export async function listarTrasladosDeEmpresa(cliente: Cliente, empresaId: string): Promise<PasaporteRow[]> {
+  const { data: titular, error: errorTitular } = await cliente
+    .from("usuarios")
+    .select("id")
+    .eq("empresa_id", empresaId)
+    .eq("rol", "titular_empresa")
+    .maybeSingle();
+
+  if (errorTitular) throw errorTitular;
+  if (!titular) {
+    throw new Error("Solo el titular de la empresa puede consultar este historial.");
+  }
+
+  const { data: traslados, error: errorTraslados } = await cliente
+    .from("traslados")
+    .select("id, creado_en")
+    .order("creado_en", { ascending: false });
+
+  if (errorTraslados) throw errorTraslados;
+
+  const ids = (traslados ?? []).map((traslado) => traslado.id);
+  if (ids.length === 0) return [];
+
+  const { data, error } = await cliente
+    .from("pasaporte_digital")
+    .select("*")
+    .in("traslado_id", ids)
+    .order("creado_en", { ascending: false });
+
+  if (error) throw error;
+  return data ?? [];
+}
+
+/**
+ * PRD §16.3 — Pestaña 1 "Traslados solicitados": Traslados ofertados/disponibles
+ * para aceptación. Visibilidad mínima por RLS (migración 0018). Esta lista
+ * puede traer candidatos visibles; la solicitud se revalida contra la función
+ * central de elegibilidad dentro de PostgreSQL.
+ */
+export async function listarTrasladosDisponibles(cliente: Cliente): Promise<PasaporteRow[]> {
+  const { data, error } = await cliente
+    .from("pasaporte_digital")
+    .select("*")
+    .eq("estado", "pendiente_de_conductor")
+    .order("creado_en", { ascending: true });
+
+  if (error) throw error;
+  return data ?? [];
+}
+
+/** PRD §16.3 — Pestaña 2 "Traslados aceptados": los que ya tiene este conductor. */
+export async function listarTrasladosAceptados(cliente: Cliente, conductorId: string): Promise<PasaporteRow[]> {
+  const { data, error } = await cliente
+    .from("pasaporte_digital")
+    .select("*")
+    .eq("conductor_id", conductorId)
+    .not("estado", "in", "(servicio_cerrado,servicio_cancelado,traslado_fallido)")
+    .order("creado_en", { ascending: false });
+
+  if (error) throw error;
+  return data ?? [];
+}
+
+async function validarIdentidadSolicitud(cliente: Cliente, conductorId: string) {
+  const { data: sesion } = await cliente.auth.getUser();
+  if (!sesion.user) throw new Error("Inicia sesión como conductor para solicitar traslados.");
+  const { data, error } = await cliente
+    .from("conductores")
+    .select("id")
+    .eq("id", conductorId)
+    .eq("auth_user_id", sesion.user.id)
+    .maybeSingle();
+  if (error) throw error;
+  if (!data) throw new Error("No se encontró el conductor autenticado.");
+}
+
+/**
+ * ADR-003 — registra al conductor en la competencia. La asignación sucede al
+ * cerrar la ventana y siempre dentro de la transacción del servidor.
+ */
+export async function solicitarAsignacionViaje(
+  cliente: Cliente,
+  trasladoId: string,
+  conductorId: string,
+  ubicacion?: { lat: number; lng: number } | null
+): Promise<SolicitudAsignacionResultado> {
+  await validarIdentidadSolicitud(cliente, conductorId);
+  const { data, error } = await cliente.rpc("conductor_solicita_asignacion" as never, {
+    p_traslado_id: trasladoId,
+    p_lat: ubicacion?.lat ?? null,
+    p_lng: ubicacion?.lng ?? null
+  } as never);
+
+  if (error) {
+    throw new Error(error.message || "No se pudo registrar la solicitud de asignación.");
+  }
+  const resultado = data as unknown as SolicitudAsignacionResultado;
+  if (!resultado?.competencia_id || !resultado?.cierra_en) {
+    throw new Error("La respuesta de la competencia de asignación es inválida.");
+  }
+  return resultado;
+}
+
+/** @deprecated Usa solicitarAsignacionViaje; se conserva para clientes internos antiguos. */
+export async function aceptarViaje(cliente: Cliente, trasladoId: string, conductorId: string) {
+  return solicitarAsignacionViaje(cliente, trasladoId, conductorId, null);
+}
+
+function horasRestantes(fechaIso: string | null) {
+  if (!fechaIso) return Number.POSITIVE_INFINITY;
+  return Math.max(0, (new Date(fechaIso).getTime() - Date.now()) / (1000 * 60 * 60));
+}
+
+/**
+ * Estados desde los que el usuario puede cancelar su traslado (decisión de
+ * producto 2026-07-09: hasta que el conductor llega al punto de recolección;
+ * después ya no es cancelación sino disputa o traslado fallido).
+ *
+ * Es el mismo conjunto que la tabla `estado_transiciones_validas` habilita
+ * hacia `servicio_cancelado` (ver migración 0005) y que la RPC
+ * `usuario_cancela_traslado` revalida en la base (migración 0051). Se
+ * duplica aquí a propósito, como defensa en profundidad, para dar un mensaje
+ * claro en la UI sin ida y vuelta a Postgres; la base sigue siendo la fuente
+ * de verdad que rechaza cualquier estado fuera de esta lista.
+ */
+const ESTADOS_CANCELABLES_POR_USUARIO: EstadoTraslado[] = [
+  "solicitud_creada",
+  "documentacion_pendiente",
+  "documentacion_en_revision",
+  "cotizacion_generada",
+  "servicio_confirmado",
+  "pendiente_de_conductor",
+  "conductor_asignado",
+  "conductor_en_punto_de_recoleccion"
+];
+
+export function usuarioPuedeCancelar(estado: EstadoTraslado): boolean {
+  return ESTADOS_CANCELABLES_POR_USUARIO.includes(estado);
+}
+
+export async function cancelarTraslado(cliente: Cliente, trasladoId: string, motivo: string) {
+  const { data: traslado, error } = await cliente
+    .from("traslados")
+    .select("id, estado, conductor_id, fecha_hora_programada, precio_cotizado, precio_final")
+    .eq("id", trasladoId)
+    .maybeSingle();
+
+  if (error) throw error;
+  if (!traslado) throw new Error("No se encontró el traslado para cancelar.");
+
+  if (!usuarioPuedeCancelar(traslado.estado)) {
+    throw new Error(
+      "Este traslado ya no puede cancelarse: el vehículo ya está en verificación o en tránsito. Solicita una revisión o reporta un problema."
+    );
+  }
+
+  const cargo = calcularCargoCancelacion(
+    Number(traslado.precio_final ?? traslado.precio_cotizado ?? 0),
+    horasRestantes(traslado.fecha_hora_programada),
+    Boolean(traslado.conductor_id),
+    // El cargo del 100% aplica cuando el conductor ya llegó al punto de
+    // recolección. Los estados posteriores (verificación/evidencia) ya no son
+    // cancelables, así que no forman parte de este flag.
+    traslado.estado === "conductor_en_punto_de_recoleccion"
+  );
+
+  const { error: rpcError } = await cliente.rpc("usuario_cancela_traslado", {
+    p_traslado_id: trasladoId,
+    p_motivo: motivo.trim() || "Cancelación solicitada por usuario",
+    p_porcentaje_cargo: cargo.porcentaje_cargo,
+    p_monto_cargo: cargo.monto_cargo,
+    p_mensaje: cargo.mensaje
+  });
+
+  if (rpcError) throw rpcError;
+  return cargo;
+}
+
+export async function crearCalificacion(
+  cliente: Cliente,
+  trasladoId: string,
+  conductorId: string,
+  estrellas: number,
+  comentario?: string | null
+) {
+  if (!Number.isInteger(estrellas) || estrellas < 1 || estrellas > 5) {
+    throw new Error("La calificación debe estar entre 1 y 5 estrellas.");
+  }
+
+  const { data: traslado, error: errorTraslado } = await cliente
+    .from("traslados")
+    .select("id, estado, actualizado_en")
+    .eq("id", trasladoId)
+    .maybeSingle();
+
+  if (errorTraslado) throw errorTraslado;
+  if (!traslado) throw new Error("No se encontró el traslado a calificar.");
+  if (traslado.estado !== "servicio_cerrado") {
+    throw new Error("Solo se puede calificar un traslado finalizado.");
+  }
+
+  const horasDesdeCierre = (Date.now() - new Date(traslado.actualizado_en).getTime()) / (1000 * 60 * 60);
+  if (horasDesdeCierre > 72) {
+    throw new Error("El plazo de 72 horas para calificar este traslado ya venció.");
+  }
+
+  const { error } = await cliente.from("calificaciones_traslado").insert({
+    traslado_id: trasladoId,
+    conductor_id: conductorId,
+    estrellas,
+    comentario: comentario?.trim() || null
+  });
+
+  if (error) throw error;
+
+  const usuarioId = await obtenerUsuarioIdActual(cliente);
+  await registrarEvento(cliente, "calificacion_conductor", "usuario", usuarioId, {
+    traslado_id: trasladoId,
+    conductor_id: conductorId,
+    estrellas
+  });
+}
+
+const EVENTO_CONDUCTOR_POR_ESTADO: Partial<Record<EstadoTraslado, EventoConductorTraslado>> = {
+  conductor_asignado: "conductor_en_camino",
+  conductor_en_camino_al_origen: "llegada_origen",
+  conductor_en_punto_de_recoleccion: "iniciar_verificacion",
+  verificacion_vehiculo_en_proceso: "iniciar_evidencia_inicial",
+  evidencia_inicial_completada: "vehiculo_recibido",
+  vehiculo_recibido: "iniciar_traslado",
+  traslado_en_curso: "llegada_destino",
+  llegada_a_destino: "iniciar_evidencia_final",
+  evidencia_final_completada: "confirmar_entrega",
+  entrega_confirmada: "cerrar_viaje"
+};
+
+/**
+ * Avanza el traslado al siguiente paso del camino feliz (primer elemento de
+ * TRANSICIONES[estadoActual]), pero sin UPDATE directo sobre traslados desde
+ * el cliente conductor. La RPC security definer valida que el conductor
+ * autenticado esté asignado, actualiza solo `estado` y escribe auditoría.
+ * No se usa para completar evidencia: esos pasos viven en services/evidencia.ts
+ * porque primero revalidan evidenciaCompleta() en aplicación y luego pasan por
+ * la misma RPC dedicada.
+ */
+export async function avanzarEstadoTraslado(cliente: Cliente, trasladoId: string, estadoActual: EstadoTraslado) {
+  const siguiente = TRANSICIONES[estadoActual]?.[0];
+  if (!siguiente) {
+    throw new Error(`No hay siguiente paso del camino feliz desde ${estadoActual}`);
+  }
+
+  const evento = EVENTO_CONDUCTOR_POR_ESTADO[estadoActual];
+  if (!evento) {
+    throw new Error(`El estado ${estadoActual} no corresponde a un evento directo del conductor`);
+  }
+
+  const { data, error } = await cliente.rpc("conductor_avanza_traslado", {
+    p_traslado_id: trasladoId,
+    p_evento: evento
+  });
+
+  if (error) throw error;
+  return data ?? siguiente;
+}
+
+export async function confirmarLlegadaDestino(
+  cliente: Cliente,
+  trasladoId: string,
+  geocerca?: { fueraGeocerca?: boolean; distanciaM?: number | null }
+) {
+  const { data, error } = await cliente.rpc("conductor_confirmar_llegada_destino", {
+    p_traslado_id: trasladoId,
+    p_fuera_geocerca: Boolean(geocerca?.fueraGeocerca),
+    ...(geocerca?.distanciaM !== null && geocerca?.distanciaM !== undefined ? { p_distancia_m: geocerca.distanciaM } : {})
+  });
+
+  if (error) throw error;
+  return data ?? "llegada_a_destino";
+}
+
+export interface HistorialTraslado {
+  id: string;
+  traslado_id: string;
+  estado_anterior: EstadoTraslado;
+  estado_nuevo: EstadoTraslado;
+  operativo_anterior: string;
+  operativo_nuevo: string;
+  actor_id: string | null;
+  actor_tipo: "admin" | "conductor" | "usuario" | "sistema";
+  motivo: string | null;
+  metadata: Record<string, unknown>;
+  creado_en: string;
+}
+
+/**
+ * FASE 3 — historial de ciclo de vida (public.historial_estados_traslado).
+ * Lectura por RLS (dueño/conductor/Torre); la escritura la hace el trigger.
+ */
+export async function listarHistorialTraslado(
+  cliente: Cliente,
+  trasladoId: string
+): Promise<HistorialTraslado[]> {
+  const { data, error } = await (cliente as unknown as {
+    from: (t: string) => {
+      select: (c: string) => {
+        eq: (col: string, v: string) => {
+          order: (col: string, o: { ascending: boolean }) => Promise<{
+            data: HistorialTraslado[] | null;
+            error: unknown;
+          }>;
+        };
+      };
+    };
+  })
+    .from("historial_estados_traslado")
+    .select("*")
+    .eq("traslado_id", trasladoId)
+    .order("creado_en", { ascending: false });
+
+  if (error) throw error;
+  return data ?? [];
+}

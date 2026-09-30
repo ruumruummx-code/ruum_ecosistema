@@ -1,0 +1,128 @@
+# Edge Functions — Fase 6 (Stripe + Twilio)
+
+PRD §4.6 — decisión de producto actual: **Stripe** se mantiene para cobros al usuario; el pago a conductores ya
+no usa Stripe Connect y se opera con datos bancarios capturados en `datos_bancarios_conductor`. PRD §4.12 —
+decisión de producto: **Twilio Proxy** (llamadas enmascaradas).
+
+## Funciones
+
+| Función | Quién la llama | Qué hace |
+|---|---|---|
+| `crear-payment-intent` | `app-usuario`: wizard de nuevo traslado (pago anticipado) y `/viajes/[id]` (pago al cierre) | Crea un PaymentIntent para el traslado y registra la fila `pagos` (estado `pendiente`) |
+| `stripe-webhook` | Stripe (servidor a servidor) | Recibe eventos de PaymentIntent y actualiza `pagos` y el estado del traslado asociado |
+| `crear-llamada-enmascarada` | Ambas apps, pantalla de chat del traslado | Crea (o reutiliza) la sesión de Twilio Proxy del traslado y devuelve el número virtual al que el cliente abre un enlace `tel:` |
+| `validar-documento-conductor` | `app-conductor`, registro y correcciones | Valida el contenido real, sanea el archivo, lo guarda en el bucket privado y registra/reemplaza la versión mediante RPC |
+| `validar-documento-identidad` | `app-usuario`, verificación | Acepta JPEG, PNG o PDF por multipart limitado, detecta y valida bytes, sella la carga y registra el resultado mediante RPC |
+| `limpiar-documentos-identidad-obsoletos` | Proceso interno programado | Reintenta borrar versiones reemplazadas, registra intentos y escala después de cinco fallos |
+
+### Documentos de conductor
+
+`validar-documento-conductor` recibe `multipart/form-data` y no confía en la extensión ni en el MIME enviados
+`validar-documento-identidad` aplica el mismo principio y mantiene HEIC/HEIF fuera de los formatos aceptados.
+por el navegador. Reconoce la firma y estructura de JPG, PNG, WEBP o PDF, exige imágenes de al menos 800 x 600,
+rechaza PDF truncados/cifrados, limita a 10 MB y elimina metadatos EXIF de JPG, PNG y WEBP. La ruta final es
+`auth_user_id/objetivo_id/tipo/documento`; `objetivo_id` es la solicitud durante el alta y el conductor después
+de la aprobación. Un sello SHA-256 de un solo uso enlaza la validación, el upload y la RPC, por lo que un cliente
+no puede saltarse la inspección llamando directamente a Storage. Si falla la RPC, elimina el objeto como compensación.
+
+## Validado, con un límite honesto
+
+La lógica de decisión de las 4 funciones está separada en archivos `logica.ts`, **probada de verdad con
+`deno test`** — 10 casos para Stripe, 11 para Twilio, 21 en total, sin mocks. Las 4 funciones completas pasan
+`deno check` (typecheck real contra los tipos oficiales de cada librería).
+
+**Las llamadas reales a la API de Stripe ya se probaron en modo de prueba** (PaymentIntent en MXN). **Twilio no se pudo probar
+contra su API real** — a diferencia de Stripe, no se compartieron credenciales de Twilio en esta sesión.
+
+**`stripe-webhook/index.ts` (el handler completo, no solo `logica.ts`) ya se ejecutó de verdad**, vía
+`stripe-webhook/integration-test/` (ver su README): un mock local de PostgREST + un evento de Stripe firmado
+con el mismo esquema HMAC que usa Stripe de verdad (sin red hacia Stripe — es matemática local), enviado por
+HTTP al `index.ts` real corriendo con `deno serve`. 6 casos, sobre el handler real: pago al cierre completado
+(el camino que se cerró en este corte), pago anticipado completado (confirma que no se rompió), pago fallido,
+idempotencia ante reintento de Stripe, evento no manejado, y firma inválida — los 6 pasan. Esto es más fuerte
+que solo probar `logica.ts`, pero sigue sin ser un sustituto de probar contra Stripe real: la forma del evento
+se armó a mano siguiendo la documentación pública de Stripe, no se copió de un evento real capturado, y no hay
+Postgres/RLS de verdad detrás del mock.
+
+Lo que **todavía no** se pudo probar para ninguna de las dos integraciones: las funciones desplegadas de verdad
+en Supabase, la verificación de firma del webhook de Stripe contra un evento real *de Stripe* (la de arriba es
+una firma propia, válida criptográficamente pero no emitida por Stripe), y el flujo completo end-to-end desde
+la UI (incluyendo que un enlace `tel:` realmente abra el marcador nativo con el número de Twilio Proxy).
+
+```bash
+# Stripe — instalar Stripe CLI en tu máquina, luego:
+stripe listen --forward-to https://<tu-proyecto>.supabase.co/functions/v1/stripe-webhook
+stripe trigger payment_intent.succeeded
+
+# Twilio — crear el Proxy Service una vez en Twilio Console (Develop → Proxy →
+# Services → Create new Service), copiar su SID a TWILIO_PROXY_SERVICE_SID.
+```
+
+Un gap real encontrado al construir Twilio: **ni `usuarios` ni `conductores` tenían columna de teléfono** — sin
+eso, Twilio Proxy no tiene a quién relacionar con el número virtual. Corregido en `0023_telefonos_twilio.sql`,
+y `/registro` de ambas apps ahora lo captura.
+
+## Pago por Stripe al concluir una solicitud
+
+Las solicitudes nuevas se crean con cotización automática, tipo de pago `anticipado` y un formulario Stripe en el
+último paso del wizard. Así cualquier usuario puede pagar inmediatamente al concluir su solicitud. La función
+`crear-payment-intent` sigue validando la sesión, la propiedad del traslado, la cotización y el rango del monto
+antes de crear el cobro.
+
+Los traslados históricos con `tipo_pago = "al_cierre"` conservan su camino: `crear-payment-intent` los acepta
+cuando llegan a `pago_pendiente`, y `PagoTraslado.tsx` monta el mismo formulario dentro del Pasaporte Digital.
+La función también usa `precio_final` si existe; de lo contrario cobra `precio_cotizado`.
+
+## Variables de entorno (Supabase Dashboard → Edge Functions → Secrets, nunca en el repo)
+
+```
+STRIPE_SECRET_KEY            sk_test_... (o sk_live_... en producción)
+STRIPE_WEBHOOK_SECRET        whsec_... (de Stripe Dashboard → Webhooks → tu endpoint)
+TWILIO_ACCOUNT_SID           AC...
+TWILIO_AUTH_TOKEN            (de Twilio Console)
+TWILIO_PROXY_SERVICE_SID     KS... (del Proxy Service que crees en Twilio Console)
+SUPABASE_URL                 ya disponible automáticamente en Edge Functions
+SUPABASE_ANON_KEY            idem
+SUPABASE_SERVICE_ROLE_KEY    idem
+RUUM_APP_CONDUCTOR_URL       https://www.concer.ruumruum-moviliax.online (o tu dominio)
+```
+
+## Desplegar
+
+No uses `supabase functions deploy .` ni un `Get-ChildItem` sobre todos los
+elementos del directorio: `_shared`, archivos auxiliares y carpetas sin
+`index.ts` no son funciones desplegables.
+
+Para desplegar sólo DIDIT:
+
+```bash
+supabase functions deploy iniciar-verificacion-didit
+```
+
+Para desplegar todas las funciones locales válidas desde PowerShell:
+
+```powershell
+pwsh -NoProfile -File .\scripts\deploy-supabase-functions.ps1
+```
+
+Para desplegar un subconjunto:
+
+```powershell
+pwsh -NoProfile -File .\scripts\deploy-supabase-functions.ps1 iniciar-verificacion-didit webhook-didit
+```
+
+`crear-payment-intent` está configurada con `verify_jwt = false` en `supabase/config.toml` para que el gateway de
+Supabase deje pasar el preflight `OPTIONS` desde el navegador. La función sigue exigiendo `Authorization` dentro del
+handler y valida el traslado con RLS antes de crear el cobro.
+
+Después de desplegar `stripe-webhook`, registra su URL en Stripe Dashboard → Developers → Webhooks, suscrita a:
+`payment_intent.succeeded`, `payment_intent.payment_failed`.
+
+## Pendiente
+
+- Flujo operativo para verificar datos bancarios de conductores y marcar `payouts_conductor.referencia_pago`
+  cuando se programe la transferencia.
+- Registrar la duración real de cada llamada (`llamadas_enmascaradas.duracion_segundos`) — necesita el webhook
+  de status callback de Twilio Voice, no cubierto en este corte.
+- Cerrar la sesión de Proxy cuando el traslado se cierra (`sesiones_proxy_traslado.cerrada_en`) — hoy se crea
+  pero nada la cierra automáticamente todavía.

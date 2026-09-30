@@ -1,0 +1,4 @@
+# Copia este archivo como local.properties. No uses service_role/secret keys aquí.
+sdk.dir=C\:\\Users\\tu-usuario\\AppData\\Local\\Android\\Sdk
+SUPABASE_URL=https://tu-proyecto.supabase.co
+SUPABASE_PUBLISHABLE_KEY=sb_publishable_xxx

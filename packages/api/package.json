@@ -1,0 +1,49 @@
+{
+  "name": "@ruum/api",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./supabase": "./src/supabase/index.ts",
+    "./services": "./src/services/index.ts",
+    "./operations": "./src/operations/index.ts",
+    "./transfers": "./src/transfers/index.ts",
+    "./drivers": "./src/drivers/index.ts",
+    "./organizations": "./src/organizations/index.ts",
+    "./vehicles": "./src/vehicles/index.ts",
+    "./identity": "./src/identity/index.ts",
+    "./custody": "./src/custody/index.ts",
+    "./tracking": "./src/tracking/index.ts",
+    "./incidents": "./src/incidents/index.ts",
+    "./claims": "./src/claims/index.ts",
+    "./billing": "./src/billing/index.ts",
+    "./sla": "./src/sla/index.ts",
+    "./obs": "./src/obs/index.ts",
+    "./next-server": "./src/next-server/index.ts",
+    "./next-browser": "./src/next-browser/index.ts",
+    "./observability": "./src/observability/index.ts",
+    "./feature-flags": "./src/feature-flags/index.ts",
+    "./capacitor": "./src/capacitor/index.ts",
+    "./ubicacion": "./src/ubicacion/index.ts"
+  },
+  "scripts": {
+    "build": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.47.0",
+    "@supabase/ssr": "^0.5.2",
+    "@ruum/shared": "workspace:*",
+    "zod": "^3.24.1"
+  },
+  "devDependencies": {
+    "vitest": "3.2.6",
+    "typescript": "^5.7.2",
+    "@types/node": "^22.10.0",
+    "next": "15.5.24",
+    "@capacitor/core": "^8.4.1",
+    "@capacitor/geolocation": "^8.2.0"
+  }
+}

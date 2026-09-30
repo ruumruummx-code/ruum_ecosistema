@@ -1,0 +1,1131 @@
+@import "tailwindcss";
+@import "@ruum/ui/styles/tokens.css";
+
+@theme {
+  --color-background-main: var(--ruum-background-main);
+  --color-surface-primary: var(--ruum-surface-primary);
+  --color-surface-secondary: var(--ruum-surface-secondary);
+  --color-border-default: var(--ruum-border-default);
+  --color-text-main: var(--ruum-text-main);
+  --color-text-secondary: var(--ruum-text-secondary);
+  --color-text-tertiary: var(--ruum-text-tertiary);
+  --color-text-disabled: var(--ruum-text-disabled);
+  --color-status-success: var(--ruum-status-success);
+  --color-status-success-soft: var(--ruum-status-success-soft);
+  --color-status-warning: var(--ruum-status-warning);
+  --color-status-warning-soft: var(--ruum-status-warning-soft);
+  --color-status-error: var(--ruum-status-error);
+  --color-status-error-soft: var(--ruum-status-error-soft);
+  --color-status-info: var(--ruum-status-info);
+  --color-status-info-soft: var(--ruum-status-info-soft);
+  --color-focus-default: var(--ruum-focus-default);
+  --text-admin-operativo: var(--ruum-admin-text-operativo);
+  --text-admin-secundario: var(--ruum-admin-text-secundario);
+  --text-admin-compacto: var(--ruum-admin-text-compacto);
+  --text-admin-boton: var(--ruum-admin-text-boton);
+  --text-admin-tabla: var(--ruum-admin-text-tabla);
+}
+
+:root {
+  --admin-sidebar-width: 15rem;
+  --ruum-focus-default: var(--ruum-focus, #0066ff);
+  --ruum-focus-ring: rgba(0, 102, 255, 0.24);
+  --ruum-background-main: #f6f8fb;
+  --ruum-surface-primary: #ffffff;
+  --ruum-surface-secondary: #f6f8fb;
+  --ruum-border-default: #e6f0ff;
+  --ruum-text-main: #0a2342;
+}
+
+/* =========================================================================
+ * Dark Mode v1.0 (§2 + §3) — panel-admin
+ *
+ * Base navy profunda #061529 (nunca negro puro). Se reasignan los tokens
+ * de @ruum/ui para que toda la Torre de Control herede el tema sin tocar
+ * el marcado de cada pantalla.
+ *
+ * Excepción: el sidebar (BarraLateral) ya era oscuro con texto claro por
+ * diseño ("bg-ink" + "text-mist"), al revés que el resto del contenido
+ * ("text-ink" sobre "bg-mist"). Para no romperlo, se revierten los tokens
+ * --color-ink/--color-mist solo dentro de esa rama del árbol (ver bloque
+ * "Excepción sidebar" más abajo).
+ * ========================================================================= */
+:root[data-theme="dark"],
+html[data-theme="dark"] {
+  color-scheme: dark;
+
+  /* --- Paleta Tailwind (@theme de @ruum/ui) adaptada a Dark Mode v1.0 --- */
+  --color-ink: #F6F8FB;
+  --color-ink-soft: #A8B5CC;
+  --color-steel: #A8B5CC;
+  --color-mist: #0A2342;
+  --color-mist-dim: #061529;
+  --color-signal: #00D1D1;
+  --color-signal-soft: #0F2D52;
+  --color-route: #4D94FF;
+  --color-route-dark: #6BA8FF;
+  --color-route-soft: #0F2D52;
+  --color-control: #4DD9A3;
+  --color-control-soft: #0A2E1F;
+  --color-warn: #FFC933;
+  --color-warn-soft: #3D2E00;
+  --color-danger: #FF6B7A;
+  --color-danger-soft: #3D0F1A;
+
+  /* --- Tokens semánticos Dark Mode v1.0 --- */
+  --ruum-background-main: #061529;
+  --ruum-surface-primary: #0A2342;
+  --ruum-surface-secondary: #061529;
+  --ruum-border-default: #1A3A5C;
+  --ruum-text-main: #F6F8FB;
+  --ruum-status-success: #4DD9A3;
+  --ruum-status-success-soft: #0A2E1F;
+  --ruum-status-warning: #FFC933;
+  --ruum-status-warning-soft: #3D2E00;
+  --ruum-status-error: #FF6B7A;
+  --ruum-status-error-soft: #3D0F1A;
+  --ruum-status-info: #4D94FF;
+  --ruum-status-info-soft: #0F2D52;
+  --ruum-focus-default: #4D94FF;
+  --ruum-canvas: #061529;
+  --ruum-surface: #0A2342;
+  --ruum-surface-subtle: #0F2D52;
+  --ruum-surface-elevated: #0F2D52;
+  --ruum-surface-strong: #0A2342;
+  --ruum-border: #1A3A5C;
+  --ruum-border-strong: #2D4F73;
+  --ruum-text-primary: #F6F8FB;
+  --ruum-text: #F6F8FB;
+  --ruum-text-secondary: #A8B5CC;
+  --ruum-text-tertiary: #A8B5CC;
+  --ruum-text-disabled: #6B7A99;
+  --ruum-muted: #A8B5CC;
+  --ruum-focus: #4D94FF;
+  --ruum-focus-ring: rgba(77, 148, 255, 0.35);
+  --ruum-shadow-1: 0 2px 10px rgba(0, 0, 0, 0.3);
+  --ruum-shadow-2: 0 8px 24px rgba(0, 0, 0, 0.4);
+  --ruum-shadow-3: 0 8px 24px rgba(0, 0, 0, 0.4);
+  --ruum-shadow-4: 0 16px 36px rgba(0, 0, 0, 0.45);
+  --ruum-admin-text-operativo: 14px;
+  --ruum-admin-text-secundario: 12px;
+  --ruum-admin-text-compacto: 12px;
+  --ruum-admin-text-boton: 13px;
+  --ruum-admin-text-tabla: 14px;
+  --ruum-admin-touch-target: 44px;
+}
+
+/* Lienzo Dark Mode v1.0 */
+body {
+  background:
+    radial-gradient(circle at 12% 0%, rgba(77, 148, 255, 0.08), transparent 42%),
+    radial-gradient(circle at 95% 100%, rgba(0, 209, 209, 0.05), transparent 38%),
+    var(--ruum-canvas);
+  background-attachment: fixed;
+}
+
+::selection {
+  background: var(--color-signal);
+  color: #061529;
+}
+
+html {
+  scroll-padding-top: 96px;
+}
+
+:where(a[href], button, input, select, textarea, summary, [tabindex]:not([tabindex="-1"]), [role="button"]):focus-visible {
+  outline: 3px solid var(--ruum-focus-default);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 5px var(--ruum-focus-ring);
+}
+
+:where(a[href], button, input, select, textarea, summary, [tabindex]:not([tabindex="-1"]), [role="button"]) {
+  scroll-margin-top: 96px;
+}
+
+body :where(button, [role="button"], input:not([type="checkbox"]):not([type="radio"]):not([type="file"]), select, textarea) {
+  min-width: var(--ruum-admin-touch-target);
+  min-height: var(--ruum-admin-touch-target);
+}
+
+body :where(a.inline-flex, a.inline-block, a.block, a.flex, a[class*="rounded"]) {
+  min-height: var(--ruum-admin-touch-target);
+}
+
+body :where(button, a[href], [role="button"]) svg {
+  flex-shrink: 0;
+}
+
+.admin-table-card tbody tr:focus-within {
+  background: color-mix(in srgb, var(--ruum-focus-default) 12%, transparent);
+  outline: 2px solid var(--ruum-focus-default);
+  outline-offset: -2px;
+}
+
+.mapboxgl-ctrl button,
+.mapboxgl-marker button {
+  min-width: var(--ruum-admin-touch-target);
+  min-height: var(--ruum-admin-touch-target);
+}
+
+.mapboxgl-marker button:focus-visible {
+  transform: scale(1.28);
+}
+
+.admin-content {
+  min-height: 100vh;
+  background: var(--ruum-canvas);
+}
+
+.admin-page-shell {
+  width: min(100% - 32px, 1120px);
+  margin-inline: auto;
+  padding-block: 32px 40px;
+}
+
+.admin-page-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.admin-hero {
+  position: relative;
+  overflow: hidden;
+  min-height: 220px;
+  border: 1px solid var(--ruum-border);
+  border-radius: var(--ruum-radius-card);
+  background: var(--ruum-surface-strong);
+  box-shadow: var(--ruum-shadow-3);
+}
+
+.admin-hero__overlay {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(100deg, rgba(7, 11, 20, 0.96) 0%, rgba(7, 11, 20, 0.82) 48%, rgba(7, 11, 20, 0.38) 100%),
+    linear-gradient(180deg, rgba(7, 11, 20, 0) 58%, rgba(7, 11, 20, 0.72) 100%);
+}
+
+.admin-hero__content {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 28px;
+}
+
+.admin-hero__footer {
+  position: relative;
+  border-top: 1px solid rgba(232, 237, 246, 0.12);
+  background: rgba(7, 11, 20, 0.48);
+  padding: 16px 28px 22px;
+}
+
+.admin-panel {
+  border: 1px solid var(--ruum-border);
+  border-radius: var(--ruum-radius-card);
+  background: rgba(16, 26, 44, 0.78);
+  box-shadow: var(--ruum-shadow-1);
+}
+
+.admin-table-card {
+  overflow: hidden;
+}
+
+.admin-table-card table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+}
+
+.admin-table-card thead {
+  background: rgba(232, 237, 246, 0.035);
+}
+
+.admin-table-card th {
+  padding: 12px 16px;
+  border-bottom: 1px solid rgba(232, 237, 246, 0.12);
+  text-align: left;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0;
+  text-transform: uppercase;
+  color: rgba(232, 237, 246, 0.48);
+}
+
+.admin-table-card td {
+  padding: 13px 16px;
+  border-bottom: 1px solid rgba(232, 237, 246, 0.07);
+}
+
+.admin-table-card tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.admin-table-card tbody tr:hover {
+  background: rgba(232, 237, 246, 0.035);
+}
+
+.admin-mobile-card-list {
+  display: none;
+}
+
+@media (max-width: 640px) {
+  body {
+    overflow-x: hidden;
+  }
+
+  .admin-content {
+    max-width: 100vw;
+    overflow-x: hidden;
+  }
+
+  .admin-page-shell {
+    width: min(100% - 24px, 1120px);
+    padding-block: 20px 32px;
+  }
+
+  .admin-page-header {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .admin-page-header > div:last-child {
+    justify-content: stretch;
+  }
+
+  .admin-page-header > div:last-child :where(a, button) {
+    flex: 1 1 100%;
+  }
+
+  .admin-hero {
+    min-height: auto;
+  }
+
+  .admin-hero__content {
+    flex-direction: column;
+    padding: 20px;
+  }
+
+  .admin-table-card table,
+  .admin-responsive-table table {
+    display: block;
+    min-width: 0 !important;
+  }
+
+  .admin-table-card thead,
+  .admin-responsive-table thead {
+    display: none;
+  }
+
+  .admin-table-card tbody,
+  .admin-table-card tr,
+  .admin-table-card td,
+  .admin-responsive-table tbody,
+  .admin-responsive-table tr,
+  .admin-responsive-table td {
+    display: block;
+    width: 100%;
+  }
+
+  .admin-table-card tr,
+  .admin-responsive-table tr {
+    margin: 12px;
+    overflow: hidden;
+    border: 1px solid var(--ruum-border);
+    border-radius: var(--ruum-radius-card);
+    background: var(--ruum-surface-primary);
+  }
+
+  .admin-table-card td,
+  .admin-responsive-table td {
+    display: grid;
+    grid-template-columns: minmax(96px, 0.45fr) minmax(0, 1fr);
+    gap: 12px;
+    padding: 10px 12px;
+    border-bottom: 1px solid rgba(232, 237, 246, 0.08);
+    word-break: break-word;
+  }
+
+  .admin-table-card td::before,
+  .admin-responsive-table td::before {
+    content: attr(data-label);
+    font-size: var(--ruum-admin-text-secundario);
+    font-weight: 700;
+    color: var(--ruum-text-tertiary);
+    text-transform: uppercase;
+  }
+
+  .admin-table-card td:last-child,
+  .admin-responsive-table td:last-child {
+    border-bottom: 0;
+  }
+
+  .admin-mobile-card-list {
+    display: grid;
+  }
+
+  .admin-desktop-table {
+    display: none;
+  }
+
+  .admin-modal-backdrop {
+    align-items: stretch;
+    justify-content: stretch;
+  }
+
+  .admin-modal-backdrop :where(section[role="dialog"], aside[role="dialog"]) {
+    width: 100%;
+    max-width: none;
+    min-height: 100dvh;
+    border-radius: 0;
+  }
+}
+
+.admin-auth-shell {
+  min-height: 100vh;
+  background:
+    linear-gradient(180deg, rgba(7, 11, 20, 0.82) 0%, rgba(7, 11, 20, 0.95) 62%, #070b14 100%),
+    radial-gradient(circle at 84% 12%, rgba(245, 166, 35, 0.14), transparent 30%),
+    url("/imagenes/torre-control-flota.webp") center / cover no-repeat,
+    var(--ruum-surface-strong);
+}
+
+.admin-auth-card {
+  width: min(100% - 32px, 448px);
+  border: 1px solid rgba(214, 218, 227, 0.18);
+  border-radius: var(--ruum-radius-modal);
+  background: rgba(13, 22, 38, 0.88);
+  color: var(--ruum-text);
+  box-shadow: var(--ruum-shadow-4);
+  backdrop-filter: blur(6px);
+}
+
+.admin-modal-backdrop {
+  background: color-mix(in srgb, var(--ruum-surface-strong) 80%, transparent);
+}
+
+.admin-hero-token-overlay {
+  background: linear-gradient(
+    100deg,
+    color-mix(in srgb, var(--ruum-background-main) 97%, transparent) 0%,
+    color-mix(in srgb, var(--ruum-background-main) 84%, transparent) 52%,
+    color-mix(in srgb, var(--ruum-background-main) 42%, transparent) 100%
+  );
+}
+
+/* --- Correcciones de contraste para pares fondo+texto invertidos ---
+ * Al aclarar --color-ink y oscurecer --color-mist, los componentes que
+ * combinan superficie de color con text-ink/text-mist necesitan texto
+ * fijo: dorado, azul y verde piden texto oscuro; rojo y warn piden lo
+ * mismo por ser tonos claros en esta paleta neón. */
+.bg-signal { color: var(--ruum-surface-strong); }
+.bg-route-dark { color: var(--ruum-surface-strong); }
+.bg-control { color: var(--ruum-surface-strong); }
+.bg-danger { color: var(--ruum-surface-strong); }
+.bg-warn { color: var(--ruum-surface-strong); }
+/* Folio del PassportCard (componente compartido): se posiciona sobre el listón dorado. */
+.rounded-card > span.font-mono-ruum.absolute { color: var(--ruum-surface-strong); }
+
+/* --- Excepción sidebar ---
+ * BarraLateral.tsx ya usaba bg-ink (fondo oscuro) + text-mist (texto claro)
+ * antes de este tema — el par correcto para una barra de navegación oscura.
+ * Como el resto del panel invierte esos mismos tokens, se revierten aquí
+ * solo dentro de esa rama para que el sidebar no cambie de apariencia. */
+aside.bg-ink {
+  --color-ink: #1a1f2e;
+  --color-mist: #ffffff;
+}
+
+/* La información tabular conserva su estructura y gana desplazamiento
+ * horizontal en tablet (641–767px). En móvil ≤640px rige la vista de tarjetas
+ * definida arriba y no el scroll horizontal. */
+@media (min-width: 641px) and (max-width: 767px) {
+  .admin-page-shell {
+    width: min(100% - 24px, 1120px);
+    padding-block: 24px 32px;
+  }
+
+  .admin-page-header,
+  .admin-hero__content {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .admin-hero__content {
+    padding: 22px;
+  }
+
+  .admin-hero__footer {
+    padding: 14px 22px 20px;
+  }
+
+  .admin-content .overflow-hidden:has(table) {
+    overflow-x: auto;
+  }
+
+  .admin-content table {
+    min-width: 640px;
+  }
+}
+
+/* Skip link de accesibilidad — oculto hasta recibir foco de teclado */
+.ruum-skip-link {
+  position: absolute;
+  top: -100%;
+  left: 1rem;
+  z-index: 9999;
+  padding: 8px 16px;
+  background: var(--ruum-text-main);
+  color: var(--ruum-surface-primary);
+  border: 2px solid var(--ruum-status-info);
+  border-radius: 8px;
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 500;
+  text-decoration: none;
+  transition: top 150ms ease;
+}
+
+.ruum-skip-link:focus {
+  top: 1rem;
+}
+
+/* Clase de accesibilidad — oculta visualmente, visible para lectores de pantalla */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+/*
+ * NOMENCLATURA DE TOKENS — panel-admin Torre de Control
+ *
+ * Tokens semánticos de @ruum/ui (no redefinir aquí, ya van en :root arriba):
+ *   --ruum-canvas, --ruum-surface, --ruum-surface-subtle, --ruum-surface-strong
+ *   --ruum-text, --ruum-text-secondary, --ruum-text-tertiary
+ *   --ruum-shadow-{1-4}, --ruum-radius-{field,card,modal}
+ *   --ruum-action (color signal/amber)
+ *
+ * Clases Tailwind extendidas por @ruum/ui (bg-mist, rounded-card, etc.):
+ *   bg-mist (31 usos), text-route-dark (13), bg-signal (10), rounded-card (3)
+ *   bg-danger-soft, bg-signal-soft, text-control, text-danger, text-warn
+ *
+ * Clases locales definidas en este archivo:
+ *   .admin-content, .admin-auth-shell, .admin-auth-card
+ *   .ruum-skip-link, .sr-only
+ *
+ * ruum-container: viene de @ruum/ui — width: min(100%-32px, 1200px)
+ */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}
+
+input,
+select,
+textarea {
+  color-scheme: dark;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: var(--ruum-text-tertiary);
+}
+
+/* =========================================================================
+ * Ruum Ruum V2 — panel-admin, aislado al entry point administrativo.
+ * Los componentes existentes consumen estos aliases; no se duplica el UI kit.
+ * ========================================================================= */
+html[data-theme="light"] {
+  color-scheme: light;
+
+  --admin-v2-primary: #0D2B5E;
+  --admin-v2-brand: #00C2B8;
+  --admin-v2-action: #1677FF;
+  --admin-v2-surface: #FFFFFF;
+  --admin-v2-surface-secondary: #F6F8FB;
+  --admin-v2-border: #E6F0FF;
+  --admin-v2-muted: #5F7192;
+  --admin-v2-success: #13B89B;
+  --admin-v2-warning: #F5B400;
+  --admin-v2-warning-text: #8A6200;
+  --admin-v2-danger: #D94B5B;
+  --admin-v2-gradient-action: linear-gradient(90deg, #00C2B8 0%, #1677FF 100%);
+
+  --color-ink: var(--admin-v2-primary);
+  --color-ink-soft: #244472;
+  --color-asphalt: var(--admin-v2-primary);
+  --color-steel: var(--admin-v2-muted);
+  --color-mist: var(--admin-v2-surface);
+  --color-mist-dim: var(--admin-v2-surface-secondary);
+  --color-signal: var(--admin-v2-brand);
+  --color-signal-soft: #E4FAF8;
+  --color-route: var(--admin-v2-action);
+  --color-route-dark: var(--admin-v2-primary);
+  --color-route-soft: #E9F2FF;
+  --color-control: var(--admin-v2-success);
+  --color-control-soft: #E5FAF5;
+  --color-warn: var(--admin-v2-warning-text);
+  --color-warn-soft: #FFF7DB;
+  --color-danger: var(--admin-v2-danger);
+  --color-danger-soft: #FDECEF;
+
+  --ruum-background-main: var(--admin-v2-surface-secondary);
+  --ruum-surface-primary: var(--admin-v2-surface);
+  --ruum-surface-secondary: var(--admin-v2-surface-secondary);
+  --ruum-border-default: var(--admin-v2-border);
+  --ruum-text-main: var(--admin-v2-primary);
+  --ruum-text-primary: var(--admin-v2-primary);
+  --ruum-text: var(--admin-v2-primary);
+  --ruum-text-secondary: var(--admin-v2-muted);
+  --ruum-text-tertiary: var(--admin-v2-muted);
+  --ruum-text-disabled: #9AA8BD;
+  --ruum-status-success: var(--admin-v2-success);
+  --ruum-status-success-soft: #E5FAF5;
+  --ruum-status-warning: var(--admin-v2-warning-text);
+  --ruum-status-warning-soft: #FFF7DB;
+  --ruum-status-error: var(--admin-v2-danger);
+  --ruum-status-error-soft: #FDECEF;
+  --ruum-status-info: var(--admin-v2-action);
+  --ruum-status-info-soft: #E9F2FF;
+  --ruum-focus-default: var(--admin-v2-action);
+  --ruum-focus: var(--admin-v2-action);
+  --ruum-focus-ring: rgba(22, 119, 255, 0.24);
+  --ruum-surface: var(--admin-v2-surface);
+  --ruum-surface-subtle: var(--admin-v2-surface-secondary);
+  --ruum-surface-elevated: #EEF5FF;
+  --ruum-surface-strong: var(--admin-v2-primary);
+  --ruum-border: var(--admin-v2-border);
+  --ruum-border-strong: #B8D1F4;
+  --ruum-action-primary: #0E5CAB;
+  --ruum-action-primary-hover: #0A4F9C;
+  --ruum-action-primary-active: #083E7E;
+  --ruum-on-primary: #FFFFFF;
+  --ruum-gradient-action: linear-gradient(90deg, #00C2B8 0%, #0E5CAB 100%);
+  --ruum-on-danger: #FFFFFF;
+  --ruum-route: var(--admin-v2-action);
+  --ruum-route-contrast: #0E5CAB;
+  --ruum-route-hover: #1267DD;
+  --ruum-route-active: #0E5CAB;
+  --ruum-success: var(--admin-v2-success);
+  --ruum-warning: var(--admin-v2-warning-text);
+  --ruum-danger: var(--admin-v2-danger);
+  --ruum-danger-hover: #B83D4B;
+  --ruum-danger-active: #9E3340;
+  --ruum-action: var(--admin-v2-brand);
+  --ruum-action-hover: #00A89F;
+  --ruum-overlay: rgba(13, 43, 94, 0.24);
+  --ruum-shadow-1: 0 1px 3px rgba(13, 43, 94, 0.08);
+  --ruum-shadow-2: 0 8px 24px rgba(13, 43, 94, 0.10);
+  --ruum-shadow-3: 0 16px 40px rgba(13, 43, 94, 0.14);
+  --ruum-shadow-4: 0 24px 64px rgba(13, 43, 94, 0.18);
+  --ruum-radius-field: 12px;
+  --ruum-radius-card: 16px;
+  --ruum-radius-modal: 16px;
+  --radius-card: 1rem;
+  --ruum-admin-text-operativo: 14px;
+  --ruum-admin-text-secundario: 12px;
+  --ruum-admin-text-compacto: 11px;
+  --ruum-admin-text-boton: 13px;
+  --ruum-admin-text-tabla: 13px;
+  --ruum-admin-touch-target: 44px;
+
+  /* El plan V2 especifica Inter para display, cuerpo y tablas. */
+  --font-display: var(--font-body-loaded), "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-body: var(--font-body-loaded), "Inter", ui-sans-serif, system-ui, sans-serif;
+}
+
+html[data-theme="dark"] {
+  color-scheme: dark;
+
+  --admin-v2-primary: #F5F9FF;
+  --admin-v2-brand: #22D3C5;
+  --admin-v2-action: #4D9AFF;
+  --admin-v2-surface: #0D2340;
+  --admin-v2-surface-secondary: #08182E;
+  --admin-v2-border: #254565;
+  --admin-v2-muted: #A9BCD3;
+  --admin-v2-success: #22C7A8;
+  --admin-v2-warning: #F6C547;
+  --admin-v2-warning-text: #FFD873;
+  --admin-v2-danger: #F06A78;
+  --admin-v2-gradient-action: linear-gradient(90deg, #22D3C5 0%, #4D9AFF 100%);
+
+  --color-ink: var(--admin-v2-primary);
+  --color-ink-soft: #C7D5E7;
+  --color-asphalt: var(--admin-v2-primary);
+  --color-steel: var(--admin-v2-muted);
+  --color-mist: var(--admin-v2-surface);
+  --color-mist-dim: var(--admin-v2-surface-secondary);
+  --color-signal: var(--admin-v2-brand);
+  --color-signal-soft: rgba(34, 211, 197, 0.12);
+  --color-route: var(--admin-v2-action);
+  --color-route-dark: #D8E8FF;
+  --color-route-soft: rgba(77, 154, 255, 0.14);
+  --color-control: var(--admin-v2-success);
+  --color-control-soft: rgba(34, 199, 168, 0.14);
+  --color-warn: var(--admin-v2-warning);
+  --color-warn-soft: rgba(246, 197, 71, 0.14);
+  --color-danger: var(--admin-v2-danger);
+  --color-danger-soft: rgba(240, 106, 120, 0.14);
+
+  --ruum-background-main: var(--admin-v2-surface-secondary);
+  --ruum-surface-primary: var(--admin-v2-surface);
+  --ruum-surface-secondary: var(--admin-v2-surface-secondary);
+  --ruum-border-default: var(--admin-v2-border);
+  --ruum-text-main: var(--admin-v2-primary);
+  --ruum-text-primary: var(--admin-v2-primary);
+  --ruum-text: var(--admin-v2-primary);
+  --ruum-text-secondary: var(--admin-v2-muted);
+  --ruum-text-tertiary: var(--admin-v2-muted);
+  --ruum-text-disabled: #6F839B;
+  --ruum-status-success: var(--admin-v2-success);
+  --ruum-status-success-soft: rgba(34, 199, 168, 0.14);
+  --ruum-status-warning: var(--admin-v2-warning);
+  --ruum-status-warning-soft: rgba(246, 197, 71, 0.14);
+  --ruum-status-error: var(--admin-v2-danger);
+  --ruum-status-error-soft: rgba(240, 106, 120, 0.14);
+  --ruum-status-info: var(--admin-v2-action);
+  --ruum-status-info-soft: rgba(77, 154, 255, 0.14);
+  --ruum-focus-default: var(--admin-v2-action);
+  --ruum-focus: var(--admin-v2-action);
+  --ruum-focus-ring: rgba(77, 154, 255, 0.18);
+  --ruum-surface: var(--admin-v2-surface);
+  --ruum-surface-subtle: #102844;
+  --ruum-surface-elevated: #123052;
+  --ruum-surface-strong: var(--admin-v2-surface);
+  --ruum-border: var(--admin-v2-border);
+  --ruum-border-strong: #356083;
+  --ruum-action-primary: var(--admin-v2-action);
+  --ruum-action-primary-hover: #3A8AEF;
+  --ruum-action-primary-active: #2B7BDD;
+  --ruum-on-primary: #08182E;
+  --ruum-gradient-action: var(--admin-v2-gradient-action);
+  --ruum-on-danger: #FFFFFF;
+  --ruum-route: var(--admin-v2-action);
+  --ruum-route-contrast: #D8E8FF;
+  --ruum-route-hover: #3A8AEF;
+  --ruum-route-active: #2B7BDD;
+  --ruum-success: var(--admin-v2-success);
+  --ruum-warning: var(--admin-v2-warning-text);
+  --ruum-danger: var(--admin-v2-danger);
+  --ruum-danger-hover: #D95362;
+  --ruum-danger-active: #BF3F4D;
+  --ruum-action: var(--admin-v2-brand);
+  --ruum-action-hover: #129E93;
+  --ruum-overlay: rgba(8, 24, 46, 0.82);
+  --ruum-shadow-1: 0 1px 2px rgba(0, 0, 0, 0.18);
+  --ruum-shadow-2: 0 4px 12px rgba(0, 0, 0, 0.22);
+  --ruum-shadow-3: 0 8px 24px rgba(0, 0, 0, 0.28);
+  --ruum-shadow-4: 0 16px 36px rgba(0, 0, 0, 0.36);
+  --ruum-radius-field: 12px;
+  --ruum-radius-card: 16px;
+  --ruum-radius-modal: 16px;
+  --radius-card: 1rem;
+  --ruum-admin-text-operativo: 14px;
+  --ruum-admin-text-secundario: 12px;
+  --ruum-admin-text-compacto: 11px;
+  --ruum-admin-text-boton: 13px;
+  --ruum-admin-text-tabla: 13px;
+  --ruum-admin-touch-target: 44px;
+
+  --font-display: var(--font-body-loaded), "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-body: var(--font-body-loaded), "Inter", ui-sans-serif, system-ui, sans-serif;
+}
+
+html[data-theme="light"] body {
+  background:
+    radial-gradient(circle at 8% 0%, rgba(0, 194, 184, 0.06), transparent 34%),
+    radial-gradient(circle at 100% 100%, rgba(22, 119, 255, 0.05), transparent 36%),
+    var(--admin-v2-surface-secondary);
+  color: var(--admin-v2-primary);
+}
+
+html[data-theme="light"] :where(input, select, textarea) {
+  color-scheme: light;
+}
+
+.admin-v2-shell .admin-content {
+  background: var(--admin-v2-surface-secondary);
+}
+
+.admin-v2-shell .admin-page-shell {
+  width: min(100% - 48px, 1440px);
+  padding-block: 28px 48px;
+}
+
+.admin-topbar {
+  display: flex;
+  min-height: 64px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  border-bottom: 1px solid var(--admin-v2-border);
+  background: color-mix(in srgb, var(--admin-v2-surface) 92%, transparent);
+  padding: 0 32px;
+  box-shadow: 0 1px 0 rgba(13, 43, 94, 0.02);
+  backdrop-filter: blur(12px);
+}
+
+.admin-topbar__context,
+.admin-topbar__actions {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 12px;
+}
+
+.admin-topbar__logo {
+  display: inline-flex;
+  min-width: 0;
+  align-items: center;
+  flex-shrink: 0;
+  border-radius: 10px;
+}
+
+.admin-topbar__brand,
+.admin-topbar__module,
+.admin-topbar__link {
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.admin-topbar__brand {
+  color: var(--admin-v2-muted);
+}
+
+.admin-topbar__separator {
+  color: var(--admin-v2-border-strong);
+}
+
+.admin-topbar__module {
+  overflow: hidden;
+  color: var(--admin-v2-primary);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.admin-topbar__link {
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
+  border-radius: 10px;
+  color: var(--admin-v2-muted);
+  padding: 8px 12px;
+  transition: background-color 160ms ease, color 160ms ease;
+}
+
+.admin-topbar__link:hover {
+  background: var(--color-route-soft);
+  color: var(--admin-v2-action);
+}
+
+.admin-v2-shell aside.bg-ink {
+  background: var(--admin-v2-primary);
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
+  --color-ink: var(--admin-v2-primary);
+  --color-mist: #FFFFFF;
+  --ruum-text-secondary: #D7E3F4;
+  --ruum-text-tertiary: #AFC1DD;
+  --color-text-secondary: #D7E3F4;
+  --color-text-tertiary: #AFC1DD;
+  --color-border-default: rgba(255, 255, 255, 0.16);
+}
+
+.admin-v2-shell aside.bg-ink a[aria-current="page"] {
+  background: var(--admin-v2-brand);
+  color: var(--admin-v2-primary);
+}
+
+.admin-v2-shell .admin-page-header {
+  align-items: flex-start;
+}
+
+.admin-v2-shell .admin-panel,
+.admin-v2-shell .admin-table-card {
+  border: 1px solid var(--admin-v2-border);
+  border-radius: var(--ruum-radius-card);
+  background: var(--admin-v2-surface);
+  box-shadow: var(--ruum-shadow-1);
+  color: var(--admin-v2-primary);
+}
+
+.admin-v2-shell .admin-table-card {
+  overflow: hidden;
+}
+
+.admin-v2-shell .admin-table-card thead {
+  background: var(--admin-v2-surface-secondary);
+}
+
+.admin-v2-shell .admin-table-card th {
+  border-bottom-color: var(--admin-v2-border);
+  color: var(--admin-v2-muted);
+  font-size: 0.8125rem;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.admin-v2-shell .admin-table-card td {
+  border-bottom-color: var(--admin-v2-border);
+  color: var(--admin-v2-primary);
+}
+
+.admin-v2-shell .admin-table-card tbody tr:hover {
+  background: color-mix(in srgb, var(--admin-v2-surface-secondary) 72%, var(--admin-v2-surface));
+}
+
+.admin-v2-shell .admin-table-card tbody tr:focus-within {
+  background: var(--color-route-soft);
+  outline-color: var(--admin-v2-action);
+}
+
+.admin-v2-shell .admin-button {
+  min-height: 44px;
+  border-radius: 10px;
+  transition: background-color 160ms ease, border-color 160ms ease, box-shadow 160ms ease, color 160ms ease;
+}
+
+.admin-v2-shell .admin-button-primary {
+  border-color: transparent;
+  background: var(--admin-v2-gradient-action);
+  color: var(--ruum-on-primary);
+  box-shadow: 0 5px 14px rgba(22, 119, 255, 0.18);
+}
+
+.admin-v2-shell .admin-button-primary:hover:not(:disabled) {
+  box-shadow: 0 8px 18px rgba(22, 119, 255, 0.24);
+  filter: saturate(1.05) brightness(0.96);
+}
+
+.admin-v2-shell .admin-button-secondary {
+  border-color: var(--admin-v2-border);
+  background: var(--admin-v2-surface);
+  color: var(--admin-v2-primary);
+}
+
+.admin-v2-shell .admin-button-secondary:hover:not(:disabled),
+.admin-v2-shell .admin-button-quiet:hover:not(:disabled) {
+  border-color: var(--admin-v2-border-strong);
+  background: var(--color-route-soft);
+  color: var(--admin-v2-action);
+}
+
+.admin-v2-shell .admin-button-quiet {
+  color: var(--admin-v2-muted);
+}
+
+.admin-v2-shell .admin-button-danger {
+  border-color: color-mix(in srgb, var(--admin-v2-danger) 28%, transparent);
+  background: var(--color-danger-soft);
+  color: var(--admin-v2-danger);
+}
+
+.admin-v2-shell .admin-button-danger:hover:not(:disabled) {
+  background: var(--admin-v2-danger);
+  color: #FFFFFF;
+}
+
+.admin-v2-shell .admin-content :where(a, button).bg-signal {
+  border-color: transparent;
+  background: var(--admin-v2-gradient-action);
+  color: #FFFFFF;
+}
+
+.admin-v2-shell .admin-content :where(a, button).bg-signal:hover {
+  filter: saturate(1.05) brightness(0.96);
+}
+
+.admin-v2-shell :where(input, select, textarea) {
+  border-color: var(--admin-v2-border);
+  background: var(--admin-v2-surface);
+  color: var(--admin-v2-primary);
+}
+
+.admin-v2-shell :where(input, select, textarea):focus {
+  border-color: var(--admin-v2-action);
+  box-shadow: 0 0 0 3px rgba(22, 119, 255, 0.16);
+}
+
+.admin-v2-shell .admin-hero {
+  border-color: var(--admin-v2-border);
+  background: var(--admin-v2-surface);
+  box-shadow: var(--ruum-shadow-2);
+}
+
+.admin-v2-shell .admin-hero__overlay {
+  background: linear-gradient(100deg, rgba(255, 255, 255, 0.96) 0%, rgba(246, 248, 251, 0.82) 52%, rgba(255, 255, 255, 0.38) 100%);
+}
+
+.admin-v2-shell .admin-hero__footer {
+  border-top-color: var(--admin-v2-border);
+  background: rgba(255, 255, 255, 0.82);
+}
+
+.admin-v2-shell .admin-auth-shell {
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--admin-v2-surface-secondary) 82%, transparent) 0%, color-mix(in srgb, var(--admin-v2-surface) 94%, transparent) 100%),
+    url("/imagenes/torre-control-flota.webp") center / cover no-repeat,
+    var(--admin-v2-surface-secondary);
+  color: var(--admin-v2-primary);
+}
+
+.admin-v2-shell .admin-auth-card {
+  border-color: var(--admin-v2-border);
+  background: color-mix(in srgb, var(--admin-v2-surface) 96%, transparent);
+  color: var(--admin-v2-primary);
+  box-shadow: var(--ruum-shadow-3);
+}
+
+.admin-theme-toggle {
+  display: inline-flex;
+  min-height: 44px;
+  min-width: 44px;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: 1px solid var(--admin-v2-border);
+  border-radius: 10px;
+  background: var(--admin-v2-surface);
+  color: var(--admin-v2-primary);
+  padding: 8px 12px;
+  font-family: var(--font-body);
+  font-size: var(--ruum-admin-text-boton);
+  font-weight: 700;
+  transition: background-color 160ms ease, border-color 160ms ease, color 160ms ease;
+}
+
+/* Piloto visual: dashboard administrativo con lenguaje vial/documental. */
+.admin-road-pilot {
+  --admin-v2-primary: #101012;
+  --admin-v2-brand: #ff4713;
+  --admin-v2-action: #ff4713;
+  --admin-v2-surface: #ffffff;
+  --admin-v2-surface-secondary: #f5f5f2;
+  --admin-v2-border: #dedee2;
+  --admin-v2-muted: #5a5a62;
+  --admin-v2-gradient-action: none;
+  --ruum-shadow-1: none;
+  --ruum-shadow-2: none;
+  --ruum-radius-card: 10px;
+  --radius-card: 10px;
+  --ruum-action: #ff4713;
+  --ruum-action-hover: #e93d0b;
+  --ruum-route: #101012;
+  --ruum-route-contrast: #101012;
+  --ruum-focus-default: #101012;
+  --ruum-focus: #101012;
+  --ruum-focus-ring: rgba(16, 16, 18, 0.16);
+  background: #ffffff;
+}
+
+.admin-road-pilot::before {
+  content: "CONTROL DE OPERACIÓN / CORTE EN VIVO";
+  display: block;
+  margin-bottom: 14px;
+  border-bottom: 2px solid #101012;
+  padding-bottom: 9px;
+  color: #5a5a62;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.13em;
+}
+
+.admin-road-pilot > section:first-of-type {
+  border-top: 0;
+  border-right-color: #dedee2;
+  border-bottom-color: #dedee2;
+  border-left-color: #dedee2;
+  border-radius: 10px;
+  box-shadow: none;
+}
+
+.admin-road-pilot > section:first-of-type h1 {
+  letter-spacing: -0.035em;
+}
+
+.admin-road-pilot :where(.rounded-card, .admin-panel, [class*="rounded-lg"]) {
+  box-shadow: none;
+}
+
+.admin-road-pilot nav[aria-label="Filtros rápidos del dashboard"] {
+  border-top: 2px solid #101012;
+  border-radius: 8px;
+  background: #ffffff;
+  backdrop-filter: none;
+}
+
+.admin-road-pilot nav[aria-label="Filtros rápidos del dashboard"] a {
+  border-radius: 4px;
+  background: #ffffff;
+}
+
+.admin-road-pilot :where(a, button).bg-signal {
+  border: 2px solid #101012;
+  border-radius: 8px;
+  background: #ff4713;
+  color: #101012;
+  box-shadow: none;
+}
+
+.admin-road-pilot :where(a, button).bg-signal:hover {
+  background: #e93d0b;
+  color: #101012;
+  filter: none;
+}
+
+.admin-road-pilot .font-mono-ruum.text-signal { color: #ff4713; }
+
+.admin-road-pilot [class*="rounded-full"] { border-radius: 4px; }
+
+.admin-road-pilot :where(a, button):focus-visible {
+  outline: 3px solid #101012;
+  outline-offset: 2px;
+}
+
+.admin-theme-toggle:hover {
+  border-color: var(--admin-v2-action);
+  background: var(--color-route-soft);
+  color: var(--admin-v2-action);
+}
+
+html[data-theme="dark"] .admin-v2-shell .admin-hero__overlay {
+  background: linear-gradient(100deg, rgba(8, 24, 46, 0.96) 0%, rgba(13, 35, 64, 0.84) 52%, rgba(13, 35, 64, 0.40) 100%);
+}
+
+html[data-theme="dark"] .admin-v2-shell .admin-hero__footer {
+  border-top-color: var(--admin-v2-border);
+  background: color-mix(in srgb, var(--admin-v2-surface) 86%, transparent);
+}
+
+@media (max-width: 1023.98px) {
+  .admin-topbar {
+    display: none;
+  }
+}
+
+@media (max-width: 767px) {
+  .admin-v2-shell .admin-page-shell {
+    width: min(100% - 24px, 1440px);
+    padding-block: 20px 32px;
+  }
+}

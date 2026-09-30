@@ -1,0 +1,37 @@
+#!/usr/bin/env node
+// Prepara hooks husky sin depender de binario husky instalado
+import { mkdirSync, copyFileSync, chmodSync, existsSync, writeFileSync } from "node:fs";
+import { join } from "node:path";
+
+const root = process.cwd();
+const huskyDir = join(root, ".husky");
+const gitHooksDir = join(root, ".git", "hooks");
+
+mkdirSync(huskyDir, { recursive: true });
+mkdirSync(join(huskyDir, "_"), { recursive: true });
+if (!existsSync(join(huskyDir, "_", "husky.sh"))) {
+  writeFileSync(join(huskyDir, "_", "husky.sh"), `#!/usr/bin/env sh\nif [ -f "$(dirname "$0")/../../node_modules/husky/lib/husky.sh" ]; then\n  . "$(dirname "$0")/../../node_modules/husky/lib/husky.sh"\nfi\n`);
+}
+
+const preCommitSrc = join(huskyDir, "pre-commit");
+const preCommitDest = join(gitHooksDir, "pre-commit");
+const commitMsgSrc = join(huskyDir, "commit-msg");
+const commitMsgDest = join(gitHooksDir, "commit-msg");
+if (!existsSync(preCommitSrc) || !existsSync(join(root, ".git"))) {
+  console.log("ℹ️ Se omite la instalación de Husky fuera de un repositorio Git.");
+  process.exit(0);
+}
+mkdirSync(gitHooksDir, { recursive: true });
+try {
+  copyFileSync(preCommitSrc, preCommitDest);
+  chmodSync(preCommitDest, 0o755);
+  console.log("✅ Husky hook instalado en .git/hooks/pre-commit");
+  if (existsSync(commitMsgSrc)) {
+    copyFileSync(commitMsgSrc, commitMsgDest);
+    chmodSync(commitMsgDest, 0o755);
+    console.log("✅ Husky hook instalado en .git/hooks/commit-msg");
+  }
+} catch (e) {
+  console.error("⚠️ No se pudo instalar hook:", e.message);
+  process.exit(1);
+}

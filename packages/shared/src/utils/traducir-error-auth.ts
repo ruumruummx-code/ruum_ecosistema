@@ -1,0 +1,65 @@
+/**
+ * DECISIÓN CONSCIENTE — Enumeración de correo (Baja severidad)
+ * Mensajes `email_exists` / `user_already_exists` revelan si un correo ya está
+ * registrado. Se mantiene INTENCIONALMENTE por UX: el conductor ve al instante
+ * "ya existe, inicia sesión o recupera" en lugar de un genérico ambiguo.
+ * Alternativa (mensaje genérico "si el correo existe recibirás instrucciones")
+ * oculta la enumeración pero empeora la conversión y soporte.
+ * Mitigaciones vigentes: rate-limit en Supabase Auth (over_request_rate_limit),
+ * sin exposición de datos adicionales. Si en el futuro se requiere endurecer,
+ * cambiar aquí a mensaje genérico y en `registro/page.tsx:crearCuentaParaContinuar`.
+ * Revisado: 2026-08-22 — se acepta el riesgo bajo.
+ */
+const MENSAJES_AUTH = {
+  email_exists: "Ya existe una cuenta con ese correo. Inicia sesión o recupera tu contraseña.",
+  user_already_exists: "Ya existe una cuenta con ese correo. Inicia sesión o recupera tu contraseña.",
+  invalid_credentials: "Correo o contraseña incorrectos.",
+  email_not_confirmed: "Confirma tu correo antes de iniciar sesión.",
+  user_not_found: "No encontramos una cuenta con ese correo.",
+  signup_disabled: "El registro no está disponible en este momento.",
+  email_address_invalid: "El correo no tiene un formato válido.",
+  password_too_short: "La contraseña es demasiado corta.",
+  weak_password: "La contraseña no cumple los requisitos mínimos.",
+  same_password: "La nueva contraseña debe ser diferente de la anterior.",
+  otp_expired: "El enlace o código expiró. Solicita uno nuevo.",
+  over_email_send_rate_limit: "Espera unos minutos antes de volver a intentar.",
+  over_request_rate_limit: "Demasiados intentos. Espera unos minutos y vuelve a probar."
+} as const;
+
+type CodigoAuth = keyof typeof MENSAJES_AUTH;
+
+const FRAGMENTOS_AUTH: Array<[string, string]> = [
+  ["user already registered", MENSAJES_AUTH.user_already_exists],
+  ["already been registered", MENSAJES_AUTH.user_already_exists],
+  ["email already exists", MENSAJES_AUTH.email_exists],
+  ["invalid login credentials", MENSAJES_AUTH.invalid_credentials],
+  ["email not confirmed", MENSAJES_AUTH.email_not_confirmed],
+  ["user not found", MENSAJES_AUTH.user_not_found],
+  ["signup is disabled", MENSAJES_AUTH.signup_disabled],
+  ["invalid email", MENSAJES_AUTH.email_address_invalid],
+  ["password should be at least", MENSAJES_AUTH.password_too_short],
+  ["weak password", MENSAJES_AUTH.weak_password],
+  ["same password", MENSAJES_AUTH.same_password],
+  ["new password should be different", MENSAJES_AUTH.same_password],
+  ["otp expired", MENSAJES_AUTH.otp_expired],
+  ["token has expired", MENSAJES_AUTH.otp_expired],
+  ["rate limit", MENSAJES_AUTH.over_request_rate_limit],
+  ["conductor_duplicado:curp", "Este CURP ya está asociado a otra solicitud."],
+  ["conductor_duplicado:telefono", "Ya existe un registro con ese teléfono."],
+  ["conductor_duplicado:licencia", "Este número de licencia ya está asociado a otra solicitud."],
+  ["conductor_duplicado:auth", "Esta cuenta ya tiene un registro de conductor."],
+  ["solicitud_duplicada:activa", "Ya tienes una solicitud de conductor en proceso."]
+];
+
+export function traducirErrorAuth(error: unknown, respaldo = "No pudimos iniciar tu sesión.") {
+  if (!error || typeof error !== "object") return respaldo;
+
+  const posible = error as { code?: unknown; status?: unknown; message?: unknown };
+  const code = typeof posible.code === "string" ? posible.code : undefined;
+  if (code && code in MENSAJES_AUTH) return MENSAJES_AUTH[code as CodigoAuth];
+
+  const message = typeof posible.message === "string" ? posible.message : "";
+  const normalizado = message.toLowerCase();
+  const coincidencia = FRAGMENTOS_AUTH.find(([fragmento]) => normalizado.includes(fragmento));
+  return coincidencia?.[1] ?? respaldo;
+}

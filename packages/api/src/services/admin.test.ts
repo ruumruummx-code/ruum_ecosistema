@@ -1,0 +1,269 @@
+import { describe, expect, it, vi } from "vitest";
+import {
+  aplicarTarifaNormativaAdmin,
+  ajustarPrecioFinalAdmin,
+  crearEmpresaCorporativaAdmin,
+  crearTrasladosMasivosAdmin,
+  listarExcepcionesCriticasAdmin,
+  listarTrasladosAdmin,
+  obtenerTrazabilidadMasivaTraslado,
+  obtenerMetricasRegistroConductor,
+  cambiarEstatusAdmin,
+  asignarConductorAdmin,
+  actualizarVehiculoAdmin,
+  obtenerEvidenciaVehiculo
+} from "./admin";
+import { crearClienteFake } from "./__tests__/supabase-fake";
+
+describe("servicios admin", () => {
+  it("normaliza métricas de registro desde el RPC sin exponer eventos crudos", async () => {
+    const cliente = crearClienteFake({
+      rpcs: {
+        obtener_metricas_registro_conductor_v2: {
+          data: {
+            periodo: { desde: "2026-07-01", hasta: "2026-07-13" },
+            filtros: { zona: null, fuente: null, empresa_id: null },
+            metricas: {
+              solicitudes_iniciadas: 12,
+              solicitudes_enviadas: 9,
+              conversion_envio_pct: 75,
+              errores_otp: 3,
+              errores_rpc: "no-numero",
+              fallos_documentos: 4,
+              tiempo_promedio_registro_segundos: null,
+              tiempo_promedio_revision_segundos: 3600
+            },
+            comparacion: { periodo_anterior: { desde: "2026-06-18", hasta: "2026-06-30" }, metricas: { solicitudes_enviadas: 7 } },
+            abandono_por_paso: [{ paso: 2, total: 5 }, { paso: "x", total: null }],
+            documentos_rechazados_por_tipo: [{ tipo: "licencia_frente", total: 2 }],
+            detalle: [{ clave: "solicitudes_enviadas", nombre: "Solicitudes enviadas", valor: 9, formula: "count", consulta_referencia: "solicitudes_conductor", explicacion: "Enviadas", meta: 10, operador_meta: "min", alerta: true, severidad: "alta" }],
+            segmentos: { zona: [{ segmento: "CDMX", iniciadas: 12, enviadas: 9, conversion_envio_pct: 75, errores_otp: 3, errores_rpc: 0, fallos_documentos: 4 }], fuente: [], empresa: [] },
+            calidad_datos: { eventos_tardios: 1, eventos_duplicados: 2, nota: "calidad" },
+            alertas: [{ clave: "solicitudes_enviadas", nombre: "Solicitudes enviadas", valor: 9, meta: 10, severidad: "alta" }],
+            exportacion: { recurso: "metricas_registro_conductor", formato: "csv", requiere_permiso: "exportaciones:crear" }
+          }
+        }
+      }
+    });
+
+    const metricas = await obtenerMetricasRegistroConductor(cliente as never, "2026-07-01", "2026-07-13");
+
+    expect(metricas).toMatchObject({
+      periodo: { desde: "2026-07-01", hasta: "2026-07-13" },
+      abandonoPorPaso: [{ paso: 2, total: 5 }, { paso: 0, total: 0 }],
+      erroresOtp: 3,
+      erroresRpc: 0,
+      fallosDocumentos: 4,
+      tiempoPromedioRegistroSegundos: null,
+      tiempoPromedioRevisionSegundos: 3600,
+      documentosRechazadosPorTipo: [{ tipo: "licencia_frente", total: 2 }],
+      solicitudesIniciadas: 12,
+      solicitudesEnviadas: 9,
+      conversionEnvioPct: 75,
+      calidadDatos: { eventosTardios: 1, eventosDuplicados: 2, nota: "calidad" }
+    });
+    expect(metricas.detalle[0]).toMatchObject({ clave: "solicitudes_enviadas", alerta: true });
+    expect(metricas.segmentos.zona[0]).toMatchObject({ segmento: "CDMX", iniciadas: 12 });
+    expect(cliente.rpc).toHaveBeenCalledWith("obtener_metricas_registro_conductor_v2", {
+      p_desde: "2026-07-01",
+      p_hasta: "2026-07-13",
+      p_zona: null,
+      p_fuente: null,
+      p_empresa_id: null
+    });
+  });
+
+  it("lista Traslados sin filtro para todos y con eq para estados específicos", async () => {
+    const clienteTodos = crearClienteFake({
+      tablas: { pasaporte_digital: { data: [{ traslado_id: "t1" }] }, admins: { data: { id: "admin-1", rol_operativo: "direccion" } } },
+      rpcs: { admin_tiene_permiso: { data: true } }
+    });
+    await expect(listarTrasladosAdmin(clienteTodos as never, "todos")).resolves.toEqual([{ traslado_id: "t1" }]);
+  });
+
+  it("lanza error si el RPC del RPC falla en obtenerMetricasRegistroConductor", async () => {
+    const cliente = crearClienteFake({
+      rpcs: { obtener_metricas_registro_conductor_v2: { error: new Error("RPC caído") } }
+    });
+    await expect(obtenerMetricasRegistroConductor(cliente as never, "d", "h")).rejects.toThrow("RPC caído");
+  });
+
+  it("no lanza error si data es null en listarTrasladosAdmin", async () => {
+    const cliente = crearClienteFake({
+      tablas: { pasaporte_digital: { data: null }, admins: { data: { id: "a1" } } },
+      rpcs: { admin_tiene_permiso: { data: true } }
+    });
+    await expect(listarTrasladosAdmin(cliente as never, "todos")).resolves.toEqual([]);
+  });
+
+const ADMIN_BASE = { tablas: { admins: { data: { id: "admin-1", rol_operativo: "direccion" } } }, rpcs: { admin_tiene_permiso: { data: true } } };
+
+  it("ajustarPrecioFinalAdmin lanza error si precio no es válido", async () => {
+    const cliente = crearClienteFake(ADMIN_BASE);
+    await expect(ajustarPrecioFinalAdmin(cliente as never, "t1", -1, "ap1")).rejects.toThrow("válido");
+  });
+
+  it("crearEmpresaCorporativaAdmin lanza error si faltan campos obligatorios", async () => {
+    const cliente = crearClienteFake(ADMIN_BASE);
+    await expect(crearEmpresaCorporativaAdmin(cliente as never, { empresa: { nombre: "", rfc: "" }, titular: { nombre: "", correo_facturacion: "" } })).rejects.toThrow("Captura");
+  });
+
+  it("crearEmpresaCorporativaAdmin valida RFC y correo antes del RPC", async () => {
+    const cliente = crearClienteFake(ADMIN_BASE);
+    await expect(crearEmpresaCorporativaAdmin(cliente as never, {
+      empresa: { nombre: "Empresa", rfc: "RFC-MALO" },
+      titular: { nombre: "Titular", correo_facturacion: "correo-malo" }
+    })).rejects.toThrow("RFC mexicano");
+    expect(cliente.rpc).not.toHaveBeenCalledWith("admin_crea_empresa_corporativa", expect.anything());
+  });
+
+  it("crearEmpresaCorporativaAdmin traduce errores del alta corporativa", async () => {
+    const cliente = crearClienteFake({
+      ...ADMIN_BASE,
+      rpcs: {
+        admin_tiene_permiso: { data: true },
+        admin_crea_empresa_corporativa: { error: new Error("Ya existe una empresa con ese RFC") }
+      }
+    });
+    await expect(crearEmpresaCorporativaAdmin(cliente as never, {
+      empresa: { nombre: "Empresa", rfc: "XAXX010101000" },
+      titular: { nombre: "Titular", correo_facturacion: "titular@empresa.com" }
+    })).rejects.toThrow("Ya existe una empresa con ese RFC");
+  });
+
+  it("listarExcepcionesCriticasAdmin devuelve arreglo vacío si no hay datos", async () => {
+    const cliente = crearClienteFake({
+      ...ADMIN_BASE,
+      tablas: { ...ADMIN_BASE.tablas, excepciones_traslado: { data: null } }
+    });
+    await expect(listarExcepcionesCriticasAdmin(cliente as never)).resolves.toEqual([]);
+  });
+
+  it("obtenerTrazabilidadMasivaTraslado devuelve null si no hay fila", async () => {
+    const cliente = crearClienteFake({
+      ...ADMIN_BASE,
+      tablas: { ...ADMIN_BASE.tablas, filas_carga_traslados_masivos: { data: null } }
+    });
+    await expect(obtenerTrazabilidadMasivaTraslado(cliente as never, "t1")).resolves.toBeNull();
+  });
+
+  it("crearTrasladosMasivosAdmin lanza si el archivo está vacío", async () => {
+    const cliente = crearClienteFake(ADMIN_BASE);
+    await expect(crearTrasladosMasivosAdmin(cliente as never, {
+      empresaId: "e1",
+      usuarioId: "u1",
+      nombreArchivo: "x.csv",
+      hashArchivo: "a".repeat(64),
+      tamanoBytes: 128,
+      mimeType: "text/csv",
+      filas: []
+    })).rejects.toThrow("válidas");
+  });
+
+  it("cambiarEstatusAdmin lanza si transición inválida", async () => {
+    const cliente = crearClienteFake(ADMIN_BASE);
+    await expect(cambiarEstatusAdmin(cliente as never, "t1", "solicitud_creada", "servicio_cerrado")).rejects.toThrow("Transición no permitida");
+  });
+
+describe("asignarConductorAdmin — restricciones de elegibilidad (PRD §4.3)", () => {
+  it("lanza error si el estado del traslado no está en la cadena de asignación", async () => {
+    const cliente = crearClienteFake(ADMIN_BASE);
+    await expect(asignarConductorAdmin(cliente as never, "t1", "c1", "servicio_cerrado")).rejects.toThrow("asignación manual");
+    expect(cliente.rpc).not.toHaveBeenCalledWith("admin_asigna_conductor", expect.anything());
+  });
+
+  it("delega al RPC la elegibilidad transaccional y propaga su rechazo", async () => {
+    const cliente = crearClienteFake({
+      ...ADMIN_BASE,
+      rpcs: {
+        admin_tiene_permiso: { data: true },
+        admin_asigna_conductor: { error: new Error("Conductor no elegible: expediente no aprobado") }
+      }
+    });
+    await expect(asignarConductorAdmin(cliente as never, "t1", "c1", "pendiente_de_conductor")).rejects.toThrow("expediente no aprobado");
+    expect(cliente.rpc).toHaveBeenCalledWith("admin_asigna_conductor", {
+      p_traslado_id: "t1",
+      p_conductor_id: "c1"
+    });
+  });
+
+  it("asigna mediante el RPC cuando autorización y elegibilidad pasan", async () => {
+    const cliente = crearClienteFake({
+      ...ADMIN_BASE,
+      rpcs: {
+        admin_tiene_permiso: { data: true },
+        admin_asigna_conductor: { data: { ejecutado: true } }
+      }
+    });
+    await expect(asignarConductorAdmin(cliente as never, "t1", "c1", "pendiente_de_conductor")).resolves.toBeUndefined();
+    expect(cliente.rpc).toHaveBeenCalledWith("admin_asigna_conductor", {
+      p_traslado_id: "t1",
+      p_conductor_id: "c1"
+    });
+  });
+});
+
+describe("obtenerEvidenciaVehiculo — fotos desde Storage", () => {
+  it("devuelve arreglo vacío si no hay evidencia", async () => {
+    const cliente = crearClienteFake({
+      ...ADMIN_BASE,
+      rpcs: {
+        admin_tiene_permiso: { data: true },
+        admin_obtener_evidencia_vehiculo: { data: [] }
+      }
+    });
+    await expect(obtenerEvidenciaVehiculo(cliente as never, "v1")).resolves.toEqual([]);
+  });
+
+  it("devuelve evidencia con fotos cuando existe", async () => {
+    const cliente = crearClienteFake({
+      ...ADMIN_BASE,
+      rpcs: {
+        admin_tiene_permiso: { data: true },
+        admin_obtener_evidencia_vehiculo: {
+          data: [{
+            traslado_id: "t1",
+            traslado_estado: "pendiente_de_conductor",
+            fotos: [{ id: "f1", tipo: "inicial", angulo: "frente", url: "path/foto.jpg", capturada_en: new Date().toISOString(), sincronizada: true }]
+          }]
+        }
+      }
+    });
+    const resultado = await obtenerEvidenciaVehiculo(cliente as never, "v1");
+    expect(resultado).toHaveLength(1);
+    expect(resultado[0].traslado_id).toBe("t1");
+    expect(resultado[0].fotos).toHaveLength(1);
+  });
+});
+
+describe("actualizarVehiculoAdmin — concurrencia optimista y auditoría", () => {
+  it("lanza error de concurrencia si la versión no coincide", async () => {
+    const cliente = crearClienteFake({
+      ...ADMIN_BASE,
+      rpcs: {
+        admin_tiene_permiso: { data: true },
+        admin_actualizar_vehiculo: { error: new Error("CONCURRENCY_CONFLICT: el vehículo fue modificado por otro operador. Versión actual: 2, esperada: 1") }
+      }
+    });
+    await expect(actualizarVehiculoAdmin(cliente as never, "v1", { color: "Rojo" }, 1)).rejects.toThrow("Conflicto de concurrencia");
+  });
+
+  it("actualiza exitosamente cuando la versión coincide", async () => {
+    const vehiculoRow = { id: "v1", version: 2, color: "Rojo", marca: "Toyota", modelo: "Corolla", anio: 2020, tipo: "sedan", usuario_id: "u1", creado_en: new Date().toISOString(), actualizado_en: new Date().toISOString(), tiene_tarjeta_circulacion: true, tiene_verificacion: true, tiene_placas: true, puede_circular_rodando: true };
+    const cliente = crearClienteFake({
+      ...ADMIN_BASE,
+      tablas: {
+        ...ADMIN_BASE.tablas,
+        vehiculos: { data: vehiculoRow }
+      },
+      rpcs: {
+        admin_tiene_permiso: { data: true },
+        admin_actualizar_vehiculo: { data: { ejecutado: true, version: 1 } }
+      }
+    });
+    const resultado = await actualizarVehiculoAdmin(cliente as never, "v1", { color: "Rojo" }, 0);
+    expect(resultado).toBeDefined();
+    expect(resultado.color).toBe("Rojo");
+  });
+});
+});

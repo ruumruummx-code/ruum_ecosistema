@@ -1,0 +1,444 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { Aviso, Field } from "@ruum/ui";
+import { VERSION_TERMINOS_VIGENTE } from "@ruum/shared/constants";
+import { fortalezaPassword, passwordCumpleRequisitos, requisitosPassword, traducirErrorAuth } from "@ruum/shared/utils";
+import { registrarEventoUx } from "../../lib/analytics";
+import { crearClienteNavegador, tieneSupabaseConfigurado } from "../../lib/supabase-browser";
+import {
+  CLAVE_CORREO_CONFIRMACION,
+  crearRedirectConfirmacion,
+  nombreCompleto,
+  normalizarCorreoRegistro,
+  soloDigitos,
+  telefonoLocalMx,
+  telefonoMx
+} from "../../lib/registro-usuario";
+import {
+  botonAzul,
+  botonContorno,
+  CampoOscuro,
+} from "../experiencia-publica";
+import { NavegacionUsuario } from "../NavegacionUsuario";
+
+/* Barra de progreso visual */
+function BarraProgreso({ paso }: { paso: 1 | 2 }) {
+  return (
+    <ol className="mb-7 grid grid-cols-2 gap-3" aria-label="Progreso del registro">
+      {[1, 2].map((n) => (
+        <li key={n} className="flex min-w-0 flex-col gap-2" aria-current={n === paso ? "step" : undefined}>
+          <div
+            className={[
+              "h-1.5 rounded-full transition-all duration-300",
+              n <= paso ? "bg-[var(--ruum-teal)]" : "bg-slate-200",
+            ].join(" ")}
+          />
+          <span className={[
+            "font-body text-xs transition-colors duration-200",
+            n === paso ? "font-bold text-[var(--ruum-teal-deep)]" : "font-medium text-slate-500",
+          ].join(" ")}>
+            {n === 1 ? "Datos básicos" : "Acceso"}
+          </span>
+        </li>
+      ))}
+    </ol>
+  );
+}
+
+/* ─────────────────────────────────────────
+   Componente principal
+───────────────────────────────────────── */
+export default function PaginaRegistro() {
+  const router = useRouter();
+
+  /* Paso 1: datos básicos */
+  const [tipoCuenta, setTipoCuenta] = useState<"personal" | "empresa">("personal");
+  const [nombre, setNombre] = useState("");
+  const [apellido, setApellido] = useState("");
+  const [telefono, setTelefono] = useState("");
+
+  /* Paso 2: credenciales */
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmarPassword, setConfirmarPassword] = useState("");
+  const [aceptaTerminos, setAceptaTerminos] = useState(false);
+
+  /* Estado de la UI */
+  const [paso, setPaso] = useState<1 | 2>(1);
+  const [enviando, setEnviando] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const pwd = fortalezaPassword(password);
+
+  useEffect(() => {
+    registrarEventoUx("registro_visto", { paso: 1 });
+  }, []);
+
+  useEffect(() => {
+    registrarEventoUx("registro_paso_visto", { paso });
+  }, [paso]);
+
+  /* ── Validación paso 1 ── */
+  function validarPaso1(): string | null {
+    if (!nombre.trim()) return "Escribe tu nombre.";
+    if (!apellido.trim()) return "Escribe tu apellido.";
+    const tel = soloDigitos(telefono);
+    if (tel.length !== 10) return "El teléfono debe tener 10 dígitos.";
+    return null;
+  }
+
+  /* ── Validación paso 2 ── */
+  function validarPaso2(): string | null {
+    const correo = normalizarCorreoRegistro(email);
+    if (!correo) return "Escribe tu correo electrónico.";
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(correo))
+      return "El formato del correo no es válido.";
+    /* BUGFIX: antes solo se validaba longitud>=8 en el cliente, pero el
+       servidor de Supabase Auth exige además minúscula+mayúscula+número
+       (password_requirements = "lower_upper_letters_digits" en
+       supabase/config.toml). Con la validación débil, una contraseña como
+       "abcdefgh" pasaba aquí y luego el signUp() fallaba en el servidor con
+       un error genérico. Se alinea con el mismo criterio ya usado en
+       app-conductor (passwordCumpleRequisitos) para las tres pantallas. */
+    if (!passwordCumpleRequisitos(password)) return "La contraseña debe incluir minúscula, mayúscula y número.";
+    if (password !== confirmarPassword) return "Las contraseñas no coinciden.";
+    if (!aceptaTerminos) return "Acepta los términos para continuar.";
+    return null;
+  }
+
+  function avanzarPaso2() {
+    const err = validarPaso1();
+    if (err) { setError(err); return; }
+    setError(null);
+    setPaso(2);
+  }
+
+  /* ── Crear cuenta ── */
+  async function crearCuenta(e: React.FormEvent) {
+    e.preventDefault();
+    const err = validarPaso2();
+    if (err) { setError(err); return; }
+
+    setEnviando(true);
+    setError(null);
+    registrarEventoUx("registro_enviado", { tipo_cuenta: tipoCuenta });
+
+    try {
+      const cliente = crearClienteNavegador();
+      const correo = normalizarCorreoRegistro(email);
+
+      /* tipo_registro='usuario' activa el trigger manejar_nuevo_usuario_auth.
+         El mismo trigger persiste y audita la aceptación de términos, incluso
+         cuando la confirmación de correo hace que signUp devuelva session=null. */
+      const ahora = new Date().toISOString();
+      const { data, error: errorAuth } = await cliente.auth.signUp({
+        email: correo,
+        password,
+        options: {
+          data: {
+            tipo_registro: "usuario",
+            nombre: nombreCompleto(nombre, apellido),
+            telefono: telefonoMx(telefono),
+            tipo_cuenta: tipoCuenta,
+            /* Términos: el trigger los registra si están presentes en los metadatos */
+            version_terminos_aceptada: VERSION_TERMINOS_VIGENTE,
+            terminos_aceptados_en: ahora,
+          },
+          emailRedirectTo: crearRedirectConfirmacion(window.location.origin),
+        },
+      });
+
+      if (errorAuth) throw errorAuth;
+      if (!data.user) throw new Error("No se pudo crear el usuario.");
+
+      if (data.session) {
+        registrarEventoUx("registro_exitoso", { tipo_cuenta: tipoCuenta, requiere_confirmacion: false });
+        router.push("/");
+        router.refresh();
+      } else {
+        try {
+          window.sessionStorage.setItem(CLAVE_CORREO_CONFIRMACION, correo);
+        } catch { /* La pantalla también funciona si el navegador bloquea storage. */ }
+        registrarEventoUx("registro_exitoso", { tipo_cuenta: tipoCuenta, requiere_confirmacion: true });
+        const emailParam = encodeURIComponent(correo);
+        router.push(`/registro/confirma-correo?email=${emailParam}`);
+      }
+    } catch (err: unknown) {
+      setError(traducirErrorAuth(err, "No pudimos crear la cuenta. Intenta de nuevo."));
+      registrarEventoUx("registro_error", { tipo_cuenta: tipoCuenta });
+    } finally {
+      setEnviando(false);
+    }
+  }
+
+  if (!tieneSupabaseConfigurado()) {
+    return (
+      <div className="min-h-screen bg-[#f3f6f9]">
+        <NavegacionUsuario titulo="¡Crea tu cuenta!" mostrarEnAcceso mostrarNavegacionInferior={false} />
+        <main className="ruum-force-light px-4 py-10 sm:px-6">
+          <section className="mx-auto w-full max-w-xl rounded-2xl border border-slate-200 bg-white p-6 text-center shadow-md sm:p-8">
+            <h1 className="font-display text-2xl font-extrabold text-[#0a2342]">Crear cuenta</h1>
+            <div className="mt-6">
+              <Aviso tono="danger">
+                Supabase no está configurado. El registro no está disponible en este entorno.
+              </Aviso>
+            </div>
+          </section>
+        </main>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-[#f3f6f9]">
+      <NavegacionUsuario
+        titulo={paso === 1 ? "¡Crea tu cuenta!" : "Configura tu acceso"}
+        mostrarEnAcceso
+        mostrarNavegacionInferior={false}
+      />
+      <main className="ruum-force-light min-h-[calc(100vh-80px)] bg-[#f3f6f9] px-4 py-8 sm:px-6 sm:py-10">
+        <section className="mx-auto flex w-full max-w-xl flex-col">
+        {/* Navegación superior */}
+        <div className="flex items-center justify-between">
+          {paso === 2 ? (
+            <button
+              type="button"
+              onClick={() => { setError(null); setPaso(1); }}
+              className="cursor-pointer font-body text-xs font-semibold text-[var(--ruum-teal-deep)] transition duration-200 hover:text-[#0a2342]"
+            >
+              ← Atrás
+            </button>
+          ) : (
+            <Link href="/" className="cursor-pointer font-body text-xs font-semibold text-[var(--ruum-teal-deep)] transition duration-200 hover:text-[#0a2342]">
+              ← Atrás
+            </Link>
+          )}
+          <span className="font-body text-xs font-medium text-slate-500">Paso {paso} de 2</span>
+        </div>
+
+        <div className="mt-5 rounded-2xl border border-slate-200 bg-white px-5 py-7 shadow-md sm:px-8 sm:py-8">
+          <BarraProgreso paso={paso} />
+
+          {/* ════════════ PASO 1 ════════════ */}
+          {paso === 1 && (
+            <>
+              <h1 className="font-display text-[22px] font-extrabold leading-tight text-text-primary">
+                Tus datos básicos
+              </h1>
+              <p className="mt-2 font-body text-xs leading-5 text-text-secondary">
+                Solo necesitamos tus datos básicos para empezar.
+              </p>
+
+              {/* Tipo de cuenta */}
+              <div className="mt-6 grid grid-cols-2 gap-2">
+                {(["personal", "empresa"] as const).map((tipo) => (
+                  <button
+                    key={tipo}
+                    type="button"
+                    onClick={() => setTipoCuenta(tipo)}
+                    className={[
+                      "rounded-lg border py-2.5 font-body text-sm font-semibold transition",
+                      tipoCuenta === tipo
+                        ? "border-[var(--ruum-teal-deep)] bg-[var(--ruum-teal)]/10 text-[var(--ruum-teal-deep)] shadow-sm"
+                        : "border-slate-200 text-slate-500 hover:border-[var(--ruum-teal)] hover:text-[#0a2342]",
+                    ].join(" ")}
+                  >
+                    {tipo === "personal" ? "Personal" : "Empresa"}
+                  </button>
+                ))}
+              </div>
+
+              <div className="mt-5 grid gap-4">
+                <CampoOscuro
+                  etiqueta="Nombre"
+                  type="text"
+                  value={nombre}
+                  onChange={(e) => setNombre(e.target.value)}
+                  required
+                  autoComplete="given-name"
+                  placeholder="Carlos"
+                />
+                <CampoOscuro
+                  etiqueta="Apellido"
+                  type="text"
+                  value={apellido}
+                  onChange={(e) => setApellido(e.target.value)}
+                  required
+                  autoComplete="family-name"
+                  placeholder="Mendoza"
+                />
+                <CampoOscuro
+                  etiqueta="Teléfono celular"
+                  type="tel"
+                  value={telefono}
+                  onChange={(e) => setTelefono(telefonoLocalMx(e.target.value))}
+                  required
+                  autoComplete="tel"
+                  placeholder="55 1234 5678"
+                  ayuda="Para notificaciones de tu traslado. Sin código de país."
+                  inputMode="numeric"
+                />
+              </div>
+
+              {error && (
+              <div role="status" aria-live="polite" aria-atomic="true" className="mt-4">
+                <Aviso tono="danger">{error}</Aviso>
+              </div>
+            )}
+
+              <button type="button" onClick={avanzarPaso2} className={`${botonAzul} mt-6`}>
+                Continuar
+              </button>
+            </>
+          )}
+
+          {/* ════════════ PASO 2 ════════════ */}
+          {paso === 2 && (
+            <form className="grid gap-4" onSubmit={crearCuenta}>
+              <h1 className="font-display text-[22px] font-extrabold leading-tight text-text-primary">
+                Elige tus credenciales
+              </h1>
+              <p className="font-body text-xs leading-5 text-text-secondary">
+                Con esto accederás a tu cuenta y recibirás notificaciones de tus traslados.
+              </p>
+
+              <CampoOscuro
+                etiqueta="Correo electrónico"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                autoComplete="email"
+                placeholder="correo@ejemplo.com"
+              />
+
+              <div className="flex flex-col gap-1.5">
+                  <Field
+                    etiqueta="Contraseña"
+                    etiquetaClassName="text-text-secondary text-xs font-medium"
+                    type="password"
+                    passwordToggleClassName="text-text-secondary hover:bg-surface-elevated hover:text-text-primary focus-visible:outline-focus"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                    autoComplete="new-password"
+                    placeholder="Mínimo 8 caracteres"
+                    className="border-slate-300 bg-white text-[#0a2342] placeholder:text-slate-400 focus:border-[var(--ruum-teal-deep)] focus:ring-[var(--ruum-teal)]/25"
+                  />
+                {password.length > 0 && (
+                  <>
+                    <div className="flex gap-1">
+                      {[1, 2, 3].map((n) => (
+                        <div
+                          key={n}
+                          className={[
+                            "h-1 flex-1 rounded-full transition-all",
+                            n <= pwd.nivel
+                              ? pwd.nivel === 1
+                                ? "bg-red-500"
+                                : pwd.nivel === 2
+                                ? "bg-warning"
+                                : "bg-green-500"
+                              : "bg-border-strong",
+                          ].join(" ")}
+                        />
+                      ))}
+                    </div>
+                    {pwd.etiqueta && (
+                      <span className="font-body text-xs leading-5 text-text-tertiary">
+                        {pwd.etiqueta}
+                      </span>
+                    )}
+                  </>
+                )}
+                {/* Requisitos exigidos por el servidor (mismo patrón que app-conductor) */}
+                <ul className="mt-1 flex flex-col gap-1 font-body text-xs leading-5" aria-label="Requisitos de contraseña">
+                  {requisitosPassword(password).map((requisito) => {
+                    const etiquetas: Record<string, string> = {
+                      longitud: "Mínimo 8 caracteres",
+                      minuscula: "Al menos una letra minúscula",
+                      mayuscula: "Al menos una letra mayúscula",
+                      numero: "Al menos un número",
+                    };
+                    return (
+                      <li
+                        key={requisito.clave}
+                        className={requisito.cumplido ? "text-success" : "text-text-tertiary"}
+                      >
+                        {requisito.cumplido ? "✓" : "○"} {etiquetas[requisito.clave]}
+                      </li>
+                    );
+                  })}
+                </ul>
+              </div>
+
+              <Field
+                etiqueta="Confirmar contraseña"
+                etiquetaClassName="text-text-secondary text-xs font-medium"
+                type="password"
+                passwordToggleClassName="text-text-secondary hover:bg-surface-elevated hover:text-text-primary focus-visible:outline-focus"
+                value={confirmarPassword}
+                onChange={(e) => setConfirmarPassword(e.target.value)}
+                required
+                autoComplete="new-password"
+                placeholder="Repite tu contraseña"
+                className="border-slate-300 bg-white text-[#0a2342] placeholder:text-slate-400 focus:border-[var(--ruum-teal-deep)] focus:ring-[var(--ruum-teal)]/25"
+              />
+
+              {/* Términos — inline, no como .docx descargable */}
+              <label className="flex cursor-pointer items-start gap-3 rounded-lg border border-border bg-surface-elevated p-3.5">
+                <input
+                  type="checkbox"
+                  checked={aceptaTerminos}
+                  onChange={(e) => setAceptaTerminos(e.target.checked)}
+                  className="mt-0.5 flex-shrink-0 accent-[#f5a623]"
+                />
+                <span className="font-body text-xs leading-5 text-text-secondary">
+                  Acepto los{" "}
+                  <Link
+                    href="/legal/terminos"
+                    className="text-route-action underline-offset-2 hover:underline"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    Términos y condiciones
+                  </Link>{" "}
+                  y el{" "}
+                  <Link
+                    href="/legal/privacidad"
+                    className="text-route-action underline-offset-2 hover:underline"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    Aviso de privacidad
+                  </Link>{" "}
+                  de Ruum Ruum.
+                </span>
+              </label>
+
+              {error && (
+              <div role="status" aria-live="polite" aria-atomic="true">
+                <Aviso tono="danger">{error}</Aviso>
+              </div>
+            )}
+
+              <button type="submit" disabled={enviando} className={`${botonAzul} mt-1`}>
+                {enviando ? "Creando cuenta…" : "Crear cuenta"}
+              </button>
+            </form>
+          )}
+        </div>
+
+        {paso === 1 && (
+          <Link href="/login" className={`${botonContorno} mt-4`}>
+            Ya tengo cuenta — iniciar sesión
+          </Link>
+        )}
+        </section>
+      </main>
+    </div>
+  );
+}

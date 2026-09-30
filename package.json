@@ -1,0 +1,87 @@
+{
+  "name": "ruum-ruum",
+  "private": true,
+  "scripts": {
+    "prepare": "node scripts/prepare-husky.mjs",
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "lint": "turbo run lint",
+    "typecheck": "turbo run typecheck",
+    "test": "turbo run test",
+    "test:unit": "turbo run test --filter=./packages/*",
+    "cp:generar": "node packages/shared/scripts/generar-codigos-postales-mx.mjs cp_mexico_full.json apps/app-usuario/public/data/codigos-postales apps/panel-admin/public/data/codigos-postales",
+    "db:start": "supabase start",
+    "db:stop": "supabase stop",
+    "db:reset": "supabase db reset",
+    "db:push": "supabase db push",
+    "db:types": "supabase gen types typescript --local > packages/shared/src/types/supabase.ts",
+    "android:native:build": "pnpm --filter @ruum/app-conductor-native android:build",
+    "android:native:lint": "pnpm --filter @ruum/app-conductor-native android:lint",
+    "android:native:test": "pnpm --filter @ruum/app-conductor-native android:test",
+    "typecheck:android": "pnpm -r run typecheck",
+    "test:unit:android": "pnpm --filter \"./packages/*\" run test",
+    "ci:clean": "node scripts/verify-clean-ci.mjs",
+    "validate:env": "node scripts/validate-env.mjs workspace",
+    "test:p0": "node --test apps/panel-admin/test/*.test.mjs",
+    "test:p1": "node --test apps/panel-admin/test/p1-estabilizacion.test.mjs",
+    "test:p2": "node --test apps/panel-admin/test/p2-madurez.test.mjs",
+    "test:load": "k6 run tests/load/panel-admin-degradacion.js",
+    "test:load:report": "k6 run tests/load/panel-admin-degradacion.js --out json=tests/load/results/resultados.json",
+    "test:a11y:real": "playwright test apps/panel-admin/tests/a11y-real",
+    "test:a11y:real:all": "playwright test apps/panel-admin/tests/a11y-real --reporter=html",
+    "test:e2e:real": "playwright test apps/panel-admin/tests/e2e --reporter=html",
+    "test:sql": "supabase test db supabase/test",
+    "test:e2e:golden": "node tests/e2e/run-golden.mjs",
+    "test:piramide": "pnpm test:unit && pnpm test:sql && pnpm test:e2e:golden",
+    "check:fronteras": "node scripts/check-fronteras.mjs",    "test:sql:rls": "supabase test db supabase/test/rt42_rls_admin_roles.test.sql",
+    "test:sql:concurrencia": "supabase test db supabase/test/rt43_concurrencia_operadores.test.sql",
+    "scan:secrets": "node scripts/scan-secrets.mjs",
+    "audit:deps": "pnpm audit --audit-level=high",
+    "check:supabase-security": "node scripts/check-supabase-security.mjs",
+    "check:supabase-drift": "node scripts/check-supabase-drift.mjs",
+    "test:security": "node --test tests/security/scan-secrets.test.mjs",
+    "test:ui": "vitest --ui"
+  },
+  "devDependencies": {
+    "@axe-core/cli": "^4.12.1",
+    "@axe-core/playwright": "^4.12.1",
+    "@playwright/test": "^1.51.1",
+    "@storybook/addon-a11y": "^10.5.2",
+    "@types/node": "^22.10.0",
+    "@vitest/ui": "3.2.6",
+    "eslint-plugin-jsx-a11y": "^6.10.2",
+    "turbo": "^2.10.5",
+    "typescript": "^5.7.2",
+    "vitest": "3.2.6"
+  },
+  "packageManager": "pnpm@10.0.0",
+  "engines": {
+    "node": ">=24 <25",
+    "pnpm": ">=10 <11"
+  },
+  "pnpm": {
+    "//overrides": "Overrides de seguridad para dependencias transitivas. Claves amplias (sin versión exacta de origen) para cubrir todo el grafo.",
+    "auditConfig": {
+      "ignoreGhsas": [
+        "GHSA-jmr9-qjv8-65gv",
+        "GHSA-7pqw-9j4j-h8q3"
+      ]
+    },
+    "overrides": {
+      "postcss": "8.5.26",
+      "nanoid@3": "3.3.18",
+      "fast-uri": "3.1.7",
+      "sharp": "0.35.4",
+      "brace-expansion@5.0.6": "5.0.9",
+      "tar": "7.5.21",
+      "js-yaml": "4.3.2",
+      "adm-zip": "0.6.1",
+      "image-size": "2.0.3",
+      "tmp": "0.2.7",
+      "vite": "6.4.3",
+      "ip-address": "10.3.1",
+      "browserslist": "4.28.7",
+      "@xmldom/xmldom": "0.9.12"
+    }
+  }
+}

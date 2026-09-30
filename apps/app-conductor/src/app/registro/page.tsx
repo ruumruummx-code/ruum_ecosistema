@@ -1,0 +1,1151 @@
+"use client";
+
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import type { FormEvent } from "react";
+import { useRouter } from "next/navigation";
+import { Button, Aviso } from "@ruum/ui";
+import { TEXTOS_CARGANDO } from "@ruum/shared/constants";
+import { traducirErrorAuth, traducirErrorOperativo, fortalezaPassword } from "@ruum/shared/utils";
+import {
+  validarCampoRegistroConductor,
+  type CampoRegistroConductor
+} from "@ruum/shared/validacion";
+import {
+  enviarSolicitudConductor,
+  guardarBorradorConductor,
+  iniciarSolicitudConductor,
+  iniciarVerificacionDidit,
+  obtenerConductorActual,
+  obtenerSolicitudConductorActual,
+  registrarConsentimientosConductor,
+  type ExpedienteSolicitudConductorV2,
+} from "@ruum/api/services";
+import {
+  listarConsentimientosSolicitud,
+  listarDocumentosSolicitud,
+  obtenerBorradorSolicitud
+} from "@ruum/api/drivers";
+import { crearClienteNavegador, tieneSupabaseConfigurado, obtenerOriginApp } from "../../lib/supabase-browser";
+import type { Json } from "@ruum/shared/types";
+import { consultarCodigoPostalMx } from "../../lib/codigos-postales";
+import { limpiarBorradorRegistroLocal } from "../../lib/borrador-registro";
+import { AccountStep } from "./AccountStep";
+import { DocumentsStep } from "./DocumentsStep";
+import { DraftRecoveryModal } from "./DraftRecoveryModal";
+import { DiditVerificationModal } from "./DiditVerificationModal";
+import { IdentityStep } from "./IdentityStep";
+import { LicenseStep } from "./LicenseStep";
+import { OtpVerification } from "./OtpVerification";
+import { RegistrationProgress } from "./RegistrationProgress";
+import { RegistrationShell } from "./RegistrationShell";
+import { ReviewStep } from "./ReviewStep";
+import {
+  PASOS_REGISTRO,
+  TIPOS_DOCUMENTO,
+  type EstadoGuardadoRemoto
+} from "./registration-types";
+import {
+  limpiarTexto,
+  objetoJson,
+  soloDigitos,
+  telefonoE164Mx
+} from "./registration-validation";
+import { useRegistrationDocuments } from "./useRegistrationDocuments";
+import { useRegistrationDraft } from "./useRegistrationDraft";
+import { useRegistrationTelemetry } from "./useRegistrationTelemetry";
+
+const VERSION_APP_REGISTRO = "1.0.0";
+
+function canalRegistro(): "web" | "android" | "ios" {
+  if (/android/i.test(navigator.userAgent)) return "android";
+  if (/iPad|iPhone|iPod/i.test(navigator.userAgent)) return "ios";
+  return "web";
+}
+
+// Fusiona un expediente local con el que ya existía en el servidor. Solamente
+// completa valores locales vacíos con los remotos y conserva cualquier
+// consentimiento (booleano) ya autorizado, para no borrar datos capturados
+// en otro dispositivo/pestaña al reanudar (p. ej. tras confirmar un OTP).
+function fusionarJsonExpediente(origen: Json, remoto: Json | null | undefined): Json {
+  if (origen == null) return remoto ?? null;
+  if (remoto == null) return origen;
+  if (typeof origen !== "object" || Array.isArray(origen)) return origen;
+  const local = origen as Record<string, unknown>;
+  const otro = typeof remoto === "object" && remoto && !Array.isArray(remoto) ? (remoto as Record<string, unknown>) : {};
+  const resultado: Record<string, Json> = {};
+  for (const clave of Object.keys(local)) {
+    const valorLocal = local[clave];
+    const valorRemoto = otro[clave];
+    if (typeof valorLocal === "string" && valorLocal.trim() === "") {
+      resultado[clave] = typeof valorRemoto === "string" ? valorRemoto : "";
+    } else if (typeof valorLocal === "boolean") {
+      resultado[clave] = Boolean(valorLocal || valorRemoto === true);
+    } else {
+      resultado[clave] = valorLocal as Json;
+    }
+  }
+  return resultado;
+}
+
+type SolicitudConductorResumen = {
+  datos_personales?: Json | null;
+  domicilio?: Json | null;
+  licencia?: Json | null;
+  contacto_emergencia?: Json | null;
+};
+
+function combinarExpedienteConRemoto(
+  expediente: ExpedienteSolicitudConductorV2,
+  remoto: SolicitudConductorResumen | null
+) {
+  if (!remoto) return expediente;
+  return {
+    datosPersonales: fusionarJsonExpediente(expediente.datosPersonales, remoto.datos_personales),
+    domicilio: fusionarJsonExpediente(expediente.domicilio, remoto.domicilio),
+    licencia: fusionarJsonExpediente(expediente.licencia, remoto.licencia),
+    contactoEmergencia: fusionarJsonExpediente(expediente.contactoEmergencia, remoto.contacto_emergencia)
+  };
+}
+
+
+const RETRASO_GUARDADO_REMOTO_MS = 900;
+
+const CODIGO_OTP_LONGITUD = 6;
+const ESPERA_REENVIO_OTP_SEGUNDOS = 60;
+const MAX_INTENTOS_OTP = 5;
+
+export default function PaginaRegistroConductor() {
+  const router = useRouter();
+  const [paso, setPaso] = useState(0);
+  const [nombre, setNombre] = useState("");
+  const [apellidos, setApellidos] = useState("");
+  const [curp, setCurp] = useState("");
+  const [telefono, setTelefono] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmacionPassword, setConfirmacionPassword] = useState("");
+  const [codigoPostal, setCodigoPostal] = useState("");
+  const [estado, setEstado] = useState("");
+  const [ciudad, setCiudad] = useState("");
+  const [ciudades, setCiudades] = useState<string[]>([]);
+  const [colonias, setColonias] = useState<string[]>([]);
+  const [consultandoCp, setConsultandoCp] = useState(false);
+  const [colonia, setColonia] = useState("");
+  const [calle, setCalle] = useState("");
+  const [numero, setNumero] = useState("");
+  const [referencias, setReferencias] = useState("");
+  const [numeroLicencia, setNumeroLicencia] = useState("");
+  const [tipoLicencia, setTipoLicencia] = useState("");
+  const [vigenciaLicencia, setVigenciaLicencia] = useState("");
+  const [autorizaVerificacion, setAutorizaVerificacion] = useState(false);
+  const [declaraSinSuspensiones, setDeclaraSinSuspensiones] = useState(false);
+  const [contactoEmergenciaNombre, setContactoEmergenciaNombre] = useState("");
+  const [contactoEmergenciaTelefono, setContactoEmergenciaTelefono] = useState("");
+  const [aceptaTerminos, setAceptaTerminos] = useState(false);
+  const [confirmaPrivacidad, setConfirmaPrivacidad] = useState(false);
+  const [erroresCampos, setErroresCampos] = useState<Record<string, string>>({});
+  const [enviando, setEnviando] = useState(false);
+  const [enviado, setEnviado] = useState(false);
+  const [sesionActivaTrasRegistro, setSesionActivaTrasRegistro] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [sesionAutenticada,setSesionAutenticada]=useState(false);
+  const [solicitudRemotaId,setSolicitudRemotaId]=useState<string|null>(null);
+  const [estadoGuardadoRemoto,setEstadoGuardadoRemoto]=useState<EstadoGuardadoRemoto>("inactivo");
+  const [detalleGuardadoRemoto,setDetalleGuardadoRemoto]=useState<string|null>(null);
+  const [reintentoConexion,setReintentoConexion]=useState(0);
+  const hidratacionRemotaCompletaRef=useRef(false);
+  const omitirPrimerGuardadoRemotoRef=useRef(false);
+  const ultimoGuardadoRemotoRef=useRef("");
+  const solicitudRemotaIdRef=useRef<string|null>(null);
+  const aceptadosEnRef=useRef(new Date().toISOString());
+
+  // Fase 4 — verificación por código (OTP) cuando Supabase exige confirmar el correo.
+  const [pendienteOtp, setPendienteOtp] = useState(false);
+  const [codigoOtp, setCodigoOtp] = useState("");
+  const [verificandoOtp, setVerificandoOtp] = useState(false);
+  const [errorOtp, setErrorOtp] = useState<string | null>(null);
+  const [reenviandoOtp, setReenviandoOtp] = useState(false);
+  const [esperaReenvioOtp, setEsperaReenvioOtp] = useState(0);
+  const [intentosFallidosOtp, setIntentosFallidosOtp] = useState(0);
+
+  // Verificación de identidad Didit (auto-iniciada tras envío exitoso)
+  const [mostrarVerificacionDidit, setMostrarVerificacionDidit] = useState(false);
+  const [urlVerificacionDidit, setUrlVerificacionDidit] = useState<string | null>(null);
+  const [iniciandoVerificacionDidit, setIniciandoVerificacionDidit] = useState(false);
+  const [errorVerificacionDidit, setErrorVerificacionDidit] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get("error") === "enlace_invalido") {
+        setError("El enlace de verificación ha expirado o ya fue utilizado. Si ya confirmaste tu cuenta, puedes iniciar sesión directamente.");
+      }
+    }
+  }, []);
+
+  const nombreCompleto = useMemo(() => limpiarTexto(`${nombre} ${apellidos}`), [nombre, apellidos]);
+  const fuerzaPassword = useMemo(() => fortalezaPassword(password), [password]);
+  const borradorLocal = useMemo(() => ({
+    paso,
+    nombre,
+    apellidos,
+    telefono,
+    email,
+    codigoPostal,
+    estado,
+    ciudad,
+    colonia,
+    tipoLicencia,
+    vigenciaLicencia
+  }), [paso, nombre, apellidos, telefono, email, codigoPostal, estado, ciudad, colonia, tipoLicencia, vigenciaLicencia]);
+  const tieneErroresActivos = Object.values(erroresCampos).some(Boolean);
+
+  const registrarTelemetria = useRegistrationTelemetry(paso);
+
+  const {
+    documentos,
+    estadoDocumentos,
+    documentosRemotos,
+    setDocumentosRemotos,
+    setEstadoDocumentos,
+    documentoDisponible,
+    validarDocumento,
+    cambiarDocumento,
+    cargarDocumentos
+  } = useRegistrationDocuments({
+    setCampoError,
+    limpiarErrorCampo,
+    registrarTelemetria,
+    paso
+  });
+  const {
+    borradorDisponible,
+    borradorLocalGuardado,
+    restaurarBorrador,
+    descartarBorrador
+  } = useRegistrationDraft({
+    enabled: !enviado && !pendienteOtp && !sesionAutenticada,
+    snapshot: borradorLocal,
+    onRestore: (borrador) => {
+      setNombre(borrador.nombre ?? "");
+      setApellidos(borrador.apellidos ?? "");
+      setTelefono(borrador.telefono ?? "");
+      setEmail(borrador.email ?? "");
+      setCodigoPostal(borrador.codigoPostal ?? "");
+      setEstado(borrador.estado ?? "");
+      setCiudad(borrador.ciudad ?? "");
+      setColonia(borrador.colonia ?? "");
+      setTipoLicencia(borrador.tipoLicencia ?? "");
+      setVigenciaLicencia(borrador.vigenciaLicencia ?? "");
+      setPaso(0);
+
+      const cp = soloDigitos(borrador.codigoPostal ?? "", 5);
+      if (cp.length === 5) void buscarCodigoPostal(cp);
+    }
+  });
+  const puedeEnviar = !enviando && !tieneErroresActivos && aceptaTerminos && confirmaPrivacidad && formularioCompleto();
+
+  function setCampoError(campo: string, mensaje: string) {
+    setErroresCampos((prev) => ({ ...prev, [campo]: mensaje }));
+    return !mensaje;
+  }
+
+  function limpiarErrorCampo(campo: string) {
+    if (erroresCampos[campo]) setErroresCampos((prev) => ({ ...prev, [campo]: "" }));
+  }
+
+  // Fase 4 — las reglas y mensajes viven en @ruum/shared/validacion (una sola
+  // fuente para app-conductor, panel-admin y backend).
+  function validarCampo(campo: CampoRegistroConductor, valor: string) {
+    return setCampoError(campo, validarCampoRegistroConductor(campo, valor));
+  }
+
+  function validarCurp(valor = curp) {
+    return validarCampo("curp", valor);
+  }
+
+  function validarTelefono(campo: "telefono" | "contactoEmergenciaTelefono", valor: string, setter: (valor: string) => void) {
+    const normalizado = soloDigitos(valor);
+    if (normalizado !== valor) setter(normalizado);
+    return validarCampo(campo, normalizado);
+  }
+
+  function validarPassword(valor = password) {
+    return validarCampo("password", valor);
+  }
+
+  function validarConfirmacion(valor = confirmacionPassword, base = password) {
+    if (sesionAutenticada) return setCampoError("confirmacionPassword", "");
+    if (!valor) return setCampoError("confirmacionPassword", "Confirma tu contraseña");
+    return setCampoError("confirmacionPassword", valor !== base ? "Las contraseñas no coinciden" : "");
+  }
+
+  function validarVigenciaLicencia(valor = vigenciaLicencia) {
+    return validarCampo("vigenciaLicencia", valor);
+  }
+
+  async function buscarCodigoPostal(cp: string) {
+    setConsultandoCp(true);
+    setCampoError("codigoPostal", "");
+    try {
+      const datos = await consultarCodigoPostalMx(cp);
+      if (!datos) throw new Error("CP no encontrado");
+      setEstado(datos.estado);
+      setCiudades(datos.ciudades);
+      setCiudad(datos.ciudades[0] ?? "");
+      setColonias(datos.colonias);
+      setColonia(datos.colonias[0] ?? "");
+      setErroresCampos((prev) => ({ ...prev, estado: "", ciudad: "", colonia: "" }));
+    } catch {
+      setEstado("");
+      setCiudad("");
+      setCiudades([]);
+      setColonias([]);
+      setColonia("");
+      setCampoError("codigoPostal", "No encontramos ese código postal. Verifica que tenga 5 dígitos o captura el domicilio manualmente.");
+    } finally {
+      setConsultandoCp(false);
+    }
+  }
+
+  function validarPaso(indice = paso) {
+    if (indice === 0) {
+      return [
+        validarTelefono("telefono", telefono, setTelefono),
+        validarCampo("email", email),
+        sesionAutenticada ? setCampoError("password", "") : validarPassword(),
+        validarConfirmacion()
+      ].every(Boolean);
+    }
+    if (indice === 1) {
+      return [
+        validarCampo("nombre", nombre),
+        validarCampo("apellidos", apellidos),
+        validarCurp(),
+        validarCampo("codigoPostal", codigoPostal),
+        validarCampo("estado", estado),
+        validarCampo("ciudad", ciudad),
+        validarCampo("colonia", colonia),
+        validarCampo("calle", calle),
+        validarCampo("numero", numero),
+        validarCampo("referencias", referencias),
+        validarCampo("contactoEmergenciaNombre", contactoEmergenciaNombre),
+        validarTelefono("contactoEmergenciaTelefono", contactoEmergenciaTelefono, setContactoEmergenciaTelefono)
+      ].every(Boolean);
+    }
+    if (indice === 2) {
+      return [
+        validarCampo("numeroLicencia", numeroLicencia),
+        validarCampo("tipoLicencia", tipoLicencia),
+        validarVigenciaLicencia(),
+        setCampoError("autorizaVerificacion", autorizaVerificacion ? "" : "Debes autorizar la verificación de antecedentes"),
+        setCampoError("declaraSinSuspensiones", declaraSinSuspensiones ? "" : "Debes confirmar esta declaración")
+      ].every(Boolean);
+    }
+    if (indice === 3) {
+      return [
+        setCampoError("cuentaVerificada", sesionAutenticada ? "" : "Confirma tu cuenta antes de cargar documentos"),
+        validarDocumento("licenciaFrente"),
+        validarDocumento("licenciaReverso"),
+        validarDocumento("identificacionOficial")
+      ].every(Boolean);
+    }
+    return [
+      setCampoError("aceptaTerminos", aceptaTerminos ? "" : "Debes aceptar los términos de servicio"),
+      setCampoError("confirmaPrivacidad", confirmaPrivacidad ? "" : "Debes confirmar que leíste el aviso de privacidad")
+    ].every(Boolean);
+  }
+
+  function formularioCompleto() {
+    return Boolean(
+      nombre.trim() &&
+        apellidos.trim() &&
+        curp.trim() &&
+        telefono.trim() &&
+        email.trim() &&
+        (sesionAutenticada || (password && confirmacionPassword)) &&
+        codigoPostal.trim() &&
+        estado.trim() &&
+        ciudad.trim() &&
+        colonia.trim() &&
+        calle.trim() &&
+        numero.trim() &&
+        referencias.trim() &&
+        numeroLicencia.trim() &&
+        tipoLicencia.trim() &&
+        vigenciaLicencia &&
+        documentoDisponible("licenciaFrente") &&
+        documentoDisponible("licenciaReverso") &&
+        documentoDisponible("identificacionOficial") &&
+        autorizaVerificacion &&
+        declaraSinSuspensiones &&
+        contactoEmergenciaNombre.trim() &&
+        contactoEmergenciaTelefono.trim()
+    );
+  }
+
+  function camposFaltantes() {
+    const faltantes: string[] = [];
+    if (!nombre.trim() || !apellidos.trim()) faltantes.push("nombre y apellidos");
+    if (!curp.trim()) faltantes.push("tu CURP");
+    if (!telefono.trim()) faltantes.push("tu teléfono");
+    if (!email.trim()) faltantes.push("tu correo");
+    if (!sesionAutenticada && (!password || !confirmacionPassword)) faltantes.push("tu contraseña");
+    if (!codigoPostal.trim() || !estado.trim() || !ciudad.trim() || !colonia.trim() || !calle.trim() || !numero.trim() || !referencias.trim()) faltantes.push("tu domicilio");
+    if (!numeroLicencia.trim() || !tipoLicencia.trim() || !vigenciaLicencia) faltantes.push("los datos de tu licencia");
+    if (!documentoDisponible("licenciaFrente")) faltantes.push("la foto de la licencia (frente)");
+    if (!documentoDisponible("licenciaReverso")) faltantes.push("la foto de la licencia (reverso)");
+    if (!documentoDisponible("identificacionOficial")) faltantes.push("tu identificación oficial");
+    if (!autorizaVerificacion) faltantes.push("autorizar la verificación de antecedentes");
+    if (!declaraSinSuspensiones) faltantes.push("confirmar la declaración de suspensiones");
+    if (!contactoEmergenciaNombre.trim() || !contactoEmergenciaTelefono.trim()) faltantes.push("tu contacto de emergencia");
+    if (!aceptaTerminos) faltantes.push("aceptar los términos y condiciones");
+    if (!confirmaPrivacidad) faltantes.push("confirmar el aviso de privacidad");
+    return faltantes;
+  }
+
+  async function avanzar() {
+    setError(null);
+    if (paso === 0 && !sesionAutenticada) {
+      const cuentaLista = await crearCuentaParaContinuar();
+      if (!cuentaLista) return;
+    }
+    if (validarPaso()) {
+      registrarTelemetria("paso_completado",paso+1);
+      setPaso((actual) => Math.min(actual + 1, PASOS_REGISTRO.length - 1));
+    }
+  }
+
+  function volver() {
+    setError(null);
+    setPaso((actual) => Math.max(actual - 1, 0));
+  }
+
+  const contratoExpediente=useCallback(()=>{
+    const aceptadosEn = aceptadosEnRef.current;
+    return {
+      datosPersonales: {
+        nombre: nombreCompleto,
+        nombres: limpiarTexto(nombre),
+        apellidos: limpiarTexto(apellidos),
+        email: email.trim().toLowerCase(),
+        telefono: telefonoE164Mx(telefono),
+        curp: curp.trim().toUpperCase(),
+        autoriza_verificacion_antecedentes: autorizaVerificacion,
+        declara_sin_suspensiones: declaraSinSuspensiones,
+        acepta_terminos_servicio: aceptaTerminos,
+        confirma_aviso_privacidad: confirmaPrivacidad,
+        version_terminos_aceptada: 1,
+        version_aviso_privacidad: 1,
+        terminos_aceptados_en: aceptadosEn,
+        marca_terminos: "ruum ruum by Movilia"
+      },
+      domicilio: {
+        codigo_postal: codigoPostal.trim(),
+        estado: limpiarTexto(estado),
+        ciudad_municipio: limpiarTexto(ciudad),
+        colonia: limpiarTexto(colonia),
+        calle: limpiarTexto(calle),
+        numero: limpiarTexto(numero),
+        referencias: limpiarTexto(referencias)
+      },
+      licencia: {
+        numero: limpiarTexto(numeroLicencia),
+        tipo: limpiarTexto(tipoLicencia),
+        vigencia: vigenciaLicencia
+      },
+      contactoEmergencia: {
+        nombre: limpiarTexto(contactoEmergenciaNombre),
+        telefono: soloDigitos(contactoEmergenciaTelefono)
+      }
+    };
+  },[nombreCompleto,nombre,apellidos,email,telefono,curp,autorizaVerificacion,declaraSinSuspensiones,aceptaTerminos,confirmaPrivacidad,codigoPostal,estado,ciudad,colonia,calle,numero,referencias,numeroLicencia,tipoLicencia,vigenciaLicencia,contactoEmergenciaNombre,contactoEmergenciaTelefono]);
+
+  async function prepararSolicitudBorrador(cliente: ReturnType<typeof crearClienteNavegador>) {
+    const inicio = await iniciarSolicitudConductor(cliente);
+    if (!inicio.solicitudId) {
+      throw new Error(
+        inicio.conductorId
+          ? "Esta cuenta ya tiene un perfil de conductor operativo."
+          : "No pudimos iniciar la solicitud."
+      );
+    }
+    const solicitudRemota = await obtenerBorradorSolicitud(cliente, inicio.solicitudId).catch(() => null);
+
+    // Evita pisar el expediente capturado previamente (p. ej. en otro
+    // dispositivo) con un contrato local casi vacío al reanudar tras el OTP.
+    const expediente = combinarExpedienteConRemoto(contratoExpediente(), solicitudRemota);
+
+    setSesionAutenticada(true);
+    setSolicitudRemotaId(inicio.solicitudId);
+    solicitudRemotaIdRef.current = inicio.solicitudId;
+    hidratacionRemotaCompletaRef.current = true;
+    omitirPrimerGuardadoRemotoRef.current = true;
+    limpiarBorradorRegistroLocal();
+    await guardarBorradorConductor(cliente, expediente, Math.max(paso + 1, inicio.pasoActual, 1));
+    setEstadoGuardadoRemoto("guardado");
+    return inicio.solicitudId;
+  }
+
+  async function crearCuentaParaContinuar() {
+    if (!validarPaso(0)) return false;
+    if (!tieneSupabaseConfigurado()) {
+      setError("Supabase no está configurado. El registro no está disponible en este entorno.");
+      return false;
+    }
+    setEnviando(true);
+    setError(null);
+    try {
+      const cliente = crearClienteNavegador();
+      if (sesionAutenticada) {
+        if (!solicitudRemotaIdRef.current && !solicitudRemotaId) await prepararSolicitudBorrador(cliente);
+        return true;
+      }
+      const { data: datosAuth, error: errorAuth } = await cliente.auth.signUp({
+        email: email.trim().toLowerCase(),
+        password,
+        options: {
+          data: {
+            tipo_registro: "conductor",
+            version_registro: 2
+          },
+          // El camino principal es escribir el código de 6 dígitos dentro de la
+          // app; este redirect sólo enruta el enlace de respaldo del correo al
+          // handler correcto del conductor (/auth/callback -> /registro).
+          emailRedirectTo: `${obtenerOriginApp()}/auth/callback`
+        }
+      });
+      if (errorAuth) throw errorAuth;
+      if (!datosAuth.user) throw new Error("No se pudo crear la cuenta. Intenta de nuevo.");
+      limpiarBorradorRegistroLocal();
+      if (datosAuth.session) {
+        await prepararSolicitudBorrador(cliente);
+        setSesionActivaTrasRegistro(true);
+        return true;
+      }
+      setEsperaReenvioOtp(ESPERA_REENVIO_OTP_SEGUNDOS);
+      setPendienteOtp(true);
+      return false;
+    } catch (err) {
+      setError(traducirErrorAuth(err));
+      return false;
+    } finally {
+      setEnviando(false);
+    }
+  }
+
+  async function procesarSolicitudAutenticada(cliente: ReturnType<typeof crearClienteNavegador>) {
+    const solicitudId = solicitudRemotaIdRef.current ?? solicitudRemotaId ?? await prepararSolicitudBorrador(cliente);
+    await registrarConsentimientosConductor(
+      cliente,
+      solicitudId,
+      [
+        { tipoDocumento: "terminos_servicio", version: 1 },
+        { tipoDocumento: "aviso_privacidad", version: 1 },
+        { tipoDocumento: "autorizacion_antecedentes", version: 1 },
+        { tipoDocumento: "declaracion_suspensiones", version: 1 }
+      ],
+      canalRegistro(),
+      VERSION_APP_REGISTRO
+    );
+    await guardarBorradorConductor(cliente, contratoExpediente(), PASOS_REGISTRO.length);
+    await cargarDocumentos(cliente, solicitudId);
+    const resultado = await enviarSolicitudConductor(cliente);
+    registrarTelemetria("solicitud_enviada", PASOS_REGISTRO.length, "enviado");
+
+    // Auto-iniciar verificación Didit tras envío exitoso (solicitud en_revision)
+    if (resultado.solicitudId) {
+      solicitudRemotaIdRef.current = resultado.solicitudId;
+      setSolicitudRemotaId(resultado.solicitudId);
+      registrarTelemetria("didit_iniciado", PASOS_REGISTRO.length, "auto");
+      setMostrarVerificacionDidit(true);
+      setIniciandoVerificacionDidit(true);
+      setErrorVerificacionDidit(null);
+      try {
+        const { url } = await iniciarVerificacionDidit(cliente, resultado.solicitudId);
+        setUrlVerificacionDidit(url);
+      } catch (err) {
+        // No bloqueamos el flujo si Didit falla; el usuario puede reintentar desde el modal o hacerlo desde el panel
+        const mensaje = traducirErrorOperativo(err, "No pudimos iniciar la verificación de identidad automáticamente. Podrás reintentar o completarla desde tu panel.");
+        setErrorVerificacionDidit(mensaje);
+        registrarTelemetria("didit_error", PASOS_REGISTRO.length, "auto_inicio_fallido");
+      } finally {
+        setIniciandoVerificacionDidit(false);
+      }
+    }
+
+    return resultado;
+  }
+
+  async function crearCuenta(e: FormEvent) {
+    e.preventDefault();
+    const todoValido = PASOS_REGISTRO.every((_, indice) => validarPaso(indice));
+    if (!todoValido) {
+      const primerPasoConError = PASOS_REGISTRO.findIndex((_, indice) => !validarPaso(indice));
+      setPaso(primerPasoConError >= 0 ? primerPasoConError : paso);
+      return;
+    }
+    if (!tieneSupabaseConfigurado()) {
+      setError(" El registro no está disponible en este entorno.");
+      return;
+    }
+
+    setEnviando(true);
+    setError(null);
+    let cuentaCreada = sesionAutenticada;
+
+    try {
+      const cliente = crearClienteNavegador();
+      if (!sesionAutenticada) {
+        const cuentaLista = await crearCuentaParaContinuar();
+        if (!cuentaLista) return;
+        cuentaCreada = true;
+      }
+      setSesionActivaTrasRegistro(true);
+      await procesarSolicitudAutenticada(cliente);
+      limpiarBorradorRegistroLocal();
+      setEnviado(true);
+    } catch (err) {
+      if (cuentaCreada) registrarTelemetria("rpc_error", paso + 1, "enviar_solicitud");
+      setError(cuentaCreada ? traducirErrorOperativo(err, "No pudimos enviar tu solicitud. Tu cuenta quedó creada y puedes reintentar.") : traducirErrorAuth(err));
+    } finally {
+      setEnviando(false);
+    }
+  }
+
+  
+  async function confirmarCodigoOtp(e: FormEvent) {
+    e.preventDefault();
+    if (intentosFallidosOtp >= MAX_INTENTOS_OTP) {
+      setErrorOtp(`Has superado el máximo de ${MAX_INTENTOS_OTP} intentos. Solicita un nuevo código.`);
+      return;
+    }
+    const codigo = codigoOtp.trim();
+    if (!new RegExp(`^\\d{${CODIGO_OTP_LONGITUD}}$`).test(codigo)) {
+      setErrorOtp(`Escribe el código de ${CODIGO_OTP_LONGITUD} dígitos que enviamos a tu correo.`);
+      return;
+    }
+
+    setVerificandoOtp(true);
+    setErrorOtp(null);
+    let cuentaVerificada=false;
+    try {
+      const cliente = crearClienteNavegador();
+      const { data, error: errorVerificacion } = await cliente.auth.verifyOtp({
+        email: email.trim().toLowerCase(),
+        token: codigo,
+        type: "signup"
+      });
+      if (errorVerificacion) throw errorVerificacion;
+      if (!data.session) throw new Error("El código se validó pero no pudimos iniciar tu sesión. Entra desde el acceso.");
+      cuentaVerificada=true;
+
+      setIntentosFallidosOtp(0);
+      setSesionActivaTrasRegistro(true);
+      if (paso < PASOS_REGISTRO.length - 1) {
+        await prepararSolicitudBorrador(cliente);
+        setPendienteOtp(false);
+        setPaso((actual) => Math.min(actual + 1, PASOS_REGISTRO.length - 1));
+        return;
+      }
+      await procesarSolicitudAutenticada(cliente);
+      limpiarBorradorRegistroLocal();
+      setPendienteOtp(false);
+      setEnviado(true);
+    } catch (err) {
+      if(cuentaVerificada) {
+        registrarTelemetria("rpc_error",paso+1,"enviar_solicitud");
+        setPendienteOtp(false);
+        setError(traducirErrorOperativo(err,"Tu cuenta quedó verificada, pero no pudimos enviar la solicitud. Puedes reintentar."));
+      } else {
+        registrarTelemetria("otp_error",paso+1,"verificar_otp");
+        setIntentosFallidosOtp((prev) => prev + 1);
+        const restantes = MAX_INTENTOS_OTP - (intentosFallidosOtp + 1);
+        const base = traducirErrorAuth(err);
+        setErrorOtp(restantes > 0 ? `${base} Te quedan ${restantes} intentos.` : `${base} Has agotado los intentos. Solicita un nuevo código.`);
+      }
+    } finally {
+      setVerificandoOtp(false);
+    }
+  }
+
+  async function reenviarCodigoOtp() {
+    if (esperaReenvioOtp > 0 || reenviandoOtp) return;
+    setReenviandoOtp(true);
+    setErrorOtp(null);
+    try {
+      const cliente = crearClienteNavegador();
+      const { error: errorReenvio } = await cliente.auth.resend({
+        type: "signup",
+        email: email.trim().toLowerCase(),
+        options: {
+          emailRedirectTo: `${obtenerOriginApp()}/auth/callback`
+        }
+      });
+      if (errorReenvio) throw errorReenvio;
+      setEsperaReenvioOtp(ESPERA_REENVIO_OTP_SEGUNDOS);
+      setIntentosFallidosOtp(0);
+      setCodigoOtp("");
+    } catch (err) {
+      registrarTelemetria("otp_error",paso+1,"reenviar_otp");
+      setErrorOtp(traducirErrorAuth(err));
+    } finally {
+      setReenviandoOtp(false);
+    }
+  }
+
+  
+  useEffect(() => {
+    if (!pendienteOtp || esperaReenvioOtp <= 0) return;
+    const intervalo = setInterval(() => setEsperaReenvioOtp((s) => Math.max(0, s - 1)), 1000);
+    return () => clearInterval(intervalo);
+  }, [pendienteOtp, esperaReenvioOtp]);
+
+  useEffect(() => {
+    if (!tieneSupabaseConfigurado()) { hidratacionRemotaCompletaRef.current=true; return; }
+    let activo=true;
+    const cliente=crearClienteNavegador();
+    async function hidratar() {
+      try {
+        const {data:sesion}=await cliente.auth.getUser();
+        if (!activo||!sesion.user) { hidratacionRemotaCompletaRef.current=true; return; }
+        setSesionAutenticada(true);
+        descartarBorrador();
+        setEmail(sesion.user.email??"");
+        const solicitud=await obtenerSolicitudConductorActual(cliente);
+        if (!solicitud) {
+          
+          const conductorExistente = await obtenerConductorActual(cliente);
+          if (conductorExistente) { router.replace("/panel"); return; }
+          const inicio = await iniciarSolicitudConductor(cliente);
+          if (!inicio.solicitudId) { router.replace("/panel"); return; }
+          setSolicitudRemotaId(inicio.solicitudId);
+          solicitudRemotaIdRef.current=inicio.solicitudId;
+          hidratacionRemotaCompletaRef.current=true;
+          omitirPrimerGuardadoRemotoRef.current=true;
+          setEstadoGuardadoRemoto("guardado");
+          return;
+        }
+        if (["listo_para_enviar","en_revision","requiere_correccion","aprobado","rechazado","suspendido"].includes(solicitud.estado)) {
+          router.replace("/panel"); return;
+        }
+        const [docsRemotos, consentimientosRemotos] = await Promise.all([
+          listarDocumentosSolicitud(cliente, solicitud.id),
+          listarConsentimientosSolicitud(cliente, solicitud.id)
+        ]);
+        const personales=objetoJson(solicitud.datos_personales);
+        const domicilio=objetoJson(solicitud.domicilio);
+        const licencia=objetoJson(solicitud.licencia);
+        const contacto=objetoJson(solicitud.contacto_emergencia);
+        const nombreCompletoRemoto=String(personales.nombre??"").trim();
+        const partesNombre=nombreCompletoRemoto.split(/\s+/).filter(Boolean);
+        setNombre(String(personales.nombres??partesNombre[0]??""));
+        setApellidos(String(personales.apellidos??partesNombre.slice(1).join(" ")));
+        setCurp(String(personales.curp??""));
+        setTelefono(soloDigitos(String(personales.telefono??"").replace(/^\+?52/,"")));
+        setCodigoPostal(String(domicilio.codigo_postal??""));
+        setEstado(String(domicilio.estado??""));
+        setCiudad(String(domicilio.ciudad_municipio??""));
+        setColonia(String(domicilio.colonia??""));
+        if (domicilio.ciudad_municipio) setCiudades([String(domicilio.ciudad_municipio)]);
+        if (domicilio.colonia) setColonias([String(domicilio.colonia)]);
+        setCalle(String(domicilio.calle??""));
+        setNumero(String(domicilio.numero??""));
+        setReferencias(String(domicilio.referencias??""));
+        setNumeroLicencia(String(licencia.numero??""));
+        setTipoLicencia(String(licencia.tipo??""));
+        setVigenciaLicencia(String(licencia.vigencia??""));
+        setContactoEmergenciaNombre(String(contacto.nombre??""));
+        setContactoEmergenciaTelefono(soloDigitos(String(contacto.telefono??"")));
+        const consentimientos = new Set(consentimientosRemotos.map((fila) => fila.tipo_documento));
+        setAceptaTerminos(consentimientos.has("terminos_servicio"));
+        setConfirmaPrivacidad(consentimientos.has("aviso_privacidad"));
+        setAutorizaVerificacion(consentimientos.has("autorizacion_antecedentes"));
+        setDeclaraSinSuspensiones(consentimientos.has("declaracion_suspensiones"));
+        const aceptacion = consentimientosRemotos[0]?.aceptado_en;
+        if (aceptacion) aceptadosEnRef.current = aceptacion;
+        const tiposRemotos = new Set(docsRemotos.map((doc) => doc.tipo));
+        setDocumentosRemotos(tiposRemotos);
+        setEstadoDocumentos({
+          licenciaFrente:tiposRemotos.has("licencia_frente")?"subido":"pendiente",
+          licenciaReverso:tiposRemotos.has("licencia_reverso")?"subido":"pendiente",
+          identificacionOficial:tiposRemotos.has("identificacion_oficial")?"subido":"pendiente"
+        });
+        setSolicitudRemotaId(solicitud.id);
+        solicitudRemotaIdRef.current=solicitud.id;
+        setPaso(Math.min(Math.max((solicitud.paso_actual??1)-1,0),PASOS_REGISTRO.length-1));
+        omitirPrimerGuardadoRemotoRef.current=true;
+        hidratacionRemotaCompletaRef.current=true;
+        setEstadoGuardadoRemoto("guardado");
+      } catch (err) {
+        hidratacionRemotaCompletaRef.current=true;
+        registrarTelemetria("rpc_error",undefined,"recuperar_expediente");
+        setError(traducirErrorOperativo(err,"No pudimos recuperar tu expediente. Vuelve a intentarlo."));
+      }
+    }
+    void hidratar();
+    const {data:suscripcion}=cliente.auth.onAuthStateChange((evento)=>{
+      if (evento==="SIGNED_OUT") limpiarBorradorRegistroLocal();
+    });
+    return()=>{activo=false;suscripcion.subscription.unsubscribe();};
+  },[router,registrarTelemetria,descartarBorrador,setDocumentosRemotos,setEstadoDocumentos]);
+
+  useEffect(()=>{
+    const sinConexion=()=>setEstadoGuardadoRemoto("sin_conexion");
+    const conConexion=()=>{setEstadoGuardadoRemoto("guardado");setReintentoConexion((valor)=>valor+1);};
+    window.addEventListener("offline",sinConexion);
+    window.addEventListener("online",conConexion);
+    return()=>{window.removeEventListener("offline",sinConexion);window.removeEventListener("online",conConexion);};
+  },[]);
+
+  // RT-19 — un único lote remoto 900 ms después del último cambio.
+  useEffect(()=>{
+    if (!sesionAutenticada||!solicitudRemotaId||!hidratacionRemotaCompletaRef.current||enviado||pendienteOtp) return;
+    if (omitirPrimerGuardadoRemotoRef.current) { omitirPrimerGuardadoRemotoRef.current=false; return; }
+    if (!navigator.onLine) {
+      const offlineTimer=setTimeout(()=>setEstadoGuardadoRemoto("sin_conexion"),0);
+      return()=>clearTimeout(offlineTimer);
+    }
+    const expediente=contratoExpediente();
+    const consentimientos=[
+      aceptaTerminos?{tipoDocumento:"terminos_servicio" as const,version:1}:null,
+      confirmaPrivacidad?{tipoDocumento:"aviso_privacidad" as const,version:1}:null,
+      autorizaVerificacion?{tipoDocumento:"autorizacion_antecedentes" as const,version:1}:null,
+      declaraSinSuspensiones?{tipoDocumento:"declaracion_suspensiones" as const,version:1}:null
+    ].filter((valor):valor is NonNullable<typeof valor>=>valor!==null);
+    const firma=JSON.stringify({expediente,paso,consentimientos});
+    if (firma===ultimoGuardadoRemotoRef.current) return;
+    setEstadoGuardadoRemoto("guardando");
+    setDetalleGuardadoRemoto(null);
+    const timer=setTimeout(async()=>{
+      try {
+        const cliente=crearClienteNavegador();
+        if (consentimientos.length) await registrarConsentimientosConductor(cliente,solicitudRemotaId,consentimientos,canalRegistro(),VERSION_APP_REGISTRO);
+        await guardarBorradorConductor(cliente,expediente,paso+1);
+        ultimoGuardadoRemotoRef.current=firma;
+        setEstadoGuardadoRemoto("guardado");
+      } catch(err) {
+        registrarTelemetria("rpc_error",paso+1,"guardar_borrador");
+        const mensaje=traducirErrorOperativo(err);
+        setDetalleGuardadoRemoto(mensaje);
+        setEstadoGuardadoRemoto(navigator.onLine?"error":"sin_conexion");
+      }
+    },RETRASO_GUARDADO_REMOTO_MS);
+    return()=>clearTimeout(timer);
+  },[sesionAutenticada,solicitudRemotaId,enviado,pendienteOtp,reintentoConexion,paso,contratoExpediente,autorizaVerificacion,declaraSinSuspensiones,aceptaTerminos,confirmaPrivacidad,registrarTelemetria]);
+
+  function cerrarVerificacionDidit() {
+    setMostrarVerificacionDidit(false);
+    setUrlVerificacionDidit(null);
+    setErrorVerificacionDidit(null);
+    router.push(sesionActivaTrasRegistro ? "/panel" : "/login");
+  }
+
+  function reintentarVerificacionDidit() {
+    const id = solicitudRemotaIdRef.current ?? solicitudRemotaId;
+    if (!id) {
+      setErrorVerificacionDidit("No encontramos la solicitud activa para reintentar la verificación.");
+      return;
+    }
+    setErrorVerificacionDidit(null);
+    setIniciandoVerificacionDidit(true);
+    setMostrarVerificacionDidit(true);
+    (async () => {
+      try {
+        const cliente = crearClienteNavegador();
+        const { url } = await iniciarVerificacionDidit(cliente, id);
+        setUrlVerificacionDidit(url);
+      } catch (err) {
+        setErrorVerificacionDidit(traducirErrorOperativo(err, "No pudimos reintentar la verificación."));
+      } finally {
+        setIniciandoVerificacionDidit(false);
+      }
+    })();
+  }
+
+  function finalizarVerificacionDidit() {
+    setMostrarVerificacionDidit(false);
+    setUrlVerificacionDidit(null);
+    registrarTelemetria("didit_completado", PASOS_REGISTRO.length, "auto");
+    router.push(sesionActivaTrasRegistro ? "/panel" : "/login");
+  }
+
+  return (
+    <RegistrationShell>
+        {mostrarVerificacionDidit && (
+          <DiditVerificationModal
+            isOpen={mostrarVerificacionDidit}
+            url={urlVerificacionDidit}
+            cargando={iniciandoVerificacionDidit}
+            error={errorVerificacionDidit}
+            onCerrar={cerrarVerificacionDidit}
+            onReintentar={reintentarVerificacionDidit}
+            onFinalizar={finalizarVerificacionDidit}
+          />
+        )}
+        {pendienteOtp ? (
+          <OtpVerification
+            email={email}
+            codigoOtp={codigoOtp}
+            setCodigoOtp={setCodigoOtp}
+            errorOtp={errorOtp}
+            clearErrorOtp={() => setErrorOtp(null)}
+            verificandoOtp={verificandoOtp}
+            reenviandoOtp={reenviandoOtp}
+            esperaReenvioOtp={esperaReenvioOtp}
+            codigoLongitud={CODIGO_OTP_LONGITUD}
+            intentosFallidos={intentosFallidosOtp}
+            maxIntentos={MAX_INTENTOS_OTP}
+            onSubmit={confirmarCodigoOtp}
+            onResend={() => void reenviarCodigoOtp()}
+            onAlreadyConfirmed={() => router.push("/login")}
+          />
+        ) : enviado ? (
+          <div className="py-8 text-center">
+            <div className="mx-auto flex size-12 items-center justify-center rounded-full bg-control-soft font-display text-xl font-bold text-success" aria-hidden>✓</div>
+            <h1 id="titulo-registro-conductor" className="mt-5 font-display text-2xl font-bold text-text-primary">Solicitud en revisión</h1>
+            <p className="mt-3 font-body text-sm leading-6 text-text-tertiary/80">
+              Tu cuenta está pendiente de validación. Cuando la revisión esté completa, podrás consultar y aceptar Traslados.
+            </p>
+
+            {/* Tarjeta destacada de verificación de identidad con Didit */}
+            <div className="mt-6 rounded-2xl border border-route-action/30 bg-surface p-5 text-left shadow-sm">
+              <div className="flex items-start gap-3.5">
+                <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-route-soft text-lg text-route-action">
+                  🪪
+                </div>
+                <div className="min-w-0 flex-1">
+                  <h3 className="font-display text-base font-bold text-text-primary">
+                    Verificación de identidad automática
+                  </h3>
+                  <p className="mt-1 font-body text-xs leading-5 text-text-secondary">
+                    Agiliza la validación de tu cuenta completando la prueba de vida y validación biométrica con Didit.
+                  </p>
+                </div>
+              </div>
+              <div className="mt-4 flex flex-col sm:flex-row items-center gap-3">
+                <Button
+                  className="w-full sm:w-auto"
+                  onClick={() => {
+                    setMostrarVerificacionDidit(true);
+                    if (!urlVerificacionDidit) {
+                      reintentarVerificacionDidit();
+                    }
+                  }}
+                  disabled={iniciandoVerificacionDidit}
+                >
+                  {iniciandoVerificacionDidit ? "Iniciando verificación…" : "Completar verificación de identidad"}
+                </Button>
+                <Button
+                  variant="secondary"
+                  className="w-full sm:w-auto"
+                  onClick={() => router.push(sesionActivaTrasRegistro ? "/panel" : "/login")}
+                >
+                  {sesionActivaTrasRegistro ? "Ir al panel" : "Volver al acceso"}
+                </Button>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <>
+            <h1 id="titulo-registro-conductor" className="mt-8 font-display text-2xl font-bold text-text-primary">Registro de conductor</h1>
+        
+
+            <DraftRecoveryModal
+              isOpen={Boolean(borradorDisponible)}
+              guardadoEn={borradorDisponible?.guardadoEn}
+              onRestore={restaurarBorrador}
+              onDiscard={descartarBorrador}
+            />
+
+            <RegistrationProgress
+              paso={paso}
+              onGoToStep={setPaso}
+              borradorLocalGuardado={borradorLocalGuardado}
+              sesionAutenticada={sesionAutenticada}
+              estadoGuardadoRemoto={estadoGuardadoRemoto}
+              detalleGuardadoRemoto={detalleGuardadoRemoto}
+            />
+
+            {!tieneSupabaseConfigurado() && (
+              <div className="mt-5">
+                <Aviso tono="danger">Supabase no está configurado. El registro no está disponible en este entorno.</Aviso>
+              </div>
+            )}
+
+            <form className="mt-6 grid gap-5" onSubmit={crearCuenta}>
+              {paso === 0 && (
+                <AccountStep
+                  telefono={telefono}
+                  setTelefono={setTelefono}
+                  email={email}
+                  setEmail={setEmail}
+                  password={password}
+                  setPassword={setPassword}
+                  confirmacionPassword={confirmacionPassword}
+                  setConfirmacionPassword={setConfirmacionPassword}
+                  fuerzaPassword={fuerzaPassword}
+                  sesionAutenticada={sesionAutenticada}
+                  erroresCampos={erroresCampos}
+                  limpiarErrorCampo={limpiarErrorCampo}
+                  validarTelefono={validarTelefono}
+                  validarCampo={validarCampo}
+                  validarPassword={validarPassword}
+                  validarConfirmacion={validarConfirmacion}
+                />
+              )}
+
+              {paso === 1 && (
+                <IdentityStep
+                  nombre={nombre}
+                  setNombre={setNombre}
+                  apellidos={apellidos}
+                  setApellidos={setApellidos}
+                  curp={curp}
+                  setCurp={setCurp}
+                  codigoPostal={codigoPostal}
+                  setCodigoPostal={setCodigoPostal}
+                  estado={estado}
+                  setEstado={setEstado}
+                  ciudad={ciudad}
+                  setCiudad={setCiudad}
+                  ciudades={ciudades}
+                  setCiudades={setCiudades}
+                  colonia={colonia}
+                  setColonia={setColonia}
+                  colonias={colonias}
+                  setColonias={setColonias}
+                  calle={calle}
+                  setCalle={setCalle}
+                  numero={numero}
+                  setNumero={setNumero}
+                  referencias={referencias}
+                  setReferencias={setReferencias}
+                  contactoEmergenciaNombre={contactoEmergenciaNombre}
+                  setContactoEmergenciaNombre={setContactoEmergenciaNombre}
+                  contactoEmergenciaTelefono={contactoEmergenciaTelefono}
+                  setContactoEmergenciaTelefono={setContactoEmergenciaTelefono}
+                  consultandoCp={consultandoCp}
+                  erroresCampos={erroresCampos}
+                  limpiarErrorCampo={limpiarErrorCampo}
+                  validarCampo={validarCampo}
+                  validarCurp={validarCurp}
+                  validarTelefono={validarTelefono}
+                  buscarCodigoPostal={(cp) => void buscarCodigoPostal(cp)}
+                />
+              )}
+
+              {paso === 2 && (
+                <LicenseStep
+                  numeroLicencia={numeroLicencia}
+                  setNumeroLicencia={setNumeroLicencia}
+                  tipoLicencia={tipoLicencia}
+                  setTipoLicencia={setTipoLicencia}
+                  vigenciaLicencia={vigenciaLicencia}
+                  setVigenciaLicencia={setVigenciaLicencia}
+                  autorizaVerificacion={autorizaVerificacion}
+                  setAutorizaVerificacion={setAutorizaVerificacion}
+                  declaraSinSuspensiones={declaraSinSuspensiones}
+                  setDeclaraSinSuspensiones={setDeclaraSinSuspensiones}
+                  erroresCampos={erroresCampos}
+                  limpiarErrorCampo={limpiarErrorCampo}
+                  validarCampo={validarCampo}
+                  validarVigenciaLicencia={validarVigenciaLicencia}
+                />
+              )}
+
+              {paso === 3 && (
+                <DocumentsStep
+                  sesionAutenticada={sesionAutenticada}
+                  documentos={documentos}
+                  estadoDocumentos={estadoDocumentos}
+                  erroresCampos={erroresCampos}
+                  cambiarDocumento={cambiarDocumento}
+                />
+              )}
+
+              {paso === 4 && (
+                <ReviewStep
+                  telefono={telefono}
+                  email={email}
+                  sesionAutenticada={sesionAutenticada}
+                  nombreCompleto={nombreCompleto}
+                  curp={curp}
+                  calle={calle}
+                  numero={numero}
+                  colonia={colonia}
+                  ciudad={ciudad}
+                  estado={estado}
+                  codigoPostal={codigoPostal}
+                  referencias={referencias}
+                  contactoEmergenciaTelefono={contactoEmergenciaTelefono}
+                  numeroLicencia={numeroLicencia}
+                  tipoLicencia={tipoLicencia}
+                  vigenciaLicencia={vigenciaLicencia}
+                  autorizaVerificacion={autorizaVerificacion}
+                  declaraSinSuspensiones={declaraSinSuspensiones}
+                  documentos={documentos}
+                  documentosRemotos={documentosRemotos}
+                  aceptaTerminos={aceptaTerminos}
+                  setAceptaTerminos={setAceptaTerminos}
+                  confirmaPrivacidad={confirmaPrivacidad}
+                  setConfirmaPrivacidad={setConfirmaPrivacidad}
+                  erroresCampos={erroresCampos}
+                  limpiarErrorCampo={limpiarErrorCampo}
+                  onEditar={setPaso}
+                />
+              )}
+
+              {error && <Aviso tono="danger">{error}</Aviso>}
+
+              {paso === PASOS_REGISTRO.length - 1 && !puedeEnviar && (
+                <Aviso tono="atencion">
+                  Para enviar tu registro aún te falta: {camposFaltantes().join(", ")}.
+                </Aviso>
+              )}
+
+              <div className="grid gap-3 sm:grid-cols-2">
+                {paso > 0 && <Button type="button" variant="secondary" onClick={volver}>Atrás</Button>}
+                {paso < PASOS_REGISTRO.length - 1 ? (
+                  <Button
+                    type="button"
+                    className={[
+                      "min-h-12 min-w-12 px-6 py-3.5 font-display text-base font-bold leading-6",
+                      "shadow-sm hover:-translate-y-0.5 hover:shadow-md active:translate-y-0",
+                      "focus-visible:outline-route-action focus-visible:outline-[3px] focus-visible:outline-offset-2",
+                      paso === 0 ? "sm:col-start-2 w-full" : "w-full"
+                    ].join(" ")}
+                    onClick={avanzar}
+                    loading={enviando}
+                    disabled={enviando}
+                  >
+                    {paso === 0 && !sesionAutenticada ? "Crear cuenta y continuar" : "Continuar"}
+                  </Button>
+                ) : (
+                  <Button
+                    type="submit"
+                    disabled={!puedeEnviar || !tieneSupabaseConfigurado()}
+                    loading={enviando}
+                    className={[
+                      "w-full min-h-12 px-6 py-3.5 font-display text-base font-bold leading-6",
+                      "shadow-sm hover:-translate-y-0.5 hover:shadow-md active:translate-y-0",
+                      "focus-visible:outline-route-action focus-visible:outline-[3px] focus-visible:outline-offset-2"
+                    ].join(" ")}
+                  >
+                    {enviando ? TEXTOS_CARGANDO.enviando : "Enviar registro"}
+                  </Button>
+                )}
+              </div>
+            </form>
+
+            <p className="mt-6 text-center font-body text-sm text-text-secondary">
+              ¿Ya tienes cuenta?{" "}
+              <button type="button" onClick={() => router.push("/login")} className="inline-flex min-h-11 items-center font-semibold text-route-action hover:underline">
+                Inicia sesión
+              </button>
+            </p>
+          </>
+        )}
+    </RegistrationShell>
+  );
+}
