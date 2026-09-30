@@ -1,0 +1,7 @@
+// Fixture positivo con secretos sintéticos para pruebas de detección del scanner
+export const liveStripeKey = "sk_live_51AbcDefGhIjKlMnOpQrStUvWxYz1234567890";
+export const stripeWebhookSecret = "whsec_abcdef1234567890abcdef1234567890";
+export const resendApiKey = "re_12345678_abcdefghijklmnopqrstuvwxyz";
+export const mapboxSecretToken = "sk.eyJ1IjoiY2kiLCJhIjoiY2lfdGVzdF90b2tlbiJ9.1234567890abcdef1234567890abcdef";
+export const e2ePasswordComprometida = "CompromisedTestPass2026!";
+export const rawServiceRole = "SUPABASE_SERVICE_ROLE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoic2VydmljZV9yb2xlIiwiaXNzIjoic3VwYWJhc2UifQ.signature1234567890abcdef1234567890'";
