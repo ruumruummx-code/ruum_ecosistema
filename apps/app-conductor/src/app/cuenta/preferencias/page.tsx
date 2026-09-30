@@ -176,7 +176,7 @@ export default function PaginaPreferenciasCuenta() {
   const [cargando, setCargando] = useState(true);
   const [guardandoAuto, setGuardandoAuto] = useState(false);
   const [pendiente, setPendiente] = useState(false);
-  const [temaSeleccionado, setTemaSeleccionado] = useState<"auto" | "light" | "dark">("dark");
+  const [temaSeleccionado, setTemaSeleccionado] = useState<"auto" | "light" | "dark">("light");
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -184,7 +184,9 @@ export default function PaginaPreferenciasCuenta() {
       if (stored) {
         setTemaSeleccionado(stored);
       } else {
-        setTemaSeleccionado("auto");
+        setTemaSeleccionado("light");
+        localStorage.setItem("ruum-theme", "light");
+        document.documentElement.setAttribute("data-theme", "light");
       }
     }
   }, []);
@@ -193,9 +195,8 @@ export default function PaginaPreferenciasCuenta() {
     setTemaSeleccionado(nuevoTema);
     if (typeof window !== "undefined") {
       if (nuevoTema === "auto") {
-        localStorage.removeItem("ruum-theme");
-        const matchesLight = window.matchMedia && window.matchMedia("(prefers-color-scheme: light)").matches;
-        document.documentElement.setAttribute("data-theme", matchesLight ? "light" : "dark");
+        localStorage.setItem("ruum-theme", "light");
+        document.documentElement.setAttribute("data-theme", "light");
       } else {
         localStorage.setItem("ruum-theme", nuevoTema);
         document.documentElement.setAttribute("data-theme", nuevoTema);

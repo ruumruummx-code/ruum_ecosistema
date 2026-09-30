@@ -22,11 +22,6 @@ const TemaCtx = createContext<TemaContexto>({
   fijarModo: () => {}
 });
 
-function prefiereOscuro(): boolean {
-  if (typeof window === "undefined" || !window.matchMedia) return false;
-  return window.matchMedia("(prefers-color-scheme: dark)").matches;
-}
-
 function obtenerTemaAlmacenado(): Tema | null {
   if (typeof window === "undefined") return null;
   for (const key of STORAGE_KEYS) {
@@ -73,7 +68,7 @@ function guardarModo(m: ModoTema) {
 
 function resolverTema(modo: ModoTema): Tema {
   if (modo === "light" || modo === "dark") return modo;
-  return prefiereOscuro() ? "dark" : "light";
+  return "light";
 }
 
 function aplicarTema(t: Tema) {
@@ -89,7 +84,7 @@ export function TemaProvider({ children }: { children: React.ReactNode }) {
   const [tema, setTema] = useState<Tema>("light");
 
   useEffect(() => {
-    // Spec Dark Mode §5.4: manual prevalece; sistema en oscuro → oscuro; sin preferencia → claro.
+    // Por defecto se usa tema claro; solo una selección manual activa el tema oscuro.
     const modoGuardado = obtenerModoAlmacenado();
     const temaGuardado = obtenerTemaAlmacenado();
     const inicial: ModoTema = modoGuardado ?? (temaGuardado ?? "auto");
@@ -98,19 +93,6 @@ export function TemaProvider({ children }: { children: React.ReactNode }) {
     setTema(resuelto);
     aplicarTema(resuelto);
 
-    function alCambiarSistema(e: MediaQueryListEvent) {
-      // El toggle manual prevalece; solo se sigue al sistema en modo automático.
-      if (obtenerModoAlmacenado() || obtenerTemaAlmacenado()) return;
-      const nuevoTema: Tema = e.matches ? "dark" : "light";
-      setTema(nuevoTema);
-      aplicarTema(nuevoTema);
-    }
-
-    const mq = typeof window !== "undefined" && window.matchMedia ? window.matchMedia("(prefers-color-scheme: dark)") : null;
-    if (mq?.addEventListener) {
-      mq.addEventListener("change", alCambiarSistema);
-      return () => mq.removeEventListener("change", alCambiarSistema);
-    }
   }, []);
 
   const fijarModo = useCallback((m: ModoTema) => {
