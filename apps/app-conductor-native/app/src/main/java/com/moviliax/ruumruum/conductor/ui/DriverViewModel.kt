@@ -7,6 +7,7 @@ import com.moviliax.ruumruum.conductor.data.Availability
 import com.moviliax.ruumruum.conductor.data.Driver
 import com.moviliax.ruumruum.conductor.data.DriverDocument
 import com.moviliax.ruumruum.conductor.data.DriverRepository
+import com.moviliax.ruumruum.conductor.data.EvidencePhoto
 import com.moviliax.ruumruum.conductor.data.Payout
 import com.moviliax.ruumruum.conductor.data.Trip
 import kotlinx.coroutines.async
@@ -27,6 +28,12 @@ data class DriverUiState(
     val acceptedTrips: List<Trip> = emptyList(),
     val payouts: List<Payout> = emptyList(),
     val documents: List<DriverDocument> = emptyList(),
+    val evidenceTripId: String? = null,
+    val evidenceType: String? = null,
+    val evidencePhotos: List<EvidencePhoto> = emptyList(),
+    val evidenceLoading: Boolean = false,
+    val evidenceSaving: Boolean = false,
+    val uploadingDocumentType: String? = null,
     val error: String? = null,
     val notice: String? = null,
 )
@@ -108,6 +115,75 @@ class DriverViewModel : ViewModel() {
                 refresh()
             }
             .onFailure { failure(it, "No pudimos solicitar este viaje.") }
+        _state.update { it.copy(loading = false) }
+    }
+
+    fun loadEvidence(tripId: String, type: String) = viewModelScope.launch {
+        _state.update { it.copy(evidenceTripId = tripId, evidenceType = type, evidenceLoading = true, error = null) }
+        runCatching { repository.evidencePhotos(tripId, type) }
+            .onSuccess { photos ->
+                _state.update { it.copy(evidencePhotos = photos, evidenceLoading = false) }
+            }
+            .onFailure { failure(it, "No pudimos cargar la evidencia del traslado.") }
+        _state.update { it.copy(evidenceLoading = false) }
+    }
+
+    fun captureEvidence(tripId: String, type: String, angle: String, bytes: ByteArray) = viewModelScope.launch {
+        _state.update { it.copy(evidenceSaving = true, error = null, notice = null) }
+        runCatching { repository.captureEvidence(tripId, type, angle, bytes) }
+            .onSuccess {
+                _state.update { it.copy(notice = "Fotografía de ${angle.replace('_', ' ')} guardada.") }
+                loadEvidence(tripId, type)
+            }
+            .onFailure { failure(it, "No pudimos guardar la fotografía.") }
+        _state.update { it.copy(evidenceSaving = false) }
+    }
+
+    fun confirmEvidence(tripId: String, type: String) = viewModelScope.launch {
+        _state.update { it.copy(loading = true, error = null, notice = null) }
+        runCatching { repository.confirmEvidence(tripId, type) }
+            .onSuccess {
+                _state.update { it.copy(notice = "Registro ${type} completado.") }
+                refresh()
+            }
+            .onFailure { failure(it, "No pudimos completar la evidencia.") }
+        _state.update { it.copy(loading = false) }
+    }
+
+    fun uploadDocument(type: String, fileName: String, mimeType: String, bytes: ByteArray) = viewModelScope.launch {
+        val driver = _state.value.driver ?: return@launch
+        val previousId = _state.value.documents
+            .filter { it.tipo == type && it.esActual }
+            .maxByOrNull { it.version }?.id
+        _state.update { it.copy(uploadingDocumentType = type, error = null, notice = null) }
+        runCatching { repository.uploadDocument(driver.id, type, fileName, mimeType, bytes, previousId) }
+            .onSuccess {
+                _state.update { it.copy(notice = "Documento cargado y enviado a revisión.") }
+                refresh()
+            }
+            .onFailure { failure(it, "No pudimos registrar el documento.") }
+        _state.update { it.copy(uploadingDocumentType = null) }
+    }
+
+    fun advanceTrip(tripId: String, event: String) = viewModelScope.launch {
+        _state.update { it.copy(loading = true, error = null, notice = null) }
+        runCatching { repository.advanceTrip(tripId, event) }
+            .onSuccess {
+                _state.update { it.copy(notice = "Estado del traslado actualizado.") }
+                refresh()
+            }
+            .onFailure { failure(it, "No pudimos actualizar el traslado.") }
+        _state.update { it.copy(loading = false) }
+    }
+
+    fun confirmDestinationArrival(tripId: String) = viewModelScope.launch {
+        _state.update { it.copy(loading = true, error = null, notice = null) }
+        runCatching { repository.confirmDestinationArrival(tripId) }
+            .onSuccess {
+                _state.update { it.copy(notice = "Llegada al destino registrada.") }
+                refresh()
+            }
+            .onFailure { failure(it, "No pudimos confirmar la llegada al destino.") }
         _state.update { it.copy(loading = false) }
     }
 

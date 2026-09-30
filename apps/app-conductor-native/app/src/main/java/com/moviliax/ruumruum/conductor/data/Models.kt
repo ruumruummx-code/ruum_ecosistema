@@ -11,6 +11,7 @@ data class Driver(
     val telefono: String? = null,
     val estado: String,
     @SerialName("estado_expediente") val estadoExpediente: String,
+    @SerialName("licencia_vigencia") val licenciaVigencia: String? = null,
     @SerialName("documentos_vigentes") val documentosVigentes: Boolean = false,
     @SerialName("traslados_completados") val trasladosCompletados: Int = 0,
     @SerialName("calificacion_promedio") val calificacionPromedio: Double = 0.0,
@@ -61,6 +62,36 @@ data class DriverDocument(
     @SerialName("expira_en") val expiraEn: String? = null,
     @SerialName("motivo_rechazo") val motivoRechazo: String? = null,
     @SerialName("es_actual") val esActual: Boolean = true,
+    @SerialName("version") val version: Int = 1,
+    @SerialName("notas_admin") val notasAdmin: String? = null,
+    @SerialName("creado_en") val creadoEn: String? = null,
+)
+
+@Serializable
+data class EvidencePhoto(
+    val id: String,
+    @SerialName("traslado_id") val tripId: String,
+    val tipo: String,
+    val angulo: String,
+    val url: String? = null,
+    @SerialName("capturada_en") val capturedAt: String,
+    val sincronizada: Boolean = true,
+)
+
+@Serializable
+data class EvidenceInsert(
+    val id: String,
+    @SerialName("traslado_id") val tripId: String,
+    val tipo: String,
+    val angulo: String,
+    val url: String,
+    @SerialName("capturada_en") val capturedAt: String,
+    val sincronizada: Boolean = true,
+)
+
+@Serializable
+data class OpenIncidentSummary(
+    val tipo: String,
 )
 
 @Serializable

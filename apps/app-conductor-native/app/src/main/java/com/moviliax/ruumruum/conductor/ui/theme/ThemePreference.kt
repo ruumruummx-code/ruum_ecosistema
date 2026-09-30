@@ -27,8 +27,8 @@ fun rememberRuumThemePreference(): RuumThemePreference {
     return remember {
         val preferences = context.getSharedPreferences("ruum_conductor_preferences", Context.MODE_PRIVATE)
         val initial = runCatching {
-            RuumThemeMode.valueOf(preferences.getString("theme_mode", RuumThemeMode.SYSTEM.name).orEmpty())
-        }.getOrDefault(RuumThemeMode.SYSTEM)
+            RuumThemeMode.valueOf(preferences.getString("theme_mode", RuumThemeMode.LIGHT.name).orEmpty())
+        }.getOrDefault(RuumThemeMode.LIGHT)
         RuumThemePreference(initial) { mode ->
             preferences.edit().putString("theme_mode", mode.name).apply()
         }
