@@ -46,16 +46,6 @@ function IconoTraslados({ className }: { className?: string }) {
   );
 }
 
-function IconoAyuda({ className }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden="true">
-      <circle cx="12" cy="12" r="10" />
-      <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
-      <circle cx="12" cy="17" r=".5" fill="currentColor" />
-    </svg>
-  );
-}
-
 function IconoCuenta({ className }: { className?: string }) {
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden="true">
@@ -67,8 +57,7 @@ function IconoCuenta({ className }: { className?: string }) {
 
 const DESTINOS = [
   { href: "/", etiqueta: "Inicio", Icono: IconoHome },
-  { href: "/mis-Traslados", etiqueta: "Traslados", Icono: IconoTraslados },
-  { href: "/soporte", etiqueta: "Ayuda", Icono: IconoAyuda },
+  { href: "/mis-viajes", etiqueta: "Traslados", Icono: IconoTraslados },
   { href: "/cuenta", etiqueta: "Cuenta", Icono: IconoCuenta },
 ] as const;
 
@@ -170,7 +159,7 @@ export function NavegacionUsuario({
             : "fixed inset-x-0 bottom-0 z-40 border-t border-white/10 bg-[var(--ruum-navy)] pb-[max(10px,env(safe-area-inset-bottom))] pt-1.5 shadow-[var(--ruum-elevation-2)] backdrop-blur-md"}
         >
           <div className={esClaro ? "user-v2-shell-nav-inner" : "mx-auto w-full max-w-[430px] px-2"}>
-            <div className="grid grid-cols-4 items-center">
+            <div className="grid grid-cols-3 items-center">
               {DESTINOS.map((destino) => {
                 const activo = estaActivo(pathname, destino.href);
                 return (

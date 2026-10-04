@@ -1460,3 +1460,121 @@ summary:focus-visible {
     width: min(calc(100% - 48px), 760px);
   }
 }
+
+/* Login usuario: presentación clara inspirada en el mockup móvil. */
+.login-usuario {
+  --login-navy: #0d2b5e;
+  --login-muted: #5f7192;
+  --login-line: #dce8f5;
+  width: 100%;
+  color: var(--login-navy);
+}
+
+.login-usuario__brand {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 88px;
+}
+
+.login-usuario__brand > span {
+  width: 112px;
+  height: 88px;
+}
+
+.login-usuario__brand img {
+  width: 112px !important;
+  height: 88px !important;
+  object-fit: contain;
+}
+
+.login-usuario__card {
+  border-color: #e2edf8;
+  background: #fff;
+}
+
+.login-usuario__card label {
+  color: #334155;
+}
+
+.login-usuario__card input {
+  min-height: 56px;
+  border: 2px solid #8191a5;
+  border-radius: 17px;
+  background: #fff;
+  color: #142d50;
+  padding-left: 48px;
+}
+
+.login-usuario__card input::placeholder {
+  color: #718096;
+  opacity: 1;
+}
+
+.login-usuario__card input:focus {
+  border-color: #1677ff;
+  box-shadow: 0 0 0 3px rgb(22 119 255 / 15%);
+}
+
+.login-usuario__card input[aria-invalid="true"] {
+  border-color: var(--ruum-danger);
+}
+
+.login-usuario__card [data-ruum-label="Contraseña"] + div input {
+  padding-right: 52px;
+}
+
+.login-usuario__card [data-ruum-label="Contraseña"] + div {
+  position: relative;
+}
+
+.login-usuario__card [data-ruum-label="Contraseña"] + div::before {
+  position: absolute;
+  z-index: 1;
+  left: 17px;
+  width: 19px;
+  height: 19px;
+  content: "";
+  pointer-events: none;
+  background: currentColor;
+  color: #6b7d93;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='4' y='10' width='16' height='11' rx='2'/%3E%3Cpath d='M8 10V7a4 4 0 0 1 8 0v3'/%3E%3C/svg%3E") center / contain no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='4' y='10' width='16' height='11' rx='2'/%3E%3Cpath d='M8 10V7a4 4 0 0 1 8 0v3'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+
+.login-usuario__submit {
+  background: linear-gradient(100deg, #00a99d 0%, #0877f9 100%);
+  box-shadow: 0 8px 18px rgb(22 119 255 / 18%);
+}
+
+.login-usuario__divider > span {
+  height: 1px;
+  flex: 1;
+  background: var(--login-line);
+}
+
+.login-usuario__register {
+  border-color: #172b40;
+  color: #111827;
+  background: #fff;
+}
+
+.login-usuario__register:hover {
+  border-color: #1677ff;
+  background: #f4f8ff;
+}
+
+@media (min-height: 800px) {
+  .login-usuario__benefits {
+    padding-top: clamp(2.5rem, 8vh, 7rem);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .login-usuario *,
+  .login-usuario *::before,
+  .login-usuario *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+}

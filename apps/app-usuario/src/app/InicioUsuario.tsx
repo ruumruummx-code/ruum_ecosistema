@@ -55,12 +55,20 @@ function IconoPortapapeles({ className = "size-7" }: { className?: string }) {
   );
 }
 
-function IconoAyuda({ className = "size-7" }: { className?: string }) {
+function IconoHistorial({ className = "size-7" }: { className?: string }) {
   return (
     <svg className={className} viewBox="0 0 32 32" fill="none" aria-hidden="true">
       <circle cx="16" cy="16" r="11" stroke="currentColor" strokeWidth="1.8" />
-      <path d="M12.8 12.5a3.4 3.4 0 1 1 5.9 2.3c-1.1 1.2-2.7 1.8-2.7 3.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
-      <circle cx="16" cy="22" r="1" fill="currentColor" />
+      <path d="M16 10.5V16l4 2.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+function IconoEscudo({ className = "size-5" }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path d="M12 3 5 5.8v5.4c0 4.3 2.9 7.4 7 9 4.1-1.6 7-4.7 7-9V5.8L12 3Z" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round" />
+      <path d="m9 11.5 2.2 2.2L15.5 9.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );
 }
@@ -87,9 +95,12 @@ export function InicioUsuario({ usuario, traslados, conductorFotoUrl = null }: I
 
   return (
     <div className="user-v2-screen">
-      <section id="greetingBlock" aria-labelledby="saludo-usuario">
-        <h1 id="saludo-usuario" className="sr-only">{saludo}</h1>
-        <p className="user-v2-body user-v2-muted mt-1">Gestiona tus traslados fácilmente.</p>
+      <section id="greetingBlock" aria-labelledby="saludo-usuario" className="text-center">
+        <p className="user-v2-caption user-v2-muted font-semibold uppercase tracking-widest">{saludo}</p>
+        <h1 id="saludo-usuario" className="user-v2-heading-1 mt-2 text-balance">
+          Mueve tu auto sin soltar el control.
+        </h1>
+        <p className="user-v2-body user-v2-muted mt-2">Solicita tu traslado, sigue su estatus y conserva la evidencia.</p>
       </section>
 
       <Link id="requestTransferButton" href="/viajes/nuevo" className="user-v2-primary-button group flex items-center justify-between px-4">
@@ -147,11 +158,18 @@ export function InicioUsuario({ usuario, traslados, conductorFotoUrl = null }: I
               </div>
             </dl>
             <Link
-              href={viajeActivo.traslado_id ? `/viajes/${viajeActivo.traslado_id}` : "/mis-Traslados"}
+              href={viajeActivo.traslado_id ? `/viajes/${viajeActivo.traslado_id}` : "/mis-viajes"}
               className="user-v2-secondary-button group mt-5 flex items-center justify-between px-3.5"
             >
               <span>{viajeActivo.vehiculo_tipo ? ETIQUETA_TIPO_VEHICULO[viajeActivo.vehiculo_tipo] ?? "Ver seguimiento" : "Ver seguimiento"}</span>
               <IconoChevron className="size-4 transition-transform group-hover:translate-x-0.5" />
+            </Link>
+            <Link
+              href="/soporte"
+              aria-label="Contactar a soporte sobre tu traslado activo"
+              className="user-v2-ghost-button mt-2 flex min-h-11 items-center justify-center gap-2 px-3.5 text-center"
+            >
+              <span>¿Necesitas ayuda con este traslado? Contactar a soporte</span>
             </Link>
           </>
         ) : (
@@ -172,6 +190,17 @@ export function InicioUsuario({ usuario, traslados, conductorFotoUrl = null }: I
       <section id="quickActions" aria-labelledby="acciones-rapidas">
         <h2 id="acciones-rapidas" className="user-v2-heading-2">Acciones rápidas</h2>
         <div className="mt-3 grid grid-cols-2 gap-3">
+          <Link id="quickActionHistory" href="/mis-viajes" className="user-v2-card user-v2-card-interactive group flex min-h-[144px] flex-col p-4">
+            <span className="user-v2-icon-well size-11">
+              <IconoHistorial className="size-7" />
+            </span>
+            <span className="mt-auto block">
+              <span className="user-v2-card-title block">Ver historial</span>
+              <span className="user-v2-caption user-v2-muted mt-1 block">Activos, programados, finalizados y cancelados.</span>
+            </span>
+            <span className="mt-2 flex justify-end text-[var(--user-color-brand-dark)] transition-transform group-hover:translate-x-0.5"><IconoChevron className="size-4" /></span>
+          </Link>
+
           <Link id="quickActionPassport" href="/pasaporte" className="user-v2-card user-v2-card-interactive group flex min-h-[144px] flex-col p-4">
             <span className="user-v2-icon-well size-11 text-[var(--user-color-brand-dark)]">
               <IconoPortapapeles className="size-7" />
@@ -182,17 +211,18 @@ export function InicioUsuario({ usuario, traslados, conductorFotoUrl = null }: I
             </span>
             <span className="mt-2 flex justify-end text-[var(--user-color-brand-dark)] transition-transform group-hover:translate-x-0.5"><IconoChevron className="size-4" /></span>
           </Link>
+        </div>
+      </section>
 
-          <Link id="quickActionHelpCenter" href="/soporte" className="user-v2-card user-v2-card-interactive group flex min-h-[144px] flex-col p-4">
-            <span className="user-v2-icon-well size-11">
-              <IconoAyuda className="size-7" />
-            </span>
-            <span className="mt-auto block">
-              <span className="user-v2-card-title block">Centro de ayuda</span>
-              <span className="user-v2-caption user-v2-muted mt-1 block">Encuentra respuestas y asistencia rápida.</span>
-            </span>
-            <span className="mt-2 flex justify-end text-[var(--user-color-brand-dark)] transition-transform group-hover:translate-x-0.5"><IconoChevron className="size-4" /></span>
-          </Link>
+      <section aria-label="Seguridad y confianza" className="user-v2-card flex items-start gap-3 p-4">
+        <span className="user-v2-icon-well size-11 shrink-0" aria-hidden="true">
+          <IconoEscudo className="size-7" />
+        </span>
+        <div>
+          <h2 className="user-v2-card-title">Traslados con evidencia y seguimiento</h2>
+          <p className="user-v2-caption user-v2-muted mt-1">
+            Conductores certificados, evidencia fotográfica y seguimiento del estatus en todo momento.
+          </p>
         </div>
       </section>
 

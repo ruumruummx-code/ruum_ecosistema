@@ -28,7 +28,7 @@ export function LoginCliente({ motivo, siguiente }: LoginClienteProps) {
   const errorCorreo = !correoNormalizado
     ? "Introduce tu correo electrónico."
     : !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(correoNormalizado)
-      ? "Introduce un correo válido, como correo@ejemplo.com."
+      ? "Introduce un correo válido, como correo@ejemplo.com. El acceso está disponible con correo electrónico."
       : undefined;
   const errorPassword = password.length === 0 ? "Introduce tu contraseña." : undefined;
 
@@ -74,8 +74,8 @@ export function LoginCliente({ motivo, siguiente }: LoginClienteProps) {
     return (
       <PantallaPublica>
         <section className="flex min-h-screen flex-col px-5 py-12 text-center">
-          <LogoRuum className="mx-auto" />
-          <h1 className="mt-16 font-display text-2xl font-extrabold">Accede a tu cuenta</h1>
+          <LoginMarca />
+          <h1 className="mt-12 font-display text-2xl font-extrabold">Accede a tu cuenta</h1>
           <div className="mt-6">
             <Aviso tono="danger">
               Supabase no está configurado todavía. El inicio de sesión no está disponible en este entorno.
@@ -88,42 +88,40 @@ export function LoginCliente({ motivo, siguiente }: LoginClienteProps) {
 
   return (
     <PantallaPublica>
-      <section className="flex min-h-screen flex-col px-5 py-8 sm:py-10">
-        <LogoRuum className="mx-auto text-center" />
+      <section className="login-usuario flex min-h-screen flex-col px-5 pb-[max(24px,env(safe-area-inset-bottom))] pt-9 sm:py-10">
+        <LoginMarca />
+        <header className="mt-6 text-center">
+          <h1 className="font-display text-3xl font-extrabold leading-tight tracking-tight text-text-primary sm:text-4xl">Ruum Ruum</h1>
+          <p className="mt-1.5 font-display text-lg font-semibold text-text-secondary sm:text-xl">Tu traslado, en orden.</p>
+          <p className="mt-4 font-body text-sm leading-6 text-text-secondary">Seguridad, evidencia y trazabilidad en cada viaje.</p>
+        </header>
 
-        <Link href="/" className="mt-5 inline-flex min-h-11 items-center self-start rounded font-body text-xs text-text-secondary transition hover:text-text-primary focus-visible:outline-focus">
-          ← Atrás
-        </Link>
+        {motivo === "email_confirmation" && (
+          <div className="mt-5" role="status">
+            <Aviso tono="atencion">
+              Para solicitar tu primer traslado debes confirmar tu correo e iniciar sesión.
+            </Aviso>
+          </div>
+        )}
+        {motivo === "authentication_required" && (
+          <div className="mt-5" role="status">
+            <Aviso tono="atencion">
+              Inicia sesión para solicitar un traslado. Si acabas de registrarte, confirma primero tu correo.
+            </Aviso>
+          </div>
+        )}
 
-        <div className="mt-2 rounded-card border border-border bg-surface px-5 py-7 shadow-[var(--ruum-shadow-3)]">
-          <h1 className="font-display text-2xl font-extrabold leading-tight text-text-primary">Accede a tu cuenta</h1>
-          <p className="mt-2 font-body text-sm leading-6 text-text-secondary">
-            Consulta tus traslados y solicita nuevos servicios.
-          </p>
-          {motivo === "email_confirmation" && (
-            <div className="mt-4" role="status">
-              <Aviso tono="atencion">
-                Para solicitar tu primer traslado debes confirmar tu correo e iniciar sesión.
-              </Aviso>
-            </div>
-          )}
-          {motivo === "authentication_required" && (
-            <div className="mt-4" role="status">
-              <Aviso tono="atencion">
-                Inicia sesión para solicitar un traslado. Si acabas de registrarte, confirma primero tu correo.
-              </Aviso>
-            </div>
-          )}
-
-          <form className="mt-7 grid gap-4" onSubmit={iniciarSesion} noValidate>
+        <div className="login-usuario__card mt-8 rounded-[24px] border border-border bg-surface px-5 py-6 shadow-[0_12px_32px_rgba(22,119,255,0.12)] sm:px-7">
+          <h2 className="sr-only">Accede a tu cuenta</h2>
+          <form className="grid gap-5" onSubmit={iniciarSesion} noValidate>
             <div className="relative">
               <Field
                 ref={correoRef}
                 id="login-email"
                 name="email"
-                etiqueta="Correo electrónico"
+                etiqueta="Correo o teléfono"
                 etiquetaClassName="leading-5"
-                type="email"
+                type="text"
                 value={email}
                 onChange={(e) => { setEmail(e.target.value); setError(null); }}
                 onBlur={() => setTocados((actual) => ({ ...actual, email: true }))}
@@ -134,7 +132,7 @@ export function LoginCliente({ motivo, siguiente }: LoginClienteProps) {
                 spellCheck={false}
                 inputMode="email"
                 className="pl-11"
-                placeholder="correo@ejemplo.com"
+                placeholder="tu@correo.com"
               />
               <svg className="pointer-events-none absolute left-3.5 top-[41px] size-5 text-text-secondary" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                 <rect x="3" y="5" width="18" height="14" rx="3" />
@@ -146,6 +144,7 @@ export function LoginCliente({ motivo, siguiente }: LoginClienteProps) {
               id="login-password"
               name="password"
               etiqueta="Contraseña"
+              etiquetaClassName="text-base font-medium"
               type="password"
               passwordToggleClassName="text-text-secondary hover:bg-surface-elevated hover:text-text-primary focus-visible:outline-focus"
               value={password}
@@ -154,13 +153,13 @@ export function LoginCliente({ motivo, siguiente }: LoginClienteProps) {
               error={tocados.password ? errorPassword : undefined}
               required
               autoComplete="current-password"
-              placeholder="Tu contraseña"
+              placeholder="••••••••"
             />
 
             <div className="flex justify-end">
               <Link
                 href="/recuperar-password"
-                className="font-body text-xs text-route-action underline-offset-2 hover:underline"
+                className="font-body text-sm font-medium text-route-action underline underline-offset-4 hover:text-text-primary"
               >
                 ¿Olvidaste tu contraseña?
               </Link>
@@ -172,25 +171,42 @@ export function LoginCliente({ motivo, siguiente }: LoginClienteProps) {
               </div>
             )}
 
-            <button type="submit" disabled={enviando} className={`${botonAzul} mt-2`}>
+            <button type="submit" disabled={enviando} className={`${botonAzul} login-usuario__submit mt-1 min-h-[60px] rounded-2xl text-lg font-semibold text-white`}>
               {enviando ? "Entrando..." : "Entrar"}
             </button>
           </form>
         </div>
 
-        <Link href="/registro" className={`${botonContorno} mt-4`}>
+        <div className="login-usuario__divider mt-5 flex items-center gap-4 font-body text-sm font-semibold text-text-secondary" aria-hidden="true"><span />o<span /></div>
+        <Link href="/registro" className={`${botonContorno} login-usuario__register mt-4 min-h-[56px] rounded-2xl border-2 text-base font-bold`}>
           Registrarme
         </Link>
-        <div className="mt-7 text-center font-body text-sm leading-6 text-text-secondary">
-          <p className="font-semibold text-text-primary">Gestiona tus traslados en tiempo real.</p>
-          <p>Seguimiento de vehículos y solicitudes.</p>
+        <div className="login-usuario__benefits mt-auto pt-10">
+          <ul className="flex flex-wrap items-center justify-center gap-x-3 gap-y-2 rounded-full border border-[var(--ruum-teal)] bg-[color-mix(in_srgb,var(--ruum-teal)_12%,white)] px-3 py-3 font-body text-[11px] font-medium text-text-primary sm:text-xs">
+            <li className="inline-flex items-center gap-1"><CheckIcon />Conductor certificado</li>
+            <li className="inline-flex items-center gap-1"><CheckIcon />Evidencia en cada etapa</li>
+            <li className="inline-flex items-center gap-1"><CheckIcon />Soporte humano</li>
+          </ul>
+          <p className="mt-4 text-center font-body text-xs leading-5 text-text-secondary">
+            Al continuar aceptas <Link href="/legal/terminos" className="underline underline-offset-2 hover:text-text-primary">Términos</Link> y <Link href="/legal/privacidad" className="underline underline-offset-2 hover:text-text-primary">Aviso de Privacidad</Link>.
+          </p>
+          <nav aria-label="Ayuda" className="mt-2 flex justify-center font-body text-xs text-text-secondary">
+            <Link href="/soporte" className="inline-flex min-h-11 items-center underline underline-offset-4 hover:text-text-primary">Soporte</Link>
+          </nav>
         </div>
-        <nav aria-label="Información y ayuda" className="mt-5 flex flex-wrap justify-center gap-x-5 gap-y-1 border-t border-border pt-3 font-body text-xs text-text-secondary">
-          <Link href="/legal/privacidad" className="inline-flex min-h-11 items-center underline underline-offset-4 hover:text-text-primary">Política de privacidad</Link>
-          <Link href="/legal/terminos" className="inline-flex min-h-11 items-center underline underline-offset-4 hover:text-text-primary">Términos de uso</Link>
-          <Link href="/soporte" className="inline-flex min-h-11 items-center underline underline-offset-4 hover:text-text-primary">Soporte</Link>
-        </nav>
       </section>
     </PantallaPublica>
   );
+}
+
+function LoginMarca() {
+  return (
+    <div className="login-usuario__brand" aria-label="Ruum Ruum">
+      <LogoRuum variante="simbolo" className="mx-auto" />
+    </div>
+  );
+}
+
+function CheckIcon() {
+  return <svg className="size-4 shrink-0 text-[var(--ruum-teal-deep)]" viewBox="0 0 20 20" fill="none" aria-hidden="true"><circle cx="10" cy="10" r="8" stroke="currentColor" strokeWidth="1.6" /><path d="m6.5 10 2.3 2.3 4.8-5" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" /></svg>;
 }
