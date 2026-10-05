@@ -24,6 +24,7 @@ const CATEGORIAS_CUENTA: CategoriaCuenta[] = [
     secciones: [
       { href: "/cuenta/perfil", titulo: "Perfil", descripcion: "Datos personales y contacto de emergencia.", icono: "👤" },
       { href: "/cuenta/documentos", titulo: "Documentos", descripcion: "Licencia, identificación y vigencia.", icono: "📄" },
+      { href: "/cuenta/certificacion", titulo: "Certificación", descripcion: "Nivel, Didit, MCE y derechos.", icono: "🎖️" },
       { href: "/cuenta/datos-bancarios", titulo: "Datos bancarios", descripcion: "CLABE para depósitos.", icono: "💳" }
     ]
   },

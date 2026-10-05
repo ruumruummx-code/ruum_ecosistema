@@ -16,13 +16,20 @@ services:
     ports:
       - "3001:3001"
     environment:
-      - NODE_ENV=development
-      - NEXT_PUBLIC_APP_URL=http://localhost:3001
-      - NEXT_TELEMETRY_DISABLED=1
+      NODE_ENV: development
+      RUUM_LOCAL_PRODUCTION: "true"
+      NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_CONDUCTOR_URL:-http://localhost:3001}
+      NEXT_PUBLIC_APP_VERSION: ${NEXT_PUBLIC_APP_VERSION:-1.0.0}
+      NEXT_PUBLIC_SUPABASE_URL: ${NEXT_PUBLIC_SUPABASE_URL:-}
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${NEXT_PUBLIC_SUPABASE_ANON_KEY:-}
+      NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN: ${NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN:-}
+      NEXT_TELEMETRY_DISABLED: "1"
     volumes:
       # Montar código, preservando el node_modules aislado generado por pnpm.
       - ./apps/app-conductor:/app/apps/app-conductor
       - ./packages:/app/packages
+      - ./scripts:/app/scripts
+      - ./config:/app/config
       - ./package.json:/app/package.json
       - ./pnpm-workspace.yaml:/app/pnpm-workspace.yaml
       - ./turbo.json:/app/turbo.json
@@ -48,12 +55,19 @@ services:
     ports:
       - "3000:3000"
     environment:
-      - NODE_ENV=development
-      - NEXT_PUBLIC_APP_URL=http://localhost:3000
-      - NEXT_TELEMETRY_DISABLED=1
+      NODE_ENV: development
+      RUUM_LOCAL_PRODUCTION: "true"
+      NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_USUARIO_URL:-http://localhost:3000}
+      NEXT_PUBLIC_APP_VERSION: ${NEXT_PUBLIC_APP_VERSION:-1.0.0}
+      NEXT_PUBLIC_SUPABASE_URL: ${NEXT_PUBLIC_SUPABASE_URL:-}
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${NEXT_PUBLIC_SUPABASE_ANON_KEY:-}
+      NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN: ${NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN:-}
+      NEXT_TELEMETRY_DISABLED: "1"
     volumes:
       - ./apps/app-usuario:/app/apps/app-usuario
       - ./packages:/app/packages
+      - ./scripts:/app/scripts
+      - ./config:/app/config
       - ./package.json:/app/package.json
       - ./pnpm-workspace.yaml:/app/pnpm-workspace.yaml
       - ./turbo.json:/app/turbo.json
@@ -79,12 +93,19 @@ services:
     ports:
       - "3002:3002"
     environment:
-      - NODE_ENV=development
-      - NEXT_PUBLIC_APP_URL=http://localhost:3002
-      - NEXT_TELEMETRY_DISABLED=1
+      NODE_ENV: development
+      RUUM_LOCAL_PRODUCTION: "true"
+      NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_PANEL_ADMIN_URL:-http://localhost:3002}
+      NEXT_PUBLIC_APP_VERSION: ${NEXT_PUBLIC_APP_VERSION:-1.0.0}
+      NEXT_PUBLIC_SUPABASE_URL: ${NEXT_PUBLIC_SUPABASE_URL:-}
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${NEXT_PUBLIC_SUPABASE_ANON_KEY:-}
+      NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN: ${NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN:-}
+      NEXT_TELEMETRY_DISABLED: "1"
     volumes:
       - ./apps/panel-admin:/app/apps/panel-admin
       - ./packages:/app/packages
+      - ./scripts:/app/scripts
+      - ./config:/app/config
       - ./package.json:/app/package.json
       - ./pnpm-workspace.yaml:/app/pnpm-workspace.yaml
       - ./turbo.json:/app/turbo.json

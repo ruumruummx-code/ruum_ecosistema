@@ -16,6 +16,8 @@ const REGEX_TELEFONO_NACIONAL = /^\d{10}$/;
 const REGEX_EMAIL = /^\S+@\S+\.\S+$/;
 const REGEX_FECHA_ISO = /^\d{4}-\d{2}-\d{2}$/;
 export const DIAS_ADVERTENCIA_VIGENCIA_LICENCIA = 30;
+// Modelo 11.3 — alerta operativa 15 días antes del vencimiento (deshabilita hasta renovar si vence).
+export const DIAS_ALERTA_VENCIMIENTO_LICENCIA = 15;
 export type EstadoVigenciaLicencia = "sin_vigencia" | "vigente" | "por_vencer" | "vencida";
 
 /** Días entre hoy (medianoche local) y una fecha ISO `YYYY-MM-DD`. Negativo = ya venció. */

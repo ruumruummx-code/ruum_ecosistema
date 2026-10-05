@@ -1,4 +1,5 @@
 export * from "./niveles-concer";
+export * from "./niveles-certificacion";
 export * from "./mensajes-ux";
 export * from "./tipos-vehiculo";
 export * from "./tipos-disputa";

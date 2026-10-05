@@ -115,6 +115,21 @@ export function esElegibleParaViaje(
     return { elegible: false, motivo: "Documentos vencidos o incompletos" };
   }
 
+  // Modelo 11.3 (MAIC) — filtro obligatorio: sin identidad y licencia
+  // validadas y vigentes ningún conductor es asignable, aunque el resto pase.
+  const extendido = conductor as Conductor & {
+    identidad_validada?: boolean;
+    licencia_validada?: boolean;
+    licencia_vigente?: boolean;
+  };
+  if (
+    extendido.identidad_validada === false ||
+    extendido.licencia_validada === false ||
+    extendido.licencia_vigente === false
+  ) {
+    return { elegible: false, motivo: "MAIC: identidad o licencia sin validar/vigente" };
+  }
+
   const nivel = nivelOperativoVigente(conductor, requisitos);
   if (!nivel) {
     return {

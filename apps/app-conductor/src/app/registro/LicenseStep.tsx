@@ -185,8 +185,8 @@ export function LicenseStep({
           aria-required="true"
         />
         <span className="flex-1">
-          <span className="font-medium text-route-action">Autorizo la verificación de antecedentes</span>
-          <span className="block">y de mi historial de manejo ante las autoridades correspondientes.</span>
+          <span className="font-medium text-route-action">Autorizo la verificación de antecedentes penales e infracciones de conducción</span>
+          <span className="block">ante las autoridades correspondientes, y el tratamiento de mis datos biométricos y de geolocalización para la verificación de identidad con Didit (consentimiento expreso).</span>
         </span>
       </label>
       {erroresCampos.autorizaVerificacion && <p className="font-body text-sm font-medium text-danger-action">{erroresCampos.autorizaVerificacion}</p>}
