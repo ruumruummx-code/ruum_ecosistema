@@ -1,18 +1,33 @@
 package com.moviliax.ruumruum.conductor.data
 
 import io.github.jan.supabase.SupabaseClient
+import io.github.jan.supabase.auth.OtpType
 import io.github.jan.supabase.auth.auth
 import io.github.jan.supabase.auth.providers.builtin.Email
 import io.github.jan.supabase.postgrest.from
 import io.github.jan.supabase.postgrest.postgrest
+import io.github.jan.supabase.postgrest.query.Order
 import io.github.jan.supabase.storage.storage
 import io.github.jan.supabase.functions.functions
 import io.ktor.client.request.forms.MultiPartFormDataContent
 import io.ktor.client.request.forms.formData
+import io.ktor.client.request.setBody
+import io.ktor.client.statement.bodyAsText
+import io.ktor.http.ContentType
 import io.ktor.http.Headers
 import io.ktor.http.HttpHeaders
+import io.ktor.http.HttpMethod
+import io.ktor.http.contentType
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonNull
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.contentOrNull
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.serialization.json.put
+import kotlinx.serialization.json.putJsonArray
 import java.time.Instant
 import java.util.UUID
 
@@ -27,6 +42,203 @@ class DriverRepository(private val supabase: SupabaseClient) {
     }
 
     suspend fun signOut() = supabase.auth.signOut()
+
+    // ── Registro ──────────────────────────────────────────────
+
+    /** Crea la cuenta de conductor. Devuelve true si la sesión quedó activa (sin OTP). */
+    suspend fun signUp(email: String, password: String): Boolean {
+        supabase.auth.signUpWith(Email) {
+            this.email = email.trim().lowercase()
+            this.password = password
+            this.data = buildJsonObject {
+                put("tipo_registro", "conductor")
+                put("version_registro", 2)
+            }
+        }
+        return supabase.auth.currentSessionOrNull() != null
+    }
+
+    /** Confirma la cuenta con el código de 6 dígitos enviado al correo. */
+    suspend fun verifySignupOtp(email: String, code: String) {
+        supabase.auth.verifyEmailOtp(
+            type = OtpType.Email.SIGNUP,
+            email = email.trim().lowercase(),
+            token = code.trim(),
+        )
+    }
+
+    /** Reenvía el código de confirmación (flujo signup). */
+    suspend fun resendSignupOtp(email: String) {
+        supabase.auth.resendEmail(OtpType.Email.SIGNUP, email.trim().lowercase())
+    }
+
+    // ── Recuperación de acceso ────────────────────────────────
+
+    /** Envía correo de recuperación (enlace + código según configuración del proyecto). */
+    suspend fun sendPasswordReset(email: String) {
+        supabase.auth.resetPasswordForEmail(email.trim().lowercase())
+    }
+
+    /** Valida el código de recuperación y deja la sesión lista para definir contraseña. */
+    suspend fun verifyRecoveryOtp(email: String, code: String) {
+        supabase.auth.verifyEmailOtp(
+            type = OtpType.Email.RECOVERY,
+            email = email.trim().lowercase(),
+            token = code.trim(),
+        )
+    }
+
+    /** Define la nueva contraseña (sesión de recuperación o sesión activa). */
+    suspend fun updatePassword(password: String) {
+        supabase.auth.updateUser {
+            this.password = password
+        }
+    }
+
+    // ── Solicitud de conductor (registro / recuperación de borrador) ──
+
+    suspend fun iniciarSolicitud(): SolicitudResultado =
+        supabase.postgrest.rpc("iniciar_solicitud_conductor")
+            .decodeList<SolicitudResultado>().firstOrNull()
+            ?: error("No pudimos iniciar la solicitud.")
+
+    suspend fun solicitudActual(): SolicitudRow? {
+        val uid = supabase.auth.currentUserOrNull()?.id ?: return null
+        return supabase.from("solicitudes_conductor").select {
+            filter { eq("auth_user_id", uid) }
+            order("actualizado_en", Order.DESCENDING)
+            limit(1)
+        }.decodeSingleOrNull<SolicitudRow>()
+    }
+
+    suspend fun guardarBorrador(
+        datosPersonales: JsonObject,
+        domicilio: JsonObject,
+        licencia: JsonObject,
+        contactoEmergencia: JsonObject,
+        pasoActual: Int,
+    ): SolicitudResultado =
+        supabase.postgrest.rpc(
+            function = "guardar_borrador_conductor",
+            parameters = buildJsonObject {
+                put("p_paso_actual", pasoActual)
+                put("p_datos_personales", datosPersonales)
+                put("p_domicilio", domicilio)
+                put("p_licencia", licencia)
+                put("p_contacto_emergencia", contactoEmergencia)
+            },
+        ).decodeList<SolicitudResultado>().firstOrNull()
+            ?: error("No pudimos guardar el borrador.")
+
+    suspend fun registrarConsentimientos(
+        solicitudId: String,
+        tipos: List<String>,
+        versionApp: String,
+    ) {
+        supabase.postgrest.rpc(
+            function = "registrar_consentimientos_conductor",
+            parameters = buildJsonObject {
+                put("p_solicitud_id", solicitudId)
+                putJsonArray("p_consentimientos") {
+                    tipos.forEach { tipo ->
+                        add(buildJsonObject { put("tipo_documento", tipo); put("version", 1) })
+                    }
+                }
+                put("p_canal", "android")
+                put("p_version_app", versionApp)
+            },
+        )
+    }
+
+    suspend fun enviarSolicitud(): SolicitudResultado =
+        supabase.postgrest.rpc("enviar_solicitud_conductor")
+            .decodeList<SolicitudResultado>().firstOrNull()
+            ?: error("No pudimos enviar la solicitud.")
+
+    /** Sube un documento del expediente de solicitud (objetivo = solicitud_id). */
+    suspend fun uploadSolicitudDocument(
+        solicitudId: String,
+        type: String,
+        fileName: String,
+        mimeType: String,
+        bytes: ByteArray,
+        previousDocumentId: String?,
+    ) = uploadTo(solicitudId, type, fileName, mimeType, bytes, previousDocumentId)
+
+    suspend fun documentosSolicitud(solicitudId: String): List<DriverDocument> =
+        supabase.from("documentos_conductor").select {
+            filter { eq("solicitud_id", solicitudId) }
+        }.decodeList()
+
+    // ── Verificación Didit ────────────────────────────────────
+
+    /** Inicia sesión Didit para una solicitud en revisión. Devuelve url y sessionId. */
+    suspend fun iniciarVerificacionDidit(solicitudId: String): Pair<String, String?> {
+        val response = supabase.functions.invoke("iniciar-verificacion-didit") {
+            method = HttpMethod.Post
+            contentType(ContentType.Application.Json)
+            setBody(buildJsonObject { put("solicitud_id", solicitudId) }.toString())
+        }
+        val json = Json.parseToJsonElement(response.bodyAsText()).jsonObject
+        val url = (json["url"] ?: json["session_url"])?.jsonPrimitive?.contentOrNull
+            ?: error("No se recibió una URL válida del servicio de verificación.")
+        require(url.startsWith("https://")) { "No se recibió una URL válida del servicio de verificación." }
+        val sessionId = (json["session_id"] ?: json["sessionId"])?.jsonPrimitive?.contentOrNull
+        return url to sessionId
+    }
+
+    suspend fun estadoVerificacionDidit(solicitudId: String): VerificacionDiditRow? =
+        supabase.from("verificaciones_identidad_didit").select {
+            filter { eq("solicitud_id", solicitudId) }
+            order("creado_en", Order.DESCENDING)
+            limit(1)
+        }.decodeSingleOrNull<VerificacionDiditRow>()
+
+    // ── Modificación del expediente ───────────────────────────
+
+    /**
+     * Solicita cambios de perfil. Teléfono/domicilio/contacto se aplican
+     * directo; identidad/CURP/licencia/foto van a revisión operativa.
+     */
+    suspend fun solicitarCambioExpediente(cambios: Map<String, String?>): ResultadoCambioExpediente {
+        val payload = buildJsonObject {
+            cambios.forEach { (clave, valor) ->
+                if (valor == null) put(clave, JsonNull) else put(clave, valor)
+            }
+        }
+        return supabase.postgrest.rpc(
+            function = "solicitar_cambio_expediente_conductor",
+            parameters = buildJsonObject { put("p_cambios", payload) },
+        ).decodeAs<ResultadoCambioExpediente>()
+    }
+
+    suspend fun solicitudesCambio(conductorId: String): List<SolicitudCambioRow> =
+        supabase.from("solicitudes_cambio_conductor").select {
+            filter { eq("conductor_id", conductorId) }
+            order("creado_en", Order.DESCENDING)
+        }.decodeList()
+
+    suspend fun cancelarSolicitudCambio(solicitudId: String) {
+        supabase.postgrest.rpc(
+            function = "cancelar_solicitud_cambio_conductor",
+            parameters = buildJsonObject { put("p_solicitud_id", solicitudId) },
+        )
+    }
+
+    // ── Certificación (Modelo 11) ─────────────────────────────
+
+    suspend fun capacitaciones(conductorId: String): List<CapacitacionRow> =
+        supabase.from("capacitaciones_conductor").select {
+            filter { eq("conductor_id", conductorId) }
+        }.decodeList()
+
+    suspend fun tieneDatosBancarios(conductorId: String): Boolean {
+        val row = supabase.from("datos_bancarios_conductor").select {
+            filter { eq("conductor_id", conductorId) }
+            limit(1)
+        }.decodeSingleOrNull<JsonObject>()
+        return row != null
+    }
 
     suspend fun currentDriver(): Driver? {
         val userId = supabase.auth.currentUserOrNull()?.id ?: return null
@@ -63,13 +275,22 @@ class DriverRepository(private val supabase: SupabaseClient) {
         mimeType: String,
         bytes: ByteArray,
         previousDocumentId: String?,
+    ) = uploadTo(driverId, type, fileName, mimeType, bytes, previousDocumentId)
+
+    private suspend fun uploadTo(
+        objetivoId: String,
+        type: String,
+        fileName: String,
+        mimeType: String,
+        bytes: ByteArray,
+        previousDocumentId: String?,
     ) {
         require(type in DOCUMENT_TYPES) { "Tipo de documento inválido." }
         require(bytes.isNotEmpty() && bytes.size <= MAX_DOCUMENT_BYTES) { "El archivo debe pesar hasta 10 MB." }
         require(mimeType in DOCUMENT_MIME_TYPES) { "Formato no permitido. Usa JPG, PNG, WEBP o PDF." }
         val boundary = "ruum-${UUID.randomUUID()}"
         val parts = formData {
-            append("objetivo_id", driverId)
+            append("objetivo_id", objetivoId)
             append("tipo", type)
             if (!previousDocumentId.isNullOrBlank()) append("documento_anterior_id", previousDocumentId)
             append("archivo", bytes, Headers.build {

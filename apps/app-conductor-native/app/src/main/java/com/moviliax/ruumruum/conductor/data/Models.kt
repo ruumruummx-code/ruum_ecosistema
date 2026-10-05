@@ -15,6 +15,13 @@ data class Driver(
     @SerialName("documentos_vigentes") val documentosVigentes: Boolean = false,
     @SerialName("traslados_completados") val trasladosCompletados: Int = 0,
     @SerialName("calificacion_promedio") val calificacionPromedio: Double = 0.0,
+    // Modelo 11 — columnas de certificación (con default para BD sin migrar).
+    @SerialName("nivel_certificacion") val nivelCertificacion: Int = 1,
+    @SerialName("identidad_validada") val identidadValidada: Boolean = false,
+    @SerialName("licencia_validada") val licenciaValidada: Boolean = false,
+    @SerialName("capacitacion_aprobada") val capacitacionAprobada: Boolean = false,
+    @SerialName("evaluacion_practica_aprobada") val evaluacionPracticaAprobada: Boolean = false,
+    @SerialName("prueba_manejo_aprobada") val pruebaManejoAprobada: Boolean = false,
 )
 
 @Serializable
@@ -98,6 +105,63 @@ data class OpenIncidentSummary(
 internal data class AvailabilityRow(
     @SerialName("conductor_id") val conductorId: String,
     @SerialName("modo_no_molestar") val doNotDisturb: Boolean,
+)
+
+/** Fila devuelta por iniciar/guardar/enviar solicitud de conductor. */
+@Serializable
+data class SolicitudResultado(
+    @SerialName("solicitud_id") val solicitudId: String? = null,
+    @SerialName("conductor_id") val conductorId: String? = null,
+    val estado: String? = null,
+    @SerialName("paso_actual") val pasoActual: Int = 0,
+)
+
+/** Expediente de solicitud para borrador y recuperación. */
+@Serializable
+data class SolicitudRow(
+    val id: String,
+    val estado: String,
+    @SerialName("paso_actual") val pasoActual: Int = 1,
+    @SerialName("datos_personales") val datosPersonales: kotlinx.serialization.json.JsonObject = kotlinx.serialization.json.JsonObject(emptyMap()),
+    val domicilio: kotlinx.serialization.json.JsonObject = kotlinx.serialization.json.JsonObject(emptyMap()),
+    val licencia: kotlinx.serialization.json.JsonObject = kotlinx.serialization.json.JsonObject(emptyMap()),
+    @SerialName("contacto_emergencia") val contactoEmergencia: kotlinx.serialization.json.JsonObject = kotlinx.serialization.json.JsonObject(emptyMap()),
+)
+
+/** Respuesta de solicitar_cambio_expediente_conductor. */
+@Serializable
+data class ResultadoCambioExpediente(
+    @SerialName("solicitud_id") val solicitudId: String? = null,
+    val estado: String = "",
+    val tipo: String = "",
+    val mensaje: String = "",
+)
+
+@Serializable
+data class SolicitudCambioRow(
+    val id: String,
+    @SerialName("conductor_id") val conductorId: String,
+    val tipo: String,
+    val estado: String,
+    @SerialName("creado_en") val creadoEn: String,
+    @SerialName("motivo_rechazo") val motivoRechazo: String? = null,
+)
+
+/** Fila de capacitaciones_conductor (MCE). */
+@Serializable
+data class CapacitacionRow(
+    val id: String,
+    val curso: String,
+    val estado: String,
+    val puntaje: Double? = null,
+)
+
+/** Última verificación Didit de una solicitud. */
+@Serializable
+data class VerificacionDiditRow(
+    val id: String,
+    @SerialName("session_id") val sessionId: String? = null,
+    val estado: String,
 )
 
 enum class Availability { AVAILABLE, UNAVAILABLE, ON_TRIP }
