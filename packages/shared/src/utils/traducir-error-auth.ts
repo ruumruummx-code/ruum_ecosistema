@@ -22,7 +22,10 @@ const MENSAJES_AUTH = {
   weak_password: "La contraseña no cumple los requisitos mínimos.",
   same_password: "La nueva contraseña debe ser diferente de la anterior.",
   otp_expired: "El enlace o código expiró. Solicita uno nuevo.",
-  over_email_send_rate_limit: "Espera unos minutos antes de volver a intentar.",
+  // CORRECCIÓN (auditoría F3): decía "unos minutos" cuando el bloqueo real puede
+  // durar casi una hora (email_sent es por hora). No prometer una ventana que el
+  // código no cumple.
+  over_email_send_rate_limit: "Superaste el límite de correos por hora. Intenta más tarde.",
   over_request_rate_limit: "Demasiados intentos. Espera unos minutos y vuelve a probar."
 } as const;
 

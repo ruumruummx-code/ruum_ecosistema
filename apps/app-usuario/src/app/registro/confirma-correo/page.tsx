@@ -37,6 +37,17 @@ function restanteInicial(): number {
   }
 }
 
+/** CORRECCIÓN (auditoría B-3): tras confirmar, el correo quedaba en sessionStorage
+ *  y el cooldown persistía en localStorage, reapareciendo en un registro posterior. */
+function limpiarMarcadoresConfirmacion() {
+  try {
+    window.sessionStorage.removeItem(CLAVE_CORREO_CONFIRMACION);
+    window.localStorage.removeItem(CLAVE_REENVIO_CONFIRMACION_HASTA);
+  } catch {
+    /* El navegador puede bloquear storage; la pantalla funciona igual. */
+  }
+}
+
 function ContenidoConfirmaCorreo() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -90,6 +101,7 @@ function ContenidoConfirmaCorreo() {
       if (errorAuth) throw errorAuth;
 
       registrarEventoUx("registro_confirmacion_exitosa");
+      limpiarMarcadoresConfirmacion();
       router.push("/");
       router.refresh();
     } catch (err) {

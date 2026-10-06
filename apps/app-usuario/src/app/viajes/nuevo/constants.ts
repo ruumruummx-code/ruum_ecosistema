@@ -130,21 +130,12 @@ export type SubpasoRuta = "origen" | "destino_contactos";
 export const RETRASO_GUARDADO_BORRADOR_MS = 600;
 export const RETRASO_CONSULTA_CODIGO_POSTAL_MS = 350;
 
-export function soloDigitos(valor: string, maximo?: number) {
-  const limpio = valor.replace(/\D/g, "");
-  return maximo ? limpio.slice(0, maximo) : limpio;
-}
-
-export function telefonoLocalMx(valor: string) {
-  const limpio = soloDigitos(valor);
-  const sinCodigoPais = limpio.length > 10 && limpio.startsWith("52") ? limpio.slice(2) : limpio;
-  return sinCodigoPais.slice(0, 10);
-}
-
-export function telefonoMx(diezDigitos: string) {
-  const telefono = soloDigitos(diezDigitos, 10);
-  return telefono ? `+52${telefono}` : "";
-}
+/* CORRECCIÓN (auditoría A-5): estas dos implementaciones solo quitaban el prefijo
+   "52" y conservaban el "1" móvil, produciendo "1551234567" para "+52 1 55 1234 5678".
+   El resultado pasaba la validación de 10 dígitos y se guardaba corrupto.
+   Ahora se delegan en la fuente canónica src/lib/registro-usuario.ts, que ya
+   maneja los tres formatos (10 dígitos, 12 con 52, 13 con 521). */
+export { soloDigitos, telefonoLocalMx, telefonoMx } from "../../../lib/registro-usuario";
 
 export function nombreCompleto(nombre: string, apellido: string) {
   return [nombre.trim(), apellido.trim()].filter(Boolean).join(" ");

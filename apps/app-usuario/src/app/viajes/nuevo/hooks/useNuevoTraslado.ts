@@ -1197,12 +1197,21 @@ export function useNuevoTraslado() {
           }),
         });
         if (!respPaso.ok) {
+          // Un 404 significa que la ruta NO existe (bug de despliegue): fallar cerrado
+          // con un mensaje accionable en vez de continuar y fallar más tarde.
+          if (respPaso.status === 404) {
+            throw new Error("Endpoint de validación no disponible (404). Contacta a soporte.");
+          }
           const j = await respPaso.json().catch(() => null) as { error?: string } | null;
           throw new Error(j?.error || "Validación de pasos fallida en el servidor.");
         }
       } catch (e) {
         // Si la validación de paso falla, no continuar con geocodificación/creación
         if (e instanceof Error && /Solicitud incompleta|Validación de pasos|Wizard incompleto/i.test(e.message)) throw e;
+        /* Un 404 significa que la ruta NO existe (bug de despliegue), no un fallo
+           transitorio. Antes caía en el console.warn y el flujo continuaba hasta
+           fallar más tarde con un mensaje genérico que ocultaba la causa real. */
+        if (e instanceof Error && /\b404\b|not found|Failed to fetch/i.test(e.message)) throw e;
         // Error de red en validación no bloquea si es 5xx genérico, pero logueamos
         console.warn("[traslados/nuevo] validación paso servidor no disponible", e);
       }

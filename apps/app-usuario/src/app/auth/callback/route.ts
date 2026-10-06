@@ -120,11 +120,12 @@ export async function GET(request: NextRequest) {
       const destino = type === "recovery" ? "/nueva-password" : next;
       return NextResponse.redirect(`${origin}${destino}`);
     }
-    // Código inválido/expirado/reutilizado -> limpiar marcador y redirigir a error
-    if (type === "recovery") {
-      clearRecoveryCookie(cookieStore);
-      return NextResponse.redirect(`${origin}${destinoErrorServer}`);
-    }
+    // Código inválido/expirado/reutilizado -> limpiar marcador y redirigir a error.
+    // CORRECCIÓN (auditoría A-2): antes esto solo aplicaba a recovery. Con type=signup
+    // y un enlace caducado, no había `return` y el flujo caía al fallback HTML, dejando
+    // al usuario en una pantalla estática sin salida.
+    if (type === "recovery") clearRecoveryCookie(cookieStore);
+    return NextResponse.redirect(`${origin}${destinoErrorServer}`);
   }
 
   // 2. Flujo OTP / Hash (verificación de token por correo)
@@ -142,13 +143,19 @@ export async function GET(request: NextRequest) {
       const destino = type === "recovery" ? "/nueva-password" : next;
       return NextResponse.redirect(`${origin}${destino}`);
     }
-    if (type === "recovery") {
-      clearRecoveryCookie(cookieStore);
-      return NextResponse.redirect(`${origin}${destinoErrorServer}`);
-    }
+    if (type === "recovery") clearRecoveryCookie(cookieStore);
+    return NextResponse.redirect(`${origin}${destinoErrorServer}`);
   }
 
   // 3. Respuesta HTML/JS ligera para capturar fragmentos de hash en el navegador (#access_token=... o fallback)
+  /* CORRECCIÓN (auditoría A-2): el <script> sin nonce quedaba bloqueado en
+     producción. Con 'strict-dynamic' + nonce, CSP3 ignora las fuentes de host
+     (incluido 'self'), así que el fallback nunca se ejecutaba y el usuario
+     quedaba en una pantalla estática infinita. El middleware ya inyecta
+     `x-nonce` en la request (src/middleware.ts:62). */
+  const nonce = request.headers.get("x-nonce") ?? "";
+  const attrNonce = nonce ? ` nonce="${nonce.replace(/[^A-Za-z0-9+/=_-]/g, "")}"` : "";
+
   const htmlFallback = `
     <!DOCTYPE html>
     <html lang="es">
@@ -158,13 +165,18 @@ export async function GET(request: NextRequest) {
       <style>
         body { font-family: system-ui, sans-serif; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; background: #070d18; color: #f8faf5; }
         .card { text-align: center; padding: 2rem; border-radius: 1rem; background: #0d1526; border: 1px solid #1c2a3e; max-width: 400px; }
+        a { color: #7fd4d0; }
       </style>
     </head>
     <body>
       <div class="card">
         <p>Verificando tu enlace de seguridad...</p>
+        <noscript>
+          <p>Necesitamos JavaScript para verificar tu enlace.</p>
+          <p><a href="/login">Ir al inicio de sesión</a></p>
+        </noscript>
       </div>
-      <script src="/auth-callback-fallback.js"></script>
+      <script src="/auth-callback-fallback.js"${attrNonce}></script>
     </body>
     </html>
   `;

@@ -11,21 +11,11 @@ import { crearClienteNavegador, tieneSupabaseConfigurado } from "../../lib/supab
 
 type Usuario = Database["public"]["Tables"]["usuarios"]["Row"];
 
-function soloDigitos(valor: string, maximo?: number) {
-  const limpio = valor.replace(/\D/g, "");
-  return maximo ? limpio.slice(0, maximo) : limpio;
-}
-
-function telefonoLocalMx(valor: string | null) {
-  const limpio = soloDigitos(valor ?? "");
-  const sinCodigoPais = limpio.length > 10 && limpio.startsWith("52") ? limpio.slice(2) : limpio;
-  return sinCodigoPais.slice(0, 10);
-}
-
-function telefonoMx(diezDigitos: string) {
-  const telefono = soloDigitos(diezDigitos, 10);
-  return telefono ? `+52${telefono}` : "";
-}
+/* CORRECCIÓN (auditoría A-5): la copia local de telefonoLocalMx solo quitaba "52"
+   y conservaba el "1" móvil, guardando "+521551234567" en vez de "+525512345678"
+   (el resultado pasaba la validación de 10 dígitos). Se usa la fuente canónica,
+   que maneja los tres formatos: 10 dígitos, 12 con 52 y 13 con 521. */
+import { soloDigitos, telefonoLocalMx, telefonoMx } from "../../lib/registro-usuario";
 
 function separarNombreApellido(nombreCompleto: string | null) {
   const partes = (nombreCompleto ?? "").trim().split(/\s+/).filter(Boolean);
@@ -83,7 +73,7 @@ export function PerfilCuentaForm({ usuario, fotoUrlInicial }: { usuario: Usuario
   const [apellido, setApellido] = useState(nombreInicial.apellido);
   const [fotoPath, setFotoPath] = useState(usuario.foto_url ?? "");
   const [fotoUrl, setFotoUrl] = useState(fotoUrlInicial ?? "");
-  const [telefono, setTelefono] = useState(telefonoLocalMx(usuario.telefono));
+  const [telefono, setTelefono] = useState(telefonoLocalMx(usuario.telefono ?? ""));
   const [pais, setPais] = useState(usuario.pais ?? "México");
   const [estado, setEstado] = useState(usuario.estado ?? "");
   const [codigoPostal, setCodigoPostal] = useState(usuario.codigo_postal ?? "");
