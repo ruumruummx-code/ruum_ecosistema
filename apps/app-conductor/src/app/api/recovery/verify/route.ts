@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
-import { COOKIE_RECOVERY_CONDUCTOR, COOKIE_RECOVERY_LEGACY } from "@ruum/shared/utils";
+import { COOKIE_RECOVERY_CONDUCTOR } from "@ruum/shared/utils";
 import { crearClienteServidor } from "@/lib/supabase-server";
 
 export const dynamic = "force-dynamic";
@@ -13,11 +13,11 @@ export const revalidate = 0;
 export async function GET() {
   try {
     const cookieStore = await cookies();
-    const marcador =
-      cookieStore.get(COOKIE_RECOVERY_CONDUCTOR)?.value ??
-      cookieStore.get(COOKIE_RECOVERY_LEGACY)?.value ??
-      cookieStore.get("ruum_recovery")?.value ??
-      null;
+    const marcador = cookieStore.get(COOKIE_RECOVERY_CONDUCTOR)?.value ?? null;
+
+    /* CORRECCIÓN: se elimina la lectura de la cookie legacy "ruum_recovery" y
+       cualquier autorización basada solo en sesión. El marcador debe ser un
+       UUID válido que coincida con el usuario actual. */
 
     if (!marcador) {
       return NextResponse.json({ authorized: false, reason: "no_cookie" }, { status: 200, headers: { "Cache-Control": "no-store" } });
@@ -36,7 +36,7 @@ export async function GET() {
     }
 
     const esUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(marcador);
-    if (esUuid && marcador !== data.user.id) {
+    if (!esUuid || marcador !== data.user.id) {
       return NextResponse.json({ authorized: false, reason: "user_mismatch" }, { status: 200, headers: { "Cache-Control": "no-store" } });
     }
 

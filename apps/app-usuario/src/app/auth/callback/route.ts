@@ -29,12 +29,13 @@ function opcionesCookieRecovery() {
 async function setRecoveryCookie(cookieStore: Awaited<ReturnType<typeof cookies>>, supabase: ReturnType<typeof crearClienteServidor>) {
   try {
     const { data } = await supabase.auth.getUser();
-    const valor = data.user?.id ? data.user.id : "1";
-    cookieStore.set(COOKIE_RECOVERY, valor, opcionesCookieRecovery());
-    // compat legacy
-    cookieStore.set("ruum_recovery", valor, opcionesCookieRecovery());
+    /* CORRECCIÓN: antes, si getUser() fallaba, se seteaba la cookie con "1" y
+       /api/recovery/verify la aceptaba sin validar userId. Ahora solo se
+       marca autorización cuando el usuario es conocido. */
+    if (!data.user?.id) return;
+    cookieStore.set(COOKIE_RECOVERY, data.user.id, opcionesCookieRecovery());
   } catch {
-    cookieStore.set(COOKIE_RECOVERY, "1", opcionesCookieRecovery());
+    // No se setea marcador: /nueva-password rechazará el acceso.
   }
 }
 

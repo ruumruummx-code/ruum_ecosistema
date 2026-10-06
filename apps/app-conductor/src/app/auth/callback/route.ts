@@ -22,11 +22,12 @@ function opcionesCookieRecovery() {
 async function setRecoveryCookie(cookieStore: Awaited<ReturnType<typeof cookies>>, supabase: ReturnType<typeof crearClienteServidor>) {
   try {
     const { data } = await supabase.auth.getUser();
-    const valor = data.user?.id ? data.user.id : "1";
-    cookieStore.set(COOKIE_RECOVERY, valor, opcionesCookieRecovery());
-    cookieStore.set("ruum_recovery", valor, opcionesCookieRecovery());
+    /* CORRECCIÓN: no marcar autorización si no hay user conocido y no escribir
+       la cookie legacy "ruum_recovery". */
+    if (!data.user?.id) return;
+    cookieStore.set(COOKIE_RECOVERY, data.user.id, opcionesCookieRecovery());
   } catch {
-    cookieStore.set(COOKIE_RECOVERY, "1", opcionesCookieRecovery());
+    // No se setea marcador: /nueva-password rechazará el acceso.
   }
 }
 
