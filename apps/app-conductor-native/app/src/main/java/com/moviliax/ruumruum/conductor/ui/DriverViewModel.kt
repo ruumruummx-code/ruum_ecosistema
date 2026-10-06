@@ -10,6 +10,7 @@ import com.moviliax.ruumruum.conductor.data.DriverRepository
 import com.moviliax.ruumruum.conductor.data.EvidencePhoto
 import com.moviliax.ruumruum.conductor.data.Payout
 import com.moviliax.ruumruum.conductor.data.CapacitacionRow
+import com.moviliax.ruumruum.conductor.data.NotificacionConductor
 import com.moviliax.ruumruum.conductor.data.SolicitudCambioRow
 import com.moviliax.ruumruum.conductor.data.SolicitudResultado
 import com.moviliax.ruumruum.conductor.data.SolicitudRow
@@ -45,6 +46,7 @@ data class DriverUiState(
     val needsOnboarding: Boolean = false,
     val signupNeedsOtp: Boolean = false,
     val signupEmail: String = "",
+    val signupTelefono: String = "",
     val solicitud: SolicitudRow? = null,
     val solicitudDocumentos: List<DriverDocument> = emptyList(),
     val diditUrl: String? = null,
@@ -55,6 +57,8 @@ data class DriverUiState(
     // Certificación (Modelo 11)
     val capacitaciones: List<CapacitacionRow> = emptyList(),
     val tieneBanco: Boolean = false,
+    // Notificaciones
+    val notificaciones: List<NotificacionConductor> = emptyList(),
 )
 
 class DriverViewModel : ViewModel() {
@@ -88,8 +92,8 @@ class DriverViewModel : ViewModel() {
     // ── Registro ──────────────────────────────────────────────
 
     /** Crea la cuenta; si exige OTP, marca signupNeedsOtp para la pantalla de código. */
-    fun signUp(email: String, password: String) = viewModelScope.launch {
-        _state.update { it.copy(loading = true, error = null, signupNeedsOtp = false, signupEmail = email) }
+    fun signUp(email: String, password: String, telefono: String = "") = viewModelScope.launch {
+        _state.update { it.copy(loading = true, error = null, signupNeedsOtp = false, signupEmail = email, signupTelefono = telefono) }
         runCatching { repository.signUp(email, password) }
             .onSuccess { sessionActive ->
                 if (sessionActive) {
@@ -296,6 +300,22 @@ class DriverViewModel : ViewModel() {
         loadSolicitudesCambio()
     }
 
+    // ── Notificaciones ────────────────────────────────────
+
+    fun loadNotificaciones() = viewModelScope.launch {
+        val driver = _state.value.driver ?: return@launch
+        runCatching { repository.notificaciones(driver.id) }
+            .onSuccess { lista -> _state.update { it.copy(notificaciones = lista) } }
+            .onFailure { failure(it, "No pudimos cargar tus notificaciones.") }
+    }
+
+    fun marcarNotificacionesLeidas() = viewModelScope.launch {
+        val driver = _state.value.driver ?: return@launch
+        runCatching { repository.marcarNotificacionesLeidas(driver.id) }
+            .onSuccess { loadNotificaciones() }
+            .onFailure { failure(it, "No pudimos actualizar tus avisos.") }
+    }
+
     fun refresh() = viewModelScope.launch {
         _state.update { it.copy(loading = true, error = null) }
         runCatching {
@@ -320,6 +340,9 @@ class DriverViewModel : ViewModel() {
             val payouts = async { repository.payouts(driver.id) }
             val documents = async { repository.documents(driver.id) }
             val availability = async { repository.availability(driver.id) }
+            val notificaciones = async {
+                runCatching { repository.notificaciones(driver.id) }.getOrDefault(emptyList())
+            }
             DriverUiState(
                 checkingSession = false,
                 configured = true,
@@ -334,6 +357,7 @@ class DriverViewModel : ViewModel() {
                 acceptedTrips = accepted.await(),
                 payouts = payouts.await(),
                 documents = documents.await(),
+                notificaciones = notificaciones.await(),
             )
         }.onSuccess { loaded -> _state.value = loaded }
             .onFailure { failure(it, "No pudimos actualizar tu información.") }

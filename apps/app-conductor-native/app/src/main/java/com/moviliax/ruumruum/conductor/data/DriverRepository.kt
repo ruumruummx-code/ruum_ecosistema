@@ -7,6 +7,7 @@ import io.github.jan.supabase.auth.providers.builtin.Email
 import io.github.jan.supabase.postgrest.from
 import io.github.jan.supabase.postgrest.postgrest
 import io.github.jan.supabase.postgrest.query.Order
+import io.github.jan.supabase.postgrest.query.filter.FilterOperator
 import io.github.jan.supabase.storage.storage
 import io.github.jan.supabase.functions.functions
 import io.ktor.client.request.forms.MultiPartFormDataContent
@@ -238,6 +239,27 @@ class DriverRepository(private val supabase: SupabaseClient) {
             limit(1)
         }.decodeSingleOrNull<JsonObject>()
         return row != null
+    }
+
+    // ── Notificaciones ────────────────────────────────────
+
+    suspend fun notificaciones(conductorId: String): List<NotificacionConductor> =
+        supabase.from("notificaciones_conductor").select {
+            filter { eq("conductor_id", conductorId) }
+            order("creado_en", Order.DESCENDING)
+            limit(50)
+        }.decodeList()
+
+    suspend fun marcarNotificacionesLeidas(conductorId: String) {
+        val ahora = Instant.now().toString()
+        supabase.from("notificaciones_conductor").update(
+            buildJsonObject { put("leida_en", ahora) },
+        ) {
+            filter {
+                eq("conductor_id", conductorId)
+                filter("leida_en", FilterOperator.IS, null)
+            }
+        }
     }
 
     suspend fun currentDriver(): Driver? {

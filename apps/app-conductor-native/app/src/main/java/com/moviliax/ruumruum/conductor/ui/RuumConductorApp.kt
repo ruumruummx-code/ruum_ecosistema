@@ -11,6 +11,8 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -37,12 +39,15 @@ import androidx.compose.material.icons.filled.DirectionsCar
 import androidx.compose.material.icons.filled.Error
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.LightMode
+import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material.icons.filled.Shield
 import androidx.compose.material.icons.filled.SupportAgent
 import androidx.compose.material.icons.filled.Sync
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Badge
+import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -135,12 +140,19 @@ import androidx.core.graphics.scale
 import androidx.core.net.toUri
 
 private enum class Destination(val label: String) {
-    PANEL("Inicio"), TRIPS("Traslados"), EARNINGS("Ganancias"), ACCOUNT("Cuenta")
+    PANEL("Inicio"), TRIPS("Traslados"), EARNINGS("Ganancias"), NOTIFICATIONS("Notificaciones"), ACCOUNT("Cuenta")
 }
 
 @Composable
 fun RuumConductorApp(viewModel: DriverViewModel = viewModel()) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val context = LocalContext.current
+    val prefs = remember {
+        context.getSharedPreferences("ruum_conductor_prefs", Context.MODE_PRIVATE)
+    }
+    var onboardingVisto by remember {
+        mutableStateOf(prefs.getBoolean("onboarding_visto", false))
+    }
     val themePreference = rememberRuumThemePreference()
     val streetMode = state.acceptedTrips.any { it.estado == "traslado_en_curso" }
     RuumTheme(mode = themePreference.mode, streetMode = streetMode) {
@@ -148,9 +160,80 @@ fun RuumConductorApp(viewModel: DriverViewModel = viewModel()) {
             when {
                 state.checkingSession -> CenteredProgress()
                 !state.configured -> ConfigMissingScreen()
+                !onboardingVisto -> OnboardingScreen(
+                    onTerminar = {
+                        prefs.edit().putBoolean("onboarding_visto", true).apply()
+                        onboardingVisto = true
+                    },
+                    onAcceso = {
+                        prefs.edit().putBoolean("onboarding_visto", true).apply()
+                        onboardingVisto = true
+                    },
+                )
                 !state.signedIn -> AuthNav(state, viewModel)
                 state.needsOnboarding -> RegistroWizardScreen(state, viewModel)
                 else -> AuthenticatedApp(state, viewModel, themePreference)
+            }
+        }
+    }
+}
+
+private data class PasoOnboarding(val tag: String, val titulo: String, val descripcion: String)
+
+private val PASOS_ONBOARDING = listOf(
+    PasoOnboarding(
+        "Seguridad · Evidencia · Trazabilidad",
+        "No entregues tu auto a ciegas. Un traslado serio deja evidencia.",
+        "Ruum Ruum es traslado vehicular con conductores certificados. Cada viaje inicia con evidencia, continúa con seguimiento y termina con confirmación.",
+    ),
+    PasoOnboarding(
+        "Conductores certificados · Pago promedio $680",
+        "No cualquiera mueve un Ruum Ruum.",
+        "Cada conductor cumple validación, identidad y protocolo operativo. Gana en promedio $680 por traslado —hasta $1,200 en rutas largas— con pagos trazables y bitácora de principio a fin.",
+    ),
+    PasoOnboarding(
+        "Evidencia documentada · Pago protegido",
+        "Cada viaje se documenta.",
+        "Kilometraje, carrocería, placas y entrega final con evidencia fotográfica. Tu pago se libera con evidencia validada — trazabilidad que protege tu ingreso.",
+    ),
+)
+
+@Composable
+private fun OnboardingScreen(onTerminar: () -> Unit, onAcceso: () -> Unit) {
+    var paso by remember { mutableIntStateOf(0) }
+    val actual = PASOS_ONBOARDING[paso]
+    Box(
+        Modifier.fillMaxSize().background(
+            Brush.verticalGradient(listOf(RuumTokens.Navy, Color(0xFF0F2D52))),
+        ).padding(RuumTokens.Space20),
+        contentAlignment = Alignment.Center,
+    ) {
+        Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+                RuumLogo(Modifier.size(96.dp), darkVariant = true)
+                TextButton(onClick = onAcceso) { Text("Omitir") }
+            }
+            Spacer(Modifier.height(RuumTokens.Space16))
+            RuumCard(Modifier.fillMaxWidth()) {
+                Text("Paso ${paso + 1} de 3", style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.secondary)
+                Text(actual.tag, Modifier.padding(top = RuumTokens.Space4), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text(actual.titulo, Modifier.padding(top = RuumTokens.Space8), style = MaterialTheme.typography.headlineMedium)
+                Text(actual.descripcion, Modifier.padding(top = RuumTokens.Space8), color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text(
+                    "1,200 activos hoy · 4.8★ · Hasta $1,200/traslado",
+                    Modifier.padding(top = RuumTokens.Space12),
+                    style = MaterialTheme.typography.labelLarge,
+                    color = MaterialTheme.colorScheme.secondary,
+                )
+            }
+            Spacer(Modifier.height(RuumTokens.Space16))
+            RuumPrimaryButton(
+                text = if (paso < 2) "Comenzar →" else "Crear mi cuenta",
+                onClick = { if (paso < 2) paso++ else onTerminar() },
+                modifier = Modifier.fillMaxWidth(),
+            )
+            TextButton(onClick = onAcceso, modifier = Modifier.fillMaxWidth()) {
+                Text("Ya tengo una cuenta")
             }
         }
     }
@@ -228,29 +311,52 @@ private fun LoginScreen(
 ) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+    var emailError by remember { mutableStateOf<String?>(null) }
+    fun validarEmail(valor: String) {
+        emailError = if (valor.isNotBlank() &&
+            !android.util.Patterns.EMAIL_ADDRESS.matcher(valor).matches()
+        ) {
+            "Formato de correo inválido"
+        } else {
+            null
+        }
+    }
     Box(
         Modifier.fillMaxSize().background(
             Brush.verticalGradient(listOf(RuumTokens.Navy, Color(0xFF0F2D52))),
         ).padding(RuumTokens.Space20),
         contentAlignment = Alignment.Center,
     ) {
-        Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
+        Column(
+            Modifier.fillMaxWidth().verticalScroll(rememberScrollState()),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
             RuumLogo(Modifier.size(152.dp), darkVariant = true)
             RuumCard(Modifier.fillMaxWidth()) {
-                Text("Bienvenido", style = MaterialTheme.typography.headlineMedium)
+                Text("Seguridad, evidencia y trazabilidad en cada viaje.", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Spacer(Modifier.height(RuumTokens.Space16))
+                Text("Iniciar sesión", style = MaterialTheme.typography.headlineMedium)
                 Text(
-                    "Entra para ver tus Traslados y próximos depósitos.",
+                    "Solo conductores verificados. Tu sesión inicia trazabilidad.",
                     Modifier.padding(top = RuumTokens.Space4),
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
-                Spacer(Modifier.height(RuumTokens.Space24))
+                Text(
+                    "Evidencia · GPS · Pagos trazables",
+                    Modifier.padding(top = RuumTokens.Space8),
+                    style = MaterialTheme.typography.labelLarge,
+                    color = MaterialTheme.colorScheme.secondary,
+                )
+                Spacer(Modifier.height(RuumTokens.Space20))
                 OutlinedTextField(
                     value = email,
-                    onValueChange = { email = it },
+                    onValueChange = { email = it; validarEmail(it) },
                     modifier = Modifier.fillMaxWidth().defaultMinInputHeight(),
                     label = { Text("Correo") },
                     singleLine = true,
                     shape = MaterialTheme.shapes.small,
+                    isError = emailError != null,
+                    supportingText = emailError?.let { { Text(it) } },
                 )
                 Spacer(Modifier.height(RuumTokens.Space12))
                 OutlinedTextField(
@@ -265,22 +371,41 @@ private fun LoginScreen(
                 if (error != null) RuumAlert(error, Modifier.fillMaxWidth().padding(top = RuumTokens.Space16), error = true)
                 Spacer(Modifier.height(RuumTokens.Space20))
                 RuumPrimaryButton(
-                    text = "Iniciar sesión",
-                    onClick = { onLogin(email, password) },
+                    text = "Entrar",
+                    onClick = { onLogin(email.trim(), password) },
                     modifier = Modifier.fillMaxWidth(),
-                    enabled = email.isNotBlank() && password.isNotBlank(),
+                    enabled = email.isNotBlank() && password.isNotBlank() && emailError == null,
                     loading = loading,
                 )
                 Spacer(Modifier.height(RuumTokens.Space12))
-                RuumSecondaryButton(
-                    text = "Crear cuenta de conductor",
-                    onClick = onRegistro,
-                    modifier = Modifier.fillMaxWidth(),
+                Text(
+                    "Al continuar aceptas los Términos y el Aviso de Privacidad.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
-                TextButton(onClick = onRecuperacion, modifier = Modifier.fillMaxWidth()) {
-                    Text("Olvidé mi contraseña")
-                }
             }
+            RuumCard(Modifier.fillMaxWidth().padding(top = RuumTokens.Space16)) {
+                Text("¿Aún no estás certificado?")
+                RuumSecondaryButton(
+                    text = "Crea tu cuenta →",
+                    onClick = onRegistro,
+                    modifier = Modifier.fillMaxWidth().padding(top = RuumTokens.Space8),
+                )
+                Text(
+                    "Validación de identidad en minutos. Sin costo de registro.",
+                    Modifier.padding(top = RuumTokens.Space8),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+            TextButton(onClick = onRecuperacion, modifier = Modifier.fillMaxWidth()) {
+                Text("¿Olvidaste tu contraseña?")
+            }
+            Text(
+                "¿Problemas para entrar? Escríbenos por WhatsApp soporte desde la pantalla de ayuda.",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
         }
     }
 }
@@ -362,7 +487,14 @@ private fun AuthenticatedApp(
             }
         },
         bottomBar = {
-            if (!inOverlay) RuumBottomNavigation(destination) { destination = it }
+            if (!inOverlay) {
+                val sinLeer = state.notificaciones.count { it.leidaEn == null }
+                RuumBottomNavigation(
+                    selected = destination,
+                    unreadCount = sinLeer,
+                    onSelect = { destino -> destination = destino },
+                )
+            }
         },
     ) { padding ->
         Box(Modifier.padding(padding).fillMaxSize()) {
@@ -375,9 +507,15 @@ private fun AuthenticatedApp(
                 })
                 showingPerfil -> ModificacionPerfilScreen(state, viewModel)
                 else -> when (destination) {
-                    Destination.PANEL -> PanelScreen(state, viewModel::setAvailability, onTripSelected = { selectedTrip = it })
+                    Destination.PANEL -> PanelScreen(
+                        state,
+                        viewModel::setAvailability,
+                        onTripSelected = { selectedTrip = it },
+                        onOpenDocuments = { showingDocuments = true },
+                    )
                     Destination.TRIPS -> TripsScreen(state, viewModel::requestTrip, onTripSelected = { selectedTrip = it })
                     Destination.EARNINGS -> EarningsScreen(state.payouts, state.acceptedTrips)
+                    Destination.NOTIFICATIONS -> NotificacionesScreen(state, viewModel)
                     Destination.ACCOUNT -> AccountScreen(
                         documents = state.documents,
                         driverName = state.driver?.nombre.orEmpty(),
@@ -424,18 +562,31 @@ private fun RuumTopBar(title: String, onRefresh: () -> Unit) {
 }
 
 @Composable
-private fun RuumBottomNavigation(selected: Destination, onSelect: (Destination) -> Unit) {
+private fun RuumBottomNavigation(
+    selected: Destination,
+    onSelect: (Destination) -> Unit,
+    unreadCount: Int = 0,
+) {
     NavigationBar(containerColor = MaterialTheme.colorScheme.surface, tonalElevation = 0.dp) {
         listOf(
             Triple(Destination.PANEL, Icons.Default.Home, "Inicio"),
             Triple(Destination.TRIPS, Icons.Default.DirectionsCar, "Traslados"),
             Triple(Destination.EARNINGS, Icons.Default.AttachMoney, "Ganancias"),
+            Triple(Destination.NOTIFICATIONS, Icons.Default.Notifications, "Notificaciones"),
             Triple(Destination.ACCOUNT, Icons.Default.AccountCircle, "Cuenta"),
         ).forEach { (item, icon, label) ->
             NavigationBarItem(
                 selected = selected == item,
                 onClick = { onSelect(item) },
-                icon = { Icon(icon, label) },
+                icon = {
+                    if (item == Destination.NOTIFICATIONS && unreadCount > 0) {
+                        BadgedBox(badge = { Badge { Text("$unreadCount") } }) {
+                            Icon(icon, label)
+                        }
+                    } else {
+                        Icon(icon, label)
+                    }
+                },
                 label = { Text(label, maxLines = 1) },
                 colors = NavigationBarItemDefaults.colors(
                     selectedIconColor = MaterialTheme.colorScheme.secondary,
@@ -450,16 +601,26 @@ private fun RuumBottomNavigation(selected: Destination, onSelect: (Destination) 
 }
 
 @Composable
-private fun PanelScreen(state: DriverUiState, onAvailability: (Availability) -> Unit, onTripSelected: (Trip) -> Unit) {
+private fun PanelScreen(
+    state: DriverUiState,
+    onAvailability: (Availability) -> Unit,
+    onTripSelected: (Trip) -> Unit,
+    onOpenDocuments: () -> Unit = {},
+) {
     val available = state.availability == Availability.AVAILABLE
+    val onTrip = state.availability == Availability.ON_TRIP
     val earnings = state.payouts.filter { it.estado != "revocado" }.sumOf { it.montoNeto }
+    val viajeActivo = state.acceptedTrips.firstOrNull { it.estado == "traslado_en_curso" }
+    var confirmarNoDisponible by remember { mutableStateOf(false) }
+    val docsPendientes = DOCUMENT_REQUIREMENTS.count { requirement ->
+        state.documents.none { it.tipo == requirement.type && it.esActual && it.estado == "aprobado" }
+    }
     LazyColumn(
         contentPadding = PaddingValues(RuumTokens.Space20),
         verticalArrangement = Arrangement.spacedBy(RuumTokens.Space16),
     ) {
         item {
             Text("Hola, ${state.driver?.nombre?.substringBefore(' ') ?: "conductor"}", style = MaterialTheme.typography.headlineLarge)
-            Text("Esto es lo que requiere tu atención hoy.", color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
         // Modelo 11.3 — alerta 15 días antes del vencimiento de licencia.
         alertaLicencia15Dias(state.driver?.licenciaVigencia).takeIf { it.activa }?.let { alerta ->
@@ -469,6 +630,22 @@ private fun PanelScreen(state: DriverUiState, onAvailability: (Availability) -> 
                     Modifier.fillMaxWidth(),
                     error = (alerta.dias ?: 0) < 0,
                 )
+            }
+        }
+        viajeActivo?.let { viaje ->
+            item {
+                RuumCard(Modifier.fillMaxWidth()) {
+                    Text("Traslado activo", style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.secondary)
+                    Text(
+                        "${viaje.vehiculoMarca.orEmpty()} ${viaje.vehiculoModelo.orEmpty()}".trim().ifBlank { "Traslado en curso" },
+                        style = MaterialTheme.typography.titleLarge,
+                    )
+                    RuumPrimaryButton(
+                        "Continuar traslado →",
+                        { onTripSelected(viaje) },
+                        Modifier.fillMaxWidth().padding(top = RuumTokens.Space12),
+                    )
+                }
             }
         }
         item {
@@ -486,32 +663,86 @@ private fun PanelScreen(state: DriverUiState, onAvailability: (Availability) -> 
                         Text(
                             when (state.availability) {
                                 Availability.AVAILABLE -> "Disponible"
-                                Availability.UNAVAILABLE -> "No disponible"
+                                Availability.UNAVAILABLE -> "No Disponible"
                                 Availability.ON_TRIP -> "En viaje"
                             },
                             style = MaterialTheme.typography.titleMedium,
                         )
                         Text(
-                            if (available) "Puedes recibir nuevas ofertas" else "No recibirás nuevas ofertas",
+                            when (state.availability) {
+                                Availability.AVAILABLE -> "Recibiendo solicitudes · Te avisaremos con sonido"
+                                Availability.UNAVAILABLE -> "No recibirás traslados hasta activarte"
+                                Availability.ON_TRIP -> "Traslado activo — disponibilidad bloqueada"
+                            },
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
                     }
                     Switch(
                         checked = available,
-                        enabled = state.availability != Availability.ON_TRIP,
-                        onCheckedChange = { onAvailability(if (it) Availability.AVAILABLE else Availability.UNAVAILABLE) },
+                        enabled = !onTrip,
+                        onCheckedChange = {
+                            if (!it) confirmarNoDisponible = true
+                            else onAvailability(Availability.AVAILABLE)
+                        },
                     )
+                }
+            }
+        }
+        if (viajeActivo == null) {
+            item {
+                RuumCard(Modifier.fillMaxWidth()) {
+                    val n = state.availableTrips.size
+                    Text(
+                        if (available) "Traslados disponibles" else "Modo no disponible",
+                        style = MaterialTheme.typography.labelLarge,
+                        color = MaterialTheme.colorScheme.secondary,
+                    )
+                    Text(
+                        if (n > 0) "$n traslados disponibles en tu zona" else "Sin traslados por ahora",
+                        style = MaterialTheme.typography.titleLarge,
+                    )
+                    Text(
+                        if (n > 0) "Revisa los detalles y toma el traslado que mejor se ajuste a tu ruta."
+                        else "Actívate y empieza a ganar",
+                        Modifier.padding(top = RuumTokens.Space4),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                    if (!available) {
+                        RuumPrimaryButton(
+                            "Activarme ahora →",
+                            { onAvailability(Availability.AVAILABLE) },
+                            Modifier.fillMaxWidth().padding(top = RuumTokens.Space12),
+                        )
+                    }
                 }
             }
         }
         item {
             Row(horizontalArrangement = Arrangement.spacedBy(RuumTokens.Space12)) {
-                MetricCard("Traslados activos", state.acceptedTrips.size.toString(), Icons.Default.DirectionsCar, Modifier.weight(1f))
-                MetricCard("Disponibles", state.availableTrips.size.toString(), Icons.Default.Schedule, Modifier.weight(1f))
+                MetricCard("Ganancias del día", money(earnings), Icons.Default.AttachMoney, Modifier.weight(1f))
+                MetricCard("Traslados hoy", state.acceptedTrips.size.toString(), Icons.Default.DirectionsCar, Modifier.weight(1f))
             }
         }
-        item { MetricCard("Próximo depósito", money(earnings), Icons.Default.AttachMoney, Modifier.fillMaxWidth()) }
+        item {
+            RuumCard(Modifier.fillMaxWidth()) {
+                SectionTitle("Salud Operacional")
+                Spacer(Modifier.height(RuumTokens.Space8))
+                SaludRow("Documentos", if (docsPendientes == 0) "Vigentes" else "Pendientes ($docsPendientes)")
+                SaludRow(
+                    "Perfil",
+                    if (state.driver?.estado == "activo") "Habilitado" else "En validación",
+                )
+                SaludRow("Conexión", "Conectado")
+                if (docsPendientes > 0) {
+                    RuumSecondaryButton(
+                        "Ir a mi cuenta →",
+                        onOpenDocuments,
+                        Modifier.fillMaxWidth().padding(top = RuumTokens.Space12),
+                    )
+                }
+            }
+        }
         item {
             SectionTitle("Tu siguiente viaje", "Consulta el estado y el siguiente paso.")
             Spacer(Modifier.height(RuumTokens.Space12))
@@ -521,6 +752,29 @@ private fun PanelScreen(state: DriverUiState, onAvailability: (Availability) -> 
                 Icons.Default.DirectionsCar,
             )
         }
+    }
+    if (confirmarNoDisponible) AlertDialog(
+        onDismissRequest = { confirmarNoDisponible = false },
+        title = { Text("¿Pasas a no disponible?") },
+        text = { Text("Dejarás de recibir traslados nuevos hasta que reactives tu disponibilidad.") },
+        confirmButton = {
+            RuumPrimaryButton("Confirmar", {
+                confirmarNoDisponible = false
+                onAvailability(Availability.UNAVAILABLE)
+            })
+        },
+        dismissButton = { RuumSecondaryButton("Cancelar", { confirmarNoDisponible = false }) },
+    )
+}
+
+@Composable
+private fun SaludRow(etiqueta: String, valor: String) {
+    Row(
+        Modifier.fillMaxWidth().padding(vertical = RuumTokens.Space4),
+        horizontalArrangement = Arrangement.SpaceBetween,
+    ) {
+        Text(etiqueta, style = MaterialTheme.typography.bodyMedium)
+        Text(valor, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Bold)
     }
 }
 
@@ -542,32 +796,93 @@ private fun SectionTitle(title: String, supporting: String? = null) {
 @Composable
 private fun TripsScreen(state: DriverUiState, onRequest: (Trip) -> Unit, onTripSelected: (Trip) -> Unit) {
     var tab by remember { mutableIntStateOf(0) }
+    var busqueda by remember { mutableStateOf("") }
+    var ordenMayorGanancia by remember { mutableStateOf(false) }
     Column(Modifier.fillMaxSize()) {
+        Text(
+            "Traslados",
+            Modifier.padding(horizontal = RuumTokens.Space20, vertical = RuumTokens.Space12),
+            style = MaterialTheme.typography.headlineLarge,
+        )
+        OutlinedTextField(
+            value = busqueda,
+            onValueChange = { busqueda = it },
+            modifier = Modifier.fillMaxWidth().padding(horizontal = RuumTokens.Space20).defaultMinInputHeight(),
+            placeholder = { Text("Buscar ofertas...") },
+            singleLine = true,
+            shape = MaterialTheme.shapes.small,
+        )
         Row(
             Modifier.fillMaxWidth().padding(horizontal = RuumTokens.Space20, vertical = RuumTokens.Space12),
             horizontalArrangement = Arrangement.spacedBy(RuumTokens.Space8),
         ) {
-            PillTab("Solicitados", state.availableTrips.size, tab == 0, { tab = 0 }, Modifier.weight(1f))
-            PillTab("Aceptados", state.acceptedTrips.size, tab == 1, { tab = 1 }, Modifier.weight(1f))
+            PillTab("Ofertas (${state.availableTrips.size})", tab == 0, { tab = 0 }, Modifier.weight(1f))
+            PillTab("Aceptados (${state.acceptedTrips.size})", tab == 1, { tab = 1 }, Modifier.weight(1f))
         }
-        val trips = if (tab == 0) state.availableTrips else state.acceptedTrips
+        Row(
+            Modifier.fillMaxWidth().padding(horizontal = RuumTokens.Space20),
+            horizontalArrangement = Arrangement.spacedBy(RuumTokens.Space8),
+        ) {
+            FilterChip(
+                selected = !ordenMayorGanancia,
+                onClick = { ordenMayorGanancia = false },
+                label = { Text("Recientes") },
+                modifier = Modifier.height(RuumTokens.Touch),
+            )
+            FilterChip(
+                selected = ordenMayorGanancia,
+                onClick = { ordenMayorGanancia = true },
+                label = { Text("Mayor ganancia") },
+                modifier = Modifier.height(RuumTokens.Touch),
+            )
+        }
+        val base = if (tab == 0) state.availableTrips else state.acceptedTrips
+        val filtrados = base.filter { trip ->
+            busqueda.isBlank() ||
+                listOfNotNull(trip.origenCiudad, trip.origenDireccion, trip.destinoCiudad, trip.destinoDireccion, trip.id)
+                    .joinToString(" ").contains(busqueda, ignoreCase = true)
+        }.let { lista ->
+            if (ordenMayorGanancia) lista.sortedByDescending { estimatedEarning(it) } else lista
+        }
+        if (tab == 0 && filtrados.isNotEmpty()) {
+            Text(
+                if (filtrados.size == 1) "1 oferta disponible" else "${filtrados.size} ofertas disponibles",
+                Modifier.padding(horizontal = RuumTokens.Space20, vertical = RuumTokens.Space8),
+                style = MaterialTheme.typography.labelLarge,
+                color = MaterialTheme.colorScheme.secondary,
+            )
+        }
+        if (tab == 1 && filtrados.isNotEmpty()) {
+            Text(
+                if (filtrados.size == 1) "1 traslado aceptado" else "${filtrados.size} traslados aceptados",
+                Modifier.padding(horizontal = RuumTokens.Space20, vertical = RuumTokens.Space8),
+                style = MaterialTheme.typography.labelLarge,
+                color = MaterialTheme.colorScheme.secondary,
+            )
+        }
         LazyColumn(contentPadding = PaddingValues(RuumTokens.Space20), verticalArrangement = Arrangement.spacedBy(RuumTokens.Space16)) {
-            if (trips.isEmpty()) item {
+            if (filtrados.isEmpty()) item {
                 RuumEmptyState(
-                    if (tab == 0) "No hay Traslados disponibles" else "Aún no tienes Traslados aceptados",
-                    if (tab == 0) "Actualiza en unos minutos para revisar nuevas rutas." else "Los Traslados asignados aparecerán en esta pestaña.",
+                    if (busqueda.isNotBlank()) "Sin resultados con estos filtros" else "Sin traslados para este día",
+                    if (busqueda.isNotBlank()) "Prueba limpiar filtros."
+                    else if (tab == 0) "No hay ofertas programadas en esta fecha. Revisa otro día o cambia el orden a Mayor ganancia."
+                    else "No tienes traslados aceptados para esta fecha. Acepta una oferta para verla aquí.",
                     Icons.Default.DirectionsCar,
                 )
             }
-            items(trips, key = { it.id ?: it.hashCode().toString() }) { trip ->
-                TripCard(trip, if (tab == 0) ({ onRequest(trip) }) else null, onClick = { onTripSelected(trip) })
+            items(filtrados, key = { it.id ?: it.hashCode().toString() }) { trip ->
+                if (tab == 0) {
+                    OfertaCard(trip, onRequest = { onRequest(trip) }, onClick = { onTripSelected(trip) })
+                } else {
+                    TripCard(trip, onClick = { onTripSelected(trip) }, esAceptado = true)
+                }
             }
         }
     }
 }
 
 @Composable
-private fun PillTab(label: String, count: Int, selected: Boolean, onClick: () -> Unit, modifier: Modifier = Modifier) {
+private fun PillTab(label: String, selected: Boolean, onClick: () -> Unit, modifier: Modifier = Modifier) {
     Surface(
         onClick = onClick,
         modifier = modifier.height(RuumTokens.Touch),
@@ -577,13 +892,77 @@ private fun PillTab(label: String, count: Int, selected: Boolean, onClick: () ->
         border = if (selected) null else androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
     ) {
         Box(contentAlignment = Alignment.Center) {
-            Text("$label  $count", style = MaterialTheme.typography.labelMedium, maxLines = 1)
+            Text(label, style = MaterialTheme.typography.labelMedium, maxLines = 1)
         }
     }
 }
 
 @Composable
-private fun TripCard(trip: Trip, onRequest: (() -> Unit)? = null, onClick: (() -> Unit)? = null) {
+private fun OfertaCard(trip: Trip, onRequest: () -> Unit, onClick: () -> Unit) {
+    RuumCard(Modifier.fillMaxWidth()) {
+        Box(
+            Modifier.fillMaxWidth().height(3.dp).background(if (LocalRuumDarkMode.current) RuumRouteDark else RuumRouteLight),
+        )
+        Spacer(Modifier.height(RuumTokens.Space16))
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.Top) {
+            Text("Oferta disponible", style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.secondary)
+            trip.id?.let { Text("ID ${it.take(8).uppercase()}", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant) }
+        }
+        Spacer(Modifier.height(RuumTokens.Space8))
+        Text(money(estimatedEarning(trip)), style = MaterialTheme.typography.headlineMedium)
+        Text(
+            listOfNotNull(trip.vehiculoMarca, trip.vehiculoModelo, trip.vehiculoAnio?.toString()).joinToString(" ").ifBlank { "Vehículo por confirmar" },
+            Modifier.padding(top = RuumTokens.Space8),
+            style = MaterialTheme.typography.bodyLarge,
+        )
+        Text("Origen", Modifier.padding(top = RuumTokens.Space12), style = MaterialTheme.typography.labelLarge)
+        Text(
+            trip.origenDireccion ?: "Origen por confirmar",
+            style = MaterialTheme.typography.bodyMedium,
+            fontWeight = FontWeight.Bold,
+        )
+        Text(
+            trip.origenCiudad ?: "Ciudad / Municipio por confirmar",
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        Text("Destino", Modifier.padding(top = RuumTokens.Space8), style = MaterialTheme.typography.labelLarge)
+        Text(
+            trip.destinoDireccion ?: "Destino por confirmar",
+            style = MaterialTheme.typography.bodyMedium,
+            fontWeight = FontWeight.Bold,
+        )
+        Text(
+            trip.destinoCiudad ?: "Ciudad / Municipio por confirmar",
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        Text(
+            "Inicio ${trip.creadoEn?.take(10) ?: "Por confirmar"} · " +
+                "${trip.distanciaKm?.let { "%.1f km".format(it) } ?: "Distancia por confirmar"} · " +
+                "${trip.tiempoEstimadoHoras?.let { "%.1f h".format(it) } ?: "Duración por confirmar"}",
+            Modifier.padding(top = RuumTokens.Space8),
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            style = MaterialTheme.typography.bodyMedium,
+        )
+        Row(Modifier.fillMaxWidth().padding(top = RuumTokens.Space12), horizontalArrangement = Arrangement.spacedBy(RuumTokens.Space8)) {
+            RuumPrimaryButton("Ver oferta →", onClick, Modifier.weight(1f))
+        }
+        RuumSecondaryButton(
+            "Solicitar asignación →",
+            onRequest,
+            Modifier.fillMaxWidth().padding(top = RuumTokens.Space8),
+        )
+    }
+}
+
+@Composable
+private fun TripCard(
+    trip: Trip,
+    onRequest: (() -> Unit)? = null,
+    onClick: (() -> Unit)? = null,
+    esAceptado: Boolean = false,
+) {
     RuumCard(Modifier.fillMaxWidth()) {
         Box(
             Modifier.fillMaxWidth().height(3.dp).background(if (LocalRuumDarkMode.current) RuumRouteDark else RuumRouteLight),
@@ -595,17 +974,36 @@ private fun TripCard(trip: Trip, onRequest: (() -> Unit)? = null, onClick: (() -
                 style = MaterialTheme.typography.titleLarge,
                 modifier = Modifier.weight(1f).padding(end = RuumTokens.Space8),
             )
-            trip.estado?.let { RuumStatusChip(it) }
+            trip.estado?.let { RuumStatusChip(if (esAceptado) "ACEPTADO · $it" else it) }
         }
+        Text(
+            estadoTrasladoDescripcion(trip.estado),
+            Modifier.padding(top = RuumTokens.Space4),
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            style = MaterialTheme.typography.bodyMedium,
+        )
         if (onClick != null) {
             TextButton(onClick = onClick, modifier = Modifier.fillMaxWidth()) {
-                Text("Ver detalle del traslado")
+                Text(if (esAceptado) "INICIAR TRASLADO →" else "Ver detalle del traslado")
             }
         }
         Text(
+            "Vehículo",
+            Modifier.padding(top = RuumTokens.Space8),
+            style = MaterialTheme.typography.labelLarge,
+        )
+        Text(
             listOfNotNull(trip.vehiculoMarca, trip.vehiculoModelo, trip.vehiculoAnio?.toString()).joinToString(" ").ifBlank { "Vehículo por confirmar" },
-            Modifier.padding(top = RuumTokens.Space12),
             style = MaterialTheme.typography.bodyLarge,
+        )
+        Text(
+            "Origen → Destino",
+            Modifier.padding(top = RuumTokens.Space8),
+            style = MaterialTheme.typography.labelLarge,
+        )
+        Text(
+            "${trip.origenCiudad ?: "Por confirmar"} → ${trip.destinoCiudad ?: "Por confirmar"}",
+            style = MaterialTheme.typography.bodyMedium,
         )
         Text(
             "${trip.distanciaKm?.let { "%.1f km".format(it) } ?: "Distancia por confirmar"} · ${trip.tiempoEstimadoHoras?.let { "%.1f h".format(it) } ?: "Duración por confirmar"}",
@@ -628,6 +1026,19 @@ private fun TripCard(trip: Trip, onRequest: (() -> Unit)? = null, onClick: (() -
             RuumPrimaryButton("Solicitar viaje", onRequest, Modifier.fillMaxWidth(), leadingIcon = Icons.Default.ChevronRight)
         }
     }
+}
+
+private fun estadoTrasladoDescripcion(estado: String?): String = when (estado) {
+    "pendiente_de_conductor" -> "Oferta disponible."
+    "conductor_asignado" -> "Dirígete al punto de origen."
+    "conductor_en_camino_al_origen" -> "Dirígete al punto de recolección."
+    "conductor_en_punto_de_recoleccion", "verificacion_vehiculo_en_proceso",
+    "evidencia_inicial_en_proceso", "evidencia_inicial_completada" -> "Realiza la recepción y evidencia del vehículo."
+    "vehiculo_recibido", "traslado_en_curso" -> "Conduce de forma segura al destino."
+    "llegada_a_destino", "evidencia_final_en_proceso" -> "Entrega la unidad y registra la evidencia final."
+    "evidencia_final_completada", "entrega_confirmada", "servicio_cerrado" -> "El traslado ha sido concluido."
+    "servicio_cancelado", "traslado_fallido" -> "Este traslado ya no está activo."
+    else -> "Consulta el detalle para tu siguiente paso."
 }
 
 @Suppress("UnusedExpression")
@@ -666,19 +1077,24 @@ private fun TripDetailScreen(trip: Trip, state: DriverUiState, viewModel: Driver
     ) {
         item {
             RuumCard(Modifier.fillMaxWidth()) {
-                Text("RUTA", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.secondary)
+                Text(
+                    encabezadoDetalle(trip.estado),
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.secondary,
+                )
                 Text(
                     "${trip.origenCiudad ?: "Origen"} → ${trip.destinoCiudad ?: "Destino"}",
                     Modifier.padding(top = RuumTokens.Space8),
                     style = MaterialTheme.typography.headlineMedium,
                 )
                 trip.estado?.let { RuumStatusChip(it) }
+                trip.id?.let { Text("ID ${it.take(8).uppercase()}", Modifier.padding(top = RuumTokens.Space4), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant) }
             }
         }
         nextTripAction(trip.estado)?.let { action ->
             item {
                 RuumCard(Modifier.fillMaxWidth()) {
-                    SectionTitle("Siguiente paso")
+                    Text("TU PRÓXIMA ACCIÓN", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.secondary)
                     Text(action.second, Modifier.padding(top = RuumTokens.Space8), color = MaterialTheme.colorScheme.onSurfaceVariant)
                     RuumPrimaryButton(
                         action.first,
@@ -746,7 +1162,7 @@ private fun TripDetailScreen(trip: Trip, state: DriverUiState, viewModel: Driver
         }
         item {
             RuumCard(Modifier.fillMaxWidth()) {
-                SectionTitle("Vehículo")
+                SectionTitle("VEHÍCULO A TRASLADAR")
                 Text(
                     listOfNotNull(trip.vehiculoMarca, trip.vehiculoModelo, trip.vehiculoAnio?.toString())
                         .joinToString(" ").ifBlank { "Vehículo por confirmar" },
@@ -758,49 +1174,58 @@ private fun TripDetailScreen(trip: Trip, state: DriverUiState, viewModel: Driver
         }
         item {
             RuumCard(Modifier.fillMaxWidth()) {
-                SectionTitle("Puntos del traslado")
-                DetailRow("Recoger", trip.origenDireccion ?: trip.origenCiudad ?: "Pendiente de confirmar")
+                SectionTitle("PUNTO DE RECOLECCIÓN")
+                DetailRow("Dirección", trip.origenDireccion ?: trip.origenCiudad ?: "Origen por confirmar")
                 val origin = listOfNotNull(trip.origenDireccion, trip.origenCiudad).joinToString(", ")
                 if (origin.isNotBlank()) {
                     RuumSecondaryButton(
-                        "Navegar al origen",
+                        "NAVEGAR AL ORIGEN",
                         onClick = { abrirMapa(context, origin) },
                         modifier = Modifier.fillMaxWidth().padding(top = RuumTokens.Space8),
                     )
                 }
-                DetailRow("Entregar", trip.destinoDireccion ?: trip.destinoCiudad ?: "Pendiente de confirmar")
+                SectionTitle("PUNTO DE ENTREGA")
+                DetailRow("Dirección", trip.destinoDireccion ?: trip.destinoCiudad ?: "Destino por confirmar")
                 val destination = listOfNotNull(trip.destinoDireccion, trip.destinoCiudad).joinToString(", ")
                 if (destination.isNotBlank()) {
                     RuumSecondaryButton(
-                        "Navegar al destino",
+                        "NAVEGAR AL DESTINO",
                         onClick = { abrirMapa(context, destination) },
                         modifier = Modifier.fillMaxWidth().padding(top = RuumTokens.Space8),
                     )
                 }
-                DetailRow("Distancia", trip.distanciaKm?.let { "%.1f km".format(it) } ?: "Por confirmar")
-                DetailRow("Duración estimada", trip.tiempoEstimadoHoras?.let { "%.1f h".format(it) } ?: "Por confirmar")
+                DetailRow("Distancia total", trip.distanciaKm?.let { "%.1f km".format(it) } ?: "Por confirmar")
+                DetailRow("Tiempo estimado", trip.tiempoEstimadoHoras?.let { "%.1f h".format(it) } ?: "Por confirmar")
             }
         }
         item {
             RuumCard(Modifier.fillMaxWidth()) {
-                SectionTitle("Pago estimado")
+                SectionTitle("Ganancia Neta Conductor")
+                Text("Tarifa base garantizada + bonos operativos", Modifier.padding(top = RuumTokens.Space4), color = MaterialTheme.colorScheme.onSurfaceVariant)
                 Text(money(estimatedEarning(trip)), Modifier.padding(top = RuumTokens.Space8), style = MaterialTheme.typography.headlineMedium)
             }
         }
     }
 }
 
+private fun encabezadoDetalle(estado: String?): String = when (estado) {
+    "evidencia_final_completada", "entrega_confirmada", "servicio_cerrado" -> "Cierre de Traslado"
+    "pendiente_de_conductor" -> "DETALLES DEL TRASLADO"
+    "servicio_cancelado", "traslado_fallido" -> "Traslado concluido o cancelado"
+    else -> "TRASLADO ACTIVO"
+}
+
 private fun nextTripAction(state: String?): Triple<String, String, String>? = when (state) {
-    "conductor_asignado" -> Triple("Iniciar navegación al origen", "Abre el paso de recogida del vehículo.", "conductor_en_camino")
-    "conductor_en_camino_al_origen" -> Triple("Registrar llegada al origen", "Confirma que llegaste al punto de recolección.", "llegada_origen")
-    "conductor_en_punto_de_recoleccion" -> Triple("Iniciar inspección del vehículo", "Comienza la revisión previa a recibir la unidad.", "iniciar_verificacion")
-    "verificacion_vehiculo_en_proceso" -> Triple("Iniciar registro fotográfico", "Captura la evidencia inicial antes de recibir el vehículo.", "iniciar_evidencia_inicial")
-    "evidencia_inicial_completada" -> Triple("Confirmar recepción del vehículo", "Registra que recibiste la unidad después de la inspección.", "vehiculo_recibido")
-    "vehiculo_recibido" -> Triple("Iniciar traslado al destino", "Confirma el inicio del trayecto.", "iniciar_traslado")
-    "traslado_en_curso" -> Triple("Registrar llegada al destino", "Confirma que llegaste al punto de entrega.", "confirmar_llegada_destino")
-    "llegada_a_destino" -> Triple("Iniciar evidencia de entrega", "Registra las fotografías finales del vehículo.", "iniciar_evidencia_final")
-    "evidencia_final_completada" -> Triple("Confirmar entrega", "Confirma la entrega con evidencia completa.", "confirmar_entrega")
-    "entrega_confirmada" -> Triple("Cerrar traslado", "Finaliza el flujo del traslado.", "cerrar_viaje")
+    "conductor_asignado" -> Triple("ESTOY EN CAMINO AL ORIGEN →", "Prepárate para salir. Revisa la información del vehículo y el contacto.", "conductor_en_camino")
+    "conductor_en_camino_al_origen" -> Triple("HE LLEGADO AL ORIGEN", "Navega hacia el punto de recolección y registra tu llegada.", "llegada_origen")
+    "conductor_en_punto_de_recoleccion" -> Triple("INICIAR INSPECCIÓN Y EVIDENCIA", "Localiza la unidad e inicia la inspección del vehículo.", "iniciar_verificacion")
+    "verificacion_vehiculo_en_proceso" -> Triple("CONTINUAR INSPECCIÓN", "Completa las fotos y checklist de recolección.", "iniciar_evidencia_inicial")
+    "evidencia_inicial_completada" -> Triple("INICIAR TRAYECTO AL DESTINO →", "El registro inicial está completo. Inicia el trayecto.", "vehiculo_recibido")
+    "vehiculo_recibido" -> Triple("INICIAR TRAYECTO AL DESTINO →", "Confirma el inicio del trayecto.", "iniciar_traslado")
+    "traslado_en_curso" -> Triple("HE LLEGADO AL DESTINO", "Conduce con precaución hacia el punto de entrega.", "confirmar_llegada_destino")
+    "llegada_a_destino" -> Triple("INICIAR EVIDENCIA DE ENTREGA", "Registra las fotografías finales del vehículo.", "iniciar_evidencia_final")
+    "evidencia_final_completada" -> Triple("SÍ, ENTREGAR", "Confirma la entrega con evidencia completa.", "confirmar_entrega")
+    "entrega_confirmada" -> Triple("FINALIZAR Y ENTREGAR VEHÍCULO", "Finaliza el flujo del traslado.", "cerrar_viaje")
     else -> null
 }
 
@@ -822,11 +1247,11 @@ private fun EvidenceCaptureSection(
     var photoFile by remember { mutableStateOf<File?>(null) }
     var captureError by remember { mutableStateOf<String?>(null) }
     val required = listOf(
-        "frente" to "Frente",
-        "lado_piloto" to "Lado del conductor",
-        "lado_copiloto" to "Lado del copiloto",
-        "trasera" to "Parte trasera",
-        "tablero" to "Tablero",
+        Triple("frente", "Frente", "Defensa + placas centradas, a 1.5 m"),
+        Triple("lado_piloto", "Lado piloto", "De espejo a defensa, placa legible"),
+        Triple("lado_copiloto", "Lado copiloto", "De espejo a defensa, placa legible"),
+        Triple("trasera", "Trasera", "Cajuela + defensa, placa legible"),
+        Triple("tablero", "Tablero", "Odómetro sin reflejo"),
     )
     val optional = if (type == "final") "dano_previo" to "Daño visible (opcional)" else null
     val camera = rememberLauncherForActivityResult(ActivityResultContracts.TakePicture()) { captured ->
@@ -851,11 +1276,20 @@ private fun EvidenceCaptureSection(
     val complete = required.all { it.first in savedAngles }
 
     RuumCard(Modifier.fillMaxWidth()) {
-        SectionTitle(if (type == "inicial") "Evidencia inicial" else "Evidencia final", "Captura los cinco ángulos requeridos del vehículo.")
+        SectionTitle(
+            if (type == "inicial") "Checklist de Origen" else "Checklist de Destino",
+            if (type == "inicial") "Verificación y evidencia de salida" else "Verificación y evidencia de entrega",
+        )
+        Text(
+            "FOTOGRAFÍAS DEL VEHÍCULO · ${savedAngles.size}/5 fotos",
+            Modifier.padding(top = RuumTokens.Space8),
+            style = MaterialTheme.typography.labelLarge,
+            color = MaterialTheme.colorScheme.secondary,
+        )
         if (loading) {
             CircularProgressIndicator(Modifier.padding(top = RuumTokens.Space12))
         } else {
-            required.forEach { (angle, label) ->
+            required.forEach { (angle, label, guia) ->
                 Row(
                     Modifier.fillMaxWidth().padding(top = RuumTokens.Space8),
                     verticalAlignment = Alignment.CenterVertically,
@@ -863,13 +1297,14 @@ private fun EvidenceCaptureSection(
                     Column(Modifier.weight(1f)) {
                         Text(label, style = MaterialTheme.typography.titleSmall)
                         Text(
-                            if (angle in savedAngles) "Fotografía guardada" else "Pendiente",
+                            if (angle in savedAngles) "Foto capturada, toca para reemplazar" else "Toca para capturar fotografía",
                             color = if (angle in savedAngles) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.onSurfaceVariant,
                             style = MaterialTheme.typography.bodySmall,
                         )
+                        Text(guia, color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.bodySmall)
                     }
                     RuumSecondaryButton(
-                        if (angle in savedAngles) "Repetir" else "Capturar",
+                        if (angle in savedAngles) "Repetir foto" else "Tomar foto",
                         onClick = {
                             runCatching {
                                 val directory = File(context.cacheDir, "evidence").apply { mkdirs() }
@@ -916,14 +1351,23 @@ private fun EvidenceCaptureSection(
                 }
             }
             captureError?.let { RuumAlert(it, Modifier.fillMaxWidth().padding(top = RuumTokens.Space12), error = true) }
+            val faltantes = required.map { it.first }.filter { it !in savedAngles }
+            if (faltantes.isNotEmpty()) {
+                Text(
+                    "Faltan fotografías obligatorias: ${faltantes.joinToString(", ")}.",
+                    Modifier.padding(top = RuumTokens.Space12),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    style = MaterialTheme.typography.bodySmall,
+                )
+            }
             Text(
-                if (type == "inicial") "La confirmación también valida el método de pago registrado." else "La evidencia final queda asociada al traslado para revisión.",
+                "Toca para capturar · “PENDIENTE” se sincroniza sola. Si la foto sale borrosa u oscura, repítela a 1–2 m con el teléfono firme.",
                 Modifier.padding(top = RuumTokens.Space12),
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 style = MaterialTheme.typography.bodySmall,
             )
             RuumPrimaryButton(
-                if (confirming) "Confirmando…" else "Completar evidencia",
+                if (confirming) "Enviando…" else if (complete) "Finalizar evidencias ✓" else "Finalizar evidencias (${savedAngles.size}/5)",
                 onClick = onConfirm,
                 modifier = Modifier.fillMaxWidth().padding(top = RuumTokens.Space12),
                 enabled = complete && !saving,
@@ -974,32 +1418,139 @@ private fun EarningsScreen(payouts: List<Payout>, trips: List<Trip>) {
     val total = totalDeposited(payouts)
     LazyColumn(contentPadding = PaddingValues(RuumTokens.Space20), verticalArrangement = Arrangement.spacedBy(RuumTokens.Space16)) {
         item {
+            Text("Mis ganancias y pagos", style = MaterialTheme.typography.headlineLarge)
+            Text(
+                "Evidencia financiera de cada traslado. Trazabilidad y cierre documentado.",
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+        item {
             RuumCard(Modifier.fillMaxWidth()) {
-                Text("PAGO PARA TI", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.secondary)
+                Text("Depósito acumulado", style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.secondary)
                 Text(money(total), style = MaterialTheme.typography.displayLarge)
-                Text("Total depositado", color = MaterialTheme.colorScheme.onSurfaceVariant)
                 if (trips.isNotEmpty()) {
                     RuumAlert("${trips.size} viaje(s) siguen en proceso y aún no forman parte del depósito.", Modifier.fillMaxWidth().padding(top = RuumTokens.Space16))
                 }
             }
         }
-        item { SectionTitle("Pagos por semana", "Consulta monto, ajustes y estado.") }
+        item { SectionTitle("Desglose por viaje", "${trips.size} traslado(s)") }
+        if (trips.isEmpty()) item {
+            RuumEmptyState(
+                "Aún no hay ganancias registradas",
+                "Completa tu primer traslado para comenzar a acumular ganancias. Al finalizar cada viaje, verás aquí el desglose detallado y el estatus de tu depósito bancario.",
+                Icons.Default.AttachMoney,
+            )
+        }
+        items(trips, key = { it.id ?: it.hashCode().toString() }) { trip ->
+            RuumCard(Modifier.fillMaxWidth()) {
+                Text(
+                    listOfNotNull(trip.vehiculoMarca, trip.vehiculoModelo).joinToString(" ").ifBlank { "Vehículo por confirmar" },
+                    style = MaterialTheme.typography.titleMedium,
+                )
+                Text(
+                    "${trip.origenCiudad ?: "Origen"} ➔ ${trip.destinoCiudad ?: "Destino"}",
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                Row(
+                    Modifier.fillMaxWidth().padding(top = RuumTokens.Space8),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Text("Ganancia", style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Bold)
+                    Text(money(estimatedEarning(trip)), style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Bold)
+                }
+                trip.estado?.let { RuumStatusChip(it) }
+            }
+        }
+        item { SectionTitle("Depósitos del periodo") }
         if (payouts.isEmpty()) item {
-            RuumEmptyState("Aún no hay depósitos", "Tus Traslados cerrados aparecerán aquí cuando se programe el pago.", Icons.Default.AttachMoney)
+            Text("No hay depósitos en este periodo.", color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
         items(payouts, key = { it.id }) { payout -> PayoutCard(payout) }
     }
 }
 
 @Composable
+private fun NotificacionesScreen(state: DriverUiState, viewModel: DriverViewModel) {
+    LaunchedEffect(Unit) { viewModel.loadNotificaciones() }
+    var filtro by remember { mutableIntStateOf(0) }
+    val sinLeer = state.notificaciones.filter { it.leidaEn == null }
+    val leidas = state.notificaciones.filter { it.leidaEn != null }
+    val visibles = when (filtro) {
+        1 -> sinLeer
+        2 -> leidas
+        else -> state.notificaciones
+    }
+    LazyColumn(
+        contentPadding = PaddingValues(RuumTokens.Space20),
+        verticalArrangement = Arrangement.spacedBy(RuumTokens.Space16),
+    ) {
+        item {
+            Text("Notificaciones y Avisos", style = MaterialTheme.typography.headlineLarge)
+            Text(
+                "Tus avisos y alertas operativas permanecen guardados en este centro.",
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+        item {
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    "Filtro de notificaciones",
+                    style = MaterialTheme.typography.labelLarge,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                if (sinLeer.isNotEmpty()) {
+                    TextButton(onClick = viewModel::marcarNotificacionesLeidas) {
+                        Text("✓ Marcar todas como leídas")
+                    }
+                }
+            }
+            Row(Modifier.fillMaxWidth().padding(top = RuumTokens.Space8), horizontalArrangement = Arrangement.spacedBy(RuumTokens.Space8)) {
+                PillTab("Todas (${state.notificaciones.size})", filtro == 0, { filtro = 0 }, Modifier.weight(1f))
+                PillTab("Sin leer (${sinLeer.size})", filtro == 1, { filtro = 1 }, Modifier.weight(1f))
+                PillTab("Leídas (${leidas.size})", filtro == 2, { filtro = 2 }, Modifier.weight(1f))
+            }
+        }
+        if (visibles.isEmpty()) item {
+            RuumEmptyState(
+                "¡Todo al día!",
+                "No tienes avisos pendientes por leer. Aquí aparecerán tus próximos avisos de servicio, ganancias y alertas operativas.",
+                Icons.Default.Notifications,
+            )
+        }
+        items(visibles, key = { it.id }) { aviso ->
+            RuumCard(Modifier.fillMaxWidth()) {
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        aviso.tipo.replace('_', ' ').replaceFirstChar { it.uppercase() },
+                        style = MaterialTheme.typography.labelLarge,
+                        color = MaterialTheme.colorScheme.secondary,
+                    )
+                    if (aviso.leidaEn == null) RuumStatusChip("Nueva")
+                }
+                Text(aviso.titulo, Modifier.padding(top = RuumTokens.Space4), style = MaterialTheme.typography.titleMedium)
+                Text(aviso.cuerpo, Modifier.padding(top = RuumTokens.Space4), color = MaterialTheme.colorScheme.onSurfaceVariant)
+                aviso.creadoEn?.let {
+                    Text(it.take(10), Modifier.padding(top = RuumTokens.Space8), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
+            }
+        }
+    }
+}
+
+@Composable
 private fun PayoutCard(payout: Payout) {
     RuumCard(Modifier.fillMaxWidth()) {
-        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-            Text("${payout.periodoInicio.take(10)} – ${payout.periodoFin.take(10)}", style = MaterialTheme.typography.labelMedium)
-            RuumStatusChip(payout.estado)
+        Text("Periodo Operativo", style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.secondary)
+        Text("${payout.periodoInicio.take(10)} ➔ ${payout.periodoFin.take(10)}", style = MaterialTheme.typography.titleMedium)
+        Row(Modifier.fillMaxWidth().padding(top = RuumTokens.Space8), horizontalArrangement = Arrangement.SpaceBetween) {
+            Text("Monto Neto", style = MaterialTheme.typography.bodyMedium)
+            Text(money(payout.montoNeto), style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Bold)
         }
-        Text("Depósito ${money(payout.montoNeto)}", Modifier.padding(top = RuumTokens.Space16), style = MaterialTheme.typography.headlineSmall)
-        Text("Bruto ${money(payout.montoBruto)} · Ajustes ${money(payout.ajustes)}", color = MaterialTheme.colorScheme.onSurfaceVariant)
+        DetailRow("Monto Bruto", money(payout.montoBruto))
+        DetailRow("Ajustes", money(payout.ajustes))
+        payout.referenciaPago?.let { DetailRow("SPEI", it) }
+        RuumStatusChip(payout.estado)
     }
 }
 
@@ -1014,7 +1565,11 @@ private fun AccountScreen(
     onOpenPerfil: () -> Unit,
 ) {
     var confirmSignOut by remember { mutableStateOf(false) }
+    var mostrarSoporte by remember { mutableStateOf(false) }
     LazyColumn(contentPadding = PaddingValues(RuumTokens.Space20), verticalArrangement = Arrangement.spacedBy(RuumTokens.Space16)) {
+        item {
+            Text("Cuenta", style = MaterialTheme.typography.headlineLarge)
+        }
         item {
             RuumCard(Modifier.fillMaxWidth()) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
@@ -1028,66 +1583,107 @@ private fun AccountScreen(
                         Text("Conductor certificado", color = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
                 }
-            }
-        }
-        item {
-            SectionTitle("Apariencia", "Tu elección prevalece sobre la del sistema.")
-            Row(Modifier.fillMaxWidth().padding(top = RuumTokens.Space12), horizontalArrangement = Arrangement.spacedBy(RuumTokens.Space8)) {
-                ThemeChip("Sistema", Icons.Default.Sync, RuumThemeMode.SYSTEM, themePreference, Modifier.weight(1f))
-                ThemeChip("Claro", Icons.Default.LightMode, RuumThemeMode.LIGHT, themePreference, Modifier.weight(1f))
-                ThemeChip("Oscuro", Icons.Default.DarkMode, RuumThemeMode.DARK, themePreference, Modifier.weight(1f))
-            }
-        }
-        item {
-            RuumCard(Modifier.fillMaxWidth()) {
-                SectionTitle("Tus documentos", "Consulta estados y actualiza tu expediente.")
-                val current = documents.filter { it.esActual }.distinctBy { it.tipo }
-                Text("${current.size} tipo(s) de documento registrados", Modifier.padding(top = RuumTokens.Space8), color = MaterialTheme.colorScheme.onSurfaceVariant)
-                RuumPrimaryButton("Gestionar documentos", onOpenDocuments, Modifier.fillMaxWidth().padding(top = RuumTokens.Space12))
-            }
-        }
-        item {
-            RuumCard(Modifier.fillMaxWidth()) {
-                SectionTitle("Certificación Ruum", "Nivel, verificación Didit, capacitación y derechos.")
-                Text("Modelo 11: conductor certificado, no solo registrado.", Modifier.padding(top = RuumTokens.Space8), color = MaterialTheme.colorScheme.onSurfaceVariant)
                 RuumPrimaryButton("Ver mi certificación", onOpenCertificacion, Modifier.fillMaxWidth().padding(top = RuumTokens.Space12))
             }
         }
         item {
+            Text(
+                "Gestión Operativa",
+                style = MaterialTheme.typography.labelLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Spacer(Modifier.height(RuumTokens.Space8))
             RuumCard(Modifier.fillMaxWidth()) {
-                SectionTitle("Perfil", "Actualiza teléfono, domicilio y contacto de emergencia.")
-                Text("Los cambios sensibles pasan por revisión operativa.", Modifier.padding(top = RuumTokens.Space8), color = MaterialTheme.colorScheme.onSurfaceVariant)
-                RuumSecondaryButton("Modificar perfil", onOpenPerfil, Modifier.fillMaxWidth().padding(top = RuumTokens.Space12))
+                CuentaFila("Perfil", "Datos personales y contacto de emergencia.", onOpenPerfil)
+                CuentaFila("Documentos", "Licencia, identificación y vigencia.", onOpenDocuments)
+                val current = documents.filter { it.esActual }.distinctBy { it.tipo }
+                Text(
+                    "${current.size} tipo(s) de documento registrados",
+                    Modifier.padding(top = RuumTokens.Space8),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
             }
         }
         item {
-            SectionTitle("Soporte")
-            Spacer(Modifier.height(RuumTokens.Space12))
+            Text(
+                "Ajustes de Cuenta",
+                style = MaterialTheme.typography.labelLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Spacer(Modifier.height(RuumTokens.Space8))
             RuumCard(Modifier.fillMaxWidth()) {
-                SupportRow(Icons.AutoMirrored.Filled.Help, "Preguntas frecuentes", "Resuelve dudas sobre Traslados y pagos")
-                SupportRow(Icons.Default.SupportAgent, "Contactar a soporte", "Recibe ayuda con tu cuenta")
-                SupportRow(Icons.Default.Error, "Reportar un problema", "Describe una falla o incidencia")
+                SectionTitle("Apariencia y Visualización", "Modo de Pantalla (Tema)")
+                Row(Modifier.fillMaxWidth().padding(top = RuumTokens.Space12), horizontalArrangement = Arrangement.spacedBy(RuumTokens.Space8)) {
+                    ThemeChip("Sistema", Icons.Default.Sync, RuumThemeMode.SYSTEM, themePreference, Modifier.weight(1f))
+                    ThemeChip("Claro", Icons.Default.LightMode, RuumThemeMode.LIGHT, themePreference, Modifier.weight(1f))
+                    ThemeChip("Oscuro", Icons.Default.DarkMode, RuumThemeMode.DARK, themePreference, Modifier.weight(1f))
+                }
             }
         }
-        item { RuumSecondaryButton("Cerrar sesión", { confirmSignOut = true }, Modifier.fillMaxWidth()) }
+        item {
+            Text(
+                "Ayuda y Legal",
+                style = MaterialTheme.typography.labelLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Spacer(Modifier.height(RuumTokens.Space8))
+            RuumCard(Modifier.fillMaxWidth()) {
+                CuentaFila("Soporte", "WhatsApp 24/7 y ayuda en ruta.") { mostrarSoporte = true }
+                CuentaFila("Marco Legal", "Términos y aviso de privacidad.") { }
+            }
+        }
+        item {
+            RuumCard(Modifier.fillMaxWidth()) {
+                SectionTitle("Cerrar Sesión Activa")
+                Text(
+                    "Saldrás de tu cuenta en este dispositivo. Deberás iniciar sesión para operar.",
+                    Modifier.padding(top = RuumTokens.Space4),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                RuumSecondaryButton("Cerrar sesión", { confirmSignOut = true }, Modifier.fillMaxWidth().padding(top = RuumTokens.Space12))
+            }
+        }
     }
     if (confirmSignOut) AlertDialog(
         onDismissRequest = { confirmSignOut = false },
         title = { Text("¿Cerrar sesión?") },
-        text = { Text("Tendrás que volver a escribir tus credenciales.") },
-        confirmButton = { RuumPrimaryButton("Cerrar sesión", onSignOut) },
+        text = { Text("Saldrás de tu cuenta de conductor en este dispositivo.") },
+        confirmButton = { RuumPrimaryButton("Sí, cerrar sesión", onSignOut) },
         dismissButton = { RuumSecondaryButton("Cancelar", { confirmSignOut = false }) },
     )
+    if (mostrarSoporte) AlertDialog(
+        onDismissRequest = { mostrarSoporte = false },
+        title = { Text("Centro de Soporte") },
+        text = { Text("Canales oficiales de asistencia operativa, ayuda en ruta y gestión de tu cuenta. Si tienes un viaje en curso o alguna eventualidad, usa el botón Seguridad durante el traslado.") },
+        confirmButton = { RuumPrimaryButton("Entendido", { mostrarSoporte = false }) },
+    )
+}
+
+@Composable
+private fun CuentaFila(titulo: String, descripcion: String, onClick: () -> Unit) {
+    Row(
+        Modifier.fillMaxWidth().padding(vertical = RuumTokens.Space8),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Column(Modifier.weight(1f).padding(end = RuumTokens.Space8)) {
+            Text(titulo, style = MaterialTheme.typography.titleMedium)
+            Text(descripcion, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        }
+        IconButton(onClick = onClick, modifier = Modifier.size(RuumTokens.Touch)) {
+            Icon(Icons.Default.ChevronRight, "Abrir $titulo")
+        }
+    }
 }
 
 private data class DocumentRequirement(val type: String, val label: String, val description: String, val required: Boolean)
 
 private val DOCUMENT_REQUIREMENTS = listOf(
-    DocumentRequirement("licencia_frente", "Licencia · frente", "Fotografía clara del frente de tu licencia vigente.", true),
-    DocumentRequirement("licencia_reverso", "Licencia · reverso", "Fotografía clara del reverso de tu licencia vigente.", true),
-    DocumentRequirement("identificacion_oficial", "Identificación oficial", "INE o pasaporte vigente.", true),
-    DocumentRequirement("constancia_situacion_fiscal", "Constancia de Situación Fiscal", "Archivo PDF o imagen legible del SAT.", true),
-    DocumentRequirement("documento_operativo", "Comprobante de domicilio", "Recibo reciente que acredite tu domicilio registrado.", true),
+    DocumentRequirement("licencia_frente", "Licencia - Frente", "Fotografía clara del frente de tu licencia vigente.", true),
+    DocumentRequirement("licencia_reverso", "Licencia - Reverso", "Fotografía clara del reverso de tu licencia vigente.", true),
+    DocumentRequirement("identificacion_oficial", "Identificación Oficial (INE / Pasaporte)", "Identificación oficial vigente por ambos lados o pasaporte.", true),
+    DocumentRequirement("constancia_situacion_fiscal", "Constancia de Situación Fiscal (SAT)", "Constancia actualizada del SAT en archivo PDF o imagen legible.", true),
+    DocumentRequirement("documento_operativo", "Comprobante de domicilio", "Recibo reciente (luz, agua, predial) que acredite tu domicilio registrado.", true),
 )
 
 @Composable
@@ -1118,35 +1714,81 @@ private fun DocumentsScreen(state: DriverUiState, onUpload: (String, String, Str
         photoFile = null
     }
     val today = LocalDate.now()
-    val licenseExpired = state.driver?.licenciaVigencia?.let {
-        runCatching { LocalDate.parse(it.take(10)).isBefore(today) }.getOrDefault(false)
-    } == true
+    val diasLicencia = state.driver?.licenciaVigencia?.let { com.moviliax.ruumruum.conductor.domain.diasParaVencerLicencia(it, today) }
+    val licenseExpired = (diasLicencia ?: 0) < 0
+    val licensePorVencer = diasLicencia != null && diasLicencia in 0..30
     LazyColumn(contentPadding = PaddingValues(RuumTokens.Space20), verticalArrangement = Arrangement.spacedBy(RuumTokens.Space16)) {
         item {
             RuumCard(Modifier.fillMaxWidth()) {
-                Text("Expediente digital del conductor", style = MaterialTheme.typography.titleLarge)
-                Text("Los documentos obligatorios deben estar vigentes para recibir traslados. Formatos JPG, PNG, WEBP o PDF hasta 10 MB.", Modifier.padding(top = RuumTokens.Space8), color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text(
+                    "Expediente digital del Conductor",
+                    style = MaterialTheme.typography.labelLarge,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                Text("Documentos requeridos para operar", style = MaterialTheme.typography.titleLarge)
+                Text(
+                    "Los documentos bloqueantes deben estar vigentes para recibir traslados.",
+                    Modifier.padding(top = RuumTokens.Space4),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                Text(
+                    "Formatos JPG, PNG, WEBP o PDF hasta 10 MB.",
+                    Modifier.padding(top = RuumTokens.Space4),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
             }
         }
         localError?.let { message -> item { RuumAlert(message, Modifier.fillMaxWidth(), error = true) } }
+        val pendientes = DOCUMENT_REQUIREMENTS.filter { requirement ->
+            val document = state.documents.filter { it.tipo == requirement.type && it.esActual }.maxByOrNull { it.version }
+            document?.estado != "aprobado"
+        }
+        if (pendientes.any { it.required }) {
+            item {
+                RuumAlert(
+                    "Atención requerida y pendientes · Bloquea recepción de Traslados",
+                    Modifier.fillMaxWidth(),
+                    error = true,
+                )
+            }
+        }
         items(DOCUMENT_REQUIREMENTS, key = { it.type }) { requirement ->
             val document = state.documents.filter { it.tipo == requirement.type && it.esActual }.maxByOrNull { it.version }
+            val esLicencia = requirement.type.startsWith("licencia_")
             RuumCard(Modifier.fillMaxWidth()) {
                 Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                     Column(Modifier.weight(1f).padding(end = RuumTokens.Space8)) {
                         Text(requirement.label, style = MaterialTheme.typography.titleMedium)
                         Text(requirement.description, Modifier.padding(top = RuumTokens.Space4), color = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
-                    RuumStatusChip(documentStatus(document, licenseExpired && requirement.type.startsWith("licencia_")))
+                    RuumStatusChip(documentStatus(document, esLicencia && licenseExpired, esLicencia && licensePorVencer))
                 }
                 if (document != null) {
-                    Text(document.nombreArchivo, Modifier.padding(top = RuumTokens.Space12), color = MaterialTheme.colorScheme.onSurfaceVariant, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                    Text("Archivo registrado", Modifier.padding(top = RuumTokens.Space12), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text(document.nombreArchivo, color = MaterialTheme.colorScheme.onSurface, maxLines = 1, overflow = TextOverflow.Ellipsis)
                     Text("Versión ${document.version}", color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.bodySmall)
-                    (document.motivoRechazo ?: document.notasAdmin)?.let { RuumAlert(it, Modifier.fillMaxWidth().padding(top = RuumTokens.Space8), error = document.estado == "rechazado") }
+                    if (document.estado == "rechazado") {
+                        (document.motivoRechazo ?: document.notasAdmin)?.let {
+                            Text(
+                                "Motivo de rechazo por operación:",
+                                Modifier.padding(top = RuumTokens.Space8),
+                                style = MaterialTheme.typography.labelLarge,
+                            )
+                            RuumAlert(it, Modifier.fillMaxWidth(), error = true)
+                        }
+                    }
+                } else {
+                    Text("— Sin registrar", Modifier.padding(top = RuumTokens.Space12), color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
-                Text(if (requirement.required) "Documento obligatorio" else "Documento opcional", Modifier.padding(top = RuumTokens.Space12), color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.labelSmall)
+                Text("Bloqueante", Modifier.padding(top = RuumTokens.Space12), color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.labelSmall)
+                Text(
+                    "Captura o selecciona el nuevo archivo para actualizar",
+                    Modifier.padding(top = RuumTokens.Space4),
+                    style = MaterialTheme.typography.bodyMedium,
+                )
                 Row(Modifier.fillMaxWidth().padding(top = RuumTokens.Space8), horizontalArrangement = Arrangement.spacedBy(RuumTokens.Space8)) {
-                    RuumSecondaryButton("Tomar foto", onClick = {
+                    RuumSecondaryButton("📸 Tomar foto con cámara", onClick = {
                         runCatching {
                             val directory = File(context.cacheDir, "documents").apply { mkdirs() }
                             val file = File.createTempFile("ruum-document-", ".jpg", directory)
@@ -1157,10 +1799,24 @@ private fun DocumentsScreen(state: DriverUiState, onUpload: (String, String, Str
                             camera.launch(uri)
                         }.onFailure { localError = "No se pudo abrir la cámara." }
                     }, Modifier.weight(1f), enabled = state.uploadingDocumentType == null)
-                    RuumPrimaryButton("Subir archivo", onClick = {
+                    RuumPrimaryButton("📁 Subir imagen o PDF", onClick = {
                         selectedType = requirement.type
                         picker.launch(arrayOf("image/jpeg", "image/png", "image/webp", "application/pdf"))
                     }, Modifier.weight(1f), enabled = state.uploadingDocumentType == null, loading = state.uploadingDocumentType == requirement.type)
+                }
+            }
+        }
+        val aprobados = DOCUMENT_REQUIREMENTS.filter { requirement ->
+            state.documents.any { it.tipo == requirement.type && it.esActual && it.estado == "aprobado" }
+        }
+        if (aprobados.isNotEmpty()) {
+            item {
+                RuumCard(Modifier.fillMaxWidth()) {
+                    Text("Documentos Aprobados (${aprobados.size})", style = MaterialTheme.typography.titleMedium)
+                    Text(
+                        "Puedes subir una nueva versión cuando renueves tu documento.",
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
                 }
             }
         }
@@ -1198,13 +1854,14 @@ private suspend fun uploadSelectedDocument(
     }.onFailure { onError(it.message ?: "No pudimos leer el archivo seleccionado.") }
 }
 
-private fun documentStatus(document: DriverDocument?, licenseExpired: Boolean): String = when {
-    licenseExpired -> "vencido"
-    document == null -> "falta"
-    document.estado == "rechazado" -> "rechazado"
-    document.estado == "aprobado" -> "aprobado"
-    document.estado == "en_revision" -> "en revisión"
-    else -> "cargado"
+private fun documentStatus(document: DriverDocument?, licenseExpired: Boolean, licensePorVencer: Boolean = false): String = when {
+    licenseExpired -> "Vencido"
+    document == null -> "Falta documento"
+    document.estado == "rechazado" -> "Rechazado"
+    document.estado == "aprobado" && licensePorVencer -> "Por vencer"
+    document.estado == "aprobado" -> "Aprobado"
+    document.estado == "en_revision" -> "En revisión"
+    else -> "Cargado"
 }
 
 @Composable
@@ -1265,67 +1922,104 @@ private fun money(value: Double): String =
 private fun RegistroScreen(
     loading: Boolean,
     error: String?,
-    onCrear: (String, String) -> Unit,
+    onCrear: (String, String, String) -> Unit,
     onVolver: () -> Unit,
 ) {
+    var telefono by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var confirm by remember { mutableStateOf("") }
     val passOk = password.length >= 8 &&
         password.any(Char::isLowerCase) && password.any(Char::isUpperCase) && password.any(Char::isDigit)
-    val valido = android.util.Patterns.EMAIL_ADDRESS.matcher(email.trim()).matches() &&
-        passOk && password == confirm
+    val emailOk = android.util.Patterns.EMAIL_ADDRESS.matcher(email.trim()).matches()
+    val valido = telefono.length == 10 && emailOk && passOk && password == confirm
     Box(
         Modifier.fillMaxSize().background(
             Brush.verticalGradient(listOf(RuumTokens.Navy, Color(0xFF0F2D52))),
         ).padding(RuumTokens.Space20),
         contentAlignment = Alignment.Center,
     ) {
-        Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
+        Column(
+            Modifier.fillMaxWidth().verticalScroll(rememberScrollState()),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
             RuumLogo(Modifier.size(120.dp), darkVariant = true)
             RuumCard(Modifier.fillMaxWidth()) {
                 Text("Registro de conductor", style = MaterialTheme.typography.headlineMedium)
                 Text(
-                    "Crea tu cuenta para iniciar tu certificación Ruum.",
+                    "Crea tu cuenta para poder iniciar sesión.",
                     Modifier.padding(top = RuumTokens.Space4),
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
                 Spacer(Modifier.height(RuumTokens.Space16))
                 OutlinedTextField(
+                    value = telefono,
+                    onValueChange = { telefono = it.filter(Char::isDigit).take(10) },
+                    modifier = Modifier.fillMaxWidth().defaultMinInputHeight(),
+                    label = { Text("Teléfono móvil") },
+                    placeholder = { Text("(55) 1234-5678") },
+                    supportingText = { Text("Formato estándar 10 dígitos (ej. (55) 1234-5678).") },
+                    singleLine = true, shape = MaterialTheme.shapes.small,
+                )
+                Spacer(Modifier.height(RuumTokens.Space12))
+                OutlinedTextField(
                     value = email, onValueChange = { email = it },
                     modifier = Modifier.fillMaxWidth().defaultMinInputHeight(),
-                    label = { Text("Correo") }, singleLine = true, shape = MaterialTheme.shapes.small,
+                    label = { Text("Correo electrónico") },
+                    placeholder = { Text("conductor@ejemplo.com") },
+                    singleLine = true, shape = MaterialTheme.shapes.small,
                 )
                 Spacer(Modifier.height(RuumTokens.Space12))
                 OutlinedTextField(
                     value = password, onValueChange = { password = it },
                     modifier = Modifier.fillMaxWidth().defaultMinInputHeight(),
-                    label = { Text("Contraseña (8+, mayúscula, minúscula y número)") },
+                    label = { Text("Crea tu contraseña") },
+                    placeholder = { Text("Ingresa tu contraseña") },
                     singleLine = true, shape = MaterialTheme.shapes.small,
                     visualTransformation = PasswordVisualTransformation(),
                 )
+                Spacer(Modifier.height(RuumTokens.Space8))
+                Text("Requisitos de contraseña:", style = MaterialTheme.typography.labelLarge)
+                RequisitoRow("Mínimo 8 caracteres", password.length >= 8)
+                RequisitoRow("Al menos un número (0-9)", password.any(Char::isDigit))
+                RequisitoRow("Al menos una letra mayúscula (A-Z)", password.any(Char::isUpperCase))
                 Spacer(Modifier.height(RuumTokens.Space12))
                 OutlinedTextField(
                     value = confirm, onValueChange = { confirm = it },
                     modifier = Modifier.fillMaxWidth().defaultMinInputHeight(),
                     label = { Text("Confirma tu contraseña") },
+                    placeholder = { Text("Repite tu contraseña") },
                     singleLine = true, shape = MaterialTheme.shapes.small,
                     visualTransformation = PasswordVisualTransformation(),
+                )
+                Text(
+                    "Tus datos personales y contraseña se transmiten y almacenan con cifrado de grado bancario (SSL/TLS).",
+                    Modifier.padding(top = RuumTokens.Space8),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
                 if (error != null) RuumAlert(error, Modifier.fillMaxWidth().padding(top = RuumTokens.Space16), error = true)
                 Spacer(Modifier.height(RuumTokens.Space20))
                 RuumPrimaryButton(
                     text = "Crear cuenta y continuar",
-                    onClick = { onCrear(email.trim(), password) },
+                    onClick = { onCrear(email.trim(), password, telefono) },
                     modifier = Modifier.fillMaxWidth(),
                     enabled = valido,
                     loading = loading,
                 )
                 TextButton(onClick = onVolver, modifier = Modifier.fillMaxWidth()) {
-                    Text("Ya tengo cuenta")
+                    Text("¿Ya tienes cuenta? Inicia sesión")
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun RequisitoRow(texto: String, cumplido: Boolean) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Text(if (cumplido) "✓" else "○", color = MaterialTheme.colorScheme.secondary)
+        Text(texto, Modifier.padding(start = RuumTokens.Space8), style = MaterialTheme.typography.bodyMedium)
     }
 }
 
@@ -1349,7 +2043,7 @@ private fun OtpScreen(
             RuumCard(Modifier.fillMaxWidth()) {
                 Text("Confirma tu correo", style = MaterialTheme.typography.headlineMedium)
                 Text(
-                    "Escribe el código de 6 dígitos que enviamos a $email.",
+                    "Enviamos un código de 6 dígitos a $email. Escríbelo aquí para activar tu cuenta y subir tus documentos sin salir de la app.",
                     Modifier.padding(top = RuumTokens.Space4),
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -1358,13 +2052,14 @@ private fun OtpScreen(
                     value = codigo,
                     onValueChange = { codigo = it.filter(Char::isDigit).take(6) },
                     modifier = Modifier.fillMaxWidth().defaultMinInputHeight(),
-                    label = { Text("Código de 6 dígitos") },
+                    label = { Text("Código de verificación") },
+                    supportingText = { Text("Revisa también tu carpeta de spam o promociones.") },
                     singleLine = true, shape = MaterialTheme.shapes.small,
                 )
                 if (error != null) RuumAlert(error, Modifier.fillMaxWidth().padding(top = RuumTokens.Space16), error = true)
                 Spacer(Modifier.height(RuumTokens.Space20))
                 RuumPrimaryButton(
-                    text = "Confirmar código",
+                    text = if (loading) "Verificando…" else "Confirmar y activar",
                     onClick = { onConfirmar(codigo) },
                     modifier = Modifier.fillMaxWidth(),
                     enabled = codigo.length == 6,
@@ -1402,9 +2097,9 @@ private fun RecuperacionScreen(
     ) {
         Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
             RuumCard(Modifier.fillMaxWidth()) {
-                Text("Recuperar acceso", style = MaterialTheme.typography.headlineMedium)
+                Text("Recuperar contraseña", style = MaterialTheme.typography.headlineMedium)
                 Text(
-                    "Te enviamos un código a tu correo para definir una nueva contraseña.",
+                    "Escribe el correo con el que te registraste y te enviamos un enlace seguro.",
                     Modifier.padding(top = RuumTokens.Space4),
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -1412,24 +2107,30 @@ private fun RecuperacionScreen(
                 OutlinedTextField(
                     value = email, onValueChange = { email = it },
                     modifier = Modifier.fillMaxWidth().defaultMinInputHeight(),
-                    label = { Text("Correo") }, singleLine = true, shape = MaterialTheme.shapes.small,
+                    label = { Text("Correo electrónico") }, singleLine = true, shape = MaterialTheme.shapes.small,
                 )
                 if (!enviado) {
                     Spacer(Modifier.height(RuumTokens.Space16))
                     RuumPrimaryButton(
-                        text = "Enviar código",
+                        text = "Enviar enlace",
                         onClick = { onEnviar(email.trim()); enviado = true },
                         modifier = Modifier.fillMaxWidth(),
                         enabled = android.util.Patterns.EMAIL_ADDRESS.matcher(email.trim()).matches(),
                         loading = loading,
                     )
                 } else {
+                    Text(
+                        "Correo enviado a $email. Revisa tu bandeja incluyendo spam. En esta app confirma con el código y define tu nueva contraseña.",
+                        Modifier.padding(top = RuumTokens.Space12),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
                     Spacer(Modifier.height(RuumTokens.Space12))
                     OutlinedTextField(
                         value = codigo,
                         onValueChange = { codigo = it.filter(Char::isDigit).take(6) },
                         modifier = Modifier.fillMaxWidth().defaultMinInputHeight(),
-                        label = { Text("Código de 6 dígitos") },
+                        label = { Text("Código de verificación") },
                         singleLine = true, shape = MaterialTheme.shapes.small,
                     )
                     Spacer(Modifier.height(RuumTokens.Space12))
@@ -1437,12 +2138,13 @@ private fun RecuperacionScreen(
                         value = password, onValueChange = { password = it },
                         modifier = Modifier.fillMaxWidth().defaultMinInputHeight(),
                         label = { Text("Nueva contraseña") },
+                        placeholder = { Text("Mínimo 8 caracteres") },
                         singleLine = true, shape = MaterialTheme.shapes.small,
                         visualTransformation = PasswordVisualTransformation(),
                     )
                     Spacer(Modifier.height(RuumTokens.Space16))
                     RuumPrimaryButton(
-                        text = "Actualizar contraseña",
+                        text = "Guardar nueva contraseña",
                         onClick = { onConfirmar(email.trim(), codigo, password) },
                         modifier = Modifier.fillMaxWidth(),
                         enabled = codigo.length == 6 && password.length >= 8,
@@ -1452,7 +2154,7 @@ private fun RecuperacionScreen(
                 if (error != null) RuumAlert(error, Modifier.fillMaxWidth().padding(top = RuumTokens.Space16), error = true)
                 if (notice != null) RuumAlert(notice, Modifier.fillMaxWidth().padding(top = RuumTokens.Space16))
                 TextButton(onClick = onVolver, modifier = Modifier.fillMaxWidth()) {
-                    Text("Volver al acceso")
+                    Text("← Volver al inicio de sesión")
                 }
             }
         }
@@ -1481,7 +2183,7 @@ private fun RegistroWizardScreen(state: DriverUiState, viewModel: DriverViewMode
     var nombre by remember { mutableStateOf("") }
     var apellidos by remember { mutableStateOf("") }
     var curp by remember { mutableStateOf("") }
-    var telefono by remember { mutableStateOf("") }
+    var telefono by remember { mutableStateOf(state.signupTelefono) }
     var codigoPostal by remember { mutableStateOf("") }
     var estadoMx by remember { mutableStateOf("") }
     var ciudad by remember { mutableStateOf("") }
@@ -1571,10 +2273,10 @@ private fun RegistroWizardScreen(state: DriverUiState, viewModel: DriverViewMode
         viewModel.guardarBorrador(dp, dom, lic, ce, pasoActual)
     }
 
-    val titulos = listOf("Identidad y domicilio", "Licencia y consentimientos", "Documentos", "Revisión y envío")
+    val titulos = listOf("Cuenta", "Identidad y domicilio", "Licencia", "Documentos", "Revisión y envío")
     Scaffold(
         topBar = {
-            RuumTopBar("Registro · ${titulos[paso]}", viewModel::loadOrStartSolicitud)
+            RuumTopBar("Registro de conductor", viewModel::loadOrStartSolicitud)
         },
     ) { padding ->
         LazyColumn(
@@ -1584,7 +2286,7 @@ private fun RegistroWizardScreen(state: DriverUiState, viewModel: DriverViewMode
         ) {
             item {
                 Text(
-                    "Paso ${paso + 1} de ${titulos.size}",
+                    "Paso ${paso + 2} de 5 — ${titulos[paso + 1]}",
                     style = MaterialTheme.typography.labelLarge,
                     color = MaterialTheme.colorScheme.secondary,
                 )
@@ -1669,10 +2371,10 @@ private fun RegistroWizardScreen(state: DriverUiState, viewModel: DriverViewMode
                         }
                     }
                     listOf(
-                        Triple("licencia_frente", "Licencia · frente", "Frente de tu licencia vigente."),
-                        Triple("licencia_reverso", "Licencia · reverso", "Reverso de tu licencia vigente."),
-                        Triple("identificacion_oficial", "Identificación oficial", "INE o pasaporte vigente."),
-                        Triple("constancia_situacion_fiscal", "Constancia de Situación Fiscal", "PDF o imagen legible del SAT."),
+                        Triple("licencia_frente", "Foto de tu licencia (frente)", "Fotografía clara del frente de tu licencia vigente."),
+                        Triple("licencia_reverso", "Foto de tu licencia (reverso)", "Fotografía clara del reverso de tu licencia vigente."),
+                        Triple("identificacion_oficial", "Foto de tu Identificación oficial (INE/pasaporte)", "Identificación oficial vigente."),
+                        Triple("constancia_situacion_fiscal", "Constancia de Situación Fiscal (SAT)", "Constancia actualizada del SAT en archivo PDF o imagen legible."),
                     ).forEach { (tipo, etiqueta, descripcion) ->
                         item {
                             WizardDocumentRow(
@@ -1686,13 +2388,33 @@ private fun RegistroWizardScreen(state: DriverUiState, viewModel: DriverViewMode
                     }
                 }
                 else -> {
+                    if (state.solicitud?.estado == "en_revision") {
+                        item {
+                            RuumCard(Modifier.fillMaxWidth()) {
+                                Text("Solicitud en revisión", style = MaterialTheme.typography.titleLarge)
+                                Text(
+                                    "Tu cuenta está pendiente de validación. Cuando la revisión esté completa, podrás consultar y aceptar Traslados.",
+                                    Modifier.padding(top = RuumTokens.Space4),
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                )
+                            }
+                        }
+                    }
                     item {
                         RuumCard(Modifier.fillMaxWidth()) {
-                            Text("Revisa y envía", style = MaterialTheme.typography.titleMedium)
-                            Text("Nombre: $nombre $apellidos", Modifier.padding(top = RuumTokens.Space8))
-                            Text("Teléfono: ${telefonoE164Mx(telefono)}")
-                            Text("Domicilio: $calle $numero, $colonia, $ciudad, $estadoMx CP $codigoPostal")
-                            Text("Licencia: $numeroLicencia · $tipoLicencia · vence $vigenciaLicencia")
+                            Text("Revisa tu información", style = MaterialTheme.typography.titleMedium)
+                            Text(
+                                "Verifica que todo sea correcto antes de enviar tu registro.",
+                                Modifier.padding(top = RuumTokens.Space4),
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                            Text("Cuenta", Modifier.padding(top = RuumTokens.Space12), style = MaterialTheme.typography.labelLarge)
+                            Text(telefonoE164Mx(telefono))
+                            Text("Identidad", Modifier.padding(top = RuumTokens.Space8), style = MaterialTheme.typography.labelLarge)
+                            Text("$nombre $apellidos · CURP $curp")
+                            Text("$calle $numero, $colonia, $ciudad, $estadoMx CP $codigoPostal")
+                            Text("Licencia", Modifier.padding(top = RuumTokens.Space8), style = MaterialTheme.typography.labelLarge)
+                            Text("$numeroLicencia · $tipoLicencia · Vigente hasta $vigenciaLicencia")
                             Text(
                                 "Al enviar aceptas términos, aviso de privacidad y autorizaciones marcadas.",
                                 Modifier.padding(top = RuumTokens.Space8),
@@ -1844,7 +2566,7 @@ private fun DiditSection(state: DriverUiState, viewModel: DriverViewModel) {
     RuumCard(Modifier.fillMaxWidth()) {
         Text("Verificación de identidad (Didit)", style = MaterialTheme.typography.titleMedium)
         Text(
-            "Completa la prueba de vida y validación biométrica. Al terminar, vuelve aquí y confirma.",
+            "Agiliza la validación de tu cuenta completando la prueba de vida y validación biométrica con Didit.",
             Modifier.padding(top = RuumTokens.Space4),
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
@@ -1855,7 +2577,20 @@ private fun DiditSection(state: DriverUiState, viewModel: DriverViewModel) {
                 style = MaterialTheme.typography.bodyMedium,
             )
         }
+        if (state.diditLoading && state.diditUrl == null) {
+            Text(
+                "Iniciando verificación de identidad… Conectando con el servicio seguro de Didit.",
+                Modifier.padding(top = RuumTokens.Space8),
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
         if (state.diditUrl != null) {
+            Text(
+                "Prueba de vida y validación biométrica",
+                Modifier.padding(top = RuumTokens.Space8),
+                style = MaterialTheme.typography.labelLarge,
+                color = MaterialTheme.colorScheme.secondary,
+            )
             RuumPrimaryButton(
                 text = "Abrir verificación",
                 onClick = {
@@ -1865,14 +2600,26 @@ private fun DiditSection(state: DriverUiState, viewModel: DriverViewModel) {
                 },
                 modifier = Modifier.fillMaxWidth().padding(top = RuumTokens.Space12),
             )
+            Text(
+                "Se detectará automáticamente al concluir en Didit.",
+                Modifier.padding(top = RuumTokens.Space8),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
             RuumSecondaryButton(
                 text = "Ya completé la verificación",
                 onClick = viewModel::pollVerificacionDidit,
                 modifier = Modifier.fillMaxWidth().padding(top = RuumTokens.Space8),
             )
+            Text(
+                "También puedes completar la verificación más tarde desde tu panel de conductor.",
+                Modifier.padding(top = RuumTokens.Space8),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
         } else {
             RuumPrimaryButton(
-                text = "Iniciar verificación",
+                text = if (state.diditLoading) "Iniciando verificación…" else "Completar verificación de identidad",
                 onClick = viewModel::iniciarDidit,
                 modifier = Modifier.fillMaxWidth().padding(top = RuumTokens.Space12),
                 loading = state.diditLoading,
@@ -2039,6 +2786,7 @@ private fun CertificacionScreen(
 @Composable
 private fun ModificacionPerfilScreen(state: DriverUiState, viewModel: DriverViewModel) {
     LaunchedEffect(Unit) { viewModel.loadSolicitudesCambio() }
+    var tab by remember { mutableIntStateOf(0) }
     var telefono by remember { mutableStateOf("") }
     var codigoPostal by remember { mutableStateOf("") }
     var estadoMx by remember { mutableStateOf("") }
@@ -2049,35 +2797,78 @@ private fun ModificacionPerfilScreen(state: DriverUiState, viewModel: DriverView
     var referencias by remember { mutableStateOf("") }
     var contactoNombre by remember { mutableStateOf("") }
     var contactoTelefono by remember { mutableStateOf("") }
+    val hayCambios = listOf(
+        telefono, codigoPostal, estadoMx, ciudad, colonia, calle, numero,
+        referencias, contactoNombre, contactoTelefono,
+    ).any { it.isNotBlank() }
     LazyColumn(
         contentPadding = PaddingValues(RuumTokens.Space20),
         verticalArrangement = Arrangement.spacedBy(RuumTokens.Space16),
     ) {
         item {
+            Text("Perfil del Conductor", style = MaterialTheme.typography.headlineLarge)
+            Text(
+                "Administra tus datos personales, documentación y contactos operativos.",
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+        if (hayCambios) {
+            item {
+                RuumAlert(
+                    "Hay cambios pendientes por guardar. Al guardar, tu perfil será enviado a revisión operativa.",
+                    Modifier.fillMaxWidth(),
+                )
+            }
+        }
+        item {
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(RuumTokens.Space8)) {
+                PillTab("Identidad", tab == 0, { tab = 0 }, Modifier.weight(1f))
+                PillTab("Ubicación", tab == 1, { tab = 1 }, Modifier.weight(1f))
+            }
+        }
+        item {
             RuumCard(Modifier.fillMaxWidth()) {
-                SectionTitle("Modificar perfil", "Teléfono, domicilio y contacto se aplican directo; identidad, CURP, licencia y foto van a revisión.")
-                Spacer(Modifier.height(RuumTokens.Space8))
-                WizardField("Teléfono (10 dígitos)", telefono) {
-                    telefono = it.filter(Char::isDigit).take(10)
-                }
-                WizardField("Código postal", codigoPostal) {
-                    codigoPostal = it.filter(Char::isDigit).take(5)
-                }
-                WizardField("Estado", estadoMx) { estadoMx = it }
-                WizardField("Ciudad o municipio", ciudad) { ciudad = it }
-                WizardField("Colonia", colonia) { colonia = it }
-                WizardField("Calle", calle) { calle = it }
-                WizardField("Número", numero) { numero = it }
-                WizardField("Referencias", referencias) { referencias = it }
-                WizardField("Contacto de emergencia · nombre", contactoNombre) {
-                    contactoNombre = it
-                }
-                WizardField("Contacto de emergencia · teléfono", contactoTelefono) {
-                    contactoTelefono = it.filter(Char::isDigit).take(10)
+                when (tab) {
+                    0 -> {
+                        SectionTitle("Identidad", "Fotografía, datos personales y teléfono de contacto.")
+                        Spacer(Modifier.height(RuumTokens.Space8))
+                        Text(
+                            "Nombre: ${state.driver?.nombre.orEmpty()}",
+                            style = MaterialTheme.typography.bodyLarge,
+                            fontWeight = FontWeight.Bold,
+                        )
+                        WizardField("Teléfono (10 dígitos)", telefono) {
+                            telefono = it.filter(Char::isDigit).take(10)
+                        }
+                        Text(
+                            "La CURP, la licencia y la fotografía solo se modifican con revisión operativa desde el expediente.",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                    else -> {
+                        SectionTitle("Ubicación y emergencia", "Domicilio particular y contacto de emergencia.")
+                        Spacer(Modifier.height(RuumTokens.Space8))
+                        WizardField("Código postal", codigoPostal) {
+                            codigoPostal = it.filter(Char::isDigit).take(5)
+                        }
+                        WizardField("Estado", estadoMx) { estadoMx = it }
+                        WizardField("Ciudad o municipio", ciudad) { ciudad = it }
+                        WizardField("Colonia", colonia) { colonia = it }
+                        WizardField("Calle", calle) { calle = it }
+                        WizardField("Número", numero) { numero = it }
+                        WizardField("Referencias", referencias) { referencias = it }
+                        WizardField("Contacto de emergencia (nombre)", contactoNombre) {
+                            contactoNombre = it
+                        }
+                        WizardField("Teléfono de emergencia", contactoTelefono) {
+                            contactoTelefono = it.filter(Char::isDigit).take(10)
+                        }
+                    }
                 }
                 Spacer(Modifier.height(RuumTokens.Space8))
                 RuumPrimaryButton(
-                    text = "Enviar solicitud de cambio",
+                    text = if (state.loading) "Guardando perfil..." else "Guardar perfil",
                     onClick = {
                         val cambios = mutableMapOf<String, String?>()
                         if (telefono.isNotBlank()) cambios["telefono"] = telefonoE164Mx(telefono)
@@ -2093,8 +2884,17 @@ private fun ModificacionPerfilScreen(state: DriverUiState, viewModel: DriverView
                         viewModel.solicitarCambio(cambios) { }
                     },
                     modifier = Modifier.fillMaxWidth(),
+                    enabled = hayCambios,
                     loading = state.loading,
                 )
+                if (!hayCambios) {
+                    Text(
+                        "Sin cambios detectados",
+                        Modifier.padding(top = RuumTokens.Space8),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
             }
         }
         if (state.solicitudesCambio.isNotEmpty()) {

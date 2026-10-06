@@ -156,6 +156,19 @@ data class CapacitacionRow(
     val puntaje: Double? = null,
 )
 
+/** Aviso del centro de notificaciones del conductor. */
+@Serializable
+data class NotificacionConductor(
+    val id: String,
+    val titulo: String,
+    val cuerpo: String,
+    val tipo: String = "aviso",
+    @SerialName("creado_en") val creadoEn: String? = null,
+    @SerialName("leida_en") val leidaEn: String? = null,
+    @SerialName("entidad_id") val entidadId: String? = null,
+    @SerialName("entidad_tipo") val entidadTipo: String? = null,
+)
+
 /** Última verificación Didit de una solicitud. */
 @Serializable
 data class VerificacionDiditRow(
