@@ -21,6 +21,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -208,7 +209,10 @@ private fun OnboardingScreen(onTerminar: () -> Unit, onAcceso: () -> Unit) {
         ).padding(RuumTokens.Space20),
         contentAlignment = Alignment.Center,
     ) {
-        Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
+        Column(
+            Modifier.fillMaxWidth().verticalScroll(rememberScrollState()),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
                 RuumLogo(Modifier.size(96.dp), darkVariant = true)
                 TextButton(onClick = onAcceso) { Text("Omitir") }
@@ -410,7 +414,7 @@ private fun LoginScreen(
     }
 }
 
-private fun Modifier.defaultMinInputHeight() = height(RuumTokens.InputHeight)
+private fun Modifier.defaultMinInputHeight() = defaultMinSize(minHeight = RuumTokens.InputHeight)
 
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
@@ -2039,7 +2043,10 @@ private fun OtpScreen(
         ).padding(RuumTokens.Space20),
         contentAlignment = Alignment.Center,
     ) {
-        Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
+        Column(
+            Modifier.fillMaxWidth().verticalScroll(rememberScrollState()),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
             RuumCard(Modifier.fillMaxWidth()) {
                 Text("Confirma tu correo", style = MaterialTheme.typography.headlineMedium)
                 Text(
@@ -2095,7 +2102,10 @@ private fun RecuperacionScreen(
         ).padding(RuumTokens.Space20),
         contentAlignment = Alignment.Center,
     ) {
-        Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
+        Column(
+            Modifier.fillMaxWidth().verticalScroll(rememberScrollState()),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
             RuumCard(Modifier.fillMaxWidth()) {
                 Text("Recuperar contraseña", style = MaterialTheme.typography.headlineMedium)
                 Text(
@@ -2502,8 +2512,9 @@ private fun pasoValido(
 private fun WizardField(label: String, value: String, onChange: (String) -> Unit) {
     OutlinedTextField(
         value = value, onValueChange = onChange,
-        modifier = Modifier.fillMaxWidth().padding(vertical = RuumTokens.Space4),
+        modifier = Modifier.fillMaxWidth().defaultMinSize(minHeight = RuumTokens.InputHeight).padding(vertical = RuumTokens.Space4),
         label = { Text(label) }, singleLine = true, shape = MaterialTheme.shapes.small,
+        textStyle = MaterialTheme.typography.bodyLarge,
     )
 }
 
