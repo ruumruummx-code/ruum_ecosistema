@@ -163,8 +163,10 @@ export default function PaginaRegistro() {
           window.sessionStorage.setItem(CLAVE_CORREO_CONFIRMACION, correo);
         } catch { /* La pantalla también funciona si el navegador bloquea storage. */ }
         registrarEventoUx("registro_exitoso", { tipo_cuenta: tipoCuenta, requiere_confirmacion: true });
-        const emailParam = encodeURIComponent(correo);
-        router.push(`/registro/confirma-correo?email=${emailParam}`);
+        /* CORRECCIÓN (auditoría S-8): el correo en el query string quedaba en los access
+           logs del CDN, en el header Referer y en el historial del navegador. Es
+           redundante: ya se guarda en sessionStorage y la pantalla lo recupera. */
+        router.push("/registro/confirma-correo");
       }
     } catch (err: unknown) {
       setError(traducirErrorAuth(err, "No pudimos crear la cuenta. Intenta de nuevo."));

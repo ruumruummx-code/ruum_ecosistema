@@ -49,7 +49,7 @@ export default function ErrorTraslado({
             Reintentar
           </button>
           <Link
-            href="/mis-Traslados"
+            href="/mis-viajes"
             className="inline-flex min-h-11 items-center justify-center rounded-xl border border-[#1C2A3E] bg-[#0A1220] px-5 py-2.5 font-display text-xs font-bold uppercase tracking-wider text-slate-300 transition hover:border-[#FFC400]/40 hover:text-white"
           >
             Ver mis traslados

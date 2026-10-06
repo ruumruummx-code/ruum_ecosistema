@@ -77,7 +77,7 @@ export const PasoPago = memo(function PasoPago({
 
       <div className="pt-2">
         <Link
-          href="/mis-Traslados"
+          href="/mis-viajes"
           className="inline-flex min-h-10 items-center justify-center rounded-lg border border-ink/20 bg-mist px-4 py-2 font-body text-sm font-medium text-ink transition hover:border-ink/40"
         >
           Ver mis traslados

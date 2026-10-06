@@ -1,10 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
 import { crearClienteServidor } from "@/lib/supabase-server";
 import { esquemaSolicitudTraslado } from "@ruum/shared/validacion";
+import { obtenerIp, rateLimitConVentana } from "@/lib/csp-rate-limit";
 
 // Sec3: validación servidor del wizard — rechazar si paso < 4 (PASOS.length = 4)
 // El cliente no debe poder crear traslado enviando paso 0 como si fuera paso 5.
 const PASOS_REQUERIDOS = 4;
+
+/* CORRECCIÓN (auditoría S-7): este endpoint no tenía rate limit, a diferencia de
+   /api/csp-report. El wizard reintenta en cada paso. */
+const MAX_POR_MINUTO = 60;
+const VENTANA_MS = 60_000;
 
 function esPasoValido(paso: unknown): boolean {
   const n = typeof paso === "string" ? Number(paso) : typeof paso === "number" ? paso : NaN;
@@ -13,6 +19,19 @@ function esPasoValido(paso: unknown): boolean {
 
 export async function POST(request: NextRequest) {
   try {
+    const limite = await rateLimitConVentana(
+      obtenerIp(request),
+      "api-viajes",
+      MAX_POR_MINUTO,
+      VENTANA_MS
+    );
+    if (!limite.allowed) {
+      return NextResponse.json(
+        { error: "Demasiadas solicitudes. Espera un momento e inténtalo de nuevo." },
+        { status: 429, headers: { "Retry-After": String(limite.retryAfterSec ?? 60) } }
+      );
+    }
+
     const cliente = await crearClienteServidor();
     const { data: { user } } = await cliente.auth.getUser();
     if (!user) {
@@ -46,10 +65,11 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Validación completa del payload con esquema compartido (defensa en profundidad)
-    // Si el body trae campos del wizard, los validamos; si es payload ya transformado, al menos validar que no esté vacío
-    const tieneCamposWizard = "marca" in body || "origenCodigoPostal" in body;
-    if (tieneCamposWizard) {
+    /* Validación completa del payload con esquema compartido (defensa en profundidad).
+       CORRECCIÓN (auditoría S-7): antes solo validaba si venía "marca" u
+       "origenCodigoPostal", así que un body { paso: 4 } se saltaba el zod por
+       completo. Ahora se aplica el esquema siempre, con defaults. */
+    {
       const parsed = esquemaSolicitudTraslado.safeParse({
         ...body,
         // defaults para campos no enviados por el API pero requeridos por el esquema

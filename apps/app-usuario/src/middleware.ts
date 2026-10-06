@@ -12,17 +12,44 @@ import { buildCspUsuario as buildCspUsuarioCanonica, HSTS_HEADER, PERMISSIONS_PO
  * Fuente canónica: src/lib/csp.ts
  */
 
+/* CORRECCIÓN (auditoría A-3): la ruta real es "/mis-viajes" (minúsculas). Con
+   "/mis-Traslados" el predicado nunca casaba y los visitantes anónimos llegaban a
+   la pantalla de traslados sin redirect a /login. */
 const RUTAS_PROTEGIDAS_USUARIO = [
   "/viajes",
-  "/mis-Traslados",
+  "/mis-viajes",
   "/cuenta",
   "/pasaporte",
-  "/verificacion"
+  "/verificacion",
+  "/soporte",
+  "/onboarding"
 ];
 
 function esRutaProtegidaUsuario(pathname: string): boolean {
   return RUTAS_PROTEGIDAS_USUARIO.some(
     (ruta) => pathname === ruta || pathname.startsWith(`${ruta}/`)
+  );
+}
+
+/** Rutas cuyo render depende de quién esté conectado. */
+const RUTAS_DEPENDIENTES_DE_SESION = new Set<string>([
+  "/login",
+  "/registro",
+  "/cuenta",
+  "/pasaporte",
+  "/verificacion",
+  "/soporte",
+  "/onboarding",
+  "/mis-viajes",
+  "/viajes"
+]);
+
+function RUTAS_NECESITAN_SESION(pathname: string): boolean {
+  return (
+    esRutaProtegidaUsuario(pathname) ||
+    [...RUTAS_DEPENDIENTES_DE_SESION].some(
+      (ruta) => pathname === ruta || pathname.startsWith(`${ruta}/`)
+    )
   );
 }
 
@@ -90,8 +117,18 @@ export async function middleware(request: NextRequest) {
     }
   });
 
-  const { data: { user } } = await supabase.auth.getUser();
   const { pathname } = request.nextUrl;
+
+  /* CORRECCIÓN (auditoría S-5): getUser() es un round-trip a GoTrue por request.
+     Antes se ejecutaba para CADA request, incluidos los ~200 catálogos postales
+     JSON estáticos (98 × 2 copias en public/), lo que permitía agotar el rate
+     limit de Supabase Auth con peticiones estáticas. Solo hace falta cuando la
+     ruta depende de la sesión. */
+  if (!RUTAS_NECESITAN_SESION(pathname)) {
+    return applySecurityHeadersUsuario(response, nonce);
+  }
+
+  const { data: { user } } = await supabase.auth.getUser();
 
   if (!user && esRutaProtegidaUsuario(pathname)) {
     const login = request.nextUrl.clone();
@@ -109,6 +146,10 @@ export async function middleware(request: NextRequest) {
   return applySecurityHeadersUsuario(response, nonce);
 }
 
+/* CORRECCIÓN (auditoría S-5): se excluyen también json/xml/txt/ico/woff para que los
+   assets estáticos no atraviesen el middleware. */
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)"]
+  matcher: [
+    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|json|xml|txt|ico|woff2?|map)$).*)"
+  ]
 };

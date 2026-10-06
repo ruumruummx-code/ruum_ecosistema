@@ -1,3 +1,4 @@
+import { destinoSeguro } from "@ruum/shared/utils";
 import { LoginCliente } from "./LoginCliente";
 
 interface PaginaLoginProps {
@@ -5,10 +6,6 @@ interface PaginaLoginProps {
     next?: string;
     reason?: string;
   }>;
-}
-
-function destinoSeguro(next: string | undefined) {
-  return next?.startsWith("/") && !next.startsWith("//") ? next : "/";
 }
 
 export default async function PaginaLogin({ searchParams }: PaginaLoginProps) {

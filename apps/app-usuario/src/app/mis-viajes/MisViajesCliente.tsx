@@ -433,7 +433,7 @@ export function MisTrasladosCliente({
           filtrados.map(({ pasaporte, traslado }) => {
             const { label, tone } = estadoVisual(pasaporte);
             const fecha = fechaProgramada(traslado?.fecha_hora_programada ?? null);
-            const urlViaje = pasaporte.traslado_id ? `/viajes/${pasaporte.traslado_id}` : "/mis-Traslados";
+            const urlViaje = pasaporte.traslado_id ? `/viajes/${pasaporte.traslado_id}` : "/mis-viajes";
             const origenCiudad = pasaporte.origen_ciudad ?? traslado?.origen_ciudad;
             const destinoCiudad = pasaporte.destino_ciudad ?? traslado?.destino_ciudad;
             const esPagoPendiente = pasaporte.estado === "cotizacion_aceptada" || pasaporte.estado === "pago_pendiente";

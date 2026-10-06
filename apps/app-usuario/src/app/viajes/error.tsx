@@ -27,7 +27,7 @@ export default function ErrorTraslados({ reset }: { reset: () => void }) {
           >
             Reintentar
           </button>
-          <Link href="/mis-Traslados" className="inline-flex min-h-10 items-center justify-center rounded-xl bg-signal px-4 py-2 font-display text-sm font-bold text-ink transition hover:bg-signal/90">
+          <Link href="/mis-viajes" className="inline-flex min-h-10 items-center justify-center rounded-xl bg-signal px-4 py-2 font-display text-sm font-bold text-ink transition hover:bg-signal/90">
             Mis Traslados
           </Link>
         </div>

@@ -57,14 +57,17 @@ function ContenidoConfirmaCorreo() {
   const [reenviando, setReenviando] = useState(false);
   const [mensaje, setMensaje] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  /* CORRECCIÓN (auditoría S-8): el correo ya no viaja en la URL (se queda en los
+     access logs y en el Referer). Se lee de sessionStorage. El param se mantiene
+     como compatibilidad con enlaces previos al despliegue de este fix. */
   const emailFromUrl = normalizarCorreoRegistro(searchParams.get("email") || "");
   const hayCooldown = restante > 0;
   const [correo] = useState(() => {
-    if (typeof window === "undefined") return "";
+    if (typeof window === "undefined") return emailFromUrl;
     try {
-      return emailFromUrl || correoInicial();
+      return correoInicial() || emailFromUrl;
     } catch {
-      return emailFromUrl || "";
+      return emailFromUrl;
     }
   });
 
@@ -92,13 +95,24 @@ function ContenidoConfirmaCorreo() {
     registrarEventoUx("registro_confirmacion_enviada");
 
     try {
-      const cliente = crearClienteNavegador();
-      const { error: errorAuth } = await cliente.auth.verifyOtp({
-        email: correo,
-        token: codigoLimpio,
-        type: "email"
+      /* CORRECCIÓN (auditoría S-3): verifyOtp con 6 dígitos se llamaba desde el
+         navegador sin throttling. El espacio de búsqueda es de 10^6 y el correo
+         objetivo venía del query param. Ahora pasa por el servidor con rate limit. */
+      const res = await fetch("/api/auth/verify-otp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: correo, codigo: codigoLimpio }),
+        cache: "no-store",
       });
-      if (errorAuth) throw errorAuth;
+      const cuerpo = (await res.json().catch(() => null)) as { error?: string } | null;
+      if (!res.ok) {
+        /* El mensaje del servidor ya viene listo para el usuario (genérico, sin
+           revelar si el correo existe). Se muestra tal cual en vez de pasarlo por
+           traducirErrorAuth, que sustituiría el copy del servidor por un fallback. */
+        setError(cuerpo?.error ?? "No pudimos verificar el código. Inténtalo de nuevo.");
+        registrarEventoUx("registro_confirmacion_error");
+        return;
+      }
 
       registrarEventoUx("registro_confirmacion_exitosa");
       limpiarMarcadoresConfirmacion();
@@ -118,13 +132,25 @@ function ContenidoConfirmaCorreo() {
     setMensaje(null);
     setError(null);
     try {
-      const cliente = crearClienteNavegador();
-      const { error: errorAuth } = await cliente.auth.resend({
-        type: "signup",
-        email: correo,
-        options: { emailRedirectTo: crearRedirectConfirmacion(window.location.origin) }
+      /* CORRECCIÓN (auditoría S-2): el cooldown vivía solo en localStorage y era
+         trivial de saltar. Ahora pasa por el servidor, que es el único control
+         efectivo. localStorage queda comofeedback inmediato de UI. */
+      const res = await fetch("/api/auth/resend", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: correo, origen: window.location.origin }),
+        cache: "no-store",
       });
-      if (errorAuth) throw errorAuth;
+      const cuerpo = (await res.json().catch(() => null)) as { error?: string } | null;
+      if (!res.ok) {
+        setError(
+          cuerpo?.error ??
+            (res.status === 429
+              ? "Espera un momento antes de solicitar otro correo."
+              : "No pudimos reenviar el correo. Espera un momento e intenta nuevamente.")
+        );
+        return;
+      }
       const hasta = Date.now() + COOLDOWN_SEGUNDOS * 1000;
       window.localStorage.setItem(CLAVE_REENVIO_CONFIRMACION_HASTA, String(hasta));
       try {

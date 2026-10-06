@@ -234,7 +234,7 @@ export function SoporteCliente({
               </div>
 
               <Link
-                href={viajeActivo.traslado_id ? `/viajes/${viajeActivo.traslado_id}` : "/mis-Traslados"}
+                href={viajeActivo.traslado_id ? `/viajes/${viajeActivo.traslado_id}` : "/mis-viajes"}
                 className="text-slate-400 hover:text-white transition"
                 aria-label="Ver traslado activo"
               >
@@ -263,7 +263,7 @@ export function SoporteCliente({
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5 sm:gap-3">
           {/* Card 1: Mi traslado */}
           <Link
-            href="/mis-Traslados"
+            href="/mis-viajes"
             className="group flex flex-col items-start justify-between rounded-2xl border border-[#1C2A3E] bg-[#0A1220]/95 p-4 shadow-md transition hover:border-[#FFC400]/40 hover:bg-[#0D182A] min-h-[140px]"
           >
             <div className="flex size-11 items-center justify-center rounded-xl bg-[#141F32] border border-white/10 text-[#FFC400]">

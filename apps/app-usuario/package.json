@@ -17,9 +17,9 @@
     "analyze:bundle": "ANALYZE=true next build"
   },
   "dependencies": {
-    "@capacitor/android": "^8.4.1",
+    "@capacitor/android": "^8.5.2",
     "@capacitor/app": "^8.1.0",
-    "@capacitor/core": "^8.4.1",
+    "@capacitor/core": "^8.5.2",
     "@capacitor/geolocation": "^8.2.0",
     "@ruum/api": "workspace:*",
     "@ruum/shared": "workspace:*",
@@ -36,7 +36,7 @@
     "zustand": "^5.0.15"
   },
   "devDependencies": {
-    "@capacitor/cli": "^8.4.1",
+    "@capacitor/cli": "^8.5.2",
     "@eslint/eslintrc": "^3.3.6",
     "@lhci/cli": "^0.15.1",
     "@tailwindcss/postcss": "^4.0.0",

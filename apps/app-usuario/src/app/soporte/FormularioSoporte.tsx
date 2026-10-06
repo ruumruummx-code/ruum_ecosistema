@@ -250,7 +250,7 @@ export function FormularioSoporte({ traslados, preseleccionado, emailUsuario }: 
           <p className="mt-4 font-body text-xs leading-5 text-text-secondary">
             <span className="font-semibold text-text-primary">¿Necesitas ayuda inmediata?</span> 
             Si es una emergencia con daño o seguridad durante el traslado, usa el 
-            <Link href={viajeId ? `/viajes/${viajeId}#chat-conductor` : "/mis-Traslados"} className="font-semibold text-route-action underline-offset-2 hover:underline">
+            <Link href={viajeId ? `/viajes/${viajeId}#chat-conductor` : "/mis-viajes"} className="font-semibold text-route-action underline-offset-2 hover:underline">
               chat del Pasaporte Digital
             </Link>.
           </p>

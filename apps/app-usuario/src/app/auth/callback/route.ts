@@ -9,17 +9,20 @@
 import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { crearClienteServidor } from "@ruum/api/supabase";
-import { COOKIE_RECOVERY_USUARIO, MAX_AGE_RECOVERY_S, RUTA_COOKIE_RECOVERY } from "@ruum/shared/utils";
+import { COOKIE_RECOVERY_USUARIO, destinoSeguro, MAX_AGE_RECOVERY_S, RUTA_COOKIE_RECOVERY } from "@ruum/shared/utils";
 
 type TipoOtpSanitizado = "signup" | "recovery" | "magiclink" | "email";
 
 const COOKIE_RECOVERY = COOKIE_RECOVERY_USUARIO;
 
 function opcionesCookieRecovery() {
-  const isProd = process.env.NODE_ENV === "production";
+  /* CORRECCIÓN (auditoría S-6): esta cookie ES la autorización para cambiar la
+     contraseña. Con `secure: isProd` se emitía sin Secure en staging/preview,
+    单位和 vía en claro por HTTP. Ahora solo se relaja en desarrollo local. */
+  const secure = process.env.NODE_ENV !== "development";
   return {
     httpOnly: true as const,
-    secure: isProd,
+    secure,
     sameSite: "lax" as const,
     maxAge: MAX_AGE_RECOVERY_S,
     path: RUTA_COOKIE_RECOVERY,
@@ -76,8 +79,11 @@ export async function GET(request: NextRequest) {
     type = "signup";
   }
 
-  const nextSolicitado = searchParams.get("next") ?? (type === "recovery" ? "/nueva-password" : "/");
-  const next = nextSolicitado.startsWith("/") && !nextSolicitado.startsWith("//") ? nextSolicitado : "/";
+  /* CORRECCIÓN (auditoría S-1): el guard anterior `startsWith("/") && !startsWith("//")`
+     dejaba pasar "/\evil.com". El parser WHATWG normaliza "\" a "/", así que el
+     Location resultante cruzaba al dominio atacante tras un login exitoso. */
+  const nextSolicitado = searchParams.get("next");
+  const next = destinoSeguro(nextSolicitado, type === "recovery" ? "/nueva-password" : "/");
 
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL;
   const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY;

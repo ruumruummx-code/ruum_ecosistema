@@ -782,7 +782,7 @@ export function CargaMasivaForm() {
             <Button variant="secondary" onClick={() => { setPaso(1); setArchivo(null); setFilas([]); }} type="button">
               Cargar otro archivo
             </Button>
-            <Button variant="primary" onClick={() => router.push("/mis-Traslados")} type="button">
+            <Button variant="primary" onClick={() => router.push("/mis-viajes")} type="button">
               Ver mis traslados
             </Button>
           </div>

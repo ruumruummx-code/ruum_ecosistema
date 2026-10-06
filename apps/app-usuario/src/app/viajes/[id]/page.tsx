@@ -601,7 +601,7 @@ export default async function PaginaTraslado({ params }: { params: Promise<{ id:
               </p>
               <div className="mt-8 flex flex-wrap justify-center gap-3">
                 <Link
-                  href="/mis-Traslados"
+                  href="/mis-viajes"
                   className="inline-flex min-h-11 items-center justify-center rounded-xl bg-[#FFC400] px-5 py-2.5 font-display text-xs font-black uppercase tracking-wider text-[#0B111B] shadow-md transition hover:bg-[#e6b000]"
                 >
                   Ver mis traslados
@@ -630,7 +630,7 @@ export default async function PaginaTraslado({ params }: { params: Promise<{ id:
               </p>
               <div className="mt-8 flex flex-wrap justify-center gap-3">
                 <Link
-                  href="/mis-Traslados"
+                  href="/mis-viajes"
                   className="inline-flex min-h-11 items-center justify-center rounded-xl bg-[#FFC400] px-5 py-2.5 font-display text-xs font-black uppercase tracking-wider text-[#0B111B] shadow-md transition hover:bg-[#e6b000]"
                 >
                   Ver mis traslados
@@ -669,7 +669,7 @@ export default async function PaginaTraslado({ params }: { params: Promise<{ id:
           </p>
           <div className="mt-8 flex flex-wrap justify-center gap-3">
             <Link
-              href="/mis-Traslados"
+              href="/mis-viajes"
               className="inline-flex min-h-11 items-center justify-center rounded-xl bg-[#FFC400] px-5 py-2.5 font-display text-xs font-black uppercase tracking-wider text-[#0B111B] shadow-md transition hover:bg-[#e6b000]"
             >
               Ver mis traslados
@@ -700,7 +700,7 @@ export default async function PaginaTraslado({ params }: { params: Promise<{ id:
           </p>
           <div className="mt-8 flex flex-wrap justify-center gap-3">
             <Link
-              href="/mis-Traslados"
+              href="/mis-viajes"
               className="inline-flex min-h-11 items-center justify-center rounded-xl bg-[#FFC400] px-5 py-2.5 font-display text-xs font-black uppercase tracking-wider text-[#0B111B] shadow-md transition hover:bg-[#e6b000]"
             >
               Ver mis traslados
