@@ -1,13 +1,9 @@
-import { AvisoSinSesion, LayoutCuenta, SeccionVehiculos, obtenerCuenta } from "../cuenta-ui";
+import { SeccionVehiculos, conCuenta, LayoutCuenta } from "../cuenta-ui";
 
 export default async function PaginaVehiculosCuenta() {
-  const cuenta = await obtenerCuenta();
-
-  if (!cuenta) return <AvisoSinSesion />;
-
-  return (
+  return conCuenta((cuenta) => (
     <LayoutCuenta cuenta={cuenta}>
       <SeccionVehiculos vehiculos={cuenta.vehiculos} />
     </LayoutCuenta>
-  );
+  ));
 }

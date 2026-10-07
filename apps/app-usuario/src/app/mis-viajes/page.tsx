@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Button, PassportCard } from "@ruum/ui";
+import { Aviso, Button, PassportCard } from "@ruum/ui";
 import type { Database } from "@ruum/shared/types";
 import { NavegacionUsuario } from "../NavegacionUsuario";
 import { MisTrasladosCliente } from "./MisViajesCliente";
@@ -29,11 +29,22 @@ const PESTANAS: { id: PestañaTraslados; etiqueta: string }[] = [
   { id: "cancelados", etiqueta: "Cancelados" }
 ];
 
-async function obtenerTraslados(): Promise<ViajeLista[]> {
+/**
+ * A-4 (auditoría): antes el catch devolvía `[]`, igual que "no tienes
+ * traslados". Un fallo de Supabase se veía como una cuenta vacía y el usuario
+ * veía un CTA para crear uno, sin ninguna señal de que algo falló. Ahora el
+ * error es un estado explícito y la página muestra un aviso con reintento.
+ */
+type ResultadoTraslados =
+  | { estado: "ok"; traslados: ViajeLista[] }
+  | { estado: "sin_sesion" }
+  | { estado: "error" };
+
+async function obtenerTraslados(): Promise<ResultadoTraslados> {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
-  if (!url || !anonKey) return [];
+  if (!url || !anonKey) return { estado: "sin_sesion" };
 
   try {
     const { crearClienteServidor } = await import("../../lib/supabase-server");
@@ -42,21 +53,24 @@ async function obtenerTraslados(): Promise<ViajeLista[]> {
     const cliente = await crearClienteServidor();
     const usuario = await obtenerUsuarioActual(cliente);
 
-    if (!usuario) return [];
+    if (!usuario) return { estado: "sin_sesion" };
 
     const pasaportes = await listarTrasladosDeUsuario(cliente, usuario.id);
     const ids = pasaportes.map((pasaporte) => pasaporte.traslado_id).filter((id): id is string => Boolean(id));
     const traslados = await obtenerTrasladosPorIds(cliente, ids);
     const trasladosPorId = new Map(traslados.map((traslado) => [traslado.id, traslado]));
-    return pasaportes.map((pasaporte) => ({
-      pasaporte,
-      traslado: pasaporte.traslado_id ? trasladosPorId.get(pasaporte.traslado_id) ?? null : null
-    }));
+    return {
+      estado: "ok",
+      traslados: pasaportes.map((pasaporte) => ({
+        pasaporte,
+        traslado: pasaporte.traslado_id ? trasladosPorId.get(pasaporte.traslado_id) ?? null : null
+      }))
+    };
   } catch (err) {
     console.error("[app-usuario:obtenerTraslados] supabase_error", {
       message: err instanceof Error ? err.message : String(err),
     });
-    return [];
+    return { estado: "error" };
   }
 }
 
@@ -67,7 +81,29 @@ export default async function PaginaMisTraslados({
 }) {
   const { tab } = await searchParams;
   const pestañaActiva = PESTANAS.some((pestaña) => pestaña.id === tab) ? (tab as PestañaTraslados) : "activos";
-  const Traslados = await obtenerTraslados();
+  const resultado = await obtenerTraslados();
+
+  if (resultado.estado === "error") {
+    return (
+      <main className="user-v2-scope user-v2-page">
+        <NavegacionUsuario variante="claro" />
+        <div className="user-v2-content user-v2-content--wide py-12 text-center">
+          <Aviso tono="danger">
+            No pudimos cargar tus traslados en este momento. Inténtalo de nuevo en unos segundos.
+          </Aviso>
+          <div className="mt-6 flex justify-center">
+            <Link href="/soporte">
+              <Button className="w-full sm:w-auto">Reportar un problema</Button>
+            </Link>
+          </div>
+        </div>
+      </main>
+    );
+  }
+
+  // Sin sesión el middleware ya redirige a /login; si llegara aquí, la lista
+  // vacía es el comportamiento correcto.
+  const Traslados = resultado.estado === "ok" ? resultado.traslados : [];
 
   return (
     <main className="user-v2-scope user-v2-page">

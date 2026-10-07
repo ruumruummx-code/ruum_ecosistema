@@ -63,4 +63,24 @@ if (invalid.length) {
   console.error(`[env:${app}] Configuración inválida: ${invalid.join("; ")}`);
   process.exit(1);
 }
+
+/* ARQ-5 (auditoría fase 4): `required` solo cubría 3 variables para app-usuario,
+   así que el build pasaba sin Sentry ni flags de CSP y la observabilidad y la
+   seguridad se degradaban en silencio. Estas no bloquean el build (muchos
+   entornos legítimos no las usan) pero se avisa para que la ausencia sea
+   deliberada y no un olvido. */
+const recommendedByApp = {
+  "app-usuario": [
+    ["NEXT_PUBLIC_RUUM_AMBIENTE", "sin ella staging emite CSP bloqueante en vez de Report-Only"],
+    ["NEXT_PUBLIC_APP_VERSION", "Sentry reporta sin versión de release"],
+    ["NEXT_PUBLIC_APP_URL", "se usa para redirects absolutos en /pasaporte"]
+  ]
+};
+const recommended = (recommendedByApp[app] ?? []).filter(([name]) => !process.env[name]?.trim());
+if (recommended.length) {
+  const detalle = recommended.map(([name, motivo]) => `${name} (${motivo})`).join("; ");
+  if (hostedBuild) console.warn(`[env:${app}] Recomendadas no configuradas: ${detalle}`);
+  else console.log(`[env:${app}] Recomendadas ausentes (informativo): ${detalle}`);
+}
+
 console.log(`[env:${app}] configuración válida (${prod ? "production" : "non-production"}).`);

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
+import type { ReactNode } from "react";
 import { Aviso, Button, PassportCard } from "@ruum/ui";
 import { ETIQUETA_TIPO_VEHICULO } from "@ruum/shared/constants";
 import type { Database } from "@ruum/shared/types";
@@ -50,10 +51,24 @@ function etiquetaVerificacion(estado: string): string {
 }
 
 
-export async function obtenerCuenta(): Promise<CuentaReal | null> {
+/**
+ * Resultado de cargar la cuenta.
+ *
+ * A-4 (auditoría): antes `obtenerCuenta` devolvía `null` tanto si no había
+ * sesión como si Supabase estaba caído. Las 6 subrutas de /cuenta renderizaban
+ * "Inicia sesión para consultar y actualizar los datos de tu cuenta", mandando
+ * al usuario a un bucle de autenticación sin causa visible ni traza.
+ * `sin_sesion` y `error` ahora son estados distintos y explícitos.
+ */
+export type ResultadoCuenta =
+  | { estado: "ok"; cuenta: CuentaReal }
+  | { estado: "sin_sesion" }
+  | { estado: "error"; mensaje: string };
+
+export async function obtenerCuenta(): Promise<ResultadoCuenta> {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-  if (!url || !anonKey) return null;
+  if (!url || !anonKey) return { estado: "sin_sesion" };
 
   try {
     const { crearClienteServidor } = await import("../../lib/supabase-server");
@@ -62,7 +77,7 @@ export async function obtenerCuenta(): Promise<CuentaReal | null> {
     const { obtenerEmpresaVisible } = await import("@ruum/api/organizations");
     const cliente = await crearClienteServidor();
     const usuario = await obtenerUsuarioActual(cliente);
-    if (!usuario) return null;
+    if (!usuario) return { estado: "sin_sesion" };
 
     const fotoPerfilUrl = await obtenerUrlFotoPerfilUsuario(cliente, usuario.foto_url);
 
@@ -77,14 +92,23 @@ export async function obtenerCuenta(): Promise<CuentaReal | null> {
         : [];
 
     return {
-      usuario,
-      fotoPerfilUrl,
-      vehiculos,
-      empresa,
-      historialEmpresa
+      estado: "ok",
+      cuenta: {
+        usuario,
+        fotoPerfilUrl,
+        vehiculos,
+        empresa,
+        historialEmpresa
+      }
     };
-  } catch {
-    return null;
+  } catch (err) {
+    // No tragamos el error: queda traza para soporte y el usuario ve un estado
+    // de fallo real en vez de un formulario de login que no va a funcionar.
+    console.error("[cuenta] no se pudo cargar la cuenta del usuario", err);
+    return {
+      estado: "error",
+      mensaje: "No pudimos cargar tu cuenta en este momento. Inténtalo de nuevo en unos segundos."
+    };
   }
 }
 
@@ -178,6 +202,45 @@ function GrupoConfiguracion({ titulo, children }: { titulo: string; children: Re
       <div className="grid gap-3 sm:grid-cols-2">{children}</div>
     </div>
   );
+}
+
+/**
+ * Aviso de fallo de carga (A-4). Distinto de AvisoSinSesion: aquí el usuario
+ * SÍ está autenticado y reintentar tiene sentido; ofrecer "Iniciar sesión"
+ * lo llevaría a un bucle sin solución.
+ */
+export function AvisoErrorCuenta({ mensaje }: { mensaje?: string | null }) {
+  return (
+    <main className="user-v2-scope user-v2-page user-v2-secondary-screen">
+      <NavegacionUsuario variante="claro" />
+      <div className="user-v2-content user-v2-content--wide py-12 sm:py-20 text-center">
+        <Aviso tono="danger">
+          {mensaje ?? "No pudimos cargar tu cuenta en este momento. Inténtalo de nuevo en unos segundos."}
+        </Aviso>
+        <div className="mt-6 flex flex-col gap-3 sm:flex-row justify-center">
+          <Link href="/soporte">
+            <Button className="w-full sm:w-auto">Reportar un problema</Button>
+          </Link>
+          <Link href="/">
+            <Button variant="secondary" className="w-full sm:w-auto">Ir al inicio</Button>
+          </Link>
+        </div>
+      </div>
+    </main>
+  );
+}
+
+/**
+ * Resuelve obtenerCuenta() y devuelve el JSX de estado, o null si hay cuenta.
+ * Evita que cada subruta tenga que repetir el switch de tres casos.
+ */
+export async function conCuenta(
+  render: (cuenta: CuentaReal) => ReactNode
+): Promise<ReactNode> {
+  const resultado = await obtenerCuenta();
+  if (resultado.estado === "error") return <AvisoErrorCuenta mensaje={resultado.mensaje} />;
+  if (resultado.estado === "sin_sesion") return <AvisoSinSesion />;
+  return render(resultado.cuenta);
 }
 
 export function AvisoSinSesion() {

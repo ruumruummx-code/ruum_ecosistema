@@ -1,13 +1,9 @@
-import { AvisoSinSesion, LayoutCuenta, SeccionLegal, obtenerCuenta } from "../cuenta-ui";
+import { SeccionLegal, conCuenta, LayoutCuenta } from "../cuenta-ui";
 
 export default async function PaginaLegalCuenta() {
-  const cuenta = await obtenerCuenta();
-
-  if (!cuenta) return <AvisoSinSesion />;
-
-  return (
+  return conCuenta((cuenta) => (
     <LayoutCuenta cuenta={cuenta}>
       <SeccionLegal />
     </LayoutCuenta>
-  );
+  ));
 }

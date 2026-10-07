@@ -1,13 +1,9 @@
-import { AvisoSinSesion, LayoutCuenta, SeccionPreferencias, obtenerCuenta } from "../cuenta-ui";
+import { SeccionPreferencias, conCuenta, LayoutCuenta } from "../cuenta-ui";
 import { BotonTema } from "../../TemaProvider";
 import { PassportCard } from "@ruum/ui";
 
 export default async function PaginaPreferenciasCuenta() {
-  const cuenta = await obtenerCuenta();
-
-  if (!cuenta) return <AvisoSinSesion />;
-
-  return (
+  return conCuenta((cuenta) => (
     <LayoutCuenta cuenta={cuenta}>
       <PassportCard>
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
@@ -22,5 +18,5 @@ export default async function PaginaPreferenciasCuenta() {
         <SeccionPreferencias usuario={cuenta.usuario} />
       </div>
     </LayoutCuenta>
-  );
+  ));
 }

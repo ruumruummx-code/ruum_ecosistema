@@ -13,9 +13,11 @@ import { botonAzul, botonContorno, LogoRuum, PantallaPublica } from "../experien
 interface LoginClienteProps {
   motivo: string | null;
   siguiente: string;
+  /** Mensaje de éxito a mostrar (p. ej. tras restablecer la contraseña). */
+  aviso?: string | null;
 }
 
-export function LoginCliente({ motivo, siguiente }: LoginClienteProps) {
+export function LoginCliente({ motivo, siguiente, aviso }: LoginClienteProps) {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -96,6 +98,11 @@ export function LoginCliente({ motivo, siguiente }: LoginClienteProps) {
           <p className="mt-4 font-body text-sm leading-6 text-text-secondary">Seguridad, evidencia y trazabilidad en cada viaje.</p>
         </header>
 
+        {aviso && (
+          <div className="mt-5" role="status">
+            <Aviso tono="success">{aviso}</Aviso>
+          </div>
+        )}
         {motivo === "email_confirmation" && (
           <div className="mt-5" role="status">
             <Aviso tono="atencion">
@@ -119,7 +126,7 @@ export function LoginCliente({ motivo, siguiente }: LoginClienteProps) {
                 ref={correoRef}
                 id="login-email"
                 name="email"
-                etiqueta="Correo o teléfono"
+                etiqueta="Correo electrónico"
                 etiquetaClassName="leading-5"
                 type="text"
                 value={email}
@@ -171,7 +178,7 @@ export function LoginCliente({ motivo, siguiente }: LoginClienteProps) {
               </div>
             )}
 
-            <button type="submit" disabled={enviando} className={`${botonAzul} login-usuario__submit mt-1 min-h-[60px] rounded-2xl text-lg font-semibold text-white`}>
+            <button type="submit" disabled={enviando} aria-busy={enviando} className={`${botonAzul} login-usuario__submit mt-1 min-h-[60px] rounded-2xl text-lg font-semibold text-white`}>
               {enviando ? "Entrando..." : "Entrar"}
             </button>
           </form>

@@ -1,13 +1,9 @@
-import { AvisoSinSesion, LayoutCuenta, SeccionMetodosPago, obtenerCuenta } from "../cuenta-ui";
+import { SeccionMetodosPago, conCuenta, LayoutCuenta } from "../cuenta-ui";
 
 export default async function PaginaMetodosPagoCuenta() {
-  const cuenta = await obtenerCuenta();
-
-  if (!cuenta) return <AvisoSinSesion />;
-
-  return (
+  return conCuenta((cuenta) => (
     <LayoutCuenta cuenta={cuenta}>
       <SeccionMetodosPago usuario={cuenta.usuario} />
     </LayoutCuenta>
-  );
+  ));
 }

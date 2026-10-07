@@ -25,8 +25,16 @@ export function buildCspUsuario(nonce: string, isProd: boolean, _isStaging: bool
 }
 
 /**
- * CSP estático para `next.config.ts` headers() — sin nonce por request.
- * Prod: 'strict-dynamic' sin unsafe-inline/eval (SEC-002).
+ * CSP estático sin nonce por request.
+ *
+ * ARQ-4 (auditoría fase 4): ya NO se usa en `next.config.ts`. Emitir aquí una
+ * CSP sin nonce mientras el middleware emite la canónica con nonce produce dos
+ * cabeceras CSP para la misma URL, y el navegador aplica la intersección: en
+ * producción la estática (`script-src 'self' 'strict-dynamic'` sin nonce) hace
+ * que CSP3 ignore `'self'` y no quede origen válido, bloqueando el bundle.
+ *
+ * Se conserva exportada para tests y para consumidores que necesiten
+ * inspeccionar la política, pero el middleware es la única que la emite.
  */
 export function buildCspEstatico(isProd: boolean): string {
   return buildCsp({ nonce: null, isProd, extras: CSP_PRESETS.usuario });

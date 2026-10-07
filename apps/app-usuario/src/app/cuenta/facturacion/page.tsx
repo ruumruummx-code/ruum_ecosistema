@@ -1,13 +1,9 @@
-import { AvisoSinSesion, LayoutCuenta, SeccionFacturacion, obtenerCuenta } from "../cuenta-ui";
+import { SeccionFacturacion, conCuenta, LayoutCuenta } from "../cuenta-ui";
 
 export default async function PaginaFacturacionCuenta() {
-  const cuenta = await obtenerCuenta();
-
-  if (!cuenta) return <AvisoSinSesion />;
-
-  return (
+  return conCuenta((cuenta) => (
     <LayoutCuenta cuenta={cuenta}>
       <SeccionFacturacion empresa={cuenta.empresa} usuario={cuenta.usuario} />
     </LayoutCuenta>
-  );
+  ));
 }

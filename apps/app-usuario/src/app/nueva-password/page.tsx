@@ -116,15 +116,28 @@ export default function PaginaNuevaPassword() {
       const cliente = crearClienteNavegador();
       const { error: errorAuth } = await cliente.auth.updateUser({ password });
       if (errorAuth) throw errorAuth;
+
       // PR-02 P0: invalidar contexto temporal de recovery para que no sea reutilizable
       try {
         await fetch("/api/recovery/clear", { method: "POST", cache: "no-store", credentials: "same-origin" });
       } catch {}
+
+      /* F-4 (auditoría): /api/recovery/clear solo borra cookies httpOnly; nunca
+         revocaba la sesión de Supabase creada por el enlace de recovery. Esa
+         sesión seguía viva (y con refresh token rotatorio, indefinidamente),
+         así que "cambiar la contraseña" no cerraba la puerta a quien tuviera la
+         sesión. Se cierra la sesión y se manda a /login. */
+      try {
+        await cliente.auth.signOut();
+      } catch {
+        // best-effort: si falla, la redirección a /login sigue siendo lo seguro
+      }
+
       if (!montadoRef.current) return;
       setListo(true);
       redireccionRef.current = setTimeout(() => {
-        if (montadoRef.current) router.push("/");
-      }, 2000);
+        if (montadoRef.current) router.push("/login?contrasena=actualizada");
+      }, 2500);
     } catch (err) {
       if (montadoRef.current) setError(traducirErrorAuth(err, "No pudimos actualizar la contraseña. Intenta de nuevo."));
     } finally {
@@ -143,10 +156,10 @@ export default function PaginaNuevaPassword() {
 
         <LogoRuum className="mx-auto mt-8 text-center" />
 
-        /* ACC-6 (auditoría): esta pantalla cambia por completo de contenido según el
+        {/* ACC-6 (auditoría): esta pantalla cambia por completo de contenido según el
              resultado de una verificación asíncrona (verificando / listo / sesión
              no válida). Sin live region el lector de pantalla no anuncia nada y
-             el usuario queda ante un silencio. */
+             el usuario queda ante un silencio. */}
         <div
           className="mt-14 rounded-card border border-border bg-surface px-5 py-7 shadow-[var(--ruum-shadow-3)]"
           aria-live="polite"
@@ -163,7 +176,8 @@ export default function PaginaNuevaPassword() {
               </div>
               <h1 className="font-display text-[22px] font-extrabold text-text-primary">Contraseña actualizada</h1>
               <p className="font-body text-sm text-text-secondary">
-                Tu contraseña fue actualizada. Los cambios son inmediatos. Redirigiendo al inicio…
+                Tu contraseña fue actualizada y cerramos esta sesión por seguridad.
+                Inicia sesión de nuevo para continuar. Redirigiendo…
               </p>
             </div>
           ) : !sesionLista ? (

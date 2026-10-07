@@ -1,13 +1,9 @@
-import { AvisoSinSesion, LayoutCuenta, SeccionPerfil, obtenerCuenta } from "../cuenta-ui";
+import { SeccionPerfil, conCuenta, LayoutCuenta } from "../cuenta-ui";
 
 export default async function PaginaPerfilCuenta() {
-  const cuenta = await obtenerCuenta();
-
-  if (!cuenta) return <AvisoSinSesion />;
-
-  return (
+  return conCuenta((cuenta) => (
     <LayoutCuenta cuenta={cuenta}>
       <SeccionPerfil usuario={cuenta.usuario} fotoUrl={cuenta.fotoPerfilUrl} />
     </LayoutCuenta>
-  );
+  ));
 }
