@@ -82,15 +82,41 @@ function EvidenciaVisual() {
 }
 
 export default function OnboardingUsuario() {
-  const [paso, setPaso] = useState(0);
+  const [paso, setPaso] = useState(() => {
+    try {
+      if (typeof window === "undefined") return 0;
+      const guardado = window.localStorage.getItem("ruum-onboarding-paso");
+      const n = guardado === null ? 0 : Number.parseInt(guardado, 10);
+      return Number.isInteger(n) && n >= 0 && n < PASOS.length ? n : 0;
+    } catch {
+      return 0;
+    }
+  });
   const actual = PASOS[paso];
   const esUltimo = paso === PASOS.length - 1;
+
+  function irAPaso(siguiente: number) {
+    setPaso(siguiente);
+    try {
+      if (typeof window !== "undefined") window.localStorage.setItem("ruum-onboarding-paso", String(siguiente));
+    } catch {
+      // almacenamiento no disponible: el flujo sigue funcionando en memoria
+    }
+  }
+
+  function marcarVisto() {
+    try {
+      if (typeof window !== "undefined") window.localStorage.setItem("ruum-onboarding-visto", "1");
+    } catch {
+      // ignore
+    }
+  }
 
   return (
     <main className="user-road-onboarding">
       <header className="user-road-header">
-        <span className="user-road-wordmark">RUUM<span>·</span>RUUM</span>
-        <Link href="/login">Omitir</Link>
+        <span className="user-road-wordmark">RUUM</span>
+        <Link href="/login" onClick={marcarVisto}>Omitir</Link>
       </header>
 
       <section className="user-road-stage" aria-live="polite">
@@ -108,30 +134,37 @@ export default function OnboardingUsuario() {
       </section>
 
       <footer className="user-road-footer">
-        <div className="user-road-progress" role="tablist" aria-label="Progreso del recorrido">
+        <div
+          className="user-road-progress"
+          role="progressbar"
+          aria-label="Progreso del recorrido"
+          aria-valuemin={1}
+          aria-valuemax={PASOS.length}
+          aria-valuenow={paso + 1}
+          aria-valuetext={`Paso ${paso + 1} de ${PASOS.length}: ${actual.titulo}`}
+        >
           {PASOS.map((item, indice) => (
             <button
               key={item.folio}
               type="button"
-              role="tab"
-              aria-selected={paso === indice}
+              aria-current={paso === indice ? "step" : undefined}
               aria-label={`Ir al paso ${indice + 1}: ${item.titulo}`}
-              onClick={() => setPaso(indice)}
+              onClick={() => irAPaso(indice)}
               className={paso === indice ? "is-active" : ""}
             >
-              <span className="mono">0{indice + 1}</span>
+              <span className="mono" aria-hidden="true">0{indice + 1}</span>
             </button>
           ))}
         </div>
 
         {esUltimo ? (
-          <Link href="/registro" className="user-road-primary">Solicitar mi primer traslado <span aria-hidden="true">→</span></Link>
+          <Link href="/registro" onClick={marcarVisto} className="user-road-primary">Crear cuenta y cotizar <span aria-hidden="true">→</span></Link>
         ) : (
-          <button type="button" className="user-road-primary" onClick={() => setPaso((valor) => valor + 1)}>
+          <button type="button" className="user-road-primary" onClick={() => irAPaso(paso + 1)}>
             Continuar <span aria-hidden="true">→</span>
           </button>
         )}
-        <Link href="/login" className="user-road-secondary">Ya tengo una cuenta</Link>
+        <Link href="/login" onClick={marcarVisto} className="user-road-secondary">Ya tengo una cuenta</Link>
       </footer>
     </main>
   );

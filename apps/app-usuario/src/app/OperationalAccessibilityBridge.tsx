@@ -11,10 +11,32 @@ const EVENTOS_A11Y_USUARIO: Record<string, string> = {
   "ruum:sesion-cerrada": "Sesión cerrada correctamente."
 };
 
+/* Cola de eventos operativos disparados antes de montar el puente
+   (p. ej. durante la hidratación SSR). El módulo se evalúa al cargar el
+   bundle cliente, antes que cualquier efecto; al montar se drena la cola. */
+const colaTemprana: string[] = [];
+let puenteListo = false;
+
+if (typeof window !== "undefined") {
+  for (const nombre of Object.keys(EVENTOS_A11Y_USUARIO)) {
+    window.addEventListener(nombre, () => {
+      if (!puenteListo) colaTemprana.push(nombre);
+    });
+  }
+}
+
 export function OperationalAccessibilityBridge() {
   const live = useLiveRegion();
 
   useEffect(() => {
+    puenteListo = true;
+    // Drenar eventos de hidratación temprana (último por tipo).
+    for (const nombre of [...new Set(colaTemprana)]) {
+      const mensaje = EVENTOS_A11Y_USUARIO[nombre];
+      if (mensaje) live.announce(mensaje);
+    }
+    colaTemprana.length = 0;
+
     const handlers = Object.entries(EVENTOS_A11Y_USUARIO).map(([name, message]) => {
       const h = () => live.announce(message);
       window.addEventListener(name, h);
@@ -27,6 +49,7 @@ export function OperationalAccessibilityBridge() {
       void recordOperationalEvent("startup_failure", {
         reason: event.reason instanceof Error ? event.reason.name : "unhandled_rejection"
       });
+      live.alert("Ocurrió un error inesperado. Intenta de nuevo.");
     };
 
     window.addEventListener("offline", offline);
@@ -34,6 +57,7 @@ export function OperationalAccessibilityBridge() {
     window.addEventListener("unhandledrejection", rejected);
 
     return () => {
+      puenteListo = false;
       handlers.forEach(([n, h]) => window.removeEventListener(n, h));
       window.removeEventListener("offline", offline);
       window.removeEventListener("online", online);

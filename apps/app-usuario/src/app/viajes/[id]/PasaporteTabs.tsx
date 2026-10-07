@@ -1,6 +1,6 @@
 "use client";
 
-import { useId, useState, type ReactNode } from "react";
+import { useEffect, useId, useState, type ReactNode } from "react";
 
 type TabId = "trazabilidad" | "evidencias" | "detalles";
 
@@ -20,6 +20,17 @@ export function PasaporteTabs({ trazabilidad, evidencias, detalles }: PasaporteT
   const [activa, setActiva] = useState<TabId>("trazabilidad");
   const baseId = useId();
   const paneles: Record<TabId, ReactNode> = { trazabilidad, evidencias, detalles };
+
+  useEffect(() => {
+    function activarDesdeAncla(evento: Event) {
+      const seccion = (evento as CustomEvent<string>).detail;
+      if (seccion === "trazabilidad" || seccion === "evidencias" || seccion === "detalles") {
+        setActiva(seccion);
+      }
+    }
+    document.addEventListener("ruum:pasaporte:ir", activarDesdeAncla);
+    return () => document.removeEventListener("ruum:pasaporte:ir", activarDesdeAncla);
+  }, []);
 
   return (
     <section className="mt-6" aria-label="Secciones del Pasaporte Digital">

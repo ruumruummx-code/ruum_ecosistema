@@ -85,9 +85,9 @@ export default async function PaginaMisTraslados({
 
   if (resultado.estado === "error") {
     return (
-      <main className="user-v2-scope user-v2-page">
-        <NavegacionUsuario variante="claro" />
-        <div className="user-v2-content user-v2-content--wide py-12 text-center">
+      <>
+      <NavegacionUsuario variante="claro" />
+      <main className="user-v2-scope user-v2-page"><div className="user-v2-content user-v2-content--wide py-12 text-center">
           <Aviso tono="danger">
             No pudimos cargar tus traslados en este momento. Inténtalo de nuevo en unos segundos.
           </Aviso>
@@ -98,6 +98,7 @@ export default async function PaginaMisTraslados({
           </div>
         </div>
       </main>
+    </>
     );
   }
 
@@ -106,11 +107,12 @@ export default async function PaginaMisTraslados({
   const Traslados = resultado.estado === "ok" ? resultado.traslados : [];
 
   return (
-    <main className="user-v2-scope user-v2-page">
+    <>
       <NavegacionUsuario variante="claro" />
-      <div className="user-v2-content">
+      <main className="user-v2-scope user-v2-page"><div className="user-v2-content">
         <MisTrasladosCliente Traslados={Traslados} pestanaInicial={pestañaActiva} />
       </div>
     </main>
+    </>
   );
 }

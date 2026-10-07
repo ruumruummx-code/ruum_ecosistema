@@ -68,6 +68,13 @@ function guardarModo(m: ModoTema) {
 
 function resolverTema(modo: ModoTema): Tema {
   if (modo === "light" || modo === "dark") return modo;
+  if (typeof window !== "undefined" && typeof window.matchMedia === "function") {
+    try {
+      if (window.matchMedia("(prefers-color-scheme: dark)").matches) return "dark";
+    } catch {
+      // ignore
+    }
+  }
   return "light";
 }
 
@@ -84,7 +91,7 @@ export function TemaProvider({ children }: { children: React.ReactNode }) {
   const [tema, setTema] = useState<Tema>("light");
 
   useEffect(() => {
-    // Por defecto se usa tema claro; solo una selección manual activa el tema oscuro.
+    // Por defecto se respeta el sistema; solo una selección manual fija el tema.
     const modoGuardado = obtenerModoAlmacenado();
     const temaGuardado = obtenerTemaAlmacenado();
     const inicial: ModoTema = modoGuardado ?? (temaGuardado ?? "auto");
@@ -93,6 +100,29 @@ export function TemaProvider({ children }: { children: React.ReactNode }) {
     setTema(resuelto);
     aplicarTema(resuelto);
 
+    // Si el modo es automático, seguir cambios del sistema en vivo.
+    if (inicial === "auto" && typeof window !== "undefined" && typeof window.matchMedia === "function") {
+      let media: MediaQueryList | null = null;
+      try {
+        media = window.matchMedia("(prefers-color-scheme: dark)");
+      } catch {
+        media = null;
+      }
+      if (media) {
+        const alCambiar = (e: MediaQueryListEvent) => {
+          const t: Tema = e.matches ? "dark" : "light";
+          setTema(t);
+          aplicarTema(t);
+        };
+        if (typeof media.addEventListener === "function") media.addEventListener("change", alCambiar);
+        else media.addListener(alCambiar as unknown as (e: MediaQueryListEvent) => void);
+        return () => {
+          if (!media) return;
+          if (typeof media.removeEventListener === "function") media.removeEventListener("change", alCambiar);
+          else media.removeListener(alCambiar as unknown as (e: MediaQueryListEvent) => void);
+        };
+      }
+    }
   }, []);
 
   const fijarModo = useCallback((m: ModoTema) => {
@@ -151,7 +181,7 @@ export function BotonTema() {
               value={o.valor}
               checked={modo === o.valor}
               onChange={() => fijarModo(o.valor)}
-              className="size-5 shrink-0 accent-[#0066FF]"
+              className="size-5 shrink-0 accent-[var(--user-color-action)]"
             />
             {o.etiqueta}
           </label>

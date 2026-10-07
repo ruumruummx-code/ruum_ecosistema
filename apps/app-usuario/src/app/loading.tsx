@@ -3,9 +3,15 @@ import { NavegacionUsuario } from "./NavegacionUsuario";
 
 export default function Loading() {
   return (
-    <main className="user-v2-scope user-v2-page user-v2-secondary-screen">
+    <>
       <NavegacionUsuario variante="claro" />
-      <div className="user-v2-content user-v2-content--wide py-6 sm:py-10 space-y-6">
+      <main className="user-v2-scope user-v2-page user-v2-secondary-screen"><div
+        className="user-v2-content user-v2-content--wide py-6 sm:py-10 space-y-6"
+        role="status"
+        aria-label="Cargando contenido"
+      >
+        <span className="sr-only">Cargando…</span>
+        <div aria-hidden="true" className="space-y-6">
         {/* Header Skeleton */}
         <div className="flex items-center justify-between border-b border-border pb-4">
           <div className="h-8 w-36 rounded-lg bg-surface-elevated animate-pulse" />
@@ -33,7 +39,9 @@ export default function Loading() {
             <div className="h-16 rounded-xl bg-surface-elevated/60" />
           </div>
         </div>
+        </div>
       </div>
     </main>
+    </>
   );
 }

@@ -80,10 +80,40 @@ export function AccionesRapidasPasaporte({ trasladoId: _trasladoId, estado }: Pr
   // Focus al primer item al abrir
   useEffect(() => {
     if (abierto) {
-      // microtask para esperar render del menú
       requestAnimationFrame(() => primerItemRef.current?.focus());
     }
   }, [abierto]);
+
+  // Navegación robusta: abre el <details> destino y activa el tab
+  // correspondiente antes de hacer scroll + foco. Evita clicks muertos
+  // cuando el destino está en un acordeón cerrado o tab oculto.
+  function irASeccion(evento: React.MouseEvent<HTMLAnchorElement>, href: string) {
+    const id = href.startsWith("#") ? href.slice(1) : null;
+    if (!id) return;
+    const destino = document.getElementById(id);
+    if (!destino) return;
+    evento.preventDefault();
+    setAbierto(false);
+
+    const seccionTab = id === "trazabilidad" || id === "evidencias" || id === "detalles" ? id : null;
+    if (seccionTab) {
+      document.dispatchEvent(new CustomEvent("ruum:pasaporte:ir", { detail: seccionTab }));
+    }
+    const detailsCerrado = destino.closest("details:not([open])") as HTMLDetailsElement | null;
+    if (detailsCerrado) detailsCerrado.open = true;
+
+    window.setTimeout(() => {
+      destino.scrollIntoView({ behavior: "smooth", block: "start" });
+      const foco = destino.querySelector<HTMLElement>(
+        "button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex='-1'])"
+      );
+      if (foco) foco.focus({ preventScroll: true });
+      else {
+        if (!destino.hasAttribute("tabindex")) destino.setAttribute("tabindex", "-1");
+        (destino as HTMLElement).focus({ preventScroll: true });
+      }
+    }, seccionTab ? 80 : 0);
+  }
 
   // Navegación con flechas dentro del menú
   function handleMenuKeyDown(event: React.KeyboardEvent) {
@@ -112,6 +142,7 @@ export function AccionesRapidasPasaporte({ trasladoId: _trasladoId, estado }: Pr
         {/* CTA Primario - siempre visible */}
         <a
           href={primario.href}
+          onClick={(e) => irASeccion(e, primario.href)}
           className={`flex-1 inline-flex min-h-11 items-center justify-center rounded-[var(--ruum-radius-field)] border px-3 text-center font-body text-xs font-bold transition focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-route-action ${primario.clase}`}
         >
           {primario.label}
@@ -144,7 +175,7 @@ export function AccionesRapidasPasaporte({ trasladoId: _trasladoId, estado }: Pr
               onKeyDown={handleMenuKeyDown}
               className="absolute right-0 top-full z-50 mt-2 min-w-[268px] max-w-[min(88vw,320px)] overflow-hidden rounded-xl border border-border bg-surface py-1.5 shadow-3 animate-fade-in"
             >
-              <p className="px-3 pb-1.5 pt-1 font-body text-[10px] font-bold uppercase tracking-widest text-text-tertiary">Más acciones</p>
+              <p className="px-3 pb-1.5 pt-1 font-body text-xs font-bold uppercase tracking-widest text-text-tertiary">Más acciones</p>
               {itemsSecundarios.map((item, idx) => (
                 <a
                   key={item.href}
@@ -152,7 +183,7 @@ export function AccionesRapidasPasaporte({ trasladoId: _trasladoId, estado }: Pr
                   href={item.href}
                   role="menuitem"
                   tabIndex={0}
-                  onClick={() => setAbierto(false)}
+                  onClick={(e) => irASeccion(e, item.href)}
                   className="flex flex-col gap-0.5 px-3 py-2.5 text-left transition hover:bg-surface-soft focus:bg-surface-soft focus:outline-none focus-visible:bg-surface-soft"
                 >
                   <span className="font-body text-sm font-semibold leading-none text-text-primary">{item.label}</span>
@@ -160,8 +191,8 @@ export function AccionesRapidasPasaporte({ trasladoId: _trasladoId, estado }: Pr
                 </a>
               ))}
               <div className="mx-2 mt-1.5 border-t border-border pt-1.5">
-                <p className="px-1 font-body text-[11px] leading-4 text-text-tertiary">
-                  Accesos directos a las secciones del pasaporte. Si no ves la opción, desplázate al acordeón correspondiente.
+                <p className="px-1 font-body text-xs leading-4 text-text-tertiary">
+                  Accesos directos a las secciones del pasaporte.
                 </p>
               </div>
             </div>

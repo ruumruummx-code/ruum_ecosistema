@@ -37,9 +37,9 @@ export default async function UiV2Preview({ searchParams }: { searchParams: Prom
   const esMisTraslados = screen === "mis-Traslados";
 
   return (
-    <main className="user-v2-scope user-v2-page">
+    <>
       <NavegacionUsuario variante="claro" />
-      <div className="user-v2-content">
+      <main className="user-v2-scope user-v2-page"><div className="user-v2-content">
         {esMisTraslados ? (
           <MisTrasladosCliente
             pestanaInicial="programados"
@@ -50,5 +50,6 @@ export default async function UiV2Preview({ searchParams }: { searchParams: Prom
         )}
       </div>
     </main>
+    </>
   );
 }

@@ -591,9 +591,9 @@ export default async function PaginaTraslado({ params }: { params: Promise<{ id:
       if (!user) {
         // Tratar como no encontrado para no filtrar existencia (IDOR)
         return (
-          <main className="user-v2-scope user-v2-page user-v2-secondary-screen">
-            <NavegacionUsuario variante="claro" />
-            <div className="w-full max-w-md mx-auto py-20 px-4 text-center">
+          <>
+      <NavegacionUsuario variante="claro" />
+      <main className="user-v2-scope user-v2-page user-v2-secondary-screen"><div className="w-full max-w-md mx-auto py-20 px-4 text-center">
               <p className="font-display text-xs font-bold uppercase tracking-widest text-[#FFC400]">Traslado no encontrado</p>
               <h1 className="mt-3 font-display text-2xl font-black text-white">No encontramos ese traslado</h1>
               <p className="mt-3 max-w-sm mx-auto font-body text-xs leading-relaxed text-[#8E9CAE]">
@@ -609,6 +609,7 @@ export default async function PaginaTraslado({ params }: { params: Promise<{ id:
               </div>
             </div>
           </main>
+    </>
         );
       }
 
@@ -620,9 +621,9 @@ export default async function PaginaTraslado({ params }: { params: Promise<{ id:
       if (!perfilId || perfilId !== pasaporte.usuario_id) {
         // Tratar como no encontrado para no filtrar existencia (IDOR)
         return (
-          <main className="user-v2-scope user-v2-page user-v2-secondary-screen">
-            <NavegacionUsuario variante="claro" />
-            <div className="w-full max-w-md mx-auto py-20 px-4 text-center">
+          <>
+      <NavegacionUsuario variante="claro" />
+      <main className="user-v2-scope user-v2-page user-v2-secondary-screen"><div className="w-full max-w-md mx-auto py-20 px-4 text-center">
               <p className="font-display text-xs font-bold uppercase tracking-widest text-[#FFC400]">Traslado no encontrado</p>
               <h1 className="mt-3 font-display text-2xl font-black text-white">No encontramos ese traslado</h1>
               <p className="mt-3 max-w-sm mx-auto font-body text-xs leading-relaxed text-[#8E9CAE]">
@@ -638,28 +639,30 @@ export default async function PaginaTraslado({ params }: { params: Promise<{ id:
               </div>
             </div>
           </main>
+    </>
         );
       }
     } catch {
       // Si falla la verificación de sesión, no exponer datos
       return (
-        <main className="user-v2-scope user-v2-page user-v2-secondary-screen">
-          <NavegacionUsuario variante="claro" />
-          <div className="w-full max-w-md mx-auto py-20 px-4 text-center">
+        <>
+      <NavegacionUsuario variante="claro" />
+      <main className="user-v2-scope user-v2-page user-v2-secondary-screen"><div className="w-full max-w-md mx-auto py-20 px-4 text-center">
             <p className="font-display text-xs font-bold uppercase tracking-widest text-[#FFC400]">Traslado no encontrado</p>
             <h1 className="mt-3 font-display text-2xl font-black text-white">No encontramos ese traslado</h1>
             <p className="mt-3 max-w-sm mx-auto font-body text-xs leading-relaxed text-[#8E9CAE]">No pudimos verificar tu sesión. Intenta iniciar sesión de nuevo.</p>
           </div>
         </main>
+    </>
       );
     }
   }
 
   if (!pasaporte) {
     return (
-      <main className="user-v2-scope user-v2-page user-v2-secondary-screen">
-        <NavegacionUsuario variante="claro" />
-        <div className="w-full max-w-md mx-auto py-20 px-4 text-center">
+      <>
+      <NavegacionUsuario variante="claro" />
+      <main className="user-v2-scope user-v2-page user-v2-secondary-screen"><div className="w-full max-w-md mx-auto py-20 px-4 text-center">
           <p className="font-display text-xs font-bold uppercase tracking-widest text-[#FFC400]">
             Traslado no encontrado
           </p>
@@ -683,14 +686,15 @@ export default async function PaginaTraslado({ params }: { params: Promise<{ id:
           </div>
         </div>
       </main>
+    </>
     );
   }
 
   if (!pasaporte.traslado_id || !pasaporte.estado) {
     return (
-      <main className="user-v2-scope user-v2-page user-v2-secondary-screen">
-        <NavegacionUsuario variante="claro" />
-        <div className="w-full max-w-md mx-auto py-20 px-4 text-center">
+      <>
+      <NavegacionUsuario variante="claro" />
+      <main className="user-v2-scope user-v2-page user-v2-secondary-screen"><div className="w-full max-w-md mx-auto py-20 px-4 text-center">
           <p className="font-display text-xs font-bold uppercase tracking-widest text-[#FFC400]">
             Traslado incompleto
           </p>
@@ -708,6 +712,7 @@ export default async function PaginaTraslado({ params }: { params: Promise<{ id:
           </div>
         </div>
       </main>
+    </>
     );
   }
 
@@ -726,9 +731,9 @@ export default async function PaginaTraslado({ params }: { params: Promise<{ id:
     dentroDeVentanaPostCierre;
 
   return (
-    <main className="user-v2-scope user-v2-page user-v2-secondary-screen">
+    <>
       <NavegacionUsuario variante="claro" />
-      <div className="w-full max-w-2xl mx-auto px-4 py-4 sm:py-8 pb-28">
+      <main className="user-v2-scope user-v2-page user-v2-secondary-screen"><div className="w-full max-w-2xl mx-auto px-4 py-4 sm:py-8 pb-28">
       <PassportCard folio={`#RM-${pasaporte.traslado_id.slice(0, 4).toUpperCase()}`}>
         <div className="flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between">
           <div>
@@ -795,6 +800,16 @@ export default async function PaginaTraslado({ params }: { params: Promise<{ id:
       <HeroAnsiedadCero pasaporte={pasaporte} conductor={conductor} traslado={traslado} trasladoId={pasaporte.traslado_id} />
 
       <AccionesRapidasPasaporte trasladoId={pasaporte.traslado_id} estado={pasaporte.estado} />
+
+      {mostrarPromptCalificacion && (
+        <section id="calificacion" aria-label="Califica tu traslado" className="mt-4 scroll-mt-28">
+          <CalificarTraslado
+            trasladoId={pasaporte.traslado_id}
+            conductorId={pasaporte.conductor_id}
+            mostrar={mostrarPromptCalificacion}
+          />
+        </section>
+      )}
 
       <section id="chat-conductor" className="mt-4 scroll-mt-28">
         <AcordeonPasaporte 
@@ -917,11 +932,6 @@ export default async function PaginaTraslado({ params }: { params: Promise<{ id:
               <p className="mt-5 font-body text-xs leading-5 text-ink/50">
                 {pasaporte.conductor_id ? MENSAJES_CLAVE_UX.conductor_asignado : "Se mostrará cuando sea asignado."}
               </p>
-              <CalificarTraslado
-                trasladoId={pasaporte.traslado_id}
-                conductorId={pasaporte.conductor_id}
-                mostrar={mostrarPromptCalificacion}
-              />
             </AcordeonPasaporte>
 
             <AcordeonPasaporte titulo="Datos del vehículo" descripcion="Ficha técnica y documentos declarados.">
@@ -1003,12 +1013,20 @@ export default async function PaginaTraslado({ params }: { params: Promise<{ id:
                 </dl>
                 {pagos.length > 0 && (
                   <div className="mt-5 space-y-3">
-                    {pagos.map((pago) => (
+                    {pagos.map((pago, indice) => (
                       <div key={pago.id} className="flex items-center justify-between border-t border-ink/10 pt-3 font-body text-sm">
-                        <span>{pago.metodo} · {pago.momento ? String(pago.momento).replaceAll("_", " ") : ""}</span>
+                        <span>
+                          Pago {indice + 1} de {pagos.length} · {pago.metodo} · {pago.momento ? String(pago.momento).replaceAll("_", " ") : ""}
+                        </span>
                         <span className="font-mono-ruum">{formatoMoneda(pago.monto)}</span>
                       </div>
                     ))}
+                    <p className="font-body text-xs text-ink/60" role="status">
+                      Total pagado {formatoMoneda(pasaporte.monto_pagado)} de {formatoMoneda(precioBase)}.
+                      {precioBase - (pasaporte.monto_pagado ?? 0) > 0
+                        ? ` Restan ${formatoMoneda(precioBase - (pasaporte.monto_pagado ?? 0))}.`
+                        : " Sin saldo pendiente."}
+                    </p>
                   </div>
                 )}
                 {pasaporte.estado === "cotizacion_generada" && pasaporte.precio_cotizado != null && (
@@ -1118,5 +1136,6 @@ export default async function PaginaTraslado({ params }: { params: Promise<{ id:
       />
       </div>
     </main>
+    </>
   );
 }

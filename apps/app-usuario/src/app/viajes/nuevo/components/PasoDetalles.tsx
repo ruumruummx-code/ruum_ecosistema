@@ -113,8 +113,15 @@ function PasoDetallesComponent({
                     placeholder="Ej. 09:00 a 12:00 o indicación específica"
                     value={valorCustom}
                     onChange={(e) => actualizar("ventanaRecoleccion", `Otra: ${e.target.value}`)}
+                    onBlur={(e) => actualizar("ventanaRecoleccion", `Otra: ${e.target.value.trim()}`)}
+                    aria-describedby={valorCustom.trim() ? undefined : "ventanaRecoleccionCustom-ayuda"}
                     className="rounded-lg border border-ink/50 bg-mist px-3.5 py-2.5 font-body text-sm"
                   />
+                  {!valorCustom.trim() && (
+                    <span id="ventanaRecoleccionCustom-ayuda" className="font-body text-xs leading-5 text-ink/60">
+                      Especifica el horario para que operación pueda programar la recolección.
+                    </span>
+                  )}
                 </label>
               );
             })()}
@@ -145,8 +152,15 @@ function PasoDetallesComponent({
                     placeholder="Ej. Mismo día por la tarde"
                     value={valorCustom}
                     onChange={(e) => actualizar("ventanaEntrega", `Otra: ${e.target.value}`)}
+                    onBlur={(e) => actualizar("ventanaEntrega", `Otra: ${e.target.value.trim()}`)}
+                    aria-describedby={valorCustom.trim() ? undefined : "ventanaEntregaCustom-ayuda"}
                     className="rounded-lg border border-ink/50 bg-mist px-3.5 py-2.5 font-body text-sm"
                   />
+                  {!valorCustom.trim() && (
+                    <span id="ventanaEntregaCustom-ayuda" className="font-body text-xs leading-5 text-ink/60">
+                      Especifica el horario para que operación pueda programar la entrega.
+                    </span>
+                  )}
                 </label>
               );
             })()}
@@ -190,7 +204,7 @@ function PasoDetallesComponent({
         <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <p id="titulo-tarifa-calculada" className="font-body text-xs font-semibold uppercase tracking-wide text-ink/45">
-              Tarifa a pagar
+              Precio final del traslado
             </p>
             {previsualizando && (
               <p className="mt-1 font-body text-sm text-ink/55">Calculando tarifa…</p>
@@ -298,7 +312,7 @@ function PasoDetallesComponent({
         <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <p id="titulo-tarifa-flotante" className="font-body text-xs font-semibold uppercase tracking-wide text-ink/45">
-              Tarifa estimada
+              Precio final del traslado
             </p>
             {previsualizando ? (
               <p className="mt-2 font-body text-sm text-ink/55">Calculando tarifa…</p>

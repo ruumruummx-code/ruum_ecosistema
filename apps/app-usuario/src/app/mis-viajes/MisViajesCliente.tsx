@@ -149,8 +149,6 @@ function pestañaDeViaje(p: Pasaporte): PestañaTraslados {
     "documentacion_en_revision",
     "documentacion_validada",
     "cotizacion_generada",
-    "cotizacion_aceptada",
-    "pago_pendiente",
     "servicio_confirmado",
     "pendiente_de_conductor",
   ].includes(estado)) return "programados";
@@ -173,9 +171,18 @@ function estadoVisual(p: Pasaporte): { label: string; tone: TonoEstado } {
     case "servicio_cancelado":
     case "traslado_fallido":
       return { label: "Cancelado", tone: "error" };
-    case "en_ruta":
-    case "en_recoleccion":
-    case "vehiculo_entregado":
+    case "conductor_asignado":
+    case "conductor_en_camino_al_origen":
+    case "conductor_en_punto_de_recoleccion":
+    case "verificacion_vehiculo_en_proceso":
+    case "evidencia_inicial_en_proceso":
+    case "evidencia_inicial_completada":
+    case "vehiculo_recibido":
+    case "traslado_en_curso":
+    case "llegada_a_destino":
+    case "evidencia_final_en_proceso":
+    case "evidencia_final_completada":
+    case "entrega_confirmada":
       return { label: "En curso", tone: "active" };
     default:
       return { label: "En proceso", tone: "neutral" };

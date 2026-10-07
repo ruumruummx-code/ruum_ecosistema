@@ -86,8 +86,8 @@ export function NavegacionUsuario({
   mostrarNavegacionInferior?: boolean;
 }) {
   const pathname = usePathname();
+  void variante;
   const esAcceso = pathname === "/login" || pathname === "/registro" || pathname === "/recuperar-password" || pathname === "/nueva-password" || pathname.startsWith("/registro/");
-  const esClaro = variante === "claro";
   const nombre = primerNombre(nombreUsuario);
   const saludo = nombre ? `¡Hola, ${nombre}!` : "¡Hola!";
   const textoCabecera = titulo ?? saludo;
@@ -99,50 +99,64 @@ export function NavegacionUsuario({
       <header
         id="homeHeader"
         role="banner"
-        className="sticky top-0 z-30 w-full border-b border-white/10 bg-[var(--ruum-navy)]/95 pt-[env(safe-area-inset-top)] text-white shadow-sm backdrop-blur-md"
+        className="user-v2-shell-header user-v2-scope"
       >
-        <div className="mx-auto flex w-full max-w-7xl items-center gap-3 px-4 py-4 sm:gap-6 sm:px-6 lg:px-8">
+        <div className="user-v2-shell-inner">
           <Link
             href="/"
-            className="group flex shrink-0 cursor-pointer select-none items-center rounded-2xl transition duration-200 hover:opacity-80 focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-[var(--ruum-focus)]"
-            aria-label="Ir al inicio de Ruum Ruum"
+            className="group flex shrink-0 cursor-pointer select-none items-center rounded-2xl transition duration-200 hover:opacity-80 focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-[var(--user-color-action)]"
+            aria-label="Ir al inicio"
           >
             <Image
               src="/imagenes/ruum-logo-header.png"
-              alt="Ruum Ruum — Driveaway Service"
+              alt="Ruum Ruum"
               width={1195}
               height={784}
               priority
               sizes="(max-width: 639px) 96px, 200px"
-              className="h-11 w-24 rounded-xl object-cover sm:h-14 sm:w-[200px] sm:rounded-2xl"
+              className="h-11 w-24 rounded-xl object-contain sm:h-14 sm:w-[200px] sm:rounded-2xl"
             />
           </Link>
 
-          <p className="min-w-0 flex-1 truncate text-center font-display text-xs font-bold text-white sm:text-xl lg:text-2xl">
+          <p className="min-w-0 flex-1 truncate text-center font-display text-sm font-bold sm:text-xl lg:text-2xl">
             {textoCabecera}
           </p>
+
+          <nav aria-label="Navegación principal — escritorio" className="hidden shrink-0 items-center gap-1 lg:flex">
+            {DESTINOS.map((destino) => {
+              const activo = estaActivo(pathname, destino.href);
+              return (
+                <Link
+                  key={destino.href}
+                  href={destino.href}
+                  aria-current={activo ? "page" : undefined}
+                  className="inline-flex min-h-11 items-center gap-2 rounded-xl px-3 font-body text-sm font-semibold transition hover:bg-[var(--user-color-brand-soft)] focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-[var(--user-color-action)]"
+                >
+                  <destino.Icono className="size-5" />
+                  {destino.etiqueta}
+                </Link>
+              );
+            })}
+          </nav>
 
           <nav aria-label="Acciones del usuario" className="flex shrink-0 items-center gap-1 sm:gap-3">
             <Link
               href="/cuenta/preferencias"
-              className="group flex min-h-12 min-w-12 cursor-pointer flex-col items-center justify-center gap-0.5 rounded-xl px-0.5 text-slate-200 transition duration-200 hover:bg-white/5 hover:text-cyan-300 focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-[var(--ruum-focus)] sm:px-2"
-              aria-label="Notificaciones"
+              className="group flex min-h-12 min-w-12 cursor-pointer flex-col items-center justify-center gap-0.5 rounded-xl px-0.5 transition duration-200 hover:bg-[var(--user-color-brand-soft)] focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-[var(--user-color-action)] sm:px-2"
+              aria-label="Preferencias"
             >
-              <span className="relative">
-                <IconoCampana className="size-6" />
-                <span className="absolute -right-0.5 -top-0.5 size-2 rounded-full bg-sky-400 ring-2 ring-[var(--ruum-navy)]" aria-hidden="true" />
-              </span>
-              <span className="text-[9px] font-medium leading-none text-slate-300 transition-colors duration-200 group-hover:text-cyan-300 sm:text-xs">
-                Notificaciones
+              <IconoCampana className="size-6" aria-hidden="true" />
+              <span className="text-xs font-medium leading-none sm:text-xs">
+                Preferencias
               </span>
             </Link>
             <Link
               href="/soporte"
-              className="group flex min-h-12 min-w-12 cursor-pointer flex-col items-center justify-center gap-0.5 rounded-xl px-0.5 text-slate-200 transition duration-200 hover:bg-white/5 hover:text-cyan-300 focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-[var(--ruum-focus)] sm:px-2"
+              className="group flex min-h-12 min-w-12 cursor-pointer flex-col items-center justify-center gap-0.5 rounded-xl px-0.5 transition duration-200 hover:bg-[var(--user-color-brand-soft)] focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-[var(--user-color-action)] sm:px-2"
               aria-label="Soporte"
             >
               <IconoSoporte className="size-6" />
-              <span className="text-[9px] font-medium leading-none text-slate-300 transition-colors duration-200 group-hover:text-cyan-300 sm:text-xs">
+              <span className="text-xs font-medium leading-none sm:text-xs">
                 Soporte
               </span>
             </Link>
@@ -154,11 +168,9 @@ export function NavegacionUsuario({
         <nav
           id="bottomNavigation"
           aria-label="Navegación principal"
-          className={esClaro
-            ? "user-v2-shell-nav"
-            : "fixed inset-x-0 bottom-0 z-40 border-t border-white/10 bg-[var(--ruum-navy)] pb-[max(10px,env(safe-area-inset-bottom))] pt-1.5 shadow-[var(--ruum-elevation-2)] backdrop-blur-md"}
+          className="user-v2-shell-nav lg:hidden user-v2-scope"
         >
-          <div className={esClaro ? "user-v2-shell-nav-inner" : "mx-auto w-full max-w-[430px] px-2"}>
+          <div className="user-v2-shell-nav-inner">
             <div className="grid grid-cols-3 items-center">
               {DESTINOS.map((destino) => {
                 const activo = estaActivo(pathname, destino.href);
@@ -167,12 +179,11 @@ export function NavegacionUsuario({
                     key={destino.href}
                     href={destino.href}
                     aria-current={activo ? "page" : undefined}
-                    className={esClaro ? "user-v2-nav-link group select-none" : "group relative flex min-h-[53px] flex-col items-center justify-center gap-1 py-1.5 select-none"}
+                    className="user-v2-nav-link group select-none"
                   >
-                    {esClaro && <span className={`user-v2-nav-indicator ${activo ? "is-active" : ""}`} aria-hidden="true" />}
-                    {!esClaro && activo && <span className="absolute inset-x-8 top-0 h-[3px] rounded-b-full bg-[var(--ruum-teal)]" />}
-                    <destino.Icono className={esClaro ? "size-[22px] transition-colors" : `size-[22px] transition-colors ${activo ? "text-[var(--ruum-teal)]" : "text-[#A9BCD3]"}`} />
-                    <span className={esClaro ? "transition-colors" : `font-body text-xs leading-none tracking-tight transition-colors ${activo ? "font-bold text-[var(--ruum-teal)]" : "font-medium text-[#A9BCD3]"}`}>
+                    <span className={`user-v2-nav-indicator ${activo ? "is-active" : ""}`} aria-hidden="true" />
+                    <destino.Icono className="size-[22px] transition-colors" />
+                    <span className="transition-colors">
                       {destino.etiqueta}
                     </span>
                   </Link>

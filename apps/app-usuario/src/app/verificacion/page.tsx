@@ -17,7 +17,7 @@ interface Props {
 }
 
 /* Pantalla cuando el usuario ya está verificado */
-function CuentaYaVerificada() {
+function CuentaYaVerificada({ destino = "/viajes/nuevo" }: { destino?: string }) {
   return (
     <div className="grid gap-5 text-center">
       <div className="flex justify-center">
@@ -47,7 +47,7 @@ function CuentaYaVerificada() {
 
       <div className="mt-2 grid gap-3">
         <Link
-          href="/viajes/nuevo"
+          href={destino}
           className="inline-flex min-h-11 w-full items-center justify-center rounded-xl bg-signal px-5 py-3 font-display text-sm font-bold text-ink shadow-sm transition hover:-translate-y-0.5 hover:bg-signal/90 focus-visible:outline-route-dark"
         >
           Solicitar traslado
@@ -205,7 +205,8 @@ function EsperandoRevision({ fotoPerfilUrl }: { fotoPerfilUrl: string | null }) 
 
 export default async function PaginaVerificacion({ searchParams }: Props) {
   const { next } = await searchParams;
-  void next;
+  const destinoSeguro =
+    typeof next === "string" && next.startsWith("/") && !next.startsWith("//") ? next : "/viajes/nuevo";
 
   /* Leer estado actual del usuario para decidir qué mostrar */
   let estadoVerificacion: string | null = null;
@@ -225,14 +226,15 @@ export default async function PaginaVerificacion({ searchParams }: Props) {
   /* Si ya está verificado → pantalla de éxito */
   if (estadoVerificacion === "verificado") {
     return (
-      <main className="user-v2-scope user-v2-page user-v2-secondary-screen">
-        <NavegacionUsuario variante="claro" />
-        <div className="user-v2-content user-v2-content--wide py-10 sm:py-14">
+      <>
+      <NavegacionUsuario variante="claro" />
+      <main className="user-v2-scope user-v2-page user-v2-secondary-screen"><div className="user-v2-content user-v2-content--wide py-10 sm:py-14">
           <div className="mx-auto max-w-lg">
-            <CuentaYaVerificada />
+            <CuentaYaVerificada destino={destinoSeguro} />
           </div>
         </div>
       </main>
+    </>
     );
   }
 
@@ -240,9 +242,9 @@ export default async function PaginaVerificacion({ searchParams }: Props) {
   const yaEnRevision = estadoVerificacion === "en_revision" || (docYaSubido && estadoVerificacion !== "rechazado");
 
   return (
-    <main className="user-v2-scope user-v2-page user-v2-secondary-screen">
+    <>
       <NavegacionUsuario variante="claro" />
-      <div className="user-v2-content user-v2-content--wide py-10 sm:py-14">
+      <main className="user-v2-scope user-v2-page user-v2-secondary-screen"><div className="user-v2-content user-v2-content--wide py-10 sm:py-14">
         <div className="mb-6">
           <Link href="/" className="font-body text-sm text-ink/55 underline-offset-4 hover:underline">
             ← Inicio
@@ -263,7 +265,7 @@ export default async function PaginaVerificacion({ searchParams }: Props) {
                 </p>
 
                 {estadoVerificacion === "rechazado" && (
-                  <div className="mt-4">
+                  <div className="mt-4" role="alert" aria-live="assertive" aria-atomic="true">
                     <div className="flex items-start gap-2.5 rounded-lg border border-red-200 bg-red-50 px-4 py-3">
                       <svg
                         width="14"
@@ -362,11 +364,12 @@ export default async function PaginaVerificacion({ searchParams }: Props) {
                 </p>
               </div>
 
-              <VerificacionForm fotoPerfilInicial={fotoPerfilUrl} />
+              <VerificacionForm fotoPerfilInicial={fotoPerfilUrl} destinoExito={destinoSeguro} />
             </>
           )}
         </div>
       </div>
     </main>
+    </>
   );
 }

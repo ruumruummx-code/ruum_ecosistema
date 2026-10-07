@@ -302,8 +302,8 @@ export function CuentaCliente({ usuario }: { usuario: Usuario | null }) {
                 <IconoPinMorado className="size-5" />
               </div>
             }
-            titulo="Direcciones guardadas"
-            subtitulo="Orígenes y destinos frecuentes"
+            titulo="Mis vehículos"
+            subtitulo="Autos frecuentes, placas, VIN"
           />
         </div>
       </section>
@@ -360,8 +360,8 @@ export function CuentaCliente({ usuario }: { usuario: Usuario | null }) {
                 <IconoMundoMorado className="size-5" />
               </div>
             }
-            titulo="Preferencias"
-            subtitulo="Idioma, zona horaria y otras opciones"
+            titulo="Apariencia"
+            subtitulo="Tema claro u oscuro"
           />
         </div>
       </section>

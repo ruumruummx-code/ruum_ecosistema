@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 type BotonFlotanteSolicitarTrasladoProps = {
   mostrar: boolean;
@@ -9,6 +9,7 @@ type BotonFlotanteSolicitarTrasladoProps = {
 
 export function BotonFlotanteSolicitarTraslado({ mostrar }: BotonFlotanteSolicitarTrasladoProps) {
   const [scrollSuficiente, setScrollSuficiente] = useState(false);
+  const rafRef = useRef<number | null>(null);
 
   useEffect(() => {
     if (!mostrar) {
@@ -17,7 +18,11 @@ export function BotonFlotanteSolicitarTraslado({ mostrar }: BotonFlotanteSolicit
     }
 
     const revisarScroll = () => {
-      setScrollSuficiente(window.scrollY > 200);
+      if (rafRef.current !== null) return;
+      rafRef.current = requestAnimationFrame(() => {
+        rafRef.current = null;
+        setScrollSuficiente(window.scrollY > 200);
+      });
     };
 
     revisarScroll();
@@ -25,6 +30,10 @@ export function BotonFlotanteSolicitarTraslado({ mostrar }: BotonFlotanteSolicit
 
     return () => {
       window.removeEventListener("scroll", revisarScroll);
+      if (rafRef.current !== null) {
+        cancelAnimationFrame(rafRef.current);
+        rafRef.current = null;
+      }
     };
   }, [mostrar]);
 
@@ -35,7 +44,8 @@ export function BotonFlotanteSolicitarTraslado({ mostrar }: BotonFlotanteSolicit
   return (
     <Link
       href="/viajes/nuevo"
-      className="fixed bottom-[80px] right-4 z-40 inline-flex min-h-[var(--ruum-button-height)] items-center justify-center rounded-full bg-white px-5 py-3 font-body text-sm font-semibold text-[var(--ruum-navy)] shadow-[var(--ruum-elevation-2)] ring-1 ring-black/10 transition hover:-translate-y-0.5 hover:bg-[var(--ruum-neutral-bg)] focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-[var(--ruum-focus)] sm:right-8"
+      aria-label="Solicitar traslado (acceso rápido)"
+      className="user-v2-primary-button fixed bottom-[calc(88px+env(safe-area-inset-bottom))] right-4 z-40 inline-flex min-h-[52px] items-center justify-center rounded-full px-5 py-3 font-body text-sm motion-safe:transition motion-safe:hover:-translate-y-0.5 sm:right-8 lg:hidden"
     >
       Solicitar traslado
     </Link>

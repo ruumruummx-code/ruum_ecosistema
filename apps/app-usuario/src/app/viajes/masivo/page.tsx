@@ -9,11 +9,12 @@ export const metadata: Metadata = {
 
 export default function PaginaCargaMasiva() {
   return (
-    <main id="contenido-principal" className="user-v2-scope user-v2-page user-v2-secondary-screen">
+    <>
       <NavegacionUsuario variante="claro" />
-      <div className="user-v2-content user-v2-content--wide">
+      <main className="user-v2-scope user-v2-page user-v2-secondary-screen"><div className="user-v2-content user-v2-content--wide">
         <CargaMasivaForm />
       </div>
     </main>
+    </>
   );
 }

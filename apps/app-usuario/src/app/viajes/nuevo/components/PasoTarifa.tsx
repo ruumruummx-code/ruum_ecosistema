@@ -367,7 +367,7 @@ function PasoTarifaComponent({
         </div>
       </PassportCard>
 
-      {/* Resultado de la Tarifa a pagar — aria-live para cambios de cálculo */}
+      {/* Resultado del precio final — aria-live para cambios de cálculo */}
       <section className="app-status-strip px-5 py-5" aria-labelledby="titulo-tarifa-gate" aria-live="polite" aria-atomic="true">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>

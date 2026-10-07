@@ -1,5 +1,5 @@
 "use client";
-import React, { memo, useCallback } from "react";
+import React, { memo, useCallback, useEffect, useRef } from "react";
 import { Button, Field, PassportCard } from "@ruum/ui";
 import { esNativo } from "@/lib/capacitor";
 import { obtenerUbicacionActual } from "@/lib/ubicacion";
@@ -48,6 +48,141 @@ export interface PasoRutaProps {
   onReintentarRuta: () => void;
   onParadasChange: (next: ParadaForm[]) => void;
   erroresParadas?: Array<Partial<Record<keyof ParadaForm, string>>>;
+}
+
+function DetallesContactos({
+  datos,
+  errores,
+  claseControl,
+  actualizar,
+  actualizarTelefono,
+  validarCampo,
+}: {
+  datos: DatosFormulario;
+  errores: ErroresFormulario;
+  claseControl: PasoRutaProps["claseControl"];
+  actualizar: PasoRutaProps["actualizar"];
+  actualizarTelefono: PasoRutaProps["actualizarTelefono"];
+  validarCampo: PasoRutaProps["validarCampo"];
+}) {
+  // Si la validación marca un contacto, el bloque se reabre solo. El usuario
+  // conserva el control (uncontrolled): nunca se fuerza el cierre.
+  const tieneErrores = Boolean(
+    errores.entregaNombre ||
+    errores.entregaApellido ||
+    errores.entregaTelefono ||
+    errores.recepcionNombre ||
+    errores.recepcionApellido ||
+    errores.recepcionTelefono
+  );
+  const contactosRef = useRef<HTMLDetailsElement>(null);
+  useEffect(() => {
+    if (tieneErrores) contactosRef.current?.setAttribute("open", "");
+  }, [tieneErrores]);
+  return (
+    <details ref={contactosRef} className="grid gap-4 rounded-lg border border-ink/10 p-4">
+      <summary className="cursor-pointer font-body text-sm font-semibold focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-route-dark">
+        Contactos de entrega y recepción
+      </summary>
+      <div className="mt-3 grid gap-4">
+        <p className="font-body text-sm font-semibold">Quien entrega el vehículo</p>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <Field
+            id="entregaNombre"
+            name="entregaNombre"
+            etiqueta="Nombre"
+            value={datos.entregaNombre}
+            onChange={(e) => actualizar("entregaNombre", e.target.value)}
+            onBlur={() => validarCampo("entregaNombre")}
+            error={errores.entregaNombre}
+          />
+          <Field
+            id="entregaApellido"
+            name="entregaApellido"
+            etiqueta="Apellido"
+            value={datos.entregaApellido}
+            onChange={(e) => actualizar("entregaApellido", e.target.value)}
+            onBlur={() => validarCampo("entregaApellido")}
+            error={errores.entregaApellido}
+          />
+        </div>
+        <div className="flex flex-col gap-1.5">
+          <label htmlFor="entregaTelefono" className="font-body text-sm font-medium">Teléfono de contacto para recolección</label>
+          <div className={`flex overflow-hidden rounded-lg border bg-mist ${claseControl("entregaTelefono")}`}>
+            <span className="flex items-center border-r border-ink/10 px-3.5 font-body text-sm font-semibold text-ink/70" aria-hidden="true">+52</span>
+            <input
+              id="entregaTelefono"
+              name="entregaTelefono"
+              type="tel"
+              autoComplete="tel"
+              inputMode="numeric"
+              pattern="[0-9]{10}"
+              maxLength={10}
+              value={datos.entregaTelefono}
+              onChange={(e) => actualizarTelefono("entregaTelefono", e.target.value)}
+              onBlur={() => validarCampo("entregaTelefono")}
+              className="min-w-0 flex-1 bg-transparent px-3.5 py-2.5 font-body text-sm text-ink placeholder:text-ink/65 focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-1 focus-visible:outline-route-dark"
+              placeholder="10 dígitos"
+              aria-label="Teléfono de entrega, 10 dígitos sin incluir +52"
+              aria-invalid={Boolean(errores.entregaTelefono)}
+              aria-describedby={errores.entregaTelefono ? "telefono-entrega-error telefono-entrega-ayuda" : "telefono-entrega-ayuda"}
+              title="10 dígitos, sin espacios ni prefijo"
+            />
+          </div>
+          <p id="telefono-entrega-ayuda" className="sr-only">Prefijo +52 ya incluido, ingresa solo 10 dígitos.</p>
+          {errores.entregaTelefono && <p id="telefono-entrega-error" className="font-body text-xs text-danger" role="alert">{errores.entregaTelefono}</p>}
+        </div>
+
+        <p className="mt-2 font-body text-sm font-semibold">Quien recibe el vehículo</p>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <Field
+            id="recepcionNombre"
+            name="recepcionNombre"
+            etiqueta="Nombre"
+            value={datos.recepcionNombre}
+            onChange={(e) => actualizar("recepcionNombre", e.target.value)}
+            onBlur={() => validarCampo("recepcionNombre")}
+            error={errores.recepcionNombre}
+          />
+          <Field
+            id="recepcionApellido"
+            name="recepcionApellido"
+            etiqueta="Apellido"
+            value={datos.recepcionApellido}
+            onChange={(e) => actualizar("recepcionApellido", e.target.value)}
+            onBlur={() => validarCampo("recepcionApellido")}
+            error={errores.recepcionApellido}
+          />
+        </div>
+        <div className="flex flex-col gap-1.5">
+          <label htmlFor="recepcionTelefono" className="font-body text-sm font-medium">Teléfono de contacto para entrega</label>
+          <div className={`flex overflow-hidden rounded-lg border bg-mist ${claseControl("recepcionTelefono")}`}>
+            <span className="flex items-center border-r border-ink/10 px-3.5 font-body text-sm font-semibold text-ink/70" aria-hidden="true">+52</span>
+            <input
+              id="recepcionTelefono"
+              name="recepcionTelefono"
+              type="tel"
+              autoComplete="tel"
+              inputMode="numeric"
+              pattern="[0-9]{10}"
+              maxLength={10}
+              value={datos.recepcionTelefono}
+              onChange={(e) => actualizarTelefono("recepcionTelefono", e.target.value)}
+              onBlur={() => validarCampo("recepcionTelefono")}
+              className="min-w-0 flex-1 bg-transparent px-3.5 py-2.5 font-body text-sm text-ink placeholder:text-ink/65 focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-1 focus-visible:outline-route-dark"
+              placeholder="10 dígitos"
+              aria-label="Teléfono de recepción, 10 dígitos sin incluir +52"
+              aria-invalid={Boolean(errores.recepcionTelefono)}
+              aria-describedby={errores.recepcionTelefono ? "telefono-recepcion-error telefono-recepcion-ayuda" : "telefono-recepcion-ayuda"}
+              title="10 dígitos, sin espacios ni prefijo"
+            />
+          </div>
+          <p id="telefono-recepcion-ayuda" className="sr-only">Prefijo +52 ya incluido, ingresa solo 10 dígitos.</p>
+          {errores.recepcionTelefono && <p id="telefono-recepcion-error" className="font-body text-xs text-danger" role="alert">{errores.recepcionTelefono}</p>}
+        </div>
+      </div>
+    </details>
+  );
 }
 
 function PasoRutaComponent({
@@ -141,9 +276,11 @@ function PasoRutaComponent({
               </p>
             </div>
 
-            <div className="grid gap-4 rounded-lg border border-ink/10 p-4">
-              <p className="font-body text-sm font-semibold">Domicilio de origen</p>
-              <div className="grid gap-4 sm:grid-cols-2">
+            <details className="grid gap-4 rounded-lg border border-ink/10 p-4" open>
+              <summary className="cursor-pointer font-body text-sm font-semibold focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-route-dark">
+                Domicilio de origen
+              </summary>
+              <div className="mt-3 grid gap-4 sm:grid-cols-2">
                 <CampoCodigoPostal
                   id="origenCodigoPostal"
                   nombre="origenCodigoPostal"
@@ -213,7 +350,7 @@ function PasoRutaComponent({
                 onBlur={() => validarCampo("origenReferencias")}
                 placeholder="Entre calles, color de fachada, acceso, piso, etc."
               />
-            </div>
+            </details>
 
             {esNativo() && (
               <div>
@@ -290,9 +427,11 @@ function PasoRutaComponent({
               </p>
             </div>
 
-            <div className="grid gap-4 rounded-lg border border-ink/10 p-4">
-              <p className="font-body text-sm font-semibold">Domicilio de destino</p>
-              <div className="grid gap-4 sm:grid-cols-2">
+            <details className="grid gap-4 rounded-lg border border-ink/10 p-4" open>
+              <summary className="cursor-pointer font-body text-sm font-semibold focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-route-dark">
+                Domicilio de destino
+              </summary>
+              <div className="mt-3 grid gap-4 sm:grid-cols-2">
                 <CampoCodigoPostal
                   id="destinoCodigoPostal"
                   nombre="destinoCodigoPostal"
@@ -362,7 +501,7 @@ function PasoRutaComponent({
                 onBlur={() => validarCampo("destinoReferencias")}
                 placeholder="Entre calles, color de fachada, acceso, piso, etc."
               />
-            </div>
+            </details>
 
             <section className="rounded-lg border border-route/20 bg-route-soft px-4 py-4" aria-labelledby="titulo-estimacion-ruta">
               <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -405,116 +544,34 @@ function PasoRutaComponent({
               )}
             </section>
 
-            <p className="font-body text-sm font-semibold">Quien entrega el vehículo</p>
-            <div className="grid gap-4 sm:grid-cols-2">
-              <Field
-                id="entregaNombre"
-                name="entregaNombre"
-                etiqueta="Nombre"
-                value={datos.entregaNombre}
-                onChange={(e) => actualizar("entregaNombre", e.target.value)}
-                onBlur={() => validarCampo("entregaNombre")}
-                error={errores.entregaNombre}
-              />
-              <Field
-                id="entregaApellido"
-                name="entregaApellido"
-                etiqueta="Apellido"
-                value={datos.entregaApellido}
-                onChange={(e) => actualizar("entregaApellido", e.target.value)}
-                onBlur={() => validarCampo("entregaApellido")}
-                error={errores.entregaApellido}
-              />
-            </div>
-            <div className="flex flex-col gap-1.5">
-              <label htmlFor="entregaTelefono" className="font-body text-sm font-medium">Teléfono de contacto para recolección</label>
-              <div className={`flex overflow-hidden rounded-lg border bg-mist ${claseControl("entregaTelefono")}`}>
-                <span className="flex items-center border-r border-ink/10 px-3.5 font-body text-sm font-semibold text-ink/70" aria-hidden="true">+52</span>
-                <input
-                  id="entregaTelefono"
-                  name="entregaTelefono"
-                  type="tel"
-                  autoComplete="tel"
-                  inputMode="numeric"
-                  pattern="[0-9]{10}"
-                  maxLength={10}
-                  value={datos.entregaTelefono}
-                  onChange={(e) => actualizarTelefono("entregaTelefono", e.target.value)}
-                  onBlur={() => validarCampo("entregaTelefono")}
-                  className="min-w-0 flex-1 bg-transparent px-3.5 py-2.5 font-body text-sm text-ink placeholder:text-ink/65 focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-1 focus-visible:outline-route-dark"
-                  placeholder="10 dígitos"
-                  aria-label="Teléfono de entrega, 10 dígitos sin incluir +52"
-                  aria-invalid={Boolean(errores.entregaTelefono)}
-                  aria-describedby={errores.entregaTelefono ? "telefono-entrega-error telefono-entrega-ayuda" : "telefono-entrega-ayuda"}
-                  title="10 dígitos, sin espacios ni prefijo"
-                />
-              </div>
-              <p id="telefono-entrega-ayuda" className="sr-only">Prefijo +52 ya incluido, ingresa solo 10 dígitos.</p>
-              {errores.entregaTelefono && <p id="telefono-entrega-error" className="font-body text-xs text-danger" role="alert">{errores.entregaTelefono}</p>}
-            </div>
+            <DetallesContactos
+              datos={datos}
+              errores={errores}
+              claseControl={claseControl}
+              actualizar={actualizar}
+              actualizarTelefono={actualizarTelefono}
+              validarCampo={validarCampo}
+            />
 
-            <p className="mt-2 font-body text-sm font-semibold">Quien recibe el vehículo</p>
-            <div className="grid gap-4 sm:grid-cols-2">
-              <Field
-                id="recepcionNombre"
-                name="recepcionNombre"
-                etiqueta="Nombre"
-                value={datos.recepcionNombre}
-                onChange={(e) => actualizar("recepcionNombre", e.target.value)}
-                onBlur={() => validarCampo("recepcionNombre")}
-                error={errores.recepcionNombre}
-              />
-              <Field
-                id="recepcionApellido"
-                name="recepcionApellido"
-                etiqueta="Apellido"
-                value={datos.recepcionApellido}
-                onChange={(e) => actualizar("recepcionApellido", e.target.value)}
-                onBlur={() => validarCampo("recepcionApellido")}
-                error={errores.recepcionApellido}
-              />
-            </div>
-            <div className="flex flex-col gap-1.5">
-              <label htmlFor="recepcionTelefono" className="font-body text-sm font-medium">Teléfono de contacto para entrega</label>
-              <div className={`flex overflow-hidden rounded-lg border bg-mist ${claseControl("recepcionTelefono")}`}>
-                <span className="flex items-center border-r border-ink/10 px-3.5 font-body text-sm font-semibold text-ink/70" aria-hidden="true">+52</span>
-                <input
-                  id="recepcionTelefono"
-                  name="recepcionTelefono"
-                  type="tel"
-                  autoComplete="tel"
-                  inputMode="numeric"
-                  pattern="[0-9]{10}"
-                  maxLength={10}
-                  value={datos.recepcionTelefono}
-                  onChange={(e) => actualizarTelefono("recepcionTelefono", e.target.value)}
-                  onBlur={() => validarCampo("recepcionTelefono")}
-                  className="min-w-0 flex-1 bg-transparent px-3.5 py-2.5 font-body text-sm text-ink placeholder:text-ink/65 focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-1 focus-visible:outline-route-dark"
-                  placeholder="10 dígitos"
-                  aria-label="Teléfono de recepción, 10 dígitos sin incluir +52"
-                  aria-invalid={Boolean(errores.recepcionTelefono)}
-                  aria-describedby={errores.recepcionTelefono ? "telefono-recepcion-error telefono-recepcion-ayuda" : "telefono-recepcion-ayuda"}
-                  title="10 dígitos, sin espacios ni prefijo"
+            <details className="grid gap-1.5 rounded-lg border border-ink/10 p-4">
+              <summary className="cursor-pointer font-body text-sm font-medium focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-route-dark">
+                Instrucciones especiales <span className="font-normal text-ink/45">(opcional)</span>
+              </summary>
+              <label htmlFor="instruccionesEspeciales" className="mt-3 flex flex-col gap-1.5">
+                <span className="sr-only">Instrucciones especiales para el traslado</span>
+                <textarea
+                  id="instruccionesEspeciales"
+                  name="instruccionesEspeciales"
+                  value={datos.instruccionesEspeciales}
+                  onChange={(e) => actualizar("instruccionesEspeciales", e.target.value)}
+                  onBlur={() => validarCampo("instruccionesEspeciales")}
+                  maxLength={1000}
+                  placeholder="Detalles sobre caseta de acceso, horarios de entrega en privada o requisitos de seguridad."
+                  aria-label="Instrucciones especiales para el traslado"
+                  className="min-h-24 rounded-lg border border-ink/50 bg-mist px-3.5 py-2.5 font-body text-sm text-ink focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-1 focus-visible:outline-route-dark"
                 />
-              </div>
-              <p id="telefono-recepcion-ayuda" className="sr-only">Prefijo +52 ya incluido, ingresa solo 10 dígitos.</p>
-              {errores.recepcionTelefono && <p id="telefono-recepcion-error" className="font-body text-xs text-danger" role="alert">{errores.recepcionTelefono}</p>}
-            </div>
-
-            <label htmlFor="instruccionesEspeciales" className="flex flex-col gap-1.5">
-              <span className="font-body text-sm font-medium">Instrucciones especiales</span>
-              <textarea
-                id="instruccionesEspeciales"
-                name="instruccionesEspeciales"
-                value={datos.instruccionesEspeciales}
-                onChange={(e) => actualizar("instruccionesEspeciales", e.target.value)}
-                onBlur={() => validarCampo("instruccionesEspeciales")}
-                maxLength={1000}
-                placeholder="Detalles sobre caseta de acceso, horarios de entrega en privada o requisitos de seguridad."
-                aria-label="Instrucciones especiales para el traslado"
-                className="min-h-24 rounded-lg border border-ink/50 bg-mist px-3.5 py-2.5 font-body text-sm text-ink focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-1 focus-visible:outline-route-dark"
-              />
-            </label>
+              </label>
+            </details>
           </div>
         </div>
       </PassportCard>

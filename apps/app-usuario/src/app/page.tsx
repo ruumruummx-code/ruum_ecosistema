@@ -6,6 +6,7 @@ import { IDENTIDAD_MARCA } from "@ruum/shared/constants";
 import { LogoMarca, SelloConductor } from "@ruum/ui";
 import { NavegacionUsuario } from "./NavegacionUsuario";
 import { InicioUsuario } from "./InicioUsuario";
+import { BotonReintentarSesion } from "./ReintentarSesion";
 import { obtenerViajeActivo } from "../lib/inicio";
 import { botonAzul, botonContorno } from "./experiencia-publica";
 
@@ -69,9 +70,9 @@ export default async function PaginaInicio({
   if (error && !usuario) {
     const esConfigError = error === "config_error";
     return (
-      <main className="user-v2-scope user-v2-page">
-        <NavegacionUsuario variante="claro" />
-        <div className="user-v2-content">
+      <>
+      <NavegacionUsuario variante="claro" />
+      <main className="user-v2-scope user-v2-page"><div className="user-v2-content">
           <div className="user-v2-card p-6 text-center" role="alert" aria-live="assertive">
             <p className="font-display text-xs font-bold uppercase tracking-widest text-[var(--user-color-error)]">
               {esConfigError ? "Servicio no configurado" : "No pudimos verificar tu sesión"}
@@ -85,12 +86,7 @@ export default async function PaginaInicio({
                 : "No pudimos cargar tu sesión por un error de red. Tus datos siguen seguros; intenta recargar o inicia sesión de nuevo."}
             </p>
             <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-center">
-              <Link
-                href="/"
-                className="user-v2-primary-button inline-flex items-center justify-center px-6"
-              >
-                Reintentar
-              </Link>
+              <BotonReintentarSesion />
               <Link
                 href="/login"
                 className="user-v2-secondary-button inline-flex items-center justify-center px-6"
@@ -104,17 +100,19 @@ export default async function PaginaInicio({
           </div>
         </div>
       </main>
+    </>
     );
   }
 
   if (usuario && !forzarLanding) {
     return (
-      <main className="user-v2-scope user-v2-page">
-        <NavegacionUsuario variante="claro" nombreUsuario={usuario.nombre} />
-        <div className="user-v2-content">
+      <>
+      <NavegacionUsuario variante="claro" nombreUsuario={usuario.nombre} />
+      <main className="user-v2-scope user-v2-page"><div className="user-v2-content" aria-live="polite">
           <InicioUsuario usuario={usuario} traslados={traslados} conductorFotoUrl={conductorFotoUrl} />
         </div>
       </main>
+    </>
     );
   }
 
@@ -156,10 +154,10 @@ export default async function PaginaInicio({
 
       {/* 1. PORTADA / HERO (Páginas 1 & 28) */}
       <section className="relative overflow-hidden border-b border-white/10 px-4 pb-16 pt-12 sm:px-6 sm:pb-24 sm:pt-20">
-        <div className="pointer-events-none absolute inset-0 opacity-20">
+        <div className="pointer-events-none absolute inset-0 opacity-20" aria-hidden="true">
           <Image
             src="/imagenes/seguridad-traslado.png"
-            alt="Traslado vehicular con conductores certificados"
+            alt=""
             fill
             priority
             sizes="100vw"

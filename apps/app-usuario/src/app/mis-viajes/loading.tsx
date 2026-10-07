@@ -6,13 +6,14 @@ function SkeletonCard() {
 }
 export default function Loading() {
   return (
-    <main className="user-v2-scope user-v2-page user-v2-secondary-screen" aria-busy="true">
+    <>
       <NavegacionUsuario variante="claro" />
-      <div className="user-v2-content py-6 sm:py-10" role="status" aria-live="polite" aria-label="Cargando traslados">
+      <main className="user-v2-scope user-v2-page user-v2-secondary-screen" aria-busy="true"><div className="user-v2-content py-6 sm:py-10" role="status" aria-live="polite" aria-label="Cargando traslados">
         <div className="h-6 w-24 rounded bg-surface-elevated animate-pulse" />
         <div className="mt-4 h-8 w-48 rounded bg-surface-elevated animate-pulse" />
         <PassportCard><div className="h-10 rounded bg-surface-elevated animate-pulse" /><div className="mt-6 grid gap-4"><SkeletonCard /><SkeletonCard /><SkeletonCard /></div></PassportCard>
       </div>
     </main>
+    </>
   );
 }

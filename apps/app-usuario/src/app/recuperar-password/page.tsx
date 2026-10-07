@@ -24,6 +24,7 @@ export default function PaginaRecuperarPassword() {
      anuncia con role="alert" (assertive); el segundo se asocia al input. */
   const [errorCampo, setErrorCampo] = useState<string | null>(null);
   const correoRef = useRef<HTMLInputElement>(null);
+  const ultimoEnvioRef = useRef<number>(0);
 
   useEffect(() => {
     registrarEventoUx("recuperacion_vista");
@@ -36,7 +37,8 @@ export default function PaginaRecuperarPassword() {
 
   async function enviar(e: React.FormEvent) {
     e.preventDefault();
-    if (!email.trim()) {
+    const correo = email.trim();
+    if (!correo) {
       setError("Escribe tu correo electrónico.");
       setErrorCampo("Escribe tu correo electrónico.");
       registrarEventoUx("recuperacion_error", { motivo: "email_vacio" });
@@ -45,6 +47,19 @@ export default function PaginaRecuperarPassword() {
       correoRef.current?.focus();
       return;
     }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(correo)) {
+      setError("Escribe un correo válido, como correo@ejemplo.com.");
+      setErrorCampo("Escribe un correo válido, como correo@ejemplo.com.");
+      registrarEventoUx("recuperacion_error", { motivo: "email_invalido" });
+      correoRef.current?.focus();
+      return;
+    }
+    const ahora = Date.now();
+    if (ahora - ultimoEnvioRef.current < 30000) {
+      setError("Ya enviamos un enlace hace unos segundos. Revisa tu bandeja o espera 30 segundos antes de solicitar otro.");
+      return;
+    }
+    ultimoEnvioRef.current = ahora;
     setEnviando(true);
     setError(null);
     registrarEventoUx("recuperacion_enviada");
@@ -72,7 +87,10 @@ export default function PaginaRecuperarPassword() {
   return (
     <PantallaPublica>
       <section className="flex min-h-screen flex-col px-5 py-10">
-        <Link href="/login" className="font-body text-xs text-route-action transition hover:text-text-primary">
+        <Link
+          href="/login"
+          className="inline-flex min-h-11 items-center font-body text-sm text-route-action transition hover:text-text-primary"
+        >
           ← Volver al inicio de sesión
         </Link>
 
@@ -94,20 +112,19 @@ export default function PaginaRecuperarPassword() {
               </h1>
               <p className="font-body text-sm leading-6 text-text-secondary">
                 Revisa tu bandeja de entrada en{" "}
-                <span className="font-semibold text-text-primary">{email}</span>, incluyendo
+                <span className="font-semibold text-text-primary">{email.trim()}</span>, incluyendo
                 la carpeta de spam. El enlace expira en 60 minutos.
               </p>
               <p className="font-body text-xs text-text-tertiary">
-                Si no llega en unos minutos, puedes solicitar otro enlace.
+                Si no llega en unos minutos, puedes solicitar otro enlace. Espera 30 segundos entre intentos.
               </p>
               <button
                 type="button"
                 onClick={() => {
                     setEnviado(false);
-                    setEmail("");
                     setError(null);
                     setErrorCampo(null);
-                    correoRef.current?.focus();
+                    window.setTimeout(() => correoRef.current?.focus(), 0);
                   }}
                 className={botonContorno}
               >
@@ -149,7 +166,7 @@ export default function PaginaRecuperarPassword() {
                   </div>
                 )}
 
-                <button type="submit" disabled={enviando} className={`${botonAzul} mt-2`}>
+                <button type="submit" disabled={enviando} aria-busy={enviando} className={`${botonAzul} mt-2`}>
                   {enviando ? TEXTOS_CARGANDO.enviando : "Enviar enlace de recuperación"}
                 </button>
               </form>

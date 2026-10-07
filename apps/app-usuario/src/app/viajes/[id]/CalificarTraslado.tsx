@@ -21,7 +21,22 @@ export function CalificarTraslado({
   const [enviado, setEnviado] = useState(false);
   const [pendiente, startTransition] = useTransition();
 
-  if (!mostrar || !conductorId || enviado) return null;
+  if (!mostrar || !conductorId) return null;
+
+  if (enviado) {
+    return (
+      <div
+        className="mt-6 rounded-lg border border-signal/20 bg-signal-soft/35 px-4 py-4"
+        role="status"
+        aria-live="polite"
+        aria-atomic="true"
+      >
+        <p className="font-body text-sm font-semibold text-ink">
+          Calificación registrada. Gracias por ayudarnos a mantener la calidad.
+        </p>
+      </div>
+    );
+  }
 
   function enviar() {
     setMensaje(null);
@@ -43,17 +58,19 @@ export function CalificarTraslado({
 
   return (
     <div className="mt-6 rounded-lg border border-signal/20 bg-signal-soft/35 px-4 py-4">
-      <p className="font-body text-sm font-semibold">{MENSAJES_CLAVE_UX.calificacion}</p>
-      <div className="mt-3 flex gap-1" aria-label="Calificación">
+      <p className="font-body text-sm font-semibold" id="titulo-calificacion">{MENSAJES_CLAVE_UX.calificacion}</p>
+      <div className="mt-3 flex gap-2" role="radiogroup" aria-labelledby="titulo-calificacion">
         {[1, 2, 3, 4, 5].map((valor) => (
           <button
             key={valor}
             type="button"
+            role="radio"
+            aria-checked={valor === estrellas}
             onClick={() => setEstrellas(valor)}
-            className={valor <= estrellas ? "text-2xl leading-none text-signal" : "text-2xl leading-none text-ink/25"}
-            aria-label={`${valor} estrellas`}
+            className={`inline-flex min-h-11 min-w-11 items-center justify-center rounded-lg text-2xl leading-none transition focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-route-dark ${valor <= estrellas ? "text-signal" : "text-ink/25"}`}
+            aria-label={`${valor} estrella${valor === 1 ? "" : "s"}${valor === estrellas ? " (seleccionada)" : ""}`}
           >
-            ★
+            <span aria-hidden="true">★</span>
           </button>
         ))}
       </div>

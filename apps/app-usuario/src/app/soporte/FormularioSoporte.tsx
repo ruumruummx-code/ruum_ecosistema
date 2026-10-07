@@ -11,6 +11,7 @@ type Props = {
   traslados: { id: string; label: string }[];
   preseleccionado?: string;
   emailUsuario?: string | null;
+  motivoInicial?: string;
 };
 
 const MOTIVOS = [
@@ -22,6 +23,11 @@ const MOTIVOS = [
   "Consulta general u otro",
 ] as const;
 
+/* TipoIncidencia es un enum cerrado en BD (sin "consulta_general"). Los motivos
+   de soporte que no son incidencias operativas se registran con el tipo más
+   cercano y el motivo real siempre viaja en la descripción ([Soporte
+   app-usuario] Motivo: …). Sin viaje seleccionado la consulta sale por correo
+   y no toca esta taxonomía. */
 const MOTIVO_A_TIPO_INCIDENCIA: Record<string, TipoIncidencia> = {
   "Reportar daño o incidente": "dano_previo_relevante",
   "Reportar problema con un viaje": "contacto_no_localizado",
@@ -40,8 +46,9 @@ const HORARIO_SOPORTE = {
 
 const CORREO_SOPORTE = "soporte@ruumruum.mx";
 
-export function FormularioSoporte({ traslados, preseleccionado, emailUsuario }: Props) {
-  const [motivo, setMotivo] = useState<string>(MOTIVOS[0] ?? "Otro");
+export function FormularioSoporte({ traslados, preseleccionado, emailUsuario, motivoInicial }: Props) {
+  const motivoValido = motivoInicial && (MOTIVOS as readonly string[]).includes(motivoInicial) ? motivoInicial : undefined;
+  const [motivo, setMotivo] = useState<string>(motivoValido ?? MOTIVOS[0] ?? "Otro");
   const [viajeId, setViajeId] = useState(preseleccionado ?? "");
   const [descripcion, setDescripcion] = useState("");
   const [enviando, setEnviando] = useState(false);
@@ -173,6 +180,9 @@ export function FormularioSoporte({ traslados, preseleccionado, emailUsuario }: 
             <option key={m} value={m}>{m}</option>
           ))}
         </select>
+        <span className="font-body text-xs text-text-tertiary">
+          Las consultas generales sin viaje se atienden por correo; con viaje se abre un folio de seguimiento.
+        </span>
       </label>
 
       <label className="flex flex-col gap-1.5">

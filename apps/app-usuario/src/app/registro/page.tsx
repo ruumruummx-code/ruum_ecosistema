@@ -502,7 +502,7 @@ export default function PaginaRegistro() {
               </div>
             )}
 
-              <button type="submit" disabled={enviando} className={`${botonAzul} mt-1`}>
+              <button type="submit" disabled={enviando} aria-busy={enviando} className={`${botonAzul} mt-1`}>
                 {enviando ? "Creando cuenta…" : "Crear cuenta"}
               </button>
             </form>

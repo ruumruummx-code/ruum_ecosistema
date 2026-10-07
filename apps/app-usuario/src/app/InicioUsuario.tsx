@@ -96,7 +96,7 @@ export function InicioUsuario({ usuario, traslados, conductorFotoUrl = null }: I
   return (
     <div className="user-v2-screen">
       <section id="greetingBlock" aria-labelledby="saludo-usuario" className="text-center">
-        <p className="user-v2-caption user-v2-muted font-semibold uppercase tracking-widest">{saludo}</p>
+        <p className="user-v2-caption user-v2-muted font-semibold uppercase tracking-widest">{nombre ? "Panel principal" : saludo}</p>
         <h1 id="saludo-usuario" className="user-v2-heading-1 mt-2 text-balance">
           Mueve tu auto sin soltar el control.
         </h1>
@@ -113,7 +113,7 @@ export function InicioUsuario({ usuario, traslados, conductorFotoUrl = null }: I
         <IconoChevron className="size-6 transition-transform group-hover:translate-x-0.5" />
       </Link>
 
-      <section id="activeTransferCard" aria-labelledby="traslados-activos" className="user-v2-card p-5">
+      <section id="activeTransferCard" aria-labelledby="traslados-activos" aria-live="polite" className="user-v2-card p-5">
         {viajeActivo ? (
           <>
             <div className="flex items-center gap-4">
@@ -161,7 +161,12 @@ export function InicioUsuario({ usuario, traslados, conductorFotoUrl = null }: I
               href={viajeActivo.traslado_id ? `/viajes/${viajeActivo.traslado_id}` : "/mis-viajes"}
               className="user-v2-secondary-button group mt-5 flex items-center justify-between px-3.5"
             >
-              <span>{viajeActivo.vehiculo_tipo ? ETIQUETA_TIPO_VEHICULO[viajeActivo.vehiculo_tipo] ?? "Ver seguimiento" : "Ver seguimiento"}</span>
+              <span>
+                Ver seguimiento
+                {viajeActivo.vehiculo_tipo && ETIQUETA_TIPO_VEHICULO[viajeActivo.vehiculo_tipo] ? (
+                  <span className="sr-only"> — {ETIQUETA_TIPO_VEHICULO[viajeActivo.vehiculo_tipo]}</span>
+                ) : null}
+              </span>
               <IconoChevron className="size-4 transition-transform group-hover:translate-x-0.5" />
             </Link>
             <Link
@@ -189,7 +194,7 @@ export function InicioUsuario({ usuario, traslados, conductorFotoUrl = null }: I
 
       <section id="quickActions" aria-labelledby="acciones-rapidas">
         <h2 id="acciones-rapidas" className="user-v2-heading-2">Acciones rápidas</h2>
-        <div className="mt-3 grid grid-cols-2 gap-3">
+        <div className="mt-3 grid grid-cols-1 gap-3 min-[360px]:grid-cols-2">
           <Link id="quickActionHistory" href="/mis-viajes" className="user-v2-card user-v2-card-interactive group flex min-h-[144px] flex-col p-4">
             <span className="user-v2-icon-well size-11">
               <IconoHistorial className="size-7" />
@@ -214,6 +219,15 @@ export function InicioUsuario({ usuario, traslados, conductorFotoUrl = null }: I
         </div>
       </section>
 
+      {conductorAsignado && (
+        <ConductorAsignado
+          trasladoId={conductorAsignado.trasladoId}
+          estado={conductorAsignado.estado}
+          nombre={conductorAsignado.nombre}
+          fotoUrl={conductorFotoUrl}
+        />
+      )}
+
       <section aria-label="Seguridad y confianza" className="user-v2-card flex items-start gap-3 p-4">
         <span className="user-v2-icon-well size-11 shrink-0" aria-hidden="true">
           <IconoEscudo className="size-7" />
@@ -225,15 +239,6 @@ export function InicioUsuario({ usuario, traslados, conductorFotoUrl = null }: I
           </p>
         </div>
       </section>
-
-      {conductorAsignado && (
-        <ConductorAsignado
-          trasladoId={conductorAsignado.trasladoId}
-          estado={conductorAsignado.estado}
-          nombre={conductorAsignado.nombre}
-          fotoUrl={conductorFotoUrl}
-        />
-      )}
     </div>
   );
 }

@@ -128,8 +128,9 @@ export function DiditVerificationModal({
     if (!isOpen) return;
     const handleMessage = (event: MessageEvent) => {
       if (!esOrigenDiditValido(event.origin)) return;
-      if (event.source && event.source !== iframeRef.current?.contentWindow) return;
-
+      // Aceptar mensajes de Didit vengan del iframe o de una ventana nueva:
+      // el origen ya está validado y el payload se interpreta de forma segura.
+      // (Antes se exigía event.source === iframe, lo que rompía "Abrir en nueva ventana".)
       const mensaje = interpretarMensajeDidit(event.data);
       if (!mensaje) return;
       if (mensaje.tipo === "cancelado") onCerrar();
@@ -161,7 +162,7 @@ export function DiditVerificationModal({
         {/* Cabecera del modal */}
         <div className="flex items-center justify-between border-b border-[#334155] p-4 shrink-0 bg-[#0F172A]">
           <div className="flex items-center gap-2.5">
-            <span className="text-xl">🪪</span>
+            <span className="text-xl" aria-hidden="true">🪪</span>
             <h2 id="titulo-didit-usuario" className="font-display text-base sm:text-lg font-bold text-white">
               Verificación de identidad oficial
             </h2>
@@ -198,7 +199,7 @@ export function DiditVerificationModal({
               Procesando verificación de identidad…
             </p>
             <p className="mt-1 font-body text-xs text-[#94A3B8]">
-              Conectando con el servicio seguro y encriptado de Didit. Puedes cerrar con Esc en cualquier momento.
+              Conectando con el servicio seguro y encriptado de Didit. Puedes cerrar con Esc en cualquier momento sin perder tu solicitud: podrás reintentar.
             </p>
           </div>
         ) : error ? (
@@ -239,7 +240,7 @@ export function DiditVerificationModal({
             <div className="px-4 py-2 bg-amber-500/10 border-b border-amber-500/20 text-[11px] leading-4 text-amber-200" role="note" aria-live="polite">
               Antes de continuar, Didit solicitará acceso a <strong>cámara</strong>, <strong>micrófono</strong> y <strong>ubicación</strong> para la prueba de vida. Solo se usan para esta verificación y puedes revocar el permiso desde el diálogo del navegador. Ningún dato biométrico se comparte con conductores.
             </div>
-            <div className="relative h-[460px] sm:h-[520px] w-full bg-black/40">
+            <div className="relative h-[min(460px,60dvh)] sm:h-[min(520px,62dvh)] w-full bg-black/40">
               <iframe
                 ref={iframeRef}
                 src={url}
@@ -254,7 +255,7 @@ export function DiditVerificationModal({
             </div>
             <div className="p-4 bg-[#0F172A] border-t border-[#334155] flex flex-col sm:flex-row items-center justify-between gap-3">
               <p className="text-xs text-[#94A3B8] text-center sm:text-left">
-                Tu cuenta se actualizará automáticamente al completar la prueba.
+                Tu cuenta se actualizará automáticamente al completar la prueba. Si abriste en nueva ventana, vuelve aquí y pulsa el botón.
               </p>
               <button
                 type="button"

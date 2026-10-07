@@ -13,14 +13,14 @@ vi.mock("next/image", () => ({
 }));
 
 describe("NavegacionUsuario", () => {
-  it("muestra el saludo y expone acciones semánticas de notificaciones y soporte", () => {
+  it("muestra el saludo y expone acciones semánticas de preferencias y soporte", () => {
     render(<NavegacionUsuario variante="claro" nombreUsuario="LUIS Hernández" />);
 
     const header = screen.getByRole("banner");
     const acciones = within(header).getByRole("navigation", { name: "Acciones del usuario" });
 
     expect(within(header).getByText("¡Hola, Luis!")).toBeInTheDocument();
-    expect(within(acciones).getByRole("link", { name: "Notificaciones" })).toHaveAttribute("href", "/cuenta/preferencias");
+    expect(within(acciones).getByRole("link", { name: "Preferencias" })).toHaveAttribute("href", "/cuenta/preferencias");
     expect(within(acciones).getByRole("link", { name: "Soporte" })).toHaveAttribute("href", "/soporte");
   });
 });

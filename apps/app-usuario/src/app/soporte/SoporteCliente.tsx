@@ -142,14 +142,21 @@ export function SoporteCliente({
   usuario,
   traslados,
   viajePreseleccionado,
+  motivoPreseleccionado,
 }: {
   usuario: Usuario | null;
   traslados: Pasaporte[];
   viajePreseleccionado?: string;
+  motivoPreseleccionado?: string;
 }) {
   const [busqueda, setBusqueda] = useState("");
   const [faqAbierto, setFaqAbierto] = useState<string | null>(null);
   const [modalReporte, setModalReporte] = useState(false);
+  /* Si se llega con ?motivo=eliminar_cuenta (desde /cuenta), abrir el
+     formulario directamente con el motivo correspondiente preseleccionado. */
+  useEffect(() => {
+    if (motivoPreseleccionado === "eliminar_cuenta") setModalReporte(true);
+  }, [motivoPreseleccionado]);
   /* ACC-1 (auditoría): foco inicial, trampa y restauración para el modal. */
   const modalReporteRef = useRef<HTMLDialogElement>(null);
   const cerrarModalRef = useRef<HTMLButtonElement>(null);
@@ -244,7 +251,7 @@ export function SoporteCliente({
             value={busqueda}
             onChange={(e) => setBusqueda(e.target.value)}
             placeholder="Buscar una solución..."
-            className="w-full bg-transparent p-0 font-body text-sm font-semibold text-white placeholder:text-[#8E9CAE] focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-[var(--ruum-focus)] min-h-11"
+            className="w-full bg-transparent p-0 font-body text-sm font-semibold text-white placeholder:text-[#8E9CAE] focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-[var(--user-color-action)] min-h-11"
           />
         </div>
       </section>
@@ -503,7 +510,7 @@ export function SoporteCliente({
                 type="button"
                 onClick={() => setModalReporte(false)}
                 aria-label="Cerrar reporte a soporte"
-                className="flex size-11 items-center justify-center rounded-full bg-[#141F32] text-slate-400 hover:text-white focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-[var(--ruum-focus)]"
+                className="flex size-11 items-center justify-center rounded-full bg-[#141F32] text-slate-400 hover:text-white focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-[var(--user-color-action)]"
               >
                 <span aria-hidden="true">✕</span>
               </button>
@@ -513,6 +520,7 @@ export function SoporteCliente({
               traslados={traslados.filter((t) => t.traslado_id).map((t) => ({ id: t.traslado_id!, label: `${t.vehiculo_marca ?? "Vehículo"} - ${t.traslado_id!.slice(0, 8)}` }))}
               preseleccionado={viajeActivo?.traslado_id ?? undefined}
               emailUsuario={usuario?.correo_facturacion}
+              motivoInicial={motivoPreseleccionado === "eliminar_cuenta" ? "Consulta general u otro" : undefined}
             />
         </dialog>
       )}

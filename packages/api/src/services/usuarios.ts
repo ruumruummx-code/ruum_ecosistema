@@ -105,6 +105,34 @@ export async function actualizarPerfilUsuario(cliente: Cliente, datos: PerfilUsu
   return data;
 }
 
+export type PreferenciasNotificacionesActualizables = Pick<
+  Database["public"]["Tables"]["usuarios"]["Update"],
+  | "notificaciones_push"
+  | "notificaciones_email"
+  | "notificaciones_sms_whatsapp"
+  | "alertas_pago"
+  | "notificaciones_promocionales"
+>;
+
+/** Actualiza solo las preferencias de notificación del usuario con sesión activa. */
+export async function actualizarPreferenciasNotificaciones(
+  cliente: Cliente,
+  datos: PreferenciasNotificacionesActualizables
+): Promise<UsuarioRow> {
+  const { data: sesion } = await cliente.auth.getUser();
+  if (!sesion.user) throw new Error("Sin sesión activa.");
+
+  const { data, error } = await cliente
+    .from("usuarios")
+    .update(datos)
+    .eq("auth_user_id", sesion.user.id)
+    .select("*")
+    .single();
+
+  if (error) throw error;
+  return data;
+}
+
 function rutaFotoPerfilUsuario(valor: string | null | undefined, authUserId: string): string | null {
   if (!valor) return null;
   const rutaEsperada = new RegExp(`^${authUserId}/perfil\\.(?:jpe?g|png|webp)$`, "i");

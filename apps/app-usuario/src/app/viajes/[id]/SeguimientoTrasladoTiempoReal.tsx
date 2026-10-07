@@ -176,7 +176,22 @@ export function SeguimientoTrasladoTiempoReal({
     }
   }
 
-  if (!visible) return null;
+  if (!visible) {
+    return (
+      <section className="mt-6" aria-label="Estado de la búsqueda de conductor">
+        <PassportCard>
+          <div role="status" aria-live="polite" aria-atomic="true" className="flex flex-col gap-2">
+            <p className="font-body text-xs uppercase tracking-wide text-ink/45">Buscando conductor</p>
+            <h2 className="font-display text-xl font-semibold">No necesitas hacer nada</h2>
+            <p className="font-body text-sm leading-6 text-ink/60">
+              Estamos confirmando tu tarifa y asignando un conductor certificado.
+              Te avisaremos aquí mismo y por notificación en cuanto inicie el seguimiento en vivo.
+            </p>
+          </div>
+        </PassportCard>
+      </section>
+    );
+  }
 
   return (
     <section className="mt-6">
@@ -186,7 +201,7 @@ export function SeguimientoTrasladoTiempoReal({
             <p className="font-body text-xs uppercase tracking-wide text-ink/45">Trazabilidad en tiempo real</p>
             <h2 className="mt-1 font-display text-xl font-semibold">Sigue tu traslado</h2>
             <p className="mt-2 font-body text-sm leading-6 text-ink/60">
-              La ubicación se actualiza automáticamente mientras el conductor mantiene abierta la app.
+              Actualizamos la ubicación automáticamente durante el servicio.
             </p>
           </div>
           {estadoEnVivo && <EstadoBadge estado={estadoEnVivo} />}
@@ -226,27 +241,25 @@ export function SeguimientoTrasladoTiempoReal({
         ) : (
           <div className="mt-5">
             <Aviso tono="info">
-              El mapa se mostrará cuando exista token de Mapbox y coordenadas de la ruta. El seguimiento seguirá registrando la última ubicación disponible.
+              Aún no hay mapa disponible. Te mostraremos la ruta en cuanto inicie el traslado.
             </Aviso>
           </div>
         )}
 
         <dl className="mt-5 grid gap-4 sm:grid-cols-3">
           <div>
-            <dt className="font-body text-xs uppercase tracking-wide text-ink/45">Última ubicación</dt>
+            <dt className="font-body text-xs uppercase tracking-wide text-ink/45">Última actualización</dt>
             <dd className="mt-1 font-body text-sm font-medium text-ink">
-              {ubicacion ? `${Number(ubicacion.lat).toFixed(5)}, ${Number(ubicacion.lng).toFixed(5)}` : "Aún no recibida"}
+              {ubicacion?.registrado_en ? formatoHora(ubicacion.registrado_en) : "En cuanto inicie el traslado"}
             </dd>
+          </div>
+          <div>
+            <dt className="font-body text-xs uppercase tracking-wide text-ink/45">Fuente</dt>
+            <dd className="mt-1 font-body text-sm font-medium text-ink">Compartida por el conductor</dd>
           </div>
           <div>
             <dt className="font-body text-xs uppercase tracking-wide text-ink/45">Actualizado</dt>
             <dd className="mt-1 font-body text-sm font-medium text-ink">{formatoHora(ubicacion?.registrado_en)}</dd>
-          </div>
-          <div>
-            <dt className="font-body text-xs uppercase tracking-wide text-ink/45">Precisión</dt>
-            <dd className="mt-1 font-body text-sm font-medium text-ink">
-              {ubicacion?.precision_m ? `${Math.round(Number(ubicacion.precision_m))} m` : "Pendiente"}
-            </dd>
           </div>
         </dl>
       </PassportCard>

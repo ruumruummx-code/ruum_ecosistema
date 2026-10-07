@@ -265,13 +265,18 @@ summary:focus-visible {
   /* La página reserva espacio al fondo para que la barra fija no tape acciones */
   .app-page {
     padding-bottom: max(104px, calc(var(--user-mobile-nav-offset) + env(safe-area-inset-bottom))) !important;
-    overflow-x: clip;
     -webkit-overflow-scrolling: touch;
     scroll-behavior: smooth;
   }
 
-  /* Alturas táctiles mínimas para evitar frustración en pantallas móviles */
-  .app-page :where(button, input, select, textarea, [role="button"], [role="tab"], a[class]) {
+  /* Alturas táctiles mínimas para controles (no para enlaces de navegación,
+     que ya definen su propio target en user-v2-shell) */
+  .app-page :where(button, input, select, textarea, [role="button"], [role="tab"]) {
+    min-height: 44px;
+  }
+
+  .user-v2-content a[class*="button"],
+  .user-v2-content a[class*="card"] {
     min-height: 44px;
   }
 
@@ -1173,7 +1178,8 @@ summary:focus-visible {
 }
 
 .user-v2-search-input::placeholder {
-  color: #8797b3;
+  color: #5f7192;
+  opacity: 1;
 }
 
 .user-v2-filter-panel {
@@ -1457,6 +1463,18 @@ summary:focus-visible {
 
 .user-v2-nav-indicator.is-active {
   opacity: 1;
+}
+
+[data-theme="dark"] .user-v2-shell-header {
+  background: rgba(10, 35, 66, 0.96);
+}
+
+[data-theme="dark"] .user-v2-shell-nav {
+  background: rgba(10, 35, 66, 0.96);
+}
+
+[data-theme="dark"] .user-v2-search-input::placeholder {
+  color: #8293b0;
 }
 
 @media (min-width: 640px) {

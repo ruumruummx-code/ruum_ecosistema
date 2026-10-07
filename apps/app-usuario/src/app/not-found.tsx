@@ -1,15 +1,21 @@
+"use client";
+import { useEffect, useRef } from "react";
 import Link from "next/link";
 import { NavegacionUsuario } from "./NavegacionUsuario";
 
 export default function PaginaNoEncontrada() {
+  const tituloRef = useRef<HTMLHeadingElement>(null);
+  useEffect(() => {
+    tituloRef.current?.focus();
+  }, []);
   return (
-    <main className="user-v2-scope user-v2-page user-v2-secondary-screen">
+    <>
       <NavegacionUsuario variante="claro" />
-      <div className="user-v2-content user-v2-content--wide flex min-h-[60vh] flex-col items-center justify-center py-20 text-center">
-        <p className="font-mono-ruum text-xs font-medium uppercase tracking-widest text-ink/35">
+      <main className="user-v2-scope user-v2-page user-v2-secondary-screen"><div className="user-v2-content user-v2-content--wide flex min-h-[60vh] flex-col items-center justify-center py-20 text-center">
+        <p className="font-mono-ruum text-xs font-medium uppercase tracking-widest text-ink/60" aria-hidden="true">
           404
         </p>
-        <h1 className="mt-4 font-display text-3xl font-semibold leading-tight">
+        <h1 ref={tituloRef} tabIndex={-1} className="mt-4 font-display text-3xl font-semibold leading-tight focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-2">
           Esta página no existe
         </h1>
         <p className="mt-3 max-w-sm font-body text-sm leading-6 text-ink/60">
@@ -32,5 +38,6 @@ export default function PaginaNoEncontrada() {
         </div>
       </div>
     </main>
+    </>
   );
 }

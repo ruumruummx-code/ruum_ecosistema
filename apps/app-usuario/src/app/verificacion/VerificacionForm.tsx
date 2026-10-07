@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Aviso } from "@ruum/ui";
@@ -189,10 +189,13 @@ interface VerificacionFormProps {
   fotoPerfilInicial?: string | null;
   /** En revisión documental se ofrece Didit sin repetir el formulario manual. */
   soloDidit?: boolean;
+  /** Destino interno tras completar la verificación (sanitizado por el padre). */
+  destinoExito?: string;
 }
 
-export function VerificacionForm({ fotoPerfilInicial, soloDidit = false }: VerificacionFormProps = {}) {
+export function VerificacionForm({ fotoPerfilInicial, soloDidit = false, destinoExito = "/viajes/nuevo" }: VerificacionFormProps = {}) {
   const router = useRouter();
+  const cpDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   /* Didit Verification State */
   const [mostrarDiditModal, setMostrarDiditModal] = useState(false);
@@ -256,7 +259,7 @@ export function VerificacionForm({ fotoPerfilInicial, soloDidit = false }: Verif
     if (!archivo) return;
     setErrorDidit(null);
     if (!archivo.type.startsWith("image/")) {
-      setErrorDidit("Selecciona una fotografía en formato JPG, PNG o WEBP.");
+      setErrorDidit("Selecciona una fotografía en formato JPG, PNG, WEBP o HEIC.");
       return;
     }
     // A-12: si supera 2 MB, intentar compresión cliente antes de rechazar; si falla, guiar
@@ -367,7 +370,22 @@ export function VerificacionForm({ fotoPerfilInicial, soloDidit = false }: Verif
     }
   }
 
-  /* Consultar Código Postal */
+  /* Consultar Código Postal (con debounce: evita disparar en cada tecla) */
+  function consultarCPDebounced(valor: string) {
+    const cp = soloDigitos(valor, 5);
+    setCodigoPostal(cp);
+    if (cpDebounceRef.current) clearTimeout(cpDebounceRef.current);
+    if (cp.length !== 5) {
+      setCpAviso(null);
+      setCiudadesCp([]);
+      setColoniasCp([]);
+      return;
+    }
+    cpDebounceRef.current = setTimeout(() => {
+      void consultarCP(cp);
+    }, 500);
+  }
+
   async function consultarCP(valor: string) {
     const cp = soloDigitos(valor, 5);
     setCodigoPostal(cp);
@@ -510,7 +528,7 @@ export function VerificacionForm({ fotoPerfilInicial, soloDidit = false }: Verif
           </p>
         </div>
         <Link
-          href="/viajes/nuevo"
+          href={destinoExito}
           className="inline-flex min-h-11 w-full items-center justify-center rounded-xl bg-[#FFC400] px-5 py-3 font-display text-sm font-extrabold text-[#151515] shadow-[0_10px_28px_rgba(255,196,0,0.24)] transition hover:bg-[#e0ac00]"
         >
           Solicitar mi primer traslado
@@ -557,7 +575,7 @@ export function VerificacionForm({ fotoPerfilInicial, soloDidit = false }: Verif
               <span className="font-display text-xs font-semibold text-amber-950">Fotografía de referencia</span>
               <input
                 type="file"
-                accept="image/jpeg,image/png,image/webp"
+                accept="image/jpeg,image/png,image/webp,image/heic,image/heif,.heic,.heif"
                 onChange={(e) => void cargarFotoPerfilDidit(e.target.files?.[0])}
                 disabled={subiendoFotoPerfil || cargandoDidit}
                 className="w-full rounded-lg border border-amber-900/20 bg-white/70 px-3 py-2 font-body text-xs text-ink file:mr-3 file:rounded-md file:border-0 file:bg-ink file:px-3 file:py-1.5 file:text-mist"
@@ -601,6 +619,8 @@ export function VerificacionForm({ fotoPerfilInicial, soloDidit = false }: Verif
               <button
                 type="button"
                 onClick={() => setMostrarFormularioManual(!mostrarFormularioManual)}
+                aria-expanded={mostrarFormularioManual}
+                aria-controls="formulario-verificacion-manual"
                 className="rounded-full bg-surface px-4 py-1 text-xs font-medium text-ink/60 border border-ink/15 hover:text-ink transition cursor-pointer"
               >
                 {mostrarFormularioManual ? "▲ Ocultar verificación manual" : "▼ O prefiero subir mis documentos manualmente (24-48h)"}
@@ -609,7 +629,7 @@ export function VerificacionForm({ fotoPerfilInicial, soloDidit = false }: Verif
           </div>
 
           {mostrarFormularioManual && (
-        <form onSubmit={enviarManual} className="grid gap-6 animate-fadeIn">
+        <form id="formulario-verificacion-manual" onSubmit={enviarManual} className="grid gap-6 animate-fadeIn">
           {/* ── Domicilio ── */}
           <fieldset className="grid gap-4">
             <legend className="font-body text-xs font-semibold uppercase tracking-wide text-ink/40">
@@ -622,14 +642,22 @@ export function VerificacionForm({ fotoPerfilInicial, soloDidit = false }: Verif
                 type="text"
                 inputMode="numeric"
                 value={codigoPostal}
-                onChange={(e) => consultarCP(e.target.value)}
+                onChange={(e) => consultarCPDebounced(e.target.value)}
                 placeholder="06600"
                 maxLength={5}
                 required
                 className={campoBase}
               />
-              {cpConsultando && <span className="font-body text-xs text-ink/45">Buscando…</span>}
-              {cpAviso && <span className="font-body text-xs text-amber-700">{cpAviso}</span>}
+              {cpConsultando && (
+                <span className="font-body text-xs text-ink/45" role="status" aria-live="polite">
+                  Buscando…
+                </span>
+              )}
+              {cpAviso && (
+                <span className="font-body text-xs text-amber-700" role="status" aria-live="polite">
+                  {cpAviso}
+                </span>
+              )}
             </label>
 
             <div className="grid grid-cols-2 gap-3">

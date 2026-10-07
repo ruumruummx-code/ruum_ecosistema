@@ -66,9 +66,9 @@ export function NuevoTrasladoForm() {
 
   if (t.bloqueoVerificacion) {
     return (
-      <main className="user-v2-scope user-v2-page user-v2-secondary-screen">
-        <NavegacionUsuario variante="claro" />
-        <div className="mx-auto max-w-xl px-6 py-12">
+      <>
+      <NavegacionUsuario variante="claro" />
+      <main className="user-v2-scope user-v2-page user-v2-secondary-screen"><div className="mx-auto max-w-xl px-6 py-12">
           <p className="font-body text-xs font-semibold uppercase tracking-wide text-ink/45">Verificación requerida</p>
           <h1 className="mt-2 font-display text-2xl font-semibold">Antes de solicitar un traslado</h1>
           <div className="mt-5">
@@ -90,13 +90,14 @@ export function NuevoTrasladoForm() {
           </div>
         </div>
       </main>
+    </>
     );
   }
 
   return (
-    <main className="user-v2-scope user-v2-page user-v2-secondary-screen">
+    <>
       <NavegacionUsuario variante="claro" />
-      <div className="mx-auto max-w-xl px-4 sm:px-6 py-6 sm:py-12">
+      <main className="user-v2-scope user-v2-page user-v2-secondary-screen"><div className="mx-auto max-w-xl px-4 sm:px-6 py-6 sm:py-12">
         <h1 className="font-display text-2xl sm:text-3xl font-black text-text-primary">Nuevo traslado</h1>
         <div className="mt-3 flex flex-wrap items-center gap-2 font-body text-xs">
           <span className="inline-flex items-center gap-1.5 rounded-full bg-signal/15 px-3 py-1 font-semibold text-ink border border-signal/30"><span aria-hidden="true">⏱</span> Te tomará ~3 min</span>
@@ -173,10 +174,13 @@ export function NuevoTrasladoForm() {
             <span className="text-signal font-extrabold">{PASOS[t.paso]}</span>
           </div>
 
-          <div className="mt-2 grid grid-cols-5 gap-1.5 sm:hidden">
-            {PASOS.map((_, i) => (
+          <div className="mt-2 grid grid-cols-5 gap-1.5 sm:hidden" role="list" aria-label="Progreso de pasos">
+            {PASOS.map((etiqueta, i) => (
               <div
-                key={i}
+                key={etiqueta}
+                role="listitem"
+                aria-current={i === t.paso ? "step" : undefined}
+                aria-label={`Paso ${i + 1} de ${PASOS.length}: ${etiqueta}${i < t.paso ? " (completado)" : i === t.paso ? " (actual)" : ""}`}
                 className={[
                   "h-1.5 rounded-full transition-all duration-300",
                   i <= t.paso ? "bg-signal" : "bg-surface-elevated border border-border/40"
@@ -185,9 +189,9 @@ export function NuevoTrasladoForm() {
             ))}
           </div>
 
-          <ol className="mt-3 hidden sm:flex items-center gap-2">
+          <ol className="mt-3 hidden sm:flex items-center gap-2" aria-label="Progreso de pasos">
             {PASOS.map((etiqueta, i) => (
-              <li key={etiqueta} className="flex items-center gap-2">
+              <li key={etiqueta} className="flex items-center gap-2" aria-current={i === t.paso ? "step" : undefined}>
                 <span
                   className={[
                     "flex size-7 items-center justify-center rounded-full font-mono-ruum text-xs font-bold",
@@ -203,6 +207,9 @@ export function NuevoTrasladoForm() {
                 </span>
                 <span className={i === t.paso ? "font-body text-xs font-bold text-text-primary" : "font-body text-xs text-text-tertiary"}>
                   {etiqueta}
+                  <span className="sr-only">
+                    {i < t.paso ? " (completado)" : i === t.paso ? " (paso actual)" : ""}
+                  </span>
                 </span>
                 {i < PASOS.length - 1 && <span className="text-border mx-1" aria-hidden>›</span>}
               </li>
@@ -234,14 +241,8 @@ export function NuevoTrasladoForm() {
           </div>
         )}
 
-        {/* Anuncio de paso actual para lectores de pantalla */}
-        <h2
-          ref={encabezadoPasoRef}
-          tabIndex={-1}
-          className="sr-only"
-          aria-live="polite"
-          aria-atomic="true"
-        >
+        {/* Anuncio de paso actual para lectores de pantalla (una sola live region) */}
+        <h2 ref={encabezadoPasoRef} tabIndex={-1} className="sr-only">
           Paso {t.paso + 1} de {PASOS.length}: {PASOS[t.paso]}
         </h2>
         <p className="sr-only" role="status" aria-live="polite" aria-atomic="true">
@@ -387,5 +388,6 @@ export function NuevoTrasladoForm() {
         )}
       </div>
     </main>
+    </>
   );
 }

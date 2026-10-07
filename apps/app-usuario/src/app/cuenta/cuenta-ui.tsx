@@ -5,6 +5,7 @@ import { Aviso, Button, PassportCard } from "@ruum/ui";
 import { ETIQUETA_TIPO_VEHICULO } from "@ruum/shared/constants";
 import type { Database } from "@ruum/shared/types";
 import { PerfilCuentaForm } from "./PerfilCuentaForm";
+import { PreferenciasToggles } from "./PreferenciasToggles";
 import { BotonResetPassword } from "./BotonResetPassword";
 import { FacturacionCuentaForm } from "./FacturacionCuentaForm";
 import { NavegacionUsuario } from "../NavegacionUsuario";
@@ -138,8 +139,8 @@ function dinero(valor: number | null | undefined) {
 export function Campo({ etiqueta, valor }: { etiqueta: string; valor?: string | null | undefined }) {
   return (
     <div>
-      <dt className="font-body text-xs uppercase tracking-wide text-text-tertiary font-medium">{etiqueta}</dt>
-      <dd className="mt-1 font-body text-sm font-semibold text-text-primary">{dato(valor)}</dd>
+      <dt className="font-body text-xs uppercase tracking-wide font-medium text-[var(--user-color-muted)]">{etiqueta}</dt>
+      <dd className="mt-1 font-body text-sm font-semibold text-[var(--user-color-primary)]">{dato(valor)}</dd>
     </div>
   );
 }
@@ -154,13 +155,13 @@ export function Seccion({
   children: React.ReactNode;
 }) {
   return (
-    <PassportCard>
+    <div className="user-v2-card p-5 sm:p-6">
       <div className="flex flex-col gap-1">
-        <h2 className="font-display text-xl font-bold text-text-primary">{titulo}</h2>
-        {descripcion && <p className="font-body text-sm text-text-secondary">{descripcion}</p>}
+        <h2 className="user-v2-heading-2">{titulo}</h2>
+        {descripcion && <p className="user-v2-caption user-v2-muted">{descripcion}</p>}
       </div>
       <div className="mt-6">{children}</div>
-    </PassportCard>
+    </div>
   );
 }
 
@@ -180,17 +181,17 @@ function FilaConfiguracion({
   return (
     <Link
       href={href}
-      className="group flex items-center gap-3.5 app-card app-card-interactive rounded-xl bg-surface px-4 py-4 font-body text-sm border border-border hover:border-route-action hover:bg-surface-elevated"
+      className="user-v2-card user-v2-card-interactive group flex items-center gap-3.5 px-4 py-4 font-body text-sm"
     >
-      <span className="flex size-10 shrink-0 items-center justify-center rounded-lg border border-route-action/30 bg-route-action/10 font-display text-sm font-bold text-route-action">
+      <span className="flex size-10 shrink-0 items-center justify-center rounded-lg border border-[var(--user-color-action)]/30 bg-[var(--user-color-action)]/10 font-display text-sm font-bold text-[var(--user-color-action)]">
         {inicial}
       </span>
       <span className="min-w-0 flex-1">
-        <span className="block font-display text-sm font-bold leading-tight text-text-primary">{titulo}</span>
-        {descripcion && <span className="mt-1 block text-xs leading-4 text-text-secondary">{descripcion}</span>}
+        <span className="block font-display text-sm font-bold leading-tight text-[var(--user-color-primary)]">{titulo}</span>
+        {descripcion && <span className="mt-1 block text-xs leading-4 text-[var(--user-color-muted)]">{descripcion}</span>}
       </span>
-      {detalle && <span className="shrink-0 rounded-full border border-route-action/30 bg-route-action/10 px-2 py-0.5 text-xs font-semibold text-route-action">{detalle}</span>}
-      <span className="text-lg leading-none text-text-tertiary transition-transform group-hover:translate-x-0.5 group-hover:text-signal">›</span>
+      {detalle && <span className="shrink-0 rounded-full border border-[var(--user-color-action)]/30 bg-[var(--user-color-action)]/10 px-2 py-0.5 text-xs font-semibold text-[var(--user-color-action)]">{detalle}</span>}
+      <span className="text-lg leading-none text-[var(--user-color-muted)] transition-transform group-hover:translate-x-0.5 group-hover:text-[var(--user-color-brand)]">›</span>
     </Link>
   );
 }
@@ -198,7 +199,7 @@ function FilaConfiguracion({
 function GrupoConfiguracion({ titulo, children }: { titulo: string; children: React.ReactNode }) {
   return (
     <div>
-      <p className="mb-2 font-mono-ruum text-xs font-semibold uppercase tracking-wider text-route-action">{titulo}</p>
+      <p className="mb-2 font-mono-ruum text-xs font-semibold uppercase tracking-wider text-[var(--user-color-action)]">{titulo}</p>
       <div className="grid gap-3 sm:grid-cols-2">{children}</div>
     </div>
   );
@@ -211,9 +212,9 @@ function GrupoConfiguracion({ titulo, children }: { titulo: string; children: Re
  */
 export function AvisoErrorCuenta({ mensaje }: { mensaje?: string | null }) {
   return (
-    <main className="user-v2-scope user-v2-page user-v2-secondary-screen">
+    <>
       <NavegacionUsuario variante="claro" />
-      <div className="user-v2-content user-v2-content--wide py-12 sm:py-20 text-center">
+      <main className="user-v2-scope user-v2-page user-v2-secondary-screen"><div className="user-v2-content user-v2-content--wide py-12 sm:py-20 text-center">
         <Aviso tono="danger">
           {mensaje ?? "No pudimos cargar tu cuenta en este momento. Inténtalo de nuevo en unos segundos."}
         </Aviso>
@@ -227,6 +228,7 @@ export function AvisoErrorCuenta({ mensaje }: { mensaje?: string | null }) {
         </div>
       </div>
     </main>
+    </>
   );
 }
 
@@ -245,9 +247,9 @@ export async function conCuenta(
 
 export function AvisoSinSesion() {
   return (
-    <main className="user-v2-scope user-v2-page user-v2-secondary-screen">
+    <>
       <NavegacionUsuario variante="claro" />
-      <div className="user-v2-content user-v2-content--wide py-12 sm:py-20 text-center">
+      <main className="user-v2-scope user-v2-page user-v2-secondary-screen"><div className="user-v2-content user-v2-content--wide py-12 sm:py-20 text-center">
         <Aviso tono="info">Inicia sesión para consultar y actualizar los datos de tu cuenta.</Aviso>
         <div className="mt-6 flex flex-col gap-3 sm:flex-row justify-center">
         <Link href="/login?next=/cuenta">
@@ -259,6 +261,7 @@ export function AvisoSinSesion() {
         </div>
       </div>
     </main>
+    </>
   );
 }
 
@@ -266,7 +269,7 @@ export function HeaderCuenta({ usuario, fotoUrl }: { usuario?: Usuario; fotoUrl?
   return (
     <header className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
       <div>
-        <Link href="/" className="font-body text-xs font-medium text-text-tertiary underline-offset-4 hover:text-text-primary hover:underline">
+        <Link href="/" className="inline-flex min-h-11 items-center font-body text-sm font-medium text-[var(--user-color-muted)] underline-offset-4 hover:text-[var(--user-color-primary)] hover:underline">
           ← Volver al inicio
         </Link>
         <h1 className="mt-2 font-display text-2xl sm:text-3xl font-black leading-tight text-text-primary">Cuenta</h1>
@@ -363,14 +366,15 @@ export function NavegacionCuenta({ usuario }: { usuario: Usuario }) {
 
 export function LayoutCuenta({ cuenta, children }: { cuenta: CuentaReal; children: React.ReactNode }) {
   return (
-    <main className="user-v2-scope user-v2-page user-v2-secondary-screen">
+    <>
       <NavegacionUsuario variante="claro" />
-      <div className="user-v2-content user-v2-content--wide py-10 sm:py-14">
+      <main className="user-v2-scope user-v2-page user-v2-secondary-screen"><div className="user-v2-content user-v2-content--wide py-10 sm:py-14">
         <HeaderCuenta usuario={cuenta.usuario} fotoUrl={cuenta.fotoPerfilUrl} />
         <NavegacionCuenta usuario={cuenta.usuario} />
         {children}
       </div>
     </main>
+    </>
   );
 }
 
@@ -426,15 +430,15 @@ export function SeccionVehiculos({ vehiculos }: { vehiculos: Vehiculo[] }) {
       <div className="grid gap-4 md:grid-cols-2">
         {vehiculos.length > 0 ? (
           vehiculos.map((vehiculo) => (
-            <div key={vehiculo.id} className="app-card rounded-lg bg-mist px-4 py-4">
+            <div key={vehiculo.id} className="user-v2-card px-4 py-4">
               <div className="flex items-start justify-between gap-4">
                 <div>
-                  <p className="font-body text-xs uppercase tracking-wide text-ink/45">{vehiculo.alias || "Vehículo frecuente"}</p>
-                  <h3 className="mt-1 font-display text-lg font-semibold">
+                  <p className="font-body text-xs uppercase tracking-wide text-[var(--user-color-muted)]">{vehiculo.alias || "Vehículo frecuente"}</p>
+                  <h3 className="mt-1 font-display text-lg font-semibold text-[var(--user-color-primary)]">
                     {vehiculo.marca} {vehiculo.modelo} {vehiculo.anio}
                   </h3>
                 </div>
-                <span className="rounded-full border border-ink/10 px-2.5 py-1 font-body text-xs text-ink/55">
+                <span className="rounded-full border border-[var(--user-color-border)] px-2.5 py-1 font-body text-xs text-[var(--user-color-muted)]">
                   {ETIQUETA_TIPO_VEHICULO[vehiculo.tipo]}
                 </span>
               </div>
@@ -445,7 +449,7 @@ export function SeccionVehiculos({ vehiculos }: { vehiculos: Vehiculo[] }) {
                   ))}
                 </div>
               ) : (
-                <div className="mt-4 flex aspect-[5/2] items-center justify-center rounded-lg border border-dashed border-ink/15 bg-ink/[0.02] font-body text-sm text-ink/45">
+                <div className="mt-4 flex aspect-[5/2] items-center justify-center rounded-lg border border-dashed border-[var(--user-color-border)] bg-[var(--user-color-surface-soft)] font-body text-sm text-[var(--user-color-muted)]">
                   Sin fotografías guardadas
                 </div>
               )}
@@ -479,17 +483,17 @@ export function SeccionMetodosPago({ usuario }: { usuario: Usuario }) {
       <div className="grid gap-4 sm:grid-cols-3">
 
         {/* Tarjeta bancaria — CTA condicional según estado de registro */}
-        <div className="flex flex-col gap-3 rounded-lg border border-ink/10 px-4 py-4">
+        <div className="flex flex-col gap-3 rounded-lg border border-[var(--user-color-border)] bg-[var(--user-color-surface)] px-4 py-4">
           <div>
-            <p className="font-body text-sm font-semibold">Tarjeta bancaria</p>
-            <p className="mt-1 font-body text-xs text-ink/55">
+            <p className="font-body text-sm font-semibold text-[var(--user-color-primary)]">Tarjeta bancaria</p>
+            <p className="mt-1 font-body text-xs text-[var(--user-color-muted)]">
               {usuario.metodo_pago_registrado ? "Registrada y activa" : "Sin tarjeta registrada"}
             </p>
           </div>
           {!usuario.metodo_pago_registrado && (
             <Link
               href="/cuenta/metodos-pago"
-              className="inline-flex min-h-9 items-center justify-center rounded-lg border border-ink/20 px-3 py-1.5 font-body text-xs font-medium text-ink transition hover:border-route-dark hover:text-route-dark"
+              className="inline-flex min-h-11 items-center justify-center rounded-lg border border-[var(--user-color-border)] px-3 py-1.5 font-body text-xs font-medium text-[var(--user-color-primary)] transition hover:border-[var(--user-color-action)] hover:text-[var(--user-color-action)]"
             >
               Registrar tarjeta →
             </Link>
@@ -497,23 +501,23 @@ export function SeccionMetodosPago({ usuario }: { usuario: Usuario }) {
         </div>
 
         {/* Transferencia */}
-        <div className="rounded-lg border border-ink/10 px-4 py-4">
-          <p className="font-body text-sm font-semibold">Transferencia</p>
-          <p className="mt-1 font-body text-xs text-ink/55">Disponible para todos los traslados</p>
+        <div className="rounded-lg border border-[var(--user-color-border)] bg-[var(--user-color-surface)] px-4 py-4">
+          <p className="font-body text-sm font-semibold text-[var(--user-color-primary)]">Transferencia</p>
+          <p className="mt-1 font-body text-xs text-[var(--user-color-muted)]">Disponible para todos los traslados</p>
         </div>
 
         {/* Pago empresarial */}
-        <div className="flex flex-col gap-3 rounded-lg border border-ink/10 px-4 py-4">
+        <div className="flex flex-col gap-3 rounded-lg border border-[var(--user-color-border)] bg-[var(--user-color-surface)] px-4 py-4">
           <div>
-            <p className="font-body text-sm font-semibold">Pago empresarial</p>
-            <p className="mt-1 font-body text-xs text-ink/55">
+            <p className="font-body text-sm font-semibold text-[var(--user-color-primary)]">Pago empresarial</p>
+            <p className="mt-1 font-body text-xs text-[var(--user-color-muted)]">
               {esEmpresa ? "Activo para esta cuenta" : "Disponible en cuentas empresa"}
             </p>
           </div>
           {!esEmpresa && (
             <Link
               href="/soporte"
-              className="inline-flex min-h-9 items-center justify-center rounded-lg border border-ink/20 px-3 py-1.5 font-body text-xs font-medium text-ink transition hover:border-route-dark hover:text-route-dark"
+              className="inline-flex min-h-11 items-center justify-center rounded-lg border border-[var(--user-color-border)] px-3 py-1.5 font-body text-xs font-medium text-[var(--user-color-primary)] transition hover:border-[var(--user-color-action)] hover:text-[var(--user-color-action)]"
             >
               Solicitar activación →
             </Link>
@@ -535,23 +539,8 @@ export function SeccionFacturacion({ usuario, empresa }: { usuario: Usuario; emp
 
 export function SeccionPreferencias({ usuario }: { usuario: Usuario }) {
   return (
-    <Seccion titulo="Preferencias" descripcion="Controla notificaciones y alertas de tu cuenta.">
-      <div className="grid gap-3">
-        {[
-          ["Push", usuario.notificaciones_push],
-          ["Correo electrónico", usuario.notificaciones_email],
-          ["SMS / WhatsApp", usuario.notificaciones_sms_whatsapp],
-          ["Alertas de pago", usuario.alertas_pago],
-          ["Promocionales", usuario.notificaciones_promocionales]
-        ].map(([etiqueta, activo]) => (
-          <div key={String(etiqueta)} className="flex items-center justify-between border-t border-ink/10 py-3 font-body text-sm">
-            <span className="font-semibold">{etiqueta}</span>
-            <span className={`rounded-full border px-2.5 py-1 text-xs ${activo ? "border-route/30 bg-route-soft text-route-dark" : "border-ink/15 bg-ink/[0.05] text-ink/60"}`}>
-              {activo ? "Activa" : "Pausada"}
-            </span>
-          </div>
-        ))}
-      </div>
+    <Seccion titulo="Preferencias" descripcion="Controla notificaciones y alertas de tu cuenta. Los cambios se guardan automáticamente.">
+      <PreferenciasToggles usuario={usuario} />
     </Seccion>
   );
 }
@@ -561,27 +550,27 @@ export function SeccionLegal() {
     <Seccion titulo="Legal" descripcion="Documentos y condiciones vigentes de Ruum Ruum.">
       <div className="grid gap-3">
         {/* Página HTML accesible + descarga .docx opcional */}
-        <div className="flex items-center justify-between rounded-lg border border-ink/10 px-4 py-3">
-          <Link href={DOCUMENTOS_LEGALES.terminos.pagina} className="font-body text-sm font-semibold text-ink hover:text-route-dark">
+        <div className="flex items-center justify-between rounded-lg border border-[var(--user-color-border)] bg-[var(--user-color-surface)] px-4 py-3">
+          <Link href={DOCUMENTOS_LEGALES.terminos.pagina} className="font-body text-sm font-semibold text-[var(--user-color-primary)] hover:text-[var(--user-color-action)]">
             Términos y condiciones
           </Link>
           <a
             href={DOCUMENTOS_LEGALES.terminos.descarga}
             download
-            className="font-body text-xs text-ink/45 underline-offset-2 hover:text-ink/70 hover:underline"
+            className="font-body text-xs text-[var(--user-color-muted)] underline-offset-2 hover:underline"
             aria-label="Descargar términos y condiciones en Word"
           >
             .docx
           </a>
         </div>
-        <div className="flex items-center justify-between rounded-lg border border-ink/10 px-4 py-3">
-          <Link href={DOCUMENTOS_LEGALES.privacidad.pagina} className="font-body text-sm font-semibold text-ink hover:text-route-dark">
+        <div className="flex items-center justify-between rounded-lg border border-[var(--user-color-border)] bg-[var(--user-color-surface)] px-4 py-3">
+          <Link href={DOCUMENTOS_LEGALES.privacidad.pagina} className="font-body text-sm font-semibold text-[var(--user-color-primary)] hover:text-[var(--user-color-action)]">
             Aviso de privacidad
           </Link>
           <a
             href={DOCUMENTOS_LEGALES.privacidad.descarga}
             download
-            className="font-body text-xs text-ink/45 underline-offset-2 hover:text-ink/70 hover:underline"
+            className="font-body text-xs text-[var(--user-color-muted)] underline-offset-2 hover:underline"
             aria-label="Descargar aviso de privacidad en Word"
           >
             .docx
@@ -600,7 +589,7 @@ export function SeccionHistorialEmpresa({ historialEmpresa }: { historialEmpresa
           historialEmpresa.slice(0, 6).map((traslado, index) => {
             const trasladoId = traslado.traslado_id;
             return (
-              <div key={trasladoId ?? `historial-${index}`} className="grid gap-4 rounded-lg border border-ink/10 bg-mist px-4 py-4 md:grid-cols-[1.2fr_1fr_auto]">
+              <div key={trasladoId ?? `historial-${index}`} className="grid gap-4 rounded-lg border border-[var(--user-color-border)] bg-[var(--user-color-surface-soft)] px-4 py-4 md:grid-cols-[1.2fr_1fr_auto]">
                 <div>
                   <p className="font-body text-xs uppercase tracking-wide text-ink/45">{(traslado.estado ?? "estado_pendiente").replaceAll("_", " ")}</p>
                   <h3 className="mt-1 font-display text-lg font-semibold">

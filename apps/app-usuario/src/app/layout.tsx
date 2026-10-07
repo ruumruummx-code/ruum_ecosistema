@@ -68,7 +68,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           <TextInputUppercaseBridge />
           <TemaProvider>
             <AppStateProvider>
-              <div id="contenido-principal" tabIndex={-1} className="outline-none focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-[var(--ruum-focus)]">
+              <div id="contenido-principal" tabIndex={-1} className="outline-none focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-[var(--user-color-action)]">
                 {children}
               </div>
             </AppStateProvider>

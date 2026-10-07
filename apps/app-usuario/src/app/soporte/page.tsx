@@ -38,22 +38,24 @@ async function obtenerContexto() {
 export default async function PaginaSoporte({
   searchParams,
 }: {
-  searchParams: Promise<{ viaje?: string }>;
+  searchParams: Promise<{ viaje?: string; motivo?: string }>;
 }) {
-  const { viaje } = await searchParams;
+  const { viaje, motivo } = await searchParams;
   const { usuario, traslados } = await obtenerContexto();
 
   return (
-    <main className="user-v2-scope user-v2-page user-v2-secondary-screen">
+    <>
       <NavegacionUsuario variante="claro" />
-      <div className="user-v2-content">
+      <main className="user-v2-scope user-v2-page user-v2-secondary-screen"><div className="user-v2-content">
         <SoporteCliente
           usuario={usuario}
           traslados={traslados}
           viajePreseleccionado={viaje}
+          motivoPreseleccionado={motivo}
         />
       </div>
     </main>
+    </>
   );
 }
 

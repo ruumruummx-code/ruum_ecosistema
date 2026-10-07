@@ -18,7 +18,7 @@ describe("LoginCliente", () => {
   it("valida antes de enviar, enfoca el primer error y lo elimina al corregir", async () => {
     const user = userEvent.setup();
     render(<LoginCliente motivo={null} siguiente="/" />);
-    const correo = screen.getByRole("textbox", { name: "Correo o teléfono" });
+    const correo = screen.getByRole("textbox", { name: "Correo electrónico" });
     await user.click(screen.getByRole("button", { name: "Entrar" }));
     expect(correo).toHaveFocus();
     expect(correo).toHaveAttribute("aria-invalid", "true");
@@ -50,7 +50,7 @@ describe("LoginCliente", () => {
   it("mantiene el destino solicitado después de autenticar", async () => {
     const user = userEvent.setup();
     render(<LoginCliente motivo="authentication_required" siguiente="/viajes/nuevo" />);
-    await user.type(screen.getByRole("textbox", { name: "Correo o teléfono" }), "usuario@ejemplo.com");
+    await user.type(screen.getByRole("textbox", { name: "Correo electrónico" }), "usuario@ejemplo.com");
     await user.type(screen.getByLabelText(/^Contraseña/, { selector: "input" }), "clave-existente");
     await user.click(screen.getByRole("button", { name: "Entrar" }));
     await waitFor(() => expect(mocks.push).toHaveBeenCalledWith("/viajes/nuevo"));

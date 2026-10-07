@@ -14,11 +14,12 @@ export default async function PaginaCuenta() {
      registrado" como si la cuenta estuviera vacía. Ahora los tres estados se
      distinguen. */
   return conCuenta((cuenta) => (
-    <main className="user-v2-scope user-v2-page user-v2-secondary-screen">
+    <>
       <NavegacionUsuario variante="claro" nombreUsuario={cuenta.usuario?.nombre} />
-      <div className="user-v2-content">
+      <main className="user-v2-scope user-v2-page user-v2-secondary-screen"><div className="user-v2-content">
         <CuentaCliente usuario={cuenta.usuario} />
       </div>
     </main>
+    </>
   ));
 }
