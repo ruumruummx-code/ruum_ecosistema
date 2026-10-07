@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { FormularioSoporte } from "./FormularioSoporte";
 import type { Database } from "@ruum/shared/types";
@@ -150,6 +150,49 @@ export function SoporteCliente({
   const [busqueda, setBusqueda] = useState("");
   const [faqAbierto, setFaqAbierto] = useState<string | null>(null);
   const [modalReporte, setModalReporte] = useState(false);
+  /* ACC-1 (auditoría): foco inicial, trampa y restauración para el modal. */
+  const modalReporteRef = useRef<HTMLDialogElement>(null);
+  const cerrarModalRef = useRef<HTMLButtonElement>(null);
+  const previoFocoRef = useRef<HTMLElement | null>(null);
+
+  useEffect(() => {
+    if (!modalReporte) return;
+    const dialog = modalReporteRef.current;
+    if (!dialog) return;
+
+    previoFocoRef.current = document.activeElement as HTMLElement | null;
+    if (!dialog.open) {
+      try {
+        dialog.showModal();
+      } catch {
+        dialog.setAttribute("open", "");
+      }
+    }
+    requestAnimationFrame(() => cerrarModalRef.current?.focus());
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") return; // cancel nativo
+      if (e.key !== "Tab") return;
+      const focusables = dialog.querySelectorAll<HTMLElement>(
+        'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+      );
+      if (focusables.length === 0) return;
+      const first = focusables[0];
+      const last = focusables[focusables.length - 1];
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    };
+    dialog.addEventListener("keydown", handleKeyDown);
+    return () => {
+      dialog.removeEventListener("keydown", handleKeyDown);
+      previoFocoRef.current?.focus?.();
+    };
+  }, [modalReporte]);
 
   // Solo tomar viaje activo si existe en la lista real
   const viajeActivo = viajePreseleccionado
@@ -438,19 +481,25 @@ export function SoporteCliente({
         </div>
       </section>
 
-      {/* Modal / Formulario de Reporte Directo */}
+      {/* Modal / Formulario de Reporte Directo
+          ACC-1 (auditoría): era un overlay con role="dialog" pero sin foco
+          inicial, sin trampa de foco y ESC nunca llegaba (el onKeyDown estaba en
+          el overlay, fuera del foco). Se migra a <dialog> nativo replicando el
+          patrón de DiditVerificationModal. */}
       {modalReporte && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm"
-          onClick={(e) => { if (e.target === e.currentTarget) setModalReporte(false); }}
-          onKeyDown={(e) => { if (e.key === "Escape") setModalReporte(false); }}
+        <dialog
+          ref={modalReporteRef}
+          aria-modal="true"
+          aria-labelledby="reporte-titulo"
+          onCancel={(e) => { e.preventDefault(); setModalReporte(false); }}
+          className="max-h-[90vh] w-[calc(100vw-2rem)] max-w-lg overflow-y-auto rounded-3xl border border-[#1C2A3E] bg-[#0A1220] p-6 text-left text-white shadow-2xl backdrop:bg-black/80 backdrop:backdrop-blur-sm"
         >
-          <div role="dialog" aria-modal="true" aria-labelledby="reporte-titulo" className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-3xl border border-[#1C2A3E] bg-[#0A1220] p-6 shadow-2xl text-left">
             <div className="flex items-center justify-between border-b border-[#1C2A3E] pb-4 mb-4">
               <h3 id="reporte-titulo" className="font-display text-base font-extrabold text-white">
                 Reportar problema a soporte
               </h3>
               <button
+                ref={cerrarModalRef}
                 type="button"
                 onClick={() => setModalReporte(false)}
                 aria-label="Cerrar reporte a soporte"
@@ -465,8 +514,7 @@ export function SoporteCliente({
               preseleccionado={viajeActivo?.traslado_id ?? undefined}
               emailUsuario={usuario?.correo_facturacion}
             />
-          </div>
-        </div>
+        </dialog>
       )}
     </div>
   );

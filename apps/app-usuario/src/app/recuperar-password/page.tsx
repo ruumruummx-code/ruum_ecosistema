@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { Aviso } from "@ruum/ui";
 import { TEXTOS_CARGANDO } from "@ruum/shared/constants";
@@ -20,6 +20,10 @@ export default function PaginaRecuperarPassword() {
   const [enviando, setEnviando] = useState(false);
   const [enviado, setEnviado] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  /* ACC-5 (auditoría): error del formulario vs error del campo. El primero se
+     anuncia con role="alert" (assertive); el segundo se asocia al input. */
+  const [errorCampo, setErrorCampo] = useState<string | null>(null);
+  const correoRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     registrarEventoUx("recuperacion_vista");
@@ -34,7 +38,11 @@ export default function PaginaRecuperarPassword() {
     e.preventDefault();
     if (!email.trim()) {
       setError("Escribe tu correo electrónico.");
+      setErrorCampo("Escribe tu correo electrónico.");
       registrarEventoUx("recuperacion_error", { motivo: "email_vacio" });
+      /* ACC-5 (auditoría): el foco no se movía al campo inválido. El patrón
+         correcto ya existe en LoginCliente.tsx. */
+      correoRef.current?.focus();
       return;
     }
     setEnviando(true);
@@ -94,7 +102,13 @@ export default function PaginaRecuperarPassword() {
               </p>
               <button
                 type="button"
-                onClick={() => { setEnviado(false); setEmail(""); }}
+                onClick={() => {
+                    setEnviado(false);
+                    setEmail("");
+                    setError(null);
+                    setErrorCampo(null);
+                    correoRef.current?.focus();
+                  }}
                 className={botonContorno}
               >
                 Solicitar otro enlace
@@ -110,19 +124,27 @@ export default function PaginaRecuperarPassword() {
                 Escribe el correo con el que te registraste y te enviamos un enlace para crear una nueva contraseña.
               </p>
 
-              <form className="mt-7 grid gap-4" onSubmit={enviar}>
+              <form className="mt-7 grid gap-4" onSubmit={enviar} noValidate>
                 <CampoOscuro
+                  ref={correoRef}
                   etiqueta="Correo electrónico"
                   type="email"
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  onChange={(e) => {
+                    setEmail(e.target.value);
+                    if (errorCampo) setErrorCampo(null);
+                  }}
+                  error={errorCampo}
                   required
                   autoComplete="email"
                   placeholder="correo@ejemplo.com"
                 />
 
+                {/* ACC-5 (auditoría): antes el wrapper usaba aria-live="polite",
+                    que anulaba el role="alert" del Aviso (assertive) y el lector
+                    no interrumpía al usuario para anunciar un error. */}
                 {error && (
-                  <div aria-live="polite" aria-atomic="true">
+                  <div role="alert" aria-atomic="true">
                     <Aviso tono="danger">{error}</Aviso>
                   </div>
                 )}

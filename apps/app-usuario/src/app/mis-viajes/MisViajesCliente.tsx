@@ -308,21 +308,30 @@ export function MisTrasladosCliente({
     startTransition(() => setPestana(nueva));
   }
 
+  /* ACC-7 (auditoría): el manejador buscaba '[role="tab"]', que no existe en el
+     DOM (el grupo usa role="group" + aria-pressed), así que las flechas nunca
+     hacían nada: código muerto que aparenta implementar el patrón de tabs.
+     Ahora consulta los botones reales y añade navegación por flechas + Home/End. */
   function handleTablistKeyDown(e: React.KeyboardEvent) {
-    const tabs = Array.from(tablistRef.current?.querySelectorAll<HTMLButtonElement>('[role="tab"]') ?? []);
-    const idx = tabs.indexOf(document.activeElement as HTMLButtonElement);
-    if (e.key === "ArrowRight") {
+    const botones = Array.from(
+      tablistRef.current?.querySelectorAll<HTMLButtonElement>("button:not([disabled])") ?? []
+    );
+    if (botones.length === 0) return;
+    const idx = botones.indexOf(document.activeElement as HTMLButtonElement);
+    if (idx < 0) return;
+
+    let destino = -1;
+    if (e.key === "ArrowRight" || e.key === "ArrowDown") destino = (idx + 1) % botones.length;
+    else if (e.key === "ArrowLeft" || e.key === "ArrowUp") destino = (idx - 1 + botones.length) % botones.length;
+    else if (e.key === "Home") destino = 0;
+    else if (e.key === "End") destino = botones.length - 1;
+
+    if (destino >= 0) {
       e.preventDefault();
-      tabs[(idx + 1) % tabs.length]?.focus();
-    } else if (e.key === "ArrowLeft") {
-      e.preventDefault();
-      tabs[(idx - 1 + tabs.length) % tabs.length]?.focus();
-    } else if (e.key === "Home") {
-      e.preventDefault();
-      tabs[0]?.focus();
-    } else if (e.key === "End") {
-      e.preventDefault();
-      tabs[tabs.length - 1]?.focus();
+      botones[destino]?.focus();
+      // Following the ARIA toolbar pattern: moving focus also activates.
+      const id = (botones[destino]?.dataset.pestana ?? "") as PestañaTraslados;
+      if (id) handlePestanaChange(id);
     }
   }
 
@@ -405,6 +414,10 @@ export function MisTrasladosCliente({
               key={id}
               type="button"
               aria-pressed={activo}
+              data-pestana={id}
+              /* Roving tabindex: solo la pestaña activa es alcanzable con Tab,
+                 el resto con flechas (patrón toolbar de WAI-ARIA). */
+              tabIndex={activo ? 0 : -1}
               onClick={() => handlePestanaChange(id)}
               className={`user-v2-ghost-button shrink-0 px-4 ${activo ? "border-[var(--user-color-brand)] bg-[var(--user-color-brand-soft)] text-[var(--user-color-brand-dark)]" : ""}`}
             >

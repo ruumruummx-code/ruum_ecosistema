@@ -22,6 +22,11 @@ export default function PaginaNuevaPassword() {
      al cargar el cliente. Verificamos que haya sesión activa. */
   const [sesionLista, setSesionLista] = useState(false);
   const [verificando, setVerificando] = useState(true);
+  /* ACC-6 (auditoría): se separa el error de campo del aviso de la pantalla,
+     que se anuncia con role="alert" y no con aria-live="polite". */
+  const [errorCampo, setErrorCampo] = useState<{ campo: "password" | "confirmar"; mensaje: string } | null>(null);
+  const passwordRef = useRef<HTMLInputElement>(null);
+  const confirmarRef = useRef<HTMLInputElement>(null);
   const montadoRef = useRef(true);
   const redireccionRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -88,10 +93,21 @@ export default function PaginaNuevaPassword() {
 
   async function establecer(e: React.FormEvent) {
     e.preventDefault();
-    /* BUGFIX: igual que en /registro, se alinea con el requisito real del
-       servidor (minúscula + mayúscula + número), no solo longitud. */
-    if (!passwordCumpleRequisitos(password)) { setError("La contraseña debe incluir minúscula, mayúscula y número."); return; }
-    if (password !== confirmar) { setError("Las contraseñas no coinciden."); return; }
+    /* ACC-6 (auditoría): el error se asocia al campo responsable y el foco viaja
+       allí, en vez de pintarse solo como aviso global. */
+    if (!passwordCumpleRequisitos(password)) {
+      setError("La contraseña debe incluir minúscula, mayúscula y número.");
+      setErrorCampo({ campo: "password", mensaje: "La contraseña debe incluir minúscula, mayúscula y número." });
+      passwordRef.current?.focus();
+      return;
+    }
+    if (password !== confirmar) {
+      setError("Las contraseñas no coinciden.");
+      setErrorCampo({ campo: "confirmar", mensaje: "Las contraseñas no coinciden." });
+      confirmarRef.current?.focus();
+      return;
+    }
+    setErrorCampo(null);
 
     setEnviando(true);
     setError(null);
@@ -127,7 +143,15 @@ export default function PaginaNuevaPassword() {
 
         <LogoRuum className="mx-auto mt-8 text-center" />
 
-        <div className="mt-14 rounded-card border border-border bg-surface px-5 py-7 shadow-[var(--ruum-shadow-3)]">
+        /* ACC-6 (auditoría): esta pantalla cambia por completo de contenido según el
+             resultado de una verificación asíncrona (verificando / listo / sesión
+             no válida). Sin live region el lector de pantalla no anuncia nada y
+             el usuario queda ante un silencio. */
+        <div
+          className="mt-14 rounded-card border border-border bg-surface px-5 py-7 shadow-[var(--ruum-shadow-3)]"
+          aria-live="polite"
+          aria-atomic="true"
+        >
           {verificando ? (
             <p className="py-4 text-center font-body text-sm text-text-secondary">Verificando enlace…</p>
           ) : listo ? (
@@ -143,7 +167,9 @@ export default function PaginaNuevaPassword() {
               </p>
             </div>
           ) : !sesionLista ? (
-            <div className="grid gap-4">
+            /* El enlace inválido es un error: se anuncia con role="alert" para
+               interrumpir, no con la región polite del contenedor. */
+            <div className="grid gap-4" role="alert">
               <h1 className="font-display text-[22px] font-extrabold text-text-primary">Enlace inválido o expirado</h1>
               <p className="font-body text-sm leading-6 text-text-secondary">
                 El enlace de recuperación expiró o ya fue usado. Los enlaces son válidos por 60 minutos y solo se pueden usar una vez.
@@ -161,16 +187,18 @@ export default function PaginaNuevaPassword() {
                 Elige una contraseña segura. Mínimo 8 caracteres.
               </p>
 
-              <form className="mt-7 grid gap-4" onSubmit={establecer}>
+              <form className="mt-7 grid gap-4" onSubmit={establecer} noValidate>
                 {/* Contraseña */}
                 <div className="flex flex-col gap-1.5">
                   <Field
+                    ref={passwordRef}
                     etiqueta="Nueva contraseña"
                     etiquetaClassName="text-text-secondary text-xs font-medium"
                     type="password"
                     passwordToggleClassName="text-text-secondary hover:bg-surface-elevated hover:text-text-primary focus-visible:outline-focus"
                     value={password}
-                    onChange={(e) => setPassword(e.target.value)}
+                    onChange={(e) => { setPassword(e.target.value); if (errorCampo?.campo === "password") setErrorCampo(null); }}
+                    error={errorCampo?.campo === "password" ? errorCampo.mensaje : undefined}
                     required
                     minLength={8}
                     autoComplete="new-password"
@@ -215,20 +243,24 @@ export default function PaginaNuevaPassword() {
                 </div>
 
                 <Field
+                  ref={confirmarRef}
                   etiqueta="Confirmar nueva contraseña"
                   etiquetaClassName="text-text-secondary text-xs font-medium"
                   type="password"
                   passwordToggleClassName="text-text-secondary hover:bg-surface-elevated hover:text-text-primary focus-visible:outline-focus"
                   value={confirmar}
-                  onChange={(e) => setConfirmar(e.target.value)}
+                  onChange={(e) => { setConfirmar(e.target.value); if (errorCampo?.campo === "confirmar") setErrorCampo(null); }}
+                  error={errorCampo?.campo === "confirmar" ? errorCampo.mensaje : undefined}
                   required
                   autoComplete="new-password"
                   placeholder="Repite tu contraseña"
                   className="border-border bg-surface text-text-primary placeholder:text-text-tertiary focus:border-route-action focus:ring-route-action/25"
                 />
 
+                {/* ACC-5 (auditoría): role="alert" en vez de aria-live="polite",
+                    que retrasaba el anuncio del error. */}
                 {error && (
-                  <div aria-live="polite" aria-atomic="true">
+                  <div role="alert" aria-atomic="true">
                     <Aviso tono="danger">{error}</Aviso>
                   </div>
                 )}

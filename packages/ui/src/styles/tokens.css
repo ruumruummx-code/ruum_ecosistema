@@ -15,7 +15,9 @@
 
 @theme {
   --color-navy: #0a2342;
-  --color-teal-deep: #008b8b;
+  /* ACC-8 (auditoría): #008b8b sobre blanco daba 4.15:1 (enlaces "← Atrás" y
+     "Términos y condiciones" en registro). Oscurecido a #007575 → 4.97:1. */
+  --color-teal-deep: #007575;
   --color-ink: #0a2342;
   --color-ink-soft: #566889;
   --color-asphalt: #0a2342;

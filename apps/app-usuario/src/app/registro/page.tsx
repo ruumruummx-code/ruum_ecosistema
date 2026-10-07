@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Aviso, Field } from "@ruum/ui";
@@ -69,7 +69,18 @@ export default function PaginaRegistro() {
   /* Estado de la UI */
   const [paso, setPaso] = useState<1 | 2>(1);
   const [enviando, setEnviando] = useState(false);
+  /* ACC-3 (auditoría): separamos el error global (fallo de envío) del error de
+     campo, que se asocia al input y mueve el foco. */
   const [error, setError] = useState<string | null>(null);
+  const [errorCampo, setErrorCampo] = useState<{ campo: string; mensaje: string } | null>(null);
+
+  const nombreRef = useRef<HTMLInputElement>(null);
+  const apellidoRef = useRef<HTMLInputElement>(null);
+  const telefonoRef = useRef<HTMLInputElement>(null);
+  const emailRef = useRef<HTMLInputElement>(null);
+  const passwordRef = useRef<HTMLInputElement>(null);
+  const confirmarRef = useRef<HTMLInputElement>(null);
+  const terminosRef = useRef<HTMLInputElement>(null);
 
   const pwd = fortalezaPassword(password);
 
@@ -81,46 +92,76 @@ export default function PaginaRegistro() {
     registrarEventoUx("registro_paso_visto", { paso });
   }, [paso]);
 
-  /* ── Validación paso 1 ── */
-  function validarPaso1(): string | null {
-    if (!nombre.trim()) return "Escribe tu nombre.";
-    if (!apellido.trim()) return "Escribe tu apellido.";
+  /* ── Validación paso 1 ──
+     ACC-3 (auditoría): antes devolvía un único string que se pintaba como Aviso
+     global, sin asociación con el campo ni movimiento de foco. Ahora se devuelve
+     el campo culpable para poder marcarlo y enfocarlo. */
+  function validarPaso1(): { campo: string; mensaje: string } | null {
+    if (!nombre.trim()) return { campo: "nombre", mensaje: "Escribe tu nombre." };
+    if (!apellido.trim()) return { campo: "apellido", mensaje: "Escribe tu apellido." };
     const tel = soloDigitos(telefono);
-    if (tel.length !== 10) return "El teléfono debe tener 10 dígitos.";
+    if (tel.length !== 10) return { campo: "telefono", mensaje: "El teléfono debe tener 10 dígitos." };
     return null;
   }
 
   /* ── Validación paso 2 ── */
-  function validarPaso2(): string | null {
+  function validarPaso2(): { campo: string; mensaje: string } | null {
     const correo = normalizarCorreoRegistro(email);
-    if (!correo) return "Escribe tu correo electrónico.";
+    if (!correo) return { campo: "email", mensaje: "Escribe tu correo electrónico." };
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(correo))
-      return "El formato del correo no es válido.";
-    /* BUGFIX: antes solo se validaba longitud>=8 en el cliente, pero el
-       servidor de Supabase Auth exige además minúscula+mayúscula+número
-       (password_requirements = "lower_upper_letters_digits" en
-       supabase/config.toml). Con la validación débil, una contraseña como
-       "abcdefgh" pasaba aquí y luego el signUp() fallaba en el servidor con
-       un error genérico. Se alinea con el mismo criterio ya usado en
-       app-conductor (passwordCumpleRequisitos) para las tres pantallas. */
-    if (!passwordCumpleRequisitos(password)) return "La contraseña debe incluir minúscula, mayúscula y número.";
-    if (password !== confirmarPassword) return "Las contraseñas no coinciden.";
-    if (!aceptaTerminos) return "Acepta los términos para continuar.";
+      return { campo: "email", mensaje: "El formato del correo no es válido." };
+    /* BUGFIX: antes solo se validaba longitud>=8 en el cliente. El servidor de
+       Supabase Auth en supabase/config.toml fija ahora el mismo criterio
+       (password_requirements = "lower_upper_letters_digits",
+        minimum_password_length = 8), así que cliente y servidor coinciden. */
+    if (!passwordCumpleRequisitos(password))
+      return { campo: "password", mensaje: "La contraseña debe incluir minúscula, mayúscula y número." };
+    if (password !== confirmarPassword)
+      return { campo: "confirmarPassword", mensaje: "Las contraseñas no coinciden." };
+    if (!aceptaTerminos) return { campo: "terminos", mensaje: "Acepta los términos para continuar." };
     return null;
   }
 
-  function avanzarPaso2() {
-    const err = validarPaso1();
-    if (err) { setError(err); return; }
+  const refs = {
+    nombre: nombreRef,
+    apellido: apellidoRef,
+    telefono: telefonoRef,
+    email: emailRef,
+    password: passwordRef,
+    confirmarPassword: confirmarRef,
+  };
+
+  /** Muestra el error en el campo correcto, lo marca y mueve el foco allí. */
+  function reportarError(fallo: { campo: string; mensaje: string } | null) {
+    if (!fallo) {
+      setError(null);
+      setErrorCampo(null);
+      return false;
+    }
     setError(null);
+    setErrorCampo({ campo: fallo.campo, mensaje: fallo.mensaje });
+    if (fallo.campo === "terminos") {
+      terminosRef.current?.focus();
+    } else {
+      (refs as Record<string, React.RefObject<HTMLInputElement | null>>)[fallo.campo]?.current?.focus();
+    }
+    return true;
+  }
+
+  function avanzarPaso2(e?: React.FormEvent) {
+    e?.preventDefault();
+    const err = validarPaso1();
+    if (reportarError(err)) return;
     setPaso(2);
+    // El foco debe viajar al primer campo del paso nuevo.
+    requestAnimationFrame(() => emailRef.current?.focus());
   }
 
   /* ── Crear cuenta ── */
   async function crearCuenta(e: React.FormEvent) {
     e.preventDefault();
     const err = validarPaso2();
-    if (err) { setError(err); return; }
+    if (reportarError(err)) return;
 
     setEnviando(true);
     setError(null);
@@ -208,7 +249,12 @@ export default function PaginaRegistro() {
           {paso === 2 ? (
             <button
               type="button"
-              onClick={() => { setError(null); setPaso(1); }}
+              onClick={() => {
+                setError(null);
+                setErrorCampo(null);
+                setPaso(1);
+                requestAnimationFrame(() => nombreRef.current?.focus());
+              }}
               className="cursor-pointer font-body text-xs font-semibold text-[var(--ruum-teal-deep)] transition duration-200 hover:text-[#0a2342]"
             >
               ← Atrás
@@ -226,7 +272,10 @@ export default function PaginaRegistro() {
 
           {/* ════════════ PASO 1 ════════════ */}
           {paso === 1 && (
-            <>
+              /* ACC-3 (auditoría): el paso 1 no era un <form>. El botón era
+                 type="button", así que Enter no enviaba y no había validación
+                 nativa ni punto de asociación semántico. */
+              <form onSubmit={avanzarPaso2} noValidate>
               <h1 className="font-display text-[22px] font-extrabold leading-tight text-text-primary">
                 Tus datos básicos
               </h1>
@@ -255,28 +304,34 @@ export default function PaginaRegistro() {
 
               <div className="mt-5 grid gap-4">
                 <CampoOscuro
+                  ref={nombreRef}
                   etiqueta="Nombre"
                   type="text"
                   value={nombre}
-                  onChange={(e) => setNombre(e.target.value)}
+                  onChange={(e) => { setNombre(e.target.value); if (errorCampo?.campo === "nombre") setErrorCampo(null); }}
+                  error={errorCampo?.campo === "nombre" ? errorCampo.mensaje : undefined}
                   required
                   autoComplete="given-name"
                   placeholder="Carlos"
                 />
                 <CampoOscuro
+                  ref={apellidoRef}
                   etiqueta="Apellido"
                   type="text"
                   value={apellido}
-                  onChange={(e) => setApellido(e.target.value)}
+                  onChange={(e) => { setApellido(e.target.value); if (errorCampo?.campo === "apellido") setErrorCampo(null); }}
+                  error={errorCampo?.campo === "apellido" ? errorCampo.mensaje : undefined}
                   required
                   autoComplete="family-name"
                   placeholder="Mendoza"
                 />
                 <CampoOscuro
+                  ref={telefonoRef}
                   etiqueta="Teléfono celular"
                   type="tel"
                   value={telefono}
-                  onChange={(e) => setTelefono(telefonoLocalMx(e.target.value))}
+                  onChange={(e) => { setTelefono(telefonoLocalMx(e.target.value)); if (errorCampo?.campo === "telefono") setErrorCampo(null); }}
+                  error={errorCampo?.campo === "telefono" ? errorCampo.mensaje : undefined}
                   required
                   autoComplete="tel"
                   placeholder="55 1234 5678"
@@ -285,21 +340,23 @@ export default function PaginaRegistro() {
                 />
               </div>
 
+              {/* ACC-5 (auditoría): role="alert" en vez de role="status" +
+                  aria-live="polite", que retrasaba el anuncio de un error. */}
               {error && (
-              <div role="status" aria-live="polite" aria-atomic="true" className="mt-4">
+              <div role="alert" aria-atomic="true" className="mt-4">
                 <Aviso tono="danger">{error}</Aviso>
               </div>
             )}
 
-              <button type="button" onClick={avanzarPaso2} className={`${botonAzul} mt-6`}>
+              <button type="submit" className={`${botonAzul} mt-6`}>
                 Continuar
               </button>
-            </>
+              </form>
           )}
 
           {/* ════════════ PASO 2 ════════════ */}
           {paso === 2 && (
-            <form className="grid gap-4" onSubmit={crearCuenta}>
+            <form className="grid gap-4" onSubmit={crearCuenta} noValidate>
               <h1 className="font-display text-[22px] font-extrabold leading-tight text-text-primary">
                 Elige tus credenciales
               </h1>
@@ -308,10 +365,12 @@ export default function PaginaRegistro() {
               </p>
 
               <CampoOscuro
+                ref={emailRef}
                 etiqueta="Correo electrónico"
                 type="email"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                onChange={(e) => { setEmail(e.target.value); if (errorCampo?.campo === "email") setErrorCampo(null); }}
+                error={errorCampo?.campo === "email" ? errorCampo.mensaje : undefined}
                 required
                 autoComplete="email"
                 placeholder="correo@ejemplo.com"
@@ -319,16 +378,20 @@ export default function PaginaRegistro() {
 
               <div className="flex flex-col gap-1.5">
                   <Field
+                    ref={passwordRef}
                     etiqueta="Contraseña"
                     etiquetaClassName="text-text-secondary text-xs font-medium"
                     type="password"
                     passwordToggleClassName="text-text-secondary hover:bg-surface-elevated hover:text-text-primary focus-visible:outline-focus"
                     value={password}
-                    onChange={(e) => setPassword(e.target.value)}
+                    onChange={(e) => { setPassword(e.target.value); if (errorCampo?.campo === "password") setErrorCampo(null); }}
+                    error={errorCampo?.campo === "password" ? errorCampo.mensaje : undefined}
                     required
                     autoComplete="new-password"
                     placeholder="Mínimo 8 caracteres"
-                    className="border-slate-300 bg-white text-[#0a2342] placeholder:text-slate-400 focus:border-[var(--ruum-teal-deep)] focus:ring-[var(--ruum-teal)]/25"
+                    /* ACC-9 (auditoría): placeholder slate-400 sobre blanco = 2.56:1.
+                       slate-500 alcanza 4.6:1 y sigue siendo tenue. */
+                    className="border-slate-300 bg-white text-[#0a2342] placeholder:text-slate-500 focus:border-[var(--ruum-teal-deep)] focus:ring-[var(--ruum-teal)]/25"
                   />
                 {password.length > 0 && (
                   <>
@@ -378,24 +441,29 @@ export default function PaginaRegistro() {
               </div>
 
               <Field
+                ref={confirmarRef}
                 etiqueta="Confirmar contraseña"
                 etiquetaClassName="text-text-secondary text-xs font-medium"
                 type="password"
                 passwordToggleClassName="text-text-secondary hover:bg-surface-elevated hover:text-text-primary focus-visible:outline-focus"
                 value={confirmarPassword}
-                onChange={(e) => setConfirmarPassword(e.target.value)}
+                onChange={(e) => { setConfirmarPassword(e.target.value); if (errorCampo?.campo === "confirmarPassword") setErrorCampo(null); }}
+                error={errorCampo?.campo === "confirmarPassword" ? errorCampo.mensaje : undefined}
                 required
                 autoComplete="new-password"
                 placeholder="Repite tu contraseña"
-                className="border-slate-300 bg-white text-[#0a2342] placeholder:text-slate-400 focus:border-[var(--ruum-teal-deep)] focus:ring-[var(--ruum-teal)]/25"
+                className="border-slate-300 bg-white text-[#0a2342] placeholder:text-slate-500 focus:border-[var(--ruum-teal-deep)] focus:ring-[var(--ruum-teal)]/25"
               />
 
               {/* Términos — inline, no como .docx descargable */}
               <label className="flex cursor-pointer items-start gap-3 rounded-lg border border-border bg-surface-elevated p-3.5">
                 <input
+                  ref={terminosRef}
                   type="checkbox"
                   checked={aceptaTerminos}
-                  onChange={(e) => setAceptaTerminos(e.target.checked)}
+                  onChange={(e) => { setAceptaTerminos(e.target.checked); if (errorCampo?.campo === "terminos") setErrorCampo(null); }}
+                  aria-invalid={errorCampo?.campo === "terminos" ? true : undefined}
+                  aria-describedby={errorCampo?.campo === "terminos" ? "terminos-error" : undefined}
                   className="mt-0.5 flex-shrink-0 accent-[#f5a623]"
                 />
                 <span className="font-body text-xs leading-5 text-text-secondary">
@@ -421,8 +489,15 @@ export default function PaginaRegistro() {
                 </span>
               </label>
 
+              {errorCampo?.campo === "terminos" && (
+                <p id="terminos-error" role="alert" className="font-body text-xs leading-5 text-[var(--ruum-signal)]">
+                  {errorCampo.mensaje}
+                </p>
+              )}
+
+              {/* ACC-5 (auditoría): role="alert" para errores, no status/polite. */}
               {error && (
-              <div role="status" aria-live="polite" aria-atomic="true">
+              <div role="alert" aria-atomic="true">
                 <Aviso tono="danger">{error}</Aviso>
               </div>
             )}

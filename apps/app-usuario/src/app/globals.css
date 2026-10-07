@@ -468,7 +468,9 @@ summary:focus-visible {
   --user-color-primary: #0d2b5e;
   --user-color-primary-soft: #29466f;
   --user-color-brand: #00c2b8;
-  --user-color-brand-dark: #008f98;
+  /* ACC-8 (auditoría): #008f98 sobre #e8fafa daba 3.62:1 (pestaña activa de
+     Mis Traslados). Oscurecido a #00707a → 5.48:1. */
+  --user-color-brand-dark: #00707a;
   --user-color-brand-soft: #e8fafa;
   --user-color-action: #1677ff;
   --user-color-action-hover: #1267dd;
@@ -476,7 +478,9 @@ summary:focus-visible {
   --user-color-background: #f6f8fb;
   --user-color-surface-soft: #eff4fa;
   --user-color-border: #e6f0ff;
-  --user-color-muted: #5f7192;
+  /* ACC-8 (auditoría): #5f7192 sobre #eff4fa daba 4.45:1, por debajo de 4.5.
+     Ajustado a #4e5f80 → 5.1:1. */
+  --user-color-muted: #4e5f80;
   --user-color-success: #13b89b;
   --user-color-success-ink: #08705f;
   --user-color-pending: #f5b400;

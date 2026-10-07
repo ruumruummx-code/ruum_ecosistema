@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import { forwardRef, useId, type ReactNode } from "react";
 import { LogoMarca, type LogoVariante } from "@ruum/ui";
 
 const fondoPublico = "bg-surface-elevated";
@@ -113,21 +113,51 @@ export const botonAzul =
 export const botonContorno =
   `inline-flex min-h-11 w-full items-center justify-center rounded-lg border border-border bg-transparent px-5 py-3 font-display text-sm font-bold text-text-primary outline-none transition hover:border-signal hover:bg-signal/10 focus-visible:ring-2 ${focoAcentoPublico} focus-visible:ring-offset-2`;
 
-export function CampoOscuro({
-  etiqueta,
-  ayuda,
-  id,
-  ...props
-}: React.InputHTMLAttributes<HTMLInputElement> & { etiqueta: string; ayuda?: ReactNode }) {
-  const inputId = id ?? `campo-${etiqueta.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "")}`;
+/**
+ * Campo de texto de la experiencia pública.
+ *
+ * ACC-4 (auditoría): no aceptaba estado de error, lo que obligaba a los
+ * formularios a pintar el error como Aviso global, sin association semántica
+ * con el campo (WCAG 3.3.1 Error Identification). Ahora setea
+ * `aria-invalid` y enlaza el mensaje con `aria-describedby`.
+ *
+ * ACC-18: el id se derivaba del texto de la etiqueta, lo que puede colisionar
+ * si dos campos comparten etiqueta en la misma página. `useId` garantiza
+ * unicidad; la etiqueta solo se usa para el `data-ruum-label` de los tests.
+ */
+export const CampoOscuro = forwardRef<
+  HTMLInputElement,
+  React.InputHTMLAttributes<HTMLInputElement> & {
+    etiqueta: string;
+    ayuda?: ReactNode;
+    error?: string | null;
+  }
+>(function CampoOscuro({ etiqueta, ayuda, error, id, ...props }, ref) {
+  const idGenerado = useId();
+  const inputId = id ?? `campo-${idGenerado}`;
   const ayudaId = ayuda ? `${inputId}-ayuda` : undefined;
-  const ariaDescribedBy = [props["aria-describedby"], ayudaId].filter(Boolean).join(" ") || undefined;
+  const errorId = error ? `${inputId}-error` : undefined;
+  const ariaDescribedBy =
+    [props["aria-describedby"], ayudaId, errorId].filter(Boolean).join(" ") || undefined;
 
   return (
     <div className="flex flex-col gap-1.5">
       <label htmlFor={inputId} className={etiquetaOscura}>{etiqueta}</label>
-      <input {...props} id={inputId} aria-describedby={ariaDescribedBy} data-ruum-label={etiqueta} className={`${campoOscuro} ${props.className ?? ""}`} />
+      <input
+        {...props}
+        ref={ref}
+        id={inputId}
+        aria-describedby={ariaDescribedBy}
+        aria-invalid={error ? true : props["aria-invalid"]}
+        data-ruum-label={etiqueta}
+        className={`${campoOscuro} ${error ? "border-[var(--ruum-signal)]" : ""} ${props.className ?? ""}`}
+      />
       {ayuda ? <span id={ayudaId} className={`font-body text-xs leading-5 ${textoFuncionalPublico}`}>{ayuda}</span> : null}
+      {error ? (
+        <p id={errorId} role="alert" className="font-body text-xs leading-5 text-[var(--ruum-signal)]">
+          {error}
+        </p>
+      ) : null}
     </div>
   );
-}
+});

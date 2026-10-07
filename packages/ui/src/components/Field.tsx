@@ -43,10 +43,20 @@ export const Field = forwardRef<HTMLInputElement, FieldProps>(function Field({
 
   return (
     <div className="flex flex-col gap-1.5">
-      <label htmlFor={inputId} className={`font-body text-sm font-semibold text-text-primary ${etiquetaClassName}`}>
-        {etiqueta}
-        {props.required ? <span className="ml-1 text-danger-action" aria-hidden> *</span> : null}
-      </label>
+      {/* ACC-18 (auditoría): el asterisco de "obligatorio" estaba DENTRO del
+         <label>. Aunque llevaba aria-hidden, contaminaba el nombre accesible
+         ("Placas *") y rompía getByLabelText con coincidencia exacta. Se mueve
+         fuera del label: la obligatoriedad ya la comunica el atributo required. */}
+      <div className="flex items-baseline justify-between gap-2">
+        <label htmlFor={inputId} className={`font-body text-sm font-semibold text-text-primary ${etiquetaClassName}`}>
+          {etiqueta}
+        </label>
+        {props.required ? (
+          <span className="shrink-0 text-danger-action" aria-hidden title="Obligatorio">
+            *
+          </span>
+        ) : null}
+      </div>
       {esPassword ? (
         <div className="relative flex items-center w-full">
           <input
