@@ -3,6 +3,8 @@ import { readFileSync, readdirSync, statSync, existsSync } from "node:fs";
 import { join, extname, basename, resolve } from "node:path";
 
 // Directorios excluidos (builds, dependencias, artefactos temporales)
+// NOTA: .temp/.branches son artefactos generados por `supabase start/stop`
+// (supabase/.gitignore) con JWTs locales efímeros — nunca deben bloquear el commit.
 const DIRS_EXCLUIDOS = new Set([
   "node_modules",
   ".git",
@@ -28,7 +30,10 @@ const DIRS_EXCLUIDOS = new Set([
   ".gradle",
   "scratch",
   ".scratch",
-  "work"
+  "work",
+  ".temp",
+  ".branches",
+  ".supabase",
 ]);
 
 // Archivos individuales excluidos

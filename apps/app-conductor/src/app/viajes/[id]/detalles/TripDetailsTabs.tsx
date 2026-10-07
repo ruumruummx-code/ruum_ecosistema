@@ -503,7 +503,7 @@ export function TripDetailsTabs({ pasaporte }: { pasaporte: PasaporteRow }) {
                 {solicitanteTelefono && (
                   <div className="flex items-center gap-1.5 shrink-0 ml-2">
                     <a
-                      href={enlaceWhatsApp(solicitanteTelefono, `Hola ${solicitanteNombre}, me comunico como tu conductor certificado de Ruum Ruum respecto al traslado #TR-${folio}.`)}
+                      href={enlaceWhatsApp(solicitanteTelefono, `olicitanteNombre}, me comunico como tu conductor certificado de Ruum Ruum respecto al traslado #TR-${folio}.`)}
                       target="_blank"
                       rel="noreferrer"
                       className="min-h-11 min-w-11 rounded-xl bg-emerald-500/15 text-emerald-400 flex items-center justify-center border border-emerald-500/30 active:scale-95 transition-transform hover:bg-emerald-500/25 focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-route-action"
@@ -543,7 +543,7 @@ export function TripDetailsTabs({ pasaporte }: { pasaporte: PasaporteRow }) {
                 {entregaTelefono && (
                   <div className="flex items-center gap-1.5 shrink-0 ml-2">
                     <a
-                      href={enlaceWhatsApp(entregaTelefono, `Hola ${entregaNombre}, soy el conductor de Ruum Ruum asignado para recolectar el vehículo del traslado #TR-${folio}.`)}
+                      href={enlaceWhatsApp(entregaTelefono, `ntregaNombre}, soy el conductor de Ruum Ruum asignado para recolectar el vehículo del traslado #TR-${folio}.`)}
                       target="_blank"
                       rel="noreferrer"
                       className="min-h-11 min-w-11 rounded-xl bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 flex items-center justify-center border border-emerald-500/30 active:scale-95 transition-transform hover:bg-emerald-500/25 focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-route-action"
@@ -583,7 +583,7 @@ export function TripDetailsTabs({ pasaporte }: { pasaporte: PasaporteRow }) {
                 {recepcionTelefono && (
                   <div className="flex items-center gap-1.5 shrink-0 ml-2">
                     <a
-                      href={enlaceWhatsApp(recepcionTelefono, `Hola ${recepcionNombre}, soy el conductor de Ruum Ruum en camino a tu ubicación con el traslado #TR-${folio}.`)}
+                      href={enlaceWhatsApp(recepcionTelefono, `ecepcionNombre}, soy el conductor de Ruum Ruum en camino a tu ubicación con el traslado #TR-${folio}.`)}
                       target="_blank"
                       rel="noreferrer"
                       className="min-h-11 min-w-11 rounded-xl bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 flex items-center justify-center border border-emerald-500/30 active:scale-95 transition-transform hover:bg-emerald-500/25 focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-route-action"
