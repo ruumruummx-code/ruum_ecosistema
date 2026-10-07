@@ -268,24 +268,28 @@ otp_expiry = 3600
 # /registro/confirma-correo exige un código de 6 dígitos que el usuario nunca
 # recibía, quedando en un bucle sin salida. `otp_length = 6` + estas plantillas
 # hacen que el correo incluya el código.
+# OJO: `content_path` se resuelve desde la RAÍZ del proyecto (donde se ejecuta
+# el CLI), no desde el directorio de este archivo. Con "./templates/..." el CLI
+# buscaba <raiz>/templates/ y fallaba con NotFound. Por eso las líneas comentadas
+# más abajo usan "./supabase/templates/...".
 [auth.email.template.confirmation]
 subject = "Confirma tu correo — Ruum Ruum"
-content_path = "./templates/confirmation.html"
+content_path = "./supabase/templates/confirmation.html"
 
 [auth.email.template.recovery]
 subject = "Restablece tu contraseña — Ruum Ruum"
-content_path = "./templates/recovery.html"
+content_path = "./supabase/templates/recovery.html"
 
 # Uncomment to customize email template
 # [auth.email.template.invite]
 # subject = "You have been invited"
-# content_path = "./templates/invite.html"
+# content_path = "./supabase/templates/invite.html"
 
 # Uncomment to customize notification email template
 # [auth.email.notification.password_changed]
 # enabled = true
 # subject = "Your password has been changed"
-# content_path = "./templates/password_changed_notification.html"
+# content_path = "./supabase/templates/password_changed_notification.html"
 
 [auth.sms]
 # Allow/disallow new user signups via SMS to your project.
