@@ -1057,15 +1057,7 @@ summary:focus-visible {
 }
 
 .user-v2-card-interactive {
-  min-width: 44px;
-  min-height: 44px;
-  transition: transform 180ms ease, border-color 180ms ease, box-shadow 180ms ease, background-color 180ms ease;
-}
-
-.user-v2-card-interactive:active {
-  transform: scale(0.99);
-  border-color: var(--user-color-brand);
-  background-color: var(--user-color-brand-soft);
+  transition: transform 180ms ease, border-color 180ms ease, box-shadow 180ms ease;
 }
 
 @media (hover: hover) and (pointer: fine) {
@@ -1073,67 +1065,6 @@ summary:focus-visible {
     transform: translateY(-2px);
     border-color: var(--user-color-brand);
     box-shadow: var(--user-shadow-soft);
-    background-color: var(--user-color-surface);
-  }
-}
-
-@media (hover: none) {
-  .user-v2-card-interactive:active {
-    transform: scale(0.98);
-  }
-}
-
-/* Hero enfocado + empty state ilustrado */
-.user-v2-hero .user-v2-primary-button {
-  text-align: left;
-}
-
-.user-v2-empty-illustration {
-  width: 100%;
-  max-width: 340px;
-  height: auto;
-  display: block;
-}
-
-.user-v2-empty-illustration__bg {
-  fill: var(--user-color-brand-soft);
-}
-
-.user-v2-empty-illustration__pin {
-  fill: var(--user-color-action);
-}
-
-.user-v2-empty-illustration__car {
-  fill: var(--user-color-primary);
-  opacity: 0.92;
-}
-
-/* Grid adaptable: acciones rápidas + bloque de confianza */
-.user-v2-home-grid {
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-}
-
-.user-v2-quick-grid {
-  grid-template-columns: 1fr;
-}
-
-@media (min-width: 900px) {
-  .user-v2-home-grid {
-    display: grid;
-    grid-template-columns: 1.35fr 0.65fr;
-    gap: 16px;
-    align-items: start;
-  }
-
-  .user-v2-home-grid #quickActions {
-    min-width: 0;
-  }
-
-  .user-v2-home-grid .user-v2-trust {
-    position: sticky;
-    top: 84px;
   }
 }
 
@@ -1247,7 +1178,7 @@ summary:focus-visible {
 }
 
 .user-v2-search-input::placeholder {
-  color: #4e5f80;
+  color: #5f7192;
   opacity: 1;
 }
 
@@ -1549,12 +1480,6 @@ summary:focus-visible {
 @media (min-width: 640px) {
   .user-v2-content {
     width: min(calc(100% - 48px), 760px);
-  }
-}
-
-@media (min-width: 1024px) {
-  .user-v2-content {
-    width: min(calc(100% - 48px), 960px);
   }
 }
 

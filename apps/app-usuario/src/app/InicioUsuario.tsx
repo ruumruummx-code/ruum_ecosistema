@@ -81,44 +81,6 @@ function IconoChevron({ className = "size-5" }: { className?: string }) {
   );
 }
 
-function IlustracionRutaVacia() {
-  return (
-    <svg
-      className="user-v2-empty-illustration"
-      viewBox="0 0 320 148"
-      role="img"
-      aria-label="Ilustración de un vehículo listo para iniciar una ruta en el mapa"
-    >
-      <rect x="8" y="8" width="304" height="132" rx="20" className="user-v2-empty-illustration__bg" />
-      <path
-        d="M44 108 C 96 108, 104 44, 160 52 S 224 116, 276 60"
-        fill="none"
-        stroke="var(--user-color-brand)"
-        strokeWidth="3"
-        strokeDasharray="8 7"
-        strokeLinecap="round"
-      />
-      <g>
-        <circle cx="44" cy="108" r="12" className="user-v2-empty-illustration__pin" />
-        <circle cx="44" cy="108" r="4.5" fill="#fff" />
-      </g>
-      <g>
-        <circle cx="276" cy="60" r="12" className="user-v2-empty-illustration__pin" />
-        <path d="m271.5 60 3.2 3.2 6-6.8" stroke="#fff" strokeWidth="2.2" fill="none" strokeLinecap="round" strokeLinejoin="round" />
-      </g>
-      <g transform="translate(128 44)">
-        <rect x="0" y="18" width="64" height="34" rx="10" className="user-v2-empty-illustration__car" />
-        <rect x="10" y="8" width="44" height="22" rx="8" className="user-v2-empty-illustration__car" />
-        <rect x="15" y="12" width="34" height="12" rx="5" fill="#fff" opacity="0.85" />
-        <circle cx="16" cy="52" r="7" fill="var(--user-color-primary)" />
-        <circle cx="48" cy="52" r="7" fill="var(--user-color-primary)" />
-        <circle cx="16" cy="52" r="2.4" fill="#fff" />
-        <circle cx="48" cy="52" r="2.4" fill="#fff" />
-      </g>
-    </svg>
-  );
-}
-
 export function InicioUsuario({ usuario, traslados, conductorFotoUrl = null }: InicioUsuarioProps) {
   const viajeActivo = obtenerViajeActivo(traslados);
   const nombre = primerNombre(usuario?.nombre);
@@ -197,7 +159,7 @@ export function InicioUsuario({ usuario, traslados, conductorFotoUrl = null }: I
             </dl>
             <Link
               href={viajeActivo.traslado_id ? `/viajes/${viajeActivo.traslado_id}` : "/mis-viajes"}
-              className="user-v2-secondary-button group mt-5 flex min-h-[52px] items-center justify-between px-3.5"
+              className="user-v2-secondary-button group mt-5 flex items-center justify-between px-3.5"
             >
               <span>
                 Ver seguimiento
@@ -216,85 +178,67 @@ export function InicioUsuario({ usuario, traslados, conductorFotoUrl = null }: I
             </Link>
           </>
         ) : (
-          <div className="user-v2-empty flex flex-col items-center text-center">
-            <IlustracionRutaVacia />
+          <div className="flex flex-col items-center text-center">
+            <span className="user-v2-icon-well" aria-hidden="true">
+              <IconoCarro className="size-8" />
+            </span>
             <h2 id="traslados-activos" className="user-v2-heading-2 mt-4">Sin traslados activos</h2>
-            <p className="user-v2-caption user-v2-muted mt-1 max-w-[36ch]">
-              Tu vehículo listo, ruta trazada. Cuando solicites un traslado aparecerá aquí con su seguimiento.
-            </p>
-            {/* CTA unificado: un solo botón primario "Solicitar traslado" por vista. */}
-            <Link id="requestTransferButton" href="/viajes/nuevo" className="user-v2-primary-button group mt-5 flex min-h-[52px] w-full items-center justify-between px-4">
-              <span className="flex items-center gap-3">
-                <span className="flex size-10 items-center justify-center rounded-full bg-white text-[var(--user-color-primary)]">
-                  <IconoCarro className="size-6" />
-                </span>
-                <span>Solicitar traslado</span>
-              </span>
-              <IconoChevron className="size-6 transition-transform group-hover:translate-x-0.5" />
+            <p className="user-v2-caption user-v2-muted mt-1">Tu próximo traslado aparecerá aquí.</p>
+            <Link id="firstTransferButton" href="/viajes/nuevo" className="user-v2-secondary-button mt-5 flex w-full items-center justify-center gap-2 px-3.5">
+              <span>Solicitar mi primer traslado</span>
+              <IconoChevron className="size-4" />
             </Link>
           </div>
         )}
       </section>
 
-      <div className="user-v2-home-grid">
-        <section id="quickActions" aria-labelledby="acciones-rapidas">
-          <h2 id="acciones-rapidas" className="user-v2-heading-2">Acciones rápidas</h2>
-          <div className="user-v2-quick-grid mt-3 grid grid-cols-1 gap-3 min-[360px]:grid-cols-2">
-            <Link
-              id="quickActionHistory"
-              href="/mis-viajes"
-              aria-label="Ver historial: activos, programados, finalizados y cancelados"
-              className="user-v2-card user-v2-card-interactive group flex min-h-[144px] min-w-[44px] flex-col p-4"
-            >
-              <span className="user-v2-icon-well size-11">
-                <IconoHistorial className="size-7" />
-              </span>
-              <span className="mt-auto block pt-3">
-                <span className="user-v2-card-title block">Ver historial</span>
-                <span className="user-v2-caption user-v2-muted mt-1 block">Activos, programados, finalizados y cancelados.</span>
-              </span>
-              <span className="mt-2 flex justify-end text-[var(--user-color-brand-dark)] transition-transform group-hover:translate-x-0.5" aria-hidden="true"><IconoChevron className="size-4" /></span>
-            </Link>
+      <section id="quickActions" aria-labelledby="acciones-rapidas">
+        <h2 id="acciones-rapidas" className="user-v2-heading-2">Acciones rápidas</h2>
+        <div className="mt-3 grid grid-cols-1 gap-3 min-[360px]:grid-cols-2">
+          <Link id="quickActionHistory" href="/mis-viajes" className="user-v2-card user-v2-card-interactive group flex min-h-[144px] flex-col p-4">
+            <span className="user-v2-icon-well size-11">
+              <IconoHistorial className="size-7" />
+            </span>
+            <span className="mt-auto block">
+              <span className="user-v2-card-title block">Ver historial</span>
+              <span className="user-v2-caption user-v2-muted mt-1 block">Activos, programados, finalizados y cancelados.</span>
+            </span>
+            <span className="mt-2 flex justify-end text-[var(--user-color-brand-dark)] transition-transform group-hover:translate-x-0.5"><IconoChevron className="size-4" /></span>
+          </Link>
 
-            <Link
-              id="quickActionPassport"
-              href="/pasaporte"
-              aria-label="Pasaporte Digital: fotos, folios, firmas y evidencia de cada entrega"
-              className="user-v2-card user-v2-card-interactive group flex min-h-[144px] min-w-[44px] flex-col p-4"
-            >
-              <span className="user-v2-icon-well size-11 text-[var(--user-color-brand-dark)]">
-                <IconoPortapapeles className="size-7" />
-              </span>
-              <span className="mt-auto block pt-3">
-                <span className="user-v2-card-title block">Pasaporte Digital</span>
-                <span className="user-v2-caption user-v2-muted mt-1 block">Fotos, folios, firmas y evidencia de cada entrega.</span>
-              </span>
-              <span className="mt-2 flex justify-end text-[var(--user-color-brand-dark)] transition-transform group-hover:translate-x-0.5" aria-hidden="true"><IconoChevron className="size-4" /></span>
-            </Link>
-          </div>
-        </section>
+          <Link id="quickActionPassport" href="/pasaporte" className="user-v2-card user-v2-card-interactive group flex min-h-[144px] flex-col p-4">
+            <span className="user-v2-icon-well size-11 text-[var(--user-color-brand-dark)]">
+              <IconoPortapapeles className="size-7" />
+            </span>
+            <span className="mt-auto block">
+              <span className="user-v2-card-title block">Pasaporte Digital</span>
+              <span className="user-v2-caption user-v2-muted mt-1 block">Consulta el estado de tus traslados.</span>
+            </span>
+            <span className="mt-2 flex justify-end text-[var(--user-color-brand-dark)] transition-transform group-hover:translate-x-0.5"><IconoChevron className="size-4" /></span>
+          </Link>
+        </div>
+      </section>
 
-        {conductorAsignado && (
-          <ConductorAsignado
-            trasladoId={conductorAsignado.trasladoId}
-            estado={conductorAsignado.estado}
-            nombre={conductorAsignado.nombre}
-            fotoUrl={conductorFotoUrl}
-          />
-        )}
+      {conductorAsignado && (
+        <ConductorAsignado
+          trasladoId={conductorAsignado.trasladoId}
+          estado={conductorAsignado.estado}
+          nombre={conductorAsignado.nombre}
+          fotoUrl={conductorFotoUrl}
+        />
+      )}
 
-        <section aria-label="Seguridad y confianza" className="user-v2-card user-v2-trust flex items-start gap-3 p-4">
-          <span className="user-v2-icon-well size-11 shrink-0" aria-hidden="true">
-            <IconoEscudo className="size-7" />
-          </span>
-          <div>
-            <h2 className="user-v2-card-title">Traslados con evidencia y seguimiento</h2>
-            <p className="user-v2-caption user-v2-muted mt-1">
-              Conductores certificados, evidencia fotográfica y seguimiento del estatus en todo momento.
-            </p>
-          </div>
-        </section>
-      </div>
+      <section aria-label="Seguridad y confianza" className="user-v2-card flex items-start gap-3 p-4">
+        <span className="user-v2-icon-well size-11 shrink-0" aria-hidden="true">
+          <IconoEscudo className="size-7" />
+        </span>
+        <div>
+          <h2 className="user-v2-card-title">Traslados con evidencia y seguimiento</h2>
+          <p className="user-v2-caption user-v2-muted mt-1">
+            Conductores certificados, evidencia fotográfica y seguimiento del estatus en todo momento.
+          </p>
+        </div>
+      </section>
     </div>
   );
 }
