@@ -21,6 +21,12 @@ function folioVisible(trasladoId: string | null): string {
   return trasladoId ? `#${trasladoId.slice(0, 8).toUpperCase()}` : "#—";
 }
 
+function primerNombre(nombre: string | null | undefined): string | null {
+  const valor = nombre?.trim().split(/\s+/)[0];
+  if (!valor) return null;
+  return valor.charAt(0).toUpperCase() + valor.slice(1).toLowerCase();
+}
+
 function IconoCarro({ className = "size-6" }: { className?: string }) {
   return (
     <svg className={className} viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -114,8 +120,9 @@ function IlustracionRutaVacia() {
 }
 
 export function InicioUsuario({ usuario, traslados, conductorFotoUrl = null }: InicioUsuarioProps) {
-  void usuario;
   const viajeActivo = obtenerViajeActivo(traslados);
+  const nombre = primerNombre(usuario?.nombre);
+  const saludo = nombre ? `Hola, ${nombre}` : "Hola";
   const conductorAsignado = viajeActivo?.traslado_id && viajeActivo.conductor_id && viajeActivo.conductor_nombre && viajeActivo.estado
     ? {
         trasladoId: viajeActivo.traslado_id,
@@ -126,27 +133,23 @@ export function InicioUsuario({ usuario, traslados, conductorFotoUrl = null }: I
 
   return (
     <div className="user-v2-screen">
-      {/* Hero enfocado: mensaje principal + único CTA primario.
-          El saludo vive solo en la barra superior (NavegacionUsuario) para
-          liberar espacio y reducir carga cognitiva. */}
-      <section id="greetingBlock" aria-labelledby="saludo-usuario" className="user-v2-hero text-center">
-        <p className="user-v2-caption user-v2-muted font-semibold uppercase tracking-widest">Panel principal</p>
+      <section id="greetingBlock" aria-labelledby="saludo-usuario" className="text-center">
+        <p className="user-v2-caption user-v2-muted font-semibold uppercase tracking-widest">{nombre ? "Panel principal" : saludo}</p>
         <h1 id="saludo-usuario" className="user-v2-heading-1 mt-2 text-balance">
           Mueve tu auto sin soltar el control.
         </h1>
         <p className="user-v2-body user-v2-muted mt-2">Solicita tu traslado, sigue su estatus y conserva la evidencia.</p>
-        {viajeActivo ? (
-          <Link id="requestTransferButton" href="/viajes/nuevo" className="user-v2-primary-button group mt-5 flex min-h-[52px] w-full items-center justify-between px-4">
-            <span className="flex items-center gap-3">
-              <span className="flex size-10 items-center justify-center rounded-full bg-white text-[var(--user-color-primary)]">
-                <IconoCarro className="size-6" />
-              </span>
-              <span>Solicitar traslado</span>
-            </span>
-            <IconoChevron className="size-6 transition-transform group-hover:translate-x-0.5" />
-          </Link>
-        ) : null}
       </section>
+
+      <Link id="requestTransferButton" href="/viajes/nuevo" className="user-v2-primary-button group flex items-center justify-between px-4">
+        <span className="flex items-center gap-3">
+          <span className="flex size-10 items-center justify-center rounded-full bg-white text-[var(--user-color-primary)]">
+            <IconoCarro className="size-6" />
+          </span>
+          <span>Solicitar traslado</span>
+        </span>
+        <IconoChevron className="size-6 transition-transform group-hover:translate-x-0.5" />
+      </Link>
 
       <section id="activeTransferCard" aria-labelledby="traslados-activos" aria-live="polite" className="user-v2-card p-5">
         {viajeActivo ? (
