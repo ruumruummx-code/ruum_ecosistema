@@ -165,6 +165,62 @@ const ADMIN_BASE = { tablas: { admins: { data: { id: "admin-1", rol_operativo: "
     await expect(cambiarEstatusAdmin(cliente as never, "t1", "solicitud_creada", "servicio_cerrado")).rejects.toThrow("Transición no permitida");
   });
 
+describe("cambiarEstatusAdmin — gate de pago anticipado antes de operar (F1/F2)", () => {
+  const TRASLADO_ANTICIPADO = { tablas: { ...ADMIN_BASE.tablas, traslados: { data: { tipo_pago: "anticipado" } } } };
+
+  it("bloquea servicio_confirmado anticipado sin pago completado", async () => {
+    const cliente = crearClienteFake({
+      ...ADMIN_BASE,
+      tablas: { ...TRASLADO_ANTICIPADO.tablas, pagos: { data: [] } },
+    });
+    await expect(
+      cambiarEstatusAdmin(cliente as never, "t1", "cotizacion_aceptada", "servicio_confirmado")
+    ).rejects.toThrow("pago electrónico completado");
+    expect(cliente.rpc).not.toHaveBeenCalledWith("admin_cambiar_estado_traslado", expect.anything());
+  });
+
+  it("bloquea pendiente_de_conductor anticipado sin pago completado", async () => {
+    const cliente = crearClienteFake({
+      ...ADMIN_BASE,
+      tablas: { ...TRASLADO_ANTICIPADO.tablas, pagos: { data: [] } },
+    });
+    await expect(
+      cambiarEstatusAdmin(cliente as never, "t1", "servicio_confirmado", "pendiente_de_conductor")
+    ).rejects.toThrow("pago electrónico completado");
+    expect(cliente.rpc).not.toHaveBeenCalledWith("admin_cambiar_estado_traslado", expect.anything());
+  });
+
+  it("permite servicio_confirmado anticipado con pago completado", async () => {
+    const cliente = crearClienteFake({
+      ...ADMIN_BASE,
+      tablas: { ...TRASLADO_ANTICIPADO.tablas, pagos: { data: [{ id: "p1" }] } },
+      rpcs: { admin_tiene_permiso: { data: true }, admin_cambiar_estado_traslado: { data: { ejecutado: true } } },
+    });
+    await expect(
+      cambiarEstatusAdmin(cliente as never, "t1", "cotizacion_aceptada", "servicio_confirmado")
+    ).resolves.toBeUndefined();
+    expect(cliente.rpc).toHaveBeenCalledWith(
+      "admin_cambiar_estado_traslado",
+      expect.objectContaining({ p_traslado_id: "t1", p_nuevo_estado: "servicio_confirmado" })
+    );
+  });
+
+  it("exime al_cierre: confirma sin prepago", async () => {
+    const cliente = crearClienteFake({
+      ...ADMIN_BASE,
+      tablas: {
+        ...ADMIN_BASE.tablas,
+        traslados: { data: { tipo_pago: "al_cierre" } },
+        pagos: { data: [] },
+      },
+      rpcs: { admin_tiene_permiso: { data: true }, admin_cambiar_estado_traslado: { data: { ejecutado: true } } },
+    });
+    await expect(
+      cambiarEstatusAdmin(cliente as never, "t1", "cotizacion_generada", "servicio_confirmado")
+    ).resolves.toBeUndefined();
+  });
+});
+
 describe("asignarConductorAdmin — restricciones de elegibilidad (PRD §4.3)", () => {
   it("lanza error si el estado del traslado no está en la cadena de asignación", async () => {
     const cliente = crearClienteFake(ADMIN_BASE);

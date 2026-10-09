@@ -59,6 +59,33 @@ async function validarPagoCompletadoParaAdmin(cliente: Cliente, trasladoId: stri
   }
 }
 
+async function validarPagoAnticipadoParaOperar(cliente: Cliente, trasladoId: string, nuevoEstado: EstadoTraslado) {
+  if (nuevoEstado !== "servicio_confirmado" && nuevoEstado !== "pendiente_de_conductor") return;
+  const { data: traslado, error } = await cliente
+    .from("traslados")
+    .select("tipo_pago")
+    .eq("id", trasladoId)
+    .maybeSingle();
+
+  if (error) throw error;
+  if (!traslado || traslado.tipo_pago !== "anticipado") return;
+
+  const { data: pagos, error: errorPagos } = await cliente
+    .from("pagos")
+    .select("id")
+    .eq("traslado_id", trasladoId)
+    .eq("estado", "completado")
+    .limit(1);
+
+  if (errorPagos) throw errorPagos;
+
+  if ((pagos ?? []).length === 0) {
+    throw new Error(
+      `No se puede avanzar a ${nuevoEstado}: el traslado anticipado no tiene un pago electrónico completado (Stripe).`
+    );
+  }
+}
+
 async function validarPrerequisitosEstatusAdmin(cliente: Cliente, trasladoId: string, nuevoEstado: EstadoTraslado) {
   if (nuevoEstado === "evidencia_inicial_completada") {
     await validarEvidenciaCompletaParaAdmin(cliente, trasladoId, "inicial");
@@ -69,6 +96,7 @@ async function validarPrerequisitosEstatusAdmin(cliente: Cliente, trasladoId: st
   if (nuevoEstado === "pago_completado") {
     await validarPagoCompletadoParaAdmin(cliente, trasladoId);
   }
+  await validarPagoAnticipadoParaOperar(cliente, trasladoId, nuevoEstado);
 }
 
 export async function asignarConductorAdmin(
@@ -92,11 +120,13 @@ export async function asignarConductorAdmin(
  * PRD §17.4 — "cambiar estatus". Valida contra TRANSICIONES (mismo mapa que
  * el trigger de Postgres en 0005) antes de intentarlo, para dar un mensaje
  * claro en vez de depender solo del error crudo de la base. También valida
- * los prerequisitos de contenido real (evidencia completa, pago completado)
- * antes de aplicar el cambio — cierra el hueco donde este selector genérico
- * podía marcar evidencia_*_completada o pago_completado sin que existiera
- * evidencia o pago real detrás (mismo criterio que ya aplicaban
- * evidencia.ts::confirmarEvidenciaCompleta y el webhook de Stripe).
+ * los prerequisitos de contenido real (evidencia completa, pago completado,
+ * pago anticipado antes de operar) antes de aplicar el cambio — cierra el
+ * hueco donde este selector genérico podía marcar evidencia_*_completada o
+ * pago_completado sin que existiera evidencia o pago real detrás (mismo
+ * criterio que ya aplicaban evidencia.ts::confirmarEvidenciaCompleta y el
+ * webhook de Stripe), y donde Torre podía confirmar o poner en operación
+ * un traslado anticipado sin pago electrónico completado.
  */
 export const ESTADOS_CRITICOS_TRASLADO: readonly EstadoTraslado[] = ["pago_completado"];
 
@@ -113,6 +143,8 @@ export async function cambiarEstatusAdmin(
   if (!transicionValida(estadoActual, nuevoEstado)) {
     throw new Error(`Transición no permitida: ${estadoActual} -> ${nuevoEstado}`);
   }
+
+  await validarPrerequisitosEstatusAdmin(cliente, trasladoId, nuevoEstado);
 
   return withIdempotentRetry(async () => {
     const rpc = cliente.rpc.bind(cliente) as unknown as (

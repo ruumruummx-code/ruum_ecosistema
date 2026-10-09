@@ -91,7 +91,9 @@ begin
 
     alter table public.traslados disable trigger traslados_validar_transicion;
     alter table public.traslados disable trigger traslados_validar_transicion_operativa;
+    alter table public.traslados disable trigger traslados_validar_transicion_pago;
     update public.traslados set estado = r.estado where id = v_traslado_id;
+    alter table public.traslados enable trigger traslados_validar_transicion_pago;
     alter table public.traslados enable trigger traslados_validar_transicion_operativa;
     alter table public.traslados enable trigger traslados_validar_transicion;
 
