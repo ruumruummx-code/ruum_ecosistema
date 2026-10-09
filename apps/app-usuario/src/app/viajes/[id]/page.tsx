@@ -1,12 +1,7 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
-import {
-  firmarUrlsEvidencia,
-  obtenerPasaporteDigital,
-  obtenerUltimaUbicacionTraslado,
-  type FotoEvidenciaConUrlVisual,
-  type UbicacionTraslado
-} from "@ruum/api/services";
+import { firmarUrlsEvidencia, obtenerPasaporteDigital, obtenerUltimaUbicacionTraslado } from "@ruum/api/services";
+import type { FotoEvidenciaConUrlVisual, UbicacionTraslado } from "@ruum/api/services";
 import {
   listarDisputasTraslado,
   listarFotosEvidencia,
@@ -19,7 +14,7 @@ import {
   obtenerTrasladoConRelaciones,
   obtenerVehiculoTraslado
 } from "@ruum/api/transfers";
-import { Aviso, EstadoBadge, EstadoStepper, MapaEstatico, PassportCard } from "@ruum/ui";
+import { Aviso, EstadoBadge } from "@ruum/ui";
 import { ETIQUETA_TIPO_INCIDENCIA, ETIQUETA_TIPO_VEHICULO, MENSAJES_CLAVE_UX } from "@ruum/shared/constants";
 import { ETIQUETA_ESTADO_TRASLADO } from "@ruum/shared/states";
 import type { Database } from "@ruum/shared/types";
@@ -30,10 +25,9 @@ import { CancelarTraslado } from "./CancelarTraslado";
 import { CalificarTraslado } from "./CalificarTraslado";
 import { AbrirDisputa } from "./AbrirDisputa";
 import { SeguimientoTrasladoTiempoReal } from "./SeguimientoTrasladoTiempoReal";
-import { PasaporteTabs } from "./PasaporteTabs";
-import { HeroAnsiedadCero } from "./HeroAnsiedadCero";
 import { EvidenciaComparativa } from "./EvidenciaComparativa";
 import { ExportarPasaportePdf } from "./ExportarPasaportePdf";
+import { CompartirPasaporte } from "./CompartirPasaporte";
 import { AceptarCotizacion } from "./AceptarCotizacion";
 import { PagoRecuperable } from "./PagoRecuperable";
 import { PagoTraslado } from "./PagoTraslado";
@@ -59,6 +53,10 @@ type Traslado = Pick<
   | "contacto_recepcion_telefono"
   | "fecha_hora_programada"
   | "cotizacion_expira_en"
+  | "tipo_servicio"
+  | "motivo_servicio"
+  | "ventana_recoleccion"
+  | "ventana_entrega"
 >;
 type Vehiculo = Pick<
   Database["public"]["Tables"]["vehiculos"]["Row"],
@@ -68,6 +66,9 @@ type Vehiculo = Pick<
   | "anio"
   | "vin"
   | "condicion"
+  | "color"
+  | "transmision"
+  | "placas"
   | "tiene_tarjeta_circulacion"
   | "tiene_verificacion"
   | "tiene_placas"
@@ -158,34 +159,6 @@ function formatoFecha(fecha: string | null | undefined) {
 
 function formatoMoneda(monto: number | null | undefined) {
   return `$${Number(monto ?? 0).toLocaleString("es-MX")}`;
-}
-
-function pasaporteMuestraQr(estado: EstadoTraslado) {
-  return [
-    "conductor_en_camino_al_origen",
-    "conductor_en_punto_de_recoleccion",
-    "verificacion_vehiculo_en_proceso",
-    "evidencia_inicial_en_proceso",
-    "llegada_a_destino",
-    "evidencia_final_en_proceso",
-    "evidencia_final_completada",
-    "entrega_confirmada"
-  ].includes(estado);
-}
-
-function PatronQrPasaporte({ folio }: { folio: string }) {
-  const bits = Array.from({ length: 49 }, (_, indice) => {
-    const codigo = folio.charCodeAt(indice % folio.length) + indice * 17;
-    return codigo % 3 !== 0;
-  });
-
-  return (
-    <div className="grid size-[120px] grid-cols-7 gap-1 rounded-lg border border-ink/15 bg-mist p-2" aria-label="QR de verificación del pasaporte">
-      {bits.map((activo, indice) => (
-        <span key={indice} className={activo ? "rounded-[2px] bg-ink" : "rounded-[2px] bg-ink/[0.06]"} aria-hidden />
-      ))}
-    </div>
-  );
 }
 
 function iniciales(nombre: string | null | undefined) {
@@ -395,79 +368,143 @@ async function obtenerDatos(id: string) {
   }
 }
 
-function Dato({ etiqueta, valor }: { etiqueta: string; valor: string | number | null | undefined }) {
+/* ---------- Iconos del pasaporte (SVG inline, sin dependencias) ---------- */
+
+function IconoTarjeta({ d, className = "size-3.5" }: { d: string; className?: string }) {
   return (
-    <div>
-      <dt className="font-body text-xs uppercase tracking-wide text-ink/45">{etiqueta}</dt>
-      <dd className="mt-1 font-body text-sm font-medium text-ink">{valor || "Pendiente"}</dd>
-    </div>
+    <svg className={className} viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path d={d} stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
   );
 }
 
-function AcordeonPasaporte({
+function IconoAtras({ className = "size-[18px]" }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path d="M19 12H5M11 6l-6 6 6 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+function IconoAuto({ className = "size-8" }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path
+        d="M5.2 10.5 6.7 6.8A2 2 0 0 1 8.55 5.5h6.9a2 2 0 0 1 1.85 1.3l1.5 3.7c1.05.32 1.7 1.28 1.7 2.38v4.37a1 1 0 0 1-1 1h-1.4a1 1 0 0 1-1-1v-.75H6.9v.75a1 1 0 0 1-1 1H4.5a1 1 0 0 1-1-1v-4.37c0-1.1.65-2.06 1.7-2.38Z"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinejoin="round"
+      />
+      <path d="M6.5 10.5h11" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+      <circle cx="7.2" cy="14.4" r="1.3" fill="currentColor" />
+      <circle cx="16.8" cy="14.4" r="1.3" fill="currentColor" />
+    </svg>
+  );
+}
+
+function IconoPersona({ className = "size-8" }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <circle cx="12" cy="8" r="3.6" stroke="currentColor" strokeWidth="1.8" />
+      <path d="M4.5 19.5c0-3.6 3.4-6 7.5-6s7.5 2.4 7.5 6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+function humanizar(valor: string | null | undefined): string | null {
+  if (!valor) return null;
+  const texto = valor.replaceAll("_", " ").trim();
+  if (!texto) return null;
+  return texto.charAt(0).toUpperCase() + texto.slice(1);
+}
+
+function formatoDuracion(horas: number | null | undefined): string | null {
+  if (horas == null || Number.isNaN(Number(horas))) return null;
+  const totalMin = Math.round(Number(horas) * 60);
+  const h = Math.floor(totalMin / 60);
+  const m = totalMin % 60;
+  if (h <= 0) return `${m} min`;
+  if (m === 0) return `${h} h`;
+  return `${h}h ${m.toString().padStart(2, "0")}m`;
+}
+
+/* ---------- Piezas visuales de la tarjeta pasaporte ---------- */
+
+function TarjetaPasaporte({
+  id,
   titulo,
-  descripcion,
   children,
-  abierto = false
 }: {
+  id: string;
   titulo: string;
-  descripcion?: string;
   children: ReactNode;
-  abierto?: boolean;
 }) {
   return (
-    <details open={abierto} className="group rounded-card border border-ink/15 bg-mist shadow-1">
-      <summary className="flex min-h-14 cursor-pointer list-none items-center justify-between gap-4 px-5 py-4 focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-route-dark sm:px-6">
-        <span>
-          <span className="block font-display text-base font-semibold text-ink">{titulo}</span>
-          {descripcion && <span className="mt-1 block font-body text-xs leading-5 text-ink/55">{descripcion}</span>}
-        </span>
-        <span className="grid size-8 shrink-0 place-items-center rounded-full border border-ink/15 font-body text-lg leading-none text-ink/65 transition group-open:rotate-45">
-          +
-        </span>
-      </summary>
-      <div className="border-t border-ink/10 px-5 py-5 sm:px-6">{children}</div>
-    </details>
+    <section
+      id={id}
+      aria-labelledby={`${id}-titulo`}
+      className="scroll-mt-28 rounded-[22px] border border-[#eef2f7] bg-white p-5 shadow-[0_6px_16px_rgba(0,0,0,0.01)]"
+    >
+      {children}
+    </section>
+  );
+}
+
+function EncabezadoTarjeta({ id, icono, titulo }: { id: string; icono: ReactNode; titulo: string }) {
+  return (
+    <h2 id={`${id}-titulo`} className="mb-4 flex items-center gap-2.5 text-[16px] font-bold text-[#0b1e33]">
+      <span
+        aria-hidden="true"
+        className="flex size-7 items-center justify-center rounded-[10px] bg-[#f0f5fe] text-[#2e5a88]"
+      >
+        {icono}
+      </span>
+      {titulo}
+    </h2>
+  );
+}
+
+function FilaInfo({ etiqueta, valor }: { etiqueta: string; valor: ReactNode }) {
+  return (
+    <div className="flex items-start text-[14px] leading-snug">
+      <span className="w-[130px] shrink-0 font-medium text-[#6f7e94]">{etiqueta}</span>
+      <span className="flex-1 font-semibold text-[#1a293b]">{valor}</span>
+    </div>
   );
 }
 
 function LineaTiempoVisual({ estadoActual }: { estadoActual: EstadoTraslado }) {
   return (
-    <ol className="mt-5">
-      {LINEA_TIEMPO.map((paso, indice) => {
+    <ol className="mt-1.5 flex flex-col gap-0.5">
+      {LINEA_TIEMPO.map((paso) => {
         const estado = estadoDePaso(estadoActual, paso.estado);
-        const esUltimo = indice === LINEA_TIEMPO.length - 1;
-
         return (
-          <li key={paso.etiqueta} className="relative grid grid-cols-[28px_1fr] gap-3 pb-5 last:pb-0">
-            {!esUltimo && (
-              <span
-                aria-hidden
-                className={[
-                  "absolute left-[13px] top-7 h-[calc(100%-1.75rem)] w-0.5",
-                  estado === "pendiente" ? "bg-ink/12" : "bg-control/45"
-                ].join(" ")}
-              />
-            )}
+          <li key={paso.etiqueta} className="flex gap-3.5 py-2 text-[13px]">
             <span
+              aria-hidden="true"
               className={[
-                "relative z-10 mt-0.5 grid size-7 place-items-center rounded-full border font-mono-ruum text-[11px] font-semibold",
+                "mt-1 size-2.5 shrink-0 rounded-full",
                 estado === "completado"
-                  ? "border-control bg-control text-mist"
+                  ? "bg-[#0b1e33] shadow-[0_0_0_3px_#e6edf6]"
                   : estado === "actual"
-                    ? "border-signal bg-signal text-ink shadow-2"
-                    : "border-ink/20 bg-mist text-ink/35"
+                    ? "bg-[#2e9e6b] shadow-[0_0_0_3px_#d6f0e3]"
+                    : "bg-[#cbd7e6]",
               ].join(" ")}
-              aria-hidden
-            >
-              {indice + 1}
-            </span>
-            <div className={estado === "pendiente" ? "pt-0.5 text-ink/45" : "pt-0.5 text-ink"}>
-              <p className="font-body text-sm font-semibold">{paso.etiqueta}</p>
-              <p className="mt-0.5 font-body text-xs">
+            />
+            <span className="flex-1">
+              <span
+                className={[
+                  "block font-semibold",
+                  estado === "pendiente" ? "font-medium text-[#a6b7cb]" : "text-[#1a293b]",
+                  estado === "actual" ? "font-bold text-[#0b1e33]" : "",
+                ].join(" ")}
+              >
+                {paso.etiqueta}
+              </span>
+              <span className="mt-0.5 block text-[11px] text-[#8b9bb0]">
                 {estado === "actual" ? "Estado actual" : estado === "completado" ? "Completado" : "Pendiente"}
-              </p>
-            </div>
+              </span>
+            </span>
           </li>
         );
       })}
@@ -731,79 +768,274 @@ export default async function PaginaTraslado({ params }: { params: Promise<{ id:
     ["servicio_cerrado", "reclamo_resuelto", "cierre_operativo_con_incidencia_abierta"].includes(pasaporte.estado) &&
     dentroDeVentanaPostCierre;
 
+  const folioCorto = `#RR-${pasaporte.traslado_id.slice(0, 4).toUpperCase()}`;
+  const tipoServicio = humanizar(traslado?.tipo_servicio) ?? "Traslado estándar";
+  const motivoServicio = humanizar(traslado?.motivo_servicio) ?? "Por definir";
+  const ventanaRecoleccion =
+    traslado?.ventana_recoleccion ??
+    (traslado?.fecha_hora_programada ? formatoFecha(traslado.fecha_hora_programada) : null) ??
+    "Por definir";
+  const ventanaEntrega = traslado?.ventana_entrega ?? "Por definir";
+  const colorVehiculo = vehiculo?.color ?? pasaporte.vehiculo_color ?? "No registrado";
+  const transmisionVehiculo = humanizar(vehiculo?.transmision) ?? "No registrada";
+  const condicionVehiculo = humanizar(vehiculo?.condicion ?? pasaporte.vehiculo_condicion) ?? "No registrada";
+  const placasVehiculo = vehiculo?.placas ?? pasaporte.vehiculo_placas;
+  const vinVehiculo = vehiculo?.vin ?? pasaporte.vehiculo_vin;
+  const tipoVehiculoEtiqueta = (vehiculo?.tipo ?? pasaporte.vehiculo_tipo)
+    ? (ETIQUETA_TIPO_VEHICULO[(vehiculo?.tipo ?? pasaporte.vehiculo_tipo) as keyof typeof ETIQUETA_TIPO_VEHICULO] ??
+      humanizar(vehiculo?.tipo ?? pasaporte.vehiculo_tipo))
+    : null;
+  const nombreConductor = conductor?.nombre ?? pasaporte.conductor_nombre;
+  const calificacionConductor = conductor?.calificacion_promedio ?? pasaporte.conductor_calificacion;
+  const duracionEstimada = formatoDuracion(pasaporte.tiempo_estimado_horas);
+  const distanciaTexto =
+    pasaporte.distancia_km != null ? `${Number(pasaporte.distancia_km).toLocaleString("es-MX")} km` : null;
+  const metodoPago =
+    pagos.length > 0 && pagos[0]?.metodo
+      ? humanizar(String(pagos[0].metodo))
+      : (humanizar(pasaporte.tipo_pago) ?? "Por definir");
+  const saldoPendiente = precioBase - (pasaporte.monto_pagado ?? 0);
+  const estadoPago =
+    precioBase > 0 && (pasaporte.monto_pagado ?? 0) >= precioBase
+      ? "Pagado"
+      : (pasaporte.monto_pagado ?? 0) > 0
+        ? "Pago parcial"
+        : "Pendiente";
+  const soporteHref = `/soporte?viaje=${pasaporte.traslado_id}`;
+
   return (
     <>
       <NavegacionUsuario variante="claro" />
-      <main className="user-v2-scope user-v2-page user-v2-secondary-screen"><div className="w-full max-w-2xl mx-auto px-4 py-4 sm:py-8 pb-28">
-      <PassportCard folio={`#RM-${pasaporte.traslado_id.slice(0, 4).toUpperCase()}`}>
-        <div className="flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between">
-          <div>
-            <p className="font-body text-xs font-semibold uppercase tracking-wide text-ink/55">RUUM — PASAPORTE DIGITAL</p>
-            <h1 className="mt-3 font-display text-lg font-bold leading-tight text-ink">
-              {vehiculoNombre || "Traslado de vehículo"}
-              {pasaporte.vehiculo_tipo && (
-                <span className="ml-2 align-middle font-body text-sm font-normal text-ink/50">
-                  · {ETIQUETA_TIPO_VEHICULO[pasaporte.vehiculo_tipo]}
-                </span>
-              )}
-            </h1>
-            <p className="mt-1 font-mono-ruum text-xs text-ink/60">
-              Placas {pasaporte.vehiculo_placas ?? "Pendiente"}
-              {pasaporte.vehiculo_color ? ` · ${pasaporte.vehiculo_color}` : ""}
-            </p>
-            <p className="mt-3 font-body text-xs text-ink/60">
-              Actualizado {formatoFecha(pasaporte.actualizado_en)}
-            </p>
-          </div>
-          <div className="rounded-lg border border-ink/10 bg-mist/80 px-3 py-2">
-            <EstadoBadge estado={pasaporte.estado} />
-          </div>
+      <main className="user-v2-scope user-v2-page user-v2-secondary-screen"><div className="w-full max-w-2xl mx-auto px-4 py-4 sm:py-8 pb-28 flex flex-col gap-4">
+      {/* Cabecera del pasaporte */}
+      <div className="flex items-center gap-3.5 border-b border-[#f0f4fa] bg-white px-1 py-3">
+        <Link
+          href="/mis-viajes"
+          aria-label="Volver a mis traslados"
+          className="flex size-10 shrink-0 items-center justify-center rounded-full bg-[#f2f6fc] text-[#0b1e33] transition-colors hover:bg-[#e6eef9] focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-[#1677ff]"
+        >
+          <IconoAtras />
+        </Link>
+        <div className="min-w-0">
+          <h1 className="text-[18px] font-bold tracking-tight text-[#0b1e33]">Pasaporte Digital</h1>
+          <p className="mt-0.5 text-[12px] font-medium text-[#6b7c94]">Traslado {folioCorto}</p>
         </div>
+        <div className="ml-auto shrink-0">
+          <CompartirPasaporte folio={folioCorto} variante="cabecera" />
+        </div>
+      </div>
 
-        <dl className="mt-8 grid gap-4 border-t border-ink/10 pt-6 sm:grid-cols-2">
-          <Dato etiqueta="Origen" valor={pasaporte.origen_ciudad} />
-          <Dato etiqueta="Destino" valor={pasaporte.destino_ciudad} />
-        </dl>
+      {/* Estado y folio */}
+      <div className="flex items-center justify-between gap-3">
+        <EstadoBadge estado={pasaporte.estado} />
+        <span className="shrink-0 rounded-full bg-[#f2f6fc] px-3.5 py-1.5 text-[14px] font-semibold text-[#5e718a]">
+          {folioCorto}
+        </span>
+      </div>
 
-        {pasaporteMuestraQr(pasaporte.estado) && (
-          <div className="mt-6 flex flex-col gap-4 border-t border-ink/10 pt-6 sm:flex-row sm:items-end sm:justify-between">
-            <PatronQrPasaporte folio={pasaporte.traslado_id} />
-            <div className="font-body text-sm text-ink/60">
-              <p className="font-semibold text-ink">Verificación de identidad</p>
-              <p className="mt-1">Válido hasta entrega.</p>
-            </div>
-          </div>
-        )}
+      {pasaporte.tiene_incidencia_abierta && (
+        <Aviso tono="atencion">
+          Este traslado tiene una incidencia abierta. Nuestro equipo te mantendrá informado.
+        </Aviso>
+      )}
 
-        {pasaporte.tiene_incidencia_abierta && (
-          <div className="mt-6">
-            <Aviso tono="atencion">
-              Este traslado tiene una incidencia abierta. Nuestro equipo te mantendrá informado.
-            </Aviso>
-          </div>
-        )}
-
-        {pasaporte.estado === "servicio_cerrado" && (
-          <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <Aviso tono="info">{MENSAJES_CLAVE_UX.cierre}</Aviso>
-            <ExportarPasaportePdf />
-          </div>
-        )}
-
-        <dl className="mt-8 grid gap-4 border-t border-ink/10 pt-6 sm:grid-cols-4">
-          <Dato etiqueta="Estado actual" valor={ETIQUETA_ESTADO_TRASLADO[pasaporte.estado]} />
-          <Dato etiqueta="Conductor" valor={pasaporte.conductor_nombre ?? "Por asignar"} />
-          <Dato etiqueta="Evidencia" valor={`${evidenciaInicial.length} inicial · ${evidenciaFinal.length} final`} />
-          <Dato etiqueta="Pago" valor={`${formatoMoneda(pasaporte.monto_pagado)} pagado`} />
-        </dl>
-      </PassportCard>
-
-      <HeroAnsiedadCero pasaporte={pasaporte} conductor={conductor} traslado={traslado} trasladoId={pasaporte.traslado_id} />
+      {pasaporte.estado === "servicio_cerrado" && <Aviso tono="info">{MENSAJES_CLAVE_UX.cierre}</Aviso>}
 
       <AccionesRapidasPasaporte trasladoId={pasaporte.traslado_id} estado={pasaporte.estado} />
 
+      {/* 1. Información del traslado */}
+      <TarjetaPasaporte id="info-traslado" titulo="Información del traslado">
+        <EncabezadoTarjeta
+          id="info-traslado"
+          icono={
+            <IconoTarjeta d="M8 5H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2M9 5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2h-4a2 2 0 0 1-2-2V5ZM9 12h6M9 16h4" />
+          }
+          titulo="Información del traslado"
+        />
+        <div className="flex flex-col gap-3">
+          <FilaInfo etiqueta="Tipo de servicio" valor={tipoServicio} />
+          <FilaInfo etiqueta="Ventana recolección" valor={ventanaRecoleccion} />
+          <FilaInfo etiqueta="Ventana entrega" valor={ventanaEntrega} />
+          <FilaInfo etiqueta="Motivo" valor={motivoServicio} />
+        </div>
+      </TarjetaPasaporte>
+
+      {/* 2. Datos del vehículo */}
+      <TarjetaPasaporte id="datos-vehiculo" titulo="Datos del vehículo">
+        <EncabezadoTarjeta
+          id="datos-vehiculo"
+          icono={
+            <IconoTarjeta d="M5 16 6.5 9.5A2 2 0 0 1 8.5 8h7a2 2 0 0 1 2 1.5L19 16M5 16h14M5 16v3.5M19 16v3.5M7.5 19.5h.01M16.5 19.5h.01" />
+          }
+          titulo="Datos del vehículo"
+        />
+        <div className="mb-4 flex items-center gap-4">
+          <span
+            aria-hidden="true"
+            className="flex size-20 shrink-0 items-center justify-center rounded-2xl border-2 border-white bg-[#dfe8f3] text-[#2e5a88] shadow-[0_4px_12px_rgba(0,0,0,0.05)]"
+          >
+            <IconoAuto />
+          </span>
+          <div className="min-w-0 flex-1">
+            <p className="truncate text-[18px] font-bold text-[#0b1e33]">{vehiculoNombre || "Vehículo"}</p>
+            {tipoVehiculoEtiqueta && (
+              <p className="mt-0.5 text-[12px] font-medium text-[#6b7c94]">{tipoVehiculoEtiqueta}</p>
+            )}
+            {placasVehiculo && (
+              <p className="mt-1.5 inline-block rounded-full bg-[#f0f4fa] px-3 py-1 text-[13px] font-semibold tracking-wider text-[#1f2c3d]">
+                {placasVehiculo}
+              </p>
+            )}
+            <p className="mt-1.5 truncate text-[12px] text-[#6b7c94]">VIN: {vinVehiculo ?? "pendiente de registro"}</p>
+          </div>
+        </div>
+        <div className="flex flex-col gap-3">
+          <FilaInfo etiqueta="Color" valor={colorVehiculo} />
+          <FilaInfo etiqueta="Transmisión" valor={transmisionVehiculo} />
+          <FilaInfo etiqueta="Condición declarada" valor={condicionVehiculo} />
+        </div>
+      </TarjetaPasaporte>
+
+      {/* 3. Conductor asignado */}
+      <TarjetaPasaporte id="conductor" titulo="Conductor asignado">
+        <EncabezadoTarjeta
+          id="conductor"
+          icono={
+            <IconoTarjeta d="M12 12a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7ZM5 20c0-3.9 3.1-7 7-7s7 3.1 7 7M16 11l2 2 4-4" />
+          }
+          titulo="Conductor asignado"
+        />
+        {nombreConductor ? (
+          <div className="rounded-[18px] border border-[#e9f0f8] bg-[#f8fafd] p-4">
+            <div className="flex items-center gap-4">
+              {conductor?.foto_perfil_url ? (
+                // eslint-disable-next-line @next/next/no-img-element -- URL de fotografía del conductor
+                <img
+                  src={conductor.foto_perfil_url}
+                  alt={`Fotografía de ${nombreConductor}`}
+                  className="size-[70px] shrink-0 rounded-full border-2 border-white object-cover shadow-[0_4px_12px_rgba(0,0,0,0.05)]"
+                />
+              ) : (
+                <span
+                  aria-hidden="true"
+                  className="flex size-[70px] shrink-0 items-center justify-center rounded-full border-2 border-white bg-[#d1ddeb] text-[24px] font-bold text-[#0b1e33] shadow-[0_4px_12px_rgba(0,0,0,0.05)]"
+                >
+                  {iniciales(nombreConductor)}
+                </span>
+              )}
+              <div className="min-w-0">
+                <p className="truncate text-[17px] font-bold text-[#0b1e33]">{nombreConductor}</p>
+                <p className="mt-1 flex flex-wrap items-center gap-x-2.5 gap-y-1 text-[12px] text-[#4d6079]">
+                  <span className="inline-flex items-center rounded-full bg-[#dff0e6] px-2.5 py-0.5 text-[11px] font-semibold text-[#1f6b4a]">
+                    {humanizar(conductor?.nivel_operativo_vigente ?? pasaporte.conductor_nivel) ?? "Certificado"}
+                  </span>
+                  <span>
+                    {calificacionConductor != null
+                      ? `${Number(calificacionConductor).toFixed(1)} / 5`
+                      : "Sin calificación"}
+                  </span>
+                  <span>{conductor ? `ID: ${conductor.id.slice(0, 8).toUpperCase()}` : "ID pendiente"}</span>
+                </p>
+              </div>
+            </div>
+            {pasaporte.conductor_id && (
+              <p className="mt-3 text-[12px] leading-5 text-[#4d6079]">{MENSAJES_CLAVE_UX.conductor_asignado}</p>
+            )}
+          </div>
+        ) : (
+          <div className="rounded-[18px] border border-dashed border-[#cbd7e6] bg-[#f8fafd] p-4">
+            <p className="text-[15px] font-bold text-[#0b1e33]">Por asignar</p>
+            <p className="mt-1 text-[13px] text-[#4d6079]">
+              Te avisamos en cuanto un conductor certificado tome tu traslado.
+            </p>
+          </div>
+        )}
+        <div id="chat-conductor" className="mt-3 scroll-mt-28">
+          <ChatTraslado trasladoId={pasaporte.traslado_id} estado={pasaporte.estado} />
+        </div>
+      </TarjetaPasaporte>
+
+      {/* 4. Ruta del traslado */}
+      <TarjetaPasaporte id="ruta" titulo="Ruta del traslado">
+        <EncabezadoTarjeta
+          id="ruta"
+          icono={
+            <IconoTarjeta d="M12 21s-7-5.5-7-11a7 7 0 0 1 14 0c0 5.5-7 11-7 11Z M12 12.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5Z" />
+          }
+          titulo="Ruta del traslado"
+        />
+        <SeguimientoTrasladoTiempoReal
+          trasladoId={pasaporte.traslado_id ?? id}
+          estado={pasaporte.estado}
+          origen={{ lat: pasaporte.origen_lat, lng: pasaporte.origen_lng }}
+          destino={{ lat: pasaporte.destino_lat, lng: pasaporte.destino_lng }}
+          ubicacionInicial={ultimaUbicacion}
+        />
+        <div className="mt-4 flex flex-col gap-3">
+          <div className="flex items-start gap-3">
+            <span
+              aria-hidden="true"
+              className="mt-0.5 flex size-6 shrink-0 items-center justify-center rounded-full bg-[#e2f0e9] text-[#1f6b4a]"
+            >
+              <IconoTarjeta d="M12 21s-7-5.5-7-11a7 7 0 0 1 14 0c0 5.5-7 11-7 11Z" className="size-3" />
+            </span>
+            <p className="text-[14px] font-medium text-[#1a293b]">
+              {traslado?.origen_ciudad ?? pasaporte.origen_ciudad ?? "Origen pendiente"}
+              <small className="mt-0.5 block text-[12px] font-normal text-[#6f7e94]">
+                {traslado?.origen_direccion ?? pasaporte.origen_direccion ?? "Dirección registrada"}
+              </small>
+            </p>
+          </div>
+          <div aria-hidden="true" className="ml-[11px] h-4 w-0 border-l-2 border-dashed border-[#cbd7e6]" />
+          <div className="flex items-start gap-3">
+            <span
+              aria-hidden="true"
+              className="mt-0.5 flex size-6 shrink-0 items-center justify-center rounded-full bg-[#fef0e0] text-[#b36b1e]"
+            >
+              <IconoTarjeta d="M5 21V4m0 1h12l-2.5 4L17 13H5" className="size-3" />
+            </span>
+            <p className="text-[14px] font-medium text-[#1a293b]">
+              {traslado?.destino_ciudad ?? pasaporte.destino_ciudad ?? "Destino pendiente"}
+              <small className="mt-0.5 block text-[12px] font-normal text-[#6f7e94]">
+                {traslado?.destino_direccion ?? pasaporte.destino_direccion ?? "Dirección registrada"}
+              </small>
+            </p>
+          </div>
+        </div>
+        {(duracionEstimada || distanciaTexto) && (
+          <div className="mt-4 flex flex-wrap gap-2">
+            {duracionEstimada && (
+              <span className="rounded-full bg-[#eef3fa] px-2.5 py-1 text-[11px] font-semibold text-[#2e5a88]">
+                Tiempo estimado: {duracionEstimada}
+              </span>
+            )}
+            {distanciaTexto && (
+              <span className="rounded-full bg-[#eef3fa] px-2.5 py-1 text-[11px] font-semibold text-[#2e5a88]">
+                {distanciaTexto}
+              </span>
+            )}
+          </div>
+        )}
+        {(traslado?.contacto_entrega_nombre || traslado?.contacto_recepcion_nombre) && (
+          <div className="mt-4 flex flex-col gap-3 border-t border-[#f0f4fa] pt-4">
+            {traslado?.contacto_entrega_nombre && (
+              <FilaInfo
+                etiqueta="Entrega"
+                valor={`${traslado.contacto_entrega_nombre}${traslado.contacto_entrega_telefono ? ` · ${traslado.contacto_entrega_telefono}` : ""}`}
+              />
+            )}
+            {traslado?.contacto_recepcion_nombre && (
+              <FilaInfo
+                etiqueta="Recibe"
+                valor={`${traslado.contacto_recepcion_nombre}${traslado.contacto_recepcion_telefono ? ` · ${traslado.contacto_recepcion_telefono}` : ""}`}
+              />
+            )}
+          </div>
+        )}
+      </TarjetaPasaporte>
+
       {mostrarPromptCalificacion && (
-        <section id="calificacion" aria-label="Califica tu traslado" className="mt-4 scroll-mt-28">
+        <section id="calificacion" aria-label="Califica tu traslado" className="scroll-mt-28">
           <CalificarTraslado
             trasladoId={pasaporte.traslado_id}
             conductorId={pasaporte.conductor_id}
@@ -812,336 +1044,298 @@ export default async function PaginaTraslado({ params }: { params: Promise<{ id:
         </section>
       )}
 
-      <section id="chat-conductor" className="mt-4 scroll-mt-28">
-        <AcordeonPasaporte 
-          titulo="Chat con el conductor" 
-          descripcion="Comunicación autorizada y llamada enmascarada."
-          abierto={["conductor_asignado","conductor_en_camino_al_origen","conductor_en_punto_de_recoleccion","traslado_en_curso","llegada_a_destino"].includes(pasaporte.estado)}
-        >
-          <ChatTraslado trasladoId={pasaporte.traslado_id} estado={pasaporte.estado} />
-        </AcordeonPasaporte>
-      </section>
+      {/* 5. Línea de tiempo */}
+      <TarjetaPasaporte id="linea-tiempo" titulo="Línea de tiempo">
+        <EncabezadoTarjeta
+          id="linea-tiempo"
+          icono={
+            <IconoTarjeta d="M4 6h16M4 12h16M4 18h10M18 16.5a2.5 2.5 0 1 0 0 .01" />
+          }
+          titulo="Línea de tiempo"
+        />
+        <LineaTiempoVisual estadoActual={pasaporte.estado} />
+      </TarjetaPasaporte>
 
-      <section id="acciones-incidencia" className="mt-4 scroll-mt-28">
-        <AcordeonPasaporte titulo="Reportar incidencia" descripcion="Da aviso a soporte sin buscar el formulario al final de la página.">
+      {/* 6. Evidencia del vehículo */}
+      <TarjetaPasaporte id="evidencia" titulo="Evidencia del vehículo">
+        <EncabezadoTarjeta
+          id="evidencia"
+          icono={
+            <IconoTarjeta d="M4 8h3l2-2.5h6L17 8h3a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1Z M12 16.5a3.2 3.2 0 1 0 0-6.4 3.2 3.2 0 0 0 0 6.4Z" />
+          }
+          titulo="Evidencia del vehículo"
+        />
+        <div className="flex flex-col gap-6">
+          <EvidenciaMomento
+            titulo="Check inicial"
+            descripcion={MENSAJES_CLAVE_UX.evidencia_inicial}
+            fotos={evidenciaInicial}
+          />
+          <EvidenciaComparativa
+            inicial={evidenciaInicial}
+            final={evidenciaFinal}
+            tieneIncidenciaAbierta={incidencias.some((i) => !i.resuelta)}
+          />
+          <EvidenciaDurante pasaporte={pasaporte} traslado={traslado} incidencias={incidencias} />
+          <EvidenciaMomento
+            titulo="Check final"
+            descripcion="Fotos finales exteriores e interiores, kilometraje y combustible final, confirmación de entrega, observaciones finales y aceptación del receptor cuando aplique."
+            fotos={evidenciaFinal}
+          />
+        </div>
+      </TarjetaPasaporte>
+      {/* 7. Reportes o incidencias */}
+      <TarjetaPasaporte id="reportes" titulo="Reportes o incidencias">
+        <EncabezadoTarjeta
+          id="reportes"
+          icono={
+            <IconoTarjeta d="M12 8v5m0 3.5h.01M10.3 3.9 2.6 17a2 2 0 0 0 1.7 3h15.4a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z" />
+          }
+          titulo="Reportes o incidencias"
+        />
+        {incidencias.length > 0 ? (
+          <ul className="mb-4 flex flex-col gap-2.5">
+            {incidencias.map((incidencia) => (
+              <li key={incidencia.id} className="rounded-2xl border border-[#eef2f7] px-4 py-3">
+                <div className="flex items-start justify-between gap-3">
+                  <p className="text-[14px] font-semibold text-[#1a293b]">{ETIQUETA_TIPO_INCIDENCIA[incidencia.tipo]}</p>
+                  <span
+                    className={`shrink-0 rounded-full px-2.5 py-1 text-[11px] font-bold ${incidencia.resuelta ? "bg-[#e9f3ee] text-[#1f6b4a]" : "bg-[#fef0e0] text-[#b36b1e]"}`}
+                  >
+                    {incidencia.resuelta ? "Resuelta" : "Abierta"}
+                  </span>
+                </div>
+                <p className="mt-1.5 text-[13px] text-[#4d6079]">{incidencia.descripcion}</p>
+                <p className="mt-1.5 text-[11px] text-[#8b9bb0]">
+                  {incidencia.momento ? String(incidencia.momento).replaceAll("_", " ") : "Traslado"} ·{" "}
+                  {formatoFecha(incidencia.creada_en)}
+                </p>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="mb-4 flex items-center gap-2.5 text-[14px] text-[#4d6079]">
+            <span
+              aria-hidden="true"
+              className="flex size-6 shrink-0 items-center justify-center rounded-full bg-[#e9f3ee] text-[#1f6b4a]"
+            >
+              <IconoTarjeta d="m5 12.5 4.5 4.5L19 7.5" className="size-3.5" />
+            </span>
+            Sin incidencias reportadas
+          </p>
+        )}
+        <div className="flex flex-col gap-3">
           <ReportarIncidenciaUsuario trasladoId={pasaporte.traslado_id} />
-        </AcordeonPasaporte>
-      </section>
-
-      <PasaporteTabs
-        trazabilidad={
-          <div id="trazabilidad" className="space-y-6">
-            <SeguimientoTrasladoTiempoReal
-              trasladoId={pasaporte.traslado_id ?? id}
-              estado={pasaporte.estado}
-              origen={{ lat: pasaporte.origen_lat, lng: pasaporte.origen_lng }}
-              destino={{ lat: pasaporte.destino_lat, lng: pasaporte.destino_lng }}
-              ubicacionInicial={ultimaUbicacion}
-            />
-
-            <PassportCard>
-              <h2 className="font-display text-xl font-semibold">Progreso del traslado</h2>
-              <p className="mt-1 font-body text-sm leading-6 text-ink/60">
-                Los pasos completados quedan sellados, el punto actual queda resaltado y los pasos futuros permanecen en gris.
-              </p>
-              <div className="mt-6">
-                <EstadoStepper estado={pasaporte.estado} />
-              </div>
-              <LineaTiempoVisual estadoActual={pasaporte.estado} />
-            </PassportCard>
-          </div>
-        }
-        evidencias={
-          <section id="evidencias" className="space-y-6">
-            <PassportCard>
-              <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
-                <div>
-                  <p className="font-body text-xs uppercase tracking-wide text-ink/45">Evidencia documental</p>
-                  <h2 className="mt-1 font-display text-xl font-semibold">Fotos y bitácora operativa</h2>
+          <CancelarTraslado
+            trasladoId={pasaporte.traslado_id}
+            estado={pasaporte.estado}
+            precio={precioBase}
+            fechaProgramada={traslado?.fecha_hora_programada ?? null}
+            conductorAsignado={Boolean(pasaporte.conductor_id)}
+          />
+          <AbrirDisputa trasladoId={pasaporte.traslado_id} disponible={puedeAbrirDisputa} />
+        </div>
+        {(disputas.length > 0 || reclamosSeguro.length > 0) && (
+          <div className="mt-4 flex flex-col gap-2.5 border-t border-[#f0f4fa] pt-4">
+            {disputas.map((disputa) => (
+              <div key={disputa.id} className="rounded-2xl border border-[#eef2f7] px-4 py-3">
+                <div className="flex items-start justify-between gap-3">
+                  <p className="text-[14px] font-semibold text-[#1a293b]">
+                    {disputa.tipo ? String(disputa.tipo).replaceAll("_", " ") : "Disputa"}
+                  </p>
+                  <span className="shrink-0 text-[11px] text-[#8b9bb0]">
+                    {disputa.estado ? String(disputa.estado).replaceAll("_", " ") : ""}
+                  </span>
                 </div>
-                <p className="font-body text-sm text-ink/55">La evidencia se consulta por momento, sin mezclarla con soporte o pago.</p>
+                <p className="mt-1.5 text-[13px] text-[#4d6079]">{disputa.descripcion}</p>
+                {disputa.resolucion && (
+                  <p className="mt-1.5 text-[13px] text-[#1f6b4a]">
+                    Resolución: {String(disputa.resolucion).replaceAll("_", " ")}
+                    {disputa.resolucion_detalle ? ` · ${disputa.resolucion_detalle}` : ""}
+                  </p>
+                )}
               </div>
-
-              <div className="mt-6 space-y-6">
-                <EvidenciaMomento
-                  titulo="Evidencia inicial"
-                  descripcion={MENSAJES_CLAVE_UX.evidencia_inicial}
-                  fotos={evidenciaInicial}
-                />
-                <EvidenciaComparativa
-                  inicial={evidenciaInicial}
-                  final={evidenciaFinal}
-                  tieneIncidenciaAbierta={incidencias.some((i) => !i.resuelta)}
-                />
-                <EvidenciaDurante pasaporte={pasaporte} traslado={traslado} incidencias={incidencias} />
-                <EvidenciaMomento
-                  titulo="Evidencia final"
-                  descripcion="Fotos finales exteriores e interiores, kilometraje y combustible final, confirmación de entrega, observaciones finales y aceptación del receptor cuando aplique."
-                  fotos={evidenciaFinal}
-                />
-                <div className="flex justify-end">
-                  <ExportarPasaportePdf />
+            ))}
+            {reclamosSeguro.map((reclamo) => (
+              <div key={reclamo.id} className="rounded-2xl border border-[#eef2f7] px-4 py-3">
+                <div className="flex items-start justify-between gap-3">
+                  <p className="text-[14px] font-semibold text-[#1a293b]">Reclamo de seguro</p>
+                  <span className="shrink-0 text-[11px] text-[#8b9bb0]">
+                    {reclamo.estado ? String(reclamo.estado).replaceAll("_", " ") : ""}
+                  </span>
                 </div>
-              </div>
-            </PassportCard>
-          </section>
-        }
-        detalles={
-          <section id="detalles" className="space-y-4">
-            <AcordeonPasaporte titulo="Ruta y contactos" descripcion="Origen, destino y personas autorizadas." abierto>
-              <dl className="grid gap-4 sm:grid-cols-2">
-                <Dato etiqueta="Origen" valor={traslado ? `${traslado.origen_direccion}, ${traslado.origen_ciudad}` : null} />
-                <Dato etiqueta="Destino" valor={traslado ? `${traslado.destino_direccion}, ${traslado.destino_ciudad}` : null} />
-                <Dato etiqueta="Entrega" valor={traslado?.contacto_entrega_nombre} />
-                <Dato etiqueta="Recibe" valor={traslado?.contacto_recepcion_nombre} />
-                <Dato etiqueta="Teléfono entrega" valor={traslado?.contacto_entrega_telefono} />
-                <Dato etiqueta="Teléfono recepción" valor={traslado?.contacto_recepcion_telefono} />
-              </dl>
-              <div className="mt-6 rounded-lg border border-route/20 bg-route-soft/40 px-4 py-4">
-                <p className="font-body text-xs uppercase tracking-wide text-route-dark">Ruta general</p>
-                <p className="mt-2 font-body text-sm text-ink">
-                  {traslado
-                    ? `${traslado.origen_ciudad} → ${traslado.destino_ciudad}`
-                    : "La ruta se mostrará cuando operación confirme origen y destino."}
+                <p className="mt-1.5 text-[13px] text-[#4d6079]">
+                  Abierto {formatoFecha(reclamo.abierto_en)}
+                  {reclamo.resuelto_en ? ` · Resuelto ${formatoFecha(reclamo.resuelto_en)}` : ""}
                 </p>
               </div>
-            </AcordeonPasaporte>
+            ))}
+          </div>
+        )}
+      </TarjetaPasaporte>
 
-            <AcordeonPasaporte titulo="Conductor asignado" descripcion="Identidad, certificación y canal autorizado.">
-              <div className="flex items-center gap-4">
-                {conductor?.foto_perfil_url ? (
-                  // eslint-disable-next-line @next/next/no-img-element -- URL de fotografía del conductor
-                  <img src={conductor.foto_perfil_url} alt={`Fotografía de ${conductor?.nombre ?? pasaporte.conductor_nombre ?? "conductor"}`} className="size-16 shrink-0 rounded-full border border-ink/15 object-cover" />
-                ) : (
-                  <div className="flex size-16 shrink-0 items-center justify-center rounded-full bg-ink font-display text-xl text-mist">
-                    {iniciales(conductor?.nombre ?? pasaporte.conductor_nombre)}
-                  </div>
-                )}
-                <div>
-                  <p className="font-body text-base font-semibold">{conductor?.nombre ?? pasaporte.conductor_nombre ?? "Por asignar"}</p>
-                  <p className="mt-1 font-body text-sm text-ink/55">
-                    {conductor ? `ID interno ${conductor.id.slice(0, 8).toUpperCase()}` : "Se mostrará cuando sea asignado"}
-                  </p>
-                </div>
-              </div>
-              <dl className="mt-5 grid gap-4 sm:grid-cols-2">
-                <Dato etiqueta="Certificación" valor={conductor?.nivel_operativo_vigente ?? pasaporte.conductor_nivel} />
-                <Dato
-                  etiqueta="Calificación"
-                  valor={
-                    pasaporte.conductor_calificacion != null ? `${Number(pasaporte.conductor_calificacion).toFixed(1)} / 5` : "Sin calificación"
-                  }
-                />
-                <Dato etiqueta="Estatus" valor={conductor?.estado ?? pasaporte.conductor_estado} />
-                <Dato etiqueta="Canal autorizado" valor={conductor ? "Chat y llamada enmascarada" : "Pendiente"} />
-              </dl>
-              <p className="mt-5 font-body text-xs leading-5 text-ink/50">
-                {pasaporte.conductor_id ? MENSAJES_CLAVE_UX.conductor_asignado : "Se mostrará cuando sea asignado."}
-              </p>
-            </AcordeonPasaporte>
-
-            <AcordeonPasaporte titulo="Datos del vehículo" descripcion="Ficha técnica y documentos declarados.">
-              <dl className="grid gap-4 sm:grid-cols-2">
-                <Dato etiqueta="Marca" valor={vehiculo?.marca ?? pasaporte.vehiculo_marca} />
-                <Dato etiqueta="Modelo" valor={vehiculo?.modelo ?? pasaporte.vehiculo_modelo} />
-                <Dato etiqueta="Año" valor={vehiculo?.anio ?? pasaporte.vehiculo_anio} />
-                <Dato
-                  etiqueta="Tipo"
-                  valor={
-                    (vehiculo?.tipo ?? pasaporte.vehiculo_tipo)
-                      ? ETIQUETA_TIPO_VEHICULO[(vehiculo?.tipo ?? pasaporte.vehiculo_tipo) as keyof typeof ETIQUETA_TIPO_VEHICULO] ?? (vehiculo?.tipo ?? pasaporte.vehiculo_tipo)
-                      : null
-                  }
-                />
-                <Dato etiqueta="VIN" valor={vehiculo?.vin ?? pasaporte.vehiculo_vin} />
-                <Dato etiqueta="Condición" valor={vehiculo?.condicion ?? pasaporte.vehiculo_condicion} />
-              </dl>
-              <div className="mt-5 grid gap-2 font-body text-sm">
-                {[
-                  ["Tarjeta de circulación", vehiculo?.tiene_tarjeta_circulacion],
-                  ["Verificación vehicular", vehiculo?.tiene_verificacion],
-                  ["Placas instaladas", vehiculo?.tiene_placas],
-                  ["Puede circular rodando", vehiculo?.puede_circular_rodando]
-                ].map(([etiqueta, listo]) => (
-                  <div key={String(etiqueta)} className="flex items-center justify-between border-t border-ink/10 py-2 first:border-t-0">
-                    <span>{etiqueta}</span>
-                    <span className={listo ? "text-control" : "text-ink/45"}>{listo ? "Confirmado" : "Pendiente"}</span>
-                  </div>
-                ))}
-              </div>
-            </AcordeonPasaporte>
-
-            <AcordeonPasaporte titulo="Reportes e incidencias" descripcion="Acciones disponibles durante y después del traslado.">
-              <div>
-                {incidencias.length > 0 ? (
-                  <div className="space-y-4">
-                    {incidencias.map((incidencia) => (
-                      <div key={incidencia.id} className="rounded-lg border border-ink/10 px-4 py-3">
-                        <div className="flex items-start justify-between gap-3">
-                          <p className="font-body text-sm font-semibold">{ETIQUETA_TIPO_INCIDENCIA[incidencia.tipo]}</p>
-                          <span className={incidencia.resuelta ? "font-body text-xs text-control" : "font-body text-xs text-warn"}>
-                            {incidencia.resuelta ? "Resuelta" : "Abierta"}
-                          </span>
-                        </div>
-                        <p className="mt-2 font-body text-sm text-ink/65">{incidencia.descripcion}</p>
-                        <p className="mt-2 font-body text-xs text-ink/45">
-                          {incidencia.momento ? String(incidencia.momento).replaceAll("_", " ") : "Traslado"} · {formatoFecha(incidencia.creada_en)}
-                        </p>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="rounded-lg border border-dashed border-ink/15 px-3 py-3 font-body text-sm text-ink/50">
-                    No hay incidencias reportadas para este traslado.
-                  </p>
-                )}
-                <AbrirDisputa trasladoId={pasaporte.traslado_id} disponible={puedeAbrirDisputa} />
-                <CancelarTraslado
-                  trasladoId={pasaporte.traslado_id}
-                  estado={pasaporte.estado}
-                  precio={precioBase}
-                  fechaProgramada={traslado?.fecha_hora_programada ?? null}
-                  conductorAsignado={Boolean(pasaporte.conductor_id)}
-                />
-              </div>
-            </AcordeonPasaporte>
-
-            <section id="pago-soporte" className="scroll-mt-28">
-              <AcordeonPasaporte
-                titulo="Pago y soporte"
-                descripcion="Tarifa, pagos registrados y contacto de ayuda."
-                abierto={["cotizacion_generada", "cotizacion_aceptada", "pago_pendiente"].includes(pasaporte.estado)}
+      {/* 8. Información de pago */}
+      <TarjetaPasaporte id="pago" titulo="Información de pago">
+        <EncabezadoTarjeta
+          id="pago"
+          icono={<IconoTarjeta d="M3 7a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7ZM3 10h18M7 15h4" />}
+          titulo="Información de pago"
+        />
+        <div className="flex flex-col gap-3">
+          <FilaInfo etiqueta="Método de pago" valor={metodoPago ?? "Por definir"} />
+          <FilaInfo
+            etiqueta="Estado"
+            valor={
+              <span
+                className={
+                  estadoPago === "Pagado"
+                    ? "text-[#1f6b4a]"
+                    : estadoPago === "Pago parcial"
+                      ? "text-[#b36b1e]"
+                      : "text-[#4d6079]"
+                }
               >
-                <p className="font-body text-sm text-ink/55">{MENSAJES_CLAVE_UX.pago}</p>
-                <dl className="mt-5 grid gap-4 sm:grid-cols-2">
-                  <Dato etiqueta="Tipo de pago" valor={(pasaporte.tipo_pago ? String(pasaporte.tipo_pago) : "por_definir").replaceAll("_", " ")} />
-                  <Dato etiqueta="Precio cotizado" valor={formatoMoneda(pasaporte.precio_cotizado)} />
-                  <Dato etiqueta="Precio final" valor={formatoMoneda(pasaporte.precio_final ?? precioBase)} />
-                  <Dato etiqueta="Monto pagado" valor={formatoMoneda(pasaporte.monto_pagado)} />
-                </dl>
-                {pagos.length > 0 && (
-                  <div className="mt-5 space-y-3">
-                    {pagos.map((pago, indice) => (
-                      <div key={pago.id} className="flex items-center justify-between border-t border-ink/10 pt-3 font-body text-sm">
-                        <span>
-                          Pago {indice + 1} de {pagos.length} · {pago.metodo} · {pago.momento ? String(pago.momento).replaceAll("_", " ") : ""}
-                        </span>
-                        <span className="font-mono-ruum">{formatoMoneda(pago.monto)}</span>
-                      </div>
-                    ))}
-                    <p className="font-body text-xs text-ink/60" role="status">
-                      Total pagado {formatoMoneda(pasaporte.monto_pagado)} de {formatoMoneda(precioBase)}.
-                      {precioBase - (pasaporte.monto_pagado ?? 0) > 0
-                        ? ` Restan ${formatoMoneda(precioBase - (pasaporte.monto_pagado ?? 0))}.`
-                        : " Sin saldo pendiente."}
-                    </p>
-                  </div>
-                )}
-                {pasaporte.estado === "cotizacion_generada" && pasaporte.precio_cotizado != null && (
-                  <div className="mt-6 rounded-xl border border-[#FFC400]/40 bg-[#FFC400]/10 p-4">
-                    <div className="flex items-center gap-2">
-                      <span className="flex size-6 items-center justify-center rounded-full bg-[#FFC400] text-xs font-black text-slate-950">
-                        $
-                      </span>
-                      <p className="font-display text-sm font-bold text-white">Cotización lista para confirmación</p>
-                    </div>
-                    <p className="mt-2 font-body text-xs text-[#d7dce5]">
-                      El equipo operativo calculó la tarifa de tu traslado:{" "}
-                      <strong className="text-[#FFC400] font-bold text-sm">
-                        {formatoMoneda(pasaporte.precio_cotizado)} MXN
-                      </strong>
-                      . Revisa los detalles y acéptala para continuar con la asignación del conductor.
-                    </p>
-                    <AceptarCotizacion
-                      trasladoId={pasaporte.traslado_id}
-                      tipoPago={pasaporte.tipo_pago ?? "anticipado"}
-                    />
-                  </div>
-                )}
-                {pasaporte.estado === "cotizacion_aceptada" && pasaporte.tipo_pago === "anticipado" && precioBase > 0 && (
-                  <div className="mt-6 rounded-xl border border-sky-500/30 bg-sky-500/10 p-4">
-                    <p className="font-display text-sm font-bold text-white">Cotización aceptada · Pago anticipado</p>
-                    <p className="mt-1 font-body text-xs text-[#d7dce5]">
-                      Para que nuestro equipo confirme y asigne un conductor certificado a tu traslado, completa el pago con tarjeta.
-                    </p>
-                    {traslado?.cotizacion_expira_en ? (
-                      <PagoRecuperable
-                        trasladoId={pasaporte.traslado_id}
-                        monto={precioBase}
-                        cotizacionExpiraEn={traslado.cotizacion_expira_en}
-                      />
-                    ) : (
-                      <PagoTraslado trasladoId={pasaporte.traslado_id} monto={precioBase} />
-                    )}
-                  </div>
-                )}
-                {pasaporte.estado === "pago_pendiente" && (
-                  <div className="mt-6">
-                    {precioBase > 0 ? (
-                      <div className="rounded-xl border border-[#FFC400]/40 bg-[#FFC400]/10 p-4">
-                        <p className="font-display text-sm font-bold text-white">Pago pendiente del traslado</p>
-                        <p className="mt-1 font-body text-xs text-[#d7dce5]">
-                          El servicio ha llegado a su destino. Completa el pago pendiente para finalizar el servicio.
-                        </p>
-                        <PagoTraslado trasladoId={pasaporte.traslado_id} monto={precioBase} />
-                      </div>
-                    ) : (
-                      <Aviso tono="atencion">
-                        Pago pendiente. El cobro al cierre se activará en cuanto operación confirme el precio final.
-                      </Aviso>
-                    )}
-                  </div>
-                )}
-                <div id="soporte-pasaporte" className="mt-6 rounded-lg border border-ink/10 px-4 py-4">
-                  <p className="font-body text-sm font-semibold">Contacto con soporte</p>
-                  <p className="mt-1 font-body text-sm text-ink/60">
-                    {MENSAJES_CLAVE_UX.comunicacion} Si hay una incidencia abierta, soporte dará seguimiento desde este mismo expediente.
-                  </p>
-                  <div className="mt-4">
-                    <Link href={`/soporte?viaje=${pasaporte.traslado_id}`} className="font-body text-sm font-medium text-route-dark">
-                      Abrir soporte del traslado
-                    </Link>
-                  </div>
-                </div>
-              </AcordeonPasaporte>
-            </section>
-
-            {(disputas.length > 0 || reclamosSeguro.length > 0) && (
-              <AcordeonPasaporte titulo="Disputas, reclamos y resoluciones" descripcion="Historial de resolución posterior al servicio.">
-                <div className="space-y-3">
-                  {disputas.map((disputa) => (
-                    <div key={disputa.id} className="rounded-lg border border-ink/10 px-4 py-3">
-                      <div className="flex items-start justify-between gap-3">
-                        <p className="font-body text-sm font-semibold">{disputa.tipo ? String(disputa.tipo).replaceAll("_", " ") : "Disputa"}</p>
-                        <span className="font-body text-xs text-ink/50">{disputa.estado ? String(disputa.estado).replaceAll("_", " ") : ""}</span>
-                      </div>
-                      <p className="mt-2 font-body text-sm text-ink/65">{disputa.descripcion}</p>
-                      {disputa.resolucion && (
-                        <p className="mt-2 font-body text-sm text-control">
-                          Resolución: {String(disputa.resolucion).replaceAll("_", " ")}
-                          {disputa.resolucion_detalle ? ` · ${disputa.resolucion_detalle}` : ""}
-                        </p>
-                      )}
-                    </div>
-                  ))}
-                  {reclamosSeguro.map((reclamo) => (
-                    <div key={reclamo.id} className="rounded-lg border border-ink/10 px-4 py-3">
-                      <div className="flex items-start justify-between gap-3">
-                        <p className="font-body text-sm font-semibold">Reclamo de seguro</p>
-                        <span className="font-body text-xs text-ink/50">{reclamo.estado ? String(reclamo.estado).replaceAll("_", " ") : ""}</span>
-                      </div>
-                      <p className="mt-2 font-body text-sm text-ink/65">
-                        Abierto {formatoFecha(reclamo.abierto_en)}
-                        {reclamo.resuelto_en ? ` · Resuelto ${formatoFecha(reclamo.resuelto_en)}` : ""}
-                      </p>
-                    </div>
-                  ))}
-                </div>
-              </AcordeonPasaporte>
+                {estadoPago}
+              </span>
+            }
+          />
+        </div>
+        <div className="mt-2 flex items-center justify-between gap-3 rounded-2xl border border-[#e9f0f8] bg-[#f7faff] p-4">
+          <span className="text-[14px] font-medium text-[#4d6079]">Total pagado</span>
+          <span className="text-[22px] font-extrabold tracking-tight text-[#0b1e33]">
+            {formatoMoneda(pasaporte.monto_pagado)} MXN
+          </span>
+        </div>
+        <p className="mt-2 text-[12px] text-[#7e8fa8]">
+          {pasaporte.estado === "servicio_cerrado"
+            ? "Factura disponible en tu correo registrado."
+            : "Factura disponible al finalizar."}
+        </p>
+        <p className="mt-3 text-[13px] leading-5 text-[#4d6079]">{MENSAJES_CLAVE_UX.pago}</p>
+        {pagos.length > 0 && (
+          <div className="mt-4 flex flex-col gap-3">
+            {pagos.map((pago, indice) => (
+              <div
+                key={pago.id}
+                className="flex items-center justify-between gap-3 border-t border-[#f0f4fa] pt-3 text-[14px]"
+              >
+                <span className="text-[#1a293b]">
+                  Pago {indice + 1} de {pagos.length} · {humanizar(pago.metodo) ?? pago.metodo}
+                  {pago.momento ? ` · ${String(pago.momento).replaceAll("_", " ")}` : ""}
+                </span>
+                <span className="shrink-0 font-mono-ruum font-semibold text-[#0b1e33]">{formatoMoneda(pago.monto)}</span>
+              </div>
+            ))}
+            <p className="text-[12px] text-[#4d6079]" role="status">
+              Total pagado {formatoMoneda(pasaporte.monto_pagado)} de {formatoMoneda(precioBase)}.
+              {saldoPendiente > 0 ? ` Restan ${formatoMoneda(saldoPendiente)}.` : " Sin saldo pendiente."}
+            </p>
+          </div>
+        )}
+        {pasaporte.estado === "cotizacion_generada" && pasaporte.precio_cotizado != null && (
+          <div className="mt-4 rounded-2xl border border-[#FFC400]/40 bg-[#FFC400]/10 p-4">
+            <div className="flex items-center gap-2">
+              <span className="flex size-6 items-center justify-center rounded-full bg-[#FFC400] text-xs font-black text-slate-950">
+                $
+              </span>
+              <p className="font-display text-sm font-bold text-white">Cotización lista para confirmación</p>
+            </div>
+            <p className="mt-2 font-body text-xs text-[#d7dce5]">
+              El equipo operativo calculó la tarifa de tu traslado:{" "}
+              <strong className="text-[#FFC400] font-bold text-sm">{formatoMoneda(pasaporte.precio_cotizado)} MXN</strong>
+              . Revisa los detalles y acéptala para continuar con la asignación del conductor.
+            </p>
+            <AceptarCotizacion trasladoId={pasaporte.traslado_id} tipoPago={pasaporte.tipo_pago ?? "anticipado"} />
+          </div>
+        )}
+        {pasaporte.estado === "cotizacion_aceptada" && pasaporte.tipo_pago === "anticipado" && precioBase > 0 && (
+          <div className="mt-4 rounded-2xl border border-sky-500/30 bg-sky-500/10 p-4">
+            <p className="font-display text-sm font-bold text-white">Cotización aceptada · Pago anticipado</p>
+            <p className="mt-1 font-body text-xs text-[#d7dce5]">
+              Para que nuestro equipo confirme y asigne un conductor certificado a tu traslado, completa el pago con
+              tarjeta.
+            </p>
+            {traslado?.cotizacion_expira_en ? (
+              <PagoRecuperable
+                trasladoId={pasaporte.traslado_id}
+                monto={precioBase}
+                cotizacionExpiraEn={traslado.cotizacion_expira_en}
+              />
+            ) : (
+              <PagoTraslado trasladoId={pasaporte.traslado_id} monto={precioBase} />
             )}
-          </section>
-        }
-      />
+          </div>
+        )}
+        {pasaporte.estado === "pago_pendiente" && (
+          <div className="mt-4">
+            {precioBase > 0 ? (
+              <div className="rounded-2xl border border-[#FFC400]/40 bg-[#FFC400]/10 p-4">
+                <p className="font-display text-sm font-bold text-white">Pago pendiente del traslado</p>
+                <p className="mt-1 font-body text-xs text-[#d7dce5]">
+                  El servicio ha llegado a su destino. Completa el pago pendiente para finalizar el servicio.
+                </p>
+                <PagoTraslado trasladoId={pasaporte.traslado_id} monto={precioBase} />
+              </div>
+            ) : (
+              <Aviso tono="atencion">
+                Pago pendiente. El cobro al cierre se activará en cuanto operación confirme el precio final.
+              </Aviso>
+            )}
+          </div>
+        )}
+      </TarjetaPasaporte>
+
+      {/* 9. Contacto con soporte */}
+      <TarjetaPasaporte id="soporte" titulo="Contacto con soporte">
+        <EncabezadoTarjeta
+          id="soporte"
+          icono={
+            <IconoTarjeta d="M4 13v-1a8 8 0 0 1 16 0v1M4 13a2 2 0 0 1 2-2h1v6H6a2 2 0 0 1-2-2v-2ZM20 13a2 2 0 0 0-2-2h-1v6h1a2 2 0 0 0 2-2v-2ZM17 17c0 2-1.8 3-4 3h-1" />
+          }
+          titulo="Contacto con soporte"
+        />
+        <Link
+          href={soporteHref}
+          className="flex items-center gap-3 rounded-2xl border-l-4 border-l-[#e8a23e] bg-[#fef7e8] p-3.5 text-[#4a3a22] transition-transform active:scale-[0.99]"
+        >
+          <span aria-hidden="true" className="shrink-0 text-[#b36b1e]">
+            <IconoTarjeta
+              d="M4 13v-1a8 8 0 0 1 16 0v1M4 13a2 2 0 0 1 2-2h1v6H6a2 2 0 0 1-2-2v-2ZM20 13a2 2 0 0 0-2-2h-1v6h1a2 2 0 0 0 2-2v-2ZM17 17c0 2-1.8 3-4 3h-1"
+              className="size-5"
+            />
+          </span>
+          <span className="flex-1">
+            <span className="block text-[14px] font-bold">Soporte Ruum Ruum</span>
+            <span className="block text-[12px] opacity-80">Atención 24/7 · Respuesta inmediata</span>
+          </span>
+          <span aria-hidden="true" className="shrink-0 text-[18px] font-bold">
+            ›
+          </span>
+        </Link>
+        <div className="mt-3 flex gap-2.5">
+          <Link
+            href={soporteHref}
+            className="rounded-full bg-[#eef3fa] px-3 py-1.5 text-[11px] font-semibold text-[#2e5a88]"
+          >
+            Llamar
+          </Link>
+          <Link
+            href={soporteHref}
+            className="rounded-full bg-[#eef3fa] px-3 py-1.5 text-[11px] font-semibold text-[#2e5a88]"
+          >
+            Chat
+          </Link>
+        </div>
+        <p className="mt-3 text-[13px] leading-5 text-[#4d6079]">{MENSAJES_CLAVE_UX.comunicacion}</p>
+      </TarjetaPasaporte>
+
+      {/* Barra inferior de acciones */}
+      <div className="sticky bottom-[84px] z-20 flex gap-3 rounded-[20px] border border-[#eef2f7] bg-white/95 p-3 shadow-[0_-6px_18px_rgba(0,0,0,0.06)] backdrop-blur">
+        <div className="flex flex-1 [&>*]:w-full [&_button]:min-h-[52px]">
+          <ExportarPasaportePdf />
+        </div>
+        <CompartirPasaporte folio={folioCorto} />
+      </div>
       </div>
     </main>
     </>

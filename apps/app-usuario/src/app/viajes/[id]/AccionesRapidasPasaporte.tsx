@@ -28,22 +28,22 @@ export function AccionesRapidasPasaporte({ trasladoId: _trasladoId, estado }: Pr
 
   const primario =
     estado === "cotizacion_generada"
-      ? { href: "#pago-soporte", label: "Aceptar cotización", clase: "bg-signal text-ink border-signal hover:bg-signal/90" }
+      ? { href: "#pago", label: "Aceptar cotización", clase: "bg-signal text-ink border-signal hover:bg-signal/90" }
       : estado === "cotizacion_aceptada"
-        ? { href: "#pago-soporte", label: "Pagar traslado", clase: "bg-signal text-ink border-signal hover:bg-signal/90" }
+        ? { href: "#pago", label: "Pagar traslado", clase: "bg-signal text-ink border-signal hover:bg-signal/90" }
         : estado === "pago_pendiente"
-          ? { href: "#pago-soporte", label: "Completar pago", clase: "bg-signal text-ink border-signal hover:bg-signal/90" }
+          ? { href: "#pago", label: "Completar pago", clase: "bg-signal text-ink border-signal hover:bg-signal/90" }
           : enCurso
             ? { href: "#chat-conductor", label: "Chatear con conductor", clase: "bg-signal text-ink border-signal hover:bg-signal/90" }
-            : { href: "#acciones-incidencia", label: "Reportar incidencia", clase: "bg-surface-elevated border-border text-text-primary hover:border-signal/40" };
+            : { href: "#reportes", label: "Reportar incidencia", clase: "bg-surface-elevated border-border text-text-primary hover:border-signal/40" };
 
   const todosItems: ItemMenu[] = [
     { href: "#chat-conductor", label: "Chat con conductor", descripcion: "Mensajes y llamada enmascarada" },
-    { href: "#acciones-incidencia", label: "Reportar incidencia", descripcion: "Aviso a soporte" },
-    { href: "#pago-soporte", label: "Pago y soporte", descripcion: "Tarifa y ayuda" },
-    { href: "#trazabilidad", label: "Trazabilidad", descripcion: "Progreso del traslado" },
-    { href: "#evidencias", label: "Evidencias", descripcion: "Fotos y bitácora" },
-    { href: "#detalles", label: "Detalles del traslado", descripcion: "Ruta, conductor y vehículo" },
+    { href: "#reportes", label: "Reportar incidencia", descripcion: "Aviso a soporte" },
+    { href: "#pago", label: "Pago y soporte", descripcion: "Tarifa y ayuda" },
+    { href: "#linea-tiempo", label: "Línea de tiempo", descripcion: "Progreso del traslado" },
+    { href: "#evidencia", label: "Evidencias", descripcion: "Fotos y bitácora" },
+    { href: "#ruta", label: "Ruta del traslado", descripcion: "Origen, destino y mapa" },
   ];
 
   // Excluir el destino del CTA primario para no duplicar

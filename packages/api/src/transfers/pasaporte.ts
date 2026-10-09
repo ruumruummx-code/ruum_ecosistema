@@ -30,6 +30,10 @@ export type ResumenTraslado = Pick<
   | "contacto_recepcion_telefono"
   | "fecha_hora_programada"
   | "cotizacion_expira_en"
+  | "tipo_servicio"
+  | "motivo_servicio"
+  | "ventana_recoleccion"
+  | "ventana_entrega"
 >;
 
 export type VehiculoTraslado = Pick<
@@ -40,6 +44,9 @@ export type VehiculoTraslado = Pick<
   | "anio"
   | "vin"
   | "condicion"
+  | "color"
+  | "transmision"
+  | "placas"
   | "tiene_tarjeta_circulacion"
   | "tiene_verificacion"
   | "tiene_placas"
@@ -94,7 +101,7 @@ export function obtenerResumenTraslado(cliente: Cliente, trasladoId: string): Pr
     cliente
       .from("traslados")
       .select(
-        "origen_direccion, origen_ciudad, destino_direccion, destino_ciudad, contacto_entrega_nombre, contacto_entrega_telefono, contacto_recepcion_nombre, contacto_recepcion_telefono, fecha_hora_programada, cotizacion_expira_en"
+        "origen_direccion, origen_ciudad, destino_direccion, destino_ciudad, contacto_entrega_nombre, contacto_entrega_telefono, contacto_recepcion_nombre, contacto_recepcion_telefono, fecha_hora_programada, cotizacion_expira_en, tipo_servicio, motivo_servicio, ventana_recoleccion, ventana_entrega"
       )
       .eq("id", trasladoId)
       .maybeSingle()
@@ -110,7 +117,7 @@ export function obtenerVehiculoTraslado(
     cliente
       .from("vehiculos")
       .select(
-        "tipo, marca, modelo, anio, vin, condicion, tiene_tarjeta_circulacion, tiene_verificacion, tiene_placas, puede_circular_rodando"
+        "tipo, marca, modelo, anio, vin, condicion, color, transmision, placas, tiene_tarjeta_circulacion, tiene_verificacion, tiene_placas, puede_circular_rodando"
       )
       .eq("id", vehiculoId)
       .maybeSingle()
