@@ -43,10 +43,8 @@ describe("InicioUsuario", () => {
     expect(comunicacion).toBeInTheDocument();
     expect(screen.getByText("Ana López")).toBeInTheDocument();
     expect(within(tarjetaActiva).getByRole("heading", { name: "Traslado Activo #TRASLADO" })).toBeInTheDocument();
-    expect(within(tarjetaActiva).getByText("Toyota")).toBeInTheDocument();
-    expect(within(tarjetaActiva).getByText("Corolla")).toBeInTheDocument();
-    expect(within(tarjetaActiva).getByText("2024")).toBeInTheDocument();
-    expect(within(tarjetaActiva).getByText("ABC123D")).toBeInTheDocument();
+    expect(within(tarjetaActiva).getByText("Toyota Corolla 2024")).toBeInTheDocument();
+    expect(within(tarjetaActiva).getByText("Placas ABC123D")).toBeInTheDocument();
     expect(within(tarjetaActiva).getByText("Conductor asignado")).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Abrir chat con Ana López" })).toHaveAttribute(
       "href",
