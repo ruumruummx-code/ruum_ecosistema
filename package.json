@@ -33,7 +33,8 @@
     "test:sql": "supabase test db supabase/test",
     "test:e2e:golden": "node tests/e2e/run-golden.mjs",
     "test:piramide": "pnpm test:unit && pnpm test:sql && pnpm test:e2e:golden",
-    "check:fronteras": "node scripts/check-fronteras.mjs",    "test:sql:rls": "supabase test db supabase/test/rt42_rls_admin_roles.test.sql",
+    "check:fronteras": "node scripts/check-fronteras.mjs",
+    "test:sql:rls": "supabase test db supabase/test/rt42_rls_admin_roles.test.sql",
     "test:sql:concurrencia": "supabase test db supabase/test/rt43_concurrencia_operadores.test.sql",
     "scan:secrets": "node scripts/scan-secrets.mjs",
     "audit:deps": "pnpm audit --audit-level=high",
@@ -83,5 +84,9 @@
       "browserslist": "4.28.7",
       "@xmldom/xmldom": "0.9.12"
     }
+  },
+  "dependencies": {
+    "mapbox-gl": "^3.32.0",
+    "react-map-gl": "^8.1.3"
   }
 }

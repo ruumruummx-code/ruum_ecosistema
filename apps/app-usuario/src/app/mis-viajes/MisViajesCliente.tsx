@@ -513,10 +513,25 @@ export function MisTrasladosCliente({
                   <div><p className="user-v2-caption user-v2-muted">Tarifa</p><p className="text-xl font-bold text-[var(--user-color-brand-dark)]">{moneda(pasaporte.precio_final ?? pasaporte.precio_cotizado)}</p></div>
                 </div>
 
-                <Link href={urlViaje} className="user-v2-secondary-button mt-5 flex items-center justify-between px-4">
-                  <span>{esPagoPendiente ? "Completar pago" : "Ver detalles del traslado"}</span>
-                  <IconoChevron />
-                </Link>
+                <div className="mt-5 flex flex-col gap-3 sm:flex-row">
+                  <Link href={urlViaje} className="user-v2-secondary-button flex flex-1 items-center justify-between px-4">
+                    <span>{esPagoPendiente ? "Completar pago" : "Ver detalles del traslado"}</span>
+                    <IconoChevron />
+                  </Link>
+                  {pasaporte.traslado_id && (
+                    <Link
+                      href={`/pasaporte?traslado=${pasaporte.traslado_id}`}
+                      className="user-v2-ghost-button flex items-center justify-center gap-2 px-4"
+                      aria-label={`Ver pasaporte digital del traslado ${vehiculoNombre(pasaporte)}`}
+                    >
+                      <svg className="size-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                        <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+                        <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
+                      </svg>
+                      <span>Pasaporte digital</span>
+                    </Link>
+                  )}
+                </div>
               </article>
             );
           })

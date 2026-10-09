@@ -66,6 +66,8 @@ type Vehiculo = Pick<
   | "marca"
   | "modelo"
   | "anio"
+  | "vin"
+  | "condicion"
   | "tiene_tarjeta_circulacion"
   | "tiene_verificacion"
   | "tiene_placas"
@@ -73,7 +75,7 @@ type Vehiculo = Pick<
 >;
 type Conductor = Pick<
   Database["public"]["Tables"]["conductores"]["Row"],
-  "id" | "nombre" | "estado" | "nivel_operativo_vigente" | "calificacion_promedio" | "traslados_completados"
+  "id" | "nombre" | "estado" | "nivel_operativo_vigente" | "calificacion_promedio" | "traslados_completados" | "foto_perfil_url"
 >;
 type FotoEvidencia = Database["public"]["Tables"]["evidencia_fotos"]["Row"];
 type FotoEvidenciaVisual = FotoEvidenciaConUrlVisual<FotoEvidencia>;
@@ -89,17 +91,16 @@ type EstadoTraslado = Database["public"]["Enums"]["estado_traslado"];
 
 const LINEA_TIEMPO: { estado: EstadoTraslado; etiqueta: string }[] = [
   { estado: "solicitud_creada", etiqueta: "Solicitud creada" },
-  { estado: "servicio_confirmado", etiqueta: "Solicitud aceptada por operación" },
+  { estado: "cotizacion_generada", etiqueta: "Tarifa asignada" },
+  { estado: "pago_completado", etiqueta: "Pago realizado" },
   { estado: "conductor_asignado", etiqueta: "Conductor asignado" },
-  { estado: "conductor_en_camino_al_origen", etiqueta: "Conductor en camino" },
-  { estado: "vehiculo_recibido", etiqueta: "Vehículo recibido" },
-  { estado: "evidencia_inicial_completada", etiqueta: "Evidencia inicial cargada" },
-  { estado: "traslado_en_curso", etiqueta: "Traslado iniciado" },
-  { estado: "incidencia_reportada", etiqueta: "Traslado en curso" },
-  { estado: "llegada_a_destino", etiqueta: "Vehículo en destino" },
-  { estado: "evidencia_final_completada", etiqueta: "Evidencia final cargada" },
+  { estado: "conductor_en_camino_al_origen", etiqueta: "Conductor en camino al origen" },
+  { estado: "vehiculo_recibido", etiqueta: "Vehículo localizado" },
+  { estado: "evidencia_inicial_completada", etiqueta: "Check inicial cargado" },
+  { estado: "traslado_en_curso", etiqueta: "En camino al destino" },
+  { estado: "evidencia_final_completada", etiqueta: "Check final cargado" },
   { estado: "entrega_confirmada", etiqueta: "Entrega confirmada" },
-  { estado: "servicio_cerrado", etiqueta: "Viaje finalizado" }
+  { estado: "servicio_cerrado", etiqueta: "Traslado finalizado" }
 ];
 
 const ORDEN_ESTADOS: EstadoTraslado[] = [
@@ -908,9 +909,14 @@ export default async function PaginaTraslado({ params }: { params: Promise<{ id:
 
             <AcordeonPasaporte titulo="Conductor asignado" descripcion="Identidad, certificación y canal autorizado.">
               <div className="flex items-center gap-4">
-                <div className="flex size-16 shrink-0 items-center justify-center rounded-full bg-ink font-display text-xl text-mist">
-                  {iniciales(conductor?.nombre ?? pasaporte.conductor_nombre)}
-                </div>
+                {conductor?.foto_perfil_url ? (
+                  // eslint-disable-next-line @next/next/no-img-element -- URL de fotografía del conductor
+                  <img src={conductor.foto_perfil_url} alt={`Fotografía de ${conductor?.nombre ?? pasaporte.conductor_nombre ?? "conductor"}`} className="size-16 shrink-0 rounded-full border border-ink/15 object-cover" />
+                ) : (
+                  <div className="flex size-16 shrink-0 items-center justify-center rounded-full bg-ink font-display text-xl text-mist">
+                    {iniciales(conductor?.nombre ?? pasaporte.conductor_nombre)}
+                  </div>
+                )}
                 <div>
                   <p className="font-body text-base font-semibold">{conductor?.nombre ?? pasaporte.conductor_nombre ?? "Por asignar"}</p>
                   <p className="mt-1 font-body text-sm text-ink/55">
@@ -947,6 +953,8 @@ export default async function PaginaTraslado({ params }: { params: Promise<{ id:
                       : null
                   }
                 />
+                <Dato etiqueta="VIN" valor={vehiculo?.vin ?? pasaporte.vehiculo_vin} />
+                <Dato etiqueta="Condición" valor={vehiculo?.condicion ?? pasaporte.vehiculo_condicion} />
               </dl>
               <div className="mt-5 grid gap-2 font-body text-sm">
                 {[

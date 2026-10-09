@@ -38,6 +38,8 @@ export type VehiculoTraslado = Pick<
   | "marca"
   | "modelo"
   | "anio"
+  | "vin"
+  | "condicion"
   | "tiene_tarjeta_circulacion"
   | "tiene_verificacion"
   | "tiene_placas"
@@ -46,7 +48,7 @@ export type VehiculoTraslado = Pick<
 
 export type ConductorTraslado = Pick<
   ConductorRow,
-  "id" | "nombre" | "estado" | "nivel_operativo_vigente" | "calificacion_promedio" | "traslados_completados"
+  "id" | "nombre" | "estado" | "nivel_operativo_vigente" | "calificacion_promedio" | "traslados_completados" | "foto_perfil_url"
 >;
 
 export type ReclamoTraslado = Pick<
@@ -108,7 +110,7 @@ export function obtenerVehiculoTraslado(
     cliente
       .from("vehiculos")
       .select(
-        "tipo, marca, modelo, anio, tiene_tarjeta_circulacion, tiene_verificacion, tiene_placas, puede_circular_rodando"
+        "tipo, marca, modelo, anio, vin, condicion, tiene_tarjeta_circulacion, tiene_verificacion, tiene_placas, puede_circular_rodando"
       )
       .eq("id", vehiculoId)
       .maybeSingle()
@@ -123,7 +125,7 @@ export function obtenerConductorTraslado(
   return uno(
     cliente
       .from("conductores")
-      .select("id, nombre, estado, nivel_operativo_vigente, calificacion_promedio, traslados_completados")
+      .select("id, nombre, estado, nivel_operativo_vigente, calificacion_promedio, traslados_completados, foto_perfil_url")
       .eq("id", conductorId)
       .maybeSingle()
   );

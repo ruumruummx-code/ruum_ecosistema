@@ -450,7 +450,44 @@ export function SoporteCliente({
         </div>
       </section>
 
-      {/* 6. Sección: PREGUNTAS FRECUENTES (Acordeón) */}
+      {/* 6. Sección: Documentos legales */}
+      <section className="space-y-3">
+        <h2 className="font-display text-[11px] font-bold uppercase tracking-wider text-[#64748B]">
+          Documentos legales
+        </h2>
+        <div className="grid grid-cols-1 gap-2.5">
+          <Link
+            href="/cuenta/legal"
+            className="group flex items-center justify-between rounded-2xl border border-[#1C2A3E] bg-[#0A1220]/95 p-4 shadow-md transition hover:border-[#FFC400]/40 hover:bg-[#0D182A]"
+          >
+            <div>
+              <h3 className="font-display text-xs sm:text-sm font-bold text-white leading-snug">
+                Términos y condiciones
+              </h3>
+              <p className="font-body text-[11px] text-[#8E9CAE] mt-0.5 leading-tight">
+                Marco legal del servicio
+              </p>
+            </div>
+            <IconoChevron className="size-4 shrink-0 text-[#8E9CAE] transition group-hover:text-[#FFC400]" />
+          </Link>
+          <Link
+            href="/cuenta/legal"
+            className="group flex items-center justify-between rounded-2xl border border-[#1C2A3E] bg-[#0A1220]/95 p-4 shadow-md transition hover:border-[#FFC400]/40 hover:bg-[#0D182A]"
+          >
+            <div>
+              <h3 className="font-display text-xs sm:text-sm font-bold text-white leading-snug">
+                Aviso de privacidad
+              </h3>
+              <p className="font-body text-[11px] text-[#8E9CAE] mt-0.5 leading-tight">
+                Política de datos personales
+              </p>
+            </div>
+            <IconoChevron className="size-4 shrink-0 text-[#8E9CAE] transition group-hover:text-[#FFC400]" />
+          </Link>
+        </div>
+      </section>
+
+      {/* 7. Sección: PREGUNTAS FRECUENTES (Acordeón) */}
       <section id="faqs" className="space-y-3">
         <h2 className="font-display text-[11px] font-bold uppercase tracking-wider text-[#64748B]">
           Preguntas frecuentes
