@@ -447,6 +447,10 @@ verify_jwt = false
 enabled = true
 verify_jwt = false
 
+[functions.crear-payment-intent]
+enabled = true
+verify_jwt = false
+
 # [edge_runtime.secrets]
 # secret_key = "env(SECRET_VALUE)"
 
