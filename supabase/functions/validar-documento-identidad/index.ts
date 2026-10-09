@@ -34,7 +34,9 @@ function codigoSeguro(error: unknown) {
 }
 
 Deno.serve(async (req) => {
-  if (req.method === "OPTIONS") return new Response(null, { headers: CORS });
+  /* 204 explícito: algunos gateways/proxies no tratan el 200 implícito de
+     `new Response(null, ...)` como preflight válido. */
+  if (req.method === "OPTIONS") return new Response(null, { status: 204, headers: CORS });
   if (req.method !== "POST") return json({ error: "Método no permitido." }, 405);
 
   const authorization = req.headers.get("Authorization");

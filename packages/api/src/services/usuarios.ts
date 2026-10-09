@@ -372,6 +372,10 @@ export async function iniciarVerificacionDiditUsuario(cliente: Cliente): Promise
 
 /**
  * Consulta la última verificación de identidad Didit registrada para el usuario actual.
+ *
+ * Si se pasa `sessionId`, filtra estrictamente por esa sesión. Sin `sessionId`
+ * devuelve la más reciente (solo para lectura informativa): NO usar para decidir
+ * éxito/rechazo de un intento en curso, porque puede ser de un intento anterior.
  */
 export async function obtenerEstadoVerificacionDiditUsuario(cliente: Cliente, sessionId?: string) {
   const { data: sesion } = await cliente.auth.getUser();

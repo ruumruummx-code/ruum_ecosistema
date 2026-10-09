@@ -419,6 +419,34 @@ inspector_port = 8083
 # The Deno major version to use.
 deno_version = 2
 
+# Las funciones invocadas desde el navegador (supabase-js functions.invoke envía
+# Authorization + apikey + x-client-info y dispara preflight OPTIONS sin auth)
+# deben tener verify_jwt = false: con JWT enforced, el gateway responde 401 al
+# OPTIONS y el navegador lo reporta como "blocked by CORS policy ... does not
+# have HTTP ok status". La autenticación real se hace DENTRO del handler con
+# auth.getUser() (fail-closed 401), así que es seguro. Mismo patrón ya
+# documentado para crear-payment-intent en supabase/functions/README.md.
+[functions.validar-documento-identidad]
+enabled = true
+verify_jwt = false
+
+[functions.iniciar-verificacion-didit]
+enabled = true
+verify_jwt = false
+
+[functions.validar-documento-conductor]
+enabled = true
+verify_jwt = false
+
+# Webhooks server-to-server (Didit/Stripe firman con HMAC, no envían JWT).
+[functions.webhook-didit]
+enabled = true
+verify_jwt = false
+
+[functions.stripe-webhook]
+enabled = true
+verify_jwt = false
+
 # [edge_runtime.secrets]
 # secret_key = "env(SECRET_VALUE)"
 

@@ -4,18 +4,14 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Aviso, Field } from "@ruum/ui";
-import { VERSION_TERMINOS_VIGENTE } from "@ruum/shared/constants";
 import { fortalezaPassword, passwordCumpleRequisitos, requisitosPassword, traducirErrorAuth } from "@ruum/shared/utils";
 import { registrarEventoUx } from "../../lib/analytics";
-import { crearClienteNavegador, tieneSupabaseConfigurado } from "../../lib/supabase-browser";
+import { tieneSupabaseConfigurado } from "../../lib/supabase-browser";
 import {
   CLAVE_CORREO_CONFIRMACION,
-  crearRedirectConfirmacion,
-  nombreCompleto,
   normalizarCorreoRegistro,
   soloDigitos,
   telefonoLocalMx,
-  telefonoMx
 } from "../../lib/registro-usuario";
 import {
   botonAzul,
@@ -168,40 +164,45 @@ export default function PaginaRegistro() {
     registrarEventoUx("registro_enviado", { tipo_cuenta: tipoCuenta });
 
     try {
-      const cliente = crearClienteNavegador();
       const correo = normalizarCorreoRegistro(email);
 
-      /* tipo_registro='usuario' activa el trigger manejar_nuevo_usuario_auth.
-         El mismo trigger persiste y audita la aceptación de términos, incluso
-         cuando la confirmación de correo hace que signUp devuelva session=null. */
-      const ahora = new Date().toISOString();
-      const { data, error: errorAuth } = await cliente.auth.signUp({
-        email: correo,
-        password,
-        options: {
-          data: {
-            tipo_registro: "usuario",
-            nombre: nombreCompleto(nombre, apellido),
-            telefono: telefonoMx(telefono),
-            tipo_cuenta: tipoCuenta,
-            /* Términos: el trigger los registra si están presentes en los metadatos */
-            version_terminos_aceptada: VERSION_TERMINOS_VIGENTE,
-            terminos_aceptados_en: ahora,
-          },
-          emailRedirectTo: crearRedirectConfirmacion(window.location.origin),
-        },
+      /* CORRECCIÓN rate-limit: el signUp directo desde el navegador no tenía
+         throttling de aplicación. Ahora pasa por /api/auth/signup (10/h IP,
+         5/h correo), que valida y crea la cuenta en servidor. */
+      const res = await fetch("/api/auth/signup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          nombre: nombre.trim(),
+          apellido: apellido.trim(),
+          telefono: soloDigitos(telefono),
+          email: correo,
+          password,
+          tipoCuenta,
+          aceptaTerminos,
+        }),
+        cache: "no-store",
       });
+      const cuerpo = (await res.json().catch(() => null)) as {
+        error?: string;
+        requiereConfirmacion?: boolean;
+        correo?: string;
+      } | null;
+      if (!res.ok) {
+        /* El servidor ya devuelve copy listo y genérico (sin enumerar
+           correos); se muestra tal cual en vez de traducir el error. */
+        setError(cuerpo?.error ?? "No pudimos crear la cuenta. Intenta de nuevo.");
+        registrarEventoUx("registro_error", { tipo_cuenta: tipoCuenta });
+        return;
+      }
 
-      if (errorAuth) throw errorAuth;
-      if (!data.user) throw new Error("No se pudo crear el usuario.");
-
-      if (data.session) {
+      if (!cuerpo?.requiereConfirmacion) {
         registrarEventoUx("registro_exitoso", { tipo_cuenta: tipoCuenta, requiere_confirmacion: false });
         router.push("/");
         router.refresh();
       } else {
         try {
-          window.sessionStorage.setItem(CLAVE_CORREO_CONFIRMACION, correo);
+          window.sessionStorage.setItem(CLAVE_CORREO_CONFIRMACION, cuerpo.correo ?? correo);
         } catch { /* La pantalla también funciona si el navegador bloquea storage. */ }
         registrarEventoUx("registro_exitoso", { tipo_cuenta: tipoCuenta, requiere_confirmacion: true });
         /* CORRECCIÓN (auditoría S-8): el correo en el query string quedaba en los access

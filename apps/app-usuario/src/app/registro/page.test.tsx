@@ -6,7 +6,7 @@ import userEvent from "@testing-library/user-event";
 const mocks = vi.hoisted(() => ({
   push: vi.fn(),
   refresh: vi.fn(),
-  signUp: vi.fn()
+  signupFetch: vi.fn()
 }));
 
 vi.mock("next/navigation", () => ({
@@ -16,7 +16,6 @@ vi.mock("next/navigation", () => ({
 }));
 
 vi.mock("@/lib/supabase-browser", () => ({
-  crearClienteNavegador: vi.fn(() => ({ auth: { signUp: mocks.signUp } })),
   tieneSupabaseConfigurado: () => true
 }));
 
@@ -31,7 +30,8 @@ describe("registro — accesibilidad de errores de validación", () => {
   beforeEach(() => {
     mocks.push.mockReset();
     mocks.refresh.mockReset();
-    mocks.signUp.mockReset();
+    mocks.signupFetch.mockReset();
+    vi.stubGlobal("fetch", mocks.signupFetch);
     window.sessionStorage.clear();
   });
 
@@ -50,7 +50,7 @@ describe("registro — accesibilidad de errores de validación", () => {
     await waitFor(() => expect(nombre).toHaveAttribute("aria-invalid", "true"));
     expect(nombre).toHaveFocus();
     expect(screen.getByText("Escribe tu nombre.")).toHaveAttribute("role", "alert");
-    expect(mocks.signUp).not.toHaveBeenCalled();
+    expect(mocks.signupFetch).not.toHaveBeenCalled();
   });
 
   it("el mensaje de error queda enlazado al campo vía aria-describedby", async () => {
@@ -111,7 +111,7 @@ describe("registro — accesibilidad de errores de validación", () => {
     const confirmar = screen.getByLabelText(/confirmar contraseña/i);
     await waitFor(() => expect(confirmar).toHaveAttribute("aria-invalid", "true"));
     expect(confirmar).toHaveFocus();
-    expect(mocks.signUp).not.toHaveBeenCalled();
+    expect(mocks.signupFetch).not.toHaveBeenCalled();
   });
 
   it("exige aceptar términos y enfoca el checkbox", async () => {
@@ -136,9 +136,9 @@ describe("registro — accesibilidad de errores de validación", () => {
   });
 
   it("envía el registro cuando la validación pasa", async () => {
-    mocks.signUp.mockResolvedValue({
-      data: { user: { id: "u1" }, session: { access_token: "t" } },
-      error: null
+    mocks.signupFetch.mockResolvedValue({
+      ok: true,
+      json: async () => ({ ok: true, requiereConfirmacion: false, correo: "ana@ejemplo.com" }),
     });
     const user = userEvent.setup();
     render(<PaginaRegistro />);
@@ -155,7 +155,7 @@ describe("registro — accesibilidad de errores de validación", () => {
     await user.click(screen.getByRole("checkbox"));
     await user.click(screen.getByRole("button", { name: /crear cuenta/i }));
 
-    await waitFor(() => expect(mocks.signUp).toHaveBeenCalled());
+    await waitFor(() => expect(mocks.signupFetch).toHaveBeenCalled());
     expect(mocks.push).toHaveBeenCalledWith("/");
   });
 });

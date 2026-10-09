@@ -58,8 +58,9 @@ function ContenidoConfirmaCorreo() {
   const [mensaje, setMensaje] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   /* CORRECCIÓN (auditoría S-8): el correo ya no viaja en la URL (se queda en los
-     access logs y en el Referer). Se lee de sessionStorage. El param se mantiene
-     como compatibilidad con enlaces previos al despliegue de este fix. */
+     access logs y en el Referer). Se lee de sessionStorage. El param `email` es
+     DEPRECADO: solo se acepta por compatibilidad y se registra para eliminarlo.
+     No generar nuevos enlaces con `?email=`. */
   const emailFromUrl = normalizarCorreoRegistro(searchParams.get("email") || "");
   const hayCooldown = restante > 0;
   const [correo] = useState(() => {
@@ -73,6 +74,12 @@ function ContenidoConfirmaCorreo() {
 
   useEffect(() => {
     registrarEventoUx("registro_confirmacion_vista");
+    /* Telemetría de deprecación: si aún llega `?email=`, contarlo para saber
+       cuándo retirar el fallback sin romper enlaces antiguos. */
+    if (emailFromUrl) {
+      console.warn("[confirma-correo] param ?email= deprecado en uso");
+      registrarEventoUx("registro_confirmacion_url_deprecada");
+    }
   }, []);
 
   useEffect(() => {

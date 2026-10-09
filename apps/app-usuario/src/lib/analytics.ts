@@ -20,6 +20,7 @@ export type EventoUxUsuario =
   | "registro_exitoso"
   | "registro_error"
   | "registro_confirmacion_vista"
+  | "registro_confirmacion_url_deprecada"
   | "registro_confirmacion_enviada"
   | "registro_confirmacion_exitosa"
   | "registro_confirmacion_error"

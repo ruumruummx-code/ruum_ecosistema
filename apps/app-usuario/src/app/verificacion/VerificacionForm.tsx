@@ -325,6 +325,15 @@ export function VerificacionForm({ fotoPerfilInicial, soloDidit = false, destino
 
   async function finalizarDidit() {
     if (cargandoDidit) return;
+    /* CORRECCIÓN stale-session: sin sessionId el lookup devolvía la última
+       verificación del usuario (podía ser de un intento anterior) y marcar
+       éxito/rechazo equivocado. Se captura el id al inicio y se exige para
+       decidir por tabla; sin id solo vale el estado canónico del usuario. */
+    const sid = sessionIdDidit;
+    if (!sid) {
+      setErrorDidit("No pudimos vincular la sesión de verificación. Cierra y vuelve a iniciar la verificación con Didit.");
+      return;
+    }
     setCargandoDidit(true);
     setErrorDidit(null);
     try {
@@ -335,14 +344,18 @@ export function VerificacionForm({ fotoPerfilInicial, soloDidit = false, destino
       // tardar unos segundos; esperar la actualización canónica evita mostrar
       // éxito mientras la cuenta todavía sigue pendiente.
       for (let intento = 0; intento < 12; intento += 1) {
-        const [usuario, verificacion] = await Promise.all([
-          obtenerUsuarioActual(cliente),
-          obtenerEstadoVerificacionDiditUsuario(cliente, sessionIdDidit ?? undefined),
-        ]);
+        const usuario = await obtenerUsuarioActual(cliente);
+        const verificacion = await obtenerEstadoVerificacionDiditUsuario(cliente, sid);
 
         if (usuario?.estado_verificacion === "verificado") {
           resultado = "verificado";
           break;
+        }
+        /* Solo cuenta la fila de ESTA sesión: si el servicio devolvió otra
+           (p. ej. por condición de carrera), se ignora y se sigue esperando. */
+        if (verificacion && verificacion.session_id !== sid) {
+          if (intento < 11) await new Promise((resolve) => window.setTimeout(resolve, 1000));
+          continue;
         }
         if (["rechazado", "error", "expirado", "cancelado"].includes(verificacion?.estado ?? "")) {
           resultado = "rechazado";
@@ -463,8 +476,17 @@ export function VerificacionForm({ fotoPerfilInicial, soloDidit = false, destino
       setError("Adjunta tu identificación oficial para continuar.");
       return;
     }
-    if (!calle.trim() || !codigoPostal || !colonia) {
-      setError("Completa tu domicilio antes de continuar.");
+    /* CORRECCIÓN domicilio incompleto: antes solo se exigía calle+CP+colonia y
+       estado/ciudad podían guardarse vacíos. Se exigen los 5 para no persistir
+       direcciones parciales. */
+    if (
+      !calle.trim() ||
+      soloDigitos(codigoPostal, 5).length !== 5 ||
+      !colonia.trim() ||
+      !estadoMx.trim() ||
+      !ciudad.trim()
+    ) {
+      setError("Completa tu domicilio (calle, código postal, colonia, ciudad y estado) antes de continuar.");
       return;
     }
 
@@ -487,10 +509,10 @@ export function VerificacionForm({ fotoPerfilInicial, soloDidit = false, destino
 
       await actualizarPerfilUsuario(cliente, {
         pais: "México",
-        estado: estadoMx,
-        codigo_postal: codigoPostal,
-        ciudad,
-        colonia,
+        estado: estadoMx.trim(),
+        codigo_postal: soloDigitos(codigoPostal, 5),
+        ciudad: ciudad.trim(),
+        colonia: colonia.trim(),
         calle: calle.trim(),
         numero: numero.trim() || null,
         referencias: referencias.trim() || null,

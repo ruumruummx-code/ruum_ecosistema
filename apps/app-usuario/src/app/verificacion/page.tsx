@@ -11,6 +11,7 @@ import Link from "next/link";
 import { NavegacionUsuario } from "../NavegacionUsuario";
 import { VerificacionForm } from "./VerificacionForm";
 import { obtenerUsuarioActual } from "@ruum/api/services";
+import { destinoSeguro } from "@ruum/shared/utils";
 
 interface Props {
   searchParams: Promise<{ next?: string }>;
@@ -205,8 +206,10 @@ function EsperandoRevision({ fotoPerfilUrl }: { fotoPerfilUrl: string | null }) 
 
 export default async function PaginaVerificacion({ searchParams }: Props) {
   const { next } = await searchParams;
-  const destinoSeguro =
-    typeof next === "string" && next.startsWith("/") && !next.startsWith("//") ? next : "/viajes/nuevo";
+  /* CORRECCIÓN open-redirect: el guard `startsWith("/") && !startsWith("//")`
+     dejaba pasar `/\evil.com` (el parser WHATWG normaliza `\` a `/`).
+     Se usa el sanitizador canónico, igual que en /auth/callback. */
+  const destino = destinoSeguro(next, "/viajes/nuevo");
 
   /* Leer estado actual del usuario para decidir qué mostrar */
   let estadoVerificacion: string | null = null;
@@ -230,7 +233,7 @@ export default async function PaginaVerificacion({ searchParams }: Props) {
       <NavegacionUsuario variante="claro" />
       <main className="user-v2-scope user-v2-page user-v2-secondary-screen"><div className="user-v2-content user-v2-content--wide py-10 sm:py-14">
           <div className="mx-auto max-w-lg">
-            <CuentaYaVerificada destino={destinoSeguro} />
+            <CuentaYaVerificada destino={destino} />
           </div>
         </div>
       </main>
@@ -364,7 +367,7 @@ export default async function PaginaVerificacion({ searchParams }: Props) {
                 </p>
               </div>
 
-              <VerificacionForm fotoPerfilInicial={fotoPerfilUrl} destinoExito={destinoSeguro} />
+              <VerificacionForm fotoPerfilInicial={fotoPerfilUrl} destinoExito={destino} />
             </>
           )}
         </div>
