@@ -7,7 +7,7 @@ export const PASOS = [
   "¿Qué vehículo trasladamos?",
   "¿Dónde lo recogemos y llevamos?",
   "Detalles del servicio",
-  "Pago del traslado"
+  "Pago"
 ] as const;
 
 /** Subtítulos cortos del encabezado ("Paso X de 5 · …"). */
