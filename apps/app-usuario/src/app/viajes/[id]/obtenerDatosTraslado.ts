@@ -25,6 +25,12 @@ import type {
   ReclamoSeguroUsuario,
 } from "./tipos-pasaporte";
 
+/* `obtenerTrasladoConRelaciones` ya devuelve las filas tipadas: antes se
+   metían en el Record<string, unknown> del fallback y se rescataban con
+   `as any`. Se conservan aparte, con su tipo real. */
+type VehiculoRow = Database["public"]["Tables"]["vehiculos"]["Row"];
+type ConductorRow = Database["public"]["Tables"]["conductores"]["Row"];
+
 /** Objeto vacío de 13 campos: antes triplicado en cada salida temprana de
  * `obtenerDatos` (sin env, sin pasaporte, catch). Una sola fábrica. */
 export function datosVaciosTraslado() {
@@ -67,18 +73,20 @@ export async function obtenerDatos(id: string) {
     // 2. Fallback resiliente: consultar tabla traslados directamente si la vista no devuelve datos
     if (!pasaporte) {
       let tRow: Record<string, unknown> | null = null;
+      let vehiculoRow: VehiculoRow | null = null;
+      let conductorRow: ConductorRow | null = null;
       try {
         const rel = await obtenerTrasladoConRelaciones(cliente, id);
         tRow = rel.traslado
           ? ({ ...rel.traslado, vehiculos: rel.vehiculo, conductores: rel.conductor } as unknown as Record<string, unknown>)
           : null;
+        vehiculoRow = rel.vehiculo;
+        conductorRow = rel.conductor;
       } catch {
         tRow = null;
       }
 
       if (tRow) {
-        const v = tRow.vehiculos as any;
-        const c = tRow.conductores as any;
         pasaporte = {
           traslado_id: tRow.id as string,
           usuario_id: tRow.usuario_id as string,
@@ -92,14 +100,14 @@ export async function obtenerDatos(id: string) {
           precio_final: (tRow.precio_final as number) ?? null,
           creado_en: tRow.creado_en as string,
           actualizado_en: tRow.actualizado_en as string,
-          vehiculo_tipo: v?.tipo ?? null,
-          vehiculo_marca: v?.marca ?? null,
-          vehiculo_modelo: v?.modelo ?? null,
-          vehiculo_anio: v?.anio ?? null,
-          conductor_nombre: c?.nombre ?? null,
-          conductor_estado: c?.estado ?? null,
-          conductor_nivel: c?.nivel_operativo_vigente ?? null,
-          conductor_calificacion: c?.calificacion_promedio ?? null,
+          vehiculo_tipo: vehiculoRow?.tipo ?? null,
+          vehiculo_marca: vehiculoRow?.marca ?? null,
+          vehiculo_modelo: vehiculoRow?.modelo ?? null,
+          vehiculo_anio: vehiculoRow?.anio ?? null,
+          conductor_nombre: conductorRow?.nombre ?? null,
+          conductor_estado: conductorRow?.estado ?? null,
+          conductor_nivel: conductorRow?.nivel_operativo_vigente ?? null,
+          conductor_calificacion: conductorRow?.calificacion_promedio ?? null,
           evidencia_inicial_fotos_sincronizadas: 0,
           evidencia_final_fotos_sincronizadas: 0,
           incidencias_abiertas: 0,
@@ -110,9 +118,9 @@ export async function obtenerDatos(id: string) {
           destino_lng: (tRow.destino_lng as number) ?? null,
           distancia_km: (tRow.distancia_km as number) ?? null,
           tiempo_estimado_horas: (tRow.tiempo_estimado_horas as number) ?? null,
-          vehiculo_categoria_tarifa: v?.categoria_tarifa ?? null,
-          vehiculo_gama: v?.gama ?? null,
-          vehiculo_condicion: v?.condicion ?? null,
+          vehiculo_categoria_tarifa: vehiculoRow?.categoria_tarifa ?? null,
+          vehiculo_gama: vehiculoRow?.gama ?? null,
+          vehiculo_condicion: vehiculoRow?.condicion ?? null,
           origen_direccion: (tRow.origen_direccion as string) ?? null,
           origen_ciudad: (tRow.origen_ciudad as string) ?? null,
           origen_referencias: (tRow.origen_referencias as string) ?? null,
@@ -123,9 +131,9 @@ export async function obtenerDatos(id: string) {
           contacto_entrega_telefono: (tRow.contacto_entrega_telefono as string) ?? null,
           contacto_recepcion_nombre: (tRow.contacto_recepcion_nombre as string) ?? null,
           contacto_recepcion_telefono: (tRow.contacto_recepcion_telefono as string) ?? null,
-          vehiculo_color: v?.color ?? null,
-          vehiculo_placas: v?.placas ?? null,
-          vehiculo_vin: v?.vin ?? null,
+          vehiculo_color: vehiculoRow?.color ?? null,
+          vehiculo_placas: vehiculoRow?.placas ?? null,
+          vehiculo_vin: vehiculoRow?.vin ?? null,
           ganancia_conductor: null
         };
       }

@@ -30,6 +30,7 @@
     "test:a11y:real": "playwright test apps/panel-admin/tests/a11y-real",
     "test:a11y:real:all": "playwright test apps/panel-admin/tests/a11y-real --reporter=html",
     "test:e2e:real": "playwright test apps/panel-admin/tests/e2e --reporter=html",
+    "test:e2e:usuario": "pnpm --filter @ruum/app-usuario test:e2e",
     "test:sql": "supabase test db supabase/test",
     "test:e2e:golden": "node tests/e2e/run-golden.mjs",
     "test:piramide": "pnpm test:unit && pnpm test:sql && pnpm test:e2e:golden",

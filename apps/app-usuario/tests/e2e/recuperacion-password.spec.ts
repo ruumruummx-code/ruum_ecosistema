@@ -231,22 +231,18 @@ test.describe("PR-02 Recuperación PKCE — app-usuario", () => {
 
     // Ir a login y probar nueva contraseña
     await page.goto("/login");
-    await expect(page.getByRole("heading", { name: /iniciar sesión/i }).or(page.getByText(/bienvenido/i))).toBeVisible({ timeout: 5000 }).catch(() => {});
-    // Si no hay heading específico, al menos verificar que hay inputs
+    await expect(page.getByRole("heading", { name: /iniciar sesión/i }).or(page.getByText(/bienvenido/i))).toBeVisible({ timeout: 5000 });
+    // Los inputs existen en /login: sin probing condicional, si faltan es fallo real.
     const emailInput = page.getByLabel(/correo/i).or(page.locator('input[type="email"]'));
     const passInput = page.locator('input[type="password"]').first();
-    if (await emailInput.isVisible().catch(() => false)) {
-      await emailInput.fill("usuario-e2e@ruum.test");
-      await passInput.fill("NuevaSegura123");
-      const entrar = page.getByRole("button", { name: /entrar|iniciar sesión/i });
-      if (await entrar.isVisible().catch(() => false)) {
-        await entrar.click();
-        // No validamos redirect final porque depende de mock, pero capturamos que se llamó login con nueva pass
-        await page.waitForTimeout(500);
-      }
-    }
-    // El test pasa si no hubo errores de timeout de 7s y el flujo anterior funcionó
-    expect(true).toBeTruthy();
+    await emailInput.fill("usuario-e2e@ruum.test");
+    await passInput.fill("NuevaSegura123");
+    const entrar = page.getByRole("button", { name: /entrar|iniciar sesión/i });
+    await entrar.click();
+    // No validamos redirect final porque depende de mock, pero el login con
+    // la nueva contraseña sí debe haberse invocado.
+    await page.waitForTimeout(500);
+    expect(loginCapturado).toBe(true);
   });
 
   test("negativo: enlace expirado muestra error y no autoriza formulario", async ({ page }) => {
@@ -254,7 +250,7 @@ test.describe("PR-02 Recuperación PKCE — app-usuario", () => {
     await page.goto("/nueva-password");
     // Debe mostrar "Enlace inválido" rápido (<4s, no 7s)
     await expect(page.getByText(/enlace inválido o expirado/i)).toBeVisible({ timeout: 4000 });
-    await expect(page.getByRole("heading", { name: /nueva contraseña/i })).toBeHidden().catch(() => {});
+    await expect(page.getByRole("heading", { name: /nueva contraseña/i })).toBeHidden();
     // No debe haber formulario
     await expect(page.getByLabel(/^nueva contraseña/i)).toBeHidden();
   });

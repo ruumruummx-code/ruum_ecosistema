@@ -38,7 +38,9 @@ describe("PuertaConsentimiento", () => {
 
   it("muestra el muro con sesion y sin consentimiento", async () => {
     render(<PuertaConsentimiento />);
-    expect(await screen.findByRole("dialog")).toBeInTheDocument();
+    // Timeout amplio: el muro monta tras 2 saltos async y showModal corre en
+    // efecto pasivo; bajo carga de la suite completa 1s no alcanza.
+    expect(await screen.findByRole("dialog", undefined, { timeout: 5000 })).toBeInTheDocument();
   });
 
   it("no muestra nada sin sesion", async () => {

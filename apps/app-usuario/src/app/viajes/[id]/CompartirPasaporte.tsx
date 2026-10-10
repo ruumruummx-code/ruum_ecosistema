@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 function IconoCompartir({ className = "size-5" }: { className?: string }) {
   return (
@@ -21,6 +21,39 @@ export function CompartirPasaporte({
   variante?: "barra" | "cabecera";
 }) {
   const [estado, setEstado] = useState<"ocioso" | "copiado" | "error">("ocioso");
+  const temporizadorRef = useRef<number | null>(null);
+  const montadoRef = useRef(true);
+
+  /* El temporizador de 2,5 s vive dentro de `compartir()` (función async
+     invocada por un evento), no dentro de un useEffect, así que el
+     `return () => clearTimeout` no aplica. La guarda de montaje cubre los
+     setState diferidos (los que siguen a un `await`: copiar al portapapeles o
+     el diálogo nativo de compartir, que puede durar segundos abierto) y el
+     clearTimeout suelta el temporizador al desmontar, para no dejarlo vivo
+     hasta los 2,5 s. Se reinicia montadoRef en true porque el montaje doble de
+     StrictMode ejecuta la limpieza antes del segundo montaje. */
+  useEffect(() => {
+    montadoRef.current = true;
+    return () => {
+      montadoRef.current = false;
+      if (temporizadorRef.current !== null) {
+        window.clearTimeout(temporizadorRef.current);
+        temporizadorRef.current = null;
+      }
+    };
+  }, []);
+
+  function cambiarEstado(nuevo: "ocioso" | "copiado" | "error") {
+    if (montadoRef.current) setEstado(nuevo);
+  }
+
+  function programarRegresoAOcioso() {
+    if (temporizadorRef.current !== null) window.clearTimeout(temporizadorRef.current);
+    temporizadorRef.current = window.setTimeout(() => {
+      temporizadorRef.current = null;
+      cambiarEstado("ocioso");
+    }, 2500);
+  }
 
   async function compartir() {
     const url = window.location.href;
@@ -35,17 +68,17 @@ export function CompartirPasaporte({
         return;
       }
       await navigator.clipboard.writeText(url);
-      setEstado("copiado");
-      window.setTimeout(() => setEstado("ocioso"), 2500);
+      cambiarEstado("copiado");
+      programarRegresoAOcioso();
     } catch {
       // El usuario canceló el diálogo nativo: no es un error.
-      if (estado === "error") setEstado("ocioso");
+      if (estado === "error") cambiarEstado("ocioso");
       try {
         await navigator.clipboard.writeText(window.location.href);
-        setEstado("copiado");
-        window.setTimeout(() => setEstado("ocioso"), 2500);
+        cambiarEstado("copiado");
+        programarRegresoAOcioso();
       } catch {
-        setEstado("error");
+        cambiarEstado("error");
       }
     }
   }

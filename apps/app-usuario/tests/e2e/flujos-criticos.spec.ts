@@ -206,7 +206,7 @@ test.describe("Registro 2 pasos", () => {
     await page.getByLabel(/correo electrónico/i).fill("ANA@EJEMPLO.COM");
     await page.locator('input[type="password"]').first().fill("abcdefgh");
     await page.getByLabel(/confirmar contraseña/i).fill("abcdefgh");
-    await page.getByLabel(/acepto/i).check().catch(() => {});
+    await page.getByLabel(/acepto/i).check();
     // Click crear sin checkbox o password débil debe mostrar error
     await page.getByRole("button", { name: /crear cuenta/i }).click();
     await expect(page.getByText(/minúscula.*mayúscula.*número/i).first()).toBeVisible({ timeout: 4000 });
@@ -234,10 +234,10 @@ test.describe("Wizard traslado nuevo (parcial mock)", () => {
     await mockMapboxGeocode(page);
     await mockUsuarioVerificado(page);
     await page.goto("/viajes/nuevo", { waitUntil: "domcontentloaded" });
-    await expect(page.getByRole("heading", { name: /¿Cuánto costará tu traslado\?/i }).or(page.getByText(/Conoce tu tarifa/i)).first()).toBeVisible({ timeout: 10000 }).catch(async () => {
-      await expect(page.locator("body")).not.toContainText(/traslado no encontrado/i);
-    });
-    await expect(page.getByText(/Paso 1 de 5/i)).toBeVisible().catch(() => {});
+    // Sin página de error intermedia: el wizard debe montar siempre.
+    await expect(page.locator("body")).not.toContainText(/traslado no encontrado/i);
+    await expect(page.getByRole("heading", { name: /¿Cuánto costará tu traslado\?/i }).or(page.getByText(/Conoce tu tarifa/i)).first()).toBeVisible({ timeout: 10000 });
+    await expect(page.getByText(/Paso 1 de 5/i)).toBeVisible();
   });
 
   test("paso 0 happy path: llena campos, ve tarifa, acepta y avanza a paso 1 con card de resumen", async ({ page }) => {
@@ -314,9 +314,16 @@ test.describe("Didit modal a11y (R4)", () => {
     await mockDidit(page);
     await page.route("**/rest/v1/rpc/subir_foto_perfil**", async (r) => r.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify("https://cdn.test/foto.jpg") }));
     await page.goto("/verificacion", { waitUntil: "domcontentloaded" });
-    // Si ya está verificado no hay botón, skip
+    // Sin botón no hay flujo que probar: depende del estado de verificación
+    // en el backend (cuenta ya verificada). Skip explícito y visible en el reporte.
     const btnDidit = page.getByRole("button", { name: /iniciar verificación con didit/i });
     if (!(await btnDidit.isVisible().catch(() => false))) {
+      test.info().annotations.push({
+        type: "skip-precondicion",
+        description: "Botón Didit ausente: la cuenta ya está verificada o el backend no expone el flujo.",
+      });
+      // eslint-disable-next-line no-console
+      console.warn("[e2e:didit] skip: botón 'iniciar verificación' ausente; precondición externa no cumplida.");
       test.skip();
       return;
     }
@@ -326,7 +333,7 @@ test.describe("Didit modal a11y (R4)", () => {
     await expect(dialog).toHaveAttribute("aria-modal", "true");
     await expect(dialog).toHaveAttribute("aria-describedby", /didit-desc/);
     // Aviso previo de permisos visible dentro del modal
-    await expect(page.getByText(/solicitará acceso a.*cámara/i).first()).toBeVisible().catch(() => {});
+    await expect(page.getByText(/solicitará acceso a.*cámara/i).first()).toBeVisible();
     // ESC debe cerrar
     await page.keyboard.press("Escape");
     await expect(dialog).toBeHidden({ timeout: 3000 });
@@ -338,7 +345,16 @@ test.describe("Didit modal a11y (R4)", () => {
     await page.route("**/rest/v1/rpc/subir_foto_perfil**", async (r) => r.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify("https://cdn.test/foto.jpg") }));
     await page.goto("/verificacion", { waitUntil: "domcontentloaded" });
     const btnDidit = page.getByRole("button", { name: /iniciar verificación con didit/i });
-    if (!(await btnDidit.isVisible().catch(() => false))) { test.skip(); return; }
+    if (!(await btnDidit.isVisible().catch(() => false))) {
+      test.info().annotations.push({
+        type: "skip-precondicion",
+        description: "Botón Didit ausente: la cuenta ya está verificada o el backend no expone el flujo.",
+      });
+      // eslint-disable-next-line no-console
+      console.warn("[e2e:didit] skip: botón 'iniciar verificación' ausente; precondición externa no cumplida.");
+      test.skip();
+      return;
+    }
     await btnDidit.click();
     const iframe = page.locator('iframe[title*="Didit"]');
     await expect(iframe).toBeVisible({ timeout: 8000 }).catch(async () => { await expect(page.getByRole("dialog")).toBeVisible(); });
@@ -371,7 +387,7 @@ test.describe("Mis Traslados y soporte", () => {
     await expect(page.getByRole("heading", { name: /mis traslados/i })).toBeVisible();
     await page.getByRole("button", { name: /En curso/i }).click();
     await page.getByRole("button", { name: /Historial/i }).click();
-    await expect(page.getByText(/sin traslados|no se encontraron/i).first()).toBeVisible({ timeout: 5000 }).catch(() => {});
+    await expect(page.getByText(/sin traslados|no se encontraron/i).first()).toBeVisible({ timeout: 5000 });
   });
 
   test("soporte muestra contexto y link con ?viaje", async ({ page }) => {

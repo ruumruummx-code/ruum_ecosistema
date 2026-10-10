@@ -89,16 +89,13 @@ test.describe("R6 Carga masiva — cancelación y cleanup on-unmount", () => {
     const fileInput = page.locator("#archivo-csv");
     await fileInput.setInputFiles({ name: "plantilla.csv", mimeType: "text/csv", buffer: Buffer.from(PLANTILLA_CSV) });
 
-    // Esperar a paso 2 (revisión) — indica enriquecimiento terminó
-    await expect(page.getByText(/total filas/i).first()).toBeVisible({ timeout: 15000 }).catch(async () => {
-      // Si no llega, skip polling test (Mapbox mock puede fallar en CI sin token)
-      test.skip();
-      return;
-    });
+    // Esperar a paso 2 (revisión) — indica enriquecimiento terminó.
+    // Sin catch-skip: el flujo está totalmente mockeado, si no llega es fallo real.
+    await expect(page.getByText(/total filas/i).first()).toBeVisible({ timeout: 15000 });
 
     // Ir a paso 3
     const continuar = page.getByRole("button", { name: /continuar al resumen/i });
-    if (await continuar.isVisible().catch(() => false)) await continuar.click();
+    await continuar.click();
     await expect(page.getByText(/confirmación del lote/i)).toBeVisible({ timeout: 5000 });
 
     const crearBtn = page.getByRole("button", { name: /crear.*traslados/i });
@@ -139,9 +136,9 @@ test.describe("R6 Carga masiva — cancelación y cleanup on-unmount", () => {
     await page.goto("/viajes/masivo");
     const fileInput = page.locator("#archivo-csv");
     await fileInput.setInputFiles({ name: "plantilla.csv", mimeType: "text/csv", buffer: Buffer.from(PLANTILLA_CSV) });
-    await expect(page.getByText(/total filas/i).first()).toBeVisible({ timeout: 15000 }).catch(() => test.skip());
+    await expect(page.getByText(/total filas/i).first()).toBeVisible({ timeout: 15000 });
     const continuar = page.getByRole("button", { name: /continuar al resumen/i });
-    if (await continuar.isVisible().catch(() => false)) await continuar.click();
+    await continuar.click();
     await page.getByRole("button", { name: /crear.*traslados/i }).click();
     await page.waitForTimeout(800);
     const countAntes = procesarCount;

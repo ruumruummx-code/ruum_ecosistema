@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import type { Appearance, Stripe, StripeElements } from "@stripe/stripe-js";
 import { Button, Aviso } from "@ruum/ui";
 import { crearClienteNavegador } from "../lib/supabase-browser";
 
@@ -9,7 +10,7 @@ const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
 /* Configuración de apariencia institucional oscura para Stripe Elements */
-const aparienciaStripe = {
+const aparienciaStripe: Appearance = {
   theme: "night" as const,
   variables: {
     colorPrimary: "#FFC400",
@@ -60,6 +61,18 @@ export interface PagoStripeProps {
   trasladoId: string;
   monto?: number | null;
   onPagado: () => void;
+}
+
+/** El SDK de Stripe se carga por import() dinámico (fuera del bundle inicial) y
+ *  se guarda en estado porque los hooks viajan como props: `useStripe` /
+ *  `useElements` no pueden invocarse tras un render condicional. Los tipos de
+ *  los componentes salen del propio paquete para no redeclararlos. */
+interface ModuloStripe {
+  Elements: (typeof import("@stripe/react-stripe-js"))["Elements"];
+  PaymentElement: (typeof import("@stripe/react-stripe-js"))["PaymentElement"];
+  useStripe: () => Stripe | null;
+  useElements: () => StripeElements | null;
+  stripePromise: Promise<Stripe | null>;
 }
 
 async function crearPaymentIntent(trasladoId: string): Promise<{ clientSecret?: string; pagoConfirmado?: boolean }> {
@@ -119,7 +132,7 @@ async function crearPaymentIntent(trasladoId: string): Promise<{ clientSecret?: 
 export function PagoStripe({ trasladoId, monto, onPagado }: PagoStripeProps) {
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [stripeModule, setStripeModule] = useState<any>(null);
+  const [stripeModule, setStripeModule] = useState<ModuloStripe | null>(null);
   const [reintento, setReintento] = useState(0);
   const reconciliadoNotificado = useRef(false);
 
@@ -152,8 +165,11 @@ export function PagoStripe({ trasladoId, monto, onPagado }: PagoStripeProps) {
 
         const mod = await import("@stripe/react-stripe-js");
         const { loadStripe } = await import("@stripe/stripe-js");
-        const stripePromise = await loadStripe(clavePublica);
-        if (!stripePromise) {
+        const promesaStripe = loadStripe(clavePublica);
+        /* Elements recibe la promesa (su contrato documentado); se espera aparte
+           solo para detectar clave inválida, porque loadStripe resuelve null. */
+        const stripe = await promesaStripe;
+        if (!stripe) {
           throw new Error("No fue posible inicializar Stripe con la clave pública configurada.");
         }
         setStripeModule({
@@ -161,7 +177,7 @@ export function PagoStripe({ trasladoId, monto, onPagado }: PagoStripeProps) {
           PaymentElement: mod.PaymentElement,
           useStripe: mod.useStripe,
           useElements: mod.useElements,
-          stripePromise,
+          stripePromise: promesaStripe,
         });
 
         setClientSecret(inicio.clientSecret ?? null);
@@ -226,12 +242,12 @@ function FormularioPagoReal({
 }: {
   trasladoId: string;
   onPagado: () => void;
-  PaymentElement: React.ComponentType<{ options?: unknown }>;
-  useStripe: () => unknown;
-  useElements: () => unknown;
+  PaymentElement: (typeof import("@stripe/react-stripe-js"))["PaymentElement"];
+  useStripe: () => Stripe | null;
+  useElements: () => StripeElements | null;
 }) {
-  const stripe = useStripe() as any;
-  const elements = useElements() as any;
+  const stripe = useStripe();
+  const elements = useElements();
   const [enviando, setEnviando] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
