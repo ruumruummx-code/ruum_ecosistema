@@ -4,6 +4,7 @@ import { useMemo, useState, useEffect, useTransition, useRef } from "react";
 import Link from "next/link";
 import { ETIQUETA_TIPO_VEHICULO } from "@ruum/shared/constants";
 import type { Database } from "@ruum/shared/types";
+import { progresoPorEstadoTraslado } from "../../lib/inicio";
 
 type Pasaporte = Database["public"]["Views"]["pasaporte_digital"]["Row"];
 type Traslado = Pick<
@@ -17,7 +18,7 @@ export interface ViajeLista {
   traslado: Traslado | null;
 }
 
-type TonoEstado = "active" | "pending" | "success" | "error" | "neutral";
+type TonoPildora = "active" | "scheduled" | "completed" | "cancelled";
 
 function IconoBuscar({ className = "size-5" }: { className?: string }) {
   return (
@@ -41,24 +42,6 @@ function IconoFiltro({ className = "size-5" }: { className?: string }) {
   );
 }
 
-function IconoCalendario({ className = "size-5" }: { className?: string }) {
-  return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <rect x="3.5" y="5" width="17" height="15.5" rx="2" />
-      <path d="M7 3.5v3M17 3.5v3M3.5 9h17" />
-    </svg>
-  );
-}
-
-function IconoReloj({ className = "size-5" }: { className?: string }) {
-  return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <circle cx="12" cy="12" r="8.5" />
-      <path d="M12 7.5v5l3 2" />
-    </svg>
-  );
-}
-
 function IconoCarroFrente({ className = "size-6" }: { className?: string }) {
   return (
     <svg className={className} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
@@ -69,39 +52,30 @@ function IconoCarroFrente({ className = "size-6" }: { className?: string }) {
   );
 }
 
-function IconoPinOrigen({ className = "size-5" }: { className?: string }) {
+function IconoUsuario({ className = "size-3" }: { className?: string }) {
   return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <circle cx="12" cy="10" r="3" />
-      <path d="M12 21.7C17.3 17 20 13 20 10a8 8 0 1 0-16 0c0 3 2.7 7 8 11.7z" />
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <circle cx="12" cy="8" r="3.6" />
+      <path d="M4.5 19.5c0-3.6 3.4-6 7.5-6s7.5 2.4 7.5 6" />
     </svg>
   );
 }
 
-function IconoDianaDestino({ className = "size-5" }: { className?: string }) {
+function IconoReloj({ className = "size-3" }: { className?: string }) {
   return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <circle cx="12" cy="12" r="10" />
-      <circle cx="12" cy="12" r="6" />
-      <circle cx="12" cy="12" r="2" />
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
+      <circle cx="12" cy="12" r="8.5" />
+      <path d="M12 7.5V12l3 2" />
     </svg>
   );
 }
 
-function IconoUsuarioConductor({ className = "size-5" }: { className?: string }) {
+function IconoRuta({ className = "size-3" }: { className?: string }) {
   return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <circle cx="12" cy="8" r="4" />
-      <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" />
-    </svg>
-  );
-}
-
-function IconoDolarTarifa({ className = "size-5" }: { className?: string }) {
-  return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <line x1="12" y1="2" x2="12" y2="22" />
-      <path d="M17 6H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <circle cx="6" cy="19" r="2.2" />
+      <circle cx="18" cy="5" r="2.2" />
+      <path d="M8.2 19H15a3 3 0 0 0 0-6H9a3 3 0 0 1 0-6h6.8" />
     </svg>
   );
 }
@@ -124,9 +98,41 @@ function IconoSoporte({ className = "size-7" }: { className?: string }) {
   );
 }
 
-function moneda(valor: number | null | undefined): string {
-  if (valor == null) return "$0.00";
-  return `$${Number(valor).toLocaleString("es-MX", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+function IconoCalendario({ className = "size-3" }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <rect x="3.5" y="5" width="17" height="15.5" rx="2" />
+      <path d="M7 3.5v3M17 3.5v3M3.5 9h17" />
+    </svg>
+  );
+}
+
+function folioCorto(trasladoId: string | null | undefined): string {
+  return trasladoId ? `#RR-${trasladoId.slice(0, 4).toUpperCase()}` : "#RR-—";
+}
+
+function primerNombre(nombre: string | null | undefined): string | null {
+  const valor = nombre?.trim().split(/\s+/)[0];
+  if (!valor) return null;
+  return `${valor.charAt(0).toUpperCase()}${valor.slice(1).toLowerCase()}.`;
+}
+
+function formatoDuracion(horas: number | null | undefined): string | null {
+  if (horas == null || Number.isNaN(Number(horas))) return null;
+  const totalMin = Math.round(Number(horas) * 60);
+  const h = Math.floor(totalMin / 60);
+  const m = totalMin % 60;
+  if (h <= 0) return `${m}m`;
+  if (m === 0) return `${h}h`;
+  return `${h}h ${m.toString().padStart(2, "0")}m`;
+}
+
+function formatoGastado(total: number): string {
+  if (total >= 1000) {
+    const miles = total / 1000;
+    return `$${miles >= 100 ? Math.round(miles).toString() : miles.toFixed(1).replace(/\.0$/, "")}k`;
+  }
+  return `$${Math.round(total).toLocaleString("es-MX")}`;
 }
 
 function vehiculoNombre(p: Pasaporte): string {
@@ -155,37 +161,61 @@ function pestañaDeViaje(p: Pasaporte): PestañaTraslados {
   return "activos";
 }
 
-function estadoVisual(p: Pasaporte): { label: string; tone: TonoEstado } {
+const PILDORA_POR_PESTAÑA: Record<PestañaTraslados, { tono: TonoPildora; borde: string }> = {
+  activos: { tono: "active", borde: "border-l-[#4ade80]" },
+  programados: { tono: "scheduled", borde: "border-l-[#8b5cf6]" },
+  finalizados: { tono: "completed", borde: "border-l-[#cbd5e1]" },
+  cancelados: { tono: "cancelled", borde: "border-l-[#f87171]" },
+};
+
+const PILDORA_CLASE: Record<TonoPildora, string> = {
+  active: "bg-[#e9f3ee] text-[#1f6b4a]",
+  scheduled: "bg-[#f2eef9] text-[#5e3b8c]",
+  completed: "bg-[#eef3fa] text-[#2e5a88]",
+  cancelled: "bg-[#fdeaea] text-[#b33c3c]",
+};
+
+function estadoVisual(p: Pasaporte): { label: string } {
   switch (String(p.estado ?? "")) {
     case "pendiente_de_conductor":
-      return { label: "Pendiente de conductor", tone: "pending" };
+      return { label: "Pendiente de conductor" };
     case "cotizacion_aceptada":
     case "pago_pendiente":
-      return { label: "Pago pendiente", tone: "pending" };
+      return { label: "Pago pendiente" };
     case "servicio_confirmado":
-      return { label: "Confirmado", tone: "success" };
+      return { label: "Confirmado" };
     case "servicio_cerrado":
     case "reclamo_resuelto":
     case "disputa_resuelta":
-      return { label: "Completado", tone: "success" };
+      return { label: "Completado" };
     case "servicio_cancelado":
     case "traslado_fallido":
-      return { label: "Cancelado", tone: "error" };
+      return { label: "Cancelado" };
     case "conductor_asignado":
+      return { label: "Conductor asignado" };
     case "conductor_en_camino_al_origen":
+      return { label: "En camino al origen" };
     case "conductor_en_punto_de_recoleccion":
+      return { label: "Check origen" };
     case "verificacion_vehiculo_en_proceso":
     case "evidencia_inicial_en_proceso":
+      return { label: "Check origen" };
     case "evidencia_inicial_completada":
+      return { label: "Evidencia inicial lista" };
     case "vehiculo_recibido":
+      return { label: "Vehículo recibido" };
     case "traslado_en_curso":
+      return { label: "En camino al destino" };
     case "llegada_a_destino":
+      return { label: "En punto de entrega" };
     case "evidencia_final_en_proceso":
+      return { label: "Check final en curso" };
     case "evidencia_final_completada":
+      return { label: "Evidencia final lista" };
     case "entrega_confirmada":
-      return { label: "En curso", tone: "active" };
+      return { label: "Entregado" };
     default:
-      return { label: "En proceso", tone: "neutral" };
+      return { label: "En proceso" };
   }
 }
 
@@ -207,16 +237,16 @@ function direccion(valor: string | null | undefined, fallback: string): string {
 
 function SkeletonCard() {
   return (
-    <div className="user-v2-trip-card animate-pulse" aria-hidden="true">
+    <div className="animate-pulse rounded-[22px] border border-[#eef2f7] bg-white p-5" aria-hidden="true">
       <div className="flex gap-3">
-        <div className="size-11 rounded-full bg-[var(--user-color-border)]" />
+        <div className="size-11 rounded-full bg-[#eef2f7]" />
         <div className="flex-1 space-y-2">
-          <div className="h-4 w-24 rounded bg-[var(--user-color-border)]" />
-          <div className="h-3 w-40 rounded bg-[var(--user-color-border)]" />
+          <div className="h-4 w-24 rounded bg-[#eef2f7]" />
+          <div className="h-3 w-40 rounded bg-[#eef2f7]" />
         </div>
       </div>
-      <div className="mt-4 h-16 rounded-xl bg-[var(--user-color-border)]/60" />
-      <div className="mt-4 h-10 rounded-xl bg-[var(--user-color-border)]/60" />
+      <div className="mt-4 h-16 rounded-2xl bg-[#eef2f7]/70" />
+      <div className="mt-4 h-10 rounded-2xl bg-[#eef2f7]/70" />
     </div>
   );
 }
@@ -234,18 +264,28 @@ function FichaVacia({ hayBusqueda, hayFiltro, pestana }: { hayBusqueda: boolean;
     : "Tus traslados aparecerán aquí tan pronto como los registres en la plataforma.";
 
   return (
-    <div className="user-v2-card p-8 text-center">
-      <div className="user-v2-icon-well mx-auto mb-3 text-[var(--user-color-muted)]">
-        <IconoCarroFrente className="size-7" />
+    <div className="rounded-[22px] border border-[#eef2f7] bg-white px-6 py-12 text-center shadow-[0_6px_16px_rgba(0,0,0,0.02)]">
+      <div aria-hidden="true" className="mx-auto mb-5 flex size-20 items-center justify-center rounded-[30px] bg-[#f2f6fc] text-[#a6b7cb]">
+        <IconoCarroFrente className="size-[34px]" />
       </div>
-      <h3 className="user-v2-heading-3">{titulo}</h3>
-      <p className="user-v2-caption user-v2-muted mx-auto mt-1 max-w-xs">{descripcion}</p>
-      <Link href="/viajes/nuevo" className="user-v2-primary-button mx-auto mt-5 inline-flex items-center justify-center px-4">
+      <h3 className="text-[17px] font-bold text-[#0b1e33]">{titulo}</h3>
+      <p className="mx-auto mt-2 max-w-xs text-[14px] font-medium leading-relaxed text-[#7e8fa8]">{descripcion}</p>
+      <Link
+        href="/viajes/nuevo"
+        className="mt-5 inline-flex min-h-11 items-center gap-2 rounded-full bg-[#0b1e33] px-7 py-3.5 text-[14px] font-bold text-white"
+      >
         Solicitar traslado
       </Link>
     </div>
   );
 }
+
+const PESTAÑAS: { id: PestañaTraslados; etiqueta: string }[] = [
+  { id: "activos", etiqueta: "Activos" },
+  { id: "programados", etiqueta: "Programados" },
+  { id: "finalizados", etiqueta: "Finalizados" },
+  { id: "cancelados", etiqueta: "Cancelados" },
+];
 
 export function MisTrasladosCliente({
   Traslados,
@@ -285,6 +325,10 @@ export function MisTrasladosCliente({
     return Array.from(new Set(Traslados.map(({ pasaporte }) => vehiculoTipo(pasaporte)))).sort((a, b) => a.localeCompare(b, "es"));
   }, [Traslados]);
 
+  const gastoTotal = useMemo(() => {
+    return Traslados.reduce((acc, { pasaporte }) => acc + (Number(pasaporte.monto_pagado) || 0), 0);
+  }, [Traslados]);
+
   const filtrados = useMemo(() => {
     let lista = Traslados.filter(({ pasaporte }) => pestañaDeViaje(pasaporte) === pestana);
     if (tipoVehiculoSeleccionado) {
@@ -315,10 +359,8 @@ export function MisTrasladosCliente({
     startTransition(() => setPestana(nueva));
   }
 
-  /* ACC-7 (auditoría): el manejador buscaba '[role="tab"]', que no existe en el
-     DOM (el grupo usa role="group" + aria-pressed), así que las flechas nunca
-     hacían nada: código muerto que aparenta implementar el patrón de tabs.
-     Ahora consulta los botones reales y añade navegación por flechas + Home/End. */
+  /* ACC-7 (auditoría): navegación por flechas + Home/End sobre los botones
+     reales del grupo (patrón toolbar de WAI-ARIA). */
   function handleTablistKeyDown(e: React.KeyboardEvent) {
     const botones = Array.from(
       tablistRef.current?.querySelectorAll<HTMLButtonElement>("button:not([disabled])") ?? []
@@ -336,85 +378,29 @@ export function MisTrasladosCliente({
     if (destino >= 0) {
       e.preventDefault();
       botones[destino]?.focus();
-      // Following the ARIA toolbar pattern: moving focus also activates.
       const id = (botones[destino]?.dataset.pestana ?? "") as PestañaTraslados;
       if (id) handlePestanaChange(id);
     }
   }
 
   return (
-    <div className="user-v2-screen">
+    <div className="flex flex-col gap-[18px]">
       <section aria-labelledby="titulo-mis-traslados">
-        <h1 id="titulo-mis-traslados" className="user-v2-heading-1">Mis traslados</h1>
-        <p className="user-v2-body user-v2-muted mt-1">Consulta y administra tus traslados.</p>
+        <h1 id="titulo-mis-traslados" className="text-[26px] font-extrabold tracking-tight text-[#0b1e33]">
+          Traslados
+        </h1>
       </section>
 
-      <section aria-label="Buscar y filtrar traslados" className="space-y-3">
-        <div className="flex items-center gap-3">
-          <label className="user-v2-search" htmlFor="buscar-traslado">
-            <IconoBuscar className="size-6 shrink-0 text-[var(--user-color-muted)]" />
-            <span className="sr-only">Buscar traslado</span>
-            <input
-              id="buscar-traslado"
-              type="search"
-              value={busquedaInput}
-              onChange={(event) => setBusquedaInput(event.target.value)}
-              placeholder="Buscar traslado"
-              className="user-v2-search-input"
-              aria-busy={buscando}
-              aria-describedby="busqueda-ayuda"
-            />
-          </label>
-          <button
-            type="button"
-            aria-controls="panel-filtros-traslados"
-            aria-expanded={filtroAbierto}
-            onClick={() => setFiltroAbierto((abierto) => !abierto)}
-            className="user-v2-filter-button flex shrink-0 items-center justify-center gap-2 px-4"
-          >
-            <IconoFiltro className="size-5" />
-            <span>Filtrar</span>
-          </button>
-        </div>
-        <div className="flex items-center gap-2 px-1">
-          <p id="busqueda-ayuda" className="user-v2-caption user-v2-muted">Folio, placa, vehículo, ciudad o conductor</p>
-          {buscando && <span className="inline-flex items-center gap-1 text-xs text-[var(--user-color-muted)]" role="status" aria-live="polite"><span className="size-3 animate-spin rounded-full border-2 border-[var(--user-color-border)] border-t-[var(--user-color-action)]" aria-hidden />Buscando…</span>}
-        </div>
-
-        {filtroAbierto && (
-          <div id="panel-filtros-traslados" className="user-v2-filter-panel">
-            <label className="user-v2-filter-label" htmlFor="tipo-vehiculo">Tipo de vehículo</label>
-            <select
-              id="tipo-vehiculo"
-              value={tipoVehiculoSeleccionado}
-              onChange={(event) => setTipoVehiculoSeleccionado(event.target.value)}
-              className="user-v2-filter-select"
-            >
-              <option value="">Todos los vehículos</option>
-              {tiposVehiculo.map((tipo) => <option key={tipo} value={tipo}>{tipo}</option>)}
-            </select>
-            {(busqueda || tipoVehiculoSeleccionado) && (
-              <button type="button" onClick={limpiarFiltros} className="user-v2-ghost-button mt-3 w-full px-4">
-                Limpiar filtros
-              </button>
-            )}
-          </div>
-        )}
-      </section>
-
+      {/* Pestañas estilo segmento con conteos */}
       <div
         aria-label="Filtrar por estado del traslado"
         role="group"
-        className="flex gap-2 overflow-x-auto no-scrollbar py-0.5"
         ref={tablistRef}
         onKeyDown={handleTablistKeyDown}
+        className="flex gap-1.5 overflow-x-auto rounded-[40px] bg-[#f2f6fb] p-[5px]"
+        style={{ scrollbarWidth: "none" }}
       >
-        {([
-          ["activos", "En curso"],
-          ["programados", "Por iniciar"],
-          ["finalizados", "Historial"],
-          ["cancelados", "Cancelados"],
-        ] as const).map(([id, etiqueta]) => {
+        {PESTAÑAS.map(({ id, etiqueta }) => {
           const activo = pestana === id;
           return (
             <button
@@ -422,27 +408,118 @@ export function MisTrasladosCliente({
               type="button"
               aria-pressed={activo}
               data-pestana={id}
-              /* Roving tabindex: solo la pestaña activa es alcanzable con Tab,
-                 el resto con flechas (patrón toolbar de WAI-ARIA). */
               tabIndex={activo ? 0 : -1}
               onClick={() => handlePestanaChange(id)}
-              className={`user-v2-ghost-button shrink-0 px-4 ${activo ? "border-[var(--user-color-brand)] bg-[var(--user-color-brand-soft)] text-[var(--user-color-brand-dark)]" : ""}`}
+              className={[
+                "min-h-11 flex-1 whitespace-nowrap rounded-[30px] px-1.5 text-[13px] transition-all",
+                activo
+                  ? "bg-white font-bold text-[#0b1e33] shadow-[0_4px_12px_rgba(0,0,0,0.06)]"
+                  : "font-semibold text-[#5c6e86]",
+              ].join(" ")}
             >
-              {etiqueta} ({conteos[id]})
+              {etiqueta}
+              {conteos[id] > 0 && (
+                <span
+                  className={[
+                    "ml-1 inline-block rounded-[20px] px-[7px] py-[2px] align-[1px] text-[10px] font-bold",
+                    activo ? "bg-[#0b1e33] text-white" : "bg-[#dfe8f3] text-[#2e5a88]",
+                  ].join(" ")}
+                >
+                  {conteos[id]}
+                </span>
+              )}
             </button>
           );
         })}
       </div>
 
+      {/* Resumen: total / activos / gastado */}
+      <dl className="flex rounded-[18px] border border-[#eef2f7] bg-white p-4 shadow-[0_4px_12px_rgba(0,0,0,0.01)]">
+        {[
+          { etiqueta: "Total", valor: String(Traslados.length) },
+          { etiqueta: "Activos", valor: String(conteos.activos) },
+          { etiqueta: "Gastado", valor: formatoGastado(gastoTotal) },
+        ].map(({ etiqueta, valor }) => (
+          <div key={etiqueta} className="flex-1 text-center first:border-l-0 border-l border-[#eef2f7]">
+            <dd className="text-[20px] font-extrabold tracking-tight text-[#0b1e33]">{valor}</dd>
+            <dt className="mt-[3px] text-[11px] font-semibold uppercase tracking-[0.4px] text-[#7e8fa8]">{etiqueta}</dt>
+          </div>
+        ))}
+      </dl>
+
+      {/* Buscador + filtro */}
+      <section aria-label="Buscar y filtrar traslados" className="flex flex-col gap-2">
+        <div className="flex items-center gap-2.5 rounded-2xl border border-[#eef2f7] bg-white px-4 py-[13px]">
+          <IconoBuscar className="size-4 shrink-0 text-[#a6b7cb]" />
+          <label htmlFor="buscar-traslado" className="sr-only">
+            Buscar traslado
+          </label>
+          <input
+            id="buscar-traslado"
+            type="search"
+            value={busquedaInput}
+            onChange={(event) => setBusquedaInput(event.target.value)}
+            placeholder="Buscar por vehículo, destino o # de traslado"
+            className="w-full border-0 bg-transparent p-0 text-[14px] font-medium text-[#0b1e33] outline-none placeholder:font-medium placeholder:text-[#a6b7cb]"
+            aria-busy={buscando}
+            aria-describedby="busqueda-ayuda"
+          />
+          <button
+            type="button"
+            aria-controls="panel-filtros-traslados"
+            aria-expanded={filtroAbierto}
+            aria-label={tipoVehiculoSeleccionado ? `Filtrar por tipo de vehículo, filtro activo: ${tipoVehiculoSeleccionado}` : "Filtrar por tipo de vehículo"}
+            onClick={() => setFiltroAbierto((abierto) => !abierto)}
+            className={[
+              "flex size-11 shrink-0 items-center justify-center rounded-xl transition-colors",
+              filtroAbierto || tipoVehiculoSeleccionado
+                ? "bg-[#0b1e33] text-white"
+                : "text-[#a6b7cb] hover:bg-[#f2f6fc] hover:text-[#2e5a88]",
+            ].join(" ")}
+          >
+            <IconoFiltro className="size-5" />
+          </button>
+        </div>
+        <div className="flex items-center gap-2 px-1">
+          <p id="busqueda-ayuda" className="text-[12px] text-[#7e8fa8]">Folio, placa, vehículo, ciudad o conductor</p>
+          {buscando && <span className="inline-flex items-center gap-1 text-xs text-[#7e8fa8]" role="status" aria-live="polite"><span className="size-3 animate-spin rounded-full border-2 border-[#eef2f7] border-t-[#2e5a88]" aria-hidden />Buscando…</span>}
+        </div>
+
+        {filtroAbierto && (
+          <div id="panel-filtros-traslados" className="rounded-2xl border border-[#eef2f7] bg-white p-4 shadow-[0_4px_12px_rgba(0,0,0,0.01)]">
+            <label className="mb-2 block text-[14px] font-bold text-[#0b1e33]" htmlFor="tipo-vehiculo">Tipo de vehículo</label>
+            <select
+              id="tipo-vehiculo"
+              value={tipoVehiculoSeleccionado}
+              onChange={(event) => setTipoVehiculoSeleccionado(event.target.value)}
+              className="min-h-12 w-full rounded-xl border border-[#eef2f7] bg-white px-3 text-[16px] text-[#0b1e33]"
+            >
+              <option value="">Todos los vehículos</option>
+              {tiposVehiculo.map((tipo) => <option key={tipo} value={tipo}>{tipo}</option>)}
+            </select>
+            {(busqueda || tipoVehiculoSeleccionado) && (
+              <button
+                type="button"
+                onClick={limpiarFiltros}
+                className="mt-3 min-h-11 w-full rounded-xl border border-[#dae5f2] bg-[#f0f5fe] px-4 text-[14px] font-bold text-[#0b1e33]"
+              >
+                Limpiar filtros
+              </button>
+            )}
+          </div>
+        )}
+      </section>
+
+      {/* Lista de traslados */}
       <section
         id="lista-traslados"
         aria-live="polite"
         aria-busy={isPending || buscando}
         aria-label={`Lista de traslados ${pestana} — ${filtrados.length} resultados`}
-        className="space-y-4"
+        className="flex flex-col gap-3.5"
       >
         {(isPending || buscando) ? (
-          <div className="space-y-4" role="status" aria-label="Cargando traslados">
+          <div className="flex flex-col gap-3.5" role="status" aria-label="Cargando traslados">
             <SkeletonCard />
             <SkeletonCard />
             <SkeletonCard />
@@ -451,86 +528,124 @@ export function MisTrasladosCliente({
           <FichaVacia hayBusqueda={Boolean(busqueda.trim())} hayFiltro={Boolean(tipoVehiculoSeleccionado)} pestana={pestana} />
         ) : (
           filtrados.map(({ pasaporte, traslado }) => {
-            const { label, tone } = estadoVisual(pasaporte);
-            const fecha = fechaProgramada(traslado?.fecha_hora_programada ?? null);
+            const { label } = estadoVisual(pasaporte);
+            const { tono, borde } = PILDORA_POR_PESTAÑA[pestana];
+            const folio = folioCorto(pasaporte.traslado_id);
             const urlViaje = pasaporte.traslado_id ? `/viajes/${pasaporte.traslado_id}` : "/mis-viajes";
+            const nombreVehiculo = vehiculoNombre(pasaporte);
             const origenCiudad = pasaporte.origen_ciudad ?? traslado?.origen_ciudad;
             const destinoCiudad = pasaporte.destino_ciudad ?? traslado?.destino_ciudad;
             const esPagoPendiente = pasaporte.estado === "cotizacion_aceptada" || pasaporte.estado === "pago_pendiente";
+            const esActiva = tono === "active";
+            const progreso = progresoPorEstadoTraslado(pasaporte.estado);
+            const conductor = primerNombre(pasaporte.conductor_nombre) ?? "Por asignar";
+            const duracion = formatoDuracion(pasaporte.tiempo_estimado_horas);
+            const distancia = pasaporte.distancia_km != null
+              ? `${Number(pasaporte.distancia_km).toLocaleString("es-MX")} km`
+              : null;
+            const fecha = fechaProgramada(traslado?.fecha_hora_programada ?? null);
+            const datoSecundario = duracion ?? distancia ?? fecha.fecha;
+            const etiquetaBoton = esActiva ? "Pasaporte" : esPagoPendiente ? "Completar pago" : "Detalle";
 
             return (
-              <article key={pasaporte.traslado_id ?? `${pasaporte.creado_en}-${pasaporte.estado}`} className="user-v2-trip-card">
-                <div className="flex items-start justify-between gap-3">
-                  <div className="flex min-w-0 items-start gap-3">
-                    <div className="user-v2-icon-well mt-0.5 size-11">
-                      <IconoCarroFrente className="size-6" />
-                    </div>
-                    <div className="min-w-0">
-                      <span className={`user-v2-status user-v2-status--${tone}`}>{label}</span>
-                      <h2 className="user-v2-card-title mt-2 break-words">{vehiculoNombre(pasaporte)}</h2>
-                      <p className="user-v2-caption user-v2-muted mt-0.5 break-words">
-                        {vehiculoTipo(pasaporte)}{pasaporte.vehiculo_placas ? ` · Placas ${pasaporte.vehiculo_placas}` : ""}
-                      </p>
-                    </div>
+              <article
+                key={pasaporte.traslado_id ?? `${pasaporte.creado_en}-${pasaporte.estado}`}
+                className={[
+                  "rounded-[22px] border border-[#eef2f7] border-l-4 bg-white p-5 shadow-[0_6px_16px_rgba(0,0,0,0.02)]",
+                  borde,
+                  tono === "cancelled" ? "opacity-[0.85]" : "",
+                ].join(" ")}
+              >
+                <div className="mb-3.5 flex items-start justify-between gap-3">
+                  <span className={["inline-flex items-center gap-1.5 rounded-[30px] px-3 py-1.5 text-[11px] font-bold tracking-[0.2px]", PILDORA_CLASE[tono]].join(" ")}>
+                    {esActiva && <span aria-hidden="true" className="size-1.5 animate-pulse rounded-full bg-[#4ade80] shadow-[0_0_0_2px_rgba(74,222,128,0.3)]" />}
+                    {label}
+                  </span>
+                  <span className="shrink-0 rounded-[20px] bg-[#f7faff] px-3 py-[5px] text-[12px] font-semibold text-[#8b9bb0]">
+                    {folio}
+                  </span>
+                </div>
+
+                <div className="mb-3.5 flex items-center gap-3.5">
+                  <span aria-hidden="true" className="flex size-[50px] shrink-0 items-center justify-center rounded-2xl bg-[#eef3fa] text-[#2e5a88]">
+                    <IconoCarroFrente className="size-[22px]" />
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <h2 className="truncate text-[17px] font-extrabold tracking-tight text-[#0b1e33]">{nombreVehiculo}</h2>
+                    <p className="mt-[3px] text-[12px] font-semibold tracking-[0.5px] text-[#6b7c94]">
+                      {pasaporte.vehiculo_placas ?? "Placas pendientes"}
+                    </p>
                   </div>
-                  <Link href={urlViaje} className="user-v2-ghost-button flex size-11 shrink-0 items-center justify-center px-0" aria-label={`Ver detalle del traslado ${vehiculoNombre(pasaporte)}${pasaporte.traslado_id ? ` ${pasaporte.traslado_id.slice(0, 8)}` : ""}`}>
-                    <IconoChevron />
-                  </Link>
                 </div>
 
-                <div className="user-v2-trip-meta mt-4">
-                  <div className="user-v2-trip-meta-item"><IconoCalendario className="size-5 shrink-0 text-[var(--user-color-action)]" /><span>{fecha.fecha}</span></div>
-                  <div className="user-v2-trip-meta-item"><IconoReloj className="size-5 shrink-0 text-[var(--user-color-action)]" /><span>{fecha.hora}</span></div>
-                </div>
-
-                <div className="mt-5 space-y-4">
-                  <div className="user-v2-route-row">
-                    <div className="user-v2-route-icon text-[var(--user-color-action)]"><IconoPinOrigen /></div>
-                    <div className="min-w-0">
-                      <p className="user-v2-caption user-v2-muted">Origen</p>
-                      <p className="user-v2-card-title break-words">{direccion(origenCiudad, "Origen pendiente")}</p>
-                      <p className="user-v2-caption user-v2-muted mt-0.5 break-words">{direccion(traslado?.origen_direccion ?? pasaporte.origen_direccion, "Dirección registrada")}</p>
-                    </div>
-                  </div>
-                  <div className="user-v2-route-row">
-                    <div className="user-v2-route-icon text-[var(--user-color-brand-dark)]"><IconoDianaDestino /></div>
-                    <div className="min-w-0">
-                      <p className="user-v2-caption user-v2-muted">Destino</p>
-                      <p className="user-v2-card-title break-words">{direccion(destinoCiudad, "Destino pendiente")}</p>
-                      <p className="user-v2-caption user-v2-muted mt-0.5 break-words">{direccion(traslado?.destino_direccion ?? pasaporte.destino_direccion, "Dirección registrada")}</p>
-                    </div>
-                  </div>
-                  {pasaporte.conductor_nombre && (
-                    <div className="user-v2-route-row">
-                      <div className="user-v2-route-icon text-[var(--user-color-primary)]"><IconoUsuarioConductor /></div>
-                      <div className="min-w-0"><p className="user-v2-caption user-v2-muted">Conductor asignado</p><p className="user-v2-card-title break-words">{pasaporte.conductor_nombre}</p></div>
-                    </div>
-                  )}
-                </div>
-
-                <div className="mt-5 flex items-center gap-3 border-t border-[var(--user-color-border)] pt-4">
-                  <div className="user-v2-route-icon size-11 text-[var(--user-color-primary)]"><IconoDolarTarifa /></div>
-                  <div><p className="user-v2-caption user-v2-muted">Tarifa</p><p className="text-xl font-bold text-[var(--user-color-brand-dark)]">{moneda(pasaporte.precio_final ?? pasaporte.precio_cotizado)}</p></div>
-                </div>
-
-                <div className="mt-5 flex flex-col gap-3 sm:flex-row">
-                  <Link href={urlViaje} className="user-v2-secondary-button flex flex-1 items-center justify-between px-4">
-                    <span>{esPagoPendiente ? "Completar pago" : "Ver detalles del traslado"}</span>
-                    <IconoChevron />
-                  </Link>
-                  {pasaporte.traslado_id && (
-                    <Link
-                      href={`/pasaporte?traslado=${pasaporte.traslado_id}`}
-                      className="user-v2-ghost-button flex items-center justify-center gap-2 px-4"
-                      aria-label={`Ver pasaporte digital del traslado ${vehiculoNombre(pasaporte)}`}
+                {esActiva && (
+                  <div className="mb-3 flex items-center gap-2.5">
+                    <div
+                      className="h-[5px] flex-1 overflow-hidden rounded-[10px] bg-[#e8eef6]"
+                      role="progressbar"
+                      aria-valuenow={progreso}
+                      aria-valuemin={0}
+                      aria-valuemax={100}
+                      aria-label={`Avance del traslado ${nombreVehiculo}: ${label}`}
                     >
-                      <svg className="size-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                        <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
-                        <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
-                      </svg>
-                      <span>Pasaporte digital</span>
-                    </Link>
-                  )}
+                      <div
+                        className="h-full rounded-[10px]"
+                        style={{ width: `${progreso}%`, background: "linear-gradient(90deg, #0b1e33, #2e5a88)" }}
+                      />
+                    </div>
+                    <span className="whitespace-nowrap text-[12px] font-bold text-[#0b1e33]">{progreso}%</span>
+                  </div>
+                )}
+
+                <div className="mb-3.5 rounded-2xl bg-[#f8fafd] px-4 py-3.5">
+                  <div className="flex items-start gap-3">
+                    <span aria-hidden="true" className="mt-[3px] size-2.5 shrink-0 rounded-full bg-[#2e9e6b] shadow-[0_0_0_3px_#e2f0e9]" />
+                    <p className="text-[13px] font-semibold leading-snug text-[#1a293b]">
+                      {direccion(origenCiudad, "Origen pendiente")}
+                      <small className="mt-[1px] block text-[11px] font-medium text-[#8b9bb0]">
+                        {direccion(traslado?.origen_direccion ?? pasaporte.origen_direccion, "Dirección registrada")}
+                      </small>
+                    </p>
+                  </div>
+                  <div className="mt-2.5 flex items-start gap-3">
+                    <span aria-hidden="true" className="mt-[3px] size-2.5 shrink-0 rounded-full bg-[#e8a23e] shadow-[0_0_0_3px_#fef0e0]" />
+                    <p className="text-[13px] font-semibold leading-snug text-[#1a293b]">
+                      {direccion(destinoCiudad, "Destino pendiente")}
+                      <small className="mt-[1px] block text-[11px] font-medium text-[#8b9bb0]">
+                        {direccion(traslado?.destino_direccion ?? pasaporte.destino_direccion, "Dirección registrada")}
+                      </small>
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between gap-3 border-t border-[#f0f4fa] pt-3.5">
+                  <div className="flex min-w-0 gap-4 text-[12px] font-medium text-[#6b7c94]">
+                    <span className="inline-flex min-w-0 items-center gap-1.5">
+                      <IconoUsuario className="shrink-0 text-[#8b9bb0]" />
+                      <span className="truncate">{conductor}</span>
+                    </span>
+                    <span className="inline-flex shrink-0 items-center gap-1.5">
+                      {pestana === "programados" && !duracion
+                        ? <IconoCalendario className="text-[#8b9bb0]" />
+                        : distancia && !duracion
+                          ? <IconoRuta className="text-[#8b9bb0]" />
+                          : <IconoReloj className="text-[#8b9bb0]" />}
+                      {datoSecundario}
+                    </span>
+                  </div>
+                  <Link
+                    href={urlViaje}
+                    aria-label={`${etiquetaBoton} del traslado ${nombreVehiculo} ${folio}`}
+                    className={[
+                      "inline-flex min-h-11 shrink-0 items-center gap-[7px] whitespace-nowrap rounded-[30px] px-4 py-2 text-[12px] font-bold tracking-tight",
+                      esActiva || esPagoPendiente
+                        ? "bg-[#0b1e33] text-white shadow-[0_6px_14px_-4px_rgba(11,30,51,0.3)]"
+                        : "border border-[#dae5f2] bg-[#f0f5fe] text-[#0b1e33]",
+                    ].join(" ")}
+                  >
+                    {etiquetaBoton}
+                    <IconoChevron className="size-3" />
+                  </Link>
                 </div>
               </article>
             );
@@ -538,10 +653,22 @@ export function MisTrasladosCliente({
         )}
       </section>
 
-      <Link href="/soporte" className="user-v2-support-card user-v2-card-interactive">
+      {filtrados.length > 0 && (
+        <p className="py-2 text-center text-[12px] font-medium text-[#a6b7cb]">
+          Actualizado hace un momento
+        </p>
+      )}
+
+      <Link
+        href="/soporte"
+        className="flex min-h-[76px] items-center justify-between gap-3 rounded-2xl border border-[#eef2f7] bg-[#fbfdff] px-4 py-3.5 text-[#1677ff] transition-transform active:scale-[0.99]"
+      >
         <span className="flex min-w-0 items-center gap-3">
           <IconoSoporte className="size-8 shrink-0" />
-          <span className="min-w-0"><span className="user-v2-caption block">¿Dudas o necesitas ayuda con este traslado?</span><span className="user-v2-card-title mt-1 block text-[var(--user-color-action)]">Contactar soporte</span></span>
+          <span className="min-w-0">
+            <span className="block text-[12px] text-[#4d6079]">¿Dudas o necesitas ayuda con este traslado?</span>
+            <span className="mt-1 block text-[14px] font-bold">Contactar soporte</span>
+          </span>
         </span>
         <IconoChevron className="size-5 shrink-0" />
       </Link>

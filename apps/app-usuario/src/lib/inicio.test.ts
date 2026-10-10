@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { esTrasladoActivo, obtenerViajeActivo, obtenerHistorial, construirNotificaciones } from "./inicio";
+import { esTrasladoActivo, obtenerViajeActivo, obtenerHistorial, construirNotificaciones, progresoPorEstadoTraslado } from "./inicio";
 import type { Database } from "@ruum/shared/types";
 
 type Pasaporte = Database["public"]["Views"]["pasaporte_digital"]["Row"];
@@ -71,5 +71,14 @@ describe("inicio helpers (R7)", () => {
     expect(notis.some((n) => n.id === "verificacion-en-curso")).toBe(true);
     expect(notis.some((n) => n.id.startsWith("incidencia-"))).toBe(true);
     expect(notis.some((n) => n.id.startsWith("pago-"))).toBe(true);
+  });
+  it("progresoPorEstadoTraslado crece con la etapa operativa", () => {
+    expect(progresoPorEstadoTraslado("solicitud_creada")).toBe(15);
+    expect(progresoPorEstadoTraslado("conductor_asignado")).toBe(40);
+    expect(progresoPorEstadoTraslado("traslado_en_curso")).toBe(65);
+    expect(progresoPorEstadoTraslado("llegada_a_destino")).toBe(85);
+    expect(progresoPorEstadoTraslado("servicio_cerrado")).toBe(100);
+    expect(progresoPorEstadoTraslado(null)).toBe(25);
+    expect(progresoPorEstadoTraslado("estado_desconocido")).toBe(25);
   });
 });

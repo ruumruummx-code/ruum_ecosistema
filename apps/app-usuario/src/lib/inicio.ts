@@ -52,6 +52,46 @@ export function obtenerHistorial(traslados: PasaporteRow[]): PasaporteRow[] {
   return [...traslados].sort((a, b) => fechaOrdenable(b.creado_en) - fechaOrdenable(a.creado_en));
 }
 
+/**
+ * Porcentaje ilustrativo del avance según la etapa operativa (solo visual,
+ * para barras de progreso en Inicio y Traslados). No representa GPS real.
+ */
+export function progresoPorEstadoTraslado(estado: string | null): number {
+  switch (estado) {
+    case "solicitud_creada":
+    case "documentacion_pendiente":
+    case "documentacion_en_revision":
+    case "documentacion_validada":
+    case "cotizacion_generada":
+    case "cotizacion_aceptada":
+    case "servicio_confirmado":
+    case "pendiente_de_conductor":
+    case "pago_pendiente":
+      return 15;
+    case "conductor_asignado":
+    case "conductor_en_camino_al_origen":
+    case "conductor_en_punto_de_recoleccion":
+    case "verificacion_vehiculo_en_proceso":
+    case "evidencia_inicial_en_proceso":
+    case "evidencia_inicial_completada":
+    case "vehiculo_recibido":
+      return 40;
+    case "traslado_en_curso":
+    case "incidencia_reportada":
+      return 65;
+    case "llegada_a_destino":
+    case "evidencia_final_en_proceso":
+    case "evidencia_final_completada":
+      return 85;
+    case "entrega_confirmada":
+    case "pago_completado":
+    case "servicio_cerrado":
+      return 100;
+    default:
+      return 25;
+  }
+}
+
 export interface NotificacionInicio {
   id: string;
   tono: "info" | "atencion" | "danger";

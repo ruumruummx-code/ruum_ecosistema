@@ -3,7 +3,7 @@
 import Link from "next/link";
 import type { Database } from "@ruum/shared/types";
 import { ETIQUETA_ESTADO_TRASLADO } from "@ruum/shared/states";
-import { obtenerHistorial, obtenerViajeActivo } from "../lib/inicio";
+import { obtenerHistorial, obtenerViajeActivo, progresoPorEstadoTraslado } from "../lib/inicio";
 import { TERMINOLOGIA_USUARIO } from "../lib/glosario";
 import { ConductorAsignado } from "./ConductorAsignado";
 
@@ -42,43 +42,6 @@ function ciudadDestino(t: PasaporteRow): string {
 function etiquetaEstado(t: PasaporteRow): string {
   if (!t.estado) return "En seguimiento";
   return TERMINOLOGIA_USUARIO[t.estado] ?? ETIQUETA_ESTADO_TRASLADO[t.estado] ?? "En seguimiento";
-}
-
-/** Porcentaje ilustrativo del avance según la etapa operativa (solo visual). */
-function progresoPorEstado(estado: string | null): number {
-  switch (estado) {
-    case "solicitud_creada":
-    case "documentacion_pendiente":
-    case "documentacion_en_revision":
-    case "documentacion_validada":
-    case "cotizacion_generada":
-    case "cotizacion_aceptada":
-    case "servicio_confirmado":
-    case "pendiente_de_conductor":
-    case "pago_pendiente":
-      return 15;
-    case "conductor_asignado":
-    case "conductor_en_camino_al_origen":
-    case "conductor_en_punto_de_recoleccion":
-    case "verificacion_vehiculo_en_proceso":
-    case "evidencia_inicial_en_proceso":
-    case "evidencia_inicial_completada":
-    case "vehiculo_recibido":
-      return 40;
-    case "traslado_en_curso":
-    case "incidencia_reportada":
-      return 65;
-    case "llegada_a_destino":
-    case "evidencia_final_en_proceso":
-    case "evidencia_final_completada":
-      return 85;
-    case "entrega_confirmada":
-    case "pago_completado":
-    case "servicio_cerrado":
-      return 100;
-    default:
-      return 25;
-  }
 }
 
 function tiempoEstimadoTexto(horas: number | null): string {
@@ -305,7 +268,7 @@ export function InicioUsuario({ usuario, traslados, conductorFotoUrl = null }: I
               <div
                 className="h-1.5 flex-1 overflow-hidden rounded-full bg-white/20"
                 role="progressbar"
-                aria-valuenow={progresoPorEstado(viajeActivo.estado)}
+                aria-valuenow={progresoPorEstadoTraslado(viajeActivo.estado)}
                 aria-valuemin={0}
                 aria-valuemax={100}
                 aria-label={`Avance del traslado: ${etiquetaEstado(viajeActivo)}`}
@@ -313,7 +276,7 @@ export function InicioUsuario({ usuario, traslados, conductorFotoUrl = null }: I
                 <div
                   className="h-full rounded-full"
                   style={{
-                    width: `${progresoPorEstado(viajeActivo.estado)}%`,
+                    width: `${progresoPorEstadoTraslado(viajeActivo.estado)}%`,
                     background: "linear-gradient(90deg, #4ade80, #86efac)",
                   }}
                 />

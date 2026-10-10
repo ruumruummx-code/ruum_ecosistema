@@ -17,7 +17,12 @@ export default async function PaginaCuenta() {
     <>
       <NavegacionUsuario variante="claro" nombreUsuario={cuenta.usuario?.nombre} />
       <main className="user-v2-scope user-v2-page user-v2-secondary-screen"><div className="user-v2-content">
-        <CuentaCliente usuario={cuenta.usuario} />
+        <CuentaCliente
+          usuario={cuenta.usuario}
+          fotoUrl={cuenta.fotoPerfilUrl}
+          vehiculos={cuenta.vehiculos}
+          totalTraslados={cuenta.totalTraslados}
+        />
       </div>
     </main>
     </>

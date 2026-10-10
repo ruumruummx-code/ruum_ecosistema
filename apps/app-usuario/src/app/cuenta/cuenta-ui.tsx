@@ -21,6 +21,7 @@ export interface CuentaReal {
   vehiculos: Vehiculo[];
   empresa: Empresa | null;
   historialEmpresa: PasaporteRow[];
+  totalTraslados: number;
 }
 
 const LINKS_CUENTA = [
@@ -73,7 +74,7 @@ export async function obtenerCuenta(): Promise<ResultadoCuenta> {
 
   try {
     const { crearClienteServidor } = await import("../../lib/supabase-server");
-    const { listarTrasladosDeEmpresa, obtenerUrlFotoPerfilUsuario, obtenerUsuarioActual } = await import("@ruum/api/services");
+    const { listarTrasladosDeEmpresa, obtenerUrlFotoPerfilUsuario, obtenerUsuarioActual, listarTrasladosDeUsuario } = await import("@ruum/api/services");
     const { listarVehiculosDeUsuario } = await import("@ruum/api/vehicles");
     const { obtenerEmpresaVisible } = await import("@ruum/api/organizations");
     const cliente = await crearClienteServidor();
@@ -82,9 +83,10 @@ export async function obtenerCuenta(): Promise<ResultadoCuenta> {
 
     const fotoPerfilUrl = await obtenerUrlFotoPerfilUsuario(cliente, usuario.foto_url);
 
-    const [vehiculos, empresa] = await Promise.all([
+    const [vehiculos, empresa, trasladosPropios] = await Promise.all([
       listarVehiculosDeUsuario(cliente, usuario.id),
-      usuario.empresa_id ? obtenerEmpresaVisible(cliente, usuario.empresa_id) : Promise.resolve(null)
+      usuario.empresa_id ? obtenerEmpresaVisible(cliente, usuario.empresa_id) : Promise.resolve(null),
+      listarTrasladosDeUsuario(cliente, usuario.id),
     ]);
 
     const historialEmpresa =
@@ -99,7 +101,8 @@ export async function obtenerCuenta(): Promise<ResultadoCuenta> {
         fotoPerfilUrl,
         vehiculos,
         empresa,
-        historialEmpresa
+        historialEmpresa,
+        totalTraslados: trasladosPropios.length
       }
     };
   } catch (err) {
