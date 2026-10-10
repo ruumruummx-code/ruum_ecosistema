@@ -4,8 +4,10 @@
 // Edge Function: crea un PaymentIntent de Stripe para el cobro de un
 
 import Stripe from "npm:stripe@^17";
-import { createClient } from "npm:@supabase/supabase-js@2";
-import { montoAutorizadoParaCobro, validarRangoMontoCobro } from "./logica.ts";
+import { createClient, type SupabaseClient } from "npm:@supabase/supabase-js@2";
+import { decidirIntentExistente, montoAutorizadoParaCobro, validarRangoMontoCobro } from "./logica.ts";
+
+const SISTEMA_ACTOR_ID = "00000000-0000-0000-0000-000000000000";
 
 const CABECERAS_CORS = {
   "Access-Control-Allow-Origin": "*",
@@ -18,6 +20,65 @@ function respuestaJson(body: Record<string, unknown>, status = 200) {
     status,
     headers: { ...CABECERAS_CORS, "Content-Type": "application/json" }
   });
+}
+
+/**
+ * Concilia un cobro que Stripe ya marcó succeeded pero nuestra base aún
+ * tiene pendiente. Replica lo que hace el webhook en
+ * stripe-webhook/index.ts (pago -> completado, avance de estado del
+ * traslado, auditoría). Si el webhook llega después, re-aplica los mismos
+ * valores finales (operación idempotente por naturaleza; solo duplicaría la
+ * fila de auditoría, igual que ante reintentos de Stripe).
+ */
+async function reconciliarPagoExitoso(
+  clienteServicio: SupabaseClient,
+  trasladoId: string,
+  paymentIntentId: string
+) {
+  const { error: errorPago } = await clienteServicio
+    .from("pagos")
+    .update({ estado: "completado" })
+    .eq("stripe_payment_intent_id", paymentIntentId)
+    .eq("estado", "pendiente");
+  if (errorPago) throw new Error(`No se pudo conciliar el pago: ${errorPago.message}`);
+
+  const { data: traslado, error: errorTraslado } = await clienteServicio
+    .from("traslados")
+    .select("estado, tipo_pago")
+    .eq("id", trasladoId)
+    .maybeSingle();
+  if (errorTraslado) throw new Error(`No se pudo leer el traslado a conciliar: ${errorTraslado.message}`);
+
+  // Mismo mapa que estadoTrasladoSiguienteTrasPago en stripe-webhook/logica.ts
+  // (fuente de verdad para avances por pago; duplicado aquí para no cruzar
+  // imports entre funciones desplegadas por separado).
+  const siguienteEstado =
+    traslado?.estado === "cotizacion_aceptada" && traslado?.tipo_pago === "anticipado"
+      ? "servicio_confirmado"
+      : traslado?.estado === "entrega_confirmada" || traslado?.estado === "pago_pendiente"
+        ? "pago_completado"
+        : null;
+
+  if (siguienteEstado) {
+    const { error: errorEstado } = await clienteServicio
+      .from("traslados")
+      .update({ estado: siguienteEstado })
+      .eq("id", trasladoId);
+    if (errorEstado) throw new Error(`No se pudo avanzar el traslado conciliado: ${errorEstado.message}`);
+  }
+
+  const { error: errorAuditoria } = await clienteServicio.from("registro_auditoria").insert({
+    traslado_id: trasladoId,
+    evento: "registro_pago",
+    actor: "sistema",
+    actor_id: SISTEMA_ACTOR_ID,
+    datos: {
+      stripe_payment_intent_id: paymentIntentId,
+      estado_pago: "completado",
+      origen: "reconciliacion-crear-payment-intent"
+    }
+  });
+  if (errorAuditoria) throw new Error(`No se pudo auditar la conciliación: ${errorAuditoria.message}`);
 }
 
 Deno.serve(async (req) => {
@@ -174,12 +235,44 @@ Deno.serve(async (req) => {
   }
 
   if (pagoPendiente?.stripe_payment_intent_id) {
+    let intentExistente: Stripe.PaymentIntent;
     try {
-      const intentExistente = await stripe.paymentIntents.retrieve(pagoPendiente.stripe_payment_intent_id);
-      return respuestaJson({ clientSecret: intentExistente.client_secret });
+      intentExistente = await stripe.paymentIntents.retrieve(pagoPendiente.stripe_payment_intent_id);
     } catch (error) {
       console.error("Error recuperando PaymentIntent:", error);
       return respuestaJson({ error: "No se pudo recuperar el intento de pago" }, 502);
+    }
+
+    const decision = decidirIntentExistente(intentExistente.status);
+
+    // PI ya cobrado en Stripe pero aún pendiente en base (webhook con lag o
+    // fallido): se reconcilia aquí en vez de devolver un clientSecret que
+    // Elements rechazaría ("terminal state"). El estado viene de la API de
+    // Stripe con llave secreta: misma verdad que el webhook.
+    if (decision.accion === "reconciliar") {
+      try {
+        await reconciliarPagoExitoso(clienteServicio, traslado.id, intentExistente.id);
+      } catch (error) {
+        console.error("Error reconciliando pago exitoso:", error);
+        return respuestaJson({ error: "Tu pago ya se procesó pero no pudimos reflejarlo. Intenta de nuevo." }, 500);
+      }
+      return respuestaJson({ pagoConfirmado: true });
+    }
+
+    // PI muerto (cancelado/abandonado): se marca fallido y se crea uno
+    // nuevo abajo, nunca se reutiliza.
+    if (decision.accion === "reemplazar") {
+      const { error: errorCierre } = await clienteServicio
+        .from("pagos")
+        .update({ estado: "fallido" })
+        .eq("stripe_payment_intent_id", intentExistente.id)
+        .eq("estado", "pendiente");
+      if (errorCierre) {
+        console.error("Error cerrando PaymentIntent cancelado:", errorCierre);
+        return respuestaJson({ error: "No se pudo reiniciar el intento de pago" }, 500);
+      }
+    } else {
+      return respuestaJson({ clientSecret: intentExistente.client_secret });
     }
   }
 

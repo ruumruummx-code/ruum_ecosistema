@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Button, Aviso } from "@ruum/ui";
 import { crearClienteNavegador } from "../lib/supabase-browser";
 
@@ -62,7 +62,7 @@ export interface PagoStripeProps {
   onPagado: () => void;
 }
 
-async function crearPaymentIntent(trasladoId: string): Promise<string> {
+async function crearPaymentIntent(trasladoId: string): Promise<{ clientSecret?: string; pagoConfirmado?: boolean }> {
   if (!supabaseUrl || !supabaseAnonKey) {
     throw new Error("Supabase no está configurado para iniciar el cobro.");
   }
@@ -87,10 +87,10 @@ async function crearPaymentIntent(trasladoId: string): Promise<string> {
   });
 
   const texto = await respuesta.text();
-  let data: { clientSecret?: string; error?: string } | null = null;
+  let data: { clientSecret?: string; pagoConfirmado?: boolean; error?: string } | null = null;
   if (texto) {
     try {
-      data = JSON.parse(texto) as { clientSecret?: string; error?: string };
+      data = JSON.parse(texto) as { clientSecret?: string; pagoConfirmado?: boolean; error?: string };
     } catch {
       throw new Error(`La función de pago respondió con un formato inválido (${respuesta.status}).`);
     }
@@ -100,11 +100,17 @@ async function crearPaymentIntent(trasladoId: string): Promise<string> {
     throw new Error(data?.error ?? `No pudimos iniciar el cobro (${respuesta.status}).`);
   }
 
+  // El backend reconcilió un cobro ya exitoso en Stripe (webhook con lag o
+  // fallido): no hay Elements que montar, el pago ya está confirmado.
+  if (data?.pagoConfirmado) {
+    return { pagoConfirmado: true };
+  }
+
   if (!data?.clientSecret) {
     throw new Error("La función de pago no devolvió clientSecret.");
   }
 
-  return data.clientSecret;
+  return { clientSecret: data.clientSecret };
 }
 
 /**
@@ -115,6 +121,7 @@ export function PagoStripe({ trasladoId, monto, onPagado }: PagoStripeProps) {
   const [error, setError] = useState<string | null>(null);
   const [stripeModule, setStripeModule] = useState<any>(null);
   const [reintento, setReintento] = useState(0);
+  const reconciliadoNotificado = useRef(false);
 
   useEffect(() => {
     async function iniciar() {
@@ -132,6 +139,17 @@ export function PagoStripe({ trasladoId, monto, onPagado }: PagoStripeProps) {
           return;
         }
 
+        const inicio = await crearPaymentIntent(trasladoId);
+        if (inicio.pagoConfirmado) {
+          // El backend encontró el cobro ya exitoso y lo reconcilió: no se
+          // monta Elements (Stripe lo rechazaría por estado terminal).
+          if (!reconciliadoNotificado.current) {
+            reconciliadoNotificado.current = true;
+            onPagado();
+          }
+          return;
+        }
+
         const mod = await import("@stripe/react-stripe-js");
         const { loadStripe } = await import("@stripe/stripe-js");
         const stripePromise = await loadStripe(clavePublica);
@@ -146,8 +164,7 @@ export function PagoStripe({ trasladoId, monto, onPagado }: PagoStripeProps) {
           stripePromise,
         });
 
-        const secret = await crearPaymentIntent(trasladoId);
-        setClientSecret(secret);
+        setClientSecret(inicio.clientSecret ?? null);
       } catch (err) {
         const msg = err instanceof Error ? err.message : "No pudimos iniciar el cobro con Stripe.";
         if (msg.includes("Failed to load Stripe.js")) {
@@ -159,7 +176,7 @@ export function PagoStripe({ trasladoId, monto, onPagado }: PagoStripeProps) {
     }
 
     void iniciar();
-  }, [trasladoId, reintento, monto]);
+  }, [trasladoId, reintento, monto, onPagado]);
 
   if (error) {
     return (

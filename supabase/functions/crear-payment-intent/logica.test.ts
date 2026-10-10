@@ -1,7 +1,7 @@
 /// <reference lib="deno.ns" />
 
 import { assertEquals } from "jsr:@std/assert@1";
-import { montoAutorizadoParaCobro, validarRangoMontoCobro } from "./logica.ts";
+import { decidirIntentExistente, montoAutorizadoParaCobro, validarRangoMontoCobro } from "./logica.ts";
 
 Deno.test("montoAutorizadoParaCobro: usa precio_final por encima de precio_cotizado", () => {
   assertEquals(montoAutorizadoParaCobro({ precio_cotizado: 2400, precio_final: 2750 }), 2750);
@@ -33,4 +33,18 @@ Deno.test("validarRangoMontoCobro: aplica piso y techo al monto autorizado", () 
   assertEquals(validarRangoMontoCobro(699), { valido: true });
   assertEquals(validarRangoMontoCobro(100000), { valido: true });
   assertEquals(validarRangoMontoCobro(100001).valido, false);
+});
+
+Deno.test("decidirIntentExistente: succeeded se reconcilia (terminal para Elements)", () => {
+  assertEquals(decidirIntentExistente("succeeded"), { accion: "reconciliar" });
+});
+
+Deno.test("decidirIntentExistente: canceled se reemplaza con un PI nuevo", () => {
+  assertEquals(decidirIntentExistente("canceled"), { accion: "reemplazar" });
+});
+
+Deno.test("decidirIntentExistente: estados no terminales se reutilizan", () => {
+  for (const estado of ["requires_payment_method", "requires_confirmation", "requires_action", "processing", "requires_capture", null, undefined]) {
+    assertEquals(decidirIntentExistente(estado), { accion: "reutilizar" });
+  }
 });

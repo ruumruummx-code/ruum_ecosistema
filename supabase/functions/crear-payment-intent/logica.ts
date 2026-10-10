@@ -25,3 +25,25 @@ export function validarRangoMontoCobro(monto: number | null): { valido: true } |
 
   return { valido: true };
 }
+
+/**
+ * Decisión ante un PaymentIntent existente reutilizable (fila pagos en
+ * estado pendiente). Stripe rechaza inicializar Elements con un PI en
+ * estado terminal ("This PaymentIntent is in a terminal state..."), así que
+ * no basta con devolver su client_secret:
+ * - succeeded: el cobro SÍ ocurrió (el webhook aún no lo refleja o falló).
+ *   Se reconcilia en base y se avisa al cliente, en vez de romper Elements.
+ * - canceled: el intento murió; se marca fallido y se crea uno nuevo abajo.
+ * - cualquier otro estado (requires_payment_method, requires_action,
+ *   processing, requires_confirmation, requires_capture): reutilizable.
+ */
+export type DecisionIntentExistente =
+  | { accion: "reutilizar" }
+  | { accion: "reconciliar" }
+  | { accion: "reemplazar" };
+
+export function decidirIntentExistente(status: string | null | undefined): DecisionIntentExistente {
+  if (status === "succeeded") return { accion: "reconciliar" };
+  if (status === "canceled") return { accion: "reemplazar" };
+  return { accion: "reutilizar" };
+}
