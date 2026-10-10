@@ -42,7 +42,6 @@ function PasoTarifaComponent({
       <PassportCard>
         <div className="grid gap-4">
           <div>
-            <h2 className="font-display text-lg font-bold text-ink">Conoce tu tarifa</h2>
             <p className="mt-1 font-body text-xs text-ink/65">
               Ingresa los datos esenciales para calcular el precio real de tu traslado de inmediato.
             </p>

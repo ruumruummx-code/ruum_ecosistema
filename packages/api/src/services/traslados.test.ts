@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { crearTraslado, listarHistorialTraslado } from "./traslados";
+import { crearTraslado, listarHistorialTraslado, verificarPagoAnticipadoCompletado } from "./traslados";
 
 describe("crearTraslado service - validación preventiva", () => {
   const clienteMock = {
@@ -57,8 +57,7 @@ describe("crearTraslado service - validación preventiva", () => {
     expect(clienteMock.rpc).toHaveBeenCalledWith("usuario_crea_traslado", expect.any(Object));
   });
 
-  it("listarHistorialTraslado ordena del más reciente al más antiguo", async () => {
-    const order = vi.fn().mockResolvedValue({
+  it("listarHistorialTraslado ordena del más reciente al más antiguo", async () => {    const order = vi.fn().mockResolvedValue({
       data: [
         { id: "h2", traslado_id: "t1", estado_nuevo: "cotizacion_generada" },
         { id: "h1", traslado_id: "t1", estado_nuevo: "solicitud_creada" }
@@ -74,5 +73,26 @@ describe("crearTraslado service - validación preventiva", () => {
     expect(eq).toHaveBeenCalledWith("traslado_id", "t1");
     expect(order).toHaveBeenCalledWith("creado_en", { ascending: false });
     expect(historial).toHaveLength(2);
+  });
+
+  it("verificarPagoAnticipadoCompletado es true con pago completado", async () => {
+    const limit = vi.fn().mockResolvedValue({ data: [{ id: "p1" }], error: null });
+    const eq2 = vi.fn().mockReturnValue({ limit });
+    const eq1 = vi.fn().mockReturnValue({ eq: eq2 });
+    const select = vi.fn().mockReturnValue({ eq: eq1 });
+    const cliente = { from: vi.fn().mockReturnValue({ select }) };
+
+    await expect(verificarPagoAnticipadoCompletado(cliente as never, "t1")).resolves.toBe(true);
+    expect(cliente.from).toHaveBeenCalledWith("pagos");
+    expect(eq1).toHaveBeenCalledWith("traslado_id", "t1");
+    expect(eq2).toHaveBeenCalledWith("estado", "completado");
+  });
+
+  it("verificarPagoAnticipadoCompletado es false sin pagos y propaga error de BD", async () => {
+    const vacio = { from: vi.fn().mockReturnValue({ select: vi.fn().mockReturnValue({ eq: vi.fn().mockReturnValue({ eq: vi.fn().mockReturnValue({ limit: vi.fn().mockResolvedValue({ data: [], error: null }) }) }) }) }) };
+    await expect(verificarPagoAnticipadoCompletado(vacio as never, "t1")).resolves.toBe(false);
+
+    const roto = { from: vi.fn().mockReturnValue({ select: vi.fn().mockReturnValue({ eq: vi.fn().mockReturnValue({ eq: vi.fn().mockReturnValue({ limit: vi.fn().mockResolvedValue({ data: null, error: new Error("db caída") }) }) }) }) }) };
+    await expect(verificarPagoAnticipadoCompletado(roto as never, "t1")).rejects.toThrow("db caída");
   });
 });

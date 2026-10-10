@@ -15,38 +15,37 @@ function usuario(overrides: Partial<Usuario> = {}): Usuario {
   };
 }
 
-describe("determinarMomentoPago — PRD §4.6", () => {
+describe("determinarMomentoPago — política estricta (solo electrónico anticipado)", () => {
   it("usuario nuevo sin historial -> anticipado", () => {
     expect(determinarMomentoPago(usuario()).momento).toBe("anticipado");
   });
 
-  it(">=2 traslados sin incidencias y método registrado -> al_cierre", () => {
+  it("historial positivo con método registrado -> anticipado (sin excepción)", () => {
     const r = determinarMomentoPago(
       usuario({ traslados_completados_sin_incidencia: 2, metodo_pago_registrado: true })
     );
-    expect(r.momento).toBe("al_cierre");
-  });
-
-  it("2 traslados pero SIN método de pago registrado -> anticipado", () => {
-    const r = determinarMomentoPago(usuario({ traslados_completados_sin_incidencia: 2 }));
     expect(r.momento).toBe("anticipado");
   });
 
-  it("titular de cuenta empresa -> al_cierre por defecto", () => {
+  it("titular de cuenta empresa -> anticipado (sin excepción)", () => {
     const r = determinarMomentoPago(usuario({ tipo_cuenta: "empresa", rol: "titular_empresa" }));
-    expect(r.momento).toBe("al_cierre");
+    expect(r.momento).toBe("anticipado");
   });
 
-  it("usuario_autorizado de empresa (no titular) sin historial -> anticipado", () => {
+  it("usuario_autorizado de empresa -> anticipado", () => {
     const r = determinarMomentoPago(usuario({ tipo_cuenta: "empresa", rol: "usuario_autorizado" }));
     expect(r.momento).toBe("anticipado");
   });
 
-  it("respeta un umbral de historial positivo distinto al default", () => {
+  it("el umbral histórico ya no otorga al_cierre", () => {
     const r = determinarMomentoPago(
       usuario({ traslados_completados_sin_incidencia: 5, metodo_pago_registrado: true }),
       5
     );
-    expect(r.momento).toBe("al_cierre");
+    expect(r.momento).toBe("anticipado");
+  });
+
+  it("la razón comunica cobro electrónico anticipado", () => {
+    expect(determinarMomentoPago(usuario()).razon).toMatch(/anticipada/i);
   });
 });

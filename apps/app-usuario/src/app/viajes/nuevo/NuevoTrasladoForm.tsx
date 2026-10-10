@@ -3,7 +3,7 @@ import React, { lazy, Suspense, useCallback, useEffect, useRef } from "react";
 import Link from "next/link";
 import { Button, Aviso } from "@ruum/ui";
 import { NavegacionUsuario } from "../../NavegacionUsuario";
-import { PASOS } from "./constants";
+import { PASOS, SUBTITULOS_PASO, DESCRIPCIONES_PASO } from "./constants";
 import { formatearTiempoRelativoBorrador } from "@/lib/borrador-traslado";
 import { useNuevoTraslado } from "./hooks/useNuevoTraslado";
 
@@ -15,6 +15,14 @@ import { PasoPago } from "./components/PasoPago";
 // 1.3 Lazy load — PasoRuta es ~350 líneas, se carga solo cuando paso 2/3 lo necesita
 const PasoRuta = lazy(() => import("./components/PasoRuta").then((m) => ({ default: m.PasoRuta })));
 const PasoDetalles = lazy(() => import("./components/PasoDetalles").then((m) => ({ default: m.PasoDetalles })));
+
+function IconoAtras({ className = "size-[18px]" }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path d="M19 12H5M11 6l-6 6 6 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
 
 function SkeletonPaso() {
   return <div role="status" aria-live="polite" aria-busy="true" aria-label="Cargando paso" className="animate-pulse rounded-xl border border-ink/10 bg-mist p-6 h-64" />;
@@ -97,8 +105,63 @@ export function NuevoTrasladoForm() {
   return (
     <>
       <NavegacionUsuario variante="claro" />
-      <main className="user-v2-scope user-v2-page user-v2-secondary-screen"><div className="mx-auto max-w-xl px-4 sm:px-6 py-6 sm:py-12">
-        <h1 className="font-display text-2xl sm:text-3xl font-black text-text-primary">Nuevo traslado</h1>
+      <main className="user-v2-scope user-v2-page user-v2-secondary-screen"><div className="mx-auto w-full max-w-[430px] px-4 py-6 sm:py-8">
+        {/* Encabezado del flujo */}
+        <div className="flex items-center gap-3.5">
+          {t.paso > 0 ? (
+            <button
+              type="button"
+              onClick={t.retrocederPaso}
+              aria-label="Volver al paso anterior"
+              className="flex size-10 shrink-0 items-center justify-center rounded-full bg-[#f2f6fc] text-[#0b1e33] transition-transform active:scale-95"
+            >
+              <IconoAtras />
+            </button>
+          ) : (
+            <Link
+              href="/"
+              aria-label="Volver al inicio"
+              className="flex size-10 shrink-0 items-center justify-center rounded-full bg-[#f2f6fc] text-[#0b1e33] transition-transform active:scale-95"
+            >
+              <IconoAtras />
+            </Link>
+          )}
+          <div className="min-w-0">
+            <p className="truncate text-[17px] font-bold tracking-tight text-[#0b1e33]">Solicitar traslado</p>
+            <p className="mt-[1px] text-[11.5px] font-medium text-[#6b7c94]">
+              Paso {t.paso + 1} de {PASOS.length} · {SUBTITULOS_PASO[t.paso]}
+            </p>
+          </div>
+          <span className="ml-auto shrink-0 rounded-[20px] bg-[#f0f5fe] px-3 py-1.5 text-[12px] font-bold text-[#2e5a88]">
+            {t.paso + 1}/{PASOS.length}
+          </span>
+        </div>
+
+        {/* Segmentos de progreso */}
+        <div className="mt-3.5 flex gap-1" aria-hidden="true">
+          {PASOS.map((etiqueta, i) => (
+            <span
+              key={etiqueta}
+              className="h-1 flex-1 rounded-[10px]"
+              style={
+                i < t.paso
+                  ? { background: "#0b1e33" }
+                  : i === t.paso
+                    ? { background: "linear-gradient(90deg, #0b1e33 50%, #e8eef6 50%)" }
+                    : { background: "#e8eef6" }
+              }
+            />
+          ))}
+        </div>
+
+        {/* Título del paso */}
+        <h1 className="mb-1.5 mt-[22px] text-[22px] font-extrabold leading-snug tracking-tight text-[#0b1e33]">
+          {PASOS[t.paso]}
+        </h1>
+        <p className="mb-6 text-[13.5px] font-medium leading-relaxed text-[#6b7c94]">
+          {DESCRIPCIONES_PASO[t.paso]}
+        </p>
+
         <div className="mt-3 flex flex-wrap items-center gap-2 font-body text-xs">
           <span className="inline-flex items-center gap-1.5 rounded-full bg-signal/15 px-3 py-1 font-semibold text-ink border border-signal/30"><span aria-hidden="true">⏱</span> Te tomará ~3 min</span>
           {t.estadoGuardado === "guardando" ? (
@@ -144,10 +207,7 @@ export function NuevoTrasladoForm() {
           </Link>
         </aside>
 
-        {/* Slim sticky progress visible en móvil al hacer scroll */}
-        <div className="sticky top-0 z-10 -mx-4 mt-4 h-1 bg-surface-elevated sm:hidden" aria-hidden>
-          <div className="h-full bg-signal transition-all duration-300" style={{ width: `${((t.paso + 1) / PASOS.length) * 100}%` }} />
-        </div>
+        {/* Slim sticky progress visible en móvil al hacer scroll: reemplazado por segmentos del encabezado */}
 
         {t.borradorDisponible && (
           <div className="mt-4 rounded-xl border border-route-action/30 bg-route-action/10 p-4" role="region" aria-label="Borrador pendiente">
@@ -167,55 +227,6 @@ export function NuevoTrasladoForm() {
         )}
 
 
-        {/* Stepper móvil y de escritorio */}
-        <div className="mt-6" aria-label={`Paso ${t.paso + 1} de ${PASOS.length} — ${PASOS[t.paso]}`}>
-          <div className="flex items-center justify-between text-xs font-bold font-display uppercase tracking-wider text-text-tertiary">
-            <span>Paso {t.paso + 1} de {PASOS.length}</span>
-            <span className="text-signal font-extrabold">{PASOS[t.paso]}</span>
-          </div>
-
-          <div className="mt-2 grid grid-cols-5 gap-1.5 sm:hidden" role="list" aria-label="Progreso de pasos">
-            {PASOS.map((etiqueta, i) => (
-              <div
-                key={etiqueta}
-                role="listitem"
-                aria-current={i === t.paso ? "step" : undefined}
-                aria-label={`Paso ${i + 1} de ${PASOS.length}: ${etiqueta}${i < t.paso ? " (completado)" : i === t.paso ? " (actual)" : ""}`}
-                className={[
-                  "h-1.5 rounded-full transition-all duration-300",
-                  i <= t.paso ? "bg-signal" : "bg-surface-elevated border border-border/40"
-                ].join(" ")}
-              />
-            ))}
-          </div>
-
-          <ol className="mt-3 hidden sm:flex items-center gap-2" aria-label="Progreso de pasos">
-            {PASOS.map((etiqueta, i) => (
-              <li key={etiqueta} className="flex items-center gap-2" aria-current={i === t.paso ? "step" : undefined}>
-                <span
-                  className={[
-                    "flex size-7 items-center justify-center rounded-full font-mono-ruum text-xs font-bold",
-                    i === t.paso
-                      ? "bg-signal text-[var(--ruum-on-primary)] shadow-xs"
-                      : i < t.paso
-                        ? "bg-control/20 text-control border border-control/40"
-                        : "bg-surface-elevated text-text-tertiary border border-border"
-                  ].join(" ")}
-                  aria-hidden="true"
-                >
-                  {i + 1}
-                </span>
-                <span className={i === t.paso ? "font-body text-xs font-bold text-text-primary" : "font-body text-xs text-text-tertiary"}>
-                  {etiqueta}
-                  <span className="sr-only">
-                    {i < t.paso ? " (completado)" : i === t.paso ? " (paso actual)" : ""}
-                  </span>
-                </span>
-                {i < PASOS.length - 1 && <span className="text-border mx-1" aria-hidden>›</span>}
-              </li>
-            ))}
-          </ol>
-        </div>
 
         {/* Aviso de tarifa desactualizada si se editó algún campo relevante — C-02: scroll+foco automático */}
         {!t.tarifaPreviaAceptada && t.tarifaPreviaSnapshot && t.paso > 0 && (
@@ -359,11 +370,16 @@ export function NuevoTrasladoForm() {
             <PasoPago
               trasladoCreado={t.trasladoCreado}
               pagoConfirmado={t.pagoConfirmado}
-              setPagoConfirmado={t.setPagoConfirmado}
+              verificandoPago={t.verificandoPago}
+              errorVerificacionPago={t.errorVerificacionPago}
+              onPagoStripeConfirmado={t.manejarPagoStripeConfirmado}
+              onReintentarVerificacion={t.manejarPagoStripeConfirmado}
               errorAceptacion={t.errorAceptacion}
               onReintentarAceptacion={t.reintentarAceptacion}
               aceptandoCotizacion={t.aceptandoCotizacion}
               cotizacionAceptada={t.cotizacionAceptada}
+              datos={t.datos}
+              rutaEstimacion={t.rutaEstimacion}
             />
           )}
         </div>

@@ -144,6 +144,25 @@ export async function aceptarCotizacionUsuario(cliente: Cliente, trasladoId: str
   return data;
 }
 
+/**
+ * Regla estricta del Paso 5: confirma contra la base (no contra el callback
+ * optimista del cliente) que el traslado tiene un pago electrónico con
+ * estado = 'completado'. RLS (`usuario_ve_pagos_de_sus_traslados`) limita la
+ * lectura a pagos del propio usuario. Lanza en error de red/BD para que la
+ * UI reintente en vez de asumir el pago.
+ */
+export async function verificarPagoAnticipadoCompletado(cliente: Cliente, trasladoId: string): Promise<boolean> {
+  const { data, error } = await cliente
+    .from("pagos")
+    .select("id")
+    .eq("traslado_id", trasladoId)
+    .eq("estado", "completado")
+    .limit(1);
+
+  if (error) throw error;
+  return (data ?? []).length > 0;
+}
+
 /** PRD §5.1 — el Pasaporte Digital de Traslado completo, para la pantalla de seguimiento. */
 export async function obtenerPasaporteDigital(cliente: Cliente, trasladoId: string): Promise<PasaporteRow | null> {
   const { data, error } = await cliente

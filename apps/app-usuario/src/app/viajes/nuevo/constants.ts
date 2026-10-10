@@ -7,7 +7,25 @@ export const PASOS = [
   "¿Qué vehículo trasladamos?",
   "¿Dónde lo recogemos y llevamos?",
   "Detalles del servicio",
-  "Pago"
+  "Pago del traslado"
+] as const;
+
+/** Subtítulos cortos del encabezado ("Paso X de 5 · …"). */
+export const SUBTITULOS_PASO = [
+  "Conoce tu tarifa",
+  "Datos del vehículo",
+  "Origen y destino",
+  "Detalles del servicio",
+  "Pago seguro"
+] as const;
+
+/** Descripción visible de cada paso. */
+export const DESCRIPCIONES_PASO = [
+  "Ingresa los datos básicos para obtener una estimación inmediata del costo.",
+  "Proporciona los datos completos del vehículo y la documentación mínima requerida.",
+  "Define los domicilios de origen y destino, y los contactos de entrega y recepción.",
+  "Confirma los parámetros operativos y la tarifa final antes de proceder al pago.",
+  "Completa el pago de forma segura. La transacción se procesa a través de Stripe."
 ] as const;
 
 export const CAMPOS_PASO_VEHICULO_ESENCIAL = new Set(["marca", "modelo", "anio", "condicion", "transmision"]);

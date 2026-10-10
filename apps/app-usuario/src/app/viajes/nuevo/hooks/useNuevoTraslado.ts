@@ -1,5 +1,5 @@
 "use client";
-import { useCallback, useEffect, useMemo, useRef, type SetStateAction } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type SetStateAction } from "react";
 import { useRouter } from "next/navigation";
 import * as Sentry from "@sentry/nextjs";
 import type { SupabaseClient } from "@supabase/supabase-js";
@@ -12,6 +12,7 @@ import {
   obtenerUsuarioActual,
   previsualizarTarifaUsuario,
   aceptarCotizacionUsuario,
+  verificarPagoAnticipadoCompletado,
   type PrevisualizacionTarifa
 } from "@ruum/api/services";
 import { registrarEventoUx, iniciarFlujoTraslado, registrarPasoIniciado, registrarPasoCompletado, registrarAbandono } from "@/lib/analytics";
@@ -175,7 +176,33 @@ export function useNuevoTraslado() {
   const setReintentoAceptacion = useCallback((valor: SetStateAction<number>) => setFormulario("reintentoAceptacion", valor), [setFormulario]);
   const reintentarAceptacion = useCallback(() => setReintentoAceptacion((n) => n + 1), [setReintentoAceptacion]);
 
-  // Analítica del gate de tarifa (Paso 0)
+  // Regla estricta del Paso 5: el callback de Stripe es optimista (llega con
+  // status succeeded|processing del cliente). El avance solo se marca cuando
+  // la base confirma un pago con estado = 'completado' (webhook procesado).
+  const [verificandoPago, setVerificandoPago] = useState(false);
+  const [errorVerificacionPago, setErrorVerificacionPago] = useState<string | null>(null);
+
+  const manejarPagoStripeConfirmado = useCallback(async () => {
+    if (!trasladoCreado || verificandoPago) return;
+    setVerificandoPago(true);
+    setErrorVerificacionPago(null);
+    try {
+      const cliente = crearClienteNavegador();
+      let confirmado = false;
+      for (let intento = 0; intento < 6 && !confirmado; intento++) {
+        if (intento > 0) await new Promise((resolver) => setTimeout(resolver, 2000));
+        confirmado = await verificarPagoAnticipadoCompletado(cliente, trasladoCreado.id);
+      }
+      if (!confirmado) {
+        throw new Error("Aún no vemos tu pago confirmado. Espera unos segundos y pulsa «Verificar pago».");
+      }
+      setPagoConfirmado(true);
+    } catch (err) {
+      setErrorVerificacionPago(err instanceof Error ? err.message : "No pudimos verificar tu pago. Intenta de nuevo.");
+    } finally {
+      setVerificandoPago(false);
+    }
+  }, [trasladoCreado, verificandoPago, setPagoConfirmado]);  // Analítica del gate de tarifa (Paso 0)
   const tarifaGateVistaRegistrada = useRef(false);
   const tarifaGateCalculadaRegistrada = useRef(false);
   const tarifaGateNoDisponibleRegistrada = useRef(false);
@@ -1406,6 +1433,9 @@ export function useNuevoTraslado() {
     errorAceptacion,
     pagoConfirmado,
     setPagoConfirmado,
+    verificandoPago,
+    errorVerificacionPago,
+    manejarPagoStripeConfirmado,
     reintentarAceptacion,
     // 1.4 debounce dinámico
     solicitarGeocodificacionInmediata,
