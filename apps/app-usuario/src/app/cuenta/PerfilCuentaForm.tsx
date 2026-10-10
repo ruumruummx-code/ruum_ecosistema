@@ -30,6 +30,10 @@ function nombreCompleto(nombre: string, apellido: string) {
   return [nombre.trim(), apellido.trim()].filter(Boolean).join(" ");
 }
 
+// NOTA (auditoría): intencionalmente local y NO unificada con
+// `cuenta-utils.iniciales`. Esa toma las 2 primeras palabras de un nombre
+// completo ("Ana María López" → "AM"); esta toma nombre+apellido
+// ("Ana María", "López" → "AL"). Unificar cambiaría avatares visibles.
 function iniciales(nombre: string, apellido: string) {
   return [nombre, apellido]
     .filter(Boolean)

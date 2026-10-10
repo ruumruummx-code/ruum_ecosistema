@@ -3,7 +3,7 @@ import Image from "next/image";
 import { redirect } from "next/navigation";
 import type { Database } from "@ruum/shared/types";
 import { IDENTIDAD_MARCA } from "@ruum/shared/constants";
-import { LogoMarca, SelloConductor } from "@ruum/ui";
+import { LogoMarca, SelloConductor, Icono } from "@ruum/ui";
 import { NavegacionUsuario } from "./NavegacionUsuario";
 import { InicioUsuario } from "./InicioUsuario";
 import { BotonReintentarSesion } from "./ReintentarSesion";
@@ -306,9 +306,7 @@ export default async function PaginaInicio({
             {IDENTIDAD_MARCA.diferenciadores.map((dif, idx) => (
               <div key={idx} className="rounded-xl border border-white/10 bg-white/5 p-5">
                 <div className="flex size-10 items-center justify-center rounded-lg bg-[var(--ruum-teal)]/15 text-[var(--ruum-teal)]">
-                  <svg className="size-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
-                  </svg>
+                  <Icono nombre="palomita" className="size-5" strokeWidth={2} />
                 </div>
                 <h3 className="mt-4 font-display text-base font-bold text-white">
                   {dif.titulo}

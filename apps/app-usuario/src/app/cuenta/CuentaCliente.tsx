@@ -5,6 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { crearClienteNavegador } from "../../lib/supabase-browser";
+import { Icono, SENDAS_ICONO } from "@ruum/ui";
 import { iniciales } from "./cuenta-utils";
 import { PreferenciasToggles } from "./PreferenciasToggles";
 import type { Database } from "@ruum/shared/types";
@@ -19,15 +20,7 @@ export interface CuentaClienteProps {
   totalTraslados?: number;
 }
 
-/* ---------- Iconos (SVG inline, sin dependencias) ---------- */
-
-function Icono({ d, className = "size-[17px]" }: { d: string; className?: string }) {
-  return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <path d={d} />
-    </svg>
-  );
-}
+/* ---------- Piezas ---------- */
 
 function IconoChevron({ className = "size-3.5" }: { className?: string }) {
   return (
@@ -52,8 +45,6 @@ function IconoAuto({ className = "size-[18px]" }: { className?: string }) {
     </svg>
   );
 }
-
-/* ---------- Piezas ---------- */
 
 type TonoIcono = "base" | "green" | "orange" | "purple" | "red";
 
@@ -103,7 +94,7 @@ function FilaEnlace({
         <span aria-hidden="true" className="absolute left-[66px] right-[18px] top-0 h-px bg-[#f0f4fa]" />
       )}
       <span aria-hidden="true" className={["flex size-10 shrink-0 items-center justify-center rounded-[13px]", ICONO_FONDO[tono]].join(" ")}>
-        <Icono d={icono} />
+        <Icono d={icono} className="size-[17px]" />
       </span>
       <span className="min-w-0 flex-1">
         <span className={["mb-0.5 block text-[14.5px] font-bold tracking-tight", tituloRojo ? "text-[#b33c3c]" : "text-[#0b1e33]"].join(" ")}>
@@ -285,7 +276,7 @@ export function CuentaCliente({ usuario, fotoUrl = null, vehiculos = [], totalTr
         />
         <FilaEnlace
           href="/cuenta/perfil#acceso"
-          icono="M3 11h18v11H3z M7 11V7a5 5 0 0 1 10 0v4"
+          icono={SENDAS_ICONO.candado}
           titulo="Contraseña"
           subtitulo="Cambiar contraseña de acceso"
         />
@@ -399,7 +390,7 @@ export function CuentaCliente({ usuario, fotoUrl = null, vehiculos = [], totalTr
             className="flex w-full items-center gap-3.5 px-[18px] py-[15px] text-left transition-colors active:bg-[#f8fbfe] disabled:opacity-60"
           >
             <span aria-hidden="true" className={["flex size-10 shrink-0 items-center justify-center rounded-[13px]", ICONO_FONDO.base].join(" ")}>
-              <Icono d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4 M16 17l5-5-5-5 M21 12H9" />
+              <Icono d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4 M16 17l5-5-5-5 M21 12H9" className="size-[17px]" />
             </span>
             <span className="min-w-0 flex-1">
               <span className="mb-0.5 block text-[14.5px] font-bold tracking-tight text-[#0b1e33]">

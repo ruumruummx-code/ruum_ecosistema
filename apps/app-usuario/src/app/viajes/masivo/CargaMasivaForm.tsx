@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Aviso, Button } from "@ruum/ui";
+import { Aviso, Button, Icono } from "@ruum/ui";
 import {
   COLUMNAS_PLANTILLA,
   COLUMNAS_REQUERIDAS,
@@ -727,9 +727,7 @@ export function CargaMasivaForm() {
       {paso === 4 && resultado && (
         <section className="space-y-6 rounded-2xl border border-[#1C2A3E] bg-[#0A1220]/95 p-6 shadow-xl text-center">
           <div className="size-16 rounded-full bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center mx-auto text-emerald-400">
-            <svg className="size-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M5 13l4 4L19 7" />
-            </svg>
+            <Icono nombre="palomita" className="size-8" strokeWidth={2.5} />
           </div>
 
           <div className="space-y-2">

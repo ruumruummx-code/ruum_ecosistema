@@ -14,11 +14,13 @@ import {
   obtenerTrasladoConRelaciones,
   obtenerVehiculoTraslado
 } from "@ruum/api/transfers";
-import { Aviso, EstadoBadge } from "@ruum/ui";
+import { Aviso, EstadoBadge, Icono } from "@ruum/ui";
+import { formatearPrecio } from "@ruum/shared/utils";
 import { ETIQUETA_TIPO_INCIDENCIA, ETIQUETA_TIPO_VEHICULO, MENSAJES_CLAVE_UX } from "@ruum/shared/constants";
 import { ETIQUETA_ESTADO_TRASLADO } from "@ruum/shared/states";
 import type { Database } from "@ruum/shared/types";
 import { crearClienteServidor } from "@/lib/supabase-server";
+import { iniciales } from "../../cuenta/cuenta-utils";
 import { ChatTraslado } from "./ChatTraslado";
 import { ReportarIncidenciaUsuario } from "./ReportarIncidencia";
 import { CancelarTraslado } from "./CancelarTraslado";
@@ -158,20 +160,6 @@ function formatoFecha(fecha: string | null | undefined) {
   } catch {
     return "Pendiente";
   }
-}
-
-function formatoMoneda(monto: number | null | undefined) {
-  return `$${Number(monto ?? 0).toLocaleString("es-MX")}`;
-}
-
-function iniciales(nombre: string | null | undefined) {
-  if (!nombre) return "RR";
-  return nombre
-    .split(" ")
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((parte) => parte[0]?.toUpperCase())
-    .join("");
 }
 
 function estadoDePaso(estadoActual: EstadoTraslado, estadoPaso: EstadoTraslado) {
@@ -373,20 +361,9 @@ async function obtenerDatos(id: string) {
 
 /* ---------- Iconos del pasaporte (SVG inline, sin dependencias) ---------- */
 
+// Capa compartida (@ruum/ui): conserva la API y el tamaño por defecto.
 function IconoTarjeta({ d, className = "size-3.5" }: { d: string; className?: string }) {
-  return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" aria-hidden="true">
-      <path d={d} stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  );
-}
-
-function IconoAtras({ className = "size-[18px]" }: { className?: string }) {
-  return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" aria-hidden="true">
-      <path d="M19 12H5M11 6l-6 6 6 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  );
+  return <Icono d={d} className={className} />;
 }
 
 function IconoAuto({ className = "size-8" }: { className?: string }) {
@@ -817,7 +794,7 @@ export default async function PaginaTraslado({ params }: { params: Promise<{ id:
           aria-label="Volver a mis traslados"
           className="flex size-10 shrink-0 items-center justify-center rounded-full bg-[#f2f6fc] text-[#0b1e33] transition-colors hover:bg-[#e6eef9] focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-[#1677ff]"
         >
-          <IconoAtras />
+          <Icono nombre="atras" className="size-[18px]" strokeWidth={2} />
         </Link>
         <div className="min-w-0">
           <h1 className="text-[18px] font-bold tracking-tight text-[#0b1e33]">Pasaporte Digital</h1>
@@ -1206,7 +1183,7 @@ export default async function PaginaTraslado({ params }: { params: Promise<{ id:
         <div className="mt-2 flex items-center justify-between gap-3 rounded-2xl border border-[#e9f0f8] bg-[#f7faff] p-4">
           <span className="text-[14px] font-medium text-[#4d6079]">Total pagado</span>
           <span className="text-[22px] font-extrabold tracking-tight text-[#0b1e33]">
-            {formatoMoneda(pasaporte.monto_pagado)} MXN
+            {formatearPrecio(pasaporte.monto_pagado ?? 0)}
           </span>
         </div>
         <p className="mt-2 text-[12px] text-[#7e8fa8]">
@@ -1226,12 +1203,12 @@ export default async function PaginaTraslado({ params }: { params: Promise<{ id:
                   Pago {indice + 1} de {pagos.length} · {humanizar(pago.metodo) ?? pago.metodo}
                   {pago.momento ? ` · ${String(pago.momento).replaceAll("_", " ")}` : ""}
                 </span>
-                <span className="shrink-0 font-mono-ruum font-semibold text-[#0b1e33]">{formatoMoneda(pago.monto)}</span>
+                <span className="shrink-0 font-mono-ruum font-semibold text-[#0b1e33]">{formatearPrecio(pago.monto ?? 0)}</span>
               </div>
             ))}
             <p className="text-[12px] text-[#4d6079]" role="status">
-              Total pagado {formatoMoneda(pasaporte.monto_pagado)} de {formatoMoneda(precioBase)}.
-              {saldoPendiente > 0 ? ` Restan ${formatoMoneda(saldoPendiente)}.` : " Sin saldo pendiente."}
+              Total pagado {formatearPrecio(pasaporte.monto_pagado ?? 0)} de {formatearPrecio(precioBase)}.
+              {saldoPendiente > 0 ? ` Restan ${formatearPrecio(saldoPendiente)}.` : " Sin saldo pendiente."}
             </p>
           </div>
         )}
@@ -1245,7 +1222,7 @@ export default async function PaginaTraslado({ params }: { params: Promise<{ id:
             </div>
             <p className="mt-2 font-body text-xs text-[#d7dce5]">
               El equipo operativo calculó la tarifa de tu traslado:{" "}
-              <strong className="text-[#FFC400] font-bold text-sm">{formatoMoneda(pasaporte.precio_cotizado)} MXN</strong>
+              <strong className="text-[#FFC400] font-bold text-sm">{formatearPrecio(pasaporte.precio_cotizado)}</strong>
               . Revisa los detalles y acéptala para continuar con la asignación del conductor.
             </p>
             <AceptarCotizacion trasladoId={pasaporte.traslado_id} tipoPago={pasaporte.tipo_pago ?? "anticipado"} />

@@ -8,6 +8,7 @@ import { formatearTiempoRelativoBorrador } from "@/lib/borrador-traslado";
 import { useNuevoTraslado } from "./hooks/useNuevoTraslado";
 
 import { EstadoCreacion } from "./components/EstadoCreacion";
+import { Icono } from "@ruum/ui";
 import { PasoTarifa } from "./components/PasoTarifa";
 import { PasoVehiculo } from "./components/PasoVehiculo";
 import { PasoPago } from "./components/PasoPago";
@@ -15,14 +16,6 @@ import { PasoPago } from "./components/PasoPago";
 // 1.3 Lazy load — PasoRuta es ~350 líneas, se carga solo cuando paso 2/3 lo necesita
 const PasoRuta = lazy(() => import("./components/PasoRuta").then((m) => ({ default: m.PasoRuta })));
 const PasoDetalles = lazy(() => import("./components/PasoDetalles").then((m) => ({ default: m.PasoDetalles })));
-
-function IconoAtras({ className = "size-[18px]" }: { className?: string }) {
-  return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" aria-hidden="true">
-      <path d="M19 12H5M11 6l-6 6 6 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  );
-}
 
 function SkeletonPaso() {
   return <div role="status" aria-live="polite" aria-busy="true" aria-label="Cargando paso" className="animate-pulse rounded-xl border border-ink/10 bg-mist p-6 h-64" />;
@@ -115,7 +108,7 @@ export function NuevoTrasladoForm() {
               aria-label="Volver al paso anterior"
               className="flex size-10 shrink-0 items-center justify-center rounded-full bg-[#f2f6fc] text-[#0b1e33] transition-transform active:scale-95"
             >
-              <IconoAtras />
+              <Icono nombre="atras" className="size-[18px]" strokeWidth={2} />
             </button>
           ) : (
             <Link
@@ -123,7 +116,7 @@ export function NuevoTrasladoForm() {
               aria-label="Volver al inicio"
               className="flex size-10 shrink-0 items-center justify-center rounded-full bg-[#f2f6fc] text-[#0b1e33] transition-transform active:scale-95"
             >
-              <IconoAtras />
+              <Icono nombre="atras" className="size-[18px]" strokeWidth={2} />
             </Link>
           )}
           <div className="min-w-0">
@@ -266,17 +259,11 @@ export function NuevoTrasladoForm() {
             <PasoTarifa
               datos={t.datos}
               errores={t.errores}
-              claseControl={t.claseControl}
-              actualizar={t.actualizar}
-              actualizarCodigoPostal={t.actualizarCodigoPostal}
-              actualizarMarcaCatalogo={t.actualizarMarcaCatalogo}
-              actualizarModeloCatalogo={t.actualizarModeloCatalogo}
-              validarCampo={t.validarCampo}
+              acciones={t.accionesTarifa}
               cpConsultando={t.cpConsultando}
               modelosDisponibles={t.modelosDisponibles}
               previsualizacion={t.previsualizacion}
               previsualizando={t.previsualizando}
-              onContinuar={t.aceptarTarifaYContinuar}
             />
           )}
 
@@ -284,23 +271,15 @@ export function NuevoTrasladoForm() {
             <PasoVehiculo
               datos={t.datos}
               errores={t.errores}
-              claseControl={t.claseControl}
-              actualizar={t.actualizar}
-              actualizarMarcaCatalogo={t.actualizarMarcaCatalogo}
-              actualizarModeloCatalogo={t.actualizarModeloCatalogo}
-              validarCampo={t.validarCampo}
+              acciones={t.accionesVehiculo}
               vehiculosGuardados={t.vehiculosGuardados}
               vehiculoSeleccionadoId={t.vehiculoSeleccionadoId}
-              aplicarVehiculoGuardado={t.aplicarVehiculoGuardado}
-              limpiarVehiculoGuardado={t.limpiarVehiculoGuardado}
               categoriaCatalogo={t.categoriaCatalogo}
               gamaCatalogo={t.gamaCatalogo}
               modelosDisponibles={t.modelosDisponibles}
               clasificacionCatalogo={t.clasificacionCatalogo}
               previsualizacion={t.previsualizacion}
-              onEditarTarifa={volverPasoInicial}
               detallesVehiculoExpandido={t.detallesVehiculoExpandido}
-              setDetallesVehiculoExpandido={t.setDetallesVehiculoExpandido}
               tarifaPreviaAceptada={t.tarifaPreviaAceptada}
             />
           )}
@@ -311,22 +290,13 @@ export function NuevoTrasladoForm() {
               <PasoRuta
                 datos={t.datos}
                 errores={t.errores}
-                claseControl={t.claseControl}
-                actualizar={t.actualizar}
-                actualizarTelefono={t.actualizarTelefono}
-                actualizarCodigoPostal={t.actualizarCodigoPostal}
-                consultarCodigoPostal={t.consultarCodigoPostal}
-                validarCampo={t.validarCampo}
-                aplicarSugerenciaCp={t.aplicarSugerenciaCp}
-                aplicarSugerenciaDireccion={t.aplicarSugerenciaDireccion}
+                acciones={t.accionesRuta}
                 cpConsultando={t.cpConsultando}
                 cpAviso={t.cpAviso}
                 cpOpciones={t.cpOpciones}
                 placesOpciones={t.placesOpciones}
                 origenBusqueda={t.origenBusqueda}
-                setOrigenBusqueda={t.setOrigenBusqueda}
                 destinoBusqueda={t.destinoBusqueda}
-                setDestinoBusqueda={t.setDestinoBusqueda}
                 origenSugerencias={t.origenSugerencias}
                 destinoSugerencias={t.destinoSugerencias}
                 buscandoOrigen={t.buscandoOrigen}
@@ -334,8 +304,6 @@ export function NuevoTrasladoForm() {
                 rutaEstimacion={t.rutaEstimacion}
                 rutaCalculando={t.rutaCalculando}
                 rutaAviso={t.rutaAviso}
-                onReintentarRuta={t.reintentarRuta}
-                onParadasChange={t.actualizarParadas}
                 erroresParadas={t.erroresParadas}
               />
             </Suspense>
@@ -345,8 +313,7 @@ export function NuevoTrasladoForm() {
             <Suspense fallback={<SkeletonPaso />}>
               <PasoDetalles
               datos={t.datos}
-              actualizar={t.actualizar}
-              onEditarAgenda={volverPasoInicial}
+              acciones={t.accionesDetalles}
               previsualizacion={t.previsualizacion}
               previsualizando={t.previsualizando}
               momentoPago={t.momentoPago}
@@ -355,12 +322,9 @@ export function NuevoTrasladoForm() {
               rutaEstimacion={t.rutaEstimacion}
               politicaCancelacion={t.politicaCancelacion}
               aceptaPoliticasPagoCancelacion={t.aceptaPoliticasPagoCancelacion}
-              setAceptaPoliticasPagoCancelacion={t.setAceptaPoliticasPagoCancelacion}
-              enviarSolicitud={t.enviarSolicitud}
               enviando={t.enviando}
               cargandoSesion={t.cargandoSesion}
               tarifaPreviaAceptada={t.tarifaPreviaAceptada}
-              onRevisarTarifa={volverPasoInicial}
             />
             </Suspense>
           )}

@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import { Aviso, Field } from "@ruum/ui";
+import { useRef, useState } from "react";
+import { Aviso, Field, useDialogAccesible } from "@ruum/ui";
 import { VERSION_TERMINOS_VIGENTE } from "@ruum/shared/constants";
 import { registrarConsentimientoUsuario } from "@ruum/api/services";
 import { crearClienteNavegador } from "../lib/supabase-browser";
@@ -24,50 +24,12 @@ export function ConsentimientoTerminosWall({
      sin role="dialog", sin aria-modal, sin foco inicial, sin trampa de foco,
      sin ESC y sin restauración. Se replica el patrón correcto de
      DiditVerificationModal (showModal + focus trap + restore). */
-  const dialogRef = useRef<HTMLDialogElement>(null);
+  /* Deuda (auditoría): el bloque showModal + trampa + restauración vivía
+     triplicado aquí, en SoporteCliente y en DiditVerificationModal. Ahora
+     vive en `useDialogAccesible` (@ruum/ui). */
   const checkboxRef = useRef<HTMLInputElement>(null);
-  const previoFocoRef = useRef<HTMLElement | null>(null);
-
-  useEffect(() => {
-    const dialog = dialogRef.current;
-    if (!dialog) return;
-
-    previoFocoRef.current = document.activeElement as HTMLElement | null;
-    if (!dialog.open) {
-      try {
-        dialog.showModal();
-      } catch {
-        dialog.setAttribute("open", "");
-      }
-    }
-    // Foco inicial: el checkbox, que es la acción real del diálogo.
-    requestAnimationFrame(() => checkboxRef.current?.focus());
-
-    // Trampa de foco (Tab / Shift+Tab cicla dentro del diálogo).
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") return; // cancel nativo lo gestiona <dialog>
-      if (e.key !== "Tab") return;
-      const focusables = dialog.querySelectorAll<HTMLElement>(
-        'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
-      );
-      if (focusables.length === 0) return;
-      const first = focusables[0];
-      const last = focusables[focusables.length - 1];
-      if (e.shiftKey && document.activeElement === first) {
-        e.preventDefault();
-        last.focus();
-      } else if (!e.shiftKey && document.activeElement === last) {
-        e.preventDefault();
-        first.focus();
-      }
-    };
-    dialog.addEventListener("keydown", handleKeyDown);
-    return () => {
-      dialog.removeEventListener("keydown", handleKeyDown);
-      // Restaurar el foco al elemento que abrió la capa.
-      previoFocoRef.current?.focus?.();
-    };
-  }, []);
+  // Foco inicial: el checkbox, que es la acción real del diálogo.
+  const dialogRef = useDialogAccesible({ focoInicial: checkboxRef });
 
   async function aceptar() {
     if (!acepta) {

@@ -8,6 +8,8 @@ export * from "./status-mapping";
 export * from "./Theme";
 export * from "./Alert";
 export * from "./Modal";
+export * from "./Icono";
+export * from "./useDialogAccesible";
 export * from "./EmptyState";
 export * from "./Controls";
 export * from "./Navigation";

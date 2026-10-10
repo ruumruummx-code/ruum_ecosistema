@@ -6,10 +6,17 @@ import type { PrevisualizacionTarifa } from "@ruum/api/services";
 import { CONDICIONES_VEHICULO, VENTANAS_PREDEFINIDAS, formatearDistancia, formatearTiempo } from "../constants";
 import type { DatosFormulario, MotivoServicioTraslado, TipoRutaTraslado, TipoServicioTraslado } from "../types";
 
-export interface PasoDetallesProps {
-  datos: DatosFormulario;
+export interface AccionesPasoDetalles {
   actualizar: <K extends keyof DatosFormulario>(campo: K, valor: DatosFormulario[K]) => void;
   onEditarAgenda: () => void;
+  setAceptaPoliticasPagoCancelacion: (valor: boolean) => void;
+  enviarSolicitud: () => Promise<void>;
+  onRevisarTarifa: () => void;
+}
+
+export interface PasoDetallesProps {
+  datos: DatosFormulario;
+  acciones: AccionesPasoDetalles;
   previsualizacion: PrevisualizacionTarifa | null;
   previsualizando: boolean;
   momentoPago: { momento: "anticipado" | "al_cierre"; razon: string };
@@ -21,18 +28,14 @@ export interface PasoDetallesProps {
   } | null;
   politicaCancelacion: { mensaje: string };
   aceptaPoliticasPagoCancelacion: boolean;
-  setAceptaPoliticasPagoCancelacion: (valor: boolean) => void;
-  enviarSolicitud: () => Promise<void>;
   enviando: boolean;
   cargandoSesion: boolean;
   tarifaPreviaAceptada: boolean;
-  onRevisarTarifa: () => void;
 }
 
 function PasoDetallesComponent({
   datos,
-  actualizar,
-  onEditarAgenda,
+  acciones,
   previsualizacion,
   previsualizando,
   categoriaCatalogo,
@@ -40,13 +43,17 @@ function PasoDetallesComponent({
   rutaEstimacion,
   politicaCancelacion,
   aceptaPoliticasPagoCancelacion,
-  setAceptaPoliticasPagoCancelacion,
-  enviarSolicitud,
   enviando,
   cargandoSesion,
-  tarifaPreviaAceptada,
-  onRevisarTarifa
+  tarifaPreviaAceptada
 }: PasoDetallesProps) {
+  const {
+    actualizar,
+    onEditarAgenda,
+    setAceptaPoliticasPagoCancelacion,
+    enviarSolicitud,
+    onRevisarTarifa,
+  } = acciones;
 
   return (
     <div className="space-y-4">
@@ -389,6 +396,7 @@ function areEqualPasoDetalles(prev: PasoDetallesProps, next: PasoDetallesProps) 
     prev.datos.condicion === next.datos.condicion &&
     prev.datos.origenCiudad === next.datos.origenCiudad &&
     prev.datos.destinoCiudad === next.datos.destinoCiudad &&
+    prev.acciones === next.acciones &&
     prev.datos.tipoRuta === next.datos.tipoRuta &&
     prev.datos.ventanaRecoleccion === next.datos.ventanaRecoleccion &&
     prev.datos.ventanaEntrega === next.datos.ventanaEntrega &&

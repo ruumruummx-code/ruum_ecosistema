@@ -7,37 +7,44 @@ import { MARCAS_CATALOGO } from "@/lib/catalogo-vehiculos";
 import { CONDICIONES_VEHICULO, SLOTS_HORARIOS, type PrefijoDomicilio } from "../constants";
 import type { CondicionVehiculo, DatosFormulario, ErroresFormulario } from "../types";
 
-export interface PasoTarifaProps {
-  datos: DatosFormulario;
-  errores: ErroresFormulario;
+export interface AccionesPasoTarifa {
   claseControl: (campo: keyof DatosFormulario) => string;
   actualizar: <K extends keyof DatosFormulario>(campo: K, valor: DatosFormulario[K]) => void;
   actualizarCodigoPostal: (prefijo: PrefijoDomicilio, valor: string) => void;
   actualizarMarcaCatalogo: (marca: string) => void;
   actualizarModeloCatalogo: (modelo: string) => void;
   validarCampo: (campo: keyof DatosFormulario) => void;
+  onContinuar: () => void;
+}
+
+export interface PasoTarifaProps {
+  datos: DatosFormulario;
+  errores: ErroresFormulario;
+  acciones: AccionesPasoTarifa;
   cpConsultando: PrefijoDomicilio | null;
   modelosDisponibles: string[];
   previsualizacion: PrevisualizacionTarifa | null;
   previsualizando: boolean;
-  onContinuar: () => void;
 }
 
 function PasoTarifaComponent({
   datos,
   errores,
-  claseControl,
-  actualizar,
-  actualizarCodigoPostal,
-  actualizarMarcaCatalogo,
-  actualizarModeloCatalogo,
-  validarCampo,
+  acciones,
   cpConsultando,
   modelosDisponibles,
   previsualizacion,
   previsualizando,
-  onContinuar
 }: PasoTarifaProps) {
+  const {
+    claseControl,
+    actualizar,
+    actualizarCodigoPostal,
+    actualizarMarcaCatalogo,
+    actualizarModeloCatalogo,
+    validarCampo,
+    onContinuar,
+  } = acciones;
   return (
     <div className="space-y-4">
       <PassportCard>
@@ -470,6 +477,7 @@ function areEqualPasoTarifa(prev: PasoTarifaProps, next: PasoTarifaProps) {
     prev.datos.modalidadProgramacion === next.datos.modalidadProgramacion &&
     prev.datos.fechaHoraProgramada === next.datos.fechaHoraProgramada &&
     prev.modelosDisponibles === next.modelosDisponibles &&
+    prev.acciones === next.acciones &&
     prev.previsualizacion === next.previsualizacion &&
     prev.previsualizando === next.previsualizando &&
     prev.cpConsultando === next.cpConsultando &&

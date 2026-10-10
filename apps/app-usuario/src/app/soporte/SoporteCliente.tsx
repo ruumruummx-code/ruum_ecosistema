@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
+import { useDialogAccesible } from "@ruum/ui";
 import { FormularioSoporte } from "./FormularioSoporte";
 import type { Database } from "@ruum/shared/types";
 
@@ -158,48 +159,12 @@ export function SoporteCliente({
     if (motivoPreseleccionado === "eliminar_cuenta") setModalReporte(true);
   }, [motivoPreseleccionado]);
   /* ACC-1 (auditoría): foco inicial, trampa y restauración para el modal. */
-  const modalReporteRef = useRef<HTMLDialogElement>(null);
+  /* Deuda (auditoría): el bloque showModal + trampa + restauración vivía
+     triplicado aquí, en ConsentimientoTerminos y en DiditVerificationModal.
+     Ahora vive en `useDialogAccesible` (@ruum/ui). El `onCancel` del <dialog>
+     sigue sincronizando el estado con ESC. */
   const cerrarModalRef = useRef<HTMLButtonElement>(null);
-  const previoFocoRef = useRef<HTMLElement | null>(null);
-
-  useEffect(() => {
-    if (!modalReporte) return;
-    const dialog = modalReporteRef.current;
-    if (!dialog) return;
-
-    previoFocoRef.current = document.activeElement as HTMLElement | null;
-    if (!dialog.open) {
-      try {
-        dialog.showModal();
-      } catch {
-        dialog.setAttribute("open", "");
-      }
-    }
-    requestAnimationFrame(() => cerrarModalRef.current?.focus());
-
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") return; // cancel nativo
-      if (e.key !== "Tab") return;
-      const focusables = dialog.querySelectorAll<HTMLElement>(
-        'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
-      );
-      if (focusables.length === 0) return;
-      const first = focusables[0];
-      const last = focusables[focusables.length - 1];
-      if (e.shiftKey && document.activeElement === first) {
-        e.preventDefault();
-        last.focus();
-      } else if (!e.shiftKey && document.activeElement === last) {
-        e.preventDefault();
-        first.focus();
-      }
-    };
-    dialog.addEventListener("keydown", handleKeyDown);
-    return () => {
-      dialog.removeEventListener("keydown", handleKeyDown);
-      previoFocoRef.current?.focus?.();
-    };
-  }, [modalReporte]);
+  const modalReporteRef = useDialogAccesible({ abierto: modalReporte, focoInicial: cerrarModalRef });
 
   // Solo tomar viaje activo si existe en la lista real
   const viajeActivo = viajePreseleccionado

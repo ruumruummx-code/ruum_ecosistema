@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Aviso, Button, Field } from "@ruum/ui";
 import { MENSAJES_CLAVE_UX } from "@ruum/shared/constants";
+import { formatearPrecio } from "@ruum/shared/utils";
 import { calcularCargoCancelacion } from "@ruum/shared/rules";
 import type { Database } from "@ruum/shared/types";
 import { cancelarTraslado, usuarioPuedeCancelar } from "@ruum/api/services";
@@ -74,7 +75,7 @@ export function CancelarTraslado({
       const resultado = await cancelarTraslado(cliente, trasladoId, motivo);
       setMensaje({
         tono: "info",
-        texto: `Traslado cancelado. Cargo registrado: $${resultado.monto_cargo.toLocaleString("es-MX")} MXN.`,
+        texto: `Traslado cancelado. Cargo registrado: ${formatearPrecio(resultado.monto_cargo)}.`,
       });
       router.refresh();
     } catch (err) {

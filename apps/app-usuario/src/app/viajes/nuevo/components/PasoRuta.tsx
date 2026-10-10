@@ -10,9 +10,7 @@ import { EscalasAcordeon } from "./EscalasAcordeon";
 import { formatearDistancia, formatearTiempo, type PrefijoDomicilio } from "../constants";
 import type { DatosFormulario, ErroresFormulario, ParadaForm } from "../types";
 
-export interface PasoRutaProps {
-  datos: DatosFormulario;
-  errores: ErroresFormulario;
+export interface AccionesPasoRuta {
   claseControl: (campo: keyof DatosFormulario) => string;
   actualizar: <K extends keyof DatosFormulario>(campo: K, valor: DatosFormulario[K]) => void;
   actualizarTelefono: (campo: "entregaTelefono" | "recepcionTelefono", valor: string) => void;
@@ -21,14 +19,22 @@ export interface PasoRutaProps {
   validarCampo: (campo: keyof DatosFormulario) => void;
   aplicarSugerenciaCp: (prefijo: PrefijoDomicilio, ciudad: string, colonia: string) => void;
   aplicarSugerenciaDireccion: (prefijo: PrefijoDomicilio, s: Awaited<ReturnType<typeof sugerirDireccionesAutocomplete>>[number]) => void;
+  setOrigenBusqueda: (v: string) => void;
+  setDestinoBusqueda: (v: string) => void;
+  onReintentarRuta: () => void;
+  onParadasChange: (next: ParadaForm[]) => void;
+}
+
+export interface PasoRutaProps {
+  datos: DatosFormulario;
+  errores: ErroresFormulario;
+  acciones: AccionesPasoRuta;
   cpConsultando: PrefijoDomicilio | null;
   cpAviso: Record<PrefijoDomicilio, string | null>;
   cpOpciones: Record<PrefijoDomicilio, DatosCodigoPostal | null>;
   placesOpciones: Record<PrefijoDomicilio, string[]>;
   origenBusqueda: string;
-  setOrigenBusqueda: (v: string) => void;
   destinoBusqueda: string;
-  setDestinoBusqueda: (v: string) => void;
   origenSugerencias: Awaited<ReturnType<typeof sugerirDireccionesAutocomplete>>;
   destinoSugerencias: Awaited<ReturnType<typeof sugerirDireccionesAutocomplete>>;
   buscandoOrigen: boolean;
@@ -45,8 +51,6 @@ export interface PasoRutaProps {
   } | null;
   rutaCalculando: boolean;
   rutaAviso: string | null;
-  onReintentarRuta: () => void;
-  onParadasChange: (next: ParadaForm[]) => void;
   erroresParadas?: Array<Partial<Record<keyof ParadaForm, string>>>;
 }
 
@@ -60,10 +64,10 @@ function DetallesContactos({
 }: {
   datos: DatosFormulario;
   errores: ErroresFormulario;
-  claseControl: PasoRutaProps["claseControl"];
-  actualizar: PasoRutaProps["actualizar"];
-  actualizarTelefono: PasoRutaProps["actualizarTelefono"];
-  validarCampo: PasoRutaProps["validarCampo"];
+  claseControl: AccionesPasoRuta["claseControl"];
+  actualizar: AccionesPasoRuta["actualizar"];
+  actualizarTelefono: AccionesPasoRuta["actualizarTelefono"];
+  validarCampo: AccionesPasoRuta["validarCampo"];
 }) {
   // Si la validación marca un contacto, el bloque se reabre solo. El usuario
   // conserva el control (uncontrolled): nunca se fuerza el cierre.
@@ -188,22 +192,13 @@ function DetallesContactos({
 function PasoRutaComponent({
   datos,
   errores,
-  claseControl,
-  actualizar,
-  actualizarTelefono,
-  actualizarCodigoPostal,
-  consultarCodigoPostal,
-  validarCampo,
-  aplicarSugerenciaCp,
-  aplicarSugerenciaDireccion,
+  acciones,
   cpConsultando,
   cpAviso,
   cpOpciones,
   placesOpciones,
   origenBusqueda,
-  setOrigenBusqueda,
   destinoBusqueda,
-  setDestinoBusqueda,
   origenSugerencias,
   destinoSugerencias,
   buscandoOrigen,
@@ -211,10 +206,22 @@ function PasoRutaComponent({
   rutaEstimacion,
   rutaCalculando,
   rutaAviso,
-  onReintentarRuta,
-  onParadasChange,
   erroresParadas
 }: PasoRutaProps) {
+  const {
+    claseControl,
+    actualizar,
+    actualizarTelefono,
+    actualizarCodigoPostal,
+    consultarCodigoPostal,
+    validarCampo,
+    aplicarSugerenciaCp,
+    aplicarSugerenciaDireccion,
+    setOrigenBusqueda,
+    setDestinoBusqueda,
+    onReintentarRuta,
+    onParadasChange,
+  } = acciones;
   const cambiarOrigenCodigoPostal = useCallback((valor: string) => actualizarCodigoPostal("origen", valor), [actualizarCodigoPostal]);
   const consultarOrigenCodigoPostal = useCallback((valor: string) => {
     void consultarCodigoPostal("origen", valor);
@@ -606,6 +613,7 @@ function areEqualPasoRuta(prev: PasoRutaProps, next: PasoRutaProps) {
     prev.datos.destinoNumero === next.datos.destinoNumero &&
     prev.datos.destinoReferencias === next.datos.destinoReferencias &&
     prev.datos.instruccionesEspeciales === next.datos.instruccionesEspeciales &&
+    prev.acciones === next.acciones &&
     prev.origenBusqueda === next.origenBusqueda &&
     prev.destinoBusqueda === next.destinoBusqueda &&
     prev.origenSugerencias === next.origenSugerencias &&

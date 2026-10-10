@@ -7,26 +7,30 @@ import { MARCAS_CATALOGO } from "@/lib/catalogo-vehiculos";
 import { CONDICIONES_VEHICULO, ESTADOS_GENERALES_VEHICULO } from "../constants";
 import type { CondicionVehiculo, DatosFormulario, ErroresFormulario, TransmisionVehiculo, VehiculoGuardado } from "../types";
 
-export interface PasoVehiculoProps {
-  datos: DatosFormulario;
-  errores: ErroresFormulario;
+export interface AccionesPasoVehiculo {
   claseControl: (campo: keyof DatosFormulario) => string;
   actualizar: <K extends keyof DatosFormulario>(campo: K, valor: DatosFormulario[K]) => void;
   actualizarMarcaCatalogo: (marca: string) => void;
   actualizarModeloCatalogo: (modelo: string) => void;
   validarCampo: (campo: keyof DatosFormulario) => void;
-  vehiculosGuardados: VehiculoGuardado[];
-  vehiculoSeleccionadoId: string;
   aplicarVehiculoGuardado: (vehiculo: VehiculoGuardado) => void;
   limpiarVehiculoGuardado: () => void;
+  setDetallesVehiculoExpandido: (valor: React.SetStateAction<boolean>) => void;
+  onEditarTarifa: () => void;
+}
+
+export interface PasoVehiculoProps {
+  datos: DatosFormulario;
+  errores: ErroresFormulario;
+  acciones: AccionesPasoVehiculo;
+  vehiculosGuardados: VehiculoGuardado[];
+  vehiculoSeleccionadoId: string;
   categoriaCatalogo: string;
   gamaCatalogo: string;
   modelosDisponibles: string[];
   clasificacionCatalogo: string | null;
   previsualizacion: PrevisualizacionTarifa | null;
-  onEditarTarifa: () => void;
   detallesVehiculoExpandido: boolean;
-  setDetallesVehiculoExpandido: (valor: React.SetStateAction<boolean>) => void;
   tarifaPreviaAceptada?: boolean;
 }
 
@@ -34,25 +38,28 @@ export interface PasoVehiculoProps {
 function PasoVehiculoComponent({
   datos,
   errores,
-  claseControl,
-  actualizar,
-  actualizarMarcaCatalogo,
-  actualizarModeloCatalogo,
-  validarCampo,
+  acciones,
   vehiculosGuardados,
   vehiculoSeleccionadoId,
-  aplicarVehiculoGuardado,
-  limpiarVehiculoGuardado,
   categoriaCatalogo,
   gamaCatalogo,
   modelosDisponibles,
   clasificacionCatalogo,
   previsualizacion,
-  onEditarTarifa,
   detallesVehiculoExpandido,
-  setDetallesVehiculoExpandido,
   tarifaPreviaAceptada
 }: PasoVehiculoProps) {
+  const {
+    claseControl,
+    actualizar,
+    actualizarMarcaCatalogo,
+    actualizarModeloCatalogo,
+    validarCampo,
+    aplicarVehiculoGuardado,
+    limpiarVehiculoGuardado,
+    setDetallesVehiculoExpandido,
+    onEditarTarifa,
+  } = acciones;
   // 1.2 useMemo en valores derivados (modelos ya viene memoizado del hook, reforzamos aquí)
   const modelosMemo = useMemo(() => modelosDisponibles, [modelosDisponibles]);
 
@@ -390,6 +397,7 @@ function areEqualPasoVehiculo(prev: PasoVehiculoProps, next: PasoVehiculoProps) 
     prev.datos.tieneVerificacion === next.datos.tieneVerificacion &&
     prev.datos.tienePlacas === next.datos.tienePlacas &&
     prev.datos.puedeCircular === next.datos.puedeCircular &&
+    prev.acciones === next.acciones &&
     prev.previsualizacion === next.previsualizacion &&
     prev.vehiculoSeleccionadoId === next.vehiculoSeleccionadoId &&
     prev.errores === next.errores &&

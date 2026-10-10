@@ -7,8 +7,13 @@ import { PasoDetalles, type PasoDetallesProps } from "./PasoDetalles";
 function propsIniciales(): PasoDetallesProps {
   return {
     datos: { ...VALORES_INICIALES },
-    actualizar: vi.fn(),
-    onEditarAgenda: vi.fn(),
+    acciones: {
+      actualizar: vi.fn(),
+      onEditarAgenda: vi.fn(),
+      setAceptaPoliticasPagoCancelacion: vi.fn(),
+      enviarSolicitud: vi.fn(async () => undefined),
+      onRevisarTarifa: vi.fn(),
+    },
     previsualizacion: null,
     previsualizando: false,
     momentoPago: { momento: "al_cierre", razon: "El pago se realiza al finalizar." },
@@ -17,12 +22,9 @@ function propsIniciales(): PasoDetallesProps {
     rutaEstimacion: null,
     politicaCancelacion: { mensaje: "Aplican cargos según el momento de cancelación." },
     aceptaPoliticasPagoCancelacion: false,
-    setAceptaPoliticasPagoCancelacion: vi.fn(),
-    enviarSolicitud: vi.fn(async () => undefined),
     enviando: false,
     cargandoSesion: false,
     tarifaPreviaAceptada: true,
-    onRevisarTarifa: vi.fn(),
   };
 }
 

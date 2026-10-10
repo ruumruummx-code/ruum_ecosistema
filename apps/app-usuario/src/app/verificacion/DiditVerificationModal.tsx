@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useRef, useCallback } from "react";
-import { Aviso } from "@ruum/ui";
+import { useEffect, useRef } from "react";
+import { Aviso, useDialogAccesible } from "@ruum/ui";
 import { esOrigenDiditValido, interpretarMensajeDidit } from "../../lib/didit";
 
 interface Props {
@@ -39,90 +39,23 @@ export function DiditVerificationModal({
   onReintentar,
   onFinalizar,
 }: Props) {
-  const dialogRef = useRef<HTMLDialogElement>(null);
-  const iframeRef = useRef<HTMLIFrameElement>(null);
-  const previoFocoRef = useRef<HTMLElement | null>(null);
   const cerrarBtnRef = useRef<HTMLButtonElement>(null);
+  const iframeRef = useRef<HTMLIFrameElement>(null);
+  // Deuda (auditoría): showModal + trampa + restauración + cierre vive en
+  // `useDialogAccesible` (@ruum/ui). Aquí quedan backdrop-click y mensajes.
+  const dialogRef = useDialogAccesible({ abierto: isOpen, focoInicial: cerrarBtnRef, alCancelar: onCerrar });
 
-  // R4: ESC + cancel nativo del <dialog> debe cerrar siempre, incluso cargando
-  const handleCancel = useCallback(
-    (e: Event) => {
-      e.preventDefault();
-      onCerrar();
-    },
-    [onCerrar]
-  );
-
-  // R4: showModal() + focus trap + restauración de foco + scroll lock
+  // Clic en backdrop (área fuera del .max-w-xl) cierra — UX esperado.
   useEffect(() => {
+    if (!isOpen) return;
     const dialog = dialogRef.current;
     if (!dialog) return;
-
-    if (isOpen) {
-      previoFocoRef.current = document.activeElement as HTMLElement | null;
-
-      // showModal() da backdrop nativo, focus trap y aria-modal; open sin showModal no lo hace
-      if (!dialog.open) {
-        try {
-          dialog.showModal();
-        } catch {
-          // Fallback si ya está abierto o en entorno de test/jsdom sin showModal
-          dialog.setAttribute("open", "");
-        }
-      }
-
-      // Foco inicial accesible: botón cerrar (siempre enabled, ver abajo)
-      requestAnimationFrame(() => cerrarBtnRef.current?.focus());
-
-      dialog.addEventListener("cancel", handleCancel);
-      // Clic en backdrop (área fuera del .max-w-xl) cierra — UX esperado
-      const handleBackdropClick = (e: MouseEvent) => {
-        if (e.target === dialog) onCerrar();
-      };
-      dialog.addEventListener("click", handleBackdropClick);
-
-      // R4: Focus trap manual (Tab / Shift+Tab cicla dentro del dialog)
-      const handleKeyDown = (e: KeyboardEvent) => {
-        if (e.key !== "Tab") return;
-        const focusables = dialog.querySelectorAll<HTMLElement>(
-          'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), iframe, [tabindex]:not([tabindex="-1"])'
-        );
-        if (focusables.length === 0) return;
-        const first = focusables[0];
-        const last = focusables[focusables.length - 1];
-        if (e.shiftKey && document.activeElement === first) {
-          e.preventDefault();
-          last.focus();
-        } else if (!e.shiftKey && document.activeElement === last) {
-          e.preventDefault();
-          first.focus();
-        }
-      };
-      dialog.addEventListener("keydown", handleKeyDown);
-
-      return () => {
-        dialog.removeEventListener("cancel", handleCancel);
-        dialog.removeEventListener("click", handleBackdropClick);
-        dialog.removeEventListener("keydown", handleKeyDown);
-      };
-    } else {
-      if (dialog.open) dialog.close();
-      // Restaurar foco al elemento que abrió el modal
-      previoFocoRef.current?.focus();
-    }
-  }, [isOpen, handleCancel, onCerrar]);
-
-  // Limpieza al desmontar si quedó abierto
-  useEffect(() => {
-    return () => {
-      const d = dialogRef.current;
-      if (d?.open) {
-        try {
-          d.close();
-        } catch {}
-      }
+    const alBackdrop = (e: MouseEvent) => {
+      if (e.target === dialog) onCerrar();
     };
-  }, []);
+    dialog.addEventListener("click", alBackdrop);
+    return () => dialog.removeEventListener("click", alBackdrop);
+  }, [isOpen, onCerrar, dialogRef]);
 
   useEffect(() => {
     if (!isOpen) return;

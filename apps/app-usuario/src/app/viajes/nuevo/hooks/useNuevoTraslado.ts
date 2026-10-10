@@ -862,6 +862,31 @@ export function useNuevoTraslado() {
     tarifaPreviaAceptada, vehiculoSeleccionadoId, vehiculosGuardados, rutaEstimacion
   ]);
 
+  // Bundles de callbacks por paso (props drilling): cada miembro es
+  // referencialmente estable, así que el objeto conserva identidad entre
+  // renders y los comparadores memo siguen siendo efectivos con
+  // `prev.acciones === next.acciones`.
+  const irAPasoInicial = useCallback(() => setPaso(0), [setPaso]);
+  const accionesTarifa = useMemo(() => ({
+    claseControl, actualizar, actualizarCodigoPostal, actualizarMarcaCatalogo,
+    actualizarModeloCatalogo, validarCampo, onContinuar: aceptarTarifaYContinuar,
+  }), [claseControl, actualizar, actualizarCodigoPostal, actualizarMarcaCatalogo, actualizarModeloCatalogo, validarCampo, aceptarTarifaYContinuar]);
+  const accionesVehiculo = useMemo(() => ({
+    claseControl, actualizar, actualizarMarcaCatalogo, actualizarModeloCatalogo,
+    validarCampo, aplicarVehiculoGuardado, limpiarVehiculoGuardado,
+    setDetallesVehiculoExpandido, onEditarTarifa: irAPasoInicial,
+  }), [claseControl, actualizar, actualizarMarcaCatalogo, actualizarModeloCatalogo, validarCampo, aplicarVehiculoGuardado, limpiarVehiculoGuardado, setDetallesVehiculoExpandido, irAPasoInicial]);
+  const accionesRuta = useMemo(() => ({
+    claseControl, actualizar, actualizarTelefono, actualizarCodigoPostal,
+    consultarCodigoPostal, validarCampo, aplicarSugerenciaCp,
+    aplicarSugerenciaDireccion, setOrigenBusqueda, setDestinoBusqueda,
+    onReintentarRuta: reintentarRuta, onParadasChange: actualizarParadas,
+  }), [claseControl, actualizar, actualizarTelefono, actualizarCodigoPostal, consultarCodigoPostal, validarCampo, aplicarSugerenciaCp, aplicarSugerenciaDireccion, setOrigenBusqueda, setDestinoBusqueda, reintentarRuta, actualizarParadas]);
+  const accionesDetalles = useMemo(() => ({
+    actualizar, onEditarAgenda: irAPasoInicial, setAceptaPoliticasPagoCancelacion,
+    enviarSolicitud, onRevisarTarifa: irAPasoInicial,
+  }), [actualizar, irAPasoInicial, setAceptaPoliticasPagoCancelacion, enviarSolicitud]);
+
   return {
     // Paso
     paso,
@@ -954,6 +979,11 @@ export function useNuevoTraslado() {
     reintentarAceptacion,
     // 1.4 debounce dinámico
     solicitarGeocodificacionInmediata,
+    // Bundles de callbacks por paso (props drilling)
+    accionesTarifa,
+    accionesVehiculo,
+    accionesRuta,
+    accionesDetalles,
     // Export backward-compatibility
     crear
   };

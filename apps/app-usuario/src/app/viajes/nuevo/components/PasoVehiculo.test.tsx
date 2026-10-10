@@ -9,23 +9,25 @@ function propsIniciales(): PasoVehiculoProps {
   return {
     datos: { ...VALORES_INICIALES },
     errores: {},
-    claseControl: () => "",
-    actualizar: vi.fn(),
-    actualizarMarcaCatalogo: vi.fn(),
-    actualizarModeloCatalogo: vi.fn(),
-    validarCampo: vi.fn(),
+    acciones: {
+      claseControl: () => "",
+      actualizar: vi.fn(),
+      actualizarMarcaCatalogo: vi.fn(),
+      actualizarModeloCatalogo: vi.fn(),
+      validarCampo: vi.fn(),
+      aplicarVehiculoGuardado: vi.fn(),
+      limpiarVehiculoGuardado: vi.fn(),
+      setDetallesVehiculoExpandido: vi.fn(),
+      onEditarTarifa: vi.fn(),
+    },
     vehiculosGuardados: [],
     vehiculoSeleccionadoId: "",
-    aplicarVehiculoGuardado: vi.fn(),
-    limpiarVehiculoGuardado: vi.fn(),
     categoriaCatalogo: "Sedán",
     gamaCatalogo: "General",
     modelosDisponibles: [],
     clasificacionCatalogo: null,
     previsualizacion: null,
-    onEditarTarifa: vi.fn(),
     detallesVehiculoExpandido: true,
-    setDetallesVehiculoExpandido: vi.fn(),
     tarifaPreviaAceptada: true,
   };
 }
@@ -65,7 +67,10 @@ describe("PasoVehiculo", () => {
 
   it("omite re-render ante cambios de datos irrelevantes para el paso", () => {
     const claseControl = vi.fn(() => "");
-    const iniciales = { ...propsIniciales(), claseControl };
+    const iniciales = {
+      ...propsIniciales(),
+      acciones: { ...propsIniciales().acciones, claseControl },
+    };
     const vista = render(<PasoVehiculo {...iniciales} />);
     const llamadasTrasMontaje = claseControl.mock.calls.length;
     expect(llamadasTrasMontaje).toBeGreaterThan(0);

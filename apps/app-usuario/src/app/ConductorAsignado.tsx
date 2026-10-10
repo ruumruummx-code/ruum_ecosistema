@@ -8,6 +8,7 @@ import { crearLlamadaEnmascarada } from "@ruum/api/services";
 import { chatDisponible } from "@ruum/shared/rules";
 import type { Database } from "@ruum/shared/types";
 import { crearClienteNavegador, tieneSupabaseConfigurado } from "../lib/supabase-browser";
+import { iniciales } from "./cuenta/cuenta-utils";
 
 type EstadoTraslado = Database["public"]["Enums"]["estado_traslado"];
 
@@ -16,11 +17,6 @@ interface ConductorAsignadoProps {
   estado: EstadoTraslado;
   nombre: string;
   fotoUrl: string | null;
-}
-
-function iniciales(nombre: string): string {
-  const partes = nombre.trim().split(/\s+/).filter(Boolean);
-  return partes.slice(0, 2).map((parte) => parte.charAt(0).toUpperCase()).join("") || "CO";
 }
 
 function IconoChat() {
@@ -41,6 +37,8 @@ function IconoTelefono() {
 }
 
 export function ConductorAsignado({ trasladoId, estado, nombre, fotoUrl }: ConductorAsignadoProps) {
+  // "CO" conserva el respaldo histórico de este avatar (canónico en cuenta-utils).
+  const siglas = iniciales(nombre, "CO");
   const [llamando, setLlamando] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const disponible = chatDisponible(estado);
@@ -71,7 +69,7 @@ export function ConductorAsignado({ trasladoId, estado, nombre, fotoUrl }: Condu
           {fotoUrl ? (
             <Image src={fotoUrl} alt={`Foto de ${nombre}`} width={56} height={56} className="size-14 object-cover" unoptimized />
           ) : (
-            <span>{iniciales(nombre)}</span>
+            <span>{siglas}</span>
           )}
         </div>
         <div className="min-w-0">

@@ -9,22 +9,26 @@ function propsIniciales(): PasoRutaProps {
   return {
     datos: { ...VALORES_INICIALES },
     errores: {},
-    claseControl: () => "",
-    actualizar: vi.fn(),
-    actualizarTelefono: vi.fn(),
-    actualizarCodigoPostal: vi.fn(),
-    consultarCodigoPostal: vi.fn(async () => undefined),
-    validarCampo: vi.fn(),
-    aplicarSugerenciaCp: vi.fn(),
-    aplicarSugerenciaDireccion: vi.fn(),
+    acciones: {
+      claseControl: () => "",
+      actualizar: vi.fn(),
+      actualizarTelefono: vi.fn(),
+      actualizarCodigoPostal: vi.fn(),
+      consultarCodigoPostal: vi.fn(async () => undefined),
+      validarCampo: vi.fn(),
+      aplicarSugerenciaCp: vi.fn(),
+      aplicarSugerenciaDireccion: vi.fn(),
+      setOrigenBusqueda: vi.fn(),
+      setDestinoBusqueda: vi.fn(),
+      onReintentarRuta: vi.fn(),
+      onParadasChange: vi.fn(),
+    },
     cpConsultando: null,
     cpAviso: { origen: null, destino: null },
     cpOpciones: { origen: null, destino: null },
     placesOpciones: { origen: [], destino: [] },
     origenBusqueda: "",
-    setOrigenBusqueda: vi.fn(),
     destinoBusqueda: "",
-    setDestinoBusqueda: vi.fn(),
     origenSugerencias: [],
     destinoSugerencias: [],
     buscandoOrigen: false,
@@ -32,8 +36,6 @@ function propsIniciales(): PasoRutaProps {
     rutaEstimacion: null,
     rutaCalculando: false,
     rutaAviso: null,
-    onReintentarRuta: vi.fn(),
-    onParadasChange: vi.fn(),
     erroresParadas: undefined,
   };
 }
@@ -80,7 +82,11 @@ describe("PasoRuta", () => {
 
   it("omite re-render ante cambios de datos irrelevantes para el paso", () => {
     const claseControl = vi.fn(() => "");
-    const iniciales = { ...propsIniciales(), claseControl };
+    const base = propsIniciales();
+    const iniciales: PasoRutaProps = {
+      ...base,
+      acciones: { ...base.acciones, claseControl },
+    };
     const vista = render(<PasoRuta {...iniciales} />);
     const llamadasTrasMontaje = claseControl.mock.calls.length;
     expect(llamadasTrasMontaje).toBeGreaterThan(0);

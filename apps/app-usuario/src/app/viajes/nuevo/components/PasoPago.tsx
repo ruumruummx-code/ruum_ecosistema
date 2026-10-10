@@ -1,7 +1,8 @@
 "use client";
 import { memo } from "react";
 import Link from "next/link";
-import { Button, Aviso } from "@ruum/ui";
+import { Button, Aviso, Icono } from "@ruum/ui";
+import { formatearPrecio } from "@ruum/shared/utils";
 import { PagoStripe } from "@/app/PagoStripe";
 import type { DatosFormulario } from "../types";
 import type { RutaEstimacion } from "@/state/app-state";
@@ -23,14 +24,6 @@ export interface PasoPagoProps {
   cotizacionAceptada: boolean;
   datos: DatosFormulario;
   rutaEstimacion: RutaEstimacion | null;
-}
-
-function Icono({ d, className = "size-[13px]" }: { d: string; className?: string }) {
-  return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <path d={d} />
-    </svg>
-  );
 }
 
 function folioCorto(id: string): string {
@@ -156,7 +149,7 @@ export const PasoPago = memo(function PasoPago({
       <section aria-label="Resumen del traslado" className="rounded-[22px] border border-[#eef2f7] bg-white p-5 shadow-[0_6px_16px_rgba(0,0,0,0.02)]">
         <h2 className="mb-4 flex items-center gap-2.5 text-[14.5px] font-bold text-[#0b1e33]">
           <span aria-hidden="true" className="flex size-[30px] items-center justify-center rounded-[10px] bg-[#f0f5fe] text-[#2e5a88]">
-            <Icono d="M8 5H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2M9 5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2h-4a2 2 0 0 1-2-2V5Z" />
+            <Icono d="M8 5H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2M9 5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2h-4a2 2 0 0 1-2-2V5Z" className="size-[13px]" />
           </span>
           Resumen del traslado
         </h2>
@@ -177,7 +170,7 @@ export const PasoPago = memo(function PasoPago({
 
       {/* Total a pagar */}
       <section
-        aria-label={`Total a pagar: $${Number(precio).toLocaleString("es-MX")} MXN`}
+        aria-label={`Total a pagar: ${formatearPrecio(Number(precio))}`}
         className="relative overflow-hidden rounded-3xl p-6 text-[#fff] shadow-[0_16px_32px_-12px_rgba(11,30,51,0.4)]"
         style={{ background: "linear-gradient(135deg, #0b1e33 0%, #162c47 100%)" }}
       >
@@ -185,10 +178,10 @@ export const PasoPago = memo(function PasoPago({
           Total a pagar
         </p>
         <p className="mb-1.5 text-[38px] font-extrabold tracking-tight">
-          ${Number(precio).toLocaleString("es-MX")} <small className="text-[18px] font-bold opacity-70">MXN</small>
+          {formatearPrecio(Number(precio))}
         </p>
         <p className="flex items-center gap-1.5 text-[13px] font-medium text-[rgba(255,255,255,0.65)]">
-          <Icono d="M3 11h18v11H3z M7 11V7a5 5 0 0 1 10 0v4" />
+          <Icono nombre="candado" className="size-[13px]" />
           Pago seguro con Stripe
         </p>
       </section>

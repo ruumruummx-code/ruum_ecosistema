@@ -8,17 +8,19 @@ function propsIniciales(): PasoTarifaProps {
   return {
     datos: { ...VALORES_INICIALES },
     errores: {},
-    claseControl: () => "",
-    actualizar: vi.fn(),
-    actualizarCodigoPostal: vi.fn(),
-    actualizarMarcaCatalogo: vi.fn(),
-    actualizarModeloCatalogo: vi.fn(),
-    validarCampo: vi.fn(),
+    acciones: {
+      claseControl: () => "",
+      actualizar: vi.fn(),
+      actualizarCodigoPostal: vi.fn(),
+      actualizarMarcaCatalogo: vi.fn(),
+      actualizarModeloCatalogo: vi.fn(),
+      validarCampo: vi.fn(),
+      onContinuar: vi.fn(),
+    },
     cpConsultando: null,
     modelosDisponibles: [],
     previsualizacion: null,
     previsualizando: false,
-    onContinuar: vi.fn(),
   };
 }
 
@@ -39,14 +41,15 @@ describe("PasoTarifa — comparador sin identidad", () => {
   });
 
   it("omite re-render ante cambios de datos irrelevantes para el paso", () => {
+    const iniciales = propsIniciales();
     const claseControl = vi.fn(() => "");
-    const iniciales = { ...propsIniciales(), claseControl };
-    const vista = render(<PasoTarifa {...iniciales} />);
+    const conEspia = { ...iniciales, acciones: { ...iniciales.acciones, claseControl } };
+    const vista = render(<PasoTarifa {...conEspia} />);
     const llamadasTrasMontaje = claseControl.mock.calls.length;
     expect(llamadasTrasMontaje).toBeGreaterThan(0);
     // El tipo de vehículo no lo pinta este paso: memo debe bloquear el re-render.
     vista.rerender(
-      <PasoTarifa {...iniciales} datos={{ ...iniciales.datos, tipo: "suv" as never }} />,
+      <PasoTarifa {...conEspia} datos={{ ...conEspia.datos, tipo: "suv" as never }} />,
     );
     expect(claseControl.mock.calls.length).toBe(llamadasTrasMontaje);
   });

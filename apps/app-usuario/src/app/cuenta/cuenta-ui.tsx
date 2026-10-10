@@ -1,7 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import type { ReactNode } from "react";
-import { Aviso, Button, PassportCard } from "@ruum/ui";
+import { Aviso, Button, Icono, PassportCard, SENDAS_ICONO } from "@ruum/ui";
 import { ETIQUETA_TIPO_VEHICULO } from "@ruum/shared/constants";
 import type { Database } from "@ruum/shared/types";
 import { PerfilCuentaForm } from "./PerfilCuentaForm";
@@ -322,11 +322,7 @@ export function LayoutCuenta({ cuenta, children }: { cuenta: CuentaReal; childre
 }
 
 function IconoSeccion({ d }: { d: string }) {
-  return (
-    <svg className="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <path d={d} />
-    </svg>
-  );
+  return <Icono d={d} className="size-3.5" />;
 }
 
 function TarjetaSeccion({
@@ -376,16 +372,14 @@ export function SeccionPerfil({ usuario, fotoUrl }: { usuario: Usuario; fotoUrl?
         className="inline-flex min-h-11 items-center gap-2.5 text-[14px] font-bold text-[#2e5a88]"
       >
         <span aria-hidden="true" className="flex size-10 items-center justify-center rounded-full bg-[#f2f6fc] text-[#0b1e33]">
-          <svg className="size-[18px]" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-            <path d="M19 12H5M11 6l-6 6 6 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
+          <Icono nombre="atras" className="size-[18px]" strokeWidth={2} />
         </span>
         Volver
       </Link>
 
       <TarjetaSeccion
         id="informacion-personal"
-        icono="M12 12a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7ZM5 20c0-3.9 3.1-7 7-7s7 3.1 7 7"
+        icono={SENDAS_ICONO.usuario}
         titulo="Información personal"
       >
         <div className="mb-4 flex items-center gap-4">
@@ -439,7 +433,7 @@ export function SeccionPerfil({ usuario, fotoUrl }: { usuario: Usuario; fotoUrl?
 
       <TarjetaSeccion
         id="seguridad"
-        icono="M3 11h18v11H3z M7 11V7a5 5 0 0 1 10 0v4"
+        icono={SENDAS_ICONO.candado}
         titulo="Contraseña"
       >
         <p className="font-body text-sm text-[#4d6079]">
