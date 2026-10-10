@@ -37,10 +37,9 @@ describe("determinarMomentoPago — política estricta (solo electrónico antici
     expect(r.momento).toBe("anticipado");
   });
 
-  it("el umbral histórico ya no otorga al_cierre", () => {
+  it("sin parámetros extra: la firma solo recibe el usuario", () => {
     const r = determinarMomentoPago(
-      usuario({ traslados_completados_sin_incidencia: 5, metodo_pago_registrado: true }),
-      5
+      usuario({ traslados_completados_sin_incidencia: 5, metodo_pago_registrado: true })
     );
     expect(r.momento).toBe("anticipado");
   });

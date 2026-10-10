@@ -115,19 +115,19 @@ export const PasoPago = memo(function PasoPago({
     );
   }
 
-  // Sin tarifa automática: no hay nada que cobrar aún. El traslado queda en
-  // espera de cotización de Torre; el pago se exigirá desde el Pasaporte.
+  // Sin monto cobrable el flujo no debió llegar aquí (el Paso 1 bloquea sin
+  // tarifa automática). Estado de error sin salida lateral: volver al inicio.
   if (precio == null || precio <= 0) {
     return (
       <div className="flex flex-col gap-4">
-        <Aviso tono="info">
-          No se requiere pago en este momento. Te avisaremos en cuanto exista una cotización autorizada. Si ves tarifa $0, nuestro equipo la revisará antes de solicitar cobro.
+        <Aviso tono="danger">
+          Esta solicitud no tiene un monto cobrable. Vuelve al inicio y solicita una cotización especial con soporte.
         </Aviso>
         <Link
-          href="/mis-viajes"
+          href="/"
           className="inline-flex min-h-11 items-center justify-center gap-2 rounded-[18px] bg-[#f2f6fb] px-4 py-2 text-[14px] font-bold text-[#0b1e33]"
         >
-          Ver mis traslados
+          Volver al inicio
         </Link>
       </div>
     );
@@ -227,19 +227,7 @@ export const PasoPago = memo(function PasoPago({
           <Icono d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z M9 12l2 2 4-4" className="size-4" />
         </span>
         <p className="text-[12.5px] font-medium leading-relaxed text-[#3d5470]">
-          Tu información de pago está cifrada. Ruum Ruum no almacena los datos de tu tarjeta. El traslado solo avanza con el pago electrónico confirmado.
-        </p>
-      </div>
-
-      <div className="flex flex-col items-center gap-1.5 pt-1">
-        <Link
-          href="/mis-viajes"
-          className="inline-flex min-h-11 items-center justify-center rounded-[18px] px-4 text-[13px] font-semibold text-[#6b7c94]"
-        >
-          Continuar después
-        </Link>
-        <p className="text-center text-[11.5px] font-medium text-[#a6b7cb]">
-          Tu solicitud quedará en espera de pago y no avanzará hasta completarlo.
+          Tu información de pago está cifrada. Ruum Ruum no almacena los datos de tu tarjeta. El traslado solo se considera solicitado con el pago electrónico confirmado; si sales sin pagar, la solicitud se cancela automáticamente.
         </p>
       </div>
     </div>

@@ -12,13 +12,13 @@ confianza, visibilidad y cierre documental."**
 - `/registro` — alta de cuenta personal/empresa (PRD §3, §4.1), conectado de
   verdad: `auth.signUp()` + inserción real en `usuarios`. El nombre se guarda
   en los metadatos de Auth (no existe columna `usuarios.nombre`).
-- `/viajes/nuevo` — wizard de 4 pasos (vehículo → ruta → agenda →
-  servicio), con las reglas reales de
-  `packages/shared` conectadas en vivo: el paso de confirmación muestra el
-  momento de pago (`determinarMomentoPago`, PRD §4.6) y el aviso de política
+- `/viajes/nuevo` — wizard de 5 pasos (tarifa → vehículo → ruta → detalles →
+  pago), con las reglas reales de
+  `packages/shared` conectadas en vivo: el paso de confirmación muestra
+  pago electrónico anticipado obligatorio (`determinarMomentoPago`, siempre
+  anticipado) y el aviso de política
   de cancelación (`calcularCargoCancelacion`, PRD §4.7) calculados de verdad,
-  no texto estático. Si hay sesión real, usa el usuario real (historial real
-  decide pago anticipado vs. al cierre); si Supabase está configurado pero no
+  no texto estático. Si hay sesión real, usa el usuario real; si Supabase está configurado pero no
   hay sesión, manda a `/login` en vez de fallar en silencio contra RLS.
 - `/viajes/[id]` — Pasaporte Digital de Traslado (PRD §5.1): estado,
   stepper de las 7 etapas visibles para el usuario, conductor, evidencia y

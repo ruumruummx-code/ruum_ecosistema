@@ -35,7 +35,6 @@ function PasoDetallesComponent({
   onEditarAgenda,
   previsualizacion,
   previsualizando,
-  momentoPago,
   categoriaCatalogo,
   gamaCatalogo,
   rutaEstimacion,
@@ -236,7 +235,7 @@ function PasoDetallesComponent({
               <span className="inline-flex size-8 items-center justify-center rounded-full bg-signal text-ink" aria-hidden="true">
                 $
               </span>
-              {momentoPago.momento === "anticipado" ? "Pago anticipado" : "Pago a la entrega"}
+              Pago electrónico anticipado obligatorio
             </p>
           </div>
         </div>
@@ -270,7 +269,7 @@ function PasoDetallesComponent({
       </PassportCard>
 
       <Aviso tono="info">
-        {MENSAJES_CLAVE_UX.pago} {momentoPago.razon}
+        {MENSAJES_CLAVE_UX.pago} Todo traslado se cobra por medios electrónicos de forma anticipada, antes de operar.
       </Aviso>
       <Aviso tono="atencion">
         {MENSAJES_CLAVE_UX.cancelacion} {politicaCancelacion.mensaje}
@@ -326,7 +325,7 @@ function PasoDetallesComponent({
                 {previsualizacion?.motivo ?? "Completa la agenda para calcular la tarifa."}
               </p>
             )}
-            <p className="mt-2 max-w-xs font-body text-xs leading-5 text-ink/60">{momentoPago.razon}</p>
+            <p className="mt-2 max-w-xs font-body text-xs leading-5 text-ink/60">Todo traslado se cobra por medios electrónicos de forma anticipada, antes de operar.</p>
             <p className="mt-2 flex flex-wrap items-center gap-2 font-body text-xs text-ink/45">
               <span className="inline-flex items-center gap-1 rounded-full border border-emerald-500/20 bg-emerald-500/10 px-2 py-0.5 font-semibold text-emerald-700">✓ Conductores certificados</span>
               <span>★ 4.8/5 · +2,340 traslados verificados este mes</span>
@@ -361,9 +360,7 @@ function PasoDetallesComponent({
                     ? TEXTOS_CARGANDO.enviando
                     : cargandoSesion
                       ? "Validando sesión…"
-                      : previsualizacion?.disponible && momentoPago.momento === "anticipado"
-                        ? "Confirmar y pagar"
-                        : "Confirmar solicitud"}
+                      : "Continuar al pago"}
                 </Button>
                 {!aceptaPoliticasPagoCancelacion ? (
                   <p id="confirmar-solicitud-ayuda" className="font-body text-xs leading-5 text-ink/65">

@@ -261,7 +261,7 @@ test.describe("Wizard traslado nuevo (parcial mock)", () => {
     await expect(page.getByRole("button", { name: /Editar/i }).first()).toBeVisible();
   });
 
-  test("paso 0: cotización manual para vehículo o ruta especial permite continuar", async ({ page }) => {
+  test("paso 0: sin tarifa automática se bloquea y ofrece cotización especial", async ({ page }) => {
     await seedMockAuthSession(page);
     await mockMapboxGeocode(page);
     await page.route("**/rpc/previsualizar_tarifa_usuario**", async (route) => {
@@ -276,12 +276,12 @@ test.describe("Wizard traslado nuevo (parcial mock)", () => {
     await page.locator("#modelo").fill("Camión Especial");
     await page.locator("#condicion").selectOption("rescate_mecanico");
 
-    const btnCotizacion = page.getByRole("button", { name: /Continuar con cotización manual/i });
-    await expect(btnCotizacion).toBeVisible({ timeout: 10000 });
-    await btnCotizacion.click();
-
-    await expect(page.getByText(/Paso 2 de 5/i)).toBeVisible();
-    await expect(page.getByText(/Cotización por nuestro equipo/i)).toBeVisible();
+    await expect(page.getByText(/requiere cotización especial/i).first()).toBeVisible({ timeout: 10000 });
+    await expect(page.getByRole("button", { name: /Continuar con mi solicitud/i })).toBeDisabled();
+    const enlaceEspecial = page.getByRole("link", { name: /Solicitar cotización especial/i });
+    await expect(enlaceEspecial).toBeVisible();
+    await enlaceEspecial.click();
+    await expect(page).toHaveURL(/\/soporte/);
   });
 
   test("invalidación de tarifa: editar campo en paso 0 requiere re-confirmación", async ({ page }) => {

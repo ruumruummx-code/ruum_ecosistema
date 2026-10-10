@@ -14,7 +14,7 @@ create extension if not exists pgtap with schema extensions;
 
 begin;
 
-select plan(9);
+select plan(14);
 
 create or replace function pg_temp.correr_rt64() returns setof text as $$
 declare
@@ -25,8 +25,13 @@ declare
   v_t2 uuid := '96400000-0000-4000-8000-000000000302';
   v_t3 uuid := '96400000-0000-4000-8000-000000000303';
   v_t4 uuid := '96400000-0000-4000-8000-000000000304';
+  v_t5 uuid := '96400000-0000-4000-8000-000000000305';
+  v_t6 uuid := '96400000-0000-4000-8000-000000000306';
+  v_t7 uuid := '96400000-0000-4000-8000-000000000307';
+  v_t8 uuid := '96400000-0000-4000-8000-000000000308';
   v_ok boolean;
   v_msg text;
+  v_barridos int;
 begin
   insert into auth.users (id, email, email_confirmed_at, raw_app_meta_data, raw_user_meta_data, created_at, updated_at)
   values (v_auth_user, v_auth_user || '@rt64.test', now(), '{}', '{}', now(), now());
@@ -138,6 +143,62 @@ begin
     (select estado::text from public.traslados where id = v_t4),
     'servicio_cancelado',
     'RT-64.9: la cancelación nunca queda bloqueada por el gate de pago'
+  );
+
+  -- 10-14. Barrido E: impagos vencidos se cancelan, el resto queda intacto.
+  -- T5: anticipado sin pago y vencido (45 min). T6: vencido pero pagado.
+  -- T7: vencido con intento de pago reciente (PI pendiente de hace 5 min).
+  -- T8: al_cierre vencido (exento por diseño).
+  insert into public.traslados (
+    id, estado, usuario_id, vehiculo_id, clave_idempotencia, creado_en,
+    contacto_entrega_nombre, contacto_entrega_telefono,
+    contacto_recepcion_nombre, contacto_recepcion_telefono,
+    origen_lat, origen_lng, origen_direccion, origen_ciudad,
+    destino_lat, destino_lng, destino_direccion, destino_ciudad,
+    precio_cotizado, tipo_pago
+  ) values
+    (v_t5, 'cotizacion_aceptada', v_usuario_id, v_vehiculo_id, gen_random_uuid(), now() - interval '45 minutes',
+     'A', '+520000000000', 'B', '+520000000001',
+     19.0, -99.0, 'origen', 'CDMX', 19.5, -99.5, 'destino', 'CDMX',
+     1000, 'anticipado'),
+    (v_t6, 'cotizacion_aceptada', v_usuario_id, v_vehiculo_id, gen_random_uuid(), now() - interval '45 minutes',
+     'A', '+520000000000', 'B', '+520000000001',
+     19.0, -99.0, 'origen', 'CDMX', 19.5, -99.5, 'destino', 'CDMX',
+     1000, 'anticipado'),
+    (v_t7, 'cotizacion_aceptada', v_usuario_id, v_vehiculo_id, gen_random_uuid(), now() - interval '45 minutes',
+     'A', '+520000000000', 'B', '+520000000001',
+     19.0, -99.0, 'origen', 'CDMX', 19.5, -99.5, 'destino', 'CDMX',
+     1000, 'anticipado'),
+    (v_t8, 'cotizacion_aceptada', v_usuario_id, v_vehiculo_id, gen_random_uuid(), now() - interval '45 minutes',
+     'A', '+520000000000', 'B', '+520000000001',
+     19.0, -99.0, 'origen', 'CDMX', 19.5, -99.5, 'destino', 'CDMX',
+     1000, 'al_cierre');
+  insert into public.pagos (traslado_id, monto, momento, estado, metodo)
+  values (v_t6, 1000, 'anticipado', 'completado', 'tarjeta');
+  insert into public.pagos (traslado_id, monto, momento, estado, metodo, registrado_en)
+  values (v_t7, 1000, 'anticipado', 'pendiente', 'tarjeta', now() - interval '5 minutes');
+
+  v_barridos := public.cancelar_traslados_impagos_vencidos();
+  return next ok(v_barridos >= 1, 'RT-64.10: el barrido cancela impagos vencidos');
+  return next is(
+    (select estado::text from public.traslados where id = v_t5),
+    'servicio_cancelado',
+    'RT-64.11: anticipado vencido sin pago queda cancelado'
+  );
+  return next is(
+    (select estado::text from public.traslados where id = v_t6),
+    'cotizacion_aceptada',
+    'RT-64.12: vencido con pago completado queda intacto'
+  );
+  return next is(
+    (select estado::text from public.traslados where id = v_t7),
+    'cotizacion_aceptada',
+    'RT-64.13: vencido con intento de pago reciente queda intacto'
+  );
+  return next is(
+    (select estado::text from public.traslados where id = v_t8),
+    'cotizacion_aceptada',
+    'RT-64.14: al_cierre vencido queda intacto (exención por diseño)'
   );
 end;
 $$ language plpgsql;

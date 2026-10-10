@@ -1,6 +1,7 @@
 "use client";
 import React, { memo } from "react";
-import { Button, PassportCard } from "@ruum/ui";
+import Link from "next/link";
+import { Button, PassportCard, Aviso } from "@ruum/ui";
 import type { PrevisualizacionTarifa } from "@ruum/api/services";
 import { MARCAS_CATALOGO } from "@/lib/catalogo-vehiculos";
 import { CONDICIONES_VEHICULO, SLOTS_HORARIOS, type PrefijoDomicilio } from "../constants";
@@ -392,7 +393,7 @@ function PasoTarifaComponent({
             )}
             {!previsualizando && previsualizacion && !previsualizacion.disponible && (
               <p className="mt-1 max-w-sm font-body text-sm leading-6 text-ink/65">
-                {previsualizacion.motivo ? previsualizacion.motivo.replace("Torre de Control", "nuestro equipo") : "Nuestro equipo aplicará la tarifa correspondiente antes de enviarte la cotización."}
+                Sin tarifa automática por ahora. Revisa el aviso de abajo para solicitar tu cotización especial.
               </p>
             )}
             {!previsualizando && !previsualizacion && (
@@ -405,40 +406,48 @@ function PasoTarifaComponent({
           <div className="flex flex-col gap-2 sm:items-end sm:min-w-[220px]">
             <Button
               type="button"
-              disabled={!previsualizacion || previsualizando}
+              disabled={!previsualizacion?.disponible || previsualizando}
               onClick={onContinuar}
-              aria-describedby={!previsualizacion && !previsualizando ? "tarifa-gate-ayuda" : previsualizacion && !previsualizacion.disponible ? "tarifa-gate-no-disponible-ayuda" : undefined}
+              aria-describedby={!previsualizacion?.disponible && !previsualizando ? "tarifa-gate-bloqueo-ayuda" : undefined}
               aria-busy={previsualizando}
             >
               Continuar con mi solicitud
             </Button>
-            {!previsualizando && !previsualizacion && (
+            {!previsualizando && !previsualizacion?.disponible && (
               <div className="w-full sm:text-right">
-                <p id="tarifa-gate-ayuda" className="font-body text-xs leading-4 text-ink/60">
-                  Completa origen, destino, vehículo y fecha para calcular. Si ya completaste todo y no aparece tarifa, puedes continuar igualmente.
-                </p>
-                <Button
-                  type="button"
-                  variant="secondary"
-                  onClick={onContinuar}
-                  className="mt-2 w-full sm:w-auto text-xs"
-                  aria-label="Continuar y solicitar revisión manual de tarifa por operación"
-                >
-                  Solicitar revisión manual
-                </Button>
-                <p className="mt-1 font-body text-[11px] leading-3 text-ink/50 sm:text-right">
-                  Operación confirmará tu tarifa antes de asignar conductor.
+                <p id="tarifa-gate-bloqueo-ayuda" className="font-body text-xs leading-4 text-ink/60">
+                  {!previsualizacion
+                    ? "Completa origen, destino, vehículo y fecha para calcular tu tarifa."
+                    : "Tu vehículo o ruta requiere cotización especial: el flujo express solo continúa con tarifa automática."}
                 </p>
               </div>
-            )}
-            {!previsualizando && previsualizacion && !previsualizacion.disponible && (
-              <p id="tarifa-gate-no-disponible-ayuda" className="max-w-[260px] font-body text-xs leading-4 text-ink/60 sm:text-right">
-                Puedes continuar: nuestro equipo confirmará la tarifa en la siguiente etapa.
-              </p>
             )}
           </div>
         </div>
       </section>
+
+      {/* Bloqueo estricto: sin tarifa automática no hay flujo express.
+          La cotización especial se solicita fuera del flujo, con soporte. */}
+      {!previsualizando && previsualizacion && !previsualizacion.disponible && (
+        <div role="alert">
+          <Aviso tono="atencion">
+            <div className="flex flex-col gap-3">
+              <p className="font-bold">Este traslado requiere cotización especial</p>
+              <p className="font-body text-xs leading-5">
+                {previsualizacion.motivo
+                  ? previsualizacion.motivo.replace("Torre de Control", "nuestro equipo")
+                  : "Nuestro equipo debe calcular tu tarifa manualmente."}{" "}
+                El flujo express solo continúa con tarifa automática y pago electrónico anticipado.
+              </p>
+              <Link href="/soporte">
+                <Button type="button" variant="secondary">
+                  Solicitar cotización especial
+                </Button>
+              </Link>
+            </div>
+          </Aviso>
+        </div>
+      )}
     </div>
   );
 }
