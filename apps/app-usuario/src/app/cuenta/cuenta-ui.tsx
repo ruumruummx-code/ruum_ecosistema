@@ -8,7 +8,10 @@ import { PerfilCuentaForm } from "./PerfilCuentaForm";
 import { PreferenciasToggles } from "./PreferenciasToggles";
 import { BotonResetPassword } from "./BotonResetPassword";
 import { FacturacionCuentaForm } from "./FacturacionCuentaForm";
+import { iniciales } from "./cuenta-utils";
 import { NavegacionUsuario } from "../NavegacionUsuario";
+
+export { iniciales } from "./cuenta-utils";
 
 export type Usuario = Database["public"]["Tables"]["usuarios"]["Row"];
 export type Vehiculo = Database["public"]["Tables"]["vehiculos"]["Row"];
@@ -114,16 +117,6 @@ export async function obtenerCuenta(): Promise<ResultadoCuenta> {
       mensaje: "No pudimos cargar tu cuenta en este momento. Inténtalo de nuevo en unos segundos."
     };
   }
-}
-
-export function iniciales(nombre: string | null | undefined) {
-  if (!nombre) return "RR";
-  return nombre
-    .split(" ")
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((parte) => parte[0]?.toUpperCase())
-    .join("");
 }
 
 export function dato(valor: string | number | null | undefined) {

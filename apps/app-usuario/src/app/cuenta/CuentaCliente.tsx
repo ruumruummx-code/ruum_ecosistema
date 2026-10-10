@@ -5,7 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { crearClienteNavegador } from "../../lib/supabase-browser";
-import { iniciales } from "./cuenta-ui";
+import { iniciales } from "./cuenta-utils";
 import { PreferenciasToggles } from "./PreferenciasToggles";
 import type { Database } from "@ruum/shared/types";
 
