@@ -374,49 +374,135 @@ export function LayoutCuenta({ cuenta, children }: { cuenta: CuentaReal; childre
   );
 }
 
-export function SeccionPerfil({ usuario, fotoUrl }: { usuario: Usuario; fotoUrl?: string | null }) {
+function IconoSeccion({ d }: { d: string }) {
   return (
-    <Seccion titulo="Perfil del usuario" descripcion="Datos visibles y de contacto de la cuenta.">
-      <div className="flex flex-col gap-6">
-        <div id="informacion-personal" className="flex items-center gap-4 scroll-mt-28">
+    <svg className="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d={d} />
+    </svg>
+  );
+}
+
+function TarjetaSeccion({
+  id,
+  icono,
+  titulo,
+  children,
+}: {
+  id?: string;
+  icono: string;
+  titulo: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <section
+      id={id}
+      aria-label={titulo}
+      className="scroll-mt-28 rounded-[22px] border border-[#eef2f7] bg-white p-5 shadow-[0_6px_16px_rgba(0,0,0,0.01)]"
+    >
+      <h2 className="mb-4 flex items-center gap-2.5 text-[16px] font-bold text-[#0b1e33]">
+        <span aria-hidden="true" className="flex size-7 items-center justify-center rounded-[10px] bg-[#f0f5fe] text-[#2e5a88]">
+          <IconoSeccion d={icono} />
+        </span>
+        {titulo}
+      </h2>
+      {children}
+    </section>
+  );
+}
+
+function FilaDato({ etiqueta, valor }: { etiqueta: string; valor: React.ReactNode }) {
+  return (
+    <div className="flex items-start text-[14px] leading-snug">
+      <span className="w-[130px] shrink-0 font-medium text-[#6f7e94]">{etiqueta}</span>
+      <span className="flex-1 font-semibold text-[#1a293b]">{valor}</span>
+    </div>
+  );
+}
+
+export function SeccionPerfil({ usuario, fotoUrl }: { usuario: Usuario; fotoUrl?: string | null }) {
+  const verificado = usuario.estado_verificacion === "verificado";
+  return (
+    <div className="flex flex-col gap-4">
+      <Link
+        href="/cuenta"
+        aria-label="Volver a Cuenta"
+        className="inline-flex min-h-11 items-center gap-2.5 text-[14px] font-bold text-[#2e5a88]"
+      >
+        <span aria-hidden="true" className="flex size-10 items-center justify-center rounded-full bg-[#f2f6fc] text-[#0b1e33]">
+          <svg className="size-[18px]" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M19 12H5M11 6l-6 6 6 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        </span>
+        Volver
+      </Link>
+
+      <TarjetaSeccion
+        id="informacion-personal"
+        icono="M12 12a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7ZM5 20c0-3.9 3.1-7 7-7s7 3.1 7 7"
+        titulo="Información personal"
+      >
+        <div className="mb-4 flex items-center gap-4">
           {fotoUrl ? (
-            <Image src={fotoUrl} alt="Foto de perfil" width={80} height={80} className="size-20 rounded-full object-cover" />
+            <Image src={fotoUrl} alt="Foto de perfil" width={80} height={80} className="size-20 shrink-0 rounded-full border-2 border-white object-cover shadow-[0_4px_12px_rgba(0,0,0,0.05)]" />
           ) : (
-            <div className="flex size-20 items-center justify-center rounded-full bg-ink font-display text-2xl text-mist">
+            <span aria-hidden="true" className="flex size-20 shrink-0 items-center justify-center rounded-full border-2 border-white bg-[#d1ddeb] font-display text-2xl font-bold text-[#0b1e33] shadow-[0_4px_12px_rgba(0,0,0,0.05)]">
               {iniciales(usuario.nombre)}
-            </div>
+            </span>
           )}
-          <div>
-            <p className="font-body text-lg font-semibold">{dato(usuario.nombre)}</p>
-            <p className="mt-1 font-body text-sm text-ink/55">
-              {usuario.tipo_cuenta === "empresa" ? "Cuenta empresarial" : "Cuenta personal"} ·{" "}
-              {etiquetaVerificacion(usuario.estado_verificacion)}
+          <div className="min-w-0">
+            <p className="truncate font-body text-lg font-bold text-[#0b1e33]">{dato(usuario.nombre)}</p>
+            <p className="mt-1">
+              <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-[11px] font-bold ${verificado ? "bg-[#e9f3ee] text-[#1f6b4a]" : "bg-[#eef3fa] text-[#2e5a88]"}`}>
+                {etiquetaVerificacion(usuario.estado_verificacion)}
+              </span>
             </p>
           </div>
         </div>
-        <div id="contacto" className="scroll-mt-28">
-          <PerfilCuentaForm usuario={usuario} fotoUrlInicial={fotoUrl} />
+        <div className="flex flex-col gap-3">
+          <FilaDato etiqueta="Nombre" valor={dato(usuario.nombre)} />
+          <FilaDato etiqueta="Correo" valor={dato(usuario.correo_facturacion)} />
+          <FilaDato etiqueta="Teléfono" valor={dato(usuario.telefono)} />
+          <FilaDato
+            etiqueta="Cuenta"
+            valor={usuario.tipo_cuenta === "empresa" ? "Empresarial" : "Personal"}
+          />
         </div>
-        <div id="acceso" className="rounded-lg border border-ink/10 px-4 py-4 scroll-mt-28">
-          <p className="font-body text-sm font-semibold">Verificación de identidad</p>
-          <p className="mt-1 font-body text-sm text-ink/55">Estado actual: {etiquetaVerificacion(usuario.estado_verificacion)}.</p>
-          <div className="mt-4">
-            <Link href="/verificacion">
-              <Button variant="secondary">{usuario.doc_identidad_url ? "Actualizar identificación" : "Subir identificación"}</Button>
-            </Link>
-          </div>
+      </TarjetaSeccion>
+
+      <TarjetaSeccion
+        id="contacto"
+        icono="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7 M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5Z"
+        titulo="Contacto y dirección"
+      >
+        <PerfilCuentaForm usuario={usuario} fotoUrlInicial={fotoUrl} />
+      </TarjetaSeccion>
+
+      <TarjetaSeccion
+        id="acceso"
+        icono="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z M9 12l2 2 4-4"
+        titulo="Verificación de identidad"
+      >
+        <p className="font-body text-sm text-[#4d6079]">Estado actual: {etiquetaVerificacion(usuario.estado_verificacion)}.</p>
+        <div className="mt-4">
+          <Link href="/verificacion">
+            <Button variant="secondary">{usuario.doc_identidad_url ? "Actualizar identificación" : "Subir identificación"}</Button>
+          </Link>
         </div>
-        <div id="seguridad" className="rounded-lg border border-ink/10 px-4 py-4 scroll-mt-28">
-          <p className="font-body text-sm font-semibold">Contraseña</p>
-          <p className="mt-1 font-body text-sm text-ink/55">
-            Te enviaremos un enlace a tu correo para crear una nueva contraseña de forma segura.
-          </p>
-          <div className="mt-4">
-            <BotonResetPassword />
-          </div>
+      </TarjetaSeccion>
+
+      <TarjetaSeccion
+        id="seguridad"
+        icono="M3 11h18v11H3z M7 11V7a5 5 0 0 1 10 0v4"
+        titulo="Contraseña"
+      >
+        <p className="font-body text-sm text-[#4d6079]">
+          Te enviaremos un enlace a tu correo para crear una nueva contraseña de forma segura.
+        </p>
+        <div className="mt-4">
+          <BotonResetPassword />
         </div>
-      </div>
-    </Seccion>
+      </TarjetaSeccion>
+    </div>
   );
 }
 

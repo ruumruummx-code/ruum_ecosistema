@@ -82,6 +82,7 @@ function FilaEnlace({
   subtitulo,
   insignia,
   insigniaVerde = false,
+  conDivisor = true,
 }: {
   href: string;
   icono: string;
@@ -91,12 +92,16 @@ function FilaEnlace({
   subtitulo?: string;
   insignia?: string;
   insigniaVerde?: boolean;
+  conDivisor?: boolean;
 }) {
   return (
     <Link
       href={href}
       className="relative flex items-center gap-3.5 px-[18px] py-[15px] transition-colors active:bg-[#f8fbfe]"
     >
+      {conDivisor && (
+        <span aria-hidden="true" className="absolute left-[66px] right-[18px] top-0 h-px bg-[#f0f4fa]" />
+      )}
       <span aria-hidden="true" className={["flex size-10 shrink-0 items-center justify-center rounded-[13px]", ICONO_FONDO[tono]].join(" ")}>
         <Icono d={icono} />
       </span>
@@ -164,13 +169,17 @@ export function CuentaCliente({ usuario, fotoUrl = null, vehiculos = [], totalTr
   }
 
   return (
-    <div className="flex flex-col">
+    <div className="mx-auto flex w-full max-w-[430px] flex-col">
       <h1 className="pb-3 text-[26px] font-extrabold tracking-tight text-[#0b1e33]">Cuenta</h1>
 
-      {/* Héroe de perfil */}
+      {/* Héroe de perfil.
+          Nota: colores blancos como valores arbitrarios (text-[#fff],
+          rgba) y NO como text-white/* — el scope user-v2-secondary-screen
+          re-mapea [class*="text-white"] a azul oscuro y rompería el
+          contraste sobre el fondo oscuro. */}
       <section
         aria-label="Perfil"
-        className="relative mb-5 overflow-hidden rounded-[26px] p-6 text-white shadow-[0_16px_32px_-12px_rgba(11,30,51,0.4)]"
+        className="relative mb-5 overflow-hidden rounded-[26px] p-6 text-[#fff] shadow-[0_16px_32px_-12px_rgba(11,30,51,0.4)]"
         style={{ background: "linear-gradient(135deg, #0b1e33 0%, #162c47 100%)" }}
       >
         <span
@@ -185,24 +194,24 @@ export function CuentaCliente({ usuario, fotoUrl = null, vehiculos = [], totalTr
               alt={`Foto de perfil de ${nombreMostrar}`}
               width={72}
               height={72}
-              className="size-[72px] shrink-0 rounded-full border-[2.5px] border-white/25 object-cover"
+              className="size-[72px] shrink-0 rounded-full border-[2.5px] border-[rgba(255,255,255,0.25)] object-cover"
               unoptimized
             />
           ) : (
             <span
               aria-hidden="true"
-              className="flex size-[72px] shrink-0 items-center justify-center rounded-full border-[2.5px] border-white/25 bg-white/15 text-[30px] font-bold text-white"
+              className="flex size-[72px] shrink-0 items-center justify-center rounded-full border-[2.5px] border-[rgba(255,255,255,0.25)] bg-white/15 text-[30px] font-bold text-[#fff]"
             >
               {iniciales(usuario?.nombre)}
             </span>
           )}
           <div className="min-w-0">
             <h2 className="truncate text-[20px] font-extrabold tracking-tight">{nombreMostrar}</h2>
-            <p className="mt-1 flex items-center gap-1.5 truncate text-[13px] font-medium text-white/70">
+            <p className="mt-1 flex items-center gap-1.5 truncate text-[13px] font-medium text-[rgba(255,255,255,0.7)]">
               <Icono d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2Z M22 6 12 13 2 6" className="size-3 shrink-0" />
               <span className="truncate">{correoMostrar}</span>
             </p>
-            <p className="mt-1 flex items-center gap-1.5 text-[13px] font-medium text-white/70">
+            <p className="mt-1 flex items-center gap-1.5 text-[13px] font-medium text-[rgba(255,255,255,0.7)]">
               <Icono d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.79 19.79 0 0 1 2.12 4.18 2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92Z" className="size-3 shrink-0" />
               {telefonoMostrar}
             </p>
@@ -214,9 +223,9 @@ export function CuentaCliente({ usuario, fotoUrl = null, vehiculos = [], totalTr
             { valor: String(vehiculos.length), etiqueta: "Vehículos" },
             { valor: String(sinIncidencias), etiqueta: "Sin incidencias" },
           ].map(({ valor, etiqueta }) => (
-            <div key={etiqueta} className="flex-1 text-center first:border-l-0 border-l border-white/10">
+            <div key={etiqueta} className="flex-1 text-center first:border-l-0 border-l border-[rgba(255,255,255,0.12)]">
               <dd className="text-[18px] font-extrabold tracking-tight">{valor}</dd>
-              <dt className="mt-[3px] text-[10px] font-semibold uppercase tracking-[0.4px] text-white/60">{etiqueta}</dt>
+              <dt className="mt-[3px] text-[10px] font-semibold uppercase tracking-[0.4px] text-[rgba(255,255,255,0.6)]">{etiqueta}</dt>
             </div>
           ))}
         </dl>
@@ -272,6 +281,7 @@ export function CuentaCliente({ usuario, fotoUrl = null, vehiculos = [], totalTr
           icono="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7 M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5Z"
           titulo="Datos personales"
           subtitulo="Nombre, correo, teléfono, dirección"
+          conDivisor={false}
         />
         <FilaEnlace
           href="/cuenta/perfil#acceso"
@@ -298,6 +308,7 @@ export function CuentaCliente({ usuario, fotoUrl = null, vehiculos = [], totalTr
           icono="M2 5h20v14H2z M2 10h20"
           titulo="Métodos de pago"
           subtitulo={metodoSub}
+          conDivisor={false}
         />
         <FilaEnlace
           href="/cuenta/facturacion"
@@ -372,6 +383,7 @@ export function CuentaCliente({ usuario, fotoUrl = null, vehiculos = [], totalTr
           href="/legal/terminos"
           icono="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z M14 2v6h6"
           titulo="Términos y condiciones"
+          conDivisor={false}
         />
         <FilaEnlace
           href="/legal/privacidad"
@@ -379,6 +391,7 @@ export function CuentaCliente({ usuario, fotoUrl = null, vehiculos = [], totalTr
           titulo="Aviso de privacidad"
         />
         <div className="relative">
+          <span aria-hidden="true" className="absolute left-[66px] right-[18px] top-0 z-[1] h-px bg-[#f0f4fa]" />
           <button
             type="button"
             onClick={handleCerrarSesion}

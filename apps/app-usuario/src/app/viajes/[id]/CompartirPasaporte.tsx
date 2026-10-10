@@ -70,7 +70,7 @@ export function CompartirPasaporte({
     <button
       type="button"
       onClick={compartir}
-      className="flex min-h-[52px] flex-1 items-center justify-center gap-2 rounded-[16px] bg-[#0b1e33] px-4 text-[14px] font-bold text-white shadow-[0_8px_18px_-6px_rgba(11,30,51,0.3)] transition-transform active:scale-[0.98]"
+      className="flex min-h-[52px] flex-1 items-center justify-center gap-2 rounded-[16px] bg-[#0b1e33] px-4 text-[14px] font-bold text-[#fff] shadow-[0_8px_18px_-6px_rgba(11,30,51,0.3)] transition-transform active:scale-[0.98]"
     >
       <IconoCompartir />
       {estado === "copiado" ? "¡Enlace copiado!" : estado === "error" ? "Reintentar" : "Compartir"}
