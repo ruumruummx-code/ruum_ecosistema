@@ -19,7 +19,7 @@ describe("LoginCliente", () => {
     const user = userEvent.setup();
     render(<LoginCliente motivo={null} siguiente="/" />);
     const correo = screen.getByRole("textbox", { name: "Correo electrónico" });
-    await user.click(screen.getByRole("button", { name: "Entrar" }));
+    await user.click(screen.getByRole("button", { name: "Iniciar sesión" }));
     expect(correo).toHaveFocus();
     expect(correo).toHaveAttribute("aria-invalid", "true");
     expect(mocks.signIn).not.toHaveBeenCalled();
@@ -29,7 +29,7 @@ describe("LoginCliente", () => {
     await user.type(correo, "Persona@ejemplo.com");
     expect(correo).toHaveAttribute("aria-invalid", "false");
     await user.type(screen.getByLabelText(/^Contraseña/, { selector: "input" }), "clave-existente");
-    await user.click(screen.getByRole("button", { name: "Entrar" }));
+    await user.click(screen.getByRole("button", { name: "Iniciar sesión" }));
     await waitFor(() => expect(mocks.push).toHaveBeenCalledWith("/"));
     expect(mocks.signIn).toHaveBeenCalledWith({ email: "persona@ejemplo.com", password: "clave-existente" });
   });
@@ -52,7 +52,7 @@ describe("LoginCliente", () => {
     render(<LoginCliente motivo="authentication_required" siguiente="/viajes/nuevo" />);
     await user.type(screen.getByRole("textbox", { name: "Correo electrónico" }), "usuario@ejemplo.com");
     await user.type(screen.getByLabelText(/^Contraseña/, { selector: "input" }), "clave-existente");
-    await user.click(screen.getByRole("button", { name: "Entrar" }));
+    await user.click(screen.getByRole("button", { name: "Iniciar sesión" }));
     await waitFor(() => expect(mocks.push).toHaveBeenCalledWith("/viajes/nuevo"));
     expect(mocks.refresh).toHaveBeenCalled();
   });
