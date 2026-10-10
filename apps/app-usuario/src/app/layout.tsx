@@ -5,6 +5,7 @@ import { headers } from "next/headers";
 import { TextInputUppercaseBridge } from "@ruum/ui";
 import { TemaProvider } from "./TemaProvider";
 import { LiveRegionProvider } from "../components/LiveRegionProvider";
+import { PuertaConsentimiento } from "../components/PuertaConsentimiento";
 import { OperationalAccessibilityBridge } from "./OperationalAccessibilityBridge";
 import { AppStateProvider } from "../state/AppStateProvider";
 import "./globals.css";
@@ -68,6 +69,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           <TextInputUppercaseBridge />
           <TemaProvider>
             <AppStateProvider>
+              <PuertaConsentimiento />
               <div id="contenido-principal" tabIndex={-1} className="outline-none focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-[var(--user-color-action)]">
                 {children}
               </div>

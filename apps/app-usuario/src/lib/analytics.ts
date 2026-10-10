@@ -82,10 +82,14 @@ export function registrarEventoUx(evento: EventoUxUsuario, propiedades: Propieda
   window.dispatchEvent(new CustomEvent("ruum:ux", { detail: detalle }));
   window.dataLayer?.push({ event: `ruum_${evento}`, ...base });
 
-  // 3.1 forward a Sentry breadcrumb (no-op si no hay DSN)
+  // 3.1 forward a Sentry breadcrumb (no-op si no hay DSN).
+  // A3: antes leía window.Sentry, que no es un global del SDK (@sentry/nextjs
+  // v10 no lo expone): siempre era no-op aunque Sentry estuviera inicializado.
+  // Se usa el SDK directamente con import dinámico para no crecer el chunk inicial.
   try {
-    const w = window as unknown as { Sentry?: { addBreadcrumb?: (b: unknown) => void } };
-    w.Sentry?.addBreadcrumb?.({ category: "ux", message: evento, data: base, level: "info" });
+    void import("@sentry/nextjs")
+      .then((Sentry) => Sentry.addBreadcrumb?.({ category: "ux", message: evento, data: base, level: "info" }))
+      .catch(() => {});
   } catch {}
 }
 

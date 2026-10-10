@@ -1,75 +1,54 @@
 "use client";
-import { useCallback, useEffect, useMemo, useRef, useState, type SetStateAction } from "react";
+import { useCallback, useEffect, useMemo, useRef } from "react";
 import { useRouter } from "next/navigation";
 import * as Sentry from "@sentry/nextjs";
 import type { SupabaseClient } from "@supabase/supabase-js";
-import type { Database, TipoCuenta, TipoVehiculo, Usuario } from "@ruum/shared/types";
-import { determinarMomentoPago, calcularCargoCancelacion } from "@ruum/shared/rules";
+import type { Database } from "@ruum/shared/types";
 import { crearClienteNavegador, tieneSupabaseConfigurado } from "@/lib/supabase-browser";
 import {
   crearTraslado,
-  listarVehiculosDeUsuario,
-  obtenerUsuarioActual,
   previsualizarTarifaUsuario,
-  aceptarCotizacionUsuario,
-  verificarPagoAnticipadoCompletado,
-  type PrevisualizacionTarifa
 } from "@ruum/api/services";
 import { registrarEventoUx, iniciarFlujoTraslado, registrarPasoIniciado, registrarPasoCompletado, registrarAbandono } from "@/lib/analytics";
-import { consultarCodigoPostalMx, type DatosCodigoPostal } from "@/lib/codigos-postales";
 import {
   esErrorConfiguracionMapbox,
   mensajeErrorMapbox,
   sugerirDireccionesAutocomplete,
-  sugerirDireccionesPorCodigoPostal,
   tieneMapboxConfigurado
 } from "@/lib/mapbox";
-import {
-  clasificacionesPorVehiculo,
-  modelosPorMarca,
-  resumenClasificacionVehiculo,
-  tipoSugeridoParaVehiculo
-} from "@/lib/catalogo-vehiculos";
-import {
-  guardarBorradorTrasladoLocal,
-  leerBorradorTrasladoLocal,
-  limpiarBorradorTrasladoLocal,
-  type BorradorTrasladoLocal
-} from "@/lib/borrador-traslado";
+import { tipoSugeridoParaVehiculo } from "@/lib/catalogo-vehiculos";
+import { limpiarBorradorTrasladoLocal } from "@/lib/borrador-traslado";
 import { esquemaSolicitudTraslado, erroresFormulario } from "../schema";
 import { CAMPOS_PASO_TARIFA, codigoPostalCompleto, generarTarifaSnapshot, haCambiadoTarifa } from "../tarifa-gate";
 import { construirPayloadCreacion, type CoordenadasTraslado, type CoordenadasParada } from "../adapters";
 import { useGeocodificacion } from "./useGeocodificacion";
-import { useNuevoTrasladoState, useTrasladoRealtime } from "@/state/AppStateProvider";
-import type { NuevoTrasladoState, RutaEstimacion, TrasladoCreado } from "@/state/app-state";
+import { useAutocompleteDirecciones } from "./useAutocompleteDirecciones";
+import { useBorradorTraslado } from "./useBorradorTraslado";
+import { useCatalogosTraslado } from "./useCatalogosTraslado";
+import { useCodigoPostal } from "./useCodigoPostal";
+import { useCotizacionTraslado } from "./useCotizacionTraslado";
+import { usePagoTraslado } from "./usePagoTraslado";
+import { useSesionTraslado } from "./useSesionTraslado";
+import { useValidacionTraslado } from "./useValidacionTraslado";
+import { useSettersFormulario } from "./useSettersFormulario";
+import { useNuevoTrasladoState } from "@/state/AppStateProvider";
 import {
   CAMPOS_PASO_RUTA,
   CAMPOS_PASO_VEHICULO,
   CAMPOS_PASO_VEHICULO_DETALLE,
-  CAMPOS_PASO_VEHICULO_ESENCIAL,
   CAMPOS_RUTA_DESTINO_CONTACTOS,
   CAMPOS_RUTA_ORIGEN,
-  RETRASO_CONSULTA_CODIGO_POSTAL_MS,
-  RETRASO_GUARDADO_BORRADOR_MS,
   domicilioCompleto,
-  esCampoEsencialVehiculo,
   mensajeAmigableErrorCreacion,
   pasoDeCampo,
-  soloDigitos,
   telefonoLocalMx,
-  type PrefijoDomicilio,
-  type SubpasoRuta
+  type PrefijoDomicilio
 } from "../constants";
 import type {
   CondicionVehiculo,
   DatosFormulario,
   ErroresFormulario,
-  ModalidadProgramacion,
-  MotivoServicioTraslado,
   ParadaForm,
-  TipoRutaTraslado,
-  TipoServicioTraslado,
-  TransmisionVehiculo,
   VehiculoGuardado
 } from "../types";
 
@@ -121,88 +100,72 @@ export function useNuevoTraslado() {
   } = formulario;
 
   const estadoTrasladoId = trasladoCreado?.id ?? "nuevo";
+
   const {
-    pagoConfirmado,
+    setFormulario,
+    setEstadoGuardado,
+    setTiempoUltimoGuardado,
+    setPaso,
+    setDatos,
+    setEnviando,
+    setResultado,
+    setBloqueoVerificacion,
+    setUsuario,
+    setSesionReal,
+    setCargandoSesion,
+    setAceptaPoliticasPagoCancelacion,
+    setCpConsultando,
+    setCpAviso,
+    setCpOpciones,
+    setPlacesOpciones,
+    setSubpasoRuta,
+    setVehiculosGuardados,
+    setVehiculoSeleccionadoId,
+    setErrorPaso,
+    setErrores,
+    setDetallesVehiculoExpandido,
+    setOrigenBusqueda,
+    setDestinoBusqueda,
+    setOrigenSugerencias,
+    setDestinoSugerencias,
+    setBuscandoOrigen,
+    setBuscandoDestino,
+    setPrevisualizacion,
+    setPrevisualizando,
+    setTarifaPreviaAceptada,
+    setTarifaPreviaSnapshot,
+    setRutaEstimacion,
+    setRutaCalculando,
+    setRutaAviso,
+    setRutaReintento,
+    setBorradorDisponible,
+    setClaveIdempotencia,
+    setTrasladoCreado,
+    setReintentoAceptacion,
+  } = useSettersFormulario(setField);
+
+  const {
     cotizacionAceptada,
     aceptandoCotizacion,
     errorAceptacion,
-    actualizar: actualizarEstadoTraslado
-  } = useTrasladoRealtime(estadoTrasladoId);
+    setCotizacionAceptada,
+    setAceptandoCotizacion,
+    setErrorAceptacion,
+    reintentarAceptacion,
+  } = useCotizacionTraslado({
+    estadoTrasladoId,
+    trasladoCreado,
+    reintentoAceptacion,
+    setReintentoAceptacion,
+  });
 
-  const setFormulario = useCallback(<K extends keyof NuevoTrasladoState>(campo: K, valor: SetStateAction<NuevoTrasladoState[K]>) => setField(campo, valor), [setField]);
-  const setEstadoGuardado = useCallback((valor: SetStateAction<NuevoTrasladoState["estadoGuardado"]>) => setFormulario("estadoGuardado", valor), [setFormulario]);
-  const setTiempoUltimoGuardado = useCallback((valor: SetStateAction<string | null>) => setFormulario("tiempoUltimoGuardado", valor), [setFormulario]);
-
-  const setPaso = useCallback((valor: SetStateAction<number>) => setFormulario("paso", valor), [setFormulario]);
-  const setDatos = useCallback((valor: SetStateAction<DatosFormulario>) => setFormulario("datos", valor), [setFormulario]);
-  const setEnviando = useCallback((valor: SetStateAction<boolean>) => setFormulario("enviando", valor), [setFormulario]);
-  const setResultado = useCallback((valor: SetStateAction<{ ok: boolean; mensaje: string } | null>) => setFormulario("resultado", valor), [setFormulario]);
-  const setBloqueoVerificacion = useCallback((valor: SetStateAction<string | null>) => setFormulario("bloqueoVerificacion", valor), [setFormulario]);
-  const setUsuario = useCallback((valor: SetStateAction<Usuario>) => setFormulario("usuario", valor), [setFormulario]);
-  const setSesionReal = useCallback((valor: SetStateAction<boolean>) => setFormulario("sesionReal", valor), [setFormulario]);
-  const setCargandoSesion = useCallback((valor: SetStateAction<boolean>) => setFormulario("cargandoSesion", valor), [setFormulario]);
-  const setAceptaPoliticasPagoCancelacion = useCallback((valor: SetStateAction<boolean>) => setFormulario("aceptaPoliticasPagoCancelacion", valor), [setFormulario]);
-  const setCpConsultando = useCallback((valor: SetStateAction<PrefijoDomicilio | null>) => setFormulario("cpConsultando", valor), [setFormulario]);
-  const setCpAviso = useCallback((valor: SetStateAction<Record<PrefijoDomicilio, string | null>>) => setFormulario("cpAviso", valor), [setFormulario]);
-  const setCpOpciones = useCallback((valor: SetStateAction<Record<PrefijoDomicilio, DatosCodigoPostal | null>>) => setFormulario("cpOpciones", valor), [setFormulario]);
-  const setPlacesOpciones = useCallback((valor: SetStateAction<Record<PrefijoDomicilio, string[]>>) => setFormulario("placesOpciones", valor), [setFormulario]);
-  const setSubpasoRuta = useCallback((valor: SetStateAction<SubpasoRuta>) => setFormulario("subpasoRuta", valor), [setFormulario]);
-  const setVehiculosGuardados = useCallback((valor: SetStateAction<VehiculoGuardado[]>) => setFormulario("vehiculosGuardados", valor), [setFormulario]);
-  const setVehiculoSeleccionadoId = useCallback((valor: SetStateAction<string>) => setFormulario("vehiculoSeleccionadoId", valor), [setFormulario]);
-  const setErrorPaso = useCallback((valor: SetStateAction<string | null>) => setFormulario("errorPaso", valor), [setFormulario]);
-  const setErrores = useCallback((valor: SetStateAction<ErroresFormulario>) => setFormulario("errores", valor), [setFormulario]);
-  const setDetallesVehiculoExpandido = useCallback((valor: SetStateAction<boolean>) => setFormulario("detallesVehiculoExpandido", valor), [setFormulario]);
-  const setOrigenBusqueda = useCallback((valor: SetStateAction<string>) => setFormulario("origenBusqueda", valor), [setFormulario]);
-  const setDestinoBusqueda = useCallback((valor: SetStateAction<string>) => setFormulario("destinoBusqueda", valor), [setFormulario]);
-  const setOrigenSugerencias = useCallback((valor: SetStateAction<NuevoTrasladoState["origenSugerencias"]>) => setFormulario("origenSugerencias", valor), [setFormulario]);
-  const setDestinoSugerencias = useCallback((valor: SetStateAction<NuevoTrasladoState["destinoSugerencias"]>) => setFormulario("destinoSugerencias", valor), [setFormulario]);
-  const setBuscandoOrigen = useCallback((valor: SetStateAction<boolean>) => setFormulario("buscandoOrigen", valor), [setFormulario]);
-  const setBuscandoDestino = useCallback((valor: SetStateAction<boolean>) => setFormulario("buscandoDestino", valor), [setFormulario]);
-  const setPrevisualizacion = useCallback((valor: SetStateAction<PrevisualizacionTarifa | null>) => setFormulario("previsualizacion", valor), [setFormulario]);
-  const setPrevisualizando = useCallback((valor: SetStateAction<boolean>) => setFormulario("previsualizando", valor), [setFormulario]);
-  const setTarifaPreviaAceptada = useCallback((valor: SetStateAction<boolean>) => setFormulario("tarifaPreviaAceptada", valor), [setFormulario]);
-  const setTarifaPreviaSnapshot = useCallback((valor: SetStateAction<string | null>) => setFormulario("tarifaPreviaSnapshot", valor), [setFormulario]);
-  const setRutaEstimacion = useCallback((valor: SetStateAction<RutaEstimacion | null>) => setFormulario("rutaEstimacion", valor), [setFormulario]);
-  const setRutaCalculando = useCallback((valor: SetStateAction<boolean>) => setFormulario("rutaCalculando", valor), [setFormulario]);
-  const setRutaAviso = useCallback((valor: SetStateAction<string | null>) => setFormulario("rutaAviso", valor), [setFormulario]);
-  const setRutaReintento = useCallback((valor: SetStateAction<number>) => setFormulario("rutaReintento", valor), [setFormulario]);
-  const setBorradorDisponible = useCallback((valor: SetStateAction<BorradorTrasladoLocal | null>) => setFormulario("borradorDisponible", valor), [setFormulario]);
-  const setClaveIdempotencia = useCallback((valor: SetStateAction<string>) => setFormulario("claveIdempotencia", valor), [setFormulario]);
-  const setTrasladoCreado = useCallback((valor: SetStateAction<TrasladoCreado | null>) => setFormulario("trasladoCreado", valor), [setFormulario]);
-  const setCotizacionAceptada = useCallback((valor: boolean) => actualizarEstadoTraslado({ cotizacionAceptada: valor }), [actualizarEstadoTraslado]);
-  const setAceptandoCotizacion = useCallback((valor: boolean) => actualizarEstadoTraslado({ aceptandoCotizacion: valor }), [actualizarEstadoTraslado]);
-  const setErrorAceptacion = useCallback((valor: string | null) => actualizarEstadoTraslado({ errorAceptacion: valor }), [actualizarEstadoTraslado]);
-  const setPagoConfirmado = useCallback((valor: boolean) => actualizarEstadoTraslado({ pagoConfirmado: valor }), [actualizarEstadoTraslado]);
-  const setReintentoAceptacion = useCallback((valor: SetStateAction<number>) => setFormulario("reintentoAceptacion", valor), [setFormulario]);
-  const reintentarAceptacion = useCallback(() => setReintentoAceptacion((n) => n + 1), [setReintentoAceptacion]);
-
-  // Regla estricta del Paso 5: el callback de Stripe es optimista (llega con
-  // status succeeded|processing del cliente). El avance solo se marca cuando
-  // la base confirma un pago con estado = 'completado' (webhook procesado).
-  const [verificandoPago, setVerificandoPago] = useState(false);
-  const [errorVerificacionPago, setErrorVerificacionPago] = useState<string | null>(null);
-
-  const manejarPagoStripeConfirmado = useCallback(async () => {
-    if (!trasladoCreado || verificandoPago) return;
-    setVerificandoPago(true);
-    setErrorVerificacionPago(null);
-    try {
-      const cliente = crearClienteNavegador();
-      let confirmado = false;
-      for (let intento = 0; intento < 6 && !confirmado; intento++) {
-        if (intento > 0) await new Promise((resolver) => setTimeout(resolver, 2000));
-        confirmado = await verificarPagoAnticipadoCompletado(cliente, trasladoCreado.id);
-      }
-      if (!confirmado) {
-        throw new Error("Aún no vemos tu pago confirmado. Espera unos segundos y pulsa «Verificar pago».");
-      }
-      setPagoConfirmado(true);
-    } catch (err) {
-      setErrorVerificacionPago(err instanceof Error ? err.message : "No pudimos verificar tu pago. Intenta de nuevo.");
-    } finally {
-      setVerificandoPago(false);
-    }
-  }, [trasladoCreado, verificandoPago, setPagoConfirmado]);  // Analítica del gate de tarifa (Paso 0)
+  const {
+    pagoConfirmado,
+    setPagoConfirmado,
+    verificandoPago,
+    errorVerificacionPago,
+    manejarPagoStripeConfirmado,
+  } = usePagoTraslado({ estadoTrasladoId, trasladoCreado });  // Analítica del gate de tarifa (Paso 0)
   const tarifaGateVistaRegistrada = useRef(false);
   const tarifaGateCalculadaRegistrada = useRef(false);
   const tarifaGateNoDisponibleRegistrada = useRef(false);
@@ -215,7 +178,6 @@ export function useNuevoTraslado() {
 
   // Borrador local no sensible
 
-  const trasladoAceptacionIntentado = useRef<string | null>(null);
   const seqGeocodificaRef = useRef(0);
   const abortGeocodificaRef = useRef<AbortController | null>(null);
   // 1.4 Debounce dinámico — inmediato si onBlur, 650ms si typing
@@ -223,24 +185,12 @@ export function useNuevoTraslado() {
   const solicitarGeocodificacionInmediata = useCallback(() => {
     geocodificacionInmediataRef.current = true;
   }, []);
-  const seqCodigoPostalRef = useRef<Record<PrefijoDomicilio, number>>({ origen: 0, destino: 0 });
-  const codigoPostalTimersRef = useRef<Record<PrefijoDomicilio, ReturnType<typeof setTimeout> | null>>({ origen: null, destino: null });
-  const codigoPostalAbortRef = useRef<Record<PrefijoDomicilio, AbortController | null>>({ origen: null, destino: null });
-  const codigoPostalSolicitadoRef = useRef<Record<PrefijoDomicilio, string>>({ origen: "", destino: "" });
   const datosRef = useRef(datos);
   datosRef.current = datos;
   const erroresRef = useRef(errores);
   erroresRef.current = errores;
   const tarifaPreviaSnapshotRef = useRef(tarifaPreviaSnapshot);
   tarifaPreviaSnapshotRef.current = tarifaPreviaSnapshot;
-
-  useEffect(() => () => {
-    (Object.keys(codigoPostalTimersRef.current) as PrefijoDomicilio[]).forEach((prefijo) => {
-      const timer = codigoPostalTimersRef.current[prefijo];
-      if (timer) clearTimeout(timer);
-      codigoPostalAbortRef.current[prefijo]?.abort();
-    });
-  }, []);
 
   // El provider vive en el layout para que el estado sea único. El wizard se
   // reinicia al entrar para no reutilizar un envío anterior de la misma sesión.
@@ -249,26 +199,14 @@ export function useNuevoTraslado() {
   }, [reset]);
 
   // Modelos y catálogo
-  const modelosDisponibles = useMemo(() => modelosPorMarca(datos.marca), [datos.marca]);
-  const clasificacionCatalogo = useMemo(
-    () => resumenClasificacionVehiculo(datos.marca, datos.modelo),
-    [datos.marca, datos.modelo]
-  );
-  const clasificacionesCatalogo = useMemo(
-    () => clasificacionesPorVehiculo(datos.marca, datos.modelo),
-    [datos.marca, datos.modelo]
-  );
-  const categoriaCatalogo = useMemo(() => {
-    const valores = [...new Set(clasificacionesCatalogo.map((vehiculo) => vehiculo.categoria))];
-    return valores.length ? valores.join(" / ") : "Pendiente";
-  }, [clasificacionesCatalogo]);
-  const gamaCatalogo = useMemo(() => {
-    const valores = [...new Set(clasificacionesCatalogo.map((vehiculo) => vehiculo.gama))];
-    return valores.length ? valores.join(" / ") : "Pendiente";
-  }, [clasificacionesCatalogo]);
-
-  const momentoPago = useMemo(() => determinarMomentoPago(usuario), [usuario]);
-  const politicaCancelacion = useMemo(() => calcularCargoCancelacion(0, 0, false, false), []);
+  const {
+    modelosDisponibles,
+    clasificacionCatalogo,
+    categoriaCatalogo,
+    gamaCatalogo,
+    momentoPago,
+    politicaCancelacion,
+  } = useCatalogosTraslado({ marca: datos.marca, modelo: datos.modelo, usuario });
   const cpTarifaListo = useMemo(
     () => codigoPostalCompleto(datos.origenCodigoPostal) && codigoPostalCompleto(datos.destinoCodigoPostal),
     [datos.destinoCodigoPostal, datos.origenCodigoPostal]
@@ -321,104 +259,6 @@ export function useNuevoTraslado() {
       }
     };
   }, []);
-
-  // Toda solicitud nueva con tarifa se confirma automáticamente para habilitar
-  // el pago Stripe en el último paso del wizard.
-  useEffect(() => {
-    if (!trasladoCreado) return;
-    if (trasladoCreado.precioCotizado == null) return;
-    if (trasladoAceptacionIntentado.current === trasladoCreado.id) return;
-    trasladoAceptacionIntentado.current = trasladoCreado.id;
-
-    setAceptandoCotizacion(true);
-    setErrorAceptacion(null);
-    (async () => {
-      try {
-        const cliente = crearClienteNavegador();
-        await aceptarCotizacionUsuario(cliente, trasladoCreado.id);
-        setCotizacionAceptada(true);
-      } catch (err) {
-        trasladoAceptacionIntentado.current = null; // permite reintentar
-        setErrorAceptacion(err instanceof Error ? err.message : "No se pudo confirmar la tarifa para iniciar el pago.");
-      } finally {
-        setAceptandoCotizacion(false);
-      }
-    })();
-  }, [reintentoAceptacion, setAceptandoCotizacion, setCotizacionAceptada, setErrorAceptacion, trasladoCreado]);
-
-  // Borrador: lectura al montar
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      const borrador = leerBorradorTrasladoLocal();
-      setBorradorDisponible(borrador);
-      setClaveIdempotencia(borrador?.claveIdempotencia ?? crypto.randomUUID());
-    }, 0);
-    return () => clearTimeout(timer);
-  }, [setBorradorDisponible, setClaveIdempotencia]);
-
-  // Borrador: guardado con debounce
-  useEffect(() => {
-    if (enviando || resultado) return;
-    const hayContenido = [datos.marca, datos.modelo, datos.origenCodigoPostal, datos.destinoCodigoPostal, datos.entregaNombre].some(
-      (v) => v.trim()
-    );
-    if (!hayContenido) return;
-
-    setEstadoGuardado("guardando");
-
-    const timer = setTimeout(() => {
-      guardarBorradorTrasladoLocal({
-        claveIdempotencia,
-        paso,
-        tipo: datos.tipo,
-        transmision: datos.transmision,
-        marca: datos.marca,
-        modelo: datos.modelo,
-        anio: datos.anio,
-        color: datos.color,
-        condicion: datos.condicion,
-        estadoGeneral: datos.estadoGeneral,
-        tieneTarjeta: datos.tieneTarjeta,
-        tieneVerificacion: datos.tieneVerificacion,
-        tienePlacas: datos.tienePlacas,
-        puedeCircular: datos.puedeCircular,
-        origenCodigoPostal: datos.origenCodigoPostal,
-        origenEstado: datos.origenEstado,
-        origenCiudad: datos.origenCiudad,
-        origenColonia: datos.origenColonia,
-        destinoCodigoPostal: datos.destinoCodigoPostal,
-        destinoEstado: datos.destinoEstado,
-        destinoCiudad: datos.destinoCiudad,
-        destinoColonia: datos.destinoColonia,
-        entregaNombre: datos.entregaNombre,
-        entregaApellido: datos.entregaApellido,
-        recepcionNombre: datos.recepcionNombre,
-        recepcionApellido: datos.recepcionApellido,
-        modalidadProgramacion: datos.modalidadProgramacion,
-        fechaHoraProgramada: datos.fechaHoraProgramada,
-        tipoRuta: datos.tipoRuta,
-        ventanaRecoleccion: datos.ventanaRecoleccion,
-        ventanaEntrega: datos.ventanaEntrega,
-        tipoServicio: datos.tipoServicio,
-        motivoServicio: datos.motivoServicio
-      });
-      setEstadoGuardado("guardado");
-      setTiempoUltimoGuardado(new Date().toISOString());
-    }, RETRASO_GUARDADO_BORRADOR_MS);
-
-    return () => clearTimeout(timer);
-  }, [
-    enviando, resultado, paso, claveIdempotencia,
-    datos.tipo, datos.transmision, datos.marca, datos.modelo, datos.anio, datos.color, datos.condicion, datos.estadoGeneral,
-    datos.tieneTarjeta, datos.tieneVerificacion, datos.tienePlacas, datos.puedeCircular,
-    datos.origenCodigoPostal, datos.origenEstado, datos.origenCiudad, datos.origenColonia,
-    datos.destinoCodigoPostal, datos.destinoEstado, datos.destinoCiudad, datos.destinoColonia,
-    datos.entregaNombre, datos.entregaApellido, datos.recepcionNombre, datos.recepcionApellido,
-    datos.modalidadProgramacion, datos.fechaHoraProgramada, datos.tipoRuta,
-    datos.ventanaRecoleccion, datos.ventanaEntrega, datos.tipoServicio, datos.motivoServicio,
-    setEstadoGuardado, setTiempoUltimoGuardado
-  ]);
-
 
   // Geocodificación y cálculo de ruta Mapbox con debounce y AbortController
   useEffect(() => {
@@ -602,91 +442,16 @@ export function useNuevoTraslado() {
     cpTarifaListo, rutaAviso, rutaCalculando, setPrevisualizacion, setPrevisualizando
   ]);
 
-  // Buscador autocomplete Mapbox
-  useEffect(() => {
-    if (origenBusqueda.trim().length < 3) {
-      setOrigenSugerencias([]);
-      return;
-    }
-    let cancelado = false;
-    const t = setTimeout(async () => {
-      setBuscandoOrigen(true);
-      try {
-        const res = await sugerirDireccionesAutocomplete(origenBusqueda);
-        if (!cancelado) setOrigenSugerencias(res);
-      } finally {
-        if (!cancelado) setBuscandoOrigen(false);
-      }
-    }, 350);
-    return () => { cancelado = true; clearTimeout(t); };
-  }, [origenBusqueda, setBuscandoOrigen, setOrigenSugerencias]);
-
-  useEffect(() => {
-    if (destinoBusqueda.trim().length < 3) {
-      setDestinoSugerencias([]);
-      return;
-    }
-    let cancelado = false;
-    const t = setTimeout(async () => {
-      setBuscandoDestino(true);
-      try {
-        const res = await sugerirDireccionesAutocomplete(destinoBusqueda);
-        if (!cancelado) setDestinoSugerencias(res);
-      } finally {
-        if (!cancelado) setBuscandoDestino(false);
-      }
-    }, 350);
-    return () => { cancelado = true; clearTimeout(t); };
-  }, [destinoBusqueda, setBuscandoDestino, setDestinoSugerencias]);
-
   // Carga de sesión de usuario y vehículos
-  useEffect(() => {
-    async function cargarUsuario() {
-      if (!tieneSupabaseConfigurado()) {
-        setCargandoSesion(false);
-        return;
-      }
-      try {
-        const cliente = crearClienteNavegador();
-        const real = await obtenerUsuarioActual(cliente);
-        if (!real) {
-          registrarEventoUx("traslado_nuevo_sin_sesion", { origen: "carga" });
-          router.replace("/login?next=/viajes/nuevo&reason=authentication_required");
-          return;
-        }
-        if (real) {
-          if (real.estado_verificacion !== "verificado") {
-            setBloqueoVerificacion(
-              real.estado_verificacion === "en_revision"
-                ? "Tu cuenta está en revisión. Podrás solicitar traslados cuando el equipo apruebe tu documentación."
-                : "Necesitamos verificar tu cuenta antes de que solicites un traslado."
-            );
-            return;
-          }
-          setUsuario({
-            id: real.id,
-            tipo_cuenta: real.tipo_cuenta as TipoCuenta,
-            rol: real.rol,
-            ...(real.empresa_id ? { empresa_id: real.empresa_id } : {}),
-            estado_verificacion: real.estado_verificacion,
-            traslados_completados_sin_incidencia: real.traslados_completados_sin_incidencia,
-            metodo_pago_registrado: real.metodo_pago_registrado,
-            creado_en: real.creado_en
-          });
-          setSesionReal(true);
-          setVehiculosGuardados(await listarVehiculosDeUsuario(cliente, real.id));
-        }
-      } catch (err) {
-        setResultado({
-          ok: false,
-          mensaje: err instanceof Error ? err.message : "No pudimos validar tu sesión. Intenta iniciar sesión de nuevo."
-        });
-      } finally {
-        setCargandoSesion(false);
-      }
-    }
-    cargarUsuario();
-  }, [router, setBloqueoVerificacion, setCargandoSesion, setResultado, setSesionReal, setUsuario, setVehiculosGuardados]);
+  useSesionTraslado({
+    router,
+    setBloqueoVerificacion,
+    setCargandoSesion,
+    setResultado,
+    setSesionReal,
+    setUsuario,
+    setVehiculosGuardados,
+  });
 
   // Métodos de formulario
   const actualizar = useCallback(<K extends keyof DatosFormulario>(campo: K, valor: DatosFormulario[K]) => {
@@ -720,6 +485,53 @@ export function useNuevoTraslado() {
     setDatos((prev) => ({ ...prev, [campo]: valor }));
   }, [setDatos, setErrorPaso, setErrores, setTarifaPreviaAceptada]);
 
+  const { consultarCodigoPostal, actualizarCodigoPostal } = useCodigoPostal({
+    actualizar,
+    datosRef,
+    setDatos,
+    setCpConsultando,
+    setCpAviso,
+    setCpOpciones,
+    setPlacesOpciones,
+  });
+
+  const { restaurarBorrador, descartarBorrador } = useBorradorTraslado({
+    datos,
+    paso,
+    claveIdempotencia,
+    enviando,
+    resultado,
+    borradorDisponible,
+    consultarCodigoPostal,
+    setDatos,
+    setPaso,
+    setTarifaPreviaAceptada,
+    setTarifaPreviaSnapshot,
+    setErrorPaso,
+    setClaveIdempotencia,
+    setBorradorDisponible,
+    setEstadoGuardado,
+    setTiempoUltimoGuardado,
+  });
+
+  const { aplicarSugerenciaCp, aplicarSugerenciaDireccion } = useAutocompleteDirecciones({
+    origenBusqueda,
+    destinoBusqueda,
+    pasoRef,
+    tarifaPreviaSnapshotRef,
+    datosRef,
+    consultarCodigoPostal,
+    setDatos,
+    setErrorPaso,
+    setTarifaPreviaAceptada,
+    setOrigenBusqueda,
+    setDestinoBusqueda,
+    setOrigenSugerencias,
+    setDestinoSugerencias,
+    setBuscandoOrigen,
+    setBuscandoDestino,
+  });
+
   const actualizarTelefono = useCallback((campo: "entregaTelefono" | "recepcionTelefono", valor: string) => {
     actualizar(campo, telefonoLocalMx(valor));
   }, [actualizar]);
@@ -736,116 +548,6 @@ export function useNuevoTraslado() {
     if (tipoSugerido) actualizar("tipo", tipoSugerido);
   }, [actualizar]);
 
-  const limpiarConsultaCodigoPostal = useCallback((prefijo: PrefijoDomicilio) => {
-    const timer = codigoPostalTimersRef.current[prefijo];
-    if (timer) clearTimeout(timer);
-    codigoPostalTimersRef.current[prefijo] = null;
-    codigoPostalAbortRef.current[prefijo]?.abort();
-    codigoPostalAbortRef.current[prefijo] = null;
-    codigoPostalSolicitadoRef.current[prefijo] = "";
-    ++seqCodigoPostalRef.current[prefijo];
-    setCpConsultando((actual) => actual === prefijo ? null : actual);
-    setCpAviso((prev) => prev[prefijo] === null ? prev : { ...prev, [prefijo]: null });
-    setCpOpciones((prev) => prev[prefijo] === null ? prev : { ...prev, [prefijo]: null });
-    setPlacesOpciones((prev) => prev[prefijo].length === 0 ? prev : { ...prev, [prefijo]: [] });
-  }, [setCpAviso, setCpConsultando, setCpOpciones, setPlacesOpciones]);
-
-  const ejecutarConsultaCodigoPostal = useCallback(async (prefijo: PrefijoDomicilio, cp: string, secuencia: number) => {
-    const vigente = () => seqCodigoPostalRef.current[prefijo] === secuencia;
-    if (!vigente()) return;
-
-    const controller = new AbortController();
-    codigoPostalAbortRef.current[prefijo] = controller;
-    let avisoMapbox: string | null = null;
-    try {
-      const sugerenciasMapboxPromise = sugerirDireccionesPorCodigoPostal(cp, controller.signal).catch(() => {
-        // Mapbox es complementario: un fallo externo no invalida el catálogo
-        // postal local ni debe presentarse como CP inexistente.
-        avisoMapbox = "No pudimos cargar referencias de Mapbox. Puedes continuar con el catálogo postal local.";
-        return [] as string[];
-      });
-      const [sugerenciasMapbox, datosCp] = await Promise.all([
-        sugerenciasMapboxPromise,
-        consultarCodigoPostalMx(cp)
-      ]);
-      if (!vigente()) return;
-      setPlacesOpciones((prev) => ({ ...prev, [prefijo]: sugerenciasMapbox }));
-      if (!datosCp) {
-        setCpAviso((prev) => ({
-          ...prev,
-          [prefijo]: "No pudimos encontrar ese CP. Captura estado, ciudad y colonia manualmente."
-        }));
-        setCpOpciones((prev) => ({ ...prev, [prefijo]: null }));
-        return;
-      }
-      const ciudad = datosCp.ciudades[0] ?? datosCp.colonias[0] ?? "";
-      const colonia = datosCp.colonias[0] ?? ciudad;
-
-      setDatos((prev) => ({
-        ...prev,
-        [`${prefijo}Estado`]: datosCp.estado || prev[`${prefijo}Estado` as keyof DatosFormulario],
-        [`${prefijo}Ciudad`]: ciudad || prev[`${prefijo}Ciudad` as keyof DatosFormulario],
-        [`${prefijo}Colonia`]: colonia || prev[`${prefijo}Colonia` as keyof DatosFormulario]
-      }));
-      setCpOpciones((prev) => ({ ...prev, [prefijo]: datosCp }));
-      if (avisoMapbox) setCpAviso((prev) => ({ ...prev, [prefijo]: avisoMapbox }));
-    } catch {
-      if (vigente()) {
-        setCpAviso((prev) => ({
-          ...prev,
-          [prefijo]: "No pudimos encontrar ese CP. Captura estado, ciudad y colonia manualmente."
-        }));
-      }
-    } finally {
-      if (codigoPostalAbortRef.current[prefijo] === controller) codigoPostalAbortRef.current[prefijo] = null;
-      if (vigente()) setCpConsultando(null);
-    }
-  }, [setCpAviso, setCpConsultando, setCpOpciones, setDatos, setPlacesOpciones]);
-
-  const programarConsultaCodigoPostal = useCallback((prefijo: PrefijoDomicilio, cp: string) => {
-    if (codigoPostalSolicitadoRef.current[prefijo] === cp) return;
-    const timerAnterior = codigoPostalTimersRef.current[prefijo];
-    if (timerAnterior) clearTimeout(timerAnterior);
-    codigoPostalAbortRef.current[prefijo]?.abort();
-    codigoPostalAbortRef.current[prefijo] = null;
-
-    const secuencia = ++seqCodigoPostalRef.current[prefijo];
-    codigoPostalSolicitadoRef.current[prefijo] = cp;
-    setCpConsultando(prefijo);
-    setCpAviso((prev) => prev[prefijo] === null ? prev : { ...prev, [prefijo]: null });
-    setCpOpciones((prev) => prev[prefijo] === null ? prev : { ...prev, [prefijo]: null });
-    setPlacesOpciones((prev) => prev[prefijo].length === 0 ? prev : { ...prev, [prefijo]: [] });
-    const timer = setTimeout(() => {
-      codigoPostalTimersRef.current[prefijo] = null;
-      void ejecutarConsultaCodigoPostal(prefijo, cp, secuencia);
-    }, RETRASO_CONSULTA_CODIGO_POSTAL_MS);
-    codigoPostalTimersRef.current[prefijo] = timer;
-  }, [ejecutarConsultaCodigoPostal, setCpAviso, setCpConsultando, setCpOpciones, setPlacesOpciones]);
-
-  const consultarCodigoPostal = useCallback((prefijo: PrefijoDomicilio, codigoPostal: string): Promise<void> => {
-    const cp = soloDigitos(codigoPostal, 5);
-    const campo = `${prefijo}CodigoPostal` as keyof DatosFormulario;
-    if (datosRef.current[campo] !== cp) actualizar(campo, cp as never);
-    if (cp.length !== 5) limpiarConsultaCodigoPostal(prefijo);
-    else programarConsultaCodigoPostal(prefijo, cp);
-    return Promise.resolve();
-  }, [actualizar, limpiarConsultaCodigoPostal, programarConsultaCodigoPostal]);
-
-  const actualizarCodigoPostal = useCallback((prefijo: PrefijoDomicilio, valor: string) => {
-    const cp = soloDigitos(valor, 5);
-    actualizar(`${prefijo}CodigoPostal` as keyof DatosFormulario, cp as never);
-    if (cp.length === 5) programarConsultaCodigoPostal(prefijo, cp);
-    else limpiarConsultaCodigoPostal(prefijo);
-  }, [actualizar, limpiarConsultaCodigoPostal, programarConsultaCodigoPostal]);
-
-  const aplicarSugerenciaCp = useCallback((prefijo: PrefijoDomicilio, ciudad: string, colonia: string) => {
-    setDatos((prev) => ({
-      ...prev,
-      [`${prefijo}Ciudad`]: ciudad,
-      [`${prefijo}Colonia`]: colonia
-    }));
-  }, [setDatos]);
-
   const actualizarParadas = useCallback((paradas: ParadaForm[]) => {
     setErrorPaso(null);
     setDatos((prev) => ({ ...prev, paradas }));
@@ -854,32 +556,6 @@ export function useNuevoTraslado() {
   const reintentarRuta = useCallback(() => {
     setRutaReintento((valor) => valor + 1);
   }, [setRutaReintento]);
-
-  const aplicarSugerenciaDireccion = useCallback((prefijo: PrefijoDomicilio, s: Awaited<ReturnType<typeof sugerirDireccionesAutocomplete>>[number]) => {
-    const calleExtraida = s.direccion || s.textoCompleto.split(",")[0] || "";
-
-    if (pasoRef.current > 0 && tarifaPreviaSnapshotRef.current && s.codigoPostal) {
-      const campoCp = `${prefijo}CodigoPostal` as keyof DatosFormulario;
-      const datosNuevos = { ...datosRef.current, [campoCp]: s.codigoPostal };
-      if (haCambiadoTarifa(tarifaPreviaSnapshotRef.current, datosNuevos)) {
-        setTarifaPreviaAceptada(false);
-        setErrorPaso("Tu tarifa puede haber cambiado. Confírmala antes de continuar.");
-      }
-    }
-
-    setDatos((prev) => ({
-      ...prev,
-      [`${prefijo}Calle`]: calleExtraida || prev[`${prefijo}Calle` as keyof DatosFormulario] as string,
-      [`${prefijo}Colonia`]: s.colonia || prev[`${prefijo}Colonia` as keyof DatosFormulario] as string,
-      [`${prefijo}Ciudad`]: s.ciudad || prev[`${prefijo}Ciudad` as keyof DatosFormulario] as string,
-      [`${prefijo}Estado`]: s.estado || prev[`${prefijo}Estado` as keyof DatosFormulario] as string,
-      [`${prefijo}CodigoPostal`]: s.codigoPostal || prev[`${prefijo}CodigoPostal` as keyof DatosFormulario] as string,
-      ...(prefijo === "origen" && s.lat && s.lng ? { origenLat: s.lat, origenLng: s.lng } : {}),
-    }));
-    if (prefijo === "origen") { setOrigenBusqueda(s.textoCompleto); setOrigenSugerencias([]); }
-    else { setDestinoBusqueda(s.textoCompleto); setDestinoSugerencias([]); }
-    if (s.codigoPostal && s.codigoPostal.length === 5) void consultarCodigoPostal(prefijo, s.codigoPostal);
-  }, [consultarCodigoPostal, setDestinoBusqueda, setDestinoSugerencias, setErrorPaso, setOrigenBusqueda, setOrigenSugerencias, setDatos, setTarifaPreviaAceptada]);
 
   const aplicarVehiculoGuardado = useCallback((vehiculo: VehiculoGuardado) => {
     const transmisionGuardada =
@@ -928,182 +604,29 @@ export function useNuevoTraslado() {
     erroresRef.current[campo] ? "border-danger" : "border-ink/50"
   ), []);
 
-  const enfocarPrimerError = useCallback((campos: string[]) => {
-    if (campos.length === 0) return;
-    const primer = campos[0]!;
-    setTimeout(() => {
-      const candidato =
-        document.getElementById(primer) ??
-        (document.querySelector(`[name="${primer}"]`) as HTMLElement | null) ??
-        (document.querySelector(`[data-ruum-label]`) as HTMLElement | null) ??
-        (document.querySelector('[aria-invalid="true"]') as HTMLElement | null);
-      if (candidato) {
-        candidato.focus();
-        candidato.scrollIntoView({ behavior: "smooth", block: "center" });
-      }
-    }, 60);
-  }, []);
-
-  const datosParaValidacion = useCallback(() => {
-    return {
-      ...datos,
-      vehiculoSeleccionadoId,
-      vehiculosUsuarioIds: vehiculosGuardados.map((v) => v.id),
-      aceptaPoliticas: aceptaPoliticasPagoCancelacion,
-      zonaHoraria: Intl.DateTimeFormat().resolvedOptions().timeZone
-    };
-  }, [aceptaPoliticasPagoCancelacion, datos, vehiculoSeleccionadoId, vehiculosGuardados]);
-
-  const erroresParadas = useMemo(() => {
-    const res = esquemaSolicitudTraslado.safeParse(datosParaValidacion());
-    if (res.success) return undefined;
-    const byIdx: Array<Partial<Record<keyof ParadaForm, string>>> = [];
-    for (const issue of res.error.issues) {
-      if (issue.path[0] === "paradas" && typeof issue.path[1] === "number") {
-        const idx = issue.path[1] as number;
-        const field = String(issue.path[2] ?? "calle") as keyof ParadaForm;
-        byIdx[idx] = { ...byIdx[idx], [field]: issue.message };
-      }
-    }
-    return byIdx.length ? byIdx : undefined;
-  }, [datosParaValidacion]);
-
-  const validarCampo = useCallback((campo: keyof DatosFormulario) => {
-    const res = esquemaSolicitudTraslado.safeParse(datosParaValidacion());
-    if (!res.success) {
-      const map = erroresFormulario(res) as ErroresFormulario;
-      if (map[campo]) {
-        setErrores((prev) => ({ ...prev, [campo]: map[campo] }));
-      } else {
-        setErrores((prev) => {
-          if (!prev[campo]) return prev;
-          const n = { ...prev };
-          delete n[campo];
-          return n;
-        });
-      }
-    } else {
-      setErrores((prev) => {
-        if (!prev[campo]) return prev;
-        const n = { ...prev };
-        delete n[campo];
-        return n;
-      });
-    }
-  }, [datosParaValidacion, setErrores]);
-
-  const validarPasoActual = useCallback(() => {
-    if (paso > 0 && paso < 3 && !tarifaPreviaAceptada) {
-      setErrorPaso("Tu tarifa cambió o requiere confirmación. Por favor revísala en el paso inicial.");
-      setPaso(0);
-      return false;
-    }
-
-    const todos = erroresFormulario(esquemaSolicitudTraslado.safeParse(datosParaValidacion()));
-    const siguientesErrores = Object.fromEntries(
-      Object.entries(todos).filter(([campo]) => {
-        if (paso === 0) return CAMPOS_PASO_TARIFA.has(campo as keyof DatosFormulario);
-        if (paso === 1) return CAMPOS_PASO_VEHICULO.has(campo as string) || campo === "vehiculoSeleccionadoId";
-        if (paso === 2) return CAMPOS_PASO_RUTA.has(campo) || campo === "paradas";
-        return pasoDeCampo(campo) === paso;
-      })
-    ) as ErroresFormulario;
-
-    const totalErrores = Object.keys(siguientesErrores).length;
-    setErrores(siguientesErrores);
-
-    if (totalErrores) {
-      const esDetalleVehiculo = paso === 1 && Object.keys(siguientesErrores).some((c) => CAMPOS_PASO_VEHICULO_DETALLE.has(c));
-      if (esDetalleVehiculo) setDetallesVehiculoExpandido(true);
-      setErrorPaso(`${totalErrores} ${totalErrores === 1 ? "campo por completar" : "campos por completar"}. Revisa los campos marcados${paso === 1 ? " — color, placas, VIN y documentación son obligatorios" : ""}.`);
-      if (paso === 2) {
-        const primerCampo = Object.keys(siguientesErrores)[0]!;
-        if (CAMPOS_RUTA_ORIGEN.has(primerCampo)) setSubpasoRuta("origen");
-        else if (CAMPOS_RUTA_DESTINO_CONTACTOS.has(primerCampo)) setSubpasoRuta("destino_contactos");
-      }
-      enfocarPrimerError(Object.keys(siguientesErrores));
-    } else {
-      setErrorPaso(null);
-    }
-    return totalErrores === 0;
-  }, [datosParaValidacion, enfocarPrimerError, paso, setDetallesVehiculoExpandido, setErrorPaso, setErrores, setPaso, setSubpasoRuta, tarifaPreviaAceptada]);
-
-  function restaurarBorrador() {
-    const borrador = borradorDisponible;
-    if (!borrador) return;
-
-    let fechaRestaurada = borrador.fechaHoraProgramada;
-    let modalidadRestaurada = (borrador.modalidadProgramacion || datos.modalidadProgramacion) as ModalidadProgramacion;
-
-    if (fechaRestaurada && new Date(fechaRestaurada).getTime() <= Date.now()) {
-      fechaRestaurada = "";
-      modalidadRestaurada = "lo_antes_posible";
-      setErrorPaso("La fecha programada en tu borrador ya pasó. Se restableció a 'Lo antes posible'.");
-    }
-
-    setDatos((prev) => ({
-      ...prev,
-      tipo: (borrador.tipo || prev.tipo) as TipoVehiculo,
-      transmision: (borrador.transmision || prev.transmision) as TransmisionVehiculo,
-      marca: borrador.marca,
-      modelo: borrador.modelo,
-      anio: borrador.anio,
-      color: borrador.color,
-      condicion: (borrador.condicion || prev.condicion) as CondicionVehiculo | "",
-      estadoGeneral: borrador.estadoGeneral,
-      tieneTarjeta: borrador.tieneTarjeta,
-      tieneVerificacion: borrador.tieneVerificacion,
-      tienePlacas: borrador.tienePlacas,
-      puedeCircular: borrador.puedeCircular,
-      origenCodigoPostal: borrador.origenCodigoPostal,
-      origenEstado: borrador.origenEstado,
-      origenCiudad: borrador.origenCiudad,
-      origenColonia: borrador.origenColonia,
-      destinoCodigoPostal: borrador.destinoCodigoPostal,
-      destinoEstado: borrador.destinoEstado,
-      destinoCiudad: borrador.destinoCiudad,
-      destinoColonia: borrador.destinoColonia,
-      entregaNombre: borrador.entregaNombre,
-      entregaApellido: borrador.entregaApellido,
-      recepcionNombre: borrador.recepcionNombre,
-      recepcionApellido: borrador.recepcionApellido,
-      modalidadProgramacion: modalidadRestaurada,
-      fechaHoraProgramada: fechaRestaurada,
-      tipoRuta: (borrador.tipoRuta || prev.tipoRuta) as TipoRutaTraslado,
-      ventanaRecoleccion: borrador.ventanaRecoleccion,
-      ventanaEntrega: borrador.ventanaEntrega,
-      tipoServicio: (borrador.tipoServicio || prev.tipoServicio) as TipoServicioTraslado,
-      motivoServicio: (borrador.motivoServicio || prev.motivoServicio) as MotivoServicioTraslado
-    }));
-
-    setPaso(0);
-    setTarifaPreviaAceptada(false);
-    setTarifaPreviaSnapshot(null);
-    setClaveIdempotencia(borrador.claveIdempotencia);
-    setBorradorDisponible(null);
-
-    if (borrador.origenCodigoPostal.length === 5) void consultarCodigoPostal("origen", borrador.origenCodigoPostal);
-    if (borrador.destinoCodigoPostal.length === 5) void consultarCodigoPostal("destino", borrador.destinoCodigoPostal);
-  }
-
-  function descartarBorrador() {
-    limpiarBorradorTrasladoLocal();
-    setClaveIdempotencia(crypto.randomUUID());
-    setBorradorDisponible(null);
-  }
-
-  const aceptarTarifaYContinuar = useCallback(() => {
-    if (!validarPasoActual()) return;
-    setTarifaPreviaAceptada(true);
-    setTarifaPreviaSnapshot(generarTarifaSnapshot(datos));
-    setErrorPaso(null);
-    registrarEventoUx("tarifa_gate_aceptada", {
-      monto: previsualizacion?.tarifa ?? null,
-      marca: datos.marca,
-      modelo: datos.modelo
-    });
-    setPaso(1);
-  }, [datos, previsualizacion, setErrorPaso, setPaso, setTarifaPreviaAceptada, setTarifaPreviaSnapshot, validarPasoActual]);
+  const {
+    datosParaValidacion,
+    enfocarPrimerError,
+    erroresParadas,
+    validarCampo,
+    validarPasoActual,
+    aceptarTarifaYContinuar,
+  } = useValidacionTraslado({
+    datos,
+    paso,
+    tarifaPreviaAceptada,
+    vehiculoSeleccionadoId,
+    vehiculosGuardados,
+    aceptaPoliticasPagoCancelacion,
+    previsualizacion,
+    setErrores,
+    setErrorPaso,
+    setPaso,
+    setDetallesVehiculoExpandido,
+    setSubpasoRuta,
+    setTarifaPreviaAceptada,
+    setTarifaPreviaSnapshot,
+  });
 
   const avanzarPaso = useCallback(() => {
     if (!validarPasoActual()) return;
@@ -1208,6 +731,9 @@ export function useNuevoTraslado() {
         tipo_ruta: datos.tipoRuta
       });
       // Sec3: validación servidor — el servidor es fuente de verdad, el cliente no puede falsificar paso
+      // M9: fail-closed. Antes un 5xx o un error de red caía en console.warn y
+      // el flujo continuaba sin validación: provocar el error la evitaba.
+      // Ahora cualquier fallo de validación bloquea la creación.
       try {
         const respPaso = await fetch("/api/viajes", {
           method: "POST",
@@ -1224,23 +750,12 @@ export function useNuevoTraslado() {
           }),
         });
         if (!respPaso.ok) {
-          // Un 404 significa que la ruta NO existe (bug de despliegue): fallar cerrado
-          // con un mensaje accionable en vez de continuar y fallar más tarde.
-          if (respPaso.status === 404) {
-            throw new Error("Endpoint de validación no disponible (404). Contacta a soporte.");
-          }
           const j = await respPaso.json().catch(() => null) as { error?: string } | null;
-          throw new Error(j?.error || "Validación de pasos fallida en el servidor.");
+          throw new Error(j?.error || `No pudimos validar tu solicitud en el servidor (código ${respPaso.status}). Intenta de nuevo.`);
         }
       } catch (e) {
-        // Si la validación de paso falla, no continuar con geocodificación/creación
-        if (e instanceof Error && /Solicitud incompleta|Validación de pasos|Wizard incompleto/i.test(e.message)) throw e;
-        /* Un 404 significa que la ruta NO existe (bug de despliegue), no un fallo
-           transitorio. Antes caía en el console.warn y el flujo continuaba hasta
-           fallar más tarde con un mensaje genérico que ocultaba la causa real. */
-        if (e instanceof Error && /\b404\b|not found|Failed to fetch/i.test(e.message)) throw e;
-        // Error de red en validación no bloquea si es 5xx genérico, pero logueamos
-        console.warn("[traslados/nuevo] validación paso servidor no disponible", e);
+        console.warn("[traslados/nuevo] validación paso servidor fallida: se bloquea la creación", e);
+        throw e instanceof Error ? e : new Error("No pudimos validar tu solicitud en el servidor. Intenta de nuevo.");
       }
       const cliente = crearClienteNavegador();
       const origenDireccion = domicilioCompleto({

@@ -57,8 +57,7 @@ describe("app-usuario — estado centralizado", () => {
     expect(mismoEstado["t-1"]?.mensajes).toHaveLength(1);
   });
 
-  it("conserva un mensaje Realtime que llega antes del historial inicial", () => {
-    const enVivo = {
+  it("conserva un mensaje Realtime que llega antes del historial inicial", () => {    const enVivo = {
       id: "m-2",
       remitente: "conductor" as const,
       contenido: "Ya llegué",
@@ -75,5 +74,23 @@ describe("app-usuario — estado centralizado", () => {
     estado = realtimeTrasladosReducer(estado, { type: "messages", trasladoId: "t-1", mensajes: [historico] });
 
     expect(estado["t-1"]?.mensajes.map((mensaje) => mensaje.id)).toEqual(["m-1", "m-2"]);
+  });
+
+  it("clear libera la entrada del traslado sin tocar las demás (deuda realtime)", () => {
+    let estado: RealtimeTrasladosState = {};
+    estado = realtimeTrasladosReducer(estado, { type: "init", trasladoId: "t-1", ubicacionInicial: null });
+    estado = realtimeTrasladosReducer(estado, { type: "init", trasladoId: "t-2", ubicacionInicial: null });
+    estado = realtimeTrasladosReducer(estado, {
+      type: "message",
+      trasladoId: "t-1",
+      mensaje: { id: "m-1", remitente: "usuario" as const, contenido: "hola", enviado_en: "2026-09-03T12:00:00.000Z" },
+    });
+
+    const limpio = realtimeTrasladosReducer(estado, { type: "clear", trasladoId: "t-1" });
+    expect(limpio["t-1"]).toBeUndefined();
+    expect(limpio["t-2"]).toBeDefined();
+
+    // Sin entrada es no-op y conserva identidad.
+    expect(realtimeTrasladosReducer(limpio, { type: "clear", trasladoId: "t-1" })).toBe(limpio);
   });
 });

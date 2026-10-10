@@ -16,14 +16,12 @@ export { iniciales } from "./cuenta-utils";
 export type Usuario = Database["public"]["Tables"]["usuarios"]["Row"];
 export type Vehiculo = Database["public"]["Tables"]["vehiculos"]["Row"];
 export type Empresa = Database["public"]["Tables"]["empresas"]["Row"];
-export type PasaporteRow = Database["public"]["Views"]["pasaporte_digital"]["Row"];
 
 export interface CuentaReal {
   usuario: Usuario;
   fotoPerfilUrl: string | null;
   vehiculos: Vehiculo[];
   empresa: Empresa | null;
-  historialEmpresa: PasaporteRow[];
   totalTraslados: number;
 }
 
@@ -77,7 +75,7 @@ export async function obtenerCuenta(): Promise<ResultadoCuenta> {
 
   try {
     const { crearClienteServidor } = await import("../../lib/supabase-server");
-    const { listarTrasladosDeEmpresa, obtenerUrlFotoPerfilUsuario, obtenerUsuarioActual, listarTrasladosDeUsuario } = await import("@ruum/api/services");
+    const { obtenerUrlFotoPerfilUsuario, obtenerUsuarioActual, listarTrasladosDeUsuario } = await import("@ruum/api/services");
     const { listarVehiculosDeUsuario } = await import("@ruum/api/vehicles");
     const { obtenerEmpresaVisible } = await import("@ruum/api/organizations");
     const cliente = await crearClienteServidor();
@@ -92,11 +90,6 @@ export async function obtenerCuenta(): Promise<ResultadoCuenta> {
       listarTrasladosDeUsuario(cliente, usuario.id),
     ]);
 
-    const historialEmpresa =
-      usuario.rol === "titular_empresa" && usuario.empresa_id
-        ? await listarTrasladosDeEmpresa(cliente, usuario.empresa_id)
-        : [];
-
     return {
       estado: "ok",
       cuenta: {
@@ -104,7 +97,6 @@ export async function obtenerCuenta(): Promise<ResultadoCuenta> {
         fotoPerfilUrl,
         vehiculos,
         empresa,
-        historialEmpresa,
         totalTraslados: trasladosPropios.length
       }
     };
@@ -121,15 +113,6 @@ export async function obtenerCuenta(): Promise<ResultadoCuenta> {
 
 export function dato(valor: string | number | null | undefined) {
   return valor ? String(valor) : "Pendiente";
-}
-
-function fechaCorta(fechaIso: string | null | undefined) {
-  if (!fechaIso) return "Fecha por confirmar";
-  return new Intl.DateTimeFormat("es-MX", { dateStyle: "medium", timeStyle: "short" }).format(new Date(fechaIso));
-}
-
-function dinero(valor: number | null | undefined) {
-  return new Intl.NumberFormat("es-MX", { style: "currency", currency: "MXN" }).format(valor ?? 0);
 }
 
 export function Campo({ etiqueta, valor }: { etiqueta: string; valor?: string | null | undefined }) {
@@ -294,42 +277,6 @@ export function HeaderCuenta({ usuario, fotoUrl }: { usuario?: Usuario; fotoUrl?
         </div>
       )}
     </header>
-  );
-}
-
-export function HeroCuenta({ usuario, fotoUrl }: { usuario: Usuario; fotoUrl?: string | null }) {
-  return (
-    <section className="mb-6">
-      <PassportCard>
-        <div className="flex flex-col items-center gap-4 sm:flex-row">
-          {fotoUrl ? (
-            <Image src={fotoUrl} alt="Foto de perfil" width={80} height={80} className="size-16 rounded-full object-cover sm:size-20" />
-          ) : (
-            <div className="flex size-16 items-center justify-center rounded-full bg-route-soft font-display text-lg font-bold text-route-dark sm:size-20 sm:text-2xl">
-              {iniciales(usuario.nombre)}
-            </div>
-          )}
-          <div className="text-center sm:text-left">
-            <p className="font-display text-lg font-bold sm:text-xl">{dato(usuario.nombre)}</p>
-            <p className="mt-1 font-mono-ruum text-sm text-ink/55">{dato(usuario.telefono)}</p>
-            <p className="mt-1 font-body text-sm text-ink/55">
-              {usuario.tipo_cuenta === "empresa" ? "Cuenta empresarial" : "Cuenta personal"} ·{" "}
-              {etiquetaVerificacion(usuario.estado_verificacion)}
-            </p>
-            <div className="mt-2 flex justify-center gap-2 sm:justify-start">
-              <Link href="/cuenta/perfil">
-                <Button variant="secondary">Editar perfil</Button>
-              </Link>
-              {!usuario.doc_identidad_url && (
-                <Link href="/verificacion">
-                  <Button variant="secondary">Subir identificación</Button>
-                </Link>
-              )}
-            </div>
-          </div>
-        </div>
-      </PassportCard>
-    </section>
   );
 }
 
@@ -658,48 +605,6 @@ export function SeccionLegal() {
             .docx
           </a>
         </div>
-      </div>
-    </Seccion>
-  );
-}
-
-export function SeccionHistorialEmpresa({ historialEmpresa }: { historialEmpresa: PasaporteRow[] }) {
-  return (
-    <Seccion titulo="Historial de empresa" descripcion="Traslados creados por la cuenta titular y por usuarios autorizados de la misma empresa.">
-      <div className="grid gap-3">
-        {historialEmpresa.length > 0 ? (
-          historialEmpresa.slice(0, 6).map((traslado, index) => {
-            const trasladoId = traslado.traslado_id;
-            return (
-              <div key={trasladoId ?? `historial-${index}`} className="grid gap-4 rounded-lg border border-[var(--user-color-border)] bg-[var(--user-color-surface-soft)] px-4 py-4 md:grid-cols-[1.2fr_1fr_auto]">
-                <div>
-                  <p className="font-body text-xs uppercase tracking-wide text-ink/45">{(traslado.estado ?? "estado_pendiente").replaceAll("_", " ")}</p>
-                  <h3 className="mt-1 font-display text-lg font-semibold">
-                    {dato(traslado.vehiculo_marca)} {dato(traslado.vehiculo_modelo)}
-                  </h3>
-                  <p className="mt-1 font-body text-sm text-ink/55">{fechaCorta(traslado.creado_en)}</p>
-                </div>
-                <div className="grid gap-1 font-body text-sm text-ink/65">
-                  <span>Conductor: {dato(traslado.conductor_nombre)}</span>
-                  <span>Pago: {(traslado.tipo_pago ?? "por_definir").replaceAll("_", " ")}</span>
-                  <span>Evidencia inicial: {traslado.evidencia_inicial_fotos_sincronizadas ?? 0}/5</span>
-                </div>
-                <div className="flex items-center justify-between gap-4 md:flex-col md:items-end md:justify-center">
-                  <span className="font-body text-sm font-semibold">{dinero(traslado.precio_final ?? traslado.precio_cotizado)}</span>
-                  {trasladoId ? (
-                    <Link href={`/viajes/${trasladoId}`}>
-                      <Button variant="secondary">Ver detalle</Button>
-                    </Link>
-                  ) : null}
-                </div>
-              </div>
-            );
-          })
-        ) : (
-          <div className="rounded-lg border border-dashed border-ink/15 px-4 py-6 font-body text-sm text-ink/55">
-            Aún no hay traslados empresariales para mostrar.
-          </div>
-        )}
       </div>
     </Seccion>
   );

@@ -35,4 +35,18 @@ describe("PasoDetalles", () => {
 
     expect(screen.getByLabelText(/acepto la política de cancelación/i)).toBeChecked();
   });
+
+  it("actualiza el resumen del vehículo aunque el resto no cambie", () => {
+    const iniciales = propsIniciales();
+    const vista = render(<PasoDetalles {...iniciales} />);
+
+    vista.rerender(
+      <PasoDetalles
+        {...iniciales}
+        datos={{ ...iniciales.datos, marca: "Nissan", modelo: "Versa", anio: "2020" }}
+      />,
+    );
+
+    expect(screen.getByText(/Nissan Versa 2020/)).toBeInTheDocument();
+  });
 });

@@ -60,18 +60,3 @@ export function useGeocodificacion() {
   );
   return { geocodificarRuta, geocodificarRutaConParadas };
 }
-
-// 1.4 Debounce dinámico — inmediato en onBlur, 650ms en onChange
-export function useGeocodificacionDinamica() {
-  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  const geocodificarDireccionDinamica = useCallback((direccion: string, isOnBlur = false) => {
-    if (timeoutRef.current) clearTimeout(timeoutRef.current);
-    const delay = isOnBlur ? 0 : 650;
-    timeoutRef.current = setTimeout(() => {
-      void geocodificarDireccion(direccion);
-    }, delay);
-  }, []);
-
-  return { geocodificarDireccionDinamica };
-}

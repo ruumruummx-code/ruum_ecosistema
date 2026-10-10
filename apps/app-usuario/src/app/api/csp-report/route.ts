@@ -1,11 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { MAX_BODY, rateLimit } from "@/lib/csp-rate-limit";
-
-function ipDeRequest(req: NextRequest): string {
-  const xf = req.headers.get("x-forwarded-for");
-  if (xf) return xf.split(",")[0]?.trim() || "unknown";
-  return req.headers.get("x-real-ip")?.trim() || (req as unknown as { ip?: string }).ip || "unknown";
-}
+import { MAX_BODY, obtenerIp, rateLimit } from "@/lib/csp-rate-limit";
 
 function sanitizarCspBody(raw: string): string {
   const truncado = raw.slice(0, MAX_BODY);
@@ -13,7 +7,8 @@ function sanitizarCspBody(raw: string): string {
 }
 
 export async function POST(request: NextRequest) {
-  const ip = ipDeRequest(request);
+  // A1/A2: IP validada por plataforma; null = sin identificador (no bucket compartido).
+  const ip = obtenerIp(request);
   const rl = await rateLimit(ip);
   if (!rl.allowed) {
     return new NextResponse(null, {

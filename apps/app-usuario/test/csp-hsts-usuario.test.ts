@@ -80,13 +80,40 @@ describe("PR-12 — CSP + HSTS en app-usuario", () => {
       process.env.NODE_ENV = "production";
       process.env.NEXT_PUBLIC_RUUM_AMBIENTE = "staging";
       const nonce = "nonce-staging";
-      const res = applySecurityHeadersUsuario(new NextResponse(), nonce);
+      const res = applySecurityHeadersUsuario(new NextResponse(), nonce, "https://staging.ruum.test");
 
       const reportOnly = res.headers.get("Content-Security-Policy-Report-Only");
       expect(reportOnly).toBeDefined();
       expect(reportOnly).toContain("report-uri /api/csp-report");
       expect(reportOnly).toContain("report-to csp-endpoint");
       expect(reportOnly).toContain(`nonce-${nonce}`);
+    });
+
+    it("en staging (M13): define el grupo Report-To al que apunta report-to", () => {
+      process.env.NODE_ENV = "production";
+      process.env.NEXT_PUBLIC_RUUM_AMBIENTE = "staging";
+      const res = applySecurityHeadersUsuario(new NextResponse(), "nonce-rt", "https://staging.ruum.test");
+
+      const reportTo = res.headers.get("Report-To");
+      expect(reportTo).toBeDefined();
+      const grupo = JSON.parse(reportTo as string) as { group: string; endpoints: Array<{ url: string }> };
+      expect(grupo.group).toBe("csp-endpoint");
+      expect(grupo.endpoints[0]?.url).toBe("https://staging.ruum.test/api/csp-report");
+    });
+
+    it("en staging (M12): el bloqueo aplica la politica estricta de produccion, no la permisiva", () => {
+      process.env.NODE_ENV = "production";
+      process.env.NEXT_PUBLIC_RUUM_AMBIENTE = "staging";
+      const nonce = "nonce-staging-estricta";
+      const res = applySecurityHeadersUsuario(new NextResponse(), nonce);
+
+      const enforced = res.headers.get("Content-Security-Policy") ?? "";
+      const scriptDirective = enforced.split(";").find((d) => d.trim().startsWith("script-src"));
+      expect(scriptDirective).toBeDefined();
+      expect(scriptDirective).toContain(`nonce-${nonce}`);
+      expect(scriptDirective).toContain("'strict-dynamic'");
+      expect(scriptDirective).not.toContain("unsafe-eval");
+      expect(scriptDirective).not.toContain("'unsafe-inline'");
     });
   });
 

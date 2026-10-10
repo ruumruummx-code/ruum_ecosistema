@@ -12,9 +12,9 @@ export default function ErrorGlobalConductor({
 }) {
   useEffect(() => {
     void recordOperationalEvent("native_crash", { scope: "global", digest: error.digest ?? "sin-digest", message: error.message.slice(0, 240) }, "error");
+    // A3: window.Sentry no es un global del SDK (siempre no-op). SDK directo.
     try {
-      const w = window as unknown as { Sentry?: { captureException: (e: unknown) => void } };
-      w.Sentry?.captureException(error);
+      void import("@sentry/nextjs").then((Sentry) => Sentry.captureException(error)).catch(() => {});
     } catch {}
     console.error("[app-conductor/error]", { digest: error.digest ?? "sin-digest", message: error.message });
   }, [error]);

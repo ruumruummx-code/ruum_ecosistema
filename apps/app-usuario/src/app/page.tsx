@@ -188,6 +188,13 @@ export default async function PaginaInicio({
             <Link href="#como-funciona" className={`sm:w-auto ${botonContorno} sm:px-8`}>
               Conoce el servicio
             </Link>
+            {/* M6: /onboarding existía sin un solo enlace en 24 rutas. */}
+            <Link
+              href="/onboarding"
+              className="inline-flex min-h-11 w-full sm:w-auto items-center justify-center rounded-lg px-5 py-3 font-display text-sm font-semibold text-[#8B98AD] transition hover:text-white"
+            >
+              Ver recorrido guiado →
+            </Link>
             <Link
               href="/login"
               className="inline-flex min-h-11 w-full sm:w-auto items-center justify-center rounded-lg px-5 py-3 font-display text-sm font-semibold text-[#8B98AD] transition hover:text-white"
@@ -405,6 +412,9 @@ export default async function PaginaInicio({
           <div className="flex flex-wrap items-center justify-center gap-4 font-body text-xs text-[#8B98AD]">
             <Link href="#como-funciona" className="transition hover:text-white">
               Cómo funciona
+            </Link>
+            <Link href="/onboarding" className="transition hover:text-white">
+              Recorrido guiado
             </Link>
             <Link href="/login" className="transition hover:text-white">
               Iniciar sesión

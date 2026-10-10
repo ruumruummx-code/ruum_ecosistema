@@ -52,4 +52,27 @@ describe("PasoVehiculo", () => {
     expect(screen.getByLabelText("Tarjeta de circulación vigente")).toBeChecked();
     expect(screen.getByLabelText("Ambas placas instaladas")).toBeChecked();
   });
+
+  it("refleja el tipo de vehículo cuando cambia (comparador sin identidad)", () => {
+    const iniciales = propsIniciales();
+    const vista = render(<PasoVehiculo {...iniciales} />);
+    // "Sedán" aparece 2 veces: tipo + categoría de catálogo.
+    expect(screen.getAllByText("Sedán")).toHaveLength(2);
+    vista.rerender(<PasoVehiculo {...iniciales} datos={{ ...iniciales.datos, tipo: "suv" as never }} />);
+    expect(screen.getByText("SUV")).toBeInTheDocument();
+    expect(screen.getAllByText("Sedán")).toHaveLength(1);
+  });
+
+  it("omite re-render ante cambios de datos irrelevantes para el paso", () => {
+    const claseControl = vi.fn(() => "");
+    const iniciales = { ...propsIniciales(), claseControl };
+    const vista = render(<PasoVehiculo {...iniciales} />);
+    const llamadasTrasMontaje = claseControl.mock.calls.length;
+    expect(llamadasTrasMontaje).toBeGreaterThan(0);
+    // CP de origen no lo pinta este paso: memo debe bloquear el re-render.
+    vista.rerender(
+      <PasoVehiculo {...iniciales} datos={{ ...iniciales.datos, origenCodigoPostal: "03100" }} />,
+    );
+    expect(claseControl.mock.calls.length).toBe(llamadasTrasMontaje);
+  });
 });

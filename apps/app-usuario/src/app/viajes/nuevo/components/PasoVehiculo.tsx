@@ -374,8 +374,9 @@ function PasoVehiculoComponent({
 }
 
 function areEqualPasoVehiculo(prev: PasoVehiculoProps, next: PasoVehiculoProps) {
+  // Sin `prev.datos === next.datos` (cortaba todo cambio; resto muerto).
   return (
-    prev.datos === next.datos &&
+    prev.datos.tipo === next.datos.tipo &&
     prev.datos.marca === next.datos.marca &&
     prev.datos.modelo === next.datos.modelo &&
     prev.datos.anio === next.datos.anio &&

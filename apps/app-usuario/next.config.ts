@@ -1,7 +1,7 @@
 import type { NextConfig } from "next";
+import { withSentryConfig } from "@sentry/nextjs";
 import {
-  HSTS_HEADER,
-  PERMISSIONS_POLICY,
+  headersSeguridadEstaticos,
   IMAGES_REMOTE_PATTERNS,
   IMAGE_FORMATS,
 } from "./src/lib/csp";
@@ -33,19 +33,10 @@ const nextConfig: NextConfig = {
 
        El middleware es la única fuente de verdad de la CSP (genera el nonce por
        request). Aquí solo se.headers defensivos que no dependen de nonce. */
-    const headersList: { key: string; value: string }[] = [
-      { key: "X-Frame-Options", value: "DENY" },
-      { key: "X-Content-Type-Options", value: "nosniff" },
-      { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
-      { key: "Permissions-Policy", value: PERMISSIONS_POLICY }
-    ];
-
-    if (isProd) {
-      headersList.push({
-        key: "Strict-Transport-Security",
-        value: HSTS_HEADER
-      });
-    }
+    /* M16: fuente única (lib/csp) — el middleware emite los mismos valores y
+       los sobrescribe con .set(). Aquí solo headers que no dependen de nonce;
+       ver ARQ-4: jamás una CSP estática. */
+    const headersList = headersSeguridadEstaticos(isProd);
 
     return [
       {
@@ -56,4 +47,9 @@ const nextConfig: NextConfig = {
   }
 };
 
-export default nextConfig;
+// A3: withSentryConfig inyecta sentry.client.config.ts en el bundle del
+// navegador y sentry.server.config.ts en el servidor. Sin este wrapper los
+// archivos de config existían pero nunca se cargaban en el cliente: todos los
+// Sentry.captureException / breadcrumbs eran no-ops silenciosos.
+// Sin DSN el SDK es no-op; silent:true evita ruido en el build.
+export default withSentryConfig(nextConfig, { silent: true });

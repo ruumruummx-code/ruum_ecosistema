@@ -155,6 +155,10 @@ function pestañaDeViaje(p: Pasaporte): PestañaTraslados {
     "documentacion_en_revision",
     "documentacion_validada",
     "cotizacion_generada",
+    // M14: cotizacion_aceptada es estado válido (fuente: ESTADOS_TRASLADO) y
+    // espera pago, como pago_pendiente en InicioUsuario → "Programado".
+    // Sin esto caía en "activos" mientras el inicio lo mostraba programado.
+    "cotizacion_aceptada",
     "servicio_confirmado",
     "pendiente_de_conductor",
   ].includes(estado)) return "programados";

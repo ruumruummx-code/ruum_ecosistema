@@ -19,23 +19,38 @@ function esPasoValido(paso: unknown): boolean {
 
 export async function POST(request: NextRequest) {
   try {
-    const limite = await rateLimitConVentana(
-      obtenerIp(request),
-      "api-viajes",
-      MAX_POR_MINUTO,
-      VENTANA_MS
-    );
-    if (!limite.allowed) {
-      return NextResponse.json(
-        { error: "Demasiadas solicitudes. Espera un momento e inténtalo de nuevo." },
-        { status: 429, headers: { "Retry-After": String(limite.retryAfterSec ?? 60) } }
-      );
-    }
-
     const cliente = await crearClienteServidor();
     const { data: { user } } = await cliente.auth.getUser();
     if (!user) {
       return NextResponse.json({ error: "No autenticado" }, { status: 401 });
+    }
+
+    /* A2: el bucket principal es por usuario autenticado, no por IP sin validar.
+       Con IP como única clave, todos los clientes sin cabecera confiable
+       compartían un bucket de 60 req/min: uno solo podía negarle el servicio
+       a los demás. La IP (validada por plataforma) queda como segunda capa. */
+    const porUsuario = await rateLimitConVentana(
+      `uid:${user.id}`,
+      "api-viajes-usuario",
+      MAX_POR_MINUTO,
+      VENTANA_MS
+    );
+    if (!porUsuario.allowed) {
+      return NextResponse.json(
+        { error: "Demasiadas solicitudes. Espera un momento e inténtalo de nuevo." },
+        { status: 429, headers: { "Retry-After": String(porUsuario.retryAfterSec ?? 60) } }
+      );
+    }
+
+    const ip = obtenerIp(request);
+    if (ip) {
+      const porIp = await rateLimitConVentana(ip, "api-viajes-ip", MAX_POR_MINUTO, VENTANA_MS);
+      if (!porIp.allowed) {
+        return NextResponse.json(
+          { error: "Demasiadas solicitudes. Espera un momento e inténtalo de nuevo." },
+          { status: 429, headers: { "Retry-After": String(porIp.retryAfterSec ?? 60) } }
+        );
+      }
     }
 
     const body = await request.json().catch(() => null) as Record<string, unknown> | null;
@@ -58,7 +73,7 @@ export async function POST(request: NextRequest) {
     }
 
     if (pasoContador === null || pasoContador < PASOS_REQUERIDOS) {
-      console.warn("[api/viajes] wizard incompleto rechazado", { paso: rawPaso, ip: request.headers.get("x-forwarded-for")?.split(",")[0] });
+      console.warn("[api/viajes] wizard incompleto rechazado", { paso: rawPaso, usuario: user.id });
       return NextResponse.json(
         { error: "Solicitud incompleta: debes completar todos los pasos del wizard." },
         { status: 400 }
@@ -69,20 +84,35 @@ export async function POST(request: NextRequest) {
        CORRECCIÓN (auditoría S-7): antes solo validaba si venía "marca" u
        "origenCodigoPostal", así que un body { paso: 4 } se saltaba el zod por
        completo. Ahora se aplica el esquema siempre, con defaults. */
-    {
-      const parsed = esquemaSolicitudTraslado.safeParse({
-        ...body,
-        // defaults para campos no enviados por el API pero requeridos por el esquema
-        vehiculoSeleccionadoId: (body as Record<string, unknown>).vehiculoSeleccionadoId ?? "",
-        vehiculosUsuarioIds: (body as Record<string, unknown>).vehiculosUsuarioIds ?? [],
-        zonaHoraria: (body as Record<string, unknown>).zonaHoraria ?? "America/Mexico_City",
-        aceptaPoliticas: (body as Record<string, unknown>).aceptaPoliticas ?? true,
-        paradas: (body as Record<string, unknown>).paradas ?? [],
-      });
-      if (!parsed.success) {
+    const parsed = esquemaSolicitudTraslado.safeParse({
+      ...body,
+      // defaults para campos no enviados por el API pero requeridos por el esquema
+      vehiculoSeleccionadoId: (body as Record<string, unknown>).vehiculoSeleccionadoId ?? "",
+      vehiculosUsuarioIds: (body as Record<string, unknown>).vehiculosUsuarioIds ?? [],
+      zonaHoraria: (body as Record<string, unknown>).zonaHoraria ?? "America/Mexico_City",
+      aceptaPoliticas: (body as Record<string, unknown>).aceptaPoliticas ?? true,
+      paradas: (body as Record<string, unknown>).paradas ?? [],
+    });
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: "Datos de traslado inválidos", detalles: parsed.error.issues.slice(0, 3).map((i) => i.message) },
+        { status: 400 }
+      );
+    }
+
+    /* M10: el superRefine de Zod solo comprueba vehiculoSeleccionadoId contra
+       vehiculosUsuarioIds, un array que envía el propio cliente. La pertenencia
+       real se verifica aquí contra la BD (RLS): un id ajeno o inventado se
+       rechaza con 403 aunque venga en el array del cliente. */
+    if (parsed.data.vehiculoSeleccionadoId) {
+      const { listarVehiculosDeUsuario } = await import("@ruum/api/services");
+      const propios = await listarVehiculosDeUsuario(cliente, user.id);
+      const esPropio = propios.some((v) => v.id === parsed.data.vehiculoSeleccionadoId);
+      if (!esPropio) {
+        console.warn("[api/viajes] vehiculo no pertenece al usuario", { usuario: user.id });
         return NextResponse.json(
-          { error: "Datos de traslado inválidos", detalles: parsed.error.issues.slice(0, 3).map((i) => i.message) },
-          { status: 400 }
+          { error: "El vehículo seleccionado no pertenece al usuario." },
+          { status: 403 }
         );
       }
     }

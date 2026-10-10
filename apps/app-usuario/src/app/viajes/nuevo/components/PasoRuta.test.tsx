@@ -68,4 +68,26 @@ describe("PasoRuta", () => {
     expect(referencias[0]).toHaveValue("Portón azul");
     expect(referencias[1]).toHaveValue("Acceso por estacionamiento");
   });
+
+  it("re-renderiza al cambiar solo un contacto (comparador sin identidad)", () => {
+    const iniciales = propsIniciales();
+    const vista = render(<PasoRuta {...iniciales} />);
+    vista.rerender(
+      <PasoRuta {...iniciales} datos={{ ...iniciales.datos, entregaNombre: "María" }} />,
+    );
+    expect(document.getElementById("entregaNombre")).toHaveValue("María");
+  });
+
+  it("omite re-render ante cambios de datos irrelevantes para el paso", () => {
+    const claseControl = vi.fn(() => "");
+    const iniciales = { ...propsIniciales(), claseControl };
+    const vista = render(<PasoRuta {...iniciales} />);
+    const llamadasTrasMontaje = claseControl.mock.calls.length;
+    expect(llamadasTrasMontaje).toBeGreaterThan(0);
+    // marca/modelo no los pinta este paso: memo debe bloquear el re-render.
+    vista.rerender(
+      <PasoRuta {...iniciales} datos={{ ...iniciales.datos, marca: "Toyota", modelo: "Yaris" }} />,
+    );
+    expect(claseControl.mock.calls.length).toBe(llamadasTrasMontaje);
+  });
 });

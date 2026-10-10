@@ -21,7 +21,7 @@ const VENTANA_MS = 60 * 60 * 1000;
 export async function POST(request: NextRequest) {
   try {
     const body = (await request.json().catch(() => null)) as
-      | { email?: unknown; origen?: unknown }
+      | { email?: unknown }
       | null;
 
     const correo =
@@ -59,18 +59,10 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Servicio no disponible." }, { status: 503 });
     }
 
-    const origenSolicitado = typeof body?.origen === "string" ? body.origen : "";
-    // Solo se acepta el origen si es http(s) y sin rutas; evita usar un
-    // attacker-controlled origen como redirectTo.
-    let redirectTo = `${request.nextUrl.origin}/auth/callback?next=%2F`;
-    try {
-      const u = new URL(origenSolicitado);
-      if ((u.protocol === "http:" || u.protocol === "https:") && u.pathname === "/") {
-        redirectTo = `${u.origin}/auth/callback?next=%2F`;
-      }
-    } catch {
-      /* origen inválido: se usa el fallback derivado del request */
-    }
+    // C1: el redirect del correo nunca sale del origen de la app. El cuerpo no
+    // acepta `origen` del cliente (antes permitía un origen arbitrario http(s)
+    // que Supabase ponía en el enlace legítimo → token_hash al atacante).
+    const redirectTo = `${request.nextUrl.origin}/auth/callback?next=%2F`;
 
     const supabase = crearClienteServidor(url, anonKey, {
       getAll() {

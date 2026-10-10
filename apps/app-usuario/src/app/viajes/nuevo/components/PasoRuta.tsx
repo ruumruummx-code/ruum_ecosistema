@@ -580,14 +580,32 @@ function PasoRutaComponent({
 }
 
 function areEqualPasoRuta(prev: PasoRutaProps, next: PasoRutaProps) {
+  // Sin `prev.datos === next.datos` (cortaba todo cambio; resto muerto). Se
+  // comparan todos los campos que el paso renderiza: contactos, domicilios
+  // completos, referencias, latitud capturada, paradas e instrucciones.
   return (
-    prev.datos === next.datos &&
+    prev.datos.entregaNombre === next.datos.entregaNombre &&
+    prev.datos.entregaApellido === next.datos.entregaApellido &&
+    prev.datos.entregaTelefono === next.datos.entregaTelefono &&
+    prev.datos.recepcionNombre === next.datos.recepcionNombre &&
+    prev.datos.recepcionApellido === next.datos.recepcionApellido &&
+    prev.datos.recepcionTelefono === next.datos.recepcionTelefono &&
     prev.datos.origenCodigoPostal === next.datos.origenCodigoPostal &&
+    prev.datos.origenEstado === next.datos.origenEstado &&
+    prev.datos.origenCiudad === next.datos.origenCiudad &&
+    prev.datos.origenColonia === next.datos.origenColonia &&
     prev.datos.origenCalle === next.datos.origenCalle &&
     prev.datos.origenNumero === next.datos.origenNumero &&
+    prev.datos.origenReferencias === next.datos.origenReferencias &&
+    prev.datos.origenLat === next.datos.origenLat &&
     prev.datos.destinoCodigoPostal === next.datos.destinoCodigoPostal &&
+    prev.datos.destinoEstado === next.datos.destinoEstado &&
+    prev.datos.destinoCiudad === next.datos.destinoCiudad &&
+    prev.datos.destinoColonia === next.datos.destinoColonia &&
     prev.datos.destinoCalle === next.datos.destinoCalle &&
     prev.datos.destinoNumero === next.datos.destinoNumero &&
+    prev.datos.destinoReferencias === next.datos.destinoReferencias &&
+    prev.datos.instruccionesEspeciales === next.datos.instruccionesEspeciales &&
     prev.origenBusqueda === next.origenBusqueda &&
     prev.destinoBusqueda === next.destinoBusqueda &&
     prev.origenSugerencias === next.origenSugerencias &&

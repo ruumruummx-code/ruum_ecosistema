@@ -13,8 +13,7 @@
     "predev": "node ../../scripts/validate-env.mjs app-usuario",
     "prebuild": "node ../../scripts/validate-env.mjs app-usuario && node scripts/assert-csp.mjs",
     "validate:env": "node ../../scripts/validate-env.mjs app-usuario",
-    "assert:csp": "node scripts/assert-csp.mjs",
-    "analyze:bundle": "ANALYZE=true next build"
+    "assert:csp": "node scripts/assert-csp.mjs"
   },
   "dependencies": {
     "@capacitor/android": "^8.5.2",
@@ -32,8 +31,7 @@
     "next": "15.5.24",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "zod": "^3.24.1",
-    "zustand": "^5.0.15"
+    "zod": "^3.24.1"
   },
   "devDependencies": {
     "@capacitor/cli": "^8.5.2",

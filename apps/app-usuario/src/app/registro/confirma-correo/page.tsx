@@ -145,7 +145,7 @@ function ContenidoConfirmaCorreo() {
       const res = await fetch("/api/auth/resend", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: correo, origen: window.location.origin }),
+        body: JSON.stringify({ email: correo }),
         cache: "no-store",
       });
       const cuerpo = (await res.json().catch(() => null)) as { error?: string } | null;

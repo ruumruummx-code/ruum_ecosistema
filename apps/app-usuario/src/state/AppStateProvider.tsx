@@ -77,12 +77,18 @@ export function useTrasladoRealtime(trasladoId: string) {
   const agregarMensaje = useCallback((mensaje: EstadoRealtimeTraslado["mensajes"][number]) => {
     dispatch({ type: "message", trasladoId, mensaje });
   }, [dispatch, trasladoId]);
+  // Deuda realtime: la acción "clear" existía pero nadie la despachaba y cada
+  // traslado visitado retenía chat/ubicación/mensajes toda la sesión SPA.
+  const limpiar = useCallback(() => {
+    dispatch({ type: "clear", trasladoId });
+  }, [dispatch, trasladoId]);
 
-  return useMemo(() => ({ ...traslado, inicializar, actualizar, cargarMensajes, agregarMensaje }), [
+  return useMemo(() => ({ ...traslado, inicializar, actualizar, cargarMensajes, agregarMensaje, limpiar }), [
     agregarMensaje,
     actualizar,
     cargarMensajes,
     inicializar,
+    limpiar,
     traslado
   ]);
 }

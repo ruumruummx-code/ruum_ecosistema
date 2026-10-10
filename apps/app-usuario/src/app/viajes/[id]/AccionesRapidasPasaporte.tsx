@@ -84,9 +84,10 @@ export function AccionesRapidasPasaporte({ trasladoId: _trasladoId, estado }: Pr
     }
   }, [abierto]);
 
-  // Navegación robusta: abre el <details> destino y activa el tab
-  // correspondiente antes de hacer scroll + foco. Evita clicks muertos
-  // cuando el destino está en un acordeón cerrado o tab oculto.
+  // Navegación robusta: abre el <details> destino antes de hacer scroll +
+  // foco. Evita clicks muertos cuando el destino está en un acordeón cerrado.
+  // (M4: se elimina el bus "ruum:pasaporte:ir" — su único oyente,
+  // PasaporteTabs, nunca se monta y ningún destino corresponde a un tab.)
   function irASeccion(evento: React.MouseEvent<HTMLAnchorElement>, href: string) {
     const id = href.startsWith("#") ? href.slice(1) : null;
     if (!id) return;
@@ -95,10 +96,6 @@ export function AccionesRapidasPasaporte({ trasladoId: _trasladoId, estado }: Pr
     evento.preventDefault();
     setAbierto(false);
 
-    const seccionTab = id === "trazabilidad" || id === "evidencias" || id === "detalles" ? id : null;
-    if (seccionTab) {
-      document.dispatchEvent(new CustomEvent("ruum:pasaporte:ir", { detail: seccionTab }));
-    }
     const detailsCerrado = destino.closest("details:not([open])") as HTMLDetailsElement | null;
     if (detailsCerrado) detailsCerrado.open = true;
 
@@ -112,7 +109,7 @@ export function AccionesRapidasPasaporte({ trasladoId: _trasladoId, estado }: Pr
         if (!destino.hasAttribute("tabindex")) destino.setAttribute("tabindex", "-1");
         (destino as HTMLElement).focus({ preventScroll: true });
       }
-    }, seccionTab ? 80 : 0);
+    }, 0);
   }
 
   // Navegación con flechas dentro del menú

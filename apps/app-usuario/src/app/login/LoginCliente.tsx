@@ -301,6 +301,13 @@ export function LoginCliente({ motivo, siguiente, aviso }: LoginClienteProps) {
             Regístrate gratis
           </Link>
         </p>
+        {/* M6: punto de entrada al recorrido para usuarios nuevos. */}
+        <p className="pb-2 text-center text-[13px] font-medium text-[#6b7c94]">
+          ¿Primera vez aquí?
+          <Link href="/onboarding" className="ml-1 font-bold text-[#2e5a88] hover:underline">
+            Conoce cómo funciona Ruum
+          </Link>
+        </p>
 
         {/* Confianza */}
         <div className="mt-3 flex items-center justify-center gap-5 px-0 py-5" aria-label="Garantías de seguridad">

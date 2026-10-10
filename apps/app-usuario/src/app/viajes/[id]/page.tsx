@@ -112,6 +112,9 @@ const ORDEN_ESTADOS: EstadoTraslado[] = [
   "documentacion_en_revision",
   "documentacion_validada",
   "cotizacion_generada",
+  // M14: falta este estado válido (orden canónico: ESTADOS_TRASLADO) dejaba
+  // estadoDePaso en "pendiente" para todo el timeline de ese traslado.
+  "cotizacion_aceptada",
   "servicio_confirmado",
   "pendiente_de_conductor",
   "conductor_asignado",

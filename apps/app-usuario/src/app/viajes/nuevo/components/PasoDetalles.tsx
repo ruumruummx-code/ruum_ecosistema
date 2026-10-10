@@ -378,8 +378,17 @@ function PasoDetallesComponent({
 }
 
 function areEqualPasoDetalles(prev: PasoDetallesProps, next: PasoDetallesProps) {
+  // Sin `prev.datos === next.datos` (cortaba todo cambio; resto muerto). El
+  // resumen renderiza agenda, vehículo y ruta: se comparan esos campos.
   return (
-    prev.datos === next.datos &&
+    prev.datos.modalidadProgramacion === next.datos.modalidadProgramacion &&
+    prev.datos.fechaHoraProgramada === next.datos.fechaHoraProgramada &&
+    prev.datos.marca === next.datos.marca &&
+    prev.datos.modelo === next.datos.modelo &&
+    prev.datos.anio === next.datos.anio &&
+    prev.datos.condicion === next.datos.condicion &&
+    prev.datos.origenCiudad === next.datos.origenCiudad &&
+    prev.datos.destinoCiudad === next.datos.destinoCiudad &&
     prev.datos.tipoRuta === next.datos.tipoRuta &&
     prev.datos.ventanaRecoleccion === next.datos.ventanaRecoleccion &&
     prev.datos.ventanaEntrega === next.datos.ventanaEntrega &&

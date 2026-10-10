@@ -9,9 +9,9 @@ export default function ErrorEvidencia({ error, reset }: { error: Error & { dige
   const { id } = useParams<{ id: string }>();
   useEffect(() => {
     void recordOperationalEvent("evidence_stuck", { scope: "evidencia", trasladoId: id, digest: error.digest ?? "sin-digest", message: error.message.slice(0, 240) }, "error");
+    // A3: window.Sentry no es un global del SDK (siempre no-op). SDK directo.
     try {
-      const w = window as unknown as { Sentry?: { captureException: (e: unknown) => void } };
-      w.Sentry?.captureException(error);
+      void import("@sentry/nextjs").then((Sentry) => Sentry.captureException(error)).catch(() => {});
     } catch {}
     console.error("[evidencia/error]", { id, digest: error.digest, message: error.message });
   }, [error, id]);

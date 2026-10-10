@@ -453,15 +453,23 @@ function PasoTarifaComponent({
 }
 
 function areEqualPasoTarifa(prev: PasoTarifaProps, next: PasoTarifaProps) {
+  // Sin `prev.datos === next.datos`: esa identidad ya cortaba cualquier cambio
+  // del formulario y volvía muertas las comparaciones de abajo. Se comparan
+  // los campos que el paso renderiza (incl. ciudad/estado derivados del CP,
+  // que llegan por lookup sin cambiar el CP).
   return (
-    prev.datos === next.datos &&
     prev.datos.origenCodigoPostal === next.datos.origenCodigoPostal &&
+    prev.datos.origenCiudad === next.datos.origenCiudad &&
+    prev.datos.origenEstado === next.datos.origenEstado &&
     prev.datos.destinoCodigoPostal === next.datos.destinoCodigoPostal &&
+    prev.datos.destinoCiudad === next.datos.destinoCiudad &&
+    prev.datos.destinoEstado === next.datos.destinoEstado &&
     prev.datos.marca === next.datos.marca &&
     prev.datos.modelo === next.datos.modelo &&
     prev.datos.condicion === next.datos.condicion &&
     prev.datos.modalidadProgramacion === next.datos.modalidadProgramacion &&
     prev.datos.fechaHoraProgramada === next.datos.fechaHoraProgramada &&
+    prev.modelosDisponibles === next.modelosDisponibles &&
     prev.previsualizacion === next.previsualizacion &&
     prev.previsualizando === next.previsualizando &&
     prev.cpConsultando === next.cpConsultando &&

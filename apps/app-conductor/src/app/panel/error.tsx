@@ -7,9 +7,9 @@ import { recordOperationalEvent } from "../../lib/observability";
 export default function ErrorPanel({ error, reset }: { error: Error & { digest?: string }; reset: () => void }) {
   useEffect(() => {
     void recordOperationalEvent("native_crash", { scope: "panel", digest: error.digest ?? "sin-digest", message: error.message.slice(0, 240) }, "error");
+    // A3: window.Sentry no es un global del SDK (siempre no-op). SDK directo.
     try {
-      const w = window as unknown as { Sentry?: { captureException: (e: unknown) => void } };
-      w.Sentry?.captureException(error);
+      void import("@sentry/nextjs").then((Sentry) => Sentry.captureException(error)).catch(() => {});
     } catch {}
     console.error("[panel/error]", { digest: error.digest, message: error.message });
   }, [error]);

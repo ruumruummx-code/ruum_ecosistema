@@ -147,9 +147,9 @@ export function ConsentimientoTerminosWall({
 }
 
 /**
- * Hook para verificar si el usuario necesita aceptar términos.
- * Retorna true si version_terminos_aceptada es null.
+ * Predicado (función pura, no hook): el usuario necesita aceptar términos
+ * cuando version_terminos_aceptada es null.
  */
-export function useRequiereConsentimiento(versionTerminos: number | null | undefined): boolean {
+export function requiereConsentimiento(versionTerminos: number | null | undefined): boolean {
   return versionTerminos == null;
 }

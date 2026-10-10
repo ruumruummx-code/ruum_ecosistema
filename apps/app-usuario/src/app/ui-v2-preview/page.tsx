@@ -1,7 +1,18 @@
+import type { Metadata } from "next";
+import { notFound } from "next/navigation";
 import { InicioUsuario } from "../InicioUsuario";
 import { NavegacionUsuario } from "../NavegacionUsuario";
 import { MisTrasladosCliente } from "../mis-viajes/MisViajesCliente";
 import type { Database } from "@ruum/shared/types";
+
+/**
+ * M11: página de previsualización de diseño con datos DEMO hardcodeados.
+ * Solo existe para desarrollo: en producción responde 404 y en cualquier
+ * entorno es noindex (antes era accesible sin login e indexable).
+ */
+export const metadata: Metadata = {
+  robots: { index: false, follow: false },
+};
 
 type Pasaporte = Database["public"]["Views"]["pasaporte_digital"]["Row"];
 
@@ -33,6 +44,7 @@ const DEMO_TRASLADO = {
 };
 
 export default async function UiV2Preview({ searchParams }: { searchParams: Promise<{ screen?: string }> }) {
+  if (process.env.NODE_ENV === "production") notFound();
   const { screen } = await searchParams;
   const esMisTraslados = screen === "mis-Traslados";
 

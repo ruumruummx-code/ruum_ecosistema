@@ -33,10 +33,11 @@ export class ErrorBoundaryConductor extends React.Component<Props, State> {
       componentStack: info.componentStack?.slice(0, 500),
     }, "error");
 
-    // Sentry mirror si está cargado en window
+    // A3: window.Sentry no es un global del SDK (siempre no-op). SDK directo.
     try {
-      const w = window as unknown as { Sentry?: { captureException: (e: unknown, ctx?: unknown) => void } };
-      w.Sentry?.captureException(error, { extra: { scope: this.props.scope, componentStack: info.componentStack } });
+      void import("@sentry/nextjs")
+        .then((Sentry) => Sentry.captureException(error, { extra: { scope: this.props.scope, componentStack: info.componentStack } }))
+        .catch(() => {});
     } catch {}
 
     console.error(`[ErrorBoundary:${this.props.scope}]`, error, info);

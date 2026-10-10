@@ -88,7 +88,7 @@ export function SeguimientoTrasladoTiempoReal({
   destino,
   ubicacionInicial
 }: SeguimientoTrasladoTiempoRealProps) {
-  const { ubicacion, estadoRealtime, estadoActualizadoEn, cargando, mapaCargadoUrl, inicializar, actualizar } = useTrasladoRealtime(trasladoId);
+  const { ubicacion, estadoRealtime, estadoActualizadoEn, cargando, mapaCargadoUrl, inicializar, actualizar, limpiar } = useTrasladoRealtime(trasladoId);
   // R12: debounce refrescar + última vez para evitar spam
   const ultimoRefreshRef = useRef<number>(0);
 
@@ -146,10 +146,12 @@ export function SeguimientoTrasladoTiempoReal({
 
     return () => {
       cancelado = true;
+      // Libera ubicación/estado del reducer al salir del traslado (ver Chat).
+      limpiar();
       // Cleanup resiliente garantizado con limpiarCanalesSeguros
       void limpiarCanalesSeguros(cliente, [canalEstado, canalUbicacion]);
     };
-  }, [actualizar, inicializar, trasladoId, ubicacionInicial]);
+  }, [actualizar, inicializar, limpiar, trasladoId, ubicacionInicial]);
 
   async function refrescar() {
     if (!tieneSupabaseConfigurado()) return;
