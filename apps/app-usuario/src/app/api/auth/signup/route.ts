@@ -121,9 +121,13 @@ export async function POST(request: NextRequest) {
 
     if (error) {
       // No revelar si el correo ya existe: mensaje genérico.
+      // Anti-enumeración sin falsos positivos: la señal es el 422 de
+      // Supabase ("User already registered"); el "uso" a secas anterior marcaba
+      // como duplicado cualquier mensaje con esa subcadena ("uso", "incluso",
+      // "exclusivo"...) y degradaba el diagnóstico de errores reales.
       const esDuplicado =
         error.status === 422 ||
-        /already|exists|registered|en uso|uso/i.test(error.message ?? "");
+        /already[\s_-]?registered|already[\s_-]?exists|\bemail[\s_-]?taken\b|en uso/i.test(error.message ?? "");
       if (esDuplicado) {
         return NextResponse.json(
           { error: "Si el correo corresponde a una cuenta, recibirás instrucciones para continuar." },
@@ -147,5 +151,5 @@ export async function POST(request: NextRequest) {
 }
 
 export async function GET() {
-  return NextResponse.json({ error: "Método no permitido" }, { status: 405 });
+  return NextResponse.json({ error: "Método no permitido" }, { status: 405, headers: { Allow: "POST" } });
 }

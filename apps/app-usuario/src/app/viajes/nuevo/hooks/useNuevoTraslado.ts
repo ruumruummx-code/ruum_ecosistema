@@ -18,7 +18,7 @@ import {
 } from "@/lib/mapbox";
 import { tipoSugeridoParaVehiculo } from "@/lib/catalogo-vehiculos";
 import { limpiarBorradorTrasladoLocal } from "@/lib/borrador-traslado";
-import { esquemaSolicitudTraslado, erroresFormulario } from "../schema";
+import { erroresFormulario } from "../schema";
 import { CAMPOS_PASO_TARIFA, codigoPostalCompleto, generarTarifaSnapshot, haCambiadoTarifa } from "../tarifa-gate";
 import { construirPayloadCreacion, type CoordenadasTraslado, type CoordenadasParada } from "../adapters";
 import { useGeocodificacion } from "./useGeocodificacion";
@@ -605,7 +605,7 @@ export function useNuevoTraslado() {
   ), []);
 
   const {
-    datosParaValidacion,
+    resultadoValidacion,
     enfocarPrimerError,
     erroresParadas,
     validarCampo,
@@ -666,7 +666,9 @@ export function useNuevoTraslado() {
       return;
     }
 
-    const validacionFinal = esquemaSolicitudTraslado.safeParse(datosParaValidacion());
+    // Reutiliza el parseo memoizado del hook de validación (un solo
+    // safeParse por snapshot en vez de uno por consumidor).
+    const validacionFinal = resultadoValidacion;
     if (!validacionFinal.success) {
       const siguientesErrores = erroresFormulario(validacionFinal) as ErroresFormulario;
       setErrores(siguientesErrores);
@@ -855,7 +857,7 @@ export function useNuevoTraslado() {
       setEnviando(false);
     }
   }, [
-    aceptaPoliticasPagoCancelacion, cargandoSesion, claveIdempotencia, crear, datos, datosParaValidacion, enfocarPrimerError,
+    aceptaPoliticasPagoCancelacion, cargandoSesion, claveIdempotencia, crear, datos, resultadoValidacion, enfocarPrimerError,
     geocodificarRuta, geocodificarRutaConParadas,
     paso, router, sesionReal, setDetallesVehiculoExpandido, setEnviando, setErrorPaso,
     setErrores, setPaso, setResultado, setRutaAviso, setSubpasoRuta, setTrasladoCreado,

@@ -82,8 +82,16 @@ export function useValidacionTraslado({
     };
   }, [aceptaPoliticasPagoCancelacion, datos, vehiculoSeleccionadoId, vehiculosGuardados]);
 
+  // Deuda (auditoría): erroresParadas, validarCampo, validarPasoActual y
+  // enviarSolicitud reparseaban el esquema completo cada uno (4× por tecla).
+  // Un solo parseo memoizado por snapshot de entrada; todos derivan de aquí.
+  const resultadoValidacion = useMemo(
+    () => esquemaSolicitudTraslado.safeParse(datosParaValidacion()),
+    [datosParaValidacion]
+  );
+
   const erroresParadas = useMemo(() => {
-    const res = esquemaSolicitudTraslado.safeParse(datosParaValidacion());
+    const res = resultadoValidacion;
     if (res.success) return undefined;
     const byIdx: Array<Partial<Record<keyof ParadaForm, string>>> = [];
     for (const issue of res.error.issues) {
@@ -94,10 +102,10 @@ export function useValidacionTraslado({
       }
     }
     return byIdx.length ? byIdx : undefined;
-  }, [datosParaValidacion]);
+  }, [resultadoValidacion]);
 
   const validarCampo = useCallback((campo: keyof DatosFormulario) => {
-    const res = esquemaSolicitudTraslado.safeParse(datosParaValidacion());
+    const res = resultadoValidacion;
     if (!res.success) {
       const map = erroresFormulario(res) as ErroresFormulario;
       if (map[campo]) {
@@ -118,7 +126,7 @@ export function useValidacionTraslado({
         return n;
       });
     }
-  }, [datosParaValidacion, setErrores]);
+  }, [resultadoValidacion, setErrores]);
 
   const validarPasoActual = useCallback(() => {
     if (paso > 0 && paso < 3 && !tarifaPreviaAceptada) {
@@ -127,7 +135,7 @@ export function useValidacionTraslado({
       return false;
     }
 
-    const todos = erroresFormulario(esquemaSolicitudTraslado.safeParse(datosParaValidacion()));
+    const todos = erroresFormulario(resultadoValidacion);
     const siguientesErrores = Object.fromEntries(
       Object.entries(todos).filter(([campo]) => {
         if (paso === 0) return CAMPOS_PASO_TARIFA.has(campo as keyof DatosFormulario);
@@ -154,7 +162,7 @@ export function useValidacionTraslado({
       setErrorPaso(null);
     }
     return totalErrores === 0;
-  }, [datosParaValidacion, enfocarPrimerError, paso, setDetallesVehiculoExpandido, setErrorPaso, setErrores, setPaso, setSubpasoRuta, tarifaPreviaAceptada]);
+  }, [resultadoValidacion, enfocarPrimerError, paso, setDetallesVehiculoExpandido, setErrorPaso, setErrores, setPaso, setSubpasoRuta, tarifaPreviaAceptada]);
 
   const aceptarTarifaYContinuar = useCallback(() => {
     if (!validarPasoActual()) return;
@@ -169,5 +177,5 @@ export function useValidacionTraslado({
     setPaso(1);
   }, [datos, previsualizacion, setErrorPaso, setPaso, setTarifaPreviaAceptada, setTarifaPreviaSnapshot, validarPasoActual]);
 
-  return { datosParaValidacion, enfocarPrimerError, erroresParadas, validarCampo, validarPasoActual, aceptarTarifaYContinuar };
+  return { datosParaValidacion, resultadoValidacion, enfocarPrimerError, erroresParadas, validarCampo, validarPasoActual, aceptarTarifaYContinuar };
 }

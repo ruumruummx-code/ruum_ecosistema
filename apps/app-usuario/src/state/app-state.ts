@@ -5,7 +5,8 @@ import type { SetStateAction } from "react";
 import type { sugerirDireccionesAutocomplete } from "../lib/mapbox";
 import type { DatosCodigoPostal } from "../lib/codigos-postales";
 import type { BorradorTrasladoLocal } from "../lib/borrador-traslado";
-import { USUARIO_PENDIENTE, VALORES_INICIALES, type PrefijoDomicilio, type SubpasoRuta } from "../app/viajes/nuevo/constants";
+import { USUARIO_PENDIENTE, VALORES_INICIALES } from "./valores-iniciales";
+import { type PrefijoDomicilio, type SubpasoRuta } from "../app/viajes/nuevo/constants";
 import type { DatosFormulario, ErroresFormulario, VehiculoGuardado } from "../app/viajes/nuevo/types";
 
 export type SugerenciaDireccion = Awaited<ReturnType<typeof sugerirDireccionesAutocomplete>>[number];

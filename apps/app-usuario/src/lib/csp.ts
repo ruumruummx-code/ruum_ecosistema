@@ -5,6 +5,16 @@
  * (`./lib/csp`, `../src/middleware`, tests PR-12).
  */
 
+import {
+  buildCsp,
+  CSP_PRESETS,
+  CSP_ORIGINS,
+  PERMISSIONS_POLICY,
+  HSTS_HEADER,
+  IMAGES_REMOTE_PATTERNS,
+  IMAGE_FORMATS,
+} from "@ruum/shared/seguridad";
+
 export {
   CSP_ORIGINS,
   CSP_PRESETS,
@@ -12,8 +22,7 @@ export {
   HSTS_HEADER,
   IMAGES_REMOTE_PATTERNS,
   IMAGE_FORMATS,
-} from "../../../../packages/shared/src/seguridad";
-import { buildCsp, CSP_PRESETS, PERMISSIONS_POLICY, HSTS_HEADER } from "../../../../packages/shared/src/seguridad";
+};
 
 /**
  * Construye CSP dinámico con nonce (usado por middleware en runtime).
