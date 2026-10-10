@@ -6,7 +6,7 @@ create extension if not exists pgtap with schema extensions;
 
 begin;
 
-select plan(9);
+select plan(10);
 
 create or replace function pg_temp.correr_rt49() returns setof text as $$
 declare
@@ -93,6 +93,16 @@ begin
     v_respuesta_idempotente->>'id',
     v_traslado_id::text,
     'la clave de idempotencia devuelve el mismo traslado'
+  );
+
+  -- Re-aceptar una cotización ya aceptada no es error (doble clic / UI desactualizada).
+  perform set_config('role', 'authenticated', true);
+  v_estado := public.usuario_acepta_cotizacion(v_traslado_id);
+  perform set_config('role', 'postgres', true);
+  return next is(
+    v_estado::text,
+    'cotizacion_aceptada',
+    're-aceptar devuelve el estado actual sin levantar excepción'
   );
 end;
 $$ language plpgsql;
