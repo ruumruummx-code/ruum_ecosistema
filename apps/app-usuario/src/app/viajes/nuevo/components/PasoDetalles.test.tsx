@@ -1,6 +1,7 @@
 /** @vitest-environment jsdom */
 import { describe, expect, it, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { VALORES_INICIALES } from "../constants";
 import { PasoDetalles, type PasoDetallesProps } from "./PasoDetalles";
 
@@ -50,5 +51,42 @@ describe("PasoDetalles", () => {
     );
 
     expect(screen.getByText(/Nissan Versa 2020/)).toBeInTheDocument();
+  });
+
+  it("pasa la ventana de entrega personalizada con el prefijo Otra:", async () => {
+    const user = userEvent.setup();
+    const iniciales = propsIniciales();
+    render(
+      <PasoDetalles
+        {...iniciales}
+        datos={{ ...iniciales.datos, ventanaEntrega: "Otra: " }}
+      />,
+    );
+
+    const campo = screen.getByLabelText(/ventana de entrega/i);
+    await user.type(campo, "mismo día");
+    await user.tab();
+
+    // El padre es controlado y el espía no actualiza, así que cada onChange
+    // lleva un carácter. Lo que importa es que el valor se prefija.
+    expect(iniciales.acciones.actualizar).toHaveBeenCalledWith(
+      "ventanaEntrega",
+      expect.stringMatching(/^Otra: /),
+    );
+    // onBlur recorta espacios.
+    expect(iniciales.acciones.actualizar).toHaveBeenLastCalledWith(
+      "ventanaEntrega",
+      "Otra: ",
+    );
+  });
+
+  it("marca la aceptación de la política al marcar el checkbox", async () => {
+    const user = userEvent.setup();
+    const iniciales = propsIniciales();
+    render(<PasoDetalles {...iniciales} />);
+
+    await user.click(screen.getByLabelText(/acepto la política de cancelación/i));
+
+    expect(iniciales.acciones.setAceptaPoliticasPagoCancelacion).toHaveBeenCalled();
   });
 });

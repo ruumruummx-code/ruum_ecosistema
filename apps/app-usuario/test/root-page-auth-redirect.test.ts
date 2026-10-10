@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi, beforeEach, afterEach } from "vitest";
 
 const redirectMock = vi.fn((destino: string) => {
   throw new Error(`NEXT_REDIRECT:${destino}`);
@@ -28,6 +28,19 @@ async function destinoDeLaRaiz(parametros: Record<string, string | string[] | un
 }
 
 describe("raíz de app-usuario (/)", () => {
+  beforeEach(() => {
+    /* Sin estas variables `obtenerContextoSesion()` corta en "config_error"
+       (src/app/page.tsx:26) y la página renderiza el aviso de "Configuración
+       incompleta" antes de alcanzar el redirect de la linea 121: el test veía
+       `null` en lugar de `/login`. */
+    vi.stubEnv("NEXT_PUBLIC_SUPABASE_URL", "https://mock.supabase.co");
+    vi.stubEnv("NEXT_PUBLIC_SUPABASE_ANON_KEY", "anon-test");
+  });
+
+  afterEach(() => {
+    vi.unstubAllEnvs();
+  });
+
   it("sin sesión activa, redirige inmediatamente a /login", async () => {
     const destino = await destinoDeLaRaiz({});
     expect(destino).toBe("/login");

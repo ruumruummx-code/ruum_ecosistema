@@ -8,12 +8,19 @@ const EXPERIENCIA_PUBLICA = readFileSync(resolve(__dirname, "../src/app/experien
 const GLOBALES = readFileSync(resolve(__dirname, "../src/app/globals.css"), "utf8");
 
 describe("rediseño del registro de usuario", () => {
-  it("usa el header navy con un título contextual y sin navegación inferior", () => {
+  it("usa el header del design system con un título contextual y sin navegación inferior", () => {
     expect(REGISTRO).toContain('titulo={paso === 1 ? "¡Crea tu cuenta!" : "Configura tu acceso"}');
     expect(REGISTRO).toContain("mostrarEnAcceso");
     expect(REGISTRO).toContain("mostrarNavegacionInferior={false}");
-    expect(NAVEGACION).toContain("bg-[var(--ruum-navy)]/95");
     expect(NAVEGACION).toContain('aria-label="Acciones del usuario"');
+
+    /* El header pasó del navy inline (`bg-[var(--ruum-navy)]/95`) a la clase
+       semántica del design system. Se comprueba la intención —sticky,
+       translúcido, blur— donde vive ahora, en globals.css. */
+    expect(NAVEGACION).toContain("user-v2-shell-header");
+    const bloqueHeader = GLOBALES.slice(GLOBALES.indexOf(".user-v2-shell-header {"));
+    expect(bloqueHeader).toContain("position: sticky");
+    expect(bloqueHeader).toContain("backdrop-filter: blur");
   });
 
   it("presenta el formulario en una tarjeta blanca y elimina el logo vertical interno", () => {

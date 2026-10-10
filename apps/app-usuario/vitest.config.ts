@@ -36,7 +36,18 @@ export default defineConfig({
         "**/*.test.ts",
         "**/*.test.tsx",
         "**/*.stories.tsx",
-        "public/**"
+        "public/**",
+        "cap-shell/**",
+        "android/**",
+        // Tooling: nunca se importan desde el código bajo prueba, así que
+        // contaban como 0% e inflaban el denominador sin aportar información.
+        "next-env.d.ts",
+        "instrumentation.ts",
+        "next.config.ts",
+        "vitest.config.ts",
+        "capacitor.config.ts",
+        "sentry.client.config.ts",
+        "sentry.server.config.ts"
       ]
     }
   }

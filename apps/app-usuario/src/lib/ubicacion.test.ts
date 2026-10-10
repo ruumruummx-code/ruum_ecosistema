@@ -1,50 +1,49 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, expect, it, vi, beforeEach } from "vitest";
 
-vi.mock("./capacitor", () => ({ esNativo: vi.fn() }));
-const mockEsNativo = (await import("./capacitor")).esNativo as unknown as ReturnType<typeof vi.fn>;
-const mockRequestPermissions = vi.fn();
-const mockGetCurrentPosition = vi.fn();
+/* `src/lib/ubicacion` es una fachada: la implementación vive en
+   `@ruum/api/ubicacion` (fuente única). Este test verifica el CONTRATO de la
+   fachada —que delega siempre con `soloNativo: true`, el comportamiento legacy
+   de app-usuario— mockeando `@ruum/api/ubicacion` por el mismo especificador
+   que consume la fachada.
 
-vi.mock("@capacitor/geolocation", () => ({
-  Geolocation: {
-    requestPermissions: (...a: unknown[]) => mockRequestPermissions(...a),
-    getCurrentPosition: (...a: unknown[]) => mockGetCurrentPosition(...a),
-  },
+   Antes se mockeaba `./capacitor` y `@capacitor/geolocation` desde aquí, que
+   resuelven a módulos distintos de los que usa la implementación: los mocks no
+   llegaban y los casos que esperaban `null` pasaban por la razón equivocada.
+   La lógica de permisos nativos se testea en
+   `packages/api/src/ubicacion/index.test.ts`, donde reside. */
+const mockObtenerUbicacionCompartida = vi.fn();
+
+vi.mock("@ruum/api/ubicacion", () => ({
+  obtenerUbicacionActual: (...args: unknown[]) => mockObtenerUbicacionCompartida(...args),
 }));
 
-describe("ubicacion fallback web (R7)", () => {
+describe("ubicacion — fachada de app-usuario (R7)", () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  it("retorna null si no es nativo (web) — sin pedir permiso", async () => {
-    mockEsNativo.mockReturnValue(false);
+  it("delega siempre con soloNativo: true", async () => {
+    mockObtenerUbicacionCompartida.mockResolvedValue(null);
     const { obtenerUbicacionActual } = await import("./ubicacion");
-    expect(await obtenerUbicacionActual()).toBeNull();
-    expect(mockRequestPermissions).not.toHaveBeenCalled();
+    await obtenerUbicacionActual();
+    expect(mockObtenerUbicacionCompartida).toHaveBeenCalledWith({ soloNativo: true });
   });
 
-  it("solicita permiso y retorna coordenadas si granted", async () => {
-    mockEsNativo.mockReturnValue(true);
-    mockRequestPermissions.mockResolvedValue({ location: "granted" });
-    mockGetCurrentPosition.mockResolvedValue({ coords: { latitude: 19.4326, longitude: -99.1332 } });
+  it("en web devuelve null sin pedir permiso de geolocalización", async () => {
+    mockObtenerUbicacionCompartida.mockResolvedValue(null);
+    const { obtenerUbicacionActual } = await import("./ubicacion");
+    expect(await obtenerUbicacionActual()).toBeNull();
+  });
+
+  it("propaga las coordenadas que devuelve la implementación compartida", async () => {
+    mockObtenerUbicacionCompartida.mockResolvedValue({
+      lat: 19.4326,
+      lng: -99.1332,
+      precisionM: null,
+      velocidadMps: null,
+    });
     const { obtenerUbicacionActual } = await import("./ubicacion");
     const res = await obtenerUbicacionActual();
-    expect(res).toEqual({ lat: 19.4326, lng: -99.1332 });
-  });
-
-  it("retorna null si permiso denied", async () => {
-    mockEsNativo.mockReturnValue(true);
-    mockRequestPermissions.mockResolvedValue({ location: "denied" });
-    const { obtenerUbicacionActual } = await import("./ubicacion");
-    expect(await obtenerUbicacionActual()).toBeNull();
-  });
-
-  it("retorna null si getCurrentPosition lanza", async () => {
-    mockEsNativo.mockReturnValue(true);
-    mockRequestPermissions.mockResolvedValue({ location: "granted" });
-    mockGetCurrentPosition.mockRejectedValue(new Error("gps off"));
-    const { obtenerUbicacionActual } = await import("./ubicacion");
-    expect(await obtenerUbicacionActual()).toBeNull();
+    expect(res).toMatchObject({ lat: 19.4326, lng: -99.1332 });
   });
 });

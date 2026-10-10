@@ -1,6 +1,6 @@
 /** @vitest-environment jsdom */
 import { describe, expect, it, vi } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
 vi.mock("next/navigation", () => ({
@@ -57,6 +57,11 @@ describe("MisTrasladosCliente", () => {
     );
     expect(await screen.findByText(/Nissan Versa 2020/)).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: /finalizados/i }));
-    expect(screen.queryByText(/Nissan Versa 2020/)).toBeNull();
+    // handlePestanaChange envuelve setPestana en startTransition: el render puede
+    // no haberse aplicado aún tras el click. Sin waitFor la aserción lee la lista
+    // anterior y flaquea bajo carga (falla 1 de cada N ejecuciones paralelas).
+    await waitFor(() => {
+      expect(screen.queryByText(/Nissan Versa 2020/)).toBeNull();
+    });
   });
 });

@@ -1,6 +1,7 @@
 /** @vitest-environment jsdom */
 import { describe, expect, it, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { VALORES_INICIALES } from "../constants";
 import type { DatosFormulario } from "../types";
 import { PasoVehiculo, type PasoVehiculoProps } from "./PasoVehiculo";
@@ -79,5 +80,33 @@ describe("PasoVehiculo", () => {
       <PasoVehiculo {...iniciales} datos={{ ...iniciales.datos, origenCodigoPostal: "03100" }} />,
     );
     expect(claseControl.mock.calls.length).toBe(llamadasTrasMontaje);
+  });
+
+  it("abre y cierra el bloque de detalles del vehículo", async () => {
+    const user = userEvent.setup();
+    const iniciales = propsIniciales();
+    render(<PasoVehiculo {...iniciales} />);
+
+    expect(screen.getByRole("button", { name: /Detalles del vehículo/ })).toHaveAttribute(
+      "aria-expanded",
+      "true",
+    );
+
+    await user.click(screen.getByRole("button", { name: /Detalles del vehículo/ }));
+    expect(iniciales.acciones.setDetallesVehiculoExpandido).toHaveBeenCalled();
+  });
+
+  it("propaga color y validación al perder el foco", async () => {
+    const user = userEvent.setup();
+    const iniciales = propsIniciales();
+    render(<PasoVehiculo {...iniciales} />);
+
+    await user.type(screen.getByLabelText("Color"), "Rojo");
+    await user.tab();
+
+    // El input es controlado y el espía no actualiza el estado: cada onChange
+    // lleva un carácter, así que se comprueba la secuencia acumulada.
+    expect(iniciales.acciones.actualizar.mock.calls.map((c) => c[1]).join("")).toBe("Rojo");
+    expect(iniciales.acciones.validarCampo).toHaveBeenCalledWith("color");
   });
 });
