@@ -58,7 +58,7 @@ export function CompartirPasaporte({
   async function compartir() {
     const url = window.location.href;
     const datos = {
-      title: `Pasaporte Digital ${folio} · Ruum Ruum`,
+      title: `Pasaporte Digital de Traslado ${folio} · Ruum Ruum`,
       text: `Seguimiento y evidencia del traslado ${folio}`,
       url,
     };

@@ -367,11 +367,7 @@ function PasoVehiculoComponent({
                 </div>
               )}
 
-              {!detallesVehiculoExpandido && (
-                <p className="rounded-lg border border-amber-500/20 bg-amber-500/5 px-3 py-2 font-body text-xs leading-5 text-amber-800">
-                  <strong>Requerido antes de confirmar:</strong> color, placas, VIN, estado general y documentación. Puedes avanzar y volver, pero la solicitud no se enviará sin estos datos. Se validarán al intentar confirmar.
-                </p>
-              )}
+              
             </div>
           </div>
         </PassportCard>

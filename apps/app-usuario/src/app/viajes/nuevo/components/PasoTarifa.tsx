@@ -49,12 +49,6 @@ function PasoTarifaComponent({
     <div className="space-y-4">
       <PassportCard>
         <div className="grid gap-4">
-          <div>
-            <p className="mt-1 font-body text-xs text-ink/65">
-              Ingresa los datos esenciales para calcular el precio real de tu traslado de inmediato.
-            </p>
-          </div>
-
           {/* CP Origen y CP Destino */}
           <div className="grid gap-3 sm:grid-cols-2">
             <div className="flex flex-col gap-1.5">
@@ -401,11 +395,6 @@ function PasoTarifaComponent({
             {!previsualizando && previsualizacion && !previsualizacion.disponible && (
               <p className="mt-1 max-w-sm font-body text-sm leading-6 text-ink/65">
                 Sin tarifa automática por ahora. Revisa el aviso de abajo para solicitar tu cotización especial.
-              </p>
-            )}
-            {!previsualizando && !previsualizacion && (
-              <p className="mt-1 max-w-sm font-body text-sm leading-6 text-ink/65">
-                Completa el CP de origen y destino, vehículo y fecha para conocer tu tarifa antes de llenar el resto del formulario.
               </p>
             )}
           </div>

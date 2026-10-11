@@ -211,7 +211,8 @@ export function InicioUsuario({ usuario, traslados, conductorFotoUrl = null }: I
     .slice(0, 2);
 
   const detalleActivoHref = viajeActivo?.traslado_id ? `/viajes/${viajeActivo.traslado_id}` : "/mis-viajes";
-  const pasaporteHref = viajeActivo?.traslado_id ? `/viajes/${viajeActivo.traslado_id}` : "/pasaporte";
+  const ultimoTraslado = viajeActivo ?? traslados[0];
+  const pasaporteHref = ultimoTraslado?.traslado_id ? `/viajes/${ultimoTraslado.traslado_id}` : "/pasaporte";
 
   return (
     <div className="user-v2-screen">
@@ -336,7 +337,7 @@ export function InicioUsuario({ usuario, traslados, conductorFotoUrl = null }: I
         <IconoPlus />
         <span>Solicitar traslado</span>
         <span className="absolute right-4 rounded-full bg-white/15 px-2.5 py-1 text-[11px] font-bold">
-          5 pasos
+    
         </span>
       </Link>
 
@@ -347,23 +348,24 @@ export function InicioUsuario({ usuario, traslados, conductorFotoUrl = null }: I
         </h2>
         <div className="grid grid-cols-2 gap-3">
           <Link
-            id="quickActionHistory"
-            href="/mis-viajes"
+            id="quickActionVehicles"
+            href="/cuenta/vehiculos"
             className="flex items-center gap-3.5 rounded-[20px] border border-[#e9f0f8] bg-[#f7faff] p-4 transition-colors active:bg-[#eef3fa]"
           >
             <span className="flex size-[42px] shrink-0 items-center justify-center rounded-[14px] bg-white text-[#2e5a88] shadow-[0_4px_10px_rgba(0,0,0,0.03)]">
-              <IconoHistorial />
+              <IconoCarro />
             </span>
             <span className="flex min-w-0 flex-col">
-              <span className="text-[14px] font-bold text-[#0b1e33]">Historial</span>
+              <span className="text-[14px] font-bold text-[#0b1e33]">Mis vehículos</span>
               <span className="mt-0.5 text-[11px] font-medium text-[#7e8fa8]">
-                {traslados.length === 1 ? "1 traslado" : `${traslados.length} traslados`}
+                Garage y placas
               </span>
             </span>
           </Link>
           <Link
             id="quickActionPassport"
             href={pasaporteHref}
+            aria-label="Abrir pasaporte digital"
             className="flex items-center gap-3.5 rounded-[20px] border border-[#e9f0f8] bg-[#f7faff] p-4 transition-colors active:bg-[#eef3fa]"
           >
             <span className="flex size-[42px] shrink-0 items-center justify-center rounded-[14px] bg-white text-[#2e5a88] shadow-[0_4px_10px_rgba(0,0,0,0.03)]">
@@ -371,7 +373,7 @@ export function InicioUsuario({ usuario, traslados, conductorFotoUrl = null }: I
             </span>
             <span className="flex min-w-0 flex-col">
               <span className="text-[14px] font-bold text-[#0b1e33]">Pasaporte</span>
-              <span className="mt-0.5 text-[11px] font-medium text-[#7e8fa8]">Digital</span>
+              <span className="mt-0.5 text-[11px] font-medium text-[#7e8fa8]">Abrir pasaporte digital</span>
             </span>
           </Link>
         </div>

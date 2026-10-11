@@ -122,7 +122,8 @@ export function NuevoTrasladoForm() {
           <div className="min-w-0">
             <p className="truncate text-[17px] font-bold tracking-tight text-[#0b1e33]">Solicitar traslado</p>
             <p className="mt-[1px] text-[11.5px] font-medium text-[#6b7c94]">
-              Paso {t.paso + 1} de {PASOS.length} · {SUBTITULOS_PASO[t.paso]}
+              Paso {t.paso + 1} de {PASOS.length}
+              {SUBTITULOS_PASO[t.paso] ? ` · ${SUBTITULOS_PASO[t.paso]}` : ""}
             </p>
           </div>
           <span className="ml-auto shrink-0 rounded-[20px] bg-[#f0f5fe] px-3 py-1.5 text-[12px] font-bold text-[#2e5a88]">
@@ -179,7 +180,6 @@ export function NuevoTrasladoForm() {
               <span aria-hidden="true">💾</span> Guardado automático
             </span>
           )}
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-route-soft border border-route/20 px-3 py-1 text-route-dark"><span aria-hidden="true">🔒</span> Pago seguro con Stripe</span>
         </div>
 
 

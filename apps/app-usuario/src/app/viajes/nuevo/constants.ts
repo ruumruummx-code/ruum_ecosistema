@@ -11,7 +11,7 @@ export const PASOS = [
 
 /** Subtítulos cortos del encabezado ("Paso X de 5 · …"). */
 export const SUBTITULOS_PASO = [
-  "Conoce tu tarifa",
+  "",
   "Datos del vehículo",
   "Origen y destino",
   "Detalles del servicio",

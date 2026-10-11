@@ -67,4 +67,21 @@ describe("InicioUsuario", () => {
 
     expect(screen.queryByRole("region", { name: "Conductor asignado" })).not.toBeInTheDocument();
   });
+
+  it("renderiza acciones rápidas con Mis vehículos y Pasaporte digital", () => {
+    const traslado = {
+      traslado_id: "traslado-abc",
+      estado: "servicio_cerrado",
+      creado_en: "2026-09-07T12:00:00.000Z",
+    } as unknown as PasaporteRow;
+
+    render(<InicioUsuario usuario={null} traslados={[traslado]} />);
+
+    const linkVehiculos = screen.getByRole("link", { name: /Mis vehículos/i });
+    expect(linkVehiculos).toHaveAttribute("href", "/cuenta/vehiculos");
+
+    const linkPasaporte = screen.getByRole("link", { name: /Abrir pasaporte digital/i });
+    expect(linkPasaporte).toHaveAttribute("href", "/viajes/traslado-abc");
+    expect(within(linkPasaporte).getByText("Pasaporte")).toBeInTheDocument();
+  });
 });

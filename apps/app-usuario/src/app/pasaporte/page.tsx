@@ -26,8 +26,9 @@ export default async function PaginaPasaporteRedirect() {
             t.estado &&
             !["servicio_cerrado", "servicio_cancelado", "traslado_fallido"].includes(t.estado)
         );
-        if (activo?.traslado_id) {
-          destino = `/viajes/${activo.traslado_id}`;
+        const objetivo = activo ?? traslados[0];
+        if (objetivo?.traslado_id) {
+          destino = `/viajes/${objetivo.traslado_id}`;
         }
       }
     } catch {
