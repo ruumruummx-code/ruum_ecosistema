@@ -4,7 +4,7 @@ import { useState } from "react";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { EscalasAcordeon } from "./EscalasAcordeon";
-import type { ParadaForm } from "../types";
+import type { ParadaForm, TipoParadaForm } from "../types";
 
 const sugerirDireccionesMock = vi.hoisted(() => vi.fn());
 
@@ -178,8 +178,7 @@ describe("EscalasAcordeon", () => {
   });
 });
 
-function parada(id: string, tipo: ParadaForm["tipo"] = "escala"): ParadaForm {
-  return {
+function parada(id: string, tipo: TipoParadaForm = "escala"): ParadaForm {  return {
     id,
     tipo,
     calle: "",

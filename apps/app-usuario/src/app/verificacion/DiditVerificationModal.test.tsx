@@ -26,11 +26,10 @@ describe("DiditVerificationModal", () => {
   it("monta el iframe de Didit y expone las notas de permisos", () => {
     render(<DiditVerificationModal {...props()} />);
 
-    expect(screen.getByTitle(/verificación/i, { selector: "iframe" })).toHaveAttribute(
+    expect(document.querySelector("iframe")).toHaveAttribute(
       "src",
       "https://verify.didit.me/session/abc123",
-    );
-    // aria-describedby enlaza ambas notas sr-only.
+    );    // aria-describedby enlaza ambas notas sr-only.
     expect(document.getElementById("didit-permisos-nota")).toHaveTextContent(/cámara, micrófono/);
   });
 

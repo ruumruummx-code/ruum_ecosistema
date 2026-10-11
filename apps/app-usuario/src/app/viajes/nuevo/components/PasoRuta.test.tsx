@@ -108,8 +108,10 @@ describe("PasoRuta", () => {
 
     // El input es controlado por prop y el spy no actualiza el estado, así que
     // cada onChange lleva un solo carácter: concatenando se reconstruye lo escrito.
-    expect(iniciales.acciones.setOrigenBusqueda.mock.calls.map((c) => c[0]).join("")).toBe("Reforma");
-    expect(iniciales.acciones.setDestinoBusqueda.mock.calls.map((c) => c[0]).join("")).toBe("Toluca");
+    const setOrigen = iniciales.acciones.setOrigenBusqueda as unknown as ReturnType<typeof vi.fn>;
+    const setDestino = iniciales.acciones.setDestinoBusqueda as unknown as ReturnType<typeof vi.fn>;
+    expect(setOrigen.mock.calls.map((c: unknown[]) => c[0]).join("")).toBe("Reforma");
+    expect(setDestino.mock.calls.map((c: unknown[]) => c[0]).join("")).toBe("Toluca");
   });
 
   it("aplica la sugerencia elegida al origen y al destino", async () => {

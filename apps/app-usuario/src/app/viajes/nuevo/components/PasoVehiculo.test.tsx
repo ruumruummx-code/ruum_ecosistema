@@ -106,7 +106,8 @@ describe("PasoVehiculo", () => {
 
     // El input es controlado y el espía no actualiza el estado: cada onChange
     // lleva un carácter, así que se comprueba la secuencia acumulada.
-    expect(iniciales.acciones.actualizar.mock.calls.map((c) => c[1]).join("")).toBe("Rojo");
+    const actualizar = iniciales.acciones.actualizar as unknown as ReturnType<typeof vi.fn>;
+    expect(actualizar.mock.calls.map((c: unknown[]) => c[1]).join("")).toBe("Rojo");
     expect(iniciales.acciones.validarCampo).toHaveBeenCalledWith("color");
   });
 });

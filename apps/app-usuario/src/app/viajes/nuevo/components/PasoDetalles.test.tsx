@@ -63,7 +63,9 @@ describe("PasoDetalles", () => {
       />,
     );
 
-    const campo = screen.getByLabelText(/ventana de entrega/i);
+    // El label "ventana de entrega" también casa con el <select> de ventanas,
+    // así que se apunta al input personalizado por su id.
+    const campo = document.getElementById("ventanaEntregaCustom") as HTMLInputElement;
     await user.type(campo, "mismo día");
     await user.tab();
 

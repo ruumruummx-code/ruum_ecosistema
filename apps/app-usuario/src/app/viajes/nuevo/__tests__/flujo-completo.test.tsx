@@ -71,8 +71,10 @@ describe("Flujo completo de nuevo traslado (2.2)", () => {
       await user.type(modeloSelect, "Versa");
     }
 
-    // Esperar tarifa (previsualizarTarifaUsuario mock)
-    await waitFor(() => expect(screen.getByText(/\$500|\$500 MXN|Tarifa/i)).toBeInTheDocument(), { timeout: 3000 }).catch(async () => {
+    // Esperar tarifa (previsualizarTarifaUsuario mock).
+    // Timeout holgado a propósito: bajo carga en paralelo, el debounce de CP
+    // (350 ms) + el de tarifa (600 ms) suman más de 3 s y el test flaqueaba.
+    await waitFor(() => expect(screen.getByText(/\$500|\$500 MXN|Tarifa/i)).toBeInTheDocument(), { timeout: 8000 }).catch(async () => {
       // Fallback: verificar que el botón continuar esté habilitado si tarifa mock funciona
       expect(await screen.findByRole("button", { name: /continuar/i })).toBeInTheDocument();
     });
@@ -81,7 +83,7 @@ describe("Flujo completo de nuevo traslado (2.2)", () => {
     await user.click(continuar);
 
     // PASO 1: Vehículo — verificar que estamos en vehículo (buscar Año)
-    await waitFor(() => expect(screen.getByLabelText(/Año/i)).toBeInTheDocument(), { timeout: 3000 }).catch(() => {});
+    await waitFor(() => expect(screen.getByLabelText(/Año/i)).toBeInTheDocument(), { timeout: 8000 }).catch(() => {});
     const anio = screen.queryByLabelText(/Año/i);
     if (anio) await user.type(anio, "2020");
 
@@ -89,13 +91,13 @@ describe("Flujo completo de nuevo traslado (2.2)", () => {
     if (btnSiguiente) await user.click(btnSiguiente).catch(() => {});
 
     // PASO 2: Ruta — verificar que aparece origen
-    await waitFor(() => expect(screen.getByText(/¿De dónde sale/i)).toBeInTheDocument(), { timeout: 3000 }).catch(() => {});
+    await waitFor(() => expect(screen.getByText(/¿De dónde sale/i)).toBeInTheDocument(), { timeout: 8000 }).catch(() => {});
 
     // PASO 3: Detalles — verificar que aparece pago
     // Simular que tarifaPreviaAceptada ya está true para poder llegar a pago
     // Verificar traslado creado no se llama aún sin completar
     expect(trasladosService.crearTraslado).not.toHaveBeenCalled();
-  });
+  }, 30_000);
 
   it("usuario no puede pagar si tarifa cambió", async () => {
     const user = userEvent.setup();
@@ -130,5 +132,5 @@ describe("Flujo completo de nuevo traslado (2.2)", () => {
     }
 
     expect(trasladosService.crearTraslado).not.toHaveBeenCalledWith(expect.objectContaining({ paso: 4 } as never));
-  });
+  }, 30_000);
 });

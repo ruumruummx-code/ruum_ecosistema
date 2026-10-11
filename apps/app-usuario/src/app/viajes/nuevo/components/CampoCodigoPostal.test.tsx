@@ -53,7 +53,7 @@ describe("CampoCodigoPostal", () => {
           codigo: "03100",
           ciudades: ["Ciudad de México"],
           colonias: ["Del Valle", "Nápoles"],
-        }}
+        } as never}
       />,
     );
 
