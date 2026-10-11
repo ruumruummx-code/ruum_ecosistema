@@ -88,7 +88,7 @@ describe("EscalasAcordeon", () => {
     const onChange = vi.fn();
     render(
       <EscalasAcordeon
-        paradas={[parada("p1", "Escala"), parada("p2", "Escala")]}
+        paradas={[parada("p1"), parada("p2")]}
         onChange={onChange}
       />,
     );

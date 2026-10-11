@@ -20,7 +20,8 @@ describe("useSettersFormulario", () => {
       // setEstadoGuardado → "estadoGuardado"
       const claveEsperada = nombre.charAt(3).toLowerCase() + nombre.slice(4);
       const centinela = `valor-${nombre}`;
-      setter(centinela as never);
+      // Los setters tienen firmas distintas por campo: se invoca como genérico.
+      (setter as (v: unknown) => void)(centinela);
       expect(setFormulario, nombre).toHaveBeenCalledWith(claveEsperada, centinela);
     }
   });
