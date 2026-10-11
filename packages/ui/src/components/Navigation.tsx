@@ -146,6 +146,8 @@ export function Avatar({
   return (
     <span className={`relative inline-flex shrink-0 ${className}`} role="img" aria-label={`Avatar de ${nombre}`}>
       {src ? (
+        // <img> a propósito: avatar con URL firmada y tamaño inline; ver nota en
+        // CredencialConductor (sin next/image para no exigir remotePatterns).
         // eslint-disable-next-line @next/next/no-img-element
         <img src={src} alt="" width={tamano} height={tamano} style={{ width: tamano, height: tamano }} className={`object-cover ${forma === "circle" ? "rounded-full" : "rounded-[24%]"}`} />
       ) : (

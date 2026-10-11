@@ -1,7 +1,8 @@
 // Mock mínimo de PostgREST (lo que @supabase/supabase-js termina llamando)
 // para poder correr el index.ts REAL del webhook de Stripe sin un proyecto
-// de Supabase desplegado. Solo entiende las dos tablas que el webhook toca:
-// pagos y traslados, y solo las formas de query que ese archivo emite.
+// de Supabase desplegado. Entiende las tablas que el webhook toca (pagos,
+// viajes y registro_auditoria como sumidero de auditoría), y solo las formas
+// de query que ese archivo emite.
 
 import http from "node:http";
 import { URL } from "node:url";
@@ -10,12 +11,15 @@ import { URL } from "node:url";
 const PAGOS = new Map();
 // traslado_id -> { estado, tipo_pago }
 const TRASLADOS = new Map();
+// sumidero de auditoría (el webhook registra eventos; el mock solo los guarda)
+const AUDITORIA = [];
 
 const requestsLog = [];
 
 function semilla() {
   PAGOS.clear();
   TRASLADOS.clear();
+  AUDITORIA.length = 0;
   requestsLog.length = 0;
 
   PAGOS.set("pi_test_alcierre", { traslado_id: "traslado-alcierre", stripe_event_id: null });
@@ -87,7 +91,7 @@ const servidor = http.createServer((req, res) => {
       }
     }
 
-    if (url.pathname === "/rest/v1/viajes") {
+    if (url.pathname === "/rest/v1/traslados") {
       const trasladoId = eqValor(url.searchParams.get("id"));
 
       if (req.method === "GET") {
@@ -102,6 +106,16 @@ const servidor = http.createServer((req, res) => {
         if (fila && parsedBody) Object.assign(fila, parsedBody);
         res.writeHead(204);
         res.end();
+        return;
+      }
+    }
+
+    if (url.pathname === "/rest/v1/registro_auditoria") {
+      if (req.method === "POST") {
+        const filas = Array.isArray(parsedBody) ? parsedBody : [parsedBody];
+        for (const fila of filas) AUDITORIA.push(fila);
+        res.writeHead(201, { "content-type": "application/json" });
+        res.end(JSON.stringify(filas));
         return;
       }
     }

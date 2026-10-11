@@ -53,5 +53,6 @@ Deno.test("estadoTrasladoSiguienteTrasPago: avanza solo desde estados válidos",
   assertEquals(estadoTrasladoSiguienteTrasPago("pago_pendiente", "al_cierre", "completado"), "pago_completado");
   assertEquals(estadoTrasladoSiguienteTrasPago("pendiente_de_conductor", "anticipado", "completado"), null);
   assertEquals(estadoTrasladoSiguienteTrasPago("solicitud_creada", "al_cierre", "completado"), null);
+  assertEquals(estadoTrasladoSiguienteTrasPago("solicitud_creada", "anticipado", "completado"), "documentacion_pendiente");
   assertEquals(estadoTrasladoSiguienteTrasPago("entrega_confirmada", "anticipado", "fallido"), null);
 });

@@ -8,8 +8,9 @@ Esto cierra esa brecha **localmente**, sin necesitar una cuenta de Stripe ni un 
 Supabase desplegado:
 
 - `mock-supabase.mjs` — un mock mínimo de PostgREST (lo que `@supabase/supabase-js` llama por
-  debajo) que entiende exactamente las dos tablas que el webhook toca (`pagos`, `traslados`) y
-  expone `/__requests` para inspeccionar qué llamó el webhook de verdad, y `/__reset` para
+  debajo) que entiende las tablas que el webhook toca (`pagos`, `traslados` y
+  `registro_auditoria` como sumidero de auditoría) y expone `/__requests` para
+  inspeccionar qué llamó el webhook de verdad, y `/__reset` para
   reiniciar el estado entre casos.
 - `runner.mjs` — firma eventos de Stripe **exactamente como Stripe los firma** (esquema
   documentado: `HMAC-SHA256("{timestamp}.{payload}", webhook_secret)`, sin llamar a ningún
@@ -33,12 +34,13 @@ Supabase desplegado:
 # Terminal 1
 node mock-supabase.mjs
 
-# Terminal 2 (mismo directorio: supabase/functions)
-STRIPE_SECRET_KEY=sk_test_dummy_local \
-STRIPE_WEBHOOK_SECRET=whsec_test_local_12345 \
-SUPABASE_URL=http://localhost:8787 \
-SUPABASE_SERVICE_ROLE_KEY=dummy-service-role-key \
-deno run --allow-net --allow-env ../stripe-webhook/index.ts
+# Terminal 2 (mismo directorio: supabase/functions; el path correcto es ./ —
+// el README original decía ../ por error)
+$env:STRIPE_SECRET_KEY='sk_test_dummy_local'
+$env:STRIPE_WEBHOOK_SECRET='whsec_test_local_12345'
+$env:SUPABASE_URL='http://localhost:8787'
+$env:SUPABASE_SERVICE_ROLE_KEY='dummy-service-role-key'
+deno run --allow-net --allow-env ./stripe-webhook/index.ts
 
 # Terminal 3
 node runner.mjs

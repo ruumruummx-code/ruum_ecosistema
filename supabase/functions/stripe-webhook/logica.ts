@@ -49,6 +49,12 @@ export function estadoTrasladoSiguienteTrasPago(
     return "servicio_confirmado";
   }
 
+  // Pago anticipado al concluir la solicitud (wizard): la solicitud pagada
+  // avanza a documentación. Transición válida en estado_transiciones_validas.
+  if (estadoActual === "solicitud_creada" && tipoPago === "anticipado") {
+    return "documentacion_pendiente";
+  }
+
   if (estadoActual === "entrega_confirmada" || estadoActual === "pago_pendiente") {
     return "pago_completado";
   }

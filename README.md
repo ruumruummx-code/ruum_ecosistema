@@ -46,10 +46,13 @@ sintético), `pnpm db:types` para regenerar
 ```bash
 pnpm build | lint | typecheck      # turbo por workspace
 pnpm test:unit                     # vitest en packages/*
+pnpm test:coverage                  # coverage por workspace (ui, panel-admin, conductor, usuario)
 pnpm test:sql                      # pgTAP: supabase test db test (53 archivos)
 pnpm test:sql:rls | test:sql:concurrencia   # subconjuntos
 pnpm test:e2e:golden | test:piramide        # golden path / pirámide completa
 pnpm check:fronteras               # 0 accesos directos a Supabase en apps/*
+pnpm check:migrations              # convención de migraciones + sin datos de prueba
+pnpm check:native                  # controles estáticos de la app Android (sin SDK)
 pnpm scan:secrets                  # escaneo de secretos (bloqueante en CI)
 pnpm audit:deps                    # pnpm audit --audit-level=high
 pnpm validate:env                  # valida variables del workspace
@@ -95,6 +98,7 @@ está ignorado). Requiere Android SDK (`local.properties` a partir de
 ## CI y despliegue
 
 - CI (`.github/workflows/ci.yml`): install frozen → lint → typecheck →
-  unit → fronteras → secrets → audit → SQL (Supabase local) → Deno.
+  unit → fronteras → migrations → release → native → secrets → audit →
+  SQL (Supabase local) → Deno.
 - Vercel: `vercel.json` raíz (headers + `turbo run build`) y uno por app
   (`apps/*/vercel.json`). La CSP la emite el `middleware.ts` de cada app.

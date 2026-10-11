@@ -1229,14 +1229,7 @@ export default function PaginaDetalleSolicitudConductorAdmin() {
     return detalle.documentos.find((documento) => documento.id === documentoSeleccionadoId) ?? detalle.documentos[0] ?? null;
   }, [detalle?.documentos, documentoSeleccionadoId, visorCerrado]);
 
-  useEffect(() => {
-    if (!documentoSeleccionado) return;
-    if (urlsDocumento[documentoSeleccionado.id]) return;
-    void seleccionarDocumento(documentoSeleccionado);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [documentoSeleccionado?.id]);
-
-  async function seleccionarDocumento(documento: DocumentoRow) {
+  const seleccionarDocumento = useCallback(async (documento: DocumentoRow) => {
     setVisorCerrado(false);
     setDocumentoSeleccionadoId(documento.id);
     if (urlsDocumento[documento.id]) return;
@@ -1245,7 +1238,13 @@ export default function PaginaDetalleSolicitudConductorAdmin() {
       .createSignedUrl(documento.url, 60 * 30);
     if (error) throw error;
     setUrlsDocumento((actuales) => ({ ...actuales, [documento.id]: data.signedUrl }));
-  }
+  }, [urlsDocumento]);
+
+  useEffect(() => {
+    if (!documentoSeleccionado) return;
+    if (urlsDocumento[documentoSeleccionado.id]) return;
+    void seleccionarDocumento(documentoSeleccionado);
+  }, [documentoSeleccionado, seleccionarDocumento, urlsDocumento]);
 
   async function revisarDocumento(documentoId: string, estado: EstadoDocumentoConductor, notas?: string) {
     await revisarDocumentoConductorAdmin(crearClienteNavegador(), documentoId, estado, notas);

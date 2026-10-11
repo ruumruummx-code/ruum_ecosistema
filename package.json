@@ -35,6 +35,8 @@
     "test:e2e:golden": "node tests/e2e/run-golden.mjs",
     "test:piramide": "pnpm test:unit && pnpm test:sql && pnpm test:e2e:golden",
     "check:fronteras": "node scripts/check-fronteras.mjs",
+    "check:migrations": "node scripts/check-migrations.mjs",
+    "check:native": "node scripts/check-native.mjs",
     "test:sql:rls": "supabase test db test/rt42_rls_admin_roles.test.sql",
     "test:sql:concurrencia": "supabase test db test/rt43_concurrencia_operadores.test.sql",
     "scan:secrets": "node scripts/scan-secrets.mjs",
@@ -42,6 +44,8 @@
     "check:supabase-security": "node scripts/check-supabase-security.mjs",
     "check:supabase-drift": "node scripts/check-supabase-drift.mjs",
     "test:security": "node --test tests/security/scan-secrets.test.mjs",
+    "test:release": "node --test tests/release/changelog.test.mjs",
+    "changelog": "node scripts/changelog.mjs",
     "test:ui": "vitest --ui"
   },
   "devDependencies": {
@@ -66,15 +70,25 @@
     "auditConfig": {
       "ignoreGhsas": [
         "GHSA-jmr9-qjv8-65gv",
-        "GHSA-7pqw-9j4j-h8q3"
+        "GHSA-7pqw-9j4j-h8q3",
+        "GHSA-vfj7-8cjw-p6xm"
       ]
     },
     "overrides": {
       "postcss": "8.5.26",
       "nanoid@3": "3.3.18",
       "fast-uri": "3.1.7",
-      "sharp": "0.35.4",
-      "brace-expansion@5.0.6": "5.0.9",
+      "sharp": "0.35.5",
+      "proxy-addr": "2.0.8",
+      "tinypool": "2.1.2",
+      "webpack-dev-middleware": "7.4.6",
+      "undici": "8.10.2",
+      "brace-expansion@<1.1.20": "1.1.20",
+      "brace-expansion@>=2.0.0 <2.1.6": "2.1.6",
+      "brace-expansion@>=4.0.0 <5.0.11": "5.0.11",
+      "basic-ftp": "6.2.1",
+      "compression": "1.8.2",
+      "source-map-js": "1.2.2",
       "tar": "7.5.21",
       "js-yaml": "4.3.2",
       "adm-zip": "0.6.1",

@@ -46,6 +46,9 @@ export function CredencialConductor({
       <div className="mt-5 flex gap-4">
         <div className="relative size-24 shrink-0 overflow-hidden rounded-[12px] border border-[var(--ruum-teal-deep)] bg-[var(--ruum-neutral-bg)]">
           {fotoUrl ? (
+            // <img> a propósito: la foto es una signed URL efímera de Storage y
+            // @ruum/ui debe funcionar sin remotePatterns de next/image en la app
+            // consumidora. La URL viene del backend (RLS), no de input de usuario.
             // eslint-disable-next-line @next/next/no-img-element
             <img src={fotoUrl} alt={nombreConductor} className="h-full w-full object-cover" />
           ) : (

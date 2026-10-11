@@ -62,7 +62,8 @@ const EXTENSIONES_VALIDAS = new Set([
   ".json", ".yml", ".yaml",
   ".sql", ".sh", ".bash", ".zsh",
   ".pem", ".key", ".env", ".md", ".txt",
-  ".toml", ".gradle", ".properties"
+  ".toml", ".gradle", ".properties",
+  ".kt", ".kts", ".java",
 ]);
 
 // Nombres individuales de archivos sensibles inspeccionados

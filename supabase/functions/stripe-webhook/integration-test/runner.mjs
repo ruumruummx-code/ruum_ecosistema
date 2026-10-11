@@ -75,7 +75,7 @@ async function main() {
   assert(r1.status === 200, `caso al_cierre: respuesta 200 (fue ${r1.status}: ${r1.texto})`);
   const reqs1 = await obtenerRequestsMock();
   const patchPagos1 = reqs1.find((r) => r.method === "PATCH" && r.path === "/rest/v1/pagos");
-  const patchTraslados1 = reqs1.find((r) => r.method === "PATCH" && r.path === "/rest/v1/viajes");
+  const patchTraslados1 = reqs1.find((r) => r.method === "PATCH" && r.path === "/rest/v1/traslados");
   assert(Boolean(patchPagos1), "caso al_cierre: el webhook actualizó la fila de pagos");
   assert(patchPagos1.body.estado === "completado", "caso al_cierre: pagos.estado -> completado");
   assert(Boolean(patchTraslados1), "caso al_cierre: el webhook actualizó traslados (este es el path que se cerró hoy)");
@@ -91,7 +91,7 @@ async function main() {
   const r2 = await enviarEvento(ev2);
   assert(r2.status === 200, `caso anticipado: respuesta 200 (fue ${r2.status})`);
   const reqs2 = await obtenerRequestsMock();
-  const patchTraslados2 = reqs2.find((r) => r.method === "PATCH" && r.path === "/rest/v1/viajes");
+  const patchTraslados2 = reqs2.find((r) => r.method === "PATCH" && r.path === "/rest/v1/traslados");
   assert(Boolean(patchTraslados2), "caso anticipado: el webhook actualizó traslados");
   assert(
     patchTraslados2.body.estado === "documentacion_pendiente",
@@ -109,7 +109,7 @@ async function main() {
   assert(r3.status === 200, `caso fallido: respuesta 200 (fue ${r3.status})`);
   const reqs3 = await obtenerRequestsMock();
   const patchPagos3 = reqs3.find((r) => r.method === "PATCH" && r.path === "/rest/v1/pagos");
-  const patchTraslados3 = reqs3.find((r) => r.method === "PATCH" && r.path === "/rest/v1/viajes");
+  const patchTraslados3 = reqs3.find((r) => r.method === "PATCH" && r.path === "/rest/v1/traslados");
   assert(patchPagos3?.body.estado === "fallido", "caso fallido: pagos.estado -> fallido");
   assert(!patchTraslados3, "caso fallido: NO debe avanzar el estado del traslado (estadoTrasladoSiguienteTrasPago exige completado)");
 
