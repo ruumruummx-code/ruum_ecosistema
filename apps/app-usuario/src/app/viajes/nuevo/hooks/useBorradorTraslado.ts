@@ -11,9 +11,7 @@ import type {
   CondicionVehiculo,
   DatosFormulario,
   ModalidadProgramacion,
-  MotivoServicioTraslado,
   TipoRutaTraslado,
-  TipoServicioTraslado,
   TransmisionVehiculo,
 } from "../types";
 import type { SettersFormulario } from "./useSettersFormulario";
@@ -113,9 +111,7 @@ export function useBorradorTraslado({
         fechaHoraProgramada: datos.fechaHoraProgramada,
         tipoRuta: datos.tipoRuta,
         ventanaRecoleccion: datos.ventanaRecoleccion,
-        ventanaEntrega: datos.ventanaEntrega,
-        tipoServicio: datos.tipoServicio,
-        motivoServicio: datos.motivoServicio
+        ventanaEntrega: datos.ventanaEntrega
       });
       setEstadoGuardado("guardado");
       setTiempoUltimoGuardado(new Date().toISOString());
@@ -130,7 +126,7 @@ export function useBorradorTraslado({
     datos.destinoCodigoPostal, datos.destinoEstado, datos.destinoCiudad, datos.destinoColonia,
     datos.entregaNombre, datos.entregaApellido, datos.recepcionNombre, datos.recepcionApellido,
     datos.modalidadProgramacion, datos.fechaHoraProgramada, datos.tipoRuta,
-    datos.ventanaRecoleccion, datos.ventanaEntrega, datos.tipoServicio, datos.motivoServicio,
+    datos.ventanaRecoleccion, datos.ventanaEntrega,
     setEstadoGuardado, setTiempoUltimoGuardado
   ]);
 
@@ -177,9 +173,7 @@ export function useBorradorTraslado({
       fechaHoraProgramada: fechaRestaurada,
       tipoRuta: (borrador.tipoRuta || prev.tipoRuta) as TipoRutaTraslado,
       ventanaRecoleccion: borrador.ventanaRecoleccion,
-      ventanaEntrega: borrador.ventanaEntrega,
-      tipoServicio: (borrador.tipoServicio || prev.tipoServicio) as TipoServicioTraslado,
-      motivoServicio: (borrador.motivoServicio || prev.motivoServicio) as MotivoServicioTraslado
+      ventanaEntrega: borrador.ventanaEntrega
     }));
 
     setPaso(0);

@@ -4,7 +4,7 @@ import { Button, PassportCard, Aviso } from "@ruum/ui";
 import { MENSAJES_CLAVE_UX, TEXTOS_CARGANDO } from "@ruum/shared/constants";
 import type { PrevisualizacionTarifa } from "@ruum/api/services";
 import { CONDICIONES_VEHICULO, VENTANAS_PREDEFINIDAS, formatearDistancia, formatearTiempo } from "../constants";
-import type { DatosFormulario, MotivoServicioTraslado, TipoRutaTraslado, TipoServicioTraslado } from "../types";
+import type { DatosFormulario, TipoRutaTraslado } from "../types";
 
 export interface AccionesPasoDetalles {
   actualizar: <K extends keyof DatosFormulario>(campo: K, valor: DatosFormulario[K]) => void;
@@ -174,38 +174,6 @@ function PasoDetallesComponent({
         </div>
       </PassportCard>
 
-      <PassportCard>
-        <div className="grid gap-4">
-          <p className="font-body text-sm font-semibold">Tipo de servicio</p>
-          <label className="flex flex-col gap-1.5">
-            <span className="font-body text-sm font-medium">Servicio</span>
-            <select
-              value={datos.tipoServicio}
-              onChange={(e) => actualizar("tipoServicio", e.target.value as TipoServicioTraslado)}
-              className="rounded-lg border border-ink/50 bg-mist px-3.5 py-2.5 font-body text-sm"
-            >
-              <option value="personal">Traslado personal</option>
-              <option value="empresarial">Traslado empresarial</option>
-              <option value="agencia">Para agencia</option>
-              <option value="lote">Para lote</option>
-              <option value="flotilla">Para flotilla</option>
-            </select>
-          </label>
-          <label className="flex flex-col gap-1.5">
-            <span className="font-body text-sm font-medium">Motivo</span>
-            <select
-              value={datos.motivoServicio}
-              onChange={(e) => actualizar("motivoServicio", e.target.value as MotivoServicioTraslado)}
-              className="rounded-lg border border-ink/50 bg-mist px-3.5 py-2.5 font-body text-sm"
-            >
-              <option value="entrega_cliente">Entrega a cliente</option>
-              <option value="recuperacion">Recuperación</option>
-              <option value="traslado_especial">Traslado especial</option>
-            </select>
-          </label>
-        </div>
-      </PassportCard>
-
       <section className="app-status-strip px-5 py-5" aria-labelledby="titulo-tarifa-calculada">
         <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
           <div>
@@ -270,8 +238,6 @@ function PasoDetallesComponent({
           </dd>
           <dt className="text-ink/45">Agenda</dt>
           <dd>{datos.modalidadProgramacion === "programado" ? datos.fechaHoraProgramada : "Lo antes posible"}</dd>
-          <dt className="text-ink/45">Servicio</dt>
-          <dd>{datos.tipoServicio.replaceAll("_", " ")}</dd>
         </dl>
       </PassportCard>
 
@@ -400,8 +366,6 @@ function areEqualPasoDetalles(prev: PasoDetallesProps, next: PasoDetallesProps) 
     prev.datos.tipoRuta === next.datos.tipoRuta &&
     prev.datos.ventanaRecoleccion === next.datos.ventanaRecoleccion &&
     prev.datos.ventanaEntrega === next.datos.ventanaEntrega &&
-    prev.datos.tipoServicio === next.datos.tipoServicio &&
-    prev.datos.motivoServicio === next.datos.motivoServicio &&
     prev.previsualizacion === next.previsualizacion &&
     prev.previsualizando === next.previsualizando &&
     prev.momentoPago === next.momentoPago &&

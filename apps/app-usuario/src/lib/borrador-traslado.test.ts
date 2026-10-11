@@ -42,8 +42,6 @@ describe("borrador-traslado (R7)", () => {
       tipoRuta: "local",
       ventanaRecoleccion: "manana",
       ventanaEntrega: "tarde",
-      tipoServicio: "personal",
-      motivoServicio: "entrega_cliente",
       ...overrides,
     };
   }
@@ -64,7 +62,7 @@ describe("borrador-traslado (R7)", () => {
   it("excluye contenido vacío -> retorna null", async () => {
     const { guardarBorradorTrasladoLocal, leerBorradorTrasladoLocal } = await import("./borrador-traslado");
     // Todos vacíos excepto booleans -> hayContenido false -> null
-    const vacio = baseDatos({ tipo: "", marca: "", modelo: "", anio: "", color: "", condicion: "", estadoGeneral: "", origenCodigoPostal: "", origenEstado: "", origenCiudad: "", origenColonia: "", destinoCodigoPostal: "", destinoEstado: "", destinoCiudad: "", destinoColonia: "", entregaNombre: "", entregaApellido: "", recepcionNombre: "", recepcionApellido: "", modalidadProgramacion: "", fechaHoraProgramada: "", tipoRuta: "", ventanaRecoleccion: "", ventanaEntrega: "", tipoServicio: "", motivoServicio: "", transmision: "" });
+    const vacio = baseDatos({ tipo: "", marca: "", modelo: "", anio: "", color: "", condicion: "", estadoGeneral: "", origenCodigoPostal: "", origenEstado: "", origenCiudad: "", origenColonia: "", destinoCodigoPostal: "", destinoEstado: "", destinoCiudad: "", destinoColonia: "", entregaNombre: "", entregaApellido: "", recepcionNombre: "", recepcionApellido: "", modalidadProgramacion: "", fechaHoraProgramada: "", tipoRuta: "", ventanaRecoleccion: "", ventanaEntrega: "", transmision: "" });
     guardarBorradorTrasladoLocal(vacio as never);
     expect(leerBorradorTrasladoLocal()).toBeNull();
   });
@@ -82,7 +80,7 @@ describe("borrador-traslado (R7)", () => {
       origenCodigoPostal: "03100", origenEstado: "CDMX", origenCiudad: "CDMX", origenColonia: "Del Valle",
       destinoCodigoPostal: "06600", destinoEstado: "CDMX", destinoCiudad: "CDMX", destinoColonia: "Juarez",
       entregaNombre: "Ana", entregaApellido: "Lopez", recepcionNombre: "Luis", recepcionApellido: "Perez",
-      modalidadProgramacion: "lo_antes_posible", fechaHoraProgramada: "", tipoRuta: "local", ventanaRecoleccion: "", ventanaEntrega: "", tipoServicio: "", motivoServicio: ""
+      modalidadProgramacion: "lo_antes_posible", fechaHoraProgramada: "", tipoRuta: "local", ventanaRecoleccion: "", ventanaEntrega: ""
     };
     localStorage.setItem(clave, JSON.stringify(expirado));
     expect(leerBorradorTrasladoLocal()).toBeNull();
@@ -103,7 +101,7 @@ describe("borrador-traslado (R7)", () => {
       origenCodigoPostal: "", origenEstado: "", origenCiudad: "", origenColonia: "",
       destinoCodigoPostal: "", destinoEstado: "", destinoCiudad: "", destinoColonia: "",
       entregaNombre: "", entregaApellido: "", recepcionNombre: "", recepcionApellido: "",
-      modalidadProgramacion: "", fechaHoraProgramada: "", tipoRuta: "", ventanaRecoleccion: "", ventanaEntrega: "", tipoServicio: "", motivoServicio: ""
+      modalidadProgramacion: "", fechaHoraProgramada: "", tipoRuta: "", ventanaRecoleccion: "", ventanaEntrega: ""
     };
     localStorage.setItem(clave, JSON.stringify(datos));
     expect(leerBorradorTrasladoLocal()).toBeNull();
@@ -122,7 +120,7 @@ describe("borrador-traslado (R7)", () => {
       origenCodigoPostal: "", origenEstado: "", origenCiudad: "", origenColonia: "",
       destinoCodigoPostal: "", destinoEstado: "", destinoCiudad: "", destinoColonia: "",
       entregaNombre: "Ana", entregaApellido: "", recepcionNombre: "", recepcionApellido: "",
-      modalidadProgramacion: "", fechaHoraProgramada: "", tipoRuta: "", ventanaRecoleccion: "", ventanaEntrega: "", tipoServicio: "", motivoServicio: ""
+      modalidadProgramacion: "", fechaHoraProgramada: "", tipoRuta: "", ventanaRecoleccion: "", ventanaEntrega: ""
     };
     localStorage.setItem(clave, JSON.stringify(datos));
     const leido = leerBorradorTrasladoLocal();
@@ -170,7 +168,7 @@ describe("borrador-traslado (R7)", () => {
       origenCodigoPostal: "03100", origenEstado: "CDMX", origenCiudad: "CDMX", origenColonia: "Del Valle",
       destinoCodigoPostal: "06600", destinoEstado: "CDMX", destinoCiudad: "CDMX", destinoColonia: "Juarez",
       entregaNombre: "Ana", entregaApellido: "Lopez", recepcionNombre: "Luis", recepcionApellido: "Perez",
-      modalidadProgramacion: "lo_antes_posible", fechaHoraProgramada: "", tipoRuta: "local", ventanaRecoleccion: "", ventanaEntrega: "", tipoServicio: "personal", motivoServicio: "entrega_cliente"
+      modalidadProgramacion: "lo_antes_posible", fechaHoraProgramada: "", tipoRuta: "local", ventanaRecoleccion: "", ventanaEntrega: ""
     };
     localStorage.setItem(clave, JSON.stringify(raw));
     expect(leerBorradorTrasladoLocal()?.paso).toBe(0);

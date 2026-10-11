@@ -13,7 +13,7 @@ import {
   HSTS_HEADER,
   IMAGES_REMOTE_PATTERNS,
   IMAGE_FORMATS,
-} from "@ruum/shared/seguridad";
+} from "../../../../packages/shared/src/seguridad/index";
 
 export {
   CSP_ORIGINS,

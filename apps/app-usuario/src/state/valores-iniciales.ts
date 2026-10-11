@@ -49,8 +49,6 @@ export const VALORES_INICIALES: DatosFormulario = {
   tipoRuta: "local",
   ventanaRecoleccion: "",
   ventanaEntrega: "",
-  tipoServicio: "personal",
-  motivoServicio: "entrega_cliente",
   paradas: []
 };
 

@@ -13,8 +13,7 @@ describe("tarifa-gate — invalidación y snapshot de tarifa previa", () => {
     fechaHoraProgramada: "",
     color: "blanco",
     placas: "ABC-123",
-    entregaNombre: "Carlos",
-    tipoServicio: "personal"
+    entregaNombre: "Carlos"
   };
 
   it("define exactamente los 7 campos que impactan precio en CAMPOS_PASO_TARIFA", () => {
@@ -57,7 +56,7 @@ describe("tarifa-gate — invalidación y snapshot de tarifa previa", () => {
     expect(haCambiadoTarifa(snapshot, { ...base, color: "rojo" })).toBe(false);
     expect(haCambiadoTarifa(snapshot, { ...base, placas: "XYZ-999" })).toBe(false);
     expect(haCambiadoTarifa(snapshot, { ...base, entregaNombre: "Roberto" })).toBe(false);
-    expect(haCambiadoTarifa(snapshot, { ...base, tipoServicio: "empresarial" })).toBe(false);
+    expect(haCambiadoTarifa(snapshot, { ...base, tipoRuta: "foraneo" })).toBe(false);
     expect(haCambiadoTarifa(snapshot, { ...base, anio: "2024" })).toBe(false);
   });
 

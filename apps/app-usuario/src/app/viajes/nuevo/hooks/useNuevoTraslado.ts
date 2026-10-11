@@ -729,7 +729,6 @@ export function useNuevoTraslado() {
     try {
       registrarEventoUx("traslado_nuevo_enviado", {
         modalidad: datos.modalidadProgramacion,
-        tipo_servicio: datos.tipoServicio,
         tipo_ruta: datos.tipoRuta
       });
       // Sec3: validación servidor — el servidor es fuente de verdad, el cliente no puede falsificar paso
@@ -811,7 +810,6 @@ export function useNuevoTraslado() {
       registrarEventoUx("traslado_nuevo_exitoso", {
         tipo_pago: nuevoTraslado.tipo_pago,
         modalidad: datos.modalidadProgramacion,
-        tipo_servicio: datos.tipoServicio,
         tipo_ruta: datos.tipoRuta
       });
     } catch (err) {
@@ -831,7 +829,6 @@ export function useNuevoTraslado() {
             tarifaPreviaAceptada,
             datosCompletos: Boolean(datos.marca && datos.modelo && datos.origenCodigoPostal),
             modalidad: datos.modalidadProgramacion,
-            tipo_servicio: datos.tipoServicio,
           },
         },
         extra: {
@@ -844,7 +841,6 @@ export function useNuevoTraslado() {
       });
       registrarEventoUx("traslado_nuevo_error", {
         modalidad: datos.modalidadProgramacion,
-        tipo_servicio: datos.tipoServicio,
         tipo_ruta: datos.tipoRuta,
         error_code: err instanceof Error ? err.name : "unknown",
         timestamp: new Date().toISOString(),

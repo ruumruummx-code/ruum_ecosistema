@@ -71,8 +71,6 @@ describe("NuevoTrasladoForm — Arquitectura Modular (GAP 1)", () => {
     expect(pasoDeCampo("paradas")).toBe(2);
 
     // Paso 3: Detalles restantes
-    expect(pasoDeCampo("tipoServicio")).toBe(3);
-    expect(pasoDeCampo("motivoServicio")).toBe(3);
     expect(pasoDeCampo("tipoRuta")).toBe(3);
   });
 
@@ -131,7 +129,6 @@ describe("NuevoTrasladoForm — Arquitectura Modular (GAP 1)", () => {
     expect(VALORES_INICIALES.tipo).toBe("sedan");
     expect(VALORES_INICIALES.modalidadProgramacion).toBe("lo_antes_posible");
     expect(VALORES_INICIALES.tipoRuta).toBe("local");
-    expect(VALORES_INICIALES.tipoServicio).toBe("personal");
     expect(VALORES_INICIALES.paradas).toEqual([]);
   });
 });

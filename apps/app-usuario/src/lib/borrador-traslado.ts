@@ -19,6 +19,11 @@
  *    referencias de domicilio o códigos de acceso.
  *  - vehiculoSeleccionadoId: si se restaura, mejor que la persona vuelva a
  *    elegir de su lista (ya cargada por sesión) que arrastrar un id viejo.
+ *
+ * Campos retirados del wizard (tipoServicio, motivoServicio): el esquema se
+ * mantiene en v2 a propósito. Los borradores v2 ya guardados pueden traer
+ * esas claves; la lectura las ignora (no están en CAMPOS_TEXTO) en vez de
+ * descartar el borrador, que es lo que pasaría si se subiera la versión.
  */
 
 const CLAVE_ACTUAL = "ruumruum.traslados-nuevo.borrador.v2";
@@ -76,8 +81,6 @@ export interface BorradorTrasladoLocal {
   tipoRuta: string;
   ventanaRecoleccion: string;
   ventanaEntrega: string;
-  tipoServicio: string;
-  motivoServicio: string;
 }
 
 const CAMPOS_TEXTO = [
@@ -86,7 +89,7 @@ const CAMPOS_TEXTO = [
   "destinoCodigoPostal", "destinoEstado", "destinoCiudad", "destinoColonia",
   "entregaNombre", "entregaApellido", "recepcionNombre", "recepcionApellido",
   "modalidadProgramacion", "fechaHoraProgramada", "tipoRuta",
-  "ventanaRecoleccion", "ventanaEntrega", "tipoServicio", "motivoServicio"
+  "ventanaRecoleccion", "ventanaEntrega"
 ] as const;
 
 const CAMPOS_BOOLEANOS = ["tieneTarjeta", "tieneVerificacion", "tienePlacas", "puedeCircular"] as const;
@@ -131,7 +134,7 @@ export function leerBorradorTrasladoLocal(): BorradorTrasladoLocal | null {
       destinoCodigoPostal: "", destinoEstado: "", destinoCiudad: "", destinoColonia: "",
       entregaNombre: "", entregaApellido: "", recepcionNombre: "", recepcionApellido: "",
       modalidadProgramacion: "", fechaHoraProgramada: "", tipoRuta: "",
-      ventanaRecoleccion: "", ventanaEntrega: "", tipoServicio: "", motivoServicio: ""
+      ventanaRecoleccion: "", ventanaEntrega: ""
     };
 
     for (const campo of CAMPOS_TEXTO) {

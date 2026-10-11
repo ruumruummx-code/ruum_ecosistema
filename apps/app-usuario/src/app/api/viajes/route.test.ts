@@ -103,8 +103,6 @@ describe("Sec3 POST /api/viajes — validación paso servidor", () => {
       fechaHoraProgramada: "",
       zonaHoraria: "America/Mexico_City",
       tipoRuta: "local",
-      tipoServicio: "personal",
-      motivoServicio: "entrega_cliente",
       aceptaPoliticas: true,
       paradas: [],
     };
@@ -174,8 +172,6 @@ describe("Sec3 POST /api/viajes — validación paso servidor", () => {
       fechaHoraProgramada: "",
       zonaHoraria: "America/Mexico_City",
       tipoRuta: "local",
-      tipoServicio: "personal",
-      motivoServicio: "entrega_cliente",
       aceptaPoliticas: true,
       paradas: [],
     };

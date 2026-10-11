@@ -7,7 +7,7 @@ const base = {
   origenCodigoPostal: "03100", origenEstado: "CDMX", origenCiudad: "CDMX", origenColonia: "Del Valle", origenCalle: "A", origenNumero: "1",
   destinoCodigoPostal: "06600", destinoEstado: "CDMX", destinoCiudad: "CDMX", destinoColonia: "Juárez", destinoCalle: "B", destinoNumero: "2",
   entregaNombre: "Ana", entregaApellido: "López", entregaTelefono: "5512345678", recepcionNombre: "Luis", recepcionApellido: "Pérez", recepcionTelefono: "5587654321",
-  modalidadProgramacion: "lo_antes_posible" as const, fechaHoraProgramada: "", zonaHoraria: "America/Mexico_City", tipoRuta: "local" as const, tipoServicio: "personal" as const, motivoServicio: "entrega_cliente" as const, aceptaPoliticas: true as const,
+  modalidadProgramacion: "lo_antes_posible" as const, fechaHoraProgramada: "", zonaHoraria: "America/Mexico_City", tipoRuta: "local" as const, aceptaPoliticas: true as const,
 };
 
 describe("paradas duplicadas (R7)", () => {

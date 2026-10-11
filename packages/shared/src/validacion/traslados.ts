@@ -89,8 +89,14 @@ export const esquemaSolicitudTraslado = z.object({
   fechaHoraProgramada: z.string(),
   zonaHoraria: requerido("No se pudo determinar la zona horaria."),
   tipoRuta: z.enum(["local", "foraneo"]),
-  tipoServicio: z.enum(["personal", "empresarial", "agencia", "lote", "flotilla"]),
-  motivoServicio: z.enum(["entrega_cliente", "recuperacion", "traslado_especial"]),
+  /* Deprecados: el wizard de app-usuario ya no captura tipo de servicio ni
+     motivo — no alimentan tarifa, asignación ni SLA, y el eje
+     personal/empresarial vive en usuarios.tipo_cuenta. Se aceptan opcionales
+     (no se borran) porque el campo se envía desde la app nativa empaquetada
+     con Capacitor, cuyo bundle antiguo seguiría mandándolos; el flujo masivo
+     conserva sus propios valores. */
+  tipoServicio: z.enum(["personal", "empresarial", "agencia", "lote", "flotilla"]).optional().nullable(),
+  motivoServicio: z.enum(["entrega_cliente", "recuperacion", "traslado_especial"]).optional().nullable(),
   aceptaPoliticas: z.literal(true, { errorMap: () => ({ message: "Debes aceptar las políticas de pago y cancelación." }) }),
   paradas: z.array(esquemaParada).max(MAX_PARADAS_TRASLADO, `Máximo ${MAX_PARADAS_TRASLADO} escalas/tareas.`).default([])
 }).superRefine((d, ctx) => {
