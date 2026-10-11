@@ -60,3 +60,13 @@ C__inv_fronteras.*
 
 # Dumps locales con datos reales: jamás se versionan (ver supabase/seed.sql sintético).
 datos_locales.sql
+
+# El package manager del monorepo es pnpm (pnpm-lock.yaml). Los lockfiles de
+# npm/yarn no deben versionarse: rompen la coherencia del workspace.
+package-lock.json
+yarn.lock
+
+# Generadores personales de documentación y binarios sueltos en raíz:
+# el diseño vive en design-system/assets, los docs en docs/.
+build_ruum_docs.py
+Logos ruum ruum

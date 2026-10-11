@@ -34,7 +34,7 @@ COPY --from=deps /usr/src/app/node_modules ./node_modules
 COPY . .
 
 # Forzamos una instalación limpia que incluya devDependencies locales y sincronice el monorrepo
-RUN pnpm install --no-frozen-lockfile
+RUN pnpm install --frozen-lockfile
 
 # Ejecutamos el build usando el comando nativo de Turbo sin intermediarios
 RUN turbo run build --concurrency=1
