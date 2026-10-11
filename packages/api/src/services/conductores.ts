@@ -97,6 +97,37 @@ export async function obtenerSolicitudConductorActual(cliente: Cliente): Promise
   return data;
 }
 
+/**
+ * FASE 6 — Frontera arquitectónica.
+ * La página cuenta/certificacion solo necesita el id de la solicitud activa
+ * para reintentar Didit; exponerlo evita `.from("solicitudes_conductor")`
+ * directo en apps/*.
+ */
+export async function obtenerSolicitudIdActivaConductor(cliente: Cliente): Promise<string | null> {
+  const solicitud = await obtenerSolicitudConductorActual(cliente);
+  return solicitud?.id ?? null;
+}
+
+/**
+ * FASE 6 — Frontera arquitectónica.
+ * La página cuenta/certificacion solo necesita saber si existe cuenta bancaria
+ * propia (checklist 11.2); exponerlo evita `.from("datos_bancarios_conductor")`
+ * directo en apps/*.
+ */
+export async function tieneDatosBancariosConductor(cliente: Cliente, conductorId: string): Promise<boolean> {
+  const conductorAutenticado = await obtenerConductorIdActual(cliente);
+  if (conductorAutenticado !== conductorId) {
+    throw new Error("No puedes consultar los datos bancarios de otro conductor.");
+  }
+  const { data, error } = await cliente
+    .from("datos_bancarios_conductor")
+    .select("id")
+    .eq("conductor_id", conductorId)
+    .maybeSingle();
+  if (error) throw error;
+  return !!data;
+}
+
 export interface ExpedienteSolicitudConductorV2 {
   datosPersonales: Json;
   domicilio: Json;

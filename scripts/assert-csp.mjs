@@ -63,8 +63,8 @@ export function runAssertCsp(app, repoRoot) {
   // 4) Middleware genera nonce por request y lo propaga
   assert(middleware.includes("crypto.randomUUID()") && middleware.includes('requestHeaders.set("x-nonce"'), "middleware genera nonce por request y lo propaga");
 
-  // 5) Headers de seguridad presentes (middleware o next.config)
-  const conHeaders = middleware + nextConfig;
+  // 5) Headers de seguridad presentes (middleware, next.config o la fuente única en src/lib/csp.ts)
+  const conHeaders = middleware + nextConfig + libCsp;
   for (const h of ["X-Frame-Options", "X-Content-Type-Options", "Referrer-Policy", "Permissions-Policy", "Strict-Transport-Security"]) {
     assert(conHeaders.includes(h), `header ${h} presente`);
   }

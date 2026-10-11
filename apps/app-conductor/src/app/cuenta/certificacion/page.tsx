@@ -10,7 +10,7 @@ import {
   REQUISITOS_MINIMOS_CERTIFICACION,
 } from "@ruum/shared/constants";
 import { esActivoParaAsignacionMCE, puedeAscenderNivel } from "@ruum/shared/rules";
-import { obtenerConfiguracionConductor, obtenerConductorActual } from "@ruum/api/services";
+import { obtenerConfiguracionConductor, obtenerConductorActual, obtenerSolicitudIdActivaConductor, tieneDatosBancariosConductor } from "@ruum/api/services";
 import { crearClienteNavegador, tieneSupabaseConfigurado } from "@/lib/supabase-browser";
 import { alertaLicencia15Dias, esSmartphoneCompatible, evaluarChecklist } from "@/lib/certificacion";
 import { CuentaHeader } from "../CuentaHeader";
@@ -52,14 +52,12 @@ export default function PaginaCertificacion() {
         setIdentidadOk(aprobado("identificacion_oficial"));
         setLicenciaOk(aprobado("licencia_frente") && aprobado("licencia_reverso"));
         setConstanciaOk(aprobado("constancia_situacion_fiscal"));
-        const { data: banco } = await cliente.from("datos_bancarios_conductor").select("id").eq("conductor_id", c.id).maybeSingle();
-        setCuentaBanco(!!banco);
-        // Solicitud para reintentar Didit
-        const { data: ses } = await cliente.auth.getUser();
-        if (ses.user) {
-          const { data: sol } = await cliente.from("solicitudes_conductor").select("id").eq("auth_user_id", ses.user.id).order("actualizado_en", { ascending: false }).limit(1).maybeSingle();
-          if (sol) setSolicitudId(sol.id);
-        }
+        // FASE 6: lectura de dominio vía @ruum/api (sin .from directo en apps/*).
+        const cuenta = await tieneDatosBancariosConductor(cliente, c.id).catch(() => false);
+        setCuentaBanco(cuenta);
+        // Solicitud para reintentar Didit (id vía @ruum/api).
+        const solicitudActivaId = await obtenerSolicitudIdActivaConductor(cliente).catch(() => null);
+        if (solicitudActivaId) setSolicitudId(solicitudActivaId);
       } finally {
         if (vivo) setCargando(false);
       }

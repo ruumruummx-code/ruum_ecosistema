@@ -12,13 +12,6 @@
         { "key": "X-Content-Type-Options", "value": "nosniff" },
         { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" },
         { "key": "Permissions-Policy", "value": "camera=(self \"https://verify.didit.me\" \"https://*.didit.me\"), geolocation=(self \"https://verify.didit.me\" \"https://*.didit.me\"), microphone=(self \"https://verify.didit.me\" \"https://*.didit.me\")" }
-        /* ARQ-4 (auditoría fase 4): se quita la CSP Report-Only global.
-           Era la TERCERA fuente de CSP (junto a middleware y next.config) y
-           reportaba a /api/csp-report de app-usuario desde rutas de panel-admin
-           y app-conductor, que tienen su propia política y su propio endpoint.
-           La CSP de app-usuario la emite src/middleware.ts, que genera el nonce
-           por request y decide entre enforcing y Report-Only según
-           NEXT_PUBLIC_RUUM_AMBIENTE. */
       ]
     }
   ]
