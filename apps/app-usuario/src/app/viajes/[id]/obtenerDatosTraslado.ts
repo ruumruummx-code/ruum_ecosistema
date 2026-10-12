@@ -181,8 +181,21 @@ export async function obtenerDatos(id: string) {
       }));
     }
 
+    const pagosLista = (pagos?.data ?? []) as Pago[];
+    const totalPagadoCalculado = pagosLista
+      .filter((p) => p.estado === "completado")
+      .reduce((sum, p) => sum + (p.monto ?? 0), 0);
+
+    let pasaporteFinal = pasaporte;
+    if (pasaporteFinal && (!pasaporteFinal.monto_pagado || pasaporteFinal.monto_pagado === 0) && totalPagadoCalculado > 0) {
+      pasaporteFinal = {
+        ...pasaporteFinal,
+        monto_pagado: totalPagadoCalculado
+      };
+    }
+
     return {
-      pasaporte,
+      pasaporte: pasaporteFinal,
       traslado: trasladoRes?.data ?? null,
       vehiculo: vehiculoRes?.data ?? null,
       conductor: conductorRes?.data ?? null,
@@ -191,7 +204,7 @@ export async function obtenerDatos(id: string) {
       disputas: (disputas?.data ?? []) as Disputa[],
       reclamosSeguro: (reclamosSeguro?.data ?? []) as ReclamoSeguroUsuario[],
       calificacion: calificacion?.data ?? null,
-      pagos: (pagos?.data ?? []) as Pago[],
+      pagos: pagosLista,
       ultimaUbicacion: ultimaUbicacion ?? null
     };
   } catch (error) {

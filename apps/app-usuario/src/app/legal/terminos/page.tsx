@@ -56,7 +56,7 @@ export default function PaginaTerminos() {
                 realizar traslados vehiculares.
               </p>
               <p className="mt-2">
-                <strong>Pasaporte Digital:</strong> Documento digital generado por la Plataforma
+                <strong>Pasaporte Digital de Traslado:</strong> Documento digital generado por la Plataforma
                 que contiene la evidencia fotográfica, el estado del vehículo y la trazabilidad
                 del traslado.
               </p>

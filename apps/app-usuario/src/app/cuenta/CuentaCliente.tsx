@@ -281,11 +281,11 @@ export function CuentaCliente({ usuario, fotoUrl = null, vehiculos = [], totalTr
           subtitulo="Cambiar contraseña de acceso"
         />
         <FilaEnlace
-          href="/verificacion"
+          href="/cuenta/verificacion-documentos"
           icono="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z M9 12l2 2 4-4"
           tono="green"
-          titulo="Verificación"
-          subtitulo={verificado ? "Identidad y documentos verificados" : "Completa tu verificación de identidad"}
+          titulo="Verificación y documentos"
+          subtitulo={verificado ? "Identidad y documentos verificados" : "INE, comprobante y datos fiscales"}
           insignia={etiquetaVerificacion(usuario?.estado_verificacion)}
           insigniaVerde={verificado}
         />

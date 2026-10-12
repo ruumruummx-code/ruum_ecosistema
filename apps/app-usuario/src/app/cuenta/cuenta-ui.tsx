@@ -27,6 +27,8 @@ export interface CuentaReal {
 
 const LINKS_CUENTA = [
   { href: "/cuenta/perfil", inicial: "P", titulo: "Perfil del usuario", descripcion: "Datos personales, foto, teléfono y domicilio." },
+  { href: "/cuenta/datos-personales", inicial: "D", titulo: "Datos personales", descripcion: "Edita tu información personal y dirección." },
+  { href: "/cuenta/verificacion-documentos", inicial: "V", titulo: "Verificación y documentos", descripcion: "INE, comprobante de domicilio y datos fiscales." },
   { href: "/cuenta/vehiculos", inicial: "V", titulo: "Mis vehículos", descripcion: "Autos frecuentes, placas, VIN y fotografías." },
   { href: "/cuenta/metodos-pago", inicial: "M", titulo: "Métodos de pago", descripcion: "Tarjeta, transferencia y pago empresarial." },
   { href: "/cuenta/facturacion", inicial: "F", titulo: "Facturación", descripcion: "RFC, razón social, CFDI y correo fiscal." },
@@ -294,10 +296,10 @@ export function NavegacionCuenta({ usuario }: { usuario: Usuario }) {
             ))}
           </GrupoConfiguracion>
           <GrupoConfiguracion titulo="Preferencias">
-            <FilaConfiguracion {...LINKS_CUENTA[4]} detalle={detallePreferencias} />
+            <FilaConfiguracion {...LINKS_CUENTA[5]} detalle={detallePreferencias} />
           </GrupoConfiguracion>
           <GrupoConfiguracion titulo="Legal">
-            <FilaConfiguracion {...LINKS_CUENTA[5]} />
+            <FilaConfiguracion {...LINKS_CUENTA[6]} />
             <FilaConfiguracion href={DOCUMENTOS_LEGALES.terminos.pagina} inicial="T" titulo="Términos y condiciones" descripcion="Reglas de uso, pagos, cancelaciones y servicio." />
             <FilaConfiguracion href={DOCUMENTOS_LEGALES.privacidad.pagina} inicial="A" titulo="Aviso de privacidad" descripcion="Tratamiento de datos e identidad." />
           </GrupoConfiguracion>

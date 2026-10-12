@@ -48,6 +48,7 @@ Deno.test("esEventoManejado: rechaza tipos de evento que no manejamos", () => {
 
 Deno.test("estadoTrasladoSiguienteTrasPago: avanza solo desde estados válidos", () => {
   assertEquals(estadoTrasladoSiguienteTrasPago("cotizacion_aceptada", "anticipado", "completado"), "servicio_confirmado");
+  assertEquals(estadoTrasladoSiguienteTrasPago("cotizacion_generada", "anticipado", "completado"), "servicio_confirmado");
   assertEquals(estadoTrasladoSiguienteTrasPago("entrega_confirmada", "anticipado", "completado"), "pago_completado");
   assertEquals(estadoTrasladoSiguienteTrasPago("entrega_confirmada", "al_cierre", "completado"), "pago_completado");
   assertEquals(estadoTrasladoSiguienteTrasPago("pago_pendiente", "al_cierre", "completado"), "pago_completado");

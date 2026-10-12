@@ -1,6 +1,6 @@
 /** @vitest-environment jsdom */
 import { describe, expect, it, vi } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { PasaporteDigitalSegmentado } from "./PasaporteDigitalSegmentado";
 import type { Pasaporte } from "./tipos-pasaporte";
@@ -154,5 +154,68 @@ describe("PasaporteDigitalSegmentado", () => {
 
     expect(screen.getByRole("tab", { name: /Fotos/i })).toHaveAttribute("aria-selected", "true");
     expect(screen.getByText(/Evidencia del vehículo/i)).toBeInTheDocument();
+  });
+
+  it("muestra 'Tarifa asignada' y 'Pago realizado' como completados cuando el pago ya se realizó", async () => {
+    const user = userEvent.setup();
+    // Caso reportado: estado cotizacion_generada pero con pago completado
+    const pasaporte = {
+      ...crearPasaporteBase("cotizacion_generada"),
+      conductor_id: null,
+      conductor_nombre: null,
+      precio_cotizado: 1800,
+      precio_final: null,
+      monto_pagado: 1800,
+    } as unknown as Pasaporte;
+
+    const pagosMock = [
+      {
+        id: "pago-1",
+        traslado_id: "traslado-1234",
+        monto: 1800,
+        metodo: "tarjeta",
+        estado: "completado",
+        registrado_en: "2026-10-10T10:30:00Z",
+      },
+    ];
+
+    render(
+      <PasaporteDigitalSegmentado
+        pasaporte={pasaporte}
+        traslado={null}
+        vehiculo={null}
+        conductor={null}
+        evidencia={[]}
+        incidencias={[]}
+        disputas={[]}
+        reclamosSeguro={[]}
+        calificacion={null}
+        pagos={pagosMock as never}
+        ultimaUbicacion={null}
+      />
+    );
+
+    // En la pestaña En Ruta: revisar progreso del servicio
+    const timeline = screen.getByRole("list");
+
+    // Paso Tarifa asignada: debe ser Completado (no Estado actual)
+    const itemTarifa = within(timeline).getByText("Tarifa asignada").closest("li");
+    expect(itemTarifa).toHaveTextContent("Completado");
+    expect(itemTarifa).not.toHaveTextContent("Estado actual");
+
+    // Paso Pago realizado: debe ser Completado (no Pendiente)
+    const itemPago = within(timeline).getByText("Pago realizado").closest("li");
+    expect(itemPago).toHaveTextContent("Completado");
+    expect(itemPago).not.toHaveTextContent("Pendiente");
+
+    // Paso Conductor asignado: debe ser el activo (Asignando conductor...)
+    const itemConductor = within(timeline).getByText("Conductor asignado").closest("li");
+    expect(itemConductor).toHaveTextContent("Asignando conductor...");
+
+    // En la pestaña Recibo: estado de pago debe ser 'Pagado' y no pedir aceptar cotización
+    await user.click(screen.getByRole("tab", { name: /Recibo/i }));
+    expect(screen.getByText("Pagado")).toBeInTheDocument();
+    expect(screen.queryByText(/Cotización lista para confirmación/i)).not.toBeInTheDocument();
+    expect(screen.getByText(/Pago registrado con éxito/i)).toBeInTheDocument();
   });
 });

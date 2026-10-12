@@ -38,6 +38,7 @@ export const ORDEN_ESTADOS: EstadoTraslado[] = [
   // M14: falta este estado válido (orden canónico: ESTADOS_TRASLADO) dejaba
   // estadoDePaso en "pendiente" para todo el timeline de ese traslado.
   "cotizacion_aceptada",
+  "pago_completado",
   "servicio_confirmado",
   "pendiente_de_conductor",
   "conductor_asignado",
@@ -54,7 +55,6 @@ export const ORDEN_ESTADOS: EstadoTraslado[] = [
   "evidencia_final_completada",
   "entrega_confirmada",
   "pago_pendiente",
-  "pago_completado",
   "servicio_cerrado"
 ];
 
@@ -83,7 +83,41 @@ export function formatoFecha(fecha: string | null | undefined) {
   }
 }
 
-export function estadoDePaso(estadoActual: EstadoTraslado, estadoPaso: EstadoTraslado) {
+export function estadoDePaso(
+  estadoActual: EstadoTraslado,
+  estadoPaso: EstadoTraslado,
+  pagoRealizado: boolean = false,
+  tieneConductor: boolean = false
+) {
+  if (pagoRealizado) {
+    if (
+      estadoPaso === "solicitud_creada" ||
+      estadoPaso === "cotizacion_generada" ||
+      estadoPaso === "pago_completado"
+    ) {
+      return "completado";
+    }
+
+    const estadosPreviosAConductor: EstadoTraslado[] = [
+      "solicitud_creada",
+      "documentacion_pendiente",
+      "documentacion_en_revision",
+      "documentacion_validada",
+      "cotizacion_generada",
+      "cotizacion_aceptada",
+      "pago_completado",
+      "servicio_confirmado",
+      "pendiente_de_conductor"
+    ];
+
+    if (!tieneConductor && estadosPreviosAConductor.includes(estadoActual)) {
+      if (estadoPaso === "conductor_asignado") {
+        return "actual";
+      }
+      return "pendiente";
+    }
+  }
+
   const indiceActual = ORDEN_ESTADOS.indexOf(estadoActual);
   const indicePaso = ORDEN_ESTADOS.indexOf(estadoPaso);
   if (indiceActual < 0 || indicePaso < 0) return "pendiente";
@@ -187,11 +221,19 @@ export function FilaInfo({ etiqueta, valor }: { etiqueta: string; valor: ReactNo
   );
 }
 
-export function LineaTiempoVisual({ estadoActual }: { estadoActual: EstadoTraslado }) {
+export function LineaTiempoVisual({
+  estadoActual,
+  pagoRealizado = false,
+  tieneConductor = false,
+}: {
+  estadoActual: EstadoTraslado;
+  pagoRealizado?: boolean;
+  tieneConductor?: boolean;
+}) {
   return (
     <ol className="mt-1.5 flex flex-col gap-0.5">
       {LINEA_TIEMPO.map((paso) => {
-        const estado = estadoDePaso(estadoActual, paso.estado);
+        const estado = estadoDePaso(estadoActual, paso.estado, pagoRealizado, tieneConductor);
         return (
           <li key={paso.etiqueta} className="flex gap-3.5 py-2 text-[13px]">
             <span
@@ -216,7 +258,13 @@ export function LineaTiempoVisual({ estadoActual }: { estadoActual: EstadoTrasla
                 {paso.etiqueta}
               </span>
               <span className="mt-0.5 block text-[11px] text-[#8b9bb0]">
-                {estado === "actual" ? "Estado actual" : estado === "completado" ? "Completado" : "Pendiente"}
+                {estado === "actual"
+                  ? paso.estado === "conductor_asignado" && !tieneConductor
+                    ? "Asignando conductor..."
+                    : "Estado actual"
+                  : estado === "completado"
+                    ? "Completado"
+                    : "Pendiente"}
               </span>
             </span>
           </li>

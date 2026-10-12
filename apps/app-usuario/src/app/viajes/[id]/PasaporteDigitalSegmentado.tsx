@@ -142,11 +142,44 @@ export function PasaporteDigitalSegmentado({
     pagos.length > 0 && pagos[0]?.metodo
       ? humanizar(String(pagos[0].metodo))
       : (humanizar(pasaporte.tipo_pago) ?? "Por definir");
-  const saldoPendiente = precioBase - (pasaporte.monto_pagado ?? 0);
+  const totalPagosCompletados = pagos
+    .filter((p) => p.estado === "completado")
+    .reduce((sum, p) => sum + (p.monto ?? 0), 0);
+
+  const totalPagado = Math.max(pasaporte.monto_pagado ?? 0, totalPagosCompletados);
+
+  const estadosPostPagoConfirmado: Database["public"]["Enums"]["estado_traslado"][] = [
+    "servicio_confirmado",
+    "pendiente_de_conductor",
+    "conductor_asignado",
+    "conductor_en_camino_al_origen",
+    "conductor_en_punto_de_recoleccion",
+    "verificacion_vehiculo_en_proceso",
+    "evidencia_inicial_en_proceso",
+    "evidencia_inicial_completada",
+    "vehiculo_recibido",
+    "traslado_en_curso",
+    "incidencia_reportada",
+    "llegada_a_destino",
+    "evidencia_final_en_proceso",
+    "evidencia_final_completada",
+    "entrega_confirmada",
+    "pago_completado",
+    "servicio_cerrado",
+  ];
+
+  const pagoRealizado =
+    totalPagado > 0 ||
+    pagos.some((p) => p.estado === "completado") ||
+    estadosPostPagoConfirmado.includes(estado);
+
+  const montoMostrado = pagoRealizado && totalPagado === 0 && precioBase > 0 ? precioBase : totalPagado;
+  const saldoPendiente = Math.max(0, precioBase - montoMostrado);
+
   const estadoPago =
-    precioBase > 0 && (pasaporte.monto_pagado ?? 0) >= precioBase
+    pagoRealizado || (precioBase > 0 && montoMostrado >= precioBase)
       ? "Pagado"
-      : (pasaporte.monto_pagado ?? 0) > 0
+      : montoMostrado > 0
         ? "Pago parcial"
         : "Pendiente";
   const soporteHref = `/soporte?viaje=${trasladoId}`;
@@ -484,7 +517,11 @@ export function PasaporteDigitalSegmentado({
               icono={<IconoTarjeta d="M4 6h16M4 12h16M4 18h10M18 16.5a2.5 2.5 0 1 0 0 .01" />}
               titulo="Progreso del servicio"
             />
-            <LineaTiempoVisual estadoActual={estado} />
+            <LineaTiempoVisual
+              estadoActual={estado}
+              pagoRealizado={pagoRealizado}
+              tieneConductor={tieneConductor}
+            />
           </TarjetaPasaporte>
 
           {mostrarPromptCalificacion && (
@@ -779,7 +816,7 @@ export function PasaporteDigitalSegmentado({
             <div className="mt-2 flex items-center justify-between gap-3 rounded-2xl border border-[#e9f0f8] bg-[#f7faff] p-4">
               <span className="text-[14px] font-medium text-[#4d6079]">Total pagado</span>
               <span className="text-[22px] font-extrabold tracking-tight text-[#0b1e33]">
-                {formatearPrecio(pasaporte.monto_pagado ?? 0)}
+                {formatearPrecio(montoMostrado)}
               </span>
             </div>
             <p className="mt-2 text-[12px] text-[#7e8fa8]">
@@ -806,13 +843,27 @@ export function PasaporteDigitalSegmentado({
                   </div>
                 ))}
                 <p className="text-[12px] text-[#4d6079]" role="status">
-                  Total pagado {formatearPrecio(pasaporte.monto_pagado ?? 0)} de {formatearPrecio(precioBase)}.
+                  Total pagado {formatearPrecio(montoMostrado)} de {formatearPrecio(precioBase)}.
                   {saldoPendiente > 0 ? ` Restan ${formatearPrecio(saldoPendiente)}.` : " Sin saldo pendiente."}
                 </p>
               </div>
             )}
 
-            {pasaporte.estado === "cotizacion_generada" && pasaporte.precio_cotizado != null && (
+            {pagoRealizado && (
+              <div className="mt-4 rounded-2xl border border-emerald-500/30 bg-[#e9f3ee] p-4 text-[#1f6b4a]">
+                <div className="flex items-center gap-2">
+                  <span className="flex size-6 items-center justify-center rounded-full bg-[#1f6b4a] text-xs font-bold text-white">
+                    ✓
+                  </span>
+                  <p className="text-sm font-bold text-[#0b1e33]">Pago registrado con éxito</p>
+                </div>
+                <p className="mt-1 text-xs text-[#4d6079]">
+                  Tu pago de {formatearPrecio(montoMostrado || precioBase)} fue procesado correctamente a través de Stripe. No tienes saldo pendiente.
+                </p>
+              </div>
+            )}
+
+            {pasaporte.estado === "cotizacion_generada" && !pagoRealizado && pasaporte.precio_cotizado != null && (
               <div className="mt-4 rounded-2xl border border-[#FFC400]/40 bg-[#FFC400]/10 p-4">
                 <div className="flex items-center gap-2">
                   <span className="flex size-6 items-center justify-center rounded-full bg-[#FFC400] text-xs font-black text-slate-950">
@@ -835,6 +886,7 @@ export function PasaporteDigitalSegmentado({
             )}
 
             {pasaporte.estado === "cotizacion_aceptada" &&
+              !pagoRealizado &&
               pasaporte.tipo_pago === "anticipado" &&
               precioBase > 0 && (
                 <div className="mt-4 rounded-2xl border border-sky-500/30 bg-sky-500/10 p-4">
@@ -856,7 +908,7 @@ export function PasaporteDigitalSegmentado({
                 </div>
               )}
 
-            {pasaporte.estado === "pago_pendiente" && (
+            {pasaporte.estado === "pago_pendiente" && !pagoRealizado && (
               <div className="mt-4">
                 {precioBase > 0 ? (
                   <div className="rounded-2xl border border-[#FFC400]/40 bg-[#FFC400]/10 p-4">

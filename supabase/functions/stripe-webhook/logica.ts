@@ -45,7 +45,10 @@ export function estadoTrasladoSiguienteTrasPago(
   if (estadoPago !== "completado") return null;
   if (tipoPago !== "anticipado" && tipoPago !== "al_cierre") return null;
 
-  if (estadoActual === "cotizacion_aceptada" && tipoPago === "anticipado") {
+  if (
+    (estadoActual === "cotizacion_aceptada" || estadoActual === "cotizacion_generada") &&
+    tipoPago === "anticipado"
+  ) {
     return "servicio_confirmado";
   }
 

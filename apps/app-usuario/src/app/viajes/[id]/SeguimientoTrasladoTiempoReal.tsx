@@ -183,11 +183,10 @@ export function SeguimientoTrasladoTiempoReal({
       <section className="mt-6" aria-label="Estado de la búsqueda de conductor">
         <PassportCard>
           <div role="status" aria-live="polite" aria-atomic="true" className="flex flex-col gap-2">
-            <p className="font-body text-xs uppercase tracking-wide text-ink/45">Buscando conductor</p>
-            <h2 className="font-display text-xl font-semibold">No necesitas hacer nada</h2>
+            <p className="font-body text-xs uppercase tracking-wide text-ink/45"></p>
+            <h2 className="font-display text-xl font-semibold">Buscando tu conductor</h2>
             <p className="font-body text-sm leading-6 text-ink/60">
-              Estamos confirmando tu tarifa y asignando un conductor certificado.
-              Te avisaremos aquí mismo y por notificación en cuanto inicie el seguimiento en vivo.
+              Estamos buscando un conductor certificado. Te avisaremos en cuanto inicie el seguimiento en vivo.
             </p>
           </div>
         </PassportCard>
