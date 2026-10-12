@@ -268,14 +268,14 @@ export function CuentaCliente({ usuario, fotoUrl = null, vehiculos = [], totalTr
       <EtiquetaSeccion>Perfil</EtiquetaSeccion>
       <nav aria-label="Perfil" className="mb-[18px] overflow-hidden rounded-[22px] border border-[#eef2f7] bg-white py-1 shadow-[0_6px_16px_rgba(0,0,0,0.02)]">
         <FilaEnlace
-          href="/cuenta/perfil"
+          href="/cuenta/datos-personales"
           icono="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7 M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5Z"
           titulo="Datos personales"
           subtitulo="Nombre, correo, teléfono, dirección"
           conDivisor={false}
         />
         <FilaEnlace
-          href="/cuenta/perfil#acceso"
+          href="/cuenta/datos-personales"
           icono={SENDAS_ICONO.candado}
           titulo="Contraseña"
           subtitulo="Cambiar contraseña de acceso"
