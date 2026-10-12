@@ -14,10 +14,13 @@ type Usuario = Database["public"]["Tables"]["usuarios"]["Row"];
 
 function separarNombreApellido(nombreCompleto: string | null) {
   const partes = (nombreCompleto ?? "").trim().split(/\s+/).filter(Boolean);
-  if (partes.length <= 1) return { nombre: partes[0] ?? "", apellido: "" };
+  if (partes.length === 0) return { nombre: "", apellido: "" };
+  if (partes.length === 1) return { nombre: partes[0] ?? "", apellido: "" };
+  if (partes.length === 2) return { nombre: partes[0] ?? "", apellido: partes[1] ?? "" };
+  if (partes.length === 3) return { nombre: partes[0] ?? "", apellido: partes.slice(1).join(" ") };
   return {
-    nombre: partes.slice(0, -1).join(" "),
-    apellido: partes.at(-1) ?? "",
+    nombre: partes.slice(0, 2).join(" "),
+    apellido: partes.slice(2).join(" "),
   };
 }
 
@@ -26,13 +29,9 @@ function nombreCompleto(nombre: string, apellido: string) {
 }
 
 function iniciales(nombre: string, apellido: string) {
-  return (
-    [nombre, apellido]
-      .filter(Boolean)
-      .slice(0, 2)
-      .map((parte) => parte.trim()[0]?.toUpperCase())
-      .join("") || "RR"
-  );
+  const n = nombre.trim().split(/\s+/)[0]?.[0]?.toUpperCase() ?? "";
+  const a = apellido.trim().split(/\s+/)[0]?.[0]?.toUpperCase() ?? "";
+  return `${n}${a}` || "RR";
 }
 
 function domicilioCompleto({
@@ -414,7 +413,7 @@ export function DatosPersonales({ usuario, fotoUrlInicial }: DatosPersonalesProp
                 <input
                   id="email"
                   type="email"
-                  value={usuario.email ?? usuario.correo_facturacion ?? "laura.martinez@email.com"}
+                  value={usuario.correo_facturacion ?? "laura.martinez@email.com"}
                   disabled
                   placeholder="tu@email.com"
                   className="w-full p-[14px_16px] pr-11 border-[1.5px] border-[#e6edf6] rounded-[14px] text-[14.5px] text-[#8b9bb0] font-medium bg-[#f2f6fb] cursor-not-allowed outline-none"

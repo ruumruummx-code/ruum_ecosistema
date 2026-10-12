@@ -1,5 +1,5 @@
 /** @vitest-environment jsdom */
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 import { render, screen, fireEvent, act } from "@testing-library/react";
 import { DatosPersonales } from "../DatosPersonales";
 import type { Database } from "@ruum/shared/types";
@@ -8,11 +8,11 @@ type Usuario = Database["public"]["Tables"]["usuarios"]["Row"];
 
 const usuarioMock: Usuario = {
   id: "usr-456",
-  auth_id: "auth-456",
-  email: "laura.martinez@email.com",
+  auth_user_id: "auth-456",
+  correo_facturacion: "laura.martinez@email.com",
   nombre: "Laura Martínez Ruiz",
   telefono: "+52 55 1234 5678",
-  tipo_usuario: "particular",
+  tipo_cuenta: "particular",
   estado_verificacion: "verificado",
   rfc: "MARL900515XYZ",
   regimen_fiscal: "605",
@@ -20,15 +20,24 @@ const usuarioMock: Usuario = {
   actualizado_en: "2026-01-01T00:00:00Z",
   empresa_id: null,
   foto_url: null,
-  preferencias_notificacion: {},
-  perfil_completado: true,
-  stripe_customer_id: null,
-  terminos_aceptados: true,
-  privacidad_aceptada: true,
-  terminos_version: "2026.1",
-  privacidad_version: "2026.1",
-  fecha_aceptacion_terminos: "2026-01-01T00:00:00Z",
-  fecha_aceptacion_privacidad: "2026-01-01T00:00:00Z",
+  alertas_evidencia: false,
+  alertas_pago: false,
+  alertas_viaje: false,
+  notificaciones_email: false,
+  notificaciones_promocionales: false,
+  notificaciones_push: false,
+  notificaciones_sms_whatsapp: false,
+  metodo_pago_registrado: false,
+  estado_cuenta: "activo",
+  rol: "personal",
+  traslados_completados_sin_incidencia: 0,
+  uso_cfdi: null,
+  codigo_postal_fiscal: null,
+  doc_identidad_subido_en: null,
+  doc_identidad_url: null,
+  razon_social: null,
+  terminos_aceptados_en: "2026-01-01T00:00:00Z",
+  version_terminos_aceptada: 1,
   pais: "México",
   estado: "Ciudad de México",
   ciudad: "Ciudad de México",
@@ -37,6 +46,7 @@ const usuarioMock: Usuario = {
   calle: "Av. Álvaro Obregón",
   numero: "145, Int. 3",
   referencias: "Edificio blanco frente al parque",
+  direccion_principal: "Av. Álvaro Obregón 145, Int. 3, Col. Roma Norte, CP 06700, Ciudad de México, Ciudad de México",
 };
 
 describe("DatosPersonales", () => {
@@ -91,23 +101,17 @@ describe("DatosPersonales", () => {
   });
 
   it("permite enviar el formulario y muestra mensaje de éxito", async () => {
-    vi.useFakeTimers();
-
     render(<DatosPersonales usuario={usuarioMock} />);
 
     const btnGuardar = screen.getByRole("button", { name: /Guardar cambios/i });
     expect(btnGuardar).toBeInTheDocument();
 
-    fireEvent.click(btnGuardar);
-
-    // Mensaje de éxito
-    expect(await screen.findByText("Tus datos se guardaron correctamente")).toBeInTheDocument();
-
-    act(() => {
-      vi.advanceTimersByTime(4000);
+    await act(async () => {
+      fireEvent.click(btnGuardar);
     });
 
-    vi.useRealTimers();
+    // Mensaje de éxito
+    expect(screen.getByText("Tus datos se guardaron correctamente")).toBeInTheDocument();
   });
 
   it("renderiza la zona de riesgo y permite abrir y cerrar el modal de eliminación de cuenta", () => {
