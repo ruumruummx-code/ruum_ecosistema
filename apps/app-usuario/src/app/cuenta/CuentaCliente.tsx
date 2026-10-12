@@ -327,10 +327,10 @@ export function CuentaCliente({ usuario, fotoUrl = null, vehiculos = [], totalTr
       <EtiquetaSeccion>Soporte</EtiquetaSeccion>
       <div className="mb-[18px] grid grid-cols-2 gap-2.5">
         {[
-          { href: "/soporte#faqs", icono: "M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3 M12 17h.01", titulo: "Preguntas frecuentes", subtitulo: "Respuestas rápidas" },
+          { href: "/preguntas-frecuentes", icono: "M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3 M12 17h.01", titulo: "Preguntas frecuentes", subtitulo: "Respuestas rápidas" },
           { href: "/soporte", icono: "M4 13v-1a8 8 0 0 1 16 0v1 M4 13a2 2 0 0 1 2-2h1v6H6a2 2 0 0 1-2-2v-2Z M20 13a2 2 0 0 0-2-2h-1v6h1a2 2 0 0 0 2-2v-2Z", titulo: "Contactar soporte", subtitulo: "Chat 24/7" },
-          { href: "/soporte#reporte-titulo", icono: "M10.3 3.9 2.6 17a2 2 0 0 0 1.7 3h15.4a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z M12 8v5 M12 16.5h.01", tono: "orange" as TonoIcono, titulo: "Reportar problema", subtitulo: "Con un traslado" },
-          { href: "/soporte", icono: "M4 8h3l2-2.5h6L17 8h3a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1Z M12 16.5a3.2 3.2 0 1 0 0-6.4 3.2 3.2 0 0 0 0 6.4Z", tono: "red" as TonoIcono, titulo: "Ayuda con evidencia", subtitulo: "Fotos y checks" },
+          { href: "/soporte?motivo=problema_traslado", icono: "M10.3 3.9 2.6 17a2 2 0 0 0 1.7 3h15.4a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z M12 8v5 M12 16.5h.01", tono: "orange" as TonoIcono, titulo: "Reportar problema", subtitulo: "Con un traslado" },
+          { href: "/soporte?motivo=ayuda_evidencia", icono: "M4 8h3l2-2.5h6L17 8h3a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1Z M12 16.5a3.2 3.2 0 1 0 0-6.4 3.2 3.2 0 0 0 0 6.4Z", tono: "red" as TonoIcono, titulo: "Ayuda con evidencia", subtitulo: "Fotos y checks" },
         ].map(({ href, icono, titulo, subtitulo, tono }) => (
           <Link
             key={titulo}
