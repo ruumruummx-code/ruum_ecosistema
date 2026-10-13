@@ -289,6 +289,13 @@ export function CuentaCliente({ usuario, fotoUrl = null, vehiculos = [], totalTr
           insignia={etiquetaVerificacion(usuario?.estado_verificacion)}
           insigniaVerde={verificado}
         />
+        <FilaEnlace
+          href="/cuenta/preferencias"
+          icono="M4 21v-7 M4 10V3 M12 21v-9 M12 8V3 M20 21v-5 M20 12V3 M1 14h6 M9 8h6 M17 16h6"
+          tono="purple"
+          titulo="Preferencias"
+          subtitulo="Notificaciones, alertas, idioma y tema"
+        />
       </nav>
 
       {/* Pagos y facturación */}
@@ -345,27 +352,6 @@ export function CuentaCliente({ usuario, fotoUrl = null, vehiculos = [], totalTr
           </Link>
         ))}
       </div>
-
-      {/* Empresarial */}
-      <Link
-        href="/soporte"
-        aria-label="Ruum Ruum Empresarial: gestiona flotas, centros de costo y facturación. Contactar soporte."
-        className="mb-[18px] flex items-center gap-3.5 rounded-[20px] border border-[#e0d5f0] p-[18px] transition-transform active:scale-[0.99]"
-        style={{ background: "linear-gradient(135deg, #f2eef9 0%, #e9e2f5 100%)" }}
-      >
-        <span aria-hidden="true" className="flex size-[46px] shrink-0 items-center justify-center rounded-2xl bg-white text-[#5e3b8c] shadow-[0_4px_10px_rgba(94,59,140,0.1)]">
-          <Icono d="M3 21h18 M5 21V7l7-4 7 4v14 M9 21v-4h6v4 M9 10h.01 M15 10h.01 M9 14h.01 M15 14h.01" className="size-5" />
-        </span>
-        <span className="flex-1">
-          <span className="mb-0.5 block text-[14px] font-extrabold tracking-tight text-[#3d2566]">
-            Ruum Ruum Empresarial
-          </span>
-          <span className="block text-[12px] font-medium text-[#6b5296]">
-            Gestiona flotas, centros de costo y facturación
-          </span>
-        </span>
-        <IconoChevron className="shrink-0 text-[#9b7fc4]" />
-      </Link>
 
       {/* Legal y cuenta */}
       <EtiquetaSeccion>Legal y cuenta</EtiquetaSeccion>
