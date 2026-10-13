@@ -218,7 +218,7 @@ describe("registro — accesibilidad de errores y flujo de verificación telefó
 
     await waitFor(() => {
       const signupCall = mocks.fetchMock.mock.calls.find(
-        (call: [string, RequestInit?]) => typeof call[0] === "string" && call[0].includes("/api/auth/signup")
+        (call: any[]) => typeof call[0] === "string" && (call[0] as string).includes("/api/auth/signup")
       );
       expect(signupCall).toBeTruthy();
       const body = JSON.parse((signupCall?.[1]?.body as string) || "{}");

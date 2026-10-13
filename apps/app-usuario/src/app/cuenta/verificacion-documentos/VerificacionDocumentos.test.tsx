@@ -6,30 +6,18 @@ import type { Database } from "@ruum/shared/types";
 
 type Usuario = Database["public"]["Tables"]["usuarios"]["Row"];
 
-const usuarioMock: Usuario = {
+const usuarioMock = {
   id: "usr-123",
-  auth_id: "auth-123",
-  email: "carlos@ejemplo.com",
+  auth_user_id: "auth-123",
   nombre: "Carlos Martínez",
   telefono: "+52 55 1234 5678",
-  tipo_usuario: "particular",
+  tipo_cuenta: "particular",
   estado_verificacion: "pendiente",
   rfc: "MART900515ABC",
   regimen_fiscal: "612",
   creado_en: "2026-01-01T00:00:00Z",
   actualizado_en: "2026-01-01T00:00:00Z",
-  empresa_id: null,
-  foto_url: null,
-  preferencias_notificacion: {},
-  perfil_completado: true,
-  stripe_customer_id: null,
-  terminos_aceptados: true,
-  privacidad_aceptada: true,
-  terminos_version: "2026.1",
-  privacidad_version: "2026.1",
-  fecha_aceptacion_terminos: "2026-01-01T00:00:00Z",
-  fecha_aceptacion_privacidad: "2026-01-01T00:00:00Z",
-};
+} as unknown as Usuario;
 
 describe("VerificacionDocumentos", () => {
   it("renderiza encabezado con navegación de regreso a /cuenta y títulos", () => {
