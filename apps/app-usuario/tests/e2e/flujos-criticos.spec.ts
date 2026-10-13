@@ -322,7 +322,6 @@ test.describe("Didit modal a11y (R4)", () => {
         type: "skip-precondicion",
         description: "Botón Didit ausente: la cuenta ya está verificada o el backend no expone el flujo.",
       });
-      // eslint-disable-next-line no-console
       console.warn("[e2e:didit] skip: botón 'iniciar verificación' ausente; precondición externa no cumplida.");
       test.skip();
       return;
@@ -350,7 +349,6 @@ test.describe("Didit modal a11y (R4)", () => {
         type: "skip-precondicion",
         description: "Botón Didit ausente: la cuenta ya está verificada o el backend no expone el flujo.",
       });
-      // eslint-disable-next-line no-console
       console.warn("[e2e:didit] skip: botón 'iniciar verificación' ausente; precondición externa no cumplida.");
       test.skip();
       return;

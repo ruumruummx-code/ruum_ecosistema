@@ -223,6 +223,7 @@ export function useNuevoTraslado() {
       window.removeEventListener("beforeunload", handleBeforeUnload);
       registrarAbandono(paso, "unmount_flujo");
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // 3.1 tracking duración por paso

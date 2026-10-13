@@ -140,7 +140,7 @@ export function GaleriaComponentesMoviles() {
             id="boarding-pass-title"
             className="mb-2.5 px-1 text-[12px] font-semibold uppercase tracking-wider text-[#4e5f80] dark:text-[#a8b5cc]"
           >
-            2. Tarjeta Operativa ("Boarding Pass")
+            2. Tarjeta Operativa (&quot;Boarding Pass&quot;)
           </h2>
           <MobileCard padding="none" elevated className="overflow-hidden">
             {/* Cabecera del traslado */}

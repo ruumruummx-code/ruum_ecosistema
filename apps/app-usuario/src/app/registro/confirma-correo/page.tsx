@@ -80,7 +80,7 @@ function ContenidoConfirmaCorreo() {
       console.warn("[confirma-correo] param ?email= deprecado en uso");
       registrarEventoUx("registro_confirmacion_url_deprecada");
     }
-  }, []);
+  }, [emailFromUrl]);
 
   useEffect(() => {
     if (!hayCooldown) return;

@@ -218,6 +218,7 @@ export function SoporteCliente({
       };
       abrirChat(mapaMotivos[motivoPreseleccionado] || motivoPreseleccionado);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [canalPreseleccionado, motivoPreseleccionado]);
 
   // Manejo de tecla Escape
