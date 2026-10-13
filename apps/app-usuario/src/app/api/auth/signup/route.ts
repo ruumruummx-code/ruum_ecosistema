@@ -7,6 +7,7 @@ import {
   soloDigitos,
   telefonoMx,
 } from "@/lib/registro-usuario";
+import { validarTokenTelefono } from "@/lib/phone-verification";
 import { VERSION_TERMINOS_VIGENTE } from "@ruum/shared/constants";
 import { passwordCumpleRequisitos } from "@ruum/shared/utils";
 
@@ -34,6 +35,7 @@ export async function POST(request: NextRequest) {
       password?: unknown;
       tipoCuenta?: unknown;
       aceptaTerminos?: unknown;
+      tokenVerificacionTelefono?: unknown;
     } | null;
 
     const nombre = typeof body?.nombre === "string" ? body.nombre.trim().slice(0, 80) : "";
@@ -43,6 +45,8 @@ export async function POST(request: NextRequest) {
       typeof body?.email === "string" ? normalizarCorreoRegistro(body.email).slice(0, 254) : "";
     const password = typeof body?.password === "string" ? body.password : "";
     const tipoCuenta = body?.tipoCuenta === "empresa" ? "empresa" : "personal";
+    const tokenTelefono =
+      typeof body?.tokenVerificacionTelefono === "string" ? body.tokenVerificacionTelefono : "";
 
     if (!nombre) return NextResponse.json({ error: "Escribe tu nombre." }, { status: 400 });
     if (!apellido) return NextResponse.json({ error: "Escribe tu apellido." }, { status: 400 });
@@ -60,6 +64,15 @@ export async function POST(request: NextRequest) {
     }
     if (body?.aceptaTerminos !== true) {
       return NextResponse.json({ error: "Acepta los términos para continuar." }, { status: 400 });
+    }
+
+    // Validación de verificación telefónica por SMS
+    const verificacionTelefono = validarTokenTelefono(telefonoDigitos, tokenTelefono);
+    if (!verificacionTelefono.valido) {
+      return NextResponse.json(
+        { error: verificacionTelefono.error || "Debes verificar tu número de teléfono celular por SMS antes de continuar." },
+        { status: 400 }
+      );
     }
 
     const ip = obtenerIp(request);
@@ -111,6 +124,8 @@ export async function POST(request: NextRequest) {
           tipo_registro: "usuario",
           nombre: nombreCompleto(nombre, apellido),
           telefono: telefonoMx(telefonoDigitos),
+          telefono_verificado: true,
+          telefono_verificado_en: ahora,
           tipo_cuenta: tipoCuenta,
           version_terminos_aceptada: VERSION_TERMINOS_VIGENTE,
           terminos_aceptados_en: ahora,

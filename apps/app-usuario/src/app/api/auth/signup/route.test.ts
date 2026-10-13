@@ -13,11 +13,12 @@ vi.mock("next/headers", () => ({
 }));
 
 import { POST } from "./route";
+import { generarTokenTelefono } from "@/lib/phone-verification";
 
 process.env.NEXT_PUBLIC_SUPABASE_URL ??= "http://localhost:54321";
 process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ??= "anon-test";
 
-function req(correo: string): NextRequest {
+function req(correo: string, tokenTelefono = generarTokenTelefono("5512345678")): NextRequest {
   return new NextRequest("http://localhost/api/auth/signup", {
     method: "POST",
     body: JSON.stringify({
@@ -28,6 +29,7 @@ function req(correo: string): NextRequest {
       password: "Segura123",
       tipoCuenta: "personal",
       aceptaTerminos: true,
+      tokenVerificacionTelefono: tokenTelefono,
     }),
     headers: { "content-type": "application/json" },
   });
@@ -37,9 +39,17 @@ function req(correo: string): NextRequest {
  * Anti-enumeración sin falsos positivos: el "uso" a secas clasificaba como
  * duplicado cualquier mensaje con esa subcadena.
  */
-describe("POST /api/auth/signup — clasificación de duplicados", () => {
+describe("POST /api/auth/signup — validaciones y duplicados", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+  });
+
+  it("rechaza registro sin token de verificación telefónica válido", async () => {
+    const res = await POST(req("nuevo@ejemplo.com", "token-invalido"));
+    expect(res.status).toBe(400);
+    const json = (await res.json()) as { error: string };
+    expect(json.error).toMatch(/token/i);
+    expect(mockSignUp).not.toHaveBeenCalled();
   });
 
   it("422 User already registered → mensaje neutro de duplicado", async () => {

@@ -56,6 +56,17 @@ export default function PaginaRegistro() {
   const [apellido, setApellido] = useState("");
   const [telefono, setTelefono] = useState("");
 
+  /* Verificación de teléfono por SMS (Twilio Verify) */
+  const [telefonoVerificado, setTelefonoVerificado] = useState(false);
+  const [telefonoVerificadoValor, setTelefonoVerificadoValor] = useState("");
+  const [tokenVerificacionTelefono, setTokenVerificacionTelefono] = useState<string | null>(null);
+  const [modalVerificacionAbierto, setModalVerificacionAbierto] = useState(false);
+  const [codigoOtp, setCodigoOtp] = useState("");
+  const [enviandoOtp, setEnviandoOtp] = useState(false);
+  const [verificandoOtp, setVerificandoOtp] = useState(false);
+  const [errorOtp, setErrorOtp] = useState<string | null>(null);
+  const [segundosReenvio, setSegundosReenvio] = useState(0);
+
   /* Paso 2: credenciales */
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -73,12 +84,33 @@ export default function PaginaRegistro() {
   const nombreRef = useRef<HTMLInputElement>(null);
   const apellidoRef = useRef<HTMLInputElement>(null);
   const telefonoRef = useRef<HTMLInputElement>(null);
+  const otpRef = useRef<HTMLInputElement>(null);
   const emailRef = useRef<HTMLInputElement>(null);
   const passwordRef = useRef<HTMLInputElement>(null);
   const confirmarRef = useRef<HTMLInputElement>(null);
   const terminosRef = useRef<HTMLInputElement>(null);
 
   const pwd = fortalezaPassword(password);
+
+  useEffect(() => {
+    if (!modalVerificacionAbierto) return;
+    function manejarKeyDown(e: KeyboardEvent) {
+      if (e.key === "Escape") {
+        setModalVerificacionAbierto(false);
+        telefonoRef.current?.focus();
+      }
+    }
+    window.addEventListener("keydown", manejarKeyDown);
+    return () => window.removeEventListener("keydown", manejarKeyDown);
+  }, [modalVerificacionAbierto]);
+
+  useEffect(() => {
+    if (segundosReenvio <= 0) return;
+    const interval = setInterval(() => {
+      setSegundosReenvio((prev) => (prev > 0 ? prev - 1 : 0));
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [segundosReenvio]);
 
   useEffect(() => {
     registrarEventoUx("registro_visto", { paso: 1 });
@@ -144,13 +176,96 @@ export default function PaginaRegistro() {
     return true;
   }
 
-  function avanzarPaso2(e?: React.FormEvent) {
+  async function enviarOtpSms(digitos: string) {
+    setEnviandoOtp(true);
+    setErrorOtp(null);
+    try {
+      const res = await fetch("/api/auth/phone-verify/send", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ telefono: digitos }),
+      });
+      const cuerpo = (await res.json().catch(() => null)) as {
+        ok?: boolean;
+        error?: string;
+      } | null;
+
+      if (!res.ok) {
+        setErrorOtp(cuerpo?.error ?? "No pudimos enviar el código SMS. Intenta de nuevo.");
+      } else {
+        setSegundosReenvio(60);
+      }
+    } catch {
+      setErrorOtp("No se pudo enviar el mensaje SMS. Revisa tu conexión.");
+    } finally {
+      setEnviandoOtp(false);
+      requestAnimationFrame(() => otpRef.current?.focus());
+    }
+  }
+
+  async function confirmarCodigoOtp(e: React.FormEvent) {
+    e.preventDefault();
+    const digitos = soloDigitos(telefono, 10);
+    const codigo = soloDigitos(codigoOtp, 6);
+
+    if (codigo.length !== 6) {
+      setErrorOtp("El código debe tener 6 dígitos.");
+      requestAnimationFrame(() => otpRef.current?.focus());
+      return;
+    }
+
+    setVerificandoOtp(true);
+    setErrorOtp(null);
+
+    try {
+      const res = await fetch("/api/auth/phone-verify/verify", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ telefono: digitos, codigo }),
+      });
+      const cuerpo = (await res.json().catch(() => null)) as {
+        ok?: boolean;
+        token?: string;
+        error?: string;
+      } | null;
+
+      if (!res.ok || !cuerpo?.token) {
+        setErrorOtp(cuerpo?.error ?? "El código ingresado es incorrecto o ha expirado.");
+        requestAnimationFrame(() => otpRef.current?.focus());
+        return;
+      }
+
+      setTelefonoVerificado(true);
+      setTelefonoVerificadoValor(digitos);
+      setTokenVerificacionTelefono(cuerpo.token);
+      setModalVerificacionAbierto(false);
+
+      setPaso(2);
+      requestAnimationFrame(() => emailRef.current?.focus());
+    } catch {
+      setErrorOtp("Ocurrió un error al verificar el código. Intenta de nuevo.");
+      requestAnimationFrame(() => otpRef.current?.focus());
+    } finally {
+      setVerificandoOtp(false);
+    }
+  }
+
+  async function avanzarPaso2(e?: React.FormEvent) {
     e?.preventDefault();
     const err = validarPaso1();
     if (reportarError(err)) return;
-    setPaso(2);
-    // El foco debe viajar al primer campo del paso nuevo.
-    requestAnimationFrame(() => emailRef.current?.focus());
+
+    const digitos = soloDigitos(telefono, 10);
+    if (telefonoVerificado && tokenVerificacionTelefono && telefonoVerificadoValor === digitos) {
+      setPaso(2);
+      requestAnimationFrame(() => emailRef.current?.focus());
+      return;
+    }
+
+    setModalVerificacionAbierto(true);
+    setCodigoOtp("");
+    setErrorOtp(null);
+    await enviarOtpSms(digitos);
   }
 
   /* ── Crear cuenta ── */
@@ -158,6 +273,13 @@ export default function PaginaRegistro() {
     e.preventDefault();
     const err = validarPaso2();
     if (reportarError(err)) return;
+
+    const digitos = soloDigitos(telefono, 10);
+    if (!telefonoVerificado || !tokenVerificacionTelefono || telefonoVerificadoValor !== digitos) {
+      setError("Debes verificar tu número de teléfono celular por SMS antes de crear tu cuenta.");
+      setPaso(1);
+      return;
+    }
 
     setEnviando(true);
     setError(null);
@@ -175,11 +297,12 @@ export default function PaginaRegistro() {
         body: JSON.stringify({
           nombre: nombre.trim(),
           apellido: apellido.trim(),
-          telefono: soloDigitos(telefono),
+          telefono: digitos,
           email: correo,
           password,
           tipoCuenta,
           aceptaTerminos,
+          tokenVerificacionTelefono,
         }),
         cache: "no-store",
       });
@@ -326,19 +449,42 @@ export default function PaginaRegistro() {
                   autoComplete="family-name"
                   placeholder="Mendoza"
                 />
-                <CampoOscuro
-                  ref={telefonoRef}
-                  etiqueta="Teléfono celular"
-                  type="tel"
-                  value={telefono}
-                  onChange={(e) => { setTelefono(telefonoLocalMx(e.target.value)); if (errorCampo?.campo === "telefono") setErrorCampo(null); }}
-                  error={errorCampo?.campo === "telefono" ? errorCampo.mensaje : undefined}
-                  required
-                  autoComplete="tel"
-                  placeholder="55 1234 5678"
-                  ayuda="Para notificaciones de tu traslado. Sin código de país."
-                  inputMode="numeric"
-                />
+                <div className="relative">
+                  <CampoOscuro
+                    ref={telefonoRef}
+                    etiqueta="Teléfono celular"
+                    type="tel"
+                    value={telefono}
+                    onChange={(e) => {
+                      const nuevoTel = telefonoLocalMx(e.target.value);
+                      setTelefono(nuevoTel);
+                      if (telefonoVerificado && soloDigitos(nuevoTel) !== telefonoVerificadoValor) {
+                        setTelefonoVerificado(false);
+                        setTokenVerificacionTelefono(null);
+                      }
+                      if (errorCampo?.campo === "telefono") setErrorCampo(null);
+                    }}
+                    error={errorCampo?.campo === "telefono" ? errorCampo.mensaje : undefined}
+                    required
+                    autoComplete="tel"
+                    placeholder="55 1234 5678"
+                    ayuda={
+                      telefonoVerificado ? (
+                        <span className="inline-flex items-center gap-1 font-semibold text-emerald-600">
+                          <span aria-hidden>✓</span> Verificado por SMS
+                        </span>
+                      ) : (
+                        "Para notificaciones de tu traslado. Sin código de país."
+                      )
+                    }
+                    inputMode="numeric"
+                  />
+                  {telefonoVerificado && (
+                    <span className="pointer-events-none absolute right-3 top-8 inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-0.5 text-xs font-semibold text-emerald-700 border border-emerald-200">
+                      ✓ Verificado
+                    </span>
+                  )}
+                </div>
               </div>
 
               {/* ACC-5 (auditoría): role="alert" en vez de role="status" +
@@ -349,8 +495,8 @@ export default function PaginaRegistro() {
               </div>
             )}
 
-              <button type="submit" className={`${botonAzul} mt-6`}>
-                Continuar
+              <button type="submit" disabled={enviandoOtp} className={`${botonAzul} mt-6`}>
+                {enviandoOtp ? "Enviando código SMS…" : "Continuar"}
               </button>
               </form>
           )}
@@ -517,6 +663,123 @@ export default function PaginaRegistro() {
         )}
         </section>
       </main>
+
+      {/* ════════════ MODAL VERIFICACIÓN SMS ════════════ */}
+      {modalVerificacionAbierto && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="modal-sms-titulo"
+          aria-describedby="modal-sms-desc"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-sm"
+        >
+          <div className="relative w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl sm:p-7 border border-slate-100">
+            {/* Botón cerrar */}
+            <button
+              type="button"
+              onClick={() => {
+                setModalVerificacionAbierto(false);
+                telefonoRef.current?.focus();
+              }}
+              aria-label="Cerrar modal de verificación"
+              className="absolute right-4 top-4 rounded-full p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-600 focus:outline-none focus:ring-2 focus:ring-[var(--ruum-teal)]"
+            >
+              ✕
+            </button>
+
+            {/* Icono de teléfono / SMS */}
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#0a2342]/5 text-[#0a2342] mb-3">
+              <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"
+                />
+              </svg>
+            </div>
+
+            <h2 id="modal-sms-titulo" className="font-display text-xl font-extrabold text-[#0a2342]">
+              Verifica tu número celular
+            </h2>
+            <p id="modal-sms-desc" className="mt-1 font-body text-xs text-slate-600 leading-relaxed">
+              Enviamos un código de 6 dígitos por SMS al número{" "}
+              <strong className="font-semibold text-slate-900">
+                +52 {telefono.length === 10 ? `${telefono.slice(0, 2)} ${telefono.slice(2, 6)} ${telefono.slice(6, 10)}` : telefono}
+              </strong>.
+            </p>
+
+            <button
+              type="button"
+              onClick={() => {
+                setModalVerificacionAbierto(false);
+                telefonoRef.current?.focus();
+              }}
+              className="mt-1 inline-block text-xs font-semibold text-[var(--ruum-teal-deep)] hover:underline cursor-pointer"
+            >
+              Editar número de teléfono
+            </button>
+
+            <form onSubmit={confirmarCodigoOtp} className="mt-5 space-y-4" noValidate>
+              <div className="flex flex-col gap-1.5">
+                <label htmlFor="codigo-sms" className="font-body text-xs font-medium text-slate-700">
+                  Código de verificación SMS
+                </label>
+                <input
+                  id="codigo-sms"
+                  ref={otpRef}
+                  type="text"
+                  inputMode="numeric"
+                  autoComplete="one-time-code"
+                  maxLength={6}
+                  value={codigoOtp}
+                  onChange={(e) => {
+                    setCodigoOtp(soloDigitos(e.target.value, 6));
+                    if (errorOtp) setErrorOtp(null);
+                  }}
+                  placeholder="123456"
+                  className="w-full text-center tracking-[0.35em] font-mono text-2xl font-bold py-2.5 px-4 rounded-xl border border-slate-300 bg-slate-50 text-[#0a2342] placeholder:text-slate-400 focus:border-[var(--ruum-teal-deep)] focus:bg-white focus:outline-none focus:ring-4 focus:ring-[var(--ruum-teal)]/20 transition"
+                  required
+                />
+              </div>
+
+              {errorOtp && (
+                <div role="alert" className="rounded-lg bg-red-50 p-3 border border-red-200">
+                  <p className="font-body text-xs text-red-700 font-medium">{errorOtp}</p>
+                </div>
+              )}
+
+              <button
+                type="submit"
+                disabled={codigoOtp.length !== 6 || verificandoOtp}
+                className={`${botonAzul} w-full`}
+              >
+                {verificandoOtp ? "Verificando código…" : "Verificar y continuar"}
+              </button>
+
+              <div className="flex flex-col items-center gap-1.5 pt-1 text-center">
+                {segundosReenvio > 0 ? (
+                  <p className="font-body text-xs text-slate-500">
+                    Reenviar código en <span className="font-semibold text-slate-700">{segundosReenvio}s</span>
+                  </p>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => enviarOtpSms(soloDigitos(telefono, 10))}
+                    disabled={enviandoOtp}
+                    className="font-body text-xs font-semibold text-[var(--ruum-teal-deep)] hover:text-[#0a2342] hover:underline cursor-pointer disabled:opacity-50"
+                  >
+                    {enviandoOtp ? "Enviando código…" : "¿No recibiste el código? Reenviar SMS"}
+                  </button>
+                )}
+                <span className="font-body text-[11px] text-slate-400">
+                  El código tiene una vigencia de 10 minutos.
+                </span>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
