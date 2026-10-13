@@ -313,15 +313,15 @@ export function VerificacionDocumentos({ usuario }: VerificacionDocumentosProps)
         <Link
           href="/cuenta"
           aria-label="Volver a mi cuenta"
-          className="flex size-10 shrink-0 items-center justify-center rounded-full bg-[#f2f6fc] text-[#0b1e33] transition-all hover:bg-[#e3ebf5] active:scale-95"
+          className="flex size-10 shrink-0 items-center justify-center rounded-full bg-[#f2f6fc] text-[#0a2342] transition-all hover:bg-[#e3ebf5] active:scale-95"
         >
           <Icono nombre="atras" className="size-4" strokeWidth={2.2} />
         </Link>
         <div className="min-w-0">
-          <h1 className="text-[18px] font-bold tracking-tight text-[#0b1e33] leading-snug">
+          <h1 className="text-[18px] font-bold tracking-tight text-[#0a2342] leading-snug">
             Verificación y documentos
           </h1>
-          <p className="text-[12px] font-medium text-[#6b7c94]">
+          <p className="text-[12px] font-medium text-[#4e5f80]">
             Identidad y situación fiscal
           </p>
         </div>
@@ -361,12 +361,12 @@ export function VerificacionDocumentos({ usuario }: VerificacionDocumentosProps)
       {/* Tarjeta de progreso */}
       <section aria-label="Progreso de verificación" className="rounded-[22px] border border-[#eef2f7] bg-white p-5 shadow-[0_6px_16px_rgba(0,0,0,0.02)]">
         <div className="mb-3.5 flex items-center justify-between">
-          <span className="text-[14px] font-bold text-[#0b1e33]">Progreso de verificación</span>
-          <span className="text-[18px] font-extrabold tracking-tight text-[#0b1e33]">{porcentaje}%</span>
+          <span className="text-[14px] font-bold text-[#0a2342]">Progreso de verificación</span>
+          <span className="text-[18px] font-extrabold tracking-tight text-[#0a2342]">{porcentaje}%</span>
         </div>
         <div className="mb-3 h-2.5 overflow-hidden rounded-full bg-[#eef2f7]">
           <div
-            className="h-full rounded-full bg-gradient-to-r from-[#0b1e33] to-[#2e5a88] transition-all duration-500"
+            className="h-full rounded-full bg-gradient-to-r from-[#0a2342] to-[#2e5a88] transition-all duration-500"
             style={{ width: `${porcentaje}%` }}
           />
         </div>
@@ -374,10 +374,10 @@ export function VerificacionDocumentos({ usuario }: VerificacionDocumentosProps)
           <span className="flex items-center gap-1.5 text-[#1f6b4a] font-bold">
             <IconoCheckCirculo className="size-3.5" /> Identidad
           </span>
-          <span className="flex items-center gap-1.5 text-[#0b1e33] font-bold">
+          <span className="flex items-center gap-1.5 text-[#0a2342] font-bold">
             <IconoReloj className="size-3.5" /> Fiscal
           </span>
-          <span className="flex items-center gap-1.5 text-[#8b9bb0]">
+          <span className="flex items-center gap-1.5 text-[#4e5f80]">
             <span className="inline-block size-3 rounded-full border-2 border-[#cbd5e1]" /> Listo
           </span>
         </div>
@@ -387,7 +387,7 @@ export function VerificacionDocumentos({ usuario }: VerificacionDocumentosProps)
       {/* SECCIÓN 1: VERIFICACIÓN DE IDENTIDAD          */}
       {/* ============================================= */}
       <div>
-        <p className="mb-3 px-1 text-[12px] font-bold uppercase tracking-[0.8px] text-[#8b9bb0]">
+        <p className="mb-3 px-1 text-[12px] font-bold uppercase tracking-[0.8px] text-[#4e5f80]">
           Verificación de identidad
         </p>
         <div className="flex flex-col gap-3">
@@ -413,10 +413,10 @@ export function VerificacionDocumentos({ usuario }: VerificacionDocumentosProps)
                 {renderDocIcon(doc.icono)}
               </div>
               <div className="min-w-0 flex-1">
-                <p className="truncate text-[14.5px] font-bold tracking-tight text-[#0b1e33] mb-1">
+                <p className="truncate text-[14.5px] font-bold tracking-tight text-[#0a2342] mb-1">
                   {doc.titulo}
                 </p>
-                <div className="flex items-center gap-1.5 text-[12px] font-medium text-[#8b9bb0]">
+                <div className="flex items-center gap-1.5 text-[12px] font-medium text-[#4e5f80]">
                   {doc.estado === "verificado" ? (
                     <IconoCheckCirculo className="size-3.5 text-[#1f6b4a] shrink-0" />
                   ) : (
@@ -448,7 +448,7 @@ export function VerificacionDocumentos({ usuario }: VerificacionDocumentosProps)
       {/* SECCIÓN 2: INFORMACIÓN FISCAL                 */}
       {/* ============================================= */}
       <div className="mt-2">
-        <p className="mb-3 px-1 text-[12px] font-bold uppercase tracking-[0.8px] text-[#8b9bb0]">
+        <p className="mb-3 px-1 text-[12px] font-bold uppercase tracking-[0.8px] text-[#4e5f80]">
           Información fiscal
         </p>
 
@@ -491,10 +491,10 @@ export function VerificacionDocumentos({ usuario }: VerificacionDocumentosProps)
                 {renderDocIcon(doc.icono)}
               </div>
               <div className="min-w-0 flex-1">
-                <p className="truncate text-[14.5px] font-bold tracking-tight text-[#0b1e33] mb-1">
+                <p className="truncate text-[14.5px] font-bold tracking-tight text-[#0a2342] mb-1">
                   {doc.titulo}
                 </p>
-                <div className="flex items-center gap-1.5 text-[12px] font-medium text-[#8b9bb0]">
+                <div className="flex items-center gap-1.5 text-[12px] font-medium text-[#4e5f80]">
                   {doc.estado === "verificado" ? (
                     <IconoCheckCirculo className="size-3.5 text-[#1f6b4a] shrink-0" />
                   ) : (
@@ -564,11 +564,11 @@ export function VerificacionDocumentos({ usuario }: VerificacionDocumentosProps)
               {renderDocIcon(docDetalle.icono, "size-8")}
             </div>
 
-            <h2 id="detalle-titulo" className="mb-2 text-center text-[18px] font-extrabold tracking-tight text-[#0b1e33]">
+            <h2 id="detalle-titulo" className="mb-2 text-center text-[18px] font-extrabold tracking-tight text-[#0a2342]">
               {docDetalle.titulo}
             </h2>
 
-            <p className="mb-5 text-center text-[13.5px] font-medium leading-relaxed text-[#6b7c94]">
+            <p className="mb-5 text-center text-[13.5px] font-medium leading-relaxed text-[#4e5f80]">
               {docDetalle.estado === "verificado"
                 ? "Este documento ya fue verificado correctamente. Puedes actualizarlo si es necesario."
                 : "Este documento está en revisión. Puedes actualizarlo mientras tanto."}
@@ -577,7 +577,7 @@ export function VerificacionDocumentos({ usuario }: VerificacionDocumentosProps)
             {/* Preview del documento actual */}
             <div className="mb-4 rounded-[18px] border border-[#eef2f7] bg-[#f8fafd] p-4.5">
               <div className="mb-3 flex items-center justify-between">
-                <span className="text-[13px] font-bold text-[#0b1e33]">Documento actual</span>
+                <span className="text-[13px] font-bold text-[#0a2342]">Documento actual</span>
                 <span
                   className={`rounded-full px-2.5 py-1 text-[11px] font-bold ${
                     docDetalle.estado === "verificado"
@@ -590,15 +590,15 @@ export function VerificacionDocumentos({ usuario }: VerificacionDocumentosProps)
               </div>
               <div className="flex flex-col gap-2 text-[12.5px]">
                 <div className="flex justify-between">
-                  <span className="font-medium text-[#8b9bb0]">Fecha de carga</span>
+                  <span className="font-medium text-[#4e5f80]">Fecha de carga</span>
                   <span className="font-semibold text-[#1a293b]">{docDetalle.fechaCarga}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="font-medium text-[#8b9bb0]">Estado</span>
+                  <span className="font-medium text-[#4e5f80]">Estado</span>
                   <span className="font-semibold text-[#1a293b]">{docDetalle.estadoTexto}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="font-medium text-[#8b9bb0]">Archivo</span>
+                  <span className="font-medium text-[#4e5f80]">Archivo</span>
                   <span className="font-semibold text-[#1a293b] truncate max-w-[200px]">
                     {archivoSeleccionado ? "documento_actualizado.pdf" : docDetalle.archivo}
                   </span>
@@ -628,7 +628,7 @@ export function VerificacionDocumentos({ usuario }: VerificacionDocumentosProps)
                 <>
                   <IconoNubeSubir className="size-8 text-[#a6b7cb]" />
                   <span className="text-[13.5px] font-semibold text-[#2e5a88]">Actualizar documento</span>
-                  <span className="text-[11.5px] font-medium text-[#8b9bb0]">Toca para reemplazar con un archivo más reciente</span>
+                  <span className="text-[11.5px] font-medium text-[#4e5f80]">Toca para reemplazar con un archivo más reciente</span>
                 </>
               )}
             </div>
@@ -637,7 +637,7 @@ export function VerificacionDocumentos({ usuario }: VerificacionDocumentosProps)
             <button
               type="button"
               onClick={handleConfirmarActualizacion}
-              className="mb-2 flex w-full cursor-pointer items-center justify-center gap-2 rounded-[16px] bg-[#0b1e33] py-3.5 px-5 text-[15px] font-bold text-white shadow-[0_10px_22px_-8px_rgba(11,30,51,0.4)] transition-all active:scale-[0.98]"
+              className="mb-2 flex w-full cursor-pointer items-center justify-center gap-2 rounded-[16px] bg-[#0a2342] py-3.5 px-5 text-[15px] font-bold text-white shadow-[0_10px_22px_-8px_rgba(11,30,51,0.4)] transition-all active:scale-[0.98]"
             >
               <svg className="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                 <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
@@ -655,7 +655,7 @@ export function VerificacionDocumentos({ usuario }: VerificacionDocumentosProps)
                 setDocDetalle(null);
                 setArchivoSeleccionado(false);
               }}
-              className="w-full cursor-pointer rounded-[16px] bg-transparent py-3 text-center text-[14px] font-bold text-[#6b7c94] transition-colors hover:text-[#0b1e33]"
+              className="w-full cursor-pointer rounded-[16px] bg-transparent py-3 text-center text-[14px] font-bold text-[#4e5f80] transition-colors hover:text-[#0a2342]"
             >
               Cerrar
             </button>
@@ -696,23 +696,23 @@ export function VerificacionDocumentos({ usuario }: VerificacionDocumentosProps)
             <div className="mx-auto mb-4 flex size-16 items-center justify-center rounded-[22px] bg-[#f0f5fe] text-[#2e5a88]">
               <IconoNubeSubir className="size-8" />
             </div>
-            <h2 id="subir-titulo" className="mb-2 text-center text-[18px] font-extrabold tracking-tight text-[#0b1e33]">
+            <h2 id="subir-titulo" className="mb-2 text-center text-[18px] font-extrabold tracking-tight text-[#0a2342]">
               Subir: {docSubir.titulo}
             </h2>
-            <p className="mb-5 text-center text-[13.5px] font-medium leading-relaxed text-[#6b7c94]">
+            <p className="mb-5 text-center text-[13.5px] font-medium leading-relaxed text-[#4e5f80]">
               Asegúrate de que la foto sea clara y que todos los datos sean legibles. La verificación toma menos de 24 horas.
             </p>
 
             <div className="mb-4 flex cursor-pointer flex-col items-center gap-2 rounded-[20px] border-2 border-dashed border-[#cbd7e6] bg-[#f8fbfe] p-6 transition-all hover:border-[#2e5a88]">
               <IconoCamara className="size-8 text-[#a6b7cb]" />
               <span className="text-[13.5px] font-semibold text-[#2e5a88]">Tomar foto o seleccionar archivo</span>
-              <span className="text-[11.5px] font-medium text-[#8b9bb0]">JPG, PNG o PDF · Máx. 10 MB</span>
+              <span className="text-[11.5px] font-medium text-[#4e5f80]">JPG, PNG o PDF · Máx. 10 MB</span>
             </div>
 
             <button
               type="button"
               onClick={handleConfirmarSubida}
-              className="mb-2 flex w-full cursor-pointer items-center justify-center gap-2 rounded-[16px] bg-[#0b1e33] py-3.5 px-5 text-[15px] font-bold text-white shadow-[0_10px_22px_-8px_rgba(11,30,51,0.4)] transition-all active:scale-[0.98]"
+              className="mb-2 flex w-full cursor-pointer items-center justify-center gap-2 rounded-[16px] bg-[#0a2342] py-3.5 px-5 text-[15px] font-bold text-white shadow-[0_10px_22px_-8px_rgba(11,30,51,0.4)] transition-all active:scale-[0.98]"
             >
               <IconoCheckCirculo className="size-4" />
               Confirmar y enviar
@@ -720,7 +720,7 @@ export function VerificacionDocumentos({ usuario }: VerificacionDocumentosProps)
             <button
               type="button"
               onClick={() => setDocSubir(null)}
-              className="w-full cursor-pointer rounded-[16px] bg-transparent py-3 text-center text-[14px] font-bold text-[#6b7c94] transition-colors hover:text-[#0b1e33]"
+              className="w-full cursor-pointer rounded-[16px] bg-transparent py-3 text-center text-[14px] font-bold text-[#4e5f80] transition-colors hover:text-[#0a2342]"
             >
               Cancelar
             </button>

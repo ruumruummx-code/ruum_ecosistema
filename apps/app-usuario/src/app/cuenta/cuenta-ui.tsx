@@ -361,7 +361,7 @@ function TarjetaSeccion({
       aria-label={titulo}
       className="scroll-mt-28 rounded-[22px] border border-[#eef2f7] bg-white p-5 shadow-[0_6px_16px_rgba(0,0,0,0.01)]"
     >
-      <h2 className="mb-4 flex items-center gap-2.5 text-[16px] font-bold text-[#0b1e33]">
+      <h2 className="mb-4 flex items-center gap-2.5 text-[16px] font-bold text-[#0a2342]">
         <span aria-hidden="true" className="flex size-7 items-center justify-center rounded-[10px] bg-[#f0f5fe] text-[#2e5a88]">
           <IconoSeccion d={icono} />
         </span>
@@ -390,7 +390,7 @@ export function SeccionPerfil({ usuario, fotoUrl }: { usuario: Usuario; fotoUrl?
         aria-label="Volver a Cuenta"
         className="inline-flex min-h-11 items-center gap-2.5 text-[14px] font-bold text-[#2e5a88]"
       >
-        <span aria-hidden="true" className="flex size-10 items-center justify-center rounded-full bg-[#f2f6fc] text-[#0b1e33]">
+        <span aria-hidden="true" className="flex size-10 items-center justify-center rounded-full bg-[#f2f6fc] text-[#0a2342]">
           <Icono nombre="atras" className="size-[18px]" strokeWidth={2} />
         </span>
         Volver
@@ -405,12 +405,12 @@ export function SeccionPerfil({ usuario, fotoUrl }: { usuario: Usuario; fotoUrl?
           {fotoUrl ? (
             <Image src={fotoUrl} alt="Foto de perfil" width={80} height={80} className="size-20 shrink-0 rounded-full border-2 border-white object-cover shadow-[0_4px_12px_rgba(0,0,0,0.05)]" />
           ) : (
-            <span aria-hidden="true" className="flex size-20 shrink-0 items-center justify-center rounded-full border-2 border-white bg-[#d1ddeb] font-display text-2xl font-bold text-[#0b1e33] shadow-[0_4px_12px_rgba(0,0,0,0.05)]">
+            <span aria-hidden="true" className="flex size-20 shrink-0 items-center justify-center rounded-full border-2 border-white bg-[#d1ddeb] font-display text-2xl font-bold text-[#0a2342] shadow-[0_4px_12px_rgba(0,0,0,0.05)]">
               {iniciales(usuario.nombre)}
             </span>
           )}
           <div className="min-w-0">
-            <p className="truncate font-body text-lg font-bold text-[#0b1e33]">{dato(usuario.nombre)}</p>
+            <p className="truncate font-body text-lg font-bold text-[#0a2342]">{dato(usuario.nombre)}</p>
             <p className="mt-1">
               <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-[11px] font-bold ${verificado ? "bg-[#e9f3ee] text-[#1f6b4a]" : "bg-[#eef3fa] text-[#2e5a88]"}`}>
                 {etiquetaVerificacion(usuario.estado_verificacion)}

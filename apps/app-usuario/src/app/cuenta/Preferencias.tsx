@@ -216,8 +216,8 @@ function Interruptor({ activo, onAlternar, etiquetaAria, disabled = false }: Int
       disabled={disabled}
       onClick={onAlternar}
       className={[
-        "relative inline-flex h-7 w-12 shrink-0 cursor-pointer items-center rounded-full transition-colors duration-200 ease-in-out focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0b1e33] disabled:opacity-50",
-        activo ? "bg-[#0b1e33]" : "bg-[#d5e2f0]",
+        "relative inline-flex h-7 w-12 shrink-0 cursor-pointer items-center rounded-full transition-colors duration-200 ease-in-out focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0a2342] disabled:opacity-50",
+        activo ? "bg-[#0a2342]" : "bg-[#d5e2f0]",
       ].join(" ")}
     >
       <span
@@ -407,9 +407,9 @@ export function Preferencias({ usuario }: PreferenciasProps) {
         <div
           role="status"
           aria-live="polite"
-          className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2.5 rounded-full bg-[#0b1e33] px-5 py-3 text-xs font-semibold text-[#fff] shadow-xl animate-fade-in"
+          className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2.5 rounded-full bg-[#0a2342] px-5 py-3 text-xs font-semibold text-[#fff] shadow-xl animate-fade-in"
         >
-          <span className="flex size-4 items-center justify-center rounded-full bg-emerald-400 text-[#0b1e33]">
+          <span className="flex size-4 items-center justify-center rounded-full bg-emerald-400 text-[#0a2342]">
             <IconoCheck className="size-3" />
           </span>
           <span>{toastMensaje}</span>
@@ -421,15 +421,15 @@ export function Preferencias({ usuario }: PreferenciasProps) {
         <Link
           href="/cuenta"
           aria-label="Volver a mi cuenta"
-          className="flex size-10 shrink-0 items-center justify-center rounded-full bg-[#f2f6fc] text-[#0b1e33] transition-all hover:bg-[#e3ebf5] active:scale-95"
+          className="flex size-10 shrink-0 items-center justify-center rounded-full bg-[#f2f6fc] text-[#0a2342] transition-all hover:bg-[#e3ebf5] active:scale-95"
         >
           <Icono nombre="atras" className="size-4" strokeWidth={2.2} />
         </Link>
         <div className="min-w-0">
-          <h1 className="text-[18px] font-bold tracking-tight text-[#0b1e33] leading-snug">
+          <h1 className="text-[18px] font-bold tracking-tight text-[#0a2342] leading-snug">
             Preferencias
           </h1>
-          <p className="text-[12px] font-medium text-[#6b7c94]">
+          <p className="text-[12px] font-medium text-[#4e5f80]">
             Personaliza tu experiencia
           </p>
         </div>
@@ -439,7 +439,7 @@ export function Preferencias({ usuario }: PreferenciasProps) {
       <section
         aria-label="Resumen de preferencias"
         className="relative overflow-hidden rounded-[26px] p-6 text-[#fff] shadow-[0_16px_32px_-12px_rgba(11,30,51,0.4)]"
-        style={{ background: "linear-gradient(135deg, #0b1e33 0%, #162c47 100%)" }}
+        style={{ background: "linear-gradient(135deg, #0a2342 0%, #143560 100%)" }}
       >
         <span
           aria-hidden="true"
@@ -470,7 +470,7 @@ export function Preferencias({ usuario }: PreferenciasProps) {
           SECCIÓN: NOTIFICACIONES
       ───────────────────────────────────────────────────────── */}
       <div>
-        <h2 className="mb-2.5 px-1 text-[12px] font-bold uppercase tracking-[0.8px] text-[#8b9bb0]">
+        <h2 className="mb-2.5 px-1 text-[12px] font-bold uppercase tracking-[0.8px] text-[#4e5f80]">
           Notificaciones
         </h2>
         <div className="overflow-hidden rounded-[22px] border border-[#eef2f7] bg-white py-1 shadow-[0_6px_16px_rgba(0,0,0,0.02)]">
@@ -481,10 +481,10 @@ export function Preferencias({ usuario }: PreferenciasProps) {
                 <IconoCampana className="size-[17px]" />
               </span>
               <div className="min-w-0">
-                <span className="block text-[14.5px] font-bold tracking-tight text-[#0b1e33]">
+                <span className="block text-[14.5px] font-bold tracking-tight text-[#0a2342]">
                   Notificaciones push
                 </span>
-                <span className="block truncate text-[12px] font-medium text-[#8b9bb0]">
+                <span className="block truncate text-[12px] font-medium text-[#4e5f80]">
                   Alertas en tiempo real del traslado
                 </span>
               </div>
@@ -507,10 +507,10 @@ export function Preferencias({ usuario }: PreferenciasProps) {
                 <IconoCorreo className="size-[17px]" />
               </span>
               <div className="min-w-0">
-                <span className="block text-[14.5px] font-bold tracking-tight text-[#0b1e33]">
+                <span className="block text-[14.5px] font-bold tracking-tight text-[#0a2342]">
                   Correo electrónico
                 </span>
-                <span className="block truncate text-[12px] font-medium text-[#8b9bb0]">
+                <span className="block truncate text-[12px] font-medium text-[#4e5f80]">
                   Resúmenes, confirmaciones y facturas
                 </span>
               </div>
@@ -533,10 +533,10 @@ export function Preferencias({ usuario }: PreferenciasProps) {
                 <IconoMensaje className="size-[17px]" />
               </span>
               <div className="min-w-0">
-                <span className="block text-[14.5px] font-bold tracking-tight text-[#0b1e33]">
+                <span className="block text-[14.5px] font-bold tracking-tight text-[#0a2342]">
                   WhatsApp / SMS
                 </span>
-                <span className="block truncate text-[12px] font-medium text-[#8b9bb0]">
+                <span className="block truncate text-[12px] font-medium text-[#4e5f80]">
                   Mensajes de estado del traslado
                 </span>
               </div>
@@ -559,10 +559,10 @@ export function Preferencias({ usuario }: PreferenciasProps) {
                 <IconoEtiqueta className="size-[17px]" />
               </span>
               <div className="min-w-0">
-                <span className="block text-[14.5px] font-bold tracking-tight text-[#0b1e33]">
+                <span className="block text-[14.5px] font-bold tracking-tight text-[#0a2342]">
                   Promociones
                 </span>
-                <span className="block truncate text-[12px] font-medium text-[#8b9bb0]">
+                <span className="block truncate text-[12px] font-medium text-[#4e5f80]">
                   Ofertas y novedades de Ruum Ruum
                 </span>
               </div>
@@ -580,7 +580,7 @@ export function Preferencias({ usuario }: PreferenciasProps) {
           SECCIÓN: ALERTAS DE TRASLADO
       ───────────────────────────────────────────────────────── */}
       <div>
-        <h2 className="mb-2.5 px-1 text-[12px] font-bold uppercase tracking-[0.8px] text-[#8b9bb0]">
+        <h2 className="mb-2.5 px-1 text-[12px] font-bold uppercase tracking-[0.8px] text-[#4e5f80]">
           Alertas de traslado
         </h2>
         <div className="overflow-hidden rounded-[22px] border border-[#eef2f7] bg-white py-1 shadow-[0_6px_16px_rgba(0,0,0,0.02)]">
@@ -591,10 +591,10 @@ export function Preferencias({ usuario }: PreferenciasProps) {
                 <IconoCamion className="size-[17px]" />
               </span>
               <div className="min-w-0">
-                <span className="block text-[14.5px] font-bold tracking-tight text-[#0b1e33]">
+                <span className="block text-[14.5px] font-bold tracking-tight text-[#0a2342]">
                   Estado del traslado
                 </span>
-                <span className="block truncate text-[12px] font-medium text-[#8b9bb0]">
+                <span className="block truncate text-[12px] font-medium text-[#4e5f80]">
                   Conductor asignado, en camino, llegada
                 </span>
               </div>
@@ -617,10 +617,10 @@ export function Preferencias({ usuario }: PreferenciasProps) {
                 <IconoCamara className="size-[17px]" />
               </span>
               <div className="min-w-0">
-                <span className="block text-[14.5px] font-bold tracking-tight text-[#0b1e33]">
+                <span className="block text-[14.5px] font-bold tracking-tight text-[#0a2342]">
                   Evidencia disponible
                 </span>
-                <span className="block truncate text-[12px] font-medium text-[#8b9bb0]">
+                <span className="block truncate text-[12px] font-medium text-[#4e5f80]">
                   Check inicial y final cargados
                 </span>
               </div>
@@ -643,10 +643,10 @@ export function Preferencias({ usuario }: PreferenciasProps) {
                 <IconoTarjeta className="size-[17px]" />
               </span>
               <div className="min-w-0">
-                <span className="block text-[14.5px] font-bold tracking-tight text-[#0b1e33]">
+                <span className="block text-[14.5px] font-bold tracking-tight text-[#0a2342]">
                   Alertas de pago
                 </span>
-                <span className="block truncate text-[12px] font-medium text-[#8b9bb0]">
+                <span className="block truncate text-[12px] font-medium text-[#4e5f80]">
                   Confirmaciones y cargos
                 </span>
               </div>
@@ -669,10 +669,10 @@ export function Preferencias({ usuario }: PreferenciasProps) {
                 <IconoAlertaTriangulo className="size-[17px]" />
               </span>
               <div className="min-w-0">
-                <span className="block text-[14.5px] font-bold tracking-tight text-[#0b1e33]">
+                <span className="block text-[14.5px] font-bold tracking-tight text-[#0a2342]">
                   Incidentes
                 </span>
-                <span className="block truncate text-[12px] font-medium text-[#8b9bb0]">
+                <span className="block truncate text-[12px] font-medium text-[#4e5f80]">
                   Problemas durante el traslado
                 </span>
               </div>
@@ -690,7 +690,7 @@ export function Preferencias({ usuario }: PreferenciasProps) {
           SECCIÓN: IDIOMA Y REGIÓN
       ───────────────────────────────────────────────────────── */}
       <div>
-        <h2 className="mb-2.5 px-1 text-[12px] font-bold uppercase tracking-[0.8px] text-[#8b9bb0]">
+        <h2 className="mb-2.5 px-1 text-[12px] font-bold uppercase tracking-[0.8px] text-[#4e5f80]">
           Idioma y región
         </h2>
         <div className="overflow-hidden rounded-[22px] border border-[#eef2f7] bg-white p-[18px] shadow-[0_6px_16px_rgba(0,0,0,0.02)]">
@@ -712,14 +712,14 @@ export function Preferencias({ usuario }: PreferenciasProps) {
               <div
                 className={[
                   "flex size-[22px] shrink-0 items-center justify-center rounded-full border-2 transition",
-                  idioma === "es" ? "border-[#0b1e33] bg-[#0b1e33]" : "border-[#d5e2f0] bg-white",
+                  idioma === "es" ? "border-[#0a2342] bg-[#0a2342]" : "border-[#d5e2f0] bg-white",
                 ].join(" ")}
               >
                 {idioma === "es" && <span className="size-2 rounded-full bg-white" />}
               </div>
               <div className="flex-1">
-                <div className="text-[14px] font-bold text-[#0b1e33]">Español (México)</div>
-                <div className="text-[12px] font-medium text-[#8b9bb0]">Idioma predeterminado</div>
+                <div className="text-[14px] font-bold text-[#0a2342]">Español (México)</div>
+                <div className="text-[12px] font-medium text-[#4e5f80]">Idioma predeterminado</div>
               </div>
             </div>
 
@@ -740,14 +740,14 @@ export function Preferencias({ usuario }: PreferenciasProps) {
               <div
                 className={[
                   "flex size-[22px] shrink-0 items-center justify-center rounded-full border-2 transition",
-                  idioma === "en" ? "border-[#0b1e33] bg-[#0b1e33]" : "border-[#d5e2f0] bg-white",
+                  idioma === "en" ? "border-[#0a2342] bg-[#0a2342]" : "border-[#d5e2f0] bg-white",
                 ].join(" ")}
               >
                 {idioma === "en" && <span className="size-2 rounded-full bg-white" />}
               </div>
               <div className="flex-1">
-                <div className="text-[14px] font-bold text-[#0b1e33]">English (US)</div>
-                <div className="text-[12px] font-medium text-[#8b9bb0]">English</div>
+                <div className="text-[14px] font-bold text-[#0a2342]">English (US)</div>
+                <div className="text-[12px] font-medium text-[#4e5f80]">English</div>
               </div>
             </div>
           </div>
@@ -758,7 +758,7 @@ export function Preferencias({ usuario }: PreferenciasProps) {
           SECCIÓN: PREFERENCIAS DE LA APP
       ───────────────────────────────────────────────────────── */}
       <div>
-        <h2 className="mb-2.5 px-1 text-[12px] font-bold uppercase tracking-[0.8px] text-[#8b9bb0]">
+        <h2 className="mb-2.5 px-1 text-[12px] font-bold uppercase tracking-[0.8px] text-[#4e5f80]">
           Preferencias de la app
         </h2>
         <div className="overflow-hidden rounded-[22px] border border-[#eef2f7] bg-white py-1 shadow-[0_6px_16px_rgba(0,0,0,0.02)]">
@@ -773,16 +773,16 @@ export function Preferencias({ usuario }: PreferenciasProps) {
                 <IconoPaleta className="size-[17px]" />
               </span>
               <div className="min-w-0">
-                <span className="block text-[14.5px] font-bold tracking-tight text-[#0b1e33]">
+                <span className="block text-[14.5px] font-bold tracking-tight text-[#0a2342]">
                   Tema de la aplicación
                 </span>
-                <span className="block truncate text-[12px] font-medium text-[#8b9bb0]">
+                <span className="block truncate text-[12px] font-medium text-[#4e5f80]">
                   Claro, oscuro o automático
                 </span>
               </div>
             </div>
             <div className="flex shrink-0 items-center gap-2">
-              <span className="text-[13px] font-semibold text-[#6b7c94]">{tema}</span>
+              <span className="text-[13px] font-semibold text-[#4e5f80]">{tema}</span>
               <IconoChevron className="text-[#c3cfdd]" />
             </div>
           </button>
@@ -802,16 +802,16 @@ export function Preferencias({ usuario }: PreferenciasProps) {
                 <IconoRegla className="size-[17px]" />
               </span>
               <div className="min-w-0">
-                <span className="block text-[14.5px] font-bold tracking-tight text-[#0b1e33]">
+                <span className="block text-[14.5px] font-bold tracking-tight text-[#0a2342]">
                   Unidades de medida
                 </span>
-                <span className="block truncate text-[12px] font-medium text-[#8b9bb0]">
+                <span className="block truncate text-[12px] font-medium text-[#4e5f80]">
                   Kilómetros, litros, moneda
                 </span>
               </div>
             </div>
             <div className="flex shrink-0 items-center gap-2">
-              <span className="text-[13px] font-semibold text-[#6b7c94]">{unidades}</span>
+              <span className="text-[13px] font-semibold text-[#4e5f80]">{unidades}</span>
               <IconoChevron className="text-[#c3cfdd]" />
             </div>
           </button>
@@ -831,16 +831,16 @@ export function Preferencias({ usuario }: PreferenciasProps) {
                 <IconoAccesibilidad className="size-[17px]" />
               </span>
               <div className="min-w-0">
-                <span className="block text-[14.5px] font-bold tracking-tight text-[#0b1e33]">
+                <span className="block text-[14.5px] font-bold tracking-tight text-[#0a2342]">
                   Accesibilidad
                 </span>
-                <span className="block truncate text-[12px] font-medium text-[#8b9bb0]">
+                <span className="block truncate text-[12px] font-medium text-[#4e5f80]">
                   Texto grande, alto contraste
                 </span>
               </div>
             </div>
             <div className="flex shrink-0 items-center gap-2">
-              <span className="text-[13px] font-semibold text-[#6b7c94]">{accesibilidad}</span>
+              <span className="text-[13px] font-semibold text-[#4e5f80]">{accesibilidad}</span>
               <IconoChevron className="text-[#c3cfdd]" />
             </div>
           </button>
@@ -851,7 +851,7 @@ export function Preferencias({ usuario }: PreferenciasProps) {
           SECCIÓN: PRIVACIDAD Y SEGURIDAD
       ───────────────────────────────────────────────────────── */}
       <div>
-        <h2 className="mb-2.5 px-1 text-[12px] font-bold uppercase tracking-[0.8px] text-[#8b9bb0]">
+        <h2 className="mb-2.5 px-1 text-[12px] font-bold uppercase tracking-[0.8px] text-[#4e5f80]">
           Privacidad y seguridad
         </h2>
         <div className="overflow-hidden rounded-[22px] border border-[#eef2f7] bg-white py-1 shadow-[0_6px_16px_rgba(0,0,0,0.02)]">
@@ -862,10 +862,10 @@ export function Preferencias({ usuario }: PreferenciasProps) {
                 <IconoHuella className="size-[17px]" />
               </span>
               <div className="min-w-0">
-                <span className="block text-[14.5px] font-bold tracking-tight text-[#0b1e33]">
+                <span className="block text-[14.5px] font-bold tracking-tight text-[#0a2342]">
                   Inicio de sesión biométrico
                 </span>
-                <span className="block truncate text-[12px] font-medium text-[#8b9bb0]">
+                <span className="block truncate text-[12px] font-medium text-[#4e5f80]">
                   Face ID o huella digital
                 </span>
               </div>
@@ -888,10 +888,10 @@ export function Preferencias({ usuario }: PreferenciasProps) {
                 <IconoUbicacion className="size-[17px]" />
               </span>
               <div className="min-w-0">
-                <span className="block text-[14.5px] font-bold tracking-tight text-[#0b1e33]">
+                <span className="block text-[14.5px] font-bold tracking-tight text-[#0a2342]">
                   Ubicación en tiempo real
                 </span>
-                <span className="block truncate text-[12px] font-medium text-[#8b9bb0]">
+                <span className="block truncate text-[12px] font-medium text-[#4e5f80]">
                   Permitir seguimiento del conductor
                 </span>
               </div>
@@ -918,16 +918,16 @@ export function Preferencias({ usuario }: PreferenciasProps) {
                 <IconoBaseDatos className="size-[17px]" />
               </span>
               <div className="min-w-0">
-                <span className="block text-[14.5px] font-bold tracking-tight text-[#0b1e33]">
+                <span className="block text-[14.5px] font-bold tracking-tight text-[#0a2342]">
                   Uso de datos
                 </span>
-                <span className="block truncate text-[12px] font-medium text-[#8b9bb0]">
+                <span className="block truncate text-[12px] font-medium text-[#4e5f80]">
                   Compartir datos anónimos de uso
                 </span>
               </div>
             </div>
             <div className="flex shrink-0 items-center gap-2">
-              <span className="text-[13px] font-semibold text-[#6b7c94]">{usoDatos}</span>
+              <span className="text-[13px] font-semibold text-[#4e5f80]">{usoDatos}</span>
               <IconoChevron className="text-[#c3cfdd]" />
             </div>
           </button>
@@ -962,10 +962,10 @@ export function Preferencias({ usuario }: PreferenciasProps) {
             <div className="mx-auto mb-3 flex size-14 items-center justify-center rounded-2xl bg-[#f2eef9] text-[#5e3b8c]">
               <IconoPaleta className="size-7" />
             </div>
-            <h2 id="modal-tema-titulo" className="text-center text-[19px] font-extrabold text-[#0b1e33] tracking-tight">
+            <h2 id="modal-tema-titulo" className="text-center text-[19px] font-extrabold text-[#0a2342] tracking-tight">
               Tema de la aplicación
             </h2>
-            <p id="modal-tema-desc" className="mt-1 text-center text-[13.5px] font-medium text-[#6b7c94] leading-relaxed">
+            <p id="modal-tema-desc" className="mt-1 text-center text-[13.5px] font-medium text-[#4e5f80] leading-relaxed">
               Elige cómo quieres ver Ruum Ruum
             </p>
 
@@ -992,21 +992,21 @@ export function Preferencias({ usuario }: PreferenciasProps) {
                     className={[
                       "flex cursor-pointer items-center gap-3.5 rounded-2xl border-2 p-3.5 transition",
                       activo
-                        ? "border-[#0b1e33] bg-white shadow-[0_0_0_3px_rgba(11,30,51,0.06)]"
+                        ? "border-[#0a2342] bg-white shadow-[0_0_0_3px_rgba(11,30,51,0.06)]"
                         : "border-[#e6edf6] bg-[#fafcfe] hover:border-[#cbd7e6]",
                     ].join(" ")}
                   >
                     <div
                       className={[
                         "flex size-[22px] shrink-0 items-center justify-center rounded-full border-2 transition",
-                        activo ? "border-[#0b1e33] bg-[#0b1e33]" : "border-[#d5e2f0] bg-white",
+                        activo ? "border-[#0a2342] bg-[#0a2342]" : "border-[#d5e2f0] bg-white",
                       ].join(" ")}
                     >
                       {activo && <span className="size-2 rounded-full bg-white" />}
                     </div>
                     <div className="flex-1">
-                      <div className="text-[14px] font-bold text-[#0b1e33]">{opt.valor}</div>
-                      <div className="text-[12px] font-medium text-[#8b9bb0]">{opt.sub}</div>
+                      <div className="text-[14px] font-bold text-[#0a2342]">{opt.valor}</div>
+                      <div className="text-[12px] font-medium text-[#4e5f80]">{opt.sub}</div>
                     </div>
                   </div>
                 );
@@ -1017,14 +1017,14 @@ export function Preferencias({ usuario }: PreferenciasProps) {
               <button
                 type="button"
                 onClick={aplicarModal}
-                className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#0b1e33] py-3.5 text-center text-[15px] font-bold text-white shadow-lg transition hover:bg-[#162c47] active:scale-98 cursor-pointer"
+                className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#0a2342] py-3.5 text-center text-[15px] font-bold text-white shadow-lg transition hover:bg-[#143560] active:scale-98 cursor-pointer"
               >
                 <IconoCheck className="size-4" /> Aplicar
               </button>
               <button
                 type="button"
                 onClick={() => setModalAbierto(null)}
-                className="w-full py-2.5 text-center text-[14px] font-bold text-[#6b7c94] transition hover:text-[#0b1e33] cursor-pointer"
+                className="w-full py-2.5 text-center text-[14px] font-bold text-[#4e5f80] transition hover:text-[#0a2342] cursor-pointer"
               >
                 Cancelar
               </button>
@@ -1053,10 +1053,10 @@ export function Preferencias({ usuario }: PreferenciasProps) {
             <div className="mx-auto mb-3 flex size-14 items-center justify-center rounded-2xl bg-[#f2eef9] text-[#5e3b8c]">
               <IconoRegla className="size-7" />
             </div>
-            <h2 id="modal-unidades-titulo" className="text-center text-[19px] font-extrabold text-[#0b1e33] tracking-tight">
+            <h2 id="modal-unidades-titulo" className="text-center text-[19px] font-extrabold text-[#0a2342] tracking-tight">
               Unidades de medida
             </h2>
-            <p id="modal-unidades-desc" className="mt-1 text-center text-[13.5px] font-medium text-[#6b7c94] leading-relaxed">
+            <p id="modal-unidades-desc" className="mt-1 text-center text-[13.5px] font-medium text-[#4e5f80] leading-relaxed">
               Selecciona el sistema de medidas que prefieras
             </p>
 
@@ -1082,21 +1082,21 @@ export function Preferencias({ usuario }: PreferenciasProps) {
                     className={[
                       "flex cursor-pointer items-center gap-3.5 rounded-2xl border-2 p-3.5 transition",
                       activo
-                        ? "border-[#0b1e33] bg-white shadow-[0_0_0_3px_rgba(11,30,51,0.06)]"
+                        ? "border-[#0a2342] bg-white shadow-[0_0_0_3px_rgba(11,30,51,0.06)]"
                         : "border-[#e6edf6] bg-[#fafcfe] hover:border-[#cbd7e6]",
                     ].join(" ")}
                   >
                     <div
                       className={[
                         "flex size-[22px] shrink-0 items-center justify-center rounded-full border-2 transition",
-                        activo ? "border-[#0b1e33] bg-[#0b1e33]" : "border-[#d5e2f0] bg-white",
+                        activo ? "border-[#0a2342] bg-[#0a2342]" : "border-[#d5e2f0] bg-white",
                       ].join(" ")}
                     >
                       {activo && <span className="size-2 rounded-full bg-white" />}
                     </div>
                     <div className="flex-1">
-                      <div className="text-[14px] font-bold text-[#0b1e33]">{opt.valor}</div>
-                      <div className="text-[12px] font-medium text-[#8b9bb0]">{opt.sub}</div>
+                      <div className="text-[14px] font-bold text-[#0a2342]">{opt.valor}</div>
+                      <div className="text-[12px] font-medium text-[#4e5f80]">{opt.sub}</div>
                     </div>
                   </div>
                 );
@@ -1107,14 +1107,14 @@ export function Preferencias({ usuario }: PreferenciasProps) {
               <button
                 type="button"
                 onClick={aplicarModal}
-                className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#0b1e33] py-3.5 text-center text-[15px] font-bold text-white shadow-lg transition hover:bg-[#162c47] active:scale-98 cursor-pointer"
+                className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#0a2342] py-3.5 text-center text-[15px] font-bold text-white shadow-lg transition hover:bg-[#143560] active:scale-98 cursor-pointer"
               >
                 <IconoCheck className="size-4" /> Aplicar
               </button>
               <button
                 type="button"
                 onClick={() => setModalAbierto(null)}
-                className="w-full py-2.5 text-center text-[14px] font-bold text-[#6b7c94] transition hover:text-[#0b1e33] cursor-pointer"
+                className="w-full py-2.5 text-center text-[14px] font-bold text-[#4e5f80] transition hover:text-[#0a2342] cursor-pointer"
               >
                 Cancelar
               </button>
@@ -1143,10 +1143,10 @@ export function Preferencias({ usuario }: PreferenciasProps) {
             <div className="mx-auto mb-3 flex size-14 items-center justify-center rounded-2xl bg-[#f2eef9] text-[#5e3b8c]">
               <IconoAccesibilidad className="size-7" />
             </div>
-            <h2 id="modal-accesibilidad-titulo" className="text-center text-[19px] font-extrabold text-[#0b1e33] tracking-tight">
+            <h2 id="modal-accesibilidad-titulo" className="text-center text-[19px] font-extrabold text-[#0a2342] tracking-tight">
               Accesibilidad
             </h2>
-            <p id="modal-accesibilidad-desc" className="mt-1 text-center text-[13.5px] font-medium text-[#6b7c94] leading-relaxed">
+            <p id="modal-accesibilidad-desc" className="mt-1 text-center text-[13.5px] font-medium text-[#4e5f80] leading-relaxed">
               Ajusta la interfaz para que sea más fácil de usar
             </p>
 
@@ -1173,21 +1173,21 @@ export function Preferencias({ usuario }: PreferenciasProps) {
                     className={[
                       "flex cursor-pointer items-center gap-3.5 rounded-2xl border-2 p-3.5 transition",
                       activo
-                        ? "border-[#0b1e33] bg-white shadow-[0_0_0_3px_rgba(11,30,51,0.06)]"
+                        ? "border-[#0a2342] bg-white shadow-[0_0_0_3px_rgba(11,30,51,0.06)]"
                         : "border-[#e6edf6] bg-[#fafcfe] hover:border-[#cbd7e6]",
                     ].join(" ")}
                   >
                     <div
                       className={[
                         "flex size-[22px] shrink-0 items-center justify-center rounded-full border-2 transition",
-                        activo ? "border-[#0b1e33] bg-[#0b1e33]" : "border-[#d5e2f0] bg-white",
+                        activo ? "border-[#0a2342] bg-[#0a2342]" : "border-[#d5e2f0] bg-white",
                       ].join(" ")}
                     >
                       {activo && <span className="size-2 rounded-full bg-white" />}
                     </div>
                     <div className="flex-1">
-                      <div className="text-[14px] font-bold text-[#0b1e33]">{opt.valor}</div>
-                      <div className="text-[12px] font-medium text-[#8b9bb0]">{opt.sub}</div>
+                      <div className="text-[14px] font-bold text-[#0a2342]">{opt.valor}</div>
+                      <div className="text-[12px] font-medium text-[#4e5f80]">{opt.sub}</div>
                     </div>
                   </div>
                 );
@@ -1198,14 +1198,14 @@ export function Preferencias({ usuario }: PreferenciasProps) {
               <button
                 type="button"
                 onClick={aplicarModal}
-                className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#0b1e33] py-3.5 text-center text-[15px] font-bold text-white shadow-lg transition hover:bg-[#162c47] active:scale-98 cursor-pointer"
+                className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#0a2342] py-3.5 text-center text-[15px] font-bold text-white shadow-lg transition hover:bg-[#143560] active:scale-98 cursor-pointer"
               >
                 <IconoCheck className="size-4" /> Aplicar
               </button>
               <button
                 type="button"
                 onClick={() => setModalAbierto(null)}
-                className="w-full py-2.5 text-center text-[14px] font-bold text-[#6b7c94] transition hover:text-[#0b1e33] cursor-pointer"
+                className="w-full py-2.5 text-center text-[14px] font-bold text-[#4e5f80] transition hover:text-[#0a2342] cursor-pointer"
               >
                 Cancelar
               </button>
@@ -1234,10 +1234,10 @@ export function Preferencias({ usuario }: PreferenciasProps) {
             <div className="mx-auto mb-3 flex size-14 items-center justify-center rounded-2xl bg-[#f0f5fe] text-[#2e5a88]">
               <IconoBaseDatos className="size-7" />
             </div>
-            <h2 id="modal-datos-titulo" className="text-center text-[19px] font-extrabold text-[#0b1e33] tracking-tight">
+            <h2 id="modal-datos-titulo" className="text-center text-[19px] font-extrabold text-[#0a2342] tracking-tight">
               Uso de datos
             </h2>
-            <p id="modal-datos-desc" className="mt-1 text-center text-[13.5px] font-medium text-[#6b7c94] leading-relaxed">
+            <p id="modal-datos-desc" className="mt-1 text-center text-[13.5px] font-medium text-[#4e5f80] leading-relaxed">
               Ayúdanos a mejorar Ruum Ruum compartiendo datos anónimos de uso
             </p>
 
@@ -1263,21 +1263,21 @@ export function Preferencias({ usuario }: PreferenciasProps) {
                     className={[
                       "flex cursor-pointer items-center gap-3.5 rounded-2xl border-2 p-3.5 transition",
                       activo
-                        ? "border-[#0b1e33] bg-white shadow-[0_0_0_3px_rgba(11,30,51,0.06)]"
+                        ? "border-[#0a2342] bg-white shadow-[0_0_0_3px_rgba(11,30,51,0.06)]"
                         : "border-[#e6edf6] bg-[#fafcfe] hover:border-[#cbd7e6]",
                     ].join(" ")}
                   >
                     <div
                       className={[
                         "flex size-[22px] shrink-0 items-center justify-center rounded-full border-2 transition",
-                        activo ? "border-[#0b1e33] bg-[#0b1e33]" : "border-[#d5e2f0] bg-white",
+                        activo ? "border-[#0a2342] bg-[#0a2342]" : "border-[#d5e2f0] bg-white",
                       ].join(" ")}
                     >
                       {activo && <span className="size-2 rounded-full bg-white" />}
                     </div>
                     <div className="flex-1">
-                      <div className="text-[14px] font-bold text-[#0b1e33]">{opt.valor}</div>
-                      <div className="text-[12px] font-medium text-[#8b9bb0]">{opt.sub}</div>
+                      <div className="text-[14px] font-bold text-[#0a2342]">{opt.valor}</div>
+                      <div className="text-[12px] font-medium text-[#4e5f80]">{opt.sub}</div>
                     </div>
                   </div>
                 );
@@ -1288,14 +1288,14 @@ export function Preferencias({ usuario }: PreferenciasProps) {
               <button
                 type="button"
                 onClick={aplicarModal}
-                className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#0b1e33] py-3.5 text-center text-[15px] font-bold text-white shadow-lg transition hover:bg-[#162c47] active:scale-98 cursor-pointer"
+                className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#0a2342] py-3.5 text-center text-[15px] font-bold text-white shadow-lg transition hover:bg-[#143560] active:scale-98 cursor-pointer"
               >
                 <IconoCheck className="size-4" /> Aplicar
               </button>
               <button
                 type="button"
                 onClick={() => setModalAbierto(null)}
-                className="w-full py-2.5 text-center text-[14px] font-bold text-[#6b7c94] transition hover:text-[#0b1e33] cursor-pointer"
+                className="w-full py-2.5 text-center text-[14px] font-bold text-[#4e5f80] transition hover:text-[#0a2342] cursor-pointer"
               >
                 Cancelar
               </button>

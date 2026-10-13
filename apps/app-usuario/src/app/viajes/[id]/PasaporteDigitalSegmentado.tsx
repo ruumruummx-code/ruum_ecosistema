@@ -46,6 +46,78 @@ import {
 
 import type { DatosTraslado } from "./obtenerDatosTraslado";
 
+function IconoEscudoGnp({ className = "size-3.5" }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z" />
+      <path d="m9 12 2 2 4-4" />
+    </svg>
+  );
+}
+
+function IconoPinTab({ className = "size-4" }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M12 21.7C17.3 17 20 13 20 10a8 8 0 1 0-16 0c0 3 2.7 7 8 11.7Z" />
+      <circle cx="12" cy="10" r="2.6" />
+    </svg>
+  );
+}
+
+function IconoCamaraTab({ className = "size-4" }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M4 8h3l2-2.5h6L17 8h3a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1Z" />
+      <circle cx="12" cy="13.5" r="3.2" />
+    </svg>
+  );
+}
+
+function IconoAutoTab({ className = "size-4" }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.5 2.8C2.1 11 2 11.5 2 12v4c0 .6.4 1 1 1h2" />
+      <circle cx="7" cy="17" r="2" />
+      <path d="M9 17h6" />
+      <circle cx="17" cy="17" r="2" />
+    </svg>
+  );
+}
+
+function IconoReciboTab({ className = "size-4" }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <rect x="4" y="3" width="16" height="18" rx="2" />
+      <path d="M8 7h8M8 11h8M8 15h4" />
+    </svg>
+  );
+}
+
+function IconoChatAccion({ className = "size-4" }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+    </svg>
+  );
+}
+
+function IconoTelefonoAccion({ className = "size-4" }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
+    </svg>
+  );
+}
+
+function IconoSosAccion({ className = "size-4" }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M12 9v4M12 17h.01" />
+      <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+    </svg>
+  );
+}
+
 export type PestanaPasaporte = "en_ruta" | "fotos" | "unidad" | "recibo";
 
 export interface PasaporteDigitalSegmentadoProps {
@@ -219,8 +291,8 @@ export function PasaporteDigitalSegmentado({
               {folioCorto}
             </span>
           </div>
-          <span className="inline-flex items-center gap-1 rounded-md bg-amber-400/15 border border-amber-400/30 px-2 py-0.5 text-[10.5px] font-bold text-amber-300">
-            <span>🛡️</span> Cobertura GNP
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-400/20 border border-amber-400/40 px-2.5 py-0.5 text-[11px] font-bold text-amber-200">
+            <IconoEscudoGnp /> Cobertura GNP
           </span>
         </div>
 
@@ -278,7 +350,7 @@ export function PasaporteDigitalSegmentado({
         id={tablistId}
         role="tablist"
         aria-label="Pestañas del Pasaporte Digital"
-        className="sticky top-2 z-30 grid grid-cols-4 gap-1 rounded-[22px] border border-[#e2eaf4] bg-[#f2f6fc]/95 p-1.5 shadow-sm backdrop-blur-md"
+        className="sticky top-2 z-30 grid grid-cols-4 gap-1.5 rounded-2xl border border-[#e2eaf4] bg-[#f2f6fc]/95 p-1.5 shadow-sm backdrop-blur-md dark:border-[#1a3a5c] dark:bg-[#0f2d52]/90"
       >
         <button
           type="button"
@@ -287,13 +359,13 @@ export function PasaporteDigitalSegmentado({
           aria-selected={pestanaActiva === "en_ruta"}
           aria-controls="panel-en_ruta"
           onClick={() => setPestanaActiva("en_ruta")}
-          className={`flex flex-col items-center justify-center gap-0.5 rounded-[18px] py-2 px-1 text-center transition-all ${
+          className={`flex flex-col items-center justify-center gap-1 rounded-xl py-2 px-1 text-center transition-all cursor-pointer ${
             pestanaActiva === "en_ruta"
-              ? "bg-[#0b1e33] text-white shadow-md font-bold"
-              : "text-[#5e718a] hover:text-[#0b1e33] font-semibold"
+              ? "bg-[#0a2342] text-white shadow-xs font-bold dark:bg-[#4d94ff] dark:text-[#061529]"
+              : "text-[#4e5f80] hover:text-[#0a2342] font-semibold dark:text-[#a8b5cc] dark:hover:text-[#f6f8fb]"
           }`}
         >
-          <span className="text-[13px]" aria-hidden="true">📍</span>
+          <IconoPinTab />
           <span className="text-[11.5px] leading-tight">En Ruta</span>
         </button>
 
@@ -304,13 +376,13 @@ export function PasaporteDigitalSegmentado({
           aria-selected={pestanaActiva === "fotos"}
           aria-controls="panel-fotos"
           onClick={() => setPestanaActiva("fotos")}
-          className={`flex flex-col items-center justify-center gap-0.5 rounded-[18px] py-2 px-1 text-center transition-all ${
+          className={`flex flex-col items-center justify-center gap-1 rounded-xl py-2 px-1 text-center transition-all cursor-pointer ${
             pestanaActiva === "fotos"
-              ? "bg-[#0b1e33] text-white shadow-md font-bold"
-              : "text-[#5e718a] hover:text-[#0b1e33] font-semibold"
+              ? "bg-[#0a2342] text-white shadow-xs font-bold dark:bg-[#4d94ff] dark:text-[#061529]"
+              : "text-[#4e5f80] hover:text-[#0a2342] font-semibold dark:text-[#a8b5cc] dark:hover:text-[#f6f8fb]"
           }`}
         >
-          <span className="text-[13px]" aria-hidden="true">📸</span>
+          <IconoCamaraTab />
           <span className="text-[11.5px] leading-tight">Fotos</span>
         </button>
 
@@ -321,13 +393,13 @@ export function PasaporteDigitalSegmentado({
           aria-selected={pestanaActiva === "unidad"}
           aria-controls="panel-unidad"
           onClick={() => setPestanaActiva("unidad")}
-          className={`flex flex-col items-center justify-center gap-0.5 rounded-[18px] py-2 px-1 text-center transition-all ${
+          className={`flex flex-col items-center justify-center gap-1 rounded-xl py-2 px-1 text-center transition-all cursor-pointer ${
             pestanaActiva === "unidad"
-              ? "bg-[#0b1e33] text-white shadow-md font-bold"
-              : "text-[#5e718a] hover:text-[#0b1e33] font-semibold"
+              ? "bg-[#0a2342] text-white shadow-xs font-bold dark:bg-[#4d94ff] dark:text-[#061529]"
+              : "text-[#4e5f80] hover:text-[#0a2342] font-semibold dark:text-[#a8b5cc] dark:hover:text-[#f6f8fb]"
           }`}
         >
-          <span className="text-[13px]" aria-hidden="true">🚗</span>
+          <IconoAutoTab />
           <span className="text-[11.5px] leading-tight">Unidad</span>
         </button>
 
@@ -338,13 +410,13 @@ export function PasaporteDigitalSegmentado({
           aria-selected={pestanaActiva === "recibo"}
           aria-controls="panel-recibo"
           onClick={() => setPestanaActiva("recibo")}
-          className={`flex flex-col items-center justify-center gap-0.5 rounded-[18px] py-2 px-1 text-center transition-all ${
+          className={`flex flex-col items-center justify-center gap-1 rounded-xl py-2 px-1 text-center transition-all cursor-pointer ${
             pestanaActiva === "recibo"
-              ? "bg-[#0b1e33] text-white shadow-md font-bold"
-              : "text-[#5e718a] hover:text-[#0b1e33] font-semibold"
+              ? "bg-[#0a2342] text-white shadow-xs font-bold dark:bg-[#4d94ff] dark:text-[#061529]"
+              : "text-[#4e5f80] hover:text-[#0a2342] font-semibold dark:text-[#a8b5cc] dark:hover:text-[#f6f8fb]"
           }`}
         >
-          <span className="text-[13px]" aria-hidden="true">🧾</span>
+          <IconoReciboTab />
           <span className="text-[11.5px] leading-tight">Recibo</span>
         </button>
       </div>
@@ -404,20 +476,20 @@ export function PasaporteDigitalSegmentado({
                       type="button"
                       onClick={() => setChatAbierto((prev) => !prev)}
                       aria-label="Abrir o cerrar chat con el conductor"
-                      className={`flex size-10 items-center justify-center rounded-xl border text-[15px] transition-transform active:scale-95 ${
+                      className={`flex size-10 items-center justify-center rounded-xl border text-[15px] transition-transform active:scale-95 cursor-pointer ${
                         chatAbierto
-                          ? "bg-[#0b1e33] text-white border-[#0b1e33]"
-                          : "bg-white text-[#2e5a88] border-[#d7e4f2] hover:bg-[#eef3fa]"
+                          ? "bg-[#0a2342] text-white border-[#0a2342] dark:bg-[#4d94ff] dark:text-[#061529]"
+                          : "bg-white text-[#0a2342] border-[#d7e4f2] hover:bg-[#eef3fa] dark:bg-[#0a2342] dark:text-[#f6f8fb] dark:border-[#2d4f73]"
                       }`}
                     >
-                      💬
+                      <IconoChatAccion />
                     </button>
                     <Link
                       href={soporteHref}
                       aria-label="Llamar al conductor vía soporte enmascarado"
-                      className="flex size-10 items-center justify-center rounded-xl border border-[#d7e4f2] bg-white text-[15px] text-[#1f6b4a] transition-transform active:scale-95 hover:bg-[#eef3fa]"
+                      className="flex size-10 items-center justify-center rounded-xl border border-emerald-200 bg-white text-emerald-700 transition-transform active:scale-95 hover:bg-emerald-50 dark:border-emerald-800 dark:bg-emerald-950 dark:text-emerald-300"
                     >
-                      📞
+                      <IconoTelefonoAccion />
                     </Link>
                   </div>
                 </div>
@@ -747,30 +819,32 @@ export function PasaporteDigitalSegmentado({
                     {traslado.contacto_entrega_telefono && (
                       <a
                         href={`tel:${traslado.contacto_entrega_telefono}`}
-                        className="flex size-9 items-center justify-center rounded-xl bg-white text-[#1f6b4a] border border-[#d7e4f2] shadow-sm active:scale-95"
+                        aria-label={`Llamar a ${traslado.contacto_entrega_nombre}`}
+                        className="flex size-9 items-center justify-center rounded-xl bg-white text-emerald-700 border border-emerald-200 shadow-sm active:scale-95 dark:border-emerald-800 dark:bg-emerald-950 dark:text-emerald-300"
                       >
-                        📞
+                        <IconoTelefonoAccion className="size-3.5" />
                       </a>
                     )}
                   </div>
                 )}
                 {traslado?.contacto_recepcion_nombre && (
-                  <div className="flex items-center justify-between gap-3 rounded-xl border border-[#eef2f7] bg-[#f8fafd] p-3 text-[13px]">
+                  <div className="flex items-center justify-between gap-3 rounded-xl border border-[#eef2f7] bg-[#f8fafd] p-3 text-[13px] dark:border-[#1a3a5c] dark:bg-[#061529]/60">
                     <div>
                       <span className="block text-[10.5px] font-bold uppercase tracking-wider text-[#b36b1e]">
                         Recibe en destino
                       </span>
-                      <span className="font-bold text-[#0b1e33]">{traslado.contacto_recepcion_nombre}</span>
+                      <span className="font-bold text-[#0a2342] dark:text-[#f6f8fb]">{traslado.contacto_recepcion_nombre}</span>
                       {traslado.contacto_recepcion_telefono && (
-                        <span className="block text-[12px] text-[#6b7c94]">{traslado.contacto_recepcion_telefono}</span>
+                        <span className="block text-[12px] text-[#4e5f80] dark:text-[#a8b5cc]">{traslado.contacto_recepcion_telefono}</span>
                       )}
                     </div>
                     {traslado.contacto_recepcion_telefono && (
                       <a
                         href={`tel:${traslado.contacto_recepcion_telefono}`}
-                        className="flex size-9 items-center justify-center rounded-xl bg-white text-[#b36b1e] border border-[#d7e4f2] shadow-sm active:scale-95"
+                        aria-label={`Llamar a ${traslado.contacto_recepcion_nombre}`}
+                        className="flex size-9 items-center justify-center rounded-xl bg-white text-amber-700 border border-amber-200 shadow-sm active:scale-95 dark:border-amber-800 dark:bg-amber-950 dark:text-amber-300"
                       >
-                        📞
+                        <IconoTelefonoAccion className="size-3.5" />
                       </a>
                     )}
                   </div>
@@ -928,11 +1002,11 @@ export function PasaporteDigitalSegmentado({
           </TarjetaPasaporte>
 
           {/* Cobertura GNP y Legal */}
-          <div className="rounded-2xl border border-[#d5ebdf] bg-[#f0f9f4] p-4 text-[12.5px] leading-relaxed text-[#1a4a34]">
-            <p className="font-bold flex items-center gap-1.5 text-[#1f6b4a]">
-              <span>🛡️</span> Cobertura de Traslado Respaldada por GNP
+          <div className="rounded-2xl border border-[#c8e6d8] bg-[#e9f3ee] p-4 text-[12.5px] leading-relaxed text-[#1a4a34] dark:border-[#135939] dark:bg-[#0a2e1f]/70 dark:text-[#a8b5cc]">
+            <p className="font-bold flex items-center gap-1.5 text-[#08705f] dark:text-[#4dd9a3]">
+              <IconoEscudoGnp /> Cobertura de Traslado Respaldada por GNP
             </p>
-            <p className="mt-1 text-[12px] text-[#2e5e47]">
+            <p className="mt-1 text-[12px] text-[#4e5f80] dark:text-[#a8b5cc]">
               Póliza integral activa durante todo el recorrido oficial documentado. Cualquier reclamación queda
               respaldada mediante el reporte inmutable del Pasaporte Digital.
             </p>
@@ -946,12 +1020,12 @@ export function PasaporteDigitalSegmentado({
       )}
 
       {/* FLOATING ACTION DOCK (Pulgar inferior ergonómico) */}
-      <div className="sticky bottom-6 z-20 flex items-center gap-2.5 rounded-[22px] border border-[#eef2f7] bg-white/95 p-3 shadow-[0_8px_24px_rgba(11,30,51,0.12)] backdrop-blur">
+      <div className="sticky bottom-6 z-20 flex items-center gap-2.5 rounded-2xl border border-[#e6edf6] bg-white/95 p-3 shadow-[0_8px_24px_rgba(10,35,66,0.12)] backdrop-blur dark:border-[#1a3a5c] dark:bg-[#0a2342]/95">
         <Link
           href={soporteHref}
-          className="flex-1 inline-flex min-h-[48px] items-center justify-center gap-1.5 rounded-xl border border-[#dce6f2] bg-[#f2f6fc] px-3 font-body text-[12.5px] font-bold text-[#0b1e33] transition-transform active:scale-95"
+          className="flex-1 inline-flex min-h-[48px] items-center justify-center gap-1.5 rounded-xl border border-[#d7e1ee] bg-[#f8fafd] px-3 font-body text-[12.5px] font-bold text-[#0a2342] transition-transform active:scale-95 hover:bg-[#f0f5fe] dark:border-[#2d4f73] dark:bg-[#0f2d52] dark:text-[#f6f8fb]"
         >
-          <span>🆘</span>
+          <IconoSosAccion className="text-amber-600 dark:text-amber-400" />
           <span>Asistencia 24/7</span>
         </Link>
         <div className="flex-1 [&>*]:w-full [&_button]:min-h-[48px]">

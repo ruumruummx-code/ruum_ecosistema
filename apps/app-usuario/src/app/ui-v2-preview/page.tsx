@@ -43,25 +43,75 @@ const DEMO_TRASLADO = {
   fecha_hora_programada: "2025-05-20T16:36:00.000Z",
 };
 
+import Link from "next/link";
+import { GaleriaComponentesMoviles } from "./GaleriaComponentesMoviles";
+
 export default async function UiV2Preview({ searchParams }: { searchParams: Promise<{ screen?: string }> }) {
   if (process.env.NODE_ENV === "production") notFound();
-  const { screen } = await searchParams;
-  const esMisTraslados = screen === "mis-Traslados";
+  const { screen = "componentes" } = await searchParams;
 
   return (
     <>
-      <NavegacionUsuario variante="claro" />
-      <main className="user-v2-scope user-v2-page"><div className="user-v2-content">
-        {esMisTraslados ? (
-          <MisTrasladosCliente
-            pestanaInicial="programados"
-            Traslados={[{ pasaporte: DEMO_PASAPORTE, traslado: DEMO_TRASLADO }]}
-          />
-        ) : (
-          <InicioUsuario usuario={null} traslados={[]} />
-        )}
-      </div>
-    </main>
+      {/* Selector superior de vistas para diseñadores y desarrolladores */}
+      <nav
+        aria-label="Vistas de previsualización"
+        className="sticky top-0 z-50 flex items-center justify-center gap-2 border-b border-[#e2e8f0] bg-white/95 px-4 py-2 backdrop-blur-md dark:border-[#1a3a5c] dark:bg-[#0a2342]/95"
+      >
+        <Link
+          href="/ui-v2-preview?screen=componentes"
+          className={[
+            "rounded-lg px-3 py-1 text-xs font-bold transition",
+            screen === "componentes"
+              ? "bg-[#0a2342] text-white dark:bg-[#4d94ff] dark:text-[#061529]"
+              : "text-[#4e5f80] hover:bg-[#f2f6fc] dark:text-[#a8b5cc] dark:hover:bg-[#0f2d52]",
+          ].join(" ")}
+        >
+          Componentes Móviles
+        </Link>
+        <Link
+          href="/ui-v2-preview?screen=inicio"
+          className={[
+            "rounded-lg px-3 py-1 text-xs font-bold transition",
+            screen === "inicio"
+              ? "bg-[#0a2342] text-white dark:bg-[#4d94ff] dark:text-[#061529]"
+              : "text-[#4e5f80] hover:bg-[#f2f6fc] dark:text-[#a8b5cc] dark:hover:bg-[#0f2d52]",
+          ].join(" ")}
+        >
+          Inicio V2
+        </Link>
+        <Link
+          href="/ui-v2-preview?screen=mis-traslados"
+          className={[
+            "rounded-lg px-3 py-1 text-xs font-bold transition",
+            screen === "mis-traslados"
+              ? "bg-[#0a2342] text-white dark:bg-[#4d94ff] dark:text-[#061529]"
+              : "text-[#4e5f80] hover:bg-[#f2f6fc] dark:text-[#a8b5cc] dark:hover:bg-[#0f2d52]",
+          ].join(" ")}
+        >
+          Mis Traslados
+        </Link>
+      </nav>
+
+      {screen === "componentes" ? (
+        <GaleriaComponentesMoviles />
+      ) : (
+        <>
+          <NavegacionUsuario variante="claro" />
+          <main className="user-v2-scope user-v2-page">
+            <div className="user-v2-content">
+              {screen === "mis-traslados" ? (
+                <MisTrasladosCliente
+                  pestanaInicial="programados"
+                  Traslados={[{ pasaporte: DEMO_PASAPORTE, traslado: DEMO_TRASLADO }]}
+                />
+              ) : (
+                <InicioUsuario usuario={null} traslados={[]} />
+              )}
+            </div>
+          </main>
+        </>
+      )}
     </>
   );
 }
+

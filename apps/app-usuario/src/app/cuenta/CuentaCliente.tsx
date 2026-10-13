@@ -5,7 +5,13 @@ import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { crearClienteNavegador } from "../../lib/supabase-browser";
-import { Icono, SENDAS_ICONO } from "@ruum/ui";
+import {
+  Icono,
+  SENDAS_ICONO,
+  MobileRow,
+  MobileListGroup,
+  MobileBadge,
+} from "@ruum/ui";
 import { iniciales } from "./cuenta-utils";
 import { PreferenciasToggles } from "./PreferenciasToggles";
 import type { Database } from "@ruum/shared/types";
@@ -20,15 +26,7 @@ export interface CuentaClienteProps {
   totalTraslados?: number;
 }
 
-/* ---------- Piezas ---------- */
-
-function IconoChevron({ className = "size-3.5" }: { className?: string }) {
-  return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <path d="m9 18 6-6-6-6" />
-    </svg>
-  );
-}
+/* ---------- Piezas de iconos ---------- */
 
 function IconoAuto({ className = "size-[18px]" }: { className?: string }) {
   return (
@@ -43,76 +41,6 @@ function IconoAuto({ className = "size-[18px]" }: { className?: string }) {
       <circle cx="7.2" cy="14.4" r="1.3" fill="currentColor" />
       <circle cx="16.8" cy="14.4" r="1.3" fill="currentColor" />
     </svg>
-  );
-}
-
-type TonoIcono = "base" | "green" | "orange" | "purple" | "red";
-
-const ICONO_FONDO: Record<TonoIcono, string> = {
-  base: "bg-[#f0f5fe] text-[#2e5a88]",
-  green: "bg-[#e9f3ee] text-[#1f6b4a]",
-  orange: "bg-[#fef4e6] text-[#b36b1e]",
-  purple: "bg-[#f2eef9] text-[#5e3b8c]",
-  red: "bg-[#fdeaea] text-[#b33c3c]",
-};
-
-function EtiquetaSeccion({ children }: { children: string }) {
-  return (
-    <h2 className="mb-2.5 mt-1 px-1 text-[12px] font-bold uppercase tracking-[0.8px] text-[#8b9bb0]">
-      {children}
-    </h2>
-  );
-}
-
-function FilaEnlace({
-  href,
-  icono,
-  tono = "base",
-  titulo,
-  tituloRojo = false,
-  subtitulo,
-  insignia,
-  insigniaVerde = false,
-  conDivisor = true,
-}: {
-  href: string;
-  icono: string;
-  tono?: TonoIcono;
-  titulo: string;
-  tituloRojo?: boolean;
-  subtitulo?: string;
-  insignia?: string;
-  insigniaVerde?: boolean;
-  conDivisor?: boolean;
-}) {
-  return (
-    <Link
-      href={href}
-      className="relative flex items-center gap-3.5 px-[18px] py-[15px] transition-colors active:bg-[#f8fbfe]"
-    >
-      {conDivisor && (
-        <span aria-hidden="true" className="absolute left-[66px] right-[18px] top-0 h-px bg-[#f0f4fa]" />
-      )}
-      <span aria-hidden="true" className={["flex size-10 shrink-0 items-center justify-center rounded-[13px]", ICONO_FONDO[tono]].join(" ")}>
-        <Icono d={icono} className="size-[17px]" />
-      </span>
-      <span className="min-w-0 flex-1">
-        <span className={["mb-0.5 block text-[14.5px] font-bold tracking-tight", tituloRojo ? "text-[#b33c3c]" : "text-[#0b1e33]"].join(" ")}>
-          {titulo}
-        </span>
-        {subtitulo && (
-          <span className="block truncate text-[12px] font-medium text-[#8b9bb0]">{subtitulo}</span>
-        )}
-      </span>
-      <span className="flex shrink-0 items-center gap-2.5">
-        {insignia && (
-          <span className={["rounded-[20px] px-2.5 py-1 text-[11px] font-bold", insigniaVerde ? "bg-[#e9f3ee] text-[#1f6b4a]" : "bg-[#eef3fa] text-[#2e5a88]"].join(" ")}>
-            {insignia}
-          </span>
-        )}
-        <IconoChevron className="text-[#c3cfdd]" />
-      </span>
-    </Link>
   );
 }
 
@@ -135,7 +63,12 @@ function nombreVehiculo(v: Vehiculo): string {
   return [v.marca, v.modelo, v.anio].filter(Boolean).join(" ") || "Vehículo";
 }
 
-export function CuentaCliente({ usuario, fotoUrl = null, vehiculos = [], totalTraslados = 0 }: CuentaClienteProps) {
+export function CuentaCliente({
+  usuario,
+  fotoUrl = null,
+  vehiculos = [],
+  totalTraslados = 0,
+}: CuentaClienteProps) {
   const router = useRouter();
   const [cerrandoSesion, setCerrandoSesion] = useState(false);
 
@@ -160,8 +93,10 @@ export function CuentaCliente({ usuario, fotoUrl = null, vehiculos = [], totalTr
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-[430px] flex-col">
-      <h1 className="pb-3 text-[26px] font-extrabold tracking-tight text-[#0b1e33]">Cuenta</h1>
+    <div className="mx-auto flex w-full max-w-[480px] flex-col">
+      <h1 className="pb-3 text-[26px] font-extrabold tracking-tight text-[#0a2342] dark:text-[#f6f8fb]">
+        Cuenta
+      </h1>
 
       {/* Héroe de perfil.
           Nota: colores blancos como valores arbitrarios (text-[#fff],
@@ -170,8 +105,8 @@ export function CuentaCliente({ usuario, fotoUrl = null, vehiculos = [], totalTr
           contraste sobre el fondo oscuro. */}
       <section
         aria-label="Perfil"
-        className="relative mb-5 overflow-hidden rounded-[26px] p-6 text-[#fff] shadow-[0_16px_32px_-12px_rgba(11,30,51,0.4)]"
-        style={{ background: "linear-gradient(135deg, #0b1e33 0%, #162c47 100%)" }}
+        className="relative mb-5 overflow-hidden rounded-[26px] p-6 text-[#fff] shadow-[0_16px_32px_-12px_rgba(10,35,66,0.4)]"
+        style={{ background: "linear-gradient(135deg, #0a2342 0%, #143560 100%)" }}
       >
         <span
           aria-hidden="true"
@@ -223,180 +158,238 @@ export function CuentaCliente({ usuario, fotoUrl = null, vehiculos = [], totalTr
       </section>
 
       {/* Mis vehículos */}
-      <EtiquetaSeccion>Mis vehículos</EtiquetaSeccion>
-      <div
-        role="list"
-        aria-label="Mis vehículos"
-        className="mb-[18px] flex gap-3 overflow-x-auto pb-1.5"
-        style={{ scrollbarWidth: "none" }}
-      >
-        {vehiculos.map((vehiculo) => (
-          <Link
-            key={vehiculo.id}
-            role="listitem"
-            href="/cuenta/vehiculos"
-            aria-label={`Gestionar vehículo ${nombreVehiculo(vehiculo)}`}
-            className="w-[200px] shrink-0 rounded-[20px] border border-[#eef2f7] bg-white p-4 shadow-[0_6px_16px_rgba(0,0,0,0.02)] transition-transform active:scale-[0.98]"
-          >
-            <span className="mb-2.5 flex items-start justify-between">
-              <span aria-hidden="true" className="flex size-10 items-center justify-center rounded-[13px] bg-[#eef3fa] text-[#2e5a88]">
-                <IconoAuto />
-              </span>
-              <span className="rounded-[20px] bg-[#f0f5fe] px-2.5 py-[3px] text-[11px] font-bold text-[#2e5a88]">
-                {vehiculo.alias?.trim() || "Mi vehículo"}
-              </span>
-            </span>
-            <span className="mb-1 block truncate text-[14.5px] font-extrabold tracking-tight text-[#0b1e33]">
-              {nombreVehiculo(vehiculo)}
-            </span>
-            <span className="block text-[12px] font-semibold tracking-[0.5px] text-[#8b9bb0]">
-              {vehiculo.placas?.trim() || "Sin placas"}
-            </span>
-          </Link>
-        ))}
-        <Link
-          href="/cuenta/vehiculos"
-          aria-label="Agregar vehículo"
-          className="flex min-w-[130px] shrink-0 flex-col items-center justify-center gap-2 rounded-[20px] border-2 border-dashed border-[#d5e2f0] bg-[#f8fbfe] p-4 text-[13px] font-semibold text-[#2e5a88] transition-transform active:scale-[0.98]"
+      <div className="mb-5">
+        <h2 className="mb-2 px-1 text-[12px] font-semibold uppercase tracking-wider text-[#4e5f80] dark:text-[#a8b5cc]">
+          Mis vehículos
+        </h2>
+        <div
+          role="list"
+          aria-label="Mis vehículos"
+          className="flex gap-3 overflow-x-auto pb-1.5"
+          style={{ scrollbarWidth: "none" }}
         >
-          <Icono d="M12 8.5v7M8.5 12h7 M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18Z" className="size-[22px] text-[#a6b7cb]" />
-          <span>Agregar vehículo</span>
-        </Link>
+          {vehiculos.map((vehiculo) => (
+            <Link
+              key={vehiculo.id}
+              role="listitem"
+              href="/cuenta/vehiculos"
+              aria-label={`Gestionar vehículo ${nombreVehiculo(vehiculo)}`}
+              className="w-[200px] shrink-0 rounded-2xl border border-[#e6edf6] bg-white p-4 shadow-[0_2px_10px_rgba(10,35,66,0.04)] transition-transform active:scale-[0.98] dark:border-[#1a3a5c] dark:bg-[#0a2342]"
+            >
+              <span className="mb-2.5 flex items-start justify-between">
+                <span aria-hidden="true" className="flex size-10 items-center justify-center rounded-[13px] bg-[#edf4fe] text-[#104ca0] dark:bg-[#0f2d52] dark:text-[#6ba8ff]">
+                  <IconoAuto />
+                </span>
+                <span className="rounded-full bg-[#edf4fe] px-2.5 py-[3px] text-[11px] font-bold text-[#104ca0] dark:bg-[#0f2d52] dark:text-[#6ba8ff]">
+                  {vehiculo.alias?.trim() || "Mi vehículo"}
+                </span>
+              </span>
+              <span className="mb-1 block truncate text-[14.5px] font-extrabold tracking-tight text-[#0a2342] dark:text-[#f6f8fb]">
+                {nombreVehiculo(vehiculo)}
+              </span>
+              <span className="block text-[12px] font-semibold tracking-[0.5px] text-[#4e5f80] dark:text-[#a8b5cc]">
+                {vehiculo.placas?.trim() || "Sin placas"}
+              </span>
+            </Link>
+          ))}
+          <Link
+            href="/cuenta/vehiculos"
+            aria-label="Agregar vehículo"
+            className="flex min-w-[130px] shrink-0 flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-[#c8dcf8] bg-[#f8fafd] p-4 text-[13px] font-semibold text-[#104ca0] transition-transform active:scale-[0.98] dark:border-[#1d4576] dark:bg-[#0a2342]/50 dark:text-[#6ba8ff]"
+          >
+            <Icono d="M12 8.5v7M8.5 12h7 M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18Z" className="size-[22px] text-[#104ca0]/70 dark:text-[#6ba8ff]/70" />
+            <span>Agregar vehículo</span>
+          </Link>
+        </div>
       </div>
 
       {/* Perfil */}
-      <EtiquetaSeccion>Perfil</EtiquetaSeccion>
-      <nav aria-label="Perfil" className="mb-[18px] overflow-hidden rounded-[22px] border border-[#eef2f7] bg-white py-1 shadow-[0_6px_16px_rgba(0,0,0,0.02)]">
-        <FilaEnlace
+      <MobileListGroup tituloSeccion="Perfil" as="nav" ariaLabel="Perfil" className="mb-5">
+        <MobileRow
           href="/cuenta/datos-personales"
-          icono="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7 M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5Z"
+          enlaceComponente={Link}
+          icono={<Icono d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7 M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5Z" className="size-[17px]" />}
+          tonoIcono="base"
           titulo="Datos personales"
           subtitulo="Nombre, correo, teléfono, dirección"
           conDivisor={false}
         />
-        <FilaEnlace
+        <MobileRow
           href="/cuenta/datos-personales"
-          icono={SENDAS_ICONO.candado}
+          enlaceComponente={Link}
+          icono={<Icono d={SENDAS_ICONO.candado} className="size-[17px]" />}
+          tonoIcono="base"
           titulo="Contraseña"
           subtitulo="Cambiar contraseña de acceso"
         />
-        <FilaEnlace
+        <MobileRow
           href="/cuenta/verificacion-documentos"
-          icono="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z M9 12l2 2 4-4"
-          tono="green"
+          enlaceComponente={Link}
+          icono={<Icono d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z M9 12l2 2 4-4" className="size-[17px]" />}
+          tonoIcono="verde"
           titulo="Verificación y documentos"
           subtitulo={verificado ? "Identidad y documentos verificados" : "INE, comprobante y datos fiscales"}
-          insignia={etiquetaVerificacion(usuario?.estado_verificacion)}
-          insigniaVerde={verificado}
+          badge={
+            <MobileBadge
+              variante={verificado ? "exito" : "pendiente"}
+              texto={etiquetaVerificacion(usuario?.estado_verificacion)}
+              size="sm"
+            />
+          }
         />
-        <FilaEnlace
+        <MobileRow
           href="/cuenta/preferencias"
-          icono="M4 21v-7 M4 10V3 M12 21v-9 M12 8V3 M20 21v-5 M20 12V3 M1 14h6 M9 8h6 M17 16h6"
-          tono="purple"
+          enlaceComponente={Link}
+          icono={<Icono d="M4 21v-7 M4 10V3 M12 21v-9 M12 8V3 M20 21v-5 M20 12V3 M1 14h6 M9 8h6 M17 16h6" className="size-[17px]" />}
+          tonoIcono="morado"
           titulo="Preferencias"
           subtitulo="Notificaciones, alertas, idioma y tema"
         />
-      </nav>
+      </MobileListGroup>
 
       {/* Pagos y facturación */}
-      <EtiquetaSeccion>Pagos y facturación</EtiquetaSeccion>
-      <nav aria-label="Pagos y facturación" className="mb-[18px] overflow-hidden rounded-[22px] border border-[#eef2f7] bg-white py-1 shadow-[0_6px_16px_rgba(0,0,0,0.02)]">
-        <FilaEnlace
+      <MobileListGroup tituloSeccion="Pagos y facturación" as="nav" ariaLabel="Pagos y facturación" className="mb-5">
+        <MobileRow
           href="/cuenta/metodos-pago"
-          icono="M2 5h20v14H2z M2 10h20"
+          enlaceComponente={Link}
+          icono={<Icono d="M2 5h20v14H2z M2 10h20" className="size-[17px]" />}
+          tonoIcono="base"
           titulo="Métodos de pago"
           subtitulo={metodoSub}
           conDivisor={false}
         />
-        <FilaEnlace
+        <MobileRow
           href="/cuenta/facturacion"
-          icono="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z M14 2v6h6 M16 13H8 M16 17H8"
-          tono="orange"
+          enlaceComponente={Link}
+          icono={<Icono d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z M14 2v6h6 M16 13H8 M16 17H8" className="size-[17px]" />}
+          tonoIcono="ambar"
           titulo="Facturación"
           subtitulo="RFC y datos fiscales"
-          insignia={facturacionInsignia}
+          badge={
+            <MobileBadge
+              variante={usuario?.rfc?.trim() ? "exito" : "pendiente"}
+              texto={facturacionInsignia}
+              size="sm"
+            />
+          }
         />
-      </nav>
+      </MobileListGroup>
 
       {/* Notificaciones */}
-      <EtiquetaSeccion>Notificaciones</EtiquetaSeccion>
-      <div className="mb-[18px] rounded-[22px] border border-[#eef2f7] bg-white px-[18px] py-2 shadow-[0_6px_16px_rgba(0,0,0,0.02)]">
-        {usuario ? (
-          <PreferenciasToggles usuario={usuario} />
-        ) : (
-          <p className="py-4 text-[13px] font-medium text-[#8b9bb0]">
-            Inicia sesión para configurar tus notificaciones.
-          </p>
-        )}
+      <div className="mb-5">
+        <h2 className="mb-2 px-1 text-[12px] font-semibold uppercase tracking-wider text-[#4e5f80] dark:text-[#a8b5cc]">
+          Notificaciones
+        </h2>
+        <div className="rounded-2xl border border-[#e6edf6] bg-white px-4 py-3 shadow-[0_2px_10px_rgba(10,35,66,0.04)] dark:border-[#1a3a5c] dark:bg-[#0a2342]">
+          {usuario ? (
+            <PreferenciasToggles usuario={usuario} />
+          ) : (
+            <p className="py-3 text-[13px] font-medium text-[#4e5f80] dark:text-[#a8b5cc]">
+              Inicia sesión para configurar tus notificaciones.
+            </p>
+          )}
+        </div>
       </div>
 
       {/* Soporte */}
-      <EtiquetaSeccion>Soporte</EtiquetaSeccion>
-      <div className="mb-[18px] grid grid-cols-2 gap-2.5">
-        {[
-          { href: "/preguntas-frecuentes", icono: "M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3 M12 17h.01", titulo: "Preguntas frecuentes", subtitulo: "Respuestas rápidas" },
-          { href: "/soporte", icono: "M4 13v-1a8 8 0 0 1 16 0v1 M4 13a2 2 0 0 1 2-2h1v6H6a2 2 0 0 1-2-2v-2Z M20 13a2 2 0 0 0-2-2h-1v6h1a2 2 0 0 0 2-2v-2Z", titulo: "Contactar soporte", subtitulo: "Chat 24/7" },
-          { href: "/soporte?motivo=problema_traslado", icono: "M10.3 3.9 2.6 17a2 2 0 0 0 1.7 3h15.4a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z M12 8v5 M12 16.5h.01", tono: "orange" as TonoIcono, titulo: "Reportar problema", subtitulo: "Con un traslado" },
-          { href: "/soporte?motivo=ayuda_evidencia", icono: "M4 8h3l2-2.5h6L17 8h3a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1Z M12 16.5a3.2 3.2 0 1 0 0-6.4 3.2 3.2 0 0 0 0 6.4Z", tono: "red" as TonoIcono, titulo: "Ayuda con evidencia", subtitulo: "Fotos y checks" },
-        ].map(({ href, icono, titulo, subtitulo, tono }) => (
-          <Link
-            key={titulo}
-            href={href}
-            className="flex flex-col gap-2.5 rounded-[18px] border border-[#eef2f7] bg-white p-4 shadow-[0_4px_12px_rgba(0,0,0,0.01)] transition-transform active:scale-[0.98]"
-          >
-            <span aria-hidden="true" className={["flex size-9 items-center justify-center rounded-xl", ICONO_FONDO[tono ?? "base"]].join(" ")}>
-              <Icono d={icono} className="size-4" />
-            </span>
-            <span className="text-[13px] font-bold leading-snug tracking-tight text-[#0b1e33]">{titulo}</span>
-            <span className="-mt-1.5 text-[11px] font-medium text-[#8b9bb0]">{subtitulo}</span>
-          </Link>
-        ))}
+      <div className="mb-5">
+        <h2 className="mb-2 px-1 text-[12px] font-semibold uppercase tracking-wider text-[#4e5f80] dark:text-[#a8b5cc]">
+          Soporte
+        </h2>
+        <div className="grid grid-cols-2 gap-2.5">
+          {[
+            {
+              href: "/preguntas-frecuentes",
+              icono: "M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3 M12 17h.01",
+              tono: "base" as const,
+              titulo: "Preguntas frecuentes",
+              subtitulo: "Respuestas rápidas",
+            },
+            {
+              href: "/soporte",
+              icono: "M4 13v-1a8 8 0 0 1 16 0v1 M4 13a2 2 0 0 1 2-2h1v6H6a2 2 0 0 1-2-2v-2Z M20 13a2 2 0 0 0-2-2h-1v6h1a2 2 0 0 0 2-2v-2Z",
+              tono: "base" as const,
+              titulo: "Contactar soporte",
+              subtitulo: "Chat 24/7",
+            },
+            {
+              href: "/soporte?motivo=problema_traslado",
+              icono: "M10.3 3.9 2.6 17a2 2 0 0 0 1.7 3h15.4a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z M12 8v5 M12 16.5h.01",
+              tono: "ambar" as const,
+              titulo: "Reportar problema",
+              subtitulo: "Con un traslado",
+            },
+            {
+              href: "/soporte?motivo=ayuda_evidencia",
+              icono: "M4 8h3l2-2.5h6L17 8h3a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1Z M12 16.5a3.2 3.2 0 1 0 0-6.4 3.2 3.2 0 0 0 0 6.4Z",
+              tono: "rojo" as const,
+              titulo: "Ayuda con evidencia",
+              subtitulo: "Fotos y checks",
+            },
+          ].map(({ href, icono, titulo, subtitulo, tono }) => {
+            const tonoClases = {
+              base: "bg-[#edf4fe] text-[#104ca0] dark:bg-[#0f2d52] dark:text-[#6ba8ff]",
+              ambar: "bg-[#fef4e6] text-[#765100] dark:bg-[#3d2e00] dark:text-[#ffc933]",
+              rojo: "bg-[#fdeaea] text-[#9a2637] dark:bg-[#3d0f1a] dark:text-[#ff6b7a]",
+            }[tono];
+
+            return (
+              <Link
+                key={titulo}
+                href={href}
+                className="flex flex-col gap-2 rounded-2xl border border-[#e6edf6] bg-white p-3.5 shadow-[0_2px_10px_rgba(10,35,66,0.04)] transition-transform active:scale-[0.98] dark:border-[#1a3a5c] dark:bg-[#0a2342]"
+              >
+                <span aria-hidden="true" className={["flex size-9 items-center justify-center rounded-xl", tonoClases].join(" ")}>
+                  <Icono d={icono} className="size-4" />
+                </span>
+                <span className="text-[13px] font-bold leading-snug tracking-tight text-[#0a2342] dark:text-[#f6f8fb]">
+                  {titulo}
+                </span>
+                <span className="-mt-1 text-[11.5px] font-medium text-[#4e5f80] dark:text-[#a8b5cc]">
+                  {subtitulo}
+                </span>
+              </Link>
+            );
+          })}
+        </div>
       </div>
 
       {/* Legal y cuenta */}
-      <EtiquetaSeccion>Legal y cuenta</EtiquetaSeccion>
-      <nav aria-label="Legal y cuenta" className="mb-2 overflow-hidden rounded-[22px] border border-[#eef2f7] bg-white py-1 shadow-[0_6px_16px_rgba(0,0,0,0.02)]">
-        <FilaEnlace
+      <MobileListGroup tituloSeccion="Legal y cuenta" as="nav" ariaLabel="Legal y cuenta" className="mb-3">
+        <MobileRow
           href="/legal/terminos"
-          icono="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z M14 2v6h6"
+          enlaceComponente={Link}
+          icono={<Icono d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z M14 2v6h6" className="size-[17px]" />}
+          tonoIcono="base"
           titulo="Términos y condiciones"
           conDivisor={false}
         />
-        <FilaEnlace
+        <MobileRow
           href="/legal/privacidad"
-          icono="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"
+          enlaceComponente={Link}
+          icono={<Icono d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z" className="size-[17px]" />}
+          tonoIcono="base"
           titulo="Aviso de privacidad"
         />
-        <div className="relative">
-          <span aria-hidden="true" className="absolute left-[66px] right-[18px] top-0 z-[1] h-px bg-[#f0f4fa]" />
-          <button
-            type="button"
-            onClick={handleCerrarSesion}
-            disabled={cerrandoSesion}
-            className="flex w-full items-center gap-3.5 px-[18px] py-[15px] text-left transition-colors active:bg-[#f8fbfe] disabled:opacity-60"
-          >
-            <span aria-hidden="true" className={["flex size-10 shrink-0 items-center justify-center rounded-[13px]", ICONO_FONDO.base].join(" ")}>
-              <Icono d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4 M16 17l5-5-5-5 M21 12H9" className="size-[17px]" />
-            </span>
-            <span className="min-w-0 flex-1">
-              <span className="mb-0.5 block text-[14.5px] font-bold tracking-tight text-[#0b1e33]">
-                {cerrandoSesion ? "Cerrando sesión…" : "Cerrar sesión"}
-              </span>
-            </span>
-            <IconoChevron className="shrink-0 text-[#c3cfdd]" />
-          </button>
-        </div>
-        <FilaEnlace
+        <MobileRow
+          onClick={handleCerrarSesion}
+          disabled={cerrandoSesion}
+          icono={<Icono d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4 M16 17l5-5-5-5 M21 12H9" className="size-[17px]" />}
+          tonoIcono="base"
+          titulo={cerrandoSesion ? "Cerrando sesión…" : "Cerrar sesión"}
+        />
+        <MobileRow
           href="/soporte?motivo=eliminar_cuenta"
-          icono="M3 6h18 M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6 M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"
-          tono="red"
+          enlaceComponente={Link}
+          icono={<Icono d="M3 6h18 M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6 M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" className="size-[17px]" />}
+          tonoIcono="rojo"
+          destructivo={true}
           titulo="Eliminar cuenta"
-          tituloRojo
           subtitulo="Baja definitiva del usuario"
         />
-      </nav>
+      </MobileListGroup>
 
-      <p className="px-0 py-2 text-center text-[11px] font-medium text-[#b0bfd0]">
+      <p className="px-0 py-3 text-center text-[11.5px] font-medium text-[#4e5f80] dark:text-[#a8b5cc]">
         Ruum Ruum Usuario · v1.0.0 (MVP)
       </p>
     </div>

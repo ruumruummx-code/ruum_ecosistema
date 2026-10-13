@@ -166,17 +166,17 @@ function pestañaDeViaje(p: Pasaporte): PestañaTraslados {
 }
 
 const PILDORA_POR_PESTAÑA: Record<PestañaTraslados, { tono: TonoPildora; borde: string }> = {
-  activos: { tono: "active", borde: "border-l-[#4ade80]" },
-  programados: { tono: "scheduled", borde: "border-l-[#8b5cf6]" },
-  finalizados: { tono: "completed", borde: "border-l-[#cbd5e1]" },
-  cancelados: { tono: "cancelled", borde: "border-l-[#f87171]" },
+  activos: { tono: "active", borde: "border-l-emerald-500" },
+  programados: { tono: "scheduled", borde: "border-l-amber-500" },
+  finalizados: { tono: "completed", borde: "border-l-slate-400" },
+  cancelados: { tono: "cancelled", borde: "border-l-rose-500" },
 };
 
 const PILDORA_CLASE: Record<TonoPildora, string> = {
-  active: "bg-[#e9f3ee] text-[#1f6b4a]",
-  scheduled: "bg-[#f2eef9] text-[#5e3b8c]",
-  completed: "bg-[#eef3fa] text-[#2e5a88]",
-  cancelled: "bg-[#fdeaea] text-[#b33c3c]",
+  active: "bg-[#e9f3ee] text-[#08705f] border border-[#c8e6d8] dark:bg-[#0a2e1f] dark:text-[#4dd9a3] dark:border-[#135939]",
+  scheduled: "bg-[#fef4e6] text-[#765100] border border-[#f3d8a2] dark:bg-[#3d2e00] dark:text-[#ffc933] dark:border-[#664d00]",
+  completed: "bg-[#eff3f8] text-[#3b4c68] border border-[#d7e1ee] dark:bg-[#1a2e4a] dark:text-[#a8b5cc] dark:border-[#2d476e]",
+  cancelled: "bg-[#fdeaea] text-[#9a2637] border border-[#f6ccd2] dark:bg-[#3d0f1a] dark:text-[#ff6b7a] dark:border-[#661a29]",
 };
 
 function estadoVisual(p: Pasaporte): { label: string } {
@@ -390,7 +390,7 @@ export function MisTrasladosCliente({
   return (
     <div className="flex flex-col gap-[18px]">
       <section aria-labelledby="titulo-mis-traslados">
-        <h1 id="titulo-mis-traslados" className="text-[26px] font-extrabold tracking-tight text-[#0b1e33]">
+        <h1 id="titulo-mis-traslados" className="text-[24px] font-extrabold tracking-tight text-[#0a2342] dark:text-[#f6f8fb] sm:text-[26px]">
           Traslados
         </h1>
       </section>
@@ -401,7 +401,7 @@ export function MisTrasladosCliente({
         role="group"
         ref={tablistRef}
         onKeyDown={handleTablistKeyDown}
-        className="flex gap-1.5 overflow-x-auto rounded-[40px] bg-[#f2f6fb] p-[5px]"
+        className="flex gap-1.5 overflow-x-auto rounded-[32px] bg-[#f2f6fb] p-1 dark:bg-[#0f2d52]"
         style={{ scrollbarWidth: "none" }}
       >
         {PESTAÑAS.map(({ id, etiqueta }) => {
@@ -415,18 +415,20 @@ export function MisTrasladosCliente({
               tabIndex={activo ? 0 : -1}
               onClick={() => handlePestanaChange(id)}
               className={[
-                "min-h-11 flex-1 whitespace-nowrap rounded-[30px] px-1.5 text-[13px] transition-all",
+                "min-h-11 flex-1 whitespace-nowrap rounded-[24px] px-2 text-[13px] transition-all cursor-pointer",
                 activo
-                  ? "bg-white font-bold text-[#0b1e33] shadow-[0_4px_12px_rgba(0,0,0,0.06)]"
-                  : "font-semibold text-[#5c6e86]",
+                  ? "bg-white font-bold text-[#0a2342] shadow-xs dark:bg-[#0a2342] dark:text-[#f6f8fb]"
+                  : "font-semibold text-[#4e5f80] dark:text-[#a8b5cc]",
               ].join(" ")}
             >
               {etiqueta}
               {conteos[id] > 0 && (
                 <span
                   className={[
-                    "ml-1 inline-block rounded-[20px] px-[7px] py-[2px] align-[1px] text-[10px] font-bold",
-                    activo ? "bg-[#0b1e33] text-white" : "bg-[#dfe8f3] text-[#2e5a88]",
+                    "ml-1.5 inline-block rounded-full px-2 py-0.5 text-[10.5px] font-bold align-[0.5px]",
+                    activo
+                      ? "bg-[#0a2342] text-white dark:bg-[#4d94ff] dark:text-[#061529]"
+                      : "bg-[#e2eaf5] text-[#104ca0] dark:bg-[#1a3a5c] dark:text-[#6ba8ff]",
                   ].join(" ")}
                 >
                   {conteos[id]}
@@ -438,23 +440,23 @@ export function MisTrasladosCliente({
       </div>
 
       {/* Resumen: total / activos / gastado */}
-      <dl className="flex rounded-[18px] border border-[#eef2f7] bg-white p-4 shadow-[0_4px_12px_rgba(0,0,0,0.01)]">
+      <dl className="flex rounded-2xl border border-[#e6edf6] bg-white p-4 shadow-xs dark:border-[#1a3a5c] dark:bg-[#0a2342]">
         {[
           { etiqueta: "Total", valor: String(Traslados.length) },
           { etiqueta: "Activos", valor: String(conteos.activos) },
           { etiqueta: "Gastado", valor: formatoGastado(gastoTotal) },
         ].map(({ etiqueta, valor }) => (
-          <div key={etiqueta} className="flex-1 text-center first:border-l-0 border-l border-[#eef2f7]">
-            <dd className="text-[20px] font-extrabold tracking-tight text-[#0b1e33]">{valor}</dd>
-            <dt className="mt-[3px] text-[11px] font-semibold uppercase tracking-[0.4px] text-[#7e8fa8]">{etiqueta}</dt>
+          <div key={etiqueta} className="flex-1 text-center first:border-l-0 border-l border-[#eef2f7] dark:border-[#1a3a5c]">
+            <dd className="text-[20px] font-extrabold tracking-tight text-[#0a2342] dark:text-[#f6f8fb]">{valor}</dd>
+            <dt className="mt-1 text-[11.5px] font-semibold uppercase tracking-wider text-[#4e5f80] dark:text-[#a8b5cc]">{etiqueta}</dt>
           </div>
         ))}
       </dl>
 
       {/* Buscador + filtro */}
       <section aria-label="Buscar y filtrar traslados" className="flex flex-col gap-2">
-        <div className="flex items-center gap-2.5 rounded-2xl border border-[#eef2f7] bg-white px-4 py-[13px]">
-          <IconoBuscar className="size-4 shrink-0 text-[#a6b7cb]" />
+        <div className="flex items-center gap-2.5 rounded-2xl border border-[#e6edf6] bg-white px-4 py-3 shadow-xs dark:border-[#1a3a5c] dark:bg-[#0a2342]">
+          <IconoBuscar className="size-4 shrink-0 text-[#8b9bb0] dark:text-[#6b7a99]" />
           <label htmlFor="buscar-traslado" className="sr-only">
             Buscar traslado
           </label>
@@ -464,7 +466,7 @@ export function MisTrasladosCliente({
             value={busquedaInput}
             onChange={(event) => setBusquedaInput(event.target.value)}
             placeholder="Buscar por vehículo, destino o # de traslado"
-            className="w-full border-0 bg-transparent p-0 text-[14px] font-medium text-[#0b1e33] outline-none placeholder:font-medium placeholder:text-[#a6b7cb]"
+            className="w-full border-0 bg-transparent p-0 text-[14px] font-medium text-[#0a2342] outline-none placeholder:text-[#8b9bb0] dark:text-[#f6f8fb] dark:placeholder:text-[#6b7a99]"
             aria-busy={buscando}
             aria-describedby="busqueda-ayuda"
           />
@@ -475,13 +477,13 @@ export function MisTrasladosCliente({
             aria-label={tipoVehiculoSeleccionado ? `Filtrar por tipo de vehículo, filtro activo: ${tipoVehiculoSeleccionado}` : "Filtrar por tipo de vehículo"}
             onClick={() => setFiltroAbierto((abierto) => !abierto)}
             className={[
-              "flex size-11 shrink-0 items-center justify-center rounded-xl transition-colors",
+              "flex size-10 shrink-0 items-center justify-center rounded-xl transition-colors cursor-pointer",
               filtroAbierto || tipoVehiculoSeleccionado
-                ? "bg-[#0b1e33] text-white"
-                : "text-[#a6b7cb] hover:bg-[#f2f6fc] hover:text-[#2e5a88]",
+                ? "bg-[#0a2342] text-white dark:bg-[#4d94ff] dark:text-[#061529]"
+                : "text-[#8b9bb0] hover:bg-[#f2f6fc] hover:text-[#0a2342] dark:hover:bg-[#0f2d52] dark:hover:text-[#f6f8fb]",
             ].join(" ")}
           >
-            <IconoFiltro className="size-5" />
+            <IconoFiltro className="size-4.5" />
           </button>
         </div>
         <div className="flex items-center gap-2 px-1">
@@ -555,28 +557,28 @@ export function MisTrasladosCliente({
               <article
                 key={pasaporte.traslado_id ?? `${pasaporte.creado_en}-${pasaporte.estado}`}
                 className={[
-                  "rounded-[22px] border border-[#eef2f7] border-l-4 bg-white p-5 shadow-[0_6px_16px_rgba(0,0,0,0.02)]",
+                  "rounded-2xl border border-[#e6edf6] border-l-4 bg-white p-5 shadow-xs transition hover:shadow-md dark:border-[#1a3a5c] dark:bg-[#0a2342]",
                   borde,
                   tono === "cancelled" ? "opacity-[0.85]" : "",
                 ].join(" ")}
               >
                 <div className="mb-3.5 flex items-start justify-between gap-3">
-                  <span className={["inline-flex items-center gap-1.5 rounded-[30px] px-3 py-1.5 text-[11px] font-bold tracking-[0.2px]", PILDORA_CLASE[tono]].join(" ")}>
-                    {esActiva && <span aria-hidden="true" className="size-1.5 animate-pulse rounded-full bg-[#4ade80] shadow-[0_0_0_2px_rgba(74,222,128,0.3)]" />}
+                  <span className={["inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11.5px] font-bold tracking-tight", PILDORA_CLASE[tono]].join(" ")}>
+                    {esActiva && <span aria-hidden="true" className="size-1.5 animate-pulse rounded-full bg-emerald-500" />}
                     {label}
                   </span>
-                  <span className="shrink-0 rounded-[20px] bg-[#f7faff] px-3 py-[5px] text-[12px] font-semibold text-[#8b9bb0]">
+                  <span className="shrink-0 rounded-full bg-[#f2f6fb] px-2.5 py-1 text-[11.5px] font-mono font-bold text-[#4e5f80] dark:bg-[#1a3a5c] dark:text-[#a8b5cc]">
                     {folio}
                   </span>
                 </div>
 
                 <div className="mb-3.5 flex items-center gap-3.5">
-                  <span aria-hidden="true" className="flex size-[50px] shrink-0 items-center justify-center rounded-2xl bg-[#eef3fa] text-[#2e5a88]">
-                    <IconoCarroFrente className="size-[22px]" />
+                  <span aria-hidden="true" className="flex size-11 shrink-0 items-center justify-center rounded-[13px] bg-[#edf4fe] text-[#104ca0] dark:bg-[#0f2d52] dark:text-[#6ba8ff]">
+                    <IconoCarroFrente className="size-5" />
                   </span>
                   <div className="min-w-0 flex-1">
-                    <h2 className="truncate text-[17px] font-extrabold tracking-tight text-[#0b1e33]">{nombreVehiculo}</h2>
-                    <p className="mt-[3px] text-[12px] font-semibold tracking-[0.5px] text-[#6b7c94]">
+                    <h2 className="truncate text-[16.5px] font-bold tracking-tight text-[#0a2342] dark:text-[#f6f8fb]">{nombreVehiculo}</h2>
+                    <p className="mt-0.5 text-[12px] font-semibold tracking-wider uppercase text-[#4e5f80] dark:text-[#a8b5cc]">
                       {pasaporte.vehiculo_placas ?? "Placas pendientes"}
                     </p>
                   </div>
@@ -585,7 +587,7 @@ export function MisTrasladosCliente({
                 {esActiva && (
                   <div className="mb-3 flex items-center gap-2.5">
                     <div
-                      className="h-[5px] flex-1 overflow-hidden rounded-[10px] bg-[#e8eef6]"
+                      className="h-1.5 flex-1 overflow-hidden rounded-full bg-[#e8eef6] dark:bg-[#1a3a5c]"
                       role="progressbar"
                       aria-valuenow={progreso}
                       aria-valuemin={0}
@@ -593,47 +595,47 @@ export function MisTrasladosCliente({
                       aria-label={`Avance del traslado ${nombreVehiculo}: ${label}`}
                     >
                       <div
-                        className="h-full rounded-[10px]"
-                        style={{ width: `${progreso}%`, background: "linear-gradient(90deg, #0b1e33, #2e5a88)" }}
+                        className="h-full rounded-full bg-gradient-to-r from-[#0a2342] to-[#0066ff] dark:from-[#4d94ff] dark:to-[#00d1d1]"
+                        style={{ width: `${progreso}%` }}
                       />
                     </div>
-                    <span className="whitespace-nowrap text-[12px] font-bold text-[#0b1e33]">{progreso}%</span>
+                    <span className="whitespace-nowrap text-[12px] font-bold text-[#0a2342] dark:text-[#f6f8fb]">{progreso}%</span>
                   </div>
                 )}
 
-                <div className="mb-3.5 rounded-2xl bg-[#f8fafd] px-4 py-3.5">
-                  <div className="flex items-start gap-3">
-                    <span aria-hidden="true" className="mt-[3px] size-2.5 shrink-0 rounded-full bg-[#2e9e6b] shadow-[0_0_0_3px_#e2f0e9]" />
-                    <p className="text-[13px] font-semibold leading-snug text-[#1a293b]">
+                <div className="mb-3.5 rounded-xl border border-[#eef2f7] bg-[#f8fafd] px-3.5 py-3 dark:border-[#1a3a5c] dark:bg-[#061529]/60">
+                  <div className="flex items-start gap-2.5">
+                    <span aria-hidden="true" className="mt-1 size-2 shrink-0 rounded-full bg-emerald-600 dark:bg-emerald-400" />
+                    <p className="text-[13px] font-bold leading-snug text-[#0a2342] dark:text-[#f6f8fb]">
                       {direccion(origenCiudad, "Origen pendiente")}
-                      <small className="mt-[1px] block text-[11px] font-medium text-[#8b9bb0]">
+                      <small className="mt-0.5 block text-[11px] font-medium text-[#4e5f80] dark:text-[#a8b5cc]">
                         {direccion(traslado?.origen_direccion ?? pasaporte.origen_direccion, "Dirección registrada")}
                       </small>
                     </p>
                   </div>
-                  <div className="mt-2.5 flex items-start gap-3">
-                    <span aria-hidden="true" className="mt-[3px] size-2.5 shrink-0 rounded-full bg-[#e8a23e] shadow-[0_0_0_3px_#fef0e0]" />
-                    <p className="text-[13px] font-semibold leading-snug text-[#1a293b]">
+                  <div className="mt-2.5 flex items-start gap-2.5">
+                    <span aria-hidden="true" className="mt-1 size-2 shrink-0 rounded-full bg-amber-500" />
+                    <p className="text-[13px] font-bold leading-snug text-[#0a2342] dark:text-[#f6f8fb]">
                       {direccion(destinoCiudad, "Destino pendiente")}
-                      <small className="mt-[1px] block text-[11px] font-medium text-[#8b9bb0]">
+                      <small className="mt-0.5 block text-[11px] font-medium text-[#4e5f80] dark:text-[#a8b5cc]">
                         {direccion(traslado?.destino_direccion ?? pasaporte.destino_direccion, "Dirección registrada")}
                       </small>
                     </p>
                   </div>
                 </div>
 
-                <div className="flex items-center justify-between gap-3 border-t border-[#f0f4fa] pt-3.5">
-                  <div className="flex min-w-0 gap-4 text-[12px] font-medium text-[#6b7c94]">
+                <div className="flex items-center justify-between gap-3 border-t border-[#f0f4fa] pt-3 dark:border-[#1a3a5c]">
+                  <div className="flex min-w-0 gap-3 text-[12px] font-medium text-[#4e5f80] dark:text-[#a8b5cc]">
                     <span className="inline-flex min-w-0 items-center gap-1.5">
-                      <IconoUsuario className="shrink-0 text-[#8b9bb0]" />
+                      <IconoUsuario className="shrink-0 text-[#8b9bb0] dark:text-[#6b7a99]" />
                       <span className="truncate">{conductor}</span>
                     </span>
                     <span className="inline-flex shrink-0 items-center gap-1.5">
                       {pestana === "programados" && !duracion
-                        ? <IconoCalendario className="text-[#8b9bb0]" />
+                        ? <IconoCalendario className="text-[#8b9bb0] dark:text-[#6b7a99]" />
                         : distancia && !duracion
-                          ? <IconoRuta className="text-[#8b9bb0]" />
-                          : <IconoReloj className="text-[#8b9bb0]" />}
+                          ? <IconoRuta className="text-[#8b9bb0] dark:text-[#6b7a99]" />
+                          : <IconoReloj className="text-[#8b9bb0] dark:text-[#6b7a99]" />}
                       {datoSecundario}
                     </span>
                   </div>
@@ -641,14 +643,14 @@ export function MisTrasladosCliente({
                     href={urlViaje}
                     aria-label={`${etiquetaBoton} del traslado ${nombreVehiculo} ${folio}`}
                     className={[
-                      "inline-flex min-h-11 shrink-0 items-center gap-[7px] whitespace-nowrap rounded-[30px] px-4 py-2 text-[12px] font-bold tracking-tight",
+                      "inline-flex min-h-10 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-xl px-3.5 py-2 text-[12.5px] font-bold tracking-tight transition active:scale-[0.98]",
                       esActiva || esPagoPendiente
-                        ? "bg-[#0b1e33] text-white shadow-[0_6px_14px_-4px_rgba(11,30,51,0.3)]"
-                        : "border border-[#dae5f2] bg-[#f0f5fe] text-[#0b1e33]",
+                        ? "bg-[#0a2342] text-white shadow-xs hover:bg-[#162c47] dark:bg-[#4d94ff] dark:text-[#061529]"
+                        : "border border-[#d7e1ee] bg-white text-[#0a2342] hover:bg-[#f6f8fb] dark:border-[#2d4f73] dark:bg-[#0a2342] dark:text-[#f6f8fb]",
                     ].join(" ")}
                   >
                     {etiquetaBoton}
-                    <IconoChevron className="size-3" />
+                    <IconoChevron className="size-3.5" />
                   </Link>
                 </div>
               </article>

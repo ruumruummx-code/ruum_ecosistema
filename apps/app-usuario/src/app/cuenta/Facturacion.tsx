@@ -386,7 +386,7 @@ export function Facturacion({ usuario, empresa }: FacturacionProps) {
         <div
           role="status"
           aria-live="polite"
-          className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2.5 rounded-full bg-[#0b1e33] px-5 py-3 text-xs font-semibold text-white shadow-xl animate-fade-in"
+          className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2.5 rounded-full bg-[#0a2342] px-5 py-3 text-xs font-semibold text-white shadow-xl animate-fade-in"
         >
           <IconoCheckCirculo className="size-4 text-emerald-400 shrink-0" />
           <span>{toastNotificacion}</span>
@@ -398,15 +398,15 @@ export function Facturacion({ usuario, empresa }: FacturacionProps) {
         <Link
           href="/cuenta"
           aria-label="Volver a mi cuenta"
-          className="flex size-10 shrink-0 items-center justify-center rounded-full bg-[#f2f6fc] text-[#0b1e33] transition-all hover:bg-[#e3ebf5] active:scale-95"
+          className="flex size-10 shrink-0 items-center justify-center rounded-full bg-[#f2f6fc] text-[#0a2342] transition-all hover:bg-[#e3ebf5] active:scale-95"
         >
           <Icono nombre="atras" className="size-4" strokeWidth={2.2} />
         </Link>
         <div className="min-w-0">
-          <h1 className="text-[18px] font-bold tracking-tight text-[#0b1e33] leading-snug">
+          <h1 className="text-[18px] font-bold tracking-tight text-[#0a2342] leading-snug">
             Facturación
           </h1>
-          <p className="text-[12px] font-medium text-[#6b7c94]">
+          <p className="text-[12px] font-medium text-[#4e5f80]">
             Datos fiscales y comprobantes
           </p>
         </div>
@@ -416,7 +416,7 @@ export function Facturacion({ usuario, empresa }: FacturacionProps) {
       <section
         aria-label="Resumen de facturación electrónica"
         className="relative overflow-hidden rounded-[26px] p-6 text-[#fff] shadow-[0_16px_32px_-12px_rgba(11,30,51,0.4)]"
-        style={{ background: "linear-gradient(135deg, #0b1e33 0%, #162c47 100%)" }}
+        style={{ background: "linear-gradient(135deg, #0a2342 0%, #143560 100%)" }}
       >
         <span
           aria-hidden="true"
@@ -506,7 +506,7 @@ export function Facturacion({ usuario, empresa }: FacturacionProps) {
       {/* Sección Datos fiscales */}
       <div>
         <div className="mb-2.5 flex items-center justify-between px-1">
-          <h2 className="text-[12px] font-bold uppercase tracking-[0.8px] text-[#8b9bb0]">
+          <h2 className="text-[12px] font-bold uppercase tracking-[0.8px] text-[#4e5f80]">
             Datos fiscales
           </h2>
           <button
@@ -525,8 +525,8 @@ export function Facturacion({ usuario, empresa }: FacturacionProps) {
               <IconoHuella className="size-4" />
             </div>
             <div>
-              <p className="text-[15px] font-bold tracking-tight text-[#0b1e33]">RFC</p>
-              <p className="text-[11.5px] font-medium text-[#8b9bb0]">
+              <p className="text-[15px] font-bold tracking-tight text-[#0a2342]">RFC</p>
+              <p className="text-[11.5px] font-medium text-[#4e5f80]">
                 Registro Federal de Contribuyentes
               </p>
             </div>
@@ -534,35 +534,35 @@ export function Facturacion({ usuario, empresa }: FacturacionProps) {
 
           <div className="flex flex-col text-[13.5px]">
             <div className="flex items-center justify-between py-3 border-t border-[#f0f4fa]">
-              <span className="font-medium text-[#6b7c94]">RFC</span>
+              <span className="font-medium text-[#4e5f80]">RFC</span>
               <span className="font-bold text-[#1a293b] flex items-center gap-1.5">
                 {rfc} <IconoCheckCirculo className="size-3.5 text-emerald-600 inline" />
               </span>
             </div>
             <div className="flex items-center justify-between py-3 border-t border-[#f0f4fa]">
-              <span className="font-medium text-[#6b7c94]">Razón social</span>
+              <span className="font-medium text-[#4e5f80]">Razón social</span>
               <span className="font-bold text-[#1a293b] text-right truncate max-w-[220px]">
                 {razonSocial}
               </span>
             </div>
             <div className="flex items-center justify-between py-3 border-t border-[#f0f4fa]">
-              <span className="font-medium text-[#6b7c94]">Régimen fiscal</span>
+              <span className="font-medium text-[#4e5f80]">Régimen fiscal</span>
               <span className="font-semibold text-[#1a293b] text-right truncate max-w-[220px]">
                 {regimenFiscal}
               </span>
             </div>
             <div className="flex items-center justify-between py-3 border-t border-[#f0f4fa]">
-              <span className="font-medium text-[#6b7c94]">Código postal fiscal</span>
+              <span className="font-medium text-[#4e5f80]">Código postal fiscal</span>
               <span className="font-bold text-[#1a293b]">{codigoPostalFiscal}</span>
             </div>
             <div className="flex items-center justify-between py-3 border-t border-[#f0f4fa]">
-              <span className="font-medium text-[#6b7c94]">Uso de CFDI</span>
+              <span className="font-medium text-[#4e5f80]">Uso de CFDI</span>
               <span className="font-semibold text-[#1a293b] text-right truncate max-w-[220px]">
                 {usoCfdi}
               </span>
             </div>
             <div className="flex items-center justify-between py-3 border-t border-[#f0f4fa]">
-              <span className="font-medium text-[#6b7c94]">Correo para facturación</span>
+              <span className="font-medium text-[#4e5f80]">Correo para facturación</span>
               <span className="font-semibold text-[#1a293b] text-right truncate max-w-[220px]">
                 {correoFacturacion}
               </span>
@@ -573,7 +573,7 @@ export function Facturacion({ usuario, empresa }: FacturacionProps) {
 
       {/* Historial de facturas */}
       <div>
-        <h2 className="mb-2.5 px-1 text-[12px] font-bold uppercase tracking-[0.8px] text-[#8b9bb0]">
+        <h2 className="mb-2.5 px-1 text-[12px] font-bold uppercase tracking-[0.8px] text-[#4e5f80]">
           Historial de facturas
         </h2>
 
@@ -585,15 +585,15 @@ export function Facturacion({ usuario, empresa }: FacturacionProps) {
             className={[
               "flex-1 rounded-full py-2 text-center text-[13px] transition cursor-pointer font-semibold",
               tabActiva === "todas"
-                ? "bg-white font-bold text-[#0b1e33] shadow-sm"
-                : "text-[#5c6e86] hover:text-[#0b1e33]",
+                ? "bg-white font-bold text-[#0a2342] shadow-sm"
+                : "text-[#5c6e86] hover:text-[#0a2342]",
             ].join(" ")}
           >
             Todas{" "}
             <span
               className={[
                 "ml-1 rounded-full px-2 py-0.5 text-[10px] font-bold",
-                tabActiva === "todas" ? "bg-[#0b1e33] text-white" : "bg-[#dfe8f3] text-[#2e5a88]",
+                tabActiva === "todas" ? "bg-[#0a2342] text-white" : "bg-[#dfe8f3] text-[#2e5a88]",
               ].join(" ")}
             >
               {facturas.length}
@@ -605,8 +605,8 @@ export function Facturacion({ usuario, empresa }: FacturacionProps) {
             className={[
               "flex-1 rounded-full py-2 text-center text-[13px] transition cursor-pointer font-semibold",
               tabActiva === "emitidas"
-                ? "bg-white font-bold text-[#0b1e33] shadow-sm"
-                : "text-[#5c6e86] hover:text-[#0b1e33]",
+                ? "bg-white font-bold text-[#0a2342] shadow-sm"
+                : "text-[#5c6e86] hover:text-[#0a2342]",
             ].join(" ")}
           >
             Emitidas
@@ -617,8 +617,8 @@ export function Facturacion({ usuario, empresa }: FacturacionProps) {
             className={[
               "flex-1 rounded-full py-2 text-center text-[13px] transition cursor-pointer font-semibold",
               tabActiva === "pendientes"
-                ? "bg-white font-bold text-[#0b1e33] shadow-sm"
-                : "text-[#5c6e86] hover:text-[#0b1e33]",
+                ? "bg-white font-bold text-[#0a2342] shadow-sm"
+                : "text-[#5c6e86] hover:text-[#0a2342]",
             ].join(" ")}
           >
             Pendientes{" "}
@@ -627,7 +627,7 @@ export function Facturacion({ usuario, empresa }: FacturacionProps) {
                 className={[
                   "ml-1 rounded-full px-2 py-0.5 text-[10px] font-bold",
                   tabActiva === "pendientes"
-                    ? "bg-[#0b1e33] text-white"
+                    ? "bg-[#0a2342] text-white"
                     : "bg-[#fef4e6] text-[#b36b1e]",
                 ].join(" ")}
               >
@@ -662,10 +662,10 @@ export function Facturacion({ usuario, empresa }: FacturacionProps) {
                       )}
                     </div>
                     <div className="min-w-0">
-                      <h3 className="text-[14.5px] font-bold tracking-tight text-[#0b1e33] truncate">
+                      <h3 className="text-[14.5px] font-bold tracking-tight text-[#0a2342] truncate">
                         {factura.folio}
                       </h3>
-                      <p className="text-[12px] font-medium text-[#8b9bb0] truncate">
+                      <p className="text-[12px] font-medium text-[#4e5f80] truncate">
                         {factura.fecha}
                       </p>
                     </div>
@@ -683,10 +683,10 @@ export function Facturacion({ usuario, empresa }: FacturacionProps) {
                 </div>
 
                 <div className="mt-3 flex items-center justify-between border-t border-[#f0f4fa] pt-3 text-[12.5px]">
-                  <span className="font-medium text-[#6b7c94] truncate max-w-[200px]">
+                  <span className="font-medium text-[#4e5f80] truncate max-w-[200px]">
                     {factura.concepto}
                   </span>
-                  <span className="text-[16px] font-extrabold text-[#0b1e33]">
+                  <span className="text-[16px] font-extrabold text-[#0a2342]">
                     ${factura.monto.toLocaleString("es-MX")}
                   </span>
                 </div>
@@ -699,7 +699,7 @@ export function Facturacion({ usuario, empresa }: FacturacionProps) {
                         onClick={() =>
                           setToastNotificacion(`Descargando PDF de ${factura.folio}...`)
                         }
-                        className="flex-1 rounded-[12px] bg-[#0b1e33] py-2.5 text-center text-[12px] font-bold text-white transition hover:bg-[#162c47] active:scale-98 flex items-center justify-center gap-1.5 cursor-pointer"
+                        className="flex-1 rounded-[12px] bg-[#0a2342] py-2.5 text-center text-[12px] font-bold text-white transition hover:bg-[#143560] active:scale-98 flex items-center justify-center gap-1.5 cursor-pointer"
                       >
                         <IconoDescargar className="size-3.5" />
                         <span>Descargar PDF</span>
@@ -709,7 +709,7 @@ export function Facturacion({ usuario, empresa }: FacturacionProps) {
                         onClick={() =>
                           setToastNotificacion(`Descargando XML de ${factura.folio}...`)
                         }
-                        className="rounded-[12px] border border-[#dae5f2] bg-[#f0f5fe] px-4 py-2.5 text-center text-[12px] font-bold text-[#0b1e33] transition hover:bg-[#e3ebf5] active:scale-98 flex items-center justify-center gap-1.5 cursor-pointer"
+                        className="rounded-[12px] border border-[#dae5f2] bg-[#f0f5fe] px-4 py-2.5 text-center text-[12px] font-bold text-[#0a2342] transition hover:bg-[#e3ebf5] active:scale-98 flex items-center justify-center gap-1.5 cursor-pointer"
                       >
                         <IconoCodigo className="size-3.5" />
                         <span>XML</span>
@@ -719,7 +719,7 @@ export function Facturacion({ usuario, empresa }: FacturacionProps) {
                     <button
                       type="button"
                       onClick={() => handleSolicitarFactura(factura.id, factura.folio)}
-                      className="w-full rounded-[12px] bg-[#0b1e33] py-2.5 text-center text-[12px] font-bold text-white transition hover:bg-[#162c47] active:scale-98 flex items-center justify-center gap-1.5 cursor-pointer"
+                      className="w-full rounded-[12px] bg-[#0a2342] py-2.5 text-center text-[12px] font-bold text-white transition hover:bg-[#143560] active:scale-98 flex items-center justify-center gap-1.5 cursor-pointer"
                     >
                       <IconoPapelAvion className="size-3.5" />
                       <span>Solicitar factura</span>
@@ -734,7 +734,7 @@ export function Facturacion({ usuario, empresa }: FacturacionProps) {
             <div className="mx-auto mb-4 flex size-16 items-center justify-center rounded-[22px] bg-[#f2f6fc] text-[#a6b7cb]">
               <IconoFacturaDollar className="size-8" />
             </div>
-            <h3 className="text-[16px] font-bold text-[#0b1e33]">Sin facturas disponibles</h3>
+            <h3 className="text-[16px] font-bold text-[#0a2342]">Sin facturas disponibles</h3>
             <p className="mt-1 text-[13px] font-medium text-[#7e8fa8]">
               No tienes facturas bajo el filtro seleccionado.
             </p>
@@ -773,16 +773,16 @@ export function Facturacion({ usuario, empresa }: FacturacionProps) {
               <IconoLapiz className="size-6" />
             </div>
 
-            <h2 id="modal-editar-titulo" className="text-center text-[19px] font-extrabold text-[#0b1e33] tracking-tight">
+            <h2 id="modal-editar-titulo" className="text-center text-[19px] font-extrabold text-[#0a2342] tracking-tight">
               Editar datos fiscales
             </h2>
-            <p id="modal-editar-desc" className="mt-1 text-center text-[13px] font-medium text-[#6b7c94] leading-relaxed">
+            <p id="modal-editar-desc" className="mt-1 text-center text-[13px] font-medium text-[#4e5f80] leading-relaxed">
               Actualiza tu información de facturación. Los cambios se aplicarán a futuras facturas.
             </p>
 
             <form onSubmit={handleGuardarDatosFiscales} className="mt-5 flex flex-col gap-3.5">
               <div className="flex flex-col gap-1.5">
-                <label htmlFor="input-rfc" className="text-[11.5px] font-bold uppercase tracking-wider text-[#6b7c94]">
+                <label htmlFor="input-rfc" className="text-[11.5px] font-bold uppercase tracking-wider text-[#4e5f80]">
                   RFC
                 </label>
                 <input
@@ -793,12 +793,12 @@ export function Facturacion({ usuario, empresa }: FacturacionProps) {
                   onChange={(e) => setFormRfc(e.target.value.toUpperCase())}
                   required
                   placeholder="XAXX010101000"
-                  className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-[14px] font-bold text-[#0b1e33] outline-none transition focus:border-[#0b1e33] focus:bg-white focus:ring-2 focus:ring-[#0b1e33]/10"
+                  className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-[14px] font-bold text-[#0a2342] outline-none transition focus:border-[#0a2342] focus:bg-white focus:ring-2 focus:ring-[#0a2342]/10"
                 />
               </div>
 
               <div className="flex flex-col gap-1.5">
-                <label htmlFor="input-razon-social" className="text-[11.5px] font-bold uppercase tracking-wider text-[#6b7c94]">
+                <label htmlFor="input-razon-social" className="text-[11.5px] font-bold uppercase tracking-wider text-[#4e5f80]">
                   Razón social
                 </label>
                 <input
@@ -808,20 +808,20 @@ export function Facturacion({ usuario, empresa }: FacturacionProps) {
                   onChange={(e) => setFormRazonSocial(e.target.value)}
                   required
                   placeholder="Nombre o empresa fiscal"
-                  className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-[14px] font-semibold text-[#0b1e33] outline-none transition focus:border-[#0b1e33] focus:bg-white focus:ring-2 focus:ring-[#0b1e33]/10"
+                  className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-[14px] font-semibold text-[#0a2342] outline-none transition focus:border-[#0a2342] focus:bg-white focus:ring-2 focus:ring-[#0a2342]/10"
                 />
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div className="flex flex-col gap-1.5">
-                  <label htmlFor="select-regimen" className="text-[11.5px] font-bold uppercase tracking-wider text-[#6b7c94]">
+                  <label htmlFor="select-regimen" className="text-[11.5px] font-bold uppercase tracking-wider text-[#4e5f80]">
                     Régimen fiscal
                   </label>
                   <select
                     id="select-regimen"
                     value={formRegimenFiscal}
                     onChange={(e) => setFormRegimenFiscal(e.target.value)}
-                    className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-3 text-[13px] font-semibold text-[#0b1e33] outline-none transition focus:border-[#0b1e33] focus:bg-white"
+                    className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-3 text-[13px] font-semibold text-[#0a2342] outline-none transition focus:border-[#0a2342] focus:bg-white"
                   >
                     {REGIMENES_FISCALES.map((reg) => (
                       <option key={reg} value={reg}>
@@ -832,7 +832,7 @@ export function Facturacion({ usuario, empresa }: FacturacionProps) {
                 </div>
 
                 <div className="flex flex-col gap-1.5">
-                  <label htmlFor="input-cp-fiscal" className="text-[11.5px] font-bold uppercase tracking-wider text-[#6b7c94]">
+                  <label htmlFor="input-cp-fiscal" className="text-[11.5px] font-bold uppercase tracking-wider text-[#4e5f80]">
                     CP fiscal
                   </label>
                   <input
@@ -844,20 +844,20 @@ export function Facturacion({ usuario, empresa }: FacturacionProps) {
                     onChange={(e) => setFormCpFiscal(e.target.value.replace(/\D/g, "").slice(0, 5))}
                     required
                     placeholder="06700"
-                    className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-[14px] font-bold text-[#0b1e33] outline-none transition focus:border-[#0b1e33] focus:bg-white"
+                    className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-[14px] font-bold text-[#0a2342] outline-none transition focus:border-[#0a2342] focus:bg-white"
                   />
                 </div>
               </div>
 
               <div className="flex flex-col gap-1.5">
-                <label htmlFor="select-cfdi" className="text-[11.5px] font-bold uppercase tracking-wider text-[#6b7c94]">
+                <label htmlFor="select-cfdi" className="text-[11.5px] font-bold uppercase tracking-wider text-[#4e5f80]">
                   Uso de CFDI
                 </label>
                 <select
                   id="select-cfdi"
                   value={formUsoCfdi}
                   onChange={(e) => setFormUsoCfdi(e.target.value)}
-                  className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-3 text-[13px] font-semibold text-[#0b1e33] outline-none transition focus:border-[#0b1e33] focus:bg-white"
+                  className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-3 text-[13px] font-semibold text-[#0a2342] outline-none transition focus:border-[#0a2342] focus:bg-white"
                 >
                   {USOS_CFDI.map((uso) => (
                     <option key={uso} value={uso}>
@@ -868,7 +868,7 @@ export function Facturacion({ usuario, empresa }: FacturacionProps) {
               </div>
 
               <div className="flex flex-col gap-1.5">
-                <label htmlFor="input-correo-fiscal" className="text-[11.5px] font-bold uppercase tracking-wider text-[#6b7c94]">
+                <label htmlFor="input-correo-fiscal" className="text-[11.5px] font-bold uppercase tracking-wider text-[#4e5f80]">
                   Correo para facturación
                 </label>
                 <input
@@ -878,7 +878,7 @@ export function Facturacion({ usuario, empresa }: FacturacionProps) {
                   onChange={(e) => setFormCorreo(e.target.value)}
                   required
                   placeholder="facturacion@empresa.com"
-                  className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-[14px] font-semibold text-[#0b1e33] outline-none transition focus:border-[#0b1e33] focus:bg-white"
+                  className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-[14px] font-semibold text-[#0a2342] outline-none transition focus:border-[#0a2342] focus:bg-white"
                 />
               </div>
 
@@ -892,14 +892,14 @@ export function Facturacion({ usuario, empresa }: FacturacionProps) {
               <button
                 type="submit"
                 disabled={guardandoFiscal}
-                className="mt-2 w-full rounded-xl bg-[#0b1e33] py-3.5 text-center text-[14.5px] font-bold text-white shadow-lg transition hover:bg-[#162c47] active:scale-98 cursor-pointer disabled:opacity-50"
+                className="mt-2 w-full rounded-xl bg-[#0a2342] py-3.5 text-center text-[14.5px] font-bold text-white shadow-lg transition hover:bg-[#143560] active:scale-98 cursor-pointer disabled:opacity-50"
               >
                 {guardandoFiscal ? "Guardando cambios…" : "Guardar cambios"}
               </button>
               <button
                 type="button"
                 onClick={() => setModalEditarAbierto(false)}
-                className="w-full py-2.5 text-center text-[13px] font-bold text-[#6b7c94] transition hover:text-[#0b1e33] cursor-pointer"
+                className="w-full py-2.5 text-center text-[13px] font-bold text-[#4e5f80] transition hover:text-[#0a2342] cursor-pointer"
               >
                 Cancelar
               </button>
@@ -930,23 +930,23 @@ export function Facturacion({ usuario, empresa }: FacturacionProps) {
               <IconoFacturaDollar className="size-6" />
             </div>
 
-            <h2 id="modal-constancia-titulo" className="text-center text-[19px] font-extrabold text-[#0b1e33] tracking-tight">
+            <h2 id="modal-constancia-titulo" className="text-center text-[19px] font-extrabold text-[#0a2342] tracking-tight">
               Constancia de Situación Fiscal
             </h2>
-            <p id="modal-constancia-desc" className="mt-1 text-center text-[13px] font-medium text-[#6b7c94] leading-relaxed">
+            <p id="modal-constancia-desc" className="mt-1 text-center text-[13px] font-medium text-[#4e5f80] leading-relaxed">
               Sube tu constancia actualizada para mantener tu facturación activa. El archivo debe ser emitido por el SAT.
             </p>
 
             <div className="mt-5 flex flex-col gap-4">
               <div className="flex flex-col gap-1.5">
-                <label className="text-[11.5px] font-bold uppercase tracking-wider text-[#6b7c94]">
+                <label className="text-[11.5px] font-bold uppercase tracking-wider text-[#4e5f80]">
                   RFC
                 </label>
                 <input
                   type="text"
                   disabled
                   value={rfc}
-                  className="w-full rounded-xl border border-slate-200 bg-[#f2f6fb] px-4 py-3 text-[14px] font-bold text-[#8b9bb0] outline-none cursor-not-allowed"
+                  className="w-full rounded-xl border border-slate-200 bg-[#f2f6fb] px-4 py-3 text-[14px] font-bold text-[#4e5f80] outline-none cursor-not-allowed"
                 />
               </div>
 
@@ -998,7 +998,7 @@ export function Facturacion({ usuario, empresa }: FacturacionProps) {
                   <>
                     <IconoNubeSubir className="size-8 text-[#a6b7cb]" />
                     <p className="text-[13px] font-bold text-[#2e5a88]">Subir constancia</p>
-                    <p className="text-[11px] font-medium text-[#8b9bb0]">PDF · Máx. 5 MB</p>
+                    <p className="text-[11px] font-medium text-[#4e5f80]">PDF · Máx. 5 MB</p>
                   </>
                 )}
               </div>
@@ -1014,14 +1014,14 @@ export function Facturacion({ usuario, empresa }: FacturacionProps) {
                 type="button"
                 disabled={enviandoConstancia}
                 onClick={handleConfirmarConstancia}
-                className="w-full rounded-xl bg-[#0b1e33] py-3.5 text-center text-[14.5px] font-bold text-white shadow-lg transition hover:bg-[#162c47] active:scale-98 cursor-pointer disabled:opacity-50"
+                className="w-full rounded-xl bg-[#0a2342] py-3.5 text-center text-[14.5px] font-bold text-white shadow-lg transition hover:bg-[#143560] active:scale-98 cursor-pointer disabled:opacity-50"
               >
                 {enviandoConstancia ? "Enviando…" : "Confirmar y enviar"}
               </button>
               <button
                 type="button"
                 onClick={() => setModalConstanciaAbierto(false)}
-                className="w-full py-2.5 text-center text-[13px] font-bold text-[#6b7c94] transition hover:text-[#0b1e33] cursor-pointer"
+                className="w-full py-2.5 text-center text-[13px] font-bold text-[#4e5f80] transition hover:text-[#0a2342] cursor-pointer"
               >
                 Cancelar
               </button>

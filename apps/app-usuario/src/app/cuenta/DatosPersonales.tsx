@@ -302,15 +302,15 @@ export function DatosPersonales({ usuario, fotoUrlInicial }: DatosPersonalesProp
         <Link
           href="/cuenta"
           aria-label="Volver a mi cuenta"
-          className="flex size-10 shrink-0 items-center justify-center rounded-full bg-[#f2f6fc] text-[#0b1e33] transition-all hover:bg-[#e3ebf5] active:scale-95"
+          className="flex size-10 shrink-0 items-center justify-center rounded-full bg-[#f2f6fc] text-[#0a2342] transition-all hover:bg-[#e3ebf5] active:scale-95"
         >
           <Icono nombre="atras" className="size-4" strokeWidth={2.2} />
         </Link>
         <div className="min-w-0">
-          <h1 className="text-[18px] font-bold tracking-tight text-[#0b1e33] leading-snug">
+          <h1 className="text-[18px] font-bold tracking-tight text-[#0a2342] leading-snug">
             Datos personales
           </h1>
-          <p className="text-[12px] font-medium text-[#6b7c94]">
+          <p className="text-[12px] font-medium text-[#4e5f80]">
             Gestiona tu información de perfil
           </p>
         </div>
@@ -328,7 +328,7 @@ export function DatosPersonales({ usuario, fotoUrlInicial }: DatosPersonalesProp
               className="size-[100px] rounded-full object-cover border-4 border-white shadow-[0_12px_24px_-8px_rgba(11,30,51,0.35)]"
             />
           ) : (
-            <div className="flex size-[100px] items-center justify-center rounded-full bg-gradient-to-br from-[#0b1e33] to-[#2e5a88] text-[38px] font-bold text-white border-4 border-white shadow-[0_12px_24px_-8px_rgba(11,30,51,0.35)]">
+            <div className="flex size-[100px] items-center justify-center rounded-full bg-gradient-to-br from-[#0a2342] to-[#2e5a88] text-[38px] font-bold text-white border-4 border-white shadow-[0_12px_24px_-8px_rgba(11,30,51,0.35)]">
               {iniciales(nombre, apellido)}
             </div>
           )}
@@ -337,7 +337,7 @@ export function DatosPersonales({ usuario, fotoUrlInicial }: DatosPersonalesProp
             onClick={() => fileInputRef.current?.click()}
             disabled={subiendoFoto}
             aria-label="Cambiar foto de perfil"
-            className="absolute bottom-[2px] right-[2px] flex size-[34px] items-center justify-center rounded-full bg-[#0b1e33] text-white border-[3px] border-white shadow-[0_4px_10px_rgba(0,0,0,0.15)] transition-all cursor-pointer hover:bg-[#1a3454] active:scale-90"
+            className="absolute bottom-[2px] right-[2px] flex size-[34px] items-center justify-center rounded-full bg-[#0a2342] text-white border-[3px] border-white shadow-[0_4px_10px_rgba(0,0,0,0.15)] transition-all cursor-pointer hover:bg-[#1a3454] active:scale-90"
           >
             <IconoCamara className="size-3.5" />
           </button>
@@ -349,7 +349,7 @@ export function DatosPersonales({ usuario, fotoUrlInicial }: DatosPersonalesProp
             className="hidden"
           />
         </div>
-        <p className="text-[12px] font-medium text-[#8b9bb0]">
+        <p className="text-[12px] font-medium text-[#4e5f80]">
           {subiendoFoto ? "Subiendo foto..." : "Toca para cambiar tu foto"}
         </p>
       </div>
@@ -359,11 +359,11 @@ export function DatosPersonales({ usuario, fotoUrlInicial }: DatosPersonalesProp
         {/* SECCIÓN 1: INFORMACIÓN PERSONAL               */}
         {/* ============================================= */}
         <section aria-labelledby="sec-personal" className="rounded-[22px] border border-[#eef2f7] bg-white p-[22px_20px] shadow-[0_6px_16px_rgba(0,0,0,0.02)]">
-          <div className="mb-5 flex items-center gap-2.5 font-bold text-[15px] text-[#0b1e33]">
+          <div className="mb-5 flex items-center gap-2.5 font-bold text-[15px] text-[#0a2342]">
             <div className="flex size-8 shrink-0 items-center justify-center rounded-[10px] bg-[#f0f5fe] text-[#2e5a88]">
               <IconoUsuario className="size-4" />
             </div>
-            <h2 id="sec-personal" className="font-bold text-[15px] text-[#0b1e33]">
+            <h2 id="sec-personal" className="font-bold text-[15px] text-[#0a2342]">
               Información personal
             </h2>
           </div>
@@ -372,7 +372,7 @@ export function DatosPersonales({ usuario, fotoUrlInicial }: DatosPersonalesProp
             {/* Nombre y Apellidos */}
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label htmlFor="nombre" className="block text-[12px] font-bold text-[#6b7c94] mb-1.5 uppercase tracking-[0.2px]">
+                <label htmlFor="nombre" className="block text-[12px] font-bold text-[#4e5f80] mb-1.5 uppercase tracking-[0.2px]">
                   Nombre(s)
                 </label>
                 <input
@@ -382,11 +382,11 @@ export function DatosPersonales({ usuario, fotoUrlInicial }: DatosPersonalesProp
                   onChange={(e) => setNombre(e.target.value)}
                   placeholder="Ej. Laura"
                   required
-                  className="w-full p-[14px_16px] border-[1.5px] border-[#e6edf6] rounded-[14px] text-[14.5px] text-[#0b1e33] font-medium bg-[#fafcfe] outline-none transition-all focus:border-[#0b1e33] focus:bg-white focus:ring-2 focus:ring-[#0b1e33]/5"
+                  className="w-full p-[14px_16px] border-[1.5px] border-[#e6edf6] rounded-[14px] text-[14.5px] text-[#0a2342] font-medium bg-[#fafcfe] outline-none transition-all focus:border-[#0a2342] focus:bg-white focus:ring-2 focus:ring-[#0a2342]/5"
                 />
               </div>
               <div>
-                <label htmlFor="apellido" className="block text-[12px] font-bold text-[#6b7c94] mb-1.5 uppercase tracking-[0.2px]">
+                <label htmlFor="apellido" className="block text-[12px] font-bold text-[#4e5f80] mb-1.5 uppercase tracking-[0.2px]">
                   Apellidos
                 </label>
                 <input
@@ -396,14 +396,14 @@ export function DatosPersonales({ usuario, fotoUrlInicial }: DatosPersonalesProp
                   onChange={(e) => setApellido(e.target.value)}
                   placeholder="Ej. Martínez Ruiz"
                   required
-                  className="w-full p-[14px_16px] border-[1.5px] border-[#e6edf6] rounded-[14px] text-[14.5px] text-[#0b1e33] font-medium bg-[#fafcfe] outline-none transition-all focus:border-[#0b1e33] focus:bg-white focus:ring-2 focus:ring-[#0b1e33]/5"
+                  className="w-full p-[14px_16px] border-[1.5px] border-[#e6edf6] rounded-[14px] text-[14.5px] text-[#0a2342] font-medium bg-[#fafcfe] outline-none transition-all focus:border-[#0a2342] focus:bg-white focus:ring-2 focus:ring-[#0a2342]/5"
                 />
               </div>
             </div>
 
             {/* Correo electrónico */}
             <div>
-              <label htmlFor="email" className="flex items-center text-[12px] font-bold text-[#6b7c94] mb-1.5 uppercase tracking-[0.2px]">
+              <label htmlFor="email" className="flex items-center text-[12px] font-bold text-[#4e5f80] mb-1.5 uppercase tracking-[0.2px]">
                 Correo electrónico
                 <span className="inline-flex items-center gap-1 bg-[#e9f3ee] text-[#1f6b4a] text-[10px] font-bold px-2 py-0.5 rounded-full ml-2 lowercase tracking-normal">
                   <IconoCheckCirculo className="size-3" /> Verificado
@@ -416,19 +416,19 @@ export function DatosPersonales({ usuario, fotoUrlInicial }: DatosPersonalesProp
                   value={usuario.correo_facturacion ?? "laura.martinez@email.com"}
                   disabled
                   placeholder="tu@email.com"
-                  className="w-full p-[14px_16px] pr-11 border-[1.5px] border-[#e6edf6] rounded-[14px] text-[14.5px] text-[#8b9bb0] font-medium bg-[#f2f6fb] cursor-not-allowed outline-none"
+                  className="w-full p-[14px_16px] pr-11 border-[1.5px] border-[#e6edf6] rounded-[14px] text-[14.5px] text-[#4e5f80] font-medium bg-[#f2f6fb] cursor-not-allowed outline-none"
                 />
                 <IconoCandado className="absolute right-4 top-1/2 -translate-y-1/2 size-4 text-[#b0bfd0] pointer-events-none" />
               </div>
-              <p className="flex items-center gap-1.5 text-[11.5px] text-[#8b9bb0] font-medium mt-1.5">
-                <IconoInfo className="size-3.5 text-[#8b9bb0] shrink-0" />
+              <p className="flex items-center gap-1.5 text-[11.5px] text-[#4e5f80] font-medium mt-1.5">
+                <IconoInfo className="size-3.5 text-[#4e5f80] shrink-0" />
                 Para cambiar tu correo, contacta a soporte
               </p>
             </div>
 
             {/* Teléfono */}
             <div>
-              <label htmlFor="telefono" className="block text-[12px] font-bold text-[#6b7c94] mb-1.5 uppercase tracking-[0.2px]">
+              <label htmlFor="telefono" className="block text-[12px] font-bold text-[#4e5f80] mb-1.5 uppercase tracking-[0.2px]">
                 Teléfono
               </label>
               <div className="relative">
@@ -438,7 +438,7 @@ export function DatosPersonales({ usuario, fotoUrlInicial }: DatosPersonalesProp
                   value={telefono}
                   onChange={(e) => setTelefono(telefonoLocalMx(e.target.value))}
                   placeholder="+52 55 1234 5678"
-                  className="w-full p-[14px_16px] pr-11 border-[1.5px] border-[#e6edf6] rounded-[14px] text-[14.5px] text-[#0b1e33] font-medium bg-[#fafcfe] outline-none transition-all focus:border-[#0b1e33] focus:bg-white focus:ring-2 focus:ring-[#0b1e33]/5"
+                  className="w-full p-[14px_16px] pr-11 border-[1.5px] border-[#e6edf6] rounded-[14px] text-[14.5px] text-[#0a2342] font-medium bg-[#fafcfe] outline-none transition-all focus:border-[#0a2342] focus:bg-white focus:ring-2 focus:ring-[#0a2342]/5"
                 />
                 <IconoTelefono className="absolute right-4 top-1/2 -translate-y-1/2 size-4 text-[#b0bfd0] pointer-events-none" />
               </div>
@@ -446,7 +446,7 @@ export function DatosPersonales({ usuario, fotoUrlInicial }: DatosPersonalesProp
 
             {/* Fecha de nacimiento */}
             <div>
-              <label htmlFor="fecha-nacimiento" className="block text-[12px] font-bold text-[#6b7c94] mb-1.5 uppercase tracking-[0.2px]">
+              <label htmlFor="fecha-nacimiento" className="block text-[12px] font-bold text-[#4e5f80] mb-1.5 uppercase tracking-[0.2px]">
                 Fecha de nacimiento
               </label>
               <input
@@ -454,7 +454,7 @@ export function DatosPersonales({ usuario, fotoUrlInicial }: DatosPersonalesProp
                 type="date"
                 value={fechaNacimiento}
                 onChange={(e) => setFechaNacimiento(e.target.value)}
-                className="w-full p-[14px_16px] border-[1.5px] border-[#e6edf6] rounded-[14px] text-[14.5px] text-[#0b1e33] font-medium bg-[#fafcfe] outline-none transition-all focus:border-[#0b1e33] focus:bg-white focus:ring-2 focus:ring-[#0b1e33]/5"
+                className="w-full p-[14px_16px] border-[1.5px] border-[#e6edf6] rounded-[14px] text-[14.5px] text-[#0a2342] font-medium bg-[#fafcfe] outline-none transition-all focus:border-[#0a2342] focus:bg-white focus:ring-2 focus:ring-[#0a2342]/5"
               />
             </div>
           </div>
@@ -464,11 +464,11 @@ export function DatosPersonales({ usuario, fotoUrlInicial }: DatosPersonalesProp
         {/* SECCIÓN 2: DIRECCIÓN PRINCIPAL                */}
         {/* ============================================= */}
         <section aria-labelledby="sec-direccion" className="rounded-[22px] border border-[#eef2f7] bg-white p-[22px_20px] shadow-[0_6px_16px_rgba(0,0,0,0.02)]">
-          <div className="mb-5 flex items-center gap-2.5 font-bold text-[15px] text-[#0b1e33]">
+          <div className="mb-5 flex items-center gap-2.5 font-bold text-[15px] text-[#0a2342]">
             <div className="flex size-8 shrink-0 items-center justify-center rounded-[10px] bg-[#f0f5fe] text-[#2e5a88]">
               <IconoMapa className="size-4" />
             </div>
-            <h2 id="sec-direccion" className="font-bold text-[15px] text-[#0b1e33]">
+            <h2 id="sec-direccion" className="font-bold text-[15px] text-[#0a2342]">
               Dirección principal
             </h2>
           </div>
@@ -477,14 +477,14 @@ export function DatosPersonales({ usuario, fotoUrlInicial }: DatosPersonalesProp
             {/* País y Estado */}
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label htmlFor="pais" className="block text-[12px] font-bold text-[#6b7c94] mb-1.5 uppercase tracking-[0.2px]">
+                <label htmlFor="pais" className="block text-[12px] font-bold text-[#4e5f80] mb-1.5 uppercase tracking-[0.2px]">
                   País
                 </label>
                 <select
                   id="pais"
                   value={pais}
                   onChange={(e) => setPais(e.target.value)}
-                  className="w-full p-[14px_16px] border-[1.5px] border-[#e6edf6] rounded-[14px] text-[14.5px] text-[#0b1e33] font-medium bg-[#fafcfe] outline-none transition-all focus:border-[#0b1e33] focus:bg-white focus:ring-2 focus:ring-[#0b1e33]/5 cursor-pointer appearance-none bg-[url('data:image/svg+xml,%3Csvg%20xmlns=%27http://www.w3.org/2000/svg%27%20width=%2712%27%20height=%278%27%20viewBox=%270%200%2012%208%27%3E%3Cpath%20fill=%27%23b0bfd0%27%20d=%27M6%208L0%200h12z%27/%3E%3C/svg%3E')] bg-no-repeat bg-[right_18px_center]"
+                  className="w-full p-[14px_16px] border-[1.5px] border-[#e6edf6] rounded-[14px] text-[14.5px] text-[#0a2342] font-medium bg-[#fafcfe] outline-none transition-all focus:border-[#0a2342] focus:bg-white focus:ring-2 focus:ring-[#0a2342]/5 cursor-pointer appearance-none bg-[url('data:image/svg+xml,%3Csvg%20xmlns=%27http://www.w3.org/2000/svg%27%20width=%2712%27%20height=%278%27%20viewBox=%270%200%2012%208%27%3E%3Cpath%20fill=%27%23b0bfd0%27%20d=%27M6%208L0%200h12z%27/%3E%3C/svg%3E')] bg-no-repeat bg-[right_18px_center]"
                 >
                   <option value="México">México</option>
                   <option value="Estados Unidos">Estados Unidos</option>
@@ -494,14 +494,14 @@ export function DatosPersonales({ usuario, fotoUrlInicial }: DatosPersonalesProp
                 </select>
               </div>
               <div>
-                <label htmlFor="estado" className="block text-[12px] font-bold text-[#6b7c94] mb-1.5 uppercase tracking-[0.2px]">
+                <label htmlFor="estado" className="block text-[12px] font-bold text-[#4e5f80] mb-1.5 uppercase tracking-[0.2px]">
                   Estado
                 </label>
                 <select
                   id="estado"
                   value={estado}
                   onChange={(e) => setEstado(e.target.value)}
-                  className="w-full p-[14px_16px] border-[1.5px] border-[#e6edf6] rounded-[14px] text-[14.5px] text-[#0b1e33] font-medium bg-[#fafcfe] outline-none transition-all focus:border-[#0b1e33] focus:bg-white focus:ring-2 focus:ring-[#0b1e33]/5 cursor-pointer appearance-none bg-[url('data:image/svg+xml,%3Csvg%20xmlns=%27http://www.w3.org/2000/svg%27%20width=%2712%27%20height=%278%27%20viewBox=%270%200%2012%208%27%3E%3Cpath%20fill=%27%23b0bfd0%27%20d=%27M6%208L0%200h12z%27/%3E%3C/svg%3E')] bg-no-repeat bg-[right_18px_center]"
+                  className="w-full p-[14px_16px] border-[1.5px] border-[#e6edf6] rounded-[14px] text-[14.5px] text-[#0a2342] font-medium bg-[#fafcfe] outline-none transition-all focus:border-[#0a2342] focus:bg-white focus:ring-2 focus:ring-[#0a2342]/5 cursor-pointer appearance-none bg-[url('data:image/svg+xml,%3Csvg%20xmlns=%27http://www.w3.org/2000/svg%27%20width=%2712%27%20height=%278%27%20viewBox=%270%200%2012%208%27%3E%3Cpath%20fill=%27%23b0bfd0%27%20d=%27M6%208L0%200h12z%27/%3E%3C/svg%3E')] bg-no-repeat bg-[right_18px_center]"
                 >
                   <option value="Ciudad de México">Ciudad de México</option>
                   <option value="Estado de México">Estado de México</option>
@@ -530,7 +530,7 @@ export function DatosPersonales({ usuario, fotoUrlInicial }: DatosPersonalesProp
             {/* Ciudad y Código Postal */}
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label htmlFor="ciudad" className="block text-[12px] font-bold text-[#6b7c94] mb-1.5 uppercase tracking-[0.2px]">
+                <label htmlFor="ciudad" className="block text-[12px] font-bold text-[#4e5f80] mb-1.5 uppercase tracking-[0.2px]">
                   Ciudad
                 </label>
                 <input
@@ -539,11 +539,11 @@ export function DatosPersonales({ usuario, fotoUrlInicial }: DatosPersonalesProp
                   value={ciudad}
                   onChange={(e) => setCiudad(e.target.value)}
                   placeholder="Ciudad"
-                  className="w-full p-[14px_16px] border-[1.5px] border-[#e6edf6] rounded-[14px] text-[14.5px] text-[#0b1e33] font-medium bg-[#fafcfe] outline-none transition-all focus:border-[#0b1e33] focus:bg-white focus:ring-2 focus:ring-[#0b1e33]/5"
+                  className="w-full p-[14px_16px] border-[1.5px] border-[#e6edf6] rounded-[14px] text-[14.5px] text-[#0a2342] font-medium bg-[#fafcfe] outline-none transition-all focus:border-[#0a2342] focus:bg-white focus:ring-2 focus:ring-[#0a2342]/5"
                 />
               </div>
               <div>
-                <label htmlFor="cp" className="block text-[12px] font-bold text-[#6b7c94] mb-1.5 uppercase tracking-[0.2px]">
+                <label htmlFor="cp" className="block text-[12px] font-bold text-[#4e5f80] mb-1.5 uppercase tracking-[0.2px]">
                   Código postal
                 </label>
                 <input
@@ -553,14 +553,14 @@ export function DatosPersonales({ usuario, fotoUrlInicial }: DatosPersonalesProp
                   value={codigoPostal}
                   onChange={(e) => void consultarCodigoPostal(e.target.value)}
                   placeholder="00000"
-                  className="w-full p-[14px_16px] border-[1.5px] border-[#e6edf6] rounded-[14px] text-[14.5px] text-[#0b1e33] font-medium bg-[#fafcfe] outline-none transition-all focus:border-[#0b1e33] focus:bg-white focus:ring-2 focus:ring-[#0b1e33]/5"
+                  className="w-full p-[14px_16px] border-[1.5px] border-[#e6edf6] rounded-[14px] text-[14.5px] text-[#0a2342] font-medium bg-[#fafcfe] outline-none transition-all focus:border-[#0a2342] focus:bg-white focus:ring-2 focus:ring-[#0a2342]/5"
                 />
               </div>
             </div>
 
             {/* Colonia */}
             <div>
-              <label htmlFor="colonia" className="block text-[12px] font-bold text-[#6b7c94] mb-1.5 uppercase tracking-[0.2px]">
+              <label htmlFor="colonia" className="block text-[12px] font-bold text-[#4e5f80] mb-1.5 uppercase tracking-[0.2px]">
                 Colonia
               </label>
               {coloniasCp.length > 1 ? (
@@ -568,7 +568,7 @@ export function DatosPersonales({ usuario, fotoUrlInicial }: DatosPersonalesProp
                   id="colonia"
                   value={colonia}
                   onChange={(e) => setColonia(e.target.value)}
-                  className="w-full p-[14px_16px] border-[1.5px] border-[#e6edf6] rounded-[14px] text-[14.5px] text-[#0b1e33] font-medium bg-[#fafcfe] outline-none transition-all focus:border-[#0b1e33] focus:bg-white focus:ring-2 focus:ring-[#0b1e33]/5 cursor-pointer appearance-none bg-[url('data:image/svg+xml,%3Csvg%20xmlns=%27http://www.w3.org/2000/svg%27%20width=%2712%27%20height=%278%27%20viewBox=%270%200%2012%208%27%3E%3Cpath%20fill=%27%23b0bfd0%27%20d=%27M6%208L0%200h12z%27/%3E%3C/svg%3E')] bg-no-repeat bg-[right_18px_center]"
+                  className="w-full p-[14px_16px] border-[1.5px] border-[#e6edf6] rounded-[14px] text-[14.5px] text-[#0a2342] font-medium bg-[#fafcfe] outline-none transition-all focus:border-[#0a2342] focus:bg-white focus:ring-2 focus:ring-[#0a2342]/5 cursor-pointer appearance-none bg-[url('data:image/svg+xml,%3Csvg%20xmlns=%27http://www.w3.org/2000/svg%27%20width=%2712%27%20height=%278%27%20viewBox=%270%200%2012%208%27%3E%3Cpath%20fill=%27%23b0bfd0%27%20d=%27M6%208L0%200h12z%27/%3E%3C/svg%3E')] bg-no-repeat bg-[right_18px_center]"
                 >
                   {coloniasCp.map((c) => (
                     <option key={c} value={c}>
@@ -583,7 +583,7 @@ export function DatosPersonales({ usuario, fotoUrlInicial }: DatosPersonalesProp
                   value={colonia}
                   onChange={(e) => setColonia(e.target.value)}
                   placeholder="Colonia o barrio"
-                  className="w-full p-[14px_16px] border-[1.5px] border-[#e6edf6] rounded-[14px] text-[14.5px] text-[#0b1e33] font-medium bg-[#fafcfe] outline-none transition-all focus:border-[#0b1e33] focus:bg-white focus:ring-2 focus:ring-[#0b1e33]/5"
+                  className="w-full p-[14px_16px] border-[1.5px] border-[#e6edf6] rounded-[14px] text-[14.5px] text-[#0a2342] font-medium bg-[#fafcfe] outline-none transition-all focus:border-[#0a2342] focus:bg-white focus:ring-2 focus:ring-[#0a2342]/5"
                 />
               )}
             </div>
@@ -591,7 +591,7 @@ export function DatosPersonales({ usuario, fotoUrlInicial }: DatosPersonalesProp
             {/* Calle y Número */}
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label htmlFor="calle" className="block text-[12px] font-bold text-[#6b7c94] mb-1.5 uppercase tracking-[0.2px]">
+                <label htmlFor="calle" className="block text-[12px] font-bold text-[#4e5f80] mb-1.5 uppercase tracking-[0.2px]">
                   Calle
                 </label>
                 <input
@@ -600,11 +600,11 @@ export function DatosPersonales({ usuario, fotoUrlInicial }: DatosPersonalesProp
                   value={calle}
                   onChange={(e) => setCalle(e.target.value)}
                   placeholder="Nombre de la calle"
-                  className="w-full p-[14px_16px] border-[1.5px] border-[#e6edf6] rounded-[14px] text-[14.5px] text-[#0b1e33] font-medium bg-[#fafcfe] outline-none transition-all focus:border-[#0b1e33] focus:bg-white focus:ring-2 focus:ring-[#0b1e33]/5"
+                  className="w-full p-[14px_16px] border-[1.5px] border-[#e6edf6] rounded-[14px] text-[14.5px] text-[#0a2342] font-medium bg-[#fafcfe] outline-none transition-all focus:border-[#0a2342] focus:bg-white focus:ring-2 focus:ring-[#0a2342]/5"
                 />
               </div>
               <div>
-                <label htmlFor="numero" className="block text-[12px] font-bold text-[#6b7c94] mb-1.5 uppercase tracking-[0.2px]">
+                <label htmlFor="numero" className="block text-[12px] font-bold text-[#4e5f80] mb-1.5 uppercase tracking-[0.2px]">
                   Número
                 </label>
                 <input
@@ -613,14 +613,14 @@ export function DatosPersonales({ usuario, fotoUrlInicial }: DatosPersonalesProp
                   value={numero}
                   onChange={(e) => setNumero(e.target.value)}
                   placeholder="Ext. / Int."
-                  className="w-full p-[14px_16px] border-[1.5px] border-[#e6edf6] rounded-[14px] text-[14.5px] text-[#0b1e33] font-medium bg-[#fafcfe] outline-none transition-all focus:border-[#0b1e33] focus:bg-white focus:ring-2 focus:ring-[#0b1e33]/5"
+                  className="w-full p-[14px_16px] border-[1.5px] border-[#e6edf6] rounded-[14px] text-[14.5px] text-[#0a2342] font-medium bg-[#fafcfe] outline-none transition-all focus:border-[#0a2342] focus:bg-white focus:ring-2 focus:ring-[#0a2342]/5"
                 />
               </div>
             </div>
 
             {/* Referencias */}
             <div>
-              <label htmlFor="referencias" className="block text-[12px] font-bold text-[#6b7c94] mb-1.5 uppercase tracking-[0.2px]">
+              <label htmlFor="referencias" className="block text-[12px] font-bold text-[#4e5f80] mb-1.5 uppercase tracking-[0.2px]">
                 Referencias
               </label>
               <input
@@ -629,7 +629,7 @@ export function DatosPersonales({ usuario, fotoUrlInicial }: DatosPersonalesProp
                 value={referencias}
                 onChange={(e) => setReferencias(e.target.value)}
                 placeholder="Edificio blanco frente al parque / Entre calles"
-                className="w-full p-[14px_16px] border-[1.5px] border-[#e6edf6] rounded-[14px] text-[14.5px] text-[#0b1e33] font-medium bg-[#fafcfe] outline-none transition-all focus:border-[#0b1e33] focus:bg-white focus:ring-2 focus:ring-[#0b1e33]/5"
+                className="w-full p-[14px_16px] border-[1.5px] border-[#e6edf6] rounded-[14px] text-[14.5px] text-[#0a2342] font-medium bg-[#fafcfe] outline-none transition-all focus:border-[#0a2342] focus:bg-white focus:ring-2 focus:ring-[#0a2342]/5"
               />
             </div>
           </div>
@@ -647,7 +647,7 @@ export function DatosPersonales({ usuario, fotoUrlInicial }: DatosPersonalesProp
         <button
           type="submit"
           disabled={guardando}
-          className="w-full bg-[#0b1e33] text-white py-[18px] px-[22px] rounded-[18px] font-bold text-[16px] flex items-center justify-center gap-2.5 shadow-[0_14px_28px_-10px_rgba(11,30,51,0.4)] active:scale-[0.98] transition-all cursor-pointer mt-2 tracking-[-0.2px] hover:bg-[#162a42] disabled:opacity-70 disabled:cursor-not-allowed"
+          className="w-full bg-[#0a2342] text-white py-[18px] px-[22px] rounded-[18px] font-bold text-[16px] flex items-center justify-center gap-2.5 shadow-[0_14px_28px_-10px_rgba(11,30,51,0.4)] active:scale-[0.98] transition-all cursor-pointer mt-2 tracking-[-0.2px] hover:bg-[#162a42] disabled:opacity-70 disabled:cursor-not-allowed"
         >
           <IconoCheckCirculo className="size-5" />
           {guardando ? "Guardando cambios..." : "Guardar cambios"}
@@ -678,7 +678,7 @@ export function DatosPersonales({ usuario, fotoUrlInicial }: DatosPersonalesProp
             Zona de riesgo
           </h2>
         </div>
-        <p className="mb-4 text-[13px] font-medium leading-[1.5] text-[#8b9bb0]">
+        <p className="mb-4 text-[13px] font-medium leading-[1.5] text-[#4e5f80]">
           Al eliminar tu cuenta, se borrarán todos tus datos, traslados e información personal de forma permanente. Esta acción no se puede deshacer.
         </p>
         <button
@@ -709,10 +709,10 @@ export function DatosPersonales({ usuario, fotoUrlInicial }: DatosPersonalesProp
             <div className="mx-auto mb-4 flex size-14 items-center justify-center rounded-[20px] bg-[#fdeaea] text-[#b33c3c]">
               <IconoAlerta className="size-7" />
             </div>
-            <h3 id="modal-eliminar-titulo" className="mb-2 text-center text-[18px] font-extrabold text-[#0b1e33]">
+            <h3 id="modal-eliminar-titulo" className="mb-2 text-center text-[18px] font-extrabold text-[#0a2342]">
               ¿Eliminar tu cuenta?
             </h3>
-            <p className="mb-6 text-center text-[13.5px] font-medium leading-relaxed text-[#6b7c94]">
+            <p className="mb-6 text-center text-[13.5px] font-medium leading-relaxed text-[#4e5f80]">
               Esta acción no se puede deshacer. Para verificar que no existan traslados en curso ni saldos pendientes, la baja se procesa a través de nuestro canal de soporte.
             </p>
             <div className="flex flex-col gap-2.5">
@@ -726,7 +726,7 @@ export function DatosPersonales({ usuario, fotoUrlInicial }: DatosPersonalesProp
               <button
                 type="button"
                 onClick={() => setModalEliminar(false)}
-                className="w-full rounded-[16px] bg-[#f2f6fc] py-3 text-center font-bold text-[14px] text-[#0b1e33] transition-colors hover:bg-[#e4ebf5]"
+                className="w-full rounded-[16px] bg-[#f2f6fc] py-3 text-center font-bold text-[14px] text-[#0a2342] transition-colors hover:bg-[#e4ebf5]"
               >
                 Cancelar
               </button>

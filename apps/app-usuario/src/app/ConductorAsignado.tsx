@@ -63,9 +63,16 @@ export function ConductorAsignado({ trasladoId, estado, nombre, fotoUrl }: Condu
   }
 
   return (
-    <section id="assignedDriverCommunication" aria-label="Conductor asignado" className="user-v2-card p-4">
+    <section
+      id="assignedDriverCommunication"
+      aria-label="Conductor asignado"
+      className="rounded-2xl border border-[#e6edf6] bg-white p-4 shadow-xs transition dark:border-[#1a3a5c] dark:bg-[#0a2342]"
+    >
       <div className="flex items-center gap-3">
-        <div className="flex size-14 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[var(--user-color-brand-soft)] font-display text-sm font-extrabold text-[var(--user-color-brand-dark)]" aria-hidden={fotoUrl ? undefined : true}>
+        <div
+          className="flex size-14 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[#e8fafa] font-bold text-sm text-[#00707a] dark:bg-[#0f2d52] dark:text-[#4dd9a3]"
+          aria-hidden={fotoUrl ? undefined : true}
+        >
           {fotoUrl ? (
             <Image src={fotoUrl} alt={`Foto de ${nombre}`} width={56} height={56} className="size-14 object-cover" unoptimized />
           ) : (
@@ -73,15 +80,19 @@ export function ConductorAsignado({ trasladoId, estado, nombre, fotoUrl }: Condu
           )}
         </div>
         <div className="min-w-0">
-          <p className="user-v2-caption user-v2-muted">Conductor asignado</p>
-          <h2 id="conductor-asignado" className="user-v2-card-title truncate">{nombre}</h2>
+          <p className="text-[11.5px] font-semibold uppercase tracking-wider text-[#4e5f80] dark:text-[#a8b5cc]">
+            Conductor asignado
+          </p>
+          <h2 id="conductor-asignado" className="truncate text-[16px] font-bold text-[#0a2342] dark:text-[#f6f8fb]">
+            {nombre}
+          </h2>
         </div>
       </div>
 
       <div className="mt-4 grid grid-cols-2 gap-2">
         <Link
           href={`/viajes/${trasladoId}#chat-conductor`}
-          className="user-v2-secondary-button inline-flex min-h-11 items-center justify-center gap-2 px-3"
+          className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-[#d7e1ee] bg-white px-3 text-[14px] font-bold text-[#0a2342] shadow-2xs transition hover:bg-[#f6f8fb] active:scale-[0.98] dark:border-[#2d4f73] dark:bg-[#0a2342] dark:text-[#f6f8fb]"
           aria-label={`Abrir chat con ${nombre}`}
         >
           <IconoChat />
@@ -91,7 +102,7 @@ export function ConductorAsignado({ trasladoId, estado, nombre, fotoUrl }: Condu
           type="button"
           onClick={manejarLlamada}
           disabled={!disponible || llamando}
-          className="user-v2-secondary-button inline-flex min-h-11 items-center justify-center gap-2 px-3 disabled:cursor-not-allowed disabled:opacity-55"
+          className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-[#d7e1ee] bg-white px-3 text-[14px] font-bold text-[#0a2342] shadow-2xs transition hover:bg-[#f6f8fb] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-55 dark:border-[#2d4f73] dark:bg-[#0a2342] dark:text-[#f6f8fb]"
           aria-label={`Llamar a ${nombre}`}
         >
           <IconoTelefono />
