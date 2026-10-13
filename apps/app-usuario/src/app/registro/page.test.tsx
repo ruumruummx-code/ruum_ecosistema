@@ -224,8 +224,15 @@ describe("registro — accesibilidad de errores y flujo de verificación telefó
       const body = JSON.parse((signupCall?.[1]?.body as string) || "{}");
       expect(body.tokenVerificacionTelefono).toBe("token-firmado-valido");
       expect(body.telefono).toBe("5512345678");
+      expect(body.tipoCuenta).toBe("personal");
     });
 
     expect(mocks.push).toHaveBeenCalledWith("/");
+  });
+
+  it("no muestra la opción de cuenta empresa en el formulario de registro", () => {
+    render(<PaginaRegistro />);
+    expect(screen.queryByRole("button", { name: /empresa/i })).not.toBeInTheDocument();
+    expect(screen.queryByText(/^empresa$/i)).not.toBeInTheDocument();
   });
 });

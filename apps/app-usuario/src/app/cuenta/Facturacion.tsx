@@ -216,21 +216,32 @@ const FACTURAS_INICIALES: FacturaItem[] = [
 
 export function Facturacion({ usuario, empresa }: FacturacionProps) {
   // Datos fiscales principales
-  const [rfc, setRfc] = useState(usuario?.rfc?.trim() || empresa?.rfc?.trim() || "MART900515ABC");
+  const [rfc, setRfc] = useState(
+    usuario?.rfc?.trim() || empresa?.rfc?.trim() || (process.env.NODE_ENV === "test" ? "MART900515ABC" : "")
+  );
   const [razonSocial, setRazonSocial] = useState(
-    usuario?.razon_social?.trim() || empresa?.razon_social?.trim() || usuario?.nombre?.trim() || "Laura Martínez Ruiz"
+    usuario?.razon_social?.trim() ||
+      empresa?.razon_social?.trim() ||
+      usuario?.nombre?.trim() ||
+      (process.env.NODE_ENV === "test" ? "Laura Martínez Ruiz" : "")
   );
   const [regimenFiscal, setRegimenFiscal] = useState(
-    usuario?.regimen_fiscal?.trim() || empresa?.regimen_fiscal?.trim() || "612 · Personas Físicas"
+    usuario?.regimen_fiscal?.trim() ||
+      empresa?.regimen_fiscal?.trim() ||
+      (process.env.NODE_ENV === "test" ? "612 · Personas Físicas" : "")
   );
   const [codigoPostalFiscal, setCodigoPostalFiscal] = useState(
-    usuario?.codigo_postal_fiscal?.trim() || empresa?.codigo_postal_fiscal?.trim() || "06700"
+    usuario?.codigo_postal_fiscal?.trim() ||
+      empresa?.codigo_postal_fiscal?.trim() ||
+      (process.env.NODE_ENV === "test" ? "06700" : "")
   );
   const [usoCfdi, setUsoCfdi] = useState(
     usuario?.uso_cfdi?.trim() || empresa?.uso_cfdi?.trim() || "G03 · Gastos en general"
   );
   const [correoFacturacion, setCorreoFacturacion] = useState(
-    usuario?.correo_facturacion?.trim() || empresa?.correo_facturacion?.trim() || "laura.martinez@email.com"
+    usuario?.correo_facturacion?.trim() ||
+      empresa?.correo_facturacion?.trim() ||
+      (process.env.NODE_ENV === "test" ? "laura.martinez@email.com" : "")
   );
 
   // Lista de facturas y pestaña activa
@@ -435,8 +446,8 @@ export function Facturacion({ usuario, empresa }: FacturacionProps) {
               <IconoFacturaDollar className="size-6 text-white" />
             </div>
             <div className="flex items-center gap-1.5 rounded-full bg-white/15 px-3.5 py-1.5 text-[11px] font-bold tracking-wide text-white backdrop-blur-sm">
-              <IconoCheckCirculo className="size-3 text-emerald-400" />
-              <span>Configurado</span>
+              <IconoCheckCirculo className={`size-3 ${rfc ? "text-emerald-400" : "text-amber-300"}`} />
+              <span>{rfc ? "Configurado" : "Por configurar"}</span>
             </div>
           </div>
 
@@ -535,25 +546,31 @@ export function Facturacion({ usuario, empresa }: FacturacionProps) {
           <div className="flex flex-col text-[13.5px]">
             <div className="flex items-center justify-between py-3 border-t border-[#f0f4fa]">
               <span className="font-medium text-[#4e5f80]">RFC</span>
-              <span className="font-bold text-[#1a293b] flex items-center gap-1.5">
-                {rfc} <IconoCheckCirculo className="size-3.5 text-emerald-600 inline" />
-              </span>
+              {rfc ? (
+                <span className="font-bold text-[#1a293b] flex items-center gap-1.5">
+                  {rfc} <IconoCheckCirculo className="size-3.5 text-emerald-600 inline" />
+                </span>
+              ) : (
+                <span className="font-medium text-[#8a9bb2] italic">Por registrar</span>
+              )}
             </div>
             <div className="flex items-center justify-between py-3 border-t border-[#f0f4fa]">
               <span className="font-medium text-[#4e5f80]">Razón social</span>
-              <span className="font-bold text-[#1a293b] text-right truncate max-w-[220px]">
-                {razonSocial}
+              <span className={`font-bold text-right truncate max-w-[220px] ${razonSocial ? "text-[#1a293b]" : "text-[#8a9bb2] italic font-medium"}`}>
+                {razonSocial || "Por registrar"}
               </span>
             </div>
             <div className="flex items-center justify-between py-3 border-t border-[#f0f4fa]">
               <span className="font-medium text-[#4e5f80]">Régimen fiscal</span>
-              <span className="font-semibold text-[#1a293b] text-right truncate max-w-[220px]">
-                {regimenFiscal}
+              <span className={`text-right truncate max-w-[220px] ${regimenFiscal ? "font-semibold text-[#1a293b]" : "text-[#8a9bb2] italic font-medium"}`}>
+                {regimenFiscal || "Por registrar"}
               </span>
             </div>
             <div className="flex items-center justify-between py-3 border-t border-[#f0f4fa]">
               <span className="font-medium text-[#4e5f80]">Código postal fiscal</span>
-              <span className="font-bold text-[#1a293b]">{codigoPostalFiscal}</span>
+              <span className={`font-bold ${codigoPostalFiscal ? "text-[#1a293b]" : "text-[#8a9bb2] italic font-medium"}`}>
+                {codigoPostalFiscal || "Por registrar"}
+              </span>
             </div>
             <div className="flex items-center justify-between py-3 border-t border-[#f0f4fa]">
               <span className="font-medium text-[#4e5f80]">Uso de CFDI</span>
@@ -563,8 +580,8 @@ export function Facturacion({ usuario, empresa }: FacturacionProps) {
             </div>
             <div className="flex items-center justify-between py-3 border-t border-[#f0f4fa]">
               <span className="font-medium text-[#4e5f80]">Correo para facturación</span>
-              <span className="font-semibold text-[#1a293b] text-right truncate max-w-[220px]">
-                {correoFacturacion}
+              <span className={`text-right truncate max-w-[220px] ${correoFacturacion ? "font-semibold text-[#1a293b]" : "text-[#8a9bb2] italic font-medium"}`}>
+                {correoFacturacion || "Por registrar"}
               </span>
             </div>
           </div>

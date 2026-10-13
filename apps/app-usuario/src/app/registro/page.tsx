@@ -145,7 +145,7 @@ export default function PaginaRegistro() {
   const router = useRouter();
 
   /* Paso 1: datos básicos */
-  const [tipoCuenta, setTipoCuenta] = useState<"personal" | "empresa">("personal");
+  const tipoCuenta = "personal";
   const [nombre, setNombre] = useState("");
   const [apellido, setApellido] = useState("");
   const [telefono, setTelefono] = useState("");
@@ -543,34 +543,6 @@ export default function PaginaRegistro() {
               <p className="text-center text-[13.5px] font-medium text-[#4e5f80] leading-relaxed mb-5">
                 Solo necesitamos tus datos básicos para empezar.
               </p>
-
-              {/* Selector tipo de cuenta */}
-              <div className="mb-4 grid grid-cols-2 gap-2 rounded-2xl bg-[#edf4fe] p-1.5 border border-[#e5eef7]">
-                <button
-                  type="button"
-                  onClick={() => setTipoCuenta("personal")}
-                  className={[
-                    "py-2 rounded-xl text-[13px] font-bold transition cursor-pointer text-center",
-                    tipoCuenta === "personal"
-                      ? "bg-white text-[#0a2342] shadow-sm"
-                      : "text-[#4e5f80] hover:text-[#0a2342]",
-                  ].join(" ")}
-                >
-                  Personal
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setTipoCuenta("empresa")}
-                  className={[
-                    "py-2 rounded-xl text-[13px] font-bold transition cursor-pointer text-center",
-                    tipoCuenta === "empresa"
-                      ? "bg-white text-[#0a2342] shadow-sm"
-                      : "text-[#4e5f80] hover:text-[#0a2342]",
-                  ].join(" ")}
-                >
-                  Empresa
-                </button>
-              </div>
 
               {/* Formulario */}
               <div className="flex flex-col gap-3.5">

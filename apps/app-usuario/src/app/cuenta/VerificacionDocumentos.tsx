@@ -1,9 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { Icono } from "@ruum/ui";
 import type { Database } from "@ruum/shared/types";
+import { subirDocumentoIdentidad } from "@ruum/api/services";
+import { crearClienteNavegador, tieneSupabaseConfigurado } from "../../lib/supabase-browser";
 
 type Usuario = Database["public"]["Tables"]["usuarios"]["Row"];
 
@@ -183,7 +185,11 @@ export function VerificacionDocumentos({ usuario }: VerificacionDocumentosProps)
   const [docDetalle, setDocDetalle] = useState<DocItem | null>(null);
   const [docSubir, setDocSubir] = useState<DocItem | null>(null);
   const [archivoSeleccionado, setArchivoSeleccionado] = useState(false);
+  const [archivoFile, setArchivoFile] = useState<File | null>(null);
+  const [subiendo, setSubiendo] = useState(false);
+  const [errorSubida, setErrorSubida] = useState<string | null>(null);
   const [mensajeExito, setMensajeExito] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const verificado = usuario.estado_verificacion === "verificado";
   const enRevision = usuario.estado_verificacion === "en_revision";
@@ -289,11 +295,33 @@ export function VerificacionDocumentos({ usuario }: VerificacionDocumentosProps)
     setDocDetalle(doc);
   }
 
-  function handleConfirmarActualizacion() {
+  async function handleConfirmarActualizacion() {
+    setErrorSubida(null);
+    if (tieneSupabaseConfigurado() && archivoFile && docDetalle?.id === "ine") {
+      setSubiendo(true);
+      try {
+        const cliente = crearClienteNavegador();
+        await subirDocumentoIdentidad(cliente, archivoFile);
+        setMensajeExito("Documento actualizado. Será revisado en menos de 24 horas.");
+        setTimeout(() => {
+          setDocDetalle(null);
+          setArchivoSeleccionado(false);
+          setArchivoFile(null);
+          setMensajeExito(null);
+        }, 2200);
+      } catch (err) {
+        setErrorSubida(err instanceof Error ? err.message : "Error al subir el documento.");
+      } finally {
+        setSubiendo(false);
+      }
+      return;
+    }
+
     setMensajeExito("Documento actualizado. Será revisado en menos de 24 horas.");
     setTimeout(() => {
       setDocDetalle(null);
       setArchivoSeleccionado(false);
+      setArchivoFile(null);
       setMensajeExito(null);
     }, 2200);
   }
@@ -606,12 +634,49 @@ export function VerificacionDocumentos({ usuario }: VerificacionDocumentosProps)
               </div>
             </div>
 
+            {docDetalle.id === "ine" && (
+              <div className="mb-4 rounded-2xl border border-[#c8dcf8] bg-[#edf4fe] p-3.5 text-center">
+                <p className="text-[12.5px] font-semibold text-[#0a2342]">
+                  ¿Prefieres verificación biométrica instantánea?
+                </p>
+                <Link
+                  href="/verificacion"
+                  className="mt-2 inline-flex items-center justify-center gap-1.5 rounded-xl bg-[#0a2342] px-4 py-2 text-[12px] font-bold text-white shadow-sm hover:bg-[#143560]"
+                >
+                  Verificar con Didit (OCR + Liveness)
+                </Link>
+              </div>
+            )}
+
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept=".pdf,.jpg,.jpeg,.png"
+              className="hidden"
+              data-testid="input-doc-archivo"
+              onChange={(e) => {
+                const f = e.target.files?.[0];
+                if (f) {
+                  setArchivoFile(f);
+                  setArchivoSeleccionado(true);
+                }
+              }}
+            />
+
             {/* Área de carga interactiva */}
             <div
               role="button"
               tabIndex={0}
-              onClick={() => setArchivoSeleccionado(!archivoSeleccionado)}
-              onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") setArchivoSeleccionado(!archivoSeleccionado); }}
+              onClick={() => {
+                setArchivoSeleccionado(!archivoSeleccionado);
+                fileInputRef.current?.click();
+              }}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  setArchivoSeleccionado(!archivoSeleccionado);
+                  fileInputRef.current?.click();
+                }
+              }}
               className={`mb-4 flex cursor-pointer flex-col items-center gap-2 rounded-[20px] border-2 border-dashed p-6 transition-all ${
                 archivoSeleccionado
                   ? "border-[#2e9e6b] bg-[#f0f9f4]"
@@ -622,7 +687,9 @@ export function VerificacionDocumentos({ usuario }: VerificacionDocumentosProps)
                 <>
                   <IconoCheckCirculo className="size-8 text-[#2e9e6b]" />
                   <span className="text-[13.5px] font-bold text-[#1f6b4a]">✓ Archivo seleccionado</span>
-                  <span className="text-[11.5px] font-medium text-[#3d7a5a]">documento_actualizado.pdf</span>
+                  <span className="text-[11.5px] font-medium text-[#3d7a5a]">
+                    {archivoFile?.name || "documento_actualizado.pdf"}
+                  </span>
                 </>
               ) : (
                 <>
@@ -633,11 +700,18 @@ export function VerificacionDocumentos({ usuario }: VerificacionDocumentosProps)
               )}
             </div>
 
+            {errorSubida && (
+              <div role="alert" className="mb-3 text-center text-[12.5px] font-bold text-red-600">
+                {errorSubida}
+              </div>
+            )}
+
             {/* Botón principal */}
             <button
               type="button"
               onClick={handleConfirmarActualizacion}
-              className="mb-2 flex w-full cursor-pointer items-center justify-center gap-2 rounded-[16px] bg-[#0a2342] py-3.5 px-5 text-[15px] font-bold text-white shadow-[0_10px_22px_-8px_rgba(11,30,51,0.4)] transition-all active:scale-[0.98]"
+              disabled={subiendo}
+              className="mb-2 flex w-full cursor-pointer items-center justify-center gap-2 rounded-[16px] bg-[#0a2342] py-3.5 px-5 text-[15px] font-bold text-white shadow-[0_10px_22px_-8px_rgba(11,30,51,0.4)] transition-all active:scale-[0.98] disabled:opacity-50"
             >
               <svg className="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                 <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
@@ -645,7 +719,7 @@ export function VerificacionDocumentos({ usuario }: VerificacionDocumentosProps)
                 <path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16" />
                 <path d="M16 21h5v-5" />
               </svg>
-              Confirmar actualización
+              {subiendo ? "Subiendo..." : "Confirmar actualización"}
             </button>
 
             {/* Botón cerrar */}

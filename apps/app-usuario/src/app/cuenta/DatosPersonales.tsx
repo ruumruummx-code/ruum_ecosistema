@@ -166,13 +166,13 @@ export function DatosPersonales({ usuario, fotoUrlInicial }: DatosPersonalesProp
 
   // Dirección
   const [pais, setPais] = useState(usuario.pais ?? "México");
-  const [estado, setEstado] = useState(usuario.estado ?? "Ciudad de México");
-  const [codigoPostal, setCodigoPostal] = useState(usuario.codigo_postal ?? "06700");
-  const [ciudad, setCiudad] = useState(usuario.ciudad ?? "Ciudad de México");
-  const [colonia, setColonia] = useState(usuario.colonia ?? "Roma Norte");
-  const [calle, setCalle] = useState(usuario.calle ?? "Av. Álvaro Obregón");
-  const [numero, setNumero] = useState(usuario.numero ?? "145, Int. 3");
-  const [referencias, setReferencias] = useState(usuario.referencias ?? "Edificio blanco frente al parque");
+  const [estado, setEstado] = useState(usuario.estado ?? "");
+  const [codigoPostal, setCodigoPostal] = useState(usuario.codigo_postal ?? "");
+  const [ciudad, setCiudad] = useState(usuario.ciudad ?? "");
+  const [colonia, setColonia] = useState(usuario.colonia ?? "");
+  const [calle, setCalle] = useState(usuario.calle ?? "");
+  const [numero, setNumero] = useState(usuario.numero ?? "");
+  const [referencias, setReferencias] = useState(usuario.referencias ?? "");
 
   // Estado del formulario
   const [guardando, setGuardando] = useState(false);
