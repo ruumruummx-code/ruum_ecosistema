@@ -86,17 +86,22 @@ export function DiditVerificationModal({
   return (
     <dialog
       ref={dialogRef}
-      className="user-v2-scope user-v2-secondary-screen fixed inset-0 z-50 m-0 flex h-[100dvh] w-[100vw] max-h-none max-w-none items-center justify-center border-0 bg-black/75 px-4 py-6 backdrop-blur-xs sm:py-10 open:flex"
+      className="fixed inset-0 z-50 m-0 flex h-[100dvh] w-[100vw] max-h-none max-w-none items-center justify-center border-0 bg-black/80 px-4 py-6 backdrop-blur-xs sm:py-10 open:flex"
       aria-modal="true"
       aria-labelledby="titulo-didit-usuario"
       aria-describedby="didit-desc didit-permisos-nota"
     >
-      <div className="user-v2-modal w-full max-w-xl overflow-hidden rounded-2xl border border-[#334155] bg-[#1E293B] shadow-2xl flex flex-col max-h-[92vh] text-white">
+      <div className="w-full max-w-xl overflow-hidden rounded-3xl border border-[#1a3a5c] bg-[#0a2342] shadow-2xl flex flex-col max-h-[92vh] text-white">
         {/* Cabecera del modal */}
-        <div className="flex items-center justify-between border-b border-[#334155] p-4 shrink-0 bg-[#0F172A]">
+        <div className="flex items-center justify-between border-b border-[#1a3a5c] px-5 py-4 shrink-0 bg-[#071930]">
           <div className="flex items-center gap-2.5">
-            <span className="text-xl" aria-hidden="true">🪪</span>
-            <h2 id="titulo-didit-usuario" className="font-display text-base sm:text-lg font-bold text-white">
+            <span className="flex size-8 items-center justify-center rounded-xl bg-sky-500/15 text-sky-400" aria-hidden="true">
+              <svg className="size-4.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <rect width="18" height="18" x="3" y="3" rx="2" />
+                <path d="M7 7h10M7 12h10M7 17h6" />
+              </svg>
+            </span>
+            <h2 id="titulo-didit-usuario" className="text-base sm:text-lg font-bold text-white tracking-tight">
               Verificación de identidad oficial
             </h2>
           </div>
@@ -105,7 +110,7 @@ export function DiditVerificationModal({
             type="button"
             onClick={onCerrar}
             aria-label="Cerrar verificación"
-            className="rounded-lg p-1.5 text-gray-400 hover:bg-[#334155] hover:text-white transition cursor-pointer focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#FFC400] focus-visible:outline-offset-2"
+            className="flex size-9 items-center justify-center rounded-full text-gray-400 hover:bg-[#162c47] hover:text-white transition cursor-pointer focus-visible:outline focus-visible:outline-2 focus-visible:outline-sky-400"
           >
             ✕
           </button>
@@ -123,15 +128,17 @@ export function DiditVerificationModal({
         {cargando ? (
           <div className="p-10 text-center" role="status" aria-live="polite">
             <div
-              className="mx-auto flex size-12 items-center justify-center rounded-full bg-[#FFC400]/15 text-2xl font-bold text-[#FFC400] animate-spin"
-              aria-hidden
+              className="mx-auto flex size-14 items-center justify-center rounded-full bg-sky-500/15 text-sky-400"
+              aria-hidden="true"
             >
-              ⟳
+              <svg className="size-7 animate-spin" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M21 12a9 9 0 1 1-6.219-8.56" />
+              </svg>
             </div>
-            <p className="mt-4 font-display text-base font-semibold text-white">
+            <p className="mt-4 text-base font-bold text-white">
               Procesando verificación de identidad…
             </p>
-            <p className="mt-1 font-body text-xs text-[#94A3B8]">
+            <p className="mt-1.5 text-xs text-[#a8b5cc] max-w-sm mx-auto leading-relaxed">
               Conectando con el servicio seguro y encriptado de Didit. Puedes cerrar con Esc en cualquier momento sin perder tu solicitud: podrás reintentar.
             </p>
           </div>
@@ -142,7 +149,7 @@ export function DiditVerificationModal({
               <button
                 type="button"
                 onClick={onCerrar}
-                className="user-v2-modal-secondary w-full rounded-xl border border-[#475569] bg-transparent py-3 font-display text-sm font-semibold text-white hover:bg-[#334155] transition cursor-pointer"
+                className="w-full rounded-2xl border border-[#1a3a5c] bg-[#071930] py-3 text-sm font-semibold text-white hover:bg-[#162c47] transition cursor-pointer"
               >
                 Cerrar
               </button>
@@ -150,7 +157,7 @@ export function DiditVerificationModal({
                 type="button"
                 onClick={onReintentar}
                 disabled={cargando}
-                className="user-v2-modal-primary w-full rounded-xl bg-[#FFC400] py-3 font-display text-sm font-bold text-[#151515] hover:bg-[#e0ac00] transition cursor-pointer"
+                className="w-full rounded-2xl bg-sky-500 py-3 text-sm font-bold text-[#0a2342] hover:bg-sky-400 transition cursor-pointer"
               >
                 Reintentar verificación
               </button>
@@ -158,22 +165,22 @@ export function DiditVerificationModal({
           </div>
         ) : urlValida && url ? (
           <div className="flex flex-col flex-1 min-h-0">
-            <div className="flex items-center justify-between gap-2 bg-[#0F172A] px-4 py-2 border-b border-[#334155] text-xs">
-              <span className="text-[#94A3B8] truncate">
+            <div className="flex items-center justify-between gap-2 bg-[#071930] px-4 py-2.5 border-b border-[#1a3a5c] text-xs">
+              <span className="text-[#a8b5cc] truncate">
                 Prueba biométrica y validación oficial en tiempo real
               </span>
               <button
                 type="button"
                 onClick={abrirEnNuevaVentana}
-                className="shrink-0 font-display font-bold text-[#FFC400] hover:underline inline-flex items-center gap-1 cursor-pointer"
+                className="shrink-0 font-bold text-sky-400 hover:text-sky-300 inline-flex items-center gap-1 cursor-pointer transition"
               >
                 Abrir en nueva ventana ↗
               </button>
             </div>
-            <div className="px-4 py-2 bg-amber-500/10 border-b border-amber-500/20 text-[11px] leading-4 text-amber-200" role="note" aria-live="polite">
+            <div className="px-4 py-2.5 bg-amber-500/10 border-b border-amber-500/20 text-[11.5px] leading-4 text-amber-200" role="note" aria-live="polite">
               Antes de continuar, Didit solicitará acceso a <strong>cámara</strong>, <strong>micrófono</strong> y <strong>ubicación</strong> para la prueba de vida. Solo se usan para esta verificación y puedes revocar el permiso desde el diálogo del navegador. Ningún dato biométrico se comparte con conductores.
             </div>
-            <div className="relative h-[min(460px,60dvh)] sm:h-[min(520px,62dvh)] w-full bg-black/40">
+            <div className="relative h-[min(460px,60dvh)] sm:h-[min(520px,62dvh)] w-full bg-black/50">
               <iframe
                 ref={iframeRef}
                 src={url}
@@ -186,15 +193,15 @@ export function DiditVerificationModal({
                 aria-describedby="didit-permisos-nota"
               />
             </div>
-            <div className="p-4 bg-[#0F172A] border-t border-[#334155] flex flex-col sm:flex-row items-center justify-between gap-3">
-              <p className="text-xs text-[#94A3B8] text-center sm:text-left">
+            <div className="p-4 bg-[#071930] border-t border-[#1a3a5c] flex flex-col sm:flex-row items-center justify-between gap-3">
+              <p className="text-xs text-[#a8b5cc] text-center sm:text-left leading-relaxed">
                 Tu cuenta se actualizará automáticamente al completar la prueba. Si abriste en nueva ventana, vuelve aquí y pulsa el botón.
               </p>
               <button
                 type="button"
                 onClick={onFinalizar}
                 disabled={cargando}
-                className="user-v2-modal-primary w-full sm:w-auto rounded-xl bg-[#FFC400] px-5 py-2.5 font-display text-xs font-bold text-[#151515] hover:bg-[#e0ac00] transition cursor-pointer"
+                className="w-full sm:w-auto shrink-0 rounded-2xl bg-sky-500 px-5 py-2.5 text-xs font-bold text-[#0a2342] hover:bg-sky-400 transition cursor-pointer"
               >
                 Ya completé la verificación
               </button>
@@ -207,14 +214,14 @@ export function DiditVerificationModal({
               <button
                 type="button"
                 onClick={onCerrar}
-                className="user-v2-modal-secondary rounded-xl border border-[#475569] px-5 py-2.5 font-display text-sm font-semibold text-white hover:bg-[#334155] transition cursor-pointer"
+                className="rounded-2xl border border-[#1a3a5c] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[#162c47] transition cursor-pointer"
               >
                 Cerrar
               </button>
               <button
                 type="button"
                 onClick={onReintentar}
-                className="user-v2-modal-primary rounded-xl bg-[#FFC400] px-5 py-2.5 font-display text-sm font-bold text-[#151515] hover:bg-[#e0ac00] transition cursor-pointer"
+                className="rounded-2xl bg-sky-500 px-5 py-2.5 text-sm font-bold text-[#0a2342] hover:bg-sky-400 transition cursor-pointer"
               >
                 Reintentar
               </button>

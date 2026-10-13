@@ -3,7 +3,7 @@
 import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Aviso } from "@ruum/ui";
+import { Aviso, MobileBadge, MobileButton, MobileCard } from "@ruum/ui";
 import { crearClienteNavegador } from "../../lib/supabase-browser";
 import {
   subirDocumentoIdentidad,
@@ -46,16 +46,15 @@ function esErrorRed(error: unknown) {
 /* ── Pantalla de confirmación tras envío manual ── */
 function ConfirmacionEnRevision() {
   return (
-    <div className="grid gap-5">
-      <div className="flex justify-center">
-        <div className="flex size-16 items-center justify-center rounded-full bg-[#e6f9f0]">
+    <div className="flex flex-col gap-5">
+      <MobileCard padding="lg" elevated className="text-center">
+        <div className="mx-auto flex size-16 items-center justify-center rounded-full bg-[#e9f3ee] text-[#08705f] dark:bg-[#0a2e1f] dark:text-[#4dd9a3]">
           <svg
-            width="28"
-            height="28"
+            className="size-8"
             viewBox="0 0 24 24"
             fill="none"
-            stroke="#1d9e75"
-            strokeWidth="2.2"
+            stroke="currentColor"
+            strokeWidth="2.5"
             strokeLinecap="round"
             strokeLinejoin="round"
             aria-hidden="true"
@@ -63,124 +62,84 @@ function ConfirmacionEnRevision() {
             <path d="M20 6L9 17l-5-5" />
           </svg>
         </div>
-      </div>
 
-      <div className="text-center">
-        <h2 className="font-display text-xl font-semibold">Documentación enviada</h2>
-        <p className="mt-2 font-body text-sm leading-6 text-ink/60">
+        <h2 className="mt-4 text-[20px] font-bold text-[#0a2342] dark:text-[#f6f8fb]">
+          Documentación enviada
+        </h2>
+        <p className="mt-2 text-[13.5px] leading-relaxed text-[#4e5f80] dark:text-[#a8b5cc]">
           Recibimos tu identificación y domicilio. El equipo de Ruum revisará
-          tu información en un plazo de <strong className="text-ink">24 a 48 horas hábiles</strong>.
+          tu información en un plazo de <strong className="font-semibold text-[#0a2342] dark:text-white">24 a 48 horas hábiles</strong>.
         </p>
-      </div>
 
-      <div className="app-card grid gap-4 px-5 py-5">
-        {[
-          { label: "Cuenta creada", sub: "Correo y contraseña", ok: true },
-          { label: "Teléfono registrado", sub: "Para notificaciones del traslado", ok: true },
-          { label: "Domicilio", sub: "Guardado correctamente", ok: true },
-          { label: "Identificación oficial", sub: "Recibida — en revisión", ok: true },
-          { label: "Verificación de cuenta", sub: "Pendiente de aprobación por el equipo", ok: false, pendiente: true },
-        ].map(({ label, sub, ok, pendiente }) => (
-          <div key={label} className="flex items-center gap-3">
-            <div
-              className={[
-                "flex size-8 items-center justify-center rounded-full",
-                ok && !pendiente
-                  ? "bg-[#e6f9f0]"
-                  : pendiente
-                  ? "border border-[#f5a623]/40 bg-[#f5a623]/10"
-                  : "border border-ink/15 bg-mist",
-              ].join(" ")}
-            >
-              {ok && !pendiente ? (
-                <svg
-                  width="14"
-                  height="14"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="#1d9e75"
-                  strokeWidth="2.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  aria-hidden="true"
-                >
-                  <path d="M20 6L9 17l-5-5" />
-                </svg>
-              ) : pendiente ? (
-                <svg
-                  width="14"
-                  height="14"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="#b8860b"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  aria-hidden="true"
-                >
-                  <circle cx="12" cy="12" r="10" />
-                  <path d="M12 6v6l4 2" />
-                </svg>
-              ) : (
-                <svg
-                  width="14"
-                  height="14"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.8"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="text-ink/40"
-                  aria-hidden="true"
-                >
-                  <circle cx="12" cy="12" r="10" />
-                </svg>
-              )}
-            </div>
-            <div>
-              <p className="font-body text-sm font-medium">{label}</p>
-              <p
+        <div className="mt-6 flex flex-col gap-3 rounded-2xl border border-[#e6edf6] bg-[#f8fafd] p-4 text-left dark:border-[#1a3a5c] dark:bg-[#071930]">
+          {[
+            { label: "Cuenta creada", sub: "Correo y contraseña", ok: true },
+            { label: "Teléfono registrado", sub: "Para notificaciones del traslado", ok: true },
+            { label: "Domicilio", sub: "Guardado correctamente", ok: true },
+            { label: "Identificación oficial", sub: "Recibida — en revisión", ok: true },
+            { label: "Verificación de cuenta", sub: "Pendiente de aprobación por el equipo", ok: false, pendiente: true },
+          ].map(({ label, sub, ok, pendiente }) => (
+            <div key={label} className="flex items-center gap-3">
+              <div
                 className={[
-                  "font-body text-xs",
-                  pendiente ? "text-[#b8860b]" : "text-ink/45",
+                  "flex size-7 shrink-0 items-center justify-center rounded-full",
+                  ok && !pendiente
+                    ? "bg-[#e9f3ee] text-[#08705f] dark:bg-[#0a2e1f] dark:text-[#4dd9a3]"
+                    : pendiente
+                    ? "border border-[#f3d8a2] bg-[#fef4e6] text-[#765100] dark:bg-[#3d2e00] dark:text-[#ffc933] dark:border-[#664d00]"
+                    : "border border-[#d7e1ee] bg-[#eff3f8] text-[#3b4c68] dark:bg-[#1a2e4a] dark:text-[#a8b5cc]",
                 ].join(" ")}
               >
-                {sub}
-              </p>
+                {ok && !pendiente ? (
+                  <svg className="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <path d="M20 6L9 17l-5-5" />
+                  </svg>
+                ) : pendiente ? (
+                  <svg className="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <circle cx="12" cy="12" r="10" />
+                    <path d="M12 6v6l4 2" />
+                  </svg>
+                ) : (
+                  <svg className="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <circle cx="12" cy="12" r="10" />
+                  </svg>
+                )}
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="text-[13px] font-bold text-[#0a2342] dark:text-[#f6f8fb] truncate">{label}</p>
+                <p
+                  className={[
+                    "text-[11.5px] font-medium truncate",
+                    pendiente ? "text-[#765100] dark:text-[#ffc933]" : "text-[#4e5f80] dark:text-[#a8b5cc]",
+                  ].join(" ")}
+                >
+                  {sub}
+                </p>
+              </div>
             </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
 
-      <div className="flex items-start gap-2.5 rounded-lg border border-[#f5a623]/25 bg-[#f5a623]/8 px-4 py-3">
-        <svg
-          width="14"
-          height="14"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="#b8860b"
-          strokeWidth="1.8"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          className="mt-0.5 shrink-0"
-          aria-hidden="true"
-        >
-          <circle cx="12" cy="12" r="10" />
-          <path d="M12 8v4m0 4h.01" />
-        </svg>
-        <p className="font-body text-xs leading-5 text-amber-800">
-          Mientras tu cuenta está en revisión puedes explorar la app. Te
-          notificaremos por correo y SMS cuando quedes habilitado para solicitar traslados.
-        </p>
-      </div>
+        <div className="mt-4 flex items-start gap-2.5 rounded-2xl border border-[#f3d8a2] bg-[#fef4e6] p-3.5 text-left dark:border-[#664d00] dark:bg-[#3d2e00]/40">
+          <svg className="mt-0.5 size-4 shrink-0 text-[#765100] dark:text-[#ffc933]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <circle cx="12" cy="12" r="10" />
+            <path d="M12 8v4m0 4h.01" />
+          </svg>
+          <p className="text-[12px] leading-5 text-[#765100] dark:text-[#ffc933]">
+            Mientras tu cuenta está en revisión puedes explorar la app. Te
+            notificaremos por correo y SMS cuando quedes habilitado para solicitar traslados.
+          </p>
+        </div>
 
-      <Link
-        href="/"
-        className="inline-flex min-h-11 w-full items-center justify-center rounded-xl bg-signal px-5 py-3 font-display text-sm font-bold text-ink shadow-sm transition hover:-translate-y-0.5 hover:bg-signal/90 focus-visible:outline-route-dark"
-      >
-        Ir al inicio
-      </Link>
+        <div className="mt-6">
+          <Link
+            href="/"
+            className="flex min-h-[52px] w-full items-center justify-center rounded-2xl bg-[#0a2342] px-5 py-3.5 text-[15.5px] font-bold text-white shadow-[0_12px_24px_-8px_rgba(10,35,66,0.35)] transition hover:bg-[#162c47] active:scale-[0.98] dark:bg-[#4d94ff] dark:text-[#061529]"
+          >
+            Ir al inicio
+          </Link>
+        </div>
+      </MobileCard>
     </div>
   );
 }
@@ -539,23 +498,27 @@ export function VerificacionForm({ fotoPerfilInicial, soloDidit = false, destino
 
   if (verificacionCompletada) {
     return (
-      <div className="rounded-2xl border border-emerald-500/30 bg-[#064e3b]/20 p-6 text-center space-y-4 shadow-xl">
-        <div className="mx-auto flex size-16 items-center justify-center rounded-full bg-emerald-500/20 text-emerald-400 text-3xl font-bold">
-          ✓
+      <MobileCard padding="lg" elevated className="text-center space-y-4 border-[#c8e6d8] bg-[#e9f3ee]/40 dark:border-[#135939] dark:bg-[#0a2e1f]/40">
+        <div className="mx-auto flex size-16 items-center justify-center rounded-full bg-[#e9f3ee] text-[#08705f] dark:bg-[#0a2e1f] dark:text-[#4dd9a3]">
+          <svg className="size-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <path d="M20 6L9 17l-5-5" />
+          </svg>
         </div>
         <div>
-          <h2 className="font-display text-xl font-bold text-white">¡Identidad Verificada con Éxito!</h2>
-          <p className="mt-2 font-body text-sm leading-6 text-[#94a3b8]">
+          <h2 className="text-[20px] font-bold text-[#0a2342] dark:text-[#f6f8fb]">¡Identidad Verificada con Éxito!</h2>
+          <p className="mt-2 text-[13.5px] leading-relaxed text-[#4e5f80] dark:text-[#a8b5cc]">
             Tu cuenta ha sido aprobada de manera inmediata mediante Didit. Ya tienes acceso total para solicitar traslados y rastrearlos con el Pasaporte Digital.
           </p>
         </div>
-        <Link
-          href={destinoExito}
-          className="inline-flex min-h-11 w-full items-center justify-center rounded-xl bg-[#FFC400] px-5 py-3 font-display text-sm font-extrabold text-[#151515] shadow-[0_10px_28px_rgba(255,196,0,0.24)] transition hover:bg-[#e0ac00]"
-        >
-          Solicitar mi primer traslado
-        </Link>
-      </div>
+        <div className="pt-2">
+          <Link
+            href={destinoExito}
+            className="flex min-h-[52px] w-full items-center justify-center rounded-2xl bg-[#0a2342] px-5 py-3.5 text-[15.5px] font-bold text-white shadow-[0_12px_24px_-8px_rgba(10,35,66,0.35)] transition hover:bg-[#162c47] active:scale-[0.98] dark:bg-[#4d94ff] dark:text-[#061529]"
+          >
+            Solicitar mi primer traslado
+          </Link>
+        </div>
+      </MobileCard>
     );
   }
 
@@ -564,60 +527,77 @@ export function VerificacionForm({ fotoPerfilInicial, soloDidit = false, destino
   }
 
   const campoBase =
-    "w-full rounded-lg border border-app-border-strong bg-mist px-3.5 py-2.5 font-body text-sm text-ink outline-none transition focus:border-app-focus focus:ring-2 focus:ring-app-focus-ring";
+    "w-full rounded-2xl border border-[#e6edf6] bg-white px-3.5 py-3 text-[14.5px] font-medium text-[#0a2342] outline-none transition focus:border-[#0a2342] focus:bg-white focus:ring-4 focus:ring-[#0a2342]/5 dark:border-[#1a3a5c] dark:bg-[#071322] dark:text-white dark:focus:border-sky-400";
 
   return (
-    <div className="grid gap-6">
+    <div className="flex flex-col gap-5">
       {/* ── Opción 1: Didit Verificación Biométrica Instantánea ── */}
-      <div className="rounded-2xl border border-[#FFC400]/40 bg-[#FFC400]/5 p-5 shadow-lg space-y-3.5">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <span className="text-xl">⚡</span>
-            <span className="font-display text-sm font-bold text-[#FFC400]">
-              Verificación instantánea (recomendada)
+      <MobileCard elevated padding="lg" className="border-[#c8dcf8] bg-[#edf4fe]/40 dark:border-[#1d4576] dark:bg-[#0f2d52]/40 space-y-4">
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex items-center gap-2.5">
+            <span className="flex size-9 items-center justify-center rounded-xl bg-[#edf4fe] text-[#104ca0] dark:bg-[#0f2d52] dark:text-[#6ba8ff]" aria-hidden="true">
+              <svg className="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z" />
+              </svg>
             </span>
+            <h2 className="text-[15.5px] font-bold text-[#0a2342] dark:text-[#f6f8fb]">
+              Verificación instantánea (recomendada)
+            </h2>
           </div>
-          <span className="rounded-full bg-[#FFC400]/20 px-2.5 py-0.5 font-mono text-[10px] font-bold text-[#FFC400] border border-[#FFC400]/40">
-            &lt; 2 MIN
-          </span>
+          <MobileBadge variante="en_ruta" texto="< 2 MIN" size="sm" />
         </div>
 
-        <p className="font-body text-xs leading-5 text-ink/75">
+        <p className="text-[13px] leading-relaxed text-[#4e5f80] dark:text-[#a8b5cc]">
           Valida tu INE, pasaporte o licencia con reconocimiento biométrico oficial y prueba de vida en tiempo real a través de Didit. Tu cuenta quedará aprobada inmediatamente sin tiempos de espera.
         </p>
 
         {!mostrarDiditModal && errorDidit && <Aviso tono="danger">{errorDidit}</Aviso>}
 
         {!fotoPerfilUrl && (
-          <div className="rounded-xl border border-[#f5a623]/30 bg-[#f5a623]/10 p-3.5">
-            <p className="font-body text-xs leading-5 text-amber-900">
-              Este flujo usa coincidencia facial. Sube primero una fotografía clara de tu rostro para que Didit pueda compararla con la prueba de vida.
-            </p>
-            <label className="mt-3 flex flex-col gap-1.5">
-              <span className="font-display text-xs font-semibold text-amber-950">Fotografía de referencia</span>
+          <div className="rounded-2xl border border-[#f3d8a2] bg-[#fef4e6] p-4 dark:border-[#664d00] dark:bg-[#3d2e00]/40 space-y-3">
+            <div className="flex items-start gap-2.5">
+              <svg className="mt-0.5 size-4 shrink-0 text-[#765100] dark:text-[#ffc933]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <circle cx="12" cy="12" r="10" />
+                <path d="M12 8v4m0 4h.01" />
+              </svg>
+              <p className="text-[12px] leading-5 text-[#765100] dark:text-[#ffc933]">
+                Este flujo usa coincidencia facial. Sube primero una fotografía clara de tu rostro para que Didit pueda compararla con la prueba de vida.
+              </p>
+            </div>
+            <label className="flex flex-col gap-1.5">
+              <span className="text-[11.5px] font-bold uppercase tracking-wider text-[#765100] dark:text-[#ffc933]">
+                Fotografía de referencia
+              </span>
               <input
                 type="file"
                 accept="image/jpeg,image/png,image/webp,image/heic,image/heif,.heic,.heif"
                 onChange={(e) => void cargarFotoPerfilDidit(e.target.files?.[0])}
                 disabled={subiendoFotoPerfil || cargandoDidit}
-                className="w-full rounded-lg border border-amber-900/20 bg-white/70 px-3 py-2 font-body text-xs text-ink file:mr-3 file:rounded-md file:border-0 file:bg-ink file:px-3 file:py-1.5 file:text-mist"
+                className="w-full rounded-xl border border-[#e6edf6] bg-white px-3 py-2 text-xs text-[#0a2342] file:mr-3 file:rounded-lg file:border-0 file:bg-[#0a2342] file:px-3 file:py-1.5 file:font-semibold file:text-white dark:border-[#1a3a5c] dark:bg-[#071322] dark:text-white dark:file:bg-sky-500 dark:file:text-[#0a2342]"
               />
-              <span className="font-body text-[11px] text-amber-900/75">
+              <span className="text-[11px] text-[#765100]/80 dark:text-[#ffc933]/80">
                 {subiendoFotoPerfil ? "Guardando fotografía…" : "Máximo 2 MB. Si tu foto pesa más, la comprimimos automáticamente o puedes usar tinypng.com."}
               </span>
             </label>
           </div>
         )}
 
-        <button
+        <MobileButton
           type="button"
           onClick={iniciarDidit}
           disabled={cargandoDidit || subiendoFotoPerfil || !fotoPerfilUrl}
-          className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-[#FFC400] px-5 py-3 font-display text-sm font-extrabold text-[#151515] shadow-[0_10px_28px_rgba(255,196,0,0.24)] transition hover:bg-[#e0ac00] active:scale-[0.99] cursor-pointer"
+          loading={cargandoDidit || subiendoFotoPerfil}
+          icon={
+            <svg className="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <rect width="18" height="18" x="3" y="3" rx="2" />
+              <path d="M7 7h10M7 12h10M7 17h6" />
+            </svg>
+          }
+          className="w-full"
         >
-          <span>🪪</span> {fotoPerfilUrl ? "Iniciar verificación con Didit" : "Sube tu fotografía para continuar"}
-        </button>
-      </div>
+          {fotoPerfilUrl ? "Iniciar verificación con Didit" : "Sube tu fotografía para continuar"}
+        </MobileButton>
+      </MobileCard>
 
       {/* Modal Didit */}
       <DiditVerificationModal
@@ -635,7 +615,7 @@ export function VerificacionForm({ fotoPerfilInicial, soloDidit = false, destino
           {/* ── Separador / Opción 2: Verificación Tradicional Manual ── */}
           <div className="relative my-2 text-center">
             <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-ink/15" />
+              <div className="w-full border-t border-[#e2e8f0] dark:border-[#1a3a5c]" />
             </div>
             <div className="relative flex justify-center">
               <button
@@ -643,7 +623,7 @@ export function VerificacionForm({ fotoPerfilInicial, soloDidit = false, destino
                 onClick={() => setMostrarFormularioManual(!mostrarFormularioManual)}
                 aria-expanded={mostrarFormularioManual}
                 aria-controls="formulario-verificacion-manual"
-                className="rounded-full bg-surface px-4 py-1 text-xs font-medium text-ink/60 border border-ink/15 hover:text-ink transition cursor-pointer"
+                className="rounded-full bg-white px-4 py-2 text-[12.5px] font-semibold text-[#4e5f80] border border-[#d7e1ee] shadow-xs hover:text-[#0a2342] hover:bg-[#f6f8fb] transition cursor-pointer dark:border-[#1a3a5c] dark:bg-[#0a2342] dark:text-[#a8b5cc] dark:hover:text-white"
               >
                 {mostrarFormularioManual ? "▲ Ocultar verificación manual" : "▼ O prefiero subir mis documentos manualmente (24-48h)"}
               </button>
@@ -651,225 +631,210 @@ export function VerificacionForm({ fotoPerfilInicial, soloDidit = false, destino
           </div>
 
           {mostrarFormularioManual && (
-        <form id="formulario-verificacion-manual" onSubmit={enviarManual} className="grid gap-6 animate-fadeIn">
-          {/* ── Domicilio ── */}
-          <fieldset className="grid gap-4">
-            <legend className="font-body text-xs font-semibold uppercase tracking-wide text-ink/40">
-              Domicilio
-            </legend>
+            <form id="formulario-verificacion-manual" onSubmit={enviarManual} className="animate-fadeIn">
+              <MobileCard padding="lg" elevated className="flex flex-col gap-6">
+              {/* ── Domicilio ── */}
+              <fieldset className="flex flex-col gap-4 border-none p-0 m-0">
+                <legend className="text-[12px] font-bold uppercase tracking-wider text-[#4e5f80] dark:text-[#a8b5cc]">
+                  Domicilio
+                </legend>
 
-            <label className="flex flex-col gap-1.5">
-              <span className="font-body text-xs font-medium text-ink/70">Código postal</span>
-              <input
-                type="text"
-                inputMode="numeric"
-                value={codigoPostal}
-                onChange={(e) => consultarCPDebounced(e.target.value)}
-                placeholder="06600"
-                maxLength={5}
-                required
-                className={campoBase}
-              />
-              {cpConsultando && (
-                <span className="font-body text-xs text-ink/45" role="status" aria-live="polite">
-                  Buscando…
-                </span>
-              )}
-              {cpAviso && (
-                <span className="font-body text-xs text-amber-700" role="status" aria-live="polite">
-                  {cpAviso}
-                </span>
-              )}
-            </label>
-
-            <div className="grid grid-cols-2 gap-3">
-              <label className="flex flex-col gap-1.5">
-                <span className="font-body text-xs font-medium text-ink/70">Estado</span>
-                <input
-                  type="text"
-                  value={estadoMx}
-                  onChange={(e) => setEstadoMx(e.target.value)}
-                  placeholder="CDMX"
-                  required
-                  className={campoBase}
-                />
-              </label>
-              <label className="flex flex-col gap-1.5">
-                <span className="font-body text-xs font-medium text-ink/70">Ciudad</span>
-                {ciudadesCp.length > 1 ? (
-                  <select
-                    value={ciudad}
-                    onChange={(e) => setCiudad(e.target.value)}
-                    className={campoBase}
-                  >
-                    {ciudadesCp.map((c) => (
-                      <option key={c}>{c}</option>
-                    ))}
-                  </select>
-                ) : (
+                <label className="flex flex-col gap-1.5">
+                  <span className="text-[12px] font-semibold text-[#4e5f80] dark:text-[#a8b5cc]">Código postal</span>
                   <input
                     type="text"
-                    value={ciudad}
-                    onChange={(e) => setCiudad(e.target.value)}
-                    placeholder="Ciudad de México"
+                    inputMode="numeric"
+                    value={codigoPostal}
+                    onChange={(e) => consultarCPDebounced(e.target.value)}
+                    placeholder="06600"
+                    maxLength={5}
                     required
                     className={campoBase}
                   />
-                )}
-              </label>
-            </div>
+                  {cpConsultando && (
+                    <span className="text-xs text-[#4e5f80]" role="status" aria-live="polite">
+                      Buscando…
+                    </span>
+                  )}
+                  {cpAviso && (
+                    <span className="text-xs font-medium text-[#765100] dark:text-[#ffc933]" role="status" aria-live="polite">
+                      {cpAviso}
+                    </span>
+                  )}
+                </label>
 
-            <label className="flex flex-col gap-1.5">
-              <span className="font-body text-xs font-medium text-ink/70">Colonia</span>
-              {coloniasCp.length > 1 ? (
-                <select
-                  value={colonia}
-                  onChange={(e) => setColonia(e.target.value)}
-                  className={campoBase}
-                >
-                  {coloniasCp.map((c) => (
-                    <option key={c}>{c}</option>
-                  ))}
-                </select>
-              ) : (
-                <input
-                  type="text"
-                  value={colonia}
-                  onChange={(e) => setColonia(e.target.value)}
-                  placeholder="Juárez"
-                  required
-                  className={campoBase}
-                />
-              )}
-            </label>
+                <div className="grid grid-cols-2 gap-3">
+                  <label className="flex flex-col gap-1.5">
+                    <span className="text-[12px] font-semibold text-[#4e5f80] dark:text-[#a8b5cc]">Estado</span>
+                    <input
+                      type="text"
+                      value={estadoMx}
+                      onChange={(e) => setEstadoMx(e.target.value)}
+                      placeholder="CDMX"
+                      required
+                      className={campoBase}
+                    />
+                  </label>
+                  <label className="flex flex-col gap-1.5">
+                    <span className="text-[12px] font-semibold text-[#4e5f80] dark:text-[#a8b5cc]">Ciudad</span>
+                    {ciudadesCp.length > 1 ? (
+                      <select
+                        value={ciudad}
+                        onChange={(e) => setCiudad(e.target.value)}
+                        className={campoBase}
+                      >
+                        {ciudadesCp.map((c) => (
+                          <option key={c}>{c}</option>
+                        ))}
+                      </select>
+                    ) : (
+                      <input
+                        type="text"
+                        value={ciudad}
+                        onChange={(e) => setCiudad(e.target.value)}
+                        placeholder="Ciudad de México"
+                        required
+                        className={campoBase}
+                      />
+                    )}
+                  </label>
+                </div>
 
-            <div className="grid grid-cols-3 gap-3">
-              <label className="col-span-2 flex flex-col gap-1.5">
-                <span className="font-body text-xs font-medium text-ink/70">Calle</span>
-                <input
-                  type="text"
-                  value={calle}
-                  onChange={(e) => setCalle(e.target.value)}
-                  placeholder="Av. Insurgentes"
-                  required
-                  className={campoBase}
-                />
-              </label>
-              <label className="flex flex-col gap-1.5">
-                <span className="font-body text-xs font-medium text-ink/70">Núm.</span>
-                <input
-                  type="text"
-                  value={numero}
-                  onChange={(e) => setNumero(e.target.value)}
-                  placeholder="123"
-                  className={campoBase}
-                />
-              </label>
-            </div>
+                <label className="flex flex-col gap-1.5">
+                  <span className="text-[12px] font-semibold text-[#4e5f80] dark:text-[#a8b5cc]">Colonia</span>
+                  {coloniasCp.length > 1 ? (
+                    <select
+                      value={colonia}
+                      onChange={(e) => setColonia(e.target.value)}
+                      className={campoBase}
+                    >
+                      {coloniasCp.map((c) => (
+                        <option key={c}>{c}</option>
+                      ))}
+                    </select>
+                  ) : (
+                    <input
+                      type="text"
+                      value={colonia}
+                      onChange={(e) => setColonia(e.target.value)}
+                      placeholder="Juárez"
+                      required
+                      className={campoBase}
+                    />
+                  )}
+                </label>
 
-            <label className="flex flex-col gap-1.5">
-              <span className="font-body text-xs font-medium text-ink/70">
-                Referencias <span className="text-ink/35">(opcional)</span>
-              </span>
-              <textarea
-                value={referencias}
-                onChange={(e) => setReferencias(e.target.value)}
-                placeholder="Entre calles, color de fachada, etc."
-                className={`${campoBase} min-h-[72px] resize-none`}
-                maxLength={300}
-                aria-label="Referencias del domicilio"
-              />
-              <span className="text-right font-body text-xs text-ink/40">{referencias.length}/300</span>
-            </label>
-          </fieldset>
+                <div className="grid grid-cols-3 gap-3">
+                  <label className="col-span-2 flex flex-col gap-1.5">
+                    <span className="text-[12px] font-semibold text-[#4e5f80] dark:text-[#a8b5cc]">Calle</span>
+                    <input
+                      type="text"
+                      value={calle}
+                      onChange={(e) => setCalle(e.target.value)}
+                      placeholder="Av. Insurgentes"
+                      required
+                      className={campoBase}
+                    />
+                  </label>
+                  <label className="flex flex-col gap-1.5">
+                    <span className="text-[12px] font-semibold text-[#4e5f80] dark:text-[#a8b5cc]">Núm.</span>
+                    <input
+                      type="text"
+                      value={numero}
+                      onChange={(e) => setNumero(e.target.value)}
+                      placeholder="123"
+                      className={campoBase}
+                    />
+                  </label>
+                </div>
 
-          {/* ── Identificación oficial ── */}
-          <fieldset className="grid gap-3">
-            <legend className="font-body text-xs font-semibold uppercase tracking-wide text-ink/40">
-              Identificación oficial
-            </legend>
-            <p className="font-body text-xs text-ink/55">
-              INE, pasaporte vigente o licencia de conducir.
-            </p>
-            <p className="font-body text-xs font-medium text-ink/70">
-              Formatos aceptados: JPG, PNG, PDF y HEIC (iPhone — se recomienda convertir a JPG). Tamaño máximo: {TAMANO_MAXIMO_MB} MB.
-            </p>
-
-            <label className="flex cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-ink/15 px-4 py-6 transition hover:border-route/40 hover:bg-mist">
-              {documento ? (
-                <>
-                  <svg
-                    width="20"
-                    height="20"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="1.8"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    className="text-green-600"
-                    aria-hidden="true"
-                  >
-                    <path d="M20 6L9 17l-5-5" />
-                  </svg>
-                  <span className="font-body text-sm font-medium text-ink">{documento.name}</span>
-                  <span className="font-body text-xs text-ink/45">Toca para cambiar el archivo</span>
-                </>
-              ) : (
-                <>
-                  <svg
-                    width="20"
-                    height="20"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="1.8"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    className="text-ink/40"
-                    aria-hidden="true"
-                  >
-                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                    <polyline points="17 8 12 3 7 8" />
-                    <line x1="12" y1="3" x2="12" y2="15" />
-                  </svg>
-                  <span className="font-body text-sm text-ink/60">
-                    Toca para seleccionar tu identificación
+                <label className="flex flex-col gap-1.5">
+                  <span className="text-[12px] font-semibold text-[#4e5f80] dark:text-[#a8b5cc]">
+                    Referencias <span className="text-xs font-normal opacity-70">(opcional)</span>
                   </span>
-                </>
+                  <textarea
+                    value={referencias}
+                    onChange={(e) => setReferencias(e.target.value)}
+                    placeholder="Entre calles, color de fachada, etc."
+                    className={`${campoBase} min-h-[76px] resize-none`}
+                    maxLength={300}
+                    aria-label="Referencias del domicilio"
+                  />
+                  <span className="text-right text-[11px] font-medium text-[#4e5f80] dark:text-[#a8b5cc]">{referencias.length}/300</span>
+                </label>
+              </fieldset>
+
+              {/* ── Identificación oficial ── */}
+              <fieldset className="flex flex-col gap-3 border-none p-0 m-0">
+                <legend className="text-[12px] font-bold uppercase tracking-wider text-[#4e5f80] dark:text-[#a8b5cc]">
+                  Identificación oficial
+                </legend>
+                <p className="text-[12.5px] text-[#4e5f80] dark:text-[#a8b5cc]">
+                  INE, pasaporte vigente o licencia de conducir.
+                </p>
+                <p className="text-[12.5px] font-medium text-[#0a2342] dark:text-[#f6f8fb]">
+                  Formatos aceptados: JPG, PNG, PDF y HEIC (iPhone — se recomienda convertir a JPG). Tamaño máximo: {TAMANO_MAXIMO_MB} MB.
+                </p>
+
+                <label className="flex cursor-pointer flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-[#d7e1ee] p-6 text-center transition hover:border-[#0a2342] hover:bg-[#f8fafd] dark:border-[#1a3a5c] dark:hover:border-sky-400 dark:hover:bg-[#071930]">
+                  {documento ? (
+                    <>
+                      <span className="flex size-10 items-center justify-center rounded-full bg-[#e9f3ee] text-[#08705f] dark:bg-[#0a2e1f] dark:text-[#4dd9a3]">
+                        <svg className="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                          <path d="M20 6L9 17l-5-5" />
+                        </svg>
+                      </span>
+                      <span className="text-sm font-bold text-[#0a2342] dark:text-[#f6f8fb] truncate max-w-xs">{documento.name}</span>
+                      <span className="text-xs text-[#4e5f80] dark:text-[#a8b5cc]">Toca para cambiar el archivo</span>
+                    </>
+                  ) : (
+                    <>
+                      <span className="flex size-10 items-center justify-center rounded-full bg-[#edf4fe] text-[#104ca0] dark:bg-[#0f2d52] dark:text-[#6ba8ff]">
+                        <svg className="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                          <polyline points="17 8 12 3 7 8" />
+                          <line x1="12" y1="3" x2="12" y2="15" />
+                        </svg>
+                      </span>
+                      <span className="text-sm font-semibold text-[#0a2342] dark:text-[#f6f8fb]">
+                        Toca para seleccionar tu identificación
+                      </span>
+                    </>
+                  )}
+                  <input
+                    id="input-documento-identidad"
+                    type="file"
+                    accept={[...TIPOS_ACEPTADOS, ...EXTENSIONES_ACEPTADAS].join(",")}
+                    onChange={manejarDocumento}
+                    disabled={enviando}
+                    className="sr-only"
+                    aria-label="Subir identificación oficial"
+                    aria-describedby={docAviso ? "doc-aviso" : undefined}
+                    aria-invalid={Boolean(docAviso && !documento)}
+                  />
+                </label>
+                {docAviso && (
+                  <p id="doc-aviso" className="text-xs font-medium text-red-600 dark:text-red-400" role="alert" aria-live="assertive">
+                    {docAviso}
+                  </p>
+                )}
+              </fieldset>
+
+              {error && (
+                <div role="alert" aria-live="assertive">
+                  <Aviso tono="danger">{error}</Aviso>
+                </div>
               )}
-              <input
-                id="input-documento-identidad"
-                type="file"
-                accept={[...TIPOS_ACEPTADOS, ...EXTENSIONES_ACEPTADAS].join(",")}
-                onChange={manejarDocumento}
+
+              <MobileButton
+                type="submit"
                 disabled={enviando}
-                className="sr-only"
-                aria-label="Subir identificación oficial"
-                aria-describedby={docAviso ? "doc-aviso" : undefined}
-                aria-invalid={Boolean(docAviso && !documento)}
-              />
-            </label>
-            {docAviso && (
-              <p id="doc-aviso" className="font-body text-xs text-red-600" role="alert" aria-live="assertive">
-                {docAviso}
-              </p>
-            )}
-          </fieldset>
-
-          {error && (
-            <div role="alert" aria-live="assertive">
-              <Aviso tono="danger">{error}</Aviso>
-            </div>
-          )}
-
-          <button
-            type="submit"
-            disabled={enviando}
-            className="inline-flex min-h-11 w-full items-center justify-center rounded-xl bg-signal px-5 py-3 font-display text-sm font-bold text-ink shadow-sm transition hover:-translate-y-0.5 hover:bg-signal/90 focus-visible:outline-route-dark disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            {enviando ? "Enviando…" : "Enviar para revisión manual"}
-          </button>
+                loading={enviando}
+                className="w-full"
+              >
+                Enviar para revisión manual
+              </MobileButton>
+            </MobileCard>
           </form>
           )}
         </>

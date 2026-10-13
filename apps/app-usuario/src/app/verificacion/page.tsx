@@ -8,6 +8,7 @@
  *  - rechazado     → mostrar opciones con aviso para reintentar
  */
 import Link from "next/link";
+import { MobileBadge, MobileCard, MobileHeader, MobileShell } from "@ruum/ui";
 import { NavegacionUsuario } from "../NavegacionUsuario";
 import { VerificacionForm } from "./VerificacionForm";
 import { obtenerUsuarioActual } from "@ruum/api/services";
@@ -20,15 +21,14 @@ interface Props {
 /* Pantalla cuando el usuario ya está verificado */
 function CuentaYaVerificada({ destino = "/viajes/nuevo" }: { destino?: string }) {
   return (
-    <div className="grid gap-5 text-center">
+    <MobileCard padding="lg" elevated className="text-center space-y-4 border-[#c8e6d8] bg-[#e9f3ee]/40 dark:border-[#135939] dark:bg-[#0a2e1f]/40">
       <div className="flex justify-center">
-        <div className="flex size-16 items-center justify-center rounded-full bg-[#e6f9f0]">
+        <div className="flex size-16 items-center justify-center rounded-full bg-[#e9f3ee] text-[#08705f] dark:bg-[#0a2e1f] dark:text-[#4dd9a3]">
           <svg
-            width="32"
-            height="32"
+            className="size-8"
             viewBox="0 0 24 24"
             fill="none"
-            stroke="#1d9e75"
+            stroke="currentColor"
             strokeWidth="2.5"
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -39,167 +39,145 @@ function CuentaYaVerificada({ destino = "/viajes/nuevo" }: { destino?: string })
         </div>
       </div>
 
-      <div>
-        <h2 className="font-display text-xl font-bold text-ink">Cuenta Verificada</h2>
-        <p className="mt-2 font-body text-sm leading-6 text-ink/60">
-          Tu identidad ya se encuentra validada y tu cuenta está lista para solicitar y gestionar traslados vehiculares.
+      <div className="space-y-1.5">
+        <MobileBadge variante="exito" texto="Identidad confirmada" punto size="md" className="mx-auto" />
+        <h2 className="text-[20px] font-bold text-[#0a2342] dark:text-[#f6f8fb] pt-1">Cuenta Verificada</h2>
+        <p className="text-[13.5px] leading-relaxed text-[#4e5f80] dark:text-[#a8b5cc]">
+          Tu identidad ya se encuentra validada y tu cuenta está lista para solicitar y gestionar traslados vehiculares con conductores certificados.
         </p>
       </div>
 
-      <div className="mt-2 grid gap-3">
+      <div className="pt-2 flex flex-col gap-3">
         <Link
           href={destino}
-          className="inline-flex min-h-11 w-full items-center justify-center rounded-xl bg-signal px-5 py-3 font-display text-sm font-bold text-ink shadow-sm transition hover:-translate-y-0.5 hover:bg-signal/90 focus-visible:outline-route-dark"
+          className="flex min-h-[52px] w-full items-center justify-center rounded-2xl bg-[#0a2342] px-5 py-3.5 text-[15.5px] font-bold text-white shadow-[0_12px_24px_-8px_rgba(10,35,66,0.35)] transition hover:bg-[#162c47] active:scale-[0.98] dark:bg-[#4d94ff] dark:text-[#061529]"
         >
           Solicitar traslado
         </Link>
         <Link
           href="/"
-          className="inline-flex min-h-11 w-full items-center justify-center rounded-xl border border-ink/20 bg-mist px-5 py-3 font-display text-sm font-semibold text-ink transition hover:bg-ink/5"
+          className="flex min-h-[52px] w-full items-center justify-center rounded-2xl border border-[#d7e1ee] bg-white px-5 py-3.5 text-[15.5px] font-bold text-[#0a2342] transition hover:bg-[#f6f8fb] active:scale-[0.98] dark:border-[#2d4f73] dark:bg-[#0a2342] dark:text-[#f6f8fb]"
         >
           Ir al inicio
         </Link>
       </div>
-    </div>
+    </MobileCard>
   );
 }
 
 /* Pantalla de espera para usuarios que ya enviaron su documentación manual */
 function EsperandoRevision({ fotoPerfilUrl }: { fotoPerfilUrl: string | null }) {
   return (
-    <div className="grid gap-5">
-      <div className="flex justify-center">
-        <div className="flex size-16 items-center justify-center rounded-full border border-[#f5a623]/40 bg-[#f5a623]/10">
-          <svg
-            width="28"
-            height="28"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="#b8860b"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            aria-hidden="true"
-          >
-            <circle cx="12" cy="12" r="10" />
-            <path d="M12 6v6l4 2" />
-          </svg>
-        </div>
-      </div>
-
-      <div className="text-center">
-        <h2 className="font-display text-xl font-semibold">En revisión</h2>
-        <p className="mt-2 font-body text-sm leading-6 text-ink/60">
-          Ya recibimos tu documentación. El equipo de Ruum la está revisando.
-          El proceso toma entre <strong className="text-ink">24 y 48 horas hábiles</strong>.
-        </p>
-      </div>
-
-      <div className="app-card grid gap-4 px-5 py-5">
-        {[
-          { label: "Cuenta creada", sub: "Correo y contraseña", done: true },
-          { label: "Domicilio", sub: "Registrado", done: true },
-          { label: "Identificación oficial", sub: "Recibida — en revisión", done: true },
-          { label: "Aprobación de cuenta", sub: "Pendiente de revisión por el equipo", done: false },
-        ].map(({ label, sub, done }) => (
-          <div key={label} className="flex items-center gap-3">
-            <div
-              className={[
-                "flex size-8 items-center justify-center rounded-full",
-                done ? "bg-[#e6f9f0]" : "border border-[#f5a623]/40 bg-[#f5a623]/10",
-              ].join(" ")}
+    <div className="flex flex-col gap-5">
+      <MobileCard padding="lg" elevated className="text-center space-y-4">
+        <div className="flex justify-center">
+          <div className="flex size-16 items-center justify-center rounded-full border border-[#f3d8a2] bg-[#fef4e6] text-[#765100] dark:bg-[#3d2e00] dark:text-[#ffc933] dark:border-[#664d00]">
+            <svg
+              className="size-7"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
             >
-              {done ? (
-                <svg
-                  width="14"
-                  height="14"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="#1d9e75"
-                  strokeWidth="2.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  aria-hidden="true"
-                >
-                  <path d="M20 6L9 17l-5-5" />
-                </svg>
-              ) : (
-                <svg
-                  width="14"
-                  height="14"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="#b8860b"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  aria-hidden="true"
-                >
-                  <circle cx="12" cy="12" r="10" />
-                  <path d="M12 6v6l4 2" />
-                </svg>
-              )}
-            </div>
-            <div>
-              <p className="font-body text-sm font-medium">{label}</p>
-              <p
+              <circle cx="12" cy="12" r="10" />
+              <path d="M12 6v6l4 2" />
+            </svg>
+          </div>
+        </div>
+
+        <div className="space-y-1.5">
+          <MobileBadge variante="pendiente" texto="En revisión por el equipo" punto size="md" className="mx-auto" />
+          <h2 className="text-[20px] font-bold text-[#0a2342] dark:text-[#f6f8fb] pt-1">En revisión documental</h2>
+          <p className="text-[13.5px] leading-relaxed text-[#4e5f80] dark:text-[#a8b5cc]">
+            Ya recibimos tu documentación. El equipo de Ruum la está revisando.
+            El proceso toma entre <strong className="font-semibold text-[#0a2342] dark:text-white">24 y 48 horas hábiles</strong>.
+          </p>
+        </div>
+
+        {/* Pasos */}
+        <div className="flex flex-col gap-3 rounded-2xl border border-[#e6edf6] bg-[#f8fafd] p-4 text-left dark:border-[#1a3a5c] dark:bg-[#071930]">
+          {[
+            { label: "Cuenta creada", sub: "Correo y contraseña", done: true },
+            { label: "Domicilio", sub: "Registrado", done: true },
+            { label: "Identificación oficial", sub: "Recibida — en revisión", done: true },
+            { label: "Aprobación de cuenta", sub: "Pendiente de revisión por el equipo", done: false },
+          ].map(({ label, sub, done }) => (
+            <div key={label} className="flex items-center gap-3">
+              <div
                 className={[
-                  "font-body text-xs",
-                  !done ? "text-[#b8860b]" : "text-ink/45",
+                  "flex size-7 shrink-0 items-center justify-center rounded-full",
+                  done
+                    ? "bg-[#e9f3ee] text-[#08705f] dark:bg-[#0a2e1f] dark:text-[#4dd9a3]"
+                    : "border border-[#f3d8a2] bg-[#fef4e6] text-[#765100] dark:bg-[#3d2e00] dark:text-[#ffc933] dark:border-[#664d00]",
                 ].join(" ")}
               >
-                {sub}
-              </p>
+                {done ? (
+                  <svg className="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <path d="M20 6L9 17l-5-5" />
+                  </svg>
+                ) : (
+                  <svg className="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <circle cx="12" cy="12" r="10" />
+                    <path d="M12 6v6l4 2" />
+                  </svg>
+                )}
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="text-[13px] font-bold text-[#0a2342] dark:text-[#f6f8fb] truncate">{label}</p>
+                <p
+                  className={[
+                    "text-[11.5px] font-medium truncate",
+                    !done ? "text-[#765100] dark:text-[#ffc933]" : "text-[#4e5f80] dark:text-[#a8b5cc]",
+                  ].join(" ")}
+                >
+                  {sub}
+                </p>
+              </div>
             </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
 
-      <div className="flex items-start gap-2.5 rounded-lg border border-[#f5a623]/25 bg-[#f5a623]/8 px-4 py-3">
-        <svg
-          width="14"
-          height="14"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="#b8860b"
-          strokeWidth="1.8"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          className="mt-0.5 shrink-0"
-          aria-hidden="true"
+        <div className="flex items-start gap-2.5 rounded-2xl border border-[#f3d8a2] bg-[#fef4e6] p-3.5 text-left dark:border-[#664d00] dark:bg-[#3d2e00]/40">
+          <svg className="mt-0.5 size-4 shrink-0 text-[#765100] dark:text-[#ffc933]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <circle cx="12" cy="12" r="10" />
+            <path d="M12 8v4m0 4h.01" />
+          </svg>
+          <p className="text-[12px] leading-5 text-[#765100] dark:text-[#ffc933]">
+            Te notificaremos por correo y SMS cuando quedes habilitado para solicitar traslados.
+            Mientras tanto puedes explorar la app.
+          </p>
+        </div>
+
+        <div className="pt-2">
+          <Link
+            href="/"
+            className="flex min-h-[52px] w-full items-center justify-center rounded-2xl bg-[#0a2342] px-5 py-3.5 text-[15.5px] font-bold text-white shadow-[0_12px_24px_-8px_rgba(10,35,66,0.35)] transition hover:bg-[#162c47] active:scale-[0.98] dark:bg-[#4d94ff] dark:text-[#061529]"
+          >
+            Ir al inicio
+          </Link>
+        </div>
+
+        <div
+          aria-disabled="true"
+          className="rounded-2xl border border-[#d7e1ee] bg-[#f8fafd] p-3.5 text-center text-[12px] font-medium text-[#4e5f80] dark:border-[#1a3a5c] dark:bg-[#071930] dark:text-[#a8b5cc]"
         >
-          <circle cx="12" cy="12" r="10" />
-          <path d="M12 8v4m0 4h.01" />
-        </svg>
-        <p className="font-body text-xs leading-5 text-amber-800">
-          Te notificaremos por correo y SMS cuando quedes habilitado para solicitar traslados.
-          Mientras tanto puedes explorar la app.
-        </p>
-      </div>
+          Podrás solicitar tu traslado cuando tu cuenta quede aprobada.
+        </div>
+      </MobileCard>
 
-      <Link
-        href="/"
-        className="inline-flex min-h-11 w-full items-center justify-center rounded-xl bg-signal px-5 py-3 font-display text-sm font-bold text-ink shadow-sm transition hover:-translate-y-0.5 hover:bg-signal/90 focus-visible:outline-route-dark"
-      >
-        Ir al inicio
-      </Link>
-
-      <div
-        aria-disabled="true"
-        className="rounded-lg border border-ink/10 bg-mist px-4 py-3 text-center font-body text-xs leading-5 text-ink/60"
-      >
-        Podrás solicitar tu traslado cuando tu cuenta quede aprobada.
-      </div>
-
-      <div className="mt-2 border-t border-ink/10 pt-6">
-        <div className="mb-4">
-          <h2 className="font-display text-lg font-bold text-ink">Acelera la revisión con Didit</h2>
-          <p className="mt-1 font-body text-sm leading-5 text-ink/60">
+      {/* Acelerar con Didit */}
+      <MobileCard padding="lg" elevated className="border-[#c8dcf8] bg-[#edf4fe]/40 dark:border-[#1d4576] dark:bg-[#0f2d52]/40 space-y-4">
+        <div>
+          <h2 className="text-[16px] font-bold text-[#0a2342] dark:text-[#f6f8fb]">Acelera la revisión con Didit</h2>
+          <p className="mt-1 text-[13px] leading-relaxed text-[#4e5f80] dark:text-[#a8b5cc]">
             Igual que en el registro de conductor, puedes completar la prueba de vida y validación biométrica mientras tu expediente está en revisión.
           </p>
         </div>
         <VerificacionForm fotoPerfilInicial={fotoPerfilUrl} soloDidit />
-      </div>
+      </MobileCard>
     </div>
   );
 }
@@ -230,14 +208,14 @@ export default async function PaginaVerificacion({ searchParams }: Props) {
   if (estadoVerificacion === "verificado") {
     return (
       <>
-      <NavegacionUsuario variante="claro" />
-      <main className="user-v2-scope user-v2-page user-v2-secondary-screen"><div className="user-v2-content user-v2-content--wide py-10 sm:py-14">
-          <div className="mx-auto max-w-lg">
+        <NavegacionUsuario variante="claro" mostrarNavegacionInferior={false} />
+        <MobileShell variant="compact" navInferiorVisible={false}>
+          <MobileHeader titulo="Verificación" enlaceAtras="/" />
+          <div className="py-4">
             <CuentaYaVerificada destino={destino} />
           </div>
-        </div>
-      </main>
-    </>
+        </MobileShell>
+      </>
     );
   }
 
@@ -246,46 +224,45 @@ export default async function PaginaVerificacion({ searchParams }: Props) {
 
   return (
     <>
-      <NavegacionUsuario variante="claro" />
-      <main className="user-v2-scope user-v2-page user-v2-secondary-screen"><div className="user-v2-content user-v2-content--wide py-10 sm:py-14">
-        <div className="mb-6">
-          <Link href="/" className="font-body text-sm text-ink/55 underline-offset-4 hover:underline">
-            ← Inicio
-          </Link>
-        </div>
+      <NavegacionUsuario variante="claro" mostrarNavegacionInferior={false} />
+      <MobileShell variant="compact" navInferiorVisible={false}>
+        <MobileHeader
+          titulo={yaEnRevision ? "Estado de cuenta" : "Verificación de cuenta"}
+          subtitulo={yaEnRevision ? "Expediente en revisión" : "Validación oficial de identidad"}
+          enlaceAtras="/"
+        />
 
-        <div className="mx-auto max-w-lg">
+        <div className="flex flex-col gap-5 py-4">
           {yaEnRevision ? (
             <EsperandoRevision fotoPerfilUrl={fotoPerfilUrl} />
           ) : (
             <>
-              <div className="mb-8">
-                <h1 className="font-display text-2xl font-semibold leading-tight">
-                  Verificación de cuenta
+              {/* Encabezado descriptivo */}
+              <div className="space-y-1.5 px-1">
+                <h1 className="text-[22px] font-extrabold tracking-tight text-[#0a2342] dark:text-[#f6f8fb]">
+                  Verificación de identidad
                 </h1>
-                <p className="mt-2 font-body text-sm text-ink/60">
+                <p className="text-[13.5px] leading-relaxed text-[#4e5f80] dark:text-[#a8b5cc]">
                   Para tu seguridad y la del conductor certificado, validamos tu identidad oficial antes del primer traslado.
                 </p>
 
                 {estadoVerificacion === "rechazado" && (
-                  <div className="mt-4" role="alert" aria-live="assertive" aria-atomic="true">
-                    <div className="flex items-start gap-2.5 rounded-lg border border-red-200 bg-red-50 px-4 py-3">
+                  <div className="mt-3" role="alert" aria-live="assertive" aria-atomic="true">
+                    <div className="flex items-start gap-3 rounded-2xl border border-[#f6ccd2] bg-[#fdeaea] p-4 text-[#9a2637] dark:border-[#661a29] dark:bg-[#3d0f1a] dark:text-[#ff6b7a]">
                       <svg
-                        width="14"
-                        height="14"
+                        className="mt-0.5 size-5 shrink-0"
                         viewBox="0 0 24 24"
                         fill="none"
-                        stroke="#dc2626"
-                        strokeWidth="1.8"
+                        stroke="currentColor"
+                        strokeWidth="2"
                         strokeLinecap="round"
                         strokeLinejoin="round"
-                        className="mt-0.5 shrink-0"
                         aria-hidden="true"
                       >
                         <circle cx="12" cy="12" r="10" />
                         <path d="M12 8v4m0 4h.01" />
                       </svg>
-                      <p className="font-body text-xs leading-5 text-red-700">
+                      <p className="text-[12.5px] leading-5">
                         Tu verificación anterior no pudo confirmarse. Realiza la prueba biométrica con Didit o sube una foto clara de tu identificación oficial.
                       </p>
                     </div>
@@ -294,85 +271,59 @@ export default async function PaginaVerificacion({ searchParams }: Props) {
               </div>
 
               {/* Checklist de progreso */}
-              <div className="app-card mb-6 grid gap-4 px-5 py-5">
-                {[
-                  { label: "Cuenta creada", sub: "Correo y contraseña", done: true },
-                  { label: "Teléfono registrado", sub: "Para notificaciones del traslado", done: true },
-                  { label: "Identificación oficial", sub: "Validación biométrica o documental", done: false },
-                ].map(({ label, sub, done }) => (
-                  <div key={label} className="flex items-center gap-3">
-                    <div
-                      className={[
-                        "flex size-8 items-center justify-center rounded-full",
-                        done ? "bg-[#e6f9f0]" : "border border-ink/15 bg-mist",
-                      ].join(" ")}
-                    >
-                      {done ? (
-                        <svg
-                          width="14"
-                          height="14"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="#1d9e75"
-                          strokeWidth="2.5"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          aria-hidden="true"
-                        >
-                          <path d="M20 6L9 17l-5-5" />
-                        </svg>
-                      ) : (
-                        <svg
-                          width="14"
-                          height="14"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="1.8"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          className="text-ink/40"
-                          aria-hidden="true"
-                        >
-                          <circle cx="12" cy="12" r="10" />
-                        </svg>
-                      )}
+              <MobileCard padding="md" elevated>
+                <div className="flex flex-col gap-3">
+                  {[
+                    { label: "Cuenta creada", sub: "Correo y contraseña", done: true },
+                    { label: "Teléfono registrado", sub: "Para notificaciones del traslado", done: true },
+                    { label: "Identificación oficial", sub: "Validación biométrica o documental", done: false },
+                  ].map(({ label, sub, done }) => (
+                    <div key={label} className="flex items-center gap-3">
+                      <div
+                        className={[
+                          "flex size-7 shrink-0 items-center justify-center rounded-full",
+                          done
+                            ? "bg-[#e9f3ee] text-[#08705f] dark:bg-[#0a2e1f] dark:text-[#4dd9a3]"
+                            : "border border-[#d7e1ee] bg-[#eff3f8] text-[#3b4c68] dark:bg-[#1a2e4a] dark:text-[#a8b5cc]",
+                        ].join(" ")}
+                      >
+                        {done ? (
+                          <svg className="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                            <path d="M20 6L9 17l-5-5" />
+                          </svg>
+                        ) : (
+                          <svg className="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                            <circle cx="12" cy="12" r="10" />
+                          </svg>
+                        )}
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="text-[13px] font-bold text-[#0a2342] dark:text-[#f6f8fb] truncate">{label}</p>
+                        <p className="text-[11.5px] font-medium text-[#4e5f80] dark:text-[#a8b5cc] truncate">{sub}</p>
+                      </div>
                     </div>
-                    <div>
-                      <p className="font-body text-sm font-medium">{label}</p>
-                      <p className="font-body text-xs text-ink/45">{sub}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              </MobileCard>
 
-              {/* Nota de seguridad */}
-              <div className="app-status-strip mb-6 flex items-start gap-2.5 px-4 py-3">
-                <svg
-                  width="14"
-                  height="14"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="#b8860b"
-                  strokeWidth="1.8"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="mt-0.5 shrink-0"
-                  aria-hidden="true"
-                >
-                  <path d="M12 4 18 6v5c0 4-2.5 6.8-6 8-3.5-1.2-6-4-6-8V6l6-2Z" />
-                </svg>
-                <p className="font-body text-xs leading-5 text-amber-800">
+              {/* Nota de seguridad bancaria */}
+              <div className="flex items-start gap-3 rounded-2xl border border-[#c8e6d8] bg-[#e9f3ee]/60 p-4 dark:border-[#135939] dark:bg-[#0a2e1f]/50">
+                <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-white text-[#08705f] shadow-xs dark:bg-[#0a2342] dark:text-[#4dd9a3]" aria-hidden="true">
+                  <svg className="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M12 4 18 6v5c0 4-2.5 6.8-6 8-3.5-1.2-6-4-6-8V6l6-2Z" />
+                  </svg>
+                </span>
+                <p className="text-[12.5px] leading-relaxed text-[#08705f] dark:text-[#4dd9a3]">
                   Tus datos biométricos y documentos se procesan de forma encriptada bajo estándares bancarios. No se comparten con terceros ni con los conductores.
                 </p>
               </div>
 
+              {/* Formulario interactivo Didit + manual */}
               <VerificacionForm fotoPerfilInicial={fotoPerfilUrl} destinoExito={destino} />
             </>
           )}
         </div>
-      </div>
-    </main>
+      </MobileShell>
     </>
   );
 }
