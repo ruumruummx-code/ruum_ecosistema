@@ -10,7 +10,7 @@ const GLOBALES = readFileSync(resolve(__dirname, "../src/app/globals.css"), "utf
 describe("rediseño del registro de usuario", () => {
   it("usa el header con título contextual y pasos progresivos", () => {
     expect(REGISTRO).toContain("Crear cuenta");
-    expect(REGISTRO).toContain('paso === 1 ? "Paso 1 de 3 · Datos básicos" : "Paso 2 de 3 · Acceso"');
+    expect(REGISTRO).toContain('paso === 1 ? "Paso 1 de 3" : "Paso 2 de 3"');
     expect(NAVEGACION).toContain('aria-label="Acciones del usuario"');
     expect(NAVEGACION).toContain("user-v2-shell-header");
     const bloqueHeader = GLOBALES.slice(GLOBALES.indexOf(".user-v2-shell-header {"));
