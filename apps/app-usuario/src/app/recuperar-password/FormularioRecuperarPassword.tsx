@@ -2,18 +2,12 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { Aviso } from "@ruum/ui";
+import { Aviso, MobileShell, MobileCard, MobileButton } from "@ruum/ui";
 import { TEXTOS_CARGANDO } from "@ruum/shared/constants";
 import { traducirErrorAuth } from "@ruum/shared/utils";
 import { registrarEventoUx } from "../../lib/analytics";
 import { crearClienteNavegador, tieneSupabaseConfigurado } from "../../lib/supabase-browser";
-import {
-  botonAzul,
-  botonContorno,
-  CampoOscuro,
-  LogoRuum,
-  PantallaPublica,
-} from "../experiencia-publica";
+import { LogoRuum } from "../experiencia-publica";
 
 export function FormularioRecuperarPassword({
   errorInicial,
@@ -26,16 +20,12 @@ export function FormularioRecuperarPassword({
   const [enviando, setEnviando] = useState(false);
   const [enviado, setEnviado] = useState(false);
   const [error, setError] = useState<string | null>(errorInicial);
-  /* ACC-5 (auditoría): error del formulario vs error del campo. El primero se
-     anuncia con role="alert" (assertive); el segundo se asocia al input. */
   const [errorCampo, setErrorCampo] = useState<string | null>(null);
   const correoRef = useRef<HTMLInputElement>(null);
   const ultimoEnvioRef = useRef<number>(0);
 
   useEffect(() => {
     registrarEventoUx("recuperacion_vista");
-    /* El aviso llega por prop; aquí solo se registra el evento de analítica que
-       antes iba pareado a la lectura de la URL en el cliente. */
     if (errorInicial) {
       registrarEventoUx("recuperacion_error", { motivo: "enlace_invalido" });
     }
@@ -48,8 +38,6 @@ export function FormularioRecuperarPassword({
       setError("Escribe tu correo electrónico.");
       setErrorCampo("Escribe tu correo electrónico.");
       registrarEventoUx("recuperacion_error", { motivo: "email_vacio" });
-      /* ACC-5 (auditoría): el foco no se movía al campo inválido. El patrón
-         correcto ya existe en LoginCliente.tsx. */
       correoRef.current?.focus();
       return;
     }
@@ -91,95 +79,113 @@ export function FormularioRecuperarPassword({
   }
 
   return (
-    <PantallaPublica>
-      <section className="flex min-h-screen flex-col px-5 py-10">
+    <MobileShell variant="compact">
+      <div className="flex min-h-screen flex-col justify-center px-4 py-8 sm:px-6">
         <Link
           href="/login"
-          className="inline-flex min-h-11 items-center font-body text-sm text-route-action transition hover:text-text-primary"
+          className="mb-6 inline-flex min-h-11 items-center gap-1 text-[13.5px] font-bold text-[#104ca0] transition hover:text-[#0a2342] dark:text-[#6ba8ff] dark:hover:text-[#a8b5cc]"
         >
           ← Volver al inicio de sesión
         </Link>
 
-        <LogoRuum className="mx-auto mt-8 text-center" />
+        <div className="mb-8 flex justify-center">
+          <LogoRuum />
+        </div>
 
-        <div className="mt-14 rounded-card border border-border bg-surface px-5 py-7 shadow-[var(--ruum-shadow-3)]">
+        <MobileCard elevated className="p-6 sm:p-7">
           {enviado ? (
             /* Estado de éxito */
-            <div className="grid gap-4 text-center">
-              <div className="mx-auto flex size-14 items-center justify-center rounded-full bg-control-soft">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
-                  stroke="#1d9e75" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"
-                  aria-hidden="true">
+            <div className="flex flex-col items-center gap-3.5 text-center">
+              <span aria-hidden="true" className="flex size-14 items-center justify-center rounded-full bg-[#e9f3ee] text-[#08705f] dark:bg-[#0a2e1f] dark:text-[#4dd9a3]">
+                <svg className="size-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                   <path d="M20 6L9 17l-5-5" />
                 </svg>
-              </div>
-              <h1 className="font-display text-[22px] font-extrabold leading-tight text-text-primary">
+              </span>
+              <h1 className="text-[20px] font-extrabold tracking-tight text-[#0a2342] dark:text-[#f6f8fb]">
                 Correo enviado
               </h1>
-              <p className="font-body text-sm leading-6 text-text-secondary">
+              <p className="text-[13.5px] font-medium leading-relaxed text-[#4e5f80] dark:text-[#a8b5cc]">
                 Revisa tu bandeja de entrada en{" "}
-                <span className="font-semibold text-text-primary">{email.trim()}</span>, incluyendo
+                <strong className="font-bold text-[#0a2342] dark:text-[#f6f8fb]">{email.trim()}</strong>, incluyendo
                 la carpeta de spam. El enlace expira en 60 minutos.
               </p>
-              <p className="font-body text-xs text-text-tertiary">
+              <p className="text-[12px] font-medium text-[#4e5f80] dark:text-[#a8b5cc]">
                 Si no llega en unos minutos, puedes solicitar otro enlace. Espera 30 segundos entre intentos.
               </p>
-              <button
-                type="button"
+              <MobileButton
+                variant="secondary"
+                className="mt-3 w-full"
                 onClick={() => {
-                    setEnviado(false);
-                    setError(null);
-                    setErrorCampo(null);
-                    window.setTimeout(() => correoRef.current?.focus(), 0);
-                  }}
-                className={botonContorno}
+                  setEnviado(false);
+                  setError(null);
+                  setErrorCampo(null);
+                  window.setTimeout(() => correoRef.current?.focus(), 0);
+                }}
               >
                 Solicitar otro enlace
-              </button>
+              </MobileButton>
             </div>
           ) : (
             /* Formulario */
             <>
-              <h1 className="font-display text-[22px] font-extrabold leading-tight text-text-primary">
+              <h1 className="text-[20px] font-extrabold tracking-tight text-[#0a2342] dark:text-[#f6f8fb]">
                 Recuperar contraseña
               </h1>
-              <p className="mt-2 font-body text-xs leading-5 text-text-secondary">
+              <p className="mt-1.5 text-[13px] font-medium leading-relaxed text-[#4e5f80] dark:text-[#a8b5cc]">
                 Escribe el correo con el que te registraste y te enviamos un enlace para crear una nueva contraseña.
               </p>
 
-              <form className="mt-7 grid gap-4" onSubmit={enviar} noValidate>
-                <CampoOscuro
-                  ref={correoRef}
-                  etiqueta="Correo electrónico"
-                  type="email"
-                  value={email}
-                  onChange={(e) => {
-                    setEmail(e.target.value);
-                    if (errorCampo) setErrorCampo(null);
-                  }}
-                  error={errorCampo}
-                  required
-                  autoComplete="email"
-                  placeholder="correo@ejemplo.com"
-                />
+              <form className="mt-6 flex flex-col gap-4" onSubmit={enviar} noValidate>
+                <div className="flex flex-col gap-1.5">
+                  <label htmlFor="correo" className="text-[12px] font-semibold uppercase tracking-wider text-[#4e5f80] dark:text-[#a8b5cc]">
+                    Correo electrónico
+                  </label>
+                  <div className="relative">
+                    <span aria-hidden="true" className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-[#4e5f80] dark:text-[#a8b5cc]">
+                      <svg className="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                        <rect x="3" y="5" width="18" height="14" rx="3" />
+                        <path d="m4 7 8 6 8-6" />
+                      </svg>
+                    </span>
+                    <input
+                      id="correo"
+                      ref={correoRef}
+                      type="email"
+                      value={email}
+                      onChange={(e) => {
+                        setEmail(e.target.value);
+                        if (errorCampo) setErrorCampo(null);
+                      }}
+                      required
+                      autoComplete="email"
+                      placeholder="correo@ejemplo.com"
+                      className="w-full rounded-2xl border border-[#e6edf6] bg-[#fafcfe] py-3.5 pl-10 pr-3.5 text-[14.5px] font-medium text-[#0a2342] outline-none transition placeholder:text-[#8b9bb0] focus:border-[#0a2342] focus:bg-white focus:ring-4 focus:ring-[#0a2342]/5 dark:border-[#1a3a5c] dark:bg-[#061529] dark:text-[#f6f8fb] dark:focus:border-[#4d94ff] dark:focus:bg-[#0a2342]"
+                    />
+                  </div>
+                  {errorCampo && (
+                    <p className="text-[12px] font-bold text-[#9a2637] dark:text-[#ff6b7a]">{errorCampo}</p>
+                  )}
+                </div>
 
-                {/* ACC-5 (auditoría): antes el wrapper usaba aria-live="polite",
-                    que anulaba el role="alert" del Aviso (assertive) y el lector
-                    no interrumpía al usuario para anunciar un error. */}
                 {error && (
                   <div role="alert" aria-atomic="true">
                     <Aviso tono="danger">{error}</Aviso>
                   </div>
                 )}
 
-                <button type="submit" disabled={enviando} aria-busy={enviando} className={`${botonAzul} mt-2`}>
+                <MobileButton
+                  type="submit"
+                  disabled={enviando}
+                  loading={enviando}
+                  className="mt-2"
+                >
                   {enviando ? TEXTOS_CARGANDO.enviando : "Enviar enlace de recuperación"}
-                </button>
+                </MobileButton>
               </form>
             </>
           )}
-        </div>
-      </section>
-    </PantallaPublica>
+        </MobileCard>
+      </div>
+    </MobileShell>
   );
 }

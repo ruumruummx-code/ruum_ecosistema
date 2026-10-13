@@ -435,8 +435,8 @@ export default function PaginaRegistro() {
           <div className="mx-auto mb-4 flex size-14 items-center justify-center rounded-2xl bg-amber-50 text-amber-600">
             <IconoAlertaTriangulo className="size-7" />
           </div>
-          <h1 className="text-xl font-extrabold text-[#0b1e33]">Servicio no disponible</h1>
-          <p className="mt-2 text-sm text-[#6b7c94]">
+          <h1 className="text-xl font-extrabold text-[#0a2342]">Servicio no disponible</h1>
+          <p className="mt-2 text-sm text-[#4e5f80]">
             Supabase no está configurado en este entorno. El registro no está disponible.
           </p>
         </div>
@@ -454,7 +454,7 @@ export default function PaginaRegistro() {
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-[#eef2f7] p-3 sm:p-5 font-sans">
-      <div className="relative flex w-full max-w-[430px] flex-col overflow-hidden rounded-[32px] sm:rounded-[36px] border border-[#e9eef3] bg-white shadow-[0_25px_60px_rgba(0,0,0,0.12)]">
+      <div className="relative flex w-full max-w-[480px] flex-col overflow-hidden rounded-[32px] sm:rounded-[36px] border border-[#e9eef3] bg-white shadow-[0_25px_60px_rgba(0,0,0,0.12)]">
         
         {/* Encabezado */}
         <header className="flex items-center border-b border-[#f0f4fa] bg-white px-5 py-3.5 shrink-0">
@@ -468,7 +468,7 @@ export default function PaginaRegistro() {
                 requestAnimationFrame(() => nombreRef.current?.focus());
               }}
               aria-label="Volver al paso 1"
-              className="mr-3.5 flex size-10 shrink-0 cursor-pointer items-center justify-center rounded-full bg-[#f2f6fc] text-[#0b1e33] transition-all hover:bg-[#e3ebf5] active:scale-95"
+              className="mr-3.5 flex size-10 shrink-0 cursor-pointer items-center justify-center rounded-full bg-[#edf4fe] text-[#0a2342] transition-all hover:bg-[#e3ebf5] active:scale-95"
             >
               <IconoFlechaAtras />
             </button>
@@ -476,17 +476,17 @@ export default function PaginaRegistro() {
             <Link
               href="/"
               aria-label="Volver al inicio"
-              className="mr-3.5 flex size-10 shrink-0 cursor-pointer items-center justify-center rounded-full bg-[#f2f6fc] text-[#0b1e33] transition-all hover:bg-[#e3ebf5] active:scale-95"
+              className="mr-3.5 flex size-10 shrink-0 cursor-pointer items-center justify-center rounded-full bg-[#edf4fe] text-[#0a2342] transition-all hover:bg-[#e3ebf5] active:scale-95"
             >
               <IconoFlechaAtras />
             </Link>
           )}
 
           <div>
-            <h1 className="text-[17px] font-bold tracking-tight text-[#0b1e33] leading-tight">
+            <h1 className="text-[17px] font-bold tracking-tight text-[#0a2342] leading-tight">
               Crear cuenta
             </h1>
-            <p className="text-[11.5px] font-medium text-[#6b7c94] mt-0.5">
+            <p className="text-[11.5px] font-medium text-[#4e5f80] mt-0.5">
               {paso === 1 ? "Paso 1 de 3 · Datos básicos" : "Paso 2 de 3 · Acceso"}
             </p>
           </div>
@@ -500,14 +500,14 @@ export default function PaginaRegistro() {
                 "h-full rounded-full transition-all duration-300",
                 paso === 1 ? "w-1/3" : "w-2/3",
               ].join(" ")}
-              style={{ background: "linear-gradient(90deg, #0b1e33, #2e5a88)" }}
+              style={{ background: "linear-gradient(90deg, #0a2342, #2e5a88)" }}
             />
           </div>
           <div className="flex justify-between pb-2 text-[10px] font-bold uppercase tracking-wider text-[#a6b7cb]">
-            <span className={paso === 1 ? "text-[#0b1e33]" : "text-[#1f6b4a] font-bold flex items-center gap-1"}>
+            <span className={paso === 1 ? "text-[#0a2342]" : "text-[#1f6b4a] font-bold flex items-center gap-1"}>
               {paso === 2 && "✓"} Datos básicos
             </span>
-            <span className={paso === 2 ? "text-[#0b1e33]" : "text-[#a6b7cb]"}>
+            <span className={paso === 2 ? "text-[#0a2342]" : "text-[#a6b7cb]"}>
               Acceso
             </span>
             <span className="text-[#a6b7cb]">
@@ -527,7 +527,7 @@ export default function PaginaRegistro() {
               {/* Icono de bienvenida */}
               <div className="mb-4 flex justify-center">
                 <div className="relative flex size-20 items-center justify-center rounded-[28px] text-white shadow-[0_18px_36px_-12px_rgba(11,30,51,0.4)]"
-                  style={{ background: "linear-gradient(135deg, #0b1e33 0%, #2e5a88 100%)" }}
+                  style={{ background: "linear-gradient(135deg, #0a2342 0%, #2e5a88 100%)" }}
                 >
                   <IconoUsuarioPlus className="size-8 text-white" />
                   <div className="absolute -bottom-1 -right-1 flex size-7 items-center justify-center rounded-full border-2 border-white bg-[#e9f3ee] text-xs text-[#1f6b4a]">
@@ -537,23 +537,23 @@ export default function PaginaRegistro() {
               </div>
 
               {/* Título y descripción */}
-              <h2 className="text-center text-[24px] font-extrabold tracking-tight text-[#0b1e33] leading-tight mb-1.5">
+              <h2 className="text-center text-[24px] font-extrabold tracking-tight text-[#0a2342] leading-tight mb-1.5">
                 Tus datos básicos
               </h2>
-              <p className="text-center text-[13.5px] font-medium text-[#6b7c94] leading-relaxed mb-5">
+              <p className="text-center text-[13.5px] font-medium text-[#4e5f80] leading-relaxed mb-5">
                 Solo necesitamos tus datos básicos para empezar.
               </p>
 
               {/* Selector tipo de cuenta */}
-              <div className="mb-4 grid grid-cols-2 gap-2 rounded-2xl bg-[#f2f6fc] p-1.5 border border-[#e5eef7]">
+              <div className="mb-4 grid grid-cols-2 gap-2 rounded-2xl bg-[#edf4fe] p-1.5 border border-[#e5eef7]">
                 <button
                   type="button"
                   onClick={() => setTipoCuenta("personal")}
                   className={[
                     "py-2 rounded-xl text-[13px] font-bold transition cursor-pointer text-center",
                     tipoCuenta === "personal"
-                      ? "bg-white text-[#0b1e33] shadow-sm"
-                      : "text-[#6b7c94] hover:text-[#0b1e33]",
+                      ? "bg-white text-[#0a2342] shadow-sm"
+                      : "text-[#4e5f80] hover:text-[#0a2342]",
                   ].join(" ")}
                 >
                   Personal
@@ -564,8 +564,8 @@ export default function PaginaRegistro() {
                   className={[
                     "py-2 rounded-xl text-[13px] font-bold transition cursor-pointer text-center",
                     tipoCuenta === "empresa"
-                      ? "bg-white text-[#0b1e33] shadow-sm"
-                      : "text-[#6b7c94] hover:text-[#0b1e33]",
+                      ? "bg-white text-[#0a2342] shadow-sm"
+                      : "text-[#4e5f80] hover:text-[#0a2342]",
                   ].join(" ")}
                 >
                   Empresa
@@ -577,7 +577,7 @@ export default function PaginaRegistro() {
                 {/* Nombre y Apellido en 2 columnas */}
                 <div className="grid grid-cols-2 gap-3">
                   <div className="flex flex-col gap-1.5">
-                    <label htmlFor="nombre" className="text-[11px] font-bold uppercase tracking-wider text-[#6b7c94]">
+                    <label htmlFor="nombre" className="text-[11px] font-bold uppercase tracking-wider text-[#4e5f80]">
                       Nombre
                     </label>
                     <div className="relative">
@@ -599,10 +599,10 @@ export default function PaginaRegistro() {
                         aria-invalid={errorCampo?.campo === "nombre" ? "true" : undefined}
                         aria-describedby={errorCampo?.campo === "nombre" ? "nombre-error" : undefined}
                         className={[
-                          "w-full rounded-2xl border py-3.5 pl-10 pr-3 text-[14.5px] font-medium text-[#0b1e33] outline-none transition",
+                          "w-full rounded-2xl border py-3.5 pl-10 pr-3 text-[14.5px] font-medium text-[#0a2342] outline-none transition",
                           errorCampo?.campo === "nombre"
                             ? "border-red-400 bg-red-50/40 focus:border-red-500"
-                            : "border-[#e6edf6] bg-[#fafcfe] focus:border-[#0b1e33] focus:bg-white focus:ring-4 focus:ring-[#0b1e33]/5",
+                            : "border-[#e6edf6] bg-[#fafcfe] focus:border-[#0a2342] focus:bg-white focus:ring-4 focus:ring-[#0a2342]/5",
                         ].join(" ")}
                       />
                     </div>
@@ -614,7 +614,7 @@ export default function PaginaRegistro() {
                   </div>
 
                   <div className="flex flex-col gap-1.5">
-                    <label htmlFor="apellido" className="text-[11px] font-bold uppercase tracking-wider text-[#6b7c94]">
+                    <label htmlFor="apellido" className="text-[11px] font-bold uppercase tracking-wider text-[#4e5f80]">
                       Apellido
                     </label>
                     <div className="relative">
@@ -636,10 +636,10 @@ export default function PaginaRegistro() {
                         aria-invalid={errorCampo?.campo === "apellido" ? "true" : undefined}
                         aria-describedby={errorCampo?.campo === "apellido" ? "apellido-error" : undefined}
                         className={[
-                          "w-full rounded-2xl border py-3.5 pl-10 pr-3 text-[14.5px] font-medium text-[#0b1e33] outline-none transition",
+                          "w-full rounded-2xl border py-3.5 pl-10 pr-3 text-[14.5px] font-medium text-[#0a2342] outline-none transition",
                           errorCampo?.campo === "apellido"
                             ? "border-red-400 bg-red-50/40 focus:border-red-500"
-                            : "border-[#e6edf6] bg-[#fafcfe] focus:border-[#0b1e33] focus:bg-white focus:ring-4 focus:ring-[#0b1e33]/5",
+                            : "border-[#e6edf6] bg-[#fafcfe] focus:border-[#0a2342] focus:bg-white focus:ring-4 focus:ring-[#0a2342]/5",
                         ].join(" ")}
                       />
                     </div>
@@ -653,11 +653,11 @@ export default function PaginaRegistro() {
 
                 {/* Teléfono celular con prefijo +52 */}
                 <div className="flex flex-col gap-1.5">
-                  <label htmlFor="telefono" className="text-[11px] font-bold uppercase tracking-wider text-[#6b7c94]">
+                  <label htmlFor="telefono" className="text-[11px] font-bold uppercase tracking-wider text-[#4e5f80]">
                     Teléfono celular
                   </label>
                   <div className="relative">
-                    <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 font-semibold text-[14.5px] text-[#6b7c94]">
+                    <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 font-semibold text-[14.5px] text-[#4e5f80]">
                       +52
                     </span>
                     <input
@@ -682,10 +682,10 @@ export default function PaginaRegistro() {
                       aria-invalid={errorCampo?.campo === "telefono" ? "true" : undefined}
                       aria-describedby={errorCampo?.campo === "telefono" ? "telefono-error" : "telefono-ayuda"}
                       className={[
-                        "w-full rounded-2xl border py-3.5 pl-15 pr-10 text-[15px] font-medium text-[#0b1e33] outline-none transition",
+                        "w-full rounded-2xl border py-3.5 pl-15 pr-10 text-[15px] font-medium text-[#0a2342] outline-none transition",
                         errorCampo?.campo === "telefono"
                           ? "border-red-400 bg-red-50/40 focus:border-red-500"
-                          : "border-[#e6edf6] bg-[#fafcfe] focus:border-[#0b1e33] focus:bg-white focus:ring-4 focus:ring-[#0b1e33]/5",
+                          : "border-[#e6edf6] bg-[#fafcfe] focus:border-[#0a2342] focus:bg-white focus:ring-4 focus:ring-[#0a2342]/5",
                       ].join(" ")}
                     />
                     {telefonoVerificado && (
@@ -700,7 +700,7 @@ export default function PaginaRegistro() {
                       {errorCampo.mensaje}
                     </p>
                   ) : (
-                    <p id="telefono-ayuda" className="flex items-center gap-1.5 text-[11.5px] font-medium text-[#8b9bb0]">
+                    <p id="telefono-ayuda" className="flex items-center gap-1.5 text-[11.5px] font-medium text-[#4e5f80]">
                       <IconoInfo className="text-[#2e5a88] shrink-0" />
                       Para notificaciones de tu traslado. Sin código de país.
                     </p>
@@ -720,16 +720,16 @@ export default function PaginaRegistro() {
               <button
                 type="submit"
                 disabled={enviandoOtp}
-                className="mt-6 flex w-full cursor-pointer items-center justify-center gap-2.5 rounded-[18px] bg-[#0b1e33] py-4 px-5 text-[16px] font-bold text-white shadow-[0_14px_28px_-10px_rgba(11,30,51,0.45)] transition hover:bg-[#162c47] active:scale-[0.98] disabled:opacity-60"
+                className="mt-6 flex w-full cursor-pointer items-center justify-center gap-2.5 rounded-[18px] bg-[#0a2342] py-4 px-5 text-[16px] font-bold text-white shadow-[0_14px_28px_-10px_rgba(11,30,51,0.45)] transition hover:bg-[#143560] active:scale-[0.98] disabled:opacity-60"
               >
                 <span>{enviandoOtp ? "Enviando código SMS…" : "Continuar"}</span>
                 <IconoFlechaDerecha />
               </button>
 
               {/* Enlace a Login */}
-              <div className="mt-4 text-center text-[13px] font-medium text-[#6b7c94]">
+              <div className="mt-4 text-center text-[13px] font-medium text-[#4e5f80]">
                 ¿Ya tienes cuenta?
-                <Link href="/login" className="ml-1 font-bold text-[#0b1e33] hover:underline">
+                <Link href="/login" className="ml-1 font-bold text-[#0a2342] hover:underline">
                   Inicia sesión
                 </Link>
               </div>
@@ -744,7 +744,7 @@ export default function PaginaRegistro() {
               {/* Icono de credenciales */}
               <div className="mb-3.5 flex justify-center">
                 <div className="relative flex size-[76px] items-center justify-center rounded-[26px] text-white shadow-[0_18px_36px_-12px_rgba(11,30,51,0.4)]"
-                  style={{ background: "linear-gradient(135deg, #0b1e33 0%, #2e5a88 100%)" }}
+                  style={{ background: "linear-gradient(135deg, #0a2342 0%, #2e5a88 100%)" }}
                 >
                   <IconoLlave className="size-7.5 text-white" />
                   <div className="absolute -bottom-1 -right-1 flex size-6.5 items-center justify-center rounded-full border-2 border-white bg-[#e9f3ee] text-xs text-[#1f6b4a]">
@@ -754,17 +754,17 @@ export default function PaginaRegistro() {
               </div>
 
               {/* Título y descripción */}
-              <h2 className="text-center text-[23px] font-extrabold tracking-tight text-[#0b1e33] leading-tight mb-1">
+              <h2 className="text-center text-[23px] font-extrabold tracking-tight text-[#0a2342] leading-tight mb-1">
                 Elige tus credenciales
               </h2>
-              <p className="text-center text-[13px] font-medium text-[#6b7c94] leading-relaxed mb-4">
+              <p className="text-center text-[13px] font-medium text-[#4e5f80] leading-relaxed mb-4">
                 Con esto accederás a tu cuenta y recibirás notificaciones de tus traslados.
               </p>
 
               <div className="flex flex-col gap-3.5">
                 {/* Correo electrónico */}
                 <div className="flex flex-col gap-1.5">
-                  <label htmlFor="email" className="text-[11px] font-bold uppercase tracking-wider text-[#6b7c94]">
+                  <label htmlFor="email" className="text-[11px] font-bold uppercase tracking-wider text-[#4e5f80]">
                     Correo electrónico
                   </label>
                   <div className="relative">
@@ -787,10 +787,10 @@ export default function PaginaRegistro() {
                       aria-invalid={errorCampo?.campo === "email" ? "true" : undefined}
                       aria-describedby={errorCampo?.campo === "email" ? "email-error" : undefined}
                       className={[
-                        "w-full rounded-2xl border py-3.5 pl-10 pr-3.5 text-[14.5px] font-medium text-[#0b1e33] outline-none transition",
+                        "w-full rounded-2xl border py-3.5 pl-10 pr-3.5 text-[14.5px] font-medium text-[#0a2342] outline-none transition",
                         errorCampo?.campo === "email"
                           ? "border-red-400 bg-red-50/40 focus:border-red-500"
-                          : "border-[#e6edf6] bg-[#fafcfe] focus:border-[#0b1e33] focus:bg-white focus:ring-4 focus:ring-[#0b1e33]/5",
+                          : "border-[#e6edf6] bg-[#fafcfe] focus:border-[#0a2342] focus:bg-white focus:ring-4 focus:ring-[#0a2342]/5",
                       ].join(" ")}
                     />
                   </div>
@@ -803,7 +803,7 @@ export default function PaginaRegistro() {
 
                 {/* Contraseña */}
                 <div className="flex flex-col gap-1.5">
-                  <label htmlFor="password" className="text-[11px] font-bold uppercase tracking-wider text-[#6b7c94]">
+                  <label htmlFor="password" className="text-[11px] font-bold uppercase tracking-wider text-[#4e5f80]">
                     Contraseña
                   </label>
                   <div className="relative">
@@ -825,10 +825,10 @@ export default function PaginaRegistro() {
                       aria-invalid={errorCampo?.campo === "password" ? "true" : undefined}
                       aria-describedby={errorCampo?.campo === "password" ? "password-error" : undefined}
                       className={[
-                        "w-full rounded-2xl border py-3.5 pl-10 pr-11 text-[14.5px] font-medium text-[#0b1e33] outline-none transition",
+                        "w-full rounded-2xl border py-3.5 pl-10 pr-11 text-[14.5px] font-medium text-[#0a2342] outline-none transition",
                         errorCampo?.campo === "password"
                           ? "border-red-400 bg-red-50/40 focus:border-red-500"
-                          : "border-[#e6edf6] bg-[#fafcfe] focus:border-[#0b1e33] focus:bg-white focus:ring-4 focus:ring-[#0b1e33]/5",
+                          : "border-[#e6edf6] bg-[#fafcfe] focus:border-[#0a2342] focus:bg-white focus:ring-4 focus:ring-[#0a2342]/5",
                       ].join(" ")}
                     />
                     <button
@@ -836,7 +836,7 @@ export default function PaginaRegistro() {
                       tabIndex={-1}
                       onClick={() => setMostrarPassword((v) => !v)}
                       aria-label={mostrarPassword ? "Ocultar contraseña" : "Ver contraseña"}
-                      className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#b0bfd0] hover:text-[#0b1e33] transition cursor-pointer"
+                      className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#b0bfd0] hover:text-[#0a2342] transition cursor-pointer"
                     >
                       {mostrarPassword ? <IconoOjoCerrado className="size-4.5" /> : <IconoOjo className="size-4.5" />}
                     </button>
@@ -849,19 +849,19 @@ export default function PaginaRegistro() {
 
                   {/* Requisitos de contraseña interactivos */}
                   <div className="mt-1 flex flex-col gap-1.5 rounded-2xl border border-[#eef2f7] bg-[#f8fafd] p-3.5" aria-label="Requisitos de contraseña">
-                    <div className={["flex items-center gap-2 text-[12px] font-medium transition", checkLongitud ? "text-[#1f6b4a] font-semibold" : "text-[#8b9bb0]"].join(" ")}>
+                    <div className={["flex items-center gap-2 text-[12px] font-medium transition", checkLongitud ? "text-[#1f6b4a] font-semibold" : "text-[#4e5f80]"].join(" ")}>
                       {checkLongitud ? <IconoCheckCirculo className="size-3.5 text-emerald-600" /> : <IconoCirculoVacio className="size-3.5 text-[#b0bfd0]" />}
                       <span>Mínimo 8 caracteres</span>
                     </div>
-                    <div className={["flex items-center gap-2 text-[12px] font-medium transition", checkMinuscula ? "text-[#1f6b4a] font-semibold" : "text-[#8b9bb0]"].join(" ")}>
+                    <div className={["flex items-center gap-2 text-[12px] font-medium transition", checkMinuscula ? "text-[#1f6b4a] font-semibold" : "text-[#4e5f80]"].join(" ")}>
                       {checkMinuscula ? <IconoCheckCirculo className="size-3.5 text-emerald-600" /> : <IconoCirculoVacio className="size-3.5 text-[#b0bfd0]" />}
                       <span>Al menos una letra minúscula</span>
                     </div>
-                    <div className={["flex items-center gap-2 text-[12px] font-medium transition", checkMayuscula ? "text-[#1f6b4a] font-semibold" : "text-[#8b9bb0]"].join(" ")}>
+                    <div className={["flex items-center gap-2 text-[12px] font-medium transition", checkMayuscula ? "text-[#1f6b4a] font-semibold" : "text-[#4e5f80]"].join(" ")}>
                       {checkMayuscula ? <IconoCheckCirculo className="size-3.5 text-emerald-600" /> : <IconoCirculoVacio className="size-3.5 text-[#b0bfd0]" />}
                       <span>Al menos una letra mayúscula</span>
                     </div>
-                    <div className={["flex items-center gap-2 text-[12px] font-medium transition", checkNumero ? "text-[#1f6b4a] font-semibold" : "text-[#8b9bb0]"].join(" ")}>
+                    <div className={["flex items-center gap-2 text-[12px] font-medium transition", checkNumero ? "text-[#1f6b4a] font-semibold" : "text-[#4e5f80]"].join(" ")}>
                       {checkNumero ? <IconoCheckCirculo className="size-3.5 text-emerald-600" /> : <IconoCirculoVacio className="size-3.5 text-[#b0bfd0]" />}
                       <span>Al menos un número</span>
                     </div>
@@ -870,7 +870,7 @@ export default function PaginaRegistro() {
 
                 {/* Confirmar contraseña */}
                 <div className="flex flex-col gap-1.5">
-                  <label htmlFor="confirmarPassword" className="text-[11px] font-bold uppercase tracking-wider text-[#6b7c94]">
+                  <label htmlFor="confirmarPassword" className="text-[11px] font-bold uppercase tracking-wider text-[#4e5f80]">
                     Confirmar contraseña
                   </label>
                   <div className="relative">
@@ -892,10 +892,10 @@ export default function PaginaRegistro() {
                       aria-invalid={errorCampo?.campo === "confirmarPassword" ? "true" : undefined}
                       aria-describedby={errorCampo?.campo === "confirmarPassword" ? "confirmar-error" : undefined}
                       className={[
-                        "w-full rounded-2xl border py-3.5 pl-10 pr-11 text-[14.5px] font-medium text-[#0b1e33] outline-none transition",
+                        "w-full rounded-2xl border py-3.5 pl-10 pr-11 text-[14.5px] font-medium text-[#0a2342] outline-none transition",
                         errorCampo?.campo === "confirmarPassword"
                           ? "border-red-400 bg-red-50/40 focus:border-red-500"
-                          : "border-[#e6edf6] bg-[#fafcfe] focus:border-[#0b1e33] focus:bg-white focus:ring-4 focus:ring-[#0b1e33]/5",
+                          : "border-[#e6edf6] bg-[#fafcfe] focus:border-[#0a2342] focus:bg-white focus:ring-4 focus:ring-[#0a2342]/5",
                       ].join(" ")}
                     />
                     <button
@@ -903,7 +903,7 @@ export default function PaginaRegistro() {
                       tabIndex={-1}
                       onClick={() => setMostrarConfirmar((v) => !v)}
                       aria-label={mostrarConfirmar ? "Ocultar confirmación" : "Ver confirmación"}
-                      className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#b0bfd0] hover:text-[#0b1e33] transition cursor-pointer"
+                      className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#b0bfd0] hover:text-[#0a2342] transition cursor-pointer"
                     >
                       {mostrarConfirmar ? <IconoOjoCerrado className="size-4.5" /> : <IconoOjo className="size-4.5" />}
                     </button>
@@ -942,7 +942,7 @@ export default function PaginaRegistro() {
                       }}
                       aria-invalid={errorCampo?.campo === "terminos" ? "true" : undefined}
                       aria-describedby={errorCampo?.campo === "terminos" ? "terminos-error" : undefined}
-                      className="mt-0.5 size-5 shrink-0 rounded-md border-2 border-[#d5e2f0] accent-[#0b1e33] cursor-pointer"
+                      className="mt-0.5 size-5 shrink-0 rounded-md border-2 border-[#d5e2f0] accent-[#0a2342] cursor-pointer"
                     />
                     <span className="text-[12.5px] font-medium text-[#4d6079] leading-snug">
                       Acepto los{" "}
@@ -987,16 +987,16 @@ export default function PaginaRegistro() {
                 type="submit"
                 disabled={enviando}
                 aria-busy={enviando}
-                className="mt-6 flex w-full cursor-pointer items-center justify-center gap-2.5 rounded-[18px] bg-[#0b1e33] py-4 px-5 text-[16px] font-bold text-white shadow-[0_14px_28px_-10px_rgba(11,30,51,0.45)] transition hover:bg-[#162c47] active:scale-[0.98] disabled:opacity-60"
+                className="mt-6 flex w-full cursor-pointer items-center justify-center gap-2.5 rounded-[18px] bg-[#0a2342] py-4 px-5 text-[16px] font-bold text-white shadow-[0_14px_28px_-10px_rgba(11,30,51,0.45)] transition hover:bg-[#143560] active:scale-[0.98] disabled:opacity-60"
               >
                 <IconoUsuarioPlus className="size-5 text-white" />
                 <span>{enviando ? "Creando tu cuenta…" : "Crear cuenta"}</span>
               </button>
 
               {/* Enlace a Login */}
-              <div className="mt-4 text-center text-[13px] font-medium text-[#6b7c94]">
+              <div className="mt-4 text-center text-[13px] font-medium text-[#4e5f80]">
                 ¿Ya tienes cuenta?
-                <Link href="/login" className="ml-1 font-bold text-[#0b1e33] hover:underline">
+                <Link href="/login" className="ml-1 font-bold text-[#0a2342] hover:underline">
                   Inicia sesión
                 </Link>
               </div>
@@ -1013,11 +1013,11 @@ export default function PaginaRegistro() {
             aria-live="polite"
             className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-white/95 backdrop-blur-sm p-6 text-center animate-fade-in"
           >
-            <div className="size-14 rounded-full border-4 border-[#e8eef6] border-t-[#0b1e33] animate-spin mb-4" />
-            <h3 className="text-[19px] font-extrabold text-[#0b1e33] tracking-tight mb-1">
+            <div className="size-14 rounded-full border-4 border-[#e8eef6] border-t-[#0a2342] animate-spin mb-4" />
+            <h3 className="text-[19px] font-extrabold text-[#0a2342] tracking-tight mb-1">
               Creando tu cuenta...
             </h3>
-            <p className="text-[13px] font-medium text-[#6b7c94]">
+            <p className="text-[13px] font-medium text-[#4e5f80]">
               Estamos registrando tus credenciales.
             </p>
           </div>
@@ -1053,12 +1053,12 @@ export default function PaginaRegistro() {
                 </svg>
               </div>
 
-              <h2 id="modal-sms-titulo" className="text-center text-[20px] font-extrabold tracking-tight text-[#0b1e33]">
+              <h2 id="modal-sms-titulo" className="text-center text-[20px] font-extrabold tracking-tight text-[#0a2342]">
                 Verifica tu número celular
               </h2>
-              <p id="modal-sms-desc" className="mt-1 text-center text-[13px] font-medium text-[#6b7c94] leading-relaxed">
+              <p id="modal-sms-desc" className="mt-1 text-center text-[13px] font-medium text-[#4e5f80] leading-relaxed">
                 Enviamos un código de 6 dígitos por SMS al número{" "}
-                <strong className="font-bold text-[#0b1e33]">
+                <strong className="font-bold text-[#0a2342]">
                   +52 {telefono.length === 10 ? `${telefono.slice(0, 2)} ${telefono.slice(2, 6)} ${telefono.slice(6, 10)}` : telefono}
                 </strong>.
               </p>
@@ -1078,7 +1078,7 @@ export default function PaginaRegistro() {
 
               <form onSubmit={confirmarCodigoOtp} className="mt-5 flex flex-col gap-3.5" noValidate>
                 <div className="flex flex-col gap-1.5">
-                  <label htmlFor="codigo-sms" className="text-center text-[11px] font-bold uppercase tracking-wider text-[#6b7c94]">
+                  <label htmlFor="codigo-sms" className="text-center text-[11px] font-bold uppercase tracking-wider text-[#4e5f80]">
                     Código de verificación SMS
                   </label>
                   <input
@@ -1094,7 +1094,7 @@ export default function PaginaRegistro() {
                       if (errorOtp) setErrorOtp(null);
                     }}
                     placeholder="123456"
-                    className="w-full text-center tracking-[0.35em] font-mono text-2xl font-bold py-3.5 px-4 rounded-2xl border border-slate-300 bg-slate-50 text-[#0b1e33] placeholder:text-slate-400 focus:border-[#0b1e33] focus:bg-white focus:outline-none focus:ring-4 focus:ring-[#0b1e33]/10 transition"
+                    className="w-full text-center tracking-[0.35em] font-mono text-2xl font-bold py-3.5 px-4 rounded-2xl border border-slate-300 bg-slate-50 text-[#0a2342] placeholder:text-slate-400 focus:border-[#0a2342] focus:bg-white focus:outline-none focus:ring-4 focus:ring-[#0a2342]/10 transition"
                     required
                   />
                 </div>
@@ -1108,15 +1108,15 @@ export default function PaginaRegistro() {
                 <button
                   type="submit"
                   disabled={codigoOtp.length !== 6 || verificandoOtp}
-                  className="w-full rounded-2xl bg-[#0b1e33] py-3.5 px-4 text-[15px] font-bold text-white shadow-lg transition hover:bg-[#162c47] active:scale-98 disabled:opacity-50 cursor-pointer"
+                  className="w-full rounded-2xl bg-[#0a2342] py-3.5 px-4 text-[15px] font-bold text-white shadow-lg transition hover:bg-[#143560] active:scale-98 disabled:opacity-50 cursor-pointer"
                 >
                   {verificandoOtp ? "Verificando código…" : "Verificar y continuar"}
                 </button>
 
                 <div className="flex flex-col items-center gap-1 pt-1 text-center">
                   {segundosReenvio > 0 ? (
-                    <p className="text-[12px] font-medium text-[#6b7c94]">
-                      Reenviar código en <span className="font-bold text-[#0b1e33]">{segundosReenvio}s</span>
+                    <p className="text-[12px] font-medium text-[#4e5f80]">
+                      Reenviar código en <span className="font-bold text-[#0a2342]">{segundosReenvio}s</span>
                     </p>
                   ) : (
                     <button
@@ -1128,7 +1128,7 @@ export default function PaginaRegistro() {
                       {enviandoOtp ? "Enviando código…" : "¿No recibiste el código? Reenviar SMS"}
                     </button>
                   )}
-                  <span className="text-[11px] font-medium text-[#8b9bb0]">
+                  <span className="text-[11px] font-medium text-[#4e5f80]">
                     El código tiene una vigencia de 10 minutos.
                   </span>
                 </div>

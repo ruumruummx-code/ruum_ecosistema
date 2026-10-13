@@ -2,14 +2,10 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Aviso, Field } from "@ruum/ui";
+import { Aviso, Field, MobileShell, MobileCard, MobileButton } from "@ruum/ui";
 import { fortalezaPassword, observarSesionRecuperacion, passwordCumpleRequisitos, requisitosPassword, traducirErrorAuth } from "@ruum/shared/utils";
 import { crearClienteNavegador, tieneSupabaseConfigurado } from "../../lib/supabase-browser";
-import {
-  botonAzul,
-  LogoRuum,
-  PantallaPublica,
-} from "../experiencia-publica";
+import { LogoRuum } from "../experiencia-publica";
 
 export default function PaginaNuevaPassword() {
   const router = useRouter();
@@ -18,12 +14,8 @@ export default function PaginaNuevaPassword() {
   const [enviando, setEnviando] = useState(false);
   const [listo, setListo] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  /* Supabase establece la sesión desde el hash del URL automáticamente
-     al cargar el cliente. Verificamos que haya sesión activa. */
   const [sesionLista, setSesionLista] = useState(false);
   const [verificando, setVerificando] = useState(true);
-  /* ACC-6 (auditoría): se separa el error de campo del aviso de la pantalla,
-     que se anuncia con role="alert" y no con aria-live="polite". */
   const [errorCampo, setErrorCampo] = useState<{ campo: "password" | "confirmar"; mensaje: string } | null>(null);
   const passwordRef = useRef<HTMLInputElement>(null);
   const confirmarRef = useRef<HTMLInputElement>(null);
@@ -50,9 +42,6 @@ export default function PaginaNuevaPassword() {
     let cleanupObserver: (() => void) | null = null;
 
     async function verificarAutorizacion() {
-      // PR-02 P0: Camino principal — verificación server-side (cookie httpOnly + sesión)
-      // Sobrevive al callback server-side y no depende del evento efímero PASSWORD_RECOVERY.
-      // Si el servidor confirma, autorizamos inmediatamente sin esperar 7s.
       try {
         const res = await fetch("/api/recovery/verify", { cache: "no-store", credentials: "same-origin" });
         const data = (await res.json().catch(() => ({}))) as { authorized?: boolean; autorizado?: boolean };
@@ -68,8 +57,6 @@ export default function PaginaNuevaPassword() {
 
       if (!activo || !montadoRef.current) return;
 
-      // Fallback hash legacy: observar PASSWORD_RECOVERY por ventana corta (no 7s)
-      // para compatibilidad con enlaces antiguos que usan fragmento #access_token
       const cliente = crearClienteNavegador();
       cleanupObserver = observarSesionRecuperacion(
         cliente.auth,
@@ -93,8 +80,6 @@ export default function PaginaNuevaPassword() {
 
   async function establecer(e: React.FormEvent) {
     e.preventDefault();
-    /* ACC-6 (auditoría): el error se asocia al campo responsable y el foco viaja
-       allí, en vez de pintarse solo como aviso global. */
     if (!passwordCumpleRequisitos(password)) {
       setError("La contraseña debe incluir minúscula, mayúscula y número.");
       setErrorCampo({ campo: "password", mensaje: "La contraseña debe incluir minúscula, mayúscula y número." });
@@ -107,31 +92,26 @@ export default function PaginaNuevaPassword() {
       confirmarRef.current?.focus();
       return;
     }
-    setErrorCampo(null);
 
     setEnviando(true);
     setError(null);
+    setErrorCampo(null);
 
     try {
+      if (!tieneSupabaseConfigurado()) {
+        throw new Error("Supabase no está configurado en este entorno.");
+      }
       const cliente = crearClienteNavegador();
-      const { error: errorAuth } = await cliente.auth.updateUser({ password });
-      if (errorAuth) throw errorAuth;
+      const { error: errUpdate } = await cliente.auth.updateUser({ password });
+      if (errUpdate) throw errUpdate;
 
-      // PR-02 P0: invalidar contexto temporal de recovery para que no sea reutilizable
       try {
         await fetch("/api/recovery/clear", { method: "POST", cache: "no-store", credentials: "same-origin" });
       } catch {}
 
-      /* F-4 (auditoría): /api/recovery/clear solo borra cookies httpOnly; nunca
-         revocaba la sesión de Supabase creada por el enlace de recovery. Esa
-         sesión seguía viva (y con refresh token rotatorio, indefinidamente),
-         así que "cambiar la contraseña" no cerraba la puerta a quien tuviera la
-         sesión. Se cierra la sesión y se manda a /login. */
       try {
         await cliente.auth.signOut();
-      } catch {
-        // best-effort: si falla, la redirección a /login sigue siendo lo seguro
-      }
+      } catch {}
 
       if (!montadoRef.current) return;
       setListo(true);
@@ -148,95 +128,113 @@ export default function PaginaNuevaPassword() {
   const pwd = fortalezaPassword(password);
 
   return (
-    <PantallaPublica>
-      <section className="flex min-h-screen flex-col px-5 py-10">
-        <Link href="/login" className="font-body text-xs text-route-action transition hover:text-text-primary">
+    <MobileShell variant="compact">
+      <div className="flex min-h-screen flex-col justify-center px-4 py-8 sm:px-6">
+        <Link
+          href="/login"
+          className="mb-6 inline-flex min-h-11 items-center gap-1 text-[13.5px] font-bold text-[#104ca0] transition hover:text-[#0a2342] dark:text-[#6ba8ff] dark:hover:text-[#a8b5cc]"
+        >
           ← Inicio de sesión
         </Link>
 
-        <LogoRuum className="mx-auto mt-8 text-center" />
+        <div className="mb-8 flex justify-center">
+          <LogoRuum />
+        </div>
 
-        {/* ACC-6 (auditoría): esta pantalla cambia por completo de contenido según el
-             resultado de una verificación asíncrona (verificando / listo / sesión
-             no válida). Sin live region el lector de pantalla no anuncia nada y
-             el usuario queda ante un silencio. */}
-        <div
-          className="mt-14 rounded-card border border-border bg-surface px-5 py-7 shadow-[var(--ruum-shadow-3)]"
+        <MobileCard
+          elevated
+          className="p-6 sm:p-7"
           aria-live="polite"
           aria-atomic="true"
         >
           {verificando ? (
-            <p className="py-4 text-center font-body text-sm text-text-secondary">Verificando enlace…</p>
+            <p className="py-6 text-center text-[14px] font-medium text-[#4e5f80] dark:text-[#a8b5cc]">
+              Verificando enlace…
+            </p>
           ) : listo ? (
-            <div className="grid gap-4 text-center">
-              <div className="mx-auto flex size-14 items-center justify-center rounded-full bg-control-soft">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
-                  stroke="#1d9e75" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"
-                  aria-hidden="true"><path d="M20 6L9 17l-5-5" /></svg>
-              </div>
-              <h1 className="font-display text-[22px] font-extrabold text-text-primary">Contraseña actualizada</h1>
-              <p className="font-body text-sm text-text-secondary">
+            <div className="flex flex-col items-center gap-3.5 text-center">
+              <span aria-hidden="true" className="flex size-14 items-center justify-center rounded-full bg-[#e9f3ee] text-[#08705f] dark:bg-[#0a2e1f] dark:text-[#4dd9a3]">
+                <svg className="size-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <path d="M20 6L9 17l-5-5" />
+                </svg>
+              </span>
+              <h1 className="text-[20px] font-extrabold tracking-tight text-[#0a2342] dark:text-[#f6f8fb]">
+                Contraseña actualizada
+              </h1>
+              <p className="text-[13.5px] font-medium leading-relaxed text-[#4e5f80] dark:text-[#a8b5cc]">
                 Tu contraseña fue actualizada y cerramos esta sesión por seguridad.
                 Inicia sesión de nuevo para continuar. Redirigiendo…
               </p>
             </div>
           ) : !sesionLista ? (
-            /* El enlace inválido es un error: se anuncia con role="alert" para
-               interrumpir, no con la región polite del contenedor. */
-            <div className="grid gap-4" role="alert">
-              <h1 className="font-display text-[22px] font-extrabold text-text-primary">Enlace inválido o expirado</h1>
-              <p className="font-body text-sm leading-6 text-text-secondary">
+            <div className="flex flex-col gap-3.5" role="alert">
+              <h1 className="text-[20px] font-extrabold tracking-tight text-[#0a2342] dark:text-[#f6f8fb]">
+                Enlace inválido o expirado
+              </h1>
+              <p className="text-[13.5px] font-medium leading-relaxed text-[#4e5f80] dark:text-[#a8b5cc]">
                 El enlace de recuperación expiró o ya fue usado. Los enlaces son válidos por 60 minutos y solo se pueden usar una vez.
               </p>
-              <Link href="/recuperar-password" className={botonAzul}>
+              <Link
+                href="/recuperar-password"
+                className="mt-2 inline-flex min-h-[52px] w-full items-center justify-center rounded-2xl bg-[#0a2342] px-6 text-[15px] font-bold text-white shadow-lg transition hover:bg-[#143560] active:scale-98 dark:bg-[#104ca0] dark:hover:bg-[#0d3f85]"
+              >
                 Solicitar un nuevo enlace
               </Link>
             </div>
           ) : (
             <>
-              <h1 className="font-display text-[22px] font-extrabold leading-tight text-text-primary">
+              <h1 className="text-[20px] font-extrabold tracking-tight text-[#0a2342] dark:text-[#f6f8fb]">
                 Nueva contraseña
               </h1>
-              <p className="mt-2 font-body text-xs leading-5 text-text-secondary">
+              <p className="mt-1.5 text-[13px] font-medium leading-relaxed text-[#4e5f80] dark:text-[#a8b5cc]">
                 Elige una contraseña segura. Mínimo 8 caracteres.
               </p>
 
-              <form className="mt-7 grid gap-4" onSubmit={establecer} noValidate>
+              <form className="mt-6 flex flex-col gap-4" onSubmit={establecer} noValidate>
                 {/* Contraseña */}
                 <div className="flex flex-col gap-1.5">
                   <Field
                     ref={passwordRef}
                     etiqueta="Nueva contraseña"
-                    etiquetaClassName="text-text-secondary text-xs font-medium"
+                    etiquetaClassName="text-[12px] font-semibold uppercase tracking-wider text-[#4e5f80] dark:text-[#a8b5cc]"
                     type="password"
-                    passwordToggleClassName="text-text-secondary hover:bg-surface-elevated hover:text-text-primary focus-visible:outline-focus"
                     value={password}
-                    onChange={(e) => { setPassword(e.target.value); if (errorCampo?.campo === "password") setErrorCampo(null); }}
+                    onChange={(e) => {
+                      setPassword(e.target.value);
+                      if (errorCampo?.campo === "password") setErrorCampo(null);
+                    }}
                     error={errorCampo?.campo === "password" ? errorCampo.mensaje : undefined}
                     required
                     minLength={8}
                     autoComplete="new-password"
                     placeholder="Mínimo 8 caracteres"
-                    className="border-border bg-surface text-text-primary placeholder:text-text-tertiary focus:border-route-action focus:ring-route-action/25"
+                    className="w-full rounded-2xl border border-[#e6edf6] bg-[#fafcfe] py-3.5 px-4 text-[14.5px] font-medium text-[#0a2342] outline-none transition placeholder:text-[#8b9bb0] focus:border-[#0a2342] focus:bg-white focus:ring-4 focus:ring-[#0a2342]/5 dark:border-[#1a3a5c] dark:bg-[#061529] dark:text-[#f6f8fb] dark:focus:border-[#4d94ff] dark:focus:bg-[#0a2342]"
                   />
                   {password.length > 0 && (
-                    <>
+                    <div className="mt-1 flex flex-col gap-1">
                       <div className="flex gap-1">
-                        {[1, 2, 3].map(n => (
-                          <div key={n} className={[
-                            "h-1 flex-1 rounded-full transition-all",
-                            n <= pwd.nivel
-                              ? pwd.nivel === 1 ? "bg-status-error" : pwd.nivel === 2 ? "bg-warning" : "bg-success"
-                              : "bg-border-strong",
-                          ].join(" ")} />
+                        {[1, 2, 3].map((n) => (
+                          <div
+                            key={n}
+                            className={[
+                              "h-1 flex-1 rounded-full transition-all",
+                              n <= pwd.nivel
+                                ? pwd.nivel === 1
+                                  ? "bg-[#9a2637]"
+                                  : pwd.nivel === 2
+                                    ? "bg-[#765100]"
+                                    : "bg-[#08705f]"
+                                : "bg-[#e6edf6] dark:bg-[#1a3a5c]",
+                            ].join(" ")}
+                          />
                         ))}
                       </div>
                       {pwd.etiqueta && (
-                        <span className="font-body text-xs text-text-tertiary">{pwd.etiqueta}</span>
+                        <span className="text-[11.5px] font-medium text-[#4e5f80] dark:text-[#a8b5cc]">{pwd.etiqueta}</span>
                       )}
-                    </>
+                    </div>
                   )}
-                  <ul className="mt-1 flex flex-col gap-1 font-body text-xs leading-5" aria-label="Requisitos de contraseña">
+                  <ul className="mt-1 flex flex-col gap-1 text-[12px] leading-5" aria-label="Requisitos de contraseña">
                     {requisitosPassword(password).map((requisito) => {
                       const etiquetas: Record<string, string> = {
                         longitud: "Mínimo 8 caracteres",
@@ -247,7 +245,7 @@ export default function PaginaNuevaPassword() {
                       return (
                         <li
                           key={requisito.clave}
-                          className={requisito.cumplido ? "text-success" : "text-text-tertiary"}
+                          className={requisito.cumplido ? "font-semibold text-[#08705f] dark:text-[#4dd9a3]" : "font-medium text-[#4e5f80] dark:text-[#a8b5cc]"}
                         >
                           {requisito.cumplido ? "✓" : "○"} {etiquetas[requisito.clave]}
                         </li>
@@ -256,37 +254,44 @@ export default function PaginaNuevaPassword() {
                   </ul>
                 </div>
 
-                <Field
-                  ref={confirmarRef}
-                  etiqueta="Confirmar nueva contraseña"
-                  etiquetaClassName="text-text-secondary text-xs font-medium"
-                  type="password"
-                  passwordToggleClassName="text-text-secondary hover:bg-surface-elevated hover:text-text-primary focus-visible:outline-focus"
-                  value={confirmar}
-                  onChange={(e) => { setConfirmar(e.target.value); if (errorCampo?.campo === "confirmar") setErrorCampo(null); }}
-                  error={errorCampo?.campo === "confirmar" ? errorCampo.mensaje : undefined}
-                  required
-                  autoComplete="new-password"
-                  placeholder="Repite tu contraseña"
-                  className="border-border bg-surface text-text-primary placeholder:text-text-tertiary focus:border-route-action focus:ring-route-action/25"
-                />
+                <div className="flex flex-col gap-1.5">
+                  <Field
+                    ref={confirmarRef}
+                    etiqueta="Confirmar nueva contraseña"
+                    etiquetaClassName="text-[12px] font-semibold uppercase tracking-wider text-[#4e5f80] dark:text-[#a8b5cc]"
+                    type="password"
+                    value={confirmar}
+                    onChange={(e) => {
+                      setConfirmar(e.target.value);
+                      if (errorCampo?.campo === "confirmar") setErrorCampo(null);
+                    }}
+                    error={errorCampo?.campo === "confirmar" ? errorCampo.mensaje : undefined}
+                    required
+                    autoComplete="new-password"
+                    placeholder="Repite tu contraseña"
+                    className="w-full rounded-2xl border border-[#e6edf6] bg-[#fafcfe] py-3.5 px-4 text-[14.5px] font-medium text-[#0a2342] outline-none transition placeholder:text-[#8b9bb0] focus:border-[#0a2342] focus:bg-white focus:ring-4 focus:ring-[#0a2342]/5 dark:border-[#1a3a5c] dark:bg-[#061529] dark:text-[#f6f8fb] dark:focus:border-[#4d94ff] dark:focus:bg-[#0a2342]"
+                  />
+                </div>
 
-                {/* ACC-5 (auditoría): role="alert" en vez de aria-live="polite",
-                    que retrasaba el anuncio del error. */}
                 {error && (
                   <div role="alert" aria-atomic="true">
                     <Aviso tono="danger">{error}</Aviso>
                   </div>
                 )}
 
-                <button type="submit" disabled={enviando} className={`${botonAzul} mt-2`}>
+                <MobileButton
+                  type="submit"
+                  disabled={enviando}
+                  loading={enviando}
+                  className="mt-2"
+                >
                   {enviando ? "Guardando…" : "Guardar nueva contraseña"}
-                </button>
+                </MobileButton>
               </form>
             </>
           )}
-        </div>
-      </section>
-    </PantallaPublica>
+        </MobileCard>
+      </div>
+    </MobileShell>
   );
 }

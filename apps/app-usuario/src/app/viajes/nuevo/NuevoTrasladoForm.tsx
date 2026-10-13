@@ -97,8 +97,8 @@ export function NuevoTrasladoForm() {
 
   return (
     <>
-      <NavegacionUsuario variante="claro" />
-      <main className="user-v2-scope user-v2-page user-v2-secondary-screen"><div className="mx-auto w-full max-w-[430px] px-4 py-6 sm:py-8">
+      <NavegacionUsuario variante="claro" mostrarNavegacionInferior={false} />
+      <main className="user-v2-scope user-v2-page user-v2-secondary-screen"><div className="mx-auto w-full max-w-[480px] px-4 py-6 sm:py-8">
         {/* Encabezado del flujo */}
         <div className="flex items-center gap-3.5">
           {t.paso > 0 ? (
@@ -106,7 +106,7 @@ export function NuevoTrasladoForm() {
               type="button"
               onClick={t.retrocederPaso}
               aria-label="Volver al paso anterior"
-              className="flex size-10 shrink-0 items-center justify-center rounded-full bg-[#f2f6fc] text-[#0b1e33] transition-transform active:scale-95"
+              className="flex size-10 shrink-0 items-center justify-center rounded-full bg-[#edf4fe] text-[#0a2342] transition-transform active:scale-95 dark:bg-[#0f2d52] dark:text-[#6ba8ff]"
             >
               <Icono nombre="atras" className="size-[18px]" strokeWidth={2} />
             </button>
@@ -114,19 +114,19 @@ export function NuevoTrasladoForm() {
             <Link
               href="/"
               aria-label="Volver al inicio"
-              className="flex size-10 shrink-0 items-center justify-center rounded-full bg-[#f2f6fc] text-[#0b1e33] transition-transform active:scale-95"
+              className="flex size-10 shrink-0 items-center justify-center rounded-full bg-[#edf4fe] text-[#0a2342] transition-transform active:scale-95 dark:bg-[#0f2d52] dark:text-[#6ba8ff]"
             >
               <Icono nombre="atras" className="size-[18px]" strokeWidth={2} />
             </Link>
           )}
           <div className="min-w-0">
-            <p className="truncate text-[17px] font-bold tracking-tight text-[#0b1e33]">Solicitar traslado</p>
-            <p className="mt-[1px] text-[11.5px] font-medium text-[#6b7c94]">
+            <p className="truncate text-[17px] font-bold tracking-tight text-[#0a2342] dark:text-[#f6f8fb]">Solicitar traslado</p>
+            <p className="mt-[1px] text-[11.5px] font-medium text-[#4e5f80] dark:text-[#a8b5cc]">
               Paso {t.paso + 1} de {PASOS.length}
               {SUBTITULOS_PASO[t.paso] ? ` · ${SUBTITULOS_PASO[t.paso]}` : ""}
             </p>
           </div>
-          <span className="ml-auto shrink-0 rounded-[20px] bg-[#f0f5fe] px-3 py-1.5 text-[12px] font-bold text-[#2e5a88]">
+          <span className="ml-auto shrink-0 rounded-full bg-[#edf4fe] px-3 py-1.5 text-[12px] font-bold text-[#104ca0] dark:bg-[#0f2d52] dark:text-[#6ba8ff]">
             {t.paso + 1}/{PASOS.length}
           </span>
         </div>
@@ -139,9 +139,9 @@ export function NuevoTrasladoForm() {
               className="h-1 flex-1 rounded-[10px]"
               style={
                 i < t.paso
-                  ? { background: "#0b1e33" }
+                  ? { background: "#0a2342" }
                   : i === t.paso
-                    ? { background: "linear-gradient(90deg, #0b1e33 50%, #e8eef6 50%)" }
+                    ? { background: "linear-gradient(90deg, #0a2342 50%, #e8eef6 50%)" }
                     : { background: "#e8eef6" }
               }
             />
@@ -149,15 +149,18 @@ export function NuevoTrasladoForm() {
         </div>
 
         {/* Título del paso */}
-        <h1 className="mb-1.5 mt-[22px] text-[22px] font-extrabold leading-snug tracking-tight text-[#0b1e33]">
+        <h1 className="mb-1.5 mt-[22px] text-[22px] font-extrabold leading-snug tracking-tight text-[#0a2342] dark:text-[#f6f8fb]">
           {PASOS[t.paso]}
         </h1>
-        <p className="mb-6 text-[13.5px] font-medium leading-relaxed text-[#6b7c94]">
+        <p className="mb-6 text-[13.5px] font-medium leading-relaxed text-[#4e5f80] dark:text-[#a8b5cc]">
           {DESCRIPCIONES_PASO[t.paso]}
         </p>
 
         <div className="mt-3 flex flex-wrap items-center gap-2 font-body text-xs">
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-signal/15 px-3 py-1 font-semibold text-ink border border-signal/30"><span aria-hidden="true">⏱</span> Te tomará ~3 min</span>
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-signal/15 px-3 py-1 font-semibold text-ink border border-signal/30">
+            <svg className="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            Te tomará ~3 min
+          </span>
           {t.estadoGuardado === "guardando" ? (
             <span
               className="inline-flex items-center gap-1.5 rounded-full bg-amber-500/15 border border-amber-500/30 px-3 py-1 text-amber-900 font-medium animate-pulse"
@@ -165,7 +168,8 @@ export function NuevoTrasladoForm() {
               aria-live="polite"
             >
               <span className="inline-block size-1.5 rounded-full bg-amber-500 animate-ping" aria-hidden="true" />
-              <span aria-hidden="true">💾</span> Guardando cambios…
+              <svg className="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+              Guardando cambios…
             </span>
           ) : t.estadoGuardado === "guardado" ? (
             <span
@@ -177,15 +181,15 @@ export function NuevoTrasladoForm() {
             </span>
           ) : (
             <span className="inline-flex items-center gap-1.5 rounded-full bg-surface border border-border px-3 py-1 text-text-secondary">
-              <span aria-hidden="true">💾</span> Guardado automático
+              <svg className="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+              Guardado automático
             </span>
           )}
         </div>
 
-
-        <aside aria-label="Acceso a carga masiva para múltiples traslados" className="mt-4 p-3.5 rounded-xl border border-border bg-surface-elevated flex items-center justify-between gap-3">
+        <aside aria-label="Acceso a carga masiva para múltiples traslados" className="mt-4 p-3.5 rounded-2xl border border-border bg-surface-elevated flex items-center justify-between gap-3">
           <div className="flex items-center gap-2.5 text-xs">
-            <span className="text-lg" aria-hidden="true">📁</span>
+            <svg className="size-5 text-[#104ca0] dark:text-[#6ba8ff]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2Z"/></svg>
             <div>
               <p className="font-bold text-text-primary">¿Tienes varios vehículos?</p>
               <p className="text-text-secondary text-xs">Crea hasta 100 traslados a la vez con un archivo CSV</p>
