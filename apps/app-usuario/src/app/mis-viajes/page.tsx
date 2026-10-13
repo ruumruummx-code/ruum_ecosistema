@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Aviso, Button, PassportCard } from "@ruum/ui";
+import { Aviso, Button, PassportCard, MobileShell } from "@ruum/ui";
 import type { Database } from "@ruum/shared/types";
 import { NavegacionUsuario } from "../NavegacionUsuario";
 import { MisTrasladosCliente } from "./MisViajesCliente";
@@ -86,19 +86,20 @@ export default async function PaginaMisTraslados({
   if (resultado.estado === "error") {
     return (
       <>
-      <NavegacionUsuario variante="claro" />
-      <main className="user-v2-scope user-v2-page"><div className="user-v2-content user-v2-content--wide py-12 text-center">
-          <Aviso tono="danger">
-            No pudimos cargar tus traslados en este momento. Inténtalo de nuevo en unos segundos.
-          </Aviso>
-          <div className="mt-6 flex justify-center">
-            <Link href="/soporte">
-              <Button className="w-full sm:w-auto">Reportar un problema</Button>
-            </Link>
+        <NavegacionUsuario variante="claro" />
+        <MobileShell variant="compact" navInferiorVisible={true}>
+          <div className="py-12 text-center">
+            <Aviso tono="danger">
+              No pudimos cargar tus traslados en este momento. Inténtalo de nuevo en unos segundos.
+            </Aviso>
+            <div className="mt-6 flex justify-center">
+              <Link href="/soporte">
+                <Button className="w-full sm:w-auto">Reportar un problema</Button>
+              </Link>
+            </div>
           </div>
-        </div>
-      </main>
-    </>
+        </MobileShell>
+      </>
     );
   }
 
@@ -109,10 +110,9 @@ export default async function PaginaMisTraslados({
   return (
     <>
       <NavegacionUsuario variante="claro" />
-      <main className="user-v2-scope user-v2-page"><div className="user-v2-content">
+      <MobileShell variant="compact" navInferiorVisible={true}>
         <MisTrasladosCliente Traslados={Traslados} pestanaInicial={pestañaActiva} />
-      </div>
-    </main>
+      </MobileShell>
     </>
   );
 }

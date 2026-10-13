@@ -1,7 +1,7 @@
 "use client";
 import React, { lazy, Suspense, useCallback, useEffect, useRef } from "react";
 import Link from "next/link";
-import { Button, Aviso } from "@ruum/ui";
+import { Button, Aviso, MobileShell } from "@ruum/ui";
 import { NavegacionUsuario } from "../../NavegacionUsuario";
 import { PASOS, SUBTITULOS_PASO, DESCRIPCIONES_PASO } from "./constants";
 import { formatearTiempoRelativoBorrador } from "@/lib/borrador-traslado";
@@ -68,37 +68,38 @@ export function NuevoTrasladoForm() {
   if (t.bloqueoVerificacion) {
     return (
       <>
-      <NavegacionUsuario variante="claro" />
-      <main className="user-v2-scope user-v2-page user-v2-secondary-screen"><div className="mx-auto max-w-xl px-6 py-12">
-          <p className="font-body text-xs font-semibold uppercase tracking-wide text-ink/45">Verificación requerida</p>
-          <h1 className="mt-2 font-display text-2xl font-semibold">Antes de solicitar un traslado</h1>
-          <div className="mt-5">
-            <Aviso tono="atencion">{t.bloqueoVerificacion}</Aviso>
+        <NavegacionUsuario variante="claro" mostrarNavegacionInferior={false} />
+        <MobileShell variant="compact" navInferiorVisible={false} as="main">
+          <div className="mx-auto max-w-xl py-8">
+            <p className="font-body text-xs font-semibold uppercase tracking-wide text-[#765100] dark:text-[#ffc933]">Verificación requerida</p>
+            <h1 className="mt-2 font-display text-2xl font-bold text-[#0a2342] dark:text-[#f6f8fb]">Antes de solicitar un traslado</h1>
+            <div className="mt-5">
+              <Aviso tono="atencion">{t.bloqueoVerificacion}</Aviso>
+            </div>
+            <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+              <Link
+                href="/verificacion?next=/viajes/nuevo"
+                className="inline-flex min-h-[52px] items-center justify-center rounded-2xl bg-[#0a2342] px-6 py-3 font-display text-sm font-bold text-white shadow-xs transition hover:bg-[#162c47] active:scale-[0.98] dark:bg-[#4d94ff] dark:text-[#061529]"
+              >
+                Ir a verificación
+              </Link>
+              <Link
+                href="/"
+                className="inline-flex min-h-[52px] items-center justify-center rounded-2xl border border-[#d7e1ee] bg-white px-6 py-3 font-body text-sm font-semibold text-[#0a2342] transition hover:bg-[#f6f8fb] active:scale-[0.98] dark:border-[#2d4f73] dark:bg-[#0a2342] dark:text-[#f6f8fb]"
+              >
+                Volver al inicio
+              </Link>
+            </div>
           </div>
-          <div className="mt-6 flex flex-col gap-3 sm:flex-row">
-            <Link
-              href="/verificacion?next=/viajes/nuevo"
-              className="inline-flex min-h-11 items-center justify-center rounded-xl bg-signal px-5 py-3 font-display text-sm font-bold text-ink shadow-sm transition hover:-translate-y-0.5 hover:bg-signal/90 focus-visible:outline-route-dark"
-            >
-              Ir a verificación
-            </Link>
-            <Link
-              href="/"
-              className="inline-flex min-h-11 items-center justify-center rounded-xl border border-ink/20 bg-mist px-5 py-3 font-body text-sm font-medium text-ink transition hover:border-ink/40 focus-visible:outline-route-dark"
-            >
-              Volver al inicio
-            </Link>
-          </div>
-        </div>
-      </main>
-    </>
+        </MobileShell>
+      </>
     );
   }
 
   return (
     <>
       <NavegacionUsuario variante="claro" mostrarNavegacionInferior={false} />
-      <main className="user-v2-scope user-v2-page user-v2-secondary-screen"><div className="mx-auto w-full max-w-[480px] px-4 py-6 sm:py-8">
+      <MobileShell variant="compact" navInferiorVisible={false} as="main">
         {/* Encabezado del flujo */}
         <div className="flex items-center gap-3.5">
           {t.paso > 0 ? (
@@ -157,13 +158,13 @@ export function NuevoTrasladoForm() {
         </p>
 
         <div className="mt-3 flex flex-wrap items-center gap-2 font-body text-xs">
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-signal/15 px-3 py-1 font-semibold text-ink border border-signal/30">
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-[#edf4fe] px-3 py-1 font-semibold text-[#104ca0] border border-[#d7e4f2] dark:bg-[#0f2d52] dark:text-[#6ba8ff] dark:border-[#2d4f73]">
             <svg className="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
             Te tomará ~3 min
           </span>
           {t.estadoGuardado === "guardando" ? (
             <span
-              className="inline-flex items-center gap-1.5 rounded-full bg-amber-500/15 border border-amber-500/30 px-3 py-1 text-amber-900 font-medium animate-pulse"
+              className="inline-flex items-center gap-1.5 rounded-full bg-amber-500/15 border border-amber-500/30 px-3 py-1 text-amber-900 font-medium animate-pulse dark:text-amber-200"
               role="status"
               aria-live="polite"
             >
@@ -173,32 +174,32 @@ export function NuevoTrasladoForm() {
             </span>
           ) : t.estadoGuardado === "guardado" ? (
             <span
-              className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 px-3 py-1 text-emerald-800 font-medium transition-all"
+              className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 px-3 py-1 text-emerald-800 font-medium transition-all dark:text-emerald-200"
               role="status"
               aria-live="polite"
             >
-              <span className="font-bold text-emerald-600" aria-hidden="true">✓</span> Guardado {t.tiempoUltimoGuardado ? formatearTiempoRelativoBorrador(t.tiempoUltimoGuardado) : "automático"}
+              <span className="font-bold text-emerald-600 dark:text-emerald-400" aria-hidden="true">✓</span> Guardado {t.tiempoUltimoGuardado ? formatearTiempoRelativoBorrador(t.tiempoUltimoGuardado) : "automático"}
             </span>
           ) : (
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-surface border border-border px-3 py-1 text-text-secondary">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-[#f8fafd] border border-[#e6edf6] px-3 py-1 text-[#4e5f80] dark:bg-[#0f2d52] dark:border-[#1a3a5c] dark:text-[#a8b5cc]">
               <svg className="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
               Guardado automático
             </span>
           )}
         </div>
 
-        <aside aria-label="Acceso a carga masiva para múltiples traslados" className="mt-4 p-3.5 rounded-2xl border border-border bg-surface-elevated flex items-center justify-between gap-3">
+        <aside aria-label="Acceso a carga masiva para múltiples traslados" className="mt-4 p-3.5 rounded-2xl border border-[#e6edf6] bg-white shadow-xs flex items-center justify-between gap-3 dark:border-[#1a3a5c] dark:bg-[#0a2342]">
           <div className="flex items-center gap-2.5 text-xs">
             <svg className="size-5 text-[#104ca0] dark:text-[#6ba8ff]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2Z"/></svg>
             <div>
-              <p className="font-bold text-text-primary">¿Tienes varios vehículos?</p>
-              <p className="text-text-secondary text-xs">Crea hasta 100 traslados a la vez con un archivo CSV</p>
+              <p className="font-bold text-[#0a2342] dark:text-[#f6f8fb]">¿Tienes varios vehículos?</p>
+              <p className="text-[#4e5f80] dark:text-[#a8b5cc] text-xs">Crea hasta 100 traslados a la vez con un archivo CSV</p>
             </div>
           </div>
           <Link
             href="/viajes/masivo"
             aria-label="Ir a carga masiva CSV, hasta 100 traslados"
-            className="text-xs font-bold text-route-action hover:underline whitespace-nowrap transition focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-route-action"
+            className="text-xs font-bold text-[#104ca0] dark:text-[#6ba8ff] hover:underline whitespace-nowrap transition focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-[#104ca0]"
           >
             Carga masiva CSV →
           </Link>
@@ -370,8 +371,7 @@ export function NuevoTrasladoForm() {
             ) : null}
           </div>
         )}
-      </div>
-    </main>
+      </MobileShell>
     </>
   );
 }

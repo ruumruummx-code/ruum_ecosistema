@@ -1,7 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import type { ReactNode } from "react";
-import { Aviso, Button, Icono, PassportCard, SENDAS_ICONO } from "@ruum/ui";
+import { Aviso, Button, Icono, PassportCard, SENDAS_ICONO, MobileShell } from "@ruum/ui";
 import { ETIQUETA_TIPO_VEHICULO } from "@ruum/shared/constants";
 import type { Database } from "@ruum/shared/types";
 import { PerfilCuentaForm } from "./PerfilCuentaForm";
@@ -203,20 +203,21 @@ export function AvisoErrorCuenta({ mensaje }: { mensaje?: string | null }) {
   return (
     <>
       <NavegacionUsuario variante="claro" />
-      <main className="user-v2-scope user-v2-page user-v2-secondary-screen"><div className="user-v2-content user-v2-content--wide py-12 sm:py-20 text-center">
-        <Aviso tono="danger">
-          {mensaje ?? "No pudimos cargar tu cuenta en este momento. Inténtalo de nuevo en unos segundos."}
-        </Aviso>
-        <div className="mt-6 flex flex-col gap-3 sm:flex-row justify-center">
-          <Link href="/soporte">
-            <Button className="w-full sm:w-auto">Reportar un problema</Button>
-          </Link>
-          <Link href="/">
-            <Button variant="secondary" className="w-full sm:w-auto">Ir al inicio</Button>
-          </Link>
+      <MobileShell variant="compact" navInferiorVisible={true} as="main">
+        <div className="py-12 sm:py-20 text-center">
+          <Aviso tono="danger">
+            {mensaje ?? "No pudimos cargar tu cuenta en este momento. Inténtalo de nuevo en unos segundos."}
+          </Aviso>
+          <div className="mt-6 flex flex-col gap-3 sm:flex-row justify-center">
+            <Link href="/soporte">
+              <Button className="w-full sm:w-auto">Reportar un problema</Button>
+            </Link>
+            <Link href="/">
+              <Button variant="secondary" className="w-full sm:w-auto">Ir al inicio</Button>
+            </Link>
+          </div>
         </div>
-      </div>
-    </main>
+      </MobileShell>
     </>
   );
 }
@@ -238,18 +239,19 @@ export function AvisoSinSesion() {
   return (
     <>
       <NavegacionUsuario variante="claro" />
-      <main className="user-v2-scope user-v2-page user-v2-secondary-screen"><div className="user-v2-content user-v2-content--wide py-12 sm:py-20 text-center">
-        <Aviso tono="info">Inicia sesión para consultar y actualizar los datos de tu cuenta.</Aviso>
-        <div className="mt-6 flex flex-col gap-3 sm:flex-row justify-center">
-        <Link href="/login?next=/cuenta">
-          <Button className="w-full sm:w-auto">Iniciar sesión</Button>
-        </Link>
-        <Link href="/registro">
-          <Button variant="secondary" className="w-full sm:w-auto">Crear cuenta</Button>
-        </Link>
+      <MobileShell variant="compact" navInferiorVisible={true} as="main">
+        <div className="py-12 sm:py-20 text-center">
+          <Aviso tono="info">Inicia sesión para consultar y actualizar los datos de tu cuenta.</Aviso>
+          <div className="mt-6 flex flex-col gap-3 sm:flex-row justify-center">
+            <Link href="/login?next=/cuenta">
+              <Button className="w-full sm:w-auto">Iniciar sesión</Button>
+            </Link>
+            <Link href="/registro">
+              <Button variant="secondary" className="w-full sm:w-auto">Crear cuenta</Button>
+            </Link>
+          </div>
         </div>
-      </div>
-    </main>
+      </MobileShell>
     </>
   );
 }

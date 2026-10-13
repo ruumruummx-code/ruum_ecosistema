@@ -191,7 +191,7 @@ export function TarjetaPasaporte({
     <section
       id={id}
       aria-labelledby={`${id}-titulo`}
-      className="scroll-mt-28 rounded-[22px] border border-[#eef2f7] bg-white p-5 shadow-[0_6px_16px_rgba(0,0,0,0.01)]"
+      className="scroll-mt-28 rounded-[22px] border border-[#e6edf6] bg-white p-5 shadow-xs dark:border-[#1a3a5c] dark:bg-[#0a2342]"
     >
       {children}
     </section>
@@ -200,10 +200,10 @@ export function TarjetaPasaporte({
 
 export function EncabezadoTarjeta({ id, icono, titulo }: { id: string; icono: ReactNode; titulo: string }) {
   return (
-    <h2 id={`${id}-titulo`} className="mb-4 flex items-center gap-2.5 text-[16px] font-bold text-[#0b1e33]">
+    <h2 id={`${id}-titulo`} className="mb-4 flex items-center gap-2.5 text-[16px] font-bold text-[#0a2342] dark:text-[#f6f8fb]">
       <span
         aria-hidden="true"
-        className="flex size-7 items-center justify-center rounded-[10px] bg-[#f0f5fe] text-[#2e5a88]"
+        className="flex size-7 items-center justify-center rounded-[10px] bg-[#edf4fe] text-[#104ca0] dark:bg-[#0f2d52] dark:text-[#6ba8ff]"
       >
         {icono}
       </span>
@@ -215,8 +215,8 @@ export function EncabezadoTarjeta({ id, icono, titulo }: { id: string; icono: Re
 export function FilaInfo({ etiqueta, valor }: { etiqueta: string; valor: ReactNode }) {
   return (
     <div className="flex items-start text-[14px] leading-snug">
-      <span className="w-[130px] shrink-0 font-medium text-[#6f7e94]">{etiqueta}</span>
-      <span className="flex-1 font-semibold text-[#1a293b]">{valor}</span>
+      <span className="w-[130px] shrink-0 font-medium text-[#4e5f80] dark:text-[#a8b5cc]">{etiqueta}</span>
+      <span className="flex-1 font-semibold text-[#0a2342] dark:text-[#f6f8fb]">{valor}</span>
     </div>
   );
 }
@@ -241,23 +241,23 @@ export function LineaTiempoVisual({
               className={[
                 "mt-1 size-2.5 shrink-0 rounded-full",
                 estado === "completado"
-                  ? "bg-[#0b1e33] shadow-[0_0_0_3px_#e6edf6]"
+                  ? "bg-[#0a2342] shadow-[0_0_0_3px_#edf4fe] dark:bg-[#4d94ff] dark:shadow-[0_0_0_3px_#0f2d52]"
                   : estado === "actual"
-                    ? "bg-[#2e9e6b] shadow-[0_0_0_3px_#d6f0e3]"
-                    : "bg-[#cbd7e6]",
+                    ? "bg-[#08705f] shadow-[0_0_0_3px_#c8e6d8] dark:bg-[#4dd9a3] dark:shadow-[0_0_0_3px_#135939]"
+                    : "bg-[#cbd7e6] dark:bg-[#1a3a5c]",
               ].join(" ")}
             />
             <span className="flex-1">
               <span
                 className={[
                   "block font-semibold",
-                  estado === "pendiente" ? "font-medium text-[#a6b7cb]" : "text-[#1a293b]",
-                  estado === "actual" ? "font-bold text-[#0b1e33]" : "",
+                  estado === "pendiente" ? "font-medium text-[#4e5f80] dark:text-[#a8b5cc]" : "text-[#0a2342] dark:text-[#f6f8fb]",
+                  estado === "actual" ? "font-bold text-[#0a2342] dark:text-[#4d94ff]" : "",
                 ].join(" ")}
               >
                 {paso.etiqueta}
               </span>
-              <span className="mt-0.5 block text-[11px] text-[#8b9bb0]">
+              <span className="mt-0.5 block text-[11px] text-[#4e5f80] dark:text-[#a8b5cc]">
                 {estado === "actual"
                   ? paso.estado === "conductor_asignado" && !tieneConductor
                     ? "Asignando conductor..."

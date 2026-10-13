@@ -261,17 +261,17 @@ export function PasaporteDigitalSegmentado({
   return (
     <div className="w-full max-w-2xl mx-auto px-4 py-4 sm:py-8 pb-32 flex flex-col gap-4">
       {/* Cabecera compacta con botón atrás y compartir */}
-      <div className="flex items-center gap-3.5 border-b border-[#f0f4fa] bg-white px-1 py-3">
+      <div className="flex items-center gap-3.5 rounded-2xl border border-[#e6edf6] bg-white px-3 py-3 dark:border-[#1a3a5c] dark:bg-[#0a2342]">
         <Link
           href="/mis-viajes"
           aria-label="Volver a mis traslados"
-          className="flex size-10 shrink-0 items-center justify-center rounded-full bg-[#f2f6fc] text-[#0b1e33] transition-colors hover:bg-[#e6eef9] focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-[#1677ff]"
+          className="flex size-10 shrink-0 items-center justify-center rounded-full bg-[#edf4fe] text-[#0a2342] transition-colors hover:bg-[#dbe7f6] focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-[#104ca0] dark:bg-[#0f2d52] dark:text-[#f6f8fb]"
         >
           <Icono nombre="atras" className="size-[18px]" strokeWidth={2} />
         </Link>
         <div className="min-w-0">
-          <p className="text-[11px] font-bold uppercase tracking-wider text-[#2e5a88]">Pasaporte Oficial</p>
-          <h1 className="text-[18px] font-bold tracking-tight text-[#0b1e33] leading-snug">Pasaporte Digital</h1>
+          <p className="text-[11px] font-bold uppercase tracking-wider text-[#104ca0] dark:text-[#6ba8ff]">Pasaporte Oficial</p>
+          <h1 className="text-[18px] font-bold tracking-tight text-[#0a2342] leading-snug dark:text-[#f6f8fb]">Pasaporte Digital</h1>
         </div>
         <div className="ml-auto shrink-0">
           <CompartirPasaporte folio={folioCorto} variante="cabecera" />
@@ -281,8 +281,7 @@ export function PasaporteDigitalSegmentado({
       {/* HERO CARD: "Credencial Oficial del Traslado" */}
       <section
         aria-label="Credencial del Pasaporte Digital"
-        className="relative overflow-hidden rounded-[26px] p-5 text-white shadow-[0_16px_32px_-12px_rgba(11,30,51,0.4)]"
-        style={{ background: "linear-gradient(135deg, #0b1e33 0%, #173252 60%, #0d1e30 100%)" }}
+        className="relative overflow-hidden rounded-[26px] bg-[#0a2342] p-5 text-white shadow-[0_16px_32px_-12px_rgba(10,35,66,0.4)] dark:border dark:border-[#1a3a5c] dark:bg-[#061529]"
       >
         <div className="flex items-start justify-between gap-3">
           <div className="flex items-center gap-2">
@@ -350,7 +349,7 @@ export function PasaporteDigitalSegmentado({
         id={tablistId}
         role="tablist"
         aria-label="Pestañas del Pasaporte Digital"
-        className="sticky top-2 z-30 grid grid-cols-4 gap-1.5 rounded-2xl border border-[#e2eaf4] bg-[#f2f6fc]/95 p-1.5 shadow-sm backdrop-blur-md dark:border-[#1a3a5c] dark:bg-[#0f2d52]/90"
+        className="sticky top-2 z-30 grid grid-cols-4 gap-1.5 rounded-2xl border border-[#e6edf6] bg-white/95 p-1.5 shadow-sm backdrop-blur-md dark:border-[#1a3a5c] dark:bg-[#0f2d52]/90"
       >
         <button
           type="button"
@@ -436,7 +435,7 @@ export function PasaporteDigitalSegmentado({
               titulo="Conductor asignado"
             />
             {nombreConductor ? (
-              <div className="rounded-[20px] border border-[#e9f0f8] bg-[#f8fafd] p-4">
+              <div className="rounded-[20px] border border-[#e6edf6] bg-[#f8fafd] p-4 dark:border-[#1a3a5c] dark:bg-[#061529]/60">
                 <div className="flex items-center justify-between gap-3">
                   <div className="flex items-center gap-3.5 min-w-0">
                     {conductor?.foto_perfil_url ? (
@@ -449,19 +448,19 @@ export function PasaporteDigitalSegmentado({
                     ) : (
                       <span
                         aria-hidden="true"
-                        className="flex size-14 shrink-0 items-center justify-center rounded-full border-2 border-white bg-[#d1ddeb] text-[18px] font-bold text-[#0b1e33] shadow-sm"
+                        className="flex size-14 shrink-0 items-center justify-center rounded-full border-2 border-white bg-[#edf4fe] text-[18px] font-bold text-[#104ca0] shadow-sm dark:bg-[#0f2d52] dark:text-[#6ba8ff]"
                       >
                         {iniciales(nombreConductor)}
                       </span>
                     )}
                     <div className="min-w-0">
-                      <p className="truncate text-[16px] font-bold text-[#0b1e33]">{nombreConductor}</p>
-                      <div className="mt-0.5 flex flex-wrap items-center gap-1.5 text-[11px] text-[#4d6079]">
-                        <span className="inline-flex items-center rounded-full bg-[#dff0e6] px-2 py-0.5 font-semibold text-[#1f6b4a]">
+                      <p className="truncate text-[16px] font-bold text-[#0a2342] dark:text-[#f6f8fb]">{nombreConductor}</p>
+                      <div className="mt-0.5 flex flex-wrap items-center gap-1.5 text-[11px] text-[#4e5f80] dark:text-[#a8b5cc]">
+                        <span className="inline-flex items-center rounded-full bg-[#e9f3ee] px-2 py-0.5 font-semibold text-[#08705f] dark:bg-[#0a2e1f] dark:text-[#4dd9a3]">
                           {humanizar(conductor?.nivel_operativo_vigente ?? pasaporte.conductor_nivel) ?? "Certificado"}
                         </span>
                         {calificacionConductor != null && (
-                          <span className="font-semibold text-[#1a293b]">
+                          <span className="font-semibold text-[#0a2342] dark:text-[#f6f8fb]">
                             ★ {Number(calificacionConductor).toFixed(1)}
                           </span>
                         )}
@@ -495,15 +494,15 @@ export function PasaporteDigitalSegmentado({
                 </div>
 
                 {pasaporte.conductor_id && (
-                  <p className="mt-2.5 text-[11.5px] leading-relaxed text-[#5e718a]">
+                  <p className="mt-2.5 text-[11.5px] leading-relaxed text-[#4e5f80] dark:text-[#a8b5cc]">
                     {MENSAJES_CLAVE_UX.conductor_asignado}
                   </p>
                 )}
               </div>
             ) : (
-              <div className="rounded-[20px] border border-dashed border-[#cbd7e6] bg-[#f8fafd] p-4 text-center">
-                <p className="text-[14px] font-bold text-[#0b1e33]">Por asignar</p>
-                <p className="mt-1 text-[12px] text-[#6b7c94]">
+              <div className="rounded-[20px] border border-dashed border-[#e6edf6] bg-[#f8fafd] p-4 text-center dark:border-[#1a3a5c] dark:bg-[#061529]/60">
+                <p className="text-[14px] font-bold text-[#0a2342] dark:text-[#f6f8fb]">Por asignar</p>
+                <p className="mt-1 text-[12px] text-[#4e5f80] dark:text-[#a8b5cc]">
                   Te notificaremos en cuanto un conductor certificado tome tu traslado.
                 </p>
               </div>
@@ -538,28 +537,28 @@ export function PasaporteDigitalSegmentado({
               <div className="flex items-start gap-3">
                 <span
                   aria-hidden="true"
-                  className="mt-0.5 flex size-6 shrink-0 items-center justify-center rounded-full bg-[#e2f0e9] text-[#1f6b4a]"
+                  className="mt-0.5 flex size-6 shrink-0 items-center justify-center rounded-full bg-[#e9f3ee] text-[#08705f] dark:bg-[#0a2e1f] dark:text-[#4dd9a3]"
                 >
                   <IconoTarjeta d="M12 21s-7-5.5-7-11a7 7 0 0 1 14 0c0 5.5-7 11-7 11Z" className="size-3" />
                 </span>
-                <p className="text-[14px] font-medium text-[#1a293b]">
+                <p className="text-[14px] font-medium text-[#0a2342] dark:text-[#f6f8fb]">
                   {traslado?.origen_ciudad ?? pasaporte.origen_ciudad ?? "Origen pendiente"}
-                  <small className="mt-0.5 block text-[12px] font-normal text-[#6f7e94]">
+                  <small className="mt-0.5 block text-[12px] font-normal text-[#4e5f80] dark:text-[#a8b5cc]">
                     {traslado?.origen_direccion ?? pasaporte.origen_direccion ?? "Dirección registrada"}
                   </small>
                 </p>
               </div>
-              <div aria-hidden="true" className="ml-[11px] h-4 w-0 border-l-2 border-dashed border-[#cbd7e6]" />
+              <div aria-hidden="true" className="ml-[11px] h-4 w-0 border-l-2 border-dashed border-[#cbd7e6] dark:border-[#1a3a5c]" />
               <div className="flex items-start gap-3">
                 <span
                   aria-hidden="true"
-                  className="mt-0.5 flex size-6 shrink-0 items-center justify-center rounded-full bg-[#fef0e0] text-[#b36b1e]"
+                  className="mt-0.5 flex size-6 shrink-0 items-center justify-center rounded-full bg-[#fef4e6] text-[#765100] dark:bg-[#3d2e00] dark:text-[#ffc933]"
                 >
                   <IconoTarjeta d="M5 21V4m0 1h12l-2.5 4L17 13H5" className="size-3" />
                 </span>
-                <p className="text-[14px] font-medium text-[#1a293b]">
+                <p className="text-[14px] font-medium text-[#0a2342] dark:text-[#f6f8fb]">
                   {traslado?.destino_ciudad ?? pasaporte.destino_ciudad ?? "Destino pendiente"}
-                  <small className="mt-0.5 block text-[12px] font-normal text-[#6f7e94]">
+                  <small className="mt-0.5 block text-[12px] font-normal text-[#4e5f80] dark:text-[#a8b5cc]">
                     {traslado?.destino_direccion ?? pasaporte.destino_direccion ?? "Dirección registrada"}
                   </small>
                 </p>
@@ -569,12 +568,12 @@ export function PasaporteDigitalSegmentado({
             {(duracionEstimada || distanciaTexto) && (
               <div className="mt-4 flex flex-wrap gap-2">
                 {duracionEstimada && (
-                  <span className="rounded-full bg-[#eef3fa] px-3 py-1 text-[11px] font-semibold text-[#2e5a88]">
+                  <span className="rounded-full bg-[#edf4fe] px-3 py-1 text-[11px] font-semibold text-[#104ca0] dark:bg-[#0f2d52] dark:text-[#6ba8ff]">
                     Tiempo estimado: {duracionEstimada}
                   </span>
                 )}
                 {distanciaTexto && (
-                  <span className="rounded-full bg-[#eef3fa] px-3 py-1 text-[11px] font-semibold text-[#2e5a88]">
+                  <span className="rounded-full bg-[#edf4fe] px-3 py-1 text-[11px] font-semibold text-[#104ca0] dark:bg-[#0f2d52] dark:text-[#6ba8ff]">
                     Distancia: {distanciaTexto}
                   </span>
                 )}
@@ -653,21 +652,23 @@ export function PasaporteDigitalSegmentado({
             {incidencias.length > 0 ? (
               <ul className="mb-4 flex flex-col gap-2.5">
                 {incidencias.map((incidencia) => (
-                  <li key={incidencia.id} className="rounded-2xl border border-[#eef2f7] px-4 py-3">
+                  <li key={incidencia.id} className="rounded-2xl border border-[#e6edf6] px-4 py-3 dark:border-[#1a3a5c]">
                     <div className="flex items-start justify-between gap-3">
-                      <p className="text-[14px] font-semibold text-[#1a293b]">
+                      <p className="text-[14px] font-semibold text-[#0a2342] dark:text-[#f6f8fb]">
                         {ETIQUETA_TIPO_INCIDENCIA[incidencia.tipo]}
                       </p>
                       <span
                         className={`shrink-0 rounded-full px-2.5 py-1 text-[11px] font-bold ${
-                          incidencia.resuelta ? "bg-[#e9f3ee] text-[#1f6b4a]" : "bg-[#fef0e0] text-[#b36b1e]"
+                          incidencia.resuelta
+                            ? "bg-[#e9f3ee] text-[#08705f] dark:bg-[#0a2e1f] dark:text-[#4dd9a3]"
+                            : "bg-[#fef4e6] text-[#765100] dark:bg-[#3d2e00] dark:text-[#ffc933]"
                         }`}
                       >
                         {incidencia.resuelta ? "Resuelta" : "Abierta"}
                       </span>
                     </div>
-                    <p className="mt-1.5 text-[13px] text-[#4d6079]">{incidencia.descripcion}</p>
-                    <p className="mt-1.5 text-[11px] text-[#8b9bb0]">
+                    <p className="mt-1.5 text-[13px] text-[#4e5f80] dark:text-[#a8b5cc]">{incidencia.descripcion}</p>
+                    <p className="mt-1.5 text-[11px] text-[#4e5f80] dark:text-[#a8b5cc]">
                       {incidencia.momento ? String(incidencia.momento).replaceAll("_", " ") : "Traslado"} ·{" "}
                       {formatoFecha(incidencia.creada_en)}
                     </p>
@@ -675,10 +676,10 @@ export function PasaporteDigitalSegmentado({
                 ))}
               </ul>
             ) : (
-              <p className="mb-4 flex items-center gap-2.5 text-[14px] text-[#4d6079]">
+              <p className="mb-4 flex items-center gap-2.5 text-[14px] text-[#4e5f80] dark:text-[#a8b5cc]">
                 <span
                   aria-hidden="true"
-                  className="flex size-6 shrink-0 items-center justify-center rounded-full bg-[#e9f3ee] text-[#1f6b4a]"
+                  className="flex size-6 shrink-0 items-center justify-center rounded-full bg-[#e9f3ee] text-[#08705f] dark:bg-[#0a2e1f] dark:text-[#4dd9a3]"
                 >
                   <IconoTarjeta d="m5 12.5 4.5 4.5L19 7.5" className="size-3.5" />
                 </span>
@@ -699,20 +700,20 @@ export function PasaporteDigitalSegmentado({
             </div>
 
             {(disputas.length > 0 || reclamosSeguro.length > 0) && (
-              <div className="mt-4 flex flex-col gap-2.5 border-t border-[#f0f4fa] pt-4">
+              <div className="mt-4 flex flex-col gap-2.5 border-t border-[#e6edf6] pt-4 dark:border-[#1a3a5c]">
                 {disputas.map((disputa) => (
-                  <div key={disputa.id} className="rounded-2xl border border-[#eef2f7] px-4 py-3">
+                  <div key={disputa.id} className="rounded-2xl border border-[#e6edf6] px-4 py-3 dark:border-[#1a3a5c]">
                     <div className="flex items-start justify-between gap-3">
-                      <p className="text-[14px] font-semibold text-[#1a293b]">
+                      <p className="text-[14px] font-semibold text-[#0a2342] dark:text-[#f6f8fb]">
                         {disputa.tipo ? String(disputa.tipo).replaceAll("_", " ") : "Disputa"}
                       </p>
-                      <span className="shrink-0 text-[11px] text-[#8b9bb0]">
+                      <span className="shrink-0 text-[11px] text-[#4e5f80] dark:text-[#a8b5cc]">
                         {disputa.estado ? String(disputa.estado).replaceAll("_", " ") : ""}
                       </span>
                     </div>
-                    <p className="mt-1.5 text-[13px] text-[#4d6079]">{disputa.descripcion}</p>
+                    <p className="mt-1.5 text-[13px] text-[#4e5f80] dark:text-[#a8b5cc]">{disputa.descripcion}</p>
                     {disputa.resolucion && (
-                      <p className="mt-1.5 text-[13px] text-[#1f6b4a]">
+                      <p className="mt-1.5 text-[13px] text-[#08705f] dark:text-[#4dd9a3]">
                         Resolución: {String(disputa.resolucion).replaceAll("_", " ")}
                         {disputa.resolucion_detalle ? ` · ${disputa.resolucion_detalle}` : ""}
                       </p>
@@ -720,14 +721,14 @@ export function PasaporteDigitalSegmentado({
                   </div>
                 ))}
                 {reclamosSeguro.map((reclamo) => (
-                  <div key={reclamo.id} className="rounded-2xl border border-[#eef2f7] px-4 py-3">
+                  <div key={reclamo.id} className="rounded-2xl border border-[#e6edf6] px-4 py-3 dark:border-[#1a3a5c]">
                     <div className="flex items-start justify-between gap-3">
-                      <p className="text-[14px] font-semibold text-[#1a293b]">Reclamo de seguro</p>
-                      <span className="shrink-0 text-[11px] text-[#8b9bb0]">
+                      <p className="text-[14px] font-semibold text-[#0a2342] dark:text-[#f6f8fb]">Reclamo de seguro</p>
+                      <span className="shrink-0 text-[11px] text-[#4e5f80] dark:text-[#a8b5cc]">
                         {reclamo.estado ? String(reclamo.estado).replaceAll("_", " ") : ""}
                       </span>
                     </div>
-                    <p className="mt-1.5 text-[13px] text-[#4d6079]">
+                    <p className="mt-1.5 text-[13px] text-[#4e5f80] dark:text-[#a8b5cc]">
                       Abierto {formatoFecha(reclamo.abierto_en)}
                       {reclamo.resuelto_en ? ` · Resuelto ${formatoFecha(reclamo.resuelto_en)}` : ""}
                     </p>
@@ -755,21 +756,21 @@ export function PasaporteDigitalSegmentado({
             <div className="mb-4 flex items-center gap-4">
               <span
                 aria-hidden="true"
-                className="flex size-20 shrink-0 items-center justify-center rounded-2xl border-2 border-white bg-[#dfe8f3] text-[#2e5a88] shadow-sm"
+                className="flex size-20 shrink-0 items-center justify-center rounded-2xl border-2 border-white bg-[#edf4fe] text-[#104ca0] shadow-sm dark:bg-[#0f2d52] dark:text-[#6ba8ff]"
               >
                 <IconoAuto />
               </span>
               <div className="min-w-0 flex-1">
-                <p className="truncate text-[18px] font-bold text-[#0b1e33]">{vehiculoNombre || "Vehículo"}</p>
+                <p className="truncate text-[18px] font-bold text-[#0a2342] dark:text-[#f6f8fb]">{vehiculoNombre || "Vehículo"}</p>
                 {tipoVehiculoEtiqueta && (
-                  <p className="mt-0.5 text-[12px] font-medium text-[#6b7c94]">{tipoVehiculoEtiqueta}</p>
+                  <p className="mt-0.5 text-[12px] font-medium text-[#4e5f80] dark:text-[#a8b5cc]">{tipoVehiculoEtiqueta}</p>
                 )}
                 {placasVehiculo && (
-                  <p className="mt-1.5 inline-block rounded-full bg-[#f0f4fa] px-3 py-1 text-[13px] font-semibold tracking-wider text-[#1f2c3d]">
+                  <p className="mt-1.5 inline-block rounded-full bg-[#edf4fe] px-3 py-1 text-[13px] font-semibold tracking-wider text-[#0a2342] dark:bg-[#0f2d52] dark:text-[#f6f8fb]">
                     {placasVehiculo}
                   </p>
                 )}
-                <p className="mt-1.5 truncate text-[12px] text-[#6b7c94]">
+                <p className="mt-1.5 truncate text-[12px] text-[#4e5f80] dark:text-[#a8b5cc]">
                   VIN: {vinVehiculo ?? "pendiente de registro"}
                 </p>
               </div>
@@ -806,14 +807,14 @@ export function PasaporteDigitalSegmentado({
               />
               <div className="flex flex-col gap-3">
                 {traslado?.contacto_entrega_nombre && (
-                  <div className="flex items-center justify-between gap-3 rounded-xl border border-[#eef2f7] bg-[#f8fafd] p-3 text-[13px]">
+                  <div className="flex items-center justify-between gap-3 rounded-xl border border-[#e6edf6] bg-[#f8fafd] p-3 text-[13px] dark:border-[#1a3a5c] dark:bg-[#061529]/60">
                     <div>
-                      <span className="block text-[10.5px] font-bold uppercase tracking-wider text-[#1f6b4a]">
+                      <span className="block text-[10.5px] font-bold uppercase tracking-wider text-[#08705f] dark:text-[#4dd9a3]">
                         Entrega en origen
                       </span>
-                      <span className="font-bold text-[#0b1e33]">{traslado.contacto_entrega_nombre}</span>
+                      <span className="font-bold text-[#0a2342] dark:text-[#f6f8fb]">{traslado.contacto_entrega_nombre}</span>
                       {traslado.contacto_entrega_telefono && (
-                        <span className="block text-[12px] text-[#6b7c94]">{traslado.contacto_entrega_telefono}</span>
+                        <span className="block text-[12px] text-[#4e5f80] dark:text-[#a8b5cc]">{traslado.contacto_entrega_telefono}</span>
                       )}
                     </div>
                     {traslado.contacto_entrega_telefono && (
@@ -876,10 +877,10 @@ export function PasaporteDigitalSegmentado({
                   <span
                     className={
                       estadoPago === "Pagado"
-                        ? "text-[#1f6b4a] font-bold"
+                        ? "text-[#08705f] font-bold dark:text-[#4dd9a3]"
                         : estadoPago === "Pago parcial"
-                          ? "text-[#b36b1e] font-bold"
-                          : "text-[#4d6079] font-bold"
+                          ? "text-[#765100] font-bold dark:text-[#ffc933]"
+                          : "text-[#4e5f80] font-bold dark:text-[#a8b5cc]"
                     }
                   >
                     {estadoPago}
@@ -887,36 +888,36 @@ export function PasaporteDigitalSegmentado({
                 }
               />
             </div>
-            <div className="mt-2 flex items-center justify-between gap-3 rounded-2xl border border-[#e9f0f8] bg-[#f7faff] p-4">
-              <span className="text-[14px] font-medium text-[#4d6079]">Total pagado</span>
-              <span className="text-[22px] font-extrabold tracking-tight text-[#0b1e33]">
+            <div className="mt-2 flex items-center justify-between gap-3 rounded-2xl border border-[#e6edf6] bg-[#f8fafd] p-4 dark:border-[#1a3a5c] dark:bg-[#061529]/60">
+              <span className="text-[14px] font-medium text-[#4e5f80] dark:text-[#a8b5cc]">Total pagado</span>
+              <span className="text-[22px] font-extrabold tracking-tight text-[#0a2342] dark:text-[#f6f8fb]">
                 {formatearPrecio(montoMostrado)}
               </span>
             </div>
-            <p className="mt-2 text-[12px] text-[#7e8fa8]">
+            <p className="mt-2 text-[12px] text-[#4e5f80] dark:text-[#a8b5cc]">
               {pasaporte.estado === "servicio_cerrado"
                 ? "Factura disponible en tu correo registrado."
                 : "Factura disponible al finalizar el traslado."}
             </p>
-            <p className="mt-3 text-[13px] leading-5 text-[#4d6079]">{MENSAJES_CLAVE_UX.pago}</p>
+            <p className="mt-3 text-[13px] leading-5 text-[#4e5f80] dark:text-[#a8b5cc]">{MENSAJES_CLAVE_UX.pago}</p>
 
             {pagos.length > 0 && (
               <div className="mt-4 flex flex-col gap-3">
                 {pagos.map((pago, indice) => (
                   <div
                     key={pago.id}
-                    className="flex items-center justify-between gap-3 border-t border-[#f0f4fa] pt-3 text-[14px]"
+                    className="flex items-center justify-between gap-3 border-t border-[#e6edf6] pt-3 text-[14px] dark:border-[#1a3a5c]"
                   >
-                    <span className="text-[#1a293b]">
+                    <span className="text-[#0a2342] dark:text-[#f6f8fb]">
                       Pago {indice + 1} de {pagos.length} · {humanizar(pago.metodo) ?? pago.metodo}
                       {pago.momento ? ` · ${String(pago.momento).replaceAll("_", " ")}` : ""}
                     </span>
-                    <span className="shrink-0 font-mono-ruum font-semibold text-[#0b1e33]">
+                    <span className="shrink-0 font-mono-ruum font-semibold text-[#0a2342] dark:text-[#f6f8fb]">
                       {formatearPrecio(pago.monto ?? 0)}
                     </span>
                   </div>
                 ))}
-                <p className="text-[12px] text-[#4d6079]" role="status">
+                <p className="text-[12px] text-[#4e5f80] dark:text-[#a8b5cc]" role="status">
                   Total pagado {formatearPrecio(montoMostrado)} de {formatearPrecio(precioBase)}.
                   {saldoPendiente > 0 ? ` Restan ${formatearPrecio(saldoPendiente)}.` : " Sin saldo pendiente."}
                 </p>
@@ -924,14 +925,14 @@ export function PasaporteDigitalSegmentado({
             )}
 
             {pagoRealizado && (
-              <div className="mt-4 rounded-2xl border border-emerald-500/30 bg-[#e9f3ee] p-4 text-[#1f6b4a]">
+              <div className="mt-4 rounded-2xl border border-emerald-500/30 bg-[#e9f3ee] p-4 text-[#08705f] dark:border-emerald-800 dark:bg-[#0a2e1f]/60 dark:text-[#4dd9a3]">
                 <div className="flex items-center gap-2">
-                  <span className="flex size-6 items-center justify-center rounded-full bg-[#1f6b4a] text-xs font-bold text-white">
+                  <span className="flex size-6 items-center justify-center rounded-full bg-[#08705f] text-xs font-bold text-white dark:bg-[#4dd9a3] dark:text-[#061529]">
                     ✓
                   </span>
-                  <p className="text-sm font-bold text-[#0b1e33]">Pago registrado con éxito</p>
+                  <p className="text-sm font-bold text-[#0a2342] dark:text-[#f6f8fb]">Pago registrado con éxito</p>
                 </div>
-                <p className="mt-1 text-xs text-[#4d6079]">
+                <p className="mt-1 text-xs text-[#4e5f80] dark:text-[#a8b5cc]">
                   Tu pago de {formatearPrecio(montoMostrado || precioBase)} fue procesado correctamente a través de Stripe. No tienes saldo pendiente.
                 </p>
               </div>

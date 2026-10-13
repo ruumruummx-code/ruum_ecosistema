@@ -3,7 +3,7 @@ import Image from "next/image";
 import { redirect } from "next/navigation";
 import type { Database } from "@ruum/shared/types";
 import { IDENTIDAD_MARCA } from "@ruum/shared/constants";
-import { LogoMarca, SelloConductor, Icono } from "@ruum/ui";
+import { LogoMarca, SelloConductor, Icono, MobileShell } from "@ruum/ui";
 import { NavegacionUsuario } from "./NavegacionUsuario";
 import { InicioUsuario } from "./InicioUsuario";
 import { BotonReintentarSesion } from "./ReintentarSesion";
@@ -71,8 +71,8 @@ export default async function PaginaInicio({
     const esConfigError = error === "config_error";
     return (
       <>
-      <NavegacionUsuario variante="claro" />
-      <main className="user-v2-scope user-v2-page"><div className="user-v2-content">
+        <NavegacionUsuario variante="claro" />
+        <MobileShell variant="compact" navInferiorVisible={true}>
           <div className="user-v2-card p-6 text-center" role="alert" aria-live="assertive">
             <p className="font-display text-xs font-bold uppercase tracking-widest text-[var(--user-color-error)]">
               {esConfigError ? "Servicio no configurado" : "No pudimos verificar tu sesión"}
@@ -98,21 +98,21 @@ export default async function PaginaInicio({
               Si el problema persiste, <Link href="/soporte" className="underline hover:text-[var(--user-color-primary)]">contacta a soporte</Link>.
             </p>
           </div>
-        </div>
-      </main>
-    </>
+        </MobileShell>
+      </>
     );
   }
 
   if (usuario && !forzarLanding) {
     return (
       <>
-      <NavegacionUsuario variante="claro" nombreUsuario={usuario.nombre} />
-      <main className="user-v2-scope user-v2-page"><div className="user-v2-content" aria-live="polite">
-          <InicioUsuario usuario={usuario} traslados={traslados} conductorFotoUrl={conductorFotoUrl} />
-        </div>
-      </main>
-    </>
+        <NavegacionUsuario variante="claro" nombreUsuario={usuario.nombre} />
+        <MobileShell variant="compact" navInferiorVisible={true}>
+          <div aria-live="polite">
+            <InicioUsuario usuario={usuario} traslados={traslados} conductorFotoUrl={conductorFotoUrl} />
+          </div>
+        </MobileShell>
+      </>
     );
   }
 
