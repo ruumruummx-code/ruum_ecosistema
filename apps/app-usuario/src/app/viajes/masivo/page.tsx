@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { MobileShell } from "@ruum/ui";
 import { NavegacionUsuario } from "../../NavegacionUsuario";
 import { CargaMasivaForm } from "./CargaMasivaForm";
 
@@ -11,10 +12,9 @@ export default function PaginaCargaMasiva() {
   return (
     <>
       <NavegacionUsuario variante="claro" />
-      <main className="user-v2-scope user-v2-page user-v2-secondary-screen"><div className="user-v2-content user-v2-content--wide">
+      <MobileShell variant="wide" navInferiorVisible={true}>
         <CargaMasivaForm />
-      </div>
-    </main>
+      </MobileShell>
     </>
   );
 }

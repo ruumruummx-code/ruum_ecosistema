@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { MobileCard, MobileHeader, MobileShell } from "@ruum/ui";
 import { NavegacionUsuario } from "../../NavegacionUsuario";
 
 export const metadata = {
@@ -9,61 +9,61 @@ export default function PaginaTerminos() {
   return (
     <>
       <NavegacionUsuario variante="claro" />
-      <main className="user-v2-scope user-v2-page user-v2-secondary-screen"><div className="user-v2-content user-v2-content--wide py-10 sm:py-14">
-        <div className="mb-6">
-          <Link
-            href="/cuenta/legal"
-            className="font-body text-sm text-ink/55 underline-offset-4 hover:underline"
-          >
-            ← Volver a Legal
-          </Link>
-        </div>
+      <MobileShell variant="compact" navInferiorVisible={true}>
+        <MobileHeader
+          titulo="Términos y condiciones"
+          subtitulo="Vigentes desde el 3 de julio de 2026"
+          enlaceAtras="/cuenta"
+          etiquetaAtras="Volver a cuenta"
+          conBorde={false}
+          className="-mx-4 -mt-4 sm:-mx-6 sm:-mt-6 mb-4 border-b border-[#e6edf6] dark:border-[#1a3a5c]"
+        />
 
-        <article className="app-card mx-auto max-w-3xl px-6 py-8 sm:px-10">
-          <header className="mb-8 border-b border-ink/10 pb-6">
-            <p className="font-body text-xs font-semibold uppercase tracking-wide text-ink/40">
+        <MobileCard radius="2xl" padding="lg" className="space-y-6 text-[#0a2342] dark:text-[#f6f8fb]">
+          <header className="border-b border-[#e6edf6] dark:border-[#1a3a5c] pb-4">
+            <p className="text-[12px] font-bold uppercase tracking-wider text-[#4e5f80] dark:text-[#a8b5cc]">
               Documento legal
             </p>
-            <h1 className="mt-2 font-display text-2xl font-semibold">
+            <h1 className="mt-1 text-[20px] font-extrabold tracking-tight text-[#0a2342] dark:text-white">
               Términos y condiciones
             </h1>
-            <p className="mt-1 font-body text-sm text-ink/50">
-              Ruum Ruum — vigentes desde el 3 de julio de 2026
+            <p className="mt-0.5 text-[13px] font-medium text-[#4e5f80] dark:text-[#a8b5cc]">
+              Moviliax S.A. de C.V. (&quot;Ruum Ruum&quot;)
             </p>
           </header>
 
-          <div className="prose-ruum space-y-6 font-body text-sm leading-7 text-ink/80">
-            <p>
+          <div className="space-y-5 text-[13.5px] leading-relaxed text-[#4e5f80] dark:text-[#a8b5cc]">
+            <p className="text-[#0a2342] dark:text-[#f6f8fb] font-medium">
               El presente documento establece los términos y condiciones bajo los cuales Moviliax
               S.A. de C.V. (&quot;Ruum Ruum&quot;) presta el servicio de traslado vehicular
               con conductor certificado a través de su plataforma digital.
             </p>
 
-            <section>
-              <h2 className="mb-3 font-display text-base font-semibold text-ink">
+            <section className="space-y-1.5">
+              <h2 className="text-[15px] font-bold text-[#0a2342] dark:text-white">
                 1. Definiciones
               </h2>
               <p>
                 <strong>Plataforma:</strong> La aplicación móvil y web de Ruum Ruum disponible
                 para usuarios registrados.
               </p>
-              <p className="mt-2">
+              <p className="mt-1">
                 <strong>Usuario:</strong> Persona física o moral que solicita el servicio de
                 traslado vehicular a través de la Plataforma.
               </p>
-              <p className="mt-2">
+              <p className="mt-1">
                 <strong>Conductor:</strong> Persona física certificada por Ruum Ruum para
                 realizar traslados vehiculares.
               </p>
-              <p className="mt-2">
+              <p className="mt-1">
                 <strong>Pasaporte Digital de Traslado:</strong> Documento digital generado por la Plataforma
                 que contiene la evidencia fotográfica, el estado del vehículo y la trazabilidad
                 del traslado.
               </p>
             </section>
 
-            <section>
-              <h2 className="mb-3 font-display text-base font-semibold text-ink">
+            <section className="space-y-1.5">
+              <h2 className="text-[15px] font-bold text-[#0a2342] dark:text-white">
                 2. Uso del servicio
               </h2>
               <p>
@@ -74,8 +74,8 @@ export default function PaginaTerminos() {
               </p>
             </section>
 
-            <section>
-              <h2 className="mb-3 font-display text-base font-semibold text-ink">
+            <section className="space-y-1.5">
+              <h2 className="text-[15px] font-bold text-[#0a2342] dark:text-white">
                 3. Registro y verificación de identidad
               </h2>
               <p>
@@ -87,8 +87,8 @@ export default function PaginaTerminos() {
               </p>
             </section>
 
-            <section>
-              <h2 className="mb-3 font-display text-base font-semibold text-ink">
+            <section className="space-y-1.5">
+              <h2 className="text-[15px] font-bold text-[#0a2342] dark:text-white">
                 4. Pagos y cancelaciones
               </h2>
               <p>
@@ -99,8 +99,8 @@ export default function PaginaTerminos() {
               </p>
             </section>
 
-            <section>
-              <h2 className="mb-3 font-display text-base font-semibold text-ink">
+            <section className="space-y-1.5">
+              <h2 className="text-[15px] font-bold text-[#0a2342] dark:text-white">
                 5. Evidencia y responsabilidad
               </h2>
               <p>
@@ -111,8 +111,8 @@ export default function PaginaTerminos() {
               </p>
             </section>
 
-            <section>
-              <h2 className="mb-3 font-display text-base font-semibold text-ink">
+            <section className="space-y-1.5">
+              <h2 className="text-[15px] font-bold text-[#0a2342] dark:text-white">
                 6. Modificaciones
               </h2>
               <p>
@@ -124,18 +124,17 @@ export default function PaginaTerminos() {
             </section>
           </div>
 
-          <div className="mt-8 border-t border-ink/10 pt-6">
+          <div className="border-t border-[#e6edf6] dark:border-[#1a3a5c] pt-5">
             <a
               href="/docs-legales/terminos-y-condiciones-ruum-ruum.docx"
               download
-              className="font-body text-sm text-route-dark underline-offset-4 hover:underline"
+              className="inline-flex items-center gap-2 rounded-xl border border-[#d7e1ee] bg-[#edf4fe] px-4 py-2.5 text-[13px] font-bold text-[#0a2342] transition hover:bg-[#dfeaf8] dark:border-[#1a3a5c] dark:bg-[#0a2342] dark:text-white dark:hover:bg-[#0f2d52]"
             >
-              Descargar documento completo (.docx)
+              <span>Descargar documento oficial (.docx)</span>
             </a>
           </div>
-        </article>
-      </div>
-    </main>
+        </MobileCard>
+      </MobileShell>
     </>
   );
 }

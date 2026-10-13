@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { Icono } from "@ruum/ui";
+import { Icono, MobileHeader } from "@ruum/ui";
 
 type CategoriaFaq = "all" | "solicitud" | "traslado" | "pagos" | "evidencia" | "cuenta";
 
@@ -450,30 +450,21 @@ export function PreguntasFrecuentes() {
   }
 
   return (
-    <div className="w-full flex flex-col gap-4">
+    <div className="w-full flex flex-col gap-4 text-[#0a2342] dark:text-[#f6f8fb]">
       {/* Header */}
-      <header className="flex items-center gap-3.5 border-b border-[#f0f4fa] bg-white px-3 py-3 rounded-[22px] shadow-[0_2px_8px_rgba(0,0,0,0.02)]">
-        <Link
-          href="/cuenta"
-          aria-label="Volver a mi cuenta"
-          className="flex size-10 shrink-0 items-center justify-center rounded-full bg-[#f2f6fc] text-[#0b1e33] transition-all hover:bg-[#e3ebf5] active:scale-95"
-        >
-          <Icono nombre="atras" className="size-4" strokeWidth={2.2} />
-        </Link>
-        <div className="min-w-0">
-          <h1 className="text-[18px] font-bold tracking-tight text-[#0b1e33] leading-snug">
-            Preguntas frecuentes
-          </h1>
-          <p className="text-[12px] font-medium text-[#6b7c94]">
-            Respuestas a dudas comunes
-          </p>
-        </div>
-      </header>
+      <MobileHeader
+        titulo="Preguntas frecuentes"
+        subtitulo="Respuestas a dudas comunes"
+        enlaceAtras="/cuenta"
+        etiquetaAtras="Volver a mi cuenta"
+        conBorde={false}
+        className="-mx-4 -mt-4 sm:-mx-6 sm:-mt-6 mb-2 border-b border-[#e6edf6] dark:border-[#1a3a5c]"
+      />
 
       {/* Hero */}
-      <div className="relative overflow-hidden rounded-[26px] bg-gradient-to-br from-[#0b1e33] to-[#162c47] p-6 shadow-[0_16px_32px_-12px_rgba(11,30,51,0.4)] text-white">
+      <div className="relative overflow-hidden rounded-[26px] bg-gradient-to-br from-[#0a2342] via-[#0d2b5e] to-[#12335f] p-6 shadow-[0_16px_32px_-12px_rgba(10,35,66,0.35)] dark:from-[#071322] dark:via-[#0a2342] dark:to-[#0f2d52] dark:border dark:border-[#1a3a5c] text-white">
         <div className="relative z-10">
-          <div className="mb-4 flex size-[52px] items-center justify-center rounded-[18px] bg-white/12 backdrop-blur text-white text-2xl shadow-inner">
+          <div className="mb-4 flex size-[52px] items-center justify-center rounded-[18px] bg-white/12 backdrop-blur text-white shadow-inner border border-white/15">
             <svg className="size-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
               <circle cx="12" cy="12" r="10" />
               <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
@@ -483,15 +474,15 @@ export function PreguntasFrecuentes() {
           <h2 className="mb-1.5 text-[22px] font-extrabold tracking-[-0.5px] leading-tight text-white">
             ¿En qué podemos ayudarte?
           </h2>
-          <p className="text-[13.5px] font-medium leading-relaxed text-white/70">
+          <p className="text-[13.5px] font-medium leading-relaxed text-white/80">
             Encuentra respuestas rápidas sobre traslados, pagos, evidencia y más.
           </p>
         </div>
       </div>
 
       {/* Barra de búsqueda */}
-      <div className="flex items-center gap-2.5 rounded-[16px] border-[1.5px] border-[#e6edf6] bg-white p-[14px_16px] shadow-[0_4px_12px_rgba(0,0,0,0.02)] transition-all focus-within:border-[#0b1e33] focus-within:ring-2 focus-within:ring-[#0b1e33]/5">
-        <svg className="size-4 shrink-0 text-[#a6b7cb]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <div className="flex items-center gap-2.5 rounded-2xl border border-[#d7e1ee] bg-white dark:border-[#1a3a5c] dark:bg-[#0a2342] p-[14px_16px] shadow-[0_2px_10px_rgba(10,35,66,0.04)] transition-all focus-within:border-[#0066ff] focus-within:ring-2 focus-within:ring-[#0066ff]/20">
+        <svg className="size-4 shrink-0 text-[#4e5f80] dark:text-[#a8b5cc]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
           <circle cx="11" cy="11" r="8" />
           <path d="m21 21-4.35-4.35" />
         </svg>
@@ -501,7 +492,7 @@ export function PreguntasFrecuentes() {
           onChange={(e) => setTerminoBusqueda(e.target.value)}
           placeholder="Buscar en preguntas frecuentes..."
           aria-label="Buscar en preguntas frecuentes"
-          className="w-full bg-transparent text-[14.5px] font-medium text-[#0b1e33] outline-none placeholder:text-[#a6b7cb]"
+          className="w-full bg-transparent text-[14.5px] font-medium text-[#0a2342] dark:text-white outline-none placeholder:text-[#4e5f80] dark:placeholder:text-[#a8b5cc]"
         />
       </div>
 
@@ -518,8 +509,8 @@ export function PreguntasFrecuentes() {
               onClick={() => setCategoriaActiva(cat.id)}
               className={`flex shrink-0 items-center gap-1.5 rounded-full px-4 py-2.5 text-[13px] font-semibold transition-all cursor-pointer ${
                 estaActiva
-                  ? "bg-[#0b1e33] border border-[#0b1e33] text-white shadow-[0_6px_14px_-4px_rgba(11,30,51,0.3)] font-bold"
-                  : "bg-white border-[1.5px] border-[#e6edf6] text-[#5e718a] hover:border-[#0b1e33]/30"
+                  ? "bg-[#0a2342] border border-[#0a2342] text-white shadow-[0_6px_14px_-4px_rgba(10,35,66,0.3)] font-bold dark:bg-[#4d94ff] dark:text-[#061529] dark:border-[#4d94ff]"
+                  : "bg-white border border-[#d7e1ee] text-[#4e5f80] hover:border-[#0a2342]/30 dark:bg-[#0a2342] dark:border-[#1a3a5c] dark:text-[#a8b5cc] dark:hover:border-[#4d94ff]"
               }`}
             >
               <IconoFaqSvg tipo={cat.icono} className="size-3.5" />
@@ -536,29 +527,31 @@ export function PreguntasFrecuentes() {
           return (
             <div
               key={faq.id}
-              className={`rounded-[20px] border border-[#eef2f7] bg-white shadow-[0_4px_12px_rgba(0,0,0,0.02)] transition-all overflow-hidden ${
-                estaAbierto ? "ring-1 ring-[#0b1e33]/10" : ""
+              className={`rounded-[22px] border border-[#e6edf6] dark:border-[#1a3a5c] bg-white dark:bg-[#0a2342] shadow-[0_2px_10px_rgba(10,35,66,0.04)] transition-all overflow-hidden ${
+                estaAbierto ? "ring-1 ring-[#0a2342]/15 dark:ring-[#4d94ff]/30" : ""
               }`}
             >
               <button
                 type="button"
                 onClick={() => alternarFaq(faq.id)}
                 aria-expanded={estaAbierto}
-                className="flex w-full cursor-pointer items-center gap-3.5 p-4.5 text-left transition-colors active:bg-[#fbfdff]"
+                className="flex w-full cursor-pointer items-center gap-3.5 p-4.5 text-left transition-colors active:bg-[#fbfdff] dark:active:bg-[#0f2d52]"
               >
                 <div
                   className={`flex size-10 shrink-0 items-center justify-center rounded-[13px] transition-colors ${
-                    estaAbierto ? "bg-[#0b1e33] text-white" : "bg-[#f0f5fe] text-[#2e5a88]"
+                    estaAbierto
+                      ? "bg-[#0a2342] text-white dark:bg-[#4d94ff] dark:text-[#061529]"
+                      : "bg-[#edf4fe] text-[#104ca0] dark:bg-[#0f2d52] dark:text-[#6ba8ff]"
                   }`}
                 >
                   <IconoFaqSvg tipo={faq.icono} className="size-4.5" />
                 </div>
-                <span className="flex-1 text-[14.5px] font-bold tracking-tight text-[#0b1e33] leading-snug">
+                <span className="flex-1 text-[14.5px] font-bold tracking-tight text-[#0a2342] dark:text-white leading-snug">
                   {faq.pregunta}
                 </span>
                 <svg
-                  className={`size-3.5 text-[#c3cfdd] transition-transform duration-200 shrink-0 ${
-                    estaAbierto ? "rotate-180 text-[#0b1e33]" : ""
+                  className={`size-3.5 text-[#4e5f80] dark:text-[#a8b5cc] transition-transform duration-200 shrink-0 ${
+                    estaAbierto ? "rotate-180 text-[#0a2342] dark:text-[#4d94ff]" : ""
                   }`}
                   viewBox="0 0 24 24"
                   fill="none"
@@ -572,7 +565,7 @@ export function PreguntasFrecuentes() {
                 </svg>
               </button>
               {estaAbierto && (
-                <div className="border-t border-[#f0f4fa]/70 px-4.5 pb-5 pt-3.5 pl-[68px] text-[13.5px] font-medium leading-relaxed text-[#4d6079] animate-in fade-in duration-200">
+                <div className="border-t border-[#e6edf6] dark:border-[#1a3a5c] px-4.5 pb-5 pt-3.5 pl-[68px] text-[13.5px] font-medium leading-relaxed text-[#4e5f80] dark:text-[#a8b5cc] animate-in fade-in duration-200">
                   {faq.respuesta}
                 </div>
               )}
@@ -583,14 +576,14 @@ export function PreguntasFrecuentes() {
         {/* Sin resultados */}
         {faqsFiltradas.length === 0 && (
           <div className="flex flex-col items-center py-12 px-6 text-center">
-            <div className="mb-4 flex size-[72px] items-center justify-center rounded-[24px] bg-[#f2f6fc] text-[#a6b7cb]">
+            <div className="mb-4 flex size-[72px] items-center justify-center rounded-[24px] bg-[#edf4fe] dark:bg-[#0f2d52] text-[#104ca0] dark:text-[#6ba8ff]">
               <svg className="size-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                 <circle cx="11" cy="11" r="8" />
                 <path d="m21 21-4.35-4.35" />
               </svg>
             </div>
-            <h3 className="mb-1 text-[16px] font-bold text-[#0b1e33]">Sin resultados</h3>
-            <p className="text-[13.5px] font-medium text-[#8b9bb0] max-w-xs">
+            <h3 className="mb-1 text-[16px] font-bold text-[#0a2342] dark:text-white">Sin resultados</h3>
+            <p className="text-[13.5px] font-medium text-[#4e5f80] dark:text-[#a8b5cc] max-w-xs">
               No encontramos preguntas que coincidan con tu búsqueda. Intenta con otras palabras o contacta a soporte.
             </p>
           </div>
@@ -598,23 +591,23 @@ export function PreguntasFrecuentes() {
       </div>
 
       {/* Tarjeta de contacto */}
-      <div className="rounded-[22px] border border-[#eef2f7] bg-white p-5.5 text-center shadow-[0_6px_16px_rgba(0,0,0,0.02)] mt-4">
-        <div className="mx-auto mb-4 flex size-[60px] items-center justify-center rounded-[20px] bg-gradient-to-br from-[#0b1e33] to-[#2e5a88] text-white shadow-[0_10px_22px_-8px_rgba(11,30,51,0.35)]">
+      <div className="rounded-[24px] border border-[#e6edf6] dark:border-[#1a3a5c] bg-white dark:bg-[#0a2342] p-5.5 text-center shadow-[0_2px_10px_rgba(10,35,66,0.04)] mt-4">
+        <div className="mx-auto mb-4 flex size-[60px] items-center justify-center rounded-[20px] bg-gradient-to-br from-[#0a2342] to-[#12335f] dark:from-[#071322] dark:to-[#0a2342] text-white shadow-[0_10px_22px_-8px_rgba(10,35,66,0.35)]">
           <svg className="size-6.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
             <path d="M3 18v-6a9 9 0 0 1 18 0v6" />
             <path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z" />
           </svg>
         </div>
-        <h3 className="mb-1 text-[17px] font-extrabold tracking-tight text-[#0b1e33]">
+        <h3 className="mb-1 text-[17px] font-extrabold tracking-tight text-[#0a2342] dark:text-white">
           ¿No encontraste lo que buscabas?
         </h3>
-        <p className="mb-4.5 text-[13px] font-medium text-[#6b7c94] leading-normal">
+        <p className="mb-4.5 text-[13px] font-medium text-[#4e5f80] dark:text-[#a8b5cc] leading-normal">
           Nuestro equipo de soporte está disponible 24/7 para ayudarte con cualquier duda.
         </p>
         <div className="flex gap-2.5">
           <Link
             href="/soporte?canal=chat"
-            className="flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-[14px] bg-[#0b1e33] py-3.5 px-4 text-[13.5px] font-bold text-white shadow-[0_8px_18px_-6px_rgba(11,30,51,0.3)] transition-transform active:scale-[0.97]"
+            className="flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-2xl bg-[#0a2342] hover:bg-[#162c47] py-3.5 px-4 text-[14px] font-bold text-white shadow-[0_8px_18px_-6px_rgba(10,35,66,0.3)] transition-transform active:scale-[0.97] dark:bg-[#4d94ff] dark:text-[#061529] dark:hover:bg-[#6ba8ff]"
           >
             <svg className="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
               <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
@@ -623,7 +616,7 @@ export function PreguntasFrecuentes() {
           </Link>
           <Link
             href="/soporte?canal=telefono"
-            className="flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-[14px] border border-[#dae5f2] bg-[#f0f5fe] py-3.5 px-4 text-[13.5px] font-bold text-[#0b1e33] transition-transform active:scale-[0.97]"
+            className="flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-2xl border border-[#d7e1ee] bg-[#edf4fe] hover:bg-[#dfeaf8] py-3.5 px-4 text-[14px] font-bold text-[#0a2342] transition-transform active:scale-[0.97] dark:border-[#1a3a5c] dark:bg-[#0a2342] dark:text-white dark:hover:bg-[#0f2d52]"
           >
             <svg className="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
               <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />

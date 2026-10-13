@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import type { Database } from "@ruum/shared/types";
-import { Aviso, Button } from "@ruum/ui";
+import { Aviso, Button, MobileShell } from "@ruum/ui";
 import { NavegacionUsuario } from "../NavegacionUsuario";
 import { SoporteCliente } from "./SoporteCliente";
 
@@ -61,17 +61,18 @@ export default async function PaginaSoporte({
     return (
       <>
         <NavegacionUsuario variante="claro" />
-        <main className="user-v2-scope user-v2-page user-v2-secondary-screen"><div className="user-v2-content user-v2-content--wide py-12 text-center">
-          <Aviso tono="danger">
-            No pudimos cargar tu información en este momento. Inténtalo de nuevo en unos segundos.
-          </Aviso>
-          <div className="mt-6 flex justify-center">
-            <Link href="/soporte">
-              <Button className="w-full sm:w-auto">Reintentar</Button>
-            </Link>
+        <MobileShell variant="compact" navInferiorVisible={true}>
+          <div className="py-12 text-center">
+            <Aviso tono="danger">
+              No pudimos cargar tu información en este momento. Inténtalo de nuevo en unos segundos.
+            </Aviso>
+            <div className="mt-6 flex justify-center">
+              <Link href="/soporte">
+                <Button className="w-full sm:w-auto">Reintentar</Button>
+              </Link>
+            </div>
           </div>
-        </div>
-        </main>
+        </MobileShell>
       </>
     );
   }
@@ -84,7 +85,7 @@ export default async function PaginaSoporte({
   return (
     <>
       <NavegacionUsuario variante="claro" />
-      <main className="user-v2-scope user-v2-page user-v2-secondary-screen"><div className="user-v2-content mx-auto max-w-md px-4 py-4 sm:py-6">
+      <MobileShell variant="compact" navInferiorVisible={true}>
         <SoporteCliente
           usuario={usuario}
           traslados={traslados}
@@ -92,8 +93,7 @@ export default async function PaginaSoporte({
           motivoPreseleccionado={motivo}
           canalPreseleccionado={canal}
         />
-      </div>
-    </main>
+      </MobileShell>
     </>
   );
 }

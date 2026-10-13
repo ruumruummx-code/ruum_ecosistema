@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 import Link from "next/link";
-import { Aviso, Button } from "@ruum/ui";
+import { Aviso, MobileButton } from "@ruum/ui";
 import { reportarIncidencia } from "@ruum/api/services";
 import type { TipoIncidencia } from "@ruum/shared/types";
 import { crearClienteNavegador, tieneSupabaseConfigurado } from "../../lib/supabase-browser";
@@ -145,54 +145,54 @@ export function FormularioSoporte({ traslados, preseleccionado, emailUsuario, mo
   return (
     <form onSubmit={onSubmit} className="grid gap-4 sm:grid-cols-2">
       {/* SLA y horario - SIEMPRE VISIBLE */}
-      <div className="sm:col-span-2 rounded-xl border border-route/20 bg-route-soft/20 p-4">
+      <div className="sm:col-span-2 rounded-2xl border border-[#c8dcf8] bg-[#edf4fe] dark:border-[#1d4576] dark:bg-[#0f2d52]/50 p-4">
         <div className="flex items-start gap-3">
-          <svg className="size-6 text-route-action flex-shrink-0 mt-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <svg className="size-6 text-[#104ca0] dark:text-[#6ba8ff] flex-shrink-0 mt-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
             <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
             <path d="m9 12 2 2 4-4"/>
           </svg>
           <div>
-            <p className="font-body text-xs font-semibold uppercase tracking-wider text-route-dark">Atención al cliente</p>
-            <p className="mt-1 font-body text-sm text-text-primary">
+            <p className="text-[12px] font-bold uppercase tracking-wider text-[#104ca0] dark:text-[#6ba8ff]">Atención al cliente</p>
+            <p className="mt-1 text-[13.5px] text-[#0a2342] dark:text-white">
               <span className="font-bold">Horario:</span> {HORARIO_SOPORTE.dias} {HORARIO_SOPORTE.horas}
             </p>
-            <p className="mt-0.5 font-body text-sm text-text-primary">
+            <p className="mt-0.5 text-[13.5px] text-[#0a2342] dark:text-white">
               <span className="font-bold">Tiempo de respuesta:</span> {HORARIO_SOPORTE.sla} en horario, {HORARIO_SOPORTE.slaFueraHorario} fuera de horario
             </p>
-            <p className="mt-0.5 font-body text-xs text-text-tertiary">
-              Correo: <span className="font-semibold text-text-primary">{CORREO_SOPORTE}</span>
+            <p className="mt-0.5 text-[12px] text-[#4e5f80] dark:text-[#a8b5cc]">
+              Correo: <span className="font-semibold text-[#0a2342] dark:text-white">{CORREO_SOPORTE}</span>
             </p>
           </div>
         </div>
       </div>
 
       <label className="flex flex-col gap-1.5">
-        <span className="font-body text-xs font-semibold uppercase tracking-wider text-text-tertiary">
-          Motivo <span className="text-route-action">*</span>
+        <span className="text-[12px] font-bold uppercase tracking-wider text-[#4e5f80] dark:text-[#a8b5cc]">
+          Motivo <span className="text-[#9a2637] dark:text-[#ff6b7a]">*</span>
         </span>
         <select 
           value={motivo} 
           onChange={(e) => setMotivo(e.target.value)} 
-          className="w-full rounded-xl border border-border bg-surface px-3.5 py-2.5 font-body text-sm text-text-primary focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-1 focus-visible:outline-route-action"
+          className="w-full rounded-2xl border border-[#d7e1ee] bg-white dark:border-[#1a3a5c] dark:bg-[#0a2342] px-3.5 py-3 text-[14px] font-medium text-[#0a2342] dark:text-white focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-1 focus-visible:outline-[#0066ff]"
           required
         >
           {MOTIVOS.map((m) => (
             <option key={m} value={m}>{m}</option>
           ))}
         </select>
-        <span className="font-body text-xs text-text-tertiary">
+        <span className="text-[12px] text-[#4e5f80] dark:text-[#a8b5cc]">
           Las consultas generales sin viaje se atienden por correo; con viaje se abre un folio de seguimiento.
         </span>
       </label>
 
       <label className="flex flex-col gap-1.5">
-        <span className="font-body text-xs font-semibold uppercase tracking-wider text-text-tertiary">
-          Viaje relacionado <span className="text-text-tertiary">(opcional)</span>
+        <span className="text-[12px] font-bold uppercase tracking-wider text-[#4e5f80] dark:text-[#a8b5cc]">
+          Viaje relacionado <span className="text-[#4e5f80] dark:text-[#a8b5cc] font-normal">(opcional)</span>
         </span>
         <select 
           value={viajeId} 
           onChange={(e) => setViajeId(e.target.value)} 
-          className="w-full rounded-xl border border-border bg-surface px-3.5 py-2.5 font-body text-sm text-text-primary focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-1 focus-visible:outline-route-action"
+          className="w-full rounded-2xl border border-[#d7e1ee] bg-white dark:border-[#1a3a5c] dark:bg-[#0a2342] px-3.5 py-3 text-[14px] font-medium text-[#0a2342] dark:text-white focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-1 focus-visible:outline-[#0066ff]"
         >
           <option value="">Sin viaje / consulta general</option>
           {traslados.map((t) => (
@@ -202,47 +202,48 @@ export function FormularioSoporte({ traslados, preseleccionado, emailUsuario, mo
       </label>
 
       <label className="flex flex-col gap-1.5 sm:col-span-2">
-        <span className="font-body text-xs font-semibold uppercase tracking-wider text-text-tertiary">
-          Descripción <span className="text-route-action">*</span>
+        <span className="text-[12px] font-bold uppercase tracking-wider text-[#4e5f80] dark:text-[#a8b5cc]">
+          Descripción <span className="text-[#9a2637] dark:text-[#ff6b7a]">*</span>
         </span>
         <textarea
           rows={5}
           value={descripcion}
           onChange={(e) => setDescripcion(e.target.value)}
           placeholder="Describe lo que pasó con detalle. Incluye: fecha, hora aproximada, ubicación, y cualquier evidencia relevante (fotos, testigos). Mientras más información proporciones, más rápido podremos resolver tu caso."
-          className="w-full rounded-xl border border-border bg-surface px-3.5 py-2.5 font-body text-sm text-text-primary placeholder:text-text-tertiary focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-1 focus-visible:outline-route-action resize-none"
+          className="w-full rounded-2xl border border-[#d7e1ee] bg-white dark:border-[#1a3a5c] dark:bg-[#0a2342] px-3.5 py-3 text-[14px] font-medium text-[#0a2342] dark:text-white placeholder:text-[#4e5f80] dark:placeholder:text-[#a8b5cc] focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-1 focus-visible:outline-[#0066ff] resize-none"
           required
           minLength={10}
           maxLength={1000}
         />
         <div className="flex justify-between items-center">
-          <span className="font-body text-xs text-text-tertiary">
+          <span className="text-[12px] text-[#4e5f80] dark:text-[#a8b5cc]">
             {descripcion.length}/1000 caracteres
           </span>
           {descripcion.length > 0 && descripcion.length < 10 && (
-            <span className="font-body text-xs text-warning">Mínimo 10 caracteres</span>
+            <span className="text-[12px] font-semibold text-[#9a2637] dark:text-[#ff6b7a]">Mínimo 10 caracteres</span>
           )}
         </div>
       </label>
 
       <div className="sm:col-span-2">
-        <Button 
+        <MobileButton 
           type="submit" 
           disabled={enviando || descripcion.trim().length < 10}
+          loading={enviando}
           className="w-full sm:w-auto"
         >
           {enviando ? "Enviando…" : "Enviar a soporte"}
-        </Button>
+        </MobileButton>
         
         {/* Mensaje de éxito con folio destacado */}
         {resultado && (
           <div className="mt-4">
             {resultado.folio ? (
               <Aviso tono="success">
-                <p className="font-body text-sm">
+                <p className="text-sm">
                   <span className="font-bold">¡Mensaje recibido con éxito!</span>
                   <br />
-                  Folio: <span className="font-mono-ruum font-bold text-signal">{resultado.folio}</span>
+                  Folio: <span className="font-mono font-bold text-[#08705f] dark:text-[#4dd9a3]">{resultado.folio}</span>
                   <br />
                   {resultado.msg}
                 </p>
@@ -257,10 +258,10 @@ export function FormularioSoporte({ traslados, preseleccionado, emailUsuario, mo
         
         {/* Ayuda adicional */}
         {!resultado && (
-          <p className="mt-4 font-body text-xs leading-5 text-text-secondary">
-            <span className="font-semibold text-text-primary">¿Necesitas ayuda inmediata?</span> 
-            Si es una emergencia con daño o seguridad durante el traslado, usa el 
-            <Link href={viajeId ? `/viajes/${viajeId}#chat-conductor` : "/mis-viajes"} className="font-semibold text-route-action underline-offset-2 hover:underline">
+          <p className="mt-4 text-xs leading-5 text-[#4e5f80] dark:text-[#a8b5cc]">
+            <span className="font-semibold text-[#0a2342] dark:text-white">¿Necesitas ayuda inmediata?</span>{" "}
+            Si es una emergencia con daño o seguridad durante el traslado, usa el{" "}
+            <Link href={viajeId ? `/viajes/${viajeId}#chat-conductor` : "/mis-viajes"} className="font-semibold text-[#0066ff] dark:text-[#4d94ff] underline-offset-2 hover:underline">
               chat del Pasaporte Digital
             </Link>.
           </p>

@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import type { Database } from "@ruum/shared/types";
+import { MobileBadge, MobileCard, MobileHeader } from "@ruum/ui";
 import { FormularioSoporte } from "./FormularioSoporte";
 
 type Pasaporte = Database["public"]["Views"]["pasaporte_digital"]["Row"];
@@ -306,47 +307,38 @@ export function SoporteCliente({
   }
 
   return (
-    <div className="w-full max-w-md mx-auto space-y-5 pb-24 text-[#0b1e33]">
+    <div className="w-full space-y-5 pb-16 text-[#0a2342] dark:text-[#f6f8fb]">
       {/* Header */}
-      <header className="flex items-center gap-3.5 border-b border-[#f0f4fa] bg-white px-2 py-3">
-        <Link
-          href="/cuenta"
-          aria-label="Volver a cuenta"
-          className="flex size-10 shrink-0 items-center justify-center rounded-full bg-[#f2f6fc] text-[#0b1e33] transition-transform active:scale-95 hover:bg-[#e3ebf5]"
-        >
-          <IconoSvg nombre="flecha-atras" className="size-4.5" />
-        </Link>
-        <div>
-          <h1 className="text-[18px] font-bold tracking-tight text-[#0b1e33]">
-            Contactar a soporte
-          </h1>
-          <p className="text-[12px] font-medium text-[#6b7c94]">
-            Estamos aquí para ayudarte
-          </p>
-        </div>
-      </header>
+      <MobileHeader
+        titulo="Contactar a soporte"
+        subtitulo="Estamos aquí para ayudarte"
+        enlaceAtras="/cuenta"
+        etiquetaAtras="Volver a cuenta"
+        conBorde={false}
+        className="-mx-4 -mt-4 sm:-mx-6 sm:-mt-6 mb-2 border-b border-[#e6edf6] dark:border-[#1a3a5c]"
+      />
 
       {/* Hero */}
-      <section className="relative overflow-hidden rounded-[26px] bg-gradient-to-br from-[#0b1e33] to-[#162c47] p-6 text-white shadow-[0_16px_32px_-12px_rgba(11,30,51,0.4)]">
+      <section className="relative overflow-hidden rounded-[26px] bg-gradient-to-br from-[#0a2342] via-[#0d2b5e] to-[#12335f] p-6 text-white shadow-[0_16px_32px_-12px_rgba(10,35,66,0.35)] dark:from-[#071322] dark:via-[#0a2342] dark:to-[#0f2d52] dark:border dark:border-[#1a3a5c]">
         <div className="pointer-events-none absolute -top-14 -right-14 size-40 rounded-full bg-[radial-gradient(circle,rgba(255,255,255,0.08)_0%,transparent_70%)]" />
         <div className="pointer-events-none absolute -bottom-20 -left-10 size-36 rounded-full bg-[radial-gradient(circle,rgba(255,255,255,0.05)_0%,transparent_70%)]" />
 
         <div className="relative z-10 flex items-center gap-4">
-          <div className="flex size-[60px] shrink-0 items-center justify-center rounded-[20px] bg-white/12 text-white backdrop-blur-sm">
+          <div className="flex size-[60px] shrink-0 items-center justify-center rounded-[20px] bg-white/12 text-white backdrop-blur-sm border border-white/15">
             <IconoSvg nombre="headset" className="size-7" />
           </div>
           <div>
             <h2 className="text-[20px] font-extrabold tracking-tight text-white leading-tight">
               Soporte Ruum Ruum
             </h2>
-            <p className="mt-1 text-[13px] font-medium text-white/70 leading-snug">
+            <p className="mt-1 text-[13px] font-medium text-white/80 leading-snug">
               Atención 24/7 durante tu traslado
             </p>
           </div>
         </div>
 
         {/* Live status */}
-        <div className="relative z-10 mt-4 flex w-fit items-center gap-2 rounded-full bg-white/12 px-3.5 py-2 text-[12px] font-bold text-white backdrop-blur-sm">
+        <div className="relative z-10 mt-4 flex w-fit items-center gap-2 rounded-full bg-white/15 px-3.5 py-2 text-[12px] font-bold text-white backdrop-blur-sm border border-white/20">
           <span className="relative flex size-2">
             <span className="absolute inline-flex size-full animate-ping rounded-full bg-emerald-400 opacity-75" />
             <span className="relative inline-flex size-2 rounded-full bg-emerald-400 shadow-[0_0_0_2px_rgba(74,222,128,0.3)]" />
@@ -358,16 +350,16 @@ export function SoporteCliente({
       {/* Banner traslado activo */}
       <section
         aria-label="Traslado activo"
-        className="flex items-center gap-3.5 rounded-[20px] border border-[#f5dcb0] bg-gradient-to-br from-[#fef7e8] to-[#fcecd4] p-4.5"
+        className="flex items-center gap-3.5 rounded-[22px] border border-[#f3d8a2] bg-gradient-to-br from-[#fef4e6] to-[#fcecd4] p-4.5 dark:from-[#3d2e00]/40 dark:to-[#3d2e00]/20 dark:border-[#664d00]"
       >
-        <div className="flex size-11 shrink-0 items-center justify-center rounded-[15px] bg-white text-[#b36b1e] shadow-[0_4px_10px_rgba(179,107,30,0.1)]">
+        <div className="flex size-11 shrink-0 items-center justify-center rounded-[15px] bg-white dark:bg-[#0a2342] text-[#765100] dark:text-[#ffc933] shadow-[0_4px_10px_rgba(118,81,0,0.12)]">
           <IconoSvg nombre="truck" className="size-5" />
         </div>
         <div className="min-w-0 flex-1">
-          <div className="text-[14px] font-extrabold tracking-tight text-[#7a4e15]">
+          <div className="text-[14px] font-extrabold tracking-tight text-[#765100] dark:text-[#ffc933]">
             Traslado activo · {folioActivo}
           </div>
-          <div className="mt-0.5 text-[12px] font-medium text-[#8a5e25] truncate">
+          <div className="mt-0.5 text-[12px] font-medium text-[#4e5f80] dark:text-[#a8b5cc] truncate">
             {vehiculoTexto} · {estadoTexto}
           </div>
         </div>
@@ -375,7 +367,7 @@ export function SoporteCliente({
 
       {/* Métodos de contacto */}
       <section aria-labelledby="canales-atencion-titulo">
-        <h2 id="canales-atencion-titulo" className="mb-3 px-1 text-[12px] font-bold uppercase tracking-[0.8px] text-[#8b9bb0]">
+        <h2 id="canales-atencion-titulo" className="mb-3 px-1 text-[12px] font-bold uppercase tracking-wider text-[#4e5f80] dark:text-[#a8b5cc]">
           Canales de atención
         </h2>
 
@@ -384,43 +376,43 @@ export function SoporteCliente({
           <button
             type="button"
             onClick={() => abrirChat()}
-            className="flex w-full items-center gap-4 rounded-[20px] border border-[#eef2f7] border-l-4 border-l-[#2e9e6b] bg-white p-4.5 text-left shadow-[0_4px_12px_rgba(0,0,0,0.02)] transition-transform active:scale-[0.99] hover:bg-[#fbfdff]"
+            className="flex w-full items-center gap-4 rounded-[22px] border border-[#e6edf6] border-l-4 border-l-[#08705f] bg-white dark:border-[#1a3a5c] dark:bg-[#0a2342] p-4.5 text-left shadow-[0_2px_10px_rgba(10,35,66,0.04)] transition hover:shadow-md active:scale-[0.99]"
           >
-            <div className="flex size-[52px] shrink-0 items-center justify-center rounded-[17px] bg-[#e9f3ee] text-[#1f6b4a]">
+            <div className="flex size-[52px] shrink-0 items-center justify-center rounded-[17px] bg-[#e9f3ee] text-[#08705f] dark:bg-[#0a2e1f] dark:text-[#4dd9a3]">
               <IconoSvg nombre="chat" className="size-6" />
             </div>
             <div className="min-w-0 flex-1">
-              <div className="flex items-center gap-2 text-[15px] font-bold text-[#0b1e33] tracking-tight">
+              <div className="flex items-center gap-2 text-[15px] font-bold text-[#0a2342] dark:text-white tracking-tight">
                 <span>Chat en vivo</span>
-                <span className="rounded-full bg-[#e9f3ee] px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-[#1f6b4a]">
+                <span className="rounded-full bg-[#e9f3ee] px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-[#08705f] dark:bg-[#0a2e1f] dark:text-[#4dd9a3] border border-[#c8e6d8] dark:border-[#135939]">
                   Recomendado
                 </span>
               </div>
-              <div className="mt-0.5 text-[12.5px] font-medium text-[#8b9bb0] leading-snug">
+              <div className="mt-0.5 text-[12.5px] font-medium text-[#4e5f80] dark:text-[#a8b5cc] leading-snug">
                 Respuesta inmediata · Disponible 24/7
               </div>
             </div>
-            <IconoSvg nombre="chevron-derecha" className="size-4 shrink-0 text-[#c3cfdd]" />
+            <IconoSvg nombre="chevron-derecha" className="size-4 shrink-0 text-[#4e5f80] dark:text-[#a8b5cc]" />
           </button>
 
           {/* Teléfono */}
           <button
             type="button"
             onClick={abrirTelefono}
-            className="flex w-full items-center gap-4 rounded-[20px] border border-[#eef2f7] bg-white p-4.5 text-left shadow-[0_4px_12px_rgba(0,0,0,0.02)] transition-transform active:scale-[0.99] hover:bg-[#fbfdff]"
+            className="flex w-full items-center gap-4 rounded-[22px] border border-[#e6edf6] bg-white dark:border-[#1a3a5c] dark:bg-[#0a2342] p-4.5 text-left shadow-[0_2px_10px_rgba(10,35,66,0.04)] transition hover:shadow-md active:scale-[0.99]"
           >
-            <div className="flex size-[52px] shrink-0 items-center justify-center rounded-[17px] bg-[#f0f5fe] text-[#2e5a88]">
+            <div className="flex size-[52px] shrink-0 items-center justify-center rounded-[17px] bg-[#edf4fe] text-[#104ca0] dark:bg-[#0f2d52] dark:text-[#6ba8ff]">
               <IconoSvg nombre="phone" className="size-6" />
             </div>
             <div className="min-w-0 flex-1">
-              <div className="text-[15px] font-bold text-[#0b1e33] tracking-tight">
+              <div className="text-[15px] font-bold text-[#0a2342] dark:text-white tracking-tight">
                 Llamada telefónica
               </div>
-              <div className="mt-0.5 text-[12.5px] font-medium text-[#8b9bb0] leading-snug">
+              <div className="mt-0.5 text-[12.5px] font-medium text-[#4e5f80] dark:text-[#a8b5cc] leading-snug">
                 Atención personalizada · 24/7
               </div>
             </div>
-            <IconoSvg nombre="chevron-derecha" className="size-4 shrink-0 text-[#c3cfdd]" />
+            <IconoSvg nombre="chevron-derecha" className="size-4 shrink-0 text-[#4e5f80] dark:text-[#a8b5cc]" />
           </button>
 
           {/* WhatsApp */}
@@ -428,46 +420,46 @@ export function SoporteCliente({
             href="https://wa.me/525588880000?text=Hola%20Ruum%20Ruum,%20necesito%20asistencia%20con%20mi%20traslado."
             target="_blank"
             rel="noopener noreferrer"
-            className="flex w-full items-center gap-4 rounded-[20px] border border-[#eef2f7] bg-white p-4.5 text-left shadow-[0_4px_12px_rgba(0,0,0,0.02)] transition-transform active:scale-[0.99] hover:bg-[#fbfdff]"
+            className="flex w-full items-center gap-4 rounded-[22px] border border-[#e6edf6] bg-white dark:border-[#1a3a5c] dark:bg-[#0a2342] p-4.5 text-left shadow-[0_2px_10px_rgba(10,35,66,0.04)] transition hover:shadow-md active:scale-[0.99]"
           >
-            <div className="flex size-[52px] shrink-0 items-center justify-center rounded-[17px] bg-[#e6f5ec] text-[#25d366]">
+            <div className="flex size-[52px] shrink-0 items-center justify-center rounded-[17px] bg-[#e6f5ec] text-[#25d366] dark:bg-[#0a2e1f] dark:text-[#25d366]">
               <IconoSvg nombre="whatsapp" className="size-6" />
             </div>
             <div className="min-w-0 flex-1">
-              <div className="text-[15px] font-bold text-[#0b1e33] tracking-tight">
+              <div className="text-[15px] font-bold text-[#0a2342] dark:text-white tracking-tight">
                 WhatsApp
               </div>
-              <div className="mt-0.5 text-[12.5px] font-medium text-[#8b9bb0] leading-snug">
+              <div className="mt-0.5 text-[12.5px] font-medium text-[#4e5f80] dark:text-[#a8b5cc] leading-snug">
                 Mensajes de estado y soporte
               </div>
             </div>
-            <IconoSvg nombre="chevron-derecha" className="size-4 shrink-0 text-[#c3cfdd]" />
+            <IconoSvg nombre="chevron-derecha" className="size-4 shrink-0 text-[#4e5f80] dark:text-[#a8b5cc]" />
           </a>
 
           {/* Email */}
           <a
             href="mailto:soporte@ruumruum.com?subject=Soporte%20Ruum%20Ruum"
-            className="flex w-full items-center gap-4 rounded-[20px] border border-[#eef2f7] bg-white p-4.5 text-left shadow-[0_4px_12px_rgba(0,0,0,0.02)] transition-transform active:scale-[0.99] hover:bg-[#fbfdff]"
+            className="flex w-full items-center gap-4 rounded-[22px] border border-[#e6edf6] bg-white dark:border-[#1a3a5c] dark:bg-[#0a2342] p-4.5 text-left shadow-[0_2px_10px_rgba(10,35,66,0.04)] transition hover:shadow-md active:scale-[0.99]"
           >
-            <div className="flex size-[52px] shrink-0 items-center justify-center rounded-[17px] bg-[#fef4e6] text-[#b36b1e]">
+            <div className="flex size-[52px] shrink-0 items-center justify-center rounded-[17px] bg-[#fef4e6] text-[#765100] dark:bg-[#3d2e00] dark:text-[#ffc933]">
               <IconoSvg nombre="email" className="size-6" />
             </div>
             <div className="min-w-0 flex-1">
-              <div className="text-[15px] font-bold text-[#0b1e33] tracking-tight">
+              <div className="text-[15px] font-bold text-[#0a2342] dark:text-white tracking-tight">
                 Correo electrónico
               </div>
-              <div className="mt-0.5 text-[12.5px] font-medium text-[#8b9bb0] leading-snug">
+              <div className="mt-0.5 text-[12.5px] font-medium text-[#4e5f80] dark:text-[#a8b5cc] leading-snug">
                 soporte@ruumruum.com
               </div>
             </div>
-            <IconoSvg nombre="chevron-derecha" className="size-4 shrink-0 text-[#c3cfdd]" />
+            <IconoSvg nombre="chevron-derecha" className="size-4 shrink-0 text-[#4e5f80] dark:text-[#a8b5cc]" />
           </a>
         </div>
       </section>
 
       {/* Temas rápidos */}
       <section aria-labelledby="temas-frecuentes-titulo">
-        <h2 id="temas-frecuentes-titulo" className="mb-3 px-1 text-[12px] font-bold uppercase tracking-[0.8px] text-[#8b9bb0]">
+        <h2 id="temas-frecuentes-titulo" className="mb-3 px-1 text-[12px] font-bold uppercase tracking-wider text-[#4e5f80] dark:text-[#a8b5cc]">
           Temas frecuentes
         </h2>
 
@@ -475,15 +467,15 @@ export function SoporteCliente({
           <button
             type="button"
             onClick={() => abrirChat("Problema con un traslado")}
-            className="flex flex-col gap-2 rounded-[18px] border border-[#eef2f7] bg-white p-4 text-left shadow-[0_4px_12px_rgba(0,0,0,0.01)] transition-transform active:scale-[0.98] hover:bg-[#fbfdff]"
+            className="flex flex-col gap-2 rounded-[20px] border border-[#e6edf6] bg-white dark:border-[#1a3a5c] dark:bg-[#0a2342] p-4 text-left shadow-[0_2px_10px_rgba(10,35,66,0.02)] transition hover:shadow-md active:scale-[0.98]"
           >
-            <div className="flex size-[38px] shrink-0 items-center justify-center rounded-xl bg-[#fef4e6] text-[#b36b1e]">
+            <div className="flex size-[38px] shrink-0 items-center justify-center rounded-xl bg-[#fef4e6] text-[#765100] dark:bg-[#3d2e00] dark:text-[#ffc933]">
               <IconoSvg nombre="alerta-triangulo" className="size-4.5" />
             </div>
-            <div className="text-[13px] font-bold text-[#0b1e33] leading-snug tracking-tight">
+            <div className="text-[13.5px] font-bold text-[#0a2342] dark:text-white leading-snug tracking-tight">
               Problema con un traslado
             </div>
-            <div className="-mt-1 text-[11px] font-medium text-[#8b9bb0]">
+            <div className="-mt-1 text-[11.5px] font-medium text-[#4e5f80] dark:text-[#a8b5cc]">
               Incidencias durante el servicio
             </div>
           </button>
@@ -491,15 +483,15 @@ export function SoporteCliente({
           <button
             type="button"
             onClick={() => abrirChat("Reportar daño o incidente")}
-            className="flex flex-col gap-2 rounded-[18px] border border-[#eef2f7] bg-white p-4 text-left shadow-[0_4px_12px_rgba(0,0,0,0.01)] transition-transform active:scale-[0.98] hover:bg-[#fbfdff]"
+            className="flex flex-col gap-2 rounded-[20px] border border-[#e6edf6] bg-white dark:border-[#1a3a5c] dark:bg-[#0a2342] p-4 text-left shadow-[0_2px_10px_rgba(10,35,66,0.02)] transition hover:shadow-md active:scale-[0.98]"
           >
-            <div className="flex size-[38px] shrink-0 items-center justify-center rounded-xl bg-[#fdeaea] text-[#b33c3c]">
+            <div className="flex size-[38px] shrink-0 items-center justify-center rounded-xl bg-[#fdeaea] text-[#9a2637] dark:bg-[#3d0f1a] dark:text-[#ff6b7a]">
               <IconoSvg nombre="car-crash" className="size-4.5" />
             </div>
-            <div className="text-[13px] font-bold text-[#0b1e33] leading-snug tracking-tight">
+            <div className="text-[13.5px] font-bold text-[#0a2342] dark:text-white leading-snug tracking-tight">
               Reportar daño
             </div>
-            <div className="-mt-1 text-[11px] font-medium text-[#8b9bb0]">
+            <div className="-mt-1 text-[11.5px] font-medium text-[#4e5f80] dark:text-[#a8b5cc]">
               Documentación de daños
             </div>
           </button>
@@ -507,15 +499,15 @@ export function SoporteCliente({
           <button
             type="button"
             onClick={() => abrirChat("Ayuda con pagos")}
-            className="flex flex-col gap-2 rounded-[18px] border border-[#eef2f7] bg-white p-4 text-left shadow-[0_4px_12px_rgba(0,0,0,0.01)] transition-transform active:scale-[0.98] hover:bg-[#fbfdff]"
+            className="flex flex-col gap-2 rounded-[20px] border border-[#e6edf6] bg-white dark:border-[#1a3a5c] dark:bg-[#0a2342] p-4 text-left shadow-[0_2px_10px_rgba(10,35,66,0.02)] transition hover:shadow-md active:scale-[0.98]"
           >
-            <div className="flex size-[38px] shrink-0 items-center justify-center rounded-xl bg-[#f0f5fe] text-[#2e5a88]">
+            <div className="flex size-[38px] shrink-0 items-center justify-center rounded-xl bg-[#edf4fe] text-[#104ca0] dark:bg-[#0f2d52] dark:text-[#6ba8ff]">
               <IconoSvg nombre="tarjeta" className="size-4.5" />
             </div>
-            <div className="text-[13px] font-bold text-[#0b1e33] leading-snug tracking-tight">
+            <div className="text-[13.5px] font-bold text-[#0a2342] dark:text-white leading-snug tracking-tight">
               Ayuda con pagos
             </div>
-            <div className="-mt-1 text-[11px] font-medium text-[#8b9bb0]">
+            <div className="-mt-1 text-[11.5px] font-medium text-[#4e5f80] dark:text-[#a8b5cc]">
               Transacciones y cobros
             </div>
           </button>
@@ -523,15 +515,15 @@ export function SoporteCliente({
           <button
             type="button"
             onClick={() => abrirChat("Ayuda con evidencia")}
-            className="flex flex-col gap-2 rounded-[18px] border border-[#eef2f7] bg-white p-4 text-left shadow-[0_4px_12px_rgba(0,0,0,0.01)] transition-transform active:scale-[0.98] hover:bg-[#fbfdff]"
+            className="flex flex-col gap-2 rounded-[20px] border border-[#e6edf6] bg-white dark:border-[#1a3a5c] dark:bg-[#0a2342] p-4 text-left shadow-[0_2px_10px_rgba(10,35,66,0.02)] transition hover:shadow-md active:scale-[0.98]"
           >
-            <div className="flex size-[38px] shrink-0 items-center justify-center rounded-xl bg-[#f2eef9] text-[#5e3b8c]">
+            <div className="flex size-[38px] shrink-0 items-center justify-center rounded-xl bg-[#f4effc] text-[#6b3ba7] dark:bg-[#2b1f42] dark:text-[#b388ff]">
               <IconoSvg nombre="camara" className="size-4.5" />
             </div>
-            <div className="text-[13px] font-bold text-[#0b1e33] leading-snug tracking-tight">
+            <div className="text-[13.5px] font-bold text-[#0a2342] dark:text-white leading-snug tracking-tight">
               Ayuda con evidencia
             </div>
-            <div className="-mt-1 text-[11px] font-medium text-[#8b9bb0]">
+            <div className="-mt-1 text-[11.5px] font-medium text-[#4e5f80] dark:text-[#a8b5cc]">
               Fotografías y checks
             </div>
           </button>
@@ -539,49 +531,46 @@ export function SoporteCliente({
       </section>
 
       {/* Horarios */}
-      <section
-        aria-labelledby="horarios-titulo"
-        className="rounded-[20px] border border-[#eef2f7] bg-white p-5 shadow-[0_4px_12px_rgba(0,0,0,0.02)]"
-      >
-        <div id="horarios-titulo" className="flex items-center gap-2.5 font-bold text-[14.5px] text-[#0b1e33] mb-3.5">
-          <div className="flex size-7.5 items-center justify-center rounded-[10px] bg-[#f0f5fe] text-[#2e5a88]">
-            <IconoSvg nombre="clock" className="size-3.5" />
+      <MobileCard radius="xl" padding="md" className="space-y-3.5">
+        <div id="horarios-titulo" className="flex items-center gap-2.5 font-bold text-[14.5px] text-[#0a2342] dark:text-white">
+          <div className="flex size-8 items-center justify-center rounded-[10px] bg-[#edf4fe] text-[#104ca0] dark:bg-[#0f2d52] dark:text-[#6ba8ff]">
+            <IconoSvg nombre="clock" className="size-4" />
           </div>
           <span>Horarios de atención</span>
         </div>
 
-        <div className="divide-y divide-[#f0f4fa] text-[13.5px]">
+        <div className="divide-y divide-[#e6edf6] dark:divide-[#1a3a5c] text-[13.5px]">
           <div className="flex justify-between items-center py-2.5">
-            <span className="font-medium text-[#6b7c94]">Chat en vivo</span>
-            <span className="flex items-center gap-1.5 font-semibold text-[#1f6b4a]">
-              <span className="size-1.5 rounded-full bg-emerald-400 shadow-[0_0_0_2px_rgba(74,222,128,0.25)]" />
+            <span className="font-medium text-[#4e5f80] dark:text-[#a8b5cc]">Chat en vivo</span>
+            <span className="flex items-center gap-1.5 font-semibold text-[#08705f] dark:text-[#4dd9a3]">
+              <span className="size-2 rounded-full bg-emerald-500 shadow-[0_0_0_2px_rgba(16,185,129,0.25)]" />
               24/7 · En línea
             </span>
           </div>
           <div className="flex justify-between items-center py-2.5">
-            <span className="font-medium text-[#6b7c94]">Teléfono</span>
-            <span className="flex items-center gap-1.5 font-semibold text-[#1f6b4a]">
-              <span className="size-1.5 rounded-full bg-emerald-400 shadow-[0_0_0_2px_rgba(74,222,128,0.25)]" />
+            <span className="font-medium text-[#4e5f80] dark:text-[#a8b5cc]">Teléfono</span>
+            <span className="flex items-center gap-1.5 font-semibold text-[#08705f] dark:text-[#4dd9a3]">
+              <span className="size-2 rounded-full bg-emerald-500 shadow-[0_0_0_2px_rgba(16,185,129,0.25)]" />
               24/7 · En línea
             </span>
           </div>
           <div className="flex justify-between items-center py-2.5">
-            <span className="font-medium text-[#6b7c94]">WhatsApp</span>
-            <span className="font-semibold text-[#1a293b]">Lun – Dom · 8:00 – 22:00</span>
+            <span className="font-medium text-[#4e5f80] dark:text-[#a8b5cc]">WhatsApp</span>
+            <span className="font-semibold text-[#0a2342] dark:text-white">Lun – Dom · 8:00 – 22:00</span>
           </div>
           <div className="flex justify-between items-center pt-2.5">
-            <span className="font-medium text-[#6b7c94]">Correo electrónico</span>
-            <span className="font-semibold text-[#1a293b]">Respuesta en 24 h</span>
+            <span className="font-medium text-[#4e5f80] dark:text-[#a8b5cc]">Correo electrónico</span>
+            <span className="font-semibold text-[#0a2342] dark:text-white">Respuesta en 24 h</span>
           </div>
         </div>
-      </section>
+      </MobileCard>
 
       {/* Nota de soporte */}
-      <div className="flex items-start gap-3 rounded-2xl border border-[#dfe8f3] bg-[#f0f5fe] p-4">
-        <div className="text-[#2e5a88] shrink-0 mt-0.5">
-          <IconoSvg nombre="info" className="size-4.5" />
+      <div className="flex items-start gap-3 rounded-2xl border border-[#c8dcf8] bg-[#edf4fe] dark:border-[#1d4576] dark:bg-[#0f2d52]/50 p-4">
+        <div className="text-[#104ca0] dark:text-[#6ba8ff] shrink-0 mt-0.5">
+          <IconoSvg nombre="info" className="size-5" />
         </div>
-        <p className="text-[12.5px] font-medium text-[#3d5470] leading-relaxed">
+        <p className="text-[13px] font-medium text-[#0a2342] dark:text-[#f6f8fb] leading-relaxed">
           Durante un traslado activo, el botón de soporte está siempre visible. El acceso no requiere más de un toque desde cualquier pantalla del traslado.
         </p>
       </div>
@@ -589,22 +578,22 @@ export function SoporteCliente({
       {/* Enlace directo a Preguntas Frecuentes */}
       <Link
         href="/preguntas-frecuentes"
-        className="flex items-center justify-between rounded-[20px] border border-[#eef2f7] bg-white p-4.5 shadow-[0_4px_12px_rgba(0,0,0,0.02)] transition-colors hover:border-[#0b1e33]/20"
+        className="flex items-center justify-between rounded-[22px] border border-[#e6edf6] bg-white dark:border-[#1a3a5c] dark:bg-[#0a2342] p-4.5 shadow-[0_2px_10px_rgba(10,35,66,0.04)] transition hover:shadow-md"
       >
         <div className="flex items-center gap-3.5">
-          <div className="flex size-10 shrink-0 items-center justify-center rounded-[13px] bg-[#f0f5fe] text-[#2e5a88]">
+          <div className="flex size-10 shrink-0 items-center justify-center rounded-[13px] bg-[#edf4fe] text-[#104ca0] dark:bg-[#0f2d52] dark:text-[#6ba8ff]">
             <IconoSvg nombre="help" className="size-5" />
           </div>
           <div>
-            <div className="text-[14px] font-bold text-[#0b1e33]">
+            <div className="text-[14.5px] font-bold text-[#0a2342] dark:text-white">
               Preguntas frecuentes
             </div>
-            <div className="text-[12px] font-medium text-[#6b7c94]">
+            <div className="text-[12px] font-medium text-[#4e5f80] dark:text-[#a8b5cc]">
               Encuentra respuestas rápidas y guías de servicio
             </div>
           </div>
         </div>
-        <IconoSvg nombre="chevron-derecha" className="size-4 shrink-0 text-[#c3cfdd]" />
+        <IconoSvg nombre="chevron-derecha" className="size-4 shrink-0 text-[#4e5f80] dark:text-[#a8b5cc]" />
       </Link>
 
       {/* ============================================================ */}
@@ -617,30 +606,30 @@ export function SoporteCliente({
           aria-modal="true"
           aria-labelledby="chat-titulo"
           onClick={cerrarChat}
-          className="fixed inset-0 z-50 flex items-end justify-center bg-[#0b1e33]/50 backdrop-blur-sm animate-in fade-in duration-200"
+          className="fixed inset-0 z-50 flex items-end justify-center bg-[#0a2342]/60 backdrop-blur-sm animate-in fade-in duration-200"
         >
           <div
             onClick={(e) => e.stopPropagation()}
-            className="flex max-h-[85vh] w-full max-w-md flex-col rounded-t-[28px] bg-white p-6 shadow-2xl animate-in slide-in-from-bottom duration-300"
+            className="flex max-h-[85vh] w-full max-w-md flex-col rounded-t-[32px] bg-white dark:bg-[#071322] border-t border-[#e6edf6] dark:border-[#1a3a5c] p-6 shadow-2xl animate-in slide-in-from-bottom duration-300"
           >
             {/* Sheet handle */}
-            <div className="mx-auto mb-4 h-1 w-11 rounded-full bg-[#dde5ef]" />
+            <div className="mx-auto mb-4 h-1.5 w-12 rounded-full bg-[#dde5ef] dark:bg-[#2d4f73]" />
 
-            <div className="mx-auto mb-3 flex size-16 items-center justify-center rounded-[22px] bg-[#e9f3ee] text-[#1f6b4a]">
+            <div className="mx-auto mb-3 flex size-16 items-center justify-center rounded-[22px] bg-[#e9f3ee] text-[#08705f] dark:bg-[#0a2e1f] dark:text-[#4dd9a3]">
               <IconoSvg nombre="chat" className="size-7" />
             </div>
 
-            <h3 id="chat-titulo" className="text-center text-[19px] font-extrabold text-[#0b1e33] tracking-tight">
+            <h3 id="chat-titulo" className="text-center text-[19px] font-extrabold text-[#0a2342] dark:text-white tracking-tight">
               Chat en vivo
             </h3>
-            <p className="mt-1 mb-4 text-center text-[13.5px] font-medium text-[#6b7c94] leading-snug">
+            <p className="mt-1 mb-4 text-center text-[13.5px] font-medium text-[#4e5f80] dark:text-[#a8b5cc] leading-snug">
               {temaSeleccionado
                 ? "Un agente especializado te atenderá en menos de 2 minutos."
                 : "Un agente te atenderá en menos de 2 minutos."}
             </p>
 
             {/* Chat mock messages */}
-            <div className="mb-4 max-h-[260px] flex-1 overflow-y-auto rounded-[20px] border border-[#eef2f7] bg-[#f8fafd] p-4.5 space-y-3.5">
+            <div className="mb-4 max-h-[260px] flex-1 overflow-y-auto rounded-[20px] border border-[#e6edf6] dark:border-[#1a3a5c] bg-[#f8fafd] dark:bg-[#0a2342]/40 p-4.5 space-y-3.5">
               {mensajesChat.map((m) => {
                 const esAgente = m.remitente === "agente";
                 return (
@@ -650,16 +639,16 @@ export function SoporteCliente({
                   >
                     <div
                       className={`flex size-8 shrink-0 items-center justify-center rounded-full text-white text-[12px] font-bold ${
-                        esAgente ? "bg-[#2e5a88]" : "bg-[#0b1e33]"
+                        esAgente ? "bg-[#104ca0] dark:bg-[#4d94ff]" : "bg-[#0a2342] dark:bg-[#1a3a5c]"
                       }`}
                     >
                       {esAgente ? <IconoSvg nombre="headset" className="size-4" /> : <IconoSvg nombre="user" className="size-4" />}
                     </div>
                     <div
-                      className={`max-w-[85%] rounded-[16px] px-3.5 py-3 text-[13px] font-medium leading-relaxed shadow-sm ${
+                      className={`max-w-[85%] rounded-[18px] px-3.5 py-3 text-[13.5px] font-medium leading-relaxed shadow-xs ${
                         esAgente
-                          ? "rounded-tl-sm bg-[#eef3fa] text-[#1a293b]"
-                          : "rounded-tr-sm bg-white text-[#1a293b] border border-[#eef2f7]"
+                          ? "rounded-tl-xs bg-[#edf4fe] text-[#0a2342] dark:bg-[#0f2d52] dark:text-[#f6f8fb]"
+                          : "rounded-tr-xs bg-white text-[#0a2342] dark:bg-[#0a2342] dark:text-white border border-[#e6edf6] dark:border-[#1a3a5c]"
                       }`}
                     >
                       {m.texto}
@@ -671,19 +660,19 @@ export function SoporteCliente({
             </div>
 
             {/* Chat input */}
-            <form onSubmit={enviarMensaje} className="flex items-center gap-2 rounded-2xl border border-[#e6edf6] bg-[#f8fafd] p-1.5 pl-4">
+            <form onSubmit={enviarMensaje} className="flex items-center gap-2 rounded-2xl border border-[#d7e1ee] dark:border-[#1a3a5c] bg-[#f8fafd] dark:bg-[#0a2342]/60 p-1.5 pl-4 focus-within:border-[#0066ff] focus-within:ring-2 focus-within:ring-[#0066ff]/20">
               <input
                 type="text"
                 value={mensajeInput}
                 onChange={(e) => setMensajeInput(e.target.value)}
                 placeholder="Escribe tu mensaje..."
                 aria-label="Mensaje para soporte"
-                className="w-full bg-transparent text-[14px] font-medium text-[#0b1e33] outline-none placeholder:text-[#a6b7cb]"
+                className="w-full bg-transparent text-[14px] font-medium text-[#0a2342] dark:text-white outline-none placeholder:text-[#4e5f80] dark:placeholder:text-[#a8b5cc]"
               />
               <button
                 type="submit"
                 aria-label="Enviar mensaje"
-                className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-[#0b1e33] text-white transition-transform active:scale-95"
+                className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-[#0a2342] text-white hover:bg-[#162c47] dark:bg-[#4d94ff] dark:text-[#061529] transition-transform active:scale-95"
               >
                 <IconoSvg nombre="paper-plane" className="size-4.5" />
               </button>
@@ -692,7 +681,7 @@ export function SoporteCliente({
             <button
               type="button"
               onClick={cerrarChat}
-              className="mt-3.5 w-full py-2.5 text-center text-[14px] font-bold text-[#6b7c94] transition-colors hover:text-[#0b1e33]"
+              className="mt-3.5 w-full py-2.5 text-center text-[14px] font-bold text-[#4e5f80] hover:text-[#0a2342] dark:text-[#a8b5cc] dark:hover:text-white transition-colors"
             >
               Cerrar chat
             </button>
@@ -710,42 +699,42 @@ export function SoporteCliente({
           aria-modal="true"
           aria-labelledby="telefono-titulo"
           onClick={cerrarTelefono}
-          className="fixed inset-0 z-50 flex items-end justify-center bg-[#0b1e33]/50 backdrop-blur-sm animate-in fade-in duration-200"
+          className="fixed inset-0 z-50 flex items-end justify-center bg-[#0a2342]/60 backdrop-blur-sm animate-in fade-in duration-200"
         >
           <div
             onClick={(e) => e.stopPropagation()}
-            className="w-full max-w-md rounded-t-[28px] bg-white p-6 shadow-2xl animate-in slide-in-from-bottom duration-300"
+            className="w-full max-w-md rounded-t-[32px] bg-white dark:bg-[#071322] border-t border-[#e6edf6] dark:border-[#1a3a5c] p-6 shadow-2xl animate-in slide-in-from-bottom duration-300"
           >
             {/* Sheet handle */}
-            <div className="mx-auto mb-4 h-1 w-11 rounded-full bg-[#dde5ef]" />
+            <div className="mx-auto mb-4 h-1.5 w-12 rounded-full bg-[#dde5ef] dark:bg-[#2d4f73]" />
 
-            <div className="mx-auto mb-3 flex size-16 items-center justify-center rounded-[22px] bg-[#f0f5fe] text-[#2e5a88]">
+            <div className="mx-auto mb-3 flex size-16 items-center justify-center rounded-[22px] bg-[#edf4fe] text-[#104ca0] dark:bg-[#0f2d52] dark:text-[#6ba8ff]">
               <IconoSvg nombre="phone" className="size-7" />
             </div>
 
-            <h3 id="telefono-titulo" className="text-center text-[19px] font-extrabold text-[#0b1e33] tracking-tight">
+            <h3 id="telefono-titulo" className="text-center text-[19px] font-extrabold text-[#0a2342] dark:text-white tracking-tight">
               Llamada telefónica
             </h3>
-            <p className="mt-1 mb-5 text-center text-[13.5px] font-medium text-[#6b7c94] leading-snug">
+            <p className="mt-1 mb-5 text-center text-[13.5px] font-medium text-[#4e5f80] dark:text-[#a8b5cc] leading-snug">
               Nuestro equipo de soporte está disponible para atenderte.
             </p>
 
-            <div className="mb-4 rounded-[18px] border border-[#eef2f7] bg-[#f8fafd] p-5 text-center">
-              <div className="text-[26px] font-extrabold tracking-tight text-[#0b1e33]">
+            <div className="mb-4 rounded-[20px] border border-[#e6edf6] dark:border-[#1a3a5c] bg-[#f8fafd] dark:bg-[#0a2342]/40 p-5 text-center">
+              <div className="text-[26px] font-extrabold tracking-tight text-[#0a2342] dark:text-white">
                 +52 55 8888 0000
               </div>
-              <div className="mt-1 text-[12.5px] font-semibold uppercase tracking-[0.5px] text-[#8b9bb0]">
+              <div className="mt-1 text-[12px] font-bold uppercase tracking-wider text-[#4e5f80] dark:text-[#a8b5cc]">
                 Línea de soporte Ruum Ruum
               </div>
-              <div className="mt-2.5 flex items-center justify-center gap-1.5 text-[12.5px] font-semibold text-[#1f6b4a]">
-                <span className="size-1.5 rounded-full bg-emerald-400 shadow-[0_0_0_2px_rgba(74,222,128,0.25)]" />
+              <div className="mt-2.5 flex items-center justify-center gap-1.5 text-[12.5px] font-semibold text-[#08705f] dark:text-[#4dd9a3]">
+                <span className="size-2 rounded-full bg-emerald-500 shadow-[0_0_0_2px_rgba(16,185,129,0.25)]" />
                 Disponible 24/7
               </div>
             </div>
 
             <a
               href="tel:+525588880000"
-              className="mb-2 flex w-full items-center justify-center gap-2 rounded-2xl bg-[#0b1e33] py-4 text-[15px] font-bold text-white shadow-[0_10px_22px_-8px_rgba(11,30,51,0.4)] transition-transform active:scale-[0.98]"
+              className="mb-2 flex min-h-[52px] w-full items-center justify-center gap-2 rounded-2xl bg-[#0a2342] hover:bg-[#162c47] py-3.5 text-[15.5px] font-bold text-white shadow-[0_12px_24px_-8px_rgba(10,35,66,0.35)] transition-transform active:scale-[0.98] dark:bg-[#4d94ff] dark:text-[#061529] dark:hover:bg-[#6ba8ff]"
             >
               <IconoSvg nombre="phone" className="size-4.5" />
               <span>Llamar ahora</span>
@@ -754,7 +743,7 @@ export function SoporteCliente({
             <button
               type="button"
               onClick={cerrarTelefono}
-              className="w-full py-3 text-center text-[14px] font-bold text-[#6b7c94] transition-colors hover:text-[#0b1e33]"
+              className="w-full py-3 text-center text-[14px] font-bold text-[#4e5f80] hover:text-[#0a2342] dark:text-[#a8b5cc] dark:hover:text-white transition-colors"
             >
               Cancelar
             </button>
@@ -767,18 +756,18 @@ export function SoporteCliente({
         <div
           role="dialog"
           aria-modal="true"
-          className="fixed inset-0 z-50 flex items-center justify-center bg-[#0b1e33]/70 backdrop-blur-sm p-4 animate-in fade-in duration-200"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-[#0a2342]/70 backdrop-blur-sm p-4 animate-in fade-in duration-200"
         >
-          <div className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-3xl bg-white p-6 shadow-2xl text-[#0b1e33]">
-            <div className="flex items-center justify-between border-b border-[#f0f4fa] pb-4 mb-4">
-              <h3 className="text-[17px] font-extrabold text-[#0b1e33]">
+          <div className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-[28px] border border-[#e6edf6] dark:border-[#1a3a5c] bg-white dark:bg-[#071322] p-6 shadow-2xl text-[#0a2342] dark:text-white">
+            <div className="flex items-center justify-between border-b border-[#e6edf6] dark:border-[#1a3a5c] pb-4 mb-4">
+              <h3 className="text-[17px] font-extrabold text-[#0a2342] dark:text-white">
                 Reportar problema a soporte
               </h3>
               <button
                 type="button"
                 onClick={() => setModalReporte(false)}
                 aria-label="Cerrar formulario"
-                className="flex size-9 items-center justify-center rounded-full bg-[#f2f6fc] text-[#6b7c94] hover:text-[#0b1e33]"
+                className="flex size-9 items-center justify-center rounded-full bg-[#eff3f8] dark:bg-[#1a3a5c] text-[#4e5f80] dark:text-[#a8b5cc] hover:text-[#0a2342] dark:hover:text-white transition-colors"
               >
                 ✕
               </button>
