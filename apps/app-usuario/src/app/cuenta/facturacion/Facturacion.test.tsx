@@ -2,7 +2,7 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { Facturacion } from "../Facturacion";
+import { Facturacion, FACTURAS_EJEMPLO_TEST } from "../Facturacion";
 import type { Database } from "@ruum/shared/types";
 
 type Usuario = Database["public"]["Tables"]["usuarios"]["Row"];
@@ -29,7 +29,7 @@ describe("Facturación — Pantalla y flujos fiscales", () => {
   });
 
   it("renderiza encabezado, botón de regreso y hero fiscal con estadísticas", () => {
-    render(<Facturacion usuario={mockUsuario as Usuario} />);
+    render(<Facturacion usuario={mockUsuario as Usuario} facturasIniciales={FACTURAS_EJEMPLO_TEST} />);
 
     expect(screen.getByRole("heading", { name: "Facturación" })).toBeInTheDocument();
     expect(screen.getByText("Datos fiscales y comprobantes")).toBeInTheDocument();
@@ -44,7 +44,7 @@ describe("Facturación — Pantalla y flujos fiscales", () => {
   });
 
   it("muestra la información fiscal actual del usuario", () => {
-    render(<Facturacion usuario={mockUsuario as Usuario} />);
+    render(<Facturacion usuario={mockUsuario as Usuario} facturasIniciales={FACTURAS_EJEMPLO_TEST} />);
 
     expect(screen.getByText("MART900515ABC")).toBeInTheDocument();
     expect(screen.getByText("Laura Martínez Ruiz")).toBeInTheDocument();
@@ -54,7 +54,7 @@ describe("Facturación — Pantalla y flujos fiscales", () => {
 
   it("permite abrir el modal de edición de datos fiscales y guardar cambios", async () => {
     const user = userEvent.setup();
-    render(<Facturacion usuario={mockUsuario as Usuario} />);
+    render(<Facturacion usuario={mockUsuario as Usuario} facturasIniciales={FACTURAS_EJEMPLO_TEST} />);
 
     // Abrir modal
     const botonEditar = screen.getByRole("button", { name: /editar/i });
@@ -90,7 +90,7 @@ describe("Facturación — Pantalla y flujos fiscales", () => {
 
   it("permite abrir el modal de Constancia Fiscal y confirmar archivo", async () => {
     const user = userEvent.setup();
-    render(<Facturacion usuario={mockUsuario as Usuario} />);
+    render(<Facturacion usuario={mockUsuario as Usuario} facturasIniciales={FACTURAS_EJEMPLO_TEST} />);
 
     // Abrir modal desde la alerta
     const alertaConstancia = screen.getByText(/constancia de situación fiscal/i);
@@ -117,7 +117,7 @@ describe("Facturación — Pantalla y flujos fiscales", () => {
 
   it("filtra el historial de facturas por pestañas (Todas, Emitidas, Pendientes)", async () => {
     const user = userEvent.setup();
-    render(<Facturacion usuario={mockUsuario as Usuario} />);
+    render(<Facturacion usuario={mockUsuario as Usuario} facturasIniciales={FACTURAS_EJEMPLO_TEST} />);
 
     // Por defecto 'Todas' muestra tanto emitidas como pendientes
     expect(screen.getByText("Factura #FAC-2847")).toBeInTheDocument();
@@ -136,7 +136,7 @@ describe("Facturación — Pantalla y flujos fiscales", () => {
 
   it("permite solicitar una factura pendiente y actualizar su estado a emitida", async () => {
     const user = userEvent.setup();
-    render(<Facturacion usuario={mockUsuario as Usuario} />);
+    render(<Facturacion usuario={mockUsuario as Usuario} facturasIniciales={FACTURAS_EJEMPLO_TEST} />);
 
     // Filtrar a pendientes
     await user.click(screen.getByRole("button", { name: /pendientes/i }));
@@ -153,7 +153,7 @@ describe("Facturación — Pantalla y flujos fiscales", () => {
 
   it("cierra los modales al presionar la tecla Escape", async () => {
     const user = userEvent.setup();
-    render(<Facturacion usuario={mockUsuario as Usuario} />);
+    render(<Facturacion usuario={mockUsuario as Usuario} facturasIniciales={FACTURAS_EJEMPLO_TEST} />);
 
     await user.click(screen.getByRole("button", { name: /editar/i }));
     expect(await screen.findByRole("dialog")).toBeInTheDocument();

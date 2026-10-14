@@ -8,8 +8,13 @@ function esRegistro(valor: unknown): valor is Record<string, unknown> {
   return typeof valor === "object" && valor !== null;
 }
 
-/** Valida los mensajes postMessage emitidos por el iframe hospedado de Didit. */
-export function interpretarMensajeDidit(valor: unknown): MensajeDidit | null {
+/** Valida los mensajes postMessage emitidos por el iframe hospedado de Didit.
+ * V-1: si se recibe `origen`, se exige que sea un origen Didit válido;
+ * en caso contrario se descarta el mensaje (retorna null). */
+export function interpretarMensajeDidit(valor: unknown, origen?: string): MensajeDidit | null {
+  if (typeof origen === "string" && origen.length > 0 && !esOrigenDiditValido(origen)) {
+    return null;
+  }
   let mensaje = valor;
 
   if (typeof mensaje === "string") {

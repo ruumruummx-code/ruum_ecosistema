@@ -16,6 +16,9 @@ export function ChatTraslado({ trasladoId, estado }: { trasladoId: string; estad
   const { mensajes, errorChat, llamando, errorLlamada, inicializar, actualizar, cargarMensajes, agregarMensaje, limpiar } = useTrasladoRealtime(trasladoId);
   const mensajesRef = useRef(mensajes);
   useEffect(() => { mensajesRef.current = mensajes; }, [mensajes]);
+  // D-1: rate limit local (UX inmediata antes del error del servicio):
+  // máx 5 mensajes / 30s y al menos 1.5s entre envíos.
+  const enviosRef = useRef<number[]>([]);
 
   const disponible = chatDisponible(estado);
 
@@ -100,6 +103,22 @@ export function ChatTraslado({ trasladoId, estado }: { trasladoId: string; estad
     if (!clienteRef.current) return;
     const texto = contenido.trim();
     if (!texto) return;
+    if (texto.length > 1000) {
+      actualizar({ errorChat: "El mensaje supera el máximo de 1000 caracteres." });
+      return;
+    }
+    // D-1: rate limit local — 5 mensajes por 30s, mínimo 1.5s entre envíos.
+    const ahora = Date.now();
+    enviosRef.current = enviosRef.current.filter((t) => ahora - t < 30_000);
+    if (enviosRef.current.length > 0 && ahora - enviosRef.current[enviosRef.current.length - 1]! < 1500) {
+      actualizar({ errorChat: "Envía un mensaje a la vez. Espera un segundo antes del siguiente." });
+      return;
+    }
+    if (enviosRef.current.length >= 5) {
+      actualizar({ errorChat: "Estás enviando mensajes muy rápido. Espera unos segundos e inténtalo de nuevo." });
+      return;
+    }
+    enviosRef.current.push(ahora);
     // C-06: optimistic UI — mostrar mensaje inmediato antes de Realtime
     const idTemp = `optimistic-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
     const mensajeOptimista = {

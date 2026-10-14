@@ -29,11 +29,16 @@ export function AbrirDisputa({
   const [mensaje, setMensaje] = useState<string | null>(null);
   const [enviada, setEnviada] = useState(false);
   const [pendiente, startTransition] = useTransition();
+  const descripcionValida = descripcion.trim().length >= 20;
 
   if (!disponible || enviada) return null;
 
   function enviar() {
     setMensaje(null);
+    if (!descripcionValida) {
+      setMensaje("Describe la revisión con al menos 20 caracteres.");
+      return;
+    }
     startTransition(async () => {
       try {
         if (!tieneSupabaseConfigurado()) {
@@ -85,7 +90,7 @@ export function AbrirDisputa({
         </label>
       </div>
       <div className="mt-3 flex items-center gap-3">
-        <Button variant="secondary" onClick={enviar} disabled={pendiente}>
+        <Button variant="secondary" onClick={enviar} disabled={pendiente || !descripcionValida}>
           {pendiente ? TEXTOS_CARGANDO.enviando : "Enviar disputa"}
         </Button>
         <div role="status" aria-live="polite" aria-atomic="true" className="min-h-[20px]">

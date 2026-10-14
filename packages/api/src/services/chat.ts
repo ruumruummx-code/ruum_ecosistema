@@ -22,11 +22,43 @@ export async function obtenerMensajes(cliente: Cliente, trasladoId: string): Pro
  * RPC security definer `enviar_mensaje_chat` lo deriva de auth.uid() contra el
  * traslado, así un participante no puede insertar mensajes en nombre del otro.
  * El INSERT directo sobre mensajes_chat ya no está permitido por RLS.
+ *
+ * D-1: rate limit en memoria por traslado (ventana deslizante) para frenar
+ * spam/rafagas accidentales antes de llegar a la RPC.
  */
+const LIMITE_VENTANA_MS = 30_000;
+const LIMITE_MAX_MENSAJES = 5;
+const LIMITE_INTERVALO_MIN_MS = 1_000;
+const LIMITE_MAX_CARACTERES = 1000;
+const enviosPorTraslado = new Map<string, number[]>();
+
+export function validarRateLimitChat(trasladoId: string, ahora = Date.now()): void {
+  const previos = (enviosPorTraslado.get(trasladoId) ?? []).filter((t) => ahora - t < LIMITE_VENTANA_MS);
+  if (previos.length > 0 && ahora - previos[previos.length - 1]! < LIMITE_INTERVALO_MIN_MS) {
+    throw new Error("Envía un mensaje a la vez. Espera un segundo antes del siguiente.");
+  }
+  if (previos.length >= LIMITE_MAX_MENSAJES) {
+    throw new Error("Estás enviando mensajes muy rápido. Espera unos segundos e inténtalo de nuevo.");
+  }
+  previos.push(ahora);
+  enviosPorTraslado.set(trasladoId, previos);
+}
+
+export function _limpiarRateLimitChat(trasladoId?: string): void {
+  if (trasladoId) enviosPorTraslado.delete(trasladoId);
+  else enviosPorTraslado.clear();
+}
+
 export async function enviarMensaje(cliente: Cliente, trasladoId: string, contenido: string) {
+  const texto = contenido.trim();
+  if (!texto) throw new Error("El mensaje está vacío.");
+  if (texto.length > LIMITE_MAX_CARACTERES) {
+    throw new Error(`El mensaje supera el máximo de ${LIMITE_MAX_CARACTERES} caracteres.`);
+  }
+  validarRateLimitChat(trasladoId);
   const { error } = await cliente.rpc("enviar_mensaje_chat", {
     p_traslado_id: trasladoId,
-    p_contenido: contenido
+    p_contenido: texto
   });
   if (error) throw error;
 }

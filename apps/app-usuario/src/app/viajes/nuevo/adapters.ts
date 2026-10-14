@@ -17,6 +17,22 @@ export interface CoordenadasParada {
   lat?: number; lng?: number;
 }
 
+/** F-3: rangos válidos WGS84. Fuera de rango → null (no se persiste basura). */
+export function normalizarLatitud(valor: unknown): number | null {
+  if (typeof valor !== "number" || !Number.isFinite(valor)) return null;
+  return valor >= -90 && valor <= 90 ? valor : null;
+}
+
+export function normalizarLongitud(valor: unknown): number | null {
+  if (typeof valor !== "number" || !Number.isFinite(valor)) return null;
+  return valor >= -180 && valor <= 180 ? valor : null;
+}
+
+function normalizarNoNegativo(valor: unknown): number | null {
+  if (typeof valor !== "number" || !Number.isFinite(valor)) return null;
+  return valor >= 0 ? valor : null;
+}
+
 export function construirPayloadCreacion(datos: DatosFormulario, vehiculoSeleccionadoId: string, coords: CoordenadasTraslado & { paradasCoords?: CoordenadasParada[] }): {
   vehiculo: DatosVehiculoParaTraslado; traslado: DatosNuevoTraslado; paradas: DatosParadaParaTraslado[];
 } {
@@ -30,20 +46,20 @@ export function construirPayloadCreacion(datos: DatosFormulario, vehiculoSelecci
     calle: p.calle, numero: p.numero, colonia: p.colonia, codigo_postal: p.codigoPostal, estado: p.estado, ciudad: p.ciudad,
     direccion: direccion(p.calle, p.numero, p.colonia, p.codigoPostal, p.estado),
     referencias: p.referencias || null,
-    lat: coords.paradasCoords?.[idx]?.lat ?? p.lat ?? null,
-    lng: coords.paradasCoords?.[idx]?.lng ?? p.lng ?? null,
+    lat: normalizarLatitud(coords.paradasCoords?.[idx]?.lat ?? p.lat ?? null) ?? normalizarLatitud(p.lat) ?? null,
+    lng: normalizarLongitud(coords.paradasCoords?.[idx]?.lng ?? p.lng ?? null) ?? normalizarLongitud(p.lng) ?? null,
     tipo_tarea: p.tipo === "tarea" ? (p.tipoTarea ?? "otro") : null
   }));
   return { vehiculo, traslado: {
     contacto_entrega_nombre: nombre(datos.entregaNombre, datos.entregaApellido), contacto_entrega_telefono: telefono(datos.entregaTelefono),
     contacto_recepcion_nombre: nombre(datos.recepcionNombre, datos.recepcionApellido), contacto_recepcion_telefono: telefono(datos.recepcionTelefono),
-    origen_lat: coords.origenLat ?? null, origen_lng: coords.origenLng ?? null,
+    origen_lat: normalizarLatitud(coords.origenLat), origen_lng: normalizarLongitud(coords.origenLng),
     origen_direccion: direccion(datos.origenCalle, datos.origenNumero, datos.origenColonia, datos.origenCodigoPostal, datos.origenEstado), origen_ciudad: datos.origenCiudad,
-    origen_referencias: datos.origenReferencias || null, destino_lat: coords.destinoLat ?? null, destino_lng: coords.destinoLng ?? null,
+    origen_referencias: datos.origenReferencias || null, destino_lat: normalizarLatitud(coords.destinoLat), destino_lng: normalizarLongitud(coords.destinoLng),
     destino_direccion: direccion(datos.destinoCalle, datos.destinoNumero, datos.destinoColonia, datos.destinoCodigoPostal, datos.destinoEstado), destino_ciudad: datos.destinoCiudad,
     destino_referencias: datos.destinoReferencias || null, instrucciones_especiales: datos.instruccionesEspeciales,
     modalidad_programacion: datos.modalidadProgramacion, fecha_hora_programada: datos.fechaHoraProgramada ? new Date(datos.fechaHoraProgramada).toISOString() : null,
     tipo_ruta: datos.tipoRuta, ventana_recoleccion: datos.ventanaRecoleccion, ventana_entrega: datos.ventanaEntrega,
-    distancia_km: coords.distanciaKm ?? null, tiempo_estimado_horas: coords.tiempoEstimadoHoras ?? null
+    distancia_km: normalizarNoNegativo(coords.distanciaKm), tiempo_estimado_horas: normalizarNoNegativo(coords.tiempoEstimadoHoras)
   }, paradas };
 }

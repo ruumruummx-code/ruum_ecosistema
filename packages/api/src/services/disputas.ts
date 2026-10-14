@@ -30,8 +30,8 @@ export async function abrirDisputa(
   opciones?: { mantenerEstado?: boolean }
 ) {
   const descripcionLimpia = descripcion.trim();
-  if (descripcionLimpia.length < 10) {
-    throw new Error("Describe la revisión con al menos 10 caracteres.");
+  if (descripcionLimpia.length < 20) {
+    throw new Error("Describe la revisión con al menos 20 caracteres.");
   }
 
   const { data: traslado, error: errorTraslado } = await cliente

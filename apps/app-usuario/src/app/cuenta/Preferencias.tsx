@@ -237,6 +237,23 @@ function Interruptor({ activo, onAlternar, etiquetaAria, disabled = false }: Int
 type TipoModal = "tema" | "unidades" | "accesibilidad" | "datos" | null;
 
 export function Preferencias({ usuario }: PreferenciasProps) {
+  // C-3: preferencias sin columna en BD (tema, idioma, etc.) se persisten en
+  // localStorage; las de notificación/alerta van a Supabase + localStorage.
+  function leerLocal<T>(clave: string, defecto: T): T {
+    try {
+      const raw = typeof window !== "undefined" ? window.localStorage.getItem(clave) : null;
+      return raw !== null ? (JSON.parse(raw) as T) : defecto;
+    } catch {
+      return defecto;
+    }
+  }
+  function guardarLocal(clave: string, valor: unknown) {
+    try {
+      window.localStorage.setItem(clave, JSON.stringify(valor));
+    } catch {
+      // almacenamiento no disponible (SSR/privado) — se ignora
+    }
+  }
   // Notificaciones generales
   const [notifPush, setNotifPush] = useState(usuario?.notificaciones_push ?? true);
   const [notifEmail, setNotifEmail] = useState(usuario?.notificaciones_email ?? true);
@@ -247,20 +264,20 @@ export function Preferencias({ usuario }: PreferenciasProps) {
   const [alertaViaje, setAlertaViaje] = useState(usuario?.alertas_viaje ?? true);
   const [alertaEvidencia, setAlertaEvidencia] = useState(usuario?.alertas_evidencia ?? true);
   const [alertaPago, setAlertaPago] = useState(usuario?.alertas_pago ?? true);
-  const [alertaIncidente, setAlertaIncidente] = useState(true);
+  const [alertaIncidente, setAlertaIncidente] = useState(() => leerLocal("ruum:pref:alertaIncidente", true));
 
   // Idioma
-  const [idioma, setIdioma] = useState<"es" | "en">("es");
+  const [idioma, setIdioma] = useState<"es" | "en">(() => leerLocal("ruum:pref:idioma", "es"));
 
   // Preferencias de la app
-  const [tema, setTema] = useState<"Claro" | "Oscuro" | "Automático">("Claro");
-  const [unidades, setUnidades] = useState<"Métrico" | "Imperial">("Métrico");
-  const [accesibilidad, setAccesibilidad] = useState<"Estándar" | "Texto grande" | "Alto contraste">("Estándar");
+  const [tema, setTema] = useState<"Claro" | "Oscuro" | "Automático">(() => leerLocal("ruum:pref:tema", "Claro"));
+  const [unidades, setUnidades] = useState<"Métrico" | "Imperial">(() => leerLocal("ruum:pref:unidades", "Métrico"));
+  const [accesibilidad, setAccesibilidad] = useState<"Estándar" | "Texto grande" | "Alto contraste">(() => leerLocal("ruum:pref:accesibilidad", "Estándar"));
 
   // Privacidad y seguridad
-  const [biometrico, setBiometrico] = useState(true);
-  const [ubicacion, setUbicacion] = useState(true);
-  const [usoDatos, setUsoDatos] = useState<"Activado" | "Desactivado">("Activado");
+  const [biometrico, setBiometrico] = useState(() => leerLocal("ruum:pref:biometrico", true));
+  const [ubicacion, setUbicacion] = useState(() => leerLocal("ruum:pref:ubicacion", true));
+  const [usoDatos, setUsoDatos] = useState<"Activado" | "Desactivado">(() => leerLocal("ruum:pref:usoDatos", "Activado"));
 
   // Estado del modal y selección temporal
   const [modalAbierto, setModalAbierto] = useState<TipoModal>(null);
@@ -292,6 +309,7 @@ export function Preferencias({ usuario }: PreferenciasProps) {
 
   // Función genérica para guardar campo en Supabase si aplica
   async function sincronizarNotificacion(campo: string, valor: boolean) {
+    guardarLocal(`ruum:pref:${campo}`, valor);
     if (tieneSupabaseConfigurado()) {
       try {
         const cliente = crearClienteNavegador();
@@ -354,23 +372,27 @@ export function Preferencias({ usuario }: PreferenciasProps) {
   function handleToggleIncidente() {
     const nuevo = !alertaIncidente;
     setAlertaIncidente(nuevo);
+    guardarLocal("ruum:pref:alertaIncidente", nuevo);
     setToastMensaje(nuevo ? "Alertas de incidentes activadas" : "Alertas de incidentes desactivadas");
   }
 
   function handleCambiarIdioma(nuevo: "es" | "en") {
     setIdioma(nuevo);
+    guardarLocal("ruum:pref:idioma", nuevo);
     setToastMensaje(nuevo === "es" ? "Idioma cambiado a Español (México)" : "Language changed to English (US)");
   }
 
   function handleToggleBiometrico() {
     const nuevo = !biometrico;
     setBiometrico(nuevo);
+    guardarLocal("ruum:pref:biometrico", nuevo);
     setToastMensaje(nuevo ? "Inicio biométrico activado" : "Inicio biométrico desactivado");
   }
 
   function handleToggleUbicacion() {
     const nuevo = !ubicacion;
     setUbicacion(nuevo);
+    guardarLocal("ruum:pref:ubicacion", nuevo);
     setToastMensaje(nuevo ? "Ubicación en tiempo real activada" : "Ubicación en tiempo real desactivada");
   }
 
@@ -386,15 +408,19 @@ export function Preferencias({ usuario }: PreferenciasProps) {
   function aplicarModal() {
     if (modalAbierto === "tema") {
       setTema(tempTema);
+      guardarLocal("ruum:pref:tema", tempTema);
       setToastMensaje(`Tema aplicado: ${tempTema}`);
     } else if (modalAbierto === "unidades") {
       setUnidades(tempUnidades);
+      guardarLocal("ruum:pref:unidades", tempUnidades);
       setToastMensaje(`Unidades actualizadas: ${tempUnidades}`);
     } else if (modalAbierto === "accesibilidad") {
       setAccesibilidad(tempAccesibilidad);
+      guardarLocal("ruum:pref:accesibilidad", tempAccesibilidad);
       setToastMensaje(`Accesibilidad configurada: ${tempAccesibilidad}`);
     } else if (modalAbierto === "datos") {
       setUsoDatos(tempDatos);
+      guardarLocal("ruum:pref:usoDatos", tempDatos);
       setToastMensaje(`Uso de datos: ${tempDatos}`);
     }
     setModalAbierto(null);

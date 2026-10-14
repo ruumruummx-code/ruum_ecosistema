@@ -23,6 +23,8 @@ export interface FacturaItem {
 export interface FacturacionProps {
   usuario: Usuario | null;
   empresa?: Empresa | null;
+  /** C-1: facturas inyectadas (tests/storybook). En producción se consultan de BD. */
+  facturasIniciales?: FacturaItem[];
 }
 
 /* ─────────────────────────────────────────────────────────────
@@ -171,7 +173,8 @@ const USOS_CFDI = [
   "I08 · Otra maquinaria y equipo",
 ];
 
-const FACTURAS_INICIALES: FacturaItem[] = [
+/** C-1: datos de ejemplo solo para tests — la UI productiva consulta traslados reales en BD. */
+export const FACTURAS_EJEMPLO_TEST: FacturaItem[] = [
   {
     id: "fac-1",
     folio: "Factura #FAC-2847",
@@ -214,7 +217,7 @@ const FACTURAS_INICIALES: FacturaItem[] = [
    Componente Principal Facturacion
 ───────────────────────────────────────────────────────────── */
 
-export function Facturacion({ usuario, empresa }: FacturacionProps) {
+export function Facturacion({ usuario, empresa, facturasIniciales }: FacturacionProps) {
   // Datos fiscales principales
   const [rfc, setRfc] = useState(
     usuario?.rfc?.trim() || empresa?.rfc?.trim() || (process.env.NODE_ENV === "test" ? "MART900515ABC" : "")
@@ -245,9 +248,65 @@ export function Facturacion({ usuario, empresa }: FacturacionProps) {
   );
 
   // Lista de facturas y pestaña activa
-  const [facturas, setFacturas] = useState<FacturaItem[]>(FACTURAS_INICIALES);
+  // C-1: sin mocks internos — arranca con lo inyectado (tests) o vacío y
+  // consulta los traslados reales del usuario en BD.
+  const [facturas, setFacturas] = useState<FacturaItem[]>(facturasIniciales ?? []);
+  const [cargandoFacturas, setCargandoFacturas] = useState(!facturasIniciales);
+  const [errorFacturas, setErrorFacturas] = useState<string | null>(null);
   const [tabActiva, setTabActiva] = useState<"todas" | "emitidas" | "pendientes">("todas");
   const [toastNotificacion, setToastNotificacion] = useState<string | null>(null);
+
+  // C-1: historial real derivado de traslados (precio_final/cotizado).
+  useEffect(() => {
+    if (facturasIniciales) return;
+    if (!tieneSupabaseConfigurado() || !usuario?.id) {
+      setCargandoFacturas(false);
+      return;
+    }
+    let activo = true;
+    setCargandoFacturas(true);
+    setErrorFacturas(null);
+    (async () => {
+      try {
+        const cliente = crearClienteNavegador();
+        const { data, error } = await cliente
+          .from("traslados")
+          .select("id, creado_en, cerrado_en, origen_ciudad, destino_ciudad, precio_final, precio_cotizado, estado")
+          .eq("usuario_id", usuario.id)
+          .order("creado_en", { ascending: false })
+          .limit(20);
+        if (error) throw error;
+        if (!activo) return;
+        const EMITIDA = new Set(["pago_completado", "servicio_cerrado", "disputa_resuelta", "reclamo_resuelto"]);
+        const reales: FacturaItem[] = (data ?? [])
+          .filter((t) => t.estado !== "servicio_cancelado" && t.estado !== "traslado_fallido")
+          .map((t) => {
+            const corto = String(t.id).slice(0, 8).toUpperCase();
+            const monto = Number(t.precio_final ?? t.precio_cotizado ?? 0);
+            const fechaBase = t.cerrado_en ?? t.creado_en;
+            let fecha = `#RR-${corto}`;
+            try {
+              fecha = `${new Date(fechaBase).toLocaleDateString("es-MX", { day: "numeric", month: "short", year: "numeric" })} · Traslado #RR-${corto}`;
+            } catch { /* formato de respaldo */ }
+            return {
+              id: String(t.id),
+              folio: `Factura #FAC-${corto}`,
+              fecha,
+              traslado: `#RR-${corto}`,
+              concepto: `Traslado ${t.origen_ciudad ?? ""} → ${t.destino_ciudad ?? ""}`.trim(),
+              monto: Number.isFinite(monto) ? monto : 0,
+              estado: EMITIDA.has(String(t.estado)) ? "emitida" as const : "pendiente" as const,
+            };
+          });
+        setFacturas(reales);
+      } catch (err) {
+        if (activo) setErrorFacturas(err instanceof Error ? err.message : "No pudimos cargar tus facturas.");
+      } finally {
+        if (activo) setCargandoFacturas(false);
+      }
+    })();
+    return () => { activo = false; };
+  }, [facturasIniciales, usuario?.id]);
 
   // Modal: Editar datos fiscales
   const [modalEditarAbierto, setModalEditarAbierto] = useState(false);
@@ -655,7 +714,15 @@ export function Facturacion({ usuario, empresa }: FacturacionProps) {
         </div>
 
         {/* Tarjetas de facturas */}
-        {facturasFiltradas.length > 0 ? (
+        {cargandoFacturas ? (
+          <div role="status" aria-live="polite" className="rounded-[22px] border border-[#eef2f7] bg-white p-10 text-center text-[13px] font-medium text-[#7e8fa8]">
+            Cargando tus facturas…
+          </div>
+        ) : errorFacturas ? (
+          <div role="alert" className="rounded-[22px] border border-[#f5c6c6] bg-[#fdeaea] p-6 text-center text-[13px] font-semibold text-[#b33c3c]">
+            {errorFacturas}
+          </div>
+        ) : facturasFiltradas.length > 0 ? (
           <div className="flex flex-col gap-3">
             {facturasFiltradas.map((factura) => (
               <div

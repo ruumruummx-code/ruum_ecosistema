@@ -295,12 +295,13 @@ export function SoporteCliente({
     setMensajesChat((prev) => [...prev, nuevoMsgUsuario]);
     setMensajeInput("");
 
-    // Respuesta simulada de soporte en tiempo real
+    // Respuesta automática (SOP-1: el chat en vivo es demostrativo; la atención
+    // real se da por teléfono, WhatsApp, correo o ticket de reporte).
     setTimeout(() => {
       const respAgente: MensajeChat = {
         id: `agent-${Date.now()}`,
         remitente: "agente",
-        texto: "Gracias por la información. Estamos revisando tu caso de inmediato y un asesor te atenderá.",
+        texto: "Respuesta automática (demo): recibimos tu mensaje. Un asesor te contactará por este medio cuando esté disponible; para atención inmediata usa llamada, WhatsApp o correo.",
       };
       setMensajesChat((prev) => [...prev, respAgente]);
     }, 600);
@@ -626,6 +627,9 @@ export function SoporteCliente({
               {temaSeleccionado
                 ? "Un agente especializado te atenderá en menos de 2 minutos."
                 : "Un agente te atenderá en menos de 2 minutos."}
+            </p>
+            <p role="note" className="mb-4 rounded-xl border border-amber-300 bg-amber-50 px-3 py-2 text-center text-[12px] font-semibold text-amber-800 dark:border-amber-700 dark:bg-amber-950 dark:text-amber-200">
+              Chat demostrativo con respuesta automática. Para soporte real con seguimiento usa llamada, WhatsApp, correo o el formulario de reporte.
             </p>
 
             {/* Chat mock messages */}

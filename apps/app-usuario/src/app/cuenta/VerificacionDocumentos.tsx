@@ -37,6 +37,16 @@ export function VerificacionDocumentos({ usuario, empresa = null }: Verificacion
   }, [intento]);
   const [fiscalConfigurado, setFiscalConfigurado] = useState(Boolean((empresa?.rfc ?? usuario.rfc)?.trim()));
   const identidad = ine?.estado === "verificado" ? "Identidad verificada" : ine?.estado === "rechazado" ? "Identificación requiere actualización" : ine ? "Identidad en revisión" : "Identificación pendiente";
+  // C-2: porcentaje calculado desde datos reales (nada hardcodeado).
+  // 4 bloques de 25%: INE cargado, identidad verificada, RFC registrado,
+  // documentos de cuenta (licencia + comprobante presentes).
+  const tieneLicencia = documentos.some((d) => d.tipo === "licencia");
+  const tieneComprobante = documentos.some((d) => d.tipo === "comprobante");
+  const porcentajeVerificacion =
+    (ine ? 25 : 0) +
+    (ine?.estado === "verificado" ? 25 : 0) +
+    (fiscalConfigurado ? 25 : 0) +
+    (tieneLicencia && tieneComprobante ? 25 : tieneLicencia || tieneComprobante ? 12 : 0);
   function tarjeta(tipo: TipoDocumentoCuenta, titulo: string, descripcion: string) {
     return <DocumentoCuentaTarjeta tipo={tipo} titulo={titulo} descripcion={descripcion} documento={documentos.find(d => d.tipo === tipo)} cargando={cargando} errorConsulta={Boolean(error)} actualizado={dato => setDocumentos(prev => [...prev.filter(d => d.tipo !== tipo), { ...dato, tipo }])} />;
   }
@@ -45,7 +55,10 @@ export function VerificacionDocumentos({ usuario, empresa = null }: Verificacion
       <Link href="/cuenta" aria-label="Volver a mi cuenta" className="flex size-10 shrink-0 items-center justify-center rounded-full bg-[#edf4fe] text-[#0a2342]">←</Link>
       <div><h1 className="text-xl font-extrabold tracking-tight">Verificación y facturación</h1><p className="mt-1 text-xs text-[#6b7c94]">Tus documentos y datos fiscales en un solo lugar</p></div>
     </header>
-    <div className="flex flex-wrap gap-2 text-xs font-semibold"><span className="rounded-full bg-[#edf4fe] px-3 py-2 text-[#2e5a88]">{identidad}</span><span className="rounded-full bg-[#f0f5fe] px-3 py-2 text-[#3d5470]">{fiscalConfigurado ? "RFC registrado" : "Facturación sin configurar"}</span></div>
+    <div className="flex flex-wrap gap-2 text-xs font-semibold"><span className="rounded-full bg-[#edf4fe] px-3 py-2 text-[#2e5a88]">{identidad}</span><span className="rounded-full bg-[#f0f5fe] px-3 py-2 text-[#3d5470]">{fiscalConfigurado ? "RFC registrado" : "Facturación sin configurar"}</span><span className="rounded-full bg-[#e9f3ee] px-3 py-2 text-[#1f6b4a]">{porcentajeVerificacion}% completado</span></div>
+    <div className="h-2 overflow-hidden rounded-full bg-[#e6edf6]" role="progressbar" aria-valuenow={porcentajeVerificacion} aria-valuemin={0} aria-valuemax={100} aria-label="Progreso de verificación">
+      <div className="h-full rounded-full bg-[#0a2342] transition-all" style={{ width: `${porcentajeVerificacion}%` }} />
+    </div>
     <section aria-labelledby="identidad-titulo" className="flex flex-col gap-3">
       <h2 id="identidad-titulo" className="text-base font-bold">Identidad y domicilio</h2>
       <p className="text-xs leading-relaxed text-[#6b7c94]">Carga documentos legibles en PDF, JPG o PNG de hasta 10 MB. Puedes reemplazarlos cuando necesites actualizarlos.</p>

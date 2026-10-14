@@ -110,6 +110,8 @@ export type PreferenciasNotificacionesActualizables = Pick<
   | "notificaciones_push"
   | "notificaciones_email"
   | "notificaciones_sms_whatsapp"
+  | "alertas_viaje"
+  | "alertas_evidencia"
   | "alertas_pago"
   | "notificaciones_promocionales"
 >;

@@ -61,10 +61,8 @@ export function DiditVerificationModal({
     if (!isOpen) return;
     const handleMessage = (event: MessageEvent) => {
       if (!esOrigenDiditValido(event.origin)) return;
-      // Aceptar mensajes de Didit vengan del iframe o de una ventana nueva:
-      // el origen ya está validado y el payload se interpreta de forma segura.
-      // (Antes se exigía event.source === iframe, lo que rompía "Abrir en nueva ventana".)
-      const mensaje = interpretarMensajeDidit(event.data);
+      // V-1: defensa en profundidad — el intérprete también valida el origen.
+      const mensaje = interpretarMensajeDidit(event.data, event.origin);
       if (!mensaje) return;
       if (mensaje.tipo === "cancelado") onCerrar();
       else onFinalizar();

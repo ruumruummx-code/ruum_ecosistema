@@ -163,7 +163,10 @@ export function DatosPersonales({ usuario, fotoUrlInicial, correoRegistro }: Dat
   const [fotoPath, setFotoPath] = useState(usuario.foto_url ?? "");
   const [fotoUrl, setFotoUrl] = useState(fotoUrlInicial ?? "");
   const [telefono, setTelefono] = useState(telefonoLocalMx(usuario.telefono ?? ""));
-  const [fechaNacimiento, setFechaNacimiento] = useState("1990-05-15");
+  // C-4: sin fecha hardcodeada — se lee del perfil (si la columna existe) o queda vacía.
+  const [fechaNacimiento, setFechaNacimiento] = useState(
+    (usuario as unknown as { fecha_nacimiento?: string | null }).fecha_nacimiento ?? ""
+  );
 
   // Dirección
   const [pais, setPais] = useState(usuario.pais ?? "México");
@@ -256,6 +259,25 @@ export function DatosPersonales({ usuario, fotoUrlInicial, correoRegistro }: Dat
       return;
     }
 
+    // C-4: validar fecha de nacimiento real (sin default ficticio).
+    if (fechaNacimiento) {
+      const fecha = new Date(`${fechaNacimiento}T00:00:00`);
+      const hoy = new Date();
+      if (Number.isNaN(fecha.getTime())) {
+        setMensajeError("La fecha de nacimiento no es válida.");
+        return;
+      }
+      if (fecha > hoy) {
+        setMensajeError("La fecha de nacimiento no puede ser futura.");
+        return;
+      }
+      const edad = hoy.getFullYear() - fecha.getFullYear() - (hoy.getMonth() < fecha.getMonth() || (hoy.getMonth() === fecha.getMonth() && hoy.getDate() < fecha.getDate()) ? 1 : 0);
+      if (edad < 18) {
+        setMensajeError("Debes ser mayor de edad para usar Ruum Ruum.");
+        return;
+      }
+    }
+
     setGuardando(true);
 
     try {
@@ -283,6 +305,15 @@ export function DatosPersonales({ usuario, fotoUrlInicial, correoRegistro }: Dat
             referencias,
           }),
         });
+        // C-4: persistir fecha de nacimiento si la columna existe (migración
+        // pendiente); se ignora el error si el esquema aún no la tiene.
+        if (fechaNacimiento) {
+          try {
+            await cliente.from("usuarios").update({ fecha_nacimiento: fechaNacimiento } as never).eq("id", usuario.id);
+          } catch {
+            // Esquema sin columna fecha_nacimiento — el perfil ya se guardó.
+          }
+        }
       }
 
       setMensajeExito(true);
