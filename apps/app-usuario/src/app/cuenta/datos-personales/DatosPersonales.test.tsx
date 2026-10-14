@@ -51,7 +51,7 @@ const usuarioMock: Usuario = {
 
 describe("DatosPersonales", () => {
   it("renderiza encabezado con navegación de regreso a /cuenta y títulos", () => {
-    render(<DatosPersonales usuario={usuarioMock} />);
+    render(<DatosPersonales correoRegistro="registro@ruum.test" usuario={usuarioMock} />);
 
     const linkVolver = screen.getByLabelText("Volver a mi cuenta");
     expect(linkVolver).toBeInTheDocument();
@@ -62,7 +62,7 @@ describe("DatosPersonales", () => {
   });
 
   it("renderiza la sección de avatar con iniciales y botón de cambio de foto", () => {
-    render(<DatosPersonales usuario={usuarioMock} />);
+    render(<DatosPersonales correoRegistro="registro@ruum.test" usuario={usuarioMock} />);
 
     expect(screen.getByText("LM")).toBeInTheDocument();
     expect(screen.getByLabelText("Cambiar foto de perfil")).toBeInTheDocument();
@@ -70,7 +70,7 @@ describe("DatosPersonales", () => {
   });
 
   it("renderiza la sección de información personal con correo bloqueado y verificado", () => {
-    render(<DatosPersonales usuario={usuarioMock} />);
+    render(<DatosPersonales correoRegistro="registro@ruum.test" usuario={usuarioMock} />);
 
     expect(screen.getByRole("heading", { name: "Información personal" })).toBeInTheDocument();
     expect(screen.getByLabelText("Nombre(s)")).toHaveValue("Laura");
@@ -78,7 +78,7 @@ describe("DatosPersonales", () => {
 
     const inputEmail = screen.getByLabelText(/Correo electrónico/i);
     expect(inputEmail).toBeDisabled();
-    expect(inputEmail).toHaveValue("laura.martinez@email.com");
+    expect(inputEmail).toHaveValue("registro@ruum.test");
     expect(screen.getByText("Verificado")).toBeInTheDocument();
     expect(screen.getByText(/Para cambiar tu correo, contacta a soporte/i)).toBeInTheDocument();
 
@@ -87,7 +87,7 @@ describe("DatosPersonales", () => {
   });
 
   it("renderiza la sección de dirección principal con campos prellenados", () => {
-    render(<DatosPersonales usuario={usuarioMock} />);
+    render(<DatosPersonales correoRegistro="registro@ruum.test" usuario={usuarioMock} />);
 
     expect(screen.getByRole("heading", { name: "Dirección principal" })).toBeInTheDocument();
     expect(screen.getByLabelText("País")).toHaveValue("México");
@@ -101,7 +101,7 @@ describe("DatosPersonales", () => {
   });
 
   it("permite enviar el formulario y muestra mensaje de éxito", async () => {
-    render(<DatosPersonales usuario={usuarioMock} />);
+    render(<DatosPersonales correoRegistro="registro@ruum.test" usuario={usuarioMock} />);
 
     const btnGuardar = screen.getByRole("button", { name: /Guardar cambios/i });
     expect(btnGuardar).toBeInTheDocument();
@@ -115,7 +115,7 @@ describe("DatosPersonales", () => {
   });
 
   it("renderiza la zona de riesgo y permite abrir y cerrar el modal de eliminación de cuenta", () => {
-    render(<DatosPersonales usuario={usuarioMock} />);
+    render(<DatosPersonales correoRegistro="registro@ruum.test" usuario={usuarioMock} />);
 
     expect(screen.getByRole("heading", { name: "Zona de riesgo" })).toBeInTheDocument();
     expect(screen.getByText(/Al eliminar tu cuenta, se borrarán todos tus datos/i)).toBeInTheDocument();

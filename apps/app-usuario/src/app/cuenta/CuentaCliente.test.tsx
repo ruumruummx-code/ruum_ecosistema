@@ -57,6 +57,7 @@ describe("CuentaCliente — Sistema móvil unificado", () => {
   it("renderiza encabezado principal y héroe de perfil con estadísticas", () => {
     render(
       <CuentaCliente
+        correoRegistro="registro@ruum.test"
         usuario={mockUsuario as Usuario}
         vehiculos={mockVehiculos as Vehiculo[]}
         totalTraslados={15}
@@ -65,7 +66,8 @@ describe("CuentaCliente — Sistema móvil unificado", () => {
 
     expect(screen.getByRole("heading", { level: 1, name: "Cuenta" })).toBeInTheDocument();
     expect(screen.getByText("Carlos Ramos")).toBeInTheDocument();
-    expect(screen.getByText("carlos.ramos@empresa.com")).toBeInTheDocument();
+    expect(screen.getByText("registro@ruum.test")).toBeInTheDocument();
+    expect(screen.queryByText("carlos.ramos@empresa.com")).not.toBeInTheDocument();
     expect(screen.getByText("+52 55 1234 5678")).toBeInTheDocument();
 
     // Estadísticas

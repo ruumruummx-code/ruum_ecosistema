@@ -19,6 +19,7 @@ export default async function PaginaCuenta() {
       <NavegacionUsuario variante="claro" nombreUsuario={cuenta.usuario?.nombre} />
       <MobileShell variant="compact" navInferiorVisible={true} as="main">
         <CuentaCliente
+          correoRegistro={cuenta.correoRegistro}
           usuario={cuenta.usuario}
           fotoUrl={cuenta.fotoPerfilUrl}
           vehiculos={cuenta.vehiculos}

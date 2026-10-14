@@ -21,6 +21,7 @@ type Vehiculo = Database["public"]["Tables"]["vehiculos"]["Row"];
 
 export interface CuentaClienteProps {
   usuario: Usuario | null;
+  correoRegistro?: string | null;
   fotoUrl?: string | null;
   vehiculos?: Vehiculo[];
   totalTraslados?: number;
@@ -65,6 +66,7 @@ function nombreVehiculo(v: Vehiculo): string {
 
 export function CuentaCliente({
   usuario,
+  correoRegistro = null,
   fotoUrl = null,
   vehiculos = [],
   totalTraslados = 0,
@@ -73,7 +75,7 @@ export function CuentaCliente({
   const [cerrandoSesion, setCerrandoSesion] = useState(false);
 
   const nombreMostrar = usuario?.nombre?.trim() || "Mi cuenta";
-  const correoMostrar = usuario?.correo_facturacion?.trim() || "Sin correo registrado";
+  const correoMostrar = correoRegistro?.trim() || "Sin correo registrado";
   const telefonoMostrar = usuario?.telefono?.trim() || "Sin teléfono registrado";
   const verificado = usuario?.estado_verificacion === "verificado";
   const metodoSub = usuario?.metodo_pago_registrado ? "Registrada y activa" : "Sin tarjeta registrada";
@@ -215,7 +217,7 @@ export function CuentaCliente({
           conDivisor={false}
         />
         <MobileRow
-          href="/cuenta/datos-personales"
+          href="/cuenta/cambiar-contrasena"
           enlaceComponente={Link}
           icono={<Icono d={SENDAS_ICONO.candado} className="size-[17px]" />}
           tonoIcono="base"

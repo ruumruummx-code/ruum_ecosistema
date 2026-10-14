@@ -14,7 +14,7 @@ export default async function PaginaDatosPersonales() {
     <>
       <NavegacionUsuario variante="claro" nombreUsuario={cuenta.usuario?.nombre} />
       <MobileShell variant="compact" navInferiorVisible={true} as="main">
-        <DatosPersonales usuario={cuenta.usuario} fotoUrlInicial={cuenta.fotoPerfilUrl} />
+        <DatosPersonales correoRegistro={cuenta.correoRegistro} usuario={cuenta.usuario} fotoUrlInicial={cuenta.fotoPerfilUrl} />
       </MobileShell>
     </>
   ));

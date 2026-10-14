@@ -150,10 +150,11 @@ function IconoUsuarioBorrar({ className = "size-4" }: { className?: string }) {
 
 export interface DatosPersonalesProps {
   usuario: Usuario;
+  correoRegistro?: string | null;
   fotoUrlInicial?: string | null;
 }
 
-export function DatosPersonales({ usuario, fotoUrlInicial }: DatosPersonalesProps) {
+export function DatosPersonales({ usuario, fotoUrlInicial, correoRegistro }: DatosPersonalesProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const nombreInicial = separarNombreApellido(usuario.nombre);
@@ -413,7 +414,7 @@ export function DatosPersonales({ usuario, fotoUrlInicial }: DatosPersonalesProp
                 <input
                   id="email"
                   type="email"
-                  value={usuario.correo_facturacion ?? "laura.martinez@email.com"}
+                  value={correoRegistro ?? ""}
                   disabled
                   placeholder="tu@email.com"
                   className="w-full p-[14px_16px] pr-11 border-[1.5px] border-[#e6edf6] rounded-[14px] text-[14.5px] text-[#4e5f80] font-medium bg-[#f2f6fb] cursor-not-allowed outline-none"

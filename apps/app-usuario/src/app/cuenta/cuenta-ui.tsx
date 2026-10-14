@@ -19,6 +19,7 @@ export type Empresa = Database["public"]["Tables"]["empresas"]["Row"];
 
 export interface CuentaReal {
   usuario: Usuario;
+  correoRegistro?: string | null;
   fotoPerfilUrl: string | null;
   vehiculos: Vehiculo[];
   empresa: Empresa | null;
@@ -89,6 +90,10 @@ export async function obtenerCuenta(): Promise<ResultadoCuenta> {
     const { listarVehiculosDeUsuario } = await import("@ruum/api/vehicles");
     const { obtenerEmpresaVisible } = await import("@ruum/api/organizations");
     const cliente = await crearClienteServidor();
+    const { data: auth, error: errorAuth } = await cliente.auth.getUser();
+    if (errorAuth?.name === "AuthSessionMissingError") return { estado: "sin_sesion" };
+    if (errorAuth) throw errorAuth;
+    if (!auth.user) return { estado: "sin_sesion" };
     const usuario = await obtenerUsuarioActual(cliente);
     if (!usuario) return { estado: "sin_sesion" };
 
@@ -104,6 +109,7 @@ export async function obtenerCuenta(): Promise<ResultadoCuenta> {
       estado: "ok",
       cuenta: {
         usuario,
+        correoRegistro: auth.user.email ?? null,
         fotoPerfilUrl,
         vehiculos,
         empresa,
