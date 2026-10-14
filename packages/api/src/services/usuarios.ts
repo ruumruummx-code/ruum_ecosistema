@@ -105,6 +105,19 @@ export async function actualizarPerfilUsuario(cliente: Cliente, datos: PerfilUsu
   return data;
 }
 
+/** Actualiza la fecha de nacimiento del usuario autenticado si la columna existe. */
+export async function actualizarFechaNacimientoUsuario(cliente: Cliente, fechaNacimiento: string): Promise<void> {
+  const { data: sesion } = await cliente.auth.getUser();
+  if (!sesion.user) throw new Error("Sin sesión activa.");
+
+  const { error } = await cliente
+    .from("usuarios")
+    .update({ fecha_nacimiento: fechaNacimiento } as never)
+    .eq("auth_user_id", sesion.user.id);
+
+  if (error) throw error;
+}
+
 export type PreferenciasNotificacionesActualizables = Pick<
   Database["public"]["Tables"]["usuarios"]["Update"],
   | "notificaciones_push"

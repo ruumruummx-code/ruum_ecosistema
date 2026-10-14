@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { Icono } from "@ruum/ui";
 import type { Database } from "@ruum/shared/types";
-import { actualizarFacturacionUsuario } from "@ruum/api/services";
+import { actualizarFacturacionUsuario, listarTrasladosParaFacturacionUsuario } from "@ruum/api/services";
 import { crearClienteNavegador, tieneSupabaseConfigurado } from "../../lib/supabase-browser";
 
 type Usuario = Database["public"]["Tables"]["usuarios"]["Row"];
@@ -269,13 +269,7 @@ export function Facturacion({ usuario, empresa, facturasIniciales }: Facturacion
     (async () => {
       try {
         const cliente = crearClienteNavegador();
-        const { data, error } = await cliente
-          .from("traslados")
-          .select("id, creado_en, cerrado_en, origen_ciudad, destino_ciudad, precio_final, precio_cotizado, estado")
-          .eq("usuario_id", usuario.id)
-          .order("creado_en", { ascending: false })
-          .limit(20);
-        if (error) throw error;
+        const data = await listarTrasladosParaFacturacionUsuario(cliente, usuario.id);
         if (!activo) return;
         const EMITIDA = new Set(["pago_completado", "servicio_cerrado", "disputa_resuelta", "reclamo_resuelto"]);
         const reales: FacturaItem[] = (data ?? [])

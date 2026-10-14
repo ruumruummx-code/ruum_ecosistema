@@ -187,6 +187,19 @@ export async function listarTrasladosDeUsuario(cliente: Cliente, usuarioId: stri
   return data ?? [];
 }
 
+/** Lista los traslados del usuario necesarios para construir su historial de facturación. */
+export async function listarTrasladosParaFacturacionUsuario(cliente: Cliente, usuarioId: string) {
+  const { data, error } = await cliente
+    .from("traslados")
+    .select("id, creado_en, cerrado_en, origen_ciudad, destino_ciudad, precio_final, precio_cotizado, estado")
+    .eq("usuario_id", usuarioId)
+    .order("creado_en", { ascending: false })
+    .limit(20);
+
+  if (error) throw error;
+  return data ?? [];
+}
+
 /** PRD §4.1 — historial empresarial visible para el titular de la empresa. */
 export async function listarTrasladosDeEmpresa(cliente: Cliente, empresaId: string): Promise<PasaporteRow[]> {
   const { data: titular, error: errorTitular } = await cliente

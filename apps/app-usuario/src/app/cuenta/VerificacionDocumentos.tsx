@@ -51,27 +51,34 @@ export function VerificacionDocumentos({ usuario, empresa = null }: Verificacion
     return <DocumentoCuentaTarjeta tipo={tipo} titulo={titulo} descripcion={descripcion} documento={documentos.find(d => d.tipo === tipo)} cargando={cargando} errorConsulta={Boolean(error)} actualizado={dato => setDocumentos(prev => [...prev.filter(d => d.tipo !== tipo), { ...dato, tipo }])} />;
   }
   return <div className="mx-auto flex w-full max-w-[480px] flex-col gap-5 text-[#0a2342] dark:text-[#f6f8fb]">
-    <header className="flex items-center gap-3 border-b border-[#e6edf6] pb-4">
-      <Link href="/cuenta" aria-label="Volver a mi cuenta" className="flex size-10 shrink-0 items-center justify-center rounded-full bg-[#edf4fe] text-[#0a2342]">←</Link>
-      <div><h1 className="text-xl font-extrabold tracking-tight">Verificación y facturación</h1><p className="mt-1 text-xs text-[#6b7c94]">Tus documentos y datos fiscales en un solo lugar</p></div>
+    <header className="flex items-center gap-3 border-b border-[#e6edf6] pb-4 dark:border-[#1a3a5c]">
+      <Link href="/cuenta" aria-label="Volver a mi cuenta" className="flex size-10 shrink-0 items-center justify-center rounded-full bg-[#edf4fe] text-[#0a2342] transition-colors dark:bg-[#0f2d52] dark:text-[#f6f8fb]">←</Link>
+      <div>
+        <h1 className="text-xl font-extrabold tracking-tight">Verificación y facturación</h1>
+        <p className="mt-1 text-xs text-[#6b7c94] dark:text-[#a8b5cc]">Tus documentos y datos fiscales en un solo lugar</p>
+      </div>
     </header>
-    <div className="flex flex-wrap gap-2 text-xs font-semibold"><span className="rounded-full bg-[#edf4fe] px-3 py-2 text-[#2e5a88]">{identidad}</span><span className="rounded-full bg-[#f0f5fe] px-3 py-2 text-[#3d5470]">{fiscalConfigurado ? "RFC registrado" : "Facturación sin configurar"}</span><span className="rounded-full bg-[#e9f3ee] px-3 py-2 text-[#1f6b4a]">{porcentajeVerificacion}% completado</span></div>
-    <div className="h-2 overflow-hidden rounded-full bg-[#e6edf6]" role="progressbar" aria-valuenow={porcentajeVerificacion} aria-valuemin={0} aria-valuemax={100} aria-label="Progreso de verificación">
-      <div className="h-full rounded-full bg-[#0a2342] transition-all" style={{ width: `${porcentajeVerificacion}%` }} />
+    <div className="flex flex-wrap gap-2 text-xs font-semibold">
+      <span className="rounded-full bg-[#edf4fe] px-3 py-2 text-[#2e5a88] dark:bg-[#0f2d52] dark:text-[#6ba8ff]">{identidad}</span>
+      <span className="rounded-full bg-[#f0f5fe] px-3 py-2 text-[#3d5470] dark:bg-[#152a42] dark:text-[#a8b5cc]">{fiscalConfigurado ? "RFC registrado" : "Facturación sin configurar"}</span>
+      <span className="rounded-full bg-[#e9f3ee] px-3 py-2 text-[#1f6b4a] dark:bg-[#0e3a24] dark:text-[#52d294]">{porcentajeVerificacion}% completado</span>
+    </div>
+    <div className="h-2 overflow-hidden rounded-full bg-[#e6edf6] dark:bg-[#1a3a5c]" role="progressbar" aria-valuenow={porcentajeVerificacion} aria-valuemin={0} aria-valuemax={100} aria-label="Progreso de verificación">
+      <div className="h-full rounded-full bg-[#0a2342] transition-all dark:bg-[#6ba8ff]" style={{ width: `${porcentajeVerificacion}%` }} />
     </div>
     <section aria-labelledby="identidad-titulo" className="flex flex-col gap-3">
       <h2 id="identidad-titulo" className="text-base font-bold">Identidad y domicilio</h2>
-      <p className="text-xs leading-relaxed text-[#6b7c94]">Carga documentos legibles en PDF, JPG o PNG de hasta 10 MB. Puedes reemplazarlos cuando necesites actualizarlos.</p>
+      <p className="text-xs leading-relaxed text-[#6b7c94] dark:text-[#a8b5cc]">Carga documentos legibles en PDF, JPG o PNG de hasta 10 MB. Puedes reemplazarlos cuando necesites actualizarlos.</p>
       <DocumentoCuentaTarjeta tipo="ine" titulo="Identificación oficial (INE)" descripcion="Incluye anverso y reverso en un solo archivo." documento={ine} actualizado={setIne} />
-      {error && <div role="alert" className="rounded-xl bg-red-50 p-3 text-sm text-red-800">{error} <button type="button" onClick={() => setIntento(v => v + 1)} className="ml-2 font-bold underline">Reintentar</button></div>}
+      {error && <div role="alert" className="rounded-xl bg-red-50 p-3 text-sm text-red-800 dark:bg-red-950/40 dark:text-red-300">{error} <button type="button" onClick={() => setIntento(v => v + 1)} className="ml-2 font-bold underline">Reintentar</button></div>}
       {tarjeta("licencia", "Licencia de conducir", "Incluye frente y reverso de tu licencia vigente en un solo archivo. Usa Actualizar para reemplazarla al renovarla.")}
       {tarjeta("comprobante", "Comprobante de domicilio", "Carga un comprobante legible con tu domicilio actual.")}
     </section>
-    <section id="facturacion" aria-labelledby="fiscal-titulo" className="scroll-mt-5 rounded-[20px] border border-[#e6edf6] bg-white p-5 dark:border-[#1a3a5c] dark:bg-[#0a2342]">
+    <section id="facturacion" aria-labelledby="fiscal-titulo" className="scroll-mt-5 rounded-[20px] border border-[#e6edf6] bg-white p-5 shadow-[0_2px_10px_rgba(10,35,66,0.04)] dark:border-[#1a3a5c] dark:bg-[#0a2342]">
       <h2 id="fiscal-titulo" className="text-base font-bold">Datos de facturación</h2>
-      <p className="mb-4 mt-2 text-xs leading-relaxed text-[#6b7c94]">Completa estos datos solo si necesitas factura. Tu correo de facturación puede ser diferente al correo de tu cuenta.</p>
+      <p className="mb-4 mt-2 text-xs leading-relaxed text-[#6b7c94] dark:text-[#a8b5cc]">Completa estos datos solo si necesitas factura. Tu correo de facturación puede ser diferente al correo de tu cuenta.</p>
       <details open={fiscalConfigurado}>
-        <summary className="cursor-pointer py-2 text-sm font-bold">{fiscalConfigurado ? "Consultar o actualizar datos fiscales" : "Necesito factura"}</summary>
+        <summary className="cursor-pointer py-2 text-sm font-bold text-[#0a2342] dark:text-[#f6f8fb]">{fiscalConfigurado ? "Consultar o actualizar datos fiscales" : "Necesito factura"}</summary>
         <div className="mt-4 flex flex-col gap-5"><FacturacionCuentaForm usuario={usuario} empresa={empresa} onActualizado={() => setFiscalConfigurado(true)} />
           {tarjeta("constancia", "Constancia de Situación Fiscal", "Adjunta tu constancia para respaldar los datos de facturación.")}
         </div>

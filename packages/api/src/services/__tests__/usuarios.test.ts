@@ -4,7 +4,8 @@ import {
   iniciarVerificacionDiditUsuario,
   obtenerEstadoVerificacionDiditUsuario,
   solicitarRestablecimientoPasswordUsuario,
-  actualizarFacturacionUsuario
+  actualizarFacturacionUsuario,
+  actualizarFechaNacimientoUsuario
 } from "../usuarios";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@ruum/shared/types";
@@ -283,5 +284,38 @@ describe("usuarios — PR-08 Facturación atómica", () => {
         }
       )
     ).rejects.toThrow("Error en base de datos al actualizar facturación");
+  });
+});
+
+describe("usuarios — fecha de nacimiento", () => {
+  it("actualiza la fecha solo para el usuario autenticado", async () => {
+    const cliente = crearClienteFake({ userId: "auth-user-1" });
+
+    await actualizarFechaNacimientoUsuario(
+      cliente as unknown as SupabaseClient<Database>,
+      "1990-04-12"
+    );
+
+    expect(cliente.llamadas).toContainEqual({
+      table: "usuarios",
+      action: "update",
+      args: [{ fecha_nacimiento: "1990-04-12" }]
+    });
+    expect(cliente.llamadas).toContainEqual({
+      table: "usuarios",
+      action: "eq",
+      args: ["auth_user_id", "auth-user-1"]
+    });
+  });
+
+  it("requiere una sesión activa", async () => {
+    const cliente = crearClienteFake({ userId: null });
+
+    await expect(
+      actualizarFechaNacimientoUsuario(
+        cliente as unknown as SupabaseClient<Database>,
+        "1990-04-12"
+      )
+    ).rejects.toThrow("Sin sesión activa.");
   });
 });

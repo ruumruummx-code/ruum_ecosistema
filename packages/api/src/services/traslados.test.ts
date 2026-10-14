@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
-import { crearTraslado, listarHistorialTraslado, verificarPagoAnticipadoCompletado } from "./traslados";
+import { crearTraslado, listarHistorialTraslado, listarTrasladosParaFacturacionUsuario, verificarPagoAnticipadoCompletado } from "./traslados";
+import { crearClienteFake } from "./__tests__/supabase-fake";
 
 describe("crearTraslado service - validación preventiva", () => {
   const clienteMock = {
@@ -94,5 +95,29 @@ describe("crearTraslado service - validación preventiva", () => {
 
     const roto = { from: vi.fn().mockReturnValue({ select: vi.fn().mockReturnValue({ eq: vi.fn().mockReturnValue({ eq: vi.fn().mockReturnValue({ limit: vi.fn().mockResolvedValue({ data: null, error: new Error("db caída") }) }) }) }) }) };
     await expect(verificarPagoAnticipadoCompletado(roto as never, "t1")).rejects.toThrow("db caída");
+  });
+
+  it("listarTrasladosParaFacturacionUsuario limita y ordena el historial del usuario", async () => {
+    const traslado = { id: "t1", estado: "pago_completado" };
+    const cliente = crearClienteFake({ tablas: { traslados: { data: [traslado] } } });
+
+    await expect(
+      listarTrasladosParaFacturacionUsuario(cliente as never, "usuario-1")
+    ).resolves.toEqual([traslado]);
+    expect(cliente.llamadas).toContainEqual({
+      table: "traslados",
+      action: "select",
+      args: ["id, creado_en, cerrado_en, origen_ciudad, destino_ciudad, precio_final, precio_cotizado, estado"]
+    });
+    expect(cliente.llamadas).toContainEqual({
+      table: "traslados",
+      action: "eq",
+      args: ["usuario_id", "usuario-1"]
+    });
+    expect(cliente.llamadas).toContainEqual({
+      table: "traslados",
+      action: "limit",
+      args: [20]
+    });
   });
 });

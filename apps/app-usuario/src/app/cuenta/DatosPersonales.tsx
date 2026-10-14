@@ -5,7 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Icono } from "@ruum/ui";
 import type { Database } from "@ruum/shared/types";
-import { actualizarPerfilUsuario, obtenerUrlFotoPerfilUsuario, subirFotoPerfil } from "@ruum/api/services";
+import { actualizarFechaNacimientoUsuario, actualizarPerfilUsuario, obtenerUrlFotoPerfilUsuario, subirFotoPerfil } from "@ruum/api/services";
 import { consultarCodigoPostalMx } from "../../lib/codigos-postales";
 import { crearClienteNavegador, tieneSupabaseConfigurado } from "../../lib/supabase-browser";
 import { soloDigitos, telefonoLocalMx, telefonoMx } from "../../lib/registro-usuario";
@@ -309,7 +309,7 @@ export function DatosPersonales({ usuario, fotoUrlInicial, correoRegistro }: Dat
         // pendiente); se ignora el error si el esquema aún no la tiene.
         if (fechaNacimiento) {
           try {
-            await cliente.from("usuarios").update({ fecha_nacimiento: fechaNacimiento } as never).eq("id", usuario.id);
+            await actualizarFechaNacimientoUsuario(cliente, fechaNacimiento);
           } catch {
             // Esquema sin columna fecha_nacimiento — el perfil ya se guardó.
           }
