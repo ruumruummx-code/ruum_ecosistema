@@ -47,12 +47,12 @@ describe("pantalla de confirmación de correo", () => {
     const user = userEvent.setup();
     render(<PaginaConfirmaCorreo />);
 
-    expect(screen.getByRole("heading", { name: /confirma tu correo electrónico/i })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: /^revisa tu correo$/i })).toBeInTheDocument();
     expect(screen.getByText("Código de verificación", { exact: true })).toBeInTheDocument();
     expect(screen.getByText(/ana@ejemplo.com/i)).toBeInTheDocument();
 
     await user.type(screen.getByLabelText(/código de verificación/i), "406156");
-    await user.click(screen.getByRole("button", { name: /verificar mi cuenta/i }));
+    await user.click(screen.getByRole("button", { name: /verificar código/i }));
 
     await waitFor(() => expect(mocks.push).toHaveBeenCalledWith("/"));
     expect(mocks.refresh).toHaveBeenCalled();
@@ -73,7 +73,7 @@ describe("pantalla de confirmación de correo", () => {
     render(<PaginaConfirmaCorreo />);
 
     await user.type(screen.getByLabelText(/código de verificación/i), "406156");
-    await user.click(screen.getByRole("button", { name: /verificar mi cuenta/i }));
+    await user.click(screen.getByRole("button", { name: /verificar código/i }));
 
     expect(
       await screen.findByText(/No pudimos verificar el código/i)
@@ -88,7 +88,7 @@ describe("pantalla de confirmación de correo", () => {
     render(<PaginaConfirmaCorreo />);
 
     await user.type(screen.getByLabelText(/código de verificación/i), "406156");
-    await user.click(screen.getByRole("button", { name: /verificar mi cuenta/i }));
+    await user.click(screen.getByRole("button", { name: /verificar código/i }));
 
     expect(await screen.findByText(/Superaste los intentos disponibles/i)).toBeInTheDocument();
     expect(mocks.push).not.toHaveBeenCalled();
@@ -105,7 +105,7 @@ describe("pantalla de confirmación de correo", () => {
     render(<PaginaConfirmaCorreo />);
 
     await user.type(screen.getByLabelText(/código de verificación/i), "406156");
-    await user.click(screen.getByRole("button", { name: /verificar mi cuenta/i }));
+    await user.click(screen.getByRole("button", { name: /verificar código/i }));
 
     await waitFor(() => expect(mocks.push).toHaveBeenCalledWith("/"));
     expect(window.sessionStorage.getItem("ruum:correo-confirmacion")).toBeNull();

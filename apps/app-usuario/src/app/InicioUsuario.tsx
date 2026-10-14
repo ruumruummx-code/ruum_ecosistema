@@ -349,16 +349,6 @@ export function InicioUsuario({ usuario, traslados, conductorFotoUrl = null }: I
             <p className="mt-1 text-[13px] font-medium text-[#4e5f80] dark:text-[#a8b5cc]">
               Tu próximo traslado y su seguimiento en vivo aparecerán aquí.
             </p>
-            <div className="mt-5">
-              <Link
-                id="firstTransferButton"
-                href="/viajes/nuevo"
-                className="inline-flex min-h-[48px] w-full items-center justify-center gap-2 rounded-2xl border border-[#d7e1ee] bg-white px-4 text-[14.5px] font-bold text-[#0a2342] hover:bg-[#f6f8fb] active:scale-[0.98] transition dark:border-[#2d4f73] dark:bg-[#0a2342] dark:text-[#f6f8fb]"
-              >
-                <span>Solicitar mi primer traslado</span>
-                <IconoChevron className="size-4" />
-              </Link>
-            </div>
           </MobileCard>
         )}
       </section>
