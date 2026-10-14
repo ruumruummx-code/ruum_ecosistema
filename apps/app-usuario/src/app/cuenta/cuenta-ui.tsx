@@ -29,12 +29,10 @@ export interface CuentaReal {
 const LINKS_CUENTA = [
   { href: "/cuenta/datos-personales", inicial: "D", titulo: "Datos personales", descripcion: "Edita tu información personal y dirección." },
   { href: "/cuenta/vehiculos", inicial: "V", titulo: "Mis vehículos", descripcion: "Autos frecuentes, placas, VIN y fotografías." },
-  { href: "/cuenta/metodos-pago", inicial: "M", titulo: "Métodos de pago", descripcion: "Tarjeta, transferencia y pago empresarial." },
-  { href: "/cuenta/facturacion", inicial: "F", titulo: "Facturación", descripcion: "RFC, razón social, CFDI y correo fiscal." },
 ];
 
 const LINKS_VERIFICACION = [
-  { href: "/cuenta/verificacion-documentos", inicial: "V", titulo: "Verificación y documentos", descripcion: "INE, comprobante de domicilio y datos fiscales." },
+  { href: "/cuenta/verificacion-documentos", inicial: "V", titulo: "Verificación y facturación", descripcion: "INE, licencia, comprobante y datos fiscales." },
 ];
 
 const LINKS_PREFERENCIAS = [
@@ -521,59 +519,6 @@ export function SeccionVehiculos({ vehiculos }: { vehiculos: Vehiculo[] }) {
         <Link href="/viajes/nuevo">
           <Button variant="secondary">Agregar desde una solicitud</Button>
         </Link>
-      </div>
-    </Seccion>
-  );
-}
-
-export function SeccionMetodosPago({ usuario }: { usuario: Usuario }) {
-  const esEmpresa = usuario.tipo_cuenta === "empresa" || usuario.rol === "titular_empresa";
-  return (
-    <Seccion titulo="Métodos de pago" descripcion="Ruum Ruum solo usa métodos electrónicos; no se guarda información completa de tarjeta.">
-      <div className="grid gap-4 sm:grid-cols-3">
-
-        {/* Tarjeta bancaria — CTA condicional según estado de registro */}
-        <div className="flex flex-col gap-3 rounded-lg border border-[var(--user-color-border)] bg-[var(--user-color-surface)] px-4 py-4">
-          <div>
-            <p className="font-body text-sm font-semibold text-[var(--user-color-primary)]">Tarjeta bancaria</p>
-            <p className="mt-1 font-body text-xs text-[var(--user-color-muted)]">
-              {usuario.metodo_pago_registrado ? "Registrada y activa" : "Sin tarjeta registrada"}
-            </p>
-          </div>
-          {!usuario.metodo_pago_registrado && (
-            <Link
-              href="/cuenta/metodos-pago"
-              className="inline-flex min-h-11 items-center justify-center rounded-lg border border-[var(--user-color-border)] px-3 py-1.5 font-body text-xs font-medium text-[var(--user-color-primary)] transition hover:border-[var(--user-color-action)] hover:text-[var(--user-color-action)]"
-            >
-              Registrar tarjeta →
-            </Link>
-          )}
-        </div>
-
-        {/* Transferencia */}
-        <div className="rounded-lg border border-[var(--user-color-border)] bg-[var(--user-color-surface)] px-4 py-4">
-          <p className="font-body text-sm font-semibold text-[var(--user-color-primary)]">Transferencia</p>
-          <p className="mt-1 font-body text-xs text-[var(--user-color-muted)]">Disponible para todos los traslados</p>
-        </div>
-
-        {/* Pago empresarial */}
-        <div className="flex flex-col gap-3 rounded-lg border border-[var(--user-color-border)] bg-[var(--user-color-surface)] px-4 py-4">
-          <div>
-            <p className="font-body text-sm font-semibold text-[var(--user-color-primary)]">Pago empresarial</p>
-            <p className="mt-1 font-body text-xs text-[var(--user-color-muted)]">
-              {esEmpresa ? "Activo para esta cuenta" : "Disponible en cuentas empresa"}
-            </p>
-          </div>
-          {!esEmpresa && (
-            <Link
-              href="/soporte"
-              className="inline-flex min-h-11 items-center justify-center rounded-lg border border-[var(--user-color-border)] px-3 py-1.5 font-body text-xs font-medium text-[var(--user-color-primary)] transition hover:border-[var(--user-color-action)] hover:text-[var(--user-color-action)]"
-            >
-              Solicitar activación →
-            </Link>
-          )}
-        </div>
-
       </div>
     </Seccion>
   );

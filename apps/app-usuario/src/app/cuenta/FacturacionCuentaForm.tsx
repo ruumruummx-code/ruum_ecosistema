@@ -26,7 +26,7 @@ function datoFiscal(usuario: Usuario, empresa: Empresa | null, campo: CampoFisca
   return empresa?.[campo] ?? usuario?.[campo] ?? "";
 }
 
-export function FacturacionCuentaForm({ usuario, empresa }: { usuario: Usuario; empresa: Empresa | null }) {
+export function FacturacionCuentaForm({ usuario, empresa, onActualizado }: { usuario: Usuario; empresa: Empresa | null; onActualizado?: () => void }) {
   const [rfc, setRfc] = useState(datoFiscal(usuario, empresa, "rfc"));
   const [razonSocial, setRazonSocial] = useState(datoFiscal(usuario, empresa, "razon_social") || empresa?.nombre || "");
   const [regimenFiscal, setRegimenFiscal] = useState(datoFiscal(usuario, empresa, "regimen_fiscal"));
@@ -61,6 +61,7 @@ export function FacturacionCuentaForm({ usuario, empresa }: { usuario: Usuario; 
         correo_facturacion: limpiar(correoFacturacion)
       });
       setMensaje({ tono: "info", texto: "Datos de facturación actualizados." });
+      onActualizado?.();
     } catch (err) {
       setMensaje({ tono: "danger", texto: err instanceof Error ? err.message : "No pudimos guardar los datos fiscales." });
     } finally {

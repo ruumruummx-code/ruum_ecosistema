@@ -97,7 +97,7 @@ describe("CuentaCliente — Sistema móvil unificado", () => {
     );
   });
 
-  it("renderiza grupos de navegación Perfil, Pagos y facturación y Legal y cuenta", () => {
+  it("unifica verificación y facturación y elimina métodos de pago", () => {
     render(
       <CuentaCliente
         usuario={mockUsuario as Usuario}
@@ -110,15 +110,14 @@ describe("CuentaCliente — Sistema móvil unificado", () => {
     expect(screen.getByRole("navigation", { name: "Perfil" })).toBeInTheDocument();
     expect(screen.getByText("Datos personales")).toBeInTheDocument();
     expect(screen.getByText("Contraseña")).toBeInTheDocument();
-    expect(screen.getByText("Verificación y documentos")).toBeInTheDocument();
+    expect(screen.getByText("Verificación y facturación")).toBeInTheDocument();
     expect(screen.getByText("Verificado")).toBeInTheDocument();
     expect(screen.getByText("Preferencias")).toBeInTheDocument();
 
-    // Pagos y facturación
-    expect(screen.getByRole("navigation", { name: "Pagos y facturación" })).toBeInTheDocument();
-    expect(screen.getByText("Métodos de pago")).toBeInTheDocument();
-    expect(screen.getByText("Facturación")).toBeInTheDocument();
-    expect(screen.getByText("Configurado")).toBeInTheDocument();
+    expect(screen.queryByRole("navigation", { name: "Pagos y facturación" })).not.toBeInTheDocument();
+    expect(screen.queryByText("Métodos de pago")).not.toBeInTheDocument();
+    expect(screen.queryByText("Facturación")).not.toBeInTheDocument();
+    expect(screen.getByText("Verificación y facturación").closest("a")).toHaveAttribute("href", "/cuenta/verificacion-documentos");
 
     // Legal y cuenta
     expect(screen.getByRole("navigation", { name: "Legal y cuenta" })).toBeInTheDocument();

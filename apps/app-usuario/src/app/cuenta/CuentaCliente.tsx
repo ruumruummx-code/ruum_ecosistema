@@ -78,8 +78,6 @@ export function CuentaCliente({
   const correoMostrar = correoRegistro?.trim() || "Sin correo registrado";
   const telefonoMostrar = usuario?.telefono?.trim() || "Sin teléfono registrado";
   const verificado = usuario?.estado_verificacion === "verificado";
-  const metodoSub = usuario?.metodo_pago_registrado ? "Registrada y activa" : "Sin tarjeta registrada";
-  const facturacionInsignia = usuario?.rfc?.trim() ? "Configurado" : "Pendiente";
   const sinIncidencias = usuario?.traslados_completados_sin_incidencia ?? 0;
 
   async function handleCerrarSesion() {
@@ -229,8 +227,8 @@ export function CuentaCliente({
           enlaceComponente={Link}
           icono={<Icono d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z M9 12l2 2 4-4" className="size-[17px]" />}
           tonoIcono="verde"
-          titulo="Verificación y documentos"
-          subtitulo={verificado ? "Identidad y documentos verificados" : "INE, comprobante y datos fiscales"}
+          titulo="Verificación y facturación"
+          subtitulo="INE, licencia, comprobante y datos fiscales"
           badge={
             <MobileBadge
               variante={verificado ? "exito" : "pendiente"}
@@ -246,34 +244,6 @@ export function CuentaCliente({
           tonoIcono="morado"
           titulo="Preferencias"
           subtitulo="Notificaciones, alertas, idioma y tema"
-        />
-      </MobileListGroup>
-
-      {/* Pagos y facturación */}
-      <MobileListGroup tituloSeccion="Pagos y facturación" as="nav" ariaLabel="Pagos y facturación" className="mb-5">
-        <MobileRow
-          href="/cuenta/metodos-pago"
-          enlaceComponente={Link}
-          icono={<Icono d="M2 5h20v14H2z M2 10h20" className="size-[17px]" />}
-          tonoIcono="base"
-          titulo="Métodos de pago"
-          subtitulo={metodoSub}
-          conDivisor={false}
-        />
-        <MobileRow
-          href="/cuenta/facturacion"
-          enlaceComponente={Link}
-          icono={<Icono d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z M14 2v6h6 M16 13H8 M16 17H8" className="size-[17px]" />}
-          tonoIcono="ambar"
-          titulo="Facturación"
-          subtitulo="RFC y datos fiscales"
-          badge={
-            <MobileBadge
-              variante={usuario?.rfc?.trim() ? "exito" : "pendiente"}
-              texto={facturacionInsignia}
-              size="sm"
-            />
-          }
         />
       </MobileListGroup>
 

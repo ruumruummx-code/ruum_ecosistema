@@ -5,7 +5,7 @@ import { conCuenta } from "../cuenta-ui";
 import { VerificacionDocumentos } from "../VerificacionDocumentos";
 
 export const metadata: Metadata = {
-  title: "Verificación y documentos — Ruum Ruum",
+  title: "Verificación y facturación — Ruum Ruum",
   robots: { index: false, follow: false },
 };
 
@@ -14,7 +14,7 @@ export default async function PaginaVerificacionDocumentos() {
     <>
       <NavegacionUsuario variante="claro" nombreUsuario={cuenta.usuario?.nombre} />
       <MobileShell variant="compact" navInferiorVisible={true} as="main">
-        <VerificacionDocumentos usuario={cuenta.usuario} fotoUrl={cuenta.fotoPerfilUrl} />
+        <VerificacionDocumentos usuario={cuenta.usuario} empresa={cuenta.empresa} />
       </MobileShell>
     </>
   ));

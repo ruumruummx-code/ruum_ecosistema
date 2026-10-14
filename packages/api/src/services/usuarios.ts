@@ -330,6 +330,35 @@ export async function subirDocumentoIdentidad(
   return data;
 }
 
+export type TipoDocumentoCuenta = "licencia" | "comprobante" | "constancia";
+export type DocumentoCuenta = {
+  tipo: TipoDocumentoCuenta;
+  ruta: string;
+  estado: "en_revision" | "verificado" | "rechazado";
+  subido_en: string;
+};
+
+export async function listarDocumentosCuentaUsuario(cliente: Cliente): Promise<DocumentoCuenta[]> {
+  const { data, error } = await cliente.functions.invoke<{ documentos: DocumentoCuenta[] }>(
+    "documentos-cuenta-usuario", { body: { accion: "listar" } }
+  );
+  if (error) throw new Error(await mensajeErrorFuncion(error));
+  if (!Array.isArray(data?.documentos)) throw new Error("No pudimos consultar los documentos.");
+  return data.documentos;
+}
+
+export async function subirDocumentoCuentaUsuario(cliente: Cliente, tipo: TipoDocumentoCuenta, archivo: File): Promise<DocumentoCuenta> {
+  const body = new FormData();
+  body.append("tipo", tipo);
+  body.append("archivo", archivo);
+  const { data, error } = await cliente.functions.invoke<DocumentoCuenta>("documentos-cuenta-usuario", { body });
+  if (error) throw new Error(await mensajeErrorFuncion(error));
+  if (!data?.ruta || data.tipo !== tipo || data.estado !== "en_revision" || !data.subido_en) {
+    throw new Error("El servidor no confirmó el registro del documento.");
+  }
+  return data;
+}
+
 /**
  * Inicia una sesión de verificación de identidad con Didit (OCR + liveness + face match)
  * para el usuario/pasajero actual. Devuelve la URL del flujo hospedado por Didit.
