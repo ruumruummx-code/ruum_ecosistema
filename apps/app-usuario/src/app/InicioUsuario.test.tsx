@@ -16,7 +16,14 @@ vi.mock("../lib/supabase-browser", () => ({
 type PasaporteRow = Database["public"]["Views"]["pasaporte_digital"]["Row"];
 
 describe("InicioUsuario", () => {
-  it("muestra la comunicación compacta después de las acciones rápidas cuando hay conductor asignado", () => {
+  it.each([['pago_pendiente', 'Pendiente de pago'], ['solicitud_creada', 'Solicitud recibida'], ['documentacion_pendiente', 'En preparación']])("muestra el estado real %s sin anunciar movimiento", (estado, etiqueta) => {
+    render(<InicioUsuario usuario={null} traslados={[{ traslado_id: "activo", estado, creado_en: "2026-10-13" } as unknown as PasaporteRow]} />);
+    const tarjeta = screen.getByRole("region", { name: "Traslado Activo #ACTIVO" });
+    expect(within(tarjeta).getAllByText(etiqueta).length).toBeGreaterThan(0);
+    expect(within(tarjeta).queryByText("En camino")).toBeNull();
+    expect(within(tarjeta).queryByRole("progressbar")).toBeNull();
+  });
+  it("incluye el contacto del conductor en el traslado activo antes de las acciones rápidas", () => {
     const traslado = {
       traslado_id: "traslado-1",
       estado: "conductor_asignado",
@@ -45,12 +52,15 @@ describe("InicioUsuario", () => {
     expect(within(tarjetaActiva).getByRole("heading", { name: "Traslado Activo #TRASLADO" })).toBeInTheDocument();
     expect(within(tarjetaActiva).getByText("Toyota Corolla 2024")).toBeInTheDocument();
     expect(within(tarjetaActiva).getByText("Placas ABC123D")).toBeInTheDocument();
-    expect(within(tarjetaActiva).getByText("Conductor asignado")).toBeInTheDocument();
+    expect(within(tarjetaActiva).getAllByText("Conductor asignado").length).toBeGreaterThan(0);
+    expect(within(tarjetaActiva).getByRole("region", { name: "Conductor asignado" })).toBe(comunicacion);
+    expect(within(tarjetaActiva).getByText("Etapa 3 de 7: Conductor asignado")).toBeInTheDocument();
+    expect(within(tarjetaActiva).queryByRole("progressbar")).toBeNull();
     expect(screen.getByRole("link", { name: "Abrir chat con Ana López" })).toHaveAttribute(
       "href",
       "/viajes/traslado-1#chat-conductor",
     );
-    expect(acciones.compareDocumentPosition(comunicacion) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(comunicacion.compareDocumentPosition(acciones) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
     expect(screen.queryByText("Reportar incidencia")).not.toBeInTheDocument();
   });
 

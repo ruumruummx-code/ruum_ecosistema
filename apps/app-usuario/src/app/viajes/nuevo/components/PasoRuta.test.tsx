@@ -125,7 +125,8 @@ describe("PasoRuta", () => {
       />,
     );
 
-    await user.click(screen.getAllByRole("button", { name: "Av. Reforma 120, CDMX" })[0]);
+    await user.click(screen.getByRole("combobox", { name: "Buscar dirección de origen" }));
+    await user.keyboard("{ArrowDown}{Enter}");
 
     expect(iniciales.acciones.aplicarSugerenciaDireccion).toHaveBeenCalledWith(
       "origen",
@@ -253,8 +254,8 @@ describe("PasoRuta", () => {
       />,
     );
 
-    // El segundo botón con ese nombre es el del destino.
-    await user.click(screen.getAllByRole("button", { name: "Av. Reforma 120, CDMX" })[1]);
+    await user.click(screen.getByRole("combobox", { name: "Buscar dirección de destino" }));
+    await user.click(screen.getByRole("option", { name: "Av. Reforma 120, CDMX" }));
 
     expect(iniciales.acciones.aplicarSugerenciaDireccion).toHaveBeenCalledWith(
       "destino",

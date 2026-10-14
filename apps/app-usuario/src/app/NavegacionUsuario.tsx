@@ -1,17 +1,16 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 
 type VarianteNavegacion = "claro" | "oscuro";
 
-function IconoCampana({ className = "size-6" }: { className?: string }) {
+function IconoPreferencias({ className = "size-6" }: { className?: string }) {
   return (
     <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" />
-      <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" />
+      <path d="M4 7h16M4 17h16" /><circle cx="9" cy="7" r="3" fill="var(--user-color-surface)" /><circle cx="15" cy="17" r="3" fill="var(--user-color-surface)" />
     </svg>
   );
 }
@@ -55,9 +54,15 @@ function IconoCuenta({ className }: { className?: string }) {
   );
 }
 
+function IconoSolicitar({ className }: { className?: string }) {
+  return <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg>;
+}
+
 const DESTINOS = [
   { href: "/", etiqueta: "Inicio", Icono: IconoHome },
   { href: "/mis-viajes", etiqueta: "Traslados", Icono: IconoTraslados },
+  { href: "/viajes/nuevo", etiqueta: "Solicitar", Icono: IconoSolicitar },
+  { href: "/soporte", etiqueta: "Soporte", Icono: IconoSoporte },
   { href: "/cuenta", etiqueta: "Cuenta", Icono: IconoCuenta },
 ] as const;
 
@@ -86,17 +91,40 @@ export function NavegacionUsuario({
   mostrarNavegacionInferior?: boolean;
 }) {
   const pathname = usePathname();
+  const headerRef = useRef<HTMLElement>(null);
+  const navRef = useRef<HTMLElement>(null);
   void variante;
   const esAcceso = pathname === "/login" || pathname === "/registro" || pathname === "/recuperar-password" || pathname === "/nueva-password" || pathname.startsWith("/registro/");
   const nombre = primerNombre(nombreUsuario);
   const saludo = nombre ? `¡Hola, ${nombre}!` : "¡Hola!";
-  const textoCabecera = titulo ?? saludo;
+  const textoCabecera = titulo ?? (pathname === "/" ? "Ruum Ruum" : saludo);
+
+  useEffect(() => {
+    if (esAcceso && !mostrarEnAcceso) return;
+    const root = document.documentElement;
+    const actualizar = () => {
+      if (headerRef.current) root.style.setProperty("--user-header-height", headerRef.current.getBoundingClientRect().height + "px");
+      if (navRef.current) root.style.setProperty("--user-mobile-nav-height", navRef.current.getBoundingClientRect().height + "px");
+    };
+    actualizar();
+    const observer = typeof ResizeObserver !== "undefined" ? new ResizeObserver(actualizar) : null;
+    if (headerRef.current) observer?.observe(headerRef.current);
+    if (navRef.current) observer?.observe(navRef.current);
+    window.addEventListener("resize", actualizar);
+    return () => {
+      observer?.disconnect();
+      window.removeEventListener("resize", actualizar);
+      root.style.removeProperty("--user-header-height");
+      root.style.removeProperty("--user-mobile-nav-height");
+    };
+  }, [esAcceso, mostrarEnAcceso, mostrarNavegacionInferior]);
 
   if (esAcceso && !mostrarEnAcceso) return null;
 
   return (
     <>
       <header
+        ref={headerRef}
         id="homeHeader"
         role="banner"
         className="user-v2-shell-header user-v2-scope"
@@ -145,8 +173,8 @@ export function NavegacionUsuario({
               className="group flex min-h-12 min-w-12 cursor-pointer flex-col items-center justify-center gap-0.5 rounded-xl px-0.5 transition duration-200 hover:bg-[var(--user-color-brand-soft)] focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-[var(--user-color-action)] sm:px-2"
               aria-label="Preferencias"
             >
-              <IconoCampana className="size-6" aria-hidden="true" />
-              <span className="text-xs font-medium leading-none sm:text-xs">
+              <IconoPreferencias className="size-6" aria-hidden="true" />
+              <span className="text-sm font-medium leading-none">
                 Preferencias
               </span>
             </Link>
@@ -156,7 +184,7 @@ export function NavegacionUsuario({
               aria-label="Soporte"
             >
               <IconoSoporte className="size-6" />
-              <span className="text-xs font-medium leading-none sm:text-xs">
+              <span className="text-sm font-medium leading-none">
                 Soporte
               </span>
             </Link>
@@ -168,10 +196,11 @@ export function NavegacionUsuario({
         <nav
           id="bottomNavigation"
           aria-label="Navegación principal"
+          ref={navRef}
           className="user-v2-shell-nav lg:hidden user-v2-scope"
         >
           <div className="user-v2-shell-nav-inner">
-            <div className="grid grid-cols-3 items-center">
+            <div className="grid grid-cols-5 items-center">
               {DESTINOS.map((destino) => {
                 const activo = estaActivo(pathname, destino.href);
                 return (

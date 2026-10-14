@@ -80,7 +80,7 @@ export function FormularioRecuperarPassword({
 
   return (
     <MobileShell variant="compact">
-      <div className="flex min-h-screen flex-col justify-center px-4 py-8 sm:px-6">
+      <div className="flex min-h-dvh flex-col justify-center px-4 py-8 sm:px-6">
         <Link
           href="/login"
           className="mb-6 inline-flex min-h-11 items-center gap-1 text-[13.5px] font-bold text-[#104ca0] transition hover:text-[#0a2342] dark:text-[#6ba8ff] dark:hover:text-[#a8b5cc]"

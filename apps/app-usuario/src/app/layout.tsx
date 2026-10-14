@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Montserrat, Inter, IBM_Plex_Mono } from "next/font/google";
+import { Inter } from "next/font/google";
 import Script from "next/script";
 import { headers } from "next/headers";
 import { TextInputUppercaseBridge } from "@ruum/ui";
@@ -10,23 +10,9 @@ import { OperationalAccessibilityBridge } from "./OperationalAccessibilityBridge
 import { AppStateProvider } from "../state/AppStateProvider";
 import "./globals.css";
 
-const montserrat = Montserrat({
-  subsets: ["latin"],
-  weight: ["600", "700", "800"],
-  variable: "--font-display-loaded",
-  display: "swap"
-});
-
 const inter = Inter({
   subsets: ["latin"],
   variable: "--font-body-loaded",
-  display: "swap"
-});
-
-const plexMono = IBM_Plex_Mono({
-  subsets: ["latin"],
-  weight: ["400", "500"],
-  variable: "--font-mono-loaded",
   display: "swap"
 });
 
@@ -59,7 +45,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       </head>
       <body
         suppressHydrationWarning
-        className={`${montserrat.variable} ${inter.variable} ${plexMono.variable} min-h-screen`}
+        className={`${inter.variable} min-h-dvh`}
       >
         <a href="#contenido-principal" className="ruum-skip-link" aria-label="Saltar al contenido principal">
           Saltar al contenido principal

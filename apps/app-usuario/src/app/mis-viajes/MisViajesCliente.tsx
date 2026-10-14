@@ -4,7 +4,7 @@ import { useMemo, useState, useEffect, useTransition, useRef } from "react";
 import Link from "next/link";
 import { ETIQUETA_TIPO_VEHICULO } from "@ruum/shared/constants";
 import type { Database } from "@ruum/shared/types";
-import { progresoPorEstadoTraslado } from "../../lib/inicio";
+import { EtapasTrasladoUsuario } from "../EtapasTrasladoUsuario";
 
 type Pasaporte = Database["public"]["Views"]["pasaporte_digital"]["Row"];
 type Traslado = Pick<
@@ -543,7 +543,6 @@ export function MisTrasladosCliente({
             const destinoCiudad = pasaporte.destino_ciudad ?? traslado?.destino_ciudad;
             const esPagoPendiente = pasaporte.estado === "cotizacion_aceptada" || pasaporte.estado === "pago_pendiente";
             const esActiva = tono === "active";
-            const progreso = progresoPorEstadoTraslado(pasaporte.estado);
             const conductor = primerNombre(pasaporte.conductor_nombre) ?? "Por asignar";
             const duracion = formatoDuracion(pasaporte.tiempo_estimado_horas);
             const distancia = pasaporte.distancia_km != null
@@ -584,24 +583,7 @@ export function MisTrasladosCliente({
                   </div>
                 </div>
 
-                {esActiva && (
-                  <div className="mb-3 flex items-center gap-2.5">
-                    <div
-                      className="h-1.5 flex-1 overflow-hidden rounded-full bg-[#e8eef6] dark:bg-[#1a3a5c]"
-                      role="progressbar"
-                      aria-valuenow={progreso}
-                      aria-valuemin={0}
-                      aria-valuemax={100}
-                      aria-label={`Avance del traslado ${nombreVehiculo}: ${label}`}
-                    >
-                      <div
-                        className="h-full rounded-full bg-gradient-to-r from-[#0a2342] to-[#0066ff] dark:from-[#4d94ff] dark:to-[#00d1d1]"
-                        style={{ width: `${progreso}%` }}
-                      />
-                    </div>
-                    <span className="whitespace-nowrap text-[12px] font-bold text-[#0a2342] dark:text-[#f6f8fb]">{progreso}%</span>
-                  </div>
-                )}
+                {esActiva && <div className="mb-3"><EtapasTrasladoUsuario estado={pasaporte.estado} /></div>}
 
                 <div className="mb-3.5 rounded-xl border border-[#eef2f7] bg-[#f8fafd] px-3.5 py-3 dark:border-[#1a3a5c] dark:bg-[#061529]/60">
                   <div className="flex items-start gap-2.5">

@@ -8,7 +8,7 @@
  *   Navy Primary #0D2B5E · Teal Brand #00C2B8 · Blue Action #1677FF
  *   Surface #F6F8FB · Canvas #FFFFFF · Border #E6F0FF · Text Muted #5F7192
  *   Semántica: Éxito #13B89B · Advertencia/Pendiente #F5B400 · Error #D94B5B
- * Tipografía: Inter (Display, UI, Cuerpo), IBM Plex Mono (Datos/Folios/Bitácoras).
+ * Tipografía: Inter (Display, UI, Cuerpo), monoespaciada del sistema (Datos/Folios/Bitácoras).
  */
 
 :root {
@@ -115,7 +115,7 @@ summary:focus-visible {
 
 /* Superficies y componentes semánticos de app-usuario */
 .app-page {
-  min-height: 100vh;
+  min-height: 100dvh;
   background: var(--ruum-canvas);
 }
 
@@ -150,9 +150,9 @@ summary:focus-visible {
 }
 
 .app-status-strip {
-  border: 1px solid rgba(255, 196, 0, 0.32);
+  border: 1px solid var(--user-color-border);
   border-radius: 12px;
-  background: rgba(255, 196, 0, 0.08);
+  background: var(--user-color-brand-soft);
 }
 
 /* Sello de trazabilidad: línea de ruta institucional */
@@ -164,19 +164,15 @@ summary:focus-visible {
 
 /* Shell de autenticación y accesos */
 .ruum-auth-shell {
-  min-height: 100vh;
-  background:
-    radial-gradient(circle at 18% 12%, rgba(255, 196, 0, 0.10), transparent 38%),
-    radial-gradient(circle at 88% 82%, rgba(30, 136, 229, 0.14), transparent 42%),
-    linear-gradient(180deg, rgba(21, 21, 21, 0.72) 0%, rgba(15, 19, 26, 0.94) 62%, var(--ruum-canvas) 100%),
-    var(--ruum-canvas);
+  min-height: 100dvh;
+  background: var(--user-color-background);
 }
 
 .ruum-auth-card {
   width: min(100% - 32px, 448px);
   border: 1px solid rgba(122, 162, 214, 0.32);
   border-radius: var(--ruum-radius-modal, 16px);
-  background: rgba(13, 22, 38, 0.92);
+  background: var(--user-color-surface);
   color: var(--ruum-text);
   box-shadow: var(--ruum-shadow-4);
   backdrop-filter: blur(6px);
@@ -477,8 +473,8 @@ summary:focus-visible {
      Mis Traslados). Oscurecido a #00707a → 5.48:1. */
   --user-color-brand-dark: #00707a;
   --user-color-brand-soft: #e8fafa;
-  --user-color-action: #1677ff;
-  --user-color-action-hover: #1267dd;
+  --user-color-action: #1267dd;
+  --user-color-action-hover: #0d56bd;
   --user-color-surface: #ffffff;
   --user-color-background: #f6f8fb;
   --user-color-surface-soft: #eff4fa;
@@ -535,7 +531,7 @@ summary:focus-visible {
 }
 
 .user-v2-page {
-  min-height: 100vh;
+  min-height: 100dvh;
   background: var(--user-color-background);
   scroll-padding-bottom: 112px;
 }
@@ -1343,6 +1339,61 @@ summary:focus-visible {
   backdrop-filter: blur(14px);
 }
 
+/* Heights are measured by NavegacionUsuario; fallbacks cover the initial render. */
+.user-passport-tabs {
+  position: sticky;
+  top: calc(var(--user-header-height, calc(72px + env(safe-area-inset-top))) + 8px);
+  z-index: 20;
+}
+
+.user-passport-dock {
+  position: sticky;
+  bottom: calc(var(--user-mobile-nav-height, calc(65px + env(safe-area-inset-bottom))) + 12px);
+  z-index: 20;
+}
+
+.user-wizard-page {
+  padding-bottom: calc(184px + env(safe-area-inset-bottom));
+}
+
+.user-wizard-actions {
+  position: fixed;
+  inset-inline: 0;
+  bottom: var(--wizard-keyboard-offset, 0px);
+  z-index: 40;
+  border-top: 1px solid var(--user-color-border);
+  background: var(--user-color-surface);
+  color: var(--user-color-primary);
+  box-shadow: var(--user-shadow-nav);
+  padding: 8px 16px max(8px, env(safe-area-inset-bottom));
+}
+
+.user-wizard-actions-inner {
+  display: grid;
+  gap: 4px;
+  width: min(100%, 448px);
+  margin-inline: auto;
+}
+
+.user-wizard-primary:not(:disabled) {
+  background: var(--user-color-action);
+  color: var(--user-color-on-action);
+}
+
+.user-wizard-primary:not(:disabled):hover {
+  background: var(--user-color-action-hover);
+}
+
+@media (max-width: 767px) {
+  /* iOS zooms editable controls below 16px. Keep pinch zoom available. */
+  input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]):not([type="range"]):not([type="file"]),
+  select,
+  textarea {
+    font-size: 16px !important;
+    scroll-margin-block: calc(var(--user-header-height, 72px) + 16px) 184px;
+  }
+}
+
 .user-v2-shell-inner,
 .user-v2-shell-nav-inner {
   width: min(100%, 430px);
@@ -1599,4 +1650,39 @@ summary:focus-visible {
     scroll-behavior: auto !important;
     transition-duration: 0.01ms !important;
   }
+}
+
+/* Foreground tokens preserve contrast; bright semantic colors remain accents. */
+[class~="text-ink/40"], [class~="text-ink/45"], [class~="text-ink/50"],
+[class~="text-ink/55"], [class~="text-ink/60"], [class~="text-ink/65"] {
+  color: var(--user-color-muted);
+}
+[class~="text-signal"], [class~="text-[#00C2B8]"], [class~="text-[#00c2b8]"] {
+  color: var(--user-color-brand-dark);
+}
+[class~="text-success"], [class~="text-[#13B89B]"], [class~="text-[#13b89b]"] {
+  color: var(--user-color-success-ink);
+}
+[class~="text-warning"], [class~="text-[#F5B400]"], [class~="text-[#f5b400]"] {
+  color: var(--user-color-pending-ink);
+}
+@media (max-width: 767px) {
+  input::placeholder, textarea::placeholder {
+    color: var(--user-color-muted);
+    opacity: 1;
+  }
+}
+
+:root { --user-hero-surface: #0a2342; --user-hero-text: #ffffff; }
+
+:root {
+  --user-hero-muted: #a8b5cc;
+  --user-color-success-soft: #e9f3ee;
+  --user-color-success-border: #c8e6d8;
+  --user-color-pending-soft: #fff4d6;
+}
+[data-theme="dark"] {
+  --user-color-success-soft: #0a2e1f;
+  --user-color-success-border: #135939;
+  --user-color-pending-soft: #3d2e00;
 }

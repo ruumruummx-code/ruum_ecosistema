@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { IconoFlechaAtras, IconoFlechaDerecha, IconoUsuario, IconoUsuarioPlus, IconoCorreo, IconoCandado, IconoOjo, IconoOjoCerrado, IconoCheckCirculo, IconoCirculoVacio, IconoAlertaTriangulo } from "./iconos-registro";
 import { passwordCumpleRequisitos, traducirErrorAuth } from "@ruum/shared/utils";
 import { registrarEventoUx } from "../../lib/analytics";
 import { tieneSupabaseConfigurado } from "../../lib/supabase-browser";
@@ -16,107 +17,6 @@ import {
 /* ─────────────────────────────────────────────────────────────
    Iconos SVG accesibles
 ───────────────────────────────────────────────────────────── */
-
-function IconoFlechaAtras({ className = "size-4" }: { className?: string }) {
-  return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <path d="M19 12H5M11 6l-6 6 6 6" />
-    </svg>
-  );
-}
-
-function IconoFlechaDerecha({ className = "size-4.5" }: { className?: string }) {
-  return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <path d="M5 12h14M13 6l6 6-6 6" />
-    </svg>
-  );
-}
-
-function IconoUsuario({ className = "size-4.5" }: { className?: string }) {
-  return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
-      <circle cx="12" cy="7" r="4" />
-    </svg>
-  );
-}
-
-function IconoUsuarioPlus({ className = "size-8" }: { className?: string }) {
-  return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
-      <circle cx="9" cy="7" r="4" />
-      <line x1="19" y1="8" x2="19" y2="14" />
-      <line x1="22" y1="11" x2="16" y2="11" />
-    </svg>
-  );
-}
-
-function IconoCorreo({ className = "size-4.5" }: { className?: string }) {
-  return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <rect width="20" height="16" x="2" y="4" rx="2" />
-      <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
-    </svg>
-  );
-}
-
-function IconoCandado({ className = "size-4.5" }: { className?: string }) {
-  return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <rect width="18" height="11" x="3" y="11" rx="2" ry="2" />
-      <path d="M7 11V7a5 5 0 0 1 10 0v4" />
-    </svg>
-  );
-}
-
-function IconoOjo({ className = "size-4.5" }: { className?: string }) {
-  return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" />
-      <circle cx="12" cy="12" r="3" />
-    </svg>
-  );
-}
-
-function IconoOjoCerrado({ className = "size-4.5" }: { className?: string }) {
-  return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <path d="m2 2 20 20" />
-      <path d="M9.88 9.88a3 3 0 1 0 4.24 4.24" />
-      <path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68" />
-      <path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61" />
-    </svg>
-  );
-}
-
-function IconoCheckCirculo({ className = "size-4" }: { className?: string }) {
-  return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
-      <polyline points="22 4 12 14.01 9 11.01" />
-    </svg>
-  );
-}
-
-function IconoCirculoVacio({ className = "size-3.5" }: { className?: string }) {
-  return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <circle cx="12" cy="12" r="9" />
-    </svg>
-  );
-}
-
-function IconoAlertaTriangulo({ className = "size-4.5" }: { className?: string }) {
-  return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <circle cx="12" cy="12" r="10" />
-      <line x1="12" y1="8" x2="12" y2="12" />
-      <line x1="12" y1="16" x2="12.01" y2="16" />
-    </svg>
-  );
-}
 
 /* ─────────────────────────────────────────────────────────────
    Componente principal PaginaRegistro
@@ -433,7 +333,7 @@ export default function PaginaRegistro() {
 
   if (!tieneSupabaseConfigurado()) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[#eef2f7] p-4 font-sans">
+      <div className="flex min-h-dvh items-center justify-center bg-[#eef2f7] p-4 font-sans">
         <div className="w-full max-w-[420px] rounded-[36px] border border-[#e9eef3] bg-white p-7 text-center shadow-xl">
           <div className="mx-auto mb-4 flex size-14 items-center justify-center rounded-2xl bg-amber-50 text-amber-600">
             <IconoAlertaTriangulo className="size-7" />
@@ -459,7 +359,7 @@ export default function PaginaRegistro() {
   const errorCorreo = (editados.email || errorCampo?.campo === "email") && !correoValido;
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-[#eef2f7] p-3 sm:p-5 font-sans">
+    <div className="flex min-h-dvh items-center justify-center bg-[#eef2f7] p-3 sm:p-5 font-sans">
       <div className="relative flex max-h-[calc(100dvh-2rem)] w-full max-w-[480px] flex-col overflow-hidden rounded-[32px] sm:rounded-[36px] border border-[#e9eef3] bg-white shadow-[0_25px_60px_rgba(0,0,0,0.12)]">
         
         {/* Encabezado */}

@@ -37,9 +37,9 @@ export function MobileShell({
   return (
     <Component
       className={[
-        "min-h-screen w-full transition-colors",
+        "min-h-dvh w-full transition-colors",
         conFondoCanvas
-          ? "bg-[#f6f8fb] text-[#0a2342] dark:bg-[#061529] dark:text-[#f6f8fb]"
+          ? "bg-[var(--user-color-background,var(--ruum-canvas))] text-[var(--user-color-primary,var(--ruum-text-primary))]"
           : "",
         navInferiorVisible ? "pb-24" : "pb-6",
         className,

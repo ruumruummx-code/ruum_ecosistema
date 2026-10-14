@@ -124,7 +124,7 @@ export default async function PaginaInicio({
 
   // Experiencia Pública / Landing (Libro de Marca V2.1 cap. 32)
   return (
-    <div className="min-h-screen bg-[var(--ruum-navy)] text-white">
+    <div className="min-h-dvh bg-[var(--ruum-navy)] text-white">
       {/* Barra de Navegación Pública */}
       <header className="sticky top-0 z-40 border-b border-white/10 bg-[var(--ruum-navy)]/95 pt-[env(safe-area-inset-top)] backdrop-blur-md">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3.5 sm:px-6">

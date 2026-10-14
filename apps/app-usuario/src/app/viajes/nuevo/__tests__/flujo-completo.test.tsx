@@ -79,7 +79,7 @@ describe("Flujo completo de nuevo traslado (2.2)", () => {
       expect(await screen.findByRole("button", { name: /continuar/i })).toBeInTheDocument();
     });
 
-    const continuar = screen.getByRole("button", { name: /continuar con mi solicitud/i });
+    const continuar = screen.getByRole("button", { name: /^continuar$/i });
     await user.click(continuar);
 
     // PASO 1: Vehículo — verificar que estamos en vehículo (buscar Año)
@@ -113,7 +113,7 @@ describe("Flujo completo de nuevo traslado (2.2)", () => {
     await user.selectOptions(marca, "Nissan");
 
     // Aceptar tarifa
-    const continuar = await screen.findByRole("button", { name: /continuar con mi solicitud/i }).catch(() => null);
+    const continuar = await screen.findByRole("button", { name: /^continuar$/i }).catch(() => null);
     if (continuar) await user.click(continuar);
 
     // Cambiar marca en paso 1 debe invalidar

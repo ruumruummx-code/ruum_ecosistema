@@ -43,7 +43,6 @@ function PasoTarifaComponent({
     actualizarMarcaCatalogo,
     actualizarModeloCatalogo,
     validarCampo,
-    onContinuar,
   } = acciones;
   return (
     <div className="space-y-4">
@@ -400,15 +399,6 @@ function PasoTarifaComponent({
           </div>
 
           <div className="flex flex-col gap-2 sm:items-end sm:min-w-[220px]">
-            <Button
-              type="button"
-              disabled={!previsualizacion?.disponible || previsualizando}
-              onClick={onContinuar}
-              aria-describedby={!previsualizacion?.disponible && !previsualizando ? "tarifa-gate-bloqueo-ayuda" : undefined}
-              aria-busy={previsualizando}
-            >
-              Continuar con mi solicitud
-            </Button>
             {!previsualizando && !previsualizacion?.disponible && (
               <div className="w-full sm:text-right">
                 <p id="tarifa-gate-bloqueo-ayuda" className="font-body text-xs leading-4 text-ink/60">

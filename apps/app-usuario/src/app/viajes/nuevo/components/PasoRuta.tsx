@@ -5,6 +5,7 @@ import { esNativo } from "@/lib/capacitor";
 import { obtenerUbicacionActual } from "@/lib/ubicacion";
 import type { DatosCodigoPostal } from "@/lib/codigos-postales";
 import type { sugerirDireccionesAutocomplete } from "@/lib/mapbox";
+import { AutocompletarDireccion } from "./AutocompletarDireccion";
 import { CampoCodigoPostal } from "./CampoCodigoPostal";
 import { EscalasAcordeon } from "./EscalasAcordeon";
 import { formatearDistancia, formatearTiempo, type PrefijoDomicilio } from "../constants";
@@ -244,40 +245,16 @@ function PasoRutaComponent({
           {/* Origen — siempre visible, ancla superior */}
           <div className="grid gap-4" aria-label="Origen del traslado">
             <div className="rounded-lg border border-signal/30 bg-signal/10 p-3">
-              <label htmlFor="origenBusqueda" className="font-body text-xs font-semibold text-ink">Busca tu dirección (autocompleta calle, colonia y CP)</label>
-              <div className="relative mt-2">
-                <input
-                  id="origenBusqueda"
-                  value={origenBusqueda}
-                  onChange={(e) => setOrigenBusqueda(e.target.value)}
-                  placeholder="Ej. Av Patriotismo 12, Escandón, CDMX"
-                  className="w-full rounded-xl border border-ink/20 bg-mist px-3.5 py-2.5 pr-10 font-body text-sm text-ink placeholder:text-ink/45 focus:border-signal focus:outline-none focus:ring-2 focus:ring-signal/20"
-                  aria-label="Buscar dirección de origen"
-                  aria-autocomplete="list"
-                  aria-controls="origen-sugerencias"
-                  aria-expanded={origenSugerencias.length > 0}
-                  role="combobox"
-                  autoComplete="off"
-                />
-                <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-ink/40">
-                  {buscandoOrigen ? "…" : "🔍"}
-                </span>
-                {origenSugerencias.length > 0 && (
-                  <ul id="origen-sugerencias" role="listbox" aria-label="Sugerencias de origen" className="absolute z-20 mt-1 max-h-48 w-full overflow-auto rounded-xl border border-ink/10 bg-mist shadow-2">
-                    {origenSugerencias.map((s, i) => (
-                      <li key={`${s.textoCompleto}-${i}`} role="option" aria-selected={false}>
-                        <button
-                          type="button"
-                          onClick={() => aplicarSugerenciaDireccion("origen", s)}
-                          className="w-full px-3 py-2 text-left font-body text-xs leading-5 hover:bg-signal/10"
-                        >
-                          <span className="font-semibold text-ink">{s.textoCompleto}</span>
-                        </button>
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </div>
+              <AutocompletarDireccion
+                id="origenBusqueda"
+                etiqueta="Buscar dirección de origen"
+                placeholder="Calle, número, colonia y ciudad"
+                valor={origenBusqueda}
+                sugerencias={origenSugerencias}
+                buscando={buscandoOrigen}
+                onChange={setOrigenBusqueda}
+                onSeleccionar={(s) => aplicarSugerenciaDireccion("origen", s)}
+              />
               <p className="mt-1.5 font-body text-[11px] leading-4 text-ink/55">
                 Escribe al menos 3 letras y elige una sugerencia. Precargamos calle, colonia, ciudad, estado y CP — puedes editarlos abajo.
               </p>
@@ -393,42 +370,16 @@ function PasoRutaComponent({
 
           <div className="grid gap-4" aria-label="Destino y contactos del traslado">
             <div className="rounded-lg border border-signal/30 bg-signal/10 p-3">
-              <label htmlFor="input-busqueda-destino" className="font-body text-xs font-semibold text-ink">
-                Busca la dirección de destino
-              </label>
-              <div className="relative mt-2">
-                <input
-                  id="input-busqueda-destino"
-                  value={destinoBusqueda}
-                  onChange={(e) => setDestinoBusqueda(e.target.value)}
-                  placeholder="Ej. Calle 5 123, Centro, Puebla"
-                  className="w-full rounded-xl border border-ink/20 bg-mist px-3.5 py-2.5 pr-10 font-body text-sm text-ink placeholder:text-ink/45 focus:border-signal focus:outline-none focus:ring-2 focus:ring-signal/20"
-                  aria-label="Buscar dirección de destino"
-                  aria-autocomplete="list"
-                  aria-controls="destino-sugerencias"
-                  aria-expanded={destinoSugerencias.length > 0}
-                  role="combobox"
-                  autoComplete="off"
-                />
-                <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-ink/40">
-                  {buscandoDestino ? "…" : "🔍"}
-                </span>
-                {destinoSugerencias.length > 0 && (
-                  <ul id="destino-sugerencias" role="listbox" aria-label="Sugerencias de destino" className="absolute z-20 mt-1 max-h-48 w-full overflow-auto rounded-xl border border-ink/10 bg-mist shadow-2">
-                    {destinoSugerencias.map((s, i) => (
-                      <li key={`${s.textoCompleto}-${i}`} role="option" aria-selected={false}>
-                        <button
-                          type="button"
-                          onClick={() => aplicarSugerenciaDireccion("destino", s)}
-                          className="w-full px-3 py-2 text-left font-body text-xs leading-5 hover:bg-signal/10"
-                        >
-                          <span className="font-semibold text-ink">{s.textoCompleto}</span>
-                        </button>
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </div>
+              <AutocompletarDireccion
+                id="input-busqueda-destino"
+                etiqueta="Buscar dirección de destino"
+                placeholder="Calle, número, colonia y ciudad"
+                valor={destinoBusqueda}
+                sugerencias={destinoSugerencias}
+                buscando={buscandoDestino}
+                onChange={setDestinoBusqueda}
+                onSeleccionar={(s) => aplicarSugerenciaDireccion("destino", s)}
+              />
               <p className="mt-1.5 font-body text-[11px] leading-4 text-ink/55">
                 Elige una sugerencia para autocompletar el formulario.
               </p>

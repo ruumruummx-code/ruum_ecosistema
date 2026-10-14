@@ -1,7 +1,7 @@
 "use client";
 import React, { memo } from "react";
 import { Button, PassportCard, Aviso } from "@ruum/ui";
-import { MENSAJES_CLAVE_UX, TEXTOS_CARGANDO } from "@ruum/shared/constants";
+import { MENSAJES_CLAVE_UX } from "@ruum/shared/constants";
 import type { PrevisualizacionTarifa } from "@ruum/api/services";
 import { CONDICIONES_VEHICULO, VENTANAS_PREDEFINIDAS, formatearDistancia, formatearTiempo } from "../constants";
 import type { DatosFormulario, TipoRutaTraslado } from "../types";
@@ -43,15 +43,12 @@ function PasoDetallesComponent({
   rutaEstimacion,
   politicaCancelacion,
   aceptaPoliticasPagoCancelacion,
-  enviando,
-  cargandoSesion,
   tarifaPreviaAceptada
 }: PasoDetallesProps) {
   const {
     actualizar,
     onEditarAgenda,
     setAceptaPoliticasPagoCancelacion,
-    enviarSolicitud,
     onRevisarTarifa,
   } = acciones;
 
@@ -174,11 +171,11 @@ function PasoDetallesComponent({
         </div>
       </PassportCard>
 
-      <section className="app-status-strip px-5 py-5" aria-labelledby="titulo-tarifa-calculada">
+      <section id="desglose-tarifa-traslado" tabIndex={-1} className="app-status-strip px-5 py-5 scroll-mt-28" aria-labelledby="titulo-tarifa-calculada">
         <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <p id="titulo-tarifa-calculada" className="font-body text-xs font-semibold uppercase tracking-wide text-ink/45">
-              Precio final del traslado
+              Desglose de la tarifa
             </p>
             {previsualizando && (
               <p className="mt-1 font-body text-sm text-ink/55">Calculando tarifa…</p>
@@ -191,6 +188,12 @@ function PasoDetallesComponent({
                 <p className="mt-2 max-w-sm font-body text-sm leading-6 text-ink/65">
                   Este es el monto final calculado para tu traslado, no una estimación.
                 </p>
+                <dl className="mt-3 grid grid-cols-2 gap-2 text-sm">
+                  <dt>Clasificación</dt><dd>{categoriaCatalogo} · {gamaCatalogo}</dd>
+                  <dt>Distancia</dt><dd>{rutaEstimacion?.distanciaKm !== undefined ? formatearDistancia(rutaEstimacion.distanciaKm) : "Pendiente"}</dd>
+                  {previsualizacion.horario && <><dt>Horario tarifario</dt><dd>{previsualizacion.horario.replaceAll("_", " ")}</dd></>}
+                  {previsualizacion.dia && <><dt>Día tarifario</dt><dd>{previsualizacion.dia.replaceAll("_", " ")}</dd></>}
+                </dl>
               </>
             )}
             {!previsualizando && previsualizacion && !previsualizacion.disponible && (
@@ -276,76 +279,7 @@ function PasoDetallesComponent({
         </div>
       )}
 
-      <section
-        id="sticky-tarifa-paso-detalles"
-        className="sticky bottom-4 z-20 rounded-[var(--ruum-radius-modal)] border border-ink/15 bg-mist px-5 py-5 shadow-3 scroll-mt-28"
-        aria-labelledby="titulo-tarifa-flotante"
-      >
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-          <div>
-            <p id="titulo-tarifa-flotante" className="font-body text-xs font-semibold uppercase tracking-wide text-ink/45">
-              Precio final del traslado
-            </p>
-            {previsualizando ? (
-              <p className="mt-2 font-body text-sm text-ink/55">Calculando tarifa…</p>
-            ) : previsualizacion?.disponible ? (
-              <p className="mt-1 font-display text-[32px] font-extrabold leading-none text-ink">
-                ${Number(previsualizacion.tarifa ?? 0).toLocaleString("es-MX")}
-                <span className="ml-1 font-body text-sm font-medium text-ink/55">MXN</span>
-              </p>
-            ) : (
-              <p className="mt-2 max-w-sm font-body text-sm leading-6 text-ink/65">
-                {previsualizacion?.motivo ?? "Completa la agenda para calcular la tarifa."}
-              </p>
-            )}
-            <p className="mt-2 max-w-xs font-body text-xs leading-5 text-ink/60">Todo traslado se cobra por medios electrónicos de forma anticipada, antes de operar.</p>
-            <p className="mt-2 flex flex-wrap items-center gap-2 font-body text-xs text-ink/45">
-              <span className="inline-flex items-center gap-1 rounded-full border border-emerald-500/20 bg-emerald-500/10 px-2 py-0.5 font-semibold text-emerald-700">✓ Conductores certificados</span>
-              <span>★ 4.8/5 · +2,340 traslados verificados este mes</span>
-              <span className="rounded-full bg-mist border border-ink/10 px-2 py-0.5">🔒 Pago seguro Stripe</span>
-            </p>
-          </div>
-          <div className="flex flex-col items-stretch gap-2 sm:w-48">
-            {!tarifaPreviaAceptada ? (
-              <>
-                <Button
-                  type="button"
-                  variant="secondary"
-                  onClick={onRevisarTarifa}
-                  aria-describedby="tarifa-invalida-ayuda"
-                  className="border-signal bg-signal/10 text-ink hover:bg-signal/20"
-                >
-                  Revisar tarifa
-                </Button>
-                <p id="tarifa-invalida-ayuda" className="font-body text-xs leading-5 text-danger font-medium">
-                  Tu tarifa cambió. Revísala en el paso 1 antes de confirmar.
-                </p>
-              </>
-            ) : (
-              <>
-                <Button
-                  onClick={enviarSolicitud}
-                  disabled={enviando || cargandoSesion || !aceptaPoliticasPagoCancelacion}
-                  aria-disabled={enviando || cargandoSesion || !aceptaPoliticasPagoCancelacion}
-                  aria-describedby={!aceptaPoliticasPagoCancelacion ? "confirmar-solicitud-ayuda" : undefined}
-                >
-                  {enviando
-                    ? TEXTOS_CARGANDO.enviando
-                    : cargandoSesion
-                      ? "Validando sesión…"
-                      : "Continuar al pago"}
-                </Button>
-                {!aceptaPoliticasPagoCancelacion ? (
-                  <p id="confirmar-solicitud-ayuda" className="font-body text-xs leading-5 text-ink/65">
-                    Acepta la política arriba para continuar.
-                  </p>
-                ) : null}
-              </>
-            )}
-            <p className="text-center font-body text-xs leading-4 text-ink/40">Visa · Mastercard · Amex · SPEI · 3-D Secure</p>
-           </div>
-         </div>
-       </section>
+
      </div>
    );
 }

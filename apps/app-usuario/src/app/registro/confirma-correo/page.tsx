@@ -387,7 +387,7 @@ function ContenidoConfirmaCorreo() {
 
   if (!correo) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[#eef2f7] p-3 font-sans">
+      <div className="flex min-h-dvh items-center justify-center bg-[#eef2f7] p-3 font-sans">
         <div className="relative flex h-[800px] max-h-[calc(100dvh-2rem)] w-full max-w-[420px] flex-col overflow-hidden rounded-[36px] border border-[#e9eef3] bg-white shadow-[0_25px_60px_rgba(0,0,0,0.15),0_0_0_1px_rgba(0,0,0,0.02)]">
           {/* Status bar */}
           <div className="flex items-center justify-between border-b border-[#f0f2f5] bg-white px-6 py-3.5 text-sm font-semibold text-[#1c1e21] shrink-0">
@@ -439,7 +439,7 @@ function ContenidoConfirmaCorreo() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-[#eef2f7] p-3 font-sans">
+    <div className="flex min-h-dvh items-center justify-center bg-[#eef2f7] p-3 font-sans">
       <style
         dangerouslySetInnerHTML={{
           __html: `
