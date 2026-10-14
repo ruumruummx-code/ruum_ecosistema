@@ -12,10 +12,12 @@ import { botonAzul, botonContorno } from "./experiencia-publica";
 
 type UsuarioRow = Database["public"]["Tables"]["usuarios"]["Row"];
 type PasaporteRow = Database["public"]["Views"]["pasaporte_digital"]["Row"];
+type VehiculoRow = Database["public"]["Tables"]["vehiculos"]["Row"];
 
 interface ContextoSesion {
   usuario: UsuarioRow | null;
   traslados: PasaporteRow[];
+  vehiculos: VehiculoRow[];
   conductorFotoUrl: string | null;
   error?: string | null;
 }
@@ -23,18 +25,22 @@ interface ContextoSesion {
 async function obtenerContextoSesion(): Promise<ContextoSesion> {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-  if (!url || !anonKey) return { usuario: null, traslados: [], conductorFotoUrl: null, error: "config_error" };
+  if (!url || !anonKey) return { usuario: null, traslados: [], vehiculos: [], conductorFotoUrl: null, error: "config_error" };
 
   try {
     const { crearClienteServidor } = await import("../lib/supabase-server");
     const { obtenerUsuarioActual, listarTrasladosDeUsuario } = await import("@ruum/api/services");
     const { obtenerFotoPerfilConductor } = await import("@ruum/api/drivers");
+    const { listarVehiculosDeUsuario } = await import("@ruum/api/vehicles");
 
     const cliente = await crearClienteServidor();
     const usuario = await obtenerUsuarioActual(cliente);
-    if (!usuario) return { usuario: null, traslados: [], conductorFotoUrl: null };
+    if (!usuario) return { usuario: null, traslados: [], vehiculos: [], conductorFotoUrl: null };
 
-    const traslados = await listarTrasladosDeUsuario(cliente, usuario.id);
+    const [traslados, vehiculos] = await Promise.all([
+      listarTrasladosDeUsuario(cliente, usuario.id),
+      listarVehiculosDeUsuario(cliente, usuario.id).catch(() => []),
+    ]);
     const viajeActivo = obtenerViajeActivo(traslados);
     let conductorFotoUrl: string | null = null;
 
@@ -48,12 +54,12 @@ async function obtenerContextoSesion(): Promise<ContextoSesion> {
       }
     }
 
-    return { usuario, traslados, conductorFotoUrl, error: null };
+    return { usuario, traslados, vehiculos, conductorFotoUrl, error: null };
   } catch (err) {
     console.error("[app-usuario:obtenerContextoSesion] supabase_error", {
       message: err instanceof Error ? err.message : String(err),
     });
-    return { usuario: null, traslados: [], conductorFotoUrl: null, error: "supabase_error" };
+    return { usuario: null, traslados: [], vehiculos: [], conductorFotoUrl: null, error: "supabase_error" };
   }
 }
 
@@ -63,7 +69,7 @@ export default async function PaginaInicio({
   searchParams?: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const params = (await searchParams) ?? {};
-  const { usuario, traslados, conductorFotoUrl, error } = await obtenerContextoSesion();
+  const { usuario, traslados, vehiculos, conductorFotoUrl, error } = await obtenerContextoSesion();
   const forzarLanding = params.landing === "true";
 
   // C-08: no silenciar error de Supabase — mostrar Aviso en lugar de landing/redirect confuso
@@ -109,7 +115,12 @@ export default async function PaginaInicio({
         <NavegacionUsuario variante="claro" nombreUsuario={usuario.nombre} />
         <MobileShell variant="compact" navInferiorVisible={true}>
           <div aria-live="polite">
-            <InicioUsuario usuario={usuario} traslados={traslados} conductorFotoUrl={conductorFotoUrl} />
+            <InicioUsuario
+              usuario={usuario}
+              traslados={traslados}
+              conductorFotoUrl={conductorFotoUrl}
+              vehiculos={vehiculos}
+            />
           </div>
         </MobileShell>
       </>

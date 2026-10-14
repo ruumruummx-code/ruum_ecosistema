@@ -13,17 +13,22 @@ vi.mock("next/image", () => ({
 }));
 
 describe("NavegacionUsuario", () => {
-  it("evita duplicar el saludo y expone acciones semánticas de preferencias y soporte", () => {
-    render(<NavegacionUsuario variante="claro" nombreUsuario="LUIS Hernández" />);
+  it("muestra el logo RR, identidad Ruum Ruum, subtipo Usuario y acciones de notificaciones y preferencias", () => {
+    render(<NavegacionUsuario variante="claro" nombreUsuario="LUIS Hernández" notificacionesCount={2} />);
+
+    const header = screen.getByRole("banner");
+    expect(within(header).getByText("RR")).toBeInTheDocument();
+    expect(within(header).getByText("Ruum Ruum")).toBeInTheDocument();
+    expect(within(header).getByText("Usuario")).toBeInTheDocument();
+
+    const acciones = within(header).getByRole("navigation", { name: "Acciones del usuario" });
+    expect(within(acciones).getByRole("link", { name: /Notificaciones/i })).toHaveAttribute("href", "/mis-viajes");
+    expect(within(acciones).getByText("2")).toBeInTheDocument();
+    expect(within(acciones).getByRole("link", { name: "Preferencias" })).toHaveAttribute("href", "/cuenta/preferencias");
 
     const inferior = screen.getByRole("navigation", { name: "Navegación principal" });
-    expect(within(inferior).getByRole("link", { name: "Solicitar" })).toHaveAttribute("href", "/viajes/nuevo");
-    expect(within(inferior).getByRole("link", { name: "Soporte" })).toHaveAttribute("href", "/soporte");
-    const header = screen.getByRole("banner");
-    const acciones = within(header).getByRole("navigation", { name: "Acciones del usuario" });
-
-    expect(within(header).getByText("Ruum Ruum")).toBeInTheDocument();
-    expect(within(acciones).getByRole("link", { name: "Preferencias" })).toHaveAttribute("href", "/cuenta/preferencias");
-    expect(within(acciones).getByRole("link", { name: "Soporte" })).toHaveAttribute("href", "/soporte");
+    expect(within(inferior).getByRole("link", { name: "Inicio" })).toHaveAttribute("href", "/");
+    expect(within(inferior).getByRole("link", { name: "Traslados" })).toHaveAttribute("href", "/mis-viajes");
+    expect(within(inferior).getByRole("link", { name: "Cuenta" })).toHaveAttribute("href", "/cuenta");
   });
 });
