@@ -143,4 +143,76 @@ describe("CuentaCliente — Sistema móvil unificado", () => {
     expect(mockPush).toHaveBeenCalledWith("/");
     expect(mockRefresh).toHaveBeenCalled();
   });
+
+  it("inicia con todos los acordeones cerrados por defecto manteniendo perfil y vehículos visibles", () => {
+    render(
+      <CuentaCliente
+        correoRegistro="registro@ruum.test"
+        usuario={mockUsuario as Usuario}
+        vehiculos={mockVehiculos as Vehiculo[]}
+        totalTraslados={15}
+      />
+    );
+
+    // Héroe de perfil y vehículos visibles permanentemente
+    expect(screen.getByRole("region", { name: "Perfil" })).toBeInTheDocument();
+    expect(screen.getByRole("list", { name: "Mis vehículos" })).toBeInTheDocument();
+
+    // 4 botones de acordeón cerrados por defecto
+    const btnPerfil = screen.getByRole("button", { name: /perfil/i });
+    const btnNotificaciones = screen.getByRole("button", { name: /notificaciones/i });
+    const btnSoporte = screen.getByRole("button", { name: /soporte/i });
+    const btnLegal = screen.getByRole("button", { name: /legal y cuenta/i });
+
+    expect(btnPerfil).toHaveAttribute("aria-expanded", "false");
+    expect(btnNotificaciones).toHaveAttribute("aria-expanded", "false");
+    expect(btnSoporte).toHaveAttribute("aria-expanded", "false");
+    expect(btnLegal).toHaveAttribute("aria-expanded", "false");
+
+    // Todos los chevrons con rotación inicial 0°
+    const chevrons = screen.getAllByTestId("chevron-acordeon");
+    expect(chevrons).toHaveLength(4);
+    chevrons.forEach((chevron) => {
+      expect(chevron).toHaveClass("rotate-0");
+      expect(chevron).not.toHaveClass("rotate-90");
+    });
+  });
+
+  it("expande y contrae acordeones al hacer clic rotando el chevron 90 grados", async () => {
+    const user = userEvent.setup();
+    render(
+      <CuentaCliente
+        usuario={mockUsuario as Usuario}
+        vehiculos={mockVehiculos as Vehiculo[]}
+        totalTraslados={15}
+      />
+    );
+
+    const btnPerfil = screen.getByRole("button", { name: /perfil/i });
+    const chevronPerfil = btnPerfil.querySelector('[data-testid="chevron-acordeon"]');
+
+    expect(btnPerfil).toHaveAttribute("aria-expanded", "false");
+    expect(chevronPerfil).toHaveClass("rotate-0");
+
+    // Abrir Perfil
+    await user.click(btnPerfil);
+    expect(btnPerfil).toHaveAttribute("aria-expanded", "true");
+    expect(chevronPerfil).toHaveClass("rotate-90");
+
+    // Abrir Soporte independientemente
+    const btnSoporte = screen.getByRole("button", { name: /soporte/i });
+    const chevronSoporte = btnSoporte.querySelector('[data-testid="chevron-acordeon"]');
+    await user.click(btnSoporte);
+    expect(btnSoporte).toHaveAttribute("aria-expanded", "true");
+    expect(chevronSoporte).toHaveClass("rotate-90");
+    // Perfil permanece abierto
+    expect(btnPerfil).toHaveAttribute("aria-expanded", "true");
+
+    // Cerrar Perfil
+    await user.click(btnPerfil);
+    expect(btnPerfil).toHaveAttribute("aria-expanded", "false");
+    expect(chevronPerfil).toHaveClass("rotate-0");
+    // Soporte sigue abierto
+    expect(btnSoporte).toHaveAttribute("aria-expanded", "true");
+  });
 });
