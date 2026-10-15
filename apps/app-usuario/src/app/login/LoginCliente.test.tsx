@@ -1,4 +1,6 @@
 /** @vitest-environment jsdom */
+import fs from "node:fs";
+import path from "node:path";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { cleanup, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
@@ -55,5 +57,47 @@ describe("LoginCliente", () => {
     await user.click(screen.getByRole("button", { name: "Iniciar sesión" }));
     await waitFor(() => expect(mocks.push).toHaveBeenCalledWith("/viajes/nuevo"));
     expect(mocks.refresh).toHaveBeenCalled();
+  });
+
+  it("cumple estrictamente con el enfoque mobile-first y no-scroll (100dvh y overflow: hidden)", () => {
+    const { container } = render(<LoginCliente motivo={null} siguiente="/" />);
+
+    // El contenedor principal debe implementar 100dvh (Dynamic Viewport Height) y overflow: hidden
+    const mainContainer = container.querySelector("main");
+    expect(mainContainer).not.toBeNull();
+    expect(mainContainer?.className).toContain("h-dvh");
+    expect(mainContainer?.className).toContain("overflow-hidden");
+    expect(mainContainer?.className).toContain("login-usuario");
+    expect(mainContainer?.className).toContain("login-container");
+    expect(mainContainer?.style.height).toBe("100dvh");
+    expect(mainContainer?.style.overflow).toBe("hidden");
+
+    // Prohibido usar 100vh
+    expect(mainContainer?.className).not.toContain("100vh");
+    expect(mainContainer?.style.height).not.toBe("100vh");
+
+    // El logotipo debe definirse reducido por defecto en móvil (h-9 / 36px) y escalar en escritorio (md:h-16 / 64px)
+    const logoContainer = container.querySelector(".login-usuario__brand");
+    expect(logoContainer).not.toBeNull();
+    expect(logoContainer?.className).toContain("login-logo");
+    expect(logoContainer?.className).toContain("h-9");
+    expect(logoContainer?.className).toContain("md:h-16");
+    expect(logoContainer?.className).toContain("w-auto");
+  });
+
+  it("valida que la hoja de estilos globals.css contenga las reglas base mobile-first y media query de escritorio", () => {
+    const cssPath = path.resolve(__dirname, "../globals.css");
+    const cssContent = fs.readFileSync(cssPath, "utf-8");
+
+    // Contención 100dvh y overflow: hidden sin usar 100vh
+    expect(cssContent).toMatch(/\.login-usuario[\s\S]*?height:\s*100dvh;/);
+    expect(cssContent).toMatch(/\.login-usuario[\s\S]*?overflow:\s*hidden;/);
+    expect(cssContent).not.toMatch(/\.login-usuario[\s\S]*?height:\s*100vh;/);
+
+    // Enfoque Mobile-First obligatorio: estilos base con logo reducido por defecto (36px)
+    expect(cssContent).toMatch(/\.login-usuario__brand[\s\S]*?height:\s*36px/);
+
+    // Adaptación a Escritorio: media query incremental (min-width: 768px)
+    expect(cssContent).toMatch(/@media\s*\(\s*min-width:\s*768px\s*\)[\s\S]*?\.login-usuario__brand[\s\S]*?height:\s*64px/);
   });
 });

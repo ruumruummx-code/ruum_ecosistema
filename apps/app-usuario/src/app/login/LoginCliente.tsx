@@ -144,10 +144,18 @@ export function LoginCliente({ motivo, siguiente, aviso }: LoginClienteProps) {
 
   if (!tieneSupabaseConfigurado()) {
     return (
-      <MobileShell variant="compact" padding="md">
-        <div className="flex min-h-[80vh] flex-col items-center justify-center text-center">
-          <LogoRuum variante="simbolo" className="mx-auto" />
-          <h1 className="mt-8 text-2xl font-bold tracking-tight text-[#0a2342] dark:text-[#f6f8fb]">
+      <MobileShell
+        as="main"
+        variant="compact"
+        padding="md"
+        className="login-usuario login-container h-dvh max-h-dvh overflow-hidden !pb-0"
+        style={{ height: "100dvh", maxHeight: "100dvh", overflow: "hidden" }}
+      >
+        <div className="flex min-h-[80dvh] flex-col items-center justify-center text-center">
+          <div className="login-usuario__brand login-logo mx-auto h-9 w-auto md:h-16" aria-label="Ruum Ruum">
+            <LogoRuum variante="simbolo" className="mx-auto" />
+          </div>
+          <h1 className="mt-6 text-2xl font-bold tracking-tight text-[#0a2342] dark:text-[#f6f8fb]">
             Accede a tu cuenta
           </h1>
           <div className="mt-6 w-full max-w-sm">
@@ -161,37 +169,48 @@ export function LoginCliente({ motivo, siguiente, aviso }: LoginClienteProps) {
   }
 
   return (
-    <MobileShell variant="compact" padding="md" conFondoCanvas>
-      {/* Contenedor principal de acceso */}
-      <div className="flex flex-col pt-4 sm:pt-8">
+    <MobileShell
+      as="main"
+      variant="compact"
+      padding="none"
+      conFondoCanvas
+      className="login-usuario login-container h-dvh max-h-dvh overflow-hidden !pb-0"
+      contentClassName="h-full justify-between sm:justify-center sm:gap-6"
+      style={{ height: "100dvh", maxHeight: "100dvh", overflow: "hidden" }}
+    >
+      {/* Contenedor principal de acceso con contención no-scroll */}
+      <div className="mx-auto flex h-full w-full max-w-[480px] flex-col justify-between px-4 py-3 sm:justify-center sm:gap-6 sm:px-6 sm:py-8">
         {/* Marca y bienvenida */}
-        <div className="flex flex-col items-center pb-6 text-center">
-          <div className="mx-auto" aria-label="Ruum Ruum">
+        <div className="flex flex-col items-center pb-1 text-center sm:pb-5">
+          <div
+            className="login-usuario__brand login-logo mx-auto h-9 w-auto md:h-16"
+            aria-label="Ruum Ruum"
+          >
             <LogoRuum variante="simbolo" className="mx-auto" />
           </div>
-          <h1 className="mt-4 text-[24px] font-extrabold tracking-tight text-[#0a2342] dark:text-[#f6f8fb] leading-tight sm:text-[26px]">
+          <h1 className="mt-1.5 text-[20px] font-extrabold tracking-tight text-[#0a2342] dark:text-[#f6f8fb] leading-tight sm:mt-3 sm:text-[26px]">
             Bienvenido de nuevo
           </h1>
-          <p className="mt-1 text-[13.5px] font-medium text-[#4e5f80] dark:text-[#a8b5cc] leading-normal">
+          <p className="mt-0.5 text-[12px] font-medium text-[#4e5f80] dark:text-[#a8b5cc] leading-normal sm:mt-1 sm:text-[13.5px]">
             Inicia sesión para gestionar tus traslados
           </p>
         </div>
 
         {/* Mensajes de aviso */}
         {aviso && (
-          <div className="mb-4" role="status">
+          <div className="mb-2" role="status">
             <Aviso tono="success">{aviso}</Aviso>
           </div>
         )}
         {motivo === "email_confirmation" && (
-          <div className="mb-4" role="status">
+          <div className="mb-2" role="status">
             <Aviso tono="atencion">
               Para solicitar tu primer traslado debes confirmar tu correo e iniciar sesión.
             </Aviso>
           </div>
         )}
         {motivo === "authentication_required" && (
-          <div className="mb-4" role="status">
+          <div className="mb-2" role="status">
             <Aviso tono="atencion">
               Inicia sesión para solicitar un traslado. Si acabas de registrarte, confirma primero tu correo.
             </Aviso>
@@ -200,12 +219,12 @@ export function LoginCliente({ motivo, siguiente, aviso }: LoginClienteProps) {
 
         {/* Tarjeta de Formulario */}
         <MobileCard padding="md" elevated>
-          <form onSubmit={iniciarSesion} noValidate className="flex flex-col gap-4">
+          <form onSubmit={iniciarSesion} noValidate className="flex flex-col gap-3 sm:gap-4">
             {/* Campo: Correo electrónico */}
-            <div className="flex flex-col gap-1.5">
+            <div className="flex flex-col gap-1 sm:gap-1.5">
               <label
                 htmlFor="login-email"
-                className="text-[12px] font-semibold uppercase tracking-wider text-[#4e5f80] dark:text-[#a8b5cc]"
+                className="text-[11.5px] font-semibold uppercase tracking-wider text-[#4e5f80] dark:text-[#a8b5cc] sm:text-[12px]"
               >
                 Correo electrónico
               </label>
@@ -251,17 +270,17 @@ export function LoginCliente({ motivo, siguiente, aviso }: LoginClienteProps) {
             </div>
 
             {/* Campo: Contraseña */}
-            <div className="flex flex-col gap-1.5">
+            <div className="flex flex-col gap-1 sm:gap-1.5">
               <div className="flex items-center justify-between">
                 <label
                   htmlFor="login-password"
-                  className="text-[12px] font-semibold uppercase tracking-wider text-[#4e5f80] dark:text-[#a8b5cc]"
+                  className="text-[11.5px] font-semibold uppercase tracking-wider text-[#4e5f80] dark:text-[#a8b5cc] sm:text-[12px]"
                 >
                   Contraseña
                 </label>
                 <Link
                   href="/recuperar-password"
-                  className="text-[12.5px] font-bold text-[#104ca0] hover:underline dark:text-[#6ba8ff]"
+                  className="text-[12px] font-bold text-[#104ca0] hover:underline dark:text-[#6ba8ff] sm:text-[12.5px]"
                 >
                   ¿La olvidaste?
                 </Link>
@@ -321,7 +340,7 @@ export function LoginCliente({ motivo, siguiente, aviso }: LoginClienteProps) {
             )}
 
             {/* Botón Iniciar sesión (MobileButton 52px) */}
-            <div className="mt-2">
+            <div className="mt-1 sm:mt-2">
               <MobileButton
                 type="submit"
                 variant="primary"
@@ -335,14 +354,14 @@ export function LoginCliente({ motivo, siguiente, aviso }: LoginClienteProps) {
         </MobileCard>
 
         {/* Registro y bienvenida */}
-        <div className="mt-6 flex flex-col gap-2 text-center text-[13.5px] font-medium text-[#4e5f80] dark:text-[#a8b5cc]">
+        <div className="mt-3 flex flex-col gap-1.5 text-center text-[13px] font-medium text-[#4e5f80] dark:text-[#a8b5cc] sm:mt-6 sm:gap-2 sm:text-[13.5px]">
           <p>
             ¿No tienes cuenta?
             <Link href="/registro" className="ml-1 font-bold text-[#0a2342] hover:underline dark:text-[#f6f8fb]">
               Regístrate gratis
             </Link>
           </p>
-          <p className="text-[12.5px]">
+          <p className="text-[12px] sm:text-[12.5px]">
             ¿Primera vez aquí?
             <Link href="/onboarding" className="ml-1 font-bold text-[#104ca0] hover:underline dark:text-[#6ba8ff]">
               Conoce cómo funciona Ruum
@@ -351,7 +370,7 @@ export function LoginCliente({ motivo, siguiente, aviso }: LoginClienteProps) {
         </div>
 
         {/* Garantías de seguridad */}
-        <div className="mt-6 flex items-center justify-center gap-6 text-[12px] font-semibold text-[#4e5f80] dark:text-[#a8b5cc]" aria-label="Garantías de seguridad">
+        <div className="mt-2.5 flex items-center justify-center gap-5 text-[11.5px] font-semibold text-[#4e5f80] dark:text-[#a8b5cc] sm:mt-6 sm:gap-6 sm:text-[12px]" aria-label="Garantías de seguridad">
           <span className="inline-flex items-center gap-1.5">
             <span className="text-emerald-600 dark:text-emerald-400"><IconoEscudoCheck /></span>
             Datos protegidos
@@ -363,7 +382,7 @@ export function LoginCliente({ motivo, siguiente, aviso }: LoginClienteProps) {
         </div>
 
         {/* Términos y privacidad */}
-        <p className="mt-8 text-center text-[11.5px] font-medium leading-relaxed text-[#8b9bb0] dark:text-[#6b7a99]">
+        <p className="mt-2 text-center text-[11px] font-medium leading-relaxed text-[#8b9bb0] dark:text-[#6b7a99] sm:mt-6 sm:text-[11.5px]">
           Al continuar, aceptas nuestros{" "}
           <Link href="/legal/terminos" className="font-semibold text-[#104ca0] hover:underline dark:text-[#6ba8ff]">
             Términos y condiciones

@@ -1,4 +1,4 @@
-import type { ElementType, ReactNode } from "react";
+import type { CSSProperties, ElementType, ReactNode } from "react";
 
 export type MobileShellVariant = "compact" | "wide";
 export type MobileShellPadding = "none" | "sm" | "md" | "lg";
@@ -11,6 +11,8 @@ export interface MobileShellProps {
   navInferiorVisible?: boolean;
   as?: ElementType;
   className?: string;
+  contentClassName?: string;
+  style?: CSSProperties;
 }
 
 const ANCHO_VARIANTE: Record<MobileShellVariant, string> = {
@@ -33,9 +35,12 @@ export function MobileShell({
   navInferiorVisible = false,
   as: Component = "div",
   className = "",
+  contentClassName = "",
+  style,
 }: MobileShellProps) {
   return (
     <Component
+      style={style}
       className={[
         "min-h-dvh w-full transition-colors",
         conFondoCanvas
@@ -50,7 +55,8 @@ export function MobileShell({
           "w-full mx-auto flex flex-col",
           ANCHO_VARIANTE[variant],
           PADDING_VARIANTE[padding],
-        ].join(" ")}
+          contentClassName,
+        ].filter(Boolean).join(" ")}
       >
         {children}
       </div>

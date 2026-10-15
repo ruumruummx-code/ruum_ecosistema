@@ -1534,31 +1534,66 @@ summary:focus-visible {
   }
 }
 
-/* Login usuario: presentación clara inspirada en el mockup móvil. */
-.login-usuario {
+/* Login usuario: contención estricta no-scroll y viewport dinámico (100dvh) */
+.login-usuario,
+.login-container {
   --login-navy: #0d2b5e;
   --login-muted: #5f7192;
   --login-line: #dce8f5;
   width: 100%;
+  height: 100dvh;
+  max-height: 100dvh;
+  overflow: hidden;
   color: var(--login-navy);
 }
 
-.login-usuario__brand {
+/* Enfoque Mobile-First obligatorio: estilos base (fuera de cualquier media query) optimizados para móvil con tamaño reducido por defecto */
+.login-usuario__brand,
+.login-logo {
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 88px;
+  min-height: 36px;
+  height: 36px;
 }
 
-.login-usuario__brand > span {
-  width: 112px;
-  height: 88px;
+.login-usuario__brand > span,
+.login-logo > span {
+  width: auto;
+  height: 36px;
 }
 
-.login-usuario__brand img {
-  width: 112px !important;
-  height: 88px !important;
+.login-usuario__brand img,
+.login-usuario__brand svg,
+.login-logo img,
+.login-logo svg {
+  width: auto !important;
+  height: 36px !important;
+  max-height: 36px;
   object-fit: contain;
+}
+
+/* Adaptación a Escritorio: media query incremental (min-width: 768px) para escalar el logotipo hacia arriba en tabletas y escritorio */
+@media (min-width: 768px) {
+  .login-usuario__brand,
+  .login-logo {
+    min-height: 64px;
+    height: 64px;
+  }
+
+  .login-usuario__brand > span,
+  .login-logo > span {
+    width: auto;
+    height: 64px;
+  }
+
+  .login-usuario__brand img,
+  .login-usuario__brand svg,
+  .login-logo img,
+  .login-logo svg {
+    height: 64px !important;
+    max-height: 64px;
+  }
 }
 
 .login-usuario__card {
@@ -1639,7 +1674,7 @@ summary:focus-visible {
 
 @media (min-height: 800px) {
   .login-usuario__benefits {
-    padding-top: clamp(2.5rem, 8vh, 7rem);
+    padding-top: clamp(2.5rem, 8dvh, 7rem);
   }
 }
 
