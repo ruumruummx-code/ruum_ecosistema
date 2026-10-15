@@ -21,6 +21,20 @@ const nextConfig: NextConfig = {
     remotePatterns: [...IMAGES_REMOTE_PATTERNS],
     formats: [...IMAGE_FORMATS],
   },
+  async redirects() {
+    return [
+      {
+        source: "/home",
+        destination: "/",
+        permanent: false,
+      },
+      {
+        source: "/dashboard",
+        destination: "/",
+        permanent: false,
+      },
+    ];
+  },
   async headers() {
     const isProd = process.env.NODE_ENV === "production";
 

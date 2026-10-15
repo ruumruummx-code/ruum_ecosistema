@@ -43,7 +43,8 @@ export interface LogoMarcaProps {
 }
 
 const SRC = {
-  horizontal: "/imagenes/ruum-logo-header.png",
+  horizontal: "/imagenes/ruum-logo.svg",
+  "horizontal-dark": "/imagenes/ruum-logo-dark.svg",
   vertical: "/imagenes/ruum-logo-header.png",
   simbolo: "/imagenes/ruum-logo-simbolo.png",
   avatar: "/imagenes/ruum-logo-avatar.png",
@@ -76,13 +77,34 @@ function ImagenAdaptativa({
     height: variante === "horizontal" ? Math.round(tamano * 0.326) : tamano,
     decoding: eager ? "sync" : "async",
   };
-  // Lockups horizontal/vertical: PNG navy en claro, versión blanca en oscuro.
-  if (variante === "horizontal" || variante === "vertical") {
+  // Lockups horizontal/vertical: SVG/PNG navy en claro, versión blanca en oscuro.
+  if (variante === "horizontal") {
     return (
       <span className={`inline-flex shrink-0 items-center ${className ?? ""}`}>
         <img
           {...base}
           src={SRC.horizontal}
+          className="ruum-logo-light block h-auto w-auto object-contain"
+          style={{ height: `${tamano}px`, width: "auto", maxWidth: "min(68vw, 320px)" }}
+        />
+        <img
+          {...base}
+          alt=""
+          aria-hidden
+          role="presentation"
+          src={SRC["horizontal-dark"]}
+          className="ruum-logo-dark h-auto w-auto object-contain"
+          style={{ height: `${tamano}px`, width: "auto", maxWidth: "min(68vw, 320px)" }}
+        />
+      </span>
+    );
+  }
+  if (variante === "vertical") {
+    return (
+      <span className={`inline-flex shrink-0 items-center ${className ?? ""}`}>
+        <img
+          {...base}
+          src={SRC.vertical}
           className="ruum-logo-light block h-auto w-auto object-contain"
           style={{ height: `${tamano}px`, width: "auto", maxWidth: "min(68vw, 320px)" }}
         />

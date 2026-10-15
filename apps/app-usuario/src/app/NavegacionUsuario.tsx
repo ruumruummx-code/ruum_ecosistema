@@ -2,6 +2,7 @@
 
 import React, { useEffect, useRef } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 
 type VarianteNavegacion = "claro" | "oscuro";
@@ -155,23 +156,31 @@ export function NavegacionUsuario({
         className="user-v2-shell-header user-v2-scope"
       >
         <div className="user-v2-shell-inner flex items-center justify-between gap-3 px-4 py-3 sm:px-6">
-          {/* Logotipo e Identidad: "RR" en cuadro oscuro + Ruum Ruum + Usuario */}
+          {/* Logotipo e Identidad oficial de la marca: SVG responsive con soporte claro/oscuro */}
           <Link
             href="/"
-            className="group flex shrink-0 cursor-pointer select-none items-center gap-2.5 rounded-2xl transition duration-200 hover:opacity-90 focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-[var(--user-color-action)]"
-            aria-label="Ir al inicio de Ruum Ruum"
+            className="group flex shrink-0 cursor-pointer select-none items-center rounded-xl transition duration-200 hover:opacity-90 focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-[var(--user-color-action)]"
+            aria-label="Ruum Ruum usuario"
           >
-            <div className="flex size-9.5 shrink-0 items-center justify-center rounded-xl bg-[#0b1e32] text-white font-extrabold text-sm tracking-wider shadow-xs dark:bg-white dark:text-[#0b1e32]">
-              RR
-            </div>
-            <div className="flex flex-col text-left">
-              <span className="font-display text-base font-extrabold leading-tight text-[var(--user-color-primary)]">
-                Ruum Ruum
-              </span>
-              <span className="text-[11px] font-semibold text-[var(--user-color-muted)] leading-tight">
-                Usuario
-              </span>
-            </div>
+            <Image
+              src="/imagenes/ruum-logo.svg"
+              alt="Ruum Ruum usuario"
+              width={186}
+              height={40}
+              priority
+              unoptimized
+              className="ruum-logo-light h-8 w-auto object-contain md:h-10"
+            />
+            <Image
+              src="/imagenes/ruum-logo-dark.svg"
+              alt=""
+              aria-hidden
+              width={186}
+              height={40}
+              priority
+              unoptimized
+              className="ruum-logo-dark h-8 w-auto object-contain md:h-10"
+            />
           </Link>
 
           {/* Título en vistas secundarias / desktop */}
