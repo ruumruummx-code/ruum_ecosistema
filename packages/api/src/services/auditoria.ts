@@ -47,7 +47,7 @@ export async function registrarEvento(
     evento,
     actor,
     actor_id: actorId,
-    datos: sanitizarDatosAuditoria(datosConTraza) as Json
+    datos: (sanitizarDatosAuditoria(datosConTraza) as Json) ?? {}
   });
 
   if (error) throw error;

@@ -24,11 +24,11 @@ const PREFS_DEFAULT = {
   notificar_documentos: true,
   notificar_ganancias: true,
   notificar_promociones: false,
-  Traslados_locales: true,
-  Traslados_foraneos: true,
-  Traslados_nocturnos: false,
-  Traslados_empresariales: true,
-  Traslados_personales: true
+  traslados_locales: true,
+  traslados_foraneos: true,
+  traslados_nocturnos: false,
+  traslados_empresariales: true,
+  traslados_personales: true
 };
 
 type OpcionConfig = {
@@ -101,31 +101,31 @@ const SECCIONES_NOTIFICACIONES: { titulo: string; opciones: OpcionConfig[] }[] =
 
 const OPCIONES_Traslados: OpcionConfig[] = [
   {
-    clave: "Traslados_locales",
+    clave: "traslados_locales",
     titulo: "Traslados locales",
     subtitulo: "Traslados dentro de la zona metropolitana primaria",
     icono: "🏙️"
   },
   {
-    clave: "Traslados_foraneos",
+    clave: "traslados_foraneos",
     titulo: "Traslados foráneos",
     subtitulo: "Traslados interurbanos y trayectos de larga distancia",
     icono: "🛣️"
   },
   {
-    clave: "Traslados_nocturnos",
+    clave: "traslados_nocturnos",
     titulo: "Servicios nocturnos (22:00 a 06:00)",
     subtitulo: "Requiere activación voluntaria y autorización operativa",
     icono: "🌌"
   },
   {
-    clave: "Traslados_empresariales",
+    clave: "traslados_empresariales",
     titulo: "Traslados corporativos / empresariales",
     subtitulo: "Servicios ejecutivos para cuentas de empresa",
     icono: "🏢"
   },
   {
-    clave: "Traslados_personales",
+    clave: "traslados_personales",
     titulo: "Traslados personales de usuario final",
     subtitulo: "Servicios reservados directamente por particulares",
     icono: "👤"
@@ -235,11 +235,11 @@ export default function PaginaPreferenciasCuenta() {
 
   const preferenciasActivas = useMemo(
     () => [
-      prefs.Traslados_locales && "Locales",
-      prefs.Traslados_foraneos && "Foráneos",
-      prefs.Traslados_nocturnos && "Nocturnos autorizados",
-      prefs.Traslados_empresariales && "Empresariales",
-      prefs.Traslados_personales && "Personales"
+      prefs.traslados_locales && "Locales",
+      prefs.traslados_foraneos && "Foráneos",
+      prefs.traslados_nocturnos && "Nocturnos autorizados",
+      prefs.traslados_empresariales && "Empresariales",
+      prefs.traslados_personales && "Personales"
     ].filter(Boolean) as string[],
     [prefs]
   );

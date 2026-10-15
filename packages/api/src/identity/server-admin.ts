@@ -70,7 +70,7 @@ export async function registrarAuditoriaInvitacionAdminService(cliente: Cliente,
       rol_operativo: params.rolObjetivo,
       correo: "[REDACTED]",
       auth_user_id: "[REDACTED]"
-    } as Json
+    } as NonNullable<Json>
   });
   if (error) throw error;
 }
