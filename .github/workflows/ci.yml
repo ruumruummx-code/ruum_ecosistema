@@ -191,9 +191,11 @@ jobs:
         with:
           node-version-file: .nvmrc
           cache: pnpm
+      # Versión pineada (no `latest`): resolver "latest" pega al API de
+      # GitHub y tumba el job con rate-limit. Actualizar deliberadamente.
       - uses: supabase/setup-cli@v1
         with:
-          version: latest
+          version: 2.119.0
       - run: pnpm install --frozen-lockfile
       - run: supabase start
       - run: pnpm test:sql
@@ -211,9 +213,10 @@ jobs:
         with:
           node-version-file: .nvmrc
           cache: pnpm
+      # Misma versión pineada que el job `sql` (ver comentario allí).
       - uses: supabase/setup-cli@v1
         with:
-          version: latest
+          version: 2.119.0
       - run: pnpm install --frozen-lockfile
       - run: supabase start
       - run: supabase gen types typescript --local > packages/shared/src/types/supabase.ts
