@@ -47,3 +47,8 @@ if (typeof window !== "undefined") {
   });
 }
 
+// Secreto de prueba para firma criptográfica de tokens telefónicos
+process.env.PHONE_VERIFY_SECRET =
+  process.env.PHONE_VERIFY_SECRET || "default-secret-test-environment-32-chars-minimum";
+
+

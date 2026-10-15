@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { NextRequest } from "next/server";
 import {
   __clearCspRateLimitForTest,
@@ -52,6 +52,21 @@ describe("A2 rateLimitConVentana sin identificador — fail-open por dimension",
     for (let i = 0; i < 20; i += 1) {
       const r = await rateLimitConVentana(null, "prueba-nula", 2, 60_000);
       expect(r.allowed).toBe(true);
+    }
+  });
+});
+
+describe("Fix C1: fail-closed en produccion sin Redis", () => {
+  it("deniega la peticion si NODE_ENV es production y Redis no esta configurado", async () => {
+    __clearCspRateLimitForTest();
+    vi.stubEnv("NODE_ENV", "production");
+    try {
+      const r = await rateLimitConVentana("1.2.3.4", "prueba-prod-sin-redis", 10, 60_000);
+      expect(r.allowed).toBe(false);
+      expect(r.retryAfterSec).toBe(60);
+    } finally {
+      vi.unstubAllEnvs();
+      __clearCspRateLimitForTest();
     }
   });
 });

@@ -46,6 +46,7 @@ import {
   IconoAuto,
   IconoTarjeta,
 } from"./piezas-pasaporte";
+import { resumirPagoPasaporte } from"./resumen-pago";
 
 import type { DatosTraslado } from"./obtenerDatosTraslado";
 
@@ -141,50 +142,14 @@ export function PasaporteDigitalSegmentado({
   const duracionEstimada = formatoDuracion(pasaporte.tiempo_estimado_horas);
   const distanciaTexto =
     pasaporte.distancia_km != null ?`${Number(pasaporte.distancia_km).toLocaleString("es-MX")} km` : null;
-  const metodoPago =
-    pagos.length > 0 && pagos[0]?.metodo
-      ? humanizar(String(pagos[0].metodo))
-      : (humanizar(pasaporte.tipo_pago) ??"Por definir");
-  const totalPagosCompletados = pagos
-    .filter((p) => p.estado ==="completado")
-    .reduce((sum, p) => sum + (p.monto ?? 0), 0);
-
-  const totalPagado = Math.max(pasaporte.monto_pagado ?? 0, totalPagosCompletados);
-
-  const estadosPostPagoConfirmado: Database["public"]["Enums"]["estado_traslado"][] = [
-"servicio_confirmado",
-"pendiente_de_conductor",
-"conductor_asignado",
-"conductor_en_camino_al_origen",
-"conductor_en_punto_de_recoleccion",
-"verificacion_vehiculo_en_proceso",
-"evidencia_inicial_en_proceso",
-"evidencia_inicial_completada",
-"vehiculo_recibido",
-"traslado_en_curso",
-"incidencia_reportada",
-"llegada_a_destino",
-"evidencia_final_en_proceso",
-"evidencia_final_completada",
-"entrega_confirmada",
-"pago_completado",
-"servicio_cerrado",
-  ];
-
-  const pagoRealizado =
-    totalPagado > 0 ||
-    pagos.some((p) => p.estado ==="completado") ||
-    estadosPostPagoConfirmado.includes(estado);
-
-  const montoMostrado = pagoRealizado && totalPagado === 0 && precioBase > 0 ? precioBase : totalPagado;
-  const saldoPendiente = Math.max(0, precioBase - montoMostrado);
-
-  const estadoPago =
-    pagoRealizado || (precioBase > 0 && montoMostrado >= precioBase)
-      ?"Pagado"
-      : montoMostrado > 0
-        ?"Pago parcial"
-        :"Pendiente";
+  // FIX A1: resumen de pago calculado en ./resumen-pago (función pura testeable).
+  const {
+    metodoPago,
+    pagoRealizado,
+    montoMostrado,
+    saldoPendiente,
+    estadoPago
+  } = resumirPagoPasaporte(pasaporte, pagos, precioBase, estado);
   const soporteHref =`/soporte?viaje=${trasladoId}`;
 
   const tieneConductor = Boolean(nombreConductor && pasaporte.conductor_id);

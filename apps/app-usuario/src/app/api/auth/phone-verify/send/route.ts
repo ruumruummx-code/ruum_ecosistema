@@ -25,6 +25,15 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Techo global en Redis/memoria para mitigar ataques masivos distribuidos
+    const globalLimit = await rateLimitConVentana("global", "auth-phone-send-global", 200, VENTANA_MS);
+    if (!globalLimit.allowed) {
+      return NextResponse.json(
+        { error: "El servicio de verificación está experimentando alta demanda. Intenta más tarde." },
+        { status: 429, headers: { "Retry-After": String(globalLimit.retryAfterSec ?? 900) } }
+      );
+    }
+
     const ip = obtenerIp(request);
 
     // Rate limit por IP para prevenir abuso masivo

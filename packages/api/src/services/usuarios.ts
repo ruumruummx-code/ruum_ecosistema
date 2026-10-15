@@ -1,5 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@ruum/shared/types";
+import { rpcTipado } from "../supabase/funciones";
 import { registrarEvento } from "./auditoria";
 
 type Cliente = SupabaseClient<Database>;
@@ -190,14 +191,14 @@ export async function actualizarFacturacionUsuario(cliente: Cliente, datos: Fact
   const { data: sesion } = await cliente.auth.getUser();
   if (!sesion?.user) throw new Error("Sin sesión activa.");
 
-  const { error } = await cliente.rpc("actualizar_datos_facturacion" as never, {
+  const { error } = await rpcTipado(cliente, "actualizar_datos_facturacion", {
     p_rfc: datos.rfc ?? null,
     p_razon_social: datos.razon_social ?? null,
     p_regimen_fiscal: datos.regimen_fiscal ?? null,
     p_codigo_postal_fiscal: datos.codigo_postal_fiscal ?? null,
     p_uso_cfdi: datos.uso_cfdi ?? null,
     p_correo_facturacion: datos.correo_facturacion ?? null,
-  } as never);
+  });
 
   if (error) throw error;
 }
@@ -531,19 +532,20 @@ export async function registrarConsentimientoUsuario(
   }
 
   // Intentar RPC si existe (producción), fallback a inserción directa para tests/migración pendiente
-  const { data: rpcData, error: rpcError } = await cliente.rpc("registrar_consentimiento_usuario" as never, {
+  const { data: rpcData, error: rpcError } = await rpcTipado(cliente, "registrar_consentimiento_usuario", {
     p_version: version,
     p_canal: canal,
     p_version_app: versionApp.trim(),
     p_aceptado_en: aceptado,
-  } as never);
+  });
 
   if (!rpcError && rpcData) {
     return rpcData as { version: number; aceptado_en: string };
   }
 
   // Fallback: inserción directa + actualización + auditoría (para entornos sin RPC migrado)
-  if (rpcError && !String(rpcError.message ?? "").includes("does not exist") && !String((rpcError as { code?: string })?.code ?? "").includes("42883")) {
+  const detalleRpc = rpcError as { message?: string; code?: string } | null;
+  if (rpcError && !String(detalleRpc?.message ?? "").includes("does not exist") && !String(detalleRpc?.code ?? "").includes("42883")) {
     throw rpcError;
   }
 

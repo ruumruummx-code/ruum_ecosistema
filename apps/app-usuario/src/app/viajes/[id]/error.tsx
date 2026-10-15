@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import Link from "next/link";
 import { NavegacionUsuario } from "../../NavegacionUsuario";
+import { reportarErrorBoundary } from "../../../lib/reportar-error-boundary";
 
 export default function ErrorTraslado({
   error,
@@ -12,6 +13,8 @@ export default function ErrorTraslado({
   reset: () => void;
 }) {
   useEffect(() => {
+    // FIX C3: PasaporteError (red/permiso) llega aquí con telemetría.
+    reportarErrorBoundary(error, "pasaporte");
     console.error("[ErrorTraslado]", error);
   }, [error]);
 

@@ -1,5 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database, Json } from "@ruum/shared/types";
+import { rpcTipado } from "../supabase/funciones";
 import { assertAdminPermission } from "./permisos-admin";
 
 type Cliente = SupabaseClient<Database>;
@@ -297,7 +298,8 @@ export async function previsualizarTarifaUsuario(
     condicion?: Database["public"]["Enums"]["condicion_vehiculo"];
   }
 ): Promise<PrevisualizacionTarifa> {
-  const { data, error } = await cliente.rpc("usuario_previsualizar_tarifa", {
+  // FIX C1: args verificados en compilación (p_fecha_hora opcional).
+  const { data, error } = await rpcTipado(cliente, "usuario_previsualizar_tarifa", {
     p_marca: datos.marca,
     p_modelo: datos.modelo,
     p_distancia_km: datos.distanciaKm,

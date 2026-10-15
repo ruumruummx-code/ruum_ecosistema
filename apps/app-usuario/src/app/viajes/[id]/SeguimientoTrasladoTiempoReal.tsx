@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef, useDeferredValue } from "react";
 import {
   obtenerEstadoTrasladoRealtime,
   obtenerUltimaUbicacionTraslado,
@@ -91,9 +91,15 @@ export function SeguimientoTrasladoTiempoReal({
   const { ubicacion, estadoRealtime, estadoActualizadoEn, cargando, mapaCargadoUrl, inicializar, actualizar, limpiar } = useTrasladoRealtime(trasladoId);
   // R12: debounce refrescar + última vez para evitar spam
   const ultimoRefreshRef = useRef<number>(0);
+  // Fix A1: throttle de 5s para llegada de coordenadas por WebSockets
+  const ultimoUpdateUbicacionRef = useRef<number>(0);
+  const pendienteUbicacionRef = useRef<UbicacionTraslado | null>(null);
+  const timerThrottleRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const estadoEnVivo = estadoRealtime ?? estado;
-  const mapaUrl = useMemo(() => construirMapa(origen, destino, ubicacion), [destino, origen, ubicacion]);
+  // Fix A1: diferir recálculo de mapa estático para evitar recargar imágenes pesadas en móviles
+  const ubicacionDiferida = useDeferredValue(ubicacion);
+  const mapaUrl = useMemo(() => construirMapa(origen, destino, ubicacionDiferida), [destino, origen, ubicacionDiferida]);
   const mapaCargado = mapaUrl != null && mapaCargadoUrl === mapaUrl;
   const visible = estadoEnVivo ? ESTADOS_VISIBLES.includes(estadoEnVivo) : false;
 
@@ -125,6 +131,30 @@ export function SeguimientoTrasladoTiempoReal({
         trasladoId,
         (u) => {
           if (cancelado) return;
+          const ahora = Date.now();
+          const tiempoDesdeUltimo = ahora - ultimoUpdateUbicacionRef.current;
+          if (tiempoDesdeUltimo < 5000) {
+            pendienteUbicacionRef.current = u;
+            if (!timerThrottleRef.current) {
+              timerThrottleRef.current = setTimeout(() => {
+                timerThrottleRef.current = null;
+                if (cancelado) return;
+                ultimoUpdateUbicacionRef.current = Date.now();
+                if (pendienteUbicacionRef.current) {
+                  actualizar({ ubicacion: pendienteUbicacionRef.current });
+                  pendienteUbicacionRef.current = null;
+                }
+              }, 5000 - tiempoDesdeUltimo);
+            }
+            return;
+          }
+
+          if (timerThrottleRef.current) {
+            clearTimeout(timerThrottleRef.current);
+            timerThrottleRef.current = null;
+          }
+          pendienteUbicacionRef.current = null;
+          ultimoUpdateUbicacionRef.current = ahora;
           actualizar({ ubicacion: u });
         },
         {
@@ -146,6 +176,10 @@ export function SeguimientoTrasladoTiempoReal({
 
     return () => {
       cancelado = true;
+      if (timerThrottleRef.current) {
+        clearTimeout(timerThrottleRef.current);
+        timerThrottleRef.current = null;
+      }
       // Libera ubicación/estado del reducer al salir del traslado (ver Chat).
       limpiar();
       // Cleanup resiliente garantizado con limpiarCanalesSeguros

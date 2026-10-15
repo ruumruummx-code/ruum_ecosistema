@@ -2,6 +2,7 @@
 import { useEffect, useRef } from "react";
 import Link from "next/link";
 import { NavegacionUsuario } from "./NavegacionUsuario";
+import { reportarErrorBoundary } from "../lib/reportar-error-boundary";
 
 export default function ErrorGlobal({
   error,
@@ -12,6 +13,8 @@ export default function ErrorGlobal({
 }) {
   const tituloRef = useRef<HTMLHeadingElement>(null);
   useEffect(() => {
+    // FIX C3: reportar a Sentry antes de mostrar el fallback.
+    reportarErrorBoundary(error, "global");
     console.error("[app/error]", { digest: error.digest ?? "sin-digest" });
   }, [error]);
   useEffect(() => {

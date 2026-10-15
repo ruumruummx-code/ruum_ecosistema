@@ -1,22 +1,9 @@
-import { firmarUrlsEvidencia, obtenerPasaporteDigital, obtenerUltimaUbicacionTraslado } from "@ruum/api/services";
+import { firmarUrlsEvidencia } from "@ruum/api/services";
 import type { UbicacionTraslado } from "@ruum/api/services";
-import {
-  listarDisputasTraslado,
-  listarFotosEvidencia,
-  listarIncidenciasTraslado,
-  listarPagosTraslado,
-  listarReclamosTraslado,
-  obtenerCalificacionTraslado,
-  obtenerConductorTraslado,
-  obtenerResumenTraslado,
-  obtenerTrasladoConRelaciones,
-  obtenerVehiculoTraslado
-} from "@ruum/api/transfers";
-import type { Database } from "@ruum/shared/types";
+import { obtenerPasaporteCompleto } from "@ruum/api/transfers";
 import type {
   Calificacion,
   Disputa,
-  EstadoTraslado,
   FotoEvidencia,
   FotoEvidenciaVisual,
   Incidencia,
@@ -24,12 +11,6 @@ import type {
   Pasaporte,
   ReclamoSeguroUsuario,
 } from "./tipos-pasaporte";
-
-/* `obtenerTrasladoConRelaciones` ya devuelve las filas tipadas: antes se
-   metían en el Record<string, unknown> del fallback y se rescataban con
-   `as any`. Se conservan aparte, con su tipo real. */
-type VehiculoRow = Database["public"]["Tables"]["vehiculos"]["Row"];
-type ConductorRow = Database["public"]["Tables"]["conductores"]["Row"];
 
 /** Objeto vacío de 13 campos: antes triplicado en cada salida temprana de
  * `obtenerDatos` (sin env, sin pasaporte, catch). Una sola fábrica. */
@@ -51,6 +32,16 @@ export function datosVaciosTraslado() {
 
 export type DatosTraslado = Awaited<ReturnType<typeof obtenerDatos>>;
 
+/**
+ * FIX C2 (ticket arquitectura Fase 4): la orquestación de las 10 lecturas vive
+ * en `obtenerPasaporteCompleto` (@ruum/api/transfers). Este loader solo
+ * resuelve el cliente, delega y firma URLs de evidencia.
+ *
+ * Semántica de errores (FIX C3): `obtenerPasaporteCompleto` devuelve `null`
+ * solo ante ausencia de fila (RLS/inexistente → TrasladoNoEncontrado) y lanza
+ * `PasaporteError` ante fallos de red o permiso → NO se captura aquí: sube al
+ * `error.tsx` boundary, que lo reporta a Sentry.
+ */
 export async function obtenerDatos(id: string) {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
@@ -58,167 +49,36 @@ export async function obtenerDatos(id: string) {
     return datosVaciosTraslado();
   }
 
-  try {
-    const { crearClienteServidor } = await import("@/lib/supabase-server");
-    const cliente = await crearClienteServidor();
+  const { crearClienteServidor } = await import("@/lib/supabase-server");
+  const cliente = await crearClienteServidor();
 
-    // 1. Intentar obtener el pasaporte digital desde la vista oficial
-    let pasaporte: Pasaporte | null = null;
-    try {
-      pasaporte = await obtenerPasaporteDigital(cliente, id);
-    } catch (err) {
-      console.warn("[obtenerDatos] Error en obtenerPasaporteDigital, probando fallback directo:", err);
-    }
-
-    // 2. Fallback resiliente: consultar tabla traslados directamente si la vista no devuelve datos
-    if (!pasaporte) {
-      let tRow: Record<string, unknown> | null = null;
-      let vehiculoRow: VehiculoRow | null = null;
-      let conductorRow: ConductorRow | null = null;
-      try {
-        const rel = await obtenerTrasladoConRelaciones(cliente, id);
-        tRow = rel.traslado
-          ? ({ ...rel.traslado, vehiculos: rel.vehiculo, conductores: rel.conductor } as unknown as Record<string, unknown>)
-          : null;
-        vehiculoRow = rel.vehiculo;
-        conductorRow = rel.conductor;
-        if (rel.traslado?.conductor_id && !conductorRow) {
-          const { data: condPub } = await cliente
-            .from("conductores_publicos")
-            .select("id, estado, nivel_operativo_vigente, calificacion_promedio")
-            .eq("id", rel.traslado.conductor_id)
-            .maybeSingle();
-          if (condPub) {
-            conductorRow = condPub as unknown as ConductorRow;
-          }
-        }
-      } catch {
-        tRow = null;
-      }
-
-      if (tRow) {
-        pasaporte = {
-          traslado_id: tRow.id as string,
-          usuario_id: tRow.usuario_id as string,
-          vehiculo_id: (tRow.vehiculo_id as string) ?? null,
-          conductor_id: (tRow.conductor_id as string) ?? null,
-          estado: tRow.estado as EstadoTraslado,
-          tiene_incidencia_abierta: (tRow.tiene_incidencia_abierta as boolean) ?? false,
-          tipo_pago: (tRow.tipo_pago as Database["public"]["Enums"]["tipo_pago"]) ?? null,
-          causa_fallido: (tRow.causa_fallido as Database["public"]["Enums"]["causa_fallido"]) ?? null,
-          precio_cotizado: (tRow.precio_cotizado as number) ?? null,
-          precio_final: (tRow.precio_final as number) ?? null,
-          creado_en: tRow.creado_en as string,
-          actualizado_en: tRow.actualizado_en as string,
-          vehiculo_tipo: vehiculoRow?.tipo ?? null,
-          vehiculo_marca: vehiculoRow?.marca ?? null,
-          vehiculo_modelo: vehiculoRow?.modelo ?? null,
-          vehiculo_anio: vehiculoRow?.anio ?? null,
-          conductor_nombre: conductorRow?.nombre ?? null,
-          conductor_estado: conductorRow?.estado ?? null,
-          conductor_nivel: conductorRow?.nivel_operativo_vigente ?? null,
-          conductor_calificacion: conductorRow?.calificacion_promedio ?? null,
-          evidencia_inicial_fotos_sincronizadas: 0,
-          evidencia_final_fotos_sincronizadas: 0,
-          incidencias_abiertas: 0,
-          monto_pagado: 0,
-          origen_lat: (tRow.origen_lat as number) ?? null,
-          origen_lng: (tRow.origen_lng as number) ?? null,
-          destino_lat: (tRow.destino_lat as number) ?? null,
-          destino_lng: (tRow.destino_lng as number) ?? null,
-          distancia_km: (tRow.distancia_km as number) ?? null,
-          tiempo_estimado_horas: (tRow.tiempo_estimado_horas as number) ?? null,
-          vehiculo_categoria_tarifa: vehiculoRow?.categoria_tarifa ?? null,
-          vehiculo_gama: vehiculoRow?.gama ?? null,
-          vehiculo_condicion: vehiculoRow?.condicion ?? null,
-          origen_direccion: (tRow.origen_direccion as string) ?? null,
-          origen_ciudad: (tRow.origen_ciudad as string) ?? null,
-          origen_referencias: (tRow.origen_referencias as string) ?? null,
-          destino_direccion: (tRow.destino_direccion as string) ?? null,
-          destino_ciudad: (tRow.destino_ciudad as string) ?? null,
-          destino_referencias: (tRow.destino_referencias as string) ?? null,
-          contacto_entrega_nombre: (tRow.contacto_entrega_nombre as string) ?? null,
-          contacto_entrega_telefono: (tRow.contacto_entrega_telefono as string) ?? null,
-          contacto_recepcion_nombre: (tRow.contacto_recepcion_nombre as string) ?? null,
-          contacto_recepcion_telefono: (tRow.contacto_recepcion_telefono as string) ?? null,
-          vehiculo_color: vehiculoRow?.color ?? null,
-          vehiculo_placas: vehiculoRow?.placas ?? null,
-          vehiculo_vin: vehiculoRow?.vin ?? null,
-          ganancia_conductor: null
-        };
-      }
-    }
-
-    if (!pasaporte) {
-      return datosVaciosTraslado();
-    }
-
-    const vehiculoId = pasaporte.vehiculo_id;
-    const conductorId = pasaporte.conductor_id;
-
-    const [
-      trasladoRes,
-      vehiculoRes,
-      conductorRes,
-      fotosEvidencia,
-      incidencias,
-      disputas,
-      reclamosSeguro,
-      calificacion,
-      pagos,
-      ultimaUbicacion
-    ] = await Promise.all([
-      obtenerResumenTraslado(cliente, id).then((data) => ({ data })),
-      obtenerVehiculoTraslado(cliente, vehiculoId).then((data) => ({ data })),
-      obtenerConductorTraslado(cliente, conductorId).then((data) => ({ data })),
-      listarFotosEvidencia(cliente, id).then((data) => ({ data })),
-      listarIncidenciasTraslado(cliente, id).then((data) => ({ data })),
-      listarDisputasTraslado(cliente, id).then((data) => ({ data })),
-      listarReclamosTraslado(cliente, id).then((data) => ({ data })),
-      obtenerCalificacionTraslado(cliente, id).then((data) => ({ data })),
-      listarPagosTraslado(cliente, id).then((data) => ({ data })),
-      obtenerUltimaUbicacionTraslado(cliente, id).catch(() => null)
-    ]);
-
-    let evidenciaFirmada: FotoEvidenciaVisual[] = [];
-    try {
-      const fotos = (fotosEvidencia?.data ?? []) as FotoEvidencia[];
-      evidenciaFirmada = await firmarUrlsEvidencia(cliente, fotos);
-    } catch {
-      evidenciaFirmada = (((fotosEvidencia?.data ?? []) as FotoEvidencia[]) || []).map((f) => ({
-        ...f,
-        url_visual: null
-      }));
-    }
-
-    const pagosLista = (pagos?.data ?? []) as Pago[];
-    const totalPagadoCalculado = pagosLista
-      .filter((p) => p.estado === "completado")
-      .reduce((sum, p) => sum + (p.monto ?? 0), 0);
-
-    let pasaporteFinal = pasaporte;
-    if (pasaporteFinal && (!pasaporteFinal.monto_pagado || pasaporteFinal.monto_pagado === 0) && totalPagadoCalculado > 0) {
-      pasaporteFinal = {
-        ...pasaporteFinal,
-        monto_pagado: totalPagadoCalculado
-      };
-    }
-
-    return {
-      pasaporte: pasaporteFinal,
-      traslado: trasladoRes?.data ?? null,
-      vehiculo: vehiculoRes?.data ?? null,
-      conductor: conductorRes?.data ?? null,
-      evidencia: evidenciaFirmada,
-      incidencias: (incidencias?.data ?? []) as Incidencia[],
-      disputas: (disputas?.data ?? []) as Disputa[],
-      reclamosSeguro: (reclamosSeguro?.data ?? []) as ReclamoSeguroUsuario[],
-      calificacion: calificacion?.data ?? null,
-      pagos: pagosLista,
-      ultimaUbicacion: ultimaUbicacion ?? null
-    };
-  } catch (error) {
-    console.error("[obtenerDatos]", error);
+  const completo = await obtenerPasaporteCompleto(cliente, id);
+  if (!completo) {
     return datosVaciosTraslado();
   }
+
+  let evidenciaFirmada: FotoEvidenciaVisual[] = [];
+  try {
+    const fotos = completo.fotosEvidencia as FotoEvidencia[];
+    evidenciaFirmada = await firmarUrlsEvidencia(cliente, fotos);
+  } catch {
+    evidenciaFirmada = ((completo.fotosEvidencia as FotoEvidencia[]) || []).map((f) => ({
+      ...f,
+      url_visual: null
+    }));
+  }
+
+  return {
+    pasaporte: completo.pasaporte as Pasaporte,
+    traslado: completo.traslado,
+    vehiculo: completo.vehiculo,
+    conductor: completo.conductor,
+    evidencia: evidenciaFirmada,
+    incidencias: completo.incidencias as Incidencia[],
+    disputas: completo.disputas as Disputa[],
+    reclamosSeguro: completo.reclamosSeguro as ReclamoSeguroUsuario[],
+    calificacion: completo.calificacion as Calificacion | null,
+    pagos: completo.pagos as Pago[],
+    ultimaUbicacion: completo.ultimaUbicacion as UbicacionTraslado | null
+  };
 }

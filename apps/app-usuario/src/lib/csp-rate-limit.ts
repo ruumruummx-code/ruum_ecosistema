@@ -13,7 +13,7 @@ let redisClient: Redis | null | undefined;
 let redisUltimoFalloMs = 0;
 const REDIS_REINTENTO_MS = 30_000;
 
-function getRedis(): Redis | null {
+export function getRedis(): Redis | null {
   if (redisClient !== undefined && redisClient !== null) return redisClient;
   if (redisClient === null && Date.now() - redisUltimoFalloMs < REDIS_REINTENTO_MS) {
     return null; // backoff: no reintentar la construcción en cada request
@@ -47,6 +47,8 @@ function getRedis(): Redis | null {
 
 export function __clearCspRateLimitForTest() {
   hits.clear();
+  redisClient = undefined;
+  redisUltimoFalloMs = 0;
 }
 
 /** A2: purga oportunista del fallback en memoria (expiradas primero, FIFO si sigue lleno). */
@@ -97,6 +99,10 @@ export async function rateLimitConVentana(
     return { allowed: true, restantes: maxPeticiones };
   }
   const redis = getRedis();
+  if (process.env.NODE_ENV === "production" && !redis) {
+    console.warn("[rate-limit-usuario] fail-closed en produccion por ausencia de redis", { clave });
+    return { allowed: false, retryAfterSec: 60 };
+  }
   if (redis) {
     try {
       const redisKey = `rl:${clave}:${identificador}`;
@@ -113,7 +119,10 @@ export async function rateLimitConVentana(
       }
       return { allowed: true, restantes: maxPeticiones - count };
     } catch (e) {
-      console.warn("[rate-limit-usuario] redis fallo, fallback a memoria", e);
+      console.warn("[rate-limit-usuario] redis fallo", e);
+      if (process.env.NODE_ENV === "production") {
+        return { allowed: false, retryAfterSec: 60 };
+      }
     }
   }
   const now = Date.now();

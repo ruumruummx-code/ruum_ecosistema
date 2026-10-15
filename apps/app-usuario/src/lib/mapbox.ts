@@ -274,49 +274,53 @@ export async function calcularRutaMapbox(
   destino: CoordenadasGeocodificadas,
   signal?: AbortSignal
 ): Promise<RutaMapboxCalculada | null> {
-  if (signal?.aborted) return null;
-  await adquirirPermisoMapbox(signal);
-  if (signal?.aborted) return null;
-  const token = obtenerTokenPublico();
-  if (!tieneMapboxConfigurado() || !token) return null;
-  const ruta = await obtenerRutaDirectionsMapbox([origen.lng, origen.lat], [destino.lng, destino.lat], token, {
-    lanzarErrores: true,
-    signal,
-    maxIntentos: MAPBOX_GEOCODING_MAX_INTENTOS,
-    timeoutMs: MAPBOX_GEOCODING_TIMEOUT_MS,
-    demoraReintentoMs: MAPBOX_GEOCODING_RETRY_DELAY_MS
-  });
-  if (signal?.aborted) return null;
-  if (ruta?.distanciaKm == null || ruta?.tiempoHoras == null) return null;
-  return { distanciaKm: ruta.distanciaKm, tiempoEstimadoHoras: ruta.tiempoHoras };
+  return calcularRutaMapboxConParadas(origen, destino, [], signal);
 }
 
 export async function calcularRutaMapboxConParadas(
   origen: CoordenadasGeocodificadas,
   destino: CoordenadasGeocodificadas,
-  paradas: CoordenadasGeocodificadas[],
+  paradas: CoordenadasGeocodificadas[] = [],
   signal?: AbortSignal
 ): Promise<RutaMapboxCalculada | null> {
   if (signal?.aborted) return null;
   await adquirirPermisoMapbox(signal);
   if (signal?.aborted) return null;
-  const token = obtenerTokenPublico();
-  if (!tieneMapboxConfigurado() || !token) return null;
-  const { obtenerRutaDirectionsMapboxConParadas } = await import("@ruum/shared/utils");
-  const ruta = await obtenerRutaDirectionsMapboxConParadas(
-    [origen.lng, origen.lat],
-    [destino.lng, destino.lat],
-    paradas.map((p) => [p.lng, p.lat] as [number, number]),
-    token,
-    {
-      lanzarErrores: true,
-      signal,
-      maxIntentos: MAPBOX_GEOCODING_MAX_INTENTOS,
-      timeoutMs: MAPBOX_GEOCODING_TIMEOUT_MS,
-      demoraReintentoMs: MAPBOX_GEOCODING_RETRY_DELAY_MS
+  if (!tieneMapboxConfigurado()) return null;
+
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), MAPBOX_GEOCODING_TIMEOUT_MS);
+  const onSignalAbort = () => controller.abort();
+  signal?.addEventListener("abort", onSignalAbort, { once: true });
+
+  try {
+    const respuesta = await fetch("/api/ruta", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ origen, destino, paradas }),
+      signal: controller.signal
+    });
+
+    if (!respuesta.ok) {
+      const datos = (await respuesta.json().catch(() => ({}))) as { error?: string };
+      throw new MapboxUsuarioError(
+        datos.error || `Mapbox Directions respondió ${respuesta.status}.`,
+        respuesta.status
+      );
     }
-  );
-  if (signal?.aborted) return null;
-  if (ruta?.distanciaKm == null || ruta?.tiempoHoras == null) return null;
-  return { distanciaKm: ruta.distanciaKm, tiempoEstimadoHoras: ruta.tiempoHoras };
+
+    const datos = (await respuesta.json()) as { distanciaKm?: number; tiempoEstimadoHoras?: number };
+    if (datos.distanciaKm == null || datos.tiempoEstimadoHoras == null) return null;
+    return { distanciaKm: datos.distanciaKm, tiempoEstimadoHoras: datos.tiempoEstimadoHoras };
+  } catch (err: unknown) {
+    if (signal?.aborted) return null;
+    if (err instanceof MapboxUsuarioError) throw err;
+    if (controller.signal.aborted && !signal?.aborted) {
+      throw new MapboxUsuarioError("El cálculo de la ruta tardó demasiado.", 504);
+    }
+    throw err;
+  } finally {
+    clearTimeout(timer);
+    signal?.removeEventListener("abort", onSignalAbort);
+  }
 }

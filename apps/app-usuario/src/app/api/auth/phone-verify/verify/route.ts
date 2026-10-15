@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { rateLimitConVentana } from "@/lib/csp-rate-limit";
+import { obtenerIp, rateLimitConVentana } from "@/lib/csp-rate-limit";
 import { soloDigitos } from "@/lib/registro-usuario";
 import { generarTokenTelefono, verificarCodigoTwilioVerify } from "@/lib/phone-verification";
 
@@ -7,6 +7,7 @@ export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
 const MAX_INTENTOS_POR_TEL = 5;
+const MAX_INTENTOS_POR_IP = 15;
 const VENTANA_MS = 15 * 60 * 1000; // 15 minutos
 
 export async function POST(request: NextRequest) {
@@ -30,6 +31,20 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         { error: "El código de verificación debe tener 6 dígitos." },
         { status: 400 }
+      );
+    }
+
+    const ip = obtenerIp(request);
+    const porIp = await rateLimitConVentana(
+      ip,
+      "auth-phone-verify-ip",
+      MAX_INTENTOS_POR_IP,
+      VENTANA_MS
+    );
+    if (!porIp.allowed) {
+      return NextResponse.json(
+        { error: "Demasiados intentos de verificación desde esta red. Intenta más tarde." },
+        { status: 429, headers: { "Retry-After": String(porIp.retryAfterSec ?? 900) } }
       );
     }
 

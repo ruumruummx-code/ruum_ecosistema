@@ -1,9 +1,21 @@
 "use client";
 
+import { useEffect } from "react";
 import Link from "next/link";
 import { NavegacionUsuario } from "../NavegacionUsuario";
+import { reportarErrorBoundary } from "../../lib/reportar-error-boundary";
 
-export default function ErrorMisTraslados({ reset }: { reset: () => void }) {
+export default function ErrorMisTraslados({
+  error,
+  reset,
+}: {
+  error: Error & { digest?: string };
+  reset: () => void;
+}) {
+  useEffect(() => {
+    // FIX C3: reportar a Sentry antes de mostrar el fallback.
+    reportarErrorBoundary(error, "mis-viajes");
+  }, [error]);
   return (
     <>
       <NavegacionUsuario variante="claro" />

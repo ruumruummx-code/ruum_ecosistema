@@ -1,7 +1,8 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
-import type { Database, SolicitudAsignacionResultado } from "@ruum/shared/types";
+import type { Database, Json, SolicitudAsignacionResultado } from "@ruum/shared/types";
 import { TRANSICIONES } from "@ruum/shared/states";
 import { esquemaPayloadCrearTraslado } from "@ruum/shared/validacion";
+import { rpcTipado } from "../supabase/funciones";
 import { registrarEvento } from "./auditoria";
 
 type Cliente = SupabaseClient<Database>;
@@ -121,12 +122,15 @@ export async function crearTraslado(cliente: Cliente, vehiculo: DatosVehiculoPar
     throw new Error(`Datos de traslado inválidos: ${errorMsg}`);
   }
 
-  const { data, error } = await cliente.rpc("usuario_crea_traslado", {
-    p_vehiculo_id: ("vehiculoId" in vehiculo ? vehiculo.vehiculoId : null) as never,
-    p_vehiculo: ("vehiculo" in vehiculo ? vehiculo.vehiculo : null) as never,
-    p_traslado: traslado as never,
+  // FIX C1 (ticket arquitectura Fase 4): args verificados en compilación vía
+  // rpcTipado — sin `as never`. p_vehiculo_id/p_vehiculo aceptan null porque
+  // el flujo permite "vehículo nuevo" (solo uno de los dos viaja).
+  const { data, error } = await rpcTipado(cliente, "usuario_crea_traslado", {
+    p_vehiculo_id: "vehiculoId" in vehiculo ? vehiculo.vehiculoId : null,
+    p_vehiculo: ("vehiculo" in vehiculo ? vehiculo.vehiculo : null) as unknown as Json | null,
+    p_traslado: traslado as unknown as Json,
     p_clave_idempotencia: claveIdempotencia,
-    p_paradas: paradas as never
+    p_paradas: paradas as unknown as Json
   });
 
   if (error) throw error;
@@ -138,7 +142,7 @@ export async function crearTraslado(cliente: Cliente, vehiculo: DatosVehiculoPar
 }
 
 export async function aceptarCotizacionUsuario(cliente: Cliente, trasladoId: string) {
-  const { data, error } = await cliente.rpc("usuario_acepta_cotizacion", { p_traslado_id: trasladoId });
+  const { data, error } = await rpcTipado(cliente, "usuario_acepta_cotizacion", { p_traslado_id: trasladoId });
   if (error) throw error;
   return data;
 }
@@ -287,14 +291,14 @@ export async function solicitarAsignacionViaje(
   ubicacion?: { lat: number; lng: number } | null
 ): Promise<SolicitudAsignacionResultado> {
   await validarIdentidadSolicitud(cliente, conductorId);
-  const { data, error } = await cliente.rpc("conductor_solicita_asignacion" as never, {
+  const { data, error } = await rpcTipado(cliente, "conductor_solicita_asignacion", {
     p_traslado_id: trasladoId,
     p_lat: ubicacion?.lat ?? null,
     p_lng: ubicacion?.lng ?? null
-  } as never);
+  });
 
   if (error) {
-    throw new Error(error.message || "No se pudo registrar la solicitud de asignación.");
+    throw new Error(error instanceof Error ? error.message : "No se pudo registrar la solicitud de asignación.");
   }
   const resultado = data as unknown as SolicitudAsignacionResultado;
   if (!resultado?.competencia_id || !resultado?.cierra_en) {
@@ -366,7 +370,7 @@ export async function cancelarTraslado(
   // FIX C3 (ticket seguridad Fase 2): no se envía ningún monto precalculado.
   // La sobrecarga (uuid, text) calcula el cargo en la base de forma atómica
   // y lo devuelve; la UI debe mostrar ese valor, no una estimación local.
-  const { data, error: rpcError } = await cliente.rpc("usuario_cancela_traslado", {
+  const { data, error: rpcError } = await rpcTipado(cliente, "usuario_cancela_traslado", {
     p_traslado_id: trasladoId,
     p_motivo: motivo.trim() || "Cancelación solicitada por usuario"
   });
@@ -462,7 +466,7 @@ export async function avanzarEstadoTraslado(cliente: Cliente, trasladoId: string
     throw new Error(`El estado ${estadoActual} no corresponde a un evento directo del conductor`);
   }
 
-  const { data, error } = await cliente.rpc("conductor_avanza_traslado", {
+  const { data, error } = await rpcTipado(cliente, "conductor_avanza_traslado", {
     p_traslado_id: trasladoId,
     p_evento: evento
   });
@@ -476,7 +480,7 @@ export async function confirmarLlegadaDestino(
   trasladoId: string,
   geocerca?: { fueraGeocerca?: boolean; distanciaM?: number | null }
 ) {
-  const { data, error } = await cliente.rpc("conductor_confirmar_llegada_destino", {
+  const { data, error } = await rpcTipado(cliente, "conductor_confirmar_llegada_destino", {
     p_traslado_id: trasladoId,
     p_fuera_geocerca: Boolean(geocerca?.fueraGeocerca),
     ...(geocerca?.distanciaM !== null && geocerca?.distanciaM !== undefined ? { p_distancia_m: geocerca.distanciaM } : {})

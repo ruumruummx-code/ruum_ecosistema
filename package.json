@@ -43,6 +43,7 @@
     "audit:deps": "pnpm audit --audit-level=high",
     "check:supabase-security": "node scripts/check-supabase-security.mjs",
     "check:supabase-drift": "node scripts/check-supabase-drift.mjs",
+    "check:rpc-casts": "node scripts/check-rpc-casts.mjs",
     "test:security": "node --test tests/security/scan-secrets.test.mjs",
     "test:release": "node --test tests/release/changelog.test.mjs",
     "changelog": "node scripts/changelog.mjs",
