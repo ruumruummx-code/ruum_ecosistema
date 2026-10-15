@@ -5,7 +5,6 @@ import { Aviso, Button, Icono, PassportCard, SENDAS_ICONO, MobileShell } from "@
 import { ETIQUETA_TIPO_VEHICULO } from "@ruum/shared/constants";
 import type { Database } from "@ruum/shared/types";
 import { PerfilCuentaForm } from "./PerfilCuentaForm";
-import { PreferenciasToggles } from "./PreferenciasToggles";
 import { BotonResetPassword } from "./BotonResetPassword";
 import { FacturacionCuentaForm } from "./FacturacionCuentaForm";
 import { iniciales } from "./cuenta-utils";
@@ -528,14 +527,6 @@ export function SeccionFacturacion({ usuario, empresa }: { usuario: Usuario; emp
   return (
     <Seccion titulo="Facturación" descripcion="Captura los datos fiscales para comprobantes y cuentas empresariales.">
       <FacturacionCuentaForm usuario={usuario} empresa={empresa} />
-    </Seccion>
-  );
-}
-
-export function SeccionPreferencias({ usuario }: { usuario: Usuario }) {
-  return (
-    <Seccion titulo="Preferencias" descripcion="Controla notificaciones y alertas de tu cuenta. Los cambios se guardan automáticamente.">
-      <PreferenciasToggles usuario={usuario} />
     </Seccion>
   );
 }

@@ -169,7 +169,7 @@ export async function GET(request: NextRequest) {
       <meta charset="utf-8">
       <title>Verificando cuenta...</title>
       <style>
-        body { font-family: system-ui, sans-serif; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; background: #070d18; color: #f8faf5; }
+        body { font-family: system-ui, sans-serif; display: flex; align-items: center; justify-content: center; min-height: 100dvh; margin: 0; background: #070d18; color: #f8faf5; }
         .card { text-align: center; padding: 2rem; border-radius: 1rem; background: #0d1526; border: 1px solid #1c2a3e; max-width: 400px; }
         a { color: #7fd4d0; }
       </style>

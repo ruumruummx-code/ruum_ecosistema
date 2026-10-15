@@ -592,19 +592,41 @@ input[type="radio"] {
 }
 
 .ruum-page {
-  min-height: 100vh;
+  min-height: 100dvh;
   background: var(--ruum-canvas);
 }
 
+/* Arquitectura No-Scroll (base mobile-first): raíz fija 100dvh sin
+   scroll de página; el desplazamiento vive en .scrollable-content.
+   Escalado a escritorio solo con @media (min-width:…). Prohibido 100vh. */
+.ruum-screen {
+  width: 100%;
+  height: 100dvh;
+  max-height: 100dvh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.scrollable-content {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: clip;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+}
+
 .ruum-container {
-  width: min(100% - 32px, 1200px);
+  /* Base móvil; escritorio escala vía min-width. */
+  width: min(100% - 24px, 1200px);
   margin-inline: auto;
 }
 
 .ruum-content {
-  width: min(100% - 32px, 1200px);
+  width: min(100% - 24px, 1200px);
   margin-inline: auto;
-  padding-block: 32px 48px;
+  padding-block: 20px 48px;
 }
 
 /* Cards V2: Estándar (16px) y Destacada (20-24px) */
@@ -717,7 +739,7 @@ input[type="radio"] {
 }
 
 .ruum-auth-page {
-  min-height: 100vh;
+  min-height: 100dvh;
   background:
     radial-gradient(circle at top right, rgba(0, 209, 209, 0.14), transparent 32%),
     var(--ruum-surface-strong);

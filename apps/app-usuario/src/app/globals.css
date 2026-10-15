@@ -32,19 +32,88 @@
   --app-shadow-4: var(--ruum-shadow-4);
 }
 
+/* ─────────────────────────────────────────────────────────────
+   Arquitectura global Mobile-First "No-Scroll" Estricto.
+   Base (móvil por defecto, fuera de media queries): el viewport usa
+   100dvh y el scroll vive solo en .scrollable-content. El escalado a
+   tableta/escritorio se hace exclusivamente con @media (min-width:…).
+   Prohibido 100vh (rompe Safari/Chrome móvil con barras dinámicas).
+   ───────────────────────────────────────────────────────────── */
 html {
   min-width: 320px;
+  height: 100dvh;
+  max-height: 100dvh;
+  overflow: hidden;
   background: var(--ruum-canvas);
   scroll-behavior: smooth;
 }
 
 body {
   min-width: 320px;
+  height: 100dvh;
+  max-height: 100dvh;
+  overflow: hidden;
   margin: 0;
   background: var(--ruum-surface-elevated, var(--ruum-canvas));
   color: var(--ruum-text);
   font-family: var(--font-body);
   text-rendering: optimizeLegibility;
+  overscroll-behavior: none;
+}
+
+#contenido-principal {
+  height: 100dvh;
+  max-height: 100dvh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Composición con navegación fija: el header no consume viewport extra;
+   la pantalla ocupa el espacio restante y su scroll es interno. */
+#contenido-principal > header {
+  flex-shrink: 0;
+}
+
+#contenido-principal > main,
+#contenido-principal > div {
+  min-height: 0;
+}
+
+#contenido-principal > main.ruum-screen,
+#contenido-principal > div.ruum-screen {
+  flex: 1;
+  height: auto;
+  max-height: 100dvh;
+}
+
+#contenido-principal > main.user-v2-page,
+#contenido-principal > main.app-page {
+  flex: 1;
+  height: auto;
+  max-height: 100dvh;
+}
+
+/* Raíz de cada pantalla: contención estricta, sin scroll de página. */
+.ruum-screen {
+  width: 100%;
+  height: 100dvh;
+  max-height: 100dvh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Única zona con scroll permitido: contenido interno. Header/Footer y
+   CTAs quedan fijos fuera de este contenedor. */
+.scrollable-content {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: clip;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  scroll-behavior: smooth;
 }
 
 h1,
@@ -113,21 +182,77 @@ summary:focus-visible {
   outline-offset: 2px;
 }
 
-/* Superficies y componentes semánticos de app-usuario */
+/* Superficies y componentes semánticos de app-usuario.
+   Base Mobile-First: valores móviles por defecto; tableta/escritorio
+   solo escalan vía @media (min-width:…). */
 .app-page {
-  min-height: 100dvh;
+  height: 100dvh;
+  max-height: 100dvh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
   background: var(--ruum-canvas);
+  padding-bottom: max(104px, calc(var(--user-mobile-nav-offset) + env(safe-area-inset-bottom)));
 }
 
 .app-container {
-  width: min(100% - 32px, 1200px);
+  width: min(100% - 24px, 1200px);
   margin-inline: auto;
 }
 
 .app-content {
-  width: min(100% - 32px, 1200px);
+  width: min(100% - 24px, 1200px);
   margin-inline: auto;
-  padding-block: 32px 112px;
+  padding-block: 20px 112px;
+}
+
+/* Ergonomía móvil como base: sin overflow horizontal, targets ≥44px,
+   títulos fluidos y medios contenidos. */
+.app-page :where(button, input, select, textarea, [role="button"], [role="tab"]) {
+  min-height: 44px;
+}
+
+.user-v2-content a[class*="button"],
+.user-v2-content a[class*="card"] {
+  min-height: 44px;
+}
+
+.app-page :where(select) {
+  min-height: 44px;
+}
+
+.app-page :where(input, select, textarea) {
+  padding-block: max(0.75rem, 10px);
+}
+
+.app-page :where(img, picture, video, canvas) {
+  max-width: 100%;
+  height: auto;
+}
+
+.app-page :where(h1, .text-3xl, .text-4xl, .text-5xl) {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.app-page :where(h1, .text-4xl, .text-5xl) {
+  font-size: clamp(1.5rem, 7vw, 2.25rem);
+  line-height: 1.12;
+}
+
+.app-page :where(.text-3xl) {
+  font-size: clamp(1.35rem, 6vw, 1.875rem);
+  line-height: 1.16;
+}
+
+.app-page :where(.text-\[8px\]) {
+  font-size: 10px;
+}
+.app-page :where(.text-\[9px\]) {
+  font-size: 10px;
+}
+.app-page :where(.text-\[10px\]) {
+  font-size: 11px;
 }
 
 .app-card {
@@ -162,9 +287,13 @@ summary:focus-visible {
   border-radius: 999px;
 }
 
-/* Shell de autenticación y accesos */
+/* Shell de autenticación y accesos: contención no-scroll base. */
 .ruum-auth-shell {
-  min-height: 100dvh;
+  height: 100dvh;
+  max-height: 100dvh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
   background: var(--user-color-background);
 }
 
@@ -239,84 +368,7 @@ summary:focus-visible {
   border-width: 0;
 }
 
-/* =========================================================================
- * OPTIMIZACIÓN Y ERGONOMÍA MÓVIL (< 768px)
- * ========================================================================= */
-@media (max-width: 767px) {
-  /* Evitar overflow horizontal en toda la aplicación móvil */
-  html, body {
-    overflow-x: clip;
-    max-width: 100%;
-  }
-
-  .app-container {
-    width: min(100% - 24px, 1200px);
-  }
-
-  .app-content {
-    width: min(100% - 24px, 1200px);
-    padding-block: 20px 112px;
-  }
-
-  /* La página reserva espacio al fondo para que la barra fija no tape acciones */
-  .app-page {
-    padding-bottom: max(104px, calc(var(--user-mobile-nav-offset) + env(safe-area-inset-bottom))) !important;
-    -webkit-overflow-scrolling: touch;
-    scroll-behavior: smooth;
-  }
-
-  /* Alturas táctiles mínimas para controles (no para enlaces de navegación,
-     que ya definen su propio target en user-v2-shell) */
-  .app-page :where(button, input, select, textarea, [role="button"], [role="tab"]) {
-    min-height: 44px;
-  }
-
-  .user-v2-content a[class*="button"],
-  .user-v2-content a[class*="card"] {
-    min-height: 44px;
-  }
-
-  .app-page :where(select) {
-    min-height: 44px !important;
-  }
-
-  .app-page :where(input, select, textarea) {
-    padding-block: max(0.75rem, 10px);
-  }
-
-  .app-page :where(img, picture, video, canvas) {
-    max-width: 100%;
-    height: auto;
-  }
-
-  /* Títulos responsivos con escala fluida y protección de quiebre */
-  .app-page :where(h1, .text-3xl, .text-4xl, .text-5xl) {
-    overflow-wrap: anywhere;
-    word-break: break-word;
-  }
-
-  .app-page :where(h1, .text-4xl, .text-5xl) {
-    font-size: clamp(1.5rem, 7vw, 2.25rem);
-    line-height: 1.12;
-  }
-
-  .app-page :where(.text-3xl) {
-    font-size: clamp(1.35rem, 6vw, 1.875rem);
-    line-height: 1.16;
-  }
-
-  /* Evitar que textos muy pequeños se vuelvan ilegibles en pantallas móviles */
-  .app-page :where(.text-\[8px\]) {
-    font-size: 10px !important;
-  }
-  .app-page :where(.text-\[9px\]) {
-    font-size: 10px !important;
-  }
-  .app-page :where(.text-\[10px\]) {
-    font-size: 11px !important;
-  }
-}
-
+/* Escalado ascendente: tableta/escritorio vía min-width (mobile-first). */
 @media (min-width: 640px) {
   .app-container,
   .app-content {
@@ -421,7 +473,7 @@ summary:focus-visible {
   background-attachment: fixed;
   color: var(--ruum-text);
 }
-@media (max-width: 767px), (pointer: coarse) {
+@media (pointer: coarse) {
   body { background-attachment: scroll; }
 }
 /* Evitar translate en hover en dispositivos sin hover (móvil) */
@@ -531,19 +583,33 @@ summary:focus-visible {
 }
 
 .user-v2-page {
-  min-height: 100dvh;
+  height: 100dvh;
+  max-height: 100dvh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
   background: var(--user-color-background);
   scroll-padding-bottom: 112px;
 }
 
 .user-v2-content {
-  width: min(calc(100% - 32px), 430px);
+  width: min(calc(100% - 24px), 430px);
   margin-inline: auto;
   padding-block: 16px 112px;
 }
 
+/* Pantallas anidadas (p. ej. Garaje dentro de main.user-v2-page):
+   el shell interno hereda el alto del padre, no 100dvh propio. */
+.user-v2-page > .ruum-screen,
+.app-page > .ruum-screen {
+  flex: 1;
+  min-height: 0;
+  height: 100%;
+  max-height: 100%;
+}
+
 .user-v2-content--wide {
-  width: min(calc(100% - 32px), 960px);
+  width: min(calc(100% - 24px), 960px);
 }
 
 .user-v2-secondary-screen {
@@ -588,7 +654,9 @@ summary:focus-visible {
   --road-muted: #5a5a62;
   --road-line: #dedee2;
   --road-signal: #ff4713;
-  min-height: 100dvh;
+  height: 100dvh;
+  max-height: 100dvh;
+  overflow: hidden;
   display: grid;
   grid-template-rows: auto 1fr auto;
   background: var(--road-paper);
@@ -1384,14 +1452,13 @@ summary:focus-visible {
   background: var(--user-color-action-hover);
 }
 
-@media (max-width: 767px) {
-  /* iOS zooms editable controls below 16px. Keep pinch zoom available. */
-  input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]):not([type="range"]):not([type="file"]),
-  select,
-  textarea {
-    font-size: 16px !important;
-    scroll-margin-block: calc(var(--user-header-height, 72px) + 16px) 184px;
-  }
+/* Base mobile-first: iOS no debe hacer zoom en controles (<16px).
+   Se declara como base; desktop hereda el mismo mínimo legible. */
+input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]):not([type="range"]):not([type="file"]),
+select,
+textarea {
+  font-size: 16px;
+  scroll-margin-block: calc(var(--user-header-height, 72px) + 16px) 184px;
 }
 
 .user-v2-shell-inner,
@@ -1701,11 +1768,10 @@ summary:focus-visible {
 [class~="text-warning"], [class~="text-[#F5B400]"], [class~="text-[#f5b400]"] {
   color: var(--user-color-pending-ink);
 }
-@media (max-width: 767px) {
-  input::placeholder, textarea::placeholder {
-    color: var(--user-color-muted);
-    opacity: 1;
-  }
+/* Base mobile-first: placeholders legibles. */
+input::placeholder, textarea::placeholder {
+  color: var(--user-color-muted);
+  opacity: 1;
 }
 
 :root { --user-hero-surface: #0a2342; --user-hero-text: #ffffff; }

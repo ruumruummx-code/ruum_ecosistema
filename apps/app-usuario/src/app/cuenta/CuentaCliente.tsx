@@ -14,7 +14,6 @@ import {
   type MobileRowTonoIcono,
 } from "@ruum/ui";
 import { iniciales } from "./cuenta-utils";
-import { PreferenciasToggles } from "./PreferenciasToggles";
 import type { Database } from "@ruum/shared/types";
 
 type Usuario = Database["public"]["Tables"]["usuarios"]["Row"];
@@ -195,7 +194,6 @@ export function CuentaCliente({
   const [cerrandoSesion, setCerrandoSesion] = useState(false);
   const [seccionesAbiertas, setSeccionesAbiertas] = useState<Record<string, boolean>>({
     perfil: false,
-    notificaciones: false,
     soporte: false,
     legal: false,
   });
@@ -393,32 +391,6 @@ export function CuentaCliente({
             subtitulo="Notificaciones, alertas, idioma y tema"
           />
         </nav>
-      </AcordeonSeccion>
-
-      {/* Acordeón: Notificaciones */}
-      <AcordeonSeccion
-        id="notificaciones"
-        titulo="Notificaciones"
-        subtitulo="Preferencias por canal (push, correo, SMS)"
-        icono={
-          <Icono
-            d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9 M13.73 21a2 2 0 0 1-3.46 0"
-            className="size-[19px]"
-          />
-        }
-        tonoIcono="base"
-        abierto={Boolean(seccionesAbiertas.notificaciones)}
-        onToggle={() => toggleSeccion("notificaciones")}
-      >
-        <div className="px-4 py-3">
-          {usuario ? (
-            <PreferenciasToggles usuario={usuario} />
-          ) : (
-            <p className="py-3 text-[13px] font-medium text-[#4e5f80] dark:text-[#a8b5cc]">
-              Inicia sesión para configurar tus notificaciones.
-            </p>
-          )}
-        </div>
       </AcordeonSeccion>
 
       {/* Acordeón: Soporte */}

@@ -42,19 +42,20 @@ export function MobileShell({
     <Component
       style={style}
       className={[
-        "min-h-dvh w-full transition-colors",
+        "ruum-screen flex h-[100dvh] max-h-[100dvh] w-full flex-col overflow-hidden transition-colors",
         conFondoCanvas
           ? "bg-[var(--user-color-background,var(--ruum-canvas))] text-[var(--user-color-primary,var(--ruum-text-primary))]"
           : "",
-        navInferiorVisible ? "pb-24" : "pb-6",
         className,
       ].join(" ")}
     >
       <div
+        style={{ WebkitOverflowScrolling: "touch" }}
         className={[
-          "w-full mx-auto flex flex-col",
+          "scrollable-content mx-auto flex w-full min-h-0 flex-1 flex-col overflow-y-auto overscroll-contain",
           ANCHO_VARIANTE[variant],
           PADDING_VARIANTE[padding],
+          navInferiorVisible ? "pb-24" : "pb-6",
           contentClassName,
         ].filter(Boolean).join(" ")}
       >

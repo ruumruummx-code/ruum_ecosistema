@@ -158,20 +158,21 @@ describe("CuentaCliente — Sistema móvil unificado", () => {
     expect(screen.getByRole("region", { name: "Perfil" })).toBeInTheDocument();
     expect(screen.getByRole("list", { name: "Mis vehículos" })).toBeInTheDocument();
 
-    // 4 botones de acordeón cerrados por defecto
+    // 3 botones de acordeón cerrados por defecto (Notificaciones centralizado en Preferencias)
     const btnPerfil = screen.getByRole("button", { name: /perfil/i });
-    const btnNotificaciones = screen.getByRole("button", { name: /notificaciones/i });
     const btnSoporte = screen.getByRole("button", { name: /soporte/i });
     const btnLegal = screen.getByRole("button", { name: /legal y cuenta/i });
 
     expect(btnPerfil).toHaveAttribute("aria-expanded", "false");
-    expect(btnNotificaciones).toHaveAttribute("aria-expanded", "false");
     expect(btnSoporte).toHaveAttribute("aria-expanded", "false");
     expect(btnLegal).toHaveAttribute("aria-expanded", "false");
 
+    // Sin sección duplicada de Notificaciones en Cuenta
+    expect(screen.queryByRole("button", { name: /^notificaciones$/i })).not.toBeInTheDocument();
+
     // Todos los chevrons con rotación inicial 0°
     const chevrons = screen.getAllByTestId("chevron-acordeon");
-    expect(chevrons).toHaveLength(4);
+    expect(chevrons).toHaveLength(3);
     chevrons.forEach((chevron) => {
       expect(chevron).toHaveClass("rotate-0");
       expect(chevron).not.toHaveClass("rotate-90");
