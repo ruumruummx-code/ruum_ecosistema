@@ -1,0 +1,115 @@
+{
+  "project": "asmzetwwwugaoowiukdv",
+  "applied": {
+    "migration": "20261014224216_advisor_indices_claves_foraneas",
+    "validIndexes": 79
+  },
+  "before": {
+    "security": [
+      {
+        "name": "rls_enabled_no_policy",
+        "count": 4,
+        "level": "INFO"
+      },
+      {
+        "name": "function_search_path_mutable",
+        "count": 25,
+        "level": "WARN"
+      },
+      {
+        "name": "extension_in_public",
+        "count": 2,
+        "level": "WARN"
+      },
+      {
+        "name": "anon_security_definer_function_executable",
+        "count": 178,
+        "level": "WARN"
+      },
+      {
+        "name": "authenticated_security_definer_function_executable",
+        "count": 200,
+        "level": "WARN"
+      },
+      {
+        "name": "auth_leaked_password_protection",
+        "count": 1,
+        "level": "WARN"
+      }
+    ],
+    "performance": [
+      {
+        "name": "unindexed_foreign_keys",
+        "count": 79,
+        "level": "INFO"
+      },
+      {
+        "name": "auth_rls_initplan",
+        "count": 76,
+        "level": "WARN"
+      },
+      {
+        "name": "unused_index",
+        "count": 62,
+        "level": "INFO"
+      },
+      {
+        "name": "multiple_permissive_policies",
+        "count": 553,
+        "level": "WARN"
+      }
+    ]
+  },
+  "after": {
+    "security": [
+      {
+        "name": "rls_enabled_no_policy",
+        "count": 4,
+        "level": "INFO"
+      },
+      {
+        "name": "function_search_path_mutable",
+        "count": 25,
+        "level": "WARN"
+      },
+      {
+        "name": "extension_in_public",
+        "count": 2,
+        "level": "WARN"
+      },
+      {
+        "name": "anon_security_definer_function_executable",
+        "count": 178,
+        "level": "WARN"
+      },
+      {
+        "name": "authenticated_security_definer_function_executable",
+        "count": 200,
+        "level": "WARN"
+      },
+      {
+        "name": "auth_leaked_password_protection",
+        "count": 1,
+        "level": "WARN"
+      }
+    ],
+    "performance": [
+      {
+        "name": "auth_rls_initplan",
+        "count": 76,
+        "level": "WARN"
+      },
+      {
+        "name": "unused_index",
+        "count": 141,
+        "level": "INFO"
+      },
+      {
+        "name": "multiple_permissive_policies",
+        "count": 553,
+        "level": "WARN"
+      }
+    ]
+  },
+  "pending": "Security and RLS changes were rejected by automatic approval review; proposals are not migrations and have not been applied."
+}

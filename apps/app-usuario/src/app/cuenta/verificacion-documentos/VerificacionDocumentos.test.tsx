@@ -3,6 +3,7 @@ import { beforeEach, expect, it, vi } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { VerificacionDocumentos } from "../VerificacionDocumentos";
 import type { Database } from "@ruum/shared/types";
+vi.mock("next/navigation", () => ({ useRouter: () => ({ refresh: vi.fn() }) }));
 const mocks = vi.hoisted(() => ({ listar: vi.fn(), subir: vi.fn(), ine: vi.fn() }));
 vi.mock("../../../lib/supabase-browser", () => ({ crearClienteNavegador: () => ({}), tieneSupabaseConfigurado: () => true }));
 vi.mock("@ruum/api/services", () => ({ listarDocumentosCuentaUsuario: mocks.listar, subirDocumentoCuentaUsuario: mocks.subir, subirDocumentoIdentidad: mocks.ine, actualizarFacturacionUsuario: vi.fn() }));
@@ -51,4 +52,10 @@ it("distingue un error de consulta de un documento faltante", async () => {
   await screen.findByRole("alert");
   expect(screen.getAllByText("Estado no disponible")).toHaveLength(3);
   expect(screen.getByLabelText("Seleccionar archivo · Licencia de conducir")).toBeDisabled();
+});
+
+it("no anuncia facturación configurada si sólo tiene RFC", async () => {
+  render(<VerificacionDocumentos usuario={{ ...usuario, rfc: "ABC123456XYZ" }} />);
+  await waitFor(() => expect(screen.getByLabelText("Seleccionar archivo · Licencia de conducir")).not.toBeDisabled());
+  expect(screen.getByText("Facturación sin configurar")).toBeInTheDocument();
 });

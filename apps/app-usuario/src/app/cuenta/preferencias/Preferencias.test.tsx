@@ -101,6 +101,8 @@ describe("Preferencias — Pantalla y configuración de usuario", () => {
 
     expect(await screen.findByText("Tema aplicado: Oscuro")).toBeInTheDocument();
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+    expect(document.documentElement.getAttribute("data-theme")).toBe("dark");
+    expect(window.localStorage.getItem("ruum-tema")).toBe("dark");
   });
 
   it("permite abrir el modal de Unidades de medida y cambiar a Imperial", async () => {
@@ -120,29 +122,38 @@ describe("Preferencias — Pantalla y configuración de usuario", () => {
     await user.click(botonAplicar);
 
     expect(await screen.findByText("Unidades actualizadas: Imperial")).toBeInTheDocument();
+    expect(document.documentElement.getAttribute("data-units")).toBe("imperial");
   });
 
   it("permite abrir el modal de Accesibilidad y Uso de Datos", async () => {
     const user = userEvent.setup();
     render(<Preferencias usuario={mockUsuario as Usuario} />);
 
-    // Accesibilidad
+    // Accesibilidad: seleccionar Alto contraste
     const botonAccesibilidad = screen.getByRole("button", { name: /accesibilidad/i });
     await user.click(botonAccesibilidad);
     expect(await screen.findByRole("dialog")).toBeInTheDocument();
     expect(screen.getByText("Ajusta la interfaz para que sea más fácil de usar")).toBeInTheDocument();
 
-    // Cancelar
-    await user.click(screen.getByRole("button", { name: /cancelar/i }));
-    await waitFor(() => {
-      expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
-    });
+    const opcionAltoContraste = screen.getByRole("radio", { name: /alto contraste/i });
+    await user.click(opcionAltoContraste);
+    await user.click(screen.getByRole("button", { name: /aplicar/i }));
 
-    // Uso de datos
+    expect(await screen.findByText("Accesibilidad configurada: Alto contraste")).toBeInTheDocument();
+    expect(document.documentElement.getAttribute("data-a11y-contrast")).toBe("high");
+
+    // Uso de datos: seleccionar Desactivado
     const botonDatos = screen.getByRole("button", { name: /uso de datos/i });
     await user.click(botonDatos);
     expect(await screen.findByRole("dialog")).toBeInTheDocument();
     expect(screen.getByText(/compartiendo datos anónimos de uso/i)).toBeInTheDocument();
+
+    const opcionDesactivado = screen.getByRole("radio", { name: /desactivado/i });
+    await user.click(opcionDesactivado);
+    await user.click(screen.getByRole("button", { name: /aplicar/i }));
+
+    expect(await screen.findByText("Uso de datos: Desactivado")).toBeInTheDocument();
+    expect(window.localStorage.getItem("ruum:telemetria-desactivada")).toBe("true");
   });
 
   it("cierra los modales al presionar la tecla Escape", async () => {

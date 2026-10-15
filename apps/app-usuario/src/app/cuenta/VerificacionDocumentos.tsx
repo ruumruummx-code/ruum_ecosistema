@@ -35,7 +35,7 @@ export function VerificacionDocumentos({ usuario, empresa = null }: Verificacion
     void cargar();
     return () => { activo = false; };
   }, [intento]);
-  const [fiscalConfigurado, setFiscalConfigurado] = useState(Boolean((empresa?.rfc ?? usuario.rfc)?.trim()));
+  const [fiscalConfigurado, setFiscalConfigurado] = useState(["rfc", "razon_social", "regimen_fiscal", "codigo_postal_fiscal", "uso_cfdi"].every(campo => Boolean((empresa?.[campo as keyof Empresa] ?? usuario[campo as keyof Usuario])?.toString().trim())));
   const identidad = ine?.estado === "verificado" ? "Identidad verificada" : ine?.estado === "rechazado" ? "Identificación requiere actualización" : ine ? "Identidad en revisión" : "Identificación pendiente";
   // C-2: porcentaje calculado desde datos reales (nada hardcodeado).
   // 4 bloques de 25%: INE cargado, identidad verificada, RFC registrado,

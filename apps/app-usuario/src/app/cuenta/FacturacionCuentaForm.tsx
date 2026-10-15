@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import { Aviso, Button, Field } from "@ruum/ui";
 import type { Database } from "@ruum/shared/types";
 import { actualizarFacturacionUsuario } from "@ruum/api/services";
@@ -15,7 +16,7 @@ function limpiar(valor: string) {
 }
 
 function soloAlfanumericoFiscal(valor: string, maximo: number) {
-  return valor.replace(/[^a-zA-Z0-9]/g, "").toUpperCase().slice(0, maximo);
+  return valor.toUpperCase().replace(/[^A-ZÑ&0-9]/g, "").slice(0, maximo);
 }
 
 function soloDigitos(valor: string, maximo: number) {
@@ -27,6 +28,8 @@ function datoFiscal(usuario: Usuario, empresa: Empresa | null, campo: CampoFisca
 }
 
 export function FacturacionCuentaForm({ usuario, empresa, onActualizado }: { usuario: Usuario; empresa: Empresa | null; onActualizado?: () => void }) {
+  const router = useRouter();
+  const bloqueo = useRef(false);
   const [rfc, setRfc] = useState(datoFiscal(usuario, empresa, "rfc"));
   const [razonSocial, setRazonSocial] = useState(datoFiscal(usuario, empresa, "razon_social") || empresa?.nombre || "");
   const [regimenFiscal, setRegimenFiscal] = useState(datoFiscal(usuario, empresa, "regimen_fiscal"));
@@ -38,6 +41,7 @@ export function FacturacionCuentaForm({ usuario, empresa, onActualizado }: { usu
 
   async function guardar(e: React.FormEvent) {
     e.preventDefault();
+    if (bloqueo.current) return;
     setMensaje(null);
 
     if (!rfc || rfc.length < 12 || !razonSocial.trim() || !regimenFiscal.trim() || codigoPostalFiscal.length !== 5 || !usoCfdi.trim()) {
@@ -50,6 +54,7 @@ export function FacturacionCuentaForm({ usuario, empresa, onActualizado }: { usu
       return;
     }
 
+    bloqueo.current = true;
     setGuardando(true);
     try {
       await actualizarFacturacionUsuario(crearClienteNavegador(), {
@@ -62,9 +67,11 @@ export function FacturacionCuentaForm({ usuario, empresa, onActualizado }: { usu
       });
       setMensaje({ tono: "info", texto: "Datos de facturación actualizados." });
       onActualizado?.();
+      router.refresh();
     } catch (err) {
       setMensaje({ tono: "danger", texto: err instanceof Error ? err.message : "No pudimos guardar los datos fiscales." });
     } finally {
+      bloqueo.current = false;
       setGuardando(false);
     }
   }

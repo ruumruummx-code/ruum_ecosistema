@@ -41,5 +41,14 @@ export function recordOperationalEvent(
   details: Record<string, unknown> = {},
   severity: OperationalSeverity = "error"
 ): Promise<void> {
+  if (typeof window !== "undefined") {
+    try {
+      if (window.localStorage.getItem("ruum:telemetria-desactivada") === "true") {
+        return Promise.resolve();
+      }
+    } catch {
+      // ignore
+    }
+  }
   return record(type, details, severity);
 }

@@ -216,8 +216,8 @@ function Interruptor({ activo, onAlternar, etiquetaAria, disabled = false }: Int
       disabled={disabled}
       onClick={onAlternar}
       className={[
-        "relative inline-flex h-7 w-12 shrink-0 cursor-pointer items-center rounded-full transition-colors duration-200 ease-in-out focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0a2342] disabled:opacity-50",
-        activo ? "bg-[#0a2342]" : "bg-[#d5e2f0]",
+        "relative inline-flex h-7 w-12 shrink-0 cursor-pointer items-center rounded-full transition-colors duration-200 ease-in-out focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0a2342] dark:focus-visible:outline-[#6ba8ff] disabled:opacity-50",
+        activo ? "bg-[#0a2342] dark:bg-[#104ca0]" : "bg-[#d5e2f0] dark:bg-[#1a3a5c]",
       ].join(" ")}
     >
       <span
@@ -228,6 +228,88 @@ function Interruptor({ activo, onAlternar, etiquetaAria, disabled = false }: Int
       />
     </button>
   );
+}
+
+/* ─────────────────────────────────────────────────────────────
+   Funciones activas para aplicar preferencias en el DOM / Navegador
+───────────────────────────────────────────────────────────── */
+
+function aplicarTemaEnDocumento(t: "Claro" | "Oscuro" | "Automático") {
+  if (typeof window === "undefined" || typeof document === "undefined") return;
+  try {
+    let efectivo: "light" | "dark" = "light";
+    if (t === "Oscuro") {
+      efectivo = "dark";
+    } else if (t === "Claro") {
+      efectivo = "light";
+    } else {
+      efectivo = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+    }
+    document.documentElement.setAttribute("data-theme", efectivo);
+    if (efectivo === "dark") {
+      document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+    }
+    window.localStorage.setItem("ruum-tema", efectivo);
+    window.localStorage.setItem("ruum-theme", efectivo);
+    window.localStorage.setItem("ruum-tema-modo", t === "Claro" ? "light" : t === "Oscuro" ? "dark" : "auto");
+  } catch {
+    // ignore
+  }
+}
+
+function aplicarAccesibilidadEnDocumento(acc: "Estándar" | "Texto grande" | "Alto contraste") {
+  if (typeof window === "undefined" || typeof document === "undefined") return;
+  try {
+    if (acc === "Texto grande") {
+      document.documentElement.setAttribute("data-a11y-font", "large");
+      document.documentElement.style.fontSize = "18px";
+      document.documentElement.removeAttribute("data-a11y-contrast");
+    } else if (acc === "Alto contraste") {
+      document.documentElement.setAttribute("data-a11y-contrast", "high");
+      document.documentElement.style.fontSize = "";
+      document.documentElement.removeAttribute("data-a11y-font");
+    } else {
+      document.documentElement.removeAttribute("data-a11y-font");
+      document.documentElement.removeAttribute("data-a11y-contrast");
+      document.documentElement.style.fontSize = "";
+    }
+  } catch {
+    // ignore
+  }
+}
+
+function aplicarIdiomaEnDocumento(id: "es" | "en") {
+  if (typeof window === "undefined" || typeof document === "undefined") return;
+  try {
+    document.documentElement.setAttribute("lang", id);
+  } catch {
+    // ignore
+  }
+}
+
+function aplicarUnidadesEnDocumento(u: "Métrico" | "Imperial") {
+  if (typeof window === "undefined" || typeof document === "undefined") return;
+  try {
+    document.documentElement.setAttribute("data-units", u === "Imperial" ? "imperial" : "metric");
+    window.dispatchEvent(new CustomEvent("ruum:unidades-actualizadas", { detail: { unidades: u } }));
+  } catch {
+    // ignore
+  }
+}
+
+function aplicarUsoDatosEnDocumento(datos: "Activado" | "Desactivado") {
+  if (typeof window === "undefined") return;
+  try {
+    if (datos === "Desactivado") {
+      window.localStorage.setItem("ruum:telemetria-desactivada", "true");
+    } else {
+      window.localStorage.removeItem("ruum:telemetria-desactivada");
+    }
+  } catch {
+    // ignore
+  }
 }
 
 /* ─────────────────────────────────────────────────────────────
@@ -289,6 +371,15 @@ export function Preferencias({ usuario }: PreferenciasProps) {
   // Toast de feedback
   const [toastMensaje, setToastMensaje] = useState<string | null>(null);
 
+  // Activa las preferencias guardadas en el DOM al cargar el componente
+  useEffect(() => {
+    aplicarTemaEnDocumento(tema);
+    aplicarAccesibilidadEnDocumento(accesibilidad);
+    aplicarIdiomaEnDocumento(idioma);
+    aplicarUnidadesEnDocumento(unidades);
+    aplicarUsoDatosEnDocumento(usoDatos);
+  }, []);
+
   // Cerrar modales con Escape
   useEffect(() => {
     function manejarKeyDown(e: KeyboardEvent) {
@@ -324,6 +415,15 @@ export function Preferencias({ usuario }: PreferenciasProps) {
     const nuevo = !notifPush;
     setNotifPush(nuevo);
     void sincronizarNotificacion("notificaciones_push", nuevo);
+    if (nuevo && typeof window !== "undefined" && "Notification" in window) {
+      try {
+        if (Notification.permission === "default") {
+          void Notification.requestPermission();
+        }
+      } catch {
+        // ignore
+      }
+    }
     setToastMensaje(nuevo ? "Notificaciones push activadas" : "Notificaciones push desactivadas");
   }
 
@@ -379,6 +479,7 @@ export function Preferencias({ usuario }: PreferenciasProps) {
   function handleCambiarIdioma(nuevo: "es" | "en") {
     setIdioma(nuevo);
     guardarLocal("ruum:pref:idioma", nuevo);
+    aplicarIdiomaEnDocumento(nuevo);
     setToastMensaje(nuevo === "es" ? "Idioma cambiado a Español (México)" : "Language changed to English (US)");
   }
 
@@ -393,6 +494,13 @@ export function Preferencias({ usuario }: PreferenciasProps) {
     const nuevo = !ubicacion;
     setUbicacion(nuevo);
     guardarLocal("ruum:pref:ubicacion", nuevo);
+    if (nuevo && typeof navigator !== "undefined" && "geolocation" in navigator) {
+      try {
+        navigator.geolocation.getCurrentPosition(() => {}, () => {}, { timeout: 4000, maximumAge: 60000 });
+      } catch {
+        // ignore
+      }
+    }
     setToastMensaje(nuevo ? "Ubicación en tiempo real activada" : "Ubicación en tiempo real desactivada");
   }
 
@@ -409,18 +517,22 @@ export function Preferencias({ usuario }: PreferenciasProps) {
     if (modalAbierto === "tema") {
       setTema(tempTema);
       guardarLocal("ruum:pref:tema", tempTema);
+      aplicarTemaEnDocumento(tempTema);
       setToastMensaje(`Tema aplicado: ${tempTema}`);
     } else if (modalAbierto === "unidades") {
       setUnidades(tempUnidades);
       guardarLocal("ruum:pref:unidades", tempUnidades);
+      aplicarUnidadesEnDocumento(tempUnidades);
       setToastMensaje(`Unidades actualizadas: ${tempUnidades}`);
     } else if (modalAbierto === "accesibilidad") {
       setAccesibilidad(tempAccesibilidad);
       guardarLocal("ruum:pref:accesibilidad", tempAccesibilidad);
+      aplicarAccesibilidadEnDocumento(tempAccesibilidad);
       setToastMensaje(`Accesibilidad configurada: ${tempAccesibilidad}`);
     } else if (modalAbierto === "datos") {
       setUsoDatos(tempDatos);
       guardarLocal("ruum:pref:usoDatos", tempDatos);
+      aplicarUsoDatosEnDocumento(tempDatos);
       setToastMensaje(`Uso de datos: ${tempDatos}`);
     }
     setModalAbierto(null);
@@ -443,19 +555,19 @@ export function Preferencias({ usuario }: PreferenciasProps) {
       )}
 
       {/* Header con botón regresar */}
-      <header className="flex items-center gap-3.5 border-b border-[#f0f4fa] bg-white px-3 py-3 rounded-[22px] shadow-[0_2px_8px_rgba(0,0,0,0.02)]">
+      <header className="flex items-center gap-3.5 border-b border-[#f0f4fa] bg-white px-3 py-3 rounded-[22px] shadow-[0_2px_8px_rgba(0,0,0,0.02)] dark:border-[#1a3a5c] dark:bg-[#0a2342]">
         <Link
           href="/cuenta"
           aria-label="Volver a mi cuenta"
-          className="flex size-10 shrink-0 items-center justify-center rounded-full bg-[#f2f6fc] text-[#0a2342] transition-all hover:bg-[#e3ebf5] active:scale-95"
+          className="flex size-10 shrink-0 items-center justify-center rounded-full bg-[#f2f6fc] text-[#0a2342] transition-all hover:bg-[#e3ebf5] active:scale-95 dark:bg-[#0f2d52] dark:text-[#f6f8fb] dark:hover:bg-[#1a3a5c]"
         >
           <Icono nombre="atras" className="size-4" strokeWidth={2.2} />
         </Link>
         <div className="min-w-0">
-          <h1 className="text-[18px] font-bold tracking-tight text-[#0a2342] leading-snug">
+          <h1 className="text-[18px] font-bold tracking-tight text-[#0a2342] dark:text-[#f6f8fb] leading-snug">
             Preferencias
           </h1>
-          <p className="text-[12px] font-medium text-[#4e5f80]">
+          <p className="text-[12px] font-medium text-[#4e5f80] dark:text-[#a8b5cc]">
             Personaliza tu experiencia
           </p>
         </div>
@@ -496,21 +608,21 @@ export function Preferencias({ usuario }: PreferenciasProps) {
           SECCIÓN: NOTIFICACIONES
       ───────────────────────────────────────────────────────── */}
       <div>
-        <h2 className="mb-2.5 px-1 text-[12px] font-bold uppercase tracking-[0.8px] text-[#4e5f80]">
+        <h2 className="mb-2.5 px-1 text-[12px] font-bold uppercase tracking-[0.8px] text-[#4e5f80] dark:text-[#a8b5cc]">
           Notificaciones
         </h2>
-        <div className="overflow-hidden rounded-[22px] border border-[#eef2f7] bg-white py-1 shadow-[0_6px_16px_rgba(0,0,0,0.02)]">
+        <div className="overflow-hidden rounded-[22px] border border-[#eef2f7] bg-white py-1 shadow-[0_6px_16px_rgba(0,0,0,0.02)] dark:border-[#1a3a5c] dark:bg-[#0a2342]">
           {/* Push */}
           <div className="flex items-center justify-between gap-3.5 px-[18px] py-[15px]">
             <div className="flex items-center gap-3.5 min-w-0">
-              <span aria-hidden="true" className="flex size-10 shrink-0 items-center justify-center rounded-[13px] bg-[#e9f3ee] text-[#1f6b4a]">
+              <span aria-hidden="true" className="flex size-10 shrink-0 items-center justify-center rounded-[13px] bg-[#e9f3ee] text-[#1f6b4a] dark:bg-[#0e3a24] dark:text-[#52d294]">
                 <IconoCampana className="size-[17px]" />
               </span>
               <div className="min-w-0">
-                <span className="block text-[14.5px] font-bold tracking-tight text-[#0a2342]">
+                <span className="block text-[14.5px] font-bold tracking-tight text-[#0a2342] dark:text-[#f6f8fb]">
                   Notificaciones push
                 </span>
-                <span className="block truncate text-[12px] font-medium text-[#4e5f80]">
+                <span className="block truncate text-[12px] font-medium text-[#4e5f80] dark:text-[#a8b5cc]">
                   Alertas en tiempo real del traslado
                 </span>
               </div>
@@ -523,20 +635,20 @@ export function Preferencias({ usuario }: PreferenciasProps) {
           </div>
 
           <div className="relative">
-            <span aria-hidden="true" className="absolute left-[68px] right-[18px] top-0 h-px bg-[#f0f4fa]" />
+            <span aria-hidden="true" className="absolute left-[68px] right-[18px] top-0 h-px bg-[#f0f4fa] dark:bg-[#1a3a5c]" />
           </div>
 
           {/* Email */}
           <div className="flex items-center justify-between gap-3.5 px-[18px] py-[15px]">
             <div className="flex items-center gap-3.5 min-w-0">
-              <span aria-hidden="true" className="flex size-10 shrink-0 items-center justify-center rounded-[13px] bg-[#e9f3ee] text-[#1f6b4a]">
+              <span aria-hidden="true" className="flex size-10 shrink-0 items-center justify-center rounded-[13px] bg-[#e9f3ee] text-[#1f6b4a] dark:bg-[#0e3a24] dark:text-[#52d294]">
                 <IconoCorreo className="size-[17px]" />
               </span>
               <div className="min-w-0">
-                <span className="block text-[14.5px] font-bold tracking-tight text-[#0a2342]">
+                <span className="block text-[14.5px] font-bold tracking-tight text-[#0a2342] dark:text-[#f6f8fb]">
                   Correo electrónico
                 </span>
-                <span className="block truncate text-[12px] font-medium text-[#4e5f80]">
+                <span className="block truncate text-[12px] font-medium text-[#4e5f80] dark:text-[#a8b5cc]">
                   Resúmenes, confirmaciones y facturas
                 </span>
               </div>
@@ -549,20 +661,20 @@ export function Preferencias({ usuario }: PreferenciasProps) {
           </div>
 
           <div className="relative">
-            <span aria-hidden="true" className="absolute left-[68px] right-[18px] top-0 h-px bg-[#f0f4fa]" />
+            <span aria-hidden="true" className="absolute left-[68px] right-[18px] top-0 h-px bg-[#f0f4fa] dark:bg-[#1a3a5c]" />
           </div>
 
           {/* WhatsApp / SMS */}
           <div className="flex items-center justify-between gap-3.5 px-[18px] py-[15px]">
             <div className="flex items-center gap-3.5 min-w-0">
-              <span aria-hidden="true" className="flex size-10 shrink-0 items-center justify-center rounded-[13px] bg-[#e9f3ee] text-[#1f6b4a]">
+              <span aria-hidden="true" className="flex size-10 shrink-0 items-center justify-center rounded-[13px] bg-[#e9f3ee] text-[#1f6b4a] dark:bg-[#0e3a24] dark:text-[#52d294]">
                 <IconoMensaje className="size-[17px]" />
               </span>
               <div className="min-w-0">
-                <span className="block text-[14.5px] font-bold tracking-tight text-[#0a2342]">
+                <span className="block text-[14.5px] font-bold tracking-tight text-[#0a2342] dark:text-[#f6f8fb]">
                   WhatsApp / SMS
                 </span>
-                <span className="block truncate text-[12px] font-medium text-[#4e5f80]">
+                <span className="block truncate text-[12px] font-medium text-[#4e5f80] dark:text-[#a8b5cc]">
                   Mensajes de estado del traslado
                 </span>
               </div>
@@ -575,20 +687,20 @@ export function Preferencias({ usuario }: PreferenciasProps) {
           </div>
 
           <div className="relative">
-            <span aria-hidden="true" className="absolute left-[68px] right-[18px] top-0 h-px bg-[#f0f4fa]" />
+            <span aria-hidden="true" className="absolute left-[68px] right-[18px] top-0 h-px bg-[#f0f4fa] dark:bg-[#1a3a5c]" />
           </div>
 
           {/* Promociones */}
           <div className="flex items-center justify-between gap-3.5 px-[18px] py-[15px]">
             <div className="flex items-center gap-3.5 min-w-0">
-              <span aria-hidden="true" className="flex size-10 shrink-0 items-center justify-center rounded-[13px] bg-[#fef4e6] text-[#b36b1e]">
+              <span aria-hidden="true" className="flex size-10 shrink-0 items-center justify-center rounded-[13px] bg-[#fef4e6] text-[#b36b1e] dark:bg-[#3d2e00] dark:text-[#ffc933]">
                 <IconoEtiqueta className="size-[17px]" />
               </span>
               <div className="min-w-0">
-                <span className="block text-[14.5px] font-bold tracking-tight text-[#0a2342]">
+                <span className="block text-[14.5px] font-bold tracking-tight text-[#0a2342] dark:text-[#f6f8fb]">
                   Promociones
                 </span>
-                <span className="block truncate text-[12px] font-medium text-[#4e5f80]">
+                <span className="block truncate text-[12px] font-medium text-[#4e5f80] dark:text-[#a8b5cc]">
                   Ofertas y novedades de Ruum Ruum
                 </span>
               </div>
@@ -606,21 +718,21 @@ export function Preferencias({ usuario }: PreferenciasProps) {
           SECCIÓN: ALERTAS DE TRASLADO
       ───────────────────────────────────────────────────────── */}
       <div>
-        <h2 className="mb-2.5 px-1 text-[12px] font-bold uppercase tracking-[0.8px] text-[#4e5f80]">
+        <h2 className="mb-2.5 px-1 text-[12px] font-bold uppercase tracking-[0.8px] text-[#4e5f80] dark:text-[#a8b5cc]">
           Alertas de traslado
         </h2>
-        <div className="overflow-hidden rounded-[22px] border border-[#eef2f7] bg-white py-1 shadow-[0_6px_16px_rgba(0,0,0,0.02)]">
+        <div className="overflow-hidden rounded-[22px] border border-[#eef2f7] bg-white py-1 shadow-[0_6px_16px_rgba(0,0,0,0.02)] dark:border-[#1a3a5c] dark:bg-[#0a2342]">
           {/* Estado del traslado */}
           <div className="flex items-center justify-between gap-3.5 px-[18px] py-[15px]">
             <div className="flex items-center gap-3.5 min-w-0">
-              <span aria-hidden="true" className="flex size-10 shrink-0 items-center justify-center rounded-[13px] bg-[#f0f5fe] text-[#2e5a88]">
+              <span aria-hidden="true" className="flex size-10 shrink-0 items-center justify-center rounded-[13px] bg-[#f0f5fe] text-[#2e5a88] dark:bg-[#0f2d52] dark:text-[#6ba8ff]">
                 <IconoCamion className="size-[17px]" />
               </span>
               <div className="min-w-0">
-                <span className="block text-[14.5px] font-bold tracking-tight text-[#0a2342]">
+                <span className="block text-[14.5px] font-bold tracking-tight text-[#0a2342] dark:text-[#f6f8fb]">
                   Estado del traslado
                 </span>
-                <span className="block truncate text-[12px] font-medium text-[#4e5f80]">
+                <span className="block truncate text-[12px] font-medium text-[#4e5f80] dark:text-[#a8b5cc]">
                   Conductor asignado, en camino, llegada
                 </span>
               </div>
@@ -633,20 +745,20 @@ export function Preferencias({ usuario }: PreferenciasProps) {
           </div>
 
           <div className="relative">
-            <span aria-hidden="true" className="absolute left-[68px] right-[18px] top-0 h-px bg-[#f0f4fa]" />
+            <span aria-hidden="true" className="absolute left-[68px] right-[18px] top-0 h-px bg-[#f0f4fa] dark:bg-[#1a3a5c]" />
           </div>
 
           {/* Evidencia disponible */}
           <div className="flex items-center justify-between gap-3.5 px-[18px] py-[15px]">
             <div className="flex items-center gap-3.5 min-w-0">
-              <span aria-hidden="true" className="flex size-10 shrink-0 items-center justify-center rounded-[13px] bg-[#f0f5fe] text-[#2e5a88]">
+              <span aria-hidden="true" className="flex size-10 shrink-0 items-center justify-center rounded-[13px] bg-[#f0f5fe] text-[#2e5a88] dark:bg-[#0f2d52] dark:text-[#6ba8ff]">
                 <IconoCamara className="size-[17px]" />
               </span>
               <div className="min-w-0">
-                <span className="block text-[14.5px] font-bold tracking-tight text-[#0a2342]">
+                <span className="block text-[14.5px] font-bold tracking-tight text-[#0a2342] dark:text-[#f6f8fb]">
                   Evidencia disponible
                 </span>
-                <span className="block truncate text-[12px] font-medium text-[#4e5f80]">
+                <span className="block truncate text-[12px] font-medium text-[#4e5f80] dark:text-[#a8b5cc]">
                   Check inicial y final cargados
                 </span>
               </div>
@@ -659,20 +771,20 @@ export function Preferencias({ usuario }: PreferenciasProps) {
           </div>
 
           <div className="relative">
-            <span aria-hidden="true" className="absolute left-[68px] right-[18px] top-0 h-px bg-[#f0f4fa]" />
+            <span aria-hidden="true" className="absolute left-[68px] right-[18px] top-0 h-px bg-[#f0f4fa] dark:bg-[#1a3a5c]" />
           </div>
 
           {/* Alertas de pago */}
           <div className="flex items-center justify-between gap-3.5 px-[18px] py-[15px]">
             <div className="flex items-center gap-3.5 min-w-0">
-              <span aria-hidden="true" className="flex size-10 shrink-0 items-center justify-center rounded-[13px] bg-[#f0f5fe] text-[#2e5a88]">
+              <span aria-hidden="true" className="flex size-10 shrink-0 items-center justify-center rounded-[13px] bg-[#f0f5fe] text-[#2e5a88] dark:bg-[#0f2d52] dark:text-[#6ba8ff]">
                 <IconoTarjeta className="size-[17px]" />
               </span>
               <div className="min-w-0">
-                <span className="block text-[14.5px] font-bold tracking-tight text-[#0a2342]">
+                <span className="block text-[14.5px] font-bold tracking-tight text-[#0a2342] dark:text-[#f6f8fb]">
                   Alertas de pago
                 </span>
-                <span className="block truncate text-[12px] font-medium text-[#4e5f80]">
+                <span className="block truncate text-[12px] font-medium text-[#4e5f80] dark:text-[#a8b5cc]">
                   Confirmaciones y cargos
                 </span>
               </div>
@@ -685,20 +797,20 @@ export function Preferencias({ usuario }: PreferenciasProps) {
           </div>
 
           <div className="relative">
-            <span aria-hidden="true" className="absolute left-[68px] right-[18px] top-0 h-px bg-[#f0f4fa]" />
+            <span aria-hidden="true" className="absolute left-[68px] right-[18px] top-0 h-px bg-[#f0f4fa] dark:bg-[#1a3a5c]" />
           </div>
 
           {/* Incidentes */}
           <div className="flex items-center justify-between gap-3.5 px-[18px] py-[15px]">
             <div className="flex items-center gap-3.5 min-w-0">
-              <span aria-hidden="true" className="flex size-10 shrink-0 items-center justify-center rounded-[13px] bg-[#fdeaea] text-[#b33c3c]">
+              <span aria-hidden="true" className="flex size-10 shrink-0 items-center justify-center rounded-[13px] bg-[#fdeaea] text-[#b33c3c] dark:bg-[#3d0f1a] dark:text-[#ff6b7a]">
                 <IconoAlertaTriangulo className="size-[17px]" />
               </span>
               <div className="min-w-0">
-                <span className="block text-[14.5px] font-bold tracking-tight text-[#0a2342]">
+                <span className="block text-[14.5px] font-bold tracking-tight text-[#0a2342] dark:text-[#f6f8fb]">
                   Incidentes
                 </span>
-                <span className="block truncate text-[12px] font-medium text-[#4e5f80]">
+                <span className="block truncate text-[12px] font-medium text-[#4e5f80] dark:text-[#a8b5cc]">
                   Problemas durante el traslado
                 </span>
               </div>
@@ -716,10 +828,10 @@ export function Preferencias({ usuario }: PreferenciasProps) {
           SECCIÓN: IDIOMA Y REGIÓN
       ───────────────────────────────────────────────────────── */}
       <div>
-        <h2 className="mb-2.5 px-1 text-[12px] font-bold uppercase tracking-[0.8px] text-[#4e5f80]">
+        <h2 className="mb-2.5 px-1 text-[12px] font-bold uppercase tracking-[0.8px] text-[#4e5f80] dark:text-[#a8b5cc]">
           Idioma y región
         </h2>
-        <div className="overflow-hidden rounded-[22px] border border-[#eef2f7] bg-white p-[18px] shadow-[0_6px_16px_rgba(0,0,0,0.02)]">
+        <div className="overflow-hidden rounded-[22px] border border-[#eef2f7] bg-white p-[18px] shadow-[0_6px_16px_rgba(0,0,0,0.02)] dark:border-[#1a3a5c] dark:bg-[#0a2342]">
           <div className="flex flex-col gap-0" role="radiogroup" aria-label="Selección de idioma">
             {/* Español */}
             <div
@@ -733,19 +845,19 @@ export function Preferencias({ usuario }: PreferenciasProps) {
                   handleCambiarIdioma("es");
                 }
               }}
-              className="flex cursor-pointer items-center gap-3 border-b border-[#f0f4fa] py-3.5 transition first:pt-0 hover:bg-[#fafcfe]"
+              className="flex cursor-pointer items-center gap-3 border-b border-[#f0f4fa] py-3.5 transition first:pt-0 hover:bg-[#fafcfe] dark:border-[#1a3a5c] dark:hover:bg-[#0f2d52]/40"
             >
               <div
                 className={[
                   "flex size-[22px] shrink-0 items-center justify-center rounded-full border-2 transition",
-                  idioma === "es" ? "border-[#0a2342] bg-[#0a2342]" : "border-[#d5e2f0] bg-white",
+                  idioma === "es" ? "border-[#0a2342] bg-[#0a2342] dark:border-[#6ba8ff] dark:bg-[#6ba8ff]" : "border-[#d5e2f0] bg-white dark:border-[#1a3a5c] dark:bg-[#0a2342]",
                 ].join(" ")}
               >
-                {idioma === "es" && <span className="size-2 rounded-full bg-white" />}
+                {idioma === "es" && <span className="size-2 rounded-full bg-white dark:bg-[#0a2342]" />}
               </div>
               <div className="flex-1">
-                <div className="text-[14px] font-bold text-[#0a2342]">Español (México)</div>
-                <div className="text-[12px] font-medium text-[#4e5f80]">Idioma predeterminado</div>
+                <div className="text-[14px] font-bold text-[#0a2342] dark:text-[#f6f8fb]">Español (México)</div>
+                <div className="text-[12px] font-medium text-[#4e5f80] dark:text-[#a8b5cc]">Idioma predeterminado</div>
               </div>
             </div>
 
@@ -761,19 +873,19 @@ export function Preferencias({ usuario }: PreferenciasProps) {
                   handleCambiarIdioma("en");
                 }
               }}
-              className="flex cursor-pointer items-center gap-3 py-3.5 transition last:pb-0 hover:bg-[#fafcfe]"
+              className="flex cursor-pointer items-center gap-3 py-3.5 transition last:pb-0 hover:bg-[#fafcfe] dark:hover:bg-[#0f2d52]/40"
             >
               <div
                 className={[
                   "flex size-[22px] shrink-0 items-center justify-center rounded-full border-2 transition",
-                  idioma === "en" ? "border-[#0a2342] bg-[#0a2342]" : "border-[#d5e2f0] bg-white",
+                  idioma === "en" ? "border-[#0a2342] bg-[#0a2342] dark:border-[#6ba8ff] dark:bg-[#6ba8ff]" : "border-[#d5e2f0] bg-white dark:border-[#1a3a5c] dark:bg-[#0a2342]",
                 ].join(" ")}
               >
-                {idioma === "en" && <span className="size-2 rounded-full bg-white" />}
+                {idioma === "en" && <span className="size-2 rounded-full bg-white dark:bg-[#0a2342]" />}
               </div>
               <div className="flex-1">
-                <div className="text-[14px] font-bold text-[#0a2342]">English (US)</div>
-                <div className="text-[12px] font-medium text-[#4e5f80]">English</div>
+                <div className="text-[14px] font-bold text-[#0a2342] dark:text-[#f6f8fb]">English (US)</div>
+                <div className="text-[12px] font-medium text-[#4e5f80] dark:text-[#a8b5cc]">English</div>
               </div>
             </div>
           </div>
@@ -784,90 +896,90 @@ export function Preferencias({ usuario }: PreferenciasProps) {
           SECCIÓN: PREFERENCIAS DE LA APP
       ───────────────────────────────────────────────────────── */}
       <div>
-        <h2 className="mb-2.5 px-1 text-[12px] font-bold uppercase tracking-[0.8px] text-[#4e5f80]">
+        <h2 className="mb-2.5 px-1 text-[12px] font-bold uppercase tracking-[0.8px] text-[#4e5f80] dark:text-[#a8b5cc]">
           Preferencias de la app
         </h2>
-        <div className="overflow-hidden rounded-[22px] border border-[#eef2f7] bg-white py-1 shadow-[0_6px_16px_rgba(0,0,0,0.02)]">
+        <div className="overflow-hidden rounded-[22px] border border-[#eef2f7] bg-white py-1 shadow-[0_6px_16px_rgba(0,0,0,0.02)] dark:border-[#1a3a5c] dark:bg-[#0a2342]">
           {/* Tema */}
           <button
             type="button"
             onClick={() => abrirModal("tema")}
-            className="flex w-full items-center justify-between gap-3.5 px-[18px] py-[15px] text-left transition active:bg-[#f8fbfe] cursor-pointer"
+            className="flex w-full items-center justify-between gap-3.5 px-[18px] py-[15px] text-left transition active:bg-[#f8fbfe] dark:active:bg-[#0f2d52]/40 cursor-pointer"
           >
             <div className="flex items-center gap-3.5 min-w-0">
-              <span aria-hidden="true" className="flex size-10 shrink-0 items-center justify-center rounded-[13px] bg-[#f2eef9] text-[#5e3b8c]">
+              <span aria-hidden="true" className="flex size-10 shrink-0 items-center justify-center rounded-[13px] bg-[#f2eef9] text-[#5e3b8c] dark:bg-[#2b194d] dark:text-[#b490f5]">
                 <IconoPaleta className="size-[17px]" />
               </span>
               <div className="min-w-0">
-                <span className="block text-[14.5px] font-bold tracking-tight text-[#0a2342]">
+                <span className="block text-[14.5px] font-bold tracking-tight text-[#0a2342] dark:text-[#f6f8fb]">
                   Tema de la aplicación
                 </span>
-                <span className="block truncate text-[12px] font-medium text-[#4e5f80]">
+                <span className="block truncate text-[12px] font-medium text-[#4e5f80] dark:text-[#a8b5cc]">
                   Claro, oscuro o automático
                 </span>
               </div>
             </div>
             <div className="flex shrink-0 items-center gap-2">
-              <span className="text-[13px] font-semibold text-[#4e5f80]">{tema}</span>
-              <IconoChevron className="text-[#c3cfdd]" />
+              <span className="text-[13px] font-semibold text-[#4e5f80] dark:text-[#a8b5cc]">{tema}</span>
+              <IconoChevron className="text-[#c3cfdd] dark:text-[#4e5f80]" />
             </div>
           </button>
 
           <div className="relative">
-            <span aria-hidden="true" className="absolute left-[68px] right-[18px] top-0 h-px bg-[#f0f4fa]" />
+            <span aria-hidden="true" className="absolute left-[68px] right-[18px] top-0 h-px bg-[#f0f4fa] dark:bg-[#1a3a5c]" />
           </div>
 
           {/* Unidades */}
           <button
             type="button"
             onClick={() => abrirModal("unidades")}
-            className="flex w-full items-center justify-between gap-3.5 px-[18px] py-[15px] text-left transition active:bg-[#f8fbfe] cursor-pointer"
+            className="flex w-full items-center justify-between gap-3.5 px-[18px] py-[15px] text-left transition active:bg-[#f8fbfe] dark:active:bg-[#0f2d52]/40 cursor-pointer"
           >
             <div className="flex items-center gap-3.5 min-w-0">
-              <span aria-hidden="true" className="flex size-10 shrink-0 items-center justify-center rounded-[13px] bg-[#f2eef9] text-[#5e3b8c]">
+              <span aria-hidden="true" className="flex size-10 shrink-0 items-center justify-center rounded-[13px] bg-[#f2eef9] text-[#5e3b8c] dark:bg-[#2b194d] dark:text-[#b490f5]">
                 <IconoRegla className="size-[17px]" />
               </span>
               <div className="min-w-0">
-                <span className="block text-[14.5px] font-bold tracking-tight text-[#0a2342]">
+                <span className="block text-[14.5px] font-bold tracking-tight text-[#0a2342] dark:text-[#f6f8fb]">
                   Unidades de medida
                 </span>
-                <span className="block truncate text-[12px] font-medium text-[#4e5f80]">
+                <span className="block truncate text-[12px] font-medium text-[#4e5f80] dark:text-[#a8b5cc]">
                   Kilómetros, litros, moneda
                 </span>
               </div>
             </div>
             <div className="flex shrink-0 items-center gap-2">
-              <span className="text-[13px] font-semibold text-[#4e5f80]">{unidades}</span>
-              <IconoChevron className="text-[#c3cfdd]" />
+              <span className="text-[13px] font-semibold text-[#4e5f80] dark:text-[#a8b5cc]">{unidades}</span>
+              <IconoChevron className="text-[#c3cfdd] dark:text-[#4e5f80]" />
             </div>
           </button>
 
           <div className="relative">
-            <span aria-hidden="true" className="absolute left-[68px] right-[18px] top-0 h-px bg-[#f0f4fa]" />
+            <span aria-hidden="true" className="absolute left-[68px] right-[18px] top-0 h-px bg-[#f0f4fa] dark:bg-[#1a3a5c]" />
           </div>
 
           {/* Accesibilidad */}
           <button
             type="button"
             onClick={() => abrirModal("accesibilidad")}
-            className="flex w-full items-center justify-between gap-3.5 px-[18px] py-[15px] text-left transition active:bg-[#f8fbfe] cursor-pointer"
+            className="flex w-full items-center justify-between gap-3.5 px-[18px] py-[15px] text-left transition active:bg-[#f8fbfe] dark:active:bg-[#0f2d52]/40 cursor-pointer"
           >
             <div className="flex items-center gap-3.5 min-w-0">
-              <span aria-hidden="true" className="flex size-10 shrink-0 items-center justify-center rounded-[13px] bg-[#f2eef9] text-[#5e3b8c]">
+              <span aria-hidden="true" className="flex size-10 shrink-0 items-center justify-center rounded-[13px] bg-[#f2eef9] text-[#5e3b8c] dark:bg-[#2b194d] dark:text-[#b490f5]">
                 <IconoAccesibilidad className="size-[17px]" />
               </span>
               <div className="min-w-0">
-                <span className="block text-[14.5px] font-bold tracking-tight text-[#0a2342]">
+                <span className="block text-[14.5px] font-bold tracking-tight text-[#0a2342] dark:text-[#f6f8fb]">
                   Accesibilidad
                 </span>
-                <span className="block truncate text-[12px] font-medium text-[#4e5f80]">
+                <span className="block truncate text-[12px] font-medium text-[#4e5f80] dark:text-[#a8b5cc]">
                   Texto grande, alto contraste
                 </span>
               </div>
             </div>
             <div className="flex shrink-0 items-center gap-2">
-              <span className="text-[13px] font-semibold text-[#4e5f80]">{accesibilidad}</span>
-              <IconoChevron className="text-[#c3cfdd]" />
+              <span className="text-[13px] font-semibold text-[#4e5f80] dark:text-[#a8b5cc]">{accesibilidad}</span>
+              <IconoChevron className="text-[#c3cfdd] dark:text-[#4e5f80]" />
             </div>
           </button>
         </div>
@@ -877,21 +989,21 @@ export function Preferencias({ usuario }: PreferenciasProps) {
           SECCIÓN: PRIVACIDAD Y SEGURIDAD
       ───────────────────────────────────────────────────────── */}
       <div>
-        <h2 className="mb-2.5 px-1 text-[12px] font-bold uppercase tracking-[0.8px] text-[#4e5f80]">
+        <h2 className="mb-2.5 px-1 text-[12px] font-bold uppercase tracking-[0.8px] text-[#4e5f80] dark:text-[#a8b5cc]">
           Privacidad y seguridad
         </h2>
-        <div className="overflow-hidden rounded-[22px] border border-[#eef2f7] bg-white py-1 shadow-[0_6px_16px_rgba(0,0,0,0.02)]">
+        <div className="overflow-hidden rounded-[22px] border border-[#eef2f7] bg-white py-1 shadow-[0_6px_16px_rgba(0,0,0,0.02)] dark:border-[#1a3a5c] dark:bg-[#0a2342]">
           {/* Biométrico */}
           <div className="flex items-center justify-between gap-3.5 px-[18px] py-[15px]">
             <div className="flex items-center gap-3.5 min-w-0">
-              <span aria-hidden="true" className="flex size-10 shrink-0 items-center justify-center rounded-[13px] bg-[#f0f5fe] text-[#2e5a88]">
+              <span aria-hidden="true" className="flex size-10 shrink-0 items-center justify-center rounded-[13px] bg-[#f0f5fe] text-[#2e5a88] dark:bg-[#0f2d52] dark:text-[#6ba8ff]">
                 <IconoHuella className="size-[17px]" />
               </span>
               <div className="min-w-0">
-                <span className="block text-[14.5px] font-bold tracking-tight text-[#0a2342]">
+                <span className="block text-[14.5px] font-bold tracking-tight text-[#0a2342] dark:text-[#f6f8fb]">
                   Inicio de sesión biométrico
                 </span>
-                <span className="block truncate text-[12px] font-medium text-[#4e5f80]">
+                <span className="block truncate text-[12px] font-medium text-[#4e5f80] dark:text-[#a8b5cc]">
                   Face ID o huella digital
                 </span>
               </div>
@@ -904,20 +1016,20 @@ export function Preferencias({ usuario }: PreferenciasProps) {
           </div>
 
           <div className="relative">
-            <span aria-hidden="true" className="absolute left-[68px] right-[18px] top-0 h-px bg-[#f0f4fa]" />
+            <span aria-hidden="true" className="absolute left-[68px] right-[18px] top-0 h-px bg-[#f0f4fa] dark:bg-[#1a3a5c]" />
           </div>
 
           {/* Ubicación */}
           <div className="flex items-center justify-between gap-3.5 px-[18px] py-[15px]">
             <div className="flex items-center gap-3.5 min-w-0">
-              <span aria-hidden="true" className="flex size-10 shrink-0 items-center justify-center rounded-[13px] bg-[#f0f5fe] text-[#2e5a88]">
+              <span aria-hidden="true" className="flex size-10 shrink-0 items-center justify-center rounded-[13px] bg-[#f0f5fe] text-[#2e5a88] dark:bg-[#0f2d52] dark:text-[#6ba8ff]">
                 <IconoUbicacion className="size-[17px]" />
               </span>
               <div className="min-w-0">
-                <span className="block text-[14.5px] font-bold tracking-tight text-[#0a2342]">
+                <span className="block text-[14.5px] font-bold tracking-tight text-[#0a2342] dark:text-[#f6f8fb]">
                   Ubicación en tiempo real
                 </span>
-                <span className="block truncate text-[12px] font-medium text-[#4e5f80]">
+                <span className="block truncate text-[12px] font-medium text-[#4e5f80] dark:text-[#a8b5cc]">
                   Permitir seguimiento del conductor
                 </span>
               </div>
@@ -930,39 +1042,39 @@ export function Preferencias({ usuario }: PreferenciasProps) {
           </div>
 
           <div className="relative">
-            <span aria-hidden="true" className="absolute left-[68px] right-[18px] top-0 h-px bg-[#f0f4fa]" />
+            <span aria-hidden="true" className="absolute left-[68px] right-[18px] top-0 h-px bg-[#f0f4fa] dark:bg-[#1a3a5c]" />
           </div>
 
           {/* Uso de datos */}
           <button
             type="button"
             onClick={() => abrirModal("datos")}
-            className="flex w-full items-center justify-between gap-3.5 px-[18px] py-[15px] text-left transition active:bg-[#f8fbfe] cursor-pointer"
+            className="flex w-full items-center justify-between gap-3.5 px-[18px] py-[15px] text-left transition active:bg-[#f8fbfe] dark:active:bg-[#0f2d52]/40 cursor-pointer"
           >
             <div className="flex items-center gap-3.5 min-w-0">
-              <span aria-hidden="true" className="flex size-10 shrink-0 items-center justify-center rounded-[13px] bg-[#f0f5fe] text-[#2e5a88]">
+              <span aria-hidden="true" className="flex size-10 shrink-0 items-center justify-center rounded-[13px] bg-[#f0f5fe] text-[#2e5a88] dark:bg-[#0f2d52] dark:text-[#6ba8ff]">
                 <IconoBaseDatos className="size-[17px]" />
               </span>
               <div className="min-w-0">
-                <span className="block text-[14.5px] font-bold tracking-tight text-[#0a2342]">
+                <span className="block text-[14.5px] font-bold tracking-tight text-[#0a2342] dark:text-[#f6f8fb]">
                   Uso de datos
                 </span>
-                <span className="block truncate text-[12px] font-medium text-[#4e5f80]">
+                <span className="block truncate text-[12px] font-medium text-[#4e5f80] dark:text-[#a8b5cc]">
                   Compartir datos anónimos de uso
                 </span>
               </div>
             </div>
             <div className="flex shrink-0 items-center gap-2">
-              <span className="text-[13px] font-semibold text-[#4e5f80]">{usoDatos}</span>
-              <IconoChevron className="text-[#c3cfdd]" />
+              <span className="text-[13px] font-semibold text-[#4e5f80] dark:text-[#a8b5cc]">{usoDatos}</span>
+              <IconoChevron className="text-[#c3cfdd] dark:text-[#4e5f80]" />
             </div>
           </button>
         </div>
       </div>
 
       {/* Nota informativa */}
-      <div className="flex items-start gap-3 rounded-2xl border border-[#dfe8f3] bg-[#f0f5fe] p-4 text-[#3d5470]">
-        <IconoInfo className="mt-0.5 size-5 shrink-0 text-[#2e5a88]" />
+      <div className="flex items-start gap-3 rounded-2xl border border-[#dfe8f3] bg-[#f0f5fe] p-4 text-[#3d5470] dark:border-[#1a3a5c] dark:bg-[#0f2d52]/50 dark:text-[#a8b5cc]">
+        <IconoInfo className="mt-0.5 size-5 shrink-0 text-[#2e5a88] dark:text-[#6ba8ff]" />
         <p className="text-[12.5px] font-medium leading-relaxed">
           Puedes cambiar tus preferencias en cualquier momento. Las alertas de traslado activo se recomiendan mantener activadas para no perderte actualizaciones importantes.
         </p>
@@ -981,17 +1093,17 @@ export function Preferencias({ usuario }: PreferenciasProps) {
           onClick={() => setModalAbierto(null)}
         >
           <div
-            className="w-full max-w-lg rounded-t-[28px] sm:rounded-[28px] bg-white p-6 sm:p-7 shadow-2xl max-h-[88vh] overflow-y-auto"
+            className="w-full max-w-lg rounded-t-[28px] sm:rounded-[28px] bg-white p-6 sm:p-7 shadow-2xl max-h-[88vh] overflow-y-auto dark:border dark:border-[#1a3a5c] dark:bg-[#0a2342]"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="mx-auto mb-4 h-1 w-10 rounded-full bg-slate-200" />
-            <div className="mx-auto mb-3 flex size-14 items-center justify-center rounded-2xl bg-[#f2eef9] text-[#5e3b8c]">
+            <div className="mx-auto mb-4 h-1 w-10 rounded-full bg-slate-200 dark:bg-slate-700" />
+            <div className="mx-auto mb-3 flex size-14 items-center justify-center rounded-2xl bg-[#f2eef9] text-[#5e3b8c] dark:bg-[#2b194d] dark:text-[#b490f5]">
               <IconoPaleta className="size-7" />
             </div>
-            <h2 id="modal-tema-titulo" className="text-center text-[19px] font-extrabold text-[#0a2342] tracking-tight">
+            <h2 id="modal-tema-titulo" className="text-center text-[19px] font-extrabold text-[#0a2342] dark:text-[#f6f8fb] tracking-tight">
               Tema de la aplicación
             </h2>
-            <p id="modal-tema-desc" className="mt-1 text-center text-[13.5px] font-medium text-[#4e5f80] leading-relaxed">
+            <p id="modal-tema-desc" className="mt-1 text-center text-[13.5px] font-medium text-[#4e5f80] dark:text-[#a8b5cc] leading-relaxed">
               Elige cómo quieres ver Ruum Ruum
             </p>
 
@@ -1018,21 +1130,21 @@ export function Preferencias({ usuario }: PreferenciasProps) {
                     className={[
                       "flex cursor-pointer items-center gap-3.5 rounded-2xl border-2 p-3.5 transition",
                       activo
-                        ? "border-[#0a2342] bg-white shadow-[0_0_0_3px_rgba(11,30,51,0.06)]"
-                        : "border-[#e6edf6] bg-[#fafcfe] hover:border-[#cbd7e6]",
+                        ? "border-[#0a2342] bg-white shadow-[0_0_0_3px_rgba(11,30,51,0.06)] dark:border-[#6ba8ff] dark:bg-[#0f2d52] dark:shadow-[0_0_0_3px_rgba(107,168,255,0.2)]"
+                        : "border-[#e6edf6] bg-[#fafcfe] hover:border-[#cbd7e6] dark:border-[#1a3a5c] dark:bg-[#0f2d52]/40 dark:hover:border-[#2d5a88]",
                     ].join(" ")}
                   >
                     <div
                       className={[
                         "flex size-[22px] shrink-0 items-center justify-center rounded-full border-2 transition",
-                        activo ? "border-[#0a2342] bg-[#0a2342]" : "border-[#d5e2f0] bg-white",
+                        activo ? "border-[#0a2342] bg-[#0a2342] dark:border-[#6ba8ff] dark:bg-[#6ba8ff]" : "border-[#d5e2f0] bg-white dark:border-[#1a3a5c] dark:bg-[#0a2342]",
                       ].join(" ")}
                     >
-                      {activo && <span className="size-2 rounded-full bg-white" />}
+                      {activo && <span className="size-2 rounded-full bg-white dark:bg-[#0a2342]" />}
                     </div>
                     <div className="flex-1">
-                      <div className="text-[14px] font-bold text-[#0a2342]">{opt.valor}</div>
-                      <div className="text-[12px] font-medium text-[#4e5f80]">{opt.sub}</div>
+                      <div className="text-[14px] font-bold text-[#0a2342] dark:text-[#f6f8fb]">{opt.valor}</div>
+                      <div className="text-[12px] font-medium text-[#4e5f80] dark:text-[#a8b5cc]">{opt.sub}</div>
                     </div>
                   </div>
                 );
@@ -1043,14 +1155,14 @@ export function Preferencias({ usuario }: PreferenciasProps) {
               <button
                 type="button"
                 onClick={aplicarModal}
-                className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#0a2342] py-3.5 text-center text-[15px] font-bold text-white shadow-lg transition hover:bg-[#143560] active:scale-98 cursor-pointer"
+                className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#0a2342] py-3.5 text-center text-[15px] font-bold text-white shadow-lg transition hover:bg-[#143560] active:scale-98 dark:bg-[#104ca0] dark:hover:bg-[#185bc0] cursor-pointer"
               >
                 <IconoCheck className="size-4" /> Aplicar
               </button>
               <button
                 type="button"
                 onClick={() => setModalAbierto(null)}
-                className="w-full py-2.5 text-center text-[14px] font-bold text-[#4e5f80] transition hover:text-[#0a2342] cursor-pointer"
+                className="w-full py-2.5 text-center text-[14px] font-bold text-[#4e5f80] transition hover:text-[#0a2342] dark:text-[#a8b5cc] dark:hover:text-[#f6f8fb] cursor-pointer"
               >
                 Cancelar
               </button>
@@ -1072,17 +1184,17 @@ export function Preferencias({ usuario }: PreferenciasProps) {
           onClick={() => setModalAbierto(null)}
         >
           <div
-            className="w-full max-w-lg rounded-t-[28px] sm:rounded-[28px] bg-white p-6 sm:p-7 shadow-2xl max-h-[88vh] overflow-y-auto"
+            className="w-full max-w-lg rounded-t-[28px] sm:rounded-[28px] bg-white p-6 sm:p-7 shadow-2xl max-h-[88vh] overflow-y-auto dark:border dark:border-[#1a3a5c] dark:bg-[#0a2342]"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="mx-auto mb-4 h-1 w-10 rounded-full bg-slate-200" />
-            <div className="mx-auto mb-3 flex size-14 items-center justify-center rounded-2xl bg-[#f2eef9] text-[#5e3b8c]">
+            <div className="mx-auto mb-4 h-1 w-10 rounded-full bg-slate-200 dark:bg-slate-700" />
+            <div className="mx-auto mb-3 flex size-14 items-center justify-center rounded-2xl bg-[#f2eef9] text-[#5e3b8c] dark:bg-[#2b194d] dark:text-[#b490f5]">
               <IconoRegla className="size-7" />
             </div>
-            <h2 id="modal-unidades-titulo" className="text-center text-[19px] font-extrabold text-[#0a2342] tracking-tight">
+            <h2 id="modal-unidades-titulo" className="text-center text-[19px] font-extrabold text-[#0a2342] dark:text-[#f6f8fb] tracking-tight">
               Unidades de medida
             </h2>
-            <p id="modal-unidades-desc" className="mt-1 text-center text-[13.5px] font-medium text-[#4e5f80] leading-relaxed">
+            <p id="modal-unidades-desc" className="mt-1 text-center text-[13.5px] font-medium text-[#4e5f80] dark:text-[#a8b5cc] leading-relaxed">
               Selecciona el sistema de medidas que prefieras
             </p>
 
@@ -1108,21 +1220,21 @@ export function Preferencias({ usuario }: PreferenciasProps) {
                     className={[
                       "flex cursor-pointer items-center gap-3.5 rounded-2xl border-2 p-3.5 transition",
                       activo
-                        ? "border-[#0a2342] bg-white shadow-[0_0_0_3px_rgba(11,30,51,0.06)]"
-                        : "border-[#e6edf6] bg-[#fafcfe] hover:border-[#cbd7e6]",
+                        ? "border-[#0a2342] bg-white shadow-[0_0_0_3px_rgba(11,30,51,0.06)] dark:border-[#6ba8ff] dark:bg-[#0f2d52] dark:shadow-[0_0_0_3px_rgba(107,168,255,0.2)]"
+                        : "border-[#e6edf6] bg-[#fafcfe] hover:border-[#cbd7e6] dark:border-[#1a3a5c] dark:bg-[#0f2d52]/40 dark:hover:border-[#2d5a88]",
                     ].join(" ")}
                   >
                     <div
                       className={[
                         "flex size-[22px] shrink-0 items-center justify-center rounded-full border-2 transition",
-                        activo ? "border-[#0a2342] bg-[#0a2342]" : "border-[#d5e2f0] bg-white",
+                        activo ? "border-[#0a2342] bg-[#0a2342] dark:border-[#6ba8ff] dark:bg-[#6ba8ff]" : "border-[#d5e2f0] bg-white dark:border-[#1a3a5c] dark:bg-[#0a2342]",
                       ].join(" ")}
                     >
-                      {activo && <span className="size-2 rounded-full bg-white" />}
+                      {activo && <span className="size-2 rounded-full bg-white dark:bg-[#0a2342]" />}
                     </div>
                     <div className="flex-1">
-                      <div className="text-[14px] font-bold text-[#0a2342]">{opt.valor}</div>
-                      <div className="text-[12px] font-medium text-[#4e5f80]">{opt.sub}</div>
+                      <div className="text-[14px] font-bold text-[#0a2342] dark:text-[#f6f8fb]">{opt.valor}</div>
+                      <div className="text-[12px] font-medium text-[#4e5f80] dark:text-[#a8b5cc]">{opt.sub}</div>
                     </div>
                   </div>
                 );
@@ -1133,14 +1245,14 @@ export function Preferencias({ usuario }: PreferenciasProps) {
               <button
                 type="button"
                 onClick={aplicarModal}
-                className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#0a2342] py-3.5 text-center text-[15px] font-bold text-white shadow-lg transition hover:bg-[#143560] active:scale-98 cursor-pointer"
+                className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#0a2342] py-3.5 text-center text-[15px] font-bold text-white shadow-lg transition hover:bg-[#143560] active:scale-98 dark:bg-[#104ca0] dark:hover:bg-[#185bc0] cursor-pointer"
               >
                 <IconoCheck className="size-4" /> Aplicar
               </button>
               <button
                 type="button"
                 onClick={() => setModalAbierto(null)}
-                className="w-full py-2.5 text-center text-[14px] font-bold text-[#4e5f80] transition hover:text-[#0a2342] cursor-pointer"
+                className="w-full py-2.5 text-center text-[14px] font-bold text-[#4e5f80] transition hover:text-[#0a2342] dark:text-[#a8b5cc] dark:hover:text-[#f6f8fb] cursor-pointer"
               >
                 Cancelar
               </button>
@@ -1162,17 +1274,17 @@ export function Preferencias({ usuario }: PreferenciasProps) {
           onClick={() => setModalAbierto(null)}
         >
           <div
-            className="w-full max-w-lg rounded-t-[28px] sm:rounded-[28px] bg-white p-6 sm:p-7 shadow-2xl max-h-[88vh] overflow-y-auto"
+            className="w-full max-w-lg rounded-t-[28px] sm:rounded-[28px] bg-white p-6 sm:p-7 shadow-2xl max-h-[88vh] overflow-y-auto dark:border dark:border-[#1a3a5c] dark:bg-[#0a2342]"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="mx-auto mb-4 h-1 w-10 rounded-full bg-slate-200" />
-            <div className="mx-auto mb-3 flex size-14 items-center justify-center rounded-2xl bg-[#f2eef9] text-[#5e3b8c]">
+            <div className="mx-auto mb-4 h-1 w-10 rounded-full bg-slate-200 dark:bg-slate-700" />
+            <div className="mx-auto mb-3 flex size-14 items-center justify-center rounded-2xl bg-[#f2eef9] text-[#5e3b8c] dark:bg-[#2b194d] dark:text-[#b490f5]">
               <IconoAccesibilidad className="size-7" />
             </div>
-            <h2 id="modal-accesibilidad-titulo" className="text-center text-[19px] font-extrabold text-[#0a2342] tracking-tight">
+            <h2 id="modal-accesibilidad-titulo" className="text-center text-[19px] font-extrabold text-[#0a2342] dark:text-[#f6f8fb] tracking-tight">
               Accesibilidad
             </h2>
-            <p id="modal-accesibilidad-desc" className="mt-1 text-center text-[13.5px] font-medium text-[#4e5f80] leading-relaxed">
+            <p id="modal-accesibilidad-desc" className="mt-1 text-center text-[13.5px] font-medium text-[#4e5f80] dark:text-[#a8b5cc] leading-relaxed">
               Ajusta la interfaz para que sea más fácil de usar
             </p>
 
@@ -1199,21 +1311,21 @@ export function Preferencias({ usuario }: PreferenciasProps) {
                     className={[
                       "flex cursor-pointer items-center gap-3.5 rounded-2xl border-2 p-3.5 transition",
                       activo
-                        ? "border-[#0a2342] bg-white shadow-[0_0_0_3px_rgba(11,30,51,0.06)]"
-                        : "border-[#e6edf6] bg-[#fafcfe] hover:border-[#cbd7e6]",
+                        ? "border-[#0a2342] bg-white shadow-[0_0_0_3px_rgba(11,30,51,0.06)] dark:border-[#6ba8ff] dark:bg-[#0f2d52] dark:shadow-[0_0_0_3px_rgba(107,168,255,0.2)]"
+                        : "border-[#e6edf6] bg-[#fafcfe] hover:border-[#cbd7e6] dark:border-[#1a3a5c] dark:bg-[#0f2d52]/40 dark:hover:border-[#2d5a88]",
                     ].join(" ")}
                   >
                     <div
                       className={[
                         "flex size-[22px] shrink-0 items-center justify-center rounded-full border-2 transition",
-                        activo ? "border-[#0a2342] bg-[#0a2342]" : "border-[#d5e2f0] bg-white",
+                        activo ? "border-[#0a2342] bg-[#0a2342] dark:border-[#6ba8ff] dark:bg-[#6ba8ff]" : "border-[#d5e2f0] bg-white dark:border-[#1a3a5c] dark:bg-[#0a2342]",
                       ].join(" ")}
                     >
-                      {activo && <span className="size-2 rounded-full bg-white" />}
+                      {activo && <span className="size-2 rounded-full bg-white dark:bg-[#0a2342]" />}
                     </div>
                     <div className="flex-1">
-                      <div className="text-[14px] font-bold text-[#0a2342]">{opt.valor}</div>
-                      <div className="text-[12px] font-medium text-[#4e5f80]">{opt.sub}</div>
+                      <div className="text-[14px] font-bold text-[#0a2342] dark:text-[#f6f8fb]">{opt.valor}</div>
+                      <div className="text-[12px] font-medium text-[#4e5f80] dark:text-[#a8b5cc]">{opt.sub}</div>
                     </div>
                   </div>
                 );
@@ -1224,14 +1336,14 @@ export function Preferencias({ usuario }: PreferenciasProps) {
               <button
                 type="button"
                 onClick={aplicarModal}
-                className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#0a2342] py-3.5 text-center text-[15px] font-bold text-white shadow-lg transition hover:bg-[#143560] active:scale-98 cursor-pointer"
+                className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#0a2342] py-3.5 text-center text-[15px] font-bold text-white shadow-lg transition hover:bg-[#143560] active:scale-98 dark:bg-[#104ca0] dark:hover:bg-[#185bc0] cursor-pointer"
               >
                 <IconoCheck className="size-4" /> Aplicar
               </button>
               <button
                 type="button"
                 onClick={() => setModalAbierto(null)}
-                className="w-full py-2.5 text-center text-[14px] font-bold text-[#4e5f80] transition hover:text-[#0a2342] cursor-pointer"
+                className="w-full py-2.5 text-center text-[14px] font-bold text-[#4e5f80] transition hover:text-[#0a2342] dark:text-[#a8b5cc] dark:hover:text-[#f6f8fb] cursor-pointer"
               >
                 Cancelar
               </button>
@@ -1253,17 +1365,17 @@ export function Preferencias({ usuario }: PreferenciasProps) {
           onClick={() => setModalAbierto(null)}
         >
           <div
-            className="w-full max-w-lg rounded-t-[28px] sm:rounded-[28px] bg-white p-6 sm:p-7 shadow-2xl max-h-[88vh] overflow-y-auto"
+            className="w-full max-w-lg rounded-t-[28px] sm:rounded-[28px] bg-white p-6 sm:p-7 shadow-2xl max-h-[88vh] overflow-y-auto dark:border dark:border-[#1a3a5c] dark:bg-[#0a2342]"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="mx-auto mb-4 h-1 w-10 rounded-full bg-slate-200" />
-            <div className="mx-auto mb-3 flex size-14 items-center justify-center rounded-2xl bg-[#f0f5fe] text-[#2e5a88]">
+            <div className="mx-auto mb-4 h-1 w-10 rounded-full bg-slate-200 dark:bg-slate-700" />
+            <div className="mx-auto mb-3 flex size-14 items-center justify-center rounded-2xl bg-[#f0f5fe] text-[#2e5a88] dark:bg-[#0f2d52] dark:text-[#6ba8ff]">
               <IconoBaseDatos className="size-7" />
             </div>
-            <h2 id="modal-datos-titulo" className="text-center text-[19px] font-extrabold text-[#0a2342] tracking-tight">
+            <h2 id="modal-datos-titulo" className="text-center text-[19px] font-extrabold text-[#0a2342] dark:text-[#f6f8fb] tracking-tight">
               Uso de datos
             </h2>
-            <p id="modal-datos-desc" className="mt-1 text-center text-[13.5px] font-medium text-[#4e5f80] leading-relaxed">
+            <p id="modal-datos-desc" className="mt-1 text-center text-[13.5px] font-medium text-[#4e5f80] dark:text-[#a8b5cc] leading-relaxed">
               Ayúdanos a mejorar Ruum Ruum compartiendo datos anónimos de uso
             </p>
 
@@ -1289,21 +1401,21 @@ export function Preferencias({ usuario }: PreferenciasProps) {
                     className={[
                       "flex cursor-pointer items-center gap-3.5 rounded-2xl border-2 p-3.5 transition",
                       activo
-                        ? "border-[#0a2342] bg-white shadow-[0_0_0_3px_rgba(11,30,51,0.06)]"
-                        : "border-[#e6edf6] bg-[#fafcfe] hover:border-[#cbd7e6]",
+                        ? "border-[#0a2342] bg-white shadow-[0_0_0_3px_rgba(11,30,51,0.06)] dark:border-[#6ba8ff] dark:bg-[#0f2d52] dark:shadow-[0_0_0_3px_rgba(107,168,255,0.2)]"
+                        : "border-[#e6edf6] bg-[#fafcfe] hover:border-[#cbd7e6] dark:border-[#1a3a5c] dark:bg-[#0f2d52]/40 dark:hover:border-[#2d5a88]",
                     ].join(" ")}
                   >
                     <div
                       className={[
                         "flex size-[22px] shrink-0 items-center justify-center rounded-full border-2 transition",
-                        activo ? "border-[#0a2342] bg-[#0a2342]" : "border-[#d5e2f0] bg-white",
+                        activo ? "border-[#0a2342] bg-[#0a2342] dark:border-[#6ba8ff] dark:bg-[#6ba8ff]" : "border-[#d5e2f0] bg-white dark:border-[#1a3a5c] dark:bg-[#0a2342]",
                       ].join(" ")}
                     >
-                      {activo && <span className="size-2 rounded-full bg-white" />}
+                      {activo && <span className="size-2 rounded-full bg-white dark:bg-[#0a2342]" />}
                     </div>
                     <div className="flex-1">
-                      <div className="text-[14px] font-bold text-[#0a2342]">{opt.valor}</div>
-                      <div className="text-[12px] font-medium text-[#4e5f80]">{opt.sub}</div>
+                      <div className="text-[14px] font-bold text-[#0a2342] dark:text-[#f6f8fb]">{opt.valor}</div>
+                      <div className="text-[12px] font-medium text-[#4e5f80] dark:text-[#a8b5cc]">{opt.sub}</div>
                     </div>
                   </div>
                 );
@@ -1314,14 +1426,14 @@ export function Preferencias({ usuario }: PreferenciasProps) {
               <button
                 type="button"
                 onClick={aplicarModal}
-                className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#0a2342] py-3.5 text-center text-[15px] font-bold text-white shadow-lg transition hover:bg-[#143560] active:scale-98 cursor-pointer"
+                className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#0a2342] py-3.5 text-center text-[15px] font-bold text-white shadow-lg transition hover:bg-[#143560] active:scale-98 dark:bg-[#104ca0] dark:hover:bg-[#185bc0] cursor-pointer"
               >
                 <IconoCheck className="size-4" /> Aplicar
               </button>
               <button
                 type="button"
                 onClick={() => setModalAbierto(null)}
-                className="w-full py-2.5 text-center text-[14px] font-bold text-[#4e5f80] transition hover:text-[#0a2342] cursor-pointer"
+                className="w-full py-2.5 text-center text-[14px] font-bold text-[#4e5f80] transition hover:text-[#0a2342] dark:text-[#a8b5cc] dark:hover:text-[#f6f8fb] cursor-pointer"
               >
                 Cancelar
               </button>
