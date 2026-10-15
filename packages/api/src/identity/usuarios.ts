@@ -221,6 +221,33 @@ export async function obtenerUsuarioIdPorAuth(cliente: Cliente, authUserId: stri
   return data?.id ?? null;
 }
 
+/**
+ * FIX C1 (ticket seguridad Fase 2) + fronteras FASE 6: clasifica el rol de una
+ * identidad Auth para el middleware de app-usuario, SIN que la app toque
+ * PostgREST directamente (check-fronteras exige 0 `.from` en apps/*).
+ * Un JWT válido de conductor no tiene fila en `usuarios` pero sí en
+ * `conductores`; sin este gate entraba a /viajes/*, /cuenta, etc.
+ */
+export type RolApp = "usuario" | "conductor" | "ninguno";
+
+export async function clasificarRolApp(cliente: Cliente, authUserId: string): Promise<RolApp> {
+  const { data: perfilUsuario, error: errorUsuario } = await cliente
+    .from("usuarios")
+    .select("id")
+    .eq("auth_user_id", authUserId)
+    .maybeSingle();
+  if (errorUsuario) throw errorUsuario;
+  if (perfilUsuario) return "usuario";
+
+  const { data: perfilConductor, error: errorConductor } = await cliente
+    .from("conductores")
+    .select("id")
+    .eq("auth_user_id", authUserId)
+    .maybeSingle();
+  if (errorConductor) throw errorConductor;
+  return perfilConductor ? "conductor" : "ninguno";
+}
+
 /** FASE 6 cierre — contacto mínimo visible por RLS para un traslado asignado. */
 export async function obtenerContactoUsuarioVisible(cliente: Cliente, usuarioId: string): Promise<{ nombre: string | null; telefono: string | null } | null> {
   const { data, error } = await cliente.from("usuarios").select("nombre,telefono").eq("id", usuarioId).maybeSingle();
