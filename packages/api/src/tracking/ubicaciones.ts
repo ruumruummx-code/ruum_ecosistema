@@ -99,7 +99,9 @@ export function suscribirUbicacionTraslado(
       (payload) => alRecibir(payload.new as UbicacionTraslado)
     );
 
-  suscribirCanalSeguro(cliente, canal, opciones);
+  // FIX A1: reintento con backoff (el socket móvil muere en background/sin
+  // cobertura); el llamador puede desactivarlo con { reintentar: false }.
+  suscribirCanalSeguro(cliente, canal, { reintentar: true, ...opciones });
   return canal;
 }
 
@@ -132,7 +134,8 @@ export function suscribirEstadoTraslado(
       (payload) => alRecibir(payload.new as EstadoTrasladoRealtime)
     );
 
-  suscribirCanalSeguro(cliente, canal, opciones);
+  // FIX A1: ver comentario en suscribirUbicacionTraslado.
+  suscribirCanalSeguro(cliente, canal, { reintentar: true, ...opciones });
   return canal;
 }
 

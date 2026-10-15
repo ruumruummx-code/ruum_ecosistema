@@ -53,10 +53,15 @@ export type VehiculoTraslado = Pick<
   | "puede_circular_rodando"
 >;
 
-export type ConductorTraslado = Pick<
-  ConductorRow,
-  "id" | "nombre" | "estado" | "nivel_operativo_vigente" | "calificacion_promedio" | "traslados_completados" | "foto_perfil_url"
->;
+export type ConductorTraslado = {
+  id: string;
+  estado: Database["public"]["Enums"]["estado_conductor"] | null;
+  nivel_operativo_vigente: Database["public"]["Enums"]["nivel_concer"] | null;
+  calificacion_promedio: number | null;
+  nombre?: string | null;
+  traslados_completados?: number | null;
+  foto_perfil_url?: string | null;
+};
 
 export type ReclamoTraslado = Pick<
   ReclamoRow,
@@ -131,8 +136,8 @@ export function obtenerConductorTraslado(
   if (!conductorId) return Promise.resolve(null);
   return uno(
     cliente
-      .from("conductores")
-      .select("id, nombre, estado, nivel_operativo_vigente, calificacion_promedio, traslados_completados, foto_perfil_url")
+      .from("conductores_publicos")
+      .select("id, estado, nivel_operativo_vigente, calificacion_promedio")
       .eq("id", conductorId)
       .maybeSingle()
   );

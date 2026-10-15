@@ -6,17 +6,14 @@ const CODIGO_MOCK_DEV = "123456";
 
 /**
  * Obtiene la clave secreta para firmar tokens de verificación de teléfono.
- * Prioriza PHONE_VERIFY_SECRET, con fallbacks a SUPABASE_SERVICE_ROLE_KEY,
- * SUPABASE_ANON_KEY o una clave fija de desarrollo.
+ * Fail-closed: exige PHONE_VERIFY_SECRET con al menos 32 caracteres.
  */
 function obtenerSecretoFirma(): string {
-  return (
-    process.env.PHONE_VERIFY_SECRET ||
-    process.env.SUPABASE_SERVICE_ROLE_KEY ||
-    process.env.SUPABASE_ANON_KEY ||
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
-    "ruum-phone-verification-internal-salt"
-  );
+  const s = process.env.PHONE_VERIFY_SECRET;
+  if (!s || s.trim().length < 32) {
+    throw new Error("PHONE_VERIFY_SECRET no configurado (mín 32 chars).");
+  }
+  return s;
 }
 
 /**

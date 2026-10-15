@@ -150,6 +150,37 @@ export async function middleware(request: NextRequest) {
     return applySecurityHeadersUsuario(NextResponse.redirect(login), nonce, request.nextUrl.origin);
   }
 
+  /* FIX C1 (ticket seguridad Fase 2): gate de rol en rutas de usuario.
+     Un JWT válido de conductor pasaba getUser() y entraba a /viajes/*,
+     /cuenta, etc. Se verifica perfil en `usuarios`; si no existe PERO sí
+     existe en `conductores`, es un conductor en la app equivocada → 403.
+     Si no existe en ninguna (alta en curso, trigger pendiente), se permite
+     el paso para no romper el onboarding: la página creará el perfil vía
+     obtenerUsuarioActual() y RLS sigue negando datos ajenos. */
+  if (user && esRutaProtegidaUsuario(pathname)) {
+    const { data: perfilUsuario } = await supabase
+      .from("usuarios")
+      .select("id")
+      .eq("auth_user_id", user.id)
+      .maybeSingle();
+
+    if (!perfilUsuario) {
+      const { data: perfilConductor } = await supabase
+        .from("conductores")
+        .select("id")
+        .eq("auth_user_id", user.id)
+        .maybeSingle();
+
+      if (perfilConductor) {
+        const redirectUrl = request.nextUrl.clone();
+        redirectUrl.pathname = "/403";
+        redirectUrl.search = "";
+        redirectUrl.searchParams.set("reason", "rol_conductor");
+        return applySecurityHeadersUsuario(NextResponse.redirect(redirectUrl), nonce, request.nextUrl.origin);
+      }
+    }
+  }
+
   if (user && (pathname === "/login" || pathname === "/registro")) {
     return applySecurityHeadersUsuario(NextResponse.redirect(new URL("/", request.url)), nonce, request.nextUrl.origin);
   }

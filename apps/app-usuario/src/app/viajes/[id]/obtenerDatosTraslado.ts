@@ -82,6 +82,16 @@ export async function obtenerDatos(id: string) {
           : null;
         vehiculoRow = rel.vehiculo;
         conductorRow = rel.conductor;
+        if (rel.traslado?.conductor_id && !conductorRow) {
+          const { data: condPub } = await cliente
+            .from("conductores_publicos")
+            .select("id, estado, nivel_operativo_vigente, calificacion_promedio")
+            .eq("id", rel.traslado.conductor_id)
+            .maybeSingle();
+          if (condPub) {
+            conductorRow = condPub as unknown as ConductorRow;
+          }
+        }
       } catch {
         tRow = null;
       }

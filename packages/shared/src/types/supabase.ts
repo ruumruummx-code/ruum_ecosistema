@@ -5360,6 +5360,15 @@ export type Database = {
       }
     }
     Views: {
+      conductores_publicos: {
+        Row: {
+          calificacion_promedio: number | null
+          estado: Database["public"]["Enums"]["estado_conductor"] | null
+          id: string
+          nivel_operativo_vigente: Database["public"]["Enums"]["nivel_concer"] | null
+        }
+        Relationships: []
+      }
       pasaporte_digital: {
         Row: {
           actualizado_en: string | null
@@ -6629,14 +6638,19 @@ export type Database = {
         Returns: Database["public"]["Enums"]["estado_traslado"]
       }
       usuario_cancela_traslado: {
-        Args: {
-          p_mensaje: string
-          p_monto_cargo: number
-          p_motivo: string
-          p_porcentaje_cargo: number
-          p_traslado_id: string
-        }
-        Returns: undefined
+        Args:
+          | {
+              p_mensaje: string
+              p_monto_cargo: number
+              p_motivo: string
+              p_porcentaje_cargo: number
+              p_traslado_id: string
+            }
+          | {
+              p_motivo: string
+              p_traslado_id: string
+            }
+        Returns: Json
       }
       usuario_crea_traslado: {
         Args: {

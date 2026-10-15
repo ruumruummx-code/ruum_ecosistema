@@ -97,8 +97,7 @@ describe("crearTraslado service - validación preventiva", () => {
     await expect(verificarPagoAnticipadoCompletado(roto as never, "t1")).rejects.toThrow("db caída");
   });
 
-  it("listarTrasladosParaFacturacionUsuario limita y ordena el historial del usuario", async () => {
-    const traslado = { id: "t1", estado: "pago_completado" };
+  it("listarTrasladosParaFacturacionUsuario limita y ordena el historial del usuario", async () => {    const traslado = { id: "t1", estado: "pago_completado" };
     const cliente = crearClienteFake({ tablas: { traslados: { data: [traslado] } } });
 
     await expect(
@@ -119,5 +118,44 @@ describe("crearTraslado service - validación preventiva", () => {
       action: "limit",
       args: [20]
     });
+  });
+
+  it("cancelarTraslado usa el cargo del servidor y no envía montos del cliente (FIX C3)", async () => {
+    const maybeSingle = vi.fn().mockResolvedValue({
+      data: { id: "t1", estado: "conductor_asignado" },
+      error: null
+    });
+    const eq = vi.fn().mockReturnValue({ maybeSingle });
+    const select = vi.fn().mockReturnValue({ eq });
+    const rpc = vi.fn().mockResolvedValue({
+      data: { porcentaje_cargo: 20, monto_cargo: 200, mensaje: "Cancelar ahora genera un cargo del 20%. ¿Deseas continuar?" },
+      error: null
+    });
+    const cliente = { from: vi.fn().mockReturnValue({ select }), rpc };
+    const { cancelarTraslado } = await import("./traslados");
+
+    const cargo = await cancelarTraslado(cliente as never, "t1", "motivo");
+
+    expect(cargo).toEqual({ porcentaje_cargo: 20, monto_cargo: 200, mensaje: expect.any(String) });
+    // La RPC se invoca solo con (traslado, motivo): ningún monto precalculado.
+    expect(rpc).toHaveBeenCalledWith("usuario_cancela_traslado", {
+      p_traslado_id: "t1",
+      p_motivo: "motivo"
+    });
+  });
+
+  it("cancelarTraslado rechaza estados no cancelables sin llamar a la RPC", async () => {
+    const maybeSingle = vi.fn().mockResolvedValue({
+      data: { id: "t1", estado: "traslado_en_curso" },
+      error: null
+    });
+    const eq = vi.fn().mockReturnValue({ maybeSingle });
+    const select = vi.fn().mockReturnValue({ eq });
+    const rpc = vi.fn();
+    const cliente = { from: vi.fn().mockReturnValue({ select }), rpc };
+    const { cancelarTraslado } = await import("./traslados");
+
+    await expect(cancelarTraslado(cliente as never, "t1", "motivo")).rejects.toThrow(/ya no puede cancelarse/);
+    expect(rpc).not.toHaveBeenCalled();
   });
 });

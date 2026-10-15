@@ -1,7 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database, SolicitudAsignacionResultado } from "@ruum/shared/types";
 import { TRANSICIONES } from "@ruum/shared/states";
-import { calcularCargoCancelacion } from "@ruum/shared/rules";
 import { esquemaPayloadCrearTraslado } from "@ruum/shared/validacion";
 import { registrarEvento } from "./auditoria";
 
@@ -309,11 +308,6 @@ export async function aceptarViaje(cliente: Cliente, trasladoId: string, conduct
   return solicitarAsignacionViaje(cliente, trasladoId, conductorId, null);
 }
 
-function horasRestantes(fechaIso: string | null) {
-  if (!fechaIso) return Number.POSITIVE_INFINITY;
-  return Math.max(0, (new Date(fechaIso).getTime() - Date.now()) / (1000 * 60 * 60));
-}
-
 /**
  * Estados desde los que el usuario puede cancelar su traslado (decisión de
  * producto 2026-07-09: hasta que el conductor llega al punto de recolección;
@@ -341,41 +335,52 @@ export function usuarioPuedeCancelar(estado: EstadoTraslado): boolean {
   return ESTADOS_CANCELABLES_POR_USUARIO.includes(estado);
 }
 
-export async function cancelarTraslado(cliente: Cliente, trasladoId: string, motivo: string) {
+export interface CargoCancelacionAplicado {
+  porcentaje_cargo: number;
+  monto_cargo: number;
+  mensaje: string;
+}
+
+export async function cancelarTraslado(
+  cliente: Cliente,
+  trasladoId: string,
+  motivo: string
+): Promise<CargoCancelacionAplicado> {
   const { data: traslado, error } = await cliente
     .from("traslados")
-    .select("id, estado, conductor_id, fecha_hora_programada, precio_cotizado, precio_final")
+    .select("id, estado")
     .eq("id", trasladoId)
     .maybeSingle();
 
   if (error) throw error;
   if (!traslado) throw new Error("No se encontró el traslado para cancelar.");
 
+  // Pre-chequeo solo UX (defensa en profundidad): la fuente de verdad es la
+  // RPC, que revalida el estado y calcula el cargo bajo FOR UPDATE.
   if (!usuarioPuedeCancelar(traslado.estado)) {
     throw new Error(
       "Este traslado ya no puede cancelarse: el vehículo ya está en verificación o en tránsito. Solicita una revisión o reporta un problema."
     );
   }
 
-  const cargo = calcularCargoCancelacion(
-    Number(traslado.precio_final ?? traslado.precio_cotizado ?? 0),
-    horasRestantes(traslado.fecha_hora_programada),
-    Boolean(traslado.conductor_id),
-    // El cargo del 100% aplica cuando el conductor ya llegó al punto de
-    // recolección. Los estados posteriores (verificación/evidencia) ya no son
-    // cancelables, así que no forman parte de este flag.
-    traslado.estado === "conductor_en_punto_de_recoleccion"
-  );
-
-  const { error: rpcError } = await cliente.rpc("usuario_cancela_traslado", {
+  // FIX C3 (ticket seguridad Fase 2): no se envía ningún monto precalculado.
+  // La sobrecarga (uuid, text) calcula el cargo en la base de forma atómica
+  // y lo devuelve; la UI debe mostrar ese valor, no una estimación local.
+  const { data, error: rpcError } = await cliente.rpc("usuario_cancela_traslado", {
     p_traslado_id: trasladoId,
-    p_motivo: motivo.trim() || "Cancelación solicitada por usuario",
-    p_porcentaje_cargo: cargo.porcentaje_cargo,
-    p_monto_cargo: cargo.monto_cargo,
-    p_mensaje: cargo.mensaje
+    p_motivo: motivo.trim() || "Cancelación solicitada por usuario"
   });
 
   if (rpcError) throw rpcError;
+  const cargo = data as unknown as CargoCancelacionAplicado;
+  if (
+    !cargo ||
+    typeof cargo.porcentaje_cargo !== "number" ||
+    typeof cargo.monto_cargo !== "number" ||
+    typeof cargo.mensaje !== "string"
+  ) {
+    throw new Error("La respuesta del servidor al cancelar el traslado es inválida.");
+  }
   return cargo;
 }
 

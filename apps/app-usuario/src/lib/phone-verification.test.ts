@@ -7,7 +7,33 @@ import {
   verificarCodigoTwilioVerify,
 } from "./phone-verification";
 
+const SECRET_TEST = "secreto-de-prueba-con-al-menos-32-caracteres-para-hmac";
+
 describe("phone-verification — generación y validación de tokens HMAC", () => {
+  const envOriginal = { ...process.env };
+
+  beforeEach(() => {
+    process.env.PHONE_VERIFY_SECRET = SECRET_TEST;
+  });
+
+  afterEach(() => {
+    process.env = { ...envOriginal };
+  });
+
+  it("lanza error si PHONE_VERIFY_SECRET no está configurado (fail-closed)", () => {
+    delete process.env.PHONE_VERIFY_SECRET;
+    expect(() => generarTokenTelefono("5512345678")).toThrow(
+      "PHONE_VERIFY_SECRET no configurado (mín 32 chars)."
+    );
+  });
+
+  it("lanza error si PHONE_VERIFY_SECRET tiene menos de 32 caracteres (fail-closed)", () => {
+    process.env.PHONE_VERIFY_SECRET = "clave-corta-invalida";
+    expect(() => generarTokenTelefono("5512345678")).toThrow(
+      "PHONE_VERIFY_SECRET no configurado (mín 32 chars)."
+    );
+  });
+
   it("genera un token con formato valido de 3 segmentos", () => {
     const token = generarTokenTelefono("5512345678");
     const partes = token.split(":");

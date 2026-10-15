@@ -83,7 +83,8 @@ export function suscribirseAMensajes(
       (payload) => alRecibir(payload.new as MensajeRow)
     );
 
-  suscribirCanalSeguro(cliente, canal, opciones);
+  // FIX A1: reintento con backoff en chat (mismo motivo que tracking).
+  suscribirCanalSeguro(cliente, canal, { reintentar: true, ...opciones });
   return canal;
 }
 

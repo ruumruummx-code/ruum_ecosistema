@@ -29,7 +29,12 @@ const requiredByApp = {
     "NEXT_PUBLIC_APP_VERSION",
     "NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN"
   ],
-  "app-usuario": ["NEXT_PUBLIC_SUPABASE_URL", "NEXT_PUBLIC_SUPABASE_ANON_KEY", "NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN"]
+  "app-usuario": [
+    "NEXT_PUBLIC_SUPABASE_URL",
+    "NEXT_PUBLIC_SUPABASE_ANON_KEY",
+    "NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN",
+    "PHONE_VERIFY_SECRET"
+  ]
 };
 const required = requiredByApp[app] ?? [...new Set(Object.values(requiredByApp).flat())];
 const missing = required.filter((name) => !process.env[name]?.trim());
@@ -58,6 +63,12 @@ if (hostedBuild) {
   if (version && !/^\d+\.\d+\.\d+/.test(version) && !isCi) invalid.push("NEXT_PUBLIC_APP_VERSION debe ser SemVer (ej. 1.0.0)");
   // NEXT_PUBLIC_APP_VERSION en producción real no puede ser placeholder
   if (!isCi && (version === "0.0.1" || version === "ci")) invalid.push("NEXT_PUBLIC_APP_VERSION no puede ser 0.0.1/ci en producción");
+  if (app === "app-usuario" || app === "workspace") {
+    const phoneSecret = process.env.PHONE_VERIFY_SECRET;
+    if (phoneSecret && phoneSecret.trim().length < 32) {
+      invalid.push("PHONE_VERIFY_SECRET debe tener al menos 32 caracteres");
+    }
+  }
 }
 if (invalid.length) {
   console.error(`[env:${app}] Configuración inválida: ${invalid.join("; ")}`);

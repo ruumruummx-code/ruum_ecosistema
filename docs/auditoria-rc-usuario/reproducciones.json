@@ -1,0 +1,20 @@
+{
+  "safety": "Synthetic providers, no network, no production writes or real secrets",
+  "phone": {
+    "productionWithoutTwilioAcceptsDemoCode": true,
+    "publicKeyTokenAccepted": true
+  },
+  "webhook": {
+    "afterRetry": {
+      "payment": "completado",
+      "trip": "cotizacion_aceptada",
+      "first": 500,
+      "retry": 200,
+      "tripUpdateAttempts": 1
+    },
+    "lateFailureDowngradesCompletedPayment": true
+  },
+  "middleware": {
+    "nonceLostOnCookieRefresh": true
+  }
+}

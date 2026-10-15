@@ -42,16 +42,26 @@ describe("Realtime services cleanup y resiliencia (GAP 4)", () => {
     expect(sub).toBe(canal);
   });
 
-  it("suscribirseAMensajes propaga error y limpia canal ante CHANNEL_ERROR", async () => {
-    const { cliente, emitirStatus } = crearMockClienteYCanal();
-    const onError = vi.fn();
-    suscribirseAMensajes(cliente, "traslado-1", vi.fn(), { onError });
+  it("suscribirseAMensajes reintenta con backoff ante CHANNEL_ERROR (no limpia de inmediato)", async () => {
+    vi.useFakeTimers();
+    try {
+      const { cliente, canal, emitirStatus } = crearMockClienteYCanal();
+      const onError = vi.fn();
+      suscribirseAMensajes(cliente, "traslado-1", vi.fn(), { onError });
 
-    emitirStatus("CHANNEL_ERROR", new Error("Fallo de red"));
-    await Promise.resolve();
+      emitirStatus("CHANNEL_ERROR", new Error("Fallo de red"));
+      await Promise.resolve();
 
-    expect(onError).toHaveBeenCalledOnce();
-    expect(cliente.removeChannel).toHaveBeenCalled();
+      expect(onError).toHaveBeenCalledOnce();
+      // FIX A1: con reintento activado el canal NO se remueve de inmediato…
+      expect(cliente.removeChannel).not.toHaveBeenCalled();
+      // …sino que se re-suscribe tras el backoff (base 1000ms).
+      expect(canal.subscribe).toHaveBeenCalledTimes(1);
+      await vi.advanceTimersByTimeAsync(1000);
+      expect(canal.subscribe).toHaveBeenCalledTimes(2);
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   it("suscribirUbicacionTraslado propaga ubicaciones y gestiona cleanup seguro", () => {
@@ -64,19 +74,27 @@ describe("Realtime services cleanup y resiliencia (GAP 4)", () => {
     expect(alRecibir).toHaveBeenCalledWith({ id: "u-1", lat: 19.4, lng: -99.1 });
   });
 
-  it("suscribirEstadoTraslado propaga cambios de estado y maneja error", async () => {
-    const { cliente, canal, emitirPayload, emitirStatus } = crearMockClienteYCanal();
-    const alRecibir = vi.fn();
-    const onError = vi.fn();
-    suscribirEstadoTraslado(cliente, "traslado-1", alRecibir, { onError });
+  it("suscribirEstadoTraslado propaga cambios de estado y reintenta ante TIMED_OUT", async () => {
+    vi.useFakeTimers();
+    try {
+      const { cliente, canal, emitirPayload, emitirStatus } = crearMockClienteYCanal();
+      const alRecibir = vi.fn();
+      const onError = vi.fn();
+      suscribirEstadoTraslado(cliente, "traslado-1", alRecibir, { onError });
 
-    expect(cliente.channel).toHaveBeenCalledWith("estado-traslado-traslado-1");
-    emitirPayload({ new: { id: "traslado-1", estado: "en_camino" } });
-    expect(alRecibir).toHaveBeenCalledWith({ id: "traslado-1", estado: "en_camino" });
+      expect(cliente.channel).toHaveBeenCalledWith("estado-traslado-traslado-1");
+      emitirPayload({ new: { id: "traslado-1", estado: "en_camino" } });
+      expect(alRecibir).toHaveBeenCalledWith({ id: "traslado-1", estado: "en_camino" });
 
-    emitirStatus("TIMED_OUT");
-    await Promise.resolve();
-    expect(onError).toHaveBeenCalled();
-    expect(cliente.removeChannel).toHaveBeenCalledWith(canal);
+      emitirStatus("TIMED_OUT");
+      await Promise.resolve();
+      expect(onError).toHaveBeenCalled();
+      // FIX A1: re-suscribe tras backoff en vez de remover el canal.
+      expect(cliente.removeChannel).not.toHaveBeenCalledWith(canal);
+      await vi.advanceTimersByTimeAsync(1000);
+      expect(canal.subscribe).toHaveBeenCalledTimes(2);
+    } finally {
+      vi.useRealTimers();
+    }
   });
 });

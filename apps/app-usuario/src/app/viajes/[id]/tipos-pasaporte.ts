@@ -44,10 +44,15 @@ export type Vehiculo = Pick<
   | "puede_circular_rodando"
 >;
 
-export type Conductor = Pick<
-  Database["public"]["Tables"]["conductores"]["Row"],
-  "id" | "nombre" | "estado" | "nivel_operativo_vigente" | "calificacion_promedio" | "traslados_completados" | "foto_perfil_url"
->;
+export type Conductor = {
+  id: string;
+  estado: Database["public"]["Enums"]["estado_conductor"] | null;
+  nivel_operativo_vigente: Database["public"]["Enums"]["nivel_concer"] | null;
+  calificacion_promedio: number | null;
+  nombre?: string | null;
+  traslados_completados?: number | null;
+  foto_perfil_url?: string | null;
+};
 
 export type FotoEvidencia = Database["public"]["Tables"]["evidencia_fotos"]["Row"];
 export type FotoEvidenciaVisual = FotoEvidenciaConUrlVisual<FotoEvidencia>;

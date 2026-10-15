@@ -72,4 +72,50 @@ describe("realtime utils (GAP 4)", () => {
     await expect(limpiarCanalesSeguros(cliente, [canal, null, canal2])).resolves.not.toThrow();
     expect(cliente.removeChannel).toHaveBeenCalledTimes(2);
   });
+
+  it("FIX A1: con reintentar=true re-suscribe con backoff exponencial en vez de limpiar", async () => {
+    vi.useFakeTimers();
+    try {
+      const { cliente, canal, emitirStatus } = crearMockClienteYCanal();
+      const onError = vi.fn();
+      suscribirCanalSeguro(cliente, canal, { onError, reintentar: true });
+
+      emitirStatus("CHANNEL_ERROR", new Error("corte"));
+      await Promise.resolve();
+      expect(onError).toHaveBeenCalledOnce();
+      expect(cliente.removeChannel).not.toHaveBeenCalled();
+
+      await vi.advanceTimersByTimeAsync(1000); // 1er backoff: 1000ms
+      expect(canal.subscribe).toHaveBeenCalledTimes(2);
+
+      emitirStatus("CHANNEL_ERROR", new Error("corte 2"));
+      await Promise.resolve();
+      await vi.advanceTimersByTimeAsync(1999);
+      expect(canal.subscribe).toHaveBeenCalledTimes(2);
+      await vi.advanceTimersByTimeAsync(1); // 2do backoff: 2000ms
+      expect(canal.subscribe).toHaveBeenCalledTimes(3);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("FIX A1: SUBSCRIBED resetea el backoff y maxIntentos agota reintentos", async () => {
+    vi.useFakeTimers();
+    try {
+      const { cliente, canal, emitirStatus } = crearMockClienteYCanal();
+      suscribirCanalSeguro(cliente, canal, { reintentar: { maxIntentos: 1 } });
+
+      emitirStatus("CHANNEL_ERROR");
+      await Promise.resolve();
+      await vi.advanceTimersByTimeAsync(15000);
+      expect(canal.subscribe).toHaveBeenCalledTimes(2);
+
+      // 2do error supera maxIntentos=1 → limpieza final.
+      emitirStatus("CHANNEL_ERROR");
+      await Promise.resolve();
+      expect(cliente.removeChannel).toHaveBeenCalledWith(canal);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
 });
