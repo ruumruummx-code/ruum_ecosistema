@@ -68,8 +68,11 @@ deno task test:functions           # tests Deno (48)
   - *conductor*: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`,
     `NEXT_PUBLIC_APP_URL`, `NEXT_PUBLIC_APP_VERSION`, `NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN`
   - *usuario*: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`,
-    `NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN`
+    `NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN`, `PHONE_VERIFY_SECRET` (privada, mínimo
+    32 caracteres en builds alojados)
   - *admin*: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+- En Vercel, configurar estas variables en los entornos donde se construye
+  `app-usuario`; `PHONE_VERIFY_SECRET` no debe llevar el prefijo `NEXT_PUBLIC_`.
 - Secretos servidor (Stripe, `SUPABASE_SERVICE_ROLE_KEY`, Didit, FCM): **solo**
   vía `supabase secrets set`, nunca `NEXT_PUBLIC_*` ni versionados.
   Ver `supabase/functions/.env.example` y cada `apps/*/.env.example`.
