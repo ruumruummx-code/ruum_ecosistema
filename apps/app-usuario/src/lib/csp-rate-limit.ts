@@ -99,9 +99,15 @@ export async function rateLimitConVentana(
     return { allowed: true, restantes: maxPeticiones };
   }
   const redis = getRedis();
-  if (process.env.NODE_ENV === "production" && !redis) {
-    console.warn("[rate-limit-usuario] fail-closed en produccion por ausencia de redis", { clave });
-    return { allowed: false, retryAfterSec: 60 };
+  if (!redis && process.env.NODE_ENV === "production") {
+    // Degradación, no bloqueo: sin Redis en producción se limita en memoria
+    // por instancia en vez de negar todo el tráfico. El fail-closed anterior
+    // tumbaba registro/login/OTP completos (429 "alta demanda" a usuarios
+    // legítimos). El límite por instancia es más débil ante abuso
+    // distribuido, pero Twilio Verify (60203/20404) y las dimensiones por
+    // teléfono/correo siguen acotando. Configurar UPSTASH_REDIS_REST_URL +
+    // UPSTASH_REDIS_REST_TOKEN (o KV_*) para el límite global real.
+    console.warn("[rate-limit-usuario] sin redis en produccion: degradado a memoria por instancia", { clave });
   }
   if (redis) {
     try {
@@ -119,10 +125,7 @@ export async function rateLimitConVentana(
       }
       return { allowed: true, restantes: maxPeticiones - count };
     } catch (e) {
-      console.warn("[rate-limit-usuario] redis fallo", e);
-      if (process.env.NODE_ENV === "production") {
-        return { allowed: false, retryAfterSec: 60 };
-      }
+      console.warn("[rate-limit-usuario] redis fallo, degradado a memoria por instancia", e);
     }
   }
   const now = Date.now();
