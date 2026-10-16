@@ -1,0 +1,43 @@
+.sheet {
+  position: fixed;
+  inset: auto 0 0;
+  margin: 0 auto;
+  width: 100%;
+  max-width: 32rem;
+  height: 60dvh;
+  max-height: 60dvh;
+  padding: 0;
+  border: 0;
+  border-radius: 24px 24px 0 0;
+  overflow: hidden;
+}
+
+.sheet::backdrop {
+  background: rgb(6 21 41 / 55%);
+}
+.fullScreen {
+  height: 100dvh;
+  max-height: 100dvh;
+  max-width: none;
+  border-radius: 0;
+  padding-top: env(safe-area-inset-top);
+}
+
+.sheet[open] {
+  animation: sheet-enter 240ms ease-out;
+}
+
+@keyframes sheet-enter {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sheet[open] {
+    animation: none;
+  }
+}

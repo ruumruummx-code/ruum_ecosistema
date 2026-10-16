@@ -1,6 +1,10 @@
 package com.moviliax.ruumruum.conductor.ui
 
-import androidx.lifecycle.ViewModel
+import android.app.Application
+import android.content.Context
+import android.net.ConnectivityManager
+import android.net.Network
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.moviliax.ruumruum.conductor.core.SupabaseProvider
 import com.moviliax.ruumruum.conductor.data.Availability
@@ -8,6 +12,7 @@ import com.moviliax.ruumruum.conductor.data.Driver
 import com.moviliax.ruumruum.conductor.data.DriverDocument
 import com.moviliax.ruumruum.conductor.data.DriverRepository
 import com.moviliax.ruumruum.conductor.data.EvidencePhoto
+import com.moviliax.ruumruum.conductor.data.EvidenceSyncManager
 import com.moviliax.ruumruum.conductor.data.Payout
 import com.moviliax.ruumruum.conductor.data.CapacitacionRow
 import com.moviliax.ruumruum.conductor.data.NotificacionConductor
@@ -22,6 +27,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.io.File
 
 data class DriverUiState(
     val checkingSession: Boolean = true,
@@ -39,6 +45,8 @@ data class DriverUiState(
     val evidencePhotos: List<EvidencePhoto> = emptyList(),
     val evidenceLoading: Boolean = false,
     val evidenceSaving: Boolean = false,
+    val evidenceSyncing: Boolean = false,
+    val pendingEvidenceCount: Int = 0,
     val uploadingDocumentType: String? = null,
     val error: String? = null,
     val notice: String? = null,
@@ -61,12 +69,31 @@ data class DriverUiState(
     val notificaciones: List<NotificacionConductor> = emptyList(),
 )
 
-class DriverViewModel : ViewModel() {
-    private val repository by lazy { DriverRepository(SupabaseProvider.client) }
+class DriverViewModel @JvmOverloads constructor(
+    application: Application,
+    private val repository: DriverRepository = DriverRepository(
+        SupabaseProvider.client,
+        EvidenceSyncManager(File(application.filesDir, "evidence_sync")),
+    ),
+) : AndroidViewModel(application) {
+    private val connectivityManager = application.getSystemService(Context.CONNECTIVITY_SERVICE) as? ConnectivityManager
+    private val networkCallback = object : ConnectivityManager.NetworkCallback() {
+        override fun onAvailable(network: Network) {
+            if (_state.value.pendingEvidenceCount > 0) {
+                syncPendingEvidence()
+            }
+        }
+    }
     private val _state = MutableStateFlow(DriverUiState())
     val state: StateFlow<DriverUiState> = _state.asStateFlow()
 
     init {
+        try {
+            connectivityManager?.registerDefaultNetworkCallback(networkCallback)
+        } catch (_: Throwable) {
+            // Entornos de prueba o sin permisos de conectividad
+        }
+
         if (!SupabaseProvider.isConfigured) {
             _state.update { it.copy(checkingSession = false) }
         } else {
@@ -75,6 +102,14 @@ class DriverViewModel : ViewModel() {
                 _state.update { it.copy(checkingSession = false, signedIn = hasSession) }
                 if (hasSession) refresh()
             }
+        }
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        try {
+            connectivityManager?.unregisterNetworkCallback(networkCallback)
+        } catch (_: Throwable) {
         }
     }
 
@@ -343,6 +378,7 @@ class DriverViewModel : ViewModel() {
             val notificaciones = async {
                 runCatching { repository.notificaciones(driver.id) }.getOrDefault(emptyList())
             }
+            val pendingEvidence = async { runCatching { repository.pendingEvidenceCount() }.getOrDefault(0) }
             DriverUiState(
                 checkingSession = false,
                 configured = true,
@@ -358,6 +394,7 @@ class DriverViewModel : ViewModel() {
                 payouts = payouts.await(),
                 documents = documents.await(),
                 notificaciones = notificaciones.await(),
+                pendingEvidenceCount = pendingEvidence.await(),
             )
         }.onSuccess { loaded -> _state.value = loaded }
             .onFailure { failure(it, "No pudimos actualizar tu información.") }
@@ -389,23 +426,62 @@ class DriverViewModel : ViewModel() {
 
     fun loadEvidence(tripId: String, type: String) = viewModelScope.launch {
         _state.update { it.copy(evidenceTripId = tripId, evidenceType = type, evidenceLoading = true, error = null) }
-        runCatching { repository.evidencePhotos(tripId, type) }
-            .onSuccess { photos ->
-                _state.update { it.copy(evidencePhotos = photos, evidenceLoading = false) }
+        runCatching {
+            val photos = repository.evidencePhotos(tripId, type)
+            val pendingCount = repository.pendingEvidenceCount(tripId)
+            photos to pendingCount
+        }.onSuccess { (photos, pendingCount) ->
+            _state.update {
+                it.copy(
+                    evidencePhotos = photos,
+                    pendingEvidenceCount = pendingCount,
+                    evidenceLoading = false,
+                )
             }
-            .onFailure { failure(it, "No pudimos cargar la evidencia del traslado.") }
+        }.onFailure { failure(it, "No pudimos cargar la evidencia del traslado.") }
         _state.update { it.copy(evidenceLoading = false) }
     }
 
     fun captureEvidence(tripId: String, type: String, angle: String, bytes: ByteArray) = viewModelScope.launch {
         _state.update { it.copy(evidenceSaving = true, error = null, notice = null) }
         runCatching { repository.captureEvidence(tripId, type, angle, bytes) }
-            .onSuccess {
-                _state.update { it.copy(notice = "Fotografía de ${angle.replace('_', ' ')} guardada.") }
+            .onSuccess { syncedOnline ->
+                val angleLabel = angle.replace('_', ' ')
+                val noticeMsg = if (syncedOnline) {
+                    "Fotografía de $angleLabel sincronizada en la nube."
+                } else {
+                    "Fotografía de $angleLabel guardada localmente (pendiente de sincronizar)."
+                }
+                _state.update { it.copy(notice = noticeMsg) }
                 loadEvidence(tripId, type)
             }
             .onFailure { failure(it, "No pudimos guardar la fotografía.") }
         _state.update { it.copy(evidenceSaving = false) }
+    }
+
+    fun syncPendingEvidence(tripId: String? = null) = viewModelScope.launch {
+        _state.update { it.copy(evidenceSyncing = true, error = null) }
+        runCatching { repository.syncPendingEvidence(tripId) }
+            .onSuccess { result ->
+                if (result.totalPending > 0) {
+                    val noticeMsg = if (result.failedCount == 0) {
+                        "Se sincronizaron ${result.syncedCount} fotografía(s) pendientes a la nube."
+                    } else {
+                        "Se subieron ${result.syncedCount} de ${result.totalPending} foto(s). Quedan ${result.failedCount} pendientes."
+                    }
+                    _state.update { it.copy(notice = noticeMsg) }
+                }
+                val currentTripId = _state.value.evidenceTripId
+                val currentType = _state.value.evidenceType
+                if (currentTripId != null && currentType != null) {
+                    loadEvidence(currentTripId, currentType)
+                } else {
+                    val count = repository.pendingEvidenceCount()
+                    _state.update { it.copy(pendingEvidenceCount = count) }
+                }
+            }
+            .onFailure { failure(it, "Error al sincronizar evidencias pendientes.") }
+        _state.update { it.copy(evidenceSyncing = false) }
     }
 
     fun confirmEvidence(tripId: String, type: String) = viewModelScope.launch {

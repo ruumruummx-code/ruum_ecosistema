@@ -1,13 +1,21 @@
 "use client";
-import React, { memo } from "react";
-import { Button, PassportCard, Aviso } from "@ruum/ui";
-import { MENSAJES_CLAVE_UX } from "@ruum/shared/constants";
+import React, { memo, useState } from "react";
+import { MobileBottomSheet as BottomSheet } from "@/components/MobileBottomSheet";
+import styles from "./cotizador.module.css";
 import type { PrevisualizacionTarifa } from "@ruum/api/services";
-import { CONDICIONES_VEHICULO, VENTANAS_PREDEFINIDAS, formatearDistancia, formatearTiempo } from "../constants";
+import {
+  CONDICIONES_VEHICULO,
+  VENTANAS_PREDEFINIDAS,
+  formatearDistancia,
+  formatearTiempo,
+} from "../constants";
 import type { DatosFormulario, TipoRutaTraslado } from "../types";
 
 export interface AccionesPasoDetalles {
-  actualizar: <K extends keyof DatosFormulario>(campo: K, valor: DatosFormulario[K]) => void;
+  actualizar: <K extends keyof DatosFormulario>(
+    campo: K,
+    valor: DatosFormulario[K],
+  ) => void;
   onEditarAgenda: () => void;
   setAceptaPoliticasPagoCancelacion: (valor: boolean) => void;
   enviarSolicitud: () => Promise<void>;
@@ -31,6 +39,7 @@ export interface PasoDetallesProps {
   enviando: boolean;
   cargandoSesion: boolean;
   tarifaPreviaAceptada: boolean;
+  soloLectura?: boolean;
 }
 
 function PasoDetallesComponent({
@@ -42,249 +51,211 @@ function PasoDetallesComponent({
   gamaCatalogo,
   rutaEstimacion,
   politicaCancelacion,
-  aceptaPoliticasPagoCancelacion,
-  tarifaPreviaAceptada
+  tarifaPreviaAceptada,
+  soloLectura,
 }: PasoDetallesProps) {
-  const {
-    actualizar,
-    onEditarAgenda,
-    setAceptaPoliticasPagoCancelacion,
-    onRevisarTarifa,
-  } = acciones;
-
+  const [desglose, setDesglose] = useState(false);
+  const [ventana, setVentana] = useState<
+    "ventanaRecoleccion" | "ventanaEntrega" | null
+  >(null);
+  const [personalizada, setPersonalizada] = useState("");
+  const { actualizar, onEditarAgenda, onRevisarTarifa } = acciones;
+  const abrirVentana = (campo: "ventanaRecoleccion" | "ventanaEntrega") => {
+    setPersonalizada(datos[campo].replace(/^Otra:\s*/, ""));
+    setVentana(campo);
+  };
   return (
-    <div className="space-y-4">
-      <PassportCard>
-        <div className="grid gap-4">
-          {/* Agenda aceptada: visible como resumen de solo lectura */}
-          <div className="rounded-xl border border-ink/15 bg-mist p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="font-body text-xs font-semibold uppercase tracking-wide text-ink/45">Fecha y horario de recolección</p>
-                <p className="mt-1 font-body text-sm font-bold text-ink">
-                  {datos.modalidadProgramacion === "lo_antes_posible"
-                    ? "⚡ Lo antes posible"
-                    : `📅 ${datos.fechaHoraProgramada ? datos.fechaHoraProgramada.replace("T", " ") : "Programado"}`}
-                </p>
-              </div>
+    <div className={styles.fields}>
+      <div className="flex items-center justify-between gap-3 text-sm">
+        <p>
+          <span className="block text-xs text-[var(--user-color-muted)]">
+            Recolección
+          </span>
+          <strong>
+            {datos.modalidadProgramacion === "lo_antes_posible"
+              ? "Lo antes posible"
+              : datos.fechaHoraProgramada.replace("T", " ")}
+          </strong>
+        </p>
+        <button
+          type="button"
+          disabled={soloLectura}
+          onClick={onEditarAgenda}
+          aria-label="Editar agenda"
+          className="min-h-11 min-w-11"
+        >
+          ✎
+        </button>
+      </div>
+      <div>
+        <p id="tipo-traslado-label" className="mb-2 text-xs font-semibold">
+          Tipo de traslado
+        </p>
+        <div
+          className={styles.segmented}
+          role="radiogroup"
+          aria-labelledby="tipo-traslado-label"
+        >
+          {(["local", "foraneo"] as const).map((tipo) => (
+            <button
+              key={tipo}
+              type="button"
+              role="radio"
+              disabled={soloLectura}
+              aria-checked={datos.tipoRuta === tipo}
+              onClick={() => actualizar("tipoRuta", tipo as TipoRutaTraslado)}
+            >
+              {tipo === "local" ? "Local" : "Foráneo"}
+            </button>
+          ))}
+        </div>
+      </div>
+      <div className={styles.vehicle}>
+        {(["ventanaRecoleccion", "ventanaEntrega"] as const).map((campo) => (
+          <button
+            key={campo}
+            type="button"
+            disabled={soloLectura}
+            className={styles.windowButton}
+            aria-haspopup="dialog"
+            onClick={() => abrirVentana(campo)}
+          >
+            <span className={styles.label}>
+              {campo === "ventanaRecoleccion" ? "Recolección" : "Entrega"} ▾
+            </span>
+            <span className="block truncate text-sm font-semibold">
+              {datos[campo] || "Flexible"}
+            </span>
+          </button>
+        ))}
+      </div>
+      <p className="truncate text-sm font-semibold">
+        {datos.marca} {datos.modelo} {datos.anio}
+        <span className="block truncate text-xs font-normal text-[var(--user-color-muted)]">
+          {datos.origenCiudad || "Origen"} → {datos.destinoCiudad || "Destino"}
+        </span>
+      </p>
+      <button
+        type="button"
+        className="min-h-11 text-left text-sm font-semibold text-[var(--user-color-action)]"
+        onClick={() => setDesglose(true)}
+      >
+        ⓘ Ver desglose completo de la tarifa
+      </button>
+      {!tarifaPreviaAceptada && (
+        <button
+          type="button"
+          className="min-h-11 text-left text-sm font-semibold text-amber-800"
+          onClick={onRevisarTarifa}
+        >
+          Revisar nueva tarifa
+        </button>
+      )}
+      <BottomSheet
+        open={Boolean(ventana)}
+        onClose={() => setVentana(null)}
+        title={
+          ventana === "ventanaEntrega"
+            ? "Ventana de entrega"
+            : "Ventana de recolección"
+        }
+      >
+        <div className="grid gap-2">
+          {VENTANAS_PREDEFINIDAS.filter((v) => v !== "Otra (especificar)").map(
+            (v) => (
               <button
                 type="button"
-                onClick={onEditarAgenda}
-                className="rounded-lg border border-ink/20 bg-paper px-3 py-1.5 font-body text-xs font-semibold text-ink shadow-xs transition hover:bg-mist"
+                key={v}
+                className="min-h-11 rounded-xl border border-[var(--user-color-border)] p-3 text-left text-sm"
+                onClick={() => {
+                  if (ventana) actualizar(ventana, v);
+                  setVentana(null);
+                }}
               >
-                Editar
+                {v}
               </button>
-            </div>
-          </div>
-
-          <label className="flex flex-col gap-1.5">
-            <span className="font-body text-sm font-medium">Tipo de traslado</span>
-            <select
-              id="tipoRuta"
-              name="tipoRuta"
-              value={datos.tipoRuta}
-              onChange={(e) => actualizar("tipoRuta", e.target.value as TipoRutaTraslado)}
-              className="rounded-lg border border-ink/50 bg-mist px-3.5 py-2.5 font-body text-sm"
-            >
-              <option value="local">Local</option>
-              <option value="foraneo">Foráneo</option>
-            </select>
-          </label>
-
-          <label className="flex flex-col gap-1.5">
-            <span className="font-body text-sm font-medium">Ventana de recolección</span>
-            <select
-              value={VENTANAS_PREDEFINIDAS.includes(datos.ventanaRecoleccion as never) ? datos.ventanaRecoleccion : datos.ventanaRecoleccion ? "Otra (especificar)" : "Flexible (sin preferencia)"}
-              onChange={(e) => {
-                const v = e.target.value;
-                if (v === "Otra (especificar)") actualizar("ventanaRecoleccion", "Otra: ");
-                else actualizar("ventanaRecoleccion", v);
-              }}
-              className="rounded-lg border border-ink/50 bg-mist px-3.5 py-2.5 font-body text-sm"
-            >
-              {VENTANAS_PREDEFINIDAS.map((v) => <option key={v} value={v}>{v}</option>)}
-            </select>
-            {(() => {
-              const sel = VENTANAS_PREDEFINIDAS.includes(datos.ventanaRecoleccion as never) ? datos.ventanaRecoleccion : datos.ventanaRecoleccion ? "Otra (especificar)" : "Flexible (sin preferencia)";
-              if (sel !== "Otra (especificar)") return null;
-              const valorCustom = VENTANAS_PREDEFINIDAS.includes(datos.ventanaRecoleccion as never) ? "" : datos.ventanaRecoleccion.replace(/^Otra:\s*/, "");
-              return (
-                <label htmlFor="ventanaRecoleccionCustom" className="flex flex-col gap-1 mt-2">
-                  <span className="font-body text-xs font-medium text-ink">Especifica ventana de recolección</span>
-                  <input
-                    id="ventanaRecoleccionCustom"
-                    placeholder="Ej. 09:00 a 12:00 o indicación específica"
-                    value={valorCustom}
-                    onChange={(e) => actualizar("ventanaRecoleccion", `Otra: ${e.target.value}`)}
-                    onBlur={(e) => actualizar("ventanaRecoleccion", `Otra: ${e.target.value.trim()}`)}
-                    aria-describedby={valorCustom.trim() ? undefined : "ventanaRecoleccionCustom-ayuda"}
-                    className="rounded-lg border border-ink/50 bg-mist px-3.5 py-2.5 font-body text-sm"
-                  />
-                  {!valorCustom.trim() && (
-                    <span id="ventanaRecoleccionCustom-ayuda" className="font-body text-xs leading-5 text-ink/60">
-                      Especifica el horario para que operación pueda programar la recolección.
-                    </span>
-                  )}
-                </label>
-              );
-            })()}
-          </label>
-
-          <label className="flex flex-col gap-1.5">
-            <span className="font-body text-sm font-medium">Ventana de entrega</span>
-            <select
-              value={VENTANAS_PREDEFINIDAS.includes(datos.ventanaEntrega as never) ? datos.ventanaEntrega : datos.ventanaEntrega ? "Otra (especificar)" : "Flexible (sin preferencia)"}
-              onChange={(e) => {
-                const v = e.target.value;
-                if (v === "Otra (especificar)") actualizar("ventanaEntrega", "Otra: ");
-                else actualizar("ventanaEntrega", v);
-              }}
-              className="rounded-lg border border-ink/50 bg-mist px-3.5 py-2.5 font-body text-sm"
-            >
-              {VENTANAS_PREDEFINIDAS.map((v) => <option key={v} value={v}>{v}</option>)}
-            </select>
-            {(() => {
-              const sel = VENTANAS_PREDEFINIDAS.includes(datos.ventanaEntrega as never) ? datos.ventanaEntrega : datos.ventanaEntrega ? "Otra (especificar)" : "Flexible (sin preferencia)";
-              if (sel !== "Otra (especificar)") return null;
-              const valorCustom = VENTANAS_PREDEFINIDAS.includes(datos.ventanaEntrega as never) ? "" : datos.ventanaEntrega.replace(/^Otra:\s*/, "");
-              return (
-                <label htmlFor="ventanaEntregaCustom" className="flex flex-col gap-1 mt-2">
-                  <span className="font-body text-xs font-medium text-ink">Especifica ventana de entrega</span>
-                  <input
-                    id="ventanaEntregaCustom"
-                    placeholder="Ej. Mismo día por la tarde"
-                    value={valorCustom}
-                    onChange={(e) => actualizar("ventanaEntrega", `Otra: ${e.target.value}`)}
-                    onBlur={(e) => actualizar("ventanaEntrega", `Otra: ${e.target.value.trim()}`)}
-                    aria-describedby={valorCustom.trim() ? undefined : "ventanaEntregaCustom-ayuda"}
-                    className="rounded-lg border border-ink/50 bg-mist px-3.5 py-2.5 font-body text-sm"
-                  />
-                  {!valorCustom.trim() && (
-                    <span id="ventanaEntregaCustom-ayuda" className="font-body text-xs leading-5 text-ink/60">
-                      Especifica el horario para que operación pueda programar la entrega.
-                    </span>
-                  )}
-                </label>
-              );
-            })()}
-          </label>
+            ),
+          )}
         </div>
-      </PassportCard>
-
-      <section id="desglose-tarifa-traslado" tabIndex={-1} className="app-status-strip px-5 py-5 scroll-mt-28" aria-labelledby="titulo-tarifa-calculada">
-        <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <p id="titulo-tarifa-calculada" className="font-body text-xs font-semibold uppercase tracking-wide text-ink/45">
-              Desglose de la tarifa
-            </p>
-            {previsualizando && (
-              <p className="mt-1 font-body text-sm text-ink/55">Calculando tarifa…</p>
-            )}
-            {!previsualizando && previsualizacion?.disponible && (
-              <>
-                <p className="mt-1 font-display text-4xl font-bold leading-tight text-ink">
-                  ${Number(previsualizacion.tarifa ?? 0).toLocaleString("es-MX")}
-                </p>
-                <p className="mt-2 max-w-sm font-body text-sm leading-6 text-ink/65">
-                  Este es el monto final calculado para tu traslado, no una estimación.
-                </p>
-                <dl className="mt-3 grid grid-cols-2 gap-2 text-sm">
-                  <dt>Clasificación</dt><dd>{categoriaCatalogo} · {gamaCatalogo}</dd>
-                  <dt>Distancia</dt><dd>{rutaEstimacion?.distanciaKm !== undefined ? formatearDistancia(rutaEstimacion.distanciaKm) : "Pendiente"}</dd>
-                  {previsualizacion.horario && <><dt>Horario tarifario</dt><dd>{previsualizacion.horario.replaceAll("_", " ")}</dd></>}
-                  {previsualizacion.dia && <><dt>Día tarifario</dt><dd>{previsualizacion.dia.replaceAll("_", " ")}</dd></>}
-                </dl>
-              </>
-            )}
-            {!previsualizando && previsualizacion && !previsualizacion.disponible && (
-              <p className="mt-1 max-w-sm font-body text-sm leading-6 text-ink/65">
-                {previsualizacion.motivo ? previsualizacion.motivo.replace("Torre de Control", "nuestro equipo") : "Nuestro equipo aplicará la tarifa correspondiente antes de enviarte la cotización."}
-              </p>
-            )}
-            {!previsualizando && !previsualizacion && (
-              <p className="mt-1 max-w-sm font-body text-sm leading-6 text-ink/65">
-                Completa el origen, el destino y la fecha/hora para calcular tu tarifa.
-              </p>
-            )}
-          </div>
-          <div className="rounded-lg border border-ink/10 bg-mist/80 px-4 py-3">
-            <p className="font-body text-xs font-semibold uppercase tracking-wide text-ink/45">Momento de pago</p>
-            <p className="mt-2 flex items-center gap-2 font-body text-sm font-bold capitalize text-ink">
-              <span className="inline-flex size-8 items-center justify-center rounded-full bg-signal text-ink" aria-hidden="true">
-                $
-              </span>
-              Pago electrónico anticipado obligatorio
-            </p>
-          </div>
-        </div>
-      </section>
-
-      <PassportCard>
-        <dl className="grid grid-cols-2 gap-3 font-body text-sm">
-          <dt className="text-ink/45">Vehículo</dt>
+        <label
+          className="mt-4 block text-xs font-semibold"
+          htmlFor={ventana ? `${ventana}Custom` : "ventanaCustom"}
+        >
+          Especifica ventana de{" "}
+          {ventana === "ventanaEntrega" ? "entrega" : "recolección"}
+        </label>
+        <input
+          id={ventana ? `${ventana}Custom` : "ventanaCustom"}
+          className="mt-2 min-h-12 w-full rounded-xl border border-[var(--user-color-border)] p-3"
+          value={personalizada}
+          maxLength={200}
+          onChange={(e) => setPersonalizada(e.target.value)}
+          placeholder="Ej. 09:00 a 12:00"
+        />
+        <button
+          type="button"
+          disabled={!personalizada.trim()}
+          className="mt-3 min-h-12 w-full rounded-xl bg-[var(--user-color-action)] text-[var(--user-color-on-action)] disabled:opacity-50"
+          onClick={() => {
+            if (ventana) actualizar(ventana, `Otra: ${personalizada.trim()}`);
+            setVentana(null);
+          }}
+        >
+          Guardar ventana
+        </button>
+      </BottomSheet>
+      <BottomSheet
+        open={desglose}
+        onClose={() => setDesglose(false)}
+        title="Desglose de la tarifa"
+      >
+        <p className="text-xl font-bold">
+          {previsualizando
+            ? "Calculando tarifa…"
+            : previsualizacion?.disponible
+              ? `$${Number(previsualizacion.tarifa).toLocaleString("es-MX", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} MXN`
+              : "Tarifa pendiente"}
+        </p>
+        <dl className="mt-4 grid grid-cols-2 gap-3 text-sm">
+          <dt>Clasificación</dt>
           <dd>
-            {datos.marca} {datos.modelo} {datos.anio}
+            {categoriaCatalogo} · {gamaCatalogo}
           </dd>
-          <dt className="text-ink/45">Clasificación</dt>
+          <dt>Condición</dt>
           <dd>
-            {categoriaCatalogo} · {gamaCatalogo} · {datos.condicion ? CONDICIONES_VEHICULO.find((c) => c.valor === datos.condicion)?.etiqueta : "Sin condición"}
+            {CONDICIONES_VEHICULO.find((c) => c.valor === datos.condicion)
+              ?.etiqueta || "Pendiente"}
           </dd>
-          <dt className="text-ink/45">Ruta</dt>
+          <dt>Distancia</dt>
           <dd>
-            {datos.origenCiudad} → {datos.destinoCiudad}
-          </dd>
-          <dt className="text-ink/45">Estimación</dt>
-          <dd>
-            {rutaEstimacion?.distanciaKm !== undefined && rutaEstimacion.tiempoEstimadoHoras !== undefined
-              ? `${formatearDistancia(rutaEstimacion.distanciaKm)} · ${formatearTiempo(rutaEstimacion.tiempoEstimadoHoras)}`
+            {rutaEstimacion?.distanciaKm !== undefined
+              ? formatearDistancia(rutaEstimacion.distanciaKm)
               : "Pendiente"}
           </dd>
-          <dt className="text-ink/45">Agenda</dt>
-          <dd>{datos.modalidadProgramacion === "programado" ? datos.fechaHoraProgramada : "Lo antes posible"}</dd>
+          <dt>Tiempo estimado</dt>
+          <dd>
+            {rutaEstimacion?.tiempoEstimadoHoras !== undefined
+              ? formatearTiempo(rutaEstimacion.tiempoEstimadoHoras)
+              : "Pendiente"}
+          </dd>
+          <dt>Horario tarifario</dt>
+          <dd>
+            {previsualizacion?.horario?.replaceAll("_", " ") || "Estándar"}
+          </dd>
+          <dt>Día tarifario</dt>
+          <dd>{previsualizacion?.dia?.replaceAll("_", " ") || "Estándar"}</dd>
         </dl>
-      </PassportCard>
-
-      <Aviso tono="info">
-        {MENSAJES_CLAVE_UX.pago} Todo traslado se cobra por medios electrónicos de forma anticipada, antes de operar.
-      </Aviso>
-      <Aviso tono="atencion">
-        {MENSAJES_CLAVE_UX.cancelacion} {politicaCancelacion.mensaje}
-      </Aviso>
-
-      <label className="flex items-start gap-2.5 rounded-lg border border-ink/10 bg-mist px-4 py-3 font-body text-sm">
-        <input
-          type="checkbox"
-          checked={aceptaPoliticasPagoCancelacion}
-          onChange={(e) => setAceptaPoliticasPagoCancelacion(e.target.checked)}
-          className="mt-0.5 size-5 rounded border-ink/50 text-signal focus-visible:outline-route-dark"
-        />
-        <span>Acepto la política de cancelación y que el pago es solo por medios electrónicos.</span>
-      </label>
-
-      {!tarifaPreviaAceptada && (
-        <div id="aviso-tarifa-invalida-detalles" role="alert" aria-live="assertive" tabIndex={-1} className="scroll-mt-28 focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-route-action rounded-xl">
-          <Aviso tono="danger">
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-              <div>
-                <p className="font-bold">⚠️ Tarifa pendiente de re-confirmación</p>
-                <p className="text-xs text-ink/80 mt-0.5">
-                  Los datos del traslado cambiaron desde que aceptaste la tarifa previa. Debes revisar y aceptar la nueva cotización antes de confirmar el pago o la solicitud.
-                </p>
-              </div>
-              <Button type="button" variant="secondary" onClick={onRevisarTarifa} className="shrink-0">
-                Revisar nueva tarifa
-              </Button>
-            </div>
-          </Aviso>
-        </div>
-      )}
-
-
-     </div>
-   );
+        <p className="mt-4 text-sm">Pago electrónico anticipado obligatorio.</p>
+        <p className="mt-2 text-sm">{politicaCancelacion.mensaje}</p>
+      </BottomSheet>
+    </div>
+  );
 }
 
-function areEqualPasoDetalles(prev: PasoDetallesProps, next: PasoDetallesProps) {
+function areEqualPasoDetalles(
+  prev: PasoDetallesProps,
+  next: PasoDetallesProps,
+) {
   // Sin `prev.datos === next.datos` (cortaba todo cambio; resto muerto). El
   // resumen renderiza agenda, vehículo y ruta: se comparan esos campos.
   return (
@@ -307,9 +278,11 @@ function areEqualPasoDetalles(prev: PasoDetallesProps, next: PasoDetallesProps) 
     prev.gamaCatalogo === next.gamaCatalogo &&
     prev.rutaEstimacion === next.rutaEstimacion &&
     prev.politicaCancelacion === next.politicaCancelacion &&
-    prev.aceptaPoliticasPagoCancelacion === next.aceptaPoliticasPagoCancelacion &&
+    prev.aceptaPoliticasPagoCancelacion ===
+      next.aceptaPoliticasPagoCancelacion &&
     prev.enviando === next.enviando &&
     prev.cargandoSesion === next.cargandoSesion &&
+    prev.soloLectura === next.soloLectura &&
     prev.tarifaPreviaAceptada === next.tarifaPreviaAceptada
   );
 }

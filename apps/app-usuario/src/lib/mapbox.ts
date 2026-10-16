@@ -96,7 +96,7 @@ function esperarReintento(ms: number, signal?: AbortSignal): Promise<boolean> {
   });
 }
 
-async function consultarMapbox(parametros: URLSearchParams, externalSignal?: AbortSignal): Promise<FeatureMapbox[]> {
+async function consultarMapbox(parametros: URLSearchParams, externalSignal?: AbortSignal, endpoint = URL_GEOCODIFICACION): Promise<FeatureMapbox[]> {
   const token = obtenerTokenPublico();
   if (!tieneMapboxConfigurado() || !token) return [];
   if (externalSignal?.aborted) return [];
@@ -117,7 +117,7 @@ async function consultarMapbox(parametros: URLSearchParams, externalSignal?: Abo
     let error: MapboxUsuarioError | null = null;
 
     try {
-      const respuesta = await fetch(`${URL_GEOCODIFICACION}?${parametros.toString()}`, { signal: controller.signal });
+      const respuesta = await fetch(`${endpoint}?${parametros.toString()}`, { signal: controller.signal });
       if (!respuesta.ok) {
         error = new MapboxUsuarioError(`Mapbox Geocoding respondió ${respuesta.status}.`, respuesta.status);
       } else {
@@ -210,6 +210,7 @@ export async function sugerirDireccionesPorCodigoPostal(codigoPostal: string, si
 export interface SugerenciaDireccion {
   textoCompleto: string;
   direccion: string;
+  numero?: string;
   colonia?: string;
   ciudad?: string;
   estado?: string;
@@ -231,7 +232,7 @@ interface FeatureDireccionDetallada {
       locality?: { name?: string };
       neighborhood?: { name?: string };
       street?: { name?: string };
-      address?: { name?: string };
+      address?: { name?: string; address_number?: string; street_name?: string };
     };
     address?: string;
     postcode?: string;
@@ -253,7 +254,8 @@ export async function sugerirDireccionesAutocomplete(consulta: string, signal?: 
       const ctx = f.properties?.context;
       return {
         textoCompleto: f.properties?.full_address ?? [f.properties?.name, f.properties?.place_formatted].filter(Boolean).join(", ") ?? q,
-        direccion: f.properties?.address ?? f.properties?.name ?? "",
+        direccion: ctx?.street?.name ?? ctx?.address?.street_name ?? f.properties?.address ?? f.properties?.name ?? "",
+        numero: ctx?.address?.address_number,
         colonia: ctx?.neighborhood?.name ?? ctx?.locality?.name,
         ciudad: ctx?.place?.name ?? ctx?.locality?.name,
         estado: ctx?.region?.name,
@@ -267,6 +269,24 @@ export async function sugerirDireccionesAutocomplete(consulta: string, signal?: 
     // consultarMapbox ya emitió recordOperationalEvent para el caso geocoding
     return [];
   }
+}
+
+export async function resolverDireccionEnMapa(lat: number, lng: number, signal?: AbortSignal): Promise<SugerenciaDireccion | null> {
+  if (!Number.isFinite(lat) || !Number.isFinite(lng) || Math.abs(lat) > 90 || Math.abs(lng) > 180) return null;
+  const features = await consultarMapbox(new URLSearchParams({ latitude: String(lat), longitude: String(lng), types: "address", limit: "1" }), signal, "https://api.mapbox.com/search/geocode/v6/reverse") as FeatureDireccionDetallada[];
+  const feature = features[0];
+  if (!feature) return null;
+  const ctx = feature.properties?.context;
+  return {
+    textoCompleto: feature.properties?.full_address ?? feature.properties?.name ?? "",
+    direccion: ctx?.street?.name ?? ctx?.address?.street_name ?? feature.properties?.name ?? "",
+    numero: ctx?.address?.address_number,
+    colonia: ctx?.neighborhood?.name ?? ctx?.locality?.name,
+    ciudad: ctx?.place?.name ?? ctx?.locality?.name,
+    estado: ctx?.region?.name,
+    codigoPostal: ctx?.postcode?.name ?? feature.properties?.postcode,
+    lat, lng,
+  };
 }
 
 export async function calcularRutaMapbox(

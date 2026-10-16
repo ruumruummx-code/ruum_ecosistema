@@ -11,8 +11,11 @@ import io.github.jan.supabase.storage.Storage
 
 object SupabaseProvider {
     val isConfigured: Boolean
-        get() = BuildConfig.SUPABASE_URL.startsWith("https://") &&
-            BuildConfig.SUPABASE_PUBLISHABLE_KEY.isNotBlank()
+        get() {
+            val url = BuildConfig.SUPABASE_URL.trim()
+            val validScheme = url.startsWith("https://") || (BuildConfig.DEBUG && url.startsWith("http://"))
+            return validScheme && BuildConfig.SUPABASE_PUBLISHABLE_KEY.isNotBlank()
+        }
 
     val client: SupabaseClient by lazy {
         check(isConfigured) {

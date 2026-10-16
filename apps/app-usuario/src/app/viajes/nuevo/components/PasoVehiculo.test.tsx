@@ -1,10 +1,15 @@
 /** @vitest-environment jsdom */
-import { describe, expect, it, vi } from "vitest";
+import { beforeAll, describe, expect, it, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { VALORES_INICIALES } from "../constants";
 import type { DatosFormulario } from "../types";
 import { PasoVehiculo, type PasoVehiculoProps } from "./PasoVehiculo";
+
+beforeAll(() => {
+  HTMLDialogElement.prototype.showModal = function () { this.setAttribute("open", ""); };
+  HTMLDialogElement.prototype.close = function () { this.removeAttribute("open"); };
+});
 
 function propsIniciales(): PasoVehiculoProps {
   return {
@@ -56,10 +61,11 @@ describe("PasoVehiculo", () => {
     expect(screen.getByLabelText("Ambas placas instaladas")).toBeChecked();
   });
 
-  it("refleja el tipo de vehículo cuando cambia (comparador sin identidad)", () => {
+  it("refleja el tipo de vehículo cuando cambia en la ayuda del modelo", async () => {
     const iniciales = propsIniciales();
     const vista = render(<PasoVehiculo {...iniciales} />);
-    // "Sedán" aparece 2 veces: tipo + categoría de catálogo.
+    await userEvent.setup().click(screen.getByRole("button", { name: "Información del modelo" }));
+    // Tipo y categoría en la ayuda.
     expect(screen.getAllByText("Sedán")).toHaveLength(2);
     vista.rerender(<PasoVehiculo {...iniciales} datos={{ ...iniciales.datos, tipo: "suv" as never }} />);
     expect(screen.getByText("SUV")).toBeInTheDocument();
@@ -87,13 +93,10 @@ describe("PasoVehiculo", () => {
     const iniciales = propsIniciales();
     render(<PasoVehiculo {...iniciales} />);
 
-    expect(screen.getByRole("button", { name: /Detalles del vehículo/ })).toHaveAttribute(
-      "aria-expanded",
-      "true",
-    );
+    expect(screen.getByRole("dialog", { name: "Detalles del vehículo" })).toBeInTheDocument();
 
-    await user.click(screen.getByRole("button", { name: /Detalles del vehículo/ }));
-    expect(iniciales.acciones.setDetallesVehiculoExpandido).toHaveBeenCalled();
+    await user.click(screen.getByRole("button", { name: "Guardar detalles" }));
+    expect(iniciales.acciones.setDetallesVehiculoExpandido).toHaveBeenCalledWith(false);
   });
 
   it("propaga color y validación al perder el foco", async () => {

@@ -1,15 +1,27 @@
 "use client";
-import React, { memo } from "react";
+import React, { memo, useState } from "react";
 import Link from "next/link";
-import { Button, PassportCard, Aviso } from "@ruum/ui";
+import { MobileBottomSheet as BottomSheet } from "@/components/MobileBottomSheet";
+import styles from "./cotizador.module.css";
 import type { PrevisualizacionTarifa } from "@ruum/api/services";
 import { MARCAS_CATALOGO } from "@/lib/catalogo-vehiculos";
-import { CONDICIONES_VEHICULO, SLOTS_HORARIOS, type PrefijoDomicilio } from "../constants";
-import type { CondicionVehiculo, DatosFormulario, ErroresFormulario } from "../types";
+import {
+  CONDICIONES_VEHICULO,
+  SLOTS_HORARIOS,
+  type PrefijoDomicilio,
+} from "../constants";
+import type {
+  CondicionVehiculo,
+  DatosFormulario,
+  ErroresFormulario,
+} from "../types";
 
 export interface AccionesPasoTarifa {
   claseControl: (campo: keyof DatosFormulario) => string;
-  actualizar: <K extends keyof DatosFormulario>(campo: K, valor: DatosFormulario[K]) => void;
+  actualizar: <K extends keyof DatosFormulario>(
+    campo: K,
+    valor: DatosFormulario[K],
+  ) => void;
   actualizarCodigoPostal: (prefijo: PrefijoDomicilio, valor: string) => void;
   actualizarMarcaCatalogo: (marca: string) => void;
   actualizarModeloCatalogo: (modelo: string) => void;
@@ -36,6 +48,8 @@ function PasoTarifaComponent({
   previsualizacion,
   previsualizando,
 }: PasoTarifaProps) {
+  const [programando, setProgramando] = useState(false);
+  const [verAviso, setVerAviso] = useState(false);
   const {
     claseControl,
     actualizar,
@@ -45,395 +59,443 @@ function PasoTarifaComponent({
     validarCampo,
   } = acciones;
   return (
-    <div className="space-y-4">
-      <PassportCard>
-        <div className="grid gap-4">
-          {/* CP Origen y CP Destino */}
-          <div className="grid gap-3 sm:grid-cols-2">
-            <div className="flex flex-col gap-1.5">
-              <label htmlFor="gate-origenCodigoPostal" className="font-body text-sm font-medium text-ink">
-                Código Postal de origen
-              </label>
-              <div className="relative">
-                <input
-                  id="gate-origenCodigoPostal"
-                  name="origenCodigoPostal"
-                  type="text"
-                  inputMode="numeric"
-                  pattern="[0-9]{5}"
-                  autoComplete="postal-code"
-                  maxLength={5}
-                  placeholder="Ej. 03100"
-                  value={datos.origenCodigoPostal}
-                  onChange={(e) => actualizarCodigoPostal("origen", e.target.value)}
-                  onBlur={() => validarCampo("origenCodigoPostal")}
-                  className={`w-full rounded-lg border bg-mist px-3.5 py-2.5 font-body text-sm text-ink focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-1 focus-visible:outline-route-dark ${claseControl("origenCodigoPostal")}`}
-                  aria-invalid={Boolean(errores.origenCodigoPostal)}
-                  aria-busy={cpConsultando === "origen"}
-                  aria-describedby={[
-                    errores.origenCodigoPostal ? "gate-origen-cp-error" : null,
-                    cpConsultando === "origen" ? "gate-origen-cp-buscando" : null,
-                  ].filter(Boolean).join(" ") || undefined}
-                />
-                {cpConsultando === "origen" && (
-                  <span id="gate-origen-cp-buscando" className="absolute right-3 top-2.5 text-xs text-ink/40" role="status" aria-live="polite">Buscando…</span>
-                )}
-              </div>
-              {datos.origenCiudad && (
-                <p className="font-body text-xs text-emerald-700 font-medium">
-                  ✓ {datos.origenCiudad}, {datos.origenEstado}
-                </p>
-              )}
-              {errores.origenCodigoPostal && (
-                <p id="gate-origen-cp-error" className="font-body text-xs text-danger">{errores.origenCodigoPostal}</p>
-              )}
-            </div>
-
-            <div className="flex flex-col gap-1.5">
-              <label htmlFor="gate-destinoCodigoPostal" className="font-body text-sm font-medium text-ink">
-                Código Postal de destino
-              </label>
-              <div className="relative">
-                <input
-                  id="gate-destinoCodigoPostal"
-                  name="destinoCodigoPostal"
-                  type="text"
-                  inputMode="numeric"
-                  pattern="[0-9]{5}"
-                  autoComplete="postal-code"
-                  maxLength={5}
-                  placeholder="Ej. 06600"
-                  value={datos.destinoCodigoPostal}
-                  onChange={(e) => actualizarCodigoPostal("destino", e.target.value)}
-                  onBlur={() => validarCampo("destinoCodigoPostal")}
-                  className={`w-full rounded-lg border bg-mist px-3.5 py-2.5 font-body text-sm text-ink focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-1 focus-visible:outline-route-dark ${claseControl("destinoCodigoPostal")}`}
-                  aria-invalid={Boolean(errores.destinoCodigoPostal)}
-                  aria-busy={cpConsultando === "destino"}
-                  aria-describedby={[
-                    errores.destinoCodigoPostal ? "gate-destino-cp-error" : null,
-                    cpConsultando === "destino" ? "gate-destino-cp-buscando" : null,
-                  ].filter(Boolean).join(" ") || undefined}
-                />
-                {cpConsultando === "destino" && (
-                  <span id="gate-destino-cp-buscando" className="absolute right-3 top-2.5 text-xs text-ink/40" role="status" aria-live="polite">Buscando…</span>
-                )}
-              </div>
-              {datos.destinoCiudad && (
-                <p className="font-body text-xs text-emerald-700 font-medium">
-                  ✓ {datos.destinoCiudad}, {datos.destinoEstado}
-                </p>
-              )}
-              {errores.destinoCodigoPostal && (
-                <p id="gate-destino-cp-error" className="font-body text-xs text-danger">{errores.destinoCodigoPostal}</p>
-              )}
-            </div>
-          </div>
-
-          {/* Marca, Modelo y Condición */}
-          <div className="grid gap-3 sm:grid-cols-3">
-            <div className="flex flex-col gap-1.5">
-              <label htmlFor="gate-marca" className="font-body text-sm font-medium text-ink">
-                Marca
-              </label>
-              <select
-                id="gate-marca"
-                name="marca"
-                value={datos.marca}
-                onChange={(e) => actualizarMarcaCatalogo(e.target.value)}
-                onBlur={() => validarCampo("marca")}
-                className={`rounded-lg border bg-mist px-3.5 py-2.5 font-body text-sm ${claseControl("marca")}`}
-                aria-invalid={Boolean(errores.marca)}
-                aria-describedby={errores.marca ? "gate-marca-error" : undefined}
-              >
-                <option value="">Selecciona una marca</option>
-                {MARCAS_CATALOGO.map((m) => (
-                  <option key={m} value={m}>{m}</option>
-                ))}
-              </select>
-              {errores.marca && <p id="gate-marca-error" className="font-body text-xs text-danger">{errores.marca}</p>}
-            </div>
-
-            <div className="flex flex-col gap-1.5">
-              <label htmlFor="gate-modelo" className="font-body text-sm font-medium text-ink">
-                Modelo
-              </label>
-              {modelosDisponibles.length > 0 ? (
-                <select
-                  id="gate-modelo"
-                  name="modelo"
-                  value={datos.modelo}
-                  onChange={(e) => actualizarModeloCatalogo(e.target.value)}
-                  onBlur={() => validarCampo("modelo")}
-                  className={`rounded-lg border bg-mist px-3.5 py-2.5 font-body text-sm ${claseControl("modelo")}`}
-                  aria-invalid={Boolean(errores.modelo)}
-                  aria-describedby={errores.modelo ? "gate-modelo-error" : undefined}
-                >
-                  <option value="">Selecciona un modelo</option>
-                  {modelosDisponibles.map((mod) => (
-                    <option key={mod} value={mod}>{mod}</option>
-                  ))}
-                </select>
-              ) : (
-                <input
-                  id="gate-modelo"
-                  name="modelo"
-                  type="text"
-                  placeholder="Escribe el modelo"
-                  value={datos.modelo}
-                  onChange={(e) => actualizarModeloCatalogo(e.target.value)}
-                  onBlur={() => validarCampo("modelo")}
-                  className={`rounded-lg border bg-mist px-3.5 py-2.5 font-body text-sm ${claseControl("modelo")}`}
-                  aria-invalid={Boolean(errores.modelo)}
-                  aria-describedby={errores.modelo ? "gate-modelo-error" : undefined}
-                />
-              )}
-              {errores.modelo && <p id="gate-modelo-error" className="font-body text-xs text-danger">{errores.modelo}</p>}
-            </div>
-
-            <div className="flex flex-col gap-1.5">
-              <label htmlFor="gate-condicion" className="font-body text-sm font-medium text-ink">
-                Condición
-              </label>
-              <select
-                id="gate-condicion"
-                name="condicion"
-                value={datos.condicion}
-                onChange={(e) => actualizar("condicion", e.target.value as CondicionVehiculo)}
-                onBlur={() => validarCampo("condicion")}
-                className={`rounded-lg border bg-mist px-3.5 py-2.5 font-body text-sm ${claseControl("condicion")}`}
-                aria-invalid={Boolean(errores.condicion)}
-                aria-describedby={errores.condicion ? "gate-condicion-error" : undefined}
-              >
-                <option value="">Selecciona condición</option>
-                {CONDICIONES_VEHICULO.map((c) => (
-                  <option key={c.valor} value={c.valor}>{c.etiqueta}</option>
-                ))}
-              </select>
-              {errores.condicion && <p id="gate-condicion-error" className="font-body text-xs text-danger">{errores.condicion}</p>}
-            </div>
-          </div>
-
-          {/* Bloque Modalidad + Fecha + Slots */}
-          <div className="flex flex-col gap-2 pt-2 border-t border-ink/10">
-            <label id="label-gate-modalidad-programacion" className="font-body text-sm font-semibold text-ink">
-              ¿Cuándo necesitas el traslado?
-            </label>
-            <div
-              className="grid grid-cols-2 gap-2 rounded-xl border border-ink/20 bg-mist p-1.5"
-              role="radiogroup"
-              aria-labelledby="label-gate-modalidad-programacion"
-            >
-              <button
-                type="button"
-                role="radio"
-                aria-checked={datos.modalidadProgramacion === "lo_antes_posible"}
-                onClick={() => {
-                  actualizar("modalidadProgramacion", "lo_antes_posible");
-                  actualizar("fechaHoraProgramada", "");
-                  validarCampo("modalidadProgramacion");
-                }}
-                className={[
-                  "flex items-center justify-center gap-2 rounded-lg py-3 px-3 font-body text-xs sm:text-sm font-bold transition-all focus-visible:outline-route-dark",
-                  datos.modalidadProgramacion === "lo_antes_posible"
-                    ? "bg-signal text-slate-950 shadow-sm ring-1 ring-signal"
-                    : "text-ink/70 hover:bg-surface-elevated hover:text-ink"
-                ].join(" ")}
-              >
-                <span aria-hidden="true">⚡</span>
-                <span>Lo antes posible</span>
-              </button>
-              <button
-                type="button"
-                role="radio"
-                aria-checked={datos.modalidadProgramacion === "programado"}
-                onClick={() => {
-                  actualizar("modalidadProgramacion", "programado");
-                  if (!datos.fechaHoraProgramada) {
-                    const manana = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().split("T")[0];
-                    actualizar("fechaHoraProgramada", `${manana}T09:00`);
-                  }
-                  validarCampo("modalidadProgramacion");
-                }}
-                className={[
-                  "flex items-center justify-center gap-2 rounded-lg py-3 px-3 font-body text-xs sm:text-sm font-bold transition-all focus-visible:outline-route-dark",
-                  datos.modalidadProgramacion === "programado"
-                    ? "bg-signal text-slate-950 shadow-sm ring-1 ring-signal"
-                    : "text-ink/70 hover:bg-surface-elevated hover:text-ink"
-                ].join(" ")}
-              >
-                <span aria-hidden="true">📅</span>
-                <span>Programar fecha</span>
-              </button>
-            </div>
-          </div>
-
-          {datos.modalidadProgramacion === "programado" && (
-            <div className="grid gap-3 rounded-lg border border-ink/10 bg-mist p-4">
-              <p className="font-body text-xs font-semibold uppercase tracking-wide text-ink/45">Fecha y horario del servicio</p>
-              <div className="grid gap-3 sm:grid-cols-2">
-                <label htmlFor="gate-fechaHoraProgramada" className="flex flex-col gap-1.5">
-                  <span className="font-body text-sm font-medium">Fecha de recolección</span>
-                  <input
-                    id="gate-fechaHoraProgramada"
-                    name="fechaHoraProgramada"
-                    type="date"
-                    value={datos.fechaHoraProgramada ? datos.fechaHoraProgramada.split("T")[0] : ""}
-                    min={new Date(Date.now() + 2 * 60 * 60 * 1000).toISOString().split("T")[0]}
-                    onChange={(e) => {
-                      const fecha = e.target.value;
-                      const horaActual = datos.fechaHoraProgramada ? (datos.fechaHoraProgramada.split("T")[1]?.slice(0, 5) ?? "09:00") : "09:00";
-                      if (!fecha) actualizar("fechaHoraProgramada", "");
-                      else actualizar("fechaHoraProgramada", `${fecha}T${horaActual}`);
-                    }}
-                    onBlur={() => validarCampo("fechaHoraProgramada")}
-                    className={`rounded-lg border bg-mist px-3.5 py-2.5 font-body text-sm ${claseControl("fechaHoraProgramada")}`}
-                    aria-invalid={Boolean(errores.fechaHoraProgramada)}
-                    aria-describedby={errores.fechaHoraProgramada ? "gate-fecha-error" : "gate-fecha-ayuda"}
-                  />
+    <div className={styles.fields}>
+      <section aria-label="Ruta del traslado" className={styles.route}>
+        {(["origen", "destino"] as const).map((prefijo) => {
+          const campo =
+            prefijo === "origen" ? "origenCodigoPostal" : "destinoCodigoPostal";
+          const ciudad =
+            prefijo === "origen" ? datos.origenCiudad : datos.destinoCiudad;
+          const estado =
+            prefijo === "origen" ? datos.origenEstado : datos.destinoEstado;
+          return (
+            <div key={prefijo} className={styles.routeRow}>
+              <span
+                className={
+                  prefijo === "origen" ? styles.origin : styles.destination
+                }
+                aria-hidden="true"
+              />
+              <div className="min-w-0 flex-1">
+                <label htmlFor={`gate-${campo}`} className={styles.label}>
+                  Código Postal de {prefijo}
                 </label>
-
-                <div className="flex flex-col gap-1.5">
-                  <span id="label-gate-slots-horario" className="font-body text-sm font-medium">Horario sugerido</span>
-                  <div className="grid grid-cols-2 gap-1.5" role="radiogroup" aria-labelledby="label-gate-slots-horario">
-                    {SLOTS_HORARIOS.map((s) => {
-                      const t = datos.fechaHoraProgramada ? (datos.fechaHoraProgramada.split("T")[1]?.slice(0, 5) ?? "") : "";
-                      const seleccionado = s.id === "personalizado"
-                        ? Boolean(t && !SLOTS_HORARIOS.some((slot) => slot.id !== "personalizado" && slot.hora === t))
-                        : s.hora === t;
-                      return (
-                        <button
-                          key={s.id}
-                          type="button"
-                          role="radio"
-                          aria-checked={seleccionado}
-                          aria-label={s.etiqueta}
-                          onClick={() => {
-                            const fecha = datos.fechaHoraProgramada ? datos.fechaHoraProgramada.split("T")[0] : new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().split("T")[0];
-                            if (s.hora) actualizar("fechaHoraProgramada", `${fecha}T${s.hora}`);
-                            else {
-                              const h = t || "10:00";
-                              actualizar("fechaHoraProgramada", `${fecha}T${h}`);
-                            }
-                            validarCampo("fechaHoraProgramada");
-                          }}
-                          className={[
-                            "rounded-lg border px-2.5 py-2 text-left font-body text-xs font-semibold transition-all focus-visible:outline-route-dark",
-                            seleccionado
-                              ? "border-route bg-route-soft text-route-dark shadow-xs"
-                              : "border-ink/20 bg-mist text-ink/75 hover:border-ink/40 hover:text-ink"
-                          ].join(" ")}
-                        >
-                          {s.etiqueta.split("·")[0]}
-                          <span className="block text-[10px] font-normal opacity-70">
-                            {s.etiqueta.includes("·") ? s.etiqueta.split("·")[1] : "Hora exacta"}
-                          </span>
-                        </button>
-                      );
-                    })}
-                  </div>
+                <div className="flex min-w-0 items-center gap-2">
+                  <input
+                    id={`gate-${campo}`}
+                    name={campo}
+                    inputMode="numeric"
+                    pattern="[0-9]{5}"
+                    autoComplete="postal-code"
+                    maxLength={5}
+                    placeholder={
+                      prefijo === "origen" ? "Ej. 03100" : "Ej. 06600"
+                    }
+                    value={datos[campo]}
+                    onChange={(e) =>
+                      actualizarCodigoPostal(prefijo, e.target.value)
+                    }
+                    onBlur={() => validarCampo(campo)}
+                    className={styles.postal}
+                    aria-invalid={Boolean(errores[campo])}
+                    aria-describedby={`gate-${prefijo}-cp-status`}
+                  />
+                  <span
+                    id={`gate-${prefijo}-cp-status`}
+                    className="min-w-0 flex-1 text-xs text-[var(--user-color-muted)]"
+                    role="status"
+                  >
+                    {errores[campo] ||
+                      (cpConsultando === prefijo
+                        ? "Buscando…"
+                        : ciudad
+                          ? `${ciudad}, ${estado}`
+                          : "")}
+                  </span>
                 </div>
               </div>
-
-              {(() => {
-                const t = datos.fechaHoraProgramada ? (datos.fechaHoraProgramada.split("T")[1]?.slice(0, 5) ?? "") : "";
-                const esPersonalizado = t && !SLOTS_HORARIOS.some((s) => s.id !== "personalizado" && s.hora === t);
-                if (!esPersonalizado) return null;
-                return (
-                  <label htmlFor="gate-horaExactaProgramada" className="flex flex-col gap-1.5 mt-2">
-                    <span className="font-body text-sm font-medium">Especificar hora exacta</span>
-                    <input
-                      id="gate-horaExactaProgramada"
-                      type="time"
-                      value={t}
-                      onChange={(e) => {
-                        const fecha = datos.fechaHoraProgramada ? datos.fechaHoraProgramada.split("T")[0] : new Date().toISOString().split("T")[0];
-                        actualizar("fechaHoraProgramada", `${fecha}T${e.target.value}`);
-                      }}
-                      onBlur={() => validarCampo("fechaHoraProgramada")}
-                      className="rounded-lg border border-ink/50 bg-mist px-3.5 py-2.5 font-body text-sm focus-visible:outline-route-dark"
-                    />
-                  </label>
-                );
-              })()}
-
-              <div className="flex items-center gap-2 rounded-lg border border-route/15 bg-route-soft/50 p-2.5 font-body text-xs text-ink/70">
-                <span aria-hidden="true">🌐</span>
-                <span>Zona horaria: <strong className="text-ink">{typeof Intl !== "undefined" ? Intl.DateTimeFormat().resolvedOptions().timeZone : "America/Mexico_City"} (hora local del dispositivo)</strong> · Anticipación mínima de 2 horas.</span>
-              </div>
-              <p id="gate-fecha-ayuda" className="sr-only">Fecha mínima con 2 horas de anticipación respecto a ahora en tu zona horaria.</p>
-              {errores.fechaHoraProgramada && <p id="gate-fecha-error" className="font-body text-xs text-danger">{errores.fechaHoraProgramada}</p>}
             </div>
+          );
+        })}
+      </section>
+      <section aria-label="Datos del vehículo" className={styles.vehicle}>
+        <div className={styles.field}>
+          <label htmlFor="gate-marca" className={styles.label}>
+            Marca
+          </label>
+          <select
+            id="gate-marca"
+            name="marca"
+            value={datos.marca}
+            onChange={(e) => actualizarMarcaCatalogo(e.target.value)}
+            onBlur={() => validarCampo("marca")}
+            aria-invalid={Boolean(errores.marca)}
+            aria-describedby={errores.marca ? "gate-marca-error" : undefined}
+          >
+            <option value="">Selecciona</option>
+            {MARCAS_CATALOGO.map((m) => (
+              <option key={m}>{m}</option>
+            ))}
+          </select>
+          {errores.marca && (
+            <p id="gate-marca-error" className={styles.error}>
+              {errores.marca}
+            </p>
           )}
         </div>
-      </PassportCard>
-
-      {/* Resultado del precio final — aria-live para cambios de cálculo */}
-      <section className="app-status-strip px-5 py-5" aria-labelledby="titulo-tarifa-gate" aria-live="polite" aria-atomic="true">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <p id="titulo-tarifa-gate" className="font-body text-xs font-semibold uppercase tracking-wide text-ink/45">
-              Tarifa de tu traslado
+        <div className={styles.field}>
+          <label htmlFor="gate-modelo" className={styles.label}>
+            Modelo
+          </label>
+          {modelosDisponibles.length ? (
+            <select
+              id="gate-modelo"
+              name="modelo"
+              value={datos.modelo}
+              onChange={(e) => actualizarModeloCatalogo(e.target.value)}
+              onBlur={() => validarCampo("modelo")}
+              aria-invalid={Boolean(errores.modelo)}
+              aria-describedby={
+                errores.modelo ? "gate-modelo-error" : undefined
+              }
+            >
+              <option value="">Selecciona</option>
+              {modelosDisponibles.map((m) => (
+                <option key={m}>{m}</option>
+              ))}
+            </select>
+          ) : (
+            <input
+              id="gate-modelo"
+              name="modelo"
+              placeholder="Escribe el modelo"
+              value={datos.modelo}
+              onChange={(e) => actualizarModeloCatalogo(e.target.value)}
+              onBlur={() => validarCampo("modelo")}
+              aria-invalid={Boolean(errores.modelo)}
+              aria-describedby={
+                errores.modelo ? "gate-modelo-error" : undefined
+              }
+            />
+          )}
+          {errores.modelo && (
+            <p id="gate-modelo-error" className={styles.error}>
+              {errores.modelo}
             </p>
-            {previsualizando && (
-              <p className="mt-1 font-body text-sm text-ink/55">
-                <span className="inline-flex h-2 w-2 animate-pulse rounded-full bg-signal mr-2" aria-hidden />
-                Calculando tarifa real…
-              </p>
-            )}
-            {!previsualizando && previsualizacion?.disponible && (
-              <>
-                <p className="mt-1 font-display text-4xl font-bold leading-tight text-ink">
-                  ${Number(previsualizacion.tarifa ?? 0).toLocaleString("es-MX")}{" "}
-                  <span className="font-body text-sm font-semibold text-ink/55">MXN</span>
-                </p>
-                <p className="mt-2 max-w-sm font-body text-sm leading-6 text-ink/65">
-                  Tarifa real de tu traslado. Puede tener un ajuste mínimo posible si la dirección exacta cambia el rango de distancia.
-                </p>
-              </>
-            )}
-            {!previsualizando && previsualizacion && !previsualizacion.disponible && (
-              <p className="mt-1 max-w-sm font-body text-sm leading-6 text-ink/65">
-                Sin tarifa automática por ahora. Revisa el aviso de abajo para solicitar tu cotización especial.
-              </p>
-            )}
-          </div>
-
-          <div className="flex flex-col gap-2 sm:items-end sm:min-w-[220px]">
-            {!previsualizando && !previsualizacion?.disponible && (
-              <div className="w-full sm:text-right">
-                <p id="tarifa-gate-bloqueo-ayuda" className="font-body text-xs leading-4 text-ink/60">
-                  {!previsualizacion
-                    ? "Completa origen, destino, vehículo y fecha para calcular tu tarifa."
-                    : "Tu vehículo o ruta requiere cotización especial: el flujo express solo continúa con tarifa automática."}
-                </p>
-              </div>
-            )}
-          </div>
+          )}
+        </div>
+        <div className={`${styles.field} ${styles.condition}`}>
+          <label htmlFor="gate-condicion" className={styles.label}>
+            Condición
+          </label>
+          <select
+            id="gate-condicion"
+            name="condicion"
+            value={datos.condicion}
+            onChange={(e) =>
+              actualizar("condicion", e.target.value as CondicionVehiculo)
+            }
+            onBlur={() => validarCampo("condicion")}
+            aria-invalid={Boolean(errores.condicion)}
+            aria-describedby={
+              errores.condicion ? "gate-condicion-error" : undefined
+            }
+          >
+            <option value="">Selecciona condición</option>
+            {CONDICIONES_VEHICULO.map((c) => (
+              <option key={c.valor} value={c.valor}>
+                {c.etiqueta}
+              </option>
+            ))}
+          </select>
+          {errores.condicion && (
+            <p id="gate-condicion-error" className={styles.error}>
+              {errores.condicion}
+            </p>
+          )}
         </div>
       </section>
-
-      {/* Bloqueo estricto: sin tarifa automática no hay flujo express.
-          La cotización especial se solicita fuera del flujo, con soporte. */}
-      {!previsualizando && previsualizacion && !previsualizacion.disponible && (
-        <div role="alert">
-          <Aviso tono="atencion">
-            <div className="flex flex-col gap-3">
-              <p className="font-bold">Este traslado requiere cotización especial</p>
-              <p className="font-body text-xs leading-5">
-                {previsualizacion.motivo
-                  ? previsualizacion.motivo.replace("Torre de Control", "nuestro equipo")
-                  : "Nuestro equipo debe calcular tu tarifa manualmente."}{" "}
-                El flujo express solo continúa con tarifa automática y pago electrónico anticipado.
-              </p>
-              <Link href="/soporte">
-                <Button type="button" variant="secondary">
-                  Solicitar cotización especial
-                </Button>
-              </Link>
-            </div>
-          </Aviso>
+      <section>
+        <p
+          id="label-gate-modalidad-programacion"
+          className="mb-2 text-xs font-semibold"
+        >
+          ¿Cuándo necesitas el traslado?
+        </p>
+        <div
+          className={styles.segmented}
+          role="radiogroup"
+          aria-labelledby="label-gate-modalidad-programacion"
+        >
+          <button
+            type="button"
+            role="radio"
+            aria-checked={datos.modalidadProgramacion === "lo_antes_posible"}
+            onClick={() => {
+              actualizar("modalidadProgramacion", "lo_antes_posible");
+              actualizar("fechaHoraProgramada", "");
+              validarCampo("modalidadProgramacion");
+            }}
+          >
+            Lo antes posible
+          </button>
+          <button
+            type="button"
+            role="radio"
+            aria-checked={datos.modalidadProgramacion === "programado"}
+            onClick={() => {
+              actualizar("modalidadProgramacion", "programado");
+              if (!datos.fechaHoraProgramada) {
+                const manana = new Date(Date.now() + 86400000);
+                const fecha = new Date(
+                  manana.getTime() - manana.getTimezoneOffset() * 60000,
+                )
+                  .toISOString()
+                  .split("T")[0];
+                actualizar("fechaHoraProgramada", `${fecha}T09:00`);
+              }
+              validarCampo("modalidadProgramacion");
+              setProgramando(true);
+            }}
+          >
+            Programar fecha
+          </button>
         </div>
+        <p
+          className="mt-1 min-h-4 text-xs text-[var(--user-color-muted)]"
+          aria-live="polite"
+        >
+          {datos.modalidadProgramacion === "programado" &&
+          datos.fechaHoraProgramada
+            ? new Date(datos.fechaHoraProgramada).toLocaleString("es-MX", {
+                dateStyle: "medium",
+                timeStyle: "short",
+              })
+            : ""}
+        </p>
+      </section>
+      {!previsualizando && previsualizacion && !previsualizacion.disponible && (
+        <button
+          type="button"
+          className="min-h-11 text-left text-xs font-semibold text-[var(--user-color-action)]"
+          onClick={() => setVerAviso(true)}
+        >
+          Este traslado requiere cotización especial · Ver opciones
+        </button>
       )}
+      <BottomSheet
+        open={programando}
+        onClose={() => setProgramando(false)}
+        title="Programar traslado"
+      >
+        <div className="grid gap-3 rounded-lg border border-ink/10 bg-mist p-4">
+          <p className="font-body text-xs font-semibold uppercase tracking-wide text-ink/45">
+            Fecha y horario del servicio
+          </p>
+          <div className="grid gap-3 sm:grid-cols-2">
+            <label
+              htmlFor="gate-fechaHoraProgramada"
+              className="flex flex-col gap-1.5"
+            >
+              <span className="font-body text-sm font-medium">
+                Fecha de recolección
+              </span>
+              <input
+                id="gate-fechaHoraProgramada"
+                name="fechaHoraProgramada"
+                type="date"
+                value={
+                  datos.fechaHoraProgramada
+                    ? datos.fechaHoraProgramada.split("T")[0]
+                    : ""
+                }
+                min={
+                  new Date(Date.now() + 2 * 60 * 60 * 1000)
+                    .toISOString()
+                    .split("T")[0]
+                }
+                onChange={(e) => {
+                  const fecha = e.target.value;
+                  const horaActual = datos.fechaHoraProgramada
+                    ? (datos.fechaHoraProgramada.split("T")[1]?.slice(0, 5) ??
+                      "09:00")
+                    : "09:00";
+                  if (!fecha) actualizar("fechaHoraProgramada", "");
+                  else
+                    actualizar("fechaHoraProgramada", `${fecha}T${horaActual}`);
+                }}
+                onBlur={() => validarCampo("fechaHoraProgramada")}
+                className={`rounded-lg border bg-mist px-3.5 py-2.5 font-body text-sm ${claseControl("fechaHoraProgramada")}`}
+                aria-invalid={Boolean(errores.fechaHoraProgramada)}
+                aria-describedby={
+                  errores.fechaHoraProgramada
+                    ? "gate-fecha-error"
+                    : "gate-fecha-ayuda"
+                }
+              />
+            </label>
+
+            <div className="flex flex-col gap-1.5">
+              <span
+                id="label-gate-slots-horario"
+                className="font-body text-sm font-medium"
+              >
+                Horario sugerido
+              </span>
+              <div
+                className="grid grid-cols-2 gap-1.5"
+                role="radiogroup"
+                aria-labelledby="label-gate-slots-horario"
+              >
+                {SLOTS_HORARIOS.map((s) => {
+                  const t = datos.fechaHoraProgramada
+                    ? (datos.fechaHoraProgramada.split("T")[1]?.slice(0, 5) ??
+                      "")
+                    : "";
+                  const seleccionado =
+                    s.id === "personalizado"
+                      ? Boolean(
+                          t &&
+                            !SLOTS_HORARIOS.some(
+                              (slot) =>
+                                slot.id !== "personalizado" && slot.hora === t,
+                            ),
+                        )
+                      : s.hora === t;
+                  return (
+                    <button
+                      key={s.id}
+                      type="button"
+                      role="radio"
+                      aria-checked={seleccionado}
+                      aria-label={s.etiqueta}
+                      onClick={() => {
+                        const fecha = datos.fechaHoraProgramada
+                          ? datos.fechaHoraProgramada.split("T")[0]
+                          : new Date(Date.now() + 24 * 60 * 60 * 1000)
+                              .toISOString()
+                              .split("T")[0];
+                        if (s.hora)
+                          actualizar(
+                            "fechaHoraProgramada",
+                            `${fecha}T${s.hora}`,
+                          );
+                        else {
+                          const h = t || "10:00";
+                          actualizar("fechaHoraProgramada", `${fecha}T${h}`);
+                        }
+                        validarCampo("fechaHoraProgramada");
+                      }}
+                      className={[
+                        "rounded-lg border px-2.5 py-2 text-left font-body text-xs font-semibold transition-all focus-visible:outline-route-dark",
+                        seleccionado
+                          ? "border-route bg-route-soft text-route-dark shadow-xs"
+                          : "border-ink/20 bg-mist text-ink/75 hover:border-ink/40 hover:text-ink",
+                      ].join(" ")}
+                    >
+                      {s.etiqueta.split("·")[0]}
+                      <span className="block text-[10px] font-normal opacity-70">
+                        {s.etiqueta.includes("·")
+                          ? s.etiqueta.split("·")[1]
+                          : "Hora exacta"}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+
+          {(() => {
+            const t = datos.fechaHoraProgramada
+              ? (datos.fechaHoraProgramada.split("T")[1]?.slice(0, 5) ?? "")
+              : "";
+            const esPersonalizado =
+              t &&
+              !SLOTS_HORARIOS.some(
+                (s) => s.id !== "personalizado" && s.hora === t,
+              );
+            if (!esPersonalizado) return null;
+            return (
+              <label
+                htmlFor="gate-horaExactaProgramada"
+                className="flex flex-col gap-1.5 mt-2"
+              >
+                <span className="font-body text-sm font-medium">
+                  Especificar hora exacta
+                </span>
+                <input
+                  id="gate-horaExactaProgramada"
+                  type="time"
+                  value={t}
+                  onChange={(e) => {
+                    const fecha = datos.fechaHoraProgramada
+                      ? datos.fechaHoraProgramada.split("T")[0]
+                      : new Date().toISOString().split("T")[0];
+                    actualizar(
+                      "fechaHoraProgramada",
+                      `${fecha}T${e.target.value}`,
+                    );
+                  }}
+                  onBlur={() => validarCampo("fechaHoraProgramada")}
+                  className="rounded-lg border border-ink/50 bg-mist px-3.5 py-2.5 font-body text-sm focus-visible:outline-route-dark"
+                />
+              </label>
+            );
+          })()}
+
+          <div className="flex items-center gap-2 rounded-lg border border-route/15 bg-route-soft/50 p-2.5 font-body text-xs text-ink/70">
+            <span aria-hidden="true">🌐</span>
+            <span>
+              Zona horaria:{" "}
+              <strong className="text-ink">
+                {typeof Intl !== "undefined"
+                  ? Intl.DateTimeFormat().resolvedOptions().timeZone
+                  : "America/Mexico_City"}{" "}
+                (hora local del dispositivo)
+              </strong>{" "}
+              · Anticipación mínima de 2 horas.
+            </span>
+          </div>
+          <p id="gate-fecha-ayuda" className="sr-only">
+            Fecha mínima con 2 horas de anticipación respecto a ahora en tu zona
+            horaria.
+          </p>
+          {errores.fechaHoraProgramada && (
+            <p id="gate-fecha-error" className="font-body text-xs text-danger">
+              {errores.fechaHoraProgramada}
+            </p>
+          )}
+        </div>
+        <button
+          type="button"
+          className="mt-4 min-h-12 w-full rounded-xl bg-[var(--user-color-action)] font-semibold text-[var(--user-color-on-action)]"
+          onClick={() => {
+            validarCampo("fechaHoraProgramada");
+            setProgramando(false);
+          }}
+        >
+          Confirmar horario
+        </button>
+      </BottomSheet>
+      <BottomSheet
+        open={verAviso}
+        onClose={() => setVerAviso(false)}
+        title="Cotización especial"
+      >
+        <p className="text-sm">
+          {previsualizacion?.motivo?.replace(
+            "Torre de Control",
+            "nuestro equipo",
+          ) || "Nuestro equipo debe calcular tu tarifa manualmente."}
+        </p>
+        <Link
+          className="mt-4 flex min-h-12 items-center justify-center rounded-xl bg-[var(--user-color-action)] text-sm font-semibold text-[var(--user-color-on-action)]"
+          href="/soporte"
+        >
+          Solicitar cotización especial
+        </Link>
+      </BottomSheet>
     </div>
   );
 }

@@ -53,6 +53,13 @@ describe("useNuevoTraslado (2.1 Fase 1 — 80%+)", () => {
     vi.clearAllMocks();
   });
 
+  it("registra la aceptación legal sólo al solicitar continuar al pago", async () => {
+    const { result } = renderHook(() => useNuevoTraslado(), { wrapper });
+    expect(result.current.aceptaPoliticasPagoCancelacion).toBe(false);
+    await act(async()=> { await result.current.accionesDetalles.enviarSolicitud(); });
+    expect(result.current.aceptaPoliticasPagoCancelacion).toBe(true);
+  });
+
   it("actualizar marca invalida tarifa previa (haCambiadoTarifa)", async () => {
     const { result } = renderHook(() => useNuevoTraslado(), { wrapper });
 

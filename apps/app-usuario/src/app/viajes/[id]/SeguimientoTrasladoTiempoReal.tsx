@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useDeferredValue } from "react";
+import { useEffect, useRef, useDeferredValue, useState } from "react";
 import {
   obtenerEstadoTrasladoRealtime,
   obtenerUltimaUbicacionTraslado,
@@ -10,10 +10,11 @@ import {
 } from "@ruum/api/services";
 import { ETIQUETA_ESTADO_TRASLADO } from "@ruum/shared/states";
 import { limpiarCanalesSeguros } from "@ruum/shared/utils";
-import { Aviso, EstadoBadge, MapaEstatico, PassportCard } from "@ruum/ui";
+import { MapaPasaporte } from "./MapaPasaporte";
+import styles from "./pasaporte.module.css";
 import type { Database } from "@ruum/shared/types";
 import { crearClienteNavegador, tieneSupabaseConfigurado } from "@/lib/supabase-browser";
-import { SkeletonMapa } from "../../components/SkeletonMapa";
+
 import { useTrasladoRealtime } from "@/state/AppStateProvider";
 
 type EstadoTraslado = Database["public"]["Enums"]["estado_traslado"];
@@ -29,6 +30,7 @@ interface SeguimientoTrasladoTiempoRealProps {
   origen: PuntoMapa;
   destino: PuntoMapa;
   ubicacionInicial: UbicacionTraslado | null;
+  activo?: boolean;
 }
 
 const ESTADOS_VISIBLES: EstadoTraslado[] = [
@@ -48,10 +50,6 @@ const ESTADOS_VISIBLES: EstadoTraslado[] = [
   "servicio_cerrado"
 ];
 
-function puntoValido(punto: PuntoMapa): punto is { lat: number; lng: number } {
-  return typeof punto.lat === "number" && typeof punto.lng === "number";
-}
-
 function formatoHora(fechaIso: string | null | undefined) {
   if (!fechaIso) return "Sin actualización";
   try {
@@ -67,28 +65,15 @@ function formatoHora(fechaIso: string | null | undefined) {
   }
 }
 
-function construirMapa(origen: PuntoMapa, destino: PuntoMapa, ubicacion: UbicacionTraslado | null) {
-  const token = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN;
-  if (!token) return null;
-
-  const marcadores: string[] = [];
-  if (puntoValido(origen)) marcadores.push(`pin-s-o+2563eb(${origen.lng},${origen.lat})`);
-  if (puntoValido(destino)) marcadores.push(`pin-s-d+16a34a(${destino.lng},${destino.lat})`);
-  if (ubicacion) marcadores.push(`pin-l-c+f59e0b(${Number(ubicacion.lng)},${Number(ubicacion.lat)})`);
-  if (marcadores.length === 0) return null;
-
-  const overlay = marcadores.join(",");
-  return `https://api.mapbox.com/styles/v1/mapbox/streets-v12/static/${overlay}/auto/900x320@2x?padding=70&access_token=${encodeURIComponent(token)}`;
-}
-
 export function SeguimientoTrasladoTiempoReal({
   trasladoId,
   estado,
   origen,
   destino,
-  ubicacionInicial
+  ubicacionInicial,
+  activo = true
 }: SeguimientoTrasladoTiempoRealProps) {
-  const { ubicacion, estadoRealtime, estadoActualizadoEn, cargando, mapaCargadoUrl, inicializar, actualizar, limpiar } = useTrasladoRealtime(trasladoId);
+  const { ubicacion, estadoRealtime, estadoActualizadoEn, cargando, inicializar, actualizar, limpiar } = useTrasladoRealtime(trasladoId);
   // R12: debounce refrescar + última vez para evitar spam
   const ultimoRefreshRef = useRef<number>(0);
   // Fix A1: throttle de 5s para llegada de coordenadas por WebSockets
@@ -96,12 +81,10 @@ export function SeguimientoTrasladoTiempoReal({
   const pendienteUbicacionRef = useRef<UbicacionTraslado | null>(null);
   const timerThrottleRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  const [eta, setEta] = useState<number | null>(null);
   const estadoEnVivo = estadoRealtime ?? estado;
   // Fix A1: diferir recálculo de mapa estático para evitar recargar imágenes pesadas en móviles
   const ubicacionDiferida = useDeferredValue(ubicacion);
-  const mapaUrl = useMemo(() => construirMapa(origen, destino, ubicacionDiferida), [destino, origen, ubicacionDiferida]);
-  const mapaCargado = mapaUrl != null && mapaCargadoUrl === mapaUrl;
-  const visible = estadoEnVivo ? ESTADOS_VISIBLES.includes(estadoEnVivo) : false;
 
   useEffect(() => {
     inicializar(ubicacionInicial);
@@ -212,92 +195,13 @@ export function SeguimientoTrasladoTiempoReal({
     }
   }
 
-  if (!visible) {
-    return (
-      <section className="mt-6" aria-label="Estado de la búsqueda de conductor">
-        <PassportCard>
-          <div role="status" aria-live="polite" aria-atomic="true" className="flex flex-col gap-2">
-            <p className="font-body text-xs uppercase tracking-wide text-ink/45"></p>
-            <h2 className="font-display text-xl font-semibold">Buscando tu conductor</h2>
-            <p className="font-body text-sm leading-6 text-ink/60">
-              Estamos buscando un conductor certificado. Te avisaremos en cuanto inicie el seguimiento en vivo.
-            </p>
-          </div>
-        </PassportCard>
-      </section>
-    );
-  }
-
-  return (
-    <section className="mt-6">
-      <PassportCard>
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-          <div>
-            <p className="font-body text-xs uppercase tracking-wide text-ink/45">Trazabilidad en tiempo real</p>
-            <h2 className="mt-1 font-display text-xl font-semibold">Sigue tu traslado</h2>
-            <p className="mt-2 font-body text-sm leading-6 text-ink/60">
-              Actualizamos la ubicación automáticamente durante el servicio.
-            </p>
-          </div>
-          {estadoEnVivo && <EstadoBadge estado={estadoEnVivo} />}
-        </div>
-
-        <div className="mt-5 rounded-[var(--ruum-radius-field)] border border-route/20 bg-route-soft px-4 py-3">
-          <p className="font-body text-xs uppercase tracking-wide text-route-dark/80">Estado en vivo</p>
-          <p className="mt-1 font-display text-base font-semibold text-ink">
-            {estadoEnVivo ? ETIQUETA_ESTADO_TRASLADO[estadoEnVivo] : "Esperando actualización"}
-          </p>
-          <p className="mt-1 font-body text-xs text-ink/60">
-            Actualizado {formatoHora(estadoActualizadoEn ?? ubicacion?.registrado_en)}
-          </p>
-        </div>
-
-        <div className="mt-4 flex justify-end">
-          <button
-            type="button"
-            onClick={refrescar}
-            disabled={cargando}
-            className="inline-flex min-h-10 items-center justify-center rounded-xl border border-ink/20 bg-mist px-4 py-2 font-body text-sm font-medium text-ink transition hover:border-ink/40 disabled:cursor-not-allowed disabled:opacity-60"
-          >
-            {cargando ? "Actualizando" : "Actualizar"}
-          </button>
-        </div>
-
-        {mapaUrl ? (
-          <div className="relative mt-5 h-72 overflow-hidden rounded-lg border border-ink/10 bg-ink/5">
-            {!mapaCargado && <SkeletonMapa className="h-72 rounded-lg" />}
-            <MapaEstatico
-              src={mapaUrl}
-              alt="Mapa con la ruta y la última ubicación del conductor"
-              onLoad={() => actualizar({ mapaCargadoUrl: mapaUrl })}
-              className={mapaCargado ? "object-cover" : "hidden"}
-            />
-          </div>
-        ) : (
-          <div className="mt-5">
-            <Aviso tono="info">
-              Aún no hay mapa disponible. Te mostraremos la ruta en cuanto inicie el traslado.
-            </Aviso>
-          </div>
-        )}
-
-        <dl className="mt-5 grid gap-4 sm:grid-cols-3">
-          <div>
-            <dt className="font-body text-xs uppercase tracking-wide text-ink/45">Última actualización</dt>
-            <dd className="mt-1 font-body text-sm font-medium text-ink">
-              {ubicacion?.registrado_en ? formatoHora(ubicacion.registrado_en) : "En cuanto inicie el traslado"}
-            </dd>
-          </div>
-          <div>
-            <dt className="font-body text-xs uppercase tracking-wide text-ink/45">Fuente</dt>
-            <dd className="mt-1 font-body text-sm font-medium text-ink">Compartida por el conductor</dd>
-          </div>
-          <div>
-            <dt className="font-body text-xs uppercase tracking-wide text-ink/45">Actualizado</dt>
-            <dd className="mt-1 font-body text-sm font-medium text-ink">{formatoHora(ubicacion?.registrado_en)}</dd>
-          </div>
-        </dl>
-      </PassportCard>
-    </section>
-  );
+  return <div className={styles.panel}>
+    <MapaPasaporte origen={origen} destino={destino} ubicacion={ubicacionDiferida} activo={activo} haciaOrigen={estadoEnVivo === "conductor_en_camino_al_origen"} seguirUbicacion={estadoEnVivo === "traslado_en_curso" || estadoEnVivo === "conductor_en_camino_al_origen"} onEta={setEta} />
+    <div className={styles.tools}><button type="button" onClick={refrescar} disabled={cargando}>{cargando ? "Actualizando…" : "↻ Actualizar"}</button></div>
+    <div className={styles.status} role="status" aria-live="polite">
+      <progress aria-label="Progreso del traslado" max={ESTADOS_VISIBLES.length} value={Math.max(0, ESTADOS_VISIBLES.indexOf(estadoEnVivo as EstadoTraslado) + 1)} />
+      <p>{estadoEnVivo === "traslado_en_curso" ? "En camino al destino" : estadoEnVivo ? ETIQUETA_ESTADO_TRASLADO[estadoEnVivo] : "Buscando conductor"}{eta !== null ? ` · ETA: ${eta} min` : ""}</p>
+      <small>Actualizado {formatoHora(estadoActualizadoEn ?? ubicacion?.registrado_en)}</small>
+    </div>
+  </div>;
 }

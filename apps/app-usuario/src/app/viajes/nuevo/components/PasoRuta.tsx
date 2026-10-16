@@ -1,29 +1,47 @@
 "use client";
-import React, { memo, useCallback, useEffect, useRef } from "react";
-import { Button, Field, PassportCard } from "@ruum/ui";
-import { esNativo } from "@/lib/capacitor";
-import { obtenerUbicacionActual } from "@/lib/ubicacion";
+import React, { lazy, memo, Suspense, useEffect, useState } from "react";
 import type { DatosCodigoPostal } from "@/lib/codigos-postales";
 import type { sugerirDireccionesAutocomplete } from "@/lib/mapbox";
-import { AutocompletarDireccion } from "./AutocompletarDireccion";
-import { CampoCodigoPostal } from "./CampoCodigoPostal";
+import { MobileBottomSheet as BottomSheet } from "@/components/MobileBottomSheet";
 import { EscalasAcordeon } from "./EscalasAcordeon";
-import { formatearDistancia, formatearTiempo, type PrefijoDomicilio } from "../constants";
+import type { DireccionElegida } from "./DireccionMapa";
+import type { PrefijoDomicilio } from "../constants";
 import type { DatosFormulario, ErroresFormulario, ParadaForm } from "../types";
+import styles from "./cotizador.module.css";
+const DireccionMapa = lazy(() =>
+  import("./DireccionMapa").then((m) => ({ default: m.DireccionMapa })),
+);
 
 export interface AccionesPasoRuta {
   claseControl: (campo: keyof DatosFormulario) => string;
-  actualizar: <K extends keyof DatosFormulario>(campo: K, valor: DatosFormulario[K]) => void;
-  actualizarTelefono: (campo: "entregaTelefono" | "recepcionTelefono", valor: string) => void;
+  actualizar: <K extends keyof DatosFormulario>(
+    campo: K,
+    valor: DatosFormulario[K],
+  ) => void;
+  actualizarTelefono: (
+    campo: "entregaTelefono" | "recepcionTelefono",
+    valor: string,
+  ) => void;
   actualizarCodigoPostal: (prefijo: PrefijoDomicilio, valor: string) => void;
-  consultarCodigoPostal: (prefijo: PrefijoDomicilio, codigoPostal: string) => Promise<void>;
+  consultarCodigoPostal: (
+    prefijo: PrefijoDomicilio,
+    codigoPostal: string,
+  ) => Promise<void>;
   validarCampo: (campo: keyof DatosFormulario) => void;
-  aplicarSugerenciaCp: (prefijo: PrefijoDomicilio, ciudad: string, colonia: string) => void;
-  aplicarSugerenciaDireccion: (prefijo: PrefijoDomicilio, s: Awaited<ReturnType<typeof sugerirDireccionesAutocomplete>>[number]) => void;
+  aplicarSugerenciaCp: (
+    prefijo: PrefijoDomicilio,
+    ciudad: string,
+    colonia: string,
+  ) => void;
+  aplicarSugerenciaDireccion: (
+    prefijo: PrefijoDomicilio,
+    s: Awaited<ReturnType<typeof sugerirDireccionesAutocomplete>>[number],
+  ) => void;
   setOrigenBusqueda: (v: string) => void;
   setDestinoBusqueda: (v: string) => void;
   onReintentarRuta: () => void;
   onParadasChange: (next: ParadaForm[]) => void;
+  onConfirmarUbicacion?: () => void;
 }
 
 export interface PasoRutaProps {
@@ -37,7 +55,9 @@ export interface PasoRutaProps {
   origenBusqueda: string;
   destinoBusqueda: string;
   origenSugerencias: Awaited<ReturnType<typeof sugerirDireccionesAutocomplete>>;
-  destinoSugerencias: Awaited<ReturnType<typeof sugerirDireccionesAutocomplete>>;
+  destinoSugerencias: Awaited<
+    ReturnType<typeof sugerirDireccionesAutocomplete>
+  >;
   buscandoOrigen: boolean;
   buscandoDestino: boolean;
   rutaEstimacion: {
@@ -55,484 +75,308 @@ export interface PasoRutaProps {
   erroresParadas?: Array<Partial<Record<keyof ParadaForm, string>>>;
 }
 
-function DetallesContactos({
-  datos,
-  errores,
-  claseControl,
-  actualizar,
-  actualizarTelefono,
-  validarCampo,
-}: {
-  datos: DatosFormulario;
-  errores: ErroresFormulario;
-  claseControl: AccionesPasoRuta["claseControl"];
-  actualizar: AccionesPasoRuta["actualizar"];
-  actualizarTelefono: AccionesPasoRuta["actualizarTelefono"];
-  validarCampo: AccionesPasoRuta["validarCampo"];
-}) {
-  // Si la validación marca un contacto, el bloque se reabre solo. El usuario
-  // conserva el control (uncontrolled): nunca se fuerza el cierre.
-  const tieneErrores = Boolean(
-    errores.entregaNombre ||
-    errores.entregaApellido ||
-    errores.entregaTelefono ||
-    errores.recepcionNombre ||
-    errores.recepcionApellido ||
-    errores.recepcionTelefono
-  );
-  const contactosRef = useRef<HTMLDetailsElement>(null);
-  useEffect(() => {
-    if (tieneErrores) contactosRef.current?.setAttribute("open", "");
-  }, [tieneErrores]);
-  return (
-    <details ref={contactosRef} className="grid gap-4 rounded-lg border border-ink/10 p-4">
-      <summary className="cursor-pointer font-body text-sm font-semibold focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-route-dark">
-        Contactos de entrega y recepción
-      </summary>
-      <div className="mt-3 grid gap-4">
-        <p className="font-body text-sm font-semibold">Quien entrega el vehículo</p>
-        <div className="grid gap-4 sm:grid-cols-2">
-          <Field
-            id="entregaNombre"
-            name="entregaNombre"
-            etiqueta="Nombre"
-            value={datos.entregaNombre}
-            onChange={(e) => actualizar("entregaNombre", e.target.value)}
-            onBlur={() => validarCampo("entregaNombre")}
-            error={errores.entregaNombre}
-          />
-          <Field
-            id="entregaApellido"
-            name="entregaApellido"
-            etiqueta="Apellido"
-            value={datos.entregaApellido}
-            onChange={(e) => actualizar("entregaApellido", e.target.value)}
-            onBlur={() => validarCampo("entregaApellido")}
-            error={errores.entregaApellido}
-          />
-        </div>
-        <div className="flex flex-col gap-1.5">
-          <label htmlFor="entregaTelefono" className="font-body text-sm font-medium">Teléfono de contacto para recolección</label>
-          <div className={`flex overflow-hidden rounded-lg border bg-mist ${claseControl("entregaTelefono")}`}>
-            <span className="flex items-center border-r border-ink/10 px-3.5 font-body text-sm font-semibold text-ink/70" aria-hidden="true">+52</span>
-            <input
-              id="entregaTelefono"
-              name="entregaTelefono"
-              type="tel"
-              autoComplete="tel"
-              inputMode="numeric"
-              pattern="[0-9]{10}"
-              maxLength={10}
-              value={datos.entregaTelefono}
-              onChange={(e) => actualizarTelefono("entregaTelefono", e.target.value)}
-              onBlur={() => validarCampo("entregaTelefono")}
-              className="min-w-0 flex-1 bg-transparent px-3.5 py-2.5 font-body text-sm text-ink placeholder:text-ink/65 focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-1 focus-visible:outline-route-dark"
-              placeholder="10 dígitos"
-              aria-label="Teléfono de entrega, 10 dígitos sin incluir +52"
-              aria-invalid={Boolean(errores.entregaTelefono)}
-              aria-describedby={errores.entregaTelefono ? "telefono-entrega-error telefono-entrega-ayuda" : "telefono-entrega-ayuda"}
-              title="10 dígitos, sin espacios ni prefijo"
-            />
-          </div>
-          <p id="telefono-entrega-ayuda" className="sr-only">Prefijo +52 ya incluido, ingresa solo 10 dígitos.</p>
-          {errores.entregaTelefono && <p id="telefono-entrega-error" className="font-body text-xs text-danger" role="alert">{errores.entregaTelefono}</p>}
-        </div>
-
-        <p className="mt-2 font-body text-sm font-semibold">Quien recibe el vehículo</p>
-        <div className="grid gap-4 sm:grid-cols-2">
-          <Field
-            id="recepcionNombre"
-            name="recepcionNombre"
-            etiqueta="Nombre"
-            value={datos.recepcionNombre}
-            onChange={(e) => actualizar("recepcionNombre", e.target.value)}
-            onBlur={() => validarCampo("recepcionNombre")}
-            error={errores.recepcionNombre}
-          />
-          <Field
-            id="recepcionApellido"
-            name="recepcionApellido"
-            etiqueta="Apellido"
-            value={datos.recepcionApellido}
-            onChange={(e) => actualizar("recepcionApellido", e.target.value)}
-            onBlur={() => validarCampo("recepcionApellido")}
-            error={errores.recepcionApellido}
-          />
-        </div>
-        <div className="flex flex-col gap-1.5">
-          <label htmlFor="recepcionTelefono" className="font-body text-sm font-medium">Teléfono de contacto para entrega</label>
-          <div className={`flex overflow-hidden rounded-lg border bg-mist ${claseControl("recepcionTelefono")}`}>
-            <span className="flex items-center border-r border-ink/10 px-3.5 font-body text-sm font-semibold text-ink/70" aria-hidden="true">+52</span>
-            <input
-              id="recepcionTelefono"
-              name="recepcionTelefono"
-              type="tel"
-              autoComplete="tel"
-              inputMode="numeric"
-              pattern="[0-9]{10}"
-              maxLength={10}
-              value={datos.recepcionTelefono}
-              onChange={(e) => actualizarTelefono("recepcionTelefono", e.target.value)}
-              onBlur={() => validarCampo("recepcionTelefono")}
-              className="min-w-0 flex-1 bg-transparent px-3.5 py-2.5 font-body text-sm text-ink placeholder:text-ink/65 focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-1 focus-visible:outline-route-dark"
-              placeholder="10 dígitos"
-              aria-label="Teléfono de recepción, 10 dígitos sin incluir +52"
-              aria-invalid={Boolean(errores.recepcionTelefono)}
-              aria-describedby={errores.recepcionTelefono ? "telefono-recepcion-error telefono-recepcion-ayuda" : "telefono-recepcion-ayuda"}
-              title="10 dígitos, sin espacios ni prefijo"
-            />
-          </div>
-          <p id="telefono-recepcion-ayuda" className="sr-only">Prefijo +52 ya incluido, ingresa solo 10 dígitos.</p>
-          {errores.recepcionTelefono && <p id="telefono-recepcion-error" className="font-body text-xs text-danger" role="alert">{errores.recepcionTelefono}</p>}
-        </div>
-      </div>
-    </details>
-  );
-}
-
 function PasoRutaComponent({
   datos,
   errores,
   acciones,
-  cpConsultando,
-  cpAviso,
-  cpOpciones,
-  placesOpciones,
-  origenBusqueda,
-  destinoBusqueda,
-  origenSugerencias,
-  destinoSugerencias,
-  buscandoOrigen,
-  buscandoDestino,
-  rutaEstimacion,
-  rutaCalculando,
   rutaAviso,
-  erroresParadas
+  rutaCalculando,
+  erroresParadas,
 }: PasoRutaProps) {
-  const {
-    claseControl,
-    actualizar,
-    actualizarTelefono,
-    actualizarCodigoPostal,
-    consultarCodigoPostal,
-    validarCampo,
-    aplicarSugerenciaCp,
-    aplicarSugerenciaDireccion,
-    setOrigenBusqueda,
-    setDestinoBusqueda,
-    onReintentarRuta,
-    onParadasChange,
-  } = acciones;
-  const cambiarOrigenCodigoPostal = useCallback((valor: string) => actualizarCodigoPostal("origen", valor), [actualizarCodigoPostal]);
-  const consultarOrigenCodigoPostal = useCallback((valor: string) => {
-    void consultarCodigoPostal("origen", valor);
-    validarCampo("origenCodigoPostal");
-  }, [consultarCodigoPostal, validarCampo]);
-  const aplicarSugerenciaOrigen = useCallback((ciudad: string, colonia: string) => aplicarSugerenciaCp("origen", ciudad, colonia), [aplicarSugerenciaCp]);
-  const cambiarDestinoCodigoPostal = useCallback((valor: string) => actualizarCodigoPostal("destino", valor), [actualizarCodigoPostal]);
-  const consultarDestinoCodigoPostal = useCallback((valor: string) => {
-    void consultarCodigoPostal("destino", valor);
-    validarCampo("destinoCodigoPostal");
-  }, [consultarCodigoPostal, validarCampo]);
-  const aplicarSugerenciaDestino = useCallback((ciudad: string, colonia: string) => aplicarSugerenciaCp("destino", ciudad, colonia), [aplicarSugerenciaCp]);
-
+  const [tab, setTab] = useState<"direcciones" | "contactos">("direcciones");
+  const [editando, setEditando] = useState<PrefijoDomicilio | null>(null);
+  const [paradas, setParadas] = useState(false);
+  const [instrucciones, setInstrucciones] = useState(false);
+  const { actualizar, actualizarTelefono, validarCampo } = acciones;
+  useEffect(() => {
+    const campos = Object.keys(errores);
+    if (campos.some((c) => c.startsWith("origen"))) {
+      setTab("direcciones");
+      setEditando("origen");
+    } else if (campos.some((c) => c.startsWith("destino"))) {
+      setTab("direcciones");
+      setEditando("destino");
+    } else if (
+      campos.some((c) => c.startsWith("entrega") || c.startsWith("recepcion"))
+    )
+      setTab("contactos");
+    else if (campos.includes("paradas")) setParadas(true);
+  }, [errores]);
+  const inicial = (p: PrefijoDomicilio): DireccionElegida => ({
+    textoCompleto: [
+      datos[`${p}Calle`],
+      datos[`${p}Numero`],
+      datos[`${p}Colonia`],
+      datos[`${p}Ciudad`],
+    ]
+      .filter(Boolean)
+      .join(", "),
+    direccion: datos[`${p}Calle`],
+    numero: datos[`${p}Numero`],
+    colonia: datos[`${p}Colonia`],
+    ciudad: datos[`${p}Ciudad`],
+    estado: datos[`${p}Estado`],
+    codigoPostal: datos[`${p}CodigoPostal`],
+    referencias: datos[`${p}Referencias`],
+    lat: p === "origen" ? datos.origenLat : datos.destinoLat,
+    lng: p === "origen" ? datos.origenLng : datos.destinoLng,
+  });
+  const confirmar = (p: PrefijoDomicilio, d: DireccionElegida) => {
+    acciones.onConfirmarUbicacion?.();
+    acciones.aplicarSugerenciaDireccion(p, d);
+    actualizar(`${p}Calle`, d.direccion);
+    actualizar(`${p}Numero`, d.numero ?? "");
+    actualizar(`${p}Colonia`, d.colonia ?? "");
+    actualizar(`${p}Ciudad`, d.ciudad ?? "");
+    actualizar(`${p}Estado`, d.estado ?? "");
+    actualizar(`${p}CodigoPostal`, d.codigoPostal ?? "");
+    actualizar(`${p}Referencias`, d.referencias);
+    actualizar(p === "origen" ? "origenLat" : "destinoLat", d.lat);
+    actualizar(p === "origen" ? "origenLng" : "destinoLng", d.lng);
+    setEditando(null);
+  };
   return (
-    <div className="space-y-4">
-      <PassportCard>
-        <div className="grid gap-6">
-          <p className="font-body text-sm font-semibold">¿De dónde sale y a dónde llega?</p>
-
-          {/* Origen — siempre visible, ancla superior */}
-          <div className="grid gap-4" aria-label="Origen del traslado">
-            <div className="rounded-lg border border-signal/30 bg-signal/10 p-3">
-              <AutocompletarDireccion
-                id="origenBusqueda"
-                etiqueta="Buscar dirección de origen"
-                placeholder="Calle, número, colonia y ciudad"
-                valor={origenBusqueda}
-                sugerencias={origenSugerencias}
-                buscando={buscandoOrigen}
-                onChange={setOrigenBusqueda}
-                onSeleccionar={(s) => aplicarSugerenciaDireccion("origen", s)}
-              />
-              <p className="mt-1.5 font-body text-[11px] leading-4 text-ink/55">
-                Escribe al menos 3 letras y elige una sugerencia. Precargamos calle, colonia, ciudad, estado y CP — puedes editarlos abajo.
-              </p>
-            </div>
-
-            <details className="grid gap-4 rounded-lg border border-ink/10 p-4" open>
-              <summary className="cursor-pointer font-body text-sm font-semibold focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-route-dark">
-                Domicilio de origen
-              </summary>
-              <div className="mt-3 grid gap-4 sm:grid-cols-2">
-                <CampoCodigoPostal
-                  id="origenCodigoPostal"
-                  nombre="origenCodigoPostal"
-                  valor={datos.origenCodigoPostal}
-                  ciudadActual={datos.origenCiudad}
-                  opciones={cpOpciones.origen}
-                  sugerenciasMapbox={placesOpciones.origen}
-                  consultando={cpConsultando === "origen"}
-                  aviso={cpAviso.origen}
-                  error={errores.origenCodigoPostal}
-                  onCambiar={cambiarOrigenCodigoPostal}
-                  onSalir={consultarOrigenCodigoPostal}
-                  onAplicarSugerencia={aplicarSugerenciaOrigen}
-                />
-                <Field
-                  id="origenEstado"
-                  name="origenEstado"
-                  etiqueta="Estado"
-                  value={datos.origenEstado}
-                  onChange={(e) => actualizar("origenEstado", e.target.value)}
-                  onBlur={() => validarCampo("origenEstado")}
-                  error={errores.origenEstado}
-                />
-                <Field
-                  id="origenCiudad"
-                  name="origenCiudad"
-                  etiqueta="Ciudad"
-                  value={datos.origenCiudad}
-                  onChange={(e) => actualizar("origenCiudad", e.target.value)}
-                  onBlur={() => validarCampo("origenCiudad")}
-                  error={errores.origenCiudad}
-                />
-                <Field
-                  id="origenColonia"
-                  name="origenColonia"
-                  etiqueta="Colonia"
-                  value={datos.origenColonia}
-                  onChange={(e) => actualizar("origenColonia", e.target.value)}
-                  onBlur={() => validarCampo("origenColonia")}
-                  error={errores.origenColonia}
-                />
-                <Field
-                  id="origenCalle"
-                  name="origenCalle"
-                  etiqueta="Calle"
-                  value={datos.origenCalle}
-                  onChange={(e) => actualizar("origenCalle", e.target.value)}
-                  onBlur={() => validarCampo("origenCalle")}
-                  error={errores.origenCalle}
-                />
-                <Field
-                  id="origenNumero"
-                  name="origenNumero"
-                  etiqueta="Número exterior / interior"
-                  value={datos.origenNumero}
-                  onChange={(e) => actualizar("origenNumero", e.target.value)}
-                  onBlur={() => validarCampo("origenNumero")}
-                  error={errores.origenNumero}
-                />
-              </div>
-              <Field
-                id="origenReferencias"
-                name="origenReferencias"
-                etiqueta="Referencias"
-                value={datos.origenReferencias}
-                onChange={(e) => actualizar("origenReferencias", e.target.value)}
-                onBlur={() => validarCampo("origenReferencias")}
-                placeholder="Entre calles, color de fachada, acceso, piso, etc."
-              />
-            </details>
-
-            {esNativo() && (
-              <div>
-                <Button
-                  type="button"
-                  variant="secondary"
-                  onClick={async () => {
-                    const coords = await obtenerUbicacionActual();
-                    if (coords) {
-                      actualizar("origenLat", coords.lat);
-                      actualizar("origenLng", coords.lng);
-                    }
-                  }}
-                >
-                  Usar mi ubicación actual
-                </Button>
-                {datos.origenLat !== undefined && <p className="mt-1 font-body text-xs text-ink/45">Ubicación capturada ✓</p>}
-              </div>
-            )}
-          </div>
-
-          {/* Escalas / Tareas — acordeón entre origen y destino (hasta 8) */}
-          <div className="rounded-xl border border-ink/10 bg-white p-4">
-            <EscalasAcordeon
-              paradas={datos.paradas}
-              onChange={onParadasChange}
-              erroresParadas={erroresParadas}
-            />
-            {errores.paradas && typeof errores.paradas === "string" && (
-              <p className="mt-2 font-body text-xs text-danger">{errores.paradas as unknown as string}</p>
-            )}
-          </div>
-
-          <div className="grid gap-4" aria-label="Destino y contactos del traslado">
-            <div className="rounded-lg border border-signal/30 bg-signal/10 p-3">
-              <AutocompletarDireccion
-                id="input-busqueda-destino"
-                etiqueta="Buscar dirección de destino"
-                placeholder="Calle, número, colonia y ciudad"
-                valor={destinoBusqueda}
-                sugerencias={destinoSugerencias}
-                buscando={buscandoDestino}
-                onChange={setDestinoBusqueda}
-                onSeleccionar={(s) => aplicarSugerenciaDireccion("destino", s)}
-              />
-              <p className="mt-1.5 font-body text-[11px] leading-4 text-ink/55">
-                Elige una sugerencia para autocompletar el formulario.
-              </p>
-            </div>
-
-            <details className="grid gap-4 rounded-lg border border-ink/10 p-4" open>
-              <summary className="cursor-pointer font-body text-sm font-semibold focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-route-dark">
-                Domicilio de destino
-              </summary>
-              <div className="mt-3 grid gap-4 sm:grid-cols-2">
-                <CampoCodigoPostal
-                  id="destinoCodigoPostal"
-                  nombre="destinoCodigoPostal"
-                  valor={datos.destinoCodigoPostal}
-                  ciudadActual={datos.destinoCiudad}
-                  opciones={cpOpciones.destino}
-                  sugerenciasMapbox={placesOpciones.destino}
-                  consultando={cpConsultando === "destino"}
-                  aviso={cpAviso.destino}
-                  error={errores.destinoCodigoPostal}
-                  onCambiar={cambiarDestinoCodigoPostal}
-                  onSalir={consultarDestinoCodigoPostal}
-                  onAplicarSugerencia={aplicarSugerenciaDestino}
-                />
-                <Field
-                  id="destinoEstado"
-                  name="destinoEstado"
-                  etiqueta="Estado"
-                  value={datos.destinoEstado}
-                  onChange={(e) => actualizar("destinoEstado", e.target.value)}
-                  onBlur={() => validarCampo("destinoEstado")}
-                  error={errores.destinoEstado}
-                />
-                <Field
-                  id="destinoCiudad"
-                  name="destinoCiudad"
-                  etiqueta="Ciudad"
-                  value={datos.destinoCiudad}
-                  onChange={(e) => actualizar("destinoCiudad", e.target.value)}
-                  onBlur={() => validarCampo("destinoCiudad")}
-                  error={errores.destinoCiudad}
-                />
-                <Field
-                  id="destinoColonia"
-                  name="destinoColonia"
-                  etiqueta="Colonia"
-                  value={datos.destinoColonia}
-                  onChange={(e) => actualizar("destinoColonia", e.target.value)}
-                  onBlur={() => validarCampo("destinoColonia")}
-                  error={errores.destinoColonia}
-                />
-                <Field
-                  id="destinoCalle"
-                  name="destinoCalle"
-                  etiqueta="Calle"
-                  value={datos.destinoCalle}
-                  onChange={(e) => actualizar("destinoCalle", e.target.value)}
-                  onBlur={() => validarCampo("destinoCalle")}
-                  error={errores.destinoCalle}
-                />
-                <Field
-                  id="destinoNumero"
-                  name="destinoNumero"
-                  etiqueta="Número exterior / interior"
-                  value={datos.destinoNumero}
-                  onChange={(e) => actualizar("destinoNumero", e.target.value)}
-                  onBlur={() => validarCampo("destinoNumero")}
-                  error={errores.destinoNumero}
-                />
-              </div>
-              <Field
-                id="destinoReferencias"
-                name="destinoReferencias"
-                etiqueta="Referencias"
-                value={datos.destinoReferencias}
-                onChange={(e) => actualizar("destinoReferencias", e.target.value)}
-                onBlur={() => validarCampo("destinoReferencias")}
-                placeholder="Entre calles, color de fachada, acceso, piso, etc."
-              />
-            </details>
-
-            <section className="rounded-lg border border-route/20 bg-route-soft px-4 py-4" aria-labelledby="titulo-estimacion-ruta">
-              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                <div>
-                  <p id="titulo-estimacion-ruta" className="font-body text-sm font-semibold text-ink">
-                    Distancia y tiempo estimado
-                  </p>
-                  <p className="mt-1 font-body text-xs leading-5 text-ink/65">
-                    Se calcula con Mapbox usando origen y destino. Si no se puede resolver, nuestro equipo de operaciones lo revisará.
-                  </p>
-                </div>
-                {rutaCalculando ? (
-                  <p className="rounded-full bg-mist px-3 py-1.5 font-body text-xs font-semibold text-route-dark">
-                    Calculando ruta...
-                  </p>
-                ) : rutaEstimacion?.distanciaKm !== undefined && rutaEstimacion.tiempoEstimadoHoras !== undefined ? (
-                  <dl className="grid grid-cols-2 gap-2 rounded-lg bg-mist px-4 py-3 text-center font-body">
-                    <div>
-                      <dt className="text-xs font-semibold uppercase tracking-wide text-ink/45">Distancia</dt>
-                      <dd className="mt-1 text-sm font-bold text-ink">{formatearDistancia(rutaEstimacion.distanciaKm)}</dd>
-                    </div>
-                    <div>
-                      <dt className="text-xs font-semibold uppercase tracking-wide text-ink/45">Tiempo</dt>
-                      <dd className="mt-1 text-sm font-bold text-ink">{formatearTiempo(rutaEstimacion.tiempoEstimadoHoras)}</dd>
-                    </div>
-                  </dl>
-                ) : (
-                  <p className="rounded-full bg-mist px-3 py-1.5 font-body text-xs font-semibold text-ink/55">
-                    Completa ambas direcciones
-                  </p>
+    <div className={styles.fields}>
+      <div
+        className={styles.segmented}
+        role="tablist"
+        aria-label="Datos de ruta"
+      >
+        {(["direcciones", "contactos"] as const).map((v) => (
+          <button
+            type="button"
+            id={`tab-${v}`}
+            key={v}
+            role="tab"
+            aria-selected={tab === v}
+            aria-controls="ruta-panel"
+            onClick={() => setTab(v)}
+            onKeyDown={(e) => {
+              if (e.key === "ArrowLeft" || e.key === "ArrowRight") {
+                e.preventDefault();
+                const next = v === "direcciones" ? "contactos" : "direcciones";
+                setTab(next);
+                document.getElementById(`tab-${next}`)?.focus();
+              }
+            }}
+            tabIndex={tab === v ? 0 : -1}
+          >
+            {v === "direcciones" ? "Direcciones" : "Contactos"}
+          </button>
+        ))}
+      </div>
+      <section id="ruta-panel" role="tabpanel" aria-labelledby={`tab-${tab}`}>
+        {tab === "direcciones" ? (
+          <div className="grid gap-2">
+            {(["origen", "destino"] as const).map((p) => (
+              <React.Fragment key={p}>
+                {p === "destino" && (
+                  <button
+                    type="button"
+                    onClick={() => setParadas(true)}
+                    className="min-h-11 border-l border-[var(--user-color-border)] pl-4 text-left text-xs font-semibold text-[var(--user-color-action)]"
+                  >
+                    + Añadir parada
+                    {datos.paradas.length ? ` · ${datos.paradas.length}` : ""}
+                  </button>
                 )}
+                <button
+                  type="button"
+                  onClick={() => setEditando(p)}
+                  aria-haspopup="dialog"
+                  className={styles.addressCard}
+                >
+                  <span className="flex items-center gap-2 text-xs font-semibold">
+                    <span
+                      aria-hidden="true"
+                      className={
+                        p === "origen" ? styles.origin : styles.destination
+                      }
+                    />
+                    {p === "origen" ? "Origen" : "Destino"}
+                  </span>
+                  <span className="mt-1 block truncate text-sm font-bold">
+                    {datos[`${p}Ciudad`]
+                      ? `${datos[`${p}Ciudad`]}, ${datos[`${p}CodigoPostal`]}`
+                      : `Domicilio de ${p}`}
+                  </span>
+                  <span className="block truncate text-xs text-[var(--user-color-muted)]">
+                    {datos[`${p}Calle`]
+                      ? `${datos[`${p}Calle`]} #${datos[`${p}Numero`]}`
+                      : "Toca para elegir en el mapa"}
+                  </span>
+                </button>
+              </React.Fragment>
+            ))}
+            {rutaAviso && (
+              <div role="status" className="flex items-center gap-2 text-xs">
+                <span className="line-clamp-2 flex-1">{rutaAviso}</span>
+                <button
+                  type="button"
+                  className="min-h-11 font-semibold"
+                  disabled={rutaCalculando}
+                  onClick={acciones.onReintentarRuta}
+                >
+                  Reintentar cálculo
+                </button>
               </div>
-              {rutaAviso && (
-                <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                  <p className="font-body text-xs leading-5 text-danger">{rutaAviso}</p>
-                  <Button type="button" variant="secondary" onClick={onReintentarRuta} disabled={rutaCalculando}>
-                    Reintentar cálculo
-                  </Button>
-                </div>
-              )}
-            </section>
-
-            <DetallesContactos
-              datos={datos}
-              errores={errores}
-              claseControl={claseControl}
-              actualizar={actualizar}
-              actualizarTelefono={actualizarTelefono}
-              validarCampo={validarCampo}
-            />
-
-            <details className="grid gap-1.5 rounded-lg border border-ink/10 p-4">
-              <summary className="cursor-pointer font-body text-sm font-medium focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-route-dark">
-                Instrucciones especiales <span className="font-normal text-ink/45">(opcional)</span>
-              </summary>
-              <label htmlFor="instruccionesEspeciales" className="mt-3 flex flex-col gap-1.5">
-                <span className="sr-only">Instrucciones especiales para el traslado</span>
-                <textarea
-                  id="instruccionesEspeciales"
-                  name="instruccionesEspeciales"
-                  value={datos.instruccionesEspeciales}
-                  onChange={(e) => actualizar("instruccionesEspeciales", e.target.value)}
-                  onBlur={() => validarCampo("instruccionesEspeciales")}
-                  maxLength={1000}
-                  placeholder="Detalles sobre caseta de acceso, horarios de entrega en privada o requisitos de seguridad."
-                  aria-label="Instrucciones especiales para el traslado"
-                  className="min-h-24 rounded-lg border border-ink/50 bg-mist px-3.5 py-2.5 font-body text-sm text-ink focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-1 focus-visible:outline-route-dark"
-                />
-              </label>
-            </details>
+            )}
           </div>
-        </div>
-      </PassportCard>
+        ) : (
+          <div className={styles.contacts}>
+            {(["entrega", "recepcion"] as const).map((p) => (
+              <fieldset key={p} className="min-w-0">
+                <legend className="mb-2 text-xs font-bold">
+                  {p === "entrega"
+                    ? "Quien entrega el vehículo"
+                    : "Quien recibe el vehículo"}
+                </legend>
+                <div className={styles.vehicle}>
+                  {(["Nombre", "Apellido", "Telefono"] as const).map(
+                    (suffix) => {
+                      const campo = `${p}${suffix}` as
+                        | "entregaNombre"
+                        | "entregaApellido"
+                        | "entregaTelefono"
+                        | "recepcionNombre"
+                        | "recepcionApellido"
+                        | "recepcionTelefono";
+                      return (
+                        <div
+                          key={campo}
+                          className={`${styles.field} ${suffix === "Telefono" ? styles.condition : ""}`}
+                        >
+                          <label htmlFor={campo} className={styles.label}>
+                            {suffix === "Telefono" ? "Teléfono · +52" : suffix}
+                          </label>
+                          <input
+                            id={campo}
+                            name={campo}
+                            type={suffix === "Telefono" ? "tel" : "text"}
+                            autoComplete={
+                              suffix === "Telefono"
+                                ? "tel-national"
+                                : suffix === "Nombre"
+                                  ? "given-name"
+                                  : "family-name"
+                            }
+                            inputMode={
+                              suffix === "Telefono" ? "numeric" : undefined
+                            }
+                            maxLength={suffix === "Telefono" ? 10 : 100}
+                            value={datos[campo]}
+                            onChange={(e) =>
+                              suffix === "Telefono"
+                                ? actualizarTelefono(
+                                    campo as
+                                      | "entregaTelefono"
+                                      | "recepcionTelefono",
+                                    e.target.value,
+                                  )
+                                : actualizar(campo, e.target.value)
+                            }
+                            onBlur={() => validarCampo(campo)}
+                            className={acciones.claseControl(campo)}
+                            aria-label={
+                              suffix === "Telefono"
+                                ? `Teléfono de ${p === "entrega" ? "entrega" : "recepción"}, 10 dígitos sin incluir +52`
+                                : undefined
+                            }
+                            aria-invalid={Boolean(errores[campo])}
+                            aria-describedby={
+                              errores[campo] ? `${campo}-error` : undefined
+                            }
+                          />
+                          {errores[campo] && (
+                            <p id={`${campo}-error`} className={styles.error}>
+                              {errores[campo]}
+                            </p>
+                          )}
+                        </div>
+                      );
+                    },
+                  )}
+                </div>
+              </fieldset>
+            ))}
+          </div>
+        )}
+      </section>
+      {tab === "direcciones" && (
+        <button
+          type="button"
+          onClick={() => setInstrucciones(true)}
+          className="min-h-11 text-left text-xs font-semibold text-[var(--user-color-muted)]"
+        >
+          Instrucciones especiales (opcional)
+        </button>
+      )}
+      <BottomSheet
+        open={Boolean(editando)}
+        onClose={() => setEditando(null)}
+        fullScreen
+        title={`Domicilio de ${editando ?? "origen"}`}
+      >
+        {editando && (
+          <Suspense
+            fallback={
+              <p role="status" className="p-5">
+                Cargando mapa…
+              </p>
+            }
+          >
+            <DireccionMapa
+              key={editando}
+              prefijo={editando}
+              inicial={inicial(editando)}
+              onConfirmar={(d) => confirmar(editando, d)}
+            />
+          </Suspense>
+        )}
+      </BottomSheet>
+      <BottomSheet
+        open={paradas}
+        onClose={() => setParadas(false)}
+        title="Paradas del traslado"
+      >
+        <EscalasAcordeon
+          paradas={datos.paradas}
+          onChange={acciones.onParadasChange}
+          erroresParadas={erroresParadas}
+        />
+        <button
+          type="button"
+          className="mt-4 min-h-12 w-full rounded-xl bg-[var(--user-color-action)] text-[var(--user-color-on-action)]"
+          onClick={() => setParadas(false)}
+        >
+          Guardar paradas
+        </button>
+      </BottomSheet>
+      <BottomSheet
+        open={instrucciones}
+        onClose={() => setInstrucciones(false)}
+        title="Instrucciones especiales"
+      >
+        <label htmlFor="instruccionesEspeciales" className="text-sm">
+          Instrucciones especiales para el traslado
+        </label>
+        <textarea
+          id="instruccionesEspeciales"
+          className="mt-2 min-h-32 w-full rounded-xl border border-[var(--user-color-border)] p-3"
+          value={datos.instruccionesEspeciales}
+          maxLength={1000}
+          onChange={(e) =>
+            actualizar("instruccionesEspeciales", e.target.value)
+          }
+        />
+        <button
+          type="button"
+          className="mt-4 min-h-12 w-full"
+          onClick={() => setInstrucciones(false)}
+        >
+          Guardar instrucciones
+        </button>
+      </BottomSheet>
     </div>
   );
 }
@@ -556,6 +400,7 @@ function areEqualPasoRuta(prev: PasoRutaProps, next: PasoRutaProps) {
     prev.datos.origenNumero === next.datos.origenNumero &&
     prev.datos.origenReferencias === next.datos.origenReferencias &&
     prev.datos.origenLat === next.datos.origenLat &&
+    prev.datos.origenLng === next.datos.origenLng &&
     prev.datos.destinoCodigoPostal === next.datos.destinoCodigoPostal &&
     prev.datos.destinoEstado === next.datos.destinoEstado &&
     prev.datos.destinoCiudad === next.datos.destinoCiudad &&
@@ -563,6 +408,8 @@ function areEqualPasoRuta(prev: PasoRutaProps, next: PasoRutaProps) {
     prev.datos.destinoCalle === next.datos.destinoCalle &&
     prev.datos.destinoNumero === next.datos.destinoNumero &&
     prev.datos.destinoReferencias === next.datos.destinoReferencias &&
+    prev.datos.destinoLat === next.datos.destinoLat &&
+    prev.datos.destinoLng === next.datos.destinoLng &&
     prev.datos.instruccionesEspeciales === next.datos.instruccionesEspeciales &&
     prev.acciones === next.acciones &&
     prev.origenBusqueda === next.origenBusqueda &&

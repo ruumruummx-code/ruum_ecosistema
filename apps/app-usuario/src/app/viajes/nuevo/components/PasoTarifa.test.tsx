@@ -1,9 +1,14 @@
 /** @vitest-environment jsdom */
-import { describe, expect, it, vi } from "vitest";
+import { beforeAll, describe, expect, it, vi } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { VALORES_INICIALES } from "../constants";
 import { PasoTarifa, type PasoTarifaProps } from "./PasoTarifa";
+
+beforeAll(() => {
+  HTMLDialogElement.prototype.showModal = function () { this.setAttribute("open", ""); };
+  HTMLDialogElement.prototype.close = function () { this.removeAttribute("open"); };
+});
 
 function propsIniciales(): PasoTarifaProps {
   return {
@@ -62,6 +67,7 @@ describe("PasoTarifa — comparador sin identidad", () => {
 
     await user.click(screen.getByRole("radio", { name: /Programar fecha/ }));
 
+    expect(screen.getByRole("dialog", { name: "Programar traslado" })).toBeInTheDocument();
     expect(iniciales.acciones.actualizar).toHaveBeenCalledWith("modalidadProgramacion", "programado");
     expect(iniciales.acciones.actualizar).toHaveBeenCalledWith(
       "fechaHoraProgramada",
@@ -70,13 +76,14 @@ describe("PasoTarifa — comparador sin identidad", () => {
     expect(iniciales.acciones.validarCampo).toHaveBeenCalledWith("modalidadProgramacion");
   });
 
-  it("conserva la hora al cambiar la fecha programada", () => {
+  it("conserva la hora al cambiar la fecha programada", async () => {
     const iniciales = propsIniciales();
     const conFecha: PasoTarifaProps = {
       ...iniciales,
       datos: { ...iniciales.datos, modalidadProgramacion: "programado", fechaHoraProgramada: "2027-01-15T10:30" },
     };
     render(<PasoTarifa {...conFecha} />);
+    await userEvent.setup().click(screen.getByRole("radio", { name: /Programar fecha/ }));
 
     // fireEvent nativo para type=date: userEvent no soporta pickers de fecha.
     // fireEvent.change lleva el valor ya completo, así que el handler debe
@@ -98,6 +105,7 @@ describe("PasoTarifa — comparador sin identidad", () => {
       />,
     );
 
+    await user.click(screen.getByRole("radio", { name: /Programar fecha/ }));
     await user.click(screen.getByLabelText("Fecha de recolección"));
     await user.tab();
 

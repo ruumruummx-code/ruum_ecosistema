@@ -113,11 +113,13 @@ export function useAutocompleteDirecciones({
       [`${prefijo}Ciudad`]: s.ciudad || prev[`${prefijo}Ciudad` as keyof DatosFormulario] as string,
       [`${prefijo}Estado`]: s.estado || prev[`${prefijo}Estado` as keyof DatosFormulario] as string,
       [`${prefijo}CodigoPostal`]: s.codigoPostal || prev[`${prefijo}CodigoPostal` as keyof DatosFormulario] as string,
-      ...(prefijo === "origen" && s.lat && s.lng ? { origenLat: s.lat, origenLng: s.lng } : {}),
+      [`${prefijo}Numero`]: s.numero ?? "",
+      [`${prefijo}Lat`]: s.lat,
+      [`${prefijo}Lng`]: s.lng,
     }));
     if (prefijo === "origen") { setOrigenBusqueda(s.textoCompleto); setOrigenSugerencias([]); }
     else { setDestinoBusqueda(s.textoCompleto); setDestinoSugerencias([]); }
-    if (s.codigoPostal && s.codigoPostal.length === 5) void consultarCodigoPostal(prefijo, s.codigoPostal);
+    if (s.codigoPostal && s.codigoPostal.length === 5 && (!s.colonia || !s.ciudad || !s.estado)) void consultarCodigoPostal(prefijo, s.codigoPostal);
   }, [consultarCodigoPostal, datosRef, pasoRef, tarifaPreviaSnapshotRef, setDestinoBusqueda, setDestinoSugerencias, setErrorPaso, setOrigenBusqueda, setOrigenSugerencias, setDatos, setTarifaPreviaAceptada]);
 
   return { aplicarSugerenciaCp, aplicarSugerenciaDireccion };

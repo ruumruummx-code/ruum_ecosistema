@@ -1,221 +1,79 @@
 /** @vitest-environment jsdom */
-import { describe, expect, it, vi } from "vitest";
-import { render, screen, within } from "@testing-library/react";
+import { beforeAll, describe, expect, it, vi } from "vitest";
+import { act, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { PasaporteDigitalSegmentado } from "./PasaporteDigitalSegmentado";
-import type { Pasaporte } from "./tipos-pasaporte";
-
-vi.mock("next/navigation", () => ({
-  useRouter: () => ({ refresh: vi.fn(), push: vi.fn() }),
-  Link: ({ children, href, ...props }: any) => <a href={href} {...props}>{children}</a>,
-}));
-
-vi.mock("@ruum/api/services", async (importOriginal) => {
-  const actual = await importOriginal<Record<string, unknown>>();
-  return {
-    ...actual,
-    crearLlamadaEnmascarada: vi.fn(),
-    firmarUrlsEvidencia: vi.fn(),
-    obtenerPasaporteDigital: vi.fn(),
-    obtenerUltimaUbicacionTraslado: vi.fn(),
-  };
+import { PasaporteDigitalSegmentado, type PasaporteDigitalSegmentadoProps } from "./PasaporteDigitalSegmentado";
+vi.mock("./ChatTraslado", () => ({ ChatTraslado: () => <div role="log">Mensajes del chat</div> }));
+vi.mock("./SeguimientoTrasladoTiempoReal", () => ({ SeguimientoTrasladoTiempoReal: ({ activo }: {
+        activo: boolean;
+    }) => <div data-testid="map" data-active={activo}>Mapa en vivo</div> }));
+vi.mock("./CompartirPasaporte", () => ({ CompartirPasaporte: () => <button>Compartir</button> }));
+vi.mock("next/dynamic", () => ({ default: () => ({ seccion }: {
+        seccion: string;
+    }) => <div>Detalle {seccion}</div> }));
+beforeAll(() => {
+    HTMLDialogElement.prototype.showModal = function () { this.setAttribute("open", ""); };
+    HTMLDialogElement.prototype.close = function () { this.removeAttribute("open"); };
 });
-
-vi.mock("./ChatTraslado", () => ({
-  ChatTraslado: () => <div data-testid="chat-traslado">Chat Mock</div>,
-}));
-
-vi.mock("./SeguimientoTrasladoTiempoReal", () => ({
-  SeguimientoTrasladoTiempoReal: () => <div data-testid="mapa-tiempo-real">Mapa Mock</div>,
-}));
-
-vi.mock("./EvidenciaComparativa", () => ({
-  EvidenciaComparativa: () => <div data-testid="evidencia-comparativa">Comparativa Mock</div>,
-}));
-
-vi.mock("./ExportarPasaportePdf", () => ({
-  ExportarPasaportePdf: () => <button type="button">Exportar PDF Mock</button>,
-}));
-
-vi.mock("./CompartirPasaporte", () => ({
-  CompartirPasaporte: () => <button type="button">Compartir Mock</button>,
-}));
-
-function crearPasaporteBase(estado: Pasaporte["estado"] = "traslado_en_curso"): Pasaporte {
-  return {
-    traslado_id: "traslado-1234",
-    estado,
-    creado_en: "2026-10-10T10:00:00Z",
-    actualizado_en: "2026-10-10T11:00:00Z",
-    vehiculo_marca: "BMW",
-    vehiculo_modelo: "Serie 3",
-    vehiculo_anio: 2023,
-    vehiculo_placas: "NVX4921",
-    vehiculo_color: "Azul",
-    conductor_id: "cond-1",
-    conductor_nombre: "Roberto Castillo",
-    conductor_calificacion: 4.9,
-    conductor_nivel: "Nivel 2",
-    origen_ciudad: "Santa Fe",
-    destino_ciudad: "Metepec",
-    distancia_km: 64,
-    precio_final: 2146,
-    monto_pagado: 2146,
-  } as unknown as Pasaporte;
-}
-
-describe("PasaporteDigitalSegmentado", () => {
-  it("renderiza las 4 pestañas y la credencial hero card con botones de conductor", () => {
-    const pasaporte = crearPasaporteBase("traslado_en_curso");
-
-    render(
-      <PasaporteDigitalSegmentado
-        pasaporte={pasaporte}
-        traslado={null}
-        vehiculo={null}
-        conductor={{ id: "cond-1", nombre: "Roberto Castillo" } as never}
-        evidencia={[]}
-        incidencias={[]}
-        disputas={[]}
-        reclamosSeguro={[]}
-        calificacion={null}
-        pagos={[]}
-        ultimaUbicacion={null}
-      />
-    );
-
-    // 4 pestañas
-    expect(screen.getByRole("tab", { name: /En Ruta/i })).toBeInTheDocument();
-    expect(screen.getByRole("tab", { name: /Fotos/i })).toBeInTheDocument();
-    expect(screen.getByRole("tab", { name: /Unidad/i })).toBeInTheDocument();
-    expect(screen.getByRole("tab", { name: /Recibo/i })).toBeInTheDocument();
-
-    // Pestaña inicial para viaje activo: En Ruta
-    expect(screen.getByRole("tab", { name: /En Ruta/i })).toHaveAttribute("aria-selected", "true");
-    expect(screen.getByText("Roberto Castillo")).toBeInTheDocument();
-    expect(screen.getByLabelText(/Abrir o cerrar chat con el conductor/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/Llamar al conductor vía soporte enmascarado/i)).toBeInTheDocument();
-  });
-
-  it("permite cambiar entre pestañas y muestra el contenido correspondiente", async () => {
-    const user = userEvent.setup();
-    const pasaporte = crearPasaporteBase("traslado_en_curso");
-
-    render(
-      <PasaporteDigitalSegmentado
-        pasaporte={pasaporte}
-        traslado={null}
-        vehiculo={null}
-        conductor={null}
-        evidencia={[]}
-        incidencias={[]}
-        disputas={[]}
-        reclamosSeguro={[]}
-        calificacion={null}
-        pagos={[]}
-        ultimaUbicacion={null}
-      />
-    );
-
-    // Cambiar a pestaña Fotos
-    await user.click(screen.getByRole("tab", { name: /Fotos/i }));
-    expect(screen.getByRole("tab", { name: /Fotos/i })).toHaveAttribute("aria-selected", "true");
-    expect(screen.getByText(/Evidencia del vehículo/i)).toBeInTheDocument();
-
-    // Cambiar a pestaña Unidad
-    await user.click(screen.getByRole("tab", { name: /Unidad/i }));
-    expect(screen.getByRole("tab", { name: /Unidad/i })).toHaveAttribute("aria-selected", "true");
-    expect(screen.getByText(/Datos del vehículo/i)).toBeInTheDocument();
-
-    // Cambiar a pestaña Recibo
-    await user.click(screen.getByRole("tab", { name: /Recibo/i }));
-    expect(screen.getByRole("tab", { name: /Recibo/i })).toHaveAttribute("aria-selected", "true");
-    expect(screen.getByText(/Información de pago/i)).toBeInTheDocument();
-  });
-
-  it("abre por defecto en la pestaña Fotos si el traslado está concluido", () => {
-    const pasaporte = crearPasaporteBase("servicio_cerrado");
-
-    render(
-      <PasaporteDigitalSegmentado
-        pasaporte={pasaporte}
-        traslado={null}
-        vehiculo={null}
-        conductor={null}
-        evidencia={[]}
-        incidencias={[]}
-        disputas={[]}
-        reclamosSeguro={[]}
-        calificacion={null}
-        pagos={[]}
-        ultimaUbicacion={null}
-      />
-    );
-
-    expect(screen.getByRole("tab", { name: /Fotos/i })).toHaveAttribute("aria-selected", "true");
-    expect(screen.getByText(/Evidencia del vehículo/i)).toBeInTheDocument();
-  });
-
-  it("muestra 'Tarifa asignada' y 'Pago realizado' como completados cuando el pago ya se realizó", async () => {
-    const user = userEvent.setup();
-    // Caso reportado: estado cotizacion_generada pero con pago completado
-    const pasaporte = {
-      ...crearPasaporteBase("cotizacion_generada"),
-      conductor_id: null,
-      conductor_nombre: null,
-      precio_cotizado: 1800,
-      precio_final: null,
-      monto_pagado: 1800,
-    } as unknown as Pasaporte;
-
-    const pagosMock = [
-      {
-        id: "pago-1",
-        traslado_id: "traslado-1234",
-        monto: 1800,
-        metodo: "tarjeta",
-        estado: "completado",
-        registrado_en: "2026-10-10T10:30:00Z",
-      },
-    ];
-
-    render(
-      <PasaporteDigitalSegmentado
-        pasaporte={pasaporte}
-        traslado={null}
-        vehiculo={null}
-        conductor={null}
-        evidencia={[]}
-        incidencias={[]}
-        disputas={[]}
-        reclamosSeguro={[]}
-        calificacion={null}
-        pagos={pagosMock as never}
-        ultimaUbicacion={null}
-      />
-    );
-
-    // En la pestaña En Ruta: revisar progreso del servicio
-    const timeline = screen.getByRole("list");
-
-    // Paso Tarifa asignada: debe ser Completado (no Estado actual)
-    const itemTarifa = within(timeline).getByText("Tarifa asignada").closest("li");
-    expect(itemTarifa).toHaveTextContent("Completado");
-    expect(itemTarifa).not.toHaveTextContent("Estado actual");
-
-    // Paso Pago realizado: debe ser Completado (no Pendiente)
-    const itemPago = within(timeline).getByText("Pago realizado").closest("li");
-    expect(itemPago).toHaveTextContent("Completado");
-    expect(itemPago).not.toHaveTextContent("Pendiente");
-
-    // Paso Conductor asignado: debe ser el activo (Asignando conductor...)
-    const itemConductor = within(timeline).getByText("Conductor asignado").closest("li");
-    expect(itemConductor).toHaveTextContent("Asignando conductor...");
-
-    // En la pestaña Recibo: estado de pago debe ser 'Pagado' y no pedir aceptar cotización
-    await user.click(screen.getByRole("tab", { name: /Recibo/i }));
-    expect(screen.getByText("Pagado")).toBeInTheDocument();
-    expect(screen.queryByText(/Cotización lista para confirmación/i)).not.toBeInTheDocument();
-    expect(screen.getByText(/Pago registrado con éxito/i)).toBeInTheDocument();
-  });
+const props: PasaporteDigitalSegmentadoProps = {
+    pasaporte: { traslado_id: "c784-test", estado: "traslado_en_curso", vehiculo_marca: "Ford", vehiculo_modelo: "Courier", vehiculo_anio: 2004, vehiculo_placas: "PEM345", origen_ciudad: "San Mateo Atenco", destino_ciudad: "Lerma" } as PasaporteDigitalSegmentadoProps["pasaporte"],
+    traslado: null, vehiculo: null, conductor: null, evidencia: [], incidencias: [], disputas: [], reclamosSeguro: [], calificacion: null, pagos: [], ultimaUbicacion: null,
+};
+describe("Pasaporte dashboard", () => {
+    it("ajusta el lienzo al teclado y restaura el bloqueo de fondo al salir", () => {
+        const viewport = Object.assign(new EventTarget(), { height: window.innerHeight, offsetTop: 0 });
+        vi.stubGlobal("visualViewport", viewport);
+        const previousOverflow = document.body.style.overflow;
+        const { unmount } = render(<PasaporteDigitalSegmentado {...props}/>);
+        const root = screen.getByRole("heading").parentElement!.parentElement!;
+        act(() => { viewport.height = 320; viewport.dispatchEvent(new Event("resize")); });
+        expect(root.style.height).toBe("320px");
+        expect(root.dataset.keyboard).toBe("true");
+        unmount();
+        expect(document.body.style.overflow).toBe(previousOverflow);
+        vi.unstubAllGlobals();
+    });
+    it("muestra tres pestañas exclusivas y el resumen persistente", () => {
+        render(<PasaporteDigitalSegmentado {...props}/>);
+        expect(screen.getAllByRole("tab")).toHaveLength(3);
+        expect(screen.getByRole("heading", { name: "Pasaporte #RR-C784" })).toBeInTheDocument();
+        expect(screen.getByText("Ford Courier 2004 · PEM345")).toBeInTheDocument();
+        expect(screen.queryByRole("log")).not.toBeInTheDocument();
+        expect(screen.getByRole("tabpanel")).toHaveAccessibleName("En Ruta");
+    });
+    it("conserva el mapa montado y el footer al alternar fotos y chat", async () => {
+        const user = userEvent.setup();
+        render(<PasaporteDigitalSegmentado {...props}/>);
+        const map = screen.getByTestId("map"), footer = screen.getByRole("contentinfo");
+        await user.click(screen.getByRole("tab", { name: "Fotos" }));
+        expect(screen.getByRole("tabpanel")).toHaveAccessibleName("Fotos");
+        expect(map).toHaveAttribute("data-active", "false");
+        expect(map).not.toBeVisible();
+        await user.click(screen.getByRole("tab", { name: "Chat" }));
+        expect(screen.getByRole("log")).toBeVisible();
+        expect(screen.getByRole("contentinfo")).toBe(footer);
+        await user.click(screen.getByRole("tab", { name: "En Ruta" }));
+        expect(screen.getByTestId("map")).toBe(map);
+        expect(map).toBeVisible();
+    });
+    it("abre los datos en una capa modal y restaura el lienzo al cerrar", async () => {
+        const user = userEvent.setup();
+        render(<PasaporteDigitalSegmentado {...props}/>);
+        await user.click(screen.getByRole("button", { name: "Datos y recibo" }));
+        expect(screen.getByRole("dialog", { name: "Detalles del traslado" })).toBeVisible();
+        expect(document.body.style.overflow).toBe("hidden");
+        await user.click(screen.getByRole("button", { name: "Recibo" }));
+        expect(screen.getByText("Detalle recibo")).toBeInTheDocument();
+        await user.click(screen.getByRole("button", { name: /Cerrar/ }));
+        expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+        expect(screen.getByRole("tabpanel")).toHaveAccessibleName("En Ruta");
+    });
+    it("permite navegación de pestañas con teclado", async () => {
+        const user = userEvent.setup();
+        render(<PasaporteDigitalSegmentado {...props}/>);
+        screen.getByRole("tab", { name: "En Ruta" }).focus();
+        await user.keyboard("{ArrowRight}");
+        expect(screen.getByRole("tab", { name: "Fotos" })).toHaveFocus();
+        expect(screen.getByRole("tabpanel")).toHaveAccessibleName("Fotos");
+    });
 });

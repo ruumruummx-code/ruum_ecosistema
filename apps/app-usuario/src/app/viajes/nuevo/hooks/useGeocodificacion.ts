@@ -11,11 +11,11 @@ export function useGeocodificacion() {
   // completarse. Resultado: "Calculando ruta..." parpadeando sin fin y
   // distancia/tiempo que nunca llegaban a mostrarse.
   const geocodificarRuta = useCallback(
-    async (origen: string, destino: string, origenActual?: { lat: number; lng: number }, signal?: AbortSignal) => {
+    async (origen: string, destino: string, origenActual?: { lat: number; lng: number }, signal?: AbortSignal, destinoActual?: { lat: number; lng: number }) => {
       if (signal?.aborted) return { origenLat: undefined, origenLng: undefined, destinoLat: undefined, destinoLng: undefined, distanciaKm: undefined, tiempoEstimadoHoras: undefined, incompletas: true as const };
       const [origenResuelto, destinoResuelto] = await Promise.all([
         origenActual ? Promise.resolve(origenActual) : geocodificarDireccion(origen, signal),
-        geocodificarDireccion(destino, signal)
+        destinoActual ? Promise.resolve(destinoActual) : geocodificarDireccion(destino, signal)
       ]);
       if (signal?.aborted) return { origenLat: origenResuelto?.lat, origenLng: origenResuelto?.lng, destinoLat: destinoResuelto?.lat, destinoLng: destinoResuelto?.lng, distanciaKm: undefined, tiempoEstimadoHoras: undefined, incompletas: true as const };
       const ruta = origenResuelto && destinoResuelto ? await calcularRutaMapbox(origenResuelto, destinoResuelto, signal) : null;
@@ -30,11 +30,11 @@ export function useGeocodificacion() {
     []
   );
   const geocodificarRutaConParadas = useCallback(
-    async (origen: string, destino: string, paradas: string[], origenActual?: { lat: number; lng: number }, signal?: AbortSignal) => {
+    async (origen: string, destino: string, paradas: string[], origenActual?: { lat: number; lng: number }, signal?: AbortSignal, destinoActual?: { lat: number; lng: number }) => {
       if (signal?.aborted) return { origenLat: undefined, origenLng: undefined, destinoLat: undefined, destinoLng: undefined, paradasCoords: paradas.map(() => ({} as { lat: number; lng: number })), distanciaKm: undefined, tiempoEstimadoHoras: undefined, incompletas: true as const };
       const [origenResuelto, destinoResuelto, ...paradasResueltas] = await Promise.all([
         origenActual ? Promise.resolve(origenActual) : geocodificarDireccion(origen, signal),
-        geocodificarDireccion(destino, signal),
+        destinoActual ? Promise.resolve(destinoActual) : geocodificarDireccion(destino, signal),
         ...paradas.map((p) => geocodificarDireccion(p, signal))
       ]);
       if (signal?.aborted) return { origenLat: origenResuelto?.lat, origenLng: origenResuelto?.lng, destinoLat: destinoResuelto?.lat, destinoLng: destinoResuelto?.lng, paradasCoords: paradasResueltas.map((p) => (p ? { lat: p.lat, lng: p.lng } : {} as { lat: number; lng: number })), distanciaKm: undefined, tiempoEstimadoHoras: undefined, incompletas: true as const };

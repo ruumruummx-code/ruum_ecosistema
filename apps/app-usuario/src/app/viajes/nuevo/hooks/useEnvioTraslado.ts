@@ -253,9 +253,10 @@ export function useEnvioTraslado(params: ParametrosEnvioTraslado) {
             calle: p.calle, numero: p.numero, colonia: p.colonia, codigoPostal: p.codigoPostal, ciudad: p.ciudad, estado: p.estado
           }));
           const origenActual = datos.origenLat !== undefined && datos.origenLng !== undefined ? { lat: datos.origenLat, lng: datos.origenLng } : undefined;
+          const destinoActual = datos.destinoLat !== undefined && datos.destinoLng !== undefined ? { lat: datos.destinoLat, lng: datos.destinoLng } : undefined;
           coordenadas = paradasDirs.length
-            ? await geocodificarRutaConParadas(origenDireccion, destinoDireccion, paradasDirs, origenActual)
-            : await geocodificarRuta(origenDireccion, destinoDireccion, origenActual);
+            ? await geocodificarRutaConParadas(origenDireccion, destinoDireccion, paradasDirs, origenActual, undefined, destinoActual)
+            : await geocodificarRuta(origenDireccion, destinoDireccion, origenActual, undefined, destinoActual);
         } catch (error) {
           if (!esErrorConfiguracionMapbox(error)) throw error;
           setRutaAviso(mensajeErrorMapbox(error));

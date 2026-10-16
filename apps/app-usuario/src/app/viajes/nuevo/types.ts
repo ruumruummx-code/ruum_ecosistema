@@ -24,7 +24,7 @@ export interface DatosFormulario {
   tipo: TipoVehiculo; transmision: TransmisionVehiculo; marca: string; modelo: string; anio: string; color: string;
   placas: string; vin: string; condicion: CondicionVehiculo | ""; estadoGeneral: string; tieneTarjeta: boolean; tieneVerificacion: boolean; tienePlacas: boolean; puedeCircular: boolean;
   origenCodigoPostal: string; origenEstado: string; origenCiudad: string; origenColonia: string; origenCalle: string; origenNumero: string; origenReferencias: string; origenLat?: number; origenLng?: number;
-  destinoCodigoPostal: string; destinoEstado: string; destinoCiudad: string; destinoColonia: string; destinoCalle: string; destinoNumero: string; destinoReferencias: string;
+  destinoCodigoPostal: string; destinoEstado: string; destinoCiudad: string; destinoColonia: string; destinoCalle: string; destinoNumero: string; destinoReferencias: string; destinoLat?: number; destinoLng?: number;
   entregaNombre: string; entregaApellido: string; entregaTelefono: string; recepcionNombre: string; recepcionApellido: string; recepcionTelefono: string; instruccionesEspeciales: string;
   modalidadProgramacion: ModalidadProgramacion; fechaHoraProgramada: string; tipoRuta: TipoRutaTraslado; ventanaRecoleccion: string; ventanaEntrega: string;
   paradas: ParadaForm[];

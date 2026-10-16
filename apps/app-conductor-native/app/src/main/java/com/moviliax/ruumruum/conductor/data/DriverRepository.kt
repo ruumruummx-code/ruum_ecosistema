@@ -29,10 +29,14 @@ import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.serialization.json.put
 import kotlinx.serialization.json.putJsonArray
+import java.io.File
 import java.time.Instant
 import java.util.UUID
 
-class DriverRepository(private val supabase: SupabaseClient) {
+class DriverRepository(
+    private val supabase: SupabaseClient,
+    private val syncManager: EvidenceSyncManager? = null,
+) {
     suspend fun hasSession(): Boolean = supabase.auth.currentUserOrNull() != null
 
     suspend fun signIn(email: String, password: String) {
@@ -353,32 +357,107 @@ class DriverRepository(private val supabase: SupabaseClient) {
         )
     }
 
-    suspend fun evidencePhotos(tripId: String, type: String): List<EvidencePhoto> =
-        supabase.from("evidencia_fotos").select {
-            filter {
-                eq("traslado_id", tripId)
-                eq("tipo", type)
-            }
-        }.decodeList()
+    suspend fun evidencePhotos(tripId: String, type: String): List<EvidencePhoto> {
+        val remotePhotos = runCatching {
+            supabase.from("evidencia_fotos").select {
+                filter {
+                    eq("traslado_id", tripId)
+                    eq("tipo", type)
+                }
+            }.decodeList<EvidencePhoto>()
+        }.getOrDefault(emptyList())
 
-    suspend fun captureEvidence(tripId: String, type: String, angle: String, bytes: ByteArray) {
+        val localRecords = syncManager?.getLocalPhotos(tripId, type) ?: emptyList()
+        val remoteAngles = remotePhotos.map { it.angulo }.toSet()
+
+        val pendingPhotos = localRecords
+            .filterNot { it.angle in remoteAngles }
+            .map { record ->
+                EvidencePhoto(
+                    id = record.id,
+                    tripId = record.tripId,
+                    tipo = record.type,
+                    angulo = record.angle,
+                    url = record.filePath,
+                    capturedAt = record.capturedAt,
+                    sincronizada = record.synced,
+                )
+            }
+
+        return remotePhotos + pendingPhotos
+    }
+
+    suspend fun captureEvidence(tripId: String, type: String, angle: String, bytes: ByteArray): Boolean {
         require(type == "inicial" || type == "final")
         require(angle in REQUIRED_EVIDENCE_ANGLES || angle == "dano_previo")
         val userId = supabase.auth.currentUserOrNull()?.id ?: error("Tu sesión terminó. Inicia sesión de nuevo.")
-        val id = UUID.randomUUID().toString()
+
+        // 1. Persistencia local inmediata (resiliencia offline)
+        val localRecord = syncManager?.saveLocally(tripId, type, angle, bytes)
+        val id = localRecord?.id ?: UUID.randomUUID().toString()
         val path = "$userId/$tripId/$type/$id-$angle.jpg"
-        supabase.storage.from("evidencia").upload(path, bytes) { upsert = false }
-        supabase.from("evidencia_fotos").insert(
-            EvidenceInsert(
-                id = id,
-                tripId = tripId,
-                tipo = type,
-                angulo = angle,
-                url = path,
-                capturedAt = Instant.now().toString(),
-            ),
-        )
+
+        // 2. Intento de subida inmediata a Supabase
+        return try {
+            supabase.storage.from("evidencia").upload(path, bytes) { upsert = true }
+            supabase.from("evidencia_fotos").upsert(
+                EvidenceInsert(
+                    id = id,
+                    tripId = tripId,
+                    tipo = type,
+                    angulo = angle,
+                    url = path,
+                    capturedAt = localRecord?.capturedAt ?: Instant.now().toString(),
+                ),
+            )
+            syncManager?.markAsSynced(id)
+            true
+        } catch (_: Exception) {
+            // Sin conexión: queda asegurado en la cola local
+            false
+        }
     }
+
+    suspend fun syncPendingEvidence(tripId: String? = null): SyncResult {
+        val manager = syncManager ?: return SyncResult(0, 0, 0)
+        val pending = manager.getPendingRecords(tripId)
+        if (pending.isEmpty()) return SyncResult(0, 0, 0)
+
+        val userId = supabase.auth.currentUserOrNull()?.id ?: return SyncResult(pending.size, 0, pending.size)
+        var synced = 0
+        var failed = 0
+
+        for (record in pending) {
+            val file = File(record.filePath)
+            if (!file.exists()) {
+                manager.removeRecord(record.id)
+                continue
+            }
+            val path = "$userId/${record.tripId}/${record.type}/${record.id}-${record.angle}.jpg"
+            val success = runCatching {
+                val bytes = file.readBytes()
+                supabase.storage.from("evidencia").upload(path, bytes) { upsert = true }
+                supabase.from("evidencia_fotos").upsert(
+                    EvidenceInsert(
+                        id = record.id,
+                        tripId = record.tripId,
+                        tipo = record.type,
+                        angulo = record.angle,
+                        url = path,
+                        capturedAt = record.capturedAt,
+                    ),
+                )
+                manager.markAsSynced(record.id)
+            }.isSuccess
+
+            if (success) synced++ else failed++
+        }
+
+        return SyncResult(pending.size, synced, failed)
+    }
+
+    suspend fun pendingEvidenceCount(tripId: String? = null): Int =
+        syncManager?.getPendingRecords(tripId)?.size ?: 0
 
     suspend fun advanceTrip(tripId: String, event: String) {
         require(event in ALLOWED_DRIVER_EVENTS) { "Acción no permitida." }
@@ -404,6 +483,9 @@ class DriverRepository(private val supabase: SupabaseClient) {
 
     suspend fun confirmEvidence(tripId: String, type: String) {
         require(type == "inicial" || type == "final")
+        // Intenta sincronizar pendientes antes de validar
+        syncPendingEvidence(tripId)
+
         if (type == "inicial") {
             val paymentReady = supabase.postgrest.rpc(
                 function = "traslado_tiene_metodo_pago_registrado",
@@ -413,12 +495,15 @@ class DriverRepository(private val supabase: SupabaseClient) {
                 "No se puede completar el registro inicial: falta pago anticipado completado o método de pago al cierre."
             }
         }
-        val captured = evidencePhotos(tripId, type)
-            .filter { it.sincronizada }
-            .map { it.angulo }
-            .toSet()
-        val missing = REQUIRED_EVIDENCE_ANGLES - captured
+        val photos = evidencePhotos(tripId, type)
+        val capturedAngles = photos.map { it.angulo }.toSet()
+        val missing = REQUIRED_EVIDENCE_ANGLES - capturedAngles
         check(missing.isEmpty()) { "Faltan fotografías obligatorias: ${missing.joinToString(", ")}." }
+
+        val unsynced = photos.filterNot { it.sincronizada }
+        check(unsynced.isEmpty()) {
+            "Falta sincronizar ${unsynced.size} fotografía(s) a la nube. Conéctate a internet para completar el envío."
+        }
 
         advanceTrip(tripId, if (type == "inicial") "evidencia_inicial_completada" else "evidencia_final_completada")
         if (type == "final") evaluateUnreportedDamage(tripId)

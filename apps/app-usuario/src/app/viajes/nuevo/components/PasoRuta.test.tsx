@@ -1,9 +1,9 @@
 /** @vitest-environment jsdom */
-import { describe, expect, it, vi } from "vitest";
+import { beforeAll, describe, expect, it, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { VALORES_INICIALES } from "../constants";
-import type { DatosFormulario } from "../types";
+
 import { PasoRuta, type PasoRutaProps } from "./PasoRuta";
 
 function propsIniciales(): PasoRutaProps {
@@ -41,238 +41,141 @@ function propsIniciales(): PasoRutaProps {
   };
 }
 
-describe("PasoRuta", () => {
-  it("actualiza los buscadores y referencias cuando cambia el estado controlado", () => {
-    const iniciales = propsIniciales();
-    const vista = render(<PasoRuta {...iniciales} />);
+beforeAll(() => {
+  HTMLDialogElement.prototype.showModal = function () {
+    this.setAttribute("open", "");
+  };
+  HTMLDialogElement.prototype.close = function () {
+    this.removeAttribute("open");
+  };
+});
+vi.mock("./DireccionMapa", () => ({
+  DireccionMapa: ({
+    onConfirmar,
+    inicial,
+  }: {
+    onConfirmar: (value: unknown) => void;
+    inicial: { lat?: number; lng?: number };
+  }) => (
+    <button
+      data-lng={inicial.lng}
+      onClick={() =>
+        onConfirmar({
+          textoCompleto: "Reforma 120, CDMX",
+          direccion: "Reforma",
+          numero: "120",
+          codigoPostal: "06600",
+          colonia: "Juárez",
+          ciudad: "CDMX",
+          estado: "CDMX",
+          referencias: "Portón azul",
+          lat: 19.4,
+          lng: -99.1,
+        })
+      }
+    >
+      Confirmar ubicación
+    </button>
+  ),
+}));
 
-    const datosActualizados: DatosFormulario = {
-      ...iniciales.datos,
-      origenNumero: "101",
-      origenReferencias: "Portón azul",
-      destinoNumero: "202",
-      destinoReferencias: "Acceso por estacionamiento",
-    };
-    vista.rerender(
-      <PasoRuta
-        {...iniciales}
-        datos={datosActualizados}
-        origenBusqueda="Av. Reforma"
-        destinoBusqueda="Calle 5"
-      />,
-    );
-
-    expect(screen.getByLabelText("Buscar dirección de origen")).toHaveValue("Av. Reforma");
-    expect(screen.getByLabelText("Buscar dirección de destino")).toHaveValue("Calle 5");
-    const numeros = screen.getAllByLabelText("Número exterior / interior", { selector: "input" });
-    expect(numeros[0]).toHaveValue("101");
-    expect(numeros[1]).toHaveValue("202");
-    const referencias = screen.getAllByLabelText("Referencias", { selector: "input" });
-    expect(referencias[0]).toHaveValue("Portón azul");
-    expect(referencias[1]).toHaveValue("Acceso por estacionamiento");
+describe("PasoRuta en pestañas y mapa", () => {
+  it("actualiza el pin aunque sólo cambie la longitud y la dirección siga igual", async () => {
+    const props = propsIniciales();
+    const datos = { ...props.datos, destinoLat: 19.4, destinoLng: -99.1 };
+    const view = render(<PasoRuta {...props} datos={datos}/>);
+    await userEvent.setup().click(screen.getByRole("button", { name: /Domicilio de destino/ }));
+    expect(await screen.findByRole("button", { name: "Confirmar ubicación" })).toHaveAttribute("data-lng", "-99.1");
+    view.rerender(<PasoRuta {...props} datos={{ ...datos, destinoLng: -99.2 }}/>);
+    expect(screen.getByRole("button", { name: "Confirmar ubicación" })).toHaveAttribute("data-lng", "-99.2");
   });
-
-  it("re-renderiza al cambiar solo un contacto (comparador sin identidad)", () => {
-    const iniciales = propsIniciales();
-    const vista = render(<PasoRuta {...iniciales} />);
-    vista.rerender(
-      <PasoRuta {...iniciales} datos={{ ...iniciales.datos, entregaNombre: "María" }} />,
+  it("oculta los campos y confirma la dirección desde la hoja completa", async () => {
+    const user = userEvent.setup();
+    const props = propsIniciales();
+    render(<PasoRuta {...props} />);
+    expect(screen.queryByRole("textbox")).not.toBeInTheDocument();
+    await user.click(
+      screen.getByRole("button", { name: /Domicilio de origen/ }),
+    );
+    expect(
+      screen.getByRole("dialog", { name: "Domicilio de origen" }),
+    ).toBeInTheDocument();
+    await user.click(
+      await screen.findByRole("button", { name: "Confirmar ubicación" }),
+    );
+    expect(props.acciones.aplicarSugerenciaDireccion).toHaveBeenCalledWith(
+      "origen",
+      expect.objectContaining({ direccion: "Reforma", lat: 19.4 }),
+    );
+    expect(props.acciones.actualizar).toHaveBeenCalledWith(
+      "origenNumero",
+      "120",
+    );
+    expect(props.acciones.actualizar).toHaveBeenCalledWith(
+      "origenReferencias",
+      "Portón azul",
+    );
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+  });
+  it("separa los contactos y conserva los valores controlados", async () => {
+    const user = userEvent.setup();
+    const props = propsIniciales();
+    const view = render(<PasoRuta {...props} />);
+    await user.click(screen.getByRole("tab", { name: "Contactos" }));
+    expect(
+      screen.queryByRole("button", { name: /Domicilio de origen/ }),
+    ).not.toBeInTheDocument();
+    view.rerender(
+      <PasoRuta
+        {...props}
+        datos={{ ...props.datos, entregaNombre: "María" }}
+      />,
     );
     expect(document.getElementById("entregaNombre")).toHaveValue("María");
-  });
-
-  it("omite re-render ante cambios de datos irrelevantes para el paso", () => {
-    const claseControl = vi.fn(() => "");
-    const base = propsIniciales();
-    const iniciales: PasoRutaProps = {
-      ...base,
-      acciones: { ...base.acciones, claseControl },
-    };
-    const vista = render(<PasoRuta {...iniciales} />);
-    const llamadasTrasMontaje = claseControl.mock.calls.length;
-    expect(llamadasTrasMontaje).toBeGreaterThan(0);
-    // marca/modelo no los pinta este paso: memo debe bloquear el re-render.
-    vista.rerender(
-      <PasoRuta {...iniciales} datos={{ ...iniciales.datos, marca: "Toyota", modelo: "Yaris" }} />,
-    );
-    expect(claseControl.mock.calls.length).toBe(llamadasTrasMontaje);
-  });
-
-  it("propaga lo que se escribe en el buscador de origen y de destino", async () => {
-    const user = userEvent.setup();
-    const iniciales = propsIniciales();
-    render(<PasoRuta {...iniciales} />);
-
-    await user.type(screen.getByRole("combobox", { name: "Buscar dirección de origen" }), "Reforma");
-    await user.type(screen.getByRole("combobox", { name: "Buscar dirección de destino" }), "Toluca");
-
-    // El input es controlado por prop y el spy no actualiza el estado, así que
-    // cada onChange lleva un solo carácter: concatenando se reconstruye lo escrito.
-    const setOrigen = iniciales.acciones.setOrigenBusqueda as unknown as ReturnType<typeof vi.fn>;
-    const setDestino = iniciales.acciones.setDestinoBusqueda as unknown as ReturnType<typeof vi.fn>;
-    expect(setOrigen.mock.calls.map((c: unknown[]) => c[0]).join("")).toBe("Reforma");
-    expect(setDestino.mock.calls.map((c: unknown[]) => c[0]).join("")).toBe("Toluca");
-  });
-
-  it("aplica la sugerencia elegida al origen y al destino", async () => {
-    const user = userEvent.setup();
-    const iniciales = propsIniciales();
-    render(
-      <PasoRuta
-        {...iniciales}
-        origenSugerencias={[sugerencia()]}
-        destinoSugerencias={[sugerencia()]}
-      />,
-    );
-
-    await user.click(screen.getByRole("combobox", { name: "Buscar dirección de origen" }));
-    await user.keyboard("{ArrowDown}{Enter}");
-
-    expect(iniciales.acciones.aplicarSugerenciaDireccion).toHaveBeenCalledWith(
-      "origen",
-      expect.objectContaining({ textoCompleto: "Av. Reforma 120, CDMX" })
-    );
-  });
-
-  it("normaliza los teléfonos de contacto a 10 dígitos", async () => {
-    const user = userEvent.setup();
-    const iniciales = propsIniciales();
-    render(<PasoRuta {...iniciales} />);
-
-    // El valor llega como digits+52: el hook lo recorta vía actualizarTelefono.
     await user.type(
       screen.getByLabelText("Teléfono de entrega, 10 dígitos sin incluir +52"),
       "5512345678",
     );
-
-    expect(iniciales.acciones.actualizarTelefono).toHaveBeenCalled();
+    expect(props.acciones.actualizarTelefono).toHaveBeenCalled();
+    await user.click(screen.getByRole("tab", { name: "Direcciones" }));
+    expect(screen.queryByRole("textbox")).not.toBeInTheDocument();
   });
-
-  it("muestra distancia y tiempo cuando la estimación está resuelta", () => {
-    render(
+  it("actualiza el resumen de domicilios sin desplegar campos", () => {
+    const props = propsIniciales();
+    const view = render(<PasoRuta {...props} />);
+    view.rerender(
       <PasoRuta
-        {...propsIniciales()}
-        rutaEstimacion={{
-          distanciaKm: 64.4,
-          tiempoEstimadoHoras: 1.5,
-          incompletas: false,
+        {...props}
+        datos={{
+          ...props.datos,
+          destinoCiudad: "San Mateo Atenco",
+          destinoCodigoPostal: "52104",
+          destinoCalle: "Calle 400",
+          destinoNumero: "12",
         }}
       />,
     );
-
-    expect(screen.getByText("Distancia y tiempo estimado")).toBeInTheDocument();
-    expect(screen.getByText("Distancia")).toBeInTheDocument();
-    expect(screen.getByText("Tiempo")).toBeInTheDocument();
+    expect(screen.getByText("San Mateo Atenco, 52104")).toBeInTheDocument();
+    expect(screen.getByText("Calle 400 #12")).toBeInTheDocument();
   });
-
-  it("pide completar ambas direcciones cuando no hay estimación", () => {
-    render(<PasoRuta {...propsIniciales()} />);
-    expect(screen.getByText("Completa ambas direcciones")).toBeInTheDocument();
-  });
-
-  it("informa que está calculando la ruta", () => {
-    render(<PasoRuta {...propsIniciales()} rutaCalculando />);
-    expect(screen.getByText("Calculando ruta...")).toBeInTheDocument();
-  });
-
-  it("ofrece reintentar el cálculo cuando hay aviso de ruta", () => {
-    const iniciales = propsIniciales();
-    render(<PasoRuta {...iniciales} rutaAviso="No pudimos calcular la ruta." />);
-
-    const boton = screen.getByRole("button", { name: "Reintentar cálculo" });
-    expect(boton).toBeEnabled();
-    boton.click();
-    expect(iniciales.acciones.onReintentarRuta).toHaveBeenCalled();
-  });
-
-  it("no ofrece reintento mientras calcula", () => {
-    render(
-      <PasoRuta
-        {...propsIniciales()}
-        rutaAviso="No pudimos calcular la ruta."
-        rutaCalculando
-      />,
-    );
-
-    expect(screen.getByRole("button", { name: "Reintentar cálculo" })).toBeDisabled();
-  });
-
-  it("muestra los errores de teléfono de entrega y recepción", () => {
-    render(
-      <PasoRuta
-        {...propsIniciales()}
-        errores={{
-          entregaTelefono: "El teléfono de entrega es obligatorio",
-          recepcionTelefono: "El teléfono de recepción es obligatorio",
-        }}
-      />,
-    );
-
-    expect(screen.getByText("El teléfono de entrega es obligatorio")).toBeInTheDocument();
-    expect(screen.getByText("El teléfono de recepción es obligatorio")).toBeInTheDocument();
-  });
-
-  it("no pide la ubicación actual fuera del shell nativo", () => {
-    render(<PasoRuta {...propsIniciales()} />);
-    expect(screen.queryByRole("button", { name: /usar mi ubicación/i })).toBeNull();
-  });
-
-  it("delega los cambios de escalas al padre", async () => {
+  it("revela contactos inválidos y permite reintentar el cálculo", async () => {
     const user = userEvent.setup();
-    const iniciales = propsIniciales();
-    render(<PasoRuta {...iniciales} />);
-
-    await user.click(screen.getByRole("button", { name: "Agregar escala o tarea" }));
-
-    expect(iniciales.acciones.onParadasChange).toHaveBeenCalled();
-  });
-
-  it("propaga las instrucciones especiales y valida al salir", async () => {
-    const user = userEvent.setup();
-    const iniciales = propsIniciales();
-    render(<PasoRuta {...iniciales} />);
-
-    const instrucciones = screen.getByLabelText("Instrucciones especiales para el traslado");
-    await user.type(instrucciones, "Entrega en privada");
-    await user.tab();
-
-    expect(iniciales.acciones.actualizar).toHaveBeenCalledWith(
-      "instruccionesEspeciales",
-      "E",
+    const props = propsIniciales();
+    const view = render(<PasoRuta {...props} />);
+    view.rerender(
+      <PasoRuta {...props} errores={{ entregaNombre: "Requerido" }} />,
     );
-    expect(iniciales.acciones.validarCampo).toHaveBeenCalledWith("instruccionesEspeciales");
-  });
-
-  it("aplica una sugerencia al destino", async () => {
-    const user = userEvent.setup();
-    const iniciales = propsIniciales();
-    render(
-      <PasoRuta
-        {...iniciales}
-        origenSugerencias={[sugerencia()]}
-        destinoSugerencias={[sugerencia()]}
-      />,
+    expect(screen.getByRole("tab", { name: "Contactos" })).toHaveAttribute(
+      "aria-selected",
+      "true",
     );
-
-    await user.click(screen.getByRole("combobox", { name: "Buscar dirección de destino" }));
-    await user.click(screen.getByRole("option", { name: "Av. Reforma 120, CDMX" }));
-
-    expect(iniciales.acciones.aplicarSugerenciaDireccion).toHaveBeenCalledWith(
-      "destino",
-      expect.objectContaining({ textoCompleto: "Av. Reforma 120, CDMX" })
+    view.rerender(
+      <PasoRuta {...props} rutaAviso="No pudimos calcular la ruta." />,
     );
+    await user.click(screen.getByRole("tab", { name: "Direcciones" }));
+    await user.click(
+      screen.getByRole("button", { name: "Reintentar cálculo" }),
+    );
+    expect(props.acciones.onReintentarRuta).toHaveBeenCalled();
   });
 });
-
-function sugerencia() {
-  return {
-    textoCompleto: "Av. Reforma 120, CDMX",
-    direccion: "Av. Reforma",
-    colonia: "Juárez",
-    codigoPostal: "06600",
-    ciudad: "Ciudad de México",
-    estado: "CDMX",
-    lat: 19.427,
-    lng: -99.167,
-  };
-}

@@ -22,6 +22,7 @@ import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.DirectionsCar
 import androidx.compose.material.icons.filled.Error
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -247,3 +248,26 @@ fun RuumLogo(
         contentScale = ContentScale.Fit,
     )
 }
+
+@Composable
+@androidx.compose.material3.ExperimentalMaterial3Api
+fun RuumTopBar(title: String, onRefresh: () -> Unit) {
+    androidx.compose.material3.TopAppBar(
+        title = {
+            Column {
+                Text("RUUM RUUM", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.secondary)
+                Text(title, style = MaterialTheme.typography.titleLarge)
+            }
+        },
+        actions = {
+            androidx.compose.material3.IconButton(onClick = onRefresh, modifier = Modifier.size(RuumTokens.Touch)) {
+                Icon(Icons.Default.Refresh, "Actualizar")
+            }
+        },
+        colors = androidx.compose.material3.TopAppBarDefaults.topAppBarColors(
+            containerColor = MaterialTheme.colorScheme.surface,
+            titleContentColor = MaterialTheme.colorScheme.onSurface,
+        ),
+    )
+}
+

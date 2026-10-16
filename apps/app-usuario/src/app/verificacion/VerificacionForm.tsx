@@ -3,7 +3,7 @@
 import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Aviso, MobileBadge, MobileButton, MobileCard } from "@ruum/ui";
+import { Aviso, MobileButton, MobileCard } from "@ruum/ui";
 import { crearClienteNavegador } from "../../lib/supabase-browser";
 import {
   subirDocumentoIdentidad,
@@ -15,6 +15,7 @@ import {
   type PerfilUsuarioActualizable
 } from "@ruum/api/services";
 import { consultarCodigoPostalMx } from "../../lib/codigos-postales";
+import { VerificationSheet } from "./VerificationSheet";
 import { DiditVerificationModal } from "./DiditVerificationModal";
 
 const TIPOS_ACEPTADOS = ["image/jpeg", "image/png", "application/pdf", "image/heic", "image/heif"];
@@ -71,55 +72,6 @@ function ConfirmacionEnRevision() {
           tu información en un plazo de <strong className="font-semibold text-[#0a2342] dark:text-white">24 a 48 horas hábiles</strong>.
         </p>
 
-        <div className="mt-6 flex flex-col gap-3 rounded-2xl border border-[#e6edf6] bg-[#f8fafd] p-4 text-left dark:border-[#1a3a5c] dark:bg-[#071930]">
-          {[
-            { label: "Cuenta creada", sub: "Correo y contraseña", ok: true },
-            { label: "Teléfono registrado", sub: "Para notificaciones del traslado", ok: true },
-            { label: "Domicilio", sub: "Guardado correctamente", ok: true },
-            { label: "Identificación oficial", sub: "Recibida — en revisión", ok: true },
-            { label: "Verificación de cuenta", sub: "Pendiente de aprobación por el equipo", ok: false, pendiente: true },
-          ].map(({ label, sub, ok, pendiente }) => (
-            <div key={label} className="flex items-center gap-3">
-              <div
-                className={[
-                  "flex size-7 shrink-0 items-center justify-center rounded-full",
-                  ok && !pendiente
-                    ? "bg-[#e9f3ee] text-[#08705f] dark:bg-[#0a2e1f] dark:text-[#4dd9a3]"
-                    : pendiente
-                    ? "border border-[#f3d8a2] bg-[#fef4e6] text-[#765100] dark:bg-[#3d2e00] dark:text-[#ffc933] dark:border-[#664d00]"
-                    : "border border-[#d7e1ee] bg-[#eff3f8] text-[#3b4c68] dark:bg-[#1a2e4a] dark:text-[#a8b5cc]",
-                ].join(" ")}
-              >
-                {ok && !pendiente ? (
-                  <svg className="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                    <path d="M20 6L9 17l-5-5" />
-                  </svg>
-                ) : pendiente ? (
-                  <svg className="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                    <circle cx="12" cy="12" r="10" />
-                    <path d="M12 6v6l4 2" />
-                  </svg>
-                ) : (
-                  <svg className="size-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                    <circle cx="12" cy="12" r="10" />
-                  </svg>
-                )}
-              </div>
-              <div className="min-w-0 flex-1">
-                <p className="text-[13px] font-bold text-[#0a2342] dark:text-[#f6f8fb] truncate">{label}</p>
-                <p
-                  className={[
-                    "text-[11.5px] font-medium truncate",
-                    pendiente ? "text-[#765100] dark:text-[#ffc933]" : "text-[#4e5f80] dark:text-[#a8b5cc]",
-                  ].join(" ")}
-                >
-                  {sub}
-                </p>
-              </div>
-            </div>
-          ))}
-        </div>
-
         <div className="mt-4 flex items-start gap-2.5 rounded-2xl border border-[#f3d8a2] bg-[#fef4e6] p-3.5 text-left dark:border-[#664d00] dark:bg-[#3d2e00]/40">
           <svg className="mt-0.5 size-4 shrink-0 text-[#765100] dark:text-[#ffc933]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
             <circle cx="12" cy="12" r="10" />
@@ -167,6 +119,7 @@ export function VerificacionForm({ fotoPerfilInicial, soloDidit = false, destino
   const [verificacionCompletada, setVerificacionCompletada] = useState(false);
 
   /* Manual Verification Form State */
+  const [mostrarFoto, setMostrarFoto] = useState(false);
   const [mostrarFormularioManual, setMostrarFormularioManual] = useState(false);
   const [codigoPostal, setCodigoPostal] = useState("");
   const [estadoMx, setEstadoMx] = useState("");
@@ -530,30 +483,21 @@ export function VerificacionForm({ fotoPerfilInicial, soloDidit = false, destino
     "w-full rounded-2xl border border-[#e6edf6] bg-white px-3.5 py-3 text-[14.5px] font-medium text-[#0a2342] outline-none transition focus:border-[#0a2342] focus:bg-white focus:ring-4 focus:ring-[#0a2342]/5 dark:border-[#1a3a5c] dark:bg-[#071322] dark:text-white dark:focus:border-sky-400";
 
   return (
-    <div className="flex flex-col gap-5">
-      {/* ── Opción 1: Didit Verificación Biométrica Instantánea ── */}
-      <MobileCard elevated padding="lg" className="border-[#c8dcf8] bg-[#edf4fe]/40 dark:border-[#1d4576] dark:bg-[#0f2d52]/40 space-y-4">
-        <div className="flex items-center justify-between gap-3">
-          <div className="flex items-center gap-2.5">
-            <span className="flex size-9 items-center justify-center rounded-xl bg-[#edf4fe] text-[#104ca0] dark:bg-[#0f2d52] dark:text-[#6ba8ff]" aria-hidden="true">
-              <svg className="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z" />
-              </svg>
-            </span>
-            <h2 className="text-[15.5px] font-bold text-[#0a2342] dark:text-[#f6f8fb]">
-              Verificación instantánea (recomendada)
-            </h2>
-          </div>
-          <MobileBadge variante="en_ruta" texto="< 2 MIN" size="sm" />
+    <div className="flex min-h-0 flex-1 flex-col">
+      <section className="flex min-h-0 flex-1 flex-col justify-center gap-4 text-center">
+        <div className="mx-auto flex size-16 shrink-0 items-center justify-center rounded-full bg-[#edf4fe] text-[#104ca0] dark:bg-[#0f2d52] dark:text-[#6ba8ff]" aria-hidden="true">
+          <svg className="size-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6"><rect x="3" y="4" width="18" height="16" rx="3"/><circle cx="9" cy="10" r="2"/><path d="M6 16c0-4 6-4 6 0m3-7h3m-3 4h3"/></svg>
         </div>
-
-        <p className="text-[13px] leading-relaxed text-[#4e5f80] dark:text-[#a8b5cc]">
-          Valida tu INE, pasaporte o licencia con reconocimiento biométrico oficial y prueba de vida en tiempo real a través de Didit. Tu cuenta quedará aprobada inmediatamente sin tiempos de espera.
+        <div><h2 className="text-2xl font-bold">Verificación instantánea</h2>
+        <p className="mt-2 text-sm text-[#4e5f80] dark:text-[#a8b5cc]">Valida tu INE en menos de 2 minutos.</p></div>
+        <MobileButton type="button" onClick={() => fotoPerfilUrl ? void iniciarDidit() : setMostrarFoto(true)} disabled={cargandoDidit || subiendoFotoPerfil} loading={cargandoDidit || subiendoFotoPerfil} className="w-full">Iniciar verificación con Didit</MobileButton>
+        <p className="flex items-center justify-center gap-1 text-[11px] leading-4 text-[#4e5f80] dark:text-[#a8b5cc]">
+          <svg className="size-3 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><rect x="5" y="10" width="14" height="11" rx="2"/><path d="M8 10V6a4 4 0 0 1 8 0v4"/></svg>
+          Tus datos se encriptan bajo estándares bancarios.
         </p>
-
-        {!mostrarDiditModal && errorDidit && <Aviso tono="danger">{errorDidit}</Aviso>}
-
-        {!fotoPerfilUrl && (
+      </section>
+      <VerificationSheet open={mostrarFoto} onClose={() => setMostrarFoto(false)} title="Fotografía de referencia">
+                {!fotoPerfilUrl && (
           <div className="rounded-2xl border border-[#f3d8a2] bg-[#fef4e6] p-4 dark:border-[#664d00] dark:bg-[#3d2e00]/40 space-y-3">
             <div className="flex items-start gap-2.5">
               <svg className="mt-0.5 size-4 shrink-0 text-[#765100] dark:text-[#ffc933]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -582,22 +526,9 @@ export function VerificacionForm({ fotoPerfilInicial, soloDidit = false, destino
           </div>
         )}
 
-        <MobileButton
-          type="button"
-          onClick={iniciarDidit}
-          disabled={cargandoDidit || subiendoFotoPerfil || !fotoPerfilUrl}
-          loading={cargandoDidit || subiendoFotoPerfil}
-          icon={
-            <svg className="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-              <rect width="18" height="18" x="3" y="3" rx="2" />
-              <path d="M7 7h10M7 12h10M7 17h6" />
-            </svg>
-          }
-          className="w-full"
-        >
-          {fotoPerfilUrl ? "Iniciar verificación con Didit" : "Sube tu fotografía para continuar"}
-        </MobileButton>
-      </MobileCard>
+        {errorDidit && <Aviso tono="danger">{errorDidit}</Aviso>}
+        <MobileButton type="button" className="mt-4 w-full" disabled={!fotoPerfilUrl || subiendoFotoPerfil} onClick={() => { setMostrarFoto(false); void iniciarDidit(); }}>Continuar con Didit</MobileButton>
+      </VerificationSheet>
 
       {/* Modal Didit */}
       <DiditVerificationModal
@@ -612,26 +543,10 @@ export function VerificacionForm({ fotoPerfilInicial, soloDidit = false, destino
 
       {!soloDidit && (
         <>
-          {/* ── Separador / Opción 2: Verificación Tradicional Manual ── */}
-          <div className="relative my-2 text-center">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-[#e2e8f0] dark:border-[#1a3a5c]" />
-            </div>
-            <div className="relative flex justify-center">
-              <button
-                type="button"
-                onClick={() => setMostrarFormularioManual(!mostrarFormularioManual)}
-                aria-expanded={mostrarFormularioManual}
-                aria-controls="formulario-verificacion-manual"
-                className="rounded-full bg-white px-4 py-2 text-[12.5px] font-semibold text-[#4e5f80] border border-[#d7e1ee] shadow-xs hover:text-[#0a2342] hover:bg-[#f6f8fb] transition cursor-pointer dark:border-[#1a3a5c] dark:bg-[#0a2342] dark:text-[#a8b5cc] dark:hover:text-white"
-              >
-                {mostrarFormularioManual ? "▲ Ocultar verificación manual" : "▼ O prefiero subir mis documentos manualmente (24-48h)"}
-              </button>
-            </div>
-          </div>
-
-          {mostrarFormularioManual && (
-            <form id="formulario-verificacion-manual" onSubmit={enviarManual} className="animate-fadeIn">
+          <button type="button" onClick={() => setMostrarFormularioManual(true)} aria-haspopup="dialog" className="min-h-12 shrink-0 py-3 text-sm font-semibold text-[#4e5f80] dark:text-[#a8b5cc]">Prefiero subir mis documentos manualmente</button>
+          <VerificationSheet open={mostrarFormularioManual} onClose={() => setMostrarFormularioManual(false)} title="Carga manual de documentos">
+            <p className="mb-4 text-sm text-[#4e5f80] dark:text-[#a8b5cc]">Completa tu domicilio y adjunta tu identificación. La revisión toma 24–48 horas hábiles.</p>
+            <form id="formulario-verificacion-manual" onSubmit={enviarManual}>
               <MobileCard padding="lg" elevated className="flex flex-col gap-6">
               {/* ── Domicilio ── */}
               <fieldset className="flex flex-col gap-4 border-none p-0 m-0">
@@ -784,7 +699,7 @@ export function VerificacionForm({ fotoPerfilInicial, soloDidit = false, destino
                           <path d="M20 6L9 17l-5-5" />
                         </svg>
                       </span>
-                      <span className="text-sm font-bold text-[#0a2342] dark:text-[#f6f8fb] truncate max-w-xs">{documento.name}</span>
+                      <span className="text-sm font-bold text-[#0a2342] dark:text-[#f6f8fb] w-full min-w-0 break-all">{documento.name}</span>
                       <span className="text-xs text-[#4e5f80] dark:text-[#a8b5cc]">Toca para cambiar el archivo</span>
                     </>
                   ) : (
@@ -836,7 +751,7 @@ export function VerificacionForm({ fotoPerfilInicial, soloDidit = false, destino
               </MobileButton>
             </MobileCard>
           </form>
-          )}
+          </VerificationSheet>
         </>
       )}
     </div>

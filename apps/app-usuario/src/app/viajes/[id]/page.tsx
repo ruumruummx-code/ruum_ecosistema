@@ -1,8 +1,6 @@
-import { NavegacionUsuario } from "../../NavegacionUsuario";
 import { obtenerDatos } from "./obtenerDatosTraslado";
 import { TrasladoNoEncontrado } from "./TrasladoNoEncontrado";
 import { PasaporteDigitalSegmentado } from "./PasaporteDigitalSegmentado";
-import { MobileShell } from "@ruum/ui";
 
 // El Pasaporte contiene datos protegidos por sesión y cambia con el estado
 // operativo del traslado; nunca debe prerenderizarse ni servirse desde caché.
@@ -63,8 +61,7 @@ export default async function PaginaTraslado({ params }: { params: Promise<{ id:
 
   return (
     <>
-      <NavegacionUsuario variante="claro" />
-      <MobileShell variant="compact" navInferiorVisible={true} as="main">
+      <main>
         <PasaporteDigitalSegmentado
           pasaporte={pasaporte}
           traslado={traslado}
@@ -78,7 +75,7 @@ export default async function PaginaTraslado({ params }: { params: Promise<{ id:
           pagos={pagos}
           ultimaUbicacion={ultimaUbicacion}
         />
-      </MobileShell>
+      </main>
     </>
   );
 }

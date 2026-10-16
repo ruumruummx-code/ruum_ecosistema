@@ -61,6 +61,9 @@ export interface PagoStripeProps {
   trasladoId: string;
   monto?: number | null;
   onPagado: () => void;
+  compacto?: boolean;
+  formId?: string;
+  onEstadoPago?: (estado: { listo: boolean; procesando: boolean }) => void;
 }
 
 /** El SDK de Stripe se carga por import() dinámico (fuera del bundle inicial) y
@@ -75,7 +78,9 @@ interface ModuloStripe {
   stripePromise: Promise<Stripe | null>;
 }
 
-async function crearPaymentIntent(trasladoId: string): Promise<{ clientSecret?: string; pagoConfirmado?: boolean }> {
+async function crearPaymentIntent(
+  trasladoId: string,
+): Promise<{ clientSecret?: string; pagoConfirmado?: boolean }> {
   if (!supabaseUrl || !supabaseAnonKey) {
     throw new Error("Supabase no está configurado para iniciar el cobro.");
   }
@@ -89,28 +94,43 @@ async function crearPaymentIntent(trasladoId: string): Promise<{ clientSecret?: 
     throw new Error("Tu sesión expiró. Inicia sesión de nuevo para pagar.");
   }
 
-  const respuesta = await fetch(`${supabaseUrl}/functions/v1/crear-payment-intent`, {
-    method: "POST",
-    headers: {
-      apikey: supabaseAnonKey,
-      authorization: `Bearer ${token}`,
-      "content-type": "application/json",
+  const respuesta = await fetch(
+    `${supabaseUrl}/functions/v1/crear-payment-intent`,
+    {
+      method: "POST",
+      headers: {
+        apikey: supabaseAnonKey,
+        authorization: `Bearer ${token}`,
+        "content-type": "application/json",
+      },
+      body: JSON.stringify({ traslado_id: trasladoId }),
     },
-    body: JSON.stringify({ traslado_id: trasladoId }),
-  });
+  );
 
   const texto = await respuesta.text();
-  let data: { clientSecret?: string; pagoConfirmado?: boolean; error?: string } | null = null;
+  let data: {
+    clientSecret?: string;
+    pagoConfirmado?: boolean;
+    error?: string;
+  } | null = null;
   if (texto) {
     try {
-      data = JSON.parse(texto) as { clientSecret?: string; pagoConfirmado?: boolean; error?: string };
+      data = JSON.parse(texto) as {
+        clientSecret?: string;
+        pagoConfirmado?: boolean;
+        error?: string;
+      };
     } catch {
-      throw new Error(`La función de pago respondió con un formato inválido (${respuesta.status}).`);
+      throw new Error(
+        `La función de pago respondió con un formato inválido (${respuesta.status}).`,
+      );
     }
   }
 
   if (!respuesta.ok) {
-    throw new Error(data?.error ?? `No pudimos iniciar el cobro (${respuesta.status}).`);
+    throw new Error(
+      data?.error ?? `No pudimos iniciar el cobro (${respuesta.status}).`,
+    );
   }
 
   // El backend reconcilió un cobro ya exitoso en Stripe (webhook con lag o
@@ -129,12 +149,26 @@ async function crearPaymentIntent(trasladoId: string): Promise<{ clientSecret?: 
 /**
  * Componente principal de cobro con Stripe Elements conectado a la pasarela real
  */
-export function PagoStripe({ trasladoId, monto, onPagado }: PagoStripeProps) {
+export function PagoStripe({
+  trasladoId,
+  monto,
+  onPagado,
+  compacto = false,
+  formId,
+  onEstadoPago,
+}: PagoStripeProps) {
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [stripeModule, setStripeModule] = useState<ModuloStripe | null>(null);
   const [reintento, setReintento] = useState(0);
   const reconciliadoNotificado = useRef(false);
+  const onPagadoRef = useRef(onPagado);
+  useEffect(() => {
+    onPagadoRef.current = onPagado;
+  }, [onPagado]);
+  useEffect(() => {
+    onEstadoPago?.({ listo: false, procesando: false });
+  }, [trasladoId, reintento, onEstadoPago]);
 
   useEffect(() => {
     async function iniciar() {
@@ -143,12 +177,16 @@ export function PagoStripe({ trasladoId, monto, onPagado }: PagoStripeProps) {
         setClientSecret(null);
 
         if (monto != null && monto <= 0) {
-          setError("Tarifa no válida para pago ($0). Nuestro equipo revisará la cotización antes de solicitar cobro.");
+          setError(
+            "Tarifa no válida para pago ($0). Nuestro equipo revisará la cotización antes de solicitar cobro.",
+          );
           return;
         }
 
         if (!clavePublica) {
-          setError("Stripe no está configurado en este entorno. Configura NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY.");
+          setError(
+            "Stripe no está configurado en este entorno. Configura NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY.",
+          );
           return;
         }
 
@@ -158,7 +196,7 @@ export function PagoStripe({ trasladoId, monto, onPagado }: PagoStripeProps) {
           // monta Elements (Stripe lo rechazaría por estado terminal).
           if (!reconciliadoNotificado.current) {
             reconciliadoNotificado.current = true;
-            onPagado();
+            onPagadoRef.current();
           }
           return;
         }
@@ -170,7 +208,9 @@ export function PagoStripe({ trasladoId, monto, onPagado }: PagoStripeProps) {
            solo para detectar clave inválida, porque loadStripe resuelve null. */
         const stripe = await promesaStripe;
         if (!stripe) {
-          throw new Error("No fue posible inicializar Stripe con la clave pública configurada.");
+          throw new Error(
+            "No fue posible inicializar Stripe con la clave pública configurada.",
+          );
         }
         setStripeModule({
           Elements: mod.Elements,
@@ -182,9 +222,14 @@ export function PagoStripe({ trasladoId, monto, onPagado }: PagoStripeProps) {
 
         setClientSecret(inicio.clientSecret ?? null);
       } catch (err) {
-        const msg = err instanceof Error ? err.message : "No pudimos iniciar el cobro con Stripe.";
+        const msg =
+          err instanceof Error
+            ? err.message
+            : "No pudimos iniciar el cobro con Stripe.";
         if (msg.includes("Failed to load Stripe.js")) {
-          setError("No se pudo cargar la pasarela de pagos de Stripe (Stripe.js). Verifica tu conexión a internet o si algún bloqueador de anuncios está interfiriendo.");
+          setError(
+            "No se pudo cargar la pasarela de pagos de Stripe (Stripe.js). Verifica tu conexión a internet o si algún bloqueador de anuncios está interfiriendo.",
+          );
         } else {
           setError(msg);
         }
@@ -192,14 +237,23 @@ export function PagoStripe({ trasladoId, monto, onPagado }: PagoStripeProps) {
     }
 
     void iniciar();
-  }, [trasladoId, reintento, monto, onPagado]);
+  }, [trasladoId, reintento, monto]);
 
   if (error) {
     return (
-      <div className="grid gap-3" role="status" aria-live="polite" aria-atomic="true">
+      <div
+        className="grid gap-3"
+        role="status"
+        aria-live="polite"
+        aria-atomic="true"
+      >
         <Aviso tono="danger">{error}</Aviso>
         <div>
-          <Button type="button" variant="secondary" onClick={() => setReintento((valor) => valor + 1)}>
+          <Button
+            type="button"
+            variant="secondary"
+            onClick={() => setReintento((valor) => valor + 1)}
+          >
             Reintentar
           </Button>
         </div>
@@ -217,16 +271,23 @@ export function PagoStripe({ trasladoId, monto, onPagado }: PagoStripeProps) {
     );
   }
 
-  const { Elements, PaymentElement, useStripe, useElements, stripePromise } = stripeModule;
+  const { Elements, PaymentElement, useStripe, useElements, stripePromise } =
+    stripeModule;
 
   return (
-    <Elements stripe={stripePromise} options={{ clientSecret, appearance: aparienciaStripe }}>
+    <Elements
+      stripe={stripePromise}
+      options={{ clientSecret, appearance: aparienciaStripe, locale: compacto ? "es" : "auto" }}
+    >
       <FormularioPagoReal
         trasladoId={trasladoId}
         onPagado={onPagado}
         PaymentElement={PaymentElement}
         useStripe={useStripe}
         useElements={useElements}
+        compacto={compacto}
+        formId={formId}
+        onEstadoPago={onEstadoPago}
       />
     </Elements>
   );
@@ -239,21 +300,36 @@ function FormularioPagoReal({
   PaymentElement,
   useStripe,
   useElements,
+  compacto,
+  formId,
+  onEstadoPago,
 }: {
   trasladoId: string;
   onPagado: () => void;
   PaymentElement: (typeof import("@stripe/react-stripe-js"))["PaymentElement"];
   useStripe: () => Stripe | null;
   useElements: () => StripeElements | null;
+  compacto?: boolean;
+  formId?: string;
+  onEstadoPago?: PagoStripeProps["onEstadoPago"];
 }) {
   const stripe = useStripe();
   const elements = useElements();
   const [enviando, setEnviando] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [elementoListo, setElementoListo] = useState(false);
+  const enviandoRef = useRef(false);
+  useEffect(() => {
+    onEstadoPago?.({
+      listo: Boolean(stripe && elements && elementoListo),
+      procesando: enviando,
+    });
+  }, [stripe, elements, elementoListo, enviando, onEstadoPago]);
 
   async function confirmar(e: React.FormEvent) {
     e.preventDefault();
-    if (!stripe || !elements) return;
+    if (!stripe || !elements || enviandoRef.current) return;
+    enviandoRef.current = true;
     setEnviando(true);
     setError(null);
 
@@ -274,11 +350,17 @@ function FormularioPagoReal({
       if (errorPago) {
         setError(errorPago.message ?? "No pudimos procesar el pago.");
         setEnviando(false);
+        enviandoRef.current = false;
         return;
       }
 
-      if (paymentIntent?.status === "succeeded" || paymentIntent?.status === "processing") {
-        onPagado();
+      if (
+        paymentIntent?.status === "succeeded" ||
+        paymentIntent?.status === "processing"
+      ) {
+        await onPagado();
+        setEnviando(false);
+        enviandoRef.current = false;
         return;
       }
 
@@ -286,45 +368,85 @@ function FormularioPagoReal({
         "Stripe no confirmó el pago. Revisa el estado de tu tarjeta e inténtalo de nuevo.",
       );
       setEnviando(false);
+      enviandoRef.current = false;
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Ocurrió un error inesperado al procesar el cobro.");
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Ocurrió un error inesperado al procesar el cobro.",
+      );
       setEnviando(false);
+      enviandoRef.current = false;
     }
   }
 
   return (
-    <form onSubmit={confirmar} className="space-y-4 text-left">
-      <div className="rounded-xl border border-emerald-500/25 bg-emerald-500/10 p-3.5 text-left">
-        <div className="flex items-center gap-2 font-display text-xs font-bold text-emerald-400">
-          <span>🔒</span>
-          <span>Pago protegido con Stripe · Cifrado SSL de 256 bits</span>
+    <form
+      id={formId}
+      onSubmit={confirmar}
+      className={compacto ? "min-h-0 text-left" : "space-y-4 text-left"}
+    >
+      {!compacto && (
+        <div className="rounded-xl border border-emerald-500/25 bg-emerald-500/10 p-3.5 text-left">
+          <div className="flex items-center gap-2 font-display text-xs font-bold text-emerald-400">
+            <span>🔒</span>
+            <span>Pago protegido con Stripe · Cifrado SSL de 256 bits</span>
+          </div>
+          <p className="mt-1 font-body text-[11px] leading-relaxed text-[#94A3B8]">
+            Tus datos bancarios están cifrados y nunca se almacenan en nuestros
+            servidores.
+          </p>
         </div>
-        <p className="mt-1 font-body text-[11px] leading-relaxed text-[#94A3B8]">
-          Tus datos bancarios están cifrados y nunca se almacenan en nuestros servidores.
-        </p>
-      </div>
+      )}
 
-      <div className="rounded-xl border border-[#1C2A3E] bg-[#0A1220] p-4">
-        <PaymentElement />
+      <div
+        className={
+          compacto
+            ? "rounded-xl bg-[#0A1220] p-3"
+            : "rounded-xl border border-[#1C2A3E] bg-[#0A1220] p-4"
+        }
+      >
+        <PaymentElement
+          onReady={() => setElementoListo(true)}
+          options={
+            compacto
+              ? { layout: "tabs", paymentMethodOrder: ["card", "oxxo"] }
+              : undefined
+          }
+        />
       </div>
 
       {error && <Aviso tono="danger">{error}</Aviso>}
 
-      <button
-        type="submit"
-        disabled={!stripe || enviando}
-        className="flex h-12 w-full items-center justify-center rounded-xl bg-[#FFC400] font-display text-xs sm:text-sm font-black uppercase tracking-wide text-[#0B111B] shadow-lg shadow-[#FFC400]/20 transition hover:bg-[#e6b000] active:scale-[0.99] disabled:opacity-50"
-      >
-        {enviando ? "Procesando pago con Stripe…" : "Pagar y confirmar traslado"}
-      </button>
+      {!compacto && (
+        <button
+          type="submit"
+          disabled={!stripe || enviando}
+          className="flex h-12 w-full items-center justify-center rounded-xl bg-[#FFC400] font-display text-xs sm:text-sm font-black uppercase tracking-wide text-[#0B111B] shadow-lg shadow-[#FFC400]/20 transition hover:bg-[#e6b000] active:scale-[0.99] disabled:opacity-50"
+        >
+          {enviando
+            ? "Procesando pago con Stripe…"
+            : "Pagar y confirmar traslado"}
+        </button>
+      )}
 
-      <div className="flex flex-wrap items-center justify-center gap-2 pt-1 font-body text-[11px] text-[#64748B]">
-        <span className="font-semibold text-slate-400">Aceptamos:</span>
-        <span className="rounded bg-[#141F32] border border-[#1C2A3E] px-2 py-0.5 text-[#94A3B8]">Visa</span>
-        <span className="rounded bg-[#141F32] border border-[#1C2A3E] px-2 py-0.5 text-[#94A3B8]">Mastercard</span>
-        <span className="rounded bg-[#141F32] border border-[#1C2A3E] px-2 py-0.5 text-[#94A3B8]">American Express</span>
-        <span className="rounded bg-[#141F32] border border-[#1C2A3E] px-2 py-0.5 text-[#94A3B8]">SPEI</span>
-      </div>
+      {!compacto && (
+        <div className="flex flex-wrap items-center justify-center gap-2 pt-1 font-body text-[11px] text-[#64748B]">
+          <span className="font-semibold text-slate-400">Aceptamos:</span>
+          <span className="rounded bg-[#141F32] border border-[#1C2A3E] px-2 py-0.5 text-[#94A3B8]">
+            Visa
+          </span>
+          <span className="rounded bg-[#141F32] border border-[#1C2A3E] px-2 py-0.5 text-[#94A3B8]">
+            Mastercard
+          </span>
+          <span className="rounded bg-[#141F32] border border-[#1C2A3E] px-2 py-0.5 text-[#94A3B8]">
+            American Express
+          </span>
+          <span className="rounded bg-[#141F32] border border-[#1C2A3E] px-2 py-0.5 text-[#94A3B8]">
+            SPEI
+          </span>
+        </div>
+      )}
     </form>
   );
 }

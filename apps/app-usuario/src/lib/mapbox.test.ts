@@ -1,6 +1,17 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 describe("cliente Mapbox usuario", () => {
+  it("resuelve el punto del mapa conservando calle, número y coordenadas", async () => {
+    vi.stubEnv("NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN", "pk.token-valido-formato");
+    const fetchMock = vi.fn(async (_input: RequestInfo | URL) => new Response(JSON.stringify({ features: [{ properties: { full_address: "Reforma 120, Juárez, CDMX", context: { address: { address_number: "120", street_name: "Reforma" }, neighborhood: { name: "Juárez" }, place: { name: "CDMX" }, region: { name: "Ciudad de México" }, postcode: { name: "06600" } } } }] }), { status: 200 }));
+    vi.stubGlobal("fetch", fetchMock);
+    const { resolverDireccionEnMapa } = await import("./mapbox");
+    await expect(resolverDireccionEnMapa(19.4, -99.1)).resolves.toMatchObject({ direccion: "Reforma", numero: "120", codigoPostal: "06600", lat: 19.4, lng: -99.1 });
+    const url = new URL(String(fetchMock.mock.calls[0]?.[0]));
+    expect(url.pathname).toBe("/search/geocode/v6/reverse");
+    expect(url.searchParams.get("longitude")).toBe("-99.1");
+    expect(url.searchParams.get("latitude")).toBe("19.4");
+  });
   afterEach(() => {
     vi.restoreAllMocks();
     vi.unstubAllEnvs();

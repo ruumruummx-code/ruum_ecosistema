@@ -1,5 +1,5 @@
 "use client";
-import { useCallback, useEffect, useMemo, useRef } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { crearClienteNavegador } from "@/lib/supabase-browser";
 import {
@@ -321,9 +321,10 @@ export function useNuevoTraslado() {
       try {
         const usarParadas = paradasDirecciones.some((d) => d.trim());
         const coordsOrigen = datos.origenLat !== undefined && datos.origenLng !== undefined ? { lat: datos.origenLat, lng: datos.origenLng } : undefined;
+        const coordsDestino = datos.destinoLat !== undefined && datos.destinoLng !== undefined ? { lat: datos.destinoLat, lng: datos.destinoLng } : undefined;
         const coordenadas = usarParadas
-          ? await geocodificarRutaConParadas(origenDireccion, destinoDireccion, paradasDirecciones, coordsOrigen, controller.signal)
-          : await geocodificarRuta(origenDireccion, destinoDireccion, coordsOrigen, controller.signal);
+          ? await geocodificarRutaConParadas(origenDireccion, destinoDireccion, paradasDirecciones, coordsOrigen, controller.signal, coordsDestino)
+          : await geocodificarRuta(origenDireccion, destinoDireccion, coordsOrigen, controller.signal, coordsDestino);
         if (esStale()) return;
         setRutaEstimacion(coordenadas as typeof rutaEstimacion);
         if (coordenadas.incompletas) {
@@ -353,12 +354,13 @@ export function useNuevoTraslado() {
     datos.origenCalle, datos.origenNumero, datos.origenColonia, datos.origenCodigoPostal, datos.origenCiudad, datos.origenEstado,
     datos.destinoCalle, datos.destinoNumero, datos.destinoColonia, datos.destinoCodigoPostal, datos.destinoCiudad, datos.destinoEstado,
     datos.paradas,
-    datos.origenLat, datos.origenLng, geocodificarRuta, geocodificarRutaConParadas,
+    datos.origenLat, datos.origenLng, datos.destinoLat, datos.destinoLng, geocodificarRuta, geocodificarRutaConParadas,
     rutaReintento, setPrevisualizacion, setRutaAviso, setRutaCalculando, setRutaEstimacion
   ]);
 
   // Cálculo de tarifa real desde Paso 0
   useEffect(() => {
+    setPrevisualizando(false);
     if (!sesionReal) {
       return;
     }
@@ -389,9 +391,11 @@ export function useNuevoTraslado() {
     const distanciaKm = rutaEstimacion.distanciaKm;
     const tiempoEstimadoHoras = rutaEstimacion.tiempoEstimadoHoras;
     const condicionSeleccionada = datos.condicion ? (datos.condicion as CondicionVehiculo) : undefined;
+    // Invalida la tarifa anterior durante el debounce, antes de permitir avanzar.
+    setPrevisualizacion(null);
+    setPrevisualizando(true);
     let cancelado = false;
     const timer = setTimeout(async () => {
-      setPrevisualizando(true);
       try {
         const cliente = crearClienteNavegador();
         const res = await previsualizarTarifaUsuario(cliente, {
@@ -473,7 +477,11 @@ export function useNuevoTraslado() {
       }
     }
 
-    setDatos((prev) => ({ ...prev, [campo]: valor }));
+    setDatos((prev) => {
+      const prefijo = campo.startsWith("origen") ? "origen" : campo.startsWith("destino") ? "destino" : null;
+      const cambiaDomicilio = prefijo && /(?:Calle|Numero|Colonia|Ciudad|Estado|CodigoPostal)$/.test(campo) && prev[campo] !== valor;
+      return { ...prev, [campo]: valor, ...(cambiaDomicilio ? { [`${prefijo}Lat`]: undefined, [`${prefijo}Lng`]: undefined } : {}) };
+    });
   }, [setDatos, setErrorPaso, setErrores, setTarifaPreviaAceptada]);
 
   const { consultarCodigoPostal, actualizarCodigoPostal } = useCodigoPostal({
@@ -681,12 +689,24 @@ export function useNuevoTraslado() {
     claseControl, actualizar, actualizarTelefono, actualizarCodigoPostal,
     consultarCodigoPostal, validarCampo, aplicarSugerenciaCp,
     aplicarSugerenciaDireccion, setOrigenBusqueda, setDestinoBusqueda,
-    onReintentarRuta: reintentarRuta, onParadasChange: actualizarParadas,
-  }), [claseControl, actualizar, actualizarTelefono, actualizarCodigoPostal, consultarCodigoPostal, validarCampo, aplicarSugerenciaCp, aplicarSugerenciaDireccion, setOrigenBusqueda, setDestinoBusqueda, reintentarRuta, actualizarParadas]);
+    onReintentarRuta: reintentarRuta, onParadasChange: actualizarParadas, onConfirmarUbicacion: solicitarGeocodificacionInmediata,
+  }), [claseControl, actualizar, actualizarTelefono, actualizarCodigoPostal, consultarCodigoPostal, validarCampo, aplicarSugerenciaCp, aplicarSugerenciaDireccion, setOrigenBusqueda, setDestinoBusqueda, reintentarRuta, actualizarParadas, solicitarGeocodificacionInmediata]);
+  const [confirmacionSolicitada, setConfirmacionSolicitada] = useState(false);
+  const aceptarYContinuarAlPago = useCallback(async () => {
+    if (enviando || confirmacionSolicitada) return;
+    if (trasladoCreado) { setPaso(4); return; }
+    setAceptaPoliticasPagoCancelacion(true);
+    setConfirmacionSolicitada(true);
+  }, [enviando, confirmacionSolicitada, trasladoCreado, setPaso, setAceptaPoliticasPagoCancelacion]);
+  useEffect(() => {
+    if (!confirmacionSolicitada || !aceptaPoliticasPagoCancelacion) return;
+    setConfirmacionSolicitada(false);
+    void enviarSolicitud();
+  }, [confirmacionSolicitada, aceptaPoliticasPagoCancelacion, enviarSolicitud]);
   const accionesDetalles = useMemo(() => ({
     actualizar, onEditarAgenda: irAPasoInicial, setAceptaPoliticasPagoCancelacion,
-    enviarSolicitud, onRevisarTarifa: irAPasoInicial,
-  }), [actualizar, irAPasoInicial, setAceptaPoliticasPagoCancelacion, enviarSolicitud]);
+    enviarSolicitud: aceptarYContinuarAlPago, onRevisarTarifa: irAPasoInicial,
+  }), [actualizar, irAPasoInicial, setAceptaPoliticasPagoCancelacion, aceptarYContinuarAlPago]);
 
   return {
     // Paso
@@ -756,7 +776,7 @@ export function useNuevoTraslado() {
     sesionReal,
     usuario,
     bloqueoVerificacion,
-    enviando,
+    enviando: enviando || confirmacionSolicitada,
     resultado,
     setResultado,
     aceptaPoliticasPagoCancelacion,

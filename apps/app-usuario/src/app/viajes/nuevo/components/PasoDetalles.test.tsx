@@ -1,5 +1,5 @@
 /** @vitest-environment jsdom */
-import { describe, expect, it, vi } from "vitest";
+import { beforeAll, describe, expect, it, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { VALORES_INICIALES } from "../constants";
@@ -17,11 +17,16 @@ function propsIniciales(): PasoDetallesProps {
     },
     previsualizacion: null,
     previsualizando: false,
-    momentoPago: { momento: "al_cierre", razon: "El pago se realiza al finalizar." },
+    momentoPago: {
+      momento: "al_cierre",
+      razon: "El pago se realiza al finalizar.",
+    },
     categoriaCatalogo: "Sedán",
     gamaCatalogo: "General",
     rutaEstimacion: null,
-    politicaCancelacion: { mensaje: "Aplican cargos según el momento de cancelación." },
+    politicaCancelacion: {
+      mensaje: "Aplican cargos según el momento de cancelación.",
+    },
     aceptaPoliticasPagoCancelacion: false,
     enviando: false,
     cargandoSesion: false,
@@ -29,66 +34,76 @@ function propsIniciales(): PasoDetallesProps {
   };
 }
 
-describe("PasoDetalles", () => {
-  it("actualiza la aceptación de la política aunque el resto de datos no cambie", () => {
-    const iniciales = propsIniciales();
-    const vista = render(<PasoDetalles {...iniciales} />);
-
-    vista.rerender(<PasoDetalles {...iniciales} aceptaPoliticasPagoCancelacion />);
-
-    expect(screen.getByLabelText(/acepto la política de cancelación/i)).toBeChecked();
+beforeAll(() => {
+  HTMLDialogElement.prototype.showModal = function () {
+    this.setAttribute("open", "");
+  };
+  HTMLDialogElement.prototype.close = function () {
+    this.removeAttribute("open");
+  };
+});
+describe("PasoDetalles compacto", () => {
+  it("oculta el desglose y no exige un checkbox físico", async () => {
+    const props = propsIniciales();
+    render(<PasoDetalles {...props} />);
+    expect(screen.queryByRole("checkbox")).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("dialog", { name: "Desglose de la tarifa" }),
+    ).not.toBeInTheDocument();
+    await userEvent
+      .setup()
+      .click(screen.getByRole("button", { name: /Ver desglose completo/ }));
+    expect(
+      screen.getByRole("dialog", { name: "Desglose de la tarifa" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(props.politicaCancelacion.mensaje),
+    ).toBeInTheDocument();
+    expect(
+      props.acciones.setAceptaPoliticasPagoCancelacion,
+    ).not.toHaveBeenCalled();
   });
-
-  it("actualiza el resumen del vehículo aunque el resto no cambie", () => {
-    const iniciales = propsIniciales();
-    const vista = render(<PasoDetalles {...iniciales} />);
-
-    vista.rerender(
+  it("guarda una ventana personalizada y cierra la hoja", async () => {
+    const user = userEvent.setup();
+    const props = propsIniciales();
+    render(<PasoDetalles {...props} />);
+    await user.click(screen.getByRole("button", { name: /Entrega ▾/ }));
+    await user.type(
+      screen.getByLabelText("Especifica ventana de entrega"),
+      "mismo día",
+    );
+    await user.click(screen.getByRole("button", { name: "Guardar ventana" }));
+    expect(props.acciones.actualizar).toHaveBeenCalledWith(
+      "ventanaEntrega",
+      "Otra: mismo día",
+    );
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+  });
+  it("cambia el tipo de traslado con el control segmentado", async () => {
+    const props = propsIniciales();
+    render(<PasoDetalles {...props} />);
+    await userEvent
+      .setup()
+      .click(screen.getByRole("radio", { name: "Foráneo" }));
+    expect(props.acciones.actualizar).toHaveBeenCalledWith(
+      "tipoRuta",
+      "foraneo",
+    );
+  });
+  it("conserva el resumen controlado del vehículo", () => {
+    const props = propsIniciales();
+    const view = render(<PasoDetalles {...props} />);
+    view.rerender(
       <PasoDetalles
-        {...iniciales}
-        datos={{ ...iniciales.datos, marca: "Nissan", modelo: "Versa", anio: "2020" }}
+        {...props}
+        datos={{
+          ...props.datos,
+          marca: "Nissan",
+          modelo: "Versa",
+          anio: "2020",
+        }}
       />,
     );
-
-    expect(screen.getByText(/Nissan Versa 2020/)).toBeInTheDocument();
-  });
-
-  it("pasa la ventana de entrega personalizada con el prefijo Otra:", async () => {
-    const user = userEvent.setup();
-    const iniciales = propsIniciales();
-    render(
-      <PasoDetalles
-        {...iniciales}
-        datos={{ ...iniciales.datos, ventanaEntrega: "Otra: " }}
-      />,
-    );
-
-    // El label "ventana de entrega" también casa con el <select> de ventanas,
-    // así que se apunta al input personalizado por su id.
-    const campo = document.getElementById("ventanaEntregaCustom") as HTMLInputElement;
-    await user.type(campo, "mismo día");
-    await user.tab();
-
-    // El padre es controlado y el espía no actualiza, así que cada onChange
-    // lleva un carácter. Lo que importa es que el valor se prefija.
-    expect(iniciales.acciones.actualizar).toHaveBeenCalledWith(
-      "ventanaEntrega",
-      expect.stringMatching(/^Otra: /),
-    );
-    // onBlur recorta espacios.
-    expect(iniciales.acciones.actualizar).toHaveBeenLastCalledWith(
-      "ventanaEntrega",
-      "Otra: ",
-    );
-  });
-
-  it("marca la aceptación de la política al marcar el checkbox", async () => {
-    const user = userEvent.setup();
-    const iniciales = propsIniciales();
-    render(<PasoDetalles {...iniciales} />);
-
-    await user.click(screen.getByLabelText(/acepto la política de cancelación/i));
-
-    expect(iniciales.acciones.setAceptaPoliticasPagoCancelacion).toHaveBeenCalled();
+    expect(screen.getByText("Nissan Versa 2020")).toBeInTheDocument();
   });
 });

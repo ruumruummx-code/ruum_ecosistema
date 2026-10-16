@@ -2,8 +2,8 @@
 import { memo } from "react";
 import Link from "next/link";
 import { Button, Aviso, Icono } from "@ruum/ui";
-import { formatearPrecio } from "@ruum/shared/utils";
-import { PagoStripe } from "@/app/PagoStripe";
+
+import { PagoStripe, type PagoStripeProps } from "@/app/PagoStripe";
 import type { DatosFormulario } from "../types";
 import type { RutaEstimacion } from "@/state/app-state";
 
@@ -24,6 +24,8 @@ export interface PasoPagoProps {
   cotizacionAceptada: boolean;
   datos: DatosFormulario;
   rutaEstimacion: RutaEstimacion | null;
+  formId?: string;
+  onEstadoPago?: PagoStripeProps["onEstadoPago"];
 }
 
 function folioCorto(id: string): string {
@@ -31,31 +33,31 @@ function folioCorto(id: string): string {
 }
 
 function nombreVehiculo(datos: DatosFormulario): string {
-  return [datos.marca, datos.modelo, datos.anio].filter(Boolean).join(" ") || "Vehículo";
-}
-
-function fechaResumen(datos: DatosFormulario): string {
-  if (datos.modalidadProgramacion === "programado" && datos.fechaHoraProgramada) {
-    try {
-      const fecha = new Date(datos.fechaHoraProgramada);
-      if (!Number.isNaN(fecha.getTime())) {
-        return new Intl.DateTimeFormat("es-MX", { day: "numeric", month: "short", hour: "numeric", minute: "2-digit" }).format(fecha);
-      }
-    } catch {
-      // cae al valor por defecto
-    }
-  }
-  return "Lo antes posible";
+  return (
+    [datos.marca, datos.modelo, datos.anio].filter(Boolean).join(" ") ||
+    "Vehículo"
+  );
 }
 
 function distanciaResumen(rutaEstimacion: RutaEstimacion | null): string {
-  const km = rutaEstimacion && "distanciaKm" in rutaEstimacion ? rutaEstimacion.distanciaKm : undefined;
-  const horas = rutaEstimacion && "tiempoEstimadoHoras" in rutaEstimacion ? rutaEstimacion.tiempoEstimadoHoras : undefined;
+  const km =
+    rutaEstimacion && "distanciaKm" in rutaEstimacion
+      ? rutaEstimacion.distanciaKm
+      : undefined;
+  const horas =
+    rutaEstimacion && "tiempoEstimadoHoras" in rutaEstimacion
+      ? rutaEstimacion.tiempoEstimadoHoras
+      : undefined;
   if (km == null || horas == null) return "Por calcular";
   const minutosTotales = Math.round(Number(horas) * 60);
   const h = Math.floor(minutosTotales / 60);
   const m = minutosTotales % 60;
-  const tiempo = h <= 0 ? `${m} min` : m === 0 ? `${h} h` : `${h}h ${String(m).padStart(2, "0")}m`;
+  const tiempo =
+    h <= 0
+      ? `${m} min`
+      : m === 0
+        ? `${h} h`
+        : `${h}h ${String(m).padStart(2, "0")}m`;
   return `${Number(km).toLocaleString("es-MX", { maximumFractionDigits: 1 })} km · ${tiempo}`;
 }
 
@@ -72,6 +74,8 @@ export const PasoPago = memo(function PasoPago({
   cotizacionAceptada,
   datos,
   rutaEstimacion,
+  formId,
+  onEstadoPago,
 }: PasoPagoProps) {
   const folio = folioCorto(trasladoCreado.id);
   const precio = trasladoCreado.precioCotizado;
@@ -79,30 +83,14 @@ export const PasoPago = memo(function PasoPago({
   // Éxito: SOLO con pago electrónico verificado en servidor. Sin esto no hay avance.
   if (pagoConfirmado) {
     return (
-      <div className="flex flex-col items-center py-10 text-center" role="status" aria-live="polite">
-        <span aria-hidden="true" className="mb-6 flex size-24 items-center justify-center rounded-full bg-[#e9f3ee] text-[44px] text-[#1f6b4a] shadow-[0_0_0_12px_rgba(31,107,74,0.06)]">
-          <Icono d="m5 12.5 4.5 4.5L19 7.5" className="size-11" />
-        </span>
-        <h2 className="text-[24px] font-extrabold tracking-tight text-[#0a2342] dark:text-[#f6f8fb]">¡Traslado solicitado!</h2>
-        <p className="mt-2.5 max-w-[300px] text-[14px] font-medium leading-relaxed text-[#4e5f80] dark:text-[#a8b5cc]">
-          Tu pago fue confirmado y estamos asignando un conductor certificado. Recibirás una notificación cuando esté en camino.
-        </p>
-        <p className="mb-8 mt-2 rounded-full bg-[#edf4fe] px-[18px] py-2 text-[13px] font-bold text-[#104ca0] dark:bg-[#0f2d52] dark:text-[#6ba8ff]">
-          {folio}
-        </p>
-        <div className="flex w-full max-w-[300px] flex-col gap-2.5">
-          <Link
-            href={`/viajes/${trasladoCreado.id}`}
-            className="inline-flex min-h-[52px] items-center justify-center gap-2.5 rounded-2xl bg-[#0a2342] px-[22px] text-[16px] font-bold text-[#fff] shadow-[0_14px_28px_-10px_rgba(10,35,66,0.4)] transition hover:bg-[#143560] active:scale-98"
-          >
-            Ver pasaporte
-          </Link>
-          <Link
-            href="/mis-viajes"
-            className="inline-flex min-h-[52px] items-center justify-center gap-2 rounded-2xl bg-[#edf4fe] px-[22px] text-[16px] font-bold text-[#0a2342] transition hover:bg-[#e2edfd] active:scale-98 dark:bg-[#0f2d52] dark:text-[#6ba8ff]"
-          >
-            Ver mis traslados
-          </Link>
+      <div className="flex min-h-0 flex-1 flex-col items-center justify-center gap-3 text-center" role="status" aria-live="polite">
+        <span aria-hidden="true" className="flex size-12 shrink-0 items-center justify-center rounded-full bg-[#e9f3ee] text-[#1f6b4a]"><Icono d="m5 12.5 4.5 4.5L19 7.5" className="size-6"/></span>
+        <h2 className="text-xl font-extrabold">¡Traslado solicitado!</h2>
+        <p className="max-w-xs text-[13px] text-[var(--user-color-muted)]">Tu pago fue confirmado. Te notificaremos al asignar un conductor certificado.</p>
+        <p className="rounded-full bg-[var(--user-color-surface-soft)] px-4 py-1 text-xs font-bold">{folio}</p>
+        <div className="grid w-full max-w-sm grid-cols-2 gap-2">
+          <Link href={`/viajes/${trasladoCreado.id}`} className="flex min-h-12 items-center justify-center rounded-xl bg-[var(--user-color-action)] px-3 text-sm font-bold text-[var(--user-color-on-action)]">Ver pasaporte</Link>
+          <Link href="/mis-viajes" className="flex min-h-12 items-center justify-center rounded-xl bg-[var(--user-color-surface-soft)] px-3 text-sm font-bold">Ver mis traslados</Link>
         </div>
       </div>
     );
@@ -114,7 +102,8 @@ export const PasoPago = memo(function PasoPago({
     return (
       <div className="flex flex-col gap-4">
         <Aviso tono="danger">
-          Esta solicitud no tiene un monto cobrable. Vuelve al inicio y solicita una cotización especial con soporte.
+          Esta solicitud no tiene un monto cobrable. Vuelve al inicio y solicita
+          una cotización especial con soporte.
         </Aviso>
         <Link
           href="/"
@@ -139,89 +128,54 @@ export const PasoPago = memo(function PasoPago({
 
   if (aceptandoCotizacion || !cotizacionAceptada) {
     return (
-      <p role="status" aria-live="polite" className="font-body text-sm text-ink/55">Confirmando tarifa para iniciar el pago…</p>
+      <p
+        role="status"
+        aria-live="polite"
+        className="font-body text-sm text-ink/55"
+      >
+        Confirmando tarifa para iniciar el pago…
+      </p>
     );
   }
 
   return (
-    <div className="flex flex-col gap-4">
-      {/* Resumen del traslado */}
-      <section aria-label="Resumen del traslado" className="rounded-[22px] border border-[#eef2f7] bg-white p-5 shadow-[0_6px_16px_rgba(0,0,0,0.02)]">
-        <h2 className="mb-4 flex items-center gap-2.5 text-[14.5px] font-bold text-[#0a2342] dark:text-[#f6f8fb]">
-          <span aria-hidden="true" className="flex size-[30px] items-center justify-center rounded-[10px] bg-[#edf4fe] text-[#104ca0] dark:bg-[#0f2d52] dark:text-[#6ba8ff]">
-            <Icono d="M8 5H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2M9 5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2h-4a2 2 0 0 1-2-2V5Z" className="size-[13px]" />
-          </span>
-          Resumen del traslado
-        </h2>
-        <dl>
-          {[
-            { etiqueta: "Vehículo", valor: nombreVehiculo(datos) },
-            { etiqueta: "Ruta", valor: `${datos.origenCiudad || "Origen"} → ${datos.destinoCiudad || "Destino"}` },
-            { etiqueta: "Fecha", valor: fechaResumen(datos) },
-            { etiqueta: "Distancia", valor: distanciaResumen(rutaEstimacion) },
-          ].map(({ etiqueta, valor }) => (
-            <div key={etiqueta} className="flex items-start justify-between gap-4 border-b border-[#f0f4fa] py-3 text-[14px] last:border-b-0 last:pb-0 first:pt-0 dark:border-[#1a3a5c]">
-              <dt className="shrink-0 font-medium text-[#4e5f80] dark:text-[#a8b5cc]">{etiqueta}</dt>
-              <dd className="text-right font-semibold text-[#0a2342] dark:text-[#f6f8fb]">{valor}</dd>
-            </div>
-          ))}
-        </dl>
-      </section>
-
-      {/* Total a pagar */}
-      <section
-        aria-label={`Total a pagar: ${formatearPrecio(Number(precio))}`}
-        className="relative overflow-hidden rounded-3xl p-6 text-[#fff] shadow-[0_16px_32px_-12px_rgba(10,35,66,0.4)]"
-        style={{ background: "linear-gradient(135deg, #0a2342 0%, #143560 100%)" }}
-      >
-        <p className="mb-2 text-[12px] font-semibold uppercase tracking-[0.6px] text-[rgba(255,255,255,0.7)]">
-          Total a pagar
-        </p>
-        <p className="mb-1.5 text-[38px] font-extrabold tracking-tight">
-          {formatearPrecio(Number(precio))}
-        </p>
-        <p className="flex items-center gap-1.5 text-[13px] font-medium text-[rgba(255,255,255,0.65)]">
-          <Icono nombre="candado" className="size-[13px]" />
-          Pago seguro con Stripe
+    <div className="flex h-full min-h-0 flex-col gap-3">
+      <section aria-label="Resumen del traslado" className="shrink-0">
+        <h2 className="truncate text-sm font-bold">{nombreVehiculo(datos)}</h2>
+        <p className="truncate text-xs text-[var(--user-color-muted)]">
+          {datos.origenCiudad || "Origen"} → {datos.destinoCiudad || "Destino"}{" "}
+          · {distanciaResumen(rutaEstimacion)}
         </p>
       </section>
-
-      {/* Verificación en curso / error de verificación */}
-      {verificandoPago ? (
-        <div role="status" aria-live="polite" className="flex items-center gap-3 rounded-2xl border border-[#dfe8f3] bg-[#edf4fe] p-4 dark:border-[#1a3a5c] dark:bg-[#0a2342]">
-          <span aria-hidden="true" className="size-6 shrink-0 animate-spin rounded-full border-[3px] border-[#d5e2f0] border-t-[#0a2342]" />
-          <p className="text-[13.5px] font-semibold text-[#1a293b]">
-            Confirmando tu pago con Stripe… no cierres esta pantalla.
-          </p>
-        </div>
-      ) : (
-        <>
-          {errorVerificacionPago && (
-            <div className="flex flex-col gap-3">
-              <Aviso tono="danger">{errorVerificacionPago}</Aviso>
-              <Button variant="secondary" onClick={onReintentarVerificacion}>
-                Verificar pago
-              </Button>
-            </div>
-          )}
-          <Aviso tono="info">
-            Completa el pago seguro con Stripe para confirmar tu solicitud de traslado.
-          </Aviso>
-          <PagoStripe
-            trasladoId={trasladoCreado.id}
-            monto={precio}
-            onPagado={onPagoStripeConfirmado}
-          />
-        </>
+      {verificandoPago && (
+        <p role="status" className="shrink-0 text-sm font-semibold">
+          Confirmando tu pago con Stripe… no cierres esta pantalla.
+        </p>
       )}
-
-      <div className="flex items-start gap-3 rounded-2xl border border-[#dfe8f3] bg-[#f0f5fe] p-3.5">
-        <span aria-hidden="true" className="mt-0.5 shrink-0 text-[#2e5a88]">
-          <Icono d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z M9 12l2 2 4-4" className="size-4" />
-        </span>
-        <p className="text-[12.5px] font-medium leading-relaxed text-[#3d5470]">
-          Tu información de pago está cifrada. Ruum Ruum no almacena los datos de tu tarjeta. El traslado solo se considera solicitado con el pago electrónico confirmado; si sales sin pagar, la solicitud se cancela automáticamente.
-        </p>
+      {errorVerificacionPago && (
+        <div className="shrink-0 text-xs" role="alert">
+          <p>{errorVerificacionPago}</p>
+          <button
+            type="button"
+            className="min-h-11 font-semibold"
+            onClick={onReintentarVerificacion}
+          >
+            Verificar pago
+          </button>
+        </div>
+      )}
+      <div
+        className="min-h-0 flex-1 overflow-y-auto overscroll-contain"
+        hidden={verificandoPago}
+      >
+        <PagoStripe
+          trasladoId={trasladoCreado.id}
+          monto={precio}
+          onPagado={onPagoStripeConfirmado}
+          compacto
+          formId={formId}
+          onEstadoPago={onEstadoPago}
+        />
       </div>
     </div>
   );

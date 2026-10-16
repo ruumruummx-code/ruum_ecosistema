@@ -11,7 +11,7 @@ import { useTrasladoRealtime } from "@/state/AppStateProvider";
 
 type EstadoTraslado = Database["public"]["Enums"]["estado_traslado"];
 
-export function ChatTraslado({ trasladoId, estado }: { trasladoId: string; estado: EstadoTraslado }) {
+export function ChatTraslado({ trasladoId, estado, conservarEstado = false }: { trasladoId: string; estado: EstadoTraslado; conservarEstado?: boolean }) {
   const clienteRef = useRef<ReturnType<typeof crearClienteNavegador> | null>(null);
   const { mensajes, errorChat, llamando, errorLlamada, inicializar, actualizar, cargarMensajes, agregarMensaje, limpiar } = useTrasladoRealtime(trasladoId);
   const mensajesRef = useRef(mensajes);
@@ -70,14 +70,14 @@ export function ChatTraslado({ trasladoId, estado }: { trasladoId: string; estad
       cancelado = true;
       // La entrada del reducer (mensajes) se libera al salir del traslado;
       // al volver se re-inicializa y recarga desde el servidor.
-      limpiar();
+      if (!conservarEstado) limpiar();
       try {
         void cliente.removeChannel(canal);
       } catch {
         // Ignorar fallos de cleanup si ya estaba cerrado
       }
     };
-  }, [actualizar, agregarMensaje, cargarMensajes, disponible, inicializar, limpiar, trasladoId]);
+  }, [actualizar, agregarMensaje, cargarMensajes, disponible, inicializar, limpiar, trasladoId, conservarEstado]);
 
   // C-06: dedupe optimista cuando llega el real por Realtime (mismo contenido en ventana 10s)
   useEffect(() => {
