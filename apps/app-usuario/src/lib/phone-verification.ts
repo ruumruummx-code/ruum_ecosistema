@@ -258,6 +258,13 @@ export async function verificarCodigoTwilioVerify(
           error: "El código ha expirado o no se encontró solicitud activa. Solicita un nuevo código.",
         };
       }
+      if (datos?.code === 60202) {
+        return {
+          ok: false,
+          status: "failed",
+          error: "Demasiados intentos con este código. Solicita uno nuevo.",
+        };
+      }
       return {
         ok: false,
         status: "failed",
@@ -269,10 +276,13 @@ export async function verificarCodigoTwilioVerify(
       return { ok: true, status: "approved" };
     }
 
+    // 200 con status pending/canceled/failed = el código no coincide con el
+    // vigente (intento consumido en Twilio). No mezclar con "expirado": eso
+    // solo aplica al 20404 de arriba.
     return {
       ok: false,
       status: datos?.status ?? "failed",
-      error: "El código ingresado es incorrecto o ya expiró.",
+      error: "El código ingresado es incorrecto. Revisa el último SMS recibido e intenta de nuevo.",
     };
   } catch (error) {
     console.error("[Twilio Verify] Excepción en llamada HTTP:", error);

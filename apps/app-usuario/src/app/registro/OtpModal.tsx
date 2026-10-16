@@ -128,7 +128,7 @@ export function OtpModal({
               </button>
             )}
             <span className="text-[11px] font-medium text-[#4e5f80]">
-              El código tiene una vigencia de 10 minutos.
+              El código tiene una vigencia de 10 minutos. Si pediste varios, usa el del último SMS.
             </span>
           </div>
         </form>
