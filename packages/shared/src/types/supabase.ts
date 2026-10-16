@@ -3817,9 +3817,6 @@ isOneToOne: false
 "traslado_tiene_metodo_pago_registrado":
 { Args: { "p_traslado_id": string }; Returns: boolean
                            },
-"unaccent":
-{ Args: { "": string }; Returns: string
-                           },
 "usuario_acepta_cotizacion":
 { Args: { "p_traslado_id": string }; Returns: Database["public"]['Enums']["estado_traslado"]
                            },
