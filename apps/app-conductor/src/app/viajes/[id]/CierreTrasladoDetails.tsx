@@ -7,6 +7,7 @@ import { Aviso } from "@ruum/ui";
 import type { Database } from "@ruum/shared/types";
 import { traducirErrorOperativo } from "@ruum/shared/utils";
 import { crearClienteNavegador } from "@/lib/supabase-browser";
+import { CONTACTOS_SOPORTE_CONDUCTOR } from "@/lib/contactos-soporte";
 import { avanzarEstadoTraslado, extraerRutaComprobante, resolverUrlEvidencia } from "@ruum/api/services";
 import {
   eliminarGastoTraslado,
@@ -881,7 +882,7 @@ export function CierreTrasladoDetails({
             </p>
             <div className="flex flex-col gap-2.5 mt-2">
               <a
-                href="https://wa.me/525548210937"
+                href={CONTACTOS_SOPORTE_CONDUCTOR.soporte.whatsapp.href}
                 className="flex items-center gap-3 p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-xl hover:bg-emerald-500/20 transition-colors"
               >
                 <span className="text-xl">💬</span>
@@ -891,7 +892,7 @@ export function CierreTrasladoDetails({
                 </div>
               </a>
               <a
-                href="tel:+525548210937"
+                href={CONTACTOS_SOPORTE_CONDUCTOR.soporte.telefono.href}
                 className="flex items-center gap-3 p-4 bg-route-soft border border-route-action/20 rounded-xl hover:bg-route-action/10 transition-colors"
               >
                 <span className="text-xl">📞</span>
@@ -901,7 +902,7 @@ export function CierreTrasladoDetails({
                 </div>
               </a>
               <a
-                href="mailto:soporte@ruumruum.com"
+                href={CONTACTOS_SOPORTE_CONDUCTOR.soporte.correo.href}
                 className="flex items-center gap-3 p-4 bg-surface rounded-xl border border-border/40 hover:bg-surface-elevated transition-colors"
               >
                 <span className="text-xl">✉️</span>

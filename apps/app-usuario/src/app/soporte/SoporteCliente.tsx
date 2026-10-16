@@ -5,6 +5,7 @@ import Link from "next/link";
 import type { Database } from "@ruum/shared/types";
 import { HojaTareaCuenta } from "../cuenta/HojaTareaCuenta";
 import { obtenerViajeActivo } from "../../lib/inicio";
+import { CONTACTOS_SOPORTE_USUARIO } from "../../lib/contactos-soporte";
 import { FormularioSoporte } from "./FormularioSoporte";
 
 type Pasaporte = Database["public"]["Views"]["pasaporte_digital"]["Row"];
@@ -299,8 +300,8 @@ export function SoporteCliente({
     <section className="user-support-channels" aria-label="Canales de atención">
       <button type="button" onClick={() => abrirChat()}><IconoSvg nombre="chat" /><span>Chat en vivo</span><small>Demo</small></button>
       <button type="button" onClick={abrirTelefono}><IconoSvg nombre="phone" /><span>Llamada</span></button>
-      <a href="https://wa.me/525588880000?text=Hola%20Ruum%20Ruum,%20necesito%20asistencia%20con%20mi%20traslado." target="_blank" rel="noopener noreferrer"><IconoSvg nombre="whatsapp" /><span>WhatsApp</span></a>
-      <a href="mailto:soporte@ruumruum.com?subject=Soporte%20Ruum%20Ruum"><IconoSvg nombre="email" /><span>Correo</span></a>
+      <a href={`https://wa.me/${CONTACTOS_SOPORTE_USUARIO.soporte.whatsapp.valor}?text=Hola%20Ruum%20Ruum,%20necesito%20asistencia%20con%20mi%20traslado.`} target="_blank" rel="noopener noreferrer"><IconoSvg nombre="whatsapp" /><span>WhatsApp</span></a>
+      <a href={CONTACTOS_SOPORTE_USUARIO.soporte.correo.href}><IconoSvg nombre="email" /><span>Correo</span></a>
     </section>
     <section className="user-support-topics" aria-labelledby="temas-frecuentes-titulo"><h2 id="temas-frecuentes-titulo">Temas frecuentes</h2>
       {[
@@ -316,7 +317,7 @@ export function SoporteCliente({
       <form onSubmit={enviarMensaje}><input aria-label="Mensaje" placeholder="Escribe tu mensaje..." value={mensajeInput} onChange={e => setMensajeInput(e.target.value)} /><button type="submit" aria-label="Enviar mensaje">Enviar</button></form>
       <div className="user-support-chat-actions"><button type="button" onClick={() => { cerrarChat(); setModalReporte(true); }}>Crear reporte</button><button type="button" onClick={cerrarChat}>Cerrar chat</button></div>
     </div></HojaTareaCuenta>}
-    {modalTelefonoAbierto && <HojaTareaCuenta titulo="Llamada telefónica" cerrar={cerrarTelefono}><div className="user-support-phone"><p>+52 55 8888 0000</p><a href="tel:+525588880000">Llamar ahora</a><button type="button" onClick={cerrarTelefono}>Cancelar</button></div></HojaTareaCuenta>}
+    {modalTelefonoAbierto && <HojaTareaCuenta titulo="Llamada telefónica" cerrar={cerrarTelefono}><div className="user-support-phone"><p>{CONTACTOS_SOPORTE_USUARIO.soporte.telefono.valor}</p><a href={CONTACTOS_SOPORTE_USUARIO.soporte.telefono.href}>Llamar ahora</a><button type="button" onClick={cerrarTelefono}>Cancelar</button></div></HojaTareaCuenta>}
     {modalReporte && <HojaTareaCuenta titulo="Reportar problema a soporte" extendida cerrar={cerrarReporte}><div className="user-support-report"><FormularioSoporte traslados={traslados.filter(t => t.traslado_id).map(t => ({ id: t.traslado_id!, label: `${t.vehiculo_marca ?? "Vehículo"} - ${t.traslado_id!.slice(0, 8)}` }))} preseleccionado={viajeActivo?.traslado_id ?? undefined} emailUsuario={usuario?.correo_facturacion} motivoInicial={motivoPreseleccionado === "eliminar_cuenta" ? "Consulta general u otro" : undefined} /></div></HojaTareaCuenta>}
   </div>;
 }

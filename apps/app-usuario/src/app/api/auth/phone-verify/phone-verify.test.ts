@@ -1,4 +1,4 @@
-import { describe, expect, it, vi, beforeEach } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { NextRequest } from "next/server";
 import { POST as postSend } from "./send/route";
 import { POST as postVerify } from "./verify/route";
@@ -93,5 +93,38 @@ describe("POST /api/auth/phone-verify/verify", () => {
     expect(excedido.status).toBe(429);
     const json = (await excedido.json()) as { error: string };
     expect(json.error).toMatch(/red/i);
+  });
+});
+
+describe("modo mock solo fuera de producción", () => {
+  const OLD_SID = process.env.TWILIO_ACCOUNT_SID;
+  const OLD_TOKEN = process.env.TWILIO_AUTH_TOKEN;
+  const OLD_SERVICE = process.env.TWILIO_VERIFY_SERVICE_SID;
+
+  beforeEach(() => {
+    vi.stubEnv("TWILIO_ACCOUNT_SID", "");
+    vi.stubEnv("TWILIO_AUTH_TOKEN", "");
+    vi.stubEnv("TWILIO_VERIFY_SERVICE_SID", "");
+    vi.stubEnv("NODE_ENV", "production");
+  });
+
+  afterEach(() => {
+    vi.unstubAllEnvs();
+    if (OLD_SID !== undefined) process.env.TWILIO_ACCOUNT_SID = OLD_SID;
+    if (OLD_TOKEN !== undefined) process.env.TWILIO_AUTH_TOKEN = OLD_TOKEN;
+    if (OLD_SERVICE !== undefined) process.env.TWILIO_VERIFY_SERVICE_SID = OLD_SERVICE;
+  });
+
+  it("send falla cerrado en producción sin Twilio (sin mock)", async () => {
+    const { enviarCodigoTwilioVerify } = await import("@/lib/phone-verification");
+    const res = await enviarCodigoTwilioVerify("5512345678");
+    expect(res.ok).toBe(false);
+  });
+
+  it("verify rechaza 123456 en producción sin Twilio (sin mock)", async () => {
+    const { verificarCodigoTwilioVerify } = await import("@/lib/phone-verification");
+    const res = await verificarCodigoTwilioVerify("5512345678", "123456");
+    expect(res.ok).toBe(false);
+    expect(res.status).not.toBe("approved");
   });
 });

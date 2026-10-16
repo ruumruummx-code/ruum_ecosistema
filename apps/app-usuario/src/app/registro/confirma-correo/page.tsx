@@ -11,6 +11,7 @@ import {
   normalizarCorreoRegistro,
   soloDigitos,
 } from "@/lib/registro-usuario";
+import { CONTACTOS_SOPORTE_USUARIO } from "@/lib/contactos-soporte";
 
 const COOLDOWN_SEGUNDOS = 60;
 const EXPIRACION_SEGUNDOS = 300; // 5 minutos
@@ -621,7 +622,7 @@ function ContenidoConfirmaCorreo() {
             <IconoInfoCirculo className="size-4 text-[#2e5a88] shrink-0 mt-0.5" />
             <div className="text-[12.5px] text-[#3d5470] font-medium leading-[1.5]">
               Revisa tu carpeta de spam si no ves el correo. Si el problema persiste,{" "}
-              <a href="mailto:soporte@ruumruum.com" className="text-[#2e5a88] font-bold hover:underline">
+              <a href={CONTACTOS_SOPORTE_USUARIO.soporte.correo.href} className="text-[#2e5a88] font-bold hover:underline">
                 contacta a soporte
               </a>.
             </div>

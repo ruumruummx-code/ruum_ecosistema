@@ -103,6 +103,15 @@ export function tieneTwilioVerifyConfigurado(): boolean {
 }
 
 /**
+ * El código mock (123456) solo existe para desarrollo y pruebas. En
+ * producción siempre se exige Twilio Verify real: aceptar el mock ahí
+ * permitiría altas con teléfonos no verificados.
+ */
+function mockPermitido(): boolean {
+  return process.env.NODE_ENV !== "production";
+}
+
+/**
  * Envía un código OTP por SMS usando Twilio Verify API v2.
  * Si Twilio no está configurado (ej. desarrollo local o pruebas), actúa en modo mock dev (123456).
  */
@@ -117,6 +126,9 @@ export async function enviarCodigoTwilioVerify(
   const e164 = telefonoMx(telLimpio);
 
   if (!tieneTwilioVerifyConfigurado()) {
+    if (!mockPermitido()) {
+      return { ok: false, status: "error", error: "Servicio de verificación no disponible. Intenta más tarde." };
+    }
     if (process.env.NODE_ENV !== "test") {
       console.info(
         `[Twilio Verify Dev Mock] Código para ${e164}: ${CODIGO_MOCK_DEV} (Twilio no configurado en entorno actual)`
@@ -196,6 +208,9 @@ export async function verificarCodigoTwilioVerify(
   const e164 = telefonoMx(telLimpio);
 
   if (!tieneTwilioVerifyConfigurado()) {
+    if (!mockPermitido()) {
+      return { ok: false, status: "failed", error: "Servicio de verificación no disponible. Intenta más tarde." };
+    }
     if (codigoLimpio === CODIGO_MOCK_DEV) {
       return { ok: true, status: "approved", mock: true };
     }
