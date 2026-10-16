@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { MobileShell } from "@ruum/ui";
-import { NavegacionUsuario } from "../../NavegacionUsuario";
 import { conCuenta } from "../cuenta-ui";
 import { VerificacionDocumentos } from "../VerificacionDocumentos";
 
@@ -12,8 +11,7 @@ export const metadata: Metadata = {
 export default async function PaginaVerificacionDocumentos() {
   return conCuenta((cuenta) => (
     <>
-      <NavegacionUsuario variante="claro" nombreUsuario={cuenta.usuario?.nombre} />
-      <MobileShell variant="compact" navInferiorVisible={true} as="main">
+      <MobileShell variant="compact" navInferiorVisible={false} as="main" className="user-v2-scope user-verification-shell" contentClassName="user-verification-content">
         <VerificacionDocumentos usuario={cuenta.usuario} empresa={cuenta.empresa} />
       </MobileShell>
     </>

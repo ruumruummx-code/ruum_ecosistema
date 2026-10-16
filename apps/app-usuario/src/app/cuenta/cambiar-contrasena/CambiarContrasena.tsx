@@ -2,7 +2,7 @@
 
 import { useRef, useState, type FormEvent } from "react";
 import Link from "next/link";
-import { Icono, SENDAS_ICONO } from "@ruum/ui";
+import { useAltoViewportCuenta } from "../useAltoViewportCuenta";
 import { crearClienteNavegador } from "../../../lib/supabase-browser";
 
 const requisitos = [
@@ -16,17 +16,18 @@ function CampoClave({ id, titulo, valor, cambiar, actual = false, disabled = fal
   id: string; titulo: string; valor: string; cambiar: (v: string) => void; actual?: boolean; disabled?: boolean;
 }) {
   const [visible, setVisible] = useState(false);
-  return <div className="mb-[18px]">
-    <label htmlFor={id} className="mb-2 block text-[11.5px] font-bold uppercase tracking-wide text-[#6b7c94]">{titulo} <span className="text-[#e84a3e]">*</span></label>
-    <div className="relative">
-      <Icono d={SENDAS_ICONO.candado} className="pointer-events-none absolute left-[18px] top-[18px] size-[18px] text-[#8b9bb0]" />
-      <input id={id} type={visible ? "text" : "password"} autoComplete={actual ? "current-password" : "new-password"} required maxLength={128} disabled={disabled} value={valor} onChange={e => cambiar(e.target.value)} placeholder={actual ? "Ingresa tu contraseña actual" : titulo} className="w-full rounded-2xl border border-[#e6edf6] bg-[#fafcfe] py-4 pl-[52px] pr-[76px] text-[15px] text-[#0b1e33] outline-none focus:border-[#0b1e33] focus:ring-2 focus:ring-[#0b1e33]/10" />
-      <button type="button" disabled={disabled} aria-label={`${visible ? "Ocultar" : "Mostrar"} ${titulo.toLowerCase()}`} aria-pressed={visible} onClick={() => setVisible(!visible)} className="absolute right-2 top-2 rounded-xl p-2.5 text-xs font-semibold text-[#2e5a88]">{visible ? "Ocultar" : "Mostrar"}</button>
+  return <div className="user-password-field">
+    <div className="user-password-field-heading"><label htmlFor={id}>{titulo}</label>{actual && <Link href="/recuperar-password">¿Olvidaste tu contraseña?</Link>}</div>
+    <div className="user-password-input-row">
+      <input id={id} type={visible ? "text" : "password"} autoComplete={actual ? "current-password" : "new-password"} required maxLength={128} disabled={disabled} value={valor} onChange={event => cambiar(event.target.value)} />
+      <button type="button" disabled={disabled} aria-label={`${visible ? "Ocultar" : "Mostrar"} ${titulo.toLowerCase()}`} aria-pressed={visible} onClick={() => setVisible(!visible)}>{visible ? "Ocultar" : "Mostrar"}</button>
     </div>
   </div>;
 }
 
 export function CambiarContrasena() {
+  const viewportRef = useRef<HTMLDivElement>(null);
+  useAltoViewportCuenta(viewportRef);
   const [actual, setActual] = useState("");
   const [nueva, setNueva] = useState("");
   const [confirmacion, setConfirmacion] = useState("");
@@ -58,31 +59,23 @@ export function CambiarContrasena() {
     }
   }
 
-  return <div className="mx-auto w-full max-w-[420px] text-[#0b1e33]">
-    <header className="mb-7 flex items-center gap-3.5 border-b border-[#f0f4fa] pb-4">
-      <Link href="/cuenta" aria-label="Volver a mi cuenta" className="flex size-10 items-center justify-center rounded-full bg-[#f2f6fc]">←</Link>
-      <div><h1 className="text-[17px] font-bold">Cambiar contraseña</h1><p className="text-xs text-[#6b7c94]">Seguridad de tu cuenta</p></div>
-    </header>
-    <div className="relative mx-auto mb-5 flex size-[76px] items-center justify-center rounded-[26px] bg-gradient-to-br from-[#0b1e33] to-[#2e5a88] text-[#fff] shadow-lg">
-      <Icono d={SENDAS_ICONO.candado} className="size-8" /><span className="absolute -bottom-1 -right-1 rounded-full border-[3px] border-white bg-[#e9f3ee] px-1.5 text-sm text-[#1f6b4a]">✓</span>
-    </div>
-    <h2 className="text-center text-[23px] font-extrabold tracking-tight">Protege tu cuenta</h2>
-    <p className="mb-7 mt-2 text-center text-[13.5px] leading-relaxed text-[#6b7c94]">Actualiza tu contraseña para mantener tu cuenta segura.</p>
-    <p className="mb-[22px] rounded-2xl border border-[#dfe8f3] bg-[#f0f5fe] p-4 text-[12.5px] leading-relaxed text-[#3d5470]">Elige una contraseña segura que no utilices en otros servicios. Necesitarás tu contraseña actual para realizar el cambio.</p>
-    {error && <p role="alert" className="mb-4 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-800">{error}</p>}
-    {exito && <p role="status" className="mb-4 rounded-2xl border border-green-200 bg-[#e9f3ee] p-4 text-sm text-[#1f6b4a]">Tu contraseña se actualizó correctamente.</p>}
-    <form onSubmit={guardar} aria-busy={guardando}>
+  return <div ref={viewportRef} className="user-password-editor user-v2-scope">
+    <header className="user-profile-appbar"><Link href="/cuenta?seccion=perfil" aria-label="Volver a mi cuenta" className="user-profile-back">‹ Atrás</Link><h1>Cambiar contraseña</h1><span aria-hidden="true" /></header>
+    <form id="cambiar-clave-form" onSubmit={guardar} aria-busy={guardando} className="user-password-form">
       <CampoClave id="actual" titulo="Contraseña actual" valor={actual} cambiar={setActual} actual disabled={guardando} />
-      <Link href="/recuperar-password" className="mb-5 block text-right text-xs font-semibold text-[#2e5a88]">¿Olvidaste tu contraseña?</Link>
-      <hr className="my-5 border-[#f0f4fa]" />
       <CampoClave id="nueva" titulo="Nueva contraseña" valor={nueva} cambiar={setNueva} disabled={guardando} />
-      {nueva && <div className="mb-3" aria-live="polite"><div className="mb-1 flex gap-1" aria-hidden="true">{[1, 2, 3, 4].map(n => <span key={n} className={`h-[5px] flex-1 rounded-full ${n <= cumplidos ? cumplidos < 2 ? "bg-red-400" : cumplidos < 4 ? "bg-amber-400" : "bg-green-600" : "bg-[#e8eef6]"}`} />)}</div><p className="text-xs text-[#6b7c94]">{cumplidos < 2 ? "Contraseña débil" : cumplidos < 4 ? "Contraseña regular" : "Contraseña muy segura"}</p></div>}
-      <ul className="mb-5 space-y-2 rounded-[14px] border border-[#eef2f7] bg-[#f8fafd] p-4 text-[12.5px]">{requisitos.map(r => <li key={r.texto} className={r.cumple(nueva) ? "font-semibold text-[#1f6b4a]" : "text-[#6b7c94]"}><span aria-hidden="true" className="mr-2">{r.cumple(nueva) ? "✓" : "○"}</span>{r.texto}</li>)}</ul>
+      <ul className="user-password-requirements" aria-label="Requisitos de la nueva contraseña">
+        {requisitos.map(r => <li key={r.texto} className={r.cumple(nueva) ? "is-met" : ""}><span aria-hidden="true">{r.cumple(nueva) ? "✓" : "○"}</span><span>{r.texto.replace("Al menos una letra ", "").replace("Al menos un ", "")}</span><span className="sr-only">{r.cumple(nueva) ? ": cumplido" : ": pendiente"}</span></li>)}
+      </ul>
       <CampoClave id="confirmacion" titulo="Confirmar nueva contraseña" valor={confirmacion} cambiar={setConfirmacion} disabled={guardando} />
-      {confirmacion && <p role="status" className={`mb-4 text-xs font-semibold ${confirmacion === nueva ? "text-[#1f6b4a]" : "text-red-700"}`}>{confirmacion === nueva ? "Las contraseñas coinciden" : "Las contraseñas no coinciden"}</p>}
-      {nueva && actual === nueva && <p className="mb-4 text-xs text-red-700">La nueva contraseña debe ser diferente a la actual.</p>}
-      <button type="submit" disabled={!valida || guardando} className="mt-3 w-full rounded-[18px] bg-[#0b1e33] p-[19px] text-base font-bold text-[#fff] shadow-lg disabled:cursor-not-allowed disabled:bg-slate-300 disabled:shadow-none">{guardando ? "Actualizando contraseña…" : "Guardar nueva contraseña"}</button>
+      <div className="user-password-match" aria-live="polite">
+        {confirmacion && <p className={confirmacion === nueva ? "is-met" : "is-error"}>{confirmacion === nueva ? "Las contraseñas coinciden" : "Las contraseñas no coinciden"}</p>}
+        {nueva && actual === nueva && <p className="is-error">La nueva contraseña debe ser diferente a la actual.</p>}
+      </div>
     </form>
-    <p className="py-5 text-center text-[13.5px] text-[#6b7c94]">¿No quieres cambiarla? <Link href="/cuenta" className="font-bold text-[#0b1e33]">Cancelar</Link></p>
+    <footer className="user-password-actions">
+      <div className="user-password-feedback" aria-live="polite">{error && <p role="alert">{error}</p>}{exito && <p role="status">Tu contraseña se actualizó correctamente.</p>}</div>
+      <div><Link href="/cuenta?seccion=perfil">Cancelar</Link><button type="submit" form="cambiar-clave-form" disabled={!valida || guardando}>{guardando ? "Guardando…" : "Guardar"}</button></div>
+    </footer>
   </div>;
 }

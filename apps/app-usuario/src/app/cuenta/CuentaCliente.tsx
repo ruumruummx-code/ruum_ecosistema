@@ -13,6 +13,7 @@ type Usuario = Database["public"]["Tables"]["usuarios"]["Row"];
 type SeccionCuenta = "perfil" | "soporte" | "legal";
 export interface CuentaClienteProps {
   usuario: Usuario | null;
+  seccionInicial?: SeccionCuenta | null;
   correoRegistro?: string | null;
   fotoUrl?: string | null;
   totalVehiculos?: number;
@@ -81,9 +82,9 @@ function HojaCuenta({ seccion, estado, cerrar }: { seccion: SeccionCuenta; estad
   );
 }
 
-export function CuentaCliente({ usuario, correoRegistro = null, fotoUrl = null, totalVehiculos = 0, totalTraslados = 0, incidenciasAbiertas = 0 }: CuentaClienteProps) {
+export function CuentaCliente({ seccionInicial = null, usuario, correoRegistro = null, fotoUrl = null, totalVehiculos = 0, totalTraslados = 0, incidenciasAbiertas = 0 }: CuentaClienteProps) {
   const router = useRouter();
-  const [seccion, setSeccion] = useState<SeccionCuenta | null>(null);
+  const [seccion, setSeccion] = useState<SeccionCuenta | null>(seccionInicial);
   const [cerrandoSesion, setCerrandoSesion] = useState(false);
   const [errorSesion, setErrorSesion] = useState<string | null>(null);
   const salidaRef = useRef(false);

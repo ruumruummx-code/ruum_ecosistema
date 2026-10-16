@@ -9,7 +9,8 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-export default async function PaginaCuenta() {
+export default async function PaginaCuenta({ searchParams }: { searchParams?: Promise<{ seccion?: string }> }) {
+  const seccion = (await searchParams)?.seccion;
   /* A-4 (auditoría): antes `cuenta?.usuario ?? null` collapsaba "sin sesión" y
      "Supabase caído" en el mismo caso, y CuentaCliente pintaba "Sin correo
      registrado" como si la cuenta estuviera vacía. Ahora los tres estados se
@@ -19,6 +20,7 @@ export default async function PaginaCuenta() {
       <NavegacionUsuario variante="claro" nombreUsuario={cuenta.usuario?.nombre} />
       <MobileShell variant="compact" navInferiorVisible={true} as="main" className="user-v2-scope user-account-shell" contentClassName="user-account-content">
         <CuentaCliente
+          seccionInicial={seccion === "perfil" || seccion === "soporte" || seccion === "legal" ? seccion : null}
           correoRegistro={cuenta.correoRegistro}
           usuario={cuenta.usuario}
           fotoUrl={cuenta.fotoPerfilUrl}

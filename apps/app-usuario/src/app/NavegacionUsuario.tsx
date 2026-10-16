@@ -148,6 +148,10 @@ export function NavegacionUsuario({
   }, [esAcceso, mostrarEnAcceso, mostrarNavegacionInferior, pathname]);
 
   if (esAcceso && !mostrarEnAcceso) return null;
+  const tituloSecundario = pathname === "/cuenta/preferencias" ? "Preferencias" : pathname === "/soporte" ? "Soporte" : pathname === "/cuenta/datos-personales" ? "Editar Perfil" : pathname === "/cuenta/cambiar-contrasena" ? "Cambiar contraseña" : pathname === "/cuenta/verificacion-documentos" ? "Verificación y facturación" : null;
+  if (tituloSecundario) {
+    return <header ref={headerRef} className="user-profile-appbar user-secondary-appbar user-v2-scope"><Link href="/cuenta?seccion=perfil" aria-label="Volver a mi cuenta" className="user-profile-back">‹ Atrás</Link><h1>{tituloSecundario}</h1><span aria-hidden="true" /></header>;
+  }
 
   return (
     <>

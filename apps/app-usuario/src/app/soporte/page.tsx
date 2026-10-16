@@ -61,7 +61,7 @@ export default async function PaginaSoporte({
     return (
       <>
         <NavegacionUsuario variante="claro" />
-        <MobileShell variant="compact" navInferiorVisible={true}>
+        <MobileShell variant="compact" navInferiorVisible={false} className="user-v2-scope user-support-shell" contentClassName="user-support-content">
           <div className="py-12 text-center">
             <Aviso tono="danger">
               No pudimos cargar tu información en este momento. Inténtalo de nuevo en unos segundos.
@@ -84,8 +84,7 @@ export default async function PaginaSoporte({
 
   return (
     <>
-      <NavegacionUsuario variante="claro" />
-      <MobileShell variant="compact" navInferiorVisible={true}>
+      <MobileShell variant="compact" navInferiorVisible={false} className="user-v2-scope user-support-shell" contentClassName="user-support-content">
         <SoporteCliente
           usuario={usuario}
           traslados={traslados}

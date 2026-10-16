@@ -1,38 +1,13 @@
-import { MobileCard, MobileHeader, MobileShell } from "@ruum/ui";
-import { NavegacionUsuario } from "../../NavegacionUsuario";
-
-export const metadata = {
-  title: "Términos y condiciones — Ruum Ruum",
-};
-
+import Link from "next/link";
+import { MobileShell } from "@ruum/ui";
+export const metadata = { title: "Términos y condiciones — Ruum Ruum" };
 export default function PaginaTerminos() {
-  return (
-    <>
-      <NavegacionUsuario variante="claro" />
-      <MobileShell variant="compact" navInferiorVisible={true}>
-        <MobileHeader
-          titulo="Términos y condiciones"
-          subtitulo="Vigentes desde el 3 de julio de 2026"
-          enlaceAtras="/cuenta"
-          etiquetaAtras="Volver a cuenta"
-          conBorde={false}
-          className="-mx-4 -mt-4 sm:-mx-6 sm:-mt-6 mb-4 border-b border-[#e6edf6] dark:border-[#1a3a5c]"
-        />
-
-        <MobileCard radius="2xl" padding="lg" className="space-y-6 text-[#0a2342] dark:text-[#f6f8fb]">
-          <header className="border-b border-[#e6edf6] dark:border-[#1a3a5c] pb-4">
-            <p className="text-[12px] font-bold uppercase tracking-wider text-[#4e5f80] dark:text-[#a8b5cc]">
-              Documento legal
-            </p>
-            <h1 className="mt-1 text-[20px] font-extrabold tracking-tight text-[#0a2342] dark:text-white">
-              Términos y condiciones
-            </h1>
-            <p className="mt-0.5 text-[13px] font-medium text-[#4e5f80] dark:text-[#a8b5cc]">
-              Moviliax S.A. de C.V. (&quot;Ruum Ruum&quot;)
-            </p>
-          </header>
-
-          <div className="space-y-5 text-[13.5px] leading-relaxed text-[#4e5f80] dark:text-[#a8b5cc]">
+return <MobileShell variant="compact" navInferiorVisible={false} className="user-v2-scope user-legal-shell" contentClassName="user-legal-content">
+<div className="user-legal-view"><header className="user-legal-header"><div className="user-legal-appbar">
+<Link href="/cuenta?seccion=legal" className="user-profile-back">‹ Atrás</Link><h1>Términos y condiciones</h1>
+<a href="/docs-legales/terminos-y-condiciones-ruum-ruum.pdf" download aria-label="Descargar términos y condiciones en PDF"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><path d="M12 3v12m-5-5 5 5 5-5M5 16v5h14v-5" /></svg></a>
+</div><p>Vigente: 3 Jul 2026 · Moviliax S.A. de C.V.</p></header>
+<div className="user-legal-reader" role="region" aria-label="Texto de términos y condiciones" tabIndex={0}>          <div className="space-y-5 text-[13.5px] leading-relaxed text-[#4e5f80] dark:text-[#a8b5cc]">
             <p className="text-[#0a2342] dark:text-[#f6f8fb] font-medium">
               El presente documento establece los términos y condiciones bajo los cuales Moviliax
               S.A. de C.V. (&quot;Ruum Ruum&quot;) presta el servicio de traslado vehicular
@@ -124,17 +99,5 @@ export default function PaginaTerminos() {
             </section>
           </div>
 
-          <div className="border-t border-[#e6edf6] dark:border-[#1a3a5c] pt-5">
-            <a
-              href="/docs-legales/terminos-y-condiciones-ruum-ruum.docx"
-              download
-              className="inline-flex items-center gap-2 rounded-xl border border-[#d7e1ee] bg-[#edf4fe] px-4 py-2.5 text-[13px] font-bold text-[#0a2342] transition hover:bg-[#dfeaf8] dark:border-[#1a3a5c] dark:bg-[#0a2342] dark:text-white dark:hover:bg-[#0f2d52]"
-            >
-              <span>Descargar documento oficial (.docx)</span>
-            </a>
-          </div>
-        </MobileCard>
-      </MobileShell>
-    </>
-  );
+</div></div></MobileShell>;
 }

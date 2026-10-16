@@ -75,6 +75,24 @@ describe("NavegacionUsuario", () => {
     expect(within(screen.getByRole("banner")).queryByRole("navigation")).not.toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Cuenta" })).toHaveAttribute("aria-current", "page");
   });
+  it("limita Editar Perfil al App Bar secundario incluso durante errores de carga", () => {
+    ruta.pathname = "/cuenta/datos-personales";
+    render(<NavegacionUsuario />);
+    expect(screen.getByRole("heading", { name: "Editar Perfil" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Volver a mi cuenta" })).toHaveAttribute("href", "/cuenta?seccion=perfil");
+    expect(screen.queryByRole("navigation")).not.toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: "Solicitar traslado" })).not.toBeInTheDocument();
+  });
+  it.each([
+    ["/cuenta/cambiar-contrasena", "Cambiar contraseña"],
+    ["/cuenta/verificacion-documentos", "Verificación y facturación"],
+  ])("evita navegación redundante y FAB en %s", (pathname, titulo) => {
+    ruta.pathname = pathname;
+    render(<NavegacionUsuario />);
+    expect(screen.getByRole("heading", { name: titulo })).toBeInTheDocument();
+    expect(screen.queryByRole("navigation")).not.toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: "Solicitar traslado" })).not.toBeInTheDocument();
+  });
   it("no muestra el FAB durante la solicitud de traslado", () => {
     ruta.pathname = "/viajes/nuevo";
     render(<NavegacionUsuario />);

@@ -1,61 +1,82 @@
 /** @vitest-environment jsdom */
 import { beforeEach, expect, it, vi } from "vitest";
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { render, screen, fireEvent, waitFor, within } from "@testing-library/react";
 import { VerificacionDocumentos } from "../VerificacionDocumentos";
 import type { Database } from "@ruum/shared/types";
 vi.mock("next/navigation", () => ({ useRouter: () => ({ refresh: vi.fn() }) }));
-const mocks = vi.hoisted(() => ({ listar: vi.fn(), subir: vi.fn(), ine: vi.fn() }));
+const mocks = vi.hoisted(() => ({ listar: vi.fn(), subir: vi.fn(), ine: vi.fn(), fiscal: vi.fn() }));
 vi.mock("../../../lib/supabase-browser", () => ({ crearClienteNavegador: () => ({}), tieneSupabaseConfigurado: () => true }));
-vi.mock("@ruum/api/services", () => ({ listarDocumentosCuentaUsuario: mocks.listar, subirDocumentoCuentaUsuario: mocks.subir, subirDocumentoIdentidad: mocks.ine, actualizarFacturacionUsuario: vi.fn() }));
+vi.mock("@ruum/api/services", () => ({ listarDocumentosCuentaUsuario: mocks.listar, subirDocumentoCuentaUsuario: mocks.subir, subirDocumentoIdentidad: mocks.ine, actualizarFacturacionUsuario: mocks.fiscal }));
 type Usuario = Database["public"]["Tables"]["usuarios"]["Row"];
 const usuario = { id: "u1", rfc: "", estado_verificacion: "pendiente", doc_identidad_url: null } as Usuario;
-beforeEach(() => {
-  vi.clearAllMocks(); mocks.listar.mockResolvedValue([]);
-  mocks.subir.mockResolvedValue({ tipo: "licencia", ruta: "auth/licencia/nueva.pdf", estado: "en_revision", subido_en: "2026-10-14T12:00:00Z" });
+beforeEach(() => { vi.clearAllMocks(); mocks.listar.mockResolvedValue([]); mocks.fiscal.mockResolvedValue(undefined); mocks.subir.mockResolvedValue({ tipo: "licencia", ruta: "auth/licencia/nueva.pdf", estado: "en_revision", subido_en: "2026-10-14T12:00:00Z" }); });
+async function abrirLicencia() {
+  const row = screen.getByRole("button", { name: /^Licencia de Conducir/ });
+  await waitFor(() => expect(row).toBeEnabled(), { timeout: 5000 });
+  fireEvent.click(row);
+  return screen.findByRole("dialog", { name: "Licencia de Conducir" });
+}
+it("mantiene cinco tareas sin formularios, selectores de archivos ni FAB en la raíz", async () => {
+  const { container } = render(<VerificacionDocumentos usuario={usuario} />);
+  await waitFor(() => expect(screen.getByRole("button", { name: /^Licencia/ })).toBeEnabled(), { timeout: 5000 });
+  expect(within(screen.getByRole("navigation", { name: "Tareas de verificación y facturación" })).getAllByRole("button")).toHaveLength(5);
+  expect(screen.queryByLabelText("RFC")).not.toBeInTheDocument();
+  expect(container.querySelector('input[type="file"]')).toBeNull();
+  expect(screen.queryByRole("link", { name: "Solicitar traslado" })).not.toBeInTheDocument();
 });
-it("reúne documentos y un solo formulario fiscal opcional sin estados ficticios", async () => {
-  render(<VerificacionDocumentos usuario={usuario} />);
-  await waitFor(() => expect(screen.getByLabelText("Seleccionar archivo · Licencia de conducir")).not.toBeDisabled());
-  expect(screen.getByRole("heading", { name: "Verificación y facturación" })).toBeInTheDocument();
-  expect(screen.getByRole("heading", { name: "Licencia de conducir" })).toBeInTheDocument();
-  expect(screen.queryByText("75%")).not.toBeInTheDocument();
-  expect(screen.getByText("Necesito factura").closest("details")).not.toHaveAttribute("open");
-  expect(screen.getAllByLabelText("RFC")).toHaveLength(1);
-});
-it("actualiza una licencia guardada sólo tras confirmar el servidor", async () => {
-  mocks.listar.mockResolvedValue([{ tipo: "licencia", ruta: "auth/licencia/anterior.pdf", estado: "verificado", subido_en: "2026-09-01T12:00:00Z" }]);
+it("sube automáticamente, bloquea el cierre pendiente y actualiza el estado después del servidor", async () => {
+  mocks.listar.mockResolvedValue([{ tipo: "licencia", ruta: "anterior.pdf", estado: "verificado", subido_en: "2026-09-01T12:00:00Z" }]);
   let resolver!: (value: unknown) => void;
   mocks.subir.mockReturnValue(new Promise(resolve => { resolver = resolve; }));
   render(<VerificacionDocumentos usuario={usuario} />);
-  const input = await screen.findByLabelText("Seleccionar archivo actualizado · Licencia de conducir");
+  const dialog = await abrirLicencia();
   const archivo = new File(["pdf"], "licencia.pdf", { type: "application/pdf" });
-  fireEvent.change(input, { target: { files: [archivo] } });
-  fireEvent.click(screen.getByRole("button", { name: "Actualizar Licencia de conducir" }));
-  expect(screen.queryByText("Documento guardado. En revisión.")).not.toBeInTheDocument();
+  fireEvent.change(screen.getByLabelText("Seleccionar archivo · Licencia de Conducir"), { target: { files: [archivo] } });
   expect(mocks.subir).toHaveBeenCalledWith({}, "licencia", archivo);
-  resolver({ tipo: "licencia", ruta: "auth/licencia/nueva.pdf", estado: "en_revision", subido_en: "2026-10-14T12:00:00Z" });
-  expect(await screen.findByText("Documento guardado. En revisión.")).toBeInTheDocument();
+  fireEvent(dialog, new Event("cancel", { cancelable: true }));
+  expect(screen.getByRole("dialog")).toBeInTheDocument();
+  resolver({ ruta: "nueva.pdf", estado: "en_revision", subido_en: "2026-10-14T12:00:00Z" });
+  await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
+  expect(screen.getByRole("button", { name: /^Licencia de Conducir En revisión/ })).toBeInTheDocument();
 });
-it("muestra un fallo de carga sin confirmar éxito", async () => {
-  mocks.subir.mockRejectedValue(new Error("No pudimos guardar el archivo."));
-  render(<VerificacionDocumentos usuario={usuario} />);
-  const input = screen.getByLabelText("Seleccionar archivo · Licencia de conducir");
-  await waitFor(() => expect(input).not.toBeDisabled());
+it("conserva el panel abierto al fallar y rechaza archivos inválidos antes de enviar", async () => {
+  render(<VerificacionDocumentos usuario={usuario} />); await abrirLicencia();
+  const input = screen.getByLabelText("Seleccionar archivo · Licencia de Conducir");
+  fireEvent.change(input, { target: { files: [new File(["txt"], "no.txt", { type: "text/plain" })] } });
+  expect(await screen.findByRole("alert")).toHaveTextContent("PDF, JPG o PNG");
+  expect(mocks.subir).not.toHaveBeenCalled();
+  mocks.subir.mockRejectedValueOnce(new Error("No pudimos guardar el archivo."));
   fireEvent.change(input, { target: { files: [new File(["pdf"], "licencia.pdf", { type: "application/pdf" })] } });
-  fireEvent.click(screen.getByRole("button", { name: "Guardar Licencia de conducir" }));
-  expect(await screen.findByRole("alert")).toHaveTextContent("No pudimos guardar el archivo.");
-  expect(screen.queryByText("Documento guardado. En revisión.")).not.toBeInTheDocument();
+  await waitFor(() => expect(screen.getByRole("alert")).toHaveTextContent("No pudimos guardar el archivo."));
+  expect(screen.getByRole("dialog")).toBeInTheDocument();
 });
-it("distingue un error de consulta de un documento faltante", async () => {
-  mocks.listar.mockRejectedValue(new Error("offline"));
+it("distingue consulta fallida de documento sin cargar y permite reintentar", async () => {
+  mocks.listar.mockRejectedValueOnce(new Error("offline"));
   render(<VerificacionDocumentos usuario={usuario} />);
   await screen.findByRole("alert");
-  expect(screen.getAllByText("Estado no disponible")).toHaveLength(3);
-  expect(screen.getByLabelText("Seleccionar archivo · Licencia de conducir")).toBeDisabled();
+  expect(screen.getAllByText("No disponible")).toHaveLength(3);
+  expect(screen.getByRole("button", { name: /^Licencia/ })).toBeDisabled();
+  fireEvent.click(screen.getByRole("button", { name: "Reintentar" }));
+  await waitFor(() => expect(screen.getByRole("button", { name: /^Licencia/ })).toBeEnabled());
 });
-
-it("no anuncia facturación configurada si sólo tiene RFC", async () => {
-  render(<VerificacionDocumentos usuario={{ ...usuario, rfc: "ABC123456XYZ" }} />);
-  await waitFor(() => expect(screen.getByLabelText("Seleccionar archivo · Licencia de conducir")).not.toBeDisabled());
-  expect(screen.getByText("Facturación sin configurar")).toBeInTheDocument();
+it("guarda datos fiscales en la hoja extendida y conserva los valores al reabrir", async () => {
+  render(<VerificacionDocumentos usuario={usuario} />);
+  fireEvent.click(screen.getByRole("button", { name: /^Datos de Facturación/ }));
+  await screen.findByRole("dialog", { name: "Datos de Facturación" });
+  for (const [label, valor] of [["RFC", "ABC010101AB1"], ["Razón social", "Empresa Prueba"], ["Régimen fiscal", "601"], ["Código postal fiscal", "01234"], ["Uso de CFDI", "G03"]]) fireEvent.change(screen.getByLabelText(label), { target: { value: valor } });
+  fireEvent.submit(screen.getByRole("button", { name: "Guardar datos fiscales" }).closest("form")!);
+  await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
+  expect(screen.getByRole("button", { name: /^Datos de Facturación Configurado/ })).toBeInTheDocument();
+  fireEvent.click(screen.getByRole("button", { name: /^Datos de Facturación/ }));
+  expect(await screen.findByLabelText("RFC")).toHaveValue("ABC010101AB1");
+  expect(mocks.fiscal).toHaveBeenCalledTimes(1);
+});
+it("cierra la tarea de INE después de actualizarla sin atribuirle verificación automática", async () => {
+  mocks.ine.mockResolvedValue({ ruta: "ine.pdf", estado: "en_revision", subidoEn: "2026-10-16T12:00:00Z" });
+  render(<VerificacionDocumentos usuario={usuario} />);
+  fireEvent.click(screen.getByRole("button", { name: /^Identificación Oficial/ }));
+  await screen.findByRole("dialog");
+  fireEvent.change(screen.getByLabelText("Seleccionar archivo · Identificación Oficial (INE)"), { target: { files: [new File(["pdf"], "ine.pdf", { type: "application/pdf" })] } });
+  await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
+  expect(screen.getByRole("button", { name: /^Identificación Oficial \(INE\) En revisión/ })).toBeInTheDocument();
 });

@@ -27,7 +27,9 @@ function datoFiscal(usuario: Usuario, empresa: Empresa | null, campo: CampoFisca
   return empresa?.[campo] ?? usuario?.[campo] ?? "";
 }
 
-export function FacturacionCuentaForm({ usuario, empresa, onActualizado }: { usuario: Usuario; empresa: Empresa | null; onActualizado?: () => void }) {
+export type DatosFiscalesGuardados = { rfc: string; razon_social: string | null; regimen_fiscal: string | null; codigo_postal_fiscal: string; uso_cfdi: string | null; correo_facturacion: string | null };
+
+export function FacturacionCuentaForm({ usuario, empresa, onActualizado, compacto = false, onOcupada }: { usuario: Usuario; empresa: Empresa | null; onActualizado?: (datos: DatosFiscalesGuardados) => void; compacto?: boolean; onOcupada?: (valor: boolean) => void }) {
   const router = useRouter();
   const bloqueo = useRef(false);
   const [rfc, setRfc] = useState(datoFiscal(usuario, empresa, "rfc"));
@@ -55,26 +57,41 @@ export function FacturacionCuentaForm({ usuario, empresa, onActualizado }: { usu
     }
 
     bloqueo.current = true;
-    setGuardando(true);
+    setGuardando(true); onOcupada?.(true);
     try {
-      await actualizarFacturacionUsuario(crearClienteNavegador(), {
+      const datos = {
         rfc,
         razon_social: limpiar(razonSocial),
         regimen_fiscal: limpiar(regimenFiscal),
         codigo_postal_fiscal: codigoPostalFiscal,
         uso_cfdi: limpiar(usoCfdi),
         correo_facturacion: limpiar(correoFacturacion)
-      });
+      };
+      await actualizarFacturacionUsuario(crearClienteNavegador(), datos);
       setMensaje({ tono: "info", texto: "Datos de facturación actualizados." });
-      onActualizado?.();
+      onActualizado?.(datos);
       router.refresh();
     } catch (err) {
       setMensaje({ tono: "danger", texto: err instanceof Error ? err.message : "No pudimos guardar los datos fiscales." });
     } finally {
       bloqueo.current = false;
-      setGuardando(false);
+      setGuardando(false); onOcupada?.(false);
     }
   }
+
+  if (compacto) return (
+    <form id="datos-fiscales-form" className="user-fiscal-form" onSubmit={guardar}>
+      <div className="user-fiscal-fields user-profile-grid">
+        <div className="user-profile-field"><label htmlFor="fiscal-rfc">RFC</label><input id="fiscal-rfc" value={rfc} onChange={e => setRfc(soloAlfanumericoFiscal(e.target.value, 13))} minLength={12} maxLength={13} required disabled={guardando} /></div>
+        <div className="user-profile-field"><label htmlFor="fiscal-cp">Código postal fiscal</label><input id="fiscal-cp" value={codigoPostalFiscal} onChange={e => setCodigoPostalFiscal(soloDigitos(e.target.value, 5))} inputMode="numeric" maxLength={5} required disabled={guardando} /></div>
+        <div className="user-profile-field"><label htmlFor="fiscal-regimen">Régimen fiscal</label><input id="fiscal-regimen" value={regimenFiscal} onChange={e => setRegimenFiscal(e.target.value)} required disabled={guardando} /></div>
+        <div className="user-profile-field"><label htmlFor="fiscal-uso">Uso de CFDI</label><input id="fiscal-uso" value={usoCfdi} onChange={e => setUsoCfdi(e.target.value.toUpperCase())} required disabled={guardando} /></div>
+        <div className="user-profile-field is-wide"><label htmlFor="fiscal-razon">Razón social</label><input id="fiscal-razon" value={razonSocial} onChange={e => setRazonSocial(e.target.value)} required disabled={guardando} /></div>
+        <div className="user-profile-field is-wide"><label htmlFor="fiscal-email">Correo para facturación</label><input id="fiscal-email" type="email" value={correoFacturacion} onChange={e => setCorreoFacturacion(e.target.value)} disabled={guardando} /></div>
+      </div>
+      <footer className="user-fiscal-actions"><div aria-live="polite">{mensaje && <p role={mensaje.tono === "danger" ? "alert" : "status"}>{mensaje.texto}</p>}</div><button type="submit" disabled={guardando}>{guardando ? "Guardando…" : "Guardar datos fiscales"}</button></footer>
+    </form>
+  );
 
   return (
     <form className="grid gap-4" onSubmit={guardar}>

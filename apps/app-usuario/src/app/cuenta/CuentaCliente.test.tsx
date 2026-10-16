@@ -60,6 +60,11 @@ describe("CuentaCliente — RR-2026-003", () => {
     expect(within(hoja).getByRole("link", { name: "Preferencias" })).toHaveAttribute("href", "/cuenta/preferencias");
     expect(screen.queryByText("Datos personales, contraseña y documentos")).not.toBeInTheDocument();
   });
+  it("restaura el menú Perfil al regresar desde la edición", async () => {
+    render(<CuentaCliente usuario={usuario} seccionInicial="perfil" />);
+    expect(await screen.findByRole("dialog", { name: "Perfil" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Datos personales" })).toHaveAttribute("href", "/cuenta/datos-personales");
+  });
   it("cierra sesión inmediatamente y redirige al Login", async () => {
     const user = userEvent.setup(); cuenta();
     await user.click(screen.getByRole("button", { name: "Cerrar sesión" }));

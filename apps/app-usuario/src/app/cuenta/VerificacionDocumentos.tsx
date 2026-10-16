@@ -1,88 +1,74 @@
 "use client";
-
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import { Icono } from "@ruum/ui";
 import type { Database } from "@ruum/shared/types";
 import { listarDocumentosCuentaUsuario, type DocumentoCuenta, type TipoDocumentoCuenta } from "@ruum/api/services";
 import { crearClienteNavegador } from "../../lib/supabase-browser";
-import { FacturacionCuentaForm } from "./FacturacionCuentaForm";
+import { FacturacionCuentaForm, type DatosFiscalesGuardados } from "./FacturacionCuentaForm";
 import { DocumentoCuentaTarjeta } from "./DocumentoCuentaTarjeta";
-
+import { HojaTareaCuenta } from "./HojaTareaCuenta";
 type Usuario = Database["public"]["Tables"]["usuarios"]["Row"];
 type Empresa = Database["public"]["Tables"]["empresas"]["Row"];
+type Tarea = TipoDocumentoCuenta | "ine" | "fiscal";
 export interface VerificacionDocumentosProps { usuario: Usuario; empresa?: Empresa | null; fotoUrl?: string | null; }
-
+const TAREAS = [
+  { id: "ine", titulo: "Identificación Oficial (INE)", descripcion: "Incluye anverso y reverso en un solo archivo.", icono: "M3 5h18v14H3V5Z M7 9h3v3H7z M13 9h5 M13 13h5" },
+  { id: "licencia", titulo: "Licencia de Conducir", descripcion: "Incluye frente y reverso de tu licencia vigente en un solo archivo.", icono: "M3 5h18v14H3V5Z M7 9h3 M7 13h3 M14 9h4v4h-4z" },
+  { id: "comprobante", titulo: "Comprobante de Domicilio", descripcion: "Carga un comprobante legible con tu domicilio actual.", icono: "M3 10 12 3l9 7 M5 9v12h14V9 M9 21v-8h6v8" },
+  { id: "constancia", titulo: "Constancia de Situación Fiscal", descripcion: "Adjunta tu constancia vigente para respaldar los datos fiscales.", icono: "M14 2H4v20h16V8l-6-6Z M14 2v6h6 M8 12h8 M8 16h8" },
+  { id: "fiscal", titulo: "Datos de Facturación", descripcion: "", icono: "M4 3h16v18l-3-2-3 2-3-2-3 2-4-2V3Z M8 8h8 M8 12h8" },
+] as const;
+function estadoDocumento(documento: Omit<DocumentoCuenta, "tipo"> | undefined, pendiente: boolean, error: boolean) {
+  if (pendiente) return { texto: "Consultando…", tono: "neutral" };
+  if (error) return { texto: "No disponible", tono: "neutral" };
+  if (!documento) return { texto: "Sin cargar", tono: "neutral" };
+  if (documento.estado === "verificado") return { texto: "Verificado", tono: "success" };
+  if (documento.estado === "rechazado") return { texto: "Rechazado", tono: "error" };
+  return { texto: "En revisión", tono: "pending" };
+}
 export function VerificacionDocumentos({ usuario, empresa = null }: VerificacionDocumentosProps) {
   const [documentos, setDocumentos] = useState<DocumentoCuenta[]>([]);
-  const [ine, setIne] = useState<Omit<DocumentoCuenta, "tipo"> | undefined>(() => usuario.doc_identidad_url ? {
-    ruta: usuario.doc_identidad_url, subido_en: usuario.doc_identidad_subido_en ?? "",
-    estado: usuario.estado_verificacion === "verificado" ? "verificado" : usuario.estado_verificacion === "rechazado" ? "rechazado" : "en_revision",
-  } : undefined);
+  const [ine, setIne] = useState<Omit<DocumentoCuenta, "tipo"> | undefined>(() => usuario.doc_identidad_url ? { ruta: usuario.doc_identidad_url, subido_en: usuario.doc_identidad_subido_en ?? "", estado: usuario.estado_verificacion === "verificado" ? "verificado" : usuario.estado_verificacion === "rechazado" ? "rechazado" : "en_revision" } : undefined);
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [intento, setIntento] = useState(0);
+  const [tarea, setTarea] = useState<Tarea | null>(null);
+  const [ocupada, setOcupada] = useState(false);
+  const ocupadaRef = useRef(false);
+  const [aviso, setAviso] = useState("");
+  const [fiscales, setFiscales] = useState<DatosFiscalesGuardados | null>(null);
+  const [fiscalConfigurado, setFiscalConfigurado] = useState(["rfc", "razon_social", "regimen_fiscal", "codigo_postal_fiscal", "uso_cfdi"].every(campo => Boolean((empresa?.[campo as keyof Empresa] ?? usuario[campo as keyof Usuario])?.toString().trim())));
+  const cambiarOcupada = useCallback((valor: boolean) => { ocupadaRef.current = valor; setOcupada(valor); }, []);
+  const cerrar = useCallback(() => { if (!ocupadaRef.current) setTarea(null); }, []);
   useEffect(() => {
     let activo = true;
     setCargando(true); setError(null);
-    async function cargar() {
-      try {
-        const datos = await listarDocumentosCuentaUsuario(crearClienteNavegador());
-        if (activo) setDocumentos(datos);
-      } catch {
-        if (activo) setError("No pudimos consultar tus documentos. Inténtalo nuevamente.");
-      } finally { if (activo) setCargando(false); }
-    }
-    void cargar();
+    void (async () => {
+      try { const datos = await listarDocumentosCuentaUsuario(crearClienteNavegador()); if (activo) setDocumentos(datos); }
+      catch { if (activo) setError("No pudimos consultar tus documentos."); }
+      finally { if (activo) setCargando(false); }
+    })();
     return () => { activo = false; };
   }, [intento]);
-  const [fiscalConfigurado, setFiscalConfigurado] = useState(["rfc", "razon_social", "regimen_fiscal", "codigo_postal_fiscal", "uso_cfdi"].every(campo => Boolean((empresa?.[campo as keyof Empresa] ?? usuario[campo as keyof Usuario])?.toString().trim())));
-  const identidad = ine?.estado === "verificado" ? "Identidad verificada" : ine?.estado === "rechazado" ? "Identificación requiere actualización" : ine ? "Identidad en revisión" : "Identificación pendiente";
-  // C-2: porcentaje calculado desde datos reales (nada hardcodeado).
-  // 4 bloques de 25%: INE cargado, identidad verificada, RFC registrado,
-  // documentos de cuenta (licencia + comprobante presentes).
-  const tieneLicencia = documentos.some((d) => d.tipo === "licencia");
-  const tieneComprobante = documentos.some((d) => d.tipo === "comprobante");
-  const porcentajeVerificacion =
-    (ine ? 25 : 0) +
-    (ine?.estado === "verificado" ? 25 : 0) +
-    (fiscalConfigurado ? 25 : 0) +
-    (tieneLicencia && tieneComprobante ? 25 : tieneLicencia || tieneComprobante ? 12 : 0);
-  function tarjeta(tipo: TipoDocumentoCuenta, titulo: string, descripcion: string) {
-    return <DocumentoCuentaTarjeta tipo={tipo} titulo={titulo} descripcion={descripcion} documento={documentos.find(d => d.tipo === tipo)} cargando={cargando} errorConsulta={Boolean(error)} actualizado={dato => setDocumentos(prev => [...prev.filter(d => d.tipo !== tipo), { ...dato, tipo }])} />;
-  }
-  return <div className="mx-auto flex w-full max-w-[480px] flex-col gap-5 text-[#0a2342] dark:text-[#f6f8fb]">
-    <header className="flex items-center gap-3 border-b border-[#e6edf6] pb-4 dark:border-[#1a3a5c]">
-      <Link href="/cuenta" aria-label="Volver a mi cuenta" className="flex size-10 shrink-0 items-center justify-center rounded-full bg-[#edf4fe] text-[#0a2342] transition-colors dark:bg-[#0f2d52] dark:text-[#f6f8fb]">←</Link>
-      <div>
-        <h1 className="text-xl font-extrabold tracking-tight">Verificación y facturación</h1>
-        <p className="mt-1 text-xs text-[#6b7c94] dark:text-[#a8b5cc]">Tus documentos y datos fiscales en un solo lugar</p>
-      </div>
-    </header>
-    <div className="flex flex-wrap gap-2 text-xs font-semibold">
-      <span className="rounded-full bg-[#edf4fe] px-3 py-2 text-[#2e5a88] dark:bg-[#0f2d52] dark:text-[#6ba8ff]">{identidad}</span>
-      <span className="rounded-full bg-[#f0f5fe] px-3 py-2 text-[#3d5470] dark:bg-[#152a42] dark:text-[#a8b5cc]">{fiscalConfigurado ? "RFC registrado" : "Facturación sin configurar"}</span>
-      <span className="rounded-full bg-[#e9f3ee] px-3 py-2 text-[#1f6b4a] dark:bg-[#0e3a24] dark:text-[#52d294]">{porcentajeVerificacion}% completado</span>
-    </div>
-    <div className="h-2 overflow-hidden rounded-full bg-[#e6edf6] dark:bg-[#1a3a5c]" role="progressbar" aria-valuenow={porcentajeVerificacion} aria-valuemin={0} aria-valuemax={100} aria-label="Progreso de verificación">
-      <div className="h-full rounded-full bg-[#0a2342] transition-all dark:bg-[#6ba8ff]" style={{ width: `${porcentajeVerificacion}%` }} />
-    </div>
-    <section aria-labelledby="identidad-titulo" className="flex flex-col gap-3">
-      <h2 id="identidad-titulo" className="text-base font-bold">Identidad y domicilio</h2>
-      <p className="text-xs leading-relaxed text-[#6b7c94] dark:text-[#a8b5cc]">Carga documentos legibles en PDF, JPG o PNG de hasta 10 MB. Puedes reemplazarlos cuando necesites actualizarlos.</p>
-      <DocumentoCuentaTarjeta tipo="ine" titulo="Identificación oficial (INE)" descripcion="Incluye anverso y reverso en un solo archivo." documento={ine} actualizado={setIne} />
-      {error && <div role="alert" className="rounded-xl bg-red-50 p-3 text-sm text-red-800 dark:bg-red-950/40 dark:text-red-300">{error} <button type="button" onClick={() => setIntento(v => v + 1)} className="ml-2 font-bold underline">Reintentar</button></div>}
-      {tarjeta("licencia", "Licencia de conducir", "Incluye frente y reverso de tu licencia vigente en un solo archivo. Usa Actualizar para reemplazarla al renovarla.")}
-      {tarjeta("comprobante", "Comprobante de domicilio", "Carga un comprobante legible con tu domicilio actual.")}
-    </section>
-    <section id="facturacion" aria-labelledby="fiscal-titulo" className="scroll-mt-5 rounded-[20px] border border-[#e6edf6] bg-white p-5 shadow-[0_2px_10px_rgba(10,35,66,0.04)] dark:border-[#1a3a5c] dark:bg-[#0a2342]">
-      <h2 id="fiscal-titulo" className="text-base font-bold">Datos de facturación</h2>
-      <p className="mb-4 mt-2 text-xs leading-relaxed text-[#6b7c94] dark:text-[#a8b5cc]">Completa estos datos solo si necesitas factura. Tu correo de facturación puede ser diferente al correo de tu cuenta.</p>
-      <details open={fiscalConfigurado}>
-        <summary className="cursor-pointer py-2 text-sm font-bold text-[#0a2342] dark:text-[#f6f8fb]">{fiscalConfigurado ? "Consultar o actualizar datos fiscales" : "Necesito factura"}</summary>
-        <div className="mt-4 flex flex-col gap-5"><FacturacionCuentaForm usuario={usuario} empresa={empresa} onActualizado={() => setFiscalConfigurado(true)} />
-          {tarjeta("constancia", "Constancia de Situación Fiscal", "Adjunta tu constancia para respaldar los datos de facturación.")}
-        </div>
-      </details>
-    </section>
+  const seleccion = TAREAS.find(item => item.id === tarea);
+  const documento = tarea === "ine" ? ine : documentos.find(item => item.tipo === tarea);
+  return <div className="user-verification-view">
+    <header className="user-profile-appbar"><Link href="/cuenta?seccion=perfil" aria-label="Volver a mi cuenta" className="user-profile-back">‹ Atrás</Link><h1>Verificación y facturación</h1><span aria-hidden="true" /></header>
+    <nav aria-label="Tareas de verificación y facturación" className="user-verification-tasks">
+      {TAREAS.map(item => {
+        const esFiscal = item.id === "fiscal";
+        const estado = esFiscal ? { texto: fiscalConfigurado ? "Configurado" : "Sin configurar", tono: fiscalConfigurado ? "success" : "neutral" } : estadoDocumento(item.id === "ine" ? ine : documentos.find(d => d.tipo === item.id), item.id !== "ine" && cargando, item.id !== "ine" && Boolean(error));
+        return <button key={item.id} type="button" aria-haspopup="dialog" aria-label={`${item.titulo} ${estado.texto}`} disabled={!esFiscal && item.id !== "ine" && (cargando || Boolean(error))} onClick={() => setTarea(item.id)} className="user-verification-task"><Icono d={item.icono} className="size-5 shrink-0" /><span title={item.titulo}>{item.titulo}</span><span className={`user-task-badge is-${estado.tono}`}>{estado.texto}</span></button>;
+      })}
+    </nav>
+    <div className="user-verification-feedback">{error && <p role="alert">{error} <button type="button" onClick={() => setIntento(v => v + 1)}>Reintentar</button></p>}<p role="status" aria-live="polite">{aviso}</p></div>
+    {seleccion && <HojaTareaCuenta titulo={seleccion.titulo} extendida={tarea === "fiscal"} ocupada={ocupada} cerrar={cerrar}>
+      {tarea === "fiscal" ? <FacturacionCuentaForm compacto usuario={{ ...usuario, ...fiscales }} empresa={empresa ? { ...empresa, ...fiscales } : null} onOcupada={cambiarOcupada} onActualizado={datos => { setFiscales(datos); setFiscalConfigurado(true); setTarea(null); setAviso("Datos fiscales guardados."); }} /> : <DocumentoCuentaTarjeta tipo={tarea as TipoDocumentoCuenta | "ine"} titulo={seleccion.titulo} descripcion={seleccion.descripcion} documento={documento} onOcupada={cambiarOcupada} actualizado={dato => {
+        if (tarea === "ine") setIne(dato);
+        else setDocumentos(prev => [...prev.filter(d => d.tipo !== tarea), { ...dato, tipo: tarea as TipoDocumentoCuenta }]);
+        setTarea(null); setAviso(`${seleccion.titulo}: ${estadoDocumento(dato, false, false).texto}.`);
+      }} />}
+    </HojaTareaCuenta>}
   </div>;
 }
