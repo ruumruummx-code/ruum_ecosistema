@@ -26,6 +26,10 @@ import {
 export default function PaginaRegistro() {
   const router = useRouter();
 
+  /* Bypass temporal de OTP solo-dev (ver .env.example). Nunca activo en
+     producción: el servidor lo ignora ahí y seguiría exigiendo el token. */
+  const bypassOtp = process.env.NEXT_PUBLIC_PHONE_VERIFY_BYPASS === "true";
+
   /* Paso 1: datos básicos */
   const tipoCuenta = "personal";
   const [nombre, setNombre] = useState("");
@@ -264,6 +268,17 @@ export default function PaginaRegistro() {
       return;
     }
 
+    // Bypass dev: saltar el modal SMS y marcar el número como "pasado" solo
+    // para la UX local. El servidor decide si lo acepta (solo fuera de prod).
+    if (bypassOtp) {
+      setTelefonoVerificado(true);
+      setTelefonoVerificadoValor(digitos);
+      setTokenVerificacionTelefono(null);
+      setPaso(2);
+      requestAnimationFrame(() => emailRef.current?.focus());
+      return;
+    }
+
     setModalVerificacionAbierto(true);
     setCodigoOtp("");
     setErrorOtp(null);
@@ -277,7 +292,7 @@ export default function PaginaRegistro() {
     if (reportarError(err)) return;
 
     const digitos = soloDigitos(telefono, 10);
-    if (!telefonoVerificado || !tokenVerificacionTelefono || telefonoVerificadoValor !== digitos) {
+    if (!bypassOtp && (!telefonoVerificado || !tokenVerificacionTelefono || telefonoVerificadoValor !== digitos)) {
       setError("Debes verificar tu número de teléfono celular por SMS antes de crear tu cuenta.");
       setPaso(1);
       return;
@@ -612,6 +627,12 @@ export default function PaginaRegistro() {
               </button>
 
               </div>
+              {/* Bypass OTP solo-dev: recordatorio visible de que el SMS está desactivado */}
+              {bypassOtp && (
+                <div role="note" className="mt-3 rounded-xl bg-amber-50 border border-amber-200 p-3 text-xs font-bold text-amber-800">
+                  Modo desarrollo: verificación por SMS desactivada (PHONE_VERIFY_BYPASS). No usar en producción.
+                </div>
+              )}
               {/* Enlace a Login */}
               <div className="mt-auto pt-4 text-center text-[13px] font-medium text-[#4e5f80]">
                 ¿Ya tienes cuenta?

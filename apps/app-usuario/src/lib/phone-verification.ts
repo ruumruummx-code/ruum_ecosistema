@@ -112,6 +112,16 @@ function mockPermitido(): boolean {
 }
 
 /**
+ * Bypass temporal SOLO para desarrollo local (NUNCA producción).
+ * Se activa con PHONE_VERIFY_BYPASS=true y únicamente si NODE_ENV no es
+ * "production" — doble candado: aunque la variable llegue a prod por error,
+ * el servidor sigue exigiendo el token firmado.
+ */
+export function bypassVerificacionTelefonoPermitido(): boolean {
+  return process.env.PHONE_VERIFY_BYPASS === "true" && process.env.NODE_ENV !== "production";
+}
+
+/**
  * Envía un código OTP por SMS usando Twilio Verify API v2.
  * Si Twilio no está configurado (ej. desarrollo local o pruebas), actúa en modo mock dev (123456).
  */

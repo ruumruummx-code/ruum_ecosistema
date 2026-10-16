@@ -7,7 +7,7 @@ import {
   soloDigitos,
   telefonoMx,
 } from "@/lib/registro-usuario";
-import { validarTokenTelefono } from "@/lib/phone-verification";
+import { validarTokenTelefono, bypassVerificacionTelefonoPermitido } from "@/lib/phone-verification";
 import { VERSION_TERMINOS_VIGENTE } from "@ruum/shared/constants";
 import { passwordCumpleRequisitos } from "@ruum/shared/utils";
 
@@ -66,13 +66,18 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Acepta los términos para continuar." }, { status: 400 });
     }
 
-    // Validación de verificación telefónica por SMS
-    const verificacionTelefono = validarTokenTelefono(telefonoDigitos, tokenTelefono);
-    if (!verificacionTelefono.valido) {
-      return NextResponse.json(
-        { error: verificacionTelefono.error || "Debes verificar tu número de teléfono celular por SMS antes de continuar." },
-        { status: 400 }
-      );
+    // Validación de verificación telefónica por SMS.
+    // Con bypass de desarrollo activo (nunca en producción, ver
+    // bypassVerificacionTelefonoPermitido) se omite para poder desarrollar
+    // sin depender de Twilio.
+    if (!bypassVerificacionTelefonoPermitido()) {
+      const verificacionTelefono = validarTokenTelefono(telefonoDigitos, tokenTelefono);
+      if (!verificacionTelefono.valido) {
+        return NextResponse.json(
+          { error: verificacionTelefono.error || "Debes verificar tu número de teléfono celular por SMS antes de continuar." },
+          { status: 400 }
+        );
+      }
     }
 
     const ip = obtenerIp(request);
@@ -116,6 +121,9 @@ export async function POST(request: NextRequest) {
     });
 
     const ahora = new Date().toISOString();
+    // Con bypass de desarrollo el teléfono NO quedó verificado: registrarlo
+    // así en metadata para no contaminar datos con una verificación falsa.
+    const telefonoVerificadoReal = !bypassVerificacionTelefonoPermitido();
     const { data, error } = await supabase.auth.signUp({
       email: correo,
       password,
@@ -124,8 +132,8 @@ export async function POST(request: NextRequest) {
           tipo_registro: "usuario",
           nombre: nombreCompleto(nombre, apellido),
           telefono: telefonoMx(telefonoDigitos),
-          telefono_verificado: true,
-          telefono_verificado_en: ahora,
+          telefono_verificado: telefonoVerificadoReal,
+          telefono_verificado_en: telefonoVerificadoReal ? ahora : null,
           tipo_cuenta: tipoCuenta,
           version_terminos_aceptada: VERSION_TERMINOS_VIGENTE,
           terminos_aceptados_en: ahora,

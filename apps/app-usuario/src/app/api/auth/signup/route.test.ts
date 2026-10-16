@@ -84,3 +84,40 @@ describe("POST /api/auth/signup — validaciones y duplicados", () => {
     expect(json.error).toBe("No pudimos crear la cuenta. Intenta de nuevo.");
   });
 });
+
+describe("POST /api/auth/signup — bypass OTP solo-dev", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("con PHONE_VERIFY_BYPASS=true acepta sin token y marca telefono_verificado:false", async () => {
+    vi.stubEnv("PHONE_VERIFY_BYPASS", "true");
+    try {
+      mockSignUp.mockResolvedValue({
+        data: { user: { id: "u1" }, session: null },
+        error: null,
+      });
+      const res = await POST(req("bypass@ejemplo.com", "token-invalido"));
+      expect(res.status).toBe(200);
+      expect(mockSignUp).toHaveBeenCalled();
+      const llamada = mockSignUp.mock.calls[0]?.[0] as {
+        options?: { data?: { telefono_verificado?: boolean } };
+      };
+      expect(llamada.options?.data?.telefono_verificado).toBe(false);
+    } finally {
+      vi.unstubAllEnvs();
+    }
+  });
+
+  it("el bypass NO aplica en producción aunque la variable esté en true", async () => {
+    vi.stubEnv("PHONE_VERIFY_BYPASS", "true");
+    vi.stubEnv("NODE_ENV", "production");
+    try {
+      const res = await POST(req("bypass-prod@ejemplo.com", "token-invalido"));
+      expect(res.status).toBe(400);
+      expect(mockSignUp).not.toHaveBeenCalled();
+    } finally {
+      vi.unstubAllEnvs();
+    }
+  });
+});
