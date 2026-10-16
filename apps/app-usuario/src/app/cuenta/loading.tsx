@@ -1,35 +1,10 @@
+import { MobileShell } from "@ruum/ui";
 import { NavegacionUsuario } from "../NavegacionUsuario";
-
 export default function CargandoCuenta() {
-  return (
-    <>
-      <NavegacionUsuario variante="claro" />
-      <main className="user-v2-scope user-v2-page user-v2-secondary-screen"><div className="user-v2-content user-v2-content--wide py-10 sm:py-14" aria-label="Cargando cuenta">
-        <div className="grid gap-6 lg:grid-cols-[280px_1fr]">
-          {/* Skeleton del menú lateral */}
-          <div className="app-card rounded-card p-5 space-y-4">
-            <div className="flex items-center gap-3 mb-6">
-              <div className="size-12 rounded-full animate-pulse bg-ink/8" />
-              <div className="space-y-2">
-                <div className="h-3.5 w-28 animate-pulse rounded bg-ink/8" />
-                <div className="h-3 w-20 animate-pulse rounded bg-ink/6" />
-              </div>
-            </div>
-            {[1, 2, 3, 4, 5].map(i => (
-              <div key={i} className="h-10 animate-pulse rounded-lg bg-ink/6" />
-            ))}
-          </div>
-          {/* Skeleton del contenido */}
-          <div className="app-card rounded-card p-6 space-y-5">
-            <div className="h-5 w-40 animate-pulse rounded bg-ink/8" />
-            <div className="h-3 w-64 animate-pulse rounded bg-ink/6" />
-            {[1, 2, 3].map(i => (
-              <div key={i} className="h-12 animate-pulse rounded-lg bg-ink/6" />
-            ))}
-          </div>
-        </div>
-      </div>
-    </main>
-    </>
-  );
+  return <><NavegacionUsuario variante="claro" /><MobileShell as="main" variant="compact" navInferiorVisible className="user-v2-scope user-account-shell" contentClassName="user-account-content">
+    <div className="user-account-view" role="status" aria-label="Cargando cuenta" aria-busy="true">
+      <div className="h-32 shrink-0 animate-pulse rounded-2xl bg-[var(--user-color-surface-soft)]" />
+      <div className="overflow-hidden rounded-2xl" aria-hidden="true">{[1, 2, 3, 4].map(id => <div key={id} className="h-12 animate-pulse border-b border-[var(--user-color-border)] bg-[var(--user-color-surface-soft)]" />)}</div>
+    </div>
+  </MobileShell></>;
 }

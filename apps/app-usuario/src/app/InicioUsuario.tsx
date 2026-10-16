@@ -153,28 +153,11 @@ function IconoChevron({ className = "size-4" }: { className?: string }) {
   );
 }
 
-function IconoPlus({ className = "size-5" }: { className?: string }) {
-  return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <path d="M12 5v14M5 12h14" />
-    </svg>
-  );
-}
-
 function IconoPin({ className = "size-3.5" }: { className?: string }) {
   return (
     <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
       <path d="M12 21.7C17.3 17 20 13 20 10a8 8 0 1 0-16 0c0 3 2.7 7 8 11.7Z" />
       <circle cx="12" cy="10" r="2.6" />
-    </svg>
-  );
-}
-
-function IconoReloj({ className = "size-3.5" }: { className?: string }) {
-  return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <circle cx="12" cy="12" r="8.5" />
-      <path d="M12 7.5V12l3 2" />
     </svg>
   );
 }
@@ -228,10 +211,24 @@ export function InicioUsuario({ usuario, traslados, conductorFotoUrl = null, veh
     .filter((t) => t.traslado_id !== viajeActivo?.traslado_id)
     .slice(0, 3);
 
+  const evidenciaAcceso = viajeActivo ? (
+    <Link
+      href={`/viajes/${viajeActivo.traslado_id}#evidencia`}
+      aria-label={`Evidencia: ${evidenciaTexto(viajeActivo)}. Revisar o subir fotos`}
+      title={evidenciaTexto(viajeActivo)}
+      className="dashboard-evidence inline-flex items-center gap-1.5 rounded-full bg-white/10 px-2.5 py-1 text-slate-200 transition hover:bg-white/20 hover:text-white"
+    >
+      {evidenciaTexto(viajeActivo) === "Evidencia pendiente" ? (
+        <svg className="size-5 text-amber-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true"><path d="m12 3 10 18H2L12 3Z" /><path d="M12 9v5m0 3v1" /></svg>
+      ) : <IconoCamara className="size-5 text-emerald-400" />}
+      <span className="sr-only">{evidenciaTexto(viajeActivo)}</span>
+    </Link>
+  ) : null;
+
   const totalVehiculos = vehiculos.length;
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="user-dashboard flex flex-col gap-6">
       {/* B. Saludo y Bienvenida */}
       <section id="greetingBlock" aria-labelledby="saludo-usuario">
         <h1
@@ -240,9 +237,7 @@ export function InicioUsuario({ usuario, traslados, conductorFotoUrl = null, veh
         >
           {saludo} <span aria-hidden="true">👋</span>
         </h1>
-        <p className="mt-1 text-[14px] font-medium text-[var(--user-color-muted)] sm:text-[15px]">
-          ¿A dónde movemos tu auto hoy?
-        </p>
+        <Link href="/mis-viajes" aria-label="Notificaciones" className="user-dashboard-notifications"><svg className="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9M10 21h4" /></svg></Link>
       </section>
 
       {/* C. Tarjeta de Traslado Activo (Sección Destacada) */}
@@ -281,6 +276,15 @@ export function InicioUsuario({ usuario, traslados, conductorFotoUrl = null, veh
                       {vehiculoTitulo(viajeActivo)}
                     </p>
                   </Link>
+
+                </div>
+
+                {/* Ruta origen-destino */}
+                <div className="dashboard-route mt-3 flex items-center gap-2 text-[13.5px] font-medium text-slate-200">
+                  <IconoPin className="size-4 shrink-0 text-emerald-400" />
+                  <p className="truncate">
+                    {ciudadOrigen(viajeActivo)} <span className="text-emerald-400 font-bold mx-1">➔</span> {ciudadDestino(viajeActivo)}
+                  </p>
                   {viajeActivo.vehiculo_placas && (
                     <p className="mt-0.5 text-[11.5px] font-bold uppercase tracking-wider text-slate-300">
                       Placas {viajeActivo.vehiculo_placas}
@@ -288,22 +292,14 @@ export function InicioUsuario({ usuario, traslados, conductorFotoUrl = null, veh
                   )}
                 </div>
 
-                {/* Ruta origen-destino */}
-                <div className="mt-3 flex items-center gap-2 text-[13.5px] font-medium text-slate-200">
-                  <IconoPin className="size-4 shrink-0 text-emerald-400" />
-                  <p className="truncate">
-                    {ciudadOrigen(viajeActivo)} <span className="text-emerald-400 font-bold mx-1">➔</span> {ciudadDestino(viajeActivo)}
-                  </p>
-                </div>
-
                 {/* Barra de progreso y estado */}
-                <div className="mt-5 space-y-2 pt-4 border-t border-white/10">
+                <div className="dashboard-progress mt-5 space-y-2 pt-4 border-t border-white/10">
                   <div className="flex items-center justify-between text-[12.5px]">
                     <span className="font-semibold text-slate-300">
-                      Estado
+                      {etiquetaEstado(viajeActivo)}
                     </span>
                     <span className="font-bold text-emerald-400">
-                      {etiquetaEstado(viajeActivo)}
+                      {tiempoEstimadoTexto(viajeActivo.tiempo_estimado_horas)}
                     </span>
                   </div>
 
@@ -319,30 +315,17 @@ export function InicioUsuario({ usuario, traslados, conductorFotoUrl = null, veh
                   <EtapasTrasladoUsuario estado={viajeActivo.estado} />
                 </div>
 
-                {/* Metadatos: Conductor, Tiempo ETA, Evidencia */}
-                <div className="mt-5 flex flex-wrap items-center justify-between gap-3 border-t border-white/10 pt-4 text-[12px] font-medium text-slate-300">
+                {/* Resumen de conductor y evidencia cuando aún no hay contacto asignado */}
+                {!conductorAsignado && <div className="dashboard-driver-meta mt-5 flex flex-wrap items-center justify-between gap-3 border-t border-white/10 pt-4 text-[12px] font-medium text-slate-300">
                   {/* Conductor */}
                   <div className="inline-flex items-center gap-1.5">
                     <IconoUsuario className="size-4 text-slate-400" />
                     <span>{nombreAbreviado(viajeActivo.conductor_nombre) ?? "Carlos M."}</span>
                   </div>
 
-                  {/* Tiempo estimado */}
-                  <div className="inline-flex items-center gap-1.5">
-                    <IconoReloj className="size-4 text-slate-400" />
-                    <span className="font-bold text-white">{tiempoEstimadoTexto(viajeActivo.tiempo_estimado_horas)}</span>
-                  </div>
-
                   {/* Evidencia interactiva */}
-                  <Link
-                    href={`/viajes/${viajeActivo.traslado_id}#evidencia`}
-                    aria-label={`Evidencia: ${evidenciaTexto(viajeActivo)}. Revisar o subir fotos`}
-                    className="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-2.5 py-1 text-slate-200 transition hover:bg-white/20 hover:text-white"
-                  >
-                    <IconoCamara className="size-3.5 text-emerald-400" />
-                    <span className="font-semibold">{evidenciaTexto(viajeActivo)}</span>
-                  </Link>
-                </div>
+                  {evidenciaAcceso}
+                </div>}
               </div>
             </div>
 
@@ -353,11 +336,12 @@ export function InicioUsuario({ usuario, traslados, conductorFotoUrl = null, veh
                 estado={conductorAsignado.estado}
                 nombre={conductorAsignado.nombre}
                 fotoUrl={conductorFotoUrl}
+                evidencia={evidenciaAcceso}
               />
             )}
           </div>
         ) : (
-          <MobileCard padding="lg" elevated className="min-h-[220px] !rounded-[26px] !border-0 !bg-gradient-to-br from-[#071626] via-[#0b1e32] to-[#14283f] py-8 text-center [&_h2]:text-white [&_p]:text-slate-300 shadow-md">
+          <MobileCard padding="lg" elevated className="dashboard-empty min-h-[220px] !rounded-[26px] !border-0 !bg-gradient-to-br from-[#071626] via-[#0b1e32] to-[#14283f] py-8 text-center [&_h2]:text-white [&_p]:text-slate-300 shadow-md">
             <span className="mx-auto flex size-14 items-center justify-center rounded-2xl bg-white/10 text-emerald-400">
               <IconoCarro className="size-7" />
             </span>
@@ -370,21 +354,6 @@ export function InicioUsuario({ usuario, traslados, conductorFotoUrl = null, veh
           </MobileCard>
         )}
       </section>
-
-      {/* D. Botón de Acción Principal (CTA) */}
-      <div>
-        <Link
-          id="requestTransferButton"
-          href="/viajes/nuevo"
-          className="flex min-h-[58px] w-full items-center justify-center gap-2.5 rounded-2xl bg-[#0b1e32] px-5 py-3.5 text-[15.5px] font-bold text-white shadow-[0_12px_24px_-8px_rgba(11,30,50,0.35)] transition hover:bg-[#132d4b] active:scale-[0.98] dark:bg-[#0b1e32] dark:hover:bg-[#132d4b]"
-        >
-          <IconoPlus className="size-5" />
-          <span>Solicitar traslado</span>
-          <span className="ml-1.5 rounded-full bg-white/15 px-2.5 py-0.5 text-xs font-semibold text-white/90">
-            5 pasos
-          </span>
-        </Link>
-      </div>
 
       {/* E. Tarjetas Secundarias (Grid 2 columnas) */}
       <section id="quickActions" role="region" aria-labelledby="acciones-rapidas">
@@ -469,7 +438,7 @@ export function InicioUsuario({ usuario, traslados, conductorFotoUrl = null, veh
         </div>
 
         {trasladosRecientes.length > 0 ? (
-          <div className="flex flex-col gap-2.5">
+          <div className="dashboard-carousel" role="region" aria-label="Carrusel de traslados recientes" tabIndex={0}>
             {trasladosRecientes.map((t) => {
               const estadoFormateado = formatearEstadoReciente(t.estado);
               return (

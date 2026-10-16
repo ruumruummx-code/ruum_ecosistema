@@ -23,6 +23,7 @@ export interface CuentaReal {
   vehiculos: Vehiculo[];
   empresa: Empresa | null;
   totalTraslados: number;
+  incidenciasAbiertas?: number;
 }
 
 const LINKS_CUENTA = [
@@ -110,7 +111,8 @@ export async function obtenerCuenta(): Promise<ResultadoCuenta> {
         fotoPerfilUrl,
         vehiculos,
         empresa,
-        totalTraslados: trasladosPropios.length
+        totalTraslados: trasladosPropios.length,
+        incidenciasAbiertas: trasladosPropios.reduce((total, traslado) => total + (traslado.incidencias_abiertas ?? 0), 0)
       }
     };
   } catch (err) {
@@ -206,8 +208,8 @@ export function AvisoErrorCuenta({ mensaje }: { mensaje?: string | null }) {
   return (
     <>
       <NavegacionUsuario variante="claro" />
-      <MobileShell variant="compact" navInferiorVisible={true} as="main">
-        <div className="py-12 sm:py-20 text-center">
+      <MobileShell variant="compact" navInferiorVisible={true} as="main" className="user-v2-scope user-account-shell" contentClassName="user-account-content">
+        <div className="user-account-fallback text-center">
           <Aviso tono="danger">
             {mensaje ?? "No pudimos cargar tu cuenta en este momento. Inténtalo de nuevo en unos segundos."}
           </Aviso>
@@ -242,8 +244,8 @@ export function AvisoSinSesion() {
   return (
     <>
       <NavegacionUsuario variante="claro" />
-      <MobileShell variant="compact" navInferiorVisible={true} as="main">
-        <div className="py-12 sm:py-20 text-center">
+      <MobileShell variant="compact" navInferiorVisible={true} as="main" className="user-v2-scope user-account-shell" contentClassName="user-account-content">
+        <div className="user-account-fallback text-center">
           <Aviso tono="info">Inicia sesión para consultar y actualizar los datos de tu cuenta.</Aviso>
           <div className="mt-6 flex flex-col gap-3 sm:flex-row justify-center">
             <Link href="/login?next=/cuenta">

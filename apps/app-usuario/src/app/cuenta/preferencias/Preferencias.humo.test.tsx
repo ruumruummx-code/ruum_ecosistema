@@ -7,7 +7,6 @@ import { CuentaCliente } from "../CuentaCliente";
 import type { Database } from "@ruum/shared/types";
 
 type Usuario = Database["public"]["Tables"]["usuarios"]["Row"];
-type Vehiculo = Database["public"]["Tables"]["vehiculos"]["Row"];
 
 vi.mock("@/lib/supabase-browser", () => ({
   tieneSupabaseConfigurado: () => false,
@@ -41,11 +40,13 @@ beforeEach(() => {
 });
 
 describe("Humo ticket: Cuenta sin Notificaciones + Preferencias centralizado", () => {
-  it("Cuenta no expone sección de Notificaciones pero enlaza a Preferencias", () => {
+  it("Cuenta no expone sección de Notificaciones pero enlaza a Preferencias", async () => {
+    const user = userEvent.setup();
     render(
-      <CuentaCliente usuario={mockUsuario} vehiculos={[] as Vehiculo[]} totalTraslados={0} />
+      <CuentaCliente usuario={mockUsuario} totalVehiculos={0} totalTraslados={0} />
     );
     expect(screen.queryByRole("button", { name: /^notificaciones$/i })).not.toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: /^Perfil/ }));
     expect(screen.getByText("Preferencias").closest("a")).toHaveAttribute(
       "href",
       "/cuenta/preferencias"

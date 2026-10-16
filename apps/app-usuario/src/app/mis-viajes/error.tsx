@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import Link from "next/link";
+import { MobileShell } from "@ruum/ui";
 import { NavegacionUsuario } from "../NavegacionUsuario";
 import { reportarErrorBoundary } from "../../lib/reportar-error-boundary";
 
@@ -19,7 +20,7 @@ export default function ErrorMisTraslados({
   return (
     <>
       <NavegacionUsuario variante="claro" />
-      <main className="user-v2-scope user-v2-page user-v2-secondary-screen"><div className="user-v2-content flex min-h-[60vh] flex-col items-center justify-center py-20 text-center">
+      <MobileShell variant="compact" navInferiorVisible className="user-v2-scope user-transfers-shell" contentClassName="user-transfers-content"><div className="user-transfers-fallback text-center">
         <div className="mb-6 flex size-16 items-center justify-center rounded-full bg-danger-soft">
           <svg width="28" height="28" viewBox="0 0 24 24" fill="none"
             stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"
@@ -28,7 +29,7 @@ export default function ErrorMisTraslados({
             <path d="M12 8v4m0 4h.01" />
           </svg>
         </div>
-        <h1 className="font-display text-xl font-semibold">No pudimos cargar tus Traslados</h1>
+        <h2 className="font-display text-xl font-semibold">No pudimos cargar tus Traslados</h2>
         <p className="mt-2 font-body text-sm text-ink/60">
           Puede ser una falla temporal de conexión. Intenta de nuevo en unos segundos.
         </p>
@@ -44,7 +45,7 @@ export default function ErrorMisTraslados({
           </Link>
         </div>
       </div>
-    </main>
+    </MobileShell>
     </>
   );
 }

@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Aviso, Button, PassportCard, MobileShell } from "@ruum/ui";
+import { Aviso, Button, MobileShell } from "@ruum/ui";
 import type { Database } from "@ruum/shared/types";
 import { NavegacionUsuario } from "../NavegacionUsuario";
 import { MisTrasladosCliente } from "./MisViajesCliente";
@@ -87,8 +87,8 @@ export default async function PaginaMisTraslados({
     return (
       <>
         <NavegacionUsuario variante="claro" />
-        <MobileShell variant="compact" navInferiorVisible={true}>
-          <div className="py-12 text-center">
+        <MobileShell variant="compact" navInferiorVisible={true} className="user-v2-scope user-transfers-shell" contentClassName="user-transfers-content">
+          <div className="user-transfers-fallback text-center">
             <Aviso tono="danger">
               No pudimos cargar tus traslados en este momento. Inténtalo de nuevo en unos segundos.
             </Aviso>
@@ -110,7 +110,7 @@ export default async function PaginaMisTraslados({
   return (
     <>
       <NavegacionUsuario variante="claro" />
-      <MobileShell variant="compact" navInferiorVisible={true}>
+      <MobileShell variant="compact" navInferiorVisible={true} className="user-v2-scope user-transfers-shell" contentClassName="user-transfers-content">
         <MisTrasladosCliente Traslados={Traslados} pestanaInicial={pestañaActiva} />
       </MobileShell>
     </>

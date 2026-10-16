@@ -113,7 +113,7 @@ export default async function PaginaInicio({
     return (
       <>
         <NavegacionUsuario variante="claro" nombreUsuario={usuario.nombre} />
-        <MobileShell variant="compact" navInferiorVisible={true}>
+        <MobileShell variant="compact" navInferiorVisible={true} className="user-dashboard-shell" contentClassName="user-dashboard-content">
           <div aria-live="polite">
             <InicioUsuario
               usuario={usuario}

@@ -34,14 +34,12 @@ function viaje(estado: string, id = "t-1", marca = "Nissan", modelo = "Versa") {
 }
 
 describe("MisTrasladosCliente", () => {
-  it("muestra estado vacío con CTA cuando no hay traslados", async () => {
+  it("muestra estado vacío sin duplicar el CTA universal", async () => {
     render(<MisTrasladosCliente Traslados={[]} pestanaInicial="activos" />);
     // La búsqueda tiene debounce de 300ms: esperar a que salga el skeleton.
     expect(await screen.findByText(/sin traslados/i)).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: /solicitar traslado/i })).toHaveAttribute(
-      "href",
-      "/viajes/nuevo"
-    );
+    expect(screen.queryByRole("link", { name: /solicitar traslado/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: /contactar soporte/i })).not.toBeInTheDocument();
   });
 
   it("clasifica en programados y filtra por pestaña", async () => {
@@ -63,5 +61,19 @@ describe("MisTrasladosCliente", () => {
     await waitFor(() => {
       expect(screen.queryByText(/Nissan Versa 2020/)).toBeNull();
     });
+  });
+  it("permite navegar los filtros con teclado y buscar sin cambiar de categoría", async () => {
+    const user = userEvent.setup();
+    render(<MisTrasladosCliente Traslados={[viaje("servicio_cerrado", "t-2", "Toyota", "Corolla")]} pestanaInicial="activos" />);
+    const activos = screen.getByRole("button", { name: /^Activos/ });
+    activos.focus();
+    await user.keyboard("{End}");
+    expect(screen.getByRole("button", { name: /^Cancelados/ })).toHaveFocus();
+    expect(screen.getByRole("button", { name: /^Cancelados/ })).toHaveAttribute("aria-pressed", "true");
+    await user.keyboard("{ArrowLeft}");
+    expect(await screen.findByText("Toyota Corolla 2020")).toBeInTheDocument();
+    await user.type(screen.getByRole("searchbox", { name: "Buscar traslado" }), "inexistente");
+    expect(await screen.findByText("No se encontraron traslados")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /^Finalizados/ })).toHaveAttribute("aria-pressed", "true");
   });
 });

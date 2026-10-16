@@ -1,22 +1,24 @@
 /** @vitest-environment jsdom */
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { render, screen, within } from "@testing-library/react";
 import { NavegacionUsuario } from "./NavegacionUsuario";
 
-vi.mock("next/navigation", () => ({
-  usePathname: () => "/",
-}));
+const { ruta } = vi.hoisted(() => ({ ruta: { pathname: "/" } }));
+vi.mock("next/navigation", () => ({ usePathname: () => ruta.pathname }));
 
 vi.mock("next/image", () => ({
-  // eslint-disable-next-line @next/next/no-img-element, jsx-a11y/alt-text
   default: ({
     priority: _priority,
     unoptimized: _unoptimized,
     ...props
-  }: React.ImgHTMLAttributes<HTMLImageElement> & { priority?: boolean; unoptimized?: boolean }) => <img {...props} />,
+  }: React.ImgHTMLAttributes<HTMLImageElement> & { priority?: boolean; unoptimized?: boolean }) => (
+    // eslint-disable-next-line @next/next/no-img-element, jsx-a11y/alt-text
+    <img {...props} />
+  ),
 }));
 
 describe("NavegacionUsuario", () => {
+  beforeEach(() => { ruta.pathname = "/"; });
   it("muestra el nuevo logotipo oficial responsivo con redirección a inicio y alt correcto", () => {
     render(<NavegacionUsuario variante="claro" nombreUsuario="LUIS Hernández" notificacionesCount={2} />);
 
@@ -48,9 +50,34 @@ describe("NavegacionUsuario", () => {
     expect(within(acciones).getByText("2")).toBeInTheDocument();
     expect(within(acciones).getByRole("link", { name: "Preferencias" })).toHaveAttribute("href", "/cuenta/preferencias");
 
+    expect(screen.getByRole("link", { name: "Solicitar traslado" })).toHaveAttribute("href", "/viajes/nuevo");
+
     const inferior = screen.getByRole("navigation", { name: "Navegación principal" });
     expect(within(inferior).getByRole("link", { name: "Inicio" })).toHaveAttribute("href", "/");
     expect(within(inferior).getByRole("link", { name: "Traslados" })).toHaveAttribute("href", "/mis-viajes");
     expect(within(inferior).getByRole("link", { name: "Cuenta" })).toHaveAttribute("href", "/cuenta");
+  });
+  it("consolida Mis Traslados en un encabezado compacto con soporte y un único FAB", () => {
+    ruta.pathname = "/mis-viajes";
+    render(<NavegacionUsuario />);
+    const header = screen.getByRole("banner");
+    expect(within(header).getByRole("heading", { name: "Mis Traslados", level: 1 })).toBeInTheDocument();
+    expect(within(header).getByRole("link", { name: "Contactar soporte" })).toHaveAttribute("href", "/soporte");
+    expect(within(header).queryByRole("navigation")).not.toBeInTheDocument();
+    expect(within(header).queryByRole("img")).not.toBeInTheDocument();
+    expect(screen.getAllByRole("link", { name: "Solicitar traslado" })).toHaveLength(1);
+    expect(screen.getByRole("link", { name: "Traslados" })).toHaveAttribute("aria-current", "page");
+  });
+  it("presenta Mi Cuenta con un único encabezado y navegación inferior", () => {
+    ruta.pathname = "/cuenta";
+    render(<NavegacionUsuario />);
+    expect(screen.getByRole("heading", { name: "Mi Cuenta", level: 1 })).toBeInTheDocument();
+    expect(within(screen.getByRole("banner")).queryByRole("navigation")).not.toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Cuenta" })).toHaveAttribute("aria-current", "page");
+  });
+  it("no muestra el FAB durante la solicitud de traslado", () => {
+    ruta.pathname = "/viajes/nuevo";
+    render(<NavegacionUsuario />);
+    expect(screen.queryByRole("link", { name: "Solicitar traslado" })).not.toBeInTheDocument();
   });
 });

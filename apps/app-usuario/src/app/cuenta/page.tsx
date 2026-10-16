@@ -17,12 +17,13 @@ export default async function PaginaCuenta() {
   return conCuenta((cuenta) => (
     <>
       <NavegacionUsuario variante="claro" nombreUsuario={cuenta.usuario?.nombre} />
-      <MobileShell variant="compact" navInferiorVisible={true} as="main">
+      <MobileShell variant="compact" navInferiorVisible={true} as="main" className="user-v2-scope user-account-shell" contentClassName="user-account-content">
         <CuentaCliente
           correoRegistro={cuenta.correoRegistro}
           usuario={cuenta.usuario}
           fotoUrl={cuenta.fotoPerfilUrl}
-          vehiculos={cuenta.vehiculos}
+          totalVehiculos={cuenta.vehiculos.length}
+          incidenciasAbiertas={cuenta.incidenciasAbiertas}
           totalTraslados={cuenta.totalTraslados}
         />
       </MobileShell>

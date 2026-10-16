@@ -88,16 +88,6 @@ function IconoChevron({ className = "size-4" }: { className?: string }) {
   );
 }
 
-function IconoSoporte({ className = "size-7" }: { className?: string }) {
-  return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <path d="M4 14v-2a8 8 0 0 1 16 0v2" />
-      <path d="M4 14h2v5H4a2 2 0 0 1-2-2v-1a2 2 0 0 1 2-2ZM20 14h-2v5h2a2 2 0 0 0 2-2v-1a2 2 0 0 0-2-2Z" />
-      <path d="M18 20c-1 .9-2.3 1.5-4 1.5h-1" />
-    </svg>
-  );
-}
-
 function IconoCalendario({ className = "size-3" }: { className?: string }) {
   return (
     <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -268,18 +258,12 @@ function FichaVacia({ hayBusqueda, hayFiltro, pestana }: { hayBusqueda: boolean;
     : "Tus traslados aparecerán aquí tan pronto como los registres en la plataforma.";
 
   return (
-    <div className="rounded-[22px] border border-[#e6edf6] bg-white px-6 py-12 text-center shadow-[0_6px_16px_rgba(0,0,0,0.02)] dark:border-[#1a3a5c] dark:bg-[#0a2342]">
+    <div className="user-transfers-empty rounded-[22px] border border-[#e6edf6] bg-white px-6 py-12 text-center shadow-[0_6px_16px_rgba(0,0,0,0.02)] dark:border-[#1a3a5c] dark:bg-[#0a2342]">
       <div aria-hidden="true" className="mx-auto mb-5 flex size-20 items-center justify-center rounded-[30px] bg-[#edf4fe] text-[#104ca0] dark:bg-[#0f2d52] dark:text-[#6ba8ff]">
         <IconoCarroFrente className="size-[34px]" />
       </div>
-      <h3 className="text-[17px] font-bold text-[#0a2342] dark:text-[#f6f8fb]">{titulo}</h3>
+      <h2 className="text-[17px] font-bold text-[#0a2342] dark:text-[#f6f8fb]">{titulo}</h2>
       <p className="mx-auto mt-2 max-w-xs text-[14px] font-medium leading-relaxed text-[#4e5f80] dark:text-[#a8b5cc]">{descripcion}</p>
-      <Link
-        href="/viajes/nuevo"
-        className="mt-5 inline-flex min-h-[52px] items-center justify-center gap-2 rounded-2xl bg-[#0a2342] px-7 py-3 text-[14px] font-bold text-white transition hover:bg-[#162c47] dark:bg-[#4d94ff] dark:text-[#061529]"
-      >
-        Solicitar traslado
-      </Link>
     </div>
   );
 }
@@ -306,6 +290,10 @@ export function MisTrasladosCliente({
   const [tipoVehiculoSeleccionado, setTipoVehiculoSeleccionado] = useState("");
   const [isPending, startTransition] = useTransition();
   const tablistRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    tablistRef.current?.querySelector<HTMLButtonElement>(`[data-pestana="${pestana}"]`)?.scrollIntoView?.({ block: "nearest", inline: "nearest" });
+  }, [pestana]);
 
   // C-09: debounce búsqueda 300ms con aria-busy y skeleton
   useEffect(() => {
@@ -388,21 +376,14 @@ export function MisTrasladosCliente({
   }
 
   return (
-    <div className="flex flex-col gap-[18px]">
-      <section aria-labelledby="titulo-mis-traslados">
-        <h1 id="titulo-mis-traslados" className="text-[24px] font-extrabold tracking-tight text-[#0a2342] dark:text-[#f6f8fb] sm:text-[26px]">
-          Traslados
-        </h1>
-      </section>
-
+    <div className="user-transfers-view">
       {/* Pestañas estilo segmento con conteos */}
       <div
         aria-label="Filtrar por estado del traslado"
         role="group"
         ref={tablistRef}
         onKeyDown={handleTablistKeyDown}
-        className="flex gap-1.5 overflow-x-auto rounded-[32px] bg-[#f2f6fb] p-1 dark:bg-[#0f2d52]"
-        style={{ scrollbarWidth: "none" }}
+        className="user-transfers-tabs flex gap-1.5 overflow-x-auto rounded-[32px] bg-[#f2f6fb] p-1 dark:bg-[#0f2d52]"
       >
         {PESTAÑAS.map(({ id, etiqueta }) => {
           const activo = pestana === id;
@@ -415,7 +396,7 @@ export function MisTrasladosCliente({
               tabIndex={activo ? 0 : -1}
               onClick={() => handlePestanaChange(id)}
               className={[
-                "min-h-11 flex-1 whitespace-nowrap rounded-[24px] px-2 text-[13px] transition-all cursor-pointer",
+                "min-h-11 shrink-0 whitespace-nowrap rounded-[24px] px-2 text-[13px] transition-all cursor-pointer",
                 activo
                   ? "bg-white font-bold text-[#0a2342] shadow-xs dark:bg-[#0a2342] dark:text-[#f6f8fb]"
                   : "font-semibold text-[#4e5f80] dark:text-[#a8b5cc]",
@@ -440,22 +421,22 @@ export function MisTrasladosCliente({
       </div>
 
       {/* Resumen: total / activos / gastado */}
-      <dl className="flex rounded-2xl border border-[#e6edf6] bg-white p-4 shadow-xs dark:border-[#1a3a5c] dark:bg-[#0a2342]">
+      <dl aria-label="Resumen de traslados" className="user-transfers-stats flex rounded-2xl border border-[#e6edf6] bg-white p-4 shadow-xs dark:border-[#1a3a5c] dark:bg-[#0a2342]">
         {[
           { etiqueta: "Total", valor: String(Traslados.length) },
           { etiqueta: "Activos", valor: String(conteos.activos) },
           { etiqueta: "Gastado", valor: formatoGastado(gastoTotal) },
         ].map(({ etiqueta, valor }) => (
-          <div key={etiqueta} className="flex-1 text-center first:border-l-0 border-l border-[#eef2f7] dark:border-[#1a3a5c]">
-            <dd className="text-[20px] font-extrabold tracking-tight text-[#0a2342] dark:text-[#f6f8fb]">{valor}</dd>
+          <div key={etiqueta} className="flex flex-1 items-center justify-center gap-1.5 text-center first:border-l-0 border-l border-[#eef2f7] dark:border-[#1a3a5c]">
             <dt className="mt-1 text-[11.5px] font-semibold uppercase tracking-wider text-[#4e5f80] dark:text-[#a8b5cc]">{etiqueta}</dt>
+            <dd className="text-[20px] font-extrabold tracking-tight text-[#0a2342] dark:text-[#f6f8fb]">{valor}</dd>
           </div>
         ))}
       </dl>
 
       {/* Buscador + filtro */}
-      <section aria-label="Buscar y filtrar traslados" className="flex flex-col gap-2">
-        <div className="flex items-center gap-2.5 rounded-2xl border border-[#e6edf6] bg-white px-4 py-3 shadow-xs dark:border-[#1a3a5c] dark:bg-[#0a2342]">
+      <section aria-label="Buscar y filtrar traslados" className="user-transfers-search flex flex-col gap-2">
+        <div className="user-transfers-search-row flex items-center gap-2.5 rounded-2xl border border-[#e6edf6] bg-white px-4 py-3 shadow-xs dark:border-[#1a3a5c] dark:bg-[#0a2342]">
           <IconoBuscar className="size-4 shrink-0 text-[#4e5f80] dark:text-[#a8b5cc]" />
           <label htmlFor="buscar-traslado" className="sr-only">
             Buscar traslado
@@ -477,7 +458,7 @@ export function MisTrasladosCliente({
             aria-label={tipoVehiculoSeleccionado ? `Filtrar por tipo de vehículo, filtro activo: ${tipoVehiculoSeleccionado}` : "Filtrar por tipo de vehículo"}
             onClick={() => setFiltroAbierto((abierto) => !abierto)}
             className={[
-              "flex size-10 shrink-0 items-center justify-center rounded-xl transition-colors cursor-pointer",
+              "flex size-11 shrink-0 items-center justify-center rounded-xl transition-colors cursor-pointer",
               filtroAbierto || tipoVehiculoSeleccionado
                 ? "bg-[#0a2342] text-white dark:bg-[#4d94ff] dark:text-[#061529]"
                 : "text-[#4e5f80] hover:bg-[#edf4fe] hover:text-[#0a2342] dark:text-[#a8b5cc] dark:hover:bg-[#0f2d52] dark:hover:text-[#f6f8fb]",
@@ -486,13 +467,13 @@ export function MisTrasladosCliente({
             <IconoFiltro className="size-4.5" />
           </button>
         </div>
-        <div className="flex items-center gap-2 px-1">
-          <p id="busqueda-ayuda" className="text-[12px] text-[#4e5f80] dark:text-[#a8b5cc]">Folio, placa, vehículo, ciudad o conductor</p>
+        <div className="user-transfers-search-help flex items-center gap-2 px-1">
+          <p id="busqueda-ayuda" className="sr-only text-[12px] text-[#4e5f80] dark:text-[#a8b5cc]">Folio, placa, vehículo, ciudad o conductor</p>
           {buscando && <span className="inline-flex items-center gap-1 text-xs text-[#4e5f80] dark:text-[#a8b5cc]" role="status" aria-live="polite"><span className="size-3 animate-spin rounded-full border-2 border-[#eef2f7] border-t-[#104ca0]" aria-hidden />Buscando…</span>}
         </div>
 
         {filtroAbierto && (
-          <div id="panel-filtros-traslados" className="rounded-2xl border border-[#e6edf6] bg-white p-4 shadow-xs dark:border-[#1a3a5c] dark:bg-[#0a2342]">
+          <div id="panel-filtros-traslados" className="user-transfers-filter-panel rounded-2xl border border-[#e6edf6] bg-white p-4 shadow-xs dark:border-[#1a3a5c] dark:bg-[#0a2342]">
             <label className="mb-2 block text-[14px] font-bold text-[#0a2342] dark:text-[#f6f8fb]" htmlFor="tipo-vehiculo">Tipo de vehículo</label>
             <select
               id="tipo-vehiculo"
@@ -522,7 +503,8 @@ export function MisTrasladosCliente({
         aria-live="polite"
         aria-busy={isPending || buscando}
         aria-label={`Lista de traslados ${pestana} — ${filtrados.length} resultados`}
-        className="flex flex-col gap-3.5"
+        className="user-transfers-list"
+        tabIndex={0}
       >
         {(isPending || buscando) ? (
           <div className="flex flex-col gap-3.5" role="status" aria-label="Cargando traslados">
@@ -641,25 +623,6 @@ export function MisTrasladosCliente({
         )}
       </section>
 
-      {filtrados.length > 0 && (
-        <p className="py-2 text-center text-[12px] font-medium text-[#4e5f80] dark:text-[#a8b5cc]">
-          Actualizado hace un momento
-        </p>
-      )}
-
-      <Link
-        href="/soporte"
-        className="flex min-h-[76px] items-center justify-between gap-3 rounded-2xl border border-[#e6edf6] bg-white px-4 py-3.5 text-[#104ca0] shadow-xs transition hover:bg-[#f8fafd] active:scale-[0.99] dark:border-[#1a3a5c] dark:bg-[#0a2342] dark:text-[#4d94ff] dark:hover:bg-[#0f2d52]"
-      >
-        <span className="flex min-w-0 items-center gap-3">
-          <IconoSoporte className="size-8 shrink-0" />
-          <span className="min-w-0">
-            <span className="block text-[12px] text-[#4e5f80] dark:text-[#a8b5cc]">¿Dudas o necesitas ayuda con este traslado?</span>
-            <span className="mt-1 block text-[14px] font-bold">Contactar soporte</span>
-          </span>
-        </span>
-        <IconoChevron className="size-5 shrink-0" />
-      </Link>
     </div>
   );
 }

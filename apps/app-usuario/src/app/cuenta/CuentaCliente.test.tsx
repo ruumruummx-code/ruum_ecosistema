@@ -1,219 +1,79 @@
 /** @vitest-environment jsdom */
-import { describe, expect, it, vi, beforeEach } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { CuentaCliente } from "./CuentaCliente";
 import type { Database } from "@ruum/shared/types";
-
-type Usuario = Database["public"]["Tables"]["usuarios"]["Row"];
-type Vehiculo = Database["public"]["Tables"]["vehiculos"]["Row"];
-
-const mockPush = vi.fn();
-const mockRefresh = vi.fn();
-const mockSignOut = vi.fn().mockResolvedValue({ error: null });
-
-vi.mock("next/navigation", () => ({
-  useRouter: () => ({
-    push: mockPush,
-    refresh: mockRefresh,
-  }),
-}));
-
-vi.mock("../../lib/supabase-browser", () => ({
-  crearClienteNavegador: () => ({
-    auth: {
-      signOut: mockSignOut,
-    },
-  }),
-}));
-
-const mockUsuario: Partial<Usuario> = {
-  id: "user-cuenta-1",
-  nombre: "Carlos Ramos",
-  correo_facturacion: "carlos.ramos@empresa.com",
-  telefono: "+52 55 1234 5678",
-  estado_verificacion: "verificado",
-  metodo_pago_registrado: true,
-  rfc: "RAMC850101XYZ",
-  traslados_completados_sin_incidencia: 12,
-};
-
-const mockVehiculos: Partial<Vehiculo>[] = [
-  {
-    id: "veh-1",
-    marca: "BMW",
-    modelo: "Serie 3",
-    anio: 2023,
-    placas: "XYZ-789",
-    alias: "Auto personal",
-  },
-];
-
-describe("CuentaCliente — Sistema móvil unificado", () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-  });
-
-  it("renderiza encabezado principal y héroe de perfil con estadísticas", () => {
-    render(
-      <CuentaCliente
-        correoRegistro="registro@ruum.test"
-        usuario={mockUsuario as Usuario}
-        vehiculos={mockVehiculos as Vehiculo[]}
-        totalTraslados={15}
-      />
-    );
-
-    expect(screen.getByRole("heading", { level: 1, name: "Cuenta" })).toBeInTheDocument();
+const { replace, refresh, signOut } = vi.hoisted(() => ({ replace: vi.fn(), refresh: vi.fn(), signOut: vi.fn() }));
+vi.mock("next/navigation", () => ({ useRouter: () => ({ replace, refresh }) }));
+vi.mock("../../lib/supabase-browser", () => ({ crearClienteNavegador: () => ({ auth: { signOut } }) }));
+const usuario = { nombre: "Carlos Ramos", telefono: "+52 55 1234 5678", estado_verificacion: "verificado" } as Database["public"]["Tables"]["usuarios"]["Row"];
+function cuenta() { return render(<CuentaCliente usuario={usuario} correoRegistro="registro@ruum.test" totalVehiculos={2} totalTraslados={15} incidenciasAbiertas={1} />); }
+beforeEach(() => { vi.clearAllMocks(); signOut.mockResolvedValue({ error: null }); });
+describe("CuentaCliente — RR-2026-003", () => {
+  it("muestra perfil compacto, contadores y logout final sin gestión de vehículos ni submenús en el lienzo", () => {
+    cuenta();
     expect(screen.getByText("Carlos Ramos")).toBeInTheDocument();
     expect(screen.getByText("registro@ruum.test")).toBeInTheDocument();
-    expect(screen.queryByText("carlos.ramos@empresa.com")).not.toBeInTheDocument();
     expect(screen.getByText("+52 55 1234 5678")).toBeInTheDocument();
-
-    // Estadísticas
     expect(screen.getByText("15")).toBeInTheDocument();
-    expect(screen.getByText("Traslados")).toBeInTheDocument();
+    expect(screen.getByText("2")).toBeInTheDocument();
     expect(screen.getByText("1")).toBeInTheDocument();
-    expect(screen.getByText("Vehículos")).toBeInTheDocument();
-    expect(screen.getByText("12")).toBeInTheDocument();
-    expect(screen.getByText("Sin incidencias")).toBeInTheDocument();
-  });
-
-  it("renderiza lista de vehículos y enlace para agregar vehículo", () => {
-    render(
-      <CuentaCliente
-        usuario={mockUsuario as Usuario}
-        vehiculos={mockVehiculos as Vehiculo[]}
-        totalTraslados={15}
-      />
-    );
-
-    expect(screen.getByText("BMW Serie 3 2023")).toBeInTheDocument();
-    expect(screen.getByText("XYZ-789")).toBeInTheDocument();
-    expect(screen.getByText("Auto personal")).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: /agregar vehículo/i })).toHaveAttribute(
-      "href",
-      "/cuenta/vehiculos"
-    );
-  });
-
-  it("unifica verificación y facturación y elimina métodos de pago", () => {
-    render(
-      <CuentaCliente
-        usuario={mockUsuario as Usuario}
-        vehiculos={mockVehiculos as Vehiculo[]}
-        totalTraslados={15}
-      />
-    );
-
-    // Perfil
-    expect(screen.getByRole("navigation", { name: "Perfil" })).toBeInTheDocument();
-    expect(screen.getByText("Datos personales")).toBeInTheDocument();
-    expect(screen.getByText("Contraseña")).toBeInTheDocument();
-    expect(screen.getByText("Verificación y facturación")).toBeInTheDocument();
+    expect(screen.queryByText("Mis vehículos")).not.toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: /vehículo/i })).not.toBeInTheDocument();
+    expect(screen.queryByText("Datos personales")).not.toBeInTheDocument();
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+    const filas = within(screen.getByRole("navigation", { name: "Ajustes de cuenta" })).getAllByRole("button");
+    expect(filas).toHaveLength(4);
+    expect(filas.at(-1)).toHaveAccessibleName("Cerrar sesión");
+    expect(filas.at(-1)).toHaveClass("is-destructive");
     expect(screen.getByText("Verificado")).toBeInTheDocument();
-    expect(screen.getByText("Preferencias")).toBeInTheDocument();
-
-    expect(screen.queryByRole("navigation", { name: "Pagos y facturación" })).not.toBeInTheDocument();
-    expect(screen.queryByText("Métodos de pago")).not.toBeInTheDocument();
-    expect(screen.queryByText("Facturación")).not.toBeInTheDocument();
-    expect(screen.getByText("Verificación y facturación").closest("a")).toHaveAttribute("href", "/cuenta/verificacion-documentos");
-
-    // Legal y cuenta
-    expect(screen.getByRole("navigation", { name: "Legal y cuenta" })).toBeInTheDocument();
-    expect(screen.getByText("Términos y condiciones")).toBeInTheDocument();
-    expect(screen.getByText("Aviso de privacidad")).toBeInTheDocument();
-    expect(screen.getByText("Eliminar cuenta")).toBeInTheDocument();
   });
-
-  it("permite cerrar sesión y redirige a la raíz", async () => {
-    const user = userEvent.setup();
-    render(
-      <CuentaCliente
-        usuario={mockUsuario as Usuario}
-        vehiculos={mockVehiculos as Vehiculo[]}
-        totalTraslados={15}
-      />
-    );
-
-    const botonCerrarSesion = screen.getByRole("button", { name: /cerrar sesión/i });
-    await user.click(botonCerrarSesion);
-
-    expect(mockSignOut).toHaveBeenCalled();
-    expect(mockPush).toHaveBeenCalledWith("/");
-    expect(mockRefresh).toHaveBeenCalled();
+  it.each([[/^Perfil/, "Perfil", "Datos personales"], [/^Soporte/, "Soporte", "Preguntas frecuentes"], [/^Legal y cuenta/, "Legal y cuenta", "Términos y condiciones"]])("abre %s como diálogo y restaura el foco al cerrar", async (boton, titulo, enlace) => {
+    const user = userEvent.setup(); cuenta();
+    const trigger = screen.getByRole("button", { name: boton });
+    await user.click(trigger);
+    const hoja = await screen.findByRole("dialog", { name: titulo });
+    expect(hoja).toHaveAttribute("aria-modal", "true");
+    expect(within(hoja).getByRole("link", { name: new RegExp(enlace) })).toBeInTheDocument();
+    const cerrar = within(hoja).getByRole("button", { name: `Cerrar panel de ${titulo}` });
+    await waitFor(() => expect(cerrar).toHaveFocus());
+    await user.click(cerrar);
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+    expect(trigger).toHaveFocus();
   });
-
-  it("inicia con todos los acordeones cerrados por defecto manteniendo perfil y vehículos visibles", () => {
-    render(
-      <CuentaCliente
-        correoRegistro="registro@ruum.test"
-        usuario={mockUsuario as Usuario}
-        vehiculos={mockVehiculos as Vehiculo[]}
-        totalTraslados={15}
-      />
-    );
-
-    // Héroe de perfil y vehículos visibles permanentemente
-    expect(screen.getByRole("region", { name: "Perfil" })).toBeInTheDocument();
-    expect(screen.getByRole("list", { name: "Mis vehículos" })).toBeInTheDocument();
-
-    // 3 botones de acordeón cerrados por defecto (Notificaciones centralizado en Preferencias)
-    const btnPerfil = screen.getByRole("button", { name: /perfil/i });
-    const btnSoporte = screen.getByRole("button", { name: /soporte/i });
-    const btnLegal = screen.getByRole("button", { name: /legal y cuenta/i });
-
-    expect(btnPerfil).toHaveAttribute("aria-expanded", "false");
-    expect(btnSoporte).toHaveAttribute("aria-expanded", "false");
-    expect(btnLegal).toHaveAttribute("aria-expanded", "false");
-
-    // Sin sección duplicada de Notificaciones en Cuenta
-    expect(screen.queryByRole("button", { name: /^notificaciones$/i })).not.toBeInTheDocument();
-
-    // Todos los chevrons con rotación inicial 0°
-    const chevrons = screen.getAllByTestId("chevron-acordeon");
-    expect(chevrons).toHaveLength(3);
-    chevrons.forEach((chevron) => {
-      expect(chevron).toHaveClass("rotate-0");
-      expect(chevron).not.toHaveClass("rotate-90");
-    });
+  it("cierra con tap exterior y Escape sin expandir subopciones en el fondo", async () => {
+    const user = userEvent.setup(); cuenta();
+    await user.click(screen.getByRole("button", { name: /^Perfil/ }));
+    fireEvent.click(await screen.findByRole("dialog"));
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: /^Soporte/ }));
+    fireEvent(await screen.findByRole("dialog"), new Event("cancel", { cancelable: true }));
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
   });
-
-  it("expande y contrae acordeones al hacer clic rotando el chevron 90 grados", async () => {
-    const user = userEvent.setup();
-    render(
-      <CuentaCliente
-        usuario={mockUsuario as Usuario}
-        vehiculos={mockVehiculos as Vehiculo[]}
-        totalTraslados={15}
-      />
-    );
-
-    const btnPerfil = screen.getByRole("button", { name: /perfil/i });
-    const chevronPerfil = btnPerfil.querySelector('[data-testid="chevron-acordeon"]');
-
-    expect(btnPerfil).toHaveAttribute("aria-expanded", "false");
-    expect(chevronPerfil).toHaveClass("rotate-0");
-
-    // Abrir Perfil
-    await user.click(btnPerfil);
-    expect(btnPerfil).toHaveAttribute("aria-expanded", "true");
-    expect(chevronPerfil).toHaveClass("rotate-90");
-
-    // Abrir Soporte independientemente
-    const btnSoporte = screen.getByRole("button", { name: /soporte/i });
-    const chevronSoporte = btnSoporte.querySelector('[data-testid="chevron-acordeon"]');
-    await user.click(btnSoporte);
-    expect(btnSoporte).toHaveAttribute("aria-expanded", "true");
-    expect(chevronSoporte).toHaveClass("rotate-90");
-    // Perfil permanece abierto
-    expect(btnPerfil).toHaveAttribute("aria-expanded", "true");
-
-    // Cerrar Perfil
-    await user.click(btnPerfil);
-    expect(btnPerfil).toHaveAttribute("aria-expanded", "false");
-    expect(chevronPerfil).toHaveClass("rotate-0");
-    // Soporte sigue abierto
-    expect(btnSoporte).toHaveAttribute("aria-expanded", "true");
+  it("mantiene verificación inline y enlaces de las subopciones", async () => {
+    const user = userEvent.setup(); cuenta();
+    await user.click(screen.getByRole("button", { name: /^Perfil/ }));
+    const hoja = await screen.findByRole("dialog");
+    expect(within(hoja).getByRole("link", { name: /Verificación y facturación/ })).toHaveAttribute("href", "/cuenta/verificacion-documentos");
+    expect(within(hoja).getByText("Verificado")).toBeInTheDocument();
+    expect(within(hoja).getByRole("link", { name: "Preferencias" })).toHaveAttribute("href", "/cuenta/preferencias");
+    expect(screen.queryByText("Datos personales, contraseña y documentos")).not.toBeInTheDocument();
+  });
+  it("cierra sesión inmediatamente y redirige al Login", async () => {
+    const user = userEvent.setup(); cuenta();
+    await user.click(screen.getByRole("button", { name: "Cerrar sesión" }));
+    expect(signOut).toHaveBeenCalledTimes(1);
+    expect(replace).toHaveBeenCalledWith("/login");
+    expect(refresh).toHaveBeenCalledTimes(1);
+  });
+  it.each(["returned", "thrown"])("permite reintentar si el logout falla (%s) sin redirigir", async (modo) => {
+    if (modo === "returned") signOut.mockResolvedValueOnce({ error: new Error("error") });
+    else signOut.mockRejectedValueOnce(new Error("error"));
+    const user = userEvent.setup(); cuenta();
+    await user.click(screen.getByRole("button", { name: "Cerrar sesión" }));
+    expect(await screen.findByRole("alert")).toHaveTextContent("No pudimos cerrar tu sesión");
+    expect(replace).not.toHaveBeenCalled();
+    expect(screen.getByRole("button", { name: "Cerrar sesión" })).toBeEnabled();
   });
 });

@@ -120,6 +120,9 @@ export function NavegacionUsuario({
     pathname === "/recuperar-password" ||
     pathname === "/nueva-password" ||
     pathname.startsWith("/registro/");
+  const esMisTraslados = pathname === "/mis-viajes";
+  const esCuenta = pathname === "/cuenta";
+  const cabeceraCompacta = esMisTraslados || esCuenta;
   const nombre = primerNombre(nombreUsuario);
   const saludo = nombre ? `¡Hola, ${nombre}!` : "¡Hola!";
   const textoCabecera = titulo ?? (pathname === "/" ? "Ruum Ruum" : saludo);
@@ -142,7 +145,7 @@ export function NavegacionUsuario({
       root.style.removeProperty("--user-header-height");
       root.style.removeProperty("--user-mobile-nav-height");
     };
-  }, [esAcceso, mostrarEnAcceso, mostrarNavegacionInferior]);
+  }, [esAcceso, mostrarEnAcceso, mostrarNavegacionInferior, pathname]);
 
   if (esAcceso && !mostrarEnAcceso) return null;
 
@@ -153,9 +156,16 @@ export function NavegacionUsuario({
         ref={headerRef}
         id="homeHeader"
         role="banner"
-        className="user-v2-shell-header user-v2-scope"
+        className={`user-v2-shell-header user-v2-scope ${pathname === "/" ? "user-dashboard-header" : ""} ${cabeceraCompacta ? "user-transfers-header" : ""}`}
       >
-        <div className="user-v2-shell-inner flex items-center justify-between gap-3 px-4 py-3 sm:px-6">
+        {cabeceraCompacta ? (
+          <div className="user-transfers-header-inner">
+            <h1 id={esCuenta ? "titulo-mi-cuenta" : "titulo-mis-traslados"}>{esCuenta ? "Mi Cuenta" : "Mis Traslados"}</h1>
+            <Link href="/soporte" aria-label="Contactar soporte" className="user-v2-shell-icon-action">
+              <IconoSoporte className="size-5" />
+            </Link>
+          </div>
+        ) : <div className="user-v2-shell-inner flex items-center justify-between gap-3 px-4 py-3 sm:px-6">
           {/* Logotipo e Identidad oficial de la marca: SVG responsive con soporte claro/oscuro */}
           <Link
             href="/"
@@ -243,7 +253,7 @@ export function NavegacionUsuario({
               </Link>
             )}
           </nav>
-        </div>
+        </div>}
       </header>
 
       {/* G. Barra de Navegación Inferior (Bottom Navigation Bar) */}
@@ -252,7 +262,7 @@ export function NavegacionUsuario({
           id="bottomNavigation"
           aria-label="Navegación principal"
           ref={navRef}
-          className="user-v2-shell-nav lg:hidden user-v2-scope"
+          className={`user-v2-shell-nav ${cabeceraCompacta ? "" : "lg:hidden"} user-v2-scope`}
         >
           <div className="user-v2-shell-nav-inner">
             <div className="grid grid-cols-3 items-center">
@@ -295,6 +305,11 @@ export function NavegacionUsuario({
             </div>
           </div>
         </nav>
+      )}
+      {mostrarNavegacionInferior && !esAcceso && !pathname.startsWith("/viajes/nuevo") && (
+        <Link id="requestTransferButton" href="/viajes/nuevo" aria-label="Solicitar traslado" title="Solicitar traslado" className="user-transfer-fab user-v2-scope">
+          <svg className="size-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg>
+        </Link>
       )}
     </>
   );

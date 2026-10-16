@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { Aviso } from "@ruum/ui";
 import { crearLlamadaEnmascarada } from "@ruum/api/services";
 import { chatDisponible } from "@ruum/shared/rules";
@@ -17,6 +17,7 @@ interface ConductorAsignadoProps {
   estado: EstadoTraslado;
   nombre: string;
   fotoUrl: string | null;
+  evidencia?: ReactNode;
 }
 
 function IconoChat() {
@@ -36,7 +37,7 @@ function IconoTelefono() {
   );
 }
 
-export function ConductorAsignado({ trasladoId, estado, nombre, fotoUrl }: ConductorAsignadoProps) {
+export function ConductorAsignado({ trasladoId, estado, nombre, fotoUrl, evidencia }: ConductorAsignadoProps) {
   // "CO" conserva el respaldo histórico de este avatar (canónico en cuenta-utils).
   const siglas = iniciales(nombre, "CO");
   const [llamando, setLlamando] = useState(false);
@@ -89,7 +90,7 @@ export function ConductorAsignado({ trasladoId, estado, nombre, fotoUrl }: Condu
         </div>
       </div>
 
-      <div className="mt-4 grid grid-cols-2 gap-2">
+      <div className={`mt-4 grid ${evidencia ? "grid-cols-[repeat(2,minmax(0,1fr))_auto]" : "grid-cols-2"} gap-2`}>
         <Link
           href={`/viajes/${trasladoId}#chat-conductor`}
           className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-[#d7e1ee] bg-[var(--user-color-surface)] px-3 text-[14px] font-bold text-[var(--user-color-primary)] shadow-2xs transition hover:bg-[#f6f8fb] active:scale-[0.98] dark:border-[#2d4f73]  "
@@ -108,6 +109,7 @@ export function ConductorAsignado({ trasladoId, estado, nombre, fotoUrl }: Condu
           <IconoTelefono />
           <span>{llamando ? "Conectando…" : "Llamar"}</span>
         </button>
+        {evidencia}
       </div>
 
       {error && <div className="mt-3"><Aviso tono="danger">{error}</Aviso></div>}

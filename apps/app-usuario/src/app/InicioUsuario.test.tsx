@@ -65,6 +65,7 @@ describe("InicioUsuario", () => {
     const tarjetaActiva = screen.getByRole("region", { name: "Traslado Activo #TRASLADO" });
 
     expect(comunicacion).toBeInTheDocument();
+    expect(within(comunicacion).getByRole("link", { name: /Evidencia: Evidencia pendiente/ })).toHaveAttribute("href", "/viajes/traslado-1#evidencia");
     expect(screen.getByText("Ana López")).toBeInTheDocument();
     expect(within(tarjetaActiva).getByRole("heading", { name: "Traslado Activo #TRASLADO" })).toBeInTheDocument();
     expect(within(tarjetaActiva).getByText("Toyota Corolla 2024")).toBeInTheDocument();
@@ -119,7 +120,7 @@ describe("InicioUsuario", () => {
     expect(within(linkPasaporte).getByText("Digital")).toBeInTheDocument();
   });
 
-  it("muestra el saludo, CTA principal en 5 pasos, traslados recientes y banner de soporte", () => {
+  it("muestra el saludo, traslados recientes y banner de soporte", () => {
     const trasladoActivo = {
       traslado_id: "activo-123",
       estado: "traslado_en_curso",
@@ -164,7 +165,8 @@ describe("InicioUsuario", () => {
 
     // Saludo y contexto
     expect(screen.getByText(/Hola, Carlos/i)).toBeInTheDocument();
-    expect(screen.getByText("¿A dónde movemos tu auto hoy?")).toBeInTheDocument();
+    expect(screen.queryByText("¿A dónde movemos tu auto hoy?")).not.toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Notificaciones" })).toHaveAttribute("href", "/mis-viajes");
 
     // Tarjeta activa
     expect(screen.getByText("TRASLADO ACTIVO")).toBeInTheDocument();
@@ -173,15 +175,14 @@ describe("InicioUsuario", () => {
     expect(screen.getByText(/Guadalajara, Zapopan/)).toBeInTheDocument();
     expect(screen.getByText("Carlos M.")).toBeInTheDocument();
     expect(screen.getByText("En camino")).toBeInTheDocument();
-    expect(screen.getByText("Evidencia pendiente")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /Evidencia: Evidencia pendiente/ })).toHaveAttribute("href", "/viajes/activo-123#evidencia");
     expect(screen.getByText("Evidencia fotográfica · Seguimiento en tiempo real")).toBeInTheDocument();
 
-    // CTA principal
-    const cta = screen.getByRole("link", { name: /Solicitar traslado/i });
-    expect(cta).toHaveAttribute("href", "/viajes/nuevo");
-    expect(within(cta).getByText("5 pasos")).toBeInTheDocument();
+    // El CTA universal lo proporciona NavegacionUsuario.
+    expect(screen.queryByRole("link", { name: /Solicitar traslado/i })).not.toBeInTheDocument();
 
     // Traslados recientes
+    expect(screen.getByRole("region", { name: "Carrusel de traslados recientes" })).toHaveAttribute("tabindex", "0");
     expect(screen.getByText("Traslados recientes")).toBeInTheDocument();
     expect(screen.getByRole("link", { name: /Ver todos/i })).toHaveAttribute("href", "/mis-viajes");
     expect(screen.getByText("Honda CR-V 2022")).toBeInTheDocument();
