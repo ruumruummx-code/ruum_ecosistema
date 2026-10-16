@@ -26,9 +26,8 @@ import {
 export default function PaginaRegistro() {
   const router = useRouter();
 
-  /* Bypass temporal de OTP solo-dev (ver .env.example). Nunca activo en
-     producción: el servidor lo ignora ahí y seguiría exigiendo el token. */
-  const bypassOtp = process.env.NEXT_PUBLIC_PHONE_VERIFY_BYPASS === "true";
+  const smsSuspendido = process.env.NEXT_PUBLIC_PHONE_VERIFICATION_SUSPENDED === "true";
+  const bypassOtp = smsSuspendido || (process.env.NODE_ENV !== "production" && process.env.NEXT_PUBLIC_PHONE_VERIFY_BYPASS === "true");
 
   /* Paso 1: datos básicos */
   const tipoCuenta = "personal";
@@ -627,10 +626,10 @@ export default function PaginaRegistro() {
               </button>
 
               </div>
-              {/* Bypass OTP solo-dev: recordatorio visible de que el SMS está desactivado */}
+              {/* Información visible durante la suspensión del SMS */}
               {bypassOtp && (
                 <div role="note" className="mt-3 rounded-xl bg-amber-50 border border-amber-200 p-3 text-xs font-bold text-amber-800">
-                  Modo desarrollo: verificación por SMS desactivada (PHONE_VERIFY_BYPASS). No usar en producción.
+                  {smsSuspendido ? "La verificación por SMS está suspendida temporalmente. Puedes continuar con tu registro." : "Modo desarrollo: verificación por SMS desactivada."}
                 </div>
               )}
               {/* Enlace a Login */}

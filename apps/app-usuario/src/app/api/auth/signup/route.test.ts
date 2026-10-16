@@ -121,3 +121,23 @@ describe("POST /api/auth/signup — bypass OTP solo-dev", () => {
     }
   });
 });
+
+
+describe("suspensión temporal de SMS en producción", () => {
+  it("acepta sin token y conserva el teléfono sin verificar", async () => {
+    vi.clearAllMocks();
+    vi.stubEnv("NODE_ENV", "production");
+    vi.stubEnv("PHONE_VERIFICATION_SUSPENDED", "true");
+    try {
+      mockSignUp.mockResolvedValue({data:{user:{id:"prod-suspendido"},session:null},error:null});
+      const res = await POST(req("suspendido@ejemplo.com", ""));
+      expect(res.status).toBe(200);
+      expect(mockSignUp.mock.calls[0][0].options.data).toMatchObject({telefono_verificado:false,telefono_verificado_en:null});
+      vi.stubEnv("PHONE_VERIFICATION_SUSPENDED", "false");
+      mockSignUp.mockClear();
+      const reactivado = await POST(req("reactivado@ejemplo.com", ""));
+      expect(reactivado.status).toBe(400);
+      expect(mockSignUp).not.toHaveBeenCalled();
+    } finally { vi.unstubAllEnvs(); }
+  });
+});

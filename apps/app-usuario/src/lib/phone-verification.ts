@@ -111,14 +111,10 @@ function mockPermitido(): boolean {
   return process.env.NODE_ENV !== "production";
 }
 
-/**
- * Bypass temporal SOLO para desarrollo local (NUNCA producción).
- * Se activa con PHONE_VERIFY_BYPASS=true y únicamente si NODE_ENV no es
- * "production" — doble candado: aunque la variable llegue a prod por error,
- * el servidor sigue exigiendo el token firmado.
- */
+/** Suspensión explícita y reversible; el bypass anterior sigue limitado a desarrollo. */
 export function bypassVerificacionTelefonoPermitido(): boolean {
-  return process.env.PHONE_VERIFY_BYPASS === "true" && process.env.NODE_ENV !== "production";
+  return process.env.PHONE_VERIFICATION_SUSPENDED === "true" ||
+    (process.env.PHONE_VERIFY_BYPASS === "true" && process.env.NODE_ENV !== "production");
 }
 
 /**

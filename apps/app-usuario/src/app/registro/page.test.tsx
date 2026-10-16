@@ -235,4 +235,20 @@ describe("registro — accesibilidad de errores y flujo de verificación telefó
     expect(screen.queryByRole("button", { name: /empresa/i })).not.toBeInTheDocument();
     expect(screen.queryByText(/^empresa$/i)).not.toBeInTheDocument();
   });
+  it("suspende el paso SMS en producción sin enviar códigos", async () => {
+    vi.stubEnv("NODE_ENV", "production");
+    vi.stubEnv("NEXT_PUBLIC_PHONE_VERIFICATION_SUSPENDED", "true");
+    try {
+      const user = userEvent.setup();
+      render(<PaginaRegistro />);
+      await user.type(screen.getByLabelText(/^nombre$/i), "Ana");
+      await user.type(screen.getByLabelText(/^apellido$/i), "López");
+      await user.type(screen.getByLabelText(/teléfono celular/i), "5512345678");
+      await user.click(screen.getByRole("button", {name:/continuar/i}));
+      expect(await screen.findByLabelText(/^correo electrónico$/i)).toBeInTheDocument();
+      expect(screen.queryByLabelText(/código de verificación sms/i)).not.toBeInTheDocument();
+      expect(mocks.fetchMock).not.toHaveBeenCalled();
+    } finally { vi.unstubAllEnvs(); }
+  });
+
 });

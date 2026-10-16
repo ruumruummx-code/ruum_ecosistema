@@ -67,9 +67,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Validación de verificación telefónica por SMS.
-    // Con bypass de desarrollo activo (nunca en producción, ver
-    // bypassVerificacionTelefonoPermitido) se omite para poder desarrollar
-    // sin depender de Twilio.
+    // La suspensión explícita permite el alta sin acreditar la propiedad del teléfono.
     if (!bypassVerificacionTelefonoPermitido()) {
       const verificacionTelefono = validarTokenTelefono(telefonoDigitos, tokenTelefono);
       if (!verificacionTelefono.valido) {
@@ -121,7 +119,7 @@ export async function POST(request: NextRequest) {
     });
 
     const ahora = new Date().toISOString();
-    // Con bypass de desarrollo el teléfono NO quedó verificado: registrarlo
+    // Con la verificación suspendida el teléfono NO quedó verificado: registrarlo
     // así en metadata para no contaminar datos con una verificación falsa.
     const telefonoVerificadoReal = !bypassVerificacionTelefonoPermitido();
     const { data, error } = await supabase.auth.signUp({
