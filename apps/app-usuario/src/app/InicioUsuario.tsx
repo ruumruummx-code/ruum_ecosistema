@@ -4,7 +4,7 @@ import Link from "next/link";
 import type { Database } from "@ruum/shared/types";
 import { ETIQUETA_ESTADO_TRASLADO } from "@ruum/shared/states";
 import { MobileCard } from "@ruum/ui";
-import { obtenerHistorial, obtenerViajeActivo, progresoPorEstadoTraslado } from "../lib/inicio";
+import { obtenerViajeActivo, progresoPorEstadoTraslado } from "../lib/inicio";
 import { TERMINOLOGIA_USUARIO } from "../lib/glosario";
 import { EtapasTrasladoUsuario } from "./EtapasTrasladoUsuario";
 import { ConductorAsignado } from "./ConductorAsignado";
@@ -56,45 +56,6 @@ function etiquetaEstado(t: PasaporteRow): string {
   if (!t.estado) return "En seguimiento";
   if (t.estado === "traslado_en_curso") return "En camino";
   return TERMINOLOGIA_USUARIO[t.estado] ?? ETIQUETA_ESTADO_TRASLADO[t.estado] ?? "En seguimiento";
-}
-
-function formatearEstadoReciente(estado: string | null): string {
-  if (!estado) return "Registrado";
-  switch (estado) {
-    case "servicio_cerrado":
-    case "entrega_confirmada":
-      return "Finalizado";
-    case "solicitud_creada":
-    case "servicio_confirmado":
-    case "pendiente_de_conductor":
-    case "conductor_asignado":
-      return "Programado";
-    case "traslado_en_curso":
-      return "En camino";
-    case "pago_pendiente":
-      return "Pendiente de pago";
-    default:
-      return TERMINOLOGIA_USUARIO[estado] ?? "Registrado";
-  }
-}
-
-function estadoBadgeClase(estado: string | null): string {
-  switch (estado) {
-    case "servicio_cerrado":
-    case "entrega_confirmada":
-      return "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300";
-    case "solicitud_creada":
-    case "servicio_confirmado":
-    case "pendiente_de_conductor":
-    case "conductor_asignado":
-      return "bg-blue-50 text-blue-700 dark:bg-blue-950/50 dark:text-blue-300";
-    case "traslado_en_curso":
-      return "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300";
-    case "pago_pendiente":
-      return "bg-amber-50 text-amber-800 dark:bg-amber-950/50 dark:text-amber-300";
-    default:
-      return "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300";
-  }
 }
 
 function tiempoEstimadoTexto(horas: number | null): string {
@@ -205,11 +166,6 @@ export function InicioUsuario({ usuario, traslados, conductorFotoUrl = null, veh
   const detalleActivoHref = viajeActivo?.traslado_id ? `/viajes/${viajeActivo.traslado_id}` : "/mis-viajes";
   const ultimoTraslado = viajeActivo ?? traslados[0];
   const pasaporteHref = ultimoTraslado?.traslado_id ? `/viajes/${ultimoTraslado.traslado_id}` : "/pasaporte";
-
-  // Traslados recientes (excluyendo el activo para no duplicar información crítica)
-  const trasladosRecientes = traslados
-    .filter((t) => t.traslado_id !== viajeActivo?.traslado_id)
-    .slice(0, 3);
 
   const evidenciaAcceso = viajeActivo ? (
     <Link
@@ -423,55 +379,7 @@ export function InicioUsuario({ usuario, traslados, conductorFotoUrl = null, veh
         </div>
       </section>
 
-      {/* 2. Traslados Recientes (Sección de lista) */}
-      <section aria-labelledby="titulo-traslados-recientes" className="flex flex-col gap-3">
-        <div className="flex items-center justify-between">
-          <h2 id="titulo-traslados-recientes" className="text-[16px] font-extrabold text-[var(--user-color-primary)]">
-            Traslados recientes
-          </h2>
-          <Link
-            href="/mis-viajes"
-            className="text-[12.5px] font-bold text-[var(--user-color-primary)] hover:underline flex items-center gap-0.5"
-          >
-            Ver todos <span aria-hidden="true">&gt;</span>
-          </Link>
-        </div>
-
-        {trasladosRecientes.length > 0 ? (
-          <div className="dashboard-carousel" role="region" aria-label="Carrusel de traslados recientes" tabIndex={0}>
-            {trasladosRecientes.map((t) => {
-              const estadoFormateado = formatearEstadoReciente(t.estado);
-              return (
-                <Link
-                  key={t.traslado_id}
-                  href={`/viajes/${t.traslado_id}`}
-                  className="flex items-center justify-between gap-3 rounded-2xl border border-[var(--user-color-border)] bg-[var(--user-color-surface)] p-3.5 sm:p-4 shadow-xs transition hover:border-[var(--user-color-primary)] hover:bg-[var(--user-color-surface-soft)] active:scale-[0.99]"
-                >
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate text-[14px] font-extrabold text-[var(--user-color-primary)]">
-                      {vehiculoTitulo(t)}
-                    </p>
-                    <p className="mt-0.5 truncate text-[12px] font-medium text-[var(--user-color-muted)]">
-                      {ciudadOrigen(t)} → {ciudadDestino(t)}
-                    </p>
-                  </div>
-                  <div className="shrink-0 text-right">
-                    <span className={`inline-flex items-center rounded-full px-2.5 py-1 text-[11px] font-bold ${estadoBadgeClase(t.estado)}`}>
-                      {estadoFormateado}
-                    </span>
-                  </div>
-                </Link>
-              );
-            })}
-          </div>
-        ) : (
-          <div className="rounded-2xl border border-dashed border-[var(--user-color-border)] bg-[var(--user-color-surface-soft)] p-5 text-center text-[12.5px] font-medium text-[var(--user-color-muted)]">
-            Tus traslados anteriores o programados aparecerán aquí.
-          </div>
-        )}
-      </section>
-
-      {/* 3. Banner de Ayuda / Soporte */}
+      {/* 2. Banner de Ayuda / Soporte */}
       <Link
         href="/soporte"
         aria-label="¿Necesitas ayuda? Soporte 24/7 durante tu traslado"

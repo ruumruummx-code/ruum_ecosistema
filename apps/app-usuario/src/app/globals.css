@@ -1791,8 +1791,6 @@ input::placeholder, textarea::placeholder {
 .user-dashboard-notifications { display: inline-flex; align-items: center; justify-content: center; min-width: 44px; min-height: 44px; border-radius: 12px; }
 .user-dashboard #greetingBlock { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
 .user-dashboard #saludo-usuario { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.dashboard-carousel { display: flex; gap: 10px; overflow-x: auto; overscroll-behavior-x: contain; scroll-snap-type: x mandatory; padding: 2px 2px 6px; }
-.dashboard-carousel > a { flex: 0 0 88%; min-width: 0; scroll-snap-align: start; }
 .dashboard-route > p:first-of-type { min-width: 0; flex: 1; }
 .dashboard-route > p:last-of-type:not(:first-of-type) { flex-shrink: 0; margin: 0; }
 .dashboard-evidence { min-width: 44px; min-height: 44px; justify-content: center; }
@@ -1829,10 +1827,6 @@ input::placeholder, textarea::placeholder {
   .user-dashboard section[aria-label="Seguridad y confianza"] { padding: 6px 10px; gap: 8px; }
   .user-dashboard section[aria-label="Seguridad y confianza"] > span { width: 28px; height: 28px; }
   .user-dashboard section[aria-label="Seguridad y confianza"] p { font-size: 10px; }
-  .user-dashboard section[aria-labelledby="titulo-traslados-recientes"] { gap: 2px; }
-  .user-dashboard #titulo-traslados-recientes { font-size: 14px; }
-  .user-dashboard section[aria-labelledby="titulo-traslados-recientes"] > div:first-child { min-height: 44px; }
-  .user-dashboard .dashboard-carousel > a { padding: 10px; }
   .user-dashboard > a:last-child { padding: 6px 10px; gap: 6px; }
   .user-dashboard > a:last-child > div { gap: 6px; }
   .user-dashboard > a:last-child span[aria-hidden] { width: 28px; height: 28px; }

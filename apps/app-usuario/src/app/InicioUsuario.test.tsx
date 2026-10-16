@@ -120,7 +120,7 @@ describe("InicioUsuario", () => {
     expect(within(linkPasaporte).getByText("Digital")).toBeInTheDocument();
   });
 
-  it("muestra el saludo, traslados recientes y banner de soporte", () => {
+  it("muestra el traslado activo y soporte sin duplicar el historial", () => {
     const trasladoActivo = {
       traslado_id: "activo-123",
       estado: "traslado_en_curso",
@@ -181,16 +181,12 @@ describe("InicioUsuario", () => {
     // El CTA universal lo proporciona NavegacionUsuario.
     expect(screen.queryByRole("link", { name: /Solicitar traslado/i })).not.toBeInTheDocument();
 
-    // Traslados recientes
-    expect(screen.getByRole("region", { name: "Carrusel de traslados recientes" })).toHaveAttribute("tabindex", "0");
-    expect(screen.getByText("Traslados recientes")).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: /Ver todos/i })).toHaveAttribute("href", "/mis-viajes");
-    expect(screen.getByText("Honda CR-V 2022")).toBeInTheDocument();
-    expect(screen.getByText("Monterrey → Saltillo")).toBeInTheDocument();
-    expect(screen.getByText("Programado")).toBeInTheDocument();
-    expect(screen.getByText("Nissan Versa 2020")).toBeInTheDocument();
-    expect(screen.getByText("CDMX → Puebla")).toBeInTheDocument();
-    expect(screen.getByText("Finalizado")).toBeInTheDocument();
+    // Los traslados secundarios se consultan exclusivamente en la pestaña Traslados.
+    expect(screen.queryByText("Traslados recientes")).not.toBeInTheDocument();
+    expect(screen.queryByRole("region", { name: "Carrusel de traslados recientes" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: /Ver todos/i })).not.toBeInTheDocument();
+    expect(screen.queryByText("Honda CR-V 2022")).not.toBeInTheDocument();
+    expect(screen.queryByText("Nissan Versa 2020")).not.toBeInTheDocument();
 
     // Soporte
     const soporte = screen.getByRole("link", { name: /¿Necesitas ayuda\? Soporte 24\/7/i });
