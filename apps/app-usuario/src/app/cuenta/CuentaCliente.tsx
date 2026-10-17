@@ -101,6 +101,17 @@ export function CuentaCliente({ seccionInicial = null, usuario, correoRegistro =
     try {
       const { error } = await crearClienteNavegador().auth.signOut();
       if (error) throw error;
+
+      // RC-12: Limpiar el borrador del wizard al salir para evitar que
+      // otro usuario en el mismo dispositivo vea los datos del anterior.
+      // El borrador contiene nombres de contactos y direcciones.
+      try {
+        localStorage.removeItem("ruumruum.traslados-nuevo.borrador.v2");
+      } catch {
+        // Si localStorage no está disponible (modo incógnito, etc.),
+        // no hay nada que limpiar.
+      }
+
       router.replace("/login");
       router.refresh();
     } catch {

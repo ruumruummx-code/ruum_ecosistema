@@ -5,7 +5,7 @@
 
 import Stripe from "npm:stripe@^17";
 import { createClient, type SupabaseClient } from "npm:@supabase/supabase-js@2";
-import { decidirIntentExistente, montoAutorizadoParaCobro, validarRangoMontoCobro } from "./logica.ts";
+import { claveIdempotenciaStripe, decidirIntentExistente, montoAutorizadoParaCobro, validarRangoMontoCobro } from "./logica.ts";
 
 const SISTEMA_ACTOR_ID = "00000000-0000-0000-0000-000000000000";
 
@@ -234,6 +234,11 @@ Deno.serve(async (req) => {
     return respuestaJson({ error: errorPagoPendiente.message }, 500);
   }
 
+  // RC-05: clave de idempotencia estable por operación de cobro. Dos pestañas
+  // o reintentos concurrentes para el mismo traslado obtienen el MISMO
+  // PaymentIntent en Stripe en vez de crear dos.
+  let idempotencyKey = claveIdempotenciaStripe(traslado.id);
+
   if (pagoPendiente?.stripe_payment_intent_id) {
     let intentExistente: Stripe.PaymentIntent;
     try {
@@ -271,6 +276,9 @@ Deno.serve(async (req) => {
         console.error("Error cerrando PaymentIntent cancelado:", errorCierre);
         return respuestaJson({ error: "No se pudo reiniciar el intento de pago" }, 500);
       }
+      // El PI anterior está muerto: la nueva clave incluye su id para que
+      // Stripe NO devuelva el PaymentIntent cancelado al reintentar.
+      idempotencyKey = claveIdempotenciaStripe(traslado.id, intentExistente.id);
     } else {
       return respuestaJson({ clientSecret: intentExistente.client_secret });
     }
@@ -283,6 +291,9 @@ Deno.serve(async (req) => {
       currency: "mxn",
       metadata: { traslado_id: traslado.id },
       automatic_payment_methods: { enabled: true }
+    }, {
+      // RC-05: idempotencia ante concurrencia (ver claveIdempotenciaStripe).
+      idempotencyKey
     });
   } catch (error) {
     console.error("Error creando PaymentIntent:", error);
@@ -302,6 +313,12 @@ Deno.serve(async (req) => {
   });
 
   if (errorPago) {
+    // RC-05: carrera. Otra petición concurrente ya registró este mismo PI
+    // (unicidad por stripe_payment_intent_id). Devolvemos su clientSecret en
+    // vez de un 500: ambas pestañas cobran el MISMO intento.
+    if ((errorPago as { code?: string }).code === "23505") {
+      return respuestaJson({ clientSecret: intent.client_secret });
+    }
     return respuestaJson({ error: errorPago.message }, 500);
   }
 

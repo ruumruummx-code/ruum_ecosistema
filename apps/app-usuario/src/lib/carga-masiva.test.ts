@@ -31,7 +31,10 @@ describe("plantilla oficial masiva", () => {
     expect(validada.errores).toHaveProperty("condicion");
     expect(validada.errores).toHaveProperty("entregaTelefono");
     expect(validarFila({ ...invalida, entregaTelefono: "5512345678" }, 0).estado).toBe("error");
-  }, 30000);
+    // RC-13: la plantilla oficial pesa ~4.6 MB (embebe los catálogos de CP en
+    // sheet5/sheet6), así que el parseo con ExcelJS supera los 30 s en frío.
+    // El test es válido; se le da margen real mientras se reduce el archivo.
+  }, 120000);
   it("conserva ceros de CP y no interpreta fórmulas ni objetos como texto", () => {
     expect(normalizarFilaPlantilla({ origen_codigo_postal: "6700" }).origenCodigoPostal).toBe("06700");
     expect(valorCelda({ formula: "SUM(A1)", result: "06700" })).toBe("06700");

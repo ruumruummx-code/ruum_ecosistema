@@ -1,13 +1,16 @@
 // Mock mínimo de PostgREST (lo que @supabase/supabase-js termina llamando)
 // para poder correr el index.ts REAL del webhook de Stripe sin un proyecto
-// de Supabase desplegado. Entiende las tablas que el webhook toca (pagos,
-// viajes y registro_auditoria como sumidero de auditoría), y solo las formas
-// de query que ese archivo emite.
+// de Supabase desplegado.
+//
+// RC-04: tras volver el webhook transaccional, el handler ya no hace PATCH
+// sueltos: llama a la RPC `procesar_pago_stripe` (que en producción ejecuta la
+// transacción real). Este mock emula esa RPC con el MISMO mapeo de estados que
+// la función SQL / logica.ts, para poder verificar el resultado final.
 
 import http from "node:http";
 import { URL } from "node:url";
 
-// pi_xxx -> { traslado_id, stripe_event_id }  (estado del row en `pagos`)
+// pi_xxx -> { traslado_id, stripe_event_id, estado }
 const PAGOS = new Map();
 // traslado_id -> { estado, tipo_pago }
 const TRASLADOS = new Map();
@@ -22,24 +25,61 @@ function semilla() {
   AUDITORIA.length = 0;
   requestsLog.length = 0;
 
-  PAGOS.set("pi_test_alcierre", { traslado_id: "traslado-alcierre", stripe_event_id: null });
+  PAGOS.set("pi_test_alcierre", { traslado_id: "traslado-alcierre", stripe_event_id: null, estado: "pendiente" });
   TRASLADOS.set("traslado-alcierre", { estado: "pago_pendiente", tipo_pago: "al_cierre" });
 
-  PAGOS.set("pi_test_anticipado", { traslado_id: "traslado-anticipado", stripe_event_id: null });
+  PAGOS.set("pi_test_anticipado", { traslado_id: "traslado-anticipado", stripe_event_id: null, estado: "pendiente" });
   TRASLADOS.set("traslado-anticipado", { estado: "solicitud_creada", tipo_pago: "anticipado" });
 
-  PAGOS.set("pi_test_idem", { traslado_id: "traslado-idem", stripe_event_id: "evt_test_idem_1" });
-  TRASLADOS.set("traslado-idem", { estado: "pago_pendiente", tipo_pago: "al_cierre" });
+  PAGOS.set("pi_test_idem", { traslado_id: "traslado-idem", stripe_event_id: "evt_test_idem_1", estado: "completado" });
+  TRASLADOS.set("traslado-idem", { estado: "pago_completado", tipo_pago: "al_cierre" });
 
-  PAGOS.set("pi_test_fallido", { traslado_id: "traslado-fallido", stripe_event_id: null });
+  PAGOS.set("pi_test_fallido", { traslado_id: "traslado-fallido", stripe_event_id: null, estado: "pendiente" });
   TRASLADOS.set("traslado-fallido", { estado: "pago_pendiente", tipo_pago: "al_cierre" });
 }
 semilla();
 
-function eqValor(parametro) {
-  // PostgREST: ?columna=eq.valor
-  if (!parametro || !parametro.startsWith("eq.")) return null;
-  return decodeURIComponent(parametro.slice(3));
+// Mismo mapeo que logica.ts::estadoTrasladoSiguienteTrasPago y la función SQL.
+function estadoTrasladoSiguiente(estadoActual, tipoPago, estadoPago) {
+  if (estadoPago !== "completado") return null;
+  if (tipoPago !== "anticipado" && tipoPago !== "al_cierre") return null;
+  if ((estadoActual === "cotizacion_aceptada" || estadoActual === "cotizacion_generada") && tipoPago === "anticipado") {
+    return "servicio_confirmado";
+  }
+  if (estadoActual === "solicitud_creada" && tipoPago === "anticipado") {
+    return "documentacion_pendiente";
+  }
+  if (estadoActual === "entrega_confirmada" || estadoActual === "pago_pendiente") {
+    return "pago_completado";
+  }
+  return null;
+}
+
+function procesarPagoStripe({ p_stripe_event_id, p_stripe_payment_intent_id, p_estado_pago }) {
+  const pago = PAGOS.get(p_stripe_payment_intent_id);
+  if (!pago) return { status: 404, body: { message: `Pago no encontrado para PaymentIntent ${p_stripe_payment_intent_id}` } };
+
+  const traslado = TRASLADOS.get(pago.traslado_id);
+  const nuevoEstado = estadoTrasladoSiguiente(traslado?.estado, traslado?.tipo_pago, p_estado_pago);
+
+  if (pago.stripe_event_id === p_stripe_event_id && nuevoEstado === null) {
+    return { status: 200, body: { ok: true, ya_procesado: true } };
+  }
+
+  const eventoCambia = pago.stripe_event_id !== p_stripe_event_id;
+  pago.estado = p_estado_pago;
+  pago.stripe_event_id = p_stripe_event_id;
+
+  if (eventoCambia) {
+    AUDITORIA.push({ traslado_id: pago.traslado_id, evento: "registro_pago", datos: { stripe_event_id: p_stripe_event_id, estado_pago: p_estado_pago } });
+  }
+  if (nuevoEstado) {
+    const anterior = traslado.estado;
+    traslado.estado = nuevoEstado;
+    AUDITORIA.push({ traslado_id: pago.traslado_id, evento: "registro_pago", datos: { estado_anterior: anterior, estado_nuevo: nuevoEstado } });
+  }
+
+  return { status: 200, body: { ok: true, ya_procesado: false } };
 }
 
 const servidor = http.createServer((req, res) => {
@@ -58,11 +98,20 @@ const servidor = http.createServer((req, res) => {
 
     requestsLog.push({ method: req.method, path: url.pathname, query: url.search, body: parsedBody });
 
-    // Endpoint de depuración para que el runner del test inspeccione qué llamó el webhook de verdad.
     if (url.pathname === "/__requests" && req.method === "GET") {
-      requestsLog.pop(); // no es una llamada real del webhook — no contaminar el log que se está leyendo
+      requestsLog.pop();
       res.writeHead(200, { "content-type": "application/json" });
       res.end(JSON.stringify(requestsLog));
+      return;
+    }
+    if (url.pathname === "/__state" && req.method === "GET") {
+      requestsLog.pop();
+      res.writeHead(200, { "content-type": "application/json" });
+      res.end(JSON.stringify({
+        pagos: Object.fromEntries(PAGOS),
+        traslados: Object.fromEntries(TRASLADOS),
+        auditoria: AUDITORIA,
+      }));
       return;
     }
     if (url.pathname === "/__reset" && req.method === "POST") {
@@ -72,52 +121,11 @@ const servidor = http.createServer((req, res) => {
       return;
     }
 
-    if (url.pathname === "/rest/v1/pagos") {
-      const piId = eqValor(url.searchParams.get("stripe_payment_intent_id"));
-
-      if (req.method === "GET") {
-        const fila = piId ? PAGOS.get(piId) : null;
-        res.writeHead(200, { "content-type": "application/json" });
-        res.end(fila ? JSON.stringify(fila) : "null");
-        return;
-      }
-
-      if (req.method === "PATCH") {
-        const fila = piId ? PAGOS.get(piId) : null;
-        if (fila && parsedBody) Object.assign(fila, parsedBody);
-        res.writeHead(204);
-        res.end();
-        return;
-      }
-    }
-
-    if (url.pathname === "/rest/v1/traslados") {
-      const trasladoId = eqValor(url.searchParams.get("id"));
-
-      if (req.method === "GET") {
-        const fila = trasladoId ? TRASLADOS.get(trasladoId) : null;
-        res.writeHead(200, { "content-type": "application/json" });
-        res.end(fila ? JSON.stringify(fila) : "null");
-        return;
-      }
-
-      if (req.method === "PATCH") {
-        const fila = trasladoId ? TRASLADOS.get(trasladoId) : null;
-        if (fila && parsedBody) Object.assign(fila, parsedBody);
-        res.writeHead(204);
-        res.end();
-        return;
-      }
-    }
-
-    if (url.pathname === "/rest/v1/registro_auditoria") {
-      if (req.method === "POST") {
-        const filas = Array.isArray(parsedBody) ? parsedBody : [parsedBody];
-        for (const fila of filas) AUDITORIA.push(fila);
-        res.writeHead(201, { "content-type": "application/json" });
-        res.end(JSON.stringify(filas));
-        return;
-      }
+    if (url.pathname === "/rest/v1/rpc/procesar_pago_stripe" && req.method === "POST") {
+      const resultado = procesarPagoStripe(parsedBody ?? {});
+      res.writeHead(200, { "content-type": "application/json" });
+      res.end(JSON.stringify(resultado.body));
+      return;
     }
 
     res.writeHead(404, { "content-type": "application/json" });

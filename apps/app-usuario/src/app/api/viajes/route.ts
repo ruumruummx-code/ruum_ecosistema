@@ -103,13 +103,35 @@ export async function POST(request: NextRequest) {
     /* M10: el superRefine de Zod solo comprueba vehiculoSeleccionadoId contra
        vehiculosUsuarioIds, un array que envía el propio cliente. La pertenencia
        real se verifica aquí contra la BD (RLS): un id ajeno o inventado se
-       rechaza con 403 aunque venga en el array del cliente. */
+       rechaza con 403 aunque venga en el array del cliente.
+
+       RC-07: user.id es el Auth ID (auth_user_id), pero vehiculos.usuario_id
+       es el ID interno del perfil. Es necesario resolver el perfil primero. */
     if (parsed.data.vehiculoSeleccionadoId) {
-      const { listarVehiculosDeUsuario } = await import("@ruum/api/services");
-      const propios = await listarVehiculosDeUsuario(cliente, user.id);
+      const { listarVehiculosDeUsuario, obtenerUsuarioActual } = await import("@ruum/api/services");
+
+      // RC-07: user.id es el Auth ID (auth_user_id), pero vehiculos.usuario_id
+      // es el ID interno del perfil. El servicio resuelve el perfil de la sesión
+      // (buscándolo por auth_user_id) y devuelve su id interno.
+      let perfil: { id: string } | null = null;
+      try {
+        perfil = await obtenerUsuarioActual(cliente);
+      } catch (errorPerfil) {
+        console.warn("[api/viajes] no se pudo obtener el perfil del usuario", { usuario: user.id, errorPerfil });
+      }
+
+      if (!perfil) {
+        return NextResponse.json(
+          { error: "No se pudo verificar la propiedad del vehículo." },
+          { status: 500 }
+        );
+      }
+
+      // Usar el ID interno del perfil para listar los vehículos
+      const propios = await listarVehiculosDeUsuario(cliente, perfil.id);
       const esPropio = propios.some((v) => v.id === parsed.data.vehiculoSeleccionadoId);
       if (!esPropio) {
-        console.warn("[api/viajes] vehiculo no pertenece al usuario", { usuario: user.id });
+        console.warn("[api/viajes] vehiculo no pertenece al usuario", { usuario: user.id, perfil: perfil.id });
         return NextResponse.json(
           { error: "El vehículo seleccionado no pertenece al usuario." },
           { status: 403 }

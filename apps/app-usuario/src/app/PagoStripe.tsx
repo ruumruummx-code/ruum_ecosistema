@@ -325,13 +325,18 @@ function FormularioPagoReal({
   const [enviando, setEnviando] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [elementoListo, setElementoListo] = useState(false);
+  // RC-06: métodos asíncronos (OXXO/SPEI) quedan en `processing`; no es un
+  // pago confirmado todavía.
+  const [enProceso, setEnProceso] = useState(false);
   const enviandoRef = useRef(false);
   useEffect(() => {
     onEstadoPago?.({
-      listo: Boolean(stripe && elements && elementoListo),
+      // RC-06: en estado "en proceso" el formulario no se monta; se expone
+      // `listo:false` para que el botón externo (modo compacto) se deshabilite.
+      listo: enProceso ? false : Boolean(stripe && elements && elementoListo),
       procesando: enviando,
     });
-  }, [stripe, elements, elementoListo, enviando, onEstadoPago]);
+  }, [stripe, elements, elementoListo, enviando, enProceso, onEstadoPago]);
 
   async function confirmar(e: React.FormEvent) {
     e.preventDefault();
@@ -361,11 +366,18 @@ function FormularioPagoReal({
         return;
       }
 
-      if (
-        paymentIntent?.status === "succeeded" ||
-        paymentIntent?.status === "processing"
-      ) {
+      if (paymentIntent?.status === "succeeded") {
         await onPagado();
+        setEnviando(false);
+        enviandoRef.current = false;
+        return;
+      }
+
+      // RC-06: "processing" NO es un pago confirmado (métodos asíncronos como
+      // OXXO o transferencia). No se llama onPagado; se muestra un estado
+      // pendiente hasta que el webhook confirme el cobro.
+      if (paymentIntent?.status === "processing") {
+        setEnProceso(true);
         setEnviando(false);
         enviandoRef.current = false;
         return;
@@ -385,6 +397,22 @@ function FormularioPagoReal({
       setEnviando(false);
       enviandoRef.current = false;
     }
+  }
+
+  if (enProceso) {
+    return (
+      <div className="grid gap-3 text-left" role="status" aria-live="polite" aria-atomic="true">
+        <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-3.5">
+          <p className="font-display text-xs font-bold text-amber-300">
+            Tu pago está en proceso de confirmación
+          </p>
+          <p className="mt-1 font-body text-[11px] leading-relaxed text-[#94A3B8]">
+            Elegiste un método que se acredita en minutos u horas. Te avisaremos
+            en cuanto Stripe confirme el cobro; no necesitas pagar de nuevo.
+          </p>
+        </div>
+      </div>
+    );
   }
 
   return (

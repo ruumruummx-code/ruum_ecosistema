@@ -1,304 +1,132 @@
-import { Field } from "@ruum/ui";
-import type { CampoRegistroConductor } from "@ruum/shared/validacion";
-import { DatosSensiblesTooltip } from "../cuenta/datos-sensibles";
-import {
-  formatoTelefonoNacional,
-  calcularCursorTelefono,
-  soloDigitos,
-  formatoCurpMask,
-  esCurpValida
-} from "./registration-validation";
+import { useEffect, useRef, useState } from "react";
+import { validarCampoRegistroConductor, type CampoRegistroConductor } from "@ruum/shared/validacion";
+import { consultarCodigoPostalMx } from "../../lib/codigos-postales";
+import { DenseField } from "./DenseField";
 import { SelectField } from "./SelectField";
-import { useRef, useState } from "react";
+import { RegistrationSheet } from "./RegistrationSheet";
+import { formatoCurpMask, formatoTelefonoNacional, soloDigitos } from "./registration-validation";
+import styles from "./registration.module.css";
 
-export function IdentityStep({
-  nombre,
-  setNombre,
-  apellidos,
-  setApellidos,
-  curp,
-  setCurp,
-  codigoPostal,
-  setCodigoPostal,
-  estado,
-  setEstado,
-  ciudad,
-  setCiudad,
-  ciudades,
-  setCiudades,
-  colonia,
-  setColonia,
-  colonias,
-  setColonias,
-  calle,
-  setCalle,
-  numero,
-  setNumero,
-  referencias,
-  setReferencias,
-  contactoEmergenciaNombre,
-  setContactoEmergenciaNombre,
-  contactoEmergenciaTelefono,
-  setContactoEmergenciaTelefono,
-  consultandoCp,
-  erroresCampos,
-  limpiarErrorCampo,
-  validarCampo,
-  validarCurp,
-  validarTelefono,
-  buscarCodigoPostal
-}: {
-  nombre: string;
-  setNombre: (valor: string) => void;
-  apellidos: string;
-  setApellidos: (valor: string) => void;
-  curp: string;
-  setCurp: (valor: string) => void;
-  codigoPostal: string;
-  setCodigoPostal: (valor: string) => void;
-  estado: string;
-  setEstado: (valor: string) => void;
-  ciudad: string;
-  setCiudad: (valor: string) => void;
-  ciudades: string[];
-  setCiudades: (valor: string[]) => void;
-  colonia: string;
-  setColonia: (valor: string) => void;
-  colonias: string[];
-  setColonias: (valor: string[]) => void;
-  calle: string;
-  setCalle: (valor: string) => void;
-  numero: string;
-  setNumero: (valor: string) => void;
-  referencias: string;
-  setReferencias: (valor: string) => void;
-  contactoEmergenciaNombre: string;
-  setContactoEmergenciaNombre: (valor: string) => void;
-  contactoEmergenciaTelefono: string;
-  setContactoEmergenciaTelefono: (valor: string) => void;
-  consultandoCp: boolean;
-  erroresCampos: Record<string, string>;
-  limpiarErrorCampo: (campo: string) => void;
-  validarCampo: (campo: CampoRegistroConductor, valor: string) => boolean;
+type TextKey = "nombre" | "apellidos" | "curp" | "codigoPostal" | "estado" | "ciudad" | "colonia" | "calle" | "numero" | "referencias" | "contactoEmergenciaNombre" | "contactoEmergenciaTelefono";
+type IdentityProps = Record<TextKey, string> & { [K in TextKey as `set${Capitalize<K>}`]: (value: string) => void } & {
+  ciudades: string[]; setCiudades: (value: string[]) => void;
+  colonias: string[]; setColonias: (value: string[]) => void;
+  consultandoCp: boolean; erroresCampos: Record<string, string>;
+  limpiarErrorCampo: (key: string) => void;
+  validarCampo: (key: CampoRegistroConductor, value: string) => boolean;
   validarCurp: () => boolean;
-  validarTelefono: (campo: "telefono" | "contactoEmergenciaTelefono", valor: string, setter: (valor: string) => void) => boolean;
+  validarTelefono: (key: "telefono" | "contactoEmergenciaTelefono", value: string, setter: (value: string) => void) => boolean;
   buscarCodigoPostal: (cp: string) => void;
-}) {
-  const telefonoContactoRef = useRef<HTMLInputElement>(null);
-  const curpInputRef = useRef<HTMLInputElement>(null);
-  const valorAnteriorTelefonoRef = useRef("");
-  const [errorCurpTemp, setErroresCurpTemp] = useState("");
+};
+type AddressKey = "codigoPostal" | "estado" | "ciudad" | "colonia" | "calle" | "numero" | "referencias";
+const ADDRESS_KEYS: AddressKey[] = ["codigoPostal", "estado", "ciudad", "colonia", "calle", "numero", "referencias"];
 
-  // Manejar input del teléfono de contacto con máscara fluida
-  const manejarCambioTelefonoContacto = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const input = e.target;
-    const valorNuevo = input.value;
-    const cursorPos = input.selectionStart ?? 0;
-    const nuevaPosicion = calcularCursorTelefono(valorAnteriorTelefonoRef.current, valorNuevo, cursorPos);
+export function IdentityStep(p: IdentityProps) {
+  const [sheet, setSheet] = useState<"address" | "contact" | null>(null);
+  const [address, setAddress] = useState<Pick<IdentityProps, AddressKey>>({ codigoPostal: "", estado: "", ciudad: "", colonia: "", calle: "", numero: "", referencias: "" });
+  const [cities, setCities] = useState<string[]>([]);
+  const [colonies, setColonies] = useState<string[]>([]);
+  const [contact, setContact] = useState({ contactoEmergenciaNombre: "", contactoEmergenciaTelefono: "" });
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [lookupMessage, setLookupMessage] = useState("");
+  const [loadingCp, setLoadingCp] = useState(false);
+  const lookupRef = useRef(0);
+  useEffect(() => () => { lookupRef.current++; }, []);
+  const completeAddress = ADDRESS_KEYS.every((key) => !validarCampoRegistroConductor(key, p[key]));
+  const completeContact = !validarCampoRegistroConductor("contactoEmergenciaNombre", p.contactoEmergenciaNombre) && !validarCampoRegistroConductor("contactoEmergenciaTelefono", p.contactoEmergenciaTelefono);
 
-    const soloNumeros = soloDigitos(valorNuevo);
-    setContactoEmergenciaTelefono(soloNumeros);
-    limpiarErrorCampo("contactoEmergenciaTelefono");
-    valorAnteriorTelefonoRef.current = valorNuevo;
-
-    requestAnimationFrame(() => {
-      if (telefonoContactoRef.current) {
-        telefonoContactoRef.current.value = formatoTelefonoNacional(soloNumeros);
-        telefonoContactoRef.current.setSelectionRange(nuevaPosicion, nuevaPosicion);
-      }
-    });
-  };
-
-  const manejarBlurTelefonoContacto = () => {
-    if (telefonoContactoRef.current) {
-      telefonoContactoRef.current.value = formatoTelefonoNacional(contactoEmergenciaTelefono);
+  function close() {
+    lookupRef.current++;
+    setSheet(null);
+    setLoadingCp(false);
+  }
+  function open(kind: "address" | "contact") {
+    setErrors({}); setLookupMessage("");
+    if (kind === "address") {
+      setAddress({ codigoPostal: p.codigoPostal, estado: p.estado, ciudad: p.ciudad, colonia: p.colonia, calle: p.calle, numero: p.numero, referencias: p.referencias });
+      setCities(p.ciudades); setColonies(p.colonias);
+    } else setContact({ contactoEmergenciaNombre: p.contactoEmergenciaNombre, contactoEmergenciaTelefono: p.contactoEmergenciaTelefono });
+    setSheet(kind);
+  }
+  function changeAddress(key: AddressKey, value: string) {
+    setAddress((previous) => ({ ...previous, [key]: value }));
+    setErrors((previous) => ({ ...previous, [key]: "" }));
+  }
+  async function changePostalCode(value: string) {
+    const cp = soloDigitos(value, 5);
+    const request = ++lookupRef.current;
+    setAddress((previous) => ({ ...previous, codigoPostal: cp, estado: "", ciudad: "", colonia: "" }));
+    setCities([]); setColonies([]); setErrors({}); setLookupMessage(""); setLoadingCp(cp.length === 5);
+    if (cp.length !== 5) return;
+    try {
+      const data = await consultarCodigoPostalMx(cp);
+      if (request !== lookupRef.current) return;
+      if (!data) throw new Error("cp_not_found");
+      setAddress((previous) => ({ ...previous, estado: data.estado, ciudad: data.ciudades[0] ?? "", colonia: data.colonias[0] ?? "" }));
+      setCities(data.ciudades); setColonies(data.colonias);
+    } catch {
+      if (request === lookupRef.current) setLookupMessage("No encontramos el CP. Verifícalo o captura el domicilio manualmente.");
+    } finally {
+      if (request === lookupRef.current) setLoadingCp(false);
     }
-    validarTelefono("contactoEmergenciaTelefono", contactoEmergenciaTelefono, setContactoEmergenciaTelefono);
-  };
-
-  // Manejar input de CURP con formato automático, mayúsculas y validación en tiempo real
-  const manejarCambioCurp = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const valor = e.target.value;
-    const valorFormateado = formatoCurpMask(valor).toUpperCase();
-    setCurp(valorFormateado);
-    limpiarErrorCampo("curp");
-
-    // Validación en tiempo real: si tiene 18 caracteres, verificar formato
-    if (valorFormateado.length === 18 && !esCurpValida(valorFormateado)) {
-      setErroresCurpTemp("Formato de CURP inválido. Debe ser 18 caracteres alfanuméricos.");
-    } else if (valorFormateado.length === 18 && esCurpValida(valorFormateado)) {
-      setErroresCurpTemp("");
-    } else {
-      setErroresCurpTemp("");
-    }
-  };
-
+  }
+  function saveAddress() {
+    const nextErrors = Object.fromEntries(ADDRESS_KEYS.map((key) => [key, validarCampoRegistroConductor(key, address[key])]));
+    setErrors(nextErrors);
+    if (Object.values(nextErrors).some(Boolean)) return false;
+    p.setCodigoPostal(address.codigoPostal); p.setEstado(address.estado); p.setCiudad(address.ciudad);
+    p.setColonia(address.colonia); p.setCalle(address.calle); p.setNumero(address.numero); p.setReferencias(address.referencias);
+    p.setCiudades(cities); p.setColonias(colonies);
+    ADDRESS_KEYS.forEach(p.limpiarErrorCampo); return true;
+  }
+  function saveContact() {
+    const nextErrors = {
+      contactoEmergenciaNombre: validarCampoRegistroConductor("contactoEmergenciaNombre", contact.contactoEmergenciaNombre),
+      contactoEmergenciaTelefono: validarCampoRegistroConductor("contactoEmergenciaTelefono", contact.contactoEmergenciaTelefono)
+    };
+    setErrors(nextErrors);
+    if (Object.values(nextErrors).some(Boolean)) return false;
+    p.setContactoEmergenciaNombre(contact.contactoEmergenciaNombre);
+    p.setContactoEmergenciaTelefono(contact.contactoEmergenciaTelefono);
+    p.limpiarErrorCampo("contactoEmergenciaNombre"); p.limpiarErrorCampo("contactoEmergenciaTelefono"); return true;
+  }
   return (
-    <fieldset className="grid gap-4">
-      <div className="grid gap-4 sm:grid-cols-2">
-        <Field etiqueta="Nombre (s)" value={nombre} onChange={(e) => { setNombre(e.target.value); limpiarErrorCampo("nombre"); }} onBlur={() => validarCampo("nombre", nombre)} error={erroresCampos.nombre || undefined} required autoComplete="given-name" aria-required="true" />
-        <Field etiqueta="Apellido (s)" value={apellidos} onChange={(e) => { setApellidos(e.target.value); limpiarErrorCampo("apellidos"); }} onBlur={() => validarCampo("apellidos", apellidos)} error={erroresCampos.apellidos || undefined} required autoComplete="family-name" aria-required="true" />
+    <fieldset className={styles.fields}>
+      <legend className="sr-only">Identidad y domicilio</legend>
+      <div className={styles.row}>
+        <DenseField etiqueta="Nombre" placeholder="Como en tu identificación" value={p.nombre} onChange={(e) => { p.setNombre(e.target.value); p.limpiarErrorCampo("nombre"); }} onBlur={() => p.validarCampo("nombre", p.nombre)} error={p.erroresCampos.nombre} required autoComplete="given-name" />
+        <DenseField etiqueta="Apellido" placeholder="Como en tu identificación" value={p.apellidos} onChange={(e) => { p.setApellidos(e.target.value); p.limpiarErrorCampo("apellidos"); }} onBlur={() => p.validarCampo("apellidos", p.apellidos)} error={p.erroresCampos.apellidos} required autoComplete="family-name" />
       </div>
-      <div className="flex items-start gap-2">
-        <div className="relative flex-1">
-          <Field
-            etiqueta="CURP"
-            value={curp}
-            onChange={manejarCambioCurp}
-            onBlur={() => validarCurp()}
-            error={erroresCampos.curp || errorCurpTemp || undefined}
-            required
-            maxLength={18}
-            autoComplete="off"
-            aria-required="true"
-            ref={curpInputRef}
-          />
+      <DenseField etiqueta="CURP" value={p.curp} onChange={(e) => { p.setCurp(formatoCurpMask(e.target.value)); p.limpiarErrorCampo("curp"); }} onBlur={() => p.validarCurp()} error={p.erroresCampos.curp} required maxLength={18} autoComplete="off" autoCapitalize="characters" />
+      <div className={styles.summaries}>
+        <button type="button" className={styles.summary} onClick={(event) => { event.currentTarget.focus(); open("address"); }} aria-haspopup="dialog" data-complete={completeAddress}>
+          <strong>📍 Domicilio</strong>
+          <span>{completeAddress ? `${p.calle} ${p.numero}, ${p.colonia}. ${p.ciudad}, ${p.estado}, CP ${p.codigoPostal}` : "Agregar domicilio"}</span>
+        </button>
+        <button type="button" className={styles.summary} onClick={(event) => { event.currentTarget.focus(); open("contact"); }} aria-haspopup="dialog" data-complete={completeContact}>
+          <strong>📞 Contacto de emergencia</strong>
+          <span>{completeContact ? `${p.contactoEmergenciaNombre} · ${formatoTelefonoNacional(p.contactoEmergenciaTelefono)}` : "Agregar contacto"}</span>
+        </button>
+      </div>
+      {sheet === "address" && <RegistrationSheet title="Domicilio" kind="address" onClose={close} onSave={saveAddress} saving={loadingCp}>
+        <DenseField etiqueta="Código postal" inputMode="numeric" autoComplete="postal-code" value={address.codigoPostal} onChange={(e) => void changePostalCode(e.target.value)} maxLength={5} error={errors.codigoPostal} />
+        <div className={styles.row}>
+          <DenseField etiqueta="Estado" autoComplete="address-level1" value={address.estado} onChange={(e) => changeAddress("estado", e.target.value)} error={errors.estado} />
+          {cities.length ? <SelectField dense etiqueta="Ciudad o municipio" value={address.ciudad} onChange={(v) => changeAddress("ciudad", v)} opciones={cities} placeholder="Selecciona" error={errors.ciudad} /> : <DenseField etiqueta="Ciudad o municipio" autoComplete="address-level2" value={address.ciudad} onChange={(e) => changeAddress("ciudad", e.target.value)} error={errors.ciudad} />}
         </div>
-        <DatosSensiblesTooltip tipo="curp" />
-      </div>
-      <Field
-        etiqueta="Código Postal"
-        inputMode="numeric"
-        value={codigoPostal}
-         ayuda={consultandoCp ? (
-          <span className="flex items-center gap-1.5 text-text-tertiary/80">
-            <span className="size-3 animate-spin rounded-full border border-text-tertiary border-t-transparent" aria-hidden="true" />
-            <span>Buscando domicilio...</span>
-          </span>
-        ) : (
-          <span className="text-text-tertiary/80">Al capturar 5 dígitos se completa el domicilio.</span>
-        )}
-        onChange={(e) => {
-          const cp = soloDigitos(e.target.value, 5);
-          setCodigoPostal(cp);
-          limpiarErrorCampo("codigoPostal");
-          if (cp.length < 5) {
-            setEstado("");
-            setCiudad("");
-            setCiudades([]);
-            setColonia("");
-            setColonias([]);
-          }
-          if (cp.length === 5) buscarCodigoPostal(cp);
-        }}
-        error={erroresCampos.codigoPostal || undefined}
-        required
-        autoComplete="postal-code"
-        aria-required="true"
-      />
-
-      <div className="grid gap-4 sm:grid-cols-2">
-        <Field
-          etiqueta="Estado"
-          value={estado}
-          onChange={(e) => {
-            setEstado(e.target.value);
-            limpiarErrorCampo("estado");
-          }}
-          error={erroresCampos.estado || undefined}
-          required
-          autoComplete="address-level1"
-          disabled={codigoPostal.length < 5}
-          aria-required="true"
-         ayuda={consultandoCp && codigoPostal.length >= 5 ? (
-          <span className="flex items-center gap-1.5 text-text-tertiary/80">
-            <span className="size-3 animate-spin rounded-full border border-text-tertiary border-t-transparent" aria-hidden="true" />
-            <span>Validando...</span>
-          </span>
-        ) : undefined}
-        />
-        {ciudades.length > 0 ? (
-          <SelectField
-            etiqueta="Ciudad o Municipio"
-            value={ciudad}
-            onChange={(valor) => {
-              setCiudad(valor);
-              limpiarErrorCampo("ciudad");
-            }}
-            error={erroresCampos.ciudad || undefined}
-            required
-            placeholder={consultandoCp ? "Obteniendo ciudades..." : "Selecciona tu ciudad o municipio"}
-            opciones={ciudades}
-            disabled={codigoPostal.length < 5 || consultandoCp}
-          />
-        ) : (
-          <Field
-            etiqueta="Ciudad o Municipio"
-             ayuda={colonias.length > 0 ? <span className="text-text-tertiary/80">Captura el municipio; este CP no lo devolvió automáticamente.</span> : undefined}
-            value={ciudad}
-            onChange={(e) => {
-              setCiudad(e.target.value);
-              limpiarErrorCampo("ciudad");
-            }}
-            error={erroresCampos.ciudad || undefined}
-            required
-            autoComplete="address-level2"
-            disabled={codigoPostal.length < 5}
-            aria-required="true"
-          />
-        )}
-      </div>
-
-      <SelectField
-        etiqueta="Colonia"
-        value={colonia}
-        onChange={(valor) => {
-          setColonia(valor);
-          limpiarErrorCampo("colonia");
-        }}
-        error={erroresCampos.colonia || undefined}
-        required
-        disabled={codigoPostal.length < 5}
-        placeholder={
-          codigoPostal.length < 5
-            ? "Captura primero un código postal válido"
-            : colonias.length === 0
-              ? consultandoCp
-                ? "Buscando colonias..."
-                : "No hay colonias para este CP"
-              : "Selecciona tu colonia"
-        }
-        opciones={colonias}
-        aria-required="true"
-      />
-      <div className="grid gap-4 sm:grid-cols-[1fr_120px]">
-        <Field etiqueta="Calle" value={calle} onChange={(e) => { setCalle(e.target.value); limpiarErrorCampo("calle"); }} error={erroresCampos.calle || undefined} required autoComplete="address-line1" aria-required="true" />
-        <Field etiqueta="Número" value={numero} onChange={(e) => { setNumero(e.target.value); limpiarErrorCampo("numero"); }} error={erroresCampos.numero || undefined} required aria-required="true" />
-      </div>
-      <Field etiqueta="Referencias" value={referencias} onChange={(e) => { setReferencias(e.target.value); limpiarErrorCampo("referencias"); }} error={erroresCampos.referencias || undefined} required aria-required="true" />
-      <div className="grid gap-4 sm:grid-cols-2">
-        <Field
-          etiqueta="Contacto de emergencia (nombre)"
-          value={contactoEmergenciaNombre}
-          onChange={(e) => {
-            setContactoEmergenciaNombre(e.target.value);
-            limpiarErrorCampo("contactoEmergenciaNombre");
-          }}
-          error={erroresCampos.contactoEmergenciaNombre || undefined}
-          required
-          aria-required="true"
-        />
-        <div className="flex items-start gap-2">
-          <div className="relative flex-1">
-            <Field
-              etiqueta="Teléfono del contacto"
-              type="tel"
-              inputMode="numeric"
-              pattern="[0-9]*"
-              placeholder="(55) 1234-5678"
-              value={formatoTelefonoNacional(contactoEmergenciaTelefono)}
-              onChange={manejarCambioTelefonoContacto}
-              onBlur={manejarBlurTelefonoContacto}
-              error={erroresCampos.contactoEmergenciaTelefono || undefined}
-              required
-              autoComplete="tel-national"
-              aria-required="true"
-              ref={telefonoContactoRef}
-            />
-          </div>
-          <DatosSensiblesTooltip tipo="contacto_emergencia" />
+        {colonies.length ? <SelectField dense etiqueta="Colonia" value={address.colonia} onChange={(v) => changeAddress("colonia", v)} opciones={colonies} placeholder="Selecciona" error={errors.colonia} /> : <DenseField etiqueta="Colonia" value={address.colonia} onChange={(e) => changeAddress("colonia", e.target.value)} error={errors.colonia} />}
+        <div className={styles.row}>
+          <DenseField etiqueta="Calle" autoComplete="address-line1" value={address.calle} onChange={(e) => changeAddress("calle", e.target.value)} error={errors.calle} />
+          <DenseField etiqueta="Número" value={address.numero} onChange={(e) => changeAddress("numero", e.target.value)} error={errors.numero} />
         </div>
-      </div>
+        <DenseField etiqueta="Referencias" value={address.referencias} onChange={(e) => changeAddress("referencias", e.target.value)} error={errors.referencias} />
+        <p className={styles.sheetError} role="status">{loadingCp ? "Buscando domicilio…" : Object.values(errors).find(Boolean) || lookupMessage}</p>
+      </RegistrationSheet>}
+      {sheet === "contact" && <RegistrationSheet title="Contacto de emergencia" kind="contact" onClose={close} onSave={saveContact}>
+        <DenseField etiqueta="Nombre del contacto" value={contact.contactoEmergenciaNombre} onChange={(e) => setContact((previous) => ({ ...previous, contactoEmergenciaNombre: e.target.value }))} error={errors.contactoEmergenciaNombre} autoComplete="off" />
+        <DenseField etiqueta="Teléfono del contacto" type="tel" inputMode="tel" value={formatoTelefonoNacional(contact.contactoEmergenciaTelefono)} onChange={(e) => setContact((previous) => ({ ...previous, contactoEmergenciaTelefono: soloDigitos(e.target.value) }))} error={errors.contactoEmergenciaTelefono} autoComplete="off" />
+        <p className={styles.sheetError} role="status">{Object.values(errors).find(Boolean)}</p>
+      </RegistrationSheet>}
     </fieldset>
   );
 }

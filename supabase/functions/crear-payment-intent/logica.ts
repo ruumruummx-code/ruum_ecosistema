@@ -47,3 +47,20 @@ export function decidirIntentExistente(status: string | null | undefined): Decis
   if (status === "canceled") return { accion: "reemplazar" };
   return { accion: "reutilizar" };
 }
+
+/**
+ * RC-05 — clave de idempotencia para `stripe.paymentIntents.create`.
+ *
+ * Es estable por operación de cobro: dos pestañas o reintentos concurrentes
+ * del mismo traslado obtienen el MISMO PaymentIntent en Stripe en lugar de
+ * crear dos.
+ *
+ * IMPORTANTE: al reemplazar un PI muerto (cancelado), la clave debe CAMBIAR
+ * porque Stripe cachea la respuesta 24 h por clave y devolvería el PI
+ * cancelado. Por eso se incluye el id del PI reemplazado.
+ */
+export function claveIdempotenciaStripe(trasladoId: string, intentReemplazadoId?: string | null): string {
+  return intentReemplazadoId
+    ? `traslado-${trasladoId}-reemplazo-${intentReemplazadoId}`
+    : `traslado-${trasladoId}`;
+}

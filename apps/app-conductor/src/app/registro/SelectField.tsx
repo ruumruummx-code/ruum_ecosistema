@@ -1,4 +1,5 @@
 import { useId } from "react";
+import styles from "./registration.module.css";
 
 export type OpcionSelect =
   | string
@@ -16,7 +17,8 @@ export function SelectField({
   placeholder,
   error,
   required,
-  disabled
+  disabled,
+  dense = false
 }: {
   etiqueta: string;
   value: string;
@@ -26,16 +28,17 @@ export function SelectField({
   error?: string;
   required?: boolean;
   disabled?: boolean;
+  dense?: boolean;
 }) {
   const id = useId();
 
   const tieneGrupos = opciones.some((o) => typeof o === "object" && Boolean(o.grupo));
 
   return (
-    <div className="flex flex-col gap-1.5">
+    <div className={dense ? styles.field : "flex flex-col gap-1.5"} data-invalid={Boolean(error)}>
       <label htmlFor={id} className="font-body text-sm font-semibold text-text-primary">
         {etiqueta}
-        {required ? <span className="ml-1 text-danger-action" aria-hidden> *</span> : null}
+        {required && !dense ? <span className="ml-1 text-danger-action" aria-hidden> *</span> : null}
       </label>
       <select
         id={id}
@@ -44,6 +47,7 @@ export function SelectField({
         disabled={disabled}
         required={required}
         aria-invalid={Boolean(error)}
+        aria-describedby={error ? `${id}-error` : undefined}
         className={[
           "w-full min-h-12 rounded-[10px] border bg-surface px-3.5 py-2.5 font-body text-base text-text-primary shadow-[inset_0_1px_0_rgba(26,31,46,0.02)]",
           "transition-[border-color,box-shadow,background-color] duration-150 hover:border-border-strong focus:border-route-action focus:outline-none focus:ring-[3px] focus:ring-route-action/20",
@@ -103,7 +107,7 @@ export function SelectField({
           })
         )}
       </select>
-      {error ? <p role="alert" className="font-body text-sm font-medium leading-5 text-danger-action">{error}</p> : null}
+      {error ? <p id={`${id}-error`} role={dense ? undefined : "alert"} className={dense ? "sr-only" : "font-body text-sm font-medium leading-5 text-danger-action"}>{error}</p> : null}
     </div>
   );
 }

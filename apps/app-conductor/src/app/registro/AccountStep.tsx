@@ -1,4 +1,5 @@
-import { Field } from "@ruum/ui";
+import { DenseField } from "./DenseField";
+import styles from "./registration.module.css";
 import type { fortalezaPassword } from "@ruum/shared/utils";
 import { formatoTelefonoNacional, soloDigitos, calcularCursorTelefono } from "./registration-validation";
 import { useRef } from "react";
@@ -14,7 +15,6 @@ export function AccountStep({
   setPassword,
   confirmacionPassword,
   setConfirmacionPassword,
-  fuerzaPassword,
   sesionAutenticada,
   erroresCampos,
   limpiarErrorCampo,
@@ -41,9 +41,10 @@ export function AccountStep({
   validarConfirmacion: (valor?: string, base?: string) => boolean;
 }) {
   const requisitosPassword = [
-    { label: "Mínimo 8 caracteres", cumplido: password.length >= 8 },
-    { label: "Al menos un número (0-9)", cumplido: /[0-9]/.test(password) },
-    { label: "Al menos una letra mayúscula (A-Z)", cumplido: /[A-Z]/.test(password) }
+    { label: "8 caracteres", cumplido: password.length >= 8 },
+    { label: "Un número", cumplido: /[0-9]/.test(password) },
+    { label: "Mayús. y minús.", cumplido: /[A-Z]/.test(password) && /[a-z]/.test(password) },
+    { label: "Coinciden", cumplido: Boolean(confirmacionPassword) && password === confirmacionPassword }
   ];
 
   const telefonoInputRef = useRef<HTMLInputElement>(null);
@@ -76,139 +77,29 @@ export function AccountStep({
   };
 
   return (
-    <fieldset className="grid gap-4">
-      <Field
-        etiqueta="Teléfono móvil"
-        ayuda={
-          <span className="font-body text-xs text-text-tertiary/80 dark:text-gray-400/80">
-            Formato estándar 10 dígitos (ej. (55) 1234-5678).
-          </span>
-        }
-        type="tel"
-        inputMode="numeric"
-        pattern="[0-9]*"
-        placeholder="(55) 1234-5678"
-        value={formatoTelefonoNacional(telefono)}
-        onChange={manejarCambioTelefono}
+    <fieldset className={[styles.fields, styles.account].join(" ")}>
+      <legend className="sr-only">Datos de cuenta</legend>
+      <DenseField etiqueta="Teléfono" type="tel" inputMode="tel" placeholder="10 dígitos"
+        value={formatoTelefonoNacional(telefono)} onChange={manejarCambioTelefono}
         onBlur={() => validarTelefono("telefono", telefono, setTelefono)}
-        error={erroresCampos.telefono || undefined}
-        required
-        autoComplete="tel-national"
-        ref={telefonoInputRef}
-      />
-
-      <Field
-        etiqueta="Correo electrónico"
-        type="email"
-        placeholder="conductor@ejemplo.com"
-        value={email}
-        onChange={(e) => {
-          setEmail(e.target.value);
-          limpiarErrorCampo("email");
-        }}
-        onBlur={() => validarCampo("email", email)}
-        error={erroresCampos.email || undefined}
-        required
-        autoComplete="email"
-        readOnly={sesionAutenticada}
-      />
-
-      {!sesionAutenticada && (
-        <div className="grid gap-4">
-          <div className="flex flex-col gap-2">
-            <Field
-              etiqueta="Crea tu contraseña"
-              type="password"
-              placeholder="Ingresa tu contraseña"
-              value={password}
-              onChange={(e) => {
-                const valor = e.target.value;
-                setPassword(valor);
-                limpiarErrorCampo("password");
-                if (confirmacionPassword) validarConfirmacion(confirmacionPassword, valor);
-              }}
-              onBlur={() => validarPassword()}
-              error={erroresCampos.password || undefined}
-              required
-              minLength={8}
-              autoComplete="new-password"
-            />
-
-            {/* Requisitos dinámicos interactivos con cambio de color verde al cumplirse */}
-            <ul className="flex flex-col gap-1.5 rounded-xl border border-border bg-surface-elevated/70 p-3 text-xs font-body" aria-label="Requisitos de contraseña">
-              {requisitosPassword.map((req, idx) => (
-                <li
-                  key={idx}
-                  className={`flex items-center gap-2 transition-all duration-150 ${
-                    req.cumplido ? "font-semibold text-emerald-600 dark:text-emerald-400" : "text-text-secondary"
-                  }`}
-                >
-                  <span
-                    className={`flex size-4 shrink-0 items-center justify-center rounded-full text-[10px] font-bold transition-all ${
-                      req.cumplido
-                        ? "bg-emerald-600 text-white dark:bg-emerald-500 shadow-xs"
-                        : "bg-surface-elevated border border-border text-text-tertiary"
-                    }`}
-                    aria-hidden
-                  >
-                    {req.cumplido ? "✓" : "○"}
-                  </span>
-                  <span>{req.label}</span>
-                </li>
-              ))}
-            </ul>
-
-            {password.length > 0 && (
-              <div className="flex flex-col gap-1" aria-live="polite">
-                <div className="flex gap-1" aria-hidden>
-                  {[1, 2, 3].map((n) => (
-                    <div
-                      key={n}
-                      className={[
-                        "h-1 flex-1 rounded-full transition-all",
-                        n <= fuerzaPassword.nivel
-                          ? fuerzaPassword.nivel === 1
-                            ? "bg-danger-action"
-                            : fuerzaPassword.nivel === 2
-                              ? "bg-signal"
-                              : "bg-emerald-500"
-                          : "bg-surface-elevated"
-                      ].join(" ")}
-                    />
-                  ))}
-                </div>
-                {fuerzaPassword.etiqueta && (
-                  <span className="font-body text-xs leading-4 text-text-secondary">
-                    Fuerza de la contraseña: <strong className="text-text-primary">{fuerzaPassword.etiqueta}</strong>
-                  </span>
-                )}
-              </div>
-            )}
-          </div>
-
-          <Field
-            etiqueta="Confirma tu contraseña"
-            type="password"
-            placeholder="Repite tu contraseña"
-            value={confirmacionPassword}
-            onChange={(e) => {
-              setConfirmacionPassword(e.target.value);
-              validarConfirmacion(e.target.value, password);
-            }}
-            error={erroresCampos.confirmacionPassword || undefined}
-            required
-            minLength={8}
-            autoComplete="new-password"
-          />
-        </div>
-      )}
-
-      {!sesionAutenticada && (
-        <p className="mt-1 flex items-center gap-1.5 font-body text-xs text-text-tertiary/80 dark:text-gray-400/80">
-          <span>🔒</span>
-          <span>Tus datos personales y contraseña se transmiten y almacenan con cifrado de grado bancario (SSL/TLS).</span>
-        </p>
-      )}
+        error={erroresCampos.telefono} required autoComplete="tel-national" ref={telefonoInputRef} enterKeyHint="next" />
+      <DenseField etiqueta="Correo" type="email" inputMode="email" autoCapitalize="none" autoCorrect="off" spellCheck={false}
+        value={email} onChange={(e) => { setEmail(e.target.value); limpiarErrorCampo("email"); }}
+        onBlur={() => validarCampo("email", email)} error={erroresCampos.email}
+        required autoComplete="email" readOnly={sesionAutenticada} enterKeyHint="next" />
+      {!sesionAutenticada && <>
+        <DenseField etiqueta="Contraseña" type="password" value={password}
+          onChange={(e) => { const valor = e.target.value; setPassword(valor); limpiarErrorCampo("password"); if (confirmacionPassword) validarConfirmacion(confirmacionPassword, valor); }}
+          onBlur={() => validarPassword()} error={erroresCampos.password} required minLength={8} autoComplete="new-password" enterKeyHint="next" />
+        <DenseField etiqueta="Confirmar contraseña" type="password" value={confirmacionPassword}
+          onChange={(e) => { setConfirmacionPassword(e.target.value); validarConfirmacion(e.target.value, password); }}
+          error={erroresCampos.confirmacionPassword} required minLength={8} autoComplete="new-password" enterKeyHint="go" />
+        <ul className={styles.rules} aria-label="Requisitos de contraseña">
+          {requisitosPassword.map((req) => <li key={req.label} data-met={req.cumplido}>
+            <span aria-hidden="true">{req.cumplido ? "✓" : "○"}</span>{req.label}<span className="sr-only">{req.cumplido ? ": cumplido" : ": pendiente"}</span>
+          </li>)}
+        </ul>
+      </>}
     </fieldset>
   );
 }

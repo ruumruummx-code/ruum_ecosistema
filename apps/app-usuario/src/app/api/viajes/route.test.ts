@@ -4,6 +4,8 @@ import { NextRequest } from "next/server";
 const mockGetUser = vi.fn();
 const mocksServicios = vi.hoisted(() => ({
   listarVehiculos: vi.fn(async (_cliente: unknown, _usuarioId: string): Promise<Array<{ id: string }>> => []),
+  // RC-07: el route resuelve el perfil de la sesión vía servicio de @ruum/api.
+  obtenerUsuarioActual: vi.fn(async (): Promise<{ id: string } | null> => ({ id: "perfil-1" })),
 }));
 
 vi.mock("@/lib/supabase-server", () => ({
@@ -14,11 +16,15 @@ vi.mock("@/lib/supabase-server", () => ({
 
 vi.mock("@ruum/api/services", () => ({
   listarVehiculosDeUsuario: mocksServicios.listarVehiculos,
+  obtenerUsuarioActual: mocksServicios.obtenerUsuarioActual,
 }));
 
 describe("Sec3 POST /api/viajes — validación paso servidor", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    // Perfil del usuario autenticado: auth_user_id "u1" -> perfil interno "perfil-1".
+    mocksServicios.obtenerUsuarioActual.mockResolvedValue({ id: "perfil-1" });
+    mocksServicios.listarVehiculos.mockResolvedValue([]);
   });
 
   function req(body: unknown, headers: Record<string, string> = {}) {
@@ -193,5 +199,33 @@ describe("Sec3 POST /api/viajes — validación paso servidor", () => {
     const { POST } = await import("./route");
     const res = await POST(req(payloadConVehiculo(UUID_AJENO)));
     expect(res.status).toBe(200);
+  });
+
+  /* RC-07: el Auth ID (auth_user_id) no es el ID interno del perfil. El route
+     debe resolver el perfil y pasar su id interno a listarVehiculosDeUsuario. */
+  it("RC-07: usa el id interno del perfil, no el Auth ID", async () => {
+    mockGetUser.mockResolvedValue({ data: { user: { id: "auth-u1" } } });
+    mocksServicios.obtenerUsuarioActual.mockResolvedValue({ id: "perfil-interno-9" });
+    mocksServicios.listarVehiculos.mockResolvedValue([{ id: UUID_AJENO }]);
+    const { POST } = await import("./route");
+    const res = await POST(req(payloadConVehiculo(UUID_AJENO)));
+    expect(res.status).toBe(200);
+    expect(mocksServicios.listarVehiculos).toHaveBeenCalledWith(expect.anything(), "perfil-interno-9");
+  });
+
+  it("RC-07: falla cerrado (500) si no se puede resolver el perfil", async () => {
+    mockGetUser.mockResolvedValue({ data: { user: { id: "auth-u1" } } });
+    mocksServicios.obtenerUsuarioActual.mockResolvedValue(null);
+    const { POST } = await import("./route");
+    const res = await POST(req(payloadConVehiculo(UUID_AJENO)));
+    expect(res.status).toBe(500);
+  });
+
+  it("RC-07: falla cerrado (500) si el servicio de perfil lanza", async () => {
+    mockGetUser.mockResolvedValue({ data: { user: { id: "auth-u1" } } });
+    mocksServicios.obtenerUsuarioActual.mockRejectedValue(new Error("db caída"));
+    const { POST } = await import("./route");
+    const res = await POST(req(payloadConVehiculo(UUID_AJENO)));
+    expect(res.status).toBe(500);
   });
 });

@@ -1,7 +1,8 @@
 "use client";
 
-import React, { createContext, useCallback, useContext, useMemo, useReducer, type Context, type ReactNode } from "react";
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useReducer, useRef, type Context, type ReactNode } from "react";
 import type { UbicacionTraslado } from "@ruum/api/services";
+import { crearClienteNavegador, tieneSupabaseConfigurado } from "@/lib/supabase-browser";
 import {
   crearEstadoNuevoTrasladoInicial,
   crearEstadoRealtimeTraslado,
@@ -28,6 +29,34 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
     crearEstadoNuevoTrasladoInicial
   );
   const [trasladosRealtime, dispatchRealtime] = useReducer(realtimeTrasladosReducer, {});
+  // RC-12: identidad del usuario anterior para detectar cambio de cuenta.
+  const usuarioPrevioRef = useRef<string | null | undefined>(undefined);
+
+  // RC-12: al cambiar de identidad (logout o cambio de cuenta en el mismo
+  // dispositivo) se descarta el estado global y el borrador local para no
+  // exponer datos del usuario anterior.
+  useEffect(() => {
+    if (!tieneSupabaseConfigurado()) return;
+    const cliente = crearClienteNavegador();
+    const { data: { subscription } } = cliente.auth.onAuthStateChange((_evento, sesion) => {
+      const idActual = sesion?.user?.id ?? null;
+      if (usuarioPrevioRef.current === undefined) {
+        usuarioPrevioRef.current = idActual;
+        return;
+      }
+      if (usuarioPrevioRef.current !== idActual) {
+        usuarioPrevioRef.current = idActual;
+        dispatchNuevoTraslado({ type: "reset" });
+        dispatchRealtime({ type: "resetAll" });
+        try {
+          localStorage.removeItem("ruumruum.traslados-nuevo.borrador.v2");
+        } catch {
+          // localStorage no disponible: nada que limpiar.
+        }
+      }
+    });
+    return () => subscription.unsubscribe();
+  }, []);
 
   return (
     <NuevoTrasladoStateContext.Provider value={nuevoTraslado}>

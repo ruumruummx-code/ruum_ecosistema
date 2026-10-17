@@ -12,7 +12,11 @@ export default defineConfig({
   },
   test: {
     globals: true,
-    testTimeout: 15_000,
+    // RC-09: la suite (417 tests jsdom que importan páginas Next completas)
+    // flaqueaba en CI/carga: tests pesados superaban los 15 s y los `findBy`
+    // agotaban su espera de 1 s por el debounce de 300 ms del buscador. Estos
+    // márgenes NO relajan ninguna aserción; solo evitan falsos rojos por carga.
+    testTimeout: 30_000,
     include: ["src/**/*.test.ts", "src/**/*.test.tsx", "test/**/*.test.ts", "test/**/*.test.tsx"],
     exclude: ["tests/**", "**/*.spec.ts", "node_modules/**", ".next/**"],
     setupFiles: ["./vitest.setup.ts"],

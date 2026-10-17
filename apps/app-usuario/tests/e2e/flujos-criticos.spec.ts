@@ -118,17 +118,17 @@ async function mockDidit(page: import("@playwright/test").Page) {
 // ── Suites ──
 
 test.describe("Middleware protección rutas", () => {
-  test("sin sesión, /viajes redirige a /login?next", async ({ page }) => {
+  test("sin sesión, /viajes/nuevo redirige a /login?next", async ({ page }) => {
     await page.goto("/viajes/nuevo", { waitUntil: "domcontentloaded" });
-    await expect(page).toHaveURL(/\/login\?next=%2Ftraslados/);
+    await expect(page).toHaveURL(/\/login\?next=%2Fviajes%2Fnuevo/);
     await expect(page.getByText(/authentication_required|inicia sesión para solicitar/i).first()).toBeVisible({ timeout: 8000 }).catch(async () => {
       // fallback: al menos el heading de login debe estar
       await expect(page.getByRole("heading", { name: /iniciar sesión/i })).toBeVisible();
     });
   });
 
-  test("sin sesión, /mis-Traslados redirige a login", async ({ page }) => {
-    await page.goto("/mis-Traslados", { waitUntil: "domcontentloaded" });
+  test("sin sesión, /mis-viajes redirige a login", async ({ page }) => {
+    await page.goto("/mis-viajes", { waitUntil: "domcontentloaded" });
     await expect(page).toHaveURL(/\/login/);
   });
 
@@ -364,27 +364,31 @@ test.describe("Didit modal a11y (R4)", () => {
 });
 
 test.describe("Carga masiva", () => {
-  test("plantilla descarga y validación límite 100", async ({ page }) => {
+  test("abre el módulo desde el wizard y muestra límites 100 / 5 MB", async ({ page }) => {
     await seedMockAuthSession(page);
-    await page.goto("/viajes/masivo", { waitUntil: "domcontentloaded" });
-    await expect(page.getByRole("heading", { name: /creación masiva/i })).toBeVisible();
-    const btn = page.getByRole("button", { name: /descargar plantilla/i });
-    await expect(btn).toBeVisible();
-    // Simular validación cliente de 100 límite: inyectar CSV grande vía JS no es necesario, basta verificar texto límite
-    await expect(page.getByText(/hasta 100/i).first()).toBeVisible();
+    await mockMapboxGeocode(page);
+    await mockUsuarioVerificado(page);
+    await page.goto("/viajes/nuevo", { waitUntil: "domcontentloaded" });
+    // El módulo es un BottomSheet dentro del Paso 0 del wizard (no una ruta propia).
+    const btn = page.getByRole("button", { name: /Abrir módulo de carga masiva de traslados/i });
+    await expect(btn).toBeVisible({ timeout: 10000 });
+    await btn.click();
+    await expect(page.getByRole("heading", { name: /carga masiva de traslados/i })).toBeVisible();
+    await expect(page.getByText(/máximo 100/i).first()).toBeVisible();
     await expect(page.getByText(/5 MB/i).first()).toBeVisible();
   });
 });
 
 test.describe("Mis Traslados y soporte", () => {
-  test("mis-Traslados filtra por pestañas sin error", async ({ page }) => {
+  test("mis-viajes filtra por pestañas sin error", async ({ page }) => {
     await seedMockAuthSession(page);
     // Mock pasaporte_digital vacío para que no falle
     await page.route("**/rest/v1/pasaporte_digital**", async (r) => r.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify([]) }));
-    await page.goto("/mis-Traslados", { waitUntil: "domcontentloaded" });
+    await page.goto("/mis-viajes", { waitUntil: "domcontentloaded" });
     await expect(page.getByRole("heading", { name: /mis traslados/i })).toBeVisible();
-    await page.getByRole("button", { name: /En curso/i }).click();
-    await page.getByRole("button", { name: /Historial/i }).click();
+    // Pestañas reales del componente: Activos / Programados / Finalizados / Cancelados
+    await page.getByRole("button", { name: /^Activos/i }).click();
+    await page.getByRole("button", { name: /^Finalizados/i }).click();
     await expect(page.getByText(/sin traslados|no se encontraron/i).first()).toBeVisible({ timeout: 5000 });
   });
 

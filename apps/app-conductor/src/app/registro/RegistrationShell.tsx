@@ -1,7 +1,34 @@
+import { useEffect, useRef } from "react";
+import styles from "./registration.module.css";
 import Image from "next/image";
 import { LogoMarca } from "@ruum/ui";
 
-export function RegistrationShell({ children }: { children: React.ReactNode }) {
+export function RegistrationShell({ children, compact = false }: { children: React.ReactNode; compact?: boolean }) {
+  const screenRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const screen = screenRef.current;
+    const viewport = window.visualViewport;
+    if (!compact || !screen || !viewport) return;
+    let frame = 0;
+    const update = () => {
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(() => {
+        screen.style.setProperty("--registration-height", viewport.height + "px");
+        screen.style.setProperty("--registration-top", viewport.offsetTop + "px");
+      });
+    };
+    update();
+    viewport.addEventListener("resize", update);
+    viewport.addEventListener("scroll", update);
+    window.addEventListener("resize", update);
+    return () => {
+      cancelAnimationFrame(frame);
+      viewport.removeEventListener("resize", update);
+      viewport.removeEventListener("scroll", update);
+      window.removeEventListener("resize", update);
+    };
+  }, [compact]);
+  if (compact) return <div ref={screenRef} className={styles.screen} data-conductor-registration>{children}</div>;
   return (
     <div className="conductor-auth-shell flex items-center justify-center px-4 py-10 sm:px-6">
       <section className="conductor-auth-card p-6 sm:p-8" aria-labelledby="titulo-registro-conductor">

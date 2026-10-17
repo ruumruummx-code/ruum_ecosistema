@@ -165,6 +165,16 @@ function ContenidoConfirmaCorreo() {
   const [mensajeExito, setMensajeExito] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [errorShake, setErrorShake] = useState(false);
+  // RC-09: el "shake" de error termina a los 600 ms; si el componente se
+  // desmonta antes (p. ej. al redirigir tras verificar), el temporizador
+  // disparaba `setState` sobre un árbol desmontado. Se cancela al desmontar.
+  const timerShakeRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (timerShakeRef.current) clearTimeout(timerShakeRef.current);
+    };
+  }, []);
 
   const emailFromUrl = normalizarCorreoRegistro(searchParams.get("email") || "");
   const hayCooldown = cooldownRestante > 0;
@@ -299,6 +309,11 @@ function ContenidoConfirmaCorreo() {
 
   const codigoCompleto = digitos.join("");
 
+  const programarFinShake = useCallback(() => {
+    if (timerShakeRef.current) clearTimeout(timerShakeRef.current);
+    timerShakeRef.current = setTimeout(() => setErrorShake(false), 600);
+  }, []);
+
   async function verificarCodigo(e?: React.FormEvent) {
     if (e) e.preventDefault();
     const codigoLimpio = soloDigitos(codigoCompleto, 6);
@@ -324,7 +339,7 @@ function ContenidoConfirmaCorreo() {
       if (!res.ok) {
         setError(cuerpo?.error ?? "Código incorrecto. Intenta de nuevo.");
         setErrorShake(true);
-        setTimeout(() => setErrorShake(false), 600);
+        programarFinShake();
         registrarEventoUx("registro_confirmacion_error");
         return;
       }
@@ -338,7 +353,7 @@ function ContenidoConfirmaCorreo() {
     } catch (err) {
       setError(traducirErrorAuth(err, "Código incorrecto. Intenta de nuevo."));
       setErrorShake(true);
-      setTimeout(() => setErrorShake(false), 600);
+      programarFinShake();
       registrarEventoUx("registro_confirmacion_error");
     } finally {
       setVerificando(false);

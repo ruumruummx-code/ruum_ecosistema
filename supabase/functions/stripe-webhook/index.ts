@@ -20,12 +20,7 @@
 // probar con eventos reales de Stripe en modo test.
 import Stripe from "npm:stripe@^17";
 import { createClient } from "npm:@supabase/supabase-js@2";
-import {
-  esEventoYaProcesado,
-  extraerTrasladoId,
-  esEventoManejado,
-  estadoTrasladoSiguienteTrasPago
-} from "./logica.ts";
+import { esEventoManejado } from "./logica.ts";
 
 const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") ?? "", {
   apiVersion: "2025-02-24.acacia",
@@ -37,8 +32,6 @@ const supabase = createClient(
   Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
 );
 
-const SISTEMA_ACTOR_ID = "00000000-0000-0000-0000-000000000000";
-
 async function ejecutarSupabase<T>(
   operacion: PromiseLike<{ data: T; error: { message: string } | null }>,
   contexto: string
@@ -46,21 +39,6 @@ async function ejecutarSupabase<T>(
   const { data, error } = await operacion;
   if (error) throw new Error(`${contexto}: ${error.message}`);
   return data;
-}
-
-async function registrarEventoWebhook(
-  evento: string,
-  datos: Record<string, unknown>,
-  trasladoId: string | null = null
-) {
-  const { error } = await supabase.from("registro_auditoria").insert({
-    traslado_id: trasladoId,
-    evento,
-    actor: "sistema",
-    actor_id: SISTEMA_ACTOR_ID,
-    datos
-  });
-  if (error) throw error;
 }
 
 Deno.serve(async (req) => {
@@ -104,75 +82,24 @@ Deno.serve(async (req) => {
           }
           break;
         }
-        const trasladoId = extraerTrasladoId(intent.metadata);
-        if (!trasladoId) {
-          console.warn("PaymentIntent sin traslado_id en metadata:", intent.id);
-          break;
-        }
-
-        const pagoExistente = await ejecutarSupabase(
-          supabase
-            .from("pagos")
-            .select("stripe_event_id, traslado_id")
-            .eq("stripe_payment_intent_id", intent.id)
-            .maybeSingle(),
-          "No se pudo consultar el pago existente"
-        );
-
-        if (esEventoYaProcesado(evento.id, pagoExistente?.stripe_event_id)) break;
-
         const nuevoEstado = evento.type === "payment_intent.succeeded" ? "completado" : "fallido";
-        await ejecutarSupabase(
-          supabase
-            .from("pagos")
-            .update({ estado: nuevoEstado, stripe_event_id: evento.id })
-            .eq("stripe_payment_intent_id", intent.id),
-          "No se pudo actualizar el pago"
+
+        // RC-04: Usar función RPC transaccional para evitar inconsistencias
+        // si falla después de marcar el evento como procesado.
+        // La función es idempotente: si el evento ya fue procesado y el
+        // traslado ya está completo, no hace nada.
+        const resultado = await ejecutarSupabase(
+          supabase.rpc("procesar_pago_stripe", {
+            p_stripe_event_id: evento.id,
+            p_stripe_payment_intent_id: intent.id,
+            p_estado_pago: nuevoEstado
+          }),
+          "No se pudo procesar el pago de Stripe"
         );
 
-        await registrarEventoWebhook(
-          "registro_pago",
-          {
-            stripe_event_id: evento.id,
-            stripe_payment_intent_id: intent.id,
-            estado_pago: nuevoEstado,
-            traslado_id: pagoExistente?.traslado_id ?? trasladoId
-          },
-          pagoExistente?.traslado_id ?? trasladoId
-        );
-
-        if (pagoExistente?.traslado_id) {
-          const traslado = await ejecutarSupabase(
-            supabase
-              .from("traslados")
-              .select("estado, tipo_pago")
-              .eq("id", pagoExistente.traslado_id)
-              .maybeSingle(),
-            "No se pudo consultar el traslado del pago"
-          );
-
-          const siguienteEstado = estadoTrasladoSiguienteTrasPago(
-            traslado?.estado,
-            traslado?.tipo_pago,
-            nuevoEstado
-          );
-
-          if (siguienteEstado) {
-            await ejecutarSupabase(
-              supabase.from("traslados").update({ estado: siguienteEstado }).eq("id", pagoExistente.traslado_id),
-              "No se pudo actualizar el estado del traslado tras el pago"
-            );
-            await registrarEventoWebhook(
-              "registro_pago",
-              {
-                stripe_event_id: evento.id,
-                estado_anterior: traslado?.estado,
-                estado_nuevo: siguienteEstado,
-                tipo_pago: traslado?.tipo_pago
-              },
-              pagoExistente.traslado_id
-            );
-          }
+        // Verificar si el procesamiento fue exitoso
+        if (resultado && typeof resultado === 'object' && 'ok' in resultado && !resultado.ok) {
+          console.warn("procesar_pago_stripe devolvió error:", resultado);
         }
         break;
       }

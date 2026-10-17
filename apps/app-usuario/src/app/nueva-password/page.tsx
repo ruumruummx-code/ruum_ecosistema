@@ -113,6 +113,12 @@ export default function PaginaNuevaPassword() {
         await cliente.auth.signOut();
       } catch {}
 
+      // RC-12: limpiar el borrador del wizard al cerrar sesión para no dejar
+      // datos de contacto/direcciones de un usuario en un dispositivo compartido.
+      try {
+        localStorage.removeItem("ruumruum.traslados-nuevo.borrador.v2");
+      } catch {}
+
       if (!montadoRef.current) return;
       setListo(true);
       redireccionRef.current = setTimeout(() => {

@@ -192,12 +192,20 @@ export type RealtimeTrasladosAction =
   | { type: "patch"; trasladoId: string; patch: RealtimeTrasladoPatch }
   | { type: "messages"; trasladoId: string; mensajes: MensajeChat[] }
   | { type: "message"; trasladoId: string; mensaje: MensajeChat }
-  | { type: "clear"; trasladoId: string };
+  | { type: "clear"; trasladoId: string }
+  | { type: "resetAll" };
 
 export function realtimeTrasladosReducer(
   state: RealtimeTrasladosState,
   action: RealtimeTrasladosAction
 ): RealtimeTrasladosState {
+  // RC-12: al cambiar de identidad se descarta el estado de chat/ubicación
+  // de todos los traslados para no filtrar datos del usuario anterior.
+  if (action.type === "resetAll") {
+    if (Object.keys(state).length === 0) return state;
+    return {};
+  }
+
   if (action.type === "clear") {
     if (!(action.trasladoId in state)) return state;
     const siguiente = { ...state };

@@ -195,6 +195,24 @@ describe("PagoStripe — cobro real con Elements mockeado en el borde", () => {
     );
   });
 
+  it("RC-06: paymentIntent 'processing' NO confirma el pago y muestra estado pendiente", async () => {
+    stripeMocks.confirmPayment.mockResolvedValueOnce({
+      paymentIntent: { status: "processing" },
+    });
+    const PagoStripe = await importarPagoStripe();
+    const onPagado = vi.fn();
+    const user = userEvent.setup();
+    render(<PagoStripe trasladoId="t-1" monto={500} onPagado={onPagado} />);
+    await screen.findByTestId("payment-element");
+    await user.click(
+      screen.getByRole("button", { name: /pagar y confirmar traslado/i }),
+    );
+    expect(
+      await screen.findByText(/en proceso de confirmación/i),
+    ).toBeInTheDocument();
+    expect(onPagado).not.toHaveBeenCalled();
+  });
+
   it("error de confirmPayment muestra el mensaje y libera el botón", async () => {
     stripeMocks.confirmPayment.mockResolvedValueOnce({
       error: { message: "Tarjeta rechazada." },

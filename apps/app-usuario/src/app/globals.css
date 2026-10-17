@@ -1795,69 +1795,8 @@ input::placeholder, textarea::placeholder {
 .dashboard-route > p:last-of-type:not(:first-of-type) { flex-shrink: 0; margin: 0; }
 .dashboard-evidence { min-width: 44px; min-height: 44px; justify-content: center; }
 .user-dashboard > a:last-child { margin-right: 72px; }
-@media (max-width: 1023px) {
-  .user-dashboard-header { display: none; }
-  .user-dashboard-shell .user-dashboard-content { padding: max(4px, env(safe-area-inset-top)) 12px calc(var(--user-mobile-nav-height, 65px) + 8px); overflow-y: auto; }
-  .user-dashboard { gap: 8px; }
-  .user-dashboard #saludo-usuario { font-size: 22px; }
-  .user-dashboard #activeTransferCard > div { gap: 6px; }
-  .user-dashboard #activeTransferCard > div > div > div { padding: 10px 12px; }
-  .user-dashboard #activeTransferCard a[aria-label^="Ver seguimiento"] { min-width: 44px; min-height: 44px; margin-block: -6px; }
-  .user-dashboard #activeTransferCard .mt-3\.5 { margin-top: 4px; }
-  .user-dashboard #activeTransferCard .text-\[22px\] { font-size: 18px; }
-  .user-dashboard .dashboard-route { margin-top: 2px; gap: 4px; font-size: 12px; }
-  .user-dashboard .dashboard-route > p:last-child:not(:first-of-type) { font-size: 10px; max-width: 35%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .user-dashboard .dashboard-progress { margin-top: 6px; padding-top: 6px; }
-  .user-dashboard .dashboard-progress > div:last-child { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
-  .user-dashboard .dashboard-driver-meta { margin-top: 4px; padding-top: 0; border-top: 0; gap: 4px; }
-  .user-dashboard #assignedDriverCommunication { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 4px; padding: 6px 10px; }
-  .user-dashboard #assignedDriverCommunication > div:first-child { gap: 6px; min-width: 0; }
-  .user-dashboard #assignedDriverCommunication > div:first-child > div:first-child,
-  .user-dashboard #assignedDriverCommunication img { width: 32px; height: 32px; }
-  .user-dashboard #assignedDriverCommunication h2 { font-size: 12px; }
-  .user-dashboard #assignedDriverCommunication p { font-size: 9px; }
-  .user-dashboard #assignedDriverCommunication > div:nth-child(2) { margin: 0; gap: 4px; }
-  .user-dashboard #assignedDriverCommunication > div:nth-child(2) :is(a, button) { padding-inline: 8px; font-size: 11px; gap: 4px; }
-  .user-dashboard #assignedDriverCommunication > div:nth-child(3) { grid-column: 1 / -1; }
-  .user-dashboard #quickActions > div { gap: 8px; }
-  .user-dashboard #quickActions a { flex-direction: row; align-items: center; justify-content: flex-start; gap: 8px; padding: 10px; }
-  .user-dashboard #quickActions a > div:last-child { margin: 0; }
-  .user-dashboard #quickActions a > div:first-child { width: 28px; height: 28px; }
-  .user-dashboard #quickActions a span { font-size: 12px; }
-  .user-dashboard section[aria-label="Seguridad y confianza"] { padding: 6px 10px; gap: 8px; }
-  .user-dashboard section[aria-label="Seguridad y confianza"] > span { width: 28px; height: 28px; }
-  .user-dashboard section[aria-label="Seguridad y confianza"] p { font-size: 10px; }
-  .user-dashboard > a:last-child { padding: 6px 10px; gap: 6px; }
-  .user-dashboard > a:last-child > div { gap: 6px; }
-  .user-dashboard > a:last-child span[aria-hidden] { width: 28px; height: 28px; }
-  .user-dashboard > a:last-child p { font-size: 10px; }
-}
-/* Smaller phones: reclaim decorative spacing while retaining 44px controls. */
-@media (max-width: 1023px) and (max-height: 700px) {
-  .user-dashboard { gap: 4px; }
-  .user-dashboard section[aria-label="Seguridad y confianza"] { display: none; }
-  .user-dashboard #quickActions a { padding: 6px 8px; }
-}
-@media (min-width: 1024px) {
-  .user-dashboard .dashboard-fab { bottom: 24px; }
-}
-@media (max-width: 1023px) {
-  .user-dashboard #assignedDriverCommunication > div:first-child p { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
-  .user-dashboard #assignedDriverCommunication .dashboard-evidence { color: var(--user-color-pending-ink); background: var(--user-color-pending-soft); padding-inline: 0; }
-  .user-dashboard #assignedDriverCommunication .dashboard-evidence svg { color: inherit; }
-  .user-dashboard .dashboard-empty { min-height: 150px; padding: 12px; }
-  .user-dashboard .dashboard-empty > span { width: 36px; height: 36px; }
-  .user-dashboard .dashboard-empty h2 { margin-top: 6px; }
-}
-@media (max-width: 1023px) and (max-height: 600px) {
-  .user-dashboard { gap: 3px; }
-  .user-dashboard #quickActions a { padding-block: 2px; min-height: 44px; }
-}
-@media (max-width: 1023px) and (max-height: 600px) {
-  .user-dashboard #activeTransferCard > div > div > div { padding-block: 8px; }
-  .user-dashboard .dashboard-progress > div:first-child { font-size: 11px; }
-  .user-dashboard .dashboard-progress > div:nth-child(2) { margin-top: 4px; height: 6px; }
-}
+/* RR-2026-001: el dashboard define su layout responsivo en InicioUsuario.css
+   para que el CSS de layout global permanezca mobile-first (RC-14). */
 /* RR-2026-002: one fixed canvas; only the results region scrolls vertically. */
 .user-transfer-fab {
   position: fixed;

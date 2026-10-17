@@ -3686,6 +3686,9 @@ isOneToOne: false
 "procesar_competencias_asignacion":
 { Args: Record<PropertyKey, never>; Returns: Json
                            },
+"procesar_pago_stripe":
+{ Args: { "p_estado_pago": string,"p_stripe_event_id": string,"p_stripe_payment_intent_id": string }; Returns: Json
+                           },
 "puede_ver_tarifa_traslado":
 { Args: { "p_usuario_id": string }; Returns: boolean
                            },

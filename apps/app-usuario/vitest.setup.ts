@@ -1,4 +1,12 @@
 import "@testing-library/jest-dom/vitest";
+import { configure } from "@testing-library/react";
+
+// RC-09: los `findBy*`/`waitFor` usan 1 s por defecto, insuficiente bajo carga
+// paralela (p. ej. el buscador con debounce de 300 ms). Este margen no cambia
+// ninguna aserción; solo evita falsos rojos por contención de CPU.
+if (typeof window !== "undefined") {
+  configure({ asyncUtilTimeout: 5_000 });
+}
 
 function createStorageMock(): Storage {
   let store: Record<string, string> = {};

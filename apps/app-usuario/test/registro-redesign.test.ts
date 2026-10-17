@@ -3,6 +3,9 @@ import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 
 const REGISTRO = readFileSync(resolve(__dirname, "../src/app/registro/page.tsx"), "utf8");
+// RC-09: el modal de verificación SMS se extrajo a OtpModal.tsx (Fase 4), por
+// eso el texto "Verifica tu número celular" ya no vive en page.tsx.
+const OTP_MODAL = readFileSync(resolve(__dirname, "../src/app/registro/OtpModal.tsx"), "utf8");
 const NAVEGACION = readFileSync(resolve(__dirname, "../src/app/NavegacionUsuario.tsx"), "utf8");
 const EXPERIENCIA_PUBLICA = readFileSync(resolve(__dirname, "../src/app/experiencia-publica.tsx"), "utf8");
 const GLOBALES = readFileSync(resolve(__dirname, "../src/app/globals.css"), "utf8");
@@ -24,7 +27,8 @@ describe("rediseño del registro de usuario", () => {
   });
 
   it("aplica verificación telefónica SMS y tokens de foco accesibles", () => {
-    expect(REGISTRO).toContain("Verifica tu número celular");
+    expect(OTP_MODAL).toContain("Verifica tu número celular");
+    expect(REGISTRO).toContain("OtpModal");
     expect(EXPERIENCIA_PUBLICA).toContain("focus:border-[var(--ruum-teal-deep)]");
     expect(EXPERIENCIA_PUBLICA).toContain("focus:ring-[var(--ruum-teal)]/25");
     expect(GLOBALES).toContain("linear-gradient(100deg, var(--ruum-teal) 0%, #00aeb8 100%)");

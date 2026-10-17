@@ -1,7 +1,7 @@
 /// <reference lib="deno.ns" />
 
 import { assertEquals } from "jsr:@std/assert@1";
-import { decidirIntentExistente, montoAutorizadoParaCobro, validarRangoMontoCobro } from "./logica.ts";
+import { claveIdempotenciaStripe, decidirIntentExistente, montoAutorizadoParaCobro, validarRangoMontoCobro } from "./logica.ts";
 
 Deno.test("montoAutorizadoParaCobro: usa precio_final por encima de precio_cotizado", () => {
   assertEquals(montoAutorizadoParaCobro({ precio_cotizado: 2400, precio_final: 2750 }), 2750);
@@ -47,4 +47,23 @@ Deno.test("decidirIntentExistente: estados no terminales se reutilizan", () => {
   for (const estado of ["requires_payment_method", "requires_confirmation", "requires_action", "processing", "requires_capture", null, undefined]) {
     assertEquals(decidirIntentExistente(estado), { accion: "reutilizar" });
   }
+});
+
+Deno.test("claveIdempotenciaStripe: estable por traslado (misma clave = mismo PI)", () => {
+  assertEquals(claveIdempotenciaStripe("t-1"), "traslado-t-1");
+  assertEquals(claveIdempotenciaStripe("t-1"), claveIdempotenciaStripe("t-1"));
+  // Traslados distintos no colisionan.
+  assertEquals(claveIdempotenciaStripe("t-2") === claveIdempotenciaStripe("t-1"), false);
+});
+
+Deno.test("claveIdempotenciaStripe: cambia al reemplazar un PI muerto", () => {
+  const base = claveIdempotenciaStripe("t-1");
+  const trasReemplazo = claveIdempotenciaStripe("t-1", "pi_cancelado_1");
+  assertEquals(trasReemplazo === base, false);
+  assertEquals(trasReemplazo, "traslado-t-1-reemplazo-pi_cancelado_1");
+  // Reemplazos sucesivos de PIs distintos generan claves distintas.
+  assertEquals(
+    claveIdempotenciaStripe("t-1", "pi_cancelado_2") === trasReemplazo,
+    false
+  );
 });

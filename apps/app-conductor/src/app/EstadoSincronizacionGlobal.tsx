@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { calcularSyncSnapshot, obtenerUltimoSyncSnapshot, publicarSyncSnapshot, SYNC_STATUS_EVENT, type GlobalSyncSnapshot } from "../lib/offline-sync-status";
 import { recordOperationalEvent } from "../lib/observability";
 
@@ -50,6 +51,7 @@ function AccionRequeridaCTA({ snapshot }: { snapshot: GlobalSyncSnapshot }) {
 }
 
 export function EstadoSincronizacionGlobal() {
+  const pathname = usePathname();
   const [mounted, setMounted] = useState(false);
   const [snapshot, setSnapshot] = useState<GlobalSyncSnapshot>(obtenerUltimoSyncSnapshot());
 
@@ -82,7 +84,7 @@ export function EstadoSincronizacionGlobal() {
     };
   }, []);
 
-  if (!mounted) return null;
+  if (!mounted || pathname === "/login" || pathname === "/registro") return null;
 
   // R4: celebrar éxito — verde cuando online y sin pendientes (no solo null)
   if (snapshot.status === "todo_sincronizado") {

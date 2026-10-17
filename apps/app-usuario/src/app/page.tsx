@@ -9,6 +9,8 @@ import { InicioUsuario } from "./InicioUsuario";
 import { BotonReintentarSesion } from "./ReintentarSesion";
 import { obtenerViajeActivo } from "../lib/inicio";
 import { botonAzul, botonContorno } from "./experiencia-publica";
+// RC-14: estilos responsivos del dashboard (ver InicioUsuario.css).
+import "./InicioUsuario.css";
 
 type UsuarioRow = Database["public"]["Tables"]["usuarios"]["Row"];
 type PasaporteRow = Database["public"]["Views"]["pasaporte_digital"]["Row"];

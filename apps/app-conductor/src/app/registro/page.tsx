@@ -38,6 +38,9 @@ import { LicenseStep } from "./LicenseStep";
 import { OtpVerification } from "./OtpVerification";
 import { RegistrationProgress } from "./RegistrationProgress";
 import { RegistrationShell } from "./RegistrationShell";
+import { RegistrationNotice } from "./RegistrationNotice";
+import { LicenseConsentDetails } from "./LicenseConsentDetails";
+import styles from "./registration.module.css";
 import { ReviewStep } from "./ReviewStep";
 import {
   PASOS_REGISTRO,
@@ -145,9 +148,11 @@ export default function PaginaRegistroConductor() {
   const [confirmaPrivacidad, setConfirmaPrivacidad] = useState(false);
   const [erroresCampos, setErroresCampos] = useState<Record<string, string>>({});
   const [enviando, setEnviando] = useState(false);
+  const [registroListo, setRegistroListo] = useState(false);
   const [enviado, setEnviado] = useState(false);
   const [sesionActivaTrasRegistro, setSesionActivaTrasRegistro] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [mostrarDetalleConsentimiento, setMostrarDetalleConsentimiento] = useState(false);
   const [sesionAutenticada,setSesionAutenticada]=useState(false);
   const [solicitudRemotaId,setSolicitudRemotaId]=useState<string|null>(null);
   const [estadoGuardadoRemoto,setEstadoGuardadoRemoto]=useState<EstadoGuardadoRemoto>("inactivo");
@@ -308,7 +313,7 @@ export default function PaginaRegistroConductor() {
     }
   }
 
-  function validarPaso(indice = paso) {
+  function validarPaso(indice = paso, aceptaLicenciaAlContinuar = false) {
     if (indice === 0) {
       return [
         validarTelefono("telefono", telefono, setTelefono),
@@ -338,8 +343,8 @@ export default function PaginaRegistroConductor() {
         validarCampo("numeroLicencia", numeroLicencia),
         validarCampo("tipoLicencia", tipoLicencia),
         validarVigenciaLicencia(),
-        setCampoError("autorizaVerificacion", autorizaVerificacion ? "" : "Debes autorizar la verificación de antecedentes"),
-        setCampoError("declaraSinSuspensiones", declaraSinSuspensiones ? "" : "Debes confirmar esta declaración")
+        setCampoError("autorizaVerificacion", (aceptaLicenciaAlContinuar || autorizaVerificacion) ? "" : "Debes autorizar la verificación de antecedentes"),
+        setCampoError("declaraSinSuspensiones", (aceptaLicenciaAlContinuar || declaraSinSuspensiones) ? "" : "Debes confirmar esta declaración")
       ].every(Boolean);
     }
     if (indice === 3) {
@@ -410,7 +415,12 @@ export default function PaginaRegistroConductor() {
       const cuentaLista = await crearCuentaParaContinuar();
       if (!cuentaLista) return;
     }
-    if (validarPaso()) {
+    if (validarPaso(paso, paso === 2)) {
+      if (paso === 2) {
+        aceptadosEnRef.current = new Date().toISOString();
+        setAutorizaVerificacion(true);
+        setDeclaraSinSuspensiones(true);
+      }
       registrarTelemetria("paso_completado",paso+1);
       setPaso((actual) => Math.min(actual + 1, PASOS_REGISTRO.length - 1));
     }
@@ -702,7 +712,7 @@ export default function PaginaRegistroConductor() {
   }, [pendienteOtp, esperaReenvioOtp]);
 
   useEffect(() => {
-    if (!tieneSupabaseConfigurado()) { hidratacionRemotaCompletaRef.current=true; return; }
+    if (!tieneSupabaseConfigurado()) { hidratacionRemotaCompletaRef.current=true; setRegistroListo(true); return; }
     let activo=true;
     const cliente=crearClienteNavegador();
     async function hidratar() {
@@ -781,6 +791,8 @@ export default function PaginaRegistroConductor() {
         hidratacionRemotaCompletaRef.current=true;
         registrarTelemetria("rpc_error",undefined,"recuperar_expediente");
         setError(traducirErrorOperativo(err,"No pudimos recuperar tu expediente. Vuelve a intentarlo."));
+      } finally {
+        if (activo) setRegistroListo(true);
       }
     }
     void hidratar();
@@ -870,8 +882,15 @@ export default function PaginaRegistroConductor() {
     router.push(sesionActivaTrasRegistro ? "/panel" : "/login");
   }
 
+  const registroCompacto = paso < 3 && !pendienteOtp && !enviado;
+  const domicilioYContactoCompletos = (["codigoPostal", "estado", "ciudad", "colonia", "calle", "numero", "referencias", "contactoEmergenciaNombre", "contactoEmergenciaTelefono"] as const).every((campo) => {
+    const valores = { codigoPostal, estado, ciudad, colonia, calle, numero, referencias, contactoEmergenciaNombre, contactoEmergenciaTelefono };
+    return !validarCampoRegistroConductor(campo, valores[campo]);
+  });
+
   return (
-    <RegistrationShell>
+    <RegistrationShell compact={registroCompacto}>
+        {mostrarDetalleConsentimiento && <LicenseConsentDetails onClose={() => setMostrarDetalleConsentimiento(false)} />}
         {mostrarVerificacionDidit && (
           <DiditVerificationModal
             isOpen={mostrarVerificacionDidit}
@@ -948,7 +967,7 @@ export default function PaginaRegistroConductor() {
           </div>
         ) : (
           <>
-            <h1 id="titulo-registro-conductor" className="mt-8 font-display text-2xl font-bold text-text-primary">Registro de conductor</h1>
+
         
 
             <DraftRecoveryModal
@@ -960,20 +979,19 @@ export default function PaginaRegistroConductor() {
 
             <RegistrationProgress
               paso={paso}
-              onGoToStep={setPaso}
+              onBack={() => paso === 0 ? router.push("/login") : volver()}
               borradorLocalGuardado={borradorLocalGuardado}
               sesionAutenticada={sesionAutenticada}
               estadoGuardadoRemoto={estadoGuardadoRemoto}
               detalleGuardadoRemoto={detalleGuardadoRemoto}
             />
 
-            {!tieneSupabaseConfigurado() && (
-              <div className="mt-5">
-                <Aviso tono="danger">Supabase no está configurado. El registro no está disponible en este entorno.</Aviso>
-              </div>
-            )}
-
-            <form className="mt-6 grid gap-5" onSubmit={crearCuenta}>
+            <form className={registroCompacto ? styles.form : "mt-6 grid gap-5"} noValidate
+              inert={!registroListo} aria-busy={!registroListo || enviando} data-registration-ready={registroListo}
+              onSubmit={(event) => {
+              if (paso < PASOS_REGISTRO.length - 1) { event.preventDefault(); void avanzar(); }
+              else void crearCuenta(event);
+            }}>
               {paso === 0 && (
                 <AccountStep
                   telefono={telefono}
@@ -1043,10 +1061,6 @@ export default function PaginaRegistroConductor() {
                   setTipoLicencia={setTipoLicencia}
                   vigenciaLicencia={vigenciaLicencia}
                   setVigenciaLicencia={setVigenciaLicencia}
-                  autorizaVerificacion={autorizaVerificacion}
-                  setAutorizaVerificacion={setAutorizaVerificacion}
-                  declaraSinSuspensiones={declaraSinSuspensiones}
-                  setDeclaraSinSuspensiones={setDeclaraSinSuspensiones}
                   erroresCampos={erroresCampos}
                   limpiarErrorCampo={limpiarErrorCampo}
                   validarCampo={validarCampo}
@@ -1096,7 +1110,7 @@ export default function PaginaRegistroConductor() {
                 />
               )}
 
-              {error && <Aviso tono="danger">{error}</Aviso>}
+              {registroCompacto ? <RegistrationNotice message={!tieneSupabaseConfigurado() ? "Registro no disponible. Inténtalo más tarde." : error || Object.values(erroresCampos).find(Boolean) || (estadoGuardadoRemoto === "error" ? detalleGuardadoRemoto : null)} /> : error && <Aviso tono="danger">{error}</Aviso>}
 
               {paso === PASOS_REGISTRO.length - 1 && !puedeEnviar && (
                 <Aviso tono="atencion">
@@ -1104,6 +1118,19 @@ export default function PaginaRegistroConductor() {
                 </Aviso>
               )}
 
+              {registroCompacto ? (
+                <footer className={styles.actionFooter}>
+                  {paso === 0 && <p className={styles.microcopy}>Tus datos personales, biométricos y bancarios se tratan según el <a href="/legal/privacidad" target="_blank" rel="noopener noreferrer">Aviso de Privacidad</a>.</p>}
+                  {paso === 2 && <p className={styles.microcopy}>
+                    Al continuar, declaras que tu licencia es válida y autorizas la verificación de antecedentes y datos biométricos. <a href="/legal/privacidad" target="_blank" rel="noopener noreferrer">Privacidad</a> · <a href="/legal/terminos" target="_blank" rel="noopener noreferrer">Términos</a>
+                    <button type="button" className={styles.legalTrigger} onClick={() => setMostrarDetalleConsentimiento(true)}>Ver declaración</button>
+                  </p>}
+                  <button className={styles.primary} type="submit" aria-busy={enviando}
+                    disabled={!registroListo || enviando || !tieneSupabaseConfigurado() || (paso === 1 && !domicilioYContactoCompletos)}>
+                    {!registroListo ? "Preparando…" : enviando ? "Guardando…" : paso === 0 && !sesionAutenticada ? "Crear cuenta y continuar" : paso === 1 ? "Guardar y Continuar" : "Continuar"}
+                  </button>
+                </footer>
+              ) : (
               <div className="grid gap-3 sm:grid-cols-2">
                 {paso > 0 && <Button type="button" variant="secondary" onClick={volver}>Atrás</Button>}
                 {paso < PASOS_REGISTRO.length - 1 ? (
@@ -1136,14 +1163,10 @@ export default function PaginaRegistroConductor() {
                   </Button>
                 )}
               </div>
+              )}
             </form>
 
-            <p className="mt-6 text-center font-body text-sm text-text-secondary">
-              ¿Ya tienes cuenta?{" "}
-              <button type="button" onClick={() => router.push("/login")} className="inline-flex min-h-11 items-center font-semibold text-route-action hover:underline">
-                Inicia sesión
-              </button>
-            </p>
+
           </>
         )}
     </RegistrationShell>
