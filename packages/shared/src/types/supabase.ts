@@ -383,6 +383,25 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"checkout_traslados_masivos": {
+                  Row: {
+                    "auth_user_id": string,"carga_id": string | null,"cotizaciones": NonNullable<Json>,"creado_en": string,"filas": NonNullable<Json>,"id": string,"monto_centavos": number,"pagado_en": string | null,"stripe_payment_intent_id": string | null
+                  }
+                  Insert: {
+                    "auth_user_id": string,"carga_id"?: string | null,"cotizaciones": NonNullable<Json>,"creado_en"?: string,"filas": NonNullable<Json>,"id": string,"monto_centavos": number,"pagado_en"?: string | null,"stripe_payment_intent_id"?: string | null
+                  }
+                  Update: {
+                    "auth_user_id"?: string,"carga_id"?: string | null,"cotizaciones"?: NonNullable<Json>,"creado_en"?: string,"filas"?: NonNullable<Json>,"id"?: string,"monto_centavos"?: number,"pagado_en"?: string | null,"stripe_payment_intent_id"?: string | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "checkout_traslados_masivos_carga_id_fkey"
+      columns: ["carga_id"]
+isOneToOne: false
+      referencedRelation: "cargas_traslados_masivos"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"claves_idempotencia": {
                   Row: {
                     "clave": string,"creado_en": string,"entidad": string,"entidad_id": string | null,"expira_en": string,"id": string,"resultado": Json | null
@@ -1877,16 +1896,22 @@ isOneToOne: false
                   ]
                 },"pagos": {
                   Row: {
-                    "comision_mxn": number | null,"estado": Database["public"]['Enums']["estado_pago"],"id": string,"metodo": string,"momento": Database["public"]['Enums']["momento_pago"],"monto": number,"registrado_en": string,"stripe_event_id": string | null,"stripe_payment_intent_id": string | null,"traslado_id": string
+                    "checkout_masivo_id": string | null,"comision_mxn": number | null,"estado": Database["public"]['Enums']["estado_pago"],"id": string,"metodo": string,"momento": Database["public"]['Enums']["momento_pago"],"monto": number,"registrado_en": string,"stripe_event_id": string | null,"stripe_payment_intent_id": string | null,"traslado_id": string
                   }
                   Insert: {
-                    "comision_mxn"?: number | null,"estado"?: Database["public"]['Enums']["estado_pago"],"id"?: string,"metodo": string,"momento": Database["public"]['Enums']["momento_pago"],"monto": number,"registrado_en"?: string,"stripe_event_id"?: string | null,"stripe_payment_intent_id"?: string | null,"traslado_id": string
+                    "checkout_masivo_id"?: string | null,"comision_mxn"?: number | null,"estado"?: Database["public"]['Enums']["estado_pago"],"id"?: string,"metodo": string,"momento": Database["public"]['Enums']["momento_pago"],"monto": number,"registrado_en"?: string,"stripe_event_id"?: string | null,"stripe_payment_intent_id"?: string | null,"traslado_id": string
                   }
                   Update: {
-                    "comision_mxn"?: number | null,"estado"?: Database["public"]['Enums']["estado_pago"],"id"?: string,"metodo"?: string,"momento"?: Database["public"]['Enums']["momento_pago"],"monto"?: number,"registrado_en"?: string,"stripe_event_id"?: string | null,"stripe_payment_intent_id"?: string | null,"traslado_id"?: string
+                    "checkout_masivo_id"?: string | null,"comision_mxn"?: number | null,"estado"?: Database["public"]['Enums']["estado_pago"],"id"?: string,"metodo"?: string,"momento"?: Database["public"]['Enums']["momento_pago"],"monto"?: number,"registrado_en"?: string,"stripe_event_id"?: string | null,"stripe_payment_intent_id"?: string | null,"traslado_id"?: string
                   }
                   Relationships: [
                     {
+      foreignKeyName: "pagos_checkout_masivo_id_fkey"
+      columns: ["checkout_masivo_id"]
+isOneToOne: false
+      referencedRelation: "checkout_traslados_masivos"
+      referencedColumns: ["id"]
+    },{
       foreignKeyName: "pagos_traslado_id_fkey"
       columns: ["traslado_id"]
 isOneToOne: false
@@ -2110,6 +2135,32 @@ isOneToOne: false
       referencedRelation: "usuarios"
       referencedColumns: ["id"]
     }
+                  ]
+                },"sat_regimenes_fiscales": {
+                  Row: {
+                    "clave": string,"descripcion": string,"fisica": boolean,"moral": boolean,"vigente_desde": string,"vigente_hasta": string | null
+                  }
+                  Insert: {
+                    "clave": string,"descripcion": string,"fisica": boolean,"moral": boolean,"vigente_desde": string,"vigente_hasta"?: string | null
+                  }
+                  Update: {
+                    "clave"?: string,"descripcion"?: string,"fisica"?: boolean,"moral"?: boolean,"vigente_desde"?: string,"vigente_hasta"?: string | null
+                  }
+                  Relationships: [
+                    
+                  ]
+                },"sat_usos_cfdi": {
+                  Row: {
+                    "clave": string,"descripcion": string,"fisica": boolean,"moral": boolean,"regimenes": (string)[],"vigente_desde": string,"vigente_hasta": string | null
+                  }
+                  Insert: {
+                    "clave": string,"descripcion": string,"fisica": boolean,"moral": boolean,"regimenes": (string)[],"vigente_desde": string,"vigente_hasta"?: string | null
+                  }
+                  Update: {
+                    "clave"?: string,"descripcion"?: string,"fisica"?: boolean,"moral"?: boolean,"regimenes"?: (string)[],"vigente_desde"?: string,"vigente_hasta"?: string | null
+                  }
+                  Relationships: [
+                    
                   ]
                 },"sesiones_proxy_traslado": {
                   Row: {
@@ -3486,6 +3537,9 @@ isOneToOne: false
 "conductor_solicita_asignacion":
 { Args: { "p_lat"?: number,"p_lng"?: number,"p_traslado_id": string }; Returns: Json
                            },
+"confirmar_checkout_masivo":
+{ Args: { "p_id": string,"p_intent": string,"p_moneda": string,"p_monto": number }; Returns: string
+                           },
 "consentimientos_solicitud_completos":
 { Args: { "p_solicitud_id": string }; Returns: boolean
                            },
@@ -3842,6 +3896,9 @@ isOneToOne: false
                            },
 "usuario_previsualizar_tarifa":
 { Args: { "p_condicion"?: Database["public"]['Enums']["condicion_vehiculo"],"p_distancia_km": number,"p_fecha_hora"?: string,"p_marca": string,"p_modelo": string,"p_tiempo_estimado_horas": number }; Returns: Json
+                           },
+"usuario_previsualizar_tarifas_masivas":
+{ Args: { "p_filas": Json }; Returns: Json
                            },
 "usuario_procesa_carga_traslados_masivos":
 { Args: { "p_carga_id": string,"p_limite"?: number }; Returns: Json

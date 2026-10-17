@@ -197,7 +197,7 @@ export function listarPagosTraslado(cliente: Cliente, trasladoId: string): Promi
   return varios(
     cliente
       .from("pagos")
-      .select("id, traslado_id, monto, momento, estado, metodo, registrado_en, stripe_payment_intent_id, stripe_event_id, comision_mxn")
+      .select("id, traslado_id, monto, momento, estado, metodo, registrado_en, stripe_payment_intent_id, stripe_event_id, comision_mxn, checkout_masivo_id")
       .eq("traslado_id", trasladoId)
       .order("registrado_en", { ascending: false })
   );
@@ -512,7 +512,7 @@ export async function obtenerPasaporteCompleto(
     exigirVarios(
       cliente
         .from("pagos")
-        .select("id, traslado_id, monto, momento, estado, metodo, registrado_en, stripe_payment_intent_id, stripe_event_id, comision_mxn")
+        .select("id, traslado_id, monto, momento, estado, metodo, registrado_en, stripe_payment_intent_id, stripe_event_id, comision_mxn, checkout_masivo_id")
         .eq("traslado_id", trasladoId)
         .order("registrado_en", { ascending: false }),
       trasladoId,

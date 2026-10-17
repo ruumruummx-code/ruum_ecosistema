@@ -52,7 +52,7 @@ select set_config('request.jwt.claim.sub', '90800000-0000-4000-8000-000000000001
 select lives_ok(
   $sql$
     select public.actualizar_datos_facturacion(
-      'NUEVO800101AB2',
+      'NUE800101AB2',
       'Empresa Actualizada SA',
       '626',
       '01000',
@@ -64,7 +64,7 @@ select lives_ok(
 );
 
 select ok(
-  (select (u.rfc = 'NUEVO800101AB2' and e.rfc = 'NUEVO800101AB2' and u.razon_social = e.razon_social and u.correo_facturacion = e.correo_facturacion)
+  (select (u.rfc = 'NUE800101AB2' and e.rfc = 'NUE800101AB2' and u.razon_social = e.razon_social and u.correo_facturacion = e.correo_facturacion)
    from public.usuarios u
    join public.empresas e on e.id = u.empresa_id
    where u.id = '90800000-0000-4000-8000-000000000001'),
@@ -112,7 +112,7 @@ reset role;
 -- Comprobar que la tabla usuarios NO quedó con 'FAIL_EMPRESA' (rollback íntegro de la transacción)
 select is(
   (select rfc from public.usuarios where id = '90800000-0000-4000-8000-000000000001'),
-  'NUEVO800101AB2',
+  'NUE800101AB2',
   'PR-08.5: fallo en empresas revierte también los cambios en usuarios (rollback atómico)'
 );
 
