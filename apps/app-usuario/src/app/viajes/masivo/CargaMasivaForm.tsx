@@ -20,6 +20,10 @@ import {
 import {
   crearTrasladosMasivosUsuario,
   procesarCargaTrasladosMasivosUsuario,
+  obtenerEstadoCargaMasivaUsuario,
+  listarCargasMasivasUsuario,
+  previsualizarTarifaUsuario,
+  type CargaTrasladosMasivosUsuario,
   type FilaTrasladoMasivoNormalizada,
   type ResultadoCargaTrasladosMasivos
 } from "@ruum/api/services";
@@ -34,7 +38,11 @@ import {
 
 interface FilaPrevalidada {
   numero: number;
+  original: FilaCsv;
+  excluida?: boolean;
   datos: FilaTrasladoMasivoNormalizada;
+  tarifa?: number;
+  errorTarifa?: string;
   errores: string[];
   advertencias: string[];
 }
@@ -52,8 +60,8 @@ function construirDireccionCompleta(calle: string, numero: string, colonia: stri
   return [calle, numero, colonia, cp, ciudad, estado, "México"].map((val) => val.trim()).filter(Boolean).join(", ");
 }
 
-async function calcularSha256(archivo: File): Promise<string> {
-  const buffer = await archivo.arrayBuffer();
+async function calcularSha256(contenido: string): Promise<string> {
+  const buffer = new TextEncoder().encode(contenido);
   const digest = await crypto.subtle.digest("SHA-256", buffer);
   return Array.from(new Uint8Array(digest))
     .map((b) => b.toString(16).padStart(2, "0"))
@@ -85,7 +93,36 @@ export function CargaMasivaForm() {
       abortCargaRef.current?.abort();
     };
   }, []);
+  const [historial, setHistorial] = useState<CargaTrasladosMasivosUsuario[]>([]);
+  const [errorHistorial, setErrorHistorial] = useState(false);
+  const [cotizando, setCotizando] = useState(false);
+  const [progresoCarga, setProgresoCarga] = useState<ResultadoCargaTrasladosMasivos | null>(null);
+  const abortCotizacionRef = useRef<AbortController | null>(null);
+
+  const actualizarHistorial = async () => {
+    try {
+      setHistorial(await listarCargasMasivasUsuario(crearClienteNavegador()));
+      setErrorHistorial(false);
+    } catch { setErrorHistorial(true); }
+  };
+
+  useEffect(() => {
+    let activa = true;
+    if (tieneSupabaseConfigurado()) {
+      listarCargasMasivasUsuario(crearClienteNavegador()).then((cargas) => {
+        if (activa) setHistorial(cargas);
+      }).catch(() => { if (activa) setErrorHistorial(true); });
+    }
+    return () => { activa = false; abortCotizacionRef.current?.abort(); };
+  }, []);
+
   const [paso, setPaso] = useState<1 | 2 | 3 | 4>(1);
+  const [edicion, setEdicion] = useState<{ numero: number; datos: FilaCsv } | null>(null);
+  const [guardando, setGuardando] = useState(false);
+  const [reporteServidor, setReporteServidor] = useState<string | null>(null);
+  const [errorReporte, setErrorReporte] = useState(false);
+  const cargaIdRef = useRef<string | null>(null);
+  const filasEnviadasRef = useRef<FilaPrevalidada[]>([]);
   const [archivo, setArchivo] = useState<File | null>(null);
   const [analizando, setAnalizando] = useState(false);
   const [progresoGeocodificacion, setProgresoGeocodificacion] = useState<{ actual: number; total: number } | null>(null);
@@ -97,11 +134,18 @@ export function CargaMasivaForm() {
 
   const totalErrores = filas.filter((f) => f.errores.length > 0).length;
   const totalAdvertencias = filas.filter((f) => f.errores.length === 0 && f.advertencias.length > 0).length;
-  const totalValidas = filas.filter((f) => f.errores.length === 0).length;
+  const filasSeleccionadas = filas.filter((f) => f.errores.length === 0 && !f.excluida);
+  const totalValidas = filasSeleccionadas.length;
+  const totalOmitidas = filas.length - totalValidas;
+  const todasCotizadas = totalValidas > 0 && filasSeleccionadas.every((f) => f.tarifa !== undefined && !f.errorTarifa);
+  const totalCotizado = filasSeleccionadas.reduce((total, f) => total + (f.tarifa ?? 0), 0);
+  const moneda = (valor: number) => new Intl.NumberFormat("es-MX", { style: "currency", currency: "MXN" }).format(valor);
 
   // ── 1. Descarga de plantilla CSV ─────────────────────────────────────────
   const descargarPlantilla = () => {
-    const blob = new Blob([EJEMPLO_CSV_PLANTILLA], { type: "text/csv;charset=utf-8" });
+    const fechaEjemplo = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+    const plantilla = EJEMPLO_CSV_PLANTILLA.replace(/\d{4}-\d{2}-\d{2}(?=T)/g, fechaEjemplo);
+    const blob = new Blob([plantilla], { type: "text/csv;charset=utf-8" });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
@@ -123,7 +167,12 @@ export function CargaMasivaForm() {
 
   // ── 3. Procesar archivo CSV seleccionado ─────────────────────────────────
   const manejarArchivo = async (archivoSeleccionado: File) => {
+    abortEnriquecimientoRef.current?.abort();
     setErrorGeneral(null);
+    setEdicion(null);
+    setReporteServidor(null);
+    setErrorReporte(false);
+    cargaIdRef.current = null;
     if (!archivoSeleccionado.name.toLowerCase().endsWith(".csv")) {
       setErrorGeneral("El archivo debe tener formato .csv");
       return;
@@ -181,6 +230,7 @@ export function CargaMasivaForm() {
       const filasEnriquecidas = await Promise.all(tareas);
       if (controller.signal.aborted) return;
       setFilas(filasEnriquecidas);
+      setFiltroTabla(filasEnriquecidas.some((f) => f.errores.length > 0) ? "errores" : "todas");
       setPaso(2);
     } catch (err) {
       if (err instanceof DOMException && err.name === "AbortError") return;
@@ -209,16 +259,27 @@ export function CargaMasivaForm() {
       errores.push("Fecha y hora requerida para modalidad programada");
     }
 
+    for (const campo of ["origen_codigo_postal", "destino_codigo_postal"]) {
+      if (limpiar(fila[campo]) && !/^\d{5}$/.test(limpiar(fila[campo]))) errores.push(campo + " debe tener 5 dígitos");
+    }
+    if (limpiar(fila.vehiculo_anio) && !/^\d{4}$/.test(limpiar(fila.vehiculo_anio))) errores.push("El año debe tener 4 dígitos");
+    if (!["lo_antes_posible", "programado"].includes(modalidad)) errores.push("Modalidad de programación inválida");
+    if (modalidad === "programado" && fila.fecha_hora_programada &&
+        (!Number.isFinite(Date.parse(fila.fecha_hora_programada)) || Date.parse(fila.fecha_hora_programada) <= Date.now())) {
+      errores.push("La fecha programada debe ser válida y futura");
+    }
+
+    // No consultar servicios externos para filas con errores bloqueantes.
     // Consulta de código postal SEPOMEX
     const origenCp = limpiar(fila.origen_codigo_postal);
     const destinoCp = limpiar(fila.destino_codigo_postal);
     const [origenCpDatos, destinoCpDatos] = await Promise.all([
-      consultarCodigoPostalMx(origenCp),
-      consultarCodigoPostalMx(destinoCp)
+      errores.length ? Promise.resolve(null) : consultarCodigoPostalMx(origenCp),
+      errores.length ? Promise.resolve(null) : consultarCodigoPostalMx(destinoCp)
     ]);
 
-    if (origenCp && !origenCpDatos) advertencias.push("CP origen no encontrado en SEPOMEX");
-    if (destinoCp && !destinoCpDatos) advertencias.push("CP destino no encontrado en SEPOMEX");
+    if (!errores.length && origenCp && !origenCpDatos) advertencias.push("CP origen no encontrado en SEPOMEX");
+    if (!errores.length && destinoCp && !destinoCpDatos) advertencias.push("CP destino no encontrado en SEPOMEX");
 
     const origenEstado = origenCpDatos?.estado ?? "";
     const destinoEstado = destinoCpDatos?.estado ?? "";
@@ -252,7 +313,7 @@ export function CargaMasivaForm() {
     let tiempoEstimadoHoras = numeroTexto(fila.tiempo_estimado_horas);
 
     // Geocodificación Mapbox si faltan coordenadas — timeout, retry y abort centralizados en lib/mapbox
-    if (tieneMapboxConfigurado() && !signal?.aborted) {
+    if (errores.length === 0 && tieneMapboxConfigurado() && !signal?.aborted) {
       try {
         const [geoOrigen, geoDestino] = await Promise.all([
           origenLat && origenLng ? null : geocodificarDireccion(origenDireccion, signal),
@@ -294,6 +355,7 @@ export function CargaMasivaForm() {
 
     return {
       numero,
+      original: { ...fila },
       errores,
       advertencias,
       datos: {
@@ -331,10 +393,153 @@ export function CargaMasivaForm() {
     };
   };
 
+  const cotizarSeleccionadas = async () => {
+    abortCotizacionRef.current?.abort();
+    const controller = new AbortController();
+    abortCotizacionRef.current = controller;
+    setCotizando(true);
+    setErrorGeneral(null);
+    setPaso(3);
+    const limit = pLimit(2);
+    try {
+      const cliente = crearClienteNavegador();
+      const cotizadas = await Promise.all(filasSeleccionadas.map((fila) => limit(async () => {
+        if (controller.signal.aborted) return fila;
+        try {
+          const distancia = Number(fila.datos.distancia_km);
+          const tiempo = Number(fila.datos.tiempo_estimado_horas);
+          if (!Number.isFinite(distancia) || distancia <= 0 || !Number.isFinite(tiempo) || tiempo <= 0) {
+            throw new Error("Completa una ruta con distancia y tiempo válidos para cotizar.");
+          }
+          const tarifa = await previsualizarTarifaUsuario(cliente, {
+            marca: fila.datos.vehiculo_marca,
+            modelo: fila.datos.vehiculo_modelo,
+            distanciaKm: distancia,
+            tiempoEstimadoHoras: tiempo,
+            fechaHora: fila.datos.modalidad_programacion === "programado" && fila.datos.fecha_hora_programada ? new Date(fila.datos.fecha_hora_programada) : null,
+            condicion: fila.datos.condicion as Parameters<typeof previsualizarTarifaUsuario>[1]["condicion"]
+          });
+          if (!tarifa.disponible || typeof tarifa.tarifa !== "number" || !Number.isFinite(tarifa.tarifa) || tarifa.tarifa < 0) {
+            throw new Error(tarifa.motivo || "No hay una tarifa disponible para este vehículo.");
+          }
+          return { ...fila, tarifa: tarifa.tarifa, errorTarifa: undefined, datos: {
+            ...fila.datos,
+            categoria_tarifa: tarifa.categoria_tarifa ?? fila.datos.categoria_tarifa,
+            gama: tarifa.gama ?? fila.datos.gama
+          } };
+        } catch (err) {
+          return { ...fila, tarifa: undefined, errorTarifa: err instanceof Error ? err.message : "No se pudo consultar la tarifa." };
+        }
+      })));
+      if (!controller.signal.aborted) setFilas((actuales) => actuales.map((fila) => cotizadas.find((f) => f.numero === fila.numero) ?? fila));
+    } catch (err) {
+      if (!controller.signal.aborted) setErrorGeneral(err instanceof Error ? err.message : "No se pudo cotizar el lote.");
+    } finally { if (!controller.signal.aborted) setCotizando(false); }
+  };
+
+  const guardarEdicion = async () => {
+    if (!edicion) return;
+    setGuardando(true);
+    setErrorGeneral(null);
+    const controller = new AbortController();
+    abortEnriquecimientoRef.current = controller;
+    try {
+      const datos = { ...edicion.datos };
+      const anterior = filas.find((f) => f.numero === edicion.numero)?.original;
+      for (const lado of ["origen", "destino"]) {
+        if (["calle", "numero", "colonia", "codigo_postal"].some((campo) => datos[lado + "_" + campo] !== anterior?.[lado + "_" + campo])) {
+          delete datos[lado + "_lat"];
+          delete datos[lado + "_lng"];
+          delete datos.distancia_km;
+          delete datos.tiempo_estimado_horas;
+        }
+      }
+      const revisada = await enriquecerFilaUsuario(datos, edicion.numero, controller.signal);
+      if (controller.signal.aborted) return;
+      setFilas((actuales) => actuales.map((f) => f.numero === revisada.numero ? { ...revisada, excluida: f.excluida } : f));
+      setEdicion(null);
+      setFiltroTabla("todas");
+    } catch (err) {
+      if (!controller.signal.aborted) setErrorGeneral(err instanceof Error ? err.message : "No se pudo revisar la fila.");
+    } finally { setGuardando(false); }
+  };
+
+  const cargarReporteServidor = async () => {
+    if (!cargaIdRef.current) return;
+    try {
+      const carga = await obtenerEstadoCargaMasivaUsuario(crearClienteNavegador(), cargaIdRef.current);
+      if (!carga?.reporte_errores_csv) throw new Error("Reporte aún no disponible");
+      // El servidor numera las filas del subconjunto enviado; recuperar el número original.
+      const reporte = carga.reporte_errores_csv.replace(/^(\d+),/gm, (_, numero: string) =>
+        String(filasEnviadasRef.current[Number(numero) - 1]?.numero ?? numero) + ",");
+      setReporteServidor(reporte);
+      setErrorReporte(false);
+    } catch { setErrorReporte(true); }
+  };
+
+  const seguirCarga = async (cargaId: string, controller: AbortController) => {
+      if (controller.signal.aborted) throw new DOMException("Aborted", "AbortError");
+      const cliente = crearClienteNavegador();
+      // 2. Procesar lote en chunks — R6: delay + maxRetries para evitar loop infinito
+      let resProcesamiento = await procesarCargaTrasladosMasivosUsuario(cliente, cargaId, 50);
+      const MAX_INTENTOS = MAX_INTENTOS_MASIVO;
+      let intentos = 0;
+
+      if (controller.signal.aborted) return;
+      setProgresoCarga(resProcesamiento);
+      while (resProcesamiento.estado === "procesando" || resProcesamiento.estado === "pendiente") {
+        if (controller.signal.aborted) throw new DOMException("Aborted", "AbortError");
+        if (intentos++ >= MAX_INTENTOS) {
+          throw new Error("El lote sigue pendiente. Puedes reanudarlo desde Cargas recientes.");
+        }
+        await dormir(1000 + Math.min(intentos * 250, 3000), controller.signal);
+        resProcesamiento = await procesarCargaTrasladosMasivosUsuario(cliente, cargaId, 50);
+        if (controller.signal.aborted) return;
+        setProgresoCarga(resProcesamiento);
+      }
+
+      if (controller.signal.aborted) return;
+      setResultado(resProcesamiento);
+      setPaso(4);
+      if (resProcesamiento.filas_error > 0) await cargarReporteServidor();
+      await actualizarHistorial();
+  };
+
+  const abrirCarga = async (carga: CargaTrasladosMasivosUsuario) => {
+    if (enviando) return;
+    setEnviando(true);
+    setErrorGeneral(null);
+    setReporteServidor(null);
+    setErrorReporte(false);
+    setResultado(null);
+    setProgresoCarga(null);
+    cargaIdRef.current = carga.id;
+    filasEnviadasRef.current = [];
+    const controller = new AbortController();
+    abortCargaRef.current?.abort();
+    abortCargaRef.current = controller;
+    try {
+      if (carga.estado === "pendiente" || carga.estado === "procesando") {
+        await seguirCarga(carga.id, controller);
+      } else {
+        const actual = await obtenerEstadoCargaMasivaUsuario(crearClienteNavegador(), carga.id);
+        if (!actual) throw new Error("No se encontró el lote.");
+        if (controller.signal.aborted) return;
+        setResultado({ ...actual, carga_id: actual.id });
+        setReporteServidor(actual.reporte_errores_csv);
+        setErrorReporte(actual.filas_error > 0 && !actual.reporte_errores_csv);
+        setPaso(4);
+      }
+    } catch (err) {
+      if (!controller.signal.aborted) setErrorGeneral(err instanceof Error ? err.message : "No se pudo abrir el lote.");
+    } finally { setEnviando(false); void actualizarHistorial(); }
+  };
+
   // ── 5. Confirmar y procesar carga en backend ─────────────────────────────
   const ejecutarCarga = async () => {
-    if (!archivo || filas.length === 0) return;
+    if (!archivo || !todasCotizadas || cotizando || enviando) return;
     setEnviando(true);
+    setProgresoCarga(null);
     setErrorGeneral(null);
     // R6: abort control para evitar loop infinito si usuario navega/cancela
     abortCargaRef.current?.abort();
@@ -347,39 +552,28 @@ export function CargaMasivaForm() {
       }
       if (controller.signal.aborted) throw new DOMException("Aborted", "AbortError");
       const cliente = crearClienteNavegador();
-      const hash = await calcularSha256(archivo);
+      const seleccionadas = filasSeleccionadas;
+      filasEnviadasRef.current = seleccionadas;
+      const hash = await calcularSha256(JSON.stringify(seleccionadas.map((f) => f.original)));
 
       // 1. Encolar carga en backend
       const resCreacion = await crearTrasladosMasivosUsuario(cliente, {
         nombreArchivo: archivo.name,
-        filas: filas.map((f) => f.datos),
+        filas: seleccionadas.map((f) => f.datos),
         hashArchivo: hash,
         tamanoBytes: archivo.size,
         mimeType: archivo.type || "text/csv"
       });
 
-      // 2. Procesar lote en chunks — R6: delay + maxRetries para evitar loop infinito
-      let resProcesamiento = await procesarCargaTrasladosMasivosUsuario(cliente, resCreacion.carga_id, 50);
-      const MAX_INTENTOS = MAX_INTENTOS_MASIVO;
-      let intentos = 0;
+      cargaIdRef.current = resCreacion.carga_id;
 
-      while (resProcesamiento.estado === "procesando") {
-        if (controller.signal.aborted) throw new DOMException("Aborted", "AbortError");
-        if (intentos++ >= MAX_INTENTOS) {
-          throw new Error("El backend sigue procesando el lote. Revisa Mis Traslados en unos minutos para ver el resultado parcial.");
-        }
-        await dormir(1000 + Math.min(intentos * 250, 3000), controller.signal);
-        resProcesamiento = await procesarCargaTrasladosMasivosUsuario(cliente, resCreacion.carga_id, 50);
-      }
-
-      if (controller.signal.aborted) return;
-      setResultado(resProcesamiento);
-      setPaso(4);
+      await seguirCarga(resCreacion.carga_id, controller);
     } catch (err) {
       if (err instanceof DOMException && err.name === "AbortError") return;
       setErrorGeneral(err instanceof Error ? err.message : "Error al procesar la carga masiva.");
     } finally {
       setEnviando(false);
+      void actualizarHistorial();
     }
   };
 
@@ -413,6 +607,30 @@ export function CargaMasivaForm() {
         </p>
       </header>
 
+      {paso === 1 && (
+        <section className="rounded-xl border border-[#1C2A3E] bg-[#0A1220] p-4 space-y-3">
+          <h2 className="text-white font-bold">Cargas recientes</h2>
+          {errorHistorial && <Aviso tono="atencion">No se pudo cargar el historial. <button type="button" onClick={() => void actualizarHistorial()}>Reintentar historial</button></Aviso>}
+          {!errorHistorial && historial.length === 0 && <p className="text-sm text-slate-400">No hay cargas recientes.</p>}
+          <ul className="space-y-3">
+            {historial.map((carga) => (
+              <li key={carga.id} className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-700 pb-3 text-sm text-slate-200">
+                <div><p>{carga.nombre_archivo}</p><p className="text-xs text-slate-400">{carga.estado.replaceAll("_", " ")} · {carga.filas_procesadas}/{carga.total_filas} procesadas · {carga.filas_creadas} creadas · {carga.filas_error} con error</p></div>
+                <Button type="button" variant="secondary" disabled={enviando || analizando} onClick={() => void abrirCarga(carga)}>{carga.estado === "pendiente" || carga.estado === "procesando" ? "Reanudar lote" : "Ver resultado"}</Button>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+      {enviando && (
+        <div role="status" className="rounded-xl border border-[#FFC400]/30 p-4 text-slate-200">
+          <p>{progresoCarga ? "Procesadas " + progresoCarga.filas_procesadas + " de " + progresoCarga.total_filas + " · " + progresoCarga.filas_creadas + " creadas · " + progresoCarga.filas_error + " con error" : "Abriendo lote…"}</p>
+          <Button type="button" variant="secondary" onClick={() => { abortCargaRef.current?.abort(); setErrorGeneral("Seguimiento detenido. Reanuda el lote desde Cargas recientes."); }}>Detener seguimiento</Button>
+        </div>
+      )}
+      {paso !== 1 && !enviando && !cotizando && (
+        <Button type="button" variant="secondary" onClick={() => { setPaso(1); void actualizarHistorial(); }}>Ver cargas recientes</Button>
+      )}
       {/* Indicador de pasos */}
       <nav aria-label="Progreso de carga masiva" className="grid grid-cols-4 gap-2 text-center text-xs font-display">
         {[
@@ -477,6 +695,7 @@ export function CargaMasivaForm() {
                 id="archivo-csv"
                 type="file"
                 accept=".csv,text/csv"
+                disabled={analizando || enviando}
                 className="sr-only"
                 onChange={(e) => {
                   const f = e.target.files?.[0];
@@ -573,7 +792,7 @@ export function CargaMasivaForm() {
           {totalErrores > 0 && (
             <Aviso tono="atencion">
               {totalErrores} {totalErrores === 1 ? "fila contiene errores bloqueantes" : "filas contienen errores bloqueantes"}.
-              Se omitirán durante la creación o puedes corregir tu archivo antes de continuar.
+              Puedes corregirlas aquí. Solo se enviarán las filas válidas y seleccionadas.
             </Aviso>
           )}
 
@@ -583,6 +802,7 @@ export function CargaMasivaForm() {
               <table className="w-full text-left text-xs border-collapse">
                 <thead className="sticky top-0 bg-[#141F32] border-b border-[#1C2A3E] text-[#8E9CAE] uppercase font-mono">
                   <tr>
+                    <th className="py-3 px-3">Incluir</th>
                     <th className="py-3 px-3">#</th>
                     <th className="py-3 px-3">Estado</th>
                     <th className="py-3 px-3">Vehículo</th>
@@ -598,6 +818,20 @@ export function CargaMasivaForm() {
                     const tieneAdv = f.advertencias.length > 0;
                     return (
                       <tr key={f.numero} className="hover:bg-white/5 transition">
+                        <td className="py-2.5 px-3">
+                          <input
+                            type="checkbox"
+                            aria-label={`Incluir fila ${f.numero}`}
+                            checked={!f.excluida && !tieneError}
+                            disabled={tieneError || guardando}
+                            onChange={(e) => {
+                              const incluida = e.target.checked;
+                              setFilas((actuales) => actuales.map((fila) =>
+                                fila.numero === f.numero ? { ...fila, excluida: !incluida } : fila
+                              ));
+                            }}
+                          />
+                        </td>
                         <td className="py-2.5 px-3 font-mono text-[#8E9CAE]">{f.numero}</td>
                         <td className="py-2.5 px-3">
                           {tieneError ? (
@@ -637,6 +871,7 @@ export function CargaMasivaForm() {
                           ) : (
                             <span className="text-emerald-400">Ruta lista</span>
                           )}
+                          <button type="button" className="block mt-2 text-[#FFC400] underline" disabled={guardando} onClick={() => setEdicion({ numero: f.numero, datos: { ...f.original } })}>Corregir fila {f.numero}</button>
                         </td>
                       </tr>
                     );
@@ -646,14 +881,28 @@ export function CargaMasivaForm() {
             </div>
           </div>
 
+          {edicion && (
+            <form className="rounded-xl border border-[#1C2A3E] bg-[#0A1220] p-4 space-y-4" onSubmit={(e) => { e.preventDefault(); void guardarEdicion(); }}>
+              <h3 className="text-white font-bold">Corregir fila {edicion.numero}</h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {Array.from(new Set([...COLUMNAS_PLANTILLA, ...Object.keys(edicion.datos)])).map((campo) => (
+                  <label key={campo} className="text-xs text-slate-300">{campo.replaceAll("_", " ")}
+                    <input className="block w-full mt-1 rounded border border-slate-600 bg-[#070D18] p-2 text-white" value={edicion.datos[campo] ?? ""} disabled={guardando} onChange={(e) => setEdicion({ ...edicion, datos: { ...edicion.datos, [campo]: e.target.value } })} />
+                  </label>
+                ))}
+              </div>
+              <Button type="submit" loading={guardando}>Guardar y volver a validar</Button>
+              <Button type="button" variant="secondary" disabled={guardando} onClick={() => setEdicion(null)}>Descartar cambios</Button>
+            </form>
+          )}
           <div className="flex items-center justify-between pt-2">
-            <Button variant="secondary" onClick={() => setPaso(1)} type="button">
+            <Button variant="secondary" onClick={() => { setEdicion(null); setPaso(1); }} disabled={guardando} type="button">
               Cargar otro archivo
             </Button>
             <Button
               variant="primary"
-              disabled={totalValidas === 0}
-              onClick={() => setPaso(3)}
+              disabled={totalValidas === 0 || !!edicion || guardando}
+              onClick={() => void cotizarSeleccionadas()}
               type="button"
             >
               Continuar al resumen ({totalValidas} listos)
@@ -679,41 +928,44 @@ export function CargaMasivaForm() {
               <p className="text-sm font-semibold text-white mt-2 truncate">{archivo?.name}</p>
             </div>
             <div className="p-4 rounded-xl border border-[#1C2A3E] bg-[#070D18]">
-              <p className="text-xs text-[#8E9CAE]">Filas omitidas por error</p>
-              <p className="text-2xl font-extrabold text-rose-400 font-mono mt-1">{totalErrores}</p>
+              <p className="text-xs text-[#8E9CAE]">Filas pendientes o excluidas</p>
+              <p className="text-2xl font-extrabold text-rose-400 font-mono mt-1">{totalOmitidas}</p>
             </div>
           </div>
 
+          <div aria-live="polite" className="space-y-3">
+            <h3 className="text-white font-bold">Cotización del lote</h3>
+            {cotizando ? <p className="text-slate-300">Consultando tarifas…</p> : (
+              <>
+                <ul className="space-y-2 text-sm text-slate-200">
+                  {filasSeleccionadas.map((f) => <li key={f.numero}>Fila {f.numero} · {f.datos.vehiculo_placas || f.datos.vehiculo_vin}: {f.errorTarifa || (f.tarifa !== undefined ? moneda(f.tarifa) : "Pendiente de cotizar")}</li>)}
+                </ul>
+                <p className="text-lg text-[#FFC400] font-bold">{todasCotizadas ? "Total estimado" : "Subtotal de filas cotizadas"}: {moneda(totalCotizado)}</p>
+                {!todasCotizadas && <Button type="button" variant="secondary" onClick={() => void cotizarSeleccionadas()}>Reintentar cotización</Button>}
+                <p className="text-xs text-slate-400">Importes en MXN. La tarifa se recalcula al crear; puede variar si cambia el horario o la configuración vigente.</p>
+              </>
+            )}
+          </div>
+          <p className="text-sm text-slate-200">Se enviarán {totalValidas} de {filas.length} filas. {totalOmitidas} quedarán pendientes o excluidas.</p>
           <div className="p-4 rounded-xl border border-sky-500/30 bg-sky-500/5 text-xs text-sky-200 space-y-1">
             <p className="font-bold text-sky-400">ℹ️ Cálculo tarifario server-side</p>
             <p>
-              Cada traslado se creará en estado de cotización generada con la tarifa oficial calculada en base a la
+              Cada traslado cotizado se creará con la tarifa vigente calculada según la
               categoría del vehículo, distancia y ventanas de tiempo.
             </p>
           </div>
 
           <div className="flex items-center justify-between pt-4 border-t border-[#1C2A3E]">
             <div className="flex gap-2">
-              <Button variant="secondary" onClick={() => setPaso(2)} type="button" disabled={enviando}>
+              <Button variant="secondary" onClick={() => setPaso(2)} type="button" disabled={enviando || cotizando}>
                 Volver a la tabla
               </Button>
-              {enviando && (
-                <Button
-                  variant="secondary"
-                  type="button"
-                  onClick={() => {
-                    abortCargaRef.current?.abort();
-                    setErrorGeneral("Carga cancelada por el usuario.");
-                  }}
-                >
-                  Cancelar carga
-                </Button>
-              )}
+
             </div>
             <Button
               variant="primary"
               loading={enviando}
-              disabled={enviando || totalValidas === 0}
+              disabled={enviando || cotizando || !todasCotizadas}
               onClick={ejecutarCarga}
               type="button"
             >
@@ -732,7 +984,7 @@ export function CargaMasivaForm() {
 
           <div className="space-y-2">
             <h2 className="text-xl font-bold font-display text-white">
-              Carga masiva procesada
+              {resultado.estado === "cancelada" ? "Lote cancelado" : resultado.estado === "rechazada" ? "Lote rechazado" : "Carga masiva procesada"}
             </h2>
             <p className="text-sm text-[#8E9CAE]">
               {resultado.filas_creadas} traslados fueron registrados exitosamente en tu cuenta.
@@ -759,15 +1011,12 @@ export function CargaMasivaForm() {
               <Aviso tono="atencion">
                 Algunas filas no pudieron crearse. Puedes descargar el reporte de errores para corregirlas.
               </Aviso>
+              {errorReporte && <Aviso tono="atencion">No se pudo recuperar el reporte. <button type="button" onClick={() => void cargarReporteServidor()}>Reintentar reporte</button></Aviso>}
               <div className="mt-3">
                 <Button
                   variant="secondary"
-                  onClick={() => descargarReporteErrores(
-                    filas
-                      .filter((f) => f.errores.length > 0)
-                      .map((f) => `${f.numero},"${f.datos.referencia_externa || ""}","${f.errores.join("; ")}"`)
-                      .join("\n")
-                  )}
+                  disabled={!reporteServidor}
+                  onClick={() => reporteServidor && descargarReporteErrores(reporteServidor)}
                   type="button"
                 >
                   Descargar reporte de errores (.csv)
@@ -777,7 +1026,7 @@ export function CargaMasivaForm() {
           )}
 
           <div className="pt-4 flex flex-col sm:flex-row items-center justify-center gap-3 border-t border-[#1C2A3E]">
-            <Button variant="secondary" onClick={() => { setPaso(1); setArchivo(null); setFilas([]); }} type="button">
+            <Button variant="secondary" onClick={() => { setPaso(1); setArchivo(null); setFilas([]); setResultado(null); setReporteServidor(null); setErrorReporte(false); }} type="button">
               Cargar otro archivo
             </Button>
             <Button variant="primary" onClick={() => router.push("/mis-viajes")} type="button">

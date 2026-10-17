@@ -5,8 +5,8 @@ import path from "node:path";
 loadDotenv({ path: path.resolve(process.cwd(), ".env.local") });
 
 const PLANTILLA_CSV = [
-  "referencia_externa,centro_costo,orden_compra,prioridad,vehiculo_placas,vehiculo_vin,vehiculo_marca,vehiculo_modelo,vehiculo_anio,vehiculo_color,condicion,contacto_entrega_nombre,contacto_entrega_telefono,contacto_recepcion_nombre,contacto_recepcion_telefono,origen_codigo_postal,origen_colonia,origen_calle,origen_numero,origen_referencias,destino_codigo_postal,destino_colonia,destino_calle,destino_numero,destino_referencias,modalidad_programacion,fecha_hora_programada,ventana_recoleccion,ventana_entrega,instrucciones_especiales",
-  "FLOT-001,CC-NORTE,OC-45881,normal,ABC123,,Nissan,Versa,2024,Blanco,seminueva,Operaciones,+525500000000,Recepcion,+525500000001,06700,Roma Norte,Av. Reforma,100,Acceso por estacionamiento,04360,Copilco Universidad,Av. Universidad,300,Entregar en recepción,programado,2026-07-20T12:00:00-06:00,2026-07-20T11:00:00-06:00,2026-07-20T14:00:00-06:00,Unidad prioritaria",
+  "referencia_externa,centro_costo,orden_compra,prioridad,vehiculo_placas,vehiculo_vin,vehiculo_marca,vehiculo_modelo,vehiculo_anio,vehiculo_color,condicion,contacto_entrega_nombre,contacto_entrega_telefono,contacto_recepcion_nombre,contacto_recepcion_telefono,origen_codigo_postal,origen_colonia,origen_calle,origen_numero,origen_referencias,destino_codigo_postal,destino_colonia,destino_calle,destino_numero,destino_referencias,modalidad_programacion,fecha_hora_programada,ventana_recoleccion,ventana_entrega,instrucciones_especiales,distancia_km,tiempo_estimado_horas",
+  "FLOT-001,CC-NORTE,OC-45881,normal,ABC123,,Nissan,Versa,2024,Blanco,seminueva,Operaciones,+525500000000,Recepcion,+525500000001,06700,Roma Norte,Av. Reforma,100,Acceso por estacionamiento,04360,Copilco Universidad,Av. Universidad,300,Entregar en recepción,lo_antes_posible,2026-07-20T12:00:00-06:00,2026-07-20T11:00:00-06:00,2026-07-20T14:00:00-06:00,Unidad prioritaria,12,0.5",
 ].join("\n");
 
 async function seedMockAuthSession(page: import("@playwright/test").Page) {
@@ -25,6 +25,12 @@ async function seedMockAuthSession(page: import("@playwright/test").Page) {
 }
 
 test.describe("R6 Carga masiva — cancelación y cleanup on-unmount", () => {
+  test.beforeEach(async ({ page }) => {
+    await page.route("**/rest/v1/rpc/usuario_previsualizar_tarifa**", (route) => route.fulfill({
+      status: 200, contentType: "application/json",
+      body: JSON.stringify({ disponible: true, tarifa: 1250, categoria_tarifa: "ligero_a", gama: "entrada" })
+    }));
+  });
   test("cancelar durante análisis aborta enriquecimiento y muestra mensaje", async ({ page }) => {
     await seedMockAuthSession(page);
 
@@ -109,8 +115,8 @@ test.describe("R6 Carga masiva — cancelación y cleanup on-unmount", () => {
     const countAntes = procesarCount;
 
     // Cancelar
-    await page.getByRole("button", { name: /cancelar carga/i }).click();
-    await expect(page.getByText(/carga cancelada por el usuario/i)).toBeVisible({ timeout: 3000 });
+    await page.getByRole("button", { name: /detener seguimiento/i }).click();
+    await expect(page.getByText(/seguimiento detenido/i)).toBeVisible({ timeout: 3000 });
 
     // Esperar 2.5s y confirmar que no hubo llamadas adicionales (abort funciona)
     await page.waitForTimeout(2500);
