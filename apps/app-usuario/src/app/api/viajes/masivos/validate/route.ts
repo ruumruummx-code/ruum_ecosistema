@@ -15,7 +15,7 @@ export async function POST(request: NextRequest) {
   const body = esquemaCarga.safeParse(await request.json().catch(() => null));
   if (!body.success) return NextResponse.json({ error: "Carga entre 1 y 100 filas válidas." }, { status: 400 });
   try {
-    const filas = await validarFilasServidor(cliente, body.data.filas);
+    const filas = await validarFilasServidor(body.data.filas);
     return NextResponse.json({ filas });
   } catch {
     return NextResponse.json({ error: "No se pudo consultar la validación. Intenta de nuevo." }, { status: 503 });

@@ -3,7 +3,7 @@ import { z } from "zod";
 import { crearClienteServidor } from "@/lib/supabase-server";
 import { rateLimitConVentana } from "@/lib/csp-rate-limit";
 import { clienteMasivoServicio, stripeMasivo, validarFilasServidor } from "@/lib/carga-masiva-server";
-import { previsualizarTarifaUsuario, clasificarVehiculoMasivo, verificarUsuarioMasivo, guardarCheckoutMasivoServidor, vincularPagoMasivoServidor } from "@ruum/api/services";
+import { previsualizarTarifaUsuario, verificarUsuarioMasivo, guardarCheckoutMasivoServidor, vincularPagoMasivoServidor } from "@ruum/api/services";
 import { tipoSugeridoParaVehiculo } from "@ruum/shared/catalogos";
 import { obtenerRutaDirectionsMapboxConParadas } from "@ruum/shared/utils";
 export const dynamic = "force-dynamic";
@@ -27,7 +27,7 @@ export async function POST(request: NextRequest) {
   if (!body.success) return NextResponse.json({ error: "La carga no es válida." }, { status: 400 });
   try {
     if (!await verificarUsuarioMasivo(cliente, user.id)) return NextResponse.json({ error: "Verifica tu cuenta antes de pagar." }, { status: 403 });
-    const filas = await validarFilasServidor(cliente, body.data.filas);
+    const filas = await validarFilasServidor(body.data.filas);
     if (filas.some(f => f.estado === "error")) return NextResponse.json({ filas });
     const token = process.env.MAPBOX_SECRET_TOKEN || process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN;
     if (!token) throw new Error("Servicio de mapas no disponible.");
@@ -45,12 +45,13 @@ export async function POST(request: NextRequest) {
         if (!tarifa.disponible || !tarifa.tarifa || tarifa.tarifa <= 0) throw new Error("No hay tarifa disponible para este vehículo y ruta.");
         const precio = Math.round(tarifa.tarifa * 100);
         centavos += precio;
-        const clasificacion = await clasificarVehiculoMasivo(cliente, d.marca, d.modelo);
-        if (!clasificacion) throw new Error("No se pudo clasificar el vehículo.");
+        // La clasificación ya fue resuelta por el cotizador en su contexto de
+        // confianza. Repetir el RPC con el usuario la ocultaría por RLS.
+        if (!tarifa.categoria_tarifa || !tarifa.gama) throw new Error("No se pudo clasificar el vehículo.");
         const n: Record<string, string> = {
           vehiculo_marca: d.marca, vehiculo_modelo: d.modelo, vehiculo_anio: d.anio,
           vehiculo_tipo: tipoSugeridoParaVehiculo(d.marca, d.modelo) ?? "sedan",
-          categoria_tarifa: clasificacion.categoria_tarifa, gama: clasificacion.gama, condicion: d.condicion,
+          categoria_tarifa: tarifa.categoria_tarifa, gama: tarifa.gama, condicion: d.condicion,
           contacto_entrega_nombre: d.entregaNombre, contacto_entrega_telefono: `+52${d.entregaTelefono}`,
           contacto_recepcion_nombre: d.recepcionNombre, contacto_recepcion_telefono: `+52${d.recepcionTelefono}`,
           origen_direccion: [d.origen_calle, d.origen_numero, d.origen_colonia, d.origenCodigoPostal].filter(Boolean).join(", "),

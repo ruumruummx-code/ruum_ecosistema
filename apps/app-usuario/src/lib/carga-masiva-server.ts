@@ -2,10 +2,8 @@ import "server-only";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { createClient } from "@supabase/supabase-js";
-import type { crearClienteServidor } from "./supabase-server";
 import { validarFila, type FilaValidada } from "./carga-masiva";
 import { clasificarVehiculoMasivo } from "@ruum/api/services";
-type Cliente = Awaited<ReturnType<typeof crearClienteServidor>>;
 
 export function clienteMasivoServicio() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -13,7 +11,10 @@ export function clienteMasivoServicio() {
   if (!url || !key) throw new Error("El cobro masivo no está configurado en este entorno.");
   return createClient(url, key, { auth: { persistSession: false, autoRefreshToken: false } });
 }
-export async function validarFilasServidor(cliente: Cliente, entradas: Record<string, string>[]): Promise<FilaValidada[]> {
+/** Las rutas comprueban la sesión antes de entrar. El catálogo es de lectura
+ * administrativa: un cliente de usuario devolvería cero filas por RLS. */
+export async function validarFilasServidor(entradas: Record<string, string>[]): Promise<FilaValidada[]> {
+  const catalogoServidor = clienteMasivoServicio();
   const archivos = new Map<string, Promise<Record<string, unknown>>>();
   return Promise.all(entradas.map(async (entrada, indice) => {
     const fila = validarFila(entrada, indice);
@@ -26,7 +27,7 @@ export async function validarFilasServidor(cliente: Cliente, entradas: Record<st
       if (!catalogo[cp]) fila.errores[campo] = "Código postal fuera del catálogo vigente";
     }
     if (entrada.marca && entrada.modelo) {
-      const clasificacion = await clasificarVehiculoMasivo(cliente, entrada.marca, entrada.modelo);
+      const clasificacion = await clasificarVehiculoMasivo(catalogoServidor, entrada.marca, entrada.modelo);
       if (!clasificacion?.categoria_tarifa || !clasificacion.gama) fila.errores.modelo = "La combinación marca/modelo no está en catálogo";
     }
     fila.estado = Object.keys(fila.errores).length ? "error" : "correcto";
