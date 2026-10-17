@@ -101,6 +101,48 @@ export async function generarPlantillaExcel(filas: FilaCsv[]): Promise<ArrayBuff
   return new Uint8Array(buffer).buffer as ArrayBuffer;
 }
 
+/**
+ * Alias para la plantilla oficial RR-2026-021 (34 columnas).
+ * Mapea encabezados de la plantilla adjunta a campos internos.
+ * Las claves están normalizadas para coincidir con el resultado de normalizar().
+ */
+const ALIAS_RR2026_021 = new Map<string, string>([
+  ["codigo_postal_origen", "origen_codigo_postal"],
+  ["codigo_postal_destino", "destino_codigo_postal"],
+  ["marca", "vehiculo_marca"],
+  ["modelo", "vehiculo_modelo"],
+  ["condicion", "condicion"],
+  ["fecha", "fecha_hora_programada"],
+  ["hora", "hora_programada"],
+  ["categoria", "categoria_tarifa"],
+  ["gama", "gama"],
+  ["tipo", "vehiculo_tipo"],
+  ["transmision", "vehiculo_transmision"],
+  ["ano", "vehiculo_anio"],
+  ["color", "vehiculo_color"],
+  ["placas", "vehiculo_placas"],
+  ["numero_serie_vin", "vehiculo_vin"],
+  ["estado_general", "estado_general_declarado"],
+  ["estado_origen", "origen_estado"],
+  ["municipio_origen", "origen_ciudad"],
+  ["colonia_origen", "origen_colonia"],
+  ["calle_origen", "origen_calle"],
+  ["numero_origen", "origen_numero"],
+  ["estado_destino", "destino_estado"],
+  ["municipio_destino", "destino_ciudad"],
+  ["colonia_destino", "destino_colonia"],
+  ["calle_destino", "destino_calle"],
+  ["numero_destino", "destino_numero"],
+  ["nombre_contacto_origen", "contacto_entrega_nombre"],
+  ["telefono_contacto_origen", "contacto_entrega_telefono"],
+  ["nombre_contacto_destino", "contacto_recepcion_nombre"],
+  ["telefono_contacto_destino", "contacto_recepcion_telefono"],
+  ["tipo_traslado", "tipo_ruta"],
+  ["ventana_recoleccion", "ventana_recoleccion"],
+  ["ventana_entrega", "ventana_entrega"],
+  ["motivo_traslado", "instrucciones_especiales"]
+]);
+
 export async function leerArchivoMasivo(archivo: File) {
   if (archivo.name.toLowerCase().endsWith(".csv")) return revisarCsv(await archivo.text());
   const { Workbook, ValueType } = await import("exceljs");
@@ -112,9 +154,11 @@ export async function leerArchivoMasivo(archivo: File) {
   const encabezados: string[] = [];
   hoja.getRow(1).eachCell({ includeEmpty: true }, (cell, index) => {
     const original = normalizar(cell.text);
-    encabezados[index - 1] = aliases.get(original) ?? original;
+    // Primero buscar en aliases RR-2026-021, luego en aliases originales
+    const campo = ALIAS_RR2026_021.get(original) ?? aliases.get(original) ?? original;
+    encabezados[index - 1] = campo;
   });
-  const usados = encabezados.filter((c) => c && !["categoria", "gama"].includes(c));
+  const usados = encabezados.filter((c) => c && !["categoria", "gama", "categoria_tarifa", "hora_programada"].includes(c));
   if (new Set(usados).size !== usados.length) throw new Error("El Excel contiene columnas repetidas. Usa un encabezado por campo.");
   const filas: FilaCsv[] = [];
   for (let numero = 2; numero <= hoja.rowCount; numero++) {
@@ -125,17 +169,34 @@ export async function leerArchivoMasivo(archivo: File) {
       if (cell.type === ValueType.Formula) throw new Error("No se permiten fórmulas en los datos de traslado (fila " + numero + "). Pega solo valores.");
       let valor = cell.value instanceof Date ? cell.value.toISOString().replace(/Z$/, "-06:00") : cell.text.trim();
       if (valor) tieneDatos = true;
-      if (["categoria", "gama"].includes(campo)) return;
+      // Excluir columnas técnicas que no se persisten (excepto hora_programada que se usa para combinar)
+      if (["categoria", "gama", "categoria_tarifa"].includes(campo)) return;
       if (booleanos.has(campo)) valor = ["si", "true", "1"].includes(normalizar(valor)) ? "true" : ["no", "false", "0"].includes(normalizar(valor)) ? "false" : valor;
       if ((campo === "origen_codigo_postal" || campo === "destino_codigo_postal") && /^\d{1,5}$/.test(valor)) valor = valor.padStart(5, "0");
       if (campo) datos[campo] = valor;
     });
+    // Combinar FECHA + HORA en fecha_hora_programada después de leer todas las columnas
+    if (datos.fecha_hora_programada && datos.hora_programada) {
+      const fecha = datos.fecha_hora_programada;
+      const hora = datos.hora_programada;
+      // Si la fecha no tiene hora, combinarla
+      if (!fecha.includes("T")) {
+        datos.fecha_hora_programada = `${fecha}T${hora}:00-06:00`;
+      }
+    } else if (datos.fecha_hora_programada && !datos.hora_programada) {
+      // Si solo hay fecha, asumir hora 09:00
+      const fecha = datos.fecha_hora_programada;
+      if (!fecha.includes("T")) {
+        datos.fecha_hora_programada = `${fecha}T09:00:00-06:00`;
+      }
+    }
+    delete datos.hora_programada;
     if (tieneDatos) {
       if (!datos.modalidad_programacion) datos.modalidad_programacion = datos.fecha_hora_programada ? "programado" : "lo_antes_posible";
       filas.push(datos);
     }
   }
-  const campos = encabezados.filter((c) => c && !["categoria", "gama"].includes(c));
+  const campos = encabezados.filter((c) => c && !["categoria", "gama", "categoria_tarifa", "hora_programada"].includes(c));
   const escape = (v: string) => '"' + v.replaceAll('"', '""') + '"';
   const csv = [campos.map(escape).join(","), ...filas.map((f) => campos.map((c) => escape(f[c] ?? "")).join(","))].join("\n");
   // Reutilizar las mismas comprobaciones de encabezados para CSV y Excel.

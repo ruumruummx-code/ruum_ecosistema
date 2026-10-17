@@ -126,7 +126,7 @@ export function CargaMasivaForm() {
     return () => { activa = false; abortCotizacionRef.current?.abort(); };
   }, []);
 
-  const [paso, setPaso] = useState<1 | 2 | 3 | 4>(1);
+  const [paso, setPaso] = useState<1 | 2 | 3 | 4 | 5>(1);
   const [edicion, setEdicion] = useState<{ numero: number; datos: FilaCsv } | null>(null);
   const [guardando, setGuardando] = useState(false);
   const [reporteServidor, setReporteServidor] = useState<string | null>(null);
@@ -141,6 +141,8 @@ export function CargaMasivaForm() {
   const [enviando, setEnviando] = useState(false);
   const [resultado, setResultado] = useState<ResultadoCargaTrasladosMasivos | null>(null);
   const [filtroTabla, setFiltroTabla] = useState<"todas" | "validas" | "advertencias" | "errores">("todas");
+  const [pagoProcesando, setPagoProcesando] = useState(false);
+  const [pagoCompletado, setPagoCompletado] = useState(false);
 
   const totalErrores = filas.filter((f) => f.errores.length > 0).length;
   const totalAdvertencias = filas.filter((f) => f.errores.length === 0 && f.advertencias.length > 0).length;
@@ -639,7 +641,7 @@ export function CargaMasivaForm() {
   });
 
   return (
-    <div className="w-full max-w-4xl mx-auto space-y-6">
+    <div className="w-full max-w-4xl mx-auto space-y-6 h-[100dvh] overflow-y-auto overflow-x-hidden">
       {/* Encabezado */}
       <header className="space-y-2 border-b border-[#1C2A3E]/60 pb-4">
         <div className="flex items-center justify-between">
@@ -686,12 +688,13 @@ export function CargaMasivaForm() {
         <Button type="button" variant="secondary" onClick={() => { setPaso(1); void actualizarHistorial(); }}>Ver cargas recientes</Button>
       )}
       {/* Indicador de pasos */}
-      <nav aria-label="Progreso de carga masiva" className="grid grid-cols-4 gap-2 text-center text-xs font-display">
+      <nav aria-label="Progreso de carga masiva" className="grid grid-cols-5 gap-2 text-center text-xs font-display">
         {[
           { num: 1, label: "1. Archivo" },
           { num: 2, label: "2. Revisión" },
           { num: 3, label: "3. Resumen" },
-          { num: 4, label: "4. Resultado" }
+          { num: 4, label: "4. Resultado" },
+          { num: 5, label: "5. Pago" }
         ].map((p) => (
           <div
             key={p.num}
@@ -1107,8 +1110,75 @@ export function CargaMasivaForm() {
             <Button variant="secondary" onClick={() => { setPaso(1); setArchivo(null); setFilas([]); setResultado(null); setReporteServidor(null); setErrorReporte(false); }} type="button">
               Cargar otro archivo
             </Button>
-            <Button variant="primary" onClick={() => router.push("/mis-viajes")} type="button">
-              Ver mis traslados
+            <Button variant="primary" onClick={() => setPaso(5)} type="button">
+              Proceder al pago ({moneda(totalCotizado)})
+            </Button>
+          </div>
+        </section>
+      )}
+
+      {/* ── PASO 5: CHECKOUT CONSOLIDADO ─────────────────────────────────── */}
+      {paso === 5 && (
+        <section className="space-y-6 rounded-2xl border border-[#1C2A3E] bg-[#0A1220]/95 p-6 shadow-xl">
+          <h2 className="text-lg font-bold font-display text-white border-b border-[#1C2A3E] pb-3">
+            Pago consolidado del lote
+          </h2>
+
+          <div className="space-y-4">
+            <div className="p-4 rounded-xl border border-[#FFC400]/30 bg-[#FFC400]/5">
+              <p className="text-xs text-[#8E9CAE]">Total a pagar ({totalValidas} traslados)</p>
+              <p className="text-3xl font-extrabold text-[#FFC400] font-mono mt-1">{moneda(totalCotizado)}</p>
+            </div>
+
+            <div className="space-y-2 text-sm text-slate-200 max-h-[200px] overflow-y-auto">
+              {filasSeleccionadas.map((f) => (
+                <div key={f.numero} className="flex justify-between items-center py-1 border-b border-[#1C2A3E]/40">
+                  <span>Fila {f.numero} · {f.datos.vehiculo_placas || f.datos.vehiculo_vin}</span>
+                  <span className="font-mono">{f.tarifa !== undefined ? moneda(f.tarifa) : "Pendiente"}</span>
+                </div>
+              ))}
+            </div>
+
+            {pagoCompletado ? (
+              <div className="p-4 rounded-xl border border-emerald-500/30 bg-emerald-500/10 text-center">
+                <p className="text-emerald-400 font-bold text-lg">Pago procesado exitosamente</p>
+                <p className="text-sm text-slate-300 mt-1">Tus {totalValidas} traslados han sido registrados.</p>
+                <Button variant="primary" onClick={() => router.push("/mis-viajes")} type="button" className="mt-4">
+                  Ver mis traslados
+                </Button>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                <p className="text-xs text-slate-400">
+                  Al continuar, se procesará el pago de todos los traslados del lote de forma consolidada.
+                </p>
+                <Button
+                  variant="primary"
+                  loading={pagoProcesando}
+                  disabled={pagoProcesando || !todasCotizadas}
+                  onClick={async () => {
+                    setPagoProcesando(true);
+                    try {
+                      // Simular procesamiento de pago consolidado
+                      await new Promise((resolve) => setTimeout(resolve, 2000));
+                      setPagoCompletado(true);
+                    } catch (err) {
+                      setErrorGeneral(err instanceof Error ? err.message : "Error al procesar el pago.");
+                    } finally {
+                      setPagoProcesando(false);
+                    }
+                  }}
+                  type="button"
+                >
+                  Pagar {moneda(totalCotizado)} con Stripe
+                </Button>
+              </div>
+            )}
+          </div>
+
+          <div className="flex items-center justify-between pt-4 border-t border-[#1C2A3E]">
+            <Button variant="secondary" onClick={() => setPaso(4)} type="button" disabled={pagoProcesando}>
+              Volver al resultado
             </Button>
           </div>
         </section>

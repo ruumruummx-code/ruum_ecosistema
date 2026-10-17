@@ -384,7 +384,7 @@ export function CotizadorPortal({
                 href="/viajes/masivo"
                 className="flex min-h-11 items-center justify-center text-xs font-semibold text-[var(--user-color-muted)]"
               >
-                Carga masiva CSV
+                Carga masiva Excel / CSV
               </Link>
             </div>
           )}
