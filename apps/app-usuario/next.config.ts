@@ -7,6 +7,9 @@ import {
 } from "./src/lib/csp";
 
 const nextConfig: NextConfig = {
+  outputFileTracingIncludes: {
+    "/api/viajes/masivos/*": ["./public/data/codigos-postales/*.json"],
+  },
   transpilePackages: ["@ruum/shared", "@ruum/ui", "@ruum/api"],
   typescript: { ignoreBuildErrors: false },
   // No filtrar la tecnología del servidor.

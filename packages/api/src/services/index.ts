@@ -26,3 +26,4 @@ export * from "./masivos-usuario";
 export * from "./operaciones";
 export * from "./empresa-equipo";
 export * from "./asignaciones";
+export * from "./checkout-masivo";

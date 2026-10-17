@@ -58,6 +58,8 @@ export function tieneStripePublicoConfigurado(): boolean {
 }
 
 export interface PagoStripeProps {
+  clientSecretExterno?: string;
+  returnPath?: string;
   trasladoId: string;
   monto?: number | null;
   onPagado: () => void;
@@ -156,6 +158,8 @@ export function PagoStripe({
   compacto = false,
   formId,
   onEstadoPago,
+  clientSecretExterno,
+  returnPath,
 }: PagoStripeProps) {
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -190,7 +194,7 @@ export function PagoStripe({
           return;
         }
 
-        const inicio = await crearPaymentIntent(trasladoId);
+        const inicio = clientSecretExterno ? { clientSecret: clientSecretExterno } : await crearPaymentIntent(trasladoId);
         if (inicio.pagoConfirmado) {
           // El backend encontró el cobro ya exitoso y lo reconcilió: no se
           // monta Elements (Stripe lo rechazaría por estado terminal).
@@ -237,7 +241,7 @@ export function PagoStripe({
     }
 
     void iniciar();
-  }, [trasladoId, reintento, monto]);
+  }, [trasladoId, reintento, monto, clientSecretExterno]);
 
   if (error) {
     return (
@@ -280,6 +284,7 @@ export function PagoStripe({
       options={{ clientSecret, appearance: aparienciaStripe, locale: compacto ? "es" : "auto" }}
     >
       <FormularioPagoReal
+        returnPath={returnPath}
         trasladoId={trasladoId}
         onPagado={onPagado}
         PaymentElement={PaymentElement}
@@ -295,6 +300,7 @@ export function PagoStripe({
 
 /* Formulario conectado a Stripe Elements Real */
 function FormularioPagoReal({
+  returnPath,
   trasladoId,
   onPagado,
   PaymentElement,
@@ -304,6 +310,7 @@ function FormularioPagoReal({
   formId,
   onEstadoPago,
 }: {
+  returnPath?: string;
   trasladoId: string;
   onPagado: () => void;
   PaymentElement: (typeof import("@stripe/react-stripe-js"))["PaymentElement"];
@@ -335,7 +342,7 @@ function FormularioPagoReal({
 
     const returnUrl =
       typeof window !== "undefined"
-        ? `${window.location.origin}/viajes/${trasladoId}?pago=exitoso`
+        ? `${window.location.origin}${returnPath ?? `/viajes/${trasladoId}?pago=exitoso`}`
         : `http://localhost:3000/viajes/${trasladoId}?pago=exitoso`;
 
     try {

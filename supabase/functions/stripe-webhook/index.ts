@@ -93,6 +93,17 @@ Deno.serve(async (req) => {
       case "payment_intent.succeeded":
       case "payment_intent.payment_failed": {
         const intent = evento.data.object as Stripe.PaymentIntent;
+        if (intent.metadata.carga_masiva_id) {
+          if (evento.type === "payment_intent.succeeded") {
+            await ejecutarSupabase(supabase.rpc("confirmar_checkout_masivo", {
+              p_id: intent.metadata.carga_masiva_id,
+              p_intent: intent.id,
+              p_monto: intent.amount_received,
+              p_moneda: intent.currency,
+            }), "No se pudo confirmar la carga masiva pagada");
+          }
+          break;
+        }
         const trasladoId = extraerTrasladoId(intent.metadata);
         if (!trasladoId) {
           console.warn("PaymentIntent sin traslado_id en metadata:", intent.id);

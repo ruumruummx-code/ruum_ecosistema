@@ -5,6 +5,8 @@ import {
   useEffect,
   useRef,
   useState,
+  lazy,
+  Suspense,
   type RefObject,
 } from "react";
 import Link from "next/link";
@@ -19,6 +21,13 @@ import { formatearDistancia, formatearTiempo } from "../constants";
 import { PasoTarifa } from "./PasoTarifa";
 import styles from "./cotizador.module.css";
 
+// Lazy: el módulo de carga masiva es pesado (ExcelJS) y solo se carga si el usuario lo abre
+const BottomSheetCargaMasiva = lazy(() =>
+  import("./carga-masiva/BottomSheetCargaMasiva").then((m) => ({
+    default: m.BottomSheetCargaMasiva,
+  })),
+);
+
 export function CotizadorPortal({
   t,
   headingRef,
@@ -29,6 +38,21 @@ export function CotizadorPortal({
   const root = useRef<HTMLElement>(null);
   const content = useRef<HTMLDivElement>(null);
   const [borradorAbierto, setBorradorAbierto] = useState(false);
+  const [cargaMasivaAbierta, setCargaMasivaAbierta] = useState(false);
+  const dialogMasivo = useRef<HTMLDialogElement>(null);
+  useEffect(() => {
+    if (!cargaMasivaAbierta) return;
+    const dialog = dialogMasivo.current;
+    const anterior = document.activeElement;
+    const overflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    dialog?.showModal();
+    return () => {
+      dialog?.close();
+      document.body.style.overflow = overflow;
+      if (anterior instanceof HTMLElement) anterior.focus();
+    };
+  }, [cargaMasivaAbierta]);
   const [estadoPago, setEstadoPago] = useState({
     listo: false,
     procesando: false,
@@ -279,6 +303,26 @@ export function CotizadorPortal({
               previsualizando={t.previsualizando}
             />
           )}
+          {/* RR-2026-022: Botones de carga masiva — solo en Paso 0 */}
+          {t.paso === 0 && (
+            <div className="mt-2 grid grid-cols-2 gap-2">
+              <button
+                type="button"
+                onClick={() => setCargaMasivaAbierta(true)}
+                className="flex min-h-11 items-center justify-center gap-2 rounded-2xl border border-[var(--user-color-action)] bg-transparent px-4 text-sm font-bold text-[var(--user-color-action)] transition-colors active:bg-[var(--user-color-brand-soft)]"
+                aria-label="Abrir módulo de carga masiva de traslados"
+              >
+                📤 Carga Masiva de Traslados
+              </button>
+              <a
+                href="/docs-legales/plantilla-carga-masiva.xlsx"
+                download="plantilla-carga-masiva-ruum.xlsx"
+                className="flex min-h-10 items-center justify-center gap-1 text-xs font-semibold text-[var(--user-color-muted)] underline underline-offset-2"
+              >
+                ⬇️ Descargar Plantilla Oficial (.xlsx)
+              </a>
+            </div>
+          )}
           {t.paso === 1 && (
             <PasoVehiculo
               datos={t.datos}
@@ -439,6 +483,54 @@ export function CotizadorPortal({
           Empezar de cero
         </button>
       </BottomSheet>
+      {/* RR-2026-022: Bottom Sheet de Carga Masiva — 95dvh, bloquea pantalla raíz */}
+      <dialog
+        ref={dialogMasivo}
+        aria-label="Carga masiva de traslados"
+        aria-modal="true"
+        style={{ display: cargaMasivaAbierta ? undefined : "none" }}
+        className="fixed inset-0 z-50 m-0 flex h-dvh w-screen max-h-none max-w-none flex-col overflow-hidden border-0 bg-transparent p-0"
+        onCancel={(e) => { e.preventDefault(); setCargaMasivaAbierta(false); }}
+      >
+        {/* Backdrop */}
+        <div
+          className="absolute inset-0 bg-black/50"
+          onClick={() => setCargaMasivaAbierta(false)}
+          aria-hidden="true"
+        />
+        {/* Sheet panel — 95dvh anclado al fondo */}
+        <div
+          className="relative mt-auto flex max-h-[95dvh] min-h-[95dvh] flex-col rounded-t-3xl bg-[var(--user-color-background)] text-[var(--user-color-primary)] shadow-2xl"
+          onClick={(e) => e.stopPropagation()}
+        >
+          {/* Header del sheet */}
+          <header className="flex shrink-0 items-center justify-between gap-3 border-b border-[var(--user-color-border)] px-5 py-3">
+            <h2 className="text-base font-bold">Carga Masiva de Traslados</h2>
+            <button
+              type="button"
+              onClick={() => setCargaMasivaAbierta(false)}
+              aria-label="Cerrar carga masiva"
+              className="min-h-11 min-w-11 text-xl"
+            >
+              ×
+            </button>
+          </header>
+          {/* Contenido lazy */}
+          {cargaMasivaAbierta && (
+            <Suspense
+              fallback={
+                <div className="flex flex-1 items-center justify-center">
+                  <p role="status" className="text-sm text-[var(--user-color-muted)]">
+                    Cargando módulo masivo…
+                  </p>
+                </div>
+              }
+            >
+              <BottomSheetCargaMasiva onCerrar={() => setCargaMasivaAbierta(false)} />
+            </Suspense>
+          )}
+        </div>
+      </dialog>
     </main>
   );
 }

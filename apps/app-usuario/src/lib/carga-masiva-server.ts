@@ -1,0 +1,49 @@
+import "server-only";
+import { readFile } from "node:fs/promises";
+import path from "node:path";
+import { createClient } from "@supabase/supabase-js";
+import type { crearClienteServidor } from "./supabase-server";
+import { validarFila, type FilaValidada } from "./carga-masiva";
+import { clasificarVehiculoMasivo } from "@ruum/api/services";
+type Cliente = Awaited<ReturnType<typeof crearClienteServidor>>;
+
+export function clienteMasivoServicio() {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!url || !key) throw new Error("El cobro masivo no está configurado en este entorno.");
+  return createClient(url, key, { auth: { persistSession: false, autoRefreshToken: false } });
+}
+export async function validarFilasServidor(cliente: Cliente, entradas: Record<string, string>[]): Promise<FilaValidada[]> {
+  const archivos = new Map<string, Promise<Record<string, unknown>>>();
+  return Promise.all(entradas.map(async (entrada, indice) => {
+    const fila = validarFila(entrada, indice);
+    for (const campo of ["origenCodigoPostal", "destinoCodigoPostal"]) {
+      const cp = entrada[campo] ?? "";
+      if (!/^\d{5}$/.test(cp)) continue;
+      const prefijo = cp.slice(0, 2);
+      if (!archivos.has(prefijo)) archivos.set(prefijo, readFile(path.join(process.cwd(), "public/data/codigos-postales", `${prefijo}.json`), "utf8").then(JSON.parse).catch((error: NodeJS.ErrnoException) => { if (error.code === "ENOENT") return {}; throw error; }));
+      const catalogo = await archivos.get(prefijo)!;
+      if (!catalogo[cp]) fila.errores[campo] = "Código postal fuera del catálogo vigente";
+    }
+    if (entrada.marca && entrada.modelo) {
+      const clasificacion = await clasificarVehiculoMasivo(cliente, entrada.marca, entrada.modelo);
+      if (!clasificacion?.categoria_tarifa || !clasificacion.gama) fila.errores.modelo = "La combinación marca/modelo no está en catálogo";
+    }
+    fila.estado = Object.keys(fila.errores).length ? "error" : "correcto";
+    return fila;
+  }));
+}
+
+/** Stripe REST evita agregar otro SDK al bundle de la aplicación. */
+export async function stripeMasivo(endpoint: string, parametros?: URLSearchParams, idempotencia?: string) {
+  const key = process.env.STRIPE_SECRET_KEY;
+  if (!key) throw new Error("El cobro masivo no está configurado en este entorno.");
+  const res = await fetch(`https://api.stripe.com/v1/${endpoint}`, {
+    method: parametros ? "POST" : "GET",
+    headers: { Authorization: `Bearer ${key}`, ...(parametros ? { "Content-Type": "application/x-www-form-urlencoded" } : {}), ...(idempotencia ? { "Idempotency-Key": idempotencia } : {}) },
+    body: parametros, signal: AbortSignal.timeout(15000), cache: "no-store",
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error("No se pudo iniciar o consultar el pago seguro.");
+  return data as { id: string; client_secret: string; status: string; amount: number; amount_received: number; currency: string };
+}

@@ -53,6 +53,13 @@ async function importarPagoStripe() {
 }
 
 describe("PagoStripe — cobro real con Elements mockeado en el borde", () => {
+  it("usa el secreto consolidado sin crear un cobro individual", async () => {
+    const PagoStripe = await importarPagoStripe();
+    render(<PagoStripe trasladoId="carga-1" clientSecretExterno="cs_masivo" returnPath="/mis-viajes?pago=masivo" onPagado={vi.fn()} />);
+    await screen.findByTestId("payment-element");
+    expect(fetch).not.toHaveBeenCalled();
+    expect(stripeMocks.Elements).toHaveBeenCalledWith(expect.objectContaining({ options: expect.objectContaining({ clientSecret: "cs_masivo" }) }), undefined);
+  });
   beforeEach(() => {
     vi.resetModules();
     vi.stubEnv("NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY", "pk_test_123");
