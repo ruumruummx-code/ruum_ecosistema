@@ -23,3 +23,9 @@ it("no confirma éxito ni refresca si el servidor rechaza el guardado", async ()
   expect(await screen.findByText("No se pudo guardar")).toBeInTheDocument();
   expect(mocks.refresh).not.toHaveBeenCalled();
 });
+it("normaliza los valores legados a claves antes de persistir", async () => {
+  render(<FacturacionCuentaForm usuario={{ ...usuario, regimen_fiscal: "601 · General de Ley Personas Morales", uso_cfdi: "G03 · Gastos en general" }} empresa={null} />);
+  expect(screen.getByLabelText("Régimen fiscal")).toHaveTextContent("601 - General de Ley Personas Morales");
+  fireEvent.submit(screen.getByRole("button", { name: "Guardar datos fiscales" }).closest("form")!);
+  await waitFor(() => expect(mocks.guardar).toHaveBeenCalledWith({}, expect.objectContaining({ regimen_fiscal: "601", uso_cfdi: "G03" })));
+});

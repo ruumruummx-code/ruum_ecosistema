@@ -1,5 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@ruum/shared/types";
+import { validarSeleccionFiscalSat } from "@ruum/shared/catalogos";
 import { rpcTipado } from "../supabase/funciones";
 import { registrarEvento } from "./auditoria";
 
@@ -190,6 +191,11 @@ export type FacturacionActualizable = {
 export async function actualizarFacturacionUsuario(cliente: Cliente, datos: FacturacionActualizable): Promise<void> {
   const { data: sesion } = await cliente.auth.getUser();
   if (!sesion?.user) throw new Error("Sin sesión activa.");
+
+  if (datos.regimen_fiscal || datos.uso_cfdi) {
+    const errorFiscal = validarSeleccionFiscalSat(datos.regimen_fiscal ?? "", datos.uso_cfdi ?? "", datos.rfc ?? "");
+    if (errorFiscal) throw new Error(errorFiscal);
+  }
 
   const { error } = await rpcTipado(cliente, "actualizar_datos_facturacion", {
     p_rfc: datos.rfc ?? null,

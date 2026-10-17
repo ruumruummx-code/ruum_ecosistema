@@ -1,7 +1,8 @@
 /** @vitest-environment jsdom */
-import { beforeEach, expect, it, vi } from "vitest";
+import { beforeAll, beforeEach, expect, it, vi } from "vitest";
 import { render, screen, fireEvent, waitFor, within } from "@testing-library/react";
 import { VerificacionDocumentos } from "../VerificacionDocumentos";
+import { consultarCatalogosSat } from "@ruum/shared/catalogos";
 import type { Database } from "@ruum/shared/types";
 vi.mock("next/navigation", () => ({ useRouter: () => ({ refresh: vi.fn() }) }));
 const mocks = vi.hoisted(() => ({ listar: vi.fn(), subir: vi.fn(), ine: vi.fn(), fiscal: vi.fn() }));
@@ -9,7 +10,11 @@ vi.mock("../../../lib/supabase-browser", () => ({ crearClienteNavegador: () => (
 vi.mock("@ruum/api/services", () => ({ listarDocumentosCuentaUsuario: mocks.listar, subirDocumentoCuentaUsuario: mocks.subir, subirDocumentoIdentidad: mocks.ine, actualizarFacturacionUsuario: mocks.fiscal }));
 type Usuario = Database["public"]["Tables"]["usuarios"]["Row"];
 const usuario = { id: "u1", rfc: "", estado_verificacion: "pendiente", doc_identidad_url: null } as Usuario;
-beforeEach(() => { vi.clearAllMocks(); mocks.listar.mockResolvedValue([]); mocks.fiscal.mockResolvedValue(undefined); mocks.subir.mockResolvedValue({ tipo: "licencia", ruta: "auth/licencia/nueva.pdf", estado: "en_revision", subido_en: "2026-10-14T12:00:00Z" }); });
+beforeAll(() => {
+  HTMLDialogElement.prototype.showModal = function() { this.setAttribute("open", ""); };
+  HTMLDialogElement.prototype.close = function() { this.removeAttribute("open"); };
+});
+beforeEach(() => { vi.stubGlobal("fetch", vi.fn(async (url: string) => { const params = new URL(url, "http://localhost").searchParams; return { ok: true, json: async () => consultarCatalogosSat({ regimen: params.get("regimen") ?? undefined, persona: params.get("persona") as "fisica" | "moral" | undefined }) }; })); vi.clearAllMocks(); mocks.listar.mockResolvedValue([]); mocks.fiscal.mockResolvedValue(undefined); mocks.subir.mockResolvedValue({ tipo: "licencia", ruta: "auth/licencia/nueva.pdf", estado: "en_revision", subido_en: "2026-10-14T12:00:00Z" }); });
 async function abrirLicencia() {
   const row = screen.getByRole("button", { name: /^Licencia de Conducir/ });
   await waitFor(() => expect(row).toBeEnabled(), { timeout: 5000 });
@@ -63,7 +68,11 @@ it("guarda datos fiscales en la hoja extendida y conserva los valores al reabrir
   render(<VerificacionDocumentos usuario={usuario} />);
   fireEvent.click(screen.getByRole("button", { name: /^Datos de Facturación/ }));
   await screen.findByRole("dialog", { name: "Datos de Facturación" });
-  for (const [label, valor] of [["RFC", "ABC010101AB1"], ["Razón social", "Empresa Prueba"], ["Régimen fiscal", "601"], ["Código postal fiscal", "01234"], ["Uso de CFDI", "G03"]]) fireEvent.change(screen.getByLabelText(label), { target: { value: valor } });
+  for (const [label, valor] of [["RFC", "ABC010101AB1"], ["Razón social", "Empresa Prueba"], ["Código postal fiscal", "01234"]]) fireEvent.change(screen.getByLabelText(label), { target: { value: valor } });
+  fireEvent.click(screen.getByLabelText("Régimen fiscal"));
+  fireEvent.click(await screen.findByRole("button", { name: /^601 -/ }));
+  fireEvent.click(screen.getByLabelText("Uso de CFDI"));
+  fireEvent.click(await screen.findByRole("button", { name: /^G03 -/ }));
   fireEvent.submit(screen.getByRole("button", { name: "Guardar datos fiscales" }).closest("form")!);
   await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
   expect(screen.getByRole("button", { name: /^Datos de Facturación Configurado/ })).toBeInTheDocument();

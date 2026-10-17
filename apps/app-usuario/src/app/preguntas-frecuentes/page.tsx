@@ -12,7 +12,7 @@ export default function PaginaPreguntasFrecuentes() {
   return (
     <>
       <NavegacionUsuario variante="claro" />
-      <MobileShell variant="compact" navInferiorVisible={true}>
+      <MobileShell variant="compact" navInferiorVisible={true} contentClassName="faq-shell-content">
         <PreguntasFrecuentes />
       </MobileShell>
     </>

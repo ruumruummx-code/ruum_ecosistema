@@ -2109,3 +2109,6 @@ input::placeholder, textarea::placeholder {
 .user-legal-reader { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; padding: 12px 16px calc(16px + env(safe-area-inset-bottom)); }
 .user-language-segments { height: 44px; }
 .user-language-segments button { height: 44px; }
+
+/* RR-2026-019: FAQ conserva el lienzo fijo sobre la navegación. */
+.ruum-screen > .faq-shell-content { overflow: hidden; padding: 8px 12px calc(var(--user-mobile-nav-height, calc(66px + env(safe-area-inset-bottom))) + 8px); }

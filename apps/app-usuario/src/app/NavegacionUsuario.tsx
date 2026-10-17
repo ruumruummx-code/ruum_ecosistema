@@ -156,7 +156,7 @@ export function NavegacionUsuario({
   return (
     <>
       {/* A. Barra Superior (Header) */}
-      <header
+      {pathname !== "/preguntas-frecuentes" && <header
         ref={headerRef}
         id="homeHeader"
         role="banner"
@@ -258,7 +258,7 @@ export function NavegacionUsuario({
             )}
           </nav>
         </div>}
-      </header>
+      </header>}
 
       {/* G. Barra de Navegación Inferior (Bottom Navigation Bar) */}
       {mostrarNavegacionInferior && !esAcceso && (
@@ -310,7 +310,7 @@ export function NavegacionUsuario({
           </div>
         </nav>
       )}
-      {mostrarNavegacionInferior && !esAcceso && !pathname.startsWith("/viajes/nuevo") && (
+      {mostrarNavegacionInferior && !esAcceso && !pathname.startsWith("/viajes/nuevo") && pathname !== "/preguntas-frecuentes" && (
         <Link id="requestTransferButton" href="/viajes/nuevo" aria-label="Solicitar traslado" title="Solicitar traslado" className="user-transfer-fab user-v2-scope">
           <svg className="size-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg>
         </Link>

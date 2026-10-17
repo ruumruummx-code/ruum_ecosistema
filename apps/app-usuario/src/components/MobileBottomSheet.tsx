@@ -9,13 +9,16 @@ export function MobileBottomSheet({
   title,
   children,
   fullScreen = false,
+  swipeToClose = false,
 }: {
   open: boolean;
   onClose: () => void;
   title: string;
   children: ReactNode;
   fullScreen?: boolean;
+  swipeToClose?: boolean;
 }) {
+  const swipeStart = useRef<number | null>(null);
   const ref = useRef<HTMLDialogElement>(null);
   useEffect(() => {
     const dialog = ref.current;
@@ -48,8 +51,13 @@ export function MobileBottomSheet({
         className="flex h-full min-h-0 flex-col"
         onClick={(event) => event.stopPropagation()}
       >
-        <header className="flex shrink-0 items-center justify-between gap-3 border-b border-[#d7e1ee] px-5 py-2 dark:border-[#1a3a5c]">
-          <h2 className="text-base font-bold">{title}</h2>
+        <header
+          style={swipeToClose ? { touchAction: "none" } : undefined}
+          onPointerDown={e => { if (swipeToClose && e.isPrimary && !(e.target as HTMLElement).closest("button")) { swipeStart.current = e.clientY; e.currentTarget.setPointerCapture(e.pointerId); } }}
+          onPointerUp={e => { if (swipeStart.current !== null && e.clientY - swipeStart.current > 60) onClose(); swipeStart.current = null; }}
+          onPointerCancel={() => { swipeStart.current = null; }}
+          className="flex shrink-0 items-center justify-between gap-3 border-b border-[#d7e1ee] px-5 py-2 dark:border-[#1a3a5c]">
+          <div>{swipeToClose && <span aria-hidden="true" className="mx-auto mb-1 block h-1 w-8 rounded-full bg-slate-400" />}<h2 className="text-base font-bold">{title}</h2></div>
           <button
             type="button"
             onClick={onClose}

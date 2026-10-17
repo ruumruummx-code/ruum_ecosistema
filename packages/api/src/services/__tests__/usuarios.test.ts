@@ -208,6 +208,15 @@ describe("usuarios — PR-05 Separar Auth de facturación", () => {
 describe("usuarios — PR-08 Facturación atómica", () => {
   beforeEach(() => vi.clearAllMocks());
 
+  it("rechaza combinaciones SAT inválidas antes de invocar la RPC", async () => {
+    const cliente = crearClienteFake({ userId: "user-123" });
+    await expect(actualizarFacturacionUsuario(cliente as unknown as SupabaseClient<Database>, {
+      rfc: "ABC010101AB1", razon_social: "Prueba", regimen_fiscal: "601", uso_cfdi: "D01",
+      codigo_postal_fiscal: "01234", correo_facturacion: null,
+    })).rejects.toThrow("no es compatible");
+    expect(cliente.llamadas.some(l => l.table === "rpc")).toBe(false);
+  });
+
   it("actualizarFacturacionUsuario: invoca la RPC transaccional actualizar_datos_facturacion con los parámetros correctos", async () => {
     const cliente = crearClienteFake({
       userId: "user-123",

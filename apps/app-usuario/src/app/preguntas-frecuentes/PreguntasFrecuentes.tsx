@@ -1,8 +1,10 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import Link from "next/link";
-import { Icono, MobileHeader } from "@ruum/ui";
+import { MobileHeader } from "@ruum/ui";
+import { MobileBottomSheet } from "../../components/MobileBottomSheet";
+import styles from "./faq.module.css";
 
 type CategoriaFaq = "all" | "solicitud" | "traslado" | "pagos" | "evidencia" | "cuenta";
 
@@ -430,201 +432,20 @@ function IconoFaqSvg({ tipo, className = "size-4" }: { tipo: string; className?:
 export function PreguntasFrecuentes() {
   const [categoriaActiva, setCategoriaActiva] = useState<CategoriaFaq>("all");
   const [terminoBusqueda, setTerminoBusqueda] = useState("");
-  const [faqAbierto, setFaqAbierto] = useState<string | null>("solicitud-1");
-
-  // Filtrado reactivo de FAQs
-  const faqsFiltradas = useMemo(() => {
-    const q = terminoBusqueda.toLowerCase().trim();
-    return FAQS.filter((f) => {
-      const matchCategoria = categoriaActiva === "all" || f.categoria === categoriaActiva;
-      const matchBusqueda =
-        q === "" ||
-        f.pregunta.toLowerCase().includes(q) ||
-        (typeof f.respuesta === "string" && f.respuesta.toLowerCase().includes(q));
-      return matchCategoria && matchBusqueda;
-    });
-  }, [categoriaActiva, terminoBusqueda]);
-
-  function alternarFaq(id: string) {
-    setFaqAbierto((actual) => (actual === id ? null : id));
-  }
-
-  return (
-    <div className="w-full flex flex-col gap-4 text-[#0a2342] dark:text-[#f6f8fb]">
-      {/* Header */}
-      <MobileHeader
-        titulo="Preguntas frecuentes"
-        subtitulo="Respuestas a dudas comunes"
-        enlaceAtras="/cuenta"
-        etiquetaAtras="Volver a mi cuenta"
-        conBorde={false}
-        className="-mx-4 -mt-4 sm:-mx-6 sm:-mt-6 mb-2 border-b border-[#e6edf6] dark:border-[#1a3a5c]"
-      />
-
-      {/* Hero */}
-      <div className="relative overflow-hidden rounded-[26px] bg-gradient-to-br from-[#0a2342] via-[#0d2b5e] to-[#12335f] p-6 shadow-[0_16px_32px_-12px_rgba(10,35,66,0.35)] dark:from-[#071322] dark:via-[#0a2342] dark:to-[#0f2d52] dark:border dark:border-[#1a3a5c] text-white">
-        <div className="relative z-10">
-          <div className="mb-4 flex size-[52px] items-center justify-center rounded-[18px] bg-white/12 backdrop-blur text-white shadow-inner border border-white/15">
-            <svg className="size-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-              <circle cx="12" cy="12" r="10" />
-              <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
-              <circle cx="12" cy="17" r="0.5" fill="currentColor" />
-            </svg>
-          </div>
-          <h2 className="mb-1.5 text-[22px] font-extrabold tracking-[-0.5px] leading-tight text-white">
-            ¿En qué podemos ayudarte?
-          </h2>
-          <p className="text-[13.5px] font-medium leading-relaxed text-white/80">
-            Encuentra respuestas rápidas sobre traslados, pagos, evidencia y más.
-          </p>
-        </div>
-      </div>
-
-      {/* Barra de búsqueda */}
-      <div className="flex items-center gap-2.5 rounded-2xl border border-[#d7e1ee] bg-white dark:border-[#1a3a5c] dark:bg-[#0a2342] p-[14px_16px] shadow-[0_2px_10px_rgba(10,35,66,0.04)] transition-all focus-within:border-[#0066ff] focus-within:ring-2 focus-within:ring-[#0066ff]/20">
-        <svg className="size-4 shrink-0 text-[#4e5f80] dark:text-[#a8b5cc]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-          <circle cx="11" cy="11" r="8" />
-          <path d="m21 21-4.35-4.35" />
-        </svg>
-        <input
-          type="search"
-          value={terminoBusqueda}
-          onChange={(e) => setTerminoBusqueda(e.target.value)}
-          placeholder="Buscar en preguntas frecuentes..."
-          aria-label="Buscar en preguntas frecuentes"
-          className="w-full bg-transparent text-[14.5px] font-medium text-[#0a2342] dark:text-white outline-none placeholder:text-[#4e5f80] dark:placeholder:text-[#a8b5cc]"
-        />
-      </div>
-
-      {/* Chips de categorías scrollables */}
-      <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none" role="tablist" aria-label="Categorías de preguntas">
-        {CATEGORIAS.map((cat) => {
-          const estaActiva = categoriaActiva === cat.id;
-          return (
-            <button
-              key={cat.id}
-              type="button"
-              role="tab"
-              aria-selected={estaActiva}
-              onClick={() => setCategoriaActiva(cat.id)}
-              className={`flex shrink-0 items-center gap-1.5 rounded-full px-4 py-2.5 text-[13px] font-semibold transition-all cursor-pointer ${
-                estaActiva
-                  ? "bg-[#0a2342] border border-[#0a2342] text-white shadow-[0_6px_14px_-4px_rgba(10,35,66,0.3)] font-bold dark:bg-[#4d94ff] dark:text-[#061529] dark:border-[#4d94ff]"
-                  : "bg-white border border-[#d7e1ee] text-[#4e5f80] hover:border-[#0a2342]/30 dark:bg-[#0a2342] dark:border-[#1a3a5c] dark:text-[#a8b5cc] dark:hover:border-[#4d94ff]"
-              }`}
-            >
-              <IconoFaqSvg tipo={cat.icono} className="size-3.5" />
-              <span>{cat.label}</span>
-            </button>
-          );
-        })}
-      </div>
-
-      {/* Lista de FAQs (Acordeón) */}
-      <div className="flex flex-col gap-2.5" id="faqList">
-        {faqsFiltradas.map((faq) => {
-          const estaAbierto = faqAbierto === faq.id;
-          return (
-            <div
-              key={faq.id}
-              className={`rounded-[22px] border border-[#e6edf6] dark:border-[#1a3a5c] bg-white dark:bg-[#0a2342] shadow-[0_2px_10px_rgba(10,35,66,0.04)] transition-all overflow-hidden ${
-                estaAbierto ? "ring-1 ring-[#0a2342]/15 dark:ring-[#4d94ff]/30" : ""
-              }`}
-            >
-              <button
-                type="button"
-                onClick={() => alternarFaq(faq.id)}
-                aria-expanded={estaAbierto}
-                className="flex w-full cursor-pointer items-center gap-3.5 p-4.5 text-left transition-colors active:bg-[#fbfdff] dark:active:bg-[#0f2d52]"
-              >
-                <div
-                  className={`flex size-10 shrink-0 items-center justify-center rounded-[13px] transition-colors ${
-                    estaAbierto
-                      ? "bg-[#0a2342] text-white dark:bg-[#4d94ff] dark:text-[#061529]"
-                      : "bg-[#edf4fe] text-[#104ca0] dark:bg-[#0f2d52] dark:text-[#6ba8ff]"
-                  }`}
-                >
-                  <IconoFaqSvg tipo={faq.icono} className="size-4.5" />
-                </div>
-                <span className="flex-1 text-[14.5px] font-bold tracking-tight text-[#0a2342] dark:text-white leading-snug">
-                  {faq.pregunta}
-                </span>
-                <svg
-                  className={`size-3.5 text-[#4e5f80] dark:text-[#a8b5cc] transition-transform duration-200 shrink-0 ${
-                    estaAbierto ? "rotate-180 text-[#0a2342] dark:text-[#4d94ff]" : ""
-                  }`}
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  aria-hidden="true"
-                >
-                  <path d="m6 9 6 6 6-6" />
-                </svg>
-              </button>
-              {estaAbierto && (
-                <div className="border-t border-[#e6edf6] dark:border-[#1a3a5c] px-4.5 pb-5 pt-3.5 pl-[68px] text-[13.5px] font-medium leading-relaxed text-[#4e5f80] dark:text-[#a8b5cc] animate-in fade-in duration-200">
-                  {faq.respuesta}
-                </div>
-              )}
-            </div>
-          );
-        })}
-
-        {/* Sin resultados */}
-        {faqsFiltradas.length === 0 && (
-          <div className="flex flex-col items-center py-12 px-6 text-center">
-            <div className="mb-4 flex size-[72px] items-center justify-center rounded-[24px] bg-[#edf4fe] dark:bg-[#0f2d52] text-[#104ca0] dark:text-[#6ba8ff]">
-              <svg className="size-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                <circle cx="11" cy="11" r="8" />
-                <path d="m21 21-4.35-4.35" />
-              </svg>
-            </div>
-            <h3 className="mb-1 text-[16px] font-bold text-[#0a2342] dark:text-white">Sin resultados</h3>
-            <p className="text-[13.5px] font-medium text-[#4e5f80] dark:text-[#a8b5cc] max-w-xs">
-              No encontramos preguntas que coincidan con tu búsqueda. Intenta con otras palabras o contacta a soporte.
-            </p>
-          </div>
-        )}
-      </div>
-
-      {/* Tarjeta de contacto */}
-      <div className="rounded-[24px] border border-[#e6edf6] dark:border-[#1a3a5c] bg-white dark:bg-[#0a2342] p-5.5 text-center shadow-[0_2px_10px_rgba(10,35,66,0.04)] mt-4">
-        <div className="mx-auto mb-4 flex size-[60px] items-center justify-center rounded-[20px] bg-gradient-to-br from-[#0a2342] to-[#12335f] dark:from-[#071322] dark:to-[#0a2342] text-white shadow-[0_10px_22px_-8px_rgba(10,35,66,0.35)]">
-          <svg className="size-6.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-            <path d="M3 18v-6a9 9 0 0 1 18 0v6" />
-            <path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z" />
-          </svg>
-        </div>
-        <h3 className="mb-1 text-[17px] font-extrabold tracking-tight text-[#0a2342] dark:text-white">
-          ¿No encontraste lo que buscabas?
-        </h3>
-        <p className="mb-4.5 text-[13px] font-medium text-[#4e5f80] dark:text-[#a8b5cc] leading-normal">
-          Nuestro equipo de soporte está disponible 24/7 para ayudarte con cualquier duda.
-        </p>
-        <div className="flex gap-2.5">
-          <Link
-            href="/soporte?canal=chat"
-            className="flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-2xl bg-[#0a2342] hover:bg-[#162c47] py-3.5 px-4 text-[14px] font-bold text-white shadow-[0_8px_18px_-6px_rgba(10,35,66,0.3)] transition-transform active:scale-[0.97] dark:bg-[#4d94ff] dark:text-[#061529] dark:hover:bg-[#6ba8ff]"
-          >
-            <svg className="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-            </svg>
-            Chat
-          </Link>
-          <Link
-            href="/soporte?canal=telefono"
-            className="flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-2xl border border-[#d7e1ee] bg-[#edf4fe] hover:bg-[#dfeaf8] py-3.5 px-4 text-[14px] font-bold text-[#0a2342] transition-transform active:scale-[0.97] dark:border-[#1a3a5c] dark:bg-[#0a2342] dark:text-white dark:hover:bg-[#0f2d52]"
-          >
-            <svg className="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-              <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
-            </svg>
-            Llamar
-          </Link>
-        </div>
-      </div>
-    </div>
-  );
+  const [pagina, setPagina] = useState(0);
+  const [seleccionada, setSeleccionada] = useState<FaqItemData | null>(null);
+  const faqs = useMemo(() => FAQS.filter(f => (categoriaActiva === "all" || f.categoria === categoriaActiva) && f.pregunta.toLocaleLowerCase("es").includes(terminoBusqueda.toLocaleLowerCase("es").trim())), [categoriaActiva, terminoBusqueda]);
+  const paginas = Math.ceil(faqs.length / 4);
+  return <div className={styles.screen}>
+    <MobileHeader titulo="Preguntas frecuentes" enlaceAtras="/cuenta" etiquetaAtras="Volver a mi cuenta" conBorde={false} />
+    <input className={styles.search} type="search" aria-label="Buscar en preguntas frecuentes" placeholder="¿En qué podemos ayudarte?" value={terminoBusqueda} onChange={e => { setTerminoBusqueda(e.target.value); setPagina(0); }} />
+    <div className={styles.categories} role="group" aria-label="Categorías de preguntas">{CATEGORIAS.map(c => <button key={c.id} type="button" aria-pressed={categoriaActiva === c.id} onClick={() => { setCategoriaActiva(c.id); setPagina(0); }}><IconoFaqSvg tipo={c.icono} />{c.label}</button>)}</div>
+    <section className={styles.results} aria-label="Preguntas frecuentes">
+      <p className={styles.caption} role="status">{faqs.length} preguntas · Respuestas rápidas</p>
+      <div className={styles.questions}>{faqs.slice(pagina * 4, pagina * 4 + 4).map(f => <button className={styles.question} key={f.id} type="button" aria-haspopup="dialog" onClick={() => setSeleccionada(f)}><IconoFaqSvg tipo={f.icono} /><span>{f.pregunta}</span><span aria-hidden="true">›</span></button>)}{!faqs.length && <p>Sin resultados. Intenta con otras palabras o contacta a soporte.</p>}</div>
+      <nav className={styles.pagination} aria-label="Paginación de preguntas"><button type="button" disabled={!pagina} onClick={() => setPagina(pagina - 1)} aria-label="Preguntas anteriores">‹</button><span>{paginas ? pagina + 1 : 0} / {paginas}</span><button type="button" disabled={pagina + 1 >= paginas} onClick={() => setPagina(pagina + 1)} aria-label="Preguntas siguientes">›</button></nav>
+    </section>
+    <footer className={styles.footer}><p>¿No encontraste lo que buscabas?</p><div><Link href="/soporte?canal=chat">💬 Chat con Humano</Link><Link href="/soporte?canal=telefono">📞 Llamada de Soporte</Link></div></footer>
+    <MobileBottomSheet open={seleccionada !== null} onClose={() => setSeleccionada(null)} title={seleccionada?.pregunta ?? "Respuesta"} swipeToClose><div className="text-sm leading-relaxed">{seleccionada?.respuesta}</div></MobileBottomSheet>
+  </div>;
 }
