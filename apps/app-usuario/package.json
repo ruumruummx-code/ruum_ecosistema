@@ -31,6 +31,7 @@
     "@stripe/stripe-js": "^9.8.0",
     "@supabase/supabase-js": "^2.47.0",
     "@upstash/redis": "^1.38.3",
+    "exceljs": "4.4.0",
     "mapbox-gl": "^3.32.0",
     "next": "15.5.24",
     "react": "^19.0.0",

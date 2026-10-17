@@ -9,7 +9,6 @@ import {
   COLUMNAS_REQUERIDAS,
   EJEMPLO_CSV_PLANTILLA,
   pLimit,
-  revisarCsv,
   type FilaCsv
 } from "@ruum/shared/utils";
 import {
@@ -23,6 +22,8 @@ import {
   obtenerEstadoCargaMasivaUsuario,
   listarCargasMasivasUsuario,
   previsualizarTarifaUsuario,
+  obtenerUsuarioActual,
+  listarVehiculosDeUsuario,
   type CargaTrasladosMasivosUsuario,
   type FilaTrasladoMasivoNormalizada,
   type ResultadoCargaTrasladosMasivos
@@ -35,6 +36,9 @@ import {
   mensajeErrorMapbox,
   tieneMapboxConfigurado
 } from "@/lib/mapbox";
+
+import { CAMPOS_COMUNES, filasParaPlantilla, generarPlantillaExcel, leerArchivoMasivo } from "./plantilla-excel";
+import type { VehiculoGuardado } from "../nuevo/types";
 
 interface FilaPrevalidada {
   numero: number;
@@ -83,6 +87,12 @@ export const MAX_INTENTOS_MASIVO = 20;
 
 export function CargaMasivaForm() {
   const router = useRouter();
+  const [vehiculosPlantilla, setVehiculosPlantilla] = useState<VehiculoGuardado[]>([]);
+  const [seleccionVehiculos, setSeleccionVehiculos] = useState<string[]>([]);
+  const [comunesPlantilla, setComunesPlantilla] = useState<FilaCsv>({ modalidad_programacion: "lo_antes_posible", tipo_ruta: "local" });
+  const [cantidadPlantilla, setCantidadPlantilla] = useState(1);
+  const [preparandoPlantilla, setPreparandoPlantilla] = useState(false);
+  const [mostrarPreparacion, setMostrarPreparacion] = useState(false);
   const abortEnriquecimientoRef = useRef<AbortController | null>(null);
   const abortCargaRef = useRef<AbortController | null>(null);
 
@@ -154,6 +164,37 @@ export function CargaMasivaForm() {
     URL.revokeObjectURL(url);
   };
 
+  const cargarVehiculosPlantilla = async () => {
+    setPreparandoPlantilla(true);
+    setErrorGeneral(null);
+    try {
+      const cliente = crearClienteNavegador();
+      const usuario = await obtenerUsuarioActual(cliente);
+      if (!usuario) throw new Error("Inicia sesión para precargar tus vehículos.");
+      const vehiculos = await listarVehiculosDeUsuario(cliente, usuario.id);
+      setVehiculosPlantilla(vehiculos);
+      setSeleccionVehiculos([]);
+      if (!vehiculos.length) setErrorGeneral("No tienes vehículos guardados. Puedes generar filas vacías con los datos comunes.");
+    } catch (err) { setErrorGeneral(err instanceof Error ? err.message : "No se pudieron cargar tus vehículos."); }
+    finally { setPreparandoPlantilla(false); }
+  };
+
+  const descargarExcel = async () => {
+    setPreparandoPlantilla(true);
+    setErrorGeneral(null);
+    try {
+      const seleccion = vehiculosPlantilla.filter((v) => seleccionVehiculos.includes(v.id));
+      const contenido = await generarPlantillaExcel(filasParaPlantilla(seleccion, comunesPlantilla, cantidadPlantilla));
+      const url = URL.createObjectURL(new Blob([contenido], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" }));
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "plantilla-traslados-precargada-ruum.xlsx";
+      link.click();
+      URL.revokeObjectURL(url);
+    } catch (err) { setErrorGeneral(err instanceof Error ? err.message : "No se pudo generar la plantilla."); }
+    finally { setPreparandoPlantilla(false); }
+  };
+
   // ── 2. Descarga de errores CSV ───────────────────────────────────────────
   const descargarReporteErrores = (contenido: string) => {
     const blob = new Blob([contenido], { type: "text/csv;charset=utf-8" });
@@ -173,8 +214,8 @@ export function CargaMasivaForm() {
     setReporteServidor(null);
     setErrorReporte(false);
     cargaIdRef.current = null;
-    if (!archivoSeleccionado.name.toLowerCase().endsWith(".csv")) {
-      setErrorGeneral("El archivo debe tener formato .csv");
+    if (!/\.(csv|xlsx)$/i.test(archivoSeleccionado.name)) {
+      setErrorGeneral("El archivo debe tener formato .csv o .xlsx");
       return;
     }
     if (archivoSeleccionado.size > 5 * 1024 * 1024) {
@@ -186,8 +227,7 @@ export function CargaMasivaForm() {
     setAnalizando(true);
 
     try {
-      const texto = await archivoSeleccionado.text();
-      const revision = revisarCsv(texto);
+      const revision = await leerArchivoMasivo(archivoSeleccionado);
 
       if (revision.errores.length > 0) {
         setErrorGeneral(`Error en el formato del archivo: ${revision.errores.slice(0, 3).join(", ")}`);
@@ -269,6 +309,12 @@ export function CargaMasivaForm() {
       errores.push("La fecha programada debe ser válida y futura");
     }
 
+    for (const campo of ["tiene_tarjeta_circulacion", "tiene_verificacion", "puede_circular_rodando"]) {
+      if (limpiar(fila[campo]) && !["true", "false"].includes(limpiar(fila[campo]))) errores.push(campo + " debe ser Sí o No en Excel, o true/false en CSV");
+    }
+    if (limpiar(fila.vehiculo_transmision) && !["manual", "automatica", "electrica"].includes(limpiar(fila.vehiculo_transmision))) errores.push("Transmisión inválida");
+    if (limpiar(fila.vehiculo_tipo) && !["sedan", "suv", "pick_up", "van", "luxury", "coleccion"].includes(limpiar(fila.vehiculo_tipo))) errores.push("Tipo de vehículo inválido");
+    if (limpiar(fila.tipo_ruta) && !["local", "foraneo"].includes(limpiar(fila.tipo_ruta))) errores.push("Tipo de ruta inválido");
     // No consultar servicios externos para filas con errores bloqueantes.
     // Consulta de código postal SEPOMEX
     const origenCp = limpiar(fila.origen_codigo_postal);
@@ -281,10 +327,10 @@ export function CargaMasivaForm() {
     if (!errores.length && origenCp && !origenCpDatos) advertencias.push("CP origen no encontrado en SEPOMEX");
     if (!errores.length && destinoCp && !destinoCpDatos) advertencias.push("CP destino no encontrado en SEPOMEX");
 
-    const origenEstado = origenCpDatos?.estado ?? "";
-    const destinoEstado = destinoCpDatos?.estado ?? "";
-    const origenCiudad = origenCpDatos?.ciudades[0] ?? "";
-    const destinoCiudad = destinoCpDatos?.ciudades[0] ?? "";
+    const origenEstado = limpiar(fila.origen_estado) || origenCpDatos?.estado || "";
+    const destinoEstado = limpiar(fila.destino_estado) || destinoCpDatos?.estado || "";
+    const origenCiudad = limpiar(fila.origen_ciudad) || origenCpDatos?.ciudades[0] || "";
+    const destinoCiudad = limpiar(fila.destino_ciudad) || destinoCpDatos?.ciudades[0] || "";
     const origenColonia = limpiar(fila.origen_colonia);
     const destinoColonia = limpiar(fila.destino_colonia);
 
@@ -365,7 +411,12 @@ export function CargaMasivaForm() {
         vehiculo_marca: marca,
         vehiculo_modelo: modelo,
         vehiculo_anio: limpiar(fila.vehiculo_anio),
-        vehiculo_tipo: tipoVehiculo,
+        vehiculo_tipo: limpiar(fila.vehiculo_tipo) || tipoVehiculo,
+        vehiculo_transmision: limpiar(fila.vehiculo_transmision),
+        estado_general_declarado: limpiar(fila.estado_general_declarado),
+        tiene_tarjeta_circulacion: limpiar(fila.tiene_tarjeta_circulacion),
+        tiene_verificacion: limpiar(fila.tiene_verificacion),
+        puede_circular_rodando: limpiar(fila.puede_circular_rodando),
         vehiculo_color: limpiar(fila.vehiculo_color),
         categoria_tarifa: categoriaTarifa,
         gama,
@@ -386,6 +437,9 @@ export function CargaMasivaForm() {
         destino_referencias: limpiar(fila.destino_referencias),
         modalidad_programacion: modalidad,
         fecha_hora_programada: limpiar(fila.fecha_hora_programada) || undefined,
+        tipo_ruta: limpiar(fila.tipo_ruta) || "local",
+        ventana_recoleccion: limpiar(fila.ventana_recoleccion),
+        ventana_entrega: limpiar(fila.ventana_entrega),
         distancia_km: distanciaKm || undefined,
         tiempo_estimado_horas: tiempoEstimadoHoras || undefined,
         instrucciones_especiales: limpiar(fila.instrucciones_especiales)
@@ -447,7 +501,7 @@ export function CargaMasivaForm() {
       const datos = { ...edicion.datos };
       const anterior = filas.find((f) => f.numero === edicion.numero)?.original;
       for (const lado of ["origen", "destino"]) {
-        if (["calle", "numero", "colonia", "codigo_postal"].some((campo) => datos[lado + "_" + campo] !== anterior?.[lado + "_" + campo])) {
+        if (["calle", "numero", "colonia", "codigo_postal", "estado", "ciudad"].some((campo) => datos[lado + "_" + campo] !== anterior?.[lado + "_" + campo])) {
           delete datos[lado + "_lat"];
           delete datos[lado + "_lng"];
           delete datos.distancia_km;
@@ -558,11 +612,11 @@ export function CargaMasivaForm() {
 
       // 1. Encolar carga en backend
       const resCreacion = await crearTrasladosMasivosUsuario(cliente, {
-        nombreArchivo: archivo.name,
+        nombreArchivo: archivo.name.replace(/\.xlsx$/i, ".csv"),
         filas: seleccionadas.map((f) => f.datos),
         hashArchivo: hash,
         tamanoBytes: archivo.size,
-        mimeType: archivo.type || "text/csv"
+        mimeType: "text/csv"
       });
 
       cargaIdRef.current = resCreacion.carga_id;
@@ -596,14 +650,14 @@ export function CargaMasivaForm() {
             ← Volver a traslado individual
           </Link>
           <span className="text-[11px] font-mono tracking-wide uppercase px-2.5 py-1 rounded bg-[#141F32] text-[#FFC400] border border-[#FFC400]/20">
-            Carga masiva CSV
+            Carga masiva Excel / CSV
           </span>
         </div>
         <h1 className="text-xl sm:text-2xl font-bold font-display text-white">
           Creación masiva de traslados
         </h1>
         <p className="text-xs sm:text-sm font-body text-[#8E9CAE]">
-          Sube un archivo CSV con hasta 100 vehículos y rutas para cotizar y programar en lote de forma segura.
+          Sube un archivo Excel o CSV con hasta 100 vehículos y rutas para cotizar y programar en lote de forma segura.
         </p>
       </header>
 
@@ -676,6 +730,30 @@ export function CargaMasivaForm() {
           </div>
 
           <div className="space-y-3">
+            <Button type="button" variant="secondary" onClick={() => setMostrarPreparacion((actual) => !actual)}>Preparar plantilla Excel precargada</Button>
+            {mostrarPreparacion && (
+              <div className="space-y-4 rounded-xl border border-slate-700 p-4">
+                <h3 className="text-white font-bold">Datos para tu plantilla</h3>
+                <p className="text-xs text-slate-400">Selecciona tus vehículos y completa datos comunes. Podrás editar cada fila en Excel. Las rutas con paradas intermedias se capturan en traslado individual.</p>
+                <Button type="button" variant="secondary" loading={preparandoPlantilla} onClick={() => void cargarVehiculosPlantilla()}>Cargar mis vehículos</Button>
+                {vehiculosPlantilla.map((v) => <label key={v.id} className="flex gap-2 text-sm text-slate-200">
+                  <input type="checkbox" checked={seleccionVehiculos.includes(v.id)} disabled={preparandoPlantilla} onChange={(e) => { const seleccionada = e.target.checked; setSeleccionVehiculos((actual) => seleccionada ? [...actual, v.id] : actual.filter((id) => id !== v.id)); }} />
+                  {v.marca} {v.modelo} · {v.placas || v.vin}
+                </label>)}
+                <p className="text-sm text-slate-300">{seleccionVehiculos.length} vehículos seleccionados (máximo 100).</p>
+                {!seleccionVehiculos.length && <label className="block text-sm text-slate-300">Cantidad de filas vacías<input className="block rounded bg-[#070D18] p-2" type="number" min={1} max={100} value={cantidadPlantilla} onChange={(e) => setCantidadPlantilla(Number(e.target.value))} /></label>}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {CAMPOS_COMUNES.map(([titulo, campo]) => <label key={campo} className="text-xs text-slate-300">{titulo.replaceAll("_", " ")}
+                    {campo === "modalidad_programacion" || campo === "tipo_ruta" ? (
+                      <select className="block w-full rounded bg-[#070D18] p-2" value={comunesPlantilla[campo] ?? ""} onChange={(e) => setComunesPlantilla({ ...comunesPlantilla, [campo]: e.target.value })}>
+                        {(campo === "tipo_ruta" ? ["local", "foraneo"] : ["lo_antes_posible", "programado"]).map((opcion) => <option key={opcion} value={opcion}>{opcion.replaceAll("_", " ")}</option>)}
+                      </select>
+                    ) : <input className="block w-full rounded bg-[#070D18] p-2" value={comunesPlantilla[campo] ?? ""} onChange={(e) => setComunesPlantilla({ ...comunesPlantilla, [campo]: e.target.value })} />}
+                  </label>)}
+                </div>
+                <Button type="button" loading={preparandoPlantilla} disabled={seleccionVehiculos.length > 100} onClick={() => void descargarExcel()}>Descargar Excel precargado</Button>
+              </div>
+            )}
             <label
               htmlFor="archivo-csv"
               className="flex flex-col items-center justify-center border-2 border-dashed border-[#1C2A3E] hover:border-[#FFC400]/50 bg-[#070D18]/80 rounded-xl p-8 text-center cursor-pointer transition"
@@ -686,15 +764,15 @@ export function CargaMasivaForm() {
                 </svg>
               </div>
               <p className="text-sm font-bold text-white font-display">
-                Arrastra tu archivo CSV o haz clic para seleccionarlo
+                Selecciona tu archivo Excel o CSV
               </p>
               <p className="text-xs text-[#8E9CAE] mt-1">
-                Archivos .csv hasta 5 MB (máximo 100 traslados por lote)
+                Archivos .xlsx o .csv hasta 5 MB (máximo 100 traslados por lote)
               </p>
               <input
                 id="archivo-csv"
                 type="file"
-                accept=".csv,text/csv"
+                accept=".csv,.xlsx,text/csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
                 disabled={analizando || enviando}
                 className="sr-only"
                 onChange={(e) => {

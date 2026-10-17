@@ -66,7 +66,10 @@ export const COLUMNAS_TECNICAS_OPCIONALES = [
 
 export const CAMPOS_PERMITIDOS = new Set<string>([
   ...COLUMNAS_PLANTILLA,
-  ...COLUMNAS_TECNICAS_OPCIONALES
+  ...COLUMNAS_TECNICAS_OPCIONALES,
+  "origen_estado", "origen_ciudad", "destino_estado", "destino_ciudad",
+  "vehiculo_tipo", "vehiculo_transmision", "estado_general_declarado",
+  "tiene_tarjeta_circulacion", "tiene_verificacion", "puede_circular_rodando", "tipo_ruta"
 ]);
 
 export const EJEMPLO_CSV_PLANTILLA = [

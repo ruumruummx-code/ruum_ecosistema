@@ -33,6 +33,8 @@ vi.mock("@/lib/mapbox", () => ({
 
 vi.mock("@ruum/api/services", () => ({
   listarCargasMasivasUsuario: vi.fn(async () => []),
+  obtenerUsuarioActual: vi.fn(async () => ({ id: "usuario-1" })),
+  listarVehiculosDeUsuario: vi.fn(async () => [{ id: "v-1", marca: "Nissan", modelo: "Versa", anio: 2024, placas: "ABC123", tipo: "sedan", condicion: "seminueva" }]),
   previsualizarTarifaUsuario: vi.fn(async () => ({ disponible: true, tarifa: 1250, categoria_tarifa: "ligero_a", gama: "entrada" })),
   crearTrasladosMasivosUsuario: vi.fn(async () => ({ carga_id: "lote-1" })),
   procesarCargaTrasladosMasivosUsuario: vi.fn(async () => ({ estado: "procesada_con_errores", filas_creadas: 0, filas_error: 1, filas_procesadas: 1 })),
@@ -168,6 +170,32 @@ describe("CargaMasivaForm", () => {
     await screen.findByText(/Seguimiento detenido/);
     await waitFor(() => expect(screen.queryByRole("button", { name: "Detener seguimiento" })).not.toBeInTheDocument());
     expect(procesarCargaTrasladosMasivosUsuario).toHaveBeenCalledTimes(1);
+  });
+
+  it("genera desde la pantalla un Excel con vehículos seleccionados y datos comunes", async () => {
+    const user = userEvent.setup();
+    render(<CargaMasivaForm />);
+    await user.click(screen.getByRole("button", { name: "Preparar plantilla Excel precargada" }));
+    await user.click(screen.getByRole("button", { name: "Cargar mis vehículos" }));
+    await user.click(await screen.findByRole("checkbox", { name: /Nissan Versa/ }));
+    await user.type(screen.getByLabelText("CODIGO POSTAL ORIGEN"), "06700");
+    const crearUrl = vi.fn((_blob: Blob) => "blob:plantilla");
+    Object.defineProperty(URL, "createObjectURL", { configurable: true, value: crearUrl });
+    Object.defineProperty(URL, "revokeObjectURL", { configurable: true, value: vi.fn() });
+    const click = vi.spyOn(HTMLAnchorElement.prototype, "click").mockImplementation(() => {});
+    await user.click(screen.getByRole("button", { name: "Descargar Excel precargado" }));
+    await waitFor(() => expect(crearUrl).toHaveBeenCalled());
+    const buffer = await new Promise<ArrayBuffer>((resolve) => {
+      const lector = new FileReader();
+      lector.onload = () => resolve(lector.result as ArrayBuffer);
+      lector.readAsArrayBuffer(crearUrl.mock.calls[0][0]);
+    });
+    const { Workbook } = await import("exceljs");
+    const libro = new Workbook();
+    await libro.xlsx.load(buffer);
+    expect(libro.getWorksheet("Traslados")!.getCell("A2").value).toBe("06700");
+    expect(libro.getWorksheet("Traslados")!.getCell("V2").value).toBe("ABC123");
+    click.mockRestore();
   });
 
   it("rechaza un archivo vacío sin avanzar de paso", async () => {
