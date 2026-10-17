@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { Aviso, LogoMarca } from "@ruum/ui";
+import { Aviso } from "@ruum/ui";
 import type { Conductor } from "@ruum/shared/types";
 import type { MotivoRechazo } from "@ruum/shared/constants";
 import { traducirErrorOperativo, suscribirCanalSeguro } from "@ruum/shared/utils";
@@ -15,17 +15,14 @@ import {
   listarHistorialTrasladosConductor,
   registrarEvento
 } from "@ruum/api/services";
-import { contarNotificacionesNoLeidas } from "@ruum/api/drivers";
 import { obtenerTrasladosPorIds } from "@ruum/api/transfers";
 import { RejectTripDialog } from "./RejectTripDialog";
 import { OfertaCard } from "./OfertaCard";
 import { AcceptedTripCard } from "./AcceptedTripCard";
-import { TrasladosDateNavigator } from "./ViajesDateNavigator";
-import { TrasladosFilters, type OrdenTraslados } from "./ViajesFilters";
 import { UndoRechazoToast } from "./UndoRechazoToast";
 import { TrasladosMapa } from "./ViajesMapa";
 import { TrasladosSearch, filterTrasladosBySearch } from "./ViajesSearch";
-import { PanelSupportSheet } from "../panel/PanelSupportSheet";
+import type { OrdenTraslados } from "./ViajesFilters";
 import {
   claveDia,
   crearCalendario,
@@ -34,6 +31,8 @@ import {
   type DetalleOperativo,
   type PasaporteRow
 } from "./trips-utils";
+import { FechaChipSelector } from "./components/FechaChipSelector";
+import { CalendarioBottomSheet } from "./components/CalendarioBottomSheet";
 
 type RechazoPendiente = {
   viaje: PasaporteRow;
@@ -67,8 +66,6 @@ export default function PaginaTraslados() {
   const [viajeParaRechazar, setViajeParaRechazar] = useState<PasaporteRow | null>(null);
   const [rechazoPendiente, setRechazoPendiente] = useState<RechazoPendiente | null>(null);
   const [refreshCount, setRefreshCount] = useState(0);
-  const [soporteAbierto, setSoporteAbierto] = useState(false);
-  const [notificacionesCount, setNotificacionesCount] = useState(0);
   const [orden, setOrden] = useState<OrdenTraslados>(() => {
     const v = searchParams.get("orden") as OrdenTraslados | null;
     return v === "mayor_ganancia" || v === "menor_distancia" ? v : "recientes";
@@ -78,6 +75,7 @@ export default function PaginaTraslados() {
   const [estaOnline, setEstaOnline] = useState(
     typeof navigator !== "undefined" ? navigator.onLine : true
   );
+  const [calendarioAbierto, setCalendarioAbierto] = useState(false);
 
   const timeoutRechazoRef = useRef<number | null>(null);
   const recargaDebounceRef = useRef<NodeJS.Timeout | null>(null);
@@ -90,7 +88,6 @@ export default function PaginaTraslados() {
     const params = new URLSearchParams(searchParams.toString());
     Object.entries(cambios).forEach(([clave, valor]) => {
       if (!valor || valor === "todos" || valor === "recientes") {
-        // rec recientes es default -> limpia URL
         if (clave === "orden" && valor === "recientes") params.delete(clave);
         else if (clave === "ciudad" && (valor === "todas" || !valor)) params.delete(clave);
         else if (clave !== "orden" && clave !== "ciudad") params.delete(clave);
@@ -105,6 +102,34 @@ export default function PaginaTraslados() {
 
   function hrefDetalle(viaje: PasaporteRow) {
     return `/viajes/${viaje.traslado_id}?volver=${encodeURIComponent(rutaActual)}`;
+  }
+
+  // Ciclar orden al tocar el ícono de sort en la toolbar
+  function ciclarOrden() {
+    const siguiente: Record<OrdenTraslados, OrdenTraslados> = {
+      recientes: "mayor_ganancia",
+      mayor_ganancia: "menor_distancia",
+      menor_distancia: "recientes"
+    };
+    const nuevoOrden = siguiente[orden];
+    setOrden(nuevoOrden);
+    actualizarUrl({ orden: nuevoOrden });
+    if (typeof navigator !== "undefined" && "vibrate" in navigator) navigator.vibrate(10);
+  }
+
+  // Cambiar modo lista/mapa
+  function cambiarModo(modo: "lista" | "mapa") {
+    setModoMapa(modo);
+    if (typeof navigator !== "undefined" && "vibrate" in navigator) navigator.vibrate(10);
+    void (async () => {
+      try {
+        const { Preferences } = await import("@capacitor/preferences");
+        await Preferences.set({ key: "ruum_conductor_Traslados_modo", value: modo });
+      } catch {}
+      try {
+        localStorage.setItem("ruum_conductor_Traslados_modo", modo);
+      } catch {}
+    })();
   }
 
   // Escuchar estado de conexión
@@ -123,7 +148,6 @@ export default function PaginaTraslados() {
     let cancelado = false;
     async function cargarModo() {
       try {
-        // Intentar Preferences (nativo)
         const { Preferences } = await import("@capacitor/preferences");
         const { value } = await Preferences.get({ key: "ruum_conductor_Traslados_modo" });
         if (!cancelado && (value === "mapa" || value === "lista")) setModoMapa(value);
@@ -138,36 +162,6 @@ export default function PaginaTraslados() {
     return () => {
       cancelado = true;
     };
-  }, []);
-
-  function cambiarModo(modo: "lista" | "mapa") {
-    setModoMapa(modo);
-    if (typeof navigator !== "undefined" && "vibrate" in navigator) navigator.vibrate(10);
-    void (async () => {
-      try {
-        const { Preferences } = await import("@capacitor/preferences");
-        await Preferences.set({ key: "ruum_conductor_Traslados_modo", value: modo });
-      } catch {}
-      try {
-        localStorage.setItem("ruum_conductor_Traslados_modo", modo);
-      } catch {}
-    })();
-  }
-
-  // Notificaciones no leídas
-  useEffect(() => {
-    async function cargarNotificacionesCount() {
-      if (!tieneSupabaseConfigurado()) return;
-      try {
-        setNotificacionesCount(await contarNotificacionesNoLeidas(crearClienteNavegador()));
-      } catch {
-        // Ignorar
-      }
-    }
-    void cargarNotificacionesCount();
-    const actualizar = () => void cargarNotificacionesCount();
-    window.addEventListener("ruum:notificaciones-actualizar", actualizar);
-    return () => window.removeEventListener("ruum:notificaciones-actualizar", actualizar);
   }, []);
 
   // Inicializar fecha de hoy
@@ -405,7 +399,7 @@ export default function PaginaTraslados() {
 
     // Filtrar por búsqueda (AI-002)
     if (searchQuery.trim()) {
-      result = result.filter((item) => 
+      result = result.filter((item) =>
         filterTrasladosBySearch(item.viaje, searchQuery)
       );
     }
@@ -422,6 +416,10 @@ export default function PaginaTraslados() {
   const tieneOfertasOtrosDias = calendario.some(
     ({ dia, Traslados }) => claveDia(dia) !== diaSeleccionado && Traslados.some((v) => v.tipo === "Ofertado")
   );
+  const diaConOfertas = calendario.find(({ dia, Traslados }) => claveDia(dia) !== diaSeleccionado && Traslados.some((v) => v.tipo === "Ofertado"));
+  const diaConOfertasLabel = diaConOfertas
+    ? new Intl.DateTimeFormat("es-MX", { weekday: "long", day: "numeric", timeZone: "America/Mexico_City" }).format(diaConOfertas.dia)
+    : "otro día";
 
   // Reset paginación al cambiar filtros/vista/día
   useEffect(() => {
@@ -430,74 +428,233 @@ export default function PaginaTraslados() {
 
   const listToRenderVisible = useMemo(() => listToRender.slice(0, visibleCount), [listToRender, visibleCount]);
 
+  const ORDEN_LABEL: Record<OrdenTraslados, string> = {
+    recientes: "Recientes",
+    mayor_ganancia: "Mayor ganancia",
+    menor_distancia: "Menor distancia"
+  };
+
+  // Estado vacío (variables extraídas para evitar ternarios anidados en el JSX)
+  const estaVacio = listToRender.length === 0;
+  const iconoVacio =
+    rawListToRender.length > 0 && estaVacio
+      ? "🔍"
+      : vista === "disponibles"
+      ? "📭"
+      : "📋";
+  const tituloVacio =
+    rawListToRender.length > 0 && estaVacio
+      ? "Sin resultados con estos filtros"
+      : vista === "disponibles"
+      ? "Sin traslados para este día"
+      : "No tienes traslados aceptados para esta fecha";
+  const textoVacio =
+    rawListToRender.length > 0 && estaVacio
+      ? `Hay ${rawListToRender.length} ofertas este día, pero ninguna coincide con tus filtros actuales.`
+      : vista === "disponibles"
+      ? "No hay ofertas programadas en esta fecha. Revisa otro día o cambia el orden."
+      : "Acepta una oferta para verla aquí.";
+
+  // Contenido principal (lista o vacío), extraído para simplificar el return
+  const contenidoPrincipal = cargando ? (
+    <TripsLoadingList />
+  ) : estaVacio ? (
+    <div className="flex-1 flex flex-col items-center justify-center text-center py-6">
+      <div className="size-10 rounded-2xl bg-surface border border-border/20 flex items-center justify-center text-3xl mb-2" aria-hidden>
+        {iconoVacio}
+      </div>
+      <p className="font-display text-sm font-bold text-text-primary">{tituloVacio}</p>
+      <p className="mt-1 font-body text-xs text-text-secondary max-w-[260px] leading-relaxed">{textoVacio}</p>
+      {rawListToRender.length > 0 && estaVacio ? (
+        <div className="mt-4 flex flex-col gap-2 w-full max-w-[260px]">
+          <button
+            type="button"
+            onClick={() => {
+              setCiudadFiltro("todas");
+              setOrden("recientes");
+              actualizarUrl({ ciudad: "todas", orden: "recientes" });
+            }}
+            className="inline-flex min-h-11 items-center justify-center rounded-xl bg-signal text-slate-950 px-5 py-3 font-display text-sm font-black shadow-sm focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-signal"
+          >
+            Limpiar filtros
+          </button>
+        </div>
+      ) : tieneOfertasOtrosDias && diaConOfertas ? (
+        <div className="mt-4 flex flex-col gap-2 w-full max-w-[260px]">
+          <button
+            type="button"
+            onClick={() => setDiaSeleccionado(claveDia(diaConOfertas.dia))}
+            className="inline-flex min-h-11 items-center justify-center rounded-xl border border-route-action/30 bg-route-soft px-5 py-3 font-body text-sm font-bold text-route-action hover:bg-route-soft/70 focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-route-action"
+          >
+            Ver ofertas del {diaConOfertasLabel} →
+          </button>
+        </div>
+      ) : null}
+    </div>
+  ) : (
+    <div className="flex flex-col gap-3.5">
+      {listToRenderVisible.map((item, index) => {
+        const viaje = item.viaje;
+        const trasladoId = viaje.traslado_id ?? `viaje-${index}`;
+        const detalle = detalles[trasladoId] ?? detalleFallback(viaje);
+
+        if (vista === "disponibles") {
+          return (
+            <OfertaCard
+              key={trasladoId}
+              viaje={viaje}
+              detalle={detalle}
+              hrefDetalle={hrefDetalle(viaje)}
+            />
+          );
+        }
+
+        return (
+          <AcceptedTripCard
+            key={trasladoId}
+            viaje={viaje}
+            detalle={detalle}
+            onReject={(viaje) => setViajeParaRechazar(viaje)}
+            hrefDetalle={hrefDetalle(viaje)}
+          />
+        );
+      })}
+      {listToRender.length > visibleCount && (
+        <button
+          type="button"
+          onClick={() => setVisibleCount((v) => v + 10)}
+          className="mt-2 inline-flex min-h-11 items-center justify-center rounded-xl border border-border bg-surface px-5 py-3 font-body text-sm font-bold text-text-primary hover:bg-surface-elevated focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-route-action"
+        >
+          Cargar más ({listToRender.length - visibleCount} restantes)
+        </button>
+      )}
+    </div>
+  );
+
   return (
     <div className="mx-auto w-full max-w-md px-4 py-6 sm:px-6 sm:py-10 flex flex-col justify-between min-h-[calc(100vh-100px)] text-text-primary">
       <div className="w-full flex flex-col flex-1 pb-16">
-        {/* Header — sticky con acciones 44px y barra fina */}
+        {/* Refresh bar */}
         {refrescando && (
           <div className="pointer-events-none fixed left-0 right-0 top-0 z-50 h-1 bg-signal/20" aria-hidden>
             <div className="h-full w-1/3 animate-pulse conductor-refresh-bar bg-signal" />
           </div>
         )}
-        <header className="sticky top-0 z-20 -mx-4 px-4 sm:-mx-6 sm:px-6 bg-surface/95 backdrop-blur supports-[backdrop-filter]:bg-surface/80 border-b border-border/20 py-3 flex items-center justify-between gap-3">
-          <div className="min-w-0 flex-1">
-            <p className="font-body text-[10px] font-bold uppercase tracking-widest text-text-tertiary">Conductor</p>
-            <h1 className="mt-1 font-display text-2xl sm:text-3xl font-extrabold tracking-tight text-text-primary leading-none">
-              Traslados
-            </h1>
-            <div className="mt-2 flex items-center gap-1.5 text-xs font-bold text-text-tertiary">
-              <span className={`h-1.5 w-1.5 rounded-full ${estaOnline ? "bg-signal animate-pulse" : "bg-danger"}`} aria-hidden />
-              <span>{estaOnline ? "En vivo" : "Sin conexión"}</span>
-              <span className="text-text-tertiary/60" aria-hidden>·</span>
-              <button
-                type="button"
-                onClick={() => {
-                  setRefrescando(true);
-                  setRefreshCount((prev) => prev + 1);
-                }}
-                disabled={refrescando}
-                aria-busy={refrescando || undefined}
-                className="inline-flex items-center gap-1 min-h-11 rounded-lg border border-border/30 bg-surface-elevated px-3 py-1.5 text-xs font-bold text-route-action hover:bg-surface disabled:opacity-50 focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-route-action"
-              >
-                Recargar
-              </button>
-            </div>
-          </div>
 
-          <div className="flex shrink-0 items-center gap-2 select-none">
+        {/* ===================== HEADER LIGERO =====================
+           Título + Segmented Control Ofertas / Aceptados.
+           Los iconos de notificaciones y soporte viven en el header global (layout). ===================== */}
+        <header className="mb-3">
+          <div className="flex items-center gap-2 mb-2">
+            <span className="font-body text-[10px] font-bold uppercase tracking-wider text-text-tertiary">Traslados</span>
+            <span className={`h-1.5 w-1.5 rounded-full ${estaOnline ? "bg-signal animate-pulse" : "bg-danger"}`} aria-hidden />
+            <span className="text-xs font-bold text-text-tertiary">{estaOnline ? "En vivo" : "Sin conexión"}</span>
+          </div>
+          <h1 className="font-display text-2xl sm:text-3xl font-extrabold tracking-tight text-text-primary leading-none">
+            {vista === "disponibles" ? "Ofertas" : "Aceptados"}
+          </h1>
+
+          {/* Segmented Control integrado en el Header */}
+          <div
+            role="tablist"
+            aria-label="Vistas de traslados"
+            className="mt-2 flex w-full rounded-xl border border-border/20 bg-surface-elevated p-1 select-none"
+          >
             <button
               type="button"
-              onClick={() => setSoporteAbierto(true)}
-              className="flex h-11 w-11 items-center justify-center rounded-full border border-border/20 bg-surface-elevated text-text-primary hover:text-route-action transition-colors cursor-pointer shadow-xs focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-route-action"
-              aria-label="Ayuda y soporte rápido"
+              role="tab"
+              id="tab-ofertas"
+              aria-selected={vista === "disponibles"}
+              aria-controls="panel-traslados"
+              onClick={() => actualizarUrl({ vista: "disponibles" })}
+              className={`flex-1 rounded-xl px-3 text-center text-sm font-bold transition-all duration-200 cursor-pointer min-h-11 flex items-center justify-center tabular-nums focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-route-action ${
+                vista === "disponibles"
+                  ? "bg-signal text-slate-950 shadow-md"
+                  : "text-text-secondary hover:text-text-primary"
+              }`}
             >
-              <span className="font-display text-sm font-black">?</span>
+              Ofertas <span className="ml-1 tabular-nums">({disponiblesVisibles.length})</span>
             </button>
-
-            <Link
-              href="/notificaciones"
-              className="relative flex h-11 w-11 items-center justify-center rounded-full border border-border/20 bg-surface-elevated text-text-primary hover:text-route-action transition-colors shadow-xs focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-route-action"
-              aria-label={notificacionesCount > 0 ? `Notificaciones (${notificacionesCount > 99 ? "99+" : notificacionesCount} sin leer)` : "Notificaciones"}
+            <button
+              type="button"
+              role="tab"
+              id="tab-aceptados"
+              aria-selected={vista === "mis-Traslados"}
+              aria-controls="panel-traslados"
+              onClick={() => actualizarUrl({ vista: "mis-Traslados" })}
+              className={`flex-1 rounded-xl px-3 text-center text-sm font-bold transition-all duration-200 cursor-pointer min-h-11 flex items-center justify-center tabular-nums focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-route-action ${
+                vista === "mis-Traslados"
+                  ? "bg-signal text-slate-950 shadow-md"
+                  : "text-text-secondary hover:text-text-primary"
+              }`}
             >
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-                <path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9" />
-                <path d="M10 21h4" />
-              </svg>
-              {notificacionesCount > 0 && (
-                <span className="absolute -top-0.5 -right-0.5 bg-danger text-white text-[11px] font-black rounded-full min-w-5 h-5 px-1 flex items-center justify-center border-2 border-surface shadow-xs tabular-nums">
-                  {notificacionesCount > 99 ? "99+" : notificacionesCount}
-                </span>
-              )}
-            </Link>
+              Aceptados <span className="ml-1 tabular-nums">({aceptados.length})</span>
+            </button>
           </div>
         </header>
 
-        {/* Barra de Búsqueda - AI-002 */}
-        <div className="mt-3 px-1">
-          <TrasladosSearch 
-            placeholder={`Buscar ${vista === "disponibles" ? "ofertas" : "Traslados"}...`}
-          />
+        {/* ===================== TOOLBAR ÚNICA =====================
+           Búsqueda + ícono toggle Lista/Mapa + ícono ordenamiento (Sort). ===================== */}
+        <div className="mt-3 flex flex-col gap-2">
+          <TrasladosSearch placeholder="Buscar ofertas..." />
+          <div className="flex items-center justify-between gap-2">
+            <button
+              type="button"
+              aria-pressed={modoMapa === "mapa"}
+              aria-label={modoMapa === "mapa" ? "Cambiar a vista lista" : "Cambiar a vista mapa"}
+              onClick={() => cambiarModo(modoMapa === "mapa" ? "lista" : "mapa")}
+              className="flex h-10 w-10 items-center justify-center rounded-xl border border-border/20 bg-surface-elevated text-text-primary hover:text-route-action transition-colors cursor-pointer shadow-xs focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-route-action"
+            >
+              {modoMapa === "mapa" ? (
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} aria-hidden>
+                  <line x1="8" y1="6" x2="21" y2="6" />
+                  <line x1="8" y1="12" x2="21" y2="12" />
+                  <line x1="8" y1="18" x2="21" y2="18" />
+                  <line x1="3" y1="6" x2="3.01" y2="6" />
+                  <line x1="3" y1="12" x2="3.01" y2="12" />
+                  <line x1="3" y1="18" x2="3.01" y2="18" />
+                </svg>
+              ) : (
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} aria-hidden>
+                  <polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6" />
+                  <line x1="8" y1="2" x2="8" y2="18" />
+                  <line x1="16" y1="6" x2="16" y2="22" />
+                </svg>
+              )}
+              {listToRender.length > 0 && (
+                <span className={`absolute -top-1 -right-1 rounded-full px-1.5 py-0.5 text-[9px] font-black tabular-nums ${
+                  modoMapa === "mapa" ? "bg-slate-950 text-signal" : "bg-border text-text-tertiary"
+                }`}>{listToRender.length}</span>
+              )}
+            </button>
+
+            <button
+              type="button"
+              onClick={ciclarOrden}
+              aria-label={`Ordenar por: ${ORDEN_LABEL[orden]}`}
+              className="flex h-10 w-10 items-center justify-center rounded-xl border border-border/20 bg-surface-elevated text-text-primary hover:text-route-action transition-colors cursor-pointer shadow-xs focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-route-action"
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                <line x1="12" y1="1" x2="12" y2="23" />
+                <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+              </svg>
+              <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-signal text-[9px] font-black text-slate-950 shadow-xs">
+                {orden.charAt(0).toUpperCase()}
+              </span>
+            </button>
+          </div>
         </div>
+
+        {/* ===================== SELECTOR DE FECHA COLAPSADO =====================
+           Reemplaza el carrusel de semana (DO 11, LU 12, etc.). Abre un Bottom Sheet
+           de calendario al hacer tap. ===================== */}
+        <FechaChipSelector
+          calendario={calendario}
+          diaSeleccionado={diaSeleccionado}
+          diaHoy={diaHoy}
+          onSelectDia={setDiaSeleccionado}
+          onAbrirCalendario={() => setCalendarioAbierto(true)}
+        />
 
         {/* Banner Modo Offline */}
         {!estaOnline && (
@@ -508,121 +665,7 @@ export default function PaginaTraslados() {
           </div>
         )}
 
-        {/* Tab switch 44px real, normal-case, signal activo */}
-        <div
-          role="tablist"
-          aria-label="Vistas de traslados"
-          className="mt-5 flex w-full rounded-2xl border border-border/20 bg-surface-elevated p-1 select-none"
-        >
-          <button
-            type="button"
-            role="tab"
-            id="tab-ofertas"
-            aria-selected={vista === "disponibles"}
-            aria-controls="panel-traslados"
-            onClick={() => actualizarUrl({ vista: "disponibles" })}
-            className={`flex-1 rounded-xl px-3 text-center text-sm font-bold transition-all duration-200 cursor-pointer min-h-11 flex items-center justify-center tabular-nums focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-route-action ${
-              vista === "disponibles"
-                ? "bg-signal text-slate-950 shadow-md"
-                : "text-text-secondary hover:text-text-primary"
-            }`}
-          >
-            Ofertas <span className="ml-1 tabular-nums">({disponiblesVisibles.length})</span>
-          </button>
-          <button
-            type="button"
-            role="tab"
-            id="tab-aceptados"
-            aria-selected={vista === "mis-Traslados"}
-            aria-controls="panel-traslados"
-            onClick={() => actualizarUrl({ vista: "mis-Traslados" })}
-            className={`flex-1 rounded-xl px-3 text-center text-sm font-bold transition-all duration-200 cursor-pointer min-h-11 flex items-center justify-center tabular-nums focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-route-action ${
-              vista === "mis-Traslados"
-                ? "bg-signal text-slate-950 shadow-md"
-                : "text-text-secondary hover:text-text-primary"
-            }`}
-          >
-            Aceptados <span className="ml-1 tabular-nums">({aceptados.length})</span>
-          </button>
-        </div>
-
-        {/* Toggle Lista | Mapa — R2 persistente */}
-        <div role="group" aria-label="Vista Lista o Mapa" className="mt-3 flex w-full rounded-xl border border-border/20 bg-surface-elevated p-1 select-none">
-          <button
-            type="button"
-            aria-pressed={modoMapa === "lista"}
-            aria-label="Vista lista"
-            onClick={() => cambiarModo("lista")}
-            className={`flex-1 rounded-lg px-3 py-2 text-center text-xs font-black tracking-wide transition-all cursor-pointer min-h-11 flex items-center justify-center gap-1.5 focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-route-action ${
-              modoMapa === "lista" ? "bg-surface text-text-primary shadow-sm border border-border" : "text-text-tertiary hover:text-text-primary"
-            }`}
-          >
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} aria-hidden>
-              <line x1="8" y1="6" x2="21" y2="6" />
-              <line x1="8" y1="12" x2="21" y2="12" />
-              <line x1="8" y1="18" x2="21" y2="18" />
-              <line x1="3" y1="6" x2="3.01" y2="6" />
-              <line x1="3" y1="12" x2="3.01" y2="12" />
-              <line x1="3" y1="18" x2="3.01" y2="18" />
-            </svg>
-            Lista
-          </button>
-          <button
-            type="button"
-            aria-pressed={modoMapa === "mapa"}
-            aria-label="Vista mapa"
-            onClick={() => cambiarModo("mapa")}
-            className={`flex-1 rounded-lg px-3 py-2 text-center text-xs font-black tracking-wide transition-all cursor-pointer min-h-11 flex items-center justify-center gap-1.5 focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-route-action ${
-              modoMapa === "mapa" ? "bg-signal text-slate-950 shadow-md" : "text-text-tertiary hover:text-text-primary"
-            }`}
-          >
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} aria-hidden>
-              <polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6" />
-              <line x1="8" y1="2" x2="8" y2="18" />
-              <line x1="16" y1="6" x2="16" y2="22" />
-            </svg>
-            Mapa
-            {listToRender.length > 0 && (
-              <span className={`ml-1 rounded-full px-1.5 py-0.5 text-[10px] font-black tabular-nums ${modoMapa === "mapa" ? "bg-slate-950 text-signal" : "bg-border text-text-tertiary"}`}>{listToRender.length}</span>
-            )}
-          </button>
-        </div>
-
-        {/* Navegador de Fechas y Calendario Semanal */}
-        <TrasladosDateNavigator
-          calendario={calendario}
-          diaSeleccionado={diaSeleccionado}
-          diaHoy={diaHoy}
-          onSelectDia={setDiaSeleccionado}
-        />
-
-        {/* Filtros y Ordenamiento */}
-        {rawListToRender.length > 1 && (
-          <TrasladosFilters
-            orden={orden}
-            onCambiarOrden={(v) => {
-              setOrden(v);
-              actualizarUrl({ orden: v });
-            }}
-            ciudadFiltro={ciudadFiltro}
-            onCambiarCiudad={(v) => {
-              setCiudadFiltro(v);
-              actualizarUrl({ ciudad: v });
-            }}
-            ciudadesDisponibles={ciudadesDisponibles}
-          />
-        )}
-
-        {/* Conteo de Elementos */}
-        <div className="mt-3 flex items-center justify-between text-xs font-bold text-text-secondary select-none px-1">
-          <span>
-            {listToRender.length === 1
-              ? `1 ${vista === "disponibles" ? "oferta disponible" : "traslado aceptado"}`
-              : `${listToRender.length} ${vista === "disponibles" ? "ofertas disponibles" : "traslados aceptados"}`}
-          </span>
-        </div>
-
-        {/* Vista Mapa — R2 */}
+        {/* Mapa de ofertas (vista geográfica) */}
         {modoMapa === "mapa" && !cargando && listToRender.length > 0 && (
           <div className="mt-3">
             <TrasladosMapa
@@ -630,154 +673,20 @@ export default function PaginaTraslados() {
               onSelect={(viaje) => router.push(hrefDetalle(viaje))}
               vistaId={`${vista}-${diaSeleccionado}-${orden}-${ciudadFiltro}`}
             />
-            <p className="mt-2 font-body text-[11px] text-center text-text-tertiary">Vista geográfica · {listToRender.length} ofertas · Toca un pin o vuelve a Lista para detalle completo</p>
+            <p className="mt-2 font-body text-[11px] text-center text-text-tertiary">
+              Vista geográfica · {listToRender.length} ofertas · Toca un pin o vuelve a Lista para detalle completo
+            </p>
           </div>
         )}
 
-        {/* Lista de Tarjetas — oculta cuando mapa y hay datos */}
+        {/* Lista de tarjetas o estado vacío */}
         <div
           id="panel-traslados"
           role="tabpanel"
           aria-labelledby={vista === "disponibles" ? "tab-ofertas" : "tab-aceptados"}
           className={`mt-3 flex flex-col gap-3.5 ${modoMapa === "mapa" && !cargando && listToRender.length > 0 ? "hidden" : ""}`}
         >
-          {cargando ? (
-            <TripsLoadingList />
-          ) : listToRender.length === 0 ? (
-            <div className="text-center py-10 flex flex-col items-center bg-surface-elevated border border-border/20 rounded-3xl p-6">
-              <div className="size-14 rounded-2xl bg-surface border border-border/20 flex items-center justify-center text-2xl" aria-hidden>
-                {rawListToRender.length > 0 && listToRender.length === 0 ? "🔍" : vista === "disponibles" ? "📭" : "📋"}
-              </div>
-              <p className="mt-3 font-display text-sm font-bold text-text-primary">
-                {rawListToRender.length > 0 && listToRender.length === 0 ? "Sin resultados con estos filtros" : "Sin traslados para este día"}
-              </p>
-              <p className="mt-1 font-body text-xs text-text-secondary max-w-[300px] leading-relaxed">
-                {rawListToRender.length > 0 && listToRender.length === 0
-                  ? `Hay ${rawListToRender.length} ofertas este día, pero ninguna coincide con “${ciudadFiltro !== "todas" ? ciudadFiltro : orden}”. Prueba limpiar filtros.`
-                  : vista === "disponibles"
-                  ? "No hay ofertas programadas en esta fecha. Revisa otro día o cambia el orden a Mayor ganancia."
-                  : "No tienes traslados aceptados para esta fecha. Acepta una oferta para verla aquí."}
-              </p>
-
-              {rawListToRender.length > 0 && listToRender.length === 0 ? (
-                <div className="mt-4 flex flex-col gap-2 w-full max-w-[300px]">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setCiudadFiltro("todas");
-                      setOrden("recientes");
-                      actualizarUrl({ ciudad: "todas", orden: "recientes" });
-                    }}
-                    className="inline-flex min-h-11 items-center justify-center rounded-xl bg-signal text-slate-950 px-5 py-3 font-display text-sm font-black shadow-sm focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-signal"
-                  >
-                    Limpiar filtros
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setCiudadFiltro("todas");
-                      setOrden("mayor_ganancia");
-                      actualizarUrl({ ciudad: "todas", orden: "mayor_ganancia" });
-                    }}
-                    className="inline-flex min-h-11 items-center justify-center rounded-xl border border-route-action/30 bg-route-soft px-5 py-3 font-body text-sm font-bold text-route-action"
-                  >
-                    Probar “Mayor ganancia” →
-                  </button>
-                </div>
-              ) : vista === "mis-Traslados" ? (
-                <button
-                  type="button"
-                  onClick={() => actualizarUrl({ vista: "disponibles" })}
-                  className="mt-4 bg-signal text-slate-950 font-display text-sm font-bold px-5 py-3 rounded-xl transition-all shadow-sm cursor-pointer select-none min-h-11 focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-signal"
-                >
-                  Buscar ofertas disponibles
-                </button>
-              ) : tieneOfertasOtrosDias ? (
-                (() => {
-                  const diaConOfertas = calendario.find(({ dia, Traslados }) => claveDia(dia) !== diaSeleccionado && Traslados.some((v) => v.tipo === "Ofertado"));
-                  const label = diaConOfertas
-                    ? new Intl.DateTimeFormat("es-MX", { weekday: "long", day: "numeric", timeZone: "America/Mexico_City" }).format(diaConOfertas.dia)
-                    : "otro día";
-                  return (
-                    <div className="mt-4 flex flex-col gap-2 w-full max-w-[300px]">
-                      <button
-                        type="button"
-                        onClick={() => diaConOfertas && setDiaSeleccionado(claveDia(diaConOfertas.dia))}
-                        className="inline-flex min-h-11 items-center justify-center rounded-xl border border-route-action/30 bg-route-soft px-5 py-3 font-body text-sm font-bold text-route-action hover:bg-route-soft/70 focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-route-action"
-                      >
-                        Ver ofertas del {label} →
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setCiudadFiltro("todas");
-                          setOrden("mayor_ganancia");
-                          actualizarUrl({ ciudad: "todas", orden: "mayor_ganancia" });
-                        }}
-                        className="inline-flex min-h-11 items-center justify-center rounded-xl bg-surface border border-border px-5 py-3 font-body text-sm font-bold text-text-secondary"
-                      >
-                        Ver con “Mayor ganancia”
-                      </button>
-                    </div>
-                  );
-                })()
-              ) : (
-                <div className="mt-4 flex flex-col gap-2 w-full max-w-[300px]">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setOrden("mayor_ganancia");
-                      actualizarUrl({ orden: "mayor_ganancia" });
-                    }}
-                    className="inline-flex min-h-11 items-center justify-center rounded-xl border border-route-action/30 bg-route-soft px-5 py-3 font-body text-sm font-bold text-route-action"
-                  >
-                    Ordenar por mayor ganancia
-                  </button>
-                  <Link href="/panel" className="inline-flex min-h-11 items-center justify-center rounded-xl bg-surface border border-border px-5 py-3 font-body text-sm font-bold text-text-secondary text-center">
-                    Volver al panel
-                  </Link>
-                </div>
-              )}
-            </div>
-          ) : (
-            <>
-              {listToRenderVisible.map((item, index) => {
-                const viaje = item.viaje;
-                const trasladoId = viaje.traslado_id ?? `viaje-${index}`;
-                const detalle = detalles[trasladoId] ?? detalleFallback(viaje);
-
-                if (vista === "disponibles") {
-                  return (
-                    <OfertaCard
-                      key={trasladoId}
-                      viaje={viaje}
-                      detalle={detalle}
-                      hrefDetalle={hrefDetalle(viaje)}
-                    />
-                  );
-                }
-
-                return (
-                  <AcceptedTripCard
-                    key={trasladoId}
-                    viaje={viaje}
-                    detalle={detalle}
-                    onReject={(viaje) => setViajeParaRechazar(viaje)}
-                    hrefDetalle={hrefDetalle(viaje)}
-                  />
-                );
-              })}
-              {listToRender.length > visibleCount && (
-                <button
-                  type="button"
-                  onClick={() => setVisibleCount((v) => v + 10)}
-                  className="mt-2 inline-flex min-h-11 items-center justify-center rounded-xl border border-border bg-surface px-5 py-3 font-body text-sm font-bold text-text-primary hover:bg-surface-elevated focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-route-action"
-                >
-                  Cargar más ({listToRender.length - visibleCount} restantes)
-                </button>
-              )}
-            </>
-          )}
+          {contenidoPrincipal}
         </div>
 
         {aviso && (
@@ -803,10 +712,14 @@ export default function PaginaTraslados() {
         onConfirm={confirmarRechazo}
       />
 
-      {/* Bottom Sheet de Soporte Accesible */}
-      <PanelSupportSheet
-        abierto={soporteAbierto}
-        onCerrar={() => setSoporteAbierto(false)}
+      {/* Bottom Sheet de Calendario (selector de fecha) */}
+      <CalendarioBottomSheet
+        abierto={calendarioAbierto}
+        onCerrar={() => setCalendarioAbierto(false)}
+        calendario={calendario}
+        diaSeleccionado={diaSeleccionado}
+        diaHoy={diaHoy}
+        onSelectDia={setDiaSeleccionado}
       />
     </div>
   );
