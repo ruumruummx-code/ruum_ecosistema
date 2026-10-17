@@ -17,6 +17,10 @@ import type { Database, Json } from "@ruum/shared/types";
  * validadas en runtime por cada servicio.
  */
 export interface FuncionesRpc {
+  usuario_previsualizar_tarifas_masivas: {
+    args: { p_filas: Json };
+    ret: Json;
+  };
   usuario_crea_traslado: {
     args: {
       p_vehiculo_id: string | null;

@@ -1,5 +1,28 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
-import type { Database } from "@ruum/shared/types";
+import type { Database, Json } from "@ruum/shared/types";
+import { rpcTipado } from "../supabase/funciones";
+import type { PrevisualizacionTarifa } from "./tarifas";
+import { z } from "zod";
+
+export interface EntradaCotizacionMasiva {
+  indice: number; marca: string; modelo: string;
+  condicion: Database["public"]["Enums"]["condicion_vehiculo"];
+  distanciaKm: number; tiempoEstimadoHoras: number; fechaHora: string;
+}
+const esquemaTarifasMasivas = z.array(z.object({
+  indice: z.number().int().nonnegative(), disponible: z.boolean(), motivo: z.string().optional(),
+  tarifa: z.number().finite().nullable().optional(),
+  categoria_tarifa: z.enum(["ligero_a", "ligero_b"]).optional(),
+  gama: z.enum(["entrada", "media", "alta", "premium"]).optional(),
+}));
+export async function previsualizarTarifasMasivasUsuario(cliente: SupabaseClient<Database>, filas: EntradaCotizacionMasiva[]): Promise<Array<PrevisualizacionTarifa & { indice: number }>> {
+  const { data, error } = await rpcTipado(cliente, "usuario_previsualizar_tarifas_masivas", { p_filas: filas as unknown as Json });
+  if (error) throw error;
+  const resultado = esquemaTarifasMasivas.parse(data);
+  const indices = new Set(resultado.map(f => f.indice));
+  if (resultado.length !== filas.length || indices.size !== filas.length || filas.some(f => !indices.has(f.indice))) throw new Error("El cotizador devolvió un lote incompleto.");
+  return resultado.map(f => ({ ...f, tarifa: f.tarifa ?? undefined }));
+}
 
 export async function clasificarVehiculoMasivo(cliente: SupabaseClient<Database>, marca: string, modelo: string) {
   const { data, error } = await cliente.rpc("catalogar_vehiculo_para_tarifa", { p_marca: marca, p_modelo: modelo });

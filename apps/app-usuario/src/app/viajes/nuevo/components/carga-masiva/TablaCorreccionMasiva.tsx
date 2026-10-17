@@ -77,6 +77,7 @@ export function TablaCorreccionMasiva({ filas, onCorregir, onEliminar }: Props) 
       </div>
 
       {/* ─── Lista de filas ───────────────────────────────────── */}
+      {filas.some(f => f.errorCotizacion) && <p role="alert" className="text-sm text-red-600">Hay traslados sin cotización. Puedes reintentar la cotización u omitir sus filas; los datos del vehículo se conservan.</p>}
       <div
         className="min-h-0 flex-1 overflow-y-auto overscroll-contain"
         role="list"
@@ -129,7 +130,7 @@ function FilaItem({
   onCambio,
   onEliminar,
 }: FilaItemProps) {
-  const tieneError = fila.estado === "error";
+  const tieneError = fila.estado === "error" || Boolean(fila.errorCotizacion);
   const camposConError = Object.keys(fila.errores ?? {});
 
   return (
@@ -166,7 +167,8 @@ function FilaItem({
           </p>
           <p className="truncate text-xs text-[var(--user-color-muted)]">
             {fila.datos.origenCodigoPostal || "–"} → {fila.datos.destinoCodigoPostal || "–"}
-            {tieneError && ` · ${camposConError.length} campo${camposConError.length !== 1 ? "s" : ""} con error`}
+            {camposConError.length > 0 && ` · ${camposConError.length} campo${camposConError.length !== 1 ? "s" : ""} con error`}
+            {fila.errorCotizacion && " · Sin cotización"}
             {fila.validando && " · Validando…"}
           </p>
         </div>
@@ -179,6 +181,7 @@ function FilaItem({
           {activa ? "▲" : "▼"}
         </span>
       </button>
+      {fila.errorCotizacion && <p role="alert" className="px-4 pb-3 text-sm text-red-600">Cotización: {fila.errorCotizacion}</p>}
 
       {/* ── Panel expandido de edición ── */}
       {activa && (

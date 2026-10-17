@@ -15,6 +15,7 @@ export const esquemaFilaMasiva = z.object({
 }).catchall(z.string().max(2000));
 export type FilaMasivaEntrada = z.infer<typeof esquemaFilaMasiva>;
 export interface FilaValidada {
+  errorCotizacion?: string;
   indice: number;
   datos: FilaMasivaEntrada;
   errores: Record<string, string>;
