@@ -369,23 +369,15 @@ export function CotizadorPortal({
               {t.errorPaso}
             </p>
           )}
-          {t.paso < 3 && (
+          {t.paso < 3 && t.borradorDisponible && (
             <div className="flex items-center justify-center gap-4">
-              {t.borradorDisponible && (
-                <button
-                  type="button"
-                  onClick={() => setBorradorAbierto(true)}
-                  className="min-h-11 text-xs font-semibold"
-                >
-                  Recuperar borrador
-                </button>
-              )}
-              <Link
-                href="/viajes/masivo"
-                className="flex min-h-11 items-center justify-center text-xs font-semibold text-[var(--user-color-muted)]"
+              <button
+                type="button"
+                onClick={() => setBorradorAbierto(true)}
+                className="min-h-11 text-xs font-semibold"
               >
-                Carga masiva Excel / CSV
-              </Link>
+                Recuperar borrador
+              </button>
             </div>
           )}
           {t.paso === 3 && (

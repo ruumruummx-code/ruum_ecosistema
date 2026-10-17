@@ -34,7 +34,7 @@ describe("cotizador en una vista fija", () => {
     const continuar = screen.getByRole("button", { name: "Continuar al pago · $892.50 MXN" });
     expect(continuar).toBeEnabled();
     expect(screen.queryByRole("checkbox")).not.toBeInTheDocument();
-    expect(screen.queryByRole("link", { name: "Carga masiva CSV" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: "Carga masiva Excel / CSV" })).not.toBeInTheDocument();
     await userEvent.setup().click(continuar);
     expect(enviarSolicitud).toHaveBeenCalledOnce();
   });
