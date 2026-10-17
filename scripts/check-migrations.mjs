@@ -56,6 +56,10 @@ const TABLAS_REFERENCIA = new Set([
   "public.tarifas_config",
   "public.certificacion_pago_conductor",
   "public.catalogo_vehiculos_tarifa",
+  // Catálogos fiscales de referencia requeridos por la validación persistente
+  // de RFC/régimen/uso CFDI (RR-2026-020); no contienen datos de contribuyentes.
+  "public.sat_regimenes_fiscales",
+  "public.sat_usos_cfdi",
   "public.configuracion_contactos_soporte",
   "public.politicas_version_app",
   "public.configuracion_admin",

@@ -43,6 +43,10 @@ YYYYMMDDHHMMSS_slug_en_snake_case.sql
   catálogos, políticas, backfills `INSERT..SELECT` sobre datos existentes).
   Las tablas permitidas están allowlistadas en el guard: una tabla nueva
   exige actualizarlo deliberadamente.
+  Los catálogos `public.sat_regimenes_fiscales` y `public.sat_usos_cfdi`
+  (RR-2026-020) son referencias operativas necesarias para validar los datos
+  fiscales en persistencia. Sus cargas idempotentes están permitidas; no son
+  fixtures ni contienen datos de contribuyentes.
 - **No**: filas de prueba, usuarios/conductores/traslados de ejemplo, fixtures
   E2E, `DELETE`/`TRUNCATE`/`COPY` de datos. Datos de prueba → `test/`
   (fixtures transaccionales pgTAP); semilla local reproducible →
