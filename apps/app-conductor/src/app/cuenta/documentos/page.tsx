@@ -19,6 +19,7 @@ export default function PaginaDocumentosCuenta() {
   const [mensaje, setMensaje] = useState<string | null>(null);
   const [errorCarga, setErrorCarga] = useState<string | null>(null);
   const [subiendo, setSubiendo] = useState<TipoDocumentoConductor | null>(null);
+  const [faqAbierto, setFaqAbierto] = useState(false);
   const [cargando, setCargando] = useState(true);
 
   async function cargar() {
@@ -62,16 +63,51 @@ export default function PaginaDocumentosCuenta() {
   }
 
   return (
-    <div className="mx-auto w-full max-w-3xl px-4 py-8 sm:px-6 sm:py-12">
-      <CuentaHeader titulo="Expediente de Documentos" descripcion="Consulta y actualiza tu documentación operativa para mantener tu cuenta activa." />
+    <div className="mx-auto w-full max-w-md px-4 pb-[calc(88px+env(safe-area-inset-bottom))]">
+      {/* Header limpio con ícono de ayuda para la sección educativa */}
+      <header className="flex items-center justify-between gap-3 px-4 pt-4 pb-3 border-b border-border/30">
+        <CuentaHeader titulo="Expediente de Documentos" descripcion="Consulta y actualiza tu documentación operativa para mantener tu cuenta activa." />
+        <button
+          type="button"
+          onClick={() => setFaqAbierto(!faqAbierto)}
+          className="flex size-9 shrink-0 items-center justify-center rounded-xl border border-border/60 bg-surface-elevated/40 text-text-tertiary hover:bg-surface-elevated focus-visible:outline-none"
+          aria-label={faqAbierto ? "Ocultar ayuda" : "Mostrar ayuda"}
+        >
+          ℹ️
+        </button>
+      </header>
 
       {mensaje && (
-        <div className="mt-5">
+        <div className="mt-4 px-4">
           <Aviso tono="info">{mensaje}</Aviso>
         </div>
       )}
 
-      <Card className="mt-6">
+      {errorCarga && (
+        <div className="mt-4 px-4">
+          <Aviso tono="danger">{errorCarga}</Aviso>
+        </div>
+      )}
+
+      {/* Sección educativa colapsada por defecto */}
+      {faqAbierto && (
+        <Card className="mt-5 px-4">
+          <div className="py-4">
+            <p className="font-body text-xs font-bold uppercase tracking-wider text-text-tertiary">
+              Expediente digital del Conductor
+            </p>
+            <h2 className="mt-1 font-display text-xl font-bold text-text-primary">
+              Documentos requeridos para operar
+            </h2>
+            <p className="mt-1 font-body text-sm leading-6 text-text-tertiary">
+              Los documentos bloqueantes deben estar vigentes para recibir traslados.
+            </p>
+            <DatosSensiblesInfo tipo="documentos" />
+          </div>
+        </Card>
+      )}
+
+      <Card className={`mt-5 px-4 ${cargando || errorCarga ? "min-h-[200px] flex items-center justify-center" : ""}`}>
         {cargando ? (
           <div className="py-8 text-center font-body text-sm text-text-secondary">
             Cargando expediente documental...
@@ -81,28 +117,12 @@ export default function PaginaDocumentosCuenta() {
             <Aviso tono="danger">{errorCarga}</Aviso>
           </div>
         ) : (
-          <div className="grid gap-6">
-            <div>
-              <p className="font-body text-xs font-bold uppercase tracking-wider text-text-tertiary">
-                Expediente digital del Conductor
-              </p>
-              <h2 className="mt-1 font-display text-xl font-bold text-text-primary">
-                Documentos requeridos para operar
-              </h2>
-              <p className="mt-1 font-body text-sm leading-6 text-text-tertiary">
-                Los documentos bloqueantes deben estar vigentes para recibir traslados.
-              </p>
-            </div>
-
-            <DatosSensiblesInfo tipo="documentos" />
-
-            <DriverDocumentChecklist
-              conductor={conductor}
-              documentos={documentos}
-              subiendo={subiendo}
-              onUpload={subirDocumento}
-            />
-          </div>
+          <DriverDocumentChecklist
+            conductor={conductor}
+            documentos={documentos}
+            subiendo={subiendo}
+            onUpload={subirDocumento}
+          />
         )}
       </Card>
     </div>

@@ -1,14 +1,15 @@
 "use client";
 
-import { ChangeEvent, DragEvent, useState } from "react";
+import { ChangeEvent, useRef, useState } from "react";
 import type { Database } from "@ruum/shared/types";
 import {
   estadoVigenciaLicencia,
-  vencimientoDocumentoDesdeLicencia
+  vencimientoDocumentoDesdeLicencia,
 } from "@ruum/shared/validacion";
 import type { TipoDocumentoConductor } from "@ruum/api/services";
 import { fechaCuenta, type ConductorCuenta } from "../cuenta-utils";
 import { enmascararNombreArchivo } from "../datos-sensibles";
+import { MobileRow } from "@ruum/ui";
 
 type Documento = Database["public"]["Tables"]["documentos_conductor"]["Row"];
 
@@ -29,14 +30,14 @@ const DOCUMENTOS_REQUERIDOS: DocumentoRequerido[] = [
   { tipo: "documento_operativo", etiqueta: "Comprobante de domicilio", descripcion: "Recibo reciente (luz, agua, predial) que acredite tu domicilio registrado.", bloqueante: true },
 ];
 
-const ESTILO_ESTADO: Record<EstadoChecklist, { texto: string; clase: string; icono: string }> = {
-  falta: { texto: "Falta documento", clase: "border-red-500/40 bg-red-500/10 text-red-500 dark:text-red-400", icono: "⚠️" },
-  cargado: { texto: "Cargado", clase: "border-sky-500/40 bg-sky-500/10 text-sky-600 dark:text-sky-400", icono: "⏳" },
-  en_revision: { texto: "En revisión", clase: "border-amber-500/40 bg-amber-500/10 text-amber-600 dark:text-amber-400", icono: "🔍" },
-  aprobado: { texto: "Aprobado", clase: "border-emerald-500/40 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300", icono: "✓" },
-  rechazado: { texto: "Rechazado", clase: "border-red-500/40 bg-red-500/10 text-red-500 dark:text-red-400", icono: "❌" },
-  por_vencer: { texto: "Por vencer", clase: "border-amber-500/40 bg-amber-500/10 text-amber-600 dark:text-amber-400", icono: "⏰" },
-  vencido: { texto: "Vencido", clase: "border-red-500/40 bg-red-500/10 text-red-500 dark:text-red-400", icono: "🚨" }
+const ESTILO_ESTADO: Record<EstadoChecklist, { texto: string; tonoIcono: "rojo" | "azul" | "ambar" | "verde" | "neutro"; icono: string }> = {
+  falta: { texto: "Falta documento", tonoIcono: "rojo", icono: "⚠️" },
+  cargado: { texto: "Cargado", tonoIcono: "azul", icono: "⏳" },
+  en_revision: { texto: "En revisión", tonoIcono: "ambar", icono: "🔍" },
+  aprobado: { texto: "Aprobado", tonoIcono: "verde", icono: "✓" },
+  rechazado: { texto: "Rechazado", tonoIcono: "rojo", icono: "❌" },
+  por_vencer: { texto: "Por vencer", tonoIcono: "ambar", icono: "⏰" },
+  vencido: { texto: "Vencido", tonoIcono: "rojo", icono: "🚨" },
 };
 
 function documentoActual(documentos: Documento[], tipo: TipoDocumentoConductor) {
@@ -64,15 +65,16 @@ export function DriverDocumentChecklist({
   conductor,
   documentos,
   subiendo,
-  onUpload
+  onUpload,
 }: {
   conductor: ConductorCuenta | null;
   documentos: Documento[];
   subiendo: TipoDocumentoConductor | null;
   onUpload: (tipo: TipoDocumentoConductor, file: File, documentoAnteriorId?: string) => void;
 }) {
-  const [arrastrandoSobre, setArrastrandoSobre] = useState<TipoDocumentoConductor | null>(null);
-  const [actualizarAbierto, setActualizarAbierto] = useState<Record<string, boolean>>({});
+  const inputRef = useRef<HTMLInputElement>(null);
+  const [subidaPendiente, setSubidaPendiente] = useState<{ tipo: TipoDocumentoConductor; documentoAnteriorId?: string } | null>(null);
+  const [menuAbierto, setMenuAbierto] = useState<TipoDocumentoConductor | null>(null);
 
   const items = DOCUMENTOS_REQUERIDOS.map((requerido) => {
     const documento = documentoActual(documentos, requerido.tipo);
@@ -81,213 +83,102 @@ export function DriverDocumentChecklist({
     return { requerido, documento, vencimiento, estado };
   });
 
-  const requeridosOAccion = items.filter((i) => i.estado !== "aprobado");
+  const pendientes = items.filter((i) => i.estado !== "aprobado");
   const aprobados = items.filter((i) => i.estado === "aprobado");
 
-  function alternarFormActualizar(tipo: TipoDocumentoConductor) {
-    setActualizarAbierto((prev) => ({ ...prev, [tipo]: !prev[tipo] }));
+  function abrirSelectorArchivo(tipo: TipoDocumentoConductor, documentoAnteriorId?: string) {
+    setSubidaPendiente({ tipo, documentoAnteriorId });
+    inputRef.current?.click();
   }
 
-  function manejarDragOver(e: DragEvent<HTMLElement>, tipo: TipoDocumentoConductor) {
-    e.preventDefault();
-    e.stopPropagation();
-    setArrastrandoSobre(tipo);
-  }
-
-  function manejarDragLeave(e: DragEvent<HTMLElement>) {
-    e.preventDefault();
-    e.stopPropagation();
-    setArrastrandoSobre(null);
-  }
-
-  function manejarDrop(e: DragEvent<HTMLElement>, tipo: TipoDocumentoConductor, documentoAnteriorId?: string) {
-    e.preventDefault();
-    e.stopPropagation();
-    setArrastrandoSobre(null);
-
-    const archivo = e.dataTransfer.files?.[0];
-    if (archivo) {
-      onUpload(tipo, archivo, documentoAnteriorId);
-    }
-  }
-
-  function manejarSeleccionArchivo(e: ChangeEvent<HTMLInputElement>, tipo: TipoDocumentoConductor, documentoAnteriorId?: string) {
+  function manejarSeleccionArchivo(e: ChangeEvent<HTMLInputElement>) {
     const archivo = e.target.files?.[0];
-    if (archivo) {
-      onUpload(tipo, archivo, documentoAnteriorId);
-      e.target.value = "";
+    if (archivo && subidaPendiente) {
+      onUpload(subidaPendiente.tipo, archivo, subidaPendiente.documentoAnteriorId);
+      setSubidaPendiente(null);
     }
+    e.target.value = "";
   }
 
-  function renderizarZonaCaptura(tipo: TipoDocumentoConductor, estaSubiendo: boolean, documentoAnteriorId?: string) {
-    return (
-      <section
-        onDragOver={(e) => manejarDragOver(e, tipo)}
-        onDragLeave={manejarDragLeave}
-        onDrop={(e) => manejarDrop(e, tipo, documentoAnteriorId)}
-        aria-label={`Zona de carga para ${tipo}`}
-        className={[
-          "relative flex w-full max-w-full min-w-0 flex-col items-center justify-center rounded-2xl border-2 border-dashed p-3.5 text-center transition-all duration-150 overflow-hidden box-border",
-          arrastrandoSobre === tipo
-            ? "border-signal bg-signal/10 scale-[1.01] shadow-md"
-            : "border-signal/50 bg-surface-elevated/40 hover:border-signal hover:bg-signal/5"
-        ].join(" ")}
-      >
-        <p className="mb-3 font-display text-xs font-bold text-text-primary">
-          {estaSubiendo ? "⏳ Registrando documento..." : "Captura o selecciona el nuevo archivo para actualizar"}
-        </p>
+  function abrirMenu(tipo: TipoDocumentoConductor) {
+    setMenuAbierto(menuAbierto === tipo ? null : tipo);
+  }
 
-        {/* Doble Opción: Cámara Móvil (📸) vs Selector de Archivos (📁) */}
-        <div className="flex w-full max-w-full min-w-0 flex-col gap-2.5 sm:flex-row sm:items-center sm:justify-center">
-          {/* Opción 1: Cámara Móvil */}
-          <label className="inline-flex min-h-10 w-full max-w-full min-w-0 cursor-pointer items-center justify-center gap-2 rounded-xl border border-border/80 bg-surface-elevated px-3.5 py-2 font-display text-xs font-bold text-text-primary transition hover:border-route-action hover:text-route-action active:scale-95 sm:w-auto">
-            <span className="truncate">📸 Tomar foto con cámara</span>
-            <input
-              type="file"
-              accept="image/*"
-              capture="environment"
-              disabled={estaSubiendo}
-              className="sr-only"
-              onChange={(e) => manejarSeleccionArchivo(e, tipo, documentoAnteriorId)}
-            />
-          </label>
-
-          {/* Opción 2: Archivo de Galería / PDF */}
-          <label className="inline-flex min-h-10 w-full max-w-full min-w-0 cursor-pointer items-center justify-center gap-2 rounded-xl border border-border bg-surface px-3.5 py-2 font-display text-xs font-bold text-text-primary transition hover:border-signal hover:bg-surface-elevated active:scale-95 sm:w-auto">
-            <span className="truncate">📁 Subir imagen o PDF</span>
-            <input
-              type="file"
-              accept="image/*,.pdf"
-              disabled={estaSubiendo}
-              className="sr-only"
-              onChange={(e) => manejarSeleccionArchivo(e, tipo, documentoAnteriorId)}
-            />
-          </label>
-        </div>
-
-        <p className="mt-2.5 font-body text-[11px] text-text-tertiary">
-          Formatos JPG, PNG, WEBP o PDF hasta 10 MB. También puedes arrastrar el archivo desde tu escritorio.
-        </p>
-      </section>
-    );
+  function cerrarMenu() {
+    setMenuAbierto(null);
   }
 
   return (
-    <div className="grid gap-8">
-      {/* 1. Sección: Documentos pendientes o requeridos de atención */}
-      <section className="grid gap-4" aria-label="Documentos pendientes de atención">
-        <div className="flex items-center justify-between">
+    <>
+      {/* Input nativo oculto — dispara selector de archivos del OS (cámara/galería/archivos) */}
+      <input
+        ref={inputRef}
+        type="file"
+        accept="image/*,application/pdf"
+        capture="environment"
+        hidden
+        onChange={manejarSeleccionArchivo}
+      />
+
+      {/* 1. Sección: Documentos pendientes o requeridos de atención (ListTiles compactos) */}
+      <section className="grid gap-2" aria-label="Documentos pendientes de atención">
+        <div className="flex items-center justify-between px-4">
           <h2 className="font-display text-base font-bold text-text-primary flex items-center gap-2">
             <span className="flex size-6 items-center justify-center rounded-full bg-amber-500/20 text-xs font-bold text-amber-500">
-              {requeridosOAccion.length}
+              {pendientes.length}
             </span>
             Atención requerida y pendientes
           </h2>
-          {requeridosOAccion.some((i) => i.requerido.bloqueante && ["falta", "rechazado", "vencido"].includes(i.estado)) && (
+          {pendientes.some((i) => i.requerido.bloqueante && ["falta", "rechazado", "vencido"].includes(i.estado)) && (
             <span className="rounded-full bg-red-500/15 border border-red-500/30 px-3 py-1 font-body text-xs font-bold text-red-500">
-              🚨 Bloquea recepción de Traslados
+              🚨 Bloquea traslados
             </span>
           )}
         </div>
 
-        <div className="grid gap-4">
-          {requeridosOAccion.map(({ requerido, documento, vencimiento, estado }) => {
+        <div className="grid gap-2 px-4">
+          {pendientes.map(({ requerido, documento, vencimiento, estado }) => {
             const visual = ESTILO_ESTADO[estado];
-            const rechazo = documento?.motivo_rechazo ?? documento?.notas_admin;
             const esBloqueanteAccion = requerido.bloqueante && ["falta", "rechazado", "vencido"].includes(estado);
             const estaSubiendo = subiendo === requerido.tipo;
+            const nombreArchivo = documento?.nombre_archivo ? enmascararNombreArchivo(documento.nombre_archivo) : "Sin registrar";
 
             return (
-              <article
+              <MobileRow
                 key={requerido.tipo}
-                className={[
-                  "relative w-full max-w-full min-w-0 rounded-2xl border p-4 sm:p-5 transition-all duration-200 overflow-hidden box-border",
-                  esBloqueanteAccion
-                    ? "border-red-500/40 bg-red-500/5 shadow-xs"
-                    : "border-border bg-surface"
-                ].join(" ")}
-              >
-                <div className="flex flex-col gap-4">
-                  {/* Encabezado del documento */}
-                  <div className="flex flex-wrap items-start justify-between gap-3">
-                    <div>
-                      <div className="flex flex-wrap items-center gap-2">
-                        <h3 className="font-display text-base font-bold text-text-primary">{requerido.etiqueta}</h3>
-                        {requerido.bloqueante ? (
-                          <span className="rounded-md border border-red-500/40 bg-red-500/10 px-2 py-0.5 font-body text-[11px] font-bold text-red-500">
-                            Bloqueante
-                          </span>
-                        ) : (
-                          <span className="rounded-md border border-border bg-surface-elevated px-2 py-0.5 font-body text-[11px] font-semibold text-text-tertiary">
-                            Opcional / Requerido
-                          </span>
-                        )}
-                        {documento?.version && (
-                          <span className="rounded-md border border-border bg-surface-elevated px-2 py-0.5 font-body text-[10px] font-bold text-text-tertiary">
-                            v{documento.version}
-                          </span>
-                        )}
-                      </div>
-                      <p className="mt-1 font-body text-xs leading-5 text-text-tertiary">{requerido.descripcion}</p>
-                    </div>
-
-                    <span className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 font-body text-xs font-bold ${visual.clase}`}>
-                      <span>{visual.icono}</span>
-                      {visual.texto}
-                    </span>
-                  </div>
-
-                  {/* Metadatos */}
-                  <div className="grid gap-3 rounded-xl border border-border/40 bg-surface-elevated/50 p-3.5 sm:grid-cols-2">
-                    <div className="flex items-center gap-3">
-                      <div className="flex size-10 shrink-0 items-center justify-center rounded-lg border border-border bg-surface font-display text-lg text-route-action shadow-2xs">
-                        📎
-                      </div>
-                      <div className="min-w-0">
-                        <dt className="font-body text-[11px] font-semibold uppercase tracking-wider text-text-tertiary">
-                          Archivo registrado
-                        </dt>
-                        <dd className="truncate font-body text-xs font-bold text-text-primary">
-                          {documento?.nombre_archivo ? enmascararNombreArchivo(documento.nombre_archivo) : "— Sin registrar"}
-                        </dd>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center gap-3">
-                      <div className="flex size-10 shrink-0 items-center justify-center rounded-lg border border-border bg-surface font-display text-lg text-text-primary shadow-2xs">
-                        📅
-                      </div>
-                      <div>
-                        <dt className="font-body text-[11px] font-semibold uppercase tracking-wider text-text-tertiary">
-                          Fecha de Vencimiento
-                        </dt>
-                        <dd className="font-body text-xs font-bold text-text-primary">
-                          {vencimiento ? fechaCuenta(vencimiento) : "—"}
-                        </dd>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Motivo de rechazo */}
-                  {rechazo && estado === "rechazado" && (
-                    <div className="rounded-xl border border-red-500/40 bg-red-500/10 p-3.5 font-body text-xs text-red-500">
-                      <p className="font-bold text-red-600 dark:text-red-400">Motivo de rechazo por operación:</p>
-                      <p className="mt-1 text-text-primary">{rechazo}</p>
-                    </div>
-                  )}
-
-                  {/* Captura / Carga de Archivo para Actualización */}
-                  {renderizarZonaCaptura(requerido.tipo, estaSubiendo, documento?.id)}
-                </div>
-              </article>
+                titulo={requerido.etiqueta}
+                subtitulo={estado !== "falta" ? `${visual.texto} · ${nombreArchivo}` : nombreArchivo}
+                icono={visual.icono}
+                tonoIcono={visual.tonoIcono}
+                derecha={
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      abrirSelectorArchivo(requerido.tipo, documento?.id);
+                    }}
+                    disabled={estaSubiendo}
+                    className={`inline-flex shrink-0 items-center justify-center gap-1.5 rounded-xl border px-3 py-1 font-display text-xs font-bold transition ${estaSubiendo
+                      ? "border-sky-500/40 bg-sky-500/10 text-sky-600"
+                      : esBloqueanteAccion
+                        ? "border-red-500/40 bg-red-500/5 text-red-500 hover:bg-red-500/10"
+                        : "border-border bg-surface text-text-primary hover:bg-surface-elevated"}`}
+                  >
+                    {estaSubiendo ? "⏳" : "Subir"}
+                  </button>
+                }
+                onClick={() => {
+                  if (estado === "falta" || esBloqueanteAccion) abrirSelectorArchivo(requerido.tipo, documento?.id);
+                }}
+              />
             );
           })}
         </div>
       </section>
 
-      {/* 2. Sección: Documentos Aprobados con opción para actualizar/reemplazar */}
+      {/* 2. Sección: Documentos Aprobados (ListTiles de alta densidad con menú ⋮) */}
       {aprobados.length > 0 && (
-        <section className="grid gap-4 pt-4 border-t border-border/40" aria-label="Documentos aprobados">
+        <section className="grid gap-2 pt-3 border-t border-border/40 px-4" aria-label="Documentos aprobados">
           <div className="flex items-center justify-between">
             <h2 className="font-display text-base font-bold text-text-primary flex items-center gap-2">
               <span className="flex size-6 items-center justify-center rounded-full bg-emerald-500/20 text-xs font-bold text-emerald-500">
@@ -295,72 +186,70 @@ export function DriverDocumentChecklist({
               </span>
               Documentos Aprobados ({aprobados.length})
             </h2>
-            <span className="font-body text-xs text-text-tertiary">
-              Puedes subir una nueva versión cuando renueves tu documento
-            </span>
           </div>
 
-          <div className="grid gap-3">
+          <div className="grid gap-2">
             {aprobados.map(({ requerido, documento, vencimiento }) => {
-              const estaAbierto = Boolean(actualizarAbierto[requerido.tipo]);
               const estaSubiendo = subiendo === requerido.tipo;
+              const menuEstaAbierto = menuAbierto === requerido.tipo;
+              const fechaVenc = vencimiento ? fechaCuenta(vencimiento) : "Sin vencimiento";
 
               return (
-                <article key={requerido.tipo} className="w-full max-w-full min-w-0 rounded-xl border border-emerald-500/30 bg-emerald-500/5 p-4 transition overflow-hidden box-border">
-                  <div className="flex flex-col gap-3">
-                    <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                      <div className="flex items-center gap-3">
-                        <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-emerald-500/20 font-bold text-emerald-500">
-                          ✓
-                        </div>
-                        <div>
-                          <div className="flex items-center gap-2">
-                            <h3 className="font-display text-sm font-bold text-text-primary">{requerido.etiqueta}</h3>
-                            {documento?.version && (
-                              <span className="rounded-md border border-emerald-500/40 bg-emerald-500/10 px-2 py-0.5 font-body text-[10px] font-bold text-emerald-700 dark:text-emerald-300">
-                                v{documento.version}
-                              </span>
-                            )}
-                          </div>
-                          <p className="font-body text-xs text-text-tertiary">
-                            {documento?.nombre_archivo ? enmascararNombreArchivo(documento.nombre_archivo) : "Documento validado"}
-                            {vencimiento ? ` • Vence: ${fechaCuenta(vencimiento)}` : ""}
-                          </p>
-                        </div>
-                      </div>
-
-                      <div className="flex items-center gap-2 shrink-0">
-                        {/* Botón Habilitador para Actualizar / Reemplazar Documento Aprobado */}
+                <div key={requerido.tipo} className="relative">
+                  <MobileRow
+                    titulo={requerido.etiqueta}
+                    subtitulo={`Vence: ${fechaVenc}`}
+                    icono="✓"
+                    tonoIcono="verde"
+                    derecha={
+                      <>
                         <button
                           type="button"
-                          onClick={() => alternarFormActualizar(requerido.tipo)}
-                          className="inline-flex items-center gap-1.5 rounded-xl border border-border bg-surface px-3 py-1.5 font-display text-xs font-bold text-route-action shadow-2xs transition hover:border-signal hover:bg-surface-elevated"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            abrirMenu(requerido.tipo);
+                          }}
+                          className="flex size-9 shrink-0 items-center justify-center rounded-xl border border-border/60 text-text-tertiary hover:bg-surface-elevated focus-visible:outline-none"
+                          aria-label="Más opciones"
                         >
-                          ✏️ {estaAbierto ? "Cancelar actualización" : "Actualizar / Reemplazar"}
+                          ⋮
                         </button>
 
-                        <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/40 bg-emerald-500/10 px-3 py-1 font-body text-xs font-bold text-emerald-700 dark:text-emerald-300">
-                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                            <polyline points="20 6 9 17 4 12" />
-                          </svg>
-                          Aprobado
-                        </span>
-                      </div>
-                    </div>
+                        {menuEstaAbierto && (
+                          <div className="absolute right-0 mt-1.5 w-40 rounded-xl border border-border bg-surface-elevated shadow-lg z-20 py-1.5 animate-in fade-in slide-in-from-top-2">
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                cerrarMenu();
+                                abrirSelectorArchivo(requerido.tipo, documento?.id);
+                              }}
+                              disabled={estaSubiendo}
+                              className="flex w-full items-center gap-2 px-3 py-2 text-sm font-display text-text-primary hover:bg-surface/50 transition focus-visible:outline-none"
+                            >
+                              {estaSubiendo ? "⏳ Registrando…" : "Actualizar / Reemplazar"}
+                            </button>
+                          </div>
+                        )}
+                      </>
+                    }
+                  />
 
-                    {/* Desplegable de Captura/Carga para Documento Aprobado */}
-                    {estaAbierto && (
-                      <div className="mt-2 pt-3 border-t border-emerald-500/20">
-                        {renderizarZonaCaptura(requerido.tipo, estaSubiendo, documento?.id)}
-                      </div>
-                    )}
-                  </div>
-                </article>
+                  {/* Cerrar menú al hacer clic fuera */}
+                  {menuEstaAbierto && (
+                    <button
+                      type="button"
+                      className="fixed inset-0 z-10"
+                      onClick={cerrarMenu}
+                      aria-hidden="true"
+                    />
+                  )}
+                </div>
               );
             })}
           </div>
         </section>
       )}
-    </div>
+    </>
   );
 }
