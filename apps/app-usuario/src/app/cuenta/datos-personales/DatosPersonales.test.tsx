@@ -47,6 +47,8 @@ const usuarioMock: Usuario = {
   numero: "145, Int. 3",
   referencias: "Edificio blanco frente al parque",
   direccion_principal: "Av. Álvaro Obregón 145, Int. 3, Col. Roma Norte, CP 06700, Ciudad de México, Ciudad de México",
+  fecha_nacimiento: null,
+  preferencias: {},
 };
 
 

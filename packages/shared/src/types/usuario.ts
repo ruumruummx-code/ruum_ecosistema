@@ -13,5 +13,6 @@ export interface Usuario {
   traslados_completados_sin_incidencia: number;
   metodo_pago_registrado: boolean;
   fecha_nacimiento?: string | null;
+  preferencias?: Record<string, unknown> | null;
   creado_en: string;
 }

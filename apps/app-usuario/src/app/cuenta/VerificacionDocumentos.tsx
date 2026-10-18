@@ -61,31 +61,31 @@ export function VerificacionDocumentos({ usuario, empresa = null }: Verificacion
   const documento = tarea === "ine" ? ine : documentos.find(item => item.tipo === tarea);
   return <div className="user-verification-view">
     <header className="user-profile-appbar"><Link href="/cuenta?seccion=perfil" aria-label="Volver a mi cuenta" className="user-profile-back">‹ Atrás</Link><h1>Verificación y facturación</h1><span aria-hidden="true" /></header>
-    <div className="space-y-6">
+    <nav aria-label="Tareas de verificación y facturación" className="space-y-6">
       <section className="user-verification-section" aria-labelledby="seccion-docs-identidad">
         <h2 id="seccion-docs-identidad" className="mb-2 text-xs font-bold uppercase tracking-wider text-[var(--user-color-muted)]">
           Documentos de identidad y conducción
         </h2>
-        <nav aria-label="Tareas de documentación" className="user-verification-tasks">
+        <div className="user-verification-tasks">
           {TAREAS_DOCUMENTOS.map(item => {
             const estado = estadoDocumento(item.id === "ine" ? ine : documentos.find(d => d.tipo === item.id), item.id !== "ine" && cargando, item.id !== "ine" && Boolean(error));
             return <button key={item.id} type="button" aria-haspopup="dialog" aria-label={`${item.titulo} ${estado.texto}`} disabled={item.id !== "ine" && (cargando || Boolean(error))} onClick={() => setTarea(item.id)} className="user-verification-task"><Icono d={item.icono} className="size-5 shrink-0" /><span title={item.titulo}>{item.titulo}</span><span className={`user-task-badge is-${estado.tono}`}>{estado.texto}</span></button>;
           })}
-        </nav>
+        </div>
       </section>
 
       <section className="user-verification-section" aria-labelledby="seccion-datos-fiscales">
         <h2 id="seccion-datos-fiscales" className="mb-2 text-xs font-bold uppercase tracking-wider text-[var(--user-color-muted)]">
           Datos fiscales y facturación CFDI
         </h2>
-        <nav aria-label="Tareas de facturación fiscal" className="user-verification-tasks">
+        <div className="user-verification-tasks">
           {TAREAS_FISCAL.map(item => {
             const estado = { texto: fiscalConfigurado ? "Configurado" : "Sin configurar", tono: fiscalConfigurado ? "success" : "neutral" };
             return <button key={item.id} type="button" aria-haspopup="dialog" aria-label={`${item.titulo} ${estado.texto}`} onClick={() => setTarea(item.id)} className="user-verification-task"><Icono d={item.icono} className="size-5 shrink-0" /><span title={item.titulo}>{item.titulo}</span><span className={`user-task-badge is-${estado.tono}`}>{estado.texto}</span></button>;
           })}
-        </nav>
+        </div>
       </section>
-    </div>
+    </nav>
     <div className="user-verification-feedback">{error && <p role="alert">{error} <button type="button" onClick={() => setIntento(v => v + 1)}>Reintentar</button></p>}<p role="status" aria-live="polite">{aviso}</p></div>
     {seleccion && <HojaTareaCuenta titulo={seleccion.titulo} extendida={tarea === "fiscal"} ocupada={ocupada} cerrar={cerrar}>
       {tarea === "fiscal" ? <FacturacionCuentaForm compacto usuario={{ ...usuario, ...fiscales }} empresa={empresa ? { ...empresa, ...fiscales } : null} onOcupada={cambiarOcupada} onActualizado={datos => { setFiscales(datos); setFiscalConfigurado(true); setTarea(null); setAviso("Datos fiscales guardados."); }} /> : <DocumentoCuentaTarjeta tipo={tarea as TipoDocumentoCuenta | "ine"} titulo={seleccion.titulo} descripcion={seleccion.descripcion} documento={documento} onOcupada={cambiarOcupada} actualizado={dato => {

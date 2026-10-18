@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Aviso, Button, Field } from "@ruum/ui";
 import type { Database } from "@ruum/shared/types";

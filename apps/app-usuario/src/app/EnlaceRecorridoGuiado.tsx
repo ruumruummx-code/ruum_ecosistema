@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { leerItemConTtl } from "./onboarding/page";
+import { leerItemConTtl } from "./onboarding/onboarding-storage";
 
 export function EnlaceRecorridoGuiado() {
   const [oculto, setOculto] = useState(false);
