@@ -1,6 +1,16 @@
 @import "tailwindcss";
 @import "@ruum/ui/styles/tokens.css";
 
+@theme {
+  --color-ruum-blue: #0066FF;
+  --color-ruum-bg: #F4F7FC;
+  --color-ruum-card: #FFFFFF;
+  --color-ruum-text: #1A1A1A;
+  --color-ruum-muted: #667085;
+  --color-ruum-success: #00B365;
+  --color-ruum-successBg: rgba(0, 179, 101, 0.1);
+}
+
 /*
  * Ruum Ruum V2 — theme isolated to Conductor.
  * Usuario y Administración keep their own entry points and tokens.
