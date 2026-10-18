@@ -1,6 +1,7 @@
 /** @vitest-environment jsdom */
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { render, screen, within } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { NavegacionUsuario } from "./NavegacionUsuario";
 
 const { ruta } = vi.hoisted(() => ({ ruta: { pathname: "/" } }));
@@ -19,6 +20,18 @@ vi.mock("next/image", () => ({
 
 describe("NavegacionUsuario", () => {
   beforeEach(() => { ruta.pathname = "/"; });
+  it("integra Mis vehículos con tabs, sin enlaces de header y con una sola acción para agregar", () => {
+    ruta.pathname = "/cuenta/vehiculos";
+    render(<NavegacionUsuario />);
+    const header = screen.getByRole("banner");
+    expect(within(header).getByRole("heading", { name: "Mis vehículos", level: 1 })).toBeInTheDocument();
+    expect(within(header).getByText("Autos frecuentes para solicitudes rápidas")).toBeInTheDocument();
+    expect(within(header).queryByRole("link")).not.toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Cuenta" })).toHaveAttribute("aria-current", "page");
+    expect(screen.getAllByRole("link", { name: "Agregar vehículo" })).toHaveLength(1);
+    expect(screen.getByRole("link", { name: "Agregar vehículo" })).toHaveAttribute("href", "/viajes/nuevo");
+    expect(screen.queryByRole("link", { name: "Solicitar traslado" })).not.toBeInTheDocument();
+  });
   it("muestra el nuevo logotipo oficial responsivo con redirección a inicio y alt correcto", () => {
     render(<NavegacionUsuario variante="claro" nombreUsuario="LUIS Hernández" notificacionesCount={2} />);
 
@@ -34,11 +47,6 @@ describe("NavegacionUsuario", () => {
     expect(logoImg).toBeInTheDocument();
     expect(logoImg).toHaveAttribute("src", "/imagenes/ruum-logo.svg");
 
-    // Comportamiento responsive: alto 32px (h-8) en móvil y 40px (md:h-10) en desktop
-    expect(logoImg.className).toContain("h-8");
-    expect(logoImg.className).toContain("md:h-10");
-    expect(logoImg.className).toContain("w-auto");
-
     // Soporte para tema claro y oscuro
     expect(logoImg.className).toContain("ruum-logo-light");
     const logoDarkImg = within(logoLink).getByRole("presentation", { hidden: true });
@@ -47,25 +55,30 @@ describe("NavegacionUsuario", () => {
 
     const acciones = within(header).getByRole("navigation", { name: "Acciones del usuario" });
     expect(within(acciones).getByRole("link", { name: /Notificaciones/i })).toHaveAttribute("href", "/mis-viajes");
-    expect(within(acciones).getByText("2")).toBeInTheDocument();
-    expect(within(acciones).getByRole("link", { name: "Preferencias" })).toHaveAttribute("href", "/cuenta/preferencias");
-
-    expect(screen.getByRole("link", { name: "Solicitar traslado" })).toHaveAttribute("href", "/viajes/nuevo");
+    expect(within(acciones).getByLabelText("2 avisos pendientes")).toBeInTheDocument();
+    expect(within(acciones).getByRole("link", { name: "Contactar soporte" })).toHaveAttribute("href", "/soporte");
+    expect(within(acciones).getByRole("link", { name: "Mi cuenta" })).toHaveTextContent("LH");
+    expect(within(acciones).getByRole("link", { name: "Mi cuenta" })).toHaveAttribute("href", "/cuenta");
+    expect(screen.queryByRole("link", { name: "Solicitar traslado" })).not.toBeInTheDocument();
 
     const inferior = screen.getByRole("navigation", { name: "Navegación principal" });
     expect(within(inferior).getByRole("link", { name: "Inicio" })).toHaveAttribute("href", "/");
+    expect(within(inferior).getByRole("link", { name: "Inicio" })).toHaveAttribute("aria-current", "page");
     expect(within(inferior).getByRole("link", { name: "Traslados" })).toHaveAttribute("href", "/mis-viajes");
     expect(within(inferior).getByRole("link", { name: "Cuenta" })).toHaveAttribute("href", "/cuenta");
   });
-  it("consolida Mis Traslados en un encabezado compacto con soporte y un único FAB", () => {
+  it("presenta Mis Traslados con contexto, campana y navegación inferior sin FAB", async () => {
     ruta.pathname = "/mis-viajes";
-    render(<NavegacionUsuario />);
+    render(<NavegacionUsuario notificaciones={[{ id: "pago", tono: "atencion", mensaje: "Tienes un pago pendiente.", href: "/viajes/t-1" }]} />);
     const header = screen.getByRole("banner");
     expect(within(header).getByRole("heading", { name: "Mis Traslados", level: 1 })).toBeInTheDocument();
-    expect(within(header).getByRole("link", { name: "Contactar soporte" })).toHaveAttribute("href", "/soporte");
+    expect(within(header).getByText("Gestiona todos tus viajes en un solo lugar")).toBeInTheDocument();
+    expect(within(header).getByLabelText("1 avisos pendientes")).toBeInTheDocument();
+    await userEvent.click(within(header).getByRole("button", { name: "Notificaciones de traslados" }));
+    expect(within(header).getByRole("link", { name: "Tienes un pago pendiente." })).toHaveAttribute("href", "/viajes/t-1");
     expect(within(header).queryByRole("navigation")).not.toBeInTheDocument();
     expect(within(header).queryByRole("img")).not.toBeInTheDocument();
-    expect(screen.getAllByRole("link", { name: "Solicitar traslado" })).toHaveLength(1);
+    expect(screen.queryByRole("link", { name: "Solicitar traslado" })).not.toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Traslados" })).toHaveAttribute("aria-current", "page");
   });
   it("presenta Mi Cuenta con un único encabezado y navegación inferior", () => {

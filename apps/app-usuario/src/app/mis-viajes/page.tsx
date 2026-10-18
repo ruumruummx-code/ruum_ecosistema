@@ -4,6 +4,7 @@ import { Aviso, Button, MobileShell } from "@ruum/ui";
 import type { Database } from "@ruum/shared/types";
 import { NavegacionUsuario } from "../NavegacionUsuario";
 import { MisTrasladosCliente } from "./MisViajesCliente";
+import { construirNotificaciones, type NotificacionInicio } from "../../lib/inicio";
 
 export const metadata: Metadata = {
   title: "Mis Traslados — Ruum Ruum",
@@ -36,7 +37,7 @@ const PESTANAS: { id: PestañaTraslados; etiqueta: string }[] = [
  * error es un estado explícito y la página muestra un aviso con reintento.
  */
 type ResultadoTraslados =
-  | { estado: "ok"; traslados: ViajeLista[] }
+  | { estado: "ok"; traslados: ViajeLista[]; notificaciones: NotificacionInicio[] }
   | { estado: "sin_sesion" }
   | { estado: "error" };
 
@@ -61,6 +62,7 @@ async function obtenerTraslados(): Promise<ResultadoTraslados> {
     const trasladosPorId = new Map(traslados.map((traslado) => [traslado.id, traslado]));
     return {
       estado: "ok",
+      notificaciones: construirNotificaciones(usuario, pasaportes),
       traslados: pasaportes.map((pasaporte) => ({
         pasaporte,
         traslado: pasaporte.traslado_id ? trasladosPorId.get(pasaporte.traslado_id) ?? null : null
@@ -87,7 +89,7 @@ export default async function PaginaMisTraslados({
     return (
       <>
         <NavegacionUsuario variante="claro" />
-        <MobileShell variant="compact" navInferiorVisible={true} className="user-v2-scope user-transfers-shell" contentClassName="user-transfers-content">
+        <MobileShell as="main" variant="compact" navInferiorVisible={true} className="user-v2-scope user-transfers-shell" contentClassName="user-transfers-content">
           <div className="user-transfers-fallback text-center">
             <Aviso tono="danger">
               No pudimos cargar tus traslados en este momento. Inténtalo de nuevo en unos segundos.
@@ -109,8 +111,8 @@ export default async function PaginaMisTraslados({
 
   return (
     <>
-      <NavegacionUsuario variante="claro" />
-      <MobileShell variant="compact" navInferiorVisible={true} className="user-v2-scope user-transfers-shell" contentClassName="user-transfers-content">
+      <NavegacionUsuario variante="claro" notificaciones={resultado.estado === "ok" ? resultado.notificaciones : []} />
+      <MobileShell as="main" variant="compact" navInferiorVisible={true} className="user-v2-scope user-transfers-shell" contentClassName="user-transfers-content">
         <MisTrasladosCliente Traslados={Traslados} pestanaInicial={pestañaActiva} />
       </MobileShell>
     </>

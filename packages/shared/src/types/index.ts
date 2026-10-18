@@ -17,4 +17,4 @@ export * from "./empresa";
 export * from "./empresa-equipo";
 export * from "./operacion";
 export * from "./asignacion";
-export * from "./supabase";
+export type * from "./supabase";

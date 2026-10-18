@@ -5,6 +5,7 @@ import Link from "next/link";
 import { ETIQUETA_TIPO_VEHICULO } from "@ruum/shared/constants";
 import type { Database } from "@ruum/shared/types";
 import { EtapasTrasladoUsuario } from "../EtapasTrasladoUsuario";
+import { MobileBottomSheet } from "../../components/MobileBottomSheet";
 
 type Pasaporte = Database["public"]["Views"]["pasaporte_digital"]["Row"];
 type Traslado = Pick<
@@ -245,7 +246,7 @@ function SkeletonCard() {
   );
 }
 
-function FichaVacia({ hayBusqueda, hayFiltro, pestana }: { hayBusqueda: boolean; hayFiltro: boolean; pestana: PestañaTraslados }) {
+function FichaVacia({ hayBusqueda, hayFiltro, pestana, onLimpiar }: { hayBusqueda: boolean; hayFiltro: boolean; pestana: PestañaTraslados; onLimpiar: () => void }) {
   const etiquetasPestana: Record<PestañaTraslados, string> = {
     activos: "En curso",
     programados: "Por iniciar",
@@ -258,12 +259,13 @@ function FichaVacia({ hayBusqueda, hayFiltro, pestana }: { hayBusqueda: boolean;
     : "Tus traslados aparecerán aquí tan pronto como los registres en la plataforma.";
 
   return (
-    <div className="user-transfers-empty rounded-[22px] border border-[#e6edf6] bg-white px-6 py-12 text-center shadow-[0_6px_16px_rgba(0,0,0,0.02)] dark:border-[#1a3a5c] dark:bg-[#0a2342]">
-      <div aria-hidden="true" className="mx-auto mb-5 flex size-20 items-center justify-center rounded-[30px] bg-[#edf4fe] text-[#104ca0] dark:bg-[#0f2d52] dark:text-[#6ba8ff]">
-        <IconoCarroFrente className="size-[34px]" />
+    <div className="user-transfers-empty">
+      <div aria-hidden="true" className="transfers-empty-illustration">
+        <span className="transfers-empty-orbit"><IconoCarroFrente /></span>
       </div>
       <h2 className="text-[17px] font-bold text-[#0a2342] dark:text-[#f6f8fb]">{titulo}</h2>
       <p className="mx-auto mt-2 max-w-xs text-[14px] font-medium leading-relaxed text-[#4e5f80] dark:text-[#a8b5cc]">{descripcion}</p>
+      {hayBusqueda || hayFiltro ? <button type="button" className="transfers-create-button" onClick={onLimpiar}>Limpiar filtros</button> : <Link href="/viajes/nuevo" className="transfers-create-button"><span aria-hidden="true">＋</span> Crear traslado</Link>}
     </div>
   );
 }
@@ -291,12 +293,9 @@ export function MisTrasladosCliente({
   const [isPending, startTransition] = useTransition();
   const tablistRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    tablistRef.current?.querySelector<HTMLButtonElement>(`[data-pestana="${pestana}"]`)?.scrollIntoView?.({ block: "nearest", inline: "nearest" });
-  }, [pestana]);
-
   // C-09: debounce búsqueda 300ms con aria-busy y skeleton
   useEffect(() => {
+    if (busquedaInput === busqueda) return;
     setBuscando(true);
     const t = setTimeout(() => {
       startTransition(() => {
@@ -305,7 +304,7 @@ export function MisTrasladosCliente({
       });
     }, 300);
     return () => clearTimeout(t);
-  }, [busquedaInput]);
+  }, [busquedaInput, busqueda]);
 
   const conteos = useMemo(() => {
     const counts: Record<PestañaTraslados, number> = { activos: 0, programados: 0, finalizados: 0, cancelados: 0 };
@@ -329,10 +328,10 @@ export function MisTrasladosCliente({
     if (busqueda.trim()) {
       const q = busqueda.trim().toLowerCase();
       lista = lista.filter(({ pasaporte, traslado }) => {
-        const folio = pasaporte.traslado_id?.toLowerCase() ?? "";
+        const folio = `${pasaporte.traslado_id ?? ""} ${folioCorto(pasaporte.traslado_id)}`.toLowerCase();
         const veh = vehiculoNombre(pasaporte).toLowerCase();
-        const origen = `${traslado?.origen_ciudad ?? ""} ${traslado?.origen_direccion ?? ""}`.toLowerCase();
-        const destino = `${traslado?.destino_ciudad ?? ""} ${traslado?.destino_direccion ?? ""}`.toLowerCase();
+        const origen = `${pasaporte.origen_ciudad ?? ""} ${pasaporte.origen_direccion ?? ""} ${traslado?.origen_ciudad ?? ""} ${traslado?.origen_direccion ?? ""}`.toLowerCase();
+        const destino = `${pasaporte.destino_ciudad ?? ""} ${pasaporte.destino_direccion ?? ""} ${traslado?.destino_ciudad ?? ""} ${traslado?.destino_direccion ?? ""}`.toLowerCase();
         const conductor = (pasaporte.conductor_nombre ?? "").toLowerCase();
         const placas = (pasaporte.vehiculo_placas ?? "").toLowerCase();
         return folio.includes(q) || veh.includes(q) || origen.includes(q) || destino.includes(q) || conductor.includes(q) || placas.includes(q);
@@ -345,6 +344,7 @@ export function MisTrasladosCliente({
     setBusquedaInput("");
     setBusqueda("");
     setTipoVehiculoSeleccionado("");
+    setBuscando(false);
   }
 
   function handlePestanaChange(nueva: PestañaTraslados) {
@@ -395,24 +395,15 @@ export function MisTrasladosCliente({
               data-pestana={id}
               tabIndex={activo ? 0 : -1}
               onClick={() => handlePestanaChange(id)}
-              className={[
-                "min-h-11 shrink-0 whitespace-nowrap rounded-[24px] px-2 text-[13px] transition-all cursor-pointer",
-                activo
-                  ? "bg-white font-bold text-[#0a2342] shadow-xs dark:bg-[#0a2342] dark:text-[#f6f8fb]"
-                  : "font-semibold text-[#4e5f80] dark:text-[#a8b5cc]",
-              ].join(" ")}
+              className={activo ? "is-selected" : ""}
             >
               {etiqueta}
-              {conteos[id] > 0 && (
+              {id === "programados" && conteos[id] > 0 && (
                 <span
-                  className={[
-                    "ml-1.5 inline-block rounded-full px-2 py-0.5 text-[10.5px] font-bold align-[0.5px]",
-                    activo
-                      ? "bg-[#0a2342] text-white dark:bg-[#4d94ff] dark:text-[#061529]"
-                      : "bg-[#e2eaf5] text-[#104ca0] dark:bg-[#1a3a5c] dark:text-[#6ba8ff]",
-                  ].join(" ")}
+                  className="transfers-tab-count"
+                  title={`${conteos[id]} programados`}
                 >
-                  {conteos[id]}
+                  {new Intl.NumberFormat("es-MX", { notation: conteos[id] >= 1000 ? "compact" : "standard", maximumFractionDigits: 0 }).format(conteos[id])}
                 </span>
               )}
             </button>
@@ -421,13 +412,13 @@ export function MisTrasladosCliente({
       </div>
 
       {/* Resumen: total / activos / gastado */}
-      <dl aria-label="Resumen de traslados" className="user-transfers-stats flex rounded-2xl border border-[#e6edf6] bg-white p-4 shadow-xs dark:border-[#1a3a5c] dark:bg-[#0a2342]">
+      <dl aria-label="Resumen de traslados" className="user-transfers-stats">
         {[
           { etiqueta: "Total", valor: String(Traslados.length) },
           { etiqueta: "Activos", valor: String(conteos.activos) },
           { etiqueta: "Gastado", valor: formatoGastado(gastoTotal) },
         ].map(({ etiqueta, valor }) => (
-          <div key={etiqueta} className="flex flex-1 items-center justify-center gap-1.5 text-center first:border-l-0 border-l border-[#eef2f7] dark:border-[#1a3a5c]">
+          <div key={etiqueta}>
             <dt className="mt-1 text-[11.5px] font-semibold uppercase tracking-wider text-[#4e5f80] dark:text-[#a8b5cc]">{etiqueta}</dt>
             <dd className="text-[20px] font-extrabold tracking-tight text-[#0a2342] dark:text-[#f6f8fb]">{valor}</dd>
           </div>
@@ -472,8 +463,8 @@ export function MisTrasladosCliente({
           {buscando && <span className="inline-flex items-center gap-1 text-xs text-[#4e5f80] dark:text-[#a8b5cc]" role="status" aria-live="polite"><span className="size-3 animate-spin rounded-full border-2 border-[#eef2f7] border-t-[#104ca0]" aria-hidden />Buscando…</span>}
         </div>
 
-        {filtroAbierto && (
-          <div id="panel-filtros-traslados" className="user-transfers-filter-panel rounded-2xl border border-[#e6edf6] bg-white p-4 shadow-xs dark:border-[#1a3a5c] dark:bg-[#0a2342]">
+        <MobileBottomSheet open={filtroAbierto} onClose={() => setFiltroAbierto(false)} title="Filtrar traslados">
+          <div id="panel-filtros-traslados">
             <label className="mb-2 block text-[14px] font-bold text-[#0a2342] dark:text-[#f6f8fb]" htmlFor="tipo-vehiculo">Tipo de vehículo</label>
             <select
               id="tipo-vehiculo"
@@ -493,8 +484,9 @@ export function MisTrasladosCliente({
                 Limpiar filtros
               </button>
             )}
+            <button type="button" className="transfers-create-button mt-4 w-full" onClick={() => setFiltroAbierto(false)}>Aplicar filtros</button>
           </div>
-        )}
+        </MobileBottomSheet>
       </section>
 
       {/* Lista de traslados */}
@@ -503,7 +495,7 @@ export function MisTrasladosCliente({
         aria-live="polite"
         aria-busy={isPending || buscando}
         aria-label={`Lista de traslados ${pestana} — ${filtrados.length} resultados`}
-        className="user-transfers-list"
+        className={`user-transfers-list ${filtrados.length === 0 && !buscando && !isPending ? "is-empty" : ""}`}
         tabIndex={0}
       >
         {(isPending || buscando) ? (
@@ -513,9 +505,9 @@ export function MisTrasladosCliente({
             <SkeletonCard />
           </div>
         ) : filtrados.length === 0 ? (
-          <FichaVacia hayBusqueda={Boolean(busqueda.trim())} hayFiltro={Boolean(tipoVehiculoSeleccionado)} pestana={pestana} />
+          <FichaVacia hayBusqueda={Boolean(busqueda.trim())} hayFiltro={Boolean(tipoVehiculoSeleccionado)} pestana={pestana} onLimpiar={limpiarFiltros} />
         ) : (
-          filtrados.map(({ pasaporte, traslado }) => {
+          <><div className="transfers-results-heading"><span>{filtrados.length} {filtrados.length === 1 ? "traslado" : "traslados"}</span><Link href="/viajes/nuevo" className="transfers-create-button">＋ Crear traslado</Link></div>{filtrados.map(({ pasaporte, traslado }) => {
             const { label } = estadoVisual(pasaporte);
             const { tono, borde } = PILDORA_POR_PESTAÑA[pestana];
             const folio = folioCorto(pasaporte.traslado_id);
@@ -619,7 +611,7 @@ export function MisTrasladosCliente({
                 </div>
               </article>
             );
-          })
+          })}</>
         )}
       </section>
 

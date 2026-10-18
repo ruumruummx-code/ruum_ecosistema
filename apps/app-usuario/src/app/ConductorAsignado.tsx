@@ -18,6 +18,7 @@ interface ConductorAsignadoProps {
   nombre: string;
   fotoUrl: string | null;
   evidencia?: ReactNode;
+  compacto?: boolean;
 }
 
 function IconoChat() {
@@ -37,7 +38,7 @@ function IconoTelefono() {
   );
 }
 
-export function ConductorAsignado({ trasladoId, estado, nombre, fotoUrl, evidencia }: ConductorAsignadoProps) {
+export function ConductorAsignado({ trasladoId, estado, nombre, fotoUrl, evidencia, compacto = false }: ConductorAsignadoProps) {
   // "CO" conserva el respaldo histórico de este avatar (canónico en cuenta-utils).
   const siglas = iniciales(nombre, "CO");
   const [llamando, setLlamando] = useState(false);
@@ -61,6 +62,17 @@ export function ConductorAsignado({ trasladoId, estado, nombre, fotoUrl, evidenc
     } finally {
       setLlamando(false);
     }
+  }
+
+  if (compacto) {
+    return <section id="assignedDriverCommunication" aria-label="Conductor asignado" className="home-driver">
+      <span className="home-driver-avatar" aria-hidden="true">
+        {fotoUrl ? <Image src={fotoUrl} alt="" width={36} height={36} unoptimized /> : <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><circle cx="12" cy="8" r="4" /><path d="M4 21v-2a8 8 0 0 1 16 0v2" /></svg>}
+      </span>
+      <div><p>Tu conductor</p><h3 title={nombre}>{nombre}</h3></div>
+      <button type="button" onClick={manejarLlamada} disabled={!disponible || llamando} aria-label={llamando ? `Conectando con ${nombre}` : `Llamar a ${nombre}`} className="home-call"><IconoTelefono /></button>
+      {error && <p role="alert" className="home-call-error">{error}</p>}
+    </section>;
   }
 
   return (

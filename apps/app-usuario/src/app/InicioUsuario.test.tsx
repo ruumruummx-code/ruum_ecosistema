@@ -1,6 +1,8 @@
 /** @vitest-environment jsdom */
 import { describe, expect, it, vi } from "vitest";
 import { render, screen, within } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import { crearLlamadaEnmascarada } from "@ruum/api/services";
 import type { Database } from "@ruum/shared/types";
 import { InicioUsuario } from "./InicioUsuario";
 
@@ -38,6 +40,9 @@ describe("InicioUsuario", () => {
     expect(within(tarjeta).getAllByText(etiqueta).length).toBeGreaterThan(0);
     expect(within(tarjeta).queryByText("En camino")).toBeNull();
     expect(within(tarjeta).queryByRole("progressbar")).toBeNull();
+    expect(within(tarjeta).getAllByText("Pendiente")).toHaveLength(3);
+    expect(within(tarjeta).getByText("ETA por confirmar")).toBeInTheDocument();
+    expect(within(tarjeta).queryByText("Toyota Corolla 2021")).not.toBeInTheDocument();
   });
 
   it("incluye el contacto del conductor en el traslado activo antes de las acciones rápidas", () => {
@@ -65,19 +70,16 @@ describe("InicioUsuario", () => {
     const tarjetaActiva = screen.getByRole("region", { name: "Traslado Activo #TRASLADO" });
 
     expect(comunicacion).toBeInTheDocument();
-    expect(within(comunicacion).getByRole("link", { name: /Evidencia: Evidencia pendiente/ })).toHaveAttribute("href", "/viajes/traslado-1#evidencia");
+    expect(within(comunicacion).getByRole("button", { name: "Llamar a Ana López" })).toBeEnabled();
     expect(screen.getByText("Ana López")).toBeInTheDocument();
-    expect(within(tarjetaActiva).getByRole("heading", { name: "Traslado Activo #TRASLADO" })).toBeInTheDocument();
+    expect(within(tarjetaActiva).getByRole("heading", { name: "Toyota Corolla 2024" })).toBeInTheDocument();
     expect(within(tarjetaActiva).getByText("Toyota Corolla 2024")).toBeInTheDocument();
     expect(within(tarjetaActiva).getByText("Placas ABC123D")).toBeInTheDocument();
     expect(within(tarjetaActiva).getAllByText("Conductor asignado").length).toBeGreaterThan(0);
     expect(within(tarjetaActiva).getByRole("region", { name: "Conductor asignado" })).toBe(comunicacion);
-    expect(within(tarjetaActiva).getByText("Etapa 3 de 7: Conductor asignado")).toBeInTheDocument();
+    expect(within(tarjetaActiva).getByRole("list", { name: "Progreso del traslado" })).toBeInTheDocument();
+    expect(within(tarjetaActiva).getAllByText("Pendiente")).toHaveLength(3);
     expect(within(tarjetaActiva).queryByRole("progressbar")).toBeNull();
-    expect(screen.getByRole("link", { name: "Abrir chat con Ana López" })).toHaveAttribute(
-      "href",
-      "/viajes/traslado-1#chat-conductor",
-    );
     expect(comunicacion.compareDocumentPosition(acciones) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
     expect(screen.queryByText("Reportar incidencia")).not.toBeInTheDocument();
   });
@@ -94,6 +96,18 @@ describe("InicioUsuario", () => {
     render(<InicioUsuario usuario={null} traslados={[traslado]} />);
 
     expect(screen.queryByRole("region", { name: "Conductor asignado" })).not.toBeInTheDocument();
+    expect(screen.getByText("Pendiente de asignación")).toBeInTheDocument();
+  });
+
+  it("usa el servicio de llamadas existente y muestra un fallo recuperable dentro de la tarjeta", async () => {
+    vi.mocked(crearLlamadaEnmascarada).mockRejectedValueOnce(new Error("No pudimos conectar. Intenta de nuevo."));
+    render(<InicioUsuario usuario={null} traslados={[{
+      traslado_id: "llamada-1", estado: "traslado_en_curso", conductor_id: "c1", conductor_nombre: "Ana López",
+    } as unknown as PasaporteRow]} />);
+    await userEvent.click(screen.getByRole("button", { name: "Llamar a Ana López" }));
+    expect(crearLlamadaEnmascarada).toHaveBeenCalledWith(undefined, "llamada-1");
+    expect(await screen.findByRole("alert")).toHaveTextContent("No pudimos conectar. Intenta de nuevo.");
+    expect(screen.getByRole("button", { name: "Llamar a Ana López" })).toBeEnabled();
   });
 
   it("renderiza acciones rápidas con Mis vehículos y Pasaporte digital", () => {
@@ -166,17 +180,19 @@ describe("InicioUsuario", () => {
     // Saludo y contexto
     expect(screen.getByText(/Hola, Carlos/i)).toBeInTheDocument();
     expect(screen.queryByText("¿A dónde movemos tu auto hoy?")).not.toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Notificaciones" })).toHaveAttribute("href", "/mis-viajes");
+    expect(screen.getByText("Aquí va el estatus de tu traslado.")).toBeInTheDocument();
 
     // Tarjeta activa
     expect(screen.getByText("TRASLADO ACTIVO")).toBeInTheDocument();
     expect(screen.getByText("Toyota Corolla 2021")).toBeInTheDocument();
     expect(screen.getByText(/CDMX, Roma Norte/)).toBeInTheDocument();
     expect(screen.getByText(/Guadalajara, Zapopan/)).toBeInTheDocument();
-    expect(screen.getByText("Carlos M.")).toBeInTheDocument();
-    expect(screen.getByText("En camino")).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: /Evidencia: Evidencia pendiente/ })).toHaveAttribute("href", "/viajes/activo-123#evidencia");
-    expect(screen.getByText("Evidencia fotográfica · Seguimiento en tiempo real")).toBeInTheDocument();
+    expect(screen.getByText("Carlos Mendoza")).toBeInTheDocument();
+    expect(screen.getByText("En camino a destino")).toBeInTheDocument();
+    const pasos = within(screen.getByRole("list", { name: "Progreso del traslado" })).getAllByRole("listitem");
+    expect(within(pasos[0]).getByText("Completada")).toBeInTheDocument();
+    expect(pasos[1]).toHaveAttribute("aria-current", "step");
+    expect(within(pasos[2]).getByText("Pendiente")).toBeInTheDocument();
 
     // El CTA universal lo proporciona NavegacionUsuario.
     expect(screen.queryByRole("link", { name: /Solicitar traslado/i })).not.toBeInTheDocument();

@@ -4,6 +4,8 @@ import React, { useEffect, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
+import { iniciales } from "./cuenta/cuenta-utils";
+import type { NotificacionInicio } from "../lib/inicio";
 
 type VarianteNavegacion = "claro" | "oscuro";
 
@@ -100,6 +102,7 @@ export interface NavegacionUsuarioProps {
   mostrarEnAcceso?: boolean;
   mostrarNavegacionInferior?: boolean;
   notificacionesCount?: number;
+  notificaciones?: NotificacionInicio[];
 }
 
 export function NavegacionUsuario({
@@ -108,9 +111,11 @@ export function NavegacionUsuario({
   titulo,
   mostrarEnAcceso = false,
   mostrarNavegacionInferior = true,
-  notificacionesCount = 1,
+  notificacionesCount = 0,
+  notificaciones = [],
 }: NavegacionUsuarioProps) {
   const pathname = usePathname();
+  const esInicio = pathname === "/";
   const headerRef = useRef<HTMLElement>(null);
   const navRef = useRef<HTMLElement>(null);
   void variante;
@@ -122,7 +127,9 @@ export function NavegacionUsuario({
     pathname.startsWith("/registro/");
   const esMisTraslados = pathname === "/mis-viajes";
   const esCuenta = pathname === "/cuenta";
-  const cabeceraCompacta = esMisTraslados || esCuenta;
+  const esVehiculos = pathname === "/cuenta/vehiculos" || pathname.startsWith("/cuenta/vehiculos/");
+  const cabeceraCompacta = esMisTraslados || esCuenta || esVehiculos;
+  const etiquetaFab = esVehiculos ? "Agregar vehículo" : "Solicitar traslado";
   const nombre = primerNombre(nombreUsuario);
   const saludo = nombre ? `¡Hola, ${nombre}!` : "¡Hola!";
   const textoCabecera = titulo ?? (pathname === "/" ? "Ruum Ruum" : saludo);
@@ -160,14 +167,31 @@ export function NavegacionUsuario({
         ref={headerRef}
         id="homeHeader"
         role="banner"
-        className={`user-v2-shell-header user-v2-scope ${pathname === "/" ? "user-dashboard-header" : ""} ${cabeceraCompacta ? "user-transfers-header" : ""}`}
+        className={`user-v2-shell-header user-v2-scope ${pathname === "/" ? "user-dashboard-header" : ""} ${cabeceraCompacta ? "user-transfers-header" : ""} ${esMisTraslados ? "user-transfers-page-header" : ""}`}
       >
-        {cabeceraCompacta ? (
+        {esInicio ? <div className="home-header-inner">
+          <Link href="/" aria-label="Ruum Ruum usuario" className="home-header-logo">
+            <Image src="/imagenes/ruum-logo.svg" alt="Ruum Ruum usuario" width={186} height={40} priority unoptimized className="ruum-logo-light" />
+            <Image src="/imagenes/ruum-logo-dark.svg" alt="" aria-hidden width={186} height={40} priority unoptimized className="ruum-logo-dark" />
+          </Link>
+          <nav aria-label="Acciones del usuario" className="home-header-actions">
+            <Link href="/soporte" aria-label="Contactar soporte"><IconoSoporte className="size-5" /></Link>
+            <Link href="/mis-viajes" aria-label="Notificaciones"><IconoCampana className="size-5" />{notificacionesCount > 0 && <span className="home-notification-dot" aria-label={`${notificacionesCount} avisos pendientes`} />}</Link>
+            <Link href="/cuenta" aria-label="Mi cuenta" className="home-user-avatar">{iniciales(nombreUsuario ?? "", "RR")}</Link>
+          </nav>
+        </div> : cabeceraCompacta ? (
           <div className="user-transfers-header-inner">
-            <h1 id={esCuenta ? "titulo-mi-cuenta" : "titulo-mis-traslados"}>{esCuenta ? "Mi Cuenta" : "Mis Traslados"}</h1>
-            <Link href="/soporte" aria-label="Contactar soporte" className="user-v2-shell-icon-action">
+            {esMisTraslados ? <div className="transfers-heading"><h1 id="titulo-mis-traslados">Mis Traslados</h1><p>Gestiona todos tus viajes en un solo lugar</p></div> : esVehiculos ? <div className="min-w-0 py-2"><h1>Mis vehículos</h1><p className="text-xs text-[var(--user-color-muted)]">Autos frecuentes para solicitudes rápidas</p></div> : <h1 id="titulo-mi-cuenta">Mi Cuenta</h1>}
+            {esMisTraslados && <details className="transfers-notifications">
+              <summary aria-label="Notificaciones de traslados" role="button"><IconoCampana className="size-5" />{notificaciones.length > 0 && <span className="transfers-notification-dot" aria-label={`${notificaciones.length} avisos pendientes`} />}</summary>
+              <section aria-label="Avisos de tus traslados" className="transfers-notification-panel">
+                <h2>Notificaciones</h2>
+                {notificaciones.length > 0 ? <ul>{notificaciones.map((aviso) => <li key={aviso.id}>{aviso.href ? <Link href={aviso.href}>{aviso.mensaje}</Link> : <p>{aviso.mensaje}</p>}</li>)}</ul> : <p>No tienes avisos pendientes.</p>}
+              </section>
+            </details>}
+            {!esVehiculos && !esMisTraslados && <Link href="/soporte" aria-label="Contactar soporte" className="user-v2-shell-icon-action">
               <IconoSoporte className="size-5" />
-            </Link>
+            </Link>}
           </div>
         ) : <div className="user-v2-shell-inner flex items-center justify-between gap-3 px-4 py-3 sm:px-6">
           {/* Logotipo e Identidad oficial de la marca: SVG responsive con soporte claro/oscuro */}
@@ -266,7 +290,7 @@ export function NavegacionUsuario({
           id="bottomNavigation"
           aria-label="Navegación principal"
           ref={navRef}
-          className={`user-v2-shell-nav ${cabeceraCompacta ? "" : "lg:hidden"} user-v2-scope`}
+          className={`user-v2-shell-nav ${cabeceraCompacta || esInicio ? "" : "lg:hidden"} ${esInicio ? "home-tab-navigation" : ""} ${esMisTraslados ? "user-transfers-nav" : ""} user-v2-scope`}
         >
           <div className="user-v2-shell-nav-inner">
             <div className="grid grid-cols-3 items-center">
@@ -279,25 +303,25 @@ export function NavegacionUsuario({
                     aria-current={activo ? "page" : undefined}
                     className={`user-v2-nav-link group select-none transition-colors duration-150 ${
                       activo
-                        ? "!text-[var(--user-color-primary)] dark:!text-emerald-400"
+                        ? esMisTraslados ? "!text-[#0046c4] dark:!text-[#80b4ff]" : "!text-[var(--user-color-primary)] dark:!text-emerald-400"
                         : "text-[var(--user-color-muted)] hover:text-[var(--user-color-primary)] dark:text-slate-400 dark:hover:text-white"
                     }`}
                   >
                     <span
-                      className={`user-v2-nav-indicator ${activo ? "is-active !bg-[#0b1e32] dark:!bg-emerald-400" : ""}`}
+                      className={`user-v2-nav-indicator ${activo ? esMisTraslados ? "is-active !bg-[#0046c4] dark:!bg-[#80b4ff]" : "is-active !bg-[#0b1e32] dark:!bg-emerald-400" : ""}`}
                       aria-hidden="true"
                     />
                     <destino.Icono
                       className={`size-[22px] transition-all duration-150 ${
                         activo
-                          ? "scale-105 stroke-[2.3] text-[var(--user-color-primary)] dark:text-emerald-400"
+                          ? esMisTraslados ? "scale-105 stroke-[2.3] text-[#0046c4] dark:text-[#80b4ff]" : "scale-105 stroke-[2.3] text-[var(--user-color-primary)] dark:text-emerald-400"
                           : "text-[var(--user-color-muted)] group-hover:text-[var(--user-color-primary)] dark:text-slate-400 dark:group-hover:text-white"
                       }`}
                     />
                     <span
                       className={`transition-colors text-[12px] ${
                         activo
-                          ? "font-extrabold text-[var(--user-color-primary)] dark:text-emerald-400"
+                          ? esMisTraslados ? "font-extrabold text-[#0046c4] dark:text-[#80b4ff]" : "font-extrabold text-[var(--user-color-primary)] dark:text-emerald-400"
                           : "font-medium text-[var(--user-color-muted)] group-hover:text-[var(--user-color-primary)] dark:text-slate-400 dark:group-hover:text-white"
                       }`}
                     >
@@ -310,8 +334,8 @@ export function NavegacionUsuario({
           </div>
         </nav>
       )}
-      {mostrarNavegacionInferior && !esAcceso && !pathname.startsWith("/viajes/nuevo") && pathname !== "/preguntas-frecuentes" && (
-        <Link id="requestTransferButton" href="/viajes/nuevo" aria-label="Solicitar traslado" title="Solicitar traslado" className="user-transfer-fab user-v2-scope">
+      {mostrarNavegacionInferior && !esAcceso && !esInicio && !esMisTraslados && !pathname.startsWith("/viajes/nuevo") && pathname !== "/preguntas-frecuentes" && (
+        <Link id="requestTransferButton" href="/viajes/nuevo" aria-label={etiquetaFab} title={etiquetaFab} className="user-transfer-fab user-v2-scope">
           <svg className="size-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg>
         </Link>
       )}

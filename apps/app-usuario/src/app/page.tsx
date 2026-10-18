@@ -8,7 +8,7 @@ import { NavegacionUsuario } from "./NavegacionUsuario";
 import { InicioUsuario } from "./InicioUsuario";
 import { BotonReintentarSesion } from "./ReintentarSesion";
 import { EnlaceRecorridoGuiado } from "./EnlaceRecorridoGuiado";
-import { obtenerViajeActivo } from "../lib/inicio";
+import { construirNotificaciones, obtenerViajeActivo } from "../lib/inicio";
 import { botonAzul, botonContorno } from "./experiencia-publica";
 // RC-14: estilos responsivos del dashboard (ver InicioUsuario.css).
 import "./InicioUsuario.css";
@@ -115,8 +115,8 @@ export default async function PaginaInicio({
   if (usuario && !forzarLanding) {
     return (
       <>
-        <NavegacionUsuario variante="claro" nombreUsuario={usuario.nombre} />
-        <MobileShell variant="compact" navInferiorVisible={true} className="user-dashboard-shell" contentClassName="user-dashboard-content">
+        <NavegacionUsuario variante="claro" nombreUsuario={usuario.nombre} notificacionesCount={construirNotificaciones(usuario, traslados).length} />
+        <MobileShell as="main" variant="compact" navInferiorVisible={true} className="user-v2-scope user-dashboard-shell" contentClassName="user-dashboard-content">
           <div aria-live="polite">
             <InicioUsuario
               usuario={usuario}

@@ -3,10 +3,9 @@
 import Link from "next/link";
 import type { Database } from "@ruum/shared/types";
 import { ETIQUETA_ESTADO_TRASLADO } from "@ruum/shared/states";
-import { MobileCard } from "@ruum/ui";
-import { obtenerViajeActivo, progresoPorEstadoTraslado } from "../lib/inicio";
+import { indiceEtapaActual } from "@ruum/ui";
+import { obtenerViajeActivo } from "../lib/inicio";
 import { TERMINOLOGIA_USUARIO } from "../lib/glosario";
-import { EtapasTrasladoUsuario } from "./EtapasTrasladoUsuario";
 import { ConductorAsignado } from "./ConductorAsignado";
 
 type PasaporteRow = Database["public"]["Views"]["pasaporte_digital"]["Row"];
@@ -20,391 +19,110 @@ export interface InicioUsuarioProps {
   vehiculos?: VehiculoRow[];
 }
 
-function folioVisible(trasladoId: string | null): string {
-  return trasladoId ? `#${trasladoId.slice(0, 8).toUpperCase()}` : "#—";
+function tiempoEstimadoTexto(horas: number | null) {
+  if (horas == null || !Number.isFinite(horas) || horas < 0) return "ETA por confirmar";
+  const total = Math.round(horas * 60);
+  const h = Math.floor(total / 60);
+  const m = total % 60;
+  return `ETA ${h ? `${h}h ` : ""}${m}m`;
 }
 
-function primerNombre(nombre: string | null | undefined): string | null {
-  const valor = nombre?.trim().split(/\s+/)[0];
-  if (!valor) return null;
-  return valor.charAt(0).toUpperCase() + valor.slice(1).toLowerCase();
+function Chevron() {
+  return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><path d="m9 6 6 6-6 6" strokeLinecap="round" strokeLinejoin="round" /></svg>;
 }
 
-function nombreAbreviado(nombre: string | null | undefined): string | null {
-  if (!nombre) return null;
-  const partes = nombre.trim().split(/\s+/);
-  if (partes.length === 1) return partes[0];
-  const primer = partes[0].charAt(0).toUpperCase() + partes[0].slice(1).toLowerCase();
-  const inicialApellido = partes[1].charAt(0).toUpperCase();
-  return `${primer} ${inicialApellido}.`;
+function IconoInicio({ tipo }: { tipo: "auto" | "documento" | "soporte" | "ubicacion" | "usuario" }) {
+  return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    {tipo === "auto" && <><path d="m5 10 2-5h10l2 5M4 10h16v8H4zM7 18v2m10-2v2M7 14h1m8 0h1" /></>}
+    {tipo === "documento" && <><rect x="5" y="3" width="14" height="18" rx="3" /><path d="M9 8h6M9 12h6M9 16h3" /></>}
+    {tipo === "soporte" && <><path d="M4 14v-3a8 8 0 0 1 16 0v3M18 18c0 2-2 3-6 3" /><rect x="3" y="11" width="4" height="7" rx="2" /><rect x="17" y="11" width="4" height="7" rx="2" /></>}
+    {tipo === "ubicacion" && <><path d="M19 10c0 5-7 11-7 11S5 15 5 10a7 7 0 0 1 14 0Z" /><circle cx="12" cy="10" r="2" /></>}
+    {tipo === "usuario" && <><circle cx="12" cy="8" r="4" /><path d="M4 21v-2a8 8 0 0 1 16 0v2" /></>}
+  </svg>;
 }
 
-function vehiculoTitulo(t: PasaporteRow): string {
-  const partes = [t.vehiculo_marca, t.vehiculo_modelo, t.vehiculo_anio].filter(Boolean);
-  return partes.length > 0 ? partes.join(" ") : "Toyota Corolla 2021";
-}
-
-function ciudadOrigen(t: PasaporteRow): string {
-  return t.origen_ciudad?.trim() || t.origen_direccion?.trim() || "CDMX, Roma Norte";
-}
-
-function ciudadDestino(t: PasaporteRow): string {
-  return t.destino_ciudad?.trim() || t.destino_direccion?.trim() || "Guadalajara, Zapopan";
-}
-
-function etiquetaEstado(t: PasaporteRow): string {
-  if (!t.estado) return "En seguimiento";
-  if (t.estado === "traslado_en_curso") return "En camino";
-  return TERMINOLOGIA_USUARIO[t.estado] ?? ETIQUETA_ESTADO_TRASLADO[t.estado] ?? "En seguimiento";
-}
-
-function tiempoEstimadoTexto(horas: number | null): string {
-  if (horas == null || Number.isNaN(Number(horas))) return "ETA 17:30";
-  const totalMin = Math.round(Number(horas) * 60);
-  const h = Math.floor(totalMin / 60);
-  const m = totalMin % 60;
-  if (h <= 0) return `ETA ${m}m`;
-  if (m === 0) return `ETA ${h}h`;
-  return `ETA ${h}h ${m}m`;
-}
-
-function evidenciaTexto(t: PasaporteRow): string {
-  if ((t.evidencia_final_fotos_sincronizadas ?? 0) > 0) return "Evidencia completa";
-  if ((t.evidencia_inicial_fotos_sincronizadas ?? 0) > 0) return "Check inicial listo";
-  return "Evidencia pendiente";
-}
-
-/* ---------- Iconos SVG Semánticos ---------- */
-
-function IconoCarro({ className = "size-5" }: { className?: string }) {
-  return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.5 2.8C2.1 11 2 11.5 2 12v4c0 .6.4 1 1 1h2" />
-      <circle cx="7" cy="17" r="2" />
-      <path d="M9 17h6" />
-      <circle cx="17" cy="17" r="2" />
-    </svg>
-  );
-}
-
-function IconoPortapapeles({ className = "size-5" }: { className?: string }) {
-  return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <rect x="5" y="4" width="14" height="17" rx="2" />
-      <path d="M9 4V2.8h6V4" />
-      <path d="M8.5 10h7M8.5 13.5h7M8.5 17h4" />
-    </svg>
-  );
-}
-
-function IconoEscudo({ className = "size-5" }: { className?: string }) {
-  return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <path d="M12 3 5 5.8v5.4c0 4.3 2.9 7.4 7 9 4.1-1.6 7-4.7 7-9V5.8L12 3Z" />
-      <path d="m9 11.5 2.2 2.2L15.5 9.5" />
-    </svg>
-  );
-}
-
-function IconoChevron({ className = "size-4" }: { className?: string }) {
-  return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <path d="m9 18 6-6-6-6" />
-    </svg>
-  );
-}
-
-function IconoPin({ className = "size-3.5" }: { className?: string }) {
-  return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <path d="M12 21.7C17.3 17 20 13 20 10a8 8 0 1 0-16 0c0 3 2.7 7 8 11.7Z" />
-      <circle cx="12" cy="10" r="2.6" />
-    </svg>
-  );
-}
-
-function IconoCamara({ className = "size-3.5" }: { className?: string }) {
-  return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <path d="M4 8h3l2-2.5h6L17 8h3a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1Z" />
-      <circle cx="12" cy="13.5" r="3.2" />
-    </svg>
-  );
-}
-
-function IconoUsuario({ className = "size-3.5" }: { className?: string }) {
-  return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <circle cx="12" cy="8" r="3.6" />
-      <path d="M4.5 19.5c0-3.6 3.4-6 7.5-6s7.5 2.4 7.5 6" />
-    </svg>
-  );
-}
-
-function IconoAuriculares({ className = "size-5" }: { className?: string }) {
-  return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <path d="M3 14h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V10a9 9 0 0 1 18 0v9a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3" />
-    </svg>
-  );
+function ProgresoInicio({ estado }: { estado: PasaporteRow["estado"] }) {
+  const etapa = estado ? indiceEtapaActual(estado) : -1;
+  // El pago se procesa antes de la operación: no implica entrega completada.
+  const previo = etapa < 3 || estado === "pago_pendiente" || estado === "pago_completado";
+  const actual = previo ? -1 : estado === "entrega_confirmada" ? 3 : etapa >= 5 || estado === "llegada_a_destino" ? 2 : etapa === 4 ? 1 : 0;
+  return <ol className="home-stepper" aria-label="Progreso del traslado">
+    {["Recolección", "En tránsito", "Entrega"].map((nombre, i) => {
+      const completado = i < actual;
+      const current = i === actual;
+      const situacion = completado ? "Completada" : current ? "Actual" : "Pendiente";
+      return <li key={nombre} className={completado ? "is-complete" : current ? "is-current" : "is-pending"} aria-current={current ? "step" : undefined}>
+        <span className="home-step-dot" aria-hidden="true">{completado && <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="m5 10 3 3 7-7" /></svg>}</span>
+        <span className="home-step-name">{i + 1}. {nombre}</span>
+        <span className="home-step-status">{situacion}</span>
+      </li>;
+    })}
+  </ol>;
 }
 
 export function InicioUsuario({ usuario, traslados, conductorFotoUrl = null, vehiculos = [] }: InicioUsuarioProps) {
-  const viajeActivo = obtenerViajeActivo(traslados);
-  const nombre = primerNombre(usuario?.nombre);
-  const saludo = nombre ? `Hola, ${nombre}` : "Hola";
+  const viaje = obtenerViajeActivo(traslados);
+  const primerNombre = usuario?.nombre?.trim().split(/\s+/)[0];
+  const nombre = primerNombre ? primerNombre.charAt(0).toUpperCase() + primerNombre.slice(1).toLowerCase() : null;
+  const detalle = viaje?.traslado_id ? `/viajes/${viaje.traslado_id}` : "/mis-viajes";
+  const ultimo = viaje ?? [...traslados].sort((a, b) => (b.creado_en ?? "").localeCompare(a.creado_en ?? ""))[0];
+  const pasaporte = ultimo?.traslado_id ? `/viajes/${ultimo.traslado_id}` : "/pasaporte";
+  const vehiculo = viaje ? [viaje.vehiculo_marca, viaje.vehiculo_modelo, viaje.vehiculo_anio].filter(Boolean).join(" ") || "Vehículo por confirmar" : "";
+  const estado = viaje?.estado ? TERMINOLOGIA_USUARIO[viaje.estado] ?? ETIQUETA_ESTADO_TRASLADO[viaje.estado] : "En seguimiento";
+  const conductor = viaje?.traslado_id && viaje.conductor_id && viaje.conductor_nombre && viaje.estado
+    ? { trasladoId: viaje.traslado_id, estado: viaje.estado, nombre: viaje.conductor_nombre }
+    : null;
 
-  const conductorAsignado =
-    viajeActivo?.traslado_id && viajeActivo.conductor_id && viajeActivo.conductor_nombre && viajeActivo.estado
-      ? {
-          trasladoId: viajeActivo.traslado_id,
-          estado: viajeActivo.estado,
-          nombre: viajeActivo.conductor_nombre,
-        }
-      : null;
+  return <div className="user-dashboard">
+    <section id="greetingBlock" aria-labelledby="saludo-usuario" className="home-greeting">
+      <h1 id="saludo-usuario">{nombre ? `Hola, ${nombre}` : "Hola"}</h1>
+      <p>Aquí va el estatus de tu traslado.</p>
+    </section>
 
-  const detalleActivoHref = viajeActivo?.traslado_id ? `/viajes/${viajeActivo.traslado_id}` : "/mis-viajes";
-  const ultimoTraslado = viajeActivo ?? traslados[0];
-  const pasaporteHref = ultimoTraslado?.traslado_id ? `/viajes/${ultimoTraslado.traslado_id}` : "/pasaporte";
-
-  const evidenciaAcceso = viajeActivo ? (
-    <Link
-      href={`/viajes/${viajeActivo.traslado_id}#evidencia`}
-      aria-label={`Evidencia: ${evidenciaTexto(viajeActivo)}. Revisar o subir fotos`}
-      title={evidenciaTexto(viajeActivo)}
-      className="dashboard-evidence inline-flex items-center gap-1.5 rounded-full bg-white/10 px-2.5 py-1 text-slate-200 transition hover:bg-white/20 hover:text-white"
-    >
-      {evidenciaTexto(viajeActivo) === "Evidencia pendiente" ? (
-        <svg className="size-5 text-amber-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true"><path d="m12 3 10 18H2L12 3Z" /><path d="M12 9v5m0 3v1" /></svg>
-      ) : <IconoCamara className="size-5 text-emerald-400" />}
-      <span className="sr-only">{evidenciaTexto(viajeActivo)}</span>
-    </Link>
-  ) : null;
-
-  const totalVehiculos = vehiculos.length;
-
-  return (
-    <div className="user-dashboard flex flex-col gap-6">
-      {/* B. Saludo y Bienvenida */}
-      <section id="greetingBlock" aria-labelledby="saludo-usuario">
-        <h1
-          id="saludo-usuario"
-          className="text-[28px] font-extrabold tracking-tight text-[var(--user-color-primary)] sm:text-[32px]"
-        >
-          {saludo} <span aria-hidden="true">👋</span>
-        </h1>
-        <Link href="/mis-viajes" aria-label="Notificaciones" className="user-dashboard-notifications"><svg className="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9M10 21h4" /></svg></Link>
-      </section>
-
-      {/* C. Tarjeta de Traslado Activo (Sección Destacada) */}
-      <section
-        id="activeTransferCard"
-        role="region"
-        aria-label={viajeActivo ? `Traslado Activo ${folioVisible(viajeActivo.traslado_id)}` : "Sin traslados activos"}
-        aria-live="polite"
-      >
-        {viajeActivo ? (
-          <div className="flex flex-col gap-3">
-            <div className="relative overflow-hidden rounded-[26px] bg-gradient-to-br from-[#071626] via-[#0b1e32] to-[#14283f] text-white shadow-[0_14px_34px_rgba(7,22,38,0.28)] border border-white/10">
-              <div className="p-5 sm:p-6">
-                {/* Badge superior y flecha a detalle */}
-                <div className="flex items-center justify-between gap-2">
-                  <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-emerald-400">
-                    <span aria-hidden="true" className="size-2 rounded-full bg-emerald-400 animate-pulse" />
-                    TRASLADO ACTIVO
-                  </span>
-                  <Link
-                    href={detalleActivoHref}
-                    aria-label={`Ver seguimiento del traslado activo ${vehiculoTitulo(viajeActivo)}`}
-                    className="flex size-8 items-center justify-center rounded-full bg-white/10 text-white/80 transition hover:bg-white/20 hover:text-white"
-                  >
-                    <IconoChevron className="size-4" />
-                  </Link>
-                </div>
-
-                {/* Detalle del vehículo */}
-                <div className="mt-3.5">
-                  <h2 className="sr-only">
-                    Traslado Activo {folioVisible(viajeActivo.traslado_id)}
-                  </h2>
-                  <Link href={detalleActivoHref} className="group block">
-                    <p className="text-[22px] sm:text-[24px] font-extrabold tracking-tight text-white group-hover:text-emerald-300 transition-colors">
-                      {vehiculoTitulo(viajeActivo)}
-                    </p>
-                  </Link>
-
-                </div>
-
-                {/* Ruta origen-destino */}
-                <div className="dashboard-route mt-3 flex items-center gap-2 text-[13.5px] font-medium text-slate-200">
-                  <IconoPin className="size-4 shrink-0 text-emerald-400" />
-                  <p className="truncate">
-                    {ciudadOrigen(viajeActivo)} <span className="text-emerald-400 font-bold mx-1">➔</span> {ciudadDestino(viajeActivo)}
-                  </p>
-                  {viajeActivo.vehiculo_placas && (
-                    <p className="mt-0.5 text-[11.5px] font-bold uppercase tracking-wider text-slate-300">
-                      Placas {viajeActivo.vehiculo_placas}
-                    </p>
-                  )}
-                </div>
-
-                {/* Barra de progreso y estado */}
-                <div className="dashboard-progress mt-5 space-y-2 pt-4 border-t border-white/10">
-                  <div className="flex items-center justify-between text-[12.5px]">
-                    <span className="font-semibold text-slate-300">
-                      {etiquetaEstado(viajeActivo)}
-                    </span>
-                    <span className="font-bold text-emerald-400">
-                      {tiempoEstimadoTexto(viajeActivo.tiempo_estimado_horas)}
-                    </span>
-                  </div>
-
-                  {/* Indicador visual lineal de avance en color verde */}
-                  <div aria-hidden="true" className="h-2 w-full rounded-full bg-white/15 overflow-hidden">
-                    <div
-                      className="h-full rounded-full bg-gradient-to-r from-emerald-500 to-teal-400 transition-all duration-500"
-                      style={{ width: `${progresoPorEstadoTraslado(viajeActivo.estado)}%` }}
-                    />
-                  </div>
-
-                  {/* Stepper accesible de etapas */}
-                  <EtapasTrasladoUsuario estado={viajeActivo.estado} />
-                </div>
-
-                {/* Resumen de conductor y evidencia cuando aún no hay contacto asignado */}
-                {!conductorAsignado && <div className="dashboard-driver-meta mt-5 flex flex-wrap items-center justify-between gap-3 border-t border-white/10 pt-4 text-[12px] font-medium text-slate-300">
-                  {/* Conductor */}
-                  <div className="inline-flex items-center gap-1.5">
-                    <IconoUsuario className="size-4 text-slate-400" />
-                    <span>{nombreAbreviado(viajeActivo.conductor_nombre) ?? "Carlos M."}</span>
-                  </div>
-
-                  {/* Evidencia interactiva */}
-                  {evidenciaAcceso}
-                </div>}
-              </div>
-            </div>
-
-            {/* Módulo de comunicación si hay conductor asignado */}
-            {conductorAsignado && (
-              <ConductorAsignado
-                trasladoId={conductorAsignado.trasladoId}
-                estado={conductorAsignado.estado}
-                nombre={conductorAsignado.nombre}
-                fotoUrl={conductorFotoUrl}
-                evidencia={evidenciaAcceso}
-              />
-            )}
-          </div>
-        ) : (
-          <MobileCard padding="lg" elevated className="dashboard-empty min-h-[220px] !rounded-[26px] !border-0 !bg-gradient-to-br from-[#071626] via-[#0b1e32] to-[#14283f] py-8 text-center [&_h2]:text-white [&_p]:text-slate-300 shadow-md">
-            <span className="mx-auto flex size-14 items-center justify-center rounded-2xl bg-white/10 text-emerald-400">
-              <IconoCarro className="size-7" />
-            </span>
-            <h2 className="mt-4 text-[17px] font-bold text-white">
-              No tienes traslados activos
-            </h2>
-            <p className="mt-1 text-[13px] font-medium text-slate-300 max-w-xs mx-auto">
-              Solicita tu primer traslado y sigue cada etapa en tiempo real con evidencia fotográfica.
-            </p>
-          </MobileCard>
-        )}
-      </section>
-
-      {/* E. Tarjetas Secundarias (Grid 2 columnas) */}
-      <section id="quickActions" role="region" aria-labelledby="acciones-rapidas">
-        <h2 id="acciones-rapidas" className="sr-only">
-          Acciones rápidas
-        </h2>
-        <div className="grid grid-cols-2 gap-3 sm:gap-4">
-          <Link
-            id="quickActionVehicles"
-            href="/cuenta/vehiculos"
-            aria-label="Mis vehiculos - Vehiculos registrados"
-            className="group flex flex-col justify-between rounded-2xl border border-[var(--user-color-border)] bg-[var(--user-color-surface)] p-4 shadow-xs transition hover:border-[var(--user-color-primary)] hover:bg-[var(--user-color-surface-soft)] active:scale-[0.98]"
-          >
-            <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-[var(--user-color-brand-soft)] text-[var(--user-color-primary)] transition group-hover:scale-105">
-              <IconoCarro className="size-5" />
-            </div>
-            <div className="mt-3 min-w-0">
-              <span className="block truncate text-[14px] font-bold text-[var(--user-color-primary)]">
-                Mis vehiculos
-              </span>
-              <span className="mt-0.5 block truncate text-[11.5px] font-medium text-[var(--user-color-muted)]">
-                {totalVehiculos > 0 ? `${totalVehiculos} registrados` : "Vehiculos registrados"}
-              </span>
-            </div>
-          </Link>
-
-          <Link
-            id="quickActionPassport"
-            href={pasaporteHref}
-            aria-label="Abrir pasaporte digital"
-            className="group flex flex-col justify-between rounded-2xl border border-[var(--user-color-border)] bg-[var(--user-color-surface)] p-4 shadow-xs transition hover:border-[var(--user-color-primary)] hover:bg-[var(--user-color-surface-soft)] active:scale-[0.98]"
-          >
-            <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400 transition group-hover:scale-105">
-              <IconoPortapapeles className="size-5" />
-            </div>
-            <div className="mt-3 min-w-0">
-              <span className="block truncate text-[14px] font-bold text-[var(--user-color-primary)]">
-                Pasaporte
-              </span>
-              <span className="mt-0.5 block truncate text-[11.5px] font-medium text-[var(--user-color-muted)]">
-                Digital
-              </span>
-            </div>
-          </Link>
+    <section id="activeTransferCard" aria-label={viaje ? `Traslado Activo #${viaje.traslado_id?.slice(0, 8).toUpperCase() ?? "—"}` : "Sin traslados activos"} className="home-transfer" aria-live="polite">
+      {viaje ? <>
+        <div className="home-transfer-top">
+          <span className="home-active-chip"><span aria-hidden="true" />TRASLADO ACTIVO</span>
+          <Link href={detalle} aria-label={`Ver seguimiento del traslado activo ${vehiculo}`} className="home-detail-button"><Chevron /></Link>
         </div>
-      </section>
-
-      {/* F. Bloques Informativos y de Confianza */}
-      {/* 1. Propuesta de Valor / Características */}
-      <section
-        aria-label="Seguridad y confianza"
-        className="flex items-center gap-3.5 rounded-2xl border border-[var(--user-color-success-border)] bg-[var(--user-color-success-soft)]/60 p-4 dark:border-[var(--user-color-success-border)] dark:bg-[var(--user-color-success-soft)]/50"
-      >
-        <span
-          aria-hidden="true"
-          className="flex size-10 shrink-0 items-center justify-center rounded-[13px] bg-[var(--user-color-surface)] text-[var(--user-color-success-ink)] shadow-xs"
-        >
-          <IconoEscudo className="size-5" />
-        </span>
-        <div className="min-w-0">
-          <h2 className="text-[13px] font-bold text-[var(--user-color-success-ink)]">
-            Conductores certificados
-          </h2>
-          <p className="mt-0.5 text-[12px] font-medium text-[var(--user-color-muted)]">
-            Evidencia fotográfica · Seguimiento en tiempo real
+        <Link href={detalle} className="home-vehicle-link"><h2 title={vehiculo}>{vehiculo}</h2></Link>
+        <div className="home-route-row">
+          <p className="home-route" title={`${viaje.origen_ciudad || viaje.origen_direccion || "Origen por confirmar"} → ${viaje.destino_ciudad || viaje.destino_direccion || "Destino por confirmar"}`}>
+            <IconoInicio tipo="ubicacion" /><span>{viaje.origen_ciudad || viaje.origen_direccion || "Origen por confirmar"} <span aria-hidden="true">➜</span><span className="sr-only"> hacia </span> {viaje.destino_ciudad || viaje.destino_direccion || "Destino por confirmar"}</span>
           </p>
+          <span className="home-plates" title={viaje.vehiculo_placas || "Sin placas"}>Placas {viaje.vehiculo_placas || "por confirmar"}</span>
         </div>
-      </section>
+        <div className="home-progress">
+          <div className="home-progress-heading"><span>{estado}</span><span title="Duración estimada del trayecto">{tiempoEstimadoTexto(viaje.tiempo_estimado_horas)}</span></div>
+          <ProgresoInicio estado={viaje.estado} />
+        </div>
+        {conductor ? <ConductorAsignado trasladoId={conductor.trasladoId} estado={conductor.estado} nombre={conductor.nombre} fotoUrl={conductorFotoUrl} compacto /> : <div className="home-driver home-driver-pending"><span className="home-driver-avatar"><IconoInicio tipo="usuario" /></span><div><p>Tu conductor</p><span>{viaje.conductor_nombre || "Pendiente de asignación"}</span></div></div>}
+      </> : <div className="home-empty">
+        <span className="home-empty-icon"><IconoInicio tipo="auto" /></span>
+        <h2>No tienes traslados activos</h2>
+        <p>Solicita tu primer traslado y sigue cada etapa en tiempo real con evidencia fotográfica.</p>
+        <Link href="/viajes/nuevo" className="home-empty-cta">Solicitar traslado <Chevron /></Link>
+      </div>}
+    </section>
 
-      {/* 2. Banner de Ayuda / Soporte */}
-      <Link
-        href="/soporte"
-        aria-label="¿Necesitas ayuda? Soporte 24/7 durante tu traslado"
-        className="group flex items-center justify-between gap-3.5 rounded-2xl border border-[var(--user-color-border)] bg-[var(--user-color-surface)] p-4 sm:p-4.5 shadow-xs transition hover:border-[var(--user-color-primary)] hover:bg-[var(--user-color-surface-soft)] active:scale-[0.99]"
-      >
-        <div className="flex items-center gap-3.5 min-w-0">
-          <span
-            aria-hidden="true"
-            className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-[var(--user-color-brand-soft)] text-[var(--user-color-primary)] transition group-hover:scale-105"
-          >
-            <IconoAuriculares className="size-5.5" />
-          </span>
-          <div className="min-w-0">
-            <h3 className="text-[14px] font-bold text-[var(--user-color-primary)] leading-tight">
-              ¿Necesitas ayuda?
-            </h3>
-            <p className="mt-0.5 text-[12px] font-medium text-[var(--user-color-muted)] leading-tight truncate">
-              Soporte 24/7 durante tu traslado
-            </p>
-          </div>
-        </div>
-        <span className="flex size-8 shrink-0 items-center justify-center rounded-full text-[var(--user-color-muted)] transition group-hover:translate-x-0.5 group-hover:text-[var(--user-color-primary)]">
-          <IconoChevron className="size-4.5" />
-        </span>
+    <section id="quickActions" aria-labelledby="acciones-rapidas" className="home-quick-actions">
+      <h2 id="acciones-rapidas" className="sr-only">Acciones rápidas</h2>
+      <Link href="/cuenta/vehiculos" className="home-quick-card" aria-label="Mis vehículos">
+        <span className="home-module-icon home-icon-blue"><IconoInicio tipo="auto" /></span>
+        <span className="home-module-copy"><strong>Mis vehículos</strong><span>{vehiculos.length} {vehiculos.length === 1 ? "registrado" : "registrados"}</span></span>
+        <span className="home-module-chevron"><Chevron /></span>
       </Link>
-    </div>
-  );
+      <Link href={pasaporte} className="home-quick-card" aria-label="Abrir pasaporte digital">
+        <span className="home-module-icon home-icon-green"><IconoInicio tipo="documento" /></span>
+        <span className="home-module-copy"><strong>Pasaporte</strong><span>Digital</span></span>
+        <span className="home-module-chevron"><Chevron /></span>
+      </Link>
+    </section>
+
+    <Link href="/soporte" className="home-support" aria-label="¿Necesitas ayuda? Soporte 24/7">
+      <span className="home-module-icon home-icon-purple"><IconoInicio tipo="soporte" /></span>
+      <span className="home-module-copy"><strong>¿Necesitas ayuda?</strong><span>Soporte 24/7</span></span>
+      <span className="home-module-chevron"><Chevron /></span>
+    </Link>
+  </div>;
 }
