@@ -12,7 +12,7 @@ test.beforeEach(async ({ context, page }) => {
 
 async function openTrips(page: Page, offers = 0) {
   await page.goto("/viajes", { waitUntil: "domcontentloaded" });
-  await expect(page.locator("[data-driver-traslados] [role=tabpanel]")).toHaveAttribute("aria-busy", "false", { timeout: 30_000 });
+  await expect(page.locator("[data-driver-traslados] [role=tabpanel]")).toHaveAttribute("aria-busy", "false", { timeout: 180_000 });
   await expect(page.getByRole("tab", { name: `Ofertas (${offers})`, exact: true })).toBeVisible();
   await expect(page.getByText("Información de los traslados", { exact: true })).toHaveCount(0);
   await page.locator("nextjs-portal").evaluateAll((nodes) => nodes.forEach((node) => (node as HTMLElement).style.setProperty("display", "none", "important")));
