@@ -6,7 +6,8 @@ import Link from "next/link";
 import { AccountIcon } from "./AccountIcon";
 import styles from "./details.module.css";
 
-export function DriverDetailsShell({ kind, children }: { kind: "profile" | "documents"; children: ReactNode }) {
+export function DriverDetailsShell({ kind, children }: { kind: "profile" | "documents" | "bank" | "certification"; children: ReactNode }) {
+  const step = kind === "bank" ? 4 : kind === "documents" ? 3 : null;
   const screen = useRef<HTMLDivElement>(null);
   useEffect(() => {
     const viewport = window.visualViewport;
@@ -23,7 +24,7 @@ export function DriverDetailsShell({ kind, children }: { kind: "profile" | "docu
       <header className={styles.header}>
         <Link href="/cuenta" prefetch={false}>‹ Atrás</Link>
         <div className={styles.brand}><Image src="/imagenes/ruum-logo.svg" alt="Ruum Ruum" width={160} height={35} priority />{kind === "profile" && <span>DRIVEAWAY SERVICE</span>}</div>
-        {kind === "documents" && <div className={styles.progress} role="progressbar" aria-label="Progreso del expediente" aria-valuemin={0} aria-valuemax={5} aria-valuenow={3} aria-valuetext="3 de 5"><span>3 de 5</span><div aria-hidden="true">{Array.from({ length: 5 }, (_, index) => <i key={index} data-active={index < 3} />)}</div></div>}
+        {step && <div className={styles.progress} role="progressbar" aria-label="Progreso del expediente" aria-valuemin={0} aria-valuemax={5} aria-valuenow={step} aria-valuetext={`${step} de 5`}><span>{step} de 5</span><div aria-hidden="true">{Array.from({ length: 5 }, (_, index) => <i key={index} data-active={index < step} />)}</div></div>}
       </header>
       {children}
     </div>

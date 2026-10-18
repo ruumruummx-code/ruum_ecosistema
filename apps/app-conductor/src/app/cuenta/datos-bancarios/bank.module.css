@@ -1,0 +1,29 @@
+.form { display: flex; align-items: center; flex: 1; min-height: min-content; }
+.form > div { gap: clamp(8px, 2dvh, 15px); grid-auto-rows: clamp(46px, 7dvh, 70px); }
+.form > div > div { background: #f9fafc; padding-inline: 17px; }
+.form svg { color: #122b4b; }
+.form select { min-height: 22px !important; height: 22px !important; line-height: 1.2; }
+.form select[data-empty="true"] { color: #8795aa; }
+.warning { display: flex; align-items: flex-start; gap: 13px; flex-shrink: 0; border: 1px solid #ffc56b; border-radius: 14px; background: #fff3e1; padding: 16px; color: #804214; }
+.warning > svg { color: #f5a017; flex-shrink: 0; width: 25px; height: 25px; }
+.warning p { font-size: 12px; line-height: 1.45; }
+.warning button { display: inline; min-height: 0; padding: 0; border: 0; background: transparent; color: #854109; text-decoration: underline; font: inherit; font-weight: 700; }
+.warning button:hover { color: #005cff; }
+.seal { display: flex; justify-content: center; align-items: center; gap: 7px; flex-shrink: 0; font-size: 11px; color: #657998; }
+.seal svg { width: 21px; height: 21px; }
+.passwordLabel { display: block; font-size: 13px; color: #526983; }
+.password { display: flex; align-items: center; gap: 10px; margin-block: 7px 15px; }
+.password input { flex: 1; width: 0; font-size: 16px; }
+.password button { border: 0; background: transparent; color: #005cff; min-height: 44px; font-size: 12px; }
+@media (max-height: 620px) { .form > div { gap: 7px; grid-auto-rows: 46px; } .form > div > div { padding-block: 4px; } .warning { padding: 10px; gap: 9px; } .warning p { font-size: 10px; } .seal { font-size: 10px; } }
+@media (max-height: 500px) {
+  .form > div { grid-auto-rows: 38px; gap: 4px; }
+  .form > div > div { padding-block: 2px; }
+  :global([data-driver-details="bank"]):has(.form[data-authorized="true"]) .warning,
+  :global([data-driver-details="bank"]):has(.form[data-authorized="true"]) .seal { display: none; }
+}
+@container driver-bank (max-height: 500px) {
+  .form > div { grid-auto-rows: 38px; gap: 4px; }
+  .form > div > div { padding-block: 2px; }
+  .form[data-authorized="true"] ~ .warning, .form[data-authorized="true"] ~ .seal { display: none; }
+}

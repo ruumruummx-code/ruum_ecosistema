@@ -42,5 +42,5 @@ export default function PaginaDocumentosCuenta() {
   }
   const items = buildDocumentChecklist(documents, driver);
   const canContinue = !!driver && !loading && !error && !uploading && items.every(item => item.complete);
-  return <DriverDocumentsView items={items} loading={loading} error={error} message={message} uploading={uploading} enabled={!!driver} onUpload={(...args) => { void upload(...args); }} onRetry={() => { void load(); }} onContinue={() => { if (canContinue) router.push("/cuenta/certificacion"); }} />;
+  return <DriverDocumentsView items={items} loading={loading} error={error} message={message} uploading={uploading} enabled={!!driver} onUpload={(...args) => { void upload(...args); }} onRetry={() => { void load(); }} onContinue={() => { if (canContinue) router.push("/cuenta/datos-bancarios"); }} />;
 }

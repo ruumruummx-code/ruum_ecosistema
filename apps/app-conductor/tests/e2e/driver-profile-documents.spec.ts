@@ -17,6 +17,7 @@ async function fixture(page: Page, allDocuments = false) {
   const headers = { "access-control-allow-origin": "*" };
   await page.route("**/rest/v1/conductores?*", route => route.fulfill({ contentType: "application/json", headers, body: JSON.stringify(driver) }));
   await page.route("**/rest/v1/documentos_conductor?*", route => route.fulfill({ contentType: "application/json", headers, body: JSON.stringify(documents) }));
+  await page.route("**/rest/v1/datos_bancarios_conductor?*", route => route.fulfill({ contentType: "application/json", headers, body: "null" }));
   await page.route("**/rest/v1/rpc/solicitar_cambio_expediente_conductor", async route => {
     const body = route.request().postDataJSON() as { p_cambios: Record<string, unknown> };
     mutations.push(body.p_cambios);
@@ -112,7 +113,7 @@ test("sube documento con tipo y versión, actualiza estado y habilita continuar"
   await (await replacement).setFiles({ name: "licencia.pdf", mimeType: "application/pdf", buffer: Buffer.from("%PDF-1.4\n%%EOF") });
   await expect(page.getByRole("button", { name: "Continuar", exact: true })).toBeEnabled({ timeout: 30_000 });
   expect(uploaded).toContain("documento_anterior_id"); expect(uploaded).toContain("doc-licencia_frente");
-  await page.getByRole("button", { name: "Continuar", exact: true }).click(); await expect(page).toHaveURL(/\/cuenta\/certificacion$/, { timeout: 180_000 });
+  await page.getByRole("button", { name: "Continuar", exact: true }).click(); await expect(page).toHaveURL(/\/cuenta\/datos-bancarios$/, { timeout: 180_000 });
 });
 test("rechaza archivos no permitidos y permite consultar el detalle sin exponer rutas privadas", async ({ page }) => {
   await fixture(page); await open(page, "documents");
