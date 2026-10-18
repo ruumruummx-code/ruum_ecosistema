@@ -84,7 +84,7 @@ export function EstadoSincronizacionGlobal() {
     };
   }, []);
 
-  if (!mounted || pathname === "/login" || pathname === "/registro" || pathname === "/cuenta") return null;
+  if (!mounted || pathname === "/login" || pathname === "/registro" || pathname === "/cuenta" || pathname === "/cuenta/perfil" || pathname === "/cuenta/documentos") return null;
 
   if (snapshot.status === "todo_sincronizado") return null;
 

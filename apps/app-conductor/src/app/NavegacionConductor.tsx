@@ -198,7 +198,7 @@ export function NavegacionConductor() {
     return () => document.body.classList.remove("conductor-tiene-viaje-activo");
   }, [viajeActivo]);
 
-  if (esAcceso || pathname === "/viajes" || pathname === "/ganancias" || pathname === "/cuenta") return null;
+  if (esAcceso || pathname === "/viajes" || pathname === "/ganancias" || pathname === "/cuenta" || pathname === "/cuenta/perfil" || pathname === "/cuenta/documentos") return null;
 
   return (
     <>
