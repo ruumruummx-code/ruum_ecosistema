@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { FormEvent } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { Button, Aviso } from "@ruum/ui";
 import { TEXTOS_CARGANDO } from "@ruum/shared/constants";
 import { traducirErrorAuth, traducirErrorOperativo, fortalezaPassword } from "@ruum/shared/utils";
@@ -37,6 +38,7 @@ import { IdentityStep } from "./IdentityStep";
 import { LicenseStep } from "./LicenseStep";
 import { OtpVerification } from "./OtpVerification";
 import { RegistrationProgress } from "./RegistrationProgress";
+import { RegistrationIcon } from "./RegistrationIcon";
 import { RegistrationShell } from "./RegistrationShell";
 import { RegistrationNotice } from "./RegistrationNotice";
 import { LicenseConsentDetails } from "./LicenseConsentDetails";
@@ -171,6 +173,7 @@ export default function PaginaRegistroConductor() {
   const [errorOtp, setErrorOtp] = useState<string | null>(null);
   const [reenviandoOtp, setReenviandoOtp] = useState(false);
   const [esperaReenvioOtp, setEsperaReenvioOtp] = useState(0);
+  const reenvioOtpDisponibleEnRef = useRef(0);
   const [intentosFallidosOtp, setIntentosFallidosOtp] = useState(0);
 
   // Verificación de identidad Didit (auto-iniciada tras envío exitoso)
@@ -319,7 +322,8 @@ export default function PaginaRegistroConductor() {
         validarTelefono("telefono", telefono, setTelefono),
         validarCampo("email", email),
         sesionAutenticada ? setCampoError("password", "") : validarPassword(),
-        validarConfirmacion()
+        validarConfirmacion(),
+        setCampoError("aceptaTerminos", aceptaTerminos && confirmaPrivacidad ? "" : "Acepta los Términos y Condiciones y el Aviso de Privacidad para continuar.")
       ].every(Boolean);
     }
     if (indice === 1) {
@@ -533,7 +537,7 @@ export default function PaginaRegistroConductor() {
         setSesionActivaTrasRegistro(true);
         return true;
       }
-      setEsperaReenvioOtp(ESPERA_REENVIO_OTP_SEGUNDOS);
+      iniciarEsperaReenvioOtp();
       setPendienteOtp(true);
       return false;
     } catch (err) {
@@ -693,7 +697,7 @@ export default function PaginaRegistroConductor() {
         }
       });
       if (errorReenvio) throw errorReenvio;
-      setEsperaReenvioOtp(ESPERA_REENVIO_OTP_SEGUNDOS);
+      iniciarEsperaReenvioOtp();
       setIntentosFallidosOtp(0);
       setCodigoOtp("");
     } catch (err) {
@@ -705,11 +709,19 @@ export default function PaginaRegistroConductor() {
   }
 
   
+  function iniciarEsperaReenvioOtp() {
+    reenvioOtpDisponibleEnRef.current = Date.now() + ESPERA_REENVIO_OTP_SEGUNDOS * 1000;
+    setEsperaReenvioOtp(ESPERA_REENVIO_OTP_SEGUNDOS);
+  }
+
+  const esperandoReenvioOtp = esperaReenvioOtp > 0;
   useEffect(() => {
-    if (!pendienteOtp || esperaReenvioOtp <= 0) return;
-    const intervalo = setInterval(() => setEsperaReenvioOtp((s) => Math.max(0, s - 1)), 1000);
-    return () => clearInterval(intervalo);
-  }, [pendienteOtp, esperaReenvioOtp]);
+    if (!pendienteOtp || !esperandoReenvioOtp) return;
+    const actualizar = () => setEsperaReenvioOtp(Math.max(0, Math.ceil((reenvioOtpDisponibleEnRef.current - Date.now()) / 1000)));
+    const intervalo = setInterval(actualizar, 1000);
+    window.addEventListener("focus", actualizar);
+    return () => { clearInterval(intervalo); window.removeEventListener("focus", actualizar); };
+  }, [pendienteOtp, esperandoReenvioOtp]);
 
   useEffect(() => {
     if (!tieneSupabaseConfigurado()) { hidratacionRemotaCompletaRef.current=true; setRegistroListo(true); return; }
@@ -882,14 +894,18 @@ export default function PaginaRegistroConductor() {
     router.push(sesionActivaTrasRegistro ? "/panel" : "/login");
   }
 
-  const registroCompacto = paso < 3 && !pendienteOtp && !enviado;
+  const registroCompacto = (paso < 3 || pendienteOtp) && !enviado;
+  const cuentaCompleta = aceptaTerminos && confirmaPrivacidad
+    && !validarCampoRegistroConductor("telefono", telefono)
+    && !validarCampoRegistroConductor("email", email)
+    && (sesionAutenticada || (!validarCampoRegistroConductor("password", password) && Boolean(confirmacionPassword) && password === confirmacionPassword));
   const domicilioYContactoCompletos = (["codigoPostal", "estado", "ciudad", "colonia", "calle", "numero", "referencias", "contactoEmergenciaNombre", "contactoEmergenciaTelefono"] as const).every((campo) => {
     const valores = { codigoPostal, estado, ciudad, colonia, calle, numero, referencias, contactoEmergenciaNombre, contactoEmergenciaTelefono };
     return !validarCampoRegistroConductor(campo, valores[campo]);
   });
 
   return (
-    <RegistrationShell compact={registroCompacto}>
+    <RegistrationShell compact={registroCompacto} account={paso === 0 || pendienteOtp}>
         {mostrarDetalleConsentimiento && <LicenseConsentDetails onClose={() => setMostrarDetalleConsentimiento(false)} />}
         {mostrarVerificacionDidit && (
           <DiditVerificationModal
@@ -918,6 +934,7 @@ export default function PaginaRegistroConductor() {
             onSubmit={confirmarCodigoOtp}
             onResend={() => void reenviarCodigoOtp()}
             onAlreadyConfirmed={() => router.push("/login")}
+            onBack={() => { setPendienteOtp(false); setCodigoOtp(""); setErrorOtp(null); }}
           />
         ) : enviado ? (
           <div className="py-8 text-center">
@@ -992,7 +1009,11 @@ export default function PaginaRegistroConductor() {
               if (paso < PASOS_REGISTRO.length - 1) { event.preventDefault(); void avanzar(); }
               else void crearCuenta(event);
             }}>
-              {paso === 0 && (
+              {paso === 0 && (<>
+                <div className={styles.accountIntro}>
+                  <h1 id="titulo-registro-conductor">Crea tu cuenta</h1>
+                  <p>Comienza a conducir con nosotros</p>
+                </div>
                 <AccountStep
                   telefono={telefono}
                   setTelefono={setTelefono}
@@ -1011,6 +1032,17 @@ export default function PaginaRegistroConductor() {
                   validarPassword={validarPassword}
                   validarConfirmacion={validarConfirmacion}
                 />
+                <label className={styles.accountLegal}>
+                  <input type="checkbox" required checked={aceptaTerminos && confirmaPrivacidad} onChange={(event) => {
+                    setAceptaTerminos(event.target.checked);
+                    setConfirmaPrivacidad(event.target.checked);
+                    limpiarErrorCampo("aceptaTerminos");
+                    limpiarErrorCampo("confirmaPrivacidad");
+                    if (event.target.checked) aceptadosEnRef.current = new Date().toISOString();
+                  }} />
+                  <span>Acepto los <a href="/legal/terminos" target="_blank" rel="noopener noreferrer">Términos y Condiciones</a> y el <a href="/legal/privacidad" target="_blank" rel="noopener noreferrer">Aviso de Privacidad</a>.</span>
+                </label>
+              </>
               )}
 
               {paso === 1 && (
@@ -1120,15 +1152,16 @@ export default function PaginaRegistroConductor() {
 
               {registroCompacto ? (
                 <footer className={styles.actionFooter}>
-                  {paso === 0 && <p className={styles.microcopy}>Tus datos personales, biométricos y bancarios se tratan según el <a href="/legal/privacidad" target="_blank" rel="noopener noreferrer">Aviso de Privacidad</a>.</p>}
                   {paso === 2 && <p className={styles.microcopy}>
                     Al continuar, declaras que tu licencia es válida y autorizas la verificación de antecedentes y datos biométricos. <a href="/legal/privacidad" target="_blank" rel="noopener noreferrer">Privacidad</a> · <a href="/legal/terminos" target="_blank" rel="noopener noreferrer">Términos</a>
                     <button type="button" className={styles.legalTrigger} onClick={() => setMostrarDetalleConsentimiento(true)}>Ver declaración</button>
                   </p>}
                   <button className={styles.primary} type="submit" aria-busy={enviando}
-                    disabled={!registroListo || enviando || !tieneSupabaseConfigurado() || (paso === 1 && !domicilioYContactoCompletos)}>
+                    disabled={!registroListo || enviando || !tieneSupabaseConfigurado() || (paso === 0 && !cuentaCompleta) || (paso === 1 && !domicilioYContactoCompletos)}>
                     {!registroListo ? "Preparando…" : enviando ? "Guardando…" : paso === 0 && !sesionAutenticada ? "Crear cuenta y continuar" : paso === 1 ? "Guardar y Continuar" : "Continuar"}
+                    {paso === 0 && <RegistrationIcon name="arrow" />}
                   </button>
+                  {paso === 0 && <p className={styles.accountLogin}>¿Ya tienes una cuenta? <Link href="/login">Entrar</Link></p>}
                 </footer>
               ) : (
               <div className="grid gap-3 sm:grid-cols-2">

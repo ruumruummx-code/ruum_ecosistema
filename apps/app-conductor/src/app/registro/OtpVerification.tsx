@@ -1,6 +1,8 @@
-import type { FormEvent } from "react";
-import { Aviso, Button, Field } from "@ruum/ui";
+import { useEffect, useRef, type FormEvent } from "react";
 import { soloDigitos } from "./registration-validation";
+import { RegistrationAccessHeader } from "./RegistrationAccessHeader";
+import { RegistrationIcon } from "./RegistrationIcon";
+import styles from "./registration.module.css";
 
 export function OtpVerification({
   email,
@@ -16,7 +18,8 @@ export function OtpVerification({
   maxIntentos = 5,
   onSubmit,
   onResend,
-  onAlreadyConfirmed
+  onAlreadyConfirmed,
+  onBack
 }: {
   email: string;
   codigoOtp: string;
@@ -32,54 +35,59 @@ export function OtpVerification({
   onSubmit: (event: FormEvent) => void;
   onResend: () => void;
   onAlreadyConfirmed: () => void;
+  onBack: () => void;
 }) {
   const bloqueado = intentosFallidos >= maxIntentos;
   const restantes = Math.max(0, maxIntentos - intentosFallidos);
+  const inputRef = useRef<HTMLInputElement>(null);
+  useEffect(() => {
+    if (!bloqueado && !verificandoOtp) inputRef.current?.focus({ preventScroll: true });
+  }, [bloqueado, verificandoOtp]);
+
+  function actualizarCodigo(valor: string) {
+    setCodigoOtp(soloDigitos(valor, codigoLongitud));
+    if (errorOtp) clearErrorOtp();
+  }
+
   return (
-    <div className="py-4">
-      <h1 id="titulo-registro-conductor" className="mt-4 font-display text-2xl font-bold text-text-primary">
-        Confirma tu correo
-      </h1>
-      <p className="mt-3 font-body text-sm leading-6 text-text-secondary">
-        Enviamos un código de {codigoLongitud} dígitos a{" "}
-        <span className="font-semibold text-text-primary">{email.trim().toLowerCase()}</span>. Escríbelo aquí para
-        activar tu cuenta y subir tus documentos sin salir de la app.
-      </p>
+    <>
+      <RegistrationAccessHeader step={2} onBack={onBack} />
+      <form className={`${styles.form} ${styles.otpForm}`} onSubmit={(event) => {
+        if (verificandoOtp || reenviandoOtp || bloqueado || !new RegExp(`^\\d{${codigoLongitud}}$`).test(codigoOtp)) { event.preventDefault(); return; }
+        onSubmit(event);
+      }}>
+        <div className={`${styles.accountIntro} ${styles.otpIntro}`}>
+          <h1 id="titulo-registro-conductor">Confirma tu correo</h1>
+          <p>Enviamos un código de {codigoLongitud} dígitos a <strong>{email.trim().toLowerCase()}</strong></p>
+          <p>Escríbelo aquí para activar tu cuenta y subir tus documentos sin salir de la app.</p>
+        </div>
 
-      <form className="mt-6 grid gap-4" onSubmit={onSubmit}>
-        <Field
-          etiqueta="Código de verificación"
-          inputMode="numeric"
-          pattern="[0-9]*"
-          autoComplete="one-time-code"
-          maxLength={codigoLongitud}
-          value={codigoOtp}
-          onChange={(e) => {
-            setCodigoOtp(soloDigitos(e.target.value, codigoLongitud));
-            if (errorOtp) clearErrorOtp();
-          }}
-          ayuda={bloqueado ? `Has agotado los ${maxIntentos} intentos. Solicita un nuevo código.` : `Revisa también tu carpeta de spam o promociones. ${intentosFallidos > 0 ? `Te quedan ${restantes} intentos.` : ""}`}
-          required
-          disabled={bloqueado}
-        />
+        <div className={styles.otpEntry}>
+          <label htmlFor="codigo-verificacion">Código de verificación <span aria-hidden="true">*</span></label>
+          <div className={styles.otpCode} data-invalid={Boolean(errorOtp)}>
+            <div className={styles.otpSlots} aria-hidden="true">
+              {Array.from({ length: codigoLongitud }, (_, index) => <span key={index}>{codigoOtp[index] || "_"}</span>)}
+            </div>
+            <input id="codigo-verificacion" name="codigo-verificacion" ref={inputRef}
+              type="text" inputMode="numeric" pattern={`[0-9]{${codigoLongitud}}`} autoComplete="one-time-code"
+              autoCapitalize="none" spellCheck={false} maxLength={codigoLongitud} value={codigoOtp}
+              onChange={(event) => actualizarCodigo(event.target.value)}
+              onPaste={(event) => { event.preventDefault(); actualizarCodigo(event.clipboardData.getData("text")); }}
+              required disabled={bloqueado || verificandoOtp}
+              aria-invalid={Boolean(errorOtp)} aria-describedby={`ayuda-codigo${errorOtp || bloqueado ? " error-codigo" : ""}`} />
+          </div>
+          <p id="ayuda-codigo" className={styles.otpHelp}>Revisa también tu carpeta de spam o promociones.</p>
+          {(errorOtp || bloqueado) && <p id="error-codigo" className={styles.otpError} role="alert">
+            {errorOtp || `Has agotado los ${maxIntentos} intentos. Solicita un nuevo código.`}
+          </p>}
+          {!errorOtp && intentosFallidos > 0 && !bloqueado && <p className={styles.otpHelp}>Te quedan {restantes} intentos.</p>}
+        </div>
 
-        {errorOtp && <Aviso tono="danger">{errorOtp}</Aviso>}
-        {bloqueado && (
-          <Aviso tono="atencion">
-            Por seguridad bloqueamos los intentos. Espera 60 s y pulsa “Reenviar código” para obtener uno nuevo.
-          </Aviso>
-        )}
-
-        <Button type="submit" loading={verificandoOtp} disabled={verificandoOtp || codigoOtp.length !== codigoLongitud || bloqueado}>
-          {verificandoOtp ? "Verificando…" : bloqueado ? "Bloqueado — reenvía el código" : "Confirmar y activar"}
-        </Button>
-
-        <div className="flex flex-wrap items-center justify-between gap-2">
+        <div className={styles.otpResend}>
           <button
             type="button"
             onClick={onResend}
-            disabled={esperaReenvioOtp > 0 || reenviandoOtp}
-            className="inline-flex min-h-11 items-center font-body text-sm font-semibold text-route-action hover:underline disabled:cursor-not-allowed disabled:text-text-disabled disabled:no-underline"
+            disabled={esperaReenvioOtp > 0 || reenviandoOtp || verificandoOtp}
           >
             {reenviandoOtp
               ? "Reenviando…"
@@ -87,15 +95,21 @@ export function OtpVerification({
                 ? `Reenviar código (${esperaReenvioOtp}s)`
                 : "Reenviar código"}
           </button>
+        </div>
+        <footer className={styles.actionFooter}>
+          <button type="submit" className={styles.primary} aria-busy={verificandoOtp} disabled={verificandoOtp || reenviandoOtp || codigoOtp.length !== codigoLongitud || bloqueado}>
+            {verificandoOtp ? "Verificando…" : "Confirmar y activar"}<RegistrationIcon name="arrow" />
+          </button>
           <button
             type="button"
             onClick={onAlreadyConfirmed}
-            className="inline-flex min-h-11 items-center font-body text-sm text-text-secondary hover:text-text-primary hover:underline"
+            disabled={verificandoOtp}
+            className={styles.otpAlreadyConfirmed}
           >
             Ya confirmé desde el enlace del correo
           </button>
-        </div>
+        </footer>
       </form>
-    </div>
+    </>
   );
 }

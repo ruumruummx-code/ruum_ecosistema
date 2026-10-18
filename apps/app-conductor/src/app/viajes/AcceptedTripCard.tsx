@@ -4,6 +4,7 @@ import Link from "next/link";
 import type { PasaporteRow, DetalleOperativo } from "./trips-utils";
 import { formatearDuracion, nombreVehiculo } from "./trips-utils";
 import { ConductorStatusBadge, conductorButtonClasses, type ConductorStatus } from "../../components/v2/ConductorUI";
+import { TripPreviewCard } from "./TripPreviewCard";
 
 function getEstadoCardInfo(estado: string) {
   switch (estado) {
@@ -64,14 +65,17 @@ interface AcceptedTripCardProps {
   detalle: DetalleOperativo;
   onReject: (viaje: PasaporteRow) => void;
   hrefDetalle: string;
+  compact?: boolean;
 }
 
 export function AcceptedTripCard({
   viaje,
   detalle,
   onReject,
-  hrefDetalle
+  hrefDetalle,
+  compact = false
 }: AcceptedTripCardProps) {
+  if (compact) return <TripPreviewCard viaje={viaje} detalle={detalle} hrefDetalle={hrefDetalle} accepted={{ label: getEstadoCardInfo(viaje.estado || "").titulo, onReject: () => onReject(viaje) }} />;
   const folio = viaje.traslado_id ? viaje.traslado_id.slice(0, 8).toUpperCase() : "POR CONFIRMAR";
   const ganancia = viaje.ganancia_conductor != null
     ? `$${viaje.ganancia_conductor.toLocaleString("es-MX", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`

@@ -23,9 +23,7 @@ export function TrasladosSearch({ onSearch, placeholder = "Buscar Traslados..." 
   // Sincronizar con URL
   useEffect(() => {
     const urlQuery = searchParams.get("q");
-    if (urlQuery) {
-      setQuery(urlQuery);
-    }
+    setQuery(urlQuery ?? "");
   }, [searchParams]);
 
   const handleSearch = useCallback(
