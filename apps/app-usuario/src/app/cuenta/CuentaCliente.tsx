@@ -31,6 +31,7 @@ const OPCIONES: Record<SeccionCuenta, { titulo: string; href: string; icono: str
     { titulo: "Datos personales", href: "/cuenta/datos-personales", icono: SECCIONES.perfil.icono },
     { titulo: "Contraseña", href: "/cuenta/cambiar-contrasena", icono: SENDAS_ICONO.candado },
     { titulo: "Verificación y facturación", href: "/cuenta/verificacion-documentos", icono: SECCIONES.legal.icono, verificacion: true },
+    { titulo: "Cargas masivas pendientes", href: "/viajes/masivo", icono: "M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2Z" },
     { titulo: "Preferencias", href: "/cuenta/preferencias", icono: "M4 21V3 M12 21V3 M20 21V3 M1 8h6 M9 16h6 M17 8h6" },
   ],
   soporte: [

@@ -1,6 +1,8 @@
 "use client";
-import { useCallback, useEffect, useReducer, useRef } from "react";
+import { useCallback, useEffect, useReducer, useRef, useState } from "react";
 import { validarFila, normalizarFilaPlantilla, valorCelda, type FilaValidada } from "@/lib/carga-masiva";
+
+export const STORAGE_KEY_CARGA_ACTIVA = "ruum_carga_masiva_activa_id";
 
 // ── Tipos públicos ──────────────────────────────────────────────────────────
 
@@ -33,7 +35,8 @@ type Action =
   | { type: "ELIMINAR_FILA"; indice: number }
   | { type: "PROGRESO"; valor: number }
   | { type: "COTIZACION_OK"; filas: FilaMasiva[]; totalMXN: number }
-  | { type: "CHECKOUT"; stripeClientSecret: string; cargaId: string };
+  | { type: "CHECKOUT"; stripeClientSecret: string; cargaId: string }
+  | { type: "REANUDAR_CHECKOUT"; stripeClientSecret: string; cargaId: string; filas: FilaMasiva[]; totalMXN: number };
 const inicial: State = { estado: "idle", filas: [], totalMXN: 0, error: null, progreso: 0, stripeClientSecret: null, cargaId: null, pagoConfirmado: false };
 function revalidarFila(fila: FilaMasiva): FilaMasiva {
   return { ...fila, ...validarFila(fila.datos, fila.indice) };
@@ -73,6 +76,17 @@ function reducer(state: State, action: Action): State {
       return { ...state, estado: "checkout", filas: action.filas, totalMXN: action.totalMXN, progreso: 100 };
     case "CHECKOUT":
       return { ...state, stripeClientSecret: action.stripeClientSecret, cargaId: action.cargaId };
+    case "REANUDAR_CHECKOUT":
+      return {
+        ...state,
+        estado: "checkout",
+        stripeClientSecret: action.stripeClientSecret,
+        cargaId: action.cargaId,
+        filas: action.filas,
+        totalMXN: action.totalMXN,
+        progreso: 100,
+        error: null,
+      };
     case "PAGO_OK":
       return { ...state, estado: "pagado", pagoConfirmado: true };
     case "RESET":
@@ -87,12 +101,29 @@ export function useCargaMasiva() {
   const abortRef = useRef<AbortController | null>(null);
   const claveCobro = useRef<string | null>(null);
   const correcciones = useRef(new Map<number, AbortController>());
+  const [cargaPendienteStorage, setCargaPendienteStorage] = useState<string | null>(null);
+
+  useEffect(() => {
+    try {
+      const guardada = localStorage.getItem(STORAGE_KEY_CARGA_ACTIVA);
+      if (guardada) setCargaPendienteStorage(guardada);
+    } catch {
+      // Ignore storage access error
+    }
+  }, []);
+
   useEffect(() => {
     const pendientes = correcciones.current;
     return () => { abortRef.current?.abort(); pendientes.forEach(c => c.abort()); };
   }, []);
 
   const cancelar = useCallback(() => {
+    try {
+      localStorage.removeItem(STORAGE_KEY_CARGA_ACTIVA);
+    } catch {
+      // Ignore
+    }
+    setCargaPendienteStorage(null);
     claveCobro.current = null;
     abortRef.current?.abort();
     correcciones.current.forEach(c => c.abort());
@@ -231,6 +262,12 @@ export function useCargaMasiva() {
       if (controller.signal.aborted) return;
       if (!res.ok) throw new Error(resultado.error ?? "No se pudo cotizar.");
       if (resultado.filas) { dispatch({ type: "VALIDACION_OK", filas: resultado.filas }); return; }
+      try {
+        localStorage.setItem(STORAGE_KEY_CARGA_ACTIVA, resultado.id);
+      } catch {
+        // Ignore
+      }
+      setCargaPendienteStorage(resultado.id);
       dispatch({ type: "CHECKOUT", stripeClientSecret: resultado.clientSecret, cargaId: resultado.id });
       dispatch({ type: "COTIZACION_OK", filas: resultado.cotizaciones, totalMXN: resultado.totalMXN });
     } catch (err) {
@@ -241,7 +278,84 @@ export function useCargaMasiva() {
 
   /** Llama cuando Stripe confirma el pago */
   const confirmarPago = useCallback(() => {
+    try {
+      localStorage.removeItem(STORAGE_KEY_CARGA_ACTIVA);
+    } catch {
+      // Ignore
+    }
+    setCargaPendienteStorage(null);
     dispatch({ type: "PAGO_OK" });
+  }, []);
+
+  /** Reanuda una carga pendiente previamente guardada */
+  const reanudarCarga = useCallback(async (id: string): Promise<boolean> => {
+    abortRef.current?.abort();
+    const controller = new AbortController();
+    abortRef.current = controller;
+    dispatch({ type: "COTIZANDO" });
+    try {
+      const res = await fetch(`/api/viajes/masivos/pendientes?id=${encodeURIComponent(id)}`, {
+        signal: controller.signal,
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? "No se pudo recuperar la carga pendiente.");
+      if (data.pagado) {
+        try { localStorage.removeItem(STORAGE_KEY_CARGA_ACTIVA); } catch {}
+        setCargaPendienteStorage(null);
+        dispatch({ type: "PAGO_OK" });
+        return true;
+      }
+      if (data.expirado) {
+        try { localStorage.removeItem(STORAGE_KEY_CARGA_ACTIVA); } catch {}
+        setCargaPendienteStorage(null);
+        dispatch({ type: "ERROR", mensaje: data.error ?? "La carga masiva ya no está disponible." });
+        return false;
+      }
+      if (!data.clientSecret) throw new Error("No se pudo obtener la sesión de pago de la carga.");
+
+      try { localStorage.setItem(STORAGE_KEY_CARGA_ACTIVA, id); } catch {}
+      setCargaPendienteStorage(id);
+      const filasCarga = Array.isArray(data.cotizaciones) && data.cotizaciones.length > 0
+        ? data.cotizaciones
+        : (data.filas ?? []);
+      dispatch({
+        type: "REANUDAR_CHECKOUT",
+        cargaId: id,
+        stripeClientSecret: data.clientSecret,
+        filas: filasCarga,
+        totalMXN: data.totalMXN ?? 0,
+      });
+      return true;
+    } catch (err) {
+      if (err instanceof DOMException && err.name === "AbortError") return false;
+      dispatch({ type: "ERROR", mensaje: err instanceof Error ? err.message : "Error al reanudar la carga." });
+      return false;
+    }
+  }, []);
+
+  /** Descarta una carga pendiente */
+  const descartarCargaPendiente = useCallback(async (id: string): Promise<void> => {
+    try {
+      await fetch(`/api/viajes/masivos/pendientes?id=${encodeURIComponent(id)}`, { method: "DELETE" });
+    } catch {
+      // Ignorar errores de red en descarte
+    } finally {
+      try { localStorage.removeItem(STORAGE_KEY_CARGA_ACTIVA); } catch {}
+      setCargaPendienteStorage(null);
+      claveCobro.current = null;
+      dispatch({ type: "RESET" });
+    }
+  }, []);
+
+  /** Consulta lista de cargas pendientes desde el servidor */
+  const consultarCargasPendientes = useCallback(async () => {
+    try {
+      const res = await fetch("/api/viajes/masivos/pendientes");
+      const data = await res.json();
+      return (data.pendientes ?? []) as Array<{ id: string; totalMXN: number; cantidad_traslados: number; creado_en?: string }>;
+    } catch {
+      return [];
+    }
   }, []);
 
   const filasVisibles = state.filas.filter((f) => !f.eliminada);
@@ -255,12 +369,16 @@ export function useCargaMasiva() {
     filasConError,
     filasCorrectas,
     todasListas,
+    cargaPendienteStorage,
     cargarArchivo,
     corregirCampo,
     eliminarFila,
     geocodificarYCotizar,
     confirmarPago,
     cancelar,
+    reanudarCarga,
+    descartarCargaPendiente,
+    consultarCargasPendientes,
   };
 }
 

@@ -88,6 +88,21 @@ export interface DatosPersonalesProps {
   fotoUrlInicial?: string | null;
 }
 
+function esErrorEsquemaFechaNacimiento(err: unknown): boolean {
+  if (!err || typeof err !== "object") return false;
+  const e = err as { code?: string | number; status?: number; message?: string };
+  return (
+    e.code === "PGRST204" ||
+    e.code === "42703" ||
+    e.status === 400 ||
+    e.code === "400" ||
+    (typeof e.message === "string" &&
+      (e.message.includes("fecha_nacimiento") ||
+        e.message.includes("schema cache") ||
+        e.message.includes("column")))
+  );
+}
+
 export function DatosPersonales({ usuario, fotoUrlInicial, correoRegistro }: DatosPersonalesProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -98,9 +113,7 @@ export function DatosPersonales({ usuario, fotoUrlInicial, correoRegistro }: Dat
   const [fotoUrl, setFotoUrl] = useState(fotoUrlInicial ?? "");
   const [telefono, setTelefono] = useState(telefonoLocalMx(usuario.telefono ?? ""));
   // C-4: sin fecha hardcodeada — se lee del perfil (si la columna existe) o queda vacía.
-  const [fechaNacimiento, setFechaNacimiento] = useState(
-    (usuario as unknown as { fecha_nacimiento?: string | null }).fecha_nacimiento ?? ""
-  );
+  const [fechaNacimiento, setFechaNacimiento] = useState(usuario.fecha_nacimiento ?? "");
 
   // Dirección
   const [pais, setPais] = useState(usuario.pais ?? "México");
@@ -117,6 +130,7 @@ export function DatosPersonales({ usuario, fotoUrlInicial, correoRegistro }: Dat
   const [subiendoFoto, setSubiendoFoto] = useState(false);
   const [mensajeExito, setMensajeExito] = useState(false);
   const [mensajeError, setMensajeError] = useState<string | null>(null);
+  const [avisoDiscreto, setAvisoDiscreto] = useState<string | null>(null);
   const [pestana, setPestana] = useState<"personal" | "direccion">("personal");
   const viewportRef = useRef<HTMLDivElement>(null);
 
@@ -266,13 +280,25 @@ export function DatosPersonales({ usuario, fotoUrlInicial, correoRegistro }: Dat
             referencias,
           }),
         });
-        // C-4: persistir fecha de nacimiento si la columna existe (migración
-        // pendiente); se ignora el error si el esquema aún no la tiene.
+        // Persistir fecha de nacimiento si fue provista. Si el esquema no tiene
+        // la columna aún (PGRST204/400), restringimos el catch a error de schema,
+        // loggeamos advertencia y mostramos aviso discreto sin bloquear el perfil.
         if (fechaNacimiento) {
           try {
             await actualizarFechaNacimientoUsuario(cliente, fechaNacimiento);
-          } catch {
-            // Esquema sin columna fecha_nacimiento — el perfil ya se guardó.
+          } catch (errFecha) {
+            if (esErrorEsquemaFechaNacimiento(errFecha)) {
+              console.warn(
+                "[DatosPersonales] Columna fecha_nacimiento no disponible en esquema (PGRST204/400); no persistió:",
+                errFecha
+              );
+              setAvisoDiscreto(
+                "Tu perfil se guardó, pero la fecha de nacimiento no se pudo registrar en la base de datos."
+              );
+            } else {
+              // Cualquier otro error (red, permisos, etc.) no se silencia
+              throw errFecha;
+            }
           }
         }
       }
@@ -280,7 +306,8 @@ export function DatosPersonales({ usuario, fotoUrlInicial, correoRegistro }: Dat
       setMensajeExito(true);
       setTimeout(() => {
         setMensajeExito(false);
-      }, 3500);
+        setAvisoDiscreto(null);
+      }, 5000);
     } catch (err) {
       setMensajeError(err instanceof Error ? err.message : "Error al guardar los cambios.");
     } finally {
@@ -335,7 +362,18 @@ export function DatosPersonales({ usuario, fotoUrlInicial, correoRegistro }: Dat
       <footer className="user-profile-actions">
         <div className="user-profile-feedback" aria-live="polite">
           {mensajeError && <p role="alert">{mensajeError}</p>}
-          {mensajeExito && !mensajeError && <p role="status">Tus datos se guardaron correctamente</p>}
+          {avisoDiscreto && !mensajeError && (
+            <p role="status" className="user-profile-warning text-xs text-amber-600 dark:text-amber-400">
+              {avisoDiscreto}
+            </p>
+          )}
+          {mensajeExito && !mensajeError && (
+            <p role="status">
+              {avisoDiscreto
+                ? "Cambios guardados con observaciones"
+                : "Tus datos se guardaron correctamente"}
+            </p>
+          )}
         </div>
         <button type="submit" form="editar-perfil-form" disabled={guardando || subiendoFoto}><IconoCheckCirculo className="size-5" />{guardando ? "Guardando cambios…" : "Guardar cambios"}</button>
       </footer>

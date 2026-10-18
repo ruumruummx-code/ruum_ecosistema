@@ -37,7 +37,7 @@ export async function verificarUsuarioMasivo(cliente: SupabaseClient<Database>, 
 
 export interface CheckoutMasivoGuardado {
   id: string; auth_user_id: string; filas: Record<string, string>[]; cotizaciones: unknown[];
-  monto_centavos: number; stripe_payment_intent_id?: string; pagado_en?: string;
+  monto_centavos: number; stripe_payment_intent_id?: string; pagado_en?: string; expirado_en?: string | null; creado_en?: string;
 }
 /** Solo para rutas autenticadas de servidor que ya poseen el cliente de servicio. */
 export async function guardarCheckoutMasivoServidor(cliente: SupabaseClient, datos: CheckoutMasivoGuardado) {
@@ -50,6 +50,31 @@ export async function obtenerCheckoutMasivoServidor(cliente: SupabaseClient, id:
   if (error || !data) throw new Error("Carga no encontrada");
   return data as CheckoutMasivoGuardado;
 }
+export async function listarCheckoutsMasivosPendientesUsuario(cliente: SupabaseClient, authId: string): Promise<CheckoutMasivoGuardado[]> {
+  const { data, error } = await cliente
+    .from("checkout_traslados_masivos")
+    .select("*")
+    .eq("auth_user_id", authId)
+    .is("pagado_en", null)
+    .is("expirado_en", null)
+    .order("creado_en", { ascending: false });
+  if (error) throw error;
+  return (data ?? []) as CheckoutMasivoGuardado[];
+}
+export async function descartarCheckoutMasivoServidor(cliente: SupabaseClient, id: string, authId: string): Promise<void> {
+  const { error } = await cliente
+    .from("checkout_traslados_masivos")
+    .update({ expirado_en: new Date().toISOString() })
+    .eq("id", id)
+    .eq("auth_user_id", authId)
+    .is("pagado_en", null);
+  if (error) throw error;
+}
+export async function expirarCheckoutsMasivosHuerfanosServidor(cliente: SupabaseClient, horasAntiguedad = 24): Promise<number> {
+  const { data, error } = await cliente.rpc("expirar_checkouts_masivos_huerfanos", { p_horas: horasAntiguedad });
+  if (error) throw error;
+  return Number(data ?? 0);
+}
 export async function vincularPagoMasivoServidor(cliente: SupabaseClient, id: string, authId: string, intent: string) {
   const { error } = await cliente.from("checkout_traslados_masivos").update({ stripe_payment_intent_id: intent }).eq("id", id).eq("auth_user_id", authId);
   if (error) throw error;
@@ -58,3 +83,4 @@ export async function confirmarPagoMasivoServidor(cliente: SupabaseClient, id: s
   const { error } = await cliente.rpc("confirmar_checkout_masivo", { p_id: id, p_intent: intent, p_monto: monto, p_moneda: moneda });
   if (error) throw error;
 }
+

@@ -101,4 +101,40 @@ describe("PasoPago", () => {
       screen.getByRole("button", { name: /Verificar pago/i }),
     ).toBeInTheDocument();
   });
+
+  it("muestra estado intermedio 'pago en proceso de confirmación' y permite reintento manual ilimitado", async () => {
+    const onReintentarVerificacion = vi.fn();
+    render(
+      <PasoPago
+        {...propsBase}
+        pagoEnProcesoConfirmacion
+        onReintentarVerificacion={onReintentarVerificacion}
+      />,
+    );
+
+    expect(
+      screen.getByText("Pago en proceso de confirmación"),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(/Tu pago fue recibido por Stripe y se está procesando/i),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: /Pagar traslado-1 1200/i }),
+    ).not.toBeInTheDocument();
+
+    const botonVerificar = screen.getByRole("button", {
+      name: /Verificar pago/i,
+    });
+    expect(botonVerificar).toBeInTheDocument();
+
+    // Reintento manual ilimitado
+    botonVerificar.click();
+    botonVerificar.click();
+    expect(onReintentarVerificacion).toHaveBeenCalledTimes(2);
+
+    // Permite navegar sin bloquearse
+    expect(
+      screen.getByRole("link", { name: /Ver pasaporte/i }),
+    ).toHaveAttribute("href", "/viajes/traslado-1");
+  });
 });

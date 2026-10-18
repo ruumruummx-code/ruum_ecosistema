@@ -1,12 +1,20 @@
 /// <reference lib="deno.ns" />
 
-import { assertEquals } from "jsr:@std/assert@1";
+import { strictEqual as assertEquals } from "node:assert";
 import {
   esEventoYaProcesado,
   extraerTrasladoId,
+  extraerPaymentIntentDeObjeto,
   esEventoManejado,
   estadoTrasladoSiguienteTrasPago
 } from "./logica.ts";
+
+Deno.test("extraerPaymentIntentDeObjeto: extrae id como string u objeto anidado", () => {
+  assertEquals(extraerPaymentIntentDeObjeto({ payment_intent: "pi_123" }), "pi_123");
+  assertEquals(extraerPaymentIntentDeObjeto({ payment_intent: { id: "pi_456" } }), "pi_456");
+  assertEquals(extraerPaymentIntentDeObjeto({ payment_intent: null }), null);
+  assertEquals(extraerPaymentIntentDeObjeto({}), null);
+});
 
 Deno.test("esEventoYaProcesado: false cuando nunca se guardó un evento", () => {
   assertEquals(esEventoYaProcesado("evt_123", null), false);
@@ -34,16 +42,21 @@ Deno.test("extraerTrasladoId: devuelve el id cuando está presente", () => {
   assertEquals(extraerTrasladoId({ traslado_id: "abc-123" }), "abc-123");
 });
 
-Deno.test("esEventoManejado: reconoce los eventos de PaymentIntent que sí procesamos", () => {
+Deno.test("esEventoManejado: reconoce los eventos de PaymentIntent, Checkout Session y Refunds que sí procesamos", () => {
   assertEquals(esEventoManejado("payment_intent.succeeded"), true);
   assertEquals(esEventoManejado("payment_intent.payment_failed"), true);
+  assertEquals(esEventoManejado("checkout.session.completed"), true);
+  assertEquals(esEventoManejado("charge.refunded"), true);
+  assertEquals(esEventoManejado("charge.refund.updated"), true);
+  assertEquals(esEventoManejado("refund.created"), true);
+  assertEquals(esEventoManejado("refund.updated"), true);
 });
 
 Deno.test("esEventoManejado: rechaza tipos de evento que no manejamos", () => {
   assertEquals(esEventoManejado("account.updated"), false);
   assertEquals(esEventoManejado("transfer.created"), false);
-  assertEquals(esEventoManejado("charge.refunded"), false);
   assertEquals(esEventoManejado("customer.created"), false);
+  assertEquals(esEventoManejado("invoice.payment_succeeded"), false);
 });
 
 Deno.test("estadoTrasladoSiguienteTrasPago: avanza solo desde estados válidos", () => {

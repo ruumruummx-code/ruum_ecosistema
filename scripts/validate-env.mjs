@@ -33,6 +33,7 @@ const requiredByApp = {
     "NEXT_PUBLIC_SUPABASE_URL",
     "NEXT_PUBLIC_SUPABASE_ANON_KEY",
     "NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN",
+    "MAPBOX_SECRET_TOKEN",
     "PHONE_VERIFY_SECRET"
   ]
 };
@@ -59,6 +60,8 @@ if (hostedBuild) {
   }
   const mapbox = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN;
   if (mapbox && !/^pk\./.test(mapbox)) invalid.push("NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN debe empezar con pk.");
+  const mapboxSecret = process.env.MAPBOX_SECRET_TOKEN;
+  if (mapboxSecret && !/^sk\./.test(mapboxSecret)) invalid.push("MAPBOX_SECRET_TOKEN debe empezar con sk.");
   const version = process.env.NEXT_PUBLIC_APP_VERSION;
   if (version && !/^\d+\.\d+\.\d+/.test(version) && !isCi) invalid.push("NEXT_PUBLIC_APP_VERSION debe ser SemVer (ej. 1.0.0)");
   // NEXT_PUBLIC_APP_VERSION en producción real no puede ser placeholder

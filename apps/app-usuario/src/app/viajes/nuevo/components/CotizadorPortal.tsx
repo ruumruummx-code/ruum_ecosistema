@@ -391,10 +391,11 @@ export function CotizadorPortal({
           <PasoPago
             trasladoCreado={t.trasladoCreado}
             pagoConfirmado={t.pagoConfirmado}
+            pagoEnProcesoConfirmacion={t.pagoEnProcesoConfirmacion}
             verificandoPago={t.verificandoPago}
             errorVerificacionPago={t.errorVerificacionPago}
             onPagoStripeConfirmado={t.manejarPagoStripeConfirmado}
-            onReintentarVerificacion={t.manejarPagoStripeConfirmado}
+            onReintentarVerificacion={t.reintentarVerificacion ?? t.manejarPagoStripeConfirmado}
             errorAceptacion={t.errorAceptacion}
             onReintentarAceptacion={t.reintentarAceptacion}
             aceptandoCotizacion={t.aceptandoCotizacion}

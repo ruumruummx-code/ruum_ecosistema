@@ -20,7 +20,7 @@
 // probar con eventos reales de Stripe en modo test.
 import Stripe from "npm:stripe@^17";
 import { createClient } from "npm:@supabase/supabase-js@2";
-import { esEventoManejado } from "./logica.ts";
+import { esEventoManejado, extraerPaymentIntentDeObjeto } from "./logica.ts";
 
 const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") ?? "", {
   apiVersion: "2025-02-24.acacia",
@@ -100,6 +100,83 @@ Deno.serve(async (req) => {
         // Verificar si el procesamiento fue exitoso
         if (resultado && typeof resultado === 'object' && 'ok' in resultado && !resultado.ok) {
           console.warn("procesar_pago_stripe devolvió error:", resultado);
+        }
+        break;
+      }
+
+      case "checkout.session.completed": {
+        const session = evento.data.object as Stripe.Checkout.Session;
+        const intentId = extraerPaymentIntentDeObjeto(session);
+
+        if (session.payment_status === "paid") {
+          if (session.metadata?.carga_masiva_id && intentId) {
+            await ejecutarSupabase(
+              supabase.rpc("confirmar_checkout_masivo", {
+                p_id: session.metadata.carga_masiva_id,
+                p_intent: intentId,
+                p_monto: session.amount_total ?? 0,
+                p_moneda: session.currency ?? "mxn",
+              }),
+              "No se pudo confirmar la carga masiva desde checkout.session.completed"
+            );
+            break;
+          }
+
+          if (intentId) {
+            const resultado = await ejecutarSupabase(
+              supabase.rpc("procesar_pago_stripe", {
+                p_stripe_event_id: evento.id,
+                p_stripe_payment_intent_id: intentId,
+                p_estado_pago: "completado"
+              }),
+              "No se pudo procesar checkout.session.completed en Stripe"
+            );
+            if (resultado && typeof resultado === "object" && "ok" in resultado && !resultado.ok) {
+              console.warn("procesar_pago_stripe devolvió error en checkout.session.completed:", resultado);
+            }
+          }
+        }
+        break;
+      }
+
+      case "charge.refunded":
+      case "charge.refund.updated": {
+        const charge = evento.data.object as Stripe.Charge;
+        const intentId = extraerPaymentIntentDeObjeto(charge);
+
+        if (intentId && charge.refunded) {
+          const resultado = await ejecutarSupabase(
+            supabase.rpc("procesar_pago_stripe", {
+              p_stripe_event_id: evento.id,
+              p_stripe_payment_intent_id: intentId,
+              p_estado_pago: "reembolsado"
+            }),
+            "No se pudo registrar reembolso de cargo de Stripe"
+          );
+          if (resultado && typeof resultado === "object" && "ok" in resultado && !resultado.ok) {
+            console.warn("procesar_pago_stripe devolvió error en charge.refunded:", resultado);
+          }
+        }
+        break;
+      }
+
+      case "refund.created":
+      case "refund.updated": {
+        const refund = evento.data.object as Stripe.Refund;
+        const intentId = extraerPaymentIntentDeObjeto(refund);
+
+        if (intentId && (refund.status === "succeeded" || !refund.status)) {
+          const resultado = await ejecutarSupabase(
+            supabase.rpc("procesar_pago_stripe", {
+              p_stripe_event_id: evento.id,
+              p_stripe_payment_intent_id: intentId,
+              p_estado_pago: "reembolsado"
+            }),
+            "No se pudo registrar reembolso de Stripe"
+          );
+          if (resultado && typeof resultado === "object" && "ok" in resultado && !resultado.ok) {
+            console.warn("procesar_pago_stripe devolvió error en refund:", resultado);
+          }
         }
         break;
       }

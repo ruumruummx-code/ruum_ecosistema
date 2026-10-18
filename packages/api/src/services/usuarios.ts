@@ -114,7 +114,7 @@ export async function actualizarFechaNacimientoUsuario(cliente: Cliente, fechaNa
 
   const { error } = await cliente
     .from("usuarios")
-    .update({ fecha_nacimiento: fechaNacimiento } as never)
+    .update({ fecha_nacimiento: fechaNacimiento })
     .eq("auth_user_id", sesion.user.id);
 
   if (error) throw error;

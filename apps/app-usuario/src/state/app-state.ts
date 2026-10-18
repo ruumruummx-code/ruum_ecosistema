@@ -147,6 +147,7 @@ export interface EstadoRealtimeTraslado {
   aceptandoCotizacion: boolean;
   errorAceptacion: string | null;
   pagoConfirmado: boolean;
+  pagoEnProcesoConfirmacion: boolean;
   ubicacion: UbicacionTraslado | null;
   estadoRealtime: EstadoTraslado | null;
   estadoActualizadoEn: string | null;
@@ -164,6 +165,7 @@ export function crearEstadoRealtimeTraslado(ubicacionInicial: UbicacionTraslado 
     aceptandoCotizacion: false,
     errorAceptacion: null,
     pagoConfirmado: false,
+    pagoEnProcesoConfirmacion: false,
     ubicacion: ubicacionInicial,
     estadoRealtime: null,
     estadoActualizadoEn: null,

@@ -22,33 +22,67 @@ export async function POST(request: NextRequest) {
     if (!await verificarUsuarioMasivo(cliente, user.id)) return NextResponse.json({ error: "Verifica tu cuenta antes de pagar." }, { status: 403 });
     const filas = await validarFilasServidor(body.data.filas);
     if (filas.some(f => f.estado === "error")) return NextResponse.json({ filas });
-    const token = process.env.MAPBOX_SECRET_TOKEN || process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN;
-    if (!token) throw new Error("Servicio de mapas no disponible.");
+    const token = process.env.MAPBOX_SECRET_TOKEN;
+    if (!token) return NextResponse.json({ error: "Servicio de mapas no configurado (falta MAPBOX_SECRET_TOKEN)." }, { status: 500 });
     const normalizadas: Record<string, string>[] = [];
     const cotizaciones = [];
     let centavos = 0;
     const momento = new Date().toISOString();
     type Ruta = { origen: [number, number]; destino: [number, number]; distanciaKm: number; tiempoHoras: number };
     const rutas = new Map<number, Ruta>();
-    // Se resuelven las rutas antes de cotizar. La base recibe un único lote,
-    // conservando el límite de 30/min del wizard individual.
-    for (const fila of filas) {
-      const d = fila.datos;
-      try {
-        const [origen, destino] = await Promise.all([coordenadaPostalMasiva(d.origenCodigoPostal, token), coordenadaPostalMasiva(d.destinoCodigoPostal, token)]);
-        if (!origen || !destino) {
-          if (!origen) fila.errores.origenCodigoPostal = "El servicio de mapas no encontró el CP de origen.";
-          if (!destino) fila.errores.destinoCodigoPostal = "El servicio de mapas no encontró el CP de destino.";
-          fila.estado = "error";
-          continue;
-        }
-        const ruta = await obtenerRutaDirectionsMapboxConParadas(origen, destino, [], token, { lanzarErrores: true, maxIntentos: 2, timeoutMs: 8000, demoraReintentoMs: 300 });
-        if (!ruta || ruta.distanciaKm == null || ruta.tiempoHoras == null) throw new Error("No existe una ruta compatible para este traslado.");
-        rutas.set(fila.indice, { origen, destino, distanciaKm: ruta.distanciaKm, tiempoHoras: ruta.tiempoHoras });
-      } catch (err) {
-        if (err instanceof ErrorServicioCotizacion) throw err;
-        fila.errorCotizacion = "No se pudo calcular la ruta de este traslado. Reintenta o revisa sus ubicaciones.";
-      }
+
+    // Cotización incremental por lotes de N filas con reintento solo de fallidas.
+    // Un 429 o timeout en una fila no aborta el lote completo y conserva cotizaciones parciales.
+    const TAMANIO_LOTE = 10;
+    for (let i = 0; i < filas.length; i += TAMANIO_LOTE) {
+      const lote = filas.slice(i, i + TAMANIO_LOTE);
+      await Promise.all(
+        lote.map(async (fila) => {
+          const d = fila.datos;
+          const MAX_INTENTOS = 2;
+          let ultimoError: unknown = null;
+          for (let intento = 0; intento <= MAX_INTENTOS; intento++) {
+            try {
+              if (intento > 0) {
+                await new Promise((resolve) => setTimeout(resolve, 300 * intento));
+              }
+              const [origen, destino] = await Promise.all([
+                coordenadaPostalMasiva(d.origenCodigoPostal, token),
+                coordenadaPostalMasiva(d.destinoCodigoPostal, token),
+              ]);
+              if (!origen || !destino) {
+                if (!origen) fila.errores.origenCodigoPostal = "El servicio de mapas no encontró el CP de origen.";
+                if (!destino) fila.errores.destinoCodigoPostal = "El servicio de mapas no encontró el CP de destino.";
+                fila.estado = "error";
+                return;
+              }
+              const ruta = await obtenerRutaDirectionsMapboxConParadas(
+                origen,
+                destino,
+                [],
+                token,
+                { lanzarErrores: true, maxIntentos: 2, timeoutMs: 8000, demoraReintentoMs: 300 }
+              );
+              if (!ruta || ruta.distanciaKm == null || ruta.tiempoHoras == null) {
+                fila.errorCotizacion = "No existe una ruta compatible para este traslado.";
+                return;
+              }
+              rutas.set(fila.indice, { origen, destino, distanciaKm: ruta.distanciaKm, tiempoHoras: ruta.tiempoHoras });
+              return;
+            } catch (err) {
+              ultimoError = err;
+              if (err instanceof ErrorServicioCotizacion && (err.status === 401 || err.status === 403)) {
+                throw err;
+              }
+            }
+          }
+          if (ultimoError instanceof ErrorServicioCotizacion && ultimoError.status === 429) {
+            fila.errorCotizacion = "El servicio de mapas alcanzó su límite de consultas para esta fila. Reintenta esta fila.";
+          } else {
+            fila.errorCotizacion = "No se pudo calcular la ruta de este traslado (tiempo de espera o error de red). Reintenta o revisa sus ubicaciones.";
+          }
+        })
+      );
     }
     if (filas.some(f => f.estado === "error" || f.errorCotizacion)) return NextResponse.json({ filas });
     const tarifas = await previsualizarTarifasMasivasUsuario(cliente, filas.map(f => {

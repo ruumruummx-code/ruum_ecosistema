@@ -152,9 +152,11 @@ export function useNuevoTraslado() {
   const {
     pagoConfirmado,
     setPagoConfirmado,
+    pagoEnProcesoConfirmacion,
     verificandoPago,
     errorVerificacionPago,
     manejarPagoStripeConfirmado,
+    reintentarVerificacion,
   } = usePagoTraslado({ estadoTrasladoId, trasladoCreado });  // Analítica del gate de tarifa (Paso 0)
   const tarifaGateVistaRegistrada = useRef(false);
   const tarifaGateCalculadaRegistrada = useRef(false);
@@ -794,9 +796,11 @@ export function useNuevoTraslado() {
     errorAceptacion,
     pagoConfirmado,
     setPagoConfirmado,
+    pagoEnProcesoConfirmacion,
     verificandoPago,
     errorVerificacionPago,
     manejarPagoStripeConfirmado,
+    reintentarVerificacion,
     reintentarAceptacion,
     // 1.4 debounce dinámico
     solicitarGeocodificacionInmediata,

@@ -23,8 +23,7 @@ function peticion() {
 }
 describe("cotización de 100 traslados", () => {
   beforeEach(() => {
-    vi.stubEnv("NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN", "token-prueba");
-    vi.stubEnv("MAPBOX_SECRET_TOKEN", "");
+    vi.stubEnv("MAPBOX_SECRET_TOKEN", "sk.token-prueba");
     vi.stubGlobal("fetch", vi.fn().mockImplementation(async () => Response.json({ features: [{ geometry: { coordinates: [-99.1,19.4] } }] })));
     mocks.ruta.mockReset().mockResolvedValue({ distanciaKm: 50, tiempoHoras: 1 });
     mocks.cotizar.mockReset().mockImplementation(async (_cliente, entradas: Array<{ indice: number }>) => entradas.map(f => ({ indice: f.indice, disponible: true, tarifa: 1234.56, categoria_tarifa: "ligero_b", gama: "media" })));
@@ -32,6 +31,13 @@ describe("cotización de 100 traslados", () => {
     mocks.stripe.mockReset().mockResolvedValue({ id: "pi_prueba", client_secret: "cs_prueba" });
   });
   afterEach(() => { vi.unstubAllGlobals(); vi.unstubAllEnvs(); });
+  it("falla con 500 si falta MAPBOX_SECRET_TOKEN", async () => {
+    vi.stubEnv("MAPBOX_SECRET_TOKEN", "");
+    const respuesta = await POST(peticion());
+    const data = await respuesta.json();
+    expect(respuesta.status).toBe(500);
+    expect(data.error).toContain("MAPBOX_SECRET_TOKEN");
+  });
   it("consolida las 100 filas en una llamada y conserva la suma exacta", async () => {
     const respuesta = await POST(peticion());
     const data = await respuesta.json();
@@ -59,5 +65,19 @@ describe("cotización de 100 traslados", () => {
     expect(data.filas[0].errores.modelo).toBeUndefined();
     expect(mocks.cotizar).not.toHaveBeenCalled();
     expect(mocks.stripe).not.toHaveBeenCalled();
+  });
+  it("un fallo en una fila no aborta el lote completo y reporta errorCotizacion", async () => {
+    let llamadas = 0;
+    mocks.ruta.mockImplementation(async () => {
+      llamadas++;
+      if (llamadas <= 3) return null; // Falla intentos de la primera fila
+      return { distanciaKm: 50, tiempoHoras: 1 };
+    });
+    const respuesta = await POST(peticion());
+    const data = await respuesta.json();
+    expect(respuesta.status).toBe(200);
+    expect(data.filas).toHaveLength(100);
+    expect(data.filas[0].errorCotizacion).toBeDefined();
+    expect(mocks.guardar).not.toHaveBeenCalled();
   });
 });

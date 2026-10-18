@@ -34,3 +34,49 @@ it("espera la revalidación del servidor y descarta su respuesta al cancelar", a
   await waitFor(() => expect(result.current.estado).toBe("idle"));
   expect(result.current.filasVisibles).toEqual([]);
 });
+
+it("reanuda una carga pendiente y actualiza el estado a checkout", async () => {
+  const cargaId = "92200000-0000-4000-8000-000000000010";
+  const fetchMock = vi.fn().mockResolvedValue(
+    Response.json({
+      id: cargaId,
+      clientSecret: "cs_test_retome",
+      totalMXN: 3500,
+      cotizaciones: [{ indice: 0, tarifa: 3500, datos: {} }],
+    })
+  );
+  vi.stubGlobal("fetch", fetchMock);
+
+  const { result } = renderHook(() => useCargaMasiva());
+
+  let ok = false;
+  await act(async () => {
+    ok = await result.current.reanudarCarga(cargaId);
+  });
+
+  expect(ok).toBe(true);
+  expect(result.current.estado).toBe("checkout");
+  expect(result.current.cargaId).toBe(cargaId);
+  expect(result.current.stripeClientSecret).toBe("cs_test_retome");
+  expect(result.current.totalMXN).toBe(3500);
+});
+
+it("descarta la carga pendiente y resetea el estado", async () => {
+  const cargaId = "92200000-0000-4000-8000-000000000020";
+  const fetchMock = vi.fn().mockResolvedValue(Response.json({ ok: true }));
+  vi.stubGlobal("fetch", fetchMock);
+
+  const { result } = renderHook(() => useCargaMasiva());
+
+  await act(async () => {
+    await result.current.descartarCargaPendiente(cargaId);
+  });
+
+  expect(fetchMock).toHaveBeenCalledWith(
+    `/api/viajes/masivos/pendientes?id=${cargaId}`,
+    expect.objectContaining({ method: "DELETE" })
+  );
+  expect(result.current.estado).toBe("idle");
+  expect(result.current.cargaId).toBeNull();
+});
+

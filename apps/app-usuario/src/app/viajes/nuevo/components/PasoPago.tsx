@@ -14,6 +14,7 @@ export interface PasoPagoProps {
     precioCotizado: number | null;
   };
   pagoConfirmado: boolean;
+  pagoEnProcesoConfirmacion?: boolean;
   verificandoPago: boolean;
   errorVerificacionPago: string | null;
   onPagoStripeConfirmado: () => void;
@@ -64,6 +65,7 @@ function distanciaResumen(rutaEstimacion: RutaEstimacion | null): string {
 export const PasoPago = memo(function PasoPago({
   trasladoCreado,
   pagoConfirmado,
+  pagoEnProcesoConfirmacion = false,
   verificandoPago,
   errorVerificacionPago,
   onPagoStripeConfirmado,
@@ -152,7 +154,56 @@ export const PasoPago = memo(function PasoPago({
           Confirmando tu pago con Stripe… no cierres esta pantalla.
         </p>
       )}
-      {errorVerificacionPago && (
+
+      {/* Estado intermedio: pago en proceso de confirmación */}
+      {pagoEnProcesoConfirmacion && (
+        <div
+          className="flex flex-col gap-3 rounded-2xl border border-amber-500/30 bg-amber-500/10 p-4 text-left"
+          role="status"
+          aria-live="polite"
+        >
+          <div className="flex items-center gap-2">
+            <span
+              aria-hidden="true"
+              className="flex size-7 shrink-0 items-center justify-center rounded-full bg-amber-500/20 text-xs font-bold text-amber-500"
+            >
+              ⏳
+            </span>
+            <h3 className="text-sm font-bold text-amber-600 dark:text-amber-400">
+              Pago en proceso de confirmación
+            </h3>
+          </div>
+          <p className="text-xs leading-relaxed text-[var(--user-color-muted)]">
+            Tu pago fue recibido por Stripe y se está procesando en nuestro
+            sistema. No necesitas realizar otro pago. Puedes verificar el estado
+            manualmente en cualquier momento.
+          </p>
+          <div className="flex flex-wrap items-center gap-2 pt-1">
+            <Button
+              variant="secondary"
+              onClick={onReintentarVerificacion}
+              disabled={verificandoPago}
+              className="min-h-10 text-xs font-bold"
+            >
+              {verificandoPago ? "Verificando…" : "Verificar pago"}
+            </Button>
+            <Link
+              href={`/viajes/${trasladoCreado.id}`}
+              className="inline-flex min-h-10 items-center justify-center rounded-xl bg-[var(--user-color-surface-soft)] px-3 text-xs font-semibold text-[var(--user-color-text)] hover:opacity-90"
+            >
+              Ver pasaporte
+            </Link>
+          </div>
+          {errorVerificacionPago && (
+            <p className="mt-1 text-xs text-red-600 dark:text-red-400" role="alert">
+              {errorVerificacionPago}
+            </p>
+          )}
+        </div>
+      )}
+
+      {/* Si no está en estado intermedio pero ocurrió un error de verificación */}
+      {!pagoEnProcesoConfirmacion && errorVerificacionPago && (
         <div className="shrink-0 text-xs" role="alert">
           <p>{errorVerificacionPago}</p>
           <button
@@ -164,9 +215,11 @@ export const PasoPago = memo(function PasoPago({
           </button>
         </div>
       )}
+
+      {/* Oculta el formulario de Stripe durante verificación o estado intermedio para evitar reintentos duplicados */}
       <div
         className="min-h-0 flex-1 overflow-y-auto overscroll-contain"
-        hidden={verificandoPago}
+        hidden={verificandoPago || pagoEnProcesoConfirmacion}
       >
         <PagoStripe
           trasladoId={trasladoCreado.id}

@@ -12,5 +12,6 @@ export interface Usuario {
   // PRD §4.6 — historial positivo habilita pago al cierre (umbral ajustable por Admin)
   traslados_completados_sin_incidencia: number;
   metodo_pago_registrado: boolean;
+  fecha_nacimiento?: string | null;
   creado_en: string;
 }

@@ -26,15 +26,41 @@ export function extraerTrasladoId(metadata: Record<string, string> | null | unde
 
 export type TipoEventoManejado =
   | "payment_intent.succeeded"
-  | "payment_intent.payment_failed";
+  | "payment_intent.payment_failed"
+  | "checkout.session.completed"
+  | "charge.refunded"
+  | "charge.refund.updated"
+  | "refund.created"
+  | "refund.updated";
 
 const EVENTOS_MANEJADOS: readonly TipoEventoManejado[] = [
   "payment_intent.succeeded",
-  "payment_intent.payment_failed"
+  "payment_intent.payment_failed",
+  "checkout.session.completed",
+  "charge.refunded",
+  "charge.refund.updated",
+  "refund.created",
+  "refund.updated"
 ];
 
 export function esEventoManejado(tipo: string): tipo is TipoEventoManejado {
   return (EVENTOS_MANEJADOS as readonly string[]).includes(tipo);
+}
+
+/** Extrae el ID del PaymentIntent desde un objeto Stripe (Session, Charge, Refund) */
+export function extraerPaymentIntentDeObjeto(objeto: {
+  payment_intent?: string | { id?: string } | null;
+}): string | null {
+  if (!objeto) return null;
+  if (typeof objeto.payment_intent === "string") return objeto.payment_intent;
+  if (
+    objeto.payment_intent &&
+    typeof objeto.payment_intent === "object" &&
+    typeof objeto.payment_intent.id === "string"
+  ) {
+    return objeto.payment_intent.id;
+  }
+  return null;
 }
 
 export function estadoTrasladoSiguienteTrasPago(

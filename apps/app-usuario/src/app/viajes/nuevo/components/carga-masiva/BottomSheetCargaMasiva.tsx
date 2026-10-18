@@ -36,6 +36,9 @@ export function BottomSheetCargaMasiva({ onCerrar }: Props) {
     geocodificarYCotizar,
     confirmarPago,
     cancelar,
+    cargaPendienteStorage,
+    reanudarCarga,
+    descartarCargaPendiente,
   } = useCargaMasiva();
   const verificarPago = useCallback(async () => {
     if (!cargaId) return;
@@ -138,6 +141,36 @@ export function BottomSheetCargaMasiva({ onCerrar }: Props) {
               <p role="alert" className="w-full rounded-xl bg-red-50 px-4 py-3 text-sm font-semibold text-red-600">
                 {error}
               </p>
+            )}
+
+            {cargaPendienteStorage && (
+              <div className="w-full rounded-2xl border-2 border-[var(--user-color-action)] bg-[var(--user-color-brand-soft)] p-4 text-left shadow-sm">
+                <div className="flex items-center gap-2">
+                  <span className="text-base" aria-hidden="true">⏱️</span>
+                  <p className="text-xs font-bold uppercase tracking-wider text-[var(--user-color-action)]">
+                    Carga masiva pendiente
+                  </p>
+                </div>
+                <p className="mt-1 text-sm font-semibold text-zinc-900 dark:text-zinc-100">
+                  Tienes una carga masiva cotizada pendiente de pago.
+                </p>
+                <div className="mt-3 flex flex-col gap-2 sm:flex-row">
+                  <button
+                    type="button"
+                    onClick={() => void reanudarCarga(cargaPendienteStorage)}
+                    className="flex-1 rounded-xl bg-[var(--user-color-action)] py-2.5 text-xs font-bold text-[var(--user-color-on-action)] transition-opacity hover:opacity-95"
+                  >
+                    Reanudar carga pendiente
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => void descartarCargaPendiente(cargaPendienteStorage)}
+                    className="rounded-xl border border-[var(--user-color-border)] px-4 py-2.5 text-xs font-semibold text-red-600 hover:bg-red-50 dark:hover:bg-red-950/20"
+                  >
+                    Descartar y nueva carga
+                  </button>
+                </div>
+              </div>
             )}
 
             {/* Zona drag & drop / tap para cargar */}
