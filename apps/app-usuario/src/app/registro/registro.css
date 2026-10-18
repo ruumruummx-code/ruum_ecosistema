@@ -1,0 +1,38 @@
+/* Sólo el registro: el módulo de facturación conserva su propia maquetación. */
+.registro-usuario { height: 100dvh; max-height: 100dvh; min-height: 0; padding: max(8px, env(safe-area-inset-top)) 8px max(8px, env(safe-area-inset-bottom)); }
+.registro-usuario .registro-shell { height: 100%; max-height: 760px; min-height: 0; }
+.registro-shell > header { min-height: 52px; padding-block: 6px; }
+.registro-progreso { padding-top: 4px; }
+.registro-progreso > [role="progressbar"] { height: 6px; margin-bottom: 2px; }
+.registro-shell > ol { padding-top: 2px; font-size: 10px; line-height: 14px; }
+.registro-shell > p { padding-top: 0; font-size: 10px; line-height: 14px; }
+.registro-usuario .registro-content { padding: 8px 16px; }
+.registro-content form { min-height: 0; }
+.registro-content form > div.flex.flex-col, .registro-content .grid.grid-cols-1 { gap: 8px; }
+.registro-content .flex.flex-col.gap-1\.5 { gap: 4px; }
+.registro-content label { font-size: 12px; line-height: 16px; }
+.registro-content input:not([type="checkbox"]) { min-height: 44px; height: 44px; padding-block: 8px; }
+.registro-content form > h2 { margin-bottom: 6px; font-size: 16px; line-height: 20px; }
+.registro-content #password-requisitos { margin-top: 2px; gap: 2px 6px; }
+.registro-content #password-requisitos > div { gap: 4px; font-size: 10px; line-height: 14px; }
+.registro-content #confirmar-estado { margin-top: 0; font-size: 11px; line-height: 14px; }
+.registro-content .registro-acceso > div.flex.flex-col { gap: 6px; }
+.registro-content label:has(input[type="checkbox"]) { align-items: center; padding-block: 2px; min-height: 44px; }
+.registro-content label:has(input[type="checkbox"]) > span { font-size: 10px; line-height: 14px; }
+.registro-content button[type="submit"] { min-height: 44px; flex-shrink: 0; padding-block: 8px; font-size: 14px; margin-top: 8px; }
+.registro-content .sticky:has(button[type="submit"]) { position: static; margin-top: 6px; padding-block: 0; }
+.registro-content .sticky > button[type="submit"] { margin-top: 0; }
+.registro-content form > div:has(> a[href="/login"]) { display: flex; flex-shrink: 0; align-items: center; justify-content: center; gap: 4px; margin-top: auto; padding-top: 0; font-size: 11px; line-height: 16px; }
+.registro-content form > div[role="note"] { margin-top: 6px; padding: 6px 8px; font-size: 10px; line-height: 14px; }
+.registro-content .registro-datos p:has(> svg) { margin-top: 6px; padding: 6px 8px; font-size: 10px; line-height: 14px; }
+.registro-datos p[id$="-estado"] { margin: 0; font-size: 10px; line-height: 12px; }
+@media (min-height: 740px) {
+  .registro-usuario { padding: max(16px, env(safe-area-inset-top)) 16px max(16px, env(safe-area-inset-bottom)); }
+  .registro-usuario .registro-content { padding: 16px 24px; }
+  .registro-content form > div.flex.flex-col, .registro-content .grid.grid-cols-1 { gap: 14px; }
+  .registro-content .registro-acceso > div.flex.flex-col { gap: 10px; }
+  .registro-content #password-requisitos > div { font-size: 12px; line-height: 18px; }
+  .registro-content label { font-size: 14px; line-height: 20px; }
+  .registro-content input:not([type="checkbox"]) { min-height: 48px; height: 48px; }
+  .registro-content label:has(input[type="checkbox"]) > span { font-size: 12px; line-height: 16px; }
+}

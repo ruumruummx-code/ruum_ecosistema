@@ -10,6 +10,15 @@ import {
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@ruum/shared/types";
 
+it("guarda los datos fiscales de persona física con la RPC existente sin convertir la cuenta a empresa", async () => {
+  const cliente = crearClienteFake({ userId: "personal", rpcs: { actualizar_datos_facturacion: { data: { ok: true } } } });
+  await actualizarFacturacionUsuario(cliente as unknown as SupabaseClient<Database>, {
+    rfc: "GODE561231GR8", razon_social: "Ana López", regimen_fiscal: "612", codigo_postal_fiscal: "01234", uso_cfdi: "G03", correo_facturacion: "ana@ejemplo.com",
+  });
+  expect(cliente.llamadas).toContainEqual(expect.objectContaining({ table: "rpc", action: "actualizar_datos_facturacion", args: [expect.objectContaining({ p_rfc: "GODE561231GR8", p_regimen_fiscal: "612", p_codigo_postal_fiscal: "01234" })] }));
+  expect(cliente.llamadas.some(call => call.table === "usuarios" && call.action === "update")).toBe(false);
+});
+
 describe("usuarios — Verificación de identidad con Didit", () => {
   beforeEach(() => vi.clearAllMocks());
 

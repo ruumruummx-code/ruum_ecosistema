@@ -29,3 +29,17 @@ it("normaliza los valores legados a claves antes de persistir", async () => {
   fireEvent.submit(screen.getByRole("button", { name: "Guardar datos fiscales" }).closest("form")!);
   await waitFor(() => expect(mocks.guardar).toHaveBeenCalledWith({}, expect.objectContaining({ regimen_fiscal: "601", uso_cfdi: "G03" })));
 });
+
+it.each([["GODE561231GR8", "612", "G03"], ["ABCD010101A12", "626", "G03"], ["GODE561231GR8", "605", "CN01"]])("guarda el RFC individual %s con régimen %s y uso %s", async (rfc, regimen, uso) => {
+  render(<FacturacionCuentaForm usuario={{ ...usuario, tipo_cuenta: "personal", rfc, regimen_fiscal: regimen, uso_cfdi: uso }} empresa={null} />);
+  expect(screen.getByLabelText("RFC")).toHaveAttribute("minlength", "13");
+  fireEvent.submit(screen.getByRole("button", { name: "Guardar datos fiscales" }).closest("form")!);
+  await waitFor(() => expect(mocks.guardar).toHaveBeenCalledWith({}, expect.objectContaining({ rfc, regimen_fiscal: regimen, uso_cfdi: uso, codigo_postal_fiscal: "01234" })));
+});
+
+it.each(["ABC010101AB1", "1234567890123"])("rechaza el RFC %s en cuentas individuales antes de invocar el servicio", async rfc => {
+  render(<FacturacionCuentaForm compacto usuario={{ ...usuario, tipo_cuenta: "personal", rfc, regimen_fiscal: "612" }} empresa={null} />);
+  fireEvent.submit(screen.getByRole("button", { name: "Guardar datos fiscales" }).closest("form")!);
+  expect(await screen.findByRole("alert")).toHaveTextContent("RFC de persona física de 13 caracteres");
+  expect(mocks.guardar).not.toHaveBeenCalled();
+});

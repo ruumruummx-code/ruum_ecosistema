@@ -33,7 +33,6 @@ export async function POST(request: NextRequest) {
       telefono?: unknown;
       email?: unknown;
       password?: unknown;
-      tipoCuenta?: unknown;
       aceptaTerminos?: unknown;
       tokenVerificacionTelefono?: unknown;
     } | null;
@@ -44,7 +43,6 @@ export async function POST(request: NextRequest) {
     const correo =
       typeof body?.email === "string" ? normalizarCorreoRegistro(body.email).slice(0, 254) : "";
     const password = typeof body?.password === "string" ? body.password : "";
-    const tipoCuenta = body?.tipoCuenta === "empresa" ? "empresa" : "personal";
     const tokenTelefono =
       typeof body?.tokenVerificacionTelefono === "string" ? body.tokenVerificacionTelefono : "";
 
@@ -132,7 +130,7 @@ export async function POST(request: NextRequest) {
           telefono: telefonoMx(telefonoDigitos),
           telefono_verificado: telefonoVerificadoReal,
           telefono_verificado_en: telefonoVerificadoReal ? ahora : null,
-          tipo_cuenta: tipoCuenta,
+          tipo_cuenta: "personal",
           version_terminos_aceptada: VERSION_TERMINOS_VIGENTE,
           terminos_aceptados_en: ahora,
         },

@@ -8,6 +8,7 @@ import { passwordCumpleRequisitos, traducirErrorAuth } from "@ruum/shared/utils"
 import { registrarEventoUx } from "../../lib/analytics";
 import { tieneSupabaseConfigurado } from "../../lib/supabase-browser";
 import { OtpModal } from "./OtpModal";
+import "./registro.css";
 import {
   CLAVE_CORREO_CONFIRMACION,
   normalizarCorreoRegistro,
@@ -30,7 +31,6 @@ export default function PaginaRegistro() {
   const bypassOtp = smsSuspendido || (process.env.NODE_ENV !== "production" && process.env.NEXT_PUBLIC_PHONE_VERIFY_BYPASS === "true");
 
   /* Paso 1: datos básicos */
-  const [tipoCuenta, setTipoCuenta] = useState<"personal" | "empresa">("personal");
   const [nombre, setNombre] = useState("");
   const [apellido, setApellido] = useState("");
   const [telefono, setTelefono] = useState("");
@@ -299,7 +299,7 @@ export default function PaginaRegistro() {
 
     setEnviando(true);
     setError(null);
-    registrarEventoUx("registro_enviado", { tipo_cuenta: tipoCuenta });
+    registrarEventoUx("registro_enviado", { tipo_cuenta: "personal" });
 
     try {
       const correo = normalizarCorreoRegistro(email);
@@ -313,7 +313,7 @@ export default function PaginaRegistro() {
           telefono: digitos,
           email: correo,
           password,
-          tipoCuenta,
+          tipoCuenta: "personal",
           aceptaTerminos: true,
           tokenVerificacionTelefono,
         }),
@@ -328,12 +328,12 @@ export default function PaginaRegistro() {
 
       if (!res.ok) {
         setError(cuerpo?.error ?? "No pudimos crear la cuenta. Intenta de nuevo.");
-        registrarEventoUx("registro_error", { tipo_cuenta: tipoCuenta });
+        registrarEventoUx("registro_error", { tipo_cuenta: "personal" });
         return;
       }
 
       if (!cuerpo?.requiereConfirmacion) {
-        registrarEventoUx("registro_exitoso", { tipo_cuenta: tipoCuenta, requiere_confirmacion: false });
+        registrarEventoUx("registro_exitoso", { tipo_cuenta: "personal", requiere_confirmacion: false });
         router.push("/");
         router.refresh();
       } else {
@@ -342,12 +342,12 @@ export default function PaginaRegistro() {
         } catch {
           // ignore
         }
-        registrarEventoUx("registro_exitoso", { tipo_cuenta: tipoCuenta, requiere_confirmacion: true });
+        registrarEventoUx("registro_exitoso", { tipo_cuenta: "personal", requiere_confirmacion: true });
         router.push("/registro/confirma-correo");
       }
     } catch (err: unknown) {
       setError(traducirErrorAuth(err, "No pudimos crear la cuenta. Intenta de nuevo."));
-      registrarEventoUx("registro_error", { tipo_cuenta: tipoCuenta });
+      registrarEventoUx("registro_error", { tipo_cuenta: "personal" });
     } finally {
       setEnviando(false);
     }
@@ -381,8 +381,8 @@ export default function PaginaRegistro() {
   const errorCorreo = (editados.email || errorCampo?.campo === "email") && !correoValido;
 
   return (
-    <div className="flex min-h-dvh items-center justify-center bg-[#eef2f7] p-3 sm:p-5 font-sans">
-      <div className="relative flex max-h-[calc(100dvh-2rem)] w-full max-w-[480px] flex-col overflow-hidden rounded-[32px] sm:rounded-[36px] border border-[#e9eef3] bg-white shadow-[0_25px_60px_rgba(0,0,0,0.12)]">
+    <div className="registro-usuario flex min-h-dvh items-center justify-center bg-[#eef2f7] p-3 sm:p-5 font-sans">
+      <div className="registro-shell relative flex max-h-[calc(100dvh-2rem)] w-full max-w-[480px] flex-col overflow-hidden rounded-[32px] sm:rounded-[36px] border border-[#e9eef3] bg-white shadow-[0_25px_60px_rgba(0,0,0,0.12)]">
         
         {/* Encabezado */}
         <header className="flex items-center border-b border-[#f0f4fa] bg-white px-5 py-3.5 shrink-0">
@@ -421,7 +421,7 @@ export default function PaginaRegistro() {
         </header>
 
         {/* Barra de progreso */}
-        <div className="bg-white px-5 pt-3.5 shrink-0">
+        <div className="registro-progreso bg-white px-5 pt-3.5 shrink-0">
           <div role="progressbar" aria-label="Progreso del registro" aria-valuemin={0} aria-valuemax={3} aria-valuenow={paso} aria-valuetext={`Paso ${paso} de 3`} className="h-2 w-full overflow-hidden rounded-full bg-[#e8eef6] mb-2">
             <div
               className={[
@@ -444,50 +444,15 @@ export default function PaginaRegistro() {
         <p className="px-5 pt-1 text-right text-xs text-[#4e5f80]">{paso === 1 ? "33%" : "67%"}</p>
 
         {/* Contenido principal scrollable */}
-        <div className="flex min-h-0 flex-1 flex-col bg-white px-6 py-5 sm:px-7 sm:py-7 overflow-y-auto">
+        <div className="registro-content flex min-h-0 flex-1 flex-col bg-white px-6 py-5 sm:px-7 sm:py-7 overflow-y-auto">
           
           {/* ═════════════════════════════════════════════════════════
               PASO 1: DATOS BÁSICOS
           ═════════════════════════════════════════════════════════ */}
           {paso === 1 && (
-            <form onSubmit={avanzarPaso2} noValidate className="flex flex-1 flex-col">
+            <form onSubmit={avanzarPaso2} noValidate className="registro-datos flex flex-1 flex-col">
               {/* Formulario */}
               <div className="flex flex-col gap-5">
-                {/* Selector de tipo de cuenta */}
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-sm font-semibold text-[#4e5f80]">
-                    Tipo de cuenta
-                  </label>
-                  <div className="grid grid-cols-2 gap-2 rounded-2xl bg-[#f0f4f9] p-1.5 border border-[#e1e8f0]">
-                    <button
-                      type="button"
-                      onClick={() => setTipoCuenta("personal")}
-                      className={[
-                        "flex flex-col items-center justify-center rounded-xl py-2 px-3 text-xs font-bold transition",
-                        tipoCuenta === "personal"
-                          ? "bg-white text-[#0a2342] shadow-sm"
-                          : "text-[#677b98] hover:text-[#0a2342]",
-                      ].join(" ")}
-                    >
-                      <span>Personal</span>
-                      <span className="text-[10.5px] font-normal text-[#7e90a6]">Uso particular</span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setTipoCuenta("empresa")}
-                      className={[
-                        "flex flex-col items-center justify-center rounded-xl py-2 px-3 text-xs font-bold transition",
-                        tipoCuenta === "empresa"
-                          ? "bg-white text-[#0a2342] shadow-sm"
-                          : "text-[#677b98] hover:text-[#0a2342]",
-                      ].join(" ")}
-                    >
-                      <span>Empresa</span>
-                      <span className="text-[10.5px] font-normal text-[#7e90a6]">Flotillas / CFDI</span>
-                    </button>
-                  </div>
-                </div>
-
                 {/* Campos de ancho completo */}
                 <div className="grid grid-cols-1 gap-5">
                   <div className="flex flex-col gap-1.5">
@@ -681,7 +646,7 @@ export default function PaginaRegistro() {
               PASO 2: ACCESO / CREDENCIALES
           ═════════════════════════════════════════════════════════ */}
           {paso === 2 && (
-            <form onSubmit={crearCuenta} noValidate className="flex flex-1 flex-col">
+            <form onSubmit={crearCuenta} noValidate className="registro-acceso flex flex-1 flex-col">
               <h2 className="mb-4 text-lg font-bold text-[#0a2342]">Elige tus credenciales</h2>
 
               <div className="flex flex-col gap-3.5">

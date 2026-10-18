@@ -46,6 +46,7 @@ function leerDraftFiscal(): Partial<DatosFiscalesGuardados> | null {
 
 export function FacturacionCuentaForm({ usuario, empresa, onActualizado, compacto = false, onOcupada }: { usuario: Usuario; empresa: Empresa | null; onActualizado?: (datos: DatosFiscalesGuardados) => void; compacto?: boolean; onOcupada?: (valor: boolean) => void }) {
   const router = useRouter();
+  const cuentaIndividual = usuario.tipo_cuenta === "personal" && !empresa;
   const bloqueo = useRef(false);
   const draftInicial = useRef<Partial<DatosFiscalesGuardados> | null>(null);
   if (draftInicial.current === null && typeof window !== "undefined") {
@@ -85,11 +86,11 @@ export function FacturacionCuentaForm({ usuario, empresa, onActualizado, compact
     return () => clearTimeout(timer);
   }, [rfc, razonSocial, regimenFiscal, codigoPostalFiscal, usoCfdi, correoFacturacion]);
 
-  const persona = rfc.length === 12 ? "moral" : rfc.length === 13 ? "fisica" : undefined;
+  const persona = cuentaIndividual ? "fisica" : rfc.length === 12 ? "moral" : rfc.length === 13 ? "fisica" : undefined;
   function cambiarRfc(valor: string) {
     const nuevo = soloAlfanumericoFiscal(valor, 13);
     setRfc(nuevo);
-    const tipo = nuevo.length === 12 ? "moral" : nuevo.length === 13 ? "fisica" : undefined;
+    const tipo = cuentaIndividual ? "fisica" : nuevo.length === 12 ? "moral" : nuevo.length === 13 ? "fisica" : undefined;
     if (!tipo) return;
     const opciones = consultarCatalogosSat({ regimen: regimenFiscal, persona: tipo });
     if (!opciones.regimenes.some(o => o.clave === regimenFiscal)) {
@@ -111,6 +112,11 @@ export function FacturacionCuentaForm({ usuario, empresa, onActualizado, compact
 
     if (!rfc || rfc.length < 12 || !razonSocial.trim() || !regimenFiscal.trim() || codigoPostalFiscal.length !== 5 || !usoCfdi.trim()) {
       setMensaje({ tono: "danger", texto: "Completa RFC, razón social, régimen fiscal, CP fiscal y uso de CFDI." });
+      return;
+    }
+
+    if (cuentaIndividual && !/^[A-ZÑ&]{4}\d{6}[A-Z0-9]{3}$/.test(rfc)) {
+      setMensaje({ tono: "danger", texto: "Captura un RFC de persona física de 13 caracteres (4 letras, 6 dígitos y 3 caracteres de homoclave)." });
       return;
     }
 
@@ -154,7 +160,7 @@ export function FacturacionCuentaForm({ usuario, empresa, onActualizado, compact
   if (compacto) return (
     <form id="datos-fiscales-form" className="user-fiscal-form" onSubmit={guardar}>
       <div className="user-fiscal-fields user-profile-grid">
-        <div className="user-profile-field"><label htmlFor="fiscal-rfc">RFC</label><input id="fiscal-rfc" value={rfc} onChange={e => cambiarRfc(e.target.value)} minLength={12} maxLength={13} required disabled={guardando} /></div>
+        <div className="user-profile-field"><label htmlFor="fiscal-rfc">RFC</label><input id="fiscal-rfc" value={rfc} onChange={e => cambiarRfc(e.target.value)} minLength={cuentaIndividual ? 13 : 12} maxLength={13} required disabled={guardando} /></div>
         <div className="user-profile-field"><label htmlFor="fiscal-cp">Código postal fiscal</label><input id="fiscal-cp" value={codigoPostalFiscal} onChange={e => setCodigoPostalFiscal(soloDigitos(e.target.value, 5))} inputMode="numeric" maxLength={5} required disabled={guardando} /></div>
         {selectorRegimen}
         {selectorUso}
@@ -168,7 +174,7 @@ export function FacturacionCuentaForm({ usuario, empresa, onActualizado, compact
   return (
     <form className="grid gap-4" onSubmit={guardar}>
       <div className="grid gap-4 sm:grid-cols-2">
-        <Field etiqueta="RFC" value={rfc} onChange={(e) => cambiarRfc(e.target.value)} minLength={12} maxLength={13} required />
+        <Field etiqueta="RFC" value={rfc} onChange={(e) => cambiarRfc(e.target.value)} minLength={cuentaIndividual ? 13 : 12} maxLength={13} required />
         <Field etiqueta="Razón social" value={razonSocial} onChange={(e) => setRazonSocial(e.target.value)} required />
         {selectorRegimen}
         <Field etiqueta="Código postal fiscal" value={codigoPostalFiscal} onChange={(e) => setCodigoPostalFiscal(soloDigitos(e.target.value, 5))} inputMode="numeric" maxLength={5} required />

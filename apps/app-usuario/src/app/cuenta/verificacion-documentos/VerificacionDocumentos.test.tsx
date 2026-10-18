@@ -89,3 +89,17 @@ it("cierra la tarea de INE después de actualizarla sin atribuirle verificación
   await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
   expect(screen.getByRole("button", { name: /^Identificación Oficial \(INE\) En revisión/ })).toBeInTheDocument();
 });
+
+it("conserva la carga y consulta de CSF para el perfil individual", async () => {
+  mocks.subir.mockResolvedValue({ tipo: "constancia", ruta: "auth/constancia/csf.pdf", estado: "en_revision", subido_en: "2026-10-18T12:00:00Z" });
+  render(<VerificacionDocumentos usuario={{ ...usuario, tipo_cuenta: "personal" }} />);
+  const tarea = screen.getByRole("button", { name: /^Constancia de Situación Fiscal/ });
+  await waitFor(() => expect(tarea).toBeEnabled());
+  fireEvent.click(tarea);
+  const archivo = new File(["%PDF-1.7 constancia"], "csf.pdf", { type: "application/pdf" });
+  fireEvent.change(screen.getByLabelText("Seleccionar archivo · Constancia de Situación Fiscal"), { target: { files: [archivo] } });
+  await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
+  expect(mocks.subir).toHaveBeenCalledWith({}, "constancia", archivo);
+  fireEvent.click(screen.getByRole("button", { name: /^Constancia de Situación Fiscal En revisión/ }));
+  expect(await screen.findByText("csf.pdf")).toBeInTheDocument();
+});

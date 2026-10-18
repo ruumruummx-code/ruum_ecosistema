@@ -18,7 +18,7 @@ import { generarTokenTelefono } from "@/lib/phone-verification";
 process.env.NEXT_PUBLIC_SUPABASE_URL ??= "http://localhost:54321";
 process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ??= "anon-test";
 
-function req(correo: string, tokenTelefono = generarTokenTelefono("5512345678")): NextRequest {
+function req(correo: string, tokenTelefono = generarTokenTelefono("5512345678"), tipoCuenta: unknown = "personal"): NextRequest {
   return new NextRequest("http://localhost/api/auth/signup", {
     method: "POST",
     body: JSON.stringify({
@@ -27,7 +27,7 @@ function req(correo: string, tokenTelefono = generarTokenTelefono("5512345678"))
       telefono: "5512345678",
       email: correo,
       password: "Segura123",
-      tipoCuenta: "personal",
+      tipoCuenta,
       aceptaTerminos: true,
       tokenVerificacionTelefono: tokenTelefono,
     }),
@@ -42,6 +42,13 @@ function req(correo: string, tokenTelefono = generarTokenTelefono("5512345678"))
 describe("POST /api/auth/signup — validaciones y duplicados", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+  });
+
+  it.each(["empresa", null, "personal"])("crea únicamente perfil personal aunque el cliente envíe %s", async (tipoCuenta) => {
+    mockSignUp.mockResolvedValue({ data: { user: { id: "individual" }, session: null }, error: null });
+    const res = await POST(req(`individual-${String(tipoCuenta)}@ejemplo.com`, generarTokenTelefono("5512345678"), tipoCuenta));
+    expect(res.status).toBe(200);
+    expect(mockSignUp).toHaveBeenCalledWith(expect.objectContaining({ options: expect.objectContaining({ data: expect.objectContaining({ tipo_registro: "usuario", tipo_cuenta: "personal" }) }) }));
   });
 
   it("rechaza registro sin token de verificación telefónica válido", async () => {

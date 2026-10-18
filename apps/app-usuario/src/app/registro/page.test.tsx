@@ -234,6 +234,9 @@ describe("registro — accesibilidad de errores y flujo de verificación telefó
     render(<PaginaRegistro />);
     expect(screen.queryByRole("button", { name: /empresa/i })).not.toBeInTheDocument();
     expect(screen.queryByText(/^empresa$/i)).not.toBeInTheDocument();
+    expect(screen.queryByText("Tipo de cuenta")).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /personal|particular/i })).not.toBeInTheDocument();
+    expect(screen.getByLabelText(/^nombre$/i)).toBeInTheDocument();
   });
   it("suspende el paso SMS en producción sin enviar códigos", async () => {
     vi.stubEnv("NODE_ENV", "production");
