@@ -1,5 +1,7 @@
 import { expect, test, type Page } from "@playwright/test";
 
+test.skip(process.env.PLAYWRIGHT_TRASLADOS_FIXTURE !== "1", "Usa playwright.traslados.config.ts para iniciar el API local de pruebas.");
+
 test.beforeEach(async ({ context, page }) => {
   const userId = "00000000-0000-4000-8000-000000000001";
   const token = `eyJhbGciOiJIUzI1NiJ9.${Buffer.from(JSON.stringify({ sub: userId, role: "authenticated", aud: "authenticated", exp: 2100000000 })).toString("base64url")}.e2e-signature`;
@@ -8,10 +10,10 @@ test.beforeEach(async ({ context, page }) => {
   await page.clock.setFixedTime(new Date("2026-10-17T18:00:00Z"));
 });
 
-async function openTrips(page: Page) {
+async function openTrips(page: Page, offers = 0) {
   await page.goto("/viajes", { waitUntil: "domcontentloaded" });
   await expect(page.locator("[data-driver-traslados] [role=tabpanel]")).toHaveAttribute("aria-busy", "false", { timeout: 30_000 });
-  await expect(page.getByRole("tab", { name: "Ofertas (0)", exact: true })).toBeVisible();
+  await expect(page.getByRole("tab", { name: `Ofertas (${offers})`, exact: true })).toBeVisible();
   await expect(page.getByText("Información de los traslados", { exact: true })).toHaveCount(0);
   await page.locator("nextjs-portal").evaluateAll((nodes) => nodes.forEach((node) => (node as HTMLElement).style.setProperty("display", "none", "important")));
 }
@@ -90,10 +92,9 @@ test("pagina ofertas reales del fixture, ordena y filtra sin perder el detalle",
     { traslado_id: "00000000-0000-4000-8000-000000000011", estado: "pendiente_de_conductor", origen_ciudad: "Ciudad de México", origen_direccion: "Plaza de la Constitución 1", destino_ciudad: "Toluca", destino_direccion: "Centro de Toluca", ganancia_conductor: 650, distancia_km: 60, creado_en: "2026-10-17T18:00:00Z", vehiculo_marca: "Toyota", vehiculo_modelo: "Corolla" },
     { traslado_id: "00000000-0000-4000-8000-000000000012", estado: "pendiente_de_conductor", origen_ciudad: "Puebla", origen_direccion: "Centro de Puebla", destino_ciudad: "Cuernavaca", destino_direccion: "Centro de Cuernavaca", ganancia_conductor: 900, distancia_km: 120, creado_en: "2026-10-17T19:00:00Z" },
   ];
-  await page.route("**/rest/v1/pasaporte_digital*", (route) => route.fulfill({ json: new URL(route.request().url()).searchParams.get("estado") === "eq.pendiente_de_conductor" ? trips : [] }));
+  await page.route("**/rest/v1/pasaporte_digital*", (route) => route.fulfill({ headers: { "access-control-allow-origin": "*", "access-control-allow-headers": "*" }, json: new URL(route.request().url()).searchParams.get("estado") === "eq.pendiente_de_conductor" ? trips : [] }));
   await page.setViewportSize({ width: 320, height: 568 });
-  await page.goto("/viajes", { waitUntil: "domcontentloaded" });
-  await expect(page.getByRole("tab", { name: "Ofertas (2)" })).toBeVisible();
+  await openTrips(page, 2);
   await expect(page.getByRole("link", { name: "Ver oferta" })).toHaveAttribute("href", new RegExp(trips[0].traslado_id));
   const layout = await measureScreen(page);
   await page.screenshot({ path: testInfo.outputPath("ofertas.png") });

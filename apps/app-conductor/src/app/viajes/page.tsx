@@ -64,9 +64,7 @@ export default function PaginaTraslados() {
   });
   const [ciudadFiltro, setCiudadFiltro] = useState<string>(() => searchParams.get("ciudad") ?? "todas");
   const [modoMapa, setModoMapa] = useState<"lista" | "mapa">("lista");
-  const [estaOnline, setEstaOnline] = useState(
-    typeof navigator !== "undefined" ? navigator.onLine : true
-  );
+  const [estaOnline, setEstaOnline] = useState(true);
 
   const timeoutRechazoRef = useRef<number | null>(null);
   const recargaDebounceRef = useRef<NodeJS.Timeout | null>(null);
@@ -85,7 +83,8 @@ export default function PaginaTraslados() {
       }
     });
     const query = params.toString();
-    router.replace(query ? `/viajes?${query}` : "/viajes", { scroll: false });
+    // Los filtros son locales; History sincroniza useSearchParams sin pedir otra página al servidor.
+    window.history.replaceState(null, "", query ? `/viajes?${query}` : "/viajes");
   }
 
   function hrefDetalle(viaje: PasaporteRow) {
@@ -95,6 +94,7 @@ export default function PaginaTraslados() {
   // Escuchar estado de conexión
   useEffect(() => {
     const actualizar = () => setEstaOnline(navigator.onLine);
+    actualizar();
     window.addEventListener("online", actualizar);
     window.addEventListener("offline", actualizar);
     return () => {
@@ -179,7 +179,7 @@ export default function PaginaTraslados() {
   useEffect(() => {
     async function cargar() {
       if (!tieneSupabaseConfigurado()) {
-        setAviso("Supabase no está configurado. No se pueden consultar Traslados reales.");
+        setAviso("No pudimos consultar los traslados. Inténtalo más tarde.");
         setCargando(false);
         setRefrescando(false);
         return;

@@ -1,6 +1,6 @@
 "use client";
 
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 /**
@@ -14,7 +14,6 @@ interface TrasladosSearchProps {
 }
 
 export function TrasladosSearch({ onSearch, placeholder = "Buscar Traslados..." }: TrasladosSearchProps) {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const [query, setQuery] = useState("");
   const [isFocused, setIsFocused] = useState(false);
@@ -38,22 +37,24 @@ export function TrasladosSearch({ onSearch, placeholder = "Buscar Traslados..." 
         params.delete("q");
       }
       
-      router.replace(`/viajes?${params.toString()}`, { scroll: false });
+      const queryString = params.toString();
+      window.history.replaceState(null, "", queryString ? `/viajes?${queryString}` : "/viajes");
       
       // Llamar callback si existe
       onSearch?.(newQuery);
     },
-    [router, searchParams, onSearch]
+    [searchParams, onSearch]
   );
 
   const handleClear = useCallback(() => {
     setQuery("");
     const params = new URLSearchParams(searchParams.toString());
     params.delete("q");
-    router.replace(`/viajes?${params.toString()}`, { scroll: false });
+    const queryString = params.toString();
+    window.history.replaceState(null, "", queryString ? `/viajes?${queryString}` : "/viajes");
     inputRef.current?.focus();
     onSearch?.("");
-  }, [router, searchParams, onSearch]);
+  }, [searchParams, onSearch]);
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLInputElement>) => {
