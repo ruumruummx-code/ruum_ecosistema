@@ -32,17 +32,58 @@ function datoFiscal(usuario: Usuario, empresa: Empresa | null, campo: CampoFisca
 
 export type DatosFiscalesGuardados = { rfc: string; razon_social: string | null; regimen_fiscal: string | null; codigo_postal_fiscal: string; uso_cfdi: string | null; correo_facturacion: string | null };
 
+const DRAFT_FISCAL_KEY = "ruum:draft:fiscal";
+
+function leerDraftFiscal(): Partial<DatosFiscalesGuardados> | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = window.localStorage.getItem(DRAFT_FISCAL_KEY);
+    return raw ? (JSON.parse(raw) as Partial<DatosFiscalesGuardados>) : null;
+  } catch {
+    return null;
+  }
+}
+
 export function FacturacionCuentaForm({ usuario, empresa, onActualizado, compacto = false, onOcupada }: { usuario: Usuario; empresa: Empresa | null; onActualizado?: (datos: DatosFiscalesGuardados) => void; compacto?: boolean; onOcupada?: (valor: boolean) => void }) {
   const router = useRouter();
   const bloqueo = useRef(false);
-  const [rfc, setRfc] = useState(datoFiscal(usuario, empresa, "rfc"));
-  const [razonSocial, setRazonSocial] = useState(datoFiscal(usuario, empresa, "razon_social") || empresa?.nombre || "");
-  const [regimenFiscal, setRegimenFiscal] = useState(claveFiscal(datoFiscal(usuario, empresa, "regimen_fiscal")));
-  const [codigoPostalFiscal, setCodigoPostalFiscal] = useState(datoFiscal(usuario, empresa, "codigo_postal_fiscal"));
-  const [usoCfdi, setUsoCfdi] = useState(claveFiscal(datoFiscal(usuario, empresa, "uso_cfdi")));
-  const [correoFacturacion, setCorreoFacturacion] = useState(empresa?.correo_facturacion ?? usuario.correo_facturacion ?? "");
+  const draftInicial = useRef<Partial<DatosFiscalesGuardados> | null>(null);
+  if (draftInicial.current === null && typeof window !== "undefined") {
+    draftInicial.current = leerDraftFiscal();
+  }
+
+  const [rfc, setRfc] = useState(() => datoFiscal(usuario, empresa, "rfc") || (draftInicial.current?.rfc ?? ""));
+  const [razonSocial, setRazonSocial] = useState(() => datoFiscal(usuario, empresa, "razon_social") || empresa?.nombre || (draftInicial.current?.razon_social ?? ""));
+  const [regimenFiscal, setRegimenFiscal] = useState(() => claveFiscal(datoFiscal(usuario, empresa, "regimen_fiscal")) || (draftInicial.current?.regimen_fiscal ?? ""));
+  const [codigoPostalFiscal, setCodigoPostalFiscal] = useState(() => datoFiscal(usuario, empresa, "codigo_postal_fiscal") || (draftInicial.current?.codigo_postal_fiscal ?? ""));
+  const [usoCfdi, setUsoCfdi] = useState(() => claveFiscal(datoFiscal(usuario, empresa, "uso_cfdi")) || (draftInicial.current?.uso_cfdi ?? ""));
+  const [correoFacturacion, setCorreoFacturacion] = useState(() => empresa?.correo_facturacion ?? usuario.correo_facturacion ?? (draftInicial.current?.correo_facturacion ?? ""));
   const [guardando, setGuardando] = useState(false);
   const [mensaje, setMensaje] = useState<{ tono: "info" | "danger"; texto: string } | null>(null);
+
+  // Autosave del borrador fiscal local
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      try {
+        if (typeof window !== "undefined") {
+          const hayDatos = Boolean(rfc || razonSocial || regimenFiscal || codigoPostalFiscal || usoCfdi || correoFacturacion);
+          if (hayDatos) {
+            window.localStorage.setItem(DRAFT_FISCAL_KEY, JSON.stringify({
+              rfc,
+              razon_social: razonSocial,
+              regimen_fiscal: regimenFiscal,
+              codigo_postal_fiscal: codigoPostalFiscal,
+              uso_cfdi: usoCfdi,
+              correo_facturacion: correoFacturacion,
+            }));
+          }
+        }
+      } catch {
+        // ignore
+      }
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [rfc, razonSocial, regimenFiscal, codigoPostalFiscal, usoCfdi, correoFacturacion]);
 
   const persona = rfc.length === 12 ? "moral" : rfc.length === 13 ? "fisica" : undefined;
   function cambiarRfc(valor: string) {
@@ -94,6 +135,11 @@ export function FacturacionCuentaForm({ usuario, empresa, onActualizado, compact
       };
       const cliente = crearClienteNavegador();
       await actualizarFacturacionUsuario(cliente, datos);
+      try {
+        if (typeof window !== "undefined") {
+          window.localStorage.removeItem(DRAFT_FISCAL_KEY);
+        }
+      } catch {}
       setMensaje({ tono: "info", texto: "Datos de facturación actualizados." });
       onActualizado?.(datos);
       router.refresh();

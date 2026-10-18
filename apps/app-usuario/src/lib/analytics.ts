@@ -66,8 +66,34 @@ export interface EventoTraslado {
   };
 }
 
+export function telemetriaPermitida(): boolean {
+  if (typeof window === "undefined") return false;
+  try {
+    if (window.localStorage.getItem("ruum:telemetria-desactivada") === "true") return false;
+    const usoDatos = window.localStorage.getItem("ruum:pref:usoDatos");
+    if (usoDatos === '"Desactivado"' || usoDatos === "Desactivado") return false;
+    return true;
+  } catch {
+    return true;
+  }
+}
+
+export function desactivarTelemetriaActiva() {
+  if (typeof window === "undefined") return;
+  try {
+    window.localStorage.setItem("ruum:telemetria-desactivada", "true");
+    if (window.dataLayer) {
+      window.dataLayer.length = 0;
+    }
+    window.dispatchEvent(new CustomEvent("ruum:telemetria-detenida"));
+  } catch {
+    // ignore
+  }
+}
+
 export function registrarEventoUx(evento: EventoUxUsuario, propiedades: PropiedadesAnalitica = {}) {
   if (typeof window === "undefined") return;
+  if (!telemetriaPermitida()) return;
 
   const base: PropiedadesAnalitica = {
     timestamp: new Date().toISOString(),

@@ -150,6 +150,22 @@ export async function actualizarPreferenciasNotificaciones(
   return data;
 }
 
+/** Sincroniza las preferencias de la aplicación (tema, idioma, unidades, etc.) en la columna jsonb. */
+export async function actualizarPreferenciasGeneralesUsuario(
+  cliente: Cliente,
+  preferencias: Record<string, unknown>
+): Promise<void> {
+  const { data: sesion } = await cliente.auth.getUser();
+  if (!sesion.user) throw new Error("Sin sesión activa.");
+
+  const { error } = await cliente
+    .from("usuarios")
+    .update({ preferencias } as never)
+    .eq("auth_user_id", sesion.user.id);
+
+  if (error) throw error;
+}
+
 function rutaFotoPerfilUsuario(valor: string | null | undefined, authUserId: string): string | null {
   if (!valor) return null;
   const rutaEsperada = new RegExp(`^${authUserId}/perfil\\.(?:jpe?g|png|webp)$`, "i");

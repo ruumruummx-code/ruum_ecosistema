@@ -103,11 +103,14 @@ export function CuentaCliente({ seccionInicial = null, usuario, correoRegistro =
       const { error } = await crearClienteNavegador().auth.signOut();
       if (error) throw error;
 
-      // RC-12: Limpiar el borrador del wizard al salir para evitar que
-      // otro usuario en el mismo dispositivo vea los datos del anterior.
-      // El borrador contiene nombres de contactos y direcciones.
+      // RC-12: Limpiar el borrador del wizard y estado de onboarding al salir
+      // para evitar que otro usuario en el mismo dispositivo vea datos anteriores.
       try {
         localStorage.removeItem("ruumruum.traslados-nuevo.borrador.v2");
+        localStorage.removeItem("ruum-onboarding-paso");
+        localStorage.removeItem("ruum-onboarding-paso:exp");
+        localStorage.removeItem("ruum-onboarding-visto");
+        localStorage.removeItem("ruum-onboarding-visto:exp");
       } catch {
         // Si localStorage no está disponible (modo incógnito, etc.),
         // no hay nada que limpiar.

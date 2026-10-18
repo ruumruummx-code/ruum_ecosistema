@@ -463,6 +463,10 @@ export function CotizadorPortal({
           Tu borrador tiene vigencia de 24 horas. Recalcularemos la tarifa al
           recuperarlo.
         </p>
+        <div className="mt-3 rounded-lg border border-[var(--user-color-border)] bg-[var(--user-color-card)] p-3 text-xs text-[var(--user-color-muted)]">
+          <p className="font-semibold text-[var(--user-color-primary)]">Por tu seguridad no guardamos direcciones exactas ni teléfonos.</p>
+          <p className="mt-1">Se recuperaron códigos postales y datos del vehículo; únicamente deberás reingresar calles y teléfonos de contacto.</p>
+        </div>
         <button
           type="button"
           className="mt-4 min-h-12 w-full rounded-xl bg-[var(--user-color-action)] text-[var(--user-color-on-action)]"

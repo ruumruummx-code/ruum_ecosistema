@@ -5,8 +5,9 @@ import Link from "next/link";
 import { Icono } from "@ruum/ui";
 import { HojaTareaCuenta } from "./HojaTareaCuenta";
 import type { Database } from "@ruum/shared/types";
-import { actualizarPreferenciasNotificaciones } from "@ruum/api/services";
+import { actualizarPreferenciasNotificaciones, actualizarPreferenciasGeneralesUsuario } from "@ruum/api/services";
 import { crearClienteNavegador, tieneSupabaseConfigurado } from "../../lib/supabase-browser";
+import { desactivarTelemetriaActiva } from "../../lib/analytics";
 
 type Usuario = Database["public"]["Tables"]["usuarios"]["Row"];
 
@@ -66,9 +67,10 @@ function aplicarTemaEnDocumento(t: "Claro" | "Oscuro" | "Automático") {
     } else {
       document.documentElement.classList.remove("dark");
     }
+    // Unificar a una sola clave canónica "ruum-tema", limpiando claves obsoletas
     window.localStorage.setItem("ruum-tema", efectivo);
-    window.localStorage.setItem("ruum-theme", efectivo);
-    window.localStorage.setItem("ruum-tema-modo", t === "Claro" ? "light" : t === "Oscuro" ? "dark" : "auto");
+    window.localStorage.removeItem("ruum-theme");
+    window.localStorage.removeItem("ruum-tema-modo");
   } catch {
     // ignore
   }
@@ -118,7 +120,7 @@ function aplicarUsoDatosEnDocumento(datos: "Activado" | "Desactivado") {
   if (typeof window === "undefined") return;
   try {
     if (datos === "Desactivado") {
-      window.localStorage.setItem("ruum:telemetria-desactivada", "true");
+      desactivarTelemetriaActiva();
     } else {
       window.localStorage.removeItem("ruum:telemetria-desactivada");
     }
@@ -149,6 +151,10 @@ export function Preferencias({ usuario }: PreferenciasProps) {
       // almacenamiento no disponible (SSR/privado) — se ignora
     }
   }
+  const prefBD = (usuario?.preferencias && typeof usuario.preferencias === "object" && !Array.isArray(usuario.preferencias))
+    ? (usuario.preferencias as Record<string, unknown>)
+    : {};
+
   // Notificaciones generales
   const [notifPush, setNotifPush] = useState(usuario?.notificaciones_push ?? true);
   const [notifEmail, setNotifEmail] = useState(usuario?.notificaciones_email ?? true);
@@ -159,31 +165,59 @@ export function Preferencias({ usuario }: PreferenciasProps) {
   const [alertaViaje, setAlertaViaje] = useState(usuario?.alertas_viaje ?? true);
   const [alertaEvidencia, setAlertaEvidencia] = useState(usuario?.alertas_evidencia ?? true);
   const [alertaPago, setAlertaPago] = useState(usuario?.alertas_pago ?? true);
-  const [alertaIncidente, setAlertaIncidente] = useState(() => leerLocal("ruum:pref:alertaIncidente", true));
+  const [alertaIncidente, setAlertaIncidente] = useState(() => (typeof prefBD.alertaIncidente === "boolean" ? prefBD.alertaIncidente : leerLocal("ruum:pref:alertaIncidente", true)));
 
   // Idioma
-  const [idioma, setIdioma] = useState<"es" | "en">(() => leerLocal("ruum:pref:idioma", "es"));
+  const [idioma, setIdioma] = useState<"es" | "en">(() => (prefBD.idioma as "es" | "en") ?? leerLocal("ruum:pref:idioma", "es"));
 
   // Preferencias de la app
-  const [tema, setTema] = useState<"Claro" | "Oscuro" | "Automático">(() => leerLocal("ruum:pref:tema", "Claro"));
-  const [unidades, setUnidades] = useState<"Métrico" | "Imperial">(() => leerLocal("ruum:pref:unidades", "Métrico"));
-  const [accesibilidad, setAccesibilidad] = useState<"Estándar" | "Texto grande" | "Alto contraste">(() => leerLocal("ruum:pref:accesibilidad", "Estándar"));
+  const [tema, setTema] = useState<"Claro" | "Oscuro" | "Automático">(() => (prefBD.tema as "Claro" | "Oscuro" | "Automático") ?? leerLocal("ruum:pref:tema", "Claro"));
+  const [unidades, setUnidades] = useState<"Métrico" | "Imperial">(() => (prefBD.unidades as "Métrico" | "Imperial") ?? leerLocal("ruum:pref:unidades", "Métrico"));
+  const [accesibilidad, setAccesibilidad] = useState<"Estándar" | "Texto grande" | "Alto contraste">(() => (prefBD.accesibilidad as "Estándar" | "Texto grande" | "Alto contraste") ?? leerLocal("ruum:pref:accesibilidad", "Estándar"));
 
   // Privacidad y seguridad
-  const [biometrico, setBiometrico] = useState(() => leerLocal("ruum:pref:biometrico", true));
-  const [ubicacion, setUbicacion] = useState(() => leerLocal("ruum:pref:ubicacion", true));
-  const [usoDatos, setUsoDatos] = useState<"Activado" | "Desactivado">(() => leerLocal("ruum:pref:usoDatos", "Activado"));
+  const [biometrico, setBiometrico] = useState(() => (typeof prefBD.biometrico === "boolean" ? prefBD.biometrico : leerLocal("ruum:pref:biometrico", true)));
+  const [ubicacion, setUbicacion] = useState(() => (typeof prefBD.ubicacion === "boolean" ? prefBD.ubicacion : leerLocal("ruum:pref:ubicacion", true)));
+  const [usoDatos, setUsoDatos] = useState<"Activado" | "Desactivado">(() => (prefBD.usoDatos as "Activado" | "Desactivado") ?? leerLocal("ruum:pref:usoDatos", "Activado"));
 
   const [notificacionesAbiertas, setNotificacionesAbiertas] = useState(false);
   const cerrarNotificaciones = useCallback(() => setNotificacionesAbiertas(false), []);
   const colaGuardado = useRef<Promise<void>>(Promise.resolve());
+  const timeoutDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const preferenciasPendientesRef = useRef<Record<string, unknown>>({});
   const [toastMensaje, setToastMensaje] = useState<string | null>(null);
+
   useEffect(() => aplicarTemaEnDocumento(tema), [tema]);
   useEffect(() => aplicarAccesibilidadEnDocumento(accesibilidad), [accesibilidad]);
   useEffect(() => aplicarIdiomaEnDocumento(idioma), [idioma]);
   useEffect(() => aplicarUnidadesEnDocumento(unidades), [unidades]);
   useEffect(() => aplicarUsoDatosEnDocumento(usoDatos), [usoDatos]);
+  useEffect(() => {
+    return () => {
+      if (timeoutDebounceRef.current) clearTimeout(timeoutDebounceRef.current);
+    };
+  }, []);
   useEffect(() => { if (!toastMensaje) return; const t = setTimeout(() => setToastMensaje(null), 3000); return () => clearTimeout(t); }, [toastMensaje]);
+
+  function programarSincronizacionGeneral(cambios: Record<string, unknown>) {
+    Object.assign(preferenciasPendientesRef.current, cambios);
+    if (timeoutDebounceRef.current) {
+      clearTimeout(timeoutDebounceRef.current);
+    }
+    timeoutDebounceRef.current = setTimeout(() => {
+      const payload = { ...preferenciasPendientesRef.current };
+      preferenciasPendientesRef.current = {};
+      if (!tieneSupabaseConfigurado()) return;
+      colaGuardado.current = colaGuardado.current.then(async () => {
+        try {
+          await actualizarPreferenciasGeneralesUsuario(crearClienteNavegador(), payload);
+        } catch {
+          setToastMensaje("Guardado en este dispositivo; no pudimos sincronizar con tu cuenta.");
+        }
+      });
+    }, 400);
+  }
+
   async function sincronizarNotificacion(campo: string, valor: boolean) {
     guardarLocal(`ruum:pref:${campo}`, valor);
     if (!tieneSupabaseConfigurado()) return;
@@ -255,6 +289,7 @@ export function Preferencias({ usuario }: PreferenciasProps) {
     const nuevo = !alertaIncidente;
     setAlertaIncidente(nuevo);
     guardarLocal("ruum:pref:alertaIncidente", nuevo);
+    programarSincronizacionGeneral({ alertaIncidente: nuevo });
     setToastMensaje(nuevo ? "Alertas de incidentes activadas" : "Alertas de incidentes desactivadas");
   }
 
@@ -262,6 +297,7 @@ export function Preferencias({ usuario }: PreferenciasProps) {
     setIdioma(nuevo);
     guardarLocal("ruum:pref:idioma", nuevo);
     aplicarIdiomaEnDocumento(nuevo);
+    programarSincronizacionGeneral({ idioma: nuevo });
     setToastMensaje(nuevo === "es" ? "Idioma cambiado a Español (México)" : "Language changed to English (US)");
   }
 
@@ -269,6 +305,7 @@ export function Preferencias({ usuario }: PreferenciasProps) {
     const nuevo = !biometrico;
     setBiometrico(nuevo);
     guardarLocal("ruum:pref:biometrico", nuevo);
+    programarSincronizacionGeneral({ biometrico: nuevo });
     setToastMensaje(nuevo ? "Inicio biométrico activado" : "Inicio biométrico desactivado");
   }
 
@@ -276,6 +313,7 @@ export function Preferencias({ usuario }: PreferenciasProps) {
     const nuevo = !ubicacion;
     setUbicacion(nuevo);
     guardarLocal("ruum:pref:ubicacion", nuevo);
+    programarSincronizacionGeneral({ ubicacion: nuevo });
     if (nuevo && typeof navigator !== "undefined" && "geolocation" in navigator) {
       try {
         navigator.geolocation.getCurrentPosition(() => {}, () => {}, { timeout: 4000, maximumAge: 60000 });
@@ -301,13 +339,13 @@ export function Preferencias({ usuario }: PreferenciasProps) {
       </FilaPreferencia>
       <h2>APLICACIÓN</h2>
       <button type="button" className="user-preference-row" onClick={() => setNotificacionesAbiertas(true)} aria-haspopup="dialog"><Icono d="M6 8a6 6 0 0 1 12 0v8l3 2H3l3-2V8Z M10 21h4" className="size-4 shrink-0" /><span>Notificaciones y alertas</span><span aria-hidden="true">›</span></button>
-      <FilaPreferencia titulo="Tema" icono="M12 3a9 9 0 1 0 9 9c-6 3-12-3-9-9Z"><select aria-label="Tema de la aplicación" value={tema} onChange={e => { const v = e.target.value as typeof tema; setTema(v); guardarLocal("ruum:pref:tema", v); setToastMensaje(`Tema aplicado: ${v}`); }}>{["Claro", "Oscuro", "Automático"].map(v => <option key={v}>{v}</option>)}</select></FilaPreferencia>
-      <FilaPreferencia titulo="Unidades" icono="M4 5h16v14H4V5Z M8 5v5 M12 5v3 M16 5v5"><select aria-label="Unidades de medida" value={unidades} onChange={e => { const v = e.target.value as typeof unidades; setUnidades(v); guardarLocal("ruum:pref:unidades", v); setToastMensaje(`Unidades actualizadas: ${v}`); }}>{["Métrico", "Imperial"].map(v => <option key={v}>{v}</option>)}</select></FilaPreferencia>
-      <FilaPreferencia titulo="Accesibilidad" icono="M12 3v1 M4 8h16 M12 8v8 M8 21l4-5 4 5"><select aria-label="Accesibilidad" value={accesibilidad} onChange={e => { const v = e.target.value as typeof accesibilidad; setAccesibilidad(v); guardarLocal("ruum:pref:accesibilidad", v); setToastMensaje(`Accesibilidad configurada: ${v}`); }}>{["Estándar", "Texto grande", "Alto contraste"].map(v => <option key={v}>{v}</option>)}</select></FilaPreferencia>
+      <FilaPreferencia titulo="Tema" icono="M12 3a9 9 0 1 0 9 9c-6 3-12-3-9-9Z"><select aria-label="Tema de la aplicación" value={tema} onChange={e => { const v = e.target.value as typeof tema; setTema(v); guardarLocal("ruum:pref:tema", v); programarSincronizacionGeneral({ tema: v }); setToastMensaje(`Tema aplicado: ${v}`); }}>{["Claro", "Oscuro", "Automático"].map(v => <option key={v}>{v}</option>)}</select></FilaPreferencia>
+      <FilaPreferencia titulo="Unidades" icono="M4 5h16v14H4V5Z M8 5v5 M12 5v3 M16 5v5"><select aria-label="Unidades de medida" value={unidades} onChange={e => { const v = e.target.value as typeof unidades; setUnidades(v); guardarLocal("ruum:pref:unidades", v); programarSincronizacionGeneral({ unidades: v }); setToastMensaje(`Unidades actualizadas: ${v}`); }}>{["Métrico", "Imperial"].map(v => <option key={v}>{v}</option>)}</select></FilaPreferencia>
+      <FilaPreferencia titulo="Accesibilidad" icono="M12 3v1 M4 8h16 M12 8v8 M8 21l4-5 4 5"><select aria-label="Accesibilidad" value={accesibilidad} onChange={e => { const v = e.target.value as typeof accesibilidad; setAccesibilidad(v); guardarLocal("ruum:pref:accesibilidad", v); programarSincronizacionGeneral({ accesibilidad: v }); setToastMensaje(`Accesibilidad configurada: ${v}`); }}>{["Estándar", "Texto grande", "Alto contraste"].map(v => <option key={v}>{v}</option>)}</select></FilaPreferencia>
       <h2>PRIVACIDAD</h2>
       <FilaPreferencia titulo="Biometría" icono="M6 16V9a6 6 0 0 1 12 0v7 M9 19V9a3 3 0 0 1 6 0v11 M12 8v14"><Interruptor activo={biometrico} onAlternar={handleToggleBiometrico} etiquetaAria="Inicio biométrico" /></FilaPreferencia>
       <FilaPreferencia titulo="Ubicación" icono="M12 22s8-8 8-13a8 8 0 0 0-16 0c0 5 8 13 8 13Z M12 6v6"><Interruptor activo={ubicacion} onAlternar={handleToggleUbicacion} etiquetaAria="Ubicación en tiempo real" /></FilaPreferencia>
-      <FilaPreferencia titulo="Uso de datos" icono="M4 4h16v16H4V4Z M8 16v-4 M12 16V8 M16 16v-6"><select aria-label="Uso de datos" value={usoDatos} onChange={e => { const v = e.target.value as typeof usoDatos; setUsoDatos(v); guardarLocal("ruum:pref:usoDatos", v); setToastMensaje(`Uso de datos: ${v}`); }}>{["Activado", "Desactivado"].map(v => <option key={v}>{v}</option>)}</select></FilaPreferencia>
+      <FilaPreferencia titulo="Uso de datos" icono="M4 4h16v16H4V4Z M8 16v-4 M12 16V8 M16 16v-6"><select aria-label="Uso de datos" value={usoDatos} onChange={e => { const v = e.target.value as typeof usoDatos; setUsoDatos(v); guardarLocal("ruum:pref:usoDatos", v); programarSincronizacionGeneral({ usoDatos: v }); setToastMensaje(`Uso de datos: ${v}`); }}>{["Activado", "Desactivado"].map(v => <option key={v}>{v}</option>)}</select></FilaPreferencia>
     </div>
     <div className="user-preferences-feedback" role="status" aria-live="polite">{toastMensaje}</div>
     {notificacionesAbiertas && <HojaTareaCuenta titulo="Notificaciones y alertas" extendida cerrar={cerrarNotificaciones}><div className="user-preferences-notifications">{notificaciones.map(([titulo, activo, cambiar]) => <FilaPreferencia key={titulo} titulo={titulo}><Interruptor activo={activo} onAlternar={cambiar} etiquetaAria={titulo} /></FilaPreferencia>)}</div></HojaTareaCuenta>}

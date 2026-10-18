@@ -35,8 +35,13 @@ export function DocumentoCuentaTarjeta({ tipo, titulo, descripcion, documento, c
     <p>{descripcion} PDF, JPG o PNG, máximo 10 MB.</p>
     {documento?.subido_en && <p>Última carga: {new Date(documento.subido_en).toLocaleDateString("es-MX", { timeZone: "America/Mexico_City" })}</p>}
     <p className="user-document-name" title={nombreArchivo ?? documento?.ruta.split("/").at(-1)}>{nombreArchivo ?? documento?.ruta.split("/").at(-1) ?? "Sin archivo cargado"}</p>
+    {documento?.ruta && (
+      <div className="mt-2 rounded-lg border border-amber-500/40 bg-amber-500/10 p-2.5 text-xs text-amber-800 dark:text-amber-200" role="note">
+        ⚠️ <strong>Aviso:</strong> Reemplazar este archivo reabrirá la revisión manual (24 a 48 hrs hábiles).
+      </div>
+    )}
     <input ref={input} id={`archivo-${tipo}`} type="file" accept="image/jpeg,image/png,application/pdf" hidden aria-label={`Seleccionar archivo · ${titulo}`} disabled={guardando || cargando || errorConsulta} onChange={event => void cargar(event.target.files?.[0])} />
-    <button type="button" disabled={guardando || cargando || errorConsulta} onClick={() => input.current?.click()}>{guardando ? "Subiendo…" : "Seleccionar archivo"}</button>
+    <button type="button" disabled={guardando || cargando || errorConsulta} onClick={() => input.current?.click()}>{guardando ? "Subiendo…" : (documento?.ruta ? "Reemplazar archivo" : "Seleccionar archivo")}</button>
     {error && <p role="alert">{error}</p>}
   </article>;
 }

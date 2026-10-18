@@ -7,6 +7,7 @@ import { LogoMarca, SelloConductor, Icono, MobileShell } from "@ruum/ui";
 import { NavegacionUsuario } from "./NavegacionUsuario";
 import { InicioUsuario } from "./InicioUsuario";
 import { BotonReintentarSesion } from "./ReintentarSesion";
+import { EnlaceRecorridoGuiado } from "./EnlaceRecorridoGuiado";
 import { obtenerViajeActivo } from "../lib/inicio";
 import { botonAzul, botonContorno } from "./experiencia-publica";
 // RC-14: estilos responsivos del dashboard (ver InicioUsuario.css).
@@ -201,13 +202,8 @@ export default async function PaginaInicio({
             <Link href="#como-funciona" className={`sm:w-auto ${botonContorno} sm:px-8`}>
               Conoce el servicio
             </Link>
-            {/* M6: /onboarding existía sin un solo enlace en 24 rutas. */}
-            <Link
-              href="/onboarding"
-              className="inline-flex min-h-11 w-full sm:w-auto items-center justify-center rounded-lg px-5 py-3 font-display text-sm font-semibold text-[#8B98AD] transition hover:text-white"
-            >
-              Ver recorrido guiado →
-            </Link>
+            {/* M6: /onboarding enlace condicional según TTL */}
+            <EnlaceRecorridoGuiado />
             <Link
               href="/login"
               className="inline-flex min-h-11 w-full sm:w-auto items-center justify-center rounded-lg px-5 py-3 font-display text-sm font-semibold text-[#8B98AD] transition hover:text-white"

@@ -130,9 +130,13 @@ function FormularioNuevaPassword() {
         try {
           await cliente.auth.signOut({ scope: "global" });
         } catch {}
-        // RC-12: limpiar borrador local de traslados al cerrar sesión
+        // RC-12: limpiar borrador local y onboarding al cerrar sesión
         try {
           localStorage.removeItem("ruumruum.traslados-nuevo.borrador.v2");
+          localStorage.removeItem("ruum-onboarding-paso");
+          localStorage.removeItem("ruum-onboarding-paso:exp");
+          localStorage.removeItem("ruum-onboarding-visto");
+          localStorage.removeItem("ruum-onboarding-visto:exp");
         } catch {}
       }
 
