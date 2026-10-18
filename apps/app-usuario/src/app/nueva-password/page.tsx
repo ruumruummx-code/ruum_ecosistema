@@ -1,16 +1,23 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
+import { Suspense, useEffect, useRef, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Aviso, Field, MobileShell, MobileCard, MobileButton } from "@ruum/ui";
 import { fortalezaPassword, observarSesionRecuperacion, passwordCumpleRequisitos, requisitosPassword, traducirErrorAuth } from "@ruum/shared/utils";
 import { crearClienteNavegador, tieneSupabaseConfigurado } from "../../lib/supabase-browser";
 import { LogoRuum } from "../experiencia-publica";
 
-export default function PaginaNuevaPassword() {
+function FormularioNuevaPassword() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const esCuentaDistinta = searchParams.get("cuenta_distinta") === "1";
+  const anterior = searchParams.get("anterior") || "";
+  const nueva = searchParams.get("nueva") || "";
+
   const [password, setPassword] = useState("");
   const [confirmar, setConfirmar] = useState("");
+  const [mantenermeConectado, setMantenermeConectado] = useState(true);
+  const [confirmadoCambioCuenta, setConfirmadoCambioCuenta] = useState(!esCuentaDistinta);
   const [enviando, setEnviando] = useState(false);
   const [listo, setListo] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -80,6 +87,10 @@ export default function PaginaNuevaPassword() {
 
   async function establecer(e: React.FormEvent) {
     e.preventDefault();
+    if (esCuentaDistinta && !confirmadoCambioCuenta) {
+      setError("Por favor confirma que deseas cambiar la contraseña de esta cuenta.");
+      return;
+    }
     if (!passwordCumpleRequisitos(password)) {
       setError("La contraseña debe incluir minúscula, mayúscula y número.");
       setErrorCampo({ campo: "password", mensaje: "La contraseña debe incluir minúscula, mayúscula y número." });
@@ -109,20 +120,32 @@ export default function PaginaNuevaPassword() {
         await fetch("/api/recovery/clear", { method: "POST", cache: "no-store", credentials: "same-origin" });
       } catch {}
 
-      try {
-        await cliente.auth.signOut();
-      } catch {}
-
-      // RC-12: limpiar el borrador del wizard al cerrar sesión para no dejar
-      // datos de contacto/direcciones de un usuario en un dispositivo compartido.
-      try {
-        localStorage.removeItem("ruumruum.traslados-nuevo.borrador.v2");
-      } catch {}
+      if (mantenermeConectado) {
+        // Invalidación selectiva de otras sesiones manteniendo la actual
+        try {
+          await cliente.auth.signOut({ scope: "others" });
+        } catch {}
+      } else {
+        // Cierre total de sesión
+        try {
+          await cliente.auth.signOut({ scope: "global" });
+        } catch {}
+        // RC-12: limpiar borrador local de traslados al cerrar sesión
+        try {
+          localStorage.removeItem("ruumruum.traslados-nuevo.borrador.v2");
+        } catch {}
+      }
 
       if (!montadoRef.current) return;
       setListo(true);
       redireccionRef.current = setTimeout(() => {
-        if (montadoRef.current) router.push("/login?contrasena=actualizada");
+        if (montadoRef.current) {
+          if (mantenermeConectado) {
+            router.push("/?sesion=restablecida");
+          } else {
+            router.push("/login?contrasena=actualizada");
+          }
+        }
       }, 2500);
     } catch (err) {
       if (montadoRef.current) setError(traducirErrorAuth(err, "No pudimos actualizar la contraseña. Intenta de nuevo."));
@@ -168,8 +191,9 @@ export default function PaginaNuevaPassword() {
                 Contraseña actualizada
               </h1>
               <p className="text-[13.5px] font-medium leading-relaxed text-[#4e5f80] dark:text-[#a8b5cc]">
-                Tu contraseña fue actualizada y cerramos esta sesión por seguridad.
-                Inicia sesión de nuevo para continuar. Redirigiendo…
+                {mantenermeConectado
+                  ? "Tu contraseña fue actualizada exitosamente. Tu sesión permanece activa en este dispositivo y se cerraron las sesiones en otros dispositivos por seguridad. Redirigiendo…"
+                  : "Tu contraseña fue actualizada y cerramos la sesión por seguridad. Inicia sesión de nuevo para continuar. Redirigiendo…"}
               </p>
             </div>
           ) : !sesionLista ? (
@@ -195,6 +219,27 @@ export default function PaginaNuevaPassword() {
               <p className="mt-1.5 text-[13px] font-medium leading-relaxed text-[#4e5f80] dark:text-[#a8b5cc]">
                 Elige una contraseña segura. Mínimo 8 caracteres.
               </p>
+
+              {esCuentaDistinta && (
+                <div className="mt-4 rounded-2xl border border-amber-300 bg-amber-50 p-4 text-xs text-amber-900 dark:border-amber-700 dark:bg-amber-950/40 dark:text-amber-200 space-y-2">
+                  <div className="flex items-center gap-2 font-bold text-amber-950 dark:text-amber-100">
+                    <span aria-hidden="true">⚠️</span>
+                    <span>Sesión previa de otra cuenta detectada</span>
+                  </div>
+                  <p className="leading-relaxed">
+                    Había una sesión activa con <strong>{anterior || "otra cuenta"}</strong>. Este enlace restablecerá la contraseña de <strong>{nueva || "la cuenta indicada en el correo"}</strong>.
+                  </p>
+                  <label className="flex items-center gap-2 pt-1 font-semibold cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={confirmadoCambioCuenta}
+                      onChange={(e) => setConfirmadoCambioCuenta(e.target.checked)}
+                      className="size-4 rounded border-amber-400 text-[#0a2342] focus:ring-amber-400"
+                    />
+                    <span>Confirmo restablecer la contraseña de {nueva || "esta cuenta"}</span>
+                  </label>
+                </div>
+              )}
 
               <form className="mt-6 flex flex-col gap-4" onSubmit={establecer} noValidate>
                 {/* Contraseña */}
@@ -279,6 +324,21 @@ export default function PaginaNuevaPassword() {
                   />
                 </div>
 
+                {/* Opción mantenerme conectado */}
+                <label className="flex items-start gap-2.5 text-xs text-[#4e5f80] dark:text-[#a8b5cc] cursor-pointer pt-1">
+                  <input
+                    type="checkbox"
+                    checked={mantenermeConectado}
+                    onChange={(e) => setMantenermeConectado(e.target.checked)}
+                    className="size-4 mt-0.5 rounded border-[#d0dbe7] text-[#0a2342] focus:ring-[#0a2342]"
+                  />
+                  <span className="leading-snug">
+                    <strong className="text-[#0a2342] dark:text-[#f6f8fb]">Mantenerme conectado tras restablecer</strong>
+                    <br />
+                    Cerrará selectivamente tus sesiones en otros dispositivos por seguridad.
+                  </span>
+                </label>
+
                 {error && (
                   <div role="alert" aria-atomic="true">
                     <Aviso tono="danger">{error}</Aviso>
@@ -287,7 +347,7 @@ export default function PaginaNuevaPassword() {
 
                 <MobileButton
                   type="submit"
-                  disabled={enviando}
+                  disabled={enviando || (esCuentaDistinta && !confirmadoCambioCuenta)}
                   loading={enviando}
                   className="mt-2"
                 >
@@ -299,5 +359,13 @@ export default function PaginaNuevaPassword() {
         </MobileCard>
       </div>
     </MobileShell>
+  );
+}
+
+export default function PaginaNuevaPassword() {
+  return (
+    <Suspense fallback={<div className="flex min-h-dvh items-center justify-center bg-[#eef2f7] p-4 text-sm text-[#4e5f80]">Cargando…</div>}>
+      <FormularioNuevaPassword />
+    </Suspense>
   );
 }

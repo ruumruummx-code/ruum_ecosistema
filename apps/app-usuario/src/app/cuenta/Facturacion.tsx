@@ -384,7 +384,8 @@ export function Facturacion({ usuario, empresa, facturasIniciales }: Facturacion
 
     if (tieneSupabaseConfigurado()) {
       try {
-        await actualizarFacturacionUsuario(crearClienteNavegador(), {
+        const cliente = crearClienteNavegador();
+        await actualizarFacturacionUsuario(cliente, {
           rfc: rfcLimpio,
           razon_social: razonLimpia || null,
           regimen_fiscal: formRegimenFiscal || null,

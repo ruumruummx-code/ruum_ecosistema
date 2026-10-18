@@ -46,6 +46,14 @@ export function formatearTiempoRelativoBorrador(guardadoEn: string, ahora: numbe
 }
 
 
+export function ofuscarNumero(val: number): number {
+  return Math.round(val * 100) / 100;
+}
+
+export function ofuscarCoordenada(coord: [number, number]): [number, number] {
+  return [ofuscarNumero(coord[0]), ofuscarNumero(coord[1])];
+}
+
 export interface BorradorTrasladoLocal {
   versionEsquema: 2;
   claveIdempotencia: string;
@@ -68,10 +76,16 @@ export interface BorradorTrasladoLocal {
   origenEstado: string;
   origenCiudad: string;
   origenColonia: string;
+  origenLatOfuscada?: number | null;
+  origenLngOfuscada?: number | null;
+  origenPoiGenerico?: string | null;
   destinoCodigoPostal: string;
   destinoEstado: string;
   destinoCiudad: string;
   destinoColonia: string;
+  destinoLatOfuscada?: number | null;
+  destinoLngOfuscada?: number | null;
+  destinoPoiGenerico?: string | null;
   entregaNombre: string;
   entregaApellido: string;
   recepcionNombre: string;
@@ -146,6 +160,25 @@ export function leerBorradorTrasladoLocal(): BorradorTrasladoLocal | null {
     }
     for (const campo of CAMPOS_BOOLEANOS) {
       borrador[campo] = Boolean(dato[campo]);
+    }
+
+    if (typeof dato.origenLatOfuscada === "number" && Number.isFinite(dato.origenLatOfuscada)) {
+      borrador.origenLatOfuscada = ofuscarNumero(dato.origenLatOfuscada);
+    }
+    if (typeof dato.origenLngOfuscada === "number" && Number.isFinite(dato.origenLngOfuscada)) {
+      borrador.origenLngOfuscada = ofuscarNumero(dato.origenLngOfuscada);
+    }
+    if (typeof dato.origenPoiGenerico === "string" && dato.origenPoiGenerico.length <= LONGITUD_MAXIMA_CAMPO) {
+      borrador.origenPoiGenerico = dato.origenPoiGenerico;
+    }
+    if (typeof dato.destinoLatOfuscada === "number" && Number.isFinite(dato.destinoLatOfuscada)) {
+      borrador.destinoLatOfuscada = ofuscarNumero(dato.destinoLatOfuscada);
+    }
+    if (typeof dato.destinoLngOfuscada === "number" && Number.isFinite(dato.destinoLngOfuscada)) {
+      borrador.destinoLngOfuscada = ofuscarNumero(dato.destinoLngOfuscada);
+    }
+    if (typeof dato.destinoPoiGenerico === "string" && dato.destinoPoiGenerico.length <= LONGITUD_MAXIMA_CAMPO) {
+      borrador.destinoPoiGenerico = dato.destinoPoiGenerico;
     }
 
     const hayContenido = CAMPOS_TEXTO.some((campo) => borrador[campo].trim());

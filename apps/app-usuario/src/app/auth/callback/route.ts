@@ -98,6 +98,23 @@ export async function GET(request: NextRequest) {
     return NextResponse.redirect(`${origin}${destinoErrorServer}`);
   }
 
+function clasificarCausaError(error: unknown, searchParams: URLSearchParams): "expirado" | "reutilizado" | "otro_dispositivo" {
+  const errorObj = error as { message?: string; code?: string } | null;
+  const errorMsg = (errorObj?.message || searchParams.get("error_description") || "").toLowerCase();
+  const errorCode = (errorObj?.code || searchParams.get("error_code") || "").toLowerCase();
+
+  if (errorCode.includes("otp_expired") || errorMsg.includes("expired") || errorMsg.includes("caduc") || errorMsg.includes("expirad")) {
+    return "expirado";
+  }
+  if (errorMsg.includes("flow_state") || errorMsg.includes("code_verifier") || errorMsg.includes("pkce") || errorMsg.includes("different device")) {
+    return "otro_dispositivo";
+  }
+  if (errorMsg.includes("already") || errorMsg.includes("reutiliz") || errorMsg.includes("used") || errorMsg.includes("consum")) {
+    return "reutilizado";
+  }
+  return "expirado";
+}
+
   const cookieStore = await cookies();
   const supabase = crearClienteServidor(url, anonKey, {
     getAll() {
@@ -114,24 +131,44 @@ export async function GET(request: NextRequest) {
     },
   });
 
+  // Detectar cuenta abierta previamente para evitar cambio silencioso de sesión
+  let usuarioPrevioEmail: string | null = null;
+  let usuarioPrevioId: string | null = null;
+  try {
+    const { data: dataPrevia } = await supabase.auth.getUser();
+    usuarioPrevioId = dataPrevia?.user?.id ?? null;
+    usuarioPrevioEmail = dataPrevia?.user?.email ?? null;
+  } catch {
+    // Sin sesión previa activa
+  }
+
   // 1. Flujo PKCE (autorización por código)
   if (code) {
     const { error } = await supabase.auth.exchangeCodeForSession(code);
     if (!error) {
+      let queryMismatch = "";
       if (type === "recovery") {
         await setRecoveryCookie(cookieStore, supabase);
+        try {
+          const { data: dataNueva } = await supabase.auth.getUser();
+          const nuevoUser = dataNueva?.user;
+          if (usuarioPrevioId && nuevoUser && nuevoUser.id !== usuarioPrevioId) {
+            queryMismatch = `?cuenta_distinta=1&anterior=${encodeURIComponent(usuarioPrevioEmail || "")}&nueva=${encodeURIComponent(nuevoUser.email || "")}`;
+          }
+        } catch {}
       } else {
         clearRecoveryCookie(cookieStore);
       }
-      const destino = type === "recovery" ? "/nueva-password" : next;
+      const destino = type === "recovery" ? `/nueva-password${queryMismatch}` : next;
       return NextResponse.redirect(`${origin}${destino}`);
     }
-    // Código inválido/expirado/reutilizado -> limpiar marcador y redirigir a error.
-    // CORRECCIÓN (auditoría A-2): antes esto solo aplicaba a recovery. Con type=signup
-    // y un enlace caducado, no había `return` y el flujo caía al fallback HTML, dejando
-    // al usuario en una pantalla estática sin salida.
+    // Código inválido/expirado/reutilizado -> limpiar marcador y redirigir a error con causa clasificada.
     if (type === "recovery") clearRecoveryCookie(cookieStore);
-    return NextResponse.redirect(`${origin}${destinoErrorServer}`);
+    const causa = clasificarCausaError(error, searchParams);
+    const destinoError = type === "recovery"
+      ? `/recuperar-password?error=enlace_invalido&causa=${causa}`
+      : `/login?reason=email_confirmation&error=enlace_invalido&causa=${causa}`;
+    return NextResponse.redirect(`${origin}${destinoError}`);
   }
 
   // 2. Flujo OTP / Hash (verificación de token por correo)
@@ -141,16 +178,28 @@ export async function GET(request: NextRequest) {
       token_hash: tokenHash,
     });
     if (!error) {
+      let queryMismatch = "";
       if (type === "recovery") {
         await setRecoveryCookie(cookieStore, supabase);
+        try {
+          const { data: dataNueva } = await supabase.auth.getUser();
+          const nuevoUser = dataNueva?.user;
+          if (usuarioPrevioId && nuevoUser && nuevoUser.id !== usuarioPrevioId) {
+            queryMismatch = `?cuenta_distinta=1&anterior=${encodeURIComponent(usuarioPrevioEmail || "")}&nueva=${encodeURIComponent(nuevoUser.email || "")}`;
+          }
+        } catch {}
       } else {
         clearRecoveryCookie(cookieStore);
       }
-      const destino = type === "recovery" ? "/nueva-password" : next;
+      const destino = type === "recovery" ? `/nueva-password${queryMismatch}` : next;
       return NextResponse.redirect(`${origin}${destino}`);
     }
     if (type === "recovery") clearRecoveryCookie(cookieStore);
-    return NextResponse.redirect(`${origin}${destinoErrorServer}`);
+    const causa = clasificarCausaError(error, searchParams);
+    const destinoError = type === "recovery"
+      ? `/recuperar-password?error=enlace_invalido&causa=${causa}`
+      : `/login?reason=email_confirmation&error=enlace_invalido&causa=${causa}`;
+    return NextResponse.redirect(`${origin}${destinoError}`);
   }
 
   // 3. Respuesta HTML/JS ligera para capturar fragmentos de hash en el navegador (#access_token=... o fallback)

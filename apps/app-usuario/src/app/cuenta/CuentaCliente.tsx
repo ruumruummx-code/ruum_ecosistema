@@ -128,13 +128,21 @@ export function CuentaCliente({ seccionInicial = null, usuario, correoRegistro =
         <div className="user-account-identity">
           {fotoUrl ? <Image src={fotoUrl} alt={`Foto de perfil de ${nombre}`} width={56} height={56} className="user-account-avatar" unoptimized /> : <span className="user-account-avatar" aria-hidden="true">{iniciales(usuario?.nombre)}</span>}
           <div className="user-account-contact">
-            <h2 title={nombre}>{nombre}</h2>
+            <div className="flex items-center gap-2">
+              <h2 title={nombre}>{nombre}</h2>
+              {usuario?.tipo_cuenta === "empresa" && (
+                <span className="rounded-md bg-[#eef4ff] px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-[#104ca0] border border-[#cbe0ff] dark:bg-[#0f2d52] dark:text-[#6ba8ff] dark:border-[#1a4a80]">
+                  Empresa
+                </span>
+              )}
+            </div>
             <p title={correo}>{correo}</p>
             <p title={telefono}>{telefono}</p>
           </div>
         </div>
         <dl className="user-account-stats">
           {[
+            { etiqueta: "Cuenta", valor: usuario?.tipo_cuenta === "empresa" ? "Empresa" : "Personal", detalle: `Cuenta ${usuario?.tipo_cuenta === "empresa" ? "Empresa" : "Personal"}` },
             { etiqueta: "Traslados", valor: totalTraslados },
             { etiqueta: "Vehículos", valor: totalVehiculos },
             { etiqueta: "Incidencias", valor: incidenciasAbiertas, detalle: "Incidencias abiertas" },

@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Aviso, MobileButton, MobileCard } from "@ruum/ui";
@@ -117,6 +117,43 @@ export function VerificacionForm({ fotoPerfilInicial, soloDidit = false, destino
   const [fotoPerfilUrl, setFotoPerfilUrl] = useState(fotoPerfilInicial ?? "");
   const [subiendoFotoPerfil, setSubiendoFotoPerfil] = useState(false);
   const [verificacionCompletada, setVerificacionCompletada] = useState(false);
+  const [pollingDiditActivo, setPollingDiditActivo] = useState(false);
+  const pollingRef = useRef<{ cancelado: boolean }>({ cancelado: false });
+
+  // Polling corto tras modal o webhook demorado (cada 2s, máx 10 intentos = 20s)
+  useEffect(() => {
+    if (!pollingDiditActivo) return;
+    pollingRef.current.cancelado = false;
+    let intentos = 0;
+    const maxIntentos = 10;
+
+    const interval = setInterval(async () => {
+      if (pollingRef.current.cancelado || intentos >= maxIntentos) {
+        clearInterval(interval);
+        setPollingDiditActivo(false);
+        return;
+      }
+      intentos += 1;
+      try {
+        const cliente = crearClienteNavegador();
+        const usuario = await obtenerUsuarioActual(cliente);
+        if (usuario?.estado_verificacion === "verificado") {
+          clearInterval(interval);
+          setPollingDiditActivo(false);
+          setVerificacionCompletada(true);
+          router.push(destinoExito);
+          router.refresh();
+        }
+      } catch {
+        // reintenta en el próximo ciclo
+      }
+    }, 2000);
+
+    return () => {
+      pollingRef.current.cancelado = true;
+      clearInterval(interval);
+    };
+  }, [pollingDiditActivo, destinoExito, router]);
 
   /* Manual Verification Form State */
   const [mostrarFoto, setMostrarFoto] = useState(false);
@@ -161,10 +198,14 @@ export function VerificacionForm({ fotoPerfilInicial, soloDidit = false, destino
   }
 
   function cerrarDidit() {
+    const teniaSesion = Boolean(sessionIdDidit);
     setMostrarDiditModal(false);
     setUrlDidit(null);
     setSessionIdDidit(null);
     setErrorDidit(null);
+    if (teniaSesion) {
+      setPollingDiditActivo(true);
+    }
   }
 
   async function cargarFotoPerfilDidit(archivo: File | undefined) {
@@ -281,10 +322,14 @@ export function VerificacionForm({ fotoPerfilInicial, soloDidit = false, destino
         setUrlDidit(null);
         setSessionIdDidit(null);
         setVerificacionCompletada(true);
+        router.push(destinoExito);
+        router.refresh();
+        return;
       } else if (resultado === "rechazado") {
         setErrorDidit("La verificación no pudo confirmarse. Puedes reintentar o usar la opción manual.");
       } else {
-        setErrorDidit("Recibimos tu verificación, pero todavía estamos procesando el resultado. Actualiza en unos segundos.");
+        setErrorDidit("Recibimos tu verificación, pero todavía estamos procesando el resultado. Estamos consultando en segundo plano.");
+        setPollingDiditActivo(true);
       }
       router.refresh();
     } catch (err) {
@@ -490,7 +535,13 @@ export function VerificacionForm({ fotoPerfilInicial, soloDidit = false, destino
         </div>
         <div><h2 className="text-2xl font-bold">Verificación instantánea</h2>
         <p className="mt-2 text-sm text-[#4e5f80] dark:text-[#a8b5cc]">Valida tu INE en menos de 2 minutos.</p></div>
-        <MobileButton type="button" onClick={() => fotoPerfilUrl ? void iniciarDidit() : setMostrarFoto(true)} disabled={cargandoDidit || subiendoFotoPerfil} loading={cargandoDidit || subiendoFotoPerfil} className="w-full">Iniciar verificación con Didit</MobileButton>
+        {pollingDiditActivo && (
+          <div className="flex items-center justify-center gap-2 rounded-2xl border border-sky-200 bg-sky-50 p-3 text-xs font-semibold text-sky-800 dark:border-sky-800 dark:bg-sky-950/40 dark:text-sky-200">
+            <span className="inline-block size-3.5 animate-spin rounded-full border-2 border-sky-600 border-t-transparent" />
+            <span>Confirmando verificación con Didit en segundo plano…</span>
+          </div>
+        )}
+        <MobileButton type="button" onClick={() => fotoPerfilUrl ? void iniciarDidit() : setMostrarFoto(true)} disabled={cargandoDidit || subiendoFotoPerfil || pollingDiditActivo} loading={cargandoDidit || subiendoFotoPerfil || pollingDiditActivo} className="w-full">Iniciar verificación con Didit</MobileButton>
         <p className="flex items-center justify-center gap-1 text-[11px] leading-4 text-[#4e5f80] dark:text-[#a8b5cc]">
           <svg className="size-3 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><rect x="5" y="10" width="14" height="11" rx="2"/><path d="M8 10V6a4 4 0 0 1 8 0v4"/></svg>
           Tus datos se encriptan bajo estándares bancarios.

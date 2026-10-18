@@ -3,6 +3,7 @@ import {
   guardarBorradorTrasladoLocal,
   leerBorradorTrasladoLocal,
   limpiarBorradorTrasladoLocal,
+  ofuscarNumero,
 } from "@/lib/borrador-traslado";
 import { RETRASO_GUARDADO_BORRADOR_MS, type PrefijoDomicilio } from "../constants";
 import type { BorradorTrasladoLocal } from "@/lib/borrador-traslado";
@@ -99,10 +100,20 @@ export function useBorradorTraslado({
         origenEstado: datos.origenEstado,
         origenCiudad: datos.origenCiudad,
         origenColonia: datos.origenColonia,
+        origenLatOfuscada: typeof datos.origenLat === "number" ? ofuscarNumero(datos.origenLat) : null,
+        origenLngOfuscada: typeof datos.origenLng === "number" ? ofuscarNumero(datos.origenLng) : null,
+        origenPoiGenerico: datos.origenColonia
+          ? `${datos.origenColonia}, ${datos.origenCiudad || datos.origenEstado}`
+          : (datos.origenCiudad || null),
         destinoCodigoPostal: datos.destinoCodigoPostal,
         destinoEstado: datos.destinoEstado,
         destinoCiudad: datos.destinoCiudad,
         destinoColonia: datos.destinoColonia,
+        destinoLatOfuscada: typeof datos.destinoLat === "number" ? ofuscarNumero(datos.destinoLat) : null,
+        destinoLngOfuscada: typeof datos.destinoLng === "number" ? ofuscarNumero(datos.destinoLng) : null,
+        destinoPoiGenerico: datos.destinoColonia
+          ? `${datos.destinoColonia}, ${datos.destinoCiudad || datos.destinoEstado}`
+          : (datos.destinoCiudad || null),
         entregaNombre: datos.entregaNombre,
         entregaApellido: datos.entregaApellido,
         recepcionNombre: datos.recepcionNombre,
@@ -123,7 +134,9 @@ export function useBorradorTraslado({
     datos.tipo, datos.transmision, datos.marca, datos.modelo, datos.anio, datos.color, datos.condicion, datos.estadoGeneral,
     datos.tieneTarjeta, datos.tieneVerificacion, datos.tienePlacas, datos.puedeCircular,
     datos.origenCodigoPostal, datos.origenEstado, datos.origenCiudad, datos.origenColonia,
+    datos.origenLat, datos.origenLng,
     datos.destinoCodigoPostal, datos.destinoEstado, datos.destinoCiudad, datos.destinoColonia,
+    datos.destinoLat, datos.destinoLng,
     datos.entregaNombre, datos.entregaApellido, datos.recepcionNombre, datos.recepcionApellido,
     datos.modalidadProgramacion, datos.fechaHoraProgramada, datos.tipoRuta,
     datos.ventanaRecoleccion, datos.ventanaEntrega,
@@ -161,10 +174,14 @@ export function useBorradorTraslado({
       origenEstado: borrador.origenEstado,
       origenCiudad: borrador.origenCiudad,
       origenColonia: borrador.origenColonia,
+      origenLat: borrador.origenLatOfuscada ?? prev.origenLat,
+      origenLng: borrador.origenLngOfuscada ?? prev.origenLng,
       destinoCodigoPostal: borrador.destinoCodigoPostal,
       destinoEstado: borrador.destinoEstado,
       destinoCiudad: borrador.destinoCiudad,
       destinoColonia: borrador.destinoColonia,
+      destinoLat: borrador.destinoLatOfuscada ?? prev.destinoLat,
+      destinoLng: borrador.destinoLngOfuscada ?? prev.destinoLng,
       entregaNombre: borrador.entregaNombre,
       entregaApellido: borrador.entregaApellido,
       recepcionNombre: borrador.recepcionNombre,

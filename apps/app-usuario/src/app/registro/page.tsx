@@ -30,7 +30,7 @@ export default function PaginaRegistro() {
   const bypassOtp = smsSuspendido || (process.env.NODE_ENV !== "production" && process.env.NEXT_PUBLIC_PHONE_VERIFY_BYPASS === "true");
 
   /* Paso 1: datos básicos */
-  const tipoCuenta = "personal";
+  const [tipoCuenta, setTipoCuenta] = useState<"personal" | "empresa">("personal");
   const [nombre, setNombre] = useState("");
   const [apellido, setApellido] = useState("");
   const [telefono, setTelefono] = useState("");
@@ -453,6 +453,41 @@ export default function PaginaRegistro() {
             <form onSubmit={avanzarPaso2} noValidate className="flex flex-1 flex-col">
               {/* Formulario */}
               <div className="flex flex-col gap-5">
+                {/* Selector de tipo de cuenta */}
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-sm font-semibold text-[#4e5f80]">
+                    Tipo de cuenta
+                  </label>
+                  <div className="grid grid-cols-2 gap-2 rounded-2xl bg-[#f0f4f9] p-1.5 border border-[#e1e8f0]">
+                    <button
+                      type="button"
+                      onClick={() => setTipoCuenta("personal")}
+                      className={[
+                        "flex flex-col items-center justify-center rounded-xl py-2 px-3 text-xs font-bold transition",
+                        tipoCuenta === "personal"
+                          ? "bg-white text-[#0a2342] shadow-sm"
+                          : "text-[#677b98] hover:text-[#0a2342]",
+                      ].join(" ")}
+                    >
+                      <span>Personal</span>
+                      <span className="text-[10.5px] font-normal text-[#7e90a6]">Uso particular</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setTipoCuenta("empresa")}
+                      className={[
+                        "flex flex-col items-center justify-center rounded-xl py-2 px-3 text-xs font-bold transition",
+                        tipoCuenta === "empresa"
+                          ? "bg-white text-[#0a2342] shadow-sm"
+                          : "text-[#677b98] hover:text-[#0a2342]",
+                      ].join(" ")}
+                    >
+                      <span>Empresa</span>
+                      <span className="text-[10.5px] font-normal text-[#7e90a6]">Flotillas / CFDI</span>
+                    </button>
+                  </div>
+                </div>
+
                 {/* Campos de ancho completo */}
                 <div className="grid grid-cols-1 gap-5">
                   <div className="flex flex-col gap-1.5">

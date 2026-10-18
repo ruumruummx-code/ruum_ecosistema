@@ -207,6 +207,18 @@ export async function actualizarFacturacionUsuario(cliente: Cliente, datos: Fact
   });
 
   if (error) throw error;
+
+  // Derivar tipo_cuenta a empresa cuando se captura un RFC de Persona Moral (12 caracteres)
+  if (datos.rfc && datos.rfc.trim().length === 12 && cliente?.from) {
+    try {
+      await cliente
+        .from("usuarios")
+        .update({ tipo_cuenta: "empresa" })
+        .eq("auth_user_id", sesion.user.id);
+    } catch {
+      // best-effort
+    }
+  }
 }
 
 // PR-09 Hardening Storage Usuario — Validación server-side (no confiar solo en file.type)

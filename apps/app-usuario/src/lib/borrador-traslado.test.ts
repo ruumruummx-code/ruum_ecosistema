@@ -196,5 +196,34 @@ describe("borrador-traslado (R7)", () => {
       expect(formatearTiempoRelativoBorrador(new Date(baseMs - 48 * 3600000).toISOString(), baseMs)).toBe("hace 2 días");
     });
   });
+
+  describe("versión redacted-safe de coordenadas y POIs (Sprint 5)", () => {
+    it("ofusca coordenadas a 2 decimales (~1km)", async () => {
+      const { ofuscarNumero, ofuscarCoordenada } = await import("./borrador-traslado");
+      expect(ofuscarNumero(19.432608)).toBe(19.43);
+      expect(ofuscarNumero(-99.133209)).toBe(-99.13);
+      expect(ofuscarCoordenada([-99.133209, 19.432608])).toEqual([-99.13, 19.43]);
+    });
+
+    it("guarda y recupera coordenadas ofuscadas y POI genérico sin exponer domicilio exacto", async () => {
+      const { guardarBorradorTrasladoLocal, leerBorradorTrasladoLocal } = await import("./borrador-traslado");
+      const datos = baseDatos({
+        origenLatOfuscada: 19.43,
+        origenLngOfuscada: -99.13,
+        origenPoiGenerico: "Del Valle, CDMX",
+        destinoLatOfuscada: 19.42,
+        destinoLngOfuscada: -99.16,
+        destinoPoiGenerico: "Juarez, CDMX",
+      });
+      guardarBorradorTrasladoLocal(datos as never);
+      const leido = leerBorradorTrasladoLocal();
+      expect(leido?.origenLatOfuscada).toBe(19.43);
+      expect(leido?.origenLngOfuscada).toBe(-99.13);
+      expect(leido?.origenPoiGenerico).toBe("Del Valle, CDMX");
+      expect(leido?.destinoLatOfuscada).toBe(19.42);
+      expect(leido?.destinoLngOfuscada).toBe(-99.16);
+      expect(leido?.destinoPoiGenerico).toBe("Juarez, CDMX");
+    });
+  });
 });
 

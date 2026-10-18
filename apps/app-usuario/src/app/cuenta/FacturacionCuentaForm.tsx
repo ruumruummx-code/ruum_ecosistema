@@ -92,7 +92,8 @@ export function FacturacionCuentaForm({ usuario, empresa, onActualizado, compact
         uso_cfdi: limpiar(usoCfdi),
         correo_facturacion: limpiar(correoFacturacion)
       };
-      await actualizarFacturacionUsuario(crearClienteNavegador(), datos);
+      const cliente = crearClienteNavegador();
+      await actualizarFacturacionUsuario(cliente, datos);
       setMensaje({ tono: "info", texto: "Datos de facturación actualizados." });
       onActualizado?.(datos);
       router.refresh();
