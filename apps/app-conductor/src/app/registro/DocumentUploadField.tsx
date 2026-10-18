@@ -17,8 +17,8 @@ function textoEstadoDocumento(estado: EstadoDocumento, nombreArchivo: string) {
   }[estado];
 }
 
-const TAMANO_MAXIMO_BYTES = 5 * 1024 * 1024; // 5 MB
-const FORMATOS_PERMITIDOS = ["JPG", "PNG", "PDF"];
+const TAMANO_MAXIMO_BYTES = 10 * 1024 * 1024; // 10 MB
+const FORMATOS_PERMITIDOS = ["JPG", "PNG", "WEBP", "PDF"];
 
 export function DocumentUploadField({
   etiqueta,
@@ -62,7 +62,7 @@ export function DocumentUploadField({
     if (archivoSeleccionado) {
       // Validar tamaño
       if (archivoSeleccionado.size > TAMANO_MAXIMO_BYTES) {
-        setErrorLocal("El archivo excede el tamaño máximo permitido de 5 MB.");
+        setErrorLocal("El archivo excede el tamaño máximo permitido de 10 MB.");
         onSeleccionar(null);
         return;
       }
@@ -77,9 +77,9 @@ export function DocumentUploadField({
       }
       // Validar dimensiones mínimas si es imagen
       if (archivoSeleccionado.type.startsWith("image/")) {
-        const resDimensiones = await validarDimensionesMinimasImagen(archivoSeleccionado, 300, 300);
+        const resDimensiones = await validarDimensionesMinimasImagen(archivoSeleccionado, 800, 600);
         if (!resDimensiones.valido) {
-          setErrorLocal(resDimensiones.error ?? "La imagen debe tener al menos 300x300 píxeles de resolución.");
+          setErrorLocal(resDimensiones.error ?? "La imagen debe tener al menos 800x600 píxeles de resolución.");
           onSeleccionar(null);
           return;
         }
