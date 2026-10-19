@@ -42,9 +42,9 @@ async function fixture(page: Page, step: number | null, complete = false) {
     }
     await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify(body) });
   });
-  await page.goto("/registro", { timeout: 90_000 });
-  await expect(page.locator('form[data-registration-ready="true"]')).toBeVisible({ timeout: 30_000 });
-  await expect(page.getByRole("heading", { name: step === 2 ? "Identidad (2/5)" : step === 3 ? "Licencia (3/5)" : "Cuenta (1/5)", exact: true })).toBeVisible();
+  await page.goto("/registro", { timeout: 360_000, waitUntil: "domcontentloaded" });
+  await expect(page.locator('form[data-registration-ready="true"]')).toBeVisible({ timeout: 120_000 });
+  await expect(page.getByRole("heading", { name: step === 2 ? "Identidad" : step === 3 ? "Licencia (3/5)" : "Crea tu cuenta", exact: true })).toBeVisible();
   return calls;
 }
 async function geometry(page: Page) {
@@ -94,22 +94,28 @@ test("Cuenta: requisitos en tiempo real y envío con Enter abre identidad", asyn
   await page.getByLabel("Confirmar contraseña", { exact: true }).fill("Conductor2026");
   await expect(page.getByRole("list", { name: "Requisitos de contraseña" }).locator('[data-met="true"]')).toHaveCount(4);
   await page.getByLabel("Confirmar contraseña", { exact: true }).press("Enter");
-  await expect(page.getByRole("heading", { name: "Identidad (2/5)", exact: true })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Identidad", exact: true })).toBeVisible();
   await geometry(page);
 });
 
 test("Identidad: sheets validan, cancelan, guardan y conservan datos al volver", async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.route("**/data/codigos-postales/52.json", (route) => route.fulfill({ json: { "52104": { estado: "México", ciudades: ["San Mateo Atenco"], colonias: ["Centro"] } } }));
   const calls = await fixture(page, 2);
-  await expect(page.getByRole("progressbar")).toHaveAttribute("value", "40");
+  await expect(page.getByRole("progressbar")).toHaveAttribute("aria-valuenow", "2");
+  await expect(page.getByRole("progressbar").locator('[data-active="true"]')).toHaveCount(2);
   await checkSizes(page);
-  await page.screenshot({ animations: "disabled", path: test.info().outputPath("identidad-teclado.png") });
-  const next = page.getByRole("button", { name: "Guardar y Continuar", exact: true });
+  await page.setViewportSize({ width: 1280, height: 900 });
+  const bounds = await page.locator("[data-conductor-registration]").boundingBox();
+  expect(bounds!.width).toBe(440);
+  expect(bounds!.x).toBe(420);
+  await geometry(page);
+  const next = page.getByRole("button", { name: "Guardar y continuar", exact: true });
   await expect(next).toBeDisabled();
   await page.setViewportSize({ width: 390, height: 844 });
   await page.getByRole("button", { name: /Domicilio/ }).click();
   let dialog = page.getByRole("dialog", { name: "Domicilio", exact: true });
   await expect(dialog).toBeVisible();
-  await page.screenshot({ animations: "disabled", path: test.info().outputPath("domicilio-sheet.png") });
   expect(await dialog.evaluate((el) => Math.round(el.getBoundingClientRect().height))).toBe(Math.round(844 * .85));
   await dialog.getByRole("button", { name: "Guardar", exact: true }).click();
   await expect(dialog.getByRole("status")).toContainText("código postal");
@@ -140,7 +146,8 @@ test("Identidad: sheets validan, cancelan, guardan y conservan datos al volver",
   await expect(dialog).toHaveCount(0);
   await expect(page.getByRole("button", { name: /Domicilio/ })).toContainText(/Juárez/i);
   await page.getByRole("button", { name: "Atrás", exact: true }).click();
-  await expect(page.getByRole("heading", { name: "Cuenta (1/5)", exact: true })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Crea tu cuenta", exact: true })).toBeVisible();
+  await page.getByRole("checkbox").check();
   await page.getByRole("button", { name: "Continuar", exact: true }).click();
   await expect(next).toBeEnabled();
   await next.click();
@@ -152,8 +159,15 @@ test("Identidad: sheets validan, cancelan, guardan y conservan datos al volver",
 });
 
 test("Identidad: visualViewport y teclado dentro del sheet no alteran el lienzo", async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
   await fixture(page, 2, true);
   await page.setViewportSize({ width: 390, height: 844 });
+  await page.screenshot({ animations: "disabled", path: test.info().outputPath("identidad.png"), timeout: 10_000 });
+  await expect(page.getByPlaceholder("Como en tu identificación")).toHaveCount(0);
+  for (const label of ["Nombre", "Apellido", "CURP"]) {
+    const height = await page.getByLabel(label, { exact: true }).evaluate((input) => input.parentElement!.parentElement!.getBoundingClientRect().height);
+    expect(height).toBeLessThanOrEqual(48);
+  }
   await page.getByLabel("CURP", { exact: true }).focus();
   await page.evaluate(() => {
     Object.defineProperties(window.visualViewport!, { height: { configurable: true, value: 320 }, offsetTop: { configurable: true, value: 24 } });

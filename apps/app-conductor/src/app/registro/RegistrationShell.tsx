@@ -3,7 +3,7 @@ import styles from "./registration.module.css";
 import Image from "next/image";
 import { LogoMarca } from "@ruum/ui";
 
-export function RegistrationShell({ children, compact = false, account = false }: { children: React.ReactNode; compact?: boolean; account?: boolean }) {
+export function RegistrationShell({ children, compact = false, account = false, identity = false }: { children: React.ReactNode; compact?: boolean; account?: boolean; identity?: boolean }) {
   const screenRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     const screen = screenRef.current;
@@ -28,7 +28,7 @@ export function RegistrationShell({ children, compact = false, account = false }
       window.removeEventListener("resize", update);
     };
   }, [compact]);
-  if (compact) return <div ref={screenRef} className={[styles.screen, account ? styles.stepOne : ""].join(" ")} data-conductor-registration>{children}</div>;
+  if (compact) return <div ref={screenRef} className={[styles.screen, account || identity ? styles.stepOne : "", identity ? styles.identity : ""].join(" ")} data-conductor-registration>{children}</div>;
   return (
     <div className="conductor-auth-shell flex items-center justify-center px-4 py-10 sm:px-6">
       <section className="conductor-auth-card p-6 sm:p-8" aria-labelledby="titulo-registro-conductor">

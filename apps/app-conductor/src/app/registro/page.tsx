@@ -911,7 +911,7 @@ export default function PaginaRegistroConductor() {
   });
 
   return (
-    <RegistrationShell compact={registroCompacto} account={paso === 0 || pendienteOtp}>
+    <RegistrationShell compact={registroCompacto} account={paso === 0 || pendienteOtp} identity={paso === 1 && !pendienteOtp}>
         {mostrarDetalleConsentimiento && <LicenseConsentDetails onClose={() => setMostrarDetalleConsentimiento(false)} />}
         {mostrarVerificacionDidit && (
           <DiditVerificationModal
@@ -1051,6 +1051,10 @@ export default function PaginaRegistroConductor() {
               </>
               )}
 
+              {paso === 1 && <div className={`${styles.accountIntro} ${styles.identityIntro}`}>
+                <h1 id="titulo-registro-conductor">Identidad</h1>
+                <p>Cuéntanos más sobre ti</p>
+              </div>}
               {paso === 1 && (
                 <IdentityStep
                   nombre={nombre}
@@ -1164,8 +1168,8 @@ export default function PaginaRegistroConductor() {
                   </p>}
                   <button className={styles.primary} type="submit" aria-busy={enviando}
                     disabled={!registroListo || enviando || !tieneSupabaseConfigurado() || (paso === 0 && !cuentaCompleta) || (paso === 1 && !domicilioYContactoCompletos)}>
-                    {!registroListo ? "Preparando…" : enviando ? "Guardando…" : paso === 0 && !sesionAutenticada ? "Crear cuenta y continuar" : paso === 1 ? "Guardar y Continuar" : "Continuar"}
-                    {paso === 0 && <RegistrationIcon name="arrow" />}
+                    {!registroListo ? "Preparando…" : enviando ? "Guardando…" : paso === 0 && !sesionAutenticada ? "Crear cuenta y continuar" : paso === 1 ? "Guardar y continuar" : "Continuar"}
+                    {paso < 2 && <RegistrationIcon name="arrow" />}
                   </button>
                   {paso === 0 && <p className={styles.accountLogin}>¿Ya tienes una cuenta? <Link href="/login">Entrar</Link></p>}
                 </footer>

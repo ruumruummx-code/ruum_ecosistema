@@ -270,3 +270,66 @@
 @media (prefers-reduced-motion: reduce) {
   .stepOne .field, .passwordToggle, .stepOne .ruleIndicator, .stepOne .primary, .otpCode { transition: none; }
 }
+
+/* Identidad: el pie se ancla al lienzo que sigue a visualViewport. */
+.identity .appBar { min-height: 50px; }
+.identity .form { justify-content: flex-start; gap: 24px; padding-bottom: 76px; }
+.identityIntro { padding-top: 28px; }
+.identity .identityFields { flex-shrink: 0; gap: 12px; padding: 0; margin: 0; }
+.identityFields > .field, .identityFields > .row > .field {
+  height: 48px; padding: 2px 12px; border-color: #bfd4f4; border-radius: 12px;
+  transition: border-color 150ms ease, box-shadow 150ms ease;
+}
+.identityFields > .field label, .identityFields > .row > .field label { font-size: 11px; line-height: 18px; font-weight: 500; }
+.identityFields .field:focus-within { border-color: #0060ee; }
+.identityFields .field[data-invalid="true"] { border-color: #b42335; }
+.identityFields input::placeholder { color: #7b8ba6; opacity: 1; }
+.identityFields .summaries { grid-template-columns: minmax(0, 1fr); gap: 12px; }
+.identityFields .summary {
+  display: flex; align-items: center; gap: 8px; min-height: 48px; padding: 0 12px;
+  border-color: #bfd4f4; border-radius: 12px; background: #fff;
+  transition: background 150ms ease, border-color 150ms ease;
+}
+.identityFields .summary:hover { background: #f3f7ff; border-color: #0060ee; }
+.identityFields .summary:active { background: #e6efff; }
+.identityFields .summary > svg { flex-shrink: 0; width: 18px; height: 18px; color: #e72a77; }
+.identityFields .summary > svg:last-of-type { width: 14px; color: #52617b; }
+.identityFields .summary strong { min-width: 0; font-size: 12px; line-height: 18px; white-space: nowrap; }
+.identityFields .summary .identityAction { display: block; flex-shrink: 0; margin-left: auto; color: #0060ee; font-size: 11px; white-space: nowrap; }
+.identity .actionFooter {
+  position: absolute; inset: auto max(20px, env(safe-area-inset-right)) max(12px, env(safe-area-inset-bottom)) max(20px, env(safe-area-inset-left));
+}
+.identity .actionFooter .primary { width: 100%; }
+.identity .sheet { max-width: 440px; }
+.identity .sheetBody { scroll-padding-block: 8px; }
+.identity .sheetBody input, .identity .sheetBody select { scroll-margin-block: 8px; }
+@container (max-height: 620px) {
+  .identity .form { gap: 16px; padding-bottom: 60px; }
+  .identityIntro { padding-top: 12px; }
+  .identity .identityFields, .identityFields .summaries { gap: 8px; }
+}
+@container (max-height: 460px) {
+  .identity .appBar { min-height: 32px; }
+  .identity .form { gap: 6px; padding-bottom: 44px; }
+  .identityIntro { padding-top: 0; }
+  .identity .identityFields, .identityFields .summaries { gap: 4px; }
+  .identityFields > .field, .identityFields > .row > .field { height: 40px; padding: 0 8px; }
+  .identityFields > .field label, .identityFields > .row > .field label { font-size: 10px; line-height: 14px; }
+  .identityFields .summary { min-height: 44px; padding-inline: 8px; gap: 6px; }
+  .identityFields .summary strong { font-size: 11px; }
+}
+@container (max-height: 360px) {
+  .identity .appBar { min-height: 30px; }
+  .identity .accountLogo { max-width: 90px; }
+  .identity .form { gap: 4px; padding-bottom: 40px; }
+  .identityIntro p { display: none; }
+  .identityFields > .field, .identityFields > .row > .field { height: 38px; }
+  .identityFields > .field label, .identityFields > .row > .field label { line-height: 12px; }
+}
+@media (max-height: 360px) {
+  .identity { padding-block: max(2px, env(safe-area-inset-top)) max(2px, env(safe-area-inset-bottom)); }
+  .identity .actionFooter { bottom: max(2px, env(safe-area-inset-bottom)); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .identityFields .summary, .identityFields .field { transition: none; }
+}

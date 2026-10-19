@@ -13,6 +13,7 @@ export function RegistrationProgress({ paso, onBack, borradorLocalGuardado, sesi
     {guardado === "guardando" ? "Guardando borrador" : guardado === "guardado" ? "Borrador guardado" : guardado === "sin_conexion" ? "Sin conexión; guardado local" : guardado === "error" ? `Error al guardar: ${detalleGuardadoRemoto ?? "Reintenta la conexión"}` : ""}
   </output>;
   if (paso === 0) return <RegistrationAccessHeader step={1} onBack={onBack}>{estadoGuardado}</RegistrationAccessHeader>;
+  if (paso === 1) return <RegistrationAccessHeader step={2} onBack={onBack}>{estadoGuardado}</RegistrationAccessHeader>;
   return (
     <header className={styles.appBar}>
       <button type="button" onClick={onBack} aria-label="Atrás">‹ Atrás</button>

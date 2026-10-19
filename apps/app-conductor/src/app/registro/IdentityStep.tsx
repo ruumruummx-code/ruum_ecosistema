@@ -4,6 +4,7 @@ import { consultarCodigoPostalMx } from "../../lib/codigos-postales";
 import { DenseField } from "./DenseField";
 import { SelectField } from "./SelectField";
 import { RegistrationSheet } from "./RegistrationSheet";
+import { RegistrationIcon } from "./RegistrationIcon";
 import { formatoCurpMask, formatoTelefonoNacional, soloDigitos } from "./registration-validation";
 import styles from "./registration.module.css";
 
@@ -91,21 +92,27 @@ export function IdentityStep(p: IdentityProps) {
     p.limpiarErrorCampo("contactoEmergenciaNombre"); p.limpiarErrorCampo("contactoEmergenciaTelefono"); return true;
   }
   return (
-    <fieldset className={styles.fields}>
+    <fieldset className={`${styles.fields} ${styles.identityFields}`}>
       <legend className="sr-only">Identidad y domicilio</legend>
       <div className={styles.row}>
-        <DenseField etiqueta="Nombre" placeholder="Como en tu identificación" value={p.nombre} onChange={(e) => { p.setNombre(e.target.value); p.limpiarErrorCampo("nombre"); }} onBlur={() => p.validarCampo("nombre", p.nombre)} error={p.erroresCampos.nombre} required autoComplete="given-name" />
-        <DenseField etiqueta="Apellido" placeholder="Como en tu identificación" value={p.apellidos} onChange={(e) => { p.setApellidos(e.target.value); p.limpiarErrorCampo("apellidos"); }} onBlur={() => p.validarCampo("apellidos", p.apellidos)} error={p.erroresCampos.apellidos} required autoComplete="family-name" />
+        <DenseField etiqueta="Nombre" value={p.nombre} onChange={(e) => { p.setNombre(e.target.value); p.limpiarErrorCampo("nombre"); }} onBlur={() => p.validarCampo("nombre", p.nombre)} error={p.erroresCampos.nombre} required autoComplete="given-name" />
+        <DenseField etiqueta="Apellido" value={p.apellidos} onChange={(e) => { p.setApellidos(e.target.value); p.limpiarErrorCampo("apellidos"); }} onBlur={() => p.validarCampo("apellidos", p.apellidos)} error={p.erroresCampos.apellidos} required autoComplete="family-name" />
       </div>
-      <DenseField etiqueta="CURP" value={p.curp} onChange={(e) => { p.setCurp(formatoCurpMask(e.target.value)); p.limpiarErrorCampo("curp"); }} onBlur={() => p.validarCurp()} error={p.erroresCampos.curp} required maxLength={18} autoComplete="off" autoCapitalize="characters" />
+      <DenseField etiqueta="CURP" placeholder="Ej. ABCD123456HDFEFG01" value={p.curp} onChange={(e) => { p.setCurp(formatoCurpMask(e.target.value)); p.limpiarErrorCampo("curp"); }} onBlur={() => p.validarCurp()} error={p.erroresCampos.curp} required maxLength={18} autoComplete="off" autoCapitalize="characters" />
       <div className={styles.summaries}>
         <button type="button" className={styles.summary} onClick={(event) => { event.currentTarget.focus(); open("address"); }} aria-haspopup="dialog" data-complete={completeAddress}>
-          <strong>📍 Domicilio</strong>
-          <span>{completeAddress ? `${p.calle} ${p.numero}, ${p.colonia}. ${p.ciudad}, ${p.estado}, CP ${p.codigoPostal}` : "Agregar domicilio"}</span>
+          <RegistrationIcon name="pin" />
+          <strong>Domicilio</strong>
+          <span className={styles.identityAction}>{completeAddress ? "Editar" : "Agregar"}</span>
+          <RegistrationIcon name="chevron" />
+          {completeAddress && <span className="sr-only">{`${p.calle} ${p.numero}, ${p.colonia}. ${p.ciudad}, ${p.estado}, CP ${p.codigoPostal}`}</span>}
         </button>
         <button type="button" className={styles.summary} onClick={(event) => { event.currentTarget.focus(); open("contact"); }} aria-haspopup="dialog" data-complete={completeContact}>
-          <strong>📞 Contacto de emergencia</strong>
-          <span>{completeContact ? `${p.contactoEmergenciaNombre} · ${formatoTelefonoNacional(p.contactoEmergenciaTelefono)}` : "Agregar contacto"}</span>
+          <RegistrationIcon name="phone" />
+          <strong>Contacto de emergencia</strong>
+          <span className={styles.identityAction}>{completeContact ? "Editar" : "Agregar"}</span>
+          <RegistrationIcon name="chevron" />
+          {completeContact && <span className="sr-only">{`${p.contactoEmergenciaNombre} · ${formatoTelefonoNacional(p.contactoEmergenciaTelefono)}`}</span>}
         </button>
       </div>
       {sheet === "address" && <RegistrationSheet title="Domicilio" kind="address" onClose={close} onSave={saveAddress} saving={loadingCp}>
