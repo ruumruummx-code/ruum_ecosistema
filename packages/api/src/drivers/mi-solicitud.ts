@@ -1,5 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@ruum/shared/types";
+import { obtenerUrlDocumentoConductor } from "./conductores";
 
 // FASE 6 (cierre) — Mi solicitud de conductor: la pantalla de registro ya no
 // consulta `solicitudes_conductor`, `documentos_conductor` ni
@@ -42,7 +43,15 @@ export async function listarDocumentosSolicitud(
     .eq("solicitud_id", solicitudId)
     .eq("es_actual", true);
   if (error) throw error;
-  return ((data ?? []) as DocumentoSolicitud[]);
+  return firmarUrlsDocumentos(cliente, (data ?? []) as DocumentoSolicitud[]);
+}
+
+async function firmarUrlsDocumentos(cliente: Cliente, documentos: DocumentoSolicitud[]): Promise<DocumentoSolicitud[]> {
+  return Promise.all(documentos.map(async (documento) => ({
+    ...documento,
+    // `url` almacena una ruta privada de Storage, no una URL del sitio web.
+    url: await obtenerUrlDocumentoConductor(cliente, documento.url)
+  })));
 }
 
 export async function listarConsentimientosSolicitud(

@@ -3811,8 +3811,6 @@ isOneToOne: false
 { Args: { "p_combustible"?: string,"p_firma_metodo"?: string,"p_foto_ids"?: (string)[],"p_inspeccion_id"?: string,"p_lat"?: number,"p_lng"?: number,"p_metadata"?: Json,"p_notas"?: string,"p_ocurrido_en"?: string,"p_odometro"?: number,"p_pin_verificado"?: boolean,"p_tipo": Database["public"]['Enums']["tipo_evento_custodia"],"p_traslado_id": string }; Returns: string
                            },
 "registrar_evento_operativo_app":
-{ Args: { "p_detalle"?: Json,"p_tipo": string,"p_version_app": string }; Returns: string
-                           } |
 { Args: { "p_correlation_id"?: string,"p_detalle"?: Json,"p_tipo": string,"p_traslado_id"?: string,"p_version_app": string }; Returns: string
                            },
 "registrar_evento_registro_conductor":

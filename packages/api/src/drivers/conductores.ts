@@ -706,7 +706,12 @@ function rutaFotoPerfilConductor(valor: string, conductorId: string): string | n
 export async function listarDocumentosConductor(cliente: Cliente, conductorId: string): Promise<DocumentoConductorRow[]> {
   const { data, error } = await cliente.from("documentos_conductor").select("*").eq("conductor_id", conductorId).order("creado_en", { ascending: false });
   if (error) throw error;
-  return data ?? [];
+  return Promise.all((data ?? []).map(async (documento) => ({
+    ...documento,
+    // La columna `url` conserva la ruta del bucket privado; el navegador debe
+    // recibir una URL firmada para poder mostrar la vista previa.
+    url: await obtenerUrlDocumentoConductor(cliente, documento.url)
+  })));
 }
 
 /** FASE 6 cierre — ganancias de servicios cerrados desde una fecha, bajo RLS. */
