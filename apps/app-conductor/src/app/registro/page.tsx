@@ -653,27 +653,32 @@ export default function PaginaRegistroConductor() {
       });
       if (errorVerificacion) throw errorVerificacion;
       if (!data.session) throw new Error("El código se validó pero no pudimos iniciar tu sesión. Entra desde el acceso.");
-      cuentaVerificada=true;
+      cuentaVerificada = true;
 
       setIntentosFallidosOtp(0);
       setSesionActivaTrasRegistro(true);
+      setSesionAutenticada(true);
+      setPendienteOtp(false);
+
       if (paso < PASOS_REGISTRO.length - 1) {
-        await prepararSolicitudBorrador(cliente);
-        setPendienteOtp(false);
+        try {
+          await prepararSolicitudBorrador(cliente);
+        } catch (borradorErr) {
+          console.error("[confirmarCodigoOtp] Aviso: error no fatal al preparar borrador inicial:", borradorErr);
+        }
         setPaso((actual) => Math.min(actual + 1, PASOS_REGISTRO.length - 1));
         return;
       }
       await procesarSolicitudAutenticada(cliente);
       limpiarBorradorRegistroLocal();
-      setPendienteOtp(false);
       setEnviado(true);
     } catch (err) {
-      if(cuentaVerificada) {
-        registrarTelemetria("rpc_error",paso+1,"enviar_solicitud");
-        setPendienteOtp(false);
-        setError(traducirErrorOperativo(err,"Tu cuenta quedó verificada, pero no pudimos enviar la solicitud. Puedes reintentar."));
+      console.error("[confirmarCodigoOtp] Error al verificar OTP:", err);
+      if (cuentaVerificada) {
+        registrarTelemetria("rpc_error", paso + 1, "enviar_solicitud");
+        setError(traducirErrorOperativo(err, "Tu cuenta quedó verificada, pero hubo un problema al procesar la solicitud. Puedes reintentar."));
       } else {
-        registrarTelemetria("otp_error",paso+1,"verificar_otp");
+        registrarTelemetria("otp_error", paso + 1, "verificar_otp");
         setIntentosFallidosOtp((prev) => prev + 1);
         const restantes = MAX_INTENTOS_OTP - (intentosFallidosOtp + 1);
         const base = traducirErrorAuth(err);

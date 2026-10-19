@@ -1,62 +1,73 @@
 <!DOCTYPE html>
-<html lang="es">
+<html>
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Confirma tu correo — Ruum Ruum</title>
 </head>
-<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #0f172a; color: #f8fafc; margin: 0; padding: 24px 12px;">
-  <div style="max-width: 520px; margin: 0 auto; background-color: #1e293b; border-radius: 16px; border: 1px solid #334155; padding: 32px 24px; text-align: center;">
+<body style="margin: 0; padding: 0; background-color: #f5f7fa; font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background-color: #f5f7fa; padding: 40px 20px;">
+    <tr>
+      <td align="center">
+        <table role="presentation" width="600" cellspacing="0" cellpadding="0" style="background-color: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.08);">
+          <!-- Header -->
+          <tr>
+            <td style="background: linear-gradient(135deg, #0b1e33 0%, #162c47 100%); padding: 32px 40px; text-align: center;">
+              <h1 style="margin: 0; color: #ffffff; font-size: 22px; font-weight: 800; letter-spacing: -0.5px;">Ruum Ruum</h1>
+              <p style="margin: 6px 0 0; color: rgba(255,255,255,0.7); font-size: 13px;">Mueve tu auto sin soltar el control</p>
+            </td>
+          </tr>
 
-    <!-- Logo / Encabezado de Marca -->
-    <h1 style="color: #f8fafc; font-size: 24px; font-weight: 800; margin-top: 0; margin-bottom: 8px;">
-      <span style="color: #f5a623;">Ruum Ruum</span> 🚗
-    </h1>
-    <h2 style="color: #cbd5e1; font-size: 18px; font-weight: 600; margin-top: 0; margin-bottom: 24px;">
-      ✉️ Confirma tu correo electrónico
-    </h2>
+          <!-- Body -->
+          <tr>
+            <td style="padding: 40px;">
+              <h2 style="margin: 0 0 12px; color: #0b1e33; font-size: 20px; font-weight: 700;">Confirma tu correo electrónico</h2>
+              <p style="margin: 0 0 28px; color: #4d6079; font-size: 15px; line-height: 1.6;">
+                Gracias por registrarte en Ruum Ruum. Ingresa el siguiente código de verificación en la aplicación para completar tu registro.
+              </p>
 
-    <!-- Mensaje principal -->
-    <p style="color: #94a3b8; font-size: 15px; line-height: 1.5; margin-bottom: 24px;">
-      Hola, gracias por crear tu cuenta en <strong>Ruum Ruum</strong>. Para activarla, ingresa el siguiente código de verificación en la aplicación:
-    </p>
+              <!-- Código OTP -->
+              <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
+                <tr>
+                  <td align="center" style="padding: 8px 0 28px;">
+                    <div style="display: inline-block; background-color: #f0f5fe; border: 2px dashed #cbd7e6; border-radius: 14px; padding: 22px 40px;">
+                      <p style="margin: 0 0 8px; color: #6b7c94; font-size: 11px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase;">Tu código de verificación</p>
+                      <p style="margin: 0; color: #0b1e33; font-size: 40px; font-weight: 800; letter-spacing: 12px; font-family: 'Courier New', monospace;">{{ .Token }}</p>
+                    </div>
+                  </td>
+                </tr>
+              </table>
 
-    <!-- Código de 6 dígitos -->
-    <p style="font-size: 32px; font-weight: 700; letter-spacing: 8px; margin: 24px 0; color: #f5a623;">
-      {{ .Token }}
-    </p>
+              <p style="margin: 0 0 24px; color: #8b9bb0; font-size: 13px; line-height: 1.5; text-align: center;">
+                Este código expira en <strong style="color: #0b1e33;">60 minutos</strong>. No lo compartas con nadie.
+              </p>
 
-    <!-- Alternativa por enlace -->
-    <p style="color: #94a3b8; font-size: 14px; line-height: 1.5; margin: 28px 0 12px;">
-      O si prefieres, confirma directamente haciendo clic en el siguiente botón:
-    </p>
-    <p style="margin: 20px 0;">
-      <a href="{{ .ConfirmationURL }}"
-         target="_blank"
-         style="background-color: #f5a623; color: #0f172a; font-weight: 700; font-size: 16px; padding: 14px 28px; text-decoration: none; border-radius: 12px; display: inline-block; box-shadow: 0 4px 12px rgba(245, 166, 35, 0.25);">
-         Verificar mi cuenta
-      </a>
-    </p>
+              <!-- Safety note -->
+              <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background-color: #f0f5fe; border-radius: 12px; border-left: 4px solid #2e5a88;">
+                <tr>
+                  <td style="padding: 16px;">
+                    <p style="margin: 0; color: #3d5470; font-size: 13px; line-height: 1.5;">
+                      <strong>¿No solicitaste este registro?</strong> Puedes ignorar este correo de forma segura. Nadie podrá acceder a tu cuenta sin este código.
+                    </p>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
 
-    <!-- Fallback de texto plano -->
-    <div style="background-color: #0f172a; border-radius: 8px; padding: 14px; margin-top: 24px; text-align: left;">
-      <p style="color: #64748b; font-size: 12px; margin: 0 0 6px 0;">
-        Si el botón no funciona, copia y pega el siguiente enlace en tu navegador:
-      </p>
-      <p style="color: #38bdf8; font-size: 12px; word-break: break-all; margin: 0;">
-        {{ .ConfirmationURL }}
-      </p>
-    </div>
-
-    <!-- Pie de página y aviso de seguridad -->
-    <p style="font-size: 13px; color: #64748b; margin-top: 28px; margin-bottom: 0; line-height: 1.4;">
-      ⏰ Este enlace expira en <strong>60 minutos</strong>.<br>
-      Si tú no solicitaste crear esta cuenta, puedes ignorar este mensaje con total tranquilidad.
-    </p>
-    <p style="font-size: 12px; color: #475569; margin-top: 16px; margin-bottom: 0;">
-      Seguridad, evidencia y trazabilidad en cada viaje.<br>
-      © 2026 Ruum Ruum by MoviliaX. Todos los derechos reservados.
-    </p>
-  </div>
+          <!-- Footer -->
+          <tr>
+            <td style="background-color: #f8fafd; padding: 24px 40px; text-align: center; border-top: 1px solid #eef2f7;">
+              <p style="margin: 0 0 6px; color: #8b9bb0; font-size: 12px;">
+                Ruum Ruum · Mueve tu auto sin soltar el control
+              </p>
+              <p style="margin: 0; color: #b0bfd0; font-size: 11px;">
+                Si tienes problemas, contacta a soporte.
+              </p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
 </body>
 </html>
