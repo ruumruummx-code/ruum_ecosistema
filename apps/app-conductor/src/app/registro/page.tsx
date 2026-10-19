@@ -568,15 +568,16 @@ export default function PaginaRegistroConductor() {
     registrarTelemetria("solicitud_enviada", PASOS_REGISTRO.length, "enviado");
 
     // Auto-iniciar verificación Didit tras envío exitoso (solicitud en_revision)
-    if (resultado.solicitudId) {
-      solicitudRemotaIdRef.current = resultado.solicitudId;
-      setSolicitudRemotaId(resultado.solicitudId);
+    const solicitudIdDidit = resultado.solicitudId ?? solicitudRemotaIdRef.current ?? solicitudRemotaId;
+    if (solicitudIdDidit) {
+      solicitudRemotaIdRef.current = solicitudIdDidit;
+      setSolicitudRemotaId(solicitudIdDidit);
       registrarTelemetria("didit_iniciado", PASOS_REGISTRO.length, "auto");
       setMostrarVerificacionDidit(true);
       setIniciandoVerificacionDidit(true);
       setErrorVerificacionDidit(null);
       try {
-        const { url } = await iniciarVerificacionDidit(cliente, resultado.solicitudId);
+        const { url } = await iniciarVerificacionDidit(cliente, solicitudIdDidit);
         setUrlVerificacionDidit(url);
       } catch (err) {
         // No bloqueamos el flujo si Didit falla; el usuario puede reintentar desde el modal o hacerlo desde el panel
