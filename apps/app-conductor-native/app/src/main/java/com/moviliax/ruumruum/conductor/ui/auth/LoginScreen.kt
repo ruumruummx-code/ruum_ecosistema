@@ -3,7 +3,6 @@ package com.moviliax.ruumruum.conductor.ui.auth
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.layout.Arrangement
@@ -14,6 +13,7 @@ import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -25,6 +25,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.relocation.BringIntoViewRequester
 import androidx.compose.foundation.relocation.bringIntoViewRequester
 import androidx.compose.foundation.rememberScrollState
@@ -59,12 +60,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusDirection
-import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
@@ -329,21 +327,25 @@ fun LoginScreen(
             Spacer(Modifier.height(RuumTokens.Space16))
         }
 
-        if (compact) {
-            Column(
-                Modifier
-                    .fillMaxSize()
-                    .verticalScroll(scrollState)
-                    .padding(horizontal = RuumTokens.Space32),
-                content = content,
-            )
-        } else {
-            Column(
-                Modifier
-                    .fillMaxSize()
-                    .padding(horizontal = RuumTokens.Space32),
-                content = content,
-            )
+        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.TopCenter) {
+            if (compact) {
+                Column(
+                    Modifier
+                        .fillMaxHeight()
+                        .widthIn(max = 440.dp)
+                        .verticalScroll(scrollState)
+                        .padding(horizontal = RuumTokens.Space32),
+                    content = content,
+                )
+            } else {
+                Column(
+                    Modifier
+                        .fillMaxHeight()
+                        .widthIn(max = 440.dp)
+                        .padding(horizontal = RuumTokens.Space32),
+                    content = content,
+                )
+            }
         }
     }
 }
