@@ -214,7 +214,26 @@ export async function registrarConsentimientosConductor(
 
 export async function enviarSolicitudConductor(cliente: Cliente) {
   const { data, error } = await cliente.rpc("enviar_solicitud_conductor");
-  if (error) throw error;
+  if (error) {
+    // Mejorar el mensaje de error para ayudar al usuario
+    const mensaje = error.message || "Error desconocido";
+    if (mensaje.includes("Faltan los tres documentos obligatorios")) {
+      throw new Error("Faltan documentos obligatorios. Asegúrate de subir: licencia (frente), licencia (reverso) e identificación oficial.");
+    }
+    if (mensaje.includes("datos obligatorios incompletos")) {
+      throw new Error("Tu solicitud tiene datos incompletos. Verifica que todos los campos estén correctamente llenados.");
+    }
+    if (mensaje.includes("licencia está vencida")) {
+      throw new Error("Tu licencia está vencida. Sube una licencia vigente para continuar.");
+    }
+    if (mensaje.includes("todavía no está lista para envío")) {
+      throw new Error("Tu solicitud aún no está lista para envío. Completa todos los pasos anteriores.");
+    }
+    if (mensaje.includes("no encontramos una solicitud activa")) {
+      throw new Error("No encontramos una solicitud activa. Inicia el registro nuevamente.");
+    }
+    throw error;
+  }
   return mapearResultadoSolicitud(data?.[0]);
 }
 
