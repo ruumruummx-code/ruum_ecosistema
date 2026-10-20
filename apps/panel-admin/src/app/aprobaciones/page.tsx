@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useTransition } from "react";
+import { useEffect, useMemo, useState, useTransition } from "react";
 import { Button } from "@ruum/ui";
 import {
   darBajaConductorAdmin,
@@ -16,9 +16,19 @@ import { AdminPageHeader } from "../admin-ui";
 import { AdminLoadingState, AdminEmptyState, AdminErrorState, AdminDialog, AdminBadge } from "../admin-components";
 
 type DecisionAccion = { solicitud: SolicitudAprobacionAdmin; aprobar: boolean } | null;
+type FiltroTipoAprobacion = "todas" | "finanzas" | "sancion" | "tarifas";
 
 function fecha(fechaIso: string) {
-  return new Intl.DateTimeFormat("es-MX", { dateStyle: "medium", timeStyle: "short" }).format(new Date(fechaIso));
+  const fecha = new Date(fechaIso);
+  return Number.isNaN(fecha.getTime()) ? "Fecha no disponible" : new Intl.DateTimeFormat("es-MX", { dateStyle: "medium", timeStyle: "short" }).format(fecha);
+}
+
+function estadoVencimiento(fechaIso: string) {
+  const ms = new Date(fechaIso).getTime() - Date.now();
+  if (Number.isNaN(ms)) return { etiqueta: "Vencimiento sin fecha", tono: "neutral" as const, orden: Number.POSITIVE_INFINITY };
+  if (ms <= 0) return { etiqueta: "Vencida", tono: "danger" as const, orden: ms };
+  if (ms <= 24 * 60 * 60 * 1000) return { etiqueta: "Vence en menos de 24 h", tono: "warning" as const, orden: ms };
+  return { etiqueta: "En plazo", tono: "success" as const, orden: ms };
 }
 
 function payloadAprobacion(solicitud: SolicitudAprobacionAdmin) {
@@ -56,7 +66,14 @@ export default function PaginaAprobaciones() {
   const [motivo, setMotivo] = useState("");
   const [mensaje, setMensaje] = useState<string | null>(null);
   const [adminActualId, setAdminActualId] = useState<string | null>(null);
+  const [filtroTipo, setFiltroTipo] = useState<FiltroTipoAprobacion>("todas");
+  const [soloPorVencer, setSoloPorVencer] = useState(false);
   const [pendiente, startTransition] = useTransition();
+
+  const solicitudesVisibles = useMemo(() => solicitudes
+    .filter((solicitud) => filtroTipo === "todas" || solicitud.tipo === filtroTipo)
+    .filter((solicitud) => !soloPorVencer || estadoVencimiento(solicitud.expira_en).orden <= 24 * 60 * 60 * 1000)
+    .sort((a, b) => estadoVencimiento(a.expira_en).orden - estadoVencimiento(b.expira_en).orden), [filtroTipo, solicitudes, soloPorVencer]);
 
   async function cargar() {
     setError(null);
@@ -137,18 +154,39 @@ export default function PaginaAprobaciones() {
         titulo="Aprobaciones"
         descripcion="Solicitudes duales de finanzas y sanciones que requieren solicitante y aprobador distintos."
         estadoConexion={error ? "sin_conexion" : "datos_en_vivo"}
-        contadorResultados={solicitudes.length}
+        contadorResultados={solicitudesVisibles.length}
       />
+
+      {solicitudes.length > 0 && (
+        <section className="mt-5 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border-default bg-surface-primary p-3" aria-label="Filtros de aprobaciones">
+          <div className="flex flex-wrap items-center gap-2" role="group" aria-label="Filtrar por tipo">
+            {(["todas", "finanzas", "sancion", "tarifas"] as const).map((tipo) => (
+              <button key={tipo} type="button" aria-pressed={filtroTipo === tipo} onClick={() => setFiltroTipo(tipo)} className={`min-h-10 rounded-lg border px-3 py-2 font-body text-sm font-semibold transition-colors ${filtroTipo === tipo ? "border-status-info/40 bg-status-info-soft text-ink" : "border-transparent text-text-secondary hover:bg-surface-secondary"}`}>
+                {tipo === "todas" ? "Todas" : tipo === "finanzas" ? "Finanzas" : tipo === "sancion" ? "Sanciones" : "Tarifas"}
+              </button>
+            ))}
+          </div>
+          <label className="flex min-h-10 items-center gap-2 rounded-lg px-2 font-body text-sm font-medium text-text-secondary">
+            <input type="checkbox" checked={soloPorVencer} onChange={(event) => setSoloPorVencer(event.target.checked)} />
+            Vencidas o por vencer en 24 h
+          </label>
+        </section>
+      )}
 
       {solicitudes.length === 0 ? (
         <div className="mt-6">
           <AdminEmptyState title="Sin solicitudes pendientes" description="No hay solicitudes de aprobación pendientes de revisión." />
         </div>
+      ) : solicitudesVisibles.length === 0 ? (
+        <div className="mt-6">
+          <AdminEmptyState title="No hay solicitudes en esta vista" description="Cambia el tipo de solicitud o desactiva el filtro de vencimiento para ver otras solicitudes." action={<button type="button" onClick={() => { setFiltroTipo("todas"); setSoloPorVencer(false); }} className="min-h-11 rounded-lg border border-status-info/35 px-4 py-2 font-body text-sm font-semibold text-status-info hover:bg-status-info-soft">Quitar filtros</button>} />
+        </div>
       ) : (
         <section className="mt-6 grid gap-4">
-          {solicitudes.map((s) => {
+          {solicitudesVisibles.map((s) => {
             const payloadStr = typeof s.payload === "string" ? s.payload : JSON.stringify(s.payload);
             const esSolicitudPropia = Boolean(adminActualId && s.solicitada_por === adminActualId);
+            const vencimiento = estadoVencimiento(s.expira_en);
             return (
               <article key={s.id} className="rounded-card border border-border-default bg-surface-primary p-5 shadow-[var(--ruum-shadow-1)]">
                 <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
@@ -168,27 +206,28 @@ export default function PaginaAprobaciones() {
                   </div>
                   <div className="flex shrink-0 flex-col items-end gap-2">
                     <span className="rounded-full border border-ink/10 bg-surface-secondary px-3 py-1 font-body text-xs font-semibold text-text-secondary">{s.estado}</span>
-                    <p className="font-body text-xs text-text-tertiary">Creada {fecha(s.creada_en)}</p>
-                    <p className="font-body text-xs text-text-tertiary">Expira {fecha(s.expira_en)}</p>
+                    <AdminBadge tone={vencimiento.tono}>{vencimiento.etiqueta}</AdminBadge>
+                    <p className="font-body text-sm font-medium text-text-secondary">Creada {fecha(s.creada_en)}</p>
+                    <p className="font-body text-sm font-semibold text-ink">Expira {fecha(s.expira_en)}</p>
                   </div>
                 </div>
                 <div className="mt-4 flex flex-wrap gap-2 border-t border-ink/10 pt-4">
                   <Button
-                    variant="quiet"
+                    variant="secondary"
                     disabled={esSolicitudPropia}
                     onClick={() => { setDecision({ solicitud: s, aprobar: true }); setMotivo(""); }}
                   >
                     Aprobar
                   </Button>
                   <Button
-                    variant="quiet"
+                    variant="danger"
                     disabled={esSolicitudPropia}
                     onClick={() => { setDecision({ solicitud: s, aprobar: false }); setMotivo(""); }}
                   >
                     Rechazar
                   </Button>
                   {esSolicitudPropia && (
-                    <p className="font-body text-xs text-text-tertiary">Requiere aprobación de otro administrador.</p>
+                    <p className="self-center font-body text-sm font-medium text-text-secondary">Requiere aprobación de otro administrador.</p>
                   )}
                 </div>
               </article>

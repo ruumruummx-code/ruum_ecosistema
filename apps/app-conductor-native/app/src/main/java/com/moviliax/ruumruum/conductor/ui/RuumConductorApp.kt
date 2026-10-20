@@ -8,17 +8,13 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.AccountCircle
-import androidx.compose.material.icons.filled.AttachMoney
-import androidx.compose.material.icons.filled.DirectionsCar
+import androidx.compose.material.icons.filled.SwapHoriz
 import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Shield
 import androidx.compose.material.icons.filled.Sync
+import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Badge
-import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
@@ -61,6 +57,7 @@ import com.moviliax.ruumruum.conductor.ui.notifications.NotificacionesScreen
 import com.moviliax.ruumruum.conductor.ui.onboarding.OnboardingScreen
 import com.moviliax.ruumruum.conductor.ui.onboarding.RegistroWizardScreen
 import com.moviliax.ruumruum.conductor.ui.panel.PanelScreen
+import com.moviliax.ruumruum.conductor.ui.panel.PanelTopBar
 import com.moviliax.ruumruum.conductor.ui.theme.LocalRuumDarkMode
 import com.moviliax.ruumruum.conductor.ui.theme.LocalRuumStreetMode
 import com.moviliax.ruumruum.conductor.ui.theme.RuumTheme
@@ -189,6 +186,12 @@ private fun AuthenticatedApp(
                         }
                     },
                 )
+            } else if (destination == Destination.PANEL) {
+                PanelTopBar(
+                    unreadCount = state.notificaciones.count { it.leidaEn == null },
+                    onNotifications = { destination = Destination.NOTIFICATIONS },
+                    onAccount = { destination = Destination.ACCOUNT },
+                )
             } else RuumTopBar(destination.label, viewModel::refresh)
         },
         snackbarHost = { SnackbarHost(snackbar) },
@@ -205,10 +208,8 @@ private fun AuthenticatedApp(
         },
         bottomBar = {
             if (!inOverlay) {
-                val sinLeer = state.notificaciones.count { it.leidaEn == null }
                 RuumBottomNavigation(
                     selected = destination,
-                    unreadCount = sinLeer,
                     onSelect = { destino -> destination = destino },
                 )
             }
@@ -229,6 +230,9 @@ private fun AuthenticatedApp(
                         viewModel::setAvailability,
                         onTripSelected = { selectedTrip = it },
                         onOpenDocuments = { showingDocuments = true },
+                        onOpenEarnings = { destination = Destination.EARNINGS },
+                        onOpenTraslados = { destination = Destination.TRIPS },
+                        onSearch = viewModel::refresh,
                     )
                     Destination.TRIPS -> TripsScreen(state, viewModel::requestTrip, onTripSelected = { selectedTrip = it })
                     Destination.EARNINGS -> EarningsScreen(state.payouts, state.acceptedTrips)
@@ -260,32 +264,21 @@ private fun AuthenticatedApp(
 private fun RuumBottomNavigation(
     selected: Destination,
     onSelect: (Destination) -> Unit,
-    unreadCount: Int = 0,
 ) {
     NavigationBar(containerColor = MaterialTheme.colorScheme.surface, tonalElevation = 0.dp) {
         listOf(
             Triple(Destination.PANEL, Icons.Default.Home, "Inicio"),
-            Triple(Destination.TRIPS, Icons.Default.DirectionsCar, "Traslados"),
-            Triple(Destination.EARNINGS, Icons.Default.AttachMoney, "Ganancias"),
-            Triple(Destination.NOTIFICATIONS, Icons.Default.Notifications, "Notificaciones"),
-            Triple(Destination.ACCOUNT, Icons.Default.AccountCircle, "Cuenta"),
+            Triple(Destination.TRIPS, Icons.Default.SwapHoriz, "Traslados"),
+            Triple(Destination.ACCOUNT, Icons.Outlined.Person, "Cuenta"),
         ).forEach { (item, icon, label) ->
             NavigationBarItem(
                 selected = selected == item,
                 onClick = { onSelect(item) },
-                icon = {
-                    if (item == Destination.NOTIFICATIONS && unreadCount > 0) {
-                        BadgedBox(badge = { Badge { Text("$unreadCount") } }) {
-                            Icon(icon, label)
-                        }
-                    } else {
-                        Icon(icon, label)
-                    }
-                },
+                icon = { Icon(icon, label) },
                 label = { Text(label, maxLines = 1) },
                 colors = NavigationBarItemDefaults.colors(
-                    selectedIconColor = MaterialTheme.colorScheme.secondary,
-                    selectedTextColor = MaterialTheme.colorScheme.secondary,
+                    selectedIconColor = MaterialTheme.colorScheme.primary,
+                    selectedTextColor = MaterialTheme.colorScheme.primary,
                     indicatorColor = MaterialTheme.colorScheme.primaryContainer,
                     unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
                     unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,

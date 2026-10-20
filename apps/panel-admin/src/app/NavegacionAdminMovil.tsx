@@ -94,7 +94,7 @@ export function NavegacionAdminMovil() {
     <header className="sticky top-0 z-40 border-b border-ink/10 bg-surface-primary/95 backdrop-blur supports-[backdrop-filter]:bg-surface-primary/85 lg:hidden">
       <div className="ruum-container flex min-h-14 items-center justify-between gap-3 py-2">
         <Link href="/" className="flex min-w-0 items-center gap-2.5 rounded-lg" aria-label="Ir a la Torre de Control">
-          <LogoMarca tamano={28} color="signal" />
+          <LogoMarca variante="horizontal" tamano={28} color="signal" mostrarDescriptor={false} mostrarRespaldo={false} />
           <span className="font-mono-ruum text-admin-secundario uppercase tracking-[0.12em] text-text-tertiary">Control</span>
         </Link>
         <button

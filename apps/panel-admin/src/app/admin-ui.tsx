@@ -84,6 +84,7 @@ function textoTipoDatos(tipo: NonNullable<AdminPageHeaderProps["tipoDatos"]>) {
 
 function formatoActualizacion(valor: string | Date) {
   const fecha = valor instanceof Date ? valor : new Date(valor);
+  if (Number.isNaN(fecha.getTime())) return "Fecha no disponible";
   return new Intl.DateTimeFormat("es-MX", { dateStyle: "medium", timeStyle: "short" }).format(fecha);
 }
 
@@ -122,23 +123,23 @@ export function AdminPageHeader({
         )}
         {etiqueta && <p className="font-mono-ruum text-xs font-medium uppercase tracking-[0.16em] text-signal">{etiqueta}</p>}
         <h1 className="mt-1 font-display text-2xl font-semibold text-ink">{titulo}</h1>
-        {descripcion && <p className="mt-1 max-w-2xl font-body text-sm leading-6 text-text-secondary">{descripcion}</p>}
-        <div className="mt-3 flex flex-wrap items-center gap-2">
+        {descripcion && <p className="admin-page-description mt-1 max-w-2xl font-body text-sm leading-6 text-text-secondary">{descripcion}</p>}
+        <div className="admin-page-meta mt-3 flex flex-wrap items-center gap-2">
           {estadoConexion && (
-            <span className={`rounded-full border px-3 py-1 font-body text-admin-secundario font-semibold ${claseConexion(estadoConexion)}`}>
+            <span className={`admin-page-meta__badge rounded-full border px-3 py-1 font-body font-semibold ${claseConexion(estadoConexion)}`}>
               {textoConexion(estadoConexion)}
             </span>
           )}
           {ultimaActualizacion && (
-            <time dateTime={(ultimaActualizacion instanceof Date ? ultimaActualizacion : new Date(ultimaActualizacion)).toISOString()} className="font-body text-admin-secundario text-text-tertiary">
+            <time dateTime={Number.isNaN((ultimaActualizacion instanceof Date ? ultimaActualizacion : new Date(ultimaActualizacion)).getTime()) ? undefined : (ultimaActualizacion instanceof Date ? ultimaActualizacion : new Date(ultimaActualizacion)).toISOString()} className="admin-page-meta__text font-body">
               {formatoActualizacionRelativa(ultimaActualizacion)} · {formatoActualizacion(ultimaActualizacion)}
             </time>
           )}
           {tipoDatos && (
-            <span className="font-body text-admin-secundario text-text-tertiary">{textoTipoDatos(tipoDatos)}</span>
+            <span className="admin-page-meta__text font-body">{textoTipoDatos(tipoDatos)}</span>
           )}
           {typeof contadorResultados === "number" && (
-            <span className="font-body text-admin-secundario text-text-tertiary">{contadorResultados.toLocaleString("es-MX")} resultados</span>
+            <span className="admin-page-meta__text font-body">{contadorResultados.toLocaleString("es-MX")} resultados</span>
           )}
         </div>
         {seccionesDesactualizadas.length > 0 && (

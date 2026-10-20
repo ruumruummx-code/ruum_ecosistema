@@ -1,23 +1,27 @@
 import DashboardCliente, { type DashboardInitialData } from "./DashboardCliente";
 import { crearClienteServidor } from "../lib/supabase-server";
-import { listarConductoresAdmin, listarIncidenciasAdmin, obtenerAdminActual, obtenerAlertasEmergenciaAdmin, obtenerIndicadoresAccionablesDashboard } from "@ruum/api/services";
-import { normalizarRolAdmin } from "../lib/roles-admin";
+import { listarConductoresAdmin, listarIncidenciasAdmin, listarTrasladosActivosMapa, obtenerAdminActual, obtenerAlertasEmergenciaAdmin, obtenerIndicadoresAccionablesDashboard } from "@ruum/api/services";
+import { normalizarRolAdmin, puedeVerRuta } from "../lib/roles-admin";
 
 export const dynamic = "force-dynamic";
 
 async function cargarInicial(): Promise<DashboardInitialData | null> {
   try {
     const cliente = await crearClienteServidor();
-    const [admin, indicadores, incidencias, conductores, emergencias] = await Promise.all([
-      obtenerAdminActual(cliente), obtenerIndicadoresAccionablesDashboard(cliente), listarIncidenciasAdmin(cliente),
-      listarConductoresAdmin(cliente), obtenerAlertasEmergenciaAdmin(cliente)
+    const admin = await obtenerAdminActual(cliente);
+    const rol = normalizarRolAdmin(admin?.rol_operativo);
+    const [indicadores, incidencias, conductores, emergencias, trasladosActivos] = await Promise.all([
+      obtenerIndicadoresAccionablesDashboard(cliente), listarIncidenciasAdmin(cliente),
+      listarConductoresAdmin(cliente), obtenerAlertasEmergenciaAdmin(cliente),
+      puedeVerRuta(rol, "/mapa") ? listarTrasladosActivosMapa(cliente).catch(() => []) : Promise.resolve([])
     ]);
     return {
       indicadores,
       incidencias: incidencias.filter((item) => !item.resuelta),
       conductoresDocVencido: conductores.filter((item) => !item.documentos_vigentes),
       emergencias,
-      rol: normalizarRolAdmin(admin?.rol_operativo),
+      trasladosActivos,
+      rol,
       cargadoEn: new Date().toISOString()
     };
   } catch (error) {

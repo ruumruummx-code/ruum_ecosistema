@@ -311,11 +311,7 @@ export function BarraLateral() {
       {/* Logo */}
       <div className={colapsada ? "px-3 py-3.5" : "px-3 py-3.5 lg:px-5"}>
         <div className="flex items-center gap-2.5">
-          {colapsada ? (
-            <LogoMarca variante="simbolo" tema="oscuro" tamano={28} />
-          ) : (
-            <LogoMarca variante="horizontal" tema="oscuro" tamano={28} mostrarDescriptor={false} mostrarRespaldo />
-          )}
+          {!colapsada && <LogoMarca variante="horizontal" tema="oscuro" tamano={28} mostrarDescriptor={false} mostrarRespaldo={false} />}
         </div>
         <p className={`mt-1 font-mono-ruum text-admin-secundario uppercase tracking-widest text-text-tertiary ${colapsada ? "hidden" : "hidden lg:block"}`}>
           Torre de Control
@@ -351,12 +347,12 @@ export function BarraLateral() {
                     aria-current={activo ? "page" : undefined}
                     className={[
                       "relative flex min-h-[44px] items-center gap-2.5 rounded-lg px-2 py-1.5 font-body text-sm font-medium transition-colors focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-1 focus-visible:outline-[var(--ruum-focus)]",
-                      activo ? "bg-signal text-ink" : "text-text-secondary hover:bg-white/8 hover:text-mist",
+                      activo ? "bg-white/10 text-white shadow-[inset_3px_0_0_#25C9D0]" : "text-text-secondary hover:bg-white/8 hover:text-mist",
                     ].join(" ")}
                   >
                     <span className={[
                       "flex size-6 shrink-0 items-center justify-center rounded-md",
-                      activo ? "bg-black/15 text-ink" : "bg-white/8 text-current",
+                      activo ? "bg-white/10 text-[#70E0E2]" : "bg-white/8 text-current",
                     ].join(" ")}>
                       <Icono nombre={s.icono} />
                     </span>

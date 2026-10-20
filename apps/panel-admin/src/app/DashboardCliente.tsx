@@ -3,7 +3,6 @@
 import { useEffect, useMemo, useRef, useState, useCallback } from "react";
 import Link from "next/link";
 import { Aviso } from "@ruum/ui";
-import { AdminPanel } from "./admin-ui";
 import { crearClienteNavegador, tieneSupabaseConfigurado } from "../lib/supabase-browser";
 import {
   obtenerIndicadoresAccionablesDashboard,
@@ -11,9 +10,11 @@ import {
   listarConductoresAdmin,
   obtenerAlertasEmergenciaAdmin,
   obtenerAdminActual,
+  listarTrasladosActivosMapa,
+  type TrasladoMapa,
   type IndicadorAccionableDashboard
 } from "@ruum/api/services";
-import { CONFIG_ROL_ADMIN, normalizarRolAdmin, type RolAdminOperativo, type WidgetDashboardAdmin } from "../lib/roles-admin";
+import { CONFIG_ROL_ADMIN, normalizarRolAdmin, puedeVerRuta, type RolAdminOperativo } from "../lib/roles-admin";
 import type { Database } from "@ruum/shared/types";
 import { useHybridRefresh } from "../hooks/useHybridRefresh";
 
@@ -27,30 +28,44 @@ export type DashboardInitialData = {
   incidencias: IncidenciaRow[];
   emergencias: AuditoriaRow[];
   conductoresDocVencido: ConductorRow[];
+  trasladosActivos: TrasladoMapa[];
   rol: RolAdminOperativo;
   cargadoEn: string;
 };
 
-const ACCIONES_FRECUENTES = [
-  {
-    etiqueta: "Programar traslado",
-    detalle: "Desde archivo corporativo",
-    href: "/masivos"
-  },
-  {
-    etiqueta: "Asignar conductor",
-    detalle: "En traslados sin conductor",
-    href: "/viajes?filtro=sin_asignacion&accion=asignar_conductor"
-  },
-  {
-    etiqueta: "Registrar incidencia",
-    detalle: "En traslados activos",
-    href: "/viajes?filtro=activos&accion=registrar_incidencia"
-  }
-] as const;
-
 function etiquetaTipoIncidencia(tipo: string) {
   return tipo.replaceAll("_", " ");
+}
+
+function iconoKpi(tono: string) {
+  if (tono === "azul") return "↗";
+  if (tono === "ambar") return "◷";
+  if (tono === "rojo") return "!";
+  return "▤";
+}
+
+function proyectarUbicaciones(traslados: TrasladoMapa[]) {
+  const conCoordenadas = traslados.filter((traslado) =>
+    traslado.origen_lat !== null && traslado.origen_lng !== null && traslado.destino_lat !== null && traslado.destino_lng !== null
+  ).slice(0, 8);
+  const valores = conCoordenadas.flatMap((traslado) => [
+    { lat: traslado.origen_lat as number, lng: traslado.origen_lng as number },
+    { lat: traslado.destino_lat as number, lng: traslado.destino_lng as number },
+  ]);
+  if (valores.length === 0) return [];
+  const minLat = Math.min(...valores.map((punto) => punto.lat));
+  const maxLat = Math.max(...valores.map((punto) => punto.lat));
+  const minLng = Math.min(...valores.map((punto) => punto.lng));
+  const maxLng = Math.max(...valores.map((punto) => punto.lng));
+  const proyectar = (lat: number, lng: number) => ({
+    x: Math.round(34 + (maxLng === minLng ? 0.5 : (lng - minLng) / (maxLng - minLng)) * 452),
+    y: Math.round(28 + (maxLat === minLat ? 0.5 : (maxLat - lat) / (maxLat - minLat)) * 192),
+  });
+  return conCoordenadas.map((traslado) => ({
+    traslado,
+    origen: proyectar(traslado.origen_lat as number, traslado.origen_lng as number),
+    destino: proyectar(traslado.destino_lat as number, traslado.destino_lng as number),
+  }));
 }
 
 function gravedadDashboardIncidencia(tipo: string) {
@@ -64,6 +79,7 @@ export default function DashboardCliente({ inicial }: { inicial: DashboardInitia
   const [incidencias, setIncidencias] = useState<IncidenciaRow[]>(inicial?.incidencias ?? []);
   const [emergencias, setEmergencias] = useState<AuditoriaRow[]>(inicial?.emergencias ?? []);
   const [conductoresDocVencido, setConductoresDocVencido] = useState<ConductorRow[]>(inicial?.conductoresDocVencido ?? []);
+  const [trasladosActivos, setTrasladosActivos] = useState<TrasladoMapa[]>(inicial?.trasladosActivos ?? []);
   const [cargando, setCargando] = useState(!inicial);
   const [ultimaSincronizacion, setUltimaSincronizacion] = useState<Date | null>(inicial ? new Date(inicial.cargadoEn) : null);
   const [ahora, setAhora] = useState<Date | null>(null);
@@ -85,6 +101,7 @@ export default function DashboardCliente({ inicial }: { inicial: DashboardInitia
           setIncidencias([]);
           setEmergencias([]);
           setConductoresDocVencido([]);
+          setTrasladosActivos([]);
         }
         setEstadoConexionDatos(teniaRespuestaExitosa ? "desactualizado" : "sin_conexion");
         setSeccionesDesactualizadas(["KPIs administrativos", "alertas operativas", "conductores"]);
@@ -109,7 +126,14 @@ export default function DashboardCliente({ inicial }: { inicial: DashboardInitia
         setIncidencias(incidenciasReales.filter((i) => !i.resuelta));
         setEmergencias(emergenciasReales);
         setConductoresDocVencido(conductoresReales.filter((c) => !c.documentos_vigentes));
-        setRolAdmin(normalizarRolAdmin(adminActual?.rol_operativo));
+        const rolActual = normalizarRolAdmin(adminActual?.rol_operativo);
+        setRolAdmin(rolActual);
+        let trasladosMapa: TrasladoMapa[] = [];
+        if (puedeVerRuta(rolActual, "/mapa")) {
+          try { trasladosMapa = await listarTrasladosActivosMapa(cliente); }
+          catch (errorMapa) { console.warn("[dashboard] resumen del mapa no disponible", errorMapa); }
+        }
+        setTrasladosActivos(trasladosMapa);
         const fecha = new Date();
         ultimaRespuestaExitosaRef.current = fecha;
         setUltimaSincronizacion(fecha);
@@ -124,6 +148,7 @@ export default function DashboardCliente({ inicial }: { inicial: DashboardInitia
           setIncidencias([]);
           setEmergencias([]);
           setConductoresDocVencido([]);
+          setTrasladosActivos([]);
         }
         setEstadoConexionDatos(teniaRespuestaExitosa ? "desactualizado" : "sin_conexion");
         setSeccionesDesactualizadas(["KPIs administrativos", "alertas operativas", "conductores"]);
@@ -149,13 +174,6 @@ export default function DashboardCliente({ inicial }: { inicial: DashboardInitia
     return () => window.clearInterval(intervalo);
   }, []);
 
-  const estadoOperacion = useMemo(() => {
-    if (cargando) return "Sincronizando";
-    if (emergencias.length > 0) return "Emergencia activa";
-    if (incidencias.length > 0 || conductoresDocVencido.length > 0) return "Atención requerida";
-    return "Operación estable";
-  }, [cargando, conductoresDocVencido.length, emergencias.length, incidencias.length]);
-
   const turno = useMemo(() => {
     if (!ahora) return "Turno pendiente";
     const hora = ahora.getHours();
@@ -179,315 +197,64 @@ export default function DashboardCliente({ inicial }: { inicial: DashboardInitia
     if (cortes.length === 0) return null;
     return new Date(Math.max(...cortes.map((fecha) => fecha.getTime())));
   }, [indicadores, ultimaSincronizacion]);
-  const filtrosRapidos = useMemo(() => [
-    { etiqueta: "Todos", href: "/viajes" },
-    { etiqueta: "Sin asignación", href: "/viajes?filtro=sin_asignacion" },
-    { etiqueta: "SLA", href: "/alertas-sla?categoria=sla_en_riesgo" },
-    { etiqueta: turno, href: `/viajes?turno=${encodeURIComponent(turno.toLowerCase())}` }
-  ], [turno]);
   const conexionGlobal = estadoConexionGlobal(estadoConexionDatos, actualizacionGlobal, ahora);
+  const indice = (clave: IndicadorAccionableDashboard["clave"]) => indicadoresVisibles.find((item) => item.clave === clave);
+  const kpisInicio = [
+    { etiqueta: "Traslados en curso", valor: indice("traslados_activos")?.valor ?? 0, detalle: "Servicios activos", href: puedeVerRuta(rolAdmin, "/viajes") ? "/viajes?filtro=activos" : "/alertas-sla", tono: "azul" },
+    { etiqueta: "Pendientes de asignación", valor: indice("sin_asignacion")?.valor ?? 0, detalle: "Sin conductor asignado", href: puedeVerRuta(rolAdmin, "/viajes") ? "/viajes?filtro=sin_asignacion" : "/incidencias", tono: "ambar" },
+    { etiqueta: "Incidencias abiertas", valor: incidencias.length, detalle: "Requieren seguimiento", href: "/incidencias?filtro=abiertas", tono: "rojo" },
+    { etiqueta: "Documentos por revisar", valor: conductoresDocVencido.length, detalle: "Vencidos o incompletos", href: "/conductores", tono: "turquesa" },
+  ] as const;
+  const atenciones = [
+    ...emergencias.map((evento) => ({ id: `emergencia-${evento.id}`, titulo: "Emergencia activada", detalle: `Traslado ${evento.traslado_id?.slice(0, 8).toUpperCase() ?? "sin folio"} · ${formatoHoraCorta(new Date(evento.timestamp))}`, href: evento.traslado_id && puedeVerRuta(rolAdmin, "/viajes") ? `/viajes/${evento.traslado_id}` : "/incidencias", tono: "rojo" })),
+    ...incidencias.map((incidencia) => ({ id: `incidencia-${incidencia.id}`, titulo: "Incidencia sin resolver", detalle: incidencia.descripcion || etiquetaTipoIncidencia(incidencia.tipo), href: puedeVerRuta(rolAdmin, "/viajes") ? `/viajes/${incidencia.traslado_id}` : "/incidencias", tono: gravedadDashboardIncidencia(incidencia.tipo) === "grave" ? "rojo" : "ambar" })),
+    ...conductoresDocVencido.map((conductor) => ({ id: `documento-${conductor.id}`, titulo: "Documentación por revisar", detalle: conductor.nombre, href: "/conductores", tono: "ambar" })),
+  ].slice(0, 5);
+  const puedeVerMapa = puedeVerRuta(rolAdmin, "/mapa");
+  const rutasMapa = proyectarUbicaciones(trasladosActivos);
+  const nombreDia = (ahora ?? new Date()).toLocaleDateString("es-MX", { weekday: "long", day: "numeric", month: "long", timeZone: "America/Mexico_City" });
 
   return (
-    <main className="admin-page-shell admin-road-pilot">
-      <section className="rounded-card border border-border-default bg-surface-primary/90 px-4 py-5 shadow-[var(--ruum-shadow-1)] sm:px-5" aria-label="Cabecera operativa">
-        <div className="flex flex-col gap-5 xl:flex-row xl:items-start xl:justify-between">
-          <div className="min-w-0">
-            <p className="font-mono-ruum text-admin-secundario uppercase tracking-[0.16em] text-signal">Torre de Control</p>
-            <h1 className="mt-1 font-display text-2xl font-semibold text-ink sm:text-3xl">Dashboard operativo</h1>
-            <p className="mt-2 max-w-3xl font-body text-base text-text-secondary">{configuracionRol.descripcion}</p>
-          </div>
-          <div className="w-full rounded-card border border-border-default bg-surface-secondary px-4 py-4 shadow-[var(--ruum-shadow-1)] xl:max-w-xl" aria-label="Estado global del día">
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-              <div>
-                <p className="font-body text-xs font-semibold uppercase tracking-wide text-text-tertiary">Estado global del día</p>
-                <div className={`mt-2 inline-flex min-h-10 items-center gap-2 rounded-lg border px-3 py-2 font-body text-sm font-semibold ${estadoOperacion === "Operación estable" ? "border-status-success/30 bg-status-success-soft text-status-success" : estadoOperacion === "Emergencia activa" ? "border-status-error/30 bg-status-error-soft text-status-error" : "border-status-warning/35 bg-status-warning-soft text-status-warning"}`}>
-                  <span className={`inline-block size-2.5 rounded-full ${estadoOperacion === "Operación estable" ? "bg-status-success" : estadoOperacion === "Emergencia activa" ? "bg-status-error" : "bg-status-warning"}`} aria-hidden="true" />
-                  {estadoOperacion}
-                </div>
-              </div>
-              <button
-                type="button"
-                onClick={() => void cargarDashboard(true, true)}
-                className="inline-flex min-h-11 items-center justify-center gap-2 rounded-lg border border-signal bg-signal px-4 py-2 font-body text-admin-boton font-semibold text-ink transition-colors hover:bg-signal/90 focus:outline-none focus:ring-2 focus:ring-focus-default/30 disabled:cursor-wait disabled:opacity-70"
-                disabled={actualizandoManual}
-              >
-                <span aria-hidden="true">↻</span>
-                {actualizandoManual ? "Actualizando" : "Actualizar"}
-              </button>
-            </div>
-            <dl className="mt-4 grid gap-2 font-body text-sm text-text-secondary sm:grid-cols-2">
-              <DatoEstado etiqueta="Última actualización" valor={actualizacionGlobal ? formatoHoraCorta(actualizacionGlobal) : "Sin respuesta"} />
-              <DatoEstado etiqueta="Rol / turno" valor={`${configuracionRol.etiqueta} · ${turno}`} />
-              <DatoEstado etiqueta="Sincronización" valor={actualizacionGlobal ? textoActualizadoHace(actualizacionGlobal, ahora) : "Sin corte"} />
-              <div className={`rounded-lg border px-3 py-2 ${conexionGlobal.clase}`}>
-                <dt className="font-body text-xs font-semibold uppercase tracking-wide">Datos en vivo</dt>
-                <dd className="mt-1 flex items-center gap-2 font-body text-sm font-semibold">
-                  <span className={`inline-block size-2 rounded-full ${conexionGlobal.punto}`} aria-hidden="true" />
-                  {conexionGlobal.etiqueta} · Auto-refresco 3 min
-                </dd>
-              </div>
-            </dl>
-          </div>
+    <main className="admin-page-shell dashboard-home">
+      <header className="dashboard-home__header">
+        <div><p className="dashboard-home__eyebrow">Torre de Control</p><h1>Buen día</h1><p className="dashboard-home__subline">Resumen de la operación · <span className="capitalize">{nombreDia}</span></p></div>
+        <div className="dashboard-home__header-actions"><span className={`dashboard-home__live ${conexionGlobal.clase}`}><i className={conexionGlobal.punto} />{conexionGlobal.etiqueta}{actualizacionGlobal ? ` · ${textoActualizadoHace(actualizacionGlobal, ahora)}` : ""}</span><button type="button" className="dashboard-home__refresh" onClick={() => void cargarDashboard(true, true)} disabled={actualizandoManual} aria-label="Actualizar información">{actualizandoManual ? "Actualizando…" : "↻ Actualizar"}</button>{puedeVerRuta(rolAdmin, "/masivos") ? <Link href="/masivos" className="dashboard-home__primary">＋ Programar traslados</Link> : <Link href="/viajes" className="dashboard-home__primary">Ver traslados <span aria-hidden="true">→</span></Link>}</div>
+      </header>
+
+      {errorOperacional && <div className="dashboard-home__notice"><Aviso tono="atencion">{errorOperacional}</Aviso></div>}
+      {seccionesDesactualizadas.length > 0 && <div className="dashboard-home__notice"><Aviso tono="atencion">Datos que podrían estar desactualizados: {seccionesDesactualizadas.join(", ")}.</Aviso></div>}
+
+      <section className="dashboard-home__kpis" aria-label="Indicadores principales">
+        {kpisInicio.map((kpi) => <Link key={kpi.etiqueta} href={kpi.href} className={`dashboard-home__kpi dashboard-home__kpi--${kpi.tono}`}><span className="dashboard-home__kpi-icon" aria-hidden="true">{iconoKpi(kpi.tono)}</span><span className="dashboard-home__kpi-title">{kpi.etiqueta}</span><strong>{cargando ? "—" : kpi.valor}</strong><small>{kpi.detalle}</small><span className="dashboard-home__kpi-link">Ver detalle <span aria-hidden="true">→</span></span></Link>)}
+      </section>
+
+      <section className="dashboard-home__workarea" aria-label="Vista de operación">
+        <div className="dashboard-home__panel dashboard-home__trips">
+          <div className="dashboard-home__panel-heading"><div><h2>Traslados activos</h2><p>Seguimiento de los servicios en curso</p></div><Link href="/viajes?filtro=activos">Ver todos <span aria-hidden="true">→</span></Link></div>
+          {trasladosActivos.length > 0 ? <div className="dashboard-home__table-wrap"><table className="dashboard-home__table"><thead><tr><th>Traslado</th><th>Ruta</th><th>Conductor</th><th>Estado</th></tr></thead><tbody>{trasladosActivos.slice(0, 5).map((traslado) => <tr key={traslado.traslado_id}><td><Link href={`/viajes/${traslado.traslado_id}`}>#{traslado.traslado_id.slice(0, 8).toUpperCase()}</Link>{traslado.tiene_incidencia_abierta && <span className="dashboard-home__incident-flag">Incidencia</span>}</td><td>{traslado.origen_ciudad || "Origen"}<span className="dashboard-home__route-arrow">→</span>{traslado.destino_ciudad || "Destino"}</td><td>{traslado.conductor_nombre ?? "Por asignar"}</td><td><span className="dashboard-home__status">{traslado.estado.replaceAll("_", " ")}</span></td></tr>)}</tbody></table></div> : <div className="dashboard-home__empty"><span aria-hidden="true">↗</span><strong>{cargando ? "Cargando traslados…" : puedeVerMapa ? "Sin traslados activos" : "Seguimiento de traslados"}</strong><p>{puedeVerMapa ? "Cuando haya servicios en curso, aparecerán aquí." : "El resumen de ubicación está limitado para tu perfil."}</p></div>}
+        </div>
+
+        <div className="dashboard-home__panel dashboard-home__map-panel">
+          <div className="dashboard-home__panel-heading"><div><h2>Mapa operativo</h2><p>{puedeVerMapa ? `${trasladosActivos.length} traslados activos` : "Vista de operación"}</p></div>{puedeVerMapa && <Link href="/mapa" aria-label="Abrir mapa operativo">Abrir <span aria-hidden="true">↗</span></Link>}</div>
+          {puedeVerMapa ? <Link href="/mapa" className="dashboard-home__map" aria-label="Abrir mapa en vivo">
+            <svg viewBox="0 0 520 250" role="img" aria-label={rutasMapa.length ? "Resumen de rutas activas" : "Mapa de operación"}>
+              <rect width="520" height="250" fill="#edf4f3"/><g className="dashboard-home__map-streets"><path d="M-15 34 535 34M-15 96 535 96M-15 164 535 164M-15 220 535 220M52-10 52 260M143-10 143 260M248-10 248 260M355-10 355 260M459-10 459 260"/><path d="m-12 72 545 91M69-10l230 270M418-10 205 260"/></g>
+              {rutasMapa.map((ruta) => <g key={ruta.traslado.traslado_id}><path d={`M${ruta.origen.x} ${ruta.origen.y} L${ruta.destino.x} ${ruta.destino.y}`} className="dashboard-home__map-route"/><circle cx={ruta.origen.x} cy={ruta.origen.y} r="7" className="dashboard-home__map-pin"/><circle cx={ruta.destino.x} cy={ruta.destino.y} r="5" className="dashboard-home__map-destination"/></g>)}
+              {rutasMapa.length === 0 && <g className="dashboard-home__map-empty-mark"><circle cx="260" cy="116" r="25"/><path d="M260 102c-8 0-14 6-14 14 0 10 14 23 14 23s14-13 14-23c0-8-6-14-14-14Zm0 19a5 5 0 1 1 0-10 5 5 0 0 1 0 10Z"/></g>}
+              <rect x="18" y="18" width="104" height="28" rx="14" className="dashboard-home__map-badge"/><circle cx="34" cy="32" r="4"/><text x="45" y="36">{rutasMapa.length ? `${rutasMapa.length} rutas` : "Vista operativa"}</text>
+            </svg>
+          </Link> : <div className="dashboard-home__map dashboard-home__map--restricted"><span aria-hidden="true">⌖</span><strong>El mapa no está disponible para este perfil</strong><small>Las ubicaciones se muestran según los permisos operativos.</small></div>}
+          <div className="dashboard-home__map-footer"><span><i /> En curso</span><span>{puedeVerMapa ? "Ubicaciones según permisos" : "Ubicaciones restringidas"}</span></div>
         </div>
       </section>
 
-      <nav className="sticky top-0 z-20 mt-4 rounded-card border border-border-default bg-surface-primary/95 px-3 py-3 shadow-[var(--ruum-shadow-1)] backdrop-blur" aria-label="Filtros rápidos del dashboard">
-        <div className="flex flex-wrap items-center gap-2">
-          <span className="mr-1 font-body text-xs font-semibold uppercase tracking-wide text-text-tertiary">Filtros superiores</span>
-          {filtrosRapidos.map((filtro) => (
-            <Link
-              key={filtro.href}
-              href={filtro.href}
-              className="inline-flex min-h-11 items-center rounded-full border border-border-default bg-surface-secondary px-4 py-2 font-body text-sm font-semibold text-text-secondary transition-colors hover:border-signal/50 hover:text-ink focus:outline-none focus:ring-2 focus:ring-focus-default/30"
-            >
-              {filtro.etiqueta}
-            </Link>
-          ))}
-        </div>
-      </nav>
+      <section className="dashboard-home__attention" aria-label="Requiere atención">
+        <div className="dashboard-home__panel-heading"><div><h2>Requiere atención</h2><p>Prioridades para mantener la operación en movimiento</p></div><Link href="/incidencias?filtro=abiertas">Ver bandeja <span aria-hidden="true">→</span></Link></div>
+        {atenciones.length ? <div className="dashboard-home__attention-grid">{atenciones.map((item) => <Link key={item.id} href={item.href} className={`dashboard-home__attention-card dashboard-home__attention-card--${item.tono}`}><span className="dashboard-home__attention-icon" aria-hidden="true">{item.tono === "rojo" ? "!" : "◷"}</span><span className="dashboard-home__attention-copy"><strong>{item.titulo}</strong><small>{item.detalle}</small><em>Atender <span aria-hidden="true">→</span></em></span></Link>)}</div> : <div className="dashboard-home__all-clear"><span aria-hidden="true">✓</span><div><strong>Todo en orden</strong><p>No hay alertas operativas pendientes para revisar.</p></div></div>}
+      </section>
 
-      {errorOperacional && (
-        <div className="mt-4">
-          <Aviso tono="danger">{errorOperacional}</Aviso>
-        </div>
-      )}
-
-      {seccionesDesactualizadas.length > 0 && (
-        <div className="mt-4">
-          <Aviso tono="atencion">Pueden estar desactualizadas: {seccionesDesactualizadas.join(", ")}.</Aviso>
-        </div>
-      )}
-
-      {cargando ? (
-        /* Ítem 11 — skeleton estructurado reemplaza "Cargando…" */
-        <div className="mt-8" aria-label="Cargando datos del dashboard" aria-busy="true">
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-5">
-            {[1, 2, 3, 4, 5].map((i) => (
-              <div key={i} className="rounded-card border border-ink/10 p-5">
-                <div className="h-3 w-28 animate-pulse rounded bg-ink/8" />
-                <div className="mt-3 h-8 w-16 animate-pulse rounded bg-ink/10" />
-              </div>
-            ))}
-          </div>
-          <div className="mt-8 grid grid-cols-1 gap-6 xl:grid-cols-2">
-            <div className="rounded-card border border-ink/10 p-5 space-y-3">
-              <div className="h-4 w-32 animate-pulse rounded bg-ink/8" />
-              {[1, 2, 3].map((i) => (
-                <div key={i} className="h-12 animate-pulse rounded-lg bg-ink/6" />
-              ))}
-            </div>
-            <div className="rounded-card border border-ink/10 p-5 space-y-3">
-              <div className="h-4 w-28 animate-pulse rounded bg-ink/8" />
-              <div className="grid grid-cols-2 gap-3">
-                {[1, 2, 3, 4].map((i) => (
-                  <div key={i} className="h-16 animate-pulse rounded-card bg-ink/6" />
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-      ) : (
-        <>
-          {errorOperacional && indicadoresVisibles.length === 0 ? (
-            <div className="mt-8">
-              <AdminPanel className="p-5 sm:p-6">
-                <h2 className="font-display text-base font-semibold">Datos no disponibles</h2>
-                <p className="mt-2 font-body text-sm text-text-secondary">
-                  El tablero está cerrado hasta recibir indicadores administrativos reales.
-                </p>
-              </AdminPanel>
-            </div>
-          ) : configuracionRol.widgets.map((widget) => renderWidgetDashboard(widget, {
-            indicadoresVisibles,
-            emergencias,
-            incidencias,
-            conductoresDocVencido
-          }))}
-        </>
-      )}
+      <footer className="dashboard-home__footer"><span>Rol operativo: {configuracionRol.etiqueta} · Turno {turno}</span><span>Última actualización: {actualizacionGlobal ? formatoHoraCorta(actualizacionGlobal) : "Sin datos recientes"}</span></footer>
     </main>
-  );
-}
-
-function renderWidgetDashboard(
-  widget: WidgetDashboardAdmin,
-  contexto: {
-    indicadoresVisibles: IndicadorAccionableDashboard[];
-    emergencias: AuditoriaRow[];
-    incidencias: IncidenciaRow[];
-    conductoresDocVencido: ConductorRow[];
-  }
-) {
-  if (widget === "indicadores") {
-    const indicadorSinAsignacion = contexto.indicadoresVisibles.find((indicador) => indicador.clave === "sin_asignacion");
-    return (
-      <section key={widget} className="mt-6 grid gap-4 xl:grid-cols-[minmax(0,1fr)_20rem]" aria-label="Indicadores y acciones operativas">
-        <div className="rounded-card border border-border-default bg-surface-primary p-4 shadow-[var(--ruum-shadow-1)]">
-          <div className="flex flex-wrap items-end justify-between gap-3">
-            <div>
-              <p className="font-body text-xs font-semibold uppercase tracking-wide text-text-tertiary">Métricas clave</p>
-              <h2 className="mt-1 font-display text-lg font-semibold text-ink">Prioridad operativa</h2>
-            </div>
-            <p className="font-body text-sm text-text-secondary">{contexto.indicadoresVisibles.length} indicadores activos</p>
-          </div>
-          <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2 2xl:grid-cols-3">
-            {contexto.indicadoresVisibles.map((indicador) => (
-              <IndicadorAccionable key={indicador.clave} indicador={indicador} />
-            ))}
-          </div>
-        </div>
-        <AccionesFrecuentes indicadorSinAsignacion={indicadorSinAsignacion} />
-      </section>
-    );
-  }
-
-  if (widget === "emergencias") {
-    if (contexto.emergencias.length === 0) return null;
-    return (
-      <section key={widget} className="mt-8">
-        <h2 className="font-display text-base font-semibold text-status-error">Emergencias prioritarias</h2>
-        <div className="mt-3 space-y-2">
-          {contexto.emergencias.map((evento) => (
-            <Link key={evento.id} href={evento.traslado_id ? `/viajes/${evento.traslado_id}` : "/viajes"} className="block">
-              <div className="rounded-lg border border-status-error/25 bg-status-error-soft px-4 py-3">
-                <p className="font-body text-sm font-semibold text-status-error">Emergencia / 911 activada por conductor</p>
-                <p className="mt-1 font-body text-xs text-text-secondary">
-                  Traslado {evento.traslado_id?.slice(0, 8).toUpperCase() ?? "sin folio"} · {new Date(evento.timestamp).toLocaleString("es-MX")}
-                </p>
-              </div>
-            </Link>
-          ))}
-        </div>
-      </section>
-    );
-  }
-
-  if (widget === "alertas_operativas") {
-    const sistemaLimpio = contexto.incidencias.length === 0 && contexto.conductoresDocVencido.length === 0;
-    const incidenciasPorTipo = Array.from(
-      contexto.incidencias.reduce((mapa, incidencia) => {
-        mapa.set(incidencia.tipo, (mapa.get(incidencia.tipo) ?? 0) + 1);
-        return mapa;
-      }, new Map<string, number>())
-    );
-    const incidenciasPorGravedad = contexto.incidencias.reduce((conteos, incidencia) => {
-      const gravedad = gravedadDashboardIncidencia(incidencia.tipo);
-      conteos[gravedad] += 1;
-      return conteos;
-    }, { grave: 0, media: 0, leve: 0 });
-    return (
-      <section key={widget} className="mt-8">
-        <AdminPanel className="p-5 sm:p-6">
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-            <div>
-              <p className="font-body text-xs font-semibold uppercase tracking-wide text-text-tertiary">Feed operativo</p>
-              <h2 className="mt-1 font-display text-base font-semibold">Alertas operativas</h2>
-            </div>
-            <Link href="/alertas-sla" className="inline-flex min-h-9 items-center rounded-lg border border-border-default px-3 py-1.5 font-body text-xs font-semibold text-text-secondary hover:border-signal/50 hover:text-ink">
-              Historial
-            </Link>
-          </div>
-          <div className="mt-4 space-y-2">
-            <div className="flex flex-wrap gap-2" aria-label="Riesgos y cumplimiento">
-              <Link href="/incidencias?filtro=abiertas" className="inline-flex min-h-8 items-center rounded-full border border-status-warning/35 bg-status-warning-soft px-3 py-1 font-body text-xs font-semibold text-status-warning">
-                Incidencias abiertas: {contexto.incidencias.length}
-              </Link>
-              <Link href="/incidencias?gravedad=grave" className="inline-flex min-h-8 items-center rounded-full border border-status-error/30 bg-status-error-soft px-3 py-1 font-body text-xs font-semibold text-status-error">
-                Graves: {incidenciasPorGravedad.grave}
-              </Link>
-              <Link href="/incidencias?gravedad=media" className="inline-flex min-h-8 items-center rounded-full border border-status-warning/30 bg-status-warning-soft px-3 py-1 font-body text-xs font-semibold text-status-warning">
-                Medias: {incidenciasPorGravedad.media}
-              </Link>
-            </div>
-            {incidenciasPorTipo.length > 0 && (
-              <div className="flex flex-wrap gap-2">
-                {incidenciasPorTipo.map(([tipo, total]) => (
-                  <Link key={tipo} href={`/incidencias?tipo=${tipo}`} className="inline-flex min-h-8 items-center rounded-full border border-border-default bg-surface-secondary px-3 py-1 font-body text-xs font-semibold capitalize text-text-secondary hover:border-signal/45 hover:text-ink">
-                    {etiquetaTipoIncidencia(tipo)} ({total})
-                  </Link>
-                ))}
-              </div>
-            )}
-            {sistemaLimpio && (
-              <div className="rounded-lg border border-status-success/30 bg-status-success-soft px-4 py-4">
-                <p className="font-body text-sm font-semibold text-status-success">Sistema limpio: no hay alertas pendientes.</p>
-                <p className="mt-1 font-body text-xs text-text-secondary">Puedes concentrarte en programar nuevos traslados; las incidencias abiertas y documentos bloqueantes aparecerán aquí cuando requieran intervención.</p>
-              </div>
-            )}
-            {contexto.incidencias.map((i) => (
-              <Link key={i.id} href={`/viajes/${i.traslado_id}`} className="block">
-                <Aviso tono="atencion">Incidencia sin resolver: {i.descripcion}</Aviso>
-              </Link>
-            ))}
-            {contexto.conductoresDocVencido.map((c) => (
-              <Link key={c.id} href="/conductores" className="block">
-                <Aviso tono="atencion">{c.nombre}: documentos vencidos o incompletos</Aviso>
-              </Link>
-            ))}
-          </div>
-        </AdminPanel>
-      </section>
-    );
-  }
-
-  return null;
-}
-
-function AccionesFrecuentes({ indicadorSinAsignacion }: { indicadorSinAsignacion?: IndicadorAccionableDashboard }) {
-  const sinAsignacion = indicadorSinAsignacion?.valor ?? 0;
-  return (
-    <aside className="rounded-card border border-border-default bg-surface-primary p-4 shadow-[var(--ruum-shadow-1)]" aria-label="Acciones frecuentes">
-      <p className="font-body text-xs font-semibold uppercase tracking-wide text-text-tertiary">Flujo operativo</p>
-      <h2 className="mt-1 font-display text-lg font-semibold text-ink">Acciones frecuentes</h2>
-      <div className="mt-4 grid gap-3">
-        {ACCIONES_FRECUENTES.map((accion) => {
-          const esAsignacion = accion.etiqueta === "Asignar conductor";
-          const estaHabilitada = !esAsignacion || sinAsignacion > 0;
-          const estado = esAsignacion
-            ? sinAsignacion > 0
-              ? `${sinAsignacion} pendiente${sinAsignacion === 1 ? "" : "s"}`
-              : "Sin pendientes"
-            : "Disponible";
-          const clase = estaHabilitada
-            ? esAsignacion && sinAsignacion > 0
-              ? "border-status-warning/35 bg-status-warning-soft text-status-warning hover:border-status-warning/70"
-              : "border-border-default bg-surface-secondary text-ink hover:border-signal/40"
-            : "border-border-default bg-surface-secondary text-text-secondary";
-          const contenido = (
-            <span className="flex items-start justify-between gap-3">
-              <span>
-                <span className="block font-body text-sm font-semibold">{accion.etiqueta}</span>
-                <span className="mt-1 block font-body text-xs text-text-tertiary">{accion.detalle}</span>
-              </span>
-              <span className="rounded-full border border-current px-2 py-1 font-body text-[0.68rem] font-semibold uppercase tracking-wide">
-                {estado}
-              </span>
-            </span>
-          );
-          if (!estaHabilitada) {
-            return (
-              <span key={accion.href} aria-disabled="true" className={`block rounded-card border px-4 py-3 ${clase}`}>
-                {contenido}
-              </span>
-            );
-          }
-          return (
-            <Link key={accion.href} href={accion.href} className={`block rounded-card border px-4 py-3 transition-colors focus:outline-none focus:ring-2 focus:ring-focus-default/30 ${clase}`}>
-              {contenido}
-            </Link>
-          );
-        })}
-      </div>
-    </aside>
-  );
-}
-
-function DatoEstado({ etiqueta, valor }: { etiqueta: string; valor: string }) {
-  return (
-    <div className="rounded-lg border border-border-default bg-surface-primary px-3 py-2">
-      <dt className="font-body text-xs font-semibold uppercase tracking-wide text-text-tertiary">{etiqueta}</dt>
-      <dd className="mt-1 font-body text-sm font-semibold text-ink">{valor}</dd>
-    </div>
   );
 }
 
@@ -525,89 +292,6 @@ function textoActualizadoHace(fecha: Date, ahora: Date | null) {
   return `Hace ${horas} horas`;
 }
 
-function IndicadorAccionable({ indicador }: { indicador: IndicadorAccionableDashboard }) {
-  const estado = estadoKpi(indicador);
-
-  return (
-    <Link
-      href={indicador.href}
-      className="block min-h-60 rounded-card border border-border-default bg-surface-secondary p-4 shadow-[var(--ruum-shadow-1)] transition-colors hover:border-signal/40 focus:outline-none focus:ring-2 focus:ring-focus-default/30"
-      aria-label={`${indicador.titulo}: ${indicador.valor}. Ver detalles`}
-    >
-      <div className="flex h-full flex-col">
-        <p className="min-h-10 font-body text-xs font-semibold uppercase tracking-wide text-text-tertiary">{indicador.titulo}</p>
-        <div className="my-4 flex flex-1 flex-col items-center justify-center text-center">
-          <p className="font-display text-5xl font-bold leading-none text-ink">{indicador.valor}</p>
-          <span className={`mt-3 rounded-full border px-3 py-1.5 font-body text-xs font-semibold ${estado.badgeClase}`}>
-            {estado.etiqueta}
-          </span>
-        </div>
-        <dl className="grid gap-2 border-t border-ink/10 pt-3">
-          <DatoKpi etiqueta="Corte" valor={formatoCorteIndicador(indicador.actualizadoEn)} />
-          <DatoKpi etiqueta="Tendencia" valor={formatoVariacion(indicador.variacion)} />
-          <DatoKpi etiqueta="Umbral" valor={indicador.umbral} />
-          <DatoKpi etiqueta="Clave operativa" valor={indicador.subgrupoCritico} />
-        </dl>
-        <span className="mt-4 inline-flex min-h-10 items-center justify-center gap-2 rounded-lg border border-status-info/35 bg-surface-primary px-3 py-2 font-body text-admin-boton font-semibold text-status-info">
-          <span aria-hidden="true">▦</span>
-          Ver detalles
-        </span>
-      </div>
-    </Link>
-  );
-}
-
-function estadoKpi(indicador: IndicadorAccionableDashboard) {
-  const positivoEnCero = indicador.clave === "riesgo_sla" || indicador.clave === "con_incidencia" || indicador.clave === "sin_asignacion";
-  if (indicador.valor === 0 && positivoEnCero) {
-    return {
-      positivoEnCero,
-      etiqueta: indicador.clave === "sin_asignacion" ? "Todo asignado" : "Sin riesgo",
-      badgeClase: "border-status-success/30 bg-surface-primary text-status-success"
-    };
-  }
-  if (indicador.severidad === "critico") {
-    return {
-      positivoEnCero,
-      etiqueta: "Crítico",
-      badgeClase: "border-status-error/30 bg-surface-primary text-status-error"
-    };
-  }
-  if (indicador.severidad === "atencion") {
-    return {
-      positivoEnCero,
-      etiqueta: "Atención",
-      badgeClase: "border-status-warning/35 bg-surface-primary text-status-warning"
-    };
-  }
-  return {
-    positivoEnCero,
-    etiqueta: "Normal",
-    badgeClase: "border-ink/10 bg-surface-secondary text-text-secondary"
-  };
-}
-
-function DatoKpi({ etiqueta, valor }: { etiqueta: string; valor: string }) {
-  return (
-    <div className="grid grid-cols-[7.5rem_1fr] gap-2 text-sm">
-      <dt className="font-body text-admin-secundario text-text-tertiary">{etiqueta}</dt>
-      <dd className="min-w-0 font-body text-admin-secundario font-semibold text-ink">{valor}</dd>
-    </div>
-  );
-}
-
-function formatoCorteIndicador(fechaIso: string) {
-  const fecha = new Date(fechaIso);
-  if (!Number.isFinite(fecha.getTime())) return "Sin corte";
-  return fecha.toLocaleString("es-MX", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit", hour12: false }).replace(",", " ·");
-}
-
-function formatoVariacion(valor: number) {
-  if (valor > 0) return `+${valor}%`;
-  if (valor < 0) return `${valor}%`;
-  return "0%";
-}
-
 function formatoHoraCorta(valor: Date) {
   return new Intl.DateTimeFormat("es-MX", {
     hour: "2-digit",
@@ -615,3 +299,4 @@ function formatoHoraCorta(valor: Date) {
     timeZone: "America/Mexico_City"
   }).format(valor);
 }
+

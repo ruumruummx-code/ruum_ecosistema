@@ -851,17 +851,20 @@ export default function PaginaTrasladosAdmin() {
         )}
       />
 
-      <div className="mt-6 flex gap-1 border-b border-ink/10">
+      <div className="mt-6 flex gap-1 overflow-x-auto border-b border-ink/10" role="group" aria-label="Filtrar traslados por estado">
         {PESTANAS.map((p) => (
           <button
             key={p.id}
+            type="button"
+            aria-pressed={pestana === p.id}
+            aria-label={`Ver traslados: ${p.etiqueta}`}
             onClick={() => {
               setPestana(p.id);
               setFiltros((actual) => ({ ...actual, estado: p.filtro }));
             }}
             className={[
-              "px-4 py-2.5 font-body text-sm font-medium transition-colors",
-              pestana === p.id ? "border-b-2 border-signal text-ink" : "text-text-secondary hover:text-ink"
+              "inline-flex min-h-11 shrink-0 items-center gap-2 px-4 py-2.5 font-body text-sm font-semibold transition-colors",
+              pestana === p.id ? "border-b-2 border-signal bg-signal-soft/50 text-ink" : "text-text-secondary hover:bg-surface-secondary hover:text-ink"
             ].join(" ")}
           >
             {p.etiqueta}

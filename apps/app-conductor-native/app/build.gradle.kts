@@ -1,5 +1,7 @@
 import java.util.Properties
 
+
+
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.plugin.compose")
@@ -62,32 +64,34 @@ android {
 }
 
 dependencies {
-    implementation(libs.androidx.compose.bom)
+    implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.core.ktx)
-    implementation(alias(libs.plugins.compose.material3))
-    implementation(alias(libs.plugins.compose.material))
-    implementation(alias(libs.plugins.compose.ui))
-    implementation(alias(libs.plugins.androidx.compose.ui))
+    implementation(libs.androidx.compose.material3)
+    implementation(libs.androidx.compose.material)
+    implementation(libs.androidx.compose.ui)
+    implementation(libs.androidx.compose.ui.graphics)
+    implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.navigation.compose)
 
-    implementation(libs.bom)
-    implementation(alias(libs.plugins.github.jan.tennert.supabase))
-    implementation(alias(libs.plugins.io.github.jan.tennert.supabase))
-    implementation(alias(libs.plugins.io.github.jan.tennert.supabaseX2))
-    implementation(alias(libs.plugins.io.github.jan.tennert.supabaseX3))
-    implementation(alias(libs.plugins.io.github.jan.tennert.supabaseX4))
+    implementation(platform(libs.supabase.bom))
+    implementation(libs.supabase.auth)
+    implementation(libs.supabase.postgrest)
+    implementation(libs.supabase.realtime)
+    implementation(libs.supabase.functions)
+    implementation(libs.supabase.storage)
+
     implementation(libs.ktor.client.android)
     implementation(libs.kotlinx.coroutines.android)
     implementation(libs.kotlinx.serialization.json)
 
     testImplementation(libs.junit)
     testImplementation(libs.kotlinx.coroutines.test)
-    androidTestImplementation(libs.androidx.compose.bom)
-    androidTestImplementation(alias(libs.plugins.androidx.compose.uiX2))
+    androidTestImplementation(platform(libs.androidx.compose.bom))
+    androidTestImplementation(libs.androidx.compose.ui.test.junit4)
     androidTestImplementation(libs.androidx.junit)
-    debugImplementation(alias(libs.plugins.androidx.compose.uiX3))
-    debugImplementation(alias(libs.plugins.androidx.compose.uiX4))
+    debugImplementation(libs.androidx.compose.ui.tooling)
+    debugImplementation(libs.androidx.compose.ui.test.manifest)
 }

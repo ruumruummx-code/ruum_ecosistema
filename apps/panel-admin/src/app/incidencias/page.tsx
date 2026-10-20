@@ -210,6 +210,15 @@ function slaObjetivoHoras(gravedad: GravedadIncidencia) {
   return 24;
 }
 
+function vencimientoSlaMs(incidencia: Incidencia) {
+  if (incidencia.sla_vence_en) {
+    const vencimiento = new Date(incidencia.sla_vence_en).getTime();
+    if (Number.isFinite(vencimiento)) return vencimiento;
+  }
+  const creada = new Date(incidencia.creada_en).getTime();
+  return Number.isFinite(creada) ? creada + slaObjetivoHoras(gravedadIncidencia(incidencia)) * 3_600_000 : Number.POSITIVE_INFINITY;
+}
+
 function slaIncidencia(incidencia: Incidencia, ahora: Date) {
   if (incidencia.resuelta) return { texto: "SLA cerrado", enRiesgo: false, vencido: false };
   const gravedad = gravedadIncidencia(incidencia);
@@ -241,7 +250,7 @@ function KpiIncidencia({ etiqueta, valor, detalle, tono = "neutral" }: { etiquet
     <AdminPanel className={`p-4 ${clase}`}>
       <p className="font-body text-xs font-semibold uppercase tracking-wide text-text-tertiary">{etiqueta}</p>
       <p className="mt-2 font-display text-2xl font-semibold text-ink">{valor}</p>
-      <p className="mt-1 font-body text-xs text-text-secondary">{detalle}</p>
+      <p className="mt-1 font-body text-xs text-[#536982] dark:text-[#c1cedd]">{detalle}</p>
     </AdminPanel>
   );
 }
@@ -721,6 +730,9 @@ export default function PaginaIncidenciasAdmin() {
     const coincideEstadoReal = estadoRealFiltro === "todos" || (incidencia.estado ?? "abierta") === estadoRealFiltro;
     const coincideSeveridad = severidadFiltro === "todos" || (incidencia.severidad ?? "medium") === severidadFiltro;
     return coincideTipo && coincideOrigen && coincideResponsable && coincideGravedad && coincideEstadoReal && coincideSeveridad;
+  }).sort((a, b) => {
+    if (a.resuelta !== b.resuelta) return a.resuelta ? 1 : -1;
+    return vencimientoSlaMs(a) - vencimientoSlaMs(b);
   }), [estadoRealFiltro, gravedadFiltro, incidencias, origen, responsableFiltro, responsables, severidadFiltro, tipo]);
 
   const kpis = useMemo(() => {
@@ -859,7 +871,12 @@ export default function PaginaIncidenciasAdmin() {
         </AdminPanel>
       </section>
 
-      <section className="mt-6 grid gap-4">
+      <section className="mt-6" aria-label="Resultados de incidencias">
+        <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+          <h2 className="font-display text-base font-semibold text-ink">Casos priorizados por vencimiento de SLA</h2>
+          <span className="font-body text-sm font-medium text-[#536982] dark:text-[#c1cedd]" aria-live="polite">{visibles.length} caso{visibles.length === 1 ? "" : "s"} en esta vista</span>
+        </div>
+        <div className="grid gap-4">
         {cargando && <AdminLoadingState label="Cargando incidencias" />}
         {!cargando && visibles.length === 0 && <EmptyIncidencias onLimpiar={limpiarFiltros} onHistorial={verHistorialCompleto} />}
         {!cargando && visibles.map((incidencia) => (
@@ -877,6 +894,7 @@ export default function PaginaIncidenciasAdmin() {
             esDemo={esDemo}
           />
         ))}
+        </div>
       </section>
     </main>
   );

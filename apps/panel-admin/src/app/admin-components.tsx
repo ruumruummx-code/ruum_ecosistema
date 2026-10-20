@@ -307,10 +307,15 @@ export function AdminTooltip({ label, children }: { label: string; children: Rea
 }
 
 export function AdminEmptyState({ title, description, action }: { title: string; description?: string; action?: ReactNode }) {
+  const titleId = useId();
+  const descriptionId = useId();
   return (
-    <section className="rounded-card border border-dashed border-border-default px-6 py-10 text-center" aria-live="polite">
-      <h2 className="font-display text-lg font-semibold text-ink">{title}</h2>
-      {description && <p className="mx-auto mt-2 max-w-md font-body text-sm text-text-secondary">{description}</p>}
+    <section className="admin-empty-state rounded-card border border-dashed border-border-default px-6 py-10 text-center" aria-live="polite" aria-labelledby={titleId} aria-describedby={description ? descriptionId : undefined}>
+      <span className="admin-empty-state__icon mx-auto mb-4 grid size-12 place-items-center rounded-full" aria-hidden="true">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M8 6h13M8 12h13M8 18h13"/><path d="M3 6h.01M3 12h.01M3 18h.01"/></svg>
+      </span>
+      <h2 id={titleId} className="font-display text-lg font-semibold text-ink">{title}</h2>
+      {description && <p id={descriptionId} className="mx-auto mt-2 max-w-md font-body text-sm text-text-secondary">{description}</p>}
       {action && <div className="mt-5 flex justify-center">{action}</div>}
     </section>
   );

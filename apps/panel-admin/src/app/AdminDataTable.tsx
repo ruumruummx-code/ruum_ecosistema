@@ -90,6 +90,7 @@ export function AdminDataTable<T>({
   }, [rows.length, sort?.columnId, sort?.direction, pageSize]);
 
   const columnasVisibles = columns.filter((column) => visibleColumns.has(column.id));
+  const totalColumnas = 1 + columnasVisibles.length + (rowActions.length > 0 ? 1 : 0);
   const sortedRows = useMemo(() => {
     if (!sort) return rows;
     const column = columns.find((item) => item.id === sort.columnId);
@@ -180,11 +181,12 @@ export function AdminDataTable<T>({
           {partialError}
         </div>
       )}
+      <div className="admin-table-scroll">
       <table>
         <caption className="sr-only">{caption}</caption>
         <thead>
           <tr>
-            <th className="w-12 px-4 py-3">
+            <th scope="col" className="w-12 px-4 py-3">
               <input type="checkbox" checked={allPageSelected} onChange={togglePage} aria-label="Seleccionar página actual" />
             </th>
             {columnasVisibles.map((column) => {
@@ -204,10 +206,10 @@ export function AdminDataTable<T>({
         </thead>
         <tbody>
           {loading ? (
-            <tr><td colSpan={columnasVisibles.length + 2} className="px-4 py-8 text-center text-text-tertiary">Cargando...</td></tr>
+            <tr><td colSpan={totalColumnas} className="px-4 py-8 text-center text-text-secondary">Cargando registros…</td></tr>
           ) : pageRows.length === 0 ? (
             <tr>
-              <td colSpan={columnasVisibles.length + 2} className="px-4 py-10 text-center text-text-tertiary">
+              <td colSpan={totalColumnas} className="px-4 py-10 text-center text-text-secondary">
                 <div className="mx-auto grid max-w-md gap-3">
                   <div className="mx-auto flex size-12 items-center justify-center rounded-full border border-status-info/25 bg-status-info-soft font-display text-lg font-semibold text-status-info" aria-hidden="true">
                     0
@@ -257,6 +259,7 @@ export function AdminDataTable<T>({
           })}
         </tbody>
       </table>
+      </div>
       {!hidePagination && (
       <div className="flex flex-wrap items-center justify-between gap-3 border-t border-ink/10 px-4 py-3">
         <label className="font-body text-sm text-text-secondary">
