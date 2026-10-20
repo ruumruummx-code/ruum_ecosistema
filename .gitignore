@@ -30,13 +30,15 @@ backups/
 **/google-services.json
 !**/google-services.json.example
 
+
 # Android nativo — Ruum Ruum Conductor
 apps/app-conductor-native/.gradle/
 apps/app-conductor-native/app/.gradle/
 apps/app-conductor-native/app/build/
 apps/app-conductor-native/build/
 apps/app-conductor-native/local.properties
-
+**/local.properties
+apps/app-conductor-native/**/local.properties
 # Artefactos de trabajo, logs locales y scratch (H7)
 work/
 scratch/
