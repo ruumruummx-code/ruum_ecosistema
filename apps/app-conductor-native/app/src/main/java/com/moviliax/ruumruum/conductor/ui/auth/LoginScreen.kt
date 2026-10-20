@@ -362,61 +362,57 @@ private fun LoginField(
     trailingIcon: (@Composable () -> Unit)? = null,
 ) {
     val interactionSource = remember { MutableInteractionSource() }
-    val focusRequester = remember { FocusRequester() }
     val focused by interactionSource.collectIsFocusedAsState()
     val shape = RoundedCornerShape(InputRadius)
 
-    Row(
-        modifier
-            .fillMaxWidth()
-            .heightIn(min = 64.dp)
-            .clip(shape)
-            .background(RuumTokens.White)
-            .border(1.dp, if (focused) BrandBlue else FieldBorder, shape)
-            .pointerInput(Unit) {
-                detectTapGestures { focusRequester.requestFocus() }
-            }
-            .padding(start = RuumTokens.Space16, end = if (trailingIcon == null) RuumTokens.Space16 else 0.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Icon(icon, contentDescription = null, modifier = Modifier.size(24.dp), tint = FieldIcon)
-        Spacer(Modifier.width(RuumTokens.Space16))
-        Column(Modifier.weight(1f).padding(vertical = 10.dp)) {
-            Text(
-                label,
-                style = MaterialTheme.typography.labelSmall.copy(fontSize = 12.sp),
-                color = Navy,
-                maxLines = 1,
-            )
-            Spacer(Modifier.height(2.dp))
-            Box(Modifier.heightIn(min = 24.dp), contentAlignment = Alignment.CenterStart) {
-                if (value.isEmpty()) {
+    BasicTextField(
+        value = value,
+        onValueChange = onValueChange,
+        modifier = modifier.fillMaxWidth().semantics { contentDescription = label },
+        textStyle = MaterialTheme.typography.bodyLarge.copy(color = Navy),
+        singleLine = true,
+        keyboardOptions = keyboardOptions,
+        keyboardActions = keyboardActions,
+        visualTransformation = visualTransformation,
+        cursorBrush = SolidColor(BrandBlue),
+        interactionSource = interactionSource,
+        decorationBox = { innerTextField ->
+            Row(
+                Modifier
+                    .fillMaxWidth()
+                    .heightIn(min = 64.dp)
+                    .clip(shape)
+                    .background(RuumTokens.White)
+                    .border(1.dp, if (focused) BrandBlue else FieldBorder, shape)
+                    .padding(start = RuumTokens.Space16, end = if (trailingIcon == null) RuumTokens.Space16 else 0.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Icon(icon, contentDescription = null, modifier = Modifier.size(24.dp), tint = FieldIcon)
+                Spacer(Modifier.width(RuumTokens.Space16))
+                Column(Modifier.weight(1f).padding(vertical = 10.dp)) {
                     Text(
-                        placeholder,
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = Muted,
+                        label,
+                        style = MaterialTheme.typography.labelSmall.copy(fontSize = 12.sp),
+                        color = Navy,
                         maxLines = 1,
                     )
+                    Spacer(Modifier.height(2.dp))
+                    Box(Modifier.heightIn(min = 24.dp), contentAlignment = Alignment.CenterStart) {
+                        if (value.isEmpty()) {
+                            Text(
+                                placeholder,
+                                style = MaterialTheme.typography.bodyLarge,
+                                color = Muted,
+                                maxLines = 1,
+                            )
+                        }
+                        innerTextField()
+                    }
                 }
-                BasicTextField(
-                    value = value,
-                    onValueChange = onValueChange,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .focusRequester(focusRequester)
-                        .semantics { contentDescription = label },
-                    textStyle = MaterialTheme.typography.bodyLarge.copy(color = Navy),
-                    singleLine = true,
-                    keyboardOptions = keyboardOptions,
-                    keyboardActions = keyboardActions,
-                    visualTransformation = visualTransformation,
-                    cursorBrush = SolidColor(BrandBlue),
-                    interactionSource = interactionSource,
-                )
+                trailingIcon?.invoke()
             }
-        }
-        trailingIcon?.invoke()
-    }
+        },
+    )
 }
 
 @Composable

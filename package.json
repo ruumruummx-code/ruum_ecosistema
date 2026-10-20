@@ -57,7 +57,7 @@
     "@types/node": "^22.10.0",
     "@vitest/ui": "3.2.6",
     "eslint-plugin-jsx-a11y": "^6.10.2",
-    "turbo": "^2.10.5",
+    "turbo": "^2.11.9",
     "typescript": "^5.7.2",
     "vitest": "3.2.6"
   },
