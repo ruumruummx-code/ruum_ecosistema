@@ -577,6 +577,28 @@ export async function iniciarVerificacionDidit(cliente: Cliente, solicitudId: st
   return { url: urlFinal, sessionId: respuesta?.session_id };
 }
 
+/**
+ * Consulta el estado de la verificación Didit de una solicitud de conductor.
+ * Se usa para polling periódico cuando el modal está abierto.
+ */
+export async function obtenerEstadoVerificacionDiditConductor(cliente: Cliente, solicitudId: string) {
+  const { data: sesion } = await cliente.auth.getUser();
+  if (!sesion.user) return null;
+
+  let consulta = cliente
+    .from("verificaciones_identidad_didit")
+    .select("id, session_id, workflow_id, estado, decision, procesado_en, creado_en")
+    .eq("solicitud_id", solicitudId);
+
+  const { data, error } = await consulta.order("creado_en", { ascending: false }).limit(1).maybeSingle();
+
+  if (error) {
+    console.error("Error consultando verificación Didit del conductor", error.message);
+    return null;
+  }
+  return data;
+}
+
 export type PerfilConductorActualizable = {
   nombre: string;
   telefono: string;

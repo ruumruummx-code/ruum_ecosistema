@@ -19,11 +19,9 @@ function esUrlDiditValida(url: string | null | undefined): url is string {
   if (!trimmed.startsWith("https://")) return false;
   try {
     const parsed = new URL(trimmed);
-    return (
-      parsed.hostname === "verify.didit.me" ||
-      parsed.hostname.endsWith(".didit.me") ||
-      parsed.hostname === "didit.me"
-    );
+    // Solo verificar.didit.me es el dominio oficial de Didit para el iframe.
+    // No se permiten subdominios genéricos para evitar redirecciones no autorizadas.
+    return parsed.hostname === "verify.didit.me";
   } catch {
     return false;
   }
@@ -139,6 +137,12 @@ export function DiditVerificationModal({
               </button>
             </div>
             <div className="relative h-[440px] sm:h-[520px] w-full bg-black/5">
+              {/*
+                Nota de seguridad: El sandbox del iframe es permisivo porque Didit
+                requiere allow-scripts + allow-same-origin para funcionar correctamente.
+                La URL se valida previamente para asegurar que solo se carga
+                contenido desde verify.didit.me.
+              */}
               <iframe
                 ref={iframeRef}
                 src={url}
@@ -146,6 +150,7 @@ export function DiditVerificationModal({
                 title="Verificación de identidad Didit"
                 allow="camera; microphone; geolocation; fullscreen; accelerometer; gyroscope; display-capture; autoplay"
                 sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox allow-modals allow-top-navigation allow-top-navigation-by-user-activation"
+                referrerpolicy="strict-origin-when-cross-origin"
               />
             </div>
             <div className="p-3 bg-surface border-t border-border flex flex-col sm:flex-row items-center justify-between gap-2">

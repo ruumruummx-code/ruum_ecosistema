@@ -179,16 +179,15 @@ Deno.serve(async (req) => {
     return json({ error: "Servicio temporalmente no disponible." }, 503);
   }
 
-  /* CORRECCIÓN: el `callback` es el webhook server-to-server donde Didit
-     publica el resultado. Si no apunta a .../functions/v1/webhook-didit, la
-     verificación queda en `pendiente` para siempre aunque el usuario complete
-     Didit (el frontend solo hace polling a la BD). No se bloquea para no romper
-     entornos de prueba, pero se deja traza observable. */
+  /* El `callback` es el webhook server-to-server donde Didit publica el
+     resultado. Si no apunta a .../functions/v1/webhook-didit, la verificación
+     queda en `pendiente` para siempre aunque el usuario complete Didit.
+     Se bloquea la creación de la sesión para evitar estados huérfanos. */
   if (!callbackUrl || !callbackUrl.includes("/functions/v1/webhook-didit")) {
-    console.warn(
-      "iniciar-verificacion-didit: DIDIT_CALLBACK_URL no apunta al webhook-didit; " +
-      "Didit no podrá notificar el resultado y la sesión quedará en pendiente.",
+    console.error(
+      "iniciar-verificacion-didit: DIDIT_CALLBACK_URL no apunta al webhook-didit",
     );
+    return json({ error: "Servicio de verificación no configurado correctamente." }, 503);
   }
 
   let portraitImage: string | null = null;

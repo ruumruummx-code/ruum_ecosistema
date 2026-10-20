@@ -17,6 +17,7 @@ import {
   iniciarSolicitudConductor,
   iniciarVerificacionDidit,
   obtenerConductorActual,
+  obtenerEstadoVerificacionDiditConductor,
   obtenerSolicitudConductorActual,
   registrarConsentimientosConductor,
   type ExpedienteSolicitudConductorV2,
@@ -870,6 +871,49 @@ export default function PaginaRegistroConductor() {
     setErrorVerificacionDidit(null);
     router.push(sesionActivaTrasRegistro ? "/panel" : "/login");
   }
+
+  // Polling de estado de verificación Didit: se ejecuta mientras el modal
+  // está abierto y la URL ya está cargada. Si la verificación pasa a estado
+  // terminal (aprobado/rechazado), se cierra el modal automáticamente.
+  useEffect(() => {
+    if (!mostrarVerificacionDidit || !urlVerificacionDidit) return;
+
+    const solicitudId = solicitudRemotaIdRef.current ?? solicitudRemotaId;
+    if (!solicitudId) return;
+
+    let cancelado = false;
+    let timer: ReturnType<typeof setTimeout>;
+
+    const verificar = async () => {
+      try {
+        const cliente = crearClienteNavegador();
+        const estado = await obtenerEstadoVerificacionDiditConductor(cliente, solicitudId);
+        if (cancelado) return;
+
+        if (estado && ["aprobado", "rechazado", "error", "expirado", "cancelado"].includes(estado.estado)) {
+          // Estado terminal: cerrar modal y redirigir
+          setMostrarVerificacionDidit(false);
+          setUrlVerificacionDidit(null);
+          registrarTelemetria("didit_completado", PASOS_REGISTRO.length, "polling");
+          router.push(sesionActivaTrasRegistro ? "/panel" : "/login");
+          return;
+        }
+
+        // Seguir consultando en 3 segundos
+        timer = setTimeout(verificar, 3000);
+      } catch {
+        // En caso de error, reintentar en 5 segundos
+        timer = setTimeout(verificar, 5000);
+      }
+    };
+
+    verificar();
+
+    return () => {
+      cancelado = true;
+      clearTimeout(timer);
+    };
+  }, [mostrarVerificacionDidit, urlVerificacionDidit, solicitudRemotaId, sesionActivaTrasRegistro, router]);
 
   function reintentarVerificacionDidit() {
     const id = solicitudRemotaIdRef.current ?? solicitudRemotaId;

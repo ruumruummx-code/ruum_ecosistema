@@ -29,16 +29,22 @@ describe("drivers mi-solicitud (Fase 6)", () => {
   });
 
   it("lista documentos y consentimientos", async () => {
-    const docs = [{ tipo: "licencia_frente", estado: "aprobado", es_actual: true }];
+    const docs = [{ tipo: "licencia_frente", estado: "aprobado", es_actual: true, url: "ruta/privada.jpg" }];
     const cons = [{ tipo_documento: "aviso", aceptado_en: "2026-01-01" }];
+    const createSignedUrl = vi.fn().mockResolvedValue({ data: { signedUrl: "https://firmada.test/doc.jpg" }, error: null });
     const clienteDocs = {
       from: vi.fn().mockReturnValue({
         select: vi.fn().mockReturnValue({
           eq: vi.fn().mockReturnValue({ eq: vi.fn().mockResolvedValue({ data: docs, error: null }) })
         })
-      })
+      }),
+      storage: {
+        from: vi.fn().mockReturnValue({ createSignedUrl })
+      }
     };
-    await expect(listarDocumentosSolicitud(clienteDocs as never, "s")).resolves.toEqual(docs);
+    await expect(listarDocumentosSolicitud(clienteDocs as never, "s")).resolves.toEqual([
+      { ...docs[0], url: "https://firmada.test/doc.jpg" }
+    ]);
     const clienteCons = {
       from: vi.fn().mockReturnValue({
         select: vi.fn().mockReturnValue({

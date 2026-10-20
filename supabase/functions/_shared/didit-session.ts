@@ -3,6 +3,10 @@
 
 const DIDIT_HOST = "verify.didit.me";
 const DIDIT_SESSION_PATH = "/v3/session/";
+// Nota: La API de Didit para crear sesiones usa verification.didit.me,
+// mientras que el iframe del frontend se sirve desde verify.didit.me.
+// Ambos dominios son válidos y están en la allowlist de CSP.
+const DIDIT_API_HOST = "verification.didit.me";
 const MAX_RETRATO_BYTES = 2 * 1024 * 1024;
 const MIME_RETRATO_PERMITIDOS = new Set([
   "image/jpeg",
@@ -17,7 +21,7 @@ function esRegistro(valor: unknown): valor is Registro {
 }
 
 export function urlSesionDidit(): string {
-  return `https://verification.didit.me${DIDIT_SESSION_PATH}`;
+  return `https://${DIDIT_API_HOST}${DIDIT_SESSION_PATH}`;
 }
 
 /**
