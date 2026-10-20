@@ -3,6 +3,7 @@ package com.moviliax.ruumruum.conductor.ui.auth
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.layout.Arrangement
@@ -58,9 +59,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusDirection
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
@@ -358,6 +362,7 @@ private fun LoginField(
     trailingIcon: (@Composable () -> Unit)? = null,
 ) {
     val interactionSource = remember { MutableInteractionSource() }
+    val focusRequester = remember { FocusRequester() }
     val focused by interactionSource.collectIsFocusedAsState()
     val shape = RoundedCornerShape(InputRadius)
 
@@ -368,6 +373,9 @@ private fun LoginField(
             .clip(shape)
             .background(RuumTokens.White)
             .border(1.dp, if (focused) BrandBlue else FieldBorder, shape)
+            .pointerInput(Unit) {
+                detectTapGestures { focusRequester.requestFocus() }
+            }
             .padding(start = RuumTokens.Space16, end = if (trailingIcon == null) RuumTokens.Space16 else 0.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -393,7 +401,10 @@ private fun LoginField(
                 BasicTextField(
                     value = value,
                     onValueChange = onValueChange,
-                    modifier = Modifier.fillMaxWidth().semantics { contentDescription = label },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .focusRequester(focusRequester)
+                        .semantics { contentDescription = label },
                     textStyle = MaterialTheme.typography.bodyLarge.copy(color = Navy),
                     singleLine = true,
                     keyboardOptions = keyboardOptions,
