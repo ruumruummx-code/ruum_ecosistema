@@ -155,6 +155,7 @@ export default function PaginaRegistroConductor() {
   const [enviado, setEnviado] = useState(false);
   const [sesionActivaTrasRegistro, setSesionActivaTrasRegistro] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [errorRecuperable, setErrorRecuperable] = useState(false);
   const [mostrarDetalleConsentimiento, setMostrarDetalleConsentimiento] = useState(false);
   const [sesionAutenticada,setSesionAutenticada]=useState(false);
   const [solicitudRemotaId,setSolicitudRemotaId]=useState<string|null>(null);
@@ -608,6 +609,7 @@ export default function PaginaRegistroConductor() {
 
     setEnviando(true);
     setError(null);
+    setErrorRecuperable(false);
     let cuentaCreada = sesionAutenticada;
 
     try {
@@ -623,7 +625,26 @@ export default function PaginaRegistroConductor() {
       setEnviado(true);
     } catch (err) {
       if (cuentaCreada) registrarTelemetria("rpc_error", paso + 1, "enviar_solicitud");
+      setErrorRecuperable(true);
       setError(cuentaCreada ? traducirErrorOperativo(err, "No pudimos enviar tu solicitud. Tu cuenta quedó creada y puedes reintentar.") : traducirErrorAuth(err));
+    } finally {
+      setEnviando(false);
+    }
+  }
+
+  async function reintentarEnvio() {
+    setEnviando(true);
+    setError(null);
+    setErrorRecuperable(false);
+    try {
+      const cliente = crearClienteNavegador();
+      setSesionActivaTrasRegistro(true);
+      await procesarSolicitudAutenticada(cliente);
+      limpiarBorradorRegistroLocal();
+      setEnviado(true);
+    } catch (err) {
+      setErrorRecuperable(true);
+      setError(traducirErrorOperativo(err, "No pudimos reintentar el envío. Inténtalo de nuevo."));
     } finally {
       setEnviando(false);
     }
@@ -1196,7 +1217,25 @@ export default function PaginaRegistroConductor() {
                 />
               )}
 
-              {registroCompacto ? <RegistrationNotice message={!tieneSupabaseConfigurado() ? "Registro no disponible. Inténtalo más tarde." : error || Object.values(erroresCampos).find(Boolean) || (estadoGuardadoRemoto === "error" ? detalleGuardadoRemoto : null)} /> : error && <Aviso tono="danger">{error}</Aviso>}
+              {registroCompacto ? <RegistrationNotice message={!tieneSupabaseConfigurado() ? "Registro no disponible. Inténtalo más tarde." : error || Object.values(erroresCampos).find(Boolean) || (estadoGuardadoRemoto === "error" ? detalleGuardadoRemoto : null)} /> : error && (
+                <div className="space-y-4">
+                  <Aviso tono="danger">{error}</Aviso>
+                  {errorRecuperable && (
+                    <div className="flex flex-col sm:flex-row gap-3">
+                      <Button onClick={reintentarEnvio} loading={enviando} disabled={enviando} className="flex-1">
+                        Reintentar envío
+                      </Button>
+                      <Button variant="secondary" onClick={() => {
+                        setError(null);
+                        setErrorRecuperable(false);
+                        router.push(sesionActivaTrasRegistro ? "/panel" : "/login");
+                      }} disabled={enviando} className="flex-1">
+                        {sesionActivaTrasRegistro ? "Ir al panel" : "Volver al acceso"}
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              )}
 
               {paso === PASOS_REGISTRO.length - 1 && !puedeEnviar && (
                 <Aviso tono="atencion">
