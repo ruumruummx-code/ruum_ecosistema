@@ -19,9 +19,11 @@ function esUrlDiditValida(url: string | null | undefined): url is string {
   if (!trimmed.startsWith("https://")) return false;
   try {
     const parsed = new URL(trimmed);
-    // Solo verificar.didit.me es el dominio oficial de Didit para el iframe.
-    // No se permiten subdominios genéricos para evitar redirecciones no autorizadas.
-    return parsed.hostname === "verify.didit.me";
+    // Didit usa dos dominios oficiales:
+    // - verify.didit.me: para el iframe del frontend
+    // - verification.didit.me: para la API y URLs de sesión
+    // Ambos son válidos y están en la allowlist de CSP.
+    return parsed.hostname === "verify.didit.me" || parsed.hostname === "verification.didit.me";
   } catch {
     return false;
   }
