@@ -1,51 +1,35 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import Image from "next/image";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Button, Card } from "@ruum/ui";
-import {
-  contarNotificacionesNoLeidas,
-  listarNotificacionesConductor,
-  marcarNotificacionLeida,
-  type NotificacionConductor
-} from "@ruum/api/drivers";
+import { listarNotificacionesConductor, marcarNotificacionLeida, type NotificacionConductor } from "@ruum/api/drivers";
 import { crearClienteNavegador } from "../../lib/supabase-browser";
-
-type Notificacion = NotificacionConductor;
+import styles from "./notifications.module.css";
 
 type FiltroTab = "todas" | "no_leidas" | "leidas";
 
-function obtenerEstiloCategoria(tipo: string): { etiqueta: string; clase: string } {
-  const t = tipo.toLowerCase();
-  if (t.includes("seguridad") || t.includes("emergencia") || t.includes("alerta")) {
-    return { etiqueta: "Seguridad", clase: "conductor-feedback conductor-feedback-error" };
-  }
-  if (t.includes("pago") || t.includes("ganancia") || t.includes("deposito")) {
-    return { etiqueta: "Ganancias", clase: "conductor-feedback conductor-feedback-success" };
-  }
-  if (t.includes("viaje") || t.includes("traslado") || t.includes("asignaci")) {
-    return { etiqueta: "Operativo", clase: "conductor-feedback conductor-feedback-info" };
-  }
-  if (t.includes("docu") || t.includes("expediente") || t.includes("licencia")) {
-    return { etiqueta: "Documentos", clase: "conductor-feedback conductor-feedback-warning" };
-  }
-  return { etiqueta: "Aviso", clase: "conductor-feedback conductor-feedback-info" };
-}
+const tabs: { id: FiltroTab; label: string }[] = [
+  { id: "todas", label: "Todas" },
+  { id: "no_leidas", label: "Sin leer" },
+  { id: "leidas", label: "Leídas" }
+];
 
 export default function CentroNotificaciones() {
-  const [items, setItems] = useState<Notificacion[]>([]);
+  const router = useRouter();
+  const [items, setItems] = useState<NotificacionConductor[]>([]);
   const [cargando, setCargando] = useState(true);
   const [filtro, setFiltro] = useState<FiltroTab>("todas");
-  const [procesandoBulk, setProcesandoBulk] = useState(false);
-  const router = useRouter();
 
   const cargar = useCallback(async () => {
     try {
       setItems(await listarNotificacionesConductor(crearClienteNavegador(), 100));
     } catch {
-      /* conservar lo último cargado ante fallos transitorios */
+      // La pantalla conserva el último estado disponible ante un fallo transitorio.
+    } finally {
+      setCargando(false);
     }
-    setCargando(false);
   }, []);
 
   useEffect(() => {
@@ -55,204 +39,66 @@ export default function CentroNotificaciones() {
     return () => window.removeEventListener("ruum:notificaciones-actualizar", actualizar);
   }, [cargar]);
 
-  async function abrir(item: Notificacion) {
+  const noLeidas = items.filter((item) => !item.leida_en);
+  const leidas = items.filter((item) => Boolean(item.leida_en));
+  const visibles = filtro === "no_leidas" ? noLeidas : filtro === "leidas" ? leidas : items;
+
+  async function abrir(item: NotificacionConductor) {
     try {
       await marcarNotificacionLeida(crearClienteNavegador(), item.id);
     } catch {
-      /* el acuse reintentará en la próxima carga */
+      // El aviso se volverá a sincronizar en la próxima carga.
     }
-    setItems((actuales) =>
-      actuales.map((n) => (n.id === item.id ? { ...n, leida_en: n.leida_en ?? new Date().toISOString() } : n))
-    );
+    setItems((actuales) => actuales.map((actual) => actual.id === item.id ? { ...actual, leida_en: actual.leida_en ?? new Date().toISOString() } : actual));
     router.push(item.destino);
   }
 
-  async function marcarTodasComoLeidas() {
-    const sinLeer = items.filter((item) => !item.leida_en);
-    if (sinLeer.length === 0) return;
-    setProcesandoBulk(true);
-    try {
-      const cliente = crearClienteNavegador();
-      for (const item of sinLeer) {
-        await marcarNotificacionLeida(cliente, item.id);
-      }
-      const ahora = new Date().toISOString();
-      setItems((actuales) => actuales.map((n) => ({ ...n, leida_en: n.leida_en ?? ahora })));
-    } catch {
-      /* ignorar fallos transitorios */
-    } finally {
-      setProcesandoBulk(false);
-    }
-  }
-
-  const noLeidas = items.filter((item) => !item.leida_en);
-  const leidas = items.filter((item) => Boolean(item.leida_en));
-
-  const itemsFiltrados = items.filter((item) => {
-    if (filtro === "no_leidas") return !item.leida_en;
-    if (filtro === "leidas") return Boolean(item.leida_en);
-    return true;
-  });
+  const contador = (tab: FiltroTab) => tab === "no_leidas" ? noLeidas.length : tab === "leidas" ? leidas.length : items.length;
+  const esVacio = !cargando && visibles.length === 0;
 
   return (
-    <div className="mx-auto grid w-full max-w-3xl gap-6 px-4 py-8 sm:px-6 sm:py-12">
-      {/* Encabezado — Brand Book p.22: título Montserrat Bold, subtítulo Inter, línea ruta */}
-      <header className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <p className="font-body text-xs font-bold uppercase tracking-widest text-text-tertiary">
-            Ruum Ruum · Seguridad · Evidencia · Trazabilidad
-          </p>
-          <h1 className="mt-1 font-display text-2xl font-bold tracking-tight text-text-primary sm:text-3xl">
-            Notificaciones y Avisos
-          </h1>
-          <p className="mt-1 font-body text-sm text-text-secondary">
-            Tus avisos y alertas operativas permanecen guardados en este centro.
-          </p>
-          <div className="conductor-ruta-divider mt-3 max-w-[280px]" aria-hidden />
-        </div>
-
-        {/* 3. Acciones Globales en Bloque */}
-        {noLeidas.length > 0 && (
-          <button
-            type="button"
-            onClick={() => void marcarTodasComoLeidas()}
-            disabled={procesandoBulk}
-            className="inline-flex shrink-0 items-center justify-center gap-1.5 rounded-xl border border-border bg-surface px-4 py-2.5 font-display text-xs font-bold text-text-primary shadow-xs transition hover:border-signal hover:bg-surface-elevated active:scale-95 disabled:opacity-50"
-          >
-            ✓ {procesandoBulk ? "Actualizando..." : "Marcar todas como leídas"}
-          </button>
-        )}
+    <div className={styles.screen}>
+      <header className={styles.appBar}>
+        <Link href="/panel" aria-label="Ruum Ruum, inicio" className={styles.brand}><Image src="/imagenes/ruum-logo.svg" alt="Ruum Ruum" width={170} height={55} priority /></Link>
+        <Link href="/cuenta" className={styles.profile} aria-label="Abrir cuenta"><svg width="27" height="27" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round"><circle cx="12" cy="8" r="3.6" /><path d="M4.5 20c0-3.7 3.3-6.2 7.5-6.2s7.5 2.5 7.5 6.2" /></svg></Link>
       </header>
 
-      {/* 2. Pestañas de Filtro (Tabs) y Contadores Dinámicos */}
-      <div className="border-b border-border/40">
-        <nav className="-mb-px flex space-x-2 sm:space-x-6" aria-label="Filtro de notificaciones">
-          {[
-            { id: "todas" as FiltroTab, etiqueta: "Todas", contador: items.length },
-            { id: "no_leidas" as FiltroTab, etiqueta: "Sin leer", contador: noLeidas.length, destacada: noLeidas.length > 0 },
-            { id: "leidas" as FiltroTab, etiqueta: "Leídas", contador: leidas.length }
-          ].map((tab) => {
+      <main className={styles.content}>
+        <section className={styles.heading} aria-labelledby="titulo-notificaciones">
+          <h1 id="titulo-notificaciones">Notificaciones y Avisos</h1>
+          <p>Tus avisos y alertas operativas permanecen guardados en este centro.</p>
+        </section>
+
+        <nav className={styles.tabs} aria-label="Filtros de notificaciones">
+          {tabs.map((tab) => {
             const activa = filtro === tab.id;
-            return (
-              <button
-                key={tab.id}
-                type="button"
-                onClick={() => setFiltro(tab.id)}
-                className={[
-                  "inline-flex items-center gap-2 border-b-2 px-3 py-3 font-display text-sm font-bold transition-all",
-                  activa
-                    ? "border-route-action text-route-action"
-                    : "border-transparent text-text-tertiary hover:border-border hover:text-text-primary"
-                ].join(" ")}
-              >
-                {tab.etiqueta}
-                <span
-                  className={[
-                    "inline-flex items-center justify-center rounded-full px-2 py-0.5 font-mono-ruum text-xs font-bold transition-colors",
-                    tab.destacada
-                      ? "motion-safe:animate-pulse"
-                      : activa
-                      ? "bg-surface-elevated text-text-primary border border-border"
-                      : "bg-surface-elevated/50 text-text-tertiary"
-                  ].join(" ")}
-                  style={tab.destacada ? { background: "var(--ruum-gradient-cta)", color: "var(--ruum-on-primary, #061529)" } : undefined}
-                >
-                  {tab.contador}
-                </span>
-              </button>
-            );
+            return <button key={tab.id} type="button" onClick={() => setFiltro(tab.id)} aria-pressed={activa} className={activa ? styles.activeTab : undefined}><span>{tab.label}</span><strong>{contador(tab.id)}</strong></button>;
           })}
         </nav>
-      </div>
 
-      {/* Contenido Principal */}
-      {cargando ? (
-        <div className="py-12 text-center font-body text-sm text-text-tertiary">
-          Cargando tus notificaciones...
-        </div>
-      ) : itemsFiltrados.length === 0 ? (
-        /* 1. Estado Vacío Cálido y Visual (Empty State) */
-        <div className="flex flex-col items-center justify-center py-16 px-4 text-center">
-          <div className="flex size-20 items-center justify-center rounded-full border border-border/60 bg-surface-elevated font-display text-4xl shadow-sm mb-4">
-            ✨
-          </div>
-          <h2 className="font-display text-xl font-bold text-text-primary">
-            ¡Todo al día!
-          </h2>
-          <p className="mt-2 max-w-sm font-body text-sm leading-6 text-text-tertiary">
-            {filtro === "no_leidas"
-              ? "No tienes avisos pendientes por leer. Puedes consultar tu historial en la pestaña 'Leídas'."
-              : "Aquí aparecerán tus próximos avisos de servicio, ganancias y alertas operativas."}
-          </p>
-        </div>
-      ) : (
-        /* Lista de Tarjetas con Categorización Visual Anticipada */
-        <section className="grid gap-3.5" aria-label="Lista de notificaciones">
-          {itemsFiltrados.map((item) => {
-            const estiloCat = obtenerEstiloCategoria(item.tipo);
-            const esNoLeida = !item.leida_en;
+        {esVacio ? (
+          <section className={styles.empty} aria-live="polite">
+            <div className={styles.sparkles} aria-hidden><span>✦</span><i>✦</i><b>✦</b></div>
+            <h2>¡Todo al día!</h2>
+            <p>{filtro === "no_leidas" ? "No tienes avisos pendientes por leer." : "Aquí aparecerán tus próximos avisos de servicio, ganancias y alertas operativas."}</p>
+          </section>
+        ) : cargando ? (
+          <section className={styles.empty} aria-busy="true"><div className={styles.sparkles} aria-hidden>⋯</div><p>Cargando avisos…</p></section>
+        ) : (
+          <section className={styles.list} aria-label="Lista de notificaciones">
+            {visibles.map((item) => <button key={item.id} type="button" onClick={() => void abrir(item)} className={styles.item}>
+              <span className={item.leida_en ? styles.readDot : styles.unreadDot} aria-hidden />
+              <span><strong>{item.titulo}</strong><small>{item.cuerpo}</small></span><span aria-hidden>›</span>
+            </button>)}
+          </section>
+        )}
+      </main>
 
-            return (
-              <Card
-                key={item.id}
-                className={[
-                  "transition-all duration-150 hover:border-signal/80",
-                  esNoLeida ? "border-border bg-surface shadow-sm" : "border-border/60 bg-surface/80"
-                ].join(" ")}
-              >
-                <div className="flex items-start justify-between gap-4">
-                  <div className="flex items-start gap-3.5 min-w-0">
-                    {/* Categoría visual: inicial + etiqueta (sin emoji, tokenizado) */}
-                    <div aria-hidden="true" className="flex size-10 shrink-0 items-center justify-center rounded-xl border border-border bg-surface-elevated font-display text-sm font-bold text-text-primary shadow-2xs">
-                      {estiloCat.etiqueta.slice(0, 1)}
-                    </div>
-
-                    <div className="min-w-0">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <span className="font-body text-xs font-bold uppercase tracking-wider text-text-tertiary">
-                          {estiloCat.etiqueta} • {new Date(item.creado_en).toLocaleString("es-MX", { dateStyle: "short", timeStyle: "short" })}
-                        </span>
-                        {esNoLeida && (
-                          <span style={{ color: "var(--ruum-on-primary, #061529)" }} className="rounded-full bg-signal px-2 py-0.5 font-body text-xs font-extrabold uppercase tracking-wider">
-                            Nueva
-                          </span>
-                        )}
-                      </div>
-
-                      <h3 className="mt-1 font-display text-base font-bold text-text-primary">
-                        {item.titulo}
-                      </h3>
-                      <p className="mt-1.5 font-body text-sm leading-6 text-text-secondary">
-                        {item.cuerpo}
-                      </p>
-                      <p className={`mt-2 rounded-lg px-2 py-1 font-body text-xs ${estiloCat.clase}`}>
-                        {estiloCat.etiqueta}
-                      </p>
-
-                      {item.entidad_tipo && (
-                        <p className="mt-2 font-mono-ruum text-xs text-text-tertiary">
-                          {item.entidad_tipo}
-                          {item.entidad_id ? ` · ${item.entidad_id.slice(0, 8)}` : ""}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-
-                  {esNoLeida && (
-                    <span role="status" aria-label="No leída" className="mt-1 h-3 w-3 shrink-0 rounded-full bg-signal shadow-xs motion-safe:animate-pulse" />
-                  )}
-                </div>
-
-                <div className="mt-4 flex justify-end">
-                  <Button variant="secondary" onClick={() => void abrir(item)}>
-                    Abrir aviso →
-                  </Button>
-                </div>
-              </Card>
-            );
-          })}
-        </section>
-      )}
+      <nav className={styles.bottomNav} aria-label="Navegación principal">
+        <Link href="/panel"><svg width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V10Z" /><path d="M9 21v-7h6v7" /></svg><span>Inicio</span></Link>
+        <Link href="/viajes"><svg width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d="m5 17 1.5-7h11L19 17" /><path d="M4 17h16v3H4zM8 10l1.3-3h5.4l1.3 3" /></svg><span>Traslados</span></Link>
+        <Link href="/cuenta"><svg width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><circle cx="12" cy="8" r="4" /><path d="M4 21c0-4 3.4-7 8-7s8 3 8 7" /></svg><span>Cuenta</span></Link>
+      </nav>
     </div>
   );
 }
