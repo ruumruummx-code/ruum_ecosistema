@@ -167,6 +167,7 @@ export default function PaginaRegistroConductor() {
   const ultimoGuardadoRemotoRef=useRef("");
   const solicitudRemotaIdRef=useRef<string|null>(null);
   const aceptadosEnRef=useRef(new Date().toISOString());
+  const aceptacionLegalAlEnviarRef=useRef(false);
 
   // Fase 4 — verificación por código (OTP) cuando Supabase exige confirmar el correo.
   const [pendienteOtp, setPendienteOtp] = useState(false);
@@ -253,7 +254,7 @@ export default function PaginaRegistroConductor() {
       if (cp.length === 5) void buscarCodigoPostal(cp);
     }
   });
-  const puedeEnviar = !enviando && !tieneErroresActivos && aceptaTerminos && confirmaPrivacidad && formularioCompleto();
+  const puedeEnviar = !enviando && !tieneErroresActivos && formularioCompleto();
 
   function setCampoError(campo: string, mensaje: string) {
     setErroresCampos((prev) => ({ ...prev, [campo]: mensaje }));
@@ -318,14 +319,14 @@ export default function PaginaRegistroConductor() {
     }
   }
 
-  function validarPaso(indice = paso, aceptaLicenciaAlContinuar = false) {
+  function validarPaso(indice = paso, aceptaLicenciaAlContinuar = false, aceptarLegalAlEnviar = false) {
     if (indice === 0) {
       return [
         validarTelefono("telefono", telefono, setTelefono),
         validarCampo("email", email),
         sesionAutenticada ? setCampoError("password", "") : validarPassword(),
         validarConfirmacion(),
-        setCampoError("aceptaTerminos", aceptaTerminos && confirmaPrivacidad ? "" : "Acepta los Términos y Condiciones y el Aviso de Privacidad para continuar.")
+        setCampoError("aceptaTerminos", (aceptaTerminos || aceptarLegalAlEnviar) && (confirmaPrivacidad || aceptarLegalAlEnviar) ? "" : "Acepta los Términos y Condiciones y el Aviso de Privacidad para continuar.")
       ].every(Boolean);
     }
     if (indice === 1) {
@@ -362,8 +363,8 @@ export default function PaginaRegistroConductor() {
       ].every(Boolean);
     }
     return [
-      setCampoError("aceptaTerminos", aceptaTerminos ? "" : "Debes aceptar los términos de servicio"),
-      setCampoError("confirmaPrivacidad", confirmaPrivacidad ? "" : "Debes confirmar que leíste el aviso de privacidad")
+      setCampoError("aceptaTerminos", aceptaTerminos || aceptarLegalAlEnviar ? "" : "Debes aceptar los términos de servicio"),
+      setCampoError("confirmaPrivacidad", confirmaPrivacidad || aceptarLegalAlEnviar ? "" : "Debes confirmar que leíste el aviso de privacidad")
     ].every(Boolean);
   }
 
@@ -410,8 +411,6 @@ export default function PaginaRegistroConductor() {
     if (!autorizaVerificacion) faltantes.push("autorizar la verificación de antecedentes");
     if (!declaraSinSuspensiones) faltantes.push("confirmar la declaración de suspensiones");
     if (!contactoEmergenciaNombre.trim() || !contactoEmergenciaTelefono.trim()) faltantes.push("tu contacto de emergencia");
-    if (!aceptaTerminos) faltantes.push("aceptar los términos y condiciones");
-    if (!confirmaPrivacidad) faltantes.push("confirmar el aviso de privacidad");
     return faltantes;
   }
 
@@ -449,8 +448,8 @@ export default function PaginaRegistroConductor() {
         curp: curp.trim().toUpperCase(),
         autoriza_verificacion_antecedentes: autorizaVerificacion,
         declara_sin_suspensiones: declaraSinSuspensiones,
-        acepta_terminos_servicio: aceptaTerminos,
-        confirma_aviso_privacidad: confirmaPrivacidad,
+        acepta_terminos_servicio: aceptaTerminos || aceptacionLegalAlEnviarRef.current,
+        confirma_aviso_privacidad: confirmaPrivacidad || aceptacionLegalAlEnviarRef.current,
         version_terminos_aceptada: 1,
         version_aviso_privacidad: 1,
         terminos_aceptados_en: aceptadosEn,
@@ -596,7 +595,7 @@ export default function PaginaRegistroConductor() {
 
   async function crearCuenta(e: FormEvent) {
     e.preventDefault();
-    const todoValido = PASOS_REGISTRO.every((_, indice) => validarPaso(indice));
+    const todoValido = PASOS_REGISTRO.every((_, indice) => validarPaso(indice, false, true));
     if (!todoValido) {
       const primerPasoConError = PASOS_REGISTRO.findIndex((_, indice) => !validarPaso(indice));
       setPaso(primerPasoConError >= 0 ? primerPasoConError : paso);
@@ -606,6 +605,11 @@ export default function PaginaRegistroConductor() {
       setError(" El registro no está disponible en este entorno.");
       return;
     }
+    // Presionar el botón final es la aceptación expresa indicada en el microcopy.
+    aceptacionLegalAlEnviarRef.current = true;
+    aceptadosEnRef.current = new Date().toISOString();
+    setAceptaTerminos(true);
+    setConfirmaPrivacidad(true);
 
     setEnviando(true);
     setError(null);
@@ -860,8 +864,8 @@ export default function PaginaRegistroConductor() {
     }
     const expediente=contratoExpediente();
     const consentimientos=[
-      aceptaTerminos?{tipoDocumento:"terminos_servicio" as const,version:1}:null,
-      confirmaPrivacidad?{tipoDocumento:"aviso_privacidad" as const,version:1}:null,
+      (aceptaTerminos || aceptacionLegalAlEnviarRef.current)?{tipoDocumento:"terminos_servicio" as const,version:1}:null,
+      (confirmaPrivacidad || aceptacionLegalAlEnviarRef.current)?{tipoDocumento:"aviso_privacidad" as const,version:1}:null,
       autorizaVerificacion?{tipoDocumento:"autorizacion_antecedentes" as const,version:1}:null,
       declaraSinSuspensiones?{tipoDocumento:"declaracion_suspensiones" as const,version:1}:null
     ].filter((valor):valor is NonNullable<typeof valor>=>valor!==null);
@@ -965,7 +969,7 @@ export default function PaginaRegistroConductor() {
     router.push(sesionActivaTrasRegistro ? "/panel" : "/login");
   }
 
-  const registroCompacto = (paso < 3 || pendienteOtp) && !enviado;
+  const registroCompacto = (paso < PASOS_REGISTRO.length || pendienteOtp) && !enviado;
   const cuentaCompleta = aceptaTerminos && confirmaPrivacidad
     && !validarCampoRegistroConductor("telefono", telefono)
     && !validarCampoRegistroConductor("email", email)
@@ -1189,7 +1193,6 @@ export default function PaginaRegistroConductor() {
                 <ReviewStep
                   telefono={telefono}
                   email={email}
-                  sesionAutenticada={sesionAutenticada}
                   nombreCompleto={nombreCompleto}
                   curp={curp}
                   calle={calle}
@@ -1207,12 +1210,6 @@ export default function PaginaRegistroConductor() {
                   declaraSinSuspensiones={declaraSinSuspensiones}
                   documentos={documentos}
                   documentosRemotos={documentosRemotos}
-                  aceptaTerminos={aceptaTerminos}
-                  setAceptaTerminos={setAceptaTerminos}
-                  confirmaPrivacidad={confirmaPrivacidad}
-                  setConfirmaPrivacidad={setConfirmaPrivacidad}
-                  erroresCampos={erroresCampos}
-                  limpiarErrorCampo={limpiarErrorCampo}
                   onEditar={setPaso}
                 />
               )}
@@ -1245,13 +1242,15 @@ export default function PaginaRegistroConductor() {
 
               {registroCompacto ? (
                 <footer className={styles.actionFooter}>
+                  {paso === 3 && <p className={styles.microcopy}>ⓘ Sube imágenes claras, completas y legibles.</p>}
+                  {paso === 4 && <p className={styles.microcopy}>Al presionar {sesionAutenticada ? "Enviar registro" : "Crear cuenta"}, confirmo que la información es correcta y acepto los <a href="/legal/terminos" target="_blank" rel="noopener noreferrer">Términos y Condiciones</a> y el <a href="/legal/privacidad" target="_blank" rel="noopener noreferrer">Aviso de Privacidad</a>.</p>}
                   {paso === 2 && <p className={styles.microcopy}>
                     Al continuar, declaras que tu licencia es válida y autorizas la verificación de antecedentes y datos biométricos. <a href="/legal/privacidad" target="_blank" rel="noopener noreferrer">Privacidad</a> · <a href="/legal/terminos" target="_blank" rel="noopener noreferrer">Términos</a>
                     <button type="button" className={styles.legalTrigger} onClick={() => setMostrarDetalleConsentimiento(true)}>Ver declaración</button>
                   </p>}
                   <button className={styles.primary} type="submit" aria-busy={enviando}
-                    disabled={!registroListo || enviando || !tieneSupabaseConfigurado() || (paso === 0 && !cuentaCompleta) || (paso === 1 && !domicilioYContactoCompletos)}>
-                    {!registroListo ? "Preparando…" : enviando ? "Guardando…" : paso === 0 && !sesionAutenticada ? "Crear cuenta y continuar" : paso === 1 ? "Guardar y continuar" : "Continuar"}
+                    disabled={!registroListo || enviando || !tieneSupabaseConfigurado() || (paso === 0 && !cuentaCompleta) || (paso === 1 && !domicilioYContactoCompletos) || (paso === 3 && !(documentoDisponible("licenciaFrente") && documentoDisponible("licenciaReverso") && documentoDisponible("identificacionOficial")))}>
+                    {!registroListo ? "Preparando…" : enviando ? "Guardando…" : paso === 0 && !sesionAutenticada ? "Crear cuenta y continuar" : paso === 1 ? "Guardar y continuar" : paso === 4 ? (sesionAutenticada ? "Enviar registro" : "Crear cuenta") : "Continuar"}
                     {paso < 2 && <RegistrationIcon name="arrow" />}
                   </button>
                   {paso === 0 && <p className={styles.accountLogin}>¿Ya tienes una cuenta? <Link href="/login">Entrar</Link></p>}

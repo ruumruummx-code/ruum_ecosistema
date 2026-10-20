@@ -96,6 +96,51 @@
 .sheetFooter button:disabled { opacity: .5; }
 .sheetError { margin: 0; color: var(--ruum-danger); font-size: 11px; line-height: 14px; }
 .legalDetails { max-width: 420px; margin: 0 auto; font-size: 12px; line-height: 18px; }
+.documentsStep { display: flex; flex: 1; flex-direction: column; gap: 12px; min-height: 0; width: 100%; max-width: 440px; margin: 0 auto; padding: 16px max(16px, env(safe-area-inset-right)) 8px max(16px, env(safe-area-inset-left)); border: 0; }
+.documentsIntro { display: flex; align-items: center; gap: 8px; color: var(--ruum-text-secondary); font-size: 12px; font-weight: 600; }
+.documentRows { display: grid; gap: 9px; }
+.documentRow { display: flex; min-height: 64px; width: 100%; align-items: center; gap: 12px; padding: 8px 10px; border: 1px solid var(--ruum-border-strong); border-radius: 13px; background: var(--ruum-surface); text-align: left; }
+.documentIcon { display: grid; width: 42px; height: 42px; flex: 0 0 42px; place-items: center; border-radius: 10px; background: var(--ruum-surface-elevated); color: var(--ruum-route-contrast); font-size: 22px; }
+.documentName { display: grid; min-width: 0; flex: 1; gap: 3px; }
+.documentName strong { overflow: hidden; color: var(--ruum-text); font-size: 13px; line-height: 17px; text-overflow: ellipsis; white-space: nowrap; }
+.documentName small { color: var(--ruum-text-secondary); font-size: 11px; line-height: 14px; }
+.documentBadge { flex: 0 0 auto; border-radius: 999px; padding: 5px 8px; font-size: 10px; font-weight: 700; }
+.badge_empty { background: var(--ruum-surface-elevated); color: var(--ruum-text-secondary); }
+.badge_review { background: #fff4d6; color: #805600; }
+.badge_done { background: #e0f4e9; color: #137b57; }
+.badge_error { background: #fde8e8; color: #b42335; }
+.documentHint { margin: auto 0 0; display: flex; align-items: center; gap: 5px; color: var(--ruum-text-secondary); font-size: 9px; line-height: 12px; }
+.documentHint span { color: var(--ruum-route-contrast); font-size: 11px; }
+.documentSheet { top: auto; bottom: 0; height: 50%; border-radius: 20px 20px 0 0; }
+.documentSheet .sheetHeader { min-height: 50px; }
+.documentSheet .sheetBody { padding: 12px 16px; }
+.documentSheet .sheetFooter { display: flex; justify-content: flex-end; }
+.documentSheet .sheetFooter button { min-width: 100px; padding: 0 18px; background: var(--conductor-action-primary); color: var(--ruum-on-primary); }
+.documentInstructions { margin: 0; color: var(--ruum-text-secondary); font-size: 12px; line-height: 17px; }
+.screen:has(.documentsStep) .actionFooter { padding-top: 6px; }
+.reviewStep { display: flex; flex: 1; flex-direction: column; min-height: 0; width: 100%; max-width: 440px; margin: 0 auto; padding: 12px max(12px, env(safe-area-inset-right)) 8px max(12px, env(safe-area-inset-left)); border: 0; }
+.reviewRows { display: grid; gap: 7px; }
+.reviewRow { display: flex; min-width: 0; min-height: 62px; align-items: center; gap: 8px; padding: 7px 9px; border: 1px solid var(--ruum-border); border-radius: 11px; background: var(--ruum-surface); }
+.reviewRowMain { display: grid; min-width: 0; flex: 1; gap: 4px; }
+.reviewRowMain strong { color: var(--ruum-text); font-size: 12px; line-height: 15px; }
+.reviewRowMain > span { display: block; overflow: hidden; color: var(--ruum-text-secondary); font-size: 11px; line-height: 15px; text-overflow: ellipsis; white-space: nowrap; }
+.reviewEdit { display: grid; width: 40px; height: 40px; flex: 0 0 40px; place-items: center; border-radius: 8px; color: var(--ruum-route-contrast); font-size: 18px; }
+.reviewBadges { display: flex; min-width: 0; gap: 5px; overflow: hidden; }
+.reviewBadges span { overflow: hidden; border-radius: 999px; padding: 3px 7px; background: var(--ruum-surface-elevated); color: var(--ruum-text-secondary); font-size: 9px; line-height: 13px; text-overflow: ellipsis; white-space: nowrap; }
+.reviewBadges span[data-ready="true"] { background: #e0f4e9; color: #137b57; }
+.screen:has(.reviewStep) .actionFooter { padding-top: 3px; }
+.screen:has(.reviewStep) .actionFooter .microcopy { margin-bottom: 4px; text-align: left; }
+@media (max-height: 650px) {
+  .reviewStep { padding-top: 6px; }
+  .reviewRows { gap: 5px; }
+  .reviewRow { min-height: 54px; padding-block: 5px; }
+}
+@media (max-height: 650px) {
+  .documentsStep { gap: 7px; padding-top: 8px; }
+  .documentRows { gap: 6px; }
+  .documentRow { min-height: 54px; padding-block: 5px; }
+  .documentIcon { width: 36px; height: 36px; flex-basis: 36px; }
+}
 @keyframes sheet-in { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 @keyframes sheet-out { from { transform: translateY(0); opacity: 1; } to { transform: translateY(20px); opacity: 0; } }
 @media (prefers-reduced-motion: reduce) { .sheet[open], .sheet[open][data-closing="true"] { animation: none; } }

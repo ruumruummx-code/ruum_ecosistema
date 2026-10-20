@@ -29,7 +29,7 @@ export const PASOS_REGISTRO = [
   },
   {
     titulo: "Revisión y envío",
-    shortTitle: "Revisión",
+    shortTitle: "Confirmación",
     icono: "📋",
     objetivo: "Revisa tus datos antes de enviarlo",
     tiempo: "2 min"
