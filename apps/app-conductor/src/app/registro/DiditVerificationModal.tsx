@@ -150,7 +150,7 @@ export function DiditVerificationModal({
                 title="Verificación de identidad Didit"
                 allow="camera; microphone; geolocation; fullscreen; accelerometer; gyroscope; display-capture; autoplay"
                 sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox allow-modals allow-top-navigation allow-top-navigation-by-user-activation"
-                referrerpolicy="strict-origin-when-cross-origin"
+                referrerPolicy="strict-origin-when-cross-origin"
               />
             </div>
             <div className="p-3 bg-surface border-t border-border flex flex-col sm:flex-row items-center justify-between gap-2">
