@@ -126,28 +126,24 @@ export function PanelStatusRow({
 
   return (
     <>
-      {/* StatusRow — bloque horizontal compacto de 4 íconos con indicadores de color */}
-      <div className="flex items-center justify-between gap-2 rounded-xl border border-border/20 bg-surface-elevated px-3 py-2 shadow-xs" role="status" aria-label="Salud operacional">
+      <div className="driver-health-row grid grid-cols-4 gap-2 rounded-2xl bg-route-action/[0.045] p-3" role="status" aria-label="Salud operacional">
         {items.map((it) => (
           <button
             key={it.label}
             type="button"
             onClick={() => setSheetAbierto(true)}
-            className="flex flex-col items-center gap-1 shrink-0"
+            className="relative flex min-h-[88px] min-w-0 flex-col items-center justify-center gap-1 rounded-xl transition hover:bg-surface/80 active:scale-[0.97] focus-visible:outline focus-visible:outline-2 focus-visible:outline-route-action"
             aria-label={`${it.label}: ${it.value}`}
           >
-            <span className={`size-7 shrink-0 rounded-full border border-border/40 flex items-center justify-center ${it.dot}`}>
-              <Icon name={it.icon} className="size-4" />
+            <span className="flex size-14 shrink-0 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-600">
+              <Icon name={it.icon} className="size-7" />
             </span>
-            <span className={`text-[10px] font-bold leading-none ${it.dot === "bg-emerald-500" ? "text-emerald-700" : "text-text-tertiary"}`}>
-              {it.label === "GPS" && !estaOnline ? "Sin red" : it.label === "Documentos" && documentoBloqueante ? "Docs" : it.label.length > 6 ? it.label.slice(0, 4) : it.label}
+            <span className="max-w-full truncate px-0.5 text-[11px] font-bold leading-none text-text-primary">
+              {it.label === "Documentos" ? "Docu" : it.label}
             </span>
+            <span className={`absolute right-1 top-1 flex size-5 items-center justify-center rounded-full border-2 border-surface text-[11px] font-black text-white ${it.dot}`} aria-hidden>✓</span>
           </button>
         ))}
-        <span
-          className={`size-1.5 rounded-full ${estadoGlobal === "ok" ? "bg-signal" : "bg-warning"}`}
-          aria-hidden
-        />
       </div>
 
       {/* BottomSheet detalle — se despliega solo al hacer tap en el StatusRow */}

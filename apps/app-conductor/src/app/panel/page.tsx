@@ -2,8 +2,8 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { Aviso } from "@ruum/ui";
-import { ConductorStatusBadge } from "../../components/v2/ConductorUI";
 import { ConfirmarDisponibilidad } from "../ConfirmarDisponibilidad";
 import { RegistroViajeActivo } from "../ViajeActivoContext";
 import { EstadoRevisionConductor } from "./EstadoRevisionConductor";
@@ -38,7 +38,7 @@ function PanelLoadingSkeleton() {
 export default function PaginaPanel() {
   const { cerrarSesion, cerrandoSesion, errorCerrarSesion } = useCerrarSesion();
   const [soporteAbierto, setSoporteAbierto] = useState(false);
-  const [abHeader, setAbHeader] = useState<"A" | "B">("A");
+  const [menuAbierto, setMenuAbierto] = useState(false);
   const [gpsActivo, setGpsActivo] = useState<boolean | null>(null);
   const [gpsUltimaSenal, setGpsUltimaSenal] = useState<Date | null>(null);
   const [pullOffset, setPullOffset] = useState(0);
@@ -46,34 +46,6 @@ export default function PaginaPanel() {
   const [estaOnline, setEstaOnline] = useState(
     typeof navigator !== "undefined" ? navigator.onLine : true
   );
-
-  // R5 — A/B header simplificado (50/50)
-  useEffect(() => {
-    let cancelado = false;
-    async function cargarAb() {
-      try {
-        const { Preferences } = await import("@capacitor/preferences");
-        const { value } = await Preferences.get({ key: "ruum_ab_header_panel" });
-        if (!cancelado && (value === "A" || value === "B")) {
-          setAbHeader(value as "A" | "B");
-          return;
-        }
-      } catch {}
-      try {
-        const v = localStorage.getItem("ruum_ab_header_panel");
-        if (!cancelado && (v === "A" || v === "B")) {
-          setAbHeader(v as "A" | "B");
-          return;
-        }
-      } catch {}
-      const asignado = Math.random() < 0.5 ? "A" : "B";
-      if (!cancelado) setAbHeader(asignado);
-    }
-    void cargarAb();
-    return () => {
-      cancelado = true;
-    };
-  }, []);
 
   useEffect(() => {
     const actualizar = () => setEstaOnline(navigator.onLine);
@@ -231,7 +203,7 @@ export default function PaginaPanel() {
   }
 
   return (
-    <div className="conductor-road-pilot mx-auto w-full max-w-md px-4 pb-[calc(88px+env(safe-area-inset-bottom))] flex flex-col min-h-[100dvh]">
+    <div className={`driver-dashboard mx-auto flex min-h-[100dvh] w-full max-w-md flex-col px-4 pb-[calc(88px+env(safe-area-inset-bottom))] ${viajeActivoPrincipal ? "" : "driver-dashboard-empty"}`}>
       <RegistroViajeActivo
         viaje={viajeActivoPrincipal ? registroViajeActivoDesdePasaporte(viajeActivoPrincipal) : null}
       />
@@ -256,27 +228,22 @@ export default function PaginaPanel() {
         </div>
       )}
 
-      {/* Header mínimo: título + notificaciones (sin logo grande, sin menú, sin migas de pan) */}
-      <header className="flex items-center justify-between gap-2 px-4 pt-3 pb-2 border-b border-border/30">
-        <h1 className="font-display text-xl font-extrabold tracking-tight text-text-primary">Panel</h1>
-        <div className="flex items-center gap-1 shrink-0">
-          {abHeader === "B" && (
-            <button
-              type="button"
-              onClick={() => setSoporteAbierto(true)}
-              aria-label="Ayuda y soporte operativo"
-              className="p-1.5 min-h-[40px] min-w-[40px] flex items-center justify-center text-text-secondary hover:text-signal rounded-full hover:bg-surface-elevated transition-colors focus-visible:outline-none"
-            >
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-                <circle cx="12" cy="12" r="10" />
-                <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
-                <line x1="12" y1="17" x2="12.01" y2="17" />
-              </svg>
-            </button>
-          )}
+      <header className="grid min-h-16 grid-cols-[44px_1fr_88px] items-center gap-1 pt-[max(8px,env(safe-area-inset-top))]" aria-label="Encabezado del panel">
+        <button
+          type="button"
+          onClick={() => setMenuAbierto(true)}
+          aria-label="Abrir menú"
+          className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-full text-text-primary transition hover:bg-surface-elevated active:scale-95 focus-visible:outline focus-visible:outline-2 focus-visible:outline-route-action"
+        >
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden><path d="M4 7h16M4 12h16M4 17h16" /></svg>
+        </button>
+        <Link href="/panel" className="justify-self-center" aria-label="Ruum Ruum, inicio">
+          <Image src="/imagenes/ruum-logo.svg" alt="Ruum Ruum" width={132} height={43} priority className="h-9 w-auto" />
+        </Link>
+        <div className="flex items-center justify-end gap-0.5">
           <Link
             href="/notificaciones"
-            className="relative p-1.5 min-h-[40px] min-w-[40px] flex items-center justify-center text-text-primary hover:text-route-action transition-colors rounded-full hover:bg-surface-elevated focus-visible:outline-none"
+            className="relative inline-flex min-h-11 min-w-11 items-center justify-center rounded-full text-text-primary transition hover:bg-surface-elevated active:scale-95 focus-visible:outline focus-visible:outline-2 focus-visible:outline-route-action"
             aria-label={notificacionesCount > 0 ? `Notificaciones (${notificacionesCount > 99 ? "99+" : notificacionesCount} sin leer)` : "Notificaciones"}
           >
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
@@ -291,20 +258,11 @@ export default function PaginaPanel() {
           </Link>
           <button
             type="button"
-            onClick={() => void cerrarSesion()}
-            disabled={cerrandoSesion}
-            aria-label="Cerrar sesión"
-            className="p-1.5 min-h-[40px] min-w-[40px] flex items-center justify-center text-text-tertiary hover:text-red-400 rounded-full hover:bg-red-500/10 transition-colors focus-visible:outline-none disabled:opacity-50"
+            onClick={() => setSoporteAbierto(true)}
+            aria-label="Abrir soporte técnico"
+            className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-full text-text-primary transition hover:bg-surface-elevated active:scale-95 focus-visible:outline focus-visible:outline-2 focus-visible:outline-route-action"
           >
-            {cerrandoSesion ? (
-              <span className="text-xs font-bold text-red-400 animate-pulse" aria-live="polite">…</span>
-            ) : (
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
-                <polyline points="16 17 21 12 16 7" />
-                <line x1="21" y1="12" x2="9" y2="12" />
-              </svg>
-            )}
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d="M4 13v-1a8 8 0 0 1 16 0v1" /><path d="M4 13a2 2 0 0 1 2-2h1v6H6a2 2 0 0 1-2-2v-2ZM20 13a2 2 0 0 0-2-2h-1v6h1a2 2 0 0 0 2-2v-2Z" /><path d="M17 19c-1.1 1.2-2.7 2-5 2" /></svg>
           </button>
         </div>
       </header>
@@ -330,30 +288,24 @@ export default function PaginaPanel() {
       {cargando ? (
         <PanelLoadingSkeleton />
       ) : (
-        <div className="w-full flex flex-col flex-1 gap-3">
-          {/* 1. Estado del conductor (toggle compacto) */}
-          <section className="bg-surface rounded-xl p-3 text-left border border-border/20" aria-labelledby="titulo-estado-conductor">
-            <div className="flex justify-between items-start gap-3">
-              <div className="flex flex-col gap-1 min-w-0">
-                <ConductorStatusBadge
-                  status={disponibilidad === "en_viaje" ? "active" : esDisponible ? "success" : "neutral"}
-                  label={disponibilidad === "en_viaje" ? "En viaje" : esDisponible ? "Disponible" : "No disponible"}
-                />
-                <span id="titulo-estado-conductor" className="sr-only">
-                  Estado del conductor
-                </span>
-                <div className="flex items-center gap-2 mt-1">
-                  <span className="font-display text-sm font-black text-text-primary uppercase tracking-wide">
-                    {disponibilidad === "en_viaje" ? "En viaje" : esDisponible ? "Disponible" : "No Disponible"}
-                  </span>
-                </div>
-                <p className="font-body text-[10px] text-text-secondary mt-0.5">
-                  {disponibilidad === "en_viaje"
-                    ? "Traslado activo — disponibilidad bloqueada"
-                    : esDisponible
-                      ? "Recibiendo solicitudes · Te avisaremos con sonido"
-                      : "No recibirás traslados hasta activarte"}
-                </p>
+        <div className="driver-dashboard-content w-full flex flex-col flex-1 gap-3 pb-2">
+          <section className="driver-dashboard-welcome flex items-center gap-3 pt-1" aria-labelledby="titulo-bienvenida">
+            <span className="inline-flex size-[58px] shrink-0 items-center justify-center rounded-full bg-route-action/10 text-route-action" aria-hidden>
+              <svg width="31" height="31" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="8" r="3.5" /><path d="M4 20c0-3.7 3.2-6.4 8-6.4s8 2.7 8 6.4" /></svg>
+            </span>
+            <div className="min-w-0">
+              <h1 id="titulo-bienvenida" className="font-display text-[28px] font-black leading-none tracking-tight text-text-primary">¡Hola, {conductor?.nombre?.trim().split(/\s+/)[0] || "Conductor"}!</h1>
+              <p className="mt-1 font-body text-base leading-none text-text-secondary">Conduce, gana y avanza</p>
+            </div>
+          </section>
+
+          <section className="driver-availability-card rounded-2xl border border-border/60 bg-surface p-4 shadow-[0_5px_20px_rgba(13,43,94,0.05)]" aria-labelledby="titulo-estado-conductor">
+            <div className="flex items-center gap-3">
+              <span className="inline-flex size-14 shrink-0 items-center justify-center rounded-full bg-emerald-500 text-white shadow-sm" aria-hidden><svg width="31" height="31" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="m5 12 4 4L19 6" /></svg></span>
+              <div className="min-w-0 flex-1">
+                <p className="font-body text-sm font-semibold leading-none text-text-secondary">Estado</p>
+                <h2 id="titulo-estado-conductor" className="mt-1 font-display text-2xl font-black leading-none text-text-primary">{disponibilidad === "en_viaje" ? "En viaje" : esDisponible ? "Disponible" : "No disponible"}</h2>
+                <p className="mt-1 font-body text-sm leading-none text-text-secondary">{disponibilidad === "en_viaje" ? "Traslado activo" : esDisponible ? "Recibiendo solicitudes" : "Solicitudes pausadas"}</p>
               </div>
               <button
                 type="button"
@@ -363,15 +315,15 @@ export default function PaginaPanel() {
                 aria-label={esDisponible ? "Disponible: recibir traslados" : "No disponible: pausar traslados"}
                 onClick={alCambiarDisponibilidad}
                 disabled={disponibilidad === "en_viaje" || persistiendoDisponibilidad || !estaOnline}
-                className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full border-2 p-0.5 transition-all duration-300 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50 ${
+                className={`relative inline-flex h-10 w-[68px] shrink-0 cursor-pointer items-center rounded-full border-2 p-1 transition-all duration-300 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50 ${
                   esDisponible
                     ? "bg-signal border-signal shadow-md shadow-signal/20"
                     : "bg-surface-elevated border-border"
                 }`}
               >
                 <span
-                  className={`inline-block h-4 w-4 transform rounded-full bg-white shadow-sm transition-transform duration-300 ${
-                    esDisponible ? "translate-x-6" : "translate-x-0"
+                  className={`inline-block h-7 w-7 transform rounded-full bg-white shadow-sm transition-transform duration-300 ${
+                    esDisponible ? "translate-x-7" : "translate-x-0"
                   }`}
                   aria-hidden
                 />
@@ -385,11 +337,7 @@ export default function PaginaPanel() {
           {/* 2. Traslado activo (sticky si existe) */}
           {viajeActivoPrincipal && (
             <div className="sticky top-[64px] z-10">
-              {registroViajeActivoDesdePasaporte(viajeActivoPrincipal) && (
-                <PanelActiveTripCard
-                  viaje={registroViajeActivoDesdePasaporte(viajeActivoPrincipal) as any}
-                />
-              )}
+              <PanelActiveTripCard viaje={viajeActivoPrincipal} />
             </div>
           )}
 
@@ -408,8 +356,6 @@ export default function PaginaPanel() {
             <PanelOpportunitiesCard
               disponibilidad={disponibilidad}
               TrasladosDisponibles={TrasladosDisponibles}
-              gananciasHoy={gananciasHoy}
-              trasladosHoy={trasladosHoy}
               ultimaActualizacion={ultimaActualizacion}
               refrescando={refrescando}
               onRecargar={() => void recargar()}
@@ -419,29 +365,35 @@ export default function PaginaPanel() {
 
           {/* 5. Métricas — grid 2 columnas, sparkline oculto si $0 */}
           <PanelMetrics gananciasHoy={gananciasHoy} trasladosHoy={trasladosHoy} />
-
-          {/* 6. Botón "Buscar ahora" ancho completo (thumb zone) */}
-          {!viajeActivoPrincipal && esDisponible && !cargando && (
-            <Link
-              href="/viajes"
-              aria-label={`Ver mapa de oportunidades${TrasladosDisponibles.length > 0 ? `, ${TrasladosDisponibles.length} traslados disponibles` : ""}`}
-              className="block w-full min-h-12 items-center justify-center rounded-xl bg-signal px-4 py-3 font-display text-sm font-black text-slate-950 shadow-lg shadow-signal/20 hover:bg-signal/90 active:scale-[0.98] transition-all focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-signal"
-            >
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden className="mr-2">
-                <polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6" />
-                <line x1="8" y1="2" x2="8" y2="18" />
-                <line x1="16" y1="6" x2="16" y2="22" />
-              </svg>
-              Buscar ahora
-              {TrasladosDisponibles.length > 0 && (
-                <span className="ml-auto rounded-full bg-slate-950 text-signal px-2 py-0.5 text-[10px] font-black tabular-nums">
-                  {TrasladosDisponibles.length}
-                </span>
-              )}
-            </Link>
-          )}
         </div>
       )}
+
+      {menuAbierto && (
+        <dialog open className="fixed inset-0 z-[60] m-0 flex h-[100dvh] w-full max-w-none items-start border-0 bg-transparent p-0" aria-modal="true" aria-labelledby="titulo-menu-panel">
+          <button type="button" onClick={() => setMenuAbierto(false)} className="absolute inset-0 bg-slate-950/40" aria-label="Cerrar menú" />
+          <section className="relative mt-[max(12px,env(safe-area-inset-top))] ml-3 w-[min(300px,calc(100vw-24px))] rounded-3xl bg-surface p-5 shadow-2xl">
+            <div className="flex items-center justify-between gap-3"><h2 id="titulo-menu-panel" className="font-display text-lg font-black text-text-primary">Menú</h2><button type="button" onClick={() => setMenuAbierto(false)} className="inline-flex size-11 items-center justify-center rounded-full text-text-secondary hover:bg-surface-elevated" aria-label="Cerrar menú">×</button></div>
+            <nav className="mt-3 grid gap-1" aria-label="Menú del conductor">
+              {[{ href: "/panel", label: "Inicio" }, { href: "/viajes", label: "Traslados" }, { href: "/ganancias", label: "Ganancias" }, { href: "/notificaciones", label: "Notificaciones" }, { href: "/cuenta", label: "Cuenta" }].map((item) => (
+                <Link key={item.href} href={item.href} onClick={() => setMenuAbierto(false)} className="flex min-h-11 items-center rounded-xl px-3 font-body text-sm font-semibold text-text-primary transition hover:bg-route-action/10">{item.label}</Link>
+              ))}
+            </nav>
+            <button type="button" onClick={() => void cerrarSesion()} disabled={cerrandoSesion} className="mt-3 inline-flex min-h-11 w-full items-center justify-center rounded-xl border border-danger/30 px-3 font-body text-sm font-bold text-danger transition hover:bg-danger-soft/30 disabled:opacity-50">{cerrandoSesion ? "Cerrando sesión…" : "Cerrar sesión"}</button>
+          </section>
+        </dialog>
+      )}
+
+      <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-border/30 bg-surface/95 px-4 pb-[max(8px,env(safe-area-inset-bottom))] pt-2 shadow-[0_-8px_28px_rgba(13,43,94,0.08)] backdrop-blur" aria-label="Navegación principal">
+        <div className="mx-auto grid w-full max-w-md grid-cols-3">
+          {[{ href: "/panel", label: "Inicio", icon: "home" }, { href: "/viajes", label: "Traslados", icon: "trips" }, { href: "/cuenta", label: "Cuenta", icon: "account" }].map((item) => {
+            const activo = item.href === "/panel";
+            return <Link key={item.href} href={item.href} aria-current={activo ? "page" : undefined} className={`relative flex min-h-14 flex-col items-center justify-center gap-0.5 rounded-xl font-body text-xs font-semibold transition active:scale-95 ${activo ? "text-route-action" : "text-text-secondary hover:bg-surface-elevated"}`}>
+              <span className="relative inline-flex size-6 items-center justify-center" aria-hidden>{item.icon === "home" ? <svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.3" strokeLinecap="round" strokeLinejoin="round"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V10Z" /><path d="M9 21v-7h6v7" /></svg> : item.icon === "trips" ? <svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.1" strokeLinecap="round" strokeLinejoin="round"><path d="M7 7h11l2 5v5H5v-5l2-5Z" /><path d="M8 17v2m8-2v2M4 12h16" /><circle cx="8" cy="14" r="1" fill="currentColor" /><circle cx="17" cy="14" r="1" fill="currentColor" /></svg> : <svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.1" strokeLinecap="round"><circle cx="12" cy="8" r="4" /><path d="M4 21c0-4 3.4-7 8-7s8 3 8 7" /></svg>}</span>
+              <span>{item.label}</span>{activo && <span className="absolute -bottom-2 h-1 w-12 rounded-full bg-route-action" aria-hidden />}
+            </Link>;
+          })}
+        </div>
+      </nav>
 
       {/* Modal de Confirmación de Disponibilidad */}
       <ConfirmarDisponibilidad
