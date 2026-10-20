@@ -35,6 +35,52 @@ describe("Sec3 POST /api/viajes — validación paso servidor", () => {
     });
   }
 
+  function payloadValido(override: Record<string, unknown> = {}) {
+    return {
+      paso: 4,
+      vehiculoSeleccionadoId: "",
+      vehiculosUsuarioIds: [],
+      marca: "Nissan",
+      modelo: "Versa",
+      color: "gris",
+      placas: "ABC123",
+      vin: "VIN123",
+      anio: "2022",
+      transmision: "automatica",
+      condicion: "seminueva",
+      estadoGeneral: "Buen estado, desgaste normal",
+      tieneTarjeta: true,
+      tieneVerificacion: true,
+      tienePlacas: true,
+      puedeCircular: true,
+      origenCodigoPostal: "03100",
+      origenEstado: "CDMX",
+      origenCiudad: "CDMX",
+      origenColonia: "Del Valle",
+      origenCalle: "A",
+      origenNumero: "1",
+      destinoCodigoPostal: "06600",
+      destinoEstado: "CDMX",
+      destinoCiudad: "CDMX",
+      destinoColonia: "Juárez",
+      destinoCalle: "B",
+      destinoNumero: "2",
+      entregaNombre: "Ana",
+      entregaApellido: "López",
+      entregaTelefono: "5512345678",
+      recepcionNombre: "Luis",
+      recepcionApellido: "Pérez",
+      recepcionTelefono: "5587654321",
+      modalidadProgramacion: "lo_antes_posible",
+      fechaHoraProgramada: "",
+      zonaHoraria: "America/Mexico_City",
+      tipoRuta: "local",
+      aceptaPoliticas: true,
+      paradas: [],
+      ...override,
+    };
+  }
+
   it("rechaza sin autenticación → 401", async () => {
     mockGetUser.mockResolvedValue({ data: { user: null } });
     const { POST } = await import("./route");
@@ -133,6 +179,50 @@ describe("Sec3 POST /api/viajes — validación paso servidor", () => {
   it("GET no permitido → 405", async () => {
     const { GET } = await import("./route");
     expect((await GET()).status).toBe(405);
+  });
+
+  describe("T01 — Aceptación de políticas", () => {
+    it("rechaza cuando el campo aceptaPoliticas está ausente → 400", async () => {
+      mockGetUser.mockResolvedValue({ data: { user: { id: "u1" } } });
+      const { POST } = await import("./route");
+      const payload = payloadValido();
+      delete (payload as Record<string, unknown>).aceptaPoliticas;
+      const res = await POST(req(payload));
+      expect(res.status).toBe(400);
+      const json = await res.json() as { error: string; detalles?: string[] };
+      expect(json.error).toBe("Datos de traslado inválidos");
+      expect(json.detalles).toContain("Debes aceptar las políticas de pago y cancelación.");
+    });
+
+    it("rechaza cuando aceptaPoliticas es false → 400", async () => {
+      mockGetUser.mockResolvedValue({ data: { user: { id: "u1" } } });
+      const { POST } = await import("./route");
+      const res = await POST(req(payloadValido({ aceptaPoliticas: false })));
+      expect(res.status).toBe(400);
+      const json = await res.json() as { error: string; detalles?: string[] };
+      expect(json.error).toBe("Datos de traslado inválidos");
+      expect(json.detalles).toContain("Debes aceptar las políticas de pago y cancelación.");
+    });
+
+    it("rechaza cuando aceptaPoliticas es null → 400", async () => {
+      mockGetUser.mockResolvedValue({ data: { user: { id: "u1" } } });
+      const { POST } = await import("./route");
+      const res = await POST(req(payloadValido({ aceptaPoliticas: null })));
+      expect(res.status).toBe(400);
+      const json = await res.json() as { error: string; detalles?: string[] };
+      expect(json.error).toBe("Datos de traslado inválidos");
+      expect(json.detalles).toContain("Debes aceptar las políticas de pago y cancelación.");
+    });
+
+    it("acepta cuando aceptaPoliticas es true con payload válido → 200", async () => {
+      mockGetUser.mockResolvedValue({ data: { user: { id: "u1" } } });
+      const { POST } = await import("./route");
+      const res = await POST(req(payloadValido({ aceptaPoliticas: true })));
+      expect(res.status).toBe(200);
+      const json = await res.json() as { ok: boolean; pasoValidado: number };
+      expect(json.ok).toBe(true);
+      expect(json.pasoValidado).toBe(4);
+    });
   });
 
   /* M10: vehiculosUsuarioIds lo envía el cliente; la pertenencia real se

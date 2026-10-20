@@ -2,6 +2,11 @@ import { NextRequest, NextResponse } from "next/server";
 import { crearClienteServidor } from "@/lib/supabase-server";
 import { obtenerIp, rateLimitConVentana } from "@/lib/csp-rate-limit";
 import { obtenerRutaDirectionsMapboxConParadas } from "@ruum/shared/utils";
+import {
+  MAX_BYTES_GEOCODE,
+  esquemaGeocodeMasivo,
+  esquemaTamanioRequest,
+} from "./schema";
 
 export const dynamic = "force-dynamic";
 
@@ -24,6 +29,15 @@ async function geocodificarCP(cp: string, token: string): Promise<{ lat: number;
 
 export async function POST(request: NextRequest) {
   try {
+    // 1. Validar límite de tamaño del request por Content-Length si está presente
+    const lenHeader = request.headers.get("content-length");
+    if (lenHeader) {
+      const numLen = Number(lenHeader);
+      if (!Number.isNaN(numLen) && numLen > MAX_BYTES_GEOCODE) {
+        return NextResponse.json({ error: "Payload demasiado grande." }, { status: 413 });
+      }
+    }
+
     const cliente = await crearClienteServidor();
     const { data: { user } } = await cliente.auth.getUser();
     if (!user) return NextResponse.json({ error: "No autenticado" }, { status: 401 });
@@ -40,19 +54,47 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    const body = await request.json().catch(() => null) as { pares?: Array<{ origenCP: string; destinoCP: string; indice: number }> } | null;
-    if (!body || !Array.isArray(body.pares)) {
+    // 2. Leer texto del cuerpo y validar tamaño
+    let raw: string;
+    try {
+      raw = await request.text();
+    } catch {
       return NextResponse.json({ error: "Payload inválido." }, { status: 400 });
     }
 
+    if (new TextEncoder().encode(raw).length > MAX_BYTES_GEOCODE || !esquemaTamanioRequest.safeParse(raw).success) {
+      return NextResponse.json({ error: "Payload demasiado grande." }, { status: 413 });
+    }
+
+    // 3. Parsear JSON
+    let bodyJson: unknown;
+    try {
+      bodyJson = JSON.parse(raw);
+    } catch {
+      return NextResponse.json({ error: "Payload inválido." }, { status: 400 });
+    }
+
+    // 4. Validar estructura con esquema Zod (cantidad máxima, CP, índices)
+    const parsed = esquemaGeocodeMasivo.safeParse(bodyJson);
+    if (!parsed.success) {
+      return NextResponse.json(
+        {
+          error: "Payload inválido.",
+          detalles: parsed.error.issues.map((i) => i.message),
+        },
+        { status: 400 }
+      );
+    }
+
+    // 5. Llamadas a Mapbox únicamente tras pasar validación completa
     const token = process.env.MAPBOX_SECRET_TOKEN || process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN;
     if (!token) return NextResponse.json({ error: "Servicio de mapas no disponible." }, { status: 503 });
 
     const BATCH = 5;
     const rutas: Array<{ indice: number; distanciaKm: number | null; tiempoEstimadoHoras: number | null }> = [];
 
-    for (let i = 0; i < body.pares.length; i += BATCH) {
-      const lote = body.pares.slice(i, i + BATCH);
+    for (let i = 0; i < parsed.data.pares.length; i += BATCH) {
+      const lote = parsed.data.pares.slice(i, i + BATCH);
       const resultados = await Promise.all(
         lote.map(async (par) => {
           try {

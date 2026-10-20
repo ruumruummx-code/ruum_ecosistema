@@ -90,7 +90,6 @@ export async function POST(request: NextRequest) {
       vehiculoSeleccionadoId: (body as Record<string, unknown>).vehiculoSeleccionadoId ?? "",
       vehiculosUsuarioIds: (body as Record<string, unknown>).vehiculosUsuarioIds ?? [],
       zonaHoraria: (body as Record<string, unknown>).zonaHoraria ?? "America/Mexico_City",
-      aceptaPoliticas: (body as Record<string, unknown>).aceptaPoliticas ?? true,
       paradas: (body as Record<string, unknown>).paradas ?? [],
     });
     if (!parsed.success) {

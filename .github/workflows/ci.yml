@@ -96,6 +96,71 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm --filter @ruum/app-usuario test
 
+  # T04 (cierra RC-10): E2E de app-usuario con build de producción, obligatorio
+  # en la rama candidata.
+  #
+  # Reproducibilidad: lockfile congelado, versión de Node pineada (.nvmrc),
+  # Chromium instalado por la versión de @playwright/test del lockfile y
+  # Playwright corriendo en 1 worker con reintentos (CI=true).
+  #
+  # Hermética: no requiere proyecto Supabase ni secretos de Stripe/Mapbox
+  # reales. `playwright.config.ts` levanta un doble local de GoTrue+PostgREST
+  # (tests/e2e/fixtures/mock-supabase.mjs) y apunta la app a él; el build usa
+  # RUUM_LOCAL_PRODUCTION=true para admitir ese http:// de loopback (lo permite
+  # scripts/validate-env.mjs, pensado para el Compose local).
+  e2e-usuario:
+    name: e2e app-usuario (Playwright)
+    runs-on: ubuntu-latest
+    needs: install
+    timeout-minutes: 45
+    env:
+      # La suite apunta al doble local; build y runtime deben ver la misma URL.
+      NEXT_PUBLIC_SUPABASE_URL: http://127.0.0.1:54399
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: sb_publishable_anon_key_e2e_mock
+      RUUM_LOCAL_PRODUCTION: "true"
+      NEXT_PUBLIC_RUUM_AMBIENTE: production
+      NEXT_PUBLIC_APP_VERSION: 1.0.0
+      NEXT_PUBLIC_APP_URL: http://localhost:3012
+      # Placeholders con la forma exigida por scripts/validate-env.mjs (pk./sk.)
+      # y longitud mínima: los E2E mockean Mapbox en el navegador.
+      NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN: pk.eyJuY19lMmVfcGxhY2Vob2xkZXIifQ
+      MAPBOX_SECRET_TOKEN: sk.test-placeholder
+      PHONE_VERIFY_SECRET: e2e-placeholder-secret-con-mas-de-32-caracteres
+      # /registro usa el bypass de OTP solo en entornos no productivos.
+      PHONE_VERIFY_BYPASS: "true"
+      NEXT_PUBLIC_PHONE_VERIFY_BYPASS: "true"
+      # Servir el build de producción en vez de `next dev`.
+      PLAYWRIGHT_E2E_PRODUCCION: "1"
+      # Los artefactos (traces/vídeos) se suben igualmente si algo falla.
+      PLAYWRIGHT_DISABLE_AUTH_ARTIFACTS: "0"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.0.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Instalar Chromium (versión del lockfile)
+        run: pnpm exec playwright install --with-deps chromium
+      - name: Build de producción app-usuario
+        run: pnpm --filter @ruum/app-usuario build
+      - name: Ejecutar E2E
+        run: pnpm --filter @ruum/app-usuario test:e2e
+      - name: Subir reporte y artefactos Playwright
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-app-usuario-${{ github.run_id }}
+          path: |
+            apps/app-usuario/playwright-report
+            apps/app-usuario/test-results
+          retention-days: 14
+          if-no-files-found: ignore
+
+
   fronteras:
     name: check fronteras
     runs-on: ubuntu-latest

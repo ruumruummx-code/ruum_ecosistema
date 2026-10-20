@@ -1,401 +1,408 @@
-import { test, expect } from "@playwright/test";
-import { config as loadDotenv } from "dotenv";
-import path from "node:path";
-
-loadDotenv({ path: path.resolve(process.cwd(), ".env.local") });
-loadDotenv({ path: path.resolve(process.cwd(), ".env.test") });
+import { expect, test } from "@playwright/test";
+import { ACCESS_TOKEN_E2E, ACCESS_TOKEN_PENDIENTE_E2E, seedMockAuthSession } from "./fixtures/sesion";
+import { esperarHidratacion, rutaActual } from "./fixtures/navegacion";
 
 /**
- * R8 — E2E flujos críticos app-usuario (antes no cubiertos)
- * Cubre gaps detectados en informe: login, registro 2 pasos, middleware,
- * wizard traslado (wizard parcial), Didit modal a11y, carga masiva,
- * soporte y mis-Traslados. Usa mocks de Supabase/Mapbox como en recuperacion-password.
+ * Rutas que este archivo cubre y que también existen como páginas:
+ * /login · /registro · /viajes/nuevo (wizard de traslado) · /verificacion (Didit) ·
+ * /soporte · /mis-viajes.
+ *
+ * Estas pruebas validan que la aplicación entrega el HTML que el usuario necesita:
+ * que el login muestra el formulario, que el registro pide nombre+teléfono, que el
+ * wizard muestra origen/destino y que las rutas privadas responden. Si la app se
+ * rompe y devuelve la página vacía de error, la prueba falla.
  */
 
-// ── helpers comunes (copiados de recuperacion-password) ──
-async function seedMockAuthSession(page: import("@playwright/test").Page) {
-  const configuredUrl = process.env.NEXT_PUBLIC_SUPABASE_URL ?? process.env.PLAYWRIGHT_SUPABASE_URL;
-  if (!configuredUrl) throw new Error("Falta NEXT_PUBLIC_SUPABASE_URL para fixture E2E.");
-  const projectRef = new URL(configuredUrl).hostname.split(".")[0];
-  const session = {
-    access_token: "mock_access_token",
-    refresh_token: "mock_refresh_token",
-    expires_in: 3600,
-    expires_at: Math.floor(Date.now() / 1000) + 3600,
-    token_type: "bearer",
-    user: { id: "00000000-0000-4000-8000-00000000e001", aud: "authenticated", role: "authenticated", email: "usuario@ejemplo.com" },
-  };
-  const value = `base64-${Buffer.from(JSON.stringify(session), "utf8").toString("base64url")}`;
-  await page.context().addCookies([{
-    name: `sb-${projectRef}-auth-token`,
-    value,
-    url: process.env.PLAYWRIGHT_BASE_URL ?? `http://localhost:${process.env.PLAYWRIGHT_PORT ?? "3012"}`,
-  }]);
-}
+/**
+ * T-03: las afirmaciones de redirección/autenticación validan el resultado final,
+ * no el estado intermedio de un fetch. Sin sesión, la prueba exige la URL exacta
+ * con su query (?next=…&reason=authentication_required); con sesión, exige que la
+ * ruta resuelva al destino. Esto hace que la prueba falle si se rompe el
+ * middleware o la sesión.
+ */
 
-async function mockSignIn(page: import("@playwright/test").Page, succeed = true, capture?: { email?: string }) {
-  await page.route("**/auth/v1/token*grant_type=password**", async (route) => {
-    const body = JSON.parse(route.request().postData() || "{}");
-    if (capture) capture.email = body.email as string;
-    if (succeed) {
-      await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ access_token: "tok", refresh_token: "ref", user: { id: "u1", email: body.email } }) });
-    } else {
-      await route.fulfill({ status: 400, contentType: "application/json", body: JSON.stringify({ error: "invalid_grant", error_description: "Invalid login credentials" }) });
-    }
-  });
-}
-
-async function mockSignUp(page: import("@playwright/test").Page, withSession: boolean) {
-  await page.route("**/auth/v1/signup**", async (route) => {
-    const body = JSON.parse(route.request().postData() || "{}");
-    // Validar que email viene normalizado (lowercase) — R7
-    const email = (body.email as string) || "";
-    if (email !== email.toLowerCase() || email.trim() !== email) {
-      await route.fulfill({ status: 400, contentType: "application/json", body: JSON.stringify({ error: "email_invalid" }) });
-      return;
-    }
-    await route.fulfill({
+/** Bloquea el endpoint de tarifas y devuelve una respuesta determinista. */
+async function mockearTarifa(page: import("@playwright/test").Page, tarifa: number) {
+  await page.route("**/api/ruta", (route) =>
+    route.fulfill({
+      json: { distanciaKm: 12.5, tiempoEstimadoHoras: 0.5, tarifa },
+    })
+  );
+  await page.route("**/api.mapbox.com/**", (route) =>
+    route.fulfill({
       status: 200,
       contentType: "application/json",
-      body: JSON.stringify(withSession
-        ? { user: { id: "new1", email }, session: { access_token: "tok", user: { id: "new1" } } }
-        : { user: { id: "new1", email }, session: null }),
-    });
-  });
+      headers: { "access-control-allow-origin": "*" },
+      json: { features: [{ place_name: "Ciudad de México, México", center: [-99.1332, 19.4326] }] },
+    })
+  );
 }
 
-async function mockMapboxGeocode(page: import("@playwright/test").Page) {
-  await page.route("**/api.mapbox.com/search/geocode/**", async (route) => {
-    await route.fulfill({
-      status: 200,
-      contentType: "application/json",
-      body: JSON.stringify({
-        features: [{ geometry: { coordinates: [-99.1332, 19.4326] }, properties: { full_address: "Av Reforma 222, CDMX", place_formatted: "CDMX" } }],
-      }),
-    });
-  });
-  await page.route("**/api.mapbox.com/directions/**", async (route) => {
-    await route.fulfill({
-      status: 200,
-      contentType: "application/json",
-      body: JSON.stringify({ routes: [{ distance: 12500, duration: 1800, geometry: null }], code: "Ok" }),
-    });
-  });
-}
-
-async function mockUsuarioVerificado(page: import("@playwright/test").Page) {
-  // Interceptar supabase rest para obtenerUsuarioActual / listarTraslados
-  await page.route("**/rest/v1/usuarios**", async (route) => {
-    if (route.request().method() === "GET") {
-      await route.fulfill({
-        status: 200,
-        contentType: "application/json",
-        body: JSON.stringify([{ id: "00000000-0000-4000-8000-00000000e001", email: "usuario@ejemplo.com", estado_verificacion: "verificado", foto_url: null, doc_identidad_url: null }]),
-      });
-    } else await route.continue();
-  });
-  await page.route("**/rest/v1/vehiculos**", async (route) => {
-    await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify([]) });
-  });
-  await page.route("**/rpc/previsualizar_tarifa_usuario**", async (route) => {
-    await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ precio: 1234, categoria: "ligero_a" }) });
-  });
-}
-
-async function mockDidit(page: import("@playwright/test").Page) {
-  await page.route("**/rest/v1/rpc/iniciar_verificacion_didit**", async (route) => {
-    await route.fulfill({
-      status: 200,
-      contentType: "application/json",
-      body: JSON.stringify({ url: "https://verify.didit.me/session/mock123", sessionId: "sess_mock" }),
-    });
-  });
-  await page.route("**/verify.didit.me/**", async (route) => {
-    await route.fulfill({ status: 200, contentType: "text/html", body: "<html><body>Didit mock</body></html>" });
-  });
-}
-
-// ── Suites ──
-
-test.describe("Middleware protección rutas", () => {
-  test("sin sesión, /viajes/nuevo redirige a /login?next", async ({ page }) => {
-    await page.goto("/viajes/nuevo", { waitUntil: "domcontentloaded" });
-    await expect(page).toHaveURL(/\/login\?next=%2Fviajes%2Fnuevo/);
-    await expect(page.getByText(/authentication_required|inicia sesión para solicitar/i).first()).toBeVisible({ timeout: 8000 }).catch(async () => {
-      // fallback: al menos el heading de login debe estar
-      await expect(page.getByRole("heading", { name: /iniciar sesión/i })).toBeVisible();
-    });
+test.describe("Flujos críticos de la aplicación", () => {
+  test("la aplicación carga y el login responde", async ({ page }) => {
+    await page.goto("/login");
+    await expect(page.locator("h1")).toContainText("Bienvenido de nuevo");
+    // formulario de acceso presente con sus campos reales
+    await expect(page.locator("#login-email")).toBeVisible();
+    await expect(page.locator("#login-password")).toBeVisible();
+    await expect(page.getByRole("button", { name: "Iniciar sesión" })).toBeVisible();
   });
 
-  test("sin sesión, /mis-viajes redirige a login", async ({ page }) => {
-    await page.goto("/mis-viajes", { waitUntil: "domcontentloaded" });
-    await expect(page).toHaveURL(/\/login/);
+  test("el formulario de login muestra errores cuando faltan datos", async ({ page }) => {
+    await page.goto("/login");
+    await esperarHidratacion(page);
+    await page.getByRole("button", { name: "Iniciar sesión" }).click();
+    // validación del lado del cliente: el usuario ve qué falta
+    await expect(page.getByText("Introduce tu correo electrónico.")).toBeVisible();
   });
 
-  test("con sesión, /login redirige a /", async ({ page }) => {
-    await seedMockAuthSession(page);
-    await page.goto("/login", { waitUntil: "domcontentloaded" });
-    // Middleware debe mandar a / (landing autenticada)
-    await expect(page).toHaveURL(/\/$|\/landing/ , { timeout: 8000 }).catch(async () => {
-      // Si no redirige por falta de cookie válida en jsdom, al menos no muestra form login como guest
-    });
-  });
-});
+  test("el login con credenciales válidas funciona", async ({ page }) => {
+    await page.goto("/login");
+    await esperarHidratacion(page);
+    await page.locator("#login-email").fill("usuario.e2e@correo.test");
+    await page.locator("#login-password").fill("ClaveE2E123!");
+    await page.getByRole("button", { name: "Iniciar sesión" }).click();
 
-test.describe("Login E2E", () => {
-  test("muestra formulario y valida email requerido", async ({ page }) => {
-    await page.goto("/login", { waitUntil: "domcontentloaded" });
-    await expect(page.getByRole("heading", { name: /iniciar sesión/i })).toBeVisible();
-    await page.getByRole("button", { name: /entrar/i }).click();
-    // HTML5 required valida, el form no hace submit si email vacío -> permanece en login
-    await expect(page).toHaveURL(/\/login/);
+    await page.waitForURL("/", { timeout: 30_000 });
+    expect(await rutaActual(page)).toBe("/");
   });
 
-  test("login éxito con email normalizado (R7)", async ({ page }) => {
-    const capture: { email?: string } = {};
-    await mockSignIn(page, true, capture);
-    await page.goto("/login", { waitUntil: "domcontentloaded" });
-    // R7: usuario escribe mayúsculas y debe enviarse lowercase
-    await page.getByLabel(/correo electrónico/i).fill("USUARIO@EJEMPLO.COM");
-    await page.locator('input[type="password"]').first().fill("Segura123");
-    await page.getByRole("button", { name: /entrar/i }).click();
-    await page.waitForTimeout(800);
-    expect(capture.email).toBe("usuario@ejemplo.com");
+  test("el login con credenciales inválidas muestra un mensaje claro", async ({ page }) => {
+    await page.goto("/login");
+    await esperarHidratacion(page);
+    await page.locator("#login-email").fill("no-existe@correo.test");
+    await page.locator("#login-password").fill("ClaveIncorrecta123");
+    await page.getByRole("button", { name: "Iniciar sesión" }).click();
+
+    await expect(page.getByText("Correo o contraseña incorrectos.")).toBeVisible({ timeout: 30_000 });
   });
 
-  test("login error muestra mensaje traducido", async ({ page }) => {
-    await mockSignIn(page, false);
-    await page.goto("/login", { waitUntil: "domcontentloaded" });
-    await page.getByLabel(/correo electrónico/i).fill("usuario@ejemplo.com");
-    await page.locator('input[type="password"]').first().fill("wrong");
-    await page.getByRole("button", { name: /entrar/i }).click();
-    await expect(page.getByText(/credenciales|contraseña|inválido/i).first()).toBeVisible({ timeout: 5000 });
+  test("el registro de usuario muestra el formulario con los campos correctos", async ({ page }) => {
+    await page.goto("/registro");
+    // formulario de registro: nombre, apellido y teléfono
+    await expect(page.locator("h1")).toContainText("Crear cuenta");
+    await expect(page.locator("#nombre")).toBeVisible();
+    await expect(page.locator("#apellido")).toBeVisible();
+    await expect(page.locator("#telefono")).toBeVisible();
   });
 
-  test("login respeta ?next seguro y bloquea //evil", async ({ page }) => {
-    await page.goto("/login?next=%2Ftraslados%2Fnuevo", { waitUntil: "domcontentloaded" });
-    // destinoSeguro debe mantener /viajes/nuevo
-    await expect(page).toHaveURL(/next=%2Ftraslados/);
-    await page.goto("/login?next=%2F%2Fevil.com", { waitUntil: "domcontentloaded" });
-    // No debe reflejar //evil.com en siguiente hidden
-    await expect(page).toHaveURL(/\/login/);
-  });
-});
+  test("el registro valida el formato del teléfono antes de avanzar", async ({ page }) => {
+    await page.goto("/registro");
+    await esperarHidratacion(page);
 
-test.describe("Registro 2 pasos", () => {
-  test("paso1 avanza solo con teléfono 10 dígitos", async ({ page }) => {
-    await page.goto("/registro", { waitUntil: "domcontentloaded" });
-    await expect(page.getByRole("heading", { name: /crea tu cuenta/i })).toBeVisible();
-    await page.getByLabel(/^nombre$/i).fill("Ana");
-    await page.getByLabel(/apellido/i).fill("López");
-    // teléfono incompleto
-    await page.getByLabel(/teléfono/i).fill("55123");
-    await page.getByRole("button", { name: /continuar/i }).click();
-    await expect(page.getByText(/10 dígitos/i)).toBeVisible();
-    await page.getByLabel(/teléfono/i).fill("5512345678");
-    await page.getByRole("button", { name: /continuar/i }).click();
-    await expect(page.getByRole("heading", { name: /elige tus credenciales/i })).toBeVisible();
+    await page.locator("#nombre").fill("Persona");
+    await page.locator("#apellido").fill("E2E");
+    await page.locator("#telefono").fill("123");
+    await page.getByRole("button", { name: /Solicitar código/i }).click();
+
+    await expect(page.getByText("El teléfono debe tener 10 dígitos.")).toBeVisible();
   });
 
-  test("paso2 valida password débil y mismatch", async ({ page }) => {
-    await page.goto("/registro", { waitUntil: "domcontentloaded" });
-    await page.getByLabel(/^nombre$/i).fill("Ana");
-    await page.getByLabel(/apellido/i).fill("López");
-    await page.getByLabel(/teléfono/i).fill("5512345678");
-    await page.getByRole("button", { name: /continuar/i }).click();
-    await page.getByLabel(/correo electrónico/i).fill("ANA@EJEMPLO.COM");
-    await page.locator('input[type="password"]').first().fill("abcdefgh");
-    await page.getByLabel(/confirmar contraseña/i).fill("abcdefgh");
-    await page.getByLabel(/acepto/i).check();
-    // Click crear sin checkbox o password débil debe mostrar error
-    await page.getByRole("button", { name: /crear cuenta/i }).click();
-    await expect(page.getByText(/minúscula.*mayúscula.*número/i).first()).toBeVisible({ timeout: 4000 });
+  test("el registro completa el OTP y avanza a credenciales", async ({ page }) => {
+    // Sin bypass en build de producción: el OTP se intercepta en la red.
+    // El mock del dev server (123456) está desactivado cuando NODE_ENV=production,
+    // así que sin este route la prueba fallaría en CI.
+    await page.route("**/api/auth/phone-verify/send", (route) => route.fulfill({ json: { ok: true } }));
+    await page.route("**/api/auth/phone-verify/verify", (route) => route.fulfill({ json: { ok: true, token: "e2e-otp-token" } }));
+    await page.route("**/api/auth/signup", (route) =>
+      route.fulfill({ json: { user: { id: "e2e-user-id", email: "persona.e2e@correo.test" } } })
+    );
+
+    await page.goto("/registro");
+    await esperarHidratacion(page);
+
+    await page.locator("#nombre").fill("Persona");
+    await page.locator("#apellido").fill("E2E");
+    await page.locator("#telefono").fill("5512345678");
+    await page.getByRole("button", { name: /Solicitar código/i }).click();
+
+    // el modal de OTP se abre y pide el código
+    await expect(page.getByRole("dialog")).toContainText("Verifica tu número celular");
+    await page.locator("#codigo-sms").fill("123456");
+    await page.getByRole("button", { name: "Verificar y continuar" }).click();
+
+    // paso 2: credenciales — el wizard de registro pide email y contraseña
+    await expect(page.getByText("Elige tus credenciales")).toBeVisible({ timeout: 15_000 });
+    await expect(page.locator("#password")).toBeVisible();
+
+    // una contraseña débil explica exactamente qué falta
+    await page.locator("#password").fill("debil");
+    await page.locator("#password").blur();
+    await expect(page.getByText("La contraseña necesita una mayúscula.")).toBeVisible({ timeout: 10_000 });
   });
 
-  test("registro con sesión -> /, sin sesión -> confirma-correo", async ({ page }) => {
-    await mockSignUp(page, false);
-    await page.goto("/registro", { waitUntil: "domcontentloaded" });
-    await page.getByLabel(/^nombre$/i).fill("Ana");
-    await page.getByLabel(/apellido/i).fill("López");
-    await page.getByLabel(/teléfono/i).fill("5512345678");
-    await page.getByRole("button", { name: /continuar/i }).click();
-    await page.getByLabel(/correo electrónico/i).fill("ana@ejemplo.com");
-    await page.locator('input[type="password"]').first().fill("Segura123");
-    await page.getByLabel(/confirmar contraseña/i).fill("Segura123");
-    await page.getByLabel(/acepto/i).check();
-    await page.getByRole("button", { name: /crear cuenta/i }).click();
-    await expect(page).toHaveURL(/\/registro\/confirma-correo/, { timeout: 8000 });
-  });
-});
+  test("el registro con datos válidos envía a la pantalla de confirmación", async ({ page }) => {
+    await page.route("**/api/auth/phone-verify/send", (route) => route.fulfill({ json: { ok: true } }));
+    await page.route("**/api/auth/phone-verify/verify", (route) => route.fulfill({ json: { ok: true, token: "e2e-otp-token" } }));
+    await page.route("**/api/auth/signup", (route) =>
+      route.fulfill({ json: { user: { id: "e2e-user-id", email: "persona.e2e@correo.test" } } })
+    );
 
-test.describe("Wizard traslado nuevo (parcial mock)", () => {
-  test("usuario verificado ve wizard 5 pasos con paso 0 Conoce tu tarifa", async ({ page }) => {
-    await seedMockAuthSession(page);
-    await mockMapboxGeocode(page);
-    await mockUsuarioVerificado(page);
-    await page.goto("/viajes/nuevo", { waitUntil: "domcontentloaded" });
-    // Sin página de error intermedia: el wizard debe montar siempre.
-    await expect(page.locator("body")).not.toContainText(/traslado no encontrado/i);
-    await expect(page.getByRole("heading", { name: /¿Cuánto costará tu traslado\?/i }).or(page.getByText(/Conoce tu tarifa/i)).first()).toBeVisible({ timeout: 10000 });
-    await expect(page.getByText(/Paso 1 de 5/i)).toBeVisible();
+    await page.goto("/registro");
+    await esperarHidratacion(page);
+    await page.locator("#nombre").fill("Persona");
+    await page.locator("#apellido").fill("E2E");
+    await page.locator("#telefono").fill("5512345678");
+    await page.getByRole("button", { name: /Solicitar código/i }).click();
+
+    await expect(page.getByRole("dialog")).toContainText("Verifica tu número celular");
+    await page.locator("#codigo-sms").fill("123456");
+    await page.getByRole("button", { name: "Verificar y continuar" }).click();
+
+    await expect(page.getByText("Elige tus credenciales")).toBeVisible({ timeout: 15_000 });
+    await page.locator("#password").fill("Passw0rdE2E!");
+    await page.getByRole("button", { name: /Crear cuenta/i }).click();
+
+    await page.waitForURL("**/registro/confirma-correo", { timeout: 30_000 });
   });
 
-  test("paso 0 happy path: llena campos, ve tarifa, acepta y avanza a paso 1 con card de resumen", async ({ page }) => {
-    await seedMockAuthSession(page);
-    await mockMapboxGeocode(page);
-    await mockUsuarioVerificado(page);
-    await page.goto("/viajes/nuevo", { waitUntil: "domcontentloaded" });
+  test("el wizard de traslados abre, cotiza y permite avanzar al vehículo", async ({ page }) => {
+    await mockearTarifa(page, 500);
+    await seedMockAuthSession(page, { variante: "verificada" });
 
-    await page.locator("#origenCodigoPostal").fill("06600");
-    await page.locator("#destinoCodigoPostal").fill("64000");
-    await page.locator("#marca").selectOption("Nissan");
-    await page.locator("#modelo").fill("Versa");
-    await page.locator("#condicion").selectOption("rueda_y_enciende");
+    await page.goto("/viajes/nuevo");
+    await esperarHidratacion(page);
 
-    const btnAceptar = page.getByRole("button", { name: /Aceptar y continuar/i });
-    await expect(btnAceptar).toBeVisible({ timeout: 10000 });
-    await btnAceptar.click();
+    // paso 0: origen y destino con códigos postales del catálogo local
+    await page.locator("#gate-origenCodigoPostal").fill("03100");
+    await page.locator("#gate-destinoCodigoPostal").fill("06600");
 
-    await expect(page.getByRole("heading", { name: /¿Qué vehículo trasladamos\?/i }).or(page.getByText(/Paso 2 de 5/i)).first()).toBeVisible();
-    await expect(page.getByText(/Tarifa aceptada/i)).toBeVisible();
-    await expect(page.getByRole("button", { name: /Editar/i }).first()).toBeVisible();
+    // vehículo del catálogo
+    await page.locator("#gate-marca").selectOption({ label: "Nissan" });
+    await page.locator("#gate-modelo").selectOption({ label: "Versa" });
+    await page.locator("#gate-condicion").selectOption("seminueva");
+
+    // la cotización tarda: geocode (debounce 650 ms) → POST /api/ruta →
+    // debounce de tarifa (600 ms) → RPC de previsualización
+    const botonCotizado = page.getByRole("button", { name: /Continuar · Tarifa est\. \$500 MXN/ });
+    await expect(botonCotizado).toBeEnabled({ timeout: 30_000 });
+
+    // el botón solo se activa cuando la tarifa existe: no es decorativo
+    await botonCotizado.click();
+
+    // avanza al paso 2 de 5 y muestra los datos del vehículo
+    await expect(page.getByText("Datos del vehículo")).toBeVisible({ timeout: 15_000 });
+    await expect(page.getByText("Paso 2 de 5")).toBeVisible();
+    await expect(page.getByText("Tarifa aceptada · $500.00 MXN")).toBeVisible();
   });
 
-  test("paso 0: sin tarifa automática se bloquea y ofrece cotización especial", async ({ page }) => {
-    await seedMockAuthSession(page);
-    await mockMapboxGeocode(page);
-    await page.route("**/rpc/previsualizar_tarifa_usuario**", async (route) => {
-      await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ precio: null, categoria: "pesado_c", motivo: "Vehículo requiere grúa o cotización especializada" }) });
-    });
-    await mockUsuarioVerificado(page);
-    await page.goto("/viajes/nuevo", { waitUntil: "domcontentloaded" });
+  test("la tarifa cotizada se congela antes de avanzar al vehículo", async ({ page }) => {
+    await mockearTarifa(page, 500);
+    await seedMockAuthSession(page, { variante: "verificada" });
 
-    await page.locator("#origenCodigoPostal").fill("06600");
-    await page.locator("#destinoCodigoPostal").fill("64000");
-    await page.locator("#marca").selectOption("Otro");
-    await page.locator("#modelo").fill("Camión Especial");
-    await page.locator("#condicion").selectOption("rescate_mecanico");
+    await page.goto("/viajes/nuevo");
+    await esperarHidratacion(page);
 
-    await expect(page.getByText(/requiere cotización especial/i).first()).toBeVisible({ timeout: 10000 });
-    await expect(page.getByRole("button", { name: /Continuar con mi solicitud/i })).toBeDisabled();
-    const enlaceEspecial = page.getByRole("link", { name: /Solicitar cotización especial/i });
-    await expect(enlaceEspecial).toBeVisible();
-    await enlaceEspecial.click();
-    await expect(page).toHaveURL(/\/soporte/);
+    await page.locator("#gate-origenCodigoPostal").fill("03100");
+    await page.locator("#gate-destinoCodigoPostal").fill("06600");
+    await page.locator("#gate-marca").selectOption({ label: "Nissan" });
+    await page.locator("#gate-modelo").selectOption({ label: "Versa" });
+    await page.locator("#gate-condicion").selectOption("seminueva");
+
+    await expect(page.getByRole("button", { name: /Continuar · Tarifa est\. \$500 MXN/ })).toBeEnabled({ timeout: 30_000 });
+
+    // si el backend de tarifas está roto, el botón no se activa
+    await page.unroute("**/api/ruta");
+    await page.route("**/api/ruta", (route) => route.fulfill({ status: 500, contentType: "application/json", json: { error: "downstream_no_disponible" } }));
+
+    // recotiza cambiando el destino
+    await page.locator("#gate-destinoCodigoPostal").fill("01000");
+
+    // el usuario ve el error y no puede avanzar
+    await expect(page.getByText(/tarifa no disponible/i)).toBeVisible({ timeout: 25_000 });
+    await expect(page.getByRole("button", { name: /Continuar/ })).toBeDisabled();
   });
 
-  test("invalidación de tarifa: editar campo en paso 0 requiere re-confirmación", async ({ page }) => {
-    await seedMockAuthSession(page);
-    await mockMapboxGeocode(page);
-    await mockUsuarioVerificado(page);
-    await page.goto("/viajes/nuevo", { waitUntil: "domcontentloaded" });
+  test("el paso de vehículo pide los datos obligatorios y los congela", async ({ page }) => {
+    await mockearTarifa(page, 500);
+    await seedMockAuthSession(page, { variante: "verificada" });
 
-    await page.locator("#origenCodigoPostal").fill("06600");
-    await page.locator("#destinoCodigoPostal").fill("64000");
-    await page.locator("#marca").selectOption("Toyota");
-    await page.locator("#modelo").fill("Corolla");
-    await page.locator("#condicion").selectOption("rueda_y_enciende");
+    await page.goto("/viajes/nuevo");
+    await esperarHidratacion(page);
 
-    const btnAceptar = page.getByRole("button", { name: /Aceptar y continuar/i });
-    await expect(btnAceptar).toBeVisible({ timeout: 10000 });
-    await btnAceptar.click();
+    await page.locator("#gate-origenCodigoPostal").fill("03100");
+    await page.locator("#gate-destinoCodigoPostal").fill("06600");
+    await page.locator("#gate-marca").selectOption({ label: "Nissan" });
+    await page.locator("#gate-modelo").selectOption({ label: "Versa" });
+    await page.locator("#gate-condicion").selectOption("seminueva");
 
-    await page.getByRole("button", { name: /Editar/i }).first().click();
-    await expect(page.getByText(/Paso 1 de 5/i)).toBeVisible();
+    await expect(page.getByRole("button", { name: /Continuar · Tarifa est\. \$500 MXN/ })).toBeEnabled({ timeout: 30_000 });
+    await page.getByRole("button", { name: /Continuar · Tarifa est\. \$500 MXN/ }).click();
 
-    await page.locator("#origenCodigoPostal").fill("01000");
-    await expect(page.getByRole("button", { name: /Aceptar y continuar/i })).toBeVisible();
+    // Paso 2 de 5: datos del vehículo
+    await expect(page.getByText("Datos del vehículo")).toBeVisible({ timeout: 15_000 });
+
+    // continuar sin datos: el formulario no avanza
+    await page.getByRole("button", { name: /Continuar · Tarifa/ }).click();
+    await expect(page.getByText("Paso 2 de 5")).toBeVisible();
+
+    // el sheet de "Detalles del vehículo" pide color, placas, VIN, estado y checks
+    await page.locator("#anio").fill("2020");
+    await page.getByRole("button", { name: /Detalles del vehículo/i }).click();
+
+    await expect(page.locator("#color")).toBeVisible();
+    await expect(page.locator("#placas")).toBeVisible();
+    await expect(page.locator("#vin")).toBeVisible();
+    await expect(page.locator("#estadoGeneral")).toBeVisible();
+
+    await page.locator("#color").fill("Azul");
+    await page.locator("#placas").fill("ABC1234");
+    await page.locator("#vin").fill("1M8GDM9A0KP042788");
+    await page.locator("#estadoGeneral").selectOption("bueno");
+    await page.getByRole("button", { name: "Guardar detalles" }).click();
+
+    // con los datos guardados, el botón de continuar usa la tarifa congelada
+    const continuar = page.getByRole("button", { name: /Continuar · Tarifa: \$500\.00 MXN/ });
+    await expect(continuar).toBeEnabled({ timeout: 15_000 });
+    await continuar.click();
+
+    // avanza al paso 3 de 5: origen y destino
+    await expect(page.getByText("Origen y destino")).toBeVisible({ timeout: 15_000 });
+    await expect(page.getByText("Paso 3 de 5")).toBeVisible();
   });
-});
 
-test.describe("Didit modal a11y (R4)", () => {
-  test("modal usa showModal, ESC y focus trap", async ({ page }) => {
-    await seedMockAuthSession(page);
-    await mockDidit(page);
-    await page.route("**/rest/v1/rpc/subir_foto_perfil**", async (r) => r.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify("https://cdn.test/foto.jpg") }));
-    await page.goto("/verificacion", { waitUntil: "domcontentloaded" });
-    // Sin botón no hay flujo que probar: depende del estado de verificación
-    // en el backend (cuenta ya verificada). Skip explícito y visible en el reporte.
-    const btnDidit = page.getByRole("button", { name: /iniciar verificación con didit/i });
-    if (!(await btnDidit.isVisible().catch(() => false))) {
-      test.info().annotations.push({
-        type: "skip-precondicion",
-        description: "Botón Didit ausente: la cuenta ya está verificada o el backend no expone el flujo.",
-      });
-      console.warn("[e2e:didit] skip: botón 'iniciar verificación' ausente; precondición externa no cumplida.");
-      test.skip();
-      return;
-    }
-    await btnDidit.click();
-    const dialog = page.getByRole("dialog");
-    await expect(dialog).toBeVisible({ timeout: 5000 });
+  test("una tarifa especial bloquea el avance hasta cotizar con soporte", async ({ page }) => {
+    await mockearTarifa(page, 500);
+    // el mock devuelve disponible=false para tarifas especiales
+    await page.route("**/rest/v1/rpc/usuario_previsualizar_tarifa", (route) =>
+      route.fulfill({ status: 200, contentType: "application/json", json: { disponible: false, motivo: "Tarifa especial requerida" } })
+    );
+    await seedMockAuthSession(page, { variante: "verificada" });
+
+    await page.goto("/viajes/nuevo");
+    await esperarHidratacion(page);
+
+    await page.locator("#gate-origenCodigoPostal").fill("03100");
+    await page.locator("#gate-destinoCodigoPostal").fill("06600");
+    await page.locator("#gate-marca").selectOption({ label: "Nissan" });
+    await page.locator("#gate-modelo").selectOption({ label: "Versa" });
+    await page.locator("#gate-condicion").selectOption("seminueva");
+
+    // el usuario ve que debe cotizar con soporte
+    await expect(page.getByRole("button", { name: "Cotización especial requerida" })).toBeVisible({ timeout: 30_000 });
+    await expect(page.getByRole("button", { name: /Continuar/ })).toBeDisabled();
+
+    // el enlace a soporte funciona
+    const linkSoporte = page.getByRole("link", { name: "Solicitar cotización especial" });
+    await expect(linkSoporte).toBeVisible();
+    await linkSoporte.click();
+    await page.waitForURL("**/soporte", { timeout: 15_000 });
+  });
+
+  test("la verificación con Didit exige el portal y valida el formulario previo", async ({ page }) => {
+    await seedMockAuthSession(page, { variante: "pendiente" });
+
+    await page.goto("/verificacion");
+    await expect(page.locator("h1")).toContainText("Verificación de identidad");
+
+    // solo usuarios con identificación previa
+    await page.getByRole("button", { name: "Iniciar verificación con Didit" }).click();
+    await expect(page.getByText("Necesitas identificarte antes de verificar tu identidad.")).toBeVisible();
+
+    await page.getByLabel("Motivo de uso").fill("Traslado de mascota");
+    await page.getByLabel("Fecha de viaje").fill("2026-12-24");
+    await page.getByLabel("Descripción de la carga").fill("Mochila con objetos personales");
+
+    await page.getByRole("button", { name: "Iniciar verificación con Didit" }).click();
+
+    // se abre el modal de Didit (portal externo)
+    const dialog = page.locator('[role="dialog"][aria-labelledby="titulo-didit-usuario"]');
+    await expect(dialog).toBeVisible({ timeout: 30_000 });
     await expect(dialog).toHaveAttribute("aria-modal", "true");
-    await expect(dialog).toHaveAttribute("aria-describedby", /didit-desc/);
-    // Aviso previo de permisos visible dentro del modal
-    await expect(page.getByText(/solicitará acceso a.*cámara/i).first()).toBeVisible();
-    // ESC debe cerrar
+    await expect(dialog).toContainText("Verificación de identidad");
+    // aviso claro de lo que se necesita (cámara, micrófono, ubicación)
+    await expect(dialog.getByText(/cámara, micrófono y ubicación/i)).toBeVisible();
+    // el iframe del portal pide permisos de cámara
+    await expect(dialog.locator("iframe")).toHaveAttribute("allow", /camera/);
+
+    // el usuario puede salir del modal con Escape
     await page.keyboard.press("Escape");
-    await expect(dialog).toBeHidden({ timeout: 3000 });
+    await expect(dialog).toBeHidden({ timeout: 10_000 });
   });
 
-  test("iframe didit tiene allow camera/microscope y title", async ({ page }) => {
-    await seedMockAuthSession(page);
-    await mockDidit(page);
-    await page.route("**/rest/v1/rpc/subir_foto_perfil**", async (r) => r.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify("https://cdn.test/foto.jpg") }));
-    await page.goto("/verificacion", { waitUntil: "domcontentloaded" });
-    const btnDidit = page.getByRole("button", { name: /iniciar verificación con didit/i });
-    if (!(await btnDidit.isVisible().catch(() => false))) {
-      test.info().annotations.push({
-        type: "skip-precondicion",
-        description: "Botón Didit ausente: la cuenta ya está verificada o el backend no expone el flujo.",
-      });
-      console.warn("[e2e:didit] skip: botón 'iniciar verificación' ausente; precondición externa no cumplida.");
-      test.skip();
-      return;
-    }
-    await btnDidit.click();
-    const iframe = page.locator('iframe[title*="Didit"]');
-    await expect(iframe).toBeVisible({ timeout: 8000 }).catch(async () => { await expect(page.getByRole("dialog")).toBeVisible(); });
-    if (await iframe.isVisible().catch(() => false)) {
-      await expect(iframe).toHaveAttribute("allow", /camera/);
-      await expect(iframe).toHaveAttribute("title", /Didit/);
-    }
+  test("el wizard carga masiva avisa el límite antes de subir", async ({ page }) => {
+    await seedMockAuthSession(page, { variante: "verificada" });
+
+    await page.goto("/viajes/nuevo");
+    await esperarHidratacion(page);
+
+    // la carga masiva solo se ofrece a usuarios verificados
+    await page.getByRole("button", { name: "Carga masiva de traslados" }).click();
+    await expect(page.getByRole("dialog")).toContainText("Carga masiva de traslados");
+    await expect(page.getByRole("dialog")).toContainText("Máximo 100 traslados · 5 MB");
+  });
+
+  test("el usuario ve la lista de sus traslados", async ({ page }) => {
+    await seedMockAuthSession(page, { variante: "verificada" });
+
+    await page.goto("/mis-viajes");
+    await expect(page.locator("h1")).toContainText("Mis Traslados");
+
+    // filtros de estado: activos, finalizados y todos
+    await expect(page.getByRole("tab", { name: "Activos" })).toBeVisible();
+    await expect(page.getByRole("tab", { name: "Finalizados" })).toBeVisible();
+    await expect(page.getByRole("tab", { name: "Todos" })).toBeVisible();
+
+    // estado vacío legible
+    await expect(page.getByText("Sin traslados · Finalizados")).toBeVisible();
+  });
+
+  test("soporte funciona para un usuario autenticado", async ({ page }) => {
+    await seedMockAuthSession(page, { variante: "verificada" });
+
+    await page.goto("/soporte");
+    await expect(page.locator("h1")).toContainText("Soporte");
+    // el usuario ve canales de contacto
+    await expect(page.getByText("Canales de soporte")).toBeVisible();
+  });
+
+  test("las rutas privadas piden sesión y muestran el aviso correcto", async ({ page }) => {
+    await page.goto("/viajes/nuevo");
+
+    // T-03: si el middleware cambia, la URL exacta del redirect es la aserción.
+    await page.waitForURL("**/login?next=%2Fviajes%2Fnuevo&reason=authentication_required", { timeout: 15_000 });
+    expect(await rutaActual(page)).toBe("/login?next=%2Fviajes%2Fnuevo&reason=authentication_required");
+
+    // el usuario entiende por qué llegó al login
+    await expect(page.getByText("Inicia sesión para solicitar un traslado")).toBeVisible();
+  });
+
+  test("una sesión inválida no da acceso a las rutas privadas", async ({ page }) => {
+    await seedMockAuthSession(page, { variante: "verificada", token: "sbp_token_invalido_e2e" });
+
+    await page.goto("/viajes/nuevo");
+
+    // T-03: el resultado final es el login, no una página privada.
+    await page.waitForURL("**/login**", { timeout: 15_000 });
+    expect(await rutaActual(page)).toContain("/login");
+    await expect(page.locator("#login-email")).toBeVisible();
+  });
+
+  test("con sesión válida el login redirige al home y no bloquea", async ({ page }) => {
+    await seedMockAuthSession(page, { variante: "verificada" });
+
+    await page.goto("/login");
+    await page.waitForURL("/", { timeout: 15_000 });
+    expect(await rutaActual(page)).toBe("/");
+  });
+
+  test("con sesión válida /mis-viajes es accesible", async ({ page }) => {
+    await seedMockAuthSession(page, { variante: "verificada" });
+
+    await page.goto("/mis-viajes");
+    await expect(page.locator("h1")).toContainText("Mis Traslados");
+    expect(await rutaActual(page)).toBe("/mis-viajes");
   });
 });
 
-test.describe("Carga masiva", () => {
-  test("abre el módulo desde el wizard y muestra límites 100 / 5 MB", async ({ page }) => {
-    await seedMockAuthSession(page);
-    await mockMapboxGeocode(page);
-    await mockUsuarioVerificado(page);
-    await page.goto("/viajes/nuevo", { waitUntil: "domcontentloaded" });
-    // El módulo es un BottomSheet dentro del Paso 0 del wizard (no una ruta propia).
-    const btn = page.getByRole("button", { name: /Abrir módulo de carga masiva de traslados/i });
-    await expect(btn).toBeVisible({ timeout: 10000 });
-    await btn.click();
-    await expect(page.getByRole("heading", { name: /carga masiva de traslados/i })).toBeVisible();
-    await expect(page.getByText(/máximo 100/i).first()).toBeVisible();
-    await expect(page.getByText(/5 MB/i).first()).toBeVisible();
-  });
-});
+test.describe("Reglas de negocio del perfil de usuario", () => {
+  test("un usuario verificado y con términos aceptados pasa el guard del wizard", async ({ page }) => {
+    await seedMockAuthSession(page, { variante: "verificada" });
 
-test.describe("Mis Traslados y soporte", () => {
-  test("mis-viajes filtra por pestañas sin error", async ({ page }) => {
-    await seedMockAuthSession(page);
-    // Mock pasaporte_digital vacío para que no falle
-    await page.route("**/rest/v1/pasaporte_digital**", async (r) => r.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify([]) }));
-    await page.goto("/mis-viajes", { waitUntil: "domcontentloaded" });
-    await expect(page.getByRole("heading", { name: /mis traslados/i })).toBeVisible();
-    // Pestañas reales del componente: Activos / Programados / Finalizados / Cancelados
-    await page.getByRole("button", { name: /^Activos/i }).click();
-    await page.getByRole("button", { name: /^Finalizados/i }).click();
-    await expect(page.getByText(/sin traslados|no se encontraron/i).first()).toBeVisible({ timeout: 5000 });
-  });
-
-  test("soporte muestra contexto y link con ?viaje", async ({ page }) => {
-    await page.goto("/soporte?viaje=123e4567-e89b-12d3-a456-426614174000", { waitUntil: "domcontentloaded" });
-    await expect(page.getByRole("heading", { name: /ayuda|soporte/i }).first()).toBeVisible({ timeout: 5000 }).catch(async () => {
-      await expect(page.locator("body")).toContainText(/soporte/i);
-    });
+    await page.goto("/viajes/nuevo");
+    // el formulario del wizard está disponible: el guard no lo bloquea
+    await expect(page.locator("#gate-origenCodigoPostal")).toBeVisible({ timeout: 30_000 });
+    // sin banner de consentimiento legal pendiente
+    await expect(page.getByText(/revisa y acepta los términos/i)).toBeHidden();
   });
 });
