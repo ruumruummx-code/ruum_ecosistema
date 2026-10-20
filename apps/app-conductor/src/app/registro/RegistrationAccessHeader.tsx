@@ -2,7 +2,7 @@ import Image from "next/image";
 import type { ReactNode } from "react";
 import styles from "./registration.module.css";
 
-export function RegistrationAccessHeader({ step, onBack, children }: { step: 1 | 2; onBack: () => void; children?: ReactNode }) {
+export function RegistrationAccessHeader({ step, onBack, children }: { step: 1 | 2 | 4 | 5; onBack: () => void; children?: ReactNode }) {
   return <header className={styles.appBar}>
     <button type="button" onClick={onBack} aria-label="Atrás">‹ Atrás</button>
     <Image src="/imagenes/ruum-logo.svg" alt="Ruum Ruum" width={150} height={49} priority className={styles.accountLogo} />

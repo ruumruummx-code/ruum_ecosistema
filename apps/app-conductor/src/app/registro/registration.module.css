@@ -378,3 +378,135 @@
 @media (prefers-reduced-motion: reduce) {
   .identityFields .summary, .identityFields .field { transition: none; }
 }
+
+/* Pasos 4 y 5: composición móvil a partir de las pantallas de registro de conductor. */
+.completionStep {
+  width: min(100%, 440px);
+  margin-inline: auto;
+  padding: max(12px, env(safe-area-inset-top)) max(20px, env(safe-area-inset-right)) max(12px, env(safe-area-inset-bottom)) max(20px, env(safe-area-inset-left));
+  background: #fff;
+  color: #081b37;
+  font-family: var(--font-body, Arial, sans-serif);
+}
+.completionStep .appBar {
+  min-height: 56px;
+  grid-template-columns: 64px minmax(0, 1fr) 68px;
+  gap: 6px;
+  padding: 0;
+  border: 0;
+}
+.completionStep .appBar button { justify-content: flex-start; padding: 0; font-size: 14px; }
+.completionStep .form { gap: 10px; }
+.completionStep .segmentedProgress { gap: 8px; text-align: right; font-size: 12px; color: #52617b; }
+.completionStep .segmentedProgress > div { display: flex; gap: 3px; }
+.completionStep .segmentedProgress i { flex: 1; height: 6px; border-radius: 999px; background: #dfe5ef; }
+.completionStep .segmentedProgress i[data-active="true"] { background: #0060ff; }
+.completionStep .accountLogo { width: min(100%, 150px); height: auto; justify-self: center; }
+.completionStep .documentsStep, .completionStep .reviewStep {
+  width: 100%; max-width: none; margin: 0; padding: 8px 0 0; gap: 14px;
+}
+.completionStep .stepIntro { padding: 0; }
+.completionStep .stepIntro h1 { margin: 0; color: #081b37; font-size: 34px; line-height: 1.15; font-weight: 750; letter-spacing: -1px; }
+.completionStep .stepIntro p { margin: 6px 0 0; color: #52617b; font-size: 16px; line-height: 22px; }
+.completionStep .documentRows { gap: 14px; }
+.completionStep .documentCard {
+  display: flex; min-height: 112px; align-items: center; gap: 12px; padding: 10px 14px;
+  border: 1px solid #d8dce5; border-radius: 16px; background: #fff;
+}
+.completionStep .documentArtwork {
+  position: relative; display: grid; width: 76px; height: 76px; flex: 0 0 76px; place-items: center;
+  overflow: hidden; border-radius: 10px; background: #e9eef6; color: #203d73;
+}
+.completionStep .frontArtwork i, .completionStep .backArtwork i { position: absolute; top: 17px; left: 10px; width: 56px; height: 9px; background: #93a8c6; }
+.completionStep .frontArtwork b { position: absolute; left: 12px; bottom: 14px; width: 22px; height: 22px; border-radius: 50% 50% 38% 38%; background: #304b78; }
+.completionStep .frontArtwork em, .completionStep .backArtwork em { position: absolute; right: 10px; bottom: 16px; width: 28px; height: 4px; background: #9caeca; box-shadow: 0 8px #9caeca, 0 16px #9caeca; }
+.completionStep .backArtwork b { position: absolute; top: 32px; left: 10px; width: 56px; height: 23px; background: #bdcbe0; }
+.completionStep .passportArtwork { align-content: center; gap: 2px; background: #263c68; color: #f4d88b; font-size: 32px; }
+.completionStep .passportArtwork small { font-size: 7px; letter-spacing: .3px; }
+.completionStep .documentCopy { display: grid; min-width: 0; flex: 1; gap: 2px; }
+.completionStep .documentCopy strong { color: #081b37; font-size: 15px; line-height: 19px; }
+.completionStep .documentCopy > span { color: #52617b; font-size: 14px; line-height: 18px; }
+.completionStep .documentCopy small { overflow: hidden; color: #71809a; font-size: 11px; line-height: 15px; text-overflow: ellipsis; white-space: nowrap; }
+.completionStep .documentCopy .documentError { color: #b42335; }
+.completionStep .uploadButton {
+  display: grid; width: 96px; min-width: 44px; height: 88px; flex: 0 0 96px; place-content: center; gap: 5px;
+  border: 1px solid #d7e5fa; border-radius: 10px; background: #f5f9ff; color: #0060ee; font-size: 14px; font-weight: 700;
+}
+.completionStep .uploadButton svg { width: 26px; height: 26px; margin: auto; fill: none; stroke: currentColor; stroke-width: 2.25; }
+.completionStep .uploadButton:hover { background: #e8f1ff; }
+.completionStep .uploadButton:active { background: #d9e9ff; transform: scale(.98); }
+.completionStep .documentHint { display: flex; align-items: center; gap: 14px; margin: 4px 0 0; padding: 14px 16px; border-radius: 14px; background: #eaf4ff; color: #075bc7; }
+.completionStep .documentHint > span { display: grid; width: 34px; height: 34px; flex: 0 0 34px; place-items: center; border: 2px solid currentColor; border-radius: 50%; font-family: Georgia, serif; font-size: 24px; font-weight: 700; }
+.completionStep .documentHint p { margin: 0; font-size: 14px; line-height: 20px; }
+.completionStep .documentAlert { margin: 0; padding: 12px; border-radius: 12px; background: #fff4d6; color: #805600; font-size: 13px; line-height: 18px; }
+.completionStep .actionFooter { display: grid; grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr); gap: 12px; padding: 12px 0 0; border: 0; }
+.completionStep .actionFooter .primary, .completionStep .actionFooter .secondaryAction { width: 100%; height: 56px; min-height: 44px; margin: 0; border-radius: 14px; font-size: 16px; }
+.completionStep .actionFooter .secondaryAction { border: 1px solid #b8c7dc; background: #fff; color: #081b37; font-weight: 700; }
+.completionStep .actionFooter .primary { background: #0060ff; }
+.completionStep .actionFooter .primary[data-final-action="true"] { grid-column: 1 / -1; }
+.completionStep .reviewStep { justify-content: flex-start; }
+.completionStep .reviewRows { gap: 10px; }
+.completionStep .reviewRow { min-height: 92px; gap: 10px; padding: 10px 12px; border-color: #d8dce5; border-radius: 15px; }
+.completionStep .reviewIcon { display: grid; width: 40px; height: 40px; flex: 0 0 40px; place-items: center; color: #081b37; font-size: 26px; line-height: 1; }
+.completionStep .reviewRowMain { gap: 3px; }
+.completionStep .reviewRowMain strong { font-size: 15px; line-height: 19px; }
+.completionStep .reviewRowMain > span { overflow: hidden; color: #52617b; font-size: 12px; line-height: 17px; text-overflow: ellipsis; white-space: nowrap; }
+.completionStep .reviewEdit { width: 44px; height: 44px; flex-basis: 44px; padding: 0; color: #0060ee; font-size: 14px; font-weight: 600; }
+.completionStep .documentChecks { display: grid; gap: 5px; padding-top: 2px; }
+.completionStep .documentChecks span { display: flex; align-items: center; gap: 8px; color: #52617b; font-size: 12px; line-height: 15px; }
+.completionStep .documentChecks b { display: grid; width: 18px; height: 18px; place-items: center; border-radius: 50%; background: #e2e8f0; color: #52617b; font-size: 12px; }
+.completionStep .documentChecks span[data-ready="true"] b { background: #13ad71; color: #fff; }
+.completionStep .reviewConsent { display: flex; align-items: flex-start; gap: 10px; min-height: 44px; margin-top: auto; padding-top: 4px; color: #52617b; font-size: 13px; line-height: 18px; }
+.completionStep .reviewConsent input { width: 28px; height: 28px; flex: 0 0 28px; margin: 0; accent-color: #0060ff; }
+.completionStep .reviewConsent a { color: #0060ee; text-decoration: underline; text-underline-offset: 2px; }
+.completionStep:has(.reviewStep) .actionFooter { grid-template-columns: 1fr; }
+
+@container (max-height: 720px) {
+  .completionStep { padding-top: max(8px, env(safe-area-inset-top)); padding-bottom: max(8px, env(safe-area-inset-bottom)); }
+  .completionStep .appBar { min-height: 46px; }
+  .completionStep .documentsStep, .completionStep .reviewStep { gap: 8px; padding-top: 3px; }
+  .completionStep .stepIntro h1 { font-size: 28px; }
+  .completionStep .stepIntro p { margin-top: 3px; font-size: 14px; line-height: 18px; }
+  .completionStep .documentRows, .completionStep .reviewRows { gap: 7px; }
+  .completionStep .documentCard { min-height: 88px; padding: 7px 10px; gap: 9px; }
+  .completionStep .documentArtwork { width: 58px; height: 58px; flex-basis: 58px; }
+  .completionStep .frontArtwork i, .completionStep .backArtwork i { top: 12px; left: 8px; width: 42px; height: 7px; }
+  .completionStep .frontArtwork b { left: 9px; bottom: 10px; width: 17px; height: 17px; }
+  .completionStep .frontArtwork em, .completionStep .backArtwork em { right: 7px; bottom: 12px; width: 21px; height: 3px; box-shadow: 0 6px #9caeca, 0 12px #9caeca; }
+  .completionStep .backArtwork b { top: 25px; left: 8px; width: 42px; height: 18px; }
+  .completionStep .documentCopy strong { font-size: 13px; line-height: 17px; }
+  .completionStep .documentCopy > span { font-size: 12px; line-height: 16px; }
+  .completionStep .documentCopy small { font-size: 10px; line-height: 13px; }
+  .completionStep .uploadButton { width: 68px; height: 68px; flex-basis: 68px; font-size: 12px; }
+  .completionStep .uploadButton svg { width: 22px; height: 22px; }
+  .completionStep .documentHint { gap: 10px; padding: 9px 12px; }
+  .completionStep .documentHint > span { width: 28px; height: 28px; flex-basis: 28px; font-size: 20px; }
+  .completionStep .documentHint p { font-size: 12px; line-height: 16px; }
+  .completionStep .actionFooter { gap: 8px; padding-top: 8px; }
+  .completionStep .actionFooter .primary, .completionStep .actionFooter .secondaryAction { height: 48px; font-size: 14px; }
+  .completionStep .reviewRow { min-height: 70px; padding: 6px 9px; }
+  .completionStep .reviewIcon { width: 32px; height: 32px; flex-basis: 32px; font-size: 22px; }
+  .completionStep .reviewRowMain strong { font-size: 13px; line-height: 16px; }
+  .completionStep .reviewRowMain > span, .completionStep .documentChecks span { font-size: 11px; line-height: 14px; }
+  .completionStep .documentChecks { gap: 2px; }
+  .completionStep .documentChecks b { width: 15px; height: 15px; font-size: 10px; }
+  .completionStep .reviewConsent { padding-top: 0; font-size: 11px; line-height: 15px; }
+  .completionStep .reviewConsent input { width: 24px; height: 24px; flex-basis: 24px; }
+}
+@container (max-height: 590px) {
+  .completionStep .appBar { min-height: 38px; }
+  .completionStep .accountLogo { max-width: 112px; }
+  .completionStep .segmentedProgress { gap: 4px; font-size: 10px; }
+  .completionStep .stepIntro h1 { font-size: 24px; }
+  .completionStep .stepIntro p { font-size: 12px; line-height: 15px; }
+  .completionStep .documentCard { min-height: 74px; }
+  .completionStep .documentArtwork { width: 46px; height: 46px; flex-basis: 46px; }
+  .completionStep .documentCopy small { font-size: 9px; }
+  .completionStep .uploadButton { width: 56px; height: 56px; flex-basis: 56px; font-size: 11px; }
+  .completionStep .documentHint { padding-block: 7px; }
+  .completionStep .actionFooter .primary, .completionStep .actionFooter .secondaryAction { height: 44px; }
+  .completionStep .reviewRow { min-height: 63px; }
+  .completionStep .reviewRowMain > span { font-size: 10px; line-height: 13px; }
+  .completionStep .reviewConsent { min-height: 36px; font-size: 10px; line-height: 13px; }
+  .completionStep .reviewConsent input { width: 22px; height: 22px; flex-basis: 22px; }
+}

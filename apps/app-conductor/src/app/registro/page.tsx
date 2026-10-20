@@ -1030,7 +1030,7 @@ export default function PaginaRegistroConductor() {
   });
 
   return (
-    <RegistrationShell compact={registroCompacto} account={paso === 0 || pendienteOtp} identity={paso === 1 && !pendienteOtp}>
+    <RegistrationShell compact={registroCompacto} account={paso === 0 || pendienteOtp} identity={paso === 1 && !pendienteOtp} completion={paso === 3 || paso === 4}>
         {mostrarDetalleConsentimiento && <LicenseConsentDetails onClose={() => setMostrarDetalleConsentimiento(false)} />}
         {mostrarVerificacionDidit && (
           <DiditVerificationModal
@@ -1251,15 +1251,19 @@ export default function PaginaRegistroConductor() {
                   ciudad={ciudad}
                   estado={estado}
                   codigoPostal={codigoPostal}
-                  referencias={referencias}
-                  contactoEmergenciaTelefono={contactoEmergenciaTelefono}
                   numeroLicencia={numeroLicencia}
                   tipoLicencia={tipoLicencia}
                   vigenciaLicencia={vigenciaLicencia}
-                  autorizaVerificacion={autorizaVerificacion}
-                  declaraSinSuspensiones={declaraSinSuspensiones}
                   documentos={documentos}
                   documentosRemotos={documentosRemotos}
+                  aceptaTerminos={aceptaTerminos && confirmaPrivacidad}
+                  onAceptarTerminos={(acepta) => {
+                    setAceptaTerminos(acepta);
+                    setConfirmaPrivacidad(acepta);
+                    limpiarErrorCampo("aceptaTerminos");
+                    limpiarErrorCampo("confirmaPrivacidad");
+                    if (acepta) aceptadosEnRef.current = new Date().toISOString();
+                  }}
                   onEditar={setPaso}
                 />
               )}
@@ -1292,16 +1296,15 @@ export default function PaginaRegistroConductor() {
 
               {registroCompacto ? (
                 <footer className={styles.actionFooter}>
-                  {paso === 3 && <p className={styles.microcopy}>ⓘ Sube imágenes claras, completas y legibles.</p>}
-                  {paso === 4 && <p className={styles.microcopy}>Al presionar {sesionAutenticada ? "Enviar registro" : "Crear cuenta"}, confirmo que la información es correcta y acepto los <a href="/legal/terminos" target="_blank" rel="noopener noreferrer">Términos y Condiciones</a> y el <a href="/legal/privacidad" target="_blank" rel="noopener noreferrer">Aviso de Privacidad</a>.</p>}
                   {paso === 2 && <p className={styles.microcopy}>
                     Al continuar, declaras que tu licencia es válida y autorizas la verificación de antecedentes y datos biométricos. <a href="/legal/privacidad" target="_blank" rel="noopener noreferrer">Privacidad</a> · <a href="/legal/terminos" target="_blank" rel="noopener noreferrer">Términos</a>
                     <button type="button" className={styles.legalTrigger} onClick={() => setMostrarDetalleConsentimiento(true)}>Ver declaración</button>
                   </p>}
-                  <button className={styles.primary} type="submit" aria-busy={enviando}
+                  {paso === 3 && <button className={styles.secondaryAction} type="button" onClick={volver}>Atrás</button>}
+                  <button className={styles.primary} data-final-action={paso === 4 || undefined} type="submit" aria-busy={enviando}
                     disabled={!registroListo || enviando || !tieneSupabaseConfigurado() || (paso === 0 && !cuentaCompleta) || (paso === 1 && !domicilioYContactoCompletos) || (paso === 3 && !(documentoDisponible("licenciaFrente") && documentoDisponible("licenciaReverso") && documentoDisponible("identificacionOficial")))}>
-                    {!registroListo ? "Preparando…" : enviando ? "Guardando…" : paso === 0 && !sesionAutenticada ? "Crear cuenta y continuar" : paso === 1 ? "Guardar y continuar" : paso === 4 ? (sesionAutenticada ? "Enviar registro" : "Crear cuenta") : "Continuar"}
-                    {paso < 2 && <RegistrationIcon name="arrow" />}
+                    {!registroListo ? "Preparando…" : enviando ? "Guardando…" : paso === 0 && !sesionAutenticada ? "Crear cuenta y continuar" : paso === 1 ? "Guardar y continuar" : paso === 4 ? "Crear cuenta" : "Continuar"}
+                    {(paso < 2 || paso >= 3) && <RegistrationIcon name="arrow" />}
                   </button>
                   {paso === 0 && <p className={styles.accountLogin}>¿Ya tienes una cuenta? <Link href="/login">Entrar</Link></p>}
                 </footer>

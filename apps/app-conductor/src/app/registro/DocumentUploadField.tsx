@@ -17,7 +17,7 @@ function textoEstadoDocumento(estado: EstadoDocumento, nombreArchivo: string) {
   }[estado];
 }
 
-const TAMANO_MAXIMO_BYTES = 10 * 1024 * 1024; // 10 MB
+const TAMANO_MAXIMO_BYTES = 5 * 1024 * 1024; // 5 MB
 const FORMATOS_PERMITIDOS = ["JPG", "PNG", "WEBP", "PDF"];
 
 export function DocumentUploadField({
@@ -62,7 +62,7 @@ export function DocumentUploadField({
     if (archivoSeleccionado) {
       // Validar tamaño
       if (archivoSeleccionado.size > TAMANO_MAXIMO_BYTES) {
-        setErrorLocal("El archivo excede el tamaño máximo permitido de 10 MB.");
+        setErrorLocal("El archivo excede el tamaño máximo permitido de 5 MB.");
         onSeleccionar(null);
         return;
       }

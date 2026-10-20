@@ -1,11 +1,12 @@
 import styles from "./registration.module.css";
 
-export function ReviewSummary({ titulo, valores, onEditar }: { titulo: string; valores: Array<string | undefined>; onEditar?: () => void }) {
-  return <div className={styles.reviewRow}>
+export function ReviewSummary({ titulo, valores, icono, onEditar }: { titulo: string; valores: Array<string | undefined>; icono: "person" | "identity" | "license"; onEditar: () => void }) {
+  return <section className={styles.reviewRow} aria-label={titulo}>
+    <span className={styles.reviewIcon} aria-hidden="true">{icono === "person" ? "♙" : icono === "identity" ? "▣" : "▱"}</span>
     <div className={styles.reviewRowMain}>
       <strong>{titulo}</strong>
-      <span title={valores.filter(Boolean).join(" · ")}>{valores.filter(Boolean).join(" · ")}</span>
+      {valores.filter(Boolean).map((valor) => <span key={valor}>{valor}</span>)}
     </div>
-    {onEditar && <button type="button" className={styles.reviewEdit} onClick={onEditar} aria-label={`Editar ${titulo.toLowerCase()}`}>✎</button>}
-  </div>;
+    <button type="button" className={styles.reviewEdit} onClick={onEditar} aria-label={`Editar ${titulo.toLowerCase()}`}>Editar</button>
+  </section>;
 }

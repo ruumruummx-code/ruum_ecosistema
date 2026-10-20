@@ -41,10 +41,10 @@ export function useRegistrationDocuments({
   }
 
   function cambiarDocumento(campo: DocumentoKey, archivo: File | null) {
-    if (archivo && archivo.size > 10 * 1024 * 1024) {
+    if (archivo && archivo.size > 5 * 1024 * 1024) {
       setDocumentos((prev) => ({ ...prev, [campo]: null }));
       setEstadoDocumentos((prev) => ({ ...prev, [campo]: "error" }));
-      setCampoError(campo, "El archivo debe pesar máximo 10 MB");
+      setCampoError(campo, "El archivo debe pesar máximo 5 MB");
       return;
     }
     if (archivo && !TIPOS_ARCHIVO_PERMITIDOS.has(archivo.type)) {

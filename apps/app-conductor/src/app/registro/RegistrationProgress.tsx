@@ -14,6 +14,7 @@ export function RegistrationProgress({ paso, onBack, borradorLocalGuardado, sesi
   </output>;
   if (paso === 0) return <RegistrationAccessHeader step={1} onBack={onBack}>{estadoGuardado}</RegistrationAccessHeader>;
   if (paso === 1) return <RegistrationAccessHeader step={2} onBack={onBack}>{estadoGuardado}</RegistrationAccessHeader>;
+  if (paso >= 3) return <RegistrationAccessHeader step={paso + 1 as 4 | 5} onBack={onBack}>{estadoGuardado}</RegistrationAccessHeader>;
   return (
     <header className={styles.appBar}>
       <button type="button" onClick={onBack} aria-label="Atrás">‹ Atrás</button>
