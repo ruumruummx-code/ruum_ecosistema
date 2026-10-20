@@ -62,6 +62,15 @@ import { useRegistrationTelemetry } from "./useRegistrationTelemetry";
 
 const VERSION_APP_REGISTRO = "1.0.0";
 
+function mensajeDeError(error: unknown): string {
+  if (typeof error === "string") return error;
+  if (error && typeof error === "object" && "message" in error) {
+    const mensaje = (error as { message?: unknown }).message;
+    if (typeof mensaje === "string") return mensaje;
+  }
+  return "";
+}
+
 function canalRegistro(): "web" | "android" | "ios" {
   if (/android/i.test(navigator.userAgent)) return "android";
   if (/iPad|iPhone|iPod/i.test(navigator.userAgent)) return "ios";
@@ -551,21 +560,53 @@ export default function PaginaRegistroConductor() {
 
   async function procesarSolicitudAutenticada(cliente: ReturnType<typeof crearClienteNavegador>) {
     const solicitudId = solicitudRemotaIdRef.current ?? solicitudRemotaId ?? await prepararSolicitudBorrador(cliente);
-    await registrarConsentimientosConductor(
-      cliente,
-      solicitudId,
-      [
-        { tipoDocumento: "terminos_servicio", version: 1 },
-        { tipoDocumento: "aviso_privacidad", version: 1 },
-        { tipoDocumento: "autorizacion_antecedentes", version: 1 },
-        { tipoDocumento: "declaracion_suspensiones", version: 1 }
-      ],
-      canalRegistro(),
-      VERSION_APP_REGISTRO
-    );
-    await guardarBorradorConductor(cliente, contratoExpediente(), PASOS_REGISTRO.length);
-    await cargarDocumentos(cliente, solicitudId);
-    const resultado = await enviarSolicitudConductor(cliente);
+
+    // Si la solicitud ya fue enviada (reintento tras un fallo posterior), las
+    // RPC de consentimientos/borrador rechazan cambios. Continuamos al envío,
+    // que es idempotente si el estado ya es `en_revision`.
+    try {
+      await registrarConsentimientosConductor(
+        cliente,
+        solicitudId,
+        [
+          { tipoDocumento: "terminos_servicio", version: 1 },
+          { tipoDocumento: "aviso_privacidad", version: 1 },
+          { tipoDocumento: "autorizacion_antecedentes", version: 1 },
+          { tipoDocumento: "declaracion_suspensiones", version: 1 }
+        ],
+        canalRegistro(),
+        VERSION_APP_REGISTRO
+      );
+    } catch (err) {
+      if (!/ya no admite consentimientos/i.test(mensajeDeError(err))) {
+        console.error("[registro] fallo registrando consentimientos", err);
+        throw err;
+      }
+    }
+
+    try {
+      await guardarBorradorConductor(cliente, contratoExpediente(), PASOS_REGISTRO.length);
+    } catch (err) {
+      if (!/ya no admite cambios/i.test(mensajeDeError(err))) {
+        console.error("[registro] fallo guardando borrador", err);
+        throw err;
+      }
+    }
+
+    try {
+      await cargarDocumentos(cliente, solicitudId);
+    } catch (err) {
+      console.error("[registro] fallo cargando documentos", err);
+      throw err;
+    }
+
+    let resultado;
+    try {
+      resultado = await enviarSolicitudConductor(cliente);
+    } catch (err) {
+      console.error("[registro] fallo enviando solicitud", err);
+      throw err;
+    }
     registrarTelemetria("solicitud_enviada", PASOS_REGISTRO.length, "enviado");
 
     // Auto-iniciar verificación Didit tras envío exitoso (solicitud en_revision)
@@ -630,7 +671,13 @@ export default function PaginaRegistroConductor() {
     } catch (err) {
       if (cuentaCreada) registrarTelemetria("rpc_error", paso + 1, "enviar_solicitud");
       setErrorRecuperable(true);
-      setError(cuentaCreada ? traducirErrorOperativo(err, "No pudimos enviar tu solicitud. Tu cuenta quedó creada y puedes reintentar.") : traducirErrorAuth(err));
+      const generico = "No pudimos enviar tu solicitud. Tu cuenta quedó creada y puedes reintentar.";
+      const traducido = cuentaCreada ? traducirErrorOperativo(err, generico) : traducirErrorAuth(err);
+      // Los errores de la RPC ya vienen en español y son accionables. Si la
+      // traducción cayó al mensaje genérico, mostramos el detalle real para
+      // que el usuario (y soporte) sepan qué falta corregir.
+      const detalle = mensajeDeError(err).trim();
+      setError(traducido === generico && detalle ? `${generico} Detalle: ${detalle}` : traducido);
     } finally {
       setEnviando(false);
     }
@@ -648,7 +695,10 @@ export default function PaginaRegistroConductor() {
       setEnviado(true);
     } catch (err) {
       setErrorRecuperable(true);
-      setError(traducirErrorOperativo(err, "No pudimos reintentar el envío. Inténtalo de nuevo."));
+      const generico = "No pudimos reintentar el envío. Inténtalo de nuevo.";
+      const traducido = traducirErrorOperativo(err, generico);
+      const detalle = mensajeDeError(err).trim();
+      setError(traducido === generico && detalle ? `${generico} Detalle: ${detalle}` : traducido);
     } finally {
       setEnviando(false);
     }
