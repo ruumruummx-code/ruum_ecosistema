@@ -6,6 +6,7 @@ const isDummySupabase =
   process.env.PLAYWRIGHT_SUPABASE_SERVICE_ROLE_KEY === 'ci-service-role' ||
   (process.env.PLAYWRIGHT_SUPABASE_URL || '').includes('ci.supabase.test');
 const skipGlobalSetup = process.env.PLAYWRIGHT_SKIP_GLOBAL_SETUP === '1' || isDummySupabase;
+const includeAllBrowsers = !process.env.CI || process.env.PLAYWRIGHT_ALL_BROWSERS === '1';
 
 export default defineConfig({
   testDir: './tests',
@@ -36,16 +37,20 @@ export default defineConfig({
       use: { ...devices['Desktop Chrome'], storageState: 'tests/.auth/conductor.json' },
       dependencies: ['setup'],
     },
-    {
-      name: 'firefox',
-      use: { ...devices['Desktop Firefox'], storageState: 'tests/.auth/conductor.json' },
-      dependencies: ['setup'],
-    },
-    {
-      name: 'webkit',
-      use: { ...devices['Desktop Safari'], storageState: 'tests/.auth/conductor.json' },
-      dependencies: ['setup'],
-    },
+    ...(includeAllBrowsers
+      ? [
+          {
+            name: 'firefox',
+            use: { ...devices['Desktop Firefox'], storageState: 'tests/.auth/conductor.json' },
+            dependencies: ['setup'],
+          },
+          {
+            name: 'webkit',
+            use: { ...devices['Desktop Safari'], storageState: 'tests/.auth/conductor.json' },
+            dependencies: ['setup'],
+          },
+        ]
+      : []),
     {
       name: 'Mobile Chrome',
       use: { ...devices['Pixel 5'], storageState: 'tests/.auth/conductor.json' },
@@ -62,9 +67,9 @@ export default defineConfig({
         reuseExistingServer: !process.env.CI,
         env: {
           NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL || 'http://127.0.0.1:54321',
-          NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '',
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'ci-anon-key-placeholder',
           SUPABASE_URL: process.env.SUPABASE_URL || 'http://127.0.0.1:54321',
-          SUPABASE_ANON_KEY: process.env.SUPABASE_ANON_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '',
+          SUPABASE_ANON_KEY: process.env.SUPABASE_ANON_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'ci-anon-key-placeholder',
         },
       },
 });

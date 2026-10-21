@@ -23,6 +23,38 @@ async function abrirTraslados(
   ).toBeHidden({ timeout: DATA_READY_TIMEOUT });
 }
 
+async function seedMockRecoverySession(page: import("@playwright/test").Page) {
+  const configuredUrl =
+    process.env.NEXT_PUBLIC_SUPABASE_URL ??
+    process.env.PLAYWRIGHT_SUPABASE_URL ??
+    "http://127.0.0.1:54321";
+  const projectRef = new URL(configuredUrl).hostname.split(".")[0];
+  const session = {
+    access_token: "mock_recovery_access_token",
+    refresh_token: "mock_recovery_refresh_token",
+    expires_in: 3600,
+    expires_at: Math.floor(Date.now() / 1000) + 3600,
+    token_type: "bearer",
+    user: {
+      id: "user-test-recovery-123",
+      aud: "authenticated",
+      role: "authenticated",
+      email: "conductor@ejemplo.com",
+    },
+  };
+  const value = `base64-${Buffer.from(JSON.stringify(session), "utf8").toString("base64url")}`;
+  const baseURL = process.env.PLAYWRIGHT_BASE_URL ?? "http://localhost:3001";
+  const cookieNames = new Set([`sb-${projectRef}-auth-token`, "sb-127-auth-token", "sb-localhost-auth-token"]);
+
+  await page.context().addCookies(
+    Array.from(cookieNames).map((name) => ({
+      name,
+      value,
+      url: baseURL,
+    }))
+  );
+}
+
 const routes = [
   ["panel", "/panel"], ["oportunidades", "/viajes"], ["ganancias", "/ganancias"],
   ["perfil", "/cuenta/perfil"], ["datos bancarios", "/cuenta/datos-bancarios"]
@@ -131,6 +163,7 @@ test.describe("Sprint C5 flujos críticos", () => {
         });
       });
 
+      await seedMockRecoverySession(page);
       await page.goto("/nueva-password");
 
       await expect(page.getByRole("heading", { name: /nueva contraseña/i })).toBeVisible();
