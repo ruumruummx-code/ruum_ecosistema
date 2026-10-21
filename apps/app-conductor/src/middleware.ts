@@ -92,13 +92,26 @@ export async function middleware(request: NextRequest) {
     }
   });
 
-  const {
-    data: { user }
-  } = await supabase.auth.getUser();
-
   const { pathname } = request.nextUrl;
   const esPublica = esRutaPublicaConductor(pathname);
   const esRutaAuth = pathname === "/login" || pathname === "/onboarding";
+
+  // Si la ruta es pública y no es de autenticación (/login, /onboarding),
+  // no se necesita contactar a GoTrue por cada request.
+  if (esPublica && !esRutaAuth) {
+    return applyCspHeaders(response, nonce);
+  }
+
+  let user = null;
+  try {
+    const { data, error } = await supabase.auth.getUser();
+    if (!error && data?.user) {
+      user = data.user;
+    }
+  } catch {
+    // Si GoTrue no responde o falla la red, user queda null (fail-closed para rutas protegidas sin emitir 500)
+    user = null;
+  }
 
   if (!user && !esPublica) {
     if (pathname.startsWith("/api/")) {
