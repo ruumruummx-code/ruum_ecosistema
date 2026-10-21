@@ -76,3 +76,47 @@ export const ETIQUETA_ESTADO_TRASLADO: Record<EstadoTraslado, string> = {
   disputa_abierta: `${GLOSARIO_OPERATIVO.disputa} en curso`,
   disputa_resuelta: `${GLOSARIO_OPERATIVO.disputa} resuelta`
 };
+
+/**
+ * Estados en los que el traslado se considera una operación activa (el conductor
+ * puede realizar acciones sobre él). Fuente única de verdad para toda la app.
+ */
+export const ESTADOS_OPERACION_ACTIVA: EstadoTraslado[] = [
+  "conductor_asignado",
+  "conductor_en_camino_al_origen",
+  "conductor_en_punto_de_recoleccion",
+  "verificacion_vehiculo_en_proceso",
+  "evidencia_inicial_en_proceso",
+  "evidencia_inicial_completada",
+  "vehiculo_recibido",
+  "traslado_en_curso",
+  "incidencia_reportada",
+  "llegada_a_destino",
+  "evidencia_final_en_proceso",
+  "evidencia_final_completada",
+  "entrega_confirmada"
+];
+
+/**
+ * Estados en los que el traslado permite seguimiento de ubicación en tiempo real.
+ */
+export const ESTADOS_SEGUIMIENTO_UBICACION: EstadoTraslado[] = [
+  "conductor_en_camino_al_origen",
+  "conductor_en_punto_de_recoleccion",
+  "verificacion_vehiculo_en_proceso",
+  "evidencia_inicial_en_proceso",
+  "evidencia_inicial_completada",
+  "vehiculo_recibido",
+  "traslado_en_curso",
+  "incidencia_reportada",
+  "llegada_a_destino",
+  "evidencia_final_en_proceso",
+  "evidencia_final_completada",
+  "entrega_confirmada"
+];
+
+/**
+ * Número de fotos de evidencia requeridas por tipo de evidencia (inicial / final).
+ * Fuente única: se usa en offline-active-trip-cache y en pantallas de evidencia.
+ */
+export const FOTOS_REQUERIDAS_EVIDENCIA = 5;

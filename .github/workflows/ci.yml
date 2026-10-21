@@ -78,10 +78,10 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm test:unit
 
-  # RC-10: `test:unit` filtra sólo packages/*; la app de usuario (flujos
-  # críticos: wizard, pago, cuenta, mis-viajes) no se certificaba en CI.
-  usuario:
-    name: test app-usuario
+  # RC-10: `test:unit` filtra sólo packages/*; la app de conductor no se
+  # certificaba en CI. Job dedicado para app-conductor.
+  unit-conductor:
+    name: test app-conductor (unit)
     runs-on: ubuntu-latest
     needs: install
     steps:
@@ -94,7 +94,7 @@ jobs:
           node-version-file: .nvmrc
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - run: pnpm --filter @ruum/app-usuario test
+      - run: pnpm --filter @ruum/app-conductor test
 
   # T04 (cierra RC-10): E2E de app-usuario con build de producción, obligatorio
   # en la rama candidata.
@@ -160,6 +160,55 @@ jobs:
           retention-days: 14
           if-no-files-found: ignore
 
+
+  # Sprint C5: E2E de flujos críticos del conductor (login, traslados, offline,
+  # registro móvil, recuperación de contraseña). Obligatorio en CI para
+  # certificar la experiencia del conductor antes de cada merge.
+  e2e-conductor:
+    name: e2e app-conductor (Playwright sprint-c5)
+    runs-on: ubuntu-latest
+    needs: install
+    timeout-minutes: 45
+    env:
+      NEXT_PUBLIC_SUPABASE_URL: http://127.0.0.1:54399
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: sb_publishable_anon_key_e2e_mock
+      RUUM_LOCAL_PRODUCTION: "true"
+      NEXT_PUBLIC_RUUM_AMBIENTE: production
+      NEXT_PUBLIC_APP_VERSION: 1.0.0
+      NEXT_PUBLIC_APP_URL: http://localhost:3001
+      NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN: pk.eyJuY19lMmVfcGxhY2Vob2xkZXIifQ
+      MAPBOX_SECRET_TOKEN: sk.test-placeholder
+      PHONE_VERIFY_SECRET: e2e-placeholder-secret-con-mas-de-32-caracteres
+      PHONE_VERIFY_BYPASS: "true"
+      NEXT_PUBLIC_PHONE_VERIFY_BYPASS: "true"
+      PLAYWRIGHT_E2E_PRODUCCION: "1"
+      PLAYWRIGHT_DISABLE_AUTH_ARTIFACTS: "0"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.0.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Instalar Chromium (versión del lockfile)
+        run: pnpm exec playwright install --with-deps chromium
+      - name: Build de producción app-conductor
+        run: pnpm --filter @ruum/app-conductor build
+      - name: Ejecutar E2E sprint-c5-critical-flows
+        run: pnpm --filter @ruum/app-conductor test:e2e:critical
+      - name: Subir reporte y artefactos Playwright
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-app-conductor-${{ github.run_id }}
+          path: |
+            apps/app-conductor/playwright-report
+            apps/app-conductor/test-results
+          retention-days: 14
+          if-no-files-found: ignore
 
   fronteras:
     name: check fronteras
