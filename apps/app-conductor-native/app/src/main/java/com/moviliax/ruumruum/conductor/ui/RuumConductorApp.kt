@@ -8,11 +8,13 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.AttachMoney
 import androidx.compose.material.icons.filled.SwapHoriz
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Shield
 import androidx.compose.material.icons.filled.Sync
+import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
@@ -23,6 +25,8 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.DrawerValue
+import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
@@ -30,7 +34,10 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
+import kotlinx.coroutines.launch
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -61,7 +68,6 @@ import com.moviliax.ruumruum.conductor.ui.panel.PanelTopBar
 import com.moviliax.ruumruum.conductor.ui.theme.LocalRuumDarkMode
 import com.moviliax.ruumruum.conductor.ui.theme.LocalRuumStreetMode
 import com.moviliax.ruumruum.conductor.ui.theme.RuumTheme
-import com.moviliax.ruumruum.conductor.ui.theme.RuumThemePreference
 import com.moviliax.ruumruum.conductor.ui.theme.RuumTokens
 import com.moviliax.ruumruum.conductor.ui.theme.rememberRuumThemePreference
 import com.moviliax.ruumruum.conductor.ui.trips.TripDetailScreen
@@ -100,7 +106,7 @@ fun RuumConductorApp(viewModel: DriverViewModel = viewModel()) {
                 )
                 !state.signedIn -> AuthNav(state, viewModel)
                 state.needsOnboarding -> RegistroWizardScreen(state, viewModel)
-                else -> AuthenticatedApp(state, viewModel, themePreference)
+                else -> AuthenticatedApp(state, viewModel)
             }
         }
     }
@@ -131,7 +137,6 @@ private fun ConfigMissingScreen() {
 private fun AuthenticatedApp(
     state: DriverUiState,
     viewModel: DriverViewModel,
-    themePreference: RuumThemePreference,
 ) {
     var destination by remember { mutableStateOf(Destination.PANEL) }
     var selectedTrip by remember { mutableStateOf<Trip?>(null) }
@@ -150,8 +155,27 @@ private fun AuthenticatedApp(
         (state.error ?: state.notice)?.let { snackbar.showSnackbar(it) }
         if (state.error != null || state.notice != null) viewModel.clearMessage()
     }
+    // Refresca el flag de cuenta bancaria al entrar a Cuenta (tarjeta "Datos bancarios").
+    LaunchedEffect(destination) {
+        if (destination == Destination.ACCOUNT) viewModel.loadCertificacion()
+    }
     val inOverlay = selectedTrip != null || showingDocuments || showingCertificacion || showingPerfil
-    Scaffold(
+    val drawerState = rememberDrawerState(DrawerValue.Closed)
+    val alcance = rememberCoroutineScope()
+    ModalNavigationDrawer(
+        drawerState = drawerState,
+        gesturesEnabled = !inOverlay,
+        drawerContent = {
+            RuumDrawerContent(
+                selected = destination,
+                onSelect = { destino ->
+                    destination = destino
+                    alcance.launch { drawerState.close() }
+                },
+            )
+        },
+    ) {
+        Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             if (inOverlay) {
@@ -192,6 +216,8 @@ private fun AuthenticatedApp(
                     onNotifications = { destination = Destination.NOTIFICATIONS },
                     onAccount = { destination = Destination.ACCOUNT },
                 )
+            } else if (destination == Destination.TRIPS || destination == Destination.ACCOUNT) {
+                // Traslados y Cuenta renderizan su propia cabecera.
             } else RuumTopBar(destination.label, viewModel::refresh)
         },
         snackbarHost = { SnackbarHost(snackbar) },
@@ -234,23 +260,34 @@ private fun AuthenticatedApp(
                         onOpenTraslados = { destination = Destination.TRIPS },
                         onSearch = viewModel::refresh,
                     )
-                    Destination.TRIPS -> TripsScreen(state, viewModel::requestTrip, onTripSelected = { selectedTrip = it })
+                    Destination.TRIPS -> TripsScreen(
+                        state,
+                        viewModel::requestTrip,
+                        onTripSelected = { selectedTrip = it },
+                        onReload = viewModel::refresh,
+                        onOpenPanel = { destination = Destination.PANEL },
+                        onOpenMenu = { alcance.launch { drawerState.open() } },
+                        onNotifications = { destination = Destination.NOTIFICATIONS },
+                    )
                     Destination.EARNINGS -> EarningsScreen(state.payouts, state.acceptedTrips)
                     Destination.NOTIFICATIONS -> NotificacionesScreen(state, viewModel)
                     Destination.ACCOUNT -> AccountScreen(
-                        documents = state.documents,
                         driverName = state.driver?.nombre.orEmpty(),
-                        themePreference = themePreference,
+                        tieneBanco = state.tieneBanco,
+                        sincronizado = state.pendingEvidenceCount == 0,
+                        unreadCount = state.notificaciones.count { it.leidaEn == null },
                         onSignOut = viewModel::signOut,
                         onOpenDocuments = { showingDocuments = true },
                         onOpenCertificacion = { showingCertificacion = true },
                         onOpenPerfil = { showingPerfil = true },
+                        onNotifications = { destination = Destination.NOTIFICATIONS },
                     )
                 }
             }
             if (state.loading) CircularProgressIndicator(Modifier.align(Alignment.TopCenter).padding(top = RuumTokens.Space8))
         }
     }
+    } // Closes ModalNavigationDrawer
     if (safetyDialog) AlertDialog(
         onDismissRequest = { safetyDialog = false },
         icon = { Icon(Icons.Default.Shield, null, tint = MaterialTheme.colorScheme.error) },
@@ -283,6 +320,31 @@ private fun RuumBottomNavigation(
                     unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
                     unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
                 ),
+            )
+        }
+    }
+}
+
+@Composable
+private fun RuumDrawerContent(
+    selected: Destination,
+    onSelect: (Destination) -> Unit
+) {
+    androidx.compose.material3.ModalDrawerSheet {
+        androidx.compose.foundation.layout.Spacer(Modifier.padding(top = 24.dp))
+        listOf(
+            Triple(Destination.PANEL, Icons.Default.Home, "Inicio"),
+            Triple(Destination.TRIPS, Icons.Default.SwapHoriz, "Traslados"),
+            Triple(Destination.EARNINGS, Icons.Default.AttachMoney, "Ganancias"),
+            Triple(Destination.NOTIFICATIONS, Icons.Outlined.Notifications, "Notificaciones"),
+            Triple(Destination.ACCOUNT, Icons.Outlined.Person, "Cuenta"),
+        ).forEach { (item, icon, label) ->
+            androidx.compose.material3.NavigationDrawerItem(
+                icon = { Icon(icon, contentDescription = null) },
+                label = { Text(label) },
+                selected = selected == item,
+                onClick = { onSelect(item) },
+                modifier = Modifier.padding(androidx.compose.material3.NavigationDrawerItemDefaults.ItemPadding)
             )
         }
     }

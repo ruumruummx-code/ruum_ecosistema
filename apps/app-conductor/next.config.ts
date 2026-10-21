@@ -3,8 +3,10 @@ import { withSentryConfig } from "@sentry/nextjs";
 import {
   buildCspEstatico,
   CSP_PRESETS,
+  HSTS_HEADER,
   IMAGES_REMOTE_PATTERNS,
   IMAGE_FORMATS,
+  PERMISSIONS_POLICY,
 } from "@ruum/shared/seguridad";
 
 const nextConfig: NextConfig = {
@@ -35,11 +37,11 @@ const nextConfig: NextConfig = {
     const cspDev = buildCspEstatico(false, CSP_PRESETS.conductor);
     const csp = isProd ? cspProd : cspDev;
     const headersForAll: Array<{ key: string; value: string }> = [
-      { key: "Strict-Transport-Security", value: "max-age=31536000; includeSubDomains; preload" },
+      { key: "Strict-Transport-Security", value: HSTS_HEADER },
       { key: "X-Frame-Options", value: "DENY" },
       { key: "X-Content-Type-Options", value: "nosniff" },
       { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
-      { key: "Permissions-Policy", value: "camera=(self \"https://verify.didit.me\" \"https://*.didit.me\"), geolocation=(self \"https://verify.didit.me\" \"https://*.didit.me\"), microphone=(self \"https://verify.didit.me\" \"https://*.didit.me\")" },
+      { key: "Permissions-Policy", value: PERMISSIONS_POLICY },
       { key: "Content-Security-Policy", value: csp }
     ];
     // Report-Only en staging para validar sin romper

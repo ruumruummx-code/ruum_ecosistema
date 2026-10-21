@@ -1,64 +1,64 @@
-﻿# @ruum/app-conductor
+# @ruum/app-conductor
 
-PRD ┬º14 ÔÇö instrucci├│n operativa: **"La App Conductor debe enfocarse en
-ejecuci├│n guiada, seguridad e incidencia r├ípida."**
+PRD §14 — instrucción operativa: **"La App Conductor debe enfocarse en
+ejecución guiada, seguridad e incidencia rápida."**
 
-PRD ┬º16.8 ÔÇö idea central: la app debe responder tres preguntas en segundos:
-**┬┐qu├® Traslados tengo disponibles? ┬┐qu├® Traslados ya acept├®? ┬┐cu├ínto voy a cobrar?**
+PRD §16.8 — idea central: la app debe responder tres preguntas en segundos:
+**¿qué Traslados tengo disponibles? ¿qué Traslados ya acepté? ¿cuánto voy a cobrar?**
 
 ## Pantallas construidas (Fase 4, primer corte + login real)
 
-- `/` ÔÇö Panel: disponibilidad, resumen de la semana, pr├│ximo dep├│sito (PRD ┬º16.2), con estado de sesi├│n real
-  (Iniciar sesi├│n / Cerrar sesi├│n).
-- `/login` ÔÇö inicio de sesi├│n real con Supabase Auth.
-- `/registro` ÔÇö solicitud de certificaci├│n CONCER: `auth.signUp()` + inserci├│n real en `conductores`
-  (`estado` queda en `pendiente_verificacion`, su default ÔÇö PRD ┬º4.13: validaci├│n CONCER antes de operar).
-- `/viajes` ÔÇö Traslados disponibles y aceptados como pesta├▒as (PRD ┬º16.3), con elegibilidad evaluada en vivo
-  (`esElegibleParaViaje`, `@ruum/shared/rules`) y bot├│n de aceptar conectado de verdad a la base. Si hay sesi├│n
-  real, usa el conductor real (su propio nivel CONCER decide qu├® ve y puede aceptar).
-- `/viajes/[id]` ÔÇö Detalle del viaje (mismo Pasaporte Digital que usa app-usuario), con el siguiente paso del
-  camino feliz como acci├│n contextual (`TRANSICIONES`, `@ruum/shared/states`).
-- `/viajes/[id]/evidencia` ÔÇö Checklist de los 5 ├íngulos obligatorios (PRD ┬º4.4), completitud evaluada en vivo
-  (`evidenciaCompleta`) y confirmaci├│n que avanza el estado real del traslado.
-- `/ganancias` ÔÇö Mis ganancias (PRD ┬º16.4), consulta b├ísica.
+- `/` — Panel: disponibilidad, resumen de la semana, próximo depósito (PRD §16.2), con estado de sesión real
+  (Iniciar sesión / Cerrar sesión).
+- `/login` — inicio de sesión real con Supabase Auth.
+- `/registro` — solicitud de certificación CONCER: `auth.signUp()` + inserción real en `conductores`
+  (`estado` queda en `pendiente_verificacion`, su default — PRD §4.13: validación CONCER antes de operar).
+- `/viajes` — Traslados disponibles y aceptados como pestañas (PRD §16.3), con elegibilidad evaluada en vivo
+  (`esElegibleParaViaje`, `@ruum/shared/rules`) y botón de aceptar conectado de verdad a la base. Si hay sesión
+  real, usa el conductor real (su propio nivel CONCER decide qué ve y puede aceptar).
+- `/viajes/[id]` — Detalle del viaje (mismo Pasaporte Digital que usa app-usuario), con el siguiente paso del
+  camino feliz como acción contextual (`TRANSICIONES`, `@ruum/shared/states`).
+- `/viajes/[id]/evidencia` — Checklist de los 5 ángulos obligatorios (PRD §4.4), completitud evaluada en vivo
+  (`evidenciaCompleta`) y confirmación que avanza el estado real del traslado.
+- `/ganancias` — Mis ganancias (PRD §16.4), consulta básica.
 
-Validado con un `next build` real: las 7 rutas compilan y generan p├íginas correctamente (incluyendo el
-middleware de sesi├│n). Con `next start` en producci├│n (Vercel) se confirm├│ contenido real en las 5 pantallas
-del primer corte, incluyendo Traslados y Evidencia tras hidratarse ÔÇö ver detalle de esa validaci├│n en el historial
-de la conversaci├│n con el equipo de producto. Login/Registro reales quedan validados por typecheck + build +
-pruebas de RLS contra Postgres real (ver m├ís abajo); falta confirmar el flujo visual completo contra un proyecto
+Validado con un `next build` real: las 7 rutas compilan y generan páginas correctamente (incluyendo el
+middleware de sesión). Con `next start` en producción (Vercel) se confirmó contenido real en las 5 pantallas
+del primer corte, incluyendo Traslados y Evidencia tras hidratarse — ver detalle de esa validación en el historial
+de la conversación con el equipo de producto. Login/Registro reales quedan validados por typecheck + build +
+pruebas de RLS contra Postgres real (ver más abajo); falta confirmar el flujo visual completo contra un proyecto
 Supabase real.
 
 ## Cuatro bugs reales encontrados al construir login y las pantallas operativas
 
-Ninguno era del c├│digo de esta app ÔÇö todos eran del esquema de Fase 1, nunca antes ejercitado bajo RLS real
-porque toda la validaci├│n previa corri├│ como superusuario de Postgres (que ignora RLS por completo):
+Ninguno era del código de esta app — todos eran del esquema de Fase 1, nunca antes ejercitado bajo RLS real
+porque toda la validación previa corrió como superusuario de Postgres (que ignora RLS por completo):
 
-1. **Ning├║n conductor pod├¡a ver un viaje disponible.** Las pol├¡ticas de `0005_traslados.sql` solo cubr├¡an "mis
-   traslados como usuario" y "mis traslados ya asignados como conductor" ÔÇö ninguna cubr├¡a traslados sin asignar.
-   Corregido en `0018_traslados_Traslados_disponibles.sql`, con pol├¡ticas de SELECT y UPDATE probadas con dos
+1. **Ningún conductor podía ver un viaje disponible.** Las políticas de `0005_traslados.sql` solo cubrían "mis
+   traslados como usuario" y "mis traslados ya asignados como conductor" — ninguna cubría traslados sin asignar.
+   Corregido en `0018_traslados_Traslados_disponibles.sql`, con políticas de SELECT y UPDATE probadas con dos
    conductores reales bajo un rol no-superusuario (uno acepta el viaje, el otro deja de verlo y no puede
-   "rob├írselo" con un UPDATE directo).
-2. **Recursi├│n infinita en RLS sobre `usuarios`.** La pol├¡tica `titular_ve_usuarios_de_su_empresa` (0002) se
-   consulta a s├¡ misma. Esto no solo bloqueaba las pantallas nuevas ÔÇö bloqueaba **cualquier** consulta real de
+   "robárselo" con un UPDATE directo).
+2. **Recursión infinita en RLS sobre `usuarios`.** La política `titular_ve_usuarios_de_su_empresa` (0002) se
+   consulta a sí misma. Esto no solo bloqueaba las pantallas nuevas — bloqueaba **cualquier** consulta real de
    `app-usuario` que tocara `usuarios` o `pasaporte_digital` bajo RLS real, incluyendo su propia pantalla de
-   seguimiento. Corregido en `0019_fix_recursion_usuarios.sql` con una funci├│n `security definer`, mismo patr├│n
+   seguimiento. Corregido en `0019_fix_recursion_usuarios.sql` con una función `security definer`, mismo patrón
    que ya usaba `es_admin()`.
-3. **Ni `usuarios` ni `conductores` ten├¡an pol├¡tica de INSERT para autoservicio.** Solo SELECT/UPDATE sobre el
-   propio registro ÔÇö el registro/alta nunca podr├¡a haber completado bajo RLS real. Corregido en
+3. **Ni `usuarios` ni `conductores` tenían política de INSERT para autoservicio.** Solo SELECT/UPDATE sobre el
+   propio registro — el registro/alta nunca podría haber completado bajo RLS real. Corregido en
    `0021_self_registro.sql`, probado con dos casos reales: alguien crea su propio registro (funciona) e intenta
-   crear el registro de otra persona (se rechaza). `admins` no recibe una pol├¡tica equivalente, a prop├│sito.
-4. **El bot├│n hacia la pantalla de Evidencia nunca se pintaba.** `ETIQUETA_SIGUIENTE_PASO` (en `AccionesViaje.tsx`)
-   ten├¡a una etiqueta para el paso que *lleva* a `evidencia_inicial_en_proceso`/`evidencia_final_en_proceso`, pero
-   no para esos dos estados *en s├¡ mismos* ÔÇö que es justo cuando la pantalla de detalle deb├¡a mostrar el bot├│n
+   crear el registro de otra persona (se rechaza). `admins` no recibe una política equivalente, a propósito.
+4. **El botón hacia la pantalla de Evidencia nunca se pintaba.** `ETIQUETA_SIGUIENTE_PASO` (en `AccionesViaje.tsx`)
+   tenía una etiqueta para el paso que *lleva* a `evidencia_inicial_en_proceso`/`evidencia_final_en_proceso`, pero
+   no para esos dos estados *en sí mismos* — que es justo cuando la pantalla de detalle debía mostrar el botón
    "ir a evidencia". El bail-out `if (!etiqueta) return null` lo ocultaba en silencio. Encontrado probando la
-   c├ímara real en un tel├®fono Android (Fase 5): sin este fix, no hab├¡a ninguna ruta navegable por toque hasta
+   cámara real en un teléfono Android (Fase 5): sin este fix, no había ninguna ruta navegable por toque hasta
    `/evidencia`, solo escribiendo la URL a mano. Corregido agregando las dos etiquetas faltantes.
 
 ## Datos reales
 
 La app conductor ya no incluye datos ni acciones de muestra. Sin `NEXT_PUBLIC_SUPABASE_URL` /
-`NEXT_PUBLIC_SUPABASE_ANON_KEY`, las pantallas muestran estados vac├¡os o errores operativos y no simulan Traslados,
+`NEXT_PUBLIC_SUPABASE_ANON_KEY`, las pantallas muestran estados vacíos o errores operativos y no simulan Traslados,
 mensajes, evidencia, solicitudes ni ganancias.
 
 ## Arquitectura actual
@@ -190,21 +190,17 @@ La validacion formal por dispositivo debe registrarse en `docs/qa/fase-5-validac
 
 ## Funcionalidades pendientes reales
 
-- Offline de arranque productivo: shell local, cache persistente de viaje activo, pantalla offline local,
-  evidencia/emergencia sin servidor y sincronizacion con conflictos.
-- GPS en segundo plano con Foreground Service nativo y notificacion persistente.
-- Push notifications con FCM.
-- Validacion real de permisos Android en dispositivo: camara, galeria, ubicacion, retorno desde ajustes,
-  segundo plano y cierre forzado.
-- Ejecucion formal de matrices Android con evidencia de dispositivo.
-- Transport real para logging estructurado en piloto/produccion.
-- Consolidar migraciones historicas solo si aun no fueron aplicadas en ambientes compartidos.
-- Decidir/implementar RPC atomica equivalente para llegada a origen si Operacion requiere auditar distancia de
-  recoleccion con el mismo rigor que destino.
+- **Push notifications con FCM:** Cableado nativo completo (`google-services.json` inyectado en `android/app/`, plugin `com.google.gms.google-services` activo y APK compilado con éxito). Pendiente de validación formal en campo.
+- **GPS en segundo plano:** Implementado con `BackgroundTrackingPlugin.java`, `SecureTrackingPreferences.java`, cola encriptada y `TrackingFlushWorker.java` (WorkManager). Pendiente de validación formal en campo.
+- **Offline durante sesión:** Cubierto por `cola-offline.ts` (`ruum_cola_evidencia`) y `cola-telemetria-offline.ts` vía `@capacitor/preferences`.
+- **Offline de arranque en frío:** Shell remoto dependiente de red en boot inicial. Para el piloto, mitigado con el protocolo operativo de Torre de Control (`tests/android/offline-startup-validation.md`); para post-piloto, requiere iniciativa de shell local empaquetado.
+- Validación formal de permisos y ciclo de vida en dispositivo Android físico (cámara, ubicación en segundo plano, retorno desde ajustes y cierre forzado con red/sin red).
+- Firma del acta formal de Fase 5 por Operación (`docs/qa/fase-5-validacion.md`).
+- Transport real para logging estructurado centralizado en producción.
 
-## Checklist de Despliegue (Supabase Auth en Producci├│n / Staging)
+## Checklist de Despliegue (Supabase Auth en Producción / Staging)
 
-Para garantizar la correcta ejecuci├│n del flujo de recuperaci├│n de contrase├▒a y autenticaci├│n de la App Conductor en ambientes de Staging y Producci├│n, verificar obligatoriamente en el **Supabase Dashboard** (`Authentication -> URL Configuration`):
+Para garantizar la correcta ejecución del flujo de recuperación de contraseña y autenticación de la App Conductor en ambientes de Staging y Producción, verificar obligatoriamente en el **Supabase Dashboard** (`Authentication -> URL Configuration`):
 
 1. **Site URL**: `https://www.concer.ruumruum-moviliax.online`
 2. **Redirect URLs** (dar de alta las variaciones con y sin `www`):
@@ -213,45 +209,46 @@ Para garantizar la correcta ejecuci├│n del flujo de recuperaci├│n de con
    - `https://concer.ruumruum-moviliax.online/auth/callback`
    - `https://concer.ruumruum-moviliax.online/nueva-password`
 3. **Password Protection** (`Authentication -> Password Protection`):
-   - Habilitar *"Prevent use of leaked passwords"* (HaveIBeenPwned) para cumplimiento de seguridad en producci├│n.
+   - Habilitar *"Prevent use of leaked passwords"* (HaveIBeenPwned) para cumplimiento de seguridad en producción.
 
-## Fase 6 ÔÇö datos bancarios para pagos a conductores
+## Fase 6 — datos bancarios para pagos a conductores (Cumplimiento PCI DSS)
 
-PRD ┬º4.6 ÔÇö decisi├│n de producto actual: los cobros al usuario siguen en Stripe, pero el pago semanal al conductor
-ya no usa Stripe Connect. La pantalla de Ganancias permite capturar titular, banco, CLABE y n├║mero de tarjeta;
-el guardado pasa por la RPC `conductor_guarda_datos_bancarios`, queda en `datos_bancarios_conductor` con estado
-`en_revision` y registra auditor├¡a sin exponer n├║meros completos en el evento.
+PRD §4.6 — decisión de producto: los pagos a conductores se realizan mediante transferencia interbancaria (SPEI). Para cumplir con PCI DSS y minimizar la superficie de riesgo normativo:
+- Se eliminó el campo de tarjeta de crédito/débito (16 dígitos) del formulario del cliente.
+- Se captura y valida de forma estricta únicamente la **CLABE interbancaria (18 dígitos)**, titular y banco receptor.
+- Los datos se resguardan mediante la RPC `conductor_guarda_datos_bancarios`, quedando en `datos_bancarios_conductor` con estado `en_revision`.
+- El cliente nunca almacena ni transmite números de tarjeta completos (PAN).
 
-El resumen semanal y el detalle por viaje se calculan ├║nicamente desde `payouts_conductor`; cuando operaci├│n
+El resumen semanal y el detalle por viaje se calculan únicamente desde `payouts_conductor`; cuando operación
 programe una transferencia, la referencia debe registrarse en `payouts_conductor.referencia_pago`.
 
-## Chat (PRD ┬º4.12)
+## Chat (PRD §4.12)
 
-`/viajes/[id]` ahora tiene chat en vivo con el usuario ÔÇö mismo componente y regla de disponibilidad que
-`app-usuario` (ver su README para el detalle de `chatDisponible()`). Encontr├® el mismo bug de "use client"
-faltante que casi rompi├│ el build de las 3 apps al construir esto ÔÇö ver nota en el README ra├¡z.
+`/viajes/[id]` ahora tiene chat en vivo con el usuario — mismo componente y regla de disponibilidad que
+`app-usuario` (ver su README para el detalle de `chatDisponible()`). Encontré el mismo bug de "use client"
+faltante que casi rompió el build de las 3 apps al construir esto — ver nota en el README raíz.
 
-Ya est├í conectado: junto al chat hay un bot├│n **"Llamar"** (Twilio Proxy, v├¡a `crear-llamada-enmascarada`),
-igual criterio que `app-usuario`. `/registro` ahora pide el tel├®fono real del conductor ÔÇö sin eso, Twilio no
-tiene a qui├®n relacionar con el n├║mero virtual de la sesi├│n.
+Ya está conectado: junto al chat hay un botón **"Llamar"** (Twilio Proxy, vía `crear-llamada-enmascarada`),
+igual criterio que `app-usuario`. `/registro` ahora pide el teléfono real del conductor — sin eso, Twilio no
+tiene a quién relacionar con el número virtual de la sesión.
 
-## Flujo "Iniciar viaje" (recolecci├│n del veh├¡culo)
+## Flujo "Iniciar viaje" (recolección del vehículo)
 
-`/viajes/[id]` reemplaza el bot├│n plano por dos pantallas dedicadas entre "Iniciar viaje" y la evidencia inicial:
+`/viajes/[id]` reemplaza el botón plano por dos pantallas dedicadas entre "Iniciar viaje" y la evidencia inicial:
 
-1. **Dir├¡gete al punto de inicio** (estado `conductor_en_camino_al_origen`): direcci├│n y ciudad de recolecci├│n,
-   m├ís un mapa est├ítico de la ruta (Mapbox Static Images API, no `mapbox-gl` ÔÇö m├ís liviano dentro del WebView de
-   Capacitor). Si hay ubicaci├│n del conductor (`obtenerUbicacionActual`, solo en el shell nativo) se dibuja la
+1. **Dirígete al punto de inicio** (estado `conductor_en_camino_al_origen`): dirección y ciudad de recolección,
+   más un mapa estático de la ruta (Mapbox Static Images API, no `mapbox-gl` — más liviano dentro del WebView de
+   Capacitor). Si hay ubicación del conductor (`obtenerUbicacionActual`, solo en el shell nativo) se dibuja la
    ruta completa con Directions; si no, solo el pin de destino. Sin `NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN` configurado,
-   la pantalla no muestra mapa, solo la direcci├│n en texto. Bot├│n **"He llegado"** avanza a
+   la pantalla no muestra mapa, solo la dirección en texto. Botón **"He llegado"** avanza a
    `conductor_en_punto_de_recoleccion`.
-2. **Contacto y localizaci├│n del veh├¡culo** (estado `conductor_en_punto_de_recoleccion`): nombre/tel├®fono de quien
-   entrega (con bot├│n "Llamar" v├¡a `tel:`) y ficha del veh├¡culo (marca, modelo, a├▒o, color, placas, VIN). Exige
+2. **Contacto y localización del vehículo** (estado `conductor_en_punto_de_recoleccion`): nombre/teléfono de quien
+   entrega (con botón "Llamar" vía `tel:`) y ficha del vehículo (marca, modelo, año, color, placas, VIN). Exige
    confirmar **ambas** cosas por separado antes de habilitar "Toma evidencias", que encadena las dos transiciones
-   del camino feliz (`verificacion_vehiculo_en_proceso` ÔåÆ `evidencia_inicial_en_proceso`) y navega directo a
-   `/evidencia` ÔÇö `confirmarEvidenciaCompleta` exige estar exactamente en `evidencia_inicial_en_proceso`, as├¡ que
-   no se puede saltar ning├║n paso del PRD ┬º6, solo la pantalla intermedia.
+   del camino feliz (`verificacion_vehiculo_en_proceso` → `evidencia_inicial_en_proceso`) y navega directo a
+   `/evidencia` — `confirmarEvidenciaCompleta` exige estar exactamente en `evidencia_inicial_en_proceso`, así que
+   no se puede saltar ningún paso del PRD §6, solo la pantalla intermedia.
 
-La direcci├│n de origen, los contactos y color/placas/VIN no estaban expuestos en la vista `pasaporte_digital`
-(s├¡ exist├¡an en `traslados`/`vehiculos`, con RLS que ya cubr├¡a al conductor asignado) ÔÇö se agregaron en la
-migraci├│n `20260715000100`.
+La dirección de origen, los contactos y color/placas/VIN no estaban expuestos en la vista `pasaporte_digital`
+(sí existían en `traslados`/`vehiculos`, con RLS que ya cubría al conductor asignado) — se agregaron en la
+migración `20260715000100`.

@@ -13,7 +13,6 @@ import { obtenerUbicacionActualConEstado, distanciaMetrosEntre, type Coordenadas
 import { nombreVehiculo } from "../trips-utils";
 import { MapaRutaConduccion } from "./MapaRutaConduccion";
 import { RejectTripDialog } from "../RejectTripDialog";
-import { ConductorStatusBadge } from "@/components/v2/ConductorUI";
 
 type PasaporteRow = Database["public"]["Views"]["pasaporte_digital"]["Row"];
 
@@ -249,7 +248,9 @@ export function TripOpportunityDetails({
             <polyline points="12 19 5 12 12 5" />
           </svg>
         </Link>
-        <ConductorStatusBadge status="active" label="Nueva oferta disponible" />
+        <span className="inline-flex min-h-[28px] items-center gap-1.5 rounded-full border border-blue-200 bg-blue-50 px-2.5 py-1 font-body text-xs font-semibold text-blue-900">
+          Nueva oferta disponible
+        </span>
         <div className="w-10" />
       </header>
 
@@ -462,7 +463,7 @@ export function TripOpportunityDetails({
           type="button"
           onClick={handleAceptar}
           disabled={procesando || ofertaTomada || solicitudEnviada}
-          className="conductor-button conductor-button-primary w-full min-h-[52px] disabled:cursor-not-allowed"
+          className="inline-flex min-h-[52px] w-full items-center justify-center rounded-xl bg-[var(--ruum-action)] px-5 py-3 font-body text-base font-semibold text-white transition hover:brightness-105 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {procesando ? TEXTOS_CARGANDO.actualizando : solicitudEnviada ? "SOLICITUD REGISTRADA" : "SOLICITAR ASIGNACIÓN →"}
         </button>

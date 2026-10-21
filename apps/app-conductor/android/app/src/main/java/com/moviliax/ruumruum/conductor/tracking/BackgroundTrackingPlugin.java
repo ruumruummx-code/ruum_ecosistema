@@ -7,9 +7,14 @@ import android.net.ConnectivityManager;
 import android.net.Network;
 import android.net.NetworkCapabilities;
 import androidx.core.content.ContextCompat;
+import androidx.work.ExistingPeriodicWorkPolicy;
+import androidx.work.PeriodicWorkRequest;
+import androidx.work.WorkManager;
 import com.getcapacitor.*;
 import com.getcapacitor.annotation.*;
 import com.moviliax.ruumruum.conductor.BuildConfig;
+
+import java.util.concurrent.TimeUnit;
 
 @CapacitorPlugin(name = "BackgroundTracking", permissions = {
     @Permission(alias = "location", strings = { Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION }),
@@ -48,10 +53,25 @@ public class BackgroundTrackingPlugin extends Plugin {
             .putString(TrackingContract.KEY_REFRESH_TOKEN, call.getString("refreshToken", ""))
             .putBoolean(TrackingContract.KEY_ACTIVE, true).apply();
         ContextCompat.startForegroundService(getContext(), new Intent(getContext(), DriverTrackingService.class).setAction(TrackingContract.ACTION_START));
+        ensurePeriodicFlush();
         call.resolve(status());
     }
 
+    private void ensurePeriodicFlush() {
+        PeriodicWorkRequest flushRequest = new PeriodicWorkRequest.Builder(
+                TrackingFlushWorker.class, 15, TimeUnit.MINUTES)
+                .build();
+        WorkManager.getInstance(getContext())
+                .enqueueUniquePeriodicWork("ruum_tracking_flush",
+                        ExistingPeriodicWorkPolicy.REPLACE, flushRequest);
+    }
+
+    private void cancelPeriodicFlush() {
+        WorkManager.getInstance(getContext()).cancelUniqueWork("ruum_tracking_flush");
+    }
+
     @PluginMethod public void stop(PluginCall call) {
+        cancelPeriodicFlush();
         getContext().startService(new Intent(getContext(), DriverTrackingService.class).setAction(TrackingContract.ACTION_STOP));
         call.resolve();
     }
@@ -65,6 +85,7 @@ public class BackgroundTrackingPlugin extends Plugin {
     }
     @PermissionCallback private void backgroundPermissionCallback(PluginCall call) { JSObject out=new JSObject(); PermissionState state=getPermissionState("backgroundLocation"); out.put("granted", state==PermissionState.GRANTED); out.put("state", state.toString().toLowerCase()); call.resolve(out); }
     @PluginMethod public void clearCredentials(PluginCall call) {
+        cancelPeriodicFlush();
         getContext().startService(new Intent(getContext(), DriverTrackingService.class).setAction(TrackingContract.ACTION_STOP));
         TrackingPointStore.clear(getContext()); SecureTrackingPreferences.clearCredentials(getContext()); call.resolve();
     }

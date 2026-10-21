@@ -2,7 +2,9 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 
-const NAVEGACION = readFileSync(resolve(__dirname, "../src/app/NavegacionConductor.tsx"), "utf8");
+const NAVEGACION_WRAPPER = readFileSync(resolve(__dirname, "../src/app/NavegacionConductor.tsx"), "utf8");
+const CONDUCTOR_NAV = readFileSync(resolve(__dirname, "../src/app/components/ConductorNav.tsx"), "utf8");
+const NAVEGACION = `${NAVEGACION_WRAPPER}\n${CONDUCTOR_NAV}`;
 
 describe("header global del conductor", () => {
   it("mantiene el fondo navy, el ancho contenido y la alineación central", () => {

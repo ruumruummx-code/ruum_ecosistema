@@ -1,15 +1,7 @@
+import { ConductorIcon, type ConductorIconName } from "@/components/icons";
+
 export function TrasladosIcon({ name }: { name: "menu" | "bell" | "home" | "truck" | "user" | "sort" | "left" | "right" | "close" }) {
-  return <svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-    {name === "menu" && <path d="M4 6h16M4 12h16M4 18h16" />}
-    {name === "bell" && <><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4" /></>}
-    {name === "home" && <><path d="m3 10 9-7 9 7v11H3ZM9 21v-8h6v8" /></>}
-    {name === "truck" && <><rect x="2" y="5" width="12" height="12" rx="2" /><path d="M14 9h4l4 4v4h-8M17 9v5h5" /><circle cx="6" cy="18" r="2" /><circle cx="18" cy="18" r="2" /></>}
-    {name === "user" && <><circle cx="12" cy="7" r="4" /><path d="M4 21v-2a8 6 0 0 1 16 0v2Z" /></>}
-    {name === "sort" && <path d="M7 3v18m-4-14 4-4 4 4M17 21V3m-4 14 4 4 4-4" />}
-    {name === "left" && <path d="m15 5-7 7 7 7" />}
-    {name === "right" && <path d="m9 5 7 7-7 7" />}
-    {name === "close" && <path d="m5 5 14 14M5 19 19 5" />}
-  </svg>;
+  return <ConductorIcon name={name as ConductorIconName} size={23} strokeWidth={1.8} />;
 }
 
 export function TrasladosEmptyIllustration() {

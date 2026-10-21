@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { ConductorIcon, type ConductorIconName } from "@/components/icons";
 
 interface PanelOperationalHealthProps {
   gpsActivo: boolean | null;
@@ -84,41 +85,8 @@ export function PanelStatusRow({
   ];
 
   function Icon({ name, className }: { name: string; className: string }) {
-    if (name === "check")
-      return (
-        <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-          <polyline points="20 6 9 17 4 12" />
-        </svg>
-      );
-    if (name === "alert")
-      return (
-        <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-          <line x1="18" y1="6" x2="6" y2="18" />
-          <line x1="6" y1="6" x2="18" y2="18" />
-        </svg>
-      );
-    if (name === "user")
-      return (
-        <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-          <circle cx="12" cy="8" r="3.5" />
-          <path d="M4 19c0-3.5 3.2-6 8-6s8 2.5 8 6" />
-        </svg>
-      );
-    if (name === "gps")
-      return (
-        <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-          <circle cx="12" cy="12" r="3" />
-          <path d="M12 2v3M12 19v3M2 12h3M19 12h3" />
-        </svg>
-      );
-    return (
-      <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-        <path d="M5 12.55a11 11 0 0 1 14.08 0" />
-        <path d="M1.42 9a16 16 0 0 1 21.16 0" />
-        <path d="M8.53 16.11a6 6 0 0 1 6.95 0" />
-        <circle cx="12" cy="20" r="1.2" fill="currentColor" stroke="none" />
-      </svg>
-    );
+    const iconName = (name === "check" || name === "alert" || name === "user" || name === "gps") ? name : "wifi";
+    return <ConductorIcon name={iconName as ConductorIconName} className={className} />;
   }
 
   const estadoGlobal =

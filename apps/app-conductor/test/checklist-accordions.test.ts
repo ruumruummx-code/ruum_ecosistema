@@ -7,17 +7,25 @@ const EVIDENCIA_PAGE_FILE = readFileSync(
   "utf8"
 );
 
+const EVIDENCE_LOGIC_FILE = readFileSync(
+  resolve(__dirname, "../src/app/viajes/[id]/evidencia/useEvidenciaPageLogic.ts"),
+  "utf8"
+);
+
 const EVIDENCE_WIZARD_FILE = readFileSync(
   resolve(__dirname, "../src/app/viajes/[id]/evidencia/EvidenceWizard.tsx"),
   "utf8"
 );
 
 describe("Checklist de Evidencia - Acordeones de Documentos y Notas", () => {
-  it("contiene los controles de acordeón para documentos y notas en evidencia/page.tsx", () => {
-    expect(EVIDENCIA_PAGE_FILE).toContain("acordeonDocsAbierto");
-    expect(EVIDENCIA_PAGE_FILE).toContain("acordeonNotasAbierto");
-    expect(EVIDENCIA_PAGE_FILE).toContain("Alternar sección de documentos y placas");
-    expect(EVIDENCIA_PAGE_FILE).toContain("Alternar sección de notas");
+  it("contiene los controles de acordeón para documentos y notas en el hook de lógica", () => {
+    expect(EVIDENCE_LOGIC_FILE).toContain("acordeonDocsAbierto");
+    expect(EVIDENCE_LOGIC_FILE).toContain("acordeonNotasAbierto");
+  });
+
+  it("renderiza las secciones de documentos y notas en la página", () => {
+    expect(EVIDENCIA_PAGE_FILE).toContain("EvidenciaDocumentosSection");
+    expect(EVIDENCIA_PAGE_FILE).toContain("EvidenciaNotasSection");
   });
 
   it("contiene los controles de acordeón para documentos y notas en EvidenceWizard.tsx", () => {

@@ -76,14 +76,17 @@ test("valida dígitos, confirma sesión y guarda antes de continuar", async ({ p
   await page.getByLabel("CLABE interbancaria").fill("012345678901234567");
   await expect(page.getByLabel("CLABE interbancaria")).toHaveValue("012345678901234567");
   await expect(page.getByLabel("Banco emisor")).toHaveValue("BBVA México");
-  await page.getByLabel("Número de tarjeta", { exact: true }).fill("123456789012345");
-  const save = page.getByRole("button", { name: "Guardar y continuar" }); await expect(save).toBeDisabled();
-  await page.getByLabel("Número de tarjeta", { exact: true }).fill("1234567890123456"); await expect(save).toBeEnabled(); await layout(page);
-  await save.click(); const confirm = page.getByRole("alertdialog", { name: "Actualizar cuenta para depósitos" });
-  await expect(confirm).toContainText("terminación 4567"); await expect(confirm).not.toContainText("012345678901234567"); expect(state.mutations).toHaveLength(0);
+  const save = page.getByRole("button", { name: "Guardar y continuar" });
+  await expect(save).toBeEnabled();
+  await layout(page);
+  await save.click();
+  const confirm = page.getByRole("alertdialog", { name: "Actualizar cuenta para depósitos" });
+  await expect(confirm).toContainText("terminación 4567");
+  await expect(confirm).not.toContainText("012345678901234567");
+  expect(state.mutations).toHaveLength(0);
   await confirm.getByRole("button", { name: "Guardar y enviar a revisión" }).click();
   await expect(page).toHaveURL(/\/cuenta\/certificacion$/, { timeout: 180000 });
-  expect(state.mutations).toEqual([{ p_titular_cuenta: "Juan Pérez García", p_banco: "BBVA México", p_clabe: "012345678901234567", p_numero_tarjeta: "1234567890123456" }]);
+  expect(state.mutations).toEqual([{ p_titular_cuenta: "Juan Pérez García", p_banco: "BBVA México", p_clabe: "012345678901234567", p_numero_tarjeta: null }]);
 });
 test("enmascara la cuenta existente y rechaza una confirmación incorrecta", async ({ page }) => {
   await fixture(page, true); await open(page, "bank");

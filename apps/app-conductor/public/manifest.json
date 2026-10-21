@@ -1,0 +1,96 @@
+{
+  "name": "Ruum Conductor",
+  "short_name": "Ruum Conductor",
+  "description": "App para conductores certificados: registro operativo del vehículo, trazabilidad de traslados y gestión de viajes offline.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "theme_color": "#08182E",
+  "background_color": "#ffffff",
+  "id": "/",
+  "lang": "es",
+  "dir": "ltr",
+  "categories": ["transportation", "productivity", "utilities"],
+  "icons": [
+    {
+      "src": "/imagenes/ruum-logo-avatar.png",
+      "sizes": "48x48",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/imagenes/ruum-logo-avatar.png",
+      "sizes": "72x72",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/imagenes/ruum-logo-avatar.png",
+      "sizes": "96x96",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/imagenes/ruum-logo-avatar.png",
+      "sizes": "128x128",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/imagenes/ruum-logo-avatar.png",
+      "sizes": "144x144",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/imagenes/ruum-logo-avatar.png",
+      "sizes": "152x152",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/imagenes/ruum-logo-avatar.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/imagenes/ruum-logo-avatar.png",
+      "sizes": "384x384",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/imagenes/ruum-logo-avatar.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Mis Traslados",
+      "short_name": "Traslados",
+      "url": "/viajes",
+      "icons": [{ "src": "/imagenes/ruum-logo-avatar.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Panel del Conductor",
+      "short_name": "Panel",
+      "url": "/panel",
+      "icons": [{ "src": "/imagenes/ruum-logo-avatar.png", "sizes": "192x192" }]
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/imagenes/registro-conductor.png",
+      "sizes": "750x1334",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Pantalla de registro de conductor"
+    }
+  ],
+  "related_applications": [],
+  "prefer_related_applications": false
+}

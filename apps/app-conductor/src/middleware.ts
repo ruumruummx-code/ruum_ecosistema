@@ -11,7 +11,11 @@ const RUTAS_PUBLICAS_CONDUCTOR = [
   "/legal",
   "/auth",
   "/actualizacion-requerida",
-  "/api",
+  "/403",
+  "/api/health",
+  "/api/csp-report",
+  "/api/recovery/verify",
+  "/api/recovery/clear",
   "/theme-init.js",
   "/sw.js",
   "/manifest.json",
@@ -22,15 +26,21 @@ const RUTAS_PUBLICAS_CONDUCTOR = [
 ];
 
 function esRutaPublicaConductor(pathname: string): boolean {
-  return RUTAS_PUBLICAS_CONDUCTOR.some((ruta) => pathname === ruta || pathname.startsWith(`${ruta}/`));
+  return RUTAS_PUBLICAS_CONDUCTOR.some((ruta) => {
+    if (ruta.startsWith("/api/") || ruta.includes(".")) {
+      return pathname === ruta;
+    }
+    return pathname === ruta || pathname.startsWith(`${ruta}/`);
+  });
 }
 
 /**
- * P0.1 — Seguridad + sesión (producción)
+ * P0.1 / P1 — Seguridad + sesión (producción)
  * 1. Fail-closed en producción si Supabase no está configurado.
  * 2. Refresca el token en cada petición (getUser valida contra Auth).
- * 3. Gate de autenticación: rutas protegidas sin sesión → /login?next=...
- * 4. Redirección inversa: sesión válida en /login|/registro → /panel.
+ * 3. Gate de autenticación: rutas protegidas sin sesión → /login?next=... (o 401 si es /api/*).
+ * 4. Gate de rol: un usuario/pasajero no puede operar en app-conductor → /403?reason=rol_usuario.
+ * 5. Redirección inversa: sesión válida en /login|/onboarding → /panel.
  */
 function buildCspConductor(nonce: string, isProd: boolean) {
   return buildCsp({ nonce, isProd, extras: CSP_PRESETS.conductor });
@@ -91,21 +101,36 @@ export async function middleware(request: NextRequest) {
   const esRutaAuth = pathname === "/login" || pathname === "/onboarding";
 
   if (!user && !esPublica) {
+    if (pathname.startsWith("/api/")) {
+      return applyCspHeaders(
+        NextResponse.json({ error: "No autorizado" }, { status: 401 }),
+        nonce
+      );
+    }
     const destino = new URL("/login", request.url);
     destino.searchParams.set("next", pathname);
     return applyCspHeaders(NextResponse.redirect(destino), nonce);
   }
 
+  if (user && !esPublica) {
+    // Gate de rol: verificar que un pasajero/usuario no opere en la app conductor
+    try {
+      const { clasificarRolApp } = await import("@ruum/api/identity");
+      const rol = await clasificarRolApp(supabase, user.id);
+      if (rol === "usuario") {
+        const redirectUrl = request.nextUrl.clone();
+        redirectUrl.pathname = "/403";
+        redirectUrl.search = "";
+        redirectUrl.searchParams.set("reason", "rol_usuario");
+        return applyCspHeaders(NextResponse.redirect(redirectUrl), nonce);
+      }
+    } catch (e) {
+      // Si falla la verificación (red, etc.), se permite continuar; RLS en Supabase sigue protegiendo mutaciones
+      console.error("[security] Error al clasificar rol en middleware:", e);
+    }
+  }
+
   if (user && esRutaAuth) {
-    // Usuario ya autenticado no debe ver login/onboarding.
-    // /registro se excluye a propósito: un conductor autenticado puede seguir
-    // ahí a mitad de registro (borrador/correo_pendiente/datos_incompletos/
-    // documentos_pendientes) tras confirmar su correo — ver auth/callback/route.ts
-    // (destinoComoConductor) y registro/page.tsx (sesionAutenticada). Forzar la
-    // redirección a /panel aquí producía un loop infinito /registro ↔ /panel,
-    // porque usePanelData.ts redirige de vuelta a /registro para esos mismos
-    // estados. La propia página de registro ya redirige a /panel cuando detecta
-    // un conductor aprobado o una solicitud lista para enviar.
     return applyCspHeaders(NextResponse.redirect(new URL("/panel", request.url)), nonce);
   }
 

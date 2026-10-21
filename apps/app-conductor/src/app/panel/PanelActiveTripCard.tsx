@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { folioViaje, type PasaporteRow } from "./panel-utils";
-import { ConductorStatusBadge, conductorButtonClasses } from "../../components/v2/ConductorUI";
 
 interface PanelActiveTripCardProps {
   viaje: PasaporteRow;
@@ -75,10 +74,12 @@ export function PanelActiveTripCard({ viaje }: PanelActiveTripCardProps) {
   if (!viaje.estado) return null;
 
   return (
-    <article className="conductor-operational-card w-full p-5 flex flex-col gap-4 text-left relative">
+    <article className="border border-border rounded-2xl bg-surface p-5 shadow-[0_6px_20px_rgba(13,43,94,0.07)] w-full flex flex-col gap-4 text-left relative">
       {/* 1. Header: Traslado Activo */}
       <div className="flex justify-between items-center w-full">
-        <ConductorStatusBadge status="active" label="Traslado activo" />
+        <span className="inline-flex min-h-[28px] items-center gap-1.5 rounded-full border border-blue-200 bg-blue-50 px-2.5 py-1 font-body text-xs font-semibold text-blue-900">
+          Traslado activo
+        </span>
       </div>
 
       {/* 2. #Traslado en grande */}
@@ -120,7 +121,7 @@ export function PanelActiveTripCard({ viaje }: PanelActiveTripCardProps) {
       {/* 4. Botón de continuar traslado */}
       <Link
         href={getContinuarTrasladoHref(viaje)}
-        className={conductorButtonClasses({ variant: "primary", className: "w-full mt-1" })}
+        className="inline-flex min-h-11 w-full items-center justify-center rounded-xl bg-[var(--ruum-action)] px-5 py-3 font-body text-base font-semibold text-white transition hover:brightness-105 mt-1"
       >
         Continuar traslado →
       </Link>

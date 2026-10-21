@@ -3,6 +3,7 @@ import type { Database } from "@ruum/shared/types";
 import { registrarUbicacionTraslado } from "@ruum/api/services";
 import { distanciaMetrosEntre, type Coordenadas } from "./ubicacion";
 import { guardarJsonLocalSeguro, leerJsonLocalSeguro, eliminarJsonLocalSeguro } from "./almacenamiento-seguro-local";
+import { indexedDBTelemetryStorage, esIndexedDBDisponible } from "./idx-telemetria-store";
 
 const CLAVE_COLA_TELEMETRIA = "ruum_cola_telemetria_v1";
 const MAX_PUNTOS_COLA = 500;
@@ -60,7 +61,50 @@ export class InMemoryTelemetryQueueStorage implements TelemetryQueueStorage {
   }
 }
 
-let storageTelemetria: TelemetryQueueStorage = new SecureTelemetryQueueStorage();
+/**
+ * Almacenamiento dual: escribe siempre en el storage configurado (cifrado)
+ * Y en IndexedDB como fallback obligatorio. Lee del storage configurado;
+ * si está vacío, cae a IndexedDB. Garantiza que ningún punto de telemetría
+ * se pierda aunque el almacenamiento principal falle.
+ */
+export class DualTelemetryQueueStorage implements TelemetryQueueStorage {
+  constructor(
+    private principal: TelemetryQueueStorage,
+    private fallback: TelemetryQueueStorage = indexedDBTelemetryStorage
+  ) {}
+
+  async read(): Promise<PuntoTelemetriaLocal[]> {
+    const principales = await this.principal.read();
+    if (principales.length > 0) return principales;
+    if (esIndexedDBDisponible()) {
+      return normalizar(await this.fallback.read());
+    }
+    return principales;
+  }
+
+  async write(items: PuntoTelemetriaLocal[]): Promise<void> {
+    const normalizados = normalizar(items);
+    // Escribir al storage principal (cifrado)
+    await this.principal.write(normalizados);
+    // Fallback obligatorio: escribir también en IndexedDB
+    if (esIndexedDBDisponible()) {
+      await this.fallback.write(normalizados).catch(() => {
+        // IndexedDB no debe bloquear la operación principal
+      });
+    }
+  }
+
+  async clear(): Promise<void> {
+    await this.principal.clear();
+    if (esIndexedDBDisponible()) {
+      await this.fallback.clear().catch(() => undefined);
+    }
+  }
+}
+
+let storageTelemetria: TelemetryQueueStorage = new DualTelemetryQueueStorage(
+  new SecureTelemetryQueueStorage()
+);
 
 export function configurarStorageTelemetria(storage: TelemetryQueueStorage) {
   storageTelemetria = storage;

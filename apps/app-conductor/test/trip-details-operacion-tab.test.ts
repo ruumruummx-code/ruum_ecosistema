@@ -2,10 +2,11 @@ import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 
-const COMPONENT_FILE = readFileSync(
-  resolve(__dirname, "../src/app/viajes/[id]/detalles/TripDetailsTabs.tsx"),
-  "utf8"
-);
+const COMPONENT_FILE = [
+  readFileSync(resolve(__dirname, "../src/app/viajes/[id]/detalles/TripDetailsTabs.tsx"), "utf8"),
+  readFileSync(resolve(__dirname, "../src/app/viajes/[id]/detalles/tabs/TabOperacion.tsx"), "utf8"),
+  readFileSync(resolve(__dirname, "../src/app/viajes/[id]/detalles/tabs/detalles-utils.ts"), "utf8"),
+].join("\n");
 
 describe("TripDetailsTabs - Pestaña Operación (antes Protocolo)", () => {
   it("renombra la pestaña a Operación", () => {

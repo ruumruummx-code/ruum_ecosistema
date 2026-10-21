@@ -7,13 +7,13 @@ import { calcularSyncSnapshot, obtenerUltimoSyncSnapshot, publicarSyncSnapshot, 
 import { recordOperationalEvent } from "../lib/observability";
 
 const CLASES: Record<GlobalSyncSnapshot["status"], string> = {
-  todo_sincronizado: "conductor-feedback conductor-feedback-success",
-  sin_conexion: "conductor-feedback conductor-feedback-warning",
-  pendientes: "conductor-feedback conductor-feedback-info",
-  sincronizando: "conductor-feedback conductor-feedback-info",
-  accion_requerida: "conductor-feedback conductor-feedback-warning",
-  error_recuperable: "conductor-feedback conductor-feedback-warning",
-  conflicto_revision: "conductor-feedback conductor-feedback-error"
+  todo_sincronizado: "border border-[var(--ruum-success)]/30 bg-[var(--ruum-success-bg)] text-[var(--ruum-success-text)]",
+  sin_conexion: "border border-[var(--ruum-warning)]/40 bg-[var(--ruum-warning-bg)] text-[var(--ruum-warning-text)]",
+  pendientes: "border border-[var(--ruum-action)]/30 bg-[var(--ruum-action-bg)] text-[var(--ruum-action-text)]",
+  sincronizando: "border border-[var(--ruum-action)]/30 bg-[var(--ruum-action-bg)] text-[var(--ruum-action-text)]",
+  accion_requerida: "border border-[var(--ruum-warning)]/40 bg-[var(--ruum-warning-bg)] text-[var(--ruum-warning-text)]",
+  error_recuperable: "border border-[var(--ruum-error)]/30 bg-[var(--ruum-error-bg)] text-[var(--ruum-error-text)]",
+  conflicto_revision: "border border-[var(--ruum-error)]/30 bg-[var(--ruum-error-bg)] text-[var(--ruum-error-text)]"
 };
 
 // CODE-003 — mapeo de accion_requerida a UI accionable + observabilidad

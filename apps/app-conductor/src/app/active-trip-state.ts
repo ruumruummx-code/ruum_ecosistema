@@ -1,5 +1,5 @@
 import type { Database } from "@ruum/shared/types";
-import { ESTADOS_TRASLADO } from "@ruum/shared/states";
+import { ESTADOS_TRASLADO, ESTADOS_OPERACION_ACTIVA, ESTADOS_SEGUIMIENTO_UBICACION } from "@ruum/shared/states";
 import { getTripPresentation } from "../lib/trip-presentation";
 
 export type EstadoTraslado = Database["public"]["Enums"]["estado_traslado"];
@@ -24,37 +24,6 @@ export type RegistroViajeActivoInput = Partial<ViajeActivo> & {
 
 const INDICE_INICIO_EMERGENCIA = ESTADOS_TRASLADO.indexOf("conductor_asignado");
 const INDICE_FIN_EMERGENCIA = ESTADOS_TRASLADO.indexOf("evidencia_final_completada");
-
-const ESTADOS_OPERACION_ACTIVA: EstadoTraslado[] = [
-  "conductor_asignado",
-  "conductor_en_camino_al_origen",
-  "conductor_en_punto_de_recoleccion",
-  "verificacion_vehiculo_en_proceso",
-  "evidencia_inicial_en_proceso",
-  "evidencia_inicial_completada",
-  "vehiculo_recibido",
-  "traslado_en_curso",
-  "incidencia_reportada",
-  "llegada_a_destino",
-  "evidencia_final_en_proceso",
-  "evidencia_final_completada",
-  "entrega_confirmada"
-];
-
-const ESTADOS_SEGUIMIENTO_UBICACION: EstadoTraslado[] = [
-  "conductor_en_camino_al_origen",
-  "conductor_en_punto_de_recoleccion",
-  "verificacion_vehiculo_en_proceso",
-  "evidencia_inicial_en_proceso",
-  "evidencia_inicial_completada",
-  "vehiculo_recibido",
-  "traslado_en_curso",
-  "incidencia_reportada",
-  "llegada_a_destino",
-  "evidencia_final_en_proceso",
-  "evidencia_final_completada",
-  "entrega_confirmada"
-];
 
 export function viajePermiteEmergencia(estado: EstadoTraslado) {
   const indice = ESTADOS_TRASLADO.indexOf(estado);

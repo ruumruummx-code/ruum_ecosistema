@@ -1,6 +1,34 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+
+/**
+ * useActiveTripPolling
+ *
+ * Hook que mantiene sincronizado el viaje activo del conductor mediante
+ * **polling HTTP** (no Realtime/Supabase Realtime Channel).
+ *
+ * ¿Por qué polling y no Realtime?
+ * 1. Cobertura intermitente: el conductor circula con red móvil inestable;
+ *    los canales Realtime se rompen en background y su reconexión es costosa
+ *    en batería y datos. El polling con intervalo fijo (45s) es más predecible.
+ * 2. Control total del backoff: ante error de red, el hook conserva el último
+ *    viaje conocido en caché (offline-active-trip-cache) y marca
+ *    `viajeActivoSinActualizar`, sin derribar la UI. Un canal Realtime caído
+ *    forzaría a limpiar el estado o a mostrar spinners innecesarios.
+ * 3. Simplicidad operativa: no requiere mantener suscripciones por canal
+ *    (`ubicaciones-traslado-${id}`, `estado-traslado-${id}`) ni gestionar
+ *    `onstatechange` de clientes Realtime en pestañas múltiples.
+ * 4. Compatibilidad PWA: el Service Worker cachea respuestas de las rutas API
+ *    de listado de traslados, de modo que el polling puede servirse desde
+ *    caché incluso sin red.
+ *
+ * Compensación consciente: la latencia de detección de cambios es de hasta
+ * INTERVALO_REFRESCO_VIAJE_ACTIVO_MS (45s). Para el flujo del conductor esto
+ * es aceptable; los cambios críticos de estado (llegada, entrega) se
+ * confirman explícitamente mediante acciones del conductor, no por Realtime.
+ */
+
 import { App } from "@capacitor/app";
 import { listarTrasladosAceptados, obtenerConductorActual } from "@ruum/api/services";
 import { createLogger, errorCode } from "@ruum/shared/utils";
@@ -19,7 +47,7 @@ const RUTAS_SIN_VIAJE_ACTIVO = new Set(["/login", "/registro", "/onboarding"]);
 const INTERVALO_REFRESCO_VIAJE_ACTIVO_MS = 45_000;
 const logger = createLogger("active_trip");
 
-export function useActiveTripSubscription(pathname: string) {
+export function useActiveTripPolling(pathname: string) {
   const [viajeActivo, setViajeActivo] = useState<ViajeActivo | null>(null);
   const [viajeActivoSinActualizar, setViajeActivoSinActualizar] = useState(false);
   const [pasaporteActivo, setPasaporteActivo] = useState<Awaited<ReturnType<typeof listarTrasladosAceptados>>[number] | null>(null);

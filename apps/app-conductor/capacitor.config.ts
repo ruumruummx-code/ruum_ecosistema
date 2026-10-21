@@ -1,6 +1,6 @@
 import type { CapacitorConfig } from "@capacitor/cli";
 
-const URL_PRODUCCION = "https://conductor.ruumruum-moviliax.online";
+const URL_PRODUCCION = "https://concer.ruumruum-moviliax.online";
 
 const config: CapacitorConfig = {
   appId: "com.moviliax.ruumruum.conductor",
@@ -12,7 +12,7 @@ const config: CapacitorConfig = {
     url: process.env.RUUM_CAPACITOR_SERVER_URL || URL_PRODUCCION,
     allowNavigation: [
       "*.ruumruum-moviliax.online",
-      "conductor.ruumruum-moviliax.online",
+      "concer.ruumruum-moviliax.online",
       "*.supabase.co",
       "*.supabase.in",
       "verify.didit.me",

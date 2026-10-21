@@ -24,7 +24,7 @@
 - **Runbook:** Revisar `CSP_DEUDA_P2.md`, `scripts/assert-csp.mjs`
 
 ### 4) Health Down
-- **Uptime check:** `GET https://conductor.ruumruum-moviliax.online/api/health` cada 1m (Checkly / UptimeRobot / Sentry Crons)
+- **Uptime check:** `GET https://concer.ruumruum-moviliax.online/api/health` cada 1m (Checkly / UptimeRobot / Sentry Crons)
 - **Condition:** `status:503` OR `json.status == "down"` 2 veces consecutivas
 - **Action:** PagerDuty + Slack `#oncall`
 - **Runbook:** `docs/ops/RUNBOOK_HEALTH.md` (Supabase, middleware, Vercel)

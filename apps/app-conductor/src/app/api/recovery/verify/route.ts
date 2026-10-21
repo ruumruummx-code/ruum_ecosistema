@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { COOKIE_RECOVERY_CONDUCTOR } from "@ruum/shared/utils";
 import { crearClienteServidor } from "@/lib/supabase-server";
+import { rateLimit, ipDeRequest } from "@/lib/rate-limit";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -9,38 +10,6 @@ export const revalidate = 0;
 // M8: como el resto de endpoints de auth (ver nota en app-usuario).
 const MAX_POR_HORA = 30;
 const VENTANA_MS = 60 * 60 * 1000;
-const MAX_CLAVES = 2000;
-
-const intentos = new Map<string, { count: number; resetAt: number }>();
-
-function ipDeRequest(request: NextRequest): string | null {
-  const vercel = request.headers.get("x-vercel-forwarded-for")?.split(",").map((t) => t.trim()).filter(Boolean).pop();
-  if (vercel && /^\d{1,3}(\.\d{1,3}){3}$/.test(vercel)) return vercel;
-  const real = request.headers.get("x-real-ip")?.trim();
-  if (real && /^\d{1,3}(\.\d{1,3}){3}$/.test(real)) return real;
-  const fwd = request.headers.get("x-forwarded-for")?.split(",").map((t) => t.trim()).filter(Boolean).pop();
-  if (fwd && /^\d{1,3}(\.\d{1,3}){3}$/.test(fwd)) return fwd;
-  return null;
-}
-
-function limiteExcedido(ip: string | null): boolean {
-  if (!ip) return false;
-  const now = Date.now();
-  const entry = intentos.get(ip);
-  if (!entry || now > entry.resetAt) {
-    if (intentos.size >= MAX_CLAVES) {
-      for (const [k, v] of intentos) {
-        if (now > v.resetAt) intentos.delete(k);
-        if (intentos.size < MAX_CLAVES) break;
-      }
-    }
-    intentos.set(ip, { count: 1, resetAt: now + VENTANA_MS });
-    return false;
-  }
-  if (entry.count >= MAX_POR_HORA) return true;
-  entry.count += 1;
-  return false;
-}
 
 /**
  * PR-02 P0 — Verifica autorización de recuperación (conductor).
@@ -49,15 +18,36 @@ function limiteExcedido(ip: string | null): boolean {
  * A5: respuesta mínima { authorized } sin `reason` ni `error`. El detalle del
  * fallo iba al cliente (oráculo de estado de sesión + mensajes internos de
  * Supabase vía String(e)); ahora solo va al log del servidor.
+ *
+ * A6: rate-limit distribuido por IP (preparado para Upstash/Redis vía rateLimitStore).
  */
 export async function GET(request: NextRequest) {
   const sinCache = { "Cache-Control": "no-store" };
 
-  // M8: este endpoint decide si se puede cambiar la contraseña.
-  if (limiteExcedido(ipDeRequest(request))) {
-    return NextResponse.json({ authorized: false }, { status: 429, headers: sinCache });
+  // Rate-limit por IP (preparado para serverless: store inyectable)
+  const ip = ipDeRequest(request);
+  const { allowed, remaining, resetAt } = await rateLimit(
+    `recovery-verify:${ip ?? "anon"}`,
+    { max: MAX_POR_HORA, ventanaMs: VENTANA_MS }
+  );
+
+  if (!allowed) {
+    return NextResponse.json(
+      { authorized: false },
+      {
+        status: 429,
+        headers: {
+          ...sinCache,
+          "Retry-After": String(Math.ceil((resetAt - Date.now()) / 1000)),
+          "X-RateLimit-Limit": String(MAX_POR_HORA),
+          "X-RateLimit-Remaining": String(remaining),
+          "X-RateLimit-Reset": String(resetAt)
+        }
+      }
+    );
   }
 
+  // M8: este endpoint decide si se puede cambiar la contraseña.
   try {
     const cookieStore = await cookies();
     const marcador = cookieStore.get(COOKIE_RECOVERY_CONDUCTOR)?.value ?? null;

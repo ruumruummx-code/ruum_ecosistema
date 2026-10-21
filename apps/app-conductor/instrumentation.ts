@@ -38,6 +38,17 @@ export function onRequestError(
   request: { path: string; method: string; headers: Record<string, string> },
   context: { routerKind: string; routePath: string; routeType: string }
 ) {
-  // Log estructurado + espejo a supabase vía observability si es posible
+  // Log estructurado + captura en Sentry si está disponible
   console.error("[conductor:onRequestError]", { err, request, context });
+  try {
+    const Sentry = require("@sentry/nextjs");
+    if (Sentry.captureException) {
+      Sentry.captureException(err, {
+        tags: { routerKind: context.routerKind, routePath: context.routePath, routeType: context.routeType },
+        extra: { requestPath: request.path, requestMethod: request.method }
+      });
+    }
+  } catch {
+    // Sentry no instalado — ignorar
+  }
 }

@@ -33,7 +33,7 @@ export default function PaginaDatosBancarios() {
   const router = useRouter();
   const [confirmacionAbierta, setConfirmacionAbierta] = useState(false);
   const [datosBancarios, setDatosBancarios] = useState<DatosBancarios | null>(null);
-  const [formulario, setFormulario] = useState({ titularCuenta: "", banco: "", clabe: "", numeroTarjeta: "" });
+  const [formulario, setFormulario] = useState({ titularCuenta: "", banco: "", clabe: "" });
   const [edicionAutorizada, setEdicionAutorizada] = useState(false);
   const [password, setPassword] = useState("");
   const [mostrarPassword, setMostrarPassword] = useState(false);
@@ -59,9 +59,8 @@ export default function PaginaDatosBancarios() {
         setFormulario(datos ? {
           titularCuenta: datos.titular_cuenta,
           banco: datos.banco,
-          clabe: datos.clabe,
-          numeroTarjeta: datos.numero_tarjeta ?? ""
-        } : { titularCuenta: conductor.nombre, banco: "", clabe: "", numeroTarjeta: "" });
+          clabe: datos.clabe
+        } : { titularCuenta: conductor.nombre, banco: "", clabe: "" });
         setErrorCarga(null);
       } catch {
         if (activo) setErrorCarga("No se pudieron cargar los datos bancarios. Inténtalo de nuevo.");
@@ -82,9 +81,6 @@ export default function PaginaDatosBancarios() {
         clabe: digitos,
         banco: bancoDetectado ?? actual.banco
       }));
-    } else if (campo === "numeroTarjeta") {
-      const digitos = valorRaw.replace(/\D/g, "").slice(0, 16);
-      setFormulario((actual) => ({ ...actual, numeroTarjeta: digitos }));
     } else {
       setFormulario((actual) => ({ ...actual, [campo]: valorRaw }));
     }
@@ -111,7 +107,7 @@ export default function PaginaDatosBancarios() {
   }
 
   async function guardar() {
-    if (!edicionAutorizada || formulario.titularCuenta.trim().length < 3 || !formulario.banco.trim() || !/^\d{18}$/.test(formulario.clabe) || !/^\d{16}$/.test(formulario.numeroTarjeta) || guardando) {
+    if (!edicionAutorizada || formulario.titularCuenta.trim().length < 3 || !formulario.banco.trim() || !/^\d{18}$/.test(formulario.clabe) || guardando) {
       setMensaje("Confirma tu sesión antes de editar datos bancarios.");
       return;
     }
@@ -124,7 +120,10 @@ export default function PaginaDatosBancarios() {
     setMensaje(null);
     try {
       const cliente = crearClienteNavegador();
-      const guardado = await guardarDatosBancariosConductor(cliente, formulario);
+      const guardado = await guardarDatosBancariosConductor(cliente, {
+        ...formulario,
+        numeroTarjeta: null
+      });
       setDatosBancarios(guardado);
       setEdicionAutorizada(false);
       router.push("/cuenta/certificacion");
@@ -143,8 +142,8 @@ export default function PaginaDatosBancarios() {
     <ConfirmDialog open={confirmacionAbierta} title="Actualizar cuenta para depósitos"
       consequence="La cuenta quedará pendiente de revisión operativa y se utilizará para transferencias una vez aprobada."
       maskedData={[
-        `CLABE terminación ${formulario.clabe.slice(-4)}`,
-        `Tarjeta terminación ${formulario.numeroTarjeta.slice(-4)}`
+        `Banco: ${formulario.banco}`,
+        `CLABE terminación ${formulario.clabe.slice(-4)}`
       ]} confirmLabel="Guardar y enviar a revisión" busy={guardando}
       onCancel={() => setConfirmacionAbierta(false)} onConfirm={() => void guardar()} />
   </>;

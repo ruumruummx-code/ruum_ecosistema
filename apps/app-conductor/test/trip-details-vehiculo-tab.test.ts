@@ -2,10 +2,10 @@ import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 
-const COMPONENT_FILE = readFileSync(
-  resolve(__dirname, "../src/app/viajes/[id]/detalles/TripDetailsTabs.tsx"),
-  "utf8"
-);
+const COMPONENT_FILE = [
+  readFileSync(resolve(__dirname, "../src/app/viajes/[id]/detalles/TripDetailsTabs.tsx"), "utf8"),
+  readFileSync(resolve(__dirname, "../src/app/viajes/[id]/detalles/tabs/TabVehiculo.tsx"), "utf8"),
+].join("\n");
 
 describe("TripDetailsTabs - Pestaña Vehículo", () => {
   it("presenta los 11 campos requeridos de la unidad a trasladar", () => {

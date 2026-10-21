@@ -4,7 +4,6 @@ import Link from "next/link";
 import { ETIQUETA_TIPO_VEHICULO } from "@ruum/shared/constants";
 import type { PasaporteRow, DetalleOperativo } from "./trips-utils";
 import { formatearDuracion, nombreVehiculo } from "./trips-utils";
-import { ConductorStatusBadge, conductorButtonClasses } from "../../components/v2/ConductorUI";
 import { TripPreviewCard } from "./TripPreviewCard";
 
 function extraerColonia(direccion: string | null): string {
@@ -54,11 +53,13 @@ export function OfertaCard({ viaje, detalle, hrefDetalle, compact = false }: Ofe
   const duracionTexto = formatearDuracion(viaje.tiempo_estimado_horas);
 
   return (
-    <article className="conductor-operational-card w-full overflow-hidden select-none text-left flex flex-col gap-0">
+    <article className="border border-border rounded-2xl bg-surface overflow-hidden select-none text-left flex flex-col gap-0 shadow-[0_6px_20px_rgba(13,43,94,0.07)]">
       {/* Cabecera: ID resaltado + Tipo de Auto + Tarifa */}
       <div className="flex items-center justify-between px-4 pt-3.5 pb-2.5 border-b border-border/15 gap-2">
         <div className="flex items-center gap-2 min-w-0">
-          <ConductorStatusBadge status="active" label="Oferta disponible" className="shrink-0" />
+          <span className="inline-flex min-h-[28px] items-center gap-1.5 rounded-full border border-blue-200 bg-blue-50 px-2.5 py-1 font-body text-xs font-semibold text-blue-900 shrink-0">
+            Oferta disponible
+          </span>
           <button
             type="button"
             onClick={() => {
@@ -179,7 +180,7 @@ export function OfertaCard({ viaje, detalle, hrefDetalle, compact = false }: Ofe
       <div className="p-3 bg-surface/60 border-t border-border/15">
         <Link
           href={hrefDetalle}
-          className={conductorButtonClasses({ variant: "primary", className: "w-full" })}
+          className="inline-flex min-h-11 w-full items-center justify-center rounded-xl bg-[var(--ruum-action)] px-5 py-3 font-body text-base font-semibold text-white transition hover:brightness-105"
         >
           Ver oferta →
         </Link>

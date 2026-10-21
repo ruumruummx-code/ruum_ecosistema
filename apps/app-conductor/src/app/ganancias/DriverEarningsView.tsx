@@ -5,18 +5,13 @@ import Image from "next/image";
 import Link from "next/link";
 import type { DatosGananciasConductor } from "@ruum/api/services";
 import { CONTACTOS_SOPORTE_CONDUCTOR } from "../../lib/contactos-soporte";
+import { ConductorIcon } from "@/components/icons";
 import type { EarningsPeriod, summarizeEarnings } from "./earnings-summary";
 import styles from "./earnings.module.css";
 
 type IconName = "bell" | "chart" | "car" | "clock" | "bank";
 function Icon({ name }: { name: IconName }) {
-  return <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-    {name === "bell" && <><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4" /></>}
-    {name === "chart" && <><path strokeWidth="4" d="M5 16v4M12 10v10M19 4v16" /></>}
-    {name === "car" && <><path d="m4 10 2-6h12l2 6M3 17V10h18v7H3ZM5 17v3M19 17v3M6 13h2M16 13h2" /></>}
-    {name === "clock" && <><circle cx="12" cy="12" r="9" /><path d="M12 6v6l4 2" /></>}
-    {name === "bank" && <><path d="m3 8 9-5 9 5H3ZM3 21h18M5 18h14M6 11v7M12 11v7M18 11v7" /></>}
-  </svg>;
+  return <ConductorIcon name={name} size={24} strokeWidth={1.8} />;
 }
 const money = (value: number) => new Intl.NumberFormat("es-MX", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(value);
 const paymentDate = (value: string) => {

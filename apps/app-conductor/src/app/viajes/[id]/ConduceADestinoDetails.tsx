@@ -15,7 +15,6 @@ import { MapaRutaConduccion } from "./MapaRutaConduccion";
 import { SecondaryTripNavBar } from "./SecondaryTripNavBar";
 import { EmergencyPanel } from "./EmergencyPanel";
 import { StickyTripActions } from "./StickyTripActions";
-import { ConductorStatusBadge } from "@/components/v2/ConductorUI";
 
 type PasaporteRow = Database["public"]["Views"]["pasaporte_digital"]["Row"];
 
@@ -133,7 +132,9 @@ export function ConduceADestinoDetails({
         </div>
         <div className="flex flex-col gap-1.5">
           <span className="text-[10px] text-text-tertiary font-bold tracking-widest uppercase">Estado actual</span>
-          <ConductorStatusBadge status="active" label="En traslado" />
+          <span className="inline-flex min-h-[28px] items-center gap-1.5 rounded-full border border-blue-200 bg-blue-50 px-2.5 py-1 font-body text-xs font-semibold text-blue-900">
+            En traslado
+          </span>
         </div>
       </div>
 
@@ -274,7 +275,7 @@ export function ConduceADestinoDetails({
             type="button"
             onClick={handleLlegueDestino}
             disabled={procesando}
-            className="conductor-button conductor-button-primary w-full disabled:cursor-not-allowed"
+            className="inline-flex min-h-11 w-full items-center justify-center rounded-xl bg-[var(--ruum-action)] px-5 py-3 font-body text-base font-semibold text-white transition hover:brightness-105 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {procesando ? (
               TEXTOS_CARGANDO.actualizando

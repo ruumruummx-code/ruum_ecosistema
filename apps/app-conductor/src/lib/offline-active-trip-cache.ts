@@ -3,6 +3,7 @@ import { CONTACTOS_SOPORTE_CONDUCTOR } from "./contactos-soporte";
 import { getTripPresentation } from "./trip-presentation";
 import { eliminarJsonLocalSeguro, guardarJsonLocalSeguro, leerJsonLocalSeguro } from "./almacenamiento-seguro-local";
 import type { Coordenadas } from "./ubicacion";
+import { FOTOS_REQUERIDAS_EVIDENCIA } from "@ruum/shared/states";
 
 export type EstadoTraslado = Database["public"]["Enums"]["estado_traslado"];
 export type PasaporteRow = Database["public"]["Views"]["pasaporte_digital"]["Row"];
@@ -89,7 +90,7 @@ function tipoEvidenciaPorEstado(estado: EstadoTraslado): "inicial" | "final" | n
 function requisitosPendientes(tipo: "inicial" | "final" | null, pasaporte: PasaporteRow) {
   if (!tipo) return [];
   const sincronizadas = tipo === "final" ? pasaporte.evidencia_final_fotos_sincronizadas : pasaporte.evidencia_inicial_fotos_sincronizadas;
-  const faltantes = Math.max(0, 5 - (sincronizadas ?? 0));
+  const faltantes = Math.max(0, FOTOS_REQUERIDAS_EVIDENCIA - (sincronizadas ?? 0));
   return faltantes === 0 ? [] : [`${faltantes} fotos ${tipo === "final" ? "finales" : "iniciales"} pendientes`];
 }
 

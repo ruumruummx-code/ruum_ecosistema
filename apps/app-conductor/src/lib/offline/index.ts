@@ -21,6 +21,7 @@ import {
   limpiarColaEvidenciaCompleta,
   MAX_REINTENTOS_EVIDENCIA,
   TTL_COLA_EVIDENCIA_MS,
+  obtenerStorageColaEvidencia,
 } from "../cola-offline";
 import { encolarPuntoTelemetria, sincronizarColaTelemetria, contarColaTelemetria, leerColaTelemetria } from "../cola-telemetria-offline";
 import {
@@ -52,9 +53,9 @@ export async function purgarColaExpirada(): Promise<number> {
   const aPurgar = new Set([...expiradas, ...excedidas].map((i) => i.localId));
   if (aPurgar.size === 0) return 0;
   const restantes = todas.filter((it) => !aPurgar.has(it.localId));
-  const { sobrescribirColaParaTest } = await import("../cola-offline");
   const { eliminarJsonLocalSeguro } = await import("../almacenamiento-seguro-local");
-  await sobrescribirColaParaTest(restantes);
+  const storage = obtenerStorageColaEvidencia();
+  await storage.write(restantes);
   for (const id of aPurgar) {
     await eliminarJsonLocalSeguro(`ruum_evidencia_bin_${id}`);
   }

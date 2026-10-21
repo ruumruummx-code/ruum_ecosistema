@@ -2,10 +2,10 @@ import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 
-const COMPONENT_FILE = readFileSync(
-  resolve(__dirname, "../src/app/viajes/[id]/SecondaryTripNavBar.tsx"),
-  "utf8"
-);
+const COMPONENT_FILE = [
+  readFileSync(resolve(__dirname, "../src/app/viajes/[id]/SecondaryTripNavBar.tsx"), "utf8"),
+  readFileSync(resolve(__dirname, "../src/app/viajes/[id]/gastos/GastosModal.tsx"), "utf8"),
+].join("\n");
 const GASTOS_DRIVER_FILE = readFileSync(
   resolve(__dirname, "../../../packages/api/src/drivers/gastos.ts"),
   "utf8"

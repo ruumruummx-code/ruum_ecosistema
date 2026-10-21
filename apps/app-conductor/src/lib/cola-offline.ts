@@ -4,12 +4,11 @@ import type { Database } from "@ruum/shared/types";
 import { createLogger, errorCode } from "@ruum/shared/utils";
 import { crearClienteNavegador, tieneSupabaseConfigurado } from "./supabase-browser";
 import { withTimeout } from "./with-timeout";
-import { pLimit } from "@ruum/shared/utils";
+import { recordOperationalEvent } from "./observability";
 
-// PERF-004 — timeouts + rate limit para sync offline
+// PERF-004 — timeouts para sync offline
 const TIMEOUT_UPLOAD_MS = 15_000;
 const TIMEOUT_UPSERT_MS = 10_000;
-export const CONCURRENCIA_SYNC_EVIDENCIA = 2;
 import {
   eliminarJsonLocalSeguro,
   guardarJsonLocalSeguro,
@@ -116,10 +115,6 @@ export function configurarStorageColaEvidencia(storage: EvidenceQueueStorage) {
 
 export function obtenerStorageColaEvidencia(): EvidenceQueueStorage {
   return storageColaEvidencia;
-}
-
-export async function sobrescribirColaParaTest(items: ItemColaEvidencia[]): Promise<void> {
-  await storageColaEvidencia.write(items);
 }
 
 // P1 mediano plazo: binarios fuera del JSON principal, en storage privado cifrado por item
@@ -314,12 +309,35 @@ function esItemValidoYTolerable(item: ItemColaEvidencia, ahoraMs = Date.now()): 
     const capturadaMs = new Date(item.capturadaEn).getTime();
     if (Number.isFinite(capturadaMs) && ahoraMs - capturadaMs > TTL_COLA_EVIDENCIA_MS) {
       logger.warn("evidence_item_purged_ttl", { localId: item.localId, tripId: item.trasladoId });
+      void recordOperationalEvent("evidence_stuck", {
+        localId: item.localId,
+        trasladoId: item.trasladoId,
+        scope: "evidencia|offline",
+        razon: "ttl_expirado_7d"
+      }, "error");
+      if (typeof window !== "undefined") {
+        window.dispatchEvent(new CustomEvent("ruum:evidencia-descartada", {
+          detail: { localId: item.localId, trasladoId: item.trasladoId, razon: "ttl_expirado" }
+        }));
+      }
       return false;
     }
   }
 
   if (typeof item.retryCount === "number" && item.retryCount > MAX_REINTENTOS_EVIDENCIA) {
     logger.warn("evidence_item_purged_max_retries", { localId: item.localId, tripId: item.trasladoId, retryCount: item.retryCount });
+    void recordOperationalEvent("evidence_stuck", {
+      localId: item.localId,
+      trasladoId: item.trasladoId,
+      retryCount: item.retryCount,
+      scope: "evidencia|offline",
+      razon: "max_reintentos_excedido"
+    }, "error");
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new CustomEvent("ruum:evidencia-descartada", {
+        detail: { localId: item.localId, trasladoId: item.trasladoId, razon: "max_reintentos" }
+      }));
+    }
     return false;
   }
 
@@ -422,16 +440,21 @@ export async function sincronizarColaEvidencia(
   const items = opciones.ignoreBackoff ? itemsBase : itemsBase.filter((item) => puedeReintentarse(item));
   let sincronizadas = 0;
 
-  for (const item of items) {
-    const { data: sesion } = await cliente.auth.getUser();
-    const authUserId = sesion.user?.id;
-    if (!authUserId) {
-      const error = new Error("No hay sesión para subir evidencia.");
+  // Validar sesión UNA sola vez por ciclo de sync (no por item) para evitar
+  // N round-trips de Auth en redes lentas (3G). authUserId se reusa para todos los items.
+  const { data: sesion } = await cliente.auth.getUser();
+  const authUserId = sesion.user?.id;
+  if (!authUserId) {
+    const error = new Error("No hay sesión para subir evidencia.");
+    // Registrar intento fallido para cada item pendiente
+    for (const item of items) {
       const actualizado = await registrarIntentoFallido(item, error);
       logEvidenceSyncFailed(actualizado, "auth", error, itemsBase.length);
-      throw error;
     }
+    throw error;
+  }
 
+  for (const item of items) {
     let blob: Blob;
     let dataUrlEfectivo: string;
     try {
@@ -500,41 +523,7 @@ export async function sincronizarColaEvidencia(
 }
 
 /**
- * PERF-004 — Variante concurrente con p-limit(2) y timeouts.
- * Para subida masiva (ej. 10 fotos) sin saturar Storage.
- * Mantiene misma semántica de error: falla rápido si auth expiró,
- * registra intento fallido por item en otros errores.
- * Uso: sincronizarColaEvidenciaBulk(cliente, { trasladoId })
+ * Nota: sincronizarColaEvidenciaBulk fue eliminada (muerto y roto, O(n²)).
+ * Usar sincronizarColaEvidencia directamente, que ya valida auth una sola vez
+ * por ciclo de sync y procesa items de forma secuencial con timeouts.
  */
-export async function sincronizarColaEvidenciaBulk(
-  cliente: SupabaseClient<Database>,
-  opciones: { trasladoId?: string; ignoreBackoff?: boolean } = {}
-): Promise<number> {
-  const cola = await leerColaEvidencia();
-  const itemsBase = opciones.trasladoId ? cola.filter((i) => i.trasladoId === opciones.trasladoId) : cola;
-  const items = opciones.ignoreBackoff ? itemsBase : itemsBase.filter((i) => puedeReintentarse(i));
-  if (items.length === 0) return 0;
-
-  const limit = pLimit(CONCURRENCIA_SYNC_EVIDENCIA);
-  let sincronizadas = 0;
-
-  // Validar sesión una vez antes de lanzar paralelos
-  const { data: sesion } = await withTimeout(cliente.auth.getUser() as unknown as Promise<{ data: { user: { id: string } | null } }>, 5000, "auth.getUser");
-  if (!sesion.user) throw new Error("No hay sesión para subir evidencia.");
-
-  const tareas = items.map((item) =>
-    limit(async () => {
-      // Reusa lógica de item único con timeouts (extraída arriba)
-      const colaIndividual = [item];
-      // Llamada secuencial por item pero limitada a 2 en paralelo a nivel bulk
-      const uploaded = await sincronizarColaEvidencia(cliente, { trasladoId: item.trasladoId, ignoreBackoff: true });
-      return uploaded;
-    })
-  );
-
-  const resultados = await Promise.allSettled(tareas);
-  for (const r of resultados) {
-    if (r.status === "fulfilled") sincronizadas += r.value;
-  }
-  return sincronizadas;
-}

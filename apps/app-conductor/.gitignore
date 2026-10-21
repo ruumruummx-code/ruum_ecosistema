@@ -50,5 +50,8 @@ next-env.d.ts
 /lhci-reports/
 /.lighthouse-ci/
 
+# Build artefacts
+/build.log
+
 # Storybook
 /storybook-static/

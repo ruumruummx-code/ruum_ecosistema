@@ -3,20 +3,19 @@
 import Link from "next/link";
 import type { PasaporteRow, DetalleOperativo } from "./trips-utils";
 import { formatearDuracion, nombreVehiculo } from "./trips-utils";
-import { ConductorStatusBadge, conductorButtonClasses, type ConductorStatus } from "../../components/v2/ConductorUI";
 import { TripPreviewCard } from "./TripPreviewCard";
 
 function getEstadoCardInfo(estado: string) {
   switch (estado) {
     case "conductor_asignado":
       return {
-        status: "pending" as ConductorStatus,
+        status: "pending" as string,
         titulo: "PENDIENTE DE INICIO",
         descripcion: "Dirígete al punto de origen."
       };
     case "conductor_en_camino_al_origen":
       return {
-        status: "active" as ConductorStatus,
+        status: "active" as string,
         titulo: "EN CAMINO AL ORIGEN",
         descripcion: "Dirígete al punto de recolección."
       };
@@ -26,13 +25,13 @@ function getEstadoCardInfo(estado: string) {
     case "evidencia_inicial_completada":
     case "vehiculo_recibido":
       return {
-        status: "active" as ConductorStatus,
+        status: "active" as string,
         titulo: "EN PUNTO DE ORIGEN",
         descripcion: "Realiza la recepción y evidencia del vehículo."
       };
     case "traslado_en_curso":
       return {
-        status: "active" as ConductorStatus,
+        status: "active" as string,
         titulo: "TRASLADO EN CURSO",
         descripcion: "Conduce de forma segura al destino."
       };
@@ -40,23 +39,38 @@ function getEstadoCardInfo(estado: string) {
     case "evidencia_final_en_proceso":
     case "evidencia_final_completada":
       return {
-        status: "active" as ConductorStatus,
+        status: "active" as string,
         titulo: "LLEGADA A DESTINO",
         descripcion: "Entrega la unidad y registra la evidencia final."
       };
     case "entrega_confirmada":
     case "servicio_cerrado":
       return {
-        status: "success" as ConductorStatus,
+        status: "success" as string,
         titulo: "TRASLADO FINALIZADO",
         descripcion: "El traslado ha sido concluido."
       };
     default:
       return {
-        status: "pending" as ConductorStatus,
+        status: "pending" as string,
         titulo: "PENDIENTE DE INICIO",
         descripcion: "Dirígete al punto de origen."
       };
+  }
+}
+
+function clasesEstado(status: string): string {
+  switch (status) {
+    case "success":
+      return "border-emerald-200 bg-emerald-50 text-emerald-900";
+    case "active":
+      return "border-blue-200 bg-blue-50 text-blue-900";
+    case "pending":
+      return "border-amber-200 bg-amber-50 text-amber-900";
+    case "error":
+      return "border-rose-200 bg-rose-50 text-rose-900";
+    default:
+      return "border-slate-200 bg-slate-50 text-slate-900";
   }
 }
 
@@ -96,7 +110,7 @@ export function AcceptedTripCard({
   const cardInfo = getEstadoCardInfo(viaje.estado || "");
 
   return (
-    <article className="conductor-operational-card w-full p-4 flex flex-col gap-3 text-left select-none">
+    <article className="border border-border rounded-2xl bg-surface p-4 shadow-[0_6px_20px_rgba(13,43,94,0.07)] w-full flex flex-col gap-3 text-left select-none">
       {/* Cabecera: ID + Tarifa + Botón de Opciones */}
       <div className="flex items-center justify-between gap-2 border-b border-border/15 pb-2.5">
         <div className="flex items-center gap-2">
@@ -135,7 +149,11 @@ export function AcceptedTripCard({
 
       {/* Indicador de Estado */}
       <div className="flex flex-col text-left">
-        <ConductorStatusBadge status={cardInfo.status} label={cardInfo.titulo} />
+        <span
+          className={`inline-flex min-h-[28px] items-center gap-1.5 rounded-full border px-2.5 py-1 font-body text-xs font-semibold ${clasesEstado(cardInfo.status)}`}
+        >
+          {cardInfo.titulo}
+        </span>
         <p className="font-body text-[10px] text-text-secondary mt-1 leading-snug">
           {cardInfo.descripcion}
         </p>
@@ -208,7 +226,7 @@ export function AcceptedTripCard({
       {/* CTA Button */}
       <Link
         href={hrefDetalle}
-        className={conductorButtonClasses({ variant: "primary", className: "w-full mt-0.5" })}
+        className="inline-flex min-h-11 w-full items-center justify-center rounded-xl bg-[var(--ruum-action)] px-5 py-3 font-body text-base font-semibold text-white transition hover:brightness-105 mt-0.5"
       >
         INICIAR TRASLADO →
       </Link>
