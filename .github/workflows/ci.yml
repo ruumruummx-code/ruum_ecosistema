@@ -113,6 +113,34 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm --filter @ruum/app-conductor test
 
+  # Gate de cobertura de la UI crítica del conductor (trinquete: sólo sube).
+  # Falla si la cobertura baja del umbral global (40%) o si una de las cuatro
+  # rutas críticas (evidencia, cierre, ganancias, datos bancarios) baja del 60%.
+  # Umbrales en apps/app-conductor/vitest.config.ts.
+  coverage-conductor:
+    name: coverage app-conductor (gate UI crítica)
+    runs-on: ubuntu-latest
+    needs: install
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.0.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @ruum/app-conductor test:coverage
+      - name: Publicar resumen de cobertura
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-app-conductor
+          path: apps/app-conductor/coverage
+          retention-days: 7
+          if-no-files-found: ignore
+
   # T04 (cierra RC-10): E2E de app-usuario con build de producción, obligatorio
   # en la rama candidata.
   #
