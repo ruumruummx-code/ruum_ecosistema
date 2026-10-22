@@ -181,10 +181,21 @@ test.describe("Sprint C5 flujos críticos", () => {
       // Contraseña válida que cumple todos los requisitos
       await inputPassword.fill("PasswordSegura123!");
       await inputConfirmar.fill("PasswordSegura123!");
+      const solicitudPanel = skipAuthInDummy
+        ? page.waitForRequest(
+            (request) => new URL(request.url()).pathname === "/panel",
+            { timeout: 10_000 },
+          )
+        : null;
       await submitBtn.click();
 
       await expect(page.getByText(/contraseña actualizada\. redirigiendo/i)).toBeVisible();
-      await expect(page).toHaveURL(/\/panel/, { timeout: 10_000 });
+      if (solicitudPanel) {
+        // El token simulado no puede validarse desde el middleware servidor-side.
+        await solicitudPanel;
+      } else {
+        await expect(page).toHaveURL(/\/panel/, { timeout: 10_000 });
+      }
     });
   });
 
