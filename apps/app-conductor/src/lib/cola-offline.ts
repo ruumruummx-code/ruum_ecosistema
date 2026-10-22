@@ -1,4 +1,8 @@
-import { guardarFotoEvidenciaSincronizada } from "@ruum/api/custody";
+import {
+  guardarFotoEvidenciaSincronizada,
+  subirArchivoEvidenciaStorage,
+  type ResultadoGuardadoEvidencia
+} from "@ruum/api/custody";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@ruum/shared/types";
 import { createLogger, errorCode } from "@ruum/shared/utils";
@@ -14,6 +18,7 @@ import {
   guardarJsonLocalSeguro,
   leerJsonLocalSeguro
 } from "./almacenamiento-seguro-local";
+import { registrarEvidenciaDescartada } from "./evidencias-descartadas";
 
 const CLAVE_COLA = "ruum_cola_evidencia";
 const CLAVE_BIN_PREFIX = "ruum_evidencia_bin_";
@@ -300,6 +305,39 @@ function isOnline() {
   return navigator.onLine;
 }
 
+/**
+ * Huella sha256 (hex) del archivo de evidencia.
+ *
+ * Es lo que define la identidad de la evidencia en la cadena de custodia: un
+ * reintento de la cola con el mismo contenido tiene la misma huella (es
+ * idempotente) y un contenido distinto es un conflicto que hay que escalar.
+ */
+export async function calcularSha256(dataUrl: string): Promise<string | null> {
+  try {
+    const base64 = dataUrl.split(",")[1];
+    if (!base64) return null;
+    const binario = atob(base64);
+    const bytes = new Uint8Array(binario.length);
+    for (let i = 0; i < binario.length; i += 1) bytes[i] = binario.charCodeAt(i);
+    const digest = await crypto.subtle.digest("SHA-256", bytes);
+    return Array.from(new Uint8Array(digest))
+      .map((byte) => byte.toString(16).padStart(2, "0"))
+      .join("");
+  } catch {
+    return null;
+  }
+}
+
+/** El objeto ya existe en Storage (subida parcial previa): no es un error. */
+function esObjetoYaExistente(error: unknown): boolean {
+  if (!error || typeof error !== "object") return false;
+  const info = error as { statusCode?: number; status?: number; code?: string; message?: string };
+  const estado = info.statusCode ?? info.status;
+  if (estado === 409) return true;
+  const texto = `${info.code ?? ""} ${info.message ?? ""}`.toLowerCase();
+  return texto.includes("already exists") || texto.includes("duplicate");
+}
+
 function esItemValidoYTolerable(item: ItemColaEvidencia, ahoraMs = Date.now()): boolean {
   if (!item || typeof item !== "object") return false;
   if (!item.localId || !item.usuarioId || !item.trasladoId) return false;
@@ -315,9 +353,18 @@ function esItemValidoYTolerable(item: ItemColaEvidencia, ahoraMs = Date.now()): 
         scope: "evidencia|offline",
         razon: "ttl_expirado_7d"
       }, "error");
+      const detalle = {
+        localId: item.localId,
+        trasladoId: item.trasladoId,
+        razon: "ttl_expirado",
+        angulo: item.angulo,
+        tipo: item.tipo,
+        fecha: new Date().toISOString()
+      };
+      void registrarEvidenciaDescartada(detalle);
       if (typeof window !== "undefined") {
         window.dispatchEvent(new CustomEvent("ruum:evidencia-descartada", {
-          detail: { localId: item.localId, trasladoId: item.trasladoId, razon: "ttl_expirado" }
+          detail: detalle
         }));
       }
       return false;
@@ -333,9 +380,18 @@ function esItemValidoYTolerable(item: ItemColaEvidencia, ahoraMs = Date.now()): 
       scope: "evidencia|offline",
       razon: "max_reintentos_excedido"
     }, "error");
+    const detalle = {
+      localId: item.localId,
+      trasladoId: item.trasladoId,
+      razon: "max_reintentos",
+      angulo: item.angulo,
+      tipo: item.tipo,
+      fecha: new Date().toISOString()
+    };
+    void registrarEvidenciaDescartada(detalle);
     if (typeof window !== "undefined") {
       window.dispatchEvent(new CustomEvent("ruum:evidencia-descartada", {
-        detail: { localId: item.localId, trasladoId: item.trasladoId, razon: "max_reintentos" }
+        detail: detalle
       }));
     }
     return false;
@@ -405,7 +461,7 @@ async function registrarIntentoFallido(item: ItemColaEvidencia, error: unknown) 
 
 function logEvidenceSyncFailed(
   item: ItemColaEvidencia,
-  stage: "auth" | "local_payload" | "storage_upload" | "evidence_upsert",
+  stage: "auth" | "local_payload" | "storage_upload" | "evidence_insert" | "evidence_upsert",
   error: unknown,
   queueSize: number
 ) {
@@ -439,6 +495,7 @@ export async function sincronizarColaEvidencia(
   const itemsBase = opciones.trasladoId ? cola.filter((item) => item.trasladoId === opciones.trasladoId) : cola;
   const items = opciones.ignoreBackoff ? itemsBase : itemsBase.filter((item) => puedeReintentarse(item));
   let sincronizadas = 0;
+  let conflictos = 0;
 
   // Validar sesión UNA sola vez por ciclo de sync (no por item) para evitar
   // N round-trips de Auth en redes lentas (3G). authUserId se reusa para todos los items.
@@ -468,23 +525,31 @@ export async function sincronizarColaEvidencia(
 
     const extension = extensionDesdeDataUrl(dataUrlEfectivo);
     const ruta = `${authUserId}/${item.trasladoId}/${item.tipo}/${item.localId}-${item.angulo}.${extension}`;
+    // La huella del archivo define la identidad de la evidencia en la cadena de
+    // custodia: es lo que permite distinguir un reintento idempotente de un
+    // intento de sobrescribir.
+    const sha256 = await calcularSha256(dataUrlEfectivo);
     const { error: uploadError } = await withTimeout(
-      cliente.storage.from(BUCKET_EVIDENCIA).upload(ruta, blob, {
-        upsert: true,
+      subirArchivoEvidenciaStorage(cliente, ruta, blob, {
+        upsert: false,
         contentType: blob.type || "image/jpeg",
       }) as Promise<{ error: unknown | null }>,
       TIMEOUT_UPLOAD_MS,
       `storage_upload:${item.localId}`
     );
-    if (uploadError) {
+    // `upsert: false`: la evidencia registrada no se sobrescribe nunca. Si el
+    // objeto ya existe es porque una subida parcial previa dejó el archivo en
+    // su sitio: se conserva y sigue el flujo (el insert de abajo decide).
+    if (uploadError && !esObjetoYaExistente(uploadError)) {
       const actualizado = await registrarIntentoFallido(item, uploadError);
       logEvidenceSyncFailed(actualizado, "storage_upload", uploadError, itemsBase.length);
       throw uploadError;
     }
 
     let evidenciaError: unknown | null = null;
+    let resultado: ResultadoGuardadoEvidencia | null = null;
     try {
-      await withTimeout(
+      resultado = await withTimeout(
         guardarFotoEvidenciaSincronizada(cliente, {
           id: item.localId,
           traslado_id: item.trasladoId,
@@ -496,9 +561,10 @@ export async function sincronizarColaEvidencia(
           lat: item.lat ?? null,
           lng: item.lng ?? null,
           sincronizada: true,
+          sha256
         }),
         TIMEOUT_UPSERT_MS,
-        `evidence_upsert:${item.localId}`
+        `evidence_insert:${item.localId}`
       );
     } catch (error) {
       evidenciaError = error;
@@ -506,8 +572,41 @@ export async function sincronizarColaEvidencia(
 
     if (evidenciaError) {
       const actualizado = await registrarIntentoFallido(item, evidenciaError);
-      logEvidenceSyncFailed(actualizado, "evidence_upsert", evidenciaError, itemsBase.length);
+      logEvidenceSyncFailed(actualizado, "evidence_insert", evidenciaError, itemsBase.length);
       throw evidenciaError;
+    }
+
+    if (resultado && resultado.estado === "conflicto") {
+      // Conflicto de cadena de custodia: el archivo no coincide con el ya
+      // registrado. No se reintenta (reintentar no lo resuelve) y la evidencia
+      // queda marcada en conflicto con la incidencia abierta a soporte.
+      await quitarDeColaEvidencia(item.localId);
+      conflictos += 1;
+      logger.error(
+        "evidence_checksum_conflict",
+        {
+          tripId: item.trasladoId,
+          evidenceType: item.tipo,
+          angle: item.angulo,
+          localId: item.localId,
+          sha256Registrado: resultado.sha256Registrado,
+          sha256Recibido: resultado.sha256Recibido,
+          queueSize: itemsBase.length
+        },
+        "security_event"
+      );
+      void recordOperationalEvent("evidence_stuck", {
+        localId: item.localId,
+        trasladoId: item.trasladoId,
+        scope: "evidencia|custodia",
+        razon: "conflicto_sha256"
+      }, "error");
+      if (typeof window !== "undefined") {
+        window.dispatchEvent(new CustomEvent("ruum:evidencia-conflicto", {
+          detail: { localId: item.localId, trasladoId: item.trasladoId }
+        }));
+      }
+      continue;
     }
 
     await quitarDeColaEvidencia(item.localId);
@@ -517,6 +616,10 @@ export async function sincronizarColaEvidencia(
 
   if (sincronizadas > 0 && typeof window !== "undefined") {
     window.dispatchEvent(new CustomEvent("ruum:evidencia-sincronizada"));
+  }
+
+  if (conflictos > 0 && typeof window !== "undefined") {
+    window.dispatchEvent(new CustomEvent("ruum:evidencia-conflicto-resuelto", { detail: { conflictos } }));
   }
 
   return sincronizadas;

@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import type { EstadoEconomicoExplicito } from "@ruum/shared/constants";
 import { etiquetaEstadoUnica, formatearFecha, formatearFechaCorta, formatearMoneda } from "./useEarningsLedger";
 
 interface ViajeResumen {
@@ -16,7 +17,7 @@ interface ViajeResumen {
   gastosAutorizados: number;
   bonos: number;
   ajuste: number;
-  estatusEconomico: string;
+  estatusEconomico: EstadoEconomicoExplicito;
   liberacion: string;
   estadoTraslado: string;
 }
@@ -34,7 +35,7 @@ export function EarningsTripRow({
   setViajeExpandido,
   setInfoSheet
 }: EarningsTripRowProps) {
-  const badge = etiquetaEstadoUnica(viaje.estatusEconomico as any);
+  const badge = etiquetaEstadoUnica(viaje.estatusEconomico);
   const estaExpandido = expandido === viaje.id;
 
   return (

@@ -52,6 +52,35 @@ export async function purgarColaExpirada(): Promise<number> {
   const excedidas = todas.filter((it) => typeof it.retryCount === "number" && it.retryCount > MAX_REINTENTOS_EVIDENCIA);
   const aPurgar = new Set([...expiradas, ...excedidas].map((i) => i.localId));
   if (aPurgar.size === 0) return 0;
+  const { registrarEvidenciaDescartada } = await import("../evidencias-descartadas");
+  for (const item of expiradas) {
+    const detalle = {
+      localId: item.localId,
+      trasladoId: item.trasladoId,
+      razon: "ttl_expirado",
+      angulo: item.angulo,
+      tipo: item.tipo,
+      fecha: new Date().toISOString()
+    };
+    void registrarEvidenciaDescartada(detalle);
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new CustomEvent("ruum:evidencia-descartada", { detail: detalle }));
+    }
+  }
+  for (const item of excedidas) {
+    const detalle = {
+      localId: item.localId,
+      trasladoId: item.trasladoId,
+      razon: "max_reintentos",
+      angulo: item.angulo,
+      tipo: item.tipo,
+      fecha: new Date().toISOString()
+    };
+    void registrarEvidenciaDescartada(detalle);
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new CustomEvent("ruum:evidencia-descartada", { detail: detalle }));
+    }
+  }
   const restantes = todas.filter((it) => !aPurgar.has(it.localId));
   const { eliminarJsonLocalSeguro } = await import("../almacenamiento-seguro-local");
   const storage = obtenerStorageColaEvidencia();

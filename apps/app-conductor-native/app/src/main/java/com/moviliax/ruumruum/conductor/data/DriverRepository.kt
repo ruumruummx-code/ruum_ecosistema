@@ -6,6 +6,8 @@ import io.github.jan.supabase.auth.auth
 import io.github.jan.supabase.auth.providers.builtin.Email
 import io.github.jan.supabase.postgrest.from
 import io.github.jan.supabase.postgrest.postgrest
+import io.github.jan.supabase.postgrest.exception.PostgrestRestException
+import io.github.jan.supabase.postgrest.query.Columns
 import io.github.jan.supabase.postgrest.query.Order
 import io.github.jan.supabase.postgrest.query.filter.FilterOperator
 import io.github.jan.supabase.storage.storage
@@ -30,6 +32,7 @@ import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.serialization.json.put
 import kotlinx.serialization.json.putJsonArray
 import java.io.File
+import java.security.MessageDigest
 import java.time.Instant
 import java.util.UUID
 
@@ -359,7 +362,11 @@ class DriverRepository(
 
     suspend fun evidencePhotos(tripId: String, type: String): List<EvidencePhoto> {
         val remotePhotos = runCatching {
-            supabase.from("evidencia_fotos").select {
+            // Columnas explícitas: el decodificador es estricto con las claves
+            // desconocidas y la tabla tiene más campos (lat, lng, sha256…).
+            supabase.from("evidencia_fotos").select(
+                Columns.raw("id,traslado_id,tipo,angulo,url,capturada_en,sincronizada")
+            ) {
                 filter {
                     eq("traslado_id", tripId)
                     eq("tipo", type)
@@ -396,26 +403,105 @@ class DriverRepository(
         val localRecord = syncManager?.saveLocally(tripId, type, angle, bytes)
         val id = localRecord?.id ?: UUID.randomUUID().toString()
         val path = "$userId/$tripId/$type/$id-$angle.jpg"
+        val capturedAt = localRecord?.capturedAt ?: Instant.now().toString()
+        val sha256 = sha256Hex(bytes)
 
         // 2. Intento de subida inmediata a Supabase
         return try {
-            supabase.storage.from("evidencia").upload(path, bytes) { upsert = true }
-            supabase.from("evidencia_fotos").upsert(
+            val resultado = registrarEvidenciaRemota(
+                id = id,
+                path = path,
+                bytes = bytes,
+                tripId = tripId,
+                type = type,
+                angle = angle,
+                sha256 = sha256,
+                capturedAt = capturedAt,
+            )
+            if (resultado != ResultadoRegistroEvidencia.CONFLICTO) {
+                syncManager?.markAsSynced(id)
+            }
+            resultado != ResultadoRegistroEvidencia.CONFLICTO
+        } catch (_: Exception) {
+            // Sin conexión: queda asegurado en la cola local
+            false
+        }
+    }
+
+    /**
+     * Sube la evidencia a Storage y la registra (insert-only).
+     *
+     * La evidencia registrada nunca se sobrescribe: un duplicado con el mismo
+     * sha256 es un reintento idempotente; con sha256 distinto es un conflicto
+     * de custodia (se marca la fila y no se reintenta a ciegas).
+     */
+    private suspend fun registrarEvidenciaRemota(
+        id: String,
+        path: String,
+        bytes: ByteArray,
+        tripId: String,
+        type: String,
+        angle: String,
+        sha256: String,
+        capturedAt: String,
+    ): ResultadoRegistroEvidencia {
+        // Storage: no sobrescribir. Si el objeto ya existe es porque una subida
+        // parcial anterior lo dejó en su sitio: se conserva y se sigue.
+        try {
+            supabase.storage.from("evidencia").upload(path, bytes) { upsert = false }
+        } catch (error: Exception) {
+            if (!esObjetoYaExistente(error)) throw error
+        }
+
+        try {
+            supabase.from("evidencia_fotos").insert(
                 EvidenceInsert(
                     id = id,
                     tripId = tripId,
                     tipo = type,
                     angulo = angle,
                     url = path,
-                    capturedAt = localRecord?.capturedAt ?: Instant.now().toString(),
+                    capturedAt = capturedAt,
+                    sha256 = sha256,
                 ),
             )
-            syncManager?.markAsSynced(id)
-            true
-        } catch (_: Exception) {
-            // Sin conexión: queda asegurado en la cola local
-            false
+            return ResultadoRegistroEvidencia.REGISTRADA
+        } catch (error: PostgrestRestException) {
+            if (error.code != "23505") throw error
+            val existente = supabase.from("evidencia_fotos")
+                .select(Columns.raw("id,sha256")) {
+                    filter { eq("id", id) }
+                }
+                .decodeSingleOrNull<EvidenceRow>()
+            if (existente?.sha256 != null && existente.sha256 == sha256) {
+                return ResultadoRegistroEvidencia.YA_REGISTRADA
+            }
+            // Conflicto de custodia: la fila se marca y no se sobrescribe.
+            runCatching {
+                supabase.from("evidencia_fotos").update({
+                    set("conflicto", true)
+                    set("conflicto_detalle", "sha256 distinto al registrado")
+                    set("conflicto_detectado_en", Instant.now().toString())
+                }) {
+                    filter { eq("id", id) }
+                }
+            }
+            return ResultadoRegistroEvidencia.CONFLICTO
         }
+    }
+
+    /** Huella sha256 del archivo (hex). */
+    private fun sha256Hex(bytes: ByteArray): String {
+        val digest = MessageDigest.getInstance("SHA-256").digest(bytes)
+        return digest.joinToString("") { "%02x".format(it.toInt() and 0xff) }
+    }
+
+    /** El objeto ya existe en Storage (subida parcial previa): no es un error. */
+    private fun esObjetoYaExistente(error: Throwable): Boolean {
+        val mensaje = error.message?.lowercase() ?: ""
+        return mensaje.contains("already exists") ||
+            mensaje.contains("duplicate") ||
+            mensaje.contains("409")
     }
 
     suspend fun syncPendingEvidence(tripId: String? = null): SyncResult {
@@ -434,23 +520,32 @@ class DriverRepository(
                 continue
             }
             val path = "$userId/${record.tripId}/${record.type}/${record.id}-${record.angle}.jpg"
-            val success = runCatching {
+            val resultado = runCatching {
                 val bytes = file.readBytes()
-                supabase.storage.from("evidencia").upload(path, bytes) { upsert = true }
-                supabase.from("evidencia_fotos").upsert(
-                    EvidenceInsert(
-                        id = record.id,
-                        tripId = record.tripId,
-                        tipo = record.type,
-                        angulo = record.angle,
-                        url = path,
-                        capturedAt = record.capturedAt,
-                    ),
+                registrarEvidenciaRemota(
+                    id = record.id,
+                    path = path,
+                    bytes = bytes,
+                    tripId = record.tripId,
+                    type = record.type,
+                    angle = record.angle,
+                    sha256 = sha256Hex(bytes),
+                    capturedAt = record.capturedAt,
                 )
-                manager.markAsSynced(record.id)
-            }.isSuccess
+            }.getOrNull()
 
-            if (success) synced++ else failed++
+            when (resultado) {
+                null -> failed++
+                ResultadoRegistroEvidencia.CONFLICTO -> {
+                    // Reintentar no lo resuelve: se escala y se libera la cola local.
+                    failed++
+                    manager.removeRecord(record.id)
+                }
+                else -> {
+                    manager.markAsSynced(record.id)
+                    synced++
+                }
+            }
         }
 
         return SyncResult(pending.size, synced, failed)

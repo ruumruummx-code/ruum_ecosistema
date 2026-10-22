@@ -55,6 +55,8 @@ data class DriverUiState(
     val signupNeedsOtp: Boolean = false,
     val signupEmail: String = "",
     val signupTelefono: String = "",
+    /** Aceptación de Términos y Aviso de Privacidad capturada en el paso 1 del registro. */
+    val signupAceptaTerminos: Boolean = false,
     val solicitud: SolicitudRow? = null,
     val solicitudDocumentos: List<DriverDocument> = emptyList(),
     val diditUrl: String? = null,
@@ -127,8 +129,22 @@ class DriverViewModel @JvmOverloads constructor(
     // ── Registro ──────────────────────────────────────────────
 
     /** Crea la cuenta; si exige OTP, marca signupNeedsOtp para la pantalla de código. */
-    fun signUp(email: String, password: String, telefono: String = "") = viewModelScope.launch {
-        _state.update { it.copy(loading = true, error = null, signupNeedsOtp = false, signupEmail = email, signupTelefono = telefono) }
+    fun signUp(
+        email: String,
+        password: String,
+        telefono: String = "",
+        aceptaTerminos: Boolean = false,
+    ) = viewModelScope.launch {
+        _state.update {
+            it.copy(
+                loading = true,
+                error = null,
+                signupNeedsOtp = false,
+                signupEmail = email,
+                signupTelefono = telefono,
+                signupAceptaTerminos = aceptaTerminos,
+            )
+        }
         runCatching { repository.signUp(email, password) }
             .onSuccess { sessionActive ->
                 if (sessionActive) {
@@ -194,14 +210,30 @@ class DriverViewModel @JvmOverloads constructor(
         _state.update { it.copy(loading = false) }
     }
 
-    /** Registra consentimientos, envía la solicitud e inicia Didit. */
-    fun enviarSolicitud(versionApp: String) = viewModelScope.launch {
+    /**
+     * Registra consentimientos, envía la solicitud e inicia Didit.
+     * Solo se registran los consentimientos que el conductor aceptó de
+     * verdad: los términos se aceptan en el paso 1 (creación de cuenta) y se
+     * confirman en la revisión final; el aviso de privacidad se acepta en la
+     * revisión final.
+     */
+    fun enviarSolicitud(
+        versionApp: String,
+        aceptaTerminos: Boolean,
+        confirmaPrivacidad: Boolean,
+    ) = viewModelScope.launch {
         val solicitudId = _state.value.solicitud?.id ?: return@launch
+        val terminosAceptados = _state.value.signupAceptaTerminos || aceptaTerminos
         _state.update { it.copy(loading = true, error = null) }
         runCatching {
             repository.registrarConsentimientos(
                 solicitudId,
-                listOf("terminos_servicio", "aviso_privacidad", "autorizacion_antecedentes", "declaracion_suspensiones"),
+                buildList {
+                    if (terminosAceptados) add("terminos_servicio")
+                    if (confirmaPrivacidad) add("aviso_privacidad")
+                    add("autorizacion_antecedentes")
+                    add("declaracion_suspensiones")
+                },
                 versionApp,
             )
             val resultado = repository.enviarSolicitud()

@@ -46,19 +46,20 @@ export async function POST(request: NextRequest) {
   }
 
   const ip = ipDeRequest(request);
-  const { allowed, remaining, resetAt } = await rateLimit(
-    `recovery-clear:${ip ?? "anon"}`,
-    { max: MAX_POR_HORA, ventanaMs: VENTANA_MS }
+  const { allowed, remaining, resetAt, retryAfterSec } = await rateLimit(
+    ip,
+    { max: MAX_POR_HORA, ventanaMs: VENTANA_MS, clave: "recovery-clear", failClosed: true }
   );
 
   if (!allowed) {
+    const espera = retryAfterSec ?? Math.max(1, Math.ceil((resetAt - Date.now()) / 1000));
     return NextResponse.json(
       { error: "Demasiadas solicitudes. Espera un momento e inténtalo de nuevo." },
       {
         status: 429,
         headers: {
           "Cache-Control": "no-store",
-          "Retry-After": String(Math.ceil((resetAt - Date.now()) / 1000)),
+          "Retry-After": String(espera),
           "X-RateLimit-Limit": String(MAX_POR_HORA),
           "X-RateLimit-Remaining": String(remaining),
           "X-RateLimit-Reset": String(resetAt),

@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { createHash } from "node:crypto";
 
 const preferencesStore = vi.hoisted(() => new Map<string, string>());
 
@@ -47,12 +48,37 @@ function item(overrides: Partial<ItemColaEvidencia> = {}): ItemColaEvidencia {
   };
 }
 
-function clienteSupabaseMock({ uploadError = null, upsertError = null }: { uploadError?: Error | null; upsertError?: Error | null } = {}) {
+const SHA256_FOTO = createHash("sha256").update(Buffer.from("foto")).digest("hex");
+
+/**
+ * Mock del cliente Supabase. `evidenciaExistente` simula la fila ya
+ * registrada (reintento de cola) que devuelve el `select` tras el duplicado.
+ */
+function clienteSupabaseMock({
+  uploadError = null,
+  insertError = null,
+  evidenciaExistente = null
+}: {
+  uploadError?: Error | null;
+  insertError?: { code?: string; message?: string } | null;
+  evidenciaExistente?: { id: string; sha256: string | null } | null;
+} = {}) {
   const upload = vi.fn(async () => ({ error: uploadError }));
-  const upsert = vi.fn(async () => ({ error: upsertError }));
+  const insert = vi.fn(async () => ({ error: insertError }));
+  const insertIncidencia = vi.fn(async () => ({ error: null }));
+  const select = vi.fn(() => ({
+    eq: vi.fn(() => ({
+      maybeSingle: vi.fn(async () => ({ data: evidenciaExistente, error: null }))
+    }))
+  }));
+  const update = vi.fn(() => ({
+    eq: vi.fn(async () => ({ error: null }))
+  }));
   const getPublicUrl = vi.fn();
   const fromStorage = vi.fn(() => ({ upload, getPublicUrl }));
-  const fromTable = vi.fn(() => ({ upsert }));
+  const fromTable = vi.fn((tabla: string) =>
+    tabla === "incidencias" ? { insert: insertIncidencia } : { insert, select, update, upsert: insert }
+  );
 
   return {
     cliente: {
@@ -66,7 +92,9 @@ function clienteSupabaseMock({ uploadError = null, upsertError = null }: { uploa
     },
     upload,
     getPublicUrl,
-    upsert,
+    insert,
+    insertIncidencia,
+    update,
     fromStorage,
     fromTable
   };
@@ -112,7 +140,7 @@ describe("cola offline de evidencia", () => {
     expect(await leerColaEvidencia()).toMatchObject([{ localId: "local-2" }]);
   });
 
-  it("sincroniza storage y upsert con idempotencia por localId", async () => {
+  it("sincroniza storage e inserta la evidencia con idempotencia por localId", async () => {
     await encolarEvidencia(item());
     const onItemSincronizado = vi.fn();
     const supabase = clienteSupabaseMock();
@@ -121,19 +149,76 @@ describe("cola offline de evidencia", () => {
 
     expect(supabase.fromStorage).toHaveBeenCalledWith("evidencia");
     expect(supabase.upload.mock.calls[0]?.[0]).toBe("auth-user-1/traslado-1/inicial/local-1-frontal.jpg");
-    expect(supabase.upsert).toHaveBeenCalledWith(
+    // La evidencia registrada no se sobrescribe: la subida es insert-only.
+    expect(supabase.upload.mock.calls[0]?.[2]).toMatchObject({ upsert: false });
+    expect(supabase.insert).toHaveBeenCalledWith(
       expect.objectContaining({
         id: "local-1",
         traslado_id: "traslado-1",
         tipo: "inicial",
         angulo: "frontal",
         url: "auth-user-1/traslado-1/inicial/local-1-frontal.jpg",
-        sincronizada: true
-      }),
-      { onConflict: "id" }
+        sincronizada: true,
+        sha256: SHA256_FOTO
+      })
     );
     expect(supabase.getPublicUrl).not.toHaveBeenCalled();
     expect(onItemSincronizado).toHaveBeenCalledWith(expect.objectContaining({ localId: "local-1" }));
+    expect(await leerColaEvidencia()).toEqual([]);
+  });
+
+  it("RT-68: reintento tras una subida parcial se resuelve como éxito si el sha256 coincide", async () => {
+    await encolarEvidencia(item());
+    const logSpy = vi.spyOn(console, "error").mockImplementation(() => undefined);
+    // La subida anterior dejó el objeto en Storage y la fila ya existe.
+    const yaExiste = Object.assign(new Error("The resource already exists"), { statusCode: 409 });
+    const supabase = clienteSupabaseMock({
+      uploadError: yaExiste,
+      insertError: { code: "23505", message: "duplicate key value violates unique constraint" },
+      evidenciaExistente: { id: "local-1", sha256: SHA256_FOTO }
+    });
+
+    await expect(sincronizarColaEvidencia(supabase.cliente as never)).resolves.toBe(1);
+
+    // No se sobrescribe nada y el item sale de la cola.
+    expect(supabase.update).not.toHaveBeenCalled();
+    expect(supabase.insertIncidencia).not.toHaveBeenCalled();
+    expect(await leerColaEvidencia()).toEqual([]);
+    expect(logSpy).not.toHaveBeenCalledWith(
+      expect.objectContaining({ event: "evidence_checksum_conflict" })
+    );
+  });
+
+  it("RT-68: un sha256 distinto marca la evidencia en conflicto y avisa a soporte", async () => {
+    await encolarEvidencia(item());
+    const logSpy = vi.spyOn(console, "error").mockImplementation(() => undefined);
+    const supabase = clienteSupabaseMock({
+      insertError: { code: "23505", message: "duplicate key value violates unique constraint" },
+      evidenciaExistente: { id: "local-1", sha256: "otra-huella-distinta" }
+    });
+
+    await expect(sincronizarColaEvidencia(supabase.cliente as never)).resolves.toBe(0);
+
+    // La evidencia queda marcada en conflicto...
+    expect(supabase.update).toHaveBeenCalledWith(
+      expect.objectContaining({ conflicto: true })
+    );
+    // ...y soporte recibe el aviso (incidencia de sistema).
+    expect(supabase.insertIncidencia).toHaveBeenCalledWith(
+      expect.objectContaining({
+        traslado_id: "traslado-1",
+        tipo: "conflicto_evidencia",
+        reportada_por: "sistema"
+      })
+    );
+    expect(logSpy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        event: "evidence_checksum_conflict",
+        scope: "evidencia_offline",
+        kind: "security_event"
+      })
+    );
+    // No se reintenta en bucle: el item sale de la cola.
     expect(await leerColaEvidencia()).toEqual([]);
   });
 

@@ -7,6 +7,7 @@ import { Aviso } from "@ruum/ui";
 import { traducirErrorOperativo } from "@ruum/shared/utils";
 import { crearClienteNavegador } from "@/lib/supabase-browser";
 import { avanzarEstadoTraslado, extraerRutaComprobante, resolverUrlEvidencia } from "@ruum/api/services";
+import { subirArchivoEvidenciaStorage } from "@ruum/api/custody";
 import {
   eliminarGastoTraslado,
   listarGastosTraslado,
@@ -21,6 +22,10 @@ import { CierreConciliacionSection } from "./cierre/CierreConciliacionSection";
 import { CierreGastosSection } from "./cierre/CierreGastosSection";
 import { CierreConfirmacionModal } from "./cierre/CierreConfirmacionModal";
 import { CierreSoporteSheet } from "./cierre/CierreSoporteSheet";
+import {
+  obtenerEvidenciasDescartadasPorTraslado,
+  type EvidenciaDescartada
+} from "@/lib/evidencias-descartadas";
 
 export function CierreTrasladoDetails({
   pasaporte,
@@ -36,6 +41,7 @@ export function CierreTrasladoDetails({
   const [inspeccionInicial, setInspeccionInicial] = useState<InspeccionData | null>(null);
   const [inspeccionFinal, setInspeccionFinal] = useState<InspeccionData | null>(null);
   const [gastos, setGastos] = useState<GastoData[]>([]);
+  const [evidenciasDescartadas, setEvidenciasDescartadas] = useState<EvidenciaDescartada[]>([]);
 
   const [tipoGasto, setTipoGasto] = useState<GastoData["tipo"]>("caseta");
   const [montoGasto, setMontoGasto] = useState("");
@@ -82,6 +88,9 @@ export function CierreTrasladoDetails({
             })
           );
         }
+
+        const descartes = await obtenerEvidenciasDescartadasPorTraslado(trasladoId);
+        setEvidenciasDescartadas(descartes);
       } catch (err) {
         setError(traducirErrorOperativo(err, "No pudimos cargar la información de cierre."));
       } finally {
@@ -116,7 +125,7 @@ export function CierreTrasladoDetails({
     const id = typeof crypto !== "undefined" && "randomUUID" in crypto ? crypto.randomUUID() : `${Date.now()}`;
     const ruta = `${authUserId}/${trasladoId}/gastos/${id}-${nombreLimpio}.${extension}`;
 
-    const { error: uploadError } = await cliente.storage.from("evidencia").upload(ruta, archivo, {
+    const { error: uploadError } = await subirArchivoEvidenciaStorage(cliente, ruta, archivo, {
       upsert: false,
       contentType: archivo.type || "image/jpeg",
     });
@@ -386,6 +395,20 @@ export function CierreTrasladoDetails({
           </div>
         </div>
 
+        {/* Banner: Evidencia Descartada si existe */}
+        {evidenciasDescartadas.length > 0 && (
+          <div className="rounded-2xl border border-red-500/40 bg-red-950/30 p-4 text-xs text-red-200 shadow-md">
+            <div className="flex items-center gap-2 font-bold text-red-400 mb-1">
+              <span aria-hidden="true">⚠️</span>
+              <span>Evidencia descartada en este traslado ({evidenciasDescartadas.length})</span>
+            </div>
+            <p className="text-text-secondary leading-relaxed">
+              Se detectaron fotografías que no pudieron sincronizarse dentro del límite permitido ({evidenciasDescartadas.map((e) => e.angulo || "general").join(", ")}).
+              El cierre requerirá confirmación explícita de aviso a Torre de Control para evitar cierre silencioso.
+            </p>
+          </div>
+        )}
+
         {/* Card: Checklist Conciliación */}
         <CierreConciliacionSection
           inspeccionInicial={inspeccionInicial}
@@ -470,6 +493,7 @@ export function CierreTrasladoDetails({
           void handleFinalizarTraslado();
         }}
         procesando={procesando}
+        evidenciasDescartadas={evidenciasDescartadas}
       />
     </div>
   );

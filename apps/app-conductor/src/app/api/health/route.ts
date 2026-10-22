@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { crearClienteServidor } from "@/lib/supabase-server";
+import { verificarSaludSupabase } from "@ruum/api/health";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -42,12 +43,7 @@ export async function GET() {
       const t0 = Date.now();
       const dbCheckPromise = (async () => {
         const cliente = await crearClienteServidor();
-        const query = cliente.from("conductores").select("id").limit(1).maybeSingle();
-        const cancelableQuery = query as unknown as { abortSignal?: (signal: AbortSignal) => unknown };
-        if (typeof cancelableQuery.abortSignal === "function") {
-          cancelableQuery.abortSignal(controller.signal);
-        }
-        return await query;
+        return await verificarSaludSupabase(cliente, { signal: controller.signal });
       })();
 
       const { error } = await Promise.race([dbCheckPromise, timeoutPromise]);

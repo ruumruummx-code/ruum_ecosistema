@@ -26,19 +26,20 @@ export async function GET(request: NextRequest) {
 
   // Rate-limit por IP (preparado para serverless: store inyectable)
   const ip = ipDeRequest(request);
-  const { allowed, remaining, resetAt } = await rateLimit(
-    `recovery-verify:${ip ?? "anon"}`,
-    { max: MAX_POR_HORA, ventanaMs: VENTANA_MS }
+  const { allowed, remaining, resetAt, retryAfterSec } = await rateLimit(
+    ip,
+    { max: MAX_POR_HORA, ventanaMs: VENTANA_MS, clave: "recovery-verify", failClosed: true }
   );
 
   if (!allowed) {
+    const espera = retryAfterSec ?? Math.max(1, Math.ceil((resetAt - Date.now()) / 1000));
     return NextResponse.json(
       { authorized: false },
       {
         status: 429,
         headers: {
           ...sinCache,
-          "Retry-After": String(Math.ceil((resetAt - Date.now()) / 1000)),
+          "Retry-After": String(espera),
           "X-RateLimit-Limit": String(MAX_POR_HORA),
           "X-RateLimit-Remaining": String(remaining),
           "X-RateLimit-Reset": String(resetAt)

@@ -15,17 +15,18 @@ export async function POST(request: NextRequest) {
   }
 
   const ip = ipDeRequest(request);
-  const { allowed, remaining, resetAt } = await rateLimit(
-    `csp-report:${ip ?? "anon"}`,
-    { max: MAX_POR_VENTANA, ventanaMs: VENTANA_MS }
+  const { allowed, remaining, resetAt, retryAfterSec } = await rateLimit(
+    ip,
+    { max: MAX_POR_VENTANA, ventanaMs: VENTANA_MS, clave: "csp-report", failClosed: false }
   );
 
   if (!allowed) {
+    const espera = retryAfterSec ?? Math.max(1, Math.ceil((resetAt - Date.now()) / 1000));
     return new NextResponse(null, {
       status: 429,
       headers: {
         "Cache-Control": "no-store",
-        "Retry-After": String(Math.ceil((resetAt - Date.now()) / 1000)),
+        "Retry-After": String(espera),
         "X-RateLimit-Limit": String(MAX_POR_VENTANA),
         "X-RateLimit-Remaining": String(remaining),
         "X-RateLimit-Reset": String(resetAt)
@@ -56,17 +57,18 @@ export async function POST(request: NextRequest) {
 // Algunos navegadores envían report con GET
 export async function GET(request: NextRequest) {
   const ip = ipDeRequest(request);
-  const { allowed, remaining, resetAt } = await rateLimit(
-    `csp-report:${ip ?? "anon"}`,
-    { max: MAX_POR_VENTANA, ventanaMs: VENTANA_MS }
+  const { allowed, remaining, resetAt, retryAfterSec } = await rateLimit(
+    ip,
+    { max: MAX_POR_VENTANA, ventanaMs: VENTANA_MS, clave: "csp-report", failClosed: false }
   );
 
   if (!allowed) {
+    const espera = retryAfterSec ?? Math.max(1, Math.ceil((resetAt - Date.now()) / 1000));
     return new NextResponse(null, {
       status: 429,
       headers: {
         "Cache-Control": "no-store",
-        "Retry-After": String(Math.ceil((resetAt - Date.now()) / 1000)),
+        "Retry-After": String(espera),
         "X-RateLimit-Limit": String(MAX_POR_VENTANA),
         "X-RateLimit-Remaining": String(remaining),
         "X-RateLimit-Reset": String(resetAt)

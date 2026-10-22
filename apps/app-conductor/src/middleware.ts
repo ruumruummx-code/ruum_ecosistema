@@ -1,6 +1,14 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { crearClienteServidor } from "@ruum/api/supabase";
-import { buildCsp, CSP_PRESETS } from "@ruum/shared/seguridad";
+import {
+  buildCsp,
+  COOKIE_ROL_APP,
+  CSP_PRESETS,
+  EVENTO_FALLO_VERIFICACION_ROL,
+  firmarRolApp,
+  opcionesCookieRolApp,
+  verificarRolAppFirmado
+} from "@ruum/shared/seguridad";
 
 const RUTAS_PUBLICAS_CONDUCTOR = [
   "/login",
@@ -40,6 +48,9 @@ function esRutaPublicaConductor(pathname: string): boolean {
  * 2. Refresca el token en cada petición (getUser valida contra Auth).
  * 3. Gate de autenticación: rutas protegidas sin sesión → /login?next=... (o 401 si es /api/*).
  * 4. Gate de rol: un usuario/pasajero no puede operar en app-conductor → /403?reason=rol_usuario.
+ *    El rol se cachea en cookie httpOnly firmada (TTL 5 min) y, si la verificación
+ *    falla, el middleware deja pasar (fail-open) pero emite alerta + métrica
+ *    `conductor_role_verification_failed`. El respaldo real es RLS.
  * 5. Redirección inversa: sesión válida en /login|/onboarding → /panel.
  */
 function buildCspConductor(nonce: string, isProd: boolean) {
@@ -56,6 +67,16 @@ function applyCspHeaders(res: NextResponse, nonce: string) {
     res.headers.set("Content-Security-Policy-Report-Only", csp + "; report-uri /api/csp-report; report-to csp-endpoint");
   }
   return res;
+}
+
+/** Código de error corto y no sensible (nunca el mensaje completo). */
+function codigoErrorCorto(error: unknown): string {
+  if (error && typeof error === "object" && "code" in error) {
+    const code = (error as { code?: unknown }).code;
+    if (typeof code === "string" && code.trim()) return code.slice(0, 80);
+  }
+  if (error instanceof Error && error.name) return error.name.slice(0, 80);
+  return "unknown_error";
 }
 
 export async function middleware(request: NextRequest) {
@@ -126,20 +147,72 @@ export async function middleware(request: NextRequest) {
   }
 
   if (user && !esPublica) {
-    // Gate de rol: verificar que un pasajero/usuario no opere en la app conductor
-    try {
-      const { clasificarRolApp } = await import("@ruum/api/identity");
-      const rol = await clasificarRolApp(supabase, user.id);
-      if (rol === "usuario") {
-        const redirectUrl = request.nextUrl.clone();
-        redirectUrl.pathname = "/403";
-        redirectUrl.search = "";
-        redirectUrl.searchParams.set("reason", "rol_usuario");
-        return applyCspHeaders(NextResponse.redirect(redirectUrl), nonce);
+    // Gate de rol: verificar que un pasajero/usuario no opere en la app conductor.
+    //
+    // El rol se cachea en una cookie httpOnly firmada (HMAC-SHA256, TTL 5 min)
+    // para no pagar 2 SELECT a PostgREST en cada petición protegida.
+    // El fail-open se mantiene a propósito: un conductor en plena ruta con red
+    // inestable no debe quedar bloqueado. Lo que respalda ese fail-open es RLS
+    // (test pgTAP rt67_rls_rol_usuario_no_accede_conductor) y la métrica
+    // `conductor_role_verification_failed` que alerta cuando falla la verificación.
+    const secretoRol = process.env.RUUM_ROLE_COOKIE_SECRET?.trim() ?? "";
+    const cacheable = secretoRol.length >= 32;
+    let valorCookieRol: string | null = null;
+    let rol: "usuario" | "conductor" | "ninguno" | null = null;
+
+    if (cacheable) {
+      const verificado = await verificarRolAppFirmado(
+        request.cookies.get(COOKIE_ROL_APP)?.value,
+        secretoRol
+      );
+      // La cookie solo sirve si pertenece al usuario de esta sesión.
+      if (verificado && verificado.authUserId === user.id) rol = verificado.rol;
+    }
+
+    if (!rol) {
+      try {
+        const { clasificarRolApp } = await import("@ruum/api/identity");
+        rol = await clasificarRolApp(supabase, user.id);
+        if (cacheable) {
+          valorCookieRol = await firmarRolApp(rol, user.id, secretoRol);
+          response.cookies.set(COOKIE_ROL_APP, valorCookieRol, opcionesCookieRolApp());
+        }
+      } catch (e) {
+        // Si falla la verificación (red, etc.), se permite continuar; RLS en Supabase sigue protegiendo mutaciones
+        const motivo = codigoErrorCorto(e);
+        console.error(
+          JSON.stringify({
+            event: EVENTO_FALLO_VERIFICACION_ROL,
+            level: "error",
+            scope: "conductor_middleware",
+            kind: "security_event",
+            timestamp: new Date().toISOString(),
+            context: { pathname, motivo, failOpen: true }
+          })
+        );
+        try {
+          const { registrarFalloVerificacionRol } = await import("@ruum/api/identity");
+          await registrarFalloVerificacionRol(supabase, {
+            pathname,
+            motivo,
+            ambito: "app-conductor"
+          });
+        } catch {
+          /* la métrica nunca debe romper el fail-open */
+        }
       }
-    } catch (e) {
-      // Si falla la verificación (red, etc.), se permite continuar; RLS en Supabase sigue protegiendo mutaciones
-      console.error("[security] Error al clasificar rol en middleware:", e);
+    }
+
+    if (rol === "usuario") {
+      const redirectUrl = request.nextUrl.clone();
+      redirectUrl.pathname = "/403";
+      redirectUrl.search = "";
+      redirectUrl.searchParams.set("reason", "rol_usuario");
+      const redirectResponse = NextResponse.redirect(redirectUrl);
+      if (valorCookieRol) {
+        redirectResponse.cookies.set(COOKIE_ROL_APP, valorCookieRol, opcionesCookieRolApp());
+      }
+      return applyCspHeaders(redirectResponse, nonce);
     }
   }
 

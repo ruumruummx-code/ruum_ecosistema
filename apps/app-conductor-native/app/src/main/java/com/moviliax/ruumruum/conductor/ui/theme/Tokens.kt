@@ -46,6 +46,15 @@ object RuumTokens {
     val DarkErrorText = Color(0xFFFF6B7A)
     val DarkEmergency = Color(0xFFFF4D3D)
 
+    // Flujo de registro (espejo de apps/app-conductor/src/app/registro/registration.module.css)
+    val RegistrationFieldBorder = Color(0xFFD9DFE8)
+    val RegistrationPlaceholder = Color(0xFF7B8BA6)
+    val RegistrationTextSecondary = Color(0xFF52617B)
+    val RegistrationProgressIdle = Color(0xFFE1E5EC)
+    val RegistrationAccent = Color(0xFFE72A77)
+    val RegistrationFieldRadius = 10.dp
+    val RegistrationFieldHeight = 56.dp
+
     val Space4 = 4.dp
     val Space8 = 8.dp
     val Space12 = 12.dp

@@ -207,7 +207,7 @@ export default function PaginaGanancias() {
             {payoutsFiltrados.length > 0 && (
               <EarningsPayoutsSection
                 payoutsFiltrados={payoutsFiltrados}
-                estatusPayout={(p) => estatusPayout(p as any)}
+                estatusPayout={estatusPayout}
               />
             )}
           </section>

@@ -7,6 +7,7 @@ import { TEXTOS_CARGANDO } from "@ruum/shared/constants";
 import type { Database } from "@ruum/shared/types";
 import { traducirErrorOperativo } from "@ruum/shared/utils";
 import { activarSoporteEmergenciaConductor, reportarIncidencia } from "@ruum/api/services";
+import { subirArchivoEvidenciaStorage } from "@ruum/api/custody";
 import { crearClienteNavegador } from "@/lib/supabase-browser";
 
 type TipoIncidencia = Database["public"]["Enums"]["tipo_incidencia"];
@@ -149,7 +150,7 @@ async function subirEvidenciaIncidencia(
   const id = typeof crypto !== "undefined" && "randomUUID" in crypto ? crypto.randomUUID() : `${Date.now()}`;
   const ruta = `${authUserId}/${trasladoId}/incidencias/${id}-${nombre}.${extension}`;
 
-  const { error: uploadError } = await cliente.storage.from(BUCKET_EVIDENCIA).upload(ruta, archivo, {
+  const { error: uploadError } = await subirArchivoEvidenciaStorage(cliente, ruta, archivo, {
     upsert: false,
     contentType: archivo.type
   });

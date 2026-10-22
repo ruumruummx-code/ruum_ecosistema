@@ -29,7 +29,9 @@ fun AuthNav(state: DriverUiState, viewModel: DriverViewModel) {
         AuthRoute.REGISTRO -> RegistroScreen(
             loading = state.loading,
             error = state.error,
-            onCrear = viewModel::signUp,
+            onCrear = { email, password, telefono, aceptaTerminos ->
+                viewModel.signUp(email, password, telefono, aceptaTerminos)
+            },
             onVolver = { route = AuthRoute.LOGIN },
         )
         AuthRoute.OTP -> OtpScreen(

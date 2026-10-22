@@ -6,6 +6,7 @@ import { traducirErrorOperativo } from "@ruum/shared/utils";
 import { obtenerUbicacionActual } from "@/lib/ubicacion";
 import { crearClienteNavegador, tieneSupabaseConfigurado } from "@/lib/supabase-browser";
 import {
+  calcularSha256,
   contarColaEvidencia,
   encolarEvidencia,
   type ItemColaEvidencia,
@@ -45,6 +46,9 @@ export function useEvidenceQueue({ trasladoId, tipo }: { trasladoId: string; tip
       if (!data.user?.id) throw new Error("No hay una sesión válida para asociar la evidencia pendiente.");
       const coords = await obtenerUbicacionActual();
       const localId = crypto.randomUUID();
+      // La huella se calcula al capturar: identifica el archivo en la cadena de
+      // custodia y permite distinguir un reintento de un contenido distinto.
+      const sha256 = await calcularSha256(dataUrl);
       await encolarEvidencia({
         usuarioId: data.user.id,
         localId,
@@ -52,6 +56,7 @@ export function useEvidenceQueue({ trasladoId, tipo }: { trasladoId: string; tip
         tipo,
         angulo,
         dataUrl,
+        ...(sha256 ? { sha256 } : {}),
         ...(coords ? { lat: coords.lat, lng: coords.lng } : {}),
         capturadaEn: new Date().toISOString(),
         retryCount: 0

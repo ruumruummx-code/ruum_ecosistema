@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState, useCallback, useEffect } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { Button, Aviso, LogoMarca } from "@ruum/ui";
 import type { Database } from "@ruum/shared/types";
@@ -360,7 +361,14 @@ export function EstadoRevisionConductor({ conductorId, solicitudId, nombre, docu
 
             {documentoSeleccionado.tipo !== "cuenta" && seleccionadoDoc?.url && (
               <div className="mb-3 overflow-hidden rounded-xl border border-border bg-surface">
-                <img src={seleccionadoDoc.url} alt={`Vista previa de ${documentoSeleccionado.etiqueta}`} className="max-h-48 w-full object-contain" />
+                <Image
+                  src={seleccionadoDoc.url}
+                  alt={`Vista previa de ${documentoSeleccionado.etiqueta}`}
+                  width={400}
+                  height={200}
+                  unoptimized
+                  className="max-h-48 w-full object-contain"
+                />
               </div>
             )}
             {documentoSeleccionado.tipo !== "cuenta" && !seleccionadoDoc?.url && (

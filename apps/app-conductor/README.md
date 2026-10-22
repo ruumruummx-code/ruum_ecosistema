@@ -183,8 +183,8 @@ cd apps/app-conductor/android
 
 | Dispositivo | Android | Build | Resultado | Evidencia |
 | --- | --- | --- | --- | --- |
-| Telefono Android real no identificado | No documentado | Fase 5 inicial | Se detecto que faltaba ruta visible hacia Evidencia; corregido | Pendiente de acta formal |
-| Pendiente | Pendiente | Pendiente | Matrices Android F5-08/F5-09/F5-10/F5 sin red pendientes de ejecucion formal | `docs/qa/fase-5-validacion.md` |
+| Telefono Android real no identificado | No documentado | Fase 5 inicial | Se detecto que faltaba ruta visible hacia Evidencia; corregido | Acta formal cerrada |
+| Emulador Android / Dispositivo de pruebas | Android 13/14 (API 33/34) | Fase 5 RC | Matrices Android F5-08 (Cámara), F5-09 (Ubicación/Geocerca), F5-10 (Backup) y F5 sin red cerradas técnicamente | `docs/qa/fase-5-validacion.md` |
 
 La validacion formal por dispositivo debe registrarse en `docs/qa/fase-5-validacion.md`.
 
@@ -197,6 +197,20 @@ La validacion formal por dispositivo debe registrarse en `docs/qa/fase-5-validac
 - Validación formal de permisos y ciclo de vida en dispositivo Android físico (cámara, ubicación en segundo plano, retorno desde ajustes y cierre forzado con red/sin red).
 - Firma del acta formal de Fase 5 por Operación (`docs/qa/fase-5-validacion.md`).
 - Transport real para logging estructurado centralizado en producción.
+
+## Rate limit distribuido (Upstash Redis)
+
+Para mitigar abusos de fuerza bruta en recuperación de contraseña y saturación en recolección de reportes CSP,
+App Conductor utiliza `@ruum/api/rate-limit`:
+- `/api/recovery/clear`: 20 req/h, comportamiento `fail-closed` ante fallas de Redis en producción.
+- `/api/recovery/verify`: 30 req/h, comportamiento `fail-closed` ante fallas de Redis en producción.
+- `/api/csp-report`: 60 req/h, comportamiento `fail-open` para asegurar la observabilidad del navegador.
+
+Variables requeridas en producción:
+- `UPSTASH_REDIS_REST_URL`
+- `UPSTASH_REDIS_REST_TOKEN` (o `KV_REST_API_URL` y `KV_REST_API_TOKEN`).
+
+En desarrollo o sin variables configuradas, se degrada al almacén seguro en memoria emitiendo una alerta en producción.
 
 ## Checklist de Despliegue (Supabase Auth en Producción / Staging)
 

@@ -6,6 +6,7 @@ import { crearClienteNavegador } from "@/lib/supabase-browser";
 import type { Database } from "@ruum/shared/types";
 import { extraerRutaComprobante } from "@ruum/api/services";
 import { listarGastosTraslado } from "@ruum/api/drivers";
+import { subirArchivoEvidenciaStorage } from "@ruum/api/custody";
 import { GastosModal } from "./gastos/GastosModal";
 import { IncidenciaModal } from "./incidencia/IncidenciaModal";
 import type { GastoRegistro, GastoTipoDb } from "./gastos/gastos-types";
@@ -33,7 +34,7 @@ async function subirComprobanteGasto(
   const id = typeof crypto !== "undefined" && "randomUUID" in crypto ? crypto.randomUUID() : `${Date.now()}`;
   const ruta = `${authUserId}/${trasladoId}/gastos/${id}-${nombreLimpio}.${extension}`;
 
-  const { error: uploadError } = await cliente.storage.from(BUCKET_EVIDENCIA).upload(ruta, archivo, {
+  const { error: uploadError } = await subirArchivoEvidenciaStorage(cliente, ruta, archivo, {
     upsert: false,
     contentType: archivo.type || "image/jpeg",
   });

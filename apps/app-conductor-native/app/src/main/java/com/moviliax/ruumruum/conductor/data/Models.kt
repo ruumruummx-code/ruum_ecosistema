@@ -94,7 +94,25 @@ data class EvidenceInsert(
     val url: String,
     @SerialName("capturada_en") val capturedAt: String,
     val sincronizada: Boolean = true,
+    /** Huella sha256 del archivo: define la identidad de la evidencia (cadena de custodia). */
+    val sha256: String? = null,
 )
+
+/** Fila de evidencia ya registrada (sólo la huella) para validar un reintento. */
+@Serializable
+data class EvidenceRow(
+    val id: String,
+    val sha256: String? = null,
+)
+
+/**
+ * Resultado de registrar la evidencia en el servidor.
+ *
+ * - REGISTRADA: primera subida.
+ * - YA_REGISTRADA: el reintento trae el mismo contenido (idempotente).
+ * - CONFLICTO: la evidencia ya existe con otro contenido: no se sobrescribe.
+ */
+enum class ResultadoRegistroEvidencia { REGISTRADA, YA_REGISTRADA, CONFLICTO }
 
 @Serializable
 data class OpenIncidentSummary(

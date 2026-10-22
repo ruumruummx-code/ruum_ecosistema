@@ -84,13 +84,12 @@ import androidx.compose.ui.text.withLink
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.moviliax.ruumruum.conductor.R
+import com.moviliax.ruumruum.conductor.ui.components.RuumLegal
 import com.moviliax.ruumruum.conductor.ui.theme.RuumTokens
 
-/** Rutas legales publicadas por la app de usuario. */
-private const val BASE_URL_LEGAL = "https://usuario.ruumruum-moviliax.online"
-private const val URL_TERMINOS = "$BASE_URL_LEGAL/legal/terminos"
-private const val URL_PRIVACIDAD = "$BASE_URL_LEGAL/legal/privacidad"
-
+/** Rutas legales publicadas por la app de usuario (compartidas con el flujo de registro). */
+private const val URL_TERMINOS = RuumLegal.TERMINOS
+private const val URL_PRIVACIDAD = RuumLegal.PRIVACIDAD
 // La pantalla de acceso mantiene la paleta clara del prototipo aun con tema oscuro.
 private val Navy = RuumTokens.Navy
 private val Muted = RuumTokens.Muted

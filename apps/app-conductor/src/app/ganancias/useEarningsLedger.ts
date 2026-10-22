@@ -36,7 +36,7 @@ interface RegistroViajeGanancia {
 
 // ── Helpers puros (testables) ──────────────────────────────────────
 
-export function estatusPayout(payout: Payout): EstadoEconomicoExplicito {
+export function estatusPayout(payout: { estado: string }): EstadoEconomicoExplicito {
   if (payout.estado === "procesado") return "pagado";
   if (payout.estado === "pendiente") return "programado";
   return "rechazado";

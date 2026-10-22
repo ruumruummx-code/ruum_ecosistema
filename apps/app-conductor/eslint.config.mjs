@@ -88,8 +88,8 @@ const eslintConfig = defineConfig([
       'jsx-a11y/scope': 'error',
       'jsx-a11y/tabindex-no-positive': 'error',
       'jsx-a11y/anchor-has-content': 'error',
-      // FASE 6 — Fronteras: avisa (el gate duro es pnpm check:fronteras).
-      'no-restricted-syntax': ['warn',
+      // FASE 6 — Fronteras: arquitectura limpia a través de @ruum/api.
+      'no-restricted-syntax': ['error',
         {
           selector: "CallExpression > MemberExpression[property.name='from'][object.name!='Array'][object.name!='Buffer'][object.name!='Object']",
           message: 'Fase 6: acceso directo a Supabase en apps. Usa un módulo de @ruum/api.'
@@ -104,7 +104,15 @@ const eslintConfig = defineConfig([
         }
       ],
       // Reglas de tipado seguro (H5)
-      '@typescript-eslint/no-explicit-any': 'warn'
+      '@typescript-eslint/no-explicit-any': 'error'
+    }
+  },
+  {
+    // Global setup y tests (E2E/unitarios) requieren acceso directo a Supabase admin / service-role
+    // para aprovisionar fixtures, sembrar datos y autenticar estados limpios de prueba.
+    files: ['tests/**/*', 'test/**/*', 'scripts/**/*'],
+    rules: {
+      'no-restricted-syntax': 'off'
     }
   }
 ])

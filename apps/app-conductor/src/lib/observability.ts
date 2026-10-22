@@ -18,6 +18,7 @@ export type OperationalEvent =
   | "tracking_stopped"
   | "sync_failure"
   | "evidence_stuck"
+  | "evidence_discarded"
   | "rpc_failure"
   | "session_expired"
   | "push_not_registered"
