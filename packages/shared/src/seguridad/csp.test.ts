@@ -35,6 +35,19 @@ describe("seguridad/csp — invariantes SEC-002/SEC-003", () => {
     expect(script).toContain("'unsafe-eval'");
   });
 
+  it("permite conectar al origen Supabase configurado exactamente", () => {
+    const originalUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    process.env.NEXT_PUBLIC_SUPABASE_URL = "http://127.0.0.1:54399";
+    try {
+      const csp = buildCsp({ nonce: "n", isProd: true });
+      const connect = csp.split(";").find((d) => d.trim().startsWith("connect-src")) ?? "";
+      expect(connect).toContain("http://127.0.0.1:54399");
+    } finally {
+      if (originalUrl === undefined) delete process.env.NEXT_PUBLIC_SUPABASE_URL;
+      else process.env.NEXT_PUBLIC_SUPABASE_URL = originalUrl;
+    }
+  });
+
   it("strictStyles elimina unsafe-inline de style-src en prod", () => {
     const csp = buildCsp({
       nonce: "n",

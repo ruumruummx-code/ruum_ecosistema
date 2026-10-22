@@ -10,7 +10,8 @@ export type TipoIncidencia =
   | "infraccion_autoridad_vial"
   | "conductor_enfermo"
   | "perdida_conectividad"
-  | "dano_no_reportado"; // PRD §4.4 — se abre automáticamente al cierre
+  | "dano_no_reportado" // PRD §4.4 — se abre automáticamente al cierre
+  | "conflicto_evidencia"; // RT-68 — conflicto de cadena de custodia (sistema)
 
 export type MomentoIncidencia = "recoleccion" | "durante_traslado" | "entrega" | "post_cierre";
 

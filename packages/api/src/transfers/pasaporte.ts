@@ -11,7 +11,21 @@ type Cliente = SupabaseClient<Database>;
 type TrasladoRow = Database["public"]["Tables"]["traslados"]["Row"];
 type VehiculoRow = Database["public"]["Tables"]["vehiculos"]["Row"];
 type PasaporteRow = Database["public"]["Views"]["pasaporte_digital"]["Row"];
-type FotoRow = Database["public"]["Tables"]["evidencia_fotos"]["Row"];
+/** Solo las columnas de evidencia que el pasaporte proyecta (RT-68 añadió conflicto/sha256). */
+type FotoRow = Pick<
+  Database["public"]["Tables"]["evidencia_fotos"]["Row"],
+  | "id"
+  | "traslado_id"
+  | "tipo"
+  | "angulo"
+  | "url"
+  | "local_path"
+  | "capturada_en"
+  | "lat"
+  | "lng"
+  | "sincronizada"
+  | "conflicto"
+>;
 type IncidenciaRow = Database["public"]["Tables"]["incidencias"]["Row"];
 type DisputaRow = Database["public"]["Tables"]["disputas"]["Row"];
 type ReclamoRow = Database["public"]["Tables"]["reclamos_seguro"]["Row"];
@@ -147,7 +161,7 @@ export function listarFotosEvidencia(cliente: Cliente, trasladoId: string): Prom
   return varios(
     cliente
       .from("evidencia_fotos")
-      .select("id, traslado_id, tipo, angulo, url, local_path, capturada_en, lat, lng, sincronizada")
+      .select("id, traslado_id, tipo, angulo, url, local_path, capturada_en, lat, lng, sincronizada, conflicto")
       .eq("traslado_id", trasladoId)
       .order("capturada_en", { ascending: true })
   );
@@ -467,7 +481,7 @@ export async function obtenerPasaporteCompleto(
     exigirVarios(
       cliente
         .from("evidencia_fotos")
-        .select("id, traslado_id, tipo, angulo, url, sincronizada, capturada_en, lat, lng, local_path")
+        .select("id, traslado_id, tipo, angulo, url, sincronizada, capturada_en, lat, lng, local_path, conflicto")
         .eq("traslado_id", trasladoId)
         .order("capturada_en", { ascending: true }),
       trasladoId,

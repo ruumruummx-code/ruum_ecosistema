@@ -24,7 +24,9 @@
     "./observability": "./src/observability/index.ts",
     "./feature-flags": "./src/feature-flags/index.ts",
     "./capacitor": "./src/capacitor/index.ts",
-    "./ubicacion": "./src/ubicacion/index.ts"
+    "./ubicacion": "./src/ubicacion/index.ts",
+    "./rate-limit": "./src/rate-limit/index.ts",
+    "./health": "./src/health/index.ts"
   },
   "scripts": {
     "build": "tsc --noEmit",
@@ -36,6 +38,7 @@
     "@supabase/supabase-js": "^2.47.0",
     "@supabase/ssr": "^0.5.2",
     "@ruum/shared": "workspace:*",
+    "@upstash/redis": "^1.38.3",
     "zod": "^3.24.1"
   },
   "devDependencies": {

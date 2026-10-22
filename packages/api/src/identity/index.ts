@@ -3,3 +3,4 @@ export * from "./usuarios";
 export * from "./admins";
 
 export * from "./server-admin";
+export * from "./rol-verificacion";

@@ -72,6 +72,8 @@ export function buildCsp(options: BuildCspOptions): string {
   const extraConnect = extras.connect?.length ? ` ${joinOrigins(extras.connect)}` : "";
   const extraImg = extras.img?.length ? ` ${joinOrigins(extras.img)}` : "";
   const extraFrame = extras.frame?.length ? ` ${joinOrigins(extras.frame)}` : "";
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const configuredSupabaseOrigin = supabaseUrl ? ` ${new URL(supabaseUrl).origin}` : "";
 
   // script-src: en prod con nonce => nonce + strict-dynamic (sin inline/eval).
   // Sin nonce (fallback estático) => strict-dynamic sin inline/eval; los
@@ -92,7 +94,7 @@ export function buildCsp(options: BuildCspOptions): string {
           : `style-src 'self' 'unsafe-inline'`;
 
   const connectSrc =
-    `connect-src 'self' ${joinOrigins(CSP_ORIGINS.supabase)} ${joinOrigins(CSP_ORIGINS.mapbox)} ${joinOrigins(CSP_ORIGINS.sentry)} ${joinOrigins(CSP_ORIGINS.didit)}${extraConnect}` +
+    `connect-src 'self' ${joinOrigins(CSP_ORIGINS.supabase)} ${joinOrigins(CSP_ORIGINS.mapbox)} ${joinOrigins(CSP_ORIGINS.sentry)} ${joinOrigins(CSP_ORIGINS.didit)}${configuredSupabaseOrigin}${extraConnect}` +
     (isProd ? "" : " ws: wss: http://localhost:* http://127.0.0.1:* capacitor://localhost");
 
   const imgSrc = `img-src 'self' data: blob: ${joinOrigins(CSP_ORIGINS.supabase)} https://*.mapbox.com https://*.didit.me https://verify.didit.me${extraImg}`;

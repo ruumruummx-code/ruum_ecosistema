@@ -78,8 +78,25 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm test:unit
 
-  # RC-10: `test:unit` filtra sólo packages/*; la app de conductor no se
-  # certificaba en CI. Job dedicado para app-conductor.
+  # RC-10: `test:unit` filtra sólo packages/*; la app de usuario (flujos
+  # críticos: wizard, pago, cuenta, mis-viajes) no se certificaba en CI.
+  usuario:
+    name: test app-usuario
+    runs-on: ubuntu-latest
+    needs: install
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.0.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @ruum/app-usuario test
+
+  # Job dedicado para pruebas unitarias de app-conductor.
   unit-conductor:
     name: test app-conductor (unit)
     runs-on: ubuntu-latest

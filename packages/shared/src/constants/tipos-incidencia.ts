@@ -12,7 +12,8 @@ export const ETIQUETA_TIPO_INCIDENCIA: Record<TipoIncidencia, string> = {
   infraccion_autoridad_vial: "Infracción por autoridad vial",
   conductor_enfermo: "Conductor enfermo",
   perdida_conectividad: "Pérdida de conectividad",
-  dano_no_reportado: "Daño no reportado"
+  dano_no_reportado: "Daño no reportado",
+  conflicto_evidencia: "Conflicto de evidencia"
 };
 
 export type PrioridadSoporte = "alta" | "media" | "baja";
@@ -46,5 +47,7 @@ export const PRIORIDAD_POR_INCIDENCIA: Record<TipoIncidencia, PrioridadSoporte> 
   contacto_no_localizado: "media",
   documentacion_incompleta: "baja",
   dano_previo_relevante: "baja",
-  dano_no_reportado: "baja"
+  dano_no_reportado: "baja",
+  // RT-68: la evidencia en conflicto requiere revisión manual de soporte.
+  conflicto_evidencia: "alta"
 };

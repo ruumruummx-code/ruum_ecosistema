@@ -113,6 +113,9 @@ importers:
       '@supabase/supabase-js':
         specifier: ^2.47.0
         version: 2.108.2
+      '@upstash/redis':
+        specifier: ^1.38.3
+        version: 1.38.3
       mapbox-gl:
         specifier: ^3.26.0
         version: 3.26.0
@@ -388,6 +391,9 @@ importers:
       '@supabase/supabase-js':
         specifier: ^2.47.0
         version: 2.108.2
+      '@upstash/redis':
+        specifier: ^1.38.3
+        version: 1.38.3
       zod:
         specifier: ^3.24.1
         version: 3.25.76
