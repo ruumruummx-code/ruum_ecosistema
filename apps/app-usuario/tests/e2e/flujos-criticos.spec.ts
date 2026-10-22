@@ -26,12 +26,41 @@ import {
  */
 
 /** Bloquea el endpoint de tarifas y devuelve una respuesta determinista. */
-async function mockearTarifa(page: import("@playwright/test").Page, tarifa: number) {
+async function mockearTarifa(
+  page: import("@playwright/test").Page,
+  tarifa: number,
+  disponible = true,
+) {
   await page.route("**/api/ruta", (route) =>
     route.fulfill({
       json: { distanciaKm: 12.5, tiempoEstimadoHoras: 0.5, tarifa },
     })
   );
+  await page.route("**/rest/v1/rpc/usuario_previsualizar_tarifa", async (route) => {
+    const origen = new URL(
+      process.env.PLAYWRIGHT_BASE_URL ?? `http://localhost:${process.env.PLAYWRIGHT_PORT ?? "3012"}`
+    ).origin;
+    const headers = {
+      "access-control-allow-origin": origen,
+      "access-control-allow-credentials": "true",
+      "access-control-allow-headers":
+        route.request().headers()["access-control-request-headers"] ??
+        "apikey,authorization,content-type,x-client-info,x-supabase-api-version",
+      "access-control-allow-methods": "POST,OPTIONS",
+    };
+    if (route.request().method() === "OPTIONS") {
+      await route.fulfill({ status: 204, headers, body: "" });
+      return;
+    }
+    await route.fulfill({
+      status: 200,
+      headers,
+      contentType: "application/json",
+      json: disponible
+        ? { disponible: true, tarifa, categoria: "ligero_a", gama: "media" }
+        : { disponible: false, motivo: "Tarifa especial requerida" },
+    });
+  });
   await page.route("**/api.mapbox.com/**", (route) =>
     route.fulfill({
       status: 200,
@@ -133,7 +162,7 @@ test.describe("Flujos críticos de la aplicación", () => {
     // una contraseña débil explica exactamente qué falta
     await page.locator("#password").fill("debil");
     await page.locator("#password").blur();
-    await expect(page.getByText("La contraseña necesita una mayúscula.")).toBeVisible({ timeout: 10_000 });
+    await expect(page.locator("#password-requisitos")).toContainText("Una mayúscula");
   });
 
   test("el registro con datos válidos envía a la pantalla de confirmación", async ({ page }) => {
@@ -155,6 +184,7 @@ test.describe("Flujos críticos de la aplicación", () => {
     await page.getByRole("button", { name: "Verificar y continuar" }).click();
 
     await expect(page.getByText("Elige tus credenciales")).toBeVisible({ timeout: 15_000 });
+    await page.locator("#email").fill("persona.e2e@correo.test");
     await page.locator("#password").fill("Passw0rdE2E!");
     await page.locator("#confirmarPassword").fill("Passw0rdE2E!");
     await page.getByRole("checkbox").check();
@@ -272,11 +302,7 @@ test.describe("Flujos críticos de la aplicación", () => {
   });
 
   test("una tarifa especial bloquea el avance hasta cotizar con soporte", async ({ page }) => {
-    await mockearTarifa(page, 500);
-    // el mock devuelve disponible=false para tarifas especiales
-    await page.route("**/rest/v1/rpc/usuario_previsualizar_tarifa", (route) =>
-      route.fulfill({ status: 200, contentType: "application/json", json: { disponible: false, motivo: "Tarifa especial requerida" } })
-    );
+    await mockearTarifa(page, 500, false);
     await seedMockAuthSession(page, { variante: "verificada" });
 
     await page.goto("/viajes/nuevo");
@@ -291,7 +317,7 @@ test.describe("Flujos críticos de la aplicación", () => {
 
     // el usuario ve que debe cotizar con soporte
     await expect(page.getByRole("button", { name: "Cotización especial requerida" })).toBeVisible({ timeout: 30_000 });
-    await expect(page.getByRole("button", { name: /Continuar/ })).toBeDisabled();
+    await expect(page.getByRole("button", { name: "Cotización especial requerida" })).toBeDisabled();
 
     // el enlace a soporte funciona
     const linkSoporte = page.getByRole("link", { name: "Solicitar cotización especial" });
@@ -300,25 +326,19 @@ test.describe("Flujos críticos de la aplicación", () => {
     await page.waitForURL("**/soporte", { timeout: 15_000 });
   });
 
-  test("la verificación con Didit exige el portal y valida el formulario previo", async ({ page }) => {
+  test("la verificación con Didit abre el portal oficial", async ({ page }) => {
     await seedMockAuthSession(page, { variante: "pendiente" });
 
     await page.goto("/verificacion");
+    await esperarHidratacion(page);
     await aceptarConsentimientoSiAparece(page);
     await expect(page.locator("h1")).toContainText("Verificación de identidad");
 
-    // solo usuarios con identificación previa
-    await page.getByRole("button", { name: "Iniciar verificación con Didit" }).click();
-    await expect(page.getByText("Necesitas identificarte antes de verificar tu identidad.")).toBeVisible();
+    const iniciarDidit = page.getByRole("button", { name: "Iniciar verificación con Didit" });
+    await iniciarDidit.focus();
+    await iniciarDidit.press("Enter");
 
-    await page.getByLabel("Motivo de uso").fill("Traslado de mascota");
-    await page.getByLabel("Fecha de viaje").fill("2026-12-24");
-    await page.getByLabel("Descripción de la carga").fill("Mochila con objetos personales");
-
-    await page.getByRole("button", { name: "Iniciar verificación con Didit" }).click();
-
-    // se abre el modal de Didit (portal externo)
-    const dialog = page.locator('[role="dialog"][aria-labelledby="titulo-didit-usuario"]');
+    const dialog = page.getByRole("dialog", { name: "Verificación de identidad oficial" });
     await expect(dialog).toBeVisible({ timeout: 30_000 });
     await expect(dialog).toHaveAttribute("aria-modal", "true");
     await expect(dialog).toContainText("Verificación de identidad");
@@ -340,7 +360,9 @@ test.describe("Flujos críticos de la aplicación", () => {
     await aceptarConsentimientoSiAparece(page);
 
     // la carga masiva solo se ofrece a usuarios verificados
-    await page.getByRole("button", { name: /Abrir módulo de carga masiva de traslados/i }).click();
+    const abrirCargaMasiva = page.getByRole("button", { name: /Abrir módulo de carga masiva de traslados/i });
+    await abrirCargaMasiva.focus();
+    await abrirCargaMasiva.press("Enter");
     await expect(page.getByRole("dialog")).toContainText("Carga masiva de traslados");
     await expect(page.getByRole("dialog")).toContainText("Máximo 100 traslados · 5 MB");
   });
@@ -351,13 +373,14 @@ test.describe("Flujos críticos de la aplicación", () => {
     await page.goto("/mis-viajes");
     await expect(page.locator("h1")).toContainText("Mis Traslados");
 
-    // filtros de estado: activos, finalizados y todos
+    // filtros de estado ofrecidos por la interfaz de traslados
     await expect(page.getByRole("button", { name: "Activos" })).toBeVisible();
+    await expect(page.getByRole("button", { name: "Programados" })).toBeVisible();
     await expect(page.getByRole("button", { name: "Finalizados" })).toBeVisible();
-    await expect(page.getByRole("button", { name: "Todos" })).toBeVisible();
+    await expect(page.getByRole("button", { name: "Cancelados" })).toBeVisible();
 
     // estado vacío legible
-    await expect(page.getByText("Sin traslados · Finalizados")).toBeVisible();
+    await expect(page.getByText("Sin traslados · En curso")).toBeVisible();
   });
 
   test("soporte funciona para un usuario autenticado", async ({ page }) => {

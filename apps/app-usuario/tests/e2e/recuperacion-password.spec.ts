@@ -161,6 +161,7 @@ test.describe("PR-02 Recuperación PKCE — app-usuario", () => {
   test("happy: solicitud enlace muestra correo enviado y redirectTo correcto", async ({ page }) => {
     let redirectToCapturado: string | null = null;
     await mockRecover(page, async (route) => {
+      console.log("E2E recover request", route.request().url(), route.request().postData(), route.request().headers());
       const body = JSON.parse(route.request().postData() || "{}");
       // Supabase puede mandar redirect_to o options.redirectTo
       redirectToCapturado = (body as Record<string, unknown>).redirectTo as string

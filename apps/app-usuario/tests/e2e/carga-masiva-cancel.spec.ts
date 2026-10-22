@@ -1,6 +1,7 @@
 import { test, expect } from "@playwright/test";
 import { config as loadDotenv } from "dotenv";
 import path from "node:path";
+import { aceptarConsentimientoSiAparece, esperarHidratacion } from "./fixtures/navegacion";
 
 loadDotenv({ path: path.resolve(process.cwd(), ".env.local") });
 
@@ -55,9 +56,12 @@ async function abrirModuloCargaMasiva(page: import("@playwright/test").Page) {
   await seedMockAuthSession(page);
   await mockWizardBase(page);
   await page.goto("/viajes/nuevo", { waitUntil: "domcontentloaded" });
+  await esperarHidratacion(page);
+  await aceptarConsentimientoSiAparece(page);
   const btn = page.getByRole("button", { name: /Abrir módulo de carga masiva de traslados/i });
   await expect(btn).toBeVisible({ timeout: 10000 });
-  await btn.click();
+  await btn.focus();
+  await btn.press("Enter");
   await expect(page.getByRole("heading", { name: /carga masiva de traslados/i })).toBeVisible({ timeout: 5000 });
 }
 
