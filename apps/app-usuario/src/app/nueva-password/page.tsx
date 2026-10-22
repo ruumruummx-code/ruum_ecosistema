@@ -92,13 +92,11 @@ function FormularioNuevaPassword() {
       return;
     }
     if (!passwordCumpleRequisitos(password)) {
-      setError("La contraseña debe incluir minúscula, mayúscula y número.");
       setErrorCampo({ campo: "password", mensaje: "La contraseña debe incluir minúscula, mayúscula y número." });
       passwordRef.current?.focus();
       return;
     }
     if (password !== confirmar) {
-      setError("Las contraseñas no coinciden.");
       setErrorCampo({ campo: "confirmar", mensaje: "Las contraseñas no coinciden." });
       confirmarRef.current?.focus();
       return;

@@ -67,7 +67,6 @@
     "pnpm": ">=10 <11"
   },
   "pnpm": {
-    "//overrides": "Overrides de seguridad para dependencias transitivas. Claves amplias (sin versión exacta de origen) para cubrir todo el grafo.",
     "auditConfig": {
       "ignoreGhsas": [
         "GHSA-jmr9-qjv8-65gv",

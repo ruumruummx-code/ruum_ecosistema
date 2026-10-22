@@ -31,7 +31,15 @@ async function mockWizardBase(page: import("@playwright/test").Page) {
       await route.fulfill({
         status: 200,
         contentType: "application/json",
-        body: JSON.stringify([{ id: "00000000-0000-4000-8000-00000000e001", email: "usuario@ejemplo.com", estado_verificacion: "verificado", foto_url: null, doc_identidad_url: null }]),
+        body: JSON.stringify([{
+          id: "00000000-0000-4000-8000-00000000e001",
+          auth_user_id: "00000000-0000-4000-8000-00000000e001",
+          email: "usuario@ejemplo.com",
+          estado_verificacion: "verificado",
+          version_terminos_aceptada: 1,
+          foto_url: null,
+          doc_identidad_url: null
+        }]),
       });
     } else await route.continue();
   });

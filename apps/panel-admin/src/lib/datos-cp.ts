@@ -11,9 +11,12 @@ import { join } from "node:path";
 function candidatos(): string[] {
   // Se calculan en cada llamada (no en la carga del módulo) para no congelar
   // un cwd distinto al de ejecución (tests, standalone, workers).
+  const cwd = process.cwd();
   return [
-    join(process.cwd(), "public", "data", "codigos-postales"),
-    join(process.cwd(), "..", "app-usuario", "public", "data", "codigos-postales"),
+    join(cwd, "public", "data", "codigos-postales"),
+    join(cwd, "apps", "panel-admin", "public", "data", "codigos-postales"),
+    join(cwd, "..", "app-usuario", "public", "data", "codigos-postales"),
+    join(cwd, "apps", "app-usuario", "public", "data", "codigos-postales"),
   ];
 }
 

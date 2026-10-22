@@ -162,6 +162,29 @@ const servidor = createServer(async (req, res) => {
   if (ruta === "/auth/v1/token") {
     const tipo = url.searchParams.get("grant_type");
     const cuerpo = JSON.parse((await leerCuerpo(req)) || "{}");
+    if (
+      tipo === "password" &&
+      cuerpo.email === "usuario.e2e@correo.test" &&
+      cuerpo.password === "ClaveE2E123!"
+    ) {
+      responder(res, 200, {
+        access_token: ACCESS_TOKEN,
+        token_type: "bearer",
+        expires_in: 3600,
+        expires_at: Math.floor(Date.now() / 1000) + 3600,
+        refresh_token: REFRESH_TOKEN,
+        user: { ...USUARIO_E2E, email: cuerpo.email }
+      });
+      return;
+    }
+    if (tipo === "password") {
+      responder(res, 400, {
+        code: 400,
+        error_code: "invalid_credentials",
+        msg: "Invalid login credentials"
+      });
+      return;
+    }
     if (tipo === "refresh_token" && cuerpo.refresh_token === REFRESH_TOKEN) {
       responder(res, 200, {
         access_token: ACCESS_TOKEN,

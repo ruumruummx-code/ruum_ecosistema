@@ -1,6 +1,10 @@
 import { expect, test } from "@playwright/test";
 import { ACCESS_TOKEN_E2E, ACCESS_TOKEN_PENDIENTE_E2E, seedMockAuthSession } from "./fixtures/sesion";
-import { esperarHidratacion, rutaActual } from "./fixtures/navegacion";
+import {
+  aceptarConsentimientoSiAparece,
+  esperarHidratacion,
+  rutaActual,
+} from "./fixtures/navegacion";
 
 /**
  * Rutas que este archivo cubre y que también existen como páginas:
@@ -93,7 +97,7 @@ test.describe("Flujos críticos de la aplicación", () => {
     await page.locator("#nombre").fill("Persona");
     await page.locator("#apellido").fill("E2E");
     await page.locator("#telefono").fill("123");
-    await page.getByRole("button", { name: /Solicitar código/i }).click();
+    await page.getByRole("button", { name: "Continuar" }).click();
 
     await expect(page.getByText("El teléfono debe tener 10 dígitos.")).toBeVisible();
   });
@@ -114,7 +118,7 @@ test.describe("Flujos críticos de la aplicación", () => {
     await page.locator("#nombre").fill("Persona");
     await page.locator("#apellido").fill("E2E");
     await page.locator("#telefono").fill("5512345678");
-    await page.getByRole("button", { name: /Solicitar código/i }).click();
+    await page.getByRole("button", { name: "Continuar" }).click();
 
     // el modal de OTP se abre y pide el código
     await expect(page.getByRole("dialog")).toContainText("Verifica tu número celular");
@@ -123,6 +127,7 @@ test.describe("Flujos críticos de la aplicación", () => {
 
     // paso 2: credenciales — el wizard de registro pide email y contraseña
     await expect(page.getByText("Elige tus credenciales")).toBeVisible({ timeout: 15_000 });
+    await page.locator("#email").fill("persona.e2e@correo.test");
     await expect(page.locator("#password")).toBeVisible();
 
     // una contraseña débil explica exactamente qué falta
@@ -143,7 +148,7 @@ test.describe("Flujos críticos de la aplicación", () => {
     await page.locator("#nombre").fill("Persona");
     await page.locator("#apellido").fill("E2E");
     await page.locator("#telefono").fill("5512345678");
-    await page.getByRole("button", { name: /Solicitar código/i }).click();
+    await page.getByRole("button", { name: "Continuar" }).click();
 
     await expect(page.getByRole("dialog")).toContainText("Verifica tu número celular");
     await page.locator("#codigo-sms").fill("123456");
@@ -151,6 +156,8 @@ test.describe("Flujos críticos de la aplicación", () => {
 
     await expect(page.getByText("Elige tus credenciales")).toBeVisible({ timeout: 15_000 });
     await page.locator("#password").fill("Passw0rdE2E!");
+    await page.locator("#confirmarPassword").fill("Passw0rdE2E!");
+    await page.getByRole("checkbox").check();
     await page.getByRole("button", { name: /Crear cuenta/i }).click();
 
     await page.waitForURL("**/registro/confirma-correo", { timeout: 30_000 });
@@ -162,6 +169,7 @@ test.describe("Flujos críticos de la aplicación", () => {
 
     await page.goto("/viajes/nuevo");
     await esperarHidratacion(page);
+    await aceptarConsentimientoSiAparece(page);
 
     // paso 0: origen y destino con códigos postales del catálogo local
     await page.locator("#gate-origenCodigoPostal").fill("03100");
@@ -192,6 +200,7 @@ test.describe("Flujos críticos de la aplicación", () => {
 
     await page.goto("/viajes/nuevo");
     await esperarHidratacion(page);
+    await aceptarConsentimientoSiAparece(page);
 
     await page.locator("#gate-origenCodigoPostal").fill("03100");
     await page.locator("#gate-destinoCodigoPostal").fill("06600");
@@ -219,6 +228,7 @@ test.describe("Flujos críticos de la aplicación", () => {
 
     await page.goto("/viajes/nuevo");
     await esperarHidratacion(page);
+    await aceptarConsentimientoSiAparece(page);
 
     await page.locator("#gate-origenCodigoPostal").fill("03100");
     await page.locator("#gate-destinoCodigoPostal").fill("06600");
@@ -271,6 +281,7 @@ test.describe("Flujos críticos de la aplicación", () => {
 
     await page.goto("/viajes/nuevo");
     await esperarHidratacion(page);
+    await aceptarConsentimientoSiAparece(page);
 
     await page.locator("#gate-origenCodigoPostal").fill("03100");
     await page.locator("#gate-destinoCodigoPostal").fill("06600");
@@ -293,6 +304,7 @@ test.describe("Flujos críticos de la aplicación", () => {
     await seedMockAuthSession(page, { variante: "pendiente" });
 
     await page.goto("/verificacion");
+    await aceptarConsentimientoSiAparece(page);
     await expect(page.locator("h1")).toContainText("Verificación de identidad");
 
     // solo usuarios con identificación previa
@@ -325,9 +337,10 @@ test.describe("Flujos críticos de la aplicación", () => {
 
     await page.goto("/viajes/nuevo");
     await esperarHidratacion(page);
+    await aceptarConsentimientoSiAparece(page);
 
     // la carga masiva solo se ofrece a usuarios verificados
-    await page.getByRole("button", { name: "Carga masiva de traslados" }).click();
+    await page.getByRole("button", { name: /Abrir módulo de carga masiva de traslados/i }).click();
     await expect(page.getByRole("dialog")).toContainText("Carga masiva de traslados");
     await expect(page.getByRole("dialog")).toContainText("Máximo 100 traslados · 5 MB");
   });
@@ -339,9 +352,9 @@ test.describe("Flujos críticos de la aplicación", () => {
     await expect(page.locator("h1")).toContainText("Mis Traslados");
 
     // filtros de estado: activos, finalizados y todos
-    await expect(page.getByRole("tab", { name: "Activos" })).toBeVisible();
-    await expect(page.getByRole("tab", { name: "Finalizados" })).toBeVisible();
-    await expect(page.getByRole("tab", { name: "Todos" })).toBeVisible();
+    await expect(page.getByRole("button", { name: "Activos" })).toBeVisible();
+    await expect(page.getByRole("button", { name: "Finalizados" })).toBeVisible();
+    await expect(page.getByRole("button", { name: "Todos" })).toBeVisible();
 
     // estado vacío legible
     await expect(page.getByText("Sin traslados · Finalizados")).toBeVisible();
