@@ -113,10 +113,12 @@ function mockPermitido(): boolean {
   return process.env.NODE_ENV !== "production";
 }
 
-/** Suspensión explícita y reversible; el bypass anterior sigue limitado a desarrollo. */
+/** Suspensión explícita y reversible (activa por defecto temporalmente; usar "false" para reactivar). */
 export function bypassVerificacionTelefonoPermitido(): boolean {
-  return process.env.PHONE_VERIFICATION_SUSPENDED === "true" ||
-    (process.env.PHONE_VERIFY_BYPASS === "true" && process.env.NODE_ENV !== "production");
+  if (process.env.PHONE_VERIFICATION_SUSPENDED === "false") {
+    return process.env.PHONE_VERIFY_BYPASS === "true" && process.env.NODE_ENV !== "production";
+  }
+  return true;
 }
 
 /**

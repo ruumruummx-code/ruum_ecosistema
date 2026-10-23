@@ -42,6 +42,7 @@ function req(correo: string, tokenTelefono = generarTokenTelefono("5512345678"),
 describe("POST /api/auth/signup — validaciones y duplicados", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    vi.stubEnv("PHONE_VERIFICATION_SUSPENDED", "false");
   });
 
   it.each(["empresa", null, "personal"])("crea únicamente perfil personal aunque el cliente envíe %s", async (tipoCuenta) => {
@@ -95,6 +96,7 @@ describe("POST /api/auth/signup — validaciones y duplicados", () => {
 describe("POST /api/auth/signup — bypass OTP solo-dev", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    vi.stubEnv("PHONE_VERIFICATION_SUSPENDED", "false");
   });
 
   it("con PHONE_VERIFY_BYPASS=true acepta sin token y marca telefono_verificado:false", async () => {

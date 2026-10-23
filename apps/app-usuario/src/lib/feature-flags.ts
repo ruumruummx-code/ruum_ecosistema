@@ -78,8 +78,8 @@ export const CATALOGO_FEATURE_FLAGS_USUARIO: Record<string, DefinicionFlagProgre
   verificacion_sms_estricta: {
     key: "verificacion_sms_estricta",
     descripcion: "Despliegue progresivo de verificación telefónica por OTP SMS en registro",
-    defaultEnabled: true,
-    defaultRollout: 100,
+    defaultEnabled: false,
+    defaultRollout: 0,
   },
   tracking_realtime_v2: {
     key: "tracking_realtime_v2",

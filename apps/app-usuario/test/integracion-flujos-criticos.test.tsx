@@ -14,8 +14,8 @@ const entorno = vi.hoisted(() => {
   process.env.MAPBOX_SECRET_TOKEN = "mock-mapbox-token-integracion";
   delete process.env.PHONE_VERIFY_BYPASS;
   delete process.env.NEXT_PUBLIC_PHONE_VERIFY_BYPASS;
-  delete process.env.PHONE_VERIFICATION_SUSPENDED;
-  delete process.env.NEXT_PUBLIC_PHONE_VERIFICATION_SUSPENDED;
+  process.env.PHONE_VERIFICATION_SUSPENDED = "false";
+  process.env.NEXT_PUBLIC_PHONE_VERIFICATION_SUSPENDED = "false";
   delete process.env.TWILIO_ACCOUNT_SID;
   delete process.env.TWILIO_AUTH_TOKEN;
   delete process.env.TWILIO_VERIFY_SERVICE_SID;

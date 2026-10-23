@@ -29,7 +29,7 @@ import {
 export default function PaginaRegistro() {
   const router = useRouter();
 
-  const smsSuspendido = process.env.NEXT_PUBLIC_PHONE_VERIFICATION_SUSPENDED === "true";
+  const smsSuspendido = process.env.NEXT_PUBLIC_PHONE_VERIFICATION_SUSPENDED !== "false";
   const bypassOtp = smsSuspendido || (process.env.NODE_ENV !== "production" && process.env.NEXT_PUBLIC_PHONE_VERIFY_BYPASS === "true");
 
   /* Paso 1: datos básicos */

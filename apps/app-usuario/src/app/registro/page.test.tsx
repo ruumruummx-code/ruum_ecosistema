@@ -23,6 +23,7 @@ import PaginaRegistro from "./page";
 
 describe("registro — accesibilidad de errores y flujo de verificación telefónica SMS", () => {
   beforeEach(() => {
+    vi.stubEnv("NEXT_PUBLIC_PHONE_VERIFICATION_SUSPENDED", "false");
     mocks.push.mockReset();
     mocks.refresh.mockReset();
     mocks.fetchMock.mockReset();
@@ -59,6 +60,7 @@ describe("registro — accesibilidad de errores y flujo de verificación telefó
   });
 
   afterEach(() => {
+    vi.unstubAllEnvs();
     vi.unstubAllGlobals();
   });
 

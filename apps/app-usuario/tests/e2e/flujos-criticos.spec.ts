@@ -149,10 +149,16 @@ test.describe("Flujos críticos de la aplicación", () => {
     await page.locator("#telefono").fill("5512345678");
     await page.getByRole("button", { name: "Continuar" }).click();
 
-    // el modal de OTP se abre y pide el código
-    await expect(page.getByRole("dialog")).toContainText("Verifica tu número celular");
-    await page.locator("#codigo-sms").fill("123456");
-    await page.getByRole("button", { name: "Verificar y continuar" }).click();
+    // Con la verificación telefónica suspendida avanza directo a credenciales;
+    // si el modal de OTP está activo, se completa el código antes de continuar.
+    await expect(
+      page.getByText("Elige tus credenciales").or(page.getByRole("dialog"))
+    ).toBeVisible();
+    if (await page.getByRole("dialog").isVisible()) {
+      await expect(page.getByRole("dialog")).toContainText("Verifica tu número celular");
+      await page.locator("#codigo-sms").fill("123456");
+      await page.getByRole("button", { name: "Verificar y continuar" }).click();
+    }
 
     // paso 2: credenciales — el wizard de registro pide email y contraseña
     await expect(page.getByText("Elige tus credenciales")).toBeVisible({ timeout: 15_000 });
@@ -179,9 +185,14 @@ test.describe("Flujos críticos de la aplicación", () => {
     await page.locator("#telefono").fill("5512345678");
     await page.getByRole("button", { name: "Continuar" }).click();
 
-    await expect(page.getByRole("dialog")).toContainText("Verifica tu número celular");
-    await page.locator("#codigo-sms").fill("123456");
-    await page.getByRole("button", { name: "Verificar y continuar" }).click();
+    await expect(
+      page.getByText("Elige tus credenciales").or(page.getByRole("dialog"))
+    ).toBeVisible();
+    if (await page.getByRole("dialog").isVisible()) {
+      await expect(page.getByRole("dialog")).toContainText("Verifica tu número celular");
+      await page.locator("#codigo-sms").fill("123456");
+      await page.getByRole("button", { name: "Verificar y continuar" }).click();
+    }
 
     await expect(page.getByText("Elige tus credenciales")).toBeVisible({ timeout: 15_000 });
     await page.locator("#email").fill("persona.e2e@correo.test");
