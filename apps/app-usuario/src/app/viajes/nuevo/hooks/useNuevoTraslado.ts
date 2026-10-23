@@ -238,19 +238,24 @@ export function useNuevoTraslado() {
   }, [paso]);
 
   useEffect(() => {
-    const handleBeforeUnload = () => {
-      if (pasoRef.current === 0 && !tarifaPreviaAceptadaRef.current && !tarifaGateAbandonadaRegistrada.current) {
+    const registrarAbandonoSiAplica = (verificarEnvio: boolean) => {
+      if (
+        pasoRef.current === 0 &&
+        !tarifaPreviaAceptadaRef.current &&
+        (!verificarEnvio || !formEnviadoRef.current) &&
+        !tarifaGateAbandonadaRegistrada.current
+      ) {
         tarifaGateAbandonadaRegistrada.current = true;
         registrarEventoUx("tarifa_gate_abandonada");
       }
     };
+    const handleBeforeUnload = () => {
+      registrarAbandonoSiAplica(false);
+    };
     window.addEventListener("beforeunload", handleBeforeUnload);
     return () => {
       window.removeEventListener("beforeunload", handleBeforeUnload);
-      if (pasoRef.current === 0 && !tarifaPreviaAceptadaRef.current && !formEnviadoRef.current && !tarifaGateAbandonadaRegistrada.current) {
-        tarifaGateAbandonadaRegistrada.current = true;
-        registrarEventoUx("tarifa_gate_abandonada");
-      }
+      registrarAbandonoSiAplica(true);
     };
   }, []);
 

@@ -124,12 +124,13 @@ export function VerificacionForm({ fotoPerfilInicial, soloDidit = false, destino
   // Polling corto tras modal o webhook demorado (cada 2s, máx 10 intentos = 20s)
   useEffect(() => {
     if (!pollingDiditActivo) return;
-    pollingRef.current.cancelado = false;
+    const estadoPolling = pollingRef.current;
+    estadoPolling.cancelado = false;
     let intentos = 0;
     const maxIntentos = 10;
 
     const interval = setInterval(async () => {
-      if (pollingRef.current.cancelado || intentos >= maxIntentos) {
+      if (estadoPolling.cancelado || intentos >= maxIntentos) {
         clearInterval(interval);
         setPollingDiditActivo(false);
         return;
@@ -152,7 +153,7 @@ export function VerificacionForm({ fotoPerfilInicial, soloDidit = false, destino
     }, 2000);
 
     return () => {
-      pollingRef.current.cancelado = true;
+      estadoPolling.cancelado = true;
       clearInterval(interval);
     };
   }, [pollingDiditActivo, destinoExito, router]);
