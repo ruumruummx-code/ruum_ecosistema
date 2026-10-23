@@ -21,6 +21,20 @@ export function DriverCertificationView(props: Props) {
   const [allOpen, setAllOpen] = useState(false);
   const [expanded, setExpanded] = useState<string | null>(null);
   const [page, setPage] = useState(0);
+  const [restored, setRestored] = useState(false);
+  useEffect(() => {
+    try {
+      const saved = JSON.parse(sessionStorage.getItem("conductor:certification-panels") ?? "null");
+      if (saved && ["mce", "level", "rights", "commitments"].includes(saved.expanded)) {
+        setExpanded(saved.expanded);
+        if (Number.isSafeInteger(saved.page) && saved.page >= 0 && saved.page < 100) setPage(saved.page);
+      }
+    } catch { /* La vista funciona sin memoria de sesión. */ }
+    setRestored(true);
+  }, []);
+  useEffect(() => {
+    if (restored) try { sessionStorage.setItem("conductor:certification-panels", JSON.stringify({ expanded, page })); } catch { /* Almacenamiento opcional. */ }
+  }, [expanded, page, restored]);
   useEffect(() => { if (openMce) { setExpanded("mce"); setPage(0); onOpenMce(); } }, [openMce, onOpenMce]);
   const completed = Object.values(checklist).filter(Boolean).length;
   const next = REQUISITOS_MINIMOS_CERTIFICACION.find(item => !checklist[item.clave]);

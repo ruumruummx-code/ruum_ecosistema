@@ -46,16 +46,4 @@
 @media (max-width: 359px) { .heading h1 { font-size: 21px; } .badge { font-size: 9px; padding: 6px 7px; } .accordion > button { gap: 8px; padding-inline: 8px; font-size: 10px; } .progressCard { gap: 12px; } .progressCard p { font-size: 12px; } }
 @media (max-height: 740px) { .ring { width: 78px; height: 78px; } .nextAction { padding: 12px; gap: 12px; } .nextAction h2 { font-size: 14px; } .nextAction button { margin-top: 8px; min-height: 34px; } .accordion > button { min-height: 45px; } .sectionIcon { width: 30px; height: 30px; } }
 @media (max-height: 620px) { .heading h1 { font-size: 21px; } .ring { width: 65px; height: 65px; } .ring strong { font-size: 19px; } .progressCard { padding-block: 0; } .progressCard button { margin-top: 5px; min-height: 30px; font-size: 11px; } .nextAction { padding: 10px; } .nextAction h2 { font-size: 12px; } .nextAction button { min-height: 29px; font-size: 12px; padding-block: 4px; margin-top: 6px; } .play { width: 36px; height: 36px; font-size: 17px; } .accordionList { gap: 6px; } .accordion > button { min-height: 39px; padding-block: 4px; } .sectionIcon { width: 28px; height: 28px; } .sectionIcon svg { width: 19px; height: 19px; } .footer { font-size: 9px; } }
-@media (min-height: 0px) {
-  :global([data-driver-details="certification"]):has([aria-expanded="true"]) .ring { width: 50px; height: 50px; }
-  :global([data-driver-details="certification"]):has([aria-expanded="true"]) .ring strong { font-size: 15px; }
-  :global([data-driver-details="certification"]):has([aria-expanded="true"]) .progressCard p { font-size: 11px; }
-  :global([data-driver-details="certification"]):has([aria-expanded="true"]) .progressCard button { margin-top: 3px; min-height: 26px; padding-block: 2px; font-size: 11px; }
-  :global([data-driver-details="certification"]):has([aria-expanded="true"]) .nextAction { padding: 7px 10px; }
-  :global([data-driver-details="certification"]):has([aria-expanded="true"]) .nextAction h2 { font-size: 11px; }
-  :global([data-driver-details="certification"]):has([aria-expanded="true"]) .nextAction button { margin-top: 3px; min-height: 25px; padding: 2px 15px; font-size: 11px; }
-  :global([data-driver-details="certification"]):has([aria-expanded="true"]) .accordion > button { min-height: 33px; padding-block: 2px; }
-  :global([data-driver-details="certification"]):has([aria-expanded="true"]) .sectionIcon { width: 25px; height: 25px; }
-  :global([data-driver-details="certification"]):has([aria-expanded="true"]) .accordionList { gap: 4px; }
-}
 @media (prefers-reduced-motion: reduce) { .collapse, .ring circle, .accordion i { transition: none; } }

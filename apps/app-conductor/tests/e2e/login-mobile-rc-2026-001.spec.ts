@@ -31,8 +31,8 @@ async function expectUsableLogin(page: Page) {
     expect(bounds!.x + bounds!.width).toBeLessThanOrEqual(frame!.x + frame!.width);
   }
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
-  await expect(page.getByRole("link", { name: "Términos y Condiciones", exact: true })).toHaveAttribute("href", "/legal/terminos");
-  await expect(page.getByRole("link", { name: "Aviso de Privacidad", exact: true })).toHaveAttribute("href", "/legal/privacidad");
+  await expect(page.getByRole("link", { name: "Términos y Condiciones", exact: true })).toHaveAttribute("href", "/legal/terminos?volver=%2Flogin");
+  await expect(page.getByRole("link", { name: "Aviso de Privacidad", exact: true })).toHaveAttribute("href", "/legal/privacidad?volver=%2Flogin");
 }
 
 test("controles accesibles en móviles, paisaje y viewport reducido por teclado", async ({ page }) => {

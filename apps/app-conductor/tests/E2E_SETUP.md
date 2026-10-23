@@ -1,5 +1,7 @@
 ## UI aislada de Conductor (Chromium)
 
+La certificación de teclado nativo y safe areas en Android tiene un [protocolo separado](android/UI_CND_05_UX_CND_03_PROTOCOL.md) y un [registro de resultado](android/UI_CND_05_UX_CND_03_RESULT.md). El comando `test:android:native` recoge evidencia ADB; Chromium de escritorio no sustituye ese gate.
+
 Desde la raíz del monorepo, con Node 24:
 
 ```bash
@@ -7,11 +9,14 @@ pnpm --filter @ruum/app-conductor test:e2e:auth
 pnpm --filter @ruum/app-conductor test:e2e:ui
 pnpm --filter @ruum/app-conductor test:e2e:operational
 pnpm --filter @ruum/app-conductor test:e2e:feedback
+pnpm --filter @ruum/app-conductor test:e2e:scroll
 ```
 
 El primer comando ejecuta los 9 casos de Login/Registro; el segundo agrega las pruebas del shell, safe areas y escritorio. Estas configuraciones construyen y sirven Next en modo producción en el puerto 3001 y el API local en 54329, sin usuarios, secretos ni escrituras en servicios reales. Bloquean service workers y no usan HMR ni reutilizan un servidor de desarrollo existente: el cliente y el fixture deben apuntar al mismo host Supabase para compartir el nombre de cookie esperado.
 
 El job `e2e-conductor` de GitHub Actions ejecuta también `test:e2e:ui` después de sus flujos críticos.
+
+`test:e2e:scroll` valida expedientes y legales con scroll interno, retorno permanente y conservación del contexto. La regla de producto y los casos cubiertos se describen en [SCROLL_GOVERNANCE.md](SCROLL_GOVERNANCE.md). Sus casos nuevos también forman parte de `test:e2e:ui`.
 
 `test:e2e:feedback` cubre ganancias, notificaciones y navegación: condiciones de programación de pagos antes del clic, estados bancarios, consulta sin ingresos, lectura optimista pendiente, confirmación, fallo con reversión, reintento y apertura sin guardar. También forma parte de `test:e2e:ui`. Sus respuestas RPC son locales y no generan pagos ni notificaciones en servicios reales.
 

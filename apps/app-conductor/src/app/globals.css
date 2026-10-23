@@ -1,6 +1,10 @@
 @import "tailwindcss";
 @import "@ruum/ui/styles/tokens.css";
 
+/* En expedientes y legales, el scroll pertenece a la región, nunca a la raíz. */
+html:has([data-contained-view]), html:has([data-contained-view]) body { height: 100%; overflow: hidden; }
+html:has([data-contained-view]) .conductor-safe-content { padding: 0; min-height: 0; }
+
 /* Los subflujos de un traslado desplazan su contenido, sin mover el shell. */
 html:has([data-trip-frame]), html:has([data-trip-frame]) body { height: 100%; overflow: hidden; }
 html:has([data-trip-frame]) .conductor-safe-content { padding: 0; min-height: 0; }

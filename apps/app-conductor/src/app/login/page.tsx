@@ -151,8 +151,8 @@ function FormularioLogin() {
             Entrar
           </Button>
           <p className={styles.legal}>
-            Al entrar aceptas los <Link href="/legal/terminos">Términos y Condiciones</Link> y el{" "}
-            <Link href="/legal/privacidad">Aviso de Privacidad</Link>.
+            Al entrar aceptas los <Link href="/legal/terminos?volver=%2Flogin">Términos y Condiciones</Link> y el{" "}
+            <Link href="/legal/privacidad?volver=%2Flogin">Aviso de Privacidad</Link>.
           </p>
           <div className={styles.signup}>
             <div className={styles.separator}><span>¿Aún no tienes una cuenta?</span></div>

@@ -39,7 +39,7 @@ export function ReviewStep({ telefono, email, nombreCompleto, curp, calle, numer
     </div>
     <label className={styles.reviewConsent}>
       <input type="checkbox" checked={aceptaTerminos} onChange={(event) => onAceptarTerminos(event.target.checked)} />
-      <span>Confirmo que toda la información es correcta y acepto los <Link href="/legal/terminos" target="_blank" rel="noopener noreferrer">Términos y Condiciones</Link>.</span>
+      <span>Confirmo que toda la información es correcta y acepto los <Link href="/legal/terminos?volver=%2Fregistro" target="_blank" rel="noopener noreferrer">Términos y Condiciones</Link>.</span>
     </label>
   </fieldset>;
 }

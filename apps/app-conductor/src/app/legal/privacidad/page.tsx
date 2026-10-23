@@ -1,4 +1,5 @@
-import Link from "next/link";
+import { ContainedScrollView } from "../../components/ContainedScrollView";
+import { ContextReturnLink } from "../../components/ContextReturnLink";
 import appVersion from "@ruum/app-version";
 
 export const metadata = {
@@ -7,17 +8,7 @@ export const metadata = {
 
 export default function PaginaPrivacidadConductor() {
   return (
-    <div className="mx-auto w-full max-w-3xl px-4 py-8 sm:px-6 sm:py-12">
-      {/* Cabecera de retorno accesible e in-app */}
-      <div className="mb-6">
-        <Link
-          href="/cuenta/legal"
-          className="inline-flex items-center gap-2 rounded-xl border border-border bg-surface px-4 py-2 font-display text-xs font-bold text-text-primary shadow-2xs transition hover:border-signal hover:bg-surface-elevated"
-        >
-          ← Volver a documentos legales
-        </Link>
-      </div>
-
+    <ContainedScrollView label="Texto del aviso de privacidad" header={<ContextReturnLink fallback="/cuenta/legal" />}>
       <article className="rounded-2xl border border-border/80 bg-surface px-6 py-8 text-text-primary shadow-md sm:px-10">
         <header className="mb-8 border-b border-border/60 pb-6">
           <div className="flex items-center gap-2">
@@ -100,6 +91,6 @@ export default function PaginaPrivacidadConductor() {
           </a>
         </div>
       </article>
-    </div>
+    </ContainedScrollView>
   );
 }

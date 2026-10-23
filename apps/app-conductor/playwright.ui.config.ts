@@ -11,5 +11,6 @@ export default defineConfig({
     "driver-operational.spec.ts",
     "driver-earnings.spec.ts",
     "driver-notifications.spec.ts",
+    "driver-contained-scroll.spec.ts",
   ],
 });

@@ -22,7 +22,7 @@ export function LicenseConsentDetails({ onClose }: { onClose: () => void }) {
     <div className={styles.sheetBody}>
       <p className={styles.legalDetails}>Al pulsar Continuar, declaras que tu licencia está vigente y no tiene suspensiones, y que no tienes procesos legales activos relacionados con el manejo de vehículos.</p>
       <p className={styles.legalDetails}>Autorizas la verificación de antecedentes penales e infracciones de conducción ante las autoridades correspondientes y el tratamiento de tus datos biométricos y de geolocalización para la verificación de identidad con Didit.</p>
-      <p className={styles.legalDetails}><a href="/legal/privacidad" target="_blank" rel="noopener noreferrer">Aviso de Privacidad</a> · <a href="/legal/terminos" target="_blank" rel="noopener noreferrer">Términos de servicio</a></p>
+      <p className={styles.legalDetails}><a href="/legal/privacidad?volver=%2Fregistro" target="_blank" rel="noopener noreferrer">Aviso de Privacidad</a> · <a href="/legal/terminos?volver=%2Fregistro" target="_blank" rel="noopener noreferrer">Términos de servicio</a></p>
     </div>
     <footer className={styles.sheetFooter}><button type="button" onClick={onClose}>Cerrar</button></footer>
   </dialog>;

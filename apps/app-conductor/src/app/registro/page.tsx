@@ -187,7 +187,7 @@ export default function PaginaRegistroConductor() {
                     }}
                   />
                   <span>
-                    Acepto los <a href="/legal/terminos" target="_blank" rel="noopener noreferrer">Términos y Condiciones</a> y el <a href="/legal/privacidad" target="_blank" rel="noopener noreferrer">Aviso de Privacidad</a>.
+                    Acepto los <a href="/legal/terminos?volver=%2Fregistro" target="_blank" rel="noopener noreferrer">Términos y Condiciones</a> y el <a href="/legal/privacidad?volver=%2Fregistro" target="_blank" rel="noopener noreferrer">Aviso de Privacidad</a>.
                   </span>
                 </label>
               </>
@@ -340,7 +340,7 @@ export default function PaginaRegistroConductor() {
               <footer className={styles.actionFooter}>
                 {r.paso === 2 && (
                   <p className={styles.microcopy}>
-                    Al continuar, declaras que tu licencia es válida y autorizas la verificación de antecedentes y datos biométricos. <a href="/legal/privacidad" target="_blank" rel="noopener noreferrer">Privacidad</a> · <a href="/legal/terminos" target="_blank" rel="noopener noreferrer">Términos</a>
+                    Al continuar, declaras que tu licencia es válida y autorizas la verificación de antecedentes y datos biométricos. <a href="/legal/privacidad?volver=%2Fregistro" target="_blank" rel="noopener noreferrer">Privacidad</a> · <a href="/legal/terminos?volver=%2Fregistro" target="_blank" rel="noopener noreferrer">Términos</a>
                     <button type="button" className={styles.legalTrigger} onClick={() => r.setMostrarDetalleConsentimiento(true)}>Ver declaración</button>
                   </p>
                 )}

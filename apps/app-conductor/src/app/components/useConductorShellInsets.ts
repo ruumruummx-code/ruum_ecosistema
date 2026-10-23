@@ -16,8 +16,8 @@ export function useConductorShellInsets(headerVisible: boolean, mobileNavVisible
     };
     measure();
     const observer = typeof ResizeObserver === "undefined" ? null : new ResizeObserver(measure);
-    if (headerRef.current) observer?.observe(headerRef.current);
-    if (mobileNavRef.current) observer?.observe(mobileNavRef.current);
+    if (headerRef.current) observer?.observe(headerRef.current, { box: "border-box" });
+    if (mobileNavRef.current) observer?.observe(mobileNavRef.current, { box: "border-box" });
     window.addEventListener("resize", measure);
     return () => {
       observer?.disconnect();

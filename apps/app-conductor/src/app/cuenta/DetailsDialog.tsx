@@ -11,9 +11,9 @@ export function DetailsDialog({ open, title, onClose, children }: { open: boolea
     if (open && !node?.open) node?.showModal();
     if (!open && node?.open) node.close();
   }, [open]);
-  return <dialog ref={dialog} className={styles.dialog} aria-labelledby={titleId} onCancel={event => { event.preventDefault(); onClose(); }} onClose={onClose}>
+  return <dialog ref={dialog} className={styles.dialog} data-details-dialog aria-labelledby={titleId} onCancel={event => { event.preventDefault(); onClose(); }} onClose={onClose}>
     <h2 id={titleId}>{title}</h2>
-    {children}
+    <div className={styles.dialogContent}>{children}</div>
     <button type="button" className={styles.retry} onClick={onClose}>Cerrar</button>
   </dialog>;
 }

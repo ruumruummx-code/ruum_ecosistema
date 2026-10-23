@@ -1,4 +1,8 @@
 .screen { position: relative; margin-inline: auto; width: 100%; max-width: 440px; min-height: 0; display: flex; flex-direction: column; background: #fcfcfd; color: #0a2342; color-scheme: light; font-family: "Inter", ui-sans-serif, system-ui, sans-serif; }
+.dialog[data-details-dialog][open] { display: flex; flex-direction: column; gap: 12px; overflow: hidden; }
+.dialog[data-details-dialog] > h2, .dialog[data-details-dialog] > button { flex-shrink: 0; }
+.dialog[data-details-dialog] > button { min-height: 44px; }
+.dialogContent { min-height: 0; overflow-y: auto; overscroll-behavior: contain; }
 .screen *, .screen *::before, .screen *::after { box-sizing: border-box; }
 .screen :is(h1,h2,p,a,button,input,select,span,strong,label) { font-family: "Inter", ui-sans-serif, system-ui, sans-serif; }
 .screen :is(h1,h2,p) { margin: 0; }

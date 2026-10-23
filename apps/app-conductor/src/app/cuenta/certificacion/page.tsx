@@ -84,7 +84,7 @@ export default function PaginaCertificacion() {
     if (!next || loading || error) return;
     if (next.clave === "consentimiento_biometrico_geo") { void startDidit(); return; }
     const route = ROUTES[next.clave];
-    if (route) router.push(route); else setOpenMce(true);
+    if (route) router.push(route.startsWith("/cuenta/") ? `${route}?volver=${encodeURIComponent(window.location.pathname + window.location.search)}` : route); else setOpenMce(true);
   }
   const licenseAlert = alertaLicencia15Dias(driver?.licencia_vigencia ?? null);
   return <>
