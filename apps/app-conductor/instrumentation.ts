@@ -16,7 +16,7 @@ export async function register() {
     Sentry.init({
       dsn,
       environment: env,
-      release: `ruum-conductor@${version}`,
+      release: process.env.SENTRY_RELEASE || `ruum-conductor@${version}`,
       tracesSampleRate: Number(process.env.SENTRY_TRACES_SAMPLE_RATE ?? "0.1"),
       // No enviar PII por defecto; observability.ts ya filtra curp/clabe/token
       sendDefaultPii: false,

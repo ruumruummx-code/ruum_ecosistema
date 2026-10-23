@@ -1,6 +1,7 @@
 import { defineConfig } from 'eslint/config'
 import { FlatCompat } from '@eslint/eslintrc'
 import jsxA11y from 'eslint-plugin-jsx-a11y'
+import securityPlugin from 'eslint-plugin-security'
 import tsPlugin from '@typescript-eslint/eslint-plugin'
 import { dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -23,6 +24,18 @@ const eslintConfig = defineConfig([
     ]
   },
   ...compat.extends('next/core-web-vitals'),
+  // SAST: los patrones heurísticos quedan como warnings para revisión; las
+  // construcciones de alto riesgo/confianza alta bloquean el lint de CI.
+  securityPlugin.configs.recommended,
+  {
+    rules: {
+      'security/detect-bidi-characters': 'error',
+      'security/detect-buffer-noassert': 'error',
+      'security/detect-eval-with-expression': 'error',
+      'security/detect-invisible-characters': 'error',
+      'security/detect-new-buffer': 'error'
+    }
+  },
   {
     files: ['**/*.{ts,tsx}'],
     plugins: {

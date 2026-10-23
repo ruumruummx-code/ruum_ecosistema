@@ -1,5 +1,8 @@
 # @ruum/app-conductor
 
+Operación y despliegue: [`docs/OPERATIONS.md`](docs/OPERATIONS.md) (variables,
+arquitectura, despliegue y rollback).
+
 PRD §14 — instrucción operativa: **"La App Conductor debe enfocarse en
 ejecución guiada, seguridad e incidencia rápida."**
 

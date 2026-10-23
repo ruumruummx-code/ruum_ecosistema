@@ -45,6 +45,17 @@ const hostedBuild = prod || Boolean(process.env.VERCEL);
 const localProduction = process.env.RUUM_LOCAL_PRODUCTION === "true";
 if (hostedBuild && demo) invalid.push("NEXT_PUBLIC_PANEL_ADMIN_DEMO no puede ser true en producción");
 if (hostedBuild && missing.length) invalid.push(`faltan variables: ${missing.join(", ")}`);
+if (hostedBuild && app === "app-conductor") {
+  // El rate-limit distribuido acepta Upstash o Vercel KV. Exigir un par
+  // completo evita que el despliegue pase y luego degrade a memoria local.
+  const tieneUpstash = Boolean(
+    process.env.UPSTASH_REDIS_REST_URL?.trim() && process.env.UPSTASH_REDIS_REST_TOKEN?.trim()
+  );
+  const tieneKv = Boolean(process.env.KV_REST_API_URL?.trim() && process.env.KV_REST_API_TOKEN?.trim());
+  if (!tieneUpstash && !tieneKv) {
+    invalid.push("se requiere Redis para rate-limit distribuido: UPSTASH_REDIS_REST_URL y UPSTASH_REDIS_REST_TOKEN (o KV_REST_API_URL y KV_REST_API_TOKEN)");
+  }
+}
 for (const name of required.filter((n) => n.includes("SUPABASE_URL"))) {
   const value = process.env[name];
   if (value && !/^https:\/\//.test(value) && !(localProduction && /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?/.test(value)))

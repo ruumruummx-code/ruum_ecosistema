@@ -9,7 +9,16 @@ import {
   PERMISSIONS_POLICY,
 } from "@ruum/shared/seguridad";
 
+const canUploadSourcemaps = Boolean(
+  process.env.SENTRY_UPLOAD_SOURCE_MAPS === "true" &&
+    process.env.SENTRY_AUTH_TOKEN && process.env.SENTRY_ORG && process.env.SENTRY_PROJECT
+);
+
 const nextConfig: NextConfig = {
+  // Los mapas se suben a Sentry durante el build y se eliminan del artefacto.
+  // No publicar source maps legibles desde el servidor.
+  productionBrowserSourceMaps: canUploadSourcemaps,
+  hideSourceMaps: true,
   transpilePackages: ["@ruum/shared", "@ruum/ui", "@ruum/api"],
   images: {
     remotePatterns: [...IMAGES_REMOTE_PATTERNS],
@@ -75,4 +84,17 @@ const nextConfig: NextConfig = {
 // navegador y sentry.server.config.ts en el servidor. Sin este wrapper los
 // archivos de config existían pero nunca se cargaban en el cliente.
 // Sin DSN el SDK es no-op; silent:true evita ruido en el build.
-export default withSentryConfig(nextConfig, { silent: true });
+const sentryRelease = process.env.SENTRY_RELEASE ||
+  `ruum-conductor@${process.env.NEXT_PUBLIC_APP_VERSION || "1.0.0"}`;
+export default withSentryConfig(nextConfig, {
+  silent: true,
+  org: process.env.SENTRY_ORG,
+  project: process.env.SENTRY_PROJECT,
+  authToken: process.env.SENTRY_AUTH_TOKEN,
+  release: { name: sentryRelease, create: true, finalize: true },
+  sourcemaps: {
+    // Dev/CI sin credenciales puede compilar sin publicar artefactos incompletos.
+    disable: !canUploadSourcemaps,
+    deleteSourcemapsAfterUpload: true,
+  },
+});

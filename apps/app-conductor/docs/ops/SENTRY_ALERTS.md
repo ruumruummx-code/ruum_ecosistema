@@ -24,10 +24,10 @@
 - **Runbook:** Revisar `CSP_DEUDA_P2.md`, `scripts/assert-csp.mjs`
 
 ### 4) Health Down
-- **Uptime check:** `GET https://concer.ruumruum-moviliax.online/api/health` cada 1m (Checkly / UptimeRobot / Sentry Crons)
-- **Condition:** `status:503` OR `json.status == "down"` 2 veces consecutivas
-- **Action:** PagerDuty + Slack `#oncall`
-- **Runbook:** `docs/ops/RUNBOOK_HEALTH.md` (Supabase, middleware, Vercel)
+- **Uptime/sintético:** workflow externo [`Uptime app-conductor`](../../../../.github/workflows/conductor-healthcheck.yml), cada 5m y manual. Consulta `CONDUCTOR_HEALTHCHECK_URL` (default `https://concer.ruumruum-moviliax.online/api/health`), timeout de 10s y un reintento.
+- **Condición:** HTTP 2xx, JSON válido, `status=ok` y `checks.supabase.status=ok`; un segundo fallo termina el workflow con error.
+- **Acción:** configurar notificaciones de fallo del workflow para el on-call; abrir el enlace al run, hacer recheck manual y seguir el runbook.
+- **Runbook:** [`docs/ops/RUNBOOK_HEALTH.md`](RUNBOOK_HEALTH.md).
 
 ### 5) Offline Sync Stuck
 - **Metric:** `recordOperationalEvent` where `type: sync_failure | evidence_stuck`
@@ -35,11 +35,39 @@
 - **Filter:** `extra.scope: evidencia|offline`
 - **Action:** Slack `#conductor-ops`
 
+### 6) Fallo al verificar rol de conductor — fail-open
+- **Evento/métrica:** `conductor_role_verification_failed` (cada excepción de `clasificarRolApp` en el middleware). El middleware registra un evento estructurado en Vercel Logs y trata de persistirlo en `eventos_operativos_app`.
+- **Dimensiones:** `ambito=app-conductor`, `pathname`, `motivo` (código corto) y `version_app`. No agregar ID de usuario, cookies ni tokens. El evento no incluye campo de ambiente; ejecutar el monitor contra la BD del ambiente que se alerta y filtrar `environment=production` en Vercel Logs.
+- **Ventana y umbral:** contar filas/eventos de los últimos 5 minutos; **warning con 1 o más**, **page a Seguridad + on-call con 3 o más**. Agrupar por versión/ruta para distinguir una caída general de un endpoint aislado.
+- **Fuente principal:** monitor SQL ejecutado cada minuto con conexión de solo lectura autorizada para consultar eventos operativos:
+
+  ```sql
+  select count(*)::int as fallos_5m,
+         max(creado_en) as ultimo_fallo
+  from public.eventos_operativos_app
+  where tipo = 'conductor_role_verification_failed'
+    and detalle->>'ambito' = 'app-conductor'
+    and creado_en >= now() - interval '5 minutes';
+  ```
+
+  Alertar cuando `fallos_5m >= 1`; elevar a page cuando `fallos_5m >= 3`. Si el RPC de telemetría no persiste el evento, activar la misma regla en Vercel Logs buscando el JSON `event` exacto; el log se emite antes de intentar persistirlo.
+- **Acción:** usar [`docs/runbooks/CONDUCTOR-ROLE-FAIL-OPEN.md`](../../../docs/runbooks/CONDUCTOR-ROLE-FAIL-OPEN.md). Mantener alerta activa hasta 30 minutos sin fallos y completar las comprobaciones de autorización/RLS.
+- **Owner:** Seguridad + backend de identidad.
+
 ## Configuración código
 
 - `sentry.client.config.ts` / `sentry.server.config.ts` ya filtran PII (`sendDefaultPii:false`, `beforeSend` con `FORBIDDEN=/curp|clabe|.../`)
 - `src/lib/observability.ts:recordOperationalEvent` hace `rpc:registrar_evento_operativo_app` + mirror a `window.Sentry.captureMessage` si existe
 - `src/app/api/health/route.ts` expone `status:ok|degraded|down` + latencia Supabase
+
+## Releases y source maps
+
+- El identificador es `SENTRY_RELEASE`; si no se define, se usa `ruum-conductor@${NEXT_PUBLIC_APP_VERSION}`. Configurarlo con el mismo valor en el build y en el runtime (recomendado: `ruum-conductor@<commit-sha>`).
+- En CI/hosting, guardar `SENTRY_AUTH_TOKEN` como secreto de acceso restringido a crear releases y subir artefactos. Configurar `SENTRY_ORG` y `SENTRY_PROJECT` (slug `ruum-conductor`) como variables protegidas. Nunca incluir el token en `.env.example`, logs o archivos versionados.
+- Para el build de producción que se va a desplegar, activar `SENTRY_UPLOAD_SOURCE_MAPS=true`. `withSentryConfig` genera y sube los mapas para ese release; después los elimina del artefacto. `hideSourceMaps` evita servirlos públicamente. Sin credenciales/flag, el build no intenta subirlos.
+- La configuración de despliegue debe inyectar el mismo release en `SENTRY_RELEASE` (servidor) y `NEXT_PUBLIC_SENTRY_RELEASE` (cliente), además de `SENTRY_DSN` (servidor) y `NEXT_PUBLIC_SENTRY_DSN` (cliente). Ambiente va en `SENTRY_ENVIRONMENT`/`NEXT_PUBLIC_RUUM_AMBIENTE`.
+
+En GitHub Actions: crear el secret `SENTRY_AUTH_TOKEN` y las variables `SENTRY_ORG` y `SENTRY_PROJECT`; limitar la publicación de mapas al build de despliegue de producción. En Vercel/hosting, definir las mismas variables para el ambiente Production. El build E2E de PR no debe subir releases.
 
 ## Verificación local
 
@@ -51,12 +79,3 @@ curl -s http://localhost:3001/api/health | jq
 node scripts/assert-csp.mjs
 pnpm scan:secrets
 ```
-
-## Integración con Crons (Sentry Crons / Vercel Crons)
-
-Agregar en `vercel.json` (opcional):
-```json
-{ "crons": [{ "path": "/api/health", "schedule": "*/5 * * * *" }] }
-```
-
-Si `health` retorna `503`, Vercel Logs + Sentry Issue se crean automáticamente.

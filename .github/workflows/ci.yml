@@ -44,7 +44,8 @@ jobs:
           node-version-file: .nvmrc
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - run: pnpm lint
+      - name: ESLint + SAST (eslint-plugin-security en app-conductor)
+        run: pnpm lint
 
   typecheck:
     name: typecheck
@@ -242,6 +243,13 @@ jobs:
         run: pnpm exec playwright install --with-deps chromium
       - name: Build de producción app-conductor
         run: pnpm --filter @ruum/app-conductor build
+        env:
+          SENTRY_AUTH_TOKEN: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' && secrets.SENTRY_AUTH_TOKEN || '' }}
+          SENTRY_ORG: ${{ vars.SENTRY_ORG }}
+          SENTRY_PROJECT: ${{ vars.SENTRY_PROJECT }}
+          SENTRY_RELEASE: ruum-conductor@${{ github.sha }}
+          NEXT_PUBLIC_SENTRY_RELEASE: ruum-conductor@${{ github.sha }}
+          SENTRY_UPLOAD_SOURCE_MAPS: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' && secrets.SENTRY_AUTH_TOKEN != '' && vars.SENTRY_ORG != '' && vars.SENTRY_PROJECT != '' }}
       - name: Ejecutar E2E sprint-c5-critical-flows
         run: pnpm --filter @ruum/app-conductor test:e2e:critical
       - name: Subir reporte y artefactos Playwright

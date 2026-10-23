@@ -5,7 +5,7 @@
 .yarn/install-state.gz
 
 # Testing
-/coverage
+coverage/
 
 # Next.js
 /.next/
@@ -51,7 +51,9 @@ next-env.d.ts
 /.lighthouse-ci/
 
 # Build artefacts
-/build.log
+build.log
+tsconfig.tsbuildinfo
+android/build/
 
 # Storybook
 /storybook-static/

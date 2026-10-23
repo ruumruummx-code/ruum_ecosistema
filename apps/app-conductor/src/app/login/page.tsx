@@ -8,6 +8,7 @@ import { Button } from "@ruum/ui";
 import { traducirErrorAuth, validarDestinoSeguro } from "@ruum/shared/utils";
 import { crearClienteNavegador, tieneSupabaseConfigurado } from "../../lib/supabase-browser";
 import { onboardingVisto } from "../../lib/onboarding-visto";
+import { esEmailLoginValido, validarCredencialesLogin } from "./login-validation";
 
 import styles from "./login.module.css";
 
@@ -55,8 +56,7 @@ function FormularioLogin() {
       setEmailError(null);
       return;
     }
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(value)) {
+    if (!esEmailLoginValido(value)) {
       setEmailError("Formato de correo inválido");
     } else {
       setEmailError(null);
@@ -77,12 +77,12 @@ function FormularioLogin() {
 
   async function iniciarSesion(e: React.FormEvent) {
     e.preventDefault();
-    const emailValido = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-    if (!emailValido) {
+    const credencialInvalida = validarCredencialesLogin(email, password);
+    if (credencialInvalida === "email") {
       setEmailError("Formato de correo inválido");
       return;
     }
-    if (!password) {
+    if (credencialInvalida === "password") {
       setError("Ingresa tu contraseña para continuar.");
       return;
     }

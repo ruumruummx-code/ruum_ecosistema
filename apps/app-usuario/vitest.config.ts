@@ -23,13 +23,13 @@ export default defineConfig({
     coverage: {
       provider: "v8",
       reporter: ["text", "lcov", "html"],
-      // Gate inicial espejo de app-conductor (30/60/65/30): lines/branches/functions/statements.
+      // Gate de cobertura (lines ≥70, branches ≥60, functions ≥70, statements ≥70).
       // Si el gate queda en rojo, subir cobertura real antes de bajar el umbral.
       thresholds: {
-        lines: 30,
+        lines: 70,
         branches: 60,
-        functions: 65,
-        statements: 30
+        functions: 70,
+        statements: 70
       },
       exclude: [
         "test/**",
