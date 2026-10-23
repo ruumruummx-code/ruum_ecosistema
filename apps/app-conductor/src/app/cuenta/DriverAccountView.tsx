@@ -16,27 +16,16 @@ const sections: { href: string; title: string; description: string; icon: Accoun
 type Props = { initials: string | null; unread: number; loading: boolean; sync: GlobalSyncSnapshot | null; loggingOut: boolean; logoutError: string | null; onLogout: () => void; onOpenLogout: () => void };
 
 export function DriverAccountView(props: Props) {
-  const screen = useRef<HTMLDivElement>(null);
   const logoutDialog = useRef<HTMLDialogElement>(null);
   const settingsDialog = useRef<HTMLDialogElement>(null);
   const [openDialog, setOpenDialog] = useState<"logout" | "settings" | null>(null);
-  useEffect(() => {
-    const viewport = window.visualViewport;
-    if (!viewport) return;
-    const update = () => {
-      screen.current?.style.setProperty("--account-height", `${viewport.height}px`);
-      screen.current?.style.setProperty("--account-top", `${viewport.offsetTop}px`);
-    };
-    update(); viewport.addEventListener("resize", update); viewport.addEventListener("scroll", update);
-    return () => { viewport.removeEventListener("resize", update); viewport.removeEventListener("scroll", update); };
-  }, []);
   useEffect(() => {
     if (openDialog === "logout") logoutDialog.current?.showModal(); else logoutDialog.current?.close();
     if (openDialog === "settings") settingsDialog.current?.showModal(); else settingsDialog.current?.close();
   }, [openDialog]);
   const syncOK = props.sync?.status === "todo_sincronizado";
   const syncText = syncOK ? "Sincronizado — todo al día" : props.sync?.message ?? "Comprobando sincronización…";
-  return <div className={styles.screen} ref={screen} data-driver-account>
+  return <div className={styles.screen} data-driver-account>
     <div className={styles.body}>
       <header className={styles.header}>
         <Link href="/panel" prefetch={false} className={styles.brand} aria-label="Ruum Ruum Driver Service, inicio"><Image src="/imagenes/ruum-logo.svg" alt="Ruum Ruum" width={170} height={55} priority /><span>DRIVER SERVICE</span></Link>
@@ -60,9 +49,6 @@ export function DriverAccountView(props: Props) {
       </nav>
       <button type="button" className={styles.logout} onClick={() => { props.onOpenLogout(); setOpenDialog("logout"); }}><AccountIcon name="logout" />Cerrar sesión</button>
     </div>
-    <nav className={styles.bottomNav} aria-label="Navegación principal">
-      {([{ href: "/panel", label: "Inicio", icon: "home" }, { href: "/viajes", label: "Traslados", icon: "car" }, { href: "/ganancias", label: "Ganancias", icon: "wallet" }, { href: "/cuenta", label: "Cuenta", icon: "user" }] as const).map(item => <Link key={item.href} href={item.href} prefetch={false} aria-current={item.href === "/cuenta" ? "page" : undefined}><AccountIcon name={item.icon} /><span>{item.label}</span></Link>)}
-    </nav>
     <dialog ref={settingsDialog} className={styles.dialog} aria-labelledby="account-settings-title" onCancel={() => setOpenDialog(null)} onClose={() => setOpenDialog(current => current === "settings" ? null : current)}>
       <header><h2 id="account-settings-title">Ajustes de cuenta</h2><button type="button" aria-label="Cerrar ajustes" onClick={() => setOpenDialog(null)}>×</button></header>
       <nav aria-label="Más ajustes"><Link href="/cuenta/preferencias">Preferencias</Link><Link href="/cuenta/seguridad">Seguridad</Link><Link href="/cuenta/legal">Marco legal</Link></nav>

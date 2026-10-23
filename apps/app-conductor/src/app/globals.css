@@ -161,9 +161,43 @@ html, body {
    Proporción 60% blanco evidencia / 25% negro asfalto / 10% amarillo ruta / 5% azul trazabilidad + gris acero.
    Amarillo solo como acento (ruta, check, CTA). Fondo limpio, mucho blanco, línea de ruta como recurso. */
 .conductor-page {
-  --conductor-sticky-action-top: calc(6rem + env(safe-area-inset-top));
+  --conductor-sticky-action-top: calc(var(--conductor-shell-header-height, 0px) + 16px);
   min-height: 100vh;
   background: var(--ruum-canvas);
+}
+
+/* El header sticky ya ocupa espacio en el flujo. La separación inicial no duplica su altura. */
+:root {
+  --conductor-shell-header-height: 0px;
+  --conductor-shell-bottom-height: 0px;
+  --conductor-content-gap: 16px;
+  --conductor-operation-width: 440px;
+}
+
+/* Reservas antes de hidratar; ResizeObserver las sustituye por las alturas reales. */
+html:has([data-conductor-header]) {
+  --conductor-shell-header-height: calc(81px + env(safe-area-inset-top));
+}
+
+html:has([data-conductor-header], [data-conductor-mobile-nav]) {
+  scroll-padding-top: calc(var(--conductor-shell-header-height) + var(--conductor-content-gap));
+  scroll-padding-bottom: calc(var(--conductor-shell-bottom-height) + var(--conductor-content-gap));
+}
+
+html:has([data-conductor-header], [data-conductor-mobile-nav]) .conductor-safe-content {
+  padding-top: var(--conductor-content-gap);
+  padding-bottom: max(calc(var(--conductor-shell-bottom-height) + var(--conductor-content-gap)), env(safe-area-inset-bottom));
+  padding-inline: env(safe-area-inset-left) env(safe-area-inset-right);
+}
+
+[data-conductor-header], [data-conductor-mobile-nav] {
+  padding-inline: env(safe-area-inset-left) env(safe-area-inset-right);
+}
+
+@media (min-width: 768px) {
+  html:has([data-conductor-header]) {
+    --conductor-shell-header-height: calc(149px + env(safe-area-inset-top));
+  }
 }
 
 .conductor-content {
@@ -201,7 +235,7 @@ html, body {
 }
 
 .conductor-toast-bottom {
-  bottom: calc(80px + env(safe-area-inset-bottom));
+  bottom: calc(var(--conductor-shell-bottom-height) + var(--conductor-content-gap));
 }
 
 .conductor-mobile-active-trip-card {
@@ -215,18 +249,9 @@ html, body {
   }
 }
 
-@media (min-width: 768px) {
-  body.conductor-tiene-viaje-activo .conductor-page {
-    --conductor-sticky-action-top: calc(9.5rem + env(safe-area-inset-top));
-  }
-}
-
 @media (max-width: 767px) {
-  /* La navegación inferior ocupa espacio real para no tapar acciones finales. */
-  :root {
-    --conductor-mobile-nav-offset: 80px;
-    --conductor-mobile-active-trip-offset: 92px;
-    --conductor-mobile-page-reserve: 196px;
+  html:has([data-conductor-mobile-nav]) {
+    --conductor-shell-bottom-height: calc(80px + env(safe-area-inset-bottom));
   }
 
   /* Evitar overflow horizontal en toda la app móvil */
@@ -241,7 +266,6 @@ html, body {
   }
 
   .conductor-page {
-    padding-bottom: max(104px, calc(var(--conductor-mobile-nav-offset) + env(safe-area-inset-bottom))) !important;
     overflow-x: clip;
   }
 
@@ -348,35 +372,9 @@ html, body {
   .scrollbar-none::-webkit-scrollbar {
     display: none;
   }
-
-  body.conductor-tiene-viaje-activo .conductor-page {
-    padding-bottom: max(
-      var(--conductor-mobile-page-reserve),
-      calc(var(--conductor-mobile-nav-offset) + var(--conductor-mobile-active-trip-offset) + env(safe-area-inset-bottom))
-    ) !important;
-  }
-
-  body.conductor-tiene-viaje-activo .conductor-toast-bottom {
-    bottom: calc(var(--conductor-mobile-nav-offset) + var(--conductor-mobile-active-trip-offset) + env(safe-area-inset-bottom));
-  }
 }
 
 @media (max-width: 767px) and (max-height: 600px) {
-  :root {
-    --conductor-mobile-active-trip-offset: 72px;
-    --conductor-mobile-page-reserve: 168px;
-  }
-
-  body.conductor-tiene-viaje-activo .conductor-page {
-    padding-bottom: max(
-      var(--conductor-mobile-page-reserve),
-      calc(var(--conductor-mobile-nav-offset) + var(--conductor-mobile-active-trip-offset) + env(safe-area-inset-bottom))
-    ) !important;
-  }
-
-  body.conductor-tiene-viaje-activo .conductor-toast-bottom {
-    bottom: calc(var(--conductor-mobile-nav-offset) + var(--conductor-mobile-active-trip-offset) + env(safe-area-inset-bottom));
-  }
 
   .conductor-mobile-active-trip-card {
     min-height: 3.5rem;
@@ -388,18 +386,6 @@ html, body {
 }
 
 @media (max-width: 767px) and (max-height: 430px) {
-  :root {
-    --conductor-mobile-active-trip-offset: 0px;
-    --conductor-mobile-page-reserve: 104px;
-  }
-
-  body.conductor-tiene-viaje-activo .conductor-page {
-    padding-bottom: max(104px, calc(var(--conductor-mobile-nav-offset) + env(safe-area-inset-bottom))) !important;
-  }
-
-  body.conductor-tiene-viaje-activo .conductor-toast-bottom {
-    bottom: calc(var(--conductor-mobile-nav-offset) + env(safe-area-inset-bottom));
-  }
 
   .conductor-mobile-active-trip {
     display: none;
@@ -739,27 +725,12 @@ html[data-theme="light"] .conductor-page :where(input, select, textarea):focus {
   outline-color: #101012;
 }
 
-/* Dashboard conductor: ocupa el viewport sin desplazar el tab bar en pantallas móviles bajas. */
-.driver-dashboard-empty {
-  height: 100dvh;
-  overflow: hidden;
-}
-
-.conductor-page:has(.driver-dashboard-empty) {
-  height: 100dvh;
-  min-height: 100dvh;
-  padding-bottom: 0 !important;
-  overflow: hidden;
-}
-
+/* El dashboard participa en el flujo del shell global. */
 .driver-dashboard-content {
   min-height: 0;
 }
 
 @media (max-width: 767px) and (max-height: 740px) {
-  .driver-dashboard-empty {
-    padding-bottom: calc(72px + env(safe-area-inset-bottom));
-  }
 
   .driver-dashboard-empty > header {
     min-height: 52px;
@@ -889,7 +860,7 @@ html[data-theme="light"] .conductor-page :where(input, select, textarea):focus {
 }
 
 .conductor-toast-bottom[data-offset="mobile-nav"] {
-  bottom: calc(var(--conductor-mobile-nav-offset, 80px) + env(safe-area-inset-bottom) + 16px);
+  bottom: calc(var(--conductor-shell-bottom-height) + var(--conductor-content-gap));
 }
 
 .conductor-profile-sticky-action {
@@ -930,4 +901,67 @@ html[data-theme="light"] .conductor-page :where(input, select, textarea):focus {
   color: #1e88e5;
   font-size: 12px;
   font-weight: 800;
+}
+
+/* Escritorio: un mismo marco para el shell y las vistas operativas mobile-first. */
+@media (min-width: 1024px) {
+  body.conductor-v2-shell:has([data-conductor-header]) {
+    background: #eef2f7;
+  }
+
+  [data-conductor-header],
+  html:has([data-conductor-header]) .conductor-safe-content {
+    width: 100%;
+    max-width: var(--conductor-operation-width);
+    margin-inline: auto;
+  }
+
+  html:has([data-conductor-header]) .conductor-safe-content {
+    min-height: calc(100dvh - var(--conductor-shell-header-height));
+  }
+
+  [data-conductor-header-content] {
+    gap: 12px;
+    padding-inline: 16px;
+  }
+
+  [data-conductor-header-content] > a > span {
+    width: 64px;
+    height: 44px;
+  }
+
+  [data-conductor-header-content] > p {
+    font-size: 14px;
+    line-height: 1.4;
+  }
+
+  [data-conductor-desktop-nav] {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 4px;
+    padding-inline: 16px;
+  }
+
+  [data-conductor-desktop-nav] > a {
+    min-width: 0;
+    flex-direction: column;
+    gap: 4px;
+    padding-inline: 2px;
+    font-size: 11px;
+    white-space: nowrap;
+  }
+
+  [data-conductor-desktop-active-trip] > div {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  [data-conductor-desktop-active-trip] p {
+    flex-wrap: wrap;
+  }
+
+  [data-conductor-desktop-active-trip] > div > div {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
 }

@@ -1,15 +1,12 @@
-:global(html):has(.screen), :global(body):has(.screen) { height: 100dvh; min-height: 0; overflow: hidden; overscroll-behavior: none; }
-:global(body):has(.screen) { background: #eef2f7; }
-:global(main):has(.screen) { min-height: 0; padding: 0; }
 .screen {
   --font-body: "Inter", ui-sans-serif, system-ui, sans-serif;
   --ruum-text: #0b2143; --ruum-text-secondary: #586b8e; --ruum-text-tertiary: #586b8e;
   --ruum-surface: #fff; --ruum-surface-elevated: #edf2f8; --ruum-border: #d7e0ee;
   --ruum-border-strong: #c5d1e4; --ruum-focus: #0060ff; --ruum-route-contrast: #005bea;
   --ruum-on-primary: #fff; --color-signal: #00c9c3; --color-route-action: #005cff;
-  position: fixed; top: var(--traslados-top, 0px); inset-inline: 0;
-  width: min(100%, 440px); height: var(--traslados-height, 100dvh); margin-inline: auto;
-  display: flex; flex-direction: column; container-type: size; overflow: hidden;
+  position: relative;
+  width: min(100%, 440px); min-height: 0; margin-inline: auto;
+  display: flex; flex-direction: column;
   background: #fff; color: #0b2143; color-scheme: light; font-family: var(--font-body, Arial, sans-serif);
 }
 .body { flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 12px; padding: max(12px, env(safe-area-inset-top)) max(18px, env(safe-area-inset-right)) 10px max(18px, env(safe-area-inset-left)); }
@@ -49,7 +46,7 @@
 .dateBar span { padding: 4px 7px; border: 1px solid #9cc7ff; border-radius: 6px; color: #005cff; font-size: 10px; font-weight: 700; }
 .content { min-height: 0; flex: 1; display: flex; flex-direction: column; }
 .empty { display: flex; flex: 1; min-height: 0; flex-direction: column; align-items: center; justify-content: space-evenly; gap: 8px; padding: 14px; border-radius: 22px; background: linear-gradient(145deg, #f2f6fc, #f8faff); box-shadow: 0 2px 8px #183e6508; text-align: center; }
-.empty > svg { flex-shrink: 1; min-height: 36px; width: min(56%, 180px); height: clamp(40px, 13cqh, 112px); }
+.empty > svg { flex-shrink: 1; min-height: 36px; width: min(56%, 180px); height: 112px; }
 .empty h2 { margin: 0; font-size: 18px; line-height: 23px; font-weight: 750; }
 .empty > p { margin: 0; max-width: 310px; color: #617498; font-size: 14px; line-height: 20px; }
 .emptyActions { display: grid; gap: 8px; width: 100%; }
@@ -57,10 +54,7 @@
 .screen .primary { background: #005cff; color: #fff; }
 .screen .secondary { border: 1px solid #005cff; background: #fff; color: #005cff; }
 .primary svg { flex-shrink: 0; }
-.bottomNav { display: grid; grid-template-columns: repeat(3, 1fr); flex-shrink: 0; border-top: 1px solid #e6ebf3; padding: 6px 12px max(6px, env(safe-area-inset-bottom)); background: white; }
-.bottomNav a { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; min-height: 48px; color: #53688e; font-size: 12px; line-height: 16px; }
-.bottomNav [aria-current="page"] { color: #005cff; font-weight: 700; }
-.bottomNav [aria-current="page"] svg { fill: #005cff; stroke: white; }
+
 .loading { display: grid; flex: 1; place-items: center; font-size: 14px; color: #586b8e; }
 .notice { position: relative; flex-shrink: 0; font-size: 11px; color: #72551b; }
 .notice summary { cursor: pointer; }
@@ -92,10 +86,11 @@
 .tripActions > button { min-width: 36px; }
 .pagination { display: flex; justify-content: space-between; align-items: center; gap: 6px; font-size: 11px; }
 .pagination button { min-height: 32px; color: #005cff; }
-.map, .map > div { height: 100%; min-height: 0; }
+.map { height: 420px; min-height: 280px; }
+.map > div { height: 100%; }
 .map [role="application"] { height: 100%; }
-@media (min-width: 560px) and (min-height: 700px) { .screen { height: min(var(--traslados-height, 100dvh), 900px); top: calc(var(--traslados-top, 0px) + (var(--traslados-height, 100dvh) - min(var(--traslados-height, 100dvh), 900px)) / 2); border: 1px solid #dce4ef; border-radius: 26px; box-shadow: 0 16px 60px #18305714; } }
-@container (max-height: 700px) {
+@media (min-width: 560px) and (min-height: 700px) { .screen { border: 1px solid #dce4ef; border-radius: 26px; box-shadow: 0 16px 60px #18305714; } }
+@media (max-height: 700px) {
   .body { gap: 8px; padding-top: max(8px, env(safe-area-inset-top)); padding-bottom: 6px; }
   .header { padding: 0; gap: 6px; }
   .heading h1 { font-size: 26px; line-height: 28px; }
@@ -111,13 +106,12 @@
   .dateBar { min-height: 40px; }
   .dateBar > button { min-height: 40px; }
   .empty { gap: 6px; padding: 10px; border-radius: 18px; }
-  .empty > svg { height: clamp(36px, 9cqh, 70px); }
+  .empty > svg { height: 70px; }
   .empty h2 { font-size: 16px; line-height: 20px; }
   .empty > p { font-size: 12px; line-height: 16px; }
   .emptyActions { gap: 6px; }
   .screen .primary, .screen .secondary { min-height: 40px; font-size: 12px; line-height: 16px; }
-  .bottomNav { padding-top: 4px; padding-bottom: max(4px, env(safe-area-inset-bottom)); }
-  .bottomNav a { min-height: 44px; font-size: 11px; gap: 2px; }
+
   .tripCard { padding: 8px; gap: 3px; }
   .tripTop > button { min-height: 24px; }
   .tripAmount { font-size: 19px; line-height: 22px; }
@@ -125,7 +119,7 @@
   .route p { font-size: 12px; line-height: 16px; }
   .pagination button { min-height: 28px; }
 }
-@container (min-height: 501px) and (max-height: 620px) {
+@media (min-height: 501px) and (max-height: 620px) {
   .empty { gap: 4px; padding: 8px; }
   .empty > svg { height: 40px; }
   .empty > p { font-size: 11px; line-height: 15px; }
@@ -134,7 +128,7 @@
   .pagination button { min-height: 24px; }
   .vehicle { display: none; }
 }
-@container (max-height: 500px) {
+@media (max-height: 500px) {
   .body { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-rows: auto auto auto auto minmax(0, 1fr); grid-template-areas: "header header" "search tabs" "calendar calendar" "notice notice" "content content"; gap: 4px; padding-top: 4px; }
   .header { grid-area: header; align-items: center; }
   .search { grid-area: search; }
@@ -161,7 +155,6 @@
   .emptyActions { grid-column: 1 / -1; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: 4px; }
   .screen .primary, .screen .secondary { min-height: 30px; padding: 3px 5px; font-size: 10px; line-height: 12px; gap: 4px; }
   .primary svg { width: 16px; height: 16px; }
-  .bottomNav a { min-height: 34px; font-size: 10px; line-height: 12px; }
-  .bottomNav svg { width: 18px; height: 18px; }
+
 }
 @media (prefers-reduced-motion: reduce) { .tabs button, .day strong { transition: none; } }

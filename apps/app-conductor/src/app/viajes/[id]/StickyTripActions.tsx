@@ -30,7 +30,7 @@ export function StickyTripActions({
 
   return (
     <>
-      <div className="fixed bottom-[calc(56px+env(safe-area-inset-bottom))] inset-x-0 z-30 border-t border-border/20 bg-surface/95 backdrop-blur-md shadow-2xl" role="toolbar" aria-label="Acciones rápidas del traslado">
+      <div className="fixed bottom-[var(--conductor-shell-bottom-height,0px)] inset-x-0 z-30 border-t border-border/20 bg-surface/95 backdrop-blur-md shadow-2xl" role="toolbar" aria-label="Acciones rápidas del traslado">
         <div className="mx-auto max-w-md px-3 py-3 flex items-center gap-2">
           {/* Navegar — primario signal */}
           {primaryNav && (

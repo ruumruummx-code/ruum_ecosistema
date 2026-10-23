@@ -1,13 +1,10 @@
-:global(html):has(.screen), :global(body):has(.screen) { height: 100dvh; overflow: hidden; overscroll-behavior: none; }
-:global(main.conductor-page):has(.screen) { height: 100dvh; min-height: 0; padding-bottom: 0 !important; overflow: hidden; }
-
-.screen { position: fixed; inset: 0; z-index: 20; box-sizing: border-box; display: flex; flex-direction: column; width: 100%; height: 100dvh; max-width: 440px; margin-inline: auto; overflow: hidden; background: #fff; color: #071d49; }
+.screen { position: relative; box-sizing: border-box; display: flex; flex-direction: column; width: 100%; min-height: 0; max-width: 440px; margin-inline: auto; overflow: hidden; background: #fff; color: #071d49; }
 .appBar { display: grid; grid-template-columns: 1fr 44px 1fr; align-items: center; flex: 0 0 auto; min-height: 76px; padding: max(12px, env(safe-area-inset-top)) 22px 5px; }
 .brand { grid-column: 2; display: flex; align-items: center; justify-content: center; }
 .brand img { width: 170px; height: auto; max-width: none; }
 .profile { grid-column: 3; justify-self: end; display: inline-flex; min-width: 44px; min-height: 44px; align-items: center; justify-content: center; border-radius: 50%; color: #536684; transition: background .16s ease, color .16s ease; }
 .profile:hover { background: #eef5ff; color: #0667e9; }
-.profile:focus-visible, .tabs button:focus-visible, .bottomNav a:focus-visible { outline: 2px solid #0667e9; outline-offset: -2px; }
+.profile:focus-visible, .tabs button:focus-visible { outline: 2px solid #0667e9; outline-offset: -2px; }
 
 .content { display: flex; flex: 1; min-height: 0; flex-direction: column; padding: 34px 28px 0; }
 .heading h1 { margin: 0; font-family: var(--font-display); font-size: clamp(29px, 8vw, 38px); font-weight: 800; line-height: 1.08; letter-spacing: -.04em; color: #071d49; }
@@ -32,8 +29,5 @@
 .item { display: grid; grid-template-columns: 12px minmax(0, 1fr) 20px; width: 100%; gap: 10px; align-items: center; padding: 14px 4px; border: 0; border-bottom: 1px solid #e7edf6; background: transparent; text-align: left; color: #071d49; cursor: pointer; }
 .item strong, .item small { display: block; }.item strong { font-size: 15px; }.item small { margin-top: 3px; color: #647495; font-size: 13px; }.item > span:last-child { color: #647495; font-size: 24px; }.unreadDot, .readDot { width: 9px; height: 9px; border-radius: 50%; }.unreadDot { background: #0667e9; }.readDot { background: #d6dfec; }
 
-.bottomNav { display: grid; grid-template-columns: repeat(3, 1fr); flex: 0 0 auto; padding: 8px 18px max(8px, env(safe-area-inset-bottom)); border-top: 1px solid #e7edf6; background: #fff; }
-.bottomNav a { display: flex; min-height: 56px; flex-direction: column; align-items: center; justify-content: center; gap: 3px; border-radius: 12px; color: #536684; font-family: var(--font-body); font-size: 13px; font-weight: 700; transition: background .16s ease, color .16s ease; }.bottomNav a:hover { background: #f4f8ff; color: #0667e9; }
-
-@media (min-width: 560px) and (min-height: 700px) { .screen { top: calc((100dvh - min(100dvh, 900px)) / 2); height: min(100dvh, 900px); border: 1px solid #dce4ef; border-radius: 26px; box-shadow: 0 16px 60px rgba(24,48,95,.08); } }
-@media (max-height: 680px) { .appBar { min-height: 58px; padding-top: max(6px, env(safe-area-inset-top)); }.brand img { width: 140px; }.content { padding: 18px 22px 0; }.heading h1 { font-size: 27px; }.heading p { margin-top: 5px; font-size: 14px; }.tabs { margin-top: 16px; }.tabs button { min-height: 45px; font-size: 13px; }.tabs button strong { min-width: 25px; height: 25px; font-size: 12px; }.empty { padding-bottom: 38px; }.sparkles { width: 104px; height: 104px; font-size: 54px; }.sparkles i { top: 24px; left: 28px; font-size: 24px; }.sparkles b { bottom: 22px; left: 26px; font-size: 19px; }.empty h2 { margin-top: 20px; font-size: 25px; }.empty p { margin-top: 7px; font-size: 14px; }.bottomNav { padding-top: 4px; }.bottomNav a { min-height: 47px; font-size: 11px; } }
+@media (min-width: 560px) and (min-height: 700px) { .screen { border: 1px solid #dce4ef; border-radius: 26px; box-shadow: 0 16px 60px rgba(24,48,95,.08); } }
+@media (max-height: 680px) { .appBar { min-height: 58px; padding-top: max(6px, env(safe-area-inset-top)); }.brand img { width: 140px; }.content { padding: 18px 22px 0; }.heading h1 { font-size: 27px; }.heading p { margin-top: 5px; font-size: 14px; }.tabs { margin-top: 16px; }.tabs button { min-height: 45px; font-size: 13px; }.tabs button strong { min-width: 25px; height: 25px; font-size: 12px; }.empty { padding-bottom: 38px; }.sparkles { width: 104px; height: 104px; font-size: 54px; }.sparkles i { top: 24px; left: 28px; font-size: 24px; }.sparkles b { bottom: 22px; left: 26px; font-size: 19px; }.empty h2 { margin-top: 20px; font-size: 25px; }.empty p { margin-top: 7px; font-size: 14px; } }

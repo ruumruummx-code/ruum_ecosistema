@@ -18,31 +18,14 @@ type Props = {
 };
 
 export function DriverTrasladosView(props: Props) {
-  const screenRef = useRef<HTMLDivElement>(null);
   const menuRef = useRef<HTMLDialogElement>(null);
   const [menuOpen, setMenuOpen] = useState(false);
-  useEffect(() => {
-    const viewport = window.visualViewport;
-    if (!viewport) return;
-    let frame = 0;
-    const update = () => {
-      cancelAnimationFrame(frame);
-      frame = requestAnimationFrame(() => {
-        screenRef.current?.style.setProperty("--traslados-height", `${viewport.height}px`);
-        screenRef.current?.style.setProperty("--traslados-top", `${viewport.offsetTop}px`);
-      });
-    };
-    update();
-    viewport.addEventListener("resize", update);
-    viewport.addEventListener("scroll", update);
-    return () => { cancelAnimationFrame(frame); viewport.removeEventListener("resize", update); viewport.removeEventListener("scroll", update); };
-  }, []);
   useEffect(() => {
     if (menuOpen) menuRef.current?.showModal();
     else menuRef.current?.close();
   }, [menuOpen]);
 
-  return <div ref={screenRef} className={styles.screen} data-driver-traslados>
+  return <div className={styles.screen} data-driver-traslados>
     <div className={styles.body}>
       <header className={styles.header}>
         <button type="button" className={styles.menuButton} aria-label="Abrir menú del conductor" aria-expanded={menuOpen} aria-controls="menu-conductor-traslados" onClick={() => setMenuOpen(true)}><TrasladosIcon name="menu" /></button>
@@ -74,11 +57,6 @@ export function DriverTrasladosView(props: Props) {
         </div>}
       </section>
     </div>
-    <nav className={styles.bottomNav} aria-label="Navegación principal">
-      <Link href="/panel" prefetch={false}><TrasladosIcon name="home" />Inicio</Link>
-      <Link href="/viajes" aria-current="page" prefetch={false}><TrasladosIcon name="truck" />Traslados</Link>
-      <Link href="/cuenta" prefetch={false}><TrasladosIcon name="user" />Cuenta</Link>
-    </nav>
     <dialog ref={menuRef} id="menu-conductor-traslados" className={styles.drawer} aria-labelledby="titulo-menu-traslados" onCancel={() => setMenuOpen(false)} onClose={() => setMenuOpen(false)}>
       <header><h2 id="titulo-menu-traslados">Menú del conductor</h2><button type="button" aria-label="Cerrar menú" onClick={() => setMenuOpen(false)}><TrasladosIcon name="close" /></button></header>
       <nav aria-label="Más opciones"><Link href="/panel">Inicio</Link><Link href="/ganancias">Ganancias</Link><Link href="/notificaciones">Notificaciones</Link><Link href="/cuenta">Cuenta</Link></nav>

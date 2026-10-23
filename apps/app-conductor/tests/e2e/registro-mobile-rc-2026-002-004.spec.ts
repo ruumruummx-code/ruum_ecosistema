@@ -1,68 +1,29 @@
 import { expect, test, type Page } from "@playwright/test";
 
 test.use({ storageState: { cookies: [], origins: [] } });
-const HOST = process.env.PLAYWRIGHT_SUPABASE_URL ?? "https://rc-registration-test.supabase.co";
-const USER_ID = "00000000-0000-4000-8000-00000000c002";
-const SOLICITUD_ID = "00000000-0000-4000-8000-00000000c003";
-const user = { id: USER_ID, aud: "authenticated", role: "authenticated", email: "conductor@example.com", app_metadata: {}, user_metadata: {}, created_at: "2026-10-01T00:00:00Z" };
-function session() {
-  const exp = Math.floor(Date.now() / 1000) + 3600;
-  const encode = (value: unknown) => Buffer.from(JSON.stringify(value)).toString("base64url");
-  return { access_token: `${encode({ alg: "HS256", typ: "JWT" })}.${encode({ sub: USER_ID, aud: "authenticated", role: "authenticated", exp })}.test-signature`, refresh_token: "test-refresh-token", token_type: "bearer", expires_at: exp, expires_in: 3600, user };
-}
-async function fixture(page: Page, step: number | null, complete = false) {
-  const calls: Array<{ rpc: string; body: Record<string, unknown> }> = [];
-  const solicitud = {
-    id: SOLICITUD_ID, auth_user_id: USER_ID, estado: "datos_incompletos", paso_actual: step ?? 1,
-    datos_personales: { nombres: "Juan", apellidos: "Gómez Cruz", curp: "GOMC900101HDFRRL09", telefono: "+525512345678" },
-    domicilio: complete ? { codigo_postal: "52104", estado: "México", ciudad_municipio: "San Mateo Atenco", colonia: "Centro", calle: "Juárez", numero: "12", referencias: "Portón azul" } : {},
-    contacto_emergencia: complete ? { nombre: "María Gómez", telefono: "5512345678" } : {},
-    licencia: {},
-  };
-  await page.addInitScript(({ authenticated, value, cookie }) => {
-    localStorage.setItem("CapacitorStorage.ruum_conductor_onboarding_visto", "1");
-    if (authenticated) document.cookie = `${cookie}=${value}; path=/; SameSite=Lax`;
-  }, { authenticated: step !== null, value: `base64-${Buffer.from(JSON.stringify(session())).toString("base64url")}`, cookie: `sb-${new URL(HOST).hostname.split(".")[0]}-auth-token` });
-  await page.route("**/auth/v1/**", async (route) => {
-    const pathname = new URL(route.request().url()).pathname;
-    await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify(pathname.endsWith("signup") ? session() : user) });
-  });
-  await page.route("**/rest/v1/**", async (route) => {
-    const pathname = new URL(route.request().url()).pathname;
-    let body: unknown = [];
-    if (pathname.endsWith("/solicitudes_conductor")) body = [solicitud];
-    if (pathname.includes("/rpc/")) {
-      const rpc = pathname.split("/").pop()!;
-      const payload = route.request().postDataJSON() ?? {};
-      calls.push({ rpc, body: payload });
-      if (rpc === "guardar_borrador_conductor") {
-        Object.assign(solicitud, { paso_actual: payload.p_paso_actual, datos_personales: payload.p_datos_personales, domicilio: payload.p_domicilio, contacto_emergencia: payload.p_contacto_emergencia, licencia: payload.p_licencia });
-      }
-      if (["iniciar_solicitud_conductor", "guardar_borrador_conductor"].includes(rpc)) body = [{ solicitud_id: SOLICITUD_ID, conductor_id: null, estado: "datos_incompletos", paso_actual: solicitud.paso_actual }];
-    }
-    await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify(body) });
-  });
-  await page.goto("/registro", { timeout: 360_000, waitUntil: "domcontentloaded" });
-  await expect(page.locator('form[data-registration-ready="true"]')).toBeVisible({ timeout: 120_000 });
-  await expect(page.getByRole("heading", { name: step === 2 ? "Identidad" : step === 3 ? "Licencia (3/5)" : "Crea tu cuenta", exact: true })).toBeVisible();
-  return calls;
-}
+import { openRegistration as fixture } from "../fixtures/registration";
+
 async function geometry(page: Page) {
-  const result = await page.locator("[data-conductor-registration]").evaluate((screen) => {
-    const r = screen.getBoundingClientRect();
-    const footer = screen.querySelector("form > footer")!.getBoundingClientRect();
-    const fieldset = screen.querySelector("form > fieldset")!.getBoundingClientRect();
-    return {
-      scroll: document.documentElement.scrollHeight > window.innerHeight || screen.scrollHeight > screen.clientHeight,
-      footerInside: footer.bottom <= r.bottom + 1 && footer.top >= r.top,
-      noOverlap: fieldset.bottom <= footer.top + 1,
-      inputsInside: [...screen.querySelectorAll("fieldset input")].filter((input) => !input.closest("dialog")).every((input) => {
-        const bounds = input.getBoundingClientRect(); const parent = input.parentElement!.getBoundingClientRect();
-        return bounds.top >= parent.top && bounds.bottom <= parent.bottom && bounds.bottom <= footer.top;
-      }),
-    };
+  const screen = page.locator("[data-conductor-registration]");
+  const frame = await screen.boundingBox();
+  const form = screen.locator("form");
+  const noOverlap = await form.evaluate(element => {
+    const fields = element.querySelector(":scope > fieldset")!.getBoundingClientRect();
+    const footer = element.querySelector(":scope > footer")!.getBoundingClientRect();
+    return fields.bottom <= footer.top + 1;
   });
-  expect(result).toEqual({ scroll: false, footerInside: true, noOverlap: true, inputsInside: true });
+  expect(noOverlap).toBe(true);
+  if (!await page.getByRole("dialog").count()) {
+    for (const control of await form.locator('input:visible, select:visible, button[type="submit"]:visible').all()) {
+      await control.scrollIntoViewIfNeeded();
+      const bounds = await control.boundingBox();
+      expect(bounds!.y).toBeGreaterThanOrEqual(frame!.y - 1);
+      expect(bounds!.y + bounds!.height).toBeLessThanOrEqual(frame!.y + frame!.height + 1);
+      expect(bounds!.x).toBeGreaterThanOrEqual(frame!.x);
+      expect(bounds!.x + bounds!.width).toBeLessThanOrEqual(frame!.x + frame!.width);
+    }
+  }
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
 }
 async function checkSizes(page: Page) {
   for (const viewport of [{ width: 320, height: 568 }, { width: 360, height: 640 }, { width: 390, height: 844 }, { width: 430, height: 932 }, { width: 667, height: 375 }, { width: 320, height: 284 }]) {
@@ -72,12 +33,19 @@ async function checkSizes(page: Page) {
   }
 }
 
-test("Cuenta: sin scroll, progreso 20%, validación y enlace Entrar", async ({ page }) => {
+test("Cuenta: controles accesibles, progreso 1 de 5, validación y enlace Entrar", async ({ page }) => {
   await fixture(page, null);
-  await expect(page.getByRole("progressbar")).toHaveAttribute("value", "20");
+  await expect(page.getByRole("progressbar", { name: "Progreso de registro" })).toHaveAttribute("aria-valuenow", "1");
+  await expect(page.getByRole("progressbar")).toHaveAttribute("aria-valuemax", "5");
+  await expect(page.getByRole("progressbar")).toHaveAttribute("aria-valuetext", "1 de 5");
   await checkSizes(page);
   await page.screenshot({ animations: "disabled", path: test.info().outputPath("cuenta-teclado.png") });
-  await page.getByRole("button", { name: "Crear cuenta y continuar" }).click();
+  await expect(page.getByRole("button", { name: "Crear cuenta y continuar" })).toBeDisabled();
+  const phone = page.getByLabel("Teléfono", { exact: true });
+  await phone.fill("123");
+  await phone.blur();
+  await expect(phone).toHaveAttribute("aria-invalid", "true");
+  await expect(phone).toHaveAccessibleDescription(/teléfono/i);
   await expect(page.getByRole("status").filter({ hasText: "teléfono" })).toBeVisible();
   await geometry(page);
   await page.getByRole("link", { name: "Entrar", exact: true }).click();
@@ -93,6 +61,7 @@ test("Cuenta: requisitos en tiempo real y envío con Enter abre identidad", asyn
   await page.getByLabel("Contraseña", { exact: true }).fill("Conductor2026");
   await page.getByLabel("Confirmar contraseña", { exact: true }).fill("Conductor2026");
   await expect(page.getByRole("list", { name: "Requisitos de contraseña" }).locator('[data-met="true"]')).toHaveCount(4);
+  await page.getByRole("checkbox", { name: /Acepto los Términos y Condiciones/ }).check();
   await page.getByLabel("Confirmar contraseña", { exact: true }).press("Enter");
   await expect(page.getByRole("heading", { name: "Identidad", exact: true })).toBeVisible();
   await geometry(page);
@@ -152,10 +121,11 @@ test("Identidad: sheets validan, cancelan, guardan y conservan datos al volver",
   await expect(next).toBeEnabled();
   await next.click();
   await expect(page.getByRole("heading", { name: "Licencia (3/5)", exact: true })).toBeVisible();
-  await expect.poll(() => calls.filter((call) => call.rpc === "guardar_borrador_conductor").length).toBeGreaterThan(0);
-  const save = calls.filter((call) => call.rpc === "guardar_borrador_conductor").at(-1)!;
-  expect(save.body.p_domicilio).toMatchObject({ calle: expect.stringMatching(/^Juárez$/i), numero: "12" });
-  expect(save.body.p_contacto_emergencia).toMatchObject({ nombre: expect.stringMatching(/^María Gómez$/i) });
+  await expect.poll(() => calls.filter(call => call.rpc === "guardar_borrador_conductor").at(-1)?.body, { timeout: 15_000 }).toMatchObject({
+    p_paso_actual: 3,
+    p_domicilio: { calle: expect.stringMatching(/^Juárez$/i), numero: "12" },
+    p_contacto_emergencia: { nombre: expect.stringMatching(/^María Gómez$/i) },
+  });
 });
 
 test("Identidad: visualViewport y teclado dentro del sheet no alteran el lienzo", async ({ page }) => {
@@ -191,7 +161,7 @@ test("Identidad: visualViewport y teclado dentro del sheet no alteran el lienzo"
   await geometry(page);
 });
 
-test("Licencia: sin scroll, 60%, consulta legal y consentimientos solo al continuar", async ({ page }) => {
+test("Licencia: controles accesibles, 60%, consulta legal y consentimientos solo al continuar", async ({ page }) => {
   const calls = await fixture(page, 3, true);
   await expect(page.getByRole("progressbar")).toHaveAttribute("value", "60");
   await expect(page.getByRole("checkbox")).toHaveCount(0);
@@ -207,8 +177,8 @@ test("Licencia: sin scroll, 60%, consulta legal y consentimientos solo al contin
   await page.screenshot({ animations: "disabled", path: test.info().outputPath("licencia-teclado.png") });
   await geometry(page);
   await page.getByRole("button", { name: "Continuar", exact: true }).click();
-  await expect(page.getByRole("heading", { name: "Documentos (4/5)", exact: true })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Documentos", exact: true })).toBeVisible();
   await expect.poll(() => calls.filter((call) => call.rpc === "registrar_consentimientos_conductor").length).toBeGreaterThan(0);
   expect(calls.find((call) => call.rpc === "registrar_consentimientos_conductor")!.body.p_consentimientos).toEqual(expect.arrayContaining([{ tipo_documento: "autorizacion_antecedentes", version: 1 }, { tipo_documento: "declaracion_suspensiones", version: 1 }]));
-  expect(await page.evaluate(() => getComputedStyle(document.body).overflowY)).not.toBe("hidden");
+  await expect(page.getByRole("progressbar")).toHaveAttribute("aria-valuetext", "4 de 5");
 });

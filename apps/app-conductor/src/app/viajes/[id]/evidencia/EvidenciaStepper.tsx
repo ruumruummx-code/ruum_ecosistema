@@ -30,7 +30,7 @@ export function EvidenciaStepper({
 
   return (
     <>
-      <nav aria-label="Pasos de evidencia" className="sticky top-0 z-20 -mx-4 px-4 sm:-mx-6 sm:px-6 bg-surface/95 backdrop-blur supports-[backdrop-filter]:bg-surface/80 border-y border-border/20 mt-6 -mb-2 py-2 overflow-x-auto scrollbar-none">
+      <nav aria-label="Pasos de evidencia" className="sticky top-[var(--conductor-sticky-action-top)] z-20 -mx-4 px-4 sm:-mx-6 sm:px-6 bg-surface/95 backdrop-blur supports-[backdrop-filter]:bg-surface/80 border-y border-border/20 mt-6 -mb-2 py-2 overflow-x-auto scrollbar-none">
         <ol className="flex items-center gap-2 min-w-max">
           {pasos.map((p, idx) => (
             <li key={p.id} className="flex items-center gap-2">

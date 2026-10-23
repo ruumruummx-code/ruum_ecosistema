@@ -25,17 +25,17 @@ async function open(page: Page) {
   await page.locator("nextjs-portal").evaluateAll(nodes => nodes.forEach(node => (node as HTMLElement).style.setProperty("display", "none", "important")));
 }
 for (const size of [{ width: 320, height: 568 }, { width: 375, height: 667 }, { width: 390, height: 844 }, { width: 1280, height: 960 }]) {
-  test(`Ganancias sin scroll en ${size.width}×${size.height}`, async ({ page }, testInfo) => {
+  test(`Ganancias en el flujo del shell en ${size.width}×${size.height}`, async ({ page }, testInfo) => {
     await page.setViewportSize(size); await fixture(page); await open(page);
     await expect(page.getByTestId("earnings-total")).toContainText("$2,450.00");
     const layout = await page.locator("[data-driver-earnings]").evaluate(screen => ({
       width: screen.getBoundingClientRect().width, overflow: screen.scrollHeight - screen.clientHeight,
-      documentOverflow: document.documentElement.scrollHeight - innerHeight,
+      horizontalOverflow: document.documentElement.scrollWidth - innerWidth,
       paymentOverlap: (() => { const list = screen.querySelector("section[aria-labelledby=ultimos-pagos]")?.lastElementChild; const button = screen.querySelector(":scope > button"); return list && button ? list.getBoundingClientRect().bottom - button.getBoundingClientRect().top : 0; })(),
-      outside: [...screen.querySelectorAll("a,button,h1,h2,h3,p,time")].filter(el => { const r = el.getBoundingClientRect(); return r.width > 0 && r.height > 0 && (r.top < -1 || r.bottom > innerHeight + 1 || r.left < -1 || r.right > innerWidth + 1); }).map(el => el.textContent),
+      outside: [...screen.querySelectorAll("a,button,h1,h2,h3,p,time")].filter(el => { const r = el.getBoundingClientRect(); return r.width > 0 && r.height > 0 && (r.left < -1 || r.right > innerWidth + 1); }).map(el => el.textContent),
     }));
     await page.screenshot({ path: testInfo.outputPath("ganancias.png") });
-    expect(layout.width).toBeLessThanOrEqual(440); expect(layout.overflow).toBeLessThanOrEqual(1); expect(layout.documentOverflow).toBeLessThanOrEqual(1); expect(layout.outside).toEqual([]); expect(layout.paymentOverlap).toBeLessThanOrEqual(0);
+    expect(layout.width).toBeLessThanOrEqual(440); expect(layout.overflow).toBeLessThanOrEqual(1); expect(layout.horizontalOverflow).toBeLessThanOrEqual(1); expect(layout.outside).toEqual([]); expect(layout.paymentOverlap).toBeLessThanOrEqual(0);
   });
 }
 test("cambia periodo, distingue pagos pendientes y abre solicitud sin simular un depósito", async ({ page }) => {

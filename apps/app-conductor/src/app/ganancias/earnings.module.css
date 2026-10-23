@@ -1,7 +1,4 @@
-:global(html):has(.screen), :global(body):has(.screen) { height: 100dvh; min-height: 0; overflow: hidden; overscroll-behavior: none; }
-:global(body):has(.screen) { background: #eef2f7; }
-:global(main):has(.screen) { min-height: 0; padding: 0 !important; }
-.screen { --font-body: "Inter", ui-sans-serif, system-ui, sans-serif; position: fixed; z-index: 20; top: var(--earnings-top, 0px); left: 50%; transform: translateX(-50%); width: 100%; max-width: 440px; height: 100vh; height: var(--earnings-height, 100dvh); box-sizing: border-box; padding: max(18px, env(safe-area-inset-top)) 22px max(22px, env(safe-area-inset-bottom)); display: flex; flex-direction: column; justify-content: space-between; gap: 16px; background: #fcfcfd; color: #091b40; font-family: var(--font-body); color-scheme: light; }
+.screen { --font-body: "Inter", ui-sans-serif, system-ui, sans-serif; position: relative; margin-inline: auto; width: 100%; max-width: 440px; min-height: 0; box-sizing: border-box; padding: max(18px, env(safe-area-inset-top)) 22px max(22px, env(safe-area-inset-bottom)); display: flex; flex-direction: column; justify-content: space-between; gap: 16px; background: #fcfcfd; color: #091b40; font-family: var(--font-body); color-scheme: light; }
 .screen *, .screen *::before, .screen *::after { box-sizing: border-box; }
 .screen :is(h1,h2,h3,p,a,button,time,span,strong,small) { font-family: "Inter", ui-sans-serif, system-ui, sans-serif; }
 .screen :is(h1,h2,h3,p) { margin: 0; }

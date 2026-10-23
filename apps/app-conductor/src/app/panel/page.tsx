@@ -203,7 +203,7 @@ export default function PaginaPanel() {
   }
 
   return (
-    <div className={`driver-dashboard mx-auto flex min-h-[100dvh] w-full max-w-md flex-col px-4 pb-[calc(88px+env(safe-area-inset-bottom))] ${viajeActivoPrincipal ? "" : "driver-dashboard-empty"}`}>
+    <div className={`driver-dashboard mx-auto flex min-h-0 w-full max-w-md flex-col px-4 ${viajeActivoPrincipal ? "" : "driver-dashboard-empty"}`}>
       <RegistroViajeActivo
         viaje={viajeActivoPrincipal ? registroViajeActivoDesdePasaporte(viajeActivoPrincipal) : null}
       />
@@ -383,17 +383,6 @@ export default function PaginaPanel() {
         </dialog>
       )}
 
-      <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-border/30 bg-surface/95 px-4 pb-[max(8px,env(safe-area-inset-bottom))] pt-2 shadow-[0_-8px_28px_rgba(13,43,94,0.08)] backdrop-blur" aria-label="Navegación principal">
-        <div className="mx-auto grid w-full max-w-md grid-cols-3">
-          {[{ href: "/panel", label: "Inicio", icon: "home" }, { href: "/viajes", label: "Traslados", icon: "trips" }, { href: "/cuenta", label: "Cuenta", icon: "account" }].map((item) => {
-            const activo = item.href === "/panel";
-            return <Link key={item.href} href={item.href} aria-current={activo ? "page" : undefined} className={`relative flex min-h-14 flex-col items-center justify-center gap-0.5 rounded-xl font-body text-xs font-semibold transition active:scale-95 ${activo ? "text-route-action" : "text-text-secondary hover:bg-surface-elevated"}`}>
-              <span className="relative inline-flex size-6 items-center justify-center" aria-hidden>{item.icon === "home" ? <svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.3" strokeLinecap="round" strokeLinejoin="round"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V10Z" /><path d="M9 21v-7h6v7" /></svg> : item.icon === "trips" ? <svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.1" strokeLinecap="round" strokeLinejoin="round"><path d="M7 7h11l2 5v5H5v-5l2-5Z" /><path d="M8 17v2m8-2v2M4 12h16" /><circle cx="8" cy="14" r="1" fill="currentColor" /><circle cx="17" cy="14" r="1" fill="currentColor" /></svg> : <svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.1" strokeLinecap="round"><circle cx="12" cy="8" r="4" /><path d="M4 21c0-4 3.4-7 8-7s8 3 8 7" /></svg>}</span>
-              <span>{item.label}</span>{activo && <span className="absolute -bottom-2 h-1 w-12 rounded-full bg-route-action" aria-hidden />}
-            </Link>;
-          })}
-        </div>
-      </nav>
 
       {/* Modal de Confirmación de Disponibilidad */}
       <ConfirmarDisponibilidad

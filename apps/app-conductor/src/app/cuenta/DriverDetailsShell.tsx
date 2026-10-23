@@ -1,25 +1,13 @@
 "use client";
 
-import { useEffect, useRef, type ReactNode } from "react";
+import type { ReactNode } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { AccountIcon } from "./AccountIcon";
 import styles from "./details.module.css";
 
 export function DriverDetailsShell({ kind, children }: { kind: "profile" | "documents" | "bank" | "certification"; children: ReactNode }) {
   const step = kind === "bank" ? 4 : kind === "documents" ? 3 : null;
-  const screen = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    const viewport = window.visualViewport;
-    if (!viewport) return;
-    const update = () => {
-      screen.current?.style.setProperty("--details-height", `${viewport.height}px`);
-      screen.current?.style.setProperty("--details-top", `${viewport.offsetTop}px`);
-    };
-    update(); viewport.addEventListener("resize", update); viewport.addEventListener("scroll", update);
-    return () => { viewport.removeEventListener("resize", update); viewport.removeEventListener("scroll", update); };
-  }, []);
-  return <div ref={screen} className={styles.screen} data-driver-details={kind}>
+  return <div className={styles.screen} data-driver-details={kind}>
     <div className={styles.body}>
       <header className={styles.header}>
         <Link href="/cuenta" prefetch={false}>‹ Atrás</Link>
@@ -28,9 +16,6 @@ export function DriverDetailsShell({ kind, children }: { kind: "profile" | "docu
       </header>
       {children}
     </div>
-    {kind === "profile" && <nav className={styles.bottomNav} aria-label="Navegación principal">
-      {([{ href: "/panel", title: "Inicio", icon: "home" }, { href: "/viajes", title: "Traslados", icon: "car" }, { href: "/ganancias", title: "Ganancias", icon: "wallet" }, { href: "/cuenta", title: "Cuenta", icon: "user" }] as const).map(item => <Link key={item.href} href={item.href} prefetch={false} aria-current={item.href === "/cuenta" ? "page" : undefined}><AccountIcon name={item.icon} /><span>{item.title}</span></Link>)}
-    </nav>}
   </div>;
 }
 

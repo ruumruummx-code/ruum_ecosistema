@@ -1,4 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
+import { expectAccountShellNavigation } from "../fixtures/conductor-navigation";
 
 test.skip(process.env.PLAYWRIGHT_TRASLADOS_FIXTURE !== "1", "Requiere playwright.account.config.ts y el API local de pruebas.");
 test.beforeEach(async ({ context, page }) => {
@@ -15,36 +16,37 @@ async function openAccount(page: Page) {
   await page.locator("nextjs-portal").evaluateAll(nodes => nodes.forEach(node => (node as HTMLElement).style.setProperty("display", "none", "important")));
 }
 for (const size of [{ width: 320, height: 568 }, { width: 375, height: 667 }, { width: 390, height: 844 }, { width: 375, height: 500 }, { width: 1280, height: 960 }]) {
-  test(`Cuenta completa sin scroll en ${size.width}×${size.height}`, async ({ page }, testInfo) => {
+  test(`Cuenta completa en el flujo del shell en ${size.width}×${size.height}`, async ({ page }, testInfo) => {
     await page.setViewportSize(size); await openAccount(page);
     const layout = await page.locator("[data-driver-account]").evaluate(screen => {
       const options = screen.querySelector("nav[aria-label='Configuración de cuenta']");
       const logout = screen.querySelector(":scope > div > button");
-      const footer = screen.querySelector("nav[aria-label='Navegación principal']");
       return {
         width: screen.getBoundingClientRect().width, overflow: screen.scrollHeight - screen.clientHeight,
-        documentOverflow: document.documentElement.scrollHeight - innerHeight,
+        horizontalOverflow: document.documentElement.scrollWidth - innerWidth,
         optionsOverlap: options && logout ? options.getBoundingClientRect().bottom - logout.getBoundingClientRect().top : 0,
-        footerOverlap: logout && footer ? logout.getBoundingClientRect().bottom - footer.getBoundingClientRect().top : 0,
-        outside: [...screen.querySelectorAll("a,button,h1,h2,p")].filter(el => { const r = el.getBoundingClientRect(); return r.width > 0 && r.height > 0 && (r.top < -1 || r.bottom > innerHeight + 1 || r.left < -1 || r.right > innerWidth + 1); }).map(el => el.textContent),
+        outside: [...screen.querySelectorAll("a,button,h1,h2,p")].filter(el => { const r = el.getBoundingClientRect(); return r.width > 0 && r.height > 0 && (r.left < -1 || r.right > innerWidth + 1); }).map(el => el.textContent),
       };
     });
     await page.screenshot({ path: testInfo.outputPath("cuenta.png") });
-    expect(layout.width).toBeLessThanOrEqual(440); expect(layout.overflow).toBeLessThanOrEqual(1); expect(layout.documentOverflow).toBeLessThanOrEqual(1); expect(layout.outside).toEqual([]); expect(layout.optionsOverlap).toBeLessThanOrEqual(0); expect(layout.footerOverlap).toBeLessThanOrEqual(0);
-    await expect(page.getByRole("navigation", { name: "Navegación principal", exact: true })).toHaveCount(1);
-    await expect(page.getByRole("navigation", { name: "Navegación principal", exact: true }).getByRole("link")).toHaveCount(4);
+    expect(layout.width).toBeLessThanOrEqual(440); expect(layout.overflow).toBeLessThanOrEqual(1); expect(layout.horizontalOverflow).toBeLessThanOrEqual(1); expect(layout.outside).toEqual([]); expect(layout.optionsOverlap).toBeLessThanOrEqual(0);
+    await expectAccountShellNavigation(page);
   });
 }
-test("accesos reales, iniciales, notificaciones y ajustes adicionales", async ({ page }) => {
+for (const width of [320, 1280]) test(`accesos reales, iniciales, notificaciones y ajustes adicionales en ${width}px`, async ({ page }) => {
+  await page.setViewportSize({ width, height: 960 });
   await openAccount(page);
+  const account = page.locator("[data-driver-account]");
+  const options = account.getByRole("navigation", { name: "Configuración de cuenta", exact: true });
+  await expect(options).toHaveCount(1);
+  await expect(options.getByRole("link")).toHaveCount(4);
   for (const [name, href] of [["Perfil", "/cuenta/perfil"], ["Documentos", "/cuenta/documentos"], ["Certificación", "/cuenta/certificacion"], ["Datos bancarios", "/cuenta/datos-bancarios"]]) {
-    await expect(page.getByRole("navigation", { name: "Configuración de cuenta" }).getByRole("link", { name: new RegExp(name) })).toHaveAttribute("href", href);
+    await expect(options.getByRole("link", { name })).toHaveAttribute("href", href);
   }
-  await expect(page.getByRole("link", { name: "Soporte", exact: true })).toHaveAttribute("href", "/cuenta/soporte");
-  await expect(page.getByRole("link", { name: "Notificaciones (2 sin leer)" })).toHaveAttribute("href", "/notificaciones");
+  await expect(account.getByRole("link", { name: "Soporte", exact: true })).toHaveAttribute("href", "/cuenta/soporte");
+  await expect(account.getByRole("link", { name: "Notificaciones (2 sin leer)" })).toHaveAttribute("href", "/notificaciones");
   await expect(page.getByRole("button", { name: "Opciones de cuenta" })).toHaveText("CP");
-  const nav = page.getByRole("navigation", { name: "Navegación principal", exact: true });
-  await expect(nav.getByRole("link", { name: "Cuenta", exact: true })).toHaveAttribute("aria-current", "page");
+  const nav = await expectAccountShellNavigation(page);
   await expect(nav.getByRole("link", { name: "Ganancias", exact: true })).toHaveAttribute("href", "/ganancias");
   await page.getByRole("button", { name: "Opciones de cuenta" }).click();
   const dialog = page.getByRole("dialog", { name: "Ajustes de cuenta" });

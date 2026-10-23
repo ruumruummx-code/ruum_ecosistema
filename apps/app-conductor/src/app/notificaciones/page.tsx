@@ -63,7 +63,7 @@ export default function CentroNotificaciones() {
         <Link href="/cuenta" className={styles.profile} aria-label="Abrir cuenta"><svg width="27" height="27" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round"><circle cx="12" cy="8" r="3.6" /><path d="M4.5 20c0-3.7 3.3-6.2 7.5-6.2s7.5 2.5 7.5 6.2" /></svg></Link>
       </header>
 
-      <main className={styles.content}>
+      <div className={styles.content}>
         <section className={styles.heading} aria-labelledby="titulo-notificaciones">
           <h1 id="titulo-notificaciones">Notificaciones y Avisos</h1>
           <p>Tus avisos y alertas operativas permanecen guardados en este centro.</p>
@@ -92,13 +92,8 @@ export default function CentroNotificaciones() {
             </button>)}
           </section>
         )}
-      </main>
+      </div>
 
-      <nav className={styles.bottomNav} aria-label="Navegación principal">
-        <Link href="/panel"><svg width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V10Z" /><path d="M9 21v-7h6v7" /></svg><span>Inicio</span></Link>
-        <Link href="/viajes"><svg width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d="m5 17 1.5-7h11L19 17" /><path d="M4 17h16v3H4zM8 10l1.3-3h5.4l1.3 3" /></svg><span>Traslados</span></Link>
-        <Link href="/cuenta"><svg width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><circle cx="12" cy="8" r="4" /><path d="M4 21c0-4 3.4-7 8-7s8 3 8 7" /></svg><span>Cuenta</span></Link>
-      </nav>
-    </div>
+      </div>
   );
 }

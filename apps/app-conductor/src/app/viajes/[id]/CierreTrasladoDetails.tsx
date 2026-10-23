@@ -339,6 +339,7 @@ export function CierreTrasladoDetails({
             <span className="font-display text-xs font-black">?</span>
           </Link>
         </header>
+      <SecondaryTripNavBar trasladoId={trasladoId} pasaporte={pasaporte} />
 
         {/* Header status badge section */}
         <div className="mt-4 flex flex-col gap-1.5">
@@ -447,7 +448,7 @@ export function CierreTrasladoDetails({
       </div>
 
       {/* Sticky footer for action buttons */}
-      <div className="fixed bottom-[60px] inset-x-0 z-40 bg-surface/95 backdrop-blur-md border-t border-border/20 py-3 px-4 shadow-2xl select-none">
+      <div className="fixed bottom-[var(--conductor-shell-bottom-height,0px)] inset-x-0 z-40 bg-surface/95 backdrop-blur-md border-t border-border/20 py-3 px-4 shadow-2xl select-none">
         <div className="max-w-md md:max-w-xl mx-auto flex flex-col gap-2">
           <div className="bg-surface-elevated border border-border/20 rounded-xl px-3 py-1.5 text-center text-[10px] font-body text-text-secondary font-semibold">
             Ruum Ruum by MoviliaX · Seguridad, evidencia y trazabilidad
@@ -478,8 +479,6 @@ export function CierreTrasladoDetails({
         </div>
       </div>
 
-      {/* Secondary Bottom Navigation Bar */}
-      <SecondaryTripNavBar trasladoId={trasladoId} pasaporte={pasaporte} />
 
       {/* Bottom Sheet de Soporte */}
       <CierreSoporteSheet abierto={soporteAbierto} onCerrar={() => setSoporteAbierto(false)} />

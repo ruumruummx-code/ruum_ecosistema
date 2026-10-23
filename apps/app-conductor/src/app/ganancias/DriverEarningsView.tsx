@@ -21,24 +21,13 @@ const paymentDate = (value: string) => {
 type Props = { data: DatosGananciasConductor | null; summary: ReturnType<typeof summarizeEarnings> | null; period: EarningsPeriod; onPeriod: (period: EarningsPeriod) => void; loading: boolean; error: string | null };
 
 export function DriverEarningsView({ data, summary, period, onPeriod, loading, error }: Props) {
-  const screen = useRef<HTMLDivElement>(null);
   const dialog = useRef<HTMLDialogElement>(null);
   const [requestOpen, setRequestOpen] = useState(false);
-  useEffect(() => {
-    const viewport = window.visualViewport;
-    if (!viewport) return;
-    const update = () => {
-      screen.current?.style.setProperty("--earnings-height", `${viewport.height}px`);
-      screen.current?.style.setProperty("--earnings-top", `${viewport.offsetTop}px`);
-    };
-    update(); viewport.addEventListener("resize", update); viewport.addEventListener("scroll", update);
-    return () => { viewport.removeEventListener("resize", update); viewport.removeEventListener("scroll", update); };
-  }, []);
   useEffect(() => { if (requestOpen) dialog.current?.showModal(); else dialog.current?.close(); }, [requestOpen]);
   const payments = [...(data?.payouts ?? [])].sort((a, b) => (b.procesado_en ?? b.creado_en).localeCompare(a.procesado_en ?? a.creado_en)).slice(0, 2);
   const ready = !loading && !error && summary;
   const bank = data?.datosBancarios;
-  return <div ref={screen} className={styles.screen} data-driver-earnings>
+  return <div className={styles.screen} data-driver-earnings>
     <header className={styles.header}>
       <Link href="/panel" prefetch={false}>‹ Atrás</Link>
       <Image src="/imagenes/ruum-logo.svg" alt="Ruum Ruum" width={150} height={49} priority />

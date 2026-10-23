@@ -108,6 +108,7 @@ export default function PaginaEvidencia() {
   return (
     <div className="mx-auto w-full max-w-md px-4 py-6 sm:px-6 sm:py-10 flex flex-col justify-between min-h-screen text-text-primary">
       <EvidenciaHeader tipo={tipo} folio={folio} origen={origen} />
+      {pasaporte && <SecondaryTripNavBar trasladoId={id} pasaporte={pasaporte} />}
 
       {/* Progress */}
       {(() => {
@@ -208,10 +209,6 @@ export default function PaginaEvidencia() {
         setSoporteAbierto={setSoporteAbierto}
       />
 
-      {/* Secondary Bottom Navigation Bar */}
-      {pasaporte && (
-        <SecondaryTripNavBar trasladoId={id} pasaporte={pasaporte} />
-      )}
 
       {/* R5 — CSAT/CES Sheet */}
       <EvidenciaCsatSheet

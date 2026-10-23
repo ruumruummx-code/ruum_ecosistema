@@ -38,10 +38,10 @@ async function open(page: Page, kind: "bank" | "certification") {
 async function layout(page: Page) {
   const result = await page.locator("[data-driver-details]").evaluate(screen => ({
     width: screen.getBoundingClientRect().width, overflow: screen.scrollHeight - screen.clientHeight,
-    documentOverflow: document.documentElement.scrollHeight - innerHeight,
+    horizontalOverflow: document.documentElement.scrollWidth - innerWidth,
     outside: [...screen.querySelectorAll("a,button,input,select,h1,h2,p")].filter(el => {
       if (el.closest('[inert],dialog:not([open])')) return false;
-      const r = el.getBoundingClientRect(); return r.width > 0 && r.height > 0 && (r.top < -1 || r.bottom > innerHeight + 1 || r.left < -1 || r.right > innerWidth + 1);
+      const r = el.getBoundingClientRect(); return r.width > 0 && r.height > 0 && (r.left < -1 || r.right > innerWidth + 1);
     }).map(el => el.getAttribute("aria-label") || el.textContent),
     outsideField: [...screen.querySelectorAll("form input,form select,form label")].filter(el => {
       if (el.closest("dialog")) return false;
@@ -51,7 +51,7 @@ async function layout(page: Page) {
     }).map(el => el.id || el.textContent),
     overlaps: [...screen.firstElementChild!.children].filter(el => el.tagName !== "DIALOG").map(el => el.getBoundingClientRect()).filter(r => r.height > 0).slice(1).some((r, index, rects) => index > 0 && rects[index - 1].bottom > r.top + 1),
   }));
-  expect(result.width).toBeLessThanOrEqual(440); expect(result.overflow).toBeLessThanOrEqual(1); expect(result.documentOverflow).toBeLessThanOrEqual(1); expect(result.outside).toEqual([]); expect(result.outsideField).toEqual([]); expect(result.overlaps).toBe(false);
+  expect(result.width).toBeLessThanOrEqual(440); expect(result.overflow).toBeLessThanOrEqual(1); expect(result.horizontalOverflow).toBeLessThanOrEqual(1); expect(result.outside).toEqual([]); expect(result.outsideField).toEqual([]); expect(result.overlaps).toBe(false);
 }
 for (const kind of ["bank", "certification"] as const) for (const size of [{ width: 320, height: 568 }, { width: 375, height: 667 }, { width: 390, height: 844 }, { width: 1280, height: 960 }]) {
   test(`${kind} sin scroll ${size.width}×${size.height}`, async ({ page }) => {

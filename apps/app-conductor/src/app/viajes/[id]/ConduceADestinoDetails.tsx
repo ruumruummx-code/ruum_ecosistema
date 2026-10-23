@@ -121,6 +121,7 @@ export function ConduceADestinoDetails({
         </span>
         <div className="w-10" />
       </header>
+      <SecondaryTripNavBar trasladoId={trasladoId} pasaporte={pasaporte} />
 
       {/* ESTADO ACTUAL */}
       <div className="mt-4 bg-surface-elevated border border-border/20 rounded-2xl p-4 flex items-center gap-4 shadow-sm">
@@ -308,10 +309,6 @@ export function ConduceADestinoDetails({
 
       <div className="h-[88px]" aria-hidden />
 
-      {/* Secondary Bottom Navigation Bar */}
-      <div className="mt-auto pt-2 -mx-4 -mb-6">
-        <SecondaryTripNavBar trasladoId={trasladoId} pasaporte={pasaporte} />
-      </div>
     </div>
   );
 }

@@ -126,6 +126,7 @@ export function LocalizarVehiculoDetails({
         </span>
         <div className="w-10" />
       </header>
+      <SecondaryTripNavBar trasladoId={trasladoId} pasaporte={pasaporte} />
 
       {/* ESTADO ACTUAL */}
       <div className="mt-5 bg-surface-elevated border border-border/20 rounded-2xl p-4 flex items-center gap-4 shadow-sm">
@@ -285,10 +286,6 @@ export function LocalizarVehiculoDetails({
 
       <EmergencyPanel trasladoId={trasladoId} />
 
-      {/* Secondary Bottom Navigation Bar */}
-      <div className="mt-auto pt-4 -mx-4 -mb-6">
-        <SecondaryTripNavBar trasladoId={trasladoId} pasaporte={pasaporte} />
-      </div>
     </div>
   );
 }

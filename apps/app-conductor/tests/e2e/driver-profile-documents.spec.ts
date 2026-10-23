@@ -1,4 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
+import { expectAccountShellNavigation } from "../fixtures/conductor-navigation";
 
 test.skip(process.env.PLAYWRIGHT_TRASLADOS_FIXTURE !== "1", "Requiere playwright.profile-documents.config.ts y el API local de pruebas.");
 const driverId = "00000000-0000-4000-8000-000000000002";
@@ -36,22 +37,22 @@ async function open(page: Page, kind: "profile" | "documents") {
 async function assertLayout(page: Page) {
   const layout = await page.locator("[data-driver-details]").evaluate(screen => ({
     width: screen.getBoundingClientRect().width, overflow: screen.scrollHeight - screen.clientHeight,
-    documentOverflow: document.documentElement.scrollHeight - innerHeight,
+    horizontalOverflow: document.documentElement.scrollWidth - innerWidth,
     fieldsOverlap: (() => { const fields = screen.querySelector("[data-tab]"); const action = screen.querySelector(":scope > div > button"); return fields && action ? fields.getBoundingClientRect().bottom - action.getBoundingClientRect().top : 0; })(),
-    outside: [...screen.querySelectorAll("a,button,input,select,h1,h2,p")].filter(el => { const r = el.getBoundingClientRect(); return r.width > 0 && r.height > 0 && (r.top < -1 || r.bottom > innerHeight + 1 || r.left < -1 || r.right > innerWidth + 1); }).map(el => el.getAttribute("aria-label") || el.textContent),
+    outside: [...screen.querySelectorAll("a,button,input,select,h1,h2,p")].filter(el => { const r = el.getBoundingClientRect(); return r.width > 0 && r.height > 0 && (r.left < -1 || r.right > innerWidth + 1); }).map(el => el.getAttribute("aria-label") || el.textContent),
   }));
-  expect(layout.width).toBeLessThanOrEqual(440); expect(layout.overflow).toBeLessThanOrEqual(1); expect(layout.documentOverflow).toBeLessThanOrEqual(1); expect(layout.outside).toEqual([]); expect(layout.fieldsOverlap).toBeLessThanOrEqual(0);
+  expect(layout.width).toBeLessThanOrEqual(440); expect(layout.overflow).toBeLessThanOrEqual(1); expect(layout.horizontalOverflow).toBeLessThanOrEqual(1); expect(layout.outside).toEqual([]); expect(layout.fieldsOverlap).toBeLessThanOrEqual(0);
 }
 for (const kind of ["profile", "documents"] as const) for (const size of [{ width: 320, height: 568 }, { width: 375, height: 667 }, { width: 390, height: 844 }, { width: 1280, height: 960 }]) {
-  test(`${kind} sin scroll en ${size.width}×${size.height}`, async ({ page }, info) => {
+  test(`${kind} en el flujo del shell en ${size.width}×${size.height}`, async ({ page }, info) => {
     await page.setViewportSize(size); await fixture(page); await open(page, kind); await assertLayout(page);
     await page.screenshot({ path: info.outputPath(`${kind}.png`) });
+    await expectAccountShellNavigation(page);
     if (kind === "profile") {
       await expect(page.getByText("★ 4.8", { exact: true })).toBeVisible();
       await expect(page.getByLabel("Teléfono", { exact: true })).toHaveValue("5512345678");
       await expect(page.getByRole("button", { name: "Guardar cambios", exact: true })).toBeDisabled();
       await expect(page.getByLabel("CURP", { exact: true })).toHaveAttribute("readonly", "");
-      await expect(page.getByRole("navigation", { name: "Navegación principal", exact: true }).getByRole("link")).toHaveCount(4);
     } else {
       await expect(page.getByRole("progressbar")).toHaveAttribute("aria-valuenow", "3");
       await expect(page.getByRole("button", { name: /^Subir / })).toHaveCount(5);

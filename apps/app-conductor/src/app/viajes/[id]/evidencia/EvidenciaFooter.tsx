@@ -26,7 +26,7 @@ export function EvidenciaFooter({
   return (
     <>
       {/* Sticky Primary Action Buttons Bar */}
-      <div className="fixed bottom-[calc(56px+env(safe-area-inset-bottom))] inset-x-0 z-40 bg-surface/95 backdrop-blur-md border-t border-border/20 py-3 px-4 shadow-2xl select-none">
+      <div className="fixed bottom-[var(--conductor-shell-bottom-height,0px)] inset-x-0 z-40 bg-surface/95 backdrop-blur-md border-t border-border/20 py-3 px-4 shadow-2xl select-none">
         <div className="max-w-md mx-auto flex gap-3">
           {/* GUARDAR BORRADOR */}
           <button

@@ -124,6 +124,7 @@ export function TrasladoAsignadoDetails({
         </span>
         <div className="w-10" />
       </header>
+      <SecondaryTripNavBar trasladoId={trasladoId} pasaporte={pasaporte} />
 
       {/* ESTADO ACTUAL BADGE */}
       <div className="mt-4 bg-surface-elevated border border-border/20 rounded-2xl p-4 flex items-center justify-between shadow-sm">
@@ -362,10 +363,6 @@ export function TrasladoAsignadoDetails({
       {/* Hallazgo 6 — panel emergencia accesible en flujo activo */}
       <EmergencyPanel trasladoId={trasladoId} />
 
-      {/* Secondary Bottom Navigation Bar (Detalles del traslado, Gastos, Incidencia) */}
-      <div className="mt-auto pt-5 -mx-4 -mb-6">
-        <SecondaryTripNavBar trasladoId={trasladoId} pasaporte={pasaporte} />
-      </div>
     </div>
   );
 }

@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
+import { useConductorShellInsets } from "./useConductorShellInsets";
 import { ConductorIcon } from "@/components/icons";
 
 export type NavDestination = {
@@ -46,6 +47,7 @@ export function ConductorNav({
   const router = useRouter();
 
   const esAcceso = excluidos.some((r) => pathname === r || pathname.startsWith(r + "/"));
+  const { headerRef, mobileNavRef } = useConductorShellInsets(!esAcceso && mostrarHeader, !esAcceso && mostrarMobileNav);
   const presentacionViajeActivo = viajeActivo
     ? { primaryAction: { action: "none" as const } }
     : null;
@@ -99,8 +101,8 @@ export function ConductorNav({
   return (
     <>
       {mostrarHeader && (
-        <header role="banner" className="sticky top-0 z-30 border-b border-white/10 bg-[var(--ruum-navy)]/95 pt-[env(safe-area-inset-top)] text-white shadow-sm backdrop-blur-md">
-          <div className="mx-auto flex w-full max-w-7xl items-center gap-3 px-4 py-4 sm:gap-6 sm:px-6 lg:px-8">
+        <header role="banner" ref={headerRef} data-conductor-header className="sticky top-0 z-30 border-b border-white/10 bg-[var(--ruum-navy)]/95 pt-[env(safe-area-inset-top)] text-white shadow-sm backdrop-blur-md">
+          <div data-conductor-header-content className="mx-auto flex w-full max-w-7xl items-center gap-3 px-4 py-4 sm:gap-6 sm:px-6 lg:px-8">
             <Link
               href="/panel"
               aria-label="Ir al inicio de Ruum Conductor"
@@ -148,7 +150,7 @@ export function ConductorNav({
           </div>
 
           <nav aria-label="Navegación principal" className="hidden border-t border-white/10 md:block">
-            <div className="mx-auto flex w-full max-w-7xl items-center justify-center gap-1 px-6 py-2 lg:px-8">
+            <div data-conductor-desktop-nav className="mx-auto flex w-full max-w-7xl items-center justify-center gap-1 px-6 py-2 lg:px-8">
               {destinos.map((destino) => {
                 const Icono = destino.Icono || iconoPorDefecto[destino.href] || IcoHome;
                 const activo = esActivo(destino.href);
@@ -173,7 +175,7 @@ export function ConductorNav({
           </nav>
 
           {viajeActivo && !pathname.startsWith("/viajes") && pathname !== "/panel" && (
-            <div className="hidden border-t border-border bg-surface-elevated/95 px-3 py-2 backdrop-blur md:block">
+            <div data-conductor-desktop-active-trip className="hidden border-t border-border bg-surface-elevated/95 px-3 py-2 backdrop-blur md:block">
               <div className="ruum-container flex min-w-0 flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                 <Link
                   href={`/viajes/${viajeActivo.trasladoId}`}
@@ -234,13 +236,13 @@ export function ConductorNav({
       )}
 
       {mostrarMobileNav && (
-        <div className="fixed bottom-0 inset-x-0 z-40 md:hidden bg-surface/95 border-t border-border/20 backdrop-blur-md pb-[max(8px,env(safe-area-inset-bottom))] pt-2.5 shadow-[0_-8px_30px_rgba(13,43,94,0.10)] supports-[backdrop-filter]:bg-surface/80">
+        <div ref={mobileNavRef} data-conductor-mobile-nav className="fixed bottom-0 inset-x-0 z-40 md:hidden bg-surface/95 border-t border-border/20 backdrop-blur-md pb-[max(8px,env(safe-area-inset-bottom))] pt-2.5 shadow-[0_-8px_30px_rgba(13,43,94,0.10)] supports-[backdrop-filter]:bg-surface/80">
           {viajeActivo && !pathname.startsWith("/viajes") && pathname !== "/panel" && (
-            <div className="px-4 pb-3">
+            <div className="conductor-mobile-active-trip px-4 pb-3">
               <Link
                 href={`/viajes/${viajeActivo.trasladoId}`}
                 aria-label={`Abrir traslado activo ${viajeActivo.folio}: ${viajeActivo.etapa}`}
-                className="mx-auto grid grid-cols-[1fr_auto] items-center gap-3 rounded-2xl border border-border/40 bg-surface-elevated/95 px-4 py-2.5 shadow-lg backdrop-blur"
+                className="conductor-mobile-active-trip-card mx-auto grid grid-cols-[1fr_auto] items-center gap-3 rounded-2xl border border-border/40 bg-surface-elevated/95 px-4 py-2.5 shadow-lg backdrop-blur"
               >
                 <span className="min-w-0">
                   <span className="flex min-w-0 items-center gap-2">
@@ -252,7 +254,7 @@ export function ConductorNav({
                     )}
                   </span>
                   <span className="mt-1 block truncate font-body text-sm font-bold text-text-primary">{viajeActivo.etapa}</span>
-                  <span className="mt-0.5 block truncate font-body text-xs text-text-secondary">{viajeActivo.destinoActual}</span>
+                  <span className="conductor-mobile-active-trip-destination mt-0.5 block truncate font-body text-xs text-text-secondary">{viajeActivo.destinoActual}</span>
                 </span>
                 <span className="inline-flex min-h-10 items-center justify-center rounded-xl bg-signal px-3.5 font-display text-xs font-black uppercase" style={{ color: "var(--ruum-on-primary, #061529)" }}>
                   Abrir

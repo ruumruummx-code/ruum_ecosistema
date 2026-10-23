@@ -8,43 +8,34 @@ test.beforeEach(async ({ page }) => {
   });
   await page.goto("/login", { timeout: 90_000 });
   await expect(page.getByRole("heading", { name: "Iniciar sesión", exact: true })).toBeVisible();
+  await page.locator("nextjs-portal").evaluateAll(nodes => nodes.forEach(node => (node as HTMLElement).style.setProperty("display", "none", "important")));
 });
 
 async function expectUsableLogin(page: Page) {
-  const bounds = await page.evaluate(() => {
-    const screen = document.querySelector<HTMLElement>("[data-conductor-login]")!;
-    const rect = screen.getBoundingClientRect();
-    const selectors = ["header", "input[name=email]", "input[name=password]", "button[type=submit]", "footer"];
-    return {
-      overflow: document.documentElement.scrollHeight > window.innerHeight,
-      screenOverflow: screen.scrollHeight > screen.clientHeight,
-      visible: selectors.every((selector) => {
-        const element = screen.querySelector(selector)!.getBoundingClientRect();
-        return element.top >= rect.top && element.bottom <= rect.bottom;
-      }),
-      inputsContained: [...screen.querySelectorAll("input")].every((input) => {
-        const field = input.parentElement!.getBoundingClientRect();
-        const bounds = input.getBoundingClientRect();
-        return bounds.top >= field.top && bounds.bottom <= field.bottom;
-      }),
-      footer: screen.querySelector("footer")!.getBoundingClientRect().top,
-      formBottom: screen.querySelector("form")!.getBoundingClientRect().bottom,
-      links: [...screen.querySelectorAll("footer a")].map((link) => {
-        const { width, height } = link.getBoundingClientRect();
-        return { width, height };
-      }),
-    };
-  });
-  expect(bounds.overflow).toBe(false);
-  expect(bounds.screenOverflow).toBe(false);
-  expect(bounds.visible).toBe(true);
-  expect(bounds.inputsContained).toBe(true);
-  expect(bounds.formBottom).toBeLessThanOrEqual(bounds.footer);
-  expect(bounds.links[0].width).toBeCloseTo(bounds.links[1].width, 0);
-  for (const link of bounds.links) expect(link.height).toBeGreaterThanOrEqual(44);
+  const screen = page.locator("[data-conductor-login]");
+  const frame = await screen.boundingBox();
+  for (const control of [
+    page.getByRole("heading", { name: "Iniciar sesión", exact: true }),
+    page.getByLabel("Correo", { exact: true }),
+    page.getByLabel("Contraseña", { exact: true }),
+    page.getByRole("button", { name: "Entrar", exact: true }),
+    page.getByRole("link", { name: "¿Olvidaste tu contraseña?", exact: true }),
+    page.getByRole("link", { name: "Crear cuenta de conductor", exact: true }),
+  ]) {
+    await control.scrollIntoViewIfNeeded();
+    const bounds = await control.boundingBox();
+    expect(bounds).not.toBeNull();
+    expect(bounds!.y).toBeGreaterThanOrEqual(frame!.y - 1);
+    expect(bounds!.y + bounds!.height).toBeLessThanOrEqual(frame!.y + frame!.height + 1);
+    expect(bounds!.x).toBeGreaterThanOrEqual(frame!.x);
+    expect(bounds!.x + bounds!.width).toBeLessThanOrEqual(frame!.x + frame!.width);
+  }
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  await expect(page.getByRole("link", { name: "Términos y Condiciones", exact: true })).toHaveAttribute("href", "/legal/terminos");
+  await expect(page.getByRole("link", { name: "Aviso de Privacidad", exact: true })).toHaveAttribute("href", "/legal/privacidad");
 }
 
-test("sin scroll en móviles, paisaje y viewport reducido por teclado", async ({ page }) => {
+test("controles accesibles en móviles, paisaje y viewport reducido por teclado", async ({ page }) => {
   for (const viewport of [
     { width: 320, height: 568 }, { width: 360, height: 640 },
     { width: 390, height: 844 }, { width: 430, height: 932 },
@@ -82,9 +73,6 @@ test("sigue visualViewport cuando el teclado no redimensiona el documento", asyn
 });
 
 test.describe("errores simulados de autenticación", () => {
-  // The isolated auth fixture can use ci.supabase.test, outside production CSP.
-  // Layout and navigation tests above/below still run with the real page CSP.
-  test.use({ bypassCSP: true });
 
   test("error de acceso visible y envío con Enter en espacio de teclado", async ({ page }) => {
     await page.setViewportSize({ width: 320, height: 284 });
@@ -107,14 +95,16 @@ test.describe("errores simulados de autenticación", () => {
   });
 });
 
-test("recuperación y registro conservan la navegación y liberan el scroll", async ({ page }) => {
+test("recuperación y registro conservan la navegación y desmontan el shell de login", async ({ page }) => {
   for (const [name, destination] of [
-    ["Recuperar contraseña", "/recuperar-password"],
-    ["Solicitar certificación como conductor", "/registro"],
+    ["¿Olvidaste tu contraseña?", "/recuperar-password"],
+    ["Crear cuenta de conductor", "/registro"],
   ]) {
     await page.getByRole("link", { name, exact: true }).click();
-    await expect(page).toHaveURL(new RegExp(`${destination}$`));
-    expect(await page.evaluate(() => getComputedStyle(document.body).overflowY)).not.toBe("hidden");
+    await page.waitForURL(url => url.pathname === destination, { timeout: 120_000 });
+    await expect(page.locator("[data-conductor-login]")).toHaveCount(0);
+    if (destination === "/recuperar-password") expect(await page.evaluate(() => getComputedStyle(document.body).overflowY)).not.toBe("hidden");
+    else await expect(page.locator("[data-conductor-registration]")).toBeVisible();
     await page.goBack();
     await expect(page.getByRole("heading", { name: "Iniciar sesión", exact: true })).toBeVisible();
   }

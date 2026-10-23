@@ -22,25 +22,25 @@ async function measureScreen(page: Page) {
   return page.locator("[data-driver-traslados]").evaluate((screen) => ({
     width: screen.getBoundingClientRect().width,
     overflow: screen.scrollHeight - screen.clientHeight,
-    documentOverflow: document.documentElement.scrollHeight - window.innerHeight,
+    horizontalOverflow: document.documentElement.scrollWidth - window.innerWidth,
     outside: [...screen.querySelectorAll("button, a, input, h1, h2, p")].filter((element) => {
       const rect = element.getBoundingClientRect();
-      return rect.width > 0 && rect.height > 0 && (rect.top < -1 || rect.bottom > window.innerHeight + 1 || rect.left < -1 || rect.right > window.innerWidth + 1);
+      return rect.width > 0 && rect.height > 0 && (rect.left < -1 || rect.right > window.innerWidth + 1);
     }).map((element) => element.getAttribute("aria-label") || element.textContent || element.tagName),
   }));
 }
 
 for (const size of [{ width: 320, height: 568 }, { width: 375, height: 667 }, { width: 390, height: 844 }, { width: 375, height: 340 }, { width: 1280, height: 960 }]) {
-  test(`Traslados completo sin scroll en ${size.width}×${size.height}`, async ({ page }, testInfo) => {
+  test(`Traslados completo en el flujo del shell en ${size.width}×${size.height}`, async ({ page }, testInfo) => {
     await page.setViewportSize(size);
     await openTrips(page);
     await expect(page.getByRole("heading", { name: "Sin traslados para este día" })).toBeVisible();
-    await expect(page.getByRole("navigation", { name: "Navegación principal", exact: true }).getByRole("link")).toHaveCount(3);
+    await expect(page.getByRole("navigation", { name: /^Navegación principal(?: móvil)?$/, exact: true }).filter({ visible: true }).getByRole("link")).toHaveCount(5);
     const layout = await measureScreen(page);
     await page.screenshot({ path: testInfo.outputPath("traslados.png") });
     expect(layout.width).toBeLessThanOrEqual(440);
     expect(layout.overflow).toBeLessThanOrEqual(1);
-    expect(layout.documentOverflow).toBeLessThanOrEqual(1);
+    expect(layout.horizontalOverflow).toBeLessThanOrEqual(1);
     expect(layout.outside).toEqual([]);
   });
 }

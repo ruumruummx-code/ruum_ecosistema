@@ -59,7 +59,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
               <TextInputUppercaseBridge />
               <OfflineShell />
               <PWABootstrap />
-              <main id="contenido-principal" className="conductor-page conductor-v2" role="main">
+              <main id="contenido-principal" className="conductor-page conductor-v2 conductor-safe-content" role="main">
                 {children}
               </main>
             </ViajeActivoProvider>
