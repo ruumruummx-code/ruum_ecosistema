@@ -2,7 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
     <application
-        android:allowBackup="true"
+        android:allowBackup="false"
+        android:usesCleartextTraffic="false"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
@@ -20,6 +21,26 @@
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+
+            <!-- Android App Links verificados para retorno de OAuth, Didit, Stripe 3DS y rutas de traslado -->
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="https" android:host="usuario.ruumruum-moviliax.online" android:pathPrefix="/auth/callback" />
+                <data android:scheme="https" android:host="usuario.ruumruum-moviliax.online" android:pathPrefix="/viajes" />
+                <data android:scheme="https" android:host="usuario.ruumruum-moviliax.online" android:pathPrefix="/mis-viajes" />
+                <data android:scheme="https" android:host="usuario.ruumruum-moviliax.online" android:pathPrefix="/pasaporte" />
+                <data android:scheme="https" android:host="usuario.ruumruum-moviliax.online" android:pathPrefix="/verificacion" />
+            </intent-filter>
+
+            <!-- Esquema nativo personalizado para deep links desde notificaciones/emails -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="ruumusuario" />
             </intent-filter>
 
         </activity>

@@ -20,6 +20,7 @@ export const metadata: Metadata = {
   title: "Ruum Ruum",
   description:
     "Seguridad, evidencia y trazabilidad en cada traslado vehicular by MoviliaX.",
+  manifest: "/manifest.webmanifest",
   appleWebApp: { capable: true, statusBarStyle: "black-translucent", title: "Ruum Ruum" },
   formatDetection: { telephone: true, date: false, address: false, email: false }
 };
