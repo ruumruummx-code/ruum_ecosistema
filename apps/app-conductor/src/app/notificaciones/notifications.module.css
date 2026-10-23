@@ -26,7 +26,12 @@
 .empty p { max-width: 345px; margin: 12px 0 0; font-family: var(--font-body); font-size: 17px; line-height: 1.45; color: #647495; }
 
 .list { flex: 1; min-height: 0; overflow: auto; padding: 18px 0 86px; }
-.item { display: grid; grid-template-columns: 12px minmax(0, 1fr) 20px; width: 100%; gap: 10px; align-items: center; padding: 14px 4px; border: 0; border-bottom: 1px solid #e7edf6; background: transparent; text-align: left; color: #071d49; cursor: pointer; }
+.notice { border-bottom: 1px solid #e3eaf4; padding-bottom: 10px; }
+.readStatus { margin: 0 0 0 22px; font: 600 12px/1.5 var(--font-body); color: #43597b; }
+.item:disabled { cursor: progress; opacity: .75; }
+.readError { margin: 8px 0; padding: 10px; border: 1px solid #e4b5bb; border-radius: 12px; background: #fff7f8; color: #87313e; font: 400 13px/1.5 var(--font-body); }
+.readError button, .readError a { display: flex; align-items: center; min-height: 44px; color: #0057c9; text-align: left; font-weight: 700; }
+.item { display: grid; grid-template-columns: 12px minmax(0, 1fr) 20px; width: 100%; gap: 10px; align-items: center; padding: 14px 4px; border: 0; background: transparent; text-align: left; color: #071d49; cursor: pointer; }
 .item strong, .item small { display: block; }.item strong { font-size: 15px; }.item small { margin-top: 3px; color: #647495; font-size: 13px; }.item > span:last-child { color: #647495; font-size: 24px; }.unreadDot, .readDot { width: 9px; height: 9px; border-radius: 50%; }.unreadDot { background: #0667e9; }.readDot { background: #d6dfec; }
 
 @media (min-width: 560px) and (min-height: 700px) { .screen { border: 1px solid #dce4ef; border-radius: 26px; box-shadow: 0 16px 60px rgba(24,48,95,.08); } }

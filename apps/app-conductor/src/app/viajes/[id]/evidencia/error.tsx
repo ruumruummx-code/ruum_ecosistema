@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { recordOperationalEvent } from "@/lib/observability";
+import { TripActionDock } from "../TripOperationalFrame";
 
 export default function ErrorEvidencia({ error, reset }: { error: Error & { digest?: string }; reset: () => void }) {
   const { id } = useParams<{ id: string }>();
@@ -26,7 +27,8 @@ export default function ErrorEvidencia({ error, reset }: { error: Error & { dige
         {process.env.NODE_ENV === "development" && (
           <pre className="mt-3 max-h-24 overflow-auto rounded-lg bg-surface-elevated p-3 text-left font-mono text-xs text-danger/80 border border-danger/20">{error.message}</pre>
         )}
-        <div className="mt-6 flex flex-wrap justify-center gap-3">
+        <TripActionDock status="Evidencias · Reintenta sin recapturar">
+        <div className="flex flex-wrap justify-center gap-2">
           <button
             type="button"
             onClick={reset}
@@ -41,6 +43,7 @@ export default function ErrorEvidencia({ error, reset }: { error: Error & { dige
             Ver Traslados
           </Link>
         </div>
+        </TripActionDock>
         <p className="mt-4 font-body text-xs text-text-tertiary">Si el error persiste, la cola se sincronizará al recuperar conexión. No recaptures.</p>
       </div>
     </div>

@@ -38,7 +38,7 @@ for (const size of [{ width: 320, height: 568 }, { width: 375, height: 667 }, { 
     expect(layout.width).toBeLessThanOrEqual(440); expect(layout.overflow).toBeLessThanOrEqual(1); expect(layout.horizontalOverflow).toBeLessThanOrEqual(1); expect(layout.outside).toEqual([]); expect(layout.paymentOverlap).toBeLessThanOrEqual(0);
   });
 }
-test("cambia periodo, distingue pagos pendientes y abre solicitud sin simular un depósito", async ({ page }) => {
+test("cambia periodo y consulta programación con requisitos antes del clic", async ({ page }) => {
   await fixture(page); await open(page);
   await expect(page.getByText("↑ +12%", { exact: true })).toBeVisible();
   await expect(page.getByText("Pendiente", { exact: true })).toBeVisible();
@@ -46,10 +46,16 @@ test("cambia periodo, distingue pagos pendientes y abre solicitud sin simular un
   await expect(page.getByTestId("earnings-total")).toContainText("$4,637.50");
   await expect(page.getByRole("tab", { name: "Este mes", exact: true })).toHaveAttribute("aria-selected", "true");
   await expect(page.getByRole("link", { name: /Ver todos/ })).toHaveAttribute("href", "/ganancias/historial");
-  await page.getByRole("button", { name: "Solicitar pago", exact: true }).click();
-  await expect(page.getByRole("dialog")).toBeVisible();
-  await expect(page.getByRole("link", { name: "Revisar datos bancarios" })).toHaveAttribute("href", "/cuenta/datos-bancarios");
-  await expect(page.getByRole("link", { name: "Contactar a soporte" })).toHaveAttribute("href", /wa.me|whatsapp/);
+  const requirements = page.getByRole("region", { name: "Programación de pagos", exact: true });
+  await expect(requirements).toContainText("saldo pendiente confirmado");
+  await expect(requirements).toContainText("no equivalen necesariamente a saldo disponible");
+  await expect(requirements).toContainText("Registra tus datos bancarios");
+  await expect(requirements).toContainText("no solicita ni genera un pago inmediato");
+  await page.getByRole("button", { name: "Consultar programación de pago", exact: true }).click();
+  const dialog = page.getByRole("dialog", { name: "Programación de pago", exact: true });
+  await expect(dialog).toBeVisible();
+  await expect(dialog.getByRole("link", { name: "Revisar datos bancarios" })).toHaveAttribute("href", "/cuenta/datos-bancarios");
+  await expect(dialog.getByRole("link", { name: "Contactar a soporte" })).toHaveAttribute("href", /wa.me|whatsapp/);
   await page.keyboard.press("Escape"); await expect(page.getByRole("dialog")).not.toBeVisible();
 });
 test("estado sin actividad y errores no presentan ingresos de ejemplo", async ({ page }) => {
@@ -59,5 +65,23 @@ test("estado sin actividad y errores no presentan ingresos de ejemplo", async ({
   await fixture(page, true, true); await open(page);
   await expect(page.locator("[data-driver-earnings]").getByRole("alert")).toBeVisible();
   await expect(page.getByTestId("earnings-total")).not.toContainText("$0.00");
-  await expect(page.getByRole("button", { name: "Solicitar pago", exact: true })).toBeDisabled();
+  await expect(page.getByRole("button", { name: "Consultar programación de pago", exact: true })).toBeDisabled();
+});
+
+test("la consulta sigue disponible sin ingresos y explica el estado bancario antes de abrir", async ({ page }, info) => {
+  await page.setViewportSize({ width: 320, height: 568 });
+  await fixture(page, true);
+  for (const [state, message] of [["en_revision", "Tus datos bancarios están en revisión."], ["requiere_correccion", "Tus datos bancarios requieren corrección."], ["verificada", "Cuenta verificada: Banco de prueba · terminación 1234."]]) {
+    await page.route("**/rest/v1/datos_bancarios_conductor?*", route => route.fulfill({ headers: { "access-control-allow-origin": "*" }, json: { estado: state, banco: "Banco de prueba", clabe: "012345678901231234" } }));
+    await open(page);
+    const requirements = page.getByRole("region", { name: "Programación de pagos", exact: true });
+    await expect(requirements).toContainText(message);
+    await expect(page.getByTestId("earnings-total")).toContainText("$0.00");
+    const consult = page.getByRole("button", { name: "Consultar programación de pago", exact: true });
+    await expect(consult).toBeEnabled();
+    if (state === "verificada") await expect(requirements.getByRole("link", { name: "Revisar datos bancarios" })).toHaveCount(0);
+    else await expect(requirements.getByRole("link", { name: "Revisar datos bancarios" })).toHaveAttribute("href", "/cuenta/datos-bancarios");
+    await consult.scrollIntoViewIfNeeded();
+    await page.screenshot({ path: info.outputPath(`consulta-${state}.png`) });
+  }
 });

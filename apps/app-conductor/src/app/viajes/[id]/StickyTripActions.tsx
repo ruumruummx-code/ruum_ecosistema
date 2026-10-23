@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import { TripDockPortal } from "./TripOperationalFrame";
+import { TripDialog } from "./TripDialog";
 import { createNavigationOptions, type NavigationTarget, type NavigationOption } from "@/lib/navigation-launcher";
 
 function abrirNavegacion(option: NavigationOption) {
@@ -30,8 +32,8 @@ export function StickyTripActions({
 
   return (
     <>
-      <div className="fixed bottom-[var(--conductor-shell-bottom-height,0px)] inset-x-0 z-30 border-t border-border/20 bg-surface/95 backdrop-blur-md shadow-2xl" role="toolbar" aria-label="Acciones rápidas del traslado">
-        <div className="mx-auto max-w-md px-3 py-3 flex items-center gap-2">
+      <TripDockPortal quick><div className="border-t border-border/20 bg-surface" role="toolbar" aria-label="Acciones rápidas del traslado">
+        <div className="mx-auto max-w-md px-3 py-1 flex items-center gap-2">
           {/* Navegar — primario signal */}
           {primaryNav && (
             <a
@@ -50,15 +52,15 @@ export function StickyTripActions({
             </a>
           )}
           {/* Llamar — secundario */}
-          <a
-            href={phone ? `tel:${phone}` : `tel:`}
+          {phone && <a
+            href={`tel:${phone}`}
             onClick={() => {
               if (typeof navigator !== "undefined" && "vibrate" in navigator) navigator.vibrate(12);
             }}
             className={`flex-1 min-h-11 inline-flex items-center justify-center gap-1.5 rounded-xl border px-3 py-2.5 font-display text-xs font-bold transition-all active:scale-[0.98] ${phone ? "border-route-action bg-route-soft text-route-action hover:bg-route-soft/80" : "border-border bg-surface-elevated text-text-tertiary"}`}
           >
             <span aria-hidden>📞</span> Llamar
-          </a>
+          </a>}
           {/* Chat rápido — abre sheet */}
           <button
             type="button"
@@ -70,16 +72,12 @@ export function StickyTripActions({
             <span className="ml-1 font-display text-xs font-bold hidden sm:inline">Chat</span>
           </button>
         </div>
-        <div className="mx-auto max-w-md px-3 pb-1 flex justify-center">
-          <span className="font-body text-[10px] font-semibold text-text-tertiary">Navegar · Llamar · Mensaje en 1 toque — pensado para conducir</span>
-        </div>
-      </div>
+      </div></TripDockPortal>
 
       {/* Bottom sheet mensajes rápidos */}
       {sheetAbierto && (
-        <div className="fixed inset-0 z-40 flex items-end justify-center" role="dialog" aria-modal="true" aria-label="Mensajes rápidos">
-          <button type="button" className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setSheetAbierto(false)} aria-label="Cerrar" />
-          <div className="relative w-full max-w-md bg-surface-elevated rounded-t-2xl border-t border-border p-4 flex flex-col gap-3 animate-slideUp shadow-2xl">
+        <TripDialog title="Mensajes rápidos" onClose={() => setSheetAbierto(false)}>
+          <div className="flex flex-col gap-3">
             <div className="mx-auto h-1.5 w-12 rounded-full bg-border/40" aria-hidden />
             <h3 className="font-display text-sm font-black text-text-primary">Mensaje rápido</h3>
             <p className="font-body text-xs text-text-secondary">Envía sin escribir, se registra en el traslado {trasladoId.slice(0, 8).toUpperCase()}.</p>
@@ -103,7 +101,7 @@ export function StickyTripActions({
               Cancelar
             </button>
           </div>
-        </div>
+        </TripDialog>
       )}
     </>
   );

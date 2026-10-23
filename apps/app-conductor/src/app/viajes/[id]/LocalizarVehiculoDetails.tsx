@@ -10,7 +10,7 @@ import { traducirErrorOperativo } from "@ruum/shared/utils";
 import { crearClienteNavegador } from "@/lib/supabase-browser";
 import { avanzarEstadoTraslado } from "@ruum/api/services";
 import { SecondaryTripNavBar } from "./SecondaryTripNavBar";
-import { EmergencyPanel } from "./EmergencyPanel";
+import { TripActionDock } from "./TripOperationalFrame";
 
 type PasaporteRow = Database["public"]["Views"]["pasaporte_digital"]["Row"];
 type EstadoTraslado = Database["public"]["Enums"]["estado_traslado"];
@@ -255,7 +255,7 @@ export function LocalizarVehiculoDetails({
         </div>
 
         {/* CTAs */}
-        <div className="mt-6 flex flex-col gap-3">
+        <TripActionDock status="En origen · Verifica el vehículo y sus evidencias" error={error}>
           <button
             type="button"
             onClick={handleAccionPrincipal}
@@ -275,7 +275,7 @@ export function LocalizarVehiculoDetails({
               </>
             )}
           </button>
-        </div>
+        </TripActionDock>
       </div>
 
       {error && (
@@ -284,7 +284,6 @@ export function LocalizarVehiculoDetails({
         </div>
       )}
 
-      <EmergencyPanel trasladoId={trasladoId} />
 
     </div>
   );

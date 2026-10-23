@@ -13,7 +13,7 @@ import { createNavigationOptions, type NavigationOption } from "@/lib/navigation
 import { formatearDuracion, nombreVehiculo } from "../trips-utils";
 import { MapaRutaConduccion } from "./MapaRutaConduccion";
 import { SecondaryTripNavBar } from "./SecondaryTripNavBar";
-import { EmergencyPanel } from "./EmergencyPanel";
+import { TripActionDock } from "./TripOperationalFrame";
 import { StickyTripActions } from "./StickyTripActions";
 
 type PasaporteRow = Database["public"]["Views"]["pasaporte_digital"]["Row"];
@@ -271,7 +271,7 @@ export function ConduceADestinoDetails({
         </div>
 
         {/* CTAs */}
-        <div className="mt-5 flex flex-col gap-3">
+        <TripActionDock status="En traslado · Confirma tu llegada al destino" error={error}>
           <button
             type="button"
             onClick={handleLlegueDestino}
@@ -289,7 +289,7 @@ export function ConduceADestinoDetails({
               </>
             )}
           </button>
-        </div>
+        </TripActionDock>
       </div>
 
       {error && (
@@ -298,7 +298,6 @@ export function ConduceADestinoDetails({
         </div>
       )}
 
-      <EmergencyPanel trasladoId={trasladoId} />
 
       {/* Q7 — Acciones rápidas sticky */}
       <StickyTripActions
@@ -307,7 +306,6 @@ export function ConduceADestinoDetails({
         phone={telefonoLimpio ? `+${telefonoLimpio}` : null}
       />
 
-      <div className="h-[88px]" aria-hidden />
 
     </div>
   );

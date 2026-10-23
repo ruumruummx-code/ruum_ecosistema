@@ -56,6 +56,10 @@
 .paymentAmount[data-status="fallido"] { color: #b02e39; }
 .paymentAmount[data-status="fallido"] span { background: #fce7eb; }
 .message { padding: 16px 0; font-size: 12px; line-height: 1.5; color: #637490; }
+.paymentInfo { display: grid; gap: 8px; padding: 14px; border: 1px solid #dfe6f2; border-radius: 14px; background: #f1f6ff; }
+.paymentInfo h2 { font-size: 16px; font-weight: 700; }
+.paymentInfo p { font-size: 12px; line-height: 1.5; color: #43597b; }
+.paymentInfo .secondary { margin: 0; }
 .primary { display: flex; justify-content: center; align-items: center; gap: 13px; flex-shrink: 0; width: 100%; min-height: 52px; padding: 10px; color: white; background: #005bff; border: 0; border-radius: 16px; font-size: 15px; font-weight: 600; }
 .primary span { font-size: 24px; font-weight: 400; line-height: 1; }
 .primary:hover { background: #004bd5; }

@@ -1,4 +1,5 @@
 "use client";
+import { TripActionDock } from "./TripOperationalFrame";
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -448,11 +449,8 @@ export function CierreTrasladoDetails({
       </div>
 
       {/* Sticky footer for action buttons */}
-      <div className="fixed bottom-[var(--conductor-shell-bottom-height,0px)] inset-x-0 z-40 bg-surface/95 backdrop-blur-md border-t border-border/20 py-3 px-4 shadow-2xl select-none">
+      <TripActionDock status={writable ? "Cierre · Confirma la entrega del vehículo" : "Traslado cerrado"} error={error}>
         <div className="max-w-md md:max-w-xl mx-auto flex flex-col gap-2">
-          <div className="bg-surface-elevated border border-border/20 rounded-xl px-3 py-1.5 text-center text-[10px] font-body text-text-secondary font-semibold">
-            Ruum Ruum by MoviliaX · Seguridad, evidencia y trazabilidad
-          </div>
 
           {writable ? (
             <button
@@ -477,7 +475,7 @@ export function CierreTrasladoDetails({
             </button>
           )}
         </div>
-      </div>
+      </TripActionDock>
 
 
       {/* Bottom Sheet de Soporte */}

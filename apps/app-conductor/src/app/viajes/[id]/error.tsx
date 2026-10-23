@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import Link from "next/link";
 import { recordOperationalEvent } from "@/lib/observability";
+import { TripActionDock } from "./TripOperationalFrame";
 
 export default function ErrorDetalleViaje({ error, reset }: { error: Error & { digest?: string }; reset: () => void }) {
   useEffect(() => {
@@ -23,7 +24,8 @@ export default function ErrorDetalleViaje({ error, reset }: { error: Error & { d
       {process.env.NODE_ENV === "development" && (
         <pre className="mt-3 max-h-24 overflow-auto rounded-lg bg-surface-elevated p-3 text-left font-mono text-xs text-danger/80 border border-danger/20">{error.message}</pre>
       )}
-      <div className="mt-6 flex flex-wrap justify-center gap-3">
+      <TripActionDock status="No se pudo cargar el traslado">
+      <div className="flex flex-wrap justify-center gap-2">
         <button onClick={reset} className="inline-flex min-h-11 items-center justify-center rounded-xl border border-border bg-surface px-5 py-2.5 font-body text-sm font-medium text-text-primary transition hover:border-border-strong">
           Reintentar
         </button>
@@ -34,6 +36,7 @@ export default function ErrorDetalleViaje({ error, reset }: { error: Error & { d
           Ir al panel
         </Link>
       </div>
+      </TripActionDock>
     </div>
   );
 }

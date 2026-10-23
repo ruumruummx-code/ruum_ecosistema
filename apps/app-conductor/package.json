@@ -22,6 +22,8 @@
     "storybook:build": "storybook build",
     "typecheck": "tsc --noEmit",
     "test:e2e:ui": "playwright test --config playwright.ui.config.ts",
+    "test:e2e:operational": "playwright test --config playwright.operational.config.ts",
+    "test:e2e:feedback": "playwright test --config playwright.feedback.config.ts",
     "test:e2e:auth": "playwright test --config playwright.auth.config.ts",
     "test:e2e:critical": "playwright test tests/e2e/sprint-c5-critical-flows.spec.ts",
     "predev": "node ../../scripts/validate-env.mjs app-conductor",

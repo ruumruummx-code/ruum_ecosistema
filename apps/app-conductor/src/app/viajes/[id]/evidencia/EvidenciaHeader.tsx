@@ -1,18 +1,19 @@
 "use client";
 
 import Link from "next/link";
-import type { EstadoTraslado, TipoEvidencia } from "@ruum/shared/types";
+import type { TipoEvidencia } from "@ruum/shared/types";
 
 interface EvidenciaHeaderProps {
   tipo: TipoEvidencia | null;
   folio: string;
   origen: string;
+  onSupport: () => void;
 }
 
-export function EvidenciaHeader({ tipo, folio, origen }: EvidenciaHeaderProps) {
+export function EvidenciaHeader({ tipo, folio, origen, onSupport }: EvidenciaHeaderProps) {
   return (
-    <div className="mx-auto w-full max-w-md px-4 py-6 sm:px-6 sm:py-10 flex flex-col justify-between min-h-screen text-text-primary">
-      <div className="w-full flex flex-col flex-1 animate-fade-in pb-20">
+    <div className="w-full text-text-primary">
+      <div className="w-full flex flex-col animate-fade-in">
         {/* Top Navbar Header */}
         <header className="hidden md:flex justify-between items-center pb-4 border-b border-border/20">
           <div className="flex items-center gap-2">
@@ -28,6 +29,8 @@ export function EvidenciaHeader({ tipo, folio, origen }: EvidenciaHeaderProps) {
             <button
               type="button"
               aria-label="Soporte rápido"
+              aria-haspopup="dialog"
+              onClick={onSupport}
               className="p-1.5 text-text-primary hover:text-signal transition-colors cursor-pointer bg-transparent border-none outline-hidden"
             >
               <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-text-secondary hover:text-text-primary transition-colors">

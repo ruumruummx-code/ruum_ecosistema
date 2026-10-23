@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import { TripDialog } from "../TripDialog";
 import Image from "next/image";
 import { crearClienteNavegador } from "@/lib/supabase-browser";
 import { Aviso } from "@ruum/ui";
@@ -179,33 +180,11 @@ export function GastosModal({
   const totalGastos = gastosList.reduce((sum, g) => sum + (g.monto || 0), 0);
 
   return (
-    <div className="fixed inset-0 z-50 flex flex-col justify-end bg-black/80 backdrop-blur-md animate-fade-in">
-      <div className="w-full max-w-lg mx-auto bg-surface-elevated border-t border-border/30 rounded-t-3xl p-5 shadow-2xl max-h-[90vh] overflow-y-auto flex flex-col gap-4 text-left select-none animate-slideUp">
-        {/* Header del Modal Gastos */}
-        <div className="flex items-center justify-between border-b border-border/15 pb-3">
-          <div className="flex items-center gap-2 text-text-primary">
-            <svg className="w-5 h-5 text-route-action" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-              <path d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            <h3 className="font-display text-base font-black text-text-primary uppercase tracking-wider">
-              Gastos del Traslado
-            </h3>
-          </div>
-          <button
-            type="button"
-            onClick={onCerrar}
-            className="p-1.5 text-text-tertiary hover:text-text-primary rounded-full hover:bg-surface cursor-pointer transition-colors"
-            aria-label="Cerrar gastos"
-          >
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-              <line x1="18" y1="6" x2="6" y2="18" />
-              <line x1="6" y1="6" x2="18" y2="18" />
-            </svg>
-          </button>
-        </div>
+    <TripDialog title="Gastos del traslado" onClose={onCerrar} footer={<button type="submit" form="trip-expense-form" disabled={guardandoGasto} className="w-full min-h-11 rounded-xl bg-signal p-2 text-sm font-bold text-slate-950 disabled:opacity-50">{guardandoGasto ? "Guardando y subiendo…" : "+ Registrar gasto"}</button>}>
+      <div className="flex flex-col gap-4 text-left">
 
         {/* Formulario para agregar gasto */}
-        <form onSubmit={handleAgregarGasto} className="flex flex-col gap-3.5">
+        <form id="trip-expense-form" onSubmit={handleAgregarGasto} className="flex flex-col gap-3.5">
           <div className="grid grid-cols-2 gap-3">
             <div className="flex flex-col gap-1">
               <label htmlFor="tipo-gasto" className="text-[10px] font-bold text-text-tertiary uppercase tracking-wider">
@@ -365,13 +344,6 @@ export function GastosModal({
           {errorGasto && <Aviso tono="danger">{errorGasto}</Aviso>}
           {exitoGasto && <Aviso tono="info">{exitoGasto}</Aviso>}
 
-          <button
-            type="submit"
-            disabled={guardandoGasto}
-            className="w-full py-3 rounded-xl bg-signal hover:bg-signal/85 text-slate-950 font-display text-xs font-black uppercase tracking-widest transition-all cursor-pointer shadow-md disabled:opacity-50 mt-1"
-          >
-            {guardandoGasto ? "Guardando y subiendo..." : "+ Registrar Gasto"}
-          </button>
         </form>
 
         {/* Listado de Gastos Registrados */}
@@ -454,6 +426,6 @@ export function GastosModal({
           Volver a Detalles del Traslado
         </button>
       </div>
-    </div>
+    </TripDialog>
   );
 }

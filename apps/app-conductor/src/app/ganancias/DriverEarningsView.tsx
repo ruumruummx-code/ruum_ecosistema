@@ -27,6 +27,7 @@ export function DriverEarningsView({ data, summary, period, onPeriod, loading, e
   const payments = [...(data?.payouts ?? [])].sort((a, b) => (b.procesado_en ?? b.creado_en).localeCompare(a.procesado_en ?? a.creado_en)).slice(0, 2);
   const ready = !loading && !error && summary;
   const bank = data?.datosBancarios;
+  const bankStatus = bank ? bank.estado === "verificada" ? `Cuenta verificada: ${bank.banco} · terminación ${bank.clabe.slice(-4)}.` : bank.estado === "en_revision" ? "Tus datos bancarios están en revisión." : "Tus datos bancarios requieren corrección." : "Registra tus datos bancarios para recibir depósitos.";
   return <div className={styles.screen} data-driver-earnings>
     <header className={styles.header}>
       <Link href="/panel" prefetch={false}>‹ Atrás</Link>
@@ -60,11 +61,19 @@ export function DriverEarningsView({ data, summary, period, onPeriod, loading, e
         </div>) : <p className={styles.message}>Aún no tienes pagos registrados.</p>}
       </div>
     </section>
-    <button type="button" className={styles.primary} disabled={loading || !!error} onClick={() => setRequestOpen(true)}>Solicitar pago <span aria-hidden="true">→</span></button>
-    <dialog ref={dialog} className={styles.dialog} aria-labelledby="solicitar-pago-titulo" onCancel={() => setRequestOpen(false)} onClose={() => setRequestOpen(false)}>
-      <header><h2 id="solicitar-pago-titulo">Solicitar pago</h2><button type="button" aria-label="Cerrar solicitud de pago" onClick={() => setRequestOpen(false)}>×</button></header>
-      <p>El equipo operativo revisa y programa los pagos. Contacta a soporte para solicitar la revisión de tu saldo.</p>
-      <p>{bank ? bank.estado === "verificada" ? `Cuenta verificada: ${bank.banco} · terminación ${bank.clabe.slice(-4)}.` : bank.estado === "en_revision" ? "Tus datos bancarios están en revisión." : "Tus datos bancarios requieren corrección." : "Registra tus datos bancarios para recibir depósitos."}</p>
+    <section className={styles.paymentInfo} aria-labelledby="programacion-pago-titulo" id="condiciones-pago">
+      <h2 id="programacion-pago-titulo">Programación de pagos</h2>
+      <p>Para recibir un depósito necesitas saldo pendiente confirmado por el equipo operativo y una cuenta bancaria verificada.</p>
+      <p><strong>Saldo disponible y fecha:</strong> requieren confirmación operativa. Las ganancias del periodo no equivalen necesariamente a saldo disponible para pago.</p>
+      <p>{loading ? "Consultando el estado de tus datos bancarios…" : error ? "No pudimos confirmar el estado de tus datos bancarios." : bankStatus}</p>
+      {!loading && !error && bank?.estado !== "verificada" && <Link href="/cuenta/datos-bancarios" className={styles.secondary}>Revisar datos bancarios</Link>}
+      <p>Esta consulta abre los canales de soporte; no solicita ni genera un pago inmediato.</p>
+    </section>
+    <button type="button" className={styles.primary} aria-describedby="condiciones-pago" aria-haspopup="dialog" disabled={loading || !!error} onClick={() => setRequestOpen(true)}>Consultar programación de pago <span aria-hidden="true">→</span></button>
+    <dialog ref={dialog} className={styles.dialog} aria-labelledby="programacion-pago-dialogo" onCancel={() => setRequestOpen(false)} onClose={() => setRequestOpen(false)}>
+      <header><h2 id="programacion-pago-dialogo">Programación de pago</h2><button type="button" aria-label="Cerrar programación de pago" onClick={() => setRequestOpen(false)}>×</button></header>
+      <p>Consulta con soporte el saldo confirmado y la fecha prevista. El equipo operativo revisa y programa los pagos; abrir esta consulta no genera un depósito ni un retiro inmediato.</p>
+      <p>{bankStatus}</p>
       {bank?.estado !== "verificada" && <Link href="/cuenta/datos-bancarios" className={styles.secondary}>Revisar datos bancarios</Link>}
       <a href={CONTACTOS_SOPORTE_CONDUCTOR.soporte.whatsapp.href} target="_blank" rel="noopener noreferrer" className={styles.primary}>Contactar a soporte</a>
     </dialog>

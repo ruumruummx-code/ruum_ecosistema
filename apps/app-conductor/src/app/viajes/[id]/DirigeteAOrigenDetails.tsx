@@ -13,7 +13,7 @@ import { createNavigationOptions, type NavigationOption } from "@/lib/navigation
 import { formatearDuracion } from "../trips-utils";
 import { MapaRutaConduccion } from "./MapaRutaConduccion";
 import { SecondaryTripNavBar } from "./SecondaryTripNavBar";
-import { EmergencyPanel } from "./EmergencyPanel";
+import { TripActionDock } from "./TripOperationalFrame";
 import { StickyTripActions } from "./StickyTripActions";
 
 type PasaporteRow = Database["public"]["Views"]["pasaporte_digital"]["Row"];
@@ -189,7 +189,7 @@ export function DirigeteAOrigenDetails({
         </div>
 
         {/* CTAs */}
-        <div className="mt-5 flex flex-col gap-3">
+        <TripActionDock status="En camino al origen" error={error}>
           <button
             type="button"
             onClick={handleLlegueOrigen}
@@ -207,7 +207,7 @@ export function DirigeteAOrigenDetails({
               </>
             )}
           </button>
-        </div>
+        </TripActionDock>
       </div>
 
       {error && (
@@ -216,7 +216,6 @@ export function DirigeteAOrigenDetails({
         </div>
       )}
 
-      <EmergencyPanel trasladoId={trasladoId} />
 
       {/* Q7 — Acciones rápidas sticky (Navegar / Llamar / Chat) */}
       <StickyTripActions
@@ -226,7 +225,6 @@ export function DirigeteAOrigenDetails({
       />
 
       {/* Spacer para sticky bar + nav */}
-      <div className="h-[88px]" aria-hidden />
 
     </div>
   );

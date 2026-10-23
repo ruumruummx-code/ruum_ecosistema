@@ -54,7 +54,7 @@ function mapaUrl(lat: number, lng: number) {
   return `https://maps.google.com/?q=${lat},${lng}`;
 }
 
-export function EmergencyPanel({ trasladoId }: { trasladoId: string }) {
+export function EmergencyPanel({ trasladoId, compact = false }: { trasladoId: string; compact?: boolean }) {
   const [abierto, setAbierto] = useState(false);
   const [confirmando911, setConfirmando911] = useState(false);
   const [procesando, setProcesando] = useState<AccionPanel | null>(null);
@@ -65,6 +65,7 @@ export function EmergencyPanel({ trasladoId }: { trasladoId: string }) {
 
   useEffect(() => {
     if (!abierto) return;
+    dialogRef.current?.showModal();
     const previoOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
     window.setTimeout(() => tituloRef.current?.focus(), 0);
@@ -237,16 +238,16 @@ export function EmergencyPanel({ trasladoId }: { trasladoId: string }) {
   }
 
   return (
-    <section id="emergencia" aria-label="Seguridad" className="mt-6 rounded-[20px] border border-[var(--ruum-emergency)]/40 bg-[var(--ruum-emergency-bg)] px-4 py-4">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div>
+    <section id="emergencia" aria-label="Seguridad" className={compact ? "contents" : "mt-6 rounded-[20px] border border-[var(--ruum-emergency)]/40 bg-[var(--ruum-emergency-bg)] px-4 py-4"}>
+      <div className={compact ? "contents" : "flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"}>
+        <div hidden={compact}>
           <p className="font-body text-sm font-semibold text-[var(--ruum-emergency-text)]">Seguridad</p>
           <p className="mt-1 font-body text-[17px] leading-6 text-[var(--ruum-navy)]">
             Al enviar, soporte recibe tu ubicación, se abre un folio y te responde una persona.
           </p>
         </div>
-        <Button variant="emergency" className="min-h-[var(--ruum-button-height-street)] w-full text-[17px] sm:w-auto" onClick={abrirPanel}>
-          Abrir emergencia
+        <Button variant="emergency" aria-label="Abrir emergencia" aria-haspopup="dialog" aria-expanded={abierto} className={compact ? "min-h-11 px-2 text-xs" : "min-h-[var(--ruum-button-height-street)] w-full text-[17px] sm:w-auto"} onClick={abrirPanel}>
+          {compact ? "Emergencia" : "Abrir emergencia"}
         </Button>
       </div>
 
@@ -254,6 +255,7 @@ export function EmergencyPanel({ trasladoId }: { trasladoId: string }) {
         <div className="fixed inset-0 z-50 bg-black/60 px-3 py-[max(12px,env(safe-area-inset-top))]">
           <dialog
             ref={dialogRef}
+            data-trip-emergency-dialog
             aria-modal="true"
             aria-labelledby="emergency-panel-title"
             className="mx-auto flex max-h-[calc(100dvh_-_24px_-_env(safe-area-inset-top)_-_env(safe-area-inset-bottom))] w-full max-w-md flex-col overflow-hidden rounded-2xl border border-border bg-surface shadow-[0_24px_80px_rgba(26,31,46,0.34)] conductor-emergency-panel"

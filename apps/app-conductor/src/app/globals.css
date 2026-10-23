@@ -1,6 +1,51 @@
 @import "tailwindcss";
 @import "@ruum/ui/styles/tokens.css";
 
+/* Los subflujos de un traslado desplazan su contenido, sin mover el shell. */
+html:has([data-trip-frame]), html:has([data-trip-frame]) body { height: 100%; overflow: hidden; }
+html:has([data-trip-frame]) .conductor-safe-content { padding: 0; min-height: 0; }
+[data-trip-frame] {
+  position: fixed;
+  top: max(var(--conductor-shell-header-height, 0px), var(--trip-visible-top, 0px));
+  bottom: max(var(--trip-nav-reserve, var(--conductor-shell-bottom-height, 0px)), var(--trip-keyboard-inset, 0px));
+  left: 50%; transform: translateX(-50%);
+  width: 100%; max-width: 440px;
+  display: flex; flex-direction: column; overflow: hidden;
+  background: var(--conductor-surface); color: var(--conductor-primary);
+}
+[data-trip-safety-bar] { display: flex; align-items: center; justify-content: space-between; gap: 4px; padding: 4px 8px; flex-shrink: 0; border-bottom: 1px solid var(--conductor-border); }
+[data-trip-safety-bar] > a, [data-trip-safety-bar] > button { min-height: 44px; display: inline-flex; align-items: center; padding-inline: 8px; font-size: 12px; font-weight: 700; }
+[data-trip-safety-bar] #emergencia > div > button { min-height: 44px; font-size: 12px; padding: 8px; }
+[data-trip-scroll] { flex: 1; min-height: 0; overflow: auto; overscroll-behavior: contain; scroll-padding: 12px 0 16px; }
+[data-trip-scroll] > * { min-height: 0; }
+[data-trip-scroll] nav[aria-label="Pasos de evidencia"] { top: 0; }
+html[data-trip-keyboard="true"] [data-trip-scroll] nav[aria-label="Pasos de evidencia"] { position: static; }
+[data-trip-scroll] section[id^="evid-"] { scroll-margin-top: 64px; }
+[data-trip-dock] { flex-shrink: 0; border-top: 1px solid var(--conductor-border); background: var(--conductor-surface); }
+[data-trip-dock]:not(:has([data-trip-primary], [role="toolbar"])) { display: none; }
+[data-trip-primary] { padding: 6px 12px 8px; display: grid; gap: 4px; }
+[data-trip-primary] > [role="alert"] { max-height: 44px; overflow: auto; }
+[data-trip-primary] button { min-height: 44px; font-size: 12px; line-height: 16px; padding-block: 8px; }
+[data-trip-dialog], [data-trip-emergency-dialog] {
+  position: fixed; inset: auto 0;
+  top: calc(var(--trip-visible-top, 0px) + 8px);
+  max-height: calc(var(--trip-visible-height, 100dvh) - 16px);
+  width: min(calc(100% - 16px), 440px); margin: 0 auto;
+  border: 1px solid var(--conductor-border); border-radius: 16px;
+  background: var(--conductor-surface); color: var(--conductor-primary);
+  padding: 0; overflow: hidden;
+}
+[data-trip-dialog][open] { display: flex; flex-direction: column; }
+[data-trip-dialog]::backdrop, [data-trip-emergency-dialog]::backdrop { background: #0a2342b8; }
+[data-trip-dialog] > header { display: flex; flex-shrink: 0; align-items: center; justify-content: space-between; gap: 8px; padding: 8px 12px; border-bottom: 1px solid var(--conductor-border); }
+[data-trip-dialog] > header button { min-width: 44px; min-height: 44px; }
+[data-trip-dialog] > div:first-child button { flex-shrink: 0; white-space: nowrap; }
+[data-trip-dialog-content] { min-height: 0; overflow: auto; padding: 12px; overscroll-behavior: contain; }
+[data-trip-dialog] > footer { flex-shrink: 0; padding: 8px 12px; border-top: 1px solid var(--conductor-border); }
+[data-trip-emergency-dialog] > div:first-child { flex-shrink: 0; }
+[data-trip-emergency-dialog] > div:last-child { min-height: 0; grid-auto-rows: max-content; align-content: start; }
+[data-trip-emergency-dialog] button { height: auto; }
+
 @theme {
   --color-ruum-blue: #0066FF;
   --color-ruum-bg: #F4F7FC;

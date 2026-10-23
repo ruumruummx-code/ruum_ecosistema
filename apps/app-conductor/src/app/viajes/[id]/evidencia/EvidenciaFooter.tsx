@@ -1,6 +1,7 @@
 "use client";
 
 import { TEXTOS_CARGANDO } from "@ruum/shared/constants";
+import { TripActionDock } from "../TripOperationalFrame";
 
 import type { AnguloEvidencia } from "@ruum/shared/types";
 
@@ -12,6 +13,8 @@ interface EvidenciaFooterProps {
   onFinalizar: () => Promise<void>;
   soporteAbierto: boolean;
   setSoporteAbierto: (v: boolean) => void;
+  onIrAlPendiente: () => void;
+  error?: string | null;
 }
 
 export function EvidenciaFooter({
@@ -21,13 +24,15 @@ export function EvidenciaFooter({
   onGuardarBorrador,
   onFinalizar,
   soporteAbierto,
-  setSoporteAbierto
+  setSoporteAbierto,
+  onIrAlPendiente,
+  error
 }: EvidenciaFooterProps) {
   return (
     <>
       {/* Sticky Primary Action Buttons Bar */}
-      <div className="fixed bottom-[var(--conductor-shell-bottom-height,0px)] inset-x-0 z-40 bg-surface/95 backdrop-blur-md border-t border-border/20 py-3 px-4 shadow-2xl select-none">
-        <div className="max-w-md mx-auto flex gap-3">
+      <TripActionDock status={`Evidencias · ${totalCapturados} de ${totalRequisitos} requisitos`} error={error}>
+        <div className="w-full flex gap-2">
           {/* GUARDAR BORRADOR */}
           <button
             type="button"
@@ -41,16 +46,16 @@ export function EvidenciaFooter({
           {/* FINALIZAR EVIDENCIAS */}
           <button
             type="button"
-            onClick={onFinalizar}
-            disabled={Boolean(enviando) || totalCapturados < totalRequisitos}
+            onClick={totalCapturados < totalRequisitos ? onIrAlPendiente : onFinalizar}
+            disabled={Boolean(enviando)}
             title={totalCapturados < totalRequisitos ? `Faltan ${totalRequisitos - totalCapturados} requisitos` : undefined}
             className={`flex-1 min-h-11 rounded-xl font-display text-xs font-bold tracking-wide transition-all cursor-pointer shadow-md select-none flex items-center justify-center gap-1.5 focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-signal disabled:cursor-not-allowed ${
               totalCapturados === totalRequisitos
                 ? "bg-signal hover:bg-signal/90 text-slate-950"
-                : "bg-signal/60 text-slate-950/60 cursor-not-allowed"
+                : "bg-route-action text-white"
             }`}
           >
-            {enviando === "confirmar" ? TEXTOS_CARGANDO.actualizando : `Finalizar evidencias ${totalCapturados === totalRequisitos ? "✓" : `(${totalCapturados}/${totalRequisitos})`}`}
+            {enviando === "confirmar" ? TEXTOS_CARGANDO.actualizando : totalCapturados === totalRequisitos ? "Finalizar evidencias ✓" : "Siguiente requisito →"}
           </button>
         </div>
         {totalCapturados < totalRequisitos && (
@@ -58,7 +63,7 @@ export function EvidenciaFooter({
             Completa {totalRequisitos - totalCapturados} requisitos para habilitar el envío
           </p>
         )}
-      </div>
+      </TripActionDock>
     </>
   );
 }

@@ -185,6 +185,7 @@ export function ReportarIncidencia({ trasladoId }: { trasladoId: string }) {
 
   useEffect(() => {
     if (!abierto) return;
+    if (!dialogRef.current?.open) dialogRef.current?.showModal();
     const previoOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
     window.setTimeout(() => tituloRef.current?.focus(), 0);
@@ -290,11 +291,13 @@ export function ReportarIncidencia({ trasladoId }: { trasladoId: string }) {
         <div className="fixed inset-0 z-50 flex items-end bg-black/60 px-3 pb-[max(12px,env(safe-area-inset-bottom))] pt-[max(12px,env(safe-area-inset-top))]">
           <dialog
             ref={dialogRef}
+            data-trip-dialog
+            onCancel={event => { event.preventDefault(); cerrarSheet(); }}
             aria-modal="true"
             aria-labelledby="reportar-problema-titulo"
             className="mx-auto flex max-h-[min(86dvh,720px)] w-full max-w-lg flex-col overflow-hidden rounded-t-2xl border border-border bg-surface shadow-[0_-18px_70px_rgba(26,31,46,0.28)] sm:rounded-2xl"
           >
-            <div className="flex items-start justify-between gap-3 border-b border-border px-4 py-4">
+            <div className="flex shrink-0 items-start justify-between gap-3 border-b border-border px-4 py-2">
               <div>
                 <p className="font-body text-sm font-semibold text-route-action">Reporte operativo</p>
                 <h2 id="reportar-problema-titulo" ref={tituloRef} tabIndex={-1} className="mt-1 font-display text-xl font-semibold text-text-primary">
@@ -311,7 +314,7 @@ export function ReportarIncidencia({ trasladoId }: { trasladoId: string }) {
               </button>
             </div>
 
-            <div className="overflow-y-auto px-4 pb-[max(16px,env(safe-area-inset-bottom))] pt-4">
+            <div data-trip-dialog-content className="overflow-y-auto px-4 pb-[max(16px,env(safe-area-inset-bottom))] pt-4">
               {mensaje && (
                 <output aria-live="polite" aria-atomic="true">
                   <Aviso tono={mensaje.tono}>{mensaje.texto}</Aviso>
@@ -370,12 +373,14 @@ export function ReportarIncidencia({ trasladoId }: { trasladoId: string }) {
                       </span>
                     </label>
                   )}
-                  <Button onClick={enviar} disabled={!puedeEnviar || procesando} loading={procesando}>
-                    {procesando ? TEXTOS_CARGANDO.enviando : opcion.urgente ? "Enviar urgente" : "Enviar reporte"}
-                  </Button>
                 </div>
               )}
             </div>
+            {opcion && <footer>
+              <Button className="w-full" onClick={enviar} disabled={!puedeEnviar || procesando} loading={procesando}>
+                {procesando ? TEXTOS_CARGANDO.enviando : opcion.urgente ? "Enviar urgente" : "Enviar reporte"}
+              </Button>
+            </footer>}
           </dialog>
         </div>
       )}

@@ -36,6 +36,7 @@ export function EvidenciaStepper({
             <li key={p.id} className="flex items-center gap-2">
               <a
                 href={`#${p.id}`}
+                aria-label={`${p.label}: ${p.sub}`}
                 onClick={(e) => {
                   e.preventDefault();
                   document.getElementById(p.id)?.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -45,7 +46,7 @@ export function EvidenciaStepper({
                 <span className={`flex size-5 items-center justify-center rounded-full text-[11px] font-black ${p.done ? "bg-signal text-slate-950" : "bg-surface border border-border/30 text-text-tertiary"}`}>
                   {p.done ? "✓" : idx + 1}
                 </span>
-                <span className="hidden sm:inline">{p.label}</span>
+                <span>{p.label}</span>
                 <span className="text-[10px] tabular-nums">{p.sub}</span>
               </a>
               {idx < pasos.length - 1 && <span className="h-px w-4 bg-border/30 hidden sm:block" aria-hidden />}

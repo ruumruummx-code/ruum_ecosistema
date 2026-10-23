@@ -58,12 +58,12 @@ for (const viewport of [{ width: 320, height: 568 }, { width: 390, height: 844 }
         if (route === "/ganancias") {
           await expect(page.locator('[data-status="pendiente"]')).toHaveText(/1,620/);
           await expectUnobstructed(page.locator('[data-status="pendiente"]').locator(".."));
-          const request = page.getByRole("button", { name: "Solicitar pago", exact: false });
+          const request = page.getByRole("button", { name: "Consultar programación de pago", exact: true });
           await expect(request).toBeEnabled();
           await expectUnobstructed(request);
           await request.click();
-          await expect(page.getByRole("dialog", { name: "Solicitar pago" })).toBeVisible();
-          await page.getByRole("button", { name: "Cerrar solicitud de pago" }).click();
+          await expect(page.getByRole("dialog", { name: "Programación de pago", exact: true })).toBeVisible();
+          await page.getByRole("button", { name: "Cerrar programación de pago", exact: true }).click();
         }
         await expect(header).toBeVisible();
         expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);

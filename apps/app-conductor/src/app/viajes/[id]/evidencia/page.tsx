@@ -15,6 +15,8 @@ import { EvidenciaCsatSheet } from "./EvidenciaCsatSheet";
 import { EvidenciaSoporteSheet } from "./EvidenciaSoporteSheet";
 import { Aviso } from "@ruum/ui";
 import { SecondaryTripNavBar } from "../SecondaryTripNavBar";
+import { TripActionDock } from "../TripOperationalFrame";
+import Link from "next/link";
 
 export default function PaginaEvidencia() {
   const { id } = useParams<{ id: string }>();
@@ -98,16 +100,25 @@ export default function PaginaEvidencia() {
 
   if (cargando) {
     return (
-      <div className="mx-auto w-full max-w-md px-6 py-20 text-center text-text-primary">
+      <output aria-label="Cargando evidencias" aria-busy="true" className="block mx-auto w-full max-w-md px-6 py-8 text-center text-text-primary">
         <div className="w-8 h-8 border-4 border-signal border-t-transparent rounded-full animate-spin mx-auto mb-4" />
         <p className="font-body text-sm font-semibold text-text-secondary">Cargando checklist de evidencias...</p>
-      </div>
+      </output>
     );
   }
 
+  if (!pasaporte) return <div className="p-4">
+    <h1 className="text-xl font-bold">No pudimos cargar las evidencias</h1>
+    <p role="alert" className="mt-3 text-sm">{aviso || "No encontramos la información de este traslado. Vuelve a intentarlo."}</p>
+    <TripActionDock status="Evidencias no disponibles">
+      <button type="button" onClick={() => window.location.reload()} className="rounded-xl bg-signal p-3 font-bold text-slate-950">Reintentar</button>
+      <Link href={`/viajes/${id}`} className="inline-flex min-h-11 items-center justify-center">Volver al traslado</Link>
+    </TripActionDock>
+  </div>;
+
   return (
     <div className="mx-auto w-full max-w-md px-4 py-6 sm:px-6 sm:py-10 flex flex-col justify-between min-h-screen text-text-primary">
-      <EvidenciaHeader tipo={tipo} folio={folio} origen={origen} />
+      <EvidenciaHeader tipo={tipo} folio={folio} origen={origen} onSupport={() => setSoporteAbierto(true)} />
       {pasaporte && <SecondaryTripNavBar trasladoId={id} pasaporte={pasaporte} />}
 
       {/* Progress */}
@@ -207,6 +218,13 @@ export default function PaginaEvidencia() {
         onFinalizar={finalizar}
         soporteAbierto={soporteAbierto}
         setSoporteAbierto={setSoporteAbierto}
+        error={error}
+        onIrAlPendiente={() => {
+          const section = fotosObligCapturadas < fotosObligatorias ? "evid-fotos" : !kilometraje.trim() ? "evid-km" : "evid-docs";
+          const element = document.getElementById(section);
+          element?.scrollIntoView({ block: "start", behavior: "instant" });
+          element?.querySelector<HTMLElement>("button,input,select")?.focus({ preventScroll: true });
+        }}
       />
 
 

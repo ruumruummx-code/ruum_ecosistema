@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -21,40 +21,74 @@ export default function CentroNotificaciones() {
   const [items, setItems] = useState<NotificacionConductor[]>([]);
   const [cargando, setCargando] = useState(true);
   const [filtro, setFiltro] = useState<FiltroTab>("todas");
+  const [sincronizando, setSincronizando] = useState<string | null>(null);
+  const [erroresLectura, setErroresLectura] = useState(() => new Map<string, string>());
+  const [errorCarga, setErrorCarga] = useState<string | null>(null);
+  const pendiente = useRef<string | null>(null);
+  const montado = useRef(true);
+  const cargaActual = useRef(0);
 
   const cargar = useCallback(async () => {
+    // Una recarga antigua no debe deshacer una lectura optimista en curso.
+    if (pendiente.current) return;
+    const solicitud = ++cargaActual.current;
     try {
-      setItems(await listarNotificacionesConductor(crearClienteNavegador(), 100));
+      const resultado = await listarNotificacionesConductor(crearClienteNavegador(), 100);
+      if (!montado.current || solicitud !== cargaActual.current) return;
+      setItems(resultado);
+      setErroresLectura(actuales => {
+        const siguientes = new Map(actuales);
+        for (const item of resultado) if (item.leida_en) siguientes.delete(item.id);
+        return siguientes;
+      });
+      setErrorCarga(null);
     } catch {
-      // La pantalla conserva el último estado disponible ante un fallo transitorio.
+      if (montado.current && solicitud === cargaActual.current) setErrorCarga("No pudimos actualizar tus avisos. Intenta de nuevo.");
     } finally {
-      setCargando(false);
+      if (montado.current && solicitud === cargaActual.current) setCargando(false);
     }
   }, []);
 
   useEffect(() => {
+    montado.current = true;
     void cargar();
     const actualizar = () => void cargar();
     window.addEventListener("ruum:notificaciones-actualizar", actualizar);
-    return () => window.removeEventListener("ruum:notificaciones-actualizar", actualizar);
+    return () => {
+      montado.current = false;
+      window.removeEventListener("ruum:notificaciones-actualizar", actualizar);
+    };
   }, [cargar]);
 
   const noLeidas = items.filter((item) => !item.leida_en);
   const leidas = items.filter((item) => Boolean(item.leida_en));
-  const visibles = filtro === "no_leidas" ? noLeidas : filtro === "leidas" ? leidas : items;
+  const visibles = filtro === "no_leidas" ? items.filter(item => !item.leida_en || item.id === sincronizando) : filtro === "leidas" ? leidas : items;
 
   async function abrir(item: NotificacionConductor) {
+    if (pendiente.current) return;
+    if (item.leida_en) { router.push(item.destino); return; }
+    pendiente.current = item.id;
+    cargaActual.current++;
+    setSincronizando(item.id);
+    setErroresLectura(actuales => { const siguientes = new Map(actuales); siguientes.delete(item.id); return siguientes; });
+    setItems(actuales => actuales.map(actual => actual.id === item.id ? { ...actual, leida_en: new Date().toISOString() } : actual));
     try {
       await marcarNotificacionLeida(crearClienteNavegador(), item.id);
+      if (!montado.current) return;
+      window.dispatchEvent(new Event("ruum:notificaciones-actualizar"));
+      router.push(item.destino);
     } catch {
-      // El aviso se volverá a sincronizar en la próxima carga.
+      if (!montado.current) return;
+      setItems(actuales => actuales.map(actual => actual.id === item.id ? { ...actual, leida_en: item.leida_en } : actual));
+      setErroresLectura(actuales => new Map(actuales).set(item.id, "No pudimos confirmar la lectura. Reintenta o abre el aviso sin actualizar su estado."));
+    } finally {
+      pendiente.current = null;
+      if (montado.current) setSincronizando(null);
     }
-    setItems((actuales) => actuales.map((actual) => actual.id === item.id ? { ...actual, leida_en: actual.leida_en ?? new Date().toISOString() } : actual));
-    router.push(item.destino);
   }
 
   const contador = (tab: FiltroTab) => tab === "no_leidas" ? noLeidas.length : tab === "leidas" ? leidas.length : items.length;
-  const esVacio = !cargando && visibles.length === 0;
+  const esVacio = !cargando && !errorCarga && visibles.length === 0;
 
   return (
     <div className={styles.screen}>
@@ -76,6 +110,8 @@ export default function CentroNotificaciones() {
           })}
         </nav>
 
+        {errorCarga && <div className={styles.readError} role="alert"><p>{errorCarga}</p><button type="button" onClick={() => void cargar()}>Reintentar carga de avisos</button></div>}
+
         {esVacio ? (
           <section className={styles.empty} aria-live="polite">
             <div className={styles.sparkles} aria-hidden><span>✦</span><i>✦</i><b>✦</b></div>
@@ -86,10 +122,18 @@ export default function CentroNotificaciones() {
           <section className={styles.empty} aria-busy="true"><div className={styles.sparkles} aria-hidden>⋯</div><p>Cargando avisos…</p></section>
         ) : (
           <section className={styles.list} aria-label="Lista de notificaciones">
-            {visibles.map((item) => <button key={item.id} type="button" onClick={() => void abrir(item)} className={styles.item}>
-              <span className={item.leida_en ? styles.readDot : styles.unreadDot} aria-hidden />
-              <span><strong>{item.titulo}</strong><small>{item.cuerpo}</small></span><span aria-hidden>›</span>
-            </button>)}
+            {visibles.map((item) => <article key={item.id} className={styles.notice} data-notification-id={item.id} data-read={Boolean(item.leida_en)}>
+              <button type="button" onClick={() => void abrir(item)} disabled={Boolean(sincronizando)} aria-busy={sincronizando === item.id} aria-describedby={`lectura-${item.id}`} className={styles.item}>
+                <span className={item.leida_en ? styles.readDot : styles.unreadDot} aria-hidden />
+                <span><strong>{item.titulo}</strong><small>{item.cuerpo}</small></span><span aria-hidden>›</span>
+              </button>
+              <p id={`lectura-${item.id}`} role="status" className={styles.readStatus}>{sincronizando === item.id ? "Leída · sincronizando…" : item.leida_en ? "Leída" : "Sin leer"}</p>
+              {erroresLectura.has(item.id) && <div className={styles.readError}>
+                <p role="alert">{erroresLectura.get(item.id)}</p>
+                <button type="button" disabled={Boolean(sincronizando)} onClick={() => void abrir(item)}>Reintentar guardar lectura</button>
+                <Link href={item.destino}>Abrir aviso sin actualizar lectura</Link>
+              </div>}
+            </article>)}
           </section>
         )}
       </div>
