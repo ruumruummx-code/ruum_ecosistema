@@ -4,10 +4,13 @@ import { crearClienteServidor } from "@/lib/supabase-server";
 import { rateLimitConVentana } from "@/lib/csp-rate-limit";
 import { validarFilasServidor } from "@/lib/carga-masiva-server";
 import { logStructuredError } from "@/lib/logger";
+import { verificarCsrfORechazar } from "@/lib/csrf";
 export const dynamic = "force-dynamic";
 export type { FilaValidada, FilaMasivaEntrada } from "@/lib/carga-masiva";
 const esquemaCarga = z.object({ filas: z.array(z.record(z.string().max(2000))).min(1).max(100) });
 export async function POST(request: NextRequest) {
+  const rechazoCsrf = verificarCsrfORechazar(request);
+  if (rechazoCsrf) return rechazoCsrf;
   const cliente = await crearClienteServidor();
   const { data: { user } } = await cliente.auth.getUser();
   if (!user) return NextResponse.json({ error: "No autenticado" }, { status: 401 });

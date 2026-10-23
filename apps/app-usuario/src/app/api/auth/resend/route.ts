@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { crearClienteServidor } from "@ruum/api/supabase";
 import { obtenerIp, rateLimitConVentana } from "@/lib/csp-rate-limit";
 import { normalizarCorreoRegistro } from "@/lib/registro-usuario";
+import { verificarCsrfORechazar } from "@/lib/csrf";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -20,6 +21,9 @@ const VENTANA_MS = 60 * 60 * 1000;
  */
 export async function POST(request: NextRequest) {
   try {
+    const rechazoCsrf = verificarCsrfORechazar(request);
+    if (rechazoCsrf) return rechazoCsrf;
+
     const body = (await request.json().catch(() => null)) as
       | { email?: unknown }
       | null;

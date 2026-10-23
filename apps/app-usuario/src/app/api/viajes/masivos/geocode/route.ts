@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { crearClienteServidor } from "@/lib/supabase-server";
 import { obtenerIp, rateLimitConVentana } from "@/lib/csp-rate-limit";
 import { logStructuredError, logStructuredWarn } from "@/lib/logger";
+import { verificarCsrfORechazar } from "@/lib/csrf";
 import { obtenerRutaDirectionsMapboxConParadas } from "@ruum/shared/utils";
 import {
   MAX_BYTES_GEOCODE,
@@ -31,6 +32,9 @@ async function geocodificarCP(cp: string, token: string): Promise<{ lat: number;
 
 export async function POST(request: NextRequest) {
   try {
+    const rechazoCsrf = verificarCsrfORechazar(request);
+    if (rechazoCsrf) return rechazoCsrf;
+
     // 1. Validar límite de tamaño del request por Content-Length si está presente
     const lenHeader = request.headers.get("content-length");
     if (lenHeader) {

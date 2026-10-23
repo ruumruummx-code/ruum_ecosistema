@@ -1,6 +1,16 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { crearClienteServidor } from "@ruum/api/supabase";
 import { buildCspUsuario as buildCspUsuarioCanonica, headersSeguridadEstaticos, cabeceraReportToCsp, sufijoReporteCsp } from "./lib/csp";
+import { asegurarCookieCsrf, esMetodoMutacion, verificarCsrfORechazar } from "./lib/csrf";
+import {
+  HEADER_BAGGAGE,
+  HEADER_SENTRY_TRACE,
+  HEADER_SPAN_ID,
+  HEADER_TRACEPARENT,
+  HEADER_TRACE_ID,
+  adjuntarHeadersTrazaRespuesta,
+  extraerOIniciarTraza,
+} from "./lib/distributed-tracing";
 
 /**
  * P1 Hardening: CSP + HSTS + Control de Sesión para app-usuario
@@ -96,10 +106,29 @@ export function applySecurityHeadersUsuario(res: NextResponse, nonce: string, or
 
 export async function middleware(request: NextRequest) {
   const nonce = Buffer.from(crypto.randomUUID()).toString("base64");
+  const traza = extraerOIniciarTraza(request.headers);
+
+  if (esMetodoMutacion(request.method)) {
+    const rechazoCsrf = verificarCsrfORechazar(request);
+    if (rechazoCsrf) {
+      adjuntarHeadersTrazaRespuesta(rechazoCsrf, traza);
+      return applySecurityHeadersUsuario(rechazoCsrf, nonce, request.nextUrl.origin);
+    }
+  }
+
   const requestHeaders = new Headers(request.headers);
   requestHeaders.set("x-nonce", nonce);
+  requestHeaders.set(HEADER_TRACE_ID, traza.traceId);
+  requestHeaders.set(HEADER_SPAN_ID, traza.spanId);
+  requestHeaders.set(HEADER_SENTRY_TRACE, traza.sentryTrace);
+  requestHeaders.set(HEADER_TRACEPARENT, traza.traceparent);
+  requestHeaders.set(HEADER_BAGGAGE, traza.baggage);
   let response = NextResponse.next({ request: { headers: requestHeaders } });
   response.headers.set("x-nonce", nonce);
+  adjuntarHeadersTrazaRespuesta(response, traza);
+  if (request.method === "GET" || request.method === "HEAD") {
+    asegurarCookieCsrf(request, response);
+  }
 
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
@@ -124,6 +153,10 @@ export async function middleware(request: NextRequest) {
       cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
       response = NextResponse.next({ request });
       response.headers.set("x-nonce", nonce);
+      adjuntarHeadersTrazaRespuesta(response, traza);
+      if (request.method === "GET" || request.method === "HEAD") {
+        asegurarCookieCsrf(request, response);
+      }
       cookiesToSet.forEach(({ name, value, options }) => response.cookies.set(name, value, options));
     }
   });

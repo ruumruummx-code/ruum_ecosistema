@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { crearClienteServidor } from "@/lib/supabase-server";
 import { esquemaSolicitudTraslado } from "@ruum/shared/validacion";
 import { obtenerIp, rateLimitConVentana } from "@/lib/csp-rate-limit";
+import { verificarCsrfORechazar } from "@/lib/csrf";
 
 // Sec3: validación servidor del wizard — rechazar si paso < 4 (PASOS.length = 4)
 // El cliente no debe poder crear traslado enviando paso 0 como si fuera paso 5.
@@ -19,6 +20,9 @@ function esPasoValido(paso: unknown): boolean {
 
 export async function POST(request: NextRequest) {
   try {
+    const rechazoCsrf = verificarCsrfORechazar(request);
+    if (rechazoCsrf) return rechazoCsrf;
+
     const cliente = await crearClienteServidor();
     const { data: { user } } = await cliente.auth.getUser();
     if (!user) {

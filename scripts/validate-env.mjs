@@ -98,6 +98,8 @@ const recommendedByApp = {
   "app-usuario": [
     ["NEXT_PUBLIC_RUUM_AMBIENTE", "sin ella staging emite CSP bloqueante en vez de Report-Only"],
     ["NEXT_PUBLIC_APP_VERSION", "Sentry reporta sin versión de release"],
+    ["SENTRY_DSN", "sin ella no se capturan ni alertan errores críticos de servidor en producción"],
+    ["NEXT_PUBLIC_SENTRY_DSN", "sin ella no se capturan ni alertan errores críticos de cliente en producción"],
     ["NEXT_PUBLIC_APP_URL", "se usa para redirects absolutos en /pasaporte"],
     ["UPSTASH_REDIS_REST_URL", "sin Upstash Redis, el rate-limit fail-closed denegará peticiones en producción"],
     ["UPSTASH_REDIS_REST_TOKEN", "token de autenticación para Upstash Redis"]

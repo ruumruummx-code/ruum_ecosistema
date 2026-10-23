@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Aviso, Field, MobileShell, MobileCard, MobileButton } from "@ruum/ui";
 import { fortalezaPassword, observarSesionRecuperacion, passwordCumpleRequisitos, requisitosPassword, traducirErrorAuth } from "@ruum/shared/utils";
 import { crearClienteNavegador, tieneSupabaseConfigurado } from "../../lib/supabase-browser";
+import { obtenerHeadersCsrf } from "../../lib/csrf";
 import { logStructuredWarn } from "../../lib/logger";
 import { LogoRuum } from "../experiencia-publica";
 
@@ -117,7 +118,13 @@ function FormularioNuevaPassword() {
       if (errUpdate) throw errUpdate;
 
       try {
-        await fetch("/api/recovery/clear", { method: "POST", cache: "no-store", credentials: "same-origin" });
+        const headersCsrf = obtenerHeadersCsrf();
+        await fetch("/api/recovery/clear", {
+          method: "POST",
+          cache: "no-store",
+          credentials: "same-origin",
+          ...(Object.keys(headersCsrf).length > 0 ? { headers: headersCsrf } : {}),
+        });
       } catch (err) {
         logStructuredWarn("nueva-password", "limpiar_cookie_recovery_fallido", err);
       }

@@ -6,6 +6,7 @@ import Link from "next/link";
 import { IconoFlechaAtras, IconoFlechaDerecha, IconoUsuario, IconoUsuarioPlus, IconoCorreo, IconoCandado, IconoOjo, IconoOjoCerrado, IconoCheckCirculo, IconoCirculoVacio, IconoAlertaTriangulo } from "./iconos-registro";
 import { passwordCumpleRequisitos, traducirErrorAuth } from "@ruum/shared/utils";
 import { registrarEventoUx } from "../../lib/analytics";
+import { obtenerHeadersCsrf } from "../../lib/csrf";
 import { logStructuredWarn } from "../../lib/logger";
 import { tieneSupabaseConfigurado } from "../../lib/supabase-browser";
 import { OtpModal } from "./OtpModal";
@@ -186,7 +187,7 @@ export default function PaginaRegistro() {
     try {
       const res = await fetch("/api/auth/phone-verify/send", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: obtenerHeadersCsrf({ "Content-Type": "application/json" }),
         body: JSON.stringify({ telefono: digitos }),
       });
       const cuerpo = (await res.json().catch(() => null)) as {
@@ -226,7 +227,7 @@ export default function PaginaRegistro() {
     try {
       const res = await fetch("/api/auth/phone-verify/verify", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: obtenerHeadersCsrf({ "Content-Type": "application/json" }),
         body: JSON.stringify({ telefono: digitos, codigo }),
       });
       const cuerpo = (await res.json().catch(() => null)) as {
@@ -309,7 +310,7 @@ export default function PaginaRegistro() {
 
       const res = await fetch("/api/auth/signup", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: obtenerHeadersCsrf({ "Content-Type": "application/json" }),
         body: JSON.stringify({
           nombre: nombre.trim(),
           apellido: apellido.trim(),

@@ -3,6 +3,7 @@ import { createHash } from "node:crypto";
 import { crearClienteServidor } from "@/lib/supabase-server";
 import { getRedis, obtenerIp, rateLimitConVentana } from "@/lib/csp-rate-limit";
 import { logStructuredWarn } from "@/lib/logger";
+import { verificarCsrfORechazar } from "@/lib/csrf";
 import { obtenerRutaDirectionsMapboxConParadas } from "@ruum/shared/utils";
 
 export const dynamic = "force-dynamic";
@@ -40,6 +41,9 @@ function esCoordenadaValida(c: unknown): c is Coordenada {
 
 export async function POST(request: NextRequest) {
   try {
+    const rechazoCsrf = verificarCsrfORechazar(request);
+    if (rechazoCsrf) return rechazoCsrf;
+
     // 1. Identificar al solicitante: uid de sesión autenticada o IP
     let identificador: string | null = null;
     try {

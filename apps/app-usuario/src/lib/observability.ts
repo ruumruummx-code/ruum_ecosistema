@@ -12,8 +12,22 @@ import {
   type OperationalSeverity
 } from "@ruum/api/observability";
 import { crearClienteNavegador } from "./supabase-browser";
+import {
+  dispararAlertaCriticaSentry,
+  esErrorCriticoAlerta,
+  REGLAS_ALERTA_SENTRY,
+  resolverConfigSentryUsuario,
+  verificarSentryDsnProduccion
+} from "./sentry-alerts";
 
-export { sanitizeDetails };
+export {
+  sanitizeDetails,
+  dispararAlertaCriticaSentry,
+  esErrorCriticoAlerta,
+  REGLAS_ALERTA_SENTRY,
+  resolverConfigSentryUsuario,
+  verificarSentryDsnProduccion
+};
 export type { OperationalSeverity };
 
 export type UsuarioOperationalEvent =
@@ -49,6 +63,13 @@ export function recordOperationalEvent(
     } catch {
       // ignore
     }
+  }
+  if (esErrorCriticoAlerta(type, severity)) {
+    dispararAlertaCriticaSentry({
+      tipo: type,
+      detalle: details,
+      severidad: severity
+    });
   }
   return record(type, details, severity);
 }

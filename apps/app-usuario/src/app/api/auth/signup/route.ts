@@ -10,6 +10,7 @@ import {
 import { validarTokenTelefono, bypassVerificacionTelefonoPermitido } from "@/lib/phone-verification";
 import { VERSION_TERMINOS_VIGENTE } from "@ruum/shared/constants";
 import { passwordCumpleRequisitos } from "@ruum/shared/utils";
+import { verificarCsrfORechazar } from "@/lib/csrf";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -27,6 +28,9 @@ const VENTANA_MS = 60 * 60 * 1000;
  */
 export async function POST(request: NextRequest) {
   try {
+    const rechazoCsrf = verificarCsrfORechazar(request);
+    if (rechazoCsrf) return rechazoCsrf;
+
     const body = (await request.json().catch(() => null)) as {
       nombre?: unknown;
       apellido?: unknown;

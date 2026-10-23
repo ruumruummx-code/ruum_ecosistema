@@ -3,6 +3,7 @@ import { cookies } from "next/headers";
 import { crearClienteServidor } from "@ruum/api/supabase";
 import { obtenerIp, rateLimitConVentana } from "@/lib/csp-rate-limit";
 import { normalizarCorreoRegistro, soloDigitos } from "@/lib/registro-usuario";
+import { verificarCsrfORechazar } from "@/lib/csrf";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -21,6 +22,9 @@ const VENTANA_MS = 15 * 60 * 1000;
  */
 export async function POST(request: NextRequest) {
   try {
+    const rechazoCsrf = verificarCsrfORechazar(request);
+    if (rechazoCsrf) return rechazoCsrf;
+
     const body = (await request.json().catch(() => null)) as
       | { email?: unknown; codigo?: unknown }
       | null;

@@ -10,6 +10,7 @@ import {
 } from "@ruum/api/services";
 import { rateLimitConVentana } from "@/lib/csp-rate-limit";
 import { logStructuredError, logStructuredWarn } from "@/lib/logger";
+import { verificarCsrfORechazar } from "@/lib/csrf";
 
 export const dynamic = "force-dynamic";
 
@@ -92,6 +93,8 @@ export async function GET(request: NextRequest) {
 }
 
 export async function DELETE(request: NextRequest) {
+  const rechazoCsrf = verificarCsrfORechazar(request);
+  if (rechazoCsrf) return rechazoCsrf;
   const cliente = await crearClienteServidor();
   const { data: { user } } = await cliente.auth.getUser();
   if (!user) return NextResponse.json({ error: "No autenticado" }, { status: 401 });

@@ -27,6 +27,8 @@
     "test:p2": "node --test apps/panel-admin/test/p2-madurez.test.mjs",
     "test:load": "k6 run tests/load/panel-admin-degradacion.js",
     "test:load:report": "k6 run tests/load/panel-admin-degradacion.js --out json=tests/load/results/resultados.json",
+    "test:load:usuario": "k6 run tests/load/app-usuario-flujos-criticos.js",
+    "test:load:usuario:artillery": "artillery run tests/load/app-usuario-artillery.yml",
     "test:a11y:real": "playwright test apps/panel-admin/tests/a11y-real",
     "test:a11y:real:all": "playwright test apps/panel-admin/tests/a11y-real --reporter=html",
     "test:e2e:real": "playwright test apps/panel-admin/tests/e2e --reporter=html",

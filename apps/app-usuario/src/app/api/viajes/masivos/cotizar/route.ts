@@ -3,6 +3,7 @@ import { z } from "zod";
 import { crearClienteServidor } from "@/lib/supabase-server";
 import { rateLimitConVentana } from "@/lib/csp-rate-limit";
 import { logStructuredError, logStructuredWarn } from "@/lib/logger";
+import { verificarCsrfORechazar } from "@/lib/csrf";
 import { clienteMasivoServicio, stripeMasivo, validarFilasServidor } from "@/lib/carga-masiva-server";
 import { previsualizarTarifasMasivasUsuario, verificarUsuarioMasivo, guardarCheckoutMasivoServidor, vincularPagoMasivoServidor } from "@ruum/api/services";
 import { coordenadaPostalMasiva, ErrorServicioCotizacion } from "@/lib/mapbox-masivo";
@@ -12,6 +13,8 @@ export const dynamic = "force-dynamic";
 export const maxDuration = 300;
 const esquema = z.object({ filas: z.array(z.record(z.string().max(2000))).min(1).max(100), clave: z.string().uuid() });
 export async function POST(request: NextRequest) {
+  const rechazoCsrf = verificarCsrfORechazar(request);
+  if (rechazoCsrf) return rechazoCsrf;
   const cliente = await crearClienteServidor();
   const { data: { user } } = await cliente.auth.getUser();
   if (!user) return NextResponse.json({ error: "No autenticado" }, { status: 401 });

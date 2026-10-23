@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { obtenerIp, rateLimitConVentana } from "@/lib/csp-rate-limit";
 import { soloDigitos } from "@/lib/registro-usuario";
 import { generarTokenTelefono, verificarCodigoTwilioVerify } from "@/lib/phone-verification";
+import { verificarCsrfORechazar } from "@/lib/csrf";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -12,6 +13,9 @@ const VENTANA_MS = 15 * 60 * 1000; // 15 minutos
 
 export async function POST(request: NextRequest) {
   try {
+    const rechazoCsrf = verificarCsrfORechazar(request);
+    if (rechazoCsrf) return rechazoCsrf;
+
     const body = (await request.json().catch(() => null)) as {
       telefono?: unknown;
       codigo?: unknown;

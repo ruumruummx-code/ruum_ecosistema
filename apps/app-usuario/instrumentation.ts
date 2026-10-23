@@ -1,36 +1,37 @@
+import {
+  dispararAlertaCriticaSentry,
+  sanitizarEventoSentry,
+  verificarSentryDsnProduccion,
+} from "./src/lib/sentry-alerts";
+
 /**
  * P1 — Instrumentación Next.js (Sentry-ready) para app-usuario.
  * Se activa automáticamente por Next 15 si existe en la raíz de la app.
- * Si SENTRY_DSN no está configurado, es no-op y no afecta el bundle.
+ * Si SENTRY_DSN no está configurado, es no-op en dev y emite diagnóstico en prod.
  */
 export async function register() {
-  const dsn = process.env.SENTRY_DSN || process.env.NEXT_PUBLIC_SENTRY_DSN;
-  const env = process.env.SENTRY_ENVIRONMENT || process.env.NEXT_PUBLIC_RUUM_AMBIENTE || process.env.NODE_ENV;
-  const version = process.env.NEXT_PUBLIC_APP_VERSION || "1.0.0";
+  const { configurado, config } = verificarSentryDsnProduccion();
 
-  if (!dsn) return;
+  if (!configurado) return;
 
   try {
     const Sentry = await import("@sentry/nextjs");
     Sentry.init({
-      dsn,
-      environment: env,
-      release: `ruum-usuario@${version}`,
-      tracesSampleRate: Number(process.env.SENTRY_TRACES_SAMPLE_RATE ?? "0.1"),
+      dsn: config.dsn,
+      environment: config.environment,
+      release: config.release,
+      tracesSampleRate: config.tracesSampleRate,
+      tracePropagationTargets: config.tracePropagationTargets,
       sendDefaultPii: false,
+      initialScope: {
+        tags: {
+          app: "app-usuario",
+          environment: config.environment,
+        },
+      },
       beforeSend(event) {
-        if (event.request?.headers) {
-          delete event.request.headers.authorization;
-          delete event.request.headers.cookie;
-          delete event.request.headers["x-supabase-auth"];
-        }
-        if (event.breadcrumbs) {
-          event.breadcrumbs = event.breadcrumbs.filter(
-            (b) => !/password|token|jwt|service_role|secret|curp|clabe|cuenta|tarjeta|cvv|documento|foto/i.test(JSON.stringify(b))
-          );
-        }
-        return event;
-      }
+        return sanitizarEventoSentry(event);
+      },
     });
   } catch {
     // Sentry no instalado — ignorar en entornos sin dep.
@@ -47,6 +48,29 @@ export function onRequestError(
     err: err instanceof Error ? { name: err.name, message: err.message } : err,
     path: request.path,
     method: request.method,
-    context
+    context,
+  });
+
+  const errorNormalizado =
+    err instanceof Error
+      ? err
+      : new Error(typeof err === "string" ? err : "Unhandled request error");
+
+  dispararAlertaCriticaSentry({
+    tipo: "unhandled_request_error",
+    error: errorNormalizado,
+    severidad: "error",
+    detalle: {
+      path: request.path,
+      method: request.method,
+      routerKind: context.routerKind,
+      routePath: context.routePath,
+      routeType: context.routeType,
+    },
+    tags: {
+      routerKind: context.routerKind,
+      routePath: context.routePath,
+      routeType: context.routeType,
+    },
   });
 }

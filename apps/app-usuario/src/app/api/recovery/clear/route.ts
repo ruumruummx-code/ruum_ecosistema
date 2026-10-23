@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { COOKIE_RECOVERY_USUARIO, COOKIE_RECOVERY_LEGACY, RUTA_COOKIE_RECOVERY } from "@ruum/shared/utils";
 import { obtenerIp, rateLimitConVentana } from "@/lib/csp-rate-limit";
+import { verificarCsrfORechazar } from "@/lib/csrf";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -54,6 +55,8 @@ export async function POST(request: NextRequest) {
   if (!esMismoOrigen(request)) {
     return NextResponse.json({ error: "Origen no permitido." }, { status: 403, headers: { "Cache-Control": "no-store" } });
   }
+  const rechazoCsrf = verificarCsrfORechazar(request);
+  if (rechazoCsrf) return rechazoCsrf;
 
   const limite = await rateLimitConVentana(obtenerIp(request), "recovery-clear-ip", MAX_POR_HORA, VENTANA_MS);
   if (!limite.allowed) {

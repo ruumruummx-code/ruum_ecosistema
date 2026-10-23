@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { traducirErrorAuth } from "@ruum/shared/utils";
 import { registrarEventoUx } from "@/lib/analytics";
+import { obtenerHeadersCsrf } from "@/lib/csrf";
 import {
   CLAVE_CORREO_CONFIRMACION,
   CLAVE_REENVIO_CONFIRMACION_HASTA,
@@ -331,7 +332,7 @@ function ContenidoConfirmaCorreo() {
     try {
       const res = await fetch("/api/auth/verify-otp", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: obtenerHeadersCsrf({ "Content-Type": "application/json" }),
         body: JSON.stringify({ email: correo, codigo: codigoLimpio }),
         cache: "no-store",
       });
@@ -370,7 +371,7 @@ function ContenidoConfirmaCorreo() {
     try {
       const res = await fetch("/api/auth/resend", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: obtenerHeadersCsrf({ "Content-Type": "application/json" }),
         body: JSON.stringify({ email: correo }),
         cache: "no-store",
       });
