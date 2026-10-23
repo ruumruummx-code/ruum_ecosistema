@@ -8,6 +8,7 @@ import type { Database } from "@ruum/shared/types";
 import { actualizarPerfilUsuario, obtenerUrlFotoPerfilUsuario, subirFotoPerfil } from "@ruum/api/services";
 import { consultarCodigoPostalMx } from "../../lib/codigos-postales";
 import { crearClienteNavegador, tieneSupabaseConfigurado } from "../../lib/supabase-browser";
+import { logStructuredWarn } from "../../lib/logger";
 
 type Usuario = Database["public"]["Tables"]["usuarios"]["Row"];
 
@@ -129,7 +130,8 @@ export function PerfilCuentaForm({ usuario, fotoUrlInicial }: { usuario: Usuario
       } else if (!datosCp.ciudades.length || !datosCp.colonias.length) {
         setCpAviso("Captura manualmente los campos que no se prellenaron con el CP.");
       }
-    } catch {
+    } catch (err) {
+      logStructuredWarn("cuenta/PerfilCuentaForm", "lookup_cp_fallido", err, { cp });
       setCiudadesCp([]);
       setColoniasCp([]);
       setCpAviso("No pudimos encontrar ese CP. Captura estado, ciudad y colonia manualmente.");

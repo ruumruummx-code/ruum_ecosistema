@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createHash } from "node:crypto";
 import { crearClienteServidor } from "@/lib/supabase-server";
 import { getRedis, obtenerIp, rateLimitConVentana } from "@/lib/csp-rate-limit";
+import { logStructuredWarn } from "@/lib/logger";
 import { obtenerRutaDirectionsMapboxConParadas } from "@ruum/shared/utils";
 
 export const dynamic = "force-dynamic";
@@ -49,8 +50,9 @@ export async function POST(request: NextRequest) {
       if (user?.id) {
         identificador = `uid:${user.id}`;
       }
-    } catch {
+    } catch (err) {
       // Sin sesión activa o error leyendo cookies
+      logStructuredWarn("api/ruta", "sesion_lectura_omitida", err);
     }
 
     if (!identificador) {

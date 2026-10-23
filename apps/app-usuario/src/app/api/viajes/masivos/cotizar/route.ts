@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { crearClienteServidor } from "@/lib/supabase-server";
 import { rateLimitConVentana } from "@/lib/csp-rate-limit";
+import { logStructuredError, logStructuredWarn } from "@/lib/logger";
 import { clienteMasivoServicio, stripeMasivo, validarFilasServidor } from "@/lib/carga-masiva-server";
 import { previsualizarTarifasMasivasUsuario, verificarUsuarioMasivo, guardarCheckoutMasivoServidor, vincularPagoMasivoServidor } from "@ruum/api/services";
 import { coordenadaPostalMasiva, ErrorServicioCotizacion } from "@/lib/mapbox-masivo";
@@ -74,6 +75,12 @@ export async function POST(request: NextRequest) {
               if (err instanceof ErrorServicioCotizacion && (err.status === 401 || err.status === 403)) {
                 throw err;
               }
+              if (intento === MAX_INTENTOS) {
+                logStructuredWarn("api/viajes/masivos/cotizar", "ruta_fila_agotada", err, {
+                  indice: fila.indice,
+                  intentos: intento + 1,
+                });
+              }
             }
           }
           if (ultimoError instanceof ErrorServicioCotizacion && ultimoError.status === 429) {
@@ -128,6 +135,9 @@ export async function POST(request: NextRequest) {
     await vincularPagoMasivoServidor(servicio, id, user.id, intent.id);
     return NextResponse.json({ id, clientSecret: intent.client_secret, totalMXN: guardado.monto_centavos / 100, cotizaciones: guardado.cotizaciones });
   } catch (err) {
+    logStructuredError("api/viajes/masivos/cotizar", "cotizacion_masiva_fallida", err, {
+      usuarioId: user.id,
+    });
     if (err instanceof ErrorServicioCotizacion) return NextResponse.json({ error: err.message }, { status: err.status });
     if (err && typeof err === "object" && "message" in err && String(err.message).includes("RATE_LIMITED")) return NextResponse.json({ error: "Alcanzaste el límite de cotizaciones masivas. Espera un minuto y reintenta." }, { status: 429, headers: { "Retry-After": "60" } });
     return NextResponse.json({ error: err instanceof Error ? err.message : "No se pudo cotizar la carga." }, { status: 503 });

@@ -145,8 +145,8 @@ La app se despliega como Next.js en Vercel. La configuración por app es
    Confirmar en Sentry un evento de prueba controlado y que muestre el release
    esperado y stack trace simbolicado.
 7. Promover/asignar el deployment validado al dominio de producción según el
-   flujo de Vercel. Revisar errores, latencia, eventos de rol fail-open y
-   rate-limit después de la promoción.
+   flujo de Vercel. Revisar errores, latencia, eventos de fallo de verificación
+   de rol, respuestas 503 asociadas y rate-limit después de la promoción.
 
 El workflow sintético externo corre cada cinco minutos; si falla, revisar su run
 y aplicar [`ops/RUNBOOK_HEALTH.md`](ops/RUNBOOK_HEALTH.md). Configurar las

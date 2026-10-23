@@ -35,8 +35,8 @@
 - **Filter:** `extra.scope: evidencia|offline`
 - **Action:** Slack `#conductor-ops`
 
-### 6) Fallo al verificar rol de conductor — fail-open
-- **Evento/métrica:** `conductor_role_verification_failed` (cada excepción de `clasificarRolApp` en el middleware). El middleware registra un evento estructurado en Vercel Logs y trata de persistirlo en `eventos_operativos_app`.
+### 6) Fallo al verificar rol de conductor — fail-closed
+- **Evento/métrica:** `conductor_role_verification_failed` (cada fallo de `clasificarRolApp` tras 2 reintentos en el middleware). La petición protegida recibe HTTP 503; el middleware registra un evento estructurado en Vercel Logs y trata de persistirlo en `eventos_operativos_app`.
 - **Dimensiones:** `ambito=app-conductor`, `pathname`, `motivo` (código corto) y `version_app`. No agregar ID de usuario, cookies ni tokens. El evento no incluye campo de ambiente; ejecutar el monitor contra la BD del ambiente que se alerta y filtrar `environment=production` en Vercel Logs.
 - **Ventana y umbral:** contar filas/eventos de los últimos 5 minutos; **warning con 1 o más**, **page a Seguridad + on-call con 3 o más**. Agrupar por versión/ruta para distinguir una caída general de un endpoint aislado.
 - **Fuente principal:** monitor SQL ejecutado cada minuto con conexión de solo lectura autorizada para consultar eventos operativos:

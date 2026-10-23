@@ -4,6 +4,7 @@ import { z } from "zod";
 import { crearClienteServidor } from "@/lib/supabase-server";
 import { clienteMasivoServicio, stripeMasivo } from "@/lib/carga-masiva-server";
 import { rateLimitConVentana } from "@/lib/csp-rate-limit";
+import { logStructuredError } from "@/lib/logger";
 export const dynamic = "force-dynamic";
 export async function GET(request: NextRequest) {
   const cliente = await crearClienteServidor();
@@ -23,7 +24,11 @@ export async function GET(request: NextRequest) {
     if (intent.status !== "succeeded") return NextResponse.json({ pagado: false });
     await confirmarPagoMasivoServidor(servicio, id.data, intent.id, intent.amount_received, intent.currency);
     return NextResponse.json({ pagado: true });
-  } catch {
+  } catch (err) {
+    logStructuredError("api/viajes/masivos/estado", "conciliacion_pago_fallida", err, {
+      cargaId: id.data,
+      usuarioId: user.id,
+    });
     return NextResponse.json({ error: "El pago está pendiente de conciliación. Puedes revisar el historial en unos momentos." }, { status: 503 });
   }
 }

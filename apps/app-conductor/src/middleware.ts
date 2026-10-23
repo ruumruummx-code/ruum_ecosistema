@@ -1,5 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { crearClienteServidor } from "@ruum/api/supabase";
+import { verificarRolConReintentos } from "./lib/role-verification-retry";
 import {
   buildCsp,
   COOKIE_ROL_APP,
@@ -49,8 +50,8 @@ function esRutaPublicaConductor(pathname: string): boolean {
  * 3. Gate de autenticación: rutas protegidas sin sesión → /login?next=... (o 401 si es /api/*).
  * 4. Gate de rol: un usuario/pasajero no puede operar en app-conductor → /403?reason=rol_usuario.
  *    El rol se cachea en cookie httpOnly firmada (TTL 5 min) y, si la verificación
- *    falla, el middleware deja pasar (fail-open) pero emite alerta + métrica
- *    `conductor_role_verification_failed`. El respaldo real es RLS.
+ *    falla tras dos reintentos, el middleware deniega temporalmente con 503 y
+ *    emite la métrica `conductor_role_verification_failed`.
  * 5. Redirección inversa: sesión válida en /login|/onboarding → /panel.
  */
 function buildCspConductor(nonce: string, isProd: boolean) {
@@ -151,10 +152,9 @@ export async function middleware(request: NextRequest) {
     //
     // El rol se cachea en una cookie httpOnly firmada (HMAC-SHA256, TTL 5 min)
     // para no pagar 2 SELECT a PostgREST en cada petición protegida.
-    // El fail-open se mantiene a propósito: un conductor en plena ruta con red
-    // inestable no debe quedar bloqueado. Lo que respalda ese fail-open es RLS
-    // (test pgTAP rt67_rls_rol_usuario_no_accede_conductor) y la métrica
-    // `conductor_role_verification_failed` que alerta cuando falla la verificación.
+    // Ante un fallo transitorio se reintenta dos veces; si la identidad sigue
+    // sin poder verificarse, se deniega con 503. No se asume que RLS compense
+    // una clasificación de rol fallida.
     const secretoRol = process.env.RUUM_ROLE_COOKIE_SECRET?.trim() ?? "";
     const cacheable = secretoRol.length >= 32;
     let valorCookieRol: string | null = null;
@@ -172,13 +172,9 @@ export async function middleware(request: NextRequest) {
     if (!rol) {
       try {
         const { clasificarRolApp } = await import("@ruum/api/identity");
-        rol = await clasificarRolApp(supabase, user.id);
-        if (cacheable) {
-          valorCookieRol = await firmarRolApp(rol, user.id, secretoRol);
-          response.cookies.set(COOKIE_ROL_APP, valorCookieRol, opcionesCookieRolApp());
-        }
+        rol = await verificarRolConReintentos(() => clasificarRolApp(supabase, user.id));
       } catch (e) {
-        // Si falla la verificación (red, etc.), se permite continuar; RLS en Supabase sigue protegiendo mutaciones
+        // Fallo cerrado: una sesión autenticada sin rol verificable no entra a la app.
         const motivo = codigoErrorCorto(e);
         console.error(
           JSON.stringify({
@@ -187,7 +183,7 @@ export async function middleware(request: NextRequest) {
             scope: "conductor_middleware",
             kind: "security_event",
             timestamp: new Date().toISOString(),
-            context: { pathname, motivo, failOpen: true }
+            context: { pathname, motivo, accessDecision: "deny_503", attempts: 3 }
           })
         );
         try {
@@ -198,7 +194,20 @@ export async function middleware(request: NextRequest) {
             ambito: "app-conductor"
           });
         } catch {
-          /* la métrica nunca debe romper el fail-open */
+          /* la métrica nunca debe cambiar la denegación por fallo cerrado */
+        }
+        return applyCspHeaders(
+          NextResponse.json({ error: "No se pudo verificar el rol. Inténtalo de nuevo." }, { status: 503 }),
+          nonce
+        );
+      }
+      if (cacheable && rol) {
+        try {
+          valorCookieRol = await firmarRolApp(rol, user.id, secretoRol);
+          response.cookies.set(COOKIE_ROL_APP, valorCookieRol, opcionesCookieRolApp());
+        } catch (e) {
+          // El rol sí fue verificado; fallar la cache sólo fuerza otra consulta.
+          console.warn("[security] No se pudo cachear el rol verificado", { motivo: codigoErrorCorto(e) });
         }
       }
     }

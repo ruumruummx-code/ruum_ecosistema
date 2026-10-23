@@ -1,6 +1,7 @@
 import { obtenerDatos } from "./obtenerDatosTraslado";
 import { TrasladoNoEncontrado } from "./TrasladoNoEncontrado";
 import { PasaporteDigitalSegmentado } from "./PasaporteDigitalSegmentado";
+import { logStructuredError } from "@/lib/logger";
 
 // El Pasaporte contiene datos protegidos por sesión y cambia con el estado
 // operativo del traslado; nunca debe prerenderizarse ni servirse desde caché.
@@ -45,8 +46,11 @@ export default async function PaginaTraslado({ params }: { params: Promise<{ id:
         // Tratar como no encontrado para no filtrar existencia (IDOR)
         return <TrasladoNoEncontrado />;
       }
-    } catch {
+    } catch (err) {
       // Si falla la verificación de sesión, no exponer datos
+      logStructuredError("viajes/detalle", "verificacion_propietario_fallida", err, {
+        trasladoId: id,
+      });
       return <TrasladoNoEncontrado variante="sesion" />;
     }
   }

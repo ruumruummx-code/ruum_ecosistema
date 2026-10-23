@@ -12,6 +12,7 @@ import { MobileBadge, MobileCard } from "@ruum/ui";
 import { VerificacionForm } from "./VerificacionForm";
 import { obtenerUsuarioActual } from "@ruum/api/services";
 import { destinoSeguro } from "@ruum/shared/utils";
+import { logStructuredWarn } from "../../lib/logger";
 
 interface Props {
   searchParams: Promise<{ next?: string }>;
@@ -82,8 +83,9 @@ export default async function PaginaVerificacion({ searchParams }: Props) {
     estadoVerificacion = usuario?.estado_verificacion ?? null;
     docYaSubido = !!usuario?.doc_identidad_url;
     fotoPerfilUrl = usuario?.foto_url ?? null;
-  } catch {
+  } catch (err) {
     /* si falla, mostrar el formulario normalmente */
+    logStructuredWarn("verificacion", "lectura_estado_verificacion_fallida", err);
   }
 
   /* Si ya subió documentación y está en revisión → pantalla de espera */

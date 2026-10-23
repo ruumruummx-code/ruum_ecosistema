@@ -2,6 +2,7 @@ import { defineConfig } from "vitest/config";
 import { fileURLToPath } from "node:url";
 
 export default defineConfig({
+  esbuild: { jsx: "automatic" },
   resolve: {
     alias: {
       "@": fileURLToPath(new URL("./src", import.meta.url))
@@ -48,7 +49,11 @@ export default defineConfig({
         "src/app/viajes/*/evidencia/**": { lines: 60, branches: 60, functions: 60, statements: 60 },
         "src/app/viajes/*/cierre/**": { lines: 60, branches: 60, functions: 60, statements: 60 },
         "src/app/ganancias/**": { lines: 60, branches: 60, functions: 60, statements: 60 },
-        "src/app/cuenta/datos-bancarios/**": { lines: 60, branches: 60, functions: 60, statements: 60 }
+        "src/app/cuenta/datos-bancarios/**": { lines: 60, branches: 60, functions: 60, statements: 60 },
+        "src/app/login/**": { lines: 60, branches: 60, functions: 60, statements: 60 },
+        "src/app/registro/registration-types.ts": { lines: 60, branches: 60, functions: 60, statements: 60 },
+        "src/app/registro/registration-validation.ts": { lines: 60, branches: 60, functions: 60, statements: 60 },
+        "src/app/cuenta/**": { lines: 60, branches: 60, functions: 60, statements: 60 }
       },
       exclude: [
         // ── Infraestructura: nunca se mide ──────────────────────────────────
@@ -84,14 +89,14 @@ export default defineConfig({
         "src/app/configuracion/**",
         "src/app/documentos/**",
         "src/app/legal/**",
-        // La lógica de validación de login sí tiene unit tests; se excluye
-        // sólo la página de presentación.
-        "src/app/login/page.tsx",
         "src/app/nueva-password/**",
         "src/app/notificaciones/**",
         "src/app/onboarding/**",
         "src/app/panel/**",
         "src/app/recuperar-password/**",
+        // La lógica del registro tiene unit tests; la página es orquestación
+        // de presentación con pasos y modales, cubierta por pruebas E2E.
+        "src/app/registro/page.tsx",
         // La lógica de validación del registro tiene unit tests. Estas piezas
         // son presentación y permanecen fuera del cálculo global.
         "src/app/registro/AccountStep.tsx",
@@ -113,11 +118,9 @@ export default defineConfig({
         "src/app/registro/ReviewStep.tsx",
         "src/app/registro/ReviewSummary.tsx",
         "src/app/registro/SelectField.tsx",
-        "src/app/registro/page.tsx",
         "src/app/registro/registration.module.css",
         // Hooks de integración remota y orquestación del expediente todavía
         // requieren pruebas de integración aisladas antes de entrar al gate.
-        "src/app/registro/registration-types.ts",
         "src/app/registro/useRegistrationDocuments.ts",
         "src/app/registro/useRegistrationDraft.ts",
         "src/app/registro/useRegistrationTelemetry.ts",
@@ -164,18 +167,15 @@ export default defineConfig({
         "src/app/cuenta/datos-sensibles.stories.tsx",
         "src/app/cuenta/datos-sensibles.tsx",
         "src/app/cuenta/error.tsx",
-        "src/app/cuenta/page.tsx",
 
         // (4) Ruta crítica "datos bancarios": se mide su catálogo de bancos
         //     (bank-catalog.ts); la vista y la página son de presentación.
         "src/app/cuenta/datos-bancarios/DriverBankDetailsView.tsx",
-        "src/app/cuenta/datos-bancarios/page.tsx",
 
         // (5) Ruta crítica "ganancias": se mide su lógica (useEarningsLedger.ts,
         //     earnings-summary.ts); los componentes visuales quedan fuera.
         "src/app/ganancias/DriverEarningsLedger.tsx",
         "src/app/ganancias/DriverEarningsView.tsx",
-        "src/app/ganancias/EarningsPayoutsSection.tsx",
         "src/app/ganancias/EarningsSummary.tsx",
         "src/app/ganancias/EarningsTabs.tsx",
         "src/app/ganancias/EarningsTimeline.tsx",

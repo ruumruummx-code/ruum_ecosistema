@@ -9,6 +9,7 @@ import {
   confirmarPagoMasivoServidor,
 } from "@ruum/api/services";
 import { rateLimitConVentana } from "@/lib/csp-rate-limit";
+import { logStructuredError, logStructuredWarn } from "@/lib/logger";
 
 export const dynamic = "force-dynamic";
 
@@ -61,6 +62,10 @@ export async function GET(request: NextRequest) {
         creado_en: carga.creado_en,
       });
     } catch (err) {
+      logStructuredError("api/viajes/masivos/pendientes", "consulta_carga_pendiente_fallida", err, {
+        cargaId: idValidado.data,
+        usuarioId: user.id,
+      });
       return NextResponse.json({ error: err instanceof Error ? err.message : "Error al consultar la carga pendiente." }, { status: 500 });
     }
   }
@@ -79,6 +84,9 @@ export async function GET(request: NextRequest) {
     }));
     return NextResponse.json({ pendientes: lista });
   } catch (err) {
+    logStructuredError("api/viajes/masivos/pendientes", "listar_cargas_pendientes_fallido", err, {
+      usuarioId: user.id,
+    });
     return NextResponse.json({ error: err instanceof Error ? err.message : "Error al listar cargas pendientes." }, { status: 500 });
   }
 }
@@ -106,14 +114,22 @@ export async function DELETE(request: NextRequest) {
           `payment_intents/${encodeURIComponent(carga.stripe_payment_intent_id)}/cancel`,
           new URLSearchParams()
         );
-      } catch {
-        // Si ya estaba cancelado o no permite cancelación, ignorar
+      } catch (errCancel) {
+        // Si ya estaba cancelado o no permite cancelación, ignorar dejando traza estructurada
+        logStructuredWarn("api/viajes/masivos/pendientes", "cancelacion_payment_intent_ignorada", errCancel, {
+          cargaId: idValidado.data,
+          usuarioId: user.id,
+        });
       }
     }
 
     await descartarCheckoutMasivoServidor(servicio, idValidado.data, user.id);
     return NextResponse.json({ ok: true, descartado: idValidado.data });
   } catch (err) {
+    logStructuredError("api/viajes/masivos/pendientes", "descartar_carga_pendiente_fallido", err, {
+      cargaId: idValidado.data,
+      usuarioId: user.id,
+    });
     return NextResponse.json({ error: err instanceof Error ? err.message : "Error al descartar la carga." }, { status: 500 });
   }
 }

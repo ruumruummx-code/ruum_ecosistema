@@ -15,11 +15,10 @@ export interface DetalleFalloVerificacionRol {
 
 /**
  * Registra el fallo de verificación de rol como evento operativo: es la métrica
- * que respalda el fail-open del middleware (si el contador crece, RLS es el único
- * escudo y hay que revisar).
+ * que permite alertar sobre fallos de clasificación de identidad del middleware.
  *
- * Nunca lanza: el middleware es deliberadamente fail-open y la observabilidad
- * no debe convertir un fallo de red en un 500.
+ * Nunca lanza: la observabilidad no debe modificar la decisión de acceso
+ * (en app-conductor, el fallo de verificación termina en 503).
  */
 export async function registrarFalloVerificacionRol(
   cliente: Cliente,

@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { Icono, SENDAS_ICONO, useDialogAccesible } from "@ruum/ui";
 import type { Database } from "@ruum/shared/types";
 import { crearClienteNavegador } from "../../lib/supabase-browser";
+import { logStructuredError } from "../../lib/logger";
 import { iniciales } from "./cuenta-utils";
 
 type Usuario = Database["public"]["Tables"]["usuarios"]["Row"];
@@ -118,7 +119,8 @@ export function CuentaCliente({ seccionInicial = null, usuario, correoRegistro =
 
       router.replace("/login");
       router.refresh();
-    } catch {
+    } catch (err) {
+      logStructuredError("cuenta", "cerrar_sesion_fallido", err);
       setErrorSesion("No pudimos cerrar tu sesión. Intenta de nuevo.");
       setCerrandoSesion(false);
       salidaRef.current = false;

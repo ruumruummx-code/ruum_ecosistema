@@ -9,6 +9,7 @@ import { InicioUsuario } from "./InicioUsuario";
 import { BotonReintentarSesion } from "./ReintentarSesion";
 import { EnlaceRecorridoGuiado } from "./EnlaceRecorridoGuiado";
 import { construirNotificaciones, obtenerViajeActivo } from "../lib/inicio";
+import { logStructuredWarn } from "../lib/logger";
 import { botonAzul, botonContorno } from "./experiencia-publica";
 // RC-14: estilos responsivos del dashboard (ver InicioUsuario.css).
 import "./InicioUsuario.css";
@@ -42,7 +43,12 @@ async function obtenerContextoSesion(): Promise<ContextoSesion> {
 
     const [traslados, vehiculos] = await Promise.all([
       listarTrasladosDeUsuario(cliente, usuario.id),
-      listarVehiculosDeUsuario(cliente, usuario.id).catch(() => []),
+      listarVehiculosDeUsuario(cliente, usuario.id).catch((err) => {
+        logStructuredWarn("obtenerContextoSesion", "vehiculos_no_disponibles", err, {
+          usuarioId: usuario.id,
+        });
+        return [];
+      }),
     ]);
     const viajeActivo = obtenerViajeActivo(traslados);
     let conductorFotoUrl: string | null = null;

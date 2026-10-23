@@ -1,6 +1,7 @@
 import { firmarUrlsEvidencia } from "@ruum/api/services";
 import type { UbicacionTraslado } from "@ruum/api/services";
 import { obtenerPasaporteCompleto } from "@ruum/api/transfers";
+import { logStructuredWarn } from "@/lib/logger";
 import type {
   Calificacion,
   Disputa,
@@ -61,7 +62,10 @@ export async function obtenerDatos(id: string) {
   try {
     const fotos = completo.fotosEvidencia as FotoEvidencia[];
     evidenciaFirmada = await firmarUrlsEvidencia(cliente, fotos);
-  } catch {
+  } catch (err) {
+    logStructuredWarn("viajes/obtenerDatos", "firmar_urls_evidencia_fallido", err, {
+      trasladoId: id,
+    });
     evidenciaFirmada = ((completo.fotosEvidencia as FotoEvidencia[]) || []).map((f) => ({
       ...f,
       url_visual: null

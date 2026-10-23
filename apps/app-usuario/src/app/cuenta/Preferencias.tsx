@@ -7,6 +7,7 @@ import { HojaTareaCuenta } from "./HojaTareaCuenta";
 import type { Database } from "@ruum/shared/types";
 import { actualizarPreferenciasNotificaciones, actualizarPreferenciasGeneralesUsuario } from "@ruum/api/services";
 import { crearClienteNavegador, tieneSupabaseConfigurado } from "../../lib/supabase-browser";
+import { logStructuredWarn } from "../../lib/logger";
 import { desactivarTelemetriaActiva } from "../../lib/analytics";
 
 type Usuario = Database["public"]["Tables"]["usuarios"]["Row"];
@@ -211,7 +212,8 @@ export function Preferencias({ usuario }: PreferenciasProps) {
       colaGuardado.current = colaGuardado.current.then(async () => {
         try {
           await actualizarPreferenciasGeneralesUsuario(crearClienteNavegador(), payload);
-        } catch {
+        } catch (err) {
+          logStructuredWarn("cuenta/Preferencias", "sincronizar_preferencias_generales_fallido", err);
           setToastMensaje("Guardado en este dispositivo; no pudimos sincronizar con tu cuenta.");
         }
       });
@@ -223,7 +225,10 @@ export function Preferencias({ usuario }: PreferenciasProps) {
     if (!tieneSupabaseConfigurado()) return;
     colaGuardado.current = colaGuardado.current.then(async () => {
       try { await actualizarPreferenciasNotificaciones(crearClienteNavegador(), { [campo]: valor }); }
-      catch { setToastMensaje("Guardado en este dispositivo; no pudimos sincronizar con tu cuenta."); }
+      catch (err) {
+        logStructuredWarn("cuenta/Preferencias", "sincronizar_notificacion_fallido", err, { campo });
+        setToastMensaje("Guardado en este dispositivo; no pudimos sincronizar con tu cuenta.");
+      }
     });
     await colaGuardado.current;
   }

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Aviso, Field, MobileShell, MobileCard, MobileButton } from "@ruum/ui";
 import { fortalezaPassword, observarSesionRecuperacion, passwordCumpleRequisitos, requisitosPassword, traducirErrorAuth } from "@ruum/shared/utils";
 import { crearClienteNavegador, tieneSupabaseConfigurado } from "../../lib/supabase-browser";
+import { logStructuredWarn } from "../../lib/logger";
 import { LogoRuum } from "../experiencia-publica";
 
 function FormularioNuevaPassword() {

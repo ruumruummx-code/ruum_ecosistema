@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { crearClienteServidor } from "../../lib/supabase-server";
+import { logStructuredWarn } from "../../lib/logger";
 import { listarTrasladosDeUsuario, obtenerUsuarioActual } from "@ruum/api/services";
 import { NavegacionUsuario } from "../NavegacionUsuario";
 import { MobileShell, Icono } from "@ruum/ui";
@@ -29,8 +30,9 @@ export default async function PaginaPasaporte() {
     if (usuario) {
       traslados = await listarTrasladosDeUsuario(cliente, usuario.id);
     }
-  } catch {
+  } catch (err) {
     // Falla de red o sesión ausente
+    logStructuredWarn("pasaporte", "carga_pasaporte_activo_fallida", err);
   }
 
   if (!usuario) {

@@ -10,6 +10,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { crearClienteServidor } from "@ruum/api/supabase";
 import { COOKIE_RECOVERY_USUARIO, destinoSeguro, MAX_AGE_RECOVERY_S, RUTA_COOKIE_RECOVERY } from "@ruum/shared/utils";
+import { logStructuredWarn } from "@/lib/logger";
 
 type TipoOtpSanitizado = "signup" | "recovery" | "magiclink" | "email";
 
@@ -37,8 +38,9 @@ async function setRecoveryCookie(cookieStore: Awaited<ReturnType<typeof cookies>
        marca autorización cuando el usuario es conocido. */
     if (!data.user?.id) return;
     cookieStore.set(COOKIE_RECOVERY, data.user.id, opcionesCookieRecovery());
-  } catch {
+  } catch (err) {
     // No se setea marcador: /nueva-password rechazará el acceso.
+    logStructuredWarn("auth/callback", "set_recovery_cookie_fallido", err);
   }
 }
 
@@ -155,7 +157,9 @@ function clasificarCausaError(error: unknown, searchParams: URLSearchParams): "e
           if (usuarioPrevioId && nuevoUser && nuevoUser.id !== usuarioPrevioId) {
             queryMismatch = `?cuenta_distinta=1&anterior=${encodeURIComponent(usuarioPrevioEmail || "")}&nueva=${encodeURIComponent(nuevoUser.email || "")}`;
           }
-        } catch {}
+        } catch (err) {
+          logStructuredWarn("auth/callback", "verificacion_cambio_cuenta_pkce_omitida", err);
+        }
       } else {
         clearRecoveryCookie(cookieStore);
       }
@@ -187,7 +191,9 @@ function clasificarCausaError(error: unknown, searchParams: URLSearchParams): "e
           if (usuarioPrevioId && nuevoUser && nuevoUser.id !== usuarioPrevioId) {
             queryMismatch = `?cuenta_distinta=1&anterior=${encodeURIComponent(usuarioPrevioEmail || "")}&nueva=${encodeURIComponent(nuevoUser.email || "")}`;
           }
-        } catch {}
+        } catch (err) {
+          logStructuredWarn("auth/callback", "verificacion_cambio_cuenta_pkce_omitida", err);
+        }
       } else {
         clearRecoveryCookie(cookieStore);
       }

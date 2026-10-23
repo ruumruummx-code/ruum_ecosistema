@@ -8,6 +8,7 @@ import type { Database } from "@ruum/shared/types";
 import { actualizarFechaNacimientoUsuario, actualizarPerfilUsuario, obtenerUrlFotoPerfilUsuario, subirFotoPerfil } from "@ruum/api/services";
 import { consultarCodigoPostalMx } from "../../lib/codigos-postales";
 import { crearClienteNavegador, tieneSupabaseConfigurado } from "../../lib/supabase-browser";
+import { logStructuredWarn } from "../../lib/logger";
 import { soloDigitos, telefonoLocalMx, telefonoMx } from "../../lib/registro-usuario";
 
 type Usuario = Database["public"]["Tables"]["usuarios"]["Row"];
@@ -177,8 +178,9 @@ export function DatosPersonales({ usuario, fotoUrlInicial, correoRegistro }: Dat
           setColonia(datosCp.colonias[0] ?? "");
         }
       }
-    } catch {
+    } catch (err) {
       // Dejar captura manual si falla el lookup
+      logStructuredWarn("cuenta/DatosPersonales", "lookup_cp_fallido", err, { cp });
     }
   }
 

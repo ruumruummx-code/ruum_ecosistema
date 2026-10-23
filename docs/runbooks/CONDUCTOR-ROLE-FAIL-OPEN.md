@@ -3,11 +3,12 @@
 ## Riesgo y comportamiento
 
 El middleware de `app-conductor` valida la sesión con Supabase Auth y después
-clasifica el rol de la cuenta. Si la clasificación lanza una excepción, la app
-**falla abierta**: permite que una sesión autenticada continúe y emite
-`conductor_role_verification_failed`. Esto evita bloquear a un conductor con un
-traslado activo durante una caída o intermitencia de red, pero una cuenta sin
-rol de conductor podría alcanzar páginas de la app mientras dure el fallo.
+clasifica el rol de la cuenta. Ante una excepción reintenta dos veces (50 ms y
+100 ms). Si los tres intentos fallan, **falla cerrado**: deniega la petición
+protegida con HTTP 503 y emite `conductor_role_verification_failed`. Una
+interrupción del proveedor puede bloquear temporalmente a conductores legítimos;
+la respuesta 503 les permite reintentar sin conceder acceso a una identidad
+cuyo rol no pudo verificarse.
 
 La política RLS de Supabase es la barrera de autorización de datos y mutaciones;
 no asumir que el middleware por sí solo protege una operación. Si RLS falta o
@@ -15,9 +16,8 @@ una ruta privilegiada no la aplica, el riesgo pasa de acceso a UI a lectura o
 mutación no autorizada.
 
 El middleware emite el log estructurado antes de intentar registrar el evento
-en `eventos_operativos_app`. La persistencia de la métrica es best-effort y no
-debe bloquear el fail-open; una falla de la RPC puede dejar el log como única
-señal disponible.
+en `eventos_operativos_app`. La persistencia es best-effort y no cambia la
+denegación; si falla la RPC, el log de Vercel queda como señal alternativa.
 
 ## Disparador y severidad
 
@@ -52,10 +52,10 @@ JSON en Vercel Logs: ese log se genera antes del intento de persistencia.
 5. Si hay indicios de bypass de RLS o acceso/mutación no autorizados, elevar a
    incidente de seguridad, pausar el rollout y aplicar la mitigación aprobada
    por Seguridad (bloqueo temporal de las operaciones sensibles o rollback).
-   No confiar en que el fail-open del middleware detenga una operación.
+   No confiar únicamente en el middleware para detener una operación.
 6. Si se confirma una falla transitoria de Supabase/red sin bypass de RLS,
-   mantener el servicio operativo mientras se recupera la verificación. No
-   deshabilitar RLS ni ampliar privilegios para eliminar la alerta.
+   restaurar la verificación y monitorizar los 503 hasta recuperar el servicio.
+   No deshabilitar RLS ni ampliar privilegios para eliminar la alerta.
 7. Tras corregir la causa, repetir las pruebas de roles y RLS, confirmar que la
    métrica queda en cero durante 30 minutos y documentar causa raíz, alcance y
    acciones preventivas.

@@ -5,6 +5,7 @@ import { Icono } from "@ruum/ui";
 import type { Database } from "@ruum/shared/types";
 import { listarDocumentosCuentaUsuario, type DocumentoCuenta, type TipoDocumentoCuenta } from "@ruum/api/services";
 import { crearClienteNavegador } from "../../lib/supabase-browser";
+import { logStructuredError } from "../../lib/logger";
 import { FacturacionCuentaForm, type DatosFiscalesGuardados } from "./FacturacionCuentaForm";
 import { DocumentoCuentaTarjeta } from "./DocumentoCuentaTarjeta";
 import { HojaTareaCuenta } from "./HojaTareaCuenta";
@@ -52,7 +53,10 @@ export function VerificacionDocumentos({ usuario, empresa = null }: Verificacion
     setCargando(true); setError(null);
     void (async () => {
       try { const datos = await listarDocumentosCuentaUsuario(crearClienteNavegador()); if (activo) setDocumentos(datos); }
-      catch { if (activo) setError("No pudimos consultar tus documentos."); }
+      catch (err) {
+        logStructuredError("cuenta/VerificacionDocumentos", "listar_documentos_fallido", err);
+        if (activo) setError("No pudimos consultar tus documentos.");
+      }
       finally { if (activo) setCargando(false); }
     })();
     return () => { activo = false; };

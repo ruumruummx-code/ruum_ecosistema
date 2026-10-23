@@ -6,6 +6,7 @@ import Link from "next/link";
 import { IconoFlechaAtras, IconoFlechaDerecha, IconoUsuario, IconoUsuarioPlus, IconoCorreo, IconoCandado, IconoOjo, IconoOjoCerrado, IconoCheckCirculo, IconoCirculoVacio, IconoAlertaTriangulo } from "./iconos-registro";
 import { passwordCumpleRequisitos, traducirErrorAuth } from "@ruum/shared/utils";
 import { registrarEventoUx } from "../../lib/analytics";
+import { logStructuredWarn } from "../../lib/logger";
 import { tieneSupabaseConfigurado } from "../../lib/supabase-browser";
 import { OtpModal } from "./OtpModal";
 import "./registro.css";
@@ -198,7 +199,8 @@ export default function PaginaRegistro() {
       } else {
         setSegundosReenvio(60);
       }
-    } catch {
+    } catch (err) {
+      logStructuredWarn("registro", "envio_otp_sms_fallido", err);
       setErrorOtp("No se pudo enviar el mensaje SMS. Revisa tu conexión.");
     } finally {
       setEnviandoOtp(false);
@@ -246,7 +248,8 @@ export default function PaginaRegistro() {
 
       setPaso(2);
       requestAnimationFrame(() => emailRef.current?.focus());
-    } catch {
+    } catch (err) {
+      logStructuredWarn("registro", "verificacion_otp_sms_fallida", err);
       setErrorOtp("Ocurrió un error al verificar el código. Intenta de nuevo.");
       requestAnimationFrame(() => otpRef.current?.focus());
     } finally {

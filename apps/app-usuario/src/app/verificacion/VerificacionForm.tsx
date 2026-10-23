@@ -15,6 +15,7 @@ import {
   type PerfilUsuarioActualizable
 } from "@ruum/api/services";
 import { consultarCodigoPostalMx } from "../../lib/codigos-postales";
+import { logStructuredWarn } from "../../lib/logger";
 import { VerificationSheet } from "./VerificationSheet";
 import { DiditVerificationModal } from "./DiditVerificationModal";
 
@@ -144,8 +145,9 @@ export function VerificacionForm({ fotoPerfilInicial, soloDidit = false, destino
           router.push(destinoExito);
           router.refresh();
         }
-      } catch {
+      } catch (err) {
         // reintenta en el próximo ciclo
+        logStructuredWarn("verificacion/VerificacionForm", "polling_didit_intento_fallido", err, { intentos });
       }
     }, 2000);
 
@@ -230,7 +232,8 @@ export function VerificacionForm({ fotoPerfilInicial, soloDidit = false, destino
           );
           return;
         }
-      } catch {
+      } catch (err) {
+        logStructuredWarn("verificacion/VerificacionForm", "compresion_foto_perfil_fallida", err, { sizeMB });
         setErrorDidit(
           `La foto pesa ${sizeMB} MB y supera ${TAMANO_MAXIMO_RETRATO_DIDIT_MB} MB. Comprime la imagen antes de subirla: en iPhone Fotos > Compartir > Guardar en Archivos reduce calidad, o usa tinypng.com.`
         );
@@ -376,7 +379,8 @@ export function VerificacionForm({ fotoPerfilInicial, soloDidit = false, destino
       setColoniasCp(datos.colonias ?? []);
       setColonia(datos.colonias?.[0] ?? "");
       setCpAviso(null);
-    } catch {
+    } catch (err) {
+      logStructuredWarn("verificacion/VerificacionForm", "lookup_cp_fallido", err, { cp });
       setCpAviso("No encontramos ese código postal. Verifica o escríbelo manualmente.");
     } finally {
       setCpConsultando(false);

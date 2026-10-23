@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { crearClienteServidor } from "@/lib/supabase-server";
 import { obtenerIp, rateLimitConVentana } from "@/lib/csp-rate-limit";
+import { logStructuredError, logStructuredWarn } from "@/lib/logger";
 import { obtenerRutaDirectionsMapboxConParadas } from "@ruum/shared/utils";
 import {
   MAX_BYTES_GEOCODE,
@@ -22,7 +23,8 @@ async function geocodificarCP(cp: string, token: string): Promise<{ lat: number;
     const [lng, lat] = data.features?.[0]?.center ?? [];
     if (lat == null || lng == null) return null;
     return { lat, lng };
-  } catch {
+  } catch (err) {
+    logStructuredWarn("api/viajes/masivos/geocode", "geocodificar_cp_fallido", err, { cp });
     return null;
   }
 }
@@ -58,7 +60,8 @@ export async function POST(request: NextRequest) {
     let raw: string;
     try {
       raw = await request.text();
-    } catch {
+    } catch (err) {
+      logStructuredWarn("api/viajes/masivos/geocode", "lectura_body_fallida", err, { usuarioId: user.id });
       return NextResponse.json({ error: "Payload inválido." }, { status: 400 });
     }
 
@@ -70,7 +73,8 @@ export async function POST(request: NextRequest) {
     let bodyJson: unknown;
     try {
       bodyJson = JSON.parse(raw);
-    } catch {
+    } catch (err) {
+      logStructuredWarn("api/viajes/masivos/geocode", "json_invalido", err, { usuarioId: user.id });
       return NextResponse.json({ error: "Payload inválido." }, { status: 400 });
     }
 
@@ -115,7 +119,12 @@ export async function POST(request: NextRequest) {
               distanciaKm: ruta?.distanciaKm ?? null,
               tiempoEstimadoHoras: ruta?.tiempoHoras ?? null,
             };
-          } catch {
+          } catch (err) {
+            logStructuredWarn("api/viajes/masivos/geocode", "calculo_ruta_par_fallido", err, {
+              indice: par.indice,
+              origenCP: par.origenCP,
+              destinoCP: par.destinoCP,
+            });
             return { indice: par.indice, distanciaKm: null, tiempoEstimadoHoras: null };
           }
         }),
@@ -125,7 +134,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ rutas }, { status: 200 });
   } catch (err) {
-    console.warn("[api/viajes/masivos/geocode] error", err);
+    logStructuredError("api/viajes/masivos/geocode", "error_interno", err);
     return NextResponse.json({ error: "Error interno." }, { status: 500 });
   }
 }
