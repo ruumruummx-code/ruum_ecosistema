@@ -1,4 +1,5 @@
 import { Redis } from "@upstash/redis";
+import { logStructuredWarn } from "./logger";
 
 export const MAX_BODY = 5 * 1024;
 export const RATE_WINDOW_MS = 60_000;
@@ -36,9 +37,10 @@ export function getRedis(): Redis | null {
     }
     redisClient = Redis.fromEnv();
     return redisClient;
-  } catch {
+  } catch (err) {
     // A4: se registra el momento para reintentar más tarde en vez de
     // quedarse en null durante toda la vida de la instancia.
+    logStructuredWarn("security/csp-rate-limit", "redis_init_fallido", err);
     redisClient = null;
     redisUltimoFalloMs = Date.now();
   }

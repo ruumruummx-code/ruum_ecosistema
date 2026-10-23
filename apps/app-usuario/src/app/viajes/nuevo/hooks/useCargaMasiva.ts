@@ -1,6 +1,7 @@
 "use client";
 import { useCallback, useEffect, useReducer, useRef, useState } from "react";
 import { validarFila, normalizarFilaPlantilla, valorCelda, type FilaValidada } from "@/lib/carga-masiva";
+import { logStructuredWarn } from "@/lib/logger";
 
 export const STORAGE_KEY_CARGA_ACTIVA = "ruum_carga_masiva_activa_id";
 
@@ -224,8 +225,9 @@ export function useCargaMasiva() {
         const resultado = await res.json();
         if (!res.ok) throw new Error(resultado.error ?? "No se pudo revalidar la fila.");
         if (!controller.signal.aborted) dispatch({ type: "FILA_VALIDADA", fila: { ...resultado.filas[0], indice, validando: false } });
-      } catch {
+      } catch (err) {
         if (controller.signal.aborted) return;
+        logStructuredWarn("viajes/useCargaMasiva", "revalidacion_fila_fallida", err, { indice, campo });
         dispatch({ type: "FILA_VALIDADA", fila: { ...validarFila(datos, indice), estado: "error", errores: { [campo]: "No se pudo verificar. Edita el campo para reintentar." }, validando: false } });
       }
     })();
@@ -337,8 +339,9 @@ export function useCargaMasiva() {
   const descartarCargaPendiente = useCallback(async (id: string): Promise<void> => {
     try {
       await fetch(`/api/viajes/masivos/pendientes?id=${encodeURIComponent(id)}`, { method: "DELETE" });
-    } catch {
-      // Ignorar errores de red en descarte
+    } catch (err) {
+      // Ignorar errores de red en descarte dejando traza estructurada
+      logStructuredWarn("viajes/useCargaMasiva", "descartar_carga_red_fallido", err, { cargaId: id });
     } finally {
       try { localStorage.removeItem(STORAGE_KEY_CARGA_ACTIVA); } catch {}
       setCargaPendienteStorage(null);
@@ -353,7 +356,8 @@ export function useCargaMasiva() {
       const res = await fetch("/api/viajes/masivos/pendientes");
       const data = await res.json();
       return (data.pendientes ?? []) as Array<{ id: string; totalMXN: number; cantidad_traslados: number; creado_en?: string }>;
-    } catch {
+    } catch (err) {
+      logStructuredWarn("viajes/useCargaMasiva", "consultar_cargas_pendientes_fallido", err);
       return [];
     }
   }, []);

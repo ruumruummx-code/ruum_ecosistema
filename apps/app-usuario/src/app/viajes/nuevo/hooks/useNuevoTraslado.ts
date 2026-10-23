@@ -6,6 +6,7 @@ import {
   previsualizarTarifaUsuario,
 } from "@ruum/api/services";
 import { registrarEventoUx, iniciarFlujoTraslado, registrarPasoIniciado, registrarPasoCompletado, registrarAbandono } from "@/lib/analytics";
+import { logStructuredWarn } from "@/lib/logger";
 import {
   mensajeErrorMapbox,
   sugerirDireccionesAutocomplete,
@@ -422,8 +423,11 @@ export function useNuevoTraslado() {
             }
           }
         }
-      } catch {
-        if (!cancelado) setPrevisualizacion(null);
+      } catch (err) {
+        if (!cancelado) {
+          logStructuredWarn("viajes/useNuevoTraslado", "previsualizacion_tarifa_fallida", err);
+          setPrevisualizacion(null);
+        }
       } finally {
         if (!cancelado) setPrevisualizando(false);
       }
@@ -475,7 +479,11 @@ export function useNuevoTraslado() {
             tarifa_nueva: String(valor ?? ""),
             timestamp: new Date().toISOString(),
           } as never);
-        } catch {}
+        } catch (err) {
+          logStructuredWarn("viajes/useNuevoTraslado", "parse_tarifa_snapshot_fallido", err, {
+            campo: String(campo),
+          });
+        }
       }
     }
 

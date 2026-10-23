@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef } from "react";
 import { consultarCodigoPostalMx } from "@/lib/codigos-postales";
 import { sugerirDireccionesPorCodigoPostal } from "@/lib/mapbox";
+import { logStructuredWarn } from "@/lib/logger";
 import { RETRASO_CONSULTA_CODIGO_POSTAL_MS, soloDigitos } from "../constants";
 import type { PrefijoDomicilio } from "../constants";
 import type { DatosFormulario } from "../types";
@@ -69,9 +70,10 @@ export function useCodigoPostal({
     codigoPostalAbortRef.current[prefijo] = controller;
     let avisoMapbox: string | null = null;
     try {
-      const sugerenciasMapboxPromise = sugerirDireccionesPorCodigoPostal(cp, controller.signal).catch(() => {
+      const sugerenciasMapboxPromise = sugerirDireccionesPorCodigoPostal(cp, controller.signal).catch((err) => {
         // Mapbox es complementario: un fallo externo no invalida el catálogo
         // postal local ni debe presentarse como CP inexistente.
+        logStructuredWarn("viajes/useCodigoPostal", "sugerencias_mapbox_cp_fallidas", err, { prefijo, cp });
         avisoMapbox = "No pudimos cargar referencias de Mapbox. Puedes continuar con el catálogo postal local.";
         return [] as string[];
       });
@@ -100,7 +102,8 @@ export function useCodigoPostal({
       }));
       setCpOpciones((prev) => ({ ...prev, [prefijo]: datosCp }));
       if (avisoMapbox) setCpAviso((prev) => ({ ...prev, [prefijo]: avisoMapbox }));
-    } catch {
+    } catch (err) {
+      logStructuredWarn("viajes/useCodigoPostal", "consulta_catalogo_cp_fallida", err, { prefijo, cp });
       if (vigente()) {
         setCpAviso((prev) => ({
           ...prev,

@@ -9,6 +9,7 @@ import {
   type SugerenciaDireccion,
 } from "@/lib/mapbox";
 import { obtenerUbicacionActual } from "@/lib/ubicacion";
+import { logStructuredWarn } from "@/lib/logger";
 import { AutocompletarDireccion } from "./AutocompletarDireccion";
 import styles from "./cotizador.module.css";
 
@@ -116,11 +117,13 @@ export function DireccionMapa({
               setAviso(
                 "No encontramos una dirección en ese punto. Busca otra ubicación o completa los datos manualmente.",
               );
-          } catch {
-            if (!controller.signal.aborted && !disposed)
+          } catch (err) {
+            if (!controller.signal.aborted && !disposed) {
+              logStructuredWarn("viajes/DireccionMapa", "geocodificacion_inversa_fallida", err, { prefijo });
               setAviso(
                 "No pudimos consultar ese punto. Reintenta o captura la dirección manualmente.",
               );
+            }
           } finally {
             if (!controller.signal.aborted && !disposed) setResolviendo(false);
           }
@@ -143,11 +146,13 @@ export function DireccionMapa({
           "bottom-right",
         );
       })
-      .catch(() => {
-        if (!disposed)
+      .catch((err) => {
+        if (!disposed) {
+          logStructuredWarn("viajes/DireccionMapa", "carga_mapa_fallida", err, { prefijo });
           setAviso(
             "No pudimos abrir el mapa. Usa la búsqueda o la captura manual.",
           );
+        }
       });
     return () => {
       disposed = true;
@@ -214,11 +219,13 @@ export function DireccionMapa({
         setAviso(
           "No encontramos tu dirección. Puedes buscarla o capturarla manualmente.",
         );
-    } catch {
-      if (!controller.signal.aborted)
+    } catch (err) {
+      if (!controller.signal.aborted) {
+        logStructuredWarn("viajes/DireccionMapa", "geolocalizacion_fallida", err, { prefijo });
         setAviso(
           "No pudimos obtener tu ubicación. Busca la dirección manualmente.",
         );
+      }
     } finally {
       if (!controller.signal.aborted) setResolviendo(false);
     }

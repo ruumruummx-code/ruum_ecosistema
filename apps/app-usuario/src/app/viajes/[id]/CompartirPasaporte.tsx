@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { logStructuredWarn } from "@/lib/logger";
 
 function IconoCompartir({ className = "size-5" }: { className?: string }) {
   return (
@@ -77,7 +78,8 @@ export function CompartirPasaporte({
         await navigator.clipboard.writeText(window.location.href);
         cambiarEstado("copiado");
         programarRegresoAOcioso();
-      } catch {
+      } catch (err) {
+        logStructuredWarn("viajes/CompartirPasaporte", "portapapeles_no_disponible", err, { folio });
         cambiarEstado("error");
       }
     }

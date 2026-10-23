@@ -1,4 +1,5 @@
 import "server-only";
+import { logStructuredWarn } from "./logger";
 
 export class ErrorServicioCotizacion extends Error {
   constructor(mensaje: string, public readonly status = 503) {
@@ -49,7 +50,8 @@ export async function coordenadaPostalMasiva(cp: string, token: string): Promise
       res = await fetch(`https://api.mapbox.com/search/geocode/v6/forward?${params}`, {
         signal: AbortSignal.timeout(8000)
       });
-    } catch {
+    } catch (err) {
+      logStructuredWarn("mapbox-masivo", "conexion_geocoding_fallida", err, { cp: normalizado });
       throw new ErrorServicioCotizacion("No se pudo conectar con el servicio de mapas. Reintenta la cotización.");
     }
 

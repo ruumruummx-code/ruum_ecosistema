@@ -6,6 +6,7 @@ import { MENSAJES_CLAVE_UX, TEXTOS_CARGANDO } from "@ruum/shared/constants";
 import { chatDisponible } from "@ruum/shared/rules";
 import type { Database } from "@ruum/shared/types";
 import { crearClienteNavegador, tieneSupabaseConfigurado } from "@/lib/supabase-browser";
+import { logStructuredWarn } from "@/lib/logger";
 import { obtenerMensajes, enviarMensaje, suscribirseAMensajes, crearLlamadaEnmascarada } from "@ruum/api/services";
 import { useTrasladoRealtime } from "@/state/AppStateProvider";
 
@@ -43,8 +44,9 @@ export function ChatTraslado({ trasladoId, estado, conservarEstado = false }: { 
       .then((cargados) => {
         if (!cancelado) cargarMensajes(cargados);
       })
-      .catch(() => {
+      .catch((err) => {
         if (!cancelado) {
+          logStructuredWarn("viajes/ChatTraslado", "carga_mensajes_fallida", err, { trasladoId });
           cargarMensajes([]);
           actualizar({ errorChat: "No pudimos cargar los mensajes del traslado." });
         }

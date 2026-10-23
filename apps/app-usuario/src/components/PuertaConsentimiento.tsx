@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import { ConsentimientoTerminosWall, requiereConsentimiento } from "./ConsentimientoTerminos";
 import { crearClienteNavegador } from "../lib/supabase-browser";
+import { logStructuredWarn } from "../lib/logger";
 import { obtenerUsuarioActual } from "@ruum/api/services";
 
 /**
@@ -51,8 +52,11 @@ export function PuertaConsentimiento() {
         if (requiereConsentimiento(usuario?.version_terminos_aceptada)) {
           setRequiere(true);
         }
-      } catch {
+      } catch (err) {
         // Fail-open: sin verificación no hay barrera (se reintentará al navegar).
+        logStructuredWarn("consentimiento/PuertaConsentimiento", "verificacion_consentimiento_fallida", err, {
+          pathname,
+        });
       }
     })();
     return () => {

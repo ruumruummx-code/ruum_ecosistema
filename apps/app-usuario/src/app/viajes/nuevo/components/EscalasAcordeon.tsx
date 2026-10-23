@@ -3,6 +3,7 @@
 import React, { memo, useEffect, useRef, useState } from "react";
 import { Field } from "@ruum/ui";
 import { sugerirDireccionesAutocomplete, type SugerenciaDireccion } from "@/lib/mapbox";
+import { logStructuredWarn } from "@/lib/logger";
 import type { ParadaForm, TipoTareaForm } from "../types";
 
 const TIPOS_TAREA: Array<{ valor: TipoTareaForm; etiqueta: string }> = [
@@ -81,7 +82,8 @@ export const EscalasAcordeon = memo(function EscalasAcordeon({
       try {
         const res = await sugerirDireccionesAutocomplete(valor);
         if (seq === busquedaSeqRef.current) setSugerencias((prev) => ({ ...prev, [id]: res }));
-      } catch {
+      } catch (err) {
+        logStructuredWarn("viajes/EscalasAcordeon", "autocompletado_parada_fallido", err, { paradaId: id });
         if (seq === busquedaSeqRef.current) setSugerencias((prev) => ({ ...prev, [id]: [] }));
       } finally {
         if (seq === busquedaSeqRef.current) setBuscandoId(null);

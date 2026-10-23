@@ -1,5 +1,6 @@
 import crypto from "crypto";
 import { soloDigitos, telefonoMx } from "./registro-usuario";
+import { logStructuredWarn } from "./logger";
 
 const EXPIRACION_TOKEN_MS = 15 * 60 * 1000; // 15 minutos de vigencia para el token de registro
 const CODIGO_MOCK_DEV = "123456";
@@ -84,7 +85,8 @@ export function validarTokenTelefono(
     if (bufEsperado.length !== bufRecibido.length || !crypto.timingSafeEqual(bufEsperado, bufRecibido)) {
       return { valido: false, error: "Firma inválida en el token de verificación." };
     }
-  } catch {
+  } catch (err) {
+    logStructuredWarn("auth/phone-verification", "comparacion_hmac_fallida", err);
     return { valido: false, error: "Error al validar la firma de seguridad." };
   }
 

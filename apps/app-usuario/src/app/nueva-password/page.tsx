@@ -59,8 +59,9 @@ function FormularioNuevaPassword() {
           setVerificando(false);
           return;
         }
-      } catch {
+      } catch (err) {
         // fallback a observer
+        logStructuredWarn("nueva-password", "verificacion_recovery_servidor_fallida", err);
       }
 
       if (!activo || !montadoRef.current) return;
@@ -117,18 +118,24 @@ function FormularioNuevaPassword() {
 
       try {
         await fetch("/api/recovery/clear", { method: "POST", cache: "no-store", credentials: "same-origin" });
-      } catch {}
+      } catch (err) {
+        logStructuredWarn("nueva-password", "limpiar_cookie_recovery_fallido", err);
+      }
 
       if (mantenermeConectado) {
         // Invalidación selectiva de otras sesiones manteniendo la actual
         try {
           await cliente.auth.signOut({ scope: "others" });
-        } catch {}
+        } catch (err) {
+          logStructuredWarn("nueva-password", "signout_otras_sesiones_fallido", err);
+        }
       } else {
         // Cierre total de sesión
         try {
           await cliente.auth.signOut({ scope: "global" });
-        } catch {}
+        } catch (err) {
+          logStructuredWarn("nueva-password", "signout_global_fallido", err);
+        }
         // RC-12: limpiar borrador local y onboarding al cerrar sesión
         try {
           localStorage.removeItem("ruumruum.traslados-nuevo.borrador.v2");

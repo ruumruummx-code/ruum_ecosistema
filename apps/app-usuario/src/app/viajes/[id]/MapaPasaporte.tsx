@@ -3,6 +3,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import type { Map as MapboxMap, Marker, GeoJSONSource } from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import type { UbicacionTraslado } from "@ruum/api/services";
+import { logStructuredWarn } from "@/lib/logger";
 import styles from "./pasaporte.module.css";
 type Point = {
     lat: number | null;
@@ -60,8 +61,10 @@ export function MapaPasaporte({ origen: originProp, destino: destinationProp, ub
                 instance.fitBounds([[origen.lng, origen.lat], [destino.lng, destino.lat]], { padding: { top: 60, bottom: 140, left: 40, right: 40 }, maxZoom: 15, duration: 0 });
             observer = new ResizeObserver(() => instance.resize());
             observer.observe(container.current);
-        }).catch(() => { if (!cancelled)
-            setError("Mapa no disponible en este dispositivo."); });
+        }).catch((err) => { if (!cancelled) {
+            logStructuredWarn("viajes/MapaPasaporte", "inicializacion_mapa_fallida", err);
+            setError("Mapa no disponible en este dispositivo.");
+        } });
         return () => { cancelled = true; observer?.disconnect(); driver.current = null; map.current?.remove(); map.current = null; setReady(false); };
         // Rebuild only when the endpoints change; live driver updates keep the camera position.
     }, [token, origen, destino]);
@@ -95,8 +98,10 @@ export function MapaPasaporte({ origen: originProp, destino: destinationProp, ub
             (map.current?.getSource("route") as GeoJSONSource | undefined)?.setData({ type: "Feature", properties: {}, geometry: route.geometry });
             if (seguirUbicacion && ubicacion && Number.isFinite(route.duration))
                 onEta(Math.max(1, Math.ceil(route.duration / 60)));
-        }).catch(() => { if (!abort.signal.aborted)
-            onEta(null); });
+        }).catch((err) => { if (!abort.signal.aborted) {
+            logStructuredWarn("viajes/MapaPasaporte", "calculo_eta_fallido", err);
+            onEta(null);
+        } });
         return () => abort.abort();
     }, [ready, token, origen, destino, driverLat, driverLng, ubicacion, haciaOrigen, seguirUbicacion, onEta]);
     return <><div ref={container} className={styles.map} aria-label="Mapa interactivo del traslado">{!token && <div className={styles.empty}>El mapa no está disponible por ahora. El estado de tu traslado sigue actualizándose.</div>}</div>{error && <p className={styles.mapError} role="status">{error}</p>}</>;
