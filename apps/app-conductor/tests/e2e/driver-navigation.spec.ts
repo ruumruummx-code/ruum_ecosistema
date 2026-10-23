@@ -73,6 +73,29 @@ for (const viewport of [{ width: 320, height: 568 }, { width: 390, height: 844 }
   });
 }
 
+test("403 conserva un único shell y sus acciones accesibles", async ({ page }) => {
+  for (const viewport of [{ width: 320, height: 568 }, { width: 390, height: 844 }, { width: 667, height: 375 }, { width: 1280, height: 960 }]) {
+    await page.setViewportSize(viewport);
+    for (const route of ["/403", "/403?reason=rol_usuario"]) {
+      await test.step(`${route} en ${viewport.width}×${viewport.height}`, async () => {
+        await page.goto(route);
+        const navigation = page.getByRole("navigation", { name: viewport.width < 768 ? "Navegación principal móvil" : "Navegación principal", exact: true });
+        await expect(navigation).toHaveCount(1);
+        await expect(navigation).toBeVisible();
+        await expect(navigation.getByRole("link")).toHaveCount(5);
+        await expect(navigation.locator('[aria-current="page"]')).toHaveCount(0);
+        await expect(page.getByRole("main")).toHaveCount(1);
+        await expect(page.locator("#contenido-principal nav")).toHaveCount(0);
+        await expect(page.locator("[data-conductor-header]")).toHaveCount(1);
+        await expect(page.locator("[data-conductor-mobile-nav]")).toHaveCount(1);
+        await expectUnobstructed(page.getByRole("heading", { name: "Cuenta no autorizada para operar", exact: true }));
+        await expectUnobstructed(page.getByRole("link", { name: "Cambiar de cuenta", exact: true }));
+        await expectUnobstructed(page.getByRole("link", { name: "Ir al inicio", exact: true }));
+      });
+    }
+  }
+});
+
 test("recalcula los márgenes cuando cambian las barras, la orientación y la ruta de acceso", async ({ page }, testInfo) => {
   await page.setViewportSize({ width: 320, height: 568 });
   await page.goto("/cuenta");
