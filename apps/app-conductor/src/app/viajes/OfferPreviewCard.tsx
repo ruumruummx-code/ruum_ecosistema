@@ -7,7 +7,9 @@ import { claveDia, formatearDistancia, nombreVehiculo, type DetalleOperativo, ty
 import { OfferRoutePreview } from "./OfferRoutePreview";
 import styles from "./offer-preview.module.css";
 
-export function OfferPreviewCard({ viaje, detalle, hrefDetalle, mapPreview }: { viaje: PasaporteRow; detalle: DetalleOperativo; hrefDetalle: string; mapPreview?: ReactNode }) {
+export type AcceptedPreview = { label: string; tone: "pending" | "active" | "success"; onReject: () => void };
+
+export function OfferPreviewCard({ viaje, detalle, hrefDetalle, mapPreview, accepted }: { viaje: PasaporteRow; detalle: DetalleOperativo; hrefDetalle: string; mapPreview?: ReactNode; accepted?: AcceptedPreview }) {
   const folio = viaje.traslado_id?.slice(0, 8).toUpperCase() ?? "SIN ID";
   const origen = viaje.origen_direccion || viaje.origen_ciudad || detalle.origen;
   const destino = viaje.destino_direccion || viaje.destino_ciudad || detalle.destino;
@@ -19,8 +21,10 @@ export function OfferPreviewCard({ viaje, detalle, hrefDetalle, mapPreview }: { 
   const minutes = hours != null && Number.isFinite(hours) ? Math.max(1, Math.round(hours * 60)) : null;
   const duration = minutes == null ? "Por confirmar" : `${Math.floor(minutes / 60) ? `${Math.floor(minutes / 60)} h ` : ""}${minutes % 60 || !Math.floor(minutes / 60) ? `${minutes % 60} min` : ""}`.trim();
   const price = viaje.ganancia_conductor ?? detalle.gananciaConductorOficial;
-  return <article className={styles.card} data-offer-card aria-label={`Oferta ${folio}`}>
-    <div className={styles.top}><span className={styles.available}><ConductorIcon name="check" />Oferta disponible</span><button type="button" aria-label={`Copiar folio ${folio}`} onClick={() => { if (navigator.clipboard) void navigator.clipboard.writeText(folio); }}>ID {folio}</button></div>
+  const actionLabel = !accepted ? "Ver detalles de la oferta" : accepted.tone === "success" ? "VER TRASLADO" : accepted.tone === "active" ? "CONTINUAR TRASLADO" : "INICIAR TRASLADO";
+  const primaryAction = <Link href={hrefDetalle} className={styles.action} prefetch={false}>{actionLabel} <span aria-hidden="true">→</span></Link>;
+  return <article className={styles.card} data-offer-card={!accepted || undefined} data-accepted-card={accepted ? true : undefined} aria-label={`${accepted ? "Traslado aceptado" : "Oferta"} ${folio}`}>
+    <div className={styles.top}><span className={styles.available} data-tone={accepted?.tone}><ConductorIcon name={accepted?.tone === "active" ? "truck" : "check"} />{accepted?.label ?? "Oferta disponible"}</span><button type="button" aria-label={`Copiar folio ${folio}`} onClick={() => { if (navigator.clipboard) void navigator.clipboard.writeText(folio); }}>ID {folio}</button></div>
     <div className={styles.summary}>
       <div className={styles.priceBlock}><strong>{price == null ? "Por confirmar" : new Intl.NumberFormat("es-MX", { style: "currency", currency: "MXN" }).format(price)}</strong>{price != null && <span>MXN</span>}<p>{nombreVehiculo(viaje)}</p></div>
       <div className={styles.schedule}><ConductorIcon name="clock" /><div><span>{day}</span><time dateTime={validDate ? date.toISOString() : undefined}>{time}</time></div></div>
@@ -40,6 +44,6 @@ export function OfferPreviewCard({ viaje, detalle, hrefDetalle, mapPreview }: { 
       <span><ConductorIcon name="shield" /><span>Viaje seguro<small>Ver condiciones</small></span></span>
       <span><ConductorIcon name="card" /><span>Pago en app<small>{viaje.tipo_pago === "anticipado" ? "Anticipado" : viaje.tipo_pago === "al_cierre" ? "Al cierre" : "Por confirmar"}</small></span></span>
     </div>
-    <Link href={hrefDetalle} className={styles.action} prefetch={false}>Ver detalles de la oferta <span aria-hidden="true">→</span></Link>
+    {accepted ? <div className={styles.actionRow}>{primaryAction}<button type="button" className={styles.options} onClick={accepted.onReject} aria-label="Opciones de traslado" aria-haspopup="dialog">•••</button></div> : primaryAction}
   </article>;
 }

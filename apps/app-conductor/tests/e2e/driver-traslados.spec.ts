@@ -18,6 +18,52 @@ async function openTrips(page: Page, offers = 0) {
   await page.locator("nextjs-portal").evaluateAll((nodes) => nodes.forEach((node) => (node as HTMLElement).style.setProperty("display", "none", "important")));
 }
 
+for (const size of [{ width: 320, height: 568 }, { width: 375, height: 667 }, { width: 390, height: 844 }, { width: 375, height: 500 }, { width: 667, height: 375 }]) {
+  test(`aceptado con diseño de oferta sin scroll en ${size.width}×${size.height}`, async ({ page }, info) => {
+    const trip = {
+      traslado_id: "acbb6c27-0000-4000-8000-000000000011", estado: "conductor_asignado",
+      conductor_id: "00000000-0000-4000-8000-000000000002",
+      origen_ciudad: "Ciudad de México", origen_direccion: "LONDRES 899, Juárez, 06600, Ciudad de México",
+      destino_ciudad: "Metepec", destino_direccion: "LOS SERRANOS 225, Uno Residencial, 52104, Metepec, Méx.",
+      ganancia_conductor: 531.45, distancia_km: 51, tiempo_estimado_horas: 70 / 60,
+      creado_en: "2026-10-17T21:12:00Z", vehiculo_marca: "Chrysler", vehiculo_modelo: "Stratus", vehiculo_anio: 2015, tipo_pago: "al_cierre",
+    };
+    await page.route("**/rest/v1/pasaporte_digital*", route => {
+      const query = new URL(route.request().url()).searchParams;
+      return route.fulfill({ headers: { "access-control-allow-origin": "*" }, json: query.get("estado") === "eq.pendiente_de_conductor" || !query.has("conductor_id") ? [] : [trip, { ...trip, traslado_id: "acbb6c28-0000-4000-8000-000000000012" }] });
+    });
+    await page.route("**/rest/v1/traslados?*", route => route.fulfill({ headers: { "access-control-allow-origin": "*" }, json: [trip.traslado_id, "acbb6c28-0000-4000-8000-000000000012"].map(id => ({ ...trip, id, fecha_hora_programada: trip.creado_en })) }));
+    await page.setViewportSize(size);
+    await openTrips(page);
+    await page.getByRole("tab", { name: "Aceptados (2)", exact: true }).click();
+    const card = page.locator("[data-accepted-card]");
+    await expect(card).toContainText("PENDIENTE DE INICIO");
+    await expect(card).toContainText("$531.45");
+    await expect(card).toContainText("Chrysler Stratus 2015");
+    await expect(card).toContainText("Aprox. 1 h 10 min");
+    await expect(card.locator("[data-offer-map]")).toBeVisible();
+    await expect(card.locator("[data-offer-badges]")).toBeVisible();
+    const cta = card.getByRole("link", { name: "INICIAR TRASLADO" });
+    await expect(cta).toHaveAttribute("href", new RegExp(trip.traslado_id));
+    const layout = await page.evaluate(() => {
+      const nav = document.querySelector("[data-conductor-mobile-nav]")!.getBoundingClientRect();
+      return {
+        root: document.documentElement.scrollHeight - innerHeight,
+        overflow: ["[data-driver-traslados]", "[role=tabpanel]", "[role=tabpanel] > div", "[data-accepted-card]"].map(selector => { const e=document.querySelector(selector)!; return e.scrollHeight-e.clientHeight; }),
+        actions: Array.from(document.querySelectorAll("[data-accepted-card] a, [data-accepted-card] button, [aria-label='Paginación de traslados'] button")).every(e => { const r=e.getBoundingClientRect(); const hit=document.elementFromPoint(r.x+r.width/2,r.y+r.height/2); return r.top>=0 && r.bottom<=nav.top+1 && !!hit && e.contains(hit); }),
+      };
+    });
+    await page.screenshot({ path: info.outputPath("aceptado-redisenado.png") });
+    expect(layout.root).toBeLessThanOrEqual(1);
+    expect(layout.overflow.every(value => value<=1), JSON.stringify(layout)).toBe(true);
+    expect(layout.actions).toBe(true);
+    await page.getByRole("button", { name: "Siguiente", exact: true }).click();
+    await expect(cta).toHaveAttribute("href", /acbb6c28/);
+    await card.getByRole("button", { name: "Opciones de traslado" }).click();
+    await expect(page.getByRole("dialog", { name: "Motivo de rechazo" })).toBeVisible();
+  });
+}
+
 async function measureScreen(page: Page) {
   return page.locator("[data-driver-traslados]").evaluate((screen) => ({
     width: screen.getBoundingClientRect().width,

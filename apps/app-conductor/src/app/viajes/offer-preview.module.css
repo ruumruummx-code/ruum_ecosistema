@@ -110,3 +110,13 @@
   .badges svg { width: 10px; height: 10px; }
   .action { min-height: 30px; }
 }
+/* La variante aceptada conserva estado y opciones, con el mismo espacio de oferta. */
+.available[data-tone="pending"] { background: #fff1d9; color: #825600; }
+.available[data-tone="active"] { background: #e7f0ff; color: #0756c9; }
+.actionRow { display: flex; flex-shrink: 0; align-items: stretch; gap: 6px; margin-top: auto; }
+.actionRow > .action { flex: 1; min-width: 0; margin-top: 0; }
+.card .options { display: grid; flex-shrink: 0; place-items: center; width: 42px; min-height: 46px; border: 1px solid #d5e1f2; border-radius: 14px; background: #edf3fc; color: #0b2143; font-size: 16px; }
+@media (max-height: 740px) { .card .options { width: 38px; min-height: 40px; } }
+@media (max-height: 620px) { .card .options { width: 34px; min-height: 36px; border-radius: 9px; } }
+@media (max-height: 500px) { .actionRow { grid-column: 1 / -1; grid-row: 6; } .card .options { width: 32px; min-height: 32px; } }
+@media (max-height: 380px) { .card .options { min-height: 30px; } }

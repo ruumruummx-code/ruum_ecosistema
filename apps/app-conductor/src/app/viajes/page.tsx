@@ -434,10 +434,9 @@ export default function PaginaTraslados() {
         onCambiarCiudad={(valor) => { setCiudadFiltro(valor); actualizarUrl({ ciudad: valor }); }} ciudadesDisponibles={ciudadesDisponibles} /></>}
     >
       {item ? <div className={styles.results}>
-        {modoMapa === "mapa" && vista !== "disponibles" && <div className={styles.map}><TrasladosMapa Traslados={listToRender.map((it) => it.viaje)} onSelect={(viaje) => router.push(hrefDetalle(viaje))} vistaId={rutaActual} /></div>}
         <p className="sr-only">{listToRender.length} {vista === "disponibles" ? listToRender.length === 1 ? "oferta disponible" : "ofertas disponibles" : listToRender.length === 1 ? "traslado aceptado" : "traslados aceptados"}</p>
         {vista === "disponibles" ? <OfertaCard compact viaje={item.viaje} detalle={detalles[item.viaje.traslado_id ?? ""] ?? detalleFallback(item.viaje)} hrefDetalle={hrefDetalle(item.viaje)} mapPreview={modoMapa === "mapa" ? <TrasladosMapa Traslados={listToRender.map((it) => it.viaje)} onSelect={(viaje) => router.push(hrefDetalle(viaje))} vistaId={rutaActual} /> : undefined} />
-          : <AcceptedTripCard compact viaje={item.viaje} detalle={detalles[item.viaje.traslado_id ?? ""] ?? detalleFallback(item.viaje)} hrefDetalle={hrefDetalle(item.viaje)} onReject={setViajeParaRechazar} />}
+          : <AcceptedTripCard compact viaje={item.viaje} detalle={detalles[item.viaje.traslado_id ?? ""] ?? detalleFallback(item.viaje)} hrefDetalle={hrefDetalle(item.viaje)} onReject={setViajeParaRechazar} mapPreview={modoMapa === "mapa" ? <TrasladosMapa Traslados={listToRender.map((it) => it.viaje)} onSelect={(viaje) => router.push(hrefDetalle(viaje))} vistaId={rutaActual} /> : undefined} />}
         {listToRender.length > 1 && <div className={styles.pagination} role="group" aria-label="Paginación de traslados">
           <button type="button" disabled={indiceTarjeta === 0} onClick={() => setPaginaActual(indiceTarjeta - 1)}>Anterior</button>
           <output aria-live="polite">{indiceTarjeta + 1} de {listToRender.length}</output>

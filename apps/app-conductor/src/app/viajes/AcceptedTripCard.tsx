@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import type { ReactNode } from "react";
 import type { PasaporteRow, DetalleOperativo } from "./trips-utils";
 import { formatearDuracion, nombreVehiculo } from "./trips-utils";
 import { TripPreviewCard } from "./TripPreviewCard";
@@ -9,13 +10,13 @@ function getEstadoCardInfo(estado: string) {
   switch (estado) {
     case "conductor_asignado":
       return {
-        status: "pending" as string,
+        status: "pending" as const,
         titulo: "PENDIENTE DE INICIO",
         descripcion: "Dirígete al punto de origen."
       };
     case "conductor_en_camino_al_origen":
       return {
-        status: "active" as string,
+        status: "active" as const,
         titulo: "EN CAMINO AL ORIGEN",
         descripcion: "Dirígete al punto de recolección."
       };
@@ -25,13 +26,13 @@ function getEstadoCardInfo(estado: string) {
     case "evidencia_inicial_completada":
     case "vehiculo_recibido":
       return {
-        status: "active" as string,
+        status: "active" as const,
         titulo: "EN PUNTO DE ORIGEN",
         descripcion: "Realiza la recepción y evidencia del vehículo."
       };
     case "traslado_en_curso":
       return {
-        status: "active" as string,
+        status: "active" as const,
         titulo: "TRASLADO EN CURSO",
         descripcion: "Conduce de forma segura al destino."
       };
@@ -39,20 +40,20 @@ function getEstadoCardInfo(estado: string) {
     case "evidencia_final_en_proceso":
     case "evidencia_final_completada":
       return {
-        status: "active" as string,
+        status: "active" as const,
         titulo: "LLEGADA A DESTINO",
         descripcion: "Entrega la unidad y registra la evidencia final."
       };
     case "entrega_confirmada":
     case "servicio_cerrado":
       return {
-        status: "success" as string,
+        status: "success" as const,
         titulo: "TRASLADO FINALIZADO",
         descripcion: "El traslado ha sido concluido."
       };
     default:
       return {
-        status: "pending" as string,
+        status: "pending" as const,
         titulo: "PENDIENTE DE INICIO",
         descripcion: "Dirígete al punto de origen."
       };
@@ -80,6 +81,7 @@ interface AcceptedTripCardProps {
   onReject: (viaje: PasaporteRow) => void;
   hrefDetalle: string;
   compact?: boolean;
+  mapPreview?: ReactNode;
 }
 
 export function AcceptedTripCard({
@@ -87,9 +89,11 @@ export function AcceptedTripCard({
   detalle,
   onReject,
   hrefDetalle,
-  compact = false
+  compact = false,
+  mapPreview,
 }: AcceptedTripCardProps) {
-  if (compact) return <TripPreviewCard viaje={viaje} detalle={detalle} hrefDetalle={hrefDetalle} accepted={{ label: getEstadoCardInfo(viaje.estado || "").titulo, onReject: () => onReject(viaje) }} />;
+  const cardInfo = getEstadoCardInfo(viaje.estado || "");
+  if (compact) return <TripPreviewCard viaje={viaje} detalle={detalle} hrefDetalle={hrefDetalle} mapPreview={mapPreview} accepted={{ label: cardInfo.titulo, tone: cardInfo.status, onReject: () => onReject(viaje) }} />;
   const folio = viaje.traslado_id ? viaje.traslado_id.slice(0, 8).toUpperCase() : "POR CONFIRMAR";
   const ganancia = viaje.ganancia_conductor != null
     ? `$${viaje.ganancia_conductor.toLocaleString("es-MX", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
@@ -107,7 +111,6 @@ export function AcceptedTripCard({
   const duracionTexto = formatearDuracion(duracionHoras);
   const distanciaTexto = viaje.distancia_km != null ? `${viaje.distancia_km.toFixed(1)} km` : "Por confirmar";
 
-  const cardInfo = getEstadoCardInfo(viaje.estado || "");
 
   return (
     <article className="border border-border rounded-2xl bg-surface p-4 shadow-[0_6px_20px_rgba(13,43,94,0.07)] w-full flex flex-col gap-3 text-left select-none">
