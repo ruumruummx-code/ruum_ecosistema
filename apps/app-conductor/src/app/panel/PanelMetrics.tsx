@@ -7,31 +7,120 @@ interface PanelMetricsProps {
   trasladosHoy: number;
 }
 
-function DineroIcono() {
-  return <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden><rect x="3" y="6" width="18" height="12" rx="2" /><path d="M12 9v6m2-4.4c-.4-.45-1-.7-1.7-.7-.95 0-1.7.45-1.7 1.2 0 1.9 3.4.65 3.4 2.5 0 .8-.75 1.3-1.7 1.3-.75 0-1.4-.3-1.85-.8" /></svg>;
+function BolsaDineroMovilIcono() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+      <path d="M9.5 3h5l1.2 2.6c.2.4 0 .9-.4 1.1H8.7c-.4-.2-.6-.7-.4-1.1L9.5 3ZM7.8 8h8.4c2.4 2 3.8 4.9 3.8 8.1 0 2.7-2.1 4.9-4.8 4.9H8.8C6.1 21 4 18.8 4 16.1 4 12.9 5.4 10 7.8 8Zm4.2 3v1h-.5a1.8 1.8 0 0 0 0 3.6h1a.6.6 0 0 1 0 1.2H10v1.2h1.5v1h1v-1h.5a1.8 1.8 0 0 0 0-3.6h-1a.6.6 0 0 1 0-1.2H14V12h-1.5v-1h-1Z" />
+    </svg>
+  );
 }
 
-function AutoIcono() {
-  return <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d="m5 17 1.5-7h11L19 17" /><path d="M4 17h16v3H4zM8 10l1.3-3h5.4l1.3 3" /><circle cx="7.5" cy="18.5" r=".7" fill="currentColor" /><circle cx="16.5" cy="18.5" r=".7" fill="currentColor" /></svg>;
+function BilleteraDesktopIcono() {
+  return (
+    <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+      <path d="M4 5a3 3 0 0 0-3 3v9a3 3 0 0 0 3 3h15a3 3 0 0 0 3-3v-2h-4.5a3.5 3.5 0 1 1 0-7H22V8a3 3 0 0 0-3-3H4Zm13.5 5a1.5 1.5 0 1 0 0 3H22v-3h-4.5Z" />
+    </svg>
+  );
+}
+
+function AutoIcono({ className = "size-5" }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+      <path d="M6.5 4.5A2.5 2.5 0 0 1 8.85 3h6.3a2.5 2.5 0 0 1 2.35 1.5L19.8 10H21a1 1 0 0 1 0 2h-.5v6.5a1.5 1.5 0 0 1-3 0V17h-11v1.5a1.5 1.5 0 0 1-3 0V12H3a1 1 0 1 1 0-2h1.2l2.3-5.5ZM7.1 10h9.8l-1.5-4a.8.8 0 0 0-.75-.5h-5.3a.8.8 0 0 0-.75.5L7.1 10Zm.4 4.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3Zm9 0a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3Z" />
+    </svg>
+  );
 }
 
 export function PanelMetrics({ gananciasHoy, trasladosHoy }: PanelMetricsProps) {
   const restantes = Math.max(0, 3 - trasladosHoy);
-  const ganancias = new Intl.NumberFormat("es-MX", { style: "currency", currency: "MXN", maximumFractionDigits: 0 }).format(gananciasHoy);
+  const ganancias = new Intl.NumberFormat("es-MX", {
+    style: "currency",
+    currency: "MXN",
+    maximumFractionDigits: 0,
+  }).format(gananciasHoy);
 
   return (
-    <section className="driver-metrics grid grid-cols-2 gap-3" aria-label="Resumen del día">
-      <article className="flex min-h-[145px] flex-col rounded-2xl bg-route-action/5 p-4">
-        <div className="flex items-start justify-between gap-2"><span className="font-body text-[10px] font-black tracking-wide text-text-secondary">GANANCIAS DEL DÍA</span><span className="inline-flex size-10 items-center justify-center rounded-full bg-route-action/10 text-route-action"><DineroIcono /></span></div>
-        <strong className="mt-2 font-display text-2xl font-black leading-none text-text-primary tabular-nums">{ganancias}</strong>
-        <p className="mt-1 font-body text-xs text-text-secondary">{trasladosHoy === 0 ? "Sin cierres aún" : `${trasladosHoy} cierre${trasladosHoy === 1 ? "" : "s"} hoy`}</p>
-        <Link href="/ganancias" className="mt-auto inline-flex min-h-11 items-end font-body text-sm font-bold text-route-action transition hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-route-action">Ver balance <span className="ml-2 text-lg leading-none">→</span></Link>
+    <section className="driver-metrics grid grid-cols-2 gap-3 md:gap-5" aria-label="Resumen del día">
+      {/* Tarjeta 1: Ganancias */}
+      <article className="flex min-h-[140px] flex-col rounded-2xl bg-[#F3F7FC] p-3.5 sm:p-4 md:min-h-[136px] md:flex-row md:items-center md:gap-5 md:border md:border-[#E4ECF7] md:bg-white md:p-5 md:shadow-[0_4px_16px_rgba(10,35,66,0.03)]">
+        <span
+          className="hidden size-15 shrink-0 items-center justify-center rounded-full bg-[#E3F7ED] text-[#10B981] md:inline-flex"
+          aria-hidden="true"
+        >
+          <BilleteraDesktopIcono />
+        </span>
+
+        <div className="flex min-w-0 flex-1 flex-col h-full">
+          <div className="flex items-start justify-between gap-1.5 md:block">
+            <span className="font-body text-[10px] font-black tracking-wide text-[#566889] md:hidden">
+              GANANCIAS DEL DÍA
+            </span>
+            <span className="hidden font-display text-sm font-bold text-[#0A2342] md:block">
+              Ganancias de hoy
+            </span>
+            <span
+              className="inline-flex size-9 shrink-0 items-center justify-center rounded-full bg-[#DCE8FC] text-[#0066FF] md:hidden"
+              aria-hidden="true"
+            >
+              <BolsaDineroMovilIcono />
+            </span>
+          </div>
+
+          <strong className="mt-1.5 font-display text-2xl font-black leading-none text-[#0A2342] tabular-nums md:mt-1 md:text-3xl">
+            {ganancias}
+          </strong>
+          <p className="mt-1 font-body text-xs text-[#566889] md:text-[13px]">
+            {trasladosHoy === 0 ? "Sin cierres aún" : `${trasladosHoy} cierre${trasladosHoy === 1 ? "" : "s"} hoy`}
+          </p>
+          <Link
+            href="/ganancias"
+            className="mt-auto inline-flex min-h-9 cursor-pointer items-end pt-2 font-body text-xs sm:text-sm font-bold text-[#0057D9] transition hover:text-[#0066FF] hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#0066FF] md:min-h-8 md:pt-2.5"
+          >
+            <span>Ver balance</span>
+            <span className="ml-1.5 text-base leading-none" aria-hidden="true">→</span>
+          </Link>
+        </div>
       </article>
-      <article className="flex min-h-[145px] flex-col rounded-2xl bg-route-action/5 p-4">
-        <div className="flex items-start justify-between gap-2"><span className="font-body text-[10px] font-black tracking-wide text-text-secondary">TRASLADOS HOY</span><span className="inline-flex size-10 items-center justify-center rounded-full bg-route-action/10 text-route-action"><AutoIcono /></span></div>
-        <strong className="mt-2 font-display text-2xl font-black leading-none text-text-primary tabular-nums">{trasladosHoy} / 3</strong>
-        <p className="mt-1 font-body text-xs text-text-secondary">{restantes === 0 ? "Bono disponible" : `Faltan ${restantes} para bono`}</p>
-        <Link href="/viajes" className="mt-auto inline-flex min-h-11 items-end font-body text-sm font-bold text-route-action transition hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-route-action">Ver detalle <span className="ml-2 text-lg leading-none">→</span></Link>
+
+      {/* Tarjeta 2: Traslados hoy */}
+      <article className="flex min-h-[140px] flex-col rounded-2xl bg-[#F3F7FC] p-3.5 sm:p-4 md:min-h-[136px] md:flex-row md:items-center md:gap-5 md:border md:border-[#E4ECF7] md:bg-white md:p-5 md:shadow-[0_4px_16px_rgba(10,35,66,0.03)]">
+        <span
+          className="hidden size-15 shrink-0 items-center justify-center rounded-full bg-[#EEECFA] text-[#6366F1] md:inline-flex"
+          aria-hidden="true"
+        >
+          <AutoIcono className="size-7" />
+        </span>
+
+        <div className="flex min-w-0 flex-1 flex-col h-full">
+          <div className="flex items-start justify-between gap-1.5 md:block">
+            <span className="font-body text-[10px] font-black tracking-wide text-[#566889] md:hidden">
+              TRASLADOS HOY
+            </span>
+            <span className="hidden font-display text-sm font-bold text-[#0A2342] md:block">
+              Traslados hoy
+            </span>
+            <span
+              className="inline-flex size-9 shrink-0 items-center justify-center rounded-full bg-[#DCE8FC] text-[#0066FF] md:hidden"
+              aria-hidden="true"
+            >
+              <AutoIcono className="size-5" />
+            </span>
+          </div>
+
+          <strong className="mt-1.5 font-display text-2xl font-black leading-none text-[#0A2342] tabular-nums md:mt-1 md:text-3xl">
+            {trasladosHoy} / 3
+          </strong>
+          <p className="mt-1 font-body text-xs text-[#566889] md:text-[13px]">
+            {restantes === 0 ? "Bono disponible" : `Faltan ${restantes} para bono`}
+          </p>
+          <Link
+            href="/viajes"
+            className="mt-auto inline-flex min-h-9 cursor-pointer items-end pt-2 font-body text-xs sm:text-sm font-bold text-[#0057D9] transition hover:text-[#0066FF] hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#0066FF] md:min-h-8 md:pt-2.5"
+          >
+            <span>Ver detalle</span>
+            <span className="ml-1.5 text-base leading-none" aria-hidden="true">→</span>
+          </Link>
+        </div>
       </article>
     </section>
   );

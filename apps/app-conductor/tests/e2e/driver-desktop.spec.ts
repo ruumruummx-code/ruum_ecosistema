@@ -20,24 +20,30 @@ for (const width of [1024, 1280, 1536]) {
       await test.step(route, async () => {
         await page.goto(route, { waitUntil: "domcontentloaded" });
         await expect(page.getByRole("heading", { level: 1 }).first()).toBeVisible({ timeout: 180_000 });
-        await expect(page.locator("[data-conductor-header]")).toBeVisible();
-        await expect(page.locator("[data-conductor-desktop-nav]")).toBeVisible();
-        const left = (width - 440) / 2;
-        await expect.poll(() => page.evaluate(() =>
-          ["#contenido-principal", "[data-conductor-header]", "[data-conductor-desktop-nav]"].map(selector => {
-            const rect = document.querySelector(selector)?.getBoundingClientRect();
-            return rect ? { x: rect.x, width: rect.width } : null;
-          }),
-        )).toEqual(Array.from({ length: 3 }, () => ({ x: left, width: 440 })));
-        const bounds = await page.locator("[data-conductor-desktop-nav] a").evaluateAll(links => links.map(link => {
-          const r = link.getBoundingClientRect(); return { left: r.left, right: r.right };
-        }));
-        expect(bounds).toHaveLength(5);
-        for (const link of bounds) {
-          expect(link.left).toBeGreaterThanOrEqual(left);
-          expect(link.right).toBeLessThanOrEqual(left + 440);
+        if (route === "/panel") {
+          await expect(page.locator("[data-panel-desktop-header]")).toBeVisible();
+          await expect(page.locator("[data-panel-sidebar]")).toBeVisible();
+          await expect(page.locator("[data-panel-sidebar] nav a")).toHaveCount(7);
+        } else {
+          await expect(page.locator("[data-conductor-header]")).toBeVisible();
+          await expect(page.locator("[data-conductor-desktop-nav]")).toBeVisible();
+          const left = (width - 440) / 2;
+          await expect.poll(() => page.evaluate(() =>
+            ["#contenido-principal", "[data-conductor-header]", "[data-conductor-desktop-nav]"].map(selector => {
+              const rect = document.querySelector(selector)?.getBoundingClientRect();
+              return rect ? { x: rect.x, width: rect.width } : null;
+            }),
+          )).toEqual(Array.from({ length: 3 }, () => ({ x: left, width: 440 })));
+          const bounds = await page.locator("[data-conductor-desktop-nav] a").evaluateAll(links => links.map(link => {
+            const r = link.getBoundingClientRect(); return { left: r.left, right: r.right };
+          }));
+          expect(bounds).toHaveLength(5);
+          for (const link of bounds) {
+            expect(link.left).toBeGreaterThanOrEqual(left);
+            expect(link.right).toBeLessThanOrEqual(left + 440);
+          }
+          expect(await page.evaluate(() => getComputedStyle(document.body).backgroundColor)).toBe("rgb(238, 242, 247)");
         }
-        expect(await page.evaluate(() => getComputedStyle(document.body).backgroundColor)).toBe("rgb(238, 242, 247)");
         expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
         if (width === 1280) await page.screenshot({ path: testInfo.outputPath(route.slice(1).replaceAll("/", "-") + ".png") });
       });

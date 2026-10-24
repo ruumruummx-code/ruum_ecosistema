@@ -8,6 +8,7 @@ import { ConductorNav } from "./components/ConductorNav";
 import { crearClienteNavegador, tieneSupabaseConfigurado } from "../lib/supabase-browser";
 
 const EXCLUIDOS_NAVEGACION = [
+  "/panel",
   "/login",
   "/registro",
   "/onboarding",

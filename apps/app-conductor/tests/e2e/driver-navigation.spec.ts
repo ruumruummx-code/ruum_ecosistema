@@ -43,12 +43,18 @@ for (const viewport of [{ width: 320, height: 568 }, { width: 390, height: 844 }
         const mobile = viewport.width < 768;
         const navigation = page.getByRole("navigation", { name: mobile ? "Navegación principal móvil" : "Navegación principal", exact: true });
         await expect(navigation).toBeVisible();
-        await expect(navigation.getByRole("link")).toHaveCount(5);
+        await expect(navigation.getByRole("link")).toHaveCount(route === "/panel" ? (mobile ? 3 : 7) : 5);
         await expect(navigation.locator('[aria-current="page"]')).toHaveCount(1);
-        await expect(page.locator("#contenido-principal nav[aria-label='Navegación principal']")).toHaveCount(0);
+        if (route !== "/panel") {
+          await expect(page.locator("#contenido-principal nav[aria-label='Navegación principal']")).toHaveCount(0);
+        }
         const main = page.locator("#contenido-principal");
-        const header = page.locator("[data-conductor-header]");
-        await expect.poll(async () => main.evaluate(element => parseFloat(getComputedStyle(element).paddingTop))).toBeGreaterThanOrEqual(16);
+        const header = route === "/panel"
+          ? (mobile ? page.getByRole("banner", { name: "Encabezado móvil del panel" }) : page.locator("[data-panel-desktop-header]"))
+          : page.locator("[data-conductor-header]");
+        if (route !== "/panel") {
+          await expect.poll(async () => main.evaluate(element => parseFloat(getComputedStyle(element).paddingTop))).toBeGreaterThanOrEqual(16);
+        }
         await page.getByRole("heading", { level: 1 }).first().evaluate(element => element.scrollIntoView({ block: "start", behavior: "instant" }));
         await expectUnobstructed(page.getByRole("heading", { level: 1 }).first(), false);
         const last = main.locator('button:visible, a:visible, input:visible').last();
