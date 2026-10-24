@@ -1,5 +1,5 @@
 /** @vitest-environment jsdom */
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { renderHook, act } from "@testing-library/react";
 
 const crearTrasladoMock = vi.fn();
@@ -31,6 +31,8 @@ vi.mock("@sentry/nextjs", () => ({
 
 import { useEnvioTraslado, type ParametrosEnvioTraslado } from "./useEnvioTraslado";
 import { VALORES_INICIALES } from "../constants";
+import { NextRequest } from "next/server";
+import { validarCsrfRequest } from "@/lib/csrf";
 
 function crearParams(overrides: Partial<ParametrosEnvioTraslado> = {}): ParametrosEnvioTraslado {
   return {
@@ -97,11 +99,47 @@ function crearParams(overrides: Partial<ParametrosEnvioTraslado> = {}): Parametr
 }
 
 describe("useEnvioTraslado", () => {
+  afterEach(() => {
+    document.cookie = "ruum_csrf_token=; Max-Age=0; path=/";
+    vi.restoreAllMocks();
+  });
   beforeEach(() => {
     vi.clearAllMocks();
     tieneSupabaseMock.mockReturnValue(true);
     tieneMapboxMock.mockReturnValue(true);
     esErrorConfigMapboxMock.mockReturnValue(false);
+  });
+
+  it("avanza del paso 4 al 5 con cookie CSRF y mantiene la validación del servidor", async () => {
+    const token = "a".repeat(64);
+    document.cookie = `ruum_csrf_token=${token}; path=/`;
+    const fetchMock = vi.spyOn(globalThis, "fetch").mockImplementation(async (_input, init) => {
+      const headers = new Headers(init?.headers);
+      headers.set("cookie", `ruum_csrf_token=${token}`);
+      const request = new NextRequest("https://usuario.example.com/api/viajes", {
+        method: init?.method, body: init?.body, headers,
+      });
+      if (!validarCsrfRequest(request).valido) {
+        return Response.json({ error: "Token CSRF inválido o ausente.", code: "CSRF_INVALID" }, { status: 403 });
+      }
+      return Response.json({ ok: true });
+    });
+    crearTrasladoMock.mockResolvedValueOnce({ id: "traslado-csrf", tipo_pago: "anticipado", precio_cotizado: 3200 });
+    const params = crearParams({ paso: 3 });
+    const { result } = renderHook(() => useEnvioTraslado(params));
+
+    await act(async () => { await result.current.enviarSolicitud(); });
+
+    expect(fetchMock).toHaveBeenCalledWith("/api/viajes", expect.objectContaining({
+      headers: { "Content-Type": "application/json", "x-csrf-token": token },
+    }));
+    expect(crearTrasladoMock).toHaveBeenCalledOnce();
+    expect(params.setters.setTrasladoCreado).toHaveBeenCalledWith({
+      id: "traslado-csrf", tipoPago: "anticipado", precioCotizado: 3200,
+    });
+    expect(params.setters.setPaso).toHaveBeenCalledWith(4);
+    expect(params.formEnviadoRef.current).toBe(true);
+    expect(params.setters.setResultado).not.toHaveBeenCalledWith(expect.objectContaining({ ok: false }));
   });
 
   it("bloquea envío si tarifa no aceptada, formulario inválido, sin sesión, año inválido o paso < 3", async () => {

@@ -7,6 +7,7 @@ import type { Database } from "@ruum/shared/types";
 import { crearClienteNavegador, tieneSupabaseConfigurado } from "@/lib/supabase-browser";
 import { crearTraslado } from "@ruum/api/services";
 import { registrarEventoUx } from "@/lib/analytics";
+import { obtenerHeadersCsrf } from "@/lib/csrf";
 import {
   esErrorConfiguracionMapbox,
   mensajeErrorMapbox,
@@ -208,7 +209,7 @@ export function useEnvioTraslado(params: ParametrosEnvioTraslado) {
       try {
         const respPaso = await fetch("/api/viajes", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: obtenerHeadersCsrf({ "Content-Type": "application/json" }),
           body: JSON.stringify({
             paso,
             wizardPaso: paso,
