@@ -7,7 +7,15 @@ import { useParams, usePathname } from "next/navigation";
 import { EmergencyPanel } from "./EmergencyPanel";
 import { TripSupportDialog } from "./TripSupportDialog";
 
-const DockContext = createContext<{ primary: HTMLElement | null; quick: HTMLElement | null } | undefined>(undefined);
+const DockContext = createContext<{ primary: HTMLElement | null; quick: HTMLElement | null; setReturnPath: (path: string | null) => void } | undefined>(undefined);
+
+export function useTripReturnPath(path: string) {
+  const setReturnPath = useContext(DockContext)?.setReturnPath;
+  useLayoutEffect(() => {
+    setReturnPath?.(path);
+    return () => setReturnPath?.(null);
+  }, [path, setReturnPath]);
+}
 
 export function TripOperationalFrame({ children }: { children: ReactNode }) {
   const { id } = useParams<{ id: string }>();
@@ -16,6 +24,7 @@ export function TripOperationalFrame({ children }: { children: ReactNode }) {
   const [primary, setPrimary] = useState<HTMLDivElement | null>(null);
   const [quick, setQuick] = useState<HTMLDivElement | null>(null);
   const [support, setSupport] = useState(false);
+  const [returnPath, setReturnPath] = useState<string | null>(null);
 
   useLayoutEffect(() => {
     const root = document.documentElement;
@@ -55,10 +64,10 @@ export function TripOperationalFrame({ children }: { children: ReactNode }) {
 
   useLayoutEffect(() => { scrollRef.current?.scrollTo({ top: 0 }); }, [pathname]);
 
-  return <DockContext.Provider value={{ primary, quick }}>
+  return <DockContext.Provider value={{ primary, quick, setReturnPath }}>
     <div data-trip-frame>
       <div data-trip-safety-bar>
-        <Link href={pathname === `/viajes/${id}` ? "/viajes" : `/viajes/${id}`} aria-label={pathname === `/viajes/${id}` ? "Volver a Traslados" : "Volver al traslado"}>← Volver</Link>
+        <Link href={returnPath ?? (pathname === `/viajes/${id}` ? "/viajes" : `/viajes/${id}`)} aria-label={pathname === `/viajes/${id}` ? "Volver a Traslados" : "Volver al traslado"}>← Volver</Link>
         <button type="button" onClick={() => setSupport(true)} aria-haspopup="dialog" aria-expanded={support}>Soporte</button>
         <EmergencyPanel trasladoId={id} compact />
       </div>

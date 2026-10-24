@@ -50,7 +50,7 @@ test("alterna pestañas, selecciona fechas y navega entre semanas", async ({ pag
   await openTrips(page);
   const today = page.getByRole("group", { name: "Días de la semana" }).getByRole("button", { name: /sábado.*17/ });
   await expect(today).toHaveAttribute("aria-pressed", "true");
-  await expect(page.getByText("HOY", { exact: true })).toBeVisible();
+  await expect(today).toHaveAttribute("aria-current", "date");
   await page.getByRole("tab", { name: "Aceptados (0)" }).click();
   await expect(page.getByRole("tab", { name: "Aceptados (0)" })).toHaveAttribute("aria-selected", "true");
   await expect(page.getByText(/No tienes traslados aceptados/)).toBeVisible();
@@ -95,20 +95,61 @@ test("pagina ofertas reales del fixture, ordena y filtra sin perder el detalle",
   await page.route("**/rest/v1/pasaporte_digital*", (route) => route.fulfill({ headers: { "access-control-allow-origin": "*", "access-control-allow-headers": "*" }, json: new URL(route.request().url()).searchParams.get("estado") === "eq.pendiente_de_conductor" ? trips : [] }));
   await page.setViewportSize({ width: 320, height: 568 });
   await openTrips(page, 2);
-  await expect(page.getByRole("link", { name: "Ver oferta" })).toHaveAttribute("href", new RegExp(trips[0].traslado_id));
+  await expect(page.getByRole("link", { name: "Ver detalles de la oferta" })).toHaveAttribute("href", new RegExp(trips[0].traslado_id));
   const layout = await measureScreen(page);
   await page.screenshot({ path: testInfo.outputPath("ofertas.png") });
   expect(layout.overflow).toBeLessThanOrEqual(1);
   expect(layout.outside).toEqual([]);
   await page.getByRole("button", { name: "Siguiente", exact: true }).click();
-  await expect(page.getByRole("link", { name: "Ver oferta" })).toHaveAttribute("href", new RegExp(trips[1].traslado_id));
+  await expect(page.getByRole("link", { name: "Ver detalles de la oferta" })).toHaveAttribute("href", new RegExp(trips[1].traslado_id));
   await page.getByRole("button", { name: "Abrir menú del conductor" }).click();
   await page.getByRole("button", { name: "Mayor ganancia", exact: true }).click();
   await page.getByRole("button", { name: "Cerrar menú" }).click();
-  await expect(page.getByRole("link", { name: "Ver oferta" })).toHaveAttribute("href", new RegExp(trips[1].traslado_id));
+  await expect(page.getByRole("link", { name: "Ver detalles de la oferta" })).toHaveAttribute("href", new RegExp(trips[1].traslado_id));
   await page.getByRole("searchbox").fill("Plaza");
-  await expect(page.getByRole("link", { name: "Ver oferta" })).toHaveAttribute("href", new RegExp(trips[0].traslado_id));
+  await expect(page.getByRole("link", { name: "Ver detalles de la oferta" })).toHaveAttribute("href", new RegExp(trips[0].traslado_id));
   await page.getByRole("button", { name: "Limpiar búsqueda" }).click();
   await expect(page.getByRole("searchbox")).toHaveValue("");
-  await expect(page.getByText("2 ofertas disponibles", { exact: true })).toBeVisible();
+  await expect(page.getByRole("tab", { name: "Ofertas (2)", exact: true })).toBeVisible();
 });
+
+for (const size of [{ width: 320, height: 568 }, { width: 375, height: 667 }, { width: 390, height: 844 }, { width: 375, height: 500 }, { width: 667, height: 375 }]) {
+  test(`oferta rediseñada sin scroll en ${size.width}×${size.height}`, async ({ page }, info) => {
+    const offer = {
+      traslado_id: "cdbb6c27-0000-4000-8000-000000000011", estado: "pendiente_de_conductor",
+      origen_ciudad: "Ciudad de México", origen_direccion: "LONDRES 899, Juárez, 06600, Ciudad de México",
+      destino_ciudad: "Metepec", destino_direccion: "LOS SERRANOS 225, Uno Residencial, 52104, Metepec, Méx.",
+      ganancia_conductor: 531.45, distancia_km: 51, tiempo_estimado_horas: 70 / 60,
+      creado_en: "2026-10-17T21:12:00Z", vehiculo_marca: "Chrysler", vehiculo_modelo: "Stratus", vehiculo_anio: 2015, tipo_pago: "al_cierre",
+    };
+    await page.route("**/rest/v1/pasaporte_digital*", route => route.fulfill({ headers: { "access-control-allow-origin": "*" }, json: new URL(route.request().url()).searchParams.get("estado") === "eq.pendiente_de_conductor" ? [offer, { ...offer, traslado_id: "dabb6c28-0000-4000-8000-000000000012" }] : [] }));
+    await page.route("**/rest/v1/traslados?*", route => route.fulfill({ headers: { "access-control-allow-origin": "*" }, json: [offer.traslado_id, "dabb6c28-0000-4000-8000-000000000012"].map(id => ({ ...offer, id, fecha_hora_programada: offer.creado_en })) }));
+    await page.setViewportSize(size);
+    await openTrips(page, 2);
+    const card = page.locator("[data-offer-card]");
+    await expect(card).toContainText("$531.45");
+    await expect(card).toContainText("Chrysler Stratus 2015");
+    await expect(card.locator("time")).toHaveText(/03:12/);
+    await expect(card).toContainText("Aprox. 1 h 10 min");
+    await expect(card).toContainText("Peaje: por confirmar");
+    const cta = card.getByRole("link", { name: "Ver detalles de la oferta" });
+    await expect(cta).toHaveAttribute("href", new RegExp(offer.traslado_id));
+    const layout = await page.evaluate(() => {
+      const nav = document.querySelector("[data-conductor-mobile-nav]")!.getBoundingClientRect();
+      const selectors = ["[data-driver-traslados]", "[data-driver-traslados] > div", "[role=tabpanel]", "[role=tabpanel] > div", "[data-offer-card]"];
+      return {
+        root: document.documentElement.scrollHeight - innerHeight,
+        overflow: selectors.map(selector => { const e = document.querySelector(selector)!; return e.scrollHeight - e.clientHeight; }),
+        controls: Array.from(document.querySelectorAll("[data-offer-card] > a, [aria-label='Paginación de traslados'] button")).every(e => { const r=e.getBoundingClientRect(); const hit=document.elementFromPoint(r.x+r.width/2,r.y+r.height/2); return r.top >= 0 && r.bottom <= nav.top + 1 && !!hit && e.contains(hit); }),
+      };
+    });
+    await page.screenshot({ path: info.outputPath("oferta-redisenada.png") });
+    expect(layout.root).toBeLessThanOrEqual(1);
+    expect(layout.overflow.every(value => value <= 1), JSON.stringify(layout)).toBe(true);
+    expect(layout.controls).toBe(true);
+    await page.getByRole("button", { name: "Siguiente", exact: true }).click();
+    await expect(cta).toHaveAttribute("href", /dabb6c28/);
+    await page.getByRole("button", { name: "Abrir filtros avanzados" }).click();
+    await expect(page.getByRole("dialog", { name: "Menú del conductor" })).toBeVisible();
+  });
+}

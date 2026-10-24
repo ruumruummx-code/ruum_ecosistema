@@ -28,10 +28,10 @@ vi.mock("@ruum/api/services", () => ({
 vi.mock("@ruum/api/drivers", () => ({ contarNotificacionesNoLeidas: async () => 0 }));
 vi.mock("@ruum/api/transfers", () => ({ obtenerTrasladosPorIds: async () => [] }));
 vi.mock("../src/app/viajes/DriverTrasladosView", () => ({
-  DriverTrasladosView: ({ children }: { children?: ReactNode }) => <main>{children}</main>,
+  DriverTrasladosView: ({ children, filters }: { children?: ReactNode; filters: ReactNode }) => <main>{filters}{children}</main>,
 }));
 vi.mock("../src/app/viajes/OfertaCard", () => ({
-  OfertaCard: ({ hrefDetalle }: { hrefDetalle: string }) => <article aria-label="Oferta de traslado"><a href={hrefDetalle}>Ver oferta</a></article>,
+  OfertaCard: ({ hrefDetalle, mapPreview }: { hrefDetalle: string; mapPreview?: ReactNode }) => <article aria-label="Oferta de traslado">{mapPreview}<a href={hrefDetalle}>Ver oferta</a></article>,
 }));
 vi.mock("../src/app/viajes/AcceptedTripCard", () => ({ AcceptedTripCard: () => null }));
 vi.mock("../src/app/viajes/ViajesMapa", () => ({ TrasladosMapa: () => <div aria-label="Mapa de ofertas" /> }));

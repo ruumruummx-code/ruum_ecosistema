@@ -50,6 +50,31 @@ html[data-trip-keyboard="true"] [data-trip-scroll] nav[aria-label="Pasos de evid
 [data-trip-emergency-dialog] > div:last-child { min-height: 0; grid-auto-rows: max-content; align-content: start; }
 [data-trip-emergency-dialog] button { height: auto; }
 
+/* Solo el detalle de una oferta ocupa toda la pantalla, sin navegación inferior. */
+html:has([data-opportunity-detail]) [data-conductor-mobile-nav] { display: none; }
+html:has([data-opportunity-detail]) [data-trip-frame] {
+  bottom: 0;
+  padding-bottom: max(6px, env(safe-area-inset-bottom));
+}
+html:has([data-opportunity-detail]) [data-trip-scroll] {
+  overflow: hidden;
+  scroll-padding: 0;
+}
+html:has([data-opportunity-detail]) [data-trip-safety-bar] { padding: 0 12px; min-height: 30px; }
+html:has([data-opportunity-detail]) [data-trip-safety-bar] > :is(a, button),
+html:has([data-opportunity-detail]) [data-trip-safety-bar] #emergencia > div > button {
+  min-height: 30px;
+  padding: 3px 6px;
+  font-size: 11px;
+  line-height: 16px;
+}
+html:has([data-opportunity-detail]) [data-trip-primary] { padding: 8px 12px 4px; gap: 7px; }
+html:has([data-opportunity-detail]) [data-trip-primary] > [role="status"] { font-size: 11px; line-height: 14px; }
+@media (max-height: 500px) {
+  html:has([data-opportunity-detail]) [data-trip-primary] { padding: 4px 10px 2px; gap: 4px; }
+  html:has([data-opportunity-detail]) [data-trip-primary] > [role="status"] { font-size: 10px; line-height: 12px; }
+}
+
 @theme {
   --color-ruum-blue: #0066FF;
   --color-ruum-bg: #F4F7FC;
@@ -266,6 +291,16 @@ html:has([data-driver-traslados], [data-driver-account], .driver-dashboard) body
   flex: 1;
   overflow-y: auto;
   overscroll-behavior: contain;
+}
+
+/* Traslados reserva solo la barra fija; el diseño administra su espacio interior. */
+html:has([data-driver-traslados]) .conductor-safe-content {
+  padding-top: 0;
+  padding-bottom: var(--conductor-shell-bottom-height);
+}
+
+.conductor-safe-content > [data-driver-traslados] {
+  overflow: clip;
 }
 
 .conductor-content {

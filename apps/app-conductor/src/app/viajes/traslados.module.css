@@ -159,3 +159,82 @@
 
 }
 @media (prefers-reduced-motion: reduce) { .tabs button, .day strong { transition: none; } }
+
+/* Oferta mobile first: una tarjeta por página, sin regiones desplazables. */
+.screen { overflow: clip; }
+.body { gap: 8px; padding-top: max(10px, env(safe-area-inset-top)); padding-bottom: 8px; overflow: clip; }
+.header { padding-block: 0; }
+.heading h1 { font-size: 28px; line-height: 30px; }
+.live { min-height: 26px; }
+.live button { min-height: 26px; }
+.calendar { position: relative; display: grid; grid-template-columns: 14px minmax(0,1fr) 14px; align-items: center; gap: 2px; }
+.calendarArrow { display: grid; place-items: center; min-height: 44px; padding: 0; color: #61718e; }
+.calendarArrow svg { width: 14px; height: 18px; }
+.week { gap: 3px; }
+.day { padding: 6px 0; gap: 3px; border-radius: 12px; }
+.day > strong { background: transparent; width: auto; height: 22px; border-radius: 0; font-size: 15px; }
+.day[aria-pressed="true"] { background: #00c9c3; }
+.day[aria-pressed="true"] > span, .day[aria-pressed="true"] > strong { color: #082445; background: transparent; }
+.day i { bottom: -3px; }
+.selectedDate { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.tabs button { min-height: 38px; }
+.searchRow { display: flex; flex-shrink: 0; align-items: center; gap: 8px; }
+.search { flex: 1; min-width: 0; }
+.screen .search input { height: 42px; border-radius: 13px; }
+.filterButton { display: grid; place-items: center; flex-shrink: 0; width: 42px; min-height: 42px; border-radius: 13px; background: #edf2f8; color: #173b5d; }
+.quickActions { flex-direction: row-reverse; }
+.results { overflow: clip; }
+.results > article { flex: 1 1 0; min-height: 0; }
+.results > :not(article):not(.map) { flex-shrink: 0; }
+.results > .map { height: auto; flex: 1; min-height: 0; }
+@media (max-height: 740px) {
+  .body { gap: 5px; padding-top: max(6px, env(safe-area-inset-top)); padding-bottom: 5px; }
+  .heading h1 { font-size: 25px; line-height: 27px; }
+  .heading > p { font-size: 9px; line-height: 11px; }
+  .live, .live button { min-height: 24px; }
+  .day { padding-block: 4px; gap: 1px; }
+  .day > strong { height: 19px; font-size: 14px; }
+  .tabs button { min-height: 34px; }
+  .screen .search input { height: 38px; }
+  .filterButton { min-height: 38px; width: 38px; }
+}
+@media (max-height: 620px) {
+  .body { gap: 4px; padding-top: max(4px, env(safe-area-inset-top)); padding-bottom: 4px; padding-inline: 12px; }
+  .heading > p { display: none; }
+  .heading h1 { font-size: 23px; line-height: 25px; margin-top: 0; }
+  .header { min-height: 44px; align-items: center; }
+  .live { margin-top: 0; font-size: 10px; gap: 4px; }
+  .live, .live button { min-height: 20px; }
+  .live button { padding: 1px 6px; }
+  .menuButton { width: 28px; min-height: 40px; }
+  .quickActions > :is(button,a) { width: 32px; min-height: 32px; }
+  .day { padding-block: 2px; }
+  .day > span { font-size: 9px; line-height: 10px; }
+  .day > strong { height: 17px; font-size: 13px; }
+  .calendarArrow { min-height: 32px; }
+  .tabs { padding: 2px; }
+  .tabs button { min-height: 30px; font-size: 12px; }
+  .screen .search input { height: 34px; font-size: 14px; }
+  .filterButton { min-height: 34px; width: 34px; }
+  .pagination button { min-height: 24px; }
+  .results { gap: 3px; }
+}
+@media (max-height: 500px) {
+  .body { display: flex; }
+}
+@media (max-height: 500px) {
+  .body { display: grid; grid-template-columns: .95fr 1.05fr; grid-template-rows: auto auto minmax(0,1fr); grid-template-areas: "header calendar" "tabs search" "content content"; gap: 4px 6px; }
+  .searchRow { grid-area: search; gap: 4px; }
+  .calendar { grid-area: calendar; grid-template-columns: 10px minmax(0,1fr) 10px; }
+  .week { gap: 1px; }
+  .header { gap: 3px; }
+  .menuButton { width: 20px; }
+  .quickActions { gap: 2px; }
+  .quickActions > :is(button,a) { width: 24px; min-height: 28px; font-size: 17px; }
+  .quickActions svg { width: 17px; height: 17px; }
+  .heading h1 { font-size: 19px; line-height: 21px; }
+  .live { font-size: 8px; gap: 2px; }
+  .live button { font-size: 8px; padding-inline: 3px; }
+  .screen .search input { padding-left: 25px; padding-right: 24px; font-size: 12px; }
+  .notice { position: absolute; right: 12px; top: 0; z-index: 2; }
+}

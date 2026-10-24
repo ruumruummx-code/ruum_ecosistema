@@ -1,0 +1,112 @@
+.card { flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 10px; padding: 12px; border: 1px solid #dce3ef; border-radius: 20px; background: #fff; box-shadow: 0 5px 18px #17345c09; color: #0b2143; }
+.card > :not(.previewMap) { flex-shrink: 0; }
+.top { display: flex; align-items: center; justify-content: space-between; gap: 4px; }
+.available { display: inline-flex; align-items: center; gap: 6px; padding: 5px 9px; border-radius: 12px; background: #dcf8ee; color: #087d4d; font-size: 12px; font-weight: 750; }
+.available svg { width: 17px; height: 17px; }
+.top button { min-height: 28px; padding: 2px; color: #61718e; font-size: 10px; white-space: nowrap; }
+.summary { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.priceBlock { min-width: 0; }
+.priceBlock strong { font-size: 28px; line-height: 1.12; font-weight: 800; letter-spacing: -.7px; }
+.priceBlock > span { margin-left: 6px; font-size: 11px; color: #61718e; }
+.priceBlock p { margin: 4px 0 0; font-size: 12px; line-height: 16px; color: #61718e; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.schedule { display: flex; align-items: flex-start; gap: 6px; padding: 8px 10px; border-radius: 13px; background: #fff1d9; font-size: 12px; font-weight: 700; white-space: nowrap; }
+.schedule > svg { width: 18px; height: 18px; }
+.schedule time, .schedule span { display: block; line-height: 16px; }
+.route { display: grid; gap: 10px; margin: 0; }
+.route > div { position: relative; padding-left: 27px; min-width: 0; }
+.route > div::before { content: ""; position: absolute; top: 4px; left: 4px; width: 13px; height: 13px; border: 4px solid #00bebd; border-radius: 50%; background: #fff; z-index: 1; }
+.route > div:first-child::after { content: ""; position: absolute; top: 13px; bottom: -16px; left: 9px; width: 3px; background: #c0e7f2; }
+.route > div:last-child::before { border-color: #0866f5; }
+.route dt { font-size: 11px; font-weight: 650; line-height: 14px; color: #586b8e; }
+.route dd { margin: 0; font-size: 13px; line-height: 16px; font-weight: 600; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; overflow-wrap: anywhere; }
+.stats { display: grid; grid-template-columns: .8fr 1.15fr 1.15fr; align-items: center; gap: 5px; font-size: 11px; line-height: 14px; color: #586b8e; }
+.stats > span { display: flex; align-items: center; gap: 5px; min-width: 0; }
+.stats svg { flex-shrink: 0; width: 18px; height: 18px; }
+.previewMap { position: relative; flex: 1; min-height: 32px; max-height: 96px; overflow: hidden; border-radius: 12px; background: #eaf1e9; }
+.previewMap > svg, .mapImage { width: 100%; height: 100%; object-fit: cover; }
+.mapCaption { position: absolute; bottom: 2px; inset-inline: 5px; color: #36516a; font-size: 9px; line-height: 12px; text-align: center; background: #ffffffd9; border-radius: 4px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.badges { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 5px; }
+.badges > span { display: flex; align-items: center; gap: 5px; min-width: 0; padding: 7px 5px; border-radius: 12px; background: #eef2f8; font-size: 9px; line-height: 12px; font-weight: 650; }
+.badges svg { flex-shrink: 0; width: 19px; height: 19px; }
+.badges small { display: block; font-size: 9px; font-weight: 400; color: #586b8e; }
+.action { display: flex; width: 100%; align-items: center; justify-content: center; gap: 8px; min-height: 46px; margin-top: auto; padding: 8px; border-radius: 14px; background: #0663ff; color: #fff; font-size: 14px; line-height: 18px; font-weight: 750; text-align: center; }
+.action:hover { background: #004ddb; }
+.card :is(a,button):focus-visible { outline: 3px solid #0866f5; outline-offset: 2px; }
+@media (max-height: 740px) {
+  .card { gap: 6px; padding: 9px; border-radius: 16px; }
+  .available { font-size: 11px; padding: 3px 7px; }
+  .priceBlock strong { font-size: 25px; }
+  .priceBlock p { margin-top: 2px; font-size: 11px; line-height: 13px; }
+  .schedule { padding: 5px 7px; font-size: 11px; }
+  .route { gap: 6px; }
+  .route dd { font-size: 12px; line-height: 14px; }
+  .previewMap { min-height: 22px; max-height: 64px; }
+  .badges > span { padding: 4px; gap: 3px; }
+  .badges svg { width: 16px; height: 16px; }
+  .action { min-height: 40px; font-size: 13px; }
+}
+@media (max-height: 620px) {
+  .card { gap: 3px; padding: 6px; border-radius: 13px; }
+  .top button { min-height: 20px; font-size: 9px; }
+  .available { font-size: 10px; line-height: 14px; padding: 2px 5px; gap: 3px; }
+  .available svg { width: 13px; height: 13px; }
+  .priceBlock strong { font-size: 23px; line-height: 25px; }
+  .priceBlock p { font-size: 10px; line-height: 12px; margin: 0; }
+  .schedule { padding: 3px 5px; font-size: 10px; gap: 3px; }
+  .schedule > svg { width: 14px; height: 14px; }
+  .schedule time, .schedule span { line-height: 13px; }
+  .route { gap: 3px; }
+  .route > div { padding-left: 17px; display: grid; grid-template-columns: 39px minmax(0,1fr); gap: 3px; align-items: start; }
+  .route > div::before { left: 0; width: 10px; height: 10px; border-width: 3px; }
+  .route > div:first-child::after { left: 4px; top: 10px; bottom: -10px; width: 2px; }
+  .route dt { font-size: 9px; line-height: 12px; }
+  .route dd { font-size: 11px; line-height: 12px; }
+  .stats { font-size: 9px; line-height: 11px; gap: 3px; }
+  .stats > span { gap: 3px; }
+  .stats svg { width: 13px; height: 13px; }
+  .previewMap { min-height: 16px; max-height: 90px; border-radius: 6px; }
+  .mapCaption { font-size: 8px; line-height: 10px; }
+  .badges > span { font-size: 8px; line-height: 10px; padding: 3px; gap: 2px; border-radius: 6px; }
+  .badges small { display: none; }
+  .badges svg { width: 13px; height: 13px; }
+  .action { min-height: 36px; padding: 4px; font-size: 12px; line-height: 15px; border-radius: 9px; }
+}
+@media (max-height: 500px) {
+  .card { display: grid; grid-template-columns: .95fr 1.05fr; grid-template-rows: auto auto auto minmax(8px,1fr) auto auto; gap: 2px 6px; padding: 5px; }
+  .top { grid-column: 1 / -1; }
+  .summary { grid-column: 1; display: block; position: relative; }
+  .priceBlock strong { font-size: 21px; line-height: 23px; }
+  .priceBlock > span { font-size: 9px; margin-left: 3px; }
+  .priceBlock p { max-width: 100%; font-size: 9px; }
+  .schedule { display: flex; gap: 3px; padding: 0; background: transparent; font-size: 9px; }
+  .schedule > svg { display: none; }
+  .schedule > div { display: flex; gap: 4px; }
+  .schedule time, .schedule span { line-height: 11px; }
+  .route { grid-column: 2; grid-row: 2 / 5; align-content: center; }
+  .route > div { display: block; }
+  .route dt { font-size: 9px; line-height: 11px; }
+  .route dd { font-size: 10px; line-height: 11px; }
+  .stats { grid-column: 1; grid-row: 3; font-size: 8px; line-height: 10px; grid-template-columns: 1fr 1.5fr; }
+  .stats > span:last-child { grid-column: 1 / -1; }
+  .stats svg { width: 11px; height: 11px; }
+  .previewMap { grid-column: 1; grid-row: 4; min-height: 8px; max-height: 35px; }
+  .mapCaption { display: none; }
+  .badges { display: grid; grid-column: 1 / -1; grid-row: 5; }
+  .action { grid-column: 1 / -1; grid-row: 6; min-height: 32px; font-size: 12px; }
+}
+.previewMap > div { height: 100%; min-height: 0; }
+.previewMap [role="application"] { height: 100%; min-height: 0; }
+
+@media (max-height: 380px) {
+  .card { gap: 1px 4px; padding: 4px; }
+  .top button { min-height: 16px; }
+  .available { font-size: 9px; line-height: 12px; padding: 1px 4px; }
+  .priceBlock strong { font-size: 18px; line-height: 20px; }
+  .priceBlock p { font-size: 9px; line-height: 10px; }
+  .stats { gap: 1px 3px; font-size: 8px; line-height: 9px; }
+  .stats svg { width: 10px; height: 10px; }
+  .previewMap { min-height: 6px; }
+  .badges > span { padding: 2px; }
+  .badges svg { width: 10px; height: 10px; }
+  .action { min-height: 30px; }
+}

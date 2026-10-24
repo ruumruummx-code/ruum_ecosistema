@@ -31,7 +31,7 @@ async function keyboard(page: Page, height: number) {
   }, height);
 }
 
-for (const [index, action] of [[0, "SOLICITAR ASIGNACIÓN"], [1, "ESTOY EN CAMINO AL ORIGEN"], [2, "HE LLEGADO AL ORIGEN"], [3, "CONTINUAR INSPECCIÓN"], [4, "HE LLEGADO AL DESTINO"], [5, "FINALIZAR Y ENTREGAR VEHÍCULO"]] as const) {
+for (const [index, action] of [[0, "ACEPTAR TRASLADO"], [1, "ESTOY EN CAMINO AL ORIGEN"], [2, "HE LLEGADO AL ORIGEN"], [3, "CONTINUAR INSPECCIÓN"], [4, "HE LLEGADO AL DESTINO"], [5, "FINALIZAR Y ENTREGAR VEHÍCULO"]] as const) {
   test(`estado ${index}: acción, soporte y emergencia accesibles sin scroll raíz`, async ({ page }, info) => {
     await page.goto(`/viajes/${trip(index)}`);
     const primary = page.locator("[data-trip-primary]");

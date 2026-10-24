@@ -12,6 +12,7 @@ export interface DetalleOperativo {
   origen: string;
   destino: string;
   fechaHora: string;
+  fechaHoraProgramada?: string | null;
   tipoServicio: string;
   requisitos: string;
   distanciaKm: number | null;
@@ -79,6 +80,7 @@ export function detalleFallback(viaje: PasaporteRow): DetalleOperativo {
     origen: "Origen por confirmar",
     destino: "Destino por confirmar",
     fechaHora: viaje.creado_en ?? viaje.actualizado_en ?? new Date().toISOString(),
+    fechaHoraProgramada: null,
     tipoServicio: "Traslado estándar",
     requisitos: viaje.vehiculo_tipo ? `Nivel compatible con ${ETIQUETA_TIPO_VEHICULO[viaje.vehiculo_tipo]}.` : "Sin requisitos especiales.",
     distanciaKm: viaje.distancia_km,

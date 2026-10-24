@@ -37,12 +37,12 @@ test.describe("Cierre REPORTE_ERRORES_E2E — Flujo de oportunidades y traslados
 
     // Debe existir exactamente la oportunidad fixture, con su ruta real
     // (no un mensaje de estado vacío ni un placeholder).
-    await expect(page.getByText(/1 oferta disponible/i)).toBeVisible();
+    await expect(page.getByRole("tab", { name: "Ofertas (1)", exact: true })).toBeVisible();
     await expect(page.getByText(/Plaza de la Constitución/i)).toBeVisible();
     await expect(page.getByText(/Santa Fe|Vasco de Quiroga/i)).toBeVisible();
 
     // Expandir a detalle vía el CTA real de la tarjeta (no un selector genérico).
-    await page.getByRole("link", { name: /Ver oferta/i }).click();
+    await page.getByRole("link", { name: /Ver detalles de la oferta/i }).click();
     await expect(page).toHaveURL(new RegExp(`/viajes/${AVAILABLE_TRIP_ID}`));
 
     // El detalle de una oportunidad (aún no aceptada) debe mostrar origen,

@@ -1,10 +1,11 @@
 "use client";
 
 import Link from "next/link";
+import type { ReactNode } from "react";
 import { ETIQUETA_TIPO_VEHICULO } from "@ruum/shared/constants";
 import type { PasaporteRow, DetalleOperativo } from "./trips-utils";
 import { formatearDuracion, nombreVehiculo } from "./trips-utils";
-import { TripPreviewCard } from "./TripPreviewCard";
+import { OfferPreviewCard } from "./OfferPreviewCard";
 
 function extraerColonia(direccion: string | null): string {
   if (!direccion) return "";
@@ -24,10 +25,11 @@ interface OfertaCardProps {
   detalle: DetalleOperativo;
   hrefDetalle: string;
   compact?: boolean;
+  mapPreview?: ReactNode;
 }
 
-export function OfertaCard({ viaje, detalle, hrefDetalle, compact = false }: OfertaCardProps) {
-  if (compact) return <TripPreviewCard viaje={viaje} detalle={detalle} hrefDetalle={hrefDetalle} />;
+export function OfertaCard({ viaje, detalle, hrefDetalle, compact = false, mapPreview }: OfertaCardProps) {
+  if (compact) return <OfferPreviewCard viaje={viaje} detalle={detalle} hrefDetalle={hrefDetalle} mapPreview={mapPreview} />;
   const folio = viaje.traslado_id ? viaje.traslado_id.slice(0, 8).toUpperCase() : "SIN ID";
 
   const ganancia = viaje.ganancia_conductor != null

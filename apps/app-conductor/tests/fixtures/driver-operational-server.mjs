@@ -34,12 +34,18 @@ createServer(async (request, response) => {
     if (index === 7 && !loadingReleased) await new Promise(resolve => loadingRequests.push(resolve));
     if (index === 8) { response.writeHead(500).end('{"message":"Fallo temporal de prueba"}'); return; }
     const trip = index === 9 ? null : {
-      traslado_id: id, estado: states[index] ?? states[1], conductor_id: index === 0 ? null : "00000000-0000-4000-8000-000000000002",
+      traslado_id: id, estado: index === 10 ? "pendiente_de_conductor" : states[index] ?? states[1], conductor_id: index === 0 || index === 10 ? null : "00000000-0000-4000-8000-000000000002",
       origen_ciudad: "Ciudad de México", origen_direccion: "Avenida Reforma 100, Centro, acceso principal", destino_ciudad: "Toluca", destino_direccion: "Avenida Universidad 200, Centro, acceso sur",
       origen_lat: null, origen_lng: null, destino_lat: null, destino_lng: null,
       vehiculo_marca: "Toyota", vehiculo_modelo: "Corolla", vehiculo_anio: 2024, vehiculo_color: "Blanco", vehiculo_placas: "QA-123", vehiculo_vin: "TEST0000000000001",
       contacto_entrega_nombre: "Contacto de origen", contacto_entrega_telefono: "+525512345678", contacto_recepcion_nombre: "Contacto de destino", contacto_recepcion_telefono: "+525587654321",
       ganancia_conductor: 1850, distancia_km: 62.5, tiempo_estimado_horas: 1.5, creado_en: "2026-10-23T12:00:00Z",
+      ...(index === 10 ? {
+        origen_direccion: "Londres 899, Juárez, 06600, Ciudad de México", destino_ciudad: "Metepec",
+        destino_direccion: "Los Serranos 225, Uno Residencial, 52104, Metepec, Méx.",
+        vehiculo_marca: "Chrysler", vehiculo_modelo: "Stratus", vehiculo_anio: 2015,
+        ganancia_conductor: 531.45, distancia_km: 51, tiempo_estimado_horas: 70 / 60,
+      } : {}),
     };
     response.end(JSON.stringify(request.headers.accept?.includes("vnd.pgrst.object+json") ? trip : trip ? [trip] : [])); return;
   }

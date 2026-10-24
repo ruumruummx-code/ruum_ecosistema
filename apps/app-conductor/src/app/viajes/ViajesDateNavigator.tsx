@@ -29,11 +29,9 @@ export function TrasladosDateNavigator({
   const parte = (tipo: Intl.DateTimeFormatPartTypes) => partes.find((p) => p.type === tipo)?.value.replaceAll(".", "") ?? "";
   const etiqueta = diaCalendarioSeleccionado ? [parte("weekday"), parte("day"), "DE", parte("month")].join(" ").toUpperCase() : "HOY";
   return <div className={styles.calendar}>
+    <button type="button" className={styles.calendarArrow} onClick={() => moverDia(-1)} aria-label="Día anterior"><TrasladosIcon name="left" /></button>
     <WeekDaySelector dias={calendario} seleccionado={diaSeleccionado} hoy={diaHoy} onSelect={onSelectDia} />
-    <div className={styles.dateBar}>
-      <button type="button" onClick={() => moverDia(-1)} aria-label="Día anterior"><TrasladosIcon name="left" /></button>
-      <div><time dateTime={diaSeleccionado}>{etiqueta}</time>{diaHoy && diaSeleccionado === diaHoy && <span>HOY</span>}</div>
-      <button type="button" onClick={() => moverDia(1)} aria-label="Día siguiente"><TrasladosIcon name="right" /></button>
-    </div>
+    <button type="button" className={styles.calendarArrow} onClick={() => moverDia(1)} aria-label="Día siguiente"><TrasladosIcon name="right" /></button>
+    <span className={styles.selectedDate} aria-live="polite"><time dateTime={diaSeleccionado}>{etiqueta}</time>{diaHoy && diaSeleccionado === diaHoy && <span>HOY</span>}</span>
   </div>;
 }

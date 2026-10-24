@@ -234,6 +234,7 @@ export default function PaginaTraslados() {
                     origen: `${fila.origen_ciudad} · ${fila.origen_direccion}`,
                     destino: `${fila.destino_ciudad} · ${fila.destino_direccion}`,
                     fechaHora: fila.fecha_hora_programada ?? new Date().toISOString(),
+                    fechaHoraProgramada: fila.fecha_hora_programada,
                     tipoServicio: fila.motivo_servicio ?? fila.tipo_servicio ?? "Traslado estándar",
                     requisitos: fila.instrucciones_especiales ?? "Sin requisitos especiales.",
                     distanciaKm: viaje?.distancia_km ?? null,
@@ -424,17 +425,18 @@ export default function PaginaTraslados() {
       sortActive={orden === "mayor_ganancia"}
       onClear={() => { setCiudadFiltro("todas"); setOrden("recientes"); actualizarUrl({ ciudad: "todas", orden: "recientes", q: "" }); }}
       notice={!estaOnline ? "Sin conexión. Conéctate a internet para actualizar las ofertas." : aviso}
-      filters={<TrasladosFilters orden={orden} onCambiarOrden={(valor) => { setOrden(valor); actualizarUrl({ orden: valor }); }} ciudadFiltro={ciudadFiltro}
-        onCambiarCiudad={(valor) => { setCiudadFiltro(valor); actualizarUrl({ ciudad: valor }); }} ciudadesDisponibles={ciudadesDisponibles} />}
-    >
-      {item ? <div className={styles.results}>
+      filters={<>
         <div role="group" aria-label="Vista Lista o Mapa" className={styles.modeSwitch}>
           <button type="button" aria-pressed={modoMapa === "lista"} onClick={() => cambiarModo("lista")}>Lista</button>
           <button type="button" aria-pressed={modoMapa === "mapa"} onClick={() => cambiarModo("mapa")}>Mapa</button>
         </div>
-        {modoMapa === "mapa" && <div className={styles.map}><TrasladosMapa Traslados={listToRender.map((it) => it.viaje)} onSelect={(viaje) => router.push(hrefDetalle(viaje))} vistaId={rutaActual} /></div>}
-        <p className={styles.resultsCount}>{listToRender.length} {vista === "disponibles" ? listToRender.length === 1 ? "oferta disponible" : "ofertas disponibles" : listToRender.length === 1 ? "traslado aceptado" : "traslados aceptados"}</p>
-        {vista === "disponibles" ? <OfertaCard compact viaje={item.viaje} detalle={detalles[item.viaje.traslado_id ?? ""] ?? detalleFallback(item.viaje)} hrefDetalle={hrefDetalle(item.viaje)} />
+        <TrasladosFilters orden={orden} onCambiarOrden={(valor) => { setOrden(valor); actualizarUrl({ orden: valor }); }} ciudadFiltro={ciudadFiltro}
+        onCambiarCiudad={(valor) => { setCiudadFiltro(valor); actualizarUrl({ ciudad: valor }); }} ciudadesDisponibles={ciudadesDisponibles} /></>}
+    >
+      {item ? <div className={styles.results}>
+        {modoMapa === "mapa" && vista !== "disponibles" && <div className={styles.map}><TrasladosMapa Traslados={listToRender.map((it) => it.viaje)} onSelect={(viaje) => router.push(hrefDetalle(viaje))} vistaId={rutaActual} /></div>}
+        <p className="sr-only">{listToRender.length} {vista === "disponibles" ? listToRender.length === 1 ? "oferta disponible" : "ofertas disponibles" : listToRender.length === 1 ? "traslado aceptado" : "traslados aceptados"}</p>
+        {vista === "disponibles" ? <OfertaCard compact viaje={item.viaje} detalle={detalles[item.viaje.traslado_id ?? ""] ?? detalleFallback(item.viaje)} hrefDetalle={hrefDetalle(item.viaje)} mapPreview={modoMapa === "mapa" ? <TrasladosMapa Traslados={listToRender.map((it) => it.viaje)} onSelect={(viaje) => router.push(hrefDetalle(viaje))} vistaId={rutaActual} /> : undefined} />
           : <AcceptedTripCard compact viaje={item.viaje} detalle={detalles[item.viaje.traslado_id ?? ""] ?? detalleFallback(item.viaje)} hrefDetalle={hrefDetalle(item.viaje)} onReject={setViajeParaRechazar} />}
         {listToRender.length > 1 && <div className={styles.pagination} role="group" aria-label="Paginación de traslados">
           <button type="button" disabled={indiceTarjeta === 0} onClick={() => setPaginaActual(indiceTarjeta - 1)}>Anterior</button>
