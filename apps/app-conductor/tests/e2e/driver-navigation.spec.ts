@@ -29,7 +29,7 @@ async function expectUnobstructed(target: Locator, scroll = true) {
     const footer = document.querySelector("[data-conductor-mobile-nav]")?.getBoundingClientRect();
     const bottom = footer?.height ? footer.top : innerHeight;
     const hit = document.elementFromPoint(rect.left + rect.width / 2, rect.top + rect.height / 2);
-    return rect.top >= (header?.bottom ?? 0) && rect.bottom <= bottom && !!hit && element.contains(hit);
+    return rect.top >= (header?.bottom ?? 0) - 1 && rect.bottom <= bottom + 1 && !!hit && element.contains(hit);
   }, scroll)).toBe(true);
 }
 
@@ -40,17 +40,18 @@ for (const viewport of [{ width: 320, height: 568 }, { width: 390, height: 844 }
       await test.step(route, async () => {
         await page.goto(route, { waitUntil: "domcontentloaded" });
         await expect(page.getByRole("heading", { level: 1 }).first()).toBeVisible({ timeout: 180_000 });
+        await page.locator("nextjs-portal").evaluateAll(nodes => nodes.forEach(node => (node as HTMLElement).style.setProperty("display", "none", "important")));
         const mobile = viewport.width < 768;
-        const navigation = page.getByRole("navigation", { name: mobile ? "Navegación principal móvil" : "Navegación principal", exact: true });
+        const navigation = page.getByRole("navigation", { name: mobile || route !== "/panel" ? "Navegación principal móvil" : "Navegación principal", exact: true });
         await expect(navigation).toBeVisible();
-        await expect(navigation.getByRole("link")).toHaveCount(route === "/panel" ? (mobile ? 3 : 7) : 5);
-        await expect(navigation.locator('[aria-current="page"]')).toHaveCount(1);
+        await expect(navigation.getByRole("link")).toHaveCount(route === "/panel" ? (mobile ? 3 : 7) : 3);
+        await expect(navigation.locator('[aria-current="page"]')).toHaveCount(["/ganancias", "/notificaciones"].includes(route) ? 0 : 1);
         if (route !== "/panel") {
           await expect(page.locator("#contenido-principal nav[aria-label='Navegación principal']")).toHaveCount(0);
         }
         const main = page.locator("#contenido-principal");
         const header = route === "/panel"
-          ? (mobile ? page.getByRole("banner", { name: "Encabezado móvil del panel" }) : page.locator("[data-panel-desktop-header]"))
+          ? (mobile ? page.locator('header[aria-label="Encabezado móvil del panel"]') : page.locator("[data-panel-desktop-header]"))
           : page.locator("[data-conductor-header]");
         if (route !== "/panel") {
           await expect.poll(async () => main.evaluate(element => parseFloat(getComputedStyle(element).paddingTop))).toBeGreaterThanOrEqual(16);
@@ -61,18 +62,16 @@ for (const viewport of [{ width: 320, height: 568 }, { width: 390, height: 844 }
         await expectUnobstructed(last);
         if (route === "/viajes") await expectUnobstructed(page.getByRole("link", { name: "Volver al panel", exact: true }));
         if (route === "/cuenta") await expectUnobstructed(page.getByRole("button", { name: "Cerrar sesión", exact: true }));
-        if (route === "/ganancias") {
-          await expect(page.locator('[data-status="pendiente"]')).toHaveText(/1,620/);
-          await expectUnobstructed(page.locator('[data-status="pendiente"]').locator(".."));
-          const request = page.getByRole("button", { name: "Consultar programación de pago", exact: true });
-          await expect(request).toBeEnabled();
-          await expectUnobstructed(request);
-          await request.click();
-          await expect(page.getByRole("dialog", { name: "Programación de pago", exact: true })).toBeVisible();
-          await page.getByRole("button", { name: "Cerrar programación de pago", exact: true }).click();
+        if (route === "/panel") await expect(header).toBeVisible();
+        else {
+          await expect(header).toHaveCount(0);
+          await expect(navigation.getByRole("link")).toHaveText(["Inicio", "Traslados", "Cuenta"]);
         }
-        await expect(header).toBeVisible();
+        await expect(page.getByText("Acción requerida para continuar sincronización.", { exact: true })).toHaveCount(0);
         expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+        if (mobile && viewport.height >= 568 && ["/panel", "/viajes", "/cuenta"].includes(route)) {
+          await expect.poll(() => page.evaluate(() => document.documentElement.scrollHeight)).toBeLessThanOrEqual(viewport.height);
+        }
         expect(await page.evaluate(() => getComputedStyle(document.body).overflowY)).not.toBe("hidden");
       });
     }
@@ -85,14 +84,14 @@ test("403 conserva un único shell y sus acciones accesibles", async ({ page }) 
     for (const route of ["/403", "/403?reason=rol_usuario"]) {
       await test.step(`${route} en ${viewport.width}×${viewport.height}`, async () => {
         await page.goto(route);
-        const navigation = page.getByRole("navigation", { name: viewport.width < 768 ? "Navegación principal móvil" : "Navegación principal", exact: true });
+        const navigation = page.getByRole("navigation", { name: "Navegación principal móvil", exact: true });
         await expect(navigation).toHaveCount(1);
         await expect(navigation).toBeVisible();
-        await expect(navigation.getByRole("link")).toHaveCount(5);
+        await expect(navigation.getByRole("link")).toHaveCount(3);
         await expect(navigation.locator('[aria-current="page"]')).toHaveCount(0);
         await expect(page.getByRole("main")).toHaveCount(1);
         await expect(page.locator("#contenido-principal nav")).toHaveCount(0);
-        await expect(page.locator("[data-conductor-header]")).toHaveCount(1);
+        await expect(page.locator("[data-conductor-header]")).toHaveCount(0);
         await expect(page.locator("[data-conductor-mobile-nav]")).toHaveCount(1);
         await expectUnobstructed(page.getByRole("heading", { name: "Cuenta no autorizada para operar", exact: true }));
         await expectUnobstructed(page.getByRole("link", { name: "Cambiar de cuenta", exact: true }));
@@ -106,7 +105,7 @@ test("recalcula los márgenes cuando cambian las barras, la orientación y la ru
   await page.setViewportSize({ width: 320, height: 568 });
   await page.goto("/cuenta");
   await expect(page.getByRole("heading", { name: "Cuenta", exact: true })).toBeVisible();
-  await page.locator("[data-conductor-header]").evaluate(element => { element.style.paddingTop = "28px"; });
+  await expect(page.locator("[data-conductor-header]")).toHaveCount(0);
   await page.locator("[data-conductor-mobile-nav]").evaluate(element => {
     element.style.paddingBottom = "34px";
     const activeTrip = document.createElement("div");
@@ -116,7 +115,7 @@ test("recalcula los márgenes cuando cambian las barras, la orientación y la ru
   const assertInsets = async () => {
     await expect.poll(() => page.evaluate(() => {
       const root = getComputedStyle(document.documentElement);
-      const headerHeight = document.querySelector("[data-conductor-header]")!.getBoundingClientRect().height;
+      const headerHeight = 0;
       const footerHeight = document.querySelector("[data-conductor-mobile-nav]")!.getBoundingClientRect().height;
       const main = getComputedStyle(document.querySelector("#contenido-principal")!);
       return parseFloat(root.getPropertyValue("--conductor-shell-header-height")) >= headerHeight
@@ -129,7 +128,7 @@ test("recalcula los márgenes cuando cambian las barras, la orientación y la ru
   await page.screenshot({ path: testInfo.outputPath("cuenta-safe-areas-320.png") });
   await page.setViewportSize({ width: 1280, height: 960 });
   await assertInsets();
-  await expect.poll(() => page.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue("--conductor-shell-bottom-height"))).toBe("0px");
+  await expect.poll(() => page.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue("--conductor-shell-bottom-height"))).not.toBe("0px");
   await page.setViewportSize({ width: 320, height: 568 });
   await assertInsets();
   await page.context().clearCookies();

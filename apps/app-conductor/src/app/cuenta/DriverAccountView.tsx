@@ -36,10 +36,10 @@ export function DriverAccountView(props: Props) {
         </div>
       </header>
       <div className={styles.heading}><h1>Cuenta</h1><p>Administra tu información y configuración</p></div>
-      <div className={styles.sync} role="status" aria-live="polite" aria-atomic="true" data-state={props.sync?.status ?? "loading"}>
+      {props.sync?.status !== "accion_requerida" && <div className={styles.sync} role="status" aria-live="polite" aria-atomic="true" data-state={props.sync?.status ?? "loading"}>
         {syncOK ? <AccountIcon name="check" /> : <span aria-hidden="true">{props.sync ? "!" : "…"}</span>}<span>{syncText}</span>
-        {props.sync && ["accion_requerida", "error_recuperable", "conflicto_revision"].includes(props.sync.status) && <Link href={props.sync.status === "accion_requerida" ? "/login?next=/cuenta" : "/cuenta/soporte"}>{props.sync.status === "accion_requerida" ? "Entrar" : "Ayuda"}</Link>}
-      </div>
+        {props.sync && ["error_recuperable", "conflicto_revision"].includes(props.sync.status) && <Link href="/cuenta/soporte">Ayuda</Link>}
+      </div>}
       <nav className={styles.options} aria-label="Configuración de cuenta">
         {sections.map(section => <Link key={section.href} href={section.href} prefetch={false} className={styles.option}>
           <span className={styles.optionIcon} data-icon={section.icon}><AccountIcon name={section.icon} /></span>

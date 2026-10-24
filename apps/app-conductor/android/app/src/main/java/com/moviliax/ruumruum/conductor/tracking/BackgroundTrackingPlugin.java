@@ -63,7 +63,7 @@ public class BackgroundTrackingPlugin extends Plugin {
                 .build();
         WorkManager.getInstance(getContext())
                 .enqueueUniquePeriodicWork("ruum_tracking_flush",
-                        ExistingPeriodicWorkPolicy.REPLACE, flushRequest);
+                        ExistingPeriodicWorkPolicy.UPDATE, flushRequest);
     }
 
     private void cancelPeriodicFlush() {
@@ -95,7 +95,7 @@ public class BackgroundTrackingPlugin extends Plugin {
     @PluginMethod public void getValidatedNetworkStatus(PluginCall call) {
         ConnectivityManager manager = (ConnectivityManager) getContext().getSystemService(Context.CONNECTIVITY_SERVICE);
         Network network = manager == null ? null : manager.getActiveNetwork();
-        NetworkCapabilities capabilities = network == null || manager == null ? null : manager.getNetworkCapabilities(network);
+        NetworkCapabilities capabilities = network == null ? null : manager.getNetworkCapabilities(network);
         boolean validated = capabilities != null
             && capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
             && capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED);

@@ -15,12 +15,7 @@ public class MainActivity extends BridgeActivity {
         registerPlugin(BackgroundTrackingPlugin.class);
         super.onCreate(state);
         if (hasValidatedInternet()) {
-            String remoteUrl = BuildConfig.RUUM_REMOTE_URL;
-            if (remoteUrl != null && remoteUrl.startsWith("https://")) {
-                getBridge().getWebView().loadUrl(remoteUrl);
-            } else {
-                Log.e(TAG, "remote_url_invalid");
-            }
+            getBridge().getWebView().loadUrl(BuildConfig.RUUM_REMOTE_URL);
         } else {
             Log.i(TAG, "validated_network_unavailable_using_local_shell");
         }

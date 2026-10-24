@@ -35,7 +35,7 @@ for (const size of [{ width: 320, height: 568 }, { width: 375, height: 667 }, { 
     await page.setViewportSize(size);
     await openTrips(page);
     await expect(page.getByRole("heading", { name: "Sin traslados para este día" })).toBeVisible();
-    await expect(page.getByRole("navigation", { name: /^Navegación principal(?: móvil)?$/, exact: true }).filter({ visible: true }).getByRole("link")).toHaveCount(5);
+    await expect(page.getByRole("navigation", { name: /^Navegación principal(?: móvil)?$/, exact: true }).filter({ visible: true }).getByRole("link")).toHaveCount(3);
     const layout = await measureScreen(page);
     await page.screenshot({ path: testInfo.outputPath("traslados.png") });
     expect(layout.width).toBeLessThanOrEqual(440);

@@ -10,7 +10,7 @@ html:has([data-trip-frame]), html:has([data-trip-frame]) body { height: 100%; ov
 html:has([data-trip-frame]) .conductor-safe-content { padding: 0; min-height: 0; }
 [data-trip-frame] {
   position: fixed;
-  top: max(var(--conductor-shell-header-height, 0px), var(--trip-visible-top, 0px));
+  top: max(env(safe-area-inset-top), var(--trip-visible-top, 0px));
   bottom: max(var(--trip-nav-reserve, var(--conductor-shell-bottom-height, 0px)), var(--trip-keyboard-inset, 0px));
   left: 50%; transform: translateX(-50%);
   width: 100%; max-width: 440px;
@@ -223,30 +223,49 @@ html, body {
   --conductor-operation-width: 440px;
 }
 
-/* Reservas antes de hidratar; ResizeObserver las sustituye por las alturas reales. */
-html:has([data-conductor-header]) {
-  --conductor-shell-header-height: calc(81px + env(safe-area-inset-top));
-}
-
-html:has([data-conductor-header], [data-conductor-mobile-nav]) {
-  scroll-padding-top: calc(var(--conductor-shell-header-height) + var(--conductor-content-gap));
+/* La barra inferior es la única reserva del shell operativo. */
+html:has([data-conductor-mobile-nav]) {
+  --conductor-shell-bottom-height: calc(75px + env(safe-area-inset-bottom));
+  scroll-padding-top: max(var(--conductor-content-gap), env(safe-area-inset-top));
   scroll-padding-bottom: calc(var(--conductor-shell-bottom-height) + var(--conductor-content-gap));
 }
 
-html:has([data-conductor-header], [data-conductor-mobile-nav]) .conductor-safe-content {
-  padding-top: var(--conductor-content-gap);
-  padding-bottom: max(calc(var(--conductor-shell-bottom-height) + var(--conductor-content-gap)), env(safe-area-inset-bottom));
+html:has([data-conductor-mobile-nav]) .conductor-safe-content {
+  padding-top: max(var(--conductor-content-gap), env(safe-area-inset-top));
+  padding-bottom: calc(var(--conductor-shell-bottom-height) + var(--conductor-content-gap));
   padding-inline: env(safe-area-inset-left) env(safe-area-inset-right);
 }
 
-[data-conductor-header], [data-conductor-mobile-nav] {
+[data-conductor-mobile-nav] {
   padding-inline: env(safe-area-inset-left) env(safe-area-inset-right);
 }
 
-@media (min-width: 768px) {
-  html:has([data-conductor-header]) {
-    --conductor-shell-header-height: calc(149px + env(safe-area-inset-top));
-  }
+/* Las pantallas principales ocupan el viewport; el foco no desplaza el shell. */
+html:has([data-driver-traslados], [data-driver-account], .driver-dashboard),
+html:has([data-driver-traslados], [data-driver-account], .driver-dashboard) body {
+  height: 100%;
+  overflow: clip;
+}
+
+html:has([data-driver-traslados], [data-driver-account], .driver-dashboard) body {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+}
+
+.conductor-safe-content:has(> [data-driver-traslados], > [data-driver-account], > .driver-dashboard) {
+  height: 100dvh;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: clip;
+}
+
+.conductor-safe-content > :is([data-driver-traslados], [data-driver-account], .driver-dashboard) {
+  min-height: 0;
+  flex: 1;
+  overflow-y: auto;
+  overscroll-behavior: contain;
 }
 
 .conductor-content {
@@ -952,65 +971,16 @@ html[data-theme="light"] .conductor-page :where(input, select, textarea):focus {
   font-weight: 800;
 }
 
-/* Escritorio: un mismo marco para el shell y las vistas operativas mobile-first. */
+/* Escritorio: conservar el marco operativo mobile first y la navegación inferior. */
 @media (min-width: 1024px) {
-  body.conductor-v2-shell:has([data-conductor-header]) {
+  body.conductor-v2-shell:has([data-conductor-mobile-nav]) {
     background: #eef2f7;
   }
 
-  [data-conductor-header],
-  html:has([data-conductor-header]) .conductor-safe-content {
+  html:has([data-conductor-mobile-nav]) .conductor-safe-content,
+  [data-conductor-mobile-nav] {
     width: 100%;
     max-width: var(--conductor-operation-width);
     margin-inline: auto;
-  }
-
-  html:has([data-conductor-header]) .conductor-safe-content {
-    min-height: calc(100dvh - var(--conductor-shell-header-height));
-  }
-
-  [data-conductor-header-content] {
-    gap: 12px;
-    padding-inline: 16px;
-  }
-
-  [data-conductor-header-content] > a > span {
-    width: 64px;
-    height: 44px;
-  }
-
-  [data-conductor-header-content] > p {
-    font-size: 14px;
-    line-height: 1.4;
-  }
-
-  [data-conductor-desktop-nav] {
-    display: grid;
-    grid-template-columns: repeat(5, minmax(0, 1fr));
-    gap: 4px;
-    padding-inline: 16px;
-  }
-
-  [data-conductor-desktop-nav] > a {
-    min-width: 0;
-    flex-direction: column;
-    gap: 4px;
-    padding-inline: 2px;
-    font-size: 11px;
-    white-space: nowrap;
-  }
-
-  [data-conductor-desktop-active-trip] > div {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  [data-conductor-desktop-active-trip] p {
-    flex-wrap: wrap;
-  }
-
-  [data-conductor-desktop-active-trip] > div > div {
-    display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 }

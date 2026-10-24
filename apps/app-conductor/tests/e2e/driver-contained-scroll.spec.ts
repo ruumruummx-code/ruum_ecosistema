@@ -130,14 +130,14 @@ test("el checklist largo conserva el cierre y el retorno accesibles", async ({ p
 test("el marco se adapta al tamaño real del shell y libera la vista al salir", async ({ page }) => {
   await page.setViewportSize({ width: 320, height: 568 }); await fixture(page);
   await page.goto("/cuenta/documentos");
-  await page.locator("[data-conductor-header]").evaluate(node => { (node as HTMLElement).style.paddingTop = "28px"; });
+  await expect(page.locator("[data-conductor-header]")).toHaveCount(0);
   await page.locator("[data-conductor-mobile-nav]").evaluate(node => {
     (node as HTMLElement).style.paddingBottom = "34px";
     const trip = document.createElement("div"); trip.style.height = "72px"; node.prepend(trip);
   });
   await expect.poll(() => page.locator("[data-contained-view]").evaluate(node => {
     const rect = node.getBoundingClientRect();
-    const header = document.querySelector("[data-conductor-header]")!.getBoundingClientRect();
+    const header = { bottom: 0 };
     const footer = document.querySelector("[data-conductor-mobile-nav]")!.getBoundingClientRect();
     return Math.max(header.bottom - rect.top, rect.bottom - footer.top);
   })).toBeLessThanOrEqual(1);

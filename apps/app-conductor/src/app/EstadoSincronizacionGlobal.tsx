@@ -12,50 +12,6 @@ import {
   type EvidenciaDescartada
 } from "../lib/evidencias-descartadas";
 
-const CLASES: Record<GlobalSyncSnapshot["status"], string> = {
-  todo_sincronizado: "border border-[var(--ruum-success)]/30 bg-[var(--ruum-success-bg)] text-[var(--ruum-success-text)]",
-  sin_conexion: "border border-[var(--ruum-warning)]/40 bg-[var(--ruum-warning-bg)] text-[var(--ruum-warning-text)]",
-  pendientes: "border border-[var(--ruum-action)]/30 bg-[var(--ruum-action-bg)] text-[var(--ruum-action-text)]",
-  sincronizando: "border border-[var(--ruum-action)]/30 bg-[var(--ruum-action-bg)] text-[var(--ruum-action-text)]",
-  accion_requerida: "border border-[var(--ruum-warning)]/40 bg-[var(--ruum-warning-bg)] text-[var(--ruum-warning-text)]",
-  error_recuperable: "border border-[var(--ruum-error)]/30 bg-[var(--ruum-error-bg)] text-[var(--ruum-error-text)]",
-  conflicto_revision: "border border-[var(--ruum-error)]/30 bg-[var(--ruum-error-bg)] text-[var(--ruum-error-text)]"
-};
-
-// CODE-003 — mapeo de accion_requerida a UI accionable + observabilidad
-function AccionRequeridaCTA({ snapshot }: { snapshot: GlobalSyncSnapshot }) {
-  const isSesionExpirada = snapshot.status === "accion_requerida";
-  const isConflicto = snapshot.status === "conflicto_revision";
-  const isRelevante = snapshot.status === "accion_requerida" || snapshot.status === "conflicto_revision" || snapshot.status === "error_recuperable";
-
-  useEffect(() => {
-    if (!isRelevante) return;
-    void recordOperationalEvent(isConflicto ? "sync_failure" : "session_expired", { status: snapshot.status, message: snapshot.message }, "warning");
-  }, [snapshot.status, snapshot.message, isRelevante, isConflicto]);
-
-  if (!isRelevante) return null;
-
-  if (isSesionExpirada) {
-    return (
-      <Link href="/login?next=/panel" style={{ color: "var(--ruum-on-primary, #061529)" }} className="ml-3 inline-flex min-h-11 items-center rounded-lg bg-warning px-3 py-1 text-sm font-black hover:brightness-95">
-        Iniciar sesión
-      </Link>
-    );
-  }
-  if (isConflicto) {
-    return (
-      <Link href="/viajes" className="ml-3 inline-flex min-h-11 items-center rounded-lg border border-current px-3 py-1 text-sm font-black hover:bg-white/10">
-        Ver traslados
-      </Link>
-    );
-  }
-  return (
-    <button type="button" onClick={() => void publicarSyncSnapshot()} className="ml-3 inline-flex min-h-11 items-center rounded-lg border border-current px-3 py-1 text-sm font-bold hover:bg-white/10">
-      Reintentar
-    </button>
-  );
-}
-
 export function EstadoSincronizacionGlobal() {
   const pathname = usePathname();
   const [mounted, setMounted] = useState(false);
@@ -105,9 +61,15 @@ export function EstadoSincronizacionGlobal() {
     };
   }, []);
 
+  useEffect(() => {
+    const relevante = ["accion_requerida", "conflicto_revision", "error_recuperable"].includes(snapshot.status);
+    if (!relevante) return;
+    void recordOperationalEvent(snapshot.status === "conflicto_revision" ? "sync_failure" : "session_expired", { status: snapshot.status, message: snapshot.message }, "warning");
+  }, [snapshot.status, snapshot.message]);
+
   if (!mounted || pathname === "/login" || pathname === "/registro" || pathname === "/cuenta" || pathname === "/cuenta/perfil" || pathname === "/cuenta/documentos" || pathname === "/cuenta/datos-bancarios" || pathname === "/cuenta/certificacion") return null;
 
-  if (snapshot.status === "todo_sincronizado" && evidenciasDescartadas.length === 0) return null;
+  if (evidenciasDescartadas.length === 0) return null;
 
   return (
     <div className="flex flex-col gap-2">
@@ -151,12 +113,6 @@ export function EstadoSincronizacionGlobal() {
               </div>
             ))}
           </div>
-        </div>
-      )}
-      {snapshot.status !== "todo_sincronizado" && (
-        <div aria-live="polite" aria-atomic="true" className={`mx-auto mt-3 flex w-[min(100%-24px,1120px)] items-center justify-between gap-2 rounded-xl border px-4 py-2 font-body text-sm font-semibold ${CLASES[snapshot.status]}`}>
-          <span>{snapshot.message}</span>
-          <AccionRequeridaCTA snapshot={snapshot} />
         </div>
       )}
     </div>

@@ -1,7 +1,7 @@
 .frame[data-contained-view] {
-  position: fixed; top: var(--conductor-shell-header-height, 0px); bottom: var(--conductor-shell-bottom-height, 0px);
+  position: fixed; top: env(safe-area-inset-top, 0px); bottom: var(--conductor-shell-bottom-height, 0px);
   left: 50%; transform: translateX(-50%); width: 100%; max-width: 440px;
-  max-height: calc(100dvh - var(--conductor-shell-header-height, 0px) - var(--conductor-shell-bottom-height, 0px));
+  max-height: calc(100dvh - env(safe-area-inset-top, 0px) - var(--conductor-shell-bottom-height, 0px));
   overflow: hidden; display: flex; flex-direction: column; background: var(--conductor-surface); color: var(--conductor-primary);
 }
 .layout { display: flex; flex: 1; min-height: 0; flex-direction: column; }
@@ -9,7 +9,7 @@
 .frame[data-contained-view] .header a { display: inline-flex; align-items: center; min-height: 44px; color: var(--conductor-action); font-size: 13px; font-weight: 600; }
 .content[data-contained-scroll] {
   flex: 1; min-height: 0; overflow-y: auto; overflow-x: hidden; overscroll-behavior: contain;
-  max-height: calc(100dvh - var(--conductor-shell-header-height, 0px) - var(--conductor-shell-bottom-height, 0px) - var(--contained-header-height, 60px));
+  max-height: calc(100dvh - env(safe-area-inset-top, 0px) - var(--conductor-shell-bottom-height, 0px) - var(--contained-header-height, 60px));
   padding: 16px; scroll-padding-block: 16px; scrollbar-gutter: stable;
 }
 .flow { display: flex; flex-direction: column; gap: 16px; min-width: 0; }

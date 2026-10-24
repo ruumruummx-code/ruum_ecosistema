@@ -25,19 +25,19 @@ for (const width of [1024, 1280, 1536]) {
           await expect(page.locator("[data-panel-sidebar]")).toBeVisible();
           await expect(page.locator("[data-panel-sidebar] nav a")).toHaveCount(7);
         } else {
-          await expect(page.locator("[data-conductor-header]")).toBeVisible();
-          await expect(page.locator("[data-conductor-desktop-nav]")).toBeVisible();
+          await expect(page.locator("[data-conductor-header]")).toHaveCount(0);
+          await expect(page.locator("[data-conductor-mobile-nav]")).toBeVisible();
           const left = (width - 440) / 2;
           await expect.poll(() => page.evaluate(() =>
-            ["#contenido-principal", "[data-conductor-header]", "[data-conductor-desktop-nav]"].map(selector => {
+            ["#contenido-principal", "[data-conductor-mobile-nav]"].map(selector => {
               const rect = document.querySelector(selector)?.getBoundingClientRect();
               return rect ? { x: rect.x, width: rect.width } : null;
             }),
-          )).toEqual(Array.from({ length: 3 }, () => ({ x: left, width: 440 })));
-          const bounds = await page.locator("[data-conductor-desktop-nav] a").evaluateAll(links => links.map(link => {
+          )).toEqual(Array.from({ length: 2 }, () => ({ x: left, width: 440 })));
+          const bounds = await page.locator("[data-conductor-mobile-nav] a").evaluateAll(links => links.map(link => {
             const r = link.getBoundingClientRect(); return { left: r.left, right: r.right };
           }));
-          expect(bounds).toHaveLength(5);
+          expect(bounds).toHaveLength(3);
           for (const link of bounds) {
             expect(link.left).toBeGreaterThanOrEqual(left);
             expect(link.right).toBeLessThanOrEqual(left + 440);
@@ -48,7 +48,7 @@ for (const width of [1024, 1280, 1536]) {
         if (width === 1280) await page.screenshot({ path: testInfo.outputPath(route.slice(1).replaceAll("/", "-") + ".png") });
       });
     }
-    await page.getByRole("navigation", { name: "Navegación principal", exact: true }).getByRole("link", { name: "Traslados", exact: true }).click();
+    await page.getByRole("navigation", { name: "Navegación principal móvil", exact: true }).getByRole("link", { name: "Traslados", exact: true }).click();
     await expect(page).toHaveURL(/\/viajes$/, { timeout: 120_000 });
     await page.setViewportSize({ width: 320, height: 568 });
     await expect(page.getByRole("navigation", { name: "Navegación principal móvil", exact: true })).toBeVisible();

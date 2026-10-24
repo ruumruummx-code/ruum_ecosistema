@@ -63,12 +63,13 @@ test("barra local refleja desconexión y recuperación de sincronización", asyn
   await expect(page.getByText("Sincronizado — todo al día", { exact: true })).toHaveCount(0);
   await context.setOffline(false); await expect(status).toHaveText("Sincronizado — todo al día");
 });
-test("muestra la acción requerida de sincronización", async ({ page }) => {
+test("omite el aviso de acción requerida de sincronización", async ({ page }) => {
   await openAccount(page);
   const status = page.locator("[data-driver-account]").getByRole("status");
   await page.evaluate(() => window.dispatchEvent(new CustomEvent("ruum:sync-status-updated", { detail: { status: "accion_requerida", message: "Acción requerida para continuar sincronización.", pendingEvidence: 1, pendingTelemetry: 0, updatedAt: new Date().toISOString() } })));
-  await expect(status).toContainText("Acción requerida");
-  await expect(status.getByRole("link", { name: "Entrar", exact: true })).toHaveAttribute("href", "/login?next=/cuenta");
+  await expect(status).toHaveCount(0);
+  await expect(page.getByText("Acción requerida para continuar sincronización.", { exact: true })).toHaveCount(0);
+  await expect(page.getByRole("link", { name: "Entrar", exact: true })).toHaveCount(0);
 });
 test("cancelar conserva sesión y confirmar cierra solo la sesión local de prueba", async ({ page, context }) => {
   let signOutRequests = 0;
