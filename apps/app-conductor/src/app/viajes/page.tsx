@@ -424,16 +424,15 @@ export default function PaginaTraslados() {
       sortActive={orden === "mayor_ganancia"}
       onClear={() => { setCiudadFiltro("todas"); setOrden("recientes"); actualizarUrl({ ciudad: "todas", orden: "recientes", q: "" }); }}
       notice={!estaOnline ? "Sin conexión. Conéctate a internet para actualizar las ofertas." : aviso}
-      filters={<>
+      filters={<TrasladosFilters orden={orden} onCambiarOrden={(valor) => { setOrden(valor); actualizarUrl({ orden: valor }); }} ciudadFiltro={ciudadFiltro}
+        onCambiarCiudad={(valor) => { setCiudadFiltro(valor); actualizarUrl({ ciudad: valor }); }} ciudadesDisponibles={ciudadesDisponibles} />}
+    >
+      {item ? <div className={styles.results}>
         <div role="group" aria-label="Vista Lista o Mapa" className={styles.modeSwitch}>
           <button type="button" aria-pressed={modoMapa === "lista"} onClick={() => cambiarModo("lista")}>Lista</button>
           <button type="button" aria-pressed={modoMapa === "mapa"} onClick={() => cambiarModo("mapa")}>Mapa</button>
         </div>
-        <TrasladosFilters orden={orden} onCambiarOrden={(valor) => { setOrden(valor); actualizarUrl({ orden: valor }); }} ciudadFiltro={ciudadFiltro}
-          onCambiarCiudad={(valor) => { setCiudadFiltro(valor); actualizarUrl({ ciudad: valor }); }} ciudadesDisponibles={ciudadesDisponibles} />
-      </>}
-    >
-      {item ? modoMapa === "mapa" ? <div className={styles.map}><TrasladosMapa Traslados={listToRender.map((it) => it.viaje)} onSelect={(viaje) => router.push(hrefDetalle(viaje))} vistaId={rutaActual} /></div> : <div className={styles.results}>
+        {modoMapa === "mapa" && <div className={styles.map}><TrasladosMapa Traslados={listToRender.map((it) => it.viaje)} onSelect={(viaje) => router.push(hrefDetalle(viaje))} vistaId={rutaActual} /></div>}
         <p className={styles.resultsCount}>{listToRender.length} {vista === "disponibles" ? listToRender.length === 1 ? "oferta disponible" : "ofertas disponibles" : listToRender.length === 1 ? "traslado aceptado" : "traslados aceptados"}</p>
         {vista === "disponibles" ? <OfertaCard compact viaje={item.viaje} detalle={detalles[item.viaje.traslado_id ?? ""] ?? detalleFallback(item.viaje)} hrefDetalle={hrefDetalle(item.viaje)} />
           : <AcceptedTripCard compact viaje={item.viaje} detalle={detalles[item.viaje.traslado_id ?? ""] ?? detalleFallback(item.viaje)} hrefDetalle={hrefDetalle(item.viaje)} onReject={setViajeParaRechazar} />}
