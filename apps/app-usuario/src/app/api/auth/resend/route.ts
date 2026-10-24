@@ -82,9 +82,23 @@ export async function POST(request: NextRequest) {
     // Mismo mensaje en éxito y en "usuario inexistente": no enumeramos cuentas.
     if (error) {
       console.warn("[auth/resend] supabase devolvio error", {
-        codigo: error.status,
-        ip,
+        status: error.status,
+        code: error.code,
       });
+      // Mantener respuesta neutra sobre cuentas, pero no anunciar un envío
+      // cuando el proveedor rechazó la solicitud por límites o configuración.
+      if (error.status === 429) {
+        return NextResponse.json(
+          { error: "No pudimos reenviar el correo. Espera unos minutos e intenta nuevamente." },
+          { status: 429 }
+        );
+      }
+      if ((error.status ?? 0) >= 500 || error.code === "email_address_not_authorized") {
+        return NextResponse.json(
+          { error: "El servicio de correo no está disponible temporalmente. Intenta más tarde." },
+          { status: 503 }
+        );
+      }
     }
 
     return NextResponse.json({ ok: true });

@@ -68,7 +68,37 @@ describe("POST /api/auth/signup — validaciones y duplicados", () => {
     const res = await POST(req("duplicada@ejemplo.com"));
     expect(res.status).toBe(400);
     const json = (await res.json()) as { error: string };
-    expect(json.error).toMatch(/Si el correo corresponde/);
+    expect(json.error).toMatch(/inicia sesión o recupera tu contraseña/);
+  });
+
+  it("no envía a confirmar correo cuando Auth devuelve un registro repetido sin identidades", async () => {
+    mockSignUp.mockResolvedValue({
+      data: { user: { id: "usuario-oculto", identities: [] }, session: null }, error: null,
+    });
+    const res = await POST(req("repetida@ejemplo.com"));
+    expect(res.status).toBe(400);
+    const json = await res.json();
+    expect(json.error).toMatch(/inicia sesión o recupera tu contraseña/);
+    expect(json.requiereConfirmacion).toBeUndefined();
+  });
+
+  it("mantiene la confirmación para una cuenta nueva con identidad de correo", async () => {
+    mockSignUp.mockResolvedValue({
+      data: { user: { id: "nueva", identities: [{ provider: "email" }] }, session: null }, error: null,
+    });
+    const res = await POST(req("nueva-identidad@ejemplo.com"));
+    expect(res.status).toBe(200);
+    expect(await res.json()).toMatchObject({ ok: true, requiereConfirmacion: true });
+  });
+
+  it("no confunde un 422 de correo no autorizado con cuenta duplicada", async () => {
+    mockSignUp.mockResolvedValue({
+      data: { user: null, session: null },
+      error: { status: 422, code: "email_address_not_authorized", message: "Email address not authorized" },
+    });
+    const res = await POST(req("no-autorizada@ejemplo.com"));
+    expect(res.status).toBe(400);
+    expect((await res.json()).error).toBe("No pudimos crear la cuenta. Intenta de nuevo.");
   });
 
   it("error con subcadena 'uso' NO se clasifica como duplicado", async () => {

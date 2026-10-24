@@ -14,9 +14,38 @@ describe("cliente Mapbox usuario", () => {
   });
   afterEach(() => {
     vi.restoreAllMocks();
+    vi.unstubAllGlobals();
     vi.unstubAllEnvs();
     vi.useRealTimers();
     vi.resetModules();
+  });
+
+  it("calcula la ruta con cookie CSRF usando el mismo validador que el servidor", async () => {
+    vi.stubEnv("NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN", "pk.token-valido-formato");
+    const token = "a".repeat(64);
+    vi.stubGlobal("document", { cookie: `ruum_csrf_token=${token}` });
+    const { NextRequest } = await import("next/server");
+    const { validarCsrfRequest } = await import("./csrf");
+    const fetchMock = vi.fn(async (_input: RequestInfo | URL, init?: RequestInit) => {
+      const headers = new Headers(init?.headers);
+      headers.set("cookie", `ruum_csrf_token=${token}`);
+      const request = new NextRequest("https://usuario.example.com/api/ruta", {
+        method: init?.method, body: init?.body, headers,
+      });
+      if (!validarCsrfRequest(request).valido) {
+        return Response.json({ error: "Token CSRF inválido o ausente.", code: "CSRF_INVALID" }, { status: 403 });
+      }
+      return Response.json({ distanciaKm: 885.81, tiempoEstimadoHoras: 13.33 });
+    });
+    vi.stubGlobal("fetch", fetchMock);
+    const { calcularRutaMapbox } = await import("./mapbox");
+
+    await expect(calcularRutaMapbox(
+      { lat: 16.75, lng: -93.12 }, { lat: 19.28, lng: -99.51 }
+    )).resolves.toEqual({ distanciaKm: 885.81, tiempoEstimadoHoras: 13.33 });
+    expect(fetchMock).toHaveBeenCalledWith("/api/ruta", expect.objectContaining({
+      headers: { "Content-Type": "application/json", "x-csrf-token": token },
+    }));
   });
 
   it("expone error claro cuando Geocoding rechaza el token", async () => {

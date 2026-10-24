@@ -1,6 +1,7 @@
 import { MapboxDirectionsError, obtenerRutaDirectionsMapbox } from "@ruum/shared/utils";
 import { recordOperationalEvent } from "./observability";
 import { registrarEventoUx } from "./analytics";
+import { obtenerHeadersCsrf } from "./csrf";
 
 function obtenerTokenPublico(): string | undefined {
   return process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN;
@@ -316,7 +317,7 @@ export async function calcularRutaMapboxConParadas(
   try {
     const respuesta = await fetch("/api/ruta", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: obtenerHeadersCsrf({ "Content-Type": "application/json" }),
       body: JSON.stringify({ origen, destino, paradas }),
       signal: controller.signal
     });

@@ -18,6 +18,8 @@ export const revalidate = 0;
 const MAX_POR_IP_HORA = 10;
 const MAX_POR_CORREO_HORA = 5;
 const VENTANA_MS = 60 * 60 * 1000;
+const MENSAJE_REGISTRO_NO_COMPLETADO =
+  "No pudimos completar el registro. Si ya tienes una cuenta, inicia sesión o recupera tu contraseña.";
 
 /**
  * Alta de cuenta de usuario con rate limit de servidor.
@@ -144,19 +146,18 @@ export async function POST(request: NextRequest) {
 
     if (error) {
       // No revelar si el correo ya existe: mensaje genérico.
-      // Anti-enumeración sin falsos positivos: la señal es el 422 de
-      // Supabase ("User already registered"); el "uso" a secas anterior marcaba
-      // como duplicado cualquier mensaje con esa subcadena ("uso", "incluso",
-      // "exclusivo"...) y degradaba el diagnóstico de errores reales.
+      // 422 también puede indicar problemas de correo/configuración: usar el
+      // código de Auth o el mensaje explícito, nunca solo el estado HTTP.
       const esDuplicado =
-        error.status === 422 ||
+        error.code === "user_already_exists" || error.code === "email_exists" ||
         /already[\s_-]?registered|already[\s_-]?exists|\bemail[\s_-]?taken\b|en uso/i.test(error.message ?? "");
       if (esDuplicado) {
         return NextResponse.json(
-          { error: "Si el correo corresponde a una cuenta, recibirás instrucciones para continuar." },
+          { error: MENSAJE_REGISTRO_NO_COMPLETADO },
           { status: 400 }
         );
       }
+      console.warn("[auth/signup] supabase devolvio error", { status: error.status, code: error.code });
       return NextResponse.json(
         { error: "No pudimos crear la cuenta. Intenta de nuevo." },
         { status: 400 }
@@ -164,6 +165,12 @@ export async function POST(request: NextRequest) {
     }
     if (!data.user) {
       return NextResponse.json({ error: "No se pudo crear el usuario." }, { status: 500 });
+    }
+
+    // Auth puede ocultar un registro repetido con un usuario ficticio sin
+    // identidades y sin sesión. Esa respuesta no implica que haya enviado correo.
+    if (!data.session && data.user.identities?.length === 0) {
+      return NextResponse.json({ error: MENSAJE_REGISTRO_NO_COMPLETADO }, { status: 400 });
     }
 
     return NextResponse.json({ ok: true, requiereConfirmacion: !data.session, correo });

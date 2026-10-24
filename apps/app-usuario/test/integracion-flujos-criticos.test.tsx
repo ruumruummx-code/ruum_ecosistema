@@ -458,7 +458,7 @@ describe("Integración de flujos críticos en @ruum/app-usuario (signup, login, 
       const bodyDuplicado = (await resDuplicado.json()) as { error?: string };
       expect(resDuplicado.status).toBe(400);
       expect(bodyDuplicado.error).toBe(
-        "Si el correo corresponde a una cuenta, recibirás instrucciones para continuar.",
+        "No pudimos completar el registro. Si ya tienes una cuenta, inicia sesión o recupera tu contraseña.",
       );
     });
   });
