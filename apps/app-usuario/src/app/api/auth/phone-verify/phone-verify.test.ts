@@ -96,6 +96,45 @@ describe("POST /api/auth/phone-verify/verify", () => {
   });
 });
 
+describe("flujo Twilio Verify real (HTTP simulado)", () => {
+  afterEach(() => {
+    vi.unstubAllEnvs();
+    vi.unstubAllGlobals();
+  });
+
+  it("envía SMS y canjea el OTP por un token de registro usando las rutas oficiales", async () => {
+    vi.stubEnv("TWILIO_ACCOUNT_SID", "ACtest");
+    vi.stubEnv("TWILIO_AUTH_TOKEN", "tokentest");
+    vi.stubEnv("TWILIO_VERIFY_SERVICE_SID", "VAtest");
+    const fetchMock = vi.fn(async (url: string, init?: RequestInit) => {
+      const body = new URLSearchParams(String(init?.body));
+      expect(body.get("To")).toBe("+525512345678");
+      if (url === "https://verify.twilio.com/v2/Services/VAtest/Verifications") {
+        expect(body.get("Channel")).toBe("sms");
+        return Response.json({ status: "pending" });
+      }
+      if (url === "https://verify.twilio.com/v2/Services/VAtest/VerificationCheck") {
+        expect(body.get("Code")).toBe("654321");
+        return Response.json({ status: "approved" });
+      }
+      // Una ruta inexistente devuelve el mismo error que motivó esta regresión.
+      return Response.json({ code: 20404 }, { status: 404 });
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    const envio = await postSend(reqSend("5512345678"));
+    expect(envio.status).toBe(200);
+    expect(await envio.json()).toMatchObject({ ok: true, mock: false });
+
+    const verificacion = await postVerify(reqVerify("5512345678", "654321"));
+    expect(verificacion.status).toBe(200);
+    const resultado = await verificacion.json();
+    expect(resultado).toMatchObject({ ok: true, status: "approved" });
+    expect(validarTokenTelefono("5512345678", resultado.token).valido).toBe(true);
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
+});
+
 describe("modo mock solo fuera de producción", () => {
   const OLD_SID = process.env.TWILIO_ACCOUNT_SID;
   const OLD_TOKEN = process.env.TWILIO_AUTH_TOKEN;

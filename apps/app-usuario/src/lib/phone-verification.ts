@@ -236,7 +236,8 @@ export async function verificarCodigoTwilioVerify(
   const token = process.env.TWILIO_AUTH_TOKEN!;
   const serviceSid = process.env.TWILIO_VERIFY_SERVICE_SID!;
 
-  const url = `https://verify.twilio.com/v2/Services/${serviceSid}/VerificationChecks`;
+  // Twilio usa VerificationCheck en singular; el plural responde 20404 incluso con un OTP vigente.
+  const url = `https://verify.twilio.com/v2/Services/${serviceSid}/VerificationCheck`;
   const credenciales = Buffer.from(`${sid}:${token}`).toString("base64");
 
   const cuerpo = new URLSearchParams();

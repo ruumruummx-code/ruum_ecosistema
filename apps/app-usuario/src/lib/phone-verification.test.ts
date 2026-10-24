@@ -144,7 +144,7 @@ describe("phone-verification — integración Twilio Verify y mock dev", () => {
     );
   });
 
-  it("modo Twilio configurado: llama a VerificationChecks", async () => {
+  it("modo Twilio configurado: valida en VerificationCheck (singular) con teléfono E.164 y código", async () => {
     process.env.TWILIO_ACCOUNT_SID = "ACtest";
     process.env.TWILIO_AUTH_TOKEN = "tokentest";
     process.env.TWILIO_VERIFY_SERVICE_SID = "VAtest";
@@ -159,9 +159,14 @@ describe("phone-verification — integración Twilio Verify y mock dev", () => {
     expect(resultado.ok).toBe(true);
     expect(resultado.status).toBe("approved");
     expect(fetchMock).toHaveBeenCalledWith(
-      "https://verify.twilio.com/v2/Services/VAtest/VerificationChecks",
+      "https://verify.twilio.com/v2/Services/VAtest/VerificationCheck",
       expect.objectContaining({
         method: "POST",
+        headers: expect.objectContaining({
+          "Content-Type": "application/x-www-form-urlencoded",
+          Authorization: `Basic ${Buffer.from("ACtest:tokentest").toString("base64")}`,
+        }),
+        body: new URLSearchParams({ To: "+525512345678", Code: "654321" }).toString(),
       })
     );
   });
