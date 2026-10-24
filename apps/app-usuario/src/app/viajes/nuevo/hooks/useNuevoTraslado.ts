@@ -48,6 +48,7 @@ export function useNuevoTraslado() {
   const router = useRouter();
 
   const { state: formulario, setField, reset } = useNuevoTrasladoState();
+  const [formularioInicializado, setFormularioInicializado] = useState(false);
   const {
     paso,
     datos,
@@ -145,7 +146,7 @@ export function useNuevoTraslado() {
     reintentarAceptacion,
   } = useCotizacionTraslado({
     estadoTrasladoId,
-    trasladoCreado,
+    trasladoCreado: formularioInicializado ? trasladoCreado : null,
     reintentoAceptacion,
     setReintentoAceptacion,
   });
@@ -158,7 +159,7 @@ export function useNuevoTraslado() {
     errorVerificacionPago,
     manejarPagoStripeConfirmado,
     reintentarVerificacion,
-  } = usePagoTraslado({ estadoTrasladoId, trasladoCreado });  // Analítica del gate de tarifa (Paso 0)
+  } = usePagoTraslado({ estadoTrasladoId, trasladoCreado: formularioInicializado ? trasladoCreado : null });  // Analítica del gate de tarifa (Paso 0)
   const tarifaGateVistaRegistrada = useRef(false);
   const tarifaGateCalculadaRegistrada = useRef(false);
   const tarifaGateNoDisponibleRegistrada = useRef(false);
@@ -189,6 +190,7 @@ export function useNuevoTraslado() {
   // reinicia al entrar para no reutilizar un envío anterior de la misma sesión.
   useEffect(() => {
     reset();
+    setFormularioInicializado(true);
   }, [reset]);
 
   // Modelos y catálogo
@@ -515,6 +517,7 @@ export function useNuevoTraslado() {
     claveIdempotencia,
     enviando,
     resultado,
+    solicitudCreada: Boolean(trasladoCreado),
     borradorDisponible,
     consultarCodigoPostal,
     setDatos,

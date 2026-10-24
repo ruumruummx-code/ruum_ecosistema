@@ -25,6 +25,7 @@ interface DependenciasBorrador {
   claveIdempotencia: string;
   enviando: boolean;
   resultado: { ok: boolean; mensaje: string } | null;
+  solicitudCreada: boolean;
   borradorDisponible: BorradorTrasladoLocal | null;
   consultarCodigoPostal: ConsultarCodigoPostal;
   setDatos: SettersFormulario["setDatos"];
@@ -48,6 +49,7 @@ export function useBorradorTraslado({
   claveIdempotencia,
   enviando,
   resultado,
+  solicitudCreada,
   borradorDisponible,
   consultarCodigoPostal,
   setDatos,
@@ -63,7 +65,13 @@ export function useBorradorTraslado({
   // Borrador: lectura al montar
   useEffect(() => {
     const timer = setTimeout(() => {
-      const borrador = leerBorradorTrasladoLocal();
+      let borrador = leerBorradorTrasladoLocal();
+      // El paso de pago solo se alcanza después de crear la solicitud. Los
+      // borradores antiguos de ese paso ya consumieron su clave de idempotencia.
+      if (borrador && borrador.paso >= 4) {
+        limpiarBorradorTrasladoLocal();
+        borrador = null;
+      }
       setBorradorDisponible(borrador);
       setClaveIdempotencia(borrador?.claveIdempotencia ?? crypto.randomUUID());
     }, 0);
@@ -72,7 +80,12 @@ export function useBorradorTraslado({
 
   // Borrador: guardado con debounce
   useEffect(() => {
+    if (solicitudCreada) {
+      limpiarBorradorTrasladoLocal();
+      return;
+    }
     if (enviando || resultado) return;
+    if (paso >= 4 || !claveIdempotencia) return;
     const hayContenido = [datos.marca, datos.modelo, datos.origenCodigoPostal, datos.destinoCodigoPostal, datos.entregaNombre].some(
       (v) => v.trim()
     );
@@ -130,7 +143,7 @@ export function useBorradorTraslado({
 
     return () => clearTimeout(timer);
   }, [
-    enviando, resultado, paso, claveIdempotencia,
+    enviando, resultado, solicitudCreada, paso, claveIdempotencia,
     datos.tipo, datos.transmision, datos.marca, datos.modelo, datos.anio, datos.color, datos.condicion, datos.estadoGeneral,
     datos.tieneTarjeta, datos.tieneVerificacion, datos.tienePlacas, datos.puedeCircular,
     datos.origenCodigoPostal, datos.origenEstado, datos.origenCiudad, datos.origenColonia,

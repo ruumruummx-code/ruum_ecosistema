@@ -1,8 +1,9 @@
 /** @vitest-environment jsdom */
 import { describe, it, expect, beforeEach, vi } from "vitest";
-import { renderHook, act } from "@testing-library/react";
+import { render, renderHook, act, waitFor } from "@testing-library/react";
 import React from "react";
-import { AppStateProvider } from "@/state/AppStateProvider";
+import { AppStateProvider, useNuevoTrasladoState } from "@/state/AppStateProvider";
+import { aceptarCotizacionUsuario } from "@ruum/api/services";
 import { haCambiadoTarifa, generarTarifaSnapshot, CAMPOS_PASO_TARIFA } from "../../tarifa-gate";
 import { guardarBorradorTrasladoLocal, leerBorradorTrasladoLocal, limpiarBorradorTrasladoLocal } from "@/lib/borrador-traslado";
 
@@ -51,6 +52,27 @@ describe("useNuevoTraslado (2.1 Fase 1 — 80%+)", () => {
     localStorage.clear();
     limpiarBorradorTrasladoLocal();
     vi.clearAllMocks();
+  });
+
+  it("no intenta aceptar la cotización del traslado anterior al iniciar un segundo wizard", async () => {
+    function SegundoWizard() {
+      useNuevoTraslado();
+      return null;
+    }
+    function SesionConTrasladoPrevio() {
+      const { setField } = useNuevoTrasladoState();
+      const [abrir, setAbrir] = React.useState(false);
+      React.useEffect(() => {
+        setField("trasladoCreado", { id: "traslado-anterior", tipoPago: "anticipado", precioCotizado: 8067.55 });
+        setField("paso", 4);
+        setAbrir(true);
+      }, [setField]);
+      return abrir ? React.createElement(SegundoWizard) : null;
+    }
+    render(React.createElement(AppStateProvider, null, React.createElement(SesionConTrasladoPrevio)));
+    await waitFor(() => expect(aceptarCotizacionUsuario).not.toHaveBeenCalled());
+    await act(async () => { await new Promise((resolve) => setTimeout(resolve, 10)); });
+    expect(aceptarCotizacionUsuario).not.toHaveBeenCalled();
   });
 
   it("registra la aceptación legal sólo al solicitar continuar al pago", async () => {
