@@ -88,6 +88,13 @@ test("legales recuerda la posición y descarta un retorno externo", async ({ pag
   await region.focus(); await page.keyboard.press("ArrowDown");
   await region.evaluate(node => { node.scrollTop = 650; });
   await expect.poll(() => region.evaluate(node => node.scrollTop)).toBeGreaterThan(0);
+  // Chromium anima el gesto del teclado: la posición de referencia se toma recién cuando deja de moverse.
+  await expect.poll(async () => {
+    const antes = await region.evaluate(node => node.scrollTop);
+    await page.waitForTimeout(200);
+    const despues = await region.evaluate(node => node.scrollTop);
+    return Math.abs(despues - antes) <= 1;
+  }).toBe(true);
   const previous = await region.evaluate(node => node.scrollTop);
   await page.goto("/legal/privacidad");
   await page.goto("/legal/terminos");

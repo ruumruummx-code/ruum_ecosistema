@@ -75,6 +75,8 @@ test("Identidad: sheets validan, cancelan, guardan y conservan datos al volver",
   await expect(page.getByRole("progressbar").locator('[data-active="true"]')).toHaveCount(2);
   await checkSizes(page);
   await page.setViewportSize({ width: 1280, height: 900 });
+  // El marco debe adoptar el nuevo viewport antes de medir (mismo criterio que checkSizes).
+  await expect.poll(() => page.locator("[data-conductor-registration]").evaluate(el => el.style.getPropertyValue("--registration-height"))).toBe("900px");
   const bounds = await page.locator("[data-conductor-registration]").boundingBox();
   expect(bounds!.width).toBe(440);
   expect(bounds!.x).toBe(420);

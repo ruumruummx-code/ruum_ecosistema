@@ -9,20 +9,17 @@ export function RegistrationShell({ children, compact = false, account = false, 
     const screen = screenRef.current;
     const viewport = window.visualViewport;
     if (!compact || !screen || !viewport) return;
-    let frame = 0;
+    // Se aplica de forma síncrona: difundirlo en requestAnimationFrame deja el marco
+    // con el alto del viewport anterior hasta el siguiente cuadro.
     const update = () => {
-      cancelAnimationFrame(frame);
-      frame = requestAnimationFrame(() => {
-        screen.style.setProperty("--registration-height", viewport.height + "px");
-        screen.style.setProperty("--registration-top", viewport.offsetTop + "px");
-      });
+      screen.style.setProperty("--registration-height", viewport.height + "px");
+      screen.style.setProperty("--registration-top", viewport.offsetTop + "px");
     };
     update();
     viewport.addEventListener("resize", update);
     viewport.addEventListener("scroll", update);
     window.addEventListener("resize", update);
     return () => {
-      cancelAnimationFrame(frame);
       viewport.removeEventListener("resize", update);
       viewport.removeEventListener("scroll", update);
       window.removeEventListener("resize", update);

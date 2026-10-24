@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
+// Import estático, igual que el resto de rutas de API (verify-otp, recovery).
+import { cookies } from "next/headers";
 import { crearClienteServidor } from "@ruum/api/supabase";
 import { obtenerIp, rateLimitConVentana } from "@/lib/csp-rate-limit";
 import {
@@ -105,7 +107,6 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Servicio no disponible." }, { status: 503 });
     }
 
-    const { cookies } = await import("next/headers");
     const cookieStore = await cookies();
     const supabase = crearClienteServidor(url, anonKey, {
       getAll() {
