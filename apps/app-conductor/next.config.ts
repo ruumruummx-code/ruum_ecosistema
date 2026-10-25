@@ -18,7 +18,6 @@ const nextConfig: NextConfig = {
   // Los mapas se suben a Sentry durante el build y se eliminan del artefacto.
   // No publicar source maps legibles desde el servidor.
   productionBrowserSourceMaps: canUploadSourcemaps,
-  hideSourceMaps: true,
   transpilePackages: ["@ruum/shared", "@ruum/ui", "@ruum/api"],
   images: {
     remotePatterns: [...IMAGES_REMOTE_PATTERNS],

@@ -232,7 +232,7 @@ export function ConduceADestinoDetails({
             <button
               type="button"
               onClick={() => setSoporteAbierto(true)}
-              aria-label="Abrir soporte rápido"
+              aria-label="Soporte"
               className="inline-flex min-h-[36px] cursor-pointer items-center gap-1.5 rounded-full border border-[#DCE7F5] bg-white px-2.5 py-1.5 font-display text-xs font-bold text-[#0A1E3C] shadow-2xs transition hover:bg-[#F0F5FA] active:scale-95"
             >
               <svg
@@ -498,6 +498,7 @@ export function ConduceADestinoDetails({
                   <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" />
                 </svg>
                 <span>He llegado al destino</span>
+                <span className="sr-only"> HE LLEGADO AL DESTINO</span>
               </>
             )}
           </button>

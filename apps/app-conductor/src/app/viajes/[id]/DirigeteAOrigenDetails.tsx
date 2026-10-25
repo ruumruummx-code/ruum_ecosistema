@@ -564,6 +564,11 @@ export function DirigeteAOrigenDetails({
           </Link>
         </div>
       </nav>
+
+      {/* Modal de Soporte */}
+      {soporteAbierto && (
+        <TripSupportDialog onClose={() => setSoporteAbierto(false)} />
+      )}
     </div>
   );
 }
