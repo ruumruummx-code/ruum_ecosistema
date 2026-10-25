@@ -1,9 +1,20 @@
 import "server-only";
+import { existsSync } from "node:fs";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { createClient } from "@supabase/supabase-js";
 import { validarFila, type FilaValidada } from "./carga-masiva";
 import { clasificarVehiculoMasivo } from "@ruum/api/services";
+
+function rutaCatalogoCP(prefijo: string): string {
+  const cwd = process.cwd();
+  const candidatas = [
+    path.join(cwd, "public/data/codigos-postales", `${prefijo}.json`),
+    path.join(cwd, "apps/app-usuario/public/data/codigos-postales", `${prefijo}.json`),
+    path.join(cwd, "..", "app-usuario/public/data/codigos-postales", `${prefijo}.json`),
+  ];
+  return candidatas.find(r => existsSync(r)) ?? candidatas[0]!;
+}
 
 export function clienteMasivoServicio() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -22,7 +33,7 @@ export async function validarFilasServidor(entradas: Record<string, string>[]): 
       const cp = entrada[campo] ?? "";
       if (!/^\d{5}$/.test(cp)) continue;
       const prefijo = cp.slice(0, 2);
-      if (!archivos.has(prefijo)) archivos.set(prefijo, readFile(path.join(process.cwd(), "public/data/codigos-postales", `${prefijo}.json`), "utf8").then(JSON.parse).catch((error: NodeJS.ErrnoException) => { if (error.code === "ENOENT") return {}; throw error; }));
+      if (!archivos.has(prefijo)) archivos.set(prefijo, readFile(rutaCatalogoCP(prefijo), "utf8").then(JSON.parse).catch((error: NodeJS.ErrnoException) => { if (error.code === "ENOENT") return {}; throw error; }));
       const catalogo = await archivos.get(prefijo)!;
       if (!catalogo[cp]) fila.errores[campo] = "Código postal fuera del catálogo vigente";
     }

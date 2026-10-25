@@ -33,7 +33,12 @@ export async function rpcValidado<
 
 // Esquemas compartidos
 
-export const esquemaUuid = z.string().uuid("Debe ser un UUID válido");
+export const esquemaUuid = z
+  .string()
+  .regex(
+    /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/,
+    "Debe ser un UUID válido"
+  );
 
 export const esquemaConductorAvanzaTraslado = z.object({
   p_traslado_id: esquemaUuid,

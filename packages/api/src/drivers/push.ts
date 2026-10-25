@@ -1,7 +1,7 @@
 import { z } from "zod";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@ruum/shared/types";
-import { rpcValidado } from "../services/_rpc-validado";
+import { rpcValidado, esquemaUuid } from "../services/_rpc-validado";
 
 // FASE 6 (cierre) — Push del conductor: registro de dispositivo, acuse de
 // apertura y baja. La app ya no invoca estas RPC directamente.
@@ -18,7 +18,7 @@ const esquemaRegistrar = z.object({
 });
 
 const esquemaApertura = z.object({
-  p_notificacion_id: z.string().uuid("Debe ser un UUID válido"),
+  p_notificacion_id: esquemaUuid,
   p_device_id: z.string().trim().min(1, "Dispositivo requerido").max(64)
 });
 

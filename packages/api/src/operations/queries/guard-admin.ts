@@ -1,7 +1,7 @@
 import { z } from "zod";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@ruum/shared/types";
-import { rpcValidado } from "../../services/_rpc-validado";
+import { rpcValidado, esquemaUuid } from "../../services/_rpc-validado";
 
 // FASE 6 (cierre) — Guard de autorización del panel-admin: el middleware ya
 // no consulta `admins` ni invoca `admin_tiene_permiso` /
@@ -16,7 +16,7 @@ export interface AdminSesion {
 }
 
 const esquemaAdmin = z.object({
-  id: z.string().uuid(),
+  id: esquemaUuid,
   rol_operativo: z.string().nullable()
 });
 

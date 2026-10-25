@@ -1,12 +1,21 @@
 import { describe, expect, it } from "vitest";
 import { normalizarFilaPlantilla, validarFila, valorCelda } from "./carga-masiva";
 import ExcelJS from "exceljs";
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+
+const dirActual = path.dirname(fileURLToPath(import.meta.url));
+const rutaPlantilla = [
+  path.resolve(process.cwd(), "public/docs-legales/plantilla-carga-masiva.xlsx"),
+  path.resolve(process.cwd(), "apps/app-usuario/public/docs-legales/plantilla-carga-masiva.xlsx"),
+  path.resolve(dirActual, "../../../public/docs-legales/plantilla-carga-masiva.xlsx"),
+].find(existsSync) ?? path.resolve(process.cwd(), "public/docs-legales/plantilla-carga-masiva.xlsx");
 
 describe("plantilla oficial masiva", () => {
   it("lee la hoja Traslados y omite las 499 filas con fórmulas vacías", async () => {
     const wb = new ExcelJS.Workbook();
-    await wb.xlsx.load(new Uint8Array(readFileSync("public/docs-legales/plantilla-carga-masiva.xlsx")).buffer);
+    await wb.xlsx.load(new Uint8Array(readFileSync(rutaPlantilla)).buffer);
     expect(wb.worksheets[0]?.name).toBe("Instrucciones");
     const ws = wb.getWorksheet("Traslados")!;
     const headers: Record<number, string> = {};

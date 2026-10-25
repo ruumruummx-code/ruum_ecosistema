@@ -8,7 +8,13 @@ const mocks = vi.hoisted(() => ({
 }));
 vi.mock("server-only", () => ({}));
 vi.mock("@supabase/supabase-js", () => ({ createClient: mocks.crearCliente }));
-vi.mock("@ruum/api/services", () => ({ clasificarVehiculoMasivo: mocks.clasificar }));
+vi.mock("@ruum/api/services", async (importOriginal) => {
+  const actual = await importOriginal<Record<string, unknown>>().catch(() => ({}));
+  return {
+    ...actual,
+    clasificarVehiculoMasivo: (...args: unknown[]) => mocks.clasificar(...args),
+  };
+});
 
 import { validarFilasServidor } from "./carga-masiva-server";
 

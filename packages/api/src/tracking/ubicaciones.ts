@@ -10,7 +10,7 @@ type Cliente = SupabaseClient<Database>;
 // Se valida en cliente antes de enviar a Supabase; el servidor (RPC)
 // valida definitivamente que auth.uid() sea el conductor dueño del traslado.
 export const esquemaPuntoTelemetria = z.object({
-  localId: z.string().uuid("localId debe ser un UUID válido"),
+  localId: esquemaUuid,
   lat: z.number().min(-90).max(90, "lat fuera de rango"),
   lng: z.number().min(-180).max(180, "lng fuera de rango"),
   precisionM: z.number().min(0).max(10000).nullable().optional(),

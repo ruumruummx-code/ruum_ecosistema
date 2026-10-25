@@ -37,11 +37,13 @@ export const esquemaParada = z.object({
   }
 });
 
+const REGEX_UUID = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
+
 export type ParadaValidada = z.infer<typeof esquemaParada>;
 
 export const esquemaSolicitudTraslado = z.object({
   vehiculoSeleccionadoId: z.string(),
-  vehiculosUsuarioIds: z.array(z.string().uuid()),
+  vehiculosUsuarioIds: z.array(z.string().regex(REGEX_UUID, "Debe ser un UUID válido")),
   marca: requerido(),
   modelo: requerido(),
   color: requerido(),
@@ -162,10 +164,10 @@ export function erroresFormulario(resultado: ReturnType<typeof esquemaSolicitudT
  * Sincronizado con las restricciones de la RPC usuario_crea_traslado.
  */
 export const esquemaPayloadCrearTraslado = z.object({
-  claveIdempotencia: z.string().uuid("La clave de idempotencia debe ser un UUID válido."),
+  claveIdempotencia: z.string().regex(REGEX_UUID, "La clave de idempotencia debe ser un UUID válido."),
   vehiculo: z.union([
     z.object({
-      vehiculoId: z.string().uuid("El ID de vehículo guardado debe ser un UUID.")
+      vehiculoId: z.string().regex(REGEX_UUID, "El ID de vehículo guardado debe ser un UUID.")
     }),
     z.object({
       vehiculo: z.object({

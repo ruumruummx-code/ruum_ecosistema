@@ -1,6 +1,7 @@
 import { z } from "zod";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@ruum/shared/types";
+import { esquemaUuid } from "../services/_rpc-validado";
 
 // FASE 6 (cierre) — Gastos del traslado (conductor): listar, registrar y
 // eliminar. La subida del comprobante a Storage sigue en la app (Storage
@@ -10,8 +11,6 @@ type Cliente = SupabaseClient<Database>;
 type GastoRow = Database["public"]["Tables"]["gastos_traslado"]["Row"];
 
 export type GastoTraslado = GastoRow;
-
-const esquemaUuid = z.string().uuid("Debe ser un UUID válido");
 
 const esquemaRegistrar = z.object({
   p_traslado_id: esquemaUuid,

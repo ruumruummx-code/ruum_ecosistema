@@ -1,6 +1,7 @@
 import { z } from "zod";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@ruum/shared/types";
+import { esquemaUuid } from "../services/_rpc-validado";
 
 // FASE 6 (cierre) — Inspecciones operativas del traslado (conductor):
 // lectura y guardado idempotente por (traslado, tipo). El guardado usa
@@ -13,7 +14,7 @@ type TipoInspeccion = Database["public"]["Enums"]["tipo_evidencia"];
 export type InspeccionTraslado = InspeccionRow;
 
 const esquemaGuardar = z.object({
-  traslado_id: z.string().uuid("Debe ser un UUID válido"),
+  traslado_id: esquemaUuid,
   tipo: z.enum(["inicial", "final"]),
   combustible: z.string().max(60).nullable().optional(),
   kilometraje: z.number().min(0).nullable().optional(),
