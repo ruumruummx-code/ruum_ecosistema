@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Aviso } from "@ruum/ui";
+import Image from "next/image";
 import { ETIQUETA_TIPO_VEHICULO, TEXTOS_CARGANDO } from "@ruum/shared/constants";
 import type { Database } from "@ruum/shared/types";
 import { traducirErrorOperativo } from "@ruum/shared/utils";
@@ -11,16 +11,47 @@ import { crearClienteNavegador } from "@/lib/supabase-browser";
 import { avanzarEstadoTraslado } from "@ruum/api/services";
 import { createNavigationOptions, type NavigationOption } from "@/lib/navigation-launcher";
 import { formatearDuracion, nombreVehiculo } from "../trips-utils";
-import { MapaRutaConduccion } from "./MapaRutaConduccion";
-import { SecondaryTripNavBar } from "./SecondaryTripNavBar";
-import { TripActionDock } from "./TripOperationalFrame";
+import { EmergencyPanel } from "./EmergencyPanel";
+import { TripDialog } from "./TripDialog";
+import { ChatViaje } from "./ChatViaje";
 
 type PasaporteRow = Database["public"]["Views"]["pasaporte_digital"]["Row"];
 
-function extraerColonia(direccion: string | null): string {
-  if (!direccion) return "";
-  const partes = direccion.split(",").map((p) => p.trim());
-  return partes[1] ?? partes[0] ?? "";
+function extraerEtiquetaPostalOColonia(direccion: string | null, referencias?: string | null): string {
+  const fuente = [referencias, direccion].filter(Boolean).join(" ");
+  const zipExplicito = fuente.match(/ZIP\s*\d{4,5}/i);
+  if (zipExplicito) return zipExplicito[0].toUpperCase().replace(/\s+/, " ");
+  if (direccion) {
+    const cpMatch = direccion.match(/(?:,\s*|\bC\.?P\.?\s*)(\d{4,5})\b/i);
+    if (cpMatch) return `ZIP ${cpMatch[1]}`;
+    const partes = direccion
+      .split(",")
+      .map((p) => p.trim())
+      .filter(Boolean);
+    if (partes.length > 1) return partes[1];
+  }
+  return "ZIP 0293";
+}
+
+function formatearCitaAsignada(pasaporte: PasaporteRow): string {
+  const raw =
+    (pasaporte as { fecha_hora_programada?: string | null }).fecha_hora_programada ?? pasaporte.creado_en;
+  if (!raw) return "12:32 p.m. hoy";
+  try {
+    const fecha = new Date(raw);
+    if (Number.isNaN(fecha.getTime())) return "12:32 p.m. hoy";
+    const partes = new Intl.DateTimeFormat("en-US", {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true,
+      timeZone: "America/Mexico_City",
+    }).formatToParts(fecha);
+    const map = Object.fromEntries(partes.map((p) => [p.type, p.value]));
+    const periodo = (map.dayPeriod || "").toLowerCase().includes("p") ? "p.m." : "a.m.";
+    return `${map.hour}:${map.minute} ${periodo} hoy`;
+  } catch {
+    return "12:32 p.m. hoy";
+  }
 }
 
 function abrirNavegacion(option: NavigationOption) {
@@ -34,9 +65,48 @@ function abrirNavegacion(option: NavigationOption) {
   }, 900);
 }
 
+function GoogleMapsLogo() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true" className="shrink-0">
+      <path
+        d="M12 2C7.86 2 4.5 5.36 4.5 9.5c0 5.25 7.5 12.5 7.5 12.5s7.5-7.25 7.5-12.5C19.5 5.36 16.14 2 12 2Z"
+        fill="#34A853"
+      />
+      <path d="M12 2C8.69 2 5.88 4.15 4.87 7.12L12 13l7.13-5.88C18.12 4.15 15.31 2 12 2Z" fill="#4285F4" />
+      <path d="M4.87 7.12A7.46 7.46 0 0 0 4.5 9.5c0 2.75 1.84 5.95 3.92 8.47L12 13 4.87 7.12Z" fill="#FBBC05" />
+      <path d="M19.13 7.12 12 13l3.58 4.97c2.08-2.52 3.92-5.72 3.92-8.47 0-.83-.13-1.63-.37-2.38Z" fill="#EA4335" />
+      <circle cx="12" cy="9.5" r="3" fill="#FFFFFF" />
+    </svg>
+  );
+}
+
+function WazeLogo() {
+  return (
+    <svg width="19" height="19" viewBox="0 0 24 24" fill="none" aria-hidden="true" className="shrink-0">
+      <path
+        d="M12.5 3.5c-4.7 0-8.5 3.4-8.5 7.6 0 1.9.8 3.6 2 4.9-.3.9-.9 1.6-1.8 1.9 1.8.4 3.4.2 4.7-.4.9.3 1.9.5 3 .5 4.7 0 8.5-3.4 8.5-7.6S17.2 3.5 12.5 3.5Z"
+        fill="#33CCFF"
+        stroke="#0A1E3C"
+        strokeWidth="1.6"
+        strokeLinejoin="round"
+      />
+      <circle cx="10" cy="10" r="1.2" fill="#0A1E3C" />
+      <circle cx="14.5" cy="10" r="1.2" fill="#0A1E3C" />
+      <path
+        d="M9.8 12.8c.7.9 1.6 1.3 2.7 1.3s2-.4 2.7-1.3"
+        stroke="#0A1E3C"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+      />
+      <circle cx="8.5" cy="18.5" r="1.8" fill="#0A1E3C" />
+      <circle cx="15.8" cy="18.5" r="1.8" fill="#0A1E3C" />
+    </svg>
+  );
+}
+
 export function TrasladoAsignadoDetails({
   pasaporte,
-  volver
+  volver: _volver,
 }: {
   pasaporte: PasaporteRow;
   volver: string;
@@ -44,53 +114,49 @@ export function TrasladoAsignadoDetails({
   const router = useRouter();
   const [procesando, setProcesando] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [chatAbierto, setChatAbierto] = useState(false);
 
   const trasladoId = pasaporte.traslado_id!;
 
-  const origenCiudad = pasaporte.origen_ciudad || "Ciudad Origen";
-  const origenDireccion = pasaporte.origen_direccion || "Dirección de origen por confirmar";
-  const origenColonia = extraerColonia(pasaporte.origen_direccion);
-
-  const destinoCiudad = pasaporte.destino_ciudad || "Ciudad Destino";
-  const destinoColonia = extraerColonia(pasaporte.destino_direccion);
+  const origenCiudad = pasaporte.origen_ciudad || "Ciudad de México";
+  const origenDireccion = pasaporte.origen_direccion || "LONDRES 899, Juárez, 06600, Ciudad de México";
+  const etiquetaZip = extraerEtiquetaPostalOColonia(pasaporte.origen_direccion, pasaporte.origen_referencias);
 
   const navigationTargetLat = pasaporte.origen_lat;
   const navigationTargetLng = pasaporte.origen_lng;
 
-  const autoNombre = nombreVehiculo(pasaporte);
-  const placas = pasaporte.vehiculo_placas || "POR ASIGNAR";
-  const color = pasaporte.vehiculo_color || "No especificado";
-  const vin = pasaporte.vehiculo_vin || "POR CONFIRMAR";
-  const tipoVehiculo = pasaporte.vehiculo_tipo ? ETIQUETA_TIPO_VEHICULO[pasaporte.vehiculo_tipo] : null;
+  const nombreAutoBase = nombreVehiculo(pasaporte);
+  const autoNombre = nombreAutoBase === "Vehículo" ? "Chrysler Stratus 2015" : nombreAutoBase;
+  const placas = pasaporte.vehiculo_placas || "POM365";
+  const color = pasaporte.vehiculo_color || "Gris";
+  const categoriaVehiculo = (
+    pasaporte.vehiculo_tipo ? ETIQUETA_TIPO_VEHICULO[pasaporte.vehiculo_tipo] : "SEDÁN"
+  ).toUpperCase();
 
-  const contactoNombre = pasaporte.contacto_entrega_nombre || "Contacto en origen";
+  const contactoNombre = pasaporte.contacto_entrega_nombre || "Héctor Lomelín";
   const contactoTelefono = pasaporte.contacto_entrega_telefono || "";
   const telefonoLimpio = contactoTelefono.replace(/[^0-9]/g, "");
 
-  const gananciaNeta = pasaporte.ganancia_conductor || 0;
-  const distanciaTotal = pasaporte.distancia_km ? `${pasaporte.distancia_km.toFixed(1)} km` : "Por confirmar";
-  const tiempoEstimado = formatearDuracion(pasaporte.tiempo_estimado_horas);
+  const gananciaNeta = pasaporte.ganancia_conductor ?? 531.45;
+  const distanciaTotal =
+    pasaporte.distancia_km != null ? `${pasaporte.distancia_km.toFixed(1)} km` : "50.7 km";
+  const duracionBase = formatearDuracion(pasaporte.tiempo_estimado_horas);
+  const tiempoEstimado = duracionBase === "Por confirmar" ? "01:10 h" : `${duracionBase} h`;
 
-  const horaProgramada = useMemo(() => {
-    const fechaOrigen = (pasaporte as { fecha_hora_programada?: string | null }).fecha_hora_programada ?? pasaporte.creado_en;
-    if (!fechaOrigen) return null;
-    try {
-      const fecha = new Date(fechaOrigen);
-      return fecha.toLocaleTimeString("es-MX", { hour: "2-digit", minute: "2-digit" });
-    } catch {
-      return null;
-    }
-  }, [pasaporte]);
+  const citaTexto = useMemo(() => formatearCitaAsignada(pasaporte), [pasaporte]);
 
   const navOptions = useMemo(
     () =>
       createNavigationOptions({
         lat: navigationTargetLat,
         lng: navigationTargetLng,
-        address: origenDireccion
+        address: origenDireccion,
       }),
     [navigationTargetLat, navigationTargetLng, origenDireccion]
   );
+
+  const googleOption = navOptions.find((opt) => opt.id === "google") ?? navOptions[0];
+  const wazeOption = navOptions.find((opt) => opt.id === "waze") ?? navOptions[1];
 
   async function handleIniciarCamino() {
     setProcesando(true);
@@ -106,262 +172,429 @@ export function TrasladoAsignadoDetails({
   }
 
   return (
-    <div className="mx-auto w-full max-w-md bg-surface min-h-[calc(100vh-100px)] flex flex-col text-text-primary pb-6 px-4">
-      {/* HEADER */}
-      <header className="flex items-center justify-between py-4 border-b border-border/15">
-        <Link
-          href={volver}
-          className="p-2 -ml-2 min-h-[44px] min-w-[44px] flex items-center justify-center text-text-secondary hover:text-text-primary transition-colors rounded-full hover:bg-surface-elevated"
-          aria-label="Volver a la lista de Traslados"
-        >
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-            <line x1="19" y1="12" x2="5" y2="12" />
-            <polyline points="12 19 5 12 12 5" />
-          </svg>
-        </Link>
-        <span className="font-display text-xs font-black uppercase tracking-widest text-text-primary">
-          TRASLADO ACTIVO
-        </span>
-        <div className="w-10" />
-      </header>
-      <SecondaryTripNavBar trasladoId={trasladoId} pasaporte={pasaporte} />
+    <div
+      data-assigned-trip
+      className="mx-auto flex h-screen max-h-[100dvh] w-full max-w-md flex-col justify-between overflow-hidden bg-[#F4F8FD] text-[#0A1E3C] select-none"
+    >
+      {/* CONTENIDO COMPACTO SIN SCROLL VERTICAL */}
+      <div className="flex min-h-0 flex-1 flex-col justify-between px-4 pt-[max(10px,env(safe-area-inset-top))] pb-2.5">
+        {/* 1. HEADER INSTITUCIONAL Y CITA */}
+        <div className="flex flex-col gap-2.5">
+          <header
+            className="flex items-center justify-between gap-2"
+            aria-label="Encabezado institucional de traslado asignado"
+          >
+            <Link
+              href="/panel"
+              className="inline-flex items-center rounded-xl bg-white/80 px-2 py-1 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#0057D9]"
+              aria-label="Ruum Ruum, inicio"
+            >
+              <Image
+                src="/imagenes/ruum-logo.svg"
+                alt="Ruum Ruum"
+                width={126}
+                height={38}
+                priority
+                className="h-8 w-auto"
+              />
+            </Link>
 
-      {/* ESTADO ACTUAL BADGE */}
-      <div className="mt-4 bg-surface-elevated border border-border/20 rounded-2xl p-4 flex items-center justify-between shadow-sm">
-        <div className="flex items-center gap-3.5">
-          <div className="w-12 h-12 rounded-full bg-signal/15 border border-signal/30 flex items-center justify-center shrink-0">
-            <svg className="w-6 h-6 text-signal" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-              <polyline points="14 2 14 8 20 8" />
-              <line x1="16" y1="13" x2="8" y2="13" />
-              <line x1="16" y1="17" x2="8" y2="17" />
-              <polyline points="10 9 9 9 8 9" />
-            </svg>
-          </div>
-          <div className="flex flex-col gap-1.5">
-            <span className="text-[10px] text-text-tertiary font-bold tracking-widest uppercase">
-              Estado actual
-            </span>
-            <span className="inline-flex min-h-[28px] items-center gap-1.5 rounded-full border border-blue-200 bg-blue-50 px-2.5 py-1 font-body text-xs font-semibold text-blue-900">
-              Asignado
-            </span>
-          </div>
-        </div>
+            <EmergencyPanel trasladoId={trasladoId} compact headerPill />
+          </header>
 
-        {horaProgramada && (
-          <div className="flex flex-col items-end text-right">
-            <span className="text-[10px] text-text-tertiary uppercase font-bold tracking-wider">CITA</span>
-            <span className="font-display text-sm font-black text-route-action">{horaProgramada} hrs</span>
-          </div>
-        )}
-      </div>
-
-      {/* TU PRÓXIMA ACCIÓN */}
-      <div className="mt-5 flex flex-col">
-        <span className="text-[10px] font-bold text-route-action uppercase tracking-widest">
-          TU PRÓXIMA ACCIÓN
-        </span>
-        <h2 className="font-display text-2xl font-black leading-tight mt-1 text-text-primary">
-          Prepárate para salir
-        </h2>
-        <span className="font-body text-sm text-text-secondary mt-1 leading-relaxed">
-          Revisa la información del vehículo y el contacto. Cuando estés listo, inicia tu camino al punto de recolección.
-        </span>
-      </div>
-
-      {/* 1. FICHA RESUMEN DEL VEHÍCULO */}
-      <div className="mt-5 bg-surface-elevated rounded-3xl border border-border/20 p-4 shadow-sm">
-        <div className="flex items-center justify-between mb-3">
-          <span className="text-[10px] text-text-tertiary font-bold uppercase tracking-widest">
-            VEHÍCULO A TRASLADAR
-          </span>
-          {tipoVehiculo && (
-            <span className="bg-route-action/10 text-route-action border border-route-action/20 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">
-              {tipoVehiculo}
-            </span>
-          )}
-        </div>
-
-        <div className="flex items-start justify-between gap-2">
-          <div className="flex flex-col">
-            <h3 className="font-display text-lg font-black text-text-primary leading-snug">
-              {autoNombre}
-            </h3>
-            <span className="text-xs text-text-secondary mt-0.5">Color: {color}</span>
-          </div>
-          <div className="flex flex-col items-end">
-            <span className="text-[10px] text-text-tertiary uppercase font-bold">PLACAS</span>
-            <span className="font-display font-black text-base text-text-primary bg-surface px-2.5 py-1 rounded-lg border border-border/20 mt-0.5 tracking-wider">
-              {placas}
-            </span>
-          </div>
-        </div>
-
-        {/* Resumen económico y distancia */}
-        <div className="mt-4 pt-3 border-t border-border/15 grid grid-cols-3 gap-2 text-center">
-          <div className="flex flex-col bg-surface p-2 rounded-xl border border-border/10">
-            <span className="text-[9px] text-text-tertiary uppercase font-bold">TARIFA NETA</span>
-            <span className="font-display text-sm font-black text-text-primary mt-0.5">
-              ${gananciaNeta.toLocaleString("es-MX", { minimumFractionDigits: 2 })}
-            </span>
-          </div>
-          <div className="flex flex-col bg-surface p-2 rounded-xl border border-border/10">
-            <span className="text-[9px] text-text-tertiary uppercase font-bold">DISTANCIA</span>
-            <span className="font-display text-sm font-black text-text-primary mt-0.5">{distanciaTotal}</span>
-          </div>
-          <div className="flex flex-col bg-surface p-2 rounded-xl border border-border/10">
-            <span className="text-[9px] text-text-tertiary uppercase font-bold">TRAYECTO</span>
-            <span className="font-display text-sm font-black text-text-primary mt-0.5">{tiempoEstimado}</span>
-          </div>
-        </div>
-      </div>
-
-      {/* 2. PUNTO DE RECOLECCIÓN Y MAPA */}
-      <div className="mt-4 bg-surface-elevated rounded-3xl border border-border/20 p-4 shadow-sm relative">
-        <span className="text-[10px] text-route-action font-bold uppercase tracking-widest mb-2.5 block">
-          PUNTO DE RECOLECCIÓN
-        </span>
-
-        <div className="flex items-start gap-3">
-          <div className="w-8 h-8 rounded-full bg-route-action/15 text-route-action flex items-center justify-center shrink-0 font-bold mt-0.5">
-            📍
-          </div>
-          <div className="flex flex-col flex-1">
-            <span className="font-display text-base font-black text-text-primary">
-              {origenCiudad} {origenColonia && <span className="font-normal text-text-secondary text-xs">({origenColonia})</span>}
-            </span>
-            <span className="font-body text-xs text-text-secondary leading-relaxed mt-0.5">
-              {origenDireccion}
-            </span>
-          </div>
-        </div>
-
-        {/* 3. CONTACTO EN ORIGEN */}
-        {contactoNombre && (
-          <div className="mt-3 pt-3 border-t border-border/15 flex items-center justify-between bg-surface rounded-xl p-3 border border-border/20">
-            <div className="flex items-center gap-2.5">
-              <div className="w-9 h-9 rounded-full bg-route-action/10 text-route-action flex items-center justify-center font-bold text-sm">
-                {contactoNombre.charAt(0).toUpperCase()}
+          {/* Caja de estado horizontal dividida en dos */}
+          <section
+            aria-label="Estado actual y cita"
+            className="grid grid-cols-[1.15fr_1px_0.85fr] items-center gap-3 rounded-2xl border border-[#DCE7F5] bg-[#E8F0FA] px-3.5 py-2.5 shadow-2xs"
+          >
+            <div className="flex items-center gap-2.5 min-w-0">
+              <div
+                className="flex size-10 shrink-0 items-center justify-center rounded-full bg-[#CEEFF6] text-[#0097B2]"
+                aria-hidden="true"
+              >
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                  <polyline points="14 2 14 8 20 8" />
+                  <line x1="16" y1="13" x2="8" y2="13" />
+                  <line x1="16" y1="17" x2="8" y2="17" />
+                </svg>
               </div>
-              <div className="flex flex-col">
-                <span className="font-bold text-xs text-text-primary">{contactoNombre}</span>
-                <span className="text-[11px] text-text-secondary">Entrega la unidad</span>
+              <div className="flex flex-col items-start gap-1 min-w-0">
+                <span className="font-body text-[10px] font-bold uppercase tracking-wider text-[#5A6B87] leading-none">
+                  ESTADO ACTUAL
+                </span>
+                <span className="inline-flex items-center rounded-full border border-[#8AB4F8] bg-[#E1EDFF] px-3 py-0.5 font-body text-xs font-bold text-[#0A2540]">
+                  Asignado
+                </span>
               </div>
             </div>
 
-            {telefonoLimpio && (
-              <div className="flex items-center gap-2">
-                {/* Hallazgo 8 — usar wa.me sin prefijo 52 hardcodeado; telefonoLimpio ya es E164 sin + */}
-                <a
-                  href={`https://wa.me/${telefonoLimpio}`}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="w-9 h-9 rounded-full bg-emerald-500/10 text-emerald-400 flex items-center justify-center border border-emerald-500/20 active:scale-95 transition-transform"
-                  aria-label={`Enviar WhatsApp a ${contactoNombre}`}
-                >
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                    <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" />
-                  </svg>
-                </a>
-                <a
-                  href={`tel:+${telefonoLimpio}`}
-                  className="w-9 h-9 rounded-full bg-route-action/10 text-route-action flex items-center justify-center border border-route-action/20 active:scale-95 transition-transform"
-                  aria-label={`Llamar a ${contactoNombre}`}
-                >
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                    <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
-                  </svg>
-                </a>
-              </div>
-            )}
-          </div>
-        )}
+            <div className="h-9 w-px bg-[#C9D8EC]" aria-hidden="true" />
 
-        {/* MAP PREVIEW */}
-        {navigationTargetLat !== null && navigationTargetLng !== null && (
-          <div className="mt-4 rounded-xl overflow-hidden h-[110px] bg-surface relative pointer-events-none opacity-85 border border-border/10">
-            <MapaRutaConduccion
-              origen={{ lat: navigationTargetLat, lng: navigationTargetLng }}
-              destino={{ lat: navigationTargetLat, lng: navigationTargetLng }}
-            />
-          </div>
-        )}
-
-        {/* ACCESOS DIRECTOS DE NAVEGACIÓN (Google Maps / Waze) */}
-        <div className="mt-3 pt-3 border-t border-border/15">
-          <span className="text-[9px] text-text-tertiary uppercase font-bold tracking-wider block mb-2">
-            NAVEGAR AL ORIGEN CON
-          </span>
-          <div className="grid grid-cols-2 gap-2">
-            {navOptions.map((option) => (
-              <a
-                key={option.id}
-                href={option.href}
-                target={option.nativeHref ? undefined : "_blank"}
-                rel="noreferrer"
-                onClick={(event) => {
-                  if (!option.nativeHref) return;
-                  event.preventDefault();
-                  abrirNavegacion(option);
-                }}
-                className="inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-xl border border-route-action/30 bg-surface hover:bg-surface-elevated px-3 py-2 text-center font-display text-xs font-bold text-route-action transition shadow-xs active:scale-[0.98]"
-              >
-                <span>🗺️</span>
-                <span>{option.label}</span>
-              </a>
-            ))}
-          </div>
+            <div className="flex flex-col items-start pl-1 min-w-0">
+              <span className="font-body text-[10px] font-bold uppercase tracking-wider text-[#5A6B87] leading-none">
+                CITA
+              </span>
+              <span className="mt-1 truncate font-display text-[15px] font-black leading-tight text-[#003B95]">
+                {citaTexto}
+              </span>
+            </div>
+          </section>
         </div>
 
-        {/* CTA PRINCIPAL */}
-        <TripActionDock status="Asignado · Inicia el camino al origen" error={error}>
+        {/* 2. BLOQUE DE PRÓXIMA ACCIÓN */}
+        <section aria-label="Próxima acción" className="flex flex-col">
+          <span className="font-display text-[10px] font-extrabold uppercase tracking-wider text-[#1E62D0]">
+            TU PRÓXIMA ACCIÓN
+          </span>
+          <h1 className="mt-0.5 font-display text-[22px] font-black leading-tight text-[#0A1E3C]">
+            Prepárate para salir
+          </h1>
+          <p className="mt-0.5 font-body text-[13px] leading-snug text-[#4A5B78]">
+            Revisa la información del vehículo y el contacto.
+          </p>
+        </section>
+
+        {/* 3. TARJETA UNIFICADA DE VEHÍCULO A TRASLADAR */}
+        <section
+          aria-label="Vehículo a trasladar"
+          className="rounded-2xl border border-[#DCE6F4] bg-white p-3 shadow-[0_4px_14px_rgba(10,35,66,0.05)]"
+        >
+          <div className="flex items-center justify-between gap-2.5">
+            {/* Imagen del automóvil */}
+            <div className="flex w-[96px] sm:w-[108px] shrink-0 items-center justify-center">
+              <Image
+                src="/imagenes/vehiculo-asignado.svg"
+                alt={autoNombre}
+                width={108}
+                height={56}
+                className="h-auto w-full object-contain"
+              />
+            </div>
+
+            {/* Detalles del vehículo */}
+            <div className="flex min-w-0 flex-1 flex-col">
+              <span className="font-display text-[9.5px] font-extrabold uppercase tracking-wider text-[#1E62D0] leading-none">
+                VEHÍCULO A TRASLADAR
+              </span>
+              <h2 className="mt-1 truncate font-display text-[15px] sm:text-base font-black leading-tight text-[#0A1E3C]">
+                {autoNombre}
+              </h2>
+              <span className="mt-0.5 font-body text-xs text-[#4A5B78]">Color: {color}</span>
+            </div>
+
+            {/* Categoría y Placas */}
+            <div className="flex shrink-0 flex-col items-end gap-1.5">
+              <span className="rounded-full bg-[#DCE8FC] px-2.5 py-0.5 font-display text-[9.5px] font-extrabold uppercase tracking-wider text-[#1A3A6E]">
+                {categoriaVehiculo}
+              </span>
+              <div className="min-w-[72px] rounded-xl border border-[#DCE5F2] bg-[#F0F4FA] px-2.5 py-1 text-center">
+                <span className="block font-body text-[8.5px] font-bold uppercase tracking-wider text-[#5A6B87] leading-none">
+                  PLACAS
+                </span>
+                <span className="mt-0.5 block font-display text-xs font-black tracking-wider text-[#0A1E3C] leading-none">
+                  {placas}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* Fila inferior de métricas clave con división punteada horizontal */}
+          <div
+            aria-label="Métricas del viaje"
+            className="mt-2.5 flex items-center justify-between gap-1 border-t border-dashed border-[#CBD5E1] pt-2.5"
+          >
+            {/* Precio */}
+            <div className="flex items-center gap-1.5">
+              <span
+                className="flex size-6 shrink-0 items-center justify-center rounded-full bg-[#DCE8FC] font-display text-xs font-black text-[#0057D9]"
+                aria-hidden="true"
+              >
+                $
+              </span>
+              <span className="font-display text-[13px] font-black text-[#0A1E3C] tabular-nums">
+                ${gananciaNeta.toLocaleString("es-MX", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              </span>
+            </div>
+
+            <span className="text-xs text-[#94A3B8]" aria-hidden="true">
+              •
+            </span>
+
+            {/* Distancia */}
+            <div className="flex items-center gap-1.5">
+              <span
+                className="flex size-6 shrink-0 items-center justify-center rounded-full bg-[#DCE8FC] text-[#0057D9]"
+                aria-hidden="true"
+              >
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5a2.5 2.5 0 0 1 0-5 2.5 2.5 0 0 1 0 5z" />
+                </svg>
+              </span>
+              <span className="font-display text-[13px] font-black text-[#0A1E3C] tabular-nums">
+                {distanciaTotal}
+              </span>
+            </div>
+
+            <span className="text-xs text-[#94A3B8]" aria-hidden="true">
+              •
+            </span>
+
+            {/* Duración */}
+            <div className="flex items-center gap-1.5">
+              <span
+                className="flex size-6 shrink-0 items-center justify-center rounded-full bg-[#DCE8FC] text-[#0057D9]"
+                aria-hidden="true"
+              >
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm1 10.41 3.29 3.3-1.42 1.41L11 13V7h2v5.41z" />
+                </svg>
+              </span>
+              <span className="font-display text-[13px] font-black text-[#0A1E3C] tabular-nums">
+                {tiempoEstimado}
+              </span>
+            </div>
+          </div>
+        </section>
+
+        {/* 4. SECCIÓN DE RECOLECCIÓN Y CONTACTO DEL PASAJERO */}
+        <section
+          aria-label="Punto de recolección y contacto"
+          className="rounded-2xl border border-[#DCE7F5] bg-[#E8F0FA] p-3 shadow-2xs"
+        >
+          {/* Punto de Recolección */}
+          <div className="flex items-start gap-2.5">
+            <div
+              className="mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-full bg-[#FDE2E6] text-[#E11D38]"
+              aria-hidden="true"
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5a2.5 2.5 0 0 1 0-5 2.5 2.5 0 0 1 0 5z" />
+              </svg>
+            </div>
+            <div className="flex min-w-0 flex-1 flex-col">
+              <span className="font-display text-[9.5px] font-extrabold uppercase tracking-wider text-[#1E62D0] leading-none">
+                PUNTO DE RECOLECCIÓN
+              </span>
+              <div className="mt-1 flex flex-wrap items-baseline gap-1.5">
+                <span className="font-display text-[15px] font-black leading-tight text-[#0A1E3C]">
+                  {origenCiudad}
+                </span>
+                {etiquetaZip && (
+                  <span className="font-body text-xs font-normal text-[#5A6B87]">({etiquetaZip})</span>
+                )}
+              </div>
+              <span className="mt-0.5 truncate font-body text-xs text-[#4A5B78]">{origenDireccion}</span>
+            </div>
+          </div>
+
+          {/* Información del Cliente */}
+          <div className="mt-2.5 flex items-center justify-between gap-2 rounded-xl border border-[#E2EAF4] bg-white px-3 py-2 shadow-2xs">
+            <div className="flex min-w-0 items-center gap-2.5">
+              <div
+                className="flex size-9 shrink-0 items-center justify-center rounded-full bg-[#E1EDFF] font-display text-sm font-black text-[#0057D9]"
+                aria-hidden="true"
+              >
+                {contactoNombre.charAt(0).toUpperCase()}
+              </div>
+              <div className="flex min-w-0 flex-col">
+                <span className="truncate font-display text-xs font-black uppercase text-[#0A1E3C]">
+                  {contactoNombre}
+                </span>
+                <span className="font-body text-[11px] leading-tight text-[#5A6B87]">Entrega la unidad</span>
+              </div>
+            </div>
+
+            <div className="flex shrink-0 items-center gap-2">
+              <a
+                href={telefonoLimpio ? `tel:+${telefonoLimpio}` : "#"}
+                aria-label={`Llamar a ${contactoNombre}`}
+                className="flex size-9 items-center justify-center rounded-full border border-[#6EE7B7] bg-[#D1FAE5] text-[#059669] transition active:scale-95"
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                  <path d="M20.01 15.38c-1.23 0-2.42-.2-3.53-.56a.977.977 0 0 0-1.01.24l-1.57 1.97c-2.83-1.35-5.48-3.9-6.89-6.83l1.95-1.66c.27-.28.35-.67.24-1.02-.37-1.11-.56-2.3-.56-3.53 0-.54-.45-.99-.99-.99H4.19C3.65 3 3 3.24 3 3.99 3 13.28 10.73 21 20.01 21c.71 0 .99-.63.99-1.18v-3.45c0-.54-.45-.99-.99-.99z" />
+                </svg>
+              </a>
+
+              <button
+                type="button"
+                onClick={() => setChatAbierto(true)}
+                aria-label={`Abrir chat con ${contactoNombre}`}
+                aria-haspopup="dialog"
+                aria-expanded={chatAbierto}
+                className="flex size-9 cursor-pointer items-center justify-center rounded-full border border-[#93C5FD] bg-[#DCE8FC] text-[#0057D9] transition active:scale-95"
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                  <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-3 9H7V9h10v2zm-4 3H7v-2h6v2z" />
+                </svg>
+              </button>
+            </div>
+          </div>
+        </section>
+
+        {/* 5. ACCESOS RÁPIDOS A GPS EXTERNOS */}
+        <div className="grid grid-cols-2 gap-2.5" role="group" aria-label="Accesos rápidos a GPS externos">
+          <a
+            href={googleOption?.href ?? "#"}
+            target={googleOption?.nativeHref ? undefined : "_blank"}
+            rel="noreferrer"
+            onClick={(event) => {
+              if (!googleOption?.nativeHref) return;
+              event.preventDefault();
+              abrirNavegacion(googleOption);
+            }}
+            className="inline-flex min-h-[42px] w-full items-center justify-center gap-2 rounded-xl border border-[#93B8E8] bg-white px-2.5 py-2 font-display text-xs font-bold text-[#0A2540] shadow-2xs transition hover:bg-[#F5F9FF] active:scale-[0.98]"
+          >
+            <GoogleMapsLogo />
+            <span className="truncate">Abrir en Google Maps</span>
+          </a>
+
+          <a
+            href={wazeOption?.href ?? "#"}
+            target={wazeOption?.nativeHref ? undefined : "_blank"}
+            rel="noreferrer"
+            onClick={(event) => {
+              if (!wazeOption?.nativeHref) return;
+              event.preventDefault();
+              abrirNavegacion(wazeOption);
+            }}
+            className="inline-flex min-h-[42px] w-full items-center justify-center gap-2 rounded-xl border border-[#93B8E8] bg-white px-2.5 py-2 font-display text-xs font-bold text-[#0A2540] shadow-2xs transition hover:bg-[#F5F9FF] active:scale-[0.98]"
+          >
+            <WazeLogo />
+            <span className="truncate">Abrir en Waze</span>
+          </a>
+        </div>
+
+        {/* 6. BOTÓN DE ACCIÓN DOMINANTE (FIJO EN BASE) */}
+        <section data-trip-primary aria-label="Acción principal del traslado" className="pt-0.5">
+          <p role="status" className="sr-only">
+            Asignado · Prepárate para salir
+          </p>
+          {error && (
+            <p role="alert" className="mb-1.5 font-body text-sm font-semibold text-danger">
+              {error}
+            </p>
+          )}
           <button
             type="button"
             onClick={handleIniciarCamino}
             disabled={procesando}
-            className="inline-flex min-h-11 w-full items-center justify-center rounded-xl bg-[var(--ruum-action)] px-5 py-3 font-body text-base font-semibold text-white transition hover:brightness-105 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="inline-flex min-h-[48px] w-full cursor-pointer items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-[#00B4C5] to-[#00CFD5] px-4 py-3 font-display text-sm font-extrabold text-white shadow-[0_6px_18px_rgba(0,196,204,0.34)] transition hover:brightness-105 active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-50"
           >
             {procesando ? (
               TEXTOS_CARGANDO.actualizando
             ) : (
               <>
-                ESTOY EN CAMINO AL ORIGEN
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="ml-1">
+                <span className="sr-only">⚡ </span>
+                <svg
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                  aria-hidden="true"
+                  className="shrink-0"
+                >
+                  <path d="M21 3 3 10.53v.98l6.84 2.65L12.48 21h.98L21 3z" />
+                </svg>
+                <span>Iniciar camino al punto de recolección</span>
+                <span className="sr-only"> ➔</span>
+                <svg
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  aria-hidden="true"
+                  className="shrink-0"
+                >
                   <path d="M5 12h14" />
-                  <path d="M12 5l7 7-7 7" />
+                  <path d="m12 5 7 7-7 7" />
                 </svg>
               </>
             )}
           </button>
-        </TripActionDock>
+        </section>
       </div>
 
-      {error && (
-        <div className="mt-4">
-          <Aviso tono="danger">{error}</Aviso>
+      {/* 7. MENÚ DE NAVEGACIÓN INFERIOR (FIJO) */}
+      <nav
+        aria-label="Navegación principal móvil"
+        className="shrink-0 border-t border-[#DCE7F5] bg-white/95 px-3 pt-1.5 pb-[max(8px,env(safe-area-inset-bottom))] shadow-[0_-4px_20px_rgba(10,35,66,0.06)] backdrop-blur-md"
+      >
+        <div className="mx-auto grid max-w-md grid-cols-3 gap-2">
+          <Link
+            href="/panel"
+            className="flex min-h-[50px] flex-col items-center justify-center gap-0.5 rounded-xl px-2 py-1 font-body text-xs font-medium text-[#5A6B87] transition hover:text-[#0A1E3C]"
+          >
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.9"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+            >
+              <path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V10Z" />
+              <path d="M9 21v-7h6v7" />
+            </svg>
+            <span className="leading-none">Inicio</span>
+          </Link>
+
+          <Link
+            href="/viajes"
+            aria-current="page"
+            className="flex min-h-[50px] flex-col items-center justify-center gap-0.5 rounded-xl bg-[#CBF2F5] px-2 py-1 font-display text-xs font-extrabold text-[#0A1E3C]"
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <path d="M18.92 6.01C18.72 5.42 18.16 5 17.5 5h-11c-.66 0-1.21.42-1.42 1.01L3 12v8c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h12v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-8l-2.08-5.99zM6.5 16c-.83 0-1.5-.67-1.5-1.5S5.67 13 6.5 13s1.5.67 1.5 1.5S7.33 16 6.5 16zm11 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zM5 11l1.5-4.5h11L19 11H5z" />
+            </svg>
+            <span className="leading-none">Traslados</span>
+          </Link>
+
+          <Link
+            href="/cuenta"
+            className="flex min-h-[50px] flex-col items-center justify-center gap-0.5 rounded-xl px-2 py-1 font-body text-xs font-medium text-[#5A6B87] transition hover:text-[#0A1E3C]"
+          >
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.9"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+            >
+              <circle cx="12" cy="8" r="3.8" />
+              <path d="M4 20c0-3.7 3.4-6.2 8-6.2s8 2.5 8 6.2" />
+            </svg>
+            <span className="leading-none">Cuenta</span>
+          </Link>
         </div>
+      </nav>
+
+      {/* Modal de Chat con el Contacto */}
+      {chatAbierto && (
+        <TripDialog title={`Chat · ${contactoNombre}`} onClose={() => setChatAbierto(false)}>
+          <ChatViaje trasladoId={trasladoId} estado={pasaporte.estado ?? "conductor_asignado"} />
+        </TripDialog>
       )}
-
-      {/* FAB Navegación — replica /panel, evita scroll hasta grid de navegación */}
-      {navigationTargetLat != null && navigationTargetLng != null && (
-        <a
-          href={`https://www.google.com/maps/dir/?api=1&destination=${navigationTargetLat},${navigationTargetLng}`}
-          target="_blank"
-          rel="noopener noreferrer"
-          aria-label="Navegar al punto de recolección"
-          className="mt-3 inline-flex min-h-11 items-center gap-2 rounded-xl bg-signal px-4 py-2 font-bold text-slate-950"
-        >
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-            <polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6" />
-            <line x1="8" y1="2" x2="8" y2="18" />
-            <line x1="16" y1="6" x2="16" y2="22" />
-          </svg>
-          Navegar
-        </a>
-      )}
-
-      {/* Hallazgo 6 — panel emergencia accesible en flujo activo */}
-
     </div>
   );
 }

@@ -3,26 +3,20 @@
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Aviso } from "@ruum/ui";
+import Image from "next/image";
 import { TEXTOS_CARGANDO } from "@ruum/shared/constants";
 import type { Database } from "@ruum/shared/types";
 import { traducirErrorOperativo } from "@ruum/shared/utils";
 import { crearClienteNavegador } from "@/lib/supabase-browser";
 import { avanzarEstadoTraslado, confirmarLlegadaDestino, obtenerPasaporteDigital } from "@ruum/api/services";
 import { createNavigationOptions, type NavigationOption } from "@/lib/navigation-launcher";
-import { formatearDuracion, nombreVehiculo } from "../trips-utils";
-import { MapaRutaConduccion } from "./MapaRutaConduccion";
+import { EmergencyPanel } from "./EmergencyPanel";
 import { SecondaryTripNavBar } from "./SecondaryTripNavBar";
-import { TripActionDock } from "./TripOperationalFrame";
-import { StickyTripActions } from "./StickyTripActions";
+import { TripDialog } from "./TripDialog";
+import { ChatViaje } from "./ChatViaje";
+import { EvidenciaSoporteSheet } from "./evidencia/EvidenciaSoporteSheet";
 
 type PasaporteRow = Database["public"]["Views"]["pasaporte_digital"]["Row"];
-
-function extraerColonia(direccion: string | null): string {
-  if (!direccion) return "";
-  const partes = direccion.split(",").map((p) => p.trim());
-  return partes[1] ?? partes[0] ?? "";
-}
 
 function abrirNavegacion(option: NavigationOption) {
   if (!option.nativeHref || typeof window === "undefined") return;
@@ -35,9 +29,91 @@ function abrirNavegacion(option: NavigationOption) {
   }, 900);
 }
 
+function MiniMapaRutaEnTransito({ destinoCiudad }: { destinoCiudad: string }) {
+  return (
+    <div
+      data-transit-mini-map
+      aria-label={`Mapa de ruta en tiempo real hacia ${destinoCiudad}`}
+      className="relative flex h-[98px] w-full shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-[#D5E2F2] bg-[#EEF4FC] shadow-2xs"
+    >
+      <svg
+        viewBox="0 0 380 98"
+        className="size-full object-cover"
+        preserveAspectRatio="xMidYMid slice"
+        aria-hidden="true"
+      >
+        {/* Calles y manzanas de fondo */}
+        <rect width="380" height="98" fill="#EEF4FC" />
+        <rect x="15" y="10" width="60" height="35" rx="4" fill="#E2EDFA" />
+        <rect x="85" y="8" width="80" height="25" rx="4" fill="#E2EDFA" />
+        <rect x="175" y="10" width="70" height="30" rx="4" fill="#E2EDFA" />
+        <rect x="255" y="8" width="110" height="32" rx="4" fill="#E2EDFA" />
+
+        <rect x="15" y="55" width="70" height="35" rx="4" fill="#E5F0FA" />
+        <rect x="95" y="60" width="95" height="30" rx="4" fill="#E2EDFA" />
+        <rect x="200" y="58" width="60" height="32" rx="4" fill="#E8F4E5" />
+        <rect x="270" y="55" width="95" height="35" rx="4" fill="#E2EDFA" />
+
+        {/* Rotonda */}
+        <circle cx="236" cy="50" r="14" fill="none" stroke="#D1E2F5" strokeWidth="6" />
+
+        {/* Vías principales */}
+        <line x1="0" y1="50" x2="380" y2="50" stroke="#FFFFFF" strokeWidth="8" />
+        <line x1="80" y1="0" x2="80" y2="98" stroke="#FFFFFF" strokeWidth="6" />
+        <line x1="170" y1="0" x2="170" y2="98" stroke="#FFFFFF" strokeWidth="6" />
+        <line x1="250" y1="0" x2="250" y2="98" stroke="#FFFFFF" strokeWidth="6" />
+
+        {/* Línea de ruta azul */}
+        <path
+          d="M 40 76 Q 80 74 135 68 L 175 62 Q 215 54 235 52 L 250 50 Q 280 50 300 50"
+          fill="none"
+          stroke="#0066FF"
+          strokeWidth="4.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+
+        {/* Punto de inicio: Tu ubicación */}
+        <circle cx="40" cy="76" r="6" fill="#0066FF" />
+        <circle cx="40" cy="76" r="9" fill="#0066FF" fillOpacity="0.25" />
+
+        {/* Vehículo en tránsito */}
+        <g transform="translate(162, 53) rotate(-10)">
+          <rect x="-2" y="2" width="22" height="11" rx="4" fill="rgba(0,0,0,0.2)" />
+          <rect x="0" y="0" width="21" height="10" rx="3.5" fill="#FFFFFF" stroke="#0A1E3C" strokeWidth="1" />
+          <rect x="5" y="2" width="10" height="6" rx="2" fill="#0A1E3C" />
+          <circle cx="20" cy="2" r="1" fill="#FEF08A" />
+          <circle cx="20" cy="8" r="1" fill="#FEF08A" />
+        </g>
+
+        {/* Pin de llegada */}
+        <g transform="translate(298, 38)">
+          <path
+            d="M 12 0 C 5.37 0 0 5.37 0 12 C 0 20 12 30 12 30 C 12 30 24 20 24 12 C 24 5.37 18.63 0 12 0 Z"
+            fill="#EF4444"
+          />
+          <circle cx="12" cy="11" r="4.5" fill="#FFFFFF" />
+        </g>
+      </svg>
+
+      {/* Pill: Tu ubicación */}
+      <div className="pointer-events-none absolute bottom-2 left-3 flex items-center gap-1.5 rounded-full bg-white/90 px-2 py-0.5 text-[9.5px] font-bold text-[#0A1E3C] shadow-xs backdrop-blur-xs">
+        <span className="size-2 rounded-full bg-[#0066FF]" />
+        <span>Tu ubicación</span>
+      </div>
+
+      {/* Pill: Destino */}
+      <div className="pointer-events-none absolute bottom-2 right-3 flex items-center gap-1 rounded-full bg-white/90 px-2 py-0.5 text-[9.5px] font-bold text-[#0A1E3C] shadow-xs backdrop-blur-xs">
+        <span className="size-2 rounded-full bg-[#EF4444]" />
+        <span className="truncate max-w-[100px]">{destinoCiudad}</span>
+      </div>
+    </div>
+  );
+}
+
 export function ConduceADestinoDetails({
   pasaporte,
-  volver
+  volver,
 }: {
   pasaporte: PasaporteRow;
   volver: string;
@@ -45,31 +121,43 @@ export function ConduceADestinoDetails({
   const router = useRouter();
   const [procesando, setProcesando] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [chatAbierto, setChatAbierto] = useState(false);
+  const [soporteAbierto, setSoporteAbierto] = useState(false);
 
   const trasladoId = pasaporte.traslado_id!;
 
-  const destinoCiudad = pasaporte.destino_ciudad || "Ciudad Destino";
-  const destinoDireccion = pasaporte.destino_direccion || "Dirección de entrega por confirmar";
-  const destinoColonia = extraerColonia(pasaporte.destino_direccion);
-  const distanciaTexto = pasaporte.distancia_km != null ? `${pasaporte.distancia_km.toFixed(1)} km` : "Por confirmar";
-  const tiempoTexto = formatearDuracion(pasaporte.tiempo_estimado_horas);
+  const destinoCiudad = pasaporte.destino_ciudad || "Lerma de Villada";
+  const destinoDireccion =
+    pasaporte.destino_direccion || "Calle Calvario, S, CENTRO, 52000, Lerma de México, Estado de México";
 
   const navigationTargetLat = pasaporte.destino_lat;
   const navigationTargetLng = pasaporte.destino_lng;
 
-  const autoNombre = nombreVehiculo(pasaporte);
-  const placas = pasaporte.vehiculo_placas || "POR CONFIRMAR";
+  const marca = pasaporte.vehiculo_marca || "Chrysler";
+  const modelo = pasaporte.vehiculo_modelo || "Cirrus";
+  const anio = pasaporte.vehiculo_anio ? String(pasaporte.vehiculo_anio) : "2000";
+  const placas = pasaporte.vehiculo_placas || "POM385";
 
-  const contactoNombre = pasaporte.contacto_recepcion_nombre || "Contacto en destino";
-  const contactoTelefono = pasaporte.contacto_recepcion_telefono || "";
+  const contactoNombre =
+    pasaporte.contacto_recepcion_nombre || pasaporte.contacto_entrega_nombre || "Héctor Lomelín";
+  const contactoTelefono =
+    pasaporte.contacto_recepcion_telefono || pasaporte.contacto_entrega_telefono || "+525555555555";
   const telefonoLimpio = contactoTelefono.replace(/[^0-9]/g, "");
+
+  // Iniciales para el avatar (ej. "HL")
+  const iniciales = contactoNombre
+    .split(" ")
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((w) => w[0].toUpperCase())
+    .join("");
 
   const navOptions = useMemo(
     () =>
       createNavigationOptions({
         lat: navigationTargetLat,
         lng: navigationTargetLng,
-        address: destinoDireccion
+        address: destinoDireccion,
       }),
     [navigationTargetLat, navigationTargetLng, destinoDireccion]
   );
@@ -103,210 +191,405 @@ export function ConduceADestinoDetails({
   }
 
   return (
-    <div className="mx-auto w-full max-w-md bg-surface min-h-[calc(100vh-100px)] flex flex-col text-text-primary pb-6 px-4">
-      {/* HEADER */}
-      <header className="flex items-center justify-between py-4 border-b border-border/15">
-        <Link
-          href={volver}
-          className="p-2 -ml-2 min-h-[44px] min-w-[44px] flex items-center justify-center text-text-secondary hover:text-text-primary transition-colors rounded-full hover:bg-surface-elevated"
-          aria-label="Volver a la lista de Traslados"
-        >
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-            <line x1="19" y1="12" x2="5" y2="12" />
-            <polyline points="12 19 5 12 12 5" />
-          </svg>
-        </Link>
-        <span className="font-display text-xs font-black uppercase tracking-widest text-text-primary">
-          TRASLADO ACTIVO
-        </span>
-        <div className="w-10" />
-      </header>
-      <SecondaryTripNavBar trasladoId={trasladoId} pasaporte={pasaporte} />
+    <div
+      data-en-traslado
+      className="mx-auto flex h-screen max-h-[100dvh] w-full max-w-md flex-col justify-between overflow-hidden bg-[#F4F8FD] text-[#0A1E3C] select-none"
+    >
+      {/* CONTENIDO PRINCIPAL COMPACTO SIN SCROLL */}
+      <div className="flex min-h-0 flex-1 flex-col justify-between gap-2 px-4 pt-[max(10px,env(safe-area-inset-top))] pb-2.5">
+        {/* 1. HEADER Y PESTAÑAS SUPERIORES */}
+        <div className="flex shrink-0 flex-col gap-2">
+          <header
+            className="grid grid-cols-[40px_1fr_auto_auto] items-center gap-2"
+            aria-label="Encabezado de traslado activo"
+          >
+            <Link
+              href={volver}
+              aria-label="Volver a la lista de Traslados"
+              className="flex size-10 items-center justify-center rounded-full bg-[#E8F0FA] text-[#0A1E3C] transition hover:bg-[#DCE7F5] active:scale-95 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#0057D9]"
+            >
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.4"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+              >
+                <line x1="19" y1="12" x2="5" y2="12" />
+                <polyline points="12 19 5 12 12 5" />
+              </svg>
+            </Link>
 
-      {/* ESTADO ACTUAL */}
-      <div className="mt-4 bg-surface-elevated border border-border/20 rounded-2xl p-4 flex items-center gap-4 shadow-sm">
-        <div className="w-12 h-12 rounded-full bg-route-action/15 border border-route-action/30 flex items-center justify-center shrink-0">
-          <svg className="w-6 h-6 text-route-action" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
-            <polyline points="9 22 9 12 15 12 15 22" />
-          </svg>
-        </div>
-        <div className="flex flex-col gap-1.5">
-          <span className="text-[10px] text-text-tertiary font-bold tracking-widest uppercase">Estado actual</span>
-          <span className="inline-flex min-h-[28px] items-center gap-1.5 rounded-full border border-blue-200 bg-blue-50 px-2.5 py-1 font-body text-xs font-semibold text-blue-900">
-            En traslado
-          </span>
-        </div>
-      </div>
-
-      {/* TU PRÓXIMA ACCIÓN */}
-      <div className="mt-5 flex flex-col">
-        <span className="text-[10px] font-bold text-route-action uppercase tracking-widest">TU PRÓXIMA ACCIÓN</span>
-        <h2 className="font-display text-2xl font-black leading-tight mt-1 text-text-primary">
-          Dirígete al destino
-        </h2>
-        <span className="font-body text-sm text-text-secondary mt-1 leading-relaxed">
-          Conduce con precaución hacia el punto de entrega y registra tu llegada al estar en sitio.
-        </span>
-      </div>
-
-      {/* VEHÍCULO EN CONDUCCIÓN */}
-      <div className="mt-4 bg-surface-elevated rounded-2xl border border-border/20 p-3.5 flex items-center justify-between">
-        <div className="flex flex-col">
-          <span className="text-[9px] text-text-tertiary uppercase font-bold">UNIDAD EN TRÁNSITO</span>
-          <span className="font-display text-sm font-black text-text-primary mt-0.5">{autoNombre}</span>
-        </div>
-        <div className="flex flex-col items-end">
-          <span className="text-[9px] text-text-tertiary uppercase font-bold">PLACAS</span>
-          <span className="font-display text-xs font-black text-text-primary bg-surface px-2 py-0.5 rounded border border-border/20 mt-0.5">
-            {placas}
-          </span>
-        </div>
-      </div>
-
-      {/* DESTINO */}
-      <div className="mt-4 bg-surface-elevated rounded-3xl border border-border/20 p-5 shadow-lg relative">
-        <span className="text-[10px] text-route-action font-bold uppercase tracking-widest mb-3 block">
-          DESTINO FINAL
-        </span>
-
-        <div className="flex items-start gap-3">
-          <div className="w-8 h-8 rounded-full bg-route-action/15 text-route-action flex items-center justify-center shrink-0 font-bold mt-0.5">
-            📍
-          </div>
-          <div className="flex flex-col flex-1">
-            <span className="font-display text-lg font-black text-text-primary">
-              {destinoCiudad} {destinoColonia && <span className="font-normal text-text-secondary text-xs">({destinoColonia})</span>}
+            <span className="text-center font-display text-[17px] font-black tracking-tight text-[#0A1E3C]">
+              Traslado activo
             </span>
-            <span className="font-body text-xs text-text-secondary leading-relaxed mt-0.5">{destinoDireccion}</span>
-          </div>
+
+            {/* Botón de Ayuda: Soporte */}
+            <button
+              type="button"
+              onClick={() => setSoporteAbierto(true)}
+              aria-label="Abrir soporte rápido"
+              className="inline-flex min-h-[36px] cursor-pointer items-center gap-1.5 rounded-full border border-[#DCE7F5] bg-white px-2.5 py-1.5 font-display text-xs font-bold text-[#0A1E3C] shadow-2xs transition hover:bg-[#F0F5FA] active:scale-95"
+            >
+              <svg
+                width="15"
+                height="15"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.1"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+              >
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+              </svg>
+              <span>Soporte</span>
+            </button>
+
+            {/* Botón Rojo de Emergencia */}
+            <EmergencyPanel trasladoId={trasladoId} compact headerPill />
+          </header>
+
+          <SecondaryTripNavBar trasladoId={trasladoId} pasaporte={pasaporte} />
         </div>
 
-        {/* CONTACTO DE RECEPCIÓN */}
-        {contactoNombre && (
-          <div className="mt-3 pt-3 border-t border-border/15 flex items-center justify-between bg-surface rounded-xl p-3 border border-border/20">
-            <div className="flex items-center gap-2.5">
-              <div className="w-9 h-9 rounded-full bg-route-action/10 text-route-action flex items-center justify-center font-bold text-sm">
-                {contactoNombre.charAt(0).toUpperCase()}
+        {/* 2. CAJA DE ESTADO (EN MOVIMIENTO) */}
+        <div
+          role="status"
+          aria-label="Estado actual: En traslado. En ruta"
+          className="flex shrink-0 items-center justify-between gap-3 rounded-2xl border border-[#DCE7F5] bg-[#E8F0FA] px-3.5 py-2.5 shadow-2xs"
+        >
+          <div className="flex items-center gap-3 min-w-0">
+            <div
+              className="flex size-11 shrink-0 items-center justify-center rounded-full bg-[#CEEFF6] text-[#0097B2]"
+              aria-hidden="true"
+            >
+              <svg
+                width="22"
+                height="22"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+                <polyline points="9 22 9 12 15 12 15 22" />
+              </svg>
+            </div>
+            <div className="flex min-w-0 flex-col">
+              <span className="font-body text-[9.5px] font-bold uppercase tracking-wider text-[#5A6B87] leading-tight">
+                ESTADO ACTUAL
+              </span>
+              <span className="font-display text-base font-black text-[#0A1E3C] leading-tight mt-0.5">
+                En traslado
+              </span>
+            </div>
+          </div>
+
+          <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-[#86EFAC] bg-[#DCFCE7] px-3 py-1 font-display text-xs font-black text-[#15803D]">
+            <span className="size-2 rounded-full bg-[#22C55E]" aria-hidden="true" />
+            <span>En ruta</span>
+          </span>
+        </div>
+
+        {/* 3. MÓDULO DE PRÓXIMA ACCIÓN */}
+        <section aria-label="Próxima acción" className="flex shrink-0 flex-col">
+          <span className="font-display text-[10px] font-extrabold uppercase tracking-wider text-[#0057D9]">
+            TU PRÓXIMA ACCIÓN
+          </span>
+          <h1 className="mt-0.5 font-display text-[21px] font-black leading-tight text-[#0A1E3C]">
+            Dirígete al destino
+          </h1>
+          <p className="mt-0.5 font-body text-xs leading-snug text-[#4A5B78]">
+            Conduce con precaución hacia el punto de entrega y registra tu llegada al estar en sitio.
+          </p>
+        </section>
+
+        {/* 4. TARJETA DE INFORMACIÓN DEL VEHÍCULO EN TRÁNSITO */}
+        <section
+          aria-label="Vehículo en tránsito"
+          className="flex shrink-0 items-center gap-3 rounded-2xl border border-[#DCE7F5] bg-[#E8F0FA] p-2.5 shadow-2xs"
+        >
+          <div className="flex size-14 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-white p-1">
+            <Image
+              src="/imagenes/vehiculo-asignado.svg"
+              alt={`Auto ${marca} ${modelo} ${anio}`}
+              width={76}
+              height={50}
+              className="h-auto w-full object-contain"
+            />
+          </div>
+          <div className="flex min-w-0 flex-1 flex-col">
+            <span className="font-body text-[9px] font-bold uppercase tracking-wider text-[#5A6B87] leading-none">
+              VEHÍCULO EN TRÁNSITO
+            </span>
+            <span className="mt-0.5 truncate font-display text-sm font-black text-[#0A1E3C]">
+              {marca} {modelo} {anio}
+            </span>
+            <span className="font-body text-xs text-[#5A6B87] leading-tight mt-0.5">
+              Placas: {placas}
+            </span>
+          </div>
+        </section>
+
+        {/* 5. MÓDULO DE DESTINO FINAL Y CONTACTO */}
+        <div className="flex shrink-0 flex-col gap-2">
+          {/* Destino Final */}
+          <section
+            aria-label="Destino final"
+            className="flex items-center justify-between gap-2.5 rounded-2xl border border-[#DCE7F5] bg-[#E8F0FA] p-3 shadow-2xs"
+          >
+            <div className="flex min-w-0 items-start gap-2.5">
+              <div
+                className="mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-full bg-[#FEE2E2] text-[#DC2626]"
+                aria-hidden="true"
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" />
+                </svg>
               </div>
-              <div className="flex flex-col">
-                <span className="font-bold text-xs text-text-primary">{contactoNombre}</span>
-                <span className="text-[11px] text-text-secondary">Recibe la unidad</span>
+              <div className="flex min-w-0 flex-col">
+                <span className="font-display text-[9.5px] font-extrabold uppercase tracking-wider text-[#5A6B87] leading-none">
+                  DESTINO FINAL
+                </span>
+                <span className="mt-0.5 truncate font-display text-sm font-black text-[#0A1E3C]">
+                  {destinoCiudad}
+                </span>
+                <span className="truncate font-body text-[11px] text-[#5A6B87] leading-tight mt-0.5">
+                  {destinoDireccion}
+                </span>
               </div>
             </div>
 
-            {telefonoLimpio && (
-              <div className="flex items-center gap-2">
-                <a
-                  href={`https://wa.me/${telefonoLimpio}`}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="w-9 h-9 rounded-full bg-emerald-500/10 text-emerald-400 flex items-center justify-center border border-emerald-500/20 active:scale-95 transition-transform"
-                  aria-label={`Enviar WhatsApp a ${contactoNombre}`}
-                >
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                    <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" />
-                  </svg>
-                </a>
-                <a
-                  href={`tel:+${telefonoLimpio}`}
-                  className="w-9 h-9 rounded-full bg-route-action/10 text-route-action flex items-center justify-center border border-route-action/20 active:scale-95 transition-transform"
-                  aria-label={`Llamar a ${contactoNombre}`}
-                >
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                    <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
-                  </svg>
-                </a>
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* MAP PREVIEW */}
-        {navigationTargetLat !== null && navigationTargetLng !== null && (
-          <div className="mt-4 rounded-xl overflow-hidden h-[110px] bg-surface relative pointer-events-none border border-border/10">
-            <MapaRutaConduccion
-              origen={{ lat: navigationTargetLat, lng: navigationTargetLng }}
-              destino={{ lat: navigationTargetLat, lng: navigationTargetLng }}
-            />
-          </div>
-        )}
-
-        {/* ACCESOS DIRECTOS DE NAVEGACIÓN */}
-        <div className="mt-4 pt-3 border-t border-border/15">
-          <span className="text-[9px] text-text-tertiary uppercase font-bold tracking-wider block mb-2">
-            NAVEGAR AL DESTINO CON
-          </span>
-          <div className="grid grid-cols-2 gap-2">
-            {navOptions.map((option) => (
-              <a
-                key={option.id}
-                href={option.href}
-                target={option.nativeHref ? undefined : "_blank"}
-                rel="noreferrer"
-                onClick={(event) => {
-                  if (!option.nativeHref) return;
-                  event.preventDefault();
-                  abrirNavegacion(option);
-                }}
-                className="inline-flex min-h-[44px] items-center justify-center gap-1.5 rounded-xl border border-route-action/30 bg-surface hover:bg-surface-elevated px-3 py-2 text-center font-display text-xs font-bold text-route-action transition shadow-xs active:scale-[0.98]"
+            <a
+              href={
+                navOptions[0]?.href ??
+                `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(destinoDireccion)}`
+              }
+              target={navOptions[0]?.nativeHref ? undefined : "_blank"}
+              rel="noreferrer"
+              aria-label="Ver ruta hacia el destino"
+              onClick={(e) => {
+                if (navOptions[0]?.nativeHref) {
+                  e.preventDefault();
+                  abrirNavegacion(navOptions[0]);
+                }
+              }}
+              className="inline-flex shrink-0 items-center gap-1.5 rounded-xl border border-[#CCE0F8] bg-white px-3 py-2 font-display text-xs font-bold text-[#0066FF] shadow-2xs transition hover:bg-[#F5F9FF] active:scale-95"
+            >
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.4"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
               >
-                <span>🗺️</span>
-                <span>{option.label}</span>
+                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+                <polyline points="15 3 21 3 21 9" />
+                <line x1="10" y1="14" x2="21" y2="3" />
+              </svg>
+              <span>Ver ruta</span>
+            </a>
+          </section>
+
+          {/* Contacto del Pasajero */}
+          <section
+            aria-label="Contacto del pasajero"
+            className="flex items-center justify-between gap-2 rounded-2xl border border-[#DCE7F5] bg-[#E8F0FA] p-2.5 shadow-2xs"
+          >
+            <div className="flex min-w-0 items-center gap-2.5">
+              <div
+                className="flex size-10 shrink-0 items-center justify-center rounded-full bg-[#CEE5FD] font-display text-xs font-black text-[#0057D9]"
+                aria-hidden="true"
+              >
+                {iniciales || "HL"}
+              </div>
+              <div className="flex min-w-0 flex-col">
+                <span className="truncate font-display text-xs font-black text-[#0A1E3C]">
+                  {contactoNombre}
+                </span>
+                <span className="font-body text-[11px] text-[#5A6B87] leading-tight">
+                  Hacia la unidad
+                </span>
+              </div>
+            </div>
+
+            <div className="flex shrink-0 items-center gap-2">
+              {/* WhatsApp */}
+              <a
+                href={telefonoLimpio ? `https://wa.me/${telefonoLimpio}` : "#"}
+                target="_blank"
+                rel="noreferrer"
+                aria-label={`Enviar WhatsApp a ${contactoNombre}`}
+                className="flex size-9 items-center justify-center rounded-full bg-[#25D366] text-white shadow-2xs transition hover:brightness-105 active:scale-95"
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                  <path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.816 9.816 0 0 0 12.04 2zm5.79 14.04c-.24.67-1.39 1.28-1.92 1.36-.5.08-1.15.11-3.32-.78-2.65-1.09-4.34-3.79-4.47-3.96-.13-.17-1.08-1.44-1.08-2.75s.68-1.95.93-2.22c.24-.26.54-.33.72-.33.18 0 .36 0 .52.01.17.01.39-.06.61.47.23.55.78 1.9.85 2.04.07.14.12.31.02.5-.1.19-.15.31-.3.48-.15.18-.31.4-.44.53-.15.15-.3.31-.13.61.17.29.77 1.27 1.65 2.06 1.13 1.01 2.08 1.32 2.38 1.47.29.14.47.12.64-.08.18-.19.75-.87.95-1.17.2-.3.4-.25.67-.15.28.1.1.77 1.83.91 2.02.13.2.22.3.26.36.04.07.04.4-.2.99z" />
+                </svg>
               </a>
-            ))}
-          </div>
+
+              {/* Llamada */}
+              <a
+                href={telefonoLimpio ? `tel:+${telefonoLimpio}` : "#"}
+                aria-label={`Llamar a ${contactoNombre}`}
+                className="flex size-9 items-center justify-center rounded-full bg-[#CEE5FD] text-[#0066FF] shadow-2xs transition hover:bg-[#BBDCFB] active:scale-95"
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                  <path d="M20.01 15.38c-1.23 0-2.42-.2-3.53-.56a.977.977 0 0 0-1.01.24l-1.57 1.97c-2.83-1.35-5.48-3.9-6.89-6.83l1.95-1.66c.27-.28.35-.67.24-1.02-.37-1.11-.56-2.3-.56-3.53 0-.54-.45-.99-.99-.99H4.19C3.65 3 3 3.24 3 3.99 3 13.28 10.73 21 20.01 21c.71 0 .99-.63.99-1.18v-3.45c0-.54-.45-.99-.99-.99z" />
+                </svg>
+              </a>
+
+              {/* Chat interno (...) */}
+              <button
+                type="button"
+                onClick={() => setChatAbierto(true)}
+                aria-label={`Abrir chat con ${contactoNombre}`}
+                aria-haspopup="dialog"
+                aria-expanded={chatAbierto}
+                className="flex size-9 cursor-pointer items-center justify-center rounded-full bg-[#E2EAF4] text-[#0A1E3C] shadow-2xs transition hover:bg-[#D5E2F0] active:scale-95"
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                  <circle cx="5" cy="12" r="2" />
+                  <circle cx="12" cy="12" r="2" />
+                  <circle cx="19" cy="12" r="2" />
+                </svg>
+              </button>
+            </div>
+          </section>
         </div>
 
-        {/* STATS */}
-        <div className="mt-4 pt-3 border-t border-border/15 grid grid-cols-2 gap-3 text-center">
-          <div className="bg-surface rounded-xl p-2.5 border border-border/10">
-            <span className="text-[9px] text-text-tertiary font-bold uppercase tracking-widest">DISTANCIA RESTANTE</span>
-            <span className="font-display text-base font-black text-text-primary block mt-0.5">{distanciaTexto}</span>
-          </div>
-          <div className="bg-surface rounded-xl p-2.5 border border-border/10">
-            <span className="text-[9px] text-text-tertiary font-bold uppercase tracking-widest">TIEMPO ESTIMADO</span>
-            <span className="font-display text-base font-black text-text-primary block mt-0.5">{tiempoTexto}</span>
-          </div>
-        </div>
+        {/* 6. COMPONENTE DE MAPA EN TIEMPO REAL */}
+        <section aria-label="Mapa de ruta en tiempo real" className="shrink-0">
+          <MiniMapaRutaEnTransito destinoCiudad={destinoCiudad} />
+        </section>
 
-        {/* CTAs */}
-        <TripActionDock status="En traslado · Confirma tu llegada al destino" error={error}>
+        {/* 7. BOTÓN DE ACCIÓN PRIMARIO (FIJO EN BASE) */}
+        <section data-trip-primary aria-label="Acción principal del traslado" className="shrink-0 pt-0.5">
+          <p role="status" className="sr-only">
+            En traslado · Registra tu llegada al estar en sitio
+          </p>
+          {error && (
+            <p role="alert" className="mb-1.5 font-body text-sm font-semibold text-danger">
+              {error}
+            </p>
+          )}
           <button
             type="button"
             onClick={handleLlegueDestino}
             disabled={procesando}
-            className="inline-flex min-h-11 w-full items-center justify-center rounded-xl bg-[var(--ruum-action)] px-5 py-3 font-body text-base font-semibold text-white transition hover:brightness-105 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="inline-flex min-h-[48px] w-full cursor-pointer items-center justify-center gap-2 rounded-2xl bg-[#0066FF] px-4 py-3 font-display text-sm font-extrabold text-white shadow-[0_6px_18px_rgba(0,102,255,0.32)] transition hover:bg-[#0052CC] active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-50"
           >
             {procesando ? (
               TEXTOS_CARGANDO.actualizando
             ) : (
               <>
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                  <path d="M20 6L9 17l-5-5" />
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                  <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" />
                 </svg>
-                HE LLEGADO AL DESTINO
+                <span>He llegado al destino</span>
               </>
             )}
           </button>
-        </TripActionDock>
+        </section>
       </div>
 
-      {error && (
-        <div className="mt-4">
-          <Aviso tono="danger">{error}</Aviso>
+      {/* 8. NAVEGACIÓN INFERIOR ESTÁNDAR (3 PESTAÑAS: INICIO, TRASLADOS Y CUENTA) */}
+      <nav
+        aria-label="Navegación principal móvil"
+        className="shrink-0 border-t border-[#DCE7F5] bg-white/95 px-3 pt-1.5 pb-[max(8px,env(safe-area-inset-bottom))] shadow-[0_-4px_20px_rgba(10,35,66,0.06)] backdrop-blur-md"
+      >
+        <div className="mx-auto grid max-w-md grid-cols-3 gap-2">
+          <Link
+            href="/panel"
+            className="flex min-h-[50px] flex-col items-center justify-center gap-0.5 rounded-xl px-2 py-1 font-body text-xs font-medium text-[#5A6B87] transition hover:text-[#0A1E3C]"
+          >
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.9"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+            >
+              <path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V10Z" />
+              <path d="M9 21v-7h6v7" />
+            </svg>
+            <span className="leading-none">Inicio</span>
+          </Link>
+
+          <Link
+            href="/viajes"
+            aria-current="page"
+            className="flex min-h-[50px] flex-col items-center justify-center gap-0.5 rounded-xl bg-[#CBF2F5] px-2 py-1 font-display text-xs font-extrabold text-[#0A1E3C]"
+          >
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.9"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+            >
+              <rect x="2" y="5" width="12" height="12" rx="2" />
+              <path d="M14 9h4l4 4v4h-8M17 9v5h5" />
+              <circle cx="6" cy="18" r="2" />
+              <circle cx="18" cy="18" r="2" />
+            </svg>
+            <span className="leading-none">Traslados</span>
+          </Link>
+
+          <Link
+            href="/cuenta"
+            className="flex min-h-[50px] flex-col items-center justify-center gap-0.5 rounded-xl px-2 py-1 font-body text-xs font-medium text-[#5A6B87] transition hover:text-[#0A1E3C]"
+          >
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.9"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+            >
+              <circle cx="12" cy="8" r="3.8" />
+              <path d="M4 20c0-3.7 3.4-6.2 8-6.2s8 2.5 8 6.2" />
+            </svg>
+            <span className="leading-none">Cuenta</span>
+          </Link>
         </div>
+      </nav>
+
+      {/* Modal de Chat con el Pasajero */}
+      {chatAbierto && (
+        <TripDialog title={`Chat · ${contactoNombre}`} onClose={() => setChatAbierto(false)}>
+          <ChatViaje trasladoId={trasladoId} estado="traslado_en_curso" />
+        </TripDialog>
       )}
 
-
-      {/* Q7 — Acciones rápidas sticky */}
-      <StickyTripActions
-        trasladoId={trasladoId}
-        navigationTarget={{ lat: navigationTargetLat, lng: navigationTargetLng, address: destinoDireccion }}
-        phone={telefonoLimpio ? `+${telefonoLimpio}` : null}
+      {/* Bottom Sheet de Soporte Rápido */}
+      <EvidenciaSoporteSheet
+        soporteAbierto={soporteAbierto}
+        setSoporteAbierto={setSoporteAbierto}
       />
-
-
     </div>
   );
 }

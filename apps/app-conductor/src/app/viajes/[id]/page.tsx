@@ -8,6 +8,7 @@ import { ConduceADestinoDetails } from "./ConduceADestinoDetails";
 import { CierreTrasladoDetails } from "./CierreTrasladoDetails";
 import { DirigeteAOrigenDetails } from "./DirigeteAOrigenDetails";
 import { TrasladoAsignadoDetails } from "./TrasladoAsignadoDetails";
+import { IniciaTrayectoDetails } from "./IniciaTrayectoDetails";
 export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
@@ -87,11 +88,18 @@ export default async function PaginaDetalleViaje({
   }
 
   if (
-    pasaporte.estado === "conductor_en_punto_de_recoleccion" ||
-    pasaporte.estado === "verificacion_vehiculo_en_proceso" ||
-    pasaporte.estado === "evidencia_inicial_en_proceso" ||
     pasaporte.estado === "evidencia_inicial_completada" ||
     pasaporte.estado === "vehiculo_recibido"
+  ) {
+    return (
+      <IniciaTrayectoDetails pasaporte={pasaporte} volver={volver} />
+    );
+  }
+
+  if (
+    pasaporte.estado === "conductor_en_punto_de_recoleccion" ||
+    pasaporte.estado === "verificacion_vehiculo_en_proceso" ||
+    pasaporte.estado === "evidencia_inicial_en_proceso"
   ) {
     return (
       <LocalizarVehiculoDetails pasaporte={pasaporte} volver={volver} />

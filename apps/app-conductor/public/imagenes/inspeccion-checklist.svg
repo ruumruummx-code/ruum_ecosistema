@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 120" fill="none">
+  <!-- Soft background circle -->
+  <circle cx="108" cy="60" r="46" fill="#EBF4FE" />
+
+  <!-- Clipboard -->
+  <g transform="translate(92, 14)">
+    <!-- Board -->
+    <rect x="0" y="8" width="56" height="74" rx="8" fill="#FFFFFF" stroke="#0066FF" stroke-width="2" />
+    <!-- Clip -->
+    <rect x="16" y="2" width="24" height="10" rx="3" fill="#0066FF" />
+    <circle cx="28" cy="7" r="2.2" fill="#FFFFFF" />
+
+    <!-- Checklist rows -->
+    <!-- Row 1 -->
+    <path d="M12 26 L15.5 29.5 L22 23" fill="none" stroke="#0066FF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" />
+    <line x1="28" y1="26" x2="46" y2="26" stroke="#93C5FD" stroke-width="2.5" stroke-linecap="round" />
+
+    <!-- Row 2 -->
+    <path d="M12 42 L15.5 45.5 L22 39" fill="none" stroke="#0066FF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" />
+    <line x1="28" y1="42" x2="46" y2="42" stroke="#93C5FD" stroke-width="2.5" stroke-linecap="round" />
+
+    <!-- Row 3 -->
+    <path d="M12 58 L15.5 61.5 L22 55" fill="none" stroke="#0066FF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" />
+    <line x1="28" y1="58" x2="42" y2="58" stroke="#93C5FD" stroke-width="2.5" stroke-linecap="round" />
+  </g>
+
+  <!-- Inspection Van / Vehicle (Front 3/4 view) -->
+  <g transform="translate(14, 34)">
+    <!-- Shadow -->
+    <ellipse cx="48" cy="62" rx="42" ry="6" fill="#0F172A" fill-opacity="0.16" />
+
+    <!-- Van Body -->
+    <path d="M6 34 C6 28 10 24 16 23 L34 18 C38 17 44 17 48 19 L78 20 C82 20 86 24 86 28 L86 54 C86 58 82 60 78 60 L14 60 C8 60 6 56 6 52 Z" fill="#FFFFFF" stroke="#1E293B" stroke-width="2" />
+    
+    <!-- Van Cab Front / Bumper -->
+    <path d="M6 34 L18 34 L20 48 L6 48 Z" fill="#0057D9" />
+    <rect x="8" y="38" width="8" height="4" rx="1" fill="#FFFFFF" />
+    <circle cx="10" cy="45" r="2" fill="#FBBF24" />
+
+    <!-- Windshield & Side Window -->
+    <path d="M18 24 L34 19 C38 18 43 18 46 20 L46 32 L18 32 Z" fill="#93C5FD" stroke="#1E293B" stroke-width="1.5" />
+    <path d="M49 20 L68 21 L68 32 L49 32 Z" fill="#BFDBFE" stroke="#1E293B" stroke-width="1.5" />
+
+    <!-- Wheels -->
+    <!-- Front Wheel -->
+    <circle cx="26" cy="58" r="9" fill="#0F172A" />
+    <circle cx="26" cy="58" r="5" fill="#E2E8F0" />
+    <!-- Rear Wheel -->
+    <circle cx="70" cy="58" r="9" fill="#0F172A" />
+    <circle cx="70" cy="58" r="5" fill="#E2E8F0" />
+  </g>
+</svg>

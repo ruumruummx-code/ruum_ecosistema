@@ -54,7 +54,19 @@ function mapaUrl(lat: number, lng: number) {
   return `https://maps.google.com/?q=${lat},${lng}`;
 }
 
-export function EmergencyPanel({ trasladoId, compact = false }: { trasladoId: string; compact?: boolean }) {
+export function EmergencyPanel({
+  trasladoId,
+  compact = false,
+  headerPill = false,
+  pillLabel,
+  pillTone = "solid",
+}: {
+  trasladoId: string;
+  compact?: boolean;
+  headerPill?: boolean;
+  pillLabel?: string;
+  pillTone?: "solid" | "soft";
+}) {
   const [abierto, setAbierto] = useState(false);
   const [confirmando911, setConfirmando911] = useState(false);
   const [procesando, setProcesando] = useState<AccionPanel | null>(null);
@@ -246,9 +258,35 @@ export function EmergencyPanel({ trasladoId, compact = false }: { trasladoId: st
             Al enviar, soporte recibe tu ubicación, se abre un folio y te responde una persona.
           </p>
         </div>
-        <Button variant="emergency" aria-label="Abrir emergencia" aria-haspopup="dialog" aria-expanded={abierto} className={compact ? "min-h-11 px-2 text-xs" : "min-h-[var(--ruum-button-height-street)] w-full text-[17px] sm:w-auto"} onClick={abrirPanel}>
-          {compact ? "Emergencia" : "Abrir emergencia"}
-        </Button>
+        {headerPill ? (
+          <button
+            type="button"
+            aria-label="Abrir emergencia"
+            aria-haspopup="dialog"
+            aria-expanded={abierto}
+            onClick={abrirPanel}
+            className={
+              pillTone === "soft"
+                ? "inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-1.5 rounded-xl border border-[#FDA4AF]/60 bg-[#FEE2E2] px-3 py-1 font-display text-xs font-black text-[#DC2626] shadow-2xs transition hover:bg-[#FCD4D4] active:scale-95 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#DC2626]"
+                : "inline-flex min-h-[38px] cursor-pointer items-center justify-center gap-1.5 rounded-full bg-[#E11D38] px-3.5 py-1.5 font-display text-xs font-extrabold text-white shadow-[0_4px_12px_rgba(225,29,56,0.28)] transition hover:bg-[#BE123C] active:scale-95 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#E11D38]"
+            }
+          >
+            {pillTone === "soft" ? (
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" className="shrink-0 text-[#DC2626]">
+                <path d="M12 2L1 21h22L12 2zm0 3.99L19.53 19H4.47L12 5.99zM11 10v4h2v-4h-2zm0 6v2h2v-2h-2z" />
+              </svg>
+            ) : (
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                <path d="M20.01 15.38c-1.23 0-2.42-.2-3.53-.56a.977.977 0 0 0-1.01.24l-1.57 1.97c-2.83-1.35-5.48-3.9-6.89-6.83l1.95-1.66c.27-.28.35-.67.24-1.02-.37-1.11-.56-2.3-.56-3.53 0-.54-.45-.99-.99-.99H4.19C3.65 3 3 3.24 3 3.99 3 13.28 10.73 21 20.01 21c.71 0 .99-.63.99-1.18v-3.45c0-.54-.45-.99-.99-.99z" />
+              </svg>
+            )}
+            <span>{pillLabel || "Emergencia"}</span>
+          </button>
+        ) : (
+          <Button variant="emergency" aria-label="Abrir emergencia" aria-haspopup="dialog" aria-expanded={abierto} className={compact ? "min-h-11 px-2 text-xs" : "min-h-[var(--ruum-button-height-street)] w-full text-[17px] sm:w-auto"} onClick={abrirPanel}>
+            {compact ? "Emergencia" : "Abrir emergencia"}
+          </Button>
+        )}
       </div>
 
       {abierto && (

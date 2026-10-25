@@ -75,6 +75,64 @@ html:has([data-opportunity-detail]) [data-trip-primary] > [role="status"] { font
   html:has([data-opportunity-detail]) [data-trip-primary] > [role="status"] { font-size: 10px; line-height: 12px; }
 }
 
+/* Pantallas Mobile-First de Traslado Activo (Asignado, En Camino al Origen, Recibe el Vehículo, Inspección/Evidencia, Inicia el Trayecto, En Traslado y Cierre de Traslado): 100vh sin scroll vertical. */
+html:has([data-assigned-trip], [data-en-camino-origen], [data-recibe-vehiculo], [data-inspeccion-evidencia], [data-inicia-trayecto], [data-en-traslado], [data-cierre-traslado]),
+html:has([data-assigned-trip], [data-en-camino-origen], [data-recibe-vehiculo], [data-inspeccion-evidencia], [data-inicia-trayecto], [data-en-traslado], [data-cierre-traslado]) body {
+  height: 100vh;
+  overflow: hidden;
+}
+html:has([data-assigned-trip], [data-en-camino-origen], [data-recibe-vehiculo], [data-inspeccion-evidencia], [data-inicia-trayecto], [data-en-traslado], [data-cierre-traslado]) [data-conductor-mobile-nav],
+html:has([data-assigned-trip], [data-en-camino-origen], [data-recibe-vehiculo], [data-inspeccion-evidencia], [data-inicia-trayecto], [data-en-traslado], [data-cierre-traslado]) [data-trip-safety-bar],
+html:has([data-assigned-trip], [data-en-camino-origen], [data-recibe-vehiculo], [data-inspeccion-evidencia], [data-inicia-trayecto], [data-en-traslado], [data-cierre-traslado]) [data-trip-dock] {
+  display: none;
+}
+html:has([data-assigned-trip], [data-en-camino-origen], [data-recibe-vehiculo], [data-inspeccion-evidencia], [data-inicia-trayecto], [data-en-traslado], [data-cierre-traslado]) [data-trip-frame] {
+  top: 0;
+  bottom: 0;
+  height: 100vh;
+  max-height: 100dvh;
+  overflow: hidden;
+  background: #F4F8FD;
+}
+html:has([data-assigned-trip], [data-en-camino-origen], [data-recibe-vehiculo], [data-inspeccion-evidencia], [data-inicia-trayecto], [data-en-traslado], [data-cierre-traslado]) [data-trip-scroll] {
+  overflow: hidden;
+  scroll-padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+[data-transit-mini-map],
+[data-signature-canvas] {
+  max-height: 110px;
+}
+@media (max-height: 700px) {
+  [data-origin-mini-map] {
+    max-height: 76px;
+    min-height: 44px;
+  }
+  [data-transit-mini-map],
+  [data-signature-canvas] {
+    max-height: 85px;
+  }
+  [data-inspection-illustration] {
+    width: 82px;
+    height: auto;
+  }
+}
+@media (max-height: 600px) {
+  [data-origin-mini-map] {
+    max-height: 52px;
+    min-height: 36px;
+  }
+  [data-transit-mini-map],
+  [data-signature-canvas] {
+    max-height: 65px;
+  }
+  [data-inspection-illustration] {
+    width: 64px;
+    height: auto;
+  }
+}
+
 @theme {
   --color-ruum-blue: #0066FF;
   --color-ruum-bg: #F4F7FC;
