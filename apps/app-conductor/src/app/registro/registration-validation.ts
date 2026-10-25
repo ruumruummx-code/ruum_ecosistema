@@ -1,5 +1,34 @@
+import type { Json } from "@ruum/shared/types";
+
 export function objetoJson(valor: unknown): Record<string, unknown> {
   return valor && typeof valor === "object" && !Array.isArray(valor) ? valor as Record<string, unknown> : {};
+}
+
+export function fusionarJsonExpediente(origen: Json, remoto: Json | null | undefined): Json {
+  if (origen == null) return remoto ?? null;
+  if (remoto == null) return origen;
+  if (typeof origen !== "object" || Array.isArray(origen)) return origen;
+
+  const local = origen as Record<string, unknown>;
+  const otro = typeof remoto === "object" && !Array.isArray(remoto)
+    ? remoto as Record<string, unknown>
+    : {};
+  const entradas = Object.entries(local).map(([clave, valorLocal]): [string, Json] => {
+    const descriptorRemoto = Object.getOwnPropertyDescriptor(otro, clave);
+    const valorRemoto = descriptorRemoto && "value" in descriptorRemoto
+      ? descriptorRemoto.value
+      : undefined;
+
+    if (typeof valorLocal === "string" && valorLocal.trim() === "") {
+      return [clave, typeof valorRemoto === "string" ? valorRemoto : ""];
+    }
+    if (typeof valorLocal === "boolean") {
+      return [clave, Boolean(valorLocal || valorRemoto === true)];
+    }
+    return [clave, valorLocal as Json];
+  });
+
+  return Object.fromEntries(entradas);
 }
 
 export function soloDigitos(valor: string, max = 10) {

@@ -33,6 +33,7 @@ import {
   type EstadoGuardadoRemoto,
 } from "./registration-types";
 import {
+  fusionarJsonExpediente,
   limpiarTexto,
   objetoJson,
   soloDigitos,
@@ -62,27 +63,6 @@ function canalRegistro(): "web" | "android" | "ios" {
   if (/android/i.test(navigator.userAgent)) return "android";
   if (/iPad|iPhone|iPod/i.test(navigator.userAgent)) return "ios";
   return "web";
-}
-
-function fusionarJsonExpediente(origen: Json, remoto: Json | null | undefined): Json {
-  if (origen == null) return remoto ?? null;
-  if (remoto == null) return origen;
-  if (typeof origen !== "object" || Array.isArray(origen)) return origen;
-  const local = origen as Record<string, unknown>;
-  const otro = typeof remoto === "object" && remoto && !Array.isArray(remoto) ? (remoto as Record<string, unknown>) : {};
-  const resultado: Record<string, Json> = {};
-  for (const clave of Object.keys(local)) {
-    const valorLocal = local[clave];
-    const valorRemoto = otro[clave];
-    if (typeof valorLocal === "string" && valorLocal.trim() === "") {
-      resultado[clave] = typeof valorRemoto === "string" ? valorRemoto : "";
-    } else if (typeof valorLocal === "boolean") {
-      resultado[clave] = Boolean(valorLocal || valorRemoto === true);
-    } else {
-      resultado[clave] = valorLocal as Json;
-    }
-  }
-  return resultado;
 }
 
 type SolicitudConductorResumen = {

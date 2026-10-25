@@ -28,7 +28,11 @@ const CLAVE_SECRETO = "ruum_offline_installation_secret_v1";
 const PREFIJO_CIFRADO = "ruum:v1:";
 
 function cryptoDisponible() {
-  return typeof crypto !== "undefined" && Boolean(crypto.subtle) && typeof TextEncoder !== "undefined" && typeof TextDecoder !== "undefined";
+  return typeof crypto !== "undefined" &&
+    Boolean(crypto.subtle) &&
+    typeof crypto.getRandomValues === "function" &&
+    typeof TextEncoder !== "undefined" &&
+    typeof TextDecoder !== "undefined";
 }
 
 function bytesToBase64(bytes: Uint8Array) {
@@ -64,11 +68,7 @@ async function obtenerSecretoInstalacion() {
   if (existente.value) return existente.value;
 
   const bytes = new Uint8Array(32);
-  if (typeof crypto !== "undefined" && crypto.getRandomValues) {
-    crypto.getRandomValues(bytes);
-  } else {
-    for (let index = 0; index < bytes.length; index += 1) bytes[index] = Math.floor(Math.random() * 256);
-  }
+  crypto.getRandomValues(bytes);
 
   const secreto = bytesToBase64(bytes);
   await Preferences.set({ key: CLAVE_SECRETO, value: secreto });
@@ -164,4 +164,3 @@ export async function leerJsonLocalSeguro<T>(key: string): Promise<T | null> {
 export async function eliminarJsonLocalSeguro(key: string) {
   await Preferences.remove({ key });
 }
-

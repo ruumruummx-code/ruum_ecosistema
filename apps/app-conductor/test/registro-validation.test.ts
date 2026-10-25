@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   calcularCursorTelefono,
   esCurpValida,
+  fusionarJsonExpediente,
   formatoCurpMask,
   formatoFechaIsoParcial,
   formatoLicenciaMask,
@@ -38,6 +39,18 @@ describe("validación y normalización del registro de conductor", () => {
     expect(soloDigitos("+52 (55) 1234-5678", 4)).toBe("5255");
     expect(soloAlfanumericoMayusculas("ab-cd 123456789", 6)).toBe("ABCD12");
     expect(formatoCurpMask("gomc-900101hdfrrl09-extra")).toBe("GOMC900101HDFRRL09");
+  });
+
+  it("fusiona datos remotos sin permitir que claves JSON alteren el prototipo", () => {
+    const origen = JSON.parse('{"__proto__":"local","dato":""}') as Record<string, unknown>;
+    const remoto = JSON.parse('{"__proto__":"remoto","dato":"valor remoto"}') as Record<string, unknown>;
+    const resultado = fusionarJsonExpediente(origen, remoto) as Record<string, unknown>;
+
+    expect(Object.getPrototypeOf(resultado)).toBe(Object.prototype);
+    expect(Object.hasOwn(resultado, "__proto__")).toBe(true);
+    expect(resultado["__proto__"]).toBe("local");
+    expect(resultado.dato).toBe("valor remoto");
+    expect(({} as Record<string, unknown>).polluted).toBeUndefined();
   });
 
   it("formatea teléfono nacional en sus tramos parciales y completos", () => {

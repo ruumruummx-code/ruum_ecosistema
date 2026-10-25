@@ -53,7 +53,7 @@ export function OtpVerification({
     <>
       <RegistrationAccessHeader step={2} onBack={onBack} />
       <form className={`${styles.form} ${styles.otpForm}`} onSubmit={(event) => {
-        if (verificandoOtp || reenviandoOtp || bloqueado || !new RegExp(`^\\d{${codigoLongitud}}$`).test(codigoOtp)) { event.preventDefault(); return; }
+        if (verificandoOtp || reenviandoOtp || bloqueado || codigoOtp.length !== codigoLongitud || !/^\d+$/.test(codigoOtp)) { event.preventDefault(); return; }
         onSubmit(event);
       }}>
         <div className={`${styles.accountIntro} ${styles.otpIntro}`}>
