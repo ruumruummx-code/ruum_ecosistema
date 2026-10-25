@@ -240,7 +240,9 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - name: Instalar Chromium (versión del lockfile)
-        run: pnpm exec playwright install --with-deps chromium
+        run: |
+          pnpm exec playwright install --with-deps chromium
+          pnpm --filter @ruum/app-conductor exec playwright install --with-deps chromium
       - name: Build de producción app-conductor
         run: pnpm --filter @ruum/app-conductor build
         env:
