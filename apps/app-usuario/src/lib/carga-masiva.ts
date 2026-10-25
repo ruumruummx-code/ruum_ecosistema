@@ -7,7 +7,7 @@ export const esquemaFilaMasiva = z.object({
   marca: z.string().trim().min(1, "Marca requerida").max(80),
   modelo: z.string().trim().min(1, "Modelo requerido").max(80),
   anio: z.string().refine(v => /^\d{4}$/.test(v) && +v >= 1980 && +v <= new Date().getFullYear() + 1, "Año fuera del rango permitido"),
-  condicion: z.enum(["nueva", "seminueva", "rescate_mecanico"], { errorMap: () => ({ message: "Usa nueva, seminueva o rescate_mecanico" }) }),
+  condicion: z.enum(["nueva", "seminueva", "rescate_mecanico"], { message: "Usa nueva, seminueva o rescate_mecanico" }),
   entregaNombre: z.string().trim().min(1, "Nombre requerido").max(100),
   entregaTelefono: z.string().regex(/^\d{10}$/, "Teléfono de 10 dígitos requerido"),
   recepcionNombre: z.string().trim().min(1, "Nombre requerido").max(100),

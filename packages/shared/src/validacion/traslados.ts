@@ -50,7 +50,7 @@ export const esquemaSolicitudTraslado = z.object({
   anio: z.string().refine((v) => {
     const num = Number(v);
     return Number.isInteger(num) && num >= ANIO_MINIMO_VEHICULO && num <= obtenerAnioMaximoVehiculo();
-  }, () => ({ message: `Usa un año entre ${ANIO_MINIMO_VEHICULO} y ${obtenerAnioMaximoVehiculo()}.` })),
+  }, { message: `Usa un año entre ${ANIO_MINIMO_VEHICULO} y ${obtenerAnioMaximoVehiculo()}.` }),
   transmision: z.enum(["manual", "automatica", "electrica"], { message: "Selecciona una transmisión válida." }),
   condicion: z.enum(["nueva", "seminueva", "rescate_mecanico"], { message: "Selecciona la condición del vehículo." }),
   estadoGeneral: z.enum(
@@ -62,9 +62,9 @@ export const esquemaSolicitudTraslado = z.object({
     ],
     { message: "Selecciona un estado general válido." }
   ),
-  tieneTarjeta: z.literal(true, { errorMap: () => ({ message: "Se requiere tarjeta de circulación vigente." }) }),
-  tieneVerificacion: z.literal(true, { errorMap: () => ({ message: "Se requiere verificación vigente." }) }),
-  tienePlacas: z.literal(true, { errorMap: () => ({ message: "Se requieren ambas placas instaladas." }) }),
+  tieneTarjeta: z.literal(true, { message: "Se requiere tarjeta de circulación vigente." }),
+  tieneVerificacion: z.literal(true, { message: "Se requiere verificación vigente." }),
+  tienePlacas: z.literal(true, { message: "Se requieren ambas placas instaladas." }),
   // R10: rescate_mecanico permite traslado sin rodar (grúa/plataforma). Validación condicional en superRefine.
   puedeCircular: z.boolean(),
   origenCodigoPostal: z.string().regex(REGEX_CODIGO_POSTAL, "El Código Postal debe tener 5 dígitos."),
@@ -97,7 +97,7 @@ export const esquemaSolicitudTraslado = z.object({
      conserva sus propios valores. */
   tipoServicio: z.enum(["personal", "empresarial", "agencia", "lote", "flotilla"]).optional().nullable(),
   motivoServicio: z.enum(["entrega_cliente", "recuperacion", "traslado_especial"]).optional().nullable(),
-  aceptaPoliticas: z.literal(true, { errorMap: () => ({ message: "Debes aceptar las políticas de pago y cancelación." }) }),
+  aceptaPoliticas: z.literal(true, { message: "Debes aceptar las políticas de pago y cancelación." }),
   paradas: z.array(esquemaParada).max(MAX_PARADAS_TRASLADO, `Máximo ${MAX_PARADAS_TRASLADO} escalas/tareas.`).default([])
 }).superRefine((d, ctx) => {
   // R10: puedeCircular false solo es válido para rescate_mecanico (vehículo no rodante)

@@ -39,13 +39,13 @@
     "@supabase/ssr": "^0.5.2",
     "@ruum/shared": "workspace:*",
     "@upstash/redis": "^1.38.3",
-    "zod": "^3.24.1"
+    "zod": "^4.6.6"
   },
   "devDependencies": {
     "vitest": "3.2.6",
     "typescript": "^5.7.2",
     "@types/node": "^22.10.0",
-    "next": "15.5.24",
+    "next": "15.5.28",
     "@capacitor/core": "^8.4.1",
     "@capacitor/geolocation": "^8.2.0"
   }

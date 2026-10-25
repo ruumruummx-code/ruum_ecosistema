@@ -127,7 +127,7 @@ describe("Reglas y Esquemas Centralizados de Traslado (@ruum/shared)", () => {
     const payloadValido = {
       claveIdempotencia: "00000000-0000-0000-0000-000000000000",
       vehiculo: {
-        vehiculoId: "11111111-1111-1111-1111-111111111111"
+        vehiculoId: "11111111-1111-4111-8111-111111111111"
       },
       traslado: {
         contacto_entrega_nombre: "Ana",

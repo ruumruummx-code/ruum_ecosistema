@@ -11,7 +11,7 @@ import { tipoSugeridoParaVehiculo } from "@ruum/shared/catalogos";
 import { obtenerRutaDirectionsMapboxConParadas } from "@ruum/shared/utils";
 export const dynamic = "force-dynamic";
 export const maxDuration = 300;
-const esquema = z.object({ filas: z.array(z.record(z.string().max(2000))).min(1).max(100), clave: z.string().uuid() });
+const esquema = z.object({ filas: z.array(z.record(z.string(), z.string().max(2000))).min(1).max(100), clave: z.string().uuid() });
 export async function POST(request: NextRequest) {
   const rechazoCsrf = verificarCsrfORechazar(request);
   if (rechazoCsrf) return rechazoCsrf;

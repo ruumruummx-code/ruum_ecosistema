@@ -12,6 +12,7 @@
  * siguen existiendo, pero nuevo código debe usar el repositorio.
  */
 import type { SupabaseClient } from "@supabase/supabase-js";
+import type { z } from "zod";
 import type { Database, SolicitudAsignacionResultado } from "@ruum/shared/types";
 import {
   rpcValidado,
@@ -34,7 +35,7 @@ export interface ConductorRepository {
   /** Solicita participar en la competencia de asignación ADR-003. */
   aceptarViaje(trasladoId: string): Promise<SolicitudAsignacionResultado>;
   /** Avanza traslado al siguiente evento validado por Zod */
-  avanzarTraslado(trasladoId: string, evento: typeof esquemaConductorAvanzaTraslado._type["p_evento"]): Promise<unknown>;
+  avanzarTraslado(trasladoId: string, evento: z.infer<typeof esquemaConductorAvanzaTraslado>["p_evento"]): Promise<unknown>;
   /** Lista pasaportes del conductor */
   listarPasaportes(conductorId: string): Promise<PasaporteRow[]>;
 }
