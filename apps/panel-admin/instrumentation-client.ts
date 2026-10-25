@@ -2,7 +2,7 @@
  * P1 — Sentry client para panel-admin (activado solo si NEXT_PUBLIC_SENTRY_DSN está definido).
  * Carga perezosa para no romper build cuando @sentry/nextjs aún no está instalado o en dev.
  */
-export const onRouterTransitionStart = Sentry.captureRouterTransitionStart;
+import * as Sentry from "@sentry/nextjs";
 const dsn = process.env.NEXT_PUBLIC_SENTRY_DSN;
 if (dsn) {
   import("@sentry/nextjs")
@@ -31,4 +31,5 @@ if (dsn) {
       // @sentry/nextjs no instalado o no-op — ignorar
     });
 }
-import * as Sentry from "@sentry/nextjs";
+
+export const onRouterTransitionStart = Sentry.captureRouterTransitionStart;

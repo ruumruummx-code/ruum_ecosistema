@@ -10,6 +10,8 @@ import { crearClienteNavegador } from "@/lib/supabase-browser";
 import { avanzarEstadoTraslado } from "@ruum/api/services";
 import { listarInspeccionesTraslado } from "@ruum/api/drivers";
 import { EmergencyPanel } from "./EmergencyPanel";
+import { TripSupportDialog } from "./TripSupportDialog";
+import { CierreConfirmacionModal } from "./cierre/CierreConfirmacionModal";
 import { TripDialog } from "./TripDialog";
 import { ChatViaje } from "./ChatViaje";
 import type { PasaporteRow, InspeccionData } from "./cierre/cierre-types";
@@ -31,6 +33,8 @@ export function CierreTrasladoDetails({
   const [error, setError] = useState<string | null>(null);
   const [avisoExito, setAvisoExito] = useState<string | null>(null);
   const [chatAbierto, setChatAbierto] = useState(false);
+  const [soporteAbierto, setSoporteAbierto] = useState(false);
+  const [modalConfirmacionAbierto, setModalConfirmacionAbierto] = useState(false);
   const [tieneFirma, setTieneFirma] = useState(false);
 
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -187,7 +191,10 @@ export function CierreTrasladoDetails({
       className="mx-auto flex h-screen max-h-[100dvh] w-full max-w-md flex-col justify-between overflow-hidden bg-[#F4F8FD] text-[#0A1E3C] select-none"
     >
       {/* CONTENIDO PRINCIPAL COMPACTO SIN SCROLL */}
-      <div className="flex min-h-0 flex-1 flex-col justify-between gap-2 px-4 pt-[max(10px,env(safe-area-inset-top))] pb-[max(12px,env(safe-area-inset-bottom))]">
+      <div
+        data-trip-scroll
+        className="flex min-h-0 flex-1 flex-col justify-between gap-2 px-4 pt-[max(10px,env(safe-area-inset-top))] pb-[max(12px,env(safe-area-inset-bottom))]"
+      >
         {/* 1. HEADER TÉCNICO DE CONTROL */}
         <header
           aria-label="Encabezado técnico de cierre"
@@ -208,14 +215,24 @@ export function CierreTrasladoDetails({
             CIERRE DE TRASLADO
           </h1>
 
-          {/* ⚠️ SOS Modular */}
-          <EmergencyPanel
-            trasladoId={trasladoId}
-            compact
-            headerPill
-            pillLabel="SOS"
-            pillTone="soft"
-          />
+          <div className="flex items-center gap-1.5 shrink-0">
+            <button
+              type="button"
+              onClick={() => setSoporteAbierto(true)}
+              aria-label="Soporte"
+              className="inline-flex min-h-[36px] cursor-pointer items-center gap-1 rounded-xl bg-[#E8F0FA] px-2.5 py-1 font-display text-xs font-bold text-[#0A1E3C] shadow-2xs transition hover:bg-[#DCE7F5] active:scale-95"
+            >
+              💬 Soporte
+            </button>
+            {/* ⚠️ SOS Modular */}
+            <EmergencyPanel
+              trasladoId={trasladoId}
+              compact
+              headerPill
+              pillLabel="SOS"
+              pillTone="soft"
+            />
+          </div>
         </header>
 
         {/* 2. CAJA DE ESTADOS CRUZADOS (BADGES) */}
@@ -486,6 +503,9 @@ export function CierreTrasladoDetails({
           aria-label="Acciones de finalización"
           className="shrink-0 flex flex-col gap-2 pt-0.5"
         >
+          <p role="status" className="sr-only">
+            Cierre de traslado · Conciliación lista y firma de conformidad
+          </p>
           {error && (
             <p role="alert" className="font-body text-xs font-semibold text-[#DC2626]">
               {error}
@@ -514,7 +534,7 @@ export function CierreTrasladoDetails({
           {/* Botón Inferior (Primario Dominante): FINALIZAR TRASLADO */}
           <button
             type="button"
-            onClick={handleFinalizarTraslado}
+            onClick={() => setModalConfirmacionAbierto(true)}
             disabled={procesando}
             className="inline-flex min-h-[48px] w-full cursor-pointer items-center justify-center gap-2 rounded-2xl bg-[#0066FF] px-4 py-3 font-display text-sm font-extrabold text-white shadow-[0_6px_18px_rgba(0,102,255,0.32)] transition hover:bg-[#0052CC] active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-50"
           >
@@ -527,12 +547,31 @@ export function CierreTrasladoDetails({
                   <line x1="4" y1="22" x2="4" y2="15" />
                 </svg>
                 <span>FINALIZAR TRASLADO</span>
+                <span className="sr-only"> FINALIZAR Y ENTREGAR VEHÍCULO</span>
                 <span aria-hidden="true">❯</span>
               </>
             )}
           </button>
         </section>
       </div>
+
+      {/* Modal de Confirmación de Entrega */}
+      {modalConfirmacionAbierto && (
+        <CierreConfirmacionModal
+          abierto={modalConfirmacionAbierto}
+          onCerrar={() => setModalConfirmacionAbierto(false)}
+          onConfirmar={() => {
+            setModalConfirmacionAbierto(false);
+            void handleFinalizarTraslado();
+          }}
+          procesando={procesando}
+        />
+      )}
+
+      {/* Modal de Soporte */}
+      {soporteAbierto && (
+        <TripSupportDialog onClose={() => setSoporteAbierto(false)} />
+      )}
 
       {/* Modal de Chat con el Receptor */}
       {chatAbierto && (

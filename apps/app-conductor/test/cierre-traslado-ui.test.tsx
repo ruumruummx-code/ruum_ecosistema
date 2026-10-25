@@ -277,6 +277,10 @@ describe("[UI/UX] Pantalla de Cierre de Traslado (Conciliación y Firma) Mobile-
     const btnFinalizar = screen.getByRole("button", { name: /FINALIZAR TRASLADO/i });
     fireEvent.click(btnFinalizar);
 
+    // Confirmar en el modal de entrega
+    const btnConfirmar = screen.getByRole("button", { name: /SÍ, ENTREGAR/i });
+    fireEvent.click(btnConfirmar);
+
     await waitFor(() => {
       expect(avanzarEstadoTrasladoMock).toHaveBeenCalled();
     });

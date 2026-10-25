@@ -10,6 +10,7 @@ import { crearClienteNavegador } from "@/lib/supabase-browser";
 import { avanzarEstadoTraslado } from "@ruum/api/services";
 import { EmergencyPanel } from "./EmergencyPanel";
 import { SecondaryTripNavBar } from "./SecondaryTripNavBar";
+import { TripSupportDialog } from "./TripSupportDialog";
 import { TripDialog } from "./TripDialog";
 import { ChatViaje } from "./ChatViaje";
 
@@ -79,6 +80,7 @@ export function IniciaTrayectoDetails({
   const [procesando, setProcesando] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [chatAbierto, setChatAbierto] = useState(false);
+  const [soporteAbierto, setSoporteAbierto] = useState(false);
 
   const trasladoId = pasaporte.traslado_id!;
   const estadoActual = (pasaporte.estado || "evidencia_inicial_completada") as EstadoTraslado;
@@ -126,7 +128,10 @@ export function IniciaTrayectoDetails({
       className="mx-auto flex h-screen max-h-[100dvh] w-full max-w-md flex-col justify-between overflow-hidden bg-[#F4F8FD] text-[#0A1E3C] select-none"
     >
       {/* CONTENIDO PRINCIPAL COMPACTO SIN SCROLL */}
-      <div className="flex min-h-0 flex-1 flex-col justify-between gap-2 px-4 pt-[max(10px,env(safe-area-inset-top))] pb-2.5">
+      <div
+        data-trip-scroll
+        className="flex min-h-0 flex-1 flex-col justify-between gap-2 px-4 pt-[max(10px,env(safe-area-inset-top))] pb-2.5"
+      >
         {/* 1. HEADER Y PESTAÑAS DE GESTIÓN SUPERIOR */}
         <div className="flex shrink-0 flex-col gap-2">
           <header
@@ -158,7 +163,17 @@ export function IniciaTrayectoDetails({
               Traslado activo
             </span>
 
-            <EmergencyPanel trasladoId={trasladoId} compact headerPill />
+            <div className="flex items-center gap-1.5 shrink-0">
+              <button
+                type="button"
+                onClick={() => setSoporteAbierto(true)}
+                aria-label="Soporte"
+                className="inline-flex min-h-[36px] cursor-pointer items-center gap-1 rounded-xl bg-[#E8F0FA] px-2.5 py-1 font-display text-xs font-bold text-[#0A1E3C] shadow-2xs transition hover:bg-[#DCE7F5] active:scale-95"
+              >
+                💬 Soporte
+              </button>
+              <EmergencyPanel trasladoId={trasladoId} compact headerPill />
+            </div>
           </header>
 
           <SecondaryTripNavBar trasladoId={trasladoId} pasaporte={pasaporte} />
@@ -481,6 +496,11 @@ export function IniciaTrayectoDetails({
         <TripDialog title={`Chat · ${contactoNombre}`} onClose={() => setChatAbierto(false)}>
           <ChatViaje trasladoId={trasladoId} estado={estadoActual} />
         </TripDialog>
+      )}
+
+      {/* Modal de Soporte */}
+      {soporteAbierto && (
+        <TripSupportDialog onClose={() => setSoporteAbierto(false)} />
       )}
     </div>
   );

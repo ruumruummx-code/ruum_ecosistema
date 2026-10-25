@@ -1,8 +1,8 @@
+import * as Sentry from "@sentry/nextjs";
 import {
   resolverConfigSentryUsuario,
   sanitizarEventoSentry,
 } from "./src/lib/sentry-alerts";
-export const onRouterTransitionStart = Sentry.captureRouterTransitionStart;
 /**
  * P1 — Sentry client para app-usuario (activado solo si NEXT_PUBLIC_SENTRY_DSN está definido).
  * Carga perezosa para no romper build cuando @sentry/nextjs aún no está instalado o en dev.
@@ -35,4 +35,5 @@ if (config.enabled) {
       // @sentry/nextjs no instalado o no-op — ignorar
     });
 }
-import * as Sentry from "@sentry/nextjs";
+
+export const onRouterTransitionStart = Sentry.captureRouterTransitionStart;

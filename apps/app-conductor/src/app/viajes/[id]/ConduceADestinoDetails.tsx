@@ -196,7 +196,10 @@ export function ConduceADestinoDetails({
       className="mx-auto flex h-screen max-h-[100dvh] w-full max-w-md flex-col justify-between overflow-hidden bg-[#F4F8FD] text-[#0A1E3C] select-none"
     >
       {/* CONTENIDO PRINCIPAL COMPACTO SIN SCROLL */}
-      <div className="flex min-h-0 flex-1 flex-col justify-between gap-2 px-4 pt-[max(10px,env(safe-area-inset-top))] pb-2.5">
+      <div
+        data-trip-scroll
+        className="flex min-h-0 flex-1 flex-col justify-between gap-2 px-4 pt-[max(10px,env(safe-area-inset-top))] pb-2.5"
+      >
         {/* 1. HEADER Y PESTAÑAS SUPERIORES */}
         <div className="flex shrink-0 flex-col gap-2">
           <header

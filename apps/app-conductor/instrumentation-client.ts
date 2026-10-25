@@ -2,7 +2,7 @@
  * P0.3 — Sentry client (activado solo si NEXT_PUBLIC_SENTRY_DSN está definido)
  * Carga perezosa para no romper build cuando @sentry/nextjs aún no está instalado.
  */
-
+import * as Sentry from "@sentry/nextjs";
 const dsn = process.env.NEXT_PUBLIC_SENTRY_DSN;
 if (dsn) {
   import("@sentry/nextjs")
@@ -22,3 +22,4 @@ if (dsn) {
       // @sentry/nextjs no instalado — ignorar hasta pnpm install
     });
 }
+export const onRouterTransitionStart = Sentry.captureRouterTransitionStart;
