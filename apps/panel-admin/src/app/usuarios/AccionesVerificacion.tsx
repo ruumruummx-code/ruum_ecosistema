@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Button, Aviso } from "@ruum/ui";
 import type { Database } from "@ruum/shared/types";
-import { validarDocumentoUsuario } from "@ruum/api/services";
+import { obtenerUrlDocumentoIdentidadUsuario, validarDocumentoUsuario } from "@ruum/api/identity";
 import { crearClienteNavegador } from "../../lib/supabase-browser";
 import { AdminTooltip } from "../admin-components";
 
@@ -51,11 +51,8 @@ export function AccionesVerificacion({ usuario, onActualizado }: Props) {
     setError(null);
     try {
       const cliente = crearClienteNavegador();
-      const { data, error: errUrl } = await cliente.storage
-        .from("documentos-identidad")
-        .createSignedUrl(usuario.doc_identidad_url, 60 * 30);
-      if (errUrl) throw errUrl;
-      setUrlDocumento(data.signedUrl);
+      const urlFirmada = await obtenerUrlDocumentoIdentidadUsuario(cliente, usuario.doc_identidad_url, 60 * 30);
+      setUrlDocumento(urlFirmada);
     } catch (err) {
       setError(err instanceof Error ? err.message : "No pudimos obtener el documento.");
     } finally {

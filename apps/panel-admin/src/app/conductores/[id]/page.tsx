@@ -16,6 +16,7 @@ import {
   type DetalleSolicitudConductorAdmin,
   type EstadoDocumentoConductor
 } from "@ruum/api/services";
+import { obtenerUrlDocumentoConductor } from "@ruum/api/drivers";
 import { AdminBadge, AdminButton } from "../../admin-components";
 import { AdminPageHeader } from "../../admin-ui";
 import { crearClienteNavegador, tieneSupabaseConfigurado } from "@/lib/supabase-browser";
@@ -1233,11 +1234,8 @@ export default function PaginaDetalleSolicitudConductorAdmin() {
     setVisorCerrado(false);
     setDocumentoSeleccionadoId(documento.id);
     if (urlsDocumento[documento.id]) return;
-    const { data, error } = await crearClienteNavegador().storage
-      .from("documentos-conductor")
-      .createSignedUrl(documento.url, 60 * 30);
-    if (error) throw error;
-    setUrlsDocumento((actuales) => ({ ...actuales, [documento.id]: data.signedUrl }));
+    const urlFirmada = await obtenerUrlDocumentoConductor(crearClienteNavegador(), documento.url, 60 * 30);
+    setUrlsDocumento((actuales) => ({ ...actuales, [documento.id]: urlFirmada }));
   }, [urlsDocumento]);
 
   useEffect(() => {

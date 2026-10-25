@@ -748,7 +748,7 @@ export default function PaginaIncidenciasAdmin() {
       sinAsignar: abiertas.filter((incidencia) => !incidencia.responsable_admin_id).length,
       resueltasHoy: incidencias.filter((incidencia) => incidencia.resuelta_en?.startsWith(hoy)).length
     };
-  }, [ahora, incidencias, responsables]);
+  }, [ahora, incidencias]);
 
   function limpiarFiltros() {
     setTipo("abiertas");

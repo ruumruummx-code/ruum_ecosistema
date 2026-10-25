@@ -35,6 +35,19 @@ export async function validarDocumentoUsuario(
   if (error) throw error;
 }
 
+export async function obtenerUrlDocumentoIdentidadUsuario(
+  cliente: Cliente,
+  storagePath: string,
+  expiracionSegundos = 1800
+): Promise<string> {
+  await assertAdminPermission(cliente, "usuarios:leer");
+  const { data, error } = await cliente.storage
+    .from("documentos-identidad")
+    .createSignedUrl(storagePath, expiracionSegundos);
+  if (error) throw error;
+  return data.signedUrl;
+}
+
 export async function obtenerUsuarioAdmin(cliente: Cliente, usuarioId: string): Promise<UsuarioRow | null> {
   await assertAdminPermission(cliente, "usuarios:leer");
   const { data, error } = await cliente.from("usuarios").select("*").eq("id", usuarioId).maybeSingle();

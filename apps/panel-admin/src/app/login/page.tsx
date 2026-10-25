@@ -3,6 +3,7 @@
 import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { Aviso } from "@ruum/ui";
 import { traducirErrorAuth, validarDestinoSeguro } from "@ruum/shared/utils";
 import { crearClienteNavegador, tieneSupabaseConfigurado } from "../../lib/supabase-browser";
@@ -95,7 +96,7 @@ function FormularioLoginAdmin() {
         <div className="login-brand__shade" />
         <div className="login-brand__content">
           <Link href="/" className="login-brand__logo" aria-label="Ruum Ruum, inicio">
-            <img src="/imagenes/ruum-logo-dark.svg" alt="Ruum Ruum" className="login-brand__mark" />
+          <Image src="/imagenes/ruum-logo-dark.svg" alt="Ruum Ruum" width={186} height={40} className="login-brand__mark" />
             <span className="login-brand__tagline">Tu traslado, tu control</span>
           </Link>
           <div className="login-brand__intro">
@@ -115,7 +116,7 @@ function FormularioLoginAdmin() {
         <div className="login-language"><Icono tipo="globe" /><select aria-label="Idioma" defaultValue="es"><option value="es">ES</option><option value="en">EN</option></select><span aria-hidden="true">⌄</span></div>
         <div className="login-card-wrap">
           <section className="login-card" aria-labelledby="titulo-acceso-admin">
-            <div className="login-card__brand"><img src="/imagenes/ruum-logo-navy.svg" alt="Ruum Ruum" /><span>Tu traslado, tu control</span></div>
+            <div className="login-card__brand"><Image src="/imagenes/ruum-logo-navy.svg" alt="Ruum Ruum" width={186} height={40} /><span>Tu traslado, tu control</span></div>
             <h2 id="titulo-acceso-admin">Bienvenido</h2>
             <p className="login-card__lead">Ingresa a la Torre de Control para gestionar tus operaciones.</p>
             <form onSubmit={iniciarSesion} className="login-form">
