@@ -65,6 +65,7 @@ describe("NavegacionUsuario", () => {
     expect(within(inferior).getByRole("link", { name: "Inicio" })).toHaveAttribute("href", "/");
     expect(within(inferior).getByRole("link", { name: "Inicio" })).toHaveAttribute("aria-current", "page");
     expect(within(inferior).getByRole("link", { name: "Traslados" })).toHaveAttribute("href", "/mis-viajes");
+    expect(within(inferior).getByRole("link", { name: "Carga Masiva" })).toHaveAttribute("href", "/viajes/masivo");
     expect(within(inferior).getByRole("link", { name: "Cuenta" })).toHaveAttribute("href", "/cuenta");
   });
   it("presenta Mis Traslados con contexto, campana y navegación inferior sin FAB", async () => {

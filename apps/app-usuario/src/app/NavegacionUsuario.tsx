@@ -63,6 +63,21 @@ function IconoTraslados({ className }: { className?: string }) {
   );
 }
 
+function IconoCargaMasiva({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden="true">
+      {/* Vehículo frontal */}
+      <rect x="2" y="9" width="13" height="9" rx="2" />
+      <circle cx="5.5" cy="18" r="1.8" />
+      <circle cx="11.5" cy="18" r="1.8" />
+      {/* Lote / Segundo vehículo en fila */}
+      <path d="M15 7h4l3 3v5h-4" />
+      <circle cx="19" cy="18" r="1.8" />
+      <path d="M6 9V5a1 1 0 0 1 1-1h9l3 3v2" />
+    </svg>
+  );
+}
+
 function IconoCuenta({ className }: { className?: string }) {
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden="true">
@@ -76,11 +91,13 @@ function IconoCuenta({ className }: { className?: string }) {
  * Destinos principales de navegación según especificaciones oficiales:
  * 1. Inicio
  * 2. Traslados
- * 3. Cuenta
+ * 3. Carga Masiva (flotillas/lotes)
+ * 4. Cuenta
  */
 const DESTINOS = [
   { href: "/", etiqueta: "Inicio", Icono: IconoHome },
   { href: "/mis-viajes", etiqueta: "Traslados", Icono: IconoTraslados },
+  { href: "/viajes/masivo", etiqueta: "Carga Masiva", Icono: IconoCargaMasiva },
   { href: "/cuenta", etiqueta: "Cuenta", Icono: IconoCuenta },
 ] as const;
 
@@ -126,9 +143,10 @@ export function NavegacionUsuario({
     pathname === "/nueva-password" ||
     pathname.startsWith("/registro/");
   const esMisTraslados = pathname === "/mis-viajes";
+  const esMasivo = pathname === "/viajes/masivo" || pathname.startsWith("/viajes/masivo/");
   const esCuenta = pathname === "/cuenta";
   const esVehiculos = pathname === "/cuenta/vehiculos" || pathname.startsWith("/cuenta/vehiculos/");
-  const cabeceraCompacta = esMisTraslados || esCuenta || esVehiculos;
+  const cabeceraCompacta = esMisTraslados || esCuenta || esVehiculos || esMasivo;
   const etiquetaFab = esVehiculos ? "Agregar vehículo" : "Solicitar traslado";
   const nombre = primerNombre(nombreUsuario);
   const saludo = nombre ? `¡Hola, ${nombre}!` : "¡Hola!";
@@ -293,7 +311,7 @@ export function NavegacionUsuario({
           className={`user-v2-shell-nav ${cabeceraCompacta || esInicio ? "" : "lg:hidden"} ${esInicio ? "home-tab-navigation" : ""} ${esMisTraslados ? "user-transfers-nav" : ""} user-v2-scope`}
         >
           <div className="user-v2-shell-nav-inner">
-            <div className="grid grid-cols-3 items-center">
+            <div className="grid grid-cols-4 items-center">
               {DESTINOS.map((destino) => {
                 const activo = estaActivo(pathname, destino.href);
                 return (
@@ -305,7 +323,9 @@ export function NavegacionUsuario({
                       activo
                         ? esMisTraslados
                           ? "!text-[#0046c4] dark:!text-[#80b4ff]"
-                          : "!text-[#0a2342] dark:!text-[#f6f8fb]"
+                          : esMasivo
+                            ? "!text-[#0066FF] dark:!text-[#4d94ff]"
+                            : "!text-[#0a2342] dark:!text-[#f6f8fb]"
                         : "text-[#8293b0] hover:text-[#0a2342] dark:text-slate-400 dark:hover:text-white"
                     }`}
                   >
@@ -314,9 +334,11 @@ export function NavegacionUsuario({
                         activo
                           ? esMisTraslados
                             ? "is-active !bg-[#0046c4] dark:!bg-[#80b4ff]"
-                            : esInicio
-                              ? "is-active !bg-[#00D1D1] dark:!bg-[#2ee6b6]"
-                              : "is-active !bg-[#0b1e32] dark:!bg-emerald-400"
+                            : esMasivo
+                              ? "is-active !bg-[#0066FF] dark:!bg-[#4d94ff]"
+                              : esInicio
+                                ? "is-active !bg-[#00D1D1] dark:!bg-[#2ee6b6]"
+                                : "is-active !bg-[#0b1e32] dark:!bg-emerald-400"
                           : ""
                       }`}
                       aria-hidden="true"
@@ -326,16 +348,20 @@ export function NavegacionUsuario({
                         activo
                           ? esMisTraslados
                             ? "scale-105 stroke-[2.3] text-[#0046c4] dark:text-[#80b4ff]"
-                            : "scale-105 stroke-[2.3] text-[#0a2342] dark:text-[#f6f8fb]"
+                            : esMasivo
+                              ? "scale-105 stroke-[2.3] text-[#0066FF] dark:text-[#4d94ff]"
+                              : "scale-105 stroke-[2.3] text-[#0a2342] dark:text-[#f6f8fb]"
                           : "text-[#8293b0] group-hover:text-[#0a2342] dark:text-slate-400 dark:group-hover:text-white"
                       }`}
                     />
                     <span
-                      className={`transition-colors text-[12px] ${
+                      className={`transition-colors text-[11px] sm:text-[12px] truncate px-0.5 ${
                         activo
                           ? esMisTraslados
                             ? "font-extrabold text-[#0046c4] dark:text-[#80b4ff]"
-                            : "font-extrabold text-[#0a2342] dark:text-[#f6f8fb]"
+                            : esMasivo
+                              ? "font-extrabold text-[#0066FF] dark:text-[#4d94ff]"
+                              : "font-extrabold text-[#0a2342] dark:text-[#f6f8fb]"
                           : "font-medium text-[#8293b0] group-hover:text-[#0a2342] dark:text-slate-400 dark:group-hover:text-white"
                       }`}
                     >
@@ -348,7 +374,7 @@ export function NavegacionUsuario({
           </div>
         </nav>
       )}
-      {mostrarNavegacionInferior && !esAcceso && !esInicio && !esMisTraslados && !pathname.startsWith("/viajes/nuevo") && pathname !== "/preguntas-frecuentes" && (
+      {mostrarNavegacionInferior && !esAcceso && !esInicio && !esMisTraslados && !pathname.startsWith("/viajes/nuevo") && !pathname.startsWith("/viajes/masivo") && pathname !== "/preguntas-frecuentes" && (
         <Link id="requestTransferButton" href="/viajes/nuevo" aria-label={etiquetaFab} title={etiquetaFab} className="user-transfer-fab user-v2-scope">
           <svg className="size-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg>
         </Link>

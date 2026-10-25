@@ -348,18 +348,6 @@ function PasoTarifaComponent({
         </p>
       </section>
 
-      {/* Descarga de Plantilla Oficial y Carga Masiva */}
-      <div className="flex flex-col gap-2 pt-1">
-        <a
-          href="/docs-legales/plantilla-carga-masiva.xlsx"
-          download="plantilla-carga-masiva-ruum.xlsx"
-          className="flex min-h-[44px] items-center justify-center gap-2 rounded-2xl border border-[#0066FF] bg-white px-4 text-[13.5px] font-bold text-[#0066FF] transition hover:bg-[#edf5fd] dark:bg-[#0a2342] dark:border-[#0066FF] dark:hover:bg-[#0f2d52]"
-        >
-          <span className="flex size-5 items-center justify-center rounded bg-[#107c41] text-white text-[10px] font-extrabold" aria-hidden="true">X:</span>
-          <span>Descargar Plantilla Oficial (xlsx)</span>
-        </a>
-      </div>
-
       {/* Tarjeta de Seguridad y Confianza */}
       <div className="flex items-center gap-3 rounded-2xl border border-[#d6e4f7] bg-[#f0f6fd] p-3 text-left dark:border-[#1a3a5c] dark:bg-[#091f38]">
         <div className="flex size-7 shrink-0 items-center justify-center rounded-full bg-[#0066FF] text-white">
