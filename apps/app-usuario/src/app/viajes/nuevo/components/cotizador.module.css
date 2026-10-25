@@ -390,7 +390,6 @@
   .fields {
     gap: 8px;
   }
-}
 @media (max-height: 600px) {
   .title {
     position: absolute;
