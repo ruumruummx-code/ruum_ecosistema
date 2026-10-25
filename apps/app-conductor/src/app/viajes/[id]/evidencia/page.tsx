@@ -10,6 +10,8 @@ import { fotoSrc, OPCIONES_COMBUSTIBLE } from "./evidence-requirements";
 import { EmergencyPanel } from "../EmergencyPanel";
 import { EvidenciaCsatSheet } from "./EvidenciaCsatSheet";
 import { EvidenciaSoporteSheet } from "./EvidenciaSoporteSheet";
+import { EvidenciaDocumentosSection } from "./EvidenciaDocumentosSection";
+import { EvidenciaNotasSection } from "./EvidenciaNotasSection";
 
 type TabEvidencia = "fotos" | "llaves" | "formulario";
 

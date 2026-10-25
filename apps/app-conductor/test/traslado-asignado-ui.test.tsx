@@ -38,6 +38,12 @@ vi.mock("@/lib/supabase-browser", () => ({
   crearClienteNavegador: () => ({}),
 }));
 
+vi.mock("@ruum/api/drivers", () => ({
+  listarGastosTraslado: vi.fn().mockResolvedValue([]),
+  registrarGastoTraslado: vi.fn().mockResolvedValue({}),
+  eliminarGastoTraslado: vi.fn().mockResolvedValue({}),
+}));
+
 vi.mock("@ruum/api/services", () => ({
   avanzarEstadoTraslado: (...args: unknown[]) => avanzarEstadoTrasladoMock(...args),
   activarSoporteEmergenciaConductor: vi.fn(),

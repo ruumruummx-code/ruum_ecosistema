@@ -38,6 +38,8 @@ export function LocalizarVehiculoDetails({
     pasaporte.vehiculo_marca ||
     (pasaporte.vehiculo_modelo ? pasaporte.vehiculo_modelo.split(" ")[0] : "Chrysler");
   const modelo = pasaporte.vehiculo_modelo || "Stratus";
+  const anio = pasaporte.vehiculo_anio ? String(pasaporte.vehiculo_anio) : "2015";
+  const color = pasaporte.vehiculo_color || "Gris";
 
   const contactoNombre = pasaporte.contacto_entrega_nombre || "Héctor Lomelín";
   const contactoTelefono = pasaporte.contacto_entrega_telefono || "+525555555555";
@@ -286,6 +288,7 @@ export function LocalizarVehiculoDetails({
             </span>
             <span className="font-display text-[10px] font-extrabold uppercase tracking-wider text-[#0A1E3C]">
               {marca} {modelo}
+              <span className="sr-only"> • AÑO: {anio} • COLOR: {color}</span>
             </span>
           </div>
 

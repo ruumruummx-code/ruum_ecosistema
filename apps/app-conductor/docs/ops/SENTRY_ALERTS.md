@@ -56,7 +56,7 @@
 
 ## Configuración código
 
-- `sentry.client.config.ts` / `sentry.server.config.ts` ya filtran PII (`sendDefaultPii:false`, `beforeSend` con `FORBIDDEN=/curp|clabe|.../`)
+- `instrumentation-client.ts` / `sentry.server.config.ts` ya filtran PII (`sendDefaultPii:false`, `beforeSend` con `FORBIDDEN=/curp|clabe|.../`)
 - `src/lib/observability.ts:recordOperationalEvent` hace `rpc:registrar_evento_operativo_app` + mirror a `window.Sentry.captureMessage` si existe
 - `src/app/api/health/route.ts` expone `status:ok|degraded|down` + latencia Supabase
 

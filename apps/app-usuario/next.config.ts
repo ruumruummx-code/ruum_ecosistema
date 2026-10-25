@@ -64,7 +64,7 @@ const nextConfig: NextConfig = {
   }
 };
 
-// A3: withSentryConfig inyecta sentry.client.config.ts en el bundle del
+// A3: withSentryConfig inyecta instrumentation-client.ts en el bundle del
 // navegador y sentry.server.config.ts en el servidor. Sin este wrapper los
 // archivos de config existían pero nunca se cargaban en el cliente: todos los
 // Sentry.captureException / breadcrumbs eran no-ops silenciosos.

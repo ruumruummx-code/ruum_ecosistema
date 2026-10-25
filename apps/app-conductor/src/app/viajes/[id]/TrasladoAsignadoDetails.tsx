@@ -12,6 +12,8 @@ import { avanzarEstadoTraslado } from "@ruum/api/services";
 import { createNavigationOptions, type NavigationOption } from "@/lib/navigation-launcher";
 import { formatearDuracion, nombreVehiculo } from "../trips-utils";
 import { EmergencyPanel } from "./EmergencyPanel";
+import { SecondaryTripNavBar } from "./SecondaryTripNavBar";
+import { TripSupportDialog } from "./TripSupportDialog";
 import { TripDialog } from "./TripDialog";
 import { ChatViaje } from "./ChatViaje";
 
@@ -115,6 +117,7 @@ export function TrasladoAsignadoDetails({
   const [procesando, setProcesando] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [chatAbierto, setChatAbierto] = useState(false);
+  const [soporteAbierto, setSoporteAbierto] = useState(false);
 
   const trasladoId = pasaporte.traslado_id!;
 
@@ -199,8 +202,20 @@ export function TrasladoAsignadoDetails({
               />
             </Link>
 
-            <EmergencyPanel trasladoId={trasladoId} compact headerPill />
+            <div className="flex items-center gap-1.5 shrink-0">
+              <button
+                type="button"
+                onClick={() => setSoporteAbierto(true)}
+                aria-label="Soporte"
+                className="inline-flex min-h-[36px] cursor-pointer items-center gap-1 rounded-xl bg-[#E8F0FA] px-2.5 py-1 font-display text-xs font-bold text-[#0A1E3C] shadow-2xs transition hover:bg-[#DCE7F5] active:scale-95"
+              >
+                💬 Soporte
+              </button>
+              <EmergencyPanel trasladoId={trasladoId} compact headerPill />
+            </div>
           </header>
+
+          <SecondaryTripNavBar trasladoId={trasladoId} pasaporte={pasaporte} />
 
           {/* Caja de estado horizontal dividida en dos */}
           <section
@@ -506,6 +521,7 @@ export function TrasladoAsignadoDetails({
                   <path d="M21 3 3 10.53v.98l6.84 2.65L12.48 21h.98L21 3z" />
                 </svg>
                 <span>Iniciar camino al punto de recolección</span>
+                <span className="sr-only"> ESTOY EN CAMINO AL ORIGEN</span>
                 <span className="sr-only"> ➔</span>
                 <svg
                   width="18"
@@ -594,6 +610,11 @@ export function TrasladoAsignadoDetails({
         <TripDialog title={`Chat · ${contactoNombre}`} onClose={() => setChatAbierto(false)}>
           <ChatViaje trasladoId={trasladoId} estado={pasaporte.estado ?? "conductor_asignado"} />
         </TripDialog>
+      )}
+
+      {/* Modal de Soporte */}
+      {soporteAbierto && (
+        <TripSupportDialog onClose={() => setSoporteAbierto(false)} />
       )}
     </div>
   );

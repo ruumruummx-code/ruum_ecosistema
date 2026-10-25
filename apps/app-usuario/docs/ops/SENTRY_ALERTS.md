@@ -37,7 +37,7 @@
 
 ## Privacidad y Sanitización de Datos (P1)
 
-- `sentry.client.config.ts`, `sentry.server.config.ts` e `instrumentation.ts` configuran `sendDefaultPii: false`.
+- `instrumentation-client.ts`, `sentry.server.config.ts` e `instrumentation.ts` configuran `sendDefaultPii: false`.
 - Toda la telemetría es filtrada por `sanitizeDetails`:
   - **Prohibido**: `password`, `token`, `jwt`, `service_role`, `cvv`, `tarjeta`, `cuenta`, `curp`, `clabe`, `documento`, `foto`, `url_firmada`.
   - Los strings largos son truncados a 240 caracteres.

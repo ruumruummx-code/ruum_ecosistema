@@ -12,6 +12,7 @@ import { createNavigationOptions, type NavigationOption } from "@/lib/navigation
 import { formatearDuracion } from "../trips-utils";
 import { EmergencyPanel } from "./EmergencyPanel";
 import { SecondaryTripNavBar } from "./SecondaryTripNavBar";
+import { TripSupportDialog } from "./TripSupportDialog";
 
 type PasaporteRow = Database["public"]["Views"]["pasaporte_digital"]["Row"];
 
@@ -163,6 +164,7 @@ export function DirigeteAOrigenDetails({
   const router = useRouter();
   const [procesando, setProcesando] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [soporteAbierto, setSoporteAbierto] = useState(false);
 
   const trasladoId = pasaporte.traslado_id!;
 
@@ -242,7 +244,17 @@ export function DirigeteAOrigenDetails({
               Traslado activo
             </span>
 
-            <EmergencyPanel trasladoId={trasladoId} compact headerPill />
+            <div className="flex items-center gap-1.5 shrink-0">
+              <button
+                type="button"
+                onClick={() => setSoporteAbierto(true)}
+                aria-label="Soporte"
+                className="inline-flex min-h-[36px] cursor-pointer items-center gap-1 rounded-xl bg-[#E8F0FA] px-2.5 py-1 font-display text-xs font-bold text-[#0A1E3C] shadow-2xs transition hover:bg-[#DCE7F5] active:scale-95"
+              >
+                💬 Soporte
+              </button>
+              <EmergencyPanel trasladoId={trasladoId} compact headerPill />
+            </div>
           </header>
 
           <SecondaryTripNavBar trasladoId={trasladoId} pasaporte={pasaporte} />
@@ -472,6 +484,7 @@ export function DirigeteAOrigenDetails({
                   <line x1="4" y1="22" x2="4" y2="15" />
                 </svg>
                 <span>Ya llegué al origen</span>
+                <span className="sr-only"> HE LLEGADO AL ORIGEN</span>
               </>
             )}
           </button>

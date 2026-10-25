@@ -50,7 +50,7 @@ export default defineConfig({
         "next.config.ts",
         "vitest.config.ts",
         "capacitor.config.ts",
-        "sentry.client.config.ts",
+        "instrumentation-client.ts",
         "sentry.server.config.ts"
       ]
     }
