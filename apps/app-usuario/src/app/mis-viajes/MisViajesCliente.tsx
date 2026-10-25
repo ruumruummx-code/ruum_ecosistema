@@ -45,55 +45,60 @@ function IconoFiltro({ className = "size-5" }: { className?: string }) {
 
 function IconoCarroFrente({ className = "size-6" }: { className?: string }) {
   return (
-    <svg className={className} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-      <path d="M18.92 6.01C18.72 5.42 18.16 5 17.5 5h-11c-.66 0-1.22.42-1.42 1.01L3 12v8c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h12v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-8l-2.08-5.99zM6.85 7h10.29l1.04 3H5.81l1.04-3zM19 17H5v-4.66l.12-.34h13.77l.11.34V17z" />
-      <circle cx="7.5" cy="14.5" r="1.5" />
-      <circle cx="16.5" cy="14.5" r="1.5" />
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M5 11l1.5-4.5h11L19 11M4 11h16v6a1 1 0 0 1-1 1h-1a2 2 0 0 1-4 0H10a2 2 0 0 1-4 0H5a1 1 0 0 1-1-1v-6z" />
+      <circle cx="7.5" cy="17.5" r="1.5" />
+      <circle cx="16.5" cy="17.5" r="1.5" />
     </svg>
   );
 }
 
-function IconoUsuario({ className = "size-3" }: { className?: string }) {
+function IconoRelojVerde({ className = "size-6" }: { className?: string }) {
   return (
     <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <circle cx="12" cy="8" r="3.6" />
-      <path d="M4.5 19.5c0-3.6 3.4-6 7.5-6s7.5 2.4 7.5 6" />
+      <circle cx="12" cy="12" r="9" />
+      <polyline points="12 6 12 12 15 15" />
     </svg>
   );
 }
 
-function IconoReloj({ className = "size-3" }: { className?: string }) {
-  return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
-      <circle cx="12" cy="12" r="8.5" />
-      <path d="M12 7.5V12l3 2" />
-    </svg>
-  );
-}
-
-function IconoRuta({ className = "size-3" }: { className?: string }) {
+function IconoDolarCoral({ className = "size-6" }: { className?: string }) {
   return (
     <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <circle cx="6" cy="19" r="2.2" />
-      <circle cx="18" cy="5" r="2.2" />
-      <path d="M8.2 19H15a3 3 0 0 0 0-6H9a3 3 0 0 1 0-6h6.8" />
+      <line x1="12" y1="2" x2="12" y2="22" />
+      <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
     </svg>
   );
 }
 
-function IconoChevron({ className = "size-4" }: { className?: string }) {
-  return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <path d="m9 18 6-6-6-6" />
-    </svg>
-  );
-}
-
-function IconoCalendario({ className = "size-3" }: { className?: string }) {
+function IconoCalendarioPlus({ className = "size-5" }: { className?: string }) {
   return (
     <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <rect x="3.5" y="5" width="17" height="15.5" rx="2" />
-      <path d="M7 3.5v3M17 3.5v3M3.5 9h17" />
+      <rect x="3" y="4" width="18" height="18" rx="3" />
+      <line x1="16" y1="2" x2="16" y2="6" />
+      <line x1="8" y1="2" x2="8" y2="6" />
+      <line x1="3" y1="10" x2="21" y2="10" />
+      <line x1="12" y1="13" x2="12" y2="19" />
+      <line x1="9" y1="16" x2="15" y2="16" />
+    </svg>
+  );
+}
+
+function IconoPinRuta({ className = "size-5" }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M12 2a8 8 0 0 0-8 8c0 5.25 8 12 8 12s8-6.75 8-12a8 8 0 0 0-8-8z" />
+      <circle cx="12" cy="10" r="3" />
+    </svg>
+  );
+}
+
+function IconoGraficoBarras({ className = "size-5" }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <line x1="18" y1="20" x2="18" y2="10" />
+      <line x1="12" y1="20" x2="12" y2="4" />
+      <line x1="6" y1="20" x2="6" y2="14" />
     </svg>
   );
 }
@@ -146,9 +151,6 @@ function pestañaDeViaje(p: Pasaporte): PestañaTraslados {
     "documentacion_en_revision",
     "documentacion_validada",
     "cotizacion_generada",
-    // M14: cotizacion_aceptada es estado válido (fuente: ESTADOS_TRASLADO) y
-    // espera pago, como pago_pendiente en InicioUsuario → "Programado".
-    // Sin esto caía en "activos" mientras el inicio lo mostraba programado.
     "cotizacion_aceptada",
     "servicio_confirmado",
     "pendiente_de_conductor",
@@ -191,7 +193,6 @@ function estadoVisual(p: Pasaporte): { label: string } {
     case "conductor_en_camino_al_origen":
       return { label: "En camino al origen" };
     case "conductor_en_punto_de_recoleccion":
-      return { label: "Check origen" };
     case "verificacion_vehiculo_en_proceso":
     case "evidencia_inicial_en_proceso":
       return { label: "Check origen" };
@@ -226,10 +227,6 @@ function fechaProgramada(fecha: string | null): { fecha: string; hora: string } 
   return { fecha: esHoy ? `Hoy, ${fechaTexto}` : fechaTexto, hora: horaTexto };
 }
 
-function direccion(valor: string | null | undefined, fallback: string): string {
-  return valor?.trim() || fallback;
-}
-
 function SkeletonCard() {
   return (
     <div className="animate-pulse rounded-[22px] border border-[#eef2f7] bg-white p-5" aria-hidden="true">
@@ -246,6 +243,34 @@ function SkeletonCard() {
   );
 }
 
+function IlustracionEmptyTraslados() {
+  return (
+    <div className="relative mx-auto mb-2 flex size-28 items-center justify-center sm:size-32" aria-hidden="true">
+      <svg viewBox="0 0 140 120" fill="none" className="h-full w-full">
+        {/* Silueta urbana de fondo */}
+        <rect x="22" y="44" width="22" height="42" rx="3" fill="#e2e8f0" fillOpacity="0.8" />
+        <rect x="48" y="32" width="26" height="54" rx="3" fill="#cbd5e1" fillOpacity="0.7" />
+        <rect x="78" y="48" width="20" height="38" rx="3" fill="#e2e8f0" fillOpacity="0.8" />
+        <rect x="102" y="54" width="22" height="32" rx="3" fill="#cbd5e1" fillOpacity="0.6" />
+        <ellipse cx="26" cy="38" rx="12" ry="5" fill="#f1f5f9" />
+        <ellipse cx="114" cy="36" rx="14" ry="6" fill="#f1f5f9" />
+
+        {/* Resplandor circular principal */}
+        <circle cx="70" cy="62" r="38" fill="#e8f1fd" className="dark:fill-[#0c2848]" />
+
+        {/* Círculo central con auto azul */}
+        <g transform="translate(50, 42)">
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#0052cc" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M5 11l1.5-4.5h11L19 11M4 11h16v6a1 1 0 0 1-1 1h-1a2 2 0 0 1-4 0H10a2 2 0 0 1-4 0H5a1 1 0 0 1-1-1v-6z" />
+            <circle cx="7.5" cy="17.5" r="1.5" />
+            <circle cx="16.5" cy="17.5" r="1.5" />
+          </svg>
+        </g>
+      </svg>
+    </div>
+  );
+}
+
 function FichaVacia({ hayBusqueda, hayFiltro, pestana, onLimpiar }: { hayBusqueda: boolean; hayFiltro: boolean; pestana: PestañaTraslados; onLimpiar: () => void }) {
   const etiquetasPestana: Record<PestañaTraslados, string> = {
     activos: "En curso",
@@ -253,19 +278,58 @@ function FichaVacia({ hayBusqueda, hayFiltro, pestana, onLimpiar }: { hayBusqued
     finalizados: "Historial",
     cancelados: "Cancelados",
   };
-  const titulo = hayBusqueda || hayFiltro ? "No se encontraron traslados" : `Sin traslados · ${etiquetasPestana[pestana]}`;
+  const titulo = hayBusqueda || hayFiltro ? "No se encontraron traslados" : `Sin traslados • ${etiquetasPestana[pestana]}`;
   const descripcion = hayBusqueda || hayFiltro
     ? "Prueba con otro término o ajusta el filtro de vehículo."
     : "Tus traslados aparecerán aquí tan pronto como los registres en la plataforma.";
 
   return (
-    <div className="user-transfers-empty">
-      <div aria-hidden="true" className="transfers-empty-illustration">
-        <span className="transfers-empty-orbit"><IconoCarroFrente /></span>
+    <div className="rounded-[28px] border border-[#e2e8f0] bg-white p-6 text-center shadow-xs dark:border-[#1a3a5c] dark:bg-[#0a2342] sm:p-8">
+      <IlustracionEmptyTraslados />
+      <h2 className="text-[18px] font-extrabold tracking-tight text-[#0a2342] dark:text-[#f6f8fb] sm:text-[20px]">{titulo}</h2>
+      <p className="mx-auto mt-2 max-w-sm text-[13.5px] font-medium leading-relaxed text-[#566889] dark:text-[#a8b5cc]">{descripcion}</p>
+      
+      <div className="mt-5 flex justify-center">
+        {hayBusqueda || hayFiltro ? (
+          <button type="button" className="h-12 rounded-2xl bg-[#0052cc] px-6 text-[14.5px] font-bold text-white shadow-sm transition hover:bg-[#0041a8] cursor-pointer" onClick={onLimpiar}>
+            Limpiar filtros
+          </button>
+        ) : (
+          <Link
+            href="/viajes/nuevo"
+            className="inline-flex h-[48px] items-center justify-center gap-2 rounded-2xl bg-[#0052cc] px-7 text-[15px] font-bold text-white shadow-md transition hover:bg-[#0041a8] active:scale-[0.98] cursor-pointer"
+          >
+            <span aria-hidden="true" className="text-lg">＋</span> Crear traslado
+          </Link>
+        )}
       </div>
-      <h2 className="text-[17px] font-bold text-[#0a2342] dark:text-[#f6f8fb]">{titulo}</h2>
-      <p className="mx-auto mt-2 max-w-xs text-[14px] font-medium leading-relaxed text-[#4e5f80] dark:text-[#a8b5cc]">{descripcion}</p>
-      {hayBusqueda || hayFiltro ? <button type="button" className="transfers-create-button" onClick={onLimpiar}>Limpiar filtros</button> : <Link href="/viajes/nuevo" className="transfers-create-button"><span aria-hidden="true">＋</span> Crear traslado</Link>}
+
+      {/* 3 Beneficios destacados al pie de la tarjeta vacía (Prototipo V2) */}
+      {!hayBusqueda && !hayFiltro && (
+        <div className="mt-8 grid grid-cols-3 gap-2 border-t border-[#edf2f7] pt-6 dark:border-[#1a3a5c]/80 sm:gap-4">
+          <div className="flex flex-col items-center text-center">
+            <span className="flex size-9 items-center justify-center rounded-xl bg-[#edf4fe] text-[#2563eb] dark:bg-[#0f2d52] dark:text-[#6ba8ff]">
+              <IconoCalendarioPlus />
+            </span>
+            <span className="mt-2 text-[11.5px] font-bold text-[#0a2342] dark:text-[#f6f8fb]">Programa</span>
+            <span className="text-[10.5px] text-[#64748b] dark:text-[#a8b5cc]">tus viajes</span>
+          </div>
+          <div className="flex flex-col items-center text-center">
+            <span className="flex size-9 items-center justify-center rounded-xl bg-[#edf4fe] text-[#2563eb] dark:bg-[#0f2d52] dark:text-[#6ba8ff]">
+              <IconoPinRuta />
+            </span>
+            <span className="mt-2 text-[11.5px] font-bold text-[#0a2342] dark:text-[#f6f8fb]">Gestiona</span>
+            <span className="text-[10.5px] text-[#64748b] dark:text-[#a8b5cc]">tus rutas</span>
+          </div>
+          <div className="flex flex-col items-center text-center">
+            <span className="flex size-9 items-center justify-center rounded-xl bg-[#edf4fe] text-[#2563eb] dark:bg-[#0f2d52] dark:text-[#6ba8ff]">
+              <IconoGraficoBarras />
+            </span>
+            <span className="mt-2 text-[11.5px] font-bold text-[#0a2342] dark:text-[#f6f8fb]">Lleva un</span>
+            <span className="text-[10.5px] text-[#64748b] dark:text-[#a8b5cc]">mejor control</span>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -293,7 +357,7 @@ export function MisTrasladosCliente({
   const [isPending, startTransition] = useTransition();
   const tablistRef = useRef<HTMLDivElement>(null);
 
-  // C-09: debounce búsqueda 300ms con aria-busy y skeleton
+  // Debounce búsqueda 300ms con aria-busy y skeleton
   useEffect(() => {
     if (busquedaInput === busqueda) return;
     setBuscando(true);
@@ -351,8 +415,6 @@ export function MisTrasladosCliente({
     startTransition(() => setPestana(nueva));
   }
 
-  /* ACC-7 (auditoría): navegación por flechas + Home/End sobre los botones
-     reales del grupo (patrón toolbar de WAI-ARIA). */
   function handleTablistKeyDown(e: React.KeyboardEvent) {
     const botones = Array.from(
       tablistRef.current?.querySelectorAll<HTMLButtonElement>("button:not([disabled])") ?? []
@@ -376,14 +438,14 @@ export function MisTrasladosCliente({
   }
 
   return (
-    <div className="user-transfers-view">
-      {/* Pestañas estilo segmento con conteos */}
+    <div className="user-transfers-view flex flex-col gap-3.5 pb-8 sm:gap-4.5">
+      {/* Pestañas de categorías estilo cápsula (Pills alineadas al prototipo) */}
       <div
         aria-label="Filtrar por estado del traslado"
         role="group"
         ref={tablistRef}
         onKeyDown={handleTablistKeyDown}
-        className="user-transfers-tabs flex gap-1.5 overflow-x-auto rounded-[32px] bg-[#f2f6fb] p-1 dark:bg-[#0f2d52]"
+        className="flex gap-1 overflow-x-auto rounded-full bg-[#f1f5fa] p-1 dark:bg-[#0c233f]"
       >
         {PESTAÑAS.map(({ id, etiqueta }) => {
           const activo = pestana === id;
@@ -395,12 +457,16 @@ export function MisTrasladosCliente({
               data-pestana={id}
               tabIndex={activo ? 0 : -1}
               onClick={() => handlePestanaChange(id)}
-              className={activo ? "is-selected" : ""}
+              className={`flex-1 min-w-[84px] py-2 px-3 text-[13px] font-bold rounded-full transition-all cursor-pointer text-center ${
+                activo
+                  ? "bg-[#0052cc] text-white shadow-sm"
+                  : "text-[#64748b] hover:text-[#0a2342] dark:text-[#94a3b8] dark:hover:text-white"
+              }`}
             >
               {etiqueta}
               {id === "programados" && conteos[id] > 0 && (
                 <span
-                  className="transfers-tab-count"
+                  className="ml-1.5 inline-flex size-4.5 items-center justify-center rounded-full bg-white/20 text-[10px] font-extrabold text-current"
                   title={`${conteos[id]} programados`}
                 >
                   {new Intl.NumberFormat("es-MX", { notation: conteos[id] >= 1000 ? "compact" : "standard", maximumFractionDigits: 0 }).format(conteos[id])}
@@ -411,24 +477,46 @@ export function MisTrasladosCliente({
         })}
       </div>
 
-      {/* Resumen: total / activos / gastado */}
-      <dl aria-label="Resumen de traslados" className="user-transfers-stats">
-        {[
-          { etiqueta: "Total", valor: String(Traslados.length) },
-          { etiqueta: "Activos", valor: String(conteos.activos) },
-          { etiqueta: "Gastado", valor: formatoGastado(gastoTotal) },
-        ].map(({ etiqueta, valor }) => (
-          <div key={etiqueta}>
-            <dt className="mt-1 text-[11.5px] font-semibold uppercase tracking-wider text-[#4e5f80] dark:text-[#a8b5cc]">{etiqueta}</dt>
-            <dd className="text-[20px] font-extrabold tracking-tight text-[#0a2342] dark:text-[#f6f8fb]">{valor}</dd>
-          </div>
-        ))}
+      {/* Resumen: 3 Tarjetas métricas con fondos pasteles según prototipo */}
+      <dl aria-label="Resumen de traslados" className="grid grid-cols-3 gap-2.5 sm:gap-3.5">
+        {/* Total (Azul) */}
+        <div className="flex flex-col items-center justify-center rounded-2xl border border-[#d6e4f8] bg-[#edf4fe] p-3 text-center dark:border-[#1a3a60] dark:bg-[#0c2646]">
+          <span className="text-[#2563eb] dark:text-[#4d94ff]">
+            <IconoCarroFrente className="size-5" />
+          </span>
+          <dd className="mt-1 text-[22px] font-extrabold tracking-tight text-[#0a2342] dark:text-[#f6f8fb]">
+            {Traslados.length}
+          </dd>
+          <dt className="text-[11.5px] font-semibold text-[#64748b] dark:text-[#a8b5cc]">Total</dt>
+        </div>
+
+        {/* Activos (Verde) */}
+        <div className="flex flex-col items-center justify-center rounded-2xl border border-[#cbeed9] bg-[#eaf8f0] p-3 text-center dark:border-[#135939] dark:bg-[#09281e]">
+          <span className="text-[#10b981] dark:text-[#34d399]">
+            <IconoRelojVerde className="size-5" />
+          </span>
+          <dd className="mt-1 text-[22px] font-extrabold tracking-tight text-[#0a2342] dark:text-[#f6f8fb]">
+            {conteos.activos}
+          </dd>
+          <dt className="text-[11.5px] font-semibold text-[#64748b] dark:text-[#a8b5cc]">Activos</dt>
+        </div>
+
+        {/* Gastado (Coral/Rosa) */}
+        <div className="flex flex-col items-center justify-center rounded-2xl border border-[#f9d7d7] bg-[#fdf0f0] p-3 text-center dark:border-[#591d24] dark:bg-[#331418]">
+          <span className="text-[#ef4444] dark:text-[#f87171]">
+            <IconoDolarCoral className="size-5" />
+          </span>
+          <dd className="mt-1 text-[22px] font-extrabold tracking-tight text-[#0a2342] dark:text-[#f6f8fb]">
+            {formatoGastado(gastoTotal)}
+          </dd>
+          <dt className="text-[11.5px] font-semibold text-[#64748b] dark:text-[#a8b5cc]">Gastado</dt>
+        </div>
       </dl>
 
-      {/* Buscador + filtro */}
-      <section aria-label="Buscar y filtrar traslados" className="user-transfers-search flex flex-col gap-2">
-        <div className="user-transfers-search-row flex items-center gap-2.5 rounded-2xl border border-[#e6edf6] bg-white px-4 py-3 shadow-xs dark:border-[#1a3a5c] dark:bg-[#0a2342]">
-          <IconoBuscar className="size-4 shrink-0 text-[#4e5f80] dark:text-[#a8b5cc]" />
+      {/* Buscador y botón de filtro */}
+      <section aria-label="Buscar y filtrar traslados" className="flex flex-col gap-1.5">
+        <div className="flex items-center gap-2.5 rounded-2xl border border-[#e2e8f0] bg-white px-4 py-3 shadow-xs dark:border-[#1a3a5c] dark:bg-[#0a2342]">
+          <IconoBuscar className="size-4.5 shrink-0 text-[#64748b] dark:text-[#a8b5cc]" />
           <label htmlFor="buscar-traslado" className="sr-only">
             Buscar traslado
           </label>
@@ -438,7 +526,7 @@ export function MisTrasladosCliente({
             value={busquedaInput}
             onChange={(event) => setBusquedaInput(event.target.value)}
             placeholder="Buscar por vehículo, destino o # de traslado"
-            className="w-full border-0 bg-transparent p-0 text-[14px] font-medium text-[#0a2342] outline-none placeholder:text-[#4e5f80] dark:text-[#f6f8fb] dark:placeholder:text-[#a8b5cc]"
+            className="w-full border-0 bg-transparent p-0 text-[14px] font-medium text-[#0a2342] outline-none placeholder:text-[#64748b] dark:text-[#f6f8fb] dark:placeholder:text-[#a8b5cc]"
             aria-busy={buscando}
             aria-describedby="busqueda-ayuda"
           />
@@ -449,23 +537,32 @@ export function MisTrasladosCliente({
             aria-label={tipoVehiculoSeleccionado ? `Filtrar por tipo de vehículo, filtro activo: ${tipoVehiculoSeleccionado}` : "Filtrar por tipo de vehículo"}
             onClick={() => setFiltroAbierto((abierto) => !abierto)}
             className={[
-              "flex size-11 shrink-0 items-center justify-center rounded-xl transition-colors cursor-pointer",
+              "flex size-10 shrink-0 items-center justify-center rounded-xl transition-colors cursor-pointer",
               filtroAbierto || tipoVehiculoSeleccionado
-                ? "bg-[#0a2342] text-white dark:bg-[#4d94ff] dark:text-[#061529]"
-                : "text-[#4e5f80] hover:bg-[#edf4fe] hover:text-[#0a2342] dark:text-[#a8b5cc] dark:hover:bg-[#0f2d52] dark:hover:text-[#f6f8fb]",
+                ? "bg-[#0052cc] text-white dark:bg-[#4d94ff] dark:text-[#061529]"
+                : "text-[#64748b] hover:bg-[#edf4fe] hover:text-[#0052cc] dark:text-[#a8b5cc] dark:hover:bg-[#0f2d52] dark:hover:text-[#f6f8fb]",
             ].join(" ")}
           >
             <IconoFiltro className="size-4.5" />
           </button>
         </div>
-        <div className="user-transfers-search-help flex items-center gap-2 px-1">
-          <p id="busqueda-ayuda" className="sr-only text-[12px] text-[#4e5f80] dark:text-[#a8b5cc]">Folio, placa, vehículo, ciudad o conductor</p>
-          {buscando && <span className="inline-flex items-center gap-1 text-xs text-[#4e5f80] dark:text-[#a8b5cc]" role="status" aria-live="polite"><span className="size-3 animate-spin rounded-full border-2 border-[#eef2f7] border-t-[#104ca0]" aria-hidden />Buscando…</span>}
+        <div className="flex items-center gap-2 px-1">
+          <p id="busqueda-ayuda" className="sr-only text-[12px] text-[#4e5f80] dark:text-[#a8b5cc]">
+            Folio, placa, vehículo, ciudad o conductor
+          </p>
+          {buscando && (
+            <span className="inline-flex items-center gap-1 text-xs text-[#4e5f80] dark:text-[#a8b5cc]" role="status" aria-live="polite">
+              <span className="size-3 animate-spin rounded-full border-2 border-[#eef2f7] border-t-[#0052cc]" aria-hidden />
+              Buscando…
+            </span>
+          )}
         </div>
 
         <MobileBottomSheet open={filtroAbierto} onClose={() => setFiltroAbierto(false)} title="Filtrar traslados">
           <div id="panel-filtros-traslados">
-            <label className="mb-2 block text-[14px] font-bold text-[#0a2342] dark:text-[#f6f8fb]" htmlFor="tipo-vehiculo">Tipo de vehículo</label>
+            <label className="mb-2 block text-[14px] font-bold text-[#0a2342] dark:text-[#f6f8fb]" htmlFor="tipo-vehiculo">
+              Tipo de vehículo
+            </label>
             <select
               id="tipo-vehiculo"
               value={tipoVehiculoSeleccionado}
@@ -473,7 +570,11 @@ export function MisTrasladosCliente({
               className="min-h-12 w-full rounded-xl border border-[#e6edf6] bg-white px-3 text-[16px] text-[#0a2342] dark:border-[#1a3a5c] dark:bg-[#061529] dark:text-[#f6f8fb]"
             >
               <option value="">Todos los vehículos</option>
-              {tiposVehiculo.map((tipo) => <option key={tipo} value={tipo}>{tipo}</option>)}
+              {tiposVehiculo.map((tipo) => (
+                <option key={tipo} value={tipo}>
+                  {tipo}
+                </option>
+              ))}
             </select>
             {(busqueda || tipoVehiculoSeleccionado) && (
               <button
@@ -484,137 +585,124 @@ export function MisTrasladosCliente({
                 Limpiar filtros
               </button>
             )}
-            <button type="button" className="transfers-create-button mt-4 w-full" onClick={() => setFiltroAbierto(false)}>Aplicar filtros</button>
+            <button
+              type="button"
+              className="mt-4 flex h-12 w-full items-center justify-center rounded-2xl bg-[#0052cc] text-[14.5px] font-bold text-white shadow-sm transition hover:bg-[#0041a8] cursor-pointer"
+              onClick={() => setFiltroAbierto(false)}
+            >
+              Aplicar filtros
+            </button>
           </div>
         </MobileBottomSheet>
       </section>
 
-      {/* Lista de traslados */}
+      {/* Lista de traslados o Tarjeta Empty State */}
       <section
         id="lista-traslados"
         aria-live="polite"
         aria-busy={isPending || buscando}
         aria-label={`Lista de traslados ${pestana} — ${filtrados.length} resultados`}
-        className={`user-transfers-list ${filtrados.length === 0 && !buscando && !isPending ? "is-empty" : ""}`}
+        className="flex flex-col gap-3"
         tabIndex={0}
       >
-        {(isPending || buscando) ? (
+        {isPending || buscando ? (
           <div className="flex flex-col gap-3.5" role="status" aria-label="Cargando traslados">
             <SkeletonCard />
             <SkeletonCard />
             <SkeletonCard />
           </div>
         ) : filtrados.length === 0 ? (
-          <FichaVacia hayBusqueda={Boolean(busqueda.trim())} hayFiltro={Boolean(tipoVehiculoSeleccionado)} pestana={pestana} onLimpiar={limpiarFiltros} />
+          <FichaVacia
+            hayBusqueda={Boolean(busqueda.trim())}
+            hayFiltro={Boolean(tipoVehiculoSeleccionado)}
+            pestana={pestana}
+            onLimpiar={limpiarFiltros}
+          />
         ) : (
-          <><div className="transfers-results-heading"><span>{filtrados.length} {filtrados.length === 1 ? "traslado" : "traslados"}</span><Link href="/viajes/nuevo" className="transfers-create-button">＋ Crear traslado</Link></div>{filtrados.map(({ pasaporte, traslado }) => {
-            const { label } = estadoVisual(pasaporte);
-            const { tono, borde } = PILDORA_POR_PESTAÑA[pestana];
-            const folio = folioCorto(pasaporte.traslado_id);
-            const urlViaje = pasaporte.traslado_id ? `/viajes/${pasaporte.traslado_id}` : "/mis-viajes";
-            const nombreVehiculo = vehiculoNombre(pasaporte);
-            const origenCiudad = pasaporte.origen_ciudad ?? traslado?.origen_ciudad;
-            const destinoCiudad = pasaporte.destino_ciudad ?? traslado?.destino_ciudad;
-            const esPagoPendiente = pasaporte.estado === "cotizacion_aceptada" || pasaporte.estado === "pago_pendiente";
-            const esActiva = tono === "active";
-            const conductor = primerNombre(pasaporte.conductor_nombre) ?? "Por asignar";
-            const duracion = formatoDuracion(pasaporte.tiempo_estimado_horas);
-            const distancia = pasaporte.distancia_km != null
-              ? `${Number(pasaporte.distancia_km).toLocaleString("es-MX")} km`
-              : null;
-            const fecha = fechaProgramada(traslado?.fecha_hora_programada ?? null);
-            const datoSecundario = duracion ?? distancia ?? fecha.fecha;
-            const etiquetaBoton = esActiva ? "Pasaporte" : esPagoPendiente ? "Completar pago" : "Detalle";
-
-            return (
-              <article
-                key={pasaporte.traslado_id ?? `${pasaporte.creado_en}-${pasaporte.estado}`}
-                className={[
-                  "rounded-2xl border border-[#e6edf6] border-l-4 bg-white p-5 shadow-xs transition hover:shadow-md dark:border-[#1a3a5c] dark:bg-[#0a2342]",
-                  borde,
-                  tono === "cancelled" ? "opacity-[0.85]" : "",
-                ].join(" ")}
+          <>
+            <div className="flex items-center justify-between px-1 text-[13px] font-semibold text-[#64748b] dark:text-[#a8b5cc]">
+              <span>
+                {filtrados.length} {filtrados.length === 1 ? "traslado" : "traslados"}
+              </span>
+              <Link
+                href="/viajes/nuevo"
+                className="inline-flex items-center gap-1 text-[13px] font-bold text-[#0052cc] hover:underline dark:text-[#4d94ff]"
               >
-                <div className="mb-3.5 flex items-start justify-between gap-3">
-                  <span className={["inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11.5px] font-bold tracking-tight", PILDORA_CLASE[tono]].join(" ")}>
-                    {esActiva && <span aria-hidden="true" className="size-1.5 animate-pulse rounded-full bg-emerald-500" />}
-                    {label}
-                  </span>
-                  <span className="shrink-0 rounded-full bg-[#f2f6fb] px-2.5 py-1 text-[11.5px] font-mono font-bold text-[#4e5f80] dark:bg-[#1a3a5c] dark:text-[#a8b5cc]">
-                    {folio}
-                  </span>
-                </div>
+                ＋ Crear traslado
+              </Link>
+            </div>
+            {filtrados.map(({ pasaporte, traslado }) => {
+              const { label } = estadoVisual(pasaporte);
+              const { tono, borde } = PILDORA_POR_PESTAÑA[pestana];
+              const folio = folioCorto(pasaporte.traslado_id);
+              const urlViaje = pasaporte.traslado_id ? `/viajes/${pasaporte.traslado_id}` : "/mis-viajes";
+              const nombreVehiculo = vehiculoNombre(pasaporte);
+              const origenCiudad = pasaporte.origen_ciudad ?? traslado?.origen_ciudad;
+              const destinoCiudad = pasaporte.destino_ciudad ?? traslado?.destino_ciudad;
+              const esPagoPendiente = pasaporte.estado === "cotizacion_aceptada" || pasaporte.estado === "pago_pendiente";
+              const esActiva = tono === "active";
+              const conductor = primerNombre(pasaporte.conductor_nombre) ?? "Por asignar";
+              const duracion = formatoDuracion(pasaporte.tiempo_estimado_horas);
+              const distancia = pasaporte.distancia_km != null
+                ? `${Number(pasaporte.distancia_km).toLocaleString("es-MX")} km`
+                : null;
+              const fecha = fechaProgramada(traslado?.fecha_hora_programada ?? null);
+              const datoSecundario = duracion ?? distancia ?? fecha.fecha;
+              const etiquetaBoton = esActiva ? "Pasaporte" : esPagoPendiente ? "Completar pago" : "Detalle";
 
-                <div className="mb-3.5 flex items-center gap-3.5">
-                  <span aria-hidden="true" className="flex size-11 shrink-0 items-center justify-center rounded-[13px] bg-[#edf4fe] text-[#104ca0] dark:bg-[#0f2d52] dark:text-[#6ba8ff]">
-                    <IconoCarroFrente className="size-5" />
-                  </span>
-                  <div className="min-w-0 flex-1">
-                    <h2 className="truncate text-[16.5px] font-bold tracking-tight text-[#0a2342] dark:text-[#f6f8fb]">{nombreVehiculo}</h2>
-                    <p className="mt-0.5 text-[12px] font-semibold tracking-wider uppercase text-[#4e5f80] dark:text-[#a8b5cc]">
-                      {pasaporte.vehiculo_placas ?? "Placas pendientes"}
-                    </p>
-                  </div>
-                </div>
-
-                {esActiva && <div className="mb-3"><EtapasTrasladoUsuario estado={pasaporte.estado} /></div>}
-
-                <div className="mb-3.5 rounded-xl border border-[#eef2f7] bg-[#f8fafd] px-3.5 py-3 dark:border-[#1a3a5c] dark:bg-[#061529]/60">
-                  <div className="flex items-start gap-2.5">
-                    <span aria-hidden="true" className="mt-1 size-2 shrink-0 rounded-full bg-emerald-600 dark:bg-emerald-400" />
-                    <p className="text-[13px] font-bold leading-snug text-[#0a2342] dark:text-[#f6f8fb]">
-                      {direccion(origenCiudad, "Origen pendiente")}
-                      <small className="mt-0.5 block text-[11px] font-medium text-[#4e5f80] dark:text-[#a8b5cc]">
-                        {direccion(traslado?.origen_direccion ?? pasaporte.origen_direccion, "Dirección registrada")}
-                      </small>
-                    </p>
-                  </div>
-                  <div className="mt-2.5 flex items-start gap-2.5">
-                    <span aria-hidden="true" className="mt-1 size-2 shrink-0 rounded-full bg-amber-500" />
-                    <p className="text-[13px] font-bold leading-snug text-[#0a2342] dark:text-[#f6f8fb]">
-                      {direccion(destinoCiudad, "Destino pendiente")}
-                      <small className="mt-0.5 block text-[11px] font-medium text-[#4e5f80] dark:text-[#a8b5cc]">
-                        {direccion(traslado?.destino_direccion ?? pasaporte.destino_direccion, "Dirección registrada")}
-                      </small>
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex items-center justify-between gap-3 border-t border-[#e6edf6] pt-3 dark:border-[#1a3a5c]">
-                  <div className="flex min-w-0 gap-3 text-[12px] font-medium text-[#4e5f80] dark:text-[#a8b5cc]">
-                    <span className="inline-flex min-w-0 items-center gap-1.5">
-                      <IconoUsuario className="shrink-0 text-[#4e5f80] dark:text-[#a8b5cc]" />
-                      <span className="truncate">{conductor}</span>
+              return (
+                <article
+                  key={pasaporte.traslado_id ?? `${pasaporte.creado_en}-${pasaporte.estado}`}
+                  className={[
+                    "rounded-2xl border border-[#e6edf6] border-l-4 bg-white p-5 shadow-xs transition hover:shadow-md dark:border-[#1a3a5c] dark:bg-[#0a2342]",
+                    borde,
+                    tono === "cancelled" ? "opacity-[0.85]" : "",
+                  ].join(" ")}
+                >
+                  <div className="mb-3.5 flex items-start justify-between gap-3">
+                    <span className={["inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11.5px] font-bold tracking-tight", PILDORA_CLASE[tono]].join(" ")}>
+                      {esActiva && <span aria-hidden="true" className="size-1.5 animate-pulse rounded-full bg-emerald-500" />}
+                      {label}
                     </span>
-                    <span className="inline-flex shrink-0 items-center gap-1.5">
-                      {pestana === "programados" && !duracion
-                        ? <IconoCalendario className="text-[#4e5f80] dark:text-[#a8b5cc]" />
-                        : distancia && !duracion
-                          ? <IconoRuta className="text-[#4e5f80] dark:text-[#a8b5cc]" />
-                          : <IconoReloj className="text-[#4e5f80] dark:text-[#a8b5cc]" />}
-                      {datoSecundario}
+                    <span className="shrink-0 rounded-full bg-[#f2f6fb] px-2.5 py-1 text-[11.5px] font-mono font-bold text-[#4e5f80] dark:bg-[#1a3a5c] dark:text-[#a8b5cc]">
+                      {folio}
                     </span>
                   </div>
-                  <Link
-                    href={urlViaje}
-                    aria-label={`${etiquetaBoton} del traslado ${nombreVehiculo} ${folio}`}
-                    className={[
-                      "inline-flex min-h-10 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-xl px-3.5 py-2 text-[12.5px] font-bold tracking-tight transition active:scale-[0.98]",
-                      esActiva || esPagoPendiente
-                        ? "bg-[#0a2342] text-white shadow-xs hover:bg-[#162c47] dark:bg-[#4d94ff] dark:text-[#061529]"
-                        : "border border-[#d7e1ee] bg-white text-[#0a2342] hover:bg-[#f6f8fb] dark:border-[#2d4f73] dark:bg-[#0a2342] dark:text-[#f6f8fb]",
-                    ].join(" ")}
-                  >
-                    {etiquetaBoton}
-                    <IconoChevron className="size-3.5" />
-                  </Link>
-                </div>
-              </article>
-            );
-          })}</>
+
+                  <div className="mb-3.5 flex items-center gap-3.5">
+                    <span aria-hidden="true" className="flex size-11 shrink-0 items-center justify-center rounded-[13px] bg-[#edf4fe] text-[#0052cc] dark:bg-[#0f2d52] dark:text-[#6ba8ff]">
+                      <IconoCarroFrente className="size-5" />
+                    </span>
+                    <div className="min-w-0 flex-1">
+                      <h3 className="truncate text-[15px] font-bold text-[#0a2342] dark:text-[#f6f8fb]">
+                        {nombreVehiculo}
+                      </h3>
+                      <p className="truncate text-[12.5px] font-medium text-[#64748b] dark:text-[#a8b5cc]">
+                        {origenCiudad} → {destinoCiudad}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Trayecto / Datos secundarios */}
+                  <div className="flex items-center justify-between border-t border-[#f1f5fa] pt-3 text-[12px] font-medium text-[#64748b] dark:border-[#1a3a5c] dark:text-[#a8b5cc]">
+                    <span>Conductor: <strong className="font-semibold text-[#0a2342] dark:text-[#f6f8fb]">{conductor}</strong></span>
+                    <span>{datoSecundario}</span>
+                  </div>
+
+                  <div className="mt-3.5 flex justify-end">
+                    <Link
+                      href={urlViaje}
+                      className="inline-flex h-9 items-center justify-center rounded-xl bg-[#f0f4fa] px-4 text-[13px] font-bold text-[#0052cc] transition hover:bg-[#e2ecf9] dark:bg-[#0f2d52] dark:text-[#6ba8ff]"
+                    >
+                      {etiquetaBoton}
+                    </Link>
+                  </div>
+                </article>
+              );
+            })}
+          </>
         )}
       </section>
-
     </div>
   );
 }

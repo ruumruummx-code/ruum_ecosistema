@@ -301,28 +301,42 @@ export function NavegacionUsuario({
                     key={destino.href}
                     href={destino.href}
                     aria-current={activo ? "page" : undefined}
-                    className={`user-v2-nav-link group select-none transition-colors duration-150 ${
+                    className={`user-v2-nav-link group select-none transition-colors duration-150 min-h-[48px] min-w-[48px] ${
                       activo
-                        ? esMisTraslados ? "!text-[#0046c4] dark:!text-[#80b4ff]" : "!text-[var(--user-color-primary)] dark:!text-emerald-400"
-                        : "text-[var(--user-color-muted)] hover:text-[var(--user-color-primary)] dark:text-slate-400 dark:hover:text-white"
+                        ? esMisTraslados
+                          ? "!text-[#0046c4] dark:!text-[#80b4ff]"
+                          : "!text-[#0a2342] dark:!text-[#f6f8fb]"
+                        : "text-[#8293b0] hover:text-[#0a2342] dark:text-slate-400 dark:hover:text-white"
                     }`}
                   >
                     <span
-                      className={`user-v2-nav-indicator ${activo ? esMisTraslados ? "is-active !bg-[#0046c4] dark:!bg-[#80b4ff]" : "is-active !bg-[#0b1e32] dark:!bg-emerald-400" : ""}`}
+                      className={`user-v2-nav-indicator ${
+                        activo
+                          ? esMisTraslados
+                            ? "is-active !bg-[#0046c4] dark:!bg-[#80b4ff]"
+                            : esInicio
+                              ? "is-active !bg-[#00D1D1] dark:!bg-[#2ee6b6]"
+                              : "is-active !bg-[#0b1e32] dark:!bg-emerald-400"
+                          : ""
+                      }`}
                       aria-hidden="true"
                     />
                     <destino.Icono
                       className={`size-[22px] transition-all duration-150 ${
                         activo
-                          ? esMisTraslados ? "scale-105 stroke-[2.3] text-[#0046c4] dark:text-[#80b4ff]" : "scale-105 stroke-[2.3] text-[var(--user-color-primary)] dark:text-emerald-400"
-                          : "text-[var(--user-color-muted)] group-hover:text-[var(--user-color-primary)] dark:text-slate-400 dark:group-hover:text-white"
+                          ? esMisTraslados
+                            ? "scale-105 stroke-[2.3] text-[#0046c4] dark:text-[#80b4ff]"
+                            : "scale-105 stroke-[2.3] text-[#0a2342] dark:text-[#f6f8fb]"
+                          : "text-[#8293b0] group-hover:text-[#0a2342] dark:text-slate-400 dark:group-hover:text-white"
                       }`}
                     />
                     <span
                       className={`transition-colors text-[12px] ${
                         activo
-                          ? esMisTraslados ? "font-extrabold text-[#0046c4] dark:text-[#80b4ff]" : "font-extrabold text-[var(--user-color-primary)] dark:text-emerald-400"
-                          : "font-medium text-[var(--user-color-muted)] group-hover:text-[var(--user-color-primary)] dark:text-slate-400 dark:group-hover:text-white"
+                          ? esMisTraslados
+                            ? "font-extrabold text-[#0046c4] dark:text-[#80b4ff]"
+                            : "font-extrabold text-[#0a2342] dark:text-[#f6f8fb]"
+                          : "font-medium text-[#8293b0] group-hover:text-[#0a2342] dark:text-slate-400 dark:group-hover:text-white"
                       }`}
                     >
                       {destino.etiqueta}
