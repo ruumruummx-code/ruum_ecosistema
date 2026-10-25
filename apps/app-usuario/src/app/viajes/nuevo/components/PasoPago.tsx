@@ -1,11 +1,12 @@
 "use client";
 import { memo } from "react";
 import Link from "next/link";
-import { Button, Aviso, Icono } from "@ruum/ui";
+import { Button, Aviso } from "@ruum/ui";
 
 import { PagoStripe, type PagoStripeProps } from "@/app/PagoStripe";
 import type { DatosFormulario } from "../types";
 import type { RutaEstimacion } from "@/state/app-state";
+import styles from "./cotizador.module.css";
 
 export interface PasoPagoProps {
   trasladoCreado: {
@@ -85,14 +86,51 @@ export const PasoPago = memo(function PasoPago({
   // Éxito: SOLO con pago electrónico verificado en servidor. Sin esto no hay avance.
   if (pagoConfirmado) {
     return (
-      <div className="flex min-h-0 flex-1 flex-col items-center justify-center gap-3 text-center" role="status" aria-live="polite">
-        <span aria-hidden="true" className="flex size-12 shrink-0 items-center justify-center rounded-full bg-[#e9f3ee] text-[#1f6b4a]"><Icono d="m5 12.5 4.5 4.5L19 7.5" className="size-6"/></span>
-        <h2 className="text-xl font-extrabold">¡Traslado solicitado!</h2>
-        <p className="max-w-xs text-[13px] text-[var(--user-color-muted)]">Tu pago fue confirmado. Te notificaremos al asignar un conductor certificado.</p>
-        <p className="rounded-full bg-[var(--user-color-surface-soft)] px-4 py-1 text-xs font-bold">{folio}</p>
-        <div className="grid w-full max-w-sm grid-cols-2 gap-2">
-          <Link href={`/viajes/${trasladoCreado.id}`} className="flex min-h-12 items-center justify-center rounded-xl bg-[var(--user-color-action)] px-3 text-sm font-bold text-[var(--user-color-on-action)]">Ver pasaporte</Link>
-          <Link href="/mis-viajes" className="flex min-h-12 items-center justify-center rounded-xl bg-[var(--user-color-surface-soft)] px-3 text-sm font-bold">Ver mis traslados</Link>
+      <div
+        className="flex min-h-0 flex-1 flex-col items-center justify-center gap-4 text-center py-6"
+        role="status"
+        aria-live="polite"
+      >
+        <span
+          aria-hidden="true"
+          className="flex size-16 shrink-0 items-center justify-center rounded-full bg-[#eaf8f0] text-[#10b981] shadow-sm"
+        >
+          <svg
+            className="size-8"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="3"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <polyline points="20 6 9 17 4 12" />
+          </svg>
+        </span>
+        <div className="space-y-1">
+          <h2 className="text-2xl font-black tracking-tight text-[#0a2342] dark:text-[#f8fafc]">
+            ¡Traslado solicitado!
+          </h2>
+          <p className="max-w-xs text-xs font-medium text-[var(--user-color-muted)]">
+            Tu pago fue confirmado. Te notificaremos al asignar un conductor certificado.
+          </p>
+        </div>
+        <p className="rounded-full bg-[#f1f5fa] px-4 py-1.5 text-xs font-extrabold text-[#0066FF] dark:bg-[#0f2d52] dark:text-[#60a5fa] border border-[#dbeafe]">
+          {folio}
+        </p>
+        <div className="mt-2 grid w-full max-w-sm grid-cols-2 gap-3">
+          <Link
+            href={`/viajes/${trasladoCreado.id}`}
+            className="flex min-h-12 items-center justify-center rounded-2xl bg-[#0066FF] px-4 text-sm font-bold text-white shadow-[0_4px_14px_rgba(0,102,255,0.3)] transition-transform active:scale-[0.98]"
+          >
+            Ver pasaporte
+          </Link>
+          <Link
+            href="/mis-viajes"
+            className="flex min-h-12 items-center justify-center rounded-2xl bg-[#f1f5fa] px-4 text-sm font-bold text-[#0a2342] transition-colors hover:bg-[#e2e8f0] dark:bg-[#0f2d52] dark:text-[#f8fafc]"
+          >
+            Ver mis traslados
+          </Link>
         </div>
       </div>
     );
@@ -142,13 +180,140 @@ export const PasoPago = memo(function PasoPago({
 
   return (
     <div className="flex h-full min-h-0 flex-col gap-3">
+      {/* Resumen del vehículo */}
       <section aria-label="Resumen del traslado" className="shrink-0">
-        <h2 className="truncate text-sm font-bold">{nombreVehiculo(datos)}</h2>
-        <p className="truncate text-xs text-[var(--user-color-muted)]">
-          {datos.origenCiudad || "Origen"} → {datos.destinoCiudad || "Destino"}{" "}
-          · {distanciaResumen(rutaEstimacion)}
-        </p>
+        <div className={styles.carSummaryCard}>
+          <div className={styles.carThumb} aria-hidden="true">
+            <svg viewBox="0 0 64 64" fill="none" className="size-10">
+              <rect width="64" height="64" rx="16" fill="#e0edff" />
+              <path
+                d="M14 36l3.5-9.5c.6-1.6 2.1-2.5 3.8-2.5h21.4c1.7 0 3.2 1 3.8 2.5L50 36v13a2 2 0 01-2 2h-3a2 2 0 01-2-2v-2H21v2a2 2 0 01-2 2h-3a2 2 0 01-2-2V36z"
+                fill="#0066FF"
+              />
+              <circle cx="21" cy="41" r="3" fill="#ffffff" />
+              <circle cx="43" cy="41" r="3" fill="#ffffff" />
+              <path d="M19 33l2-6h22l2 6H19z" fill="#93c5fd" />
+            </svg>
+          </div>
+          <div className={styles.carInfo}>
+            <h2 className={styles.carTitle}>{nombreVehiculo(datos)}</h2>
+            <p className={styles.carSubtitle}>
+              {datos.origenCiudad || "Origen"} → {datos.destinoCiudad || "Destino"}
+            </p>
+            <div className={styles.carMetrics}>
+              <span className={styles.metricItem}>
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="size-3"
+                  aria-hidden="true"
+                >
+                  <circle cx="12" cy="12" r="10" />
+                  <polyline points="12 6 12 12 16 14" />
+                </svg>
+                {distanciaResumen(rutaEstimacion)}
+              </span>
+            </div>
+          </div>
+        </div>
       </section>
+
+      {/* Tabs de métodos de pago */}
+      <div
+        className={styles.paymentMethodTabs}
+        role="tablist"
+        aria-label="Métodos de pago"
+      >
+        <button
+          type="button"
+          role="tab"
+          aria-selected="true"
+          className={`${styles.paymentTab} ${styles.paymentTabActive}`}
+        >
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="size-4 text-[#0066FF]"
+            aria-hidden="true"
+          >
+            <rect x="1" y="4" width="22" height="16" rx="2" ry="2" />
+            <line x1="1" y1="10" x2="23" y2="10" />
+          </svg>
+          <span>Tarjeta</span>
+        </button>
+        <button
+          type="button"
+          role="tab"
+          aria-selected="false"
+          className={styles.paymentTab}
+        >
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="size-4"
+            aria-hidden="true"
+          >
+            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+            <polyline points="9 22 9 12 15 12 15 22" />
+          </svg>
+          <span>OXXO</span>
+        </button>
+        <button
+          type="button"
+          role="tab"
+          aria-selected="false"
+          className={styles.paymentTab}
+        >
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="size-4"
+            aria-hidden="true"
+          >
+            <rect x="5" y="2" width="14" height="20" rx="2" ry="2" />
+            <line x1="12" y1="18" x2="12.01" y2="18" />
+          </svg>
+          <span>Google Pay</span>
+        </button>
+      </div>
+
+      {/* Banner de Link / Stripe */}
+      <div className={styles.linkBanner}>
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          className="size-3.5 shrink-0 text-[#16a34a]"
+          aria-hidden="true"
+        >
+          <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+          <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+        </svg>
+        <span>
+          Proceso de compra seguro y rápido con{" "}
+          <strong className={styles.linkPill}>link</strong>
+        </span>
+      </div>
+
       {verificandoPago && (
         <p role="status" className="shrink-0 text-sm font-semibold">
           Confirmando tu pago con Stripe… no cierres esta pantalla.
@@ -216,7 +381,7 @@ export const PasoPago = memo(function PasoPago({
         </div>
       )}
 
-      {/* Oculta el formulario de Stripe durante verificación o estado intermedio para evitar reintentos duplicados */}
+      {/* Formulario Stripe */}
       <div
         className="min-h-0 flex-1 overflow-y-auto overscroll-contain"
         hidden={verificandoPago || pagoEnProcesoConfirmacion}
@@ -229,6 +394,29 @@ export const PasoPago = memo(function PasoPago({
           formId={formId}
           onEstadoPago={onEstadoPago}
         />
+        <div className={styles.stripeFooter}>
+          <div className={styles.securitySeal}>
+            <svg
+              className={styles.sealIcon}
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+            >
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+              <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+            </svg>
+            <span>Cifrado por Stripe. No guardamos tu tarjeta.</span>
+          </div>
+          <div className={styles.cardBrands} aria-hidden="true">
+            <span className={styles.brandBadge}>VISA</span>
+            <span className={styles.brandBadge}>MC</span>
+            <span className={styles.brandBadge}>AMEX</span>
+          </div>
+        </div>
       </div>
     </div>
   );

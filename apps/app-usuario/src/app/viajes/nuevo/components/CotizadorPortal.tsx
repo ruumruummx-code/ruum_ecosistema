@@ -205,9 +205,11 @@ export function CotizadorPortal({
           <Link
             href="/"
             aria-label="Volver al inicio"
-            className="flex min-h-11 min-w-11 items-center text-2xl"
+            className="flex size-10 items-center justify-center rounded-full text-[#0a2342] transition hover:bg-[#f1f5fa] dark:text-white dark:hover:bg-[#0f2d52]"
           >
-            ‹
+            <svg className="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <path d="M15 19l-7-7 7-7" />
+            </svg>
           </Link>
         ) : (
           <button
@@ -215,42 +217,90 @@ export function CotizadorPortal({
             onClick={t.retrocederPaso}
             disabled={ocupado || t.pagoConfirmado}
             aria-label="Paso anterior"
-            className="min-h-11 min-w-11 text-left text-2xl"
+            className="flex size-10 items-center justify-center rounded-full text-[#0a2342] transition hover:bg-[#f1f5fa] dark:text-white dark:hover:bg-[#0f2d52]"
           >
-            ‹
+            <svg className="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <path d="M15 19l-7-7 7-7" />
+            </svg>
           </button>
         )}
-        <p className="text-center text-xs font-semibold">
-          {t.paso === 3
-            ? "Detalles (4/5)"
-            : t.paso === 4
-              ? "Pago (5/5)"
-              : `Paso ${t.paso + 1} de 5`}
-        </p>
-        <span
-          role="status"
-          aria-label={guardado}
-          title={guardado}
-          className="flex min-h-11 items-center justify-end"
-        >
-          <svg
-            className="size-5"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.8"
-            aria-hidden="true"
+
+        {t.paso === 0 ? (
+          <div className="flex items-center gap-1.5">
+            <span className="sr-only">Paso 1 de 5</span>
+            <svg className="size-7" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+              <rect width="32" height="32" rx="8" fill="#eaf2fe" />
+              <circle cx="11" cy="16" r="4.5" fill="#0066FF" />
+              <circle cx="21" cy="16" r="4.5" fill="#00D1D1" />
+              <path d="M11 16h10" stroke="#0066FF" strokeWidth="2.5" strokeLinecap="round" />
+            </svg>
+            <span className="font-display text-[17px] font-extrabold tracking-tight text-[#0a2342] dark:text-[#f6f8fb]">
+              Ruum Ruum
+            </span>
+          </div>
+        ) : (
+          <div className={styles.progressBarContainer}>
+            <p className="text-center text-[12px] font-semibold text-[#64748b] dark:text-[#a8b5cc]">
+              {`Paso ${t.paso + 1} de 5`}
+            </p>
+            <div className={styles.progressBarSegments} aria-hidden="true">
+              {[0, 1, 2, 3, 4].map((idx) => (
+                <div
+                  key={idx}
+                  className={`${styles.progressSegment} ${idx <= t.paso ? styles.progressSegmentActive : ""}`}
+                />
+              ))}
+            </div>
+          </div>
+        )}
+
+        {t.paso === 0 ? (
+          <div className="flex items-center">
+            <span
+              role="status"
+              aria-label={guardado}
+              className="sr-only"
+            >
+              {guardado}
+            </span>
+            <Link
+              href="/soporte"
+              aria-label="Ayuda y soporte"
+              className="flex size-10 items-center justify-center rounded-full text-[#64748b] transition hover:bg-[#f1f5fa] dark:text-[#a8b5cc] dark:hover:bg-[#0f2d52]"
+            >
+              <svg className="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <circle cx="12" cy="12" r="10" />
+                <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
+                <line x1="12" x2="12.01" y1="17" y2="17" />
+              </svg>
+            </Link>
+          </div>
+        ) : (
+          <span
+            role="status"
+            aria-label={guardado}
+            title={guardado}
+            className="flex size-10 items-center justify-center text-[#94a3b8]"
           >
-            <path d="M7 18a5 5 0 0 1-1-10 6 6 0 0 1 11-1 5 5 0 0 1 1 10" />
-            <path
-              d={
-                t.estadoGuardado === "guardando"
-                  ? "M12 12v8m-3-5 3-3 3 3"
-                  : "m9 17 3 3 5-6"
-              }
-            />
-          </svg>
-        </span>
+            <svg
+              className="size-5"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.8"
+              aria-hidden="true"
+            >
+              <path d="M7 18a5 5 0 0 1-1-10 6 6 0 0 1 11-1 5 5 0 0 1 1 10" />
+              <path
+                d={
+                  t.estadoGuardado === "guardando"
+                    ? "M12 12v8m-3-5 3-3 3 3"
+                    : "m9 17 3 3 5-6"
+                }
+              />
+            </svg>
+          </span>
+        )}
       </header>
       {t.paso === 1 && (
         <div className={styles.tariffBanner} aria-live="polite">
@@ -288,6 +338,26 @@ export function CotizadorPortal({
                   ? "Detalles del servicio"
                   : "Pago seguro"}
         </h1>
+        {t.paso === 0 && (
+          <p className={styles.subtitle}>
+            Ingresa los datos de tu viaje y obtén el costo estimado en segundos.
+          </p>
+        )}
+        {t.paso === 1 && (
+          <p className={styles.subtitle}>
+            Ingresa la información del vehículo que realizará el traslado.
+          </p>
+        )}
+        {t.paso === 2 && (
+          <p className={styles.subtitle}>
+            Selecciona los puntos de partida y llegada de tu traslado.
+          </p>
+        )}
+        {t.paso === 3 && (
+          <p className={styles.subtitle}>
+            Confirma los últimos detalles de tu traslado.
+          </p>
+        )}
         <fieldset
           disabled={Boolean(t.trasladoCreado)}
           className="min-w-0 border-0 p-0 m-0"
@@ -450,7 +520,14 @@ export function CotizadorPortal({
             aria-live="polite"
             aria-busy={ocupado || (completos && t.previsualizando)}
           >
-            {etiquetaPaso}
+            <span className="inline-flex w-full items-center justify-center gap-2">
+              <span>{etiquetaPaso}</span>
+              {!etiquetaPaso.includes("→") && (
+                <svg className="size-4 shrink-0 transition-transform group-hover:translate-x-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <path d="M5 12h14M12 5l7 7-7 7" />
+                </svg>
+              )}
+            </span>
           </button>
         </footer>
       )}

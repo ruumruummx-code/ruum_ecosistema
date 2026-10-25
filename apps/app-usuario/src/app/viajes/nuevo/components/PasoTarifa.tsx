@@ -60,6 +60,36 @@ function PasoTarifaComponent({
   } = acciones;
   return (
     <div className={styles.fields}>
+      {/* Ilustración superior: nube celeste, auto azul y ruta con pin */}
+      <div className="flex flex-col items-center justify-center py-2" aria-hidden="true">
+        <div className="relative flex h-20 w-48 items-center justify-center rounded-3xl bg-gradient-to-b from-[#edf5fd] to-[#f4f9ff] dark:from-[#0a2342]/60 dark:to-[#0f2d52]/40">
+          {/* Nube decorativa */}
+          <div className="absolute inset-0 flex items-center justify-center opacity-70">
+            <svg className="h-16 w-36 text-white dark:text-[#133054]" viewBox="0 0 140 60" fill="currentColor">
+              <path d="M25 45h90a18 18 0 0 0 4-35 24 24 0 0 0-45-7 18 18 0 0 0-33 12 16 16 0 0 0-16 16c0 8 7 14 16 14Z" />
+            </svg>
+          </div>
+          {/* Auto azul en miniatura */}
+          <div className="relative z-10 flex items-center gap-2">
+            <svg className="h-10 w-20 text-[#0066FF] drop-shadow-sm" viewBox="0 0 64 32" fill="none">
+              <rect x="6" y="10" width="46" height="15" rx="5" fill="#0066FF" />
+              <path d="M12 10l5-6h20l6 6H12z" fill="#0052cc" />
+              <rect x="18" y="5" width="8" height="5" rx="1" fill="#cce0ff" />
+              <rect x="28" y="5" width="10" height="5" rx="1" fill="#cce0ff" />
+              <circle cx="16" cy="25" r="4.5" fill="#0a2342" stroke="#ffffff" strokeWidth="1.5" />
+              <circle cx="42" cy="25" r="4.5" fill="#0a2342" stroke="#ffffff" strokeWidth="1.5" />
+              <circle cx="50" cy="18" r="1.5" fill="#ffdd00" />
+            </svg>
+            {/* Ruta punteada hacia el pin */}
+            <svg className="h-8 w-12 text-[#0066FF]" viewBox="0 0 48 32" fill="none">
+              <path d="M2 20c8-10 18-5 26-10" stroke="currentColor" strokeWidth="2" strokeDasharray="3 3" strokeLinecap="round" />
+              <circle cx="36" cy="10" r="5" fill="#0052cc" />
+              <circle cx="36" cy="10" r="2" fill="#ffffff" />
+            </svg>
+          </div>
+        </div>
+      </div>
+
       <section aria-label="Ruta del traslado" className={styles.route}>
         {(["origen", "destino"] as const).map((prefijo) => {
           const campo =
@@ -76,11 +106,11 @@ function PasoTarifaComponent({
                 }
                 aria-hidden="true"
               />
-              <div className="min-w-0 flex-1">
+              <div className="min-w-0 flex-1 py-1">
                 <label htmlFor={`gate-${campo}`} className={styles.label}>
                   Código Postal de {prefijo}
                 </label>
-                <div className="flex min-w-0 items-center gap-2">
+                <div className="flex min-w-0 items-center justify-between gap-2">
                   <input
                     id={`gate-${campo}`}
                     name={campo}
@@ -100,114 +130,142 @@ function PasoTarifaComponent({
                     aria-invalid={Boolean(errores[campo])}
                     aria-describedby={`gate-${prefijo}-cp-status`}
                   />
-                  <span
-                    id={`gate-${prefijo}-cp-status`}
-                    className="min-w-0 flex-1 text-xs text-[var(--user-color-muted)]"
-                    role="status"
-                  >
-                    {errores[campo] ||
-                      (cpConsultando === prefijo
-                        ? "Buscando…"
-                        : ciudad
-                          ? `${ciudad}, ${estado}`
-                          : "")}
-                  </span>
+                  <svg className="size-5 shrink-0 text-[#94a3b8] dark:text-[#64748b]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" />
+                    <circle cx="12" cy="10" r="3" />
+                  </svg>
+                </div>
+                <div
+                  id={`gate-${prefijo}-cp-status`}
+                  className="min-h-4 text-[12px] font-medium text-[#64748b] dark:text-[#a8b5cc]"
+                  role="status"
+                >
+                  {errores[campo] ? (
+                    <span className="text-[#ef4444] font-semibold">{errores[campo]}</span>
+                  ) : cpConsultando === prefijo ? (
+                    "Buscando…"
+                  ) : ciudad ? (
+                    `${ciudad}, ${estado}`
+                  ) : (
+                    ""
+                  )}
                 </div>
               </div>
             </div>
           );
         })}
       </section>
+
       <section aria-label="Datos del vehículo" className={styles.vehicle}>
         <div className={styles.field}>
           <label htmlFor="gate-marca" className={styles.label}>
             Marca
           </label>
-          <select
-            id="gate-marca"
-            name="marca"
-            value={datos.marca}
-            onChange={(e) => actualizarMarcaCatalogo(e.target.value)}
-            onBlur={() => validarCampo("marca")}
-            aria-invalid={Boolean(errores.marca)}
-            aria-describedby={errores.marca ? "gate-marca-error" : undefined}
-          >
-            <option value="">Selecciona</option>
-            {MARCAS_CATALOGO.map((m) => (
-              <option key={m}>{m}</option>
-            ))}
-          </select>
+          <div className="relative flex items-center">
+            <select
+              id="gate-marca"
+              name="marca"
+              value={datos.marca}
+              onChange={(e) => actualizarMarcaCatalogo(e.target.value)}
+              onBlur={() => validarCampo("marca")}
+              aria-invalid={Boolean(errores.marca)}
+              aria-describedby={errores.marca ? "gate-marca-error" : undefined}
+              className="appearance-none pr-8"
+            >
+              <option value="">Selecciona</option>
+              {MARCAS_CATALOGO.map((m) => (
+                <option key={m}>{m}</option>
+              ))}
+            </select>
+            <svg className="pointer-events-none absolute right-3 size-4 text-[#94a3b8]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <path d="m6 9 6 6 6-6" />
+            </svg>
+          </div>
           {errores.marca && (
             <p id="gate-marca-error" className={styles.error}>
               {errores.marca}
             </p>
           )}
         </div>
+
         <div className={styles.field}>
           <label htmlFor="gate-modelo" className={styles.label}>
             Modelo
           </label>
-          {modelosDisponibles.length ? (
-            <select
-              id="gate-modelo"
-              name="modelo"
-              value={datos.modelo}
-              onChange={(e) => actualizarModeloCatalogo(e.target.value)}
-              onBlur={() => validarCampo("modelo")}
-              aria-invalid={Boolean(errores.modelo)}
-              aria-describedby={
-                errores.modelo ? "gate-modelo-error" : undefined
-              }
-            >
-              <option value="">Selecciona</option>
-              {modelosDisponibles.map((m) => (
-                <option key={m}>{m}</option>
-              ))}
-            </select>
-          ) : (
-            <input
-              id="gate-modelo"
-              name="modelo"
-              placeholder="Escribe el modelo"
-              value={datos.modelo}
-              onChange={(e) => actualizarModeloCatalogo(e.target.value)}
-              onBlur={() => validarCampo("modelo")}
-              aria-invalid={Boolean(errores.modelo)}
-              aria-describedby={
-                errores.modelo ? "gate-modelo-error" : undefined
-              }
-            />
-          )}
+          <div className="relative flex items-center">
+            {modelosDisponibles.length ? (
+              <select
+                id="gate-modelo"
+                name="modelo"
+                value={datos.modelo}
+                onChange={(e) => actualizarModeloCatalogo(e.target.value)}
+                onBlur={() => validarCampo("modelo")}
+                aria-invalid={Boolean(errores.modelo)}
+                aria-describedby={
+                  errores.modelo ? "gate-modelo-error" : undefined
+                }
+                className="appearance-none pr-8"
+              >
+                <option value="">Selecciona</option>
+                {modelosDisponibles.map((m) => (
+                  <option key={m}>{m}</option>
+                ))}
+              </select>
+            ) : (
+              <input
+                id="gate-modelo"
+                name="modelo"
+                placeholder="Escribe el modelo"
+                value={datos.modelo}
+                onChange={(e) => actualizarModeloCatalogo(e.target.value)}
+                onBlur={() => validarCampo("modelo")}
+                aria-invalid={Boolean(errores.modelo)}
+                aria-describedby={
+                  errores.modelo ? "gate-modelo-error" : undefined
+                }
+              />
+            )}
+            <svg className="pointer-events-none absolute right-3 size-4 text-[#94a3b8]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <path d="m6 9 6 6 6-6" />
+            </svg>
+          </div>
           {errores.modelo && (
             <p id="gate-modelo-error" className={styles.error}>
               {errores.modelo}
             </p>
           )}
         </div>
+
         <div className={`${styles.field} ${styles.condition}`}>
           <label htmlFor="gate-condicion" className={styles.label}>
             Condición
           </label>
-          <select
-            id="gate-condicion"
-            name="condicion"
-            value={datos.condicion}
-            onChange={(e) =>
-              actualizar("condicion", e.target.value as CondicionVehiculo)
-            }
-            onBlur={() => validarCampo("condicion")}
-            aria-invalid={Boolean(errores.condicion)}
-            aria-describedby={
-              errores.condicion ? "gate-condicion-error" : undefined
-            }
-          >
-            <option value="">Selecciona condición</option>
-            {CONDICIONES_VEHICULO.map((c) => (
-              <option key={c.valor} value={c.valor}>
-                {c.etiqueta}
-              </option>
-            ))}
-          </select>
+          <div className="relative flex items-center">
+            <select
+              id="gate-condicion"
+              name="condicion"
+              value={datos.condicion}
+              onChange={(e) =>
+                actualizar("condicion", e.target.value as CondicionVehiculo)
+              }
+              onBlur={() => validarCampo("condicion")}
+              aria-invalid={Boolean(errores.condicion)}
+              aria-describedby={
+                errores.condicion ? "gate-condicion-error" : undefined
+              }
+              className="appearance-none pr-8"
+            >
+              <option value="">Selecciona condición</option>
+              {CONDICIONES_VEHICULO.map((c) => (
+                <option key={c.valor} value={c.valor}>
+                  {c.etiqueta}
+                </option>
+              ))}
+            </select>
+            <svg className="pointer-events-none absolute right-3 size-4 text-[#94a3b8]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <path d="m6 9 6 6 6-6" />
+            </svg>
+          </div>
           {errores.condicion && (
             <p id="gate-condicion-error" className={styles.error}>
               {errores.condicion}
@@ -215,10 +273,11 @@ function PasoTarifaComponent({
           )}
         </div>
       </section>
+
       <section>
         <p
           id="label-gate-modalidad-programacion"
-          className="mb-2 text-xs font-semibold"
+          className="mb-2 text-[12.5px] font-bold text-[#0a2342] dark:text-[#f6f8fb]"
         >
           ¿Cuándo necesitas el traslado?
         </p>
@@ -236,8 +295,15 @@ function PasoTarifaComponent({
               actualizar("fechaHoraProgramada", "");
               validarCampo("modalidadProgramacion");
             }}
+            className="flex items-center justify-center gap-2"
           >
-            Lo antes posible
+            <svg className="size-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+              <line x1="16" y1="2" x2="16" y2="6" />
+              <line x1="8" y1="2" x2="8" y2="6" />
+              <line x1="3" y1="10" x2="21" y2="10" />
+            </svg>
+            <span>Lo antes posible</span>
           </button>
           <button
             type="button"
@@ -257,12 +323,19 @@ function PasoTarifaComponent({
               validarCampo("modalidadProgramacion");
               setProgramando(true);
             }}
+            className="flex items-center justify-center gap-2"
           >
-            Programar fecha
+            <svg className="size-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+              <line x1="16" y1="2" x2="16" y2="6" />
+              <line x1="8" y1="2" x2="8" y2="6" />
+              <line x1="3" y1="10" x2="21" y2="10" />
+            </svg>
+            <span>Programar fecha</span>
           </button>
         </div>
         <p
-          className="mt-1 min-h-4 text-xs text-[var(--user-color-muted)]"
+          className="mt-1 min-h-4 text-xs text-[#64748b] dark:text-[#a8b5cc]"
           aria-live="polite"
         >
           {datos.modalidadProgramacion === "programado" &&
@@ -274,6 +347,33 @@ function PasoTarifaComponent({
             : ""}
         </p>
       </section>
+
+      {/* Descarga de Plantilla Oficial y Carga Masiva */}
+      <div className="flex flex-col gap-2 pt-1">
+        <a
+          href="/docs-legales/plantilla-carga-masiva.xlsx"
+          download="plantilla-carga-masiva-ruum.xlsx"
+          className="flex min-h-[44px] items-center justify-center gap-2 rounded-2xl border border-[#0066FF] bg-white px-4 text-[13.5px] font-bold text-[#0066FF] transition hover:bg-[#edf5fd] dark:bg-[#0a2342] dark:border-[#0066FF] dark:hover:bg-[#0f2d52]"
+        >
+          <span className="flex size-5 items-center justify-center rounded bg-[#107c41] text-white text-[10px] font-extrabold" aria-hidden="true">X:</span>
+          <span>Descargar Plantilla Oficial (xlsx)</span>
+        </a>
+      </div>
+
+      {/* Tarjeta de Seguridad y Confianza */}
+      <div className="flex items-center gap-3 rounded-2xl border border-[#d6e4f7] bg-[#f0f6fd] p-3 text-left dark:border-[#1a3a5c] dark:bg-[#091f38]">
+        <div className="flex size-7 shrink-0 items-center justify-center rounded-full bg-[#0066FF] text-white">
+          <svg className="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+            <path d="m9 12 2 2 4-4" />
+          </svg>
+        </div>
+        <div className="text-[12px] leading-relaxed text-[#4e5f80] dark:text-[#a8b5cc]">
+          <strong className="block font-semibold text-[#0a2342] dark:text-[#f6f8fb]">Tus datos están seguros.</strong>
+          <span>Solo los usamos para calcular tu tarifa.</span>
+        </div>
+      </div>
+
       {!previsualizando && previsualizacion && !previsualizacion.disponible && (
         <button
           type="button"

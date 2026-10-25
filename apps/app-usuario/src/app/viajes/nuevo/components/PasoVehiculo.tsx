@@ -72,133 +72,253 @@ function PasoVehiculoComponent({
   const modelosMemo = modelosDisponibles;
   return (
     <div className={styles.fields}>
-      <div className={styles.vehicle}>
-        {(["marca", "modelo"] as const).map((campo) => (
-          <div key={campo} className={styles.field}>
-            <div className="relative">
-              <label htmlFor={campo} className={styles.label}>
-                {campo === "marca" ? "Marca" : "Modelo"}
-              </label>
-              {campo === "modelo" && (
-                <button
-                  type="button"
-                  aria-label="Información del modelo"
-                  onClick={() => setInformacion(true)}
-                  className="absolute right-0 top-0 flex min-h-11 min-w-11 items-center justify-center text-sm"
-                >
-                  ⓘ
-                </button>
-              )}
-            </div>
+      <div className="flex flex-col gap-3">
+        {/* Marca */}
+        <div className="relative flex items-center rounded-2xl border border-[#e2e8f0] bg-white p-3 shadow-2xs transition focus-within:border-[#0066FF] dark:border-[#1a3a5c] dark:bg-[#0a2342]">
+          <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-[#f1f5fa] text-[#64748b] dark:bg-[#0f2d52] dark:text-[#a8b5cc]" aria-hidden="true">
+            <svg className="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2" />
+              <circle cx="7" cy="17" r="2" />
+              <path d="M9 17h6" />
+              <circle cx="17" cy="17" r="2" />
+            </svg>
+          </span>
+          <div className="ml-3 min-w-0 flex-1">
+            <label htmlFor="marca" className="block text-[11.5px] font-semibold text-[#64748b] dark:text-[#a8b5cc]">
+              Marca
+            </label>
             <input
-              id={campo}
-              name={campo}
-              list={`catalogo-${campo}`}
+              id="marca"
+              name="marca"
+              list="catalogo-marca"
               autoComplete="off"
-              value={datos[campo]}
-              onChange={(e) =>
-                campo === "marca"
-                  ? actualizarMarcaCatalogo(e.target.value)
-                  : actualizarModeloCatalogo(e.target.value)
-              }
-              onBlur={() => validarCampo(campo)}
-              disabled={campo === "modelo" && !datos.marca.trim()}
-              className={claseControl(campo)}
-              aria-invalid={Boolean(errores[campo])}
-              aria-describedby={errores[campo] ? `${campo}-error` : undefined}
+              value={datos.marca}
+              onChange={(e) => actualizarMarcaCatalogo(e.target.value)}
+              onBlur={() => validarCampo("marca")}
+              className="w-full border-0 bg-transparent p-0 text-[15px] font-bold text-[#0a2342] outline-none placeholder:text-[#94a3b8] dark:text-[#f6f8fb]"
+              placeholder="Selecciona o escribe marca"
+              aria-invalid={Boolean(errores.marca)}
+              aria-describedby={errores.marca ? "marca-error" : undefined}
             />
-            <datalist id={`catalogo-${campo}`}>
-              {(campo === "marca" ? MARCAS_CATALOGO : modelosMemo).map((v) => (
+            <datalist id="catalogo-marca">
+              {MARCAS_CATALOGO.map((v) => (
                 <option key={v} value={v} />
               ))}
             </datalist>
-            {errores[campo] && (
-              <p id={`${campo}-error`} className={styles.error}>
-                {errores[campo]}
-              </p>
-            )}
           </div>
-        ))}
-        <div className={styles.field}>
-          <label htmlFor="transmision" className={styles.label}>
-            Transmisión
-          </label>
-          <select
-            id="transmision"
-            name="transmision"
-            value={datos.transmision}
-            onChange={(e) =>
-              actualizar("transmision", e.target.value as TransmisionVehiculo)
-            }
-            onBlur={() => validarCampo("transmision")}
-            aria-invalid={Boolean(errores.transmision)}
-          >
-            <option value="automatica">Automática</option>
-            <option value="manual">Manual</option>
-            <option value="electrica">Eléctrica</option>
-          </select>
-          {errores.transmision && (
-            <p className={styles.error}>{errores.transmision}</p>
+          <svg className="pointer-events-none size-4 shrink-0 text-[#94a3b8]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <path d="m6 9 6 6 6-6" />
+          </svg>
+          {errores.marca && (
+            <p id="marca-error" className="absolute bottom-1 left-16 text-[10px] text-[#ef4444]">
+              {errores.marca}
+            </p>
           )}
         </div>
-        <div className={styles.field}>
-          <label htmlFor="anio" className={styles.label}>
-            Año
-          </label>
-          <input
-            id="anio"
-            name="anio"
-            inputMode="numeric"
-            pattern="[0-9]{4}"
-            maxLength={4}
-            value={datos.anio}
-            onChange={(e) =>
-              actualizar("anio", e.target.value.replace(/\D/g, "").slice(0, 4))
-            }
-            onBlur={() => validarCampo("anio")}
-            aria-invalid={Boolean(errores.anio)}
-          />
-          {errores.anio && <p className={styles.error}>{errores.anio}</p>}
+
+        {/* Modelo */}
+        <div className="relative flex items-center rounded-2xl border border-[#e2e8f0] bg-white p-3 shadow-2xs transition focus-within:border-[#0066FF] dark:border-[#1a3a5c] dark:bg-[#0a2342]">
+          <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-[#f1f5fa] text-[#64748b] dark:bg-[#0f2d52] dark:text-[#a8b5cc]" aria-hidden="true">
+            <svg className="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2" />
+              <circle cx="7" cy="17" r="2" />
+              <path d="M9 17h6" />
+              <circle cx="17" cy="17" r="2" />
+            </svg>
+          </span>
+          <div className="ml-3 min-w-0 flex-1">
+            <div className="flex items-center gap-1.5">
+              <label htmlFor="modelo" className="block text-[11.5px] font-semibold text-[#64748b] dark:text-[#a8b5cc]">
+                Modelo
+              </label>
+              <button
+                type="button"
+                aria-label="Información del modelo"
+                onClick={() => setInformacion(true)}
+                className="inline-flex size-5 items-center justify-center rounded-full text-[11px] font-bold text-[#0066FF] hover:bg-[#edf5fd]"
+              >
+                ⓘ
+              </button>
+            </div>
+            <input
+              id="modelo"
+              name="modelo"
+              list="catalogo-modelo"
+              autoComplete="off"
+              value={datos.modelo}
+              onChange={(e) => actualizarModeloCatalogo(e.target.value)}
+              onBlur={() => validarCampo("modelo")}
+              disabled={!datos.marca.trim()}
+              className="w-full border-0 bg-transparent p-0 text-[15px] font-bold text-[#0a2342] outline-none placeholder:text-[#94a3b8] dark:text-[#f6f8fb]"
+              placeholder="Selecciona o escribe modelo"
+              aria-invalid={Boolean(errores.modelo)}
+              aria-describedby={errores.modelo ? "modelo-error" : undefined}
+            />
+            <datalist id="catalogo-modelo">
+              {modelosMemo.map((v) => (
+                <option key={v} value={v} />
+              ))}
+            </datalist>
+          </div>
+          <svg className="pointer-events-none size-4 shrink-0 text-[#94a3b8]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <path d="m6 9 6 6 6-6" />
+          </svg>
+          {errores.modelo && (
+            <p id="modelo-error" className="absolute bottom-1 left-16 text-[10px] text-[#ef4444]">
+              {errores.modelo}
+            </p>
+          )}
         </div>
-        <div className={`${styles.field} ${styles.condition}`}>
-          <label htmlFor="condicion" className={styles.label}>
-            Condición
-          </label>
-          <select
-            id="condicion"
-            name="condicion"
-            value={datos.condicion}
-            onChange={(e) =>
-              actualizar("condicion", e.target.value as CondicionVehiculo)
-            }
-            onBlur={() => validarCampo("condicion")}
-            aria-invalid={Boolean(errores.condicion)}
-          >
-            <option value="">Selecciona condición</option>
-            {CONDICIONES_VEHICULO.map((c) => (
-              <option key={c.valor} value={c.valor}>
-                {c.etiqueta}
-              </option>
-            ))}
-          </select>
+
+        {/* Transmisión */}
+        <div className="relative flex items-center rounded-2xl border border-[#e2e8f0] bg-white p-3 shadow-2xs transition focus-within:border-[#0066FF] dark:border-[#1a3a5c] dark:bg-[#0a2342]">
+          <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-[#f1f5fa] text-[#64748b] dark:bg-[#0f2d52] dark:text-[#a8b5cc]" aria-hidden="true">
+            <svg className="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="12" r="3" />
+              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
+            </svg>
+          </span>
+          <div className="ml-3 min-w-0 flex-1">
+            <label htmlFor="transmision" className="block text-[11.5px] font-semibold text-[#64748b] dark:text-[#a8b5cc]">
+              Transmisión
+            </label>
+            <select
+              id="transmision"
+              name="transmision"
+              value={datos.transmision}
+              onChange={(e) =>
+                actualizar("transmision", e.target.value as TransmisionVehiculo)
+              }
+              onBlur={() => validarCampo("transmision")}
+              aria-invalid={Boolean(errores.transmision)}
+              className="w-full border-0 bg-transparent p-0 text-[15px] font-bold text-[#0a2342] outline-none appearance-none dark:text-[#f6f8fb]"
+            >
+              <option value="automatica">Automática</option>
+              <option value="manual">Manual</option>
+              <option value="electrica">Eléctrica</option>
+            </select>
+          </div>
+          <svg className="pointer-events-none size-4 shrink-0 text-[#94a3b8]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <path d="m6 9 6 6 6-6" />
+          </svg>
+          {errores.transmision && (
+            <p className="absolute bottom-1 left-16 text-[10px] text-[#ef4444]">{errores.transmision}</p>
+          )}
+        </div>
+
+        {/* Año */}
+        <div className="relative flex items-center rounded-2xl border border-[#e2e8f0] bg-white p-3 shadow-2xs transition focus-within:border-[#0066FF] dark:border-[#1a3a5c] dark:bg-[#0a2342]">
+          <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-[#f1f5fa] text-[#64748b] dark:bg-[#0f2d52] dark:text-[#a8b5cc]" aria-hidden="true">
+            <svg className="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+              <line x1="16" y1="2" x2="16" y2="6" />
+              <line x1="8" y1="2" x2="8" y2="6" />
+              <line x1="3" y1="10" x2="21" y2="10" />
+            </svg>
+          </span>
+          <div className="ml-3 min-w-0 flex-1">
+            <label htmlFor="anio" className="block text-[11.5px] font-semibold text-[#64748b] dark:text-[#a8b5cc]">
+              Año
+            </label>
+            <input
+              id="anio"
+              name="anio"
+              inputMode="numeric"
+              pattern="[0-9]{4}"
+              maxLength={4}
+              placeholder="Ej. 2026"
+              value={datos.anio}
+              onChange={(e) =>
+                actualizar("anio", e.target.value.replace(/\D/g, "").slice(0, 4))
+              }
+              onBlur={() => validarCampo("anio")}
+              aria-invalid={Boolean(errores.anio)}
+              className="w-full border-0 bg-transparent p-0 text-[15px] font-bold text-[#0a2342] outline-none placeholder:text-[#94a3b8] dark:text-[#f6f8fb]"
+            />
+          </div>
+          <svg className="pointer-events-none size-4 shrink-0 text-[#94a3b8]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <path d="m6 9 6 6 6-6" />
+          </svg>
+          {errores.anio && <p className="absolute bottom-1 left-16 text-[10px] text-[#ef4444]">{errores.anio}</p>}
+        </div>
+
+        {/* Condición */}
+        <div className="relative flex items-center rounded-2xl border border-[#e2e8f0] bg-white p-3 shadow-2xs transition focus-within:border-[#0066FF] dark:border-[#1a3a5c] dark:bg-[#0a2342]">
+          <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-[#f1f5fa] text-[#64748b] dark:bg-[#0f2d52] dark:text-[#a8b5cc]" aria-hidden="true">
+            <svg className="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+              <polyline points="14 2 14 8 20 8" />
+              <line x1="16" y1="13" x2="8" y2="13" />
+              <line x1="16" y1="17" x2="8" y2="17" />
+              <polyline points="10 9 9 9 8 9" />
+            </svg>
+          </span>
+          <div className="ml-3 min-w-0 flex-1">
+            <label htmlFor="condicion" className="block text-[11.5px] font-semibold text-[#64748b] dark:text-[#a8b5cc]">
+              Condición
+            </label>
+            <select
+              id="condicion"
+              name="condicion"
+              value={datos.condicion}
+              onChange={(e) =>
+                actualizar("condicion", e.target.value as CondicionVehiculo)
+              }
+              onBlur={() => validarCampo("condicion")}
+              aria-invalid={Boolean(errores.condicion)}
+              className="w-full border-0 bg-transparent p-0 text-[15px] font-bold text-[#0a2342] outline-none appearance-none dark:text-[#f6f8fb]"
+            >
+              <option value="">Selecciona condición</option>
+              {CONDICIONES_VEHICULO.map((c) => (
+                <option key={c.valor} value={c.valor}>
+                  {c.etiqueta}
+                </option>
+              ))}
+            </select>
+          </div>
+          <svg className="pointer-events-none size-4 shrink-0 text-[#94a3b8]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <path d="m6 9 6 6 6-6" />
+          </svg>
           {errores.condicion && (
-            <p className={styles.error}>{errores.condicion}</p>
+            <p className="absolute bottom-1 left-16 text-[10px] text-[#ef4444]">{errores.condicion}</p>
           )}
         </div>
       </div>
+
+      {/* Tarjeta destacada: Detalles del vehículo (Color, placas y VIN) */}
       <button
         type="button"
         onClick={() => setDetallesVehiculoExpandido(true)}
         aria-haspopup="dialog"
-        className="min-h-11 text-left text-sm font-semibold text-[var(--user-color-action)]"
+        className="mt-2 flex w-full items-center justify-between rounded-2xl border border-dashed border-[#0066FF]/40 bg-[#f0f7ff] p-4 text-left transition hover:bg-[#e4effb] dark:border-[#0066FF]/30 dark:bg-[#091f38]"
       >
-        Detalles del vehículo · Color, placas y VIN
+        <div className="flex items-center gap-3">
+          <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-white text-[#0066FF] shadow-2xs dark:bg-[#0a2342]" aria-hidden="true">
+            <svg className="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M15 3h6v6" />
+              <path d="M10 14 21 3" />
+              <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+            </svg>
+          </span>
+          <div>
+            <span className="block text-[14px] font-bold text-[#0066FF] dark:text-[#4d94ff]">
+              Detalles del vehículo
+            </span>
+            <span className="block text-[12px] text-[#64748b] dark:text-[#a8b5cc]">
+              Color, placas y VIN
+            </span>
+          </div>
+        </div>
+        <svg className="size-4 text-[#0066FF]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <path d="m9 18 6-6-6-6" />
+        </svg>
       </button>
+
       {vehiculosGuardados.length > 0 && (
         <button
           type="button"
           onClick={() => setGuardados(true)}
-          className="min-h-11 text-left text-sm"
+          className="min-h-11 text-left text-sm font-semibold text-[#0066FF] hover:underline"
         >
           Usar vehículo guardado
         </button>
