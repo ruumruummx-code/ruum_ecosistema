@@ -137,7 +137,7 @@ describe("[UI/UX] Pantalla de Inspección y Evidencia Fotográfica Mobile-First"
       "/viajes/traslado-evidencia-001"
     );
 
-    const btnSoporte = within(header).getByRole("button", { name: "Abrir soporte rápido" });
+    const btnSoporte = within(header).getByRole("button", { name: /soporte/i });
     expect(btnSoporte).toBeTruthy();
     fireEvent.click(btnSoporte);
     expect(setSoporteAbiertoMock).toHaveBeenCalledWith(true);

@@ -125,7 +125,7 @@ describe("[UI/UX] Pantalla de Traslado Activo: En Ruta al Destino Mobile-First",
     ).toBe("/viajes");
     expect(within(header).getByText("Traslado activo")).toBeTruthy();
 
-    const btnSoporte = within(header).getByRole("button", { name: "Abrir soporte rápido" });
+    const btnSoporte = within(header).getByRole("button", { name: /soporte/i });
     expect(btnSoporte).toBeTruthy();
     fireEvent.click(btnSoporte);
     expect(screen.getByTestId("soporte-sheet-mock")).toBeTruthy();

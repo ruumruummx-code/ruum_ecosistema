@@ -10,8 +10,12 @@ const avanzarEstadoTrasladoMock = vi.fn();
 const listarInspeccionesTrasladoMock = vi.fn();
 
 beforeAll(() => {
-  HTMLDialogElement.prototype.showModal = vi.fn();
-  HTMLDialogElement.prototype.close = vi.fn();
+  HTMLDialogElement.prototype.showModal = vi.fn(function (this: HTMLDialogElement) {
+    this.setAttribute("open", "");
+  });
+  HTMLDialogElement.prototype.close = vi.fn(function (this: HTMLDialogElement) {
+    this.removeAttribute("open");
+  });
 
   HTMLCanvasElement.prototype.getContext = vi.fn().mockReturnValue({
     scale: vi.fn(),
@@ -278,7 +282,7 @@ describe("[UI/UX] Pantalla de Cierre de Traslado (Conciliación y Firma) Mobile-
     fireEvent.click(btnFinalizar);
 
     // Confirmar en el modal de entrega
-    const btnConfirmar = screen.getByRole("button", { name: /SÍ, ENTREGAR/i });
+    const btnConfirmar = await waitFor(() => screen.getByRole("button", { name: /SÍ, ENTREGAR/i }));
     fireEvent.click(btnConfirmar);
 
     await waitFor(() => {

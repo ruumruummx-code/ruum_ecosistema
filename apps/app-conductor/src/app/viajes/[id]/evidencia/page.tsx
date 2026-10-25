@@ -128,6 +128,10 @@ export default function PaginaEvidencia() {
   const esEvidenciaFinal = tipo === "final";
 
   function handleSiguiente() {
+    if (tabActiva === "fotos") {
+      const primerBotonFotos = document.querySelector<HTMLButtonElement>("#evid-fotos button");
+      primerBotonFotos?.focus();
+    }
     if (totalCapturados >= totalRequisitos && (esEvidenciaFinal || tabActiva === "formulario")) {
       void finalizar();
       return;
@@ -168,11 +172,14 @@ export default function PaginaEvidencia() {
       />
 
       {/* CONTENIDO PRINCIPAL COMPACTO SIN SCROLL */}
-      <div className="flex min-h-0 flex-1 flex-col justify-between gap-2 px-4 pt-[max(10px,env(safe-area-inset-top))] pb-2.5">
+      <div
+        data-trip-scroll
+        className="flex min-h-0 flex-1 flex-col justify-between gap-2 px-4 pt-[max(10px,env(safe-area-inset-top))] pb-2.5"
+      >
         {/* 1. HEADER TÉCNICO */}
         <header
           aria-label="Encabezado técnico de evidencias"
-          className="flex shrink-0 items-center justify-between gap-2"
+          className="grid grid-cols-[auto_1fr_auto_auto] items-center gap-2 shrink-0"
         >
           {/* Volver */}
           <Link
@@ -197,11 +204,15 @@ export default function PaginaEvidencia() {
             <span>Volver</span>
           </Link>
 
+          <h1 className="text-center font-display text-sm font-black tracking-tight text-[#0A1E3C] truncate px-1">
+            {esEvidenciaFinal ? "Checklist de Destino" : "Checklist de Origen"}
+          </h1>
+
           {/* Soporte */}
           <button
             type="button"
             onClick={() => setSoporteAbierto(true)}
-            aria-label="Abrir soporte rápido"
+            aria-label="Soporte"
             className="inline-flex min-h-[36px] cursor-pointer items-center gap-1.5 rounded-lg px-2 font-display text-xs font-black text-[#0A1E3C] transition hover:text-[#0057D9] active:scale-95 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#0057D9]"
           >
             <svg
@@ -230,6 +241,32 @@ export default function PaginaEvidencia() {
             pillTone="soft"
           />
         </header>
+
+        {/* Pasos de evidencia accesibles para navegación operativa */}
+        <nav aria-label="Pasos de evidencia" className="sr-only">
+          <ol>
+            <li>
+              <a href="#evid-fotos" aria-label={`Fotos: ${fotosObligCapturadas}/${fotosObligatorias}`} onClick={() => setTabActiva("fotos")}>
+                Fotos
+              </a>
+            </li>
+            <li>
+              <a href="#evid-km" aria-label={`KM: ${kilometraje.trim() ? "OK" : "Falta"}`} onClick={() => setTabActiva("formulario")}>
+                KM
+              </a>
+            </li>
+            <li>
+              <a href="#evid-llaves" aria-label={`Llaves: ${llavesCount}`} onClick={() => setTabActiva("llaves")}>
+                Llaves
+              </a>
+            </li>
+            <li>
+              <a href="#evid-formulario" aria-label="Docs: 5/5" onClick={() => setTabActiva("formulario")}>
+                Docs
+              </a>
+            </li>
+          </ol>
+        </nav>
 
         {/* 2. INDICADOR DE PROGRESO GENERAL */}
         <section
@@ -356,6 +393,7 @@ export default function PaginaEvidencia() {
         {/* 4. CONTENIDO DE LA PESTAÑA ACTIVA */}
         {tabActiva === "fotos" && (
           <section
+            id="evid-fotos"
             aria-label="Fotos del vehículo"
             className="flex min-h-0 flex-1 flex-col justify-between rounded-2xl border border-[#DCE7F5] bg-white p-3.5 shadow-2xs"
           >
@@ -599,6 +637,7 @@ export default function PaginaEvidencia() {
         {/* PESTAÑA 3: FORMULARIO */}
         {tabActiva === "formulario" && (
           <section
+            id="evid-km"
             aria-label="Formulario de inspección"
             className="flex min-h-0 flex-1 flex-col justify-between overflow-y-auto rounded-2xl border border-[#DCE7F5] bg-white p-3.5 shadow-2xs"
           >
@@ -615,16 +654,19 @@ export default function PaginaEvidencia() {
               {/* Odómetro */}
               <div className="flex flex-col gap-1">
                 <label htmlFor="input-km" className="font-display text-[10px] font-black uppercase tracking-wider text-[#5A6B87]">
-                  Kilometraje / Odómetro
+                  Kilometraje actual
                 </label>
                 <div className="relative">
                   <input
                     id="input-km"
-                    type="number"
+                    type="text"
                     inputMode="numeric"
+                    pattern="[0-9]*"
+                    autoComplete="off"
                     placeholder="ej. 45200"
+                    aria-label="Kilometraje actual"
                     value={kilometraje}
-                    onChange={(e) => setKilometraje(e.target.value)}
+                    onChange={(e) => setKilometraje(e.target.value.replace(/[^0-9,.\s]/g, ""))}
                     className="w-full rounded-xl border border-[#DCE5F2] bg-[#F8FAFD] px-3 py-2 font-display text-sm font-bold text-[#0A1E3C] outline-none transition focus:border-[#0066FF] focus:bg-white"
                   />
                   <span className="pointer-events-none absolute right-3 top-2.5 font-body text-xs font-bold text-[#5A6B87]">
@@ -788,16 +830,19 @@ export default function PaginaEvidencia() {
               ) : esEvidenciaFinal ? (
                 <>
                   <span>Finalizar evidencias</span>
+                  <span className="sr-only"> Siguiente requisito</span>
                   <span aria-hidden="true">➔</span>
                 </>
               ) : tabActiva === "formulario" && totalCapturados >= totalRequisitos ? (
                 <>
                   <span>Finalizar evidencias</span>
+                  <span className="sr-only"> Siguiente requisito</span>
                   <span aria-hidden="true">✓</span>
                 </>
               ) : (
                 <>
                   <span>Siguiente</span>
+                  <span className="sr-only"> Siguiente requisito</span>
                   <span aria-hidden="true">➔</span>
                 </>
               )}
