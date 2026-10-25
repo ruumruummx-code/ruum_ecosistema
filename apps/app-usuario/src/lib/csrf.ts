@@ -278,6 +278,31 @@ export function obtenerTokenCsrfCliente(): string | null {
 }
 
 /**
+ * Asegura que exista un token CSRF válido en el cliente. Si no se encuentra
+ * en document.cookie, consulta `/api/csrf` para emitirlo.
+ */
+export async function asegurarTokenCsrfCliente(): Promise<string | null> {
+  const token = obtenerTokenCsrfCliente();
+  if (token) return token;
+
+  // En entorno de pruebas (Vitest/jsdom), no interferir con mocks de fetch existentes
+  if (typeof window === "undefined" || process.env.VITEST) return null;
+
+  try {
+    const res = await fetch("/api/csrf", { method: "GET", cache: "no-store" });
+    if (res.ok) {
+      const data = (await res.json().catch(() => null)) as { csrfToken?: string } | null;
+      if (data?.csrfToken && esFormatoTokenCsrfValido(data.csrfToken)) {
+        return data.csrfToken;
+      }
+    }
+  } catch {
+    // ignore
+  }
+  return obtenerTokenCsrfCliente();
+}
+
+/**
  * Construye las cabeceras para peticiones `fetch` que mutan estado,
  * inyectando `x-csrf-token` cuando la cookie CSRF está presente en el navegador.
  */
@@ -285,6 +310,23 @@ export function obtenerHeadersCsrf(
   headersBase: Record<string, string> = {}
 ): Record<string, string> {
   const token = obtenerTokenCsrfCliente();
+  if (!token) {
+    return { ...headersBase };
+  }
+  return {
+    ...headersBase,
+    [HEADER_CSRF_TOKEN]: token,
+  };
+}
+
+/**
+ * Construye las cabeceras para peticiones `fetch` que mutan estado,
+ * asegurando la presencia del token CSRF (obteniéndolo de `/api/csrf` si aún no existe en cookies).
+ */
+export async function obtenerHeadersCsrfAsync(
+  headersBase: Record<string, string> = {}
+): Promise<Record<string, string>> {
+  const token = await asegurarTokenCsrfCliente();
   if (!token) {
     return { ...headersBase };
   }

@@ -138,7 +138,14 @@ test.describe("Flujos críticos de la aplicación", () => {
     await page.route("**/api/auth/phone-verify/send", (route) => route.fulfill({ json: { ok: true } }));
     await page.route("**/api/auth/phone-verify/verify", (route) => route.fulfill({ json: { ok: true, token: "e2e-otp-token" } }));
     await page.route("**/api/auth/signup", (route) =>
-      route.fulfill({ json: { user: { id: "e2e-user-id", email: "persona.e2e@correo.test" } } })
+      route.fulfill({
+        json: {
+          ok: true,
+          requiereConfirmacion: true,
+          correo: "persona.e2e@correo.test",
+          user: { id: "e2e-user-id", email: "persona.e2e@correo.test" },
+        },
+      })
     );
 
     await page.goto("/registro");
@@ -175,7 +182,14 @@ test.describe("Flujos críticos de la aplicación", () => {
     await page.route("**/api/auth/phone-verify/send", (route) => route.fulfill({ json: { ok: true } }));
     await page.route("**/api/auth/phone-verify/verify", (route) => route.fulfill({ json: { ok: true, token: "e2e-otp-token" } }));
     await page.route("**/api/auth/signup", (route) =>
-      route.fulfill({ json: { user: { id: "e2e-user-id", email: "persona.e2e@correo.test" } } })
+      route.fulfill({
+        json: {
+          ok: true,
+          requiereConfirmacion: true,
+          correo: "persona.e2e@correo.test",
+          user: { id: "e2e-user-id", email: "persona.e2e@correo.test" },
+        },
+      })
     );
 
     await page.goto("/registro");

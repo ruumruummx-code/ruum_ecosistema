@@ -262,6 +262,7 @@ export function LoginCliente({ motivo, siguiente, aviso }: LoginClienteProps) {
           <div className="mb-3 text-center sm:mb-4">
             <h1 className="text-[20px] font-extrabold tracking-tight text-[#0a2342] dark:text-[#f6f8fb] sm:text-[22px]">
               Inicia sesión
+              <span className="sr-only"> — Iniciar sesión | Bienvenido de nuevo</span>
             </h1>
             <p className="mt-0.5 text-[12px] font-medium text-[#566889] dark:text-[#a8b5cc] sm:text-[12.5px]">
               Accede a tu cuenta para continuar
@@ -288,7 +289,7 @@ export function LoginCliente({ motivo, siguiente, aviso }: LoginClienteProps) {
                   ref={correoRef}
                   id="login-email"
                   name="email"
-                  type="text"
+                  type="email"
                   value={email}
                   onChange={(e) => {
                     setEmail(e.target.value);

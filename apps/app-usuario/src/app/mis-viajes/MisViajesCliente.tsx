@@ -278,7 +278,7 @@ function FichaVacia({ hayBusqueda, hayFiltro, pestana, onLimpiar }: { hayBusqued
     finalizados: "Historial",
     cancelados: "Cancelados",
   };
-  const titulo = hayBusqueda || hayFiltro ? "No se encontraron traslados" : `Sin traslados • ${etiquetasPestana[pestana]}`;
+  const titulo = hayBusqueda || hayFiltro ? "No se encontraron traslados" : `Sin traslados · ${etiquetasPestana[pestana]}`;
   const descripcion = hayBusqueda || hayFiltro
     ? "Prueba con otro término o ajusta el filtro de vehículo."
     : "Tus traslados aparecerán aquí tan pronto como los registres en la plataforma.";

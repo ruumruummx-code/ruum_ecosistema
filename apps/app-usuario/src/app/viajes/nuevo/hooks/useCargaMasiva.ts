@@ -2,6 +2,7 @@
 import { useCallback, useEffect, useReducer, useRef, useState } from "react";
 import { validarFila, normalizarFilaPlantilla, valorCelda, type FilaValidada } from "@/lib/carga-masiva";
 import { logStructuredWarn } from "@/lib/logger";
+import { obtenerHeadersCsrf, obtenerTokenCsrfCliente } from "@/lib/csrf";
 
 export const STORAGE_KEY_CARGA_ACTIVA = "ruum_carga_masiva_activa_id";
 
@@ -111,6 +112,10 @@ export function useCargaMasiva() {
     } catch {
       // Ignore storage access error
     }
+
+    if (typeof window !== "undefined" && !obtenerTokenCsrfCliente() && !process.env.VITEST) {
+      void fetch("/api/csrf", { method: "GET", cache: "no-store" });
+    }
   }, []);
 
   useEffect(() => {
@@ -188,7 +193,7 @@ export function useCargaMasiva() {
       // Validar en servidor
       const res = await fetch("/api/viajes/masivos/validate", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: obtenerHeadersCsrf({ "Content-Type": "application/json" }),
         body: JSON.stringify({ filas: filasBruto }),
         signal: controller.signal,
       });
@@ -221,7 +226,12 @@ export function useCargaMasiva() {
     const datos = { ...fila.datos, [campo]: valor };
     void (async () => {
       try {
-        const res = await fetch("/api/viajes/masivos/validate", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ filas: [datos] }), signal: controller.signal });
+        const res = await fetch("/api/viajes/masivos/validate", {
+          method: "POST",
+          headers: obtenerHeadersCsrf({ "Content-Type": "application/json" }),
+          body: JSON.stringify({ filas: [datos] }),
+          signal: controller.signal,
+        });
         const resultado = await res.json();
         if (!res.ok) throw new Error(resultado.error ?? "No se pudo revalidar la fila.");
         if (!controller.signal.aborted) dispatch({ type: "FILA_VALIDADA", fila: { ...resultado.filas[0], indice, validando: false } });
@@ -257,8 +267,10 @@ export function useCargaMasiva() {
       const clave = claveCobro.current ?? crypto.randomUUID();
       claveCobro.current = clave;
       const res = await fetch("/api/viajes/masivos/cotizar", {
-        method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ filas: filasActivas.map(f => f.datos), clave }), signal: controller.signal,
+        method: "POST",
+        headers: obtenerHeadersCsrf({ "Content-Type": "application/json" }),
+        body: JSON.stringify({ filas: filasActivas.map(f => f.datos), clave }),
+        signal: controller.signal,
       });
       const resultado = await res.json();
       if (controller.signal.aborted) return;
@@ -338,7 +350,10 @@ export function useCargaMasiva() {
   /** Descarta una carga pendiente */
   const descartarCargaPendiente = useCallback(async (id: string): Promise<void> => {
     try {
-      await fetch(`/api/viajes/masivos/pendientes?id=${encodeURIComponent(id)}`, { method: "DELETE" });
+      await fetch(`/api/viajes/masivos/pendientes?id=${encodeURIComponent(id)}`, {
+        method: "DELETE",
+        headers: obtenerHeadersCsrf(),
+      });
     } catch (err) {
       // Ignorar errores de red en descarte dejando traza estructurada
       logStructuredWarn("viajes/useCargaMasiva", "descartar_carga_red_fallido", err, { cargaId: id });
