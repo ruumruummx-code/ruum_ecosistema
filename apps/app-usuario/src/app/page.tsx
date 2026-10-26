@@ -5,7 +5,7 @@ import type { Database } from "@ruum/shared/types";
 import { IDENTIDAD_MARCA } from "@ruum/shared/constants";
 import { LogoMarca, SelloConductor, Icono, MobileShell } from "@ruum/ui";
 import { NavegacionUsuario } from "./NavegacionUsuario";
-import { InicioUsuario } from "./InicioUsuario";
+import { InicioMobile, InicioDesktop } from "./InicioUsuario";
 import { BotonReintentarSesion } from "./ReintentarSesion";
 import { EnlaceRecorridoGuiado } from "./EnlaceRecorridoGuiado";
 import { construirNotificaciones, obtenerViajeActivo } from "../lib/inicio";
@@ -119,19 +119,43 @@ export default async function PaginaInicio({
   }
 
   if (usuario && !forzarLanding) {
+    const notificacionesCount = construirNotificaciones(usuario, traslados).length;
     return (
       <>
-        <NavegacionUsuario variante="claro" nombreUsuario={usuario.nombre} notificacionesCount={construirNotificaciones(usuario, traslados).length} />
-        <MobileShell as="main" variant="compact" navInferiorVisible={true} className="user-v2-scope user-dashboard-shell" contentClassName="user-dashboard-content">
-          <div aria-live="polite">
-            <InicioUsuario
-              usuario={usuario}
-              traslados={traslados}
-              conductorFotoUrl={conductorFotoUrl}
-              vehiculos={vehiculos}
-            />
-          </div>
-        </MobileShell>
+        {/* VISTA MÓVIL (< 1024px): Preservada idéntica bajo enfoque mobile-first */}
+        <div className="lg:hidden flex flex-col h-full w-full">
+          <NavegacionUsuario
+            variante="claro"
+            nombreUsuario={usuario.nombre}
+            notificacionesCount={notificacionesCount}
+          />
+          <MobileShell
+            as="main"
+            variant="compact"
+            navInferiorVisible={true}
+            className="user-v2-scope user-dashboard-shell"
+            contentClassName="user-dashboard-content"
+          >
+            <div aria-live="polite">
+              <InicioMobile
+                usuario={usuario}
+                traslados={traslados}
+                conductorFotoUrl={conductorFotoUrl}
+                vehiculos={vehiculos}
+              />
+            </div>
+          </MobileShell>
+        </div>
+
+        {/* VISTA ESCRITORIO (>= 1024px): Dashboard enriquecido */}
+        <div className="hidden lg:flex h-full w-full overflow-hidden">
+          <InicioDesktop
+            usuario={usuario}
+            traslados={traslados}
+            conductorFotoUrl={conductorFotoUrl}
+            vehiculos={vehiculos}
+          />
+        </div>
       </>
     );
   }
