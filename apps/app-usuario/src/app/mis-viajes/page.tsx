@@ -4,6 +4,7 @@ import { Aviso, Button, MobileShell } from "@ruum/ui";
 import type { Database } from "@ruum/shared/types";
 import { NavegacionUsuario } from "../NavegacionUsuario";
 import { MisTrasladosCliente } from "./MisViajesCliente";
+import { MisViajesDesktop } from "./MisViajesDesktop";
 import { construirNotificaciones, type NotificacionInicio } from "../../lib/inicio";
 
 export const metadata: Metadata = {
@@ -36,8 +37,10 @@ const PESTANAS: { id: PestañaTraslados; etiqueta: string }[] = [
  * veía un CTA para crear uno, sin ninguna señal de que algo falló. Ahora el
  * error es un estado explícito y la página muestra un aviso con reintento.
  */
+type UsuarioRow = Database["public"]["Tables"]["usuarios"]["Row"];
+
 type ResultadoTraslados =
-  | { estado: "ok"; traslados: ViajeLista[]; notificaciones: NotificacionInicio[] }
+  | { estado: "ok"; usuario: UsuarioRow; traslados: ViajeLista[]; notificaciones: NotificacionInicio[] }
   | { estado: "sin_sesion" }
   | { estado: "error" };
 
@@ -62,6 +65,7 @@ async function obtenerTraslados(): Promise<ResultadoTraslados> {
     const trasladosPorId = new Map(traslados.map((traslado) => [traslado.id, traslado]));
     return {
       estado: "ok",
+      usuario,
       notificaciones: construirNotificaciones(usuario, pasaportes),
       traslados: pasaportes.map((pasaporte) => ({
         pasaporte,
@@ -108,13 +112,26 @@ export default async function PaginaMisTraslados({
   // Sin sesión el middleware ya redirige a /login; si llegara aquí, la lista
   // vacía es el comportamiento correcto.
   const Traslados = resultado.estado === "ok" ? resultado.traslados : [];
+  const usuario = resultado.estado === "ok" ? resultado.usuario : null;
 
   return (
     <>
-      <NavegacionUsuario variante="claro" notificaciones={resultado.estado === "ok" ? resultado.notificaciones : []} />
-      <MobileShell as="main" variant="compact" navInferiorVisible={true} className="user-v2-scope user-transfers-shell" contentClassName="user-transfers-content">
-        <MisTrasladosCliente Traslados={Traslados} pestanaInicial={pestañaActiva} />
-      </MobileShell>
+      {/* VISTA MÓVIL (< 1024px): Intacta con enfoque mobile-first */}
+      <div className="lg:hidden flex flex-col h-full w-full">
+        <NavegacionUsuario variante="claro" notificaciones={resultado.estado === "ok" ? resultado.notificaciones : []} />
+        <MobileShell as="main" variant="compact" navInferiorVisible={true} className="user-v2-scope user-transfers-shell" contentClassName="user-transfers-content">
+          <MisTrasladosCliente Traslados={Traslados} pestanaInicial={pestañaActiva} />
+        </MobileShell>
+      </div>
+
+      {/* VISTA ESCRITORIO (>= 1024px): Dashboard de Gestión de Traslados */}
+      <div className="hidden lg:flex h-full w-full overflow-hidden">
+        <MisViajesDesktop
+          traslados={Traslados}
+          nombreUsuario={usuario?.nombre}
+          pestanaInicial="todos"
+        />
+      </div>
     </>
   );
 }

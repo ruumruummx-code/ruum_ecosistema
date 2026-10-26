@@ -6,18 +6,22 @@ import { ETIQUETA_TIPO_VEHICULO } from "@ruum/shared/constants";
 import type { Database } from "@ruum/shared/types";
 import { EtapasTrasladoUsuario } from "../EtapasTrasladoUsuario";
 import { MobileBottomSheet } from "../../components/MobileBottomSheet";
+import {
+  useGestionTraslados,
+  type ViajeLista,
+  type Pasaporte,
+  type Traslado,
+  type PestañaTraslados,
+  pestañaDeViaje,
+  vehiculoNombre,
+  vehiculoTipo,
+  folioCorto,
+  fechaProgramada,
+  formatoDuracion,
+  formatoGastado,
+} from "./useGestionTraslados";
 
-type Pasaporte = Database["public"]["Views"]["pasaporte_digital"]["Row"];
-type Traslado = Pick<
-  Database["public"]["Tables"]["traslados"]["Row"],
-  "id" | "origen_direccion" | "origen_ciudad" | "destino_direccion" | "destino_ciudad" | "fecha_hora_programada"
->;
-type PestañaTraslados = "activos" | "programados" | "finalizados" | "cancelados";
-
-export interface ViajeLista {
-  pasaporte: Pasaporte;
-  traslado: Traslado | null;
-}
+export type { ViajeLista, Pasaporte, Traslado, PestañaTraslados };
 
 type TonoPildora = "active" | "scheduled" | "completed" | "cancelled";
 
@@ -103,59 +107,10 @@ function IconoGraficoBarras({ className = "size-5" }: { className?: string }) {
   );
 }
 
-function folioCorto(trasladoId: string | null | undefined): string {
-  return trasladoId ? `#RR-${trasladoId.slice(0, 4).toUpperCase()}` : "#RR-—";
-}
-
 function primerNombre(nombre: string | null | undefined): string | null {
   const valor = nombre?.trim().split(/\s+/)[0];
   if (!valor) return null;
   return `${valor.charAt(0).toUpperCase()}${valor.slice(1).toLowerCase()}.`;
-}
-
-function formatoDuracion(horas: number | null | undefined): string | null {
-  if (horas == null || Number.isNaN(Number(horas))) return null;
-  const totalMin = Math.round(Number(horas) * 60);
-  const h = Math.floor(totalMin / 60);
-  const m = totalMin % 60;
-  if (h <= 0) return `${m}m`;
-  if (m === 0) return `${h}h`;
-  return `${h}h ${m.toString().padStart(2, "0")}m`;
-}
-
-function formatoGastado(total: number): string {
-  if (total >= 1000) {
-    const miles = total / 1000;
-    return `$${miles >= 100 ? Math.round(miles).toString() : miles.toFixed(1).replace(/\.0$/, "")}k`;
-  }
-  return `$${Math.round(total).toLocaleString("es-MX")}`;
-}
-
-function vehiculoNombre(p: Pasaporte): string {
-  const partes = [p.vehiculo_marca, p.vehiculo_modelo, p.vehiculo_anio].filter(Boolean);
-  return partes.length > 0 ? partes.join(" ") : "Vehículo";
-}
-
-function vehiculoTipo(p: Pasaporte): string {
-  if (!p.vehiculo_tipo) return "Sedán";
-  return ETIQUETA_TIPO_VEHICULO[p.vehiculo_tipo] ?? p.vehiculo_tipo;
-}
-
-function pestañaDeViaje(p: Pasaporte): PestañaTraslados {
-  const estado = String(p.estado ?? "");
-  if (estado === "servicio_cancelado" || estado === "traslado_fallido") return "cancelados";
-  if (["servicio_cerrado", "reclamo_resuelto", "disputa_resuelta"].includes(estado)) return "finalizados";
-  if ([
-    "solicitud_creada",
-    "documentacion_pendiente",
-    "documentacion_en_revision",
-    "documentacion_validada",
-    "cotizacion_generada",
-    "cotizacion_aceptada",
-    "servicio_confirmado",
-    "pendiente_de_conductor",
-  ].includes(estado)) return "programados";
-  return "activos";
 }
 
 const PILDORA_POR_PESTAÑA: Record<PestañaTraslados, { tono: TonoPildora; borde: string }> = {
@@ -213,18 +168,6 @@ function estadoVisual(p: Pasaporte): { label: string } {
     default:
       return { label: "En proceso" };
   }
-}
-
-function fechaProgramada(fecha: string | null): { fecha: string; hora: string } {
-  if (!fecha) return { fecha: "Fecha pendiente", hora: "Hora pendiente" };
-  const date = new Date(fecha);
-  if (Number.isNaN(date.getTime())) return { fecha: "Fecha pendiente", hora: "Hora pendiente" };
-
-  const hoy = new Date();
-  const esHoy = date.getFullYear() === hoy.getFullYear() && date.getMonth() === hoy.getMonth() && date.getDate() === hoy.getDate();
-  const fechaTexto = new Intl.DateTimeFormat("es-MX", { day: "numeric", month: "short", year: "numeric" }).format(date);
-  const horaTexto = new Intl.DateTimeFormat("es-MX", { hour: "numeric", minute: "2-digit" }).format(date);
-  return { fecha: esHoy ? `Hoy, ${fechaTexto}` : fechaTexto, hora: horaTexto };
 }
 
 function SkeletonCard() {
@@ -348,68 +291,25 @@ export function MisTrasladosCliente({
   Traslados: ViajeLista[];
   pestanaInicial: PestañaTraslados;
 }) {
-  const [pestana, setPestana] = useState<PestañaTraslados>(pestanaInicial);
-  const [busquedaInput, setBusquedaInput] = useState("");
-  const [busqueda, setBusqueda] = useState("");
-  const [buscando, setBuscando] = useState(false);
-  const [filtroAbierto, setFiltroAbierto] = useState(false);
-  const [tipoVehiculoSeleccionado, setTipoVehiculoSeleccionado] = useState("");
+  const {
+    pestana,
+    setPestana,
+    busquedaInput,
+    setBusquedaInput,
+    busqueda,
+    buscando,
+    filtroAbierto,
+    setFiltroAbierto,
+    tipoVehiculoSeleccionado,
+    setTipoVehiculoSeleccionado,
+    conteos,
+    tiposVehiculo,
+    gastoFormateado,
+    filtrados,
+    limpiarFiltros,
+  } = useGestionTraslados<PestañaTraslados>({ traslados: Traslados, pestanaInicial });
   const [isPending, startTransition] = useTransition();
   const tablistRef = useRef<HTMLDivElement>(null);
-
-  // Debounce búsqueda 300ms con aria-busy y skeleton
-  useEffect(() => {
-    if (busquedaInput === busqueda) return;
-    setBuscando(true);
-    const t = setTimeout(() => {
-      startTransition(() => {
-        setBusqueda(busquedaInput);
-        setBuscando(false);
-      });
-    }, 300);
-    return () => clearTimeout(t);
-  }, [busquedaInput, busqueda]);
-
-  const conteos = useMemo(() => {
-    const counts: Record<PestañaTraslados, number> = { activos: 0, programados: 0, finalizados: 0, cancelados: 0 };
-    for (const viaje of Traslados) counts[pestañaDeViaje(viaje.pasaporte)]++;
-    return counts;
-  }, [Traslados]);
-
-  const tiposVehiculo = useMemo(() => {
-    return Array.from(new Set(Traslados.map(({ pasaporte }) => vehiculoTipo(pasaporte)))).sort((a, b) => a.localeCompare(b, "es"));
-  }, [Traslados]);
-
-  const gastoTotal = useMemo(() => {
-    return Traslados.reduce((acc, { pasaporte }) => acc + (Number(pasaporte.monto_pagado) || 0), 0);
-  }, [Traslados]);
-
-  const filtrados = useMemo(() => {
-    let lista = Traslados.filter(({ pasaporte }) => pestañaDeViaje(pasaporte) === pestana);
-    if (tipoVehiculoSeleccionado) {
-      lista = lista.filter(({ pasaporte }) => vehiculoTipo(pasaporte) === tipoVehiculoSeleccionado);
-    }
-    if (busqueda.trim()) {
-      const q = busqueda.trim().toLowerCase();
-      lista = lista.filter(({ pasaporte, traslado }) => {
-        const folio = `${pasaporte.traslado_id ?? ""} ${folioCorto(pasaporte.traslado_id)}`.toLowerCase();
-        const veh = vehiculoNombre(pasaporte).toLowerCase();
-        const origen = `${pasaporte.origen_ciudad ?? ""} ${pasaporte.origen_direccion ?? ""} ${traslado?.origen_ciudad ?? ""} ${traslado?.origen_direccion ?? ""}`.toLowerCase();
-        const destino = `${pasaporte.destino_ciudad ?? ""} ${pasaporte.destino_direccion ?? ""} ${traslado?.destino_ciudad ?? ""} ${traslado?.destino_direccion ?? ""}`.toLowerCase();
-        const conductor = (pasaporte.conductor_nombre ?? "").toLowerCase();
-        const placas = (pasaporte.vehiculo_placas ?? "").toLowerCase();
-        return folio.includes(q) || veh.includes(q) || origen.includes(q) || destino.includes(q) || conductor.includes(q) || placas.includes(q);
-      });
-    }
-    return lista;
-  }, [Traslados, pestana, busqueda, tipoVehiculoSeleccionado]);
-
-  function limpiarFiltros() {
-    setBusquedaInput("");
-    setBusqueda("");
-    setTipoVehiculoSeleccionado("");
-    setBuscando(false);
-  }
 
   function handlePestanaChange(nueva: PestañaTraslados) {
     startTransition(() => setPestana(nueva));
@@ -507,7 +407,7 @@ export function MisTrasladosCliente({
             <IconoDolarCoral className="size-5" />
           </span>
           <dd className="mt-1 text-[22px] font-extrabold tracking-tight text-[#0a2342] dark:text-[#f6f8fb]">
-            {formatoGastado(gastoTotal)}
+            {gastoFormateado}
           </dd>
           <dt className="text-[11.5px] font-semibold text-[#64748b] dark:text-[#a8b5cc]">Gastado</dt>
         </div>
