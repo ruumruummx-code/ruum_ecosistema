@@ -7,6 +7,7 @@ import { useNuevoTraslado } from "./hooks/useNuevoTraslado";
 
 import { EstadoCreacion } from "./components/EstadoCreacion";
 import { CotizadorPortal } from "./components/CotizadorPortal";
+import { NuevoTrasladoDesktop } from "./NuevoTrasladoDesktop";
 
 export function NuevoTrasladoForm() {
   const t = useNuevoTraslado();
@@ -80,5 +81,14 @@ export function NuevoTrasladoForm() {
     );
   }
 
-  return <CotizadorPortal t={t} headingRef={encabezadoPasoRef} />;
+  return (
+    <>
+      <div className="lg:hidden flex flex-col h-full w-full">
+        <CotizadorPortal t={t} headingRef={encabezadoPasoRef} />
+      </div>
+      <div className="hidden lg:flex h-full w-full overflow-hidden">
+        <NuevoTrasladoDesktop t={t} />
+      </div>
+    </>
+  );
 }

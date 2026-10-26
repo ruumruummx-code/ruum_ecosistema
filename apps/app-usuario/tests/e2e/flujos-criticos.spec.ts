@@ -66,7 +66,13 @@ async function mockearTarifa(
       status: 200,
       contentType: "application/json",
       headers: { "access-control-allow-origin": "*" },
-      json: { features: [{ place_name: "Ciudad de México, México", center: [-99.1332, 19.4326] }] },
+      json: {
+        features: [{
+          place_name: "Ciudad de México, México",
+          center: [-99.1332, 19.4326],
+          geometry: { coordinates: [-99.1332, 19.4326] },
+        }],
+      },
     })
   );
 }
@@ -393,6 +399,7 @@ test.describe("Flujos críticos de la aplicación", () => {
   });
 
   test("el usuario ve la lista de sus traslados", async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
     await seedMockAuthSession(page, { variante: "verificada" });
 
     await page.goto("/mis-viajes");
@@ -448,6 +455,7 @@ test.describe("Flujos críticos de la aplicación", () => {
   });
 
   test("con sesión válida /mis-viajes es accesible", async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
     await seedMockAuthSession(page, { variante: "verificada" });
 
     await page.goto("/mis-viajes");

@@ -163,13 +163,10 @@ test.describe("PR-02 Recuperación PKCE — app-usuario", () => {
     await mockRecover(page, async (route) => {
       console.log("E2E recover request", route.request().url(), route.request().postData(), route.request().headers());
       const body = JSON.parse(route.request().postData() || "{}");
-      // Supabase puede mandar redirect_to o options.redirectTo
-      redirectToCapturado = (body as Record<string, unknown>).redirectTo as string
+      redirectToCapturado = new URL(route.request().url()).searchParams.get("redirect_to")
+        ?? (body as Record<string, unknown>).redirectTo as string
         ?? (body as Record<string, unknown>).redirect_to as string
-        ?? (body as Record<string, unknown>).gotrue_meta_security as string
         ?? null;
-      redirectToCapturado ??= new URL(route.request().url()).searchParams.get("redirect_to");
-      // también revisar URL query si viene en redirectTo param
       if (!redirectToCapturado) {
         const opts = (body as Record<string, unknown>).options as Record<string, unknown> | undefined;
         redirectToCapturado = opts?.redirectTo as string ?? null;
@@ -278,7 +275,7 @@ test.describe("PR-02 Recuperación PKCE — app-usuario", () => {
     );
 
     // Paso 4: probar el inicio de sesión con la contraseña nueva.
-    await expect(page.getByRole("heading", { name: /iniciar sesión/i }).or(page.getByText(/bienvenido/i))).toBeVisible({ timeout: 5000 });
+    await expect(page.locator("#login-email")).toBeVisible({ timeout: 5000 });
     // Los inputs existen en /login: sin probing condicional, si faltan es fallo real.
     const emailInput = page.getByLabel(/correo/i).or(page.locator('input[type="email"]'));
     const passInput = page.locator('input[type="password"]').first();

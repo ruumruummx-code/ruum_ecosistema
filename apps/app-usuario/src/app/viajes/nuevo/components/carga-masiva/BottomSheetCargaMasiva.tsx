@@ -222,7 +222,7 @@ export function BottomSheetCargaMasiva({ onCerrar }: Props) {
               <span className="text-xs text-[var(--user-color-muted)]">
                 {estado === "parseando"
                   ? "Procesando datos y catálogos vehiculares…"
-                  : "Máximo 100 traslados · hasta 25 MB"}
+                  : "Máximo 100 traslados · hasta 5 MB"}
               </span>
               <input
                 id="masivo-file-input"

@@ -17,6 +17,7 @@ import { PasoVehiculo } from "./PasoVehiculo";
 import { PasoRuta } from "./PasoRuta";
 import { formatearDistancia, formatearTiempo } from "../constants";
 import { PasoTarifa } from "./PasoTarifa";
+import { BottomSheetCargaMasiva } from "./carga-masiva";
 import styles from "./cotizador.module.css";
 
 export function CotizadorPortal({
@@ -29,6 +30,7 @@ export function CotizadorPortal({
   const root = useRef<HTMLElement>(null);
   const content = useRef<HTMLDivElement>(null);
   const [borradorAbierto, setBorradorAbierto] = useState(false);
+  const [cargaMasivaAbierta, setCargaMasivaAbierta] = useState(false);
   const [estadoPago, setEstadoPago] = useState({
     listo: false,
     procesando: false,
@@ -349,17 +351,19 @@ export function CotizadorPortal({
               previsualizando={t.previsualizando}
             />
           )}
-          {/* Enlace discreto a módulo autónomo de Carga Masiva (flotillas/lotes) */}
+          {/* Paso 0 ofrece la carga masiva dentro del wizard. */}
           {t.paso === 0 && (
             <div className="mt-2.5 rounded-2xl border border-[#d8e2ee] bg-[#f8fafc] px-3.5 py-2.5 text-center dark:border-[#1a3a5c] dark:bg-[#07192f]">
               <p className="text-[12px] font-medium text-[#566889] dark:text-[#a8b5cc]">
                 ¿Requieres cotizar o trasladar un lote de vehículos?{" "}
-                <Link
-                  href="/viajes/masivo"
+                <button
+                  type="button"
+                  onClick={() => setCargaMasivaAbierta(true)}
+                  aria-label="Abrir módulo de carga masiva de traslados"
                   className="font-bold text-[#0066FF] hover:underline dark:text-[#4d94ff]"
                 >
-                  Ir a Carga Masiva (flotillas) →
-                </Link>
+                  Abrir módulo de carga masiva de traslados →
+                </button>
               </p>
             </div>
           )}
@@ -534,6 +538,14 @@ export function CotizadorPortal({
         >
           Empezar de cero
         </button>
+      </BottomSheet>
+      <BottomSheet
+        open={cargaMasivaAbierta}
+        onClose={() => setCargaMasivaAbierta(false)}
+        title="Carga masiva de traslados"
+        fullScreen
+      >
+        <BottomSheetCargaMasiva onCerrar={() => setCargaMasivaAbierta(false)} />
       </BottomSheet>
     </main>
   );

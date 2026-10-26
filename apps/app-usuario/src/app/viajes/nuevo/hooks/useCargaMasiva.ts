@@ -150,8 +150,8 @@ export function useCargaMasiva() {
     claveCobro.current = null;
 
     try {
-      if (!archivo.name.toLowerCase().endsWith(".xlsx") || archivo.size > 25 * 1024 * 1024) {
-        throw new Error("Selecciona la plantilla oficial .xlsx de hasta 25 MB.");
+      if (!archivo.name.toLowerCase().endsWith(".xlsx") || archivo.size > 5 * 1024 * 1024) {
+        throw new Error("Selecciona la plantilla oficial .xlsx de hasta 5 MB.");
       }
       // Parsear con ExcelJS en el navegador o entorno Node
       const ExcelJSModule = await import("exceljs");
@@ -415,4 +415,3 @@ export function useCargaMasiva() {
     consultarCargasPendientes,
   };
 }
-
