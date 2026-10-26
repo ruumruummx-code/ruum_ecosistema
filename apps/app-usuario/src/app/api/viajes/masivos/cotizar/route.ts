@@ -3,15 +3,20 @@ import { z } from "zod";
 import { crearClienteServidor } from "@/lib/supabase-server";
 import { rateLimitConVentana } from "@/lib/csp-rate-limit";
 import { logStructuredError, logStructuredWarn } from "@/lib/logger";
+import { registrarMetricaCotizacion } from "@/lib/carga-masiva-telemetria";
 import { verificarCsrfORechazar } from "@/lib/csrf";
 import { clienteMasivoServicio, stripeMasivo, validarFilasServidor } from "@/lib/carga-masiva-server";
-import { previsualizarTarifasMasivasUsuario, verificarUsuarioMasivo, guardarCheckoutMasivoServidor, vincularPagoMasivoServidor } from "@ruum/api/services";
+import { previsualizarTarifasMasivasUsuario, verificarUsuarioMasivo, guardarCheckoutMasivoServidor, vincularPagoMasivoServidor, eliminarCheckoutMasivoServidor } from "@ruum/api/services";
 import { coordenadaPostalMasiva, ErrorServicioCotizacion } from "@/lib/mapbox-masivo";
 import { tipoSugeridoParaVehiculo } from "@ruum/shared/catalogos";
 import { obtenerRutaDirectionsMapboxConParadas } from "@ruum/shared/utils";
 export const dynamic = "force-dynamic";
 export const maxDuration = 300;
-const esquema = z.object({ filas: z.array(z.record(z.string(), z.string().max(2000))).min(1).max(100), clave: z.string().uuid() });
+const esquema = z.object({
+  filas: z.array(z.record(z.string(), z.string().max(2000))).min(1).max(100),
+  clave: z.string().uuid(),
+  permitirParcial: z.boolean().optional(),
+});
 export async function POST(request: NextRequest) {
   const rechazoCsrf = verificarCsrfORechazar(request);
   if (rechazoCsrf) return rechazoCsrf;
@@ -22,10 +27,12 @@ export async function POST(request: NextRequest) {
   if (!limite.allowed) return NextResponse.json({ error: "Espera antes de cotizar otra carga." }, { status: 429 });
   const body = esquema.safeParse(await request.json().catch(() => null));
   if (!body.success) return NextResponse.json({ error: "La carga no es válida." }, { status: 400 });
+  const permitirParcial = Boolean(body.data.permitirParcial);
+  const inicioCotizacion = performance.now();
   try {
     if (!await verificarUsuarioMasivo(cliente, user.id)) return NextResponse.json({ error: "Verifica tu cuenta antes de pagar." }, { status: 403 });
     const filas = await validarFilasServidor(body.data.filas);
-    if (filas.some(f => f.estado === "error")) return NextResponse.json({ filas });
+    if (!permitirParcial && filas.some(f => f.estado === "error")) return NextResponse.json({ filas });
     const token = process.env.MAPBOX_SECRET_TOKEN;
     if (!token) return NextResponse.json({ error: "Servicio de mapas no configurado (falta MAPBOX_SECRET_TOKEN)." }, { status: 500 });
     const normalizadas: Record<string, string>[] = [];
@@ -35,14 +42,63 @@ export async function POST(request: NextRequest) {
     type Ruta = { origen: [number, number]; destino: [number, number]; distanciaKm: number; tiempoHoras: number };
     const rutas = new Map<number, Ruta>();
 
-    // Cotización incremental por lotes de N filas con reintento solo de fallidas.
-    // Un 429 o timeout en una fila no aborta el lote completo y conserva cotizaciones parciales.
-    const TAMANIO_LOTE = 10;
-    for (let i = 0; i < filas.length; i += TAMANIO_LOTE) {
-      const lote = filas.slice(i, i + TAMANIO_LOTE);
+    // 1. Geocodificación optimizada: geocodificar CPs únicos para evitar llamadas redundantes a Mapbox.
+    const cpsUnicos = Array.from(new Set(
+      filas.flatMap(f => [f.datos.origenCodigoPostal, f.datos.destinoCodigoPostal]).filter(Boolean)
+    ));
+    const coordenadasPorCP = new Map<string, [number, number] | null>();
+    const TAMANIO_LOTE_CP = 10;
+    for (let i = 0; i < cpsUnicos.length; i += TAMANIO_LOTE_CP) {
+      const loteCP = cpsUnicos.slice(i, i + TAMANIO_LOTE_CP);
       await Promise.all(
-        lote.map(async (fila) => {
-          const d = fila.datos;
+        loteCP.map(async (cp) => {
+          try {
+            const coord = await coordenadaPostalMasiva(cp, token);
+            coordenadasPorCP.set(cp, coord);
+          } catch (err) {
+            if (err instanceof ErrorServicioCotizacion && (err.status === 401 || err.status === 403)) {
+              throw err;
+            }
+            coordenadasPorCP.set(cp, null);
+          }
+        })
+      );
+    }
+
+    for (const fila of filas) {
+      const d = fila.datos;
+      const origen = coordenadasPorCP.get(d.origenCodigoPostal);
+      const destino = coordenadasPorCP.get(d.destinoCodigoPostal);
+      if (!origen || !destino) {
+        if (!origen) fila.errores.origenCodigoPostal = "El servicio de mapas no encontró el CP de origen.";
+        if (!destino) fila.errores.destinoCodigoPostal = "El servicio de mapas no encontró el CP de destino.";
+        fila.estado = "error";
+      }
+    }
+    if (!permitirParcial && filas.some(f => f.estado === "error")) return NextResponse.json({ filas });
+
+    // 2. Cálculo de rutas optimizado: pares únicos (origenCP, destinoCP).
+    // Si múltiples traslados tienen los mismos CPs de origen y destino, se calcula la ruta una sola vez.
+    const paresUnicos = new Map<string, { origenCP: string; destinoCP: string; origen: [number, number]; destino: [number, number] }>();
+    for (const fila of filas) {
+      if (fila.estado === "error") continue;
+      const origen = coordenadasPorCP.get(fila.datos.origenCodigoPostal);
+      const destino = coordenadasPorCP.get(fila.datos.destinoCodigoPostal);
+      if (!origen || !destino) continue;
+      const clavePar = `${fila.datos.origenCodigoPostal}:${fila.datos.destinoCodigoPostal}`;
+      if (!paresUnicos.has(clavePar)) {
+        paresUnicos.set(clavePar, { origenCP: fila.datos.origenCodigoPostal, destinoCP: fila.datos.destinoCodigoPostal, origen, destino });
+      }
+    }
+
+    const rutasPorPar = new Map<string, { distanciaKm: number; tiempoHoras: number }>();
+    const erroresPorPar = new Map<string, string>();
+    const paresLista = Array.from(paresUnicos.entries());
+    const TAMANIO_LOTE_RUTAS = 10;
+    for (let i = 0; i < paresLista.length; i += TAMANIO_LOTE_RUTAS) {
+      const lotePares = paresLista.slice(i, i + TAMANIO_LOTE_RUTAS);
+      await Promise.all(
+        lotePares.map(async ([clavePar, par]) => {
           const MAX_INTENTOS = 2;
           let ultimoError: unknown = null;
           for (let intento = 0; intento <= MAX_INTENTOS; intento++) {
@@ -50,28 +106,18 @@ export async function POST(request: NextRequest) {
               if (intento > 0) {
                 await new Promise((resolve) => setTimeout(resolve, 300 * intento));
               }
-              const [origen, destino] = await Promise.all([
-                coordenadaPostalMasiva(d.origenCodigoPostal, token),
-                coordenadaPostalMasiva(d.destinoCodigoPostal, token),
-              ]);
-              if (!origen || !destino) {
-                if (!origen) fila.errores.origenCodigoPostal = "El servicio de mapas no encontró el CP de origen.";
-                if (!destino) fila.errores.destinoCodigoPostal = "El servicio de mapas no encontró el CP de destino.";
-                fila.estado = "error";
-                return;
-              }
               const ruta = await obtenerRutaDirectionsMapboxConParadas(
-                origen,
-                destino,
+                par.origen,
+                par.destino,
                 [],
                 token,
                 { lanzarErrores: true, maxIntentos: 2, timeoutMs: 8000, demoraReintentoMs: 300 }
               );
               if (!ruta || ruta.distanciaKm == null || ruta.tiempoHoras == null) {
-                fila.errorCotizacion = "No existe una ruta compatible para este traslado.";
+                erroresPorPar.set(clavePar, "No existe una ruta compatible para este traslado.");
                 return;
               }
-              rutas.set(fila.indice, { origen, destino, distanciaKm: ruta.distanciaKm, tiempoHoras: ruta.tiempoHoras });
+              rutasPorPar.set(clavePar, { distanciaKm: ruta.distanciaKm, tiempoHoras: ruta.tiempoHoras });
               return;
             } catch (err) {
               ultimoError = err;
@@ -79,28 +125,53 @@ export async function POST(request: NextRequest) {
                 throw err;
               }
               if (intento === MAX_INTENTOS) {
-                logStructuredWarn("api/viajes/masivos/cotizar", "ruta_fila_agotada", err, {
-                  indice: fila.indice,
+                logStructuredWarn("api/viajes/masivos/cotizar", "ruta_par_agotada", err, {
+                  clavePar,
                   intentos: intento + 1,
                 });
               }
             }
           }
           if (ultimoError instanceof ErrorServicioCotizacion && ultimoError.status === 429) {
-            fila.errorCotizacion = "El servicio de mapas alcanzó su límite de consultas para esta fila. Reintenta esta fila.";
+            erroresPorPar.set(clavePar, "El servicio de mapas alcanzó su límite de consultas para esta fila. Reintenta esta fila.");
           } else {
-            fila.errorCotizacion = "No se pudo calcular la ruta de este traslado (tiempo de espera o error de red). Reintenta o revisa sus ubicaciones.";
+            erroresPorPar.set(clavePar, "No se pudo calcular la ruta de este traslado (tiempo de espera o error de red). Reintenta o revisa sus ubicaciones.");
           }
         })
       );
     }
-    if (filas.some(f => f.estado === "error" || f.errorCotizacion)) return NextResponse.json({ filas });
-    const tarifas = await previsualizarTarifasMasivasUsuario(cliente, filas.map(f => {
+
+    for (const fila of filas) {
+      if (fila.estado === "error") continue;
+      const clavePar = `${fila.datos.origenCodigoPostal}:${fila.datos.destinoCodigoPostal}`;
+      const ruta = rutasPorPar.get(clavePar);
+      if (!ruta) {
+        fila.errorCotizacion = erroresPorPar.get(clavePar) ?? "No existe una ruta compatible para este traslado.";
+        continue;
+      }
+      const origen = coordenadasPorCP.get(fila.datos.origenCodigoPostal);
+      const destino = coordenadasPorCP.get(fila.datos.destinoCodigoPostal);
+      if (!origen || !destino) {
+        fila.errorCotizacion = "Coordenadas no disponibles para este traslado.";
+        continue;
+      }
+      rutas.set(fila.indice, { origen, destino, distanciaKm: ruta.distanciaKm, tiempoHoras: ruta.tiempoHoras });
+    }
+
+    if (!permitirParcial && filas.some(f => f.estado === "error" || f.errorCotizacion)) return NextResponse.json({ filas });
+    const filasParaTarifa = filas.filter(f => f.estado !== "error" && !f.errorCotizacion && rutas.has(f.indice));
+    if (filasParaTarifa.length === 0) {
+      return NextResponse.json({ filas, error: "Ninguna fila tiene ruta válida para cotizar." }, { status: 422 });
+    }
+    const tarifas = await previsualizarTarifasMasivasUsuario(cliente, filasParaTarifa.map(f => {
       const r = rutas.get(f.indice)!;
-      return { indice: f.indice, marca: f.datos.marca, modelo: f.datos.modelo, condicion: f.datos.condicion, distanciaKm: r.distanciaKm, tiempoEstimadoHoras: r.tiempoHoras, fechaHora: f.datos.modalidad_programacion === "programado" ? f.datos.fecha_hora_programada! : momento };
+      const fechaHora = f.datos.modalidad_programacion === "programado" && f.datos.fecha_hora_programada
+        ? f.datos.fecha_hora_programada
+        : momento;
+      return { indice: f.indice, marca: f.datos.marca, modelo: f.datos.modelo, condicion: f.datos.condicion, distanciaKm: r.distanciaKm, tiempoEstimadoHoras: r.tiempoHoras, fechaHora };
     }));
     const tarifasPorIndice = new Map(tarifas.map(t => [t.indice, t]));
-    for (const fila of filas) {
+    for (const fila of filasParaTarifa) {
       const d = fila.datos;
       const ruta = rutas.get(fila.indice)!;
       const { origen, destino } = ruta;
@@ -130,13 +201,58 @@ export async function POST(request: NextRequest) {
         normalizadas.push(n);
         cotizaciones.push({ ...fila, tarifa: precio / 100, distanciaKm: ruta.distanciaKm });
     }
-    if (filas.some(f => f.errorCotizacion)) return NextResponse.json({ filas });
+    if (!permitirParcial && filas.some(f => f.errorCotizacion)) return NextResponse.json({ filas });
+    if (normalizadas.length === 0) return NextResponse.json({ filas, error: "Ninguna fila pudo cotizarse." }, { status: 422 });
     const servicio = clienteMasivoServicio();
     const id = body.data.clave;
-    const guardado = await guardarCheckoutMasivoServidor(servicio, { id, auth_user_id: user.id, filas: normalizadas, cotizaciones, monto_centavos: centavos });
-    const intent = await stripeMasivo("payment_intents", new URLSearchParams({ amount: String(guardado.monto_centavos), currency: "mxn", "automatic_payment_methods[enabled]": "true", "metadata[carga_masiva_id]": id }), `carga-masiva-${id}`);
-    await vincularPagoMasivoServidor(servicio, id, user.id, intent.id);
-    return NextResponse.json({ id, clientSecret: intent.client_secret, totalMXN: guardado.monto_centavos / 100, cotizaciones: guardado.cotizaciones });
+    const filasErroneas = filas.filter(f => f.estado === "error" || f.errorCotizacion);
+    const filasPendientesCorreccion = filasErroneas.map(f => f.datos);
+    const guardado = await guardarCheckoutMasivoServidor(servicio, {
+      id,
+      auth_user_id: user.id,
+      filas: normalizadas,
+      cotizaciones,
+      monto_centavos: centavos,
+      filas_pendientes_correccion: filasPendientesCorreccion,
+    });
+    let intent;
+    try {
+      intent = await stripeMasivo("payment_intents", new URLSearchParams({ amount: String(guardado.monto_centavos), currency: "mxn", "automatic_payment_methods[enabled]": "true", "metadata[carga_masiva_id]": id }), `carga-masiva-${id}`);
+      await vincularPagoMasivoServidor(servicio, id, user.id, intent.id);
+    } catch (stripeErr) {
+      // Transacción de compensación: si falla Stripe al crear o vincular el PaymentIntent,
+      // eliminamos de inmediato el registro en base de datos para no dejar checkouts huérfanos sin pago.
+      try {
+        await eliminarCheckoutMasivoServidor(servicio, id, user.id);
+      } catch (compensacionErr) {
+        logStructuredError("api/viajes/masivos/cotizar", "compensacion_checkout_fallida", compensacionErr, {
+          cargaId: id,
+          usuarioId: user.id,
+        });
+      }
+      throw stripeErr;
+    }
+
+    registrarMetricaCotizacion({
+      clave: id,
+      totalFilas: filas.length,
+      cotizadas: normalizadas.length,
+      erroresRuta: filasErroneas.length,
+      duracionMs: performance.now() - inicioCotizacion,
+      montoCentavos: centavos,
+      parcial: permitirParcial && filasErroneas.length > 0,
+      usuarioId: user.id,
+    });
+
+    return NextResponse.json({
+      id,
+      clientSecret: intent.client_secret,
+      totalMXN: guardado.monto_centavos / 100,
+      cotizaciones: guardado.cotizaciones,
+      filasConError: filasErroneas,
+      filasPendientesCorreccion,
+      parcial: permitirParcial && filasErroneas.length > 0,
+    });
   } catch (err) {
     logStructuredError("api/viajes/masivos/cotizar", "cotizacion_masiva_fallida", err, {
       usuarioId: user.id,

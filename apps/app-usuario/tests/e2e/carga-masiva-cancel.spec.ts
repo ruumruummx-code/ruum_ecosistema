@@ -1,9 +1,54 @@
 import { test, expect } from "@playwright/test";
 import { config as loadDotenv } from "dotenv";
 import path from "node:path";
+import ExcelJS from "exceljs";
 import { aceptarConsentimientoSiAparece, esperarHidratacion } from "./fixtures/navegacion";
 
 loadDotenv({ path: path.resolve(process.cwd(), ".env.local") });
+
+async function crearXlsxPrueba(): Promise<Buffer> {
+  const wb = new ExcelJS.Workbook();
+  const ws = wb.addWorksheet("Traslados");
+  ws.addRow([
+    "vehiculo_marca",
+    "vehiculo_modelo",
+    "vehiculo_anio",
+    "vehiculo_placas",
+    "condicion",
+    "origen_codigo_postal",
+    "destino_codigo_postal",
+    "contacto_entrega_nombre",
+    "contacto_entrega_telefono",
+    "contacto_recepcion_nombre",
+    "contacto_recepcion_telefono",
+    "origen_calle",
+    "origen_numero",
+    "origen_colonia",
+    "destino_calle",
+    "destino_numero",
+    "destino_colonia",
+  ]);
+  ws.addRow([
+    "Nissan",
+    "Versa",
+    "2024",
+    "ABC1234",
+    "seminueva",
+    "06700",
+    "04360",
+    "Juan Entrega",
+    "5512345678",
+    "Pedro Recibe",
+    "5587654321",
+    "Reforma",
+    "123",
+    "Roma Norte",
+    "Insurgentes",
+    "456",
+    "Copilco",
+  ]);
+  return Buffer.from(await wb.xlsx.writeBuffer());
+}
 
 /**
  * Carga masiva (xlsx) — RC-09/RC-10: la ruta /viajes/masivo con CSV y polling
@@ -84,5 +129,72 @@ test.describe("R6 Carga masiva (xlsx) en BottomSheet", () => {
     // El BottomSheet debe cerrarse y volver al Paso 0 del wizard.
     await expect(page.getByRole("heading", { name: /carga masiva de traslados/i })).toBeHidden({ timeout: 5000 });
     await expect(page.getByRole("button", { name: /Abrir módulo de carga masiva de traslados/i })).toBeVisible({ timeout: 5000 });
+  });
+
+  test("flujo completo e2e: subida -> cotización -> checkout masivo simulado", async ({ page }) => {
+    await abrirModuloCargaMasiva(page);
+
+    await page.route("**/api/viajes/masivos/validate", async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({
+          filas: [{
+            indice: 0,
+            estado: "correcto",
+            errores: {},
+            datos: {
+              marca: "Nissan",
+              modelo: "Versa",
+              anio: "2024",
+              condicion: "seminueva",
+              origenCodigoPostal: "06700",
+              destinoCodigoPostal: "04360",
+              entregaNombre: "Juan Entrega",
+              entregaTelefono: "5512345678",
+              recepcionNombre: "Pedro Recibe",
+              recepcionTelefono: "5587654321",
+            },
+          }],
+        }),
+      });
+    });
+
+    await page.route("**/api/viajes/masivos/cotizar", async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({
+          id: "92200000-0000-4000-8000-000000000099",
+          clientSecret: "pi_test_secret_123",
+          totalMXN: 1500,
+          cotizaciones: [{
+            indice: 0,
+            tarifa: 1500,
+            distanciaKm: 25,
+            datos: { marca: "Nissan", modelo: "Versa" },
+          }],
+        }),
+      });
+    });
+
+    const buffer = await crearXlsxPrueba();
+    const fileChooserPromise = page.waitForEvent("filechooser");
+    await page.locator("#masivo-file-input").click();
+    const fileChooser = await fileChooserPromise;
+    await fileChooser.setFiles({
+      name: "lote-traslados.xlsx",
+      mimeType: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      buffer,
+    });
+
+    // Validar que se muestre la fila procesada y el botón de cotizar
+    await expect(page.getByText(/Nissan/i).first()).toBeVisible({ timeout: 10000 });
+    const btnCotizar = page.getByRole("button", { name: /Cotizar \d+ traslado/i });
+    await expect(btnCotizar).toBeVisible();
+    await btnCotizar.click();
+
+    // Validar transición al checkout con monto total
+    await expect(page.getByText(/\$1,500|\$1500/i).first()).toBeVisible({ timeout: 10000 });
   });
 });

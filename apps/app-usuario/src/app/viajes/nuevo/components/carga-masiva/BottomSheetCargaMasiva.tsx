@@ -35,25 +35,40 @@ export function BottomSheetCargaMasiva({ onCerrar }: Props) {
     corregirCampo,
     eliminarFila,
     geocodificarYCotizar,
+    cotizarSoloValidas,
     confirmarPago,
     cancelar,
     cargaPendienteStorage,
     reanudarCarga,
     descartarCargaPendiente,
+    consultarEstadoPago,
   } = useCargaMasiva();
   const verificarPago = useCallback(async () => {
     if (!cargaId) return;
     setConciliando(true); setErrorPago(null);
     try {
-      const res = await fetch(`/api/viajes/masivos/estado?id=${cargaId}`);
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error);
-      if (!data.pagado) throw new Error("Tu pago sigue en proceso. Consulta su estado nuevamente.");
+      // Conciliación: el webhook de Stripe es la fuente primaria; se realiza polling
+      // con retroceso escalonado (1.5s, 3s, 5s, 8s) únicamente como fallback de sincronización.
+      let reintentos = 0;
+      const demoras = [1500, 3000, 5000, 8000];
+      let pagado = false;
+      while (reintentos < demoras.length && !pagado) {
+        if (reintentos > 0) {
+          await new Promise((resolve) => setTimeout(resolve, demoras[reintentos - 1]));
+        }
+        const data = await consultarEstadoPago(cargaId);
+        if (data.pagado) {
+          pagado = true;
+          break;
+        }
+        reintentos++;
+      }
+      if (!pagado) throw new Error("Tu pago sigue en proceso de confirmación. Puedes revisar su estado en Mis viajes.");
       confirmarPago(); router.push("/mis-viajes"); router.refresh();
     } catch (err) {
       setErrorPago(err instanceof Error ? err.message : "No se pudo consultar el pago.");
     } finally { setConciliando(false); }
-  }, [cargaId, confirmarPago, router]);
+  }, [cargaId, consultarEstadoPago, confirmarPago, router]);
 
   const manejarArchivo = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -243,6 +258,7 @@ export function BottomSheetCargaMasiva({ onCerrar }: Props) {
             filas={filasVisibles}
             onCorregir={corregirCampo}
             onEliminar={eliminarFila}
+            onCotizarSoloValidas={cotizarSoloValidas}
           />
         )}
 
@@ -268,6 +284,7 @@ export function BottomSheetCargaMasiva({ onCerrar }: Props) {
             totalMXN={totalMXN}
             cargaId={cargaId ?? undefined}
             clientSecret={stripeClientSecret ?? undefined}
+            parcial={filasConError.length > 0}
             onEstadoPago={setPago}
             onPagado={() => void verificarPago()}
           />

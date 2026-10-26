@@ -191,6 +191,8 @@ export function CargaMasivaDesktop({ nombreUsuario }: CargaMasivaDesktopProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const {
+    estado,
+    progreso,
     arrastrando,
     setArrastrando,
     toast,
@@ -459,41 +461,55 @@ export function CargaMasivaDesktop({ nombreUsuario }: CargaMasivaDesktopProps) {
                   : "border-[#93c5fd] bg-[#f0f7ff]/40 hover:border-[#0066FF] hover:bg-[#f0f7ff]/80 dark:border-blue-900/60 dark:bg-[#0c2340]/30"
               }`}
             >
-              <IlustracionDropzone className="size-24 mb-2" />
+              {estado === "validando" ? (
+                <div className="flex flex-col items-center justify-center py-6">
+                  <div className="size-10 animate-spin rounded-full border-4 border-[#0066FF] border-t-transparent mb-3" />
+                  <h2 className="font-display text-base font-bold text-slate-900 dark:text-white">
+                    Validando archivo... {progreso > 0 ? `${progreso}%` : ""}
+                  </h2>
+                  <p className="mt-1 text-xs text-slate-500">
+                    Parseando datos y verificando información en segundo plano
+                  </p>
+                </div>
+              ) : (
+                <>
+                  <IlustracionDropzone className="size-24 mb-2" />
 
-              <h2 className="font-display text-lg font-bold text-slate-900 dark:text-white">
-                Arrastra y suelta tu archivo aquí
-              </h2>
+                  <h2 className="font-display text-lg font-bold text-slate-900 dark:text-white">
+                    Arrastra y suelta tu archivo aquí
+                  </h2>
 
-              <button
-                type="button"
-                className="mt-1 text-xs font-semibold text-[#0066FF] hover:underline dark:text-[#4d94ff]"
-              >
-                o haz clic para seleccionar un archivo .xlsx
-              </button>
+                  <button
+                    type="button"
+                    className="mt-1 text-xs font-semibold text-[#0066FF] hover:underline dark:text-[#4d94ff]"
+                  >
+                    o haz clic para seleccionar un archivo .xlsx
+                  </button>
 
-              <p className="mt-2 text-xs font-medium text-slate-400 dark:text-slate-500">
-                Máximo 100 traslados · Hasta 25 MB
-              </p>
+                  <p className="mt-2 text-xs font-medium text-slate-400 dark:text-slate-500">
+                    Máximo 100 traslados · Hasta 5 MB
+                  </p>
 
-              {/* Botón Seleccionar archivo */}
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  fileInputRef.current?.click();
-                }}
-                className="mt-4 inline-flex items-center gap-2 rounded-xl bg-[#0066FF] px-6 py-2.5 font-display text-xs font-bold text-white shadow-md transition hover:bg-[#0052cc] active:scale-[0.98]"
-              >
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="size-4" aria-hidden="true">
-                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-                  <polyline points="14 2 14 8 20 8" />
-                  <line x1="16" y1="13" x2="8" y2="13" />
-                  <line x1="16" y1="17" x2="8" y2="17" />
-                  <polyline points="10 9 9 9 8 9" />
-                </svg>
-                Seleccionar archivo
-              </button>
+                  {/* Botón Seleccionar archivo */}
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      fileInputRef.current?.click();
+                    }}
+                    className="mt-4 inline-flex items-center gap-2 rounded-xl bg-[#0066FF] px-6 py-2.5 font-display text-xs font-bold text-white shadow-md transition hover:bg-[#0052cc] active:scale-[0.98]"
+                  >
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="size-4" aria-hidden="true">
+                      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                      <polyline points="14 2 14 8 20 8" />
+                      <line x1="16" y1="13" x2="8" y2="13" />
+                      <line x1="16" y1="17" x2="8" y2="17" />
+                      <polyline points="10 9 9 9 8 9" />
+                    </svg>
+                    Seleccionar archivo
+                  </button>
+                </>
+              )}
 
               {/* Input nativo oculto */}
               <input
@@ -691,7 +707,14 @@ export function CargaMasivaDesktop({ nombreUsuario }: CargaMasivaDesktopProps) {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 text-xs dark:divide-slate-800">
-                  {cargasRecientes.map((carga) => (
+                  {cargasRecientes.length === 0 ? (
+                    <tr>
+                      <td colSpan={5} className="py-8 text-center text-xs text-slate-400 dark:text-slate-500">
+                        No hay cargas recientes. Arrastra o selecciona un archivo .xlsx para comenzar.
+                      </td>
+                    </tr>
+                  ) : (
+                    cargasRecientes.map((carga) => (
                     <tr key={carga.id} className="hover:bg-slate-50/70 transition dark:hover:bg-slate-800/40">
                       {/* Fecha y hora */}
                       <td className="py-3.5 px-3 font-medium text-slate-600 dark:text-slate-300 whitespace-nowrap">
@@ -810,7 +833,7 @@ export function CargaMasivaDesktop({ nombreUsuario }: CargaMasivaDesktopProps) {
                         </div>
                       </td>
                     </tr>
-                  ))}
+                  )))}
                 </tbody>
               </table>
             </div>

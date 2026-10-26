@@ -79,6 +79,16 @@ Deno.serve(async (req) => {
               p_monto: intent.amount_received,
               p_moneda: intent.currency,
             }), "No se pudo confirmar la carga masiva pagada");
+          } else if (evento.type === "payment_intent.payment_failed") {
+            // Si el pago con tarjeta falló, marcar el checkout como expirado para evitar bloqueos
+            await ejecutarSupabase(
+              supabase
+                .from("checkout_traslados_masivos")
+                .update({ expirado_en: new Date().toISOString() })
+                .eq("id", intent.metadata.carga_masiva_id)
+                .is("pagado_en", null),
+              "No se pudo marcar la carga masiva fallida como expirada"
+            );
           }
           break;
         }

@@ -4,6 +4,7 @@ import { crearClienteServidor } from "@/lib/supabase-server";
 import { rateLimitConVentana } from "@/lib/csp-rate-limit";
 import { validarFilasServidor } from "@/lib/carga-masiva-server";
 import { logStructuredError } from "@/lib/logger";
+import { registrarMetricaValidacion } from "@/lib/carga-masiva-telemetria";
 import { verificarCsrfORechazar } from "@/lib/csrf";
 export const dynamic = "force-dynamic";
 export type { FilaValidada, FilaMasivaEntrada } from "@/lib/carga-masiva";
@@ -18,8 +19,18 @@ export async function POST(request: NextRequest) {
   if (!limite.allowed) return NextResponse.json({ error: "Espera un momento antes de validar otra carga." }, { status: 429 });
   const body = esquemaCarga.safeParse(await request.json().catch(() => null));
   if (!body.success) return NextResponse.json({ error: "Carga entre 1 y 100 filas válidas." }, { status: 400 });
+  const inicio = performance.now();
   try {
     const filas = await validarFilasServidor(body.data.filas);
+    const validas = filas.filter(f => f.estado === "correcto").length;
+    const conError = filas.length - validas;
+    registrarMetricaValidacion({
+      totalFilas: filas.length,
+      filasValidas: validas,
+      filasConError: conError,
+      duracionMs: performance.now() - inicio,
+      usuarioId: user.id,
+    });
     return NextResponse.json({ filas });
   } catch (err) {
     logStructuredError("api/viajes/masivos/validate", "validacion_filas_fallida", err, {

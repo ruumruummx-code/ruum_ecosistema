@@ -1,10 +1,45 @@
 "use client";
 import { useCallback, useEffect, useReducer, useRef, useState } from "react";
-import { validarFila, normalizarFilaPlantilla, valorCelda, type FilaValidada } from "@/lib/carga-masiva";
+import { validarFila, parsearArchivoPlantilla, type FilaValidada } from "@/lib/carga-masiva";
 import { logStructuredWarn } from "@/lib/logger";
 import { obtenerHeadersCsrf, obtenerHeadersCsrfAsync, obtenerTokenCsrfCliente } from "@/lib/csrf";
 
 export const STORAGE_KEY_CARGA_ACTIVA = "ruum_carga_masiva_activa_id";
+
+/**
+ * Realiza fetch con reintentos automáticos y backoff exponencial ante errores de red,
+ * límites de tasa (429) o fallas transitorias de servidor (502, 503, 504).
+ */
+export async function fetchConReintento(
+  url: string,
+  options: RequestInit = {},
+  maxIntentos = 3,
+  demoraBaseMs = 1000
+): Promise<Response> {
+  let ultimoError: unknown = null;
+  for (let intento = 0; intento < maxIntentos; intento++) {
+    try {
+      const res = await fetch(url, options);
+      if ((res.status === 429 || (res.status >= 500 && res.status <= 504)) && intento < maxIntentos - 1) {
+        const factor = Math.pow(2, intento);
+        await new Promise((resolve) => setTimeout(resolve, demoraBaseMs * factor));
+        continue;
+      }
+      return res;
+    } catch (err) {
+      ultimoError = err;
+      if (err instanceof DOMException && err.name === "AbortError") {
+        throw err;
+      }
+      if (intento < maxIntentos - 1) {
+        const factor = Math.pow(2, intento);
+        await new Promise((resolve) => setTimeout(resolve, demoraBaseMs * factor));
+      }
+    }
+  }
+  if (ultimoError instanceof Error) throw ultimoError;
+  throw new Error("No se pudo completar la solicitud tras varios reintentos.");
+}
 
 // ── Tipos públicos ──────────────────────────────────────────────────────────
 
@@ -18,11 +53,14 @@ export type EstadoCarga =
   | "checkout"
   | "pagado";
 
+export type EstadoFilaGranular = "pendiente" | "geocodificando" | "cotizado" | "error";
+
 export interface FilaMasiva extends FilaValidada {
   tarifa?: number | null;
   distanciaKm?: number | null;
   eliminada?: boolean;
   validando?: boolean;
+  estadoGranular?: EstadoFilaGranular;
 }
 interface State {
   estado: EstadoCarga; filas: FilaMasiva[]; totalMXN: number; error: string | null;
@@ -41,7 +79,12 @@ type Action =
   | { type: "REANUDAR_CHECKOUT"; stripeClientSecret: string; cargaId: string; filas: FilaMasiva[]; totalMXN: number };
 const inicial: State = { estado: "idle", filas: [], totalMXN: 0, error: null, progreso: 0, stripeClientSecret: null, cargaId: null, pagoConfirmado: false };
 function revalidarFila(fila: FilaMasiva): FilaMasiva {
-  return { ...fila, ...validarFila(fila.datos, fila.indice) };
+  const v = validarFila(fila.datos, fila.indice);
+  return {
+    ...fila,
+    ...v,
+    estadoGranular: v.estado === "error" || fila.errorCotizacion ? "error" : fila.tarifa != null ? "cotizado" : "pendiente",
+  };
 }
 
 function reducer(state: State, action: Action): State {
@@ -49,9 +92,28 @@ function reducer(state: State, action: Action): State {
     case "PARSEANDO":
       return { ...inicial, estado: "parseando" };
     case "VALIDACION_OK":
-      return { ...state, estado: "resultados", filas: action.filas, error: null };
+      return {
+        ...state,
+        estado: "resultados",
+        filas: action.filas.map((f) => ({
+          ...f,
+          estadoGranular: f.estado === "error" || f.errorCotizacion ? "error" : f.tarifa != null ? "cotizado" : "pendiente",
+        })),
+        error: null,
+      };
     case "FILA_VALIDADA":
-      return { ...state, filas: state.filas.map(f => f.indice === action.fila.indice ? { ...action.fila, eliminada: f.eliminada } : f) };
+      return {
+        ...state,
+        filas: state.filas.map((f) =>
+          f.indice === action.fila.indice
+            ? {
+                ...action.fila,
+                eliminada: f.eliminada,
+                estadoGranular: action.fila.estado === "error" || action.fila.errorCotizacion ? "error" : action.fila.tarifa != null ? "cotizado" : "pendiente",
+              }
+            : f
+        ),
+      };
     case "ERROR":
       return { ...state, error: action.mensaje, estado: state.estado === "parseando" ? "idle" : "resultados" };
     case "CORREGIR_CAMPO": {
@@ -69,13 +131,30 @@ function reducer(state: State, action: Action): State {
       return { ...state, filas };
     }
     case "GEOCODIFICANDO":
-      return { ...state, estado: "geocodificando", progreso: 0, error: null };
+      return {
+        ...state,
+        estado: "geocodificando",
+        progreso: 0,
+        error: null,
+        filas: state.filas.map((f) =>
+          !f.eliminada && f.estado === "correcto" ? { ...f, estadoGranular: "geocodificando" } : f
+        ),
+      };
     case "PROGRESO":
       return { ...state, progreso: action.valor };
     case "COTIZANDO":
-      return { ...state, estado: "cotizando", progreso: 0 };
+      return { ...state, estado: "cotizando", progreso: 50 };
     case "COTIZACION_OK":
-      return { ...state, estado: "checkout", filas: action.filas, totalMXN: action.totalMXN, progreso: 100 };
+      return {
+        ...state,
+        estado: "checkout",
+        filas: action.filas.map((f) => ({
+          ...f,
+          estadoGranular: f.errorCotizacion ? "error" : f.tarifa != null ? "cotizado" : "pendiente",
+        })),
+        totalMXN: action.totalMXN,
+        progreso: 100,
+      };
     case "CHECKOUT":
       return { ...state, stripeClientSecret: action.stripeClientSecret, cargaId: action.cargaId };
     case "REANUDAR_CHECKOUT":
@@ -138,7 +217,7 @@ export function useCargaMasiva() {
   }, []);
 
   /**
-   * Parsea el archivo XLSX/CSV con exceljs (lazy import) y lo valida
+   * Parsea el archivo XLSX con Web Worker y lo valida
    * contra la API de validación del servidor.
    */
   const cargarArchivo = useCallback(async (archivo: File) => {
@@ -150,56 +229,7 @@ export function useCargaMasiva() {
     claveCobro.current = null;
 
     try {
-      if (!archivo.name.toLowerCase().endsWith(".xlsx") || archivo.size > 5 * 1024 * 1024) {
-        throw new Error("Selecciona la plantilla oficial .xlsx de hasta 5 MB.");
-      }
-      // Parsear con ExcelJS en el navegador o entorno Node
-      const ExcelJSModule = await import("exceljs");
-      const WorkbookCtor =
-        ("Workbook" in ExcelJSModule && ExcelJSModule.Workbook) ||
-        ("default" in ExcelJSModule && (ExcelJSModule.default as unknown as { Workbook?: typeof ExcelJSModule.Workbook })?.Workbook) ||
-        (ExcelJSModule as unknown as { Workbook: typeof ExcelJSModule.Workbook }).Workbook;
-      if (!WorkbookCtor) {
-        throw new Error("No se pudo iniciar el lector de hojas de cálculo.");
-      }
-      const wb = new WorkbookCtor();
-      const buffer = await archivo.arrayBuffer();
-      await wb.xlsx.load(buffer);
-
-      const ws = wb.getWorksheet("Traslados") ?? (wb.worksheets ? wb.worksheets.find(w => w.name?.toLowerCase() === "traslados") : undefined);
-      if (!ws) throw new Error("El archivo no contiene la hoja 'Traslados' de la plantilla oficial.");
-
-      // Obtener encabezados de la primera fila
-      const headerRow = ws.getRow(1);
-      const headers: Record<number, string> = {};
-      headerRow.eachCell((cell, col) => {
-        const val = valorCelda(cell.value).toLowerCase();
-        if (val) headers[col] = val;
-      });
-
-      const filasBruto: Record<string, string>[] = [];
-      const obligatorios = ["vehiculo_marca", "vehiculo_modelo", "origen_codigo_postal", "destino_codigo_postal"];
-      if (!obligatorios.every(h => Object.values(headers).includes(h))) {
-        throw new Error("Usa los encabezados de la plantilla oficial.");
-      }
-      ws.eachRow((row, rowNum) => {
-        if (rowNum === 1) return; // saltar encabezados
-        const obj: Record<string, string> = {};
-        let capturada = false;
-        row.eachCell((cell, col) => {
-          const key = headers[col];
-          if (key) obj[key] = valorCelda(cell.value);
-          if (key && obj[key] && cell.type !== 6) capturada = true;
-        });
-        if (capturada) filasBruto.push(normalizarFilaPlantilla(obj));
-      });
-
-      if (filasBruto.length === 0) {
-        dispatch({ type: "ERROR", mensaje: "El archivo no contiene datos de traslados para cotizar." });
-        return;
-      }
-
-      if (filasBruto.length > 100) throw new Error("El límite es de 100 traslados por lote.");
+      const filasBruto = await parsearArchivoPlantilla(archivo, controller.signal);
       if (controller.signal.aborted) return;
 
       // Validar en servidor
@@ -264,14 +294,14 @@ export function useCargaMasiva() {
 
   /**
    * Geocodifica todos los pares CP origen/destino y luego cotiza.
-   * Sólo activa las filas en estado "correcto" y no eliminadas.
+   * Si soloValidas es true, permite cotizar únicamente las filas válidas excluyendo las que tengan error.
    */
-  const geocodificarYCotizar = useCallback(async () => {
+  const geocodificarYCotizar = useCallback(async (opciones?: { soloValidas?: boolean }) => {
     abortRef.current?.abort();
     const controller = new AbortController();
     abortRef.current = controller;
 
-    const filasActivas = state.filas.filter((f) => !f.eliminada && f.estado === "correcto");
+    const filasActivas = state.filas.filter((f) => !f.eliminada && (opciones?.soloValidas ? f.estado === "correcto" : true));
     if (filasActivas.length === 0) return;
 
     dispatch({ type: "GEOCODIFICANDO" });
@@ -283,7 +313,11 @@ export function useCargaMasiva() {
       const res = await fetch("/api/viajes/masivos/cotizar", {
         method: "POST",
         headers: headersCsrf,
-        body: JSON.stringify({ filas: filasActivas.map(f => f.datos), clave }),
+        body: JSON.stringify({
+          filas: filasActivas.map(f => f.datos),
+          clave,
+          permitirParcial: Boolean(opciones?.soloValidas),
+        }),
         signal: controller.signal,
       });
       const resultado = await res.json();
@@ -304,6 +338,11 @@ export function useCargaMasiva() {
     }
   }, [state.filas]);
 
+  /** Cotiza inmediatamente solo las filas que son válidas */
+  const cotizarSoloValidas = useCallback(async () => {
+    return geocodificarYCotizar({ soloValidas: true });
+  }, [geocodificarYCotizar]);
+
   /** Llama cuando Stripe confirma el pago */
   const confirmarPago = useCallback(() => {
     try {
@@ -315,16 +354,19 @@ export function useCargaMasiva() {
     dispatch({ type: "PAGO_OK" });
   }, []);
 
-  /** Reanuda una carga pendiente previamente guardada */
+  /** Reanuda una carga pendiente previamente guardada con reintento automático y backoff */
   const reanudarCarga = useCallback(async (id: string): Promise<boolean> => {
     abortRef.current?.abort();
     const controller = new AbortController();
     abortRef.current = controller;
     dispatch({ type: "COTIZANDO" });
     try {
-      const res = await fetch(`/api/viajes/masivos/pendientes?id=${encodeURIComponent(id)}`, {
-        signal: controller.signal,
-      });
+      const res = await fetchConReintento(
+        `/api/viajes/masivos/pendientes?id=${encodeURIComponent(id)}`,
+        { signal: controller.signal },
+        3,
+        1000
+      );
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "No se pudo recuperar la carga pendiente.");
       if (data.pagado) {
@@ -380,10 +422,10 @@ export function useCargaMasiva() {
     }
   }, []);
 
-  /** Consulta lista de cargas pendientes desde el servidor */
+  /** Consulta lista de cargas pendientes desde el servidor con reintento automático y backoff */
   const consultarCargasPendientes = useCallback(async () => {
     try {
-      const res = await fetch("/api/viajes/masivos/pendientes");
+      const res = await fetchConReintento("/api/viajes/masivos/pendientes", {}, 3, 1000);
       const data = await res.json();
       return (data.pendientes ?? []) as Array<{ id: string; totalMXN: number; cantidad_traslados: number; creado_en?: string }>;
     } catch (err) {
@@ -392,9 +434,23 @@ export function useCargaMasiva() {
     }
   }, []);
 
+  /** Consulta el estado de pago de una carga masiva con reintento y backoff exponencial */
+  const consultarEstadoPago = useCallback(async (id: string): Promise<{ pagado: boolean; error?: string }> => {
+    const res = await fetchConReintento(
+      `/api/viajes/masivos/estado?id=${encodeURIComponent(id)}`,
+      {},
+      3,
+      1000
+    );
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error ?? "No se pudo consultar el estado del pago.");
+    return data as { pagado: boolean; error?: string };
+  }, []);
+
   const filasVisibles = state.filas.filter((f) => !f.eliminada);
   const filasConError = filasVisibles.filter((f) => f.estado === "error");
   const filasCorrectas = filasVisibles.filter((f) => f.estado === "correcto");
+  const filasCotizables = filasVisibles.filter((f) => f.estado === "correcto" && !f.errorCotizacion);
   const todasListas = filasVisibles.length > 0 && filasConError.length === 0 && !filasVisibles.some(f => f.validando);
 
   return {
@@ -402,16 +458,19 @@ export function useCargaMasiva() {
     filasVisibles,
     filasConError,
     filasCorrectas,
+    filasCotizables,
     todasListas,
     cargaPendienteStorage,
     cargarArchivo,
     corregirCampo,
     eliminarFila,
     geocodificarYCotizar,
+    cotizarSoloValidas,
     confirmarPago,
     cancelar,
     reanudarCarga,
     descartarCargaPendiente,
     consultarCargasPendientes,
+    consultarEstadoPago,
   };
 }

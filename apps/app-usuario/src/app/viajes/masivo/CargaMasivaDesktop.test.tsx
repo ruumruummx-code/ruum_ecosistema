@@ -1,8 +1,16 @@
 /** @vitest-environment jsdom */
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { render, screen, waitFor, fireEvent, within } from "@testing-library/react";
+import { render, screen, waitFor, fireEvent, within, act } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { CargaMasivaDesktop } from "./CargaMasivaDesktop";
+
+async function renderizarDesktop(nombre = "Alex") {
+  let view!: ReturnType<typeof render>;
+  await act(async () => {
+    view = render(<CargaMasivaDesktop nombreUsuario={nombre} />);
+  });
+  return view;
+}
 
 const pushMock = vi.fn();
 const backMock = vi.fn();
@@ -13,6 +21,32 @@ vi.mock("next/navigation", () => ({
 const cargarArchivoMock = vi.fn();
 const reanudarCargaMock = vi.fn();
 const descartarCargaPendienteMock = vi.fn();
+const consultarCargasPendientesMock = vi.fn().mockResolvedValue([
+  {
+    id: "rec-1",
+    totalMXN: 8500,
+    cantidad_traslados: 85,
+    creado_en: "2024-10-26T01:03:00Z",
+    archivo: "traslados_octubre.xlsx",
+    estado: "Completado",
+  },
+  {
+    id: "rec-2",
+    totalMXN: 10000,
+    cantidad_traslados: 100,
+    creado_en: "2024-10-24T11:42:00Z",
+    archivo: "ruta_quincena.xlsx",
+    estado: "En proceso",
+  },
+  {
+    id: "rec-3",
+    totalMXN: 4800,
+    cantidad_traslados: 48,
+    creado_en: "2024-10-22T15:18:00Z",
+    archivo: "traslados_sucursal.xlsx",
+    estado: "Con errores",
+  },
+]);
 
 vi.mock("../nuevo/hooks/useCargaMasiva", () => ({
   useCargaMasiva: () => ({
@@ -36,7 +70,7 @@ vi.mock("../nuevo/hooks/useCargaMasiva", () => ({
     cargaPendienteStorage: null,
     reanudarCarga: reanudarCargaMock,
     descartarCargaPendiente: descartarCargaPendienteMock,
-    consultarCargasPendientes: vi.fn().mockResolvedValue([]),
+    consultarCargasPendientes: consultarCargasPendientesMock,
   }),
 }));
 
@@ -45,8 +79,8 @@ describe("CargaMasivaDesktop — Pantalla de Carga Masiva de Escritorio", () => 
     vi.clearAllMocks();
   });
 
-  it("renderiza el sidebar con la opción Carga Masiva activa y la tarjeta inferior Traslados sin límites", () => {
-    render(<CargaMasivaDesktop nombreUsuario="Alex" />);
+  it("renderiza el sidebar con la opción Carga Masiva activa y la tarjeta inferior Traslados sin límites", async () => {
+    await renderizarDesktop("Alex");
 
     const navPanel = screen.getByRole("navigation", { name: "Navegación del panel" });
     const enlaceCarga = within(navPanel).getByRole("link", { name: /^Carga Masiva/ });
@@ -64,7 +98,7 @@ describe("CargaMasivaDesktop — Pantalla de Carga Masiva de Escritorio", () => 
 
   it("renderiza la barra superior con migas de pan (Breadcrumbs), notificaciones y dropdown de usuario", async () => {
     const user = userEvent.setup();
-    render(<CargaMasivaDesktop nombreUsuario="Alex" />);
+    await renderizarDesktop("Alex");
 
     // Breadcrumbs
     const breadcrumbs = screen.getByRole("navigation", { name: "Migas de pan" });
@@ -80,25 +114,25 @@ describe("CargaMasivaDesktop — Pantalla de Carga Masiva de Escritorio", () => 
     expect(screen.getByText("A")).toBeInTheDocument();
   });
 
-  it("renderiza el header de la sección con título, subtítulo y botón Mis viajes", () => {
-    render(<CargaMasivaDesktop nombreUsuario="Alex" />);
+  it("renderiza el header de la sección con título, subtítulo y botón Mis viajes", async () => {
+    await renderizarDesktop("Alex");
 
     expect(screen.getByRole("heading", { name: "Carga masiva de traslados" })).toBeInTheDocument();
     expect(screen.getByText(/Cotiza y procesa múltiples traslados desde un archivo/)).toBeInTheDocument();
     expect(screen.getByRole("link", { name: /Mis viajes/ })).toHaveAttribute("href", "/mis-viajes");
   });
 
-  it("renderiza la zona de Dropzone con arrastrar y soltar y botón Seleccionar archivo", () => {
-    render(<CargaMasivaDesktop nombreUsuario="Alex" />);
+  it("renderiza la zona de Dropzone con arrastrar y soltar y botón Seleccionar archivo", async () => {
+    await renderizarDesktop("Alex");
 
     expect(screen.getByText("Arrastra y suelta tu archivo aquí")).toBeInTheDocument();
     expect(screen.getByText("o haz clic para seleccionar un archivo .xlsx")).toBeInTheDocument();
-    expect(screen.getByText("Máximo 100 traslados · Hasta 25 MB")).toBeInTheDocument();
+    expect(screen.getByText("Máximo 100 traslados · Hasta 5 MB")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /Seleccionar archivo/ })).toBeInTheDocument();
   });
 
   it("valida y rechaza archivos que no sean .xlsx mostrando un toast de error", async () => {
-    render(<CargaMasivaDesktop nombreUsuario="Alex" />);
+    await renderizarDesktop("Alex");
 
     const input = screen.getByLabelText("Cargar archivo Excel .xlsx");
     const archivoInvalido = new File(["dummy content"], "traslados.pdf", { type: "application/pdf" });
@@ -111,26 +145,26 @@ describe("CargaMasivaDesktop — Pantalla de Carga Masiva de Escritorio", () => 
     expect(cargarArchivoMock).not.toHaveBeenCalled();
   });
 
-  it("valida y rechaza archivos mayores a 25 MB mostrando un toast de error", async () => {
-    render(<CargaMasivaDesktop nombreUsuario="Alex" />);
+  it("valida y rechaza archivos mayores a 5 MB mostrando un toast de error", async () => {
+    await renderizarDesktop("Alex");
 
     const input = screen.getByLabelText("Cargar archivo Excel .xlsx");
-    // Archivo de 26 MB
-    const archivoPesado = new File([new ArrayBuffer(26 * 1024 * 1024)], "archivo_enorme.xlsx", {
+    // Archivo de 6 MB
+    const archivoPesado = new File([new ArrayBuffer(6 * 1024 * 1024)], "archivo_enorme.xlsx", {
       type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     });
 
     fireEvent.change(input, { target: { files: [archivoPesado] } });
 
     expect(await screen.findByRole("alert")).toHaveTextContent(
-      "El archivo excede el límite máximo permitido de 25 MB."
+      "El archivo excede el límite máximo permitido de 5 MB."
     );
     expect(cargarArchivoMock).not.toHaveBeenCalled();
   });
 
   it("acepta archivos .xlsx válidos y ejecuta la carga", async () => {
     cargarArchivoMock.mockResolvedValueOnce(undefined);
-    render(<CargaMasivaDesktop nombreUsuario="Alex" />);
+    await renderizarDesktop("Alex");
 
     const input = screen.getByLabelText("Cargar archivo Excel .xlsx");
     const archivoValido = new File(["contenido excel"], "flota_central.xlsx", {
@@ -144,8 +178,8 @@ describe("CargaMasivaDesktop — Pantalla de Carga Masiva de Escritorio", () => 
     });
   });
 
-  it("renderiza el panel instructivo con 4 pasos y botón de descarga de plantilla oficial", () => {
-    render(<CargaMasivaDesktop nombreUsuario="Alex" />);
+  it("renderiza el panel instructivo con 4 pasos y botón de descarga de plantilla oficial", async () => {
+    await renderizarDesktop("Alex");
 
     expect(screen.getByRole("heading", { name: "¿Cómo funciona?" })).toBeInTheDocument();
     expect(screen.getByText("Descarga la plantilla oficial")).toBeInTheDocument();
@@ -160,7 +194,7 @@ describe("CargaMasivaDesktop — Pantalla de Carga Masiva de Escritorio", () => 
 
   it("permite abrir y cerrar el modal de guía de uso", async () => {
     const user = userEvent.setup();
-    render(<CargaMasivaDesktop nombreUsuario="Alex" />);
+    await renderizarDesktop("Alex");
 
     const botonGuia = screen.getByRole("button", { name: /Ver guía de uso/ });
     await user.click(botonGuia);
@@ -174,8 +208,8 @@ describe("CargaMasivaDesktop — Pantalla de Carga Masiva de Escritorio", () => 
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
   });
 
-  it("renderiza la cinta de 4 beneficios con iconos y descripciones", () => {
-    render(<CargaMasivaDesktop nombreUsuario="Alex" />);
+  it("renderiza la cinta de 4 beneficios con iconos y descripciones", async () => {
+    await renderizarDesktop("Alex");
 
     expect(screen.getByText("Rápido")).toBeInTheDocument();
     expect(screen.getByText("Procesa múltiples traslados en segundos")).toBeInTheDocument();
@@ -192,13 +226,13 @@ describe("CargaMasivaDesktop — Pantalla de Carga Masiva de Escritorio", () => 
 
   it("renderiza la tabla de cargas recientes con badges de estatus coloreados y acciones", async () => {
     const user = userEvent.setup();
-    render(<CargaMasivaDesktop nombreUsuario="Alex" />);
+    await renderizarDesktop("Alex");
 
     expect(screen.getByRole("heading", { name: "Cargas recientes" })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: /Ver todas/ })).toHaveAttribute("href", "/mis-viajes");
 
     // Filas
-    expect(screen.getByText("traslados_octubre.xlsx")).toBeInTheDocument();
+    expect(await screen.findByText("traslados_octubre.xlsx")).toBeInTheDocument();
     expect(screen.getByText("Completado")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Ver resultado" })).toBeInTheDocument();
 
@@ -222,9 +256,9 @@ describe("CargaMasivaDesktop — Pantalla de Carga Masiva de Escritorio", () => 
 
   it("abre el menú contextual de tres puntos en una fila y ejecuta acciones", async () => {
     const user = userEvent.setup();
-    render(<CargaMasivaDesktop nombreUsuario="Alex" />);
+    await renderizarDesktop("Alex");
 
-    const botonMenu = screen.getByRole("button", { name: "Opciones de carga traslados_octubre.xlsx" });
+    const botonMenu = await screen.findByRole("button", { name: "Opciones de carga traslados_octubre.xlsx" });
     await user.click(botonMenu);
 
     expect(screen.getByRole("menu")).toBeInTheDocument();
@@ -236,8 +270,8 @@ describe("CargaMasivaDesktop — Pantalla de Carga Masiva de Escritorio", () => 
     expect(await screen.findByRole("status")).toHaveTextContent("Resumen de carga copiado al portapapeles");
   });
 
-  it("renderiza el banner de soporte inferior con enlace a contactar soporte", () => {
-    render(<CargaMasivaDesktop nombreUsuario="Alex" />);
+  it("renderiza el banner de soporte inferior con enlace a contactar soporte", async () => {
+    await renderizarDesktop("Alex");
 
     const footerSoporte = screen.getByRole("contentinfo", { name: "Ayuda de carga masiva" });
     expect(within(footerSoporte).getByRole("heading", { name: "¿Necesitas ayuda?" })).toBeInTheDocument();

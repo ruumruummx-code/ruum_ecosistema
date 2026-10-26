@@ -9,16 +9,35 @@ interface Props {
   /** ID del traslado masivo para el checkout */
   cargaId?: string;
   clientSecret?: string;
+  parcial?: boolean;
   onEstadoPago: (estado: { listo: boolean; procesando: boolean }) => void;
   onPagado: () => void;
 }
 
-export function CheckoutMasivo({ filas, totalMXN, cargaId, clientSecret, onPagado, onEstadoPago }: Props) {
+export function CheckoutMasivo({ filas, totalMXN, cargaId, clientSecret, parcial, onPagado, onEstadoPago }: Props) {
   const formId = `pago-masivo-${cargaId ?? "pendiente"}`;
   const filasConTarifa = filas.filter((f) => !f.eliminada && f.tarifa != null);
+  const pendientes = filas.filter((f) => !f.eliminada && (f.estado === "error" || f.errorCotizacion)).length;
 
   return (
     <div className="flex min-h-0 flex-1 flex-col gap-4">
+      {/* ── Banner de pago parcial ───────────────────────────── */}
+      {(parcial || pendientes > 0) && (
+        <aside
+          role="status"
+          aria-label="Aviso de pago parcial"
+          className="flex items-start gap-2.5 rounded-xl border border-blue-200 bg-blue-50/90 p-3 text-xs text-blue-900 dark:border-blue-900/50 dark:bg-blue-950/30 dark:text-blue-200"
+        >
+          <span className="text-base leading-none">ℹ️</span>
+          <div>
+            <p className="font-bold">Pago parcial de traslados válidos</p>
+            <p className="mt-0.5 text-[11px] text-blue-700 dark:text-blue-300">
+              Estás procesando el pago de {filasConTarifa.length} traslado{filasConTarifa.length !== 1 ? "s" : ""} listos. {pendientes > 0 ? `Los ${pendientes} traslados con incidencias quedan guardados como borrador para que puedas corregirlos y reintentar su cobro sin recapturar todo el archivo.` : ""}
+            </p>
+          </div>
+        </aside>
+      )}
+
       {/* ── Resumen de traslados ─────────────────────────────── */}
       <section aria-label="Resumen de traslados">
         <h3 className="mb-2 text-sm font-bold">
@@ -40,11 +59,16 @@ export function CheckoutMasivo({ filas, totalMXN, cargaId, clientSecret, onPagad
                     ` · ${fila.distanciaKm.toLocaleString("es-MX", { maximumFractionDigits: 1 })} km`}
                 </p>
               </div>
-              <p className="shrink-0 text-sm font-bold text-[var(--user-color-primary)]">
-                {fila.tarifa != null
-                  ? `$${fila.tarifa.toLocaleString("es-MX", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
-                  : "—"}
-              </p>
+              <div className="flex shrink-0 items-center gap-2">
+                <span className="rounded-full bg-green-100 px-2 py-0.5 text-[10px] font-bold text-green-700 dark:bg-green-950/40 dark:text-green-300">
+                  ✓ Cotizado
+                </span>
+                <p className="text-sm font-bold text-[var(--user-color-primary)]">
+                  {fila.tarifa != null
+                    ? `$${fila.tarifa.toLocaleString("es-MX", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+                    : "—"}
+                </p>
+              </div>
             </div>
           ))}
         </div>

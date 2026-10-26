@@ -4,7 +4,10 @@ import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { createClient } from "@supabase/supabase-js";
 import { validarFila, type FilaValidada } from "./carga-masiva";
-import { clasificarVehiculoMasivo } from "@ruum/api/services";
+import { clasificarVehiculoMasivo, eliminarCheckoutMasivoServidor, limpiarCheckoutsMasivosSinIntentServidor } from "@ruum/api/services";
+import { logStructuredError, logStructuredWarn } from "./logger";
+
+export { eliminarCheckoutMasivoServidor, limpiarCheckoutsMasivosSinIntentServidor };
 
 function rutaCatalogoCP(prefijo: string): string {
   const cwd = process.cwd();
@@ -26,16 +29,43 @@ export function clienteMasivoServicio() {
  * administrativa: un cliente de usuario devolvería cero filas por RLS. */
 export async function validarFilasServidor(entradas: Record<string, string>[]): Promise<FilaValidada[]> {
   const catalogoServidor = clienteMasivoServicio();
-  const archivos = new Map<string, Promise<Record<string, unknown>>>();
+  const archivos = new Map<string, Promise<{ disponible: boolean; catalogo: Record<string, unknown> }>>();
   return Promise.all(entradas.map(async (entrada, indice) => {
     const fila = validarFila(entrada, indice);
     for (const campo of ["origenCodigoPostal", "destinoCodigoPostal"]) {
       const cp = entrada[campo] ?? "";
       if (!/^\d{5}$/.test(cp)) continue;
       const prefijo = cp.slice(0, 2);
-      if (!archivos.has(prefijo)) archivos.set(prefijo, readFile(rutaCatalogoCP(prefijo), "utf8").then(JSON.parse).catch((error: NodeJS.ErrnoException) => { if (error.code === "ENOENT") return {}; throw error; }));
-      const catalogo = await archivos.get(prefijo)!;
-      if (!catalogo[cp]) fila.errores[campo] = "Código postal fuera del catálogo vigente";
+      if (!archivos.has(prefijo)) {
+        archivos.set(
+          prefijo,
+          readFile(rutaCatalogoCP(prefijo), "utf8")
+            .then((contenido) => ({
+              disponible: true,
+              catalogo: JSON.parse(contenido) as Record<string, unknown>,
+            }))
+            .catch((error: NodeJS.ErrnoException) => {
+              if (error.code === "ENOENT") {
+                logStructuredWarn("carga-masiva-server", "catalogo_cp_no_encontrado", error, {
+                  prefijo,
+                  ruta: rutaCatalogoCP(prefijo),
+                });
+                return { disponible: false, catalogo: {} };
+              }
+              logStructuredError("carga-masiva-server", "error_lectura_catalogo_cp", error, {
+                prefijo,
+                ruta: rutaCatalogoCP(prefijo),
+              });
+              return { disponible: false, catalogo: {} };
+            })
+        );
+      }
+      const resultado = await archivos.get(prefijo)!;
+      if (!resultado.disponible) {
+        fila.errores[campo] = "Catálogo de códigos postales no disponible temporalmente";
+      } else if (!resultado.catalogo[cp]) {
+        fila.errores[campo] = "Código postal fuera del catálogo vigente";
+      }
     }
     if (entrada.marca && entrada.modelo) {
       const clasificacion = await clasificarVehiculoMasivo(catalogoServidor, entrada.marca, entrada.modelo);

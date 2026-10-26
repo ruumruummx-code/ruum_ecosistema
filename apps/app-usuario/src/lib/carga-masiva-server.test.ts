@@ -61,4 +61,24 @@ describe("validación del catálogo masivo con RLS administrativa", () => {
     await expect(validarFilasServidor([fila()])).rejects.toThrow("no está configurado");
     expect(mocks.clasificar).not.toHaveBeenCalled();
   });
+
+  it("distingue entre CP no encontrado en catálogo vigente y catálogo no disponible en disco", async () => {
+    // CP con prefijo inexistente en disco (prefijo 00 no tiene archivo 00.json)
+    const filaCatalogoAusente = normalizarFilaPlantilla({
+      ...fila(),
+      origen_codigo_postal: "00123",
+      destino_codigo_postal: "04360",
+    });
+    const [resAusente] = await validarFilasServidor([filaCatalogoAusente]);
+    expect(resAusente?.errores.origenCodigoPostal).toBe("Catálogo de códigos postales no disponible temporalmente");
+
+    // CP con prefijo existente (06) pero número inexistente en catálogo
+    const filaCpFuera = normalizarFilaPlantilla({
+      ...fila(),
+      origen_codigo_postal: "06999",
+      destino_codigo_postal: "04360",
+    });
+    const [resFuera] = await validarFilasServidor([filaCpFuera]);
+    expect(resFuera?.errores.origenCodigoPostal).toBe("Código postal fuera del catálogo vigente");
+  });
 });

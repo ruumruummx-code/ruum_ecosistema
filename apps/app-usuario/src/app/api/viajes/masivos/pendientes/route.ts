@@ -34,7 +34,7 @@ export async function GET(request: NextRequest) {
       if (!carga) return NextResponse.json({ error: "Carga no encontrada" }, { status: 404 });
 
       if (carga.pagado_en) {
-        return NextResponse.json({ id: carga.id, pagado: true });
+        return NextResponse.json({ id: carga.id, pagado: true, fuente: "webhook" });
       }
       if (carga.expirado_en) {
         return NextResponse.json({ id: carga.id, expirado: true, error: "Esta carga masiva ya expiró o fue descartada." });
@@ -47,7 +47,7 @@ export async function GET(request: NextRequest) {
       const intent = await stripeMasivo(`payment_intents/${encodeURIComponent(carga.stripe_payment_intent_id)}`);
       if (intent.status === "succeeded") {
         await confirmarPagoMasivoServidor(servicio, carga.id, intent.id, intent.amount_received, intent.currency);
-        return NextResponse.json({ id: carga.id, pagado: true });
+        return NextResponse.json({ id: carga.id, pagado: true, fuente: "fallback_stripe" });
       }
       if (intent.status === "canceled") {
         await descartarCheckoutMasivoServidor(servicio, carga.id, user.id);
@@ -82,6 +82,8 @@ export async function GET(request: NextRequest) {
         : Array.isArray(c.filas)
           ? c.filas.length
           : 0,
+      archivo: (c as { archivo?: string }).archivo || `lote_${c.id.slice(0, 8)}.xlsx`,
+      estado: c.pagado_en ? "Completado" : c.expirado_en ? "Con errores" : "En proceso",
     }));
     return NextResponse.json({ pendientes: lista });
   } catch (err) {

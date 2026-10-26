@@ -21,6 +21,7 @@ interface Props {
   filas: FilaMasiva[];
   onCorregir: (indice: number, campo: string, valor: string) => void;
   onEliminar: (indice: number) => void;
+  onCotizarSoloValidas?: () => void;
 }
 
 interface CeldaEditandoState {
@@ -29,7 +30,7 @@ interface CeldaEditandoState {
   valor: string;
 }
 
-export function TablaCorreccionMasiva({ filas, onCorregir, onEliminar }: Props) {
+export function TablaCorreccionMasiva({ filas, onCorregir, onEliminar, onCotizarSoloValidas }: Props) {
   const [editando, setEditando] = useState<CeldaEditandoState | null>(null);
   const [filaActiva, setFilaActiva] = useState<number | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -75,6 +76,25 @@ export function TablaCorreccionMasiva({ filas, onCorregir, onEliminar }: Props) 
           <p className="text-[10px] font-semibold uppercase tracking-wide text-[var(--user-color-muted)]">Con Error</p>
         </div>
       </div>
+
+      {/* ─── Banner de cotización incremental si hay filas válidas y con error ── */}
+      {filasCorrectas.length > 0 && filasConError.length > 0 && (
+        <div className="flex items-center justify-between rounded-xl border border-amber-200 bg-amber-50 p-3 text-xs text-amber-900 dark:border-amber-900/50 dark:bg-amber-950/20 dark:text-amber-200">
+          <div>
+            <p className="font-semibold">{filasCorrectas.length} traslados listos para cotizar</p>
+            <p className="text-[11px] opacity-80">{filasConError.length} fila(s) con incidencias.</p>
+          </div>
+          {onCotizarSoloValidas && (
+            <button
+              type="button"
+              onClick={onCotizarSoloValidas}
+              className="rounded-lg bg-amber-600 px-3 py-1.5 font-bold text-white hover:bg-amber-700 transition-colors"
+            >
+              Cotizar {filasCorrectas.length} válidas
+            </button>
+          )}
+        </div>
+      )}
 
       {/* ─── Lista de filas ───────────────────────────────────── */}
       {filas.some(f => f.errorCotizacion) && <p role="alert" className="text-sm text-red-600">Hay traslados sin cotización. Puedes reintentar la cotización u omitir sus filas; los datos del vehículo se conservan.</p>}
@@ -165,12 +185,32 @@ function FilaItem({
           <p className="truncate text-sm font-bold">
             #{fila.indice + 1} · {fila.datos.marca || "Sin marca"} {fila.datos.modelo || ""}
           </p>
-          <p className="truncate text-xs text-[var(--user-color-muted)]">
-            {fila.datos.origenCodigoPostal || "–"} → {fila.datos.destinoCodigoPostal || "–"}
-            {camposConError.length > 0 && ` · ${camposConError.length} campo${camposConError.length !== 1 ? "s" : ""} con error`}
-            {fila.errorCotizacion && " · Sin cotización"}
-            {fila.validando && " · Validando…"}
-          </p>
+          <div className="flex flex-wrap items-center gap-1.5 pt-0.5">
+            <span className="truncate text-xs text-[var(--user-color-muted)]">
+              {fila.datos.origenCodigoPostal || "–"} → {fila.datos.destinoCodigoPostal || "–"}
+            </span>
+            {fila.estadoGranular === "cotizado" && (
+              <span className="rounded-full bg-green-100 px-2 py-0.5 text-[10px] font-bold text-green-700 dark:bg-green-950/40 dark:text-green-300">
+                ✓ Cotizado
+              </span>
+            )}
+            {fila.estadoGranular === "geocodificando" && (
+              <span className="animate-pulse rounded-full bg-blue-100 px-2 py-0.5 text-[10px] font-bold text-blue-700 dark:bg-blue-950/40 dark:text-blue-300">
+                Calculando ruta…
+              </span>
+            )}
+            {fila.estadoGranular === "error" && (
+              <span className="rounded-full bg-red-100 px-2 py-0.5 text-[10px] font-bold text-red-700 dark:bg-red-950/40 dark:text-red-300">
+                ⚠ {camposConError.length > 0 ? `${camposConError.length} error(es)` : "Error de ruta/tarifa"}
+              </span>
+            )}
+            {fila.estadoGranular === "pendiente" && (
+              <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-bold text-slate-600 dark:bg-slate-800 dark:text-slate-300">
+                Listo para cotizar
+              </span>
+            )}
+            {fila.validando && <span className="text-[10px] text-blue-600 font-semibold">· Validando…</span>}
+          </div>
         </div>
         {fila.tarifa != null && (
           <span className="shrink-0 text-sm font-bold text-green-600">

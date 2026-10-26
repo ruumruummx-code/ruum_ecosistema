@@ -32,6 +32,8 @@ class QueryFake {
   limit(...args: unknown[]) { return this.registrar("limit", args); }
   order(...args: unknown[]) { return this.registrar("order", args); }
   or(...args: unknown[]) { return this.registrar("or", args); }
+  is(...args: unknown[]) { return this.registrar("is", args); }
+  lt(...args: unknown[]) { return this.registrar("lt", args); }
 
   maybeSingle() {
     this.registrar("maybeSingle", []);

@@ -1,7 +1,7 @@
 /** @vitest-environment jsdom */
 import { act, renderHook, waitFor } from "@testing-library/react";
 import { afterEach, expect, it, vi } from "vitest";
-import { useCargaMasiva } from "./useCargaMasiva";
+import { useCargaMasiva, fetchConReintento } from "./useCargaMasiva";
 import { normalizarFilaPlantilla, validarFila } from "@/lib/carga-masiva";
 
 vi.mock("exceljs", () => ({
@@ -79,4 +79,110 @@ it("descarta la carga pendiente y resetea el estado", async () => {
   expect(result.current.estado).toBe("idle");
   expect(result.current.cargaId).toBeNull();
 });
+
+it("fetchConReintento reintenta hasta 3 veces ante error 429 y tiene éxito", async () => {
+  let intentos = 0;
+  const fetchMock = vi.fn().mockImplementation(async () => {
+    intentos++;
+    if (intentos < 3) {
+      return new Response(JSON.stringify({ error: "Rate limit" }), { status: 429 });
+    }
+    return Response.json({ pagado: true });
+  });
+  vi.stubGlobal("fetch", fetchMock);
+
+  const res = await fetchConReintento("/api/test", {}, 3, 10);
+  const data = await res.json();
+  expect(intentos).toBe(3);
+  expect(data.pagado).toBe(true);
+});
+
+it("consultarEstadoPago reintenta ante errores y devuelve estado pagado", async () => {
+  let intentos = 0;
+  const fetchMock = vi.fn().mockImplementation(async () => {
+    intentos++;
+    if (intentos === 1) {
+      return new Response(JSON.stringify({ error: "Temporal" }), { status: 503 });
+    }
+    return Response.json({ pagado: true });
+  });
+  vi.stubGlobal("fetch", fetchMock);
+
+  const { result } = renderHook(() => useCargaMasiva());
+  let res: { pagado: boolean } | undefined;
+  await act(async () => {
+    res = await result.current.consultarEstadoPago("carga-123");
+  });
+  expect(intentos).toBe(2);
+  expect(res?.pagado).toBe(true);
+});
+
+it("asigna estadoGranular 'pendiente' y 'error' y cotizarSoloValidas procesa únicamente las filas válidas", async () => {
+  const datosValidos = normalizarFilaPlantilla({
+    vehiculo_marca: "Toyota",
+    vehiculo_modelo: "Corolla",
+    vehiculo_anio: "2023",
+    vehiculo_placas: "XYZ789",
+    origen_codigo_postal: "06700",
+    destino_codigo_postal: "04360",
+    condicion: "seminueva",
+    contacto_entrega_nombre: "Remitente",
+    contacto_entrega_telefono: "5512345678",
+    contacto_recepcion_nombre: "Destinatario",
+    contacto_recepcion_telefono: "5512345679",
+    origen_calle: "Insurgentes",
+    origen_numero: "100",
+    origen_colonia: "Roma Sur",
+    destino_calle: "Universidad",
+    destino_numero: "200",
+    destino_colonia: "Copilco",
+  });
+  const filaValida = { ...validarFila(datosValidos, 0), estado: "correcto" as const };
+  const filaInvalida = {
+    ...validarFila(datosValidos, 1),
+    estado: "error" as const,
+    errores: { origen_codigo_postal: "Código postal inválido" },
+  };
+
+  const fetchMock = vi.fn().mockImplementation(async (url: string, init?: RequestInit) => {
+    if (url.includes("/api/viajes/masivos/validate")) {
+      return Response.json({ filas: [filaValida, filaInvalida] });
+    }
+    if (url.includes("/api/viajes/masivos/cotizar")) {
+      const body = JSON.parse(init?.body as string);
+      expect(body.permitirParcial).toBe(true);
+      expect(body.filas).toHaveLength(1);
+      return Response.json({
+        id: "carga-parcial-123",
+        clientSecret: "pi_secret_parcial",
+        totalMXN: 2400,
+        cotizaciones: [{ indice: 0, tarifa: 2400, datos: datosValidos }],
+        filasConError: [filaInvalida],
+      });
+    }
+    return Response.json({});
+  });
+  vi.stubGlobal("fetch", fetchMock);
+
+  const { result } = renderHook(() => useCargaMasiva());
+  const archivo = { name: "mi_plantilla.xlsx", size: 100, arrayBuffer: async () => new ArrayBuffer(0) } as File;
+
+  await act(async () => {
+    await result.current.cargarArchivo(archivo);
+  });
+
+  expect(result.current.filasVisibles[0]?.estadoGranular).toBe("pendiente");
+  expect(result.current.filasVisibles[1]?.estadoGranular).toBe("error");
+  expect(result.current.filasCotizables).toHaveLength(1);
+  expect(result.current.filasConError).toHaveLength(1);
+
+  await act(async () => {
+    await result.current.cotizarSoloValidas();
+  });
+
+  expect(result.current.estado).toBe("checkout");
+  expect(result.current.totalMXN).toBe(2400);
+  expect(result.current.cargaId).toBe("carga-parcial-123");
+});
+
 

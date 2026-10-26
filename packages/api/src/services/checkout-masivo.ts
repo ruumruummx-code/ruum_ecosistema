@@ -38,6 +38,7 @@ export async function verificarUsuarioMasivo(cliente: SupabaseClient<Database>, 
 export interface CheckoutMasivoGuardado {
   id: string; auth_user_id: string; filas: Record<string, string>[]; cotizaciones: unknown[];
   monto_centavos: number; stripe_payment_intent_id?: string; pagado_en?: string; expirado_en?: string | null; creado_en?: string;
+  filas_pendientes_correccion?: Record<string, string>[] | unknown[];
 }
 /** Solo para rutas autenticadas de servidor que ya poseen el cliente de servicio. */
 export async function guardarCheckoutMasivoServidor(cliente: SupabaseClient, datos: CheckoutMasivoGuardado) {
@@ -73,6 +74,39 @@ export async function descartarCheckoutMasivoServidor(cliente: SupabaseClient, i
 export async function expirarCheckoutsMasivosHuerfanosServidor(cliente: SupabaseClient, horasAntiguedad = 24): Promise<number> {
   const { data, error } = await cliente.rpc("expirar_checkouts_masivos_huerfanos", { p_horas: horasAntiguedad });
   if (error) throw error;
+  return Number(data ?? 0);
+}
+/**
+ * Transacción de compensación: elimina un checkout recién guardado si falla Stripe
+ * antes de vincular el PaymentIntent. Solo elimina filas sin stripe_payment_intent_id.
+ */
+export async function eliminarCheckoutMasivoServidor(cliente: SupabaseClient, id: string, authId: string): Promise<void> {
+  const { error } = await cliente
+    .from("checkout_traslados_masivos")
+    .delete()
+    .eq("id", id)
+    .eq("auth_user_id", authId)
+    .is("stripe_payment_intent_id", null);
+  if (error) throw error;
+}
+
+/**
+ * Limpia checkouts huérfanos sin PaymentIntent después de N minutos (defecto: 15 minutos).
+ */
+export async function limpiarCheckoutsMasivosSinIntentServidor(cliente: SupabaseClient, minutos = 15): Promise<number> {
+  const { data, error } = await cliente.rpc("limpiar_checkouts_masivos_sin_intent", { p_minutos: minutos });
+  if (error) {
+    // Fallback a eliminación directa con service_role si la función RPC aún no está aplicada
+    const limite = new Date(Date.now() - minutos * 60 * 1000).toISOString();
+    const { data: fallbackData, error: fallbackError } = await cliente
+      .from("checkout_traslados_masivos")
+      .delete()
+      .is("stripe_payment_intent_id", null)
+      .lt("creado_en", limite)
+      .select("id");
+    if (fallbackError) throw fallbackError;
+    return fallbackData?.length ?? 0;
+  }
   return Number(data ?? 0);
 }
 export async function vincularPagoMasivoServidor(cliente: SupabaseClient, id: string, authId: string, intent: string) {
