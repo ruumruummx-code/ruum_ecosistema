@@ -1,5 +1,5 @@
 "use client";
-import React, { useCallback, useEffect, useRef } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { Button, Aviso, MobileShell } from "@ruum/ui";
 import { NavegacionUsuario } from "../../NavegacionUsuario";
@@ -15,6 +15,16 @@ export function NuevoTrasladoForm() {
   const avisoTarifaRef = useRef<HTMLDivElement>(null);
   const { setResultado } = t;
   const cerrarResultado = useCallback(() => setResultado(null), [setResultado]);
+  const [esEscritorio, setEsEscritorio] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === "undefined" || !window.matchMedia) return;
+    const mq = window.matchMedia("(min-width: 1024px)");
+    setEsEscritorio(mq.matches);
+    const handler = (e: MediaQueryListEvent) => setEsEscritorio(e.matches);
+    mq.addEventListener?.("change", handler);
+    return () => mq.removeEventListener?.("change", handler);
+  }, []);
 
   // Announce the new step without opening the mobile keyboard.
   useEffect(() => {
@@ -87,7 +97,7 @@ export function NuevoTrasladoForm() {
         <CotizadorPortal t={t} headingRef={encabezadoPasoRef} />
       </div>
       <div className="hidden lg:flex h-full w-full overflow-hidden">
-        <NuevoTrasladoDesktop t={t} />
+        {esEscritorio && <NuevoTrasladoDesktop t={t} />}
       </div>
     </>
   );
