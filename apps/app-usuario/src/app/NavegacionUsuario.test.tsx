@@ -58,12 +58,12 @@ describe("NavegacionUsuario", () => {
     expect(soporte).toBeInTheDocument();
   });
 
-  it("navega a Mis Traslados al hacer clic en campana y a Soporte en audífonos", () => {
+  it("navega a Mis Traslados al hacer clic en campana y a Soporte en audífonos", async () => {
     render(<NavegacionUsuario />);
-    userEvent.click(screen.getByRole("button", { name: "Notificaciones" }));
+    await userEvent.click(screen.getByRole("button", { name: "Notificaciones" }));
     expect(push).toHaveBeenCalledWith("/mis-viajes");
 
-    userEvent.click(screen.getByRole("button", { name: "Soporte y ayuda" }));
+    await userEvent.click(screen.getByRole("button", { name: "Soporte y ayuda" }));
     expect(push).toHaveBeenCalledWith("/soporte");
   });
 

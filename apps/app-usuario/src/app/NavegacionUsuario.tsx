@@ -104,7 +104,8 @@ export function NavegacionUsuario({
 }: NavegacionUsuarioProps) {
   const pathname = usePathname();
   const esInicio = pathname === "/";
-  const headerRef = useRef<HTMLElement>(null);
+  const headerRef = useRef<HTMLDivElement>(null);
+  const headerSecundarioRef = useRef<HTMLElement>(null);
   const navRef = useRef<HTMLElement>(null);
   void variante;
   const esAcceso =
@@ -126,13 +127,14 @@ export function NavegacionUsuario({
   useEffect(() => {
     if (esAcceso && !mostrarEnAcceso) return;
     const root = document.documentElement;
+    const headerEl = headerRef.current ?? headerSecundarioRef.current;
     const actualizar = () => {
-      if (headerRef.current) root.style.setProperty("--user-header-height", headerRef.current.getBoundingClientRect().height + "px");
+      if (headerEl) root.style.setProperty("--user-header-height", headerEl.getBoundingClientRect().height + "px");
       if (navRef.current) root.style.setProperty("--user-mobile-nav-height", navRef.current.getBoundingClientRect().height + "px");
     };
     actualizar();
     const observer = typeof ResizeObserver !== "undefined" ? new ResizeObserver(actualizar) : null;
-    if (headerRef.current) observer?.observe(headerRef.current);
+    if (headerEl) observer?.observe(headerEl);
     if (navRef.current) observer?.observe(navRef.current);
     window.addEventListener("resize", actualizar);
     return () => {
@@ -148,7 +150,7 @@ export function NavegacionUsuario({
   if (esAcceso && !mostrarEnAcceso) return null;
   const tituloSecundario = pathname === "/cuenta/preferencias" ? "Preferencias" : pathname === "/soporte" ? "Soporte" : pathname === "/cuenta/datos-personales" ? "Editar Perfil" : pathname === "/cuenta/cambiar-contrasena" ? "Cambiar contraseña" : pathname === "/cuenta/verificacion-documentos" ? "Verificación y facturación" : null;
   if (tituloSecundario) {
-    return <header ref={headerRef} className="user-profile-appbar user-secondary-appbar user-v2-scope"><Link href="/cuenta?seccion=perfil" aria-label="Volver a mi cuenta" className="user-profile-back">‹ Atrás</Link><h1>{tituloSecundario}</h1><span aria-hidden="true" /></header>;
+    return <header ref={headerSecundarioRef} className="user-profile-appbar user-secondary-appbar user-v2-scope"><Link href="/cuenta?seccion=perfil" aria-label="Volver a mi cuenta" className="user-profile-back">‹ Atrás</Link><h1>{tituloSecundario}</h1><span aria-hidden="true" /></header>;
   }
 
   return (

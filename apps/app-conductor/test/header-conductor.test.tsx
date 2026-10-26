@@ -5,7 +5,10 @@ import { NavegacionConductor } from "../src/app/NavegacionConductor";
 import { DriverAccountView } from "../src/app/cuenta/DriverAccountView";
 
 const route = vi.hoisted(() => ({ pathname: "/viajes" }));
-vi.mock("next/navigation", () => ({ usePathname: () => route.pathname }));
+vi.mock("next/navigation", () => ({
+  usePathname: () => route.pathname,
+  useRouter: () => ({ push: vi.fn() }),
+}));
 vi.mock("../src/app/ViajeActivoContext", () => ({
   useViajeActivo: () => ({ viajeActivo: null, viajeActivoSinActualizar: false }),
 }));
