@@ -17,6 +17,7 @@ export function BottomSheetCargaMasiva({ onCerrar }: Props) {
   const [pago, setPago] = useState({ listo: false, procesando: false });
   const [conciliando, setConciliando] = useState(false);
   const [errorPago, setErrorPago] = useState<string | null>(null);
+  const [arrastrando, setArrastrando] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const {
     estado,
@@ -176,25 +177,58 @@ export function BottomSheetCargaMasiva({ onCerrar }: Props) {
             {/* Zona drag & drop / tap para cargar */}
             <label
               htmlFor="masivo-file-input"
+              onDragOver={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                if (estado !== "parseando") setArrastrando(true);
+              }}
+              onDragEnter={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                if (estado !== "parseando") setArrastrando(true);
+              }}
+              onDragLeave={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                setArrastrando(false);
+              }}
+              onDrop={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                setArrastrando(false);
+                if (estado === "parseando") return;
+                const archivo = e.dataTransfer.files?.[0];
+                if (archivo) {
+                  void cargarArchivo(archivo);
+                }
+              }}
               className={[
                 "flex w-full cursor-pointer flex-col items-center gap-2 rounded-2xl border-2 border-dashed py-8 transition-colors",
-                estado === "parseando"
-                  ? "border-[var(--user-color-action)] bg-[var(--user-color-brand-soft)]"
+                estado === "parseando" || arrastrando
+                  ? "border-[var(--user-color-action)] bg-[var(--user-color-brand-soft)] ring-2 ring-[var(--user-color-action)]/20"
                   : "border-[var(--user-color-border)] hover:border-[var(--user-color-action)]",
               ].join(" ")}
             >
               <span aria-hidden="true" className="text-3xl">
-                {estado === "parseando" ? "⏳" : "⬆️"}
+                {estado === "parseando" ? "⏳" : arrastrando ? "📥" : "⬆️"}
               </span>
               <span className="text-sm font-semibold">
-                {estado === "parseando" ? "Procesando archivo…" : "Seleccionar archivo .xlsx"}
+                {estado === "parseando"
+                  ? "Leyendo plantilla oficial (esto puede demorar unos segundos)…"
+                  : arrastrando
+                    ? "Suelta la plantilla .xlsx aquí"
+                    : "Seleccionar o arrastrar archivo .xlsx"}
               </span>
-              <span className="text-xs text-[var(--user-color-muted)]">Máximo 100 traslados · 5 MB</span>
+              <span className="text-xs text-[var(--user-color-muted)]">
+                {estado === "parseando"
+                  ? "Procesando datos y catálogos vehiculares…"
+                  : "Máximo 100 traslados · hasta 25 MB"}
+              </span>
               <input
                 id="masivo-file-input"
                 ref={inputRef}
                 type="file"
-                accept=".xlsx"
+                accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
                 className="sr-only"
                 disabled={estado === "parseando"}
                 onChange={manejarArchivo}

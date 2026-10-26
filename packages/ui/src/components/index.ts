@@ -37,3 +37,4 @@ export * from "./MobileRow";
 export * from "./MobileHeader";
 export * from "./MobileButton";
 export * from "./MobileShell";
+export * from "./RuumHeader";

@@ -18,7 +18,7 @@ function rutaCatalogoCP(prefijo: string): string {
 
 export function clienteMasivoServicio() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY || (process.env.NODE_ENV !== "test" ? process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY : undefined);
   if (!url || !key) throw new Error("El cobro masivo no está configurado en este entorno.");
   return createClient(url, key, { auth: { persistSession: false, autoRefreshToken: false } });
 }

@@ -2,7 +2,7 @@
 import { useCallback, useEffect, useReducer, useRef, useState } from "react";
 import { validarFila, normalizarFilaPlantilla, valorCelda, type FilaValidada } from "@/lib/carga-masiva";
 import { logStructuredWarn } from "@/lib/logger";
-import { obtenerHeadersCsrf, obtenerTokenCsrfCliente } from "@/lib/csrf";
+import { obtenerHeadersCsrf, obtenerHeadersCsrfAsync, obtenerTokenCsrfCliente } from "@/lib/csrf";
 
 export const STORAGE_KEY_CARGA_ACTIVA = "ruum_carga_masiva_activa_id";
 
@@ -150,26 +150,38 @@ export function useCargaMasiva() {
     claveCobro.current = null;
 
     try {
-      if (!archivo.name.toLowerCase().endsWith(".xlsx") || archivo.size > 5 * 1024 * 1024) throw new Error("Selecciona la plantilla oficial .xlsx de hasta 5 MB.");
-      // Parsear con ExcelJS en el navegador
-      const ExcelJS = await import("exceljs");
-      const wb = new ExcelJS.Workbook();
+      if (!archivo.name.toLowerCase().endsWith(".xlsx") || archivo.size > 25 * 1024 * 1024) {
+        throw new Error("Selecciona la plantilla oficial .xlsx de hasta 25 MB.");
+      }
+      // Parsear con ExcelJS en el navegador o entorno Node
+      const ExcelJSModule = await import("exceljs");
+      const WorkbookCtor =
+        ("Workbook" in ExcelJSModule && ExcelJSModule.Workbook) ||
+        ("default" in ExcelJSModule && (ExcelJSModule.default as unknown as { Workbook?: typeof ExcelJSModule.Workbook })?.Workbook) ||
+        (ExcelJSModule as unknown as { Workbook: typeof ExcelJSModule.Workbook }).Workbook;
+      if (!WorkbookCtor) {
+        throw new Error("No se pudo iniciar el lector de hojas de cálculo.");
+      }
+      const wb = new WorkbookCtor();
       const buffer = await archivo.arrayBuffer();
       await wb.xlsx.load(buffer);
 
-      const ws = wb.getWorksheet("Traslados");
-      if (!ws) throw new Error("El archivo no contiene hojas válidas.");
+      const ws = wb.getWorksheet("Traslados") ?? (wb.worksheets ? wb.worksheets.find(w => w.name?.toLowerCase() === "traslados") : undefined);
+      if (!ws) throw new Error("El archivo no contiene la hoja 'Traslados' de la plantilla oficial.");
 
       // Obtener encabezados de la primera fila
       const headerRow = ws.getRow(1);
       const headers: Record<number, string> = {};
       headerRow.eachCell((cell, col) => {
-        const val = valorCelda(cell.value);
+        const val = valorCelda(cell.value).toLowerCase();
         if (val) headers[col] = val;
       });
 
       const filasBruto: Record<string, string>[] = [];
-      if (!["vehiculo_marca", "vehiculo_modelo", "origen_codigo_postal", "destino_codigo_postal"].every(h => Object.values(headers).includes(h))) throw new Error("Usa los encabezados de la plantilla oficial.");
+      const obligatorios = ["vehiculo_marca", "vehiculo_modelo", "origen_codigo_postal", "destino_codigo_postal"];
+      if (!obligatorios.every(h => Object.values(headers).includes(h))) {
+        throw new Error("Usa los encabezados de la plantilla oficial.");
+      }
       ws.eachRow((row, rowNum) => {
         if (rowNum === 1) return; // saltar encabezados
         const obj: Record<string, string> = {};
@@ -183,7 +195,7 @@ export function useCargaMasiva() {
       });
 
       if (filasBruto.length === 0) {
-        dispatch({ type: "ERROR", mensaje: "El archivo no contiene datos." });
+        dispatch({ type: "ERROR", mensaje: "El archivo no contiene datos de traslados para cotizar." });
         return;
       }
 
@@ -191,9 +203,10 @@ export function useCargaMasiva() {
       if (controller.signal.aborted) return;
 
       // Validar en servidor
+      const headersCsrf = await obtenerHeadersCsrfAsync({ "Content-Type": "application/json" });
       const res = await fetch("/api/viajes/masivos/validate", {
         method: "POST",
-        headers: obtenerHeadersCsrf({ "Content-Type": "application/json" }),
+        headers: headersCsrf,
         body: JSON.stringify({ filas: filasBruto }),
         signal: controller.signal,
       });
@@ -266,9 +279,10 @@ export function useCargaMasiva() {
     try {
       const clave = claveCobro.current ?? crypto.randomUUID();
       claveCobro.current = clave;
+      const headersCsrf = await obtenerHeadersCsrfAsync({ "Content-Type": "application/json" });
       const res = await fetch("/api/viajes/masivos/cotizar", {
         method: "POST",
-        headers: obtenerHeadersCsrf({ "Content-Type": "application/json" }),
+        headers: headersCsrf,
         body: JSON.stringify({ filas: filasActivas.map(f => f.datos), clave }),
         signal: controller.signal,
       });
@@ -350,9 +364,10 @@ export function useCargaMasiva() {
   /** Descarta una carga pendiente */
   const descartarCargaPendiente = useCallback(async (id: string): Promise<void> => {
     try {
+      const headersCsrf = await obtenerHeadersCsrfAsync();
       await fetch(`/api/viajes/masivos/pendientes?id=${encodeURIComponent(id)}`, {
         method: "DELETE",
-        headers: obtenerHeadersCsrf(),
+        headers: headersCsrf,
       });
     } catch (err) {
       // Ignorar errores de red en descarte dejando traza estructurada

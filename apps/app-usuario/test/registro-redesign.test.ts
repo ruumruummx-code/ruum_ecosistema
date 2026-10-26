@@ -14,7 +14,8 @@ describe("rediseño del registro de usuario", () => {
   it("usa el header con título contextual y pasos progresivos", () => {
     expect(REGISTRO).toContain("Crear cuenta");
     expect(REGISTRO).toContain('paso === 1 ? "Paso 1 de 3" : "Paso 2 de 3"');
-    expect(NAVEGACION).toContain('aria-label="Acciones del usuario"');
+    expect(NAVEGACION).toContain("RuumHeader");
+    expect(NAVEGACION).toContain('rol="usuario"');
     expect(NAVEGACION).toContain("user-v2-shell-header");
     const bloqueHeader = GLOBALES.slice(GLOBALES.indexOf(".user-v2-shell-header {"));
     expect(bloqueHeader).toContain("position: sticky");

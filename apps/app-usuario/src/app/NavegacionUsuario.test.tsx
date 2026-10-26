@@ -4,8 +4,15 @@ import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { NavegacionUsuario } from "./NavegacionUsuario";
 
-const { ruta } = vi.hoisted(() => ({ ruta: { pathname: "/" } }));
-vi.mock("next/navigation", () => ({ usePathname: () => ruta.pathname }));
+const { ruta, push } = vi.hoisted(() => ({
+  ruta: { pathname: "/" },
+  push: vi.fn(),
+}));
+
+vi.mock("next/navigation", () => ({
+  usePathname: () => ruta.pathname,
+  useRouter: () => ({ push }),
+}));
 
 vi.mock("next/image", () => ({
   default: ({
@@ -19,97 +26,71 @@ vi.mock("next/image", () => ({
 }));
 
 describe("NavegacionUsuario", () => {
-  beforeEach(() => { ruta.pathname = "/"; });
-  it("integra Mis vehículos con tabs, sin enlaces de header y con una sola acción para agregar", () => {
-    ruta.pathname = "/cuenta/vehiculos";
-    render(<NavegacionUsuario />);
-    const header = screen.getByRole("banner");
-    expect(within(header).getByRole("heading", { name: "Mis vehículos", level: 1 })).toBeInTheDocument();
-    expect(within(header).getByText("Autos frecuentes para solicitudes rápidas")).toBeInTheDocument();
-    expect(within(header).queryByRole("link")).not.toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Cuenta" })).toHaveAttribute("aria-current", "page");
-    expect(screen.getAllByRole("link", { name: "Agregar vehículo" })).toHaveLength(1);
-    expect(screen.getByRole("link", { name: "Agregar vehículo" })).toHaveAttribute("href", "/viajes/nuevo");
-    expect(screen.queryByRole("link", { name: "Solicitar traslado" })).not.toBeInTheDocument();
+  beforeEach(() => {
+    ruta.pathname = "/";
+    push.mockClear();
   });
-  it("muestra el nuevo logotipo oficial responsivo con redirección a inicio y alt correcto", () => {
-    render(<NavegacionUsuario variante="claro" nombreUsuario="LUIS Hernández" notificacionesCount={2} />);
+
+  it("renderiza el header estándar con logotipo, rol y acciones de usuario", () => {
+    render(<NavegacionUsuario nombreUsuario="LUIS Hernández" notificacionesCount={2} />);
 
     const header = screen.getByRole("banner");
 
-    // Enlace de redirección a la página de inicio/dashboard (/ o /home o /dashboard)
-    const logoLink = within(header).getByRole("link", { name: /Ruum Ruum usuario/i });
+    // Logotipo e identidad de marca dentro del enlace de inicio
+    const logoLink = within(header).getByRole("link", { name: /Ruum Ruum/i });
     expect(logoLink).toBeInTheDocument();
     expect(logoLink).toHaveAttribute("href", "/");
 
-    // Logotipo SVG con texto alternativo para accesibilidad (SEO/Lectores de pantalla)
-    const logoImg = within(logoLink).getByAltText("Ruum Ruum usuario");
+    const logoImg = within(logoLink).getByAltText(
+      "Símbolo oficial Ruum Ruum — RR entrelazado con ruta y pin de entrega",
+    );
     expect(logoImg).toBeInTheDocument();
-    expect(logoImg).toHaveAttribute("src", "/imagenes/ruum-logo.svg");
+    expect(logoImg).toHaveAttribute("src", "/imagenes/ruum-logo-simbolo.png");
 
-    // Soporte para tema claro y oscuro
-    expect(logoImg.className).toContain("ruum-logo-light");
-    const logoDarkImg = within(logoLink).getByRole("presentation", { hidden: true });
-    expect(logoDarkImg).toHaveAttribute("src", "/imagenes/ruum-logo-dark.svg");
-    expect(logoDarkImg.className).toContain("ruum-logo-dark");
+    // Título de marca e identificador de rol (app de clientes → "Usuario")
+    expect(within(header).getByText("Ruum Ruum")).toBeInTheDocument();
+    expect(within(header).getByText("Usuario")).toBeInTheDocument();
 
-    const acciones = within(header).getByRole("navigation", { name: "Acciones del usuario" });
-    expect(within(acciones).getByRole("link", { name: /Notificaciones/i })).toHaveAttribute("href", "/mis-viajes");
-    expect(within(acciones).getByLabelText("2 avisos pendientes")).toBeInTheDocument();
-    expect(within(acciones).getByRole("link", { name: "Contactar soporte" })).toHaveAttribute("href", "/soporte");
-    expect(within(acciones).getByRole("link", { name: "Mi cuenta" })).toHaveTextContent("LH");
-    expect(within(acciones).getByRole("link", { name: "Mi cuenta" })).toHaveAttribute("href", "/cuenta");
-    expect(screen.queryByRole("link", { name: "Solicitar traslado" })).not.toBeInTheDocument();
-
-    const inferior = screen.getByRole("navigation", { name: "Navegación principal" });
-    expect(within(inferior).getByRole("link", { name: "Inicio" })).toHaveAttribute("href", "/");
-    expect(within(inferior).getByRole("link", { name: "Inicio" })).toHaveAttribute("aria-current", "page");
-    expect(within(inferior).getByRole("link", { name: "Traslados" })).toHaveAttribute("href", "/mis-viajes");
-    expect(within(inferior).getByRole("link", { name: "Carga Masiva" })).toHaveAttribute("href", "/viajes/masivo");
-    expect(within(inferior).getByRole("link", { name: "Cuenta" })).toHaveAttribute("href", "/cuenta");
+    // Acciones a la derecha: campana de notificaciones y audífonos de soporte
+    const campana = within(header).getByRole("button", { name: "Notificaciones (2 pendientes)" });
+    expect(campana).toBeInTheDocument();
+    const soporte = within(header).getByRole("button", { name: "Soporte y ayuda" });
+    expect(soporte).toBeInTheDocument();
   });
-  it("presenta Mis Traslados con contexto, campana y navegación inferior sin FAB", async () => {
-    ruta.pathname = "/mis-viajes";
-    render(<NavegacionUsuario notificaciones={[{ id: "pago", tono: "atencion", mensaje: "Tienes un pago pendiente.", href: "/viajes/t-1" }]} />);
-    const header = screen.getByRole("banner");
-    expect(within(header).getByRole("heading", { name: "Mis Traslados", level: 1 })).toBeInTheDocument();
-    expect(within(header).getByText("Gestiona todos tus viajes en un solo lugar")).toBeInTheDocument();
-    expect(within(header).getByLabelText("1 avisos pendientes")).toBeInTheDocument();
-    await userEvent.click(within(header).getByRole("button", { name: "Notificaciones de traslados" }));
-    expect(within(header).getByRole("link", { name: "Tienes un pago pendiente." })).toHaveAttribute("href", "/viajes/t-1");
-    expect(within(header).queryByRole("navigation")).not.toBeInTheDocument();
-    expect(within(header).queryByRole("img")).not.toBeInTheDocument();
-    expect(screen.queryByRole("link", { name: "Solicitar traslado" })).not.toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Traslados" })).toHaveAttribute("aria-current", "page");
-  });
-  it("presenta Mi Cuenta con un único encabezado y navegación inferior", () => {
-    ruta.pathname = "/cuenta";
+
+  it("navega a Mis Traslados al hacer clic en campana y a Soporte en audífonos", () => {
     render(<NavegacionUsuario />);
-    expect(screen.getByRole("heading", { name: "Mi Cuenta", level: 1 })).toBeInTheDocument();
-    expect(within(screen.getByRole("banner")).queryByRole("navigation")).not.toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Cuenta" })).toHaveAttribute("aria-current", "page");
+    userEvent.click(screen.getByRole("button", { name: "Notificaciones" }));
+    expect(push).toHaveBeenCalledWith("/mis-viajes");
+
+    userEvent.click(screen.getByRole("button", { name: "Soporte y ayuda" }));
+    expect(push).toHaveBeenCalledWith("/soporte");
   });
-  it("limita Editar Perfil al App Bar secundario incluso durante errores de carga", () => {
+
+  it("oculta el header estándar en la pantalla de preguntas frecuentes", () => {
+    ruta.pathname = "/preguntas-frecuentes";
+    render(<NavegacionUsuario />);
+    expect(screen.queryByRole("banner")).not.toBeInTheDocument();
+  });
+
+  it("mantiene el App Bar secundario en vistas internas de cuenta", () => {
     ruta.pathname = "/cuenta/datos-personales";
     render(<NavegacionUsuario />);
     expect(screen.getByRole("heading", { name: "Editar Perfil" })).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Volver a mi cuenta" })).toHaveAttribute("href", "/cuenta?seccion=perfil");
+    expect(screen.getByRole("link", { name: "Volver a mi cuenta" })).toHaveAttribute(
+      "href",
+      "/cuenta?seccion=perfil",
+    );
     expect(screen.queryByRole("navigation")).not.toBeInTheDocument();
-    expect(screen.queryByRole("link", { name: "Solicitar traslado" })).not.toBeInTheDocument();
   });
+
   it.each([
     ["/cuenta/cambiar-contrasena", "Cambiar contraseña"],
     ["/cuenta/verificacion-documentos", "Verificación y facturación"],
-  ])("evita navegación redundante y FAB en %s", (pathname, titulo) => {
+  ])("evita navegación redundante en %s", (pathname, titulo) => {
     ruta.pathname = pathname;
     render(<NavegacionUsuario />);
     expect(screen.getByRole("heading", { name: titulo })).toBeInTheDocument();
     expect(screen.queryByRole("navigation")).not.toBeInTheDocument();
-    expect(screen.queryByRole("link", { name: "Solicitar traslado" })).not.toBeInTheDocument();
-  });
-  it("no muestra el FAB durante la solicitud de traslado", () => {
-    ruta.pathname = "/viajes/nuevo";
-    render(<NavegacionUsuario />);
-    expect(screen.queryByRole("link", { name: "Solicitar traslado" })).not.toBeInTheDocument();
   });
 });
