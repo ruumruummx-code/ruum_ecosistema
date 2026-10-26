@@ -24,6 +24,7 @@ export interface CuentaReal {
   empresa: Empresa | null;
   totalTraslados: number;
   incidenciasAbiertas?: number;
+  traslados?: Database["public"]["Views"]["pasaporte_digital"]["Row"][];
 }
 
 const LINKS_CUENTA = [
@@ -112,7 +113,8 @@ export async function obtenerCuenta(): Promise<ResultadoCuenta> {
         vehiculos,
         empresa,
         totalTraslados: trasladosPropios.length,
-        incidenciasAbiertas: trasladosPropios.reduce((total, traslado) => total + (traslado.incidencias_abiertas ?? 0), 0)
+        incidenciasAbiertas: trasladosPropios.reduce((total, traslado) => total + (traslado.incidencias_abiertas ?? 0), 0),
+        traslados: trasladosPropios,
       }
     };
   } catch (err) {
