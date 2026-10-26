@@ -181,7 +181,6 @@ export function TrasladoAsignadoDetails({
     >
       {/* CONTENIDO COMPACTO SIN SCROLL VERTICAL */}
       <div
-        data-trip-scroll
         className="flex min-h-0 flex-1 flex-col justify-between px-4 pt-[max(10px,env(safe-area-inset-top))] pb-2.5"
       >
         {/* 1. HEADER INSTITUCIONAL Y CITA */}
