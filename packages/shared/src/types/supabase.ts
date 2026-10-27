@@ -385,13 +385,13 @@ isOneToOne: false
                   ]
                 },"checkout_traslados_masivos": {
                   Row: {
-                    "auth_user_id": string,"carga_id": string | null,"cotizaciones": NonNullable<Json>,"creado_en": string,"expirado_en": string | null,"filas": NonNullable<Json>,"id": string,"monto_centavos": number,"pagado_en": string | null,"stripe_payment_intent_id": string | null
+                    "auth_user_id": string,"carga_id": string | null,"cotizaciones": NonNullable<Json>,"creado_en": string,"expirado_en": string | null,"filas": NonNullable<Json>,"filas_pendientes_correccion": NonNullable<Json>,"id": string,"monto_centavos": number,"pagado_en": string | null,"stripe_payment_intent_id": string | null
                   }
                   Insert: {
-                    "auth_user_id": string,"carga_id"?: string | null,"cotizaciones": NonNullable<Json>,"creado_en"?: string,"expirado_en"?: string | null,"filas": NonNullable<Json>,"id": string,"monto_centavos": number,"pagado_en"?: string | null,"stripe_payment_intent_id"?: string | null
+                    "auth_user_id": string,"carga_id"?: string | null,"cotizaciones": NonNullable<Json>,"creado_en"?: string,"expirado_en"?: string | null,"filas": NonNullable<Json>,"filas_pendientes_correccion"?: NonNullable<Json>,"id": string,"monto_centavos": number,"pagado_en"?: string | null,"stripe_payment_intent_id"?: string | null
                   }
                   Update: {
-                    "auth_user_id"?: string,"carga_id"?: string | null,"cotizaciones"?: NonNullable<Json>,"creado_en"?: string,"expirado_en"?: string | null,"filas"?: NonNullable<Json>,"id"?: string,"monto_centavos"?: number,"pagado_en"?: string | null,"stripe_payment_intent_id"?: string | null
+                    "auth_user_id"?: string,"carga_id"?: string | null,"cotizaciones"?: NonNullable<Json>,"creado_en"?: string,"expirado_en"?: string | null,"filas"?: NonNullable<Json>,"filas_pendientes_correccion"?: NonNullable<Json>,"id"?: string,"monto_centavos"?: number,"pagado_en"?: string | null,"stripe_payment_intent_id"?: string | null
                   }
                   Relationships: [
                     {
@@ -3649,6 +3649,9 @@ isOneToOne: false
                            },
 "is_superadmin":
 { Args: Record<PropertyKey, never>; Returns: boolean
+                           },
+"limpiar_checkouts_masivos_sin_intent":
+{ Args: { "p_minutos"?: number }; Returns: number
                            },
 "listar_conductores_admin_paginados":
 { Args: { "p_busqueda"?: string,"p_estado"?: string,"p_pagina"?: number,"p_tamano"?: number }; Returns: Json
