@@ -189,7 +189,7 @@ describe("UserSidebar — Componente de Navegación Lateral (RR-UI-001)", () => 
     render(<UserSidebar showPromo={true} collapsed={false} />);
 
     expect(screen.getByText("Mueve tu auto sin salir de casa")).toBeInTheDocument();
-    expect(screen.getByText(/Movemos vehículos con tecnología/)).toBeInTheDocument();
+    expect(screen.getByText("Un servicio confiable, seguro y en todo México.")).toBeInTheDocument();
     expect(screen.getByRole("link", { name: /Registrar traslado/ })).toHaveAttribute("href", "/viajes/nuevo");
   });
 

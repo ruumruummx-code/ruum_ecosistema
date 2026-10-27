@@ -404,8 +404,8 @@ export function UserSidebar({
                 <p className="relative mt-1 font-display text-[13px] font-extrabold leading-snug text-white">
                   Mueve tu auto sin salir de casa
                 </p>
-                <p className="relative mt-1 text-[11px] leading-relaxed text-[#dfeaf7]">
-                  Movemos vehículos con tecnología, evidencia y conductores certificados.
+                <p className="relative mt-1 text-[11px] leading-relaxed text-[#94a3b8]">
+                  Un servicio confiable, seguro y en todo México.
                 </p>
 
                 <Link

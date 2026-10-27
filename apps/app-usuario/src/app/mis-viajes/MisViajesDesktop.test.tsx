@@ -73,7 +73,7 @@ describe("MisViajesDesktop", () => {
 
     expect(within(sidebar).getByText("Confianza comprobable")).toBeInTheDocument();
     expect(
-      within(sidebar).getByText("Movemos vehículos con tecnología, evidencia y conductores certificados."),
+      within(sidebar).getByText("Un servicio confiable, seguro y en todo México."),
     ).toBeInTheDocument();
     expect(within(sidebar).getByRole("link", { name: "+ Crear traslado" })).toHaveAttribute("href", "/viajes/nuevo");
   });
