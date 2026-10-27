@@ -8,6 +8,7 @@ import { PerfilCuentaForm } from "./PerfilCuentaForm";
 import { BotonResetPassword } from "./BotonResetPassword";
 import { FacturacionCuentaForm } from "./FacturacionCuentaForm";
 import { iniciales } from "./cuenta-utils";
+import { BotonReintentarSesion } from "../ReintentarSesion";
 import { NavegacionUsuario } from "../NavegacionUsuario";
 
 export { iniciales } from "./cuenta-utils";
@@ -216,6 +217,7 @@ export function AvisoErrorCuenta({ mensaje }: { mensaje?: string | null }) {
             {mensaje ?? "No pudimos cargar tu cuenta en este momento. Inténtalo de nuevo en unos segundos."}
           </Aviso>
           <div className="mt-6 flex flex-col gap-3 sm:flex-row justify-center">
+            <BotonReintentarSesion />
             <Link href="/soporte">
               <Button className="w-full sm:w-auto">Reportar un problema</Button>
             </Link>

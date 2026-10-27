@@ -6,6 +6,8 @@ import { crearClienteNavegador } from "../../lib/supabase-browser";
 import { logStructuredError } from "../../lib/logger";
 import { iniciales } from "./cuenta-utils";
 import { useTema } from "../TemaProvider";
+import { ETIQUETA_ESTADO_TRASLADO } from "@ruum/shared/states";
+import { TERMINOLOGIA_USUARIO } from "../../lib/glosario";
 import type { CuentaReal } from "./cuenta-ui";
 
 export interface ActividadItem {
@@ -13,15 +15,15 @@ export interface ActividadItem {
   tipo: "traslado" | "vehiculo" | "sesion" | "perfil";
   titulo: string;
   fechaFormateada: string;
-  estado: "En curso" | "Completado" | "Cancelado";
+  estado: string;
   enlace?: string;
 }
 
 export const TIPS_SEMANA = [
   "Mantén tu información actualizada para recibir notificaciones importantes sobre tus traslados.",
   "Revisa el Pasaporte Digital para dar seguimiento en tiempo real y consultar la evidencia fotográfica.",
-  "Puedes asociar tus datos fiscales para generar facturas automáticas de cada traslado completado.",
-  "Activa las alertas SMS o WhatsApp en Preferencias para estar informado ante cada cambio de estatus.",
+  "Consulta y actualiza tus datos fiscales desde Facturación.",
+  "Revisa tus preferencias de notificaciones y los canales disponibles para tus traslados.",
 ];
 
 export function useCuentaUsuario(cuenta: CuentaReal) {
@@ -75,51 +77,32 @@ export function useCuentaUsuario(cuenta: CuentaReal) {
   }, [router]);
 
   const usuario = cuenta.usuario;
-  const nombreCompleto = (usuario?.nombre || "Hector Molina").trim();
-  const primerNombre = nombreCompleto.split(" ")[0] || "Usuario";
-  const inicialesUsuario = iniciales(nombreCompleto, "HM");
-  const correo = (cuenta.correoRegistro || "lomelinhectorm@gmail.com").trim();
-  const telefono = (usuario?.telefono || "+52 5566522178").trim();
-  const esVerificado = usuario?.estado_verificacion === "verificado" || !usuario?.estado_verificacion;
+  const nombreCompleto = usuario?.nombre?.trim() || "Usuario";
+  const primerNombre = nombreCompleto.split(/\s+/)[0] || "Usuario";
+  const inicialesUsuario = iniciales(nombreCompleto, "US");
+  const correo = cuenta.correoRegistro?.trim() || "Sin correo registrado";
+  const telefono = usuario?.telefono?.trim() || "Sin teléfono registrado";
+  const esVerificado = usuario?.estado_verificacion === "verificado";
 
   const totalIncidencias = cuenta.incidenciasAbiertas ?? 0;
-  const totalTraslados = cuenta.totalTraslados ?? 2;
-  const totalVehiculos = cuenta.vehiculos?.length ?? 2;
+  const totalTraslados = cuenta.totalTraslados ?? 0;
+  const totalVehiculos = cuenta.vehiculos?.length ?? 0;
 
-  // Actividades dinámicas derivadas de los datos reales del usuario o historial reciente
-  const actividades: ActividadItem[] = [
-    {
-      id: "act-1",
+  const estadoVerificacion = usuario?.estado_verificacion;
+  const etiquetaVerificacion = esVerificado ? "Verificado" : estadoVerificacion === "rechazado" ? "Documentación rechazada" : estadoVerificacion === "en_revision" ? "En revisión" : "Pendiente de verificación";
+  const fechaActividad = (fecha: string) => new Intl.DateTimeFormat("es-MX", { timeZone: "America/Mexico_City", dateStyle: "medium", timeStyle: "short" }).format(new Date(fecha));
+  const actividades: ActividadItem[] = (cuenta.traslados ?? [])
+    .filter(t => t.traslado_id && t.creado_en && Number.isFinite(Date.parse(t.creado_en)))
+    .sort((a, b) => Date.parse(b.creado_en!) - Date.parse(a.creado_en!))
+    .slice(0, 4)
+    .map(t => ({
+      id: t.traslado_id!,
       tipo: "traslado",
-      titulo: "Traslado creado",
-      fechaFormateada: "25 oct. 2024 · 16:24",
-      estado: "En curso",
-      enlace: "/mis-viajes",
-    },
-    {
-      id: "act-2",
-      tipo: "vehiculo",
-      titulo: cuenta.vehiculos?.[0]?.modelo ? `Vehículo agregado (${cuenta.vehiculos[0].modelo})` : "Vehículo agregado",
-      fechaFormateada: "24 oct. 2024 · 10:12",
-      estado: "Completado",
-      enlace: "/cuenta/vehiculos",
-    },
-    {
-      id: "act-3",
-      tipo: "sesion",
-      titulo: "Inicio de sesión",
-      fechaFormateada: "24 oct. 2024 · 09:05",
-      estado: "Completado",
-    },
-    {
-      id: "act-4",
-      tipo: "perfil",
-      titulo: "Perfil actualizado",
-      fechaFormateada: "22 oct. 2024 · 18:40",
-      estado: "Completado",
-      enlace: "/cuenta/datos-personales",
-    },
-  ];
+      titulo: [t.vehiculo_marca, t.vehiculo_modelo, t.vehiculo_placas].filter(Boolean).join(" · ") || "Traslado " + t.traslado_id!.slice(0, 8).toUpperCase(),
+      fechaFormateada: "Creado: " + fechaActividad(t.creado_en!),
+      estado: t.estado ? TERMINOLOGIA_USUARIO[t.estado] ?? ETIQUETA_ESTADO_TRASLADO[t.estado] : "Estado no disponible",
+      enlace: "/viajes/" + t.traslado_id,
+    }));
 
   return {
     // Estado de sesión
@@ -134,6 +117,7 @@ export function useCuentaUsuario(cuenta: CuentaReal) {
     correo,
     telefono,
     esVerificado,
+    etiquetaVerificacion,
     totalIncidencias,
     totalTraslados,
     totalVehiculos,

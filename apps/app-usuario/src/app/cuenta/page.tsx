@@ -38,6 +38,7 @@ export default async function PaginaCuenta({ searchParams }: { searchParams?: Pr
       <div className="hidden lg:flex h-full w-full overflow-hidden">
         <CuentaDesktop
           cuenta={cuenta}
+          seccionInicial={seccion}
         />
       </div>
     </>

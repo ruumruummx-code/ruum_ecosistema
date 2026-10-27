@@ -142,6 +142,7 @@ describe("cuenta-ui y carga de cuenta", () => {
     const nodoError = await conCuenta(() => <div>Contenido</div>);
     const { unmount: u2 } = render(<>{nodoError}</>);
     expect(screen.getByText(/No pudimos cargar tu cuenta/i)).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Reintentar" })).toBeInTheDocument();
     u2();
 
     // OK completo

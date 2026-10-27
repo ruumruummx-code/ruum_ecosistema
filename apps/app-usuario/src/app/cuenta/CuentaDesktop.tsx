@@ -1,28 +1,23 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useCallback, useEffect, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { useCuentaUsuario, type ActividadItem } from "./useCuentaUsuario";
+import { useCuentaUsuario } from "./useCuentaUsuario";
 import type { CuentaReal } from "./cuenta-ui";
+import { useDialogAccesible } from "@ruum/ui";
+import { useRouter } from "next/navigation";
+import { construirNotificaciones } from "../../lib/inicio";
 import { UserDashboardLayout } from "../../components/layout/UserDashboardLayout";
 
 export interface CuentaDesktopProps {
   cuenta: CuentaReal;
+  seccionInicial?: string;
 }
 
 /* =========================================================================
    ÍCONOS VECTORIALES PRECISOS
    ========================================================================= */
-
-function IconoInicio({ className = "size-5" }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden="true">
-      <path d="m3 9.5 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
-      <path d="M9 22V12h6v10" />
-    </svg>
-  );
-}
 
 function IconoTraslados({ className = "size-5" }: { className?: string }) {
   return (
@@ -35,75 +30,11 @@ function IconoTraslados({ className = "size-5" }: { className?: string }) {
   );
 }
 
-function IconoCargaMasiva({ className = "size-5" }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden="true">
-      <rect x="2" y="4" width="20" height="6" rx="1.5" />
-      <rect x="2" y="14" width="20" height="6" rx="1.5" />
-      <path d="M6 10v4" />
-      <path d="M18 10v4" />
-    </svg>
-  );
-}
-
-function IconoCuenta({ className = "size-5" }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden="true">
-      <circle cx="12" cy="8" r="4" />
-      <path d="M20 21a8 8 0 0 0-16 0" />
-    </svg>
-  );
-}
-
 function IconoPerfil({ className = "size-5" }: { className?: string }) {
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden="true">
       <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
       <circle cx="12" cy="7" r="4" />
-    </svg>
-  );
-}
-
-function IconoPreferencias({ className = "size-5" }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden="true">
-      <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z" />
-      <circle cx="12" cy="12" r="3" />
-    </svg>
-  );
-}
-
-function IconoBuscar({ className = "size-4" }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden="true">
-      <circle cx="11" cy="11" r="8" />
-      <path d="m21 21-4.35-4.35" />
-    </svg>
-  );
-}
-
-function IconoCampana({ className = "size-5" }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden="true">
-      <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" />
-      <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" />
-    </svg>
-  );
-}
-
-function IconoSol({ className = "size-5" }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden="true">
-      <circle cx="12" cy="12" r="4" />
-      <path d="M12 2v2 M12 20v2 M4.93 4.93l1.41 1.41 M17.66 17.66l1.41 1.41 M2 12h2 M20 12h2 M6.34 17.66l-1.41 1.41 M19.07 4.93l-1.41 1.41" />
-    </svg>
-  );
-}
-
-function IconoLuna({ className = "size-5" }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden="true">
-      <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" />
     </svg>
   );
 }
@@ -382,7 +313,7 @@ function IlustracionCabeceraCuenta() {
    COMPONENTE PRINCIPAL: CUENTA DESKTOP
    ========================================================================= */
 
-export function CuentaDesktop({ cuenta }: CuentaDesktopProps) {
+export function CuentaDesktop({ cuenta, seccionInicial }: CuentaDesktopProps) {
   const {
     cerrarSesion,
     cerrandoSesion,
@@ -393,6 +324,7 @@ export function CuentaDesktop({ cuenta }: CuentaDesktopProps) {
     correo,
     telefono,
     esVerificado,
+    etiquetaVerificacion,
     totalIncidencias,
     totalTraslados,
     totalVehiculos,
@@ -401,13 +333,17 @@ export function CuentaDesktop({ cuenta }: CuentaDesktopProps) {
     siguienteTip,
     seguridadModalAbierto,
     setSeguridadModalAbierto,
-    busqueda,
-    setBusqueda,
-    dropdownPerfilAbierto,
-    setDropdownPerfilAbierto,
-    tema,
-    alternarTema,
   } = useCuentaUsuario(cuenta);
+
+  const router = useRouter();
+  const cierreRef = useRef<HTMLButtonElement>(null);
+  const cerrarSeguridad = useCallback(() => setSeguridadModalAbierto(false), [setSeguridadModalAbierto]);
+  const dialogRef = useDialogAccesible({ abierto: seguridadModalAbierto, focoInicial: cierreRef, alCancelar: cerrarSeguridad });
+  useEffect(() => {
+    if (window.innerWidth < 1024) return;
+    const id = seccionInicial === "perfil" ? "opciones-perfil" : seccionInicial === "legal" ? "opciones-legales" : seccionInicial === "soporte" ? "ayuda-cuenta" : null;
+    if (id) { const destino = document.getElementById(id); destino?.scrollIntoView?.({ block: "start" }); destino?.focus(); }
+  }, [seccionInicial]);
 
   return (
     <UserDashboardLayout
@@ -415,11 +351,12 @@ export function CuentaDesktop({ cuenta }: CuentaDesktopProps) {
       nombre={nombreCompleto}
       correo={correo}
       totalVehiculos={totalVehiculos}
+      notificaciones={construirNotificaciones(cuenta.usuario, cuenta.traslados ?? [])}
       onCerrarSesion={cerrarSesion}
       padding="ninguno"
       idContenido="contenido-cuenta"
     >
-      <div className="space-y-6 px-8 py-6">
+      <div className="space-y-6 px-4 py-6 xl:px-8">
         {/* Alerta de Error de Sesión si ocurre */}
         {errorSesion && (
           <div role="alert" className="rounded-2xl border border-red-200 bg-red-50 p-4 text-xs font-bold text-red-700 dark:border-red-900 dark:bg-red-950/40 dark:text-red-300">
@@ -432,7 +369,7 @@ export function CuentaDesktop({ cuenta }: CuentaDesktopProps) {
               ----------------------------------------------------------------- */}
           <section
             aria-label="Encabezado de cuenta"
-            className="flex items-center justify-between border-b border-slate-200/60 pb-5 dark:border-[#1a3a5c]"
+            className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-200/60 pb-5 dark:border-[#1a3a5c]"
           >
             <div>
               <span className="text-[11px] font-extrabold uppercase tracking-widest text-slate-400 dark:text-slate-400">
@@ -447,7 +384,8 @@ export function CuentaDesktop({ cuenta }: CuentaDesktopProps) {
             </div>
 
             {/* Ilustración de Tránsito y Edificios */}
-            <IlustracionCabeceraCuenta />
+            <div className="hidden 2xl:block"><IlustracionCabeceraCuenta /></div>
+            <button type="button" className="text-sm text-blue-700 underline" onClick={() => router.refresh()}>Actualizar cuenta</button>
           </section>
 
           {/* -----------------------------------------------------------------
@@ -559,12 +497,13 @@ export function CuentaDesktop({ cuenta }: CuentaDesktopProps) {
             >
               <div className="relative z-10 max-w-[240px]">
                 <h2 className="font-display text-xl font-extrabold text-white tracking-tight leading-tight">
-                  Tu cuenta está verificada
+                  {esVerificado ? "Tu cuenta está verificada" : etiquetaVerificacion}
                 </h2>
                 <p className="mt-1.5 text-xs font-medium text-blue-100 leading-relaxed">
-                  Disfruta de todos los beneficios de la plataforma
+                  {esVerificado ? "Consulta tus datos y el estado de tus servicios." : "Consulta tu documentación para conocer el estado de la revisión."}
                 </p>
 
+                {!esVerificado && <Link href="/cuenta/verificacion-documentos" className="mt-4 block text-sm font-bold underline">Revisar verificación</Link>}
                 <button
                   type="button"
                   onClick={() => setSeguridadModalAbierto(true)}
@@ -634,7 +573,7 @@ export function CuentaDesktop({ cuenta }: CuentaDesktopProps) {
 
             {/* Legal y cuenta */}
             <Link
-              href="/legal/terminos"
+              href="#opciones-legales"
               className="group flex items-center justify-between rounded-2xl border border-slate-200/90 bg-white p-4.5 shadow-xs transition hover:border-orange-300 hover:shadow-md dark:border-[#1a3a5c] dark:bg-[#0a2342] dark:hover:border-orange-500"
             >
               <div className="flex items-center gap-3.5">
@@ -682,10 +621,32 @@ export function CuentaDesktop({ cuenta }: CuentaDesktopProps) {
             </button>
           </nav>
 
+          <section id="opciones-perfil" tabIndex={-1} aria-label="Opciones de perfil" className="rounded-3xl border bg-white p-6 dark:bg-[#0a2342]">
+            <h2 className="font-bold">Opciones de perfil</h2>
+            <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+              {[
+                ["/cuenta/datos-personales", "Datos personales"],
+                ["/cuenta/cambiar-contrasena", "Cambiar contraseña"],
+                ["/cuenta/verificacion-documentos", "Verificación y documentos"],
+                ["/cuenta/facturacion", "Facturación"],
+                ["/cuenta/metodos-pago", "Métodos de pago"],
+                ["/cuenta/preferencias", "Preferencias de notificaciones"],
+              ].map(([href, titulo]) => <Link key={href} href={href} className="rounded-xl border p-3 text-sm text-blue-700 dark:text-blue-300">{titulo}</Link>)}
+            </div>
+          </section>
+          <section id="opciones-legales" tabIndex={-1} aria-label="Opciones legales" className="rounded-3xl border bg-white p-6 dark:bg-[#0a2342]">
+            <h2 className="font-bold">Legal y privacidad</h2>
+            <div className="mt-4 flex flex-wrap gap-4 text-sm text-blue-700 dark:text-blue-300">
+              <Link href="/legal/terminos">Términos y condiciones</Link>
+              <Link href="/legal/privacidad">Aviso de privacidad</Link>
+              <Link href="/soporte?motivo=eliminar_cuenta">Solicitar eliminación de cuenta</Link>
+            </div>
+          </section>
+
           {/* -----------------------------------------------------------------
               BLOQUE DE DETALLE: INFORMACIÓN PERSONAL & ACTIVIDAD RECIENTE (Grid 2 cols)
               ----------------------------------------------------------------- */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+          <div className="grid grid-cols-1 2xl:grid-cols-2 gap-5">
             {/* Información Personal (Izquierda) */}
             <section
               aria-label="Información personal"
@@ -727,9 +688,7 @@ export function CuentaDesktop({ cuenta }: CuentaDesktopProps) {
                     <span className="text-xs font-bold text-slate-900 dark:text-slate-100">
                       {correo}
                     </span>
-                    <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-bold text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400">
-                      Verificado
-                    </span>
+
                   </div>
                 </div>
 
@@ -743,9 +702,7 @@ export function CuentaDesktop({ cuenta }: CuentaDesktopProps) {
                     <span className="text-xs font-bold text-slate-900 dark:text-slate-100">
                       {telefono}
                     </span>
-                    <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-bold text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400">
-                      Verificado
-                    </span>
+
                   </div>
                 </div>
 
@@ -756,8 +713,7 @@ export function CuentaDesktop({ cuenta }: CuentaDesktopProps) {
                     <span className="text-xs font-semibold">País</span>
                   </div>
                   <div className="flex items-center gap-1.5 text-xs font-bold text-slate-900 dark:text-slate-100">
-                    <span role="img" aria-label="Bandera de México" className="text-sm">🇲🇽</span>
-                    México
+                    {cuenta.usuario.pais?.trim() || "País no registrado"}
                   </div>
                 </div>
 
@@ -765,7 +721,7 @@ export function CuentaDesktop({ cuenta }: CuentaDesktopProps) {
                 <div className="flex items-center justify-between py-3.5">
                   <div className="flex items-center gap-3 text-slate-500 dark:text-slate-400">
                     <IconoReloj className="size-4 text-slate-400" />
-                    <span className="text-xs font-semibold">Zona horaria</span>
+                    <span className="text-xs font-semibold">Zona horaria del servicio</span>
                   </div>
                   <span className="text-xs font-bold text-slate-900 dark:text-slate-100">
                     (UTC-06:00) Ciudad de México
@@ -799,6 +755,7 @@ export function CuentaDesktop({ cuenta }: CuentaDesktopProps) {
                   aria-hidden="true"
                 />
 
+                {actividades.length === 0 && <p className="text-sm text-slate-500">No hay actividad de traslados registrada.</p>}
                 {actividades.map((act) => (
                   <div key={act.id} className="relative flex items-center justify-between gap-3 pl-1">
                     <div className="flex items-center gap-3 min-w-0">
@@ -839,13 +796,7 @@ export function CuentaDesktop({ cuenta }: CuentaDesktopProps) {
 
                     {/* Tag de estatus */}
                     <span
-                      className={`shrink-0 rounded-full px-2.5 py-0.5 text-[11px] font-bold ${
-                        act.estado === "En curso"
-                          ? "bg-blue-50 text-blue-600 dark:bg-blue-950/60 dark:text-blue-300"
-                          : act.estado === "Completado"
-                          ? "bg-emerald-50 text-emerald-600 dark:bg-emerald-950/60 dark:text-emerald-300"
-                          : "bg-red-50 text-red-600 dark:bg-red-950/60 dark:text-red-300"
-                      }`}
+                      className="shrink-0 rounded-full bg-blue-50 px-2.5 py-0.5 text-[11px] font-bold text-blue-700 dark:bg-blue-950 dark:text-blue-200"
                     >
                       {act.estado}
                     </span>
@@ -861,7 +812,7 @@ export function CuentaDesktop({ cuenta }: CuentaDesktopProps) {
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 pt-1">
             {/* Panel de Ayuda (Izquierda, 7 cols) */}
             <section
-              aria-label="Panel de ayuda y soporte"
+              id="ayuda-cuenta" tabIndex={-1} aria-label="Panel de ayuda y soporte"
               className="lg:col-span-7 flex flex-col sm:flex-row items-center gap-5 rounded-3xl border border-slate-200/90 bg-white p-6 shadow-xs dark:border-[#1a3a5c] dark:bg-[#0a2342]"
             >
               <AvatarOperadoraSoporte className="size-24" />
@@ -932,11 +883,11 @@ export function CuentaDesktop({ cuenta }: CuentaDesktopProps) {
           MODAL DE CONSEJOS DE SEGURIDAD
           --------------------------------------------------------------------- */}
       {seguridadModalAbierto && (
-        <div
-          role="dialog"
+        <dialog
+          ref={dialogRef}
           aria-modal="true"
           aria-labelledby="titulo-modal-seguridad"
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs p-4"
+          className="fixed inset-0 z-50 m-0 flex h-dvh max-h-none w-screen max-w-none items-center justify-center bg-black/50 backdrop-blur-xs p-4"
           onClick={(e) => {
             if (e.target === e.currentTarget) setSeguridadModalAbierto(false);
           }}
@@ -954,6 +905,7 @@ export function CuentaDesktop({ cuenta }: CuentaDesktopProps) {
               <button
                 type="button"
                 onClick={() => setSeguridadModalAbierto(false)}
+                ref={cierreRef}
                 aria-label="Cerrar modal de seguridad"
                 className="flex size-8 items-center justify-center rounded-full text-slate-400 hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-slate-800 dark:hover:text-slate-200"
               >
@@ -974,7 +926,7 @@ export function CuentaDesktop({ cuenta }: CuentaDesktopProps) {
               </div>
               <div className="flex items-start gap-3 rounded-2xl bg-slate-50 p-3.5 dark:bg-[#07192f]">
                 <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-emerald-100 text-emerald-600 font-bold text-[11px]">3</span>
-                <p><strong>Seguimiento satelital en vivo:</strong> Consulta en todo momento la posición geográfica de tu unidad desde el Pasaporte Digital.</p>
+                <p><strong>Seguimiento del traslado:</strong> Consulta la ubicación disponible y las evidencias desde el Pasaporte Digital.</p>
               </div>
             </div>
 
@@ -988,7 +940,7 @@ export function CuentaDesktop({ cuenta }: CuentaDesktopProps) {
               </button>
             </div>
           </div>
-        </div>
+        </dialog>
       )}
     </UserDashboardLayout>
   );
