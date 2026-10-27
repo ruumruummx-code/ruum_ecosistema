@@ -66,7 +66,7 @@ vi.mock("@/lib/mapbox", () => ({
   geocodificarDireccion: vi.fn(async () => ({ lat: 19.43, lng: -99.13 })),
 }));
 
-import NuevoTrasladoFormPage from "../page";
+import { NuevoTrasladoForm as NuevoTrasladoFormPage } from "../NuevoTrasladoForm";
 import * as trasladosService from "@ruum/api/services";
 
 vi.mock("../hooks/useSesionTraslado", async () => {
