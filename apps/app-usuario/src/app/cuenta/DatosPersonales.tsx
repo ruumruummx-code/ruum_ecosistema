@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Icono } from "@ruum/ui";
 import type { Database } from "@ruum/shared/types";
 import { actualizarFechaNacimientoUsuario, actualizarPerfilUsuario, obtenerUrlFotoPerfilUsuario, subirFotoPerfil } from "@ruum/api/services";
@@ -87,6 +88,7 @@ export interface DatosPersonalesProps {
   usuario: Usuario;
   correoRegistro?: string | null;
   fotoUrlInicial?: string | null;
+  escritorio?: boolean;
 }
 
 function esErrorEsquemaFechaNacimiento(err: unknown): boolean {
@@ -95,16 +97,18 @@ function esErrorEsquemaFechaNacimiento(err: unknown): boolean {
   return (
     e.code === "PGRST204" ||
     e.code === "42703" ||
-    e.status === 400 ||
-    e.code === "400" ||
     (typeof e.message === "string" &&
-      (e.message.includes("fecha_nacimiento") ||
-        e.message.includes("schema cache") ||
-        e.message.includes("column")))
+      e.message.includes("fecha_nacimiento") && (e.message.includes("schema cache") || e.message.includes("column")))
   );
 }
 
-export function DatosPersonales({ usuario, fotoUrlInicial, correoRegistro }: DatosPersonalesProps) {
+export function DatosPersonales({ usuario, fotoUrlInicial, correoRegistro, escritorio = false }: DatosPersonalesProps) {
+  const router = useRouter();
+  const guardadoRef = useRef(false);
+  const subidaRef = useRef(false);
+  const temporalFotoRef = useRef<string | null>(null);
+  const exitoTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(() => () => { if (temporalFotoRef.current) URL.revokeObjectURL(temporalFotoRef.current); if (exitoTimerRef.current) clearTimeout(exitoTimerRef.current); cpRequestRef.current++; }, []);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const nombreInicial = separarNombreApellido(usuario.nombre);
@@ -146,6 +150,8 @@ export function DatosPersonales({ usuario, fotoUrlInicial, correoRegistro }: Dat
   }, []);
 
   // CP lookup
+  const [consultandoCp, setConsultandoCp] = useState(false);
+  const [avisoCp, setAvisoCp] = useState<string | null>(null);
   const [coloniasCp, setColoniasCp] = useState<string[]>([]);
   const cpRequestRef = useRef(0);
 
@@ -156,66 +162,79 @@ export function DatosPersonales({ usuario, fotoUrlInicial, correoRegistro }: Dat
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  async function consultarCodigoPostal(valor: string) {
+  async function consultarCodigoPostal(valor: string, completar = false) {
     const request = ++cpRequestRef.current;
-    const cp = soloDigitos(valor, 5);
+    const cp = pais === "México" ? soloDigitos(valor, 5) : valor.slice(0, 12);
     setCodigoPostal(cp);
 
-    if (cp.length !== 5) {
+    if (pais !== "México" || cp.length !== 5) {
+      setConsultandoCp(false);
       setColoniasCp([]);
       return;
     }
 
+    setConsultandoCp(completar);
+    setAvisoCp(null);
     try {
       const datosCp = await consultarCodigoPostalMx(cp);
-      if (!datosCp || request !== cpRequestRef.current) return;
+      if (request !== cpRequestRef.current) return;
+      if (!datosCp) { if (completar) setAvisoCp("No encontramos ese código postal. Verifica el dato y completa el domicilio manualmente."); return; }
 
-      if (datosCp.estado) setEstado(datosCp.estado);
-      if (datosCp.ciudades?.[0]) setCiudad(datosCp.ciudades[0]);
+      if (completar && datosCp.estado) setEstado(datosCp.estado);
+      if (completar && datosCp.ciudades?.[0]) setCiudad(datosCp.ciudades[0]);
       if (datosCp.colonias && datosCp.colonias.length > 0) {
         setColoniasCp(datosCp.colonias);
-        if (!colonia || !datosCp.colonias.includes(colonia)) {
+        if (completar && (!colonia || !datosCp.colonias.includes(colonia))) {
           setColonia(datosCp.colonias[0] ?? "");
         }
       }
     } catch (err) {
       // Dejar captura manual si falla el lookup
       logStructuredWarn("cuenta/DatosPersonales", "lookup_cp_fallido", err, { cp });
+      if (completar && request === cpRequestRef.current) setAvisoCp("No pudimos consultar el código postal. Puedes completar el domicilio manualmente.");
+    } finally {
+      if (request === cpRequestRef.current) setConsultandoCp(false);
     }
   }
 
   async function cargarFoto(archivo: File | undefined) {
-    if (!archivo) return;
+    if (!archivo || subidaRef.current || guardadoRef.current) return;
     setMensajeError(null);
 
-    if (!archivo.type.startsWith("image/")) {
-      setMensajeError("Selecciona un archivo de imagen válido para la foto de perfil.");
+    if (!["image/jpeg", "image/png", "image/webp"].includes(archivo.type) || archivo.size > 5 * 1024 * 1024) {
+      setMensajeError("Selecciona una imagen JPG, PNG o WebP de hasta 5 MB.");
       return;
     }
 
     if (!tieneSupabaseConfigurado()) {
-      // Simular cambio en local
-      setFotoUrl(URL.createObjectURL(archivo));
+      setMensajeError("No hay conexión configurada para subir tu fotografía.");
       return;
     }
 
+    subidaRef.current = true;
     setSubiendoFoto(true);
     try {
       const cliente = crearClienteNavegador();
       const nuevaFotoPath = await subirFotoPerfil(cliente, archivo);
       setFotoPath(nuevaFotoPath);
       const urlFirmada = await obtenerUrlFotoPerfilUsuario(cliente, nuevaFotoPath);
-      setFotoUrl(urlFirmada ?? URL.createObjectURL(archivo));
+      if (temporalFotoRef.current) URL.revokeObjectURL(temporalFotoRef.current);
+      temporalFotoRef.current = urlFirmada ? null : URL.createObjectURL(archivo);
+      setFotoUrl(urlFirmada ?? temporalFotoRef.current ?? "");
     } catch (err) {
       setMensajeError(err instanceof Error ? err.message : "No pudimos subir la fotografía.");
     } finally {
+      subidaRef.current = false;
       setSubiendoFoto(false);
     }
   }
 
   async function guardarCambios(e: React.FormEvent) {
     e.preventDefault();
+    if (guardadoRef.current || subidaRef.current || consultandoCp) return;
     setMensajeError(null);
+    setMensajeExito(false);
+    setAvisoDiscreto(null);
 
     if (!nombre.trim() || !apellido.trim()) {
       setPestana("personal");
@@ -228,6 +247,8 @@ export function DatosPersonales({ usuario, fotoUrlInicial, correoRegistro }: Dat
       setMensajeError("El teléfono debe tener 10 dígitos.");
       return;
     }
+
+    if (pais === "México" && codigoPostal && !/^\d{5}$/.test(codigoPostal)) { setPestana("direccion"); setMensajeError("El código postal debe tener 5 dígitos."); return; }
 
     // C-4: validar fecha de nacimiento real (sin default ficticio).
     if (fechaNacimiento) {
@@ -255,6 +276,7 @@ export function DatosPersonales({ usuario, fotoUrlInicial, correoRegistro }: Dat
       setMensajeError("No hay conexión configurada para guardar los cambios.");
       return;
     }
+    guardadoRef.current = true;
     setGuardando(true);
 
     try {
@@ -285,9 +307,9 @@ export function DatosPersonales({ usuario, fotoUrlInicial, correoRegistro }: Dat
         // Persistir fecha de nacimiento si fue provista. Si el esquema no tiene
         // la columna aún (PGRST204/400), restringimos el catch a error de schema,
         // loggeamos advertencia y mostramos aviso discreto sin bloquear el perfil.
-        if (fechaNacimiento) {
+        if (fechaNacimiento !== (usuario.fecha_nacimiento ?? "")) {
           try {
-            await actualizarFechaNacimientoUsuario(cliente, fechaNacimiento);
+            await actualizarFechaNacimientoUsuario(cliente, fechaNacimiento || null);
           } catch (errFecha) {
             if (esErrorEsquemaFechaNacimiento(errFecha)) {
               console.warn(
@@ -299,26 +321,29 @@ export function DatosPersonales({ usuario, fotoUrlInicial, correoRegistro }: Dat
               );
             } else {
               // Cualquier otro error (red, permisos, etc.) no se silencia
-              throw errFecha;
+              throw new Error("Los datos personales se guardaron, pero no pudimos guardar la fecha de nacimiento. Reintenta guardar para completar el cambio.", { cause: errFecha });
             }
           }
         }
       }
 
       setMensajeExito(true);
-      setTimeout(() => {
+      router.refresh();
+      if (exitoTimerRef.current) clearTimeout(exitoTimerRef.current);
+      exitoTimerRef.current = setTimeout(() => {
         setMensajeExito(false);
         setAvisoDiscreto(null);
       }, 5000);
     } catch (err) {
       setMensajeError(err instanceof Error ? err.message : "Error al guardar los cambios.");
     } finally {
+      guardadoRef.current = false;
       setGuardando(false);
     }
   }
 
   return (
-    <div ref={viewportRef} className="user-profile-editor">
+    <div ref={viewportRef} className={`user-profile-editor ${escritorio ? "is-desktop" : ""}`}>
       <header className="user-profile-appbar">
         <Link href="/cuenta?seccion=perfil" aria-label="Volver a mi cuenta" className="user-profile-back"><Icono nombre="atras" className="size-4" />Atrás</Link>
         <h1>Editar Perfil</h1>
@@ -334,11 +359,12 @@ export function DatosPersonales({ usuario, fotoUrlInicial, correoRegistro }: Dat
         }}>{id === "personal" ? "Personal" : "Dirección"}</button>)}
       </div>
       <form id="editar-perfil-form" noValidate onSubmit={guardarCambios} className="user-profile-form">
+        <fieldset disabled={guardando || subiendoFoto} className="contents">
         <section id="perfil-panel-personal" role="tabpanel" aria-labelledby="perfil-tab-personal" hidden={pestana !== "personal"} className="user-profile-panel">
           <div className="user-profile-photo">
             {fotoUrl ? <Image src={fotoUrl} alt="Foto de perfil" width={48} height={48} unoptimized /> : <span aria-hidden="true">{iniciales(nombre, apellido)}</span>}
-            <button type="button" onClick={() => fileInputRef.current?.click()} disabled={subiendoFoto} aria-label="Cambiar foto de perfil"><IconoCamara />{subiendoFoto ? "Subiendo foto…" : "Cambiar foto"}</button>
-            <input ref={fileInputRef} type="file" accept="image/*" aria-label="Archivo de foto de perfil" onChange={(event) => void cargarFoto(event.target.files?.[0])} hidden />
+            <button type="button" onClick={() => fileInputRef.current?.click()} disabled={subiendoFoto || guardando} aria-label="Cambiar foto de perfil"><IconoCamara />{subiendoFoto ? "Subiendo foto…" : "Cambiar foto"}</button>
+            <input ref={fileInputRef} type="file" accept="image/*" aria-label="Archivo de foto de perfil" onChange={(event) => { const archivo = event.target.files?.[0]; event.target.value = ""; void cargarFoto(archivo); }} hidden />
           </div>
           <div className="user-profile-grid">
             <CampoPerfil id="nombre" etiqueta="Nombre(s)"><input id="nombre" autoComplete="given-name" value={nombre} onChange={(e) => setNombre(e.target.value)} required /></CampoPerfil>
@@ -350,19 +376,22 @@ export function DatosPersonales({ usuario, fotoUrlInicial, correoRegistro }: Dat
         </section>
         <section id="perfil-panel-direccion" role="tabpanel" aria-labelledby="perfil-tab-direccion" hidden={pestana !== "direccion"} className="user-profile-panel">
           <div className="user-profile-grid">
-            <CampoPerfil id="pais" etiqueta="País"><select id="pais" autoComplete="country-name" value={pais} onChange={(e) => setPais(e.target.value)}>{Array.from(new Set([pais, "México", "Estados Unidos", "Colombia", "Argentina", "España"])).filter(Boolean).map(valor => <option key={valor}>{valor}</option>)}</select></CampoPerfil>
-            <CampoPerfil id="cp" etiqueta="Código postal"><input id="cp" autoComplete="postal-code" inputMode="numeric" maxLength={5} value={codigoPostal} onChange={(e) => void consultarCodigoPostal(e.target.value)} /></CampoPerfil>
+            <CampoPerfil id="pais" etiqueta="País"><select id="pais" autoComplete="country-name" value={pais} onChange={(e) => { cpRequestRef.current++; setConsultandoCp(false); setColoniasCp([]); setAvisoCp(null); setPais(e.target.value); }}>{Array.from(new Set([pais, "México", "Estados Unidos", "Colombia", "Argentina", "España"])).filter(Boolean).map(valor => <option key={valor}>{valor}</option>)}</select></CampoPerfil>
+            <CampoPerfil id="cp" etiqueta="Código postal"><input id="cp" autoComplete="postal-code" inputMode={pais === "México" ? "numeric" : "text"} maxLength={pais === "México" ? 5 : 12} value={codigoPostal} onChange={(e) => void consultarCodigoPostal(e.target.value, true)} /></CampoPerfil>
             <CampoPerfil id="estado" etiqueta="Estado"><input id="estado" autoComplete="address-level1" value={estado} onChange={(e) => setEstado(e.target.value)} /></CampoPerfil>
             <CampoPerfil id="ciudad" etiqueta="Ciudad"><input id="ciudad" autoComplete="address-level2" value={ciudad} onChange={(e) => setCiudad(e.target.value)} /></CampoPerfil>
-            <CampoPerfil id="colonia" etiqueta="Colonia" ancho>{coloniasCp.length > 1 ? <select id="colonia" value={colonia} onChange={(e) => setColonia(e.target.value)}>{coloniasCp.map(valor => <option key={valor}>{valor}</option>)}</select> : <input id="colonia" value={colonia} onChange={(e) => setColonia(e.target.value)} />}</CampoPerfil>
+            <CampoPerfil id="colonia" etiqueta="Colonia" ancho>{coloniasCp.length > 1 ? <select id="colonia" value={colonia} onChange={(e) => setColonia(e.target.value)}>{Array.from(new Set([colonia, ...coloniasCp])).filter(Boolean).map(valor => <option key={valor}>{valor}</option>)}</select> : <input id="colonia" value={colonia} onChange={(e) => setColonia(e.target.value)} />}</CampoPerfil>
             <CampoPerfil id="calle" etiqueta="Calle"><input id="calle" autoComplete="address-line1" value={calle} onChange={(e) => setCalle(e.target.value)} /></CampoPerfil>
             <CampoPerfil id="numero" etiqueta="Número"><input id="numero" autoComplete="address-line2" value={numero} onChange={(e) => setNumero(e.target.value)} /></CampoPerfil>
             <CampoPerfil id="referencias" etiqueta="Referencias" ancho><input id="referencias" value={referencias} onChange={(e) => setReferencias(e.target.value)} /></CampoPerfil>
           </div>
         </section>
+        </fieldset>
       </form>
       <footer className="user-profile-actions">
         <div className="user-profile-feedback" aria-live="polite">
+          {consultandoCp && <p role="status">Consultando código postal…</p>}
+          {avisoCp && !consultandoCp && <p>{avisoCp}</p>}
           {mensajeError && <p role="alert">{mensajeError}</p>}
           {avisoDiscreto && !mensajeError && (
             <p role="status" className="user-profile-warning text-xs text-amber-600 dark:text-amber-400">
@@ -377,7 +406,7 @@ export function DatosPersonales({ usuario, fotoUrlInicial, correoRegistro }: Dat
             </p>
           )}
         </div>
-        <button type="submit" form="editar-perfil-form" disabled={guardando || subiendoFoto}><IconoCheckCirculo className="size-5" />{guardando ? "Guardando cambios…" : "Guardar cambios"}</button>
+        <button type="submit" form="editar-perfil-form" disabled={guardando || subiendoFoto || consultandoCp}><IconoCheckCirculo className="size-5" />{guardando ? "Guardando cambios…" : "Guardar cambios"}</button>
       </footer>
     </div>
   );

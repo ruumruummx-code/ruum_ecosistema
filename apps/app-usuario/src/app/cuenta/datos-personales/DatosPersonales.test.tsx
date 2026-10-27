@@ -52,6 +52,8 @@ const usuarioMock: Usuario = {
 };
 
 
+vi.mock("next/navigation", () => ({ useRouter: () => ({ refresh: vi.fn() }) }));
+
 const { guardar, guardarFecha } = vi.hoisted(() => ({ guardar: vi.fn(), guardarFecha: vi.fn() }));
 vi.mock("@ruum/api/services", () => ({ actualizarPerfilUsuario: guardar, actualizarFechaNacimientoUsuario: guardarFecha, obtenerUrlFotoPerfilUsuario: vi.fn(), subirFotoPerfil: vi.fn() }));
 vi.mock("../../../lib/supabase-browser", () => ({ tieneSupabaseConfigurado: () => true, crearClienteNavegador: () => ({}) }));
@@ -113,5 +115,19 @@ describe("DatosPersonales — RR-2026-004", () => {
     fireEvent.keyDown(personal, { key: "ArrowRight" });
     expect(screen.getByRole("tab", { name: "Dirección" })).toHaveFocus();
     expect(screen.getByRole("tab", { name: "Dirección" })).toHaveAttribute("aria-selected", "true");
+  });
+  it("permite eliminar una fecha de nacimiento previamente guardada", async () => {
+    render(<DatosPersonales usuario={{ ...usuarioMock, fecha_nacimiento: "1990-05-15" }} />);
+    fireEvent.change(screen.getByLabelText("Fecha de nacimiento"), { target: { value: "" } });
+    fireEvent.click(screen.getByRole("button", { name: "Guardar cambios" }));
+    await waitFor(() => expect(guardarFecha).toHaveBeenCalledWith(expect.anything(), null));
+  });
+  it("informa un guardado parcial cuando falla la fecha sin ocultar un error 400", async () => {
+    guardarFecha.mockRejectedValueOnce({ status: 400, message: "Fecha rechazada por validación" });
+    render(<DatosPersonales usuario={usuarioMock} />);
+    fireEvent.change(screen.getByLabelText("Fecha de nacimiento"), { target: { value: "1990-05-15" } });
+    fireEvent.click(screen.getByRole("button", { name: "Guardar cambios" }));
+    expect(await screen.findByRole("alert")).toHaveTextContent("Los datos personales se guardaron, pero");
+    expect(guardar).toHaveBeenCalledTimes(1);
   });
 });

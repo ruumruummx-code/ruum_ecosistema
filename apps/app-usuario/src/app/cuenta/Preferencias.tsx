@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback, type ReactNode } from "react";
 import Link from "next/link";
+import { useTema } from "../TemaProvider";
 import { Icono } from "@ruum/ui";
 import { HojaTareaCuenta } from "./HojaTareaCuenta";
 import type { Database } from "@ruum/shared/types";
@@ -14,6 +15,7 @@ type Usuario = Database["public"]["Tables"]["usuarios"]["Row"];
 
 export interface PreferenciasProps {
   usuario?: Usuario | null;
+  escritorio?: boolean;
 }
 
 interface InterruptorProps {
@@ -71,7 +73,7 @@ function aplicarTemaEnDocumento(t: "Claro" | "Oscuro" | "Automático") {
     // Unificar a una sola clave canónica "ruum-tema", limpiando claves obsoletas
     window.localStorage.setItem("ruum-tema", efectivo);
     window.localStorage.removeItem("ruum-theme");
-    window.localStorage.removeItem("ruum-tema-modo");
+    window.localStorage.setItem("ruum-tema-modo", t === "Automático" ? "auto" : efectivo);
   } catch {
     // ignore
   }
@@ -98,10 +100,10 @@ function aplicarAccesibilidadEnDocumento(acc: "Estándar" | "Texto grande" | "Al
   }
 }
 
-function aplicarIdiomaEnDocumento(id: "es" | "en") {
+function aplicarIdiomaEnDocumento(_id: "es" | "en") {
   if (typeof window === "undefined" || typeof document === "undefined") return;
   try {
-    document.documentElement.setAttribute("lang", id);
+    document.documentElement.setAttribute("lang", "es-MX");
   } catch {
     // ignore
   }
@@ -134,12 +136,14 @@ function aplicarUsoDatosEnDocumento(datos: "Activado" | "Desactivado") {
    Componente Principal Preferencias
 ───────────────────────────────────────────────────────────── */
 
-export function Preferencias({ usuario }: PreferenciasProps) {
+export function Preferencias({ usuario, escritorio = false }: PreferenciasProps) {
+  const { fijarModo, modo } = useTema();
+  const modoAnterior = useRef(modo);
   // C-3: preferencias sin columna en BD (tema, idioma, etc.) se persisten en
   // localStorage; las de notificación/alerta van a Supabase + localStorage.
   function leerLocal<T>(clave: string, defecto: T): T {
     try {
-      const raw = typeof window !== "undefined" ? window.localStorage.getItem(clave) : null;
+      const raw = typeof window !== "undefined" ? window.localStorage.getItem(usuario?.id ? `${clave}:${usuario.id}` : clave) : null;
       return raw !== null ? (JSON.parse(raw) as T) : defecto;
     } catch {
       return defecto;
@@ -147,7 +151,7 @@ export function Preferencias({ usuario }: PreferenciasProps) {
   }
   function guardarLocal(clave: string, valor: unknown) {
     try {
-      window.localStorage.setItem(clave, JSON.stringify(valor));
+      window.localStorage.setItem(usuario?.id ? `${clave}:${usuario.id}` : clave, JSON.stringify(valor));
     } catch {
       // almacenamiento no disponible (SSR/privado) — se ignora
     }
@@ -155,6 +159,11 @@ export function Preferencias({ usuario }: PreferenciasProps) {
   const prefBD = (usuario?.preferencias && typeof usuario.preferencias === "object" && !Array.isArray(usuario.preferencias))
     ? (usuario.preferencias as Record<string, unknown>)
     : {};
+
+  function leerOpcion<T extends string>(clave: string, valor: unknown, opciones: readonly T[], defecto: T): T {
+    const candidato = typeof valor === "string" ? valor : leerLocal(clave, defecto);
+    return opciones.includes(candidato as T) ? candidato as T : defecto;
+  }
 
   // Notificaciones generales
   const [notifPush, setNotifPush] = useState(usuario?.notificaciones_push ?? true);
@@ -169,83 +178,78 @@ export function Preferencias({ usuario }: PreferenciasProps) {
   const [alertaIncidente, setAlertaIncidente] = useState(() => (typeof prefBD.alertaIncidente === "boolean" ? prefBD.alertaIncidente : leerLocal("ruum:pref:alertaIncidente", true)));
 
   // Idioma
-  const [idioma, setIdioma] = useState<"es" | "en">(() => (prefBD.idioma as "es" | "en") ?? leerLocal("ruum:pref:idioma", "es"));
+  const [idioma, setIdioma] = useState<"es" | "en">(() => leerOpcion("ruum:pref:idioma", prefBD.idioma, ["es", "en"] as const, "es"));
 
   // Preferencias de la app
-  const [tema, setTema] = useState<"Claro" | "Oscuro" | "Automático">(() => (prefBD.tema as "Claro" | "Oscuro" | "Automático") ?? leerLocal("ruum:pref:tema", "Claro"));
-  const [unidades, setUnidades] = useState<"Métrico" | "Imperial">(() => (prefBD.unidades as "Métrico" | "Imperial") ?? leerLocal("ruum:pref:unidades", "Métrico"));
-  const [accesibilidad, setAccesibilidad] = useState<"Estándar" | "Texto grande" | "Alto contraste">(() => (prefBD.accesibilidad as "Estándar" | "Texto grande" | "Alto contraste") ?? leerLocal("ruum:pref:accesibilidad", "Estándar"));
+  const [tema, setTema] = useState<"Claro" | "Oscuro" | "Automático">(() => leerOpcion("ruum:pref:tema", prefBD.tema, ["Claro", "Oscuro", "Automático"] as const, "Claro"));
+  const [unidades, setUnidades] = useState<"Métrico" | "Imperial">(() => leerOpcion("ruum:pref:unidades", prefBD.unidades, ["Métrico", "Imperial"] as const, "Métrico"));
+  const [accesibilidad, setAccesibilidad] = useState<"Estándar" | "Texto grande" | "Alto contraste">(() => leerOpcion("ruum:pref:accesibilidad", prefBD.accesibilidad, ["Estándar", "Texto grande", "Alto contraste"] as const, "Estándar"));
 
   // Privacidad y seguridad
-  const [biometrico, setBiometrico] = useState(() => (typeof prefBD.biometrico === "boolean" ? prefBD.biometrico : leerLocal("ruum:pref:biometrico", true)));
-  const [ubicacion, setUbicacion] = useState(() => (typeof prefBD.ubicacion === "boolean" ? prefBD.ubicacion : leerLocal("ruum:pref:ubicacion", true)));
-  const [usoDatos, setUsoDatos] = useState<"Activado" | "Desactivado">(() => (prefBD.usoDatos as "Activado" | "Desactivado") ?? leerLocal("ruum:pref:usoDatos", "Activado"));
+  const [usoDatos, setUsoDatos] = useState<"Activado" | "Desactivado">(() => leerOpcion("ruum:pref:usoDatos", prefBD.usoDatos, ["Activado", "Desactivado"] as const, "Activado"));
 
   const [notificacionesAbiertas, setNotificacionesAbiertas] = useState(false);
   const cerrarNotificaciones = useCallback(() => setNotificacionesAbiertas(false), []);
   const colaGuardado = useRef<Promise<void>>(Promise.resolve());
-  const timeoutDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const pendientesNotificaciones = useRef<Record<string, boolean>>({});
+  const [errorGuardado, setErrorGuardado] = useState<string | null>(null);
+  const [guardadosPendientes, setGuardadosPendientes] = useState(0);
   const preferenciasPendientesRef = useRef<Record<string, unknown>>({});
   const [toastMensaje, setToastMensaje] = useState<string | null>(null);
 
-  useEffect(() => aplicarTemaEnDocumento(tema), [tema]);
+  useEffect(() => { fijarModo(tema === "Automático" ? "auto" : tema === "Oscuro" ? "dark" : "light"); aplicarTemaEnDocumento(tema); }, [tema, fijarModo]);
+  useEffect(() => { if (modoAnterior.current !== modo) { modoAnterior.current = modo; setTema(modo === "auto" ? "Automático" : modo === "dark" ? "Oscuro" : "Claro"); } }, [modo]);
   useEffect(() => aplicarAccesibilidadEnDocumento(accesibilidad), [accesibilidad]);
   useEffect(() => aplicarIdiomaEnDocumento(idioma), [idioma]);
   useEffect(() => aplicarUnidadesEnDocumento(unidades), [unidades]);
   useEffect(() => aplicarUsoDatosEnDocumento(usoDatos), [usoDatos]);
-  useEffect(() => {
-    return () => {
-      if (timeoutDebounceRef.current) clearTimeout(timeoutDebounceRef.current);
-    };
-  }, []);
   useEffect(() => { if (!toastMensaje) return; const t = setTimeout(() => setToastMensaje(null), 3000); return () => clearTimeout(t); }, [toastMensaje]);
 
-  function programarSincronizacionGeneral(cambios: Record<string, unknown>) {
-    Object.assign(preferenciasPendientesRef.current, cambios);
-    if (timeoutDebounceRef.current) {
-      clearTimeout(timeoutDebounceRef.current);
-    }
-    timeoutDebounceRef.current = setTimeout(() => {
-      const payload = { ...preferenciasPendientesRef.current };
-      preferenciasPendientesRef.current = {};
-      if (!tieneSupabaseConfigurado()) return;
-      colaGuardado.current = colaGuardado.current.then(async () => {
-        try {
-          await actualizarPreferenciasGeneralesUsuario(crearClienteNavegador(), payload);
-        } catch (err) {
-          logStructuredWarn("cuenta/Preferencias", "sincronizar_preferencias_generales_fallido", err);
-          setToastMensaje("Guardado en este dispositivo; no pudimos sincronizar con tu cuenta.");
-        }
-      });
-    }, 400);
-  }
-
-  async function sincronizarNotificacion(campo: string, valor: boolean) {
-    guardarLocal(`ruum:pref:${campo}`, valor);
-    if (!tieneSupabaseConfigurado()) return;
+  function encolarGuardado(tipo: "general" | "notificacion", cambios: Record<string, unknown>) {
+    const pendientes = tipo === "general" ? preferenciasPendientesRef.current : pendientesNotificaciones.current;
+    Object.assign(pendientes, cambios);
+    const payload = { ...pendientes };
+    if (!tieneSupabaseConfigurado()) { setErrorGuardado("No hay conexión configurada para sincronizar tus preferencias."); return; }
+    setGuardadosPendientes(n => n + 1);
     colaGuardado.current = colaGuardado.current.then(async () => {
-      try { await actualizarPreferenciasNotificaciones(crearClienteNavegador(), { [campo]: valor }); }
-      catch (err) {
-        logStructuredWarn("cuenta/Preferencias", "sincronizar_notificacion_fallido", err, { campo });
-        setToastMensaje("Guardado en este dispositivo; no pudimos sincronizar con tu cuenta.");
-      }
+      try {
+        if (tipo === "general") await actualizarPreferenciasGeneralesUsuario(crearClienteNavegador(), payload);
+        else await actualizarPreferenciasNotificaciones(crearClienteNavegador(), payload);
+        for (const [clave, valor] of Object.entries(payload)) if (pendientes[clave] === valor) delete pendientes[clave];
+        if (Object.keys(preferenciasPendientesRef.current).length === 0 && Object.keys(pendientesNotificaciones.current).length === 0) setErrorGuardado(null);
+      } catch (err) {
+        logStructuredWarn("cuenta/Preferencias", "sincronizar_preferencias_fallido", err);
+        setErrorGuardado("Hay cambios pendientes de sincronizar con tu cuenta. Reintenta el guardado.");
+      } finally { setGuardadosPendientes(n => n - 1); }
     });
+  }
+  function programarSincronizacionGeneral(cambios: Record<string, unknown>) { encolarGuardado("general", cambios); }
+  async function sincronizarNotificacion(campo: string, valor: boolean) {
+    guardarLocal("ruum:pref:" + campo, valor);
+    encolarGuardado("notificacion", { [campo]: valor });
     await colaGuardado.current;
   }
-  function handleTogglePush() {
+  function reintentarGuardado() {
+    if (Object.keys(preferenciasPendientesRef.current).length) encolarGuardado("general", {});
+    if (Object.keys(pendientesNotificaciones.current).length) encolarGuardado("notificacion", {});
+  }
+  async function handleTogglePush() {
     const nuevo = !notifPush;
     setNotifPush(nuevo);
     void sincronizarNotificacion("notificaciones_push", nuevo);
     if (nuevo && typeof window !== "undefined" && "Notification" in window) {
       try {
-        if (Notification.permission === "default") {
-          void Notification.requestPermission();
+        const permiso = Notification.permission === "default" ? await Notification.requestPermission() : Notification.permission;
+        if (permiso !== "granted") {
+          setToastMensaje("Preferencia push seleccionada. Debes permitir las notificaciones en el navegador para recibirlas.");
+          return;
         }
       } catch {
-        // ignore
+        setToastMensaje("Preferencia push seleccionada. No pudimos solicitar el permiso del navegador.");
+        return;
       }
     }
-    setToastMensaje(nuevo ? "Notificaciones push activadas" : "Notificaciones push desactivadas");
+    setToastMensaje(nuevo ? "Preferencia push seleccionada; la recepción depende del soporte y permiso del navegador." : "Notificaciones push desactivadas");
   }
 
   function handleToggleEmail() {
@@ -303,30 +307,7 @@ export function Preferencias({ usuario }: PreferenciasProps) {
     guardarLocal("ruum:pref:idioma", nuevo);
     aplicarIdiomaEnDocumento(nuevo);
     programarSincronizacionGeneral({ idioma: nuevo });
-    setToastMensaje(nuevo === "es" ? "Idioma cambiado a Español (México)" : "Language changed to English (US)");
-  }
-
-  function handleToggleBiometrico() {
-    const nuevo = !biometrico;
-    setBiometrico(nuevo);
-    guardarLocal("ruum:pref:biometrico", nuevo);
-    programarSincronizacionGeneral({ biometrico: nuevo });
-    setToastMensaje(nuevo ? "Inicio biométrico activado" : "Inicio biométrico desactivado");
-  }
-
-  function handleToggleUbicacion() {
-    const nuevo = !ubicacion;
-    setUbicacion(nuevo);
-    guardarLocal("ruum:pref:ubicacion", nuevo);
-    programarSincronizacionGeneral({ ubicacion: nuevo });
-    if (nuevo && typeof navigator !== "undefined" && "geolocation" in navigator) {
-      try {
-        navigator.geolocation.getCurrentPosition(() => {}, () => {}, { timeout: 4000, maximumAge: 60000 });
-      } catch {
-        // ignore
-      }
-    }
-    setToastMensaje(nuevo ? "Ubicación en tiempo real activada" : "Ubicación en tiempo real desactivada");
+    setToastMensaje("Preferencia de idioma guardada. La interfaz está disponible en español.");
   }
 
   const notificaciones = [
@@ -335,7 +316,7 @@ export function Preferencias({ usuario }: PreferenciasProps) {
     ["Estado del traslado", alertaViaje, handleToggleViaje], ["Evidencia disponible", alertaEvidencia, handleToggleEvidencia],
     ["Alertas de pago", alertaPago, handleTogglePago], ["Incidentes", alertaIncidente, handleToggleIncidente],
   ] as const;
-  return <div className="user-preferences-view">
+  return <div className={`user-preferences-view ${escritorio ? "is-desktop" : ""}`}>
     <header className="user-profile-appbar"><Link href="/cuenta?seccion=perfil" aria-label="Volver a mi cuenta" className="user-profile-back">‹ Atrás</Link><h1>Preferencias</h1><span aria-hidden="true" /></header>
     <div className="user-preferences-list">
       <h2>IDIOMA</h2>
@@ -348,10 +329,12 @@ export function Preferencias({ usuario }: PreferenciasProps) {
       <FilaPreferencia titulo="Unidades" icono="M4 5h16v14H4V5Z M8 5v5 M12 5v3 M16 5v5"><select aria-label="Unidades de medida" value={unidades} onChange={e => { const v = e.target.value as typeof unidades; setUnidades(v); guardarLocal("ruum:pref:unidades", v); programarSincronizacionGeneral({ unidades: v }); setToastMensaje(`Unidades actualizadas: ${v}`); }}>{["Métrico", "Imperial"].map(v => <option key={v}>{v}</option>)}</select></FilaPreferencia>
       <FilaPreferencia titulo="Accesibilidad" icono="M12 3v1 M4 8h16 M12 8v8 M8 21l4-5 4 5"><select aria-label="Accesibilidad" value={accesibilidad} onChange={e => { const v = e.target.value as typeof accesibilidad; setAccesibilidad(v); guardarLocal("ruum:pref:accesibilidad", v); programarSincronizacionGeneral({ accesibilidad: v }); setToastMensaje(`Accesibilidad configurada: ${v}`); }}>{["Estándar", "Texto grande", "Alto contraste"].map(v => <option key={v}>{v}</option>)}</select></FilaPreferencia>
       <h2>PRIVACIDAD</h2>
-      <FilaPreferencia titulo="Biometría" icono="M6 16V9a6 6 0 0 1 12 0v7 M9 19V9a3 3 0 0 1 6 0v11 M12 8v14"><Interruptor activo={biometrico} onAlternar={handleToggleBiometrico} etiquetaAria="Inicio biométrico" /></FilaPreferencia>
-      <FilaPreferencia titulo="Ubicación" icono="M12 22s8-8 8-13a8 8 0 0 0-16 0c0 5 8 13 8 13Z M12 6v6"><Interruptor activo={ubicacion} onAlternar={handleToggleUbicacion} etiquetaAria="Ubicación en tiempo real" /></FilaPreferencia>
+      <FilaPreferencia titulo="Biometría" icono="M6 16V9a6 6 0 0 1 12 0v7 M9 19V9a3 3 0 0 1 6 0v11 M12 8v14"><span className="text-xs">No disponible en esta aplicación</span></FilaPreferencia>
+      <FilaPreferencia titulo="Ubicación" icono="M12 22s8-8 8-13a8 8 0 0 0-16 0c0 5 8 13 8 13Z M12 6v6"><span className="text-xs">Se autoriza desde el mapa y el navegador</span></FilaPreferencia>
       <FilaPreferencia titulo="Uso de datos" icono="M4 4h16v16H4V4Z M8 16v-4 M12 16V8 M16 16v-6"><select aria-label="Uso de datos" value={usoDatos} onChange={e => { const v = e.target.value as typeof usoDatos; setUsoDatos(v); guardarLocal("ruum:pref:usoDatos", v); programarSincronizacionGeneral({ usoDatos: v }); setToastMensaje(`Uso de datos: ${v}`); }}>{["Activado", "Desactivado"].map(v => <option key={v}>{v}</option>)}</select></FilaPreferencia>
     </div>
+    {errorGuardado && <div role="alert" className="m-3 rounded-xl border border-amber-300 p-3 text-sm">{errorGuardado}<button type="button" disabled={guardadosPendientes > 0} onClick={reintentarGuardado} className="ml-3 underline">Reintentar guardado</button></div>}
+    <p className="px-3 text-xs" role="status">{guardadosPendientes > 0 ? "Sincronizando cambios…" : ""}</p>
     <div className="user-preferences-feedback" role="status" aria-live="polite">{toastMensaje}</div>
     {notificacionesAbiertas && <HojaTareaCuenta titulo="Notificaciones y alertas" extendida cerrar={cerrarNotificaciones}><div className="user-preferences-notifications">{notificaciones.map(([titulo, activo, cambiar]) => <FilaPreferencia key={titulo} titulo={titulo}><Interruptor activo={activo} onAlternar={cambiar} etiquetaAria={titulo} /></FilaPreferencia>)}</div></HojaTareaCuenta>}
   </div>;

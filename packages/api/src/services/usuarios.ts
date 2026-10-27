@@ -108,7 +108,7 @@ export async function actualizarPerfilUsuario(cliente: Cliente, datos: PerfilUsu
 }
 
 /** Actualiza la fecha de nacimiento del usuario autenticado si la columna existe. */
-export async function actualizarFechaNacimientoUsuario(cliente: Cliente, fechaNacimiento: string): Promise<void> {
+export async function actualizarFechaNacimientoUsuario(cliente: Cliente, fechaNacimiento: string | null): Promise<void> {
   const { data: sesion } = await cliente.auth.getUser();
   if (!sesion.user) throw new Error("Sin sesión activa.");
 
@@ -158,12 +158,20 @@ export async function actualizarPreferenciasGeneralesUsuario(
   const { data: sesion } = await cliente.auth.getUser();
   if (!sesion.user) throw new Error("Sin sesión activa.");
 
-  const { error } = await cliente
-    .from("usuarios")
-    .update({ preferencias } as never)
-    .eq("auth_user_id", sesion.user.id);
-
-  if (error) throw error;
+  // La columna JSONB contiene todos los ajustes: cada parche conserva las claves existentes.
+  // El timestamp protege contra escrituras concurrentes de otras pestañas.
+  for (let intento = 0; intento < 3; intento++) {
+    const { data: actual, error: errorLectura } = await cliente.from("usuarios")
+      .select("preferencias, actualizado_en").eq("auth_user_id", sesion.user.id).single();
+    if (errorLectura) throw errorLectura;
+    const previas = actual.preferencias && typeof actual.preferencias === "object" && !Array.isArray(actual.preferencias) ? actual.preferencias : {};
+    const { data, error } = await cliente.from("usuarios")
+      .update({ preferencias: { ...previas, ...preferencias }, actualizado_en: new Date(Math.max(Date.now(), Date.parse(actual.actualizado_en) + 1)).toISOString() } as never)
+      .eq("auth_user_id", sesion.user.id).eq("actualizado_en", actual.actualizado_en).select("id").maybeSingle();
+    if (error) throw error;
+    if (data) return;
+  }
+  throw new Error("Tus preferencias cambiaron en otra sesión. Reintenta guardar los cambios.");
 }
 
 function rutaFotoPerfilUsuario(valor: string | null | undefined, authUserId: string): string | null {

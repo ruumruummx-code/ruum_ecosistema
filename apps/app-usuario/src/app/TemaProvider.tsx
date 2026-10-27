@@ -81,6 +81,7 @@ function resolverTema(modo: ModoTema): Tema {
 function aplicarTema(t: Tema) {
   try {
     document.documentElement.setAttribute("data-theme", t);
+    document.documentElement.classList.toggle("dark", t === "dark");
   } catch {
     // ignore
   }
@@ -100,30 +101,16 @@ export function TemaProvider({ children }: { children: React.ReactNode }) {
     setTema(resuelto);
     aplicarTema(resuelto);
 
-    // Si el modo es automático, seguir cambios del sistema en vivo.
-    if (inicial === "auto" && typeof window !== "undefined" && typeof window.matchMedia === "function") {
-      let media: MediaQueryList | null = null;
-      try {
-        media = window.matchMedia("(prefers-color-scheme: dark)");
-      } catch {
-        media = null;
-      }
-      if (media) {
-        const alCambiar = (e: MediaQueryListEvent) => {
-          const t: Tema = e.matches ? "dark" : "light";
-          setTema(t);
-          aplicarTema(t);
-        };
-        if (typeof media.addEventListener === "function") media.addEventListener("change", alCambiar);
-        else media.addListener(alCambiar as unknown as (e: MediaQueryListEvent) => void);
-        return () => {
-          if (!media) return;
-          if (typeof media.removeEventListener === "function") media.removeEventListener("change", alCambiar);
-          else media.removeListener(alCambiar as unknown as (e: MediaQueryListEvent) => void);
-        };
-      }
-    }
   }, []);
+
+  useEffect(() => {
+    if (modo !== "auto" || typeof window.matchMedia !== "function") return;
+    const media = window.matchMedia("(prefers-color-scheme: dark)");
+    const actualizar = () => { const t: Tema = media.matches ? "dark" : "light"; setTema(t); aplicarTema(t); };
+    actualizar();
+    media.addEventListener?.("change", actualizar);
+    return () => media.removeEventListener?.("change", actualizar);
+  }, [modo]);
 
   const fijarModo = useCallback((m: ModoTema) => {
     setModo(m);

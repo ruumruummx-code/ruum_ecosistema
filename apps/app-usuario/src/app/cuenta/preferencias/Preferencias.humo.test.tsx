@@ -7,5 +7,5 @@ vi.mock("@/lib/supabase-browser",()=>({tieneSupabaseConfigurado:()=>false,crearC
 beforeEach(()=>localStorage.clear());
 describe("Aplicación inmediata de preferencias",()=>{
 it("aplica tema y unidades sin botón Aplicar",async()=>{const u=userEvent.setup();render(<Preferencias usuario={null}/>);await u.selectOptions(screen.getByRole("combobox",{name:"Tema de la aplicación"}),"Oscuro");expect(document.documentElement).toHaveClass("dark");await u.selectOptions(screen.getByRole("combobox",{name:"Unidades de medida"}),"Imperial");expect(document.documentElement).toHaveAttribute("data-units","imperial");});
-it("conserva biometría al volver a montar la vista",async()=>{const u=userEvent.setup();const r=render(<Preferencias usuario={null}/>);const b=screen.getByRole("switch",{name:"Inicio biométrico"});const old=b.getAttribute("aria-checked");await u.click(b);r.unmount();render(<Preferencias usuario={null}/>);expect(screen.getByRole("switch",{name:"Inicio biométrico"}).getAttribute("aria-checked")).not.toBe(old);});
+it("no afirma activar biometría sin una integración real",()=>{render(<Preferencias usuario={null}/>);expect(screen.getByText("No disponible en esta aplicación")).toBeInTheDocument();expect(screen.queryByRole("switch",{name:"Inicio biométrico"})).not.toBeInTheDocument();});
 });

@@ -2140,3 +2140,19 @@ input::placeholder, textarea::placeholder {
 
 /* RR-2026-019: FAQ conserva el lienzo fijo sobre la navegación. */
 .ruum-screen > .faq-shell-content { overflow: hidden; padding: 8px 12px calc(var(--user-mobile-nav-height, calc(66px + env(safe-area-inset-bottom))) + 8px); }
+
+/* Editores de cuenta dentro del shell desktop: sin capas móviles fijas. */
+.user-profile-editor.is-desktop { position: relative; inset: auto; height: auto; max-height: none; overflow: visible; border: 1px solid var(--user-color-border); border-radius: 20px; }
+:is(.user-profile-editor, .user-preferences-view).is-desktop > .user-profile-appbar { display: none; }
+.user-profile-editor.is-desktop .user-profile-tabs { margin: 16px auto; }
+.user-profile-editor.is-desktop .user-profile-form { width: 100%; padding: 0 20px 20px; overflow: visible; }
+.user-profile-editor.is-desktop .user-profile-panel { overflow: visible; }
+.user-profile-editor.is-desktop .user-profile-grid { gap: 16px; }
+.user-profile-editor.is-desktop .user-profile-field { height: auto; min-height: 64px; padding: 8px 12px; }
+.user-profile-editor.is-desktop .user-profile-field label { font-size: 12px; line-height: 20px; }
+.user-profile-editor.is-desktop .user-profile-actions { position: sticky; bottom: 0; border-radius: 0 0 20px 20px; padding: 12px 20px 20px; }
+.user-profile-editor.is-desktop .user-profile-feedback { height: auto; min-height: 36px; overflow: visible; flex-direction: column; align-items: stretch; gap: 6px; padding-block: 6px; }
+.user-preferences-view.is-desktop { overflow: visible; border: 1px solid var(--user-color-border); border-radius: 20px; }
+.user-preferences-view.is-desktop .user-preferences-list h2 { height: auto; padding: 12px 20px; font-size: 12px; }
+.user-preferences-view.is-desktop .user-preference-row { min-height: 64px; padding-inline: 20px; font-size: 14px; }
+.user-preferences-view.is-desktop .user-preferences-feedback { max-height: none; padding: 12px 20px; font-size: 13px; }
