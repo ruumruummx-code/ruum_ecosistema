@@ -1,7 +1,11 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { ETIQUETA_ESTADO_TRASLADO } from "@ruum/shared/states";
+import { TERMINOLOGIA_USUARIO } from "../../lib/glosario";
+import { obtenerViajeActivo } from "../../lib/inicio";
 import {
   useGestionTraslados,
   type ViajeLista,
@@ -10,6 +14,7 @@ import {
   vehiculoNombre,
   vehiculoTipo,
   folioCorto,
+  pestañaDeViaje,
 } from "./useGestionTraslados";
 import { UserDashboardLayout } from "../../components/layout/UserDashboardLayout";
 import type { NotificacionHeader } from "../../components/layout/UserHeader";
@@ -99,56 +104,6 @@ function IlustracionHeroAutopista() {
   );
 }
 
-/** Mapa estilizado para el widget lateral derecho */
-function MiniMapaWidget() {
-  return (
-    <div className="relative w-full h-[155px] rounded-xl overflow-hidden bg-[#eaf2f8] border border-slate-200/70 shadow-inner flex items-center justify-center">
-      <svg className="absolute inset-0 w-full h-full" viewBox="0 0 260 155" preserveAspectRatio="none" fill="none" aria-hidden="true">
-        {/* Manzanas urbanas */}
-        <rect x="10" y="10" width="50" height="35" rx="4" fill="#f8fafc" />
-        <rect x="70" y="10" width="70" height="35" rx="4" fill="#f8fafc" />
-        <rect x="150" y="10" width="95" height="35" rx="4" fill="#f8fafc" />
-
-        <rect x="10" y="60" width="60" height="40" rx="4" fill="#f8fafc" />
-        <rect x="80" y="60" width="75" height="40" rx="4" fill="#f8fafc" />
-        <rect x="165" y="60" width="80" height="40" rx="4" fill="#f8fafc" />
-
-        <rect x="10" y="115" width="85" height="30" rx="4" fill="#f8fafc" />
-        <rect x="105" y="115" width="70" height="30" rx="4" fill="#f8fafc" />
-        <rect x="185" y="115" width="60" height="30" rx="4" fill="#f8fafc" />
-
-        {/* Trazado de ruta en azul vibrante */}
-        <path
-          d="M 25 105 Q 65 105 95 85 T 160 70 T 225 35"
-          fill="none"
-          stroke="#0052cc"
-          strokeWidth="3.5"
-          strokeLinecap="round"
-        />
-        <path
-          d="M 25 105 Q 65 105 95 85 T 160 70 T 225 35"
-          fill="none"
-          stroke="#60a5fa"
-          strokeWidth="1.5"
-          strokeDasharray="4 4"
-        />
-      </svg>
-
-      {/* Pin azul con coche de origen */}
-      <div className="absolute left-4 bottom-7 size-6 rounded-full bg-blue-600 text-white flex items-center justify-center shadow-md">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="size-3.5">
-          <path d="M5 11l1.5-4.5h11L19 11M4 11h16v6a1 1 0 0 1-1 1h-1a2 2 0 0 1-4 0H10a2 2 0 0 1-4 0H5a1 1 0 0 1-1-1v-6z" />
-          <circle cx="7.5" cy="17.5" r="1.5" />
-          <circle cx="16.5" cy="17.5" r="1.5" />
-        </svg>
-      </div>
-
-      {/* Pin rojo de destino */}
-      <div className="absolute right-7 top-6 size-3.5 rounded-full bg-red-500 ring-4 ring-red-200 shadow-md" />
-    </div>
-  );
-}
-
 /* =========================================================================
    COMPONENTE PRINCIPAL MISVIAJESDESKTOP
    ========================================================================= */
@@ -168,8 +123,13 @@ export function MisViajesDesktop({
     setBusquedaInput,
     filtroFecha,
     setFiltroFecha,
-    filtroEstado,
-    setFiltroEstado,
+    filtroAbierto,
+    setFiltroAbierto,
+    tipoVehiculoSeleccionado,
+    setTipoVehiculoSeleccionado,
+    tiposVehiculo,
+    limpiarFiltros,
+    buscando,
     conteos,
     gastoFormateado,
     filtrados,
@@ -179,8 +139,16 @@ export function MisViajesDesktop({
     busquedaInicial,
   });
 
-  // Estados locales para interactividad visual de escritorio
-  const [heroIndex, setHeroIndex] = useState(0);
+  const router = useRouter();
+  const viajeActivo = obtenerViajeActivo(traslados.map(t => t.pasaporte));
+  useEffect(() => {
+    const actualizar = () => { if (document.visibilityState === "visible" && navigator.onLine) router.refresh(); };
+    const intervalo = window.setInterval(actualizar, 30000);
+    window.addEventListener("focus", actualizar);
+    window.addEventListener("online", actualizar);
+    return () => { window.clearInterval(intervalo); window.removeEventListener("focus", actualizar); window.removeEventListener("online", actualizar); };
+  }, [router]);
+  const restablecer = () => { limpiarFiltros(); setPestana("todos"); };
 
   // Pestañas de estado con contadores dinámicos reflejados en el diseño
   const tabsConfig: { id: PestañaFiltro; label: string; count: number }[] = [
@@ -191,8 +159,7 @@ export function MisViajesDesktop({
     { id: "cancelados", label: "Cancelados", count: conteos.cancelados },
   ];
 
-  // Datos de fallback de alta fidelidad si la base de datos está vacía
-  const itemsVisualizados = filtrados.length > 0 ? filtrados : traslados;
+  const itemsVisualizados = filtrados;
 
   return (
     <UserDashboardLayout
@@ -224,14 +191,14 @@ export function MisViajesDesktop({
             {/* ===============================================================
                 FEED CENTRAL (8 de 12 Columnas)
                 =============================================================== */}
-            <div className="col-span-8 flex flex-col gap-5">
+            <div className="col-span-12 2xl:col-span-8 flex min-w-0 flex-col gap-5">
               {/* Carrusel Superior: Banner Promocional Interactivo */}
               <div className="bg-gradient-to-r from-[#e8f2fe] via-[#edf6ff] to-[#e4f0fe] rounded-3xl p-6 border border-blue-100 shadow-sm relative overflow-hidden flex items-center justify-between min-h-[175px]">
                 <div className="relative z-10 max-w-[340px]">
-                  <h1 className="text-2xl font-black text-[#0a2342] tracking-tight leading-tight">
+                  <h2 className="text-2xl font-black text-[#0a2342] tracking-tight leading-tight">
                     Mueve tu auto <br />
                     sin <span className="text-[#165dfc]">soltar el control</span>
-                  </h1>
+                  </h2>
                   <p className="text-xs text-[#556987] font-medium mt-1.5">
                     Traslados seguros, rápidos y a tu medida.
                   </p>
@@ -258,20 +225,6 @@ export function MisViajesDesktop({
                   <IlustracionHeroAutopista />
                 </div>
 
-                {/* Selector de Puntos del Carrusel */}
-                <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex items-center gap-1.5 z-20">
-                  {[0, 1, 2, 3].map((idx) => (
-                    <button
-                      key={idx}
-                      type="button"
-                      onClick={() => setHeroIndex(idx)}
-                      className={`h-1.5 rounded-full transition-all cursor-pointer ${
-                        idx === heroIndex ? "w-4 bg-blue-600" : "w-1.5 bg-slate-300"
-                      }`}
-                      aria-label={`Slide ${idx + 1}`}
-                    />
-                  ))}
-                </div>
               </div>
 
               {/* Tarjetas de Métricas Rápidas (KPIs) */}
@@ -287,7 +240,7 @@ export function MisViajesDesktop({
                   </div>
                   <div>
                     <strong className="block text-2xl font-black text-[#0a2342] leading-none">
-                      {conteos.todos || traslados.length || 2}
+                      {conteos.todos}
                     </strong>
                     <span className="block text-xs font-semibold text-[#64748b] mt-1">
                       Total de traslados
@@ -320,7 +273,7 @@ export function MisViajesDesktop({
                   </div>
                   <div>
                     <strong className="block text-2xl font-black text-[#0a2342] leading-none">
-                      {gastoFormateado !== "$0" ? gastoFormateado : "$866"}
+                      {gastoFormateado}
                     </strong>
                     <span className="block text-xs font-semibold text-[#64748b] mt-1">
                       Gasto acumulado
@@ -330,17 +283,18 @@ export function MisViajesDesktop({
               </div>
 
               {/* Barra de Filtros y Búsqueda */}
-              <div className="flex items-center gap-3">
+              <div className="flex flex-wrap items-center gap-3">
                 {/* Input de Búsqueda */}
                 <div className="flex-1 flex items-center gap-2.5 px-3.5 py-2.5 bg-white rounded-xl border border-slate-200/90 shadow-2xs focus-within:ring-2 focus-within:ring-[#165dfc]">
                   <IconoBuscar className="size-4 text-slate-400" />
                   <input
                     type="search"
+                    aria-busy={buscando}
                     value={busquedaInput}
                     onChange={(e) => setBusquedaInput(e.target.value)}
-                    placeholder="Buscar por vehículo, destino o fecha"
+                    placeholder="Buscar por vehículo, placas, folio o destino"
                     className="w-full text-xs text-slate-800 placeholder:text-slate-400 bg-transparent outline-none font-medium"
-                    aria-label="Buscar por vehículo, destino o fecha"
+                    aria-label="Buscar por vehículo, placas, folio o destino"
                   />
                 </div>
 
@@ -352,7 +306,7 @@ export function MisViajesDesktop({
                     aria-label="Filtrar por fecha"
                     className="appearance-none bg-white border border-slate-200/90 rounded-xl px-4 py-2.5 pr-8 text-xs font-bold text-slate-700 cursor-pointer shadow-2xs hover:bg-slate-50 transition outline-none"
                   >
-                    <option value="todas">Fecha: Todas</option>
+                    <option value="todas">Fecha programada: Todas</option>
                     <option value="hoy">Hoy</option>
                     <option value="semana">Esta semana</option>
                     <option value="mes">Este mes</option>
@@ -365,8 +319,8 @@ export function MisViajesDesktop({
                 {/* Selector Dropdown Estado */}
                 <div className="relative shrink-0">
                   <select
-                    value={filtroEstado}
-                    onChange={(e) => setFiltroEstado(e.target.value)}
+                    value={pestana}
+                    onChange={(e) => setPestana(e.target.value as PestañaFiltro)}
                     aria-label="Filtrar por estado"
                     className="appearance-none bg-white border border-slate-200/90 rounded-xl px-4 py-2.5 pr-8 text-xs font-bold text-slate-700 cursor-pointer shadow-2xs hover:bg-slate-50 transition outline-none"
                   >
@@ -384,6 +338,9 @@ export function MisViajesDesktop({
                 {/* Botón de Más Filtros */}
                 <button
                   type="button"
+                  aria-expanded={filtroAbierto}
+                  aria-controls="filtros-adicionales-desktop"
+                  onClick={() => setFiltroAbierto(!filtroAbierto)}
                   className="bg-white hover:bg-slate-50 border border-slate-200/90 rounded-xl px-4 py-2.5 text-xs font-bold text-slate-700 flex items-center gap-1.5 shadow-2xs transition cursor-pointer"
                 >
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="size-3.5 text-slate-500">
@@ -401,11 +358,19 @@ export function MisViajesDesktop({
                 </button>
               </div>
 
+              {filtroAbierto && <div id="filtros-adicionales-desktop" className="rounded-xl border bg-white p-4">
+                <label htmlFor="tipo-vehiculo-desktop" className="mr-3 text-sm">Tipo de vehículo</label>
+                <select id="tipo-vehiculo-desktop" value={tipoVehiculoSeleccionado} onChange={e => setTipoVehiculoSeleccionado(e.target.value)} className="rounded-lg border p-2 text-slate-900">
+                  <option value="">Todos los tipos</option>
+                  {tiposVehiculo.map(tipo => <option key={tipo} value={tipo}>{tipo}</option>)}
+                </select>
+              </div>}
+              <button type="button" onClick={restablecer} className="self-start text-sm text-blue-700 underline">Limpiar filtros</button>
               {/* Pestañas de Estado (Tabs) con Contadores */}
               <div
                 role="tablist"
                 aria-label="Filtrar por estado del traslado"
-                className="flex items-center gap-2"
+                className="flex flex-wrap items-center gap-2"
               >
                 {tabsConfig.map((tab) => {
                   const activa = pestana === tab.id;
@@ -414,6 +379,14 @@ export function MisViajesDesktop({
                       key={tab.id}
                       type="button"
                       role="tab"
+                      id={"tab-desktop-" + tab.id}
+                      aria-controls="listado-traslados-desktop"
+                      tabIndex={activa ? 0 : -1}
+                      onKeyDown={e => {
+                        const i = tabsConfig.findIndex(t => t.id === tab.id);
+                        const siguiente = e.key === "ArrowRight" ? (i + 1) % tabsConfig.length : e.key === "ArrowLeft" ? (i + tabsConfig.length - 1) % tabsConfig.length : e.key === "Home" ? 0 : e.key === "End" ? tabsConfig.length - 1 : -1;
+                        if (siguiente >= 0) { e.preventDefault(); setPestana(tabsConfig[siguiente].id); document.getElementById("tab-desktop-" + tabsConfig[siguiente].id)?.focus(); }
+                      }}
                       aria-selected={activa}
                       onClick={() => setPestana(tab.id)}
                       className={`px-4 py-2 rounded-full text-xs font-bold transition-all cursor-pointer ${
@@ -429,24 +402,20 @@ export function MisViajesDesktop({
               </div>
 
               {/* Listado de Traslados (Feed Central) */}
-              <div className="space-y-3.5">
+              <div id="listado-traslados-desktop" role="tabpanel" aria-labelledby={"tab-desktop-" + pestana} aria-busy={buscando} className="space-y-3.5">
                 {itemsVisualizados.length > 0 ? (
                   itemsVisualizados.map((item, idx) => {
                     const infoFecha = fechaProgramada(
-                      item.traslado?.fecha_hora_programada || item.pasaporte.creado_en
+                      item.traslado?.fecha_hora_programada ?? null
                     );
-                    const esProgramado = item.pasaporte.estado?.includes("pendiente") || item.pasaporte.estado?.includes("programado") || item.pasaporte.estado === "solicitud_creada" || idx === 0;
-                    const estadoTexto = esProgramado ? "Programado" : "Finalizado";
-                    const estadoClase = esProgramado
-                      ? "bg-blue-50 text-blue-700 border-blue-200"
-                      : "bg-emerald-50 text-emerald-700 border-emerald-200";
-
-                    const tituloTraslado = idx === 0 ? "Traslado al Aeropuerto" : "Reunión en Santa Fe";
-                    const origen = item.pasaporte.origen_ciudad || (idx === 0 ? "Mi ubicación actual" : "Polanco");
-                    const destino = item.pasaporte.destino_ciudad || (idx === 0 ? "Aeropuerto Internacional CDMX" : "Santa Fe, CDMX");
-                    const hora = infoFecha.hora !== "Hora pendiente" ? infoFecha.hora : idx === 0 ? "10:30 a.m." : "08:15 a.m.";
+                    const estadoTexto = item.pasaporte.estado ? TERMINOLOGIA_USUARIO[item.pasaporte.estado] ?? ETIQUETA_ESTADO_TRASLADO[item.pasaporte.estado] : "Estado no disponible";
+                    const categoria = pestañaDeViaje(item.pasaporte);
+                    const estadoClase = categoria === "cancelados" ? "bg-red-50 text-red-700 border-red-200" : categoria === "finalizados" ? "bg-emerald-50 text-emerald-700 border-emerald-200" : "bg-blue-50 text-blue-700 border-blue-200";
+                    const tituloTraslado = vehiculoNombre(item.pasaporte);
+                    const origen = item.traslado?.origen_ciudad || item.pasaporte.origen_ciudad || item.traslado?.origen_direccion || item.pasaporte.origen_direccion || "Origen no disponible";
+                    const destino = item.traslado?.destino_ciudad || item.pasaporte.destino_ciudad || item.traslado?.destino_direccion || item.pasaporte.destino_direccion || "Destino no disponible";
+                    const hora = infoFecha.hora;
                     const tipoVeh = vehiculoTipo(item.pasaporte);
-                    const pasajeros = idx === 0 ? "3 pasajeros" : "2 pasajeros";
 
                     return (
                       <article
@@ -456,13 +425,13 @@ export function MisViajesDesktop({
                         {/* Bloque Lateral Fecha */}
                         <div className="size-16 rounded-xl bg-[#f8fafc] border border-slate-200 flex flex-col items-center justify-center shrink-0 text-center select-none">
                           <span className="text-[10px] font-bold text-slate-500 uppercase">
-                            {infoFecha.diaSemana !== "S/F" ? infoFecha.diaSemana : idx === 0 ? "SÁB" : "LUN"}
+                            {infoFecha.diaSemana}
                           </span>
                           <span className="text-xl font-black text-slate-900 leading-none my-0.5">
-                            {infoFecha.diaNumero !== "—" ? infoFecha.diaNumero : idx === 0 ? "25" : "20"}
+                            {infoFecha.diaNumero}
                           </span>
                           <span className="text-[9px] font-bold text-slate-400 uppercase">
-                            {infoFecha.mesTexto !== "—" ? infoFecha.mesTexto : "OCT"}
+                            {infoFecha.mesTexto}
                           </span>
                         </div>
 
@@ -493,7 +462,7 @@ export function MisViajesDesktop({
                               <span>🚗</span> {tipoVeh}
                             </span>
                             <span className="flex items-center gap-1">
-                              <span>👤</span> {pasajeros}
+                              {folioCorto(item.pasaporte.traslado_id)}
                             </span>
                           </div>
                         </div>
@@ -508,12 +477,12 @@ export function MisViajesDesktop({
                             <span className="text-slate-400 text-sm">›</span>
                           </div>
 
-                          <Link
-                            href={item.pasaporte.traslado_id ? `/viajes/${item.pasaporte.traslado_id}` : "/mis-viajes"}
+                          {item.pasaporte.traslado_id ? <Link
+                            href={`/viajes/${item.pasaporte.traslado_id}`}
                             className="text-xs font-bold text-blue-600 hover:text-blue-700 hover:underline transition"
                           >
                             Ver detalles
-                          </Link>
+                          </Link> : <span className="text-xs text-slate-500">Detalle no disponible</span>}
                         </div>
                       </article>
                     );
@@ -521,14 +490,14 @@ export function MisViajesDesktop({
                 ) : (
                   <div className="bg-white rounded-2xl p-8 border border-slate-100 text-center shadow-xs">
                     <p className="text-sm font-bold text-slate-800">
-                      No se encontraron traslados con los filtros seleccionados
+                      {traslados.length === 0 ? "Aún no tienes traslados registrados" : "No se encontraron traslados con los filtros seleccionados"}
                     </p>
                   </div>
                 )}
 
                 {/* Conteo Mostrado */}
                 <p className="text-center text-xs font-medium text-slate-400 pt-2">
-                  Mostrando {itemsVisualizados.length} de {itemsVisualizados.length} traslados
+                  Mostrando {itemsVisualizados.length} de {traslados.length} traslados
                 </p>
               </div>
             </div>
@@ -536,27 +505,27 @@ export function MisViajesDesktop({
             {/* ===============================================================
                 COLUMNA DE WIDGETS DERECHA (4 de 12 Columnas)
                 =============================================================== */}
-            <div className="col-span-4 flex flex-col gap-5">
+            <div className="col-span-12 2xl:col-span-4 flex flex-col gap-5">
               {/* Widget 1: Mapa "Tus traslados en tiempo real" */}
               <div className="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm flex flex-col justify-between">
                 <div>
-                  <MiniMapaWidget />
+
                   <h3 className="text-sm font-bold text-slate-900 mt-3">
-                    Tus traslados, en tiempo real
+                    Seguimiento de tus traslados
                   </h3>
                   <p className="text-xs text-slate-500 mt-1 leading-snug">
-                    Sigue cada etapa de tu viaje desde cualquier dispositivo.
+                    Consulta la ubicación y las evidencias disponibles desde el detalle del servicio.
                   </p>
                 </div>
 
                 <div className="mt-4 flex justify-end">
-                  <Link
-                    href="/mis-viajes"
+                  {viajeActivo?.traslado_id ? <Link
+                    href={"/viajes/" + viajeActivo.traslado_id}
                     className="size-8 rounded-full bg-blue-100 hover:bg-blue-200 text-blue-600 flex items-center justify-center transition shadow-2xs"
-                    aria-label="Ver mapa completo"
+                    aria-label="Abrir seguimiento del traslado activo"
                   >
                     <span className="font-bold text-sm">›</span>
-                  </Link>
+                  </Link> : <p className="text-xs text-slate-500">No tienes traslados activos.</p>}
                 </div>
               </div>
 
@@ -574,7 +543,7 @@ export function MisViajesDesktop({
                     Haz que cada traslado cuente
                   </h3>
                   <p className="text-xs text-blue-200 mt-1 leading-relaxed">
-                    Programa, guarda favoritos y viaja más inteligente.
+                    Consulta tus servicios y registra tu próximo traslado.
                   </p>
                   <div className="mt-2 text-yellow-400 text-base">⚡</div>
 
@@ -639,9 +608,9 @@ export function MisViajesDesktop({
                 </div>
               </Link>
 
-              {/* 2. Gestiona tus rutas */}
+              {/* 2. Mis ubicaciones */}
               <Link
-                href="/cuenta"
+                href="/ubicaciones"
                 className="bg-white hover:bg-slate-50 border border-slate-100 rounded-2xl p-4.5 flex items-center justify-between shadow-xs transition group"
               >
                 <div className="flex items-center gap-3.5">
@@ -656,7 +625,7 @@ export function MisViajesDesktop({
                       Gestiona tus rutas
                     </h3>
                     <p className="text-[11px] text-slate-500 mt-0.5">
-                      Edita, duplica o guarda favoritos.
+                      Administra tus direcciones guardadas.
                     </p>
                   </div>
                 </div>
@@ -665,9 +634,9 @@ export function MisViajesDesktop({
                 </div>
               </Link>
 
-              {/* 3. Lleva un mejor control */}
+              {/* 3. Consulta tu facturación */}
               <Link
-                href="/mis-viajes"
+                href="/cuenta/facturacion"
                 className="bg-white hover:bg-slate-50 border border-slate-100 rounded-2xl p-4.5 flex items-center justify-between shadow-xs transition group"
               >
                 <div className="flex items-center gap-3.5">
@@ -680,10 +649,10 @@ export function MisViajesDesktop({
                   </div>
                   <div>
                     <h3 className="text-xs font-bold text-slate-900 group-hover:text-blue-600 transition">
-                      Lleva un mejor control
+                      Consulta tu facturación
                     </h3>
                     <p className="text-[11px] text-slate-500 mt-0.5">
-                      Visualiza tu historial y gastos.
+                      Revisa tus pagos y datos de facturación.
                     </p>
                   </div>
                 </div>
@@ -706,8 +675,8 @@ export function MisViajesDesktop({
 
               <div className="flex items-center gap-4">
                 <Link href="/soporte" className="hover:text-slate-800 transition">Ayuda</Link>
-                <Link href="/terminos" className="hover:text-slate-800 transition">Términos</Link>
-                <Link href="/privacidad" className="hover:text-slate-800 transition">Privacidad</Link>
+                <Link href="/legal/terminos" className="hover:text-slate-800 transition">Términos</Link>
+                <Link href="/legal/privacidad" className="hover:text-slate-800 transition">Privacidad</Link>
                 <div className="flex items-center gap-2 ml-2 text-slate-400">
                   <span>f</span>
                   <span>📷</span>

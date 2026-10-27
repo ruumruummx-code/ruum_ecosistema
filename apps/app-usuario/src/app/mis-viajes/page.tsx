@@ -1,5 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { redirect } from "next/navigation";
+import { UserDashboardLayout } from "../../components/layout/UserDashboardLayout";
+import { BotonReintentarSesion } from "../ReintentarSesion";
 import { Aviso, Button, MobileShell } from "@ruum/ui";
 import type { Database } from "@ruum/shared/types";
 import { NavegacionUsuario } from "../NavegacionUsuario";
@@ -90,27 +93,17 @@ export default async function PaginaMisTraslados({
   const resultado = await obtenerTraslados();
 
   if (resultado.estado === "error") {
-    return (
-      <>
-        <NavegacionUsuario variante="claro" />
-        <MobileShell as="main" variant="compact" navInferiorVisible={true} className="user-v2-scope user-transfers-shell" contentClassName="user-transfers-content">
-          <div className="user-transfers-fallback text-center">
-            <Aviso tono="danger">
-              No pudimos cargar tus traslados en este momento. Inténtalo de nuevo en unos segundos.
-            </Aviso>
-            <div className="mt-6 flex justify-center">
-              <Link href="/soporte">
-                <Button className="w-full sm:w-auto">Reportar un problema</Button>
-              </Link>
-            </div>
-          </div>
-        </MobileShell>
-      </>
-    );
+    const aviso = <div className="space-y-5 p-6 text-center">
+      <Aviso tono="danger">No pudimos cargar tus traslados en este momento. Inténtalo de nuevo en unos segundos.</Aviso>
+      <div className="flex justify-center gap-3"><BotonReintentarSesion /><Link href="/soporte"><Button>Reportar un problema</Button></Link></div>
+    </div>;
+    return <>
+      <div className="lg:hidden"><NavegacionUsuario variante="claro" /><MobileShell as="main" variant="compact" navInferiorVisible={true}>{aviso}</MobileShell></div>
+      <div className="hidden lg:flex"><UserDashboardLayout>{aviso}</UserDashboardLayout></div>
+    </>;
   }
 
-  // Sin sesión el middleware ya redirige a /login; si llegara aquí, la lista
-  // vacía es el comportamiento correcto.
+  if (resultado.estado === "sin_sesion") redirect("/login");
   const Traslados = resultado.estado === "ok" ? resultado.traslados : [];
   const usuario = resultado.estado === "ok" ? resultado.usuario : null;
 
@@ -129,7 +122,7 @@ export default async function PaginaMisTraslados({
         <MisViajesDesktop
           traslados={Traslados}
           nombreUsuario={usuario?.nombre}
-          pestanaInicial="todos"
+          pestanaInicial={PESTANAS.some(p => p.id === tab) ? pestañaActiva : "todos"}
           busquedaInicial={typeof buscar === "string" ? buscar : ""}
           notificaciones={resultado.estado === "ok" ? resultado.notificaciones : []}
         />

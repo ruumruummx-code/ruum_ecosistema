@@ -46,14 +46,14 @@ export function vehiculoNombre(p: Pasaporte): string {
 }
 
 export function vehiculoTipo(p: Pasaporte): string {
-  if (!p.vehiculo_tipo) return "Sedán";
+  if (!p.vehiculo_tipo) return "Tipo no disponible";
   return ETIQUETA_TIPO_VEHICULO[p.vehiculo_tipo] ?? p.vehiculo_tipo;
 }
 
 export function pestañaDeViaje(p: Pasaporte): PestañaTraslados {
   const estado = String(p.estado ?? "");
   if (estado === "servicio_cancelado" || estado === "traslado_fallido") return "cancelados";
-  if (["servicio_cerrado", "reclamo_resuelto", "disputa_resuelta"].includes(estado)) return "finalizados";
+  if (["servicio_cerrado", "reclamo_resuelto", "disputa_resuelta", "cierre_operativo_con_incidencia_abierta"].includes(estado)) return "finalizados";
   if ([
     "solicitud_creada",
     "documentacion_pendiente",
@@ -67,6 +67,12 @@ export function pestañaDeViaje(p: Pasaporte): PestañaTraslados {
   return "activos";
 }
 
+const ZONA_HORARIA = "America/Mexico_City";
+function diaCalendario(fecha: Date): string {
+  const partes = new Intl.DateTimeFormat("en-CA", { timeZone: ZONA_HORARIA, year: "numeric", month: "2-digit", day: "2-digit" }).formatToParts(fecha);
+  return ["year", "month", "day"].map(tipo => partes.find(p => p.type === tipo)!.value).join("-");
+}
+
 export function fechaProgramada(fecha: string | null): { fecha: string; hora: string; diaSemana: string; diaNumero: string; mesTexto: string } {
   if (!fecha) {
     return { fecha: "Fecha pendiente", hora: "Hora pendiente", diaSemana: "S/F", diaNumero: "—", mesTexto: "—" };
@@ -77,13 +83,13 @@ export function fechaProgramada(fecha: string | null): { fecha: string; hora: st
   }
 
   const hoy = new Date();
-  const esHoy = date.getFullYear() === hoy.getFullYear() && date.getMonth() === hoy.getMonth() && date.getDate() === hoy.getDate();
-  const fechaTexto = new Intl.DateTimeFormat("es-MX", { day: "numeric", month: "short", year: "numeric" }).format(date);
-  const horaTexto = new Intl.DateTimeFormat("es-MX", { hour: "numeric", minute: "2-digit" }).format(date);
+  const esHoy = diaCalendario(date) === diaCalendario(hoy);
+  const fechaTexto = new Intl.DateTimeFormat("es-MX", { timeZone: ZONA_HORARIA, day: "numeric", month: "short", year: "numeric" }).format(date);
+  const horaTexto = new Intl.DateTimeFormat("es-MX", { timeZone: ZONA_HORARIA, hour: "numeric", minute: "2-digit" }).format(date);
   
-  const diaSemana = new Intl.DateTimeFormat("es-MX", { weekday: "short" }).format(date).toUpperCase().replace(".", "");
-  const diaNumero = String(date.getDate());
-  const mesTexto = new Intl.DateTimeFormat("es-MX", { month: "short" }).format(date).toUpperCase().replace(".", "");
+  const diaSemana = new Intl.DateTimeFormat("es-MX", { timeZone: ZONA_HORARIA, weekday: "short" }).format(date).toUpperCase().replace(".", "");
+  const diaNumero = new Intl.DateTimeFormat("es-MX", { timeZone: ZONA_HORARIA, day: "numeric" }).format(date);
+  const mesTexto = new Intl.DateTimeFormat("es-MX", { timeZone: ZONA_HORARIA, month: "short" }).format(date).toUpperCase().replace(".", "");
 
   return {
     fecha: esHoy ? `Hoy, ${fechaTexto}` : fechaTexto,
@@ -115,6 +121,9 @@ export function useGestionTraslados<T extends PestañaFiltro = PestañaFiltro>({
   const [filtroFecha, setFiltroFecha] = useState<string>("todas");
   const [filtroEstado, setFiltroEstado] = useState<string>("todos");
   const [, startTransition] = useTransition();
+
+  useEffect(() => { setPestana(pestanaInicial); }, [pestanaInicial]);
+  useEffect(() => { setBusquedaInput(busquedaInicial); setBusqueda(busquedaInicial); setBuscando(false); }, [busquedaInicial]);
 
   // Debounce búsqueda 300ms
   useEffect(() => {
@@ -179,26 +188,23 @@ export function useGestionTraslados<T extends PestañaFiltro = PestañaFiltro>({
     // Filtro por fecha (todas / hoy / semana / mes)
     if (filtroFecha !== "todas") {
       const ahora = new Date();
-      lista = lista.filter(({ pasaporte, traslado }) => {
-        const fechaStr = traslado?.fecha_hora_programada || pasaporte.creado_en;
-        if (!fechaStr) return true;
+      lista = lista.filter(({ traslado }) => {
+        const fechaStr = traslado?.fecha_hora_programada;
+        if (!fechaStr) return false;
         const fecha = new Date(fechaStr);
-        if (Number.isNaN(fecha.getTime())) return true;
+        if (Number.isNaN(fecha.getTime())) return false;
 
-        if (filtroFecha === "hoy") {
-          return (
-            fecha.getFullYear() === ahora.getFullYear() &&
-            fecha.getMonth() === ahora.getMonth() &&
-            fecha.getDate() === ahora.getDate()
-          );
-        }
+        const dia = diaCalendario(fecha);
+        const hoy = diaCalendario(ahora);
+        if (filtroFecha === "hoy") return dia === hoy;
         if (filtroFecha === "semana") {
-          const diffMs = Math.abs(ahora.getTime() - fecha.getTime());
-          return diffMs <= 7 * 24 * 60 * 60 * 1000;
+          const inicio = new Date(hoy + "T00:00:00Z");
+          inicio.setUTCDate(inicio.getUTCDate() - (inicio.getUTCDay() + 6) % 7);
+          const fin = new Date(inicio);
+          fin.setUTCDate(fin.getUTCDate() + 7);
+          return dia >= inicio.toISOString().slice(0, 10) && dia < fin.toISOString().slice(0, 10);
         }
-        if (filtroFecha === "mes") {
-          return fecha.getFullYear() === ahora.getFullYear() && fecha.getMonth() === ahora.getMonth();
-        }
+        if (filtroFecha === "mes") return dia.slice(0, 7) === hoy.slice(0, 7);
         return true;
       });
     }

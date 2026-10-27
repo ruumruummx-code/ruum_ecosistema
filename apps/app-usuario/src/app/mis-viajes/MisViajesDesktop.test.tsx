@@ -1,14 +1,15 @@
 /** @vitest-environment jsdom */
-import { describe, expect, it, vi } from "vitest";
-import { render, screen, fireEvent, within } from "@testing-library/react";
+import { describe, expect, it, vi, afterEach } from "vitest";
+import { render, screen, fireEvent, within, waitFor, act } from "@testing-library/react";
 
+const refreshMock = vi.hoisted(() => vi.fn());
 const mockPathname = vi.hoisted(() => "/mis-viajes");
 
 vi.mock("next/navigation", () => ({
   useRouter: () => ({
     push: vi.fn(),
     replace: vi.fn(),
-    refresh: vi.fn(),
+    refresh: refreshMock,
   }),
   usePathname: () => mockPathname,
   useSearchParams: () => new URLSearchParams(),
@@ -56,7 +57,81 @@ function crearViajeMock(
   } as unknown as ViajeLista;
 }
 
+afterEach(() => vi.useRealTimers());
 describe("MisViajesDesktop", () => {
+  it("actualiza al recuperar el foco y periódicamente; elimina el temporizador al salir", () => {
+    vi.useFakeTimers();
+    refreshMock.mockClear();
+    const { unmount } = render(<MisViajesDesktop traslados={[]} />);
+    act(() => window.dispatchEvent(new Event("focus")));
+    expect(refreshMock).toHaveBeenCalledTimes(1);
+    act(() => vi.advanceTimersByTime(30000));
+    expect(refreshMock).toHaveBeenCalledTimes(2);
+    unmount();
+    act(() => vi.advanceTimersByTime(30000));
+    expect(refreshMock).toHaveBeenCalledTimes(2);
+  });
+  it("permite cambiar de pestaña con teclado", () => {
+    render(<MisViajesDesktop traslados={[]} />);
+    const todos = screen.getByRole("tab", { name: "Todos (0)" });
+    fireEvent.keyDown(todos, { key: "ArrowRight" });
+    const activos = screen.getByRole("tab", { name: "En curso (0)" });
+    expect(activos).toHaveAttribute("aria-selected", "true");
+    expect(activos).toHaveFocus();
+    expect(screen.getByLabelText("Filtrar por estado")).toHaveValue("activos");
+  });
+  it("no recupera todos los registros cuando una pestaña está vacía", () => {
+    render(<MisViajesDesktop traslados={[crearViajeMock("servicio_cerrado", "cerrado")]} />);
+    fireEvent.click(screen.getByRole("tab", { name: "En curso (0)" }));
+    expect(screen.queryByRole("article")).not.toBeInTheDocument();
+    expect(screen.getByText("Mostrando 0 de 1 traslados")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Limpiar filtros" }));
+    expect(screen.getAllByRole("article")).toHaveLength(1);
+  });
+  it("mantiene búsqueda sin resultados y sincroniza el filtro de estado con las pestañas", async () => {
+    render(<MisViajesDesktop traslados={[crearViajeMock("traslado_en_curso", "activo")]} />);
+    fireEvent.change(screen.getByLabelText("Filtrar por estado"), { target: { value: "cancelados" } });
+    expect(screen.getByRole("tab", { name: "Cancelados (0)" })).toHaveAttribute("aria-selected", "true");
+    fireEvent.click(screen.getByRole("button", { name: "Limpiar filtros" }));
+    fireEvent.change(screen.getByLabelText("Buscar por vehículo, placas, folio o destino"), { target: { value: "inexistente" } });
+    await waitFor(() => expect(screen.queryByRole("article")).not.toBeInTheDocument());
+    expect(screen.getByText("Mostrando 0 de 1 traslados")).toBeInTheDocument();
+  });
+  it("usa el vehículo y estado reales para todas las posiciones y dirige al seguimiento", () => {
+    render(<MisViajesDesktop traslados={[crearViajeMock("traslado_en_curso", "activo"), crearViajeMock("servicio_cancelado", "cancelado", "Honda", "Civic")]} />);
+    const filas = screen.getAllByRole("article");
+    expect(within(filas[0]).getByText("Toyota Corolla 2024")).toBeInTheDocument();
+    expect(within(filas[0]).getByText("En camino a destino")).toBeInTheDocument();
+    expect(within(filas[1]).getByText("Cancelado")).toBeInTheDocument();
+    expect(within(filas[1]).getByText("Honda Civic 2024")).toBeInTheDocument();
+    expect(within(filas[1]).getByRole("link", { name: "Ver detalles" })).toHaveAttribute("href", "/viajes/cancelado");
+    expect(screen.getByRole("link", { name: "Abrir seguimiento del traslado activo" })).toHaveAttribute("href", "/viajes/activo");
+    expect(screen.queryByText(/pasajeros/)).not.toBeInTheDocument();
+  });
+  it("no inventa cantidades en una cuenta vacía", () => {
+    render(<MisViajesDesktop traslados={[]} />);
+    expect(screen.getByText("$0")).toBeInTheDocument();
+    expect(screen.queryByText("$866")).not.toBeInTheDocument();
+    expect(screen.getByText("Aún no tienes traslados registrados")).toBeInTheDocument();
+    expect(screen.getByText("Mostrando 0 de 0 traslados")).toBeInTheDocument();
+  });
+  it("abre filtros por tipo y excluye vehículos que no coinciden", () => {
+    const suv = crearViajeMock("solicitud_creada", "suv", "Honda", "CRV");
+    suv.pasaporte.vehiculo_tipo = "suv";
+    render(<MisViajesDesktop traslados={[crearViajeMock("solicitud_creada", "sedan"), suv]} />);
+    fireEvent.click(screen.getByRole("button", { name: "Más filtros" }));
+    fireEvent.change(screen.getByLabelText("Tipo de vehículo"), { target: { value: "Sedán" } });
+    expect(screen.getAllByRole("article")).toHaveLength(1);
+    expect(screen.queryByText("Honda CRV 2024")).not.toBeInTheDocument();
+  });
+  it("aplica una nueva búsqueda inicial al navegar desde el buscador global", () => {
+    const lista = [crearViajeMock("servicio_cerrado", "a", "Honda"), crearViajeMock("servicio_cerrado", "b", "Nissan")];
+    const { rerender } = render(<MisViajesDesktop traslados={lista} busquedaInicial="Honda" />);
+    expect(screen.getAllByRole("article")).toHaveLength(1);
+    rerender(<MisViajesDesktop traslados={lista} busquedaInicial="Nissan" />);
+    expect(screen.getByText("Nissan Corolla 2024")).toBeInTheDocument();
+    expect(screen.queryByText("Honda Corolla 2024")).not.toBeInTheDocument();
+  });
   const trasladosMock: ViajeLista[] = [
     crearViajeMock("solicitud_creada", "t-1", "Nissan", "Versa", "Mi ubicación actual", "Aeropuerto Internacional CDMX", 366),
     crearViajeMock("servicio_cerrado", "t-2", "Toyota", "RAV4", "Polanco", "Santa Fe, CDMX", 500),
@@ -112,7 +187,7 @@ describe("MisViajesDesktop", () => {
     render(<MisViajesDesktop traslados={trasladosMock} nombreUsuario="Alex Rivera" />);
 
     expect(
-      screen.getByPlaceholderText("Buscar por vehículo, destino o fecha"),
+      screen.getByPlaceholderText("Buscar por vehículo, placas, folio o destino"),
     ).toBeInTheDocument();
     expect(screen.getByLabelText("Filtrar por fecha")).toBeInTheDocument();
     expect(screen.getByLabelText("Filtrar por estado")).toBeInTheDocument();
@@ -140,15 +215,15 @@ describe("MisViajesDesktop", () => {
     render(<MisViajesDesktop traslados={trasladosMock} nombreUsuario="Alex Rivera" />);
 
     // Widget de mapa
-    expect(screen.getByText("Tus traslados, en tiempo real")).toBeInTheDocument();
+    expect(screen.getByText("Seguimiento de tus traslados")).toBeInTheDocument();
     expect(
-      screen.getByText("Sigue cada etapa de tu viaje desde cualquier dispositivo."),
+      screen.getByText("Consulta la ubicación y las evidencias disponibles desde el detalle del servicio."),
     ).toBeInTheDocument();
 
     // Widget de sugerencias
     expect(screen.getByText("Haz que cada traslado cuente")).toBeInTheDocument();
     expect(
-      screen.getByText("Programa, guarda favoritos y viaja más inteligente."),
+      screen.getByText("Consulta tus servicios y registra tu próximo traslado."),
     ).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Crear traslado" })).toHaveAttribute("href", "/viajes/nuevo");
   });
@@ -159,11 +234,11 @@ describe("MisViajesDesktop", () => {
     expect(screen.getByText("Programa tus viajes")).toBeInTheDocument();
     expect(screen.getByText("Agenda hoy tus próximos destinos.")).toBeInTheDocument();
 
-    expect(screen.getByText("Gestiona tus rutas")).toBeInTheDocument();
-    expect(screen.getByText("Edita, duplica o guarda favoritos.")).toBeInTheDocument();
+    expect(screen.getByText("Mis ubicaciones")).toBeInTheDocument();
+    expect(screen.getByText("Administra tus direcciones guardadas.")).toBeInTheDocument();
 
-    expect(screen.getByText("Lleva un mejor control")).toBeInTheDocument();
-    expect(screen.getByText("Visualiza tu historial y gastos.")).toBeInTheDocument();
+    expect(screen.getByText("Consulta tu facturación")).toBeInTheDocument();
+    expect(screen.getByText("Revisa tus pagos y datos de facturación.")).toBeInTheDocument();
 
     // Footer de marca
     expect(screen.getByText("Tu movilidad, nuestra prioridad.")).toBeInTheDocument();
