@@ -79,8 +79,8 @@ async function mockearTarifa(
 
 test.describe("Flujos críticos de la aplicación", () => {
   test("la aplicación carga y el login responde", async ({ page }) => {
-    await page.goto("/login");
-    await expect(page.locator("h1")).toContainText("Bienvenido de nuevo");
+    await page.goto("/login", { waitUntil: "domcontentloaded" });
+    await expect(page.getByRole("heading", { name: /Inicia sesión/ })).toBeVisible();
     // formulario de acceso presente con sus campos reales
     await expect(page.locator("#login-email")).toBeVisible();
     await expect(page.locator("#login-password")).toBeVisible();
@@ -88,7 +88,7 @@ test.describe("Flujos críticos de la aplicación", () => {
   });
 
   test("el formulario de login muestra errores cuando faltan datos", async ({ page }) => {
-    await page.goto("/login");
+    await page.goto("/login", { waitUntil: "domcontentloaded" });
     await esperarHidratacion(page);
     await page.getByRole("button", { name: "Iniciar sesión" }).click();
     // validación del lado del cliente: el usuario ve qué falta
@@ -96,18 +96,18 @@ test.describe("Flujos críticos de la aplicación", () => {
   });
 
   test("el login con credenciales válidas funciona", async ({ page }) => {
-    await page.goto("/login");
+    await page.goto("/login", { waitUntil: "domcontentloaded" });
     await esperarHidratacion(page);
     await page.locator("#login-email").fill("usuario.e2e@correo.test");
     await page.locator("#login-password").fill("ClaveE2E123!");
     await page.getByRole("button", { name: "Iniciar sesión" }).click();
 
-    await page.waitForURL("/", { timeout: 30_000 });
+    await page.waitForURL("/", { timeout: 30_000, waitUntil: "domcontentloaded" });
     expect(await rutaActual(page)).toBe("/");
   });
 
   test("el login con credenciales inválidas muestra un mensaje claro", async ({ page }) => {
-    await page.goto("/login");
+    await page.goto("/login", { waitUntil: "domcontentloaded" });
     await esperarHidratacion(page);
     await page.locator("#login-email").fill("no-existe@correo.test");
     await page.locator("#login-password").fill("ClaveIncorrecta123");
@@ -117,7 +117,7 @@ test.describe("Flujos críticos de la aplicación", () => {
   });
 
   test("el registro de usuario muestra el formulario con los campos correctos", async ({ page }) => {
-    await page.goto("/registro");
+    await page.goto("/registro", { waitUntil: "domcontentloaded" });
     // formulario de registro: nombre, apellido y teléfono
     await expect(page.locator("h1")).toContainText("Crear cuenta");
     await expect(page.locator("#nombre")).toBeVisible();
@@ -126,7 +126,7 @@ test.describe("Flujos críticos de la aplicación", () => {
   });
 
   test("el registro valida el formato del teléfono antes de avanzar", async ({ page }) => {
-    await page.goto("/registro");
+    await page.goto("/registro", { waitUntil: "domcontentloaded" });
     await esperarHidratacion(page);
 
     await page.locator("#nombre").fill("Persona");
@@ -154,7 +154,7 @@ test.describe("Flujos críticos de la aplicación", () => {
       })
     );
 
-    await page.goto("/registro");
+    await page.goto("/registro", { waitUntil: "domcontentloaded" });
     await esperarHidratacion(page);
 
     await page.locator("#nombre").fill("Persona");
@@ -198,7 +198,7 @@ test.describe("Flujos críticos de la aplicación", () => {
       })
     );
 
-    await page.goto("/registro");
+    await page.goto("/registro", { waitUntil: "domcontentloaded" });
     await esperarHidratacion(page);
     await page.locator("#nombre").fill("Persona");
     await page.locator("#apellido").fill("E2E");
@@ -221,14 +221,14 @@ test.describe("Flujos críticos de la aplicación", () => {
     await page.getByRole("checkbox").check();
     await page.getByRole("button", { name: /Crear cuenta/i }).click();
 
-    await page.waitForURL("**/registro/confirma-correo", { timeout: 30_000 });
+    await page.waitForURL("**/registro/confirma-correo", { timeout: 30_000, waitUntil: "domcontentloaded" });
   });
 
   test("el wizard de traslados abre, cotiza y permite avanzar al vehículo", async ({ page }) => {
     await mockearTarifa(page, 500);
     await seedMockAuthSession(page, { variante: "verificada" });
 
-    await page.goto("/viajes/nuevo");
+    await page.goto("/viajes/nuevo", { waitUntil: "domcontentloaded" });
     await esperarHidratacion(page);
     await aceptarConsentimientoSiAparece(page);
 
@@ -259,7 +259,7 @@ test.describe("Flujos críticos de la aplicación", () => {
     await mockearTarifa(page, 500);
     await seedMockAuthSession(page, { variante: "verificada" });
 
-    await page.goto("/viajes/nuevo");
+    await page.goto("/viajes/nuevo", { waitUntil: "domcontentloaded" });
     await esperarHidratacion(page);
     await aceptarConsentimientoSiAparece(page);
 
@@ -279,15 +279,15 @@ test.describe("Flujos críticos de la aplicación", () => {
     await page.locator("#gate-destinoCodigoPostal").fill("01000");
 
     // el usuario ve el error y no puede avanzar
-    await expect(page.getByText(/tarifa no disponible/i)).toBeVisible({ timeout: 25_000 });
-    await expect(page.getByRole("button", { name: /Continuar/ })).toBeDisabled();
+    await expect(page.getByRole("alert").filter({ hasText: "No pudimos calcular la ruta automáticamente" })).toBeVisible({ timeout: 25_000 });
+    await expect(page.getByRole("button", { name: "Cotización especial requerida" })).toBeDisabled();
   });
 
   test("el paso de vehículo pide los datos obligatorios y los congela", async ({ page }) => {
     await mockearTarifa(page, 500);
     await seedMockAuthSession(page, { variante: "verificada" });
 
-    await page.goto("/viajes/nuevo");
+    await page.goto("/viajes/nuevo", { waitUntil: "domcontentloaded" });
     await esperarHidratacion(page);
     await aceptarConsentimientoSiAparece(page);
 
@@ -303,13 +303,14 @@ test.describe("Flujos críticos de la aplicación", () => {
     // Paso 2 de 5: datos del vehículo
     await expect(page.getByText("Datos del vehículo")).toBeVisible({ timeout: 15_000 });
 
+    await page.locator("#anio").fill("2020");
+
     // continuar sin datos: el formulario no avanza
     await page.getByRole("button", { name: /Continuar · Tarifa/ }).click();
     await expect(page.getByText("Paso 2 de 5")).toBeVisible();
 
-    // el sheet de "Detalles del vehículo" pide color, placas, VIN, estado y checks
-    await page.locator("#anio").fill("2020");
-    await page.getByRole("button", { name: /Detalles del vehículo/i }).click();
+    // La validación abre los detalles que faltan: color, placas, VIN y estado.
+    await expect(page.getByRole("dialog", { name: "Detalles del vehículo" })).toBeVisible();
 
     await expect(page.locator("#color")).toBeVisible();
     await expect(page.locator("#placas")).toBeVisible();
@@ -319,7 +320,11 @@ test.describe("Flujos críticos de la aplicación", () => {
     await page.locator("#color").fill("Azul");
     await page.locator("#placas").fill("ABC1234");
     await page.locator("#vin").fill("1M8GDM9A0KP042788");
-    await page.locator("#estadoGeneral").selectOption("bueno");
+    await page.locator("#estadoGeneral").selectOption({ label: "Buen estado, desgaste normal" });
+    await page.getByLabel("Tarjeta de circulación vigente", { exact: true }).check();
+    await page.getByLabel("Verificación vehicular vigente", { exact: true }).check();
+    await page.getByLabel("Ambas placas instaladas", { exact: true }).check();
+    await page.getByLabel("El vehículo enciende y puede circular rodando", { exact: true }).check();
     await page.getByRole("button", { name: "Guardar detalles" }).click();
 
     // con los datos guardados, el botón de continuar usa la tarifa congelada
@@ -336,7 +341,7 @@ test.describe("Flujos críticos de la aplicación", () => {
     await mockearTarifa(page, 500, false);
     await seedMockAuthSession(page, { variante: "verificada" });
 
-    await page.goto("/viajes/nuevo");
+    await page.goto("/viajes/nuevo", { waitUntil: "domcontentloaded" });
     await esperarHidratacion(page);
     await aceptarConsentimientoSiAparece(page);
 
@@ -350,17 +355,18 @@ test.describe("Flujos críticos de la aplicación", () => {
     await expect(page.getByRole("button", { name: "Cotización especial requerida" })).toBeVisible({ timeout: 30_000 });
     await expect(page.getByRole("button", { name: "Cotización especial requerida" })).toBeDisabled();
 
+    await page.getByRole("button", { name: /Este traslado requiere cotización especial/ }).click();
     // el enlace a soporte funciona
     const linkSoporte = page.getByRole("link", { name: "Solicitar cotización especial" });
     await expect(linkSoporte).toBeVisible();
     await linkSoporte.click();
-    await page.waitForURL("**/soporte", { timeout: 15_000 });
+    await page.waitForURL("**/soporte", { timeout: 15_000, waitUntil: "domcontentloaded" });
   });
 
   test("la verificación con Didit abre el portal oficial", async ({ page }) => {
     await seedMockAuthSession(page, { variante: "pendiente" });
 
-    await page.goto("/verificacion");
+    await page.goto("/verificacion", { waitUntil: "domcontentloaded" });
     await esperarHidratacion(page);
     await aceptarConsentimientoSiAparece(page);
     await expect(page.locator("h1")).toContainText("Verificación de identidad");
@@ -374,7 +380,7 @@ test.describe("Flujos críticos de la aplicación", () => {
     await expect(dialog).toHaveAttribute("aria-modal", "true");
     await expect(dialog).toContainText("Verificación de identidad");
     // aviso claro de lo que se necesita (cámara, micrófono, ubicación)
-    await expect(dialog.getByText(/cámara, micrófono y ubicación/i)).toBeVisible();
+    await expect(dialog.getByRole("note").filter({ hasText: /cámara, micrófono y ubicación/i })).toBeVisible();
     // el iframe del portal pide permisos de cámara
     await expect(dialog.locator("iframe")).toHaveAttribute("allow", /camera/);
 
@@ -386,7 +392,7 @@ test.describe("Flujos críticos de la aplicación", () => {
   test("el wizard carga masiva avisa el límite antes de subir", async ({ page }) => {
     await seedMockAuthSession(page, { variante: "verificada" });
 
-    await page.goto("/viajes/nuevo");
+    await page.goto("/viajes/nuevo", { waitUntil: "domcontentloaded" });
     await esperarHidratacion(page);
     await aceptarConsentimientoSiAparece(page);
 
@@ -395,15 +401,15 @@ test.describe("Flujos críticos de la aplicación", () => {
     await abrirCargaMasiva.focus();
     await abrirCargaMasiva.press("Enter");
     await expect(page.getByRole("dialog")).toContainText("Carga masiva de traslados");
-    await expect(page.getByRole("dialog")).toContainText("Máximo 100 traslados · 5 MB");
+    await expect(page.getByRole("dialog")).toContainText("Máximo 100 traslados · hasta 5 MB");
   });
 
   test("el usuario ve la lista de sus traslados", async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 });
     await seedMockAuthSession(page, { variante: "verificada" });
 
-    await page.goto("/mis-viajes");
-    await expect(page.locator("h1")).toContainText("Mis Traslados");
+    await page.goto("/mis-viajes", { waitUntil: "domcontentloaded" });
+    await expect(page.locator("h1")).toContainText("Mis traslados");
 
     // filtros de estado ofrecidos por la interfaz de traslados
     await expect(page.getByRole("button", { name: "Activos" })).toBeVisible();
@@ -418,17 +424,17 @@ test.describe("Flujos críticos de la aplicación", () => {
   test("soporte funciona para un usuario autenticado", async ({ page }) => {
     await seedMockAuthSession(page, { variante: "verificada" });
 
-    await page.goto("/soporte");
-    await expect(page.locator("h1")).toContainText("Soporte");
+    await page.goto("/soporte", { waitUntil: "domcontentloaded" });
+    await expect(page.getByRole("heading", { name: "Ayuda y soporte", exact: true })).toBeVisible();
     // el usuario ve canales de contacto
     await expect(page.getByText("Canales de soporte")).toBeVisible();
   });
 
   test("las rutas privadas piden sesión y muestran el aviso correcto", async ({ page }) => {
-    await page.goto("/viajes/nuevo");
+    await page.goto("/viajes/nuevo", { waitUntil: "domcontentloaded" });
 
     // T-03: si el middleware cambia, la URL exacta del redirect es la aserción.
-    await page.waitForURL("**/login?next=%2Fviajes%2Fnuevo&reason=authentication_required", { timeout: 15_000 });
+    await page.waitForURL("**/login?next=%2Fviajes%2Fnuevo&reason=authentication_required", { timeout: 15_000, waitUntil: "domcontentloaded" });
     expect(await rutaActual(page)).toBe("/login?next=%2Fviajes%2Fnuevo&reason=authentication_required");
 
     // el usuario entiende por qué llegó al login
@@ -438,10 +444,10 @@ test.describe("Flujos críticos de la aplicación", () => {
   test("una sesión inválida no da acceso a las rutas privadas", async ({ page }) => {
     await seedMockAuthSession(page, { variante: "verificada", token: "sbp_token_invalido_e2e" });
 
-    await page.goto("/viajes/nuevo");
+    await page.goto("/viajes/nuevo", { waitUntil: "domcontentloaded" });
 
     // T-03: el resultado final es el login, no una página privada.
-    await page.waitForURL("**/login**", { timeout: 15_000 });
+    await page.waitForURL("**/login**", { timeout: 15_000, waitUntil: "domcontentloaded" });
     expect(await rutaActual(page)).toContain("/login");
     await expect(page.locator("#login-email")).toBeVisible();
   });
@@ -449,8 +455,8 @@ test.describe("Flujos críticos de la aplicación", () => {
   test("con sesión válida el login redirige al home y no bloquea", async ({ page }) => {
     await seedMockAuthSession(page, { variante: "verificada" });
 
-    await page.goto("/login");
-    await page.waitForURL("/", { timeout: 15_000 });
+    await page.goto("/login", { waitUntil: "domcontentloaded" });
+    await page.waitForURL("/", { timeout: 15_000, waitUntil: "domcontentloaded" });
     expect(await rutaActual(page)).toBe("/");
   });
 
@@ -458,8 +464,8 @@ test.describe("Flujos críticos de la aplicación", () => {
     await page.setViewportSize({ width: 390, height: 844 });
     await seedMockAuthSession(page, { variante: "verificada" });
 
-    await page.goto("/mis-viajes");
-    await expect(page.locator("h1")).toContainText("Mis Traslados");
+    await page.goto("/mis-viajes", { waitUntil: "domcontentloaded" });
+    await expect(page.locator("h1")).toContainText("Mis traslados");
     expect(await rutaActual(page)).toBe("/mis-viajes");
   });
 });
@@ -468,7 +474,7 @@ test.describe("Reglas de negocio del perfil de usuario", () => {
   test("un usuario verificado y con términos aceptados pasa el guard del wizard", async ({ page }) => {
     await seedMockAuthSession(page, { variante: "verificada" });
 
-    await page.goto("/viajes/nuevo");
+    await page.goto("/viajes/nuevo", { waitUntil: "domcontentloaded" });
     // el formulario del wizard está disponible: el guard no lo bloquea
     await expect(page.locator("#gate-origenCodigoPostal")).toBeVisible({ timeout: 30_000 });
     // sin banner de consentimiento legal pendiente

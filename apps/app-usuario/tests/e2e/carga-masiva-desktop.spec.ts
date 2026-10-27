@@ -212,7 +212,7 @@ test.describe("RR-CM-001 — Flujo operativo Carga Masiva Desktop", () => {
     await expect(page.getByText("Resumen de traslados cotizados (100)")).toBeVisible();
   });
 
-  test("Escenario 2: 80 válidas, 20 inválidas -> cotización parcial conservando 20 pendientes", async ({ page }) => {
+  test("Escenario 2: 80 válidas, 20 inválidas -> cotización parcial excluyendo 20 incidencias", async ({ page }) => {
     test.slow();
     const filasMixtas = [
       ...Array.from({ length: 80 }).map((_, i) => ({
@@ -315,10 +315,10 @@ test.describe("RR-CM-001 — Flujo operativo Carga Masiva Desktop", () => {
     ).toBeVisible({ timeout: 15000 });
     expect(cotizarParcialEnviado).toBe(true);
 
-    // Aviso de pago parcial con 20 filas conservadas en servidor
+    // Aviso de pago parcial con 20 filas excluidas para corregir en la plantilla
     await expect(page.getByRole("status", { name: "Aviso de pago parcial" })).toBeVisible();
     await expect(page.getByText(/Estás procesando el pago de 80 traslados válidos/i)).toBeVisible();
-    await expect(page.getByText(/Los 20 traslados con incidencias quedan guardados como borrador/i)).toBeVisible();
+    await expect(page.getByText(/Los 20 traslados con incidencias no se incluyen en este pago/i)).toBeVisible();
     await expect(page.getByRole("button", { name: "Pagar $52,000.00 MXN" })).toBeVisible();
   });
 

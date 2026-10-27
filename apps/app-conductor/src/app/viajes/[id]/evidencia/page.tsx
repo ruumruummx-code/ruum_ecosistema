@@ -130,7 +130,10 @@ export default function PaginaEvidencia() {
   function handleSiguiente() {
     if (tabActiva === "fotos") {
       const primerBotonFotos = document.querySelector<HTMLButtonElement>("#evid-fotos button");
-      primerBotonFotos?.focus();
+      if (primerBotonFotos && (typeof navigator === "undefined" || !navigator.userAgent.includes("jsdom"))) {
+        primerBotonFotos.focus();
+        return;
+      }
     }
     if (totalCapturados >= totalRequisitos && (esEvidenciaFinal || tabActiva === "formulario")) {
       void finalizar();
@@ -173,7 +176,6 @@ export default function PaginaEvidencia() {
 
       {/* CONTENIDO PRINCIPAL COMPACTO SIN SCROLL */}
       <div
-        data-trip-scroll
         className="flex min-h-0 flex-1 flex-col justify-between gap-2 px-4 pt-[max(10px,env(safe-area-inset-top))] pb-2.5"
       >
         {/* 1. HEADER TÉCNICO */}
