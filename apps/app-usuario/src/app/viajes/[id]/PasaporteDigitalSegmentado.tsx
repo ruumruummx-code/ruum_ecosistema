@@ -21,6 +21,17 @@ export function PasaporteDigitalSegmentado(props: PasaporteDigitalSegmentadoProp
     const root = useRef<HTMLDivElement>(null);
     const folio = `#RR-${(p.traslado_id ?? "").slice(0, 4).toUpperCase()}`;
     useEffect(() => {
+        const aplicarFragmento = () => {
+            const fragmento = window.location.hash;
+            if (fragmento === "#chat-conductor" || fragmento === "#chat") setTab("chat");
+            else if (fragmento === "#fotos") setTab("fotos");
+            else if (!fragmento || fragmento === "#en-ruta") setTab("en_ruta");
+        };
+        aplicarFragmento();
+        window.addEventListener("hashchange", aplicarFragmento);
+        return () => window.removeEventListener("hashchange", aplicarFragmento);
+    }, [p.traslado_id]);
+    useEffect(() => {
         const previous = document.body.style.overflow;
         document.body.style.overflow = "hidden";
         const viewport = window.visualViewport;

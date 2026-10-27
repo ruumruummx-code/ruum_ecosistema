@@ -450,10 +450,13 @@ export function useCargaMasiva() {
     try {
       const res = await fetchConReintento("/api/viajes/masivos/pendientes", {}, 3, 1000);
       const data = await res.json();
-      return ((data.pendientes ?? data.cargas) ?? []) as Array<{ id: string; totalMXN: number; cantidad_traslados: number; creado_en?: string }>;
+      if (!res.ok) throw new Error(data.error ?? "No pudimos consultar las cargas pendientes.");
+      const lista = data.pendientes ?? data.cargas;
+      if (!Array.isArray(lista)) throw new Error("La consulta de cargas pendientes devolvió una respuesta inválida.");
+      return lista as Array<{ id: string; totalMXN: number; cantidad_traslados: number; creado_en?: string }>;
     } catch (err) {
       logStructuredWarn("viajes/useCargaMasiva", "consultar_cargas_pendientes_fallido", err);
-      return [];
+      throw err;
     }
   }, []);
 

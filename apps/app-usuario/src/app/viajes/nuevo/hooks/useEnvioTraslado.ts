@@ -178,7 +178,8 @@ export function useEnvioTraslado(params: ParametrosEnvioTraslado) {
     if (!sesionReal) {
       setEnviando(false);
       registrarEventoUx("traslado_nuevo_sin_sesion", { origen: "envio" });
-      router.push("/login?next=/viajes/nuevo&reason=authentication_required");
+      const siguiente = window.location.pathname + window.location.search + window.location.hash;
+      router.push(`/login?${new URLSearchParams({ next: siguiente, reason: "authentication_required" })}`);
       return;
     }
 

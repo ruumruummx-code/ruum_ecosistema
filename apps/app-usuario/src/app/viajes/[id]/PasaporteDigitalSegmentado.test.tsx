@@ -1,5 +1,5 @@
 /** @vitest-environment jsdom */
-import { beforeAll, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeAll, describe, expect, it, vi } from "vitest";
 import { act, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { PasaporteDigitalSegmentado, type PasaporteDigitalSegmentadoProps } from "./PasaporteDigitalSegmentado";
@@ -19,7 +19,29 @@ const props: PasaporteDigitalSegmentadoProps = {
     pasaporte: { traslado_id: "c784-test", estado: "traslado_en_curso", vehiculo_marca: "Ford", vehiculo_modelo: "Courier", vehiculo_anio: 2004, vehiculo_placas: "PEM345", origen_ciudad: "San Mateo Atenco", destino_ciudad: "Lerma" } as PasaporteDigitalSegmentadoProps["pasaporte"],
     traslado: null, vehiculo: null, conductor: null, evidencia: [], incidencias: [], disputas: [], reclamosSeguro: [], calificacion: null, pagos: [], ultimaUbicacion: null,
 };
+afterEach(() => window.history.replaceState(null, "", "/"));
 describe("Pasaporte dashboard", () => {
+    it("abre Chat al llegar desde el enlace de soporte", () => {
+        window.history.replaceState(null, "", "/viajes/c784-test#chat-conductor");
+        render(<PasaporteDigitalSegmentado {...props}/>);
+        expect(screen.getByRole("tab", { name: "Chat" })).toHaveAttribute("aria-selected", "true");
+        expect(screen.getByRole("log")).toBeVisible();
+        expect(screen.getByTestId("map")).toHaveAttribute("data-active", "false");
+    });
+    it("responde a enlaces y navegación del fragmento con la pantalla ya abierta", () => {
+        const { unmount } = render(<PasaporteDigitalSegmentado {...props}/>);
+        act(() => {
+            window.history.replaceState(null, "", "/viajes/c784-test#chat-conductor");
+            window.dispatchEvent(new HashChangeEvent("hashchange"));
+        });
+        expect(screen.getByRole("log")).toBeVisible();
+        act(() => {
+            window.history.replaceState(null, "", "/viajes/c784-test#en-ruta");
+            window.dispatchEvent(new HashChangeEvent("hashchange"));
+        });
+        expect(screen.getByRole("tabpanel")).toHaveAccessibleName("En Ruta");
+        unmount();
+    });
     it("ajusta el lienzo al teclado y restaura el bloqueo de fondo al salir", () => {
         const viewport = Object.assign(new EventTarget(), { height: window.innerHeight, offsetTop: 0 });
         vi.stubGlobal("visualViewport", viewport);

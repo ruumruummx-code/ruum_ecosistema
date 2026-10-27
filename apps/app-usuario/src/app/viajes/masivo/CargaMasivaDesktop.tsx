@@ -134,6 +134,9 @@ export function CargaMasivaDesktop({ nombreUsuario }: CargaMasivaDesktopProps) {
     validarYProcesarArchivo,
     cargasRecientes,
     cargasPendientes,
+    cargandoPendientes,
+    errorPendientes,
+    refrescarPendientes,
     handleReanudarCarga,
     handleDescartarCarga,
     handleCancelarCarga,
@@ -217,6 +220,7 @@ export function CargaMasivaDesktop({ nombreUsuario }: CargaMasivaDesktopProps) {
       nombre={nombreUsuario}
       padding="compacto"
     >
+      {errorPendientes && <div role="alert" className="rounded-xl border border-red-300 p-4 text-sm">No pudimos actualizar tus cargas pendientes: {errorPendientes}.<button type="button" disabled={cargandoPendientes} onClick={() => void refrescarPendientes()} className="ml-3 underline">Reintentar consulta</button></div>}
       {estado === "idle" && error && <div role="alert" className="rounded-xl border border-red-300 bg-red-50 p-4 text-sm text-red-800">{error}</div>}
       {/* -----------------------------------------------------------------
           MIGAS DE PAN (BREADCRUMBS)
@@ -1242,7 +1246,7 @@ export function CargaMasivaDesktop({ nombreUsuario }: CargaMasivaDesktopProps) {
                   {cargasRecientes.length === 0 ? (
                     <tr>
                       <td colSpan={5} className="py-8 text-center text-xs text-slate-400 dark:text-slate-500">
-                        No hay cargas recientes. Arrastra o selecciona un archivo .xlsx para comenzar.
+                          {errorPendientes ? "No se pudieron consultar las cargas recientes." : cargandoPendientes ? "Consultando cargas recientes…" : "No hay cargas recientes. Arrastra o selecciona un archivo .xlsx para comenzar."}
                       </td>
                     </tr>
                   ) : (

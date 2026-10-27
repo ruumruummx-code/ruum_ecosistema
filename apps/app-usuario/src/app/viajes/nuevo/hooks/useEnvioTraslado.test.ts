@@ -100,6 +100,7 @@ function crearParams(overrides: Partial<ParametrosEnvioTraslado> = {}): Parametr
 
 describe("useEnvioTraslado", () => {
   afterEach(() => {
+    window.history.replaceState(null, "", "/");
     document.cookie = "ruum_csrf_token=; Max-Age=0; path=/";
     vi.restoreAllMocks();
   });
@@ -178,12 +179,15 @@ describe("useEnvioTraslado", () => {
     expect(p2.enfocarPrimerError).toHaveBeenCalledWith(["origenCalle"]);
 
     // 3. Sin sesión real -> redirige a /login
+    window.history.replaceState(null, "", "/viajes/nuevo?vehiculo=auto-123&buscar_origen=Toluca#ruta");
     const p3 = crearParams({ sesionReal: false });
     const { result: r3 } = renderHook(() => useEnvioTraslado(p3));
     await act(async () => {
       await r3.current.enviarSolicitud();
     });
-    expect(p3.router.push).toHaveBeenCalledWith("/login?next=/viajes/nuevo&reason=authentication_required");
+    const destinoLogin = new URL(vi.mocked(p3.router.push).mock.calls[0]![0], window.location.origin);
+    expect(destinoLogin.pathname).toBe("/login");
+    expect(destinoLogin.searchParams.get("next")).toBe("/viajes/nuevo?vehiculo=auto-123&buscar_origen=Toluca#ruta");
 
     // 4. Año inválido
     const p4 = crearParams({ datos: { ...crearParams().datos, anio: "1950" } });

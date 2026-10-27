@@ -4,7 +4,13 @@ import { crearClienteServidor } from "../../lib/supabase-server";
 import { logStructuredWarn } from "../../lib/logger";
 import { listarTrasladosDeUsuario, obtenerUsuarioActual } from "@ruum/api/services";
 import { NavegacionUsuario } from "../NavegacionUsuario";
-import { MobileShell, Icono } from "@ruum/ui";
+import { MobileShell, Icono, Aviso } from "@ruum/ui";
+import { UserDashboardLayout } from "../../components/layout/UserDashboardLayout";
+import { BotonReintentarSesion } from "../ReintentarSesion";
+
+function ErrorPasaporte() {
+  return <UserDashboardLayout><div className="mx-auto max-w-xl space-y-5 py-12 text-center"><Aviso tono="danger">No pudimos cargar tu pasaporte en este momento. Reintenta para consultar tus traslados.</Aviso><BotonReintentarSesion /><Link href="/mis-viajes" className="block underline">Volver a Mis traslados</Link></div></UserDashboardLayout>;
+}
 
 // El destino depende de la sesión y del traslado activo del usuario. Evita
 // que el despliegue genere una versión estática compartida entre sesiones.
@@ -15,10 +21,7 @@ export default async function PaginaPasaporte() {
   const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
   if (!url || !anonKey) {
-    const login = new URL("/login", process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000");
-    login.searchParams.set("reason", "authentication_required");
-    login.searchParams.set("next", "/pasaporte");
-    redirect(`${login.pathname}${login.search}`);
+    return <ErrorPasaporte />;
   }
 
   let usuario = null;
@@ -33,6 +36,7 @@ export default async function PaginaPasaporte() {
   } catch (err) {
     // Falla de red o sesión ausente
     logStructuredWarn("pasaporte", "carga_pasaporte_activo_fallida", err);
+    return <ErrorPasaporte />;
   }
 
   if (!usuario) {

@@ -39,7 +39,8 @@ export function useSesionTraslado({
         const real = await obtenerUsuarioActual(cliente);
         if (!real) {
           registrarEventoUx("traslado_nuevo_sin_sesion", { origen: "carga" });
-          router.replace("/login?next=/viajes/nuevo&reason=authentication_required");
+          const siguiente = window.location.pathname + window.location.search + window.location.hash;
+          router.replace(`/login?${new URLSearchParams({ next: siguiente, reason: "authentication_required" })}`);
           return;
         }
         if (real) {

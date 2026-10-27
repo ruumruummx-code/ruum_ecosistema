@@ -122,6 +122,15 @@ vi.mock("../nuevo/hooks/useCargaMasiva", () => ({
 }));
 
 describe("CargaMasivaDesktop — Pantalla de Carga Masiva de Escritorio", () => {
+  it("muestra el fallo de consulta y recupera los pendientes al reintentar", async () => {
+    consultarCargasPendientesMock.mockRejectedValueOnce(new Error("Servidor no disponible"));
+    await renderizarDesktop();
+    expect(await screen.findByRole("alert")).toHaveTextContent("Servidor no disponible");
+    expect(screen.queryByText(/No hay cargas recientes/)).not.toBeInTheDocument();
+    await userEvent.click(screen.getByRole("button", { name: "Reintentar consulta" }));
+    await waitFor(() => expect(screen.queryByRole("alert")).not.toBeInTheDocument());
+    expect(screen.getByText(/Cargas pendientes de pago/)).toBeInTheDocument();
+  });
   beforeEach(() => {
     vi.clearAllMocks();
     mockHookReturn.estado = "idle";

@@ -178,7 +178,7 @@ export async function middleware(request: NextRequest) {
     const login = request.nextUrl.clone();
     login.pathname = "/login";
     login.search = "";
-    login.searchParams.set("next", pathname);
+    login.searchParams.set("next", pathname + request.nextUrl.search);
     login.searchParams.set("reason", "authentication_required");
     return applySecurityHeadersUsuario(NextResponse.redirect(login), nonce, request.nextUrl.origin);
   }

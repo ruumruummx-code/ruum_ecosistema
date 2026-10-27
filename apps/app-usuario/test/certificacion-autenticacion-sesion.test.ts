@@ -38,6 +38,16 @@ describe("T07 — Certificación de Autenticación, Sesión y Middleware (app-us
   }
 
   describe("1. Middleware y Control de Acceso por Rol (Sin bucles ni acceso indebido)", () => {
+    it.each([
+      "/viajes/nuevo?vehiculo=auto-123&buscar_origen=Ciudad%20de%20M%C3%A9xico",
+      "/soporte?motivo=pagos&viaje=viaje-123&canal=telefono",
+      "/mis-viajes?tab=programados&buscar=Quer%C3%A9taro",
+    ])("conserva el contexto al autenticar %s", async ruta => {
+      mockGetUser.mockResolvedValue({ data: { user: null } });
+      const { middleware } = await import("../src/middleware");
+      const respuesta = await middleware(crearRequest(ruta));
+      expect(new URL(respuesta.headers.get("location")!).searchParams.get("next")).toBe(ruta);
+    });
     const rutasProtegidas = ["/viajes", "/viajes/nuevo", "/mis-viajes", "/cuenta", "/pasaporte", "/verificacion", "/soporte"];
 
     it.each(rutasProtegidas)(

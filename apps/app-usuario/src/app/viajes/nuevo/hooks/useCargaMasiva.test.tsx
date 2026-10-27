@@ -16,6 +16,17 @@ vi.mock("exceljs", () => ({
   },
 }));
 afterEach(() => vi.unstubAllGlobals());
+it("distingue una lista vacía de una consulta rechazada", async () => {
+  vi.stubGlobal("fetch", vi.fn().mockResolvedValueOnce(Response.json({ pendientes: [] })).mockResolvedValueOnce(Response.json({ error: "Sesión expirada" }, { status: 401 })));
+  const { result } = renderHook(() => useCargaMasiva());
+  await expect(result.current.consultarCargasPendientes()).resolves.toEqual([]);
+  await expect(result.current.consultarCargasPendientes()).rejects.toThrow("Sesión expirada");
+});
+it("no interpreta una respuesta inválida como una lista vacía", async () => {
+  vi.stubGlobal("fetch", vi.fn().mockResolvedValue(Response.json({ mensaje: "Sin lista" })));
+  const { result } = renderHook(() => useCargaMasiva());
+  await expect(result.current.consultarCargasPendientes()).rejects.toThrow("respuesta inválida");
+});
 it("guarda varios campos juntos y conserva el motivo del servidor si falla la revalidación", async () => {
   const datos = normalizarFilaPlantilla({ vehiculo_marca: "Nissan", vehiculo_modelo: "Versa", vehiculo_anio: "1800" });
   const fila = validarFila(datos, 0);

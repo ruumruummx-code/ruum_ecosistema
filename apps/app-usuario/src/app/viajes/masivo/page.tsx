@@ -19,6 +19,7 @@ export default function PaginaViajesMasivo() {
   const router = useRouter();
   const [cargasPendientes, setCargasPendientes] = useState<CargaResumen[]>([]);
   const [cargandoLista, setCargandoLista] = useState(true);
+  const [errorLista, setErrorLista] = useState<string | null>(null);
   const [cargaSeleccionadaParaRetome, setCargaSeleccionadaParaRetome] = useState<string | null>(null);
   const [nombreUsuario, setNombreUsuario] = useState<string | null>(null);
 
@@ -55,6 +56,8 @@ export default function PaginaViajesMasivo() {
             setCargaSeleccionadaParaRetome(pendientes[0]!.id);
           }
         }
+      } catch (err) {
+        if (activo) setErrorLista(err instanceof Error ? err.message : "No pudimos consultar las cargas pendientes.");
       } finally {
         if (activo) setCargandoLista(false);
       }
@@ -66,9 +69,13 @@ export default function PaginaViajesMasivo() {
 
   const refrescarLista = async () => {
     setCargandoLista(true);
-    const lista = await consultarCargasPendientes();
-    setCargasPendientes(lista);
-    setCargandoLista(false);
+    try {
+      const lista = await consultarCargasPendientes();
+      setCargasPendientes(lista);
+      setErrorLista(null);
+    } catch (err) {
+      setErrorLista(err instanceof Error ? err.message : "No pudimos consultar las cargas pendientes.");
+    } finally { setCargandoLista(false); }
   };
 
   const manejarDescartar = async (id: string) => {
@@ -111,6 +118,7 @@ export default function PaginaViajesMasivo() {
           </header>
 
           {/* Sección: Cargas pendientes encontradas */}
+          {errorLista && <div role="alert" className="mb-4 rounded-xl border p-4">{errorLista}<button type="button" disabled={cargandoLista} onClick={() => void refrescarLista()} className="ml-3 underline">Reintentar consulta</button></div>}
           {!cargandoLista && cargasPendientes.length > 0 && (
             <section
               aria-labelledby="titulo-cargas-pendientes"

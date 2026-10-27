@@ -226,7 +226,8 @@ export function useCargaMasivaDesktop() {
   const [toast, setToast] = useState<ToastNotificacion | null>(null);
   const [cargasRecientes, setCargasRecientes] = useState<CargaRecienteItem[]>([]);
   const [cargasPendientes, setCargasPendientes] = useState<CargaPendienteItem[]>([]);
-  const [cargandoPendientes, setCargandoPendientes] = useState(false);
+  const [cargandoPendientes, setCargandoPendientes] = useState(true);
+  const [errorPendientes, setErrorPendientes] = useState<string | null>(null);
   const [menuAbiertoId, setMenuAbiertoId] = useState<string | null>(null);
   const [guiaModalAbierto, setGuiaModalAbierto] = useState(false);
   const [modalDetalleData, setModalDetalleData] = useState<{
@@ -271,16 +272,17 @@ export function useCargaMasivaDesktop() {
         setCargasPendientes(lista);
         setCargasRecientes(lista.map(mapearPendienteACargaReciente));
       }
+      setErrorPendientes(null);
+    } catch (err) {
+      setErrorPendientes(err instanceof Error ? err.message : "No pudimos consultar las cargas pendientes.");
     } finally {
       setCargandoPendientes(false);
     }
   }, []);
 
-  const consultaPendientesInicialRef = useRef(false);
   useEffect(() => {
-    if (consultaPendientesInicialRef.current) return;
-    consultaPendientesInicialRef.current = true;
     let activo = true;
+    setCargandoPendientes(true);
 
     void consultarPendientesRef.current().then((pendientes) => {
       if (!activo) return;
@@ -288,7 +290,10 @@ export function useCargaMasivaDesktop() {
         setCargasPendientes(pendientes);
         setCargasRecientes(pendientes.map(mapearPendienteACargaReciente));
       }
-    });
+      setErrorPendientes(null);
+    }).catch(err => {
+      if (activo) setErrorPendientes(err instanceof Error ? err.message : "No pudimos consultar las cargas pendientes.");
+    }).finally(() => { if (activo) setCargandoPendientes(false); });
 
     return () => {
       activo = false;
@@ -545,6 +550,7 @@ export function useCargaMasivaDesktop() {
     cargasRecientes,
     cargasPendientes,
     cargandoPendientes,
+    errorPendientes,
     refrescarPendientes,
     handleReanudarCarga,
     handleDescartarCarga,
