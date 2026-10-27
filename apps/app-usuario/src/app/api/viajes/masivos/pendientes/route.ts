@@ -114,17 +114,28 @@ export async function DELETE(request: NextRequest) {
     }
 
     if (carga.stripe_payment_intent_id) {
+      const endpoint = `payment_intents/${encodeURIComponent(carga.stripe_payment_intent_id)}`;
+      let intent;
       try {
-        await stripeMasivo(
-          `payment_intents/${encodeURIComponent(carga.stripe_payment_intent_id)}/cancel`,
-          new URLSearchParams()
-        );
+        intent = await stripeMasivo(`${endpoint}/cancel`, new URLSearchParams());
       } catch (errCancel) {
-        // Si ya estaba cancelado o no permite cancelación, ignorar dejando traza estructurada
-        logStructuredWarn("api/viajes/masivos/pendientes", "cancelacion_payment_intent_ignorada", errCancel, {
+        // Un timeout puede ocurrir después de cancelar. Consultar el estado real
+        // también permite recuperar cancelaciones previas o un pago concurrente.
+        logStructuredWarn("api/viajes/masivos/pendientes", "cancelacion_payment_intent_por_verificar", errCancel, {
           cargaId: idValidado.data,
           usuarioId: user.id,
         });
+        intent = await stripeMasivo(endpoint);
+      }
+      if (intent.id !== carga.stripe_payment_intent_id) {
+        throw new Error("No pudimos verificar el cobro asociado a esta carga. La carga se conserva para reintentar.");
+      }
+      if (intent.status === "succeeded") {
+        await confirmarPagoMasivoServidor(servicio, carga.id, intent.id, intent.amount_received, intent.currency);
+        return NextResponse.json({ error: "El pago ya fue confirmado. No se puede descartar esta carga; consulta Mis traslados.", pagado: true }, { status: 409 });
+      }
+      if (intent.status !== "canceled") {
+        return NextResponse.json({ error: "No se confirmó la cancelación del cobro. La carga se conserva; verifica su estado antes de reintentar." }, { status: 409 });
       }
     }
 

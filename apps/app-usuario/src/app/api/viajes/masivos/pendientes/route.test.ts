@@ -110,4 +110,72 @@ describe("API /api/viajes/masivos/pendientes", () => {
     expect(mocks.stripe).toHaveBeenCalledWith("payment_intents/pi_pendiente/cancel", expect.any(URLSearchParams));
     expect(mocks.descartar).toHaveBeenCalledWith(expect.anything(), cargaId, "usuario-123");
   });
+
+  describe("descarte seguro del cobro", () => {
+    const descartar = () => DELETE(new NextRequest(`http://localhost/api/viajes/masivos/pendientes?id=${cargaId}`, { method: "DELETE" }));
+    beforeEach(() => {
+      mocks.obtener.mockResolvedValue({ id: cargaId, auth_user_id: "usuario-123", stripe_payment_intent_id: "pi_pendiente" });
+    });
+
+    it("conserva el lote si no puede cancelar ni consultar Stripe", async () => {
+      mocks.stripe.mockRejectedValue(new Error("Sin conexión con Stripe"));
+      const res = await descartar();
+      expect(res.status).toBe(500);
+      expect(mocks.stripe).toHaveBeenNthCalledWith(2, "payment_intents/pi_pendiente");
+      expect(mocks.descartar).not.toHaveBeenCalled();
+      expect(mocks.confirmar).not.toHaveBeenCalled();
+    });
+
+    it("permite reintentar cuando Stripe confirma una cancelación previa", async () => {
+      mocks.stripe.mockRejectedValueOnce(new Error("Ya cancelado"));
+      mocks.stripe.mockResolvedValueOnce({ id: "pi_pendiente", status: "canceled" });
+      const res = await descartar();
+      expect(res.status).toBe(200);
+      expect(mocks.descartar).toHaveBeenCalledExactlyOnceWith(expect.anything(), cargaId, "usuario-123");
+    });
+
+    it.each(["processing", "requires_action", "requires_payment_method"])("conserva el lote si la verificación devuelve %s", async status => {
+      mocks.stripe.mockRejectedValueOnce(new Error("Cancelación no confirmada"));
+      mocks.stripe.mockResolvedValueOnce({ id: "pi_pendiente", status });
+      const res = await descartar();
+      expect(res.status).toBe(409);
+      expect(await res.json()).toMatchObject({ error: expect.stringContaining("La carga se conserva") });
+      expect(mocks.descartar).not.toHaveBeenCalled();
+    });
+
+    it("concilia un pago concurrente y rechaza el descarte", async () => {
+      mocks.stripe.mockRejectedValueOnce(new Error("No cancelable"));
+      mocks.stripe.mockResolvedValueOnce({ id: "pi_pendiente", status: "succeeded", amount_received: 150000, currency: "mxn" });
+      const res = await descartar();
+      expect(res.status).toBe(409);
+      expect(await res.json()).toMatchObject({ pagado: true });
+      expect(mocks.confirmar).toHaveBeenCalledExactlyOnceWith(expect.anything(), cargaId, "pi_pendiente", 150000, "mxn");
+      expect(mocks.descartar).not.toHaveBeenCalled();
+    });
+
+    it("exige estado canceled incluso en una respuesta de cancelación exitosa", async () => {
+      mocks.stripe.mockResolvedValueOnce({ id: "pi_pendiente", status: "processing" });
+      expect((await descartar()).status).toBe(409);
+      expect(mocks.descartar).not.toHaveBeenCalled();
+    });
+
+    it("no descarta si la respuesta corresponde a otro cobro", async () => {
+      mocks.stripe.mockResolvedValueOnce({ id: "pi_otro", status: "canceled" });
+      expect((await descartar()).status).toBe(500);
+      expect(mocks.descartar).not.toHaveBeenCalled();
+    });
+
+    it("no anuncia descarte si falla la escritura local tras cancelar", async () => {
+      mocks.stripe.mockResolvedValueOnce({ id: "pi_pendiente", status: "canceled" });
+      mocks.descartar.mockRejectedValueOnce(new Error("Base de datos no disponible"));
+      expect((await descartar()).status).toBe(500);
+    });
+
+    it("rechaza una carga ya pagada antes de contactar Stripe", async () => {
+      mocks.obtener.mockResolvedValueOnce({ id: cargaId, pagado_en: "2026-10-27T12:00:00Z" });
+      expect((await descartar()).status).toBe(400);
+      expect(mocks.stripe).not.toHaveBeenCalled();
+      expect(mocks.descartar).not.toHaveBeenCalled();
+    });
+  });
 });

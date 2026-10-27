@@ -29,11 +29,13 @@ vi.mock("@/app/PagoStripe", () => ({
   PagoStripe: ({
     onPagado,
     onEstadoPago,
+    formId,
   }: {
     onPagado?: () => void;
     onEstadoPago?: (s: { listo: boolean; procesando: boolean }) => void;
+    formId?: string;
   }) => (
-    <div data-testid="pago-stripe-mock">
+    <form id={formId} data-testid="pago-stripe-mock" onSubmit={e => { e.preventDefault(); onPagado?.(); }}>
       <button type="button" onClick={() => onPagado?.()}>
         Simular Pago Stripe
       </button>
@@ -43,7 +45,7 @@ vi.mock("@/app/PagoStripe", () => ({
       >
         Simular Formulario Listo
       </button>
-    </div>
+    </form>
   ),
 }));
 
@@ -519,11 +521,11 @@ describe("CargaMasivaDesktop — Pantalla de Carga Masiva de Escritorio", () => 
     const botonPagar = screen.getByRole("button", { name: "Pagar $1,950.00 MXN" });
     expect(botonPagar).not.toBeDisabled();
 
-    // Simula confirmación de Stripe exitosa llamando onPagado
-    const botonSimularPago = screen.getByRole("button", { name: "Simular Pago Stripe" });
-    await user.click(botonSimularPago);
+    // La acción principal debe enviar el formulario embebido, no otro botón.
+    expect((botonPagar as HTMLButtonElement).form).toBe(screen.getByTestId("pago-stripe-mock"));
+    await user.click(botonPagar);
 
-    expect(confirmarPagoMock).toHaveBeenCalledTimes(1);
+    await waitFor(() => expect(confirmarPagoMock).toHaveBeenCalledTimes(1));
   });
 
   it("renderiza la pantalla de confirmación hero cuando el pago fue exitoso", async () => {

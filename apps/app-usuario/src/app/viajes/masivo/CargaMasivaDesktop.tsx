@@ -404,6 +404,8 @@ export function CargaMasivaDesktop({ nombreUsuario }: CargaMasivaDesktopProps) {
                     trasladoId={cargaId}
                     monto={totalMXN}
                     onPagado={() => void verificarPago()}
+                    compacto
+                    formId={`pago-masivo-${cargaId}`}
                   />
 
                   <button
