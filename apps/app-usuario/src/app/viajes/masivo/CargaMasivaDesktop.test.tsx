@@ -94,8 +94,8 @@ describe("CargaMasivaDesktop — Pantalla de Carga Masiva de Escritorio", () => 
     expect(within(navPanel).getByRole("link", { name: /Mi cuenta/ })).toHaveAttribute("href", "/cuenta");
 
     // Card inferior
-    expect(screen.getByText("Mueve tu auto sin soltar el control")).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: /Crear traslado/ })).toBeInTheDocument();
+    expect(screen.getByText("Mueve tu auto sin salir de casa")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /Registrar traslado/ })).toBeInTheDocument();
   });
 
   it("renderiza la barra superior con migas de pan (Breadcrumbs), notificaciones y dropdown de usuario", async () => {

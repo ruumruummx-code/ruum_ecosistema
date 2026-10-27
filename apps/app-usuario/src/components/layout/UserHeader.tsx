@@ -1,7 +1,8 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, type FormEvent } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useTema } from "../../app/TemaProvider";
 import {
@@ -30,15 +31,43 @@ export interface NotificacionHeader {
 }
 
 export interface UserHeaderProps {
-  usuario?: { nombre?: string | null; correo?: string | null } | null;
+  user?: {
+    name?: string | null;
+    avatarUrl?: string | null;
+    role?: string;
+  };
+  usuario?: { id?: string; nombre?: string | null; correo?: string | null; [key: string]: unknown } | null;
   nombre?: string | null;
   correo?: string | null;
   rol?: string;
+  unreadNotifications?: number;
   notificaciones?: NotificacionHeader[];
   totalVehiculos?: number;
+  onMenuOpen?: () => void;
+  onSearchOpen?: () => void;
+  onLogout?: () => void;
   onCerrarSesion?: () => void | Promise<void>;
   /** El tema es una acción global; se conserva en el header compartido. */
   mostrarTema?: boolean;
+}
+
+function IconoMenu({ className = "size-5" }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+      aria-hidden="true"
+    >
+      <line x1="4" y1="6" x2="20" y2="6" />
+      <line x1="4" y1="12" x2="20" y2="12" />
+      <line x1="4" y1="18" x2="20" y2="18" />
+    </svg>
+  );
 }
 
 function iniciales(nombre: string): string {
@@ -52,7 +81,7 @@ function iniciales(nombre: string): string {
 }
 
 const TONO_NOTIFICACION: Record<NonNullable<NotificacionHeader["tono"]>, string> = {
-  info: "bg-[var(--ruum-action-bg)] text-[var(--ruum-action-text)]",
+  info: "bg-[var(--ruum-action-bg,#e6f0ff)] text-[var(--ruum-action-text,#0052ff)]",
   atencion: "bg-[var(--user-color-pending-soft,#fff7dd)] text-[var(--user-color-pending-ink,#765100)]",
   danger: "bg-[var(--user-color-error-soft,#fdecef)] text-[var(--user-color-error-ink,#9a2637)]",
 };
@@ -61,12 +90,17 @@ const ITEM_MENU =
   "flex items-center gap-2.5 rounded-xl px-3 py-2 text-xs font-semibold text-[var(--ruum-text)] transition hover:bg-[var(--ruum-surface-subtle)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ruum-focus)]";
 
 export function UserHeader({
+  user,
   usuario = null,
   nombre,
   correo,
   rol = "Usuario",
+  unreadNotifications,
   notificaciones = [],
   totalVehiculos,
+  onMenuOpen,
+  onSearchOpen,
+  onLogout,
   onCerrarSesion,
   mostrarTema = true,
 }: UserHeaderProps) {
@@ -81,11 +115,14 @@ export function UserHeader({
   const [perfilAbierto, setPerfilAbierto] = useState(false);
   const [cerrandoSesion, setCerrandoSesion] = useState(false);
 
-  const nombreCompleto = (nombre || usuario?.nombre || "Usuario").trim();
+  const nombreCompleto = (user?.name || nombre || usuario?.nombre || "Usuario").trim();
   const primerNombre = nombreCompleto.split(/\s+/)[0] || "Usuario";
   const correoMostrado = (correo || usuario?.correo || "").trim();
+  const rolUsuario = user?.role || rol;
+  const avatarUrl = user?.avatarUrl;
   const inicial = iniciales(nombreCompleto);
-  const totalNotificaciones = notificaciones.length;
+  const totalNotificaciones =
+    typeof unreadNotifications === "number" ? unreadNotifications : notificaciones.length;
   const destinos = busqueda.trim() ? buscarDestinos(busqueda) : [];
   const itemPerfil = NAVEGACION_USUARIO.find((item) => item.id === "perfil");
 
@@ -103,6 +140,7 @@ export function UserHeader({
         buscadorRef.current?.focus();
         buscadorRef.current?.select();
         setBuscadorAbierto(true);
+        onSearchOpen?.();
         return;
       }
       if (evento.key === "Escape") cerrarPaneles();
@@ -110,7 +148,7 @@ export function UserHeader({
 
     document.addEventListener("keydown", alPresionar);
     return () => document.removeEventListener("keydown", alPresionar);
-  }, [cerrarPaneles]);
+  }, [cerrarPaneles, onSearchOpen]);
 
   useEffect(() => {
     if (!buscadorAbierto && !notificacionesAbiertas && !perfilAbierto) return;
@@ -123,7 +161,7 @@ export function UserHeader({
     return () => document.removeEventListener("mousedown", alClicFuera);
   }, [buscadorAbierto, notificacionesAbiertas, perfilAbierto, cerrarPaneles]);
 
-  const enviarBusqueda = (evento: React.FormEvent<HTMLFormElement>) => {
+  const enviarBusqueda = (evento: FormEvent<HTMLFormElement>) => {
     evento.preventDefault();
     const termino = busqueda.trim();
     if (!termino) return;
@@ -137,6 +175,10 @@ export function UserHeader({
     setCerrandoSesion(true);
 
     try {
+      if (onLogout) {
+        await onLogout();
+        return;
+      }
       if (onCerrarSesion) {
         await onCerrarSesion();
         return;
@@ -156,123 +198,140 @@ export function UserHeader({
     <header
       id="userDashboardHeader"
       aria-label="Barra superior de usuario"
-      className="sticky top-0 z-30 flex h-[72px] shrink-0 items-center justify-between gap-4 border-b border-[var(--ruum-border)] bg-[var(--ruum-surface)] px-6 text-[var(--ruum-text)] xl:px-8"
+      className="sticky top-0 z-30 flex h-[var(--rr-header-height,72px)] shrink-0 items-center justify-between gap-3 border-b border-[var(--rr-border,#e3eaf3)] bg-[var(--rr-header-bg,#ffffff)] px-4 sm:px-6 xl:px-8 text-[var(--ruum-text)] transition-colors duration-150"
     >
-      <div ref={contenedorRef} className="flex min-w-0 flex-1 items-center justify-between gap-4">
-        {/* Búsqueda global */}
-        <div className="relative w-full max-w-[520px]">
-          <form role="search" onSubmit={enviarBusqueda} className="relative">
-            <span className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-[var(--ruum-text-tertiary)]">
-              <IconoBuscar className="size-4" />
-            </span>
-            <input
-              ref={buscadorRef}
-              type="search"
-              value={busqueda}
-              onChange={(evento) => {
-                setBusqueda(evento.target.value);
-                setBuscadorAbierto(true);
-              }}
-              onFocus={() => setBuscadorAbierto(true)}
-              onKeyDown={(evento) => {
-                if (evento.key === "Escape") {
-                  setBuscadorAbierto(false);
-                  evento.currentTarget.blur();
-                }
-              }}
-              placeholder="Buscar traslados, vehículos o documentos..."
-              aria-label="Buscar traslados, vehículos o documentos"
-              aria-expanded={buscadorAbierto}
-              aria-controls="userHeaderSearchSuggestions"
-              aria-keyshortcuts="Control+K Meta+K"
-              autoComplete="off"
-              className="h-10 w-full rounded-full border border-[var(--ruum-border)] bg-[var(--ruum-surface-subtle)] pl-10 pr-20 text-xs font-medium text-[var(--ruum-text)] outline-none transition placeholder:text-[var(--ruum-text-tertiary)] focus:border-[var(--ruum-action)] focus:bg-[var(--ruum-surface)] focus:ring-2 focus:ring-[var(--ruum-focus-ring)]"
-            />
-            <kbd
-              aria-hidden="true"
-              className="pointer-events-none absolute right-2.5 top-1/2 hidden -translate-y-1/2 rounded-md border border-[var(--ruum-border)] bg-[var(--ruum-surface)] px-1.5 py-0.5 font-mono text-[10px] font-semibold text-[var(--ruum-text-tertiary)] sm:inline-flex"
+      <div ref={contenedorRef} className="flex min-w-0 flex-1 items-center justify-between gap-3 sm:gap-4">
+        {/* Botón de Menú Hamburguesa para Móvil + Buscador global */}
+        <div className="flex min-w-0 flex-1 items-center gap-2 sm:gap-3">
+          {onMenuOpen && (
+            <button
+              type="button"
+              onClick={onMenuOpen}
+              aria-label="Abrir menú de navegación"
+              className="flex size-10 shrink-0 items-center justify-center rounded-xl text-[var(--ruum-text-secondary)] transition hover:bg-[var(--ruum-surface-subtle)] hover:text-[var(--ruum-text)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ruum-focus)] md:hidden"
             >
-              Ctrl K
-            </kbd>
-          </form>
-
-          {buscadorAbierto && (
-            <div
-              id="userHeaderSearchSuggestions"
-              role="dialog"
-              aria-label="Sugerencias de búsqueda"
-              className="absolute left-0 right-0 top-[calc(100%+8px)] z-50 overflow-hidden rounded-2xl border border-[var(--ruum-border)] bg-[var(--ruum-surface)] p-2 shadow-[var(--ruum-shadow-3)]"
-            >
-              <p className="px-2.5 pb-1.5 pt-1 text-[10px] font-bold uppercase tracking-widest text-[var(--ruum-text-tertiary)]">
-                {busqueda.trim() ? "Resultados" : "Ir a"}
-              </p>
-
-              {busqueda.trim() ? (
-                <>
-                  {destinos.length > 0 && (
-                    <ul className="mb-1 space-y-0.5">
-                      {destinos.map((destino) => {
-                        const Icono = destino.icono;
-                        return (
-                          <li key={destino.id}>
-                            <Link
-                              href={destino.href}
-                              onClick={cerrarPaneles}
-                              className={ITEM_MENU}
-                            >
-                              <Icono className="size-4 shrink-0 text-[var(--ruum-text-tertiary)]" />
-                              <span className="truncate">{destino.etiqueta}</span>
-                            </Link>
-                          </li>
-                        );
-                      })}
-                    </ul>
-                  )}
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setBuscadorAbierto(false);
-                      router.push(hrefBusquedaTraslados(busqueda));
-                    }}
-                    className="flex w-full items-center gap-2.5 rounded-xl bg-[var(--ruum-action-bg)] px-3 py-2.5 text-left text-xs font-bold text-[var(--ruum-action-text)] transition hover:brightness-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ruum-focus)]"
-                  >
-                    <IconoBuscar className="size-4 shrink-0" />
-                    <span className="min-w-0 flex-1 truncate">
-                      Buscar “{busqueda.trim()}” en mis traslados
-                    </span>
-                    <IconoFlechaDerecha className="size-3.5 shrink-0" />
-                  </button>
-                </>
-              ) : (
-                <ul className="space-y-0.5">
-                  {NAVEGACION_USUARIO.filter(
-                    (item) => item.disponible !== false && item.id !== "inicio"
-                  ).map((destino) => {
-                    const Icono = destino.icono;
-                    return (
-                      <li key={destino.id}>
-                        <Link href={destino.href} onClick={cerrarPaneles} className={ITEM_MENU}>
-                          <Icono className="size-4 shrink-0 text-[var(--ruum-text-tertiary)]" />
-                          <span className="truncate">{destino.etiqueta}</span>
-                        </Link>
-                      </li>
-                    );
-                  })}
-                </ul>
-              )}
-            </div>
+              <IconoMenu className="size-5" />
+            </button>
           )}
+
+          <div className="relative w-full max-w-[520px]">
+            <form role="search" onSubmit={enviarBusqueda} className="relative">
+              <span className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-[var(--ruum-text-tertiary)]">
+                <IconoBuscar className="size-4" />
+              </span>
+              <input
+                ref={buscadorRef}
+                type="search"
+                value={busqueda}
+                onChange={(evento) => {
+                  setBusqueda(evento.target.value);
+                  setBuscadorAbierto(true);
+                  onSearchOpen?.();
+                }}
+                onFocus={() => {
+                  setBuscadorAbierto(true);
+                  onSearchOpen?.();
+                }}
+                onKeyDown={(evento) => {
+                  if (evento.key === "Escape") {
+                    setBuscadorAbierto(false);
+                    evento.currentTarget.blur();
+                  }
+                }}
+                placeholder="Buscar traslados, vehículos o documentos..."
+                aria-label="Buscar traslados, vehículos o documentos"
+                aria-expanded={buscadorAbierto}
+                aria-controls="userHeaderSearchSuggestions"
+                aria-keyshortcuts="Control+K Meta+K"
+                autoComplete="off"
+                className="h-10 w-full rounded-full border border-[var(--rr-border,#e3eaf3)] bg-[var(--ruum-surface-subtle)] pl-10 pr-16 sm:pr-20 text-xs font-medium text-[var(--ruum-text)] outline-none transition placeholder:text-[var(--ruum-text-tertiary)] focus:border-[var(--ruum-action,#0052ff)] focus:bg-[var(--ruum-surface)] focus:ring-2 focus:ring-[var(--ruum-focus-ring)]"
+              />
+              <kbd
+                aria-hidden="true"
+                className="pointer-events-none absolute right-2.5 top-1/2 hidden -translate-y-1/2 rounded-md border border-[var(--rr-border,#e3eaf3)] bg-[var(--ruum-surface)] px-1.5 py-0.5 font-mono text-[10px] font-semibold text-[var(--ruum-text-tertiary)] sm:inline-flex"
+              >
+                Ctrl K
+              </kbd>
+            </form>
+
+            {buscadorAbierto && (
+              <div
+                id="userHeaderSearchSuggestions"
+                role="dialog"
+                aria-label="Sugerencias de búsqueda"
+                className="absolute left-0 right-0 top-[calc(100%+8px)] z-50 overflow-hidden rounded-2xl border border-[var(--rr-border,#e3eaf3)] bg-[var(--rr-header-bg,#ffffff)] p-2 shadow-[var(--ruum-shadow-3,0_10px_25px_-5px_rgba(0,0,0,0.1))]"
+              >
+                <p className="px-2.5 pb-1.5 pt-1 text-[10px] font-bold uppercase tracking-widest text-[var(--ruum-text-tertiary)]">
+                  {busqueda.trim() ? "Resultados" : "Ir a"}
+                </p>
+
+                {busqueda.trim() ? (
+                  <>
+                    {destinos.length > 0 && (
+                      <ul className="mb-1 space-y-0.5">
+                        {destinos.map((destino) => {
+                          const Icono = destino.icono;
+                          return (
+                            <li key={destino.id}>
+                              <Link
+                                href={destino.href}
+                                onClick={cerrarPaneles}
+                                className={ITEM_MENU}
+                              >
+                                <Icono className="size-4 shrink-0 text-[var(--ruum-text-tertiary)]" />
+                                <span className="truncate">{destino.etiqueta}</span>
+                              </Link>
+                            </li>
+                          );
+                        })}
+                      </ul>
+                    )}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setBuscadorAbierto(false);
+                        router.push(hrefBusquedaTraslados(busqueda));
+                      }}
+                      className="flex w-full items-center gap-2.5 rounded-xl bg-[var(--ruum-action-bg,#e6f0ff)] px-3 py-2.5 text-left text-xs font-bold text-[var(--ruum-action-text,#0052ff)] transition hover:brightness-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ruum-focus)]"
+                    >
+                      <IconoBuscar className="size-4 shrink-0" />
+                      <span className="min-w-0 flex-1 truncate">
+                        Buscar “{busqueda.trim()}” en mis traslados
+                      </span>
+                      <IconoFlechaDerecha className="size-3.5 shrink-0" />
+                    </button>
+                  </>
+                ) : (
+                  <ul className="space-y-0.5">
+                    {NAVEGACION_USUARIO.filter(
+                      (item) => item.disponible !== false && item.id !== "inicio"
+                    ).map((destino) => {
+                      const Icono = destino.icono;
+                      return (
+                        <li key={destino.id}>
+                          <Link href={destino.href} onClick={cerrarPaneles} className={ITEM_MENU}>
+                            <Icono className="size-4 shrink-0 text-[var(--ruum-text-tertiary)]" />
+                            <span className="truncate">{destino.etiqueta}</span>
+                          </Link>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                )}
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Acciones globales */}
-        <div className="flex shrink-0 items-center gap-1.5">
+        <div className="flex shrink-0 items-center gap-1 sm:gap-1.5">
           {mostrarTema && (
             <button
               type="button"
               onClick={alternar}
               aria-label={`Cambiar a modo ${tema === "dark" ? "claro" : "oscuro"}`}
               title={`Cambiar a modo ${tema === "dark" ? "claro" : "oscuro"}`}
-              className="hidden size-10 items-center justify-center rounded-full text-[var(--ruum-text-secondary)] transition hover:bg-[var(--ruum-surface-subtle)] hover:text-[var(--ruum-text)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ruum-focus)] md:flex"
+              className="flex size-9 sm:size-10 items-center justify-center rounded-full text-[var(--ruum-text-secondary)] transition hover:bg-[var(--ruum-surface-subtle)] hover:text-[var(--ruum-text)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ruum-focus)]"
             >
               {tema === "dark" ? <IconoSol className="size-5" /> : <IconoLuna className="size-5" />}
             </button>
@@ -294,7 +353,7 @@ export function UserHeader({
               }
               aria-expanded={notificacionesAbiertas}
               aria-haspopup="dialog"
-              className="relative flex size-10 items-center justify-center rounded-full text-[var(--ruum-text-secondary)] transition hover:bg-[var(--ruum-surface-subtle)] hover:text-[var(--ruum-text)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ruum-focus)]"
+              className="relative flex size-9 sm:size-10 items-center justify-center rounded-full text-[var(--ruum-text-secondary)] transition hover:bg-[var(--ruum-surface-subtle)] hover:text-[var(--ruum-text)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ruum-focus)]"
             >
               <IconoCampana className="size-5" />
               {totalNotificaciones > 0 && (
@@ -311,9 +370,9 @@ export function UserHeader({
               <div
                 role="dialog"
                 aria-label="Notificaciones"
-                className="absolute right-0 top-[calc(100%+10px)] z-50 w-[320px] overflow-hidden rounded-2xl border border-[var(--ruum-border)] bg-[var(--ruum-surface)] shadow-[var(--ruum-shadow-3)]"
+                className="absolute right-0 top-[calc(100%+10px)] z-50 w-[300px] sm:w-[320px] overflow-hidden rounded-2xl border border-[var(--rr-border,#e3eaf3)] bg-[var(--rr-header-bg,#ffffff)] shadow-[var(--ruum-shadow-3,0_10px_25px_-5px_rgba(0,0,0,0.1))]"
               >
-                <div className="flex items-center justify-between border-b border-[var(--ruum-border)] px-4 py-3">
+                <div className="flex items-center justify-between border-b border-[var(--rr-border,#e3eaf3)] px-4 py-3">
                   <h2 className="text-sm font-bold text-[var(--ruum-text)]">Notificaciones</h2>
                   <span className="text-[11px] font-semibold text-[var(--ruum-text-tertiary)]">
                     {totalNotificaciones} {totalNotificaciones === 1 ? "pendiente" : "pendientes"}
@@ -321,7 +380,7 @@ export function UserHeader({
                 </div>
 
                 {totalNotificaciones > 0 ? (
-                  <ul className="max-h-72 divide-y divide-[var(--ruum-border)] overflow-y-auto">
+                  <ul className="max-h-72 divide-y divide-[var(--rr-border,#e3eaf3)] overflow-y-auto">
                     {notificaciones.map((notificacion) => {
                       const contenido = (
                         <span className="flex items-start gap-2.5">
@@ -363,7 +422,7 @@ export function UserHeader({
                 <Link
                   href="/mis-viajes"
                   onClick={cerrarPaneles}
-                  className="flex items-center justify-center gap-1.5 border-t border-[var(--ruum-border)] px-4 py-2.5 text-xs font-bold text-[var(--ruum-action-text)] transition hover:bg-[var(--ruum-surface-subtle)]"
+                  className="flex items-center justify-center gap-1.5 border-t border-[var(--rr-border,#e3eaf3)] px-4 py-2.5 text-xs font-bold text-[var(--ruum-action-text,#0052ff)] transition hover:bg-[var(--ruum-surface-subtle)]"
                 >
                   Ver mis traslados
                   <IconoFlechaDerecha className="size-3.5" />
@@ -386,15 +445,27 @@ export function UserHeader({
               aria-haspopup="menu"
               className="flex items-center gap-2 rounded-full p-1 transition hover:bg-[var(--ruum-surface-subtle)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ruum-focus)]"
             >
-              <span className="flex size-9 items-center justify-center rounded-full bg-[var(--ruum-navy)] text-xs font-bold text-white shadow-sm">
-                {inicial}
-              </span>
+              {avatarUrl ? (
+                <div className="relative size-9 overflow-hidden rounded-full shadow-sm">
+                  <Image
+                    src={avatarUrl}
+                    alt={nombreCompleto}
+                    fill
+                    className="object-cover"
+                  />
+                </div>
+              ) : (
+                <span className="flex size-9 items-center justify-center rounded-full bg-[var(--rr-sidebar-bg,#061b34)] text-xs font-bold text-white shadow-sm border border-white/10">
+                  {inicial}
+                </span>
+              )}
+
               <span className="hidden text-left sm:block">
                 <span className="block text-xs font-bold leading-none text-[var(--ruum-text)]">
                   Hola, {primerNombre}
                 </span>
                 <span className="mt-1 block text-[11px] font-medium leading-none text-[var(--ruum-text-tertiary)]">
-                  {rol}
+                  {rolUsuario}
                 </span>
               </span>
               <IconoChevron className="hidden size-4 text-[var(--ruum-text-tertiary)] sm:block" />
@@ -404,9 +475,9 @@ export function UserHeader({
               <div
                 role="menu"
                 aria-label={`Menú de usuario ${nombreCompleto}`}
-                className="absolute right-0 top-[calc(100%+10px)] z-50 w-60 overflow-hidden rounded-2xl border border-[var(--ruum-border)] bg-[var(--ruum-surface)] p-2 shadow-[var(--ruum-shadow-3)]"
+                className="absolute right-0 top-[calc(100%+10px)] z-50 w-60 overflow-hidden rounded-2xl border border-[var(--rr-border,#e3eaf3)] bg-[var(--rr-header-bg,#ffffff)] p-2 shadow-[var(--ruum-shadow-3,0_10px_25px_-5px_rgba(0,0,0,0.1))]"
               >
-                <div className="border-b border-[var(--ruum-border)] px-3 py-2">
+                <div className="border-b border-[var(--rr-border,#e3eaf3)] px-3 py-2">
                   <p className="truncate text-xs font-bold text-[var(--ruum-text)]">
                     {nombreCompleto}
                   </p>
@@ -418,6 +489,16 @@ export function UserHeader({
                 </div>
 
                 <div className="py-1">
+                  <Link
+                    href="/cuenta"
+                    role="menuitem"
+                    onClick={cerrarPaneles}
+                    className={ITEM_MENU}
+                  >
+                    <IconoPerfil className="size-4 text-[var(--ruum-text-tertiary)]" />
+                    Mi cuenta
+                  </Link>
+
                   {itemPerfil && (
                     <Link
                       href={itemPerfil.href}
@@ -429,6 +510,7 @@ export function UserHeader({
                       Mi perfil
                     </Link>
                   )}
+
                   <Link
                     href="/cuenta/vehiculos"
                     role="menuitem"
@@ -443,6 +525,7 @@ export function UserHeader({
                       </span>
                     )}
                   </Link>
+
                   <Link
                     href="/cuenta/preferencias"
                     role="menuitem"
@@ -454,7 +537,7 @@ export function UserHeader({
                   </Link>
                 </div>
 
-                <div className="border-t border-[var(--ruum-border)] pt-1">
+                <div className="border-t border-[var(--rr-border,#e3eaf3)] pt-1">
                   <button
                     type="button"
                     role="menuitem"

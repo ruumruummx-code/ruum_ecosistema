@@ -11,6 +11,12 @@ vi.mock("next/image", () => ({
   ),
 }));
 
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({ push: vi.fn(), replace: vi.fn(), refresh: vi.fn() }),
+  usePathname: () => "/",
+  useSearchParams: () => new URLSearchParams(),
+}));
+
 type PasaporteRow = Database["public"]["Views"]["pasaporte_digital"]["Row"];
 type UsuarioRow = Database["public"]["Tables"]["usuarios"]["Row"];
 type VehiculoRow = Database["public"]["Tables"]["vehiculos"]["Row"];
@@ -42,17 +48,18 @@ describe("InicioDesktop", () => {
 
     // Verificación de accesos en el menú lateral
     expect(within(sidebar).getByText("Inicio")).toBeInTheDocument();
-    expect(within(sidebar).getByText("Traslados")).toBeInTheDocument();
-    expect(within(sidebar).getByText("Carga masiva")).toBeInTheDocument();
-    expect(within(sidebar).getByText("Cuenta")).toBeInTheDocument();
-    expect(within(sidebar).getByText("Perfil")).toBeInTheDocument();
-    expect(within(sidebar).getByText("Preferencias")).toBeInTheDocument();
+    expect(within(sidebar).getByText("Mis traslados")).toBeInTheDocument();
+    expect(within(sidebar).getByText("Mis vehículos")).toBeInTheDocument();
+    expect(within(sidebar).getByText("Mis ubicaciones")).toBeInTheDocument();
+    expect(within(sidebar).getByText("Carga Masiva")).toBeInTheDocument();
+    expect(within(sidebar).getByText("Mi cuenta")).toBeInTheDocument();
+    expect(within(sidebar).getByText("Mi perfil")).toBeInTheDocument();
+    expect(within(sidebar).getByText("Mis preferencias")).toBeInTheDocument();
+    expect(within(sidebar).getByText("Ayuda")).toBeInTheDocument();
 
     // Verificación de la sección promocional inferior
-    expect(within(sidebar).getByText("Mueve tu auto sin soltar el control")).toBeInTheDocument();
-    expect(within(sidebar).getByText("Más simple.")).toBeInTheDocument();
-    expect(within(sidebar).getByText("Más inteligente.")).toBeInTheDocument();
-    expect(within(sidebar).getByText("Más cerca de ti.")).toBeInTheDocument();
+    expect(within(sidebar).getByText("Mueve tu auto sin salir de casa")).toBeInTheDocument();
+    expect(within(sidebar).getByText("Un servicio confiable, seguro y en todo México.")).toBeInTheDocument();
   });
 
   it("renderiza la barra superior de búsqueda, campana de alertas y perfil", () => {
@@ -68,7 +75,6 @@ describe("InicioDesktop", () => {
 
     // Notificaciones y alerta dinámica
     expect(within(header).getByLabelText(/Notificaciones/i)).toBeInTheDocument();
-    expect(within(header).getByText("3")).toBeInTheDocument();
 
     // Menú de usuario con saludo
     expect(within(header).getByText("Hola, Hector")).toBeInTheDocument();
@@ -79,13 +85,13 @@ describe("InicioDesktop", () => {
     render(<InicioDesktop usuario={usuarioMock} traslados={[trasladoActivoMock]} />);
 
     const header = screen.getByLabelText("Barra superior de usuario");
-    const botonPerfil = within(header).getByRole("button", { expanded: false });
+    const botonPerfil = within(header).getByRole("button", { name: /Menú de usuario/ });
 
     // Abrir menú
     fireEvent.click(botonPerfil);
     expect(screen.getByRole("menu")).toBeInTheDocument();
     expect(screen.getByRole("menuitem", { name: "Mi perfil" })).toBeInTheDocument();
-    expect(screen.getByRole("menuitem", { name: "Preferencias" })).toBeInTheDocument();
+    expect(screen.getByRole("menuitem", { name: "Mis preferencias" })).toBeInTheDocument();
     expect(screen.getByRole("menuitem", { name: "Cerrar sesión" })).toBeInTheDocument();
 
     // Cerrar menú

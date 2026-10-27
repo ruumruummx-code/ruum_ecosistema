@@ -36,6 +36,36 @@ const nextConfig: NextConfig = {
         destination: "/",
         permanent: false,
       },
+      {
+        source: "/inicio",
+        destination: "/",
+        permanent: false,
+      },
+      {
+        source: "/traslados",
+        destination: "/mis-viajes",
+        permanent: false,
+      },
+      {
+        source: "/vehiculos",
+        destination: "/cuenta/vehiculos",
+        permanent: false,
+      },
+      {
+        source: "/carga-masiva",
+        destination: "/viajes/masivo",
+        permanent: false,
+      },
+      {
+        source: "/perfil",
+        destination: "/cuenta?seccion=perfil",
+        permanent: false,
+      },
+      {
+        source: "/ayuda",
+        destination: "/soporte",
+        permanent: false,
+      },
     ];
   },
   async headers() {

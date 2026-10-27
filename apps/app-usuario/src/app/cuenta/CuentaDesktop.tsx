@@ -5,6 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useCuentaUsuario, type ActividadItem } from "./useCuentaUsuario";
 import type { CuentaReal } from "./cuenta-ui";
+import { UserDashboardLayout } from "../../components/layout/UserDashboardLayout";
 
 export interface CuentaDesktopProps {
   cuenta: CuentaReal;
@@ -409,252 +410,22 @@ export function CuentaDesktop({ cuenta }: CuentaDesktopProps) {
   } = useCuentaUsuario(cuenta);
 
   return (
-    <div className="flex h-screen w-full overflow-hidden bg-[#f8fafc] text-slate-800 antialiased dark:bg-[#07192f] dark:text-slate-100">
-      {/* ---------------------------------------------------------------------
-          SIDEBAR IZQUIERDO FIJO
-          --------------------------------------------------------------------- */}
-      <aside
-        aria-label="Menú principal de escritorio"
-        className="w-64 shrink-0 flex flex-col justify-between border-r border-slate-200/80 bg-white p-5 dark:border-[#1a3a5c] dark:bg-[#0a2342] z-20"
-      >
-        <div className="flex flex-col gap-6">
-          {/* Logo Ruum Ruum */}
-          <Link href="/" className="flex items-center gap-2.5 px-2 py-1">
-            <span className="flex size-9 items-center justify-center rounded-xl bg-[#0c2340] dark:bg-[#0066FF] shadow-xs">
-              <svg viewBox="0 0 32 32" fill="none" className="size-5">
-                <path d="M6 10 L16 4 L26 10 L26 22 L16 28 L6 22 Z" stroke="#38bdf8" strokeWidth="2.5" strokeLinejoin="round" />
-                <path d="M12 14 L16 11 L20 14 L20 20 L16 23 L12 20 Z" fill="#38bdf8" />
-              </svg>
-            </span>
-            <div>
-              <span className="font-display text-[17px] font-black tracking-tight text-[#0c2340] dark:text-white block leading-tight">
-                Ruum Ruum
-              </span>
-              <span className="text-[10px] font-extrabold uppercase tracking-widest text-[#0066FF] dark:text-[#38bdf8] block">
-                USUARIO
-              </span>
-            </div>
-          </Link>
-
-          {/* Menú de navegación lateral */}
-          <nav aria-label="Navegación del panel" className="flex flex-col gap-1.5">
-            <Link
-              href="/"
-              className="flex items-center gap-3.5 rounded-2xl px-4 py-3 text-[14px] font-semibold text-slate-600 transition hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white"
-            >
-              <IconoInicio className="size-5 text-slate-400 group-hover:text-slate-700 dark:text-slate-400" />
-              Inicio
-            </Link>
-
-            <Link
-              href="/mis-viajes"
-              className="flex items-center gap-3.5 rounded-2xl px-4 py-3 text-[14px] font-semibold text-slate-600 transition hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white"
-            >
-              <IconoTraslados className="size-5 text-slate-400 dark:text-slate-400" />
-              Traslados
-            </Link>
-
-            <Link
-              href="/viajes/masivo"
-              className="flex items-center gap-3.5 rounded-2xl px-4 py-3 text-[14px] font-semibold text-slate-600 transition hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white"
-            >
-              <IconoCargaMasiva className="size-5 text-slate-400 dark:text-slate-400" />
-              Carga masiva
-            </Link>
-
-            {/* Opción CUENTA Activa */}
-            <Link
-              href="/cuenta"
-              aria-current="page"
-              className="flex items-center gap-3.5 rounded-2xl bg-[#edf4fe] px-4 py-3 text-[14px] font-bold text-[#0066FF] dark:bg-[#0c2646] dark:text-[#4d94ff] shadow-2xs"
-            >
-              <IconoCuenta className="size-5 text-[#0066FF] dark:text-[#4d94ff]" />
-              Cuenta
-            </Link>
-
-            <Link
-              href="/cuenta/datos-personales"
-              className="flex items-center gap-3.5 rounded-2xl px-4 py-3 text-[14px] font-semibold text-slate-600 transition hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white"
-            >
-              <IconoPerfil className="size-5 text-slate-400 dark:text-slate-400" />
-              Perfil
-            </Link>
-
-            <Link
-              href="/cuenta/preferencias"
-              className="flex items-center gap-3.5 rounded-2xl px-4 py-3 text-[14px] font-semibold text-slate-600 transition hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white"
-            >
-              <IconoPreferencias className="size-5 text-slate-400 dark:text-slate-400" />
-              Preferencia
-            </Link>
-          </nav>
-        </div>
-
-        {/* Card Promocional Inferior */}
-        <div className="relative rounded-2xl border border-blue-100/80 bg-gradient-to-b from-[#f0f7ff] to-[#e6f0fa] p-4 text-center dark:border-blue-900/30 dark:from-[#0f2d52] dark:to-[#0a2342] shadow-2xs">
-          {/* Silueta de auto decorativa */}
-          <div className="mb-2 flex justify-center opacity-70" aria-hidden="true">
-            <svg viewBox="0 0 100 34" fill="none" className="w-24 h-8">
-              <path d="M10 20 L24 8 L66 8 L80 20 Z" fill="#93c5fd" />
-              <rect x="4" y="16" width="92" height="12" rx="3" fill="#60a5fa" />
-              <circle cx="22" cy="27" r="5" fill="#1e293b" />
-              <circle cx="78" cy="27" r="5" fill="#1e293b" />
-            </svg>
+    <UserDashboardLayout
+      usuario={cuenta.usuario}
+      nombre={nombreCompleto}
+      correo={correo}
+      totalVehiculos={totalVehiculos}
+      onCerrarSesion={cerrarSesion}
+      padding="ninguno"
+      idContenido="contenido-cuenta"
+    >
+      <div className="space-y-6 px-8 py-6">
+        {/* Alerta de Error de Sesión si ocurre */}
+        {errorSesion && (
+          <div role="alert" className="rounded-2xl border border-red-200 bg-red-50 p-4 text-xs font-bold text-red-700 dark:border-red-900 dark:bg-red-950/40 dark:text-red-300">
+            {errorSesion}
           </div>
-
-          <h3 className="font-display text-[13.5px] font-bold text-slate-900 dark:text-white leading-tight">
-            Mueve tu auto sin soltar el control.
-          </h3>
-
-          <Link
-            href="/viajes/nuevo"
-            className="mt-3.5 inline-flex w-full items-center justify-center gap-1.5 rounded-full bg-[#0c2340] px-4 py-2.5 font-display text-[12px] font-bold text-white shadow-xs transition hover:bg-[#15345d] active:scale-[0.98] dark:bg-[#0066FF] dark:hover:bg-[#0052cc]"
-          >
-            Crear traslado
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="size-3.5" aria-hidden="true">
-              <path d="m9 18 6-6-6-6" />
-            </svg>
-          </Link>
-        </div>
-      </aside>
-
-      {/* ---------------------------------------------------------------------
-          ÁREA PRINCIPAL DE CONTENIDO
-          --------------------------------------------------------------------- */}
-      <div className="flex flex-1 flex-col overflow-hidden">
-        {/* Barra de Navegación Superior */}
-        <header
-          aria-label="Barra superior de cuenta"
-          className="flex h-18 shrink-0 items-center justify-between border-b border-slate-200/80 bg-white/90 px-8 backdrop-blur-md dark:border-[#1a3a5c] dark:bg-[#0a2342]/90 z-10"
-        >
-          {/* Buscador Contextual */}
-          <div className="relative max-w-md w-full">
-            <span className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400">
-              <IconoBuscar className="size-4" />
-            </span>
-            <input
-              type="search"
-              value={busqueda}
-              onChange={(e) => setBusqueda(e.target.value)}
-              placeholder="Buscar traslados, vehículos o soporte..."
-              aria-label="Buscar traslados, vehículos o soporte"
-              className="w-full rounded-full border border-slate-200/90 bg-[#f8fafc] py-2.5 pl-10 pr-4 text-xs font-medium text-slate-800 placeholder:text-slate-400 focus:border-[#0066FF] focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#0066FF]/20 dark:border-[#1a3a5c] dark:bg-[#07192f] dark:text-slate-100 dark:placeholder:text-slate-500"
-            />
-          </div>
-
-          {/* Controles del Extremo Derecho */}
-          <div className="flex items-center gap-3">
-            {/* Campana de Notificaciones con Badge */}
-            <Link
-              href="/cuenta/preferencias"
-              aria-label="Notificaciones"
-              className="relative flex size-10 items-center justify-center rounded-full text-slate-600 transition hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800"
-            >
-              <IconoCampana className="size-5" />
-              <span
-                className="absolute top-2 right-2 size-2.5 rounded-full bg-red-500 ring-2 ring-white dark:ring-[#0a2342]"
-                aria-hidden="true"
-              />
-            </Link>
-
-            {/* Switch / Selector de Tema Claro / Oscuro */}
-            <button
-              type="button"
-              onClick={alternarTema}
-              aria-label={`Cambiar a modo ${tema === "dark" ? "claro" : "oscuro"}`}
-              className="flex size-10 items-center justify-center rounded-full text-slate-600 transition hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800 cursor-pointer"
-            >
-              {tema === "dark" ? <IconoSol className="size-5 text-amber-400" /> : <IconoSol className="size-5" />}
-            </button>
-
-            {/* Menú Dropdown de Perfil */}
-            <div className="relative">
-              <button
-                type="button"
-                onClick={() => setDropdownPerfilAbierto(!dropdownPerfilAbierto)}
-                aria-expanded={dropdownPerfilAbierto}
-                aria-haspopup="menu"
-                aria-label={`Menú de usuario ${nombreCompleto}`}
-                className="flex items-center gap-2 rounded-full p-1 transition hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer"
-              >
-                <span className="flex size-10 items-center justify-center rounded-full bg-[#0c2340] font-display text-sm font-extrabold text-white shadow-xs dark:bg-[#0066FF]">
-                  {inicialesUsuario}
-                </span>
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="size-3.5 text-slate-500" aria-hidden="true">
-                  <path d="m6 9 6 6 6-6" />
-                </svg>
-              </button>
-
-              {/* Menú desplegable */}
-              {dropdownPerfilAbierto && (
-                <div
-                  role="menu"
-                  className="absolute right-0 mt-2 w-56 rounded-2xl border border-slate-200 bg-white p-2 shadow-xl dark:border-[#1a3a5c] dark:bg-[#0a2342] z-50"
-                >
-                  <div className="border-b border-slate-100 px-3 py-2 dark:border-slate-800">
-                    <p className="truncate text-xs font-bold text-slate-900 dark:text-white">{nombreCompleto}</p>
-                    <p className="truncate text-[11px] text-slate-500 dark:text-slate-400">{correo}</p>
-                  </div>
-                  <div className="py-1">
-                    <Link
-                      href="/cuenta/datos-personales"
-                      onClick={() => setDropdownPerfilAbierto(false)}
-                      role="menuitem"
-                      className="flex items-center gap-2.5 rounded-xl px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800"
-                    >
-                      <IconoPerfil className="size-4 text-slate-400" />
-                      Mi perfil
-                    </Link>
-                    <Link
-                      href="/cuenta/vehiculos"
-                      onClick={() => setDropdownPerfilAbierto(false)}
-                      role="menuitem"
-                      className="flex items-center gap-2.5 rounded-xl px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800"
-                    >
-                      <IconoVehiculo className="size-4 text-slate-400" />
-                      Mis vehículos
-                    </Link>
-                    <Link
-                      href="/cuenta/preferencias"
-                      onClick={() => setDropdownPerfilAbierto(false)}
-                      role="menuitem"
-                      className="flex items-center gap-2.5 rounded-xl px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800"
-                    >
-                      <IconoPreferencias className="size-4 text-slate-400" />
-                      Preferencias
-                    </Link>
-                  </div>
-                  <div className="border-t border-slate-100 pt-1 dark:border-slate-800">
-                    <button
-                      type="button"
-                      role="menuitem"
-                      onClick={() => {
-                        setDropdownPerfilAbierto(false);
-                        cerrarSesion();
-                      }}
-                      className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2 text-xs font-bold text-red-600 hover:bg-red-50 dark:hover:bg-red-950/40 cursor-pointer"
-                    >
-                      <IconoCerrarSesion className="size-4" />
-                      Cerrar sesión
-                    </button>
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-        </header>
-
-        {/* Contenido Principal con Scroll */}
-        <main
-          id="contenido-cuenta"
-          className="flex-1 overflow-y-auto px-8 py-6 space-y-6"
-        >
-          {/* Alerta de Error de Sesión si ocurre */}
-          {errorSesion && (
-            <div role="alert" className="rounded-2xl border border-red-200 bg-red-50 p-4 text-xs font-bold text-red-700 dark:border-red-900 dark:bg-red-950/40 dark:text-red-300">
-              {errorSesion}
-            </div>
-          )}
+        )}
 
           {/* -----------------------------------------------------------------
               HEADER DE SECCIÓN
@@ -1155,8 +926,7 @@ export function CuentaDesktop({ cuenta }: CuentaDesktopProps) {
               </button>
             </section>
           </div>
-        </main>
-      </div>
+        </div>
 
       {/* ---------------------------------------------------------------------
           MODAL DE CONSEJOS DE SEGURIDAD
@@ -1220,6 +990,6 @@ export function CuentaDesktop({ cuenta }: CuentaDesktopProps) {
           </div>
         </div>
       )}
-    </div>
+    </UserDashboardLayout>
   );
 }

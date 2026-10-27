@@ -30,6 +30,23 @@
   --app-shadow-2: var(--ruum-shadow-2);
   --app-shadow-3: var(--ruum-shadow-3);
   --app-shadow-4: var(--ruum-shadow-4);
+
+  /* RR-UI-001: Tokens compartidos UserSidebar / UserHeader */
+  --rr-sidebar-bg: #061b34;
+  --rr-sidebar-text: #f4f8ff;
+  --rr-sidebar-active: #075be8;
+  --rr-brand-cyan: #00bfd2;
+
+  --rr-header-bg: #ffffff;
+  --rr-page-bg: #f5f8fc;
+  --rr-border: #e3eaf3;
+
+  --rr-sidebar-expanded: 256px;
+  --rr-sidebar-collapsed: 72px;
+  --rr-header-height: 72px;
+
+  --rr-nav-radius: 12px;
+  --rr-transition: 200ms;
 }
 
 /* ─────────────────────────────────────────────────────────────
@@ -411,6 +428,11 @@ summary:focus-visible {
  * ========================================================================= */
 [data-theme="dark"] {
   color-scheme: dark;
+
+  /* RR-UI-001: Tokens compartidos UserSidebar / UserHeader modo oscuro */
+  --rr-header-bg: #081a30;
+  --rr-page-bg: #071526;
+  --rr-border: #203852;
 
   /* Paleta semántica Dark Mode v1.0 */
   --color-ink: #F6F8FB;

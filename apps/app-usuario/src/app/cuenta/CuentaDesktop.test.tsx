@@ -14,6 +14,8 @@ const { replace, refresh, signOut } = vi.hoisted(() => ({
 
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ replace, refresh }),
+  usePathname: () => "/cuenta",
+  useSearchParams: () => new URLSearchParams(),
 }));
 
 vi.mock("../../lib/supabase-browser", () => ({
@@ -53,19 +55,22 @@ describe("CuentaDesktop — Pantalla de Cuenta para Escritorio", () => {
 
     // Menú lateral scoped al nav del panel
     const navPanel = screen.getByRole("navigation", { name: "Navegación del panel" });
-    const enlaceCuenta = within(navPanel).getByRole("link", { name: /^Cuenta/ });
+    const enlaceCuenta = within(navPanel).getByRole("link", { name: /Mi cuenta/ });
     expect(enlaceCuenta).toHaveAttribute("aria-current", "page");
     expect(enlaceCuenta).toHaveAttribute("href", "/cuenta");
 
-    expect(within(navPanel).getByRole("link", { name: /^Inicio/ })).toHaveAttribute("href", "/");
-    expect(within(navPanel).getByRole("link", { name: /^Traslados/ })).toHaveAttribute("href", "/mis-viajes");
-    expect(within(navPanel).getByRole("link", { name: /^Carga masiva/ })).toHaveAttribute("href", "/viajes/masivo");
-    expect(within(navPanel).getByRole("link", { name: /^Perfil/ })).toHaveAttribute("href", "/cuenta/datos-personales");
-    expect(within(navPanel).getByRole("link", { name: /^Preferencia/ })).toHaveAttribute("href", "/cuenta/preferencias");
+    expect(within(navPanel).getByRole("link", { name: /Inicio/ })).toHaveAttribute("href", "/");
+    expect(within(navPanel).getByRole("link", { name: /Mis traslados/ })).toHaveAttribute("href", "/mis-viajes");
+    expect(within(navPanel).getByRole("link", { name: /Mis vehículos/ })).toHaveAttribute("href", "/cuenta/vehiculos");
+    expect(within(navPanel).getByRole("link", { name: /Mis ubicaciones/ })).toHaveAttribute("href", "/ubicaciones");
+    expect(within(navPanel).getByRole("link", { name: /Carga Masiva/ })).toHaveAttribute("href", "/viajes/masivo");
+    expect(within(navPanel).getByRole("link", { name: /Mi perfil/ })).toHaveAttribute("href", "/cuenta?seccion=perfil");
+    expect(within(navPanel).getByRole("link", { name: /Mis preferencias/ })).toHaveAttribute("href", "/cuenta/preferencias");
+    expect(within(navPanel).getByRole("link", { name: /Ayuda/ })).toHaveAttribute("href", "/soporte");
 
     // Card promocional inferior
-    expect(screen.getByText("Mueve tu auto sin soltar el control.")).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: /Crear traslado/ })).toHaveAttribute("href", "/viajes/nuevo");
+    expect(screen.getByText("Mueve tu auto sin salir de casa")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /Registrar traslado/ })).toHaveAttribute("href", "/viajes/nuevo");
   });
 
   it("renderiza la barra superior con buscador contextual, campana y avatar dropdown", async () => {
@@ -73,7 +78,7 @@ describe("CuentaDesktop — Pantalla de Cuenta para Escritorio", () => {
     render(<CuentaDesktop cuenta={cuentaMock} />);
 
     // Buscador
-    const buscador = screen.getByPlaceholderText("Buscar traslados, vehículos o soporte...");
+    const buscador = screen.getByPlaceholderText("Buscar traslados, vehículos o documentos...");
     expect(buscador).toBeInTheDocument();
     await user.type(buscador, "Mazda");
     expect(buscador).toHaveValue("Mazda");
@@ -85,9 +90,10 @@ describe("CuentaDesktop — Pantalla de Cuenta para Escritorio", () => {
 
     await user.click(botonUsuario);
     expect(screen.getByRole("menu")).toBeInTheDocument();
-    expect(screen.getByRole("menuitem", { name: /Mi perfil/ })).toHaveAttribute("href", "/cuenta/datos-personales");
+    expect(screen.getByRole("menuitem", { name: /Mi cuenta/ })).toHaveAttribute("href", "/cuenta");
+    expect(screen.getByRole("menuitem", { name: /Mi perfil/ })).toHaveAttribute("href", "/cuenta?seccion=perfil");
     expect(screen.getByRole("menuitem", { name: /Mis vehículos/ })).toHaveAttribute("href", "/cuenta/vehiculos");
-    expect(screen.getByRole("menuitem", { name: /Preferencias/ })).toHaveAttribute("href", "/cuenta/preferencias");
+    expect(screen.getByRole("menuitem", { name: /Mis preferencias/ })).toHaveAttribute("href", "/cuenta/preferencias");
   });
 
   it("renderiza el header de cuenta con saludo dinámico y subtítulo", () => {
