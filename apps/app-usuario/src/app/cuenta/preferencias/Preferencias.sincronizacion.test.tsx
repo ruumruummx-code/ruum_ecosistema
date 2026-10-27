@@ -11,6 +11,41 @@ beforeEach(() => { localStorage.clear(); vi.clearAllMocks(); guardar.mockResolve
 const usuario = { id: "u1", preferencias: {} } as Usuario;
 
 describe("persistencia de preferencias", () => {
+  it("no borra una edición nueva al confirmar una petición anterior después de navegar", async () => {
+    let resolver!: () => void;
+    guardar.mockReturnValueOnce(new Promise<void>(resolve => { resolver = resolve; }));
+    guardar.mockRejectedValueOnce(new Error("sin red"));
+    const { unmount } = render(<Preferencias usuario={usuario} />);
+    fireEvent.change(screen.getByLabelText("Unidades de medida"), { target: { value: "Imperial" } });
+    await waitFor(() => expect(guardar).toHaveBeenCalledOnce());
+    unmount();
+    render(<Preferencias usuario={usuario} />);
+    fireEvent.change(screen.getByLabelText("Unidades de medida"), { target: { value: "Métrico" } });
+    resolver();
+    await waitFor(() => expect(guardar).toHaveBeenCalledTimes(2));
+    expect(JSON.parse(localStorage.getItem("ruum:preferencias-pendientes:u1")!).general.unidades).toBe("Métrico");
+  });
+  it("recupera cambios fallidos al volver aunque el servidor todavía devuelva los anteriores", async () => {
+    guardar.mockRejectedValueOnce(new Error("sin red"));
+    const cuenta = { ...usuario, preferencias: { unidades: "Métrico" } } as Usuario;
+    const { unmount } = render(<Preferencias usuario={cuenta} />);
+    fireEvent.change(screen.getByLabelText("Unidades de medida"), { target: { value: "Imperial" } });
+    await screen.findByRole("alert");
+    unmount();
+    render(<Preferencias usuario={cuenta} />);
+    expect(screen.getByLabelText("Unidades de medida")).toHaveValue("Imperial");
+    fireEvent.click(screen.getByRole("button", { name: "Reintentar guardado" }));
+    await waitFor(() => expect(localStorage.getItem("ruum:preferencias-pendientes:u1")).toBeNull());
+    expect(guardar).toHaveBeenLastCalledWith(expect.anything(), { unidades: "Imperial" });
+  });
+  it("recupera interruptores pendientes y reintenta al volver la conexión", async () => {
+    localStorage.setItem("ruum:preferencias-pendientes:u1", JSON.stringify({ general: {}, notificacion: { notificaciones_email: false } }));
+    render(<Preferencias usuario={{ ...usuario, notificaciones_email: true }} />);
+    fireEvent.click(screen.getByRole("button", { name: "Notificaciones y alertas" }));
+    expect(screen.getByRole("switch", { name: "Correo electrónico" })).toHaveAttribute("aria-checked", "false");
+    fireEvent(window, new Event("online"));
+    await waitFor(() => expect(notificar).toHaveBeenCalledWith(expect.anything(), { notificaciones_email: false }));
+  });
   it("envía cambios aunque el usuario salga inmediatamente de la pantalla", async () => {
     const { unmount } = render(<Preferencias usuario={usuario} escritorio />);
     fireEvent.change(screen.getByLabelText("Tema de la aplicación"), { target: { value: "Oscuro" } });

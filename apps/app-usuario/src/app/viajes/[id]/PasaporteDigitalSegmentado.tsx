@@ -2,6 +2,8 @@
 import { useEffect, useId, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useTrasladoRealtime } from "../../../state/AppStateProvider";
 import { CompartirPasaporte } from "./CompartirPasaporte";
 import { SeguimientoTrasladoTiempoReal } from "./SeguimientoTrasladoTiempoReal";
 import { ChatTraslado } from "./ChatTraslado";
@@ -13,7 +15,23 @@ export type PestanaPasaporte = "en_ruta" | "fotos" | "chat" | "unidad" | "recibo
 const Detalles = dynamic(() => import("./DetallesPasaporte").then(m => m.DetallesPasaporte));
 const tabs = [{ id: "en_ruta", label: "En Ruta" }, { id: "fotos", label: "Fotos" }, { id: "chat", label: "Chat" }] as const;
 export function PasaporteDigitalSegmentado(props: PasaporteDigitalSegmentadoProps) {
-    const { pasaporte: p, evidencia, ultimaUbicacion } = props;
+    const router = useRouter();
+    const { estadoRealtime, estadoActualizadoEn } = useTrasladoRealtime(props.pasaporte.traslado_id ?? "");
+    const masReciente = estadoRealtime && (!estadoActualizadoEn || !props.pasaporte.actualizado_en || Date.parse(estadoActualizadoEn) >= Date.parse(props.pasaporte.actualizado_en));
+    const p = masReciente ? { ...props.pasaporte, estado: estadoRealtime, actualizado_en: estadoActualizadoEn ?? props.pasaporte.actualizado_en } : props.pasaporte;
+    const { evidencia, ultimaUbicacion } = props;
+    useEffect(() => {
+        if (!estadoRealtime || (estadoRealtime === props.pasaporte.estado && (!estadoActualizadoEn || Date.parse(estadoActualizadoEn) <= Date.parse(props.pasaporte.actualizado_en ?? "")))) return;
+        const timer = window.setTimeout(() => router.refresh(), 400);
+        return () => window.clearTimeout(timer);
+    }, [estadoRealtime, estadoActualizadoEn, props.pasaporte.estado, props.pasaporte.actualizado_en, router]);
+    useEffect(() => {
+        const actualizar = () => { if (document.visibilityState === "visible" && navigator.onLine) router.refresh(); };
+        const timer = window.setInterval(actualizar, 30000);
+        window.addEventListener("focus", actualizar);
+        window.addEventListener("online", actualizar);
+        return () => { window.clearInterval(timer); window.removeEventListener("focus", actualizar); window.removeEventListener("online", actualizar); };
+    }, [router]);
     const [tab, setTab] = useState<(typeof tabs)[number]["id"]>("en_ruta");
     const [details, setDetails] = useState<"unidad" | "recibo" | "fotos" | null>(null);
     const [photo, setPhoto] = useState<(typeof evidencia)[number] | null>(null);
@@ -69,7 +87,7 @@ export function PasaporteDigitalSegmentado(props: PasaporteDigitalSegmentadoProp
     </div>
     <div className={styles.content}>
       <section role="tabpanel" id={`${id}-panel-en_ruta`} aria-labelledby={`${id}-en_ruta`} hidden={tab !== "en_ruta"} className={styles.panel}>
-        <SeguimientoTrasladoTiempoReal trasladoId={p.traslado_id ?? ""} estado={p.estado} origen={{ lat: p.origen_lat, lng: p.origen_lng }} destino={{ lat: p.destino_lat, lng: p.destino_lng }} ubicacionInicial={ultimaUbicacion} activo={tab === "en_ruta"}/>
+        <SeguimientoTrasladoTiempoReal trasladoId={p.traslado_id ?? ""} estado={p.estado} actualizadoEn={p.actualizado_en} origen={{ lat: p.origen_lat, lng: p.origen_lng }} destino={{ lat: p.destino_lat, lng: p.destino_lng }} ubicacionInicial={ultimaUbicacion} activo={tab === "en_ruta"}/>
         <div className={styles.tools} style={{ left: "auto" }}><button type="button" onClick={() => setDetails("unidad")}>Datos y recibo</button></div>
       </section>
       <section role="tabpanel" id={`${id}-panel-fotos`} aria-labelledby={`${id}-fotos`} hidden={tab !== "fotos"} className={styles.panel}>
@@ -82,7 +100,7 @@ export function PasaporteDigitalSegmentado(props: PasaporteDigitalSegmentadoProp
       <section role="tabpanel" id={`${id}-panel-chat`} aria-labelledby={`${id}-chat`} hidden={tab !== "chat"} className={styles.panel}>{tab === "chat" && <div className={styles.chat}><ChatTraslado conservarEstado trasladoId={p.traslado_id ?? ""} estado={p.estado ?? "solicitud_creada"}/></div>}</section>
     </div>
     <footer className={styles.footer}><Link href={`/soporte?viaje=${p.traslado_id}`}>⚠ Asistencia 24/7</Link><div><CompartirPasaporte folio={folio}/></div></footer>
-    <MobileBottomSheet open={details !== null} onClose={() => setDetails(null)} title="Detalles del traslado">{details && <><nav className={styles.detailsMenu} aria-label="Detalles"><button type="button" onClick={() => setDetails("unidad")}>Unidad</button><button type="button" onClick={() => setDetails("recibo")}>Recibo</button><button type="button" onClick={() => setDetails("fotos")}>Reportes</button></nav><Detalles {...props} seccion={details}/></>}</MobileBottomSheet>
+    <MobileBottomSheet open={details !== null} onClose={() => setDetails(null)} title="Detalles del traslado">{details && <><nav className={styles.detailsMenu} aria-label="Detalles"><button type="button" onClick={() => setDetails("unidad")}>Unidad</button><button type="button" onClick={() => setDetails("recibo")}>Recibo</button><button type="button" onClick={() => setDetails("fotos")}>Reportes</button></nav><Detalles {...props} pasaporte={p} seccion={details}/></>}</MobileBottomSheet>
     <MobileBottomSheet open={photo !== null} onClose={() => setPhoto(null)} title="Evidencia del vehículo" fullScreen>
       {/* eslint-disable-next-line @next/next/no-img-element */}
       {photo?.url_visual?.startsWith("https://") && <img className={styles.photoFull} src={photo.url_visual} alt={`${photo.tipo} · ${photo.angulo}`}/>}

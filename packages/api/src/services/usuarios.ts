@@ -27,6 +27,16 @@ async function buscarUsuarioPorAuthId(cliente: Cliente, authUserId: string): Pro
 }
 
 /** Usuario asociado a la sesión de Supabase Auth actual, si existe. */
+export async function obtenerPreferenciasUsuarioActual(cliente: Cliente) {
+  const { data: { user }, error: errorAuth } = await cliente.auth.getUser();
+  if (errorAuth) throw errorAuth;
+  if (!user) return null;
+  const { data, error } = await cliente.from("usuarios").select("id, preferencias").eq("auth_user_id", user.id).maybeSingle();
+  if (error) throw error;
+  return data;
+}
+
+/** Usuario asociado a la sesión, con respaldo de creación para cuentas antiguas. */
 export async function obtenerUsuarioActual(cliente: Cliente) {
   const { data: sesion } = await cliente.auth.getUser();
   if (!sesion.user) return null;

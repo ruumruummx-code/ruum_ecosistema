@@ -27,6 +27,7 @@ interface PuntoMapa {
 interface SeguimientoTrasladoTiempoRealProps {
   trasladoId: string;
   estado: EstadoTraslado | null;
+  actualizadoEn?: string | null;
   origen: PuntoMapa;
   destino: PuntoMapa;
   ubicacionInicial: UbicacionTraslado | null;
@@ -68,6 +69,7 @@ function formatoHora(fechaIso: string | null | undefined) {
 export function SeguimientoTrasladoTiempoReal({
   trasladoId,
   estado,
+  actualizadoEn,
   origen,
   destino,
   ubicacionInicial,
@@ -82,7 +84,8 @@ export function SeguimientoTrasladoTiempoReal({
   const timerThrottleRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const [eta, setEta] = useState<number | null>(null);
-  const estadoEnVivo = estadoRealtime ?? estado;
+  const servidorMasReciente = actualizadoEn && estadoActualizadoEn && Date.parse(actualizadoEn) > Date.parse(estadoActualizadoEn);
+  const estadoEnVivo = servidorMasReciente ? estado : estadoRealtime ?? estado;
   // Fix A1: diferir recálculo de mapa estático para evitar recargar imágenes pesadas en móviles
   const ubicacionDiferida = useDeferredValue(ubicacion);
 

@@ -24,6 +24,8 @@ export interface CuentaReal {
   vehiculos: Vehiculo[];
   empresa: Empresa | null;
   totalTraslados: number;
+  datosAuxiliaresCargados?: boolean;
+  fotoPerfilNoDisponible?: boolean;
   incidenciasAbiertas?: number;
   traslados?: Database["public"]["Views"]["pasaporte_digital"]["Row"][];
 }
@@ -79,7 +81,8 @@ export type ResultadoCuenta =
   | { estado: "sin_sesion" }
   | { estado: "error"; mensaje: string };
 
-export async function obtenerCuenta(): Promise<ResultadoCuenta> {
+type OpcionesCuenta = { carga?: "completa" | "perfil" | "preferencias" };
+export async function obtenerCuenta({ carga = "completa" }: OpcionesCuenta = {}): Promise<ResultadoCuenta> {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
   if (!url || !anonKey) return { estado: "sin_sesion" };
@@ -97,7 +100,19 @@ export async function obtenerCuenta(): Promise<ResultadoCuenta> {
     const usuario = await obtenerUsuarioActual(cliente);
     if (!usuario) return { estado: "sin_sesion" };
 
-    const fotoPerfilUrl = await obtenerUrlFotoPerfilUsuario(cliente, usuario.foto_url);
+    let fotoPerfilNoDisponible = false;
+    const fotoPerfilUrl = carga === "preferencias" ? null : await obtenerUrlFotoPerfilUsuario(cliente, usuario.foto_url).catch(error => {
+      if (carga === "completa") throw error;
+      fotoPerfilNoDisponible = true;
+      console.warn("[cuenta] no se pudo cargar la foto de perfil", error);
+      return null;
+    });
+
+    // Editar el perfil o preferencias no depende del historial, garaje o empresa.
+    if (carga !== "completa") return {
+      estado: "ok",
+      cuenta: { usuario, correoRegistro: auth.user.email ?? null, fotoPerfilUrl, fotoPerfilNoDisponible, vehiculos: [], empresa: null, totalTraslados: 0, datosAuxiliaresCargados: false },
+    };
 
     const [vehiculos, empresa, trasladosPropios] = await Promise.all([
       listarVehiculosDeUsuario(cliente, usuario.id),
@@ -236,9 +251,10 @@ export function AvisoErrorCuenta({ mensaje }: { mensaje?: string | null }) {
  * Evita que cada subruta tenga que repetir el switch de tres casos.
  */
 export async function conCuenta(
-  render: (cuenta: CuentaReal) => ReactNode
+  render: (cuenta: CuentaReal) => ReactNode,
+  opciones: OpcionesCuenta = {}
 ): Promise<ReactNode> {
-  const resultado = await obtenerCuenta();
+  const resultado = await obtenerCuenta(opciones);
   if (resultado.estado === "error") return <AvisoErrorCuenta mensaje={resultado.mensaje} />;
   if (resultado.estado === "sin_sesion") return <AvisoSinSesion />;
   return render(resultado.cuenta);

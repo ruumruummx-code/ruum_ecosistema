@@ -1,4 +1,5 @@
 "use client";
+import { useFormatoDistancia } from "@/lib/use-formato-distancia";
 
 import React, { useRef, useState } from "react";
 import Link from "next/link";
@@ -112,6 +113,7 @@ function IlustracionDropzone({ className = "size-28" }: { className?: string }) 
 
 export function CargaMasivaDesktop({ nombreUsuario }: CargaMasivaDesktopProps) {
   const router = useRouter();
+  const formatearDistancia = useFormatoDistancia();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const {
@@ -357,7 +359,7 @@ export function CargaMasivaDesktop({ nombreUsuario }: CargaMasivaDesktopProps) {
                         </p>
                         <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate">
                           CP {fila.datos.origenCodigoPostal} → CP {fila.datos.destinoCodigoPostal}
-                          {fila.distanciaKm != null && ` · ${fila.distanciaKm.toFixed(1)} km`}
+                          {fila.distanciaKm != null && ` · ${formatearDistancia(fila.distanciaKm)}`}
                         </p>
                       </div>
 

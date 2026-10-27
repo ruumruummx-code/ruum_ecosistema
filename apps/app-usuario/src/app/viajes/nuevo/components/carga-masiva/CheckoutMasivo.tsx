@@ -1,4 +1,5 @@
 "use client";
+import { useFormatoDistancia } from "@/lib/use-formato-distancia";
 import React from "react";
 import type { FilaMasiva } from "../../hooks/useCargaMasiva";
 import { PagoStripe } from "@/app/PagoStripe";
@@ -15,6 +16,7 @@ interface Props {
 }
 
 export function CheckoutMasivo({ filas, totalMXN, cargaId, clientSecret, parcial, onPagado, onEstadoPago }: Props) {
+  const formatearDistancia = useFormatoDistancia();
   const formId = `pago-masivo-${cargaId ?? "pendiente"}`;
   const filasConTarifa = filas.filter((f) => !f.eliminada && f.tarifa != null);
   const pendientes = filas.filter((f) => !f.eliminada && (f.estado === "error" || f.errorCotizacion)).length;
@@ -56,7 +58,7 @@ export function CheckoutMasivo({ filas, totalMXN, cargaId, clientSecret, parcial
                 <p className="truncate text-[10px] text-[var(--user-color-muted)]">
                   {fila.datos.origenCodigoPostal} → {fila.datos.destinoCodigoPostal}
                   {fila.distanciaKm != null &&
-                    ` · ${fila.distanciaKm.toLocaleString("es-MX", { maximumFractionDigits: 1 })} km`}
+                    ` · ${formatearDistancia(fila.distanciaKm)}`}
                 </p>
               </div>
               <div className="flex shrink-0 items-center gap-2">

@@ -1,16 +1,20 @@
 /** @vitest-environment jsdom */
-import { afterEach, beforeAll, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { act, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { PasaporteDigitalSegmentado, type PasaporteDigitalSegmentadoProps } from "./PasaporteDigitalSegmentado";
-vi.mock("./ChatTraslado", () => ({ ChatTraslado: () => <div role="log">Mensajes del chat</div> }));
+const { vivo, refresh } = vi.hoisted(() => ({ vivo: { estadoRealtime: null as string | null, estadoActualizadoEn: null as string | null }, refresh: vi.fn() }));
+vi.mock("next/navigation", () => ({ useRouter: () => ({ refresh }) }));
+vi.mock("../../../state/AppStateProvider", () => ({ useTrasladoRealtime: () => vivo }));
+vi.mock("./ChatTraslado", () => ({ ChatTraslado: ({ estado }: { estado: string }) => <div role="log" data-estado={estado}>Mensajes del chat</div> }));
 vi.mock("./SeguimientoTrasladoTiempoReal", () => ({ SeguimientoTrasladoTiempoReal: ({ activo }: {
         activo: boolean;
     }) => <div data-testid="map" data-active={activo}>Mapa en vivo</div> }));
 vi.mock("./CompartirPasaporte", () => ({ CompartirPasaporte: () => <button>Compartir</button> }));
-vi.mock("next/dynamic", () => ({ default: () => ({ seccion }: {
+vi.mock("next/dynamic", () => ({ default: () => ({ seccion, pasaporte }: {
         seccion: string;
-    }) => <div>Detalle {seccion}</div> }));
+        pasaporte: { estado: string };
+    }) => <div data-testid="detalle" data-estado={pasaporte.estado}>Detalle {seccion}</div> }));
 beforeAll(() => {
     HTMLDialogElement.prototype.showModal = function () { this.setAttribute("open", ""); };
     HTMLDialogElement.prototype.close = function () { this.removeAttribute("open"); };
@@ -20,7 +24,28 @@ const props: PasaporteDigitalSegmentadoProps = {
     traslado: null, vehiculo: null, conductor: null, evidencia: [], incidencias: [], disputas: [], reclamosSeguro: [], calificacion: null, pagos: [], ultimaUbicacion: null,
 };
 afterEach(() => window.history.replaceState(null, "", "/"));
+beforeEach(() => { vivo.estadoRealtime = null; vivo.estadoActualizadoEn = null; refresh.mockClear(); });
 describe("Pasaporte dashboard", () => {
+    it("comparte el estado en vivo con chat y detalles y actualiza los datos relacionados", async () => {
+        const { rerender } = render(<PasaporteDigitalSegmentado {...props}/>);
+        vivo.estadoRealtime = "servicio_cerrado";
+        vivo.estadoActualizadoEn = "2026-10-27T12:00:00Z";
+        rerender(<PasaporteDigitalSegmentado {...props}/>);
+        await userEvent.click(screen.getByRole("tab", { name: "Chat" }));
+        expect(screen.getByRole("log")).toHaveAttribute("data-estado", "servicio_cerrado");
+        await userEvent.click(screen.getByRole("tab", { name: "En Ruta" }));
+        await userEvent.click(screen.getByRole("button", { name: "Datos y recibo" }));
+        expect(screen.getByTestId("detalle")).toHaveAttribute("data-estado", "servicio_cerrado");
+        await vi.waitFor(() => expect(refresh).toHaveBeenCalled());
+    });
+    it("refresca al recuperar conectividad y elimina listeners al salir", () => {
+        const { unmount } = render(<PasaporteDigitalSegmentado {...props}/>);
+        window.dispatchEvent(new Event("online"));
+        expect(refresh).toHaveBeenCalledOnce();
+        unmount();
+        window.dispatchEvent(new Event("online"));
+        expect(refresh).toHaveBeenCalledOnce();
+    });
     it("abre Chat al llegar desde el enlace de soporte", () => {
         window.history.replaceState(null, "", "/viajes/c784-test#chat-conductor");
         render(<PasaporteDigitalSegmentado {...props}/>);

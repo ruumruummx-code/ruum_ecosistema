@@ -1,4 +1,5 @@
 "use client";
+import { useFormatoDistancia } from "@/lib/use-formato-distancia";
 import React, { memo, useState } from "react";
 import { MobileBottomSheet as BottomSheet } from "@/components/MobileBottomSheet";
 import styles from "./cotizador.module.css";
@@ -6,7 +7,6 @@ import type { PrevisualizacionTarifa } from "@ruum/api/services";
 import {
   CONDICIONES_VEHICULO,
   VENTANAS_PREDEFINIDAS,
-  formatearDistancia,
   formatearTiempo,
 } from "../constants";
 import type { DatosFormulario, TipoRutaTraslado } from "../types";
@@ -54,6 +54,7 @@ function PasoDetallesComponent({
   tarifaPreviaAceptada,
   soloLectura,
 }: PasoDetallesProps) {
+  const formatearDistancia = useFormatoDistancia();
   const [desglose, setDesglose] = useState(false);
   const [ventana, setVentana] = useState<
     "ventanaRecoleccion" | "ventanaEntrega" | null

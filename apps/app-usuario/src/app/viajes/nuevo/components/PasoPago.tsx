@@ -1,4 +1,5 @@
 "use client";
+import { useFormatoDistancia } from "@/lib/use-formato-distancia";
 import { memo } from "react";
 import Link from "next/link";
 import { Button, Aviso } from "@ruum/ui";
@@ -41,7 +42,7 @@ function nombreVehiculo(datos: DatosFormulario): string {
   );
 }
 
-function distanciaResumen(rutaEstimacion: RutaEstimacion | null): string {
+function distanciaResumen(rutaEstimacion: RutaEstimacion | null, formatear: (km: number) => string): string {
   const km =
     rutaEstimacion && "distanciaKm" in rutaEstimacion
       ? rutaEstimacion.distanciaKm
@@ -60,7 +61,7 @@ function distanciaResumen(rutaEstimacion: RutaEstimacion | null): string {
       : m === 0
         ? `${h} h`
         : `${h}h ${String(m).padStart(2, "0")}m`;
-  return `${Number(km).toLocaleString("es-MX", { maximumFractionDigits: 1 })} km · ${tiempo}`;
+  return `${formatear(Number(km))} · ${tiempo}`;
 }
 
 export const PasoPago = memo(function PasoPago({
@@ -80,6 +81,7 @@ export const PasoPago = memo(function PasoPago({
   formId,
   onEstadoPago,
 }: PasoPagoProps) {
+  const formatearDistancia = useFormatoDistancia();
   const folio = folioCorto(trasladoCreado.id);
   const precio = trasladoCreado.precioCotizado;
 
@@ -215,7 +217,7 @@ export const PasoPago = memo(function PasoPago({
                   <circle cx="12" cy="12" r="10" />
                   <polyline points="12 6 12 12 16 14" />
                 </svg>
-                {distanciaResumen(rutaEstimacion)}
+                {distanciaResumen(rutaEstimacion, formatearDistancia)}
               </span>
             </div>
           </div>

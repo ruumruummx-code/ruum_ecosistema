@@ -5,10 +5,18 @@ import {
   obtenerEstadoVerificacionDiditUsuario,
   solicitarRestablecimientoPasswordUsuario,
   actualizarFacturacionUsuario,
-  actualizarFechaNacimientoUsuario
+  actualizarFechaNacimientoUsuario,
+  obtenerPreferenciasUsuarioActual
 } from "../usuarios";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@ruum/shared/types";
+
+it("lee únicamente las preferencias propias sin crear un perfil cuando no existe", async () => {
+  const cliente = crearClienteFake({ userId: "auth-1", tablas: { usuarios: { data: null } } });
+  expect(await obtenerPreferenciasUsuarioActual(cliente as unknown as SupabaseClient<Database>)).toBeNull();
+  expect(cliente.llamadas).toContainEqual(expect.objectContaining({ table: "usuarios", action: "eq", args: ["auth_user_id", "auth-1"] }));
+  expect(cliente.llamadas.some(call => call.action === "insert")).toBe(false);
+});
 
 it("guarda los datos fiscales de persona física con la RPC existente sin convertir la cuenta a empresa", async () => {
   const cliente = crearClienteFake({ userId: "personal", rpcs: { actualizar_datos_facturacion: { data: { ok: true } } } });

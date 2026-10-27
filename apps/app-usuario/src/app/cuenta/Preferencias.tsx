@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback, type ReactNode } from "react";
 import Link from "next/link";
+import { leerPendientes, guardarPendientes, serializarPreferencias } from "../../lib/preferencias-pendientes";
 import { useTema } from "../TemaProvider";
 import { Icono } from "@ruum/ui";
 import { HojaTareaCuenta } from "./HojaTareaCuenta";
@@ -156,9 +157,12 @@ export function Preferencias({ usuario, escritorio = false }: PreferenciasProps)
       // almacenamiento no disponible (SSR/privado) — se ignora
     }
   }
-  const prefBD = (usuario?.preferencias && typeof usuario.preferencias === "object" && !Array.isArray(usuario.preferencias))
+  const pendientesIniciales = leerPendientes(usuario?.id ?? "local");
+  const notificacionesIniciales = { ...usuario, ...pendientesIniciales.notificacion };
+  const preferenciasServidor = (usuario?.preferencias && typeof usuario.preferencias === "object" && !Array.isArray(usuario.preferencias))
     ? (usuario.preferencias as Record<string, unknown>)
     : {};
+  const prefBD = { ...preferenciasServidor, ...pendientesIniciales.general };
 
   function leerOpcion<T extends string>(clave: string, valor: unknown, opciones: readonly T[], defecto: T): T {
     const candidato = typeof valor === "string" ? valor : leerLocal(clave, defecto);
@@ -166,15 +170,15 @@ export function Preferencias({ usuario, escritorio = false }: PreferenciasProps)
   }
 
   // Notificaciones generales
-  const [notifPush, setNotifPush] = useState(usuario?.notificaciones_push ?? true);
-  const [notifEmail, setNotifEmail] = useState(usuario?.notificaciones_email ?? true);
-  const [notifWhatsapp, setNotifWhatsapp] = useState(usuario?.notificaciones_sms_whatsapp ?? false);
-  const [notifPromo, setNotifPromo] = useState(usuario?.notificaciones_promocionales ?? false);
+  const [notifPush, setNotifPush] = useState(typeof notificacionesIniciales.notificaciones_push === "boolean" ? notificacionesIniciales.notificaciones_push : true);
+  const [notifEmail, setNotifEmail] = useState(typeof notificacionesIniciales.notificaciones_email === "boolean" ? notificacionesIniciales.notificaciones_email : true);
+  const [notifWhatsapp, setNotifWhatsapp] = useState(typeof notificacionesIniciales.notificaciones_sms_whatsapp === "boolean" ? notificacionesIniciales.notificaciones_sms_whatsapp : false);
+  const [notifPromo, setNotifPromo] = useState(typeof notificacionesIniciales.notificaciones_promocionales === "boolean" ? notificacionesIniciales.notificaciones_promocionales : false);
 
   // Alertas de traslado
-  const [alertaViaje, setAlertaViaje] = useState(usuario?.alertas_viaje ?? true);
-  const [alertaEvidencia, setAlertaEvidencia] = useState(usuario?.alertas_evidencia ?? true);
-  const [alertaPago, setAlertaPago] = useState(usuario?.alertas_pago ?? true);
+  const [alertaViaje, setAlertaViaje] = useState(typeof notificacionesIniciales.alertas_viaje === "boolean" ? notificacionesIniciales.alertas_viaje : true);
+  const [alertaEvidencia, setAlertaEvidencia] = useState(typeof notificacionesIniciales.alertas_evidencia === "boolean" ? notificacionesIniciales.alertas_evidencia : true);
+  const [alertaPago, setAlertaPago] = useState(typeof notificacionesIniciales.alertas_pago === "boolean" ? notificacionesIniciales.alertas_pago : true);
   const [alertaIncidente, setAlertaIncidente] = useState(() => (typeof prefBD.alertaIncidente === "boolean" ? prefBD.alertaIncidente : leerLocal("ruum:pref:alertaIncidente", true)));
 
   // Idioma
@@ -191,10 +195,10 @@ export function Preferencias({ usuario, escritorio = false }: PreferenciasProps)
   const [notificacionesAbiertas, setNotificacionesAbiertas] = useState(false);
   const cerrarNotificaciones = useCallback(() => setNotificacionesAbiertas(false), []);
   const colaGuardado = useRef<Promise<void>>(Promise.resolve());
-  const pendientesNotificaciones = useRef<Record<string, boolean>>({});
-  const [errorGuardado, setErrorGuardado] = useState<string | null>(null);
+  const pendientesNotificaciones = useRef<Record<string, unknown>>(pendientesIniciales.notificacion);
+  const [errorGuardado, setErrorGuardado] = useState<string | null>(Object.keys(pendientesIniciales.general).length || Object.keys(pendientesIniciales.notificacion).length ? "Hay cambios pendientes de sincronizar con tu cuenta. Reintenta el guardado." : null);
   const [guardadosPendientes, setGuardadosPendientes] = useState(0);
-  const preferenciasPendientesRef = useRef<Record<string, unknown>>({});
+  const preferenciasPendientesRef = useRef<Record<string, unknown>>(pendientesIniciales.general);
   const [toastMensaje, setToastMensaje] = useState<string | null>(null);
 
   useEffect(() => { fijarModo(tema === "Automático" ? "auto" : tema === "Oscuro" ? "dark" : "light"); aplicarTemaEnDocumento(tema); }, [tema, fijarModo]);
@@ -208,14 +212,27 @@ export function Preferencias({ usuario, escritorio = false }: PreferenciasProps)
   function encolarGuardado(tipo: "general" | "notificacion", cambios: Record<string, unknown>) {
     const pendientes = tipo === "general" ? preferenciasPendientesRef.current : pendientesNotificaciones.current;
     Object.assign(pendientes, cambios);
-    const payload = { ...pendientes };
+    const id = usuario?.id ?? "local";
+    const persistidos = leerPendientes(id);
+    const payload = { ...persistidos[tipo], ...pendientes };
+    guardarPendientes(id, { ...persistidos, [tipo]: payload });
     if (!tieneSupabaseConfigurado()) { setErrorGuardado("No hay conexión configurada para sincronizar tus preferencias."); return; }
     setGuardadosPendientes(n => n + 1);
-    colaGuardado.current = colaGuardado.current.then(async () => {
+    colaGuardado.current = serializarPreferencias(id, async () => {
       try {
-        if (tipo === "general") await actualizarPreferenciasGeneralesUsuario(crearClienteNavegador(), payload);
-        else await actualizarPreferenciasNotificaciones(crearClienteNavegador(), payload);
-        for (const [clave, valor] of Object.entries(payload)) if (pendientes[clave] === valor) delete pendientes[clave];
+        const cliente = crearClienteNavegador();
+        if (usuario?.auth_user_id) {
+          const { data: { user }, error } = await cliente.auth.getUser();
+          if (error || user?.id !== usuario.auth_user_id) throw new Error("La sesión cambió antes de guardar las preferencias.");
+        }
+        if (tipo === "general") await actualizarPreferenciasGeneralesUsuario(cliente, payload);
+        else await actualizarPreferenciasNotificaciones(cliente, payload);
+        const actuales = leerPendientes(id);
+        for (const [clave, valor] of Object.entries(payload)) {
+          if (pendientes[clave] === valor) delete pendientes[clave];
+          if (actuales[tipo][clave] === valor) delete actuales[tipo][clave];
+        }
+        guardarPendientes(id, actuales);
         if (Object.keys(preferenciasPendientesRef.current).length === 0 && Object.keys(pendientesNotificaciones.current).length === 0) setErrorGuardado(null);
       } catch (err) {
         logStructuredWarn("cuenta/Preferencias", "sincronizar_preferencias_fallido", err);
@@ -223,7 +240,10 @@ export function Preferencias({ usuario, escritorio = false }: PreferenciasProps)
       } finally { setGuardadosPendientes(n => n - 1); }
     });
   }
-  function programarSincronizacionGeneral(cambios: Record<string, unknown>) { encolarGuardado("general", cambios); }
+  function programarSincronizacionGeneral(cambios: Record<string, unknown>) {
+    window.dispatchEvent(new Event("ruum:preferencias-editadas"));
+    encolarGuardado("general", cambios);
+  }
   async function sincronizarNotificacion(campo: string, valor: boolean) {
     guardarLocal("ruum:pref:" + campo, valor);
     encolarGuardado("notificacion", { [campo]: valor });
@@ -233,6 +253,13 @@ export function Preferencias({ usuario, escritorio = false }: PreferenciasProps)
     if (Object.keys(preferenciasPendientesRef.current).length) encolarGuardado("general", {});
     if (Object.keys(pendientesNotificaciones.current).length) encolarGuardado("notificacion", {});
   }
+  const reintentarRef = useRef(reintentarGuardado);
+  reintentarRef.current = reintentarGuardado;
+  useEffect(() => {
+    const alConectar = () => reintentarRef.current();
+    window.addEventListener("online", alConectar);
+    return () => window.removeEventListener("online", alConectar);
+  }, []);
   async function handleTogglePush() {
     const nuevo = !notifPush;
     setNotifPush(nuevo);

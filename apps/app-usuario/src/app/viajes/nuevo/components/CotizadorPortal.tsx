@@ -1,4 +1,5 @@
 "use client";
+import { useFormatoDistancia } from "@/lib/use-formato-distancia";
 
 import {
   useCallback,
@@ -15,7 +16,7 @@ import { PasoDetalles } from "./PasoDetalles";
 import { PasoPago } from "./PasoPago";
 import { PasoVehiculo } from "./PasoVehiculo";
 import { PasoRuta } from "./PasoRuta";
-import { formatearDistancia, formatearTiempo } from "../constants";
+import { formatearTiempo } from "../constants";
 import { PasoTarifa } from "./PasoTarifa";
 import { BottomSheetCargaMasiva } from "./carga-masiva";
 import styles from "./cotizador.module.css";
@@ -29,6 +30,7 @@ export function CotizadorPortal({
   headingRef: RefObject<HTMLHeadingElement | null>;
   escritorio?: boolean;
 }) {
+  const formatearDistancia = useFormatoDistancia();
   const root = useRef<HTMLElement>(null);
   const content = useRef<HTMLDivElement>(null);
   const [borradorAbierto, setBorradorAbierto] = useState(false);
