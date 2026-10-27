@@ -30,6 +30,7 @@ const confirmarPagoMock = vi.fn();
 const cancelarMock = vi.fn();
 const reanudarCargaMock = vi.fn();
 const descartarCargaPendienteMock = vi.fn();
+const consultarEstadoPagoMock = vi.fn();
 
 let hookState = {
   estado: "idle" as "idle" | "parseando" | "resultados" | "geocodificando" | "cotizando" | "checkout",
@@ -62,6 +63,7 @@ let hookState = {
   cargaPendienteStorage: null as { id: string } | null,
   reanudarCarga: reanudarCargaMock,
   descartarCargaPendiente: descartarCargaPendienteMock,
+  consultarEstadoPago: consultarEstadoPagoMock,
 };
 
 vi.mock("../../hooks/useCargaMasiva", () => ({
@@ -121,7 +123,9 @@ describe("Módulo de Carga Masiva (BottomSheetCargaMasiva, TablaCorreccionMasiva
       cargaPendienteStorage: { id: "pend-1" },
       reanudarCarga: reanudarCargaMock,
       descartarCargaPendiente: descartarCargaPendienteMock,
+      consultarEstadoPago: consultarEstadoPagoMock,
     };
+    consultarEstadoPagoMock.mockResolvedValue({ pagado: true });
   });
 
   it("maneja estado idle con archivo, carga pendiente y estados de progreso/resultados/checkout/confirmado", async () => {
@@ -168,10 +172,6 @@ describe("Módulo de Carga Masiva (BottomSheetCargaMasiva, TablaCorreccionMasiva
     expect(geocodificarYCotizarMock).toHaveBeenCalled();
 
     // Estado: checkout (CheckoutMasivo)
-    vi.spyOn(globalThis, "fetch").mockResolvedValueOnce({
-      ok: true,
-      json: async () => ({ pagado: true }),
-    } as Response);
     hookState = { ...hookState, estado: "checkout" };
     rerender(<BottomSheetCargaMasiva onCerrar={onCerrar} />);
     await user.click(screen.getByRole("button", { name: "Marcar Listo" }));
