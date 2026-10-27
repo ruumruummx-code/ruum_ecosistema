@@ -24,6 +24,7 @@ interface ContextoSesion {
   vehiculos: VehiculoRow[];
   conductorFotoUrl: string | null;
   error?: string | null;
+  errorVehiculos?: boolean;
 }
 
 async function obtenerContextoSesion(): Promise<ContextoSesion> {
@@ -41,9 +42,11 @@ async function obtenerContextoSesion(): Promise<ContextoSesion> {
     const usuario = await obtenerUsuarioActual(cliente);
     if (!usuario) return { usuario: null, traslados: [], vehiculos: [], conductorFotoUrl: null };
 
+    let errorVehiculos = false;
     const [traslados, vehiculos] = await Promise.all([
       listarTrasladosDeUsuario(cliente, usuario.id),
       listarVehiculosDeUsuario(cliente, usuario.id).catch((err) => {
+        errorVehiculos = true;
         logStructuredWarn("obtenerContextoSesion", "vehiculos_no_disponibles", err, {
           usuarioId: usuario.id,
         });
@@ -63,7 +66,7 @@ async function obtenerContextoSesion(): Promise<ContextoSesion> {
       }
     }
 
-    return { usuario, traslados, vehiculos, conductorFotoUrl, error: null };
+    return { usuario, traslados, vehiculos, conductorFotoUrl, errorVehiculos, error: null };
   } catch (err) {
     console.error("[app-usuario:obtenerContextoSesion] supabase_error", {
       message: err instanceof Error ? err.message : String(err),
@@ -78,7 +81,7 @@ export default async function PaginaInicio({
   searchParams?: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const params = (await searchParams) ?? {};
-  const { usuario, traslados, vehiculos, conductorFotoUrl, error } = await obtenerContextoSesion();
+  const { usuario, traslados, vehiculos, conductorFotoUrl, error, errorVehiculos } = await obtenerContextoSesion();
   const forzarLanding = params.landing === "true";
 
   // C-08: no silenciar error de Supabase — mostrar Aviso en lugar de landing/redirect confuso
@@ -150,6 +153,7 @@ export default async function PaginaInicio({
         {/* VISTA ESCRITORIO (>= 1024px): Dashboard enriquecido */}
         <div className="hidden lg:flex h-full w-full overflow-hidden">
           <InicioDesktop
+            errorVehiculos={errorVehiculos}
             usuario={usuario}
             traslados={traslados}
             conductorFotoUrl={conductorFotoUrl}

@@ -22,6 +22,29 @@ type UsuarioRow = Database["public"]["Tables"]["usuarios"]["Row"];
 type VehiculoRow = Database["public"]["Tables"]["vehiculos"]["Row"];
 
 describe("InicioDesktop", () => {
+  it("muestra el estado pendiente sin inventar un traslado en camino", () => {
+    render(<InicioDesktop usuario={null} traslados={[{ traslado_id: "pendiente", estado: "solicitud_creada" } as PasaporteRow]} />);
+    expect(screen.queryByText("En camino")).not.toBeInTheDocument();
+    expect(screen.queryByText(/12 min/)).not.toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Ver detalle y seguimiento" })).toHaveAttribute("href", "/viajes/pendiente");
+  });
+  it("presenta un estado vacío sin servicios ni datos ficticios", () => {
+    render(<InicioDesktop usuario={null} traslados={[]} />);
+    expect(screen.getByText("No tienes traslados activos")).toBeInTheDocument();
+    expect(screen.getByText("Aún no tienes traslados registrados.")).toBeInTheDocument();
+    expect(screen.queryByText("TRASLADO ACTIVO")).not.toBeInTheDocument();
+    expect(screen.queryByText(/PEM709/)).not.toBeInTheDocument();
+  });
+  it("conserva la identidad del historial cerrado y su enlace", () => {
+    render(<InicioDesktop usuario={null} traslados={[{ traslado_id: "cerrado", estado: "servicio_cerrado", vehiculo_marca: "Honda", vehiculo_modelo: "Civic", vehiculo_placas: "ABC123" } as PasaporteRow]} />);
+    expect(screen.getByText("No tienes traslados activos")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /Honda Civic/ })).toHaveAttribute("href", "/viajes/cerrado");
+  });
+  it("distingue un fallo de vehículos y permite reintentar", () => {
+    render(<InicioDesktop usuario={null} traslados={[]} errorVehiculos />);
+    expect(screen.getByRole("alert")).toHaveTextContent("No pudimos cargar tus vehículos");
+    expect(screen.getByRole("button", { name: "Reintentar carga de vehículos" })).toBeInTheDocument();
+  });
   const usuarioMock = {
     id: "usr-1",
     nombre: "Hector Manuel",
@@ -110,7 +133,7 @@ describe("InicioDesktop", () => {
     ).toBeInTheDocument();
   });
 
-  it("renderiza el módulo del traslado activo con stepper, tiempos y mapa", () => {
+  it("renderiza el traslado activo con accesos al seguimiento real", () => {
     render(<InicioDesktop usuario={usuarioMock} traslados={[trasladoActivoMock]} />);
 
     // Chip de estado y datos del auto
@@ -120,19 +143,8 @@ describe("InicioDesktop", () => {
     expect(screen.getByText("San Mateo Atenco, Edo. Méx.")).toBeInTheDocument();
     expect(screen.getByText("Lerma de Villada, Edo. Méx.")).toBeInTheDocument();
 
-    // Stepper de 3 pasos
-    expect(screen.getByText("1. Recolección")).toBeInTheDocument();
-    expect(screen.getByText("2. En tránsito")).toBeInTheDocument();
-    expect(screen.getByText("3. Entrega")).toBeInTheDocument();
-
-    // Submódulo ETA y botón ver en mapa
-    expect(screen.getByText("Llegada estimada")).toBeInTheDocument();
-    expect(screen.getAllByText(/12 min/i).length).toBeGreaterThan(0);
-    expect(screen.getByText(/Ver en mapa/i)).toBeInTheDocument();
-
-    // Submódulo de Ubicación en tiempo real
-    expect(screen.getByText("Ubicación en tiempo real")).toBeInTheDocument();
-    expect(screen.getByText("Seguir en mapa →")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Abrir seguimiento" })).toHaveAttribute("href", "/viajes/traslado-12345");
+    expect(screen.queryByText(/12 min/i)).not.toBeInTheDocument();
     expect(screen.getByText("Tu conductor")).toBeInTheDocument();
     expect(screen.getByText("Marco Torres")).toBeInTheDocument();
   });
@@ -164,8 +176,8 @@ describe("InicioDesktop", () => {
     // Panel izquierdo: Últimos traslados
     expect(screen.getByRole("heading", { name: "Últimos traslados" })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Ver todos →" })).toHaveAttribute("href", "/mis-viajes");
-    expect(screen.getByText("Toyota RAV4 2023")).toBeInTheDocument();
-    expect(screen.getByText("RAM 1500 2024")).toBeInTheDocument();
+    expect(screen.queryByText("Toyota RAV4 2023")).not.toBeInTheDocument();
+    expect(screen.queryByText("RAM 1500 2024")).not.toBeInTheDocument();
 
     // Panel derecho: Soporte al cliente 24/7
     expect(screen.getByRole("heading", { name: "¿Necesitas ayuda?" })).toBeInTheDocument();

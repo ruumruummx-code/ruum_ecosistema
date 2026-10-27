@@ -1,12 +1,12 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import type { Database } from "@ruum/shared/types";
 import { ETIQUETA_ESTADO_TRASLADO } from "@ruum/shared/states";
-import { indiceEtapaActual } from "@ruum/ui";
-import { construirNotificaciones, obtenerViajeActivo, obtenerHistorial } from "../lib/inicio";
+import { useRouter } from "next/navigation";
+import { construirNotificaciones, obtenerViajeActivo, obtenerHistorial, esTrasladoActivo } from "../lib/inicio";
 import { TERMINOLOGIA_USUARIO } from "../lib/glosario";
 import { UserDashboardLayout } from "../components/layout/UserDashboardLayout";
 
@@ -19,6 +19,7 @@ export interface InicioDesktopProps {
   traslados: PasaporteRow[];
   conductorFotoUrl?: string | null;
   vehiculos?: VehiculoRow[];
+  errorVehiculos?: boolean;
 }
 
 /* =========================================================================
@@ -30,14 +31,6 @@ function IconoPerfilRR({ className = "size-5" }: { className?: string }) {
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden="true">
       <circle cx="12" cy="8" r="4" />
       <path d="M20 21a8 8 0 0 0-16 0" />
-    </svg>
-  );
-}
-
-function IconoPinUbicacion({ className = "size-4" }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" fill="currentColor" className={className} aria-hidden="true">
-      <path fillRule="evenodd" d="M11.54 22.351A2.42 2.42 0 0 1 10.1 20.89C8.38 18.3 4 11.83 4 8a8 8 0 0 1 16 0c0 3.83-4.38 10.3-6.1 12.89a2.42 2.42 0 0 1-1.44 1.461l-.92.001zM12 11.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7z" clipRule="evenodd" />
     </svg>
   );
 }
@@ -98,95 +91,6 @@ function IlustracionSedanBlanco({ className = "w-44 h-auto" }: { className?: str
   );
 }
 
-/** Ilustración de camioneta Pickup blanca para tarjeta de la barra lateral */
-function IlustracionPickupBlanca({ className = "w-full h-auto" }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 200 95" fill="none" className={className} aria-hidden="true">
-      <ellipse cx="100" cy="85" rx="88" ry="7" fill="#000000" fillOpacity="0.3" />
-      {/* Caja y cabina */}
-      <path d="M12 62 L 30 55 L 75 52 L 105 34 L 145 34 L 175 48 L 192 56 L 190 72 L 165 72 C 160 62 142 62 136 72 L 78 72 C 72 62 54 62 48 72 L 14 72 Z" fill="#ffffff" />
-      {/* Cristales polarizados */}
-      <path d="M107 38 L 141 38 L 165 49 L 115 50 Z" fill="#0c233c" />
-      <line x1="138" y1="38" x2="140" y2="50" stroke="#ffffff" strokeWidth="2" opacity="0.6" />
-      {/* Parrilla frontal */}
-      <rect x="184" y="58" width="6" height="10" rx="1" fill="#334155" />
-      <polygon points="180,56 188,58 184,62" fill="#38bdf8" />
-      {/* Ruedas grandes todoterreno */}
-      <circle cx="56" cy="72" r="14" fill="#0f172a" />
-      <circle cx="56" cy="72" r="8" fill="#475569" stroke="#94a3b8" strokeWidth="1" />
-      <circle cx="150" cy="72" r="14" fill="#0f172a" />
-      <circle cx="150" cy="72" r="8" fill="#475569" stroke="#94a3b8" strokeWidth="1" />
-    </svg>
-  );
-}
-
-/** Mapa estilizado interactivo con ruta satelital y pines */
-function MapaPrevisualizacionRuta() {
-  return (
-    <div className="relative w-full h-[150px] rounded-xl overflow-hidden bg-[#e8f1f5] border border-slate-200/60 shadow-inner flex items-center justify-center">
-      {/* Trazado simulado de calles y manzanas */}
-      <svg className="absolute inset-0 w-full h-full" viewBox="0 0 300 150" preserveAspectRatio="none" fill="none" aria-hidden="true">
-        {/* Manzanas urbanas */}
-        <rect x="15" y="15" width="45" height="30" rx="4" fill="#f8fafc" />
-        <rect x="70" y="15" width="65" height="30" rx="4" fill="#f8fafc" />
-        <rect x="145" y="15" width="80" height="30" rx="4" fill="#f8fafc" />
-        <rect x="235" y="15" width="50" height="30" rx="4" fill="#f8fafc" />
-
-        <rect x="15" y="55" width="60" height="40" rx="4" fill="#f8fafc" />
-        <rect x="85" y="55" width="60" height="40" rx="4" fill="#f8fafc" />
-        <rect x="155" y="55" width="70" height="40" rx="4" fill="#f8fafc" />
-        <rect x="235" y="55" width="50" height="40" rx="4" fill="#f8fafc" />
-
-        <rect x="15" y="105" width="85" height="35" rx="4" fill="#f8fafc" />
-        <rect x="110" y="105" width="75" height="35" rx="4" fill="#f8fafc" />
-        <rect x="195" y="105" width="90" height="35" rx="4" fill="#f8fafc" />
-
-        {/* Trazado de ruta en azul vibrante */}
-        <path
-          d="M 32 90 Q 75 88 120 72 T 205 60 T 268 45"
-          fill="none"
-          stroke="#0052cc"
-          strokeWidth="4"
-          strokeLinecap="round"
-        />
-        {/* Línea punteada de avance interior */}
-        <path
-          d="M 32 90 Q 75 88 120 72 T 205 60 T 268 45"
-          fill="none"
-          stroke="#60a5fa"
-          strokeWidth="1.8"
-          strokeDasharray="4 4"
-        />
-      </svg>
-
-      {/* Pin Verde de Origen */}
-      <div className="absolute left-6 bottom-9 flex flex-col items-center">
-        <span className="size-3.5 rounded-full bg-emerald-500 ring-4 ring-emerald-200 shadow-md animate-pulse" />
-      </div>
-
-      {/* Camión / Auto en tránsito sobre la ruta */}
-      <div className="absolute left-[44%] top-[42%] -translate-x-1/2 -translate-y-1/2 bg-[#091b33] text-white p-1.5 rounded-lg shadow-lg border border-white flex items-center justify-center">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="size-4">
-          <path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2" />
-          <path d="M14 8h4.5l3.5 4.5v5.5a1 1 0 0 1-1 1h-1" />
-          <circle cx="7" cy="18" r="2" />
-          <circle cx="18" cy="18" r="2" />
-        </svg>
-      </div>
-
-      {/* Chip flotante "En tránsito" */}
-      <div className="absolute right-7 top-4 bg-[#0a192f] text-white text-[10px] font-bold px-2.5 py-1 rounded-full shadow-md tracking-wider">
-        En tránsito
-      </div>
-
-      {/* Pin Azul de Destino */}
-      <div className="absolute right-8 top-8 flex flex-col items-center">
-        <span className="size-3.5 rounded-full bg-blue-600 ring-4 ring-blue-200 shadow-md" />
-      </div>
-    </div>
-  );
-}
-
 /** Representante de Soporte 3D amigable con diadema */
 function IlustracionAgenteSoporte() {
   return (
@@ -231,7 +135,16 @@ export function InicioDesktop({
   traslados,
   conductorFotoUrl = null,
   vehiculos = [],
+  errorVehiculos = false,
 }: InicioDesktopProps) {
+  const router = useRouter();
+  useEffect(() => {
+    const actualizar = () => { if (document.visibilityState === "visible" && navigator.onLine) router.refresh(); };
+    const intervalo = window.setInterval(actualizar, 30000);
+    window.addEventListener("focus", actualizar);
+    window.addEventListener("online", actualizar);
+    return () => { window.clearInterval(intervalo); window.removeEventListener("focus", actualizar); window.removeEventListener("online", actualizar); };
+  }, [router]);
   // Estado para el carrusel interactivo de Tips Ruum Ruum
   const [tipIndex, setTipIndex] = useState(0);
 
@@ -240,7 +153,7 @@ export function InicioDesktop({
 
   // Nombre de bienvenida
   const primerNombre = usuario?.nombre?.trim().split(/\s+/)[0];
-  const nombre = primerNombre ? primerNombre.charAt(0).toUpperCase() + primerNombre.slice(1).toLowerCase() : "Hector";
+  const nombre = primerNombre ? primerNombre.charAt(0).toUpperCase() + primerNombre.slice(1).toLowerCase() : "Usuario";
   const notificaciones = construirNotificaciones(usuario, traslados);
 
   // Tips interactivos
@@ -263,50 +176,23 @@ export function InicioDesktop({
     },
   ];
 
-  // Cálculo del estado y etapa del traslado activo
-  const etapa = viaje?.estado ? indiceEtapaActual(viaje.estado) : 4; // Por defecto etapa 4 ("En tránsito" para diseño de referencia)
-  const situacionTexto = viaje?.estado ? TERMINOLOGIA_USUARIO[viaje.estado] ?? ETIQUETA_ESTADO_TRASLADO[viaje.estado] : "En tránsito";
-
-  // Traslados recientes para la lista inferior (usar reales o fallbacks idénticos a la maqueta)
-  const trasladosMostrados = [
-    {
-      id: viaje?.traslado_id || "demo-1",
-      marcaModelo: viaje ? `${viaje.vehiculo_marca || "Chrysler"} ${viaje.vehiculo_modelo || "Cirrus"} ${viaje.vehiculo_anio || "2024"}` : "Chrysler Cirrus 2024",
-      estado: "En tránsito",
-      estadoClase: "bg-emerald-50 text-emerald-700 border-emerald-200",
-      ruta: `${viaje?.origen_ciudad || "San Mateo Atenco"} → ${viaje?.destino_ciudad || "Lerma de Villada"}`,
-      placas: viaje?.vehiculo_placas || "PEM709",
-      eta: "ETA 12 min",
-      esActivo: true,
-    },
-    {
-      id: historial[1]?.traslado_id || "demo-2",
-      marcaModelo: "Toyota RAV4 2023",
-      estado: "Completado",
-      estadoClase: "bg-blue-50 text-blue-700 border-blue-200",
-      ruta: "Toluca → Naucalpan",
-      placas: "NMX301",
-      eta: "23 oct, 2024",
-      esActivo: false,
-    },
-    {
-      id: historial[2]?.traslado_id || "demo-3",
-      marcaModelo: "RAM 1500 2024",
-      estado: "En preparación",
-      estadoClase: "bg-amber-50 text-amber-700 border-amber-200",
-      ruta: "Metepec → CDMX",
-      placas: "JPQ552",
-      eta: "Inicio mañana",
-      esActivo: false,
-    },
-  ];
+  const situacionTexto = viaje?.estado ? TERMINOLOGIA_USUARIO[viaje.estado] ?? ETIQUETA_ESTADO_TRASLADO[viaje.estado] : "Sin traslado activo";
+  const trasladosMostrados = historial.filter(t => t.traslado_id).slice(0, 3).map(t => ({
+    id: t.traslado_id!,
+    marcaModelo: [t.vehiculo_marca, t.vehiculo_modelo, t.vehiculo_anio].filter(Boolean).join(" ") || "Vehículo sin información",
+    estado: t.estado ? TERMINOLOGIA_USUARIO[t.estado] ?? ETIQUETA_ESTADO_TRASLADO[t.estado] : "Estado no disponible",
+    estadoClase: "bg-blue-50 text-blue-700 border-blue-200",
+    ruta: [t.origen_ciudad || "Origen no disponible", t.destino_ciudad || "Destino no disponible"].join(" → "),
+    placas: t.vehiculo_placas || "No disponibles",
+    eta: t.creado_en && Number.isFinite(Date.parse(t.creado_en)) ? new Intl.DateTimeFormat("es-MX", { timeZone: "America/Mexico_City", dateStyle: "medium" }).format(new Date(t.creado_en)) : "Fecha no disponible",
+  }));
 
   return (
     <UserDashboardLayout
       usuario={usuario}
       nombre={usuario?.nombre}
       notificaciones={notificaciones}
-      totalVehiculos={vehiculos.length}
+      totalVehiculos={errorVehiculos ? undefined : vehiculos.length}
       idContenido="desktopMainContent"
       padding="amplio"
     >
@@ -346,175 +232,31 @@ export function InicioDesktop({
             </div>
           </section>
 
-          {/* Módulo Principal - Traslado Activo & Ubicación en Tiempo Real */}
-          <section aria-label="Módulo principal del traslado activo" className="grid grid-cols-12 gap-5">
-            {/* Card Principal: Traslado Activo (8 de 12 columnas) */}
-            <div className="col-span-8 bg-[#0c192c] text-white rounded-2xl p-6 shadow-md relative overflow-hidden flex flex-col justify-between min-h-[300px]">
-              <div>
-                {/* Chip Superior TRASLADO ACTIVO */}
-                <div className="flex items-center justify-between mb-4">
-                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/15 border border-emerald-400/30 text-emerald-300 font-bold text-[11px] uppercase tracking-wider">
-                    <span className="size-2 rounded-full bg-emerald-400 animate-pulse" />
-                    TRASLADO ACTIVO
-                  </span>
-                  <span className="text-xs font-mono text-slate-400 bg-white/5 px-2.5 py-1 rounded-md">
-                    Placas: {viaje?.vehiculo_placas || "PEM709"}
-                  </span>
-                </div>
-
-                {/* Datos del Vehículo y Ruta */}
-                <div className="flex items-start justify-between">
-                  <div>
-                    <h2 className="text-2xl font-black text-white tracking-tight">
-                      {viaje ? [viaje.vehiculo_marca, viaje.vehiculo_modelo, viaje.vehiculo_anio].filter(Boolean).join(" ") : "Chrysler Cirrus 2024"}
-                    </h2>
-                    <div className="flex items-center gap-2 mt-2 text-xs text-slate-300 font-medium">
-                      <span className="flex items-center gap-1 text-emerald-400">
-                        <IconoPinUbicacion className="size-3.5" />
-                        {viaje?.origen_ciudad || "San Mateo Atenco, Edo. Méx."}
-                      </span>
-                      <span className="text-slate-500">→</span>
-                      <span className="flex items-center gap-1 text-blue-400">
-                        <IconoPinUbicacion className="size-3.5" />
-                        {viaje?.destino_ciudad || "Lerma de Villada, Edo. Méx."}
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Ilustración de auto en perspectiva 3D */}
-                  <div className="shrink-0 -mt-2">
-                    <IlustracionSedanBlanco className="w-48 h-auto drop-shadow-2xl" />
-                  </div>
-                </div>
-              </div>
-
-              {/* Stepper Gráfico de Progreso de Entrega en 3 Pasos */}
-              <div className="mt-6 pt-4 border-t border-slate-700/60 flex items-center justify-between gap-6">
-                <div className="flex-1 flex items-center justify-between relative">
-                  {/* Línea conectora entre los pasos */}
-                  <div className="absolute left-6 right-6 top-4 h-[2px] bg-slate-700 -z-0" />
-                  <div className="absolute left-6 w-[50%] top-4 h-[2px] bg-[#00d1d1] -z-0" />
-
-                  {/* Paso 1: Recolección */}
-                  <div className="relative z-10 flex items-center gap-3">
-                    <div className="size-8 rounded-full bg-emerald-500 text-white flex items-center justify-center font-bold text-xs ring-4 ring-[#0c192c]">
-                      ✓
-                    </div>
-                    <div>
-                      <span className="block font-semibold text-xs text-white">1. Recolección</span>
-                      <span className="block text-[11px] text-emerald-400 font-medium">Completado</span>
-                      <span className="block text-[10px] text-slate-400">23 oct, 08:00</span>
-                    </div>
-                  </div>
-
-                  {/* Paso 2: En tránsito */}
-                  <div className="relative z-10 flex items-center gap-3">
-                    <div className="size-8 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-xs ring-4 ring-[#0c192c]">
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="size-4">
-                        <path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2" />
-                        <path d="M14 8h4.5l3.5 4.5v5.5a1 1 0 0 1-1 1h-1" />
-                        <circle cx="7" cy="18" r="2" />
-                        <circle cx="18" cy="18" r="2" />
-                      </svg>
-                    </div>
-                    <div>
-                      <span className="block font-semibold text-xs text-white">2. En tránsito</span>
-                      <span className="block text-[11px] text-blue-400 font-medium">En camino</span>
-                      <span className="block text-[10px] text-slate-400">23 oct, 12:10</span>
-                    </div>
-                  </div>
-
-                  {/* Paso 3: Entrega */}
-                  <div className="relative z-10 flex items-center gap-3">
-                    <div className="size-8 rounded-full bg-slate-700 text-slate-400 flex items-center justify-center font-bold text-xs ring-4 ring-[#0c192c]">
-                      ⚐
-                    </div>
-                    <div>
-                      <span className="block font-semibold text-xs text-slate-400">3. Entrega</span>
-                      <span className="block text-[11px] text-slate-500 font-medium">Pendiente</span>
-                      <span className="block text-[10px] text-slate-500">ETA 12 min</span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Submódulo Lateral ETA y Enlace al Mapa */}
-                <div className="shrink-0 flex flex-col gap-2 min-w-[150px]">
-                  <div className="bg-[#071322] border border-slate-700/60 rounded-xl px-3.5 py-2 flex items-center justify-between">
-                    <div>
-                      <span className="block text-[10px] text-slate-400">Llegada estimada</span>
-                      <span className="font-bold text-emerald-400 text-xs flex items-center gap-1">
-                        ⏱ 12 min
-                      </span>
-                    </div>
-                    <span className="text-slate-500 text-xs">›</span>
-                  </div>
-
-                  <Link
-                    href={viaje?.traslado_id ? `/viajes/${viaje.traslado_id}` : "/mis-viajes"}
-                    className="bg-[#16273f] hover:bg-[#1d3353] text-white text-xs font-semibold px-3.5 py-2 rounded-xl flex items-center justify-between transition"
-                  >
-                    <span className="flex items-center gap-1.5">
-                      📖 Ver en mapa
-                    </span>
-                    <span>›</span>
-                  </Link>
-                </div>
-              </div>
+          {errorVehiculos && <div role="alert" className="rounded-xl border border-amber-300 bg-amber-50 p-4 text-slate-900">No pudimos cargar tus vehículos. <button type="button" className="underline" onClick={() => router.refresh()}>Reintentar carga de vehículos</button></div>}
+          <section aria-label="Módulo principal del traslado activo" className="grid gap-5 xl:grid-cols-3">
+            <div className="rounded-2xl bg-[#0c192c] p-6 text-white xl:col-span-2">
+              {viaje ? <>
+                <span className="text-xs font-bold">TRASLADO ACTIVO</span>
+                <h2 className="mt-4 text-2xl font-black">{[viaje.vehiculo_marca, viaje.vehiculo_modelo, viaje.vehiculo_anio].filter(Boolean).join(" ") || "Vehículo sin información"}</h2>
+                <p className="mt-2">Placas: {viaje.vehiculo_placas || "No disponibles"}</p>
+                <p className="mt-2"><span>{viaje.origen_ciudad || "Origen no disponible"}</span> → <span>{viaje.destino_ciudad || "Destino no disponible"}</span></p>
+                <p className="mt-4 font-bold" aria-live="polite">{situacionTexto}</p>
+                <p className="mt-2 text-sm text-slate-300">{traslados.filter(t => t.estado && esTrasladoActivo(t.estado)).length} traslado(s) activo(s). Consulta todos en Mis traslados.</p>
+                <Link className="mt-4 inline-block underline" href={"/viajes/" + viaje.traslado_id}>Ver detalle y seguimiento</Link>
+              </> : <>
+                <h2 className="text-2xl font-bold">No tienes traslados activos</h2>
+                <p className="mt-2">Registra un nuevo traslado o consulta tu historial.</p>
+                <Link className="mt-4 inline-block underline" href="/viajes/nuevo">Solicitar traslado</Link>
+              </>}
             </div>
-
-            {/* Submódulo Lateral Derecho: Ubicación en Tiempo Real (4 de 12 columnas) */}
-            <div className="col-span-4 bg-white rounded-2xl p-5 border border-slate-100 shadow-sm flex flex-col justify-between min-h-[300px]">
-              <div>
-                <div className="flex items-center justify-between mb-3">
-                  <h3 className="font-bold text-slate-900 text-sm">
-                    Ubicación en tiempo real
-                  </h3>
-                  <Link
-                    href={viaje?.traslado_id ? `/viajes/${viaje.traslado_id}` : "/mis-viajes"}
-                    className="size-7 rounded-lg hover:bg-slate-100 flex items-center justify-center text-slate-500 transition"
-                    aria-label="Expandir mapa a pantalla completa"
-                  >
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="size-4">
-                      <path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7" />
-                    </svg>
-                  </Link>
-                </div>
-
-                {/* Mini Mapa de Ruta */}
-                <MapaPrevisualizacionRuta />
-
-                {/* Enlace Seguir en Mapa */}
-                <Link
-                  href={viaje?.traslado_id ? `/viajes/${viaje.traslado_id}` : "/mis-viajes"}
-                  className="flex items-center justify-between py-2.5 text-xs font-bold text-blue-600 hover:text-blue-700 border-b border-slate-100 transition"
-                >
-                  <span>Seguir en mapa →</span>
-                  <span className="text-slate-400 text-xs">›</span>
-                </Link>
-              </div>
-
-              {/* Submódulo de Asignación de Conductor */}
-              <div className="flex items-center gap-3 pt-2">
-                <div className="size-10 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center shrink-0">
-                  {conductorFotoUrl ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img src={conductorFotoUrl} alt="Conductor asignado" className="size-full rounded-full object-cover" />
-                  ) : (
-                    <IconoPerfilRR className="size-5 text-slate-500" />
-                  )}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <span className="block text-[10px] font-semibold text-slate-400 uppercase tracking-wider">
-                    Tu conductor
-                  </span>
-                  <strong className="block text-xs font-bold text-slate-800 truncate">
-                    {viaje?.conductor_nombre || "Pendiente de asignación"}
-                  </strong>
-                  <span className="block text-[11px] text-slate-500 truncate">
-                    {viaje?.conductor_nombre ? "Conductor certificado Ruum Ruum" : "Te avisaremos en cuanto se asigne."}
-                  </span>
-                </div>
-              </div>
+            <div className="rounded-2xl border border-slate-100 bg-white p-5 text-slate-900">
+              <h3 className="font-bold">Seguimiento del traslado</h3>
+              <p className="mt-2 text-sm">Consulta la ubicación disponible y las evidencias en el detalle del servicio.</p>
+              {viaje && <Link className="mt-3 inline-block text-blue-600 underline" href={"/viajes/" + viaje.traslado_id}>Abrir seguimiento</Link>}
+              {viaje && <div className="mt-5 flex items-center gap-3">
+                {conductorFotoUrl ? <Image src={conductorFotoUrl} alt="Conductor asignado" width={40} height={40} unoptimized className="rounded-full" /> : <IconoPerfilRR />}
+                <div><span className="block text-xs">Tu conductor</span><strong>{viaje.conductor_nombre || "Pendiente de asignación"}</strong></div>
+              </div>}
             </div>
           </section>
 
@@ -615,10 +357,11 @@ export function InicioDesktop({
 
                 {/* Lista de Filas de Traslado */}
                 <div className="divide-y divide-slate-100">
+                  {trasladosMostrados.length === 0 && <p className="py-4 text-sm text-slate-500">Aún no tienes traslados registrados.</p>}
                   {trasladosMostrados.map((item) => (
                     <Link
                       key={item.id}
-                      href={item.id.startsWith("demo") ? "/mis-viajes" : `/viajes/${item.id}`}
+                      href={`/viajes/${item.id}`}
                       className="py-3.5 flex items-center justify-between hover:bg-slate-50/80 rounded-xl px-2.5 -mx-2.5 transition"
                     >
                       <div className="flex items-center gap-3.5 min-w-0">

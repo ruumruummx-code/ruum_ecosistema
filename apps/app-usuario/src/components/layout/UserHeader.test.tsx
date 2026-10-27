@@ -4,6 +4,8 @@ import { render, screen, fireEvent, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { UserHeader } from "./UserHeader";
 
+const { signOutMock } = vi.hoisted(() => ({ signOutMock: vi.fn() }));
+vi.mock("../../lib/supabase-browser", () => ({ crearClienteNavegador: () => ({ auth: { signOut: signOutMock } }) }));
 const pushMock = vi.fn();
 const replaceMock = vi.fn();
 const refreshMock = vi.fn();
@@ -29,6 +31,22 @@ vi.mock("../../app/TemaProvider", () => ({
 }));
 
 describe("UserHeader — Componente de Barra Superior Reutilizable (RR-UI-001)", () => {
+  it("mantiene la sesión y avisa cuando signOut devuelve un error", async () => {
+    signOutMock.mockResolvedValueOnce({ error: new Error("sin conexión") });
+    render(<UserHeader nombre="Usuario" />);
+    fireEvent.click(screen.getByRole("button", { name: /Menú de usuario/ }));
+    fireEvent.click(screen.getByRole("menuitem", { name: /Cerrar sesión/ }));
+    expect(await screen.findByRole("alert")).toHaveTextContent("No pudimos cerrar tu sesión");
+    expect(replaceMock).not.toHaveBeenCalled();
+  });
+  it("redirige al login al confirmar el cierre de sesión", async () => {
+    signOutMock.mockResolvedValueOnce({ error: null });
+    render(<UserHeader nombre="Usuario" />);
+    await userEvent.click(screen.getByRole("button", { name: /Menú de usuario/ }));
+    await userEvent.click(screen.getByRole("menuitem", { name: /Cerrar sesión/ }));
+    expect(replaceMock).toHaveBeenCalledWith("/login");
+    expect(refreshMock).toHaveBeenCalled();
+  });
   beforeEach(() => {
     vi.clearAllMocks();
     temaMock = "light";
@@ -112,7 +130,7 @@ describe("UserHeader — Componente de Barra Superior Reutilizable (RR-UI-001)",
     expect(within(dialogNotificaciones).getByRole("link", { name: /Ver mis traslados/ })).toHaveAttribute("href", "/mis-viajes");
   });
 
-  it("abre el dropdown de perfil con las opciones Mi cuenta, Mi perfil, Mis vehículos, Mis preferencias y Cerrar sesión", () => {
+  it("abre el dropdown de perfil con las opciones Mi cuenta, Mi perfil, Mis vehículos, Mis preferencias y Cerrar sesión", async () => {
     const onLogoutMock = vi.fn();
     render(
       <UserHeader
@@ -136,7 +154,7 @@ describe("UserHeader — Componente de Barra Superior Reutilizable (RR-UI-001)",
     expect(within(menu).getByRole("menuitem", { name: /Mis preferencias/ })).toHaveAttribute("href", "/cuenta/preferencias");
 
     const botonSalir = within(menu).getByRole("menuitem", { name: /Cerrar sesión/ });
-    fireEvent.click(botonSalir);
+    await userEvent.click(botonSalir);
     expect(onLogoutMock).toHaveBeenCalled();
   });
 

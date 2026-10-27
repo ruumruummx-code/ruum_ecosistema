@@ -35,7 +35,7 @@ function fechaOrdenable(fecha: string | null): number {
 }
 
 /**
- * El traslado activo más reciente para mostrar como protagonista del
+ * Prioriza un traslado en curso o con incidencia; después, el activo más reciente para el
  * Inicio, o null si no hay ninguno. No asume que `traslados` venga
  * ordenado — ordena por su cuenta para no depender del caller.
  */
@@ -44,10 +44,10 @@ export function obtenerViajeActivo(traslados: PasaporteRow[]): PasaporteRow | nu
     .filter((t) => t.estado && esTrasladoActivo(t.estado))
     .sort((a, b) => fechaOrdenable(b.creado_en) - fechaOrdenable(a.creado_en));
 
-  return activos[0] ?? null;
+  return activos.find(t => t.estado === "traslado_en_curso" || t.estado === "incidencia_reportada") ?? activos[0] ?? null;
 }
 
-/** Traslados ya finalizados, más recientes primero — para "Últimos Traslados". */
+/** Todos los traslados, más recientes primero — para "Últimos Traslados". */
 export function obtenerHistorial(traslados: PasaporteRow[]): PasaporteRow[] {
   return [...traslados].sort((a, b) => fechaOrdenable(b.creado_en) - fechaOrdenable(a.creado_en));
 }
@@ -117,7 +117,8 @@ export function construirNotificaciones(usuario: UsuarioRow | null, traslados: P
     notificaciones.push({
       id: "verificacion-rechazada",
       tono: "danger",
-      mensaje: "No pudimos verificar tu cuenta. Contáctanos para revisar qué falta."
+      mensaje: "No pudimos verificar tu cuenta. Contáctanos para revisar qué falta.",
+      href: "/soporte"
     });
   } else if (usuario?.estado_verificacion === "pendiente" || usuario?.estado_verificacion === "en_revision") {
     notificaciones.push({
@@ -170,5 +171,6 @@ export function construirNotificaciones(usuario: UsuarioRow | null, traslados: P
     }
   }
 
-  return notificaciones;
+  const prioridad = { danger: 0, atencion: 1, info: 2 };
+  return notificaciones.sort((a, b) => prioridad[a.tono] - prioridad[b.tono]);
 }

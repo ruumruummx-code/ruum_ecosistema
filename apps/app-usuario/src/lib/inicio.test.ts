@@ -39,6 +39,13 @@ function pasaporte(overrides: Partial<Pasaporte> & { traslado_id: string; estado
 }
 
 describe("inicio helpers (R7)", () => {
+  it("ordena alertas por urgencia y ofrece soporte para la verificación rechazada", () => {
+    const usuario = { estado_verificacion: "pendiente" } as Database["public"]["Tables"]["usuarios"]["Row"];
+    const avisos = construirNotificaciones(usuario, [pasaporte({ traslado_id: "pago", estado: "pago_pendiente" })]);
+    expect(avisos.map(n => n.tono)).toEqual(["atencion", "info"]);
+    const rechazo = construirNotificaciones({ ...usuario, estado_verificacion: "rechazado" }, []);
+    expect(rechazo[0].href).toBe("/soporte");
+  });
   it("esTrasladoActivo false para finalizados", () => {
     expect(esTrasladoActivo("servicio_cerrado")).toBe(false);
     expect(esTrasladoActivo("servicio_cancelado")).toBe(false);
@@ -50,11 +57,11 @@ describe("inicio helpers (R7)", () => {
     expect(esTrasladoActivo("traslado_en_curso")).toBe(true);
     expect(esTrasladoActivo("conductor_asignado")).toBe(true);
   });
-  it("obtenerViajeActivo retorna más reciente activo", () => {
+  it("obtenerViajeActivo prioriza el servicio en curso", () => {
     const viejo = pasaporte({ traslado_id: "a", estado: "traslado_en_curso", creado_en: "2024-01-01T00:00:00Z" } as never);
     const nuevo = pasaporte({ traslado_id: "b", estado: "conductor_en_camino_al_origen", creado_en: "2024-02-01T00:00:00Z" } as never);
     const cerrado = pasaporte({ traslado_id: "c", estado: "servicio_cerrado", creado_en: "2024-03-01T00:00:00Z" } as never);
-    expect(obtenerViajeActivo([viejo, nuevo, cerrado])?.traslado_id).toBe("b");
+    expect(obtenerViajeActivo([viejo, nuevo, cerrado])?.traslado_id).toBe("a");
   });
   it("obtenerViajeActivo retorna null si solo cerrados", () => {
     expect(obtenerViajeActivo([pasaporte({ traslado_id: "x", estado: "servicio_cerrado" } as never)])).toBeNull();

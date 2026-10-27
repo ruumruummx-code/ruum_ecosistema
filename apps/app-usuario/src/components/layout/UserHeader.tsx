@@ -113,6 +113,7 @@ export function UserHeader({
   const [buscadorAbierto, setBuscadorAbierto] = useState(false);
   const [notificacionesAbiertas, setNotificacionesAbiertas] = useState(false);
   const [perfilAbierto, setPerfilAbierto] = useState(false);
+  const [errorSesion, setErrorSesion] = useState<string | null>(null);
   const [cerrandoSesion, setCerrandoSesion] = useState(false);
 
   const nombreCompleto = (user?.name || nombre || usuario?.nombre || "Usuario").trim();
@@ -173,6 +174,7 @@ export function UserHeader({
     if (cerrandoSesion) return;
     setPerfilAbierto(false);
     setCerrandoSesion(true);
+    setErrorSesion(null);
 
     try {
       if (onLogout) {
@@ -184,11 +186,12 @@ export function UserHeader({
         return;
       }
       const { crearClienteNavegador } = await import("../../lib/supabase-browser");
-      await crearClienteNavegador().auth.signOut();
+      const { error } = await crearClienteNavegador().auth.signOut();
+      if (error) throw error;
       router.replace("/login");
       router.refresh();
     } catch {
-      // Si Supabase no responde, se ofrece de nuevo el acceso al menú.
+      setErrorSesion("No pudimos cerrar tu sesión. Inténtalo de nuevo desde el menú de usuario.");
     } finally {
       setCerrandoSesion(false);
     }
@@ -200,6 +203,7 @@ export function UserHeader({
       aria-label="Barra superior de usuario"
       className="sticky top-0 z-30 flex h-[var(--rr-header-height,72px)] shrink-0 items-center justify-between gap-3 border-b border-[var(--rr-border,#e3eaf3)] bg-[var(--rr-header-bg,#ffffff)] px-4 sm:px-6 xl:px-8 text-[var(--ruum-text)] transition-colors duration-150"
     >
+      {errorSesion && <p role="alert" className="absolute right-4 top-full rounded-xl border border-red-300 bg-white p-3 text-sm text-red-800">{errorSesion}</p>}
       <div ref={contenedorRef} className="flex min-w-0 flex-1 items-center justify-between gap-3 sm:gap-4">
         {/* Botón de Menú Hamburguesa para Móvil + Buscador global */}
         <div className="flex min-w-0 flex-1 items-center gap-2 sm:gap-3">
@@ -222,6 +226,8 @@ export function UserHeader({
               <input
                 ref={buscadorRef}
                 type="search"
+                role="combobox"
+                aria-haspopup="dialog"
                 value={busqueda}
                 onChange={(evento) => {
                   setBusqueda(evento.target.value);
