@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useCargaMasiva, STORAGE_KEY_CARGA_ACTIVA } from "../nuevo/hooks/useCargaMasiva";
+import { useCargaMasiva, STORAGE_KEY_CARGA_ACTIVA, type FilaMasiva } from "../nuevo/hooks/useCargaMasiva";
 
 export interface CargaRecienteItem {
   id: string;
@@ -62,31 +62,138 @@ export function mapearPendienteACargaReciente(p: {
 
 const LIMITE_TAMANO_BYTES = 5 * 1024 * 1024; // 5 MB
 
-export function descargarReporteLote(carga: CargaRecienteItem) {
+/**
+ * Genera y descarga un CSV con el detalle completo por traslado:
+ * Índice, Estatus, Vehículo, Origen, Destino, Tarifa, Incidencia.
+ */
+export function descargarReporteDetallado(filas: FilaMasiva[], nombreArchivo: string) {
   const lineas = [
-    ["ID Lote", "Archivo", "Fecha y Hora", "Cantidad de Traslados", "Estado", "Tipo"],
-    [
-      carga.id,
-      carga.archivo,
-      carga.fechaHora,
-      String(carga.traslados),
-      carga.estado,
-      carga.esLocal ? "Borrador local" : "Lote servidor",
-    ],
+    ["Índice", "Estatus", "Vehículo", "Origen", "Destino", "Tarifa", "Incidencia"],
+    ...filas.map((fila) => {
+      const vehiculo =
+        [fila.datos.marca, fila.datos.modelo, fila.datos.anio].filter(Boolean).join(" ") ||
+        "Sin especificar";
+
+      const origenCp = fila.datos.origenCodigoPostal || fila.datos.origen_codigo_postal || "";
+      const origenDir =
+        [
+          fila.datos.origen_calle || fila.datos.origenCalle,
+          fila.datos.origen_numero || fila.datos.origenNumero,
+          origenCp ? `CP ${origenCp}` : "",
+        ]
+          .filter(Boolean)
+          .join(" ") ||
+        origenCp ||
+        "–";
+
+      const destinoCp = fila.datos.destinoCodigoPostal || fila.datos.destino_codigo_postal || "";
+      const destinoDir =
+        [
+          fila.datos.destino_calle || fila.datos.destinoCalle,
+          fila.datos.destino_numero || fila.datos.destinoNumero,
+          destinoCp ? `CP ${destinoCp}` : "",
+        ]
+          .filter(Boolean)
+          .join(" ") ||
+        destinoCp ||
+        "–";
+
+      const estatus =
+        fila.estado === "correcto"
+          ? fila.errorCotizacion
+            ? "Incidencia de ruta"
+            : "Válido"
+          : "Con incidencias";
+
+      const tarifa =
+        fila.tarifa != null ? `$${fila.tarifa.toFixed(2)} MXN` : "Pendiente";
+
+      const detalleErrores = Object.entries(fila.errores ?? {})
+        .map(([campo, err]) => `${campo}: ${err}`)
+        .join("; ");
+
+      const incidencia = fila.errorCotizacion || detalleErrores || "Ninguna";
+
+      return [
+        String(fila.indice + 1),
+        estatus,
+        vehiculo,
+        origenDir,
+        destinoDir,
+        tarifa,
+        incidencia,
+      ];
+    }),
   ];
-  const contenido = lineas
-    .map((fila) => fila.map((campo) => `"${campo.replace(/"/g, '""')}"`).join(","))
-    .join("\n");
+
+  // BOM \uFEFF para asegurar decodificación correcta en Excel en español
+  const contenido =
+    "\uFEFF" +
+    lineas
+      .map((fila) => fila.map((campo) => `"${String(campo).replace(/"/g, '""')}"`).join(","))
+      .join("\n");
 
   const blob = new Blob([contenido], { type: "text/csv;charset=utf-8;" });
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
-  a.download = `reporte_${carga.archivo.replace(/\.[^/.]+$/, "")}.csv`;
+  const nombreBase = nombreArchivo.replace(/\.[^/.]+$/, "");
+  a.download = `reporte_detalle_${nombreBase}.csv`;
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
+}
+
+/**
+ * Genera y descarga un CSV con el resumen de métricas del lote cuando
+ * no se dispone del desglose individual de filas en memoria.
+ */
+export function descargarResumenLote(carga: CargaRecienteItem) {
+  const lineas = [
+    [
+      "ID Lote",
+      "Archivo",
+      "Fecha y Hora",
+      "Cantidad de Traslados",
+      "Total Estimado MXN",
+      "Estado",
+      "Tipo de Registro",
+    ],
+    [
+      carga.id,
+      carga.archivo,
+      carga.fechaHora,
+      String(carga.traslados),
+      carga.totalMXN != null ? `$${carga.totalMXN.toFixed(2)} MXN` : "–",
+      carga.estado,
+      carga.esLocal ? "Borrador local" : "Lote servidor",
+    ],
+  ];
+
+  const contenido =
+    "\uFEFF" +
+    lineas
+      .map((fila) => fila.map((campo) => `"${String(campo).replace(/"/g, '""')}"`).join(","))
+      .join("\n");
+
+  const blob = new Blob([contenido], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `resumen_lote_${carga.archivo.replace(/\.[^/.]+$/, "")}.csv`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+export function descargarReporteLote(carga: CargaRecienteItem, filas?: FilaMasiva[]) {
+  if (filas && filas.length > 0) {
+    descargarReporteDetallado(filas, carga.archivo);
+  } else {
+    descargarResumenLote(carga);
+  }
 }
 
 export async function copiarResumenLote(carga: CargaRecienteItem): Promise<boolean> {
@@ -97,7 +204,7 @@ export async function copiarResumenLote(carga: CargaRecienteItem): Promise<boole
       return true;
     }
   } catch {
-    // Fallback a elemento temporal
+    // Fallback a elemento temporal si Clipboard API no está permitida
   }
 
   try {
@@ -109,7 +216,7 @@ export async function copiarResumenLote(carga: CargaRecienteItem): Promise<boole
     textarea.select();
     const exito = document.execCommand("copy");
     document.body.removeChild(textarea);
-    return exito;
+    return Boolean(exito);
   } catch {
     return false;
   }
@@ -155,11 +262,14 @@ export function useCargaMasivaDesktop() {
     return () => clearTimeout(t);
   }, [toast]);
 
-  // Carga y sincronización de pendientes desde el servidor
+  // Carga y sincronización de pendientes desde el servidor con referencias estables
+  const consultarPendientesRef = useRef(cargaMasiva.consultarCargasPendientes);
+  consultarPendientesRef.current = cargaMasiva.consultarCargasPendientes;
+
   const refrescarPendientes = useCallback(async () => {
     setCargandoPendientes(true);
     try {
-      const lista = await cargaMasiva.consultarCargasPendientes();
+      const lista = await consultarPendientesRef.current();
       if (Array.isArray(lista)) {
         setCargasPendientes(lista);
         setCargasRecientes(lista.map(mapearPendienteACargaReciente));
@@ -167,28 +277,46 @@ export function useCargaMasivaDesktop() {
     } finally {
       setCargandoPendientes(false);
     }
-  }, [cargaMasiva]);
+  }, []);
 
+  const consultaPendientesInicialRef = useRef(false);
   useEffect(() => {
+    if (consultaPendientesInicialRef.current) return;
+    consultaPendientesInicialRef.current = true;
     let activo = true;
-    void cargaMasiva.consultarCargasPendientes().then((pendientes) => {
+
+    void consultarPendientesRef.current().then((pendientes) => {
       if (!activo) return;
       if (Array.isArray(pendientes)) {
         setCargasPendientes(pendientes);
         setCargasRecientes(pendientes.map(mapearPendienteACargaReciente));
       }
     });
+
     return () => {
       activo = false;
     };
-  }, [cargaMasiva.consultarCargasPendientes]);
+  }, []);
+
+  // F04: Protección contra ejecuciones repetidas al montar o ante cambios de identidad
+  const reanudacionIntentadaRef = useRef(false);
+  const reanudarCargaRef = useRef(cargaMasiva.reanudarCarga);
+  reanudarCargaRef.current = cargaMasiva.reanudarCarga;
+  const estadoCarga = cargaMasiva.estado;
 
   // Recuperación segura de checkout si existe carga activa en localStorage
   useEffect(() => {
+    if (reanudacionIntentadaRef.current) return;
+    if (estadoCarga !== "idle") return;
+
     try {
-      const guardada = localStorage.getItem(STORAGE_KEY_CARGA_ACTIVA);
-      if (guardada && cargaMasiva.estado === "idle") {
-        void cargaMasiva.reanudarCarga(guardada).then((reanudado) => {
+      const guardada =
+        typeof window !== "undefined"
+          ? localStorage.getItem(STORAGE_KEY_CARGA_ACTIVA)
+          : null;
+      if (guardada) {
+        reanudacionIntentadaRef.current = true;
+        void reanudarCargaRef.current(guardada).then((reanudado) => {
           if (reanudado) {
             mostrarToast("Sesión de checkout recuperada.", "info");
           }
@@ -197,7 +325,7 @@ export function useCargaMasivaDesktop() {
     } catch {
       // Ignorar fallo de almacenamiento
     }
-  }, [cargaMasiva, mostrarToast]);
+  }, [estadoCarga, mostrarToast]);
 
   // Sincronización de notificaciones reactivas según el estado
   useEffect(() => {
@@ -342,21 +470,45 @@ export function useCargaMasivaDesktop() {
     setModalDetalleData(null);
   }, []);
 
-  // Acciones reales de fila
+  // F01: Acciones reales de descarga con distinción entre detalle y resumen
   const handleDescargarReporte = useCallback(
     (carga: CargaRecienteItem) => {
       toggleMenu(carga.id);
-      descargarReporteLote(carga);
-      mostrarToast(`Descargando reporte de ${carga.archivo}...`, "info");
+      const tieneFilasActivas =
+        (carga.id === cargaMasiva.cargaId || carga.esLocal) &&
+        cargaMasiva.filas &&
+        cargaMasiva.filas.length > 0;
+      const filasADescargar = tieneFilasActivas ? cargaMasiva.filas : undefined;
+
+      descargarReporteLote(carga, filasADescargar);
+      if (filasADescargar && filasADescargar.length > 0) {
+        mostrarToast(`Descargando reporte detallado de ${carga.archivo}...`, "info");
+      } else {
+        mostrarToast(`Descargando resumen del lote ${carga.archivo}...`, "info");
+      }
     },
-    [mostrarToast, toggleMenu]
+    [cargaMasiva.cargaId, cargaMasiva.filas, mostrarToast, toggleMenu]
   );
 
+  const handleDescargarDetalleActivo = useCallback(() => {
+    if (!cargaMasiva.filas || cargaMasiva.filas.length === 0) {
+      mostrarToast("No hay datos de traslados para exportar.", "error");
+      return;
+    }
+    descargarReporteDetallado(cargaMasiva.filas, nombreArchivo || "lote_traslados.xlsx");
+    mostrarToast("Descargando reporte detallado de traslados (.csv)...", "info");
+  }, [cargaMasiva.filas, nombreArchivo, mostrarToast]);
+
+  // F02: Verificación real del éxito de copiado al portapapeles
   const handleCopiarResumen = useCallback(
     async (carga: CargaRecienteItem) => {
       toggleMenu(carga.id);
-      await copiarResumenLote(carga);
-      mostrarToast("Resumen de carga copiado al portapapeles", "exito");
+      const copiado = await copiarResumenLote(carga);
+      if (copiado) {
+        mostrarToast("Resumen de carga copiado al portapapeles.", "exito");
+      } else {
+        mostrarToast("No se pudo copiar el resumen al portapapeles.", "error");
+      }
     },
     [mostrarToast, toggleMenu]
   );
@@ -406,6 +558,7 @@ export function useCargaMasivaDesktop() {
     abrirDetalle,
     cerrarDetalle,
     handleDescargarReporte,
+    handleDescargarDetalleActivo,
     handleCopiarResumen,
     filaEditando,
     iniciarEdicionFila,

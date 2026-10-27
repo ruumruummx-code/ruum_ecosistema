@@ -1,8 +1,13 @@
 /** @vitest-environment jsdom */
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { render, screen, waitFor, fireEvent, within, act } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { CargaMasivaDesktop } from "./CargaMasivaDesktop";
+import {
+  descargarReporteDetallado,
+  descargarResumenLote,
+  copiarResumenLote,
+} from "./useCargaMasivaDesktop";
 
 async function renderizarDesktop(nombre = "Alex") {
   let view!: ReturnType<typeof render>;
@@ -538,5 +543,154 @@ describe("CargaMasivaDesktop — Pantalla de Carga Masiva de Escritorio", () => 
     await user.click(botonReanudar);
 
     expect(reanudarCargaMock).toHaveBeenCalledWith("carga-pendiente-99");
+  });
+
+  describe("F01 — Exportación de detalle por traslado vs resumen del lote", () => {
+    let originalCreateObjectURL: typeof URL.createObjectURL;
+    let originalRevokeObjectURL: typeof URL.revokeObjectURL;
+
+    beforeEach(() => {
+      originalCreateObjectURL = URL.createObjectURL;
+      originalRevokeObjectURL = URL.revokeObjectURL;
+      URL.createObjectURL = vi.fn(() => "blob:mock-url");
+      URL.revokeObjectURL = vi.fn();
+    });
+
+    afterEach(() => {
+      URL.createObjectURL = originalCreateObjectURL;
+      URL.revokeObjectURL = originalRevokeObjectURL;
+      vi.restoreAllMocks();
+    });
+
+    it("genera reporte detallado con las 7 columnas completas de traslados", () => {
+      const filasMock: Parameters<typeof descargarReporteDetallado>[0] = [
+        {
+          indice: 0,
+          estado: "correcto",
+          tarifa: 1450.5,
+          datos: {
+            marca: "Toyota",
+            modelo: "Corolla",
+            anio: "2023",
+            origenCodigoPostal: "01000",
+            destinoCodigoPostal: "06000",
+            entregaNombre: "Juan",
+            entregaTelefono: "5512345678",
+            recepcionNombre: "Pedro",
+            recepcionTelefono: "5587654321",
+            condicion: "seminueva",
+          },
+          errores: {},
+        },
+        {
+          indice: 1,
+          estado: "error",
+          errorCotizacion: "Dirección de destino fuera de cobertura",
+          datos: {
+            marca: "Nissan",
+            modelo: "Versa",
+            anio: "2022",
+            origenCodigoPostal: "01000",
+            destinoCodigoPostal: "99999",
+            entregaNombre: "Ana",
+            entregaTelefono: "5512345679",
+            recepcionNombre: "Luis",
+            recepcionTelefono: "5587654322",
+            condicion: "seminueva",
+          },
+          errores: { destinoCodigoPostal: "Código postal inválido" },
+        },
+      ];
+
+      const clickMock = vi.fn();
+      let elementoA: HTMLAnchorElement | null = null;
+      const origCreateElement = document.createElement.bind(document);
+      vi.spyOn(document, "createElement").mockImplementation((tag: string) => {
+        const el = origCreateElement(tag);
+        if (tag === "a") {
+          elementoA = el as HTMLAnchorElement;
+          elementoA.click = clickMock;
+        }
+        return el;
+      });
+
+      descargarReporteDetallado(filasMock, "mis_traslados.xlsx");
+
+      expect(clickMock).toHaveBeenCalled();
+      expect((elementoA as unknown as HTMLAnchorElement)?.download).toBe("reporte_detalle_mis_traslados.csv");
+    });
+
+    it("genera resumen del lote cuando se solicita sin detalle individual", () => {
+      const clickMock = vi.fn();
+      let elementoA: HTMLAnchorElement | null = null;
+      const origCreateElement = document.createElement.bind(document);
+      vi.spyOn(document, "createElement").mockImplementation((tag: string) => {
+        const el = origCreateElement(tag);
+        if (tag === "a") {
+          elementoA = el as HTMLAnchorElement;
+          elementoA.click = clickMock;
+        }
+        return el;
+      });
+
+      descargarResumenLote({
+        id: "lote-resumen-1",
+        fechaHora: "27/10/2026, 09:00 a. m.",
+        archivo: "lote_resumen.xlsx",
+        traslados: 10,
+        totalMXN: 15000,
+        estado: "Completado",
+        accion: "Ver resultado",
+        esLocal: false,
+      });
+
+      expect(clickMock).toHaveBeenCalled();
+      expect((elementoA as unknown as HTMLAnchorElement)?.download).toBe("resumen_lote_lote_resumen.csv");
+    });
+  });
+
+  describe("F02 — Validación del resultado de copiado al portapapeles", () => {
+    it("copiarResumenLote retorna true si navigator.clipboard tiene éxito", async () => {
+      const writeTextMock = vi.fn().mockResolvedValue(undefined);
+      Object.defineProperty(navigator, "clipboard", {
+        value: { writeText: writeTextMock },
+        configurable: true,
+        writable: true,
+      });
+
+      const resultado = await copiarResumenLote({
+        id: "lote-1",
+        fechaHora: "27/10/2026, 09:00 a. m.",
+        archivo: "lote_1.xlsx",
+        traslados: 5,
+        totalMXN: 7500,
+        estado: "Completado",
+        accion: "Ver resultado",
+      });
+
+      expect(resultado).toBe(true);
+      expect(writeTextMock).toHaveBeenCalled();
+    });
+
+    it("copiarResumenLote retorna false si tanto clipboard como fallback fallan", async () => {
+      Object.defineProperty(navigator, "clipboard", {
+        value: { writeText: vi.fn().mockRejectedValue(new Error("Acceso denegado")) },
+        configurable: true,
+        writable: true,
+      });
+      // Mock execCommand para fallar
+      document.execCommand = vi.fn().mockReturnValue(false);
+
+      const resultado = await copiarResumenLote({
+        id: "lote-fallido",
+        fechaHora: "27/10/2026, 09:00 a. m.",
+        archivo: "lote_fallido.xlsx",
+        traslados: 5,
+        estado: "Con errores",
+        accion: "Ver errores",
+      });
+
+      expect(resultado).toBe(false);
+    });
   });
 });
