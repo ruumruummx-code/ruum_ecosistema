@@ -400,18 +400,18 @@ export default function PaginaMapaOperativo() {
           });
           mapa.on("click", "clusters-vehiculos", (evento) => {
             const features = mapa.queryRenderedFeatures(evento.point, { layers: ["clusters-vehiculos"] });
-            const clusterId = features[0]?.properties?.cluster_id;
+            const clusterId = (features[0] as unknown as { properties?: { cluster_id?: number } })?.properties?.cluster_id;
             const source = mapa.getSource("vehiculos-operativos-cluster") as { getClusterExpansionZoom: (id: number, callback: (error: Error | null, zoom: number) => void) => void };
             if (typeof clusterId !== "number") return;
             source.getClusterExpansionZoom(clusterId, (error, zoom) => {
               if (error) return;
-              const coordinates = (features[0]?.geometry as { coordinates?: [number, number] } | undefined)?.coordinates;
+              const coordinates = (features[0] as unknown as { geometry?: { coordinates?: [number, number] } } | undefined)?.geometry?.coordinates;
               if (coordinates) mapa.easeTo({ center: coordinates, zoom });
             });
           });
           mapa.on("click", "vehiculos-no-agrupados", (evento) => {
-            const feature = evento.features?.[0];
-            const coordinates = (feature?.geometry as { coordinates?: [number, number] } | undefined)?.coordinates;
+            const feature = evento.features?.[0] as unknown as { geometry?: { coordinates?: [number, number] }; properties?: { popupHtml?: string; trasladoId?: string } } | undefined;
+            const coordinates = feature?.geometry?.coordinates;
             const popupHtml = typeof feature?.properties?.popupHtml === "string" ? feature.properties.popupHtml : null;
             const trasladoId = typeof feature?.properties?.trasladoId === "string" ? feature.properties.trasladoId : null;
             if (trasladoId) seleccionarTraslado(trasladoId);
