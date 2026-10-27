@@ -144,17 +144,24 @@ function reducer(state: State, action: Action): State {
       return { ...state, progreso: action.valor };
     case "COTIZANDO":
       return { ...state, estado: "cotizando", progreso: 50 };
-    case "COTIZACION_OK":
+    case "COTIZACION_OK": {
+      const filasCotizadas = action.filas.map((f) => ({
+        ...f,
+        estadoGranular: (f.errorCotizacion ? "error" : f.tarifa != null ? "cotizado" : "pendiente") as EstadoFilaGranular,
+      }));
+      // Si la cotización fue parcial, conservamos las filas previas con incidencias que quedaron en borrador
+      const indicesCotizados = new Set(filasCotizadas.map((f) => f.indice));
+      const filasPendientesConservadas = state.filas.filter(
+        (f) => !f.eliminada && f.estado === "error" && !indicesCotizados.has(f.indice)
+      );
       return {
         ...state,
         estado: "checkout",
-        filas: action.filas.map((f) => ({
-          ...f,
-          estadoGranular: f.errorCotizacion ? "error" : f.tarifa != null ? "cotizado" : "pendiente",
-        })),
+        filas: [...filasCotizadas, ...filasPendientesConservadas],
         totalMXN: action.totalMXN,
         progreso: 100,
       };
+    }
     case "CHECKOUT":
       return { ...state, stripeClientSecret: action.stripeClientSecret, cargaId: action.cargaId };
     case "REANUDAR_CHECKOUT":
@@ -427,7 +434,7 @@ export function useCargaMasiva() {
     try {
       const res = await fetchConReintento("/api/viajes/masivos/pendientes", {}, 3, 1000);
       const data = await res.json();
-      return (data.pendientes ?? []) as Array<{ id: string; totalMXN: number; cantidad_traslados: number; creado_en?: string }>;
+      return ((data.pendientes ?? data.cargas) ?? []) as Array<{ id: string; totalMXN: number; cantidad_traslados: number; creado_en?: string }>;
     } catch (err) {
       logStructuredWarn("viajes/useCargaMasiva", "consultar_cargas_pendientes_fallido", err);
       return [];

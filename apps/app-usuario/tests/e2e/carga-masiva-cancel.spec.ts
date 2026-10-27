@@ -107,7 +107,7 @@ async function abrirModuloCargaMasiva(page: import("@playwright/test").Page) {
   await expect(btn).toBeVisible({ timeout: 10000 });
   await btn.focus();
   await btn.press("Enter");
-  await expect(page.getByRole("heading", { name: /carga masiva de traslados/i })).toBeVisible({ timeout: 5000 });
+  await expect(page.getByRole("heading", { name: /carga masiva de traslados/i }).first()).toBeVisible({ timeout: 5000 });
 }
 
 test.describe("R6 Carga masiva (xlsx) en BottomSheet", () => {
@@ -127,7 +127,7 @@ test.describe("R6 Carga masiva (xlsx) en BottomSheet", () => {
     await page.getByRole("button", { name: /^Cancelar carga$/i }).click();
 
     // El BottomSheet debe cerrarse y volver al Paso 0 del wizard.
-    await expect(page.getByRole("heading", { name: /carga masiva de traslados/i })).toBeHidden({ timeout: 5000 });
+    await expect(page.getByRole("heading", { name: /carga masiva de traslados/i }).first()).toBeHidden({ timeout: 5000 });
     await expect(page.getByRole("button", { name: /Abrir módulo de carga masiva de traslados/i })).toBeVisible({ timeout: 5000 });
   });
 
@@ -180,7 +180,7 @@ test.describe("R6 Carga masiva (xlsx) en BottomSheet", () => {
 
     const buffer = await crearXlsxPrueba();
     const fileChooserPromise = page.waitForEvent("filechooser");
-    await page.locator("#masivo-file-input").click();
+    await page.locator("#masivo-file-input").click({ force: true });
     const fileChooser = await fileChooserPromise;
     await fileChooser.setFiles({
       name: "lote-traslados.xlsx",
@@ -189,7 +189,7 @@ test.describe("R6 Carga masiva (xlsx) en BottomSheet", () => {
     });
 
     // Validar que se muestre la fila procesada y el botón de cotizar
-    await expect(page.getByText(/Nissan/i).first()).toBeVisible({ timeout: 10000 });
+    await expect(page.getByRole("button", { name: /Nissan/i })).toBeVisible({ timeout: 10000 });
     const btnCotizar = page.getByRole("button", { name: /Cotizar \d+ traslado/i });
     await expect(btnCotizar).toBeVisible();
     await btnCotizar.click();

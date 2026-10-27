@@ -20,10 +20,40 @@ vi.mock("next/navigation", () => ({
   useSearchParams: () => new URLSearchParams(),
 }));
 
+vi.mock("@/app/PagoStripe", () => ({
+  PagoStripe: ({
+    onPagado,
+    onEstadoPago,
+  }: {
+    onPagado?: () => void;
+    onEstadoPago?: (s: { listo: boolean; procesando: boolean }) => void;
+  }) => (
+    <div data-testid="pago-stripe-mock">
+      <button type="button" onClick={() => onPagado?.()}>
+        Simular Pago Stripe
+      </button>
+      <button
+        type="button"
+        onClick={() => onEstadoPago?.({ listo: true, procesando: false })}
+      >
+        Simular Formulario Listo
+      </button>
+    </div>
+  ),
+}));
+
 const cargarArchivoMock = vi.fn();
 const reanudarCargaMock = vi.fn();
 const descartarCargaPendienteMock = vi.fn();
-const consultarCargasPendientesMock = vi.fn().mockResolvedValue([
+const corregirCampoMock = vi.fn();
+const eliminarFilaMock = vi.fn();
+const geocodificarYCotizarMock = vi.fn();
+const cotizarSoloValidasMock = vi.fn();
+const confirmarPagoMock = vi.fn();
+const consultarEstadoPagoMock = vi.fn().mockResolvedValue({ pagado: true, fuente: "webhook" });
+const cancelarMock = vi.fn();
+
+const cargasPendientesServidorDefault = [
   {
     id: "rec-1",
     totalMXN: 8500,
@@ -48,37 +78,56 @@ const consultarCargasPendientesMock = vi.fn().mockResolvedValue([
     archivo: "traslados_sucursal.xlsx",
     estado: "Con errores",
   },
-]);
+];
+
+const consultarCargasPendientesMock = vi.fn().mockResolvedValue(cargasPendientesServidorDefault);
+
+const mockHookReturn = {
+  estado: "idle" as any,
+  error: null as string | null,
+  filasVisibles: [] as any[],
+  filasConError: [] as any[],
+  filasCorrectas: [] as any[],
+  totalMXN: 0,
+  todasListas: false,
+  progreso: 0,
+  pagoConfirmado: false,
+  cargaId: null as string | null,
+  stripeClientSecret: null as string | null,
+  cargarArchivo: cargarArchivoMock,
+  corregirCampo: corregirCampoMock,
+  eliminarFila: eliminarFilaMock,
+  geocodificarYCotizar: geocodificarYCotizarMock,
+  cotizarSoloValidas: cotizarSoloValidasMock,
+  confirmarPago: confirmarPagoMock,
+  consultarEstadoPago: consultarEstadoPagoMock,
+  cancelar: cancelarMock,
+  cargaPendienteStorage: null as any,
+  reanudarCarga: reanudarCargaMock,
+  descartarCargaPendiente: descartarCargaPendienteMock,
+  consultarCargasPendientes: consultarCargasPendientesMock,
+};
 
 vi.mock("../nuevo/hooks/useCargaMasiva", () => ({
-  useCargaMasiva: () => ({
-    estado: "idle",
-    error: null,
-    filasVisibles: [],
-    filasConError: [],
-    filasCorrectas: [],
-    totalMXN: 0,
-    todasListas: false,
-    progreso: 0,
-    pagoConfirmado: false,
-    cargaId: null,
-    stripeClientSecret: null,
-    cargarArchivo: cargarArchivoMock,
-    corregirCampo: vi.fn(),
-    eliminarFila: vi.fn(),
-    geocodificarYCotizar: vi.fn(),
-    confirmarPago: vi.fn(),
-    cancelar: vi.fn(),
-    cargaPendienteStorage: null,
-    reanudarCarga: reanudarCargaMock,
-    descartarCargaPendiente: descartarCargaPendienteMock,
-    consultarCargasPendientes: consultarCargasPendientesMock,
-  }),
+  useCargaMasiva: () => mockHookReturn,
 }));
 
 describe("CargaMasivaDesktop — Pantalla de Carga Masiva de Escritorio", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockHookReturn.estado = "idle";
+    mockHookReturn.error = null;
+    mockHookReturn.filasVisibles = [];
+    mockHookReturn.filasConError = [];
+    mockHookReturn.filasCorrectas = [];
+    mockHookReturn.totalMXN = 0;
+    mockHookReturn.todasListas = false;
+    mockHookReturn.progreso = 0;
+    mockHookReturn.pagoConfirmado = false;
+    mockHookReturn.cargaId = null;
+    mockHookReturn.stripeClientSecret = null;
+    mockHookReturn.cargaPendienteStorage = null;
+    consultarCargasPendientesMock.mockResolvedValue(cargasPendientesServidorDefault);
   });
 
   it("renderiza el sidebar con la opción Carga Masiva activa y la tarjeta inferior Traslados sin límites", async () => {
@@ -279,5 +328,215 @@ describe("CargaMasivaDesktop — Pantalla de Carga Masiva de Escritorio", () => 
     expect(within(footerSoporte).getByRole("heading", { name: "¿Necesitas ayuda?" })).toBeInTheDocument();
     expect(within(footerSoporte).getByText(/Nuestro equipo está listo para ayudarte/)).toBeInTheDocument();
     expect(within(footerSoporte).getByRole("link", { name: /Contactar soporte/ })).toHaveAttribute("href", "/soporte");
+  });
+
+  const filaValidaMock: any = {
+    indice: 0,
+    estado: "correcto",
+    datos: {
+      marca: "Nissan",
+      modelo: "Versa",
+      anio: "2023",
+      condicion: "seminueva",
+      origenCodigoPostal: "01000",
+      destinoCodigoPostal: "06600",
+      origen_calle: "Av Insurgentes",
+      origen_numero: "100",
+      origen_colonia: "Roma",
+      destino_calle: "Av Reforma",
+      destino_numero: "200",
+      destino_colonia: "Juárez",
+      vehiculo_placas: "ABC1234",
+      entregaNombre: "Juan Pérez",
+      entregaTelefono: "5512345678",
+      recepcionNombre: "María López",
+      recepcionTelefono: "5587654321",
+    },
+    errores: {},
+    tarifa: 650,
+    distanciaKm: 12.5,
+  };
+
+  const filaInvalidaMock: any = {
+    indice: 1,
+    estado: "error",
+    datos: {
+      marca: "Ford",
+      modelo: "Focus",
+      anio: "2020",
+      condicion: "seminueva",
+      origenCodigoPostal: "99999",
+      destinoCodigoPostal: "06600",
+      origen_calle: "Calle Central",
+      origen_numero: "50",
+      origen_colonia: "Centro",
+      destino_calle: "Av Hidalgo",
+      destino_numero: "10",
+      destino_colonia: "Centro",
+      vehiculo_placas: "XYZ9876",
+      entregaNombre: "Carlos Ruiz",
+      entregaTelefono: "5522334455",
+      recepcionNombre: "Ana Torres",
+      recepcionTelefono: "5599887766",
+    },
+    errores: {
+      origenCodigoPostal: "CP no encontrado o inválido",
+    },
+    errorCotizacion: "Error de geocodificación en CP origen",
+    tarifa: null,
+    distanciaKm: null,
+  };
+
+  it("renderiza la tabla de validación en estado 'resultados' con filtros, edición inline y cotización", async () => {
+    const user = userEvent.setup();
+    mockHookReturn.estado = "resultados";
+    mockHookReturn.filasVisibles = [filaValidaMock, filaInvalidaMock];
+    mockHookReturn.filasCorrectas = [filaValidaMock];
+    mockHookReturn.filasConError = [filaInvalidaMock];
+
+    await renderizarDesktop("Alex");
+
+    expect(screen.getByRole("heading", { name: "Validación de archivo" })).toBeInTheDocument();
+    expect(screen.getByText("Total de traslados")).toBeInTheDocument();
+    expect(screen.getByText("Listos para cotizar")).toBeInTheDocument();
+    expect(screen.getByText("Con incidencias")).toBeInTheDocument();
+
+    // Banner de lote parcial
+    const botonesCotizarValidas = screen.getAllByRole("button", { name: "Cotizar 1 válidas" });
+    expect(botonesCotizarValidas.length).toBeGreaterThan(0);
+
+    // Ambos autos en tabla
+    expect(screen.getByText("Nissan Versa")).toBeInTheDocument();
+    expect(screen.getByText("Ford Focus")).toBeInTheDocument();
+    expect(screen.getByText("CP no encontrado o inválido")).toBeInTheDocument();
+
+    // Filtros por tabs
+    const tabErrores = screen.getByRole("button", { name: "Con incidencias (1)" });
+    await user.click(tabErrores);
+    expect(screen.getByText("Ford Focus")).toBeInTheDocument();
+    expect(screen.queryByText("Nissan Versa")).not.toBeInTheDocument();
+
+    const tabValidas = screen.getByRole("button", { name: "Válidas (1)" });
+    await user.click(tabValidas);
+    expect(screen.getByText("Nissan Versa")).toBeInTheDocument();
+    expect(screen.queryByText("Ford Focus")).not.toBeInTheDocument();
+
+    const tabTodas = screen.getByRole("button", { name: "Todas (2)" });
+    await user.click(tabTodas);
+
+    // Edición inline de una fila
+    const botonEditar = screen.getByRole("button", { name: "Editar fila 2" });
+    await user.click(botonEditar);
+
+    const inputMarca = screen.getByLabelText("Marca fila 2");
+    expect(inputMarca).toHaveValue("Ford");
+    await user.clear(inputMarca);
+    await user.type(inputMarca, "Chevrolet");
+
+    await user.click(screen.getByRole("button", { name: "Guardar fila 2" }));
+    expect(corregirCampoMock).toHaveBeenCalledWith(1, "marca", "Chevrolet");
+
+    // Eliminar fila
+    const botonEliminar = screen.getByRole("button", { name: "Eliminar fila 2" });
+    await user.click(botonEliminar);
+    expect(eliminarFilaMock).toHaveBeenCalledWith(1);
+
+    // Botón de cotizar válidas
+    await user.click(botonesCotizarValidas[0]!);
+    expect(cotizarSoloValidasMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("renderiza la barra de progreso animada durante 'geocodificando' y 'cotizando'", async () => {
+    mockHookReturn.estado = "geocodificando";
+    mockHookReturn.progreso = 60;
+
+    await renderizarDesktop("Alex");
+
+    expect(
+      screen.getByText("Calculando rutas y distancias...")
+    ).toBeInTheDocument();
+    const barraProgreso = screen.getByRole("progressbar");
+    expect(barraProgreso).toHaveAttribute("aria-valuenow", "60");
+  });
+
+  it("renderiza la vista de checkout con resumen consolidado, desglose y formulario de pago", async () => {
+    const user = userEvent.setup();
+    mockHookReturn.estado = "checkout";
+    mockHookReturn.cargaId = "carga-test-123";
+    mockHookReturn.totalMXN = 1950;
+    mockHookReturn.filasVisibles = [filaValidaMock];
+    mockHookReturn.filasCorrectas = [filaValidaMock];
+    mockHookReturn.filasConError = [filaInvalidaMock];
+    mockHookReturn.stripeClientSecret = "pi_secret_test";
+
+    await renderizarDesktop("Alex");
+
+    expect(
+      screen.getByRole("heading", { name: "Revisión consolidada y Checkout masivo" })
+    ).toBeInTheDocument();
+    expect(screen.getByText("Total consolidado a pagar")).toBeInTheDocument();
+    expect(screen.getByText("$1,950.00")).toBeInTheDocument();
+
+    // Aviso de pago parcial en checkout
+    expect(screen.getByText("Pago parcial de traslados válidos")).toBeInTheDocument();
+    expect(screen.getByText(/Estás procesando el pago de/)).toBeInTheDocument();
+
+    // PagoStripe embebido
+    expect(screen.getByTestId("pago-stripe-mock")).toBeInTheDocument();
+
+    // Simula que el formulario de tarjeta queda listo
+    const botonListo = screen.getByRole("button", { name: "Simular Formulario Listo" });
+    await user.click(botonListo);
+
+    // Botón de pago anti-doble clic ahora habilitado
+    const botonPagar = screen.getByRole("button", { name: "Pagar $1,950.00 MXN" });
+    expect(botonPagar).not.toBeDisabled();
+
+    // Simula confirmación de Stripe exitosa llamando onPagado
+    const botonSimularPago = screen.getByRole("button", { name: "Simular Pago Stripe" });
+    await user.click(botonSimularPago);
+
+    expect(confirmarPagoMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("renderiza la pantalla de confirmación hero cuando el pago fue exitoso", async () => {
+    mockHookReturn.pagoConfirmado = true;
+    mockHookReturn.totalMXN = 2600;
+    mockHookReturn.filasCorrectas = [filaValidaMock, { ...filaValidaMock, indice: 1 }];
+
+    await renderizarDesktop("Alex");
+
+    expect(screen.getByText("¡Carga masiva procesada y confirmada!")).toBeInTheDocument();
+    expect(screen.getByText("$2,600.00 MXN")).toBeInTheDocument();
+    expect(screen.getByText("2")).toBeInTheDocument();
+
+    const enlaceMisViajes = screen.getByRole("link", { name: /Ver mis traslados/ });
+    expect(enlaceMisViajes).toHaveAttribute("href", "/mis-viajes");
+  });
+
+  it("muestra las cargas pendientes de pago en servidor y permite reanudarlas", async () => {
+    const user = userEvent.setup();
+    mockHookReturn.estado = "idle";
+    const cargaPendiente = {
+      id: "carga-pendiente-99",
+      totalMXN: 3200,
+      cantidad_traslados: 4,
+      creado_en: "2024-10-27T08:00:00Z",
+      archivo: "lote_urgente.xlsx",
+      estado: "Pendiente de pago",
+    };
+    consultarCargasPendientesMock.mockResolvedValueOnce([cargaPendiente]);
+
+    await renderizarDesktop("Alex");
+
+    expect(
+      await screen.findByRole("heading", { name: "Cargas pendientes de pago (1)" })
+    ).toBeInTheDocument();
+    expect(screen.getByText("$3,200.00 MXN")).toBeInTheDocument();
+
+    const botonReanudar = screen.getByRole("button", { name: "Reanudar carga" });
+    await user.click(botonReanudar);
+
+    expect(reanudarCargaMock).toHaveBeenCalledWith("carga-pendiente-99");
   });
 });
