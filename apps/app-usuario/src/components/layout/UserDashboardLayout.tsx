@@ -111,7 +111,12 @@ export function UserDashboardLayout({
         showPromo={showPromo}
       />
 
-      <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
+      <div
+        id="userDashboardMainContent"
+        aria-hidden={mobileOpen ? true : undefined}
+        inert={mobileOpen ? true : undefined}
+        className="flex min-w-0 flex-1 flex-col overflow-x-hidden overflow-y-hidden"
+      >
         <UserHeader
           user={user}
           usuario={usuario}

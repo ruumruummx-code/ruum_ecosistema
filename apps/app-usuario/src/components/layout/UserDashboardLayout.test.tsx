@@ -44,12 +44,15 @@ describe("UserDashboardLayout — Layout Compartido Global (RR-UI-001)", () => {
     expect(screen.getByTestId("child-content")).toBeInTheDocument();
   });
 
-  it("coordina la apertura y cierre del drawer móvil entre Header y Sidebar", () => {
+  it("coordina la apertura y cierre del drawer móvil aislando el contenido principal", () => {
     render(
       <UserDashboardLayout nombre="Hector Manuel">
         <div>Contenido</div>
       </UserDashboardLayout>
     );
+
+    const mainContainer = document.getElementById("userDashboardMainContent");
+    expect(mainContainer).not.toHaveAttribute("aria-hidden");
 
     // El drawer móvil se abre mediante el botón hamburguesa del Header
     const botonHamburguesa = screen.getByRole("button", { name: "Abrir menú de navegación" });
@@ -59,11 +62,41 @@ describe("UserDashboardLayout — Layout Compartido Global (RR-UI-001)", () => {
     const drawer = screen.getByRole("dialog");
     expect(drawer).toHaveAttribute("aria-modal", "true");
 
+    // El contenido principal queda aislado
+    expect(mainContainer).toHaveAttribute("aria-hidden", "true");
+
     // Botón de cierre en el sidebar
     const botonCerrar = screen.getByRole("button", { name: "Cerrar menú de navegación" });
     fireEvent.click(botonCerrar);
 
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+    expect(mainContainer).not.toHaveAttribute("aria-hidden");
+  });
+
+  it("inicia colapsado por defecto en viewport tipo tablet (768px a 1279px)", () => {
+    // Mock matchMedia para simular tablet
+    const matchMediaOriginal = window.matchMedia;
+    window.matchMedia = vi.fn().mockImplementation((query: string) => ({
+      matches: query.includes("768px") && query.includes("1279px"),
+      media: query,
+      onchange: null,
+      addListener: vi.fn(),
+      removeListener: vi.fn(),
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+      dispatchEvent: vi.fn(),
+    }));
+
+    render(
+      <UserDashboardLayout nombre="Hector Manuel">
+        <div>Contenido Tablet</div>
+      </UserDashboardLayout>
+    );
+
+    // En tablet inicia colapsado (botón para expandir disponible)
+    expect(screen.getByRole("button", { name: "Expandir menú lateral" })).toBeInTheDocument();
+
+    window.matchMedia = matchMediaOriginal;
   });
 
   it("permite colapsar el sidebar y persiste la preferencia en localStorage", () => {

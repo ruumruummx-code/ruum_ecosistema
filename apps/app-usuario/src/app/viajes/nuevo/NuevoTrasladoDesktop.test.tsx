@@ -11,6 +11,8 @@ const pushMock = vi.fn();
 const backMock = vi.fn();
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ push: pushMock, back: backMock }),
+  usePathname: () => "/viajes/nuevo",
+  useSearchParams: () => new URLSearchParams(),
 }));
 
 vi.mock("./components/CotizadorPortal", () => ({
@@ -103,26 +105,28 @@ describe("NuevoTrasladoDesktop — Paso 1: Conoce tu tarifa (Escritorio)", () =>
     vi.clearAllMocks();
   });
 
-  it("renderiza el sidebar izquierdo con el logo oficial Ruum Ruum USUARIO y la sección de navegación", () => {
+  it("renderiza el sidebar izquierdo con el logo oficial Ruum Ruum y la sección de navegación", () => {
     const t = crearEstadoMock();
     render(<NuevoTrasladoDesktop t={t} nombreUsuario="Hector" />);
 
     expect(screen.getAllByText("Ruum Ruum").length).toBeGreaterThanOrEqual(1);
-    expect(screen.getByText("USUARIO")).toBeInTheDocument();
+    expect(screen.getByText("Tu traslado, en orden")).toBeInTheDocument();
 
     const sidebar = screen.getByRole("complementary", { name: /menú principal de escritorio/i });
     expect(within(sidebar).getByText("Inicio")).toBeInTheDocument();
-    expect(within(sidebar).getByText("Traslados")).toBeInTheDocument();
-    expect(within(sidebar).getByText("Carga masiva")).toBeInTheDocument();
-    expect(within(sidebar).getByText("Cuenta")).toBeInTheDocument();
-    expect(within(sidebar).getByText("Perfil")).toBeInTheDocument();
-    expect(within(sidebar).getByText("Preferencias")).toBeInTheDocument();
+    expect(within(sidebar).getByText("Mis traslados")).toBeInTheDocument();
+    expect(within(sidebar).getByText("Mis vehículos")).toBeInTheDocument();
+    expect(within(sidebar).getByText("Mis ubicaciones")).toBeInTheDocument();
+    expect(within(sidebar).getByText("Carga Masiva")).toBeInTheDocument();
+    expect(within(sidebar).getByText("Mi cuenta")).toBeInTheDocument();
+    expect(within(sidebar).getByText("Mi perfil")).toBeInTheDocument();
+    expect(within(sidebar).getByText("Mis preferencias")).toBeInTheDocument();
+    expect(within(sidebar).getByText("Ayuda")).toBeInTheDocument();
 
-    // Card inferior promocional/seguridad
+    // Card inferior promocional
     expect(
-      within(sidebar).getByText(/Seguridad, evidencia y trazabilidad/i),
+      within(sidebar).getByText("Mueve tu auto sin salir de casa"),
     ).toBeInTheDocument();
-    expect(within(sidebar).getByText("Más rápido. Más simple. Más lejos.")).toBeInTheDocument();
   });
 
   it("renderiza la barra de navegación superior con buscador, alertas y perfil", () => {
@@ -133,7 +137,7 @@ describe("NuevoTrasladoDesktop — Paso 1: Conoce tu tarifa (Escritorio)", () =>
       screen.getByPlaceholderText("Buscar traslados, vehículos o documentos..."),
     ).toBeInTheDocument();
     expect(screen.getByLabelText("Notificaciones")).toBeInTheDocument();
-    expect(screen.getByLabelText("Perfil de usuario")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Menú de usuario/ })).toBeInTheDocument();
     expect(screen.getByText("Hola, Hector")).toBeInTheDocument();
   });
 

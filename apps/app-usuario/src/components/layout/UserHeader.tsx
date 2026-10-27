@@ -214,7 +214,7 @@ export function UserHeader({
             </button>
           )}
 
-          <div className="relative w-full max-w-[520px]">
+          <div className="relative w-full min-w-0 max-w-[200px] sm:max-w-[320px] md:max-w-[380px] lg:max-w-[460px] xl:max-w-[520px]">
             <form role="search" onSubmit={enviarBusqueda} className="relative">
               <span className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-[var(--ruum-text-tertiary)]">
                 <IconoBuscar className="size-4" />
@@ -460,7 +460,7 @@ export function UserHeader({
                 </span>
               )}
 
-              <span className="hidden text-left sm:block">
+              <span className="hidden text-left xl:block">
                 <span className="block text-xs font-bold leading-none text-[var(--ruum-text)]">
                   Hola, {primerNombre}
                 </span>
@@ -468,7 +468,7 @@ export function UserHeader({
                   {rolUsuario}
                 </span>
               </span>
-              <IconoChevron className="hidden size-4 text-[var(--ruum-text-tertiary)] sm:block" />
+              <IconoChevron className="hidden size-4 text-[var(--ruum-text-tertiary)] xl:block" />
             </button>
 
             {perfilAbierto && (

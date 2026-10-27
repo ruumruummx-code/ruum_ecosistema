@@ -100,27 +100,117 @@ export function UserSidebar({
   const parametros = useSearchParams();
   const ruta = activePath ?? rutaActual;
   const idActivo = obtenerItemActivo(ruta, parametros);
+  const sidebarRef = useRef<HTMLElement>(null);
   const botonCerrarRef = useRef<HTMLButtonElement>(null);
+  const elementoPrevioRef = useRef<HTMLElement | null>(null);
 
-  // En móvil con drawer abierto, bloquear el scroll del fondo y escuchar Escape
+  // En móvil con drawer abierto: trampa de foco, bloqueo de scroll, aislamiento del fondo y Escape
   useEffect(() => {
     if (!mobileOpen) return;
 
-    const estiloAnterior = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    botonCerrarRef.current?.focus();
+    // 1. Guardar el elemento previamente activo para restaurar el foco al cerrar
+    elementoPrevioRef.current = (document.activeElement as HTMLElement) ?? null;
 
+    // 2. Bloquear scroll del fondo
+    const estiloAnteriorOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    // 3. Foco inicial al botón de cerrar
+    const focoTimer = setTimeout(() => {
+      botonCerrarRef.current?.focus();
+    }, 0);
+
+    // 4. Aislar elementos hermanos para tecnologías de asistencia (background isolation)
+    const elementosAislados: Array<{ el: HTMLElement; prevAriaHidden: string | null; prevInert: boolean }> = [];
+    const sidebarEl = sidebarRef.current;
+
+    if (typeof document !== "undefined" && sidebarEl) {
+      const hijosBody = Array.from(document.body.children) as HTMLElement[];
+      for (const el of hijosBody) {
+        if (el !== sidebarEl && !el.contains(sidebarEl) && !el.classList.contains(estilos.drawerBackdrop)) {
+          elementosAislados.push({
+            el,
+            prevAriaHidden: el.getAttribute("aria-hidden"),
+            prevInert: el.inert,
+          });
+          el.setAttribute("aria-hidden", "true");
+          try {
+            el.inert = true;
+          } catch {
+            // Soporte seguro de navegador
+          }
+        }
+      }
+    }
+
+    // 5. Manejar Tab, Shift+Tab (focus trap) y tecla Escape
     const alPresionarTecla = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
         e.preventDefault();
         onMobileClose?.();
+        return;
+      }
+
+      if (e.key === "Tab") {
+        const sidebar = sidebarRef.current;
+        if (!sidebar) return;
+
+        const selector =
+          'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
+        const focusables = Array.from(
+          sidebar.querySelectorAll<HTMLElement>(selector)
+        ).filter(
+          (elem) =>
+            !elem.hasAttribute("disabled") &&
+            elem.getAttribute("aria-disabled") !== "true" &&
+            !elem.hidden &&
+            elem.tabIndex !== -1
+        );
+
+        if (focusables.length === 0) {
+          e.preventDefault();
+          return;
+        }
+
+        const primerElem = focusables[0];
+        const ultimoElem = focusables[focusables.length - 1];
+
+        if (e.shiftKey) {
+          if (document.activeElement === primerElem || !sidebar.contains(document.activeElement)) {
+            e.preventDefault();
+            ultimoElem.focus();
+          }
+        } else {
+          if (document.activeElement === ultimoElem || !sidebar.contains(document.activeElement)) {
+            e.preventDefault();
+            primerElem.focus();
+          }
+        }
       }
     };
 
     document.addEventListener("keydown", alPresionarTecla);
     return () => {
-      document.body.style.overflow = estiloAnterior;
+      clearTimeout(focoTimer);
+      document.body.style.overflow = estiloAnteriorOverflow;
       document.removeEventListener("keydown", alPresionarTecla);
+
+      // Restaurar aislamiento del fondo
+      for (const item of elementosAislados) {
+        if (item.prevAriaHidden === null) {
+          item.el.removeAttribute("aria-hidden");
+        } else {
+          item.el.setAttribute("aria-hidden", item.prevAriaHidden);
+        }
+        try {
+          item.el.inert = item.prevInert;
+        } catch {
+          // No-op
+        }
+      }
+
+      // Restaurar foco al elemento que detonó la apertura
+      elementoPrevioRef.current?.focus?.();
     };
   }, [mobileOpen, onMobileClose]);
 
@@ -205,8 +295,9 @@ export function UserSidebar({
       )}
 
       <aside
+        ref={sidebarRef}
         id="userDashboardSidebar"
-        aria-label="Menú principal de escritorio"
+        aria-label={mobileOpen ? "Menú principal de navegación" : "Menú principal de escritorio"}
         aria-modal={mobileOpen ? "true" : undefined}
         role={mobileOpen ? "dialog" : undefined}
         className={`${estilos.sidebar} ${esContraida ? estilos.sidebarColapsada : ""} ${
@@ -307,11 +398,14 @@ export function UserSidebar({
                   <MiniAutoPromo />
                 </div>
 
-                <p className="relative font-display text-[13px] font-extrabold leading-snug text-white">
+                <p className="relative text-[10px] font-bold uppercase tracking-[0.18em] text-[#7dd3fc]">
+                  Confianza comprobable
+                </p>
+                <p className="relative mt-1 font-display text-[13px] font-extrabold leading-snug text-white">
                   Mueve tu auto sin salir de casa
                 </p>
-                <p className="relative mt-1 text-[11px] leading-relaxed text-[#94a3b8]">
-                  Un servicio confiable, seguro y en todo México.
+                <p className="relative mt-1 text-[11px] leading-relaxed text-[#dfeaf7]">
+                  Movemos vehículos con tecnología, evidencia y conductores certificados.
                 </p>
 
                 <Link
@@ -321,8 +415,18 @@ export function UserSidebar({
                   }}
                   className="relative mt-3 inline-flex w-full items-center justify-center gap-1.5 rounded-xl bg-[var(--rr-sidebar-active,#075be8)] px-3 py-2 text-xs font-bold text-white transition hover:brightness-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 shadow-sm"
                 >
-                  Registrar traslado
+                  + Crear traslado
                   <IconoFlechaDerecha className="size-3.5" />
+                </Link>
+
+                <Link
+                  href="/viajes/nuevo"
+                  onClick={() => {
+                    if (mobileOpen) onMobileClose?.();
+                  }}
+                  className="relative mt-2 inline-flex w-full items-center justify-center gap-1.5 rounded-xl border border-white/15 bg-white/5 px-3 py-2 text-[11px] font-semibold text-white/90 transition hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
+                >
+                  Registrar traslado
                 </Link>
               </div>
             )}

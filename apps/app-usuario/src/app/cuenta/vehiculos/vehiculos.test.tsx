@@ -8,7 +8,12 @@ import PaginaDetalleVehiculo from "./[id]/page";
 const { cuenta } = vi.hoisted(() => ({ cuenta: { usuario: { nombre: "Ana" }, vehiculos: [] as Vehiculo[] } }));
 vi.mock("../cuenta-ui", () => ({ conCuenta: (render: (value: typeof cuenta) => React.ReactNode) => render(cuenta) }));
 vi.mock("../../NavegacionUsuario", () => ({ NavegacionUsuario: () => null }));
-vi.mock("next/navigation", () => ({ notFound: () => { throw new Error("NOT_FOUND"); } }));
+vi.mock("next/navigation", () => ({
+  notFound: () => { throw new Error("NOT_FOUND"); },
+  usePathname: () => "/cuenta/vehiculos",
+  useRouter: () => ({ push: vi.fn(), replace: vi.fn(), refresh: vi.fn() }),
+  useSearchParams: () => new URLSearchParams(),
+}));
 
 const vehiculo = {
   id: "auto-1", marca: "Toyota", modelo: "RAV4", anio: 2025, tipo: "suv",
@@ -19,7 +24,8 @@ describe("Mis vehículos", () => {
   it("muestra nombre y placas en una fila que abre el detalle", async () => {
     cuenta.vehiculos = [vehiculo];
     render(await PaginaVehiculos());
-    const lista = screen.getByRole("list", { name: "Vehículos guardados" });
+    const listas = screen.getAllByRole("list", { name: "Vehículos guardados" });
+    const lista = listas[0];
     expect(within(lista).getAllByRole("listitem")).toHaveLength(1);
     expect(within(lista).getByRole("link", { name: "Toyota RAV4 2025 ABC-123" })).toHaveAttribute("href", "/cuenta/vehiculos/auto-1");
     expect(screen.queryByText("Rojo")).not.toBeInTheDocument();
@@ -41,8 +47,9 @@ describe("Mis vehículos", () => {
   });
   it("orienta al usuario sin vehículos hacia el único FAB", async () => {
     cuenta.vehiculos = [];
-    render(await PaginaVehiculos());
-    expect(screen.getByText("Sin vehículos registrados")).toBeInTheDocument();
-    expect(screen.queryByRole("link")).not.toBeInTheDocument();
+    const { container } = render(await PaginaVehiculos());
+    expect(screen.getAllByText("Sin vehículos registrados").length).toBeGreaterThanOrEqual(1);
+    const mobileContent = container.querySelector(".user-vehicles-content");
+    expect(mobileContent?.querySelector("a")).toBeNull();
   });
 });

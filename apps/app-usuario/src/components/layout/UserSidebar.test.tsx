@@ -104,11 +104,92 @@ describe("UserSidebar — Componente de Navegación Lateral (RR-UI-001)", () => 
     expect(onCloseMock).toHaveBeenCalledTimes(2);
   });
 
+  it("implementa focus trap atrapando Tab y Shift+Tab dentro del drawer en móvil", () => {
+    render(<UserSidebar mobileOpen={true} />);
+
+    const sidebar = screen.getByRole("dialog");
+    const focusables = Array.from(
+      sidebar.querySelectorAll<HTMLElement>(
+        'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+      )
+    );
+
+    expect(focusables.length).toBeGreaterThan(1);
+    const primerElemento = focusables[0];
+    const ultimoElemento = focusables[focusables.length - 1];
+
+    // Simular que el foco está en el último elemento y se presiona Tab -> vuelve al primer elemento
+    ultimoElemento.focus();
+    expect(document.activeElement).toBe(ultimoElemento);
+
+    const eventoTab = new KeyboardEvent("keydown", { key: "Tab", bubbles: true, cancelable: true });
+    document.dispatchEvent(eventoTab);
+    expect(eventoTab.defaultPrevented).toBe(true);
+    expect(document.activeElement).toBe(primerElemento);
+
+    // Simular que el foco está en el primer elemento y se presiona Shift+Tab -> vuelve al último elemento
+    primerElemento.focus();
+    expect(document.activeElement).toBe(primerElemento);
+
+    const eventoShiftTab = new KeyboardEvent("keydown", {
+      key: "Tab",
+      shiftKey: true,
+      bubbles: true,
+      cancelable: true,
+    });
+    document.dispatchEvent(eventoShiftTab);
+    expect(eventoShiftTab.defaultPrevented).toBe(true);
+    expect(document.activeElement).toBe(ultimoElemento);
+  });
+
+  it("restaura el foco al elemento detonador al cerrar el drawer", () => {
+    // Crear un botón detonador en el documento
+    const botonDetonador = document.createElement("button");
+    botonDetonador.setAttribute("id", "triggerBoton");
+    botonDetonador.textContent = "Abrir menú";
+    document.body.appendChild(botonDetonador);
+    botonDetonador.focus();
+    expect(document.activeElement).toBe(botonDetonador);
+
+    const { rerender } = render(<UserSidebar mobileOpen={true} />);
+
+    // El drawer toma el foco
+    const botonCerrar = screen.getByRole("button", { name: "Cerrar menú de navegación" });
+    botonCerrar.focus();
+    expect(document.activeElement).toBe(botonCerrar);
+
+    // Cerrar el drawer
+    rerender(<UserSidebar mobileOpen={false} />);
+
+    // El foco debe restaurarse al botón detonador
+    expect(document.activeElement).toBe(botonDetonador);
+    document.body.removeChild(botonDetonador);
+  });
+
+  it("aisla el fondo (background isolation) marcando elementos hermanos con aria-hidden e inert", () => {
+    const contenedorExterno = document.createElement("div");
+    contenedorExterno.setAttribute("id", "app-externa");
+    document.body.appendChild(contenedorExterno);
+
+    expect(contenedorExterno.getAttribute("aria-hidden")).toBeNull();
+
+    const { unmount } = render(<UserSidebar mobileOpen={true} />);
+
+    // Con el drawer abierto, el contenedor externo queda aislado
+    expect(contenedorExterno.getAttribute("aria-hidden")).toBe("true");
+
+    // Al desmontar o cerrar, se restablece el estado original
+    unmount();
+    expect(contenedorExterno.getAttribute("aria-hidden")).toBeNull();
+
+    document.body.removeChild(contenedorExterno);
+  });
+
   it("renderiza la tarjeta promocional con el titular y botón aprobado cuando showPromo es true", () => {
     render(<UserSidebar showPromo={true} collapsed={false} />);
 
     expect(screen.getByText("Mueve tu auto sin salir de casa")).toBeInTheDocument();
-    expect(screen.getByText("Un servicio confiable, seguro y en todo México.")).toBeInTheDocument();
+    expect(screen.getByText(/Movemos vehículos con tecnología/)).toBeInTheDocument();
     expect(screen.getByRole("link", { name: /Registrar traslado/ })).toHaveAttribute("href", "/viajes/nuevo");
   });
 

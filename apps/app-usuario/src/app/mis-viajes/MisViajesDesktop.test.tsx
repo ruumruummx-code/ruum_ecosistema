@@ -1,6 +1,19 @@
 /** @vitest-environment jsdom */
 import { describe, expect, it, vi } from "vitest";
 import { render, screen, fireEvent, within } from "@testing-library/react";
+
+const mockPathname = vi.hoisted(() => "/mis-viajes");
+
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({
+    push: vi.fn(),
+    replace: vi.fn(),
+    refresh: vi.fn(),
+  }),
+  usePathname: () => mockPathname,
+  useSearchParams: () => new URLSearchParams(),
+}));
+
 import { MisViajesDesktop } from "./MisViajesDesktop";
 import type { ViajeLista } from "./useGestionTraslados";
 
@@ -65,14 +78,13 @@ describe("MisViajesDesktop", () => {
     expect(within(sidebar).getByRole("link", { name: "+ Crear traslado" })).toHaveAttribute("href", "/viajes/nuevo");
   });
 
-  it("renderiza la barra superior con buscador, botón destacado y perfil", () => {
+  it("renderiza la barra superior con buscador, alertas y perfil", () => {
     render(<MisViajesDesktop traslados={trasladosMock} nombreUsuario="Alex Rivera" />);
 
-    const header = screen.getByLabelText("Barra superior de traslados");
+    const header = screen.getByLabelText("Barra superior de usuario");
     expect(header).toBeInTheDocument();
 
-    expect(within(header).getByPlaceholderText("¿A dónde vas?")).toBeInTheDocument();
-    expect(within(header).getByRole("link", { name: "+ Crear traslado" })).toHaveAttribute("href", "/viajes/nuevo");
+    expect(within(header).getByPlaceholderText("Buscar traslados, vehículos o documentos...")).toBeInTheDocument();
     expect(within(header).getByText("Hola, Alex")).toBeInTheDocument();
   });
 
@@ -155,7 +167,7 @@ describe("MisViajesDesktop", () => {
 
     // Footer de marca
     expect(screen.getByText("Tu movilidad, nuestra prioridad.")).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Ayuda" })).toBeInTheDocument();
+    expect(screen.getAllByRole("link", { name: "Ayuda" }).length).toBeGreaterThanOrEqual(1);
     expect(screen.getByRole("link", { name: "Términos" })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Privacidad" })).toBeInTheDocument();
   });
