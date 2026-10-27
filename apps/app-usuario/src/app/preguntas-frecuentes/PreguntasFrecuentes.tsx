@@ -445,7 +445,7 @@ export function PreguntasFrecuentes() {
       <div className={styles.questions}>{faqs.slice(pagina * 4, pagina * 4 + 4).map(f => <button className={styles.question} key={f.id} type="button" aria-haspopup="dialog" onClick={() => setSeleccionada(f)}><IconoFaqSvg tipo={f.icono} /><span>{f.pregunta}</span><span aria-hidden="true">›</span></button>)}{!faqs.length && <p>Sin resultados. Intenta con otras palabras o contacta a soporte.</p>}</div>
       <nav className={styles.pagination} aria-label="Paginación de preguntas"><button type="button" disabled={!pagina} onClick={() => setPagina(pagina - 1)} aria-label="Preguntas anteriores">‹</button><span>{paginas ? pagina + 1 : 0} / {paginas}</span><button type="button" disabled={pagina + 1 >= paginas} onClick={() => setPagina(pagina + 1)} aria-label="Preguntas siguientes">›</button></nav>
     </section>
-    <footer className={styles.footer}><p>¿No encontraste lo que buscabas?</p><div><Link href="/soporte?canal=chat">💬 Chat con Humano</Link><Link href="/soporte?canal=telefono">📞 Llamada de Soporte</Link></div></footer>
+    <footer className={styles.footer}><p>¿No encontraste lo que buscabas?</p><div><Link href="/soporte?canal=chat">💬 Crear reporte de soporte</Link><Link href="/soporte?canal=telefono">📞 Llamada de Soporte</Link></div></footer>
     <MobileBottomSheet open={seleccionada !== null} onClose={() => setSeleccionada(null)} title={seleccionada?.pregunta ?? "Respuesta"} swipeToClose><div className="text-sm leading-relaxed">{seleccionada?.respuesta}</div></MobileBottomSheet>
   </div>;
 }

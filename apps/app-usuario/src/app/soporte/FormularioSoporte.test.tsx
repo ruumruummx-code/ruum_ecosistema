@@ -61,6 +61,8 @@ describe("FormularioSoporte", () => {
     await user.type(textarea, "Corto");
     expect(screen.getByText("Mínimo 10 caracteres")).toBeInTheDocument();
 
+    await user.selectOptions(screen.getByLabelText("Tipo de incidencia"), "dano_previo_relevante");
+    await user.selectOptions(screen.getByLabelText("Momento de la incidencia"), "durante_traslado");
     // Con viaje seleccionado -> reportarIncidencia + folio
     await user.clear(textarea);
     await user.type(textarea, "Descripción detallada del incidente ocurrido en ruta.");
@@ -81,15 +83,46 @@ describe("FormularioSoporte", () => {
     await user.selectOptions(screen.getByLabelText(/Viaje relacionado/i), "");
     await user.type(textarea, "Consulta general sobre facturación mensual.");
     await user.click(screen.getByRole("button", { name: "Enviar a soporte" }));
-    expect(await screen.findByText(/Abrimos tu cliente de correo con el mensaje prellenado/i)).toBeInTheDocument();
+    expect(await screen.findByText(/Tu reporte aún no se ha enviado/i)).toBeInTheDocument();
 
     // Con viaje pero error en BD -> fallback a mailto
     reportarIncidenciaMock.mockRejectedValueOnce(new Error("DB error"));
     await user.selectOptions(screen.getByLabelText(/Viaje relacionado/i), "viaje-12345678");
+    await user.selectOptions(screen.getByLabelText("Tipo de incidencia"), "dano_previo_relevante");
+    await user.selectOptions(screen.getByLabelText("Momento de la incidencia"), "durante_traslado");
     await user.clear(textarea);
     await user.type(textarea, "Otro reporte cuando la base de datos falla.");
     await user.click(screen.getByRole("button", { name: "Enviar a soporte" }));
-    expect(await screen.findByText(/Abrimos tu cliente de correo para enviar tu reporte/i)).toBeInTheDocument();
+    expect(await screen.findByText(/No pudimos confirmar el registro del reporte/i)).toBeInTheDocument();
+    expect(textarea).toHaveValue("Otro reporte cuando la base de datos falla.");
+    expect(screen.getByRole("link", { name: "Abrir correo para enviar reporte" })).toHaveAttribute("href", expect.stringContaining("mailto:"));
+  });
+  it("no convierte una consulta de pagos en una incidencia arbitraria", async () => {
+    render(<FormularioSoporte traslados={[{ id: "viaje-1", label: "Viaje 1" }]} preseleccionado="viaje-1" motivoInicial="Ayuda con pagos o facturación" descripcionInicial="Necesito una aclaración de mi factura." />);
+    fireEvent.click(screen.getByRole("button", { name: "Enviar a soporte" }));
+    expect(await screen.findByRole("alert")).toHaveTextContent("aún no se ha enviado");
+    expect(reportarIncidenciaMock).not.toHaveBeenCalled();
+    expect(decodeURIComponent(screen.getByRole("link", { name: "Abrir correo para enviar reporte" }).getAttribute("href")!)).toContain("Viaje: viaje-1");
+  });
+  it("bloquea envíos duplicados y edición mientras se registra la incidencia", async () => {
+    let resolver!: (value: { id: string }) => void;
+    reportarIncidenciaMock.mockReturnValueOnce(new Promise(resolve => { resolver = resolve; }));
+    const cambio = vi.fn();
+    const { container } = render(<FormularioSoporte traslados={[{ id: "viaje-1", label: "Viaje 1" }]} preseleccionado="viaje-1" descripcionInicial="El vehículo presenta un daño previo." onEnviandoChange={cambio} />);
+    fireEvent.change(screen.getByLabelText("Tipo de incidencia"), { target: { value: "dano_previo_relevante" } });
+    fireEvent.change(screen.getByLabelText("Momento de la incidencia"), { target: { value: "recoleccion" } });
+    fireEvent.submit(container.querySelector("form")!);
+    fireEvent.submit(container.querySelector("form")!);
+    expect(reportarIncidenciaMock).toHaveBeenCalledTimes(1);
+    expect(screen.getByLabelText(/Descripción/)).toBeDisabled();
+    expect(cambio).toHaveBeenLastCalledWith(true);
+    resolver({ id: "folio-123" });
+    await waitFor(() => expect(cambio).toHaveBeenLastCalledWith(false));
+    expect(screen.getByRole("status")).toHaveTextContent("INC-FOLIO-12");
+  });
+  it("no conserva un viaje preseleccionado que no está en la cuenta", () => {
+    render(<FormularioSoporte traslados={[]} preseleccionado="viaje-ajeno" />);
+    expect(screen.getByLabelText(/Viaje relacionado/)).toHaveValue("");
   });
 });
 

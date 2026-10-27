@@ -2127,6 +2127,15 @@ input::placeholder, textarea::placeholder {
 .user-support-phone :is(a, button) { display: flex; align-items: center; justify-content: center; min-height: 44px; width: 100%; border-radius: 10px; font-weight: 700; }
 .user-support-phone a { background: var(--user-color-action); color: var(--user-color-on-action); }
 .user-support-report { flex: 1; min-height: 0; overflow-y: auto; padding: 12px; }
+@media (min-width: 1024px) {
+  .user-support-view.is-desktop { overflow: visible; gap: 16px; }
+  .user-support-view.is-desktop > .user-profile-appbar { display: none; }
+  .user-support-view.is-desktop .user-support-status { height: auto; min-height: 30px; font-size: 13px; white-space: normal; }
+  .user-support-view.is-desktop .user-support-channels { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; }
+  .user-support-view.is-desktop .user-support-channels > :is(button, a) { min-height: 80px; }
+  .user-support-view.is-desktop .user-support-topics > :is(button, a) { min-height: 56px; font-size: 14px; }
+  .user-support-view.is-desktop .user-support-topics > :is(button, a) span { white-space: normal; }
+}
 :is(.user-preferences-view, .user-support-view) :is(a, button, select):focus-visible { outline: 2px solid var(--user-color-action); outline-offset: -2px; }
 
 .user-legal-header { flex-shrink: 0; padding-top: env(safe-area-inset-top); border-bottom: 1px solid var(--user-color-border); }

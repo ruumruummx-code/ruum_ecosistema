@@ -16,7 +16,7 @@ it("limita cada página a cuatro preguntas y reinicia al filtrar", () => {
   expect(screen.getByRole("button", { name: "Preguntas anteriores" })).toBeDisabled();
   fireEvent.change(screen.getByRole("searchbox"), { target: { value: "zzzzzz" } });
   expect(screen.getByText(/Sin resultados/)).toBeInTheDocument();
-  expect(screen.getByRole("link", { name: /Chat con Humano/ })).toHaveAttribute("href", "/soporte?canal=chat");
+  expect(screen.getByRole("link", { name: /Crear reporte de soporte/ })).toHaveAttribute("href", "/soporte?canal=chat");
 });
 it("abre la respuesta completa en un diálogo y la cierra", () => {
   render(<PreguntasFrecuentes />);

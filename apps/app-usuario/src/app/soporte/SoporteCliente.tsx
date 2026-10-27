@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState, useCallback } from "react";
+import { useMemo, useState, useCallback } from "react";
 import Link from "next/link";
 import type { Database } from "@ruum/shared/types";
 import { HojaTareaCuenta } from "../cuenta/HojaTareaCuenta";
@@ -17,12 +17,7 @@ export interface SoporteClienteProps {
   viajePreseleccionado?: string;
   motivoPreseleccionado?: string;
   canalPreseleccionado?: string;
-}
-
-interface MensajeChat {
-  id: string;
-  remitente: "agente" | "usuario";
-  texto: string;
+  escritorio?: boolean;
 }
 
 /* Íconos SVG dedicados con alta fidelidad */
@@ -163,22 +158,25 @@ export function SoporteCliente({
   viajePreseleccionado,
   motivoPreseleccionado,
   canalPreseleccionado,
+  escritorio = false,
 }: SoporteClienteProps) {
-  const [modalChatAbierto, setModalChatAbierto] = useState(false);
-  const [modalTelefonoAbierto, setModalTelefonoAbierto] = useState(false);
-  const [modalReporte, setModalReporte] = useState(false);
-
-  const [temaSeleccionado, setTemaSeleccionado] = useState<string | null>(null);
-  const [mensajeInput, setMensajeInput] = useState("");
-  const [mensajesChat, setMensajesChat] = useState<MensajeChat[]>([]);
-  const chatBottomRef = useRef<HTMLDivElement>(null);
-
-  // Nombre de pila para saludo personalizado
-  const primerNombre = useMemo(() => {
-    if (!usuario?.nombre) return "usuario";
-    const parte = usuario.nombre.trim().split(/\s+/)[0];
-    return parte ? parte.charAt(0).toUpperCase() + parte.slice(1).toLowerCase() : "usuario";
-  }, [usuario?.nombre]);
+  const mapaMotivos: Record<string, string> = {
+    problema_traslado: "Reportar problema con un viaje",
+    ayuda_evidencia: "Dudas con evidencia fotográfica",
+    pagos: "Ayuda con pagos o facturación",
+    dano: "Reportar daño o incidente",
+    eliminar_cuenta: "Consulta general u otro",
+  };
+  const [modalTelefonoAbierto, setModalTelefonoAbierto] = useState(canalPreseleccionado === "telefono" || canalPreseleccionado === "call");
+  const [modalReporte, setModalReporte] = useState(Boolean(canalPreseleccionado !== "telefono" && canalPreseleccionado !== "call" && (motivoPreseleccionado || canalPreseleccionado === "chat" || canalPreseleccionado === "live")));
+  const [motivoReporte, setMotivoReporte] = useState(mapaMotivos[motivoPreseleccionado ?? ""] ?? "Consulta general u otro");
+  const [reporteEnviando, setReporteEnviando] = useState(false);
+  function abrirReporte(motivo = "Consulta general u otro") {
+    setMotivoReporte(motivo);
+    setModalReporte(true);
+  }
+  const cerrarTelefono = useCallback(() => setModalTelefonoAbierto(false), []);
+  const cerrarReporte = useCallback(() => { if (!reporteEnviando) setModalReporte(false); }, [reporteEnviando]);
 
   // Detección de viaje activo
   const viajeActivo = useMemo(() => {
@@ -192,132 +190,24 @@ export function SoporteCliente({
     ? `#${viajeActivo.traslado_id.slice(0, 8).toUpperCase()}`
     : null;
 
-  // Efecto para abrir canales según query parameters
-  useEffect(() => {
-    if (canalPreseleccionado === "chat" || canalPreseleccionado === "live") {
-      abrirChat();
-    } else if (canalPreseleccionado === "telefono" || canalPreseleccionado === "call") {
-      abrirTelefono();
-    } else if (motivoPreseleccionado === "eliminar_cuenta") {
-      setModalReporte(true);
-    } else if (motivoPreseleccionado) {
-      const mapaMotivos: Record<string, string> = {
-        problema_traslado: "Problema con un traslado",
-        ayuda_evidencia: "Ayuda con evidencia",
-        pagos: "Ayuda con pagos",
-        dano: "Reportar daño o incidente",
-      };
-      abrirChat(mapaMotivos[motivoPreseleccionado] || motivoPreseleccionado);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [canalPreseleccionado, motivoPreseleccionado]);
-
-  // Manejo de tecla Escape
-  useEffect(() => {
-    function manejarKeyDown(e: KeyboardEvent) {
-      if (e.key === "Escape") {
-        setModalChatAbierto(false);
-        setModalTelefonoAbierto(false);
-        setModalReporte(false);
-      }
-    }
-    window.addEventListener("keydown", manejarKeyDown);
-    return () => window.removeEventListener("keydown", manejarKeyDown);
-  }, []);
-
-  // Auto scroll al final del chat cuando llegan mensajes
-  useEffect(() => {
-    if (modalChatAbierto && typeof chatBottomRef.current?.scrollIntoView === "function") {
-      chatBottomRef.current.scrollIntoView({ behavior: "smooth" });
-    }
-  }, [mensajesChat, modalChatAbierto]);
-
-  function abrirChat(tema?: string) {
-    setTemaSeleccionado(tema ?? null);
-    const iniciales: MensajeChat[] = [
-      {
-        id: "msg-1",
-        remitente: "agente",
-        texto: `Hola ${primerNombre}. Este chat es demostrativo. Para atención real utiliza los canales de contacto o crea un reporte.`,
-      },
-    ];
-
-    if (tema) {
-      iniciales.push({
-        id: "msg-2",
-        remitente: "usuario",
-        texto: tema,
-      });
-      iniciales.push({
-        id: "msg-3",
-        remitente: "agente",
-        texto: "Describe tu consulta. Para seguimiento real, crea un reporte de soporte.",
-      });
-    }
-
-    setMensajesChat(iniciales);
-    setModalChatAbierto(true);
-  }
-
-  const cerrarChat = useCallback(() => setModalChatAbierto(false), []);
-
-  function abrirTelefono() {
-    setModalTelefonoAbierto(true);
-  }
-
-  const cerrarTelefono = useCallback(() => setModalTelefonoAbierto(false), []);
-  const cerrarReporte = useCallback(() => setModalReporte(false), []);
-
-  function enviarMensaje(e?: React.FormEvent) {
-    if (e) e.preventDefault();
-    const texto = mensajeInput.trim();
-    if (!texto) return;
-
-    const nuevoMsgUsuario: MensajeChat = {
-      id: `user-${Date.now()}`,
-      remitente: "usuario",
-      texto,
-    };
-
-    setMensajesChat((prev) => [...prev, nuevoMsgUsuario]);
-    setMensajeInput("");
-
-    // Respuesta automática (SOP-1: el chat en vivo es demostrativo; la atención
-    // real se da por teléfono, WhatsApp, correo o ticket de reporte).
-    setTimeout(() => {
-      const respAgente: MensajeChat = {
-        id: `agent-${Date.now()}`,
-        remitente: "agente",
-        texto: "Respuesta automática (demo): recibimos tu mensaje. Para atención real usa llamada, WhatsApp, correo o crea un reporte.",
-      };
-      setMensajesChat((prev) => [...prev, respAgente]);
-    }, 600);
-  }
-
-  return <div className="user-support-view">
+  return <div className={`user-support-view ${escritorio ? "is-desktop" : ""}`}>
     <header className="user-profile-appbar"><Link href="/cuenta?seccion=soporte" aria-label="Volver a mi cuenta" className="user-profile-back">‹ Atrás</Link><h1>Soporte</h1><span aria-hidden="true" /></header>
     <p className="user-support-status">Canales de soporte <span aria-hidden="true">•</span> {folioActivo ? `Traslado ${folioActivo}` : "Sin traslado activo"}</p>
+    {viajePreseleccionado && !viajeActivo && <p role="alert" className="mx-3 text-sm">No encontramos el traslado solicitado entre tus viajes. Selecciona otro al crear el reporte.</p>}
     <section className="user-support-channels" aria-label="Canales de atención">
-      <button type="button" onClick={() => abrirChat()}><IconoSvg nombre="chat" /><span>Chat en vivo</span><small>Demo</small></button>
-      <button type="button" onClick={abrirTelefono}><IconoSvg nombre="phone" /><span>Llamada</span></button>
-      <a href={`https://wa.me/${CONTACTOS_SOPORTE_USUARIO.soporte.whatsapp.valor}?text=Hola%20Ruum%20Ruum,%20necesito%20asistencia%20con%20mi%20traslado.`} target="_blank" rel="noopener noreferrer"><IconoSvg nombre="whatsapp" /><span>WhatsApp</span></a>
+      <button type="button" onClick={() => abrirReporte()}><IconoSvg nombre="chat" /><span>Crear reporte</span></button>
+      <button type="button" onClick={() => setModalTelefonoAbierto(true)}><IconoSvg nombre="phone" /><span>Llamada</span></button>
+      <a href={`https://wa.me/${CONTACTOS_SOPORTE_USUARIO.soporte.whatsapp.valor}?text=${encodeURIComponent("Hola Ruum Ruum, necesito asistencia" + (viajeActivo?.traslado_id ? " con el traslado " + viajeActivo.traslado_id : "") + ".")}`} target="_blank" rel="noopener noreferrer"><IconoSvg nombre="whatsapp" /><span>WhatsApp</span></a>
       <a href={CONTACTOS_SOPORTE_USUARIO.soporte.correo.href}><IconoSvg nombre="email" /><span>Correo</span></a>
     </section>
     <section className="user-support-topics" aria-labelledby="temas-frecuentes-titulo"><h2 id="temas-frecuentes-titulo">Temas frecuentes</h2>
       {[
-        ["Problema con un traslado", "alerta-triangulo"], ["Reportar daño o incidente", "car-crash"],
-        ["Ayuda con pagos", "tarjeta"], ["Ayuda con evidencia", "camara"],
-      ].map(([tema, icono]) => <button key={tema} type="button" onClick={() => abrirChat(tema)}><IconoSvg nombre={icono} className="size-4 shrink-0" /><span>{tema}</span><IconoSvg nombre="chevron-derecha" className="size-4" /></button>)}
+        ["Problema con un traslado", "alerta-triangulo", "Reportar problema con un viaje"], ["Reportar daño o incidente", "car-crash", "Reportar daño o incidente"],
+        ["Ayuda con pagos", "tarjeta", "Ayuda con pagos o facturación"], ["Ayuda con evidencia", "camara", "Dudas con evidencia fotográfica"],
+      ].map(([tema, icono, motivo]) => <button key={tema} type="button" onClick={() => abrirReporte(motivo)}><IconoSvg nombre={icono} className="size-4 shrink-0" /><span>{tema}</span><IconoSvg nombre="chevron-derecha" className="size-4" /></button>)}
       <Link href="/preguntas-frecuentes"><IconoSvg nombre="help" className="size-4 shrink-0" /><span>Preguntas frecuentes</span><IconoSvg nombre="chevron-derecha" className="size-4" /></Link>
     </section>
-    {modalChatAbierto && <HojaTareaCuenta titulo="Chat en vivo · Demo" extendida cerrar={cerrarChat}><div className="user-support-chat">
-      <p role="note">Chat demostrativo. Para atención real usa llamada, WhatsApp, correo o crea un reporte.</p>
-      <div className="user-support-messages" role="log" aria-label="Mensajes del chat">{mensajesChat.map(mensaje => <p key={mensaje.id} className={mensaje.remitente === "usuario" ? "is-user" : ""}>{mensaje.texto}</p>)}<div ref={chatBottomRef} /></div>
-      {temaSeleccionado && <p className="sr-only">{temaSeleccionado}</p>}
-      <form onSubmit={enviarMensaje}><input aria-label="Mensaje" placeholder="Escribe tu mensaje..." value={mensajeInput} onChange={e => setMensajeInput(e.target.value)} /><button type="submit" aria-label="Enviar mensaje">Enviar</button></form>
-      <div className="user-support-chat-actions"><button type="button" onClick={() => { cerrarChat(); setModalReporte(true); }}>Crear reporte</button><button type="button" onClick={cerrarChat}>Cerrar chat</button></div>
-    </div></HojaTareaCuenta>}
     {modalTelefonoAbierto && <HojaTareaCuenta titulo="Llamada telefónica" cerrar={cerrarTelefono}><div className="user-support-phone"><p>{CONTACTOS_SOPORTE_USUARIO.soporte.telefono.valor}</p><a href={CONTACTOS_SOPORTE_USUARIO.soporte.telefono.href}>Llamar ahora</a><button type="button" onClick={cerrarTelefono}>Cancelar</button></div></HojaTareaCuenta>}
-    {modalReporte && <HojaTareaCuenta titulo="Reportar problema a soporte" extendida cerrar={cerrarReporte}><div className="user-support-report"><FormularioSoporte traslados={traslados.filter(t => t.traslado_id).map(t => ({ id: t.traslado_id!, label: `${t.vehiculo_marca ?? "Vehículo"} - ${t.traslado_id!.slice(0, 8)}` }))} preseleccionado={viajeActivo?.traslado_id ?? undefined} emailUsuario={usuario?.correo_facturacion} motivoInicial={motivoPreseleccionado === "eliminar_cuenta" ? "Consulta general u otro" : undefined} /></div></HojaTareaCuenta>}
+    {modalReporte && <HojaTareaCuenta titulo="Reportar problema a soporte" extendida ocupada={reporteEnviando} cerrar={cerrarReporte}><div className="user-support-report"><FormularioSoporte traslados={traslados.filter(t => t.traslado_id).map(t => ({ id: t.traslado_id!, label: `${t.vehiculo_marca ?? "Vehículo"} - ${t.traslado_id!.slice(0, 8)}` }))} preseleccionado={viajeActivo?.traslado_id ?? undefined} emailUsuario={usuario?.correo_facturacion} motivoInicial={motivoReporte} descripcionInicial={motivoPreseleccionado === "eliminar_cuenta" ? "Solicito la eliminación de mi cuenta y mis datos personales." : undefined} onEnviandoChange={setReporteEnviando} /></div></HojaTareaCuenta>}
   </div>;
 }
