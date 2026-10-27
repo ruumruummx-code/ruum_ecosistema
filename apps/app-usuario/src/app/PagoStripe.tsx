@@ -328,15 +328,16 @@ function FormularioPagoReal({
   // RC-06: métodos asíncronos (OXXO/SPEI) quedan en `processing`; no es un
   // pago confirmado todavía.
   const [enProceso, setEnProceso] = useState(false);
+  const [aprobado, setAprobado] = useState(false);
   const enviandoRef = useRef(false);
   useEffect(() => {
     onEstadoPago?.({
       // RC-06: en estado "en proceso" el formulario no se monta; se expone
       // `listo:false` para que el botón externo (modo compacto) se deshabilite.
-      listo: enProceso ? false : Boolean(stripe && elements && elementoListo),
+      listo: enProceso || aprobado ? false : Boolean(stripe && elements && elementoListo),
       procesando: enviando,
     });
-  }, [stripe, elements, elementoListo, enviando, enProceso, onEstadoPago]);
+  }, [stripe, elements, elementoListo, enviando, enProceso, aprobado, onEstadoPago]);
 
   async function confirmar(e: React.FormEvent) {
     e.preventDefault();
@@ -367,6 +368,7 @@ function FormularioPagoReal({
       }
 
       if (paymentIntent?.status === "succeeded") {
+        setAprobado(true);
         await onPagado();
         setEnviando(false);
         enviandoRef.current = false;
@@ -399,6 +401,7 @@ function FormularioPagoReal({
     }
   }
 
+  if (aprobado) return <p role="status">Stripe aprobó tu pago. Estamos confirmando los traslados; no vuelvas a pagar. Si la conciliación tarda, consulta su estado desde esta pantalla.</p>;
   if (enProceso) {
     return (
       <div className="grid gap-3 text-left" role="status" aria-live="polite" aria-atomic="true">

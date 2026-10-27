@@ -46,7 +46,12 @@ export async function GET(request: NextRequest) {
 
       const intent = await stripeMasivo(`payment_intents/${encodeURIComponent(carga.stripe_payment_intent_id)}`);
       if (intent.status === "succeeded") {
-        await confirmarPagoMasivoServidor(servicio, carga.id, intent.id, intent.amount_received, intent.currency);
+        try {
+          await confirmarPagoMasivoServidor(servicio, carga.id, intent.id, intent.amount_received, intent.currency);
+        } catch (err) {
+          logStructuredError("api/viajes/masivos/pendientes", "pago_cobrado_conciliacion_pendiente", err, { cargaId: carga.id, usuarioId: user.id });
+          return NextResponse.json({ id: carga.id, pagado: false, cobrado: true, totalMXN: carga.monto_centavos / 100, cotizaciones: carga.cotizaciones, filas: carga.filas }, { status: 202 });
+        }
         return NextResponse.json({ id: carga.id, pagado: true, fuente: "fallback_stripe" });
       }
       if (intent.status === "canceled") {

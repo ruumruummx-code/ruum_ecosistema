@@ -21,9 +21,14 @@ export interface FilaValidada {
   errores: Record<string, string>;
   estado: "correcto" | "error";
 }
+export function normalizarTransmisionMasiva(valor: string) {
+  return valor.trim().normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+}
 export function validarFila(datos: Record<string, string>, indice: number): FilaValidada {
+  if (datos.vehiculo_transmision) datos = { ...datos, vehiculo_transmision: normalizarTransmisionMasiva(datos.vehiculo_transmision) };
   const resultado = esquemaFilaMasiva.safeParse(datos);
   const errores: Record<string, string> = {};
+  if (datos.vehiculo_transmision && !["manual", "automatica", "electrica"].includes(datos.vehiculo_transmision)) errores.vehiculo_transmision = "Selecciona manual, automática o eléctrica";
   if (!resultado.success) for (const issue of resultado.error.issues) errores[String(issue.path[0])] = issue.message;
   if (!datos.vehiculo_placas && !datos.vehiculo_vin) errores.vehiculo_placas = "Captura placas o VIN";
   for (const lado of ["origen", "destino"]) {
@@ -51,6 +56,7 @@ const ALIAS: Record<string, string> = {
 };
 export function normalizarFilaPlantilla(original: Record<string, string>): Record<string, string> {
   const datos = { ...original };
+  if (datos.vehiculo_transmision) datos.vehiculo_transmision = normalizarTransmisionMasiva(datos.vehiculo_transmision);
   for (const [origen, destino] of Object.entries(ALIAS)) datos[destino] = original[origen] ?? original[destino] ?? "";
   for (const campo of ["origenCodigoPostal", "destinoCodigoPostal"]) if (/^\d{1,5}$/.test(datos[campo] ?? "")) datos[campo] = datos[campo]!.padStart(5, "0");
   for (const campo of ["entregaTelefono", "recepcionTelefono"]) datos[campo] = (datos[campo] ?? "").replace(/^\+52/, "").replace(/[\s()-]/g, "");

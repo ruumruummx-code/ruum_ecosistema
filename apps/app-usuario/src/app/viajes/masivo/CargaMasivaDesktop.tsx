@@ -126,6 +126,7 @@ export function CargaMasivaDesktop({ nombreUsuario }: CargaMasivaDesktopProps) {
     todasListas,
     totalMXN,
     pagoConfirmado,
+    pagoEnConciliacion,
     cargaId,
     stripeClientSecret,
     nombreArchivo,
@@ -301,7 +302,7 @@ export function CargaMasivaDesktop({ nombreUsuario }: CargaMasivaDesktopProps) {
             </div>
             <button
               type="button"
-              disabled={pago.procesando || conciliando}
+              disabled={pagoEnConciliacion || pago.procesando || conciliando}
               onClick={handleCancelarCarga}
               className="rounded-xl border border-slate-300 px-4 py-2 text-xs font-semibold text-red-600 hover:bg-red-50 dark:border-slate-700 dark:hover:bg-red-950/20"
             >
@@ -403,7 +404,7 @@ export function CargaMasivaDesktop({ nombreUsuario }: CargaMasivaDesktopProps) {
 
               {cargaId ? (
                 <div className="space-y-4">
-                  <PagoStripe
+                  {pagoEnConciliacion ? <div role="status" className="space-y-4 rounded-xl border p-4 text-sm"><p>Tu pago ya fue enviado a conciliación. No vuelvas a pagar.</p><button type="button" disabled={conciliando} onClick={() => void verificarPago()} className="underline">Reintentar conciliación</button><Link href="/mis-viajes" className="block underline">Ir a Mis traslados</Link><Link href={`/soporte?motivo=pagos&carga=${cargaId}`} className="block underline">Contactar a soporte</Link></div> : <PagoStripe
                     clientSecretExterno={stripeClientSecret ?? undefined}
                     returnPath="/mis-viajes?pago=masivo"
                     onEstadoPago={setPago}
@@ -412,12 +413,12 @@ export function CargaMasivaDesktop({ nombreUsuario }: CargaMasivaDesktopProps) {
                     onPagado={() => void verificarPago()}
                     compacto
                     formId={`pago-masivo-${cargaId}`}
-                  />
+                  />}
 
                   <button
                     type="submit"
                     form={`pago-masivo-${cargaId}`}
-                    disabled={!pago.listo || pago.procesando || conciliando}
+                    disabled={pagoEnConciliacion || !pago.listo || pago.procesando || conciliando}
                     className="w-full rounded-2xl bg-[#0066FF] py-3.5 font-display text-sm font-black text-white shadow-md transition hover:bg-[#0052cc] disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     {pago.procesando || conciliando

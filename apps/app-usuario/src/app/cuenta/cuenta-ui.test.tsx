@@ -163,6 +163,27 @@ describe("cuenta-ui y carga de cuenta", () => {
       expect(resOk.cuenta.incidenciasAbiertas).toBe(2);
     }
   });
+  it.each(["perfil", "preferencias"] as const)("abre %s sin depender de vehículos, empresa ni historial", async carga => {
+    getUserMock.mockResolvedValueOnce({ data: { user: { id: "auth-1", email: "ana@empresa.mx" } }, error: null });
+    obtenerUsuarioActualMock.mockResolvedValueOnce(usuarioBase);
+    obtenerUrlFotoPerfilUsuarioMock.mockResolvedValue("https://example.com/avatar.jpg");
+    const auxiliares = [listarVehiculosDeUsuarioMock, obtenerEmpresaVisibleMock, listarTrasladosDeUsuarioMock];
+    for (const mock of auxiliares) mock.mockRejectedValue(new Error("Consulta auxiliar caída"));
+    try {
+      const resultado = await obtenerCuenta({ carga });
+      expect(resultado.estado).toBe("ok");
+      if (resultado.estado === "ok") expect(resultado.cuenta.usuario.nombre).toBe(usuarioBase.nombre);
+      for (const mock of auxiliares) expect(mock).not.toHaveBeenCalled();
+      if (carga === "preferencias") expect(obtenerUrlFotoPerfilUsuarioMock).not.toHaveBeenCalled();
+    } finally { auxiliares.forEach(mock => mock.mockReset()); }
+  });
+  it("permite editar el perfil cuando falla solo la fotografía", async () => {
+    getUserMock.mockResolvedValueOnce({ data: { user: { id: "auth-1" } }, error: null });
+    obtenerUsuarioActualMock.mockResolvedValueOnce(usuarioBase);
+    obtenerUrlFotoPerfilUsuarioMock.mockRejectedValueOnce(new Error("Storage no disponible"));
+    const resultado = await obtenerCuenta({ carga: "perfil" });
+    expect(resultado).toMatchObject({ estado: "ok", cuenta: { usuario: usuarioBase, fotoPerfilUrl: null, fotoPerfilNoDisponible: true } });
+  });
 
   it("renderiza LayoutCuenta, SeccionPerfil, SeccionVehiculos, SeccionFacturacion y SeccionLegal", () => {
     expect(dato(null)).toBe("Pendiente");

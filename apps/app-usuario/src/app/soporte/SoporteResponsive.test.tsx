@@ -1,6 +1,6 @@
 /** @vitest-environment jsdom */
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { fireEvent, render, screen } from "@testing-library/react";
+import { act, fireEvent, render, screen } from "@testing-library/react";
 import type { ReactNode } from "react";
 import { SoporteResponsive } from "./SoporteResponsive";
 
@@ -11,6 +11,22 @@ vi.mock("../NavegacionUsuario", () => ({ NavegacionUsuario: () => <nav data-test
 
 beforeEach(() => vi.clearAllMocks());
 describe("Ayuda responsive", () => {
+  it("conserva el reporte abierto y su texto al cambiar de resolución", async () => {
+    let cambiar = () => {};
+    const media = { matches: true, addEventListener: (_: string, callback: () => void) => { cambiar = callback; }, removeEventListener: vi.fn() };
+    Object.defineProperty(window, "matchMedia", { configurable: true, value: () => media });
+    render(<SoporteResponsive usuario={null} traslados={[]} canalPreseleccionado="chat" />);
+    const descripcion = await screen.findByLabelText(/Descripción/);
+    fireEvent.change(descripcion, { target: { value: "Mi pago ya fue aprobado pero el lote no avanza." } });
+    const dialog = screen.getByRole("dialog");
+    act(() => { media.matches = false; cambiar(); });
+    expect(screen.getByRole("dialog")).toBe(dialog);
+    expect(screen.getByLabelText(/Descripción/)).toBe(descripcion);
+    expect(descripcion).toHaveValue("Mi pago ya fue aprobado pero el lote no avanza.");
+    act(() => { media.matches = true; cambiar(); });
+    expect(screen.getByRole("dialog")).toBe(dialog);
+    expect(screen.getAllByRole("dialog")).toHaveLength(1);
+  });
   it.each([true, false])("monta un solo reporte con desktop=%s", async desktop => {
     Object.defineProperty(window, "matchMedia", { configurable: true, value: () => ({ matches: desktop, addEventListener: vi.fn(), removeEventListener: vi.fn() }) });
     render(<SoporteResponsive usuario={null} traslados={[]} canalPreseleccionado="chat" />);

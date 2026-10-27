@@ -13,6 +13,15 @@ const rutaPlantilla = [
 ].find(existsSync) ?? path.resolve(process.cwd(), "public/docs-legales/plantilla-carga-masiva.xlsx");
 
 describe("plantilla oficial masiva", () => {
+  it.each([["Automática", "automatica"], ["ELÉCTRICA", "electrica"], [" manual ", "manual"]])("normaliza transmisión %s antes de validar y cotizar", (valor, canonico) => {
+    const datos = normalizarFilaPlantilla({ vehiculo_transmision: valor });
+    expect(datos.vehiculo_transmision).toBe(canonico);
+    expect(validarFila({ vehiculo_transmision: valor }, 0).datos.vehiculo_transmision).toBe(canonico);
+    expect(validarFila(datos, 0).errores.vehiculo_transmision).toBeUndefined();
+  });
+  it("rechaza transmisiones desconocidas antes del pago", () => {
+    expect(validarFila({ vehiculo_transmision: "desconocida" }, 0).errores.vehiculo_transmision).toContain("Selecciona");
+  });
   it("conserva el número de fila Excel aunque existan filas vacías y detalla cada motivo", async () => {
     const wb = new ExcelJS.Workbook();
     const ws = wb.addWorksheet("Traslados");

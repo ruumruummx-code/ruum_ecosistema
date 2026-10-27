@@ -16,6 +16,14 @@ vi.mock("exceljs", () => ({
   },
 }));
 afterEach(() => vi.unstubAllGlobals());
+it("recupera un lote cobrado sin montar otro formulario de pago", async () => {
+  vi.stubGlobal("fetch", vi.fn().mockResolvedValue(Response.json({ id: "lote-cobrado", cobrado: true, cotizaciones: [], totalMXN: 500 }, { status: 202 })));
+  const { result } = renderHook(() => useCargaMasiva());
+  await act(async () => { expect(await result.current.reanudarCarga("lote-cobrado")).toBe(true); });
+  expect(result.current.estado).toBe("checkout");
+  expect(result.current.pagoEnConciliacion).toBe(true);
+  expect(result.current.stripeClientSecret).toBeNull();
+});
 it("distingue una lista vacía de una consulta rechazada", async () => {
   vi.stubGlobal("fetch", vi.fn().mockResolvedValueOnce(Response.json({ pendientes: [] })).mockResolvedValueOnce(Response.json({ error: "Sesión expirada" }, { status: 401 })));
   const { result } = renderHook(() => useCargaMasiva());

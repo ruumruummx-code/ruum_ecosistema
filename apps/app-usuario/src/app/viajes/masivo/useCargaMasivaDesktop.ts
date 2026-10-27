@@ -419,6 +419,7 @@ export function useCargaMasivaDesktop() {
   // Conciliación de pago con polling y verificación estructurada
   const verificarPago = useCallback(async () => {
     if (!cargaMasiva.cargaId) return;
+    cargaMasiva.marcarPagoEnConciliacion();
     setConciliando(true);
     setErrorPago(null);
 
@@ -431,6 +432,7 @@ export function useCargaMasivaDesktop() {
           await new Promise((r) => setTimeout(r, demoras[i - 1]));
         }
         const data = await cargaMasiva.consultarEstadoPago(cargaMasiva.cargaId);
+        if (data.cobrado && data.error) throw new Error(data.error);
         if (data.pagado) {
           pagado = true;
           break;

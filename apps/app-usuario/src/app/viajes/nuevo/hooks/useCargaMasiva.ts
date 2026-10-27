@@ -65,9 +65,10 @@ export interface FilaMasiva extends FilaValidada {
 interface State {
   estado: EstadoCarga; filas: FilaMasiva[]; totalMXN: number; error: string | null;
   progreso: number; stripeClientSecret: string | null; cargaId: string | null; pagoConfirmado: boolean;
+  pagoEnConciliacion: boolean;
 }
 type Action =
-  | { type: "PARSEANDO" | "RESET" | "GEOCODIFICANDO" | "COTIZANDO" | "PAGO_OK" }
+  | { type: "PARSEANDO" | "RESET" | "GEOCODIFICANDO" | "COTIZANDO" | "PAGO_OK" | "PAGO_PENDIENTE" }
   | { type: "VALIDACION_OK"; filas: FilaMasiva[] }
   | { type: "FILA_VALIDADA"; fila: FilaMasiva }
   | { type: "ERROR"; mensaje: string }
@@ -76,8 +77,8 @@ type Action =
   | { type: "PROGRESO"; valor: number }
   | { type: "COTIZACION_OK"; filas: FilaMasiva[]; totalMXN: number }
   | { type: "CHECKOUT"; stripeClientSecret: string; cargaId: string }
-  | { type: "REANUDAR_CHECKOUT"; stripeClientSecret: string; cargaId: string; filas: FilaMasiva[]; totalMXN: number };
-const inicial: State = { estado: "idle", filas: [], totalMXN: 0, error: null, progreso: 0, stripeClientSecret: null, cargaId: null, pagoConfirmado: false };
+  | { type: "REANUDAR_CHECKOUT"; pagoEnConciliacion: boolean; stripeClientSecret: string | null; cargaId: string; filas: FilaMasiva[]; totalMXN: number };
+const inicial: State = { estado: "idle", filas: [], totalMXN: 0, error: null, progreso: 0, stripeClientSecret: null, cargaId: null, pagoConfirmado: false, pagoEnConciliacion: false };
 function revalidarFila(fila: FilaMasiva): FilaMasiva {
   const v = validarFila(fila.datos, fila.indice);
   return {
@@ -169,12 +170,15 @@ function reducer(state: State, action: Action): State {
         ...state,
         estado: "checkout",
         stripeClientSecret: action.stripeClientSecret,
+        pagoEnConciliacion: action.pagoEnConciliacion,
         cargaId: action.cargaId,
         filas: action.filas,
         totalMXN: action.totalMXN,
         progreso: 100,
         error: null,
       };
+    case "PAGO_PENDIENTE":
+      return { ...state, pagoEnConciliacion: true };
     case "PAGO_OK":
       return { ...state, estado: "pagado", pagoConfirmado: true };
     case "RESET":
@@ -400,7 +404,7 @@ export function useCargaMasiva() {
         dispatch({ type: "ERROR", mensaje: data.error ?? "La carga masiva ya no está disponible." });
         return false;
       }
-      if (!data.clientSecret) throw new Error("No se pudo obtener la sesión de pago de la carga.");
+      if (!data.clientSecret && !data.cobrado) throw new Error("No se pudo obtener la sesión de pago de la carga.");
 
       try { localStorage.setItem(STORAGE_KEY_CARGA_ACTIVA, id); } catch {}
       setCargaPendienteStorage(id);
@@ -410,7 +414,8 @@ export function useCargaMasiva() {
       dispatch({
         type: "REANUDAR_CHECKOUT",
         cargaId: id,
-        stripeClientSecret: data.clientSecret,
+        stripeClientSecret: data.clientSecret ?? null,
+        pagoEnConciliacion: Boolean(data.cobrado),
         filas: filasCarga,
         totalMXN: data.totalMXN ?? 0,
       });
@@ -461,7 +466,7 @@ export function useCargaMasiva() {
   }, []);
 
   /** Consulta el estado de pago de una carga masiva con reintento y backoff exponencial */
-  const consultarEstadoPago = useCallback(async (id: string): Promise<{ pagado: boolean; error?: string }> => {
+  const consultarEstadoPago = useCallback(async (id: string): Promise<{ pagado: boolean; cobrado?: boolean; error?: string }> => {
     const res = await fetchConReintento(
       `/api/viajes/masivos/estado?id=${encodeURIComponent(id)}`,
       {},
@@ -470,7 +475,7 @@ export function useCargaMasiva() {
     );
     const data = await res.json();
     if (!res.ok) throw new Error(data.error ?? "No se pudo consultar el estado del pago.");
-    return data as { pagado: boolean; error?: string };
+    return data as { pagado: boolean; cobrado?: boolean; error?: string };
   }, []);
 
   const filasVisibles = state.filas.filter((f) => !f.eliminada);
@@ -494,6 +499,7 @@ export function useCargaMasiva() {
     geocodificarYCotizar,
     cotizarSoloValidas,
     confirmarPago,
+    marcarPagoEnConciliacion: () => dispatch({ type: "PAGO_PENDIENTE" }),
     cancelar,
     reanudarCarga,
     descartarCargaPendiente,

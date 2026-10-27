@@ -100,6 +100,8 @@ const mockHookReturn = {
   todasListas: false,
   progreso: 0,
   pagoConfirmado: false,
+  pagoEnConciliacion: false,
+  marcarPagoEnConciliacion: vi.fn(),
   cargaId: null as string | null,
   stripeClientSecret: null as string | null,
   cargarArchivo: cargarArchivoMock,
@@ -122,6 +124,19 @@ vi.mock("../nuevo/hooks/useCargaMasiva", () => ({
 }));
 
 describe("CargaMasivaDesktop — Pantalla de Carga Masiva de Escritorio", () => {
+  it("permite recuperar un pago en conciliación sin ofrecer otro cobro", async () => {
+    mockHookReturn.estado = "checkout";
+    mockHookReturn.cargaId = "carga-test-123";
+    mockHookReturn.pagoEnConciliacion = true;
+    mockHookReturn.totalMXN = 1950;
+    await renderizarDesktop();
+    expect(screen.queryByTestId("pago-stripe-mock")).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Pagar $1,950.00 MXN" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Cancelar carga" })).toBeDisabled();
+    expect(screen.getByRole("link", { name: "Ir a Mis traslados" })).toHaveAttribute("href", "/mis-viajes");
+    await userEvent.click(screen.getByRole("button", { name: "Reintentar conciliación" }));
+    await waitFor(() => expect(confirmarPagoMock).toHaveBeenCalledOnce());
+  });
   it("muestra el fallo de consulta y recupera los pendientes al reintentar", async () => {
     consultarCargasPendientesMock.mockRejectedValueOnce(new Error("Servidor no disponible"));
     await renderizarDesktop();
@@ -142,6 +157,7 @@ describe("CargaMasivaDesktop — Pantalla de Carga Masiva de Escritorio", () => 
     mockHookReturn.todasListas = false;
     mockHookReturn.progreso = 0;
     mockHookReturn.pagoConfirmado = false;
+    mockHookReturn.pagoEnConciliacion = false;
     mockHookReturn.cargaId = null;
     mockHookReturn.stripeClientSecret = null;
     mockHookReturn.cargaPendienteStorage = null;

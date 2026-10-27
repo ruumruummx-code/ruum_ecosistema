@@ -28,6 +28,14 @@ vi.mock("@ruum/api/services", () => ({
 import { GET } from "./route";
 
 describe("GET /api/viajes/masivos/estado — Conciliación de pago masivo", () => {
+  it("distingue un pago cobrado de una conciliación fallida sin pedir otro pago", async () => {
+    mocks.obtener.mockResolvedValue({ id: "92200000-0000-4000-8000-000000000001", monto_centavos: 50000, stripe_payment_intent_id: "pi_cobrado" });
+    mocks.stripe.mockResolvedValue({ id: "pi_cobrado", status: "succeeded", amount_received: 50000, currency: "mxn" });
+    mocks.confirmar.mockRejectedValueOnce(new Error("vehiculos_transmision_check"));
+    const respuesta = await GET(new NextRequest("http://localhost/api/viajes/masivos/estado?id=92200000-0000-4000-8000-000000000001"));
+    expect(respuesta.status).toBe(202);
+    expect(await respuesta.json()).toMatchObject({ pagado: false, cobrado: true, codigo: "PAGO_COBRADO_PENDIENTE_CONCILIACION" });
+  });
   beforeEach(() => {
     vi.clearAllMocks();
   });

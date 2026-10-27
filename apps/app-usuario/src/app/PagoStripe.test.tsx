@@ -193,6 +193,8 @@ describe("PagoStripe — cobro real con Elements mockeado en el borde", () => {
     expect(stripeMocks.confirmPayment).toHaveBeenCalledWith(
       expect.objectContaining({ redirect: "if_required" }),
     );
+    expect(screen.queryByRole("button", { name: /pagar y confirmar traslado/i })).not.toBeInTheDocument();
+    expect(screen.getByRole("status")).toHaveTextContent("Stripe aprobó tu pago");
   });
 
   it("RC-06: paymentIntent 'processing' NO confirma el pago y muestra estado pendiente", async () => {

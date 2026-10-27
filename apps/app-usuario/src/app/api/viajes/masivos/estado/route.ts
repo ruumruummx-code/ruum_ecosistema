@@ -37,7 +37,12 @@ export async function GET(request: NextRequest) {
     logStructuredInfo("api/viajes/masivos/estado", "polling_fallback_stripe", { cargaId: id.data });
     const intent = await stripeMasivo(`payment_intents/${encodeURIComponent(carga.stripe_payment_intent_id)}`);
     if (intent.status !== "succeeded") return NextResponse.json({ pagado: false });
-    await confirmarPagoMasivoServidor(servicio, id.data, intent.id, intent.amount_received, intent.currency);
+    try {
+      await confirmarPagoMasivoServidor(servicio, id.data, intent.id, intent.amount_received, intent.currency);
+    } catch (err) {
+      logStructuredError("api/viajes/masivos/estado", "pago_cobrado_conciliacion_pendiente", err, { cargaId: id.data, usuarioId: user.id });
+      return NextResponse.json({ pagado: false, cobrado: true, codigo: "PAGO_COBRADO_PENDIENTE_CONCILIACION", error: "Stripe confirmó tu pago, pero no pudimos generar los traslados. No vuelvas a pagar. Puedes reintentar la conciliación o contactar a soporte." }, { status: 202 });
+    }
     registrarMetricaPago({
       cargaId: id.data,
       exito: true,
