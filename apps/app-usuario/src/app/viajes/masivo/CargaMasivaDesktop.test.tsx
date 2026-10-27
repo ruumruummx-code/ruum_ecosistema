@@ -16,6 +16,8 @@ const pushMock = vi.fn();
 const backMock = vi.fn();
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ push: pushMock, back: backMock }),
+  usePathname: () => "/viajes/masivo",
+  useSearchParams: () => new URLSearchParams(),
 }));
 
 const cargarArchivoMock = vi.fn();
@@ -88,12 +90,12 @@ describe("CargaMasivaDesktop — Pantalla de Carga Masiva de Escritorio", () => 
     expect(enlaceCarga).toHaveAttribute("href", "/viajes/masivo");
 
     expect(within(navPanel).getByRole("link", { name: /^Inicio/ })).toHaveAttribute("href", "/");
-    expect(within(navPanel).getByRole("link", { name: /^Traslados/ })).toHaveAttribute("href", "/mis-viajes");
-    expect(within(navPanel).getByRole("link", { name: /^Cuenta/ })).toHaveAttribute("href", "/cuenta");
+    expect(within(navPanel).getByRole("link", { name: /Mis traslados/ })).toHaveAttribute("href", "/mis-viajes");
+    expect(within(navPanel).getByRole("link", { name: /Mi cuenta/ })).toHaveAttribute("href", "/cuenta");
 
     // Card inferior
-    expect(screen.getByText("Traslados sin límites")).toBeInTheDocument();
-    expect(screen.getByText("Más eficiencia para tu operación.")).toBeInTheDocument();
+    expect(screen.getByText("Mueve tu auto sin soltar el control")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /Crear traslado/ })).toBeInTheDocument();
   });
 
   it("renderiza la barra superior con migas de pan (Breadcrumbs), notificaciones y dropdown de usuario", async () => {
@@ -111,7 +113,7 @@ describe("CargaMasivaDesktop — Pantalla de Carga Masiva de Escritorio", () => 
 
     // Usuario
     expect(screen.getByText("Hola, Alex")).toBeInTheDocument();
-    expect(screen.getByText("A")).toBeInTheDocument();
+    expect(screen.getByText("AL")).toBeInTheDocument();
   });
 
   it("renderiza el header de la sección con título, subtítulo y botón Mis viajes", async () => {

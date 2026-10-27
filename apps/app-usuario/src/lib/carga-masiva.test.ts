@@ -40,10 +40,10 @@ describe("plantilla oficial masiva", () => {
     expect(validada.errores).toHaveProperty("condicion");
     expect(validada.errores).toHaveProperty("entregaTelefono");
     expect(validarFila({ ...invalida, entregaTelefono: "5512345678" }, 0).estado).toBe("error");
-    // RC-13: la plantilla oficial pesa ~4.6 MB (embebe los catálogos de CP en
-    // sheet5/sheet6), así que el parseo con ExcelJS supera los 30 s en frío.
-    // El test es válido; se le da margen real mientras se reduce el archivo.
-  }, 120000);
+    // RC-13: La plantilla oficial fue optimizada a ~200 KB (eliminando las hojas
+    // de catálogo SEPOMEX innecesarias en cliente), permitiendo un parseo rápido (< 1 s)
+    // y amplio margen bajo el límite de 5 MB para hasta 100 registros.
+  }, 30000);
   it("conserva ceros de CP y no interpreta fórmulas ni objetos como texto", () => {
     expect(normalizarFilaPlantilla({ origen_codigo_postal: "6700" }).origenCodigoPostal).toBe("06700");
     expect(valorCelda({ formula: "SUM(A1)", result: "06700" })).toBe("06700");

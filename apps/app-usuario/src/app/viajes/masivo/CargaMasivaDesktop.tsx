@@ -4,6 +4,7 @@ import React, { useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCargaMasivaDesktop, type CargaRecienteItem } from "./useCargaMasivaDesktop";
+import { UserDashboardLayout } from "../../../components/layout/UserDashboardLayout";
 
 export interface CargaMasivaDesktopProps {
   nombreUsuario?: string | null;
@@ -12,73 +13,6 @@ export interface CargaMasivaDesktopProps {
 /* =========================================================================
    ÍCONOS VECTORIALES PRECISOS
    ========================================================================= */
-
-function IconoInicio({ className = "size-5" }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden="true">
-      <path d="m3 9.5 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
-      <path d="M9 22V12h6v10" />
-    </svg>
-  );
-}
-
-function IconoTraslados({ className = "size-5" }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden="true">
-      <path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2" />
-      <path d="M14 8h4.5l3.5 4.5v5.5a1 1 0 0 1-1 1h-1" />
-      <circle cx="7" cy="18" r="2" />
-      <circle cx="18" cy="18" r="2" />
-    </svg>
-  );
-}
-
-function IconoCargaMasiva({ className = "size-5" }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden="true">
-      <rect x="2" y="4" width="20" height="6" rx="1.5" />
-      <rect x="2" y="14" width="20" height="6" rx="1.5" />
-      <path d="M6 10v4" />
-      <path d="M18 10v4" />
-    </svg>
-  );
-}
-
-function IconoCuenta({ className = "size-5" }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden="true">
-      <circle cx="12" cy="8" r="4" />
-      <path d="M20 21a8 8 0 0 0-16 0" />
-    </svg>
-  );
-}
-
-function IconoPerfil({ className = "size-5" }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden="true">
-      <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
-      <circle cx="12" cy="7" r="4" />
-    </svg>
-  );
-}
-
-function IconoPreferencias({ className = "size-5" }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden="true">
-      <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z" />
-      <circle cx="12" cy="12" r="3" />
-    </svg>
-  );
-}
-
-function IconoCampana({ className = "size-5" }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden="true">
-      <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" />
-      <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" />
-    </svg>
-  );
-}
 
 function IconoPin({ className = "size-4" }: { className?: string }) {
   return (
@@ -209,9 +143,6 @@ export function CargaMasivaDesktop({ nombreUsuario }: CargaMasivaDesktopProps) {
     mostrarToast,
   } = useCargaMasivaDesktop();
 
-  const nombreMostrado = nombreUsuario || "Usuario";
-  const inicialUsuario = nombreMostrado.trim().charAt(0).toUpperCase() || "R";
-
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -243,179 +174,31 @@ export function CargaMasivaDesktop({ nombreUsuario }: CargaMasivaDesktopProps) {
   };
 
   return (
-    <div className="flex h-screen w-full overflow-hidden bg-[#f8fafc] text-slate-800 antialiased dark:bg-[#07192f] dark:text-slate-100">
-      {/* ---------------------------------------------------------------------
-          SIDEBAR IZQUIERDO FIJO
-          --------------------------------------------------------------------- */}
-      <aside
-        aria-label="Menú principal de escritorio"
-        className="w-64 shrink-0 flex flex-col justify-between border-r border-slate-200/80 bg-white p-5 dark:border-[#1a3a5c] dark:bg-[#0a2342] z-20"
-      >
-        <div className="flex flex-col gap-6">
-          {/* Logo Ruum Ruum */}
-          <Link href="/" className="flex items-center gap-2.5 px-2 py-1">
-            <span className="flex size-9 items-center justify-center rounded-xl bg-[#0c2340] dark:bg-[#0066FF] shadow-xs">
-              <svg viewBox="0 0 32 32" fill="none" className="size-5">
-                <path d="M6 10 L16 4 L26 10 L26 22 L16 28 L6 22 Z" stroke="#38bdf8" strokeWidth="2.5" strokeLinejoin="round" />
-                <path d="M12 14 L16 11 L20 14 L20 20 L16 23 L12 20 Z" fill="#38bdf8" />
-              </svg>
-            </span>
-            <div>
-              <span className="font-display text-[17px] font-black tracking-tight text-[#0c2340] dark:text-white block leading-tight">
-                Ruum Ruum
-              </span>
-              <span className="text-[10px] font-extrabold uppercase tracking-widest text-[#0066FF] dark:text-[#38bdf8] block">
-                USUARIO
-              </span>
-            </div>
-          </Link>
-
-          {/* Menú de navegación lateral */}
-          <nav aria-label="Navegación del panel" className="flex flex-col gap-1.5">
-            <Link
-              href="/"
-              className="flex items-center gap-3.5 rounded-2xl px-4 py-3 text-[14px] font-semibold text-slate-600 transition hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white"
-            >
-              <IconoInicio className="size-5 text-slate-400 dark:text-slate-400" />
-              Inicio
-            </Link>
-
-            <Link
-              href="/mis-viajes"
-              className="flex items-center gap-3.5 rounded-2xl px-4 py-3 text-[14px] font-semibold text-slate-600 transition hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white"
-            >
-              <IconoTraslados className="size-5 text-slate-400 dark:text-slate-400" />
-              Traslados
-            </Link>
-
-            {/* Opción Carga Masiva ACTIVA */}
-            <Link
-              href="/viajes/masivo"
-              aria-current="page"
-              className="flex items-center gap-3.5 rounded-2xl bg-[#edf4fe] px-4 py-3 text-[14px] font-bold text-[#0066FF] dark:bg-[#0c2646] dark:text-[#4d94ff] shadow-2xs"
-            >
-              <IconoCargaMasiva className="size-5 text-[#0066FF] dark:text-[#4d94ff]" />
-              Carga Masiva
-            </Link>
-
-            <Link
-              href="/cuenta"
-              className="flex items-center gap-3.5 rounded-2xl px-4 py-3 text-[14px] font-semibold text-slate-600 transition hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white"
-            >
-              <IconoCuenta className="size-5 text-slate-400 dark:text-slate-400" />
-              Cuenta
-            </Link>
-
-            <Link
-              href="/cuenta/datos-personales"
-              className="flex items-center gap-3.5 rounded-2xl px-4 py-3 text-[14px] font-semibold text-slate-600 transition hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white"
-            >
-              <IconoPerfil className="size-5 text-slate-400 dark:text-slate-400" />
-              Perfil
-            </Link>
-
-            <Link
-              href="/cuenta/preferencias"
-              className="flex items-center gap-3.5 rounded-2xl px-4 py-3 text-[14px] font-semibold text-slate-600 transition hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white"
-            >
-              <IconoPreferencias className="size-5 text-slate-400 dark:text-slate-400" />
-              Preferencias
-            </Link>
-          </nav>
-        </div>
-
-        {/* Card inferior fijo rediseñado: "Traslados sin límites" */}
-        <div className="relative rounded-2xl border border-blue-400/30 bg-gradient-to-br from-[#0c2340] via-[#1d4ed8] to-[#2563eb] p-4 text-white shadow-md overflow-hidden">
-          {/* Ilustración de documento de datos con estela de velocidad */}
-          <div className="absolute -bottom-2 -right-2 opacity-35" aria-hidden="true">
-            <svg viewBox="0 0 100 100" fill="none" className="w-20 h-20">
-              <rect x="25" y="20" width="50" height="65" rx="6" fill="#ffffff" />
-              <rect x="35" y="32" width="30" height="4" rx="2" fill="#2563eb" />
-              <rect x="35" y="42" width="22" height="4" rx="2" fill="#93c5fd" />
-              <rect x="35" y="52" width="28" height="4" rx="2" fill="#2563eb" />
-              <rect x="35" y="62" width="18" height="4" rx="2" fill="#93c5fd" />
-              {/* Estela de velocidad */}
-              <path d="M10 65 L25 65 M5 75 L20 75 M15 85 L30 85" stroke="#ffffff" strokeWidth="3" strokeLinecap="round" />
-            </svg>
-          </div>
-
-          <h3 className="font-display text-[14px] font-bold text-white leading-tight">
-            Traslados sin límites
-          </h3>
-          <p className="mt-1 text-[11px] font-medium text-blue-100 max-w-[150px]">
-            Más eficiencia para tu operación.
-          </p>
-        </div>
-      </aside>
-
-      {/* ---------------------------------------------------------------------
-          ÁREA PRINCIPAL DE CONTENIDO
-          --------------------------------------------------------------------- */}
-      <div className="flex flex-1 flex-col overflow-hidden">
-        {/* Barra de Navegación Superior con Breadcrumbs */}
-        <header
-          aria-label="Barra superior de carga masiva"
-          className="flex h-18 shrink-0 items-center justify-between border-b border-slate-200/80 bg-white/90 px-8 backdrop-blur-md dark:border-[#1a3a5c] dark:bg-[#0a2342]/90 z-10"
+    <UserDashboardLayout
+      idContenido="contenido-carga-masiva"
+      nombre={nombreUsuario}
+      padding="compacto"
+    >
+      {/* Migas de pan: antes vivían en el header duplicado */}
+      <nav aria-label="Migas de pan" className="flex items-center gap-2 text-xs font-semibold text-slate-500 dark:text-slate-400">
+        <button
+          type="button"
+          onClick={() => router.back()}
+          className="flex items-center gap-1 text-slate-700 hover:text-[#0066FF] transition dark:text-slate-200 cursor-pointer"
         >
-          {/* Migas de pan (Breadcrumbs) */}
-          <nav aria-label="Migas de pan" className="flex items-center gap-2 text-xs font-semibold text-slate-500 dark:text-slate-400">
-            <button
-              type="button"
-              onClick={() => router.back()}
-              className="flex items-center gap-1 text-slate-700 hover:text-[#0066FF] transition dark:text-slate-200 cursor-pointer"
-            >
-              <span>←</span>
-              <span>Volver</span>
-            </button>
-            <span className="text-slate-300 dark:text-slate-600">|</span>
-            <Link href="/mis-viajes" className="hover:text-[#0066FF] transition">
-              Traslados
-            </Link>
-            <span className="text-slate-300 dark:text-slate-600">&gt;</span>
-            <span className="text-slate-900 font-bold dark:text-white" aria-current="location">
-              Carga Masiva
-            </span>
-          </nav>
+          <span>←</span>
+          <span>Volver</span>
+        </button>
+        <span className="text-slate-300 dark:text-slate-600">|</span>
+        <Link href="/mis-viajes" className="hover:text-[#0066FF] transition">
+          Traslados
+        </Link>
+        <span className="text-slate-300 dark:text-slate-600">&gt;</span>
+        <span className="text-slate-900 font-bold dark:text-white" aria-current="location">
+          Carga Masiva
+        </span>
+      </nav>
 
-          {/* Extremo derecho: Campana y Dropdown de Perfil */}
-          <div className="flex items-center gap-3">
-            {/* Campana de Notificaciones con Badge */}
-            <Link
-              href="/cuenta/preferencias"
-              aria-label="Notificaciones"
-              className="relative flex size-10 items-center justify-center rounded-full text-slate-600 transition hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800"
-            >
-              <IconoCampana className="size-5" />
-              <span
-                className="absolute top-2 right-2 size-2.5 rounded-full bg-red-500 ring-2 ring-white dark:ring-[#0a2342]"
-                aria-hidden="true"
-              />
-            </Link>
-
-            {/* Avatar Dropdown */}
-            <div className="flex items-center gap-2">
-              <span className="flex size-9 items-center justify-center rounded-full bg-[#7c3aed] font-display text-sm font-bold text-white shadow-xs">
-                {inicialUsuario}
-              </span>
-              <button
-                type="button"
-                onClick={() => router.push("/cuenta")}
-                className="flex items-center gap-1 text-xs font-bold text-slate-700 hover:text-slate-900 dark:text-slate-200 cursor-pointer"
-              >
-                <span>Hola, {nombreMostrado}</span>
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="size-3.5 text-slate-400" aria-hidden="true">
-                  <path d="m6 9 6 6 6-6" />
-                </svg>
-              </button>
-            </div>
-          </div>
-        </header>
-
-        {/* Contenido Principal con Scroll */}
-        <main
-          id="contenido-carga-masiva"
-          className="flex-1 overflow-y-auto px-8 py-6 space-y-6"
-        >
           {/* -----------------------------------------------------------------
               HEADER DE SECCIÓN
               ----------------------------------------------------------------- */}
@@ -879,9 +662,6 @@ export function CargaMasivaDesktop({ nombreUsuario }: CargaMasivaDesktopProps) {
               Contactar soporte
             </Link>
           </footer>
-        </main>
-      </div>
-
       {/* ---------------------------------------------------------------------
           TOAST FLOTANTE DE FEEDBACK / ERRORES
           --------------------------------------------------------------------- */}
@@ -1013,6 +793,6 @@ export function CargaMasivaDesktop({ nombreUsuario }: CargaMasivaDesktopProps) {
           </div>
         </div>
       )}
-    </div>
+    </UserDashboardLayout>
   );
 }

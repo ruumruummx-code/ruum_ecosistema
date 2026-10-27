@@ -6,8 +6,9 @@ import Image from "next/image";
 import type { Database } from "@ruum/shared/types";
 import { ETIQUETA_ESTADO_TRASLADO } from "@ruum/shared/states";
 import { indiceEtapaActual } from "@ruum/ui";
-import { obtenerViajeActivo, obtenerHistorial } from "../lib/inicio";
+import { construirNotificaciones, obtenerViajeActivo, obtenerHistorial } from "../lib/inicio";
 import { TERMINOLOGIA_USUARIO } from "../lib/glosario";
+import { UserDashboardLayout } from "../components/layout/UserDashboardLayout";
 
 type PasaporteRow = Database["public"]["Views"]["pasaporte_digital"]["Row"];
 type UsuarioRow = Database["public"]["Tables"]["usuarios"]["Row"];
@@ -24,81 +25,11 @@ export interface InicioDesktopProps {
    ÍCONOS VECTORIALES PRECISOS
    ========================================================================= */
 
-function IconoInicioRR({ className = "size-5" }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden="true">
-      <path d="m3 9.5 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
-      <path d="M9 22V12h6v10" />
-    </svg>
-  );
-}
-
-function IconoTrasladosRR({ className = "size-5" }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden="true">
-      <path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2" />
-      <path d="M14 8h4.5l3.5 4.5v5.5a1 1 0 0 1-1 1h-1" />
-      <circle cx="7" cy="18" r="2" />
-      <circle cx="18" cy="18" r="2" />
-    </svg>
-  );
-}
-
-function IconoCargaMasivaRR({ className = "size-5" }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden="true">
-      <rect x="2" y="4" width="20" height="6" rx="1.5" />
-      <rect x="2" y="14" width="20" height="6" rx="1.5" />
-      <path d="M6 10v4" />
-      <path d="M18 10v4" />
-    </svg>
-  );
-}
-
-function IconoCuentaRR({ className = "size-5" }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden="true">
-      <path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 12 10s-6.7.6-8.5 1.1C2.7 11.3 2 12.1 2 13v3c0 .6.4 1 1 1h2" />
-      <circle cx="7" cy="17" r="2" />
-      <path d="M9 17h6" />
-      <circle cx="17" cy="17" r="2" />
-      <path d="M5 10l1.5-4.5A2 2 0 0 1 8.4 4h7.2a2 2 0 0 1 1.9 1.5L19 10" />
-    </svg>
-  );
-}
-
 function IconoPerfilRR({ className = "size-5" }: { className?: string }) {
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden="true">
       <circle cx="12" cy="8" r="4" />
       <path d="M20 21a8 8 0 0 0-16 0" />
-    </svg>
-  );
-}
-
-function IconoPreferenciasRR({ className = "size-5" }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden="true">
-      <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z" />
-      <circle cx="12" cy="12" r="3" />
-    </svg>
-  );
-}
-
-function IconoCampana({ className = "size-5" }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden="true">
-      <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" />
-      <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" />
-    </svg>
-  );
-}
-
-function IconoBuscar({ className = "size-4" }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden="true">
-      <circle cx="11" cy="11" r="8" />
-      <path d="m21 21-4.3-4.3" />
     </svg>
   );
 }
@@ -303,10 +234,6 @@ export function InicioDesktop({
 }: InicioDesktopProps) {
   // Estado para el carrusel interactivo de Tips Ruum Ruum
   const [tipIndex, setTipIndex] = useState(0);
-  // Estado para el menú desplegable del perfil de usuario
-  const [perfilAbierto, setPerfilAbierto] = useState(false);
-  // Estado para la barra de búsqueda de escritorio
-  const [terminoBusqueda, setTerminoBusqueda] = useState("");
 
   const viaje = obtenerViajeActivo(traslados);
   const historial = obtenerHistorial(traslados);
@@ -314,7 +241,7 @@ export function InicioDesktop({
   // Nombre de bienvenida
   const primerNombre = usuario?.nombre?.trim().split(/\s+/)[0];
   const nombre = primerNombre ? primerNombre.charAt(0).toUpperCase() + primerNombre.slice(1).toLowerCase() : "Hector";
-  const inicialUsuario = nombre.charAt(0).toUpperCase();
+  const notificaciones = construirNotificaciones(usuario, traslados);
 
   // Tips interactivos
   const tips = [
@@ -375,219 +302,15 @@ export function InicioDesktop({
   ];
 
   return (
-    <div className="flex h-screen w-full bg-[#f4f7fc] text-[#0a2342] overflow-hidden select-none font-sans">
-      {/* ===================================================================
-          1. SIDEBAR IZQUIERDO (FIJO)
-          =================================================================== */}
-      <aside
-        id="desktopSidebar"
-        aria-label="Menú principal de escritorio"
-        className="w-[260px] h-full shrink-0 bg-[#07162c] text-white flex flex-col justify-between p-5 border-r border-[#10243e] overflow-y-auto"
-      >
-        {/* Cabecera del Sidebar con Logotipo RR */}
-        <div>
-          <div className="flex items-center gap-3 px-2 py-2 mb-6">
-            <div className="size-10 rounded-xl bg-gradient-to-tr from-[#00d1d1] to-[#155eef] flex items-center justify-center shadow-md font-display font-black text-white text-xl tracking-tighter">
-              RR
-            </div>
-            <div>
-              <span className="block font-display text-[17px] font-black leading-tight tracking-tight text-white">
-                Ruum Ruum
-              </span>
-              <span className="block text-[10px] font-bold tracking-widest text-[#7e95b3] uppercase">
-                USUARIO
-              </span>
-            </div>
-          </div>
+    <UserDashboardLayout
+      usuario={usuario}
+      nombre={usuario?.nombre}
+      notificaciones={notificaciones}
+      totalVehiculos={vehiculos.length}
+      idContenido="desktopMainContent"
+      padding="amplio"
+    >
 
-          {/* Menú de Navegación Lateral */}
-          <nav aria-label="Navegación lateral" className="space-y-1.5">
-            <Link
-              href="/"
-              className="flex items-center gap-3.5 px-4 py-3 rounded-2xl bg-[#165dfc] text-white font-semibold text-sm shadow-sm transition"
-              aria-current="page"
-            >
-              <IconoInicioRR className="size-5 text-white" />
-              <span>Inicio</span>
-            </Link>
-
-            <Link
-              href="/mis-viajes"
-              className="flex items-center gap-3.5 px-4 py-3 rounded-2xl text-[#8fa0b5] hover:text-white hover:bg-white/5 font-medium text-sm transition"
-            >
-              <IconoTrasladosRR className="size-5" />
-              <span>Traslados</span>
-            </Link>
-
-            <Link
-              href="/viajes/masivo"
-              className="flex items-center gap-3.5 px-4 py-3 rounded-2xl text-[#8fa0b5] hover:text-white hover:bg-white/5 font-medium text-sm transition"
-            >
-              <IconoCargaMasivaRR className="size-5" />
-              <span>Carga masiva</span>
-            </Link>
-
-            <Link
-              href="/cuenta"
-              className="flex items-center gap-3.5 px-4 py-3 rounded-2xl text-[#8fa0b5] hover:text-white hover:bg-white/5 font-medium text-sm transition"
-            >
-              <IconoCuentaRR className="size-5" />
-              <span>Cuenta</span>
-            </Link>
-
-            <Link
-              href="/cuenta?seccion=perfil"
-              className="flex items-center gap-3.5 px-4 py-3 rounded-2xl text-[#8fa0b5] hover:text-white hover:bg-white/5 font-medium text-sm transition"
-            >
-              <IconoPerfilRR className="size-5" />
-              <span>Perfil</span>
-            </Link>
-
-            <Link
-              href="/cuenta/preferencias"
-              className="flex items-center gap-3.5 px-4 py-3 rounded-2xl text-[#8fa0b5] hover:text-white hover:bg-white/5 font-medium text-sm transition"
-            >
-              <IconoPreferenciasRR className="size-5" />
-              <span>Preferencias</span>
-            </Link>
-          </nav>
-        </div>
-
-        {/* Sección Inferior Promocional con fondo degradado e imagen de vehículo */}
-        <div className="mt-8 rounded-2xl p-4 bg-gradient-to-b from-[#0e2746] to-[#041224] border border-[#00d1d1]/20 relative overflow-hidden shadow-lg">
-          <div className="relative z-10">
-            <IlustracionPickupBlanca className="w-full h-auto mb-2 drop-shadow-md" />
-            <h3 className="font-display text-sm font-extrabold text-white leading-snug">
-              Mueve tu auto sin soltar el control
-            </h3>
-            <div className="mt-2 space-y-0.5 text-[11px] text-[#9db2ce]">
-              <p>Más simple.</p>
-              <p>Más inteligente.</p>
-              <p>Más cerca de ti.</p>
-            </div>
-          </div>
-          {/* Luz de fondo en cian oficial */}
-          <div className="absolute -bottom-10 -right-10 size-28 bg-[#00d1d1]/10 rounded-full blur-xl pointer-events-none" />
-        </div>
-      </aside>
-
-      {/* ===================================================================
-          CONTENEDOR DERECHO: BARRA SUPERIOR + DASHBOARD PRINCIPAL
-          =================================================================== */}
-      <div className="flex-1 flex flex-col h-full min-w-0 overflow-hidden">
-        {/* ===================================================================
-            2. BARRA DE NAVEGACIÓN SUPERIOR
-            =================================================================== */}
-        <header
-          id="desktopTopNav"
-          aria-label="Barra superior de usuario"
-          className="h-[68px] shrink-0 bg-white border-b border-slate-100 px-8 flex items-center justify-between gap-4 z-20"
-        >
-          {/* Barra de Búsqueda Central */}
-          <div className="max-w-md w-full relative">
-            <div className="flex items-center gap-2.5 px-4 py-2 bg-[#f4f7fb] hover:bg-[#edf2f8] focus-within:bg-white focus-within:ring-2 focus-within:ring-[#165dfc] rounded-full border border-slate-200/80 transition">
-              <IconoBuscar className="size-4 text-slate-400" />
-              <input
-                type="text"
-                value={terminoBusqueda}
-                onChange={(e) => setTerminoBusqueda(e.target.value)}
-                placeholder="Buscar traslados, vehículos o documentos..."
-                className="w-full text-xs text-slate-800 placeholder:text-slate-400 bg-transparent outline-none"
-                aria-label="Buscar traslados, vehículos o documentos"
-              />
-            </div>
-          </div>
-
-          {/* Menú Derecho: Notificaciones y Perfil */}
-          <div className="flex items-center gap-3">
-            {/* Campana de Notificaciones con Badge */}
-            <Link
-              href="/mis-viajes"
-              className="size-10 rounded-full bg-[#f4f7fa] hover:bg-slate-200/60 flex items-center justify-center relative border border-slate-200/60 transition"
-              aria-label="Notificaciones (3 alertas pendientes)"
-            >
-              <IconoCampana className="size-5 text-slate-700" />
-              <span className="absolute -top-1 -right-1 size-4.5 bg-[#ef4444] text-white text-[10px] font-bold rounded-full flex items-center justify-center shadow-sm">
-                3
-              </span>
-            </Link>
-
-            {/* Menú Desplegable de Perfil */}
-            <div className="relative">
-              <button
-                type="button"
-                onClick={() => setPerfilAbierto(!perfilAbierto)}
-                aria-expanded={perfilAbierto}
-                className="flex items-center gap-2.5 p-1.5 rounded-full hover:bg-slate-100 transition cursor-pointer"
-              >
-                <div className="size-9 rounded-full bg-[#07162c] text-white font-bold text-xs flex items-center justify-center shadow-sm">
-                  {inicialUsuario}
-                </div>
-                <div className="text-left hidden sm:block">
-                  <span className="block text-xs font-bold text-slate-900 leading-none">
-                    Hola, {nombre}
-                  </span>
-                  <span className="block text-[11px] font-medium text-slate-400 mt-0.5 leading-none">
-                    Usuario
-                  </span>
-                </div>
-                <svg viewBox="0 0 20 20" fill="currentColor" className="size-4 text-slate-400">
-                  <path fillRule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clipRule="evenodd" />
-                </svg>
-              </button>
-
-              {/* Menú desplegable flotante */}
-              {perfilAbierto && (
-                <div
-                  role="menu"
-                  className="absolute right-0 mt-2 w-48 rounded-2xl bg-white shadow-xl border border-slate-100 py-2 z-50 animate-in fade-in slide-in-from-top-2"
-                >
-                  <Link
-                    href="/cuenta?seccion=perfil"
-                    role="menuitem"
-                    className="block px-4 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50"
-                    onClick={() => setPerfilAbierto(false)}
-                  >
-                    Mi perfil
-                  </Link>
-                  <Link
-                    href="/cuenta/vehiculos"
-                    role="menuitem"
-                    className="block px-4 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50"
-                    onClick={() => setPerfilAbierto(false)}
-                  >
-                    Mis vehículos ({vehiculos.length})
-                  </Link>
-                  <Link
-                    href="/cuenta/preferencias"
-                    role="menuitem"
-                    className="block px-4 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50"
-                    onClick={() => setPerfilAbierto(false)}
-                  >
-                    Preferencias
-                  </Link>
-                  <div className="my-1 border-t border-slate-100" />
-                  <Link
-                    href="/login"
-                    role="menuitem"
-                    className="block px-4 py-2 text-xs font-medium text-red-600 hover:bg-red-50"
-                    onClick={() => setPerfilAbierto(false)}
-                  >
-                    Cerrar sesión
-                  </Link>
-                </div>
-              )}
-            </div>
-          </div>
-        </header>
-
-        {/* ===================================================================
-            3. DASHBOARD PRINCIPAL
-            =================================================================== */}
-        <main
-          id="desktopMainContent"
-          className="flex-1 overflow-y-auto min-h-0 bg-[#f4f7fc] p-8 space-y-6"
-        >
           {/* Header del Dashboard: Saludo Dinámico y Tarjeta Informativa Derecha */}
           <section aria-labelledby="saludo-escritorio" className="flex items-center justify-between gap-6">
             <div>
@@ -1038,8 +761,6 @@ export function InicioDesktop({
               </div>
             </div>
           </section>
-        </main>
-      </div>
-    </div>
+    </UserDashboardLayout>
   );
 }

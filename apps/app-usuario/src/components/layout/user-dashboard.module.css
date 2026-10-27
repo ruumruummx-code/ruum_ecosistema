@@ -1,0 +1,88 @@
+/* Shell de escritorio del área de usuario.
+   El shell vive únicamente en la rama de escritorio de cada página; esta regla
+   evita además que un error de composición lo muestre en móvil. */
+.shell {
+  display: flex;
+  width: 100%;
+  height: 100dvh;
+  max-height: 100dvh;
+  overflow: hidden;
+  background: var(--user-color-background, var(--ruum-canvas));
+  color: var(--ruum-text);
+}
+
+@media (max-width: 1023px) {
+  .shell {
+    display: none !important;
+  }
+}
+
+.sidebar {
+  --udb-bg: var(--ruum-navy, #0a2342);
+  --udb-bg-deep: #07162c;
+  --udb-border: rgba(255, 255, 255, 0.1);
+  --udb-text: #a8b7cc;
+  --udb-text-strong: #ffffff;
+  --udb-accent: #0052ff;
+  --udb-card: rgba(255, 255, 255, 0.06);
+
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  width: 256px;
+  height: 100%;
+  overflow: hidden;
+  border-right: 1px solid var(--udb-border);
+  background:
+    radial-gradient(circle at 20% 0%, rgba(0, 82, 255, 0.24), transparent 42%),
+    linear-gradient(180deg, var(--udb-bg) 0%, var(--udb-bg-deep) 100%);
+  color: var(--udb-text-strong);
+  transition: width 200ms ease;
+  will-change: width;
+}
+
+.sidebarColapsada {
+  width: 72px;
+}
+
+.navScroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.22) transparent;
+}
+
+.navScroll::-webkit-scrollbar {
+  width: 6px;
+}
+
+.navScroll::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.22);
+}
+
+.promo {
+  flex-shrink: 0;
+}
+
+/* En pantallas bajas la tarjeta promocional desaparece para que nunca
+   empuje ni tape las opciones del menú. */
+@media (max-height: 720px) {
+  .promo {
+    display: none;
+  }
+}
+
+/* Alineación de las migas de pan que las pantallas operativas mueven desde el
+   header compartido al contenido, sin acciones específicas en la barra. */
+.pageBreadcrumbs {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--ruum-text-secondary);
+}

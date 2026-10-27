@@ -97,15 +97,18 @@ export function fechaProgramada(fecha: string | null): { fecha: string; hora: st
 export interface UseGestionTrasladosOptions<T extends PestañaFiltro = PestañaFiltro> {
   traslados: ViajeLista[];
   pestanaInicial?: T;
+  /** Término proveniente del buscador global (`/mis-viajes?buscar=...`). */
+  busquedaInicial?: string;
 }
 
 export function useGestionTraslados<T extends PestañaFiltro = PestañaFiltro>({
   traslados,
   pestanaInicial = "activos" as T,
+  busquedaInicial = "",
 }: UseGestionTrasladosOptions<T>) {
   const [pestana, setPestana] = useState<T>(pestanaInicial);
-  const [busquedaInput, setBusquedaInput] = useState("");
-  const [busqueda, setBusqueda] = useState("");
+  const [busquedaInput, setBusquedaInput] = useState(busquedaInicial);
+  const [busqueda, setBusqueda] = useState(busquedaInicial);
   const [buscando, setBuscando] = useState(false);
   const [filtroAbierto, setFiltroAbierto] = useState(false);
   const [tipoVehiculoSeleccionado, setTipoVehiculoSeleccionado] = useState("");

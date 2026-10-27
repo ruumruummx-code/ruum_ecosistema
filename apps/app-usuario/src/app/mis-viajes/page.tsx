@@ -83,9 +83,9 @@ async function obtenerTraslados(): Promise<ResultadoTraslados> {
 export default async function PaginaMisTraslados({
   searchParams
 }: {
-  searchParams: Promise<{ tab?: string }>;
+  searchParams: Promise<{ tab?: string; buscar?: string }>;
 }) {
-  const { tab } = await searchParams;
+  const { tab, buscar } = await searchParams;
   const pestañaActiva = PESTANAS.some((pestaña) => pestaña.id === tab) ? (tab as PestañaTraslados) : "activos";
   const resultado = await obtenerTraslados();
 
@@ -130,6 +130,8 @@ export default async function PaginaMisTraslados({
           traslados={Traslados}
           nombreUsuario={usuario?.nombre}
           pestanaInicial="todos"
+          busquedaInicial={typeof buscar === "string" ? buscar : ""}
+          notificaciones={resultado.estado === "ok" ? resultado.notificaciones : []}
         />
       </div>
     </>

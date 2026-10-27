@@ -1,6 +1,6 @@
 # Carga masiva de usuario (RR-2026-022)
 
-Disponible desde el primer paso de `/viajes/nuevo`. El archivo descargable es una copia exacta de `plantilla-traslados-masivos-v4.xlsx`. Se lee únicamente la hoja `Traslados`, conservando los resultados guardados de las fórmulas. El límite operativo es de 100 traslados y 5 MB por lote.
+Disponible desde el primer paso de `/viajes/nuevo`. El archivo descargable es la plantilla oficial optimizada (~200 KB) con catálogo vehicular y validaciones esenciales. Se lee únicamente la hoja `Traslados`, conservando los resultados guardados de las fórmulas. El límite operativo es de 100 traslados y 5 MB por lote (dejando >4.5 MB de holgura para los datos de los traslados del usuario).
 
 El parseo de archivos Excel se delega a un Web Worker en segundo plano (`carga-masiva.worker.ts`), evitando que la decodificación de plantillas grandes con fórmulas complejas congele el hilo principal del navegador. La interfaz conserva su estado interactivo y muestra un indicador de carga mientras se procesa el archivo.
 

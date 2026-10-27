@@ -11,92 +11,26 @@ import {
   vehiculoTipo,
   folioCorto,
 } from "./useGestionTraslados";
+import { UserDashboardLayout } from "../../components/layout/UserDashboardLayout";
+import type { NotificacionHeader } from "../../components/layout/UserHeader";
 
 export interface MisViajesDesktopProps {
   traslados: ViajeLista[];
   nombreUsuario?: string | null;
   pestanaInicial?: PestañaFiltro;
+  busquedaInicial?: string;
+  notificaciones?: NotificacionHeader[];
 }
 
 /* =========================================================================
    ÍCONOS VECTORIALES DE ALTA FIDELIDAD
    ========================================================================= */
 
-function IconoInicio({ className = "size-5" }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden="true">
-      <path d="m3 9.5 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
-      <path d="M9 22V12h6v10" />
-    </svg>
-  );
-}
-
-function IconoTraslados({ className = "size-5" }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden="true">
-      <path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2" />
-      <path d="M14 8h4.5l3.5 4.5v5.5a1 1 0 0 1-1 1h-1" />
-      <circle cx="7" cy="18" r="2" />
-      <circle cx="18" cy="18" r="2" />
-    </svg>
-  );
-}
-
-function IconoCargaMasiva({ className = "size-5" }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden="true">
-      <rect x="2" y="4" width="20" height="6" rx="1.5" />
-      <rect x="2" y="14" width="20" height="6" rx="1.5" />
-      <path d="M6 10v4" />
-      <path d="M18 10v4" />
-    </svg>
-  );
-}
-
-function IconoCuenta({ className = "size-5" }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden="true">
-      <path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 12 10s-6.7.6-8.5 1.1C2.7 11.3 2 12.1 2 13v3c0 .6.4 1 1 1h2" />
-      <circle cx="7" cy="17" r="2" />
-      <path d="M9 17h6" />
-      <circle cx="17" cy="17" r="2" />
-      <path d="M5 10l1.5-4.5A2 2 0 0 1 8.4 4h7.2a2 2 0 0 1 1.9 1.5L19 10" />
-    </svg>
-  );
-}
-
-function IconoPerfil({ className = "size-5" }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden="true">
-      <circle cx="12" cy="8" r="4" />
-      <path d="M20 21a8 8 0 0 0-16 0" />
-    </svg>
-  );
-}
-
-function IconoPreferencias({ className = "size-5" }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden="true">
-      <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z" />
-      <circle cx="12" cy="12" r="3" />
-    </svg>
-  );
-}
-
 function IconoBuscar({ className = "size-4" }: { className?: string }) {
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden="true">
       <circle cx="11" cy="11" r="8" />
       <path d="m21 21-4.35-4.35" />
-    </svg>
-  );
-}
-
-function IconoCampana({ className = "size-5" }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden="true">
-      <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" />
-      <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" />
     </svg>
   );
 }
@@ -223,6 +157,8 @@ export function MisViajesDesktop({
   traslados,
   nombreUsuario,
   pestanaInicial = "todos",
+  busquedaInicial = "",
+  notificaciones = [],
 }: MisViajesDesktopProps) {
   // Consumo del Hook Compartido de Lógica y Filtros
   const {
@@ -240,15 +176,11 @@ export function MisViajesDesktop({
   } = useGestionTraslados({
     traslados,
     pestanaInicial,
+    busquedaInicial,
   });
 
   // Estados locales para interactividad visual de escritorio
   const [heroIndex, setHeroIndex] = useState(0);
-  const [perfilAbierto, setPerfilAbierto] = useState(false);
-
-  // Nombre para saludo de usuario
-  const primerNombre = nombreUsuario?.trim().split(/\s+/)[0];
-  const nombre = primerNombre ? primerNombre.charAt(0).toUpperCase() + primerNombre.slice(1).toLowerCase() : "Alex";
 
   // Pestañas de estado con contadores dinámicos reflejados en el diseño
   const tabsConfig: { id: PestañaFiltro; label: string; count: number }[] = [
@@ -263,233 +195,30 @@ export function MisViajesDesktop({
   const itemsVisualizados = filtrados.length > 0 ? filtrados : traslados;
 
   return (
-    <div className="flex h-screen w-full bg-[#f4f7fc] text-[#0a2342] overflow-hidden select-none font-sans">
-      {/* ===================================================================
-          1. SIDEBAR IZQUIERDO (GLOBAL)
-          =================================================================== */}
-      <aside
-        id="desktopSidebarTraslados"
-        aria-label="Menú principal de escritorio"
-        className="w-[260px] h-full shrink-0 bg-[#07162c] text-white flex flex-col justify-between p-5 border-r border-[#10243e] overflow-y-auto"
-      >
-        <div>
-          {/* Logo RR Ruum Ruum USUARIO */}
-          <div className="flex items-center gap-3 px-2 py-2 mb-6">
-            <div className="size-10 rounded-xl bg-gradient-to-tr from-[#00d1d1] to-[#155eef] flex items-center justify-center shadow-md font-display font-black text-white text-xl tracking-tighter">
-              RR
-            </div>
+    <UserDashboardLayout
+      idContenido="desktopMainContentTraslados"
+      nombre={nombreUsuario}
+      notificaciones={notificaciones}
+      padding="amplio"
+    >
+          {/* Encabezado de página: acción principal fuera del shell compartido */}
+          <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
-              <span className="block font-display text-[17px] font-black leading-tight tracking-tight text-white">
-                Ruum Ruum
-              </span>
-              <span className="block text-[10px] font-bold tracking-widest text-[#7e95b3] uppercase">
-                USUARIO
-              </span>
+              <h1 className="font-display text-xl font-black tracking-tight text-[#0a2342]">
+                Mis traslados
+              </h1>
+              <p className="mt-0.5 text-xs font-medium text-slate-500">
+                Gestiona, filtra y da seguimiento a cada servicio.
+              </p>
             </div>
-          </div>
-
-          {/* Menú de Navegación Lateral */}
-          <nav aria-label="Navegación lateral" className="space-y-1.5">
-            <Link
-              href="/"
-              className="flex items-center gap-3.5 px-4 py-3 rounded-2xl text-[#8fa0b5] hover:text-white hover:bg-white/5 font-medium text-sm transition"
-            >
-              <IconoInicio className="size-5" />
-              <span>Inicio</span>
-            </Link>
-
-            <Link
-              href="/mis-viajes"
-              className="flex items-center gap-3.5 px-4 py-3 rounded-2xl bg-[#165dfc] text-white font-semibold text-sm shadow-sm transition"
-              aria-current="page"
-            >
-              <IconoTraslados className="size-5 text-white" />
-              <span>Traslados</span>
-            </Link>
-
-            <Link
-              href="/viajes/masivo"
-              className="flex items-center gap-3.5 px-4 py-3 rounded-2xl text-[#8fa0b5] hover:text-white hover:bg-white/5 font-medium text-sm transition"
-            >
-              <IconoCargaMasiva className="size-5" />
-              <span>Carga masiva</span>
-            </Link>
-
-            <Link
-              href="/cuenta"
-              className="flex items-center gap-3.5 px-4 py-3 rounded-2xl text-[#8fa0b5] hover:text-white hover:bg-white/5 font-medium text-sm transition"
-            >
-              <IconoCuenta className="size-5" />
-              <span>Cuenta</span>
-            </Link>
-
-            <Link
-              href="/cuenta?seccion=perfil"
-              className="flex items-center gap-3.5 px-4 py-3 rounded-2xl text-[#8fa0b5] hover:text-white hover:bg-white/5 font-medium text-sm transition"
-            >
-              <IconoPerfil className="size-5" />
-              <span>Perfil</span>
-            </Link>
-
-            <Link
-              href="/cuenta/preferencias"
-              className="flex items-center gap-3.5 px-4 py-3 rounded-2xl text-[#8fa0b5] hover:text-white hover:bg-white/5 font-medium text-sm transition"
-            >
-              <IconoPreferencias className="size-5" />
-              <span>Preferencias</span>
-            </Link>
-          </nav>
-        </div>
-
-        {/* Card Promocional Inferior: Confianza Comprobable */}
-        <div className="mt-8 rounded-2xl p-4.5 bg-gradient-to-b from-[#e0efff] via-[#edf6ff] to-[#f4f9ff] border border-blue-200/80 relative overflow-hidden shadow-sm text-[#0a2342]">
-          <h3 className="font-display text-sm font-black text-[#0a2342] leading-snug">
-            Confianza comprobable
-          </h3>
-          <p className="mt-1 text-[11px] text-[#475569] leading-relaxed">
-            Movemos vehículos con tecnología, evidencia y conductores certificados.
-          </p>
-
-          <Link
-            href="/viajes/nuevo"
-            className="inline-flex items-center justify-center gap-1.5 w-full mt-3 py-2 px-3 rounded-xl bg-[#165dfc] hover:bg-blue-700 text-white font-bold text-xs shadow-sm transition"
-          >
-            <span>+ Crear traslado</span>
-          </Link>
-
-          {/* Auto blanco decorativo al pie */}
-          <div className="mt-3 flex justify-center">
-            <svg viewBox="0 0 180 65" fill="none" className="w-36 h-auto" aria-hidden="true">
-              <ellipse cx="90" cy="58" rx="75" ry="6" fill="#000000" fillOpacity="0.15" />
-              <path d="M 15 42 L 35 28 C 45 20, 135 20, 145 28 L 165 42 L 160 52 C 155 46, 135 46, 130 52 L 50 52 C 45 46, 25 46, 20 52 Z" fill="#ffffff" />
-              <path d="M 40 28 L 55 22 C 65 20, 115 20, 125 22 L 140 28 Z" fill="#0a192f" />
-              <rect x="75" y="38" width="30" height="4" rx="2" fill="#3b82f6" />
-              <circle cx="35" cy="52" r="8" fill="#1e293b" />
-              <circle cx="35" cy="52" r="4" fill="#94a3b8" />
-              <circle cx="145" cy="52" r="8" fill="#1e293b" />
-              <circle cx="145" cy="52" r="4" fill="#94a3b8" />
-            </svg>
-          </div>
-        </div>
-      </aside>
-
-      {/* ===================================================================
-          CONTENEDOR CENTRAL: NAVBAR SUPERIOR + FEED + COLUMNA DERECHA
-          =================================================================== */}
-      <div className="flex-1 flex flex-col h-full min-w-0 overflow-hidden">
-        {/* ===================================================================
-            2. BARRA DE NAVEGACIÓN SUPERIOR
-            =================================================================== */}
-        <header
-          id="desktopTopNavTraslados"
-          aria-label="Barra superior de traslados"
-          className="h-[68px] shrink-0 bg-white border-b border-slate-100 px-8 flex items-center justify-between gap-4 z-20"
-        >
-          {/* Buscador Centralizado ("¿A dónde vas?") */}
-          <div className="max-w-md w-full relative">
-            <div className="flex items-center gap-2.5 px-4 py-2 bg-[#f4f7fb] hover:bg-[#edf2f8] focus-within:bg-white focus-within:ring-2 focus-within:ring-[#165dfc] rounded-full border border-slate-200/80 transition">
-              <IconoBuscar className="size-4 text-slate-400" />
-              <input
-                type="text"
-                placeholder="¿A dónde vas?"
-                className="w-full text-xs text-slate-800 placeholder:text-slate-400 bg-transparent outline-none"
-                aria-label="¿A dónde vas?"
-              />
-            </div>
-          </div>
-
-          {/* Acciones Derechas: Botón "+ Crear traslado", Notificaciones y Perfil */}
-          <div className="flex items-center gap-3.5">
-            {/* Botón de Acción Principal Azul Destacado */}
             <Link
               href="/viajes/nuevo"
-              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#165dfc] hover:bg-blue-700 text-white font-bold text-xs shadow-sm transition"
+              className="inline-flex items-center gap-1.5 rounded-xl bg-[#165dfc] px-4 py-2 text-xs font-bold text-white shadow-sm transition hover:bg-blue-700"
             >
               <span>+ Crear traslado</span>
             </Link>
-
-            {/* Icono de Notificaciones con Badge */}
-            <Link
-              href="/mis-viajes"
-              className="size-10 rounded-full bg-[#f4f7fa] hover:bg-slate-200/60 flex items-center justify-center relative border border-slate-200/60 transition"
-              aria-label="Notificaciones"
-            >
-              <IconoCampana className="size-5 text-slate-700" />
-              <span className="absolute top-2 right-2.5 size-2 bg-[#ef4444] rounded-full ring-2 ring-white" />
-            </Link>
-
-            {/* Dropdown de Perfil de Usuario */}
-            <div className="relative">
-              <button
-                type="button"
-                onClick={() => setPerfilAbierto(!perfilAbierto)}
-                aria-expanded={perfilAbierto}
-                className="flex items-center gap-2.5 p-1 rounded-full hover:bg-slate-100 transition cursor-pointer"
-              >
-                <div className="size-9 rounded-full bg-[#1e293b] text-white font-bold text-xs flex items-center justify-center shadow-sm">
-                  {nombre.charAt(0)}
-                </div>
-                <div className="text-left hidden sm:block">
-                  <span className="block text-xs font-bold text-slate-900 leading-none">
-                    Hola, {nombre}
-                  </span>
-                </div>
-                <svg viewBox="0 0 20 20" fill="currentColor" className="size-4 text-slate-400">
-                  <path fillRule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clipRule="evenodd" />
-                </svg>
-              </button>
-
-              {perfilAbierto && (
-                <div
-                  role="menu"
-                  className="absolute right-0 mt-2 w-48 rounded-2xl bg-white shadow-xl border border-slate-100 py-2 z-50 animate-in fade-in slide-in-from-top-2"
-                >
-                  <Link
-                    href="/cuenta?seccion=perfil"
-                    role="menuitem"
-                    className="block px-4 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50"
-                    onClick={() => setPerfilAbierto(false)}
-                  >
-                    Mi perfil
-                  </Link>
-                  <Link
-                    href="/cuenta/vehiculos"
-                    role="menuitem"
-                    className="block px-4 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50"
-                    onClick={() => setPerfilAbierto(false)}
-                  >
-                    Mis vehículos
-                  </Link>
-                  <Link
-                    href="/cuenta/preferencias"
-                    role="menuitem"
-                    className="block px-4 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50"
-                    onClick={() => setPerfilAbierto(false)}
-                  >
-                    Preferencias
-                  </Link>
-                  <div className="my-1 border-t border-slate-100" />
-                  <Link
-                    href="/login"
-                    role="menuitem"
-                    className="block px-4 py-2 text-xs font-medium text-red-600 hover:bg-red-50"
-                    onClick={() => setPerfilAbierto(false)}
-                  >
-                    Cerrar sesión
-                  </Link>
-                </div>
-              )}
-            </div>
           </div>
-        </header>
 
-        {/* ===================================================================
-            3. SECCIÓN PRINCIPAL Y CONTENIDO CENTRAL
-            =================================================================== */}
-        <main
-          id="desktopMainContentTraslados"
-          className="flex-1 overflow-y-auto min-h-0 bg-[#f4f7fc] p-8 space-y-6"
-        >
           {/* Contenedor Rejilla Dividido: Feed Principal (Izquierda) + Widgets (Derecha) */}
           <div className="grid grid-cols-12 gap-6">
             {/* ===============================================================
@@ -988,8 +717,6 @@ export function MisViajesDesktop({
               </div>
             </div>
           </section>
-        </main>
-      </div>
-    </div>
+    </UserDashboardLayout>
   );
 }
