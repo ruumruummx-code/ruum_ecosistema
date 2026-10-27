@@ -1,5 +1,5 @@
 "use client";
-import { useCallback, type RefObject } from "react";
+import { useCallback, useRef, type RefObject } from "react";
 import { useRouter } from "next/navigation";
 import * as Sentry from "@sentry/nextjs";
 import type { SupabaseClient } from "@supabase/supabase-js";
@@ -108,6 +108,7 @@ export function useEnvioTraslado(params: ParametrosEnvioTraslado) {
     setTrasladoCreado
   } = setters;
 
+  const envioEnCursoRef = useRef(false);
   const crear = useCallback(async (
     cliente: SupabaseClient<Database>,
     datosForm: DatosFormulario,
@@ -131,6 +132,8 @@ export function useEnvioTraslado(params: ParametrosEnvioTraslado) {
   }, [paso, tarifaPreviaAceptada]);
 
   const enviarSolicitud = useCallback(async () => {
+    if (envioEnCursoRef.current) return;
+    if (formEnviadoRef.current) { setPaso(4); return; }
     if (!tarifaPreviaAceptada) {
       setErrorPaso("Tu tarifa puede haber cambiado. Confírmala antes de continuar.");
       setPaso(0);
@@ -197,6 +200,7 @@ export function useEnvioTraslado(params: ParametrosEnvioTraslado) {
       return;
     }
 
+    envioEnCursoRef.current = true;
     try {
       registrarEventoUx("traslado_nuevo_enviado", {
         modalidad: datos.modalidadProgramacion,
@@ -322,6 +326,7 @@ export function useEnvioTraslado(params: ParametrosEnvioTraslado) {
         registrarEventoUx("traslado_geocodificacion_error", { paso, error_code: (err as Error & { status?: number })?.status?.toString() ?? "mapbox", timestamp: new Date().toISOString() } as never);
       }
     } finally {
+      envioEnCursoRef.current = false;
       setEnviando(false);
     }
   }, [

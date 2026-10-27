@@ -25,7 +25,8 @@ interface DependenciasValidacion {
   vehiculoSeleccionadoId: string;
   vehiculosGuardados: VehiculoGuardado[];
   aceptaPoliticasPagoCancelacion: boolean;
-  previsualizacion: { tarifa?: number | null } | null;
+  previsualizacion: { disponible?: boolean; tarifa?: number | null } | null;
+  previsualizando?: boolean;
   setErrores: SettersFormulario["setErrores"];
   setErrorPaso: SettersFormulario["setErrorPaso"];
   setPaso: SettersFormulario["setPaso"];
@@ -48,6 +49,7 @@ export function useValidacionTraslado({
   vehiculosGuardados,
   aceptaPoliticasPagoCancelacion,
   previsualizacion,
+  previsualizando = false,
   setErrores,
   setErrorPaso,
   setPaso,
@@ -165,6 +167,10 @@ export function useValidacionTraslado({
   }, [resultadoValidacion, enfocarPrimerError, paso, setDetallesVehiculoExpandido, setErrorPaso, setErrores, setPaso, setSubpasoRuta, tarifaPreviaAceptada]);
 
   const aceptarTarifaYContinuar = useCallback(() => {
+    if (previsualizando || !previsualizacion?.disponible || !Number.isFinite(previsualizacion.tarifa) || Number(previsualizacion.tarifa) <= 0) {
+      setErrorPaso("Espera una cotización disponible antes de continuar.");
+      return;
+    }
     if (!validarPasoActual()) return;
     setTarifaPreviaAceptada(true);
     setTarifaPreviaSnapshot(generarTarifaSnapshot(datos));
@@ -175,7 +181,7 @@ export function useValidacionTraslado({
       modelo: datos.modelo
     });
     setPaso(1);
-  }, [datos, previsualizacion, setErrorPaso, setPaso, setTarifaPreviaAceptada, setTarifaPreviaSnapshot, validarPasoActual]);
+  }, [datos, previsualizacion, previsualizando, setErrorPaso, setPaso, setTarifaPreviaAceptada, setTarifaPreviaSnapshot, validarPasoActual]);
 
   return { datosParaValidacion, resultadoValidacion, enfocarPrimerError, erroresParadas, validarCampo, validarPasoActual, aceptarTarifaYContinuar };
 }

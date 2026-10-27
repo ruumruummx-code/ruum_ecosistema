@@ -123,12 +123,7 @@ export function NuevoTrasladoForm({ busquedaOrigenInicial = "", busquedaDestinoI
   return (
     <>
       {vehiculoIdInicial ? <SeleccionVehiculoInicial key={vehiculoIdInicial} t={t} vehiculoId={vehiculoIdInicial} /> : (busquedaOrigenInicial || busquedaDestinoInicial) ? <SeleccionUbicacionInicial key={busquedaOrigenInicial + "|" + busquedaDestinoInicial} t={t} lado={busquedaOrigenInicial ? "origen" : "destino"} consulta={busquedaOrigenInicial || busquedaDestinoInicial} /> : null}
-      <div className="lg:hidden flex flex-col h-full w-full">
-        <CotizadorPortal t={t} headingRef={encabezadoPasoRef} />
-      </div>
-      <div className="hidden lg:flex h-full w-full overflow-hidden">
-        {esEscritorio && <NuevoTrasladoDesktop t={t} />}
-      </div>
+      {esEscritorio ? <NuevoTrasladoDesktop t={t} headingRef={encabezadoPasoRef} /> : <CotizadorPortal t={t} headingRef={encabezadoPasoRef} />}
     </>
   );
 }

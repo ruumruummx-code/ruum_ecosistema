@@ -23,9 +23,11 @@ import styles from "./cotizador.module.css";
 export function CotizadorPortal({
   t,
   headingRef,
+  escritorio = false,
 }: {
   t: ReturnType<typeof useNuevoTraslado>;
   headingRef: RefObject<HTMLHeadingElement | null>;
+  escritorio?: boolean;
 }) {
   const root = useRef<HTMLElement>(null);
   const content = useRef<HTMLDivElement>(null);
@@ -45,6 +47,7 @@ export function CotizadorPortal({
     [],
   );
   useEffect(() => {
+    if (escritorio) return;
     const viewport = window.visualViewport;
     if (!viewport) return;
     const update = () => {
@@ -89,7 +92,8 @@ export function CotizadorPortal({
       document.removeEventListener("focusout", focusChanged);
       cancelAnimationFrame(frame);
     };
-  }, []);
+  }, [escritorio]);
+  useEffect(() => { headingRef.current?.focus(); }, [t.paso, headingRef]);
 
   const completos =
     codigoPostalCompleto(t.datos.origenCodigoPostal) &&
@@ -100,11 +104,13 @@ export function CotizadorPortal({
     (t.datos.modalidadProgramacion !== "programado" ||
       Boolean(t.datos.fechaHoraProgramada));
   const listo =
-    completos && !t.previsualizando && Boolean(t.previsualizacion?.disponible);
+    completos && !t.previsualizando && Boolean(t.previsualizacion?.disponible && Number.isFinite(t.previsualizacion.tarifa) && Number(t.previsualizacion.tarifa) > 0);
   const etiqueta = !completos
     ? "Llena los datos para cotizar"
-    : t.previsualizando || !t.previsualizacion
+    : t.previsualizando
       ? "Calculando tarifa…"
+      : !t.previsualizacion
+        ? "Tarifa pendiente"
       : !t.previsualizacion.disponible
         ? "Cotización especial requerida"
         : `Continuar · Tarifa est. $${Number(t.previsualizacion.tarifa).toLocaleString("es-MX", { maximumFractionDigits: 2 })} MXN`;
@@ -176,8 +182,9 @@ export function CotizadorPortal({
         ? "Cambios guardados"
         : "Guardado automático disponible";
 
+  const Contenedor = escritorio ? "section" : "main";
   return (
-    <main ref={root} className={`user-v2-scope ${styles.portal}`}>
+    <Contenedor ref={root} aria-label="Crear un traslado" className={`user-v2-scope ${styles.portal} ${escritorio ? styles.desktop : ""}`}>
       <header className={styles.appBar}>
         {t.paso === 0 ? (
           <Link
@@ -336,6 +343,7 @@ export function CotizadorPortal({
             Confirma los últimos detalles de tu traslado.
           </p>
         )}
+        {t.paso === 0 && !t.previsualizando && t.previsualizacion && !t.previsualizacion.disponible && <div className="mb-4 space-y-2 rounded-xl border border-amber-300 p-3 text-sm" role="alert"><p>{t.previsualizacion.motivo || "La cotización no está disponible en este momento."}</p><button type="button" onClick={t.reintentarCotizacion} className="text-blue-700 underline dark:text-blue-300">Reintentar cotización</button><Link href="/soporte" className="ml-4 text-blue-700 underline dark:text-blue-300">Contactar soporte</Link></div>}
         <fieldset
           disabled={Boolean(t.trasladoCreado)}
           className="min-w-0 border-0 p-0 m-0"
@@ -451,7 +459,7 @@ export function CotizadorPortal({
           />
         )}
       </div>
-      {!(t.paso === 4 && t.pagoConfirmado) && (
+      {!(t.paso === 4 && (t.pagoConfirmado || t.pagoEnProcesoConfirmacion || t.verificandoPago)) && (
         <footer className={styles.footer}>
           {t.errorPaso && (
             <p role="alert" className="text-xs text-red-700 dark:text-red-300">
@@ -547,6 +555,6 @@ export function CotizadorPortal({
       >
         <BottomSheetCargaMasiva onCerrar={() => setCargaMasivaAbierta(false)} />
       </BottomSheet>
-    </main>
+    </Contenedor>
   );
 }

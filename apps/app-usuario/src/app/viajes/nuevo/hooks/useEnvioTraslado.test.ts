@@ -110,6 +110,18 @@ describe("useEnvioTraslado", () => {
     esErrorConfigMapboxMock.mockReturnValue(false);
   });
 
+  it("impide crear dos solicitudes ante llamadas simultáneas y reutiliza la creada", async () => {
+    vi.spyOn(globalThis, "fetch").mockResolvedValue(Response.json({ ok: true }));
+    crearTrasladoMock.mockResolvedValue({ id: "unico", tipo_pago: "anticipado", precio_cotizado: 500 });
+    const params = crearParams();
+    const { result } = renderHook(() => useEnvioTraslado(params));
+    await act(async () => { await Promise.all([result.current.enviarSolicitud(), result.current.enviarSolicitud()]); });
+    expect(crearTrasladoMock).toHaveBeenCalledTimes(1);
+    await act(async () => { await result.current.enviarSolicitud(); });
+    expect(crearTrasladoMock).toHaveBeenCalledTimes(1);
+    expect(params.setters.setPaso).toHaveBeenLastCalledWith(4);
+  });
+
   it("avanza del paso 4 al 5 con cookie CSRF y mantiene la validación del servidor", async () => {
     const token = "a".repeat(64);
     document.cookie = `ruum_csrf_token=${token}; path=/`;
@@ -227,10 +239,12 @@ describe("useEnvioTraslado", () => {
       json: async () => ({ error: "Paso inválido en servidor" }),
     } as Response);
 
+    const paramsFallidos = crearParams();
+    const { result: fallido } = renderHook(() => useEnvioTraslado(paramsFallidos));
     await act(async () => {
-      await result.current.enviarSolicitud();
+      await fallido.current.enviarSolicitud();
     });
-    expect(params.setters.setResultado).toHaveBeenCalledWith(
+    expect(paramsFallidos.setters.setResultado).toHaveBeenCalledWith(
       expect.objectContaining({ ok: false })
     );
   });

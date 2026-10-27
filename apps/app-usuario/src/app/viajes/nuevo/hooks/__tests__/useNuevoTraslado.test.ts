@@ -83,7 +83,7 @@ describe("useNuevoTraslado (2.1 Fase 1 — 80%+)", () => {
   });
 
   it("actualizar marca invalida tarifa previa (haCambiadoTarifa)", async () => {
-    const { result } = renderHook(() => useNuevoTraslado(), { wrapper });
+    const { result } = renderHook(() => ({ ...useNuevoTraslado(), setState: useNuevoTrasladoState().setField }), { wrapper });
 
     // Simular flujo: usuario aceptó tarifa en paso 0
     // Primero setear datos tarifa-relevantes y snapshot
@@ -97,7 +97,9 @@ describe("useNuevoTraslado (2.1 Fase 1 — 80%+)", () => {
 
     // Aceptar tarifa (setea tarifaPreviaAceptada true + snapshot)
     await act(async () => {
-      result.current.aceptarTarifaYContinuar();
+      result.current.setState("tarifaPreviaAceptada", true);
+      result.current.setState("tarifaPreviaSnapshot", generarTarifaSnapshot(result.current.datos));
+      result.current.setPaso(1);
     });
 
     // Avanzamos a paso 1 para que la guarda de tarifa esté activa (paso >0)
@@ -115,6 +117,14 @@ describe("useNuevoTraslado (2.1 Fase 1 — 80%+)", () => {
 
     expect(result.current.tarifaPreviaAceptada).toBe(false);
     expect(result.current.errorPaso).toMatch(/tarifa/i);
+  });
+
+  it("no permite aceptar una tarifa que todavía no existe", async () => {
+    const { result } = renderHook(() => useNuevoTraslado(), { wrapper });
+    act(() => result.current.aceptarTarifaYContinuar());
+    expect(result.current.paso).toBe(0);
+    expect(result.current.tarifaPreviaAceptada).toBe(false);
+    expect(result.current.errorPaso).toMatch(/cotización disponible/);
   });
 
   it("haCambiadoTarifa detecta cambios en CAMPOS_PASO_TARIFA", () => {

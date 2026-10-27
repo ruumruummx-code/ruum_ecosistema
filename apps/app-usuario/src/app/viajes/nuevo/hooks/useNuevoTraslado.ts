@@ -48,6 +48,8 @@ export function useNuevoTraslado() {
   const router = useRouter();
 
   const { state: formulario, setField, reset } = useNuevoTrasladoState();
+  const [intentoCotizacion, setIntentoCotizacion] = useState(0);
+  const reintentarCotizacion = useCallback(() => setIntentoCotizacion(n => n + 1), []);
   const [formularioInicializado, setFormularioInicializado] = useState(false);
   const {
     paso,
@@ -385,7 +387,7 @@ export function useNuevoTraslado() {
     if (rutaEstimacion?.incompletas && rutaAviso && !rutaCalculando) {
       const timer = setTimeout(() => setPrevisualizacion({
         disponible: false,
-        motivo: "No pudimos calcular la ruta automáticamente. Puedes enviar la solicitud y nuestro equipo confirmará la distancia y la cotización."
+        motivo: "No pudimos calcular la ruta automáticamente. Revisa las direcciones o reintenta el cálculo de ruta para obtener una tarifa."
       }), 0);
       return () => clearTimeout(timer);
     }
@@ -433,7 +435,7 @@ export function useNuevoTraslado() {
       } catch (err) {
         if (!cancelado) {
           logStructuredWarn("viajes/useNuevoTraslado", "previsualizacion_tarifa_fallida", err);
-          setPrevisualizacion(null);
+          setPrevisualizacion({ disponible: false, motivo: "No pudimos consultar la tarifa. Reintenta la cotización." });
         }
       } finally {
         if (!cancelado) setPrevisualizando(false);
@@ -447,7 +449,7 @@ export function useNuevoTraslado() {
   }, [
     sesionReal, datos.marca, datos.modelo, datos.condicion,
     datos.modalidadProgramacion, datos.fechaHoraProgramada, rutaEstimacion,
-    cpTarifaListo, rutaAviso, rutaCalculando, setPrevisualizacion, setPrevisualizando
+    cpTarifaListo, rutaAviso, rutaCalculando, intentoCotizacion, setPrevisualizacion, setPrevisualizando
   ]);
 
   // Carga de sesión de usuario y vehículos
@@ -636,6 +638,7 @@ export function useNuevoTraslado() {
     vehiculosGuardados,
     aceptaPoliticasPagoCancelacion,
     previsualizacion,
+    previsualizando,
     setErrores,
     setErrorPaso,
     setPaso,
@@ -785,6 +788,7 @@ export function useNuevoTraslado() {
     detallesVehiculoExpandido,
     setDetallesVehiculoExpandido,
     // Tarifa
+    reintentarCotizacion,
     previsualizacion,
     previsualizando,
     tarifaPreviaAceptada,
