@@ -74,7 +74,7 @@ export function buildCspUsuario(nonce: string, isProd: boolean, isStaging: boole
 
 export function applySecurityHeadersUsuario(res: NextResponse, nonce: string, origen?: string): NextResponse {
   const isProd = process.env.NODE_ENV === "production";
-  const isStaging = process.env.NEXT_PUBLIC_RUUM_AMBIENTE === "staging" || process.env.CSP_REPORT_ONLY === "true" || process.env.NEXT_PUBLIC_CSP_REPORT_ONLY === "true";
+  const isStaging = isProd && (process.env.NEXT_PUBLIC_RUUM_AMBIENTE === "staging" || process.env.CSP_REPORT_ONLY === "true" || process.env.NEXT_PUBLIC_CSP_REPORT_ONLY === "true");
   const csp = buildCspUsuario(nonce, isProd, isStaging);
 
   // Progressive CSP: En staging o Report-Only, emitir Content-Security-Policy-Report-Only

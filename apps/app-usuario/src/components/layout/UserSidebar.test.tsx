@@ -166,22 +166,34 @@ describe("UserSidebar — Componente de Navegación Lateral (RR-UI-001)", () => 
     document.body.removeChild(botonDetonador);
   });
 
-  it("aisla el fondo (background isolation) marcando elementos hermanos con aria-hidden e inert", () => {
+  it("aisla el fondo (background isolation) marcando el contenido principal y hermanos con aria-hidden e inert", () => {
+    // 1. Simular contenedor hermano principal (UserDashboardLayout)
+    const mainContent = document.createElement("div");
+    mainContent.setAttribute("id", "userDashboardMainContent");
+    document.body.appendChild(mainContent);
+
+    // 2. Simular contenedor externo en body
     const contenedorExterno = document.createElement("div");
     contenedorExterno.setAttribute("id", "app-externa");
     document.body.appendChild(contenedorExterno);
 
+    expect(mainContent.getAttribute("aria-hidden")).toBeNull();
     expect(contenedorExterno.getAttribute("aria-hidden")).toBeNull();
 
-    const { unmount } = render(<UserSidebar mobileOpen={true} />);
+    const { unmount } = render(<UserSidebar mobileOpen={true} mainContentId="userDashboardMainContent" />);
 
-    // Con el drawer abierto, el contenedor externo queda aislado
+    // Con el drawer abierto, tanto el contenedor hermano principal como los elementos externos quedan aislados
+    expect(mainContent.getAttribute("aria-hidden")).toBe("true");
+    expect(mainContent.inert).toBe(true);
     expect(contenedorExterno.getAttribute("aria-hidden")).toBe("true");
 
-    // Al desmontar o cerrar, se restablece el estado original
+    // Al desmontar o cerrar, se restablece el estado original de todo
     unmount();
+    expect(mainContent.getAttribute("aria-hidden")).toBeNull();
+    expect(mainContent.inert).toBe(false);
     expect(contenedorExterno.getAttribute("aria-hidden")).toBeNull();
 
+    document.body.removeChild(mainContent);
     document.body.removeChild(contenedorExterno);
   });
 

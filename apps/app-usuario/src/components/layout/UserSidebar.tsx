@@ -23,6 +23,7 @@ export interface UserSidebarProps {
   onCollapseChange?: (value: boolean) => void;
   onMobileClose?: () => void;
   showPromo?: boolean;
+  mainContentId?: string;
 }
 
 function IconoCerrar({ className = "size-5" }: { className?: string }) {
@@ -95,6 +96,7 @@ export function UserSidebar({
   onCollapseChange,
   onMobileClose,
   showPromo = true,
+  mainContentId = "userDashboardMainContent",
 }: UserSidebarProps) {
   const rutaActual = usePathname() ?? "/";
   const parametros = useSearchParams();
@@ -120,26 +122,47 @@ export function UserSidebar({
       botonCerrarRef.current?.focus();
     }, 0);
 
-    // 4. Aislar elementos hermanos para tecnologías de asistencia (background isolation)
+    // 4. Aislar explícitamente el contenido principal, header y hermanos (background isolation)
     const elementosAislados: Array<{ el: HTMLElement; prevAriaHidden: string | null; prevInert: boolean }> = [];
     const sidebarEl = sidebarRef.current;
 
+    const aislarElemento = (el: HTMLElement | null) => {
+      if (!el || el === sidebarEl || el.contains(sidebarEl) || el.classList.contains(estilos.drawerBackdrop)) {
+        return;
+      }
+      if (elementosAislados.some((item) => item.el === el)) {
+        return;
+      }
+      elementosAislados.push({
+        el,
+        prevAriaHidden: el.getAttribute("aria-hidden"),
+        prevInert: el.inert,
+      });
+      el.setAttribute("aria-hidden", "true");
+      try {
+        el.inert = true;
+      } catch {
+        // Fallback seguro si el navegador no soporta inert
+      }
+    };
+
     if (typeof document !== "undefined" && sidebarEl) {
-      const hijosBody = Array.from(document.body.children) as HTMLElement[];
-      for (const el of hijosBody) {
-        if (el !== sidebarEl && !el.contains(sidebarEl) && !el.classList.contains(estilos.drawerBackdrop)) {
-          elementosAislados.push({
-            el,
-            prevAriaHidden: el.getAttribute("aria-hidden"),
-            prevInert: el.inert,
-          });
-          el.setAttribute("aria-hidden", "true");
-          try {
-            el.inert = true;
-          } catch {
-            // Soporte seguro de navegador
-          }
+      // a) Aislar explícitamente el contenedor de contenido principal y header por ID
+      if (mainContentId) {
+        aislarElemento(document.getElementById(mainContentId));
+      }
+      aislarElemento(document.getElementById("userDashboardHeader"));
+
+      // b) Aislar hermanos directos del sidebar dentro del layout padre (UserDashboardLayout)
+      if (sidebarEl.parentElement) {
+        for (const hermano of Array.from(sidebarEl.parentElement.children) as HTMLElement[]) {
+          aislarElemento(hermano);
         }
+      }
+
+      // c) Aislar hermanos en document.body (para elementos externos o modales ajenos)
+      for (const hijo of Array.from(document.body.children) as HTMLElement[]) {
+        aislarElemento(hijo);
       }
     }
 
@@ -195,7 +218,7 @@ export function UserSidebar({
       document.body.style.overflow = estiloAnteriorOverflow;
       document.removeEventListener("keydown", alPresionarTecla);
 
-      // Restaurar aislamiento del fondo
+      // 1. Restaurar aislamiento del fondo
       for (const item of elementosAislados) {
         if (item.prevAriaHidden === null) {
           item.el.removeAttribute("aria-hidden");
@@ -209,10 +232,22 @@ export function UserSidebar({
         }
       }
 
-      // Restaurar foco al elemento que detonó la apertura
+      // 2. Garantizar que el contenedor principal esté libre de aria-hidden e inert
+      if (mainContentId) {
+        const mainEl = document.getElementById(mainContentId);
+        if (mainEl) {
+          mainEl.removeAttribute("aria-hidden");
+          mainEl.removeAttribute("inert");
+          try {
+            (mainEl as HTMLElement).inert = false;
+          } catch {}
+        }
+      }
+
+      // 3. Restaurar foco al elemento detonador inmediatamente después de desaislar el fondo
       elementoPrevioRef.current?.focus?.();
     };
-  }, [mobileOpen, onMobileClose]);
+  }, [mobileOpen, onMobileClose, mainContentId]);
 
   const esContraida = collapsed && !mobileOpen;
 

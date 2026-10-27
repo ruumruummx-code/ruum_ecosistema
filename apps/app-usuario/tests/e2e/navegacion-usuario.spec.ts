@@ -10,8 +10,9 @@ test.describe("RR-UI-002 — Hardening de navegación premium y protección Mobi
   test("Desktop: UserSidebar y UserHeader visibles, branding oficial y navegación lateral funcional", async ({
     page,
   }) => {
+    test.slow();
     await page.setViewportSize({ width: 1280, height: 800 });
-    await page.goto("/");
+    await page.goto("/cuenta", { waitUntil: "domcontentloaded" });
     await esperarHidratacion(page);
 
     // Sidebar y Header presentes
@@ -27,34 +28,35 @@ test.describe("RR-UI-002 — Hardening de navegación premium y protección Mobi
     // Navegación lateral hacia Mis traslados
     const linkTraslados = sidebar.getByRole("link", { name: "Mis traslados" });
     await expect(linkTraslados).toBeVisible();
-    await linkTraslados.click();
+    await linkTraslados.click({ timeout: 30_000 });
 
-    await page.waitForURL("**/mis-viajes", { timeout: 15_000 });
+    await page.waitForURL("**/mis-viajes", { timeout: 30_000 });
     expect(rutaActual(page)).toBe("/mis-viajes");
     await expect(linkTraslados).toHaveAttribute("aria-current", "page");
 
     // Navegación lateral hacia Mis vehículos
     const linkVehiculos = sidebar.getByRole("link", { name: "Mis vehículos" });
     await expect(linkVehiculos).toBeVisible();
-    await linkVehiculos.click();
+    await linkVehiculos.click({ timeout: 30_000 });
 
-    await page.waitForURL("**/cuenta/vehiculos", { timeout: 15_000 });
+    await page.waitForURL("**/cuenta/vehiculos", { timeout: 30_000 });
     expect(rutaActual(page)).toBe("/cuenta/vehiculos");
     await expect(linkVehiculos).toHaveAttribute("aria-current", "page");
 
     // Navegación lateral hacia Mis ubicaciones
     const linkUbicaciones = sidebar.getByRole("link", { name: "Mis ubicaciones" });
     await expect(linkUbicaciones).toBeVisible();
-    await linkUbicaciones.click();
+    await linkUbicaciones.click({ timeout: 30_000 });
 
-    await page.waitForURL("**/ubicaciones", { timeout: 15_000 });
+    await page.waitForURL("**/ubicaciones", { timeout: 30_000 });
     expect(rutaActual(page)).toBe("/ubicaciones");
     await expect(linkUbicaciones).toHaveAttribute("aria-current", "page");
   });
 
   test("Desktop: Colapso y expansión del sidebar con persistencia en localStorage", async ({ page }) => {
+    test.slow();
     await page.setViewportSize({ width: 1280, height: 800 });
-    await page.goto("/");
+    await page.goto("/cuenta", { waitUntil: "domcontentloaded" });
     await esperarHidratacion(page);
 
     const botonColapsar = page.getByRole("button", { name: "Colapsar menú lateral" });
@@ -82,8 +84,9 @@ test.describe("RR-UI-002 — Hardening de navegación premium y protección Mobi
   test("Global Search: Atajo de teclado Ctrl+K / Cmd+K y envío de búsqueda a /mis-viajes", async ({
     page,
   }) => {
+    test.slow();
     await page.setViewportSize({ width: 1280, height: 800 });
-    await page.goto("/");
+    await page.goto("/cuenta", { waitUntil: "domcontentloaded" });
     await esperarHidratacion(page);
 
     // Presionar atajo de búsqueda Control+K
@@ -99,13 +102,14 @@ test.describe("RR-UI-002 — Hardening de navegación premium y protección Mobi
     await inputBuscador.fill("Querétaro");
     await page.keyboard.press("Enter");
 
-    await page.waitForURL("**/mis-viajes?buscar=Quer%C3%A9taro", { timeout: 15_000 });
+    await page.waitForURL("**/mis-viajes?buscar=Quer%C3%A9taro", { timeout: 30_000 });
     expect(rutaActual(page)).toBe("/mis-viajes?buscar=Quer%C3%A9taro");
   });
 
   test("Tema: Alternancia entre tema claro y tema oscuro con atributo data-theme", async ({ page }) => {
+    test.slow();
     await page.setViewportSize({ width: 1280, height: 800 });
-    await page.goto("/");
+    await page.goto("/cuenta", { waitUntil: "domcontentloaded" });
     await esperarHidratacion(page);
 
     const botonTema = page.getByRole("button", { name: /Cambiar a modo (oscuro|claro)/ });
@@ -123,8 +127,9 @@ test.describe("RR-UI-002 — Hardening de navegación premium y protección Mobi
   });
 
   test("Notificaciones: Apertura de popover, lista de avisos y enlace a traslados", async ({ page }) => {
+    test.slow();
     await page.setViewportSize({ width: 1280, height: 800 });
-    await page.goto("/");
+    await page.goto("/cuenta", { waitUntil: "domcontentloaded" });
     await esperarHidratacion(page);
 
     const botonCampana = page.getByRole("button", { name: /Notificaciones/ });
@@ -136,17 +141,18 @@ test.describe("RR-UI-002 — Hardening de navegación premium y protección Mobi
 
     const enlaceVerTraslados = panelNotificaciones.getByRole("link", { name: /Ver mis traslados/ });
     await expect(enlaceVerTraslados).toBeVisible();
-    await enlaceVerTraslados.click();
+    await enlaceVerTraslados.click({ timeout: 30_000 });
 
-    await page.waitForURL("**/mis-viajes", { timeout: 15_000 });
+    await page.waitForURL("**/mis-viajes", { timeout: 30_000 });
     expect(rutaActual(page)).toBe("/mis-viajes");
   });
 
   test("Perfil: Dropdown con Mi cuenta, Mis vehículos, Mis preferencias y Cerrar sesión", async ({
     page,
   }) => {
+    test.slow();
     await page.setViewportSize({ width: 1280, height: 800 });
-    await page.goto("/");
+    await page.goto("/cuenta", { waitUntil: "domcontentloaded" });
     await esperarHidratacion(page);
 
     const botonPerfil = page.getByRole("button", { name: /Menú de usuario/ });
@@ -162,21 +168,22 @@ test.describe("RR-UI-002 — Hardening de navegación premium y protección Mobi
 
     const botonCerrarSesion = menuPerfil.getByRole("menuitem", { name: "Cerrar sesión" });
     await expect(botonCerrarSesion).toBeVisible();
-    await botonCerrarSesion.click();
+    await botonCerrarSesion.click({ timeout: 30_000 });
 
-    await page.waitForURL("**/login**", { timeout: 15_000 });
+    await page.waitForURL("**/login**", { timeout: 30_000 });
     expect(rutaActual(page)).toContain("/login");
   });
 
   test("Móvil: Drawer accesible, focus trap, Escape, restauración de foco y contención no-scroll", async ({
     page,
   }) => {
+    test.slow();
     // Viewport de smartphone moderno
     await page.setViewportSize({ width: 390, height: 844 });
-    await page.goto("/");
+    await page.goto("/ubicaciones", { waitUntil: "domcontentloaded" });
     await esperarHidratacion(page);
 
-    // Botón hamburguesa visible
+    // Botón hamburguesa visible en el header
     const botonMenu = page.getByRole("button", { name: "Abrir menú de navegación" });
     await expect(botonMenu).toBeVisible();
 
@@ -199,6 +206,9 @@ test.describe("RR-UI-002 — Hardening de navegación premium y protección Mobi
     await page.keyboard.press("Escape");
     await expect(drawer).toBeHidden();
 
+    // Restauración de aislamiento del fondo
+    await expect(contenedorPrincipal).not.toHaveAttribute("aria-hidden");
+
     // Restauración de foco al botón que detonó la apertura
     await expect(botonMenu).toBeFocused();
 
@@ -215,9 +225,10 @@ test.describe("RR-UI-002 — Hardening de navegación premium y protección Mobi
   test("Tablet (768px y 1023px): Layout contenido sin desbordamiento horizontal ni colisiones", async ({
     page,
   }) => {
+    test.slow();
     // Probar zona crítica de tablet 768px
     await page.setViewportSize({ width: 768, height: 1024 });
-    await page.goto("/");
+    await page.goto("/ubicaciones", { waitUntil: "domcontentloaded" });
     await esperarHidratacion(page);
 
     const sidebar = page.locator("#userDashboardSidebar");

@@ -20,6 +20,7 @@ import { expect, type Page } from "@playwright/test";
 export async function esperarHidratacion(page: Page): Promise<void> {
   await page.waitForFunction(
     () => {
+      if (document.querySelector('[data-hydrated="true"]')) return true;
       const candidatos = [
         document.body,
         document.querySelector("form"),
@@ -29,7 +30,7 @@ export async function esperarHidratacion(page: Page): Promise<void> {
       ].filter((nodo): nodo is HTMLElement => Boolean(nodo));
 
       return candidatos.some((nodo) =>
-        Object.keys(nodo).some((clave) => clave.startsWith("__react")),
+        Object.keys(nodo).concat(Object.getOwnPropertyNames(nodo)).some((clave) => clave.startsWith("__react")),
       );
     },
     undefined,

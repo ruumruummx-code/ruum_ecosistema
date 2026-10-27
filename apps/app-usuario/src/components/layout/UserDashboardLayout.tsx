@@ -82,9 +82,11 @@ export function UserDashboardLayout({
   const ruta = usePathname();
   const [colapsada, setColapsada] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [hidratado, setHidratado] = useState(false);
 
   useEffect(() => {
     setColapsada(leerPreferenciaColapsada());
+    setHidratado(true);
   }, []);
 
   // Al cambiar de ruta, cerrar automáticamente el drawer móvil si estaba abierto
@@ -102,18 +104,23 @@ export function UserDashboardLayout({
   };
 
   return (
-    <div className={estilos.shell} data-layout="usuario-dashboard">
+    <div
+      className={estilos.shell}
+      data-layout="usuario-dashboard"
+      data-hydrated={hidratado ? "true" : undefined}
+    >
       <UserSidebar
         collapsed={colapsada}
         mobileOpen={mobileOpen}
         onCollapseChange={cambiarColapso}
         onMobileClose={() => setMobileOpen(false)}
         showPromo={showPromo}
+        mainContentId="userDashboardMainContent"
       />
 
       <div
         id="userDashboardMainContent"
-        aria-hidden={mobileOpen ? true : undefined}
+        aria-hidden={mobileOpen ? "true" : undefined}
         inert={mobileOpen ? true : undefined}
         className="flex min-w-0 flex-1 flex-col overflow-x-hidden overflow-y-hidden"
       >
