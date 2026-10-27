@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import Link from "next/link";
+import { VehiculosDesktop } from "./VehiculosDesktop";
+import { construirNotificaciones } from "../../../lib/inicio";
 import { MobileShell } from "@ruum/ui";
 import { NavegacionUsuario } from "../../NavegacionUsuario";
 import { conCuenta } from "../cuenta-ui";
@@ -41,47 +42,9 @@ export default async function PaginaVehiculos() {
           nombre={cuenta.usuario?.nombre}
           correo={cuenta.correoRegistro}
           totalVehiculos={cuenta.vehiculos.length}
+          notificaciones={construirNotificaciones(cuenta.usuario, cuenta.traslados ?? [])}
         >
-          <div className="mx-auto max-w-5xl space-y-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <h1 className="font-display text-2xl font-bold tracking-tight text-[var(--ruum-text)]">
-                  Mis vehículos
-                </h1>
-                <p className="mt-1 text-xs text-[var(--ruum-text-secondary)]">
-                  Gestiona tu garaje de autos registrados para cotizar y solicitar traslados.
-                </p>
-              </div>
-              <Link
-                href="/viajes/nuevo"
-                className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-[var(--rr-sidebar-active,#075be8)] px-4 py-2 text-xs font-bold text-white shadow-sm transition hover:brightness-110"
-              >
-                + Nuevo traslado con vehículo
-              </Link>
-            </div>
-
-            {cuenta.vehiculos.length > 0 ? (
-              <ul aria-label="Vehículos guardados" className="overflow-hidden rounded-2xl border border-[var(--rr-border,#e3eaf3)] bg-[var(--rr-header-bg,#ffffff)] divide-y divide-[var(--rr-border,#e3eaf3)] shadow-xs">
-                {cuenta.vehiculos.map((vehiculo) => <VehicleListItem key={vehiculo.id} vehiculo={vehiculo} />)}
-              </ul>
-            ) : (
-              <div className="rounded-2xl border border-[var(--rr-border,#e3eaf3)] bg-[var(--rr-header-bg,#ffffff)] p-12 text-center shadow-xs">
-                <span aria-hidden="true" className="text-4xl">🚗</span>
-                <h2 className="mt-4 font-display text-base font-bold text-[var(--ruum-text)]">Sin vehículos registrados</h2>
-                <p className="mx-auto mt-1 max-w-sm text-xs text-[var(--ruum-text-secondary)]">
-                  Registra un traslado con un nuevo vehículo y se guardará automáticamente en tu garaje.
-                </p>
-                <div className="mt-6">
-                  <Link
-                    href="/viajes/nuevo"
-                    className="inline-flex items-center justify-center rounded-xl bg-[var(--rr-sidebar-active,#075be8)] px-4 py-2.5 text-xs font-bold text-white shadow-sm transition hover:brightness-110"
-                  >
-                    Crear primer traslado
-                  </Link>
-                </div>
-              </div>
-            )}
-          </div>
+          <VehiculosDesktop vehiculos={cuenta.vehiculos} />
         </UserDashboardLayout>
       </div>
     </>

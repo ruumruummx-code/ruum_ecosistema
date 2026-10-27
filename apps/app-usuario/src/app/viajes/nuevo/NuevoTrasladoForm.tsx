@@ -8,6 +8,7 @@ import { useNuevoTraslado } from "./hooks/useNuevoTraslado";
 import { EstadoCreacion } from "./components/EstadoCreacion";
 import { CotizadorPortal } from "./components/CotizadorPortal";
 import { NuevoTrasladoDesktop } from "./NuevoTrasladoDesktop";
+import { SeleccionVehiculoInicial } from "./SeleccionVehiculoInicial";
 
 export function SeleccionUbicacionInicial({ t, lado, consulta }: { t: ReturnType<typeof useNuevoTraslado>; lado: "origen" | "destino"; consulta: string }) {
   const [cerrado, setCerrado] = useState(false);
@@ -32,7 +33,7 @@ export function SeleccionUbicacionInicial({ t, lado, consulta }: { t: ReturnType
   </dialog>;
 }
 
-export function NuevoTrasladoForm({ busquedaOrigenInicial = "", busquedaDestinoInicial = "" }: { busquedaOrigenInicial?: string; busquedaDestinoInicial?: string } = {}) {
+export function NuevoTrasladoForm({ busquedaOrigenInicial = "", busquedaDestinoInicial = "", vehiculoIdInicial = "" }: { busquedaOrigenInicial?: string; busquedaDestinoInicial?: string; vehiculoIdInicial?: string } = {}) {
   const t = useNuevoTraslado();
   const { setOrigenBusqueda, setDestinoBusqueda } = t;
   useEffect(() => {
@@ -121,7 +122,7 @@ export function NuevoTrasladoForm({ busquedaOrigenInicial = "", busquedaDestinoI
 
   return (
     <>
-      {(busquedaOrigenInicial || busquedaDestinoInicial) && <SeleccionUbicacionInicial key={busquedaOrigenInicial + "|" + busquedaDestinoInicial} t={t} lado={busquedaOrigenInicial ? "origen" : "destino"} consulta={busquedaOrigenInicial || busquedaDestinoInicial} />}
+      {vehiculoIdInicial ? <SeleccionVehiculoInicial key={vehiculoIdInicial} t={t} vehiculoId={vehiculoIdInicial} /> : (busquedaOrigenInicial || busquedaDestinoInicial) ? <SeleccionUbicacionInicial key={busquedaOrigenInicial + "|" + busquedaDestinoInicial} t={t} lado={busquedaOrigenInicial ? "origen" : "destino"} consulta={busquedaOrigenInicial || busquedaDestinoInicial} /> : null}
       <div className="lg:hidden flex flex-col h-full w-full">
         <CotizadorPortal t={t} headingRef={encabezadoPasoRef} />
       </div>

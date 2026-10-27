@@ -37,9 +37,12 @@ describe("Mis vehículos", () => {
   it("conserva Color y VIN en el detalle", async () => {
     cuenta.vehiculos = [vehiculo];
     render(await PaginaDetalleVehiculo({ params: Promise.resolve({ id: "auto-1" }) }));
-    expect(screen.getByText("Rojo")).toBeInTheDocument();
-    expect(screen.getByText("VIN-PRIVADO")).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: /Volver a mis vehículos/ })).toHaveAttribute("href", "/cuenta/vehiculos");
+    const detalles = screen.getAllByRole("region", { name: "Detalle del vehículo" });
+    const desktop = within(detalles[1]);
+    expect(desktop.getByText("Rojo")).toBeInTheDocument();
+    expect(desktop.getByText("VIN-PRIVADO")).toBeInTheDocument();
+    expect(screen.getAllByRole("link", { name: /Volver a mis vehículos/ })[1]).toHaveAttribute("href", "/cuenta/vehiculos");
+    expect(desktop.getByRole("link", { name: "Solicitar traslado con este vehículo" })).toHaveAttribute("href", "/viajes/nuevo?vehiculo=auto-1");
   });
   it("no permite abrir un vehículo que no pertenece a la cuenta", async () => {
     cuenta.vehiculos = [vehiculo];
