@@ -51,7 +51,7 @@ const ALIAS: Record<string, string> = {
 };
 export function normalizarFilaPlantilla(original: Record<string, string>): Record<string, string> {
   const datos = { ...original };
-  for (const [origen, destino] of Object.entries(ALIAS)) datos[destino] = original[origen] ?? "";
+  for (const [origen, destino] of Object.entries(ALIAS)) datos[destino] = original[origen] ?? original[destino] ?? "";
   for (const campo of ["origenCodigoPostal", "destinoCodigoPostal"]) if (/^\d{1,5}$/.test(datos[campo] ?? "")) datos[campo] = datos[campo]!.padStart(5, "0");
   for (const campo of ["entregaTelefono", "recepcionTelefono"]) datos[campo] = (datos[campo] ?? "").replace(/^\+52/, "").replace(/[\s()-]/g, "");
   return datos;
@@ -110,7 +110,7 @@ export async function parsearBufferPlantilla(buffer: ArrayBuffer): Promise<Recor
       if (key) obj[key] = valorCelda(cell.value);
       if (key && obj[key] && cell.type !== 6) capturada = true;
     });
-    if (capturada) filasBruto.push(normalizarFilaPlantilla(obj));
+    if (capturada) filasBruto.push({ ...normalizarFilaPlantilla(obj), __fila_excel: String(rowNum) });
   });
 
   if (filasBruto.length === 0) {
@@ -182,4 +182,26 @@ export async function parsearArchivoPlantilla(archivo: File, signal?: AbortSigna
   }
 
   return parsearBufferPlantilla(buffer);
+}
+
+/** Nombres visibles de los campos de la plantilla; se comparten con el reporte. */
+export const ETIQUETAS_CAMPOS_MASIVOS: Record<string, string> = {
+  marca: "Marca", modelo: "Modelo", anio: "Año", condicion: "Condición del vehículo",
+  vehiculo_placas: "Placas o VIN", vehiculo_vin: "VIN",
+  origenCodigoPostal: "Código postal de origen", destinoCodigoPostal: "Código postal de destino",
+  entregaNombre: "Nombre del contacto de entrega", entregaTelefono: "Teléfono de entrega",
+  recepcionNombre: "Nombre del contacto de recepción", recepcionTelefono: "Teléfono de recepción",
+  origen_calle: "Calle de origen", origen_numero: "Número de origen", origen_colonia: "Colonia de origen",
+  destino_calle: "Calle de destino", destino_numero: "Número de destino", destino_colonia: "Colonia de destino",
+  modalidad_programacion: "Modalidad de programación", fecha_hora_programada: "Fecha y hora programada",
+  tipo_traslado: "Tipo de traslado", ventana_recoleccion_horario: "Horario de recolección", ventana_entrega_horario: "Horario de entrega",
+};
+export function motivosFilaMasiva(fila: FilaValidada): string[] {
+  const motivos = Object.entries(fila.errores ?? {}).map(([campo, mensaje]) => (ETIQUETAS_CAMPOS_MASIVOS[campo] ?? campo.replaceAll("_", " ")) + ": " + mensaje);
+  if (fila.errorCotizacion) motivos.push("Ruta o cotización: " + fila.errorCotizacion);
+  return motivos;
+}
+export function numeroFilaExcel(fila: FilaValidada): number {
+  const numero = Number(fila.datos.__fila_excel);
+  return Number.isInteger(numero) && numero >= 2 ? numero : fila.indice + 2;
 }

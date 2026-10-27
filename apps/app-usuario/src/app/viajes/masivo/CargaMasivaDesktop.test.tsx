@@ -51,6 +51,7 @@ const cargarArchivoMock = vi.fn();
 const reanudarCargaMock = vi.fn();
 const descartarCargaPendienteMock = vi.fn();
 const corregirCampoMock = vi.fn();
+const corregirCamposMock = vi.fn();
 const eliminarFilaMock = vi.fn();
 const geocodificarYCotizarMock = vi.fn();
 const cotizarSoloValidasMock = vi.fn();
@@ -101,6 +102,7 @@ const mockHookReturn = {
   stripeClientSecret: null as string | null,
   cargarArchivo: cargarArchivoMock,
   corregirCampo: corregirCampoMock,
+  corregirCampos: corregirCamposMock,
   eliminarFila: eliminarFilaMock,
   geocodificarYCotizar: geocodificarYCotizarMock,
   cotizarSoloValidas: cotizarSoloValidasMock,
@@ -392,6 +394,26 @@ describe("CargaMasivaDesktop — Pantalla de Carga Masiva de Escritorio", () => 
     distanciaKm: null,
   };
 
+  it("muestra todos los motivos reales y permite corregir campos que antes estaban ocultos", async () => {
+    const fila = { ...filaInvalidaMock, datos: { ...filaInvalidaMock.datos, __fila_excel: "17" }, errores: { modelo: "La combinación marca/modelo no está en catálogo", anio: "Año fuera del rango permitido", origen_calle: "Campo requerido", entregaNombre: "Nombre requerido" } };
+    mockHookReturn.estado = "resultados";
+    mockHookReturn.filasVisibles = [fila];
+    mockHookReturn.filasConError = [fila];
+    await renderizarDesktop();
+    const motivos = screen.getByRole("list", { name: "Motivos de error del registro 2" });
+    expect(within(motivos).getByText("Modelo: La combinación marca/modelo no está en catálogo")).toBeInTheDocument();
+    expect(within(motivos).getByText("Año: Año fuera del rango permitido")).toBeInTheDocument();
+    expect(within(motivos).getByText("Calle de origen: Campo requerido")).toBeInTheDocument();
+    expect(within(motivos).getByText("Ruta o cotización: Error de geocodificación en CP origen")).toBeInTheDocument();
+    expect(screen.getByText("Fila Excel 17")).toBeInTheDocument();
+    await userEvent.click(screen.getByRole("button", { name: "Editar fila 2" }));
+    fireEvent.change(screen.getByLabelText("Año fila 2"), { target: { value: "2025" } });
+    fireEvent.change(screen.getByLabelText("Calle de origen fila 2"), { target: { value: "Reforma" } });
+    await userEvent.click(screen.getByRole("button", { name: "Guardar fila 2" }));
+    expect(corregirCamposMock).toHaveBeenCalledTimes(1);
+    expect(corregirCamposMock).toHaveBeenCalledWith(1, { anio: "2025", origen_calle: "Reforma" });
+  });
+
   it("renderiza la tabla de validación en estado 'resultados' con filtros, edición inline y cotización", async () => {
     const user = userEvent.setup();
     mockHookReturn.estado = "resultados";
@@ -439,7 +461,7 @@ describe("CargaMasivaDesktop — Pantalla de Carga Masiva de Escritorio", () => 
     await user.type(inputMarca, "Chevrolet");
 
     await user.click(screen.getByRole("button", { name: "Guardar fila 2" }));
-    expect(corregirCampoMock).toHaveBeenCalledWith(1, "marca", "Chevrolet");
+    expect(corregirCamposMock).toHaveBeenCalledWith(1, { marca: "Chevrolet" });
 
     // Eliminar fila
     const botonEliminar = screen.getByRole("button", { name: "Eliminar fila 2" });

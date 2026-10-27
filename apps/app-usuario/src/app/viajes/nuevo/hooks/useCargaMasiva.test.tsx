@@ -16,6 +16,52 @@ vi.mock("exceljs", () => ({
   },
 }));
 afterEach(() => vi.unstubAllGlobals());
+it("guarda varios campos juntos y conserva el motivo del servidor si falla la revalidación", async () => {
+  const datos = normalizarFilaPlantilla({ vehiculo_marca: "Nissan", vehiculo_modelo: "Versa", vehiculo_anio: "1800" });
+  const fila = validarFila(datos, 0);
+  const fetchMock = vi.fn().mockResolvedValueOnce(Response.json({ filas: [fila] })).mockResolvedValueOnce(Response.json({ error: "Catálogo vehicular temporalmente no disponible" }, { status: 503 }));
+  vi.stubGlobal("fetch", fetchMock);
+  const { result } = renderHook(() => useCargaMasiva());
+  await act(async () => { await result.current.cargarArchivo({ name: "plantilla.xlsx", size: 100, arrayBuffer: async () => new ArrayBuffer(0) } as File); });
+  act(() => result.current.corregirCampos(0, { anio: "2024", origen_calle: "Reforma" }));
+  await waitFor(() => expect(result.current.filasVisibles[0]?.validando).toBe(false));
+  expect(fetchMock).toHaveBeenCalledTimes(2);
+  const enviados = JSON.parse(fetchMock.mock.calls[1]![1].body).filas[0];
+  expect(enviados).toMatchObject({ anio: "2024", origen_calle: "Reforma" });
+  const revisada = result.current.filasVisibles[0]!;
+  expect(revisada.errorCotizacion).toBe("Catálogo vehicular temporalmente no disponible");
+  expect(revisada.errores.vehiculo_placas).toBe("Captura placas o VIN");
+  expect(revisada.errores.anio).toBeUndefined();
+  expect(result.current.todasListas).toBe(false);
+});
+
+it("conserva el estado del lote si el servidor rechaza el descarte", async () => {
+  const fetchMock = vi.fn().mockResolvedValueOnce(Response.json({ clientSecret: "cs_test", totalMXN: 500, cotizaciones: [] })).mockResolvedValueOnce(Response.json({ error: "No se puede descartar este lote" }, { status: 409 }));
+  vi.stubGlobal("fetch", fetchMock);
+  const { result } = renderHook(() => useCargaMasiva());
+  await act(async () => { await result.current.reanudarCarga("lote-1"); });
+  await act(async () => { await expect(result.current.descartarCargaPendiente("lote-1")).rejects.toThrow("No se puede descartar este lote"); });
+  expect(result.current.cargaId).toBe("lote-1");
+  expect(result.current.estado).toBe("checkout");
+});
+
+it("conserva los errores de cotización parcial y sus índices originales", async () => {
+  const datos = normalizarFilaPlantilla({ vehiculo_marca: "Toyota", vehiculo_modelo: "Corolla" });
+  const iniciales = [
+    { ...validarFila(datos, 0), estado: "correcto", errores: {} },
+    { ...validarFila(datos, 1), estado: "error", errores: { anio: "Año inválido" } },
+    { ...validarFila(datos, 2), estado: "correcto", errores: {} },
+  ];
+  const fetchMock = vi.fn().mockResolvedValueOnce(Response.json({ filas: iniciales })).mockResolvedValueOnce(Response.json({ id: "parcial", clientSecret: "cs_test", totalMXN: 500, cotizaciones: [{ ...iniciales[2], indice: 1, tarifa: 500 }], filasConError: [{ ...iniciales[0], indice: 0, errorCotizacion: "No se encontró ruta para el origen" }] }));
+  vi.stubGlobal("fetch", fetchMock);
+  const { result } = renderHook(() => useCargaMasiva());
+  await act(async () => { await result.current.cargarArchivo({ name: "plantilla.xlsx", size: 100, arrayBuffer: async () => new ArrayBuffer(0) } as File); });
+  await act(async () => { await result.current.cotizarSoloValidas(); });
+  expect(result.current.filasVisibles.find(f => f.tarifa === 500)?.indice).toBe(2);
+  expect(result.current.filasConError.map(f => f.indice).sort()).toEqual([0, 1]);
+  expect(result.current.filasConError.find(f => f.indice === 0)?.errorCotizacion).toBe("No se encontró ruta para el origen");
+});
+
 it("espera la revalidación del servidor y descarta su respuesta al cancelar", async () => {
   const datos = normalizarFilaPlantilla({ vehiculo_marca: "Nissan", vehiculo_modelo: "Versa", vehiculo_anio: "2024", vehiculo_placas: "ABC123", origen_codigo_postal: "06700", destino_codigo_postal: "04360", condicion: "seminueva", contacto_entrega_nombre: "Entrega", contacto_entrega_telefono: "5512345678", contacto_recepcion_nombre: "Recibe", contacto_recepcion_telefono: "5512345679", origen_calle: "Uno", origen_numero: "1", origen_colonia: "Roma", destino_calle: "Dos", destino_numero: "2", destino_colonia: "Centro" });
   const fila = validarFila(datos, 0);
@@ -29,6 +75,7 @@ it("espera la revalidación del servidor y descarta su respuesta al cancelar", a
   act(() => result.current.corregirCampo(0, "modelo", "Desconocido"));
   expect(result.current.todasListas).toBe(false);
   expect(result.current.filasVisibles[0]?.validando).toBe(true);
+  await waitFor(() => expect(resolver).toBeTypeOf("function"));
   act(() => result.current.cancelar());
   await act(async () => { resolver(Response.json({ filas: [fila] })); });
   await waitFor(() => expect(result.current.estado).toBe("idle"));

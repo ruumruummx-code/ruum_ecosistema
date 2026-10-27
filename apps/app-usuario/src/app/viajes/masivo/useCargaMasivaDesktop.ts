@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { motivosFilaMasiva, numeroFilaExcel } from "@/lib/carga-masiva";
 import { useCargaMasiva, STORAGE_KEY_CARGA_ACTIVA, type FilaMasiva } from "../nuevo/hooks/useCargaMasiva";
 
 export interface CargaRecienteItem {
@@ -68,7 +69,7 @@ const LIMITE_TAMANO_BYTES = 5 * 1024 * 1024; // 5 MB
  */
 export function descargarReporteDetallado(filas: FilaMasiva[], nombreArchivo: string) {
   const lineas = [
-    ["Índice", "Estatus", "Vehículo", "Origen", "Destino", "Tarifa", "Incidencia"],
+    ["Fila Excel", "Estatus", "Vehículo", "Origen", "Destino", "Tarifa", "Incidencia"],
     ...filas.map((fila) => {
       const vehiculo =
         [fila.datos.marca, fila.datos.modelo, fila.datos.anio].filter(Boolean).join(" ") ||
@@ -108,14 +109,10 @@ export function descargarReporteDetallado(filas: FilaMasiva[], nombreArchivo: st
       const tarifa =
         fila.tarifa != null ? `$${fila.tarifa.toFixed(2)} MXN` : "Pendiente";
 
-      const detalleErrores = Object.entries(fila.errores ?? {})
-        .map(([campo, err]) => `${campo}: ${err}`)
-        .join("; ");
-
-      const incidencia = fila.errorCotizacion || detalleErrores || "Ninguna";
+      const incidencia = motivosFilaMasiva(fila).join("; ") || "Ninguna";
 
       return [
-        String(fila.indice + 1),
+        String(numeroFilaExcel(fila)),
         estatus,
         vehiculo,
         origenDir,
@@ -329,7 +326,7 @@ export function useCargaMasivaDesktop() {
 
   // Sincronización de notificaciones reactivas según el estado
   useEffect(() => {
-    const claveEstado = `${cargaMasiva.estado}:${cargaMasiva.todasListas}:${cargaMasiva.filasCorrectas?.length ?? 0}:${cargaMasiva.filasConError?.length ?? 0}`;
+    const claveEstado = `${cargaMasiva.error ?? ""}:${cargaMasiva.estado}:${cargaMasiva.todasListas}:${cargaMasiva.filasCorrectas?.length ?? 0}:${cargaMasiva.filasConError?.length ?? 0}`;
     if (ultimoEstadoAnunciado.current === claveEstado) return;
 
     if (cargaMasiva.estado === "resultados") {
@@ -375,10 +372,12 @@ export function useCargaMasivaDesktop() {
       mostrarToast(`Archivo "${archivo.name}" recibido. Procesando contenido...`, "info");
 
       try {
-        await cargaMasiva.cargarArchivo(archivo);
-        return true;
-      } catch {
-        mostrarToast("Ocurrió un error al procesar el archivo. Revisa su formato e intenta de nuevo.", "error");
+        const procesado = await cargaMasiva.cargarArchivo(archivo);
+        setFiltroTab("todas");
+        setFilaEditando(null);
+        return procesado !== false;
+      } catch (err) {
+        mostrarToast(err instanceof Error ? err.message : "Ocurrió un error al procesar el archivo.", "error");
         return false;
       }
     },
@@ -401,9 +400,13 @@ export function useCargaMasivaDesktop() {
   // Descartar carga pendiente del servidor
   const handleDescartarCarga = useCallback(
     async (id: string) => {
-      await cargaMasiva.descartarCargaPendiente(id);
-      await refrescarPendientes();
-      mostrarToast("Carga pendiente descartada.", "info");
+      try {
+        await cargaMasiva.descartarCargaPendiente(id);
+        await refrescarPendientes();
+        mostrarToast("Carga pendiente descartada.", "info");
+      } catch (err) {
+        mostrarToast(err instanceof Error ? err.message : "No se pudo descartar la carga pendiente.", "error");
+      }
     },
     [cargaMasiva, refrescarPendientes, mostrarToast]
   );
@@ -450,6 +453,7 @@ export function useCargaMasivaDesktop() {
     cargaMasiva.cancelar();
     setNombreArchivo(null);
     setFilaEditando(null);
+    setFiltroTab("todas");
     setErrorPago(null);
     setPago({ listo: false, procesando: false });
   }, [cargaMasiva]);
@@ -523,8 +527,8 @@ export function useCargaMasivaDesktop() {
   }, []);
 
   const guardarEdicionFila = useCallback(
-    (indice: number, campo: string, valor: string) => {
-      cargaMasiva.corregirCampo(indice, campo, valor);
+    (indice: number, cambios: Record<string, string>) => {
+      cargaMasiva.corregirCampos(indice, cambios);
     },
     [cargaMasiva]
   );

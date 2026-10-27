@@ -2,7 +2,7 @@
 import { useCallback, useEffect, useReducer, useRef, useState } from "react";
 import { validarFila, parsearArchivoPlantilla, type FilaValidada } from "@/lib/carga-masiva";
 import { logStructuredWarn } from "@/lib/logger";
-import { obtenerHeadersCsrf, obtenerHeadersCsrfAsync, obtenerTokenCsrfCliente } from "@/lib/csrf";
+import { obtenerHeadersCsrfAsync, obtenerTokenCsrfCliente } from "@/lib/csrf";
 
 export const STORAGE_KEY_CARGA_ACTIVA = "ruum_carga_masiva_activa_id";
 
@@ -71,7 +71,7 @@ type Action =
   | { type: "VALIDACION_OK"; filas: FilaMasiva[] }
   | { type: "FILA_VALIDADA"; fila: FilaMasiva }
   | { type: "ERROR"; mensaje: string }
-  | { type: "CORREGIR_CAMPO"; indice: number; campo: string; valor: string }
+  | { type: "CORREGIR_CAMPOS"; indice: number; cambios: Record<string, string> }
   | { type: "ELIMINAR_FILA"; indice: number }
   | { type: "PROGRESO"; valor: number }
   | { type: "COTIZACION_OK"; filas: FilaMasiva[]; totalMXN: number }
@@ -116,11 +116,11 @@ function reducer(state: State, action: Action): State {
       };
     case "ERROR":
       return { ...state, error: action.mensaje, estado: state.estado === "parseando" ? "idle" : "resultados" };
-    case "CORREGIR_CAMPO": {
+    case "CORREGIR_CAMPOS": {
       const filas = state.filas.map((f) => {
         if (f.indice !== action.indice) return f;
-        const datos = { ...f.datos, [action.campo]: action.valor };
-        return { ...revalidarFila({ ...f, datos }), validando: true };
+        const datos = { ...f.datos, ...action.cambios };
+        return { ...revalidarFila({ ...f, datos, errorCotizacion: undefined, tarifa: null, distanciaKm: null }), validando: true };
       });
       return { ...state, filas };
     }
@@ -147,7 +147,7 @@ function reducer(state: State, action: Action): State {
     case "COTIZACION_OK": {
       const filasCotizadas = action.filas.map((f) => ({
         ...f,
-        estadoGranular: (f.errorCotizacion ? "error" : f.tarifa != null ? "cotizado" : "pendiente") as EstadoFilaGranular,
+        estadoGranular: (f.estado === "error" || f.errorCotizacion ? "error" : f.tarifa != null ? "cotizado" : "pendiente") as EstadoFilaGranular,
       }));
       // Si la cotización fue parcial, conservamos las filas previas con incidencias que quedaron en borrador
       const indicesCotizados = new Set(filasCotizadas.map((f) => f.indice));
@@ -228,6 +228,8 @@ export function useCargaMasiva() {
    * contra la API de validación del servidor.
    */
   const cargarArchivo = useCallback(async (archivo: File) => {
+    correcciones.current.forEach(controller => controller.abort());
+    correcciones.current.clear();
     abortRef.current?.abort();
     const controller = new AbortController();
     abortRef.current = controller;
@@ -257,28 +259,30 @@ export function useCargaMasiva() {
       if (controller.signal.aborted) return;
 
       dispatch({ type: "VALIDACION_OK", filas: resultado.filas });
+      return true;
     } catch (err) {
       if (controller.signal.aborted) return;
       if (err instanceof DOMException && err.name === "AbortError") return;
       dispatch({ type: "ERROR", mensaje: err instanceof Error ? err.message : "Error al procesar el archivo." });
+      return false;
     }
   }, []);
 
   /** Corrige un campo en una fila específica y re-valida localmente */
-  const corregirCampo = useCallback((indice: number, campo: string, valor: string) => {
+  const corregirCampos = useCallback((indice: number, cambios: Record<string, string>) => {
     claveCobro.current = null;
-    dispatch({ type: "CORREGIR_CAMPO", indice, campo, valor });
+    dispatch({ type: "CORREGIR_CAMPOS", indice, cambios });
     const fila = state.filas.find(f => f.indice === indice);
     if (!fila) return;
     correcciones.current.get(indice)?.abort();
     const controller = new AbortController();
     correcciones.current.set(indice, controller);
-    const datos = { ...fila.datos, [campo]: valor };
+    const datos = { ...fila.datos, ...cambios };
     void (async () => {
       try {
         const res = await fetch("/api/viajes/masivos/validate", {
           method: "POST",
-          headers: obtenerHeadersCsrf({ "Content-Type": "application/json" }),
+          headers: await obtenerHeadersCsrfAsync({ "Content-Type": "application/json" }),
           body: JSON.stringify({ filas: [datos] }),
           signal: controller.signal,
         });
@@ -287,11 +291,13 @@ export function useCargaMasiva() {
         if (!controller.signal.aborted) dispatch({ type: "FILA_VALIDADA", fila: { ...resultado.filas[0], indice, validando: false } });
       } catch (err) {
         if (controller.signal.aborted) return;
-        logStructuredWarn("viajes/useCargaMasiva", "revalidacion_fila_fallida", err, { indice, campo });
-        dispatch({ type: "FILA_VALIDADA", fila: { ...validarFila(datos, indice), estado: "error", errores: { [campo]: "No se pudo verificar. Edita el campo para reintentar." }, validando: false } });
+        logStructuredWarn("viajes/useCargaMasiva", "revalidacion_fila_fallida", err, { indice, campos: Object.keys(cambios) });
+        dispatch({ type: "FILA_VALIDADA", fila: { ...validarFila(datos, indice), estado: "error", errores: { ...validarFila(datos, indice).errores }, errorCotizacion: err instanceof Error ? err.message : "No se pudo verificar la fila. Intenta guardarla de nuevo.", validando: false } });
       }
     })();
   }, [state.filas]);
+
+  const corregirCampo = useCallback((indice: number, campo: string, valor: string) => corregirCampos(indice, { [campo]: valor }), [corregirCampos]);
 
   /** Elimina una fila con error del flujo */
   const eliminarFila = useCallback((indice: number) => {
@@ -310,6 +316,7 @@ export function useCargaMasiva() {
 
     const filasActivas = state.filas.filter((f) => !f.eliminada && (opciones?.soloValidas ? f.estado === "correcto" : true));
     if (filasActivas.length === 0) return;
+    if (filasActivas.some(f => f.validando)) { dispatch({ type: "ERROR", mensaje: "Espera a que termine la validación de las filas." }); return; }
 
     dispatch({ type: "GEOCODIFICANDO" });
 
@@ -330,7 +337,12 @@ export function useCargaMasiva() {
       const resultado = await res.json();
       if (controller.signal.aborted) return;
       if (!res.ok) throw new Error(resultado.error ?? "No se pudo cotizar.");
-      if (resultado.filas) { dispatch({ type: "VALIDACION_OK", filas: resultado.filas }); return; }
+      if (resultado.filas) {
+        const indicesEnviados = new Set(filasActivas.map(f => f.indice));
+        const revisadas = resultado.filas.map((f: FilaMasiva, i: number) => ({ ...f, indice: filasActivas[f.indice]?.indice ?? filasActivas[i]?.indice ?? f.indice }));
+        dispatch({ type: "VALIDACION_OK", filas: [...revisadas, ...state.filas.filter(f => !indicesEnviados.has(f.indice))] });
+        return;
+      }
       try {
         localStorage.setItem(STORAGE_KEY_CARGA_ACTIVA, resultado.id);
       } catch {
@@ -338,7 +350,7 @@ export function useCargaMasiva() {
       }
       setCargaPendienteStorage(resultado.id);
       dispatch({ type: "CHECKOUT", stripeClientSecret: resultado.clientSecret, cargaId: resultado.id });
-      dispatch({ type: "COTIZACION_OK", filas: resultado.cotizaciones, totalMXN: resultado.totalMXN });
+      dispatch({ type: "COTIZACION_OK", filas: [...resultado.cotizaciones, ...(resultado.filasConError ?? [])].map((f: FilaMasiva, i: number) => ({ ...f, indice: filasActivas[f.indice]?.indice ?? filasActivas[i]?.indice ?? f.indice })), totalMXN: resultado.totalMXN });
     } catch (err) {
       if (err instanceof DOMException && err.name === "AbortError") return;
       dispatch({ type: "ERROR", mensaje: err instanceof Error ? err.message : "Error al procesar." });
@@ -414,19 +426,23 @@ export function useCargaMasiva() {
   const descartarCargaPendiente = useCallback(async (id: string): Promise<void> => {
     try {
       const headersCsrf = await obtenerHeadersCsrfAsync();
-      await fetch(`/api/viajes/masivos/pendientes?id=${encodeURIComponent(id)}`, {
+      const respuesta = await fetch(`/api/viajes/masivos/pendientes?id=${encodeURIComponent(id)}`, {
         method: "DELETE",
         headers: headersCsrf,
       });
+      if (!respuesta.ok) {
+        const detalle = await respuesta.json().catch(() => ({}));
+        throw new Error(detalle.error ?? "No se pudo descartar la carga pendiente.");
+      }
     } catch (err) {
-      // Ignorar errores de red en descarte dejando traza estructurada
+      // Conservar el lote y permitir reintentar si el servidor rechazó el descarte.
       logStructuredWarn("viajes/useCargaMasiva", "descartar_carga_red_fallido", err, { cargaId: id });
-    } finally {
-      try { localStorage.removeItem(STORAGE_KEY_CARGA_ACTIVA); } catch {}
-      setCargaPendienteStorage(null);
-      claveCobro.current = null;
-      dispatch({ type: "RESET" });
+      throw err;
     }
+    try { localStorage.removeItem(STORAGE_KEY_CARGA_ACTIVA); } catch {}
+    setCargaPendienteStorage(null);
+    claveCobro.current = null;
+    dispatch({ type: "RESET" });
   }, []);
 
   /** Consulta lista de cargas pendientes desde el servidor con reintento automático y backoff */
@@ -455,9 +471,9 @@ export function useCargaMasiva() {
   }, []);
 
   const filasVisibles = state.filas.filter((f) => !f.eliminada);
-  const filasConError = filasVisibles.filter((f) => f.estado === "error");
-  const filasCorrectas = filasVisibles.filter((f) => f.estado === "correcto");
-  const filasCotizables = filasVisibles.filter((f) => f.estado === "correcto" && !f.errorCotizacion);
+  const filasConError = filasVisibles.filter((f) => f.estado === "error" || Boolean(f.errorCotizacion));
+  const filasCorrectas = filasVisibles.filter((f) => f.estado === "correcto" && !f.errorCotizacion && !f.validando);
+  const filasCotizables = filasVisibles.filter((f) => f.estado === "correcto" && !f.errorCotizacion && !f.validando);
   const todasListas = filasVisibles.length > 0 && filasConError.length === 0 && !filasVisibles.some(f => f.validando);
 
   return {
@@ -470,6 +486,7 @@ export function useCargaMasiva() {
     cargaPendienteStorage,
     cargarArchivo,
     corregirCampo,
+    corregirCampos,
     eliminarFila,
     geocodificarYCotizar,
     cotizarSoloValidas,

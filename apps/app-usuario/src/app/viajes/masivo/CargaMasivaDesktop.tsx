@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { useCargaMasivaDesktop, type CargaRecienteItem } from "./useCargaMasivaDesktop";
 import { UserDashboardLayout } from "../../../components/layout/UserDashboardLayout";
 import { PagoStripe } from "@/app/PagoStripe";
+import { ETIQUETAS_CAMPOS_MASIVOS, motivosFilaMasiva, numeroFilaExcel } from "@/lib/carga-masiva";
 import type { FilaMasiva } from "../nuevo/hooks/useCargaMasiva";
 
 export interface CargaMasivaDesktopProps {
@@ -197,7 +198,7 @@ export function CargaMasivaDesktop({ nombreUsuario }: CargaMasivaDesktopProps) {
 
   // Filtrado de filas en la tabla desktop
   const filasFiltradas = filasVisibles.filter((f) => {
-    if (filtroTab === "validas") return f.estado === "correcto";
+    if (filtroTab === "validas") return f.estado === "correcto" && !f.errorCotizacion && !f.validando;
     if (filtroTab === "errores") return f.estado === "error" || Boolean(f.errorCotizacion);
     return true;
   });
@@ -216,6 +217,7 @@ export function CargaMasivaDesktop({ nombreUsuario }: CargaMasivaDesktopProps) {
       nombre={nombreUsuario}
       padding="compacto"
     >
+      {estado === "idle" && error && <div role="alert" className="rounded-xl border border-red-300 bg-red-50 p-4 text-sm text-red-800">{error}</div>}
       {/* -----------------------------------------------------------------
           MIGAS DE PAN (BREADCRUMBS)
           ----------------------------------------------------------------- */}
@@ -313,8 +315,9 @@ export function CargaMasivaDesktop({ nombreUsuario }: CargaMasivaDesktopProps) {
                 <p className="font-bold text-sm">Pago parcial de traslados válidos</p>
                 <p className="mt-1 text-xs text-blue-700 dark:text-blue-300">
                   Estás procesando el pago de <strong>{filasCotizadas.length}</strong> traslados válidos. Los{" "}
-                  <strong>{filasConError.length}</strong> traslados con incidencias quedan guardados como borrador en el servidor para que puedas corregirlos y pagarlos posteriormente sin perder tu avance.
+                  <strong>{filasConError.length}</strong> traslados con incidencias no se incluyen en este pago. Conserva la plantilla original para corregirlos y cargarlos después.
                 </p>
+                  <ul className="mt-2 list-disc pl-4 space-y-1" aria-label="Motivos de registros excluidos del pago">{filasConError.map(fila => <li key={fila.indice}>Fila Excel {numeroFilaExcel(fila)}: {motivosFilaMasiva(fila).join("; ") || "Detalle no disponible"}</li>)}</ul>
               </div>
             </aside>
           )}
@@ -547,7 +550,7 @@ export function CargaMasivaDesktop({ nombreUsuario }: CargaMasivaDesktopProps) {
                   {filasCorrectas.length} traslados listos para cotizar · {filasConError.length} fila(s) con incidencias
                 </p>
                 <p className="text-[11px] text-amber-700 dark:text-amber-300 mt-0.5">
-                  Puedes corregir las filas con error, o cotizar y pagar exclusivamente las válidas; las pendientes se conservarán en borrador.
+                  Puedes corregir las filas con error, o cotizar y pagar exclusivamente las válidas; corrige las pendientes en la plantilla original para cargarlas después.
                 </p>
               </div>
 
@@ -653,6 +656,7 @@ export function CargaMasivaDesktop({ nombreUsuario }: CargaMasivaDesktopProps) {
                       >
                         <td className="py-3 px-3 font-mono text-[11px] text-slate-400">
                           {fila.indice + 1}
+                          <span className="block whitespace-nowrap text-[10px]">Fila Excel {numeroFilaExcel(fila)}</span>
                         </td>
 
                         {/* Vehículo */}
@@ -693,6 +697,7 @@ export function CargaMasivaDesktop({ nombreUsuario }: CargaMasivaDesktopProps) {
                           {estaEditando ? (
                             <input
                               type="text"
+                              aria-label={"Código postal de origen fila " + (fila.indice + 1)}
                               defaultValue={fila.datos.origenCodigoPostal}
                               onChange={(e) =>
                                 setDatosEdicion((prev) => ({ ...prev, origenCodigoPostal: e.target.value }))
@@ -716,6 +721,7 @@ export function CargaMasivaDesktop({ nombreUsuario }: CargaMasivaDesktopProps) {
                           {estaEditando ? (
                             <input
                               type="text"
+                              aria-label={"Código postal de destino fila " + (fila.indice + 1)}
                               defaultValue={fila.datos.destinoCodigoPostal}
                               onChange={(e) =>
                                 setDatosEdicion((prev) => ({ ...prev, destinoCodigoPostal: e.target.value }))
@@ -739,6 +745,7 @@ export function CargaMasivaDesktop({ nombreUsuario }: CargaMasivaDesktopProps) {
                           {estaEditando ? (
                             <input
                               type="text"
+                              aria-label={"Teléfono de entrega fila " + (fila.indice + 1)}
                               defaultValue={fila.datos.entregaTelefono}
                               onChange={(e) =>
                                 setDatosEdicion((prev) => ({ ...prev, entregaTelefono: e.target.value }))
@@ -761,6 +768,7 @@ export function CargaMasivaDesktop({ nombreUsuario }: CargaMasivaDesktopProps) {
                           {estaEditando ? (
                             <input
                               type="text"
+                              aria-label={"Teléfono de recepción fila " + (fila.indice + 1)}
                               defaultValue={fila.datos.recepcionTelefono}
                               onChange={(e) =>
                                 setDatosEdicion((prev) => ({ ...prev, recepcionTelefono: e.target.value }))
@@ -778,18 +786,23 @@ export function CargaMasivaDesktop({ nombreUsuario }: CargaMasivaDesktopProps) {
                           )}
                         </td>
 
-                        {/* Estado */}
+                        {/* Estado y campos adicionales que necesitan corrección */}
                         <td className="py-3 px-3">
-                          {tieneError ? (
+                          {estaEditando && Array.from(new Set([...Object.keys(fila.errores ?? {}), ...(fila.errorCotizacion ? ["origen_calle", "origen_numero", "origen_colonia", "destino_calle", "destino_numero", "destino_colonia"] : [])])).filter(campo => !["marca", "modelo", "origenCodigoPostal", "destinoCodigoPostal", "entregaTelefono", "recepcionTelefono"].includes(campo)).map(campo => (
+                            <label key={campo} className="mb-2 block text-xs font-semibold text-slate-900 dark:text-white">
+                              {ETIQUETAS_CAMPOS_MASIVOS[campo] ?? campo}
+                              <input aria-label={(ETIQUETAS_CAMPOS_MASIVOS[campo] ?? campo) + " fila " + (fila.indice + 1)} defaultValue={fila.datos[campo] ?? ""} onChange={e => setDatosEdicion(prev => ({ ...prev, [campo]: e.target.value }))} className="mt-1 block w-full rounded-md border border-slate-300 bg-white px-2 py-1 text-slate-900" />
+                            </label>
+                          ))}
+                          {fila.validando ? <span role="status" className="text-xs text-blue-700">Validando cambios…</span> : tieneError ? (
                             <div>
                               <span className="inline-flex items-center gap-1 rounded-full bg-red-100 px-2.5 py-0.5 text-[10px] font-bold text-red-700 dark:bg-red-950 dark:text-red-300 whitespace-nowrap">
                                 ✕ Con incidencia
                               </span>
-                              {fila.errorCotizacion && (
-                                <p className="mt-1 text-[10px] font-medium text-red-600 max-w-xs whitespace-normal dark:text-red-400">
-                                  {fila.errorCotizacion}
-                                </p>
-                              )}
+                              <ul aria-label={"Motivos de error del registro " + (fila.indice + 1)} className="mt-2 min-w-56 max-w-sm list-disc space-y-1 pl-4 text-xs text-red-700 whitespace-normal dark:text-red-300">
+                                {motivosFilaMasiva(fila).map(motivo => <li key={motivo}>{motivo}</li>)}
+                                {motivosFilaMasiva(fila).length === 0 && <li>No se recibió el detalle de la incidencia. Guarda de nuevo la fila para revalidarla.</li>}
+                              </ul>
                             </div>
                           ) : (
                             <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2.5 py-0.5 text-[10px] font-bold text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300 whitespace-nowrap">
@@ -806,9 +819,7 @@ export function CargaMasivaDesktop({ nombreUsuario }: CargaMasivaDesktopProps) {
                                 type="button"
                                 aria-label={`Guardar fila ${fila.indice + 1}`}
                                 onClick={() => {
-                                  Object.entries(datosEdicion).forEach(([campo, valor]) => {
-                                    guardarEdicionFila(fila.indice, campo, valor);
-                                  });
+                                  guardarEdicionFila(fila.indice, datosEdicion);
                                   cancelarEdicionFila();
                                   setDatosEdicion({});
                                 }}
@@ -1499,8 +1510,7 @@ export function CargaMasivaDesktop({ nombreUsuario }: CargaMasivaDesktopProps) {
                 <div className="rounded-xl bg-red-50 p-3 text-red-700 dark:bg-red-950/40 dark:text-red-300 mt-2">
                   <p className="font-bold">Incidencias encontradas en la plantilla:</p>
                   <ul className="list-disc pl-4 mt-1 space-y-0.5">
-                    <li>Fila 12: Código postal de destino no encontrado.</li>
-                    <li>Fila 27: Teléfono de recepción incompleto (9 dígitos).</li>
+                    {modalDetalleData.item.id === cargaId || modalDetalleData.item.esLocal ? filasConError.length === 0 ? <li>No hay motivos de error disponibles para este lote en la sesión actual.</li> : filasConError.map(fila => <li key={fila.indice}>Fila Excel {numeroFilaExcel(fila)}: {motivosFilaMasiva(fila).join("; ") || "Detalle no disponible"}</li>) : <li>El historial no incluye el detalle por registro. Reanuda este lote para consultar sus datos; no se dispone de los motivos en esta vista.</li>}
                   </ul>
                 </div>
               )}

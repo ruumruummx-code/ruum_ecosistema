@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { normalizarFilaPlantilla, validarFila, valorCelda } from "./carga-masiva";
+import { normalizarFilaPlantilla, validarFila, valorCelda, parsearBufferPlantilla, numeroFilaExcel, motivosFilaMasiva } from "./carga-masiva";
 import ExcelJS from "exceljs";
 import { existsSync, readFileSync } from "node:fs";
 import path from "node:path";
@@ -13,6 +13,22 @@ const rutaPlantilla = [
 ].find(existsSync) ?? path.resolve(process.cwd(), "public/docs-legales/plantilla-carga-masiva.xlsx");
 
 describe("plantilla oficial masiva", () => {
+  it("conserva el número de fila Excel aunque existan filas vacías y detalla cada motivo", async () => {
+    const wb = new ExcelJS.Workbook();
+    const ws = wb.addWorksheet("Traslados");
+    ws.addRow(["vehiculo_marca", "vehiculo_modelo", "origen_codigo_postal", "destino_codigo_postal"]);
+    ws.getRow(7).values = ["Nissan", "Versa", "6700", "04360"];
+    const buffer = await wb.xlsx.writeBuffer();
+    const [datos] = await parsearBufferPlantilla(new Uint8Array(buffer).buffer);
+    const fila = validarFila(datos!, 0);
+    expect(numeroFilaExcel(fila)).toBe(7);
+    expect(motivosFilaMasiva(fila)).toContain("Placas o VIN: Captura placas o VIN");
+    expect(motivosFilaMasiva(fila)).toContain("Calle de origen: Campo requerido");
+  });
+
+  it("conserva campos canónicos al normalizar una fila ya normalizada", () => {
+    expect(normalizarFilaPlantilla({ marca: "Honda", modelo: "Civic", origenCodigoPostal: "06700" })).toMatchObject({ marca: "Honda", modelo: "Civic", origenCodigoPostal: "06700" });
+  });
   it("lee la hoja Traslados y omite las 499 filas con fórmulas vacías", async () => {
     const wb = new ExcelJS.Workbook();
     await wb.xlsx.load(new Uint8Array(readFileSync(rutaPlantilla)).buffer);
