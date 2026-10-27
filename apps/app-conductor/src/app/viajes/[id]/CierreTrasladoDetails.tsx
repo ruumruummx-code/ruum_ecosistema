@@ -192,6 +192,7 @@ export function CierreTrasladoDetails({
     >
       {/* CONTENIDO PRINCIPAL COMPACTO SIN SCROLL */}
       <div
+        data-trip-scroll
         className="flex min-h-0 flex-1 flex-col justify-between gap-2 px-4 pt-[max(10px,env(safe-area-inset-top))] pb-[max(12px,env(safe-area-inset-bottom))]"
       >
         {/* 1. HEADER TÉCNICO DE CONTROL */}

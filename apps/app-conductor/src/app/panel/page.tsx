@@ -3,8 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
-import { Aviso, RuumHeader } from "@ruum/ui";
+import { Aviso } from "@ruum/ui";
 import { ConfirmarDisponibilidad } from "../ConfirmarDisponibilidad";
 import { RegistroViajeActivo } from "../ViajeActivoContext";
 import { EstadoRevisionConductor } from "./EstadoRevisionConductor";
@@ -126,7 +125,6 @@ export default function PaginaPanel() {
   const [estaOnline, setEstaOnline] = useState(
     typeof navigator !== "undefined" ? navigator.onLine : true
   );
-  const router = useRouter();
 
   useEffect(() => {
     const actualizar = () => setEstaOnline(navigator.onLine);
@@ -330,26 +328,59 @@ export default function PaginaPanel() {
 
       {/* Marco principal: fluido en móvil, contenedor de 2 columnas con header superior en Web Desktop */}
       <div className="mx-auto flex w-full max-w-md flex-1 flex-col px-4 pb-[calc(88px+env(safe-area-inset-bottom))] md:max-w-[1220px] md:overflow-hidden md:rounded-[28px] md:border md:border-[#DCE7F5] md:bg-[#F9FBFE] md:px-0 md:pb-0 md:shadow-[0_12px_40px_rgba(10,35,66,0.06)]">
-        {/* HEADER MÓVIL (< md) — estándar Ruum Ruum */}
-        <RuumHeader
-          rol="conductor"
-          notificacionesCount={notificacionesCount}
-          onNotificaciones={() => void router.push("/notificaciones")}
-          onSoporte={() => void setSoporteAbierto(true)}
-          hrefLogo="/panel"
-          accionIzquierda={
+        {/* HEADER MÓVIL (< md) */}
+        <header
+          className="grid min-h-16 grid-cols-[44px_1fr_88px] items-center gap-1 pt-[max(8px,env(safe-area-inset-top))] md:hidden"
+          aria-label="Encabezado móvil del panel"
+        >
+          <button
+            type="button"
+            onClick={() => setMenuAbierto(true)}
+            aria-label="Abrir menú"
+            className="inline-flex min-h-11 min-w-11 cursor-pointer items-center justify-center rounded-full text-[#0A2342] transition hover:bg-slate-100 active:scale-95 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#0066FF]"
+          >
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.1" strokeLinecap="round" aria-hidden="true">
+              <path d="M4 7h16M4 12h16M4 17h16" />
+            </svg>
+          </button>
+
+          <Link href="/panel" className="cursor-pointer justify-self-center" aria-label="Ruum Ruum, inicio">
+            <Image src="/imagenes/ruum-logo.svg" alt="Ruum Ruum" width={132} height={43} priority className="h-9 w-auto" />
+          </Link>
+
+          <div className="flex items-center justify-end gap-0.5">
+            <Link
+              href="/notificaciones"
+              className="relative inline-flex min-h-11 min-w-11 cursor-pointer items-center justify-center rounded-full text-[#0A2342] transition hover:bg-slate-100 active:scale-95 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#0066FF]"
+              aria-label={
+                notificacionesCount > 0
+                  ? `Notificaciones (${notificacionesCount > 99 ? "99+" : notificacionesCount} sin leer)`
+                  : "Notificaciones"
+              }
+            >
+              <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.1" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9" />
+                <path d="M10 21h4" />
+              </svg>
+              <span
+                className="absolute right-2.5 top-2.5 size-2.5 rounded-full border-2 border-white bg-[#EF4444]"
+                aria-hidden="true"
+              />
+            </Link>
             <button
               type="button"
-              onClick={() => setMenuAbierto(true)}
-              aria-label="Abrir menú"
+              onClick={() => setSoporteAbierto(true)}
+              aria-label="Abrir soporte técnico"
               className="inline-flex min-h-11 min-w-11 cursor-pointer items-center justify-center rounded-full text-[#0A2342] transition hover:bg-slate-100 active:scale-95 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#0066FF]"
             >
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.1" strokeLinecap="round" aria-hidden="true">
-                <path d="M4 7h16M4 12h16M4 17h16" />
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="M4 13v-1a8 8 0 0 1 16 0v1" />
+                <path d="M4 13a2 2 0 0 1 2-2h1v6H6a2 2 0 0 1-2-2v-2ZM20 13a2 2 0 0 0-2-2h-1v6h1a2 2 0 0 0 2-2v-2Z" />
+                <path d="M17 19c-1.1 1.2-2.7 2-5 2" />
               </svg>
             </button>
-          }
-        />
+          </div>
+        </header>
 
         {/* HEADER WEB / DESKTOP (md:) */}
         <header

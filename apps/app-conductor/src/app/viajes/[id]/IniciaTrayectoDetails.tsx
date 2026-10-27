@@ -129,6 +129,7 @@ export function IniciaTrayectoDetails({
     >
       {/* CONTENIDO PRINCIPAL COMPACTO SIN SCROLL */}
       <div
+        data-trip-scroll
         className="flex min-h-0 flex-1 flex-col justify-between gap-2 px-4 pt-[max(10px,env(safe-area-inset-top))] pb-2.5"
       >
         {/* 1. HEADER Y PESTAÑAS DE GESTIÓN SUPERIOR */}

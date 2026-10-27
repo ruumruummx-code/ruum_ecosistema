@@ -1,11 +1,10 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import type { GlobalSyncSnapshot } from "../../lib/offline-sync-status";
 import { AccountIcon, type AccountIconName } from "./AccountIcon";
-import { RuumHeader } from "@ruum/ui";
 import styles from "./account.module.css";
 
 const sections: { href: string; title: string; description: string; icon: AccountIconName }[] = [
@@ -26,18 +25,16 @@ export function DriverAccountView(props: Props) {
   }, [openDialog]);
   const syncOK = props.sync?.status === "todo_sincronizado";
   const syncText = syncOK ? "Sincronizado — todo al día" : props.sync?.message ?? "Comprobando sincronización…";
-  const router = useRouter();
-
   return <div className={styles.screen} data-driver-account>
     <div className={styles.body}>
-      <RuumHeader
-        rol="conductor"
-        notificacionesCount={props.unread}
-        onNotificaciones={() => void router.push("/notificaciones")}
-        onSoporte={() => void router.push("/cuenta/soporte")}
-        hrefLogo="/panel"
-        className={styles.header}
-      />
+      <header className={styles.header}>
+        <Link href="/panel" prefetch={false} className={styles.brand} aria-label="Ruum Ruum Driver Service, inicio"><Image src="/imagenes/ruum-logo.svg" alt="Ruum Ruum" width={170} height={55} priority /><span>DRIVER SERVICE</span></Link>
+        <div className={styles.quickActions}>
+          <Link href="/notificaciones" prefetch={false} aria-label={props.unread ? `Notificaciones (${props.unread} sin leer)` : "Notificaciones"}><AccountIcon name="bell" />{props.unread > 0 && <i className={styles.notificationDot} aria-hidden="true" />}</Link>
+          <Link href="/cuenta/soporte" prefetch={false} aria-label="Soporte"><AccountIcon name="support" /></Link>
+          <button type="button" aria-label="Opciones de cuenta" aria-haspopup="dialog" aria-expanded={openDialog === "settings"} aria-busy={props.loading} onClick={() => setOpenDialog("settings")}>{props.initials ?? <AccountIcon name="user" />}</button>
+        </div>
+      </header>
       <div className={styles.heading}><h1>Cuenta</h1><p>Administra tu información y configuración</p></div>
       {props.sync?.status !== "accion_requerida" && <div className={styles.sync} role="status" aria-live="polite" aria-atomic="true" data-state={props.sync?.status ?? "loading"}>
         {syncOK ? <AccountIcon name="check" /> : <span aria-hidden="true">{props.sync ? "!" : "…"}</span>}<span>{syncText}</span>
