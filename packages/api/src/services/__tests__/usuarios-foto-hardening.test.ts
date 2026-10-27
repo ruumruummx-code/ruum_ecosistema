@@ -8,6 +8,7 @@ import {
   validarMagicBytesFoto,
   validarFotoPerfilUsuario,
   subirFotoPerfil,
+  obtenerUrlFotoPerfilUsuario,
 } from "../usuarios";
 
 // Helpers para crear File con magic bytes
@@ -43,6 +44,20 @@ function webpFile(nombre = "foto.webp", size = 1024) {
 
 describe("PR-09 Hardening Storage Usuario — Validación server-side", () => {
   beforeEach(() => vi.clearAllMocks());
+
+  it("renueva URLs antiguas sin reutilizar el token y rechaza fotos de otra identidad", async () => {
+    const cliente = crearClienteFake({ userId: "user-123" });
+    await expect(obtenerUrlFotoPerfilUsuario(cliente as never,
+      "https://test.supabase.co/storage/v1/object/sign/fotos-perfil/user-123/perfil.png?token=expired",
+    )).resolves.toContain("perfil.png?token=mock");
+    const llamadas = cliente.llamadas.filter(l => l.action === "createSignedUrl");
+    expect(llamadas).toHaveLength(1);
+    expect(llamadas[0].args[0]).toBe("user-123/perfil.png");
+    await expect(obtenerUrlFotoPerfilUsuario(cliente as never,
+      "https://test.supabase.co/storage/v1/object/sign/fotos-perfil/otro/perfil.png?token=expired",
+    )).resolves.toBeNull();
+    expect(cliente.llamadas.filter(l => l.action === "createSignedUrl")).toHaveLength(1);
+  });
 
   describe("constantes y helpers", () => {
     it("tamaño máximo 5MB", () => {
@@ -161,7 +176,8 @@ describe("PR-09 Hardening Storage Usuario — Validación server-side", () => {
       const file = jpgFile("MiFotoOriginal_HEIC.jpg", 1024);
       // Necesitamos que validar pase, usaremos un jpg válido con nombre que contiene HEIC pero ext es jpg
       const url = await subirFotoPerfil(cliente, file);
-      expect(url).toContain("/storage/v1/object/sign/fotos-perfil/user-uuid-123/perfil.jpg");
+      expect(url).toBe("user-uuid-123/perfil.jpg");
+      await expect(obtenerUrlFotoPerfilUsuario(cliente, url)).resolves.toContain("/storage/v1/object/sign/fotos-perfil/user-uuid-123/perfil.jpg");
       const uploadCall = (cliente as { llamadas: { table: string; action: string; args: unknown[] }[] }).llamadas.find((l) => l.table === "storage:fotos-perfil" && l.action === "upload");
       expect(uploadCall).toBeDefined();
       expect(uploadCall!.args[0]).toBe("user-uuid-123/perfil.jpg"); // path basado en identidad, nombre interno

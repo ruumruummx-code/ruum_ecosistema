@@ -17,7 +17,7 @@ function base(className = "size-5") {
 
 export function IconoInicio({ className }: IconoProps) {
   return (
-    <svg {...base(className)}>
+    <svg {...base(className)} data-icon="inicio">
       <path d="m3 9.5 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
       <path d="M9 22V12h6v10" />
     </svg>
@@ -25,24 +25,11 @@ export function IconoInicio({ className }: IconoProps) {
 }
 
 export function IconoTraslados({ className }: IconoProps) {
-  return (
-    <svg {...base(className)}>
-      <path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2" />
-      <path d="M14 8h4.5l3.5 4.5v5.5a1 1 0 0 1-1 1h-1" />
-      <circle cx="7" cy="18" r="2" />
-      <circle cx="18" cy="18" r="2" />
-    </svg>
-  );
+  return <svg {...base(className)}><path d="m4 10 2-6a2 2 0 0 1 2-1h8a2 2 0 0 1 2 1l2 6M3 11a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v8H3Zm1 8v2h3v-2m10 0v2h3v-2" /><circle cx="7" cy="14" r="1" /><circle cx="17" cy="14" r="1" /></svg>;
 }
 
 export function IconoVehiculos({ className }: IconoProps) {
-  return (
-    <svg {...base(className)}>
-      <path d="M5 11l1.5-4.5h11L19 11M4 11h16v6a1 1 0 0 1-1 1h-1a2 2 0 0 1-4 0H10a2 2 0 0 1-4 0H5a1 1 0 0 1-1-1v-6z" />
-      <circle cx="7.5" cy="17.5" r="1.5" />
-      <circle cx="16.5" cy="17.5" r="1.5" />
-    </svg>
-  );
+  return <IconoTraslados className={className} />;
 }
 
 export function IconoUbicaciones({ className }: IconoProps) {
@@ -55,33 +42,18 @@ export function IconoUbicaciones({ className }: IconoProps) {
 }
 
 export function IconoCargaMasiva({ className }: IconoProps) {
-  return (
-    <svg {...base(className)}>
-      <rect x="2" y="4" width="20" height="6" rx="1.5" />
-      <rect x="2" y="14" width="20" height="6" rx="1.5" />
-      <path d="M6 10v4" />
-      <path d="M18 10v4" />
-    </svg>
-  );
+  return <svg {...base(className)}><path d="M14 2H5a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V9Zm0 0v7h7M7 13h10M7 17h7" /></svg>;
 }
 
 export function IconoCuenta({ className }: IconoProps) {
-  return (
-    <svg {...base(className)}>
-      <path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 12 10s-6.7.6-8.5 1.1C2.7 11.3 2 12.1 2 13v3c0 .6.4 1 1 1h2" />
-      <circle cx="7" cy="17" r="2" />
-      <path d="M9 17h6" />
-      <circle cx="17" cy="17" r="2" />
-      <path d="M5 10l1.5-4.5A2 2 0 0 1 8.4 4h7.2a2 2 0 0 1 1.9 1.5L19 10" />
-    </svg>
-  );
+  return <IconoPerfil className={className} />;
 }
 
 export function IconoPerfil({ className }: IconoProps) {
   return (
     <svg {...base(className)}>
       <circle cx="12" cy="8" r="4" />
-      <path d="M20 21a8 8 0 0 0-16 0" />
+      <path d="M20 21H4v-2c0-6 16-6 16 0Z" />
     </svg>
   );
 }
@@ -96,13 +68,7 @@ export function IconoPreferencias({ className }: IconoProps) {
 }
 
 export function IconoAyuda({ className }: IconoProps) {
-  return (
-    <svg {...base(className)}>
-      <circle cx="12" cy="12" r="9" />
-      <circle cx="12" cy="12" r="3.5" />
-      <path d="m5.7 5.7 3.8 3.8M14.5 14.5l3.8 3.8M18.3 5.7l-3.8 3.8M9.5 14.5l-3.8 3.8" />
-    </svg>
-  );
+  return <svg {...base(className)}><circle cx="12" cy="12" r="10" /><path d="M9 8a3 3 0 0 1 6 0c0 2-3 2-3 5m0 3v.1" /></svg>;
 }
 
 export function IconoBuscar({ className }: IconoProps) {

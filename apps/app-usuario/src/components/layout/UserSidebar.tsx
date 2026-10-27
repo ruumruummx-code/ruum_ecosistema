@@ -3,7 +3,7 @@
 import { useEffect, useRef, type ReactNode } from "react";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
-import { SimboloVectorial } from "@ruum/ui";
+import { SidebarBrand } from "./SidebarBrand";
 import {
   NAVEGACION_USUARIO,
   obtenerItemActivo,
@@ -40,50 +40,6 @@ function IconoCerrar({ className = "size-5" }: { className?: string }) {
     >
       <line x1="18" y1="6" x2="6" y2="18" />
       <line x1="6" y1="6" x2="18" y2="18" />
-    </svg>
-  );
-}
-
-/** Ilustración estilizada de sedán blanco para la tarjeta promocional inferior */
-function MiniAutoPromo() {
-  return (
-    <svg viewBox="0 0 160 55" fill="none" className="w-full h-auto drop-shadow-md" aria-hidden="true">
-      <defs>
-        <radialGradient id="promoGlow" cx="50%" cy="50%" r="50%">
-          <stop offset="0%" stopColor="#075be8" stopOpacity="0.45" />
-          <stop offset="100%" stopColor="#075be8" stopOpacity="0" />
-        </radialGradient>
-        <linearGradient id="promoBody" x1="0" y1="0" x2="1" y2="0.6">
-          <stop offset="0%" stopColor="#ffffff" />
-          <stop offset="50%" stopColor="#f0f5fa" />
-          <stop offset="100%" stopColor="#d3dfec" />
-        </linearGradient>
-      </defs>
-      {/* Luz y asfalto curvado */}
-      <ellipse cx="80" cy="46" rx="72" ry="7" fill="url(#promoGlow)" />
-      <path d="M10 46 C 45 42, 115 42, 150 46" stroke="#00bfd2" strokeWidth="1.5" strokeDasharray="3 3" opacity="0.6" />
-      {/* Carrocería sedán */}
-      <path
-        d="M18 36 C 24 35, 36 32, 48 30 C 64 27, 82 20, 106 20 C 128 20, 140 25, 146 30 C 150 32, 153 35, 151 37 C 149 39, 138 41, 126 41 C 121 41, 114 34, 102 34 C 90 34, 85 41, 65 41 C 57 41, 52 34, 40 34 C 28 34, 23 41, 16 40 C 12 40, 14 37, 18 36 Z"
-        fill="url(#promoBody)"
-      />
-      {/* Cabina y cristales */}
-      <path d="M52 29 L 70 22 C 78 19, 108 19, 118 22 L 134 29 Z" fill="#081a30" />
-      <path d="M72 23 L 90 21 L 89 28 L 57 29 Z" fill="#60a5fa" opacity="0.35" />
-      {/* Faros */}
-      <polygon points="15,35 22,34 21,37" fill="#00bfd2" />
-      <polygon points="149,34 146,37 144,36" fill="#ef4444" />
-      {/* Ruedas */}
-      <g transform="translate(42, 38)">
-        <circle cx="0" cy="0" r="8" fill="#0f172a" />
-        <circle cx="0" cy="0" r="5" fill="#475569" stroke="#94a3b8" strokeWidth="1" />
-        <circle cx="0" cy="0" r="2" fill="#f8fafc" />
-      </g>
-      <g transform="translate(118, 38)">
-        <circle cx="0" cy="0" r="8" fill="#0f172a" />
-        <circle cx="0" cy="0" r="5" fill="#475569" stroke="#94a3b8" strokeWidth="1" />
-        <circle cx="0" cy="0" r="2" fill="#f8fafc" />
-      </g>
     </svg>
   );
 }
@@ -262,9 +218,7 @@ export function UserSidebar({
   const renderItem = (item: ItemNavegacionUsuario): ReactNode => {
     const Icono = item.icono;
     const activo = item.id === idActivo;
-    const base = `group relative flex min-h-[44px] items-center rounded-xl text-[13px] font-semibold transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 ${
-      esContraida ? "justify-center px-0 py-2.5" : "gap-3 px-3.5 py-2.5"
-    }`;
+    const base = `${estilos.navItem} ${esContraida ? estilos.navItemCollapsed : ""}`;
 
     if (item.disponible === false) {
       return (
@@ -274,7 +228,7 @@ export function UserSidebar({
             title={`${item.etiqueta} — disponible próximamente`}
             className={`${base} cursor-not-allowed text-[var(--udb-text,#94a3b8)]/60 opacity-60`}
           >
-            <Icono className="size-5 shrink-0" />
+            <Icono className={estilos.navIcon} />
             {!esContraida && (
               <span className="flex min-w-0 flex-1 items-center justify-between gap-2">
                 <span className="truncate">{item.etiqueta}</span>
@@ -299,20 +253,11 @@ export function UserSidebar({
           aria-current={activo ? "page" : undefined}
           aria-label={esContraida ? item.etiqueta : undefined}
           title={esContraida ? item.etiqueta : undefined}
-          className={`${base} ${
-            activo
-              ? "bg-[var(--rr-sidebar-active,#075be8)] text-white shadow-[0_6px_18px_-4px_rgba(7,91,232,0.85)] font-bold"
-              : "text-[var(--udb-text,#94a3b8)] hover:bg-white/10 hover:text-white"
-          }`}
+          className={`${base} ${activo ? estilos.navItemActive : ""}`}
         >
-          <Icono className="size-5 shrink-0" />
+          <Icono className={estilos.navIcon} />
           {!esContraida && <span className="truncate">{item.etiqueta}</span>}
-          {activo && !esContraida && (
-            <span
-              aria-hidden="true"
-              className="absolute right-3 size-1.5 rounded-full bg-white/90"
-            />
-          )}
+
         </Link>
       </li>
     );
@@ -341,7 +286,7 @@ export function UserSidebar({
       >
         {/* Cabecera del Sidebar: Logo y botón de toggle/cierre */}
         <div
-          className={`flex shrink-0 items-center gap-2 px-3 pb-2 pt-4 ${
+          className={`${estilos.brandHeader} ${
             esContraida ? "flex-col" : "justify-between"
           }`}
         >
@@ -353,13 +298,13 @@ export function UserSidebar({
             aria-label="Ruum Ruum — Ir al inicio"
             className="flex min-w-0 items-center gap-2.5 rounded-xl p-1 transition hover:bg-white/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
           >
-            <SimboloVectorial tamano={esContraida ? 32 : 34} tema="oscuro" />
+            <SidebarBrand className={estilos.brandSymbol} />
             {!esContraida && (
               <span className="min-w-0">
-                <span className="block truncate font-display text-[15px] font-black leading-tight tracking-tight text-white">
+                <span className={estilos.brandName}>
                   Ruum Ruum
                 </span>
-                <span className="mt-0.5 block truncate text-[10px] font-semibold leading-tight tracking-wide text-[var(--rr-brand-cyan,#00bfd2)]">
+                <span className={estilos.brandTagline}>
                   Tu traslado, en orden
                 </span>
               </span>
@@ -385,7 +330,7 @@ export function UserSidebar({
               aria-expanded={!esContraida}
               aria-controls="userDashboardSidebarNav"
               title={esContraida ? "Expandir menú lateral" : "Colapsar menú lateral"}
-              className={`hidden md:flex size-8 shrink-0 items-center justify-center rounded-lg text-[var(--udb-text,#94a3b8)] transition hover:bg-white/10 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 ${
+              className={`${estilos.collapseButton} hidden md:flex size-8 shrink-0 items-center justify-center rounded-lg text-[var(--udb-text,#94a3b8)] transition hover:bg-white/10 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 ${
                 esContraida ? "mt-1" : ""
               }`}
             >
@@ -394,17 +339,17 @@ export function UserSidebar({
           )}
         </div>
 
-        {/* Lista de navegación con scroll independiente */}
-        <div className={`${estilos.navScroll} px-2.5 pb-2 pt-2`}>
+        {/* Navegación flexible sin scroll en escritorio */}
+        <div className={estilos.navScroll}>
           <nav id="userDashboardSidebarNav" aria-label="Navegación del panel">
-            <ul className="flex flex-col gap-1">
+            <ul className={estilos.navGroup}>
               {itemsGrupoOperativo.map(renderItem)}
             </ul>
 
             {/* Divisor de separación entre módulos operativos y de cuenta */}
-            <div className="my-2 border-t border-white/10 mx-1" aria-hidden="true" />
+            <div className={estilos.navDivider} aria-hidden="true" />
 
-            <ul className="flex flex-col gap-1">
+            <ul className={estilos.navGroup}>
               {itemsGrupoCuenta.map(renderItem)}
             </ul>
           </nav>
@@ -412,7 +357,7 @@ export function UserSidebar({
 
         {/* Tarjeta Promocional Inferior Opcional */}
         {showPromo && (
-          <div className={`${estilos.promo} px-2.5 pb-4 pt-2`}>
+          <div className={estilos.promo}>
             {esContraida ? (
               <Link
                 href="/viajes/nuevo"
@@ -423,45 +368,14 @@ export function UserSidebar({
                 +
               </Link>
             ) : (
-              <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-[#071d36]/90 p-3.5 shadow-lg">
-                <div
-                  aria-hidden="true"
-                  className="pointer-events-none absolute -right-6 -top-6 size-24 rounded-full bg-[var(--rr-sidebar-active,#075be8)]/30 blur-xl"
-                />
-
-                <div className="relative mb-2">
-                  <MiniAutoPromo />
+              <div className={estilos.promoCard}>
+                <div className={estilos.promoArtwork} aria-hidden="true" />
+                <div className={estilos.promoCopy}>
+                  <p className={estilos.promoTitle}>Mueve tu auto sin salir de casa</p>
+                  <p className={estilos.promoDescription}>Un servicio confiable, seguro y en todo México.</p>
                 </div>
-
-                <p className="relative text-[10px] font-bold uppercase tracking-[0.18em] text-[#7dd3fc]">
-                  Confianza comprobable
-                </p>
-                <p className="relative mt-1 font-display text-[13px] font-extrabold leading-snug text-white">
-                  Mueve tu auto sin salir de casa
-                </p>
-                <p className="relative mt-1 text-[11px] leading-relaxed text-[#94a3b8]">
-                  Un servicio confiable, seguro y en todo México.
-                </p>
-
-                <Link
-                  href="/viajes/nuevo"
-                  onClick={() => {
-                    if (mobileOpen) onMobileClose?.();
-                  }}
-                  className="relative mt-3 inline-flex w-full items-center justify-center gap-1.5 rounded-xl bg-[var(--rr-sidebar-active,#075be8)] px-3 py-2 text-xs font-bold text-white transition hover:brightness-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 shadow-sm"
-                >
-                  + Crear traslado
-                  <IconoFlechaDerecha className="size-3.5" />
-                </Link>
-
-                <Link
-                  href="/viajes/nuevo"
-                  onClick={() => {
-                    if (mobileOpen) onMobileClose?.();
-                  }}
-                  className="relative mt-2 inline-flex w-full items-center justify-center gap-1.5 rounded-xl border border-white/15 bg-white/5 px-3 py-2 text-[11px] font-semibold text-white/90 transition hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
-                >
-                  Registrar traslado
+                <Link href="/viajes/nuevo" onClick={() => { if (mobileOpen) onMobileClose?.(); }} className={estilos.promoAction}>
+                  Registrar traslado<IconoFlechaDerecha className="size-5" />
                 </Link>
               </div>
             )}

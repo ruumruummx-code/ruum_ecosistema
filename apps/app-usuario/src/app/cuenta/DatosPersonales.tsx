@@ -10,6 +10,7 @@ import { actualizarFechaNacimientoUsuario, actualizarPerfilUsuario, obtenerUrlFo
 import { consultarCodigoPostalMx } from "../../lib/codigos-postales";
 import { crearClienteNavegador, tieneSupabaseConfigurado } from "../../lib/supabase-browser";
 import { logStructuredWarn } from "../../lib/logger";
+import { notificarFotoPerfilActualizada, versionarFotoPerfil } from "../../lib/foto-perfil";
 import { soloDigitos, telefonoLocalMx, telefonoMx } from "../../lib/registro-usuario";
 
 type Usuario = Database["public"]["Tables"]["usuarios"]["Row"];
@@ -220,7 +221,10 @@ export function DatosPersonales({ usuario, fotoUrlInicial, correoRegistro, escri
       const urlFirmada = await obtenerUrlFotoPerfilUsuario(cliente, nuevaFotoPath);
       if (temporalFotoRef.current) URL.revokeObjectURL(temporalFotoRef.current);
       temporalFotoRef.current = urlFirmada ? null : URL.createObjectURL(archivo);
-      setFotoUrl(urlFirmada ?? temporalFotoRef.current ?? "");
+      const url = urlFirmada ? versionarFotoPerfil(urlFirmada) : temporalFotoRef.current ?? "";
+      setFotoUrl(url);
+      notificarFotoPerfilActualizada(usuario.id, url);
+      router.refresh();
     } catch (err) {
       setMensajeError(err instanceof Error ? err.message : "No pudimos subir la fotografía.");
     } finally {

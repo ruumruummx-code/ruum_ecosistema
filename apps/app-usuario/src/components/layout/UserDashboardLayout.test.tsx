@@ -73,11 +73,11 @@ describe("UserDashboardLayout — Layout Compartido Global (RR-UI-001)", () => {
     expect(mainContainer).not.toHaveAttribute("aria-hidden");
   });
 
-  it("inicia colapsado por defecto en viewport tipo tablet (768px a 1279px)", () => {
+  it("inicia colapsado por defecto en viewport tipo tablet (768px a 1023px)", () => {
     // Mock matchMedia para simular tablet
     const matchMediaOriginal = window.matchMedia;
     window.matchMedia = vi.fn().mockImplementation((query: string) => ({
-      matches: query.includes("768px") && query.includes("1279px"),
+      matches: query.includes("768px") && query.includes("1023px"),
       media: query,
       onchange: null,
       addListener: vi.fn(),

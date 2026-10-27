@@ -3,8 +3,8 @@ import { redirect } from "next/navigation";
 import { crearClienteServidor } from "../../lib/supabase-server";
 import { logStructuredWarn } from "../../lib/logger";
 import { listarTrasladosDeUsuario, obtenerUsuarioActual } from "@ruum/api/services";
-import { NavegacionUsuario } from "../NavegacionUsuario";
-import { MobileShell, Icono, Aviso } from "@ruum/ui";
+import { UserResponsiveLayout } from "../../components/layout/UserResponsiveLayout";
+import { Icono, Aviso } from "@ruum/ui";
 import { UserDashboardLayout } from "../../components/layout/UserDashboardLayout";
 import { BotonReintentarSesion } from "../ReintentarSesion";
 
@@ -60,9 +60,8 @@ export default async function PaginaPasaporte() {
   // Empty-state dedicado: sin traslados activos informa claramente y da acceso a nuevo traslado
   return (
     <>
-      <NavegacionUsuario variante="claro" nombreUsuario={usuario.nombre} />
-      <MobileShell variant="compact" navInferiorVisible={true}>
-        <main className="user-empty-passport flex min-h-[60vh] flex-col items-center justify-center p-6 text-center" aria-live="polite">
+      <UserResponsiveLayout nombre={usuario.nombre} mobileShell mobileNavigation mobileBottomNavigation>
+        <div className="user-empty-passport flex min-h-[60vh] flex-col items-center justify-center p-6 text-center" aria-live="polite">
           <div className="flex size-16 items-center justify-center rounded-full bg-[var(--user-color-card)] text-[var(--user-color-action)] shadow-sm border border-[var(--user-color-border)] mb-4">
             <Icono d="M9 12h6 M9 16h6 M5 21h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2Z" className="size-8" />
           </div>
@@ -88,8 +87,8 @@ export default async function PaginaPasaporte() {
               </Link>
             )}
           </div>
-        </main>
-      </MobileShell>
+        </div>
+      </UserResponsiveLayout>
     </>
   );
 }

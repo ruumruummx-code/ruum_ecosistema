@@ -9,6 +9,7 @@ import { actualizarPerfilUsuario, obtenerUrlFotoPerfilUsuario, subirFotoPerfil }
 import { consultarCodigoPostalMx } from "../../lib/codigos-postales";
 import { crearClienteNavegador, tieneSupabaseConfigurado } from "../../lib/supabase-browser";
 import { logStructuredWarn } from "../../lib/logger";
+import { notificarFotoPerfilActualizada, versionarFotoPerfil } from "../../lib/foto-perfil";
 
 type Usuario = Database["public"]["Tables"]["usuarios"]["Row"];
 
@@ -212,7 +213,10 @@ export function PerfilCuentaForm({ usuario, fotoUrlInicial }: { usuario: Usuario
       const cliente = crearClienteNavegador();
       const nuevaFotoPath = await subirFotoPerfil(cliente, archivo);
       setFotoPath(nuevaFotoPath);
-      setFotoUrl(await obtenerUrlFotoPerfilUsuario(cliente, nuevaFotoPath) ?? "");
+      const urlFirmada = await obtenerUrlFotoPerfilUsuario(cliente, nuevaFotoPath);
+      const url = urlFirmada ? versionarFotoPerfil(urlFirmada) : "";
+      setFotoUrl(url);
+      notificarFotoPerfilActualizada(usuario.id, url);
       setMensaje({ tono: "info", texto: "Fotografía actualizada." });
     } catch (err) {
       setMensaje({ tono: "danger", texto: err instanceof Error ? err.message : "No pudimos subir la fotografía." });

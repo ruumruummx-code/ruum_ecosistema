@@ -190,9 +190,10 @@ function rutaFotoPerfilUsuario(valor: string | null | undefined, authUserId: str
   if (rutaEsperada.test(valor)) return valor;
   try {
     const url = new URL(valor);
-    const prefijo = `/storage/v1/object/public/fotos-perfil/${authUserId}/`;
-    const nombre = url.pathname.startsWith(prefijo) ? url.pathname.slice(prefijo.length) : "";
-    return /^[^/]+\\.(?:jpe?g|png|webp)$/i.test(nombre) ? `${authUserId}/${nombre}` : null;
+    const prefijos = ["public", "sign"].map(tipo => `/storage/v1/object/${tipo}/fotos-perfil/`);
+    const prefijo = prefijos.find(valor => url.pathname.startsWith(valor));
+    const ruta = prefijo ? decodeURIComponent(url.pathname.slice(prefijo.length)) : "";
+    return rutaEsperada.test(ruta) ? ruta : null;
   } catch {
     return null;
   }
@@ -333,7 +334,8 @@ export async function subirFotoPerfil(cliente: Cliente, archivo: File): Promise<
   const foto = await subirArchivoPerfil(cliente, "fotos-perfil", path, archivo, validado.mime);
 
   await actualizarPerfilUsuario(cliente, { foto_url: foto.path } as PerfilUsuarioActualizable);
-  return (await obtenerUrlFotoPerfilUsuario(cliente, foto.path)) ?? foto.path;
+  // El consumidor firma esta ruta para mostrarla; nunca persistir una URL efímera.
+  return foto.path;
 }
 
 async function subirArchivoPerfil(
@@ -345,6 +347,7 @@ async function subirArchivoPerfil(
 ): Promise<{ bucket: string; path: string }> {
   const { error } = await cliente.storage.from(bucket).upload(path, archivo, {
     upsert: true,
+    cacheControl: "0",
     contentType,
   });
 

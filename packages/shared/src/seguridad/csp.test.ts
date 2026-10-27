@@ -42,6 +42,9 @@ describe("seguridad/csp — invariantes SEC-002/SEC-003", () => {
       const csp = buildCsp({ nonce: "n", isProd: true });
       const connect = csp.split(";").find((d) => d.trim().startsWith("connect-src")) ?? "";
       expect(connect).toContain("http://127.0.0.1:54399");
+      const img = csp.split(";").find((d) => d.trim().startsWith("img-src")) ?? "";
+      expect(img).toContain("http://127.0.0.1:54399");
+      expect(img).not.toContain("http://127.0.0.1:*");
     } finally {
       if (originalUrl === undefined) delete process.env.NEXT_PUBLIC_SUPABASE_URL;
       else process.env.NEXT_PUBLIC_SUPABASE_URL = originalUrl;

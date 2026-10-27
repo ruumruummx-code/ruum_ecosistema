@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
-import { MobileShell } from "@ruum/ui";
-import { NavegacionUsuario } from "../NavegacionUsuario";
+import { UserResponsiveLayout } from "../../components/layout/UserResponsiveLayout";
 import { PreguntasFrecuentes } from "./PreguntasFrecuentes";
 
 export const metadata: Metadata = {
@@ -11,10 +10,9 @@ export const metadata: Metadata = {
 export default function PaginaPreguntasFrecuentes() {
   return (
     <>
-      <NavegacionUsuario variante="claro" />
-      <MobileShell variant="compact" navInferiorVisible={true} contentClassName="faq-shell-content">
+      <UserResponsiveLayout mobileShell mobileNavigation mobileBottomNavigation mobileContentClassName="faq-shell-content">
         <PreguntasFrecuentes />
-      </MobileShell>
+      </UserResponsiveLayout>
     </>
   );
 }

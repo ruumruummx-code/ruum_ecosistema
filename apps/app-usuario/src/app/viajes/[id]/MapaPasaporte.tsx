@@ -13,7 +13,7 @@ function valid(p: Point): p is {
     lat: number;
     lng: number;
 } { return typeof p.lat === "number" && typeof p.lng === "number" && Number.isFinite(p.lat) && Number.isFinite(p.lng) && Math.abs(p.lat) <= 90 && Math.abs(p.lng) <= 180; }
-export function MapaPasaporte({ origen: originProp, destino: destinationProp, ubicacion, activo, haciaOrigen = false, seguirUbicacion = false, onEta }: {
+export function MapaPasaporte({ origen: originProp, destino: destinationProp, ubicacion, activo, haciaOrigen = false, seguirUbicacion = false, compact = false, onDistance, onEta }: {
     origen: Point;
     destino: Point;
     ubicacion: UbicacionTraslado | null;
@@ -21,6 +21,8 @@ export function MapaPasaporte({ origen: originProp, destino: destinationProp, ub
     haciaOrigen?: boolean;
     seguirUbicacion?: boolean;
     onEta: (minutes: number | null) => void;
+    onDistance?: (km: number | null) => void;
+    compact?: boolean;
 }) {
     const origen = useMemo(() => ({ lat: originProp.lat, lng: originProp.lng }), [originProp.lat, originProp.lng]);
     const destino = useMemo(() => ({ lat: destinationProp.lat, lng: destinationProp.lng }), [destinationProp.lat, destinationProp.lng]);
@@ -58,7 +60,7 @@ export function MapaPasaporte({ origen: originProp, destino: destinationProp, ub
             if (valid(destino))
                 new mb.Marker({ color: "#ef4444" }).setLngLat([destino.lng, destino.lat]).addTo(instance);
             if (valid(origen) && valid(destino))
-                instance.fitBounds([[origen.lng, origen.lat], [destino.lng, destino.lat]], { padding: { top: 60, bottom: 140, left: 40, right: 40 }, maxZoom: 15, duration: 0 });
+                instance.fitBounds([[origen.lng, origen.lat], [destino.lng, destino.lat]], { padding: compact ? 32 : { top: 60, bottom: 140, left: 40, right: 40 }, maxZoom: 15, duration: 0 });
             observer = new ResizeObserver(() => instance.resize());
             observer.observe(container.current);
         }).catch((err) => { if (!cancelled) {
@@ -67,7 +69,7 @@ export function MapaPasaporte({ origen: originProp, destino: destinationProp, ub
         } });
         return () => { cancelled = true; observer?.disconnect(); driver.current = null; map.current?.remove(); map.current = null; setReady(false); };
         // Rebuild only when the endpoints change; live driver updates keep the camera position.
-    }, [token, origen, destino]);
+    }, [token, origen, destino, compact]);
     useEffect(() => { if (activo)
         map.current?.resize(); }, [activo]);
     useEffect(() => {
@@ -88,6 +90,7 @@ export function MapaPasaporte({ origen: originProp, destino: destinationProp, ub
             return;
         const abort = new AbortController();
         onEta(null);
+        onDistance?.(null);
         void fetch(`https://api.mapbox.com/directions/v5/mapbox/driving/${start.lng},${start.lat};${target.lng},${target.lat}?geometries=geojson&overview=full&access_token=${encodeURIComponent(token)}`, { signal: abort.signal }).then(r => { if (!r.ok)
             throw new Error("route"); return r.json(); }).then(data => {
             if (abort.signal.aborted)
@@ -98,11 +101,14 @@ export function MapaPasaporte({ origen: originProp, destino: destinationProp, ub
             (map.current?.getSource("route") as GeoJSONSource | undefined)?.setData({ type: "Feature", properties: {}, geometry: route.geometry });
             if (seguirUbicacion && ubicacion && Number.isFinite(route.duration))
                 onEta(Math.max(1, Math.ceil(route.duration / 60)));
+            if (seguirUbicacion && ubicacion && Number.isFinite(route.distance))
+                onDistance?.(Math.round(route.distance / 100) / 10);
         }).catch((err) => { if (!abort.signal.aborted) {
             logStructuredWarn("viajes/MapaPasaporte", "calculo_eta_fallido", err);
             onEta(null);
+        onDistance?.(null);
         } });
         return () => abort.abort();
-    }, [ready, token, origen, destino, driverLat, driverLng, ubicacion, haciaOrigen, seguirUbicacion, onEta]);
+    }, [ready, token, origen, destino, driverLat, driverLng, ubicacion, haciaOrigen, seguirUbicacion, onEta, onDistance]);
     return <><div ref={container} className={styles.map} aria-label="Mapa interactivo del traslado">{!token && <div className={styles.empty}>El mapa no está disponible por ahora. El estado de tu traslado sigue actualizándose.</div>}</div>{error && <p className={styles.mapError} role="status">{error}</p>}</>;
 }

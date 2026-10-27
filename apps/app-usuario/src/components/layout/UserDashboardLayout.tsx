@@ -15,9 +15,9 @@ function leerPreferenciaColapsada(): boolean {
     if (valor !== null) {
       return valor === "1";
     }
-    // Tablet (768px – 1279px): colapsado por defecto según especificación RR-UI-001 §5
+    // Tablet (768px – 1023px): colapsado por defecto según especificación RR-UI-001 §5
     if (typeof window.matchMedia === "function") {
-      return window.matchMedia("(min-width: 768px) and (max-width: 1279px)").matches;
+      return window.matchMedia("(min-width: 768px) and (max-width: 1023px)").matches;
     }
     return false;
   } catch {
@@ -45,6 +45,8 @@ export interface UserDashboardLayoutProps {
   padding?: "amplio" | "compacto" | "ninguno";
   classNameContenido?: string;
   showPromo?: boolean;
+  fixedContent?: boolean;
+  dashboardHeader?: boolean;
 }
 
 const PADDING: Record<NonNullable<UserDashboardLayoutProps["padding"]>, string> = {
@@ -57,10 +59,10 @@ const PADDING: Record<NonNullable<UserDashboardLayoutProps["padding"]>, string> 
  * Shell compartido del área de usuario (RR-UI-001).
  *
  * Arquitectura técnica:
- * - Desktop (>= 1280px): Sidebar expandido / contraíble (256px / 72px) con Header completo.
- * - Tablet (768–1279px): Sidebar compacto (72px) por defecto con Header adaptativo.
+ * - Desktop (>= 1024px): Sidebar expandido / contraíble (280px / 72px) con Header completo.
+ * - Tablet (768–1023px): Sidebar compacto (72px) por defecto con Header adaptativo.
  * - Móvil (<= 767px): Drawer superpuesto con backdrop, botón hamburguesa y foco accesible.
- * - El scroll pertenece al contenedor del contenido; el sidebar cuenta con scroll independiente.
+ * - El scroll pertenece al contenedor del contenido; el sidebar mantiene el menú completo sin scroll.
  */
 export function UserDashboardLayout({
   children,
@@ -78,6 +80,8 @@ export function UserDashboardLayout({
   padding = "compacto",
   classNameContenido = "",
   showPromo = true,
+  fixedContent = false,
+  dashboardHeader = false,
 }: UserDashboardLayoutProps) {
   const ruta = usePathname();
   const [colapsada, setColapsada] = useState(false);
@@ -125,6 +129,7 @@ export function UserDashboardLayout({
         className="flex min-w-0 flex-1 flex-col overflow-x-hidden overflow-y-hidden"
       >
         <UserHeader
+          varianteDashboard={dashboardHeader}
           user={user}
           usuario={usuario}
           nombre={nombre ?? user?.name ?? usuario?.nombre}
@@ -141,7 +146,7 @@ export function UserDashboardLayout({
         <main
           id={idContenido}
           aria-label="Contenido principal"
-          className={`min-h-0 flex-1 overflow-y-auto overflow-x-hidden bg-[var(--rr-page-bg,#f5f8fc)] text-[var(--ruum-text)] ${PADDING[padding]} ${classNameContenido}`}
+          className={`min-h-0 flex-1 ${fixedContent ? "overflow-hidden" : "overflow-y-auto"} overflow-x-hidden bg-[var(--rr-page-bg,#f5f8fc)] text-[var(--ruum-text)] ${PADDING[padding]} ${classNameContenido}`}
         >
           {children}
         </main>

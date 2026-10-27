@@ -1,5 +1,5 @@
 /* Shell global de usuario — RR-UI-001 & RR-UI-002
-   Mobile First: teléfono (<=767px), tablet (768–1279px) y desktop (>=1280px). */
+   Mobile First: teléfono (<=767px), tablet (768–1023px) y desktop (>=1024px). */
 .shell {
   display: flex;
   width: 100%;
@@ -80,35 +80,79 @@
   }
 }
 
-.navScroll {
-  flex: 1;
-  min-height: 0;
-  overflow-y: auto;
-  overflow-x: hidden;
-  overscroll-behavior: contain;
-  scrollbar-width: thin;
-  scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
-}
-
-.navScroll::-webkit-scrollbar {
-  width: 5px;
-}
-
-.navScroll::-webkit-scrollbar-thumb {
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.2);
-}
-
-.promo {
+.brandHeader {
+  position: relative;
+  display: flex;
   flex-shrink: 0;
+  align-items: center;
+  gap: 4px;
+  min-height: clamp(70px, 10dvh, 108px);
+  padding: 10px 16px;
 }
+.brandSymbol { width: 62px; height: 40px; flex-shrink: 0; }
+.brandName { display: block; color: #f5f7ff; font-size: 22px; font-weight: 750; line-height: 1.2; letter-spacing: -.6px; white-space: nowrap; }
+.brandTagline { display: block; margin-top: 3px; color: #00e5ee; font-size: 12px; line-height: 1.2; white-space: nowrap; }
+.collapseButton { position: absolute; right: 4px; top: 2px; opacity: 0; }
+.brandHeader:hover .collapseButton, .collapseButton:focus-visible { opacity: 1; }
+.sidebarColapsada .collapseButton { position: static; opacity: 1; }
+.sidebarColapsada .brandHeader { padding-inline: 4px; }
+.sidebarColapsada .brandSymbol { width: 40px; }
+.navScroll { flex: 1; min-height: 0; padding: 0 16px; overflow-y: auto; }
+.navGroup { display: flex; flex-direction: column; gap: clamp(2px, .5dvh, 10px); }
+.navItem {
+  position: relative; display: flex; align-items: center; gap: 20px;
+  min-height: 36px; height: clamp(36px, 5.3dvh, 56px); padding: 0 18px;
+  border: 1px solid transparent; border-radius: 13px; color: #edf3ff;
+  font-size: 15px; font-weight: 400; line-height: 1.2; white-space: nowrap;
+  transition: background 150ms ease, color 150ms ease;
+}
+.navItem:hover { background-color: #ffffff0d; }
+.navItem:focus-visible, .promoAction:focus-visible { outline: 2px solid #00d9ff; outline-offset: 3px; }
+.navIcon { width: 24px; height: 24px; flex-shrink: 0; color: #dbe9ff; }
+.navItemActive { background: linear-gradient(110deg, #006bff, #00359a); border-color: #168af3; color: #fff; }
+.navItemActive .navIcon { color: #fff; }
+.navItemActive .navIcon[data-icon="inicio"] path:first-child { fill: currentColor; }
+.navItemCollapsed { justify-content: center; padding-inline: 0; }
+.navDivider { height: 1px; background: #577b9e; margin: clamp(8px, 1dvh, 16px) 6px; }
+.sidebarColapsada .navScroll { padding-inline: 8px; }
+.promo { flex-shrink: 0; padding: 8px 12px 12px; }
+.promoCard { overflow: hidden; border: 1px solid #007ed3; border-radius: 15px; background: linear-gradient(135deg, #002442, #00162d); }
+.promoArtwork { height: clamp(48px, 9dvh, 100px); background: url('/imagenes/sidebar-traslado.webp') center / cover no-repeat; }
+.promoCopy { padding: 0 20px; }
+.promoTitle { max-width: 195px; color: #fff; font-size: 18px; font-weight: 750; line-height: 1.05; }
+.promoDescription { margin-top: 6px; color: #b3cfee; font-size: 13px; line-height: 1.25; }
+.promoAction { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin: 10px 14px; padding: 12px 18px; min-height: 40px; border-radius: 11px; background: #0061ff; color: #fff; font-size: 14px; font-weight: 500; }
+.promoAction:hover { background: #1975ff; }
 
-/* En pantallas de poca altura la tarjeta promocional se oculta
-   para asegurar que las opciones del menú siempre sean accesibles */
-@media (max-height: 720px) {
-  .promo {
-    display: none;
+@media (min-width: 768px) {
+  .sidebar {
+    margin: 12px 0 12px 12px;
+    height: calc(100% - 24px); max-height: calc(100% - 24px);
+    width: 280px; border: 1px solid #0878c5; border-radius: 20px;
+    box-shadow: 0 10px 30px #002b4b20;
+    background: linear-gradient(155deg, #00172b 5%, #002145 55%, #001326 100%);
   }
+  .sidebarColapsada { width: var(--rr-sidebar-collapsed, 72px); }
+  .navScroll { overflow: visible; }
+  .navScroll nav { display: flex; flex-direction: column; height: 100%; }
+  .navGroup { flex: 4 1 auto; justify-content: space-between; }
+  .navGroup:first-child { flex-grow: 5; }
+}
+@media (max-height: 740px) {
+  .brandHeader { min-height: 64px; }
+  .navItem { height: clamp(34px, 5.3dvh, 40px); min-height: 34px; }
+  .navGroup { gap: 2px; }
+  .navDivider { margin-block: 8px; }
+  .promo { padding-top: 5px; padding-bottom: 8px; }
+  .promoArtwork { height: 48px; }
+  .promoTitle { font-size: 16px; }
+  .promoDescription { font-size: 12px; margin-top: 4px; }
+  .promoAction { padding-block: 8px; margin-block: 8px; }
+}
+@media (max-width: 767px) {
+  .brandName { font-size: 18px; }
+  .brandSymbol { width: 46px; }
+  .navItem { min-height: 44px; }
 }
 
 /* Accesibilidad: Respeta la preferencia del usuario sobre reducción de movimiento */
@@ -128,3 +172,8 @@
   font-weight: 600;
   color: var(--ruum-text-secondary);
 }
+
+/* Variante del Inicio: mismo buscador y menús, presentación del prototipo. */
+.shell :global(header[data-dashboard]) { height: 66px; }
+.shell :global(header[data-dashboard] input[type=search]) { height: 44px; border: 0; border-radius: 15px; background: #edf3fc; font-size: 13px; }
+.shell :global(header[data-dashboard] kbd) { display: none; }

@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState, type FormEvent } from "react"
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import { FOTO_PERFIL_ACTUALIZADA, type FotoPerfilActualizada } from "../../lib/foto-perfil";
 import { useTema } from "../../app/TemaProvider";
 import {
   buscarDestinos,
@@ -49,6 +50,7 @@ export interface UserHeaderProps {
   onCerrarSesion?: () => void | Promise<void>;
   /** El tema es una acción global; se conserva en el header compartido. */
   mostrarTema?: boolean;
+  varianteDashboard?: boolean;
 }
 
 function IconoMenu({ className = "size-5" }: { className?: string }) {
@@ -103,6 +105,7 @@ export function UserHeader({
   onLogout,
   onCerrarSesion,
   mostrarTema = true,
+  varianteDashboard = false,
 }: UserHeaderProps) {
   const router = useRouter();
   const { tema, alternar } = useTema();
@@ -120,7 +123,51 @@ export function UserHeader({
   const primerNombre = nombreCompleto.split(/\s+/)[0] || "Usuario";
   const correoMostrado = (correo || usuario?.correo || "").trim();
   const rolUsuario = user?.role || rol;
-  const avatarUrl = user?.avatarUrl;
+  const [fotoPerfil, setFotoPerfil] = useState<{ usuarioId: string; url: string | null } | null>(null);
+  const usuarioId = usuario?.id;
+  const fotoPath = typeof usuario?.foto_url === "string" ? usuario.foto_url : null;
+  const avatarUrl = fotoPerfil && (!usuarioId || fotoPerfil.usuarioId === usuarioId) ? fotoPerfil.url : user?.avatarUrl;
+  useEffect(() => {
+    let activo = true;
+    let solicitud = 0;
+    let idActual = usuarioId;
+    let rutaActual = fotoPath;
+    async function cargar() {
+      const actual = ++solicitud;
+      if (idActual && !rutaActual) {
+        setFotoPerfil({ usuarioId: idActual, url: user?.avatarUrl ?? null });
+        return;
+      }
+      try {
+        const [{ obtenerUrlFotoPerfilUsuario, obtenerUsuarioActual }, { crearClienteNavegador, tieneSupabaseConfigurado }] = await Promise.all([
+          import("@ruum/api/services"), import("../../lib/supabase-browser"),
+        ]);
+        if (!idActual && !tieneSupabaseConfigurado()) return;
+        const cliente = crearClienteNavegador();
+        // Algunos shells solo reciben el nombre: recuperar el perfil autenticado.
+        if (!idActual) {
+          const perfil = await obtenerUsuarioActual(cliente);
+          if (!perfil || !activo || actual !== solicitud) return;
+          idActual = perfil.id;
+          rutaActual = perfil.foto_url;
+        }
+        const url = rutaActual ? await obtenerUrlFotoPerfilUsuario(cliente, rutaActual) : null;
+        if (activo && actual === solicitud) setFotoPerfil({ usuarioId: idActual, url: url ?? user?.avatarUrl ?? null });
+      } catch {
+        if (activo && actual === solicitud && idActual) setFotoPerfil({ usuarioId: idActual, url: user?.avatarUrl ?? null });
+      }
+    }
+    const actualizar = (evento: Event) => {
+      const { detail } = evento as CustomEvent<FotoPerfilActualizada>;
+      if (detail.usuarioId !== idActual) return;
+      solicitud++;
+      setFotoPerfil({ usuarioId: idActual, url: detail.url });
+    };
+    void cargar();
+    const renovar = window.setInterval(() => void cargar(), 25 * 60 * 1000);
+    window.addEventListener(FOTO_PERFIL_ACTUALIZADA, actualizar);
+    return () => { activo = false; window.clearInterval(renovar); window.removeEventListener(FOTO_PERFIL_ACTUALIZADA, actualizar); };
+  }, [usuarioId, fotoPath, user?.avatarUrl]);
   const inicial = iniciales(nombreCompleto);
   const totalNotificaciones =
     typeof unreadNotifications === "number" ? unreadNotifications : notificaciones.length;
@@ -200,6 +247,7 @@ export function UserHeader({
   return (
     <header
       id="userDashboardHeader"
+      data-dashboard={varianteDashboard || undefined}
       aria-label="Barra superior de usuario"
       className="sticky top-0 z-30 flex h-[var(--rr-header-height,72px)] shrink-0 items-center justify-between gap-3 border-b border-[var(--rr-border,#e3eaf3)] bg-[var(--rr-header-bg,#ffffff)] px-4 sm:px-6 xl:px-8 text-[var(--ruum-text)] transition-colors duration-150"
     >
@@ -244,7 +292,7 @@ export function UserHeader({
                     evento.currentTarget.blur();
                   }
                 }}
-                placeholder="Buscar traslados, vehículos o documentos..."
+                placeholder={varianteDashboard ? "Buscar traslados, vehículos o ubicaciones..." : "Buscar traslados, vehículos o documentos..."}
                 aria-label="Buscar traslados, vehículos o documentos"
                 aria-expanded={buscadorAbierto}
                 aria-controls="userHeaderSearchSuggestions"
@@ -331,7 +379,7 @@ export function UserHeader({
 
         {/* Acciones globales */}
         <div className="flex shrink-0 items-center gap-1 sm:gap-1.5">
-          {mostrarTema && (
+          {mostrarTema && !varianteDashboard && (
             <button
               type="button"
               onClick={alternar}
@@ -457,6 +505,7 @@ export function UserHeader({
                     src={avatarUrl}
                     alt={nombreCompleto}
                     fill
+                    unoptimized
                     className="object-cover"
                   />
                 </div>

@@ -97,7 +97,7 @@ export function buildCsp(options: BuildCspOptions): string {
     `connect-src 'self' ${joinOrigins(CSP_ORIGINS.supabase)} ${joinOrigins(CSP_ORIGINS.mapbox)} ${joinOrigins(CSP_ORIGINS.sentry)} ${joinOrigins(CSP_ORIGINS.didit)}${configuredSupabaseOrigin}${extraConnect}` +
     (isProd ? "" : " ws: wss: http://localhost:* http://127.0.0.1:* capacitor://localhost");
 
-  const imgSrc = `img-src 'self' data: blob: ${joinOrigins(CSP_ORIGINS.supabase)} https://*.mapbox.com https://*.didit.me https://verify.didit.me${extraImg}`;
+  const imgSrc = `img-src 'self' data: blob: ${joinOrigins(CSP_ORIGINS.supabase)}${configuredSupabaseOrigin} https://*.mapbox.com https://*.didit.me https://verify.didit.me${extraImg}`;
   const frameSrc = `frame-src 'self' https://verify.didit.me https://*.didit.me${extraFrame}`;
 
   return [

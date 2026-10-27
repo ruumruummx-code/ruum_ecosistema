@@ -19,6 +19,7 @@
  * Se levanta desde `playwright.config.ts` como primer `webServer`. Los tokens
  * deben coincidir con los de `fixtures/sesion.ts`.
  */
+import { DASHBOARD_TOKEN, datosDashboard } from "./dashboard.mjs";
 import { createServer } from "node:http";
 import { pathToFileURL } from "node:url";
 
@@ -87,8 +88,11 @@ export const FILA_USUARIO_PENDIENTE = {
 /** Token valido -> fila de perfil que vera el navegador y el servidor. */
 const SESIONES = new Map([
   [ACCESS_TOKEN, FILA_USUARIO_E2E],
-  [ACCESS_TOKEN_PENDIENTE, FILA_USUARIO_PENDIENTE]
+  [DASHBOARD_TOKEN, { ...FILA_USUARIO_E2E, nombre: "Carlos Mendoza", foto_url: null }],
+  [ACCESS_TOKEN_PENDIENTE, FILA_USUARIO_PENDIENTE],
+  ["mock_access_token_foto_perfil", { ...FILA_USUARIO_E2E, foto_url: null }]
 ]);
+const fotosPerfil = new Map();
 
 const CABECERAS_CORS = {
   "access-control-allow-origin": "*",
@@ -211,6 +215,57 @@ const servidor = createServer(async (req, res) => {
   }
 
   // ── PostgREST ──
+  // Storage privado para el E2E de fotografía. Conserva los bytes que sube el navegador.
+  const prefijoFoto = "/storage/v1/object/fotos-perfil/";
+  const prefijoFirma = "/storage/v1/object/sign/fotos-perfil/";
+  if (ruta.startsWith(prefijoFirma)) {
+    const path = decodeURIComponent(ruta.slice(prefijoFirma.length));
+    if (req.method === "POST") {
+      if (!SESIONES.has(tokenDe(req)) || !fotosPerfil.has(path)) {
+        responder(res, 404, { message: "Foto no disponible" });
+        return;
+      }
+      await leerCuerpo(req);
+      responder(res, 200, { signedURL: `/object/sign/fotos-perfil/${path}?token=e2e-foto` });
+    } else if (req.method === "GET" && url.searchParams.get("token") === "e2e-foto" && fotosPerfil.has(path)) {
+      const foto = fotosPerfil.get(path);
+      res.writeHead(200, { ...CABECERAS_CORS, "content-type": foto.type, "cache-control": "no-store" });
+      res.end(foto.bytes);
+    } else responder(res, 404, { message: "Foto no disponible" });
+    return;
+  }
+  if (req.method === "POST" && ruta.startsWith(prefijoFoto)) {
+    const path = decodeURIComponent(ruta.slice(prefijoFoto.length));
+    if (!SESIONES.has(tokenDe(req)) || !path.startsWith(`${USUARIO_E2E.id}/`)) {
+      responder(res, 403, { message: "Sin permiso" });
+      return;
+    }
+    const chunks = [];
+    for await (const chunk of req) chunks.push(chunk);
+    const cuerpo = Buffer.concat(chunks);
+    const form = await new Response(cuerpo, { headers: { "content-type": req.headers["content-type"] } }).formData();
+    const archivo = form.get("");
+    if (!(archivo instanceof File)) { responder(res, 400, { message: "Sin archivo" }); return; }
+    fotosPerfil.set(path, { bytes: Buffer.from(await archivo.arrayBuffer()), type: archivo.type });
+    responder(res, 200, { Key: `fotos-perfil/${path}`, Id: "foto-e2e" });
+    return;
+  }
+  if (ruta === "/functions/v1/crear-llamada-enmascarada" && tokenDe(req) === DASHBOARD_TOKEN) {
+    await leerCuerpo(req);
+    responder(res, 503, { error: "No pudimos conectar la llamada. Intenta de nuevo." });
+    return;
+  }
+  if (req.method === "GET" && tokenDe(req) === DASHBOARD_TOKEN) {
+    let filas = datosDashboard(ruta);
+    if (filas) {
+      for (const [campo, valor] of url.searchParams) {
+        if (valor.startsWith("eq.")) filas = filas.filter(fila => String(fila[campo]) === valor.slice(3));
+      }
+      const singular = (req.headers.accept ?? "").includes("vnd.pgrst.object");
+      responder(res, 200, singular ? filas[0] ?? null : filas);
+      return;
+    }
+  }
   if (ruta.startsWith("/rest/v1/")) {
     if (ruta.startsWith("/rest/v1/rpc/usuario_previsualizar_tarifa")) {
       // Tarifa determinista para el Paso 0 del wizard. Los specs que necesiten
@@ -225,7 +280,13 @@ const servidor = createServer(async (req, res) => {
       responder(res, 200, {});
       return;
     }
-    await leerCuerpo(req);
+    const cuerpo = await leerCuerpo(req);
+    if (req.method === "PATCH" && ruta === "/rest/v1/usuarios" && tokenDe(req) === "mock_access_token_foto_perfil") {
+      const fila = SESIONES.get(tokenDe(req));
+      Object.assign(fila, JSON.parse(cuerpo));
+      responder(res, 200, fila);
+      return;
+    }
     // `public.usuarios` es el único con datos: `obtenerUsuarioActual` y
     // `clasificarRolApp` lo leen desde el servidor (middleware y RSC). Cualquier
     // otra tabla/vista (pasaporte_digital, traslados, …) responde lista vacía,

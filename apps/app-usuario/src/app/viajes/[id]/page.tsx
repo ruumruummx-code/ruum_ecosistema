@@ -1,3 +1,4 @@
+import { UserResponsiveLayout } from "../../../components/layout/UserResponsiveLayout";
 import { obtenerDatos } from "./obtenerDatosTraslado";
 import { TrasladoNoEncontrado } from "./TrasladoNoEncontrado";
 import { PasaporteDigitalSegmentado } from "./PasaporteDigitalSegmentado";
@@ -65,7 +66,7 @@ export default async function PaginaTraslado({ params }: { params: Promise<{ id:
 
   return (
     <>
-      <main>
+      <UserResponsiveLayout>
         <PasaporteDigitalSegmentado
           pasaporte={pasaporte}
           traslado={traslado}
@@ -79,7 +80,7 @@ export default async function PaginaTraslado({ params }: { params: Promise<{ id:
           pagos={pagos}
           ultimaUbicacion={ultimaUbicacion}
         />
-      </main>
+      </UserResponsiveLayout>
     </>
   );
 }

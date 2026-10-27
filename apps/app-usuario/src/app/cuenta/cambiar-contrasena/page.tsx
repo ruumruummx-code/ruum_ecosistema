@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { MobileShell } from "@ruum/ui";
+import { UserResponsiveLayout } from "../../../components/layout/UserResponsiveLayout";
 import { conCuenta } from "../cuenta-ui";
 import { CambiarContrasena } from "./CambiarContrasena";
 
@@ -9,9 +9,9 @@ export const metadata: Metadata = {
 };
 
 export default async function PaginaCambiarContrasena() {
-  return conCuenta(() => (
-    <MobileShell variant="compact" navInferiorVisible={false} as="main" className="user-v2-scope user-password-shell" contentClassName="user-password-content">
+  return conCuenta((cuenta) => (
+    <UserResponsiveLayout nombre={cuenta.usuario.nombre} mobileShell mobileClassName="user-v2-scope user-password-shell" mobileContentClassName="user-password-content">
       <CambiarContrasena />
-    </MobileShell>
+    </UserResponsiveLayout>
   ));
 }

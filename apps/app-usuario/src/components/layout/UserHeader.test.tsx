@@ -1,11 +1,16 @@
 /** @vitest-environment jsdom */
 import { describe, expect, it, vi, beforeEach } from "vitest";
-import { render, screen, fireEvent, within } from "@testing-library/react";
+import { render, screen, fireEvent, within, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { UserHeader } from "./UserHeader";
+import { notificarFotoPerfilActualizada } from "../../lib/foto-perfil";
+import { act } from "@testing-library/react";
+
+const { fotoMock, perfilMock } = vi.hoisted(() => ({ fotoMock: vi.fn(), perfilMock: vi.fn() }));
+vi.mock("@ruum/api/services", () => ({ obtenerUrlFotoPerfilUsuario: fotoMock, obtenerUsuarioActual: perfilMock }));
 
 const { signOutMock } = vi.hoisted(() => ({ signOutMock: vi.fn() }));
-vi.mock("../../lib/supabase-browser", () => ({ crearClienteNavegador: () => ({ auth: { signOut: signOutMock } }) }));
+vi.mock("../../lib/supabase-browser", () => ({ tieneSupabaseConfigurado: () => true, crearClienteNavegador: () => ({ auth: { signOut: signOutMock } }) }));
 const pushMock = vi.fn();
 const replaceMock = vi.fn();
 const refreshMock = vi.fn();
@@ -31,6 +36,21 @@ vi.mock("../../app/TemaProvider", () => ({
 }));
 
 describe("UserHeader — Componente de Barra Superior Reutilizable (RR-UI-001)", () => {
+  it("recupera la fotografía autenticada cuando la pantalla solo proporciona el nombre", async () => {
+    perfilMock.mockResolvedValue({ id: "u1", foto_url: "auth/perfil.png" });
+    fotoMock.mockResolvedValue("https://foto.test/perfil.png?token=perfil");
+    render(<UserHeader nombre="Laura" />);
+    expect(await screen.findByRole("img", { name: "Laura" })).toHaveAttribute("src", "https://foto.test/perfil.png?token=perfil");
+  });
+  it("firma la foto persistida y sincroniza una sustitución del mismo usuario", async () => {
+    fotoMock.mockResolvedValue("https://foto.test/perfil.png?token=inicial");
+    render(<UserHeader usuario={{ id: "u1", nombre: "Laura", foto_url: "auth/perfil.png" }} />);
+    expect(await screen.findByRole("img", { name: "Laura" })).toHaveAttribute("src", "https://foto.test/perfil.png?token=inicial");
+    act(() => notificarFotoPerfilActualizada("otro", "https://foto.test/otro.png"));
+    expect(screen.getByRole("img", { name: "Laura" })).toHaveAttribute("src", "https://foto.test/perfil.png?token=inicial");
+    act(() => notificarFotoPerfilActualizada("u1", "https://foto.test/perfil.png?v=nueva"));
+    expect(screen.getByRole("img", { name: "Laura" })).toHaveAttribute("src", "https://foto.test/perfil.png?v=nueva");
+  });
   it("mantiene la sesión y avisa cuando signOut devuelve un error", async () => {
     signOutMock.mockResolvedValueOnce({ error: new Error("sin conexión") });
     render(<UserHeader nombre="Usuario" />);
@@ -44,11 +64,13 @@ describe("UserHeader — Componente de Barra Superior Reutilizable (RR-UI-001)",
     render(<UserHeader nombre="Usuario" />);
     await userEvent.click(screen.getByRole("button", { name: /Menú de usuario/ }));
     await userEvent.click(screen.getByRole("menuitem", { name: /Cerrar sesión/ }));
-    expect(replaceMock).toHaveBeenCalledWith("/login");
+    await waitFor(() => expect(replaceMock).toHaveBeenCalledWith("/login"));
     expect(refreshMock).toHaveBeenCalled();
   });
   beforeEach(() => {
     vi.clearAllMocks();
+    signOutMock.mockReset();
+    perfilMock.mockResolvedValue(null);
     temaMock = "light";
   });
 
