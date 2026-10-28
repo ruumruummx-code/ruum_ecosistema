@@ -11,6 +11,7 @@ export function useDashboardTracking(id: string, estado: string | null, enabled 
   const router = useRouter();
   const [ubicacion, setUbicacion] = useState<UbicacionTraslado | null>(null);
   const [error, setError] = useState(false);
+  const [realtime, setRealtime] = useState(false);
   const [actualizado, setActualizado] = useState<string | null>(null);
   const [revision, setRevision] = useState(0);
 
@@ -45,10 +46,17 @@ export function useDashboardTracking(id: string, estado: string | null, enabled 
       } else setError(true);
       if (estadoActual.status === "fulfilled") recibirEstado(estadoActual.value);
     };
-    const alFallar = () => { if (!cancelado) setError(true); };
+    const conectados = new Set<string>();
+    const alFallar = () => { if (!cancelado) setRealtime(false); };
+    const conexion = (nombre: string) => (status: string) => {
+      if (cancelado) return;
+      if (status === "SUBSCRIBED") conectados.add(nombre);
+      else conectados.delete(nombre);
+      setRealtime(conectados.size === 2);
+    };
     try {
-      canales.push(suscribirUbicacionTraslado(cliente, id, recibirUbicacion, { onError: alFallar, reintentar: false }));
-      canales.push(suscribirEstadoTraslado(cliente, id, recibirEstado, { onError: alFallar, reintentar: false }));
+      canales.push(suscribirUbicacionTraslado(cliente, id, recibirUbicacion, { onError: alFallar, onStatusChange: conexion("gps"), reintentar: false }));
+      canales.push(suscribirEstadoTraslado(cliente, id, recibirEstado, { onError: alFallar, onStatusChange: conexion("estado"), reintentar: false }));
     } catch { alFallar(); }
     void consultar();
     const intervalo = window.setInterval(() => void consultar(), 20_000);
@@ -64,5 +72,5 @@ export function useDashboardTracking(id: string, estado: string | null, enabled 
     };
   }, [id, estado, router, revision, enabled]);
 
-  return { ubicacion, error, actualizado, refrescar: () => setRevision(v => v + 1) };
+  return { ubicacion, error, realtime, actualizado, refrescar: () => setRevision(v => v + 1) };
 }

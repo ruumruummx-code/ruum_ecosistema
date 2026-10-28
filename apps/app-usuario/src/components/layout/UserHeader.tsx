@@ -293,7 +293,7 @@ export function UserHeader({
                   }
                 }}
                 placeholder={varianteDashboard ? "Buscar traslados, vehículos o ubicaciones..." : "Buscar traslados, vehículos o documentos..."}
-                aria-label="Buscar traslados, vehículos o documentos"
+                aria-label={varianteDashboard ? "Buscar traslados, vehículos o ubicaciones" : "Buscar traslados, vehículos o documentos"}
                 aria-expanded={buscadorAbierto}
                 aria-controls="userHeaderSearchSuggestions"
                 aria-keyshortcuts="Control+K Meta+K"
@@ -517,7 +517,7 @@ export function UserHeader({
 
               <span className="hidden text-left xl:block">
                 <span className="block text-xs font-bold leading-none text-[var(--ruum-text)]">
-                  Hola, {primerNombre}
+                  {varianteDashboard ? nombreCompleto : `Hola, ${primerNombre}`}
                 </span>
                 <span className="mt-1 block text-[11px] font-medium leading-none text-[var(--ruum-text-tertiary)]">
                   {rolUsuario}

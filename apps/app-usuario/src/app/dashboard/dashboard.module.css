@@ -1,6 +1,6 @@
 .dashboard {
   --ink: #081334; --muted: #52658b; --blue: #0061ff; --line: #e5edf8;
-  display: grid; grid-template-rows: clamp(68px, 10.5dvh, 100px) minmax(0, 1fr) clamp(64px, 9.6dvh, 90px) minmax(0, .54fr);
+  display: grid; grid-template-rows: clamp(68px, 10.5dvh, 100px) minmax(0, 1fr) clamp(64px, 9.6dvh, 90px) minmax(0, .49fr);
   gap: 14px; height: 100%; min-height: 0; overflow: hidden; padding: 14px 24px 16px;
   background: radial-gradient(ellipse at 40% 5%, #ffffff 0, #f6f9fe 68%); color: var(--ink);
   font-size: 14px;
@@ -25,10 +25,10 @@
 .activeTop { position: relative; min-height: 0; }
 .eyebrow { display: flex; align-items: center; gap: 8px; color: #00dba4; font-size: 12px; line-height: 1.3; }
 .eyebrow i, .status i { width: 9px; height: 9px; border-radius: 50%; background: currentColor; flex-shrink: 0; }
-.activeTop h2 { max-width: 58%; font-size: clamp(18px, 1.7vw, 29px); font-weight: 750; letter-spacing: -.5px; line-height: 1.2; margin-top: 8px; }
+.activeTop h2 { color: #fff; max-width: 58%; font-size: clamp(18px, 1.7vw, 29px); font-weight: 750; letter-spacing: -.5px; line-height: 1.2; margin-top: 8px; }
 .plate { display: flex; align-items: center; gap: 12px; font-size: 11px; color: #cfdef4; margin-top: 9px; max-width: 58%; }
 .plate strong { font-size: 15px; border-radius: 7px; padding: 6px 13px; background: #ffffff16; border: 1px solid #4472a24d; color: #fff; }
-.heroCar { position: absolute; width: 46%; height: calc(100% + 20px); object-fit: contain; right: -4px; top: -4px; filter: drop-shadow(0 8px 4px #0005); }
+.heroCar { position: absolute; width: 46%; height: 145%; object-fit: contain; right: -4px; top: -24%; filter: drop-shadow(0 8px 4px #0005); }
 .route { display: flex; align-items: center; gap: 9px; min-height: 0; }
 .route>svg { color: #56b0ff; width: 25px; height: 25px; }
 .route>svg:nth-last-of-type(1) { color: #fff; }
@@ -149,7 +149,7 @@
 .support { position: relative; overflow: hidden; border-radius: 12px; color: #fff; display: flex; align-items: center; padding: 12px 18px; gap: 16px; background: #003b8c url('/imagenes/dashboard-support.webp') center / cover no-repeat; border: 1px solid #1476ef; min-height: 0; }
 .support>div { width: 55%; position: relative; }
 .supportIcon { align-self: flex-start; display: grid; place-items: center; width: 40px; height: 40px; border-radius: 50%; background: #0061ff; flex-shrink: 0; }
-.support h2 { font-size: 15px; font-weight: 700; }
+.support h2 { color: #fff; line-height: 1.2; font-size: 15px; font-weight: 700; }
 .support p { font-size: 11px; line-height: 1.3; margin-top: 4px; }
 .support a { display: inline-flex; align-items: center; justify-content: space-between; background: #fff; color: #073779; border-radius: 7px; font-size: 11px; font-weight: 650; padding: 6px 14px; margin-top: 7px; min-width: 150px; gap: 8px; }
 .support a:hover { background: #e7f0ff; }
@@ -162,9 +162,9 @@
 .tips header button { width: 16px; height: 20px; display: grid; place-items: center; }
 .tips header i { width: 5px; height: 5px; border-radius: 50%; border: 1px solid #b4c8e5; }
 .tips header button[aria-current=true] i { background: #0061ff; border-color: #0061ff; }
-.tipContent { display: flex; align-items: center; gap: 12px; padding: 5px 10px; flex: 1; min-height: 0; border-radius: 8px; color: #fff; background: #001c34 url('/imagenes/sidebar-traslado.webp') 35% 25% / cover; }
+.tipContent { display: flex; align-items: center; gap: 12px; padding: 5px 10px; flex: 1; min-height: 0; border-radius: 8px; color: #fff; background: #001c34 url('/imagenes/dashboard-tips.webp') center / cover; }
 .tipContent>div { flex: 1; min-width: 0; }
-.tipContent h3 { font-size: 11px; font-weight: 650; }
+.tipContent h3 { color: #fff; line-height: 1.2; font-size: 11px; font-weight: 650; }
 .tipContent p { max-width: 85%; font-size: 10px; line-height: 1.15; color: #c2d6ed; margin-top: 3px; }
 .tipContent button { display: grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; background: #335477; color: #fff; flex-shrink: 0; }
 .tipContent button:first-child svg { transform: rotate(180deg); }
@@ -193,8 +193,19 @@
   .quickActions>a { padding: 8px; gap: 8px; }.quickActions>a>svg { width: 11px; }
   .recent { padding-inline: 8px; }.recent .status { padding: 4px; gap: 3px; }.vehicleCell { gap: 4px; }
   .vehicleCell small, .recent time small { font-size: 9px; }
-  .support { gap: 8px; padding: 8px; }.supportIcon { width: 28px; height: 28px; }.support h2 { font-size: 12px; }.support p { font-size: 10px; }.support a { min-width: 115px; font-size: 10px; padding: 5px 7px; }
+  .support { gap: 8px; padding: 6px; }.supportIcon { width: 28px; height: 28px; }.support h2 { font-size: 12px; line-height: 1.15; }.support p { font-size: 9px; line-height: 1.15; margin-top: 2px; }.support a { min-width: 115px; font-size: 10px; line-height: 1.15; padding: 4px 7px; margin-top: 4px; }
   .tipContent { gap: 6px; padding-inline: 6px; }.tipContent p { max-width: 100%; font-size: 9px; }
+}
+@media(max-height: 850px) {
+  .support { padding: 6px 10px; gap: 8px; }
+  .supportIcon { width: 28px; height: 28px; }
+  .support h2 { font-size: 12px; line-height: 1.1; }
+  .support p { font-size: 9px; line-height: 1.1; margin-top: 2px; }
+  .support a { font-size: 10px; line-height: 1.1; padding: 4px 8px; margin-top: 3px; min-width: 115px; }
+  .tips>header { min-height: 18px; }
+  .tipContent { padding-block: 3px; gap: 6px; }
+  .tipContent h3 { font-size: 10px; line-height: 1.1; }
+  .tipContent p { font-size: 9px; line-height: 1.05; margin-top: 2px; max-width: 100%; }
 }
 @media(max-height: 740px) {
   .dashboard { padding-block: 8px; gap: 8px; grid-template-rows: 64px minmax(0, 1fr) 58px minmax(0, .5fr); }
@@ -211,7 +222,7 @@
   .quickActions>a { padding-block: 6px; }.actionIcon { width: 34px; height: 34px; }.quickActions strong { font-size: 10px; }.quickActions p { font-size: 9px; }
   .sectionHeading { min-height: 30px; }.sectionHeading h2 { font-size: 13px; }.sectionHeading a { font-size: 10px; }
   .recent th { padding-block: 4px; }.recent td { padding-block: 3px; }.vehicleThumb { height: 26px; }
-  .support h2 { font-size: 12px; }.support p { font-size: 9px; margin-top: 2px; }.support a { padding-block: 4px; margin-top: 3px; }.supportIcon { width: 28px; height: 28px; }
-  .tips>header { min-height: 20px; }.tipContent h3 { font-size: 10px; }.tipContent p { font-size: 9px; margin-top: 2px; }
+  .support h2 { font-size: 12px; }.support p { font-size: 9px; line-height: 1.1; margin-top: 2px; }.support a { padding-block: 3px; line-height: 1.1; margin-top: 3px; }.supportIcon { width: 28px; height: 28px; }
+  .tips>header { min-height: 18px; }.tipContent { padding-block: 3px; }.tipContent h3 { font-size: 10px; line-height: 1.1; }.tipContent p { font-size: 9px; line-height: 1.05; margin-top: 2px; max-width: 100%; }
 }
 @media(prefers-reduced-motion: reduce) { .dashboard a, .dashboard button { transition: none; }.liveBadge i { animation: none; } }

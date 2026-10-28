@@ -25,6 +25,15 @@ describe('Seguimiento del dashboard', () => {
     expect(result.current.ubicacion?.lat).toBe(19.28);
     act(() => mocks.stateSubscribe.mock.calls[0][2]({ estado: 'llegada_a_destino' }));
     expect(mocks.refresh).toHaveBeenCalledOnce();
+    act(() => {
+      mocks.locationSubscribe.mock.calls[0][3].onStatusChange('SUBSCRIBED');
+      mocks.stateSubscribe.mock.calls[0][3].onStatusChange('SUBSCRIBED');
+    });
+    expect(result.current.realtime).toBe(true);
+    act(() => mocks.locationSubscribe.mock.calls[0][3].onError(new Error('Canal no disponible')));
+    expect(result.current.realtime).toBe(false);
+    expect(result.current.error).toBe(false);
+    expect(result.current.ubicacion?.lat).toBe(19.28);
     unmount();
     expect(mocks.remove).toHaveBeenCalledWith('gps-channel');
     expect(mocks.remove).toHaveBeenCalledWith('state-channel');

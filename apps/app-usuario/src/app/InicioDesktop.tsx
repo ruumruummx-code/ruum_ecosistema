@@ -44,17 +44,20 @@ const tips = [
   { title: "Ten tus documentos a mano", text: "Completa los datos de tu vehículo para agilizar tu próxima solicitud." },
 ];
 function modelo(t: Pasaporte) { return [t.vehiculo_marca, t.vehiculo_modelo, t.vehiculo_anio].filter(Boolean).join(" ") || "Vehículo registrado"; }
-function estadoTexto(t: Pasaporte) { return t.estado ? TERMINOLOGIA_USUARIO[t.estado] ?? ETIQUETA_ESTADO_TRASLADO[t.estado] : "Por confirmar"; }
+function estadoTexto(t: Pasaporte) {
+  if (t.estado === "traslado_en_curso") return "En tránsito";
+  if (["servicio_cerrado", "entrega_confirmada", "pago_completado"].includes(t.estado ?? "")) return "Completado";
+  return t.estado ? TERMINOLOGIA_USUARIO[t.estado] ?? ETIQUETA_ESTADO_TRASLADO[t.estado] : "Por confirmar"; }
 function tono(t: Pasaporte) {
   if (t.estado === "traslado_en_curso") return "green";
   if (["servicio_cerrado", "entrega_confirmada", "pago_completado"].includes(t.estado ?? "")) return "blue";
   if (["traslado_fallido", "servicio_cancelado", "incidencia_reportada"].includes(t.estado ?? "")) return "red";
   return "orange";
 }
-function VehicleImage({ traslado, vehiculos, hero = false }: { traslado: Pasaporte; vehiculos: Vehiculo[]; hero?: boolean }) {
+function VehicleImage({ traslado, vehiculos, hero = false, priority = false }: { traslado: Pasaporte; vehiculos: Vehiculo[]; hero?: boolean; priority?: boolean }) {
   const foto = vehiculos.find(v => v.id === traslado.vehiculo_id)?.fotos_urls?.find(url => /^https?:\/\//.test(url));
   const type = traslado.vehiculo_tipo === "suv" ? "suv" : traslado.vehiculo_tipo === "pick_up" ? "pickup" : "sedan";
-  return <Image src={foto ?? `/imagenes/dashboard-${type}.webp`} alt={foto ? modelo(traslado) : `Ilustración de ${type === "sedan" ? "sedán" : type === "suv" ? "SUV" : "pickup"}`} width={hero ? 720 : 120} height={hero ? 400 : 70} sizes={hero ? "(min-width: 1600px) 320px, 230px" : "70px"} unoptimized priority={hero} className={hero ? styles.heroCar : styles.vehicleThumb} />;
+  return <Image src={foto ?? `/imagenes/dashboard-${type}.webp`} alt={foto ? modelo(traslado) : `Ilustración de ${type === "sedan" ? "sedán" : type === "suv" ? "SUV" : "pickup"}`} width={hero ? 720 : 120} height={hero ? 400 : 70} sizes={hero ? "(min-width: 1600px) 320px, 230px" : "70px"} unoptimized priority={priority} className={hero ? styles.heroCar : styles.vehicleThumb} />;
 }
 function Driver({ viaje, foto }: { viaje: Pasaporte; foto: string | null }) {
   const [llamando, setLlamando] = useState(false);
@@ -82,7 +85,7 @@ function Driver({ viaje, foto }: { viaje: Pasaporte; foto: string | null }) {
         </div>
         <div className={styles.contacts}>
           <button type="button" onClick={llamar} disabled={!disponible || llamando} aria-label={`Llamar a ${nombre}`}><span><Icon name="phone" /></span>{llamando ? "Conectando…" : "Llamar"}</button>
-          <a href={CONTACTOS_SOPORTE_USUARIO.soporte.whatsapp.href} target="_blank" rel="noopener noreferrer" aria-label="Contactar soporte por WhatsApp" title="WhatsApp con soporte; el número del conductor es privado"><span className={styles.whatsapp}><Icon name="whatsapp" /></span>WhatsApp <small>soporte</small></a>
+          <a href={`${CONTACTOS_SOPORTE_USUARIO.soporte.whatsapp.href.split("?")[0]}?text=${encodeURIComponent("Hola, necesito ayuda con mi traslado " + (viaje.traslado_id ?? ""))}`} target="_blank" rel="noopener noreferrer" aria-label="Contactar soporte por WhatsApp" title="WhatsApp con soporte; el número del conductor es privado"><span className={styles.whatsapp}><Icon name="whatsapp" /></span>WhatsApp <small>soporte</small></a>
           <Link href={`/viajes/${viaje.traslado_id}#chat-conductor`} aria-label={`Enviar mensaje a ${nombre}`}><span><Icon name="chat" /></span>Mensaje</Link>
         </div>
       </div>{error && <p role="alert" className={styles.callError}>{error}</p>}
@@ -90,7 +93,7 @@ function Driver({ viaje, foto }: { viaje: Pasaporte; foto: string | null }) {
   </section>;
 }
 function ActiveOverview({ viaje, vehiculos, foto, enabled }: { viaje: Pasaporte; vehiculos: Vehiculo[]; foto: string | null; enabled: boolean }) {
-  const { ubicacion, actualizado, error, refrescar } = useDashboardTracking(viaje.traslado_id!, viaje.estado, enabled);
+  const { ubicacion, actualizado, error, realtime, refrescar } = useDashboardTracking(viaje.traslado_id!, viaje.estado, enabled);
   const [eta, setEta] = useState<number | null>(null);
   const [distance, setDistance] = useState<number | null>(null);
   const progress = progresoPorEstadoTraslado(viaje.estado);
@@ -101,7 +104,7 @@ function ActiveOverview({ viaje, vehiculos, foto, enabled }: { viaje: Pasaporte;
   const coordinates = [viaje.origen_lat, viaje.origen_lng, viaje.destino_lat, viaje.destino_lng].every(v => typeof v === "number" && Number.isFinite(v));
   return <section className={styles.overview} aria-label="Traslado activo y seguimiento">
     <article className={styles.activeCard} aria-label="Traslado activo">
-      <div className={styles.activeTop}><p className={styles.eyebrow}><i />TRASLADO ACTIVO</p><h2>{modelo(viaje)}</h2><div className={styles.plate}><strong>{viaje.vehiculo_placas || "Sin placas"}</strong><span>Placas: {viaje.vehiculo_placas || "Por confirmar"}</span></div><VehicleImage traslado={viaje} vehiculos={vehiculos} hero /></div>
+      <div className={styles.activeTop}><p className={styles.eyebrow}><i />TRASLADO ACTIVO</p><h2>{modelo(viaje)}</h2><div className={styles.plate}><strong>{viaje.vehiculo_placas || "Sin placas"}</strong><span>Placas: {viaje.vehiculo_placas || "Por confirmar"}</span></div><VehicleImage traslado={viaje} vehiculos={vehiculos} hero priority={enabled} /></div>
       <div className={styles.route}><Icon name="pin" /><div><strong>{viaje.origen_ciudad || "Origen por confirmar"}</strong><small>{viaje.origen_direccion || "Punto de recolección"}</small></div><span className={styles.routeLine}><Icon name="arrow" /></span><Icon name="pin" /><div><strong>{viaje.destino_ciudad || "Destino por confirmar"}</strong><small>{viaje.destino_direccion || "Punto de entrega"}</small></div></div>
       <dl className={styles.metrics}><div><dt>ESTADO ACTUAL</dt><dd><span className={styles.status} data-tone={tono(viaje)}><Icon name="car" />{estadoTexto(viaje)}</span></dd></div><div><dt>TIEMPO RESTANTE</dt><dd><Icon name="clock" />{fresh && moving && eta !== null ? `${eta} min` : "Por confirmar"}</dd></div><div><dt>DISTANCIA RESTANTE</dt><dd><Icon name="route" />{fresh && moving && distance !== null ? `${distance} km` : "Por confirmar"}</dd></div></dl>
       <ol className={styles.timeline} aria-label="Progreso del traslado">{["Recolección", "En tránsito", "Entrega"].map((label, index) => {
@@ -114,7 +117,7 @@ function ActiveOverview({ viaje, vehiculos, foto, enabled }: { viaje: Pasaporte;
     <div className={styles.trackingColumn}>
       <section className={`${styles.card} ${styles.mapCard}`} aria-label="Seguimiento en vivo"><header className={styles.cardHeading}><span className={styles.headingIcon}><Icon name="car" /></span><h2>Seguimiento en vivo</h2><Link href={`${href}#en-ruta`}>Abrir en mapa<Icon name="expand" /></Link></header>
         <div className={styles.mapArea}>{coordinates && enabled ? <LiveMap origen={{ lat: viaje.origen_lat, lng: viaje.origen_lng }} destino={{ lat: viaje.destino_lat, lng: viaje.destino_lng }} ubicacion={ubicacion} activo compact seguirUbicacion={Boolean(fresh && moving && ubicacion)} haciaOrigen={!moving && progress < 65} onEta={setEta} onDistance={setDistance} /> : <div className={styles.mapLoading}><Icon name="pin" /><p>Ruta por confirmar<small>El mapa aparecerá cuando se confirmen los puntos del traslado.</small></p></div>}
-          <button type="button" className={styles.liveBadge} onClick={refrescar} title="Actualizar ubicación" data-live={Boolean(fresh)}><Icon name="refresh" />{error ? "Reintentar seguimiento" : fresh ? "Actualización en tiempo real" : "Esperando ubicación GPS"}<i /></button>
+          <button type="button" className={styles.liveBadge} onClick={refrescar} title="Actualizar ubicación" data-live={Boolean(fresh)}><Icon name="refresh" />{error ? "Reintentar seguimiento" : fresh && realtime ? "Actualización en tiempo real" : fresh ? "Ubicación actualizada" : "Esperando ubicación GPS"}<i /></button>
         </div>
       </section><Driver viaje={viaje} foto={foto} />
     </div>
@@ -154,7 +157,7 @@ export function InicioDesktop({ usuario, traslados, conductorFotoUrl = null, veh
     <div className={styles.dashboard} data-testid="desktop-dashboard">
       <header className={styles.welcome}><div><p>Bienvenido de nuevo, {nombre}</p><h1>Tu traslado, en orden.</h1><span>Gestiona, monitorea y da seguimiento a todos tus traslados de forma simple y segura.</span></div><Link href="/viajes/nuevo" className={styles.primary}><Icon name="plus" />Registrar nuevo traslado</Link></header>
       {errorVehiculos && <p role="alert" className={styles.loadError}>No pudimos cargar tus vehículos. <button onClick={() => router.refresh()}>Reintentar</button></p>}
-      {viaje?.traslado_id ? <ActiveOverview key={viaje.traslado_id} viaje={viaje} vehiculos={vehiculos} foto={conductorFotoUrl} enabled={desktopVisible} /> : <section className={styles.emptyOverview} aria-label="Sin traslado activo"><div><p className={styles.eyebrow}><Icon name="car" />TU PRÓXIMO DESTINO EMPIEZA AQUÍ</p><h2>No tienes traslados activos</h2><p>Registra un nuevo traslado y sigue cada etapa de tu vehículo desde un solo lugar.</p><Link href="/viajes/nuevo" className={styles.primary}><Icon name="plus" />Registrar traslado</Link></div><Image src="/imagenes/dashboard-sedan.webp" width={720} height={400} alt="Ilustración de un sedán blanco" unoptimized priority /></section>}
+      {viaje?.traslado_id ? <ActiveOverview key={viaje.traslado_id} viaje={viaje} vehiculos={vehiculos} foto={conductorFotoUrl} enabled={desktopVisible} /> : <section className={styles.emptyOverview} aria-label="Sin traslado activo"><div><p className={styles.eyebrow}><Icon name="car" />TU PRÓXIMO DESTINO EMPIEZA AQUÍ</p><h2>No tienes traslados activos</h2><p>Registra un nuevo traslado y sigue cada etapa de tu vehículo desde un solo lugar.</p><Link href="/viajes/nuevo" className={styles.primary}><Icon name="plus" />Registrar traslado</Link></div><Image src="/imagenes/dashboard-sedan.webp" width={720} height={400} alt="Ilustración de un sedán blanco" unoptimized priority={desktopVisible} /></section>}
       <nav className={styles.quickActions} aria-label="Acciones rápidas">{actions.map(action => <Link key={action.href} href={action.href} data-tone={action.tone}><span className={styles.actionIcon}><Icon name={action.icon} /></span><div><strong>{action.title}</strong><p>{action.description}</p></div><Icon name="chevron" /></Link>)}</nav>
       <div className={styles.bottomRow}>
         <section className={`${styles.card} ${styles.recent}`} aria-label="Últimos traslados"><header className={styles.sectionHeading}><h2>Últimos traslados</h2><Link href="/mis-viajes">Ver todos</Link></header><div className={styles.recentScroll} tabIndex={0} aria-label="Tabla de últimos traslados"><table><thead><tr><th>VEHÍCULO</th><th>ORIGEN</th><th aria-label="Ruta" /><th>DESTINO</th><th>FECHA</th><th>ESTADO</th><th aria-label="Opciones" /></tr></thead><tbody>{historial.map(item => <tr key={item.traslado_id}><td><Link href={`/viajes/${item.traslado_id}`} className={styles.vehicleCell}><VehicleImage traslado={item} vehiculos={vehiculos} /><div><strong>{modelo(item)}</strong><small>{item.vehiculo_placas || "Sin placas"}</small></div></Link></td><td>{item.origen_ciudad || "Por confirmar"}</td><td><Icon name="arrow" /></td><td>{item.destino_ciudad || "Por confirmar"}</td><td>{item.creado_en && Number.isFinite(Date.parse(item.creado_en)) ? <time dateTime={item.creado_en}>{new Intl.DateTimeFormat("es-MX", { timeZone: "America/Mexico_City", day: "numeric", month: "short" }).format(new Date(item.creado_en))}<small>{new Intl.DateTimeFormat("es-MX", { timeZone: "America/Mexico_City", hour: "numeric", minute: "2-digit" }).format(new Date(item.creado_en))}</small></time> : "Sin fecha"}</td><td><span className={styles.status} data-tone={tono(item)}><i />{estadoTexto(item)}</span></td><td data-transfer-menu><button id={`opciones-${item.traslado_id}`} type="button" aria-label={`Opciones del traslado ${item.vehiculo_placas || item.traslado_id}`} aria-expanded={menuId === item.traslado_id} onClick={() => setMenuId(menuId === item.traslado_id ? null : item.traslado_id)}><Icon name="more" /></button>{menuId === item.traslado_id && <div className={styles.rowMenu}><Link href={`/viajes/${item.traslado_id}`}>Ver detalles</Link><Link href={`/soporte?traslado=${item.traslado_id}`}>Solicitar ayuda</Link></div>}</td></tr>)}</tbody></table>{!historial.length && <p className={styles.emptyHistory}>Aún no tienes traslados registrados. Aquí encontrarás tus próximos viajes.</p>}</div></section>

@@ -5,8 +5,9 @@ import { esperarHidratacion } from './fixtures/navegacion';
 const id = '10000000-0000-4000-8000-000000000001';
 const road = [[-99.531, 19.266], [-99.528, 19.265], [-99.525, 19.268], [-99.524, 19.274], [-99.517, 19.279], [-99.510, 19.286]];
 
-test.use({ launchOptions: { args: ['--use-angle=swiftshader', '--enable-unsafe-swiftshader'] } });
+test.use({ channel: 'chromium', video: 'off', trace: 'off' });
 test.beforeEach(async ({ page }) => {
+  await page.route('https://events.mapbox.com/**', route => route.fulfill({ status: 204, headers: { 'access-control-allow-origin': '*' } }));
   await page.route('https://api.mapbox.com/**', async route => {
     const url = route.request().url();
     if (url.includes('/directions/')) return route.fulfill({ json: { code: 'Ok', routes: [{ geometry: { type: 'LineString', coordinates: road }, duration: 720, distance: 8400 }] } });
@@ -37,6 +38,7 @@ test('Inicio desktop: datos, GPS, no scroll, contactos y navegación operativa',
   await expect(dashboard.getByRole('heading', { name: 'Tu traslado, en orden.' })).toBeVisible();
   await expect(dashboard.getByText('Bienvenido de nuevo, Carlos')).toBeVisible();
   const activo = dashboard.getByRole('article', { name: 'Traslado activo' });
+  await page.screenshot({ path: 'test-results/dashboard-initial.png', timeout: 10_000 });
   await expect(activo.getByText('12 min')).toBeVisible({ timeout: 30_000 });
   await expect(activo.getByText('8.4 km')).toBeVisible();
   await expect(page.locator('#userDashboardSidebar').getByRole('link', { name: 'Inicio', exact: true })).toHaveAttribute('aria-current', 'page');
@@ -78,7 +80,7 @@ test('Inicio desktop: datos, GPS, no scroll, contactos y navegación operativa',
   }
   await dashboard.getByRole('link', { name: 'Abrir en mapa' }).click();
   await expect(page).toHaveURL(new RegExp(`/viajes/${id}#en-ruta$`));
-  await expect(page.getByRole('tab', { name: /En ruta/ })).toBeVisible();
+  await expect(page.getByRole('tab', { name: /En Ruta/i })).toBeVisible();
   await page.goto('/', { waitUntil: 'domcontentloaded' });
   await dashboard.getByRole('link', { name: 'Enviar mensaje a Jorge Ramírez' }).click();
   await expect(page).toHaveURL(new RegExp(`/viajes/${id}#chat-conductor$`));
