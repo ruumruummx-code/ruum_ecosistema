@@ -20,6 +20,7 @@
  * deben coincidir con los de `fixtures/sesion.ts`.
  */
 import { DASHBOARD_TOKEN, datosDashboard } from "./dashboard.mjs";
+import { VEHICLES_TOKEN, datosVehiculos } from "./vehicles.mjs";
 import { createServer } from "node:http";
 import { pathToFileURL } from "node:url";
 
@@ -89,6 +90,7 @@ export const FILA_USUARIO_PENDIENTE = {
 const SESIONES = new Map([
   [ACCESS_TOKEN, FILA_USUARIO_E2E],
   [DASHBOARD_TOKEN, { ...FILA_USUARIO_E2E, nombre: "Carlos Mendoza", foto_url: null }],
+  [VEHICLES_TOKEN, { ...FILA_USUARIO_E2E, nombre: "Carlos Mendoza", foto_url: null }],
   [ACCESS_TOKEN_PENDIENTE, FILA_USUARIO_PENDIENTE],
   ["mock_access_token_foto_perfil", { ...FILA_USUARIO_E2E, foto_url: null }]
 ]);
@@ -255,8 +257,8 @@ const servidor = createServer(async (req, res) => {
     responder(res, 503, { error: "No pudimos conectar la llamada. Intenta de nuevo." });
     return;
   }
-  if (req.method === "GET" && tokenDe(req) === DASHBOARD_TOKEN) {
-    let filas = datosDashboard(ruta);
+  if (req.method === "GET" && [DASHBOARD_TOKEN, VEHICLES_TOKEN].includes(tokenDe(req))) {
+    let filas = tokenDe(req) === VEHICLES_TOKEN ? datosVehiculos(ruta) : datosDashboard(ruta);
     if (filas) {
       for (const [campo, valor] of url.searchParams) {
         if (valor.startsWith("eq.")) filas = filas.filter(fila => String(fila[campo]) === valor.slice(3));
