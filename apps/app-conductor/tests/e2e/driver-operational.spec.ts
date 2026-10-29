@@ -164,3 +164,16 @@ test("error al cargar evidencias mantiene reintento y ayuda inmediatos", async (
   await rootRemainsStill(page);
   await page.screenshot({ path: info.outputPath("error-evidencia.png") });
 });
+
+for (const viewport of [{ width: 320, height: 568 }, { width: 390, height: 844 }]) {
+  test(`evidencia origen: Siguiente avanza Fotos, Llaves y Formulario en ${viewport.width}px`, async ({ page }) => {
+    await page.setViewportSize(viewport);
+    await page.goto(`/viajes/${trip(3)}/evidencia`);
+    const siguiente = page.getByRole("region", { name: "Acciones de evidencia" }).getByRole("button", { name: /Siguiente/ });
+    await expect(page.getByRole("region", { name: "Fotos del vehículo", exact: true })).toBeVisible({ timeout: 30_000 });
+    await siguiente.click();
+    await expect(page.getByRole("region", { name: "Llaves del vehículo", exact: true })).toBeVisible();
+    await siguiente.click();
+    await expect(page.getByRole("region", { name: "Formulario de inspección", exact: true })).toBeVisible();
+  });
+}
