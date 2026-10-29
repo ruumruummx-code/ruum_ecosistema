@@ -117,6 +117,7 @@ import PaginaEvidencia from "../src/app/viajes/[id]/evidencia/page";
 afterEach(() => {
   cleanup();
   vi.clearAllMocks();
+  vi.restoreAllMocks();
 });
 
 describe("[UI/UX] Pantalla de Inspección y Evidencia Fotográfica Mobile-First", () => {
@@ -196,6 +197,17 @@ describe("[UI/UX] Pantalla de Inspección y Evidencia Fotográfica Mobile-First"
     expect(banner.textContent).toContain(
       "Asegúrate de que las fotos sean claras, con buena iluminación y sin personas."
     );
+  });
+
+  it("avanza de Fotos a Llaves con user agent de navegador real", () => {
+    vi.spyOn(navigator, "userAgent", "get").mockReturnValue("Mozilla/5.0 Chrome/138.0.0.0");
+    render(<PaginaEvidencia />);
+
+    const acciones = screen.getByRole("region", { name: "Acciones de evidencia" });
+    fireEvent.click(within(acciones).getByRole("button", { name: /Siguiente/i }));
+
+    expect(screen.getByRole("region", { name: "Llaves del vehículo" })).toBeTruthy();
+    expect(finalizarMock).not.toHaveBeenCalled();
   });
 
   it("interactúa con la Fila de Acciones Base y avanza modularmente entre pestañas", () => {
