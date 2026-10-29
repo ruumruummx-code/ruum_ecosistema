@@ -4,7 +4,8 @@ import type { CalificacionTraslado } from "../types/conductor";
 /**
  * PRD §4.13 — rangos de calificación que determinan elegibilidad por calificación:
  * < 4.0 pierde elegibilidad; 4.0–4.49 Básica; 4.5–4.79 Ejecutiva;
- * 4.8–4.89 Luxury; ≥4.9 Colección (sujeto a cumplir además la matriz §4.3).
+ * 4.8–4.89 Luxury; ≥4.9 Colección. Política 2026-10-29: el nivel operativo
+ * depende de este promedio; todos ingresan con 5.0, sin mínimo de experiencia.
  */
 export function nivelPorCalificacion(calificacionPromedio: number): NivelCONCER | null {
   if (calificacionPromedio >= 4.9) return "coleccion";

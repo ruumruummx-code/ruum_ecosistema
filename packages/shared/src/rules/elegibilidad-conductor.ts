@@ -1,7 +1,6 @@
 import type { Conductor, NivelCONCER } from "../types/conductor";
 import type { TipoVehiculo } from "../types/vehiculo";
 import {
-  ORDEN_NIVEL,
   NIVELES_CONCER,
   REQUISITOS_NIVEL_CONCER,
   type TipoRuta,
@@ -17,10 +16,8 @@ export type { TipoRuta };
  * cumple el conductor (traslados completados, certificaciones vigentes y
  * ausencia de incidencias graves en la ventana correspondiente).
  *
- * NO considera la calificación por sí sola más allá del mínimo de la matriz;
- * la calificación como tope independiente se evalúa en nivelPorCalificacion
- * (§4.13) y se combina en nivelOperativoVigente, conforme indica el PRD:
- * "ambos criterios deben cumplirse de forma simultánea".
+ * @deprecated Métrica histórica. Desde 2026-10-29 no limita el nivel operativo;
+ * el nivel se determina únicamente por las calificaciones de los usuarios.
  */
 export function nivelPorExperienciaYCertificacion(
   conductor: Conductor,
@@ -57,23 +54,16 @@ export function nivelPorExperienciaYCertificacion(
 }
 
 /**
- * PRD §4.3 + §4.13 — "El nivel operativo vigente de un conductor es el menor
- * entre el nivel alcanzado por experiencia y certificación (matriz) y el
- * nivel permitido por su calificación actual; ambos criterios deben
- * cumplirse de forma simultánea."
+ * Política 2026-10-29: todos ingresan con 5.0 y nivel máximo (Concer 4).
+ * Las calificaciones reales de usuarios mantienen o reducen el nivel.
+ * Experiencia y certificaciones históricas no limitan este cálculo.
  * Devuelve null si la calificación está por debajo de 4.0 (pierde elegibilidad).
  */
 export function nivelOperativoVigente(
   conductor: Conductor,
-  requisitos: Record<NivelCONCER, RequisitosNivel> = REQUISITOS_NIVEL_CONCER
+  _requisitos: Record<NivelCONCER, RequisitosNivel> = REQUISITOS_NIVEL_CONCER
 ): NivelCONCER | null {
-  const porCalificacion = nivelPorCalificacion(conductor.calificacion_promedio);
-  if (!porCalificacion) return null;
-
-  const porExperiencia = nivelPorExperienciaYCertificacion(conductor, requisitos);
-
-  const idxMenor = Math.min(ORDEN_NIVEL[porExperiencia], ORDEN_NIVEL[porCalificacion]);
-  return NIVELES_CONCER.find((n) => ORDEN_NIVEL[n] === idxMenor) ?? null;
+  return nivelPorCalificacion(conductor.calificacion_promedio);
 }
 
 export function vehiculosPermitidos(
@@ -128,6 +118,19 @@ export function esElegibleParaViaje(
     extendido.licencia_vigente === false
   ) {
     return { elegible: false, motivo: "MAIC: identidad o licencia sin validar/vigente" };
+  }
+
+  if (conductor.suspensiones_activas > 0) {
+    return { elegible: false, motivo: "Suspensión activa" };
+  }
+
+  // Las incidencias bloquean la operación; no cambian el nivel por calificación.
+  const nivelRequerido = tipoVehiculo === "coleccion" ? 4
+    : tipoVehiculo === "luxury" || tipoRuta === "interurbana_mas_100km" ? 3
+    : tipoVehiculo === "pick_up" || tipoVehiculo === "van" || tipoRuta === "interurbana_menos_100km" ? 2 : 1;
+  if ((nivelRequerido >= 2 && conductor.incidencias_graves_6m > 0)
+    || (nivelRequerido >= 3 && conductor.incidencias_graves_12m > 0)) {
+    return { elegible: false, motivo: "Incidencias graves en la ventana operativa" };
   }
 
   const nivel = nivelOperativoVigente(conductor, requisitos);
