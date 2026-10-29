@@ -177,10 +177,12 @@ export function TrasladoAsignadoDetails({
   return (
     <div
       data-assigned-trip
+      data-trip-viewport
       className="mx-auto flex h-screen max-h-[100dvh] w-full max-w-md flex-col justify-between overflow-hidden bg-[#F4F8FD] text-[#0A1E3C] select-none"
     >
-      {/* CONTENIDO COMPACTO SIN SCROLL VERTICAL */}
+      {/* ENCABEZADO Y ACCIÓN PERSISTENTES, CONTENIDO CENTRAL DESPLAZABLE */}
       <div
+        data-trip-layout
         className="flex min-h-0 flex-1 flex-col justify-between px-4 pt-[max(10px,env(safe-area-inset-top))] pb-2.5"
       >
         {/* 1. HEADER INSTITUCIONAL Y CITA */}
@@ -268,6 +270,8 @@ export function TrasladoAsignadoDetails({
           </section>
         </div>
 
+        {/* eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex -- Región desplazable accesible con teclado. */}
+        <div data-trip-body tabIndex={0} role="region" aria-label="Información del traslado asignado">
         {/* 2. BLOQUE DE PRÓXIMA ACCIÓN */}
         <section aria-label="Próxima acción" className="flex flex-col">
           <span className="font-display text-[10px] font-extrabold uppercase tracking-wider text-[#1E62D0]">
@@ -489,6 +493,8 @@ export function TrasladoAsignadoDetails({
             <WazeLogo />
             <span className="truncate">Abrir en Waze</span>
           </a>
+        </div>
+
         </div>
 
         {/* 6. BOTÓN DE ACCIÓN DOMINANTE (FIJO EN BASE) */}
