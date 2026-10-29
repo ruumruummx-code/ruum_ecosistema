@@ -1,5 +1,7 @@
 -- Política 2026-10-29. Fixtures aislados: todo se revierte al finalizar.
+create extension if not exists pgtap with schema extensions;
 begin;
+select plan(1);
 
 insert into public.conductores(id, nombre)
 values ('96900000-0000-4000-8000-000000000201', 'Conductor RT-69');
@@ -57,4 +59,6 @@ do $$ begin
   assert (select calificacion_promedio = 5 and nivel_operativo_vigente = 'coleccion'
     from public.conductores where id = '96900000-0000-4000-8000-000000000201'), 'Sin valoraciones se conserva máximo inicial';
 end; $$;
+select pass('RT-69: alta máxima, rangos, reputación por usuario y permisos verificados');
+select * from finish();
 rollback;
