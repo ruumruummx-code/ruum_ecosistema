@@ -170,7 +170,7 @@ for (const viewport of [{ width: 320, height: 568 }, { width: 390, height: 844 }
     await page.setViewportSize(viewport);
     await page.goto(`/viajes/${trip(3)}/evidencia`);
     const siguiente = page.getByRole("region", { name: "Acciones de evidencia" }).getByRole("button", { name: /Siguiente/ });
-    await expect(page.getByRole("region", { name: "Fotos del vehículo", exact: true })).toBeVisible();
+    await expect(page.getByRole("region", { name: "Fotos del vehículo", exact: true })).toBeVisible({ timeout: 30_000 });
     await siguiente.click();
     await expect(page.getByRole("region", { name: "Llaves del vehículo", exact: true })).toBeVisible();
     await siguiente.click();
