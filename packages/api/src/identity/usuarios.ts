@@ -1,5 +1,5 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
-import type { Database } from "@ruum/shared/types";
+import type { Database, Json } from "@ruum/shared/types";
 import { assertAdminAnyPermission, assertAdminPermission } from "../services/permisos-admin";
 
 type Cliente = SupabaseClient<Database>;
@@ -264,6 +264,54 @@ export async function clasificarRolApp(cliente: Cliente, authUserId: string): Pr
 /** FASE 6 cierre — contacto mínimo visible por RLS para un traslado asignado. */
 export async function obtenerContactoUsuarioVisible(cliente: Cliente, usuarioId: string): Promise<{ nombre: string | null; telefono: string | null } | null> {
   const { data, error } = await cliente.from("usuarios").select("nombre,telefono").eq("id", usuarioId).maybeSingle();
+  if (error) throw error;
+  return data;
+}
+
+
+/**
+ * FASE 6 — Preferencias de usuario (libreta de ubicaciones, etc.) bajo frontera arquitectónica.
+ */
+export interface UsuarioPreferenciasRow {
+  id: string;
+  preferencias: Json | null;
+  actualizado_en: string;
+}
+
+export async function obtenerPreferenciasUsuarioPorAuth(
+  cliente: Cliente,
+  authUserId: string
+): Promise<UsuarioPreferenciasRow | null> {
+  const { data, error } = await cliente
+    .from("usuarios")
+    .select("id, preferencias, actualizado_en")
+    .eq("auth_user_id", authUserId)
+    .single();
+  if (error) throw error;
+  return data;
+}
+
+export async function actualizarPreferenciasUsuarioOptimista(
+  cliente: Cliente,
+  params: {
+    id: string;
+    authUserId: string;
+    actualizadoEnPrevio: string;
+    preferencias: NonNullable<Json>;
+    nuevoTimestamp: string;
+  }
+): Promise<{ id: string } | null> {
+  const { data, error } = await cliente
+    .from("usuarios")
+    .update({
+      preferencias: params.preferencias,
+      actualizado_en: params.nuevoTimestamp
+    })
+    .eq("id", params.id)
+    .eq("auth_user_id", params.authUserId)
+    .eq("actualizado_en", params.actualizadoEnPrevio)
+    .select("id")
+    .maybeSingle();
   if (error) throw error;
   return data;
 }
