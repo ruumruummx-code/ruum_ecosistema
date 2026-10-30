@@ -290,7 +290,7 @@ describe("Mi cuenta desktop", () => {
         seccionInicial="perfil"
       />,
     );
-    fireEvent.error(screen.getByAltText("Foto de Carlos Mendoza"));
+    fireEvent.error(screen.getByAltText("Fotografía de Carlos Mendoza"));
     expect(
       screen.getByLabelText("Iniciales de Carlos Mendoza"),
     ).toHaveTextContent("CM");
