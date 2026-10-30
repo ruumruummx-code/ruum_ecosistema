@@ -75,11 +75,11 @@ test("Identidad: sheets validan, cancelan, guardan y conservan datos al volver",
   await expect(page.getByRole("progressbar").locator('[data-active="true"]')).toHaveCount(2);
   await checkSizes(page);
   await page.setViewportSize({ width: 1280, height: 900 });
-  // El marco debe adoptar el nuevo viewport antes de medir (mismo criterio que checkSizes).
-  await expect.poll(() => page.locator("[data-conductor-registration]").evaluate(el => el.style.getPropertyValue("--registration-height"))).toBe("900px");
-  const bounds = await page.locator("[data-conductor-registration]").boundingBox();
-  expect(bounds!.width).toBe(440);
-  expect(bounds!.x).toBe(420);
+  // El marco debe adoptar el nuevo viewport y dimensiones antes de medir (mismo criterio que checkSizes).
+  await expect.poll(async () => {
+    const b = await page.locator("[data-conductor-registration]").boundingBox();
+    return b ? { width: Math.round(b.width), height: Math.round(b.height), x: Math.round(b.x), y: Math.round(b.y) } : null;
+  }).toEqual({ width: 440, height: 860, x: 420, y: 20 });
   await geometry(page);
   const next = page.getByRole("button", { name: "Guardar y continuar", exact: true });
   await expect(next).toBeDisabled();
