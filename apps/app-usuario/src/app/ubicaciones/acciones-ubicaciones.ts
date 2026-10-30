@@ -3,6 +3,10 @@ import type { Json } from "@ruum/shared/types";
 import { revalidatePath } from "next/cache";
 import { crearClienteServidor } from "../../lib/supabase-server";
 import {
+  obtenerPreferenciasUsuarioPorAuth,
+  actualizarPreferenciasUsuarioOptimista,
+} from "@ruum/api/identity";
+import {
   aplicarOperacionLibreta,
   ErrorLibreta,
   CLAVE_LIBRETA,
@@ -24,12 +28,15 @@ export async function guardarOperacionUbicacion(
         mensaje: "Inicia sesión de nuevo para guardar tus ubicaciones.",
       };
     for (let intento = 0; intento < 3; intento++) {
-      const { data: actual, error: lectura } = await cliente
-        .from("usuarios")
-        .select("id, preferencias, actualizado_en")
-        .eq("auth_user_id", auth.user.id)
-        .single();
-      if (lectura || !actual)
+      let actual;
+      try {
+        actual = await obtenerPreferenciasUsuarioPorAuth(cliente, auth.user.id);
+      } catch {
+        throw new ErrorLibreta(
+          "No pudimos consultar tus ubicaciones. Inténtalo de nuevo.",
+        );
+      }
+      if (!actual)
         throw new ErrorLibreta(
           "No pudimos consultar tus ubicaciones. Inténtalo de nuevo.",
         );
@@ -46,24 +53,23 @@ export async function guardarOperacionUbicacion(
       const timestamp = new Date(
         Math.max(Date.now(), (Date.parse(actual.actualizado_en) || 0) + 1),
       ).toISOString();
-      const { data: guardada, error } = await cliente
-        .from("usuarios")
-        .update({
+      let guardada;
+      try {
+        guardada = await actualizarPreferenciasUsuarioOptimista(cliente, {
+          id: actual.id,
+          authUserId: auth.user.id,
+          actualizadoEnPrevio: actual.actualizado_en,
           preferencias: {
             ...previas,
             [CLAVE_LIBRETA]: libreta,
           } as unknown as NonNullable<Json>,
-          actualizado_en: timestamp,
-        })
-        .eq("id", actual.id)
-        .eq("auth_user_id", auth.user.id)
-        .eq("actualizado_en", actual.actualizado_en)
-        .select("id")
-        .maybeSingle();
-      if (error)
+          nuevoTimestamp: timestamp,
+        });
+      } catch {
         throw new ErrorLibreta(
           "No pudimos guardar tu ubicación. Inténtalo de nuevo.",
         );
+      }
       if (guardada) {
         revalidatePath("/ubicaciones");
         revalidatePath("/cuenta");

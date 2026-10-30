@@ -94,6 +94,25 @@ html:has([data-assigned-trip], [data-en-camino-origen], [data-recibe-vehiculo], 
   overflow: hidden;
   background: #F4F8FD;
 }
+html[data-trip-keyboard="true"]:has([data-assigned-trip], [data-en-camino-origen], [data-recibe-vehiculo], [data-inspeccion-evidencia], [data-inicia-trayecto], [data-en-traslado], [data-cierre-traslado]) [data-trip-frame] {
+  bottom: var(--trip-keyboard-inset, 0px);
+  height: var(--trip-visible-height, 100dvh);
+  max-height: var(--trip-visible-height, 100dvh);
+}
+html[data-trip-keyboard="true"] [data-inspeccion-evidencia] {
+  height: 100% !important;
+  max-height: 100% !important;
+}
+html[data-trip-keyboard="true"] [data-inspeccion-evidencia] nav[aria-label="Navegación principal móvil"] {
+  display: none !important;
+}
+html[data-trip-keyboard="true"] [data-inspeccion-evidencia] section[aria-label="Formulario de inspección"],
+html[data-trip-keyboard="true"] [data-inspeccion-evidencia] section[aria-label="Fotos del vehículo"],
+html[data-trip-keyboard="true"] [data-inspeccion-evidencia] section[aria-label="Llaves del vehículo"] {
+  overflow-y: auto;
+  min-height: 0;
+  justify-content: flex-start !important;
+}
 html:has([data-assigned-trip], [data-en-camino-origen], [data-recibe-vehiculo], [data-inspeccion-evidencia], [data-inicia-trayecto], [data-en-traslado], [data-cierre-traslado]) [data-trip-scroll] {
   overflow: hidden;
   scroll-padding: 0;

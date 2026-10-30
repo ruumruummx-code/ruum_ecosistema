@@ -64,7 +64,7 @@ export function AvatarCuenta({
           src={url}
           width={192}
           height={192}
-          alt={`Foto de ${nombre}`}
+          alt={`Fotografía de ${nombre}`}
           unoptimized
           onError={() => setError(true)}
         />
