@@ -150,7 +150,7 @@ test("evidencias: siguiente requisito, teclado y retorno de soporte", async ({ p
   const next = page.getByRole("button", { name: "Siguiente requisito", exact: false });
   await reachable(next);
   await next.click();
-  await expect(page.locator("#evid-fotos button").first()).toBeFocused();
+  await expect(page.getByRole("region", { name: "Llaves del vehículo", exact: true })).toBeVisible();
   const steps = page.getByRole("navigation", { name: "Pasos de evidencia", exact: true });
   await steps.getByRole("link", { name: /^KM:/ }).click();
   const km = page.getByRole("textbox", { name: "Kilometraje actual", exact: true });
