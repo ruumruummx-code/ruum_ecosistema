@@ -9,6 +9,18 @@ import { esquemaUuid, rpcValidado } from "./_rpc-validado";
 
 type Cliente = SupabaseClient<Database>;
 
+export interface OportunidadAsignacion {
+  modo: "dirigida" | "competencia"; asignacion_id: string | null; elegible: boolean;
+  motivos: string[]; expira_en: string | null; solicitud_estado: string | null;
+  cierra_en: string | null; asignada_a_mi: boolean; tomada: boolean;
+}
+export async function consultarOportunidadAsignacion(cliente: Cliente, trasladoId: string): Promise<OportunidadAsignacion> {
+  const { data, error } = await (cliente as unknown as SupabaseClient).rpc("consultar_oportunidad_asignacion", { p_traslado_id: trasladoId });
+  if (error) throw error;
+  if (!data) throw new Error("No se pudo consultar la oportunidad de asignación.");
+  return data as OportunidadAsignacion;
+}
+
 const TABLA = "asignaciones" as never;
 
 const esquemaOfrecer = z.object({

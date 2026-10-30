@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import type { SupabaseClient } from "@supabase/supabase-js";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Aviso } from "@ruum/ui";
@@ -56,6 +57,11 @@ export function CierreTrasladoDetails({
   // State
   const [inspeccionInicial, setInspeccionInicial] = useState<InspeccionData | null>(null);
   const [inspeccionFinal, setInspeccionFinal] = useState<InspeccionData | null>(null);
+  const [llavesResueltas, setLlavesResueltas] = useState(false);
+  const inventarioValido = (valor: string | null | undefined) => typeof valor === "string" && /^[0-9]+$/.test(valor);
+  const faltanLlaves = !inventarioValido(inspeccionInicial?.llaves_recibidas) || !inventarioValido(inspeccionFinal?.llaves_recibidas);
+  const diferenciaLlaves = Number(inspeccionInicial?.llaves_recibidas) !== Number(inspeccionFinal?.llaves_recibidas);
+  const bloqueoLlaves = faltanLlaves || (diferenciaLlaves && !llavesResueltas);
   const [gastos, setGastos] = useState<GastoData[]>([]);
   
   // Form states for adding expense
@@ -88,6 +94,10 @@ export function CierreTrasladoDetails({
           const final = insps.find((i) => i.tipo === "final") as InspeccionData | undefined;
           if (inicial) setInspeccionInicial(inicial);
           if (final) setInspeccionFinal(final);
+          const { data: resolucion, error: errorResolucion } = await (cliente as unknown as SupabaseClient)
+            .from("resoluciones_inventario_llaves").select("inicial,final,responsable,motivo,resuelta_en").eq("traslado_id", trasladoId).maybeSingle();
+          if (errorResolucion) throw errorResolucion;
+          setLlavesResueltas(Boolean(resolucion && resolucion.inicial === inicial?.llaves_recibidas && resolucion.final === final?.llaves_recibidas));
         }
 
         // Fetch expenses
@@ -224,6 +234,10 @@ export function CierreTrasladoDetails({
 
   async function handleFinalizarTraslado() {
     if (procesando) return;
+    if (bloqueoLlaves) {
+      setError("Inventario de llaves pendiente. Documenta la diferencia con operación y solicita resolución de administración.");
+      return;
+    }
     setProcesando(true);
     setError(null);
     setAvisoExito(null);
@@ -825,10 +839,12 @@ export function CierreTrasladoDetails({
           </div>
 
           {writable ? (
+            <>
+            {bloqueoLlaves && <p role="alert" className="text-sm text-danger">Llaves: origen {inspeccionInicial?.llaves_recibidas ?? "sin captura"}, destino {inspeccionFinal?.llaves_recibidas ?? "sin captura"}. Documenta con operación si la diferencia es física o de captura y solicita resolución de administración. Conserva el registro original. Recarga después de la resolución.</p>}
             <button
               type="button"
               onClick={() => setConfirmarCierreAbierto(true)}
-              disabled={procesando}
+              disabled={procesando || cargando || bloqueoLlaves}
               className="w-full min-h-[48px] rounded-2xl bg-signal hover:bg-signal/85 text-slate-950 font-display text-xs font-black tracking-widest uppercase transition-all cursor-pointer shadow-lg select-none flex items-center justify-center focus:outline-hidden"
             >
               {procesando ? (
@@ -837,6 +853,7 @@ export function CierreTrasladoDetails({
                 "FINALIZAR Y ENTREGAR VEHÍCULO"
               )}
             </button>
+            </>
           ) : (
             <button
               type="button"

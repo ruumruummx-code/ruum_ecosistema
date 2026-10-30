@@ -56,7 +56,13 @@ export async function exportarEvidenciaFirmada(
 }
 
 /** FASE 6 cierre — persistencia idempotente de foto ya subida a Storage. */
-export async function guardarFotoEvidenciaSincronizada(cliente: Cliente, fila: Database["public"]["Tables"]["evidencia_fotos"]["Insert"]): Promise<void> {
-  const { error } = await cliente.from("evidencia_fotos").upsert(fila, { onConflict: "id" });
+export async function guardarFotoEvidenciaSincronizada(cliente: Cliente, fila: Database["public"]["Tables"]["evidencia_fotos"]["Insert"] & { sha256: string }): Promise<void> {
+  const { data, error } = await (cliente as unknown as SupabaseClient).rpc("registrar_foto_idempotente", { p_foto: fila });
+  if (error) throw error;
+  if (!data?.ok) throw new Error("Conflicto real de evidencia. Conserva la captura y contacta a operación.");
+}
+
+export async function registrarConflictoEvidencia(cliente: Cliente, conflicto: { captura_id: string; traslado_id: string; ruta: string; sha256_esperado: string; sha256_observado: string }) {
+  const { error } = await (cliente as unknown as SupabaseClient).from("evidencia_conflictos").upsert(conflicto, { onConflict: "captura_id", ignoreDuplicates: true });
   if (error) throw error;
 }

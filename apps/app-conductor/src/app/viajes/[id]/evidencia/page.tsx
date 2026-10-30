@@ -111,7 +111,7 @@ export default function PaginaEvidencia() {
       if (data.kilometraje !== null) {
         setKilometraje(data.kilometraje.toLocaleString("es-MX"));
       }
-      setLlavesCount(Number(data.llaves_recibidas) || 2);
+      setLlavesCount(Number(data.llaves_recibidas ?? 2));
       setTarjetaCirculacion(data.tarjeta_circulacion || "no");
       setTalonVerificacion(data.talon_verificacion || "no");
       setHologramaVerificacion(data.holograma_verificacion ? "si" : "no");

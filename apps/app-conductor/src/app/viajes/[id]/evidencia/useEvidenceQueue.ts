@@ -8,6 +8,7 @@ import { crearClienteNavegador, tieneSupabaseConfigurado } from "@/lib/supabase-
 import {
   contarColaEvidencia,
   encolarEvidencia,
+  hashBlob,
   type ItemColaEvidencia,
   leerColaEvidenciaDeTraslado,
   sincronizarColaEvidencia
@@ -41,12 +42,15 @@ export function useEvidenceQueue({ trasladoId, tipo }: { trasladoId: string; tip
     async ({ angulo, dataUrl }: { angulo: AnguloEvidencia; dataUrl: string }) => {
       if (!tipo) return [];
       const cliente = crearClienteNavegador();
-      const { data } = await cliente.auth.getUser();
-      if (!data.user?.id) throw new Error("No hay una sesión válida para asociar la evidencia pendiente.");
+      const { data: sesion } = await cliente.auth.getSession();
+      const usuarioId = sesion.session?.user.id;
+      if (!usuarioId) throw new Error("No hay una sesión válida para asociar la evidencia pendiente.");
       const coords = await obtenerUbicacionActual();
-      const localId = crypto.randomUUID();
+      // La misma captura conserva identidad tras doble toque o recarga.
+      const hash = await hashBlob(new Blob([`${usuarioId}|${trasladoId}|${tipo}|${angulo}|${dataUrl}`]));
+      const localId = `${hash.slice(0,8)}-${hash.slice(8,12)}-4${hash.slice(13,16)}-a${hash.slice(17,20)}-${hash.slice(20,32)}`;
       await encolarEvidencia({
-        usuarioId: data.user.id,
+        usuarioId,
         localId,
         trasladoId,
         tipo,

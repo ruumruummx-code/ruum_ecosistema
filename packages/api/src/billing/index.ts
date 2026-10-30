@@ -2,3 +2,4 @@
 export * from "./pagos";
 export * from "./cotizaciones";
 export * from "./finanzas-operacion";
+export * from "./facturas";

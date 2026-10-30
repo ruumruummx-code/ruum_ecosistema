@@ -1,15 +1,15 @@
-import { guardarFotoEvidenciaSincronizada } from "@ruum/api/custody";
+import { guardarFotoEvidenciaSincronizada, registrarConflictoEvidencia } from "@ruum/api/custody";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@ruum/shared/types";
 import { createLogger, errorCode } from "@ruum/shared/utils";
 import { crearClienteNavegador, tieneSupabaseConfigurado } from "./supabase-browser";
 import { withTimeout } from "./with-timeout";
-import { pLimit } from "@ruum/shared/utils";
+
 
 // PERF-004 — timeouts + rate limit para sync offline
 const TIMEOUT_UPLOAD_MS = 15_000;
 const TIMEOUT_UPSERT_MS = 10_000;
-export const CONCURRENCIA_SYNC_EVIDENCIA = 2;
+export const CONCURRENCIA_SYNC_EVIDENCIA = 1;
 import {
   eliminarJsonLocalSeguro,
   guardarJsonLocalSeguro,
@@ -172,37 +172,22 @@ export async function leerColaEvidenciaCompleta(): Promise<ItemColaEvidencia[]> 
   return normalizarItemsCola(await storageColaEvidencia.read());
 }
 
-export async function encolarEvidencia(item: ItemColaEvidencia): Promise<void> {
+async function encolarEvidenciaInterna(item: ItemColaEvidencia): Promise<void> {
   if (!item.usuarioId) throw new Error("evidence_queue_user_required");
   const colaCompleta = await leerColaEvidenciaCompleta();
   const itemNormalizado = normalizarItemCola(item);
+  itemNormalizado.sha256 = await hashBlob(blobDesdeDataUrl(await obtenerDataUrlParaItem(itemNormalizado)));
   const dataUrlOriginal = itemNormalizado.dataUrl;
   // P1 mediano plazo: guardar binario fuera del JSON principal (cifrado por item)
-  if (dataUrlOriginal && dataUrlOriginal.startsWith("data:")) {
-    await guardarBinarioEvidencia(itemNormalizado.localId, dataUrlOriginal);
-  }
   // En la cola principal guardar solo metadata (sin dataUrl grande) — se reconstruye al leer para UI/sync
   const itemParaCola: ItemColaEvidencia = { ...itemNormalizado, dataUrl: "" };
-  // Deduplicar SOLO contra items del mismo usuario + mismo traslado/tipo/ángulo/sha — nunca contra otros usuarios
-  const restantes = colaCompleta.filter((existente) => {
-    if (existente.localId === itemParaCola.localId) return false;
-    if (existente.usuarioId !== itemParaCola.usuarioId) return true;
-    const mismoSlot =
-      existente.trasladoId === itemParaCola.trasladoId &&
-      existente.tipo === itemParaCola.tipo &&
-      existente.angulo === itemParaCola.angulo;
-    if (mismoSlot) return false;
-    const mismoSha =
-      Boolean(existente.sha256 && itemParaCola.sha256) &&
-      existente.trasladoId === itemParaCola.trasladoId &&
-      existente.sha256 === itemParaCola.sha256;
-    if (mismoSha) return false;
-    return true;
-  });
-  // Si se reemplaza un slot, limpiar binario del item reemplazado
-  const reemplazados = colaCompleta.filter((ex) => !restantes.includes(ex) && ex.localId !== itemParaCola.localId);
-  if (reemplazados.length > 0) await limpiarBinariosDeCola(reemplazados);
-  await storageColaEvidencia.write([...restantes, itemParaCola]);
+  // No reemplazar capturas diferentes; reintento idéntico conserva ID y metadatos.
+  const mismoId = colaCompleta.find((ex) => ex.localId === itemParaCola.localId);
+  if (mismoId && (mismoId.usuarioId !== itemParaCola.usuarioId || mismoId.trasladoId !== itemParaCola.trasladoId || mismoId.tipo !== itemParaCola.tipo || mismoId.angulo !== itemParaCola.angulo || mismoId.sha256 !== itemParaCola.sha256)) throw new Error("evidence_capture_identity_conflict");
+  const identica = colaCompleta.find((ex) => ex.usuarioId === itemParaCola.usuarioId && ex.trasladoId === itemParaCola.trasladoId && ex.tipo === itemParaCola.tipo && ex.angulo === itemParaCola.angulo && ex.sha256 === itemParaCola.sha256);
+  if (identica) return;
+  if (dataUrlOriginal && dataUrlOriginal.startsWith("data:")) await guardarBinarioEvidencia(itemNormalizado.localId, dataUrlOriginal);
+  await storageColaEvidencia.write([...colaCompleta, itemParaCola]);
   if (typeof window !== "undefined") window.dispatchEvent(new CustomEvent("ruum:evidencia-pendiente"));
 }
 
@@ -223,7 +208,7 @@ export async function leerColaEvidencia(trasladoId?: string, usuarioIdExplicito?
   return trasladoId ? porUsuario.filter((item) => item.trasladoId === trasladoId) : porUsuario;
 }
 
-export async function quitarDeColaEvidencia(localId: string): Promise<void> {
+async function quitarDeColaEvidenciaInterna(localId: string): Promise<void> {
   const colaCompleta = await leerColaEvidenciaCompleta();
   const restante = colaCompleta.filter((item) => item.localId !== localId);
   await storageColaEvidencia.write(restante);
@@ -409,7 +394,7 @@ function logEvidenceSyncFailed(
   );
 }
 
-export async function sincronizarColaEvidencia(
+async function sincronizarColaEvidenciaInterna(
   cliente: SupabaseClient<Database>,
   opciones: {
     trasladoId?: string;
@@ -417,7 +402,9 @@ export async function sincronizarColaEvidencia(
     onItemSincronizado?: (item: ItemColaEvidencia) => void | Promise<void>;
   } = {}
 ) {
-  const cola = await leerColaEvidencia();
+  const { data: sesionActual } = await cliente.auth.getUser();
+  if (!sesionActual.user) throw new Error("No hay sesión para subir evidencia.");
+  const cola = await leerColaEvidencia(undefined, sesionActual.user.id);
   const itemsBase = opciones.trasladoId ? cola.filter((item) => item.trasladoId === opciones.trasladoId) : cola;
   const items = opciones.ignoreBackoff ? itemsBase : itemsBase.filter((item) => puedeReintentarse(item));
   let sincronizadas = 0;
@@ -443,17 +430,27 @@ export async function sincronizarColaEvidencia(
       throw error;
     }
 
+    const hash = await hashBlob(blob);
+    if (item.sha256 && item.sha256 !== hash) throw new Error("evidence_local_hash_conflict");
     const extension = extensionDesdeDataUrl(dataUrlEfectivo);
     const ruta = `${authUserId}/${item.trasladoId}/${item.tipo}/${item.localId}-${item.angulo}.${extension}`;
     const { error: uploadError } = await withTimeout(
       cliente.storage.from(BUCKET_EVIDENCIA).upload(ruta, blob, {
-        upsert: true,
+        upsert: false,
         contentType: blob.type || "image/jpeg",
       }) as Promise<{ error: unknown | null }>,
       TIMEOUT_UPLOAD_MS,
       `storage_upload:${item.localId}`
     );
-    if (uploadError) {
+    if (uploadError && esObjetoExistente(uploadError)) {
+      const { data: existente, error: descargaError } = await cliente.storage.from(BUCKET_EVIDENCIA).download(ruta);
+      if (descargaError || !existente) throw descargaError ?? new Error("evidence_existing_object_unverified");
+      const hashExistente = await hashBlob(existente);
+      if (hashExistente !== hash) {
+        await registrarConflictoEvidencia(cliente, { captura_id: item.localId, traslado_id: item.trasladoId, ruta, sha256_esperado: hash, sha256_observado: hashExistente });
+        throw new Error("evidence_storage_hash_conflict: conserva la captura y solicita revisión de operación");
+      }
+    } else if (uploadError) {
       const actualizado = await registrarIntentoFallido(item, uploadError);
       logEvidenceSyncFailed(actualizado, "storage_upload", uploadError, itemsBase.length);
       throw uploadError;
@@ -473,6 +470,7 @@ export async function sincronizarColaEvidencia(
           lat: item.lat ?? null,
           lng: item.lng ?? null,
           sincronizada: true,
+          sha256: hash,
         }),
         TIMEOUT_UPSERT_MS,
         `evidence_upsert:${item.localId}`
@@ -487,7 +485,7 @@ export async function sincronizarColaEvidencia(
       throw evidenciaError;
     }
 
-    await quitarDeColaEvidencia(item.localId);
+    await quitarDeColaEvidenciaInterna(item.localId);
     sincronizadas += 1;
     await opciones.onItemSincronizado?.(item);
   }
@@ -500,41 +498,29 @@ export async function sincronizarColaEvidencia(
 }
 
 /**
- * PERF-004 — Variante concurrente con p-limit(2) y timeouts.
- * Para subida masiva (ej. 10 fotos) sin saturar Storage.
- * Mantiene misma semántica de error: falla rápido si auth expiró,
- * registra intento fallido por item en otros errores.
+ * Un lote recorre cada captura una vez bajo el mismo bloqueo de cola.
+ * Conserva timeouts y errores; no repite el traslado completo por cada foto.
  * Uso: sincronizarColaEvidenciaBulk(cliente, { trasladoId })
  */
 export async function sincronizarColaEvidenciaBulk(
-  cliente: SupabaseClient<Database>,
-  opciones: { trasladoId?: string; ignoreBackoff?: boolean } = {}
+  cliente: SupabaseClient<Database>, opciones: { trasladoId?: string; ignoreBackoff?: boolean } = {}
 ): Promise<number> {
-  const cola = await leerColaEvidencia();
-  const itemsBase = opciones.trasladoId ? cola.filter((i) => i.trasladoId === opciones.trasladoId) : cola;
-  const items = opciones.ignoreBackoff ? itemsBase : itemsBase.filter((i) => puedeReintentarse(i));
-  if (items.length === 0) return 0;
+  // Una sola pasada. Antes cada tarea volvía a sincronizar todo el traslado.
+  return sincronizarColaEvidencia(cliente, opciones);
+}
 
-  const limit = pLimit(CONCURRENCIA_SYNC_EVIDENCIA);
-  let sincronizadas = 0;
-
-  // Validar sesión una vez antes de lanzar paralelos
-  const { data: sesion } = await withTimeout(cliente.auth.getUser() as unknown as Promise<{ data: { user: { id: string } | null } }>, 5000, "auth.getUser");
-  if (!sesion.user) throw new Error("No hay sesión para subir evidencia.");
-
-  const tareas = items.map((item) =>
-    limit(async () => {
-      // Reusa lógica de item único con timeouts (extraída arriba)
-      const colaIndividual = [item];
-      // Llamada secuencial por item pero limitada a 2 en paralelo a nivel bulk
-      const uploaded = await sincronizarColaEvidencia(cliente, { trasladoId: item.trasladoId, ignoreBackoff: true });
-      return uploaded;
-    })
-  );
-
-  const resultados = await Promise.allSettled(tareas);
-  for (const r of resultados) {
-    if (r.status === "fulfilled") sincronizadas += r.value;
-  }
-  return sincronizadas;
+let operacionCola: Promise<unknown> = Promise.resolve();
+function serializar<T>(fn: () => Promise<T>): Promise<T> {
+  const p = operacionCola.then(fn, fn); operacionCola = p.catch(() => undefined); return p;
+}
+async function conLockNavegador<T>(fn: () => Promise<T>): Promise<T> {
+  return typeof navigator !== "undefined" && navigator.locks ? await navigator.locks.request("ruum-evidencia-queue", fn) : fn();
+}
+export function encolarEvidencia(...args: Parameters<typeof encolarEvidenciaInterna>) { return serializar(() => conLockNavegador(() => encolarEvidenciaInterna(...args))); }
+export function sincronizarColaEvidencia(...args: Parameters<typeof sincronizarColaEvidenciaInterna>) { return serializar(() => conLockNavegador(() => sincronizarColaEvidenciaInterna(...args))); }
+export function quitarDeColaEvidencia(...args: Parameters<typeof quitarDeColaEvidenciaInterna>) { return serializar(() => conLockNavegador(() => quitarDeColaEvidenciaInterna(...args))); }
+export async function hashBlob(blob: Blob): Promise<string> { return Array.from(new Uint8Array(await crypto.subtle.digest("SHA-256", await blob.arrayBuffer()))).map((n) => n.toString(16).padStart(2,"0")).join(""); }
+function esObjetoExistente(error: unknown): boolean {
+  const e = error as { statusCode?: string | number; error?: string; message?: string };
+  return String(e?.statusCode) === "409" || e?.error === "Duplicate" || e?.message === "The resource already exists";
 }

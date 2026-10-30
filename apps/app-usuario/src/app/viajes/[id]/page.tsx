@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { FacturacionTraslado } from "./FacturacionTraslado";
 import type { ReactNode } from "react";
 import {
   firmarUrlsEvidencia,
@@ -1066,6 +1067,7 @@ export default async function PaginaTraslado({ params }: { params: Promise<{ id:
                     )}
                   </div>
                 )}
+                <FacturacionTraslado trasladoId={pasaporte.traslado_id!} />
                 <div id="soporte-pasaporte" className="mt-6 rounded-lg border border-ink/10 px-4 py-4">
                   <p className="font-body text-sm font-semibold">Contacto con soporte</p>
                   <p className="mt-1 font-body text-sm text-ink/60">

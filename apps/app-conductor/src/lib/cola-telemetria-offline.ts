@@ -1,6 +1,5 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@ruum/shared/types";
-import { registrarUbicacionTraslado } from "@ruum/api/services";
 import { distanciaMetrosEntre, type Coordenadas } from "./ubicacion";
 import { guardarJsonLocalSeguro, leerJsonLocalSeguro, eliminarJsonLocalSeguro } from "./almacenamiento-seguro-local";
 
@@ -61,6 +60,13 @@ export class InMemoryTelemetryQueueStorage implements TelemetryQueueStorage {
 }
 
 let storageTelemetria: TelemetryQueueStorage = new SecureTelemetryQueueStorage();
+let operacionPendiente: Promise<unknown> = Promise.resolve();
+
+function serializar<T>(operacion: () => Promise<T>): Promise<T> {
+  const siguiente = operacionPendiente.then(operacion, operacion);
+  operacionPendiente = siguiente.catch(() => undefined);
+  return siguiente;
+}
 
 export function configurarStorageTelemetria(storage: TelemetryQueueStorage) {
   storageTelemetria = storage;
@@ -85,6 +91,7 @@ function esPuntoIdentico(a: PuntoTelemetriaLocal, b: PuntoTelemetriaLocal) {
 function debeGuardarPunto(ultimo: PuntoTelemetriaLocal | undefined, siguiente: PuntoTelemetriaLocal) {
   if (!ultimo || ultimo.trasladoId !== siguiente.trasladoId) return true;
   if (siguiente.critical) return true;
+  if (Date.parse(siguiente.deviceTimestamp) - Date.parse(ultimo.deviceTimestamp) >= 15_000) return true;
   if (esPuntoIdentico(ultimo, siguiente)) return false;
   return distanciaMetrosEntre(
     { lat: ultimo.latitude, lng: ultimo.longitude },
@@ -99,7 +106,7 @@ function limitarTamano(items: PuntoTelemetriaLocal[]) {
   return [...criticos, ...recientes].slice(-MAX_PUNTOS_COLA);
 }
 
-export async function encolarPuntoTelemetria(
+async function encolarPuntoTelemetriaInterno(
   trasladoId: string,
   ubicacion: Coordenadas & { heading?: number | null },
   opciones: { usuarioId: string; critical?: boolean; localId?: string; deviceTimestamp?: string }
@@ -162,32 +169,47 @@ async function quitarConfirmado(localId: string) {
   await storageTelemetria.write(cola.filter((item) => item.localId !== localId));
 }
 
-export async function sincronizarColaTelemetria(
+async function sincronizarColaTelemetriaInterno(
   cliente: SupabaseClient<Database>,
   opciones: { ignoreBackoff?: boolean } = {}
 ) {
+  const { data: sesion, error: authError } = await cliente.auth.getUser();
+  if (authError) throw authError;
+  if (!sesion.user) return 0;
   const cola = await leerColaTelemetria();
-  const items = opciones.ignoreBackoff ? cola : cola.filter((item) => puedeReintentarse(item));
+  const items = cola.filter((item) => item.usuarioId === sesion.user!.id && (opciones.ignoreBackoff || puedeReintentarse(item)));
   let sincronizados = 0;
+  let ultimoError: unknown;
 
   for (const item of items) {
     try {
-      await registrarUbicacionTraslado(cliente, {
-        trasladoId: item.trasladoId,
+      const { data, error } = await (cliente as unknown as SupabaseClient).rpc("registrar_telemetria_lote", {
+        p_traslado_id: item.trasladoId,
+        p_puntos: [{
+        localId: item.localId,
+        deviceTimestamp: item.deviceTimestamp,
         lat: item.latitude,
         lng: item.longitude,
         precisionM: item.accuracyM ?? null,
-        velocidadMps: item.speedMps ?? null
+        velocidadMps: item.speedMps ?? null,
+        fuente: "web_foreground",
+        online: true
+        }]
       });
+      if (error) throw error;
+      if (!data?.aceptados?.includes(item.localId) && !data?.duplicadosIds?.includes(item.localId)) {
+        throw new Error("telemetry_point_not_acknowledged");
+      }
       await quitarConfirmado(item.localId);
       sincronizados += 1;
     } catch (error) {
       await marcarFallo(item);
-      throw error;
+      ultimoError = error;
     }
   }
 
   if (sincronizados > 0 && typeof window !== "undefined") window.dispatchEvent(new CustomEvent("ruum:telemetria-sincronizada"));
+  if (ultimoError) throw ultimoError;
   return sincronizados;
 }
 
@@ -196,4 +218,12 @@ export async function limpiarColaTelemetria() {
 }
 
 export const OFFLINE_TELEMETRY_QUEUE_KEY = CLAVE_COLA_TELEMETRIA;
+
+export function encolarPuntoTelemetria(...args: Parameters<typeof encolarPuntoTelemetriaInterno>) {
+  return serializar(() => encolarPuntoTelemetriaInterno(...args));
+}
+
+export function sincronizarColaTelemetria(...args: Parameters<typeof sincronizarColaTelemetriaInterno>) {
+  return serializar(() => sincronizarColaTelemetriaInterno(...args));
+}
 

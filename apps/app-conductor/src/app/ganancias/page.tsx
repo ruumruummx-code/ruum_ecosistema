@@ -9,8 +9,9 @@ import { traducirErrorOperativo } from "@ruum/shared/utils";
 import { crearClienteNavegador, tieneSupabaseConfigurado } from "../../lib/supabase-browser";
 import { obtenerConductorActual, obtenerGananciasConductor, type TrasladoConductorGanancia } from "@ruum/api/services";
 import { PanelSupportSheet } from "../panel/PanelSupportSheet";
+import {estadoLiquidacion} from "../../lib/estado-liquidacion";
 
-type Payout = Database["public"]["Tables"]["payouts_conductor"]["Row"];
+type Payout = Database["public"]["Tables"]["payouts_conductor"]["Row"] & { fecha_prevista?: string|null; pagado_en?: string|null; referencia_externa_validada?: string|null };
 type DatosBancarios = Database["public"]["Tables"]["datos_bancarios_conductor"]["Row"];
 
 type PeriodoActivo = "semana" | "mes" | "anio";
@@ -35,13 +36,12 @@ interface RegistroViajeGanancia {
 }
 
 function estatusPayout(payout: Payout): EstadoEconomicoExplicito {
-  if (payout.estado === "procesado") return "pagado";
-  if (payout.estado === "pendiente") return "programado";
-  return "rechazado";
+  return estadoLiquidacion(payout);
 }
 
 function estatusViaje(traslado: TrasladoConductorGanancia, payoutEnlazado?: Payout | null): EstadoEconomicoExplicito {
   if (payoutEnlazado) return estatusPayout(payoutEnlazado);
+  if (traslado.ganancia_conductor_congelada === null) return "sin_calcular";
   if (traslado.estado === "servicio_cerrado") return "confirmado";
   if (traslado.estado === "entrega_confirmada") return "en_validacion";
   if (
@@ -235,7 +235,7 @@ export default function PaginaGanancias() {
     return traslados.map((t) => {
       const payoutEnlazado = t.payout_id ? mapaPayouts.get(t.payout_id) : null;
       const vehiculoNombre = t.vehiculos ? `${t.vehiculos.marca} ${t.vehiculos.modelo} ${t.vehiculos.anio}` : "Vehículo trasladado";
-      const montoEstimadoOGanado = Number(t.ganancia_conductor_congelada ?? ((t.precio_final ?? t.precio_cotizado ?? 0) * 0.85));
+      const montoEstimadoOGanado = Number(t.ganancia_conductor_congelada ?? 0);
       const precioBase = Number(t.precio_final ?? t.precio_cotizado ?? 0);
       const comision = precioBase > 0 ? Math.max(0, precioBase - montoEstimadoOGanado) : 0;
       const fechaStr = t.cerrado_en ?? t.actualizado_en ?? t.creado_en;
@@ -254,7 +254,7 @@ export default function PaginaGanancias() {
         bonos: 0,
         ajuste: 0,
         estatusEconomico: estatusViaje(t, payoutEnlazado),
-        liberacion: payoutEnlazado?.procesado_en ? payoutEnlazado.procesado_en.slice(0, 10) : "Pendiente de corte",
+        liberacion: payoutEnlazado?.pagado_en?.slice(0,10) ?? payoutEnlazado?.fecha_prevista ?? "Fecha pendiente de finanzas",
         payoutId: t.payout_id,
         estadoTraslado: t.estado
       };
@@ -279,10 +279,10 @@ export default function PaginaGanancias() {
 
   // Resumen filtrado por periodo activo — fórmula única: Depósito = Precio base + Bonos + Ajustes - Tasa + Reembolso
   const resumen = useMemo(() => {
-    const precioBase = TrasladosFiltrados.reduce((tot, v) => tot + v.precioBase, 0);
+    const precioBase = TrasladosFiltrados.filter((v) => v.estatusEconomico !== "sin_calcular").reduce((tot, v) => tot + v.precioBase, 0);
     const bonos = TrasladosFiltrados.reduce((tot, v) => tot + v.bonos, 0);
     const ajuste = payoutsFiltrados.reduce((tot, p) => tot + Number(p.ajustes ?? 0), 0);
-    const comisionRuum = TrasladosFiltrados.reduce((tot, v) => tot + v.comisionRuum, 0);
+    const comisionRuum = TrasladosFiltrados.filter((v) => v.estatusEconomico !== "sin_calcular").reduce((tot, v) => tot + v.comisionRuum, 0);
     const reembolsoGastos = TrasladosFiltrados.reduce((tot, v) => tot + v.gastosAutorizados, 0);
     const retenciones = TrasladosFiltrados
       .filter((v) => v.estatusEconomico === "rechazado" || v.estatusEconomico === "retenido")
@@ -305,9 +305,11 @@ export default function PaginaGanancias() {
     };
   }, [TrasladosFiltrados, payoutsFiltrados]);
 
+  const fechaPrevista = payoutsFiltrados.find((p) => estatusPayout(p) !== "pagado" && p.fecha_prevista)?.fecha_prevista;
   const fechaDispersion = useMemo(() => {
-    // Dispersión siempre el sábado del periodo actual (semana: sábado; mes/año: último día del periodo)
-    const fin = rangoActual.fin;
+    const prevista = fechaPrevista;
+    if (!prevista) return "por confirmar con finanzas";
+    const fin = new Date(`${prevista}T12:00:00-06:00`);
     try {
       return new Intl.DateTimeFormat("es-MX", {
         weekday: "long",
@@ -319,7 +321,7 @@ export default function PaginaGanancias() {
     } catch {
       return formatearFecha(fin.toISOString().slice(0, 10));
     }
-  }, [rangoActual.fin]);
+  }, [fechaPrevista]);
   const sinDatosTotales = !cargando && traslados.length === 0 && payouts.length === 0 && !error;
 
   // Cambiar periodo resetea offset y acordeón
@@ -396,21 +398,21 @@ export default function PaginaGanancias() {
           {(() => {
             const tieneTraslados = TrasladosFiltrados.length > 0;
             const tieneValidados = TrasladosFiltrados.some((v) => v.estatusEconomico === "en_validacion" || v.estatusEconomico === "confirmado" || v.estatusEconomico === "programado");
-            const tienePagado = payoutsFiltrados.some((p) => p.estado === "procesado") || TrasladosFiltrados.some((v) => v.estatusEconomico === "pagado");
+            const tienePagado = payoutsFiltrados.some((p) => estatusPayout(p) === "pagado") || TrasladosFiltrados.some((v) => v.estatusEconomico === "pagado");
             const paso = tienePagado ? 3 : tieneValidados ? 2 : tieneTraslados ? 1 : 0;
-            const proximoPayout = payoutsFiltrados.find((p) => p.estado !== "procesado");
+
             const montoPendiente = resumen.depositoAcumulado;
             return (
               <div className="rounded-2xl border border-border/40 bg-surface-elevated p-4 flex flex-col gap-3">
                 <div className="flex items-center justify-between">
                   <span className="font-display text-xs font-black tracking-widest uppercase text-text-tertiary">Ruta de tu pago</span>
-                  <span className="rounded-full border border-emerald-600/30 bg-emerald-50 px-2.5 py-1 font-body text-xs font-bold text-emerald-800 dark:border-emerald-500/30 dark:bg-emerald-950/40 dark:text-emerald-300">{paso === 3 ? "Pagado" : paso === 2 ? "En validación" : paso === 1 ? "Traslado completado" : "Sin actividad"}</span>
+                  <span className="rounded-full border border-emerald-600/30 bg-emerald-50 px-2.5 py-1 font-body text-xs font-bold text-emerald-800 dark:border-emerald-500/30 dark:bg-emerald-950/40 dark:text-emerald-300">{paso === 3 ? "Con pagos verificados" : paso === 2 ? "Devengo en validación" : paso === 1 ? "Actividad registrada" : "Sin actividad"}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   {[
-                    { n: 1, label: "Traslado", sub: tieneTraslados ? "Hecho" : "Pendiente" },
-                    { n: 2, label: "Validado", sub: tieneValidados ? "Revisado" : "En espera" },
-                    { n: 3, label: "Pagado", sub: tienePagado ? "Depositado" : "Próximo" }
+                    { n: 1, label: "Traslado", sub: tieneTraslados ? "Registrado" : "Pendiente" },
+                    { n: 2, label: "Devengo", sub: tieneValidados ? "Registrado" : "En espera" },
+                    { n: 3, label: "Pagado", sub: tienePagado ? "Verificado" : "Por validar" }
                   ].map((s, idx) => {
                     const activo = paso >= s.n;
                     const esActual = paso === s.n;
@@ -435,7 +437,7 @@ export default function PaginaGanancias() {
                         <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
                         <polyline points="22 4 12 14.01 9 11.01" />
                       </svg>
-                      Tu pago {formatearMoneda(montoPendiente)} {tienePagado ? "depositado" : proximoPayout ? `llega ${fechaDispersion}` : `se dispersa ${fechaDispersion}`}
+                      Devengo del periodo: {formatearMoneda(montoPendiente)}. Liquidación sujeta a validación financiera; fecha {fechaDispersion}.
                     </span>
                     <span className="font-body text-xs font-bold text-text-primary whitespace-nowrap">Notificación automática</span>
                   </div>
@@ -527,7 +529,7 @@ export default function PaginaGanancias() {
             {/* Tarjeta única: Depósito acumulado + Desglose completo con tooltips */}
             <FinancialCard className="overflow-hidden p-0 border-border/60" padding="none">
               <div className="px-4 sm:px-6 pt-5 sm:pt-6">
-                <h2 className="font-display text-xl sm:text-2xl font-black tracking-tight text-text-primary">Depósito acumulado</h2>
+                <h2 className="font-display text-xl sm:text-2xl font-black tracking-tight text-text-primary">Devengo del periodo</h2>
                 <p className="mt-2 font-display text-3xl sm:text-4xl font-black tracking-tight text-text-primary tabular-nums">{formatearMoneda(resumen.depositoAcumulado)}</p>
                 <p className="mt-1.5 font-body text-xs font-semibold text-text-tertiary">(Dispersión {fechaDispersion})</p>
               </div>
@@ -728,7 +730,7 @@ export default function PaginaGanancias() {
             {/* Depósitos del periodo (si existen) */}
             {payoutsFiltrados.length > 0 && (
               <div className="mt-8">
-                <h3 className="font-display text-sm font-bold text-text-primary">Depósitos del periodo</h3>
+                <h3 className="font-display text-sm font-bold text-text-primary">Liquidaciones del periodo</h3>
                 <div className="mt-3 grid gap-3">
                   {payoutsFiltrados.map((payout) => (
                     <Card key={payout.id} className="p-4" padding="none">
@@ -757,7 +759,7 @@ export default function PaginaGanancias() {
                           </div>
                         </div>
                         {payout.referencia_pago && (
-                          <p className="font-body text-xs text-text-tertiary">SPEI: {payout.referencia_pago}</p>
+                          <p className="font-body text-xs text-text-tertiary">Referencia administrativa (no confirma transferencia): {payout.referencia_pago}</p>
                         )}
                       </div>
                     </Card>

@@ -66,7 +66,8 @@ export default function PaginaTrackingTraslado() {
 
   useEffect(() => {
     const timer = setTimeout(() => void cargar(), 0);
-    return () => clearTimeout(timer);
+    const intervalo = setInterval(() => void cargar(), 15_000);
+    return () => { clearTimeout(timer); clearInterval(intervalo); };
   }, [cargar]);
 
   if (cargando) return <AdminLoadingState label="Cargando tracking…" />;

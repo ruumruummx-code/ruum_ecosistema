@@ -49,7 +49,7 @@ function item(overrides: Partial<ItemColaEvidencia> = {}): ItemColaEvidencia {
 
 function clienteSupabaseMock({ uploadError = null, upsertError = null }: { uploadError?: Error | null; upsertError?: Error | null } = {}) {
   const upload = vi.fn(async () => ({ error: uploadError }));
-  const upsert = vi.fn(async () => ({ error: upsertError }));
+  const upsert = vi.fn(async () => ({ data: { ok: true }, error: upsertError }));
   const getPublicUrl = vi.fn();
   const fromStorage = vi.fn(() => ({ upload, getPublicUrl }));
   const fromTable = vi.fn(() => ({ upsert }));
@@ -57,11 +57,12 @@ function clienteSupabaseMock({ uploadError = null, upsertError = null }: { uploa
   return {
     cliente: {
       auth: {
-        getUser: vi.fn(async () => ({ data: { user: { id: "auth-user-1" } } }))
+        getUser: vi.fn(async () => ({ data: { user: { id: "user-test" } } }))
       },
       storage: {
         from: fromStorage
       },
+      rpc: upsert,
       from: fromTable
     },
     upload,
@@ -93,14 +94,14 @@ describe("cola offline de evidencia", () => {
     expect(await leerColaEvidenciaDeTraslado("traslado-1")).toMatchObject([{ localId: "local-1" }]);
   });
 
-  it("reemplaza la foto pendiente del mismo traslado, tipo y angulo", async () => {
+  it("conserva capturas diferentes del mismo traslado, tipo y angulo", async () => {
     await encolarEvidencia(item({ localId: "local-vieja", dataUrl: DATA_URL_JPG }));
     await encolarEvidencia(item({ localId: "local-nueva", dataUrl: `data:image/png;base64,${Buffer.from("nueva").toString("base64")}` }));
 
     const cola = await leerColaEvidencia();
 
-    expect(cola).toHaveLength(1);
-    expect(cola[0]).toMatchObject({ localId: "local-nueva", angulo: "frontal" });
+    expect(cola).toHaveLength(2);
+    expect(cola[1]).toMatchObject({ localId: "local-nueva", angulo: "frontal" });
   });
 
   it("quita un item por localId sin afectar el resto", async () => {
@@ -120,17 +121,16 @@ describe("cola offline de evidencia", () => {
     await expect(sincronizarColaEvidencia(supabase.cliente as never, { onItemSincronizado })).resolves.toBe(1);
 
     expect(supabase.fromStorage).toHaveBeenCalledWith("evidencia");
-    expect(supabase.upload.mock.calls[0]?.[0]).toBe("auth-user-1/traslado-1/inicial/local-1-frontal.jpg");
+    expect(supabase.upload.mock.calls[0]?.[0]).toBe("user-test/traslado-1/inicial/local-1-frontal.jpg");
     expect(supabase.upsert).toHaveBeenCalledWith(
-      expect.objectContaining({
+      "registrar_foto_idempotente", { p_foto: expect.objectContaining({
         id: "local-1",
         traslado_id: "traslado-1",
         tipo: "inicial",
         angulo: "frontal",
-        url: "auth-user-1/traslado-1/inicial/local-1-frontal.jpg",
+        url: "user-test/traslado-1/inicial/local-1-frontal.jpg",
         sincronizada: true
-      }),
-      { onConflict: "id" }
+      }) }
     );
     expect(supabase.getPublicUrl).not.toHaveBeenCalled();
     expect(onItemSincronizado).toHaveBeenCalledWith(expect.objectContaining({ localId: "local-1" }));
@@ -322,7 +322,7 @@ describe("cola offline de evidencia", () => {
       await encolarEvidencia(item({ usuarioId: "user-a", localId: "local-a2", trasladoId: "t1", tipo: "inicial", angulo: "frontal" }));
       const completa = await leerColaEvidenciaCompleta();
       expect(completa).toHaveLength(2);
-      expect(completa.filter((i) => i.usuarioId === "user-a")).toMatchObject([{ localId: "local-a2" }]);
+      expect(completa.filter((i) => i.usuarioId === "user-a")).toMatchObject([{ localId: "local-a1" }]);
       expect(completa.filter((i) => i.usuarioId === "user-b")).toMatchObject([{ localId: "local-b1" }]);
     });
 
@@ -346,6 +346,7 @@ describe("cola offline de evidencia", () => {
       // Para forzar el caso multiusuario, verificamos que tras fallo, el item de user-b sigue intacto (retryCount 0)
       // Forzamos fallo de storage para el primer item: usamos mock que falla en upload
       const clienteFalla = clienteSupabaseMock({ uploadError: new Error("sin red") });
+      clienteFalla.cliente.auth.getUser.mockResolvedValue({ data: { user: { id: "user-a" } } });
       // En entorno sin Supabase config, leerColaEvidencia() devuelve todo, así que sincroniza el primero y falla
       // Verificamos que registrarIntentoFallido no borró user-b
       await expect(sincronizarColaEvidencia(clienteFalla.cliente as never)).rejects.toThrow("sin red");
