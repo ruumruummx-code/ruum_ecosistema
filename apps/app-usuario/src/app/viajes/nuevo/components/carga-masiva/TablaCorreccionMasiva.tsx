@@ -38,8 +38,7 @@ export function TablaCorreccionMasiva({ filas, onCorregir, onEliminar, onCotizar
   const iniciarEdicion = useCallback((indice: number, campo: string, valorActual: string) => {
     setEditando({ indice, campo, valor: valorActual });
     setFilaActiva(indice);
-    // Enfocar input en el siguiente frame
-    setTimeout(() => inputRef.current?.select(), 50);
+
   }, []);
 
   const confirmarEdicion = useCallback(() => {
@@ -247,7 +246,9 @@ function FilaItem({
                   {estaEditando ? (
                     <div className="flex items-center gap-1">
                       <input
+                        autoFocus
                         ref={inputRef}
+                        onFocus={(e) => e.currentTarget.select()}
                         type={tipo ?? "text"}
                         value={editando?.valor ?? ""}
                         onChange={(e) => onCambio(e.target.value)}
