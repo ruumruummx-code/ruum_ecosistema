@@ -104,7 +104,6 @@ export function CuentaDesktop({ cuenta, seccionInicial }: CuentaDesktopProps) {
       notificaciones={construirNotificaciones(usuario, cuenta.traslados ?? [])}
       onCerrarSesion={cerrarSesion}
       fixedContent
-      dashboardHeader
       padding="ninguno"
       idContenido="contenido-cuenta"
     >
