@@ -68,6 +68,60 @@ for (const [index, action] of [[0, "ACEPTAR TRASLADO"], [1, "ESTOY EN CAMINO AL 
   });
 }
 
+// Regresión: la información extensa no debe desplazar ni tapar la acción.
+for (const viewport of [{ width: 320, height: 568 }, { width: 390, height: 844 }]) {
+  for (const [index, action] of [[1, "ESTOY EN CAMINO AL ORIGEN"], [4, "HE LLEGADO AL DESTINO"], [5, "FINALIZAR Y ENTREGAR VEHÍCULO"]] as const) {
+    test(`acción persistente ${index} a ${viewport.width}x${viewport.height}: contenido largo y clic`, async ({ page }) => {
+      await page.setViewportSize(viewport);
+      await page.goto(`/viajes/${trip(index)}`);
+      const body = page.getByRole("region", {
+        name: index === 1 ? "Información del traslado asignado" : index === 4 ? "Información del traslado en curso" : "Información del cierre de traslado",
+        exact: true,
+      });
+      const button = page.locator("[data-trip-primary]").getByRole("button", { name: action });
+      await reachable(button, viewport.height);
+      await expect(button).toBeInViewport({ ratio: 1 });
+
+      // Simula referencias extensas sin cambiar datos ni lógica del servicio.
+      await body.evaluate(node => {
+        const extra = document.createElement("p");
+        extra.textContent = "Referencias adicionales del traslado. ".repeat(150);
+        node.append(extra);
+      });
+      expect(await body.evaluate(node => node.scrollHeight > node.clientHeight)).toBe(true);
+      await body.focus();
+      await page.keyboard.press("End");
+      await expect.poll(() => body.evaluate(node => node.scrollTop)).toBeGreaterThan(0);
+      await reachable(button, viewport.height);
+      await expect(button).toBeInViewport({ ratio: 1 });
+      await button.click({ trial: true });
+      await reachable(page.getByRole("button", { name: "Soporte", exact: true }), viewport.height);
+      await reachable(page.getByRole("button", { name: "Abrir emergencia", exact: true }), viewport.height);
+      await rootRemainsStill(page);
+
+      if (index === 5) {
+        await button.click();
+        const dialog = page.getByRole("dialog", { name: "Confirmar entrega", exact: true });
+        await reachable(dialog.getByRole("button", { name: "SÍ, ENTREGAR", exact: true }), viewport.height);
+        await page.keyboard.press("Escape");
+        await expect(button).toBeFocused();
+      } else {
+        const rpc = index === 1 ? "conductor_avanza_traslado" : "conductor_confirmar_llegada_destino";
+        // Un error del servidor también debe dejar el botón disponible para reintentar.
+        await page.route(`**/rest/v1/rpc/${rpc}`, route => route.fulfill({
+          status: 500, contentType: "application/json", body: JSON.stringify({ message: "Error de prueba recuperable" }),
+        }));
+        const request = page.waitForRequest(req => req.url().endsWith(`/rpc/${rpc}`) && req.method() === "POST");
+        await button.click();
+        expect((await request).postDataJSON()).toMatchObject({ p_traslado_id: trip(index) });
+        await expect(page.locator("[data-trip-primary]").getByRole("alert")).toBeVisible();
+        await expect(button).toBeEnabled();
+        await reachable(button, viewport.height);
+      }
+    });
+  }
+}
+
 test("carga y error conservan salida, emergencia y reintento", async ({ page }, info) => {
   await page.goto(`/viajes/${trip(7)}`, { waitUntil: "commit" });
   await expect(page.getByLabel("Cargando traslado", { exact: true })).toBeVisible();
@@ -164,3 +218,16 @@ test("error al cargar evidencias mantiene reintento y ayuda inmediatos", async (
   await rootRemainsStill(page);
   await page.screenshot({ path: info.outputPath("error-evidencia.png") });
 });
+
+for (const viewport of [{ width: 320, height: 568 }, { width: 390, height: 844 }]) {
+  test(`evidencia origen: Siguiente avanza Fotos, Llaves y Formulario en ${viewport.width}px`, async ({ page }) => {
+    await page.setViewportSize(viewport);
+    await page.goto(`/viajes/${trip(3)}/evidencia`);
+    const siguiente = page.getByRole("region", { name: "Acciones de evidencia" }).getByRole("button", { name: /Siguiente/ });
+    await expect(page.getByRole("region", { name: "Fotos del vehículo", exact: true })).toBeVisible({ timeout: 30_000 });
+    await siguiente.click();
+    await expect(page.getByRole("region", { name: "Llaves del vehículo", exact: true })).toBeVisible();
+    await siguiente.click();
+    await expect(page.getByRole("region", { name: "Formulario de inspección", exact: true })).toBeVisible();
+  });
+}

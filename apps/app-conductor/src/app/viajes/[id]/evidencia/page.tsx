@@ -128,13 +128,6 @@ export default function PaginaEvidencia() {
   const esEvidenciaFinal = tipo === "final";
 
   function handleSiguiente() {
-    if (tabActiva === "fotos") {
-      const primerBotonFotos = document.querySelector<HTMLButtonElement>("#evid-fotos button");
-      if (primerBotonFotos && (typeof navigator === "undefined" || !navigator.userAgent.includes("jsdom"))) {
-        primerBotonFotos.focus();
-        return;
-      }
-    }
     if (totalCapturados >= totalRequisitos && (esEvidenciaFinal || tabActiva === "formulario")) {
       void finalizar();
       return;

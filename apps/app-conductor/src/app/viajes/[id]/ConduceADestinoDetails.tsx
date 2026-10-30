@@ -193,15 +193,18 @@ export function ConduceADestinoDetails({
   return (
     <div
       data-en-traslado
+      data-trip-viewport
       className="mx-auto flex h-screen max-h-[100dvh] w-full max-w-md flex-col justify-between overflow-hidden bg-[#F4F8FD] text-[#0A1E3C] select-none"
     >
-      {/* CONTENIDO PRINCIPAL COMPACTO SIN SCROLL */}
+      {/* ENCABEZADO Y ACCIÓN PERSISTENTES, CONTENIDO CENTRAL DESPLAZABLE */}
       <div
+        data-trip-layout
         className="flex min-h-0 flex-1 flex-col justify-between gap-2 px-4 pt-[max(10px,env(safe-area-inset-top))] pb-2.5"
       >
         {/* 1. HEADER Y PESTAÑAS SUPERIORES */}
         <div className="flex shrink-0 flex-col gap-2">
           <header
+            data-trip-header
             className="grid grid-cols-[40px_1fr_auto_auto] items-center gap-2"
             aria-label="Encabezado de traslado activo"
           >
@@ -260,6 +263,8 @@ export function ConduceADestinoDetails({
           <SecondaryTripNavBar trasladoId={trasladoId} pasaporte={pasaporte} />
         </div>
 
+        {/* eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex -- Región desplazable accesible con teclado. */}
+        <div data-trip-body tabIndex={0} role="region" aria-label="Información del traslado en curso">
         {/* 2. CAJA DE ESTADO (EN MOVIMIENTO) */}
         <div
           role="status"
@@ -475,6 +480,8 @@ export function ConduceADestinoDetails({
         <section aria-label="Mapa de ruta en tiempo real" className="shrink-0">
           <MiniMapaRutaEnTransito destinoCiudad={destinoCiudad} />
         </section>
+
+        </div>
 
         {/* 7. BOTÓN DE ACCIÓN PRIMARIO (FIJO EN BASE) */}
         <section data-trip-primary aria-label="Acción principal del traslado" className="shrink-0 pt-0.5">

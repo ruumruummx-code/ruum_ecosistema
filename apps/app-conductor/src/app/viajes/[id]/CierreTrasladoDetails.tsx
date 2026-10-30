@@ -188,10 +188,12 @@ export function CierreTrasladoDetails({
   return (
     <div
       data-cierre-traslado
+      data-trip-viewport
       className="mx-auto flex h-screen max-h-[100dvh] w-full max-w-md flex-col justify-between overflow-hidden bg-[#F4F8FD] text-[#0A1E3C] select-none"
     >
-      {/* CONTENIDO PRINCIPAL COMPACTO SIN SCROLL */}
+      {/* ENCABEZADO Y ACCIÓN PERSISTENTES, CONTENIDO CENTRAL DESPLAZABLE */}
       <div
+        data-trip-layout
         className="flex min-h-0 flex-1 flex-col justify-between gap-2 px-4 pt-[max(10px,env(safe-area-inset-top))] pb-[max(12px,env(safe-area-inset-bottom))]"
       >
         {/* 1. HEADER TÉCNICO DE CONTROL */}
@@ -234,6 +236,8 @@ export function CierreTrasladoDetails({
           </div>
         </header>
 
+        {/* eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex -- Región desplazable accesible con teclado. */}
+        <div data-trip-body tabIndex={0} role="region" aria-label="Información del cierre de traslado">
         {/* 2. CAJA DE ESTADOS CRUZADOS (BADGES) */}
         <div
           role="status"
@@ -495,6 +499,8 @@ export function CierreTrasladoDetails({
             )}
           </div>
         </section>
+
+        </div>
 
         {/* 6. FILA DE ACCIONES BASE (FIJOS EN BASE SIN NAVEGACIÓN INFERIOR) */}
         <section

@@ -86,7 +86,7 @@ describe("nivelPorExperienciaYCertificacion — PRD §4.3", () => {
   });
 });
 
-describe("nivelOperativoVigente — el menor entre experiencia y calificación (§4.3 + §4.13)", () => {
+describe("nivelOperativoVigente — política por calificaciones 2026-10-29", () => {
   it("experiencia ejecutivo, calificación basico (4.2) -> basico", () => {
     // calificacion_promedio 4.2 limita a nivelPorCalificacion=basico,
     // aunque traslados_completados alcance ejecutivo.
@@ -94,6 +94,16 @@ describe("nivelOperativoVigente — el menor entre experiencia y calificación (
       "basico"
     );
   });
+
+  it("nuevo sin experiencia ni certificaciones inicia en el máximo", () => {
+    expect(nivelOperativoVigente(conductor({ traslados_completados: 0, calificacion_promedio: 5 }))).toBe("coleccion");
+  });
+
+  it.each([[4.9, "coleccion"], [4.89, "luxury"], [4.8, "luxury"], [4.79, "ejecutivo"], [4.5, "ejecutivo"], [4.49, "basico"], [4, "basico"]] as const)(
+    "sin experiencia, promedio %s determina %s", (promedio, nivel) => {
+      expect(nivelOperativoVigente(conductor({ traslados_completados: 0, calificacion_promedio: promedio }))).toBe(nivel);
+    }
+  );
 
   it("calificación < 4.0 -> null (pierde elegibilidad)", () => {
     expect(nivelOperativoVigente(conductor({ calificacion_promedio: 3.8 }))).toBeNull();
@@ -141,5 +151,24 @@ describe("esElegibleParaViaje — PRD §4.3", () => {
     expect(
       esElegibleParaViaje(conductor({ estado: "modo_prueba_supervisada" }), "sedan", "intraurbana").elegible
     ).toBe(true);
+  });
+});
+
+describe("asignación con nivel inicial máximo", () => {
+  it.each(["sedan", "suv", "pick_up", "van", "luxury", "coleccion"] as const)("nuevo con 5.0 puede recibir %s sin experiencia previa", tipo => {
+    expect(esElegibleParaViaje(conductor({ traslados_completados: 0, calificacion_promedio: 5 }), tipo, "intraurbana").elegible).toBe(true);
+  });
+  it("la caída de calificación retira acceso a pick-up", () => {
+    expect(esElegibleParaViaje(conductor({ calificacion_promedio: 4.49 }), "pick_up", "intraurbana").elegible).toBe(false);
+  });
+  it("mantiene el bloqueo por suspensión sin bajar el nivel", () => {
+    const c = conductor({ calificacion_promedio: 5, suspensiones_activas: 1 });
+    expect(nivelOperativoVigente(c)).toBe("coleccion");
+    expect(esElegibleParaViaje(c, "sedan", "intraurbana").elegible).toBe(false);
+  });
+  it("mantiene el bloqueo por incidencia grave sin bajar el nivel", () => {
+    const c = conductor({ calificacion_promedio: 5, incidencias_graves_6m: 1 });
+    expect(nivelOperativoVigente(c)).toBe("coleccion");
+    expect(esElegibleParaViaje(c, "pick_up", "intraurbana").elegible).toBe(false);
   });
 });
