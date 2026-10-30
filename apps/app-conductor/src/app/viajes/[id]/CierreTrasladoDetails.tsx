@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { consultarResolucionInventarioLlaves } from "@ruum/api/custody";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { TEXTOS_CARGANDO } from "@ruum/shared/constants";
@@ -27,7 +28,13 @@ export function CierreTrasladoDetails({
   const trasladoId = pasaporte.traslado_id || "";
   const estadoActual = pasaporte.estado as Database["public"]["Enums"]["estado_traslado"];
 
+  const [inspeccionInicial, setInspeccionInicial] = useState<InspeccionData | null>(null);
+  const [llavesResueltas, setLlavesResueltas] = useState(false);
   const [inspeccionFinal, setInspeccionFinal] = useState<InspeccionData | null>(null);
+  const inventarioValido = (valor: string | null | undefined) => typeof valor === "string" && /^[0-9]+$/.test(valor);
+  const faltanLlaves = !inventarioValido(inspeccionInicial?.llaves_recibidas) || !inventarioValido(inspeccionFinal?.llaves_recibidas);
+  const diferenciaLlaves = Number(inspeccionInicial?.llaves_recibidas) !== Number(inspeccionFinal?.llaves_recibidas);
+  const bloqueoLlaves = faltanLlaves || (diferenciaLlaves && !llavesResueltas);
   const [cargando, setCargando] = useState(true);
   const [procesando, setProcesando] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -41,9 +48,9 @@ export function CierreTrasladoDetails({
   const isDrawingRef = useRef(false);
 
   const contactoNombre =
-    pasaporte.contacto_recepcion_nombre || pasaporte.contacto_entrega_nombre || "HÉCTOR LOMELÍN";
+    pasaporte.contacto_recepcion_nombre || pasaporte.contacto_entrega_nombre || "Contacto de recepción por confirmar";
   const contactoTelefono =
-    pasaporte.contacto_recepcion_telefono || pasaporte.contacto_entrega_telefono || "+525555555555";
+    pasaporte.contacto_recepcion_telefono || pasaporte.contacto_entrega_telefono || "";
   const telefonoLimpio = contactoTelefono.replace(/[^0-9]/g, "");
 
   const iniciales = contactoNombre
@@ -60,8 +67,12 @@ export function CierreTrasladoDetails({
         const cliente = crearClienteNavegador();
         const insps = await listarInspeccionesTraslado(cliente, trasladoId);
         if (insps) {
+          const inicial = insps.find((i) => i.tipo === "inicial") as InspeccionData | undefined;
+          if (inicial) setInspeccionInicial(inicial);
           const final = insps.find((i) => i.tipo === "final") as InspeccionData | undefined;
           if (final) setInspeccionFinal(final);
+          const resolucion = await consultarResolucionInventarioLlaves(cliente, trasladoId);
+          setLlavesResueltas(Boolean(resolucion && resolucion.inicial === inicial?.llaves_recibidas && resolucion.final === final?.llaves_recibidas));
         }
       } catch (err) {
         console.error(err);
@@ -131,12 +142,15 @@ export function CierreTrasladoDetails({
   }
 
   function handleGuardarReporte() {
-    setAvisoExito("Reporte de cierre guardado exitosamente.");
-    setTimeout(() => setAvisoExito(null), 3000);
+    setError("La recepción y la firma aún no se guardan en servidor. Operación debe confirmar el mecanismo de recepción antes de acreditar este flujo.");
   }
 
   async function handleFinalizarTraslado() {
     if (procesando) return;
+    if (cargando || bloqueoLlaves) {
+      setError("Inventario de llaves pendiente. Documenta la diferencia con operación y solicita resolución de administración.");
+      return;
+    }
     setProcesando(true);
     setError(null);
     setAvisoExito(null);
@@ -166,8 +180,8 @@ export function CierreTrasladoDetails({
 
   const odometroTexto = inspeccionFinal?.kilometraje
     ? `${inspeccionFinal.kilometraje.toLocaleString("es-MX")} km`
-    : "124,510 km";
-  const combustibleTexto = inspeccionFinal?.combustible ? inspeccionFinal.combustible : "75%";
+    : "Sin captura";
+  const combustibleTexto = inspeccionFinal?.combustible ? inspeccionFinal.combustible : "Sin captura";
   const observacionesTexto = inspeccionFinal?.notas?.trim() || "Ninguna";
 
   if (cargando) {
@@ -476,6 +490,7 @@ export function CierreTrasladoDetails({
             </button>
           </div>
 
+          <p className="text-xs text-amber-800">Trazo local sin guardar. Esta pantalla todavía no acredita la recepción ni una firma verificada en servidor.</p>
           {/* Cuadro Canvas interactivo */}
           <div
             data-signature-canvas
@@ -509,7 +524,7 @@ export function CierreTrasladoDetails({
           className="shrink-0 flex flex-col gap-2 pt-0.5"
         >
           <p role="status" className="sr-only">
-            Cierre de traslado · Conciliación lista y firma de conformidad
+            Cierre de traslado · Recepción pendiente de acreditación
           </p>
           {error && (
             <p role="alert" className="font-body text-xs font-semibold text-[#DC2626]">
@@ -533,14 +548,14 @@ export function CierreTrasladoDetails({
             <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
               <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2zM12 19a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM7 5v4h10V5H7z" />
             </svg>
-            <span>Guardar Reporte</span>
+            <span>Consultar registro de recepción pendiente</span>
           </button>
 
           {/* Botón Inferior (Primario Dominante): FINALIZAR TRASLADO */}
           <button
             type="button"
             onClick={() => setModalConfirmacionAbierto(true)}
-            disabled={procesando}
+            disabled={procesando || cargando || bloqueoLlaves}
             className="inline-flex min-h-[48px] w-full cursor-pointer items-center justify-center gap-2 rounded-2xl bg-[#0066FF] px-4 py-3 font-display text-sm font-extrabold text-white shadow-[0_6px_18px_rgba(0,102,255,0.32)] transition hover:bg-[#0052CC] active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-50"
           >
             {procesando ? (
@@ -561,6 +576,7 @@ export function CierreTrasladoDetails({
       </div>
 
       {/* Modal de Confirmación de Entrega */}
+      {bloqueoLlaves && <p role="alert" className="p-4 text-sm text-danger">Llaves: origen {inspeccionInicial?.llaves_recibidas ?? "sin captura"}, destino {inspeccionFinal?.llaves_recibidas ?? "sin captura"}. Documenta con operación si la diferencia es física o de captura y solicita resolución administrativa. Conserva el registro original y recarga después de la resolución.</p>}
       {modalConfirmacionAbierto && (
         <CierreConfirmacionModal
           abierto={modalConfirmacionAbierto}
@@ -569,7 +585,7 @@ export function CierreTrasladoDetails({
             setModalConfirmacionAbierto(false);
             void handleFinalizarTraslado();
           }}
-          procesando={procesando}
+          procesando={procesando || cargando || bloqueoLlaves}
         />
       )}
 

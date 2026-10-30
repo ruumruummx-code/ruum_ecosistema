@@ -50,8 +50,8 @@ public class DriverTrackingService extends Service {
         Sampling sampling = Sampling.forState(prefs.getString(TrackingContract.KEY_TRIP_STATE, "en_traslado"));
         LocationRequest request = new LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, sampling.intervalMs)
             .setMinUpdateIntervalMillis(Math.max(5000, sampling.intervalMs / 2))
-            .setMinUpdateDistanceMeters(sampling.distanceM)
-            .setMaxUpdateDelayMillis(sampling.intervalMs * 2)
+            .setMinUpdateDistanceMeters(0)
+            .setMaxUpdateDelayMillis(30000)
             .build();
         callback = new LocationCallback() {
             @Override public void onLocationResult(LocationResult result) {
@@ -142,7 +142,7 @@ public class DriverTrackingService extends Service {
         static Sampling forState(String state) {
             if ("incidencia".equals(state) || "emergencia".equals(state)) return new Sampling(7000, 5);
             if ("camino_origen".equals(state) || "conductor_asignado".equals(state)) return new Sampling(20000, 20);
-            if ("vehiculo_detenido".equals(state) || "sin_movimiento".equals(state)) return new Sampling(60000, 40);
+            if ("vehiculo_detenido".equals(state) || "sin_movimiento".equals(state)) return new Sampling(30000, 40);
             return new Sampling(15000, 15);
         }
     }

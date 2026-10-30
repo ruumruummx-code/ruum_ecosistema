@@ -98,7 +98,7 @@ export type ResultadoGuardadoEvidencia =
       sha256Recibido: string | null;
     };
 
-const CODIGO_DUPLICADO = "23505";
+
 
 /**
  * FASE 6 cierre — persistencia idempotente de foto ya subida a Storage.
@@ -112,35 +112,12 @@ export async function guardarFotoEvidenciaSincronizada(
   cliente: Cliente,
   fila: Database["public"]["Tables"]["evidencia_fotos"]["Insert"]
 ): Promise<ResultadoGuardadoEvidencia> {
-  const id = typeof fila.id === "string" ? fila.id : "";
-  const sha256Recibido = typeof fila.sha256 === "string" ? fila.sha256 : null;
-
-  const { error } = await cliente.from("evidencia_fotos").insert(fila);
-  if (!error) return { estado: "registrada", id };
-
-  if ((error as { code?: string }).code !== CODIGO_DUPLICADO) throw error;
-
-  // Ya existe: sólo es idempotencia si el contenido es idéntico.
-  const { data: existente, error: errorLectura } = await cliente
-    .from("evidencia_fotos")
-    .select("id,sha256")
-    .eq("id", id)
-    .maybeSingle();
-  if (errorLectura) throw errorLectura;
-
-  const sha256Registrado = (existente as { sha256?: string | null } | null)?.sha256 ?? null;
-  if (sha256Registrado && sha256Recibido && sha256Registrado === sha256Recibido) {
-    return { estado: "duplicado_identico", id };
-  }
-
-  await marcarConflictoEvidencia(cliente, {
-    id,
-    trasladoId: typeof fila.traslado_id === "string" ? fila.traslado_id : "",
-    sha256Registrado,
-    sha256Recibido
-  });
-
-  return { estado: "conflicto", id, sha256Registrado, sha256Recibido };
+  const id = fila.id ?? "";
+  const { data, error } = await (cliente as unknown as SupabaseClient).rpc("registrar_foto_idempotente", { p_foto: fila });
+  if (error) throw error;
+  if (data?.ok) return { estado: data.duplicada ? "duplicado_identico" : "registrada", id };
+  if (!data?.conflicto) throw new Error("evidence_registration_invalid_response");
+  return { estado: "conflicto", id, sha256Registrado: null, sha256Recibido: fila.sha256 ?? null };
 }
 
 /**
@@ -181,4 +158,12 @@ export async function marcarConflictoEvidencia(
       `La evidencia no se sobrescribió y requiere revisión manual. ${detalle}`
   });
   if (errorIncidencia) throw errorIncidencia;
+}
+
+export async function descargarArchivoEvidenciaStorage(cliente: Cliente, ruta: string) {
+  return cliente.storage.from(BUCKET_EVIDENCIA).download(ruta);
+}
+export async function registrarConflictoEvidencia(cliente: Cliente, conflicto: { captura_id: string; traslado_id: string; ruta: string; sha256_esperado: string; sha256_observado: string }) {
+  const { error } = await (cliente as unknown as SupabaseClient).from("evidencia_conflictos").upsert(conflicto, { onConflict: "captura_id", ignoreDuplicates: true });
+  if (error) throw error;
 }

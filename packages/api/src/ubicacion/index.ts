@@ -2,6 +2,7 @@ import { Geolocation } from "@capacitor/geolocation";
 import { esNativo } from "../capacitor";
 
 export interface Coordenadas {
+  capturedAt?: string;
   lat: number;
   lng: number;
   precisionM?: number | null;
@@ -25,6 +26,7 @@ export interface OpcionesUbicacion {
 
 function desdePosicionWeb(posicion: GeolocationPosition): Coordenadas {
   return {
+    capturedAt: new Date(posicion.timestamp).toISOString(),
     lat: posicion.coords.latitude,
     lng: posicion.coords.longitude,
     precisionM: posicion.coords.accuracy ?? null,
@@ -85,7 +87,8 @@ export async function obtenerUbicacionActualConEstado(): Promise<ResultadoUbicac
     return {
       estado: "ok",
       coordenadas: {
-        lat: posicion.coords.latitude,
+        capturedAt: new Date(posicion.timestamp).toISOString(),
+    lat: posicion.coords.latitude,
         lng: posicion.coords.longitude,
         precisionM: posicion.coords.accuracy ?? null,
         velocidadMps: posicion.coords.speed ?? null
@@ -123,7 +126,8 @@ export async function observarUbicacionActual(
       (posicion) => {
         if (!posicion) return;
         alCambiar({
-          lat: posicion.coords.latitude,
+          capturedAt: new Date(posicion.timestamp).toISOString(),
+    lat: posicion.coords.latitude,
           lng: posicion.coords.longitude,
           precisionM: posicion.coords.accuracy ?? null,
           velocidadMps: posicion.coords.speed ?? null

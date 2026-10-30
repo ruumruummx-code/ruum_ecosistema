@@ -1,5 +1,6 @@
 "use client";
 
+import type { OportunidadAsignacion } from "@ruum/api/services";
 import { useState } from "react";
 import { ConductorIcon } from "@/components/icons";
 import { chatDisponible } from "@ruum/shared/rules";
@@ -16,7 +17,8 @@ function address(city: string | null, street: string | null) {
   return city && !street.toLocaleLowerCase("es-MX").includes(city.toLocaleLowerCase("es-MX")) ? `${street}, ${city}` : street;
 }
 
-export function OpportunityDetailsView({ pasaporte, volver, procesando, error, avisoExito, ofertaTomada, solicitudEnviada, onAccept, onReject }: {
+export function OpportunityDetailsView({ oportunidad, pasaporte, volver, procesando, error, avisoExito, ofertaTomada, solicitudEnviada, onAccept, onReject }: {
+  oportunidad: OportunidadAsignacion | null;
   pasaporte: PasaporteRow; volver: string; procesando: boolean; error: string | null; avisoExito: string | null;
   ofertaTomada: boolean; solicitudEnviada: boolean; onAccept: () => void; onReject: () => void;
 }) {
@@ -28,7 +30,7 @@ export function OpportunityDetailsView({ pasaporte, volver, procesando, error, a
   const hours = pasaporte.tiempo_estimado_horas;
   const minutes = hours != null && Number.isFinite(hours) ? Math.max(1, Math.round(hours * 60)) : null;
   const duration = minutes == null ? "Por confirmar" : `Aprox. ${Math.floor(minutes / 60) ? `${Math.floor(minutes / 60)} h ` : ""}${minutes % 60 ? `${minutes % 60} min` : ""}`.trim();
-  const status = ofertaTomada ? "Esta oferta ya fue asignada a otro conductor." : avisoExito || "Al aceptar, solicitas la asignación del traslado.";
+  const status = ofertaTomada ? "Esta oferta ya fue asignada a otro conductor." : avisoExito || (oportunidad?.modo === "dirigida" ? "Oferta dirigida: confirma para aceptar la asignación." : "Registra tu solicitud y espera la resolución del servidor.");
   const disabled = procesando || ofertaTomada || solicitudEnviada;
 
   return <>
@@ -54,7 +56,9 @@ export function OpportunityDetailsView({ pasaporte, volver, procesando, error, a
         <button type="button" className={styles.reject} onClick={onReject} disabled={disabled}>Rechazar</button>
         <button type="button" onClick={() => setDialog("messages")} aria-haspopup="dialog"><ConductorIcon name="mail" />Mensajes</button>
       </div>
-      <button type="button" className={styles.accept} onClick={onAccept} disabled={disabled}>{procesando ? TEXTOS_CARGANDO.actualizando : solicitudEnviada ? "SOLICITUD REGISTRADA" : "ACEPTAR TRASLADO"}</button>
+      {oportunidad && !oportunidad.elegible && <p role="alert">No puedes solicitar este traslado: {(oportunidad.motivos ?? []).map(m => m.replaceAll("_", " ")).join(", ")}. La disponibilidad se valida en el servidor.</p>}
+      {oportunidad?.expira_en && <p>Oferta vigente hasta {new Date(oportunidad.expira_en).toLocaleString("es-MX")}</p>}
+      <button type="button" className={styles.accept} onClick={onAccept} disabled={disabled || !oportunidad?.elegible}>{procesando ? TEXTOS_CARGANDO.actualizando : solicitudEnviada ? "SOLICITUD REGISTRADA · ESPERANDO RESOLUCIÓN" : oportunidad?.modo === "dirigida" ? "ACEPTAR OFERTA DIRIGIDA" : "SOLICITAR ASIGNACIÓN"}</button>
       </div>
     </TripActionDock>
     {dialog === "messages" && <TripDialog title="Mensajes del traslado" onClose={() => setDialog(null)}>

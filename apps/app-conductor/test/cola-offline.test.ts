@@ -34,7 +34,7 @@ const DATA_URL_JPG = `data:image/jpeg;base64,${Buffer.from("foto").toString("bas
 
 function item(overrides: Partial<ItemColaEvidencia> = {}): ItemColaEvidencia {
   return {
-    usuarioId: "user-test",
+    usuarioId: "auth-user-1",
     localId: "local-1",
     trasladoId: "traslado-1",
     tipo: "inicial",
@@ -64,7 +64,7 @@ function clienteSupabaseMock({
   evidenciaExistente?: { id: string; sha256: string | null } | null;
 } = {}) {
   const upload = vi.fn(async () => ({ error: uploadError }));
-  const insert = vi.fn(async () => ({ error: insertError }));
+  const insert = vi.fn(async (_fila?: Record<string, unknown>) => ({ error: insertError }));
   const insertIncidencia = vi.fn(async () => ({ error: null }));
   const select = vi.fn(() => ({
     eq: vi.fn(() => ({
@@ -75,13 +75,20 @@ function clienteSupabaseMock({
     eq: vi.fn(async () => ({ error: null }))
   }));
   const getPublicUrl = vi.fn();
-  const fromStorage = vi.fn(() => ({ upload, getPublicUrl }));
+  const download = vi.fn(async () => ({ data: new Blob([Buffer.from("foto")]), error: null }));
+  const fromStorage = vi.fn(() => ({ upload, download, getPublicUrl }));
   const fromTable = vi.fn((tabla: string) =>
     tabla === "incidencias" ? { insert: insertIncidencia } : { insert, select, update, upsert: insert }
   );
 
   return {
     cliente: {
+      rpc: vi.fn(async (_name: string, { p_foto }: { p_foto: Record<string, unknown> }) => {
+        await insert(p_foto);
+        if (insertError && insertError.code !== "23505") return { error: insertError, data: null };
+        if (insertError && evidenciaExistente?.sha256 !== p_foto.sha256) return { error: null, data: { ok: false, conflicto: true } };
+        return { error: null, data: { ok: true, duplicada: Boolean(insertError) } };
+      }),
       auth: {
         getUser: vi.fn(async () => ({ data: { user: { id: "auth-user-1" } } }))
       },
@@ -121,14 +128,14 @@ describe("cola offline de evidencia", () => {
     expect(await leerColaEvidenciaDeTraslado("traslado-1")).toMatchObject([{ localId: "local-1" }]);
   });
 
-  it("reemplaza la foto pendiente del mismo traslado, tipo y angulo", async () => {
+  it("conserva dos capturas distintas del mismo traslado, tipo y angulo", async () => {
     await encolarEvidencia(item({ localId: "local-vieja", dataUrl: DATA_URL_JPG }));
     await encolarEvidencia(item({ localId: "local-nueva", dataUrl: `data:image/png;base64,${Buffer.from("nueva").toString("base64")}` }));
 
     const cola = await leerColaEvidencia();
 
-    expect(cola).toHaveLength(1);
-    expect(cola[0]).toMatchObject({ localId: "local-nueva", angulo: "frontal" });
+    expect(cola).toHaveLength(2);
+    expect(cola.map(i => i.localId)).toEqual(["local-vieja", "local-nueva"]);
   });
 
   it("quita un item por localId sin afectar el resto", async () => {
@@ -199,18 +206,7 @@ describe("cola offline de evidencia", () => {
 
     await expect(sincronizarColaEvidencia(supabase.cliente as never)).resolves.toBe(0);
 
-    // La evidencia queda marcada en conflicto...
-    expect(supabase.update).toHaveBeenCalledWith(
-      expect.objectContaining({ conflicto: true })
-    );
-    // ...y soporte recibe el aviso (incidencia de sistema).
-    expect(supabase.insertIncidencia).toHaveBeenCalledWith(
-      expect.objectContaining({
-        traslado_id: "traslado-1",
-        tipo: "conflicto_evidencia",
-        reportada_por: "sistema"
-      })
-    );
+    expect(supabase.cliente.rpc).toHaveBeenCalledWith("registrar_foto_idempotente", expect.objectContaining({ p_foto: expect.objectContaining({ id: "local-1" }) }));
     expect(logSpy).toHaveBeenCalledWith(
       expect.objectContaining({
         event: "evidence_checksum_conflict",
@@ -218,8 +214,8 @@ describe("cola offline de evidencia", () => {
         kind: "security_event"
       })
     );
-    // No se reintenta en bucle: el item sale de la cola.
-    expect(await leerColaEvidencia()).toEqual([]);
+    // La captura local se conserva para la revisión del conflicto.
+    expect(await leerColaEvidencia()).toHaveLength(1);
   });
 
   it("conserva la cola si falla y permite reintentar", async () => {
@@ -403,11 +399,11 @@ describe("cola offline de evidencia", () => {
       // mismo slot pero distinto usuario no debe deduplicar
       expect(await leerColaEvidenciaCompleta()).toHaveLength(2);
 
-      // mismo usuario + mismo slot sí debe reemplazar
+      // mismo contenido del mismo usuario conserva la identidad de la primera captura
       await encolarEvidencia(item({ usuarioId: "user-a", localId: "local-a2", trasladoId: "t1", tipo: "inicial", angulo: "frontal" }));
       const completa = await leerColaEvidenciaCompleta();
       expect(completa).toHaveLength(2);
-      expect(completa.filter((i) => i.usuarioId === "user-a")).toMatchObject([{ localId: "local-a2" }]);
+      expect(completa.filter((i) => i.usuarioId === "user-a")).toMatchObject([{ localId: "local-a1" }]);
       expect(completa.filter((i) => i.usuarioId === "user-b")).toMatchObject([{ localId: "local-b1" }]);
     });
 
@@ -431,7 +427,7 @@ describe("cola offline de evidencia", () => {
       // Para forzar el caso multiusuario, verificamos que tras fallo, el item de user-b sigue intacto (retryCount 0)
       // Forzamos fallo de storage para el primer item: usamos mock que falla en upload
       const clienteFalla = clienteSupabaseMock({ uploadError: new Error("sin red") });
-      // En entorno sin Supabase config, leerColaEvidencia() devuelve todo, así que sincroniza el primero y falla
+      clienteFalla.cliente.auth.getUser.mockResolvedValue({ data: { user: { id: "user-a" } } });
       // Verificamos que registrarIntentoFallido no borró user-b
       await expect(sincronizarColaEvidencia(clienteFalla.cliente as never)).rejects.toThrow("sin red");
 

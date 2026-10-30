@@ -19,13 +19,12 @@ export function EarningsTimeline({
   tieneValidados,
   tienePagado,
   montoPendiente,
-  proximoPayoutFecha,
   fechaDispersion
 }: EarningsTimelineProps) {
   const pasos = [
-    { n: 1, label: "Traslado", sub: tieneTraslados ? "Hecho" : "Pendiente" },
-    { n: 2, label: "Validado", sub: tieneValidados ? "Revisado" : "En espera" },
-    { n: 3, label: "Pagado", sub: tienePagado ? "Depositado" : "Próximo" }
+    { n: 1, label: "Traslado", sub: tieneTraslados ? "Registrado" : "Pendiente" },
+    { n: 2, label: "Devengo", sub: tieneValidados ? "Registrado" : "En espera" },
+    { n: 3, label: "Pagado", sub: tienePagado ? "Verificado" : "Por validar" }
   ];
 
   return (
@@ -35,7 +34,7 @@ export function EarningsTimeline({
           Ruta de tu pago
         </span>
         <span className="rounded-full border border-emerald-600/30 bg-emerald-50 px-2.5 py-1 font-body text-xs font-bold text-emerald-800 dark:border-emerald-500/30 dark:bg-emerald-950/40 dark:text-emerald-300">
-          {paso === 3 ? "Pagado" : paso === 2 ? "En validación" : paso === 1 ? "Traslado completado" : "Sin actividad"}
+          {paso === 3 ? "Con pagos verificados" : paso === 2 ? "Devengo en validación" : paso === 1 ? "Actividad registrada" : "Sin actividad"}
         </span>
       </div>
       <div className="flex items-center gap-2">
@@ -63,7 +62,7 @@ export function EarningsTimeline({
               <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
               <polyline points="22 4 12 14.01 9 11.01" />
             </svg>
-            Tu pago {formatearMoneda(montoPendiente)} {tienePagado ? "depositado" : proximoPayoutFecha ? `llega ${proximoPayoutFecha}` : `se dispersa ${fechaDispersion}`}
+            Devengo del periodo: {formatearMoneda(montoPendiente)}. Liquidación sujeta a validación financiera; fecha {fechaDispersion}.
           </span>
           <span className="font-body text-xs font-bold text-text-primary whitespace-nowrap">Notificación automática</span>
         </div>

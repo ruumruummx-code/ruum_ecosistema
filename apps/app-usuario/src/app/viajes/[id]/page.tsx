@@ -1,3 +1,4 @@
+import { FacturacionTraslado } from "./FacturacionTraslado";
 import { UserResponsiveLayout } from "../../../components/layout/UserResponsiveLayout";
 import { obtenerDatos } from "./obtenerDatosTraslado";
 import { TrasladoNoEncontrado } from "./TrasladoNoEncontrado";
@@ -80,6 +81,7 @@ export default async function PaginaTraslado({ params }: { params: Promise<{ id:
           pagos={pagos}
           ultimaUbicacion={ultimaUbicacion}
         />
+        <FacturacionTraslado trasladoId={pasaporte.traslado_id} />
       </UserResponsiveLayout>
     </>
   );

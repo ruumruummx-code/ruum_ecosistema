@@ -5,6 +5,9 @@ import userEvent from "@testing-library/user-event";
 import { Facturacion, FACTURAS_EJEMPLO_TEST } from "../Facturacion";
 import type { Database } from "@ruum/shared/types";
 
+const billing = vi.hoisted(() => ({ solicitar: vi.fn() }));
+vi.mock("@ruum/api/billing", async importOriginal => ({ ...await importOriginal<object>(), solicitarFactura: billing.solicitar }));
+
 type Usuario = Database["public"]["Tables"]["usuarios"]["Row"];
 
 const mockUsuario: Partial<Usuario> = {
@@ -26,6 +29,7 @@ vi.mock("@/lib/supabase-browser", () => ({
 describe("Facturación — Pantalla y flujos fiscales", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    billing.solicitar.mockResolvedValue({ id: "request", estado: "rechazada", error_detalle: "Emisor no configurado", uuid_fiscal: null, xml_ruta: null, pdf_ruta: null, proveedor_id: null, ambiente: null });
   });
 
   it("renderiza encabezado, botón de regreso y hero fiscal con estadísticas", () => {
@@ -123,32 +127,34 @@ describe("Facturación — Pantalla y flujos fiscales", () => {
     expect(screen.getByText("Factura #FAC-2847")).toBeInTheDocument();
     expect(screen.getByText("Factura #FAC-2848")).toBeInTheDocument();
 
-    // Pestaña Emitidas
+    // A fixture without fiscal proof cannot appear as issued.
     await user.click(screen.getByRole("button", { name: /^emitidas$/i }));
-    expect(screen.getByText("Factura #FAC-2847")).toBeInTheDocument();
-    expect(screen.queryByText("Factura #FAC-2848")).not.toBeInTheDocument();
-
-    // Pestaña Pendientes
-    await user.click(screen.getByRole("button", { name: /pendientes/i }));
     expect(screen.queryByText("Factura #FAC-2847")).not.toBeInTheDocument();
+    expect(screen.getByText("Sin facturas disponibles")).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: /pendientes/i }));
+    expect(screen.getByText("Factura #FAC-2847")).toBeInTheDocument();
     expect(screen.getByText("Factura #FAC-2848")).toBeInTheDocument();
   });
 
-  it("permite solicitar una factura pendiente y actualizar su estado a emitida", async () => {
+  it("persiste la solicitud y muestra el rechazo sin simular emisión", async () => {
     const user = userEvent.setup();
     render(<Facturacion usuario={mockUsuario as Usuario} facturasIniciales={FACTURAS_EJEMPLO_TEST} />);
-
-    // Filtrar a pendientes
-    await user.click(screen.getByRole("button", { name: /pendientes/i }));
-
-    const botonSolicitar = screen.getByRole("button", { name: /solicitar factura/i });
-    await user.click(botonSolicitar);
-
-    // Debe mostrar toast de confirmación
-    expect(await screen.findByText(/ha sido emitida exitosamente/i)).toBeInTheDocument();
-
-    // La lista de pendientes ahora debe estar vacía
+    await user.click(screen.getAllByRole("button", { name: /solicitar factura/i })[0]);
+    expect(await screen.findByText("Solicitud rechazada: Emisor no configurado")).toBeInTheDocument();
+    expect(billing.solicitar).toHaveBeenCalledWith(expect.anything(), "fac-1");
+    expect(screen.queryByText(/ha sido emitida exitosamente/i)).not.toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: /^emitidas$/i }));
     expect(screen.getByText("Sin facturas disponibles")).toBeInTheDocument();
+  });
+
+  it("un error de red conserva el estado pendiente", async () => {
+    billing.solicitar.mockRejectedValue(new Error("Sin conexión"));
+    const user = userEvent.setup();
+    render(<Facturacion usuario={mockUsuario as Usuario} facturasIniciales={FACTURAS_EJEMPLO_TEST} />);
+    await user.click(screen.getAllByRole("button", { name: /solicitar factura/i })[0]);
+    expect(await screen.findByText("Sin conexión")).toBeInTheDocument();
+    expect(screen.getAllByRole("button", { name: /solicitar factura/i })[0]).toBeEnabled();
+    expect(screen.queryByText(/ha sido emitida exitosamente/i)).not.toBeInTheDocument();
   });
 
   it("cierra los modales al presionar la tecla Escape", async () => {

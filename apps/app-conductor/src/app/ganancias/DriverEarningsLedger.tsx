@@ -50,10 +50,10 @@ export default function PaginaGanancias() {
     (v) => v.estatusEconomico === "en_validacion" || v.estatusEconomico === "confirmado" || v.estatusEconomico === "programado"
   );
   const tienePagado =
-    payoutsFiltrados.some((p) => p.estado === "procesado") ||
+    payoutsFiltrados.some((p) => estatusPayout(p) === "pagado") ||
     TrasladosFiltrados.some((v) => v.estatusEconomico === "pagado");
   const paso = tienePagado ? 3 : tieneValidados ? 2 : tieneTraslados ? 1 : 0;
-  const proximoPayout = payoutsFiltrados.find((p) => p.estado !== "procesado");
+  const proximoPayout = payoutsFiltrados.find((p) => estatusPayout(p) !== "pagado");
   const montoPendiente = resumen.depositoAcumulado;
 
   return (
@@ -130,7 +130,7 @@ export default function PaginaGanancias() {
             tieneValidados={tieneValidados}
             tienePagado={tienePagado}
             montoPendiente={montoPendiente}
-            proximoPayoutFecha={proximoPayout?.periodo_fin ?? fechaDispersion}
+            proximoPayoutFecha={proximoPayout?.fecha_prevista ?? fechaDispersion}
             fechaDispersion={fechaDispersion}
           />
 

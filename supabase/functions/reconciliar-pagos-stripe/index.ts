@@ -1,215 +1,69 @@
-/// <reference lib="deno.ns" />
-/// <reference lib="dom" />
+import { createClient } from "npm:@supabase/supabase-js@2.47.16";
+import { conciliarCheckouts } from "../_shared/stripe-checkouts.ts";
+import { datosVerificacion, modoStripe, obtenerIntentoStripe, obtenerReembolsoCompletoStripe } from "../_shared/stripe-verificacion.ts";
 
-// Edge Function / Cron Job: Reconciliación periódica de pagos de Stripe.
-//
-// Consulta la API de Stripe para detectar PaymentIntents que ya alcanzaron
-// el estado "succeeded" (o "canceled" / reembolsados) pero que no fueron
-// aplicados en nuestra base de datos (por ejemplo, por pérdida de webhook,
-// latencia extrema o fallos temporales de red).
-//
-// Invocable periódicamente por cron (pg_cron o scheduler de Supabase)
-// usando autenticación Bearer SUPABASE_SERVICE_ROLE_KEY.
-
-import Stripe from "npm:stripe@^17";
-import { createClient } from "npm:@supabase/supabase-js@2";
-import { decidirAccionPagoIntent, decidirAccionCheckoutHuerfano } from "./logica.ts";
-
-function respuestaJson(body: Record<string, unknown>, status = 200) {
-  return new Response(JSON.stringify(body), {
-    status,
-    headers: { "Content-Type": "application/json" }
-  });
-}
-
-Deno.serve(async (req) => {
-  if (req.method !== "POST" && req.method !== "GET") {
-    return respuestaJson({ error: "Método no permitido." }, 405);
-  }
-
-  const supabaseUrl = Deno.env.get("SUPABASE_URL");
-  const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
-  const stripeSecretKey = Deno.env.get("STRIPE_SECRET_KEY");
-
-  if (!supabaseUrl || !serviceRoleKey || !stripeSecretKey) {
-    return respuestaJson({ error: "Variables de entorno no configuradas." }, 500);
-  }
-
-  const authHeader = req.headers.get("Authorization");
-  if (authHeader !== `Bearer ${serviceRoleKey}`) {
-    return respuestaJson({ error: "No autorizado. Se requiere service_role key." }, 401);
-  }
-
-  const stripe = new Stripe(stripeSecretKey, {
-    apiVersion: "2025-02-24.acacia",
-    httpClient: Stripe.createFetchHttpClient()
-  });
-
-  const supabase = createClient(supabaseUrl, serviceRoleKey, {
-    auth: { persistSession: false }
-  });
-
-  // 1. Obtener pagos pendientes que tienen un stripe_payment_intent_id asignado
-  const { data: pagosPendientes, error: errorPagos } = await supabase
-    .from("pagos")
-    .select("id, traslado_id, stripe_payment_intent_id, monto, registrado_en")
-    .not("stripe_payment_intent_id", "is", null)
-    .eq("estado", "pendiente")
-    .order("registrado_en", { ascending: true })
-    .limit(50);
-
-  if (errorPagos) {
-    console.error("[reconciliar-pagos-stripe] Error consultando pagos pendientes:", errorPagos);
-    return respuestaJson({ error: `Error en base de datos: ${errorPagos.message}` }, 500);
-  }
-
-  const pagos = pagosPendientes ?? [];
-  let reconciliados = 0;
-  let reembolsados = 0;
-  let fallidos = 0;
-  let ignorados = 0;
-  const errores: Array<{ pago_id: string; intent_id: string; error: string }> = [];
-
-  for (const pago of pagos) {
-    const intentId = pago.stripe_payment_intent_id;
-    if (!intentId) continue;
-
-    try {
-      const intent = await stripe.paymentIntents.retrieve(intentId);
-      const accion = decidirAccionPagoIntent(intent);
-
-      if (accion.tipo === "ignorar") {
-        ignorados += 1;
-        continue;
-      }
-
-      const eventoIdGenerado = `reconciliacion_cron_${intent.id}_${Date.now()}`;
-
-      if (accion.tipo === "completar") {
-        if (accion.cargaMasivaId) {
-          const { error: errRpc } = await supabase.rpc("confirmar_checkout_masivo", {
-            p_id: accion.cargaMasivaId,
-            p_intent: intent.id,
-            p_monto: intent.amount_received ?? Math.round(Number(pago.monto) * 100),
-            p_moneda: intent.currency ?? "mxn"
-          });
-          if (errRpc) throw errRpc;
-        } else {
-          const { error: errRpc } = await supabase.rpc("procesar_pago_stripe", {
-            p_stripe_event_id: eventoIdGenerado,
-            p_stripe_payment_intent_id: intent.id,
-            p_estado_pago: "completado"
-          });
-          if (errRpc) throw errRpc;
-        }
-        reconciliados += 1;
-        console.log(`[reconciliar-pagos-stripe] Pago reconciliado exitosamente: intent ${intent.id}, pago ${pago.id}`);
-      } else if (accion.tipo === "reembolsar") {
-        const { error: errRpc } = await supabase.rpc("procesar_pago_stripe", {
-          p_stripe_event_id: eventoIdGenerado,
-          p_stripe_payment_intent_id: intent.id,
-          p_estado_pago: "reembolsado"
-        });
-        if (errRpc) throw errRpc;
-        reembolsados += 1;
-        console.log(`[reconciliar-pagos-stripe] Reembolso aplicado: intent ${intent.id}, pago ${pago.id}`);
-      } else if (accion.tipo === "fallar") {
-        const { error: errRpc } = await supabase.rpc("procesar_pago_stripe", {
-          p_stripe_event_id: eventoIdGenerado,
-          p_stripe_payment_intent_id: intent.id,
-          p_estado_pago: "fallido"
-        });
-        if (errRpc) throw errRpc;
-        fallidos += 1;
-        console.log(`[reconciliar-pagos-stripe] Pago marcado como fallido: intent ${intent.id}, pago ${pago.id}`);
-      }
-    } catch (err) {
-      const mensaje = err instanceof Error ? err.message : String(err);
-      console.error(`[reconciliar-pagos-stripe] Error procesando intent ${intentId}:`, mensaje);
-      errores.push({ pago_id: pago.id, intent_id: intentId, error: mensaje });
+const db = createClient(Deno.env.get("SUPABASE_URL") ?? "", Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "");
+Deno.serve(async (req: Request) => {
+  if (req.method !== "POST" && req.method !== "GET") return new Response("Método no permitido", { status: 405 });
+  let id: string | undefined;
+  let autorizado = false;
+  try {
+    const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+    if (serviceKey && req.headers.get("Authorization") === `Bearer ${serviceKey}`) {
+      id = crypto.randomUUID();
+      const result = await db.from("stripe_conciliacion_ejecuciones").insert({ id, nonce_hash: "manual_service_role", estado: "procesando" });
+      if (result.error) throw new Error("reconciliation_result_create_failed");
+      autorizado = true;
+    } else {
+    if (req.method !== "POST") return new Response("No autorizado", { status: 401 });
+    const body = await req.json();
+    if (typeof body.ejecucion_id !== "string" || !/^[0-9a-f-]{36}$/.test(body.ejecucion_id) || typeof body.nonce !== "string" || !/^[0-9a-f]{64}$/.test(body.nonce)) return new Response("Solicitud inválida", { status: 400 });
+    id = body.ejecucion_id;
+    const claim = await db.rpc("tomar_ejecucion_conciliacion", { p_id: id, p_nonce: body.nonce });
+    if (claim.error) throw new Error("reconciliation_claim_failed");
+    if (!claim.data) return new Response("No autorizado", { status: 401 });
+    autorizado = true;
     }
-  }
-
-  // 2. Reconciliar y cancelar/expirar checkouts masivos huérfanos (> 24 horas sin pagar)
-  let checkoutsExpirados = 0;
-  let checkoutsReconciliados = 0;
-
-  const limiteHoras = 24;
-  const fechaCorte = new Date(Date.now() - limiteHoras * 3600 * 1000).toISOString();
-
-  const { data: checkoutsHuerfanos, error: errorHuerfanos } = await supabase
-    .from("checkout_traslados_masivos")
-    .select("id, stripe_payment_intent_id, monto_centavos, auth_user_id, creado_en")
-    .is("pagado_en", null)
-    .is("expirado_en", null)
-    .lt("creado_en", fechaCorte)
-    .limit(30);
-
-  if (!errorHuerfanos && checkoutsHuerfanos) {
-    for (const ch of checkoutsHuerfanos) {
-      try {
-        if (!ch.stripe_payment_intent_id) {
-          await supabase
-            .from("checkout_traslados_masivos")
-            .update({ expirado_en: new Date().toISOString() })
-            .eq("id", ch.id);
-          checkoutsExpirados += 1;
-          continue;
-        }
-
-        const intent = await stripe.paymentIntents.retrieve(ch.stripe_payment_intent_id);
-        const accion = decidirAccionCheckoutHuerfano(intent);
-
-        if (accion.tipo === "confirmar") {
-          const { error: errRpc } = await supabase.rpc("confirmar_checkout_masivo", {
-            p_id: ch.id,
-            p_intent: intent.id,
-            p_monto: intent.amount_received ?? ch.monto_centavos,
-            p_moneda: intent.currency ?? "mxn"
-          });
-          if (errRpc) throw errRpc;
-          checkoutsReconciliados += 1;
-          console.log(`[reconciliar-pagos-stripe] Checkout masivo huérfano confirmado: ${ch.id}`);
-        } else if (accion.tipo === "cancelar_stripe_y_expirar") {
-          try {
-            await stripe.paymentIntents.cancel(intent.id);
-          } catch {
-            // Ya cancelado en Stripe o no cancelable
+    const clave = Deno.env.get("STRIPE_SECRET_KEY") ?? "";
+    const modo = modoStripe(clave);
+    const pagos = await db.from("pagos").select("stripe_payment_intent_id")
+      .not("stripe_payment_intent_id", "is", null).not("traslado_id", "is", null)
+      .or("estado.in.(pendiente,fallido),stripe_verificado_en.is.null")
+      .order("stripe_verificado_en", { ascending: true, nullsFirst: true }).limit(50);
+    if (pagos.error) throw new Error("reconciliation_query_failed");
+    let verificados = 0;
+    const errores: { intent_id: string; codigo: string }[] = [];
+    const filas = pagos.data ?? [];
+    for (let start = 0; start < filas.length; start += 5) {
+      await Promise.all(filas.slice(start,start+5).map(async (pago) => {
+        const intentId = pago.stripe_payment_intent_id as string;
+        try {
+          const intent = await obtenerIntentoStripe(clave,intentId);
+          const reembolso = await obtenerReembolsoCompletoStripe(clave, intent);
+          if (reembolso) {
+            const result = await db.rpc("procesar_pago_stripe", { p_stripe_event_id: `conciliacion_reembolso_${reembolso}`, p_stripe_payment_intent_id: intent.id, p_estado_pago: "reembolsado" });
+            if (result.error || result.data?.ok === false) throw new Error("refund_reconciliation_failed");
+            verificados++;
+            return;
           }
-          await supabase
-            .from("checkout_traslados_masivos")
-            .update({ expirado_en: new Date().toISOString() })
-            .eq("id", ch.id);
-          checkoutsExpirados += 1;
-          console.log(`[reconciliar-pagos-stripe] Checkout masivo huérfano cancelado y expirado: ${ch.id}`);
-        } else if (accion.tipo === "expirar") {
-          await supabase
-            .from("checkout_traslados_masivos")
-            .update({ expirado_en: new Date().toISOString() })
-            .eq("id", ch.id);
-          checkoutsExpirados += 1;
-          console.log(`[reconciliar-pagos-stripe] Checkout masivo huérfano marcado como expirado: ${ch.id}`);
+          const resultado = await db.rpc("aplicar_verificacion_pago_stripe", { p_datos: datosVerificacion(intent,modo,"conciliacion") });
+          if (resultado.error) throw new Error("payment_verification_rejected");
+          if (resultado.data?.requiere_revision) throw new Error("provider_state_requires_review");
+          verificados++;
+        } catch (error) {
+          errores.push({ intent_id: intentId, codigo: error instanceof Error ? error.message : "reconciliation_failed" });
         }
-      } catch (err) {
-        const mensaje = err instanceof Error ? err.message : String(err);
-        console.error(`[reconciliar-pagos-stripe] Error procesando checkout huérfano ${ch.id}:`, mensaje);
-      }
+      }));
     }
+    const checkouts = await conciliarCheckouts(db, clave);
+    errores.push(...checkouts.errores);
+    const resultado = { verificados, errores, livemode: modo, candidatos: filas.length, checkouts_confirmados: checkouts.confirmados, checkouts_expirados: checkouts.expirados };
+    const update = await db.from("stripe_conciliacion_ejecuciones").update({ estado: errores.length ? "fallida" : "completada", finalizada_en: new Date().toISOString(), resultado }).eq("id",id);
+    if (update.error) throw new Error("reconciliation_result_write_failed");
+    return Response.json(resultado, { status: errores.length ? 502 : 200 });
+  } catch (error) {
+    const codigo = error instanceof Error ? error.message : "reconciliation_failed";
+    if (id && autorizado) await db.from("stripe_conciliacion_ejecuciones").update({ estado: "fallida", finalizada_en: new Date().toISOString(), resultado: { error: codigo } }).eq("id",id);
+    return Response.json({ error: codigo }, { status: 500 });
   }
-
-  const resumen = {
-    ok: true,
-    pendientes_encontrados: pagos.length,
-    reconciliados,
-    reembolsados,
-    fallidos,
-    ignorados,
-    checkouts_expirados: checkoutsExpirados,
-    checkouts_reconciliados: checkoutsReconciliados,
-    errores_count: errores.length,
-    errores
-  };
-
-  console.log("[reconciliar-pagos-stripe] Resumen de ejecución:", resumen);
-  return respuestaJson(resumen, 200);
 });

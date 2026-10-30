@@ -1,4 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import type { SupabaseClient } from "@supabase/supabase-js";
+import type { Database } from "@ruum/shared/types";
 import {
   configurarStorageTelemetria,
   contarColaTelemetria,
@@ -9,11 +11,8 @@ import {
   sincronizarColaTelemetria
 } from "../src/lib/cola-telemetria-offline";
 
-const mockRegistrarUbicacion = vi.fn(async () => {});
-
-vi.mock("@ruum/api/services", () => ({
-  registrarUbicacionTraslado: (...args: unknown[]) => mockRegistrarUbicacion(...args)
-}));
+const rpc = vi.fn(async (_name: string, args: { p_puntos: { localId: string }[] }) => ({ data: { aceptados: [args.p_puntos[0].localId], duplicadosIds: [] as string[] }, error: null as Error | null }));
+const cliente = { auth: { getUser: vi.fn(async () => ({ data: { user: { id: "user-1" } }, error: null })) }, rpc } as unknown as SupabaseClient<Database>;
 
 describe("Cola de Telemetría Offline (cola-telemetria-offline)", () => {
   beforeEach(async () => {
@@ -70,14 +69,40 @@ describe("Cola de Telemetría Offline (cola-telemetria-offline)", () => {
       { usuarioId: "user-1", localId: "p-sync-1" }
     );
 
-    const clienteMock = {} as unknown as SupabaseClient<Database>;
+    const clienteMock = cliente;
     const sincronizados = await sincronizarColaTelemetria(clienteMock);
 
     expect(sincronizados).toBe(1);
-    expect(mockRegistrarUbicacion).toHaveBeenCalledWith(
-      clienteMock,
-      expect.objectContaining({ trasladoId: "t-100", lat: 19.4326 })
-    );
+    expect(rpc).toHaveBeenCalledWith("registrar_telemetria_lote", expect.objectContaining({ p_traslado_id: "t-100", p_puntos: [expect.objectContaining({ localId: "p-sync-1", lat: 19.4326, fuente: "web_foreground" })] }));
     expect(await contarColaTelemetria()).toBe(0);
+  });
+
+  it("conserva identidad y hora de captura después de un fallo y reconoce el reintento duplicado", async () => {
+    await encolarPuntoTelemetria("t-100", { lat: 19, lng: -99 }, { usuarioId: "user-1", localId: "stable", deviceTimestamp: "2026-10-30T15:00:00Z" });
+    rpc.mockResolvedValueOnce({ data: { aceptados: [], duplicadosIds: [] }, error: new Error("offline") });
+    await expect(sincronizarColaTelemetria(cliente)).rejects.toThrow("offline");
+    expect((await leerColaTelemetria())[0]).toMatchObject({ localId: "stable", deviceTimestamp: "2026-10-30T15:00:00Z", attempts: 1 });
+    rpc.mockResolvedValueOnce({ data: { aceptados: [], duplicadosIds: ["stable"] }, error: null });
+    expect(await sincronizarColaTelemetria(cliente, { ignoreBackoff: true })).toBe(1);
+    expect(await contarColaTelemetria()).toBe(0);
+  });
+
+  it("no envía ni elimina los puntos de otro usuario", async () => {
+    await encolarPuntoTelemetria("t-100", { lat: 19, lng: -99 }, { usuarioId: "otro", localId: "other" });
+    expect(await sincronizarColaTelemetria(cliente)).toBe(0);
+    expect(rpc).not.toHaveBeenCalled();
+    expect(await contarColaTelemetria()).toBe(1);
+  });
+
+  it("conserva la señal cada 30 segundos aunque no haya movimiento", async () => {
+    await encolarPuntoTelemetria("t-100", { lat: 19, lng: -99 }, { usuarioId: "user-1", deviceTimestamp: "2026-10-30T15:00:00Z" });
+    expect(await encolarPuntoTelemetria("t-100", { lat: 19, lng: -99 }, { usuarioId: "user-1", deviceTimestamp: "2026-10-30T15:00:30Z" })).toBe(true);
+  });
+
+  it("no elimina puntos sin confirmación explícita", async () => {
+    await encolarPuntoTelemetria("t-100", { lat: 19, lng: -99 }, { usuarioId: "user-1", localId: "pending" });
+    rpc.mockResolvedValueOnce({ data: { aceptados: [], duplicadosIds: [] }, error: null });
+    await expect(sincronizarColaTelemetria(cliente)).rejects.toThrow("telemetry_point_not_acknowledged");
+    expect(await contarColaTelemetria()).toBe(1);
   });
 });

@@ -195,7 +195,7 @@ export function useEvidenciaPageLogic(id: string): UseEvidenciaPageLogic {
       if (data.kilometraje !== null) {
         setKilometraje(data.kilometraje.toLocaleString("es-MX"));
       }
-      setLlavesCount(Number(data.llaves_recibidas) || 2);
+      setLlavesCount(data.llaves_recibidas == null ? 2 : Number(data.llaves_recibidas));
       setTarjetaCirculacion(data.tarjeta_circulacion || "no");
       setTalonVerificacion(data.talon_verificacion || "no");
       setHologramaVerificacion(data.holograma_verificacion ? "si" : "no");

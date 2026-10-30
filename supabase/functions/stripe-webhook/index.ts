@@ -1,202 +1,66 @@
 /// <reference lib="deno.ns" />
-/// <reference lib="dom" />
-
-// Edge Function: recibe los webhooks de Stripe y actualiza pagos de usuarios
-// en consecuencia (PRD §4.6).
-//
-// Variables de entorno requeridas en el proyecto de Supabase (Dashboard →
-// Edge Functions → Secrets), nunca en el repo:
-//   STRIPE_SECRET_KEY        — clave secreta de Stripe (sk_live_/sk_test_)
-//   STRIPE_WEBHOOK_SECRET    — firma del endpoint (whsec_...), de Stripe Dashboard
-//   SUPABASE_SERVICE_ROLE_KEY — para escribir sin pasar por RLS (es un webhook
-//                               de un servidor de confianza, no de un usuario)
-//
-// No se pudo probar contra Stripe real ni un proyecto de Supabase desplegado en este entorno (no
-// hay cuenta de Stripe ni acceso a un proyecto real desde aquí). Sí se probó este archivo completo
-// (no solo logica.ts, que también está probada con `deno test`, ver logica.test.ts) corriendo de
-// verdad con `deno serve` contra un mock local de PostgREST, recibiendo un evento firmado con el
-// mismo esquema HMAC que usa Stripe — ver stripe-webhook/integration-test/.
-// Antes de production: `stripe listen --forward-to <url>/stripe-webhook` para
-// probar con eventos reales de Stripe en modo test.
-import Stripe from "npm:stripe@^17";
-import { createClient } from "npm:@supabase/supabase-js@2";
-import { esEventoManejado, extraerPaymentIntentDeObjeto } from "./logica.ts";
-
-const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") ?? "", {
-  apiVersion: "2025-02-24.acacia",
-  httpClient: Stripe.createFetchHttpClient()
-});
-
-const supabase = createClient(
-  Deno.env.get("SUPABASE_URL") ?? "",
-  Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
-);
-
-async function ejecutarSupabase<T>(
-  operacion: PromiseLike<{ data: T; error: { message: string } | null }>,
-  contexto: string
-) {
-  const { data, error } = await operacion;
-  if (error) throw new Error(`${contexto}: ${error.message}`);
-  return data;
-}
-
-Deno.serve(async (req) => {
-  const firma = req.headers.get("stripe-signature");
-  const cuerpo = await req.text();
-
-  if (!firma) {
-    return new Response("Falta stripe-signature", { status: 400 });
-  }
-
-  let evento: Stripe.Event;
+import Stripe from "npm:stripe@23.0.0";
+import { createClient } from "npm:@supabase/supabase-js@2.47.16";
+import { datosVerificacion, modoStripe, obtenerIntentoStripe, obtenerReembolsoCompletoStripe } from "../_shared/stripe-verificacion.ts";
+const clave = Deno.env.get("STRIPE_SECRET_KEY") ?? "";
+const stripe = new Stripe(clave, { apiVersion: "2026-09-30.endive", httpClient: Stripe.createFetchHttpClient() });
+const db = createClient(Deno.env.get("SUPABASE_URL") ?? "", Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "");
+Deno.serve(async (req: Request) => {
+  if (req.method !== "POST") return new Response("Método no permitido", { status: 405 });
+  let event: Stripe.Event;
+  try { event = await stripe.webhooks.constructEventAsync(await req.text(), req.headers.get("stripe-signature") ?? "", Deno.env.get("STRIPE_WEBHOOK_SECRET") ?? ""); }
+  catch { return new Response("Firma inválida", { status: 400 }); }
+  if (!["payment_intent.succeeded", "payment_intent.payment_failed", "payment_intent.processing", "payment_intent.canceled", "checkout.session.completed", "charge.refunded", "charge.refund.updated", "refund.created", "refund.updated"].includes(event.type)) return new Response("Evento no manejado", { status: 200 });
   try {
-    evento = await stripe.webhooks.constructEventAsync(
-      cuerpo,
-      firma,
-      Deno.env.get("STRIPE_WEBHOOK_SECRET") ?? ""
-    );
-  } catch (err) {
-    console.error("Firma de webhook inválida:", err);
-    return new Response("Firma inválida", { status: 400 });
-  }
-
-  if (!esEventoManejado(evento.type)) {
-    // 200, no 4xx/5xx: que Stripe no reintente eventos que de verdad no nos interesan.
-    return new Response("Evento no manejado, ignorado", { status: 200 });
-  }
-
-  try {
-    switch (evento.type) {
-      case "payment_intent.succeeded":
-      case "payment_intent.payment_failed": {
-        const intent = evento.data.object as Stripe.PaymentIntent;
-        if (intent.metadata.carga_masiva_id) {
-          if (evento.type === "payment_intent.succeeded") {
-            await ejecutarSupabase(supabase.rpc("confirmar_checkout_masivo", {
-              p_id: intent.metadata.carga_masiva_id,
-              p_intent: intent.id,
-              p_monto: intent.amount_received,
-              p_moneda: intent.currency,
-            }), "No se pudo confirmar la carga masiva pagada");
-          } else if (evento.type === "payment_intent.payment_failed") {
-            // Si el pago con tarjeta falló, marcar el checkout como expirado para evitar bloqueos
-            await ejecutarSupabase(
-              supabase
-                .from("checkout_traslados_masivos")
-                .update({ expirado_en: new Date().toISOString() })
-                .eq("id", intent.metadata.carga_masiva_id)
-                .is("pagado_en", null),
-              "No se pudo marcar la carga masiva fallida como expirada"
-            );
-          }
-          break;
-        }
-        const nuevoEstado = evento.type === "payment_intent.succeeded" ? "completado" : "fallido";
-
-        // RC-04: Usar función RPC transaccional para evitar inconsistencias
-        // si falla después de marcar el evento como procesado.
-        // La función es idempotente: si el evento ya fue procesado y el
-        // traslado ya está completo, no hace nada.
-        const resultado = await ejecutarSupabase(
-          supabase.rpc("procesar_pago_stripe", {
-            p_stripe_event_id: evento.id,
-            p_stripe_payment_intent_id: intent.id,
-            p_estado_pago: nuevoEstado
-          }),
-          "No se pudo procesar el pago de Stripe"
-        );
-
-        // Verificar si el procesamiento fue exitoso
-        if (resultado && typeof resultado === 'object' && 'ok' in resultado && !resultado.ok) {
-          console.warn("procesar_pago_stripe devolvió error:", resultado);
-        }
-        break;
-      }
-
-      case "checkout.session.completed": {
-        const session = evento.data.object as Stripe.Checkout.Session;
-        const intentId = extraerPaymentIntentDeObjeto(session);
-
-        if (session.payment_status === "paid") {
-          if (session.metadata?.carga_masiva_id && intentId) {
-            await ejecutarSupabase(
-              supabase.rpc("confirmar_checkout_masivo", {
-                p_id: session.metadata.carga_masiva_id,
-                p_intent: intentId,
-                p_monto: session.amount_total ?? 0,
-                p_moneda: session.currency ?? "mxn",
-              }),
-              "No se pudo confirmar la carga masiva desde checkout.session.completed"
-            );
-            break;
-          }
-
-          if (intentId) {
-            const resultado = await ejecutarSupabase(
-              supabase.rpc("procesar_pago_stripe", {
-                p_stripe_event_id: evento.id,
-                p_stripe_payment_intent_id: intentId,
-                p_estado_pago: "completado"
-              }),
-              "No se pudo procesar checkout.session.completed en Stripe"
-            );
-            if (resultado && typeof resultado === "object" && "ok" in resultado && !resultado.ok) {
-              console.warn("procesar_pago_stripe devolvió error en checkout.session.completed:", resultado);
-            }
-          }
-        }
-        break;
-      }
-
-      case "charge.refunded":
-      case "charge.refund.updated": {
-        const charge = evento.data.object as Stripe.Charge;
-        const intentId = extraerPaymentIntentDeObjeto(charge);
-
-        if (intentId && charge.refunded) {
-          const resultado = await ejecutarSupabase(
-            supabase.rpc("procesar_pago_stripe", {
-              p_stripe_event_id: evento.id,
-              p_stripe_payment_intent_id: intentId,
-              p_estado_pago: "reembolsado"
-            }),
-            "No se pudo registrar reembolso de cargo de Stripe"
-          );
-          if (resultado && typeof resultado === "object" && "ok" in resultado && !resultado.ok) {
-            console.warn("procesar_pago_stripe devolvió error en charge.refunded:", resultado);
-          }
-        }
-        break;
-      }
-
-      case "refund.created":
-      case "refund.updated": {
-        const refund = evento.data.object as Stripe.Refund;
-        const intentId = extraerPaymentIntentDeObjeto(refund);
-
-        if (intentId && (refund.status === "succeeded" || !refund.status)) {
-          const resultado = await ejecutarSupabase(
-            supabase.rpc("procesar_pago_stripe", {
-              p_stripe_event_id: evento.id,
-              p_stripe_payment_intent_id: intentId,
-              p_estado_pago: "reembolsado"
-            }),
-            "No se pudo registrar reembolso de Stripe"
-          );
-          if (resultado && typeof resultado === "object" && "ok" in resultado && !resultado.ok) {
-            console.warn("procesar_pago_stripe devolvió error en refund:", resultado);
-          }
-        }
-        break;
-      }
+    if (event.livemode !== modoStripe(clave)) throw new Error("stripe_environment_mismatch");
+    // Consultar el estado actual evita aplicar snapshots fallidos fuera de orden.
+    let intentId: string | null = null;
+    const snapshot = event.data.object as { id: string; payment_intent?: string | { id: string } | null };
+    if (event.type.startsWith("payment_intent.")) intentId = snapshot.id;
+    else if (event.type === "checkout.session.completed") {
+      const session = await stripe.checkout.sessions.retrieve(snapshot.id);
+      if (session.payment_status !== "paid") return new Response("Pago pendiente", { status: 200 });
+      intentId = typeof session.payment_intent === "string" ? session.payment_intent : session.payment_intent?.id ?? null;
+    } else {
+      // Preserve refunds; consult the provider and only mark full completed refunds.
+      const refundEvent = event.type.startsWith("refund.") || event.type === "charge.refund.updated";
+      const refund = refundEvent ? await stripe.refunds.retrieve(snapshot.id) : null;
+      if (refund && refund.status !== "succeeded") return new Response("Reembolso pendiente", { status: 200 });
+      const chargeId = refund ? (typeof refund.charge === "string" ? refund.charge : refund.charge?.id) : snapshot.id;
+      if (!chargeId) throw new Error("refund_charge_missing");
+      const charge = await stripe.charges.retrieve(chargeId);
+      if (charge.livemode !== modoStripe(clave)) throw new Error("stripe_environment_mismatch");
+      if (!charge.refunded) return new Response("Reembolso parcial: requiere conciliación financiera", { status: 200 });
+      intentId = typeof charge.payment_intent === "string" ? charge.payment_intent : charge.payment_intent?.id ?? null;
+      if (!intentId) throw new Error("refund_intent_missing");
+      const result = await db.rpc("procesar_pago_stripe", { p_stripe_event_id: event.id, p_stripe_payment_intent_id: intentId, p_estado_pago: "reembolsado" });
+      if (result.error || result.data?.ok === false) throw new Error("refund_reconciliation_failed");
+      return new Response("ok", { status: 200 });
     }
-  } catch (err) {
-    console.error("Error procesando webhook de Stripe:", err);
-    // 500 a propósito: Stripe reintenta automáticamente en este caso, que es
-    // lo correcto si fue un error transitorio de la base de datos.
-    return new Response("Error interno", { status: 500 });
+    if (!intentId) throw new Error("payment_intent_missing");
+    const intent = await obtenerIntentoStripe(clave,intentId);
+    const reembolso = await obtenerReembolsoCompletoStripe(clave, intent);
+    if (reembolso) {
+      const result = await db.rpc("procesar_pago_stripe", { p_stripe_event_id: `conciliacion_reembolso_${reembolso}`, p_stripe_payment_intent_id: intent.id, p_estado_pago: "reembolsado" });
+      if (result.error || result.data?.ok === false) throw new Error("refund_reconciliation_failed");
+      return new Response("ok", { status: 200 });
+    }
+    if (intent.metadata.carga_masiva_id) {
+      if (intent.status === "succeeded") {
+        const result = await db.rpc("confirmar_checkout_masivo", { p_id: intent.metadata.carga_masiva_id, p_intent: intent.id, p_monto: intent.amount_received, p_moneda: intent.currency });
+        if (result.error || result.data?.ok === false) throw new Error("bulk_checkout_reconciliation_failed");
+      } else if (["canceled", "requires_payment_method"].includes(intent.status)) {
+        const result = await db.from("checkout_traslados_masivos").update({ expirado_en: new Date().toISOString() }).eq("id", intent.metadata.carga_masiva_id).is("pagado_en", null);
+        if (result.error) throw new Error("bulk_checkout_expiration_failed");
+      }
+    } else {
+      const result = await db.rpc("aplicar_verificacion_pago_stripe", { p_datos: datosVerificacion(intent,modoStripe(clave),"webhook",event.id) });
+      if (result.error) throw new Error("payment_verification_rejected");
+      if (result.data?.requiere_revision) throw new Error("provider_state_requires_review");
+    }
+    return new Response("ok", { status: 200 });
+  } catch (error) {
+    console.error("stripe_webhook_failed", { event_id: event.id, code: error instanceof Error ? error.message : "processing_failed" });
+    return new Response("Error procesando pago; se requiere reintento", { status: 500 });
   }
-
-  return new Response("ok", { status: 200 });
 });
