@@ -1,0 +1,1892 @@
+.page {
+  height: 100%;
+  min-height: 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px 18px;
+  color: #101d42;
+  background: linear-gradient(115deg, #fafcff, #f5f8fc);
+  font-size: 12px;
+}
+.page svg,
+.dialog svg {
+  width: 19px;
+  height: 19px;
+  flex-shrink: 0;
+}
+.page a,
+.page button,
+.dialog a,
+.dialog button {
+  transition:
+    background 0.18s,
+    border-color 0.18s,
+    color 0.18s,
+    box-shadow 0.18s,
+    transform 0.18s;
+}
+.page button,
+.dialog button {
+  cursor: pointer;
+}
+.page button:disabled,
+.dialog button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+.page a:focus-visible,
+.page button:focus-visible,
+.page section:focus-visible,
+.dialog a:focus-visible,
+.dialog button:focus-visible {
+  outline: 2px solid #005cff;
+  outline-offset: 3px;
+}
+.page a:active,
+.page button:active {
+  transform: translateY(1px);
+}
+.heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  min-height: 74px;
+  flex-shrink: 0;
+}
+.heading > div:first-child {
+  min-width: 0;
+}
+.heading p {
+  margin: 0 0 4px;
+  font-size: 12px;
+  color: #4a6190;
+}
+.heading h1 {
+  font-size: 32px;
+  letter-spacing: -1.2px;
+  line-height: 1.1;
+  font-weight: 800;
+  margin: 0 0 5px;
+}
+.heading h1 > span {
+  display: inline-block;
+  letter-spacing: 0;
+  margin-left: 4px;
+  font-size: 0.9em;
+}
+.heading > div > span {
+  font-size: 12px;
+  color: #5d75a1;
+  line-height: 1.4;
+}
+.headerArt {
+  display: none;
+}
+.banners {
+  display: grid;
+  grid-template-columns: minmax(0, 1.95fr) minmax(0, 1fr);
+  gap: 14px;
+  height: 145px;
+  flex-shrink: 0;
+}
+.profile {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  gap: 8px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  color: white;
+  background: linear-gradient(110deg, #001c36, #07345d);
+  border: 1px solid #d7e5f4;
+  box-shadow: 0 2px 4px #1d3f6608;
+}
+.profileTop {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 0;
+  flex-shrink: 0;
+}
+.avatarWrap {
+  position: relative;
+  flex-shrink: 0;
+}
+.avatar {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 58px;
+  height: 58px;
+  overflow: hidden;
+  border-radius: 50%;
+  background: #d8e6f4;
+  color: #154675;
+  font-size: 23px;
+  font-weight: 700;
+}
+.avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.avatarMark {
+  position: absolute;
+  right: 0;
+  bottom: 1px;
+  display: grid;
+  place-items: center;
+  width: 17px;
+  height: 17px;
+  border-radius: 50%;
+  background: #b5c6d8;
+  border: 2px solid #e2f2ff;
+  color: #fff;
+}
+.avatarMark[data-verified="true"] {
+  background: #28d99d;
+}
+.avatarMark svg {
+  width: 10px;
+  height: 10px;
+  stroke-width: 2.2;
+}
+.profileIdentity {
+  min-width: 0;
+  flex: 1;
+}
+.profileIdentity > div {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 4px;
+}
+.profileIdentity h2 {
+  font-size: 13px;
+  line-height: 1.25;
+  font-weight: 650;
+  margin: 0;
+}
+.profileIdentity p {
+  font-size: 10px;
+  line-height: 1.4;
+  color: #e3ecf7;
+  margin: 2px 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.verification {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  border-radius: 12px;
+  background: #ffedcf;
+  color: #ac6100;
+  padding: 3px 7px;
+  font-size: 9px;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+.verification[data-verified="true"] {
+  background: #d9ffed;
+  color: #00a574;
+}
+.verification svg {
+  width: 11px;
+  height: 11px;
+}
+.editProfile {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  color: #f0f7ff;
+  border: 1px solid #7597b7;
+  border-radius: 9px;
+  font-size: 10px;
+  font-weight: 550;
+  padding: 8px;
+  align-self: flex-start;
+  white-space: nowrap;
+}
+.editProfile svg {
+  width: 14px;
+  height: 14px;
+}
+.editProfile:hover {
+  background: #ffffff12;
+  border-color: #d5eaff;
+}
+.stats {
+  min-height: 0;
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  align-items: center;
+  flex: 1;
+  border-top: 1px solid #ffffff1c;
+  padding-top: 8px;
+}
+.stats > a {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-width: 0;
+  border-right: 1px solid #ffffff30;
+  padding: 0 5px;
+  color: #d6e5f5;
+  border-radius: 3px;
+}
+.stats > a:last-child {
+  border: 0;
+}
+.stats > a:hover {
+  background: #ffffff0b;
+}
+.stats > a > svg {
+  width: 17px;
+  height: 17px;
+  align-self: flex-start;
+  margin-top: 2px;
+}
+.stats strong {
+  display: block;
+  font-size: 17px;
+  font-weight: 600;
+  line-height: 1.15;
+  white-space: nowrap;
+  color: #f6faff;
+}
+.stats small {
+  display: block;
+  font-size: 9px;
+  line-height: 1.3;
+  margin-top: 3px;
+  white-space: nowrap;
+}
+.verifiedBanner {
+  background: linear-gradient(130deg, #1046d4, #0868ff 60%, #1744d0);
+  border: 1px solid #2a6af8;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  padding: 15px;
+  gap: 8px;
+  color: white;
+  min-width: 0;
+  overflow: hidden;
+  position: relative;
+}
+.verifiedBanner > div {
+  position: relative;
+  z-index: 1;
+  flex: 1;
+  min-width: 0;
+}
+.verifiedBanner h2 {
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.3;
+  margin: 0 0 7px;
+}
+.verifiedBanner p {
+  font-size: 11px;
+  line-height: 1.5;
+  margin: 0 0 12px;
+  color: #f1f6ff;
+}
+.verifiedBanner button,
+.verifiedBanner a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  color: #005cff;
+  background: #fff;
+  border: 1px solid #edf5ff;
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-size: 10px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.verifiedBanner button:hover,
+.verifiedBanner a:hover {
+  background: #e6f1ff;
+  box-shadow: 0 3px 10px #0b2d991f;
+}
+.verifiedBanner button svg,
+.verifiedBanner a svg {
+  width: 15px;
+  height: 15px;
+}
+.verifiedBanner .shieldArt {
+  width: 60px;
+  height: 80px;
+  flex-shrink: 0;
+  filter: drop-shadow(0 3px 7px #0047ba25);
+}
+.quickLinks {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  height: 58px;
+  flex-shrink: 0;
+}
+.quickLinks > a,
+.quickLinks > button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px;
+  border: 1px solid #e2ebf8;
+  border-radius: 12px;
+  background: linear-gradient(120deg, #f6faff, #f6faff99);
+  text-align: left;
+  min-width: 0;
+  color: #11244d;
+  box-shadow: 0 1px 3px #204a6e04;
+}
+.quickLinks > a:hover,
+.quickLinks > button:hover {
+  border-color: #a5c4ff;
+  box-shadow: 0 4px 12px #005cff0b;
+}
+.quickIcon {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: #e7f0ff;
+  color: #0062ff;
+}
+.quickIcon svg {
+  width: 21px;
+  height: 21px;
+}
+.quickLinks strong {
+  display: block;
+  font-size: 11px;
+  line-height: 1.3;
+  font-weight: 650;
+}
+.quickLinks small {
+  display: block;
+  font-size: 9px;
+  line-height: 1.4;
+  color: #617ba8;
+  margin-top: 3px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.quickLinks > a > div,
+.quickLinks > button > div {
+  flex: 1;
+  min-width: 0;
+}
+.quickLinks > a > svg,
+.quickLinks > button > svg {
+  width: 13px;
+  height: 13px;
+  color: #6b87b6;
+}
+.quickLinks [data-tone="green"] {
+  background: linear-gradient(120deg, #f0fcf8, #f4fcfa);
+}
+.quickLinks [data-tone="green"] .quickIcon {
+  background: #dcf9ed;
+  color: #00b978;
+}
+.quickLinks [data-tone="purple"] {
+  background: linear-gradient(120deg, #f6f2ff, #f9f5ff);
+}
+.quickLinks [data-tone="purple"] .quickIcon {
+  background: #ece3ff;
+  color: #8538ff;
+}
+.quickLinks [data-tone="orange"] {
+  background: linear-gradient(120deg, #fff9ef, #fff9f1);
+}
+.quickLinks [data-tone="orange"] .quickIcon {
+  background: #fff0d4;
+  color: #ff9d00;
+}
+.columns {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+  gap: 16px;
+  min-height: 0;
+  flex: 1;
+}
+.leftColumn,
+.rightColumn {
+  display: grid;
+  grid-template-rows: minmax(0, 1.3fr) minmax(0, 1fr);
+  gap: 12px;
+  min-height: 0;
+  min-width: 0;
+}
+.rightColumn {
+  grid-template-rows: minmax(0, 1.45fr) minmax(0, 1fr);
+}
+.card {
+  border: 1px solid #e8edf7;
+  border-radius: 13px;
+  background: #fff;
+  box-shadow: 0 2px 5px #31587c03;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  min-width: 0;
+  overflow: hidden;
+}
+.card > header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-shrink: 0;
+  border-bottom: 1px solid #e9eef8;
+  padding-bottom: 6px;
+  min-height: 28px;
+}
+.card h2 {
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.3;
+  margin: 0;
+  letter-spacing: -0.4px;
+}
+.edit {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  border: 1px solid #c9dcff;
+  border-radius: 7px;
+  color: #005cff;
+  padding: 4px 7px;
+  font-size: 10px;
+  white-space: nowrap;
+  line-height: 1.2;
+}
+.edit svg {
+  width: 12px;
+  height: 12px;
+}
+.edit:hover {
+  background: #edf4ff;
+  border-color: #5995ff;
+}
+.textLink {
+  color: #005cff;
+  font-size: 10px;
+  font-weight: 600;
+  white-space: nowrap;
+  border-radius: 3px;
+}
+.textLink:hover {
+  color: #003fb5;
+  text-decoration: underline;
+}
+.personalFields {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  flex: 1;
+  margin: 0;
+}
+.personalFields > div {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr);
+  gap: 8px;
+  align-items: center;
+  border-bottom: 1px solid #e6edf8;
+  padding: 4px 0;
+}
+.personalFields > div:last-child {
+  border: 0;
+}
+.personalFields dt {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 10px;
+  line-height: 1.25;
+  color: #536e9c;
+  min-width: 0;
+}
+.personalFields dt svg {
+  width: 14px;
+  height: 14px;
+}
+.personalFields dd {
+  margin: 0;
+  text-align: right;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 11px;
+  color: #172d59;
+  line-height: 1.4;
+}
+.personalFields > div:first-child dd {
+  font-weight: 600;
+}
+.addressColumns {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 10px;
+  min-height: 0;
+  flex: 1;
+  padding-top: 7px;
+}
+.addressBlock {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  border: 1px solid #e8eef8;
+  border-radius: 10px;
+  padding: 8px;
+  min-width: 0;
+  overflow: hidden;
+}
+.addressBlock:hover {
+  background: #f7faff;
+  border-color: #bfd5ff;
+}
+.blockIcon {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 31px;
+  height: 31px;
+  border-radius: 50%;
+  background: #edf5ff;
+  color: #005cff;
+}
+.blockIcon svg {
+  width: 19px;
+  height: 19px;
+}
+.addressBlock > div {
+  min-width: 0;
+  flex: 1;
+}
+.addressBlock h3 {
+  font-size: 10px;
+  font-weight: 650;
+  line-height: 1.3;
+  margin: 0 0 6px;
+  color: #162c58;
+}
+.addressBlock p {
+  font-size: 10px;
+  line-height: 1.4;
+  color: #556f9a;
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+.blockHeading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 5px;
+  flex-wrap: wrap;
+}
+.defaultBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  color: #0061ff;
+  background: #edf4ff;
+  padding: 3px 5px;
+  border-radius: 12px;
+  line-height: 1;
+  white-space: nowrap;
+  font-size: 8px;
+}
+.defaultBadge svg {
+  width: 9px;
+  height: 9px;
+}
+.activity {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  list-style: none;
+  padding: 3px 0 0;
+  margin: 0;
+}
+.activity > li {
+  flex: 1;
+  min-height: 0;
+  position: relative;
+}
+.activity > li:not(:last-child):before {
+  position: absolute;
+  content: "";
+  left: 14px;
+  top: 31px;
+  bottom: -3px;
+  width: 1px;
+  background: #b7d1fb;
+}
+.activity > li > a {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 4px 0;
+  border-bottom: 1px solid #e8eef8;
+  border-radius: 4px;
+  position: relative;
+}
+.activity > li:last-child > a {
+  border: 0;
+}
+.activity > li > a:hover {
+  background: #f6faff;
+}
+.activityIcon {
+  width: 29px;
+  height: 29px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  background: #edf5ff;
+  color: #0062ff;
+  z-index: 1;
+}
+.activityIcon svg {
+  width: 17px;
+  height: 17px;
+}
+.activity > li > a > div {
+  flex: 1;
+  min-width: 0;
+}
+.activity strong {
+  display: block;
+  font-size: 11px;
+  line-height: 1.3;
+  font-weight: 650;
+  color: #152a56;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.activity time {
+  display: block;
+  font-size: 9px;
+  line-height: 1.3;
+  color: #607ba7;
+  margin-top: 4px;
+}
+.activityStatus {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  max-width: 38%;
+  border-radius: 14px;
+  padding: 4px 7px;
+  color: #005cff;
+  background: #eaf3ff;
+  font-size: 9px;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.activityStatus svg {
+  width: 10px;
+  height: 10px;
+}
+.activityStatus[data-tone="green"] {
+  color: #00ae7b;
+  background: #e1faef;
+}
+.activityStatus[data-tone="gray"] {
+  color: #71819c;
+  background: #eff3f8;
+}
+.activityStatus[data-tone="orange"] {
+  color: #ef8100;
+  background: #fff3e3;
+}
+.emptyActivity {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  flex: 1;
+  min-height: 0;
+  text-align: center;
+  color: #7085a7;
+  font-size: 12px;
+}
+.emptyActivity > svg {
+  width: 26px;
+  height: 26px;
+  color: #8aaddb;
+}
+.emptyActivity p {
+  margin: 0;
+}
+.emptyActivity a {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #005cff;
+  font-size: 11px;
+}
+.securityRows {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  flex: 1;
+  padding-top: 3px;
+}
+.securityRows > div {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  min-height: 0;
+  padding: 4px 0;
+}
+.securityRows > div > svg {
+  color: #5473a2;
+  width: 16px;
+  height: 16px;
+}
+.securityRows > div > div {
+  min-width: 0;
+  flex: 1;
+}
+.securityRows strong {
+  font-size: 10px;
+  font-weight: 500;
+  line-height: 1.3;
+  color: #213c68;
+  display: block;
+}
+.securityRows small {
+  display: block;
+  font-size: 9px;
+  line-height: 1.3;
+  color: #7083aa;
+  margin-top: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.smallAction {
+  border: 1px solid #cddfff;
+  background: #fff;
+  color: #005cff;
+  border-radius: 6px;
+  padding: 4px 7px;
+  font-size: 10px;
+  text-align: center;
+  line-height: 1.2;
+  min-width: 59px;
+  white-space: nowrap;
+}
+.smallAction:hover {
+  background: #eaf3ff;
+  border-color: #73a2ff;
+}
+.error {
+  flex-shrink: 0;
+  background: #fff1f2;
+  border: 1px solid #fecdd3;
+  border-radius: 8px;
+  padding: 7px 12px;
+  color: #bc2448;
+  font-size: 12px;
+}
+.dialog {
+  width: min(540px, calc(100vw - 32px));
+  max-height: calc(100dvh - 40px);
+  overflow: auto;
+  border: 1px solid #dce6f5;
+  background: #fff;
+  color: #16335e;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 20px 65px #001d3d30;
+  font-size: 13px;
+}
+.dialog::backdrop {
+  background: #00152d88;
+  backdrop-filter: blur(2px);
+}
+.dialog > header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid #e6edf7;
+  margin-bottom: 20px;
+}
+.dialog h2 {
+  font-size: 19px;
+  font-weight: 700;
+  margin: 0;
+}
+.dialog > header > button {
+  width: 32px;
+  height: 32px;
+  border-radius: 7px;
+  display: grid;
+  place-items: center;
+  color: #617ea8;
+}
+.dialog > header > button:hover {
+  background: #eef5ff;
+  color: #005cff;
+}
+.dialog p {
+  font-size: 13px;
+  line-height: 1.6;
+  color: #59739a;
+}
+.primary,
+.secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 40px;
+  border: 1px solid #005cff;
+  border-radius: 8px;
+  padding: 10px 15px;
+  font-size: 12px;
+  font-weight: 550;
+  background: #005cff;
+  color: #fff;
+}
+.primary:hover {
+  background: #0045c4;
+}
+.secondary {
+  background: #fff;
+  color: #005cff;
+  border-color: #cbdcff;
+}
+.secondary:hover {
+  background: #edf4ff;
+}
+.tips {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  list-style: none;
+  margin: 0 0 22px;
+  padding: 0;
+}
+.tips li {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px;
+  border-radius: 10px;
+  background: #f4f8ff;
+}
+.tips li > svg {
+  width: 23px;
+  height: 23px;
+  color: #005cff;
+}
+.tips strong {
+  font-weight: 650;
+  font-size: 13px;
+}
+.tips p {
+  font-size: 12px;
+  margin: 4px 0 0;
+}
+.modalLinks {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+.modalLinks > a,
+.modalLinks > button {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border: 1px solid #e3ebf8;
+  border-radius: 9px;
+  padding: 13px;
+  text-align: left;
+  color: #345987;
+  width: 100%;
+}
+.modalLinks > a:hover,
+.modalLinks > button:hover {
+  border-color: #aac9ff;
+  background: #f4f8ff;
+}
+.modalLinks > a > div,
+.modalLinks > button > div,
+.modalLinks > a > strong {
+  flex: 1;
+}
+.modalLinks strong {
+  font-size: 13px;
+  font-weight: 600;
+}
+.modalLinks small {
+  display: block;
+  font-size: 11px;
+  color: #788da9;
+  margin-top: 4px;
+}
+.notice,
+.sessionInfo {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  background: #f1f7ff;
+  padding: 15px;
+  border-radius: 10px;
+}
+.notice > svg,
+.sessionInfo > svg {
+  width: 27px;
+  height: 27px;
+  color: #005cff;
+}
+.notice p {
+  margin: 0;
+}
+.sessionInfo p {
+  margin: 5px 0;
+}
+.sessionInfo small {
+  font-size: 11px;
+  color: #6e84a2;
+}
+.textButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 14px;
+  color: #496b98;
+  padding: 9px;
+  font-size: 12px;
+}
+.operationResult {
+  padding: 12px;
+  border: 1px solid #b8eedb;
+  border-radius: 8px;
+  background: #edfff6;
+  color: #008863 !important;
+}
+.operationResult[data-error="true"] {
+  background: #fff2f4;
+  color: #b82b47 !important;
+  border-color: #ffcfda;
+}
+.confirmation {
+  background: #fff8ed;
+  border: 1px solid #f7dbaf;
+  border-radius: 10px;
+  padding: 14px;
+  margin-top: 12px;
+}
+.confirmation > div {
+  display: flex;
+  gap: 10px;
+}
+.confirmation strong {
+  font-size: 13px;
+}
+.confirmation p {
+  font-size: 12px;
+}
+@media (min-width: 1200px) {
+  .heading h1 {
+    font-size: 38px;
+  }
+  .heading > div > span {
+    font-size: 14px;
+  }
+  .banners {
+    height: 165px;
+  }
+  .avatar {
+    width: 72px;
+    height: 72px;
+    font-size: 28px;
+  }
+  .profileIdentity h2 {
+    font-size: 15px;
+  }
+  .profileIdentity p {
+    font-size: 12px;
+  }
+  .editProfile {
+    font-size: 12px;
+    padding: 10px;
+  }
+  .verification {
+    font-size: 10px;
+  }
+  .stats strong {
+    font-size: 19px;
+  }
+  .stats small {
+    font-size: 10px;
+  }
+  .stats > a > svg {
+    width: 20px;
+    height: 20px;
+  }
+  .verifiedBanner h2 {
+    font-size: 18px;
+  }
+  .verifiedBanner p {
+    font-size: 13px;
+  }
+  .verifiedBanner button,
+  .verifiedBanner a {
+    font-size: 12px;
+  }
+  .verifiedBanner .shieldArt {
+    width: 83px;
+    height: 105px;
+  }
+  .quickLinks {
+    height: 66px;
+  }
+  .quickLinks strong {
+    font-size: 12px;
+  }
+  .quickLinks small {
+    font-size: 10px;
+  }
+  .quickIcon {
+    width: 41px;
+    height: 41px;
+  }
+  .card h2 {
+    font-size: 16px;
+  }
+  .personalFields dt {
+    font-size: 12px;
+  }
+  .personalFields dd {
+    font-size: 12px;
+  }
+  .card {
+    padding: 14px 16px;
+  }
+  .addressBlock p {
+    font-size: 11px;
+  }
+  .addressBlock h3 {
+    font-size: 11px;
+  }
+  .defaultBadge {
+    font-size: 9px;
+  }
+  .activityIcon {
+    width: 33px;
+    height: 33px;
+  }
+  .activityIcon svg {
+    width: 19px;
+    height: 19px;
+  }
+  .activity > li:not(:last-child):before {
+    left: 16px;
+    top: 34px;
+  }
+  .activity strong {
+    font-size: 12px;
+  }
+  .activity time {
+    font-size: 10px;
+  }
+  .activityStatus {
+    font-size: 10px;
+  }
+  .securityRows strong {
+    font-size: 11px;
+  }
+  .securityRows small {
+    font-size: 10px;
+  }
+  .smallAction {
+    font-size: 11px;
+    min-width: 66px;
+  }
+  .edit,
+  .textLink {
+    font-size: 11px;
+  }
+}
+@media (min-width: 1450px) {
+  .page {
+    gap: 16px;
+    padding: 22px 22px 14px 30px;
+  }
+  .heading {
+    min-height: 100px;
+    padding: 0 6px;
+  }
+  .heading p {
+    font-size: 14px;
+  }
+  .heading h1 {
+    font-size: 44px;
+    letter-spacing: -1.5px;
+  }
+  .heading > div > span {
+    font-size: 16px;
+  }
+  .headerArt {
+    display: flex;
+    align-items: center;
+    gap: 25px;
+    flex: 0 1 650px;
+    min-width: 0;
+    max-width: 52%;
+  }
+  .headerArt svg {
+    width: 360px;
+    height: 82px;
+    min-width: 0;
+    flex: 1;
+  }
+  .headerArt p {
+    font-size: 13px;
+    line-height: 1.5;
+    flex: 0 0 220px;
+    max-width: 220px;
+    text-align: right;
+    color: #18345b;
+    margin: 0;
+  }
+  .headerArt strong {
+    color: #005cff;
+    text-decoration: underline;
+    font-weight: 600;
+  }
+  .banners {
+    height: 184px;
+    gap: 15px;
+    grid-template-columns: minmax(0, 1.95fr) minmax(0, 1fr);
+  }
+  .profile {
+    padding: 16px 20px;
+    gap: 12px;
+  }
+  .avatar {
+    width: 88px;
+    height: 88px;
+    font-size: 32px;
+  }
+  .avatarMark {
+    width: 21px;
+    height: 21px;
+  }
+  .avatarMark svg {
+    width: 13px;
+    height: 13px;
+  }
+  .profileTop {
+    gap: 18px;
+  }
+  .profileIdentity h2 {
+    font-size: 17px;
+  }
+  .profileIdentity p {
+    font-size: 13px;
+  }
+  .profileIdentity > div {
+    gap: 9px;
+  }
+  .verification {
+    font-size: 11px;
+    padding: 4px 8px;
+  }
+  .editProfile {
+    padding: 10px 13px;
+    font-size: 13px;
+  }
+  .editProfile svg {
+    width: 16px;
+    height: 16px;
+  }
+  .stats {
+    padding-top: 12px;
+  }
+  .stats > a {
+    gap: 10px;
+  }
+  .stats strong {
+    font-size: 20px;
+  }
+  .stats small {
+    font-size: 11px;
+  }
+  .stats > a > svg {
+    width: 22px;
+    height: 22px;
+  }
+  .verifiedBanner {
+    padding: 20px;
+    gap: 10px;
+  }
+  .verifiedBanner h2 {
+    font-size: 20px;
+    margin-bottom: 9px;
+  }
+  .verifiedBanner p {
+    font-size: 14px;
+    line-height: 1.4;
+    margin-bottom: 18px;
+    max-width: 260px;
+  }
+  .verifiedBanner button,
+  .verifiedBanner a {
+    font-size: 13px;
+    padding: 10px 15px;
+  }
+  .verifiedBanner .shieldArt {
+    width: 100px;
+    height: 125px;
+  }
+  .quickLinks {
+    gap: 13px;
+    height: 74px;
+  }
+  .quickLinks > a,
+  .quickLinks > button {
+    padding: 12px;
+    gap: 14px;
+  }
+  .quickIcon {
+    width: 50px;
+    height: 50px;
+  }
+  .quickIcon svg {
+    width: 24px;
+    height: 24px;
+  }
+  .quickLinks strong {
+    font-size: 13px;
+  }
+  .quickLinks small {
+    font-size: 11px;
+  }
+  .quickLinks > a > svg,
+  .quickLinks > button > svg {
+    width: 16px;
+    height: 16px;
+  }
+  .columns {
+    gap: 20px;
+  }
+  .card {
+    padding: 14px 19px;
+  }
+  .card > header {
+    min-height: 31px;
+    padding-bottom: 7px;
+  }
+  .card h2 {
+    font-size: 17px;
+  }
+  .personalFields dt {
+    font-size: 13px;
+    gap: 14px;
+  }
+  .personalFields dt svg {
+    width: 16px;
+    height: 16px;
+  }
+  .personalFields dd {
+    font-size: 13px;
+  }
+  .edit {
+    padding: 5px 10px;
+  }
+  .textLink {
+    font-size: 11px;
+  }
+  .addressColumns {
+    gap: 12px;
+    padding-top: 7px;
+  }
+  .addressBlock {
+    gap: 12px;
+    padding: 12px;
+  }
+  .blockIcon {
+    width: 47px;
+    height: 47px;
+  }
+  .blockIcon svg {
+    width: 25px;
+    height: 25px;
+  }
+  .addressBlock h3 {
+    font-size: 12px;
+    margin-bottom: 9px;
+  }
+  .addressBlock p {
+    font-size: 12px;
+    line-height: 1.45;
+  }
+  .blockHeading {
+    gap: 6px;
+  }
+  .defaultBadge {
+    padding: 4px 6px;
+    font-size: 9px;
+  }
+  .activity > li > a {
+    gap: 16px;
+    padding: 5px 0;
+  }
+  .activityIcon {
+    width: 36px;
+    height: 36px;
+  }
+  .activityIcon svg {
+    width: 20px;
+    height: 20px;
+  }
+  .activity > li:not(:last-child):before {
+    left: 18px;
+    top: 37px;
+  }
+  .activity strong {
+    font-size: 13px;
+  }
+  .activity time {
+    font-size: 11px;
+    margin-top: 4px;
+  }
+  .activityStatus {
+    font-size: 10px;
+    padding: 5px 9px;
+  }
+  .securityRows > div {
+    gap: 12px;
+    padding: 6px 0;
+  }
+  .securityRows > div > svg {
+    width: 19px;
+    height: 19px;
+  }
+  .securityRows > div > div {
+    display: grid;
+    grid-template-columns: minmax(130px, 0.95fr) minmax(0, 1fr);
+    align-items: center;
+    gap: 8px;
+  }
+  .securityRows strong {
+    font-size: 12px;
+  }
+  .securityRows small {
+    font-size: 11px;
+    margin: 0;
+  }
+  .smallAction {
+    font-size: 11px;
+    padding: 5px 9px;
+    min-width: 73px;
+  }
+}
+@media (min-width: 1450px) and (max-width: 1630px) {
+  .headerArt {
+    max-width: 47%;
+    gap: 15px;
+  }
+  .headerArt p {
+    flex-basis: 180px;
+    font-size: 12px;
+  }
+  .heading > div > span {
+    font-size: 14px;
+  }
+  .verifiedBanner {
+    padding: 17px;
+  }
+  .verifiedBanner h2 {
+    font-size: 18px;
+  }
+  .verifiedBanner p {
+    font-size: 12px;
+  }
+  .verifiedBanner .shieldArt {
+    width: 75px;
+    height: 100px;
+  }
+  .verifiedBanner button,
+  .verifiedBanner a {
+    font-size: 11px;
+    padding: 9px 10px;
+  }
+  .addressBlock {
+    gap: 8px;
+    padding: 8px;
+  }
+  .blockIcon {
+    width: 35px;
+    height: 35px;
+  }
+  .addressBlock p {
+    font-size: 11px;
+  }
+  .addressBlock h3 {
+    font-size: 11px;
+  }
+  .quickLinks small {
+    font-size: 10px;
+  }
+  .securityRows > div > div {
+    display: block;
+  }
+  .securityRows small {
+    margin-top: 2px;
+  }
+}
+@media (max-height: 800px) {
+  .page {
+    padding: 12px 16px;
+    gap: 10px;
+  }
+  .heading {
+    min-height: 66px;
+  }
+  .heading h1 {
+    font-size: 30px;
+  }
+  .heading p {
+    font-size: 11px;
+  }
+  .heading > div > span {
+    font-size: 12px;
+  }
+  .headerArt svg {
+    height: 60px;
+  }
+  .headerArt p {
+    font-size: 11px;
+  }
+  .banners {
+    height: 137px;
+    gap: 12px;
+  }
+  .profile {
+    padding: 10px 12px;
+    gap: 8px;
+  }
+  .avatar {
+    width: 58px;
+    height: 58px;
+    font-size: 23px;
+  }
+  .avatarMark {
+    width: 17px;
+    height: 17px;
+  }
+  .profileTop {
+    gap: 12px;
+  }
+  .profileIdentity h2 {
+    font-size: 13px;
+  }
+  .profileIdentity p {
+    font-size: 10px;
+  }
+  .verification {
+    font-size: 9px;
+    padding: 3px 6px;
+  }
+  .editProfile {
+    padding: 7px;
+    font-size: 10px;
+    gap: 5px;
+  }
+  .editProfile svg {
+    width: 13px;
+    height: 13px;
+  }
+  .stats {
+    padding-top: 7px;
+  }
+  .stats strong {
+    font-size: 16px;
+  }
+  .stats small {
+    font-size: 9px;
+  }
+  .stats > a {
+    gap: 6px;
+  }
+  .stats > a > svg {
+    width: 16px;
+    height: 16px;
+  }
+  .verifiedBanner {
+    padding: 13px;
+  }
+  .verifiedBanner h2 {
+    font-size: 14px;
+    margin-bottom: 6px;
+  }
+  .verifiedBanner p {
+    font-size: 10px;
+    line-height: 1.4;
+    margin-bottom: 9px;
+  }
+  .verifiedBanner button,
+  .verifiedBanner a {
+    font-size: 9px;
+    padding: 7px 8px;
+    gap: 5px;
+  }
+  .verifiedBanner .shieldArt {
+    width: 55px;
+    height: 75px;
+  }
+  .quickLinks {
+    height: 54px;
+    gap: 9px;
+  }
+  .quickLinks > a,
+  .quickLinks > button {
+    gap: 8px;
+    padding: 8px;
+  }
+  .quickIcon {
+    width: 32px;
+    height: 32px;
+  }
+  .quickIcon svg {
+    width: 19px;
+    height: 19px;
+  }
+  .quickLinks strong {
+    font-size: 10px;
+  }
+  .quickLinks small {
+    font-size: 9px;
+  }
+  .quickLinks > a > svg,
+  .quickLinks > button > svg {
+    width: 12px;
+    height: 12px;
+  }
+  .columns {
+    gap: 12px;
+  }
+  .leftColumn,
+  .rightColumn {
+    gap: 9px;
+  }
+  .card {
+    padding: 10px 12px;
+  }
+  .card h2 {
+    font-size: 13px;
+  }
+  .card > header {
+    min-height: 26px;
+    padding-bottom: 5px;
+  }
+  .personalFields dt,
+  .personalFields dd {
+    font-size: 10px;
+  }
+  .personalFields dt {
+    gap: 7px;
+  }
+  .personalFields dt svg {
+    width: 13px;
+    height: 13px;
+  }
+  .personalFields > div {
+    padding: 3px 0;
+  }
+  .edit,
+  .textLink {
+    font-size: 9px;
+  }
+  .edit {
+    padding: 4px 6px;
+  }
+  .edit svg {
+    width: 11px;
+    height: 11px;
+  }
+  .addressColumns {
+    gap: 7px;
+    padding-top: 6px;
+  }
+  .addressBlock {
+    padding: 7px;
+    gap: 7px;
+  }
+  .blockIcon {
+    width: 26px;
+    height: 26px;
+  }
+  .blockIcon svg {
+    width: 16px;
+    height: 16px;
+  }
+  .addressBlock h3 {
+    font-size: 9px;
+    margin-bottom: 5px;
+  }
+  .addressBlock p {
+    font-size: 9px;
+    line-height: 1.35;
+  }
+  .defaultBadge {
+    font-size: 7px;
+    padding: 3px 4px;
+  }
+  .defaultBadge svg {
+    width: 8px;
+    height: 8px;
+  }
+  .activity > li > a {
+    gap: 8px;
+    padding: 3px 0;
+  }
+  .activityIcon {
+    width: 27px;
+    height: 27px;
+  }
+  .activityIcon svg {
+    width: 16px;
+    height: 16px;
+  }
+  .activity > li:not(:last-child):before {
+    left: 13px;
+    top: 28px;
+  }
+  .activity strong {
+    font-size: 10px;
+  }
+  .activity time {
+    font-size: 9px;
+    margin-top: 2px;
+  }
+  .activityStatus {
+    font-size: 8px;
+    padding: 4px 5px;
+    gap: 3px;
+  }
+  .activityStatus svg {
+    width: 9px;
+    height: 9px;
+  }
+  .securityRows > div {
+    gap: 7px;
+    padding: 3px 0;
+  }
+  .securityRows > div > svg {
+    width: 15px;
+    height: 15px;
+  }
+  .securityRows > div > div {
+    display: block;
+  }
+  .securityRows strong {
+    font-size: 9px;
+  }
+  .securityRows small {
+    font-size: 8px;
+    margin-top: 2px;
+  }
+  .smallAction {
+    font-size: 9px;
+    padding: 4px 6px;
+    min-width: 55px;
+  }
+  .emptyActivity {
+    font-size: 10px;
+    gap: 6px;
+  }
+  .emptyActivity a {
+    font-size: 10px;
+  }
+}
+@media (max-height: 700px) {
+  .heading {
+    min-height: 58px;
+  }
+  .heading h1 {
+    font-size: 27px;
+  }
+  .heading p {
+    font-size: 10px;
+    margin-bottom: 3px;
+  }
+  .heading > div > span {
+    font-size: 11px;
+  }
+  .banners {
+    height: 122px;
+  }
+  .profile {
+    gap: 7px;
+    padding: 9px 11px;
+  }
+  .avatar {
+    width: 48px;
+    height: 48px;
+    font-size: 20px;
+  }
+  .profileIdentity h2 {
+    font-size: 12px;
+  }
+  .profileIdentity p {
+    font-size: 9px;
+    margin: 1px 0;
+  }
+  .profileIdentity > div {
+    margin-bottom: 2px;
+  }
+  .editProfile {
+    font-size: 9px;
+    padding: 6px;
+  }
+  .stats strong {
+    font-size: 15px;
+  }
+  .stats small {
+    font-size: 8px;
+    margin-top: 2px;
+  }
+  .stats > a > svg {
+    width: 14px;
+    height: 14px;
+  }
+  .verifiedBanner p {
+    font-size: 9px;
+  }
+  .verifiedBanner h2 {
+    font-size: 13px;
+  }
+  .quickLinks {
+    height: 49px;
+  }
+  .quickLinks small {
+    font-size: 8px;
+    margin-top: 2px;
+  }
+  .card {
+    padding: 8px 10px;
+  }
+  .card > header {
+    min-height: 24px;
+  }
+  .card h2 {
+    font-size: 12px;
+  }
+  .personalFields dt,
+  .personalFields dd {
+    font-size: 9px;
+  }
+  .personalFields > div {
+    padding: 2px 0;
+  }
+  .addressColumns {
+    gap: 6px;
+  }
+  .addressBlock {
+    padding: 6px;
+    gap: 6px;
+  }
+  .blockIcon {
+    width: 22px;
+    height: 22px;
+  }
+  .blockIcon svg {
+    width: 14px;
+    height: 14px;
+  }
+  .addressBlock h3 {
+    font-size: 8px;
+    margin-bottom: 4px;
+  }
+  .addressBlock p {
+    font-size: 8px;
+  }
+  .defaultBadge {
+    font-size: 7px;
+  }
+  .activity strong {
+    font-size: 9px;
+  }
+  .activity time {
+    font-size: 8px;
+  }
+  .activityIcon {
+    width: 23px;
+    height: 23px;
+  }
+  .activityIcon svg {
+    width: 14px;
+    height: 14px;
+  }
+  .activity > li:not(:last-child):before {
+    left: 11px;
+    top: 25px;
+  }
+  .activityStatus {
+    font-size: 7px;
+    padding: 3px 4px;
+  }
+  .securityRows strong {
+    font-size: 9px;
+  }
+  .securityRows small {
+    font-size: 8px;
+  }
+  .smallAction {
+    font-size: 8px;
+    min-width: 51px;
+  }
+  .securityRows > div {
+    padding: 2px 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .page *,
+  .dialog * {
+    transition: none !important;
+  }
+}
+.profileIdentity h2,
+.verifiedBanner h2 {
+  color: #fff;
+}

@@ -21,6 +21,8 @@
  */
 import { DASHBOARD_TOKEN, datosDashboard } from "./dashboard.mjs";
 import { VEHICLES_TOKEN, datosVehiculos } from "./vehicles.mjs";
+import { ACCOUNT_TOKEN, ACCOUNT_PROFILE, datosCuenta } from "./account.mjs";
+import { LOCATIONS_TOKEN, LOCATIONS_PROFILE, datosUbicaciones } from "./locations.mjs";
 import { createServer } from "node:http";
 import { pathToFileURL } from "node:url";
 
@@ -91,6 +93,8 @@ const SESIONES = new Map([
   [ACCESS_TOKEN, FILA_USUARIO_E2E],
   [DASHBOARD_TOKEN, { ...FILA_USUARIO_E2E, nombre: "Carlos Mendoza", foto_url: null }],
   [VEHICLES_TOKEN, { ...FILA_USUARIO_E2E, nombre: "Carlos Mendoza", foto_url: null }],
+  [ACCOUNT_TOKEN, { ...FILA_USUARIO_E2E, ...ACCOUNT_PROFILE }],
+  [LOCATIONS_TOKEN, { ...FILA_USUARIO_E2E, ...LOCATIONS_PROFILE }],
   [ACCESS_TOKEN_PENDIENTE, FILA_USUARIO_PENDIENTE],
   ["mock_access_token_foto_perfil", { ...FILA_USUARIO_E2E, foto_url: null }]
 ]);
@@ -257,8 +261,8 @@ const servidor = createServer(async (req, res) => {
     responder(res, 503, { error: "No pudimos conectar la llamada. Intenta de nuevo." });
     return;
   }
-  if (req.method === "GET" && [DASHBOARD_TOKEN, VEHICLES_TOKEN].includes(tokenDe(req))) {
-    let filas = tokenDe(req) === VEHICLES_TOKEN ? datosVehiculos(ruta) : datosDashboard(ruta);
+  if (req.method === "GET" && [DASHBOARD_TOKEN, VEHICLES_TOKEN, ACCOUNT_TOKEN, LOCATIONS_TOKEN].includes(tokenDe(req))) {
+    let filas = tokenDe(req) === LOCATIONS_TOKEN ? datosUbicaciones(ruta) : tokenDe(req) === ACCOUNT_TOKEN ? datosCuenta(ruta) : tokenDe(req) === VEHICLES_TOKEN ? datosVehiculos(ruta) : datosDashboard(ruta);
     if (filas) {
       for (const [campo, valor] of url.searchParams) {
         if (valor.startsWith("eq.")) filas = filas.filter(fila => String(fila[campo]) === valor.slice(3));
@@ -289,13 +293,19 @@ const servidor = createServer(async (req, res) => {
       responder(res, 200, fila);
       return;
     }
+    if (req.method === "PATCH" && ruta === "/rest/v1/usuarios" && tokenDe(req) === LOCATIONS_TOKEN) {
+      const fila=SESIONES.get(LOCATIONS_TOKEN);
+      const coincide=['id','auth_user_id','actualizado_en'].every(k=>url.searchParams.get(k)===`eq.${fila[k]}`);
+      if(coincide)Object.assign(fila,JSON.parse(cuerpo));
+      responder(res,200,coincide?{id:fila.id}:null);return;
+    }
     // `public.usuarios` es el único con datos: `obtenerUsuarioActual` y
     // `clasificarRolApp` lo leen desde el servidor (middleware y RSC). Cualquier
     // otra tabla/vista (pasaporte_digital, traslados, …) responde lista vacía,
     // que es lo que un usuario sin solicitudes vería en el Happy Path.
     if (req.method === "GET" && ruta === "/rest/v1/usuarios") {
       const fila = SESIONES.get(tokenDe(req) ?? "");
-      responder(res, 200, fila ? [fila] : []);
+      responder(res, 200, (req.headers.accept ?? "").includes("vnd.pgrst.object") ? fila ?? null : fila ? [fila] : []);
       return;
     }
     responder(res, 200, []);
