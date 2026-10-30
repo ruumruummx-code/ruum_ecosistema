@@ -9,11 +9,12 @@ vi.mock("../src/app/ganancias/useEarningsLedger", () => ({
 }));
 
 import { EarningsPayoutsSection } from "../src/app/ganancias/EarningsPayoutsSection";
+import { estadoLiquidacion } from "../src/lib/estado-liquidacion";
 
 describe("flujo de consulta de depósitos SPEI", () => {
   afterEach(cleanup);
   it("presenta pago procesado, montos y referencia SPEI del periodo", () => {
-    const estatusPayout = vi.fn(() => "pagado");
+    const estatusPayout = vi.fn(estadoLiquidacion);
     render(<EarningsPayoutsSection
       estatusPayout={estatusPayout}
       payoutsFiltrados={[{
@@ -24,22 +25,24 @@ describe("flujo de consulta de depósitos SPEI", () => {
         ajustes: -100,
         monto_neto: 2400,
         estado: "procesado",
+        pagado_en: "2026-10-08T12:00:00Z",
+        referencia_externa_validada: "bank-verified-123",
         referencia_pago: "SPEI-REF-123",
       }]}
     />);
 
-    expect(screen.getByRole("heading", { name: "Depósitos del periodo" })).toBeTruthy();
+    expect(screen.getByRole("heading", { name: "Liquidaciones del periodo" })).toBeTruthy();
     const article = screen.getByRole("article");
     expect(within(article).getByText("2026-10-01 ➔ 2026-10-07")).toBeTruthy();
     expect(within(article).getByText("pagado")).toBeTruthy();
-    expect(within(article).getByText(/SPEI: SPEI-REF-123/)).toBeTruthy();
+    expect(within(article).getByText(/Referencia administrativa \(no confirma transferencia\): SPEI-REF-123/)).toBeTruthy();
     expect(within(article).getByText("$2,400.00")).toBeTruthy();
     expect(estatusPayout).toHaveBeenCalled();
   });
 
   it("muestra una lista vacía sin inventar depósitos", () => {
     render(<EarningsPayoutsSection payoutsFiltrados={[]} estatusPayout={() => "—"} />);
-    expect(screen.getByRole("heading", { name: "Depósitos del periodo" })).toBeTruthy();
+    expect(screen.getByRole("heading", { name: "Liquidaciones del periodo" })).toBeTruthy();
     expect(screen.queryByRole("article")).toBeNull();
   });
 });

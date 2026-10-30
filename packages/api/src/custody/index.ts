@@ -3,3 +3,4 @@ export * from "./evidencia";
 export * from "./custodia";
 
 export * from "./inventario-llaves";
+export * from "./resumen-cierre";

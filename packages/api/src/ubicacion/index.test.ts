@@ -40,10 +40,11 @@ describe("obtenerUbicacionActual", () => {
     mockEsNativo.mockReturnValue(true);
     mockRequestPermissions.mockResolvedValue({ location: "granted" });
     mockGetCurrentPosition.mockResolvedValue({
+      timestamp: Date.parse("2026-10-30T16:00:00Z"),
       coords: { latitude: 19.4326, longitude: -99.1332, accuracy: 8, speed: null },
     });
     const res = await obtenerUbicacionActual({ soloNativo: true });
-    expect(res).toMatchObject({ lat: 19.4326, lng: -99.1332 });
+    expect(res).toMatchObject({ lat: 19.4326, lng: -99.1332, capturedAt: "2026-10-30T16:00:00.000Z" });
   });
 
   it("retorna null si permiso denied", async () => {
@@ -63,12 +64,12 @@ describe("obtenerUbicacionActual", () => {
   it("sin soloNativo en web usa navigator.geolocation", async () => {
     mockEsNativo.mockReturnValue(false);
     const getCurrentPosition = vi.fn((ok: (p: unknown) => void) =>
-      ok({ coords: { latitude: 19.4326, longitude: -99.1332, accuracy: 8 } })
+      ok({ timestamp: Date.parse("2026-10-30T16:00:00Z"), coords: { latitude: 19.4326, longitude: -99.1332, accuracy: 8 } })
     );
     vi.stubGlobal("navigator", { geolocation: { getCurrentPosition } });
     try {
       const res = await obtenerUbicacionActual();
-      expect(res).toMatchObject({ lat: 19.4326, lng: -99.1332 });
+      expect(res).toMatchObject({ lat: 19.4326, lng: -99.1332, capturedAt: "2026-10-30T16:00:00.000Z" });
       expect(mockRequestPermissions).not.toHaveBeenCalled();
     } finally {
       vi.unstubAllGlobals();

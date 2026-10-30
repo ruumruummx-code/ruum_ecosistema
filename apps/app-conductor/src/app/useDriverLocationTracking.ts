@@ -115,7 +115,7 @@ export function useDriverLocationTracking(viajeActivo: ViajeActivo | null) {
         await sincronizarColaTelemetria(cliente);
         ultimaReportada = ubicacion;
         ultimoReporteMs = Date.now();
-        publicarEstado(ultimoReporteMs);
+        if (!cancelado) publicarEstado(ultimoReporteMs);
       } catch (error) {
         logger.warn("driver_location_report_failed", { tripId: viaje.trasladoId, isOnline: isOnline(), errorCode: errorCode(error), precisionM: ubicacion.precisionM ?? null }, "connectivity");
       }

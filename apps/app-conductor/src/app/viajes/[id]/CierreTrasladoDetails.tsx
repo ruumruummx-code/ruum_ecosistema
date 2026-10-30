@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { consultarResolucionInventarioLlaves } from "@ruum/api/custody";
+import { consultarResolucionInventarioLlaves, consultarResumenEvidenciaCierre, type ResumenEvidenciaCierre } from "@ruum/api/custody";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { TEXTOS_CARGANDO } from "@ruum/shared/constants";
@@ -29,12 +29,15 @@ export function CierreTrasladoDetails({
   const estadoActual = pasaporte.estado as Database["public"]["Enums"]["estado_traslado"];
 
   const [inspeccionInicial, setInspeccionInicial] = useState<InspeccionData | null>(null);
+  const [evidenciaCierre, setEvidenciaCierre] = useState<ResumenEvidenciaCierre | null>(null);
   const [llavesResueltas, setLlavesResueltas] = useState(false);
   const [inspeccionFinal, setInspeccionFinal] = useState<InspeccionData | null>(null);
   const inventarioValido = (valor: string | null | undefined) => typeof valor === "string" && /^[0-9]+$/.test(valor);
   const faltanLlaves = !inventarioValido(inspeccionInicial?.llaves_recibidas) || !inventarioValido(inspeccionFinal?.llaves_recibidas);
   const diferenciaLlaves = Number(inspeccionInicial?.llaves_recibidas) !== Number(inspeccionFinal?.llaves_recibidas);
   const bloqueoLlaves = faltanLlaves || (diferenciaLlaves && !llavesResueltas);
+  const bloqueoEvidencia = !evidenciaCierre?.completa;
+  const bloqueoCierre = bloqueoLlaves || bloqueoEvidencia;
   const [cargando, setCargando] = useState(true);
   const [procesando, setProcesando] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -65,7 +68,8 @@ export function CierreTrasladoDetails({
       if (!trasladoId) return;
       try {
         const cliente = crearClienteNavegador();
-        const insps = await listarInspeccionesTraslado(cliente, trasladoId);
+        const [insps, resumen] = await Promise.all([listarInspeccionesTraslado(cliente, trasladoId), consultarResumenEvidenciaCierre(cliente, trasladoId)]);
+        setEvidenciaCierre(resumen);
         if (insps) {
           const inicial = insps.find((i) => i.tipo === "inicial") as InspeccionData | undefined;
           if (inicial) setInspeccionInicial(inicial);
@@ -147,8 +151,8 @@ export function CierreTrasladoDetails({
 
   async function handleFinalizarTraslado() {
     if (procesando) return;
-    if (cargando || bloqueoLlaves) {
-      setError("Inventario de llaves pendiente. Documenta la diferencia con operación y solicita resolución de administración.");
+    if (cargando || bloqueoCierre) {
+      setError("Cierre pendiente: revisa inventario de llaves, fotografías obligatorias y conflictos con operación.");
       return;
     }
     setProcesando(true);
@@ -178,7 +182,7 @@ export function CierreTrasladoDetails({
     }
   }
 
-  const odometroTexto = inspeccionFinal?.kilometraje
+  const odometroTexto = inspeccionFinal?.kilometraje != null
     ? `${inspeccionFinal.kilometraje.toLocaleString("es-MX")} km`
     : "Sin captura";
   const combustibleTexto = inspeccionFinal?.combustible ? inspeccionFinal.combustible : "Sin captura";
@@ -255,7 +259,7 @@ export function CierreTrasladoDetails({
         {/* 2. CAJA DE ESTADOS CRUZADOS (BADGES) */}
         <div
           role="status"
-          aria-label="Estado: En destino. Conciliación lista"
+          aria-label={`Estado: En destino. ${bloqueoCierre ? "Conciliación pendiente" : "Conciliación lista"}`}
           className="grid shrink-0 grid-cols-2 gap-2"
         >
           {/* Izquierda: En destino */}
@@ -283,7 +287,7 @@ export function CierreTrasladoDetails({
               </svg>
             </div>
             <span className="font-display text-[11px] font-black uppercase tracking-wide text-[#15803D]">
-              CONCILIACIÓN LISTA
+              {bloqueoCierre ? "CONCILIACIÓN PENDIENTE" : "CONCILIACIÓN LISTA"}
             </span>
           </div>
         </div>
@@ -390,7 +394,7 @@ export function CierreTrasladoDetails({
               </h2>
             </div>
             <span className="inline-flex items-center gap-1 rounded-full bg-[#DCFCE7] px-2 py-0.5 font-display text-[11px] font-black text-[#15803D]">
-              <span>5/5</span>
+              <span>{evidenciaCierre?.final ?? 0}/5</span>
               <span>✓</span>
             </span>
           </div>
@@ -406,7 +410,7 @@ export function CierreTrasladoDetails({
                 <span>Evidencias cargadas</span>
               </span>
               <span className="flex items-center gap-1 font-display font-bold text-[#0A1E3C]">
-                <span>5 de 5</span>
+                <span>{evidenciaCierre?.final ?? 0} de 5</span>
                 <span className="size-4 rounded-full bg-[#22C55E] text-white flex items-center justify-center text-[9px] font-black">
                   ✓
                 </span>
@@ -555,7 +559,7 @@ export function CierreTrasladoDetails({
           <button
             type="button"
             onClick={() => setModalConfirmacionAbierto(true)}
-            disabled={procesando || cargando || bloqueoLlaves}
+            disabled={procesando || cargando || bloqueoCierre}
             className="inline-flex min-h-[48px] w-full cursor-pointer items-center justify-center gap-2 rounded-2xl bg-[#0066FF] px-4 py-3 font-display text-sm font-extrabold text-white shadow-[0_6px_18px_rgba(0,102,255,0.32)] transition hover:bg-[#0052CC] active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-50"
           >
             {procesando ? (
@@ -576,6 +580,7 @@ export function CierreTrasladoDetails({
       </div>
 
       {/* Modal de Confirmación de Entrega */}
+      {bloqueoEvidencia && <p role="alert" className="p-4 text-sm text-danger">Fotografías sincronizadas: origen {evidenciaCierre?.inicial ?? 0}/5, destino {evidenciaCierre?.final ?? 0}/5. {evidenciaCierre?.conflicto ? "Hay un conflicto real: conserva la captura y solicita revisión." : "Completa y sincroniza todas las vistas obligatorias antes de cerrar."}</p>}
       {bloqueoLlaves && <p role="alert" className="p-4 text-sm text-danger">Llaves: origen {inspeccionInicial?.llaves_recibidas ?? "sin captura"}, destino {inspeccionFinal?.llaves_recibidas ?? "sin captura"}. Documenta con operación si la diferencia es física o de captura y solicita resolución administrativa. Conserva el registro original y recarga después de la resolución.</p>}
       {modalConfirmacionAbierto && (
         <CierreConfirmacionModal
@@ -585,7 +590,7 @@ export function CierreTrasladoDetails({
             setModalConfirmacionAbierto(false);
             void handleFinalizarTraslado();
           }}
-          procesando={procesando || cargando || bloqueoLlaves}
+          procesando={procesando || cargando || bloqueoCierre}
         />
       )}
 
