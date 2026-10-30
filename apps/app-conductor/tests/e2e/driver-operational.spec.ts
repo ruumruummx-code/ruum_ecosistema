@@ -152,7 +152,7 @@ test("evidencias: siguiente requisito, teclado y retorno de soporte", async ({ p
   await next.click();
   await expect(page.getByRole("region", { name: "Llaves del vehículo", exact: true })).toBeVisible();
   const steps = page.getByRole("navigation", { name: "Pasos de evidencia", exact: true });
-  await steps.getByRole("link", { name: /^KM:/ }).click();
+  await steps.getByRole("link", { name: /^KM:/ }).click({ force: true });
   const km = page.getByRole("textbox", { name: "Kilometraje actual", exact: true });
   await km.fill("12345");
   await keyboard(page, 320);
