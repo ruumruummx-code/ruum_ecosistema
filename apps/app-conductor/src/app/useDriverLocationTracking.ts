@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { registrarUbicacionTraslado } from "@ruum/api/services";
+import { encolarPuntoTelemetria, sincronizarColaTelemetria } from "../lib/cola-telemetria-offline";
 import { createLogger, errorCode } from "@ruum/shared/utils";
 import { crearClienteNavegador, tieneSupabaseConfigurado } from "../lib/supabase-browser";
 import { iniciarTrackingNativo, detenerTrackingNativo, solicitarUbicacionSegundoPlanoNativa, soportaTrackingNativo } from "../lib/background-tracking";
@@ -19,15 +19,17 @@ function isOnline() {
 }
 
 export function useDriverLocationTracking(viajeActivo: ViajeActivo | null) {
+  const trasladoId = viajeActivo?.trasladoId;
+  const estado = viajeActivo?.estado;
+  const folio = viajeActivo?.folio;
   useEffect(() => {
-    const autorizado = Boolean(viajeActivo && viajePermiteSeguimientoUbicacion(viajeActivo.estado));
-    if (!autorizado || !tieneSupabaseConfigurado()) {
+    if (!trasladoId || !estado || !viajePermiteSeguimientoUbicacion(estado) || !tieneSupabaseConfigurado()) {
       if (soportaTrackingNativo()) void detenerTrackingNativo().catch(() => undefined);
       return;
     }
 
     let cancelado = false;
-    const viaje = viajeActivo!;
+    const viaje = { trasladoId, estado, folio: folio ?? "" };
     const trasladoIdActual = viaje.trasladoId;
     const cliente = crearClienteNavegador();
 
@@ -97,21 +99,28 @@ export function useDriverLocationTracking(viajeActivo: ViajeActivo | null) {
 
     let ultimaReportada: Coordenadas | null = null;
     let ultimoReporteMs = 0;
+    const usuarioActual = cliente.auth.getSession().then(({ data }) => data.session?.user.id);
+    let trabajo = Promise.resolve();
+    const publicarEstado = (ultimoEnvio?: number) => window.dispatchEvent(new CustomEvent("ruum:tracking-web", { detail: { active: true, lastSentAt: ultimoEnvio } }));
+    publicarEstado();
     async function reportar(ubicacion: Coordenadas | null) {
       if (!ubicacion || cancelado) return;
+      const captura = ubicacion.capturedAt ?? new Date().toISOString();
+      trabajo = trabajo.then(async () => {
+      if (cancelado) return;
       try {
-        await registrarUbicacionTraslado(cliente, {
-          trasladoId: viaje.trasladoId,
-          lat: ubicacion.lat,
-          lng: ubicacion.lng,
-          precisionM: ubicacion.precisionM,
-          velocidadMps: ubicacion.velocidadMps
-        });
+        const usuarioId = await usuarioActual;
+        if (!usuarioId || cancelado) return;
+        await encolarPuntoTelemetria(viaje.trasladoId, ubicacion, { usuarioId, deviceTimestamp: captura });
+        await sincronizarColaTelemetria(cliente);
         ultimaReportada = ubicacion;
         ultimoReporteMs = Date.now();
+        if (!cancelado) publicarEstado(ultimoReporteMs);
       } catch (error) {
         logger.warn("driver_location_report_failed", { tripId: viaje.trasladoId, isOnline: isOnline(), errorCode: errorCode(error), precisionM: ubicacion.precisionM ?? null }, "connectivity");
       }
+      });
+      await trabajo;
     }
     function debeReportar(ubicacion: Coordenadas) {
       if (!ultimaReportada) return true;
@@ -120,8 +129,10 @@ export function useDriverLocationTracking(viajeActivo: ViajeActivo | null) {
     }
     void obtenerUbicacionActual().then(reportar);
     let cancelarObservacion: (() => void) | null = null;
-    void observarUbicacionActual((ubicacion) => { if (debeReportar(ubicacion)) void reportar(ubicacion); }).then((cancelar) => { cancelarObservacion = cancelar; });
+    void observarUbicacionActual((ubicacion) => { if (debeReportar(ubicacion)) void reportar(ubicacion); }).then((cancelar) => { if (cancelado) cancelar?.(); else cancelarObservacion = cancelar; });
     const respaldo = window.setInterval(() => void obtenerUbicacionActual().then(reportar), INTERVALO_RESPALDO_UBICACION_MS);
-    return () => { cancelado = true; cancelarObservacion?.(); window.clearInterval(respaldo); };
-  }, [viajeActivo]);
+    const reconectar = () => { trabajo = trabajo.then(async () => { try { await sincronizarColaTelemetria(cliente, { ignoreBackoff: true }); } catch { /* La cola conserva los puntos hasta recibir ACK. */ } }); void obtenerUbicacionActual().then(reportar); };
+    window.addEventListener("online", reconectar);
+    return () => { cancelado = true; cancelarObservacion?.(); window.clearInterval(respaldo); window.removeEventListener("online", reconectar); window.dispatchEvent(new CustomEvent("ruum:tracking-web", { detail: { active: false } })); };
+  }, [trasladoId, estado, folio]);
 }

@@ -9,6 +9,11 @@ const refreshMock = vi.fn();
 const avanzarEstadoTrasladoMock = vi.fn();
 const listarInspeccionesTrasladoMock = vi.fn();
 
+vi.mock("@ruum/api/custody", () => ({
+  consultarResolucionInventarioLlaves: vi.fn(async () => null),
+  consultarResumenEvidenciaCierre: vi.fn(async () => ({ inicial: 5, final: 5, conflicto: false, completa: true })),
+}));
+
 beforeAll(() => {
   HTMLDialogElement.prototype.showModal = vi.fn(function (this: HTMLDialogElement) {
     this.setAttribute("open", "");
@@ -76,10 +81,13 @@ vi.mock("../src/app/viajes/[id]/ChatViaje", () => ({
 }));
 
 import { CierreTrasladoDetails } from "../src/app/viajes/[id]/CierreTrasladoDetails";
+import { consultarResolucionInventarioLlaves, consultarResumenEvidenciaCierre } from "@ruum/api/custody";
 
 afterEach(() => {
   cleanup();
   vi.clearAllMocks();
+  vi.mocked(consultarResolucionInventarioLlaves).mockResolvedValue(null);
+  vi.mocked(consultarResumenEvidenciaCierre).mockResolvedValue({ inicial: 5, final: 5, conflicto: false, completa: true });
 });
 
 const pasaporteCierre: PasaporteRow = {
@@ -140,7 +148,7 @@ describe("[UI/UX] Pantalla de Cierre de Traslado (Conciliación y Firma) Mobile-
     expect(within(btnSos).getByText("SOS")).toBeDefined();
   });
 
-  it("2. Caja de Estados Cruzados: muestra En destino y CONCILIACIÓN LISTA", async () => {
+  it("2. Caja de Estados Cruzados: muestra conciliación pendiente si falta el inventario", async () => {
     listarInspeccionesTrasladoMock.mockResolvedValueOnce([]);
 
     render(
@@ -151,11 +159,11 @@ describe("[UI/UX] Pantalla de Cierre de Traslado (Conciliación y Firma) Mobile-
       expect(screen.queryByLabelText("Cargando cierre de traslado")).toBeNull();
     });
 
-    const statusBox = screen.getByRole("status", { name: /Estado: En destino\. Conciliación lista/i });
+    const statusBox = screen.getByRole("status", { name: /Estado: En destino\. Conciliación pendiente/i });
     expect(statusBox).toBeDefined();
     expect(within(statusBox).getByText("En destino")).toBeDefined();
     expect(within(statusBox).getByText("Vehículo en punto final")).toBeDefined();
-    expect(within(statusBox).getByText("CONCILIACIÓN LISTA")).toBeDefined();
+    expect(within(statusBox).getByText("CONCILIACIÓN PENDIENTE")).toBeDefined();
   });
 
   it("3. Módulo del Receptor: muestra datos de contacto, avatar con iniciales y botones Llamar, WhatsApp, Chat", async () => {
@@ -261,7 +269,10 @@ describe("[UI/UX] Pantalla de Cierre de Traslado (Conciliación y Firma) Mobile-
   });
 
   it("6. Fila de Acciones Base: Guardar Reporte y FINALIZAR TRASLADO ejecutan acciones esperadas", async () => {
-    listarInspeccionesTrasladoMock.mockResolvedValueOnce([]);
+    listarInspeccionesTrasladoMock.mockResolvedValueOnce([
+      { tipo: "inicial", llaves_recibidas: "2" },
+      { tipo: "final", llaves_recibidas: "2" },
+    ]);
     avanzarEstadoTrasladoMock.mockResolvedValue({});
 
     render(
@@ -275,7 +286,8 @@ describe("[UI/UX] Pantalla de Cierre de Traslado (Conciliación y Firma) Mobile-
     // Guardar Reporte
     const btnGuardar = screen.getByRole("button", { name: "Guardar Reporte" });
     fireEvent.click(btnGuardar);
-    expect(screen.getByText("Reporte de cierre guardado exitosamente.")).toBeDefined();
+    expect(screen.getByText(/La recepción y la firma aún no se guardan en servidor/)).toBeDefined();
+    expect(screen.queryByText("Reporte de cierre guardado exitosamente.")).toBeNull();
 
     // FINALIZAR TRASLADO
     const btnFinalizar = screen.getByRole("button", { name: /FINALIZAR TRASLADO/i });
@@ -292,6 +304,40 @@ describe("[UI/UX] Pantalla de Cierre de Traslado (Conciliación y Firma) Mobile-
     await waitFor(() => {
       expect(screen.getByText("¡Vehículo entregado y traslado finalizado exitosamente!")).toBeDefined();
     });
+  });
+
+  it("bloquea 2 a 1 después de recargar y habilita solo con resolución del servidor", async () => {
+    listarInspeccionesTrasladoMock.mockResolvedValue([
+      { tipo: "inicial", llaves_recibidas: "2" }, { tipo: "final", llaves_recibidas: "1" },
+    ]);
+    for (let i = 0; i < 2; i++) {
+      const view = render(<CierreTrasladoDetails pasaporte={pasaporteCierre} volver="/viajes" />);
+      await waitFor(() => expect(screen.queryByLabelText("Cargando cierre de traslado")).toBeNull());
+      const finalizar = screen.getByRole("button", { name: /FINALIZAR TRASLADO/i });
+      expect((finalizar as HTMLButtonElement).disabled).toBe(true);
+      expect(screen.getByText(/Llaves: origen 2, destino 1/)).toBeDefined();
+      fireEvent.click(finalizar);
+      expect(avanzarEstadoTrasladoMock).not.toHaveBeenCalled();
+      view.unmount();
+    }
+    vi.mocked(consultarResolucionInventarioLlaves).mockResolvedValue({ inicial: "2", final: "1", responsable: "admin", motivo: "Error de captura documentado", resuelta_en: "2026-10-30T16:00:00Z" });
+    render(<CierreTrasladoDetails pasaporte={pasaporteCierre} volver="/viajes" />);
+    await waitFor(() => expect((screen.getByRole("button", { name: /FINALIZAR TRASLADO/i }) as HTMLButtonElement).disabled).toBe(false));
+  });
+
+  it.each([
+    { inicial: 4, final: 5, conflicto: false, completa: false },
+    { inicial: 5, final: 5, conflicto: true, completa: false },
+  ])("no permite cerrar con fotografías incompletas o en conflicto: %j", async resumen => {
+    listarInspeccionesTrasladoMock.mockResolvedValue([{ tipo: "inicial", llaves_recibidas: "2" }, { tipo: "final", llaves_recibidas: "2" }]);
+    vi.mocked(consultarResumenEvidenciaCierre).mockResolvedValue(resumen);
+    render(<CierreTrasladoDetails pasaporte={pasaporteCierre} volver="/viajes" />);
+    await waitFor(() => expect(screen.queryByLabelText("Cargando cierre de traslado")).toBeNull());
+    const boton = screen.getByRole("button", { name: /FINALIZAR TRASLADO/i });
+    expect((boton as HTMLButtonElement).disabled).toBe(true);
+    expect(screen.getByText(/Fotografías sincronizadas: origen/)).toBeDefined();
+    fireEvent.click(boton);
+    expect(avanzarEstadoTrasladoMock).not.toHaveBeenCalled();
   });
 
   it("Estricto: No incluye barra de navegación inferior (Inicio, Traslados, Cuenta) en pantalla de cierre", async () => {

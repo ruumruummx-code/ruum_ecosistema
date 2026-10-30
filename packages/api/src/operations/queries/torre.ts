@@ -65,7 +65,7 @@ const ESTADOS_EVIDENCIA = [
   "evidencia_inicial_en_proceso",
   "evidencia_final_en_proceso"
 ];
-const UMBRAL_SIN_SENAL_MIN = 30;
+const UMBRAL_SIN_SENAL_MIN = 2;
 const VENTANA_ENTREGAS_MIN = 120;
 
 type CualquierFila = Record<string, unknown>;
@@ -273,7 +273,7 @@ export function construirItemsAtencion(
     }
     if (operativo === "in_transit") {
       const salud = ctx.tracking.get(id);
-      if (!salud || salud.online === false) {
+      if (!salud || salud.online === false || !salud.ultimoEnvioEn || ahoraMs - Date.parse(salud.ultimoEnvioEn) > 120_000) {
         candidatos.push({ motivo: "En viaje sin señal GPS", prioridad: 70 });
       }
     }

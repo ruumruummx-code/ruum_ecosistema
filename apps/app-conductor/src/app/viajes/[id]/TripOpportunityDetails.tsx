@@ -8,7 +8,7 @@ import { MOTIVOS_RECHAZO, type MotivoRechazo } from "@ruum/shared/constants";
 import type { Database } from "@ruum/shared/types";
 import { traducirErrorOperativo, suscribirCanalSeguro } from "@ruum/shared/utils";
 import { crearClienteNavegador, tieneSupabaseConfigurado } from "@/lib/supabase-browser";
-import { solicitarAsignacionViaje, registrarEvento, obtenerConductorActual } from "@ruum/api/services";
+import { aceptarAsignacion, rechazarAsignacion, consultarOportunidadAsignacion, type OportunidadAsignacion, solicitarAsignacionViaje, registrarEvento, obtenerConductorActual } from "@ruum/api/services";
 import { obtenerUbicacionActualConEstado, type Coordenadas } from "@/lib/ubicacion";
 import { nombreVehiculo } from "../trips-utils";
 
@@ -27,11 +27,27 @@ export function TripOpportunityDetails({
   const [avisoExito, setAvisoExito] = useState<string | null>(null);
   const [ofertaTomada, setOfertaTomada] = useState(false);
   const [conductorId, setConductorId] = useState<string | null>(null);
+  const [oportunidad, setOportunidad] = useState<OportunidadAsignacion | null>(null);
   const [solicitudEnviada, setSolicitudEnviada] = useState(false);
   const [posicionConductor, setPosicionConductor] = useState<Coordenadas | null>(null);
   const [mostrarModalRechazo, setMostrarModalRechazo] = useState(false);
 
   const trasladoId = pasaporte.traslado_id!;
+
+  useEffect(() => {
+    let activo=true;
+    async function consultar() {
+      try {
+        const estado=await consultarOportunidadAsignacion(crearClienteNavegador(),trasladoId);
+        if (!activo) return;
+        setOportunidad(estado); setSolicitudEnviada(estado.solicitud_estado === "solicitada"); setOfertaTomada(estado.tomada);
+        if (estado.asignada_a_mi) router.replace(`/viajes/${trasladoId}`);
+      } catch (err) { if (activo) setError(traducirErrorOperativo(err,"No se pudo verificar la asignación.")); }
+    }
+    void consultar(); const timer=window.setInterval(() => void consultar(),5000);
+    return () => { activo=false; window.clearInterval(timer); };
+  },[trasladoId,router]);
+
 
   // 2. Suscripción Realtime a cambios en este traslado (Detección de asignación concurrente)
   useEffect(() => {
@@ -115,6 +131,7 @@ export function TripOpportunityDetails({
   }, []);
 
   async function handleAceptar() {
+    if (procesando || !oportunidad?.elegible) return;
     setProcesando(true);
     setError(null);
 
@@ -132,6 +149,12 @@ export function TripOpportunityDetails({
       }
 
       setConductorId(conductorData.id);
+      if (oportunidad.modo === "dirigida") {
+        if (!oportunidad.asignacion_id) throw new Error("Falta el identificador de la oferta dirigida.");
+        await aceptarAsignacion(cliente, oportunidad.asignacion_id);
+        router.replace(`/viajes/${trasladoId}`);
+        return;
+      }
       const resultado = await solicitarAsignacionViaje(cliente, trasladoId, conductorData.id, posicionConductor);
       const cierre = new Date(resultado.cierra_en).toLocaleTimeString("es-MX", {
         hour: "2-digit",
@@ -154,6 +177,10 @@ export function TripOpportunityDetails({
 
     try {
       const cliente = crearClienteNavegador();
+      if (oportunidad?.modo === "dirigida" && oportunidad.asignacion_id) {
+        await rechazarAsignacion(cliente, oportunidad.asignacion_id, String(motivo));
+        router.push(volver); return;
+      }
       const { data: { session } } = await cliente.auth.getSession();
       if (session?.user) {
         const conductorData = await obtenerConductorActual(cliente).catch(() => null);
@@ -174,7 +201,7 @@ export function TripOpportunityDetails({
   }
 
   return <>
-    <OpportunityDetailsView pasaporte={pasaporte} volver={volver} procesando={procesando}
+    <OpportunityDetailsView oportunidad={oportunidad} pasaporte={pasaporte} volver={volver} procesando={procesando}
       error={error} avisoExito={avisoExito} ofertaTomada={ofertaTomada} solicitudEnviada={solicitudEnviada}
       onAccept={() => void handleAceptar()} onReject={() => setMostrarModalRechazo(true)} />
     {mostrarModalRechazo && <TripDialog title="Motivo de rechazo" onClose={() => setMostrarModalRechazo(false)}>

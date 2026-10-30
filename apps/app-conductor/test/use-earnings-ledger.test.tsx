@@ -59,8 +59,10 @@ const TRASLADO = {
 
 describe("helpers puros de ganancias", () => {
   it("mapea el estado del payout", () => {
-    expect(estatusPayout({ estado: "procesado" })).toBe("pagado");
-    expect(estatusPayout({ estado: "pendiente" })).toBe("programado");
+    expect(estatusPayout({ estado: "procesado" })).toBe("en_validacion");
+    expect(estatusPayout({ estado: "procesado", pagado_en: "2026-10-30", referencia_externa_validada: "bank-verified" })).toBe("pagado");
+    expect(estatusPayout({ estado: "pendiente" })).toBe("confirmado");
+    expect(estatusPayout({ estado: "pendiente", fecha_prevista: "2026-11-01" } as never)).toBe("programado");
     expect(estatusPayout({ estado: "fallido" })).toBe("rechazado");
   });
 
@@ -73,7 +75,7 @@ describe("helpers puros de ganancias", () => {
     expect(
       estatusViaje({ ...TRASLADO, payout_id: "p1" } as never, {
         id: "p1",
-        estado: "procesado"
+        estado: "procesado", pagado_en: "2026-10-30", referencia_externa_validada: "bank-verified"
       } as never)
     ).toBe("pagado");
   });

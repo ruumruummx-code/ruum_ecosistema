@@ -10,7 +10,9 @@ import { crearClienteNavegador, tieneSupabaseConfigurado } from "../../lib/supab
 import { obtenerConductorActual, obtenerGananciasConductor, type TrasladoConductorGanancia } from "@ruum/api/services";
 import { PanelSupportSheet } from "../panel/PanelSupportSheet";
 
-type Payout = Database["public"]["Tables"]["payouts_conductor"]["Row"];
+import { estadoLiquidacion } from "../../lib/estado-liquidacion";
+
+type Payout = Database["public"]["Tables"]["payouts_conductor"]["Row"] & { fecha_prevista?: string|null; pagado_en?: string|null; referencia_externa_validada?: string|null };
 type DatosBancarios = Database["public"]["Tables"]["datos_bancarios_conductor"]["Row"];
 
 export type PeriodoActivo = "semana" | "mes" | "anio";
@@ -36,10 +38,8 @@ interface RegistroViajeGanancia {
 
 // ── Helpers puros (testables) ──────────────────────────────────────
 
-export function estatusPayout(payout: { estado: string }): EstadoEconomicoExplicito {
-  if (payout.estado === "procesado") return "pagado";
-  if (payout.estado === "pendiente") return "programado";
-  return "rechazado";
+export function estatusPayout(payout: Parameters<typeof estadoLiquidacion>[0]): EstadoEconomicoExplicito {
+  return estadoLiquidacion(payout);
 }
 
 export function estatusViaje(
@@ -47,6 +47,7 @@ export function estatusViaje(
   payoutEnlazado?: Payout | null
 ): EstadoEconomicoExplicito {
   if (payoutEnlazado) return estatusPayout(payoutEnlazado);
+  if (traslado.ganancia_conductor_congelada === null) return "sin_calcular";
   if (traslado.estado === "servicio_cerrado") return "confirmado";
   if (traslado.estado === "entrega_confirmada") return "en_validacion";
   if (
@@ -280,7 +281,7 @@ export function useEarningsLedger(): UseEarningsLedgerResult {
     return traslados.map((t) => {
       const payoutEnlazado = t.payout_id ? mapaPayouts.get(t.payout_id) : null;
       const vehiculoNombre = t.vehiculos ? `${t.vehiculos.marca} ${t.vehiculos.modelo} ${t.vehiculos.anio}` : "Vehículo trasladado";
-      const montoEstimadoOGanado = Number(t.ganancia_conductor_congelada ?? ((t.precio_final ?? t.precio_cotizado ?? 0) * 0.85));
+      const montoEstimadoOGanado = Number(t.ganancia_conductor_congelada ?? 0);
       const precioBase = Number(t.precio_final ?? t.precio_cotizado ?? 0);
       const comision = precioBase > 0 ? Math.max(0, precioBase - montoEstimadoOGanado) : 0;
       const fechaStr = t.cerrado_en ?? t.actualizado_en ?? t.creado_en;
@@ -299,7 +300,7 @@ export function useEarningsLedger(): UseEarningsLedgerResult {
         bonos: 0,
         ajuste: 0,
         estatusEconomico: estatusViaje(t, payoutEnlazado),
-        liberacion: payoutEnlazado?.procesado_en ? payoutEnlazado.procesado_en.slice(0, 10) : "Pendiente de corte",
+        liberacion: payoutEnlazado?.pagado_en?.slice(0,10) ?? payoutEnlazado?.fecha_prevista ?? "Fecha pendiente de finanzas",
         payoutId: t.payout_id,
         estadoTraslado: t.estado
       };
@@ -322,10 +323,10 @@ export function useEarningsLedger(): UseEarningsLedgerResult {
   }, [payouts, rangoActual]);
 
   const resumen = useMemo(() => {
-    const precioBase = TrasladosFiltrados.reduce((tot, v) => tot + v.precioBase, 0);
+    const precioBase = TrasladosFiltrados.filter(v => v.estatusEconomico !== "sin_calcular").reduce((tot, v) => tot + v.precioBase, 0);
     const bonos = TrasladosFiltrados.reduce((tot, v) => tot + v.bonos, 0);
     const ajuste = payoutsFiltrados.reduce((tot, p) => tot + Number(p.ajustes ?? 0), 0);
-    const comisionRuum = TrasladosFiltrados.reduce((tot, v) => tot + v.comisionRuum, 0);
+    const comisionRuum = TrasladosFiltrados.filter(v => v.estatusEconomico !== "sin_calcular").reduce((tot, v) => tot + v.comisionRuum, 0);
     const reembolsoGastos = TrasladosFiltrados.reduce((tot, v) => tot + v.gastosAutorizados, 0);
     const retenciones = TrasladosFiltrados
       .filter((v) => v.estatusEconomico === "rechazado" || v.estatusEconomico === "retenido")
@@ -347,8 +348,10 @@ export function useEarningsLedger(): UseEarningsLedgerResult {
     };
   }, [TrasladosFiltrados, payoutsFiltrados]);
 
+  const fechaPrevista = payoutsFiltrados.find(p => estatusPayout(p) !== "pagado" && p.fecha_prevista)?.fecha_prevista;
   const fechaDispersion = useMemo(() => {
-    const fin = rangoActual.fin;
+    if (!fechaPrevista) return "por confirmar con finanzas";
+    const fin = new Date(`${fechaPrevista}T12:00:00-06:00`);
     try {
       return new Intl.DateTimeFormat("es-MX", {
         weekday: "long",
@@ -360,7 +363,7 @@ export function useEarningsLedger(): UseEarningsLedgerResult {
     } catch {
       return formatearFecha(fin.toISOString().slice(0, 10));
     }
-  }, [rangoActual.fin]);
+  }, [fechaPrevista]);
 
   const sinDatosTotales = !cargando && traslados.length === 0 && payouts.length === 0 && !error;
 

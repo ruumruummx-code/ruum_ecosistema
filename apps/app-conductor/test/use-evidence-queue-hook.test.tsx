@@ -8,6 +8,7 @@ const mocks = vi.hoisted(() => ({
   encolarEvidencia: vi.fn(),
   sincronizarColaEvidencia: vi.fn(),
   calcularSha256: vi.fn(),
+  hashBlob: vi.fn(),
   obtenerUbicacionActual: vi.fn(),
   crearClienteNavegador: vi.fn(),
   tieneSupabaseConfigurado: vi.fn(() => true)
@@ -18,7 +19,8 @@ vi.mock("@/lib/cola-offline", () => ({
   contarColaEvidencia: mocks.contarColaEvidencia,
   encolarEvidencia: mocks.encolarEvidencia,
   sincronizarColaEvidencia: mocks.sincronizarColaEvidencia,
-  calcularSha256: mocks.calcularSha256
+  calcularSha256: mocks.calcularSha256,
+  hashBlob: mocks.hashBlob
 }));
 
 vi.mock("@/lib/ubicacion", () => ({ obtenerUbicacionActual: mocks.obtenerUbicacionActual }));
@@ -45,9 +47,10 @@ describe("useEvidenceQueue", () => {
     mocks.leerColaEvidenciaDeTraslado.mockResolvedValue([PENDIENTE]);
     mocks.contarColaEvidencia.mockResolvedValue(1);
     mocks.calcularSha256.mockResolvedValue("hash-1");
+    mocks.hashBlob.mockResolvedValue("a".repeat(64));
     mocks.obtenerUbicacionActual.mockResolvedValue({ lat: 19.43, lng: -99.13 });
     mocks.crearClienteNavegador.mockReturnValue({
-      auth: { getUser: vi.fn(async () => ({ data: { user: { id: "user-1" } } })) }
+      auth: { getSession: vi.fn(async () => ({ data: { session: { user: { id: "user-1" } } } })) }
     });
   });
 
@@ -84,6 +87,10 @@ describe("useEvidenceQueue", () => {
       lng: -99.13
     });
     expect(encolado.localId).toEqual(expect.any(String));
+    await act(async () => {
+      await result.current.registrarFotoEnCola({ angulo: "frente", dataUrl: PENDIENTE.dataUrl });
+    });
+    expect(mocks.encolarEvidencia.mock.calls[1][0].localId).toBe(encolado.localId);
   });
 
   it("no encola nada si el tipo de evidencia todavía no está definido", async () => {
@@ -100,7 +107,7 @@ describe("useEvidenceQueue", () => {
 
   it("falla si no hay sesión para asociar la evidencia", async () => {
     mocks.crearClienteNavegador.mockReturnValue({
-      auth: { getUser: vi.fn(async () => ({ data: { user: null } })) }
+      auth: { getSession: vi.fn(async () => ({ data: { session: null } })) }
     });
     const { result } = renderHook(() => useEvidenceQueue({ trasladoId: "traslado-1", tipo: "inicial" }));
 

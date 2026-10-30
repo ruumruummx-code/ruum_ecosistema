@@ -47,7 +47,7 @@ export function EarningsSummary({
         </Card>
       </div>
 
-      {/* Tarjeta única: Depósito acumulado + Desglose completo con tooltips */}
+      {/* Tarjeta única: Devengo del periodo + Desglose completo con tooltips */}
       <FinancialCard className="overflow-hidden p-0 border-border/60" padding="none">
         <div className="px-4 sm:px-6 pt-5 sm:pt-6">
           <h2 className="font-display text-xl sm:text-2xl font-black tracking-tight text-text-primary">

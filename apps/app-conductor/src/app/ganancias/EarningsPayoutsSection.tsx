@@ -11,6 +11,8 @@ interface PayoutResumen {
   ajustes: number | null;
   monto_neto: number | null;
   estado: string;
+  pagado_en?: string|null;
+  referencia_externa_validada?: string|null;
   referencia_pago: string | null;
 }
 
@@ -25,7 +27,7 @@ export function EarningsPayoutsSection({
 }: EarningsPayoutsSectionProps) {
   return (
     <div className="mt-8">
-      <h3 className="font-display text-sm font-bold text-text-primary">Depósitos del periodo</h3>
+      <h3 className="font-display text-sm font-bold text-text-primary">Liquidaciones del periodo</h3>
       <div className="mt-3 grid gap-3">
         {payoutsFiltrados.map((payout) => (
           <Card key={payout.id} className="p-4" padding="none">
@@ -64,7 +66,7 @@ export function EarningsPayoutsSection({
                 </div>
               </div>
               {payout.referencia_pago && (
-                <p className="font-body text-xs text-text-tertiary">SPEI: {payout.referencia_pago}</p>
+                <p className="font-body text-xs text-text-tertiary">Referencia administrativa (no confirma transferencia): {payout.referencia_pago}</p>
               )}
             </div>
           </Card>

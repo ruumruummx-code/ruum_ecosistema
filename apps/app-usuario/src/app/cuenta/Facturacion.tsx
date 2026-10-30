@@ -1,5 +1,6 @@
 "use client";
 
+import { facturaVerificable, consultarSolicitudFactura, solicitarFactura, type SolicitudFactura } from "@ruum/api/billing";
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { Icono } from "@ruum/ui";
@@ -18,6 +19,7 @@ export interface FacturaItem {
   concepto: string;
   monto: number;
   estado: "emitida" | "pendiente" | "cancelada";
+  solicitud?: SolicitudFactura | null;
 }
 
 export interface FacturacionProps {
@@ -250,7 +252,8 @@ export function Facturacion({ usuario, empresa, facturasIniciales }: Facturacion
   // Lista de facturas y pestaña activa
   // C-1: sin mocks internos — arranca con lo inyectado (tests) o vacío y
   // consulta los traslados reales del usuario en BD.
-  const [facturas, setFacturas] = useState<FacturaItem[]>(facturasIniciales ?? []);
+  const [facturas, setFacturas] = useState<FacturaItem[]>((facturasIniciales ?? []).map(f => ({ ...f, estado: facturaVerificable(f.solicitud ?? null) ? "emitida" : "pendiente" })));
+  const [solicitandoFactura, setSolicitandoFactura] = useState<string | null>(null);
   const [cargandoFacturas, setCargandoFacturas] = useState(!facturasIniciales);
   const [errorFacturas, setErrorFacturas] = useState<string | null>(null);
   const [tabActiva, setTabActiva] = useState<"todas" | "emitidas" | "pendientes">("todas");
@@ -271,10 +274,11 @@ export function Facturacion({ usuario, empresa, facturasIniciales }: Facturacion
         const cliente = crearClienteNavegador();
         const data = await listarTrasladosParaFacturacionUsuario(cliente, usuario.id);
         if (!activo) return;
-        const EMITIDA = new Set(["pago_completado", "servicio_cerrado", "disputa_resuelta", "reclamo_resuelto"]);
-        const reales: FacturaItem[] = (data ?? [])
+
+        const reales: FacturaItem[] = await Promise.all((data ?? [])
           .filter((t) => t.estado !== "servicio_cancelado" && t.estado !== "traslado_fallido")
-          .map((t) => {
+          .map(async (t) => {
+            const solicitud = await consultarSolicitudFactura(cliente, t.id);
             const corto = String(t.id).slice(0, 8).toUpperCase();
             const monto = Number(t.precio_final ?? t.precio_cotizado ?? 0);
             const fechaBase = t.cerrado_en ?? t.creado_en;
@@ -284,14 +288,15 @@ export function Facturacion({ usuario, empresa, facturasIniciales }: Facturacion
             } catch { /* formato de respaldo */ }
             return {
               id: String(t.id),
-              folio: `Factura #FAC-${corto}`,
+              folio: solicitud?.uuid_fiscal ? `Factura ${solicitud.uuid_fiscal}` : `Solicitud fiscal · traslado #RR-${corto}`,
               fecha,
               traslado: `#RR-${corto}`,
               concepto: `Traslado ${t.origen_ciudad ?? ""} → ${t.destino_ciudad ?? ""}`.trim(),
               monto: Number.isFinite(monto) ? monto : 0,
-              estado: EMITIDA.has(String(t.estado)) ? "emitida" as const : "pendiente" as const,
+              estado: facturaVerificable(solicitud) ? "emitida" as const : "pendiente" as const,
+              solicitud,
             };
-          });
+          }));
         setFacturas(reales);
       } catch (err) {
         if (activo) setErrorFacturas(err instanceof Error ? err.message : "No pudimos cargar tus facturas.");
@@ -437,11 +442,16 @@ export function Facturacion({ usuario, empresa, facturasIniciales }: Facturacion
   }
 
   // Acción solicitar factura pendiente
-  function handleSolicitarFactura(id: string, folio: string) {
-    setFacturas((prev) =>
-      prev.map((f) => (f.id === id ? { ...f, estado: "emitida" } : f))
-    );
-    setToastNotificacion(`Solicitud enviada. ${folio} ha sido emitida exitosamente.`);
+  async function handleSolicitarFactura(id: string) {
+    if (solicitandoFactura) return;
+    setSolicitandoFactura(id);
+    try {
+      const solicitud = await solicitarFactura(crearClienteNavegador(), id);
+      setFacturas(prev => prev.map(f => f.id === id ? { ...f, solicitud, estado: facturaVerificable(solicitud) ? "emitida" : "pendiente" } : f));
+      setToastNotificacion(solicitud.estado === "rechazada" ? `Solicitud rechazada: ${solicitud.error_detalle ?? "Consulta el detalle del traslado."}` : facturaVerificable(solicitud) ? "Comprobante fiscal verificado. Consulta el detalle del traslado." : "Solicitud registrada; emisión pendiente.");
+    } catch (error) {
+      setToastNotificacion(error instanceof Error ? error.message : "No se guardó la solicitud fiscal.");
+    } finally { setSolicitandoFactura(null); }
   }
 
   return (
@@ -772,32 +782,12 @@ export function Facturacion({ usuario, empresa, facturasIniciales }: Facturacion
 
                 <div className="mt-3.5 flex gap-2 border-t border-[#f0f4fa] pt-3.5">
                   {factura.estado === "emitida" ? (
-                    <>
-                      <button
-                        type="button"
-                        onClick={() =>
-                          setToastNotificacion(`Descargando PDF de ${factura.folio}...`)
-                        }
-                        className="flex-1 rounded-[12px] bg-[#0a2342] py-2.5 text-center text-[12px] font-bold text-white transition hover:bg-[#143560] active:scale-98 flex items-center justify-center gap-1.5 cursor-pointer"
-                      >
-                        <IconoDescargar className="size-3.5" />
-                        <span>Descargar PDF</span>
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() =>
-                          setToastNotificacion(`Descargando XML de ${factura.folio}...`)
-                        }
-                        className="rounded-[12px] border border-[#dae5f2] bg-[#f0f5fe] px-4 py-2.5 text-center text-[12px] font-bold text-[#0a2342] transition hover:bg-[#e3ebf5] active:scale-98 flex items-center justify-center gap-1.5 cursor-pointer"
-                      >
-                        <IconoCodigo className="size-3.5" />
-                        <span>XML</span>
-                      </button>
-                    </>
+                    <Link href={`/viajes/${factura.id}`} className="rounded border px-4 py-3 text-sm">Consultar comprobante fiscal · {factura.solicitud?.ambiente}</Link>
                   ) : (
                     <button
                       type="button"
-                      onClick={() => handleSolicitarFactura(factura.id, factura.folio)}
+                      disabled={Boolean(solicitandoFactura) || factura.solicitud?.estado === "solicitada" || factura.solicitud?.estado === "en_proceso"}
+                      onClick={() => void handleSolicitarFactura(factura.id)}
                       className="w-full rounded-[12px] bg-[#0a2342] py-2.5 text-center text-[12px] font-bold text-white transition hover:bg-[#143560] active:scale-98 flex items-center justify-center gap-1.5 cursor-pointer"
                     >
                       <IconoPapelAvion className="size-3.5" />
