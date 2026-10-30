@@ -30,7 +30,8 @@ begin
 end;
 $$;
 revoke all on function private.sincronizar_nivel_por_calificacion() from public, anon, authenticated;
-create trigger sincronizar_nivel_por_calificacion
+-- Preview puede conservar este trigger al reconstruir el esquema.
+create or replace trigger sincronizar_nivel_por_calificacion
   before insert or update of calificacion_promedio on public.conductores
   for each row execute function private.sincronizar_nivel_por_calificacion();
 
