@@ -179,10 +179,7 @@ test.describe("R6 Carga masiva (xlsx) en BottomSheet", () => {
     });
 
     const buffer = await crearXlsxPrueba();
-    const fileChooserPromise = page.waitForEvent("filechooser");
-    await page.locator("#masivo-file-input").click({ force: true });
-    const fileChooser = await fileChooserPromise;
-    await fileChooser.setFiles({
+    await page.locator("#masivo-file-input").setInputFiles({
       name: "lote-traslados.xlsx",
       mimeType: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
       buffer,
