@@ -79,7 +79,8 @@ export function DetallesPasaporte({
   pagos,
   ultimaUbicacion,
   seccion,
-}: PasaporteDigitalSegmentadoProps & { seccion: "fotos" | "unidad" | "recibo" }) {
+  ocultarCalificacion = false,
+}: PasaporteDigitalSegmentadoProps & { seccion: "fotos" | "unidad" | "recibo"; ocultarCalificacion?: boolean }) {
   const estado: Database["public"]["Enums"]["estado_traslado"] =
     pasaporte.estado ??"solicitud_creada";
   const trasladoId = pasaporte.traslado_id ??"";
@@ -141,7 +142,7 @@ export function DetallesPasaporte({
   return (
     <div className="w-full flex flex-col gap-4">
       {seccion === "unidad" && <div className="rounded-xl border p-3 text-sm"><strong>Conductor: {nombreConductor ?? "Por asignar"}</strong>{calificacionConductor != null && <p>Calificación: {Number(calificacionConductor).toFixed(1)}</p>}</div>}
-      {mostrarPromptCalificacion && <CalificarTraslado trasladoId={trasladoId} conductorId={pasaporte.conductor_id!} mostrar />}
+      {!ocultarCalificacion && mostrarPromptCalificacion && <CalificarTraslado trasladoId={trasladoId} conductorId={pasaporte.conductor_id!} mostrar />}
       {/* ========================================================
           PESTAÑA 2: FOTOS Y EVIDENCIA 360°
           ======================================================== */}

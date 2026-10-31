@@ -5,11 +5,8 @@ import { TAMANO_MAXIMO, validarDocumento } from "../_shared/validacion-documento
 import { leerFormularioLimitado } from "../_shared/multipart-limitado.ts";
 import { consumirRateLimit } from "../_shared/rate-limit.ts";
 
-const CORS = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, apikey, content-type, x-client-info",
-  "Access-Control-Allow-Methods": "POST, OPTIONS",
-};
+import { CORS_DOCUMENTOS as CORS } from "../_shared/cors-documentos.ts";
+
 const BUCKET = "documentos-cuenta";
 const TIPOS = new Set(["licencia", "comprobante", "constancia"]);
 function json(body: unknown, status = 200) {

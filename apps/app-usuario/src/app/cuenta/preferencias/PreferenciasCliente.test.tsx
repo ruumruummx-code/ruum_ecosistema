@@ -79,7 +79,7 @@ const mockCuenta: CuentaReal = {
   fotoPerfilUrl: null,
   vehiculos: [],
   empresa: null,
-  historialEmpresa: [],
+  totalTraslados: 0,
 };
 
 describe("PreferenciasCliente", () => {
@@ -94,7 +94,7 @@ describe("PreferenciasCliente", () => {
     // El botón de tema móvil debe estar presente
     expect(screen.getByTestId("boton-tema-mobile")).toBeDefined();
     // Las opciones de la sección de preferencias móvil
-    expect(screen.getByText("SMS / WhatsApp")).toBeDefined();
+    expect(screen.getByRole("button", { name: /Notificaciones y alertas/ })).toBeDefined();
   });
 
   it("renderiza la estructura completa de escritorio (>= 1024px)", () => {

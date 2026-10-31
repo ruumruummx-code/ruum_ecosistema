@@ -5,7 +5,8 @@ import Link from "next/link";
 import { useTema } from "../../TemaProvider";
 import { BotonTema } from "../../TemaProvider";
 import { PassportCard } from "@ruum/ui";
-import { LayoutCuenta, SeccionPreferencias } from "../cuenta-ui";
+import { LayoutCuenta } from "../cuenta-ui";
+import { Preferencias as SeccionPreferencias } from "../Preferencias";
 import type { CuentaReal, Usuario } from "../cuenta-ui";
 import { crearClienteNavegador } from "../../../lib/supabase-browser";
 
