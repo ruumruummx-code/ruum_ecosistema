@@ -230,6 +230,8 @@ export default function PaginaVehiculosAdmin() {
     () => vehiculosFiltrados.find((v) => v.id === detalleVehiculoId) ?? null,
     [detalleVehiculoId, vehiculosFiltrados]
   );
+  // Editar es una acción independiente: no requiere abrir Evidencia primero.
+  const vehiculoEdicion = datos.vehiculos.find((v) => v.id === editando) ?? null;
   const exportHref = `/api/exportaciones/vehiculos${busqueda ? `?busqueda=${encodeURIComponent(busqueda)}` : ""}`;
 
   return (
@@ -254,6 +256,7 @@ export default function PaginaVehiculosAdmin() {
         )}
       />
 
+      {avisoGuardado && <Aviso tono="info">{avisoGuardado}</Aviso>}
       {error && (
         <div className="mt-4">
           <AdminErrorState
@@ -479,12 +482,12 @@ export default function PaginaVehiculosAdmin() {
         </div>
       )}
 
-      {editando && vehiculoDetalle && (
-        <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/50 pt-10">
+      {editando && vehiculoEdicion && (
+        <div role="dialog" aria-modal="true" aria-labelledby="editar-vehiculo-titulo" className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/50 pt-10">
           <div className="mx-4 mb-10 w-full max-w-2xl rounded-card border border-border-default bg-surface-primary shadow-xl">
             <div className="flex items-center justify-between border-b border-border-default px-6 py-4">
               <div>
-                <h2 className="font-display text-lg font-semibold text-ink">Editar vehículo</h2>
+                <h2 id="editar-vehiculo-titulo" className="font-display text-lg font-semibold text-ink">Editar vehículo · {vehiculoEdicion.marca} {vehiculoEdicion.modelo}</h2>
                 <p className="font-body text-sm text-text-tertiary">v{versionEditando} · Los cambios se auditan automáticamente</p>
               </div>
               <button
