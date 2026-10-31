@@ -15,6 +15,7 @@ import { CONTACTOS_SOPORTE_USUARIO } from "../../lib/contactos-soporte";
 import { progresoPorEstadoTraslado } from "../../lib/inicio";
 import { DashboardIcon as Icon } from "../dashboard/DashboardIcon";
 import { useDashboardTracking } from "../dashboard/useDashboardTracking";
+import { SolicitudCalificacion } from "../viajes/[id]/SolicitudCalificacion";
 import { CancelarTraslado } from "../viajes/[id]/CancelarTraslado";
 import { EstadoTraslado, VehiculoTraslado } from "./VisualesTraslado";
 import {
@@ -130,6 +131,7 @@ export function DetalleTrasladoDesktop({
           </svg>
         </button>
       </header>
+      <SolicitudCalificacion key={id} trasladoId={id} conductorId={p.conductor_id} estado={p.estado} cerradoEn={p.actualizado_en} />
       <div
         className={s.detailTabs}
         role="tablist"

@@ -9,11 +9,13 @@ import { crearClienteNavegador, tieneSupabaseConfigurado } from "@/lib/supabase-
 export function CalificarTraslado({
   trasladoId,
   conductorId,
-  mostrar
+  mostrar,
+  onEnviada
 }: {
   trasladoId: string;
   conductorId: string | null;
   mostrar: boolean;
+  onEnviada?: () => void;
 }) {
   const [estrellas, setEstrellas] = useState(5);
   const [comentario, setComentario] = useState("");
@@ -49,6 +51,7 @@ export function CalificarTraslado({
         const cliente = crearClienteNavegador();
         await crearCalificacion(cliente, trasladoId, conductorId!, estrellas, comentario);
         setEnviado(true);
+        onEnviada?.();
         setMensaje("Calificación registrada. Gracias por ayudarnos a mantener la calidad.");
       } catch (error) {
         setMensaje(error instanceof Error ? error.message : "No se pudo registrar la calificación.");
