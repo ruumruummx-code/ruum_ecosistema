@@ -45,7 +45,7 @@ function button(tree: Element[], text: string) {
   expect(el, `Botón ${text}`).toBeDefined();
   return el!;
 }
-const vehicle = { id: "vehiculo-1", usuario_id: "usuario-1", marca: "Peugeot", modelo: "Boxer", anio: 2025, tipo: "van", placas: "LF98392", vin: "VF3YDBTF8S2Z20376", version: 7 };
+const vehicle = { id: "vehiculo-1", usuario_id: "usuario-1", marca: "Peugeot", modelo: "Boxer", anio: 2025, tipo: "van", placas: "TEST111", vin: "1HGCM82633A004352", version: 7 };
 
 beforeEach(() => {
   vi.clearAllMocks();
