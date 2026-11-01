@@ -197,4 +197,11 @@ describe("useDriverLocationTracking - P2 Prevención de arranque nativo post-cle
 
     expect(mockDetenerTrackingNativo).toHaveBeenCalled();
   });
+  it("no solicita ubicación ni inicia el servicio cuando la operación está cerrada con disputa", () => {
+    useDriverLocationTracking({ ...viaje1, estado: "disputa_abierta", estadoOperativo: "closed", cerradoEn: "2026-10-31T20:12:00Z" });
+    expect(mockDetenerTrackingNativo).toHaveBeenCalled();
+    expect(mockGetSession).not.toHaveBeenCalled();
+    expect(mockSolicitarUbicacionSegundoPlanoNativa).not.toHaveBeenCalled();
+    expect(mockIniciarTrackingNativo).not.toHaveBeenCalled();
+  });
 });

@@ -429,7 +429,7 @@ export default function PaginaDetalleViajeAdmin() {
     );
   }
 
-  const siguientesEstados = TRANSICIONES[pasaporte.estado] ?? [];
+  const siguientesEstados = (TRANSICIONES[pasaporte.estado] ?? []).filter(estado => estado !== "disputa_resuelta");
   const clasificacionCatalogo = resumenClasificacionVehiculo(
     pasaporte.vehiculo_marca ?? "",
     pasaporte.vehiculo_modelo ?? "",
@@ -657,6 +657,7 @@ export default function PaginaDetalleViajeAdmin() {
 
         <PassportCard>
           <p className="font-body text-xs uppercase tracking-wide text-text-tertiary">Cambiar estatus</p>
+          {pasaporte.estado === "disputa_abierta" && <p className="mt-2 text-sm">Para registrar una resolución, abre <Link href="/disputas" className="underline">Disputas</Link>. El resumen se actualizará al resolver todos los casos pendientes.</p>}
           <div className="mt-3 flex gap-2">
             <select
               value={estadoSeleccionado}

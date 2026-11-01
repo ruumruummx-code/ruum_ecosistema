@@ -2,6 +2,8 @@ import { describe, expect, it } from "vitest";
 
 import {
   normalizarViajeActivo,
+  viajeActivoDesdePasaporte,
+  type PasaporteRow,
   viajeEsOperacionActiva,
   viajePermiteEmergencia,
   viajePermiteSeguimientoUbicacion
@@ -38,4 +40,12 @@ describe("active trip state", () => {
       destinoActual: "Destino · Toluca"
     });
   });
+});
+
+
+it("una disputa posterior al cierre nunca reactiva el viaje ni el GPS", () => {
+  const cierre = { cerradoEn: "2026-10-31T20:12:00Z", estadoOperativo: "closed" as const };
+  expect(normalizarViajeActivo({ trasladoId: "cerrado", estado: "disputa_abierta", ...cierre })).toBeNull();
+  expect(viajePermiteSeguimientoUbicacion("disputa_abierta", cierre)).toBe(false);
+  expect(viajeActivoDesdePasaporte({ traslado_id: "cerrado", estado: "disputa_abierta", cerrado_en: cierre.cerradoEn, estado_operativo: "closed" } as PasaporteRow)).toBeNull();
 });

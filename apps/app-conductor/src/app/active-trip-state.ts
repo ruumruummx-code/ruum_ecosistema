@@ -11,6 +11,8 @@ export type ViajeActivo = {
   folio: string;
   etapa: string;
   destinoActual: string;
+  cerradoEn?: string | null;
+  estadoOperativo?: Database["public"]["Enums"]["estado_operativo_traslado"] | null;
 };
 
 export type RegistroViajeActivoInput = Partial<ViajeActivo> & {
@@ -30,7 +32,8 @@ export function viajePermiteEmergencia(estado: EstadoTraslado) {
   return indice >= INDICE_INICIO_EMERGENCIA && indice <= INDICE_FIN_EMERGENCIA;
 }
 
-export function viajePermiteSeguimientoUbicacion(estado: EstadoTraslado) {
+export function viajePermiteSeguimientoUbicacion(estado: EstadoTraslado, contexto?: Pick<ViajeActivo, "cerradoEn" | "estadoOperativo">) {
+  if (contexto?.cerradoEn || ["closed", "cancelled", "failed"].includes(contexto?.estadoOperativo ?? "")) return false;
   return ESTADOS_SEGUIMIENTO_UBICACION.includes(estado);
 }
 
@@ -61,12 +64,15 @@ function direccionActualDeViaje(viaje: RegistroViajeActivoInput) {
 }
 
 export function normalizarViajeActivo(viaje: RegistroViajeActivoInput, previo?: ViajeActivo | null): ViajeActivo | null {
+  if (viaje.cerradoEn || ["closed", "cancelled", "failed"].includes(viaje.estadoOperativo ?? "")) return null;
   if (!viajeEsOperacionActiva(viaje.estado)) return null;
 
   const presentation = getTripPresentation(viaje.estado);
   return {
     trasladoId: viaje.trasladoId,
     estado: viaje.estado,
+    cerradoEn: viaje.cerradoEn ?? null,
+    estadoOperativo: viaje.estadoOperativo ?? null,
     folio: viaje.folio ?? previo?.folio ?? folioDesdeId(viaje.trasladoId),
     etapa: viaje.etapa ?? presentation.title,
     destinoActual: viaje.destinoActual ?? previo?.destinoActual ?? direccionActualDeViaje(viaje)
@@ -79,6 +85,8 @@ export function registroViajeActivoDesdePasaporte(viaje: PasaporteRow): Registro
   return {
     trasladoId: viaje.traslado_id,
     estado: viaje.estado,
+    cerradoEn: viaje.cerrado_en ?? null,
+    estadoOperativo: viaje.estado_operativo ?? null,
     origenDireccion: viaje.origen_direccion,
     origenCiudad: viaje.origen_ciudad,
     destinoDireccion: viaje.destino_direccion,
