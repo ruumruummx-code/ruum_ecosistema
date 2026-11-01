@@ -47,7 +47,7 @@ export function DriverEarningsView({ data, summary, period, onPeriod, loading, e
         </div>
       </div>
       <div className={styles.metrics}>
-        <div className={styles.metric}><span className={styles.metricIcon}><Icon name="car" /></span><div><h2>Viajes completados</h2><strong data-testid="earnings-trips">{ready ? summary.count : "—"}</strong><p className={styles.difference} data-negative={ready ? summary.tripDifference < 0 : undefined}>{ready ? `${summary.tripDifference > 0 ? '+' : ''}${summary.tripDifference} ${summary.tripDifference < 0 ? '↓' : '↑'}` : "—"}</p></div></div>
+        <div className={styles.metric}><span className={styles.metricIcon}><Icon name="car" /></span><div><h2>Traslados completados</h2><strong data-testid="earnings-trips" title="Completados en el periodo seleccionado">{ready ? summary.count : "—"}</strong><p data-testid="earnings-trips-total">{ready ? `${summary.totalCompleted} acumulados` : "—"}</p><p className={styles.difference} data-negative={ready ? summary.tripDifference < 0 : undefined}>{ready ? `${summary.tripDifference > 0 ? '+' : ''}${summary.tripDifference} ${summary.tripDifference < 0 ? '↓' : '↑'}` : "—"}</p></div></div>
         <div className={styles.metric}><span className={styles.metricIcon}><Icon name="clock" /></span><div><h2>Horas en línea</h2><strong>—</strong><p>Sin registro</p></div></div>
       </div>
     </section>
