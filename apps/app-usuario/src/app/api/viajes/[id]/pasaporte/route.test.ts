@@ -41,3 +41,12 @@ it("impide descargar evidencias desde un servidor externo",async()=>{
  expect((await llamar()).status).toBe(503); expect(fetchMock).not.toHaveBeenCalled();
  vi.unstubAllGlobals();
 });
+
+it("entrega expedientes grandes por bloques sin truncar el adjunto",async()=>{
+ const bytes=new Uint8Array(5*1024*1024); bytes[0]=37; bytes[bytes.length-1]=70;
+ m.pdf.mockResolvedValue(bytes);
+ const res=await llamar(); const reader=res.body!.getReader();
+ let total=0; let bloques=0; let ultimo=0;
+ while(true) { const {done,value}=await reader.read(); if(done) break; expect(value.byteLength).toBeLessThanOrEqual(64*1024); total+=value.byteLength; bloques++; ultimo=value[value.length-1]; }
+ expect(total).toBe(bytes.length); expect(bloques).toBeGreaterThan(1); expect(ultimo).toBe(70);
+});

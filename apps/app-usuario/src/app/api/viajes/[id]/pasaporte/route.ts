@@ -42,7 +42,18 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
       for (const parte of partes) { resultado.set(parte,offset); offset += parte.byteLength; }
       return resultado;
     });
-    return new Response(Buffer.from(bytes),{headers:{"Content-Type":"application/pdf","Content-Disposition":`attachment; filename="pasaporte-${id}.pdf"`,"Cache-Control":"private, no-store","X-Content-Type-Options":"nosniff"}});
+    // Stream the attachment so large photo packets are not buffered as one
+    // platform response payload. Generate fully first: errors never yield a partial PDF.
+    let offset = 0;
+    const cuerpo = new ReadableStream<Uint8Array>({
+      pull(controller) {
+        if (offset >= bytes.length) { controller.close(); return; }
+        const fin = Math.min(offset + 64 * 1024, bytes.length);
+        controller.enqueue(bytes.subarray(offset, fin));
+        offset = fin;
+      },
+    });
+    return new Response(cuerpo,{headers:{"Content-Type":"application/pdf","Content-Disposition":`attachment; filename="pasaporte-${id}.pdf"`,"Cache-Control":"private, no-store","X-Content-Type-Options":"nosniff"}});
   } catch (error) {
     return NextResponse.json({error:error instanceof Error ? error.message : "No pudimos generar el pasaporte completo."},{status:503,headers:{"Cache-Control":"private, no-store"}});
   }
