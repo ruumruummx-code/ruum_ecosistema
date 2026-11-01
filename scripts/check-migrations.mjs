@@ -77,6 +77,11 @@ const TABLAS_REFERENCIA = new Set([
   "public.obs_retencion_politicas",
   "public.admins",
   "private.politica_asignacion",
+  "private.stripe_conciliacion_config",
+  "private.configuracion_emision_fiscal",
+  "public.payout_traslados",
+  "public.totales_definitivos_traslado",
+  "public.registro_auditoria",
 ]);
 
 const SLUG_SUBSTRING = /fixture|e2e|seed|dummy|mock/;

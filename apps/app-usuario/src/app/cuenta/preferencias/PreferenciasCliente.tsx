@@ -9,6 +9,7 @@ import { NavegacionUsuario } from "../../NavegacionUsuario";
 import { Preferencias as SeccionPreferencias } from "../Preferencias";
 import type { CuentaReal, Usuario } from "../cuenta-ui";
 import { crearClienteNavegador } from "../../../lib/supabase-browser";
+import { actualizarPreferenciasNotificaciones } from "@ruum/api/services";
 
 interface PreferenciasClienteProps {
   cuenta: CuentaReal;
@@ -101,16 +102,12 @@ export function PreferenciasCliente({ cuenta }: PreferenciasClienteProps) {
     try {
       const cliente = crearClienteNavegador();
       if (usuario?.id) {
-        // eslint-disable-next-line no-restricted-syntax
-        await cliente
-          .from("usuarios")
-          .update({
-            notificaciones_push: notifPagosPush || notifCambiosEstadoPush,
-            notificaciones_email: notifPagosEmail || notifCambiosEstadoEmail,
-            alertas_pago: notifPagosEmail || notifPagosPush,
-            notificaciones_promocionales: notifPromocionesEmail || notifPromocionesPush,
-          })
-          .eq("id", usuario.id);
+        await actualizarPreferenciasNotificaciones(cliente as never, {
+          notificaciones_push: notifPagosPush || notifCambiosEstadoPush,
+          notificaciones_email: notifPagosEmail || notifCambiosEstadoEmail,
+          alertas_pago: notifPagosEmail || notifPagosPush,
+          notificaciones_promocionales: notifPromocionesEmail || notifPromocionesPush,
+        });
       }
     } catch {
       // Continúa aunque falle offline o sin permisos

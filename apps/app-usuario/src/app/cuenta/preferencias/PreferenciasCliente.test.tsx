@@ -32,13 +32,11 @@ vi.mock("next/navigation", () => ({
 
 // Mock de Supabase browser client
 vi.mock("../../../lib/supabase-browser", () => ({
-  crearClienteNavegador: () => ({
-    from: () => ({
-      update: () => ({
-        eq: () => Promise.resolve({ data: null, error: null }),
-      }),
-    }),
-  }),
+  crearClienteNavegador: () => ({}),
+}));
+
+vi.mock("@ruum/api/services", () => ({
+  actualizarPreferenciasNotificaciones: vi.fn(() => Promise.resolve({ data: null, error: null })),
 }));
 
 // Mock de useTema
