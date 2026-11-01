@@ -16,6 +16,7 @@ import { progresoPorEstadoTraslado } from "../../lib/inicio";
 import { DashboardIcon as Icon } from "../dashboard/DashboardIcon";
 import { useDashboardTracking } from "../dashboard/useDashboardTracking";
 import { SolicitudCalificacion } from "../viajes/[id]/SolicitudCalificacion";
+import { ExportarPasaportePdf } from "../viajes/[id]/ExportarPasaportePdf";
 import { CancelarTraslado } from "../viajes/[id]/CancelarTraslado";
 import { EstadoTraslado, VehiculoTraslado } from "./VisualesTraslado";
 import {
@@ -78,7 +79,7 @@ export function DetalleTrasladoDesktop({
   }, [p.conductor_id]);
   const activo = pestañaDeViaje(p) === "activos";
   const tracking = useDashboardTracking(id, p.estado, activo);
-  const progreso = progresoPorEstadoTraslado(p.estado);
+  const progreso = p.cerrado_en || p.estado_operativo === "closed" ? 100 : progresoPorEstadoTraslado(p.estado);
   const terminal = ["finalizados", "cancelados"].includes(pestañaDeViaje(p));
   const fecha = fechaProgramada(viaje.traslado?.fecha_hora_programada ?? null);
   const origen =
@@ -131,7 +132,7 @@ export function DetalleTrasladoDesktop({
           </svg>
         </button>
       </header>
-      <SolicitudCalificacion key={id} trasladoId={id} conductorId={p.conductor_id} estado={p.estado} cerradoEn={p.actualizado_en} />
+      <SolicitudCalificacion key={id} trasladoId={id} conductorId={p.conductor_id} estado={p.estado} cerradoEn={p.cerrado_en ?? p.actualizado_en} />
       <div
         className={s.detailTabs}
         role="tablist"
@@ -184,7 +185,7 @@ export function DetalleTrasladoDesktop({
               Volver al seguimiento
             </button>
             {p.estado && (
-              <CancelarTraslado
+              <CancelarTraslado cerrado={Boolean(p.cerrado_en) || p.estado_operativo === "closed"}
                 trasladoId={id}
                 estado={p.estado}
                 precio={Number(p.precio_final ?? p.precio_cotizado ?? 0)}
@@ -423,6 +424,7 @@ export function DetalleTrasladoDesktop({
         {error && <p role="alert">{error}</p>}
       </section>
       <footer className={s.detailActions}>
+        <ExportarPasaportePdf trasladoId={id} />
         <button
           className={s.danger}
           disabled={terminal || !id}

@@ -53,6 +53,7 @@ export function vehiculoTipo(p: Pasaporte): string {
 export function pestañaDeViaje(p: Pasaporte): PestañaTraslados {
   const estado = String(p.estado ?? "");
   if (estado === "servicio_cancelado" || estado === "traslado_fallido") return "cancelados";
+  if (p.cerrado_en || p.estado_operativo === "closed") return "finalizados";
   if (["servicio_cerrado", "reclamo_resuelto", "disputa_resuelta", "cierre_operativo_con_incidencia_abierta"].includes(estado)) return "finalizados";
   if ([
     "solicitud_creada",

@@ -401,7 +401,7 @@ export async function subirDocumentoIdentidad(
   return data;
 }
 
-export type TipoDocumentoCuenta = "licencia" | "comprobante" | "constancia";
+export type TipoDocumentoCuenta = "comprobante" | "constancia";
 export type DocumentoCuenta = {
   tipo: TipoDocumentoCuenta;
   ruta: string;

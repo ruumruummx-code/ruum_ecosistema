@@ -23,12 +23,14 @@ export function CancelarTraslado({
   precio,
   fechaProgramada,
   conductorAsignado,
+  cerrado = false,
 }: {
   trasladoId: string;
   estado: EstadoTraslado;
   precio: number;
   fechaProgramada: string | null;
   conductorAsignado: boolean;
+  cerrado?: boolean;
 }) {
   const router = useRouter();
   const [motivo, setMotivo] = useState("");
@@ -37,14 +39,14 @@ export function CancelarTraslado({
   const [confirmando, setConfirmando] = useState(false);
 
   const terminal = ["servicio_cerrado", "servicio_cancelado", "traslado_fallido"].includes(estado);
-  if (terminal) return null;
+  if (terminal || cerrado) return null;
 
   if (!usuarioPuedeCancelar(estado)) {
     return (
       <div className="mt-5 rounded-lg border border-ink/15 bg-mist p-4">
         <p className="font-body text-xs font-semibold uppercase tracking-wider text-ink/60">Cancelación no disponible</p>
         <p className="mt-1 font-body text-sm text-ink/80">
-          El vehículo ya se encuentra en proceso operativo (inspección, recolección o tránsito). Por protocolos de seguridad operativa, no es posible cancelar en esta etapa.
+          La cancelación desde la aplicación no está habilitada para el estado actual: {estado.replaceAll("_", " ")}. Contacta a Soporte para revisar tu solicitud.
         </p>
         <p className="mt-2 font-body text-xs text-ink/60">
           Si requieres asistencia urgente o surge alguna eventualidad, por favor{" "}

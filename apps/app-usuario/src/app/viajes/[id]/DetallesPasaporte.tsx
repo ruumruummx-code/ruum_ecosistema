@@ -108,7 +108,7 @@ export function DetallesPasaporte({
 
 
   const tipoServicio = humanizar(traslado?.tipo_servicio) ??"Traslado estándar";
-  const motivoServicio = humanizar(traslado?.motivo_servicio) ??"Por definir";
+  const motivoServicio = humanizar(traslado?.motivo_servicio);
   const ventanaRecoleccion =
     traslado?.ventana_recoleccion ??
     (traslado?.fecha_hora_programada ? formatoFecha(traslado.fecha_hora_programada) : null) ??
@@ -231,6 +231,7 @@ export function DetallesPasaporte({
                 precio={precioBase}
                 fechaProgramada={traslado?.fecha_hora_programada ?? null}
                 conductorAsignado={Boolean(pasaporte.conductor_id)}
+                cerrado={Boolean(pasaporte.cerrado_en) || pasaporte.estado_operativo === "closed"}
               />
               <AbrirDisputa trasladoId={trasladoId} disponible={puedeAbrirDisputa} />
             </div>
@@ -330,7 +331,7 @@ export function DetallesPasaporte({
               <FilaInfo etiqueta="Tipo de servicio" valor={tipoServicio} />
               <FilaInfo etiqueta="Ventana recolección" valor={ventanaRecoleccion} />
               <FilaInfo etiqueta="Ventana entrega" valor={ventanaEntrega} />
-              <FilaInfo etiqueta="Motivo" valor={motivoServicio} />
+              {motivoServicio && <FilaInfo etiqueta="Motivo" valor={motivoServicio} />}
             </div>
           </TarjetaPasaporte>
 
@@ -551,7 +552,7 @@ export function DetallesPasaporte({
 
           {/* Exportar PDF oficial */}
           <div className="mt-2 [&>*]:w-full [&_button]:min-h-[52px]">
-            <ExportarPasaportePdf />
+            <ExportarPasaportePdf trasladoId={trasladoId} />
           </div>
         </div>
       )}

@@ -344,8 +344,7 @@ describe("DetallesPasaporte y acciones operativas", () => {
 
     const { rerender } = render(<DetallesPasaporte {...baseProps} seccion="recibo" />);
     expect(screen.getByText("Pago registrado con éxito")).toBeInTheDocument();
-    await user.click(screen.getByRole("button", { name: "Exportar PDF" }));
-    expect(window.print).toHaveBeenCalled();
+    expect(screen.getByRole("button", { name: "Exportar pasaporte completo" })).toBeEnabled();
 
     // Estado: cotizacion_generada
     rerender(

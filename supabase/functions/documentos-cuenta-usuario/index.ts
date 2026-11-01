@@ -8,7 +8,7 @@ import { consumirRateLimit } from "../_shared/rate-limit.ts";
 import { CORS_DOCUMENTOS as CORS } from "../_shared/cors-documentos.ts";
 
 const BUCKET = "documentos-cuenta";
-const TIPOS = new Set(["licencia", "comprobante", "constancia"]);
+const TIPOS = new Set(["comprobante", "constancia"]);
 function json(body: unknown, status = 200) {
   return new Response(JSON.stringify(body), { status, headers: { ...CORS, "Content-Type": "application/json" } });
 }
@@ -31,7 +31,7 @@ Deno.serve(async req => {
   try {
     // Lectura siempre acotada al perfil autenticado; no se aceptan IDs del cliente.
     if (req.headers.get("Content-Type")?.includes("application/json")) {
-      const { data, error } = await cliente.from("documentos_cuenta_usuario").select("tipo,ruta,estado,subido_en").eq("usuario_id", perfil.id);
+      const { data, error } = await cliente.from("documentos_cuenta_usuario").select("tipo,ruta,estado,subido_en").eq("usuario_id", perfil.id).in("tipo", [...TIPOS]);
       if (error) return json({ error: "No pudimos consultar tus documentos." }, 503);
       return json({ documentos: data });
     }

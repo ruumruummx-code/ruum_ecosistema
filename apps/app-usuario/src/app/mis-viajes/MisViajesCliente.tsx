@@ -128,6 +128,7 @@ const PILDORA_CLASE: Record<TonoPildora, string> = {
 };
 
 function estadoVisual(p: Pasaporte): { label: string } {
+  if (p.cerrado_en || p.estado_operativo === "closed") return { label: p.estado === "disputa_abierta" ? "Finalizado · Disputa abierta" : "Finalizado" };
   switch (String(p.estado ?? "")) {
     case "pendiente_de_conductor":
       return { label: "Pendiente de conductor" };
