@@ -11,7 +11,7 @@ export function EstadoTraslado({ viaje }: { viaje: ViajeLista }) {
           ? "En tránsito"
           : "En curso"
         : tipo === "finalizados"
-          ? "Completado"
+          ? viaje.pasaporte.estado === "disputa_abierta" ? "Finalizado · Disputa abierta" : "Completado"
           : tipo === "programados"
             ? "Programado"
             : "Cancelado"}

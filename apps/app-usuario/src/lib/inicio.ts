@@ -41,7 +41,7 @@ function fechaOrdenable(fecha: string | null): number {
  */
 export function obtenerViajeActivo(traslados: PasaporteRow[]): PasaporteRow | null {
   const activos = [...traslados]
-    .filter((t) => t.estado && esTrasladoActivo(t.estado))
+    .filter((t) => t.estado && !t.cerrado_en && t.estado_operativo !== "closed" && esTrasladoActivo(t.estado))
     .sort((a, b) => fechaOrdenable(b.creado_en) - fechaOrdenable(a.creado_en));
 
   return activos.find(t => t.estado === "traslado_en_curso" || t.estado === "incidencia_reportada") ?? activos[0] ?? null;

@@ -14,44 +14,45 @@ beforeAll(() => {
   HTMLDialogElement.prototype.showModal = function() { this.setAttribute("open", ""); };
   HTMLDialogElement.prototype.close = function() { this.removeAttribute("open"); };
 });
-beforeEach(() => { vi.stubGlobal("fetch", vi.fn(async (url: string) => { const params = new URL(url, "http://localhost").searchParams; return { ok: true, json: async () => consultarCatalogosSat({ regimen: params.get("regimen") ?? undefined, persona: params.get("persona") as "fisica" | "moral" | undefined }) }; })); vi.clearAllMocks(); mocks.listar.mockResolvedValue([]); mocks.fiscal.mockResolvedValue(undefined); mocks.subir.mockResolvedValue({ tipo: "licencia", ruta: "auth/licencia/nueva.pdf", estado: "en_revision", subido_en: "2026-10-14T12:00:00Z" }); });
-async function abrirLicencia() {
-  const row = screen.getByRole("button", { name: /^Licencia de Conducir/ });
+beforeEach(() => { vi.stubGlobal("fetch", vi.fn(async (url: string) => { const params = new URL(url, "http://localhost").searchParams; return { ok: true, json: async () => consultarCatalogosSat({ regimen: params.get("regimen") ?? undefined, persona: params.get("persona") as "fisica" | "moral" | undefined }) }; })); vi.clearAllMocks(); mocks.listar.mockResolvedValue([]); mocks.fiscal.mockResolvedValue(undefined); mocks.subir.mockResolvedValue({ tipo: "comprobante", ruta: "auth/comprobante/nueva.pdf", estado: "en_revision", subido_en: "2026-10-14T12:00:00Z" }); });
+async function abrirComprobante() {
+  const row = screen.getByRole("button", { name: /^Comprobante de Domicilio/ });
   await waitFor(() => expect(row).toBeEnabled(), { timeout: 5000 });
   fireEvent.click(row);
-  return screen.findByRole("dialog", { name: "Licencia de Conducir" });
+  return screen.findByRole("dialog", { name: "Comprobante de Domicilio" });
 }
-it("mantiene cinco tareas sin formularios, selectores de archivos ni FAB en la raíz", async () => {
+it("mantiene cuatro tareas sin formularios, selectores de archivos ni FAB en la raíz", async () => {
   const { container } = render(<VerificacionDocumentos usuario={usuario} />);
-  await waitFor(() => expect(screen.getByRole("button", { name: /^Licencia/ })).toBeEnabled(), { timeout: 5000 });
-  expect(within(screen.getByRole("navigation", { name: "Tareas de verificación y facturación" })).getAllByRole("button")).toHaveLength(5);
+  await waitFor(() => expect(screen.getByRole("button", { name: /^Comprobante/ })).toBeEnabled(), { timeout: 5000 });
+  expect(within(screen.getByRole("navigation", { name: "Tareas de verificación y facturación" })).getAllByRole("button")).toHaveLength(4);
   expect(screen.queryByLabelText("RFC")).not.toBeInTheDocument();
+  expect(screen.queryByRole("button", { name: /Licencia de Conducir/ })).not.toBeInTheDocument();
   expect(container.querySelector('input[type="file"]')).toBeNull();
   expect(screen.queryByRole("link", { name: "Solicitar traslado" })).not.toBeInTheDocument();
 });
 it("sube automáticamente, bloquea el cierre pendiente y actualiza el estado después del servidor", async () => {
-  mocks.listar.mockResolvedValue([{ tipo: "licencia", ruta: "anterior.pdf", estado: "verificado", subido_en: "2026-09-01T12:00:00Z" }]);
+  mocks.listar.mockResolvedValue([{ tipo: "comprobante", ruta: "anterior.pdf", estado: "verificado", subido_en: "2026-09-01T12:00:00Z" }]);
   let resolver!: (value: unknown) => void;
   mocks.subir.mockReturnValue(new Promise(resolve => { resolver = resolve; }));
   render(<VerificacionDocumentos usuario={usuario} />);
-  const dialog = await abrirLicencia();
-  const archivo = new File(["pdf"], "licencia.pdf", { type: "application/pdf" });
-  fireEvent.change(screen.getByLabelText("Seleccionar archivo · Licencia de Conducir"), { target: { files: [archivo] } });
-  expect(mocks.subir).toHaveBeenCalledWith({}, "licencia", archivo);
+  const dialog = await abrirComprobante();
+  const archivo = new File(["pdf"], "comprobante.pdf", { type: "application/pdf" });
+  fireEvent.change(screen.getByLabelText("Seleccionar archivo · Comprobante de Domicilio"), { target: { files: [archivo] } });
+  expect(mocks.subir).toHaveBeenCalledWith({}, "comprobante", archivo);
   fireEvent(dialog, new Event("cancel", { cancelable: true }));
   expect(screen.getByRole("dialog")).toBeInTheDocument();
   resolver({ ruta: "nueva.pdf", estado: "en_revision", subido_en: "2026-10-14T12:00:00Z" });
   await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
-  expect(screen.getByRole("button", { name: /^Licencia de Conducir En revisión/ })).toBeInTheDocument();
+  expect(screen.getByRole("button", { name: /^Comprobante de Domicilio Recibido/ })).toBeInTheDocument();
 });
 it("conserva el panel abierto al fallar y rechaza archivos inválidos antes de enviar", async () => {
-  render(<VerificacionDocumentos usuario={usuario} />); await abrirLicencia();
-  const input = screen.getByLabelText("Seleccionar archivo · Licencia de Conducir");
+  render(<VerificacionDocumentos usuario={usuario} />); await abrirComprobante();
+  const input = screen.getByLabelText("Seleccionar archivo · Comprobante de Domicilio");
   fireEvent.change(input, { target: { files: [new File(["txt"], "no.txt", { type: "text/plain" })] } });
   expect(await screen.findByRole("alert")).toHaveTextContent("PDF, JPG o PNG");
   expect(mocks.subir).not.toHaveBeenCalled();
   mocks.subir.mockRejectedValueOnce(new Error("No pudimos guardar el archivo."));
-  fireEvent.change(input, { target: { files: [new File(["pdf"], "licencia.pdf", { type: "application/pdf" })] } });
+  fireEvent.change(input, { target: { files: [new File(["pdf"], "comprobante.pdf", { type: "application/pdf" })] } });
   await waitFor(() => expect(screen.getByRole("alert")).toHaveTextContent("No pudimos guardar el archivo."));
   expect(screen.getByRole("dialog")).toBeInTheDocument();
 });
@@ -59,10 +60,10 @@ it("distingue consulta fallida de documento sin cargar y permite reintentar", as
   mocks.listar.mockRejectedValueOnce(new Error("offline"));
   render(<VerificacionDocumentos usuario={usuario} />);
   await screen.findByRole("alert");
-  expect(screen.getAllByText("No disponible")).toHaveLength(3);
-  expect(screen.getByRole("button", { name: /^Licencia/ })).toBeDisabled();
+  expect(screen.getAllByText("No disponible")).toHaveLength(2);
+  expect(screen.getByRole("button", { name: /^Comprobante/ })).toBeDisabled();
   fireEvent.click(screen.getByRole("button", { name: "Reintentar" }));
-  await waitFor(() => expect(screen.getByRole("button", { name: /^Licencia/ })).toBeEnabled());
+  await waitFor(() => expect(screen.getByRole("button", { name: /^Comprobante/ })).toBeEnabled());
 });
 it("guarda datos fiscales en la hoja extendida y conserva los valores al reabrir", async () => {
   render(<VerificacionDocumentos usuario={usuario} />);
@@ -100,6 +101,6 @@ it("conserva la carga y consulta de CSF para el perfil individual", async () => 
   fireEvent.change(screen.getByLabelText("Seleccionar archivo · Constancia de Situación Fiscal"), { target: { files: [archivo] } });
   await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
   expect(mocks.subir).toHaveBeenCalledWith({}, "constancia", archivo);
-  fireEvent.click(screen.getByRole("button", { name: /^Constancia de Situación Fiscal En revisión/ }));
+  fireEvent.click(screen.getByRole("button", { name: /^Constancia de Situación Fiscal Recibido/ }));
   expect(await screen.findByText("csf.pdf")).toBeInTheDocument();
 });

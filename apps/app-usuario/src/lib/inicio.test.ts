@@ -39,6 +39,12 @@ function pasaporte(overrides: Partial<Pasaporte> & { traslado_id: string; estado
 }
 
 describe("inicio helpers (R7)", () => {
+  it("una disputa posterior al cierre no reactiva el traslado", () => {
+    const cerrado = pasaporte({ traslado_id: "cerrado", estado: "disputa_abierta", estado_operativo: "closed", cerrado_en: "2026-10-30T15:00:00Z" });
+    const activo = pasaporte({ traslado_id: "activo", estado: "traslado_en_curso" });
+    expect(obtenerViajeActivo([cerrado])).toBeNull();
+    expect(obtenerViajeActivo([cerrado, activo])?.traslado_id).toBe("activo");
+  });
   it("ordena alertas por urgencia y ofrece soporte para la verificación rechazada", () => {
     const usuario = { estado_verificacion: "pendiente" } as Database["public"]["Tables"]["usuarios"]["Row"];
     const avisos = construirNotificaciones(usuario, [pasaporte({ traslado_id: "pago", estado: "pago_pendiente" })]);

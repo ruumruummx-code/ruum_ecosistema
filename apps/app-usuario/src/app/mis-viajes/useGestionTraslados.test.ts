@@ -1,7 +1,7 @@
 /** @vitest-environment jsdom */
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { act, renderHook } from "@testing-library/react";
-import { fechaProgramada, pestañaDeViaje, useGestionTraslados, type ViajeLista } from "./useGestionTraslados";
+import { fechaProgramada, pestañaDeViaje, useGestionTraslados, type ViajeLista, type Pasaporte } from "./useGestionTraslados";
 
 function viaje(id: string, fecha: string | null): ViajeLista {
   return {
@@ -39,4 +39,9 @@ describe("fechas y clasificación de traslados", () => {
     item.pasaporte.estado = "cierre_operativo_con_incidencia_abierta";
     expect(pestañaDeViaje(item.pasaporte)).toBe("finalizados");
   });
+});
+
+it("mantiene en finalizados una disputa posterior al cierre operativo", () => {
+  expect(pestañaDeViaje({ estado: "disputa_abierta", estado_operativo: "closed", cerrado_en: "2026-10-30T15:00:00Z" } as Pasaporte)).toBe("finalizados");
+  expect(pestañaDeViaje({ estado: "disputa_abierta", estado_operativo: "in_transit", cerrado_en: null } as Pasaporte)).toBe("activos");
 });

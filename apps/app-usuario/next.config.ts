@@ -99,4 +99,4 @@ const nextConfig: NextConfig = {
 // archivos de config existían pero nunca se cargaban en el cliente: todos los
 // Sentry.captureException / breadcrumbs eran no-ops silenciosos.
 // Sin DSN el SDK es no-op; silent:true evita ruido en el build.
-export default withSentryConfig(nextConfig, { silent: true });
+export default withSentryConfig(nextConfig, { silent: true, telemetry: false });

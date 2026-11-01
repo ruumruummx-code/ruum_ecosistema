@@ -32,6 +32,7 @@ interface SeguimientoTrasladoTiempoRealProps {
   destino: PuntoMapa;
   ubicacionInicial: UbicacionTraslado | null;
   activo?: boolean;
+  cerrado?: boolean;
 }
 
 const ESTADOS_VISIBLES: EstadoTraslado[] = [
@@ -73,6 +74,7 @@ export function SeguimientoTrasladoTiempoReal({
   origen,
   destino,
   ubicacionInicial,
+  cerrado = false,
   activo = true
 }: SeguimientoTrasladoTiempoRealProps) {
   const { ubicacion, estadoRealtime, estadoActualizadoEn, cargando, inicializar, actualizar, limpiar } = useTrasladoRealtime(trasladoId);
@@ -199,11 +201,11 @@ export function SeguimientoTrasladoTiempoReal({
   }
 
   return <div className={styles.panel}>
-    <MapaPasaporte origen={origen} destino={destino} ubicacion={ubicacionDiferida} activo={activo} haciaOrigen={estadoEnVivo === "conductor_en_camino_al_origen"} seguirUbicacion={estadoEnVivo === "traslado_en_curso" || estadoEnVivo === "conductor_en_camino_al_origen"} onEta={setEta} />
+    <MapaPasaporte origen={origen} destino={destino} ubicacion={ubicacionDiferida} activo={activo} haciaOrigen={estadoEnVivo === "conductor_en_camino_al_origen"} seguirUbicacion={!cerrado && (estadoEnVivo === "traslado_en_curso" || estadoEnVivo === "conductor_en_camino_al_origen")} onEta={setEta} />
     <div className={styles.tools}><button type="button" onClick={refrescar} disabled={cargando}>{cargando ? "Actualizando…" : "↻ Actualizar"}</button></div>
     <div className={styles.status} role="status" aria-live="polite">
-      <progress aria-label="Progreso del traslado" max={ESTADOS_VISIBLES.length} value={Math.max(0, ESTADOS_VISIBLES.indexOf(estadoEnVivo as EstadoTraslado) + 1)} />
-      <p>{estadoEnVivo === "traslado_en_curso" ? "En camino al destino" : estadoEnVivo ? ETIQUETA_ESTADO_TRASLADO[estadoEnVivo] : "Buscando conductor"}{eta !== null ? ` · ETA: ${eta} min` : ""}</p>
+      <progress aria-label="Progreso del traslado" max={ESTADOS_VISIBLES.length} value={cerrado ? ESTADOS_VISIBLES.length : Math.max(0, ESTADOS_VISIBLES.indexOf(estadoEnVivo as EstadoTraslado) + 1)} />
+      <p>{cerrado ? `Finalizado${estadoEnVivo === "disputa_abierta" ? " · Disputa abierta" : ""}` : estadoEnVivo === "traslado_en_curso" ? "En camino al destino" : estadoEnVivo ? ETIQUETA_ESTADO_TRASLADO[estadoEnVivo] : "Buscando conductor"}{!cerrado && eta !== null ? ` · ETA: ${eta} min` : ""}</p>
       <small>Actualizado {formatoHora(estadoActualizadoEn ?? ubicacion?.registrado_en)}</small>
     </div>
   </div>;

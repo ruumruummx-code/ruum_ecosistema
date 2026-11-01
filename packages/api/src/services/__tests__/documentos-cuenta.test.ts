@@ -4,9 +4,9 @@ import type { Database } from "@ruum/shared/types";
 import { crearClienteFake } from "./supabase-fake";
 import { listarDocumentosCuentaUsuario, subirDocumentoCuentaUsuario } from "../usuarios";
 
-it.each(["licencia", "constancia"] as const)("envía el archivo %s al servidor sin aceptar un usuario de destino", async (tipo) => {
+it.each(["comprobante", "constancia"] as const)("envía el archivo %s al servidor sin aceptar un usuario de destino", async (tipo) => {
   const cliente = crearClienteFake({ functionsResult: { data: { tipo, ruta: `auth/${tipo}/1.pdf`, estado: "en_revision", subido_en: "2026-10-14T12:00:00Z" } } });
-  const archivo = new File(["contenido"], "licencia.pdf", { type: "application/pdf" });
+  const archivo = new File(["contenido"], "comprobante.pdf", { type: "application/pdf" });
   await subirDocumentoCuentaUsuario(cliente as unknown as SupabaseClient<Database>, tipo, archivo);
   const [nombre, opciones] = cliente.functions.invoke.mock.calls[0]!;
   expect(nombre).toBe("documentos-cuenta-usuario");
@@ -17,8 +17,8 @@ it.each(["licencia", "constancia"] as const)("envía el archivo %s al servidor s
 });
 
 it("rechaza una respuesta de carga que no confirma persistencia", async () => {
-  const cliente = crearClienteFake({ functionsResult: { data: { tipo: "licencia" } } });
-  await expect(subirDocumentoCuentaUsuario(cliente as unknown as SupabaseClient<Database>, "licencia", new File(["a"], "licencia.pdf"))).rejects.toThrow("El servidor no confirmó");
+  const cliente = crearClienteFake({ functionsResult: { data: { tipo: "comprobante" } } });
+  await expect(subirDocumentoCuentaUsuario(cliente as unknown as SupabaseClient<Database>, "comprobante", new File(["a"], "comprobante.pdf"))).rejects.toThrow("El servidor no confirmó");
 });
 
 it("no convierte errores de consulta en una lista vacía", async () => {
