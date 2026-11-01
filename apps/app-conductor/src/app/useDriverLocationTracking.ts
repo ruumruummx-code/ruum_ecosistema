@@ -22,8 +22,10 @@ export function useDriverLocationTracking(viajeActivo: ViajeActivo | null) {
   const trasladoId = viajeActivo?.trasladoId;
   const estado = viajeActivo?.estado;
   const folio = viajeActivo?.folio;
+  const cerradoEn = viajeActivo?.cerradoEn;
+  const estadoOperativo = viajeActivo?.estadoOperativo;
   useEffect(() => {
-    if (!trasladoId || !estado || !viajePermiteSeguimientoUbicacion(estado) || !tieneSupabaseConfigurado()) {
+    if (!trasladoId || !estado || !viajePermiteSeguimientoUbicacion(estado, { cerradoEn, estadoOperativo }) || !tieneSupabaseConfigurado()) {
       if (soportaTrackingNativo()) void detenerTrackingNativo().catch(() => undefined);
       return;
     }
@@ -134,5 +136,5 @@ export function useDriverLocationTracking(viajeActivo: ViajeActivo | null) {
     const reconectar = () => { trabajo = trabajo.then(async () => { try { await sincronizarColaTelemetria(cliente, { ignoreBackoff: true }); } catch { /* La cola conserva los puntos hasta recibir ACK. */ } }); void obtenerUbicacionActual().then(reportar); };
     window.addEventListener("online", reconectar);
     return () => { cancelado = true; cancelarObservacion?.(); window.clearInterval(respaldo); window.removeEventListener("online", reconectar); window.dispatchEvent(new CustomEvent("ruum:tracking-web", { detail: { active: false } })); };
-  }, [trasladoId, estado, folio]);
+  }, [trasladoId, estado, folio, cerradoEn, estadoOperativo]);
 }

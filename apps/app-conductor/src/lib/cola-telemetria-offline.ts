@@ -236,6 +236,11 @@ async function sincronizarColaTelemetriaInterno(
         fuente: "web_foreground",
         online: true
         }]);
+      const rechazo = data?.rechazadosPermanentes?.find(punto => punto.localId === item.localId);
+      if (rechazo?.razon === "traslado_cerrado") {
+        await quitarConfirmado(item.localId);
+        continue; // Server confirmed this post-close capture must never be retried.
+      }
       if (!data?.aceptados?.includes(item.localId) && !data?.duplicadosIds?.includes(item.localId)) {
         throw new Error("telemetry_point_not_acknowledged");
       }

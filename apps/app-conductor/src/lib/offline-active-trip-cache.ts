@@ -21,6 +21,8 @@ export interface OfflineActiveTripCache {
   trasladoId: string;
   folio: string;
   estado: EstadoTraslado;
+  cerradoEn?: string | null;
+  estadoOperativo?: Database["public"]["Enums"]["estado_operativo_traslado"] | null;
   siguienteAccion: {
     label: string;
     instruction: string;
@@ -98,6 +100,7 @@ export function crearCacheViajeActivoDesdePasaporte(
   pasaporte: PasaporteRow,
   ultimaUbicacionConocida: OfflineActiveTripCache["ultimaUbicacionConocida"] = null
 ): OfflineActiveTripCache | null {
+  if (pasaporte.cerrado_en || ["closed", "cancelled", "failed"].includes(pasaporte.estado_operativo ?? "")) return null;
   if (!pasaporte.traslado_id || !pasaporte.estado) return null;
 
   const presentation = getTripPresentation(pasaporte.estado);
@@ -107,6 +110,8 @@ export function crearCacheViajeActivoDesdePasaporte(
     trasladoId: pasaporte.traslado_id,
     folio: folioDesdeId(pasaporte.traslado_id),
     estado: pasaporte.estado,
+    cerradoEn: pasaporte.cerrado_en ?? null,
+    estadoOperativo: pasaporte.estado_operativo ?? null,
     siguienteAccion: {
       label: presentation.primaryAction.label,
       instruction: presentation.instruction,

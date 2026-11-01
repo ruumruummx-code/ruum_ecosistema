@@ -48,4 +48,4 @@ const nextConfig: NextConfig = {
 // navegador y sentry.server.config.ts en el servidor. Sin este wrapper los
 // archivos de config existían pero nunca se cargaban en el cliente.
 // Sin DSN el SDK es no-op; silent:true evita ruido en el build.
-export default withSentryConfig(nextConfig, { silent: true });
+export default withSentryConfig(nextConfig, { silent: true, telemetry: false });

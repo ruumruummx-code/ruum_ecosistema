@@ -11,7 +11,7 @@ import {
   sincronizarColaTelemetria
 } from "../src/lib/cola-telemetria-offline";
 
-const rpc = vi.fn(async (_name: string, args: { p_puntos: { localId: string }[] }) => ({ data: { aceptados: [args.p_puntos[0].localId], duplicadosIds: [] as string[] }, error: null as Error | null }));
+const rpc = vi.fn(async (_name: string, args: { p_puntos: { localId: string }[] }) => ({ data: { aceptados: [args.p_puntos[0].localId], duplicadosIds: [] as string[], rechazadosPermanentes: [] as Array<{localId:string;razon:string}> }, error: null as Error | null }));
 const cliente = { auth: { getUser: vi.fn(async () => ({ data: { user: { id: "user-1" } }, error: null })) }, rpc } as unknown as SupabaseClient<Database>;
 
 describe("Cola de Telemetría Offline (cola-telemetria-offline)", () => {
@@ -104,5 +104,11 @@ describe("Cola de Telemetría Offline (cola-telemetria-offline)", () => {
     rpc.mockResolvedValueOnce({ data: { aceptados: [], duplicadosIds: [] }, error: null });
     await expect(sincronizarColaTelemetria(cliente)).rejects.toThrow("telemetry_point_not_acknowledged");
     expect(await contarColaTelemetria()).toBe(1);
+  });
+  it("retira de la cola un punto postcierre sólo con rechazo permanente del servidor", async () => {
+    await encolarPuntoTelemetria("t-cerrado", { lat: 19, lng: -99 }, { usuarioId: "user-1", localId: "post-cierre" });
+    rpc.mockResolvedValueOnce({data:{aceptados:[],duplicadosIds:[],rechazadosPermanentes:[{localId:"post-cierre",razon:"traslado_cerrado"}]},error:null});
+    expect(await sincronizarColaTelemetria(cliente)).toBe(0);
+    expect(await contarColaTelemetria()).toBe(0);
   });
 });

@@ -38,8 +38,7 @@ import {
   normalizarViajeActivo,
   type RegistroViajeActivoInput,
   type ViajeActivo,
-  viajeActivoDesdePasaporte,
-  viajeEsOperacionActiva
+  viajeActivoDesdePasaporte
 } from "./active-trip-state";
 import { leerCacheViajeActivo } from "../lib/offline-active-trip-cache";
 
@@ -77,7 +76,7 @@ export function useActiveTripPolling(pathname: string) {
         }
 
         const Traslados = await listarTrasladosAceptados(cliente, conductor.id);
-        const activo = Traslados.find((viaje) => viaje.estado && viajeEsOperacionActiva(viaje.estado));
+        const activo = Traslados.find((viaje) => viajeActivoDesdePasaporte(viaje) !== null);
         if (!cancelado) {
           setViajeActivo(activo ? viajeActivoDesdePasaporte(activo) : null);
           setPasaporteActivo(activo ?? null);
@@ -95,13 +94,15 @@ export function useActiveTripPolling(pathname: string) {
         );
         if (!cancelado) {
           if (cache) {
-            setViajeActivo({
+            setViajeActivo(normalizarViajeActivo({
               trasladoId: cache.trasladoId,
               estado: cache.estado,
+              cerradoEn: cache.cerradoEn,
+              estadoOperativo: cache.estadoOperativo,
               folio: cache.folio,
               etapa: cache.siguienteAccion.label,
               destinoActual: cache.siguienteAccion.nextStep ?? cache.siguienteAccion.instruction
-            });
+            }));
           }
           setViajeActivoSinActualizar(true);
         }
