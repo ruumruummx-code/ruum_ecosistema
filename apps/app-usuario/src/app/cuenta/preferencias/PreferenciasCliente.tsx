@@ -4,8 +4,8 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useTema } from "../../TemaProvider";
 import { BotonTema } from "../../TemaProvider";
-import { PassportCard } from "@ruum/ui";
-import { LayoutCuenta } from "../cuenta-ui";
+import { PassportCard, MobileShell } from "@ruum/ui";
+import { NavegacionUsuario } from "../../NavegacionUsuario";
 import { Preferencias as SeccionPreferencias } from "../Preferencias";
 import type { CuentaReal, Usuario } from "../cuenta-ui";
 import { crearClienteNavegador } from "../../../lib/supabase-browser";
@@ -159,7 +159,8 @@ export function PreferenciasCliente({ cuenta }: PreferenciasClienteProps) {
           1. VISTA MÓVIL (< 1024px): 100% INTACTA BAJO MOBILE-FIRST
          ───────────────────────────────────────────────────────────── */}
       <div className="block lg:hidden">
-        <LayoutCuenta cuenta={cuenta}>
+        <NavegacionUsuario variante="claro" nombreUsuario={cuenta.usuario.nombre} />
+        <MobileShell as="main" variant="compact" navInferiorVisible={false} className="user-v2-scope user-preferences-shell" contentClassName="user-preferences-content">
           <PassportCard>
             <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
               <div>
@@ -174,7 +175,7 @@ export function PreferenciasCliente({ cuenta }: PreferenciasClienteProps) {
           <div className="mt-4">
             <SeccionPreferencias usuario={cuenta.usuario} />
           </div>
-        </LayoutCuenta>
+        </MobileShell>
       </div>
 
       {/* ─────────────────────────────────────────────────────────────
