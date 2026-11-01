@@ -155,13 +155,13 @@ isOneToOne: false
                   ]
                 },"asignaciones": {
                   Row: {
-                    "aceptada_en": string | null,"actualizado_en": string,"asignada_en": string,"cancelada_en": string | null,"completada_en": string | null,"conductor_id": string,"creado_en": string,"estado": Database["public"]['Enums']["estado_asignacion"],"gestionada_por": string | null,"id": string,"iniciada_en": string | null,"metadata": NonNullable<Json>,"motivo": string | null,"ofrecida_en": string | null,"origen": string,"puntaje": number | null,"rechazada_en": string | null,"traslado_id": string
+                    "aceptada_en": string | null,"actualizado_en": string,"asignada_en": string,"cancelada_en": string | null,"completada_en": string | null,"conductor_id": string,"creado_en": string,"estado": Database["public"]['Enums']["estado_asignacion"],"expira_en": string | null,"gestionada_por": string | null,"id": string,"iniciada_en": string | null,"metadata": NonNullable<Json>,"motivo": string | null,"ofrecida_en": string | null,"origen": string,"puntaje": number | null,"rechazada_en": string | null,"traslado_id": string
                   }
                   Insert: {
-                    "aceptada_en"?: string | null,"actualizado_en"?: string,"asignada_en"?: string,"cancelada_en"?: string | null,"completada_en"?: string | null,"conductor_id": string,"creado_en"?: string,"estado"?: Database["public"]['Enums']["estado_asignacion"],"gestionada_por"?: string | null,"id"?: string,"iniciada_en"?: string | null,"metadata"?: NonNullable<Json>,"motivo"?: string | null,"ofrecida_en"?: string | null,"origen"?: string,"puntaje"?: number | null,"rechazada_en"?: string | null,"traslado_id": string
+                    "aceptada_en"?: string | null,"actualizado_en"?: string,"asignada_en"?: string,"cancelada_en"?: string | null,"completada_en"?: string | null,"conductor_id": string,"creado_en"?: string,"estado"?: Database["public"]['Enums']["estado_asignacion"],"expira_en"?: string | null,"gestionada_por"?: string | null,"id"?: string,"iniciada_en"?: string | null,"metadata"?: NonNullable<Json>,"motivo"?: string | null,"ofrecida_en"?: string | null,"origen"?: string,"puntaje"?: number | null,"rechazada_en"?: string | null,"traslado_id": string
                   }
                   Update: {
-                    "aceptada_en"?: string | null,"actualizado_en"?: string,"asignada_en"?: string,"cancelada_en"?: string | null,"completada_en"?: string | null,"conductor_id"?: string,"creado_en"?: string,"estado"?: Database["public"]['Enums']["estado_asignacion"],"gestionada_por"?: string | null,"id"?: string,"iniciada_en"?: string | null,"metadata"?: NonNullable<Json>,"motivo"?: string | null,"ofrecida_en"?: string | null,"origen"?: string,"puntaje"?: number | null,"rechazada_en"?: string | null,"traslado_id"?: string
+                    "aceptada_en"?: string | null,"actualizado_en"?: string,"asignada_en"?: string,"cancelada_en"?: string | null,"completada_en"?: string | null,"conductor_id"?: string,"creado_en"?: string,"estado"?: Database["public"]['Enums']["estado_asignacion"],"expira_en"?: string | null,"gestionada_por"?: string | null,"id"?: string,"iniciada_en"?: string | null,"metadata"?: NonNullable<Json>,"motivo"?: string | null,"ofrecida_en"?: string | null,"origen"?: string,"puntaje"?: number | null,"rechazada_en"?: string | null,"traslado_id"?: string
                   }
                   Relationships: [
                     {
@@ -1227,6 +1227,37 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"evidencia_conflictos": {
+                  Row: {
+                    "captura_id": string,"creado_en": string,"resuelto_en": string | null,"ruta": string,"sha256_esperado": string,"sha256_observado": string,"traslado_id": string
+                  }
+                  Insert: {
+                    "captura_id": string,"creado_en"?: string,"resuelto_en"?: string | null,"ruta": string,"sha256_esperado": string,"sha256_observado": string,"traslado_id": string
+                  }
+                  Update: {
+                    "captura_id"?: string,"creado_en"?: string,"resuelto_en"?: string | null,"ruta"?: string,"sha256_esperado"?: string,"sha256_observado"?: string,"traslado_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "evidencia_conflictos_traslado_id_fkey"
+      columns: ["traslado_id"]
+isOneToOne: false
+      referencedRelation: "obs_tracking_fallos"
+      referencedColumns: ["traslado_id"]
+    },{
+      foreignKeyName: "evidencia_conflictos_traslado_id_fkey"
+      columns: ["traslado_id"]
+isOneToOne: false
+      referencedRelation: "pasaporte_digital"
+      referencedColumns: ["traslado_id"]
+    },{
+      foreignKeyName: "evidencia_conflictos_traslado_id_fkey"
+      columns: ["traslado_id"]
+isOneToOne: false
+      referencedRelation: "traslados"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"evidencia_fotos": {
                   Row: {
                     "angulo": Database["public"]['Enums']["angulo_evidencia"],"capturada_en": string,"conflicto": boolean,"conflicto_detalle": string | null,"conflicto_detectado_en": string | null,"id": string,"lat": number | null,"lng": number | null,"local_path": string | null,"sha256": string | null,"sincronizada": boolean,"tipo": Database["public"]['Enums']["tipo_evidencia"],"traslado_id": string,"url": string | null
@@ -1896,13 +1927,13 @@ isOneToOne: false
                   ]
                 },"pagos": {
                   Row: {
-                    "checkout_masivo_id": string | null,"comision_mxn": number | null,"estado": Database["public"]['Enums']["estado_pago"],"id": string,"metodo": string,"momento": Database["public"]['Enums']["momento_pago"],"monto": number,"registrado_en": string,"stripe_event_id": string | null,"stripe_payment_intent_id": string | null,"traslado_id": string
+                    "checkout_masivo_id": string | null,"comision_mxn": number | null,"estado": Database["public"]['Enums']["estado_pago"],"id": string,"metodo": string,"momento": Database["public"]['Enums']["momento_pago"],"monto": number,"registrado_en": string,"stripe_event_id": string | null,"stripe_livemode": boolean | null,"stripe_payment_intent_id": string | null,"stripe_verificado_en": string | null,"traslado_id": string
                   }
                   Insert: {
-                    "checkout_masivo_id"?: string | null,"comision_mxn"?: number | null,"estado"?: Database["public"]['Enums']["estado_pago"],"id"?: string,"metodo": string,"momento": Database["public"]['Enums']["momento_pago"],"monto": number,"registrado_en"?: string,"stripe_event_id"?: string | null,"stripe_payment_intent_id"?: string | null,"traslado_id": string
+                    "checkout_masivo_id"?: string | null,"comision_mxn"?: number | null,"estado"?: Database["public"]['Enums']["estado_pago"],"id"?: string,"metodo": string,"momento": Database["public"]['Enums']["momento_pago"],"monto": number,"registrado_en"?: string,"stripe_event_id"?: string | null,"stripe_livemode"?: boolean | null,"stripe_payment_intent_id"?: string | null,"stripe_verificado_en"?: string | null,"traslado_id": string
                   }
                   Update: {
-                    "checkout_masivo_id"?: string | null,"comision_mxn"?: number | null,"estado"?: Database["public"]['Enums']["estado_pago"],"id"?: string,"metodo"?: string,"momento"?: Database["public"]['Enums']["momento_pago"],"monto"?: number,"registrado_en"?: string,"stripe_event_id"?: string | null,"stripe_payment_intent_id"?: string | null,"traslado_id"?: string
+                    "checkout_masivo_id"?: string | null,"comision_mxn"?: number | null,"estado"?: Database["public"]['Enums']["estado_pago"],"id"?: string,"metodo"?: string,"momento"?: Database["public"]['Enums']["momento_pago"],"monto"?: number,"registrado_en"?: string,"stripe_event_id"?: string | null,"stripe_livemode"?: boolean | null,"stripe_payment_intent_id"?: string | null,"stripe_verificado_en"?: string | null,"traslado_id"?: string
                   }
                   Relationships: [
                     {
@@ -1931,15 +1962,52 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
-                },"payouts_conductor": {
+                },"payout_traslados": {
                   Row: {
-                    "ajustes": number,"conductor_id": string,"creado_en": string,"estado": Database["public"]['Enums']["estado_payout"],"id": string,"monto_bruto": number,"monto_neto": number,"periodo_fin": string,"periodo_inicio": string,"procesado_en": string | null,"referencia_pago": string | null
+                    "agregado_en": string,"ajuste": number,"ganancia_congelada": number,"payout_id": string,"traslado_id": string
                   }
                   Insert: {
-                    "ajustes"?: number,"conductor_id": string,"creado_en"?: string,"estado"?: Database["public"]['Enums']["estado_payout"],"id"?: string,"monto_bruto": number,"monto_neto": number,"periodo_fin": string,"periodo_inicio": string,"procesado_en"?: string | null,"referencia_pago"?: string | null
+                    "agregado_en"?: string,"ajuste"?: number,"ganancia_congelada": number,"payout_id": string,"traslado_id": string
                   }
                   Update: {
-                    "ajustes"?: number,"conductor_id"?: string,"creado_en"?: string,"estado"?: Database["public"]['Enums']["estado_payout"],"id"?: string,"monto_bruto"?: number,"monto_neto"?: number,"periodo_fin"?: string,"periodo_inicio"?: string,"procesado_en"?: string | null,"referencia_pago"?: string | null
+                    "agregado_en"?: string,"ajuste"?: number,"ganancia_congelada"?: number,"payout_id"?: string,"traslado_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "payout_traslados_payout_id_fkey"
+      columns: ["payout_id"]
+isOneToOne: false
+      referencedRelation: "payouts_conductor"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "payout_traslados_traslado_id_fkey"
+      columns: ["traslado_id"]
+isOneToOne: true
+      referencedRelation: "obs_tracking_fallos"
+      referencedColumns: ["traslado_id"]
+    },{
+      foreignKeyName: "payout_traslados_traslado_id_fkey"
+      columns: ["traslado_id"]
+isOneToOne: true
+      referencedRelation: "pasaporte_digital"
+      referencedColumns: ["traslado_id"]
+    },{
+      foreignKeyName: "payout_traslados_traslado_id_fkey"
+      columns: ["traslado_id"]
+isOneToOne: true
+      referencedRelation: "traslados"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"payouts_conductor": {
+                  Row: {
+                    "ajustes": number,"conductor_id": string,"creado_en": string,"estado": Database["public"]['Enums']["estado_payout"],"fecha_prevista": string | null,"id": string,"monto_bruto": number,"monto_neto": number,"pagado_en": string | null,"periodo_fin": string,"periodo_inicio": string,"procesado_en": string | null,"referencia_externa_validada": string | null,"referencia_pago": string | null
+                  }
+                  Insert: {
+                    "ajustes"?: number,"conductor_id": string,"creado_en"?: string,"estado"?: Database["public"]['Enums']["estado_payout"],"fecha_prevista"?: string | null,"id"?: string,"monto_bruto": number,"monto_neto": number,"pagado_en"?: string | null,"periodo_fin": string,"periodo_inicio": string,"procesado_en"?: string | null,"referencia_externa_validada"?: string | null,"referencia_pago"?: string | null
+                  }
+                  Update: {
+                    "ajustes"?: number,"conductor_id"?: string,"creado_en"?: string,"estado"?: Database["public"]['Enums']["estado_payout"],"fecha_prevista"?: string | null,"id"?: string,"monto_bruto"?: number,"monto_neto"?: number,"pagado_en"?: string | null,"periodo_fin"?: string,"periodo_inicio"?: string,"procesado_en"?: string | null,"referencia_externa_validada"?: string | null,"referencia_pago"?: string | null
                   }
                   Relationships: [
                     {
@@ -2133,6 +2201,37 @@ isOneToOne: false
       columns: ["usuario_id"]
 isOneToOne: false
       referencedRelation: "usuarios"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"resoluciones_inventario_llaves": {
+                  Row: {
+                    "final": string | null,"inicial": string | null,"motivo": string,"responsable": string,"resuelta_en": string,"traslado_id": string
+                  }
+                  Insert: {
+                    "final"?: string | null,"inicial"?: string | null,"motivo": string,"responsable": string,"resuelta_en"?: string,"traslado_id": string
+                  }
+                  Update: {
+                    "final"?: string | null,"inicial"?: string | null,"motivo"?: string,"responsable"?: string,"resuelta_en"?: string,"traslado_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "resoluciones_inventario_llaves_traslado_id_fkey"
+      columns: ["traslado_id"]
+isOneToOne: true
+      referencedRelation: "obs_tracking_fallos"
+      referencedColumns: ["traslado_id"]
+    },{
+      foreignKeyName: "resoluciones_inventario_llaves_traslado_id_fkey"
+      columns: ["traslado_id"]
+isOneToOne: true
+      referencedRelation: "pasaporte_digital"
+      referencedColumns: ["traslado_id"]
+    },{
+      foreignKeyName: "resoluciones_inventario_llaves_traslado_id_fkey"
+      columns: ["traslado_id"]
+isOneToOne: true
+      referencedRelation: "traslados"
       referencedColumns: ["id"]
     }
                   ]
@@ -2509,6 +2608,75 @@ isOneToOne: true
       referencedColumns: ["id"]
     }
                   ]
+                },"solicitudes_factura": {
+                  Row: {
+                    "actualizada_en": string,"ambiente": string | null,"correo_entregado_en": string | null,"creada_en": string,"error_codigo": string | null,"error_detalle": string | null,"errores": NonNullable<Json>,"estado": string,"id": string,"intentos": number,"moneda": string,"monto": number,"pdf_ruta": string | null,"proveedor": string | null,"proveedor_id": string | null,"receptor": NonNullable<Json>,"respuesta_proveedor": Json | null,"traslado_id": string,"usuario_id": string,"uuid_fiscal": string | null,"xml_ruta": string | null
+                  }
+                  Insert: {
+                    "actualizada_en"?: string,"ambiente"?: string | null,"correo_entregado_en"?: string | null,"creada_en"?: string,"error_codigo"?: string | null,"error_detalle"?: string | null,"errores"?: NonNullable<Json>,"estado": string,"id"?: string,"intentos"?: number,"moneda"?: string,"monto": number,"pdf_ruta"?: string | null,"proveedor"?: string | null,"proveedor_id"?: string | null,"receptor": NonNullable<Json>,"respuesta_proveedor"?: Json | null,"traslado_id": string,"usuario_id": string,"uuid_fiscal"?: string | null,"xml_ruta"?: string | null
+                  }
+                  Update: {
+                    "actualizada_en"?: string,"ambiente"?: string | null,"correo_entregado_en"?: string | null,"creada_en"?: string,"error_codigo"?: string | null,"error_detalle"?: string | null,"errores"?: NonNullable<Json>,"estado"?: string,"id"?: string,"intentos"?: number,"moneda"?: string,"monto"?: number,"pdf_ruta"?: string | null,"proveedor"?: string | null,"proveedor_id"?: string | null,"receptor"?: NonNullable<Json>,"respuesta_proveedor"?: Json | null,"traslado_id"?: string,"usuario_id"?: string,"uuid_fiscal"?: string | null,"xml_ruta"?: string | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "solicitudes_factura_traslado_id_fkey"
+      columns: ["traslado_id"]
+isOneToOne: true
+      referencedRelation: "obs_tracking_fallos"
+      referencedColumns: ["traslado_id"]
+    },{
+      foreignKeyName: "solicitudes_factura_traslado_id_fkey"
+      columns: ["traslado_id"]
+isOneToOne: true
+      referencedRelation: "pasaporte_digital"
+      referencedColumns: ["traslado_id"]
+    },{
+      foreignKeyName: "solicitudes_factura_traslado_id_fkey"
+      columns: ["traslado_id"]
+isOneToOne: true
+      referencedRelation: "traslados"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "solicitudes_factura_usuario_id_fkey"
+      columns: ["usuario_id"]
+isOneToOne: false
+      referencedRelation: "usuarios"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"stripe_conciliacion_ejecuciones": {
+                  Row: {
+                    "creada_en": string,"estado": string,"finalizada_en": string | null,"id": string,"nonce_hash": string,"request_id": number | null,"resultado": Json | null
+                  }
+                  Insert: {
+                    "creada_en"?: string,"estado"?: string,"finalizada_en"?: string | null,"id"?: string,"nonce_hash": string,"request_id"?: number | null,"resultado"?: Json | null
+                  }
+                  Update: {
+                    "creada_en"?: string,"estado"?: string,"finalizada_en"?: string | null,"id"?: string,"nonce_hash"?: string,"request_id"?: number | null,"resultado"?: Json | null
+                  }
+                  Relationships: [
+                    
+                  ]
+                },"stripe_verificaciones": {
+                  Row: {
+                    "creado_en": string,"estado_proveedor": string,"id": string,"livemode": boolean,"moneda": string,"monto_centavos": number,"origen": string,"pago_id": string,"resultado": string
+                  }
+                  Insert: {
+                    "creado_en"?: string,"estado_proveedor": string,"id": string,"livemode": boolean,"moneda": string,"monto_centavos": number,"origen": string,"pago_id": string,"resultado": string
+                  }
+                  Update: {
+                    "creado_en"?: string,"estado_proveedor"?: string,"id"?: string,"livemode"?: boolean,"moneda"?: string,"monto_centavos"?: number,"origen"?: string,"pago_id"?: string,"resultado"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "stripe_verificaciones_pago_id_fkey"
+      columns: ["pago_id"]
+isOneToOne: false
+      referencedRelation: "pagos"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"tarifas_condicion": {
                   Row: {
                     "actualizado_en": string,"actualizado_por_admin_id": string | null,"condicion": Database["public"]['Enums']["condicion_vehiculo"],"factor": number
@@ -2639,6 +2807,37 @@ isOneToOne: false
       columns: ["actualizado_por_admin_id"]
 isOneToOne: false
       referencedRelation: "admins"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"totales_definitivos_traslado": {
+                  Row: {
+                    "congelado_en": string,"cotizado": number,"fuente": string,"historico": boolean,"moneda": string,"total": number,"traslado_id": string
+                  }
+                  Insert: {
+                    "congelado_en"?: string,"cotizado": number,"fuente": string,"historico"?: boolean,"moneda"?: string,"total": number,"traslado_id": string
+                  }
+                  Update: {
+                    "congelado_en"?: string,"cotizado"?: number,"fuente"?: string,"historico"?: boolean,"moneda"?: string,"total"?: number,"traslado_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "totales_definitivos_traslado_traslado_id_fkey"
+      columns: ["traslado_id"]
+isOneToOne: true
+      referencedRelation: "obs_tracking_fallos"
+      referencedColumns: ["traslado_id"]
+    },{
+      foreignKeyName: "totales_definitivos_traslado_traslado_id_fkey"
+      columns: ["traslado_id"]
+isOneToOne: true
+      referencedRelation: "pasaporte_digital"
+      referencedColumns: ["traslado_id"]
+    },{
+      foreignKeyName: "totales_definitivos_traslado_traslado_id_fkey"
+      columns: ["traslado_id"]
+isOneToOne: true
+      referencedRelation: "traslados"
       referencedColumns: ["id"]
     }
                   ]
@@ -3002,8 +3201,7 @@ isOneToOne: false
                   ]
                 },"pasaporte_digital": {
                   Row: {
-                    "estado_operativo"?: Database["public"]["Enums"]["estado_operativo_traslado"] | null, "cerrado_en"?: string | null,
-                    "actualizado_en": string | null,"causa_fallido": Database["public"]['Enums']["causa_fallido"] | null,"conductor_calificacion": number | null,"conductor_estado": Database["public"]['Enums']["estado_conductor"] | null,"conductor_id": string | null,"conductor_nivel": Database["public"]['Enums']["nivel_concer"] | null,"conductor_nombre": string | null,"contacto_entrega_nombre": string | null,"contacto_entrega_telefono": string | null,"contacto_recepcion_nombre": string | null,"contacto_recepcion_telefono": string | null,"creado_en": string | null,"destino_ciudad": string | null,"destino_direccion": string | null,"destino_lat": number | null,"destino_lng": number | null,"destino_referencias": string | null,"distancia_km": number | null,"estado": Database["public"]['Enums']["estado_traslado"] | null,"evidencia_final_fotos_sincronizadas": number | null,"evidencia_inicial_fotos_sincronizadas": number | null,"ganancia_conductor": number | null,"incidencias_abiertas": number | null,"monto_pagado": number | null,"origen_ciudad": string | null,"origen_direccion": string | null,"origen_lat": number | null,"origen_lng": number | null,"origen_referencias": string | null,"precio_cotizado": number | null,"precio_final": number | null,"tiempo_estimado_horas": number | null,"tiene_incidencia_abierta": boolean | null,"tipo_pago": Database["public"]['Enums']["tipo_pago"] | null,"traslado_id": string | null,"usuario_id": string | null,"vehiculo_anio": number | null,"vehiculo_categoria_tarifa": Database["public"]['Enums']["categoria_tarifa_vehiculo"] | null,"vehiculo_color": string | null,"vehiculo_condicion": Database["public"]['Enums']["condicion_vehiculo"] | null,"vehiculo_gama": Database["public"]['Enums']["gama_vehiculo"] | null,"vehiculo_id": string | null,"vehiculo_marca": string | null,"vehiculo_modelo": string | null,"vehiculo_placas": string | null,"vehiculo_tipo": Database["public"]['Enums']["tipo_vehiculo"] | null,"vehiculo_vin": string | null
+                    "actualizado_en": string | null,"causa_fallido": Database["public"]['Enums']["causa_fallido"] | null,"cerrado_en": string | null,"conductor_calificacion": number | null,"conductor_estado": Database["public"]['Enums']["estado_conductor"] | null,"conductor_id": string | null,"conductor_nivel": Database["public"]['Enums']["nivel_concer"] | null,"conductor_nombre": string | null,"contacto_entrega_nombre": string | null,"contacto_entrega_telefono": string | null,"contacto_recepcion_nombre": string | null,"contacto_recepcion_telefono": string | null,"creado_en": string | null,"destino_ciudad": string | null,"destino_direccion": string | null,"destino_lat": number | null,"destino_lng": number | null,"destino_referencias": string | null,"distancia_km": number | null,"estado": Database["public"]['Enums']["estado_traslado"] | null,"estado_operativo": Database["public"]['Enums']["estado_operativo_traslado"] | null,"evidencia_final_fotos_sincronizadas": number | null,"evidencia_inicial_fotos_sincronizadas": number | null,"ganancia_conductor": number | null,"incidencias_abiertas": number | null,"monto_pagado": number | null,"origen_ciudad": string | null,"origen_direccion": string | null,"origen_lat": number | null,"origen_lng": number | null,"origen_referencias": string | null,"precio_cotizado": number | null,"precio_final": number | null,"tiempo_estimado_horas": number | null,"tiene_incidencia_abierta": boolean | null,"tipo_pago": Database["public"]['Enums']["tipo_pago"] | null,"traslado_id": string | null,"usuario_id": string | null,"vehiculo_anio": number | null,"vehiculo_categoria_tarifa": Database["public"]['Enums']["categoria_tarifa_vehiculo"] | null,"vehiculo_color": string | null,"vehiculo_condicion": Database["public"]['Enums']["condicion_vehiculo"] | null,"vehiculo_gama": Database["public"]['Enums']["gama_vehiculo"] | null,"vehiculo_id": string | null,"vehiculo_marca": string | null,"vehiculo_modelo": string | null,"vehiculo_placas": string | null,"vehiculo_tipo": Database["public"]['Enums']["tipo_vehiculo"] | null,"vehiculo_vin": string | null
                   }
                   Relationships: [
                     {
@@ -3339,8 +3537,6 @@ isOneToOne: false
 { Args: { "p_aprobar": boolean,"p_cambio_id": string,"p_comentario"?: string }; Returns: Json
                            },
 "admin_resuelve_disputa":
-{ Args: { "p_detalle": string,"p_disputa_id": string,"p_estado": Database["public"]['Enums']["estado_disputa"],"p_resolucion": Database["public"]['Enums']["resolucion_disputa"] }; Returns: undefined
-                           } |
 { Args: { "p_detalle": string,"p_disputa_id": string,"p_estado": Database["public"]['Enums']["estado_disputa"],"p_mantener_estado"?: boolean,"p_resolucion": Database["public"]['Enums']["resolucion_disputa"] }; Returns: undefined
                            },
 "admin_resumen_disputas_perdidas_conductor":
@@ -3435,6 +3631,9 @@ isOneToOne: false
                            },
 "admin_validar_configuracion_normativa":
 { Args: { "p_clave": string,"p_valor": Json }; Returns: undefined
+                           },
+"aplicar_verificacion_pago_stripe":
+{ Args: { "p_datos": Json }; Returns: Json
                            },
 "aprobar_expediente_conductor_admin":
 { Args: { "p_conductor_id": string }; Returns: undefined
@@ -3543,6 +3742,9 @@ isOneToOne: false
                            },
 "consentimientos_solicitud_completos":
 { Args: { "p_solicitud_id": string }; Returns: boolean
+                           },
+"consultar_oportunidad_asignacion":
+{ Args: { "p_traslado_id": string }; Returns: Json
                            },
 "consumir_clave_idempotencia":
 { Args: { "p_clave": string,"p_entidad": string,"p_entidad_id"?: string }; Returns: Json
@@ -3693,6 +3895,9 @@ isOneToOne: false
 "mis_empresas_miembro":
 { Args: Record<PropertyKey, never>; Returns: string[]
                            },
+"nombre_conductor_del_traslado":
+{ Args: { "p_traslado_id": string }; Returns: string
+                           },
 "notificar_torre_incidencia":
 { Args: { "p_accion": string,"p_detalle": string,"p_incidencia_id": string }; Returns: undefined
                            },
@@ -3782,6 +3987,9 @@ isOneToOne: false
               "documento_id": string,"intento": number,"ruta": string
             }[]
                            },
+"reconciliar_pagos_stripe":
+{ Args: Record<PropertyKey, never>; Returns: string
+                           },
 "reemplazar_documento_conductor":
 { Args: { "p_documento_anterior_id": string,"p_nombre_archivo": string,"p_ruta": string }; Returns: string
                            },
@@ -3823,6 +4031,9 @@ isOneToOne: false
 "registrar_evento_registro_conductor_v2":
 { Args: { "p_codigo"?: string,"p_creado_en"?: string,"p_duracion_ms"?: number,"p_empresa_id"?: string,"p_evento": string,"p_fuente"?: string,"p_paso"?: number,"p_sesion_id": string,"p_zona"?: string }; Returns: string
                            },
+"registrar_foto_idempotente":
+{ Args: { "p_foto": Json }; Returns: Json
+                           },
 "registrar_heartbeat_tracking":
 { Args: { "p_bateria_pct"?: number,"p_lat": number,"p_lng": number,"p_online"?: boolean,"p_plataforma"?: string,"p_precision_m"?: number,"p_traslado_id": string,"p_velocidad_mps"?: number }; Returns: Json
                            },
@@ -3837,6 +4048,9 @@ isOneToOne: false
                            },
 "resolver_incidencia":
 { Args: { "p_incidencia_id": string,"p_motivo"?: string,"p_severidad"?: string }; Returns: undefined
+                           },
+"resolver_inventario_llaves":
+{ Args: { "p_motivo": string,"p_traslado_id": string }; Returns: undefined
                            },
 "revisar_documento_conductor_admin":
 { Args: { "p_documento_id": string,"p_estado": string,"p_notas"?: string }; Returns: undefined
@@ -3867,11 +4081,17 @@ isOneToOne: false
 "solicitar_cambio_expediente_conductor":
 { Args: { "p_cambios": Json }; Returns: Json
                            },
+"solicitar_factura_traslado":
+{ Args: { "p_traslado_id": string }; Returns: Json
+                           },
 "solicitud_conductor_datos_completos":
 { Args: { "p_solicitud_id": string }; Returns: boolean
                            },
 "titular_es_dueno_de_empresa_de_usuario":
 { Args: { "p_usuario_id": string }; Returns: boolean
+                           },
+"tomar_ejecucion_conciliacion":
+{ Args: { "p_id": string,"p_nonce": string }; Returns: boolean
                            },
 "traducir_estado_operativo":
 { Args: { "e": Database["public"]['Enums']["estado_traslado"] }; Returns: Database["public"]['Enums']["estado_operativo_traslado"]
