@@ -3,6 +3,7 @@
 import { useRef, useState, type FormEvent } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useAltoViewportCuenta } from "../useAltoViewportCuenta";
 import { crearClienteNavegador } from "../../../lib/supabase-browser";
 
@@ -102,6 +103,7 @@ function CampoClave({
 }
 
 export function CambiarContrasena() {
+  const router = useRouter();
   const viewportRef = useRef<HTMLDivElement>(null);
   useAltoViewportCuenta(viewportRef);
   const [actual, setActual] = useState("");
@@ -142,6 +144,19 @@ export function CambiarContrasena() {
       setActual("");
       setNueva("");
       setConfirmacion("");
+      // La contraseña ya cambió: un fallo posterior debe informarse como parcial.
+      try {
+        const { error: errorCerrar } = await cliente.auth.signOut({
+          scope: mantenerSesion ? "others" : "global",
+        });
+        if (errorCerrar) throw errorCerrar;
+      } catch {
+        throw new Error("Tu contraseña se actualizó, pero no pudimos cerrar las sesiones solicitadas. No se confirmó su revocación. Contacta a soporte.");
+      }
+      if (!mantenerSesion) {
+        router.replace("/login?contrasena=actualizada");
+        return;
+      }
       setExito(true);
     } catch (err) {
       setError(err instanceof Error ? err.message : "No pudimos actualizar tu contraseña. Inténtalo de nuevo.");
@@ -281,6 +296,7 @@ export function CambiarContrasena() {
             <input
               type="checkbox"
               checked={mantenerSesion}
+              disabled={guardando}
               onChange={(e) => setMantenerSesion(e.target.checked)}
               className="mt-0.5 size-4.5 rounded border-[#94a3b8] text-[#0066FF] focus:ring-[#0066FF] cursor-pointer"
             />
@@ -289,7 +305,7 @@ export function CambiarContrasena() {
                 Mantenerme conectado tras restablecer
               </span>
               <p className="mt-0.5 text-[11.5px] text-[#64748b] dark:text-[#94a3b8]">
-                Cerrará tus sesiones activas en otros dispositivos por seguridad.
+                Revocará las otras sesiones. Si desmarcas esta opción, también cerrará esta sesión. Los accesos ya emitidos pueden seguir vigentes hasta caducar.
               </p>
             </div>
           </label>
