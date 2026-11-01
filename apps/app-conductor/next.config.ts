@@ -87,6 +87,7 @@ const sentryRelease = process.env.SENTRY_RELEASE ||
   `ruum-conductor@${process.env.NEXT_PUBLIC_APP_VERSION || "1.0.0"}`;
 export default withSentryConfig(nextConfig, {
   silent: true,
+  telemetry: false,
   org: process.env.SENTRY_ORG,
   project: process.env.SENTRY_PROJECT,
   authToken: process.env.SENTRY_AUTH_TOKEN,
