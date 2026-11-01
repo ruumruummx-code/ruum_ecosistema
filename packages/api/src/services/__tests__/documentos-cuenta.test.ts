@@ -25,3 +25,22 @@ it("no convierte errores de consulta en una lista vacía", async () => {
   const cliente = crearClienteFake({ functionsResult: { error: new Error("offline") } });
   await expect(listarDocumentosCuentaUsuario(cliente as unknown as SupabaseClient<Database>)).rejects.toThrow("offline");
 });
+
+
+it("materializa los bytes antes de enviar el archivo multipart", async () => {
+  const cliente = crearClienteFake({ functionsResult: { data: { tipo: "constancia", ruta: "auth/constancia/1.pdf", estado: "en_revision", subido_en: "2026-10-14T12:00:00Z" } } });
+  const archivo = new File(["contenido estable"], "constancia.pdf", { type: "application/pdf" });
+  await subirDocumentoCuentaUsuario(cliente as unknown as SupabaseClient<Database>, "constancia", archivo);
+  const enviado = (cliente.functions.invoke.mock.calls[0]![1] as { body: FormData }).body.get("archivo") as File;
+  expect(enviado).not.toBe(archivo);
+  expect(await enviado.text()).toBe("contenido estable");
+  expect(enviado.name).toBe("constancia.pdf");
+});
+
+it("un archivo temporal ilegible produce una indicación y no inicia la petición", async () => {
+  const cliente = crearClienteFake();
+  const archivo = new File(["pdf"], "constancia.pdf", { type: "application/pdf" });
+  Object.defineProperty(archivo, "arrayBuffer", { value: async () => { throw new Error("NotReadableError"); } });
+  await expect(subirDocumentoCuentaUsuario(cliente as unknown as SupabaseClient<Database>, "constancia", archivo)).rejects.toThrow("Descárgalo al dispositivo");
+  expect(cliente.functions.invoke).not.toHaveBeenCalled();
+});

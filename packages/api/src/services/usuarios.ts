@@ -419,9 +419,20 @@ export async function listarDocumentosCuentaUsuario(cliente: Cliente): Promise<D
 }
 
 export async function subirDocumentoCuentaUsuario(cliente: Cliente, tipo: TipoDocumentoCuenta, archivo: File): Promise<DocumentoCuenta> {
+  if (archivo.size === 0 || archivo.size > 10 * 1024 * 1024) {
+    throw new Error("Selecciona un documento de hasta 10 MB que no esté vacío.");
+  }
+  // Materializar antes del envío evita depender del archivo temporal del
+  // selector Android o del proveedor de nube durante la petición multipart.
+  let bytes: ArrayBuffer;
+  try {
+    bytes = await archivo.arrayBuffer();
+  } catch {
+    throw new Error("No pudimos leer el archivo. Descárgalo al dispositivo y vuelve a seleccionarlo.");
+  }
   const body = new FormData();
   body.append("tipo", tipo);
-  body.append("archivo", archivo);
+  body.append("archivo", new File([bytes], archivo.name, { type: archivo.type, lastModified: archivo.lastModified }));
   const { data, error } = await cliente.functions.invoke<DocumentoCuenta>("documentos-cuenta-usuario", { body });
   if (error) throw new Error(await mensajeErrorFuncion(error));
   if (!data?.ruta || data.tipo !== tipo || data.estado !== "en_revision" || !data.subido_en) {
