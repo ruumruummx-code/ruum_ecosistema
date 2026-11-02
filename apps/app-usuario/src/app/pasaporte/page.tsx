@@ -7,12 +7,14 @@ import { UserResponsiveLayout } from "../../components/layout/UserResponsiveLayo
 import { Icono, Aviso } from "@ruum/ui";
 import { UserDashboardLayout } from "../../components/layout/UserDashboardLayout";
 import { BotonReintentarSesion } from "../ReintentarSesion";
+import { obtenerViajeActivo } from "../../lib/inicio";
+import { HistorialPasaportes, type PasaporteAnterior } from "./HistorialPasaportes";
 
 function ErrorPasaporte() {
   return <UserDashboardLayout><div className="mx-auto max-w-xl space-y-5 py-12 text-center"><Aviso tono="danger">No pudimos cargar tu pasaporte en este momento. Reintenta para consultar tus traslados.</Aviso><BotonReintentarSesion /><Link href="/mis-viajes" className="block underline">Volver a Mis traslados</Link></div></UserDashboardLayout>;
 }
 
-// El destino depende de la sesión y del traslado activo del usuario. Evita
+// El destino y el historial dependen de la sesión y de sus traslados. Evita
 // que el despliegue genere una versión estática compartida entre sesiones.
 export const dynamic = "force-dynamic";
 
@@ -46,18 +48,27 @@ export default async function PaginaPasaporte() {
     redirect(`${login.pathname}${login.search}`);
   }
 
-  const activo = traslados.find(
-    (t) =>
-      t.traslado_id &&
-      t.estado &&
-      !["servicio_cerrado", "servicio_cancelado", "traslado_fallido"].includes(t.estado)
-  );
+  const activo = obtenerViajeActivo(traslados.filter(t => Boolean(t.traslado_id)));
 
   if (activo?.traslado_id) {
     redirect(`/viajes/${activo.traslado_id}`);
   }
 
-  // Empty-state dedicado: sin traslados activos informa claramente y da acceso a nuevo traslado
+  const anteriores: PasaporteAnterior[] = traslados.flatMap(t => {
+    if (!t.traslado_id || t.estado === "servicio_cancelado" || t.estado === "traslado_fallido") return [];
+    const finalizado = Boolean(t.cerrado_en) || t.estado_operativo === "closed" ||
+      ["servicio_cerrado", "cierre_operativo_con_incidencia_abierta", "reclamo_resuelto", "disputa_resuelta"].includes(t.estado ?? "");
+    if (!finalizado) return [];
+    return [{ id: t.traslado_id, marca: t.vehiculo_marca, modelo: t.vehiculo_modelo, anio: t.vehiculo_anio,
+      placas: t.vehiculo_placas, origen: t.origen_ciudad, destino: t.destino_ciudad, cerradoEn: t.cerrado_en, creadoEn: t.creado_en }];
+  });
+  if (anteriores.length) {
+    return <UserResponsiveLayout nombre={usuario.nombre} mobileShell mobileNavigation mobileBottomNavigation>
+      <HistorialPasaportes pasaportes={anteriores} />
+    </UserResponsiveLayout>;
+  }
+
+  // Vacío solo si no hay traslado activo ni pasaportes finalizados disponibles.
   return (
     <>
       <UserResponsiveLayout nombre={usuario.nombre} mobileShell mobileNavigation mobileBottomNavigation>
