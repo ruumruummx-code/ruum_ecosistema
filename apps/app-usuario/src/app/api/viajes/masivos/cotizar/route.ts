@@ -6,7 +6,7 @@ import { logStructuredError, logStructuredWarn } from "@/lib/logger";
 import { registrarMetricaCotizacion } from "@/lib/carga-masiva-telemetria";
 import { verificarCsrfORechazar } from "@/lib/csrf";
 import { clienteMasivoServicio, stripeMasivo, validarFilasServidor } from "@/lib/carga-masiva-server";
-import { previsualizarTarifasMasivasUsuario, verificarUsuarioMasivo, guardarCheckoutMasivoServidor, vincularPagoMasivoServidor, eliminarCheckoutMasivoServidor } from "@ruum/api/services";
+import { previsualizarTarifasMasivasUsuario, verificarUsuarioMasivo, guardarCheckoutMasivoServidor, vincularPagoMasivoServidor, eliminarCheckoutMasivoServidor, obtenerClienteBilleteraServidor } from "@ruum/api/services";
 import { coordenadaPostalMasiva, ErrorServicioCotizacion } from "@/lib/mapbox-masivo";
 import { tipoSugeridoParaVehiculo } from "@ruum/shared/catalogos";
 import { obtenerRutaDirectionsMapboxConParadas } from "@ruum/shared/utils";
@@ -217,7 +217,8 @@ export async function POST(request: NextRequest) {
     });
     let intent;
     try {
-      intent = await stripeMasivo("payment_intents", new URLSearchParams({ amount: String(guardado.monto_centavos), currency: "mxn", "automatic_payment_methods[enabled]": "true", "metadata[carga_masiva_id]": id }), `carga-masiva-${id}`);
+      const customer = await obtenerClienteBilleteraServidor(servicio, user.id, /^(sk|rk)_test_/.test(process.env.STRIPE_SECRET_KEY ?? "") ? "test" : "live");
+      intent = await stripeMasivo("payment_intents", new URLSearchParams({ amount: String(guardado.monto_centavos), currency: "mxn", "automatic_payment_methods[enabled]": "true", "metadata[carga_masiva_id]": id, ...(customer ? { customer } : {}) }), `carga-masiva-${id}`);
       await vincularPagoMasivoServidor(servicio, id, user.id, intent.id);
     } catch (stripeErr) {
       // Transacción de compensación: si falla Stripe al crear o vincular el PaymentIntent,

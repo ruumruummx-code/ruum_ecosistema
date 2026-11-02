@@ -26,6 +26,7 @@ vi.mock("@stripe/react-stripe-js", () => ({
 vi.mock("@stripe/stripe-js", () => ({
   loadStripe: (...args: unknown[]) => stripeMocks.loadStripe(...args),
 }));
+vi.mock("../lib/csrf", () => ({ obtenerHeadersCsrfAsync: async (headers: Record<string, string>) => headers }));
 
 const supabaseMocks = vi.hoisted(() => ({
   sesion: { access_token: "tok-test" } as unknown,
@@ -53,6 +54,15 @@ async function importarPagoStripe() {
 }
 
 describe("PagoStripe — cobro real con Elements mockeado en el borde", () => {
+  it("entrega a Elements la sesión verificada para reutilizar tarjetas", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValueOnce(Response.json({ clientSecret: "pi_propio_secret_seguro" }))
+      .mockResolvedValueOnce(Response.json({ customerSessionClientSecret: "sesion_verificada" })));
+    const PagoStripe = await importarPagoStripe();
+    render(<PagoStripe trasladoId="t-1" onPagado={vi.fn()} />);
+    await screen.findByTestId("payment-element");
+    expect(stripeMocks.Elements).toHaveBeenCalledWith(expect.objectContaining({ options: expect.objectContaining({ customerSessionClientSecret: "sesion_verificada" }) }), undefined);
+    expect(fetch).toHaveBeenNthCalledWith(2, "/api/cuenta/metodos-pago", expect.objectContaining({ body: JSON.stringify({ accion: "sesion", intentId: "pi_propio" }) }));
+  });
   it("usa el secreto consolidado sin crear un cobro individual", async () => {
     const PagoStripe = await importarPagoStripe();
     render(<PagoStripe trasladoId="carga-1" clientSecretExterno="cs_masivo" returnPath="/mis-viajes?pago=masivo" onPagado={vi.fn()} />);

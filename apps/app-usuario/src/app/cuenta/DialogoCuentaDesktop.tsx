@@ -274,6 +274,11 @@ export function DialogoCuentaDesktop({
             servicio. Gestiona tus datos fiscales en Facturación.
           </p>
           <div className={s.modalLinks}>
+            <Link href="/cuenta/metodos-pago">
+              <Icon name="card" />
+              <strong>Administrar tarjetas guardadas</strong>
+              <Icon name="chevron" />
+            </Link>
             <Link href="/mis-viajes">
               <Icon name="car" />
               <strong>Consultar mis traslados</strong>

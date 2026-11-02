@@ -13,6 +13,7 @@ vi.mock("@ruum/api/services", () => ({
   previsualizarTarifasMasivasUsuario: mocks.cotizar, verificarUsuarioMasivo: async () => true,
   guardarCheckoutMasivoServidor: mocks.guardar, vincularPagoMasivoServidor: async () => undefined,
   eliminarCheckoutMasivoServidor: mocks.eliminar,
+  obtenerClienteBilleteraServidor: async () => undefined,
 }));
 vi.mock("@ruum/shared/utils", () => ({ obtenerRutaDirectionsMapboxConParadas: mocks.ruta }));
 vi.mock("@ruum/shared/catalogos", () => ({ tipoSugeridoParaVehiculo: () => "van" }));

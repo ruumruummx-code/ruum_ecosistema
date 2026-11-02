@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import type { Appearance, Stripe, StripeElements } from "@stripe/stripe-js";
 import { Button, Aviso } from "@ruum/ui";
 import { crearClienteNavegador } from "../lib/supabase-browser";
+import { obtenerHeadersCsrfAsync } from "../lib/csrf";
 
 const clavePublica = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY;
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -162,6 +163,7 @@ export function PagoStripe({
   returnPath,
 }: PagoStripeProps) {
   const [clientSecret, setClientSecret] = useState<string | null>(null);
+  const [customerSessionClientSecret, setCustomerSessionClientSecret] = useState<string | undefined>();
   const [error, setError] = useState<string | null>(null);
   const [stripeModule, setStripeModule] = useState<ModuloStripe | null>(null);
   const [reintento, setReintento] = useState(0);
@@ -179,6 +181,7 @@ export function PagoStripe({
       try {
         setError(null);
         setClientSecret(null);
+        setCustomerSessionClientSecret(undefined);
 
         if (monto != null && monto <= 0) {
           setError(
@@ -205,6 +208,16 @@ export function PagoStripe({
           return;
         }
 
+        const intentId = inicio.clientSecret?.split("_secret_")[0];
+        if (intentId && /^pi_[A-Za-z0-9]+$/.test(intentId)) {
+          const sesion = await fetch("/api/cuenta/metodos-pago", {
+            method: "POST", headers: await obtenerHeadersCsrfAsync({ "Content-Type": "application/json" }),
+            body: JSON.stringify({ accion: "sesion", intentId }),
+          });
+          const datosSesion = await sesion.json();
+          if (!sesion.ok) throw new Error(datosSesion.error ?? "No pudimos consultar tus métodos de pago.");
+          setCustomerSessionClientSecret(datosSesion.customerSessionClientSecret ?? undefined);
+        }
         const mod = await import("@stripe/react-stripe-js");
         const { loadStripe } = await import("@stripe/stripe-js");
         const promesaStripe = loadStripe(clavePublica);
@@ -281,7 +294,7 @@ export function PagoStripe({
   return (
     <Elements
       stripe={stripePromise}
-      options={{ clientSecret, appearance: aparienciaStripe, locale: compacto ? "es" : "auto" }}
+      options={{ clientSecret, customerSessionClientSecret, appearance: aparienciaStripe, locale: compacto ? "es" : "auto" }}
     >
       <FormularioPagoReal
         returnPath={returnPath}

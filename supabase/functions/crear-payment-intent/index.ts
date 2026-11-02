@@ -286,7 +286,12 @@ Deno.serve(async (req) => {
 
   let intent: Stripe.PaymentIntent;
   try {
+    const { data: billetera, error: errorBilletera } = await clienteServicio.from("billetera_clientes_stripe")
+      .select("stripe_customer_id").eq("auth_user_id", sesion.user.id)
+      .eq("modo", /^(sk|rk)_test_/.test(stripeSecretKey) ? "test" : "live").maybeSingle();
+    if (errorBilletera) throw errorBilletera;
     intent = await stripe.paymentIntents.create({
+      ...(billetera ? { customer: billetera.stripe_customer_id } : {}),
       amount: Math.round(montoACobrar * 100), // Stripe usa centavos
       currency: "mxn",
       metadata: { traslado_id: traslado.id },

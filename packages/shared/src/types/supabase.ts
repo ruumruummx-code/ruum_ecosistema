@@ -215,6 +215,20 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"billetera_clientes_stripe": {
+                  Row: {
+                    "auth_user_id": string,"creado_en": string,"modo": string,"stripe_customer_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "auth_user_id": string,"creado_en"?: string,"modo": string,"stripe_customer_id": string
+                  }
+                  Update: {
+                    "auth_user_id"?: string,"creado_en"?: string,"modo"?: string,"stripe_customer_id"?: string
+                  }
+                  Relationships: [
+
+                  ]
                 },"calificaciones_traslado": {
                   Row: {
                     "calificado_en": string,"comentario": string | null,"conductor_id": string,"estrellas": number,"traslado_id": string

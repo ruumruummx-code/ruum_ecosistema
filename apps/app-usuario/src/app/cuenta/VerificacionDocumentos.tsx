@@ -48,6 +48,14 @@ export function VerificacionDocumentos({ usuario, empresa = null }: Verificacion
   const cambiarOcupada = useCallback((valor: boolean) => { ocupadaRef.current = valor; setOcupada(valor); }, []);
   const cerrar = useCallback(() => { if (!ocupadaRef.current) setTarea(null); }, []);
   useEffect(() => {
+    const abrirContexto = () => {
+      if (window.location.hash === "#facturacion" && !ocupadaRef.current) setTarea("fiscal");
+    };
+    abrirContexto();
+    window.addEventListener("hashchange", abrirContexto);
+    return () => window.removeEventListener("hashchange", abrirContexto);
+  }, []);
+  useEffect(() => {
     let activo = true;
     setCargando(true); setError(null);
     void (async () => {
@@ -77,7 +85,7 @@ export function VerificacionDocumentos({ usuario, empresa = null }: Verificacion
         </div>
       </section>
 
-      <section className="user-verification-section" aria-labelledby="seccion-datos-fiscales">
+      <section id="facturacion" className="user-verification-section" aria-labelledby="seccion-datos-fiscales">
         <h2 id="seccion-datos-fiscales" className="mb-2 text-xs font-bold uppercase tracking-wider text-[var(--user-color-muted)]">
           Datos fiscales y facturación CFDI
         </h2>
