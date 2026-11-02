@@ -80,12 +80,7 @@ describe("Mi cuenta desktop", () => {
       "href",
       "/cuenta/preferencias",
     );
-    fireEvent.click(nav.getByRole("button", { name: /Métodos de pago/ }));
-    expect(
-      within(screen.getByRole("dialog")).getByText(
-        "Tu cuenta no tiene un método de pago registrado.",
-      ),
-    ).toBeInTheDocument();
+    expect(nav.getByRole("link", { name: /Métodos de pago/ })).toHaveAttribute("href", "/cuenta/metodos-pago");
   });
   it.each(["pendiente", "en_revision", "rechazado", null])(
     "conserva el estado real de verificación: %s",

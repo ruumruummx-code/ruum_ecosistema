@@ -1,0 +1,13 @@
+begin;
+create extension if not exists pgtap with schema extensions;
+set local search_path = public, extensions;
+select plan(7);
+select ok((select relrowsecurity from pg_class where oid = 'public.billetera_clientes_stripe'::regclass), 'Billetera: RLS habilitado');
+select ok(not has_table_privilege('anon', 'public.billetera_clientes_stripe', 'SELECT'), 'Anon no consulta asociaciones Stripe');
+select ok(not has_table_privilege('authenticated', 'public.billetera_clientes_stripe', 'SELECT'), 'Usuario no consulta asociaciones Stripe');
+select ok(not has_table_privilege('authenticated', 'public.billetera_clientes_stripe', 'INSERT'), 'Usuario no puede asociar un cliente ajeno');
+select ok(not has_table_privilege('authenticated', 'public.billetera_clientes_stripe', 'UPDATE'), 'Usuario no puede reemplazar un cliente');
+select ok(has_table_privilege('service_role', 'public.billetera_clientes_stripe', 'SELECT, INSERT'), 'Servidor consulta y vincula clientes');
+select ok(not has_table_privilege('service_role', 'public.billetera_clientes_stripe', 'UPDATE'), 'La asociación no se reemplaza mediante UPDATE');
+select * from finish();
+rollback;

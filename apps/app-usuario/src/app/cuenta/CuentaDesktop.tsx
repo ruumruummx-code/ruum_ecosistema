@@ -231,7 +231,7 @@ export function CuentaDesktop({ cuenta, seccionInicial }: CuentaDesktopProps) {
             </div>
             <Icon name="chevron" />
           </button>
-          <button onClick={() => abrirModal("pagos")} data-tone="purple">
+          <Link href="/cuenta/metodos-pago" data-tone="purple">
             <span className={s.quickIcon}>
               <Icon name="card" />
             </span>
@@ -240,7 +240,7 @@ export function CuentaDesktop({ cuenta, seccionInicial }: CuentaDesktopProps) {
               <small>Tarjetas y facturación.</small>
             </div>
             <Icon name="chevron" />
-          </button>
+          </Link>
           <Link href="/cuenta/preferencias" data-tone="orange">
             <span className={s.quickIcon}>
               <Icon name="bell" />

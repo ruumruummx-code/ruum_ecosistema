@@ -1,5 +1,5 @@
 /** @vitest-environment jsdom */
-import { beforeAll, beforeEach, expect, it, vi } from "vitest";
+import { beforeAll, beforeEach, afterEach, expect, it, vi } from "vitest";
 import { render, screen, fireEvent, waitFor, within } from "@testing-library/react";
 import { VerificacionDocumentos } from "../VerificacionDocumentos";
 import { consultarCatalogosSat } from "@ruum/shared/catalogos";
@@ -21,6 +21,21 @@ async function abrirComprobante() {
   fireEvent.click(row);
   return screen.findByRole("dialog", { name: "Comprobante de Domicilio" });
 }
+afterEach(() => window.history.replaceState(null, "", "/"));
+it("abre el formulario fiscal al llegar desde /cuenta/facturacion", async () => {
+  window.history.replaceState(null, "", "/cuenta/verificacion-documentos#facturacion");
+  const { container } = render(<VerificacionDocumentos usuario={usuario} />);
+  expect(await screen.findByRole("dialog", { name: "Datos de Facturación" })).toBeInTheDocument();
+  expect(await screen.findByLabelText("RFC")).toBeInTheDocument();
+  expect(container.querySelector("#facturacion")).not.toBeNull();
+});
+it("responde al fragmento si cambia después de montar la página", async () => {
+  render(<VerificacionDocumentos usuario={usuario} />);
+  expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+  window.history.replaceState(null, "", "#facturacion");
+  fireEvent(window, new Event("hashchange"));
+  expect(await screen.findByRole("dialog", { name: "Datos de Facturación" })).toBeInTheDocument();
+});
 it("mantiene cuatro tareas sin formularios, selectores de archivos ni FAB en la raíz", async () => {
   const { container } = render(<VerificacionDocumentos usuario={usuario} />);
   await waitFor(() => expect(screen.getByRole("button", { name: /^Comprobante/ })).toBeEnabled(), { timeout: 5000 });
