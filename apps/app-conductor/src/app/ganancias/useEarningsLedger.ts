@@ -25,7 +25,7 @@ export interface RegistroViajeGanancia {
   vehiculoId: string;
   origen: string;
   destino: string;
-  montoGanado: number;
+  montoGanado: number | null;
   precioBase: number;
   comisionRuum: number | null;
   gastosAutorizados: number | null;
@@ -108,7 +108,10 @@ export function formatearFechaCorta(fechaIso: string) {
   }
 }
 
-export function formatearMoneda(valor: number) {
+export function formatearMoneda(valor: number | null | undefined) {
+  if (valor === null || valor === undefined || !Number.isFinite(valor)) {
+    return "Por calcular";
+  }
   return new Intl.NumberFormat("es-MX", { style: "currency", currency: "MXN", maximumFractionDigits: 2 }).format(valor);
 }
 
@@ -210,18 +213,7 @@ export interface UseEarningsLedgerResult {
   rangoActual: { inicio: Date; fin: Date };
   TrasladosFiltrados: RegistroViajeGanancia[];
   payoutsFiltrados: Payout[];
-  resumen: {
-    totalTraslados: number;
-    totalVehiculos: number;
-    precioBase: number;
-    bonos: number;
-    ajuste: number;
-    comisionRuum: number;
-    gananciaNeta: number;
-    reembolsoGastos: number;
-    retenciones: number;
-    depositoAcumulado: number;
-  };
+  resumen: ResumenGanancias;
   fechaDispersion: string;
   sinDatosTotales: boolean;
   cambiarPeriodo: (nuevo: PeriodoActivo) => void;
@@ -283,9 +275,11 @@ export function useEarningsLedger(): UseEarningsLedgerResult {
       const payoutEnlazado = t.payout_id ? mapaPayouts.get(t.payout_id) : null;
       const vehiculoKey = t.vehiculo_id || t.id;
       const vehiculoNombre = t.vehiculos ? `${t.vehiculos.marca} ${t.vehiculos.modelo} ${t.vehiculos.anio}` : "Vehículo trasladado";
-      const montoEstimadoOGanado = Number(t.ganancia_conductor_congelada ?? 0);
+      const montoEstimadoOGanado = t.ganancia_conductor_congelada !== null
+        ? Number(t.ganancia_conductor_congelada)
+        : null;
       const precioBase = Number(t.precio_final ?? t.precio_cotizado ?? 0);
-      const comision = precioBase > 0 && t.ganancia_conductor_congelada !== null
+      const comision = precioBase > 0 && montoEstimadoOGanado !== null
         ? Math.max(0, precioBase - montoEstimadoOGanado)
         : null;
       const fechaStr = t.cerrado_en ?? t.actualizado_en ?? t.creado_en;
@@ -328,21 +322,47 @@ export function useEarningsLedger(): UseEarningsLedgerResult {
     });
   }, [payouts, rangoActual]);
 
-  const resumen = useMemo(() => {
-    const precioBase = TrasladosFiltrados.filter(v => v.estatusEconomico !== "sin_calcular").reduce((tot, v) => tot + v.precioBase, 0);
-    const bonos = TrasladosFiltrados.reduce((tot, v) => tot + (v.bonos ?? 0), 0);
+  const resumen = useMemo<ResumenGanancias>(() => {
+    const totalTraslados = TrasladosFiltrados.length;
+    const totalVehiculos = totalTraslados === 0 ? 0 : new Set(TrasladosFiltrados.map((v) => v.vehiculoId)).size;
+
+    const tieneGananciaSinCalcular = TrasladosFiltrados.some((v) => v.montoGanado === null);
+    const tieneBonosDesconocidos = TrasladosFiltrados.some((v) => v.bonos === null);
+    const tieneGastosDesconocidos = TrasladosFiltrados.some((v) => v.gastosAutorizados === null);
+    const tieneComisionDesconocida = TrasladosFiltrados.some((v) => v.comisionRuum === null);
+
+    const precioBase = TrasladosFiltrados.filter((v) => v.estatusEconomico !== "sin_calcular").reduce((tot, v) => tot + v.precioBase, 0);
     const ajuste = payoutsFiltrados.reduce((tot, p) => tot + Number(p.ajustes ?? 0), 0);
-    const comisionRuum = TrasladosFiltrados.filter(v => v.estatusEconomico !== "sin_calcular").reduce((tot, v) => tot + (v.comisionRuum ?? 0), 0);
-    const reembolsoGastos = TrasladosFiltrados.reduce((tot, v) => tot + (v.gastosAutorizados ?? 0), 0);
+
+    const bonos = totalTraslados > 0 && tieneBonosDesconocidos
+      ? null
+      : TrasladosFiltrados.reduce((tot, v) => tot + (v.bonos ?? 0), 0);
+
+    const comisionRuum = totalTraslados > 0 && tieneComisionDesconocida
+      ? null
+      : TrasladosFiltrados.filter((v) => v.estatusEconomico !== "sin_calcular").reduce((tot, v) => tot + (v.comisionRuum ?? 0), 0);
+
+    const reembolsoGastos = totalTraslados > 0 && tieneGastosDesconocidos
+      ? null
+      : TrasladosFiltrados.reduce((tot, v) => tot + (v.gastosAutorizados ?? 0), 0);
+
     const retenciones = TrasladosFiltrados
       .filter((v) => v.estatusEconomico === "rechazado" || v.estatusEconomico === "retenido")
-      .reduce((tot, v) => tot + v.montoGanado, 0);
-    const gananciaNeta = precioBase + bonos + ajuste - comisionRuum;
-    const depositoAcumulado = Math.max(0, precioBase + bonos + ajuste - comisionRuum + reembolsoGastos - retenciones);
-    const totalVehiculos = new Set(TrasladosFiltrados.map((v) => v.vehiculoId)).size;
+      .reduce((tot, v) => tot + (v.montoGanado ?? 0), 0);
+
+    const totalesIncompletos = totalTraslados > 0 && (tieneGananciaSinCalcular || tieneBonosDesconocidos || tieneGastosDesconocidos || tieneComisionDesconocida);
+
+    const gananciaNeta = tieneGananciaSinCalcular
+      ? null
+      : TrasladosFiltrados.filter((v) => v.estatusEconomico !== "sin_calcular").reduce((tot, v) => tot + (v.montoGanado ?? 0), 0) + ajuste;
+
+    const depositoAcumulado = gananciaNeta === null
+      ? null
+      : Math.max(0, gananciaNeta + (reembolsoGastos ?? 0) - retenciones);
+
     return {
-      totalTraslados: TrasladosFiltrados.length,
-      totalVehiculos: TrasladosFiltrados.length === 0 ? 0 : totalVehiculos,
+      totalTraslados,
+      totalVehiculos,
       precioBase,
       bonos,
       ajuste,
@@ -350,7 +370,8 @@ export function useEarningsLedger(): UseEarningsLedgerResult {
       gananciaNeta,
       reembolsoGastos,
       retenciones,
-      depositoAcumulado
+      depositoAcumulado,
+      totalesIncompletos
     };
   }, [TrasladosFiltrados, payoutsFiltrados]);
 
@@ -411,11 +432,12 @@ export type ResumenGanancias = {
   totalTraslados: number;
   totalVehiculos: number;
   precioBase: number;
-  bonos: number;
+  bonos: number | null;
   ajuste: number;
-  comisionRuum: number;
-  gananciaNeta: number;
-  reembolsoGastos: number;
+  comisionRuum: number | null;
+  gananciaNeta: number | null;
+  reembolsoGastos: number | null;
   retenciones: number;
-  depositoAcumulado: number;
+  depositoAcumulado: number | null;
+  totalesIncompletos: boolean;
 };

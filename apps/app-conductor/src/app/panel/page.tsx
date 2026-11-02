@@ -154,6 +154,7 @@ export default function PaginaPanel() {
     gananciasHoy = 0,
     trasladosHoy = 0,
     gananciasHoyEstimadas = false,
+    gananciasHoyIncompletas = false,
     gananciasHoyDesconocidas = false,
     seleccionarDisponibilidad,
     persistirDisponibilidad,
@@ -731,6 +732,7 @@ export default function PaginaPanel() {
                   gananciasHoy={gananciasHoy}
                   trasladosHoy={trasladosHoy}
                   gananciasEstimadas={gananciasHoyEstimadas}
+                  gananciasIncompletas={gananciasHoyIncompletas}
                   gananciasDesconocidas={gananciasHoyDesconocidas}
                 />
               </div>

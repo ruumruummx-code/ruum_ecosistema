@@ -6,6 +6,7 @@ export interface PanelMetricsProps {
   gananciasHoy: number | null;
   trasladosHoy: number | null;
   gananciasEstimadas?: boolean;
+  gananciasIncompletas?: boolean;
   gananciasDesconocidas?: boolean;
 }
 
@@ -37,6 +38,7 @@ export function PanelMetrics({
   gananciasHoy,
   trasladosHoy,
   gananciasEstimadas = false,
+  gananciasIncompletas = false,
   gananciasDesconocidas = false,
 }: PanelMetricsProps) {
   const tieneDatosGanancias = !gananciasDesconocidas && gananciasHoy !== null;
@@ -53,16 +55,14 @@ export function PanelMetrics({
     : "—";
 
   const gananciasTexto = tieneDatosGanancias
-    ? gananciasEstimadas
-      ? `~ ${gananciasFormateadas}`
-      : gananciasFormateadas
-    : "—";
+    ? `${gananciasFormateadas}${gananciasIncompletas ? "*" : ""}`
+    : (gananciasIncompletas ? "En conciliación" : "—");
 
   const subtextoGanancias = !tieneDatosGanancias
-    ? "No disponible"
+    ? (gananciasIncompletas ? "En conciliación final" : "No disponible")
     : trasladosHoy === 0
       ? "Sin cierres aún"
-      : `${trasladosHoy ?? 0} cierre${trasladosHoy === 1 ? "" : "s"} hoy${gananciasEstimadas ? " (est.)" : ""}`;
+      : `${trasladosHoy ?? 0} cierre${trasladosHoy === 1 ? "" : "s"} hoy${gananciasIncompletas ? " (conciliación pendiente)" : ""}`;
 
   const trasladosTexto = tieneDatosTraslados ? `${trasladosHoy} / 3` : "—";
   const subtextoTraslados = !tieneDatosTraslados

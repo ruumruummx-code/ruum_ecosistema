@@ -112,7 +112,7 @@ describe("usePanelData - Resiliencia ante fallos parciales (H09)", () => {
     expect(result.current.errorDisponibilidad).toContain("viajes activos");
   });
 
-  it("diferencia ganancia estimada cuando falta ganancia_conductor_congelada", async () => {
+  it("marca ganancia como incompleta y no inventa 85% cuando falta ganancia_conductor_congelada (H09)", async () => {
     mocks.listarGananciasCerradasConductorDesde.mockResolvedValue([
       { ganancia_conductor_congelada: null, precio_final: 1000, precio_cotizado: 1000 },
     ]);
@@ -120,9 +120,31 @@ describe("usePanelData - Resiliencia ante fallos parciales (H09)", () => {
     const { result } = renderHook(() => usePanelData());
     await waitFor(() => expect(result.current.cargando).toBe(false));
 
-    expect(result.current.gananciasHoy).toBe(850);
-    expect(result.current.gananciasHoyEstimadas).toBe(true);
+    expect(result.current.gananciasHoy).toBeNull();
+    expect(result.current.gananciasHoyIncompletas).toBe(true);
+    expect(result.current.gananciasHoyEstimadas).toBe(false);
     expect(result.current.gananciasHoyDesconocidas).toBe(false);
+  });
+
+  it("actualiza fecha por módulo y no actualiza última actualización global ante fallos parciales (H09)", async () => {
+    const { result } = renderHook(() => usePanelData());
+    await waitFor(() => expect(result.current.cargando).toBe(false));
+
+    const fechaGlobalInicial = result.current.ultimaActualizacion;
+    expect(result.current.actualizacionesPorModulo.aceptados).toBeInstanceOf(Date);
+
+    // Simular recarga donde aceptados falla
+    mocks.listarTrasladosAceptados.mockRejectedValueOnce(new Error("Timeout"));
+
+    await act(async () => {
+      await result.current.recargar();
+    });
+
+    await waitFor(() => expect(result.current.fallosParciales.aceptados).toBe(true));
+    // La fecha global no debió avanzar porque hubo un fallo parcial
+    expect(result.current.ultimaActualizacion?.getTime()).toBe(fechaGlobalInicial?.getTime());
+    // Módulos exitosos tienen su propia marca de tiempo
+    expect(result.current.actualizacionesPorModulo.ganancias).toBeInstanceOf(Date);
   });
 
   it("marca ganancias como desconocidas cuando la consulta inicial de ganancias falla", async () => {

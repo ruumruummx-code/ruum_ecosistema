@@ -105,7 +105,7 @@ export function EarningsSummary({
                 </button>
               </span>
               <span className="font-display text-sm font-bold text-emerald-800 dark:text-emerald-300 tabular-nums">
-                + {formatearMoneda(resumen.bonos)}
+                {resumen.bonos !== null ? `+ ${formatearMoneda(resumen.bonos)}` : "Por calcular"}
               </span>
             </div>
             <div className="flex items-center justify-between gap-3 px-4 py-3.5">
@@ -147,7 +147,7 @@ export function EarningsSummary({
                 </button>
               </span>
               <span className="font-display text-sm font-bold text-red-500 tabular-nums">
-                − {formatearMoneda(resumen.comisionRuum)}
+                {resumen.comisionRuum !== null ? `− ${formatearMoneda(resumen.comisionRuum)}` : "Por calcular"}
               </span>
             </div>
             <div className="flex items-center justify-between gap-3 px-4 py-3.5">
@@ -168,10 +168,15 @@ export function EarningsSummary({
                 </button>
               </span>
               <span className="font-display text-sm font-bold text-text-primary tabular-nums">
-                + {formatearMoneda(resumen.reembolsoGastos)}
+                {resumen.reembolsoGastos !== null ? `+ ${formatearMoneda(resumen.reembolsoGastos)}` : "Por calcular"}
               </span>
             </div>
           </div>
+          {resumen.totalesIncompletos && (
+            <p className="px-4 py-2 font-body text-xs text-amber-800 dark:text-amber-300 bg-amber-500/10 border-t border-amber-500/30">
+              ⚠️ <strong>Totales preliminares:</strong> El desglose de bonos o gastos está en conciliación operativa y no se asume en cero.
+            </p>
+          )}
           {resumen.retenciones > 0 && (
             <p className="px-4 py-2 font-body text-xs text-amber-600 dark:text-amber-400 bg-amber-500/5 border-t border-amber-500/20">
               Retenciones en revisión descontadas: {formatearMoneda(resumen.retenciones)}
