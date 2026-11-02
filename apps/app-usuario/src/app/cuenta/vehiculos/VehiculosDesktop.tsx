@@ -111,7 +111,7 @@ export function VehiculosDesktop({
             <Icon name="refresh" />
             Actualizar vehículos
           </button>
-          <Link className={s.primary} href="/viajes/nuevo">
+          <Link className={s.primary} href="/cuenta/vehiculos/nuevo">
             <Icon name="plus" />
             Registrar nuevo vehículo
           </Link>
@@ -383,13 +383,13 @@ export function VehiculosDesktop({
                 <p>
                   {vehiculos.length
                     ? "Prueba otra búsqueda o limpia los filtros."
-                    : "Captura los datos de tu vehículo al solicitar un traslado para registrarlo en tu cuenta."}
+                    : "Registra tu vehículo para tenerlo disponible cuando necesites solicitar un traslado."}
                 </p>
                 {vehiculos.length ? (
                   <button onClick={limpiar}>Mostrar todos</button>
                 ) : (
-                  <Link href="/viajes/nuevo">
-                    Crear primer traslado
+                  <Link href="/cuenta/vehiculos/nuevo">
+                    Registrar primer vehículo
                     <Icon name="plus" />
                   </Link>
                 )}

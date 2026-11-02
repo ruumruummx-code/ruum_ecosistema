@@ -17,6 +17,7 @@ import type { Database, Json } from "@ruum/shared/types";
  * validadas en runtime por cada servicio.
  */
 export interface FuncionesRpc {
+  usuario_registra_vehiculo: { args: { p_id: string; p_datos: Json }; ret: string };
   usuario_previsualizar_tarifas_masivas: {
     args: { p_filas: Json };
     ret: Json;

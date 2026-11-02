@@ -4142,6 +4142,9 @@ isOneToOne: false
 "usuario_procesa_carga_traslados_masivos":
 { Args: { "p_carga_id": string,"p_limite"?: number }; Returns: Json
                            },
+"usuario_registra_vehiculo":
+{ Args: { "p_datos": Json,"p_id": string }; Returns: string
+                           },
 "validar_ruta_documento_conductor":
 { Args: { "p_auth_user_id"?: string,"p_objetivo_id": string,"p_ruta": string,"p_tipo": string }; Returns: undefined
                            },
