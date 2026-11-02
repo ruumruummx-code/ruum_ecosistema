@@ -19,9 +19,9 @@ vi.mock("@ruum/shared/utils", () => ({ obtenerRutaDirectionsMapboxConParadas: mo
 vi.mock("@ruum/shared/catalogos", () => ({ tipoSugeridoParaVehiculo: () => "van" }));
 import { POST } from "./route";
 
-function peticion() {
+function peticion(cambios: Record<string, string> = {}) {
   const datos = normalizarFilaPlantilla({ vehiculo_marca: "Nissan", vehiculo_modelo: "Urvan Panel Diesel", vehiculo_anio: "2024", vehiculo_placas: "ABC123", condicion: "seminueva", origen_codigo_postal: "06700", destino_codigo_postal: "04360", contacto_entrega_nombre: "Entrega", contacto_entrega_telefono: "5512345678", contacto_recepcion_nombre: "Recibe", contacto_recepcion_telefono: "5512345679", origen_calle: "Reforma", origen_numero: "1", origen_colonia: "Roma", destino_calle: "Universidad", destino_numero: "2", destino_colonia: "Copilco" });
-  return new NextRequest("http://localhost/api/viajes/masivos/cotizar", { method: "POST", body: JSON.stringify({ clave: "92200000-0000-4000-8000-000000000099", filas: Array.from({ length: 100 }, () => datos) }) });
+  return new NextRequest("http://localhost/api/viajes/masivos/cotizar", { method: "POST", body: JSON.stringify({ clave: "92200000-0000-4000-8000-000000000099", filas: Array.from({ length: 100 }, () => ({ ...datos, ...cambios })) }) });
 }
 describe("cotización de 100 traslados", () => {
   beforeEach(() => {
@@ -33,7 +33,42 @@ describe("cotización de 100 traslados", () => {
     mocks.stripe.mockReset().mockResolvedValue({ id: "pi_prueba", client_secret: "cs_prueba" });
     mocks.eliminar.mockReset().mockResolvedValue(undefined);
   });
-  afterEach(() => { vi.unstubAllGlobals(); vi.unstubAllEnvs(); });
+  afterEach(() => { vi.unstubAllGlobals(); vi.unstubAllEnvs(); vi.restoreAllMocks(); });
+  it("rechaza fechas pasadas en servidor sin cotizar, guardar ni iniciar el pago", async () => {
+    const respuesta = await POST(peticion({ modalidad_programacion: "programado", fecha_hora_programada: "2020-01-01T12:00:00Z" }));
+    const data = await respuesta.json();
+    expect(data.filas).toHaveLength(100);
+    expect(data.filas.every((f: { errores: Record<string, string> }) => f.errores.fecha_hora_programada?.includes("2 horas"))).toBe(true);
+    expect(mocks.cotizar).not.toHaveBeenCalled();
+    expect(mocks.guardar).not.toHaveBeenCalled();
+    expect(mocks.stripe).not.toHaveBeenCalled();
+  });
+  it("en pago parcial excluye las filas con fecha pasada del monto y del checkout", async () => {
+    const body = await peticion().json();
+    body.permitirParcial = true;
+    body.filas[0] = { ...body.filas[0], modalidad_programacion: "programado", fecha_hora_programada: "2020-01-01T12:00:00Z" };
+    const respuesta = await POST(new NextRequest("http://localhost/api/viajes/masivos/cotizar", { method: "POST", body: JSON.stringify(body) }));
+    const data = await respuesta.json();
+    expect(data.cotizaciones).toHaveLength(99);
+    expect(mocks.cotizar.mock.calls[0]![1]).toHaveLength(99);
+    expect(mocks.guardar.mock.calls[0]![1].filas).toHaveLength(99);
+    expect(mocks.guardar.mock.calls[0]![1].filas_pendientes_correccion).toHaveLength(1);
+    expect(data.totalMXN).toBe(122221.44);
+  });
+  it("revalida la fecha al terminar de calcular las rutas antes de iniciar el cobro", async () => {
+    let ahora = Date.parse("2026-11-02T18:00:00Z");
+    vi.spyOn(Date, "now").mockImplementation(() => ahora);
+    mocks.ruta.mockImplementation(async () => {
+      ahora += 1000;
+      return { distanciaKm: 50, tiempoHoras: 1 };
+    });
+    const respuesta = await POST(peticion({ modalidad_programacion: "programado", fecha_hora_programada: "2026-11-02T20:00:00Z" }));
+    const data = await respuesta.json();
+    expect(data.filas[0].errores.fecha_hora_programada).toContain("2 horas");
+    expect(mocks.cotizar).not.toHaveBeenCalled();
+    expect(mocks.guardar).not.toHaveBeenCalled();
+    expect(mocks.stripe).not.toHaveBeenCalled();
+  });
   it("falla con 500 si falta MAPBOX_SECRET_TOKEN", async () => {
     vi.stubEnv("MAPBOX_SECRET_TOKEN", "");
     const respuesta = await POST(peticion());

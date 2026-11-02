@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { ANTICIPACION_MINIMA_HORAS } from "@ruum/shared/validacion";
 
 export const MAX_FILAS_MASIVAS = 100;
 export const esquemaFilaMasiva = z.object({
@@ -26,6 +27,13 @@ export function normalizarTransmisionMasiva(valor: string) {
 }
 export function validarFila(datos: Record<string, string>, indice: number): FilaValidada {
   if (datos.vehiculo_transmision) datos = { ...datos, vehiculo_transmision: normalizarTransmisionMasiva(datos.vehiculo_transmision) };
+  // Las fechas sin zona de la plantilla se capturan en hora de Ciudad de México,
+  // independientemente de la zona del navegador o del servidor.
+  if (datos.modalidad_programacion === "programado" && datos.fecha_hora_programada) {
+    const fecha = datos.fecha_hora_programada.trim();
+    const sinZona = /^\d{4}-\d{2}-\d{2}T(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d{1,3})?)?$/.test(fecha);
+    datos = { ...datos, fecha_hora_programada: sinZona ? `${fecha}-06:00` : fecha };
+  }
   const resultado = esquemaFilaMasiva.safeParse(datos);
   const errores: Record<string, string> = {};
   if (datos.vehiculo_transmision && !["manual", "automatica", "electrica"].includes(datos.vehiculo_transmision)) errores.vehiculo_transmision = "Selecciona manual, automática o eléctrica";
@@ -37,7 +45,18 @@ export function validarFila(datos: Record<string, string>, indice: number): Fila
       if (!datos[key]?.trim()) errores[key] = "Campo requerido";
     }
   }
-  if (datos.modalidad_programacion === "programado" && !Number.isFinite(Date.parse(datos.fecha_hora_programada ?? ""))) errores.fecha_hora_programada = "Fecha y hora requeridas";
+  if (datos.modalidad_programacion === "programado") {
+    const fecha = datos.fecha_hora_programada ?? "";
+    const instante = Date.parse(fecha);
+    const formato = /^(\d{4})-(\d{2})-(\d{2})T(?:[01]\d|2[0-3]):[0-5]\d(?::[0-5]\d(?:\.\d{1,3})?)?(?:Z|[+-]\d{2}:\d{2})$/.exec(fecha);
+    const calendario = formato ? new Date(Date.UTC(+formato[1]!, +formato[2]! - 1, +formato[3]!)) : null;
+    const diaValido = formato && calendario &&
+      calendario.getUTCFullYear() === Number(formato[1]) &&
+      calendario.getUTCMonth() + 1 === Number(formato[2]) &&
+      calendario.getUTCDate() === Number(formato[3]);
+    if (!Number.isFinite(instante) || !diaValido) errores.fecha_hora_programada = "Fecha y hora válidas requeridas";
+    else if (instante < Date.now() + ANTICIPACION_MINIMA_HORAS * 60 * 60 * 1000) errores.fecha_hora_programada = `Programa con al menos ${ANTICIPACION_MINIMA_HORAS} horas de anticipación.`;
+  }
   if (datos.modalidad_programacion && !["programado", "lo_antes_posible"].includes(datos.modalidad_programacion)) errores.modalidad_programacion = "Selecciona programado o lo_antes_posible";
   if (datos.modalidad_programacion !== "programado" && datos.fecha_hora_programada) errores.fecha_hora_programada = "Borra la fecha para un traslado lo antes posible";
   if (datos.tipo_traslado && !["local", "foraneo"].includes(datos.tipo_traslado)) errores.tipo_traslado = "Selecciona local o foraneo";
@@ -66,7 +85,9 @@ export function normalizarFilaPlantilla(original: Record<string, string>): Recor
 /** Las fórmulas nunca se ejecutan. Solo se leen sus resultados guardados. */
 export function valorCelda(valor: unknown): string {
   if (valor == null) return "";
-  if (valor instanceof Date) return valor.toISOString();
+  // Excel almacena una hora civil sin zona. ExcelJS representa esos campos
+  // como UTC; conservar la hora capturada y asignarle la zona de la plantilla.
+  if (valor instanceof Date) return valor.toISOString().replace(/Z$/, "-06:00");
   if (typeof valor === "object") {
     if ("formula" in valor || "sharedFormula" in valor) return "result" in valor ? valorCelda(valor.result) : "";
     if ("richText" in valor && Array.isArray(valor.richText)) return valor.richText.map(v => v.text).join("");
