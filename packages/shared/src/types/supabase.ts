@@ -2824,6 +2824,38 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"tickets_soporte": {
+                  Row: {
+                    "auth_user_id": string,"creado_en": string,"descripcion": string,"estado": string,"id": string,"motivo": string,"resuelto_en": string | null,"resuelto_por": string | null,"traslado_id": string | null
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "auth_user_id"?: string,"creado_en"?: string,"descripcion": string,"estado"?: string,"id"?: string,"motivo": string,"resuelto_en"?: string | null,"resuelto_por"?: string | null,"traslado_id"?: string | null
+                  }
+                  Update: {
+                    "auth_user_id"?: string,"creado_en"?: string,"descripcion"?: string,"estado"?: string,"id"?: string,"motivo"?: string,"resuelto_en"?: string | null,"resuelto_por"?: string | null,"traslado_id"?: string | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "tickets_soporte_traslado_id_fkey"
+      columns: ["traslado_id"]
+isOneToOne: false
+      referencedRelation: "obs_tracking_fallos"
+      referencedColumns: ["traslado_id"]
+    },{
+      foreignKeyName: "tickets_soporte_traslado_id_fkey"
+      columns: ["traslado_id"]
+isOneToOne: false
+      referencedRelation: "pasaporte_digital"
+      referencedColumns: ["traslado_id"]
+    },{
+      foreignKeyName: "tickets_soporte_traslado_id_fkey"
+      columns: ["traslado_id"]
+isOneToOne: false
+      referencedRelation: "traslados"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"totales_definitivos_traslado": {
                   Row: {
                     "congelado_en": string,"cotizado": number,"fuente": string,"historico": boolean,"moneda": string,"total": number,"traslado_id": string
