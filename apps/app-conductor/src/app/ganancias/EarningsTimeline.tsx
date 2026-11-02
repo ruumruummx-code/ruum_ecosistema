@@ -8,7 +8,7 @@ interface EarningsTimelineProps {
   tieneTraslados: boolean;
   tieneValidados: boolean;
   tienePagado: boolean;
-  montoPendiente: number;
+  montoPendiente: number | null;
   proximoPayoutFecha: string;
   fechaDispersion: string;
 }
@@ -55,7 +55,7 @@ export function EarningsTimeline({
           );
         })}
       </div>
-      {montoPendiente > 0 && (
+      {montoPendiente !== null && montoPendiente > 0 && (
         <div className="rounded-xl bg-signal/10 border border-signal/20 px-3 py-2.5 flex items-center justify-between gap-2">
           <span className="font-body text-xs font-bold text-text-primary flex items-center gap-1.5">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} aria-hidden className="text-signal">

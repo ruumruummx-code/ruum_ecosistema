@@ -12,7 +12,7 @@ interface ViajeResumen {
   vehiculoId?: string;
   origen: string;
   destino: string;
-  montoGanado: number;
+  montoGanado: number | null;
   precioBase: number;
   comisionRuum: number | null;
   gastosAutorizados: number | null;

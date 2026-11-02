@@ -97,6 +97,8 @@ describe("helpers puros de ganancias", () => {
     expect(formatearFecha("2026-07-17")).toContain("2026");
     expect(formatearFechaCorta("2026-07-17")).toMatch(/jul/i);
     expect(formatearMoneda(1234.5)).toMatch(/1,234\.50/);
+    expect(formatearMoneda(null)).toBe("Por calcular");
+    expect(formatearMoneda(undefined)).toBe("Por calcular");
     expect(toDateSafe(null)).toBeNull();
     expect(toDateSafe("2026-07-17")?.getFullYear()).toBe(2026);
   });
@@ -232,6 +234,33 @@ describe("useEarningsLedger", () => {
     expect(result.current.registrosTraslados[0].gastosAutorizados).toBeNull();
     expect(result.current.registrosTraslados[0].bonos).toBeNull();
     expect(result.current.registrosTraslados[0].ajuste).toBeNull();
+    expect(result.current.resumen.bonos).toBeNull();
+    expect(result.current.resumen.reembolsoGastos).toBeNull();
+    expect(result.current.resumen.totalesIncompletos).toBe(true);
+  });
+
+  it("marca gananciaNeta y depositoAcumulado como null cuando falta ganancia congelada", async () => {
+    const tSinCongelar = {
+      ...TRASLADO,
+      id: "traslado-sin-congelar",
+      ganancia_conductor_congelada: null,
+      precio_final: 1500,
+      cerrado_en: new Date().toISOString()
+    };
+
+    mocks.obtenerGananciasConductor.mockResolvedValue({
+      datosBancarios: { id: "datos-1" },
+      payouts: [],
+      traslados: [tSinCongelar]
+    });
+
+    const { result } = renderHook(() => useEarningsLedger());
+    await waitFor(() => expect(result.current.cargando).toBe(false));
+
+    expect(result.current.registrosTraslados[0].montoGanado).toBeNull();
+    expect(result.current.resumen.totalesIncompletos).toBe(true);
+    expect(result.current.resumen.gananciaNeta).toBeNull();
+    expect(result.current.resumen.depositoAcumulado).toBeNull();
   });
 
   it("imputa ajustes de payout según su fecha de liquidación y no por solapamiento amplio (H10)", async () => {

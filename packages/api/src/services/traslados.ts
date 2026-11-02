@@ -503,7 +503,7 @@ export async function confirmarLlegadaDestino(
     params.p_motivo_sin_medicion = geocerca.motivoSinMedicion;
   }
 
-  const { data, error } = await rpcTipado(cliente, "conductor_confirmar_llegada_destino", params);
+  const { data, error } = await rpcTipado(cliente, "conductor_confirmar_llegada_destino", params as never);
 
   if (error) {
     // Si la función en el entorno no soporta parámetros extendidos, reintentar con la signatura base

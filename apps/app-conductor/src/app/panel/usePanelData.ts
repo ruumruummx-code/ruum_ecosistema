@@ -31,6 +31,15 @@ export interface FallosParcialesPanel {
   documentos?: boolean;
 }
 
+export interface ActualizacionesPorModulo {
+  aceptados: Date | null;
+  disponibles: Date | null;
+  disponibilidad: Date | null;
+  notificaciones: Date | null;
+  ganancias: Date | null;
+  documentos: Date | null;
+}
+
 function conductorOperativo(
   real: Awaited<ReturnType<typeof obtenerConductorActual>>,
   email?: string | null
@@ -237,7 +246,7 @@ export function usePanelData() {
       }
 
       if (Object.keys(updatesModulo).length > 0) {
-        setActualizacionesPorModulo((prev) => ({ ...prev, ...updatesModulo }));
+        setActualizacionesPorModulo((prev: ActualizacionesPorModulo) => ({ ...prev, ...updatesModulo }));
       }
 
       const numFallos = Object.keys(fallos).length;
