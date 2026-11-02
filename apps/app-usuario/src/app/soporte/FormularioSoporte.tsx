@@ -1,5 +1,6 @@
 "use client";
 import { useRef, useState } from "react";
+import { obtenerHeadersCsrfAsync } from "../../lib/csrf";
 import Link from "next/link";
 import { Aviso, MobileButton } from "@ruum/ui";
 import { reportarIncidencia } from "@ruum/api/services";
@@ -47,6 +48,7 @@ export function FormularioSoporte({ traslados, preseleccionado, emailUsuario, mo
   const [resultado, setResultado] = useState<{ ok: boolean; msg: string; folio?: string; correo?: string } | null>(null);
 
   const envioRef = useRef(false);
+  const ticketRef = useRef<{ contenido: string; id: string } | null>(null);
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -73,7 +75,7 @@ export function FormularioSoporte({ traslados, preseleccionado, emailUsuario, mo
     registrarEventoUx("soporte_enviado", {
       motivo,
       tiene_viaje: Boolean(viajeId),
-      viaEmail: !viajeId || !tipo || !tieneSupabaseConfigurado()
+      viaEmail: false
     });
 
     try {
@@ -101,26 +103,18 @@ export function FormularioSoporte({ traslados, preseleccionado, emailUsuario, mo
         return;
       }
 
-      // Fallback: mailto prellenado si es consulta general sin viaje asociado
-      const subject = encodeURIComponent(`[Ruum Ruum Soporte] ${motivo}${viajeId ? ` · Viaje: ${viajeId.slice(0, 8).toUpperCase()}` : ""}`);
-      const body = encodeURIComponent(
-        `Motivo: ${motivo}\n` +
-        `Viaje: ${viajeId || "Sin viaje vinculado (consulta general)"}\n` +
-        `Correo usuario: ${emailUsuario || "No proporcionado"}\n\n` +
-        `Tipo de incidencia: ${tipo ? ETIQUETA_TIPO_INCIDENCIA[tipo] : "Consulta de soporte"}\nMomento: ${momento || "No indicado"}\nDescripción:\n${descripcion.trim()}\n\n` +
-        `---\n` +
-        `Enviado desde app-usuario Ruum Ruum\n` +
-        `Horario soporte: ${HORARIO_SOPORTE.dias} ${HORARIO_SOPORTE.horas}\n` +
-        `SLA: ${HORARIO_SOPORTE.sla} en horario, ${HORARIO_SOPORTE.slaFueraHorario} fuera de horario`
-      );
-
-      const mailtoUrl = `mailto:${CORREO_SOPORTE}?subject=${subject}&body=${body}`;
-
-      setResultado({
-        ok: false,
-        msg: "Tu reporte aún no se ha enviado. Abre tu aplicación de correo y envía el mensaje preparado; si no abre, copia la descripción y escribe a " + CORREO_SOPORTE + ".",
-        correo: mailtoUrl,
+      const contenido = JSON.stringify({ trasladoId: viajeId || null, motivo, descripcion: descripcion.trim() });
+      if (ticketRef.current?.contenido !== contenido) ticketRef.current = { contenido, id: crypto.randomUUID() };
+      const respuesta = await fetch("/api/soporte", {
+        method: "POST", headers: await obtenerHeadersCsrfAsync({ "Content-Type": "application/json" }),
+        body: JSON.stringify({ ...JSON.parse(contenido), id: ticketRef.current.id }),
       });
+      const datos = await respuesta.json();
+      if (!respuesta.ok || !datos.id) throw new Error(datos.error ?? "No se confirmó el ticket.");
+      const folio = `SOP-${datos.id.toUpperCase()}`;
+      setResultado({ ok: true, msg: "Tu consulta quedó registrada. Nuestro equipo la atenderá desde la bandeja de soporte.", folio });
+      ticketRef.current = null;
+      setDescripcion("");
     } catch (err) {
       console.warn("[soporte] Error al reportar incidencia:", err);
       setResultado({
@@ -175,7 +169,7 @@ export function FormularioSoporte({ traslados, preseleccionado, emailUsuario, mo
           ))}
         </select>
         <span className="text-[12px] text-[#4e5f80] dark:text-[#a8b5cc]">
-          Las consultas se preparan por correo. Para registrar una incidencia operativa, selecciona el viaje, el tipo y el momento.
+          Tu consulta se guardará con un folio. Para una incidencia operativa, selecciona el viaje, el tipo y el momento.
         </span>
       </label>
 
@@ -199,7 +193,7 @@ export function FormularioSoporte({ traslados, preseleccionado, emailUsuario, mo
       {viajeId && <>
         <label className="flex flex-col gap-1.5">Tipo de incidencia
           <select disabled={enviando} value={tipo} onChange={e => { setTipo(e.target.value as TipoIncidencia | ""); setResultado(null); }} className="rounded-xl border p-3 bg-[var(--ruum-surface)]">
-            <option value="">Consulta de soporte por correo</option>
+            <option value="">Consulta de soporte</option>
             {Object.entries(ETIQUETA_TIPO_INCIDENCIA).filter(([valor]) => valor !== "conflicto_evidencia").map(([valor, etiqueta]) => <option key={valor} value={valor}>{etiqueta}</option>)}
           </select>
         </label>

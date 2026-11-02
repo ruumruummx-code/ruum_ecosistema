@@ -164,6 +164,7 @@ export function SoporteCliente({
     problema_traslado: "Reportar problema con un viaje",
     ayuda_evidencia: "Dudas con evidencia fotográfica",
     pagos: "Ayuda con pagos o facturación",
+    cancelacion: "Cancelaciones o reprogramación",
     dano: "Reportar daño o incidente",
     eliminar_cuenta: "Consulta general u otro",
   };

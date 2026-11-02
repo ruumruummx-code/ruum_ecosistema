@@ -28,3 +28,4 @@ export * from "./empresa-equipo";
 export * from "./asignaciones";
 export * from "./checkout-masivo";
 export * from "./billetera";
+export * from "./tickets-soporte";

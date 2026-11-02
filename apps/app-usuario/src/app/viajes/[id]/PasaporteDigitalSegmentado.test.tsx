@@ -11,10 +11,11 @@ vi.mock("./SeguimientoTrasladoTiempoReal", () => ({ SeguimientoTrasladoTiempoRea
         activo: boolean;
     }) => <div data-testid="map" data-active={activo}>Mapa en vivo</div> }));
 vi.mock("./CompartirPasaporte", () => ({ CompartirPasaporte: () => <button>Compartir</button> }));
-vi.mock("next/dynamic", () => ({ default: () => ({ seccion, pasaporte }: {
+vi.mock("next/dynamic", () => ({ default: () => ({ seccion, pasaporte, onAbrirChat }: {
         seccion: string;
         pasaporte: { estado: string };
-    }) => <div data-testid="detalle" data-estado={pasaporte.estado}>Detalle {seccion}</div> }));
+        onAbrirChat?: () => void;
+    }) => <div data-testid="detalle" data-estado={pasaporte.estado}>Detalle {seccion}<button onClick={onAbrirChat}>Chat desde cancelación</button></div> }));
 beforeAll(() => {
     HTMLDialogElement.prototype.showModal = function () { this.setAttribute("open", ""); };
     HTMLDialogElement.prototype.close = function () { this.removeAttribute("open"); };
@@ -26,6 +27,15 @@ const props: PasaporteDigitalSegmentadoProps = {
 afterEach(() => window.history.replaceState(null, "", "/"));
 beforeEach(() => { vivo.estadoRealtime = null; vivo.estadoActualizadoEn = null; refresh.mockClear(); });
 describe("Pasaporte dashboard", () => {
+    it("abre chat y cierra detalles incluso si el fragmento ya era chat", async () => {
+        window.history.replaceState(null, "", "/viajes/c784-test#chat-conductor");
+        render(<PasaporteDigitalSegmentado {...props}/>);
+        await userEvent.click(screen.getByRole("tab", { name: "En Ruta" }));
+        await userEvent.click(screen.getByRole("button", { name: "Datos y recibo" }));
+        await userEvent.click(screen.getByRole("button", { name: "Chat desde cancelación" }));
+        expect(screen.getByRole("log")).toBeVisible();
+        expect(screen.queryByTestId("detalle")).not.toBeInTheDocument();
+    });
     it("comparte el estado en vivo con chat y detalles y actualiza los datos relacionados", async () => {
         const { rerender } = render(<PasaporteDigitalSegmentado {...props}/>);
         vivo.estadoRealtime = "servicio_cerrado";

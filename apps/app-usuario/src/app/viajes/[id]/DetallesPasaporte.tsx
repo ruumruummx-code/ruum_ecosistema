@@ -80,7 +80,8 @@ export function DetallesPasaporte({
   ultimaUbicacion,
   seccion,
   ocultarCalificacion = false,
-}: PasaporteDigitalSegmentadoProps & { seccion: "fotos" | "unidad" | "recibo"; ocultarCalificacion?: boolean }) {
+  onAbrirChat,
+}: PasaporteDigitalSegmentadoProps & { seccion: "fotos" | "unidad" | "recibo"; ocultarCalificacion?: boolean; onAbrirChat?: () => void }) {
   const estado: Database["public"]["Enums"]["estado_traslado"] =
     pasaporte.estado ??"solicitud_creada";
   const trasladoId = pasaporte.traslado_id ??"";
@@ -226,6 +227,7 @@ export function DetallesPasaporte({
             <div className="flex flex-col gap-3">
               <ReportarIncidenciaUsuario trasladoId={trasladoId} />
               <CancelarTraslado
+                onAbrirChat={onAbrirChat}
                 trasladoId={trasladoId}
                 estado={estado}
                 precio={precioBase}

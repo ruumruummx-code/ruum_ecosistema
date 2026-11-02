@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Aviso, Button, Field } from "@ruum/ui";
 import { MENSAJES_CLAVE_UX } from "@ruum/shared/constants";
@@ -24,6 +25,7 @@ export function CancelarTraslado({
   fechaProgramada,
   conductorAsignado,
   cerrado = false,
+  onAbrirChat,
 }: {
   trasladoId: string;
   estado: EstadoTraslado;
@@ -31,6 +33,7 @@ export function CancelarTraslado({
   fechaProgramada: string | null;
   conductorAsignado: boolean;
   cerrado?: boolean;
+  onAbrirChat?: () => void;
 }) {
   const router = useRouter();
   const [motivo, setMotivo] = useState("");
@@ -50,8 +53,8 @@ export function CancelarTraslado({
         </p>
         <p className="mt-2 font-body text-xs text-ink/60">
           Si requieres asistencia urgente o surge alguna eventualidad, por favor{" "}
-          <a href="#chat-conductor" className="font-semibold text-route-action underline">comunícate con el conductor</a> o{" "}
-          <a href="#soporte-pasaporte" className="font-semibold text-route-action underline">contacta a Soporte</a>.
+          <a href="#chat-conductor" onClick={onAbrirChat} className="font-semibold text-route-action underline">comunícate con el conductor</a> o{" "}
+          <Link href={`/soporte?viaje=${encodeURIComponent(trasladoId)}&motivo=cancelacion`} className="font-semibold text-route-action underline">contacta a Soporte</Link>.
         </p>
       </div>
     );

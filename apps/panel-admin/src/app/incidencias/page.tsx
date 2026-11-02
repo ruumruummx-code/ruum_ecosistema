@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import { TicketsSoporte } from "./TicketsSoporte";
 import { Aviso } from "@ruum/ui";
 import {
   extraerRutaIncidencia,
@@ -808,6 +809,7 @@ export default function PaginaIncidenciasAdmin() {
         )}
       />
 
+      <TicketsSoporte />
       <section className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
         <KpiIncidencia etiqueta="Abiertas / activas" valor={kpis.abiertas} detalle={`Promedio transcurrido: ${kpis.promedio}`} />
         <KpiIncidencia etiqueta="En riesgo de SLA" valor={kpis.enRiesgo} detalle="Requieren atencion prioritaria" tono={kpis.enRiesgo > 0 ? "alerta" : "neutral"} />

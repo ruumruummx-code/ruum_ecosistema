@@ -43,7 +43,7 @@ export function PasaporteDigitalSegmentado(props: PasaporteDigitalSegmentadoProp
     useEffect(() => {
         const aplicarFragmento = () => {
             const fragmento = window.location.hash;
-            if (fragmento === "#chat-conductor" || fragmento === "#chat") setTab("chat");
+            if (fragmento === "#chat-conductor" || fragmento === "#chat") { setDetails(null); setTab("chat"); }
             else if (fragmento === "#fotos") setTab("fotos");
             else if (!fragmento || fragmento === "#en-ruta") setTab("en_ruta");
         };
@@ -103,7 +103,7 @@ export function PasaporteDigitalSegmentado(props: PasaporteDigitalSegmentadoProp
       <section role="tabpanel" id={`${id}-panel-chat`} aria-labelledby={`${id}-chat`} hidden={tab !== "chat"} className={styles.panel}>{tab === "chat" && <div className={styles.chat}><ChatTraslado conservarEstado trasladoId={p.traslado_id ?? ""} estado={p.estado ?? "solicitud_creada"}/></div>}</section>
     </div>
     <footer className={styles.footer}><Link href={`/soporte?viaje=${p.traslado_id}`}>⚠ Asistencia 24/7</Link><div><ExportarPasaportePdf trasladoId={p.traslado_id ?? ""} /></div></footer>
-    <MobileBottomSheet open={details !== null} onClose={() => setDetails(null)} title="Detalles del traslado">{details && <><nav className={styles.detailsMenu} aria-label="Detalles"><button type="button" onClick={() => setDetails("unidad")}>Unidad</button><button type="button" onClick={() => setDetails("recibo")}>Recibo</button><button type="button" onClick={() => setDetails("fotos")}>Reportes</button></nav><Detalles {...props} pasaporte={p} seccion={details} ocultarCalificacion/></>}</MobileBottomSheet>
+    <MobileBottomSheet open={details !== null} onClose={() => setDetails(null)} title="Detalles del traslado">{details && <><nav className={styles.detailsMenu} aria-label="Detalles"><button type="button" onClick={() => setDetails("unidad")}>Unidad</button><button type="button" onClick={() => setDetails("recibo")}>Recibo</button><button type="button" onClick={() => setDetails("fotos")}>Reportes</button></nav><Detalles {...props} pasaporte={p} seccion={details} ocultarCalificacion onAbrirChat={() => { setDetails(null); setTab("chat"); requestAnimationFrame(() => document.getElementById(`${id}-chat`)?.focus()); }}/></>}</MobileBottomSheet>
     <MobileBottomSheet open={photo !== null} onClose={() => setPhoto(null)} title="Evidencia del vehículo" fullScreen>
       {/* eslint-disable-next-line @next/next/no-img-element */}
       {photo?.url_visual?.startsWith("https://") && <img className={styles.photoFull} src={photo.url_visual} alt={`${photo.tipo} · ${photo.angulo}`}/>}

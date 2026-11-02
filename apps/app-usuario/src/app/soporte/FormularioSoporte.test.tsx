@@ -14,6 +14,7 @@ vi.mock("../../lib/supabase-browser", () => ({
   crearClienteNavegador: () => ({}),
 }));
 
+vi.mock("../../lib/csrf", () => ({ obtenerHeadersCsrfAsync: async (headers: Record<string, string>) => headers }));
 vi.mock("../../lib/analytics", () => ({
   registrarEventoUx: vi.fn(),
 }));
@@ -42,9 +43,10 @@ describe("FormularioSoporte", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     tieneSupabaseMock.mockReturnValue(true);
+    vi.stubGlobal("fetch", vi.fn().mockImplementation(async () => Response.json({ id: "11111111-1111-4111-8111-111111111111" })));
   });
 
-  it("valida longitud mínima, registra incidencia con folio y hace fallback a mailto en consulta general o error", async () => {
+  it("registra incidencias y consultas generales con folio y conserva datos ante errores", async () => {
     const user = userEvent.setup();
     reportarIncidenciaMock.mockResolvedValueOnce({ id: "abcdef12-3456-7890" });
 
@@ -83,7 +85,7 @@ describe("FormularioSoporte", () => {
     await user.selectOptions(screen.getByLabelText(/Viaje relacionado/i), "");
     await user.type(textarea, "Consulta general sobre facturación mensual.");
     await user.click(screen.getByRole("button", { name: "Enviar a soporte" }));
-    expect(await screen.findByText(/Tu reporte aún no se ha enviado/i)).toBeInTheDocument();
+    expect((await screen.findAllByText(/SOP-11111111/)).length).toBeGreaterThan(0);
 
     // Con viaje pero error en BD -> fallback a mailto
     reportarIncidenciaMock.mockRejectedValueOnce(new Error("DB error"));
@@ -100,9 +102,9 @@ describe("FormularioSoporte", () => {
   it("no convierte una consulta de pagos en una incidencia arbitraria", async () => {
     render(<FormularioSoporte traslados={[{ id: "viaje-1", label: "Viaje 1" }]} preseleccionado="viaje-1" motivoInicial="Ayuda con pagos o facturación" descripcionInicial="Necesito una aclaración de mi factura." />);
     fireEvent.click(screen.getByRole("button", { name: "Enviar a soporte" }));
-    expect(await screen.findByRole("alert")).toHaveTextContent("aún no se ha enviado");
+    expect((await screen.findAllByText(/SOP-11111111/)).length).toBeGreaterThan(0);
     expect(reportarIncidenciaMock).not.toHaveBeenCalled();
-    expect(decodeURIComponent(screen.getByRole("link", { name: "Abrir correo para enviar reporte" }).getAttribute("href")!)).toContain("Viaje: viaje-1");
+    expect(fetch).toHaveBeenCalledWith("/api/soporte", expect.objectContaining({ body: expect.stringContaining('"trasladoId":"viaje-1"') }));
   });
   it("bloquea envíos duplicados y edición mientras se registra la incidencia", async () => {
     let resolver!: (value: { id: string }) => void;
@@ -123,6 +125,21 @@ describe("FormularioSoporte", () => {
   it("no conserva un viaje preseleccionado que no está en la cuenta", () => {
     render(<FormularioSoporte traslados={[]} preseleccionado="viaje-ajeno" />);
     expect(screen.getByLabelText(/Viaje relacionado/)).toHaveValue("");
+  });
+  it("conserva la descripción y la misma clave al reintentar una consulta general", async () => {
+    vi.mocked(fetch).mockResolvedValueOnce(Response.json({ error: "Temporal" }, { status: 503 }));
+    render(<FormularioSoporte traslados={[]} motivoInicial="Consulta general u otro" descripcionInicial="Necesito ayuda con mi cuenta." />);
+    fireEvent.click(screen.getByRole("button", { name: "Enviar a soporte" }));
+    await screen.findByRole("alert");
+    expect(screen.getByLabelText(/Descripción/i)).toHaveValue("Necesito ayuda con mi cuenta.");
+    const primera = JSON.parse(vi.mocked(fetch).mock.calls[0]![1]!.body as string);
+    fireEvent.click(screen.getByRole("button", { name: "Enviar a soporte" }));
+    await screen.findByRole("status");
+    const segunda = JSON.parse(vi.mocked(fetch).mock.calls[1]![1]!.body as string);
+    expect(segunda.id).toBe(primera.id);
+    expect(segunda.trasladoId).toBeNull();
+    expect(screen.getByLabelText(/Descripción/i)).toHaveValue("");
+    expect(screen.queryByRole("link", { name: "Abrir correo para enviar reporte" })).not.toBeInTheDocument();
   });
 });
 
