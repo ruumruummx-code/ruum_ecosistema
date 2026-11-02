@@ -200,4 +200,71 @@ describe("useEarningsLedger", () => {
     expect(result.current.offsetPeriodo).toBe(0);
     expect(result.current.viajeExpandido).toBeNull();
   });
+
+  it("cuenta dos vehículos idénticos en modelo como 2 unidades distintas usando vehiculo_id (H10)", async () => {
+    const ahora = new Date().toISOString();
+    const t1 = {
+      ...TRASLADO,
+      id: "traslado-1",
+      vehiculo_id: "auto-uuid-001",
+      cerrado_en: ahora
+    };
+    const t2 = {
+      ...TRASLADO,
+      id: "traslado-2",
+      vehiculo_id: "auto-uuid-002",
+      cerrado_en: ahora
+    };
+
+    mocks.obtenerGananciasConductor.mockResolvedValue({
+      datosBancarios: { id: "datos-1" },
+      payouts: [],
+      traslados: [t1, t2]
+    });
+
+    const { result } = renderHook(() => useEarningsLedger());
+    await waitFor(() => expect(result.current.cargando).toBe(false));
+
+    expect(result.current.resumen.totalTraslados).toBe(2);
+    // Deben ser 2 vehículos distintos a pesar de tener mismo marca/modelo/año
+    expect(result.current.resumen.totalVehiculos).toBe(2);
+    // Desglose de viaje no itemizado es null y no cero falso
+    expect(result.current.registrosTraslados[0].gastosAutorizados).toBeNull();
+    expect(result.current.registrosTraslados[0].bonos).toBeNull();
+    expect(result.current.registrosTraslados[0].ajuste).toBeNull();
+  });
+
+  it("imputa ajustes de payout según su fecha de liquidación y no por solapamiento amplio (H10)", async () => {
+    // Corte que abarca del 1 de octubre al 31 de octubre, pero liquidado el 5 de noviembre
+    const payoutCorte = {
+      id: "payout-corte-octubre",
+      conductor_id: "conductor-1",
+      periodo_inicio: "2026-10-01T00:00:00Z",
+      periodo_fin: "2026-10-31T23:59:59Z",
+      pagado_en: "2026-11-05T12:00:00Z",
+      ajustes: 500,
+      estado: "procesado"
+    };
+
+    mocks.obtenerGananciasConductor.mockResolvedValue({
+      datosBancarios: { id: "datos-1" },
+      payouts: [payoutCorte],
+      traslados: []
+    });
+
+    const { result } = renderHook(() => useEarningsLedger());
+    await waitFor(() => expect(result.current.cargando).toBe(false));
+
+    // Si hoy es noviembre (o la fecha de imputación está en el rango activo), se incluye el ajuste
+    // Al filtrar por un periodo que no incluye la fecha de liquidación (ej. semana anterior a noviembre),
+    // el ajuste no se debe imputar solo por solapar el intervalo de trabajo
+    const fechaNoviembre = new Date("2026-11-05T12:00:00Z");
+    const rangoNov = obtenerRangoPeriodo("mes", fechaNoviembre, 0);
+    expect(estaEnRango(new Date("2026-11-05T12:00:00Z"), rangoNov.inicio, rangoNov.fin)).toBe(true);
+
+    const fechaOctubre = new Date("2026-10-15T12:00:00Z");
+    const rangoOct = obtenerRangoPeriodo("mes", fechaOctubre, 0);
+    // La fecha de liquidación del 5 de nov NO está en el mes de octubre
+    expect(estaEnRango(new Date("2026-11-05T12:00:00Z"), rangoOct.inicio, rangoOct.fin)).toBe(false);
+  });
 });

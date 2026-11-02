@@ -64,8 +64,8 @@ export class InMemoryTelemetryQueueStorage implements TelemetryQueueStorage {
 /**
  * Almacenamiento dual: escribe siempre en el storage configurado (cifrado)
  * Y en IndexedDB como fallback obligatorio. Lee del storage configurado;
- * si está vacío, cae a IndexedDB. Garantiza que ningún punto de telemetría
- * se pierda aunque el almacenamiento principal falle.
+ * si falla o está vacío, consulta IndexedDB. Garantiza que ningún punto de telemetría
+ * se pierda aunque el almacenamiento principal falle (H03 y H04).
  */
 export class DualTelemetryQueueStorage implements TelemetryQueueStorage {
   constructor(
@@ -73,31 +73,107 @@ export class DualTelemetryQueueStorage implements TelemetryQueueStorage {
     private fallback: TelemetryQueueStorage = indexedDBTelemetryStorage
   ) {}
 
-  async read(): Promise<PuntoTelemetriaLocal[]> {
-    const principales = await this.principal.read();
-    if (principales.length > 0) return principales;
-    if (esIndexedDBDisponible()) {
-      return normalizar(await this.fallback.read());
+  private fallbackDisponible(): boolean {
+    if (this.fallback === indexedDBTelemetryStorage) {
+      return esIndexedDBDisponible();
     }
-    return principales;
+    return Boolean(this.fallback);
+  }
+
+  async read(): Promise<PuntoTelemetriaLocal[]> {
+    let principales: PuntoTelemetriaLocal[] | null = null;
+    let errorPrincipal: unknown = null;
+
+    try {
+      principales = normalizar(await this.principal.read());
+    } catch (err) {
+      errorPrincipal = err;
+    }
+
+    if (principales !== null && principales.length > 0) {
+      return principales;
+    }
+
+    if (this.fallbackDisponible()) {
+      try {
+        const delFallback = normalizar(await this.fallback.read());
+        // Si el principal falló, retornamos lo que haya en fallback (H04)
+        if (errorPrincipal) {
+          return delFallback;
+        }
+        // Si el principal funcionó pero retornó vacío, retornamos fallback si contiene datos
+        if (delFallback.length > 0) {
+          return delFallback;
+        }
+      } catch (errFallback) {
+        if (errorPrincipal) {
+          throw errorPrincipal;
+        }
+      }
+    }
+
+    if (errorPrincipal) {
+      throw errorPrincipal;
+    }
+
+    return principales ?? [];
   }
 
   async write(items: PuntoTelemetriaLocal[]): Promise<void> {
     const normalizados = normalizar(items);
-    // Escribir al storage principal (cifrado)
-    await this.principal.write(normalizados);
-    // Fallback obligatorio: escribir también en IndexedDB
-    if (esIndexedDBDisponible()) {
-      await this.fallback.write(normalizados).catch(() => {
-        // IndexedDB no debe bloquear la operación principal
-      });
+    let errorPrincipal: unknown = null;
+    let guardadoEnPrincipal = false;
+
+    try {
+      await this.principal.write(normalizados);
+      guardadoEnPrincipal = true;
+    } catch (err) {
+      errorPrincipal = err;
+    }
+
+    let guardadoEnFallback = false;
+    let errorFallback: unknown = null;
+
+    if (this.fallbackDisponible()) {
+      try {
+        await this.fallback.write(normalizados);
+        guardadoEnFallback = true;
+      } catch (err) {
+        errorFallback = err;
+      }
+    }
+
+    // Exigir confirmación de persistencia en al menos un almacén (H04)
+    if (!guardadoEnPrincipal && !guardadoEnFallback) {
+      throw (errorPrincipal || errorFallback || new Error("telemetry_storage_write_failed")) as Error;
     }
   }
 
   async clear(): Promise<void> {
-    await this.principal.clear();
-    if (esIndexedDBDisponible()) {
-      await this.fallback.clear().catch(() => undefined);
+    let errorPrincipal: unknown = null;
+    let limpioPrincipal = false;
+
+    try {
+      await this.principal.clear();
+      limpioPrincipal = true;
+    } catch (err) {
+      errorPrincipal = err;
+    }
+
+    let limpioFallback = false;
+    let errorFallback: unknown = null;
+
+    if (this.fallbackDisponible()) {
+      try {
+        await this.fallback.clear();
+        limpioFallback = true;
+      } catch (err) {
+        errorFallback = err;
+      }
+    }
+
+    if (!limpioPrincipal && !limpioFallback) {
+      throw (errorPrincipal || errorFallback || new Error("telemetry_storage_clear_failed")) as Error;
     }
   }
 }
@@ -183,8 +259,23 @@ export async function leerColaTelemetria(trasladoId?: string) {
   return trasladoId ? cola.filter((item) => item.trasladoId === trasladoId) : cola;
 }
 
-export async function contarColaTelemetria() {
-  return (await leerColaTelemetria()).length;
+export async function contarColaTelemetria(
+  opciones?: { trasladoId?: string; usuarioId?: string } | string
+): Promise<number> {
+  let trasladoId: string | undefined;
+  let usuarioId: string | undefined;
+  if (typeof opciones === "string") {
+    trasladoId = opciones;
+  } else if (opciones) {
+    trasladoId = opciones.trasladoId;
+    usuarioId = opciones.usuarioId;
+  }
+  const cola = await leerColaTelemetria(trasladoId);
+  return usuarioId ? cola.filter((item) => item.usuarioId === usuarioId).length : cola.length;
+}
+
+export async function contarColaTelemetriaDeUsuario(usuarioId: string): Promise<number> {
+  return contarColaTelemetria({ usuarioId });
 }
 
 function puedeReintentarse(item: PuntoTelemetriaLocal, ahoraMs = Date.now()) {
@@ -257,8 +348,30 @@ async function sincronizarColaTelemetriaInterno(
   return sincronizados;
 }
 
-export async function limpiarColaTelemetria() {
+export async function limpiarColaTelemetriaDeUsuario(usuarioId: string): Promise<void> {
+  const cola = normalizar(await storageTelemetria.read());
+  const restante = cola.filter((item) => item.usuarioId !== usuarioId);
+  await storageTelemetria.write(restante);
+}
+
+export async function limpiarColaTelemetriaCompleta(): Promise<void> {
   await storageTelemetria.clear();
+}
+
+/**
+ * Limpieza segura: por defecto borra solo la telemetría del usuario especificado
+ * para evitar eliminar datos pendientes de otros conductores en el dispositivo.
+ */
+export async function limpiarColaTelemetria(usuarioIdExplicito?: string | null): Promise<void> {
+  if (usuarioIdExplicito !== undefined) {
+    if (usuarioIdExplicito === null) {
+      await limpiarColaTelemetriaCompleta();
+      return;
+    }
+    await limpiarColaTelemetriaDeUsuario(usuarioIdExplicito);
+    return;
+  }
+  await limpiarColaTelemetriaCompleta();
 }
 
 export const OFFLINE_TELEMETRY_QUEUE_KEY = CLAVE_COLA_TELEMETRIA;

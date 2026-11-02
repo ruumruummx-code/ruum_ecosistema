@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { encolarPuntoTelemetria, sincronizarColaTelemetria } from "../lib/cola-telemetria-offline";
+import { encolarPuntoTelemetria, sincronizarColaTelemetria, contarColaTelemetria } from "../lib/cola-telemetria-offline";
 import { createLogger, errorCode } from "@ruum/shared/utils";
 import { crearClienteNavegador, tieneSupabaseConfigurado } from "../lib/supabase-browser";
 import { iniciarTrackingNativo, detenerTrackingNativo, solicitarUbicacionSegundoPlanoNativa, soportaTrackingNativo } from "../lib/background-tracking";
@@ -101,26 +101,67 @@ export function useDriverLocationTracking(viajeActivo: ViajeActivo | null) {
 
     let ultimaReportada: Coordenadas | null = null;
     let ultimoReporteMs = 0;
+    let ultimoAckMs = 0;
+    let ultimoCapturaMs = 0;
     const usuarioActual = cliente.auth.getSession().then(({ data }) => data.session?.user.id);
     let trabajo = Promise.resolve();
-    const publicarEstado = (ultimoEnvio?: number) => window.dispatchEvent(new CustomEvent("ruum:tracking-web", { detail: { active: true, lastSentAt: ultimoEnvio } }));
+    const publicarEstado = (detalles?: {
+      lastSentAt?: number;
+      lastAckAt?: number;
+      lastCapturedAt?: number;
+      pendingCount?: number;
+    }) =>
+      window.dispatchEvent(
+        new CustomEvent("ruum:tracking-web", {
+          detail: {
+            active: true,
+            lastSentAt: detalles?.lastAckAt ?? detalles?.lastSentAt,
+            lastAckAt: detalles?.lastAckAt,
+            lastCapturedAt: detalles?.lastCapturedAt ?? (ultimoCapturaMs || undefined),
+            pendingCount: detalles?.pendingCount ?? 0
+          }
+        })
+      );
     publicarEstado();
     async function reportar(ubicacion: Coordenadas | null) {
       if (!ubicacion || cancelado) return;
       const captura = ubicacion.capturedAt ?? new Date().toISOString();
+      ultimoCapturaMs = Date.parse(captura) || Date.now();
       trabajo = trabajo.then(async () => {
-      if (cancelado) return;
-      try {
-        const usuarioId = await usuarioActual;
-        if (!usuarioId || cancelado) return;
-        await encolarPuntoTelemetria(viaje.trasladoId, ubicacion, { usuarioId, deviceTimestamp: captura });
-        await sincronizarColaTelemetria(cliente);
-        ultimaReportada = ubicacion;
-        ultimoReporteMs = Date.now();
-        if (!cancelado) publicarEstado(ultimoReporteMs);
-      } catch (error) {
-        logger.warn("driver_location_report_failed", { tripId: viaje.trasladoId, isOnline: isOnline(), errorCode: errorCode(error), precisionM: ubicacion.precisionM ?? null }, "connectivity");
-      }
+        if (cancelado) return;
+        try {
+          const usuarioId = await usuarioActual;
+          if (!usuarioId || cancelado) return;
+          await encolarPuntoTelemetria(viaje.trasladoId, ubicacion, { usuarioId, deviceTimestamp: captura });
+          const sincronizados = await sincronizarColaTelemetria(cliente);
+          const pendientes = await contarColaTelemetria({ usuarioId });
+          if (sincronizados > 0) {
+            ultimaReportada = ubicacion;
+            ultimoReporteMs = Date.now();
+            ultimoAckMs = ultimoReporteMs;
+            if (!cancelado) {
+              publicarEstado({
+                lastSentAt: ultimoAckMs,
+                lastAckAt: ultimoAckMs,
+                lastCapturedAt: ultimoCapturaMs,
+                pendingCount: pendientes
+              });
+            }
+          } else {
+            // H05: Sincronización retornó 0 (offline, sin usuario, o en backoff).
+            // No anunciar señal enviada/confirmada si no hubo ACK nuevo.
+            if (!cancelado) {
+              publicarEstado({
+                lastSentAt: ultimoAckMs || undefined,
+                lastAckAt: ultimoAckMs || undefined,
+                lastCapturedAt: ultimoCapturaMs,
+                pendingCount: pendientes
+              });
+            }
+          }
+        } catch (error) {
+          logger.warn("driver_location_report_failed", { tripId: viaje.trasladoId, isOnline: isOnline(), errorCode: errorCode(error), precisionM: ubicacion.precisionM ?? null }, "connectivity");
+        }
       });
       await trabajo;
     }
@@ -133,7 +174,30 @@ export function useDriverLocationTracking(viajeActivo: ViajeActivo | null) {
     let cancelarObservacion: (() => void) | null = null;
     void observarUbicacionActual((ubicacion) => { if (debeReportar(ubicacion)) void reportar(ubicacion); }).then((cancelar) => { if (cancelado) cancelar?.(); else cancelarObservacion = cancelar; });
     const respaldo = window.setInterval(() => void obtenerUbicacionActual().then(reportar), INTERVALO_RESPALDO_UBICACION_MS);
-    const reconectar = () => { trabajo = trabajo.then(async () => { try { await sincronizarColaTelemetria(cliente, { ignoreBackoff: true }); } catch { /* La cola conserva los puntos hasta recibir ACK. */ } }); void obtenerUbicacionActual().then(reportar); };
+    const reconectar = () => {
+      trabajo = trabajo.then(async () => {
+        try {
+          const usuarioId = await usuarioActual;
+          const sincronizados = await sincronizarColaTelemetria(cliente, { ignoreBackoff: true });
+          if (sincronizados > 0) {
+            ultimoAckMs = Date.now();
+            ultimoReporteMs = ultimoAckMs;
+            const pendientes = await contarColaTelemetria(usuarioId ? { usuarioId } : undefined);
+            if (!cancelado) {
+              publicarEstado({
+                lastSentAt: ultimoAckMs,
+                lastAckAt: ultimoAckMs,
+                lastCapturedAt: ultimoCapturaMs,
+                pendingCount: pendientes
+              });
+            }
+          }
+        } catch {
+          /* La cola conserva los puntos hasta recibir ACK. */
+        }
+      });
+      void obtenerUbicacionActual().then(reportar);
+    };
     window.addEventListener("online", reconectar);
     return () => { cancelado = true; cancelarObservacion?.(); window.clearInterval(respaldo); window.removeEventListener("online", reconectar); window.dispatchEvent(new CustomEvent("ruum:tracking-web", { detail: { active: false } })); };
   }, [trasladoId, estado, folio, cerradoEn, estadoOperativo]);

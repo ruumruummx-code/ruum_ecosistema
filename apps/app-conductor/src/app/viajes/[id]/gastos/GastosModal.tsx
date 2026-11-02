@@ -14,6 +14,17 @@ import { GastoRegistro, GastoTipoDb, obtenerEtiquetaGasto } from "./gastos-types
 
 const MAX_COMPROBANTE_BYTES = 10 * 1024 * 1024; // 10 MB
 
+function generarIdempotencyKey(): string {
+  if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
+    return crypto.randomUUID();
+  }
+  return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => {
+    const r = (Math.random() * 16) | 0;
+    const v = c === "x" ? r : (r & 0x3) | 0x8;
+    return v.toString(16);
+  });
+}
+
 interface GastosModalProps {
   trasladoId: string;
   onCerrar: () => void;
@@ -43,6 +54,8 @@ export function GastosModal({
   const [eliminandoId, setEliminandoId] = useState<string | null>(null);
   const [errorGasto, setErrorGasto] = useState<string | null>(null);
   const [exitoGasto, setExitoGasto] = useState<string | null>(null);
+  const [intencionGastoId, setIntencionGastoId] = useState<string>(() => generarIdempotencyKey());
+  const [comprobanteRutaPrevia, setComprobanteRutaPrevia] = useState<string | null>(null);
 
   const camaraInputRef = useRef<HTMLInputElement>(null);
   const archivoInputRef = useRef<HTMLInputElement>(null);
@@ -74,11 +87,13 @@ export function GastosModal({
 
     setErrorGasto(null);
     setArchivoComprobante(file);
+    setComprobanteRutaPrevia(null); // Nuevo archivo, resetear ruta previa
   }
 
   function handleQuitarComprobante() {
     setArchivoComprobante(null);
     setPreviewUrl(null);
+    setComprobanteRutaPrevia(null);
     if (camaraInputRef.current) camaraInputRef.current.value = "";
     if (archivoInputRef.current) archivoInputRef.current.value = "";
   }
@@ -114,12 +129,14 @@ export function GastosModal({
 
     try {
       const cliente = crearClienteNavegador();
-      let comprobanteRutaSubida: string | null = null;
+      let comprobanteRutaSubida: string | null = comprobanteRutaPrevia;
 
-      if (archivoComprobante) {
+      // Reutiliza comprobante ya subido en intento anterior si existe, o sube uno nuevo
+      if (archivoComprobante && !comprobanteRutaSubida) {
         try {
           const resultado = await onSubirComprobante(cliente, trasladoId, archivoComprobante);
           comprobanteRutaSubida = resultado.ruta;
+          setComprobanteRutaPrevia(resultado.ruta);
         } catch (subidaErr: unknown) {
           console.warn("Error al subir archivo:", subidaErr);
           throw new Error("No se pudo subir el archivo de comprobante.");
@@ -129,6 +146,7 @@ export function GastosModal({
       const descripcionFinal = notas.trim() || null;
 
       const data = await registrarGastoTraslado(cliente, {
+        id: intencionGastoId,
         trasladoId,
         tipo: tipoGasto,
         monto: montoNum,
@@ -150,6 +168,7 @@ export function GastosModal({
         setMonto("");
         setNotas("");
         handleQuitarComprobante();
+        setIntencionGastoId(generarIdempotencyKey()); // Nueva intención para el siguiente gasto
         setExitoGasto("Gasto registrado y comprobante guardado con éxito.");
       }
     } catch (err: unknown) {

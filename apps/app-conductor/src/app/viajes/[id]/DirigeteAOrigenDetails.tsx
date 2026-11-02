@@ -13,6 +13,7 @@ import { formatearDuracion } from "../trips-utils";
 import { EmergencyPanel } from "./EmergencyPanel";
 import { SecondaryTripNavBar } from "./SecondaryTripNavBar";
 import { TripSupportDialog } from "./TripSupportDialog";
+import { obtenerDistanciaTexto } from "./TrasladoAsignadoDetails";
 
 type PasaporteRow = Database["public"]["Views"]["pasaporte_digital"]["Row"];
 
@@ -172,8 +173,7 @@ export function DirigeteAOrigenDetails({
   const origenDireccion =
     pasaporte.origen_direccion || "LONDRES 819, Juárez, 06600, Ciudad de México";
 
-  const distanciaTexto =
-    pasaporte.distancia_km != null ? `${pasaporte.distancia_km.toFixed(1)} km` : "50.7 km";
+  const distanciaTexto = obtenerDistanciaTexto(pasaporte);
   const duracionBase = formatearDuracion(pasaporte.tiempo_estimado_horas);
   const tiempoTexto = duracionBase === "Por confirmar" ? "01:10 h" : `${duracionBase} h`;
 

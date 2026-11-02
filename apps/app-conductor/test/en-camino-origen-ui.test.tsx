@@ -176,4 +176,21 @@ describe("[UI/UX] Pantalla de Traslado Activo: En Camino al Origen Mobile-First"
       "/cuenta"
     );
   });
+
+  it("muestra 'Por calcular' y no 50.7 km cuando falta distancia_km en camino a origen (H12)", () => {
+    const pasaporteSinDistancia = {
+      ...pasaporteEnCamino,
+      distancia_km: null,
+      origen_lat: null,
+      origen_lng: null,
+      destino_lat: null,
+      destino_lng: null
+    };
+
+    render(<DirigeteAOrigenDetails pasaporte={pasaporteSinDistancia as never} volver="/viajes" />);
+
+    const metricas = screen.getByLabelText("Métricas de aproximación");
+    expect(within(metricas).getByText("Por calcular")).toBeTruthy();
+    expect(within(metricas).queryByText("50.7 km")).toBeNull();
+  });
 });

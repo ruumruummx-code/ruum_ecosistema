@@ -35,6 +35,40 @@ function extraerEtiquetaPostalOColonia(direccion: string | null, referencias?: s
   return "ZIP 0293";
 }
 
+export function obtenerDistanciaTexto(pasaporte: {
+  distancia_km?: number | null;
+  origen_lat?: number | null;
+  origen_lng?: number | null;
+  destino_lat?: number | null;
+  destino_lng?: number | null;
+}): string {
+  if (pasaporte.distancia_km != null) {
+    return `${pasaporte.distancia_km.toFixed(1)} km`;
+  }
+  if (
+    pasaporte.origen_lat != null &&
+    pasaporte.origen_lng != null &&
+    pasaporte.destino_lat != null &&
+    pasaporte.destino_lng != null
+  ) {
+    const R = 6371; // Radio medio de la Tierra en km
+    const dLat = ((pasaporte.destino_lat - pasaporte.origen_lat) * Math.PI) / 180;
+    const dLng = ((pasaporte.destino_lng - pasaporte.origen_lng) * Math.PI) / 180;
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos((pasaporte.origen_lat * Math.PI) / 180) *
+        Math.cos((pasaporte.destino_lat * Math.PI) / 180) *
+        Math.sin(dLng / 2) *
+        Math.sin(dLng / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    const km = R * c;
+    if (km > 0) {
+      return `${km.toFixed(1)} km (est.)`;
+    }
+  }
+  return "Por calcular";
+}
+
 function formatearCitaAsignada(pasaporte: PasaporteRow): string {
   const raw =
     (pasaporte as { fecha_hora_programada?: string | null }).fecha_hora_programada ?? pasaporte.creado_en;
@@ -141,8 +175,7 @@ export function TrasladoAsignadoDetails({
   const telefonoLimpio = contactoTelefono.replace(/[^0-9]/g, "");
 
   const gananciaNeta = pasaporte.ganancia_conductor ?? 531.45;
-  const distanciaTotal =
-    pasaporte.distancia_km != null ? `${pasaporte.distancia_km.toFixed(1)} km` : "50.7 km";
+  const distanciaTotal = obtenerDistanciaTexto(pasaporte);
   const duracionBase = formatearDuracion(pasaporte.tiempo_estimado_horas);
   const tiempoEstimado = duracionBase === "Por confirmar" ? "01:10 h" : `${duracionBase} h`;
 

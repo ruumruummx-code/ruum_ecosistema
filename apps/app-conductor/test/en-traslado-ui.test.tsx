@@ -8,11 +8,29 @@ const pushMock = vi.fn();
 const refreshMock = vi.fn();
 const avanzarEstadoTrasladoMock = vi.fn();
 const confirmarLlegadaDestinoMock = vi.fn();
+const obtenerUbicacionActualConEstadoMock = vi.fn(async () => ({
+  estado: "ok" as const,
+  coordenadas: {
+    lat: 19.2844,
+    lng: -99.5117,
+    precisionM: 8,
+    capturedAt: new Date().toISOString()
+  }
+}));
 
 beforeAll(() => {
   HTMLDialogElement.prototype.showModal = vi.fn();
   HTMLDialogElement.prototype.close = vi.fn();
 });
+
+vi.mock("@/lib/ubicacion", () => ({
+  distanciaMetrosEntre: vi.fn((a, b) => {
+    const dx = a.lat - b.lat;
+    const dy = a.lng - b.lng;
+    return Math.sqrt(dx * dx + dy * dy) * 111_000;
+  }),
+  obtenerUbicacionActualConEstado: () => obtenerUbicacionActualConEstadoMock()
+}));
 
 vi.mock("next/navigation", () => ({
   useRouter: () => ({
@@ -264,5 +282,139 @@ describe("[UI/UX] Pantalla de Traslado Activo: En Ruta al Destino Mobile-First",
 
     // Se omite explícitamente el botón "Más"
     expect(within(nav).queryByText(/Más/i)).toBeNull();
+  });
+
+  it("H06: registra medición real con distancia calculada y precisión si el GPS está disponible", async () => {
+    confirmarLlegadaDestinoMock.mockResolvedValueOnce({});
+    avanzarEstadoTrasladoMock.mockResolvedValueOnce("llegada_a_destino");
+
+    obtenerUbicacionActualConEstadoMock.mockResolvedValueOnce({
+      estado: "ok",
+      coordenadas: {
+        lat: 19.2844,
+        lng: -99.5117,
+        precisionM: 5,
+        capturedAt: new Date().toISOString()
+      }
+    });
+
+    render(
+      <ConduceADestinoDetails
+        pasaporte={{ ...pasaporteEnTraslado, destino_lat: 19.2845, destino_lng: -99.5118 }}
+        volver="/viajes"
+      />
+    );
+
+    const btnLlegue = screen.getByRole("button", { name: /He llegado al destino/i });
+    fireEvent.click(btnLlegue);
+
+    await waitFor(() => {
+      expect(confirmarLlegadaDestinoMock).toHaveBeenCalledWith(
+        expect.anything(),
+        "traslado-conduce-001",
+        expect.objectContaining({
+          fueraGeocerca: false,
+          distanciaM: expect.any(Number),
+          precisionM: 5,
+          antiguedadS: expect.any(Number)
+        })
+      );
+    });
+  });
+
+  it("H06: audita fueraGeocerca: true si la distancia calculada excede 500m", async () => {
+    confirmarLlegadaDestinoMock.mockResolvedValueOnce({});
+    avanzarEstadoTrasladoMock.mockResolvedValueOnce("llegada_a_destino");
+
+    obtenerUbicacionActualConEstadoMock.mockResolvedValueOnce({
+      estado: "ok",
+      coordenadas: {
+        lat: 19.0000, // Lejos del destino
+        lng: -99.0000,
+        precisionM: 10,
+        capturedAt: new Date().toISOString()
+      }
+    });
+
+    render(
+      <ConduceADestinoDetails
+        pasaporte={{ ...pasaporteEnTraslado, destino_lat: 19.2845, destino_lng: -99.5118 }}
+        volver="/viajes"
+      />
+    );
+
+    const btnLlegue = screen.getByRole("button", { name: /He llegado al destino/i });
+    fireEvent.click(btnLlegue);
+
+    await waitFor(() => {
+      expect(confirmarLlegadaDestinoMock).toHaveBeenCalled();
+      const callArgs = confirmarLlegadaDestinoMock.mock.calls[0];
+      expect(callArgs[1]).toBe("traslado-conduce-001");
+      expect(callArgs[2].fueraGeocerca).toBe(true);
+      expect(callArgs[2].distanciaM).toBeGreaterThan(500);
+    });
+  });
+
+  it("H06: registra motivoSinMedicion: 'gps_denegado' y distanciaM: null cuando el permiso es revocado", async () => {
+    confirmarLlegadaDestinoMock.mockResolvedValueOnce({});
+    avanzarEstadoTrasladoMock.mockResolvedValueOnce("llegada_a_destino");
+
+    obtenerUbicacionActualConEstadoMock.mockResolvedValueOnce({
+      estado: "denegado"
+    });
+
+    render(
+      <ConduceADestinoDetails
+        pasaporte={{ ...pasaporteEnTraslado, destino_lat: 19.2845, destino_lng: -99.5118 }}
+        volver="/viajes"
+      />
+    );
+
+    const btnLlegue = screen.getByRole("button", { name: /He llegado al destino/i });
+    fireEvent.click(btnLlegue);
+
+    await waitFor(() => {
+      expect(confirmarLlegadaDestinoMock).toHaveBeenCalledWith(
+        expect.anything(),
+        "traslado-conduce-001",
+        expect.objectContaining({
+          distanciaM: null,
+          motivoSinMedicion: "gps_denegado"
+        })
+      );
+    });
+  });
+
+  it("H06: audita motivoSinMedicion: 'lectura_obsoleta' y antigüedad real si la lectura excede 120s", async () => {
+    confirmarLlegadaDestinoMock.mockResolvedValueOnce({});
+    avanzarEstadoTrasladoMock.mockResolvedValueOnce("llegada_a_destino");
+
+    const hace180s = new Date(Date.now() - 180_000).toISOString();
+    obtenerUbicacionActualConEstadoMock.mockResolvedValueOnce({
+      estado: "ok",
+      coordenadas: {
+        lat: 19.2844,
+        lng: -99.5117,
+        precisionM: 12,
+        capturedAt: hace180s
+      }
+    });
+
+    render(
+      <ConduceADestinoDetails
+        pasaporte={{ ...pasaporteEnTraslado, destino_lat: 19.2845, destino_lng: -99.5118 }}
+        volver="/viajes"
+      />
+    );
+
+    const btnLlegue = screen.getByRole("button", { name: /He llegado al destino/i });
+    fireEvent.click(btnLlegue);
+
+    await waitFor(() => {
+      expect(confirmarLlegadaDestinoMock).toHaveBeenCalled();
+      const callArgs = confirmarLlegadaDestinoMock.mock.calls[0];
+      expect(callArgs[2].motivoSinMedicion).toBe("lectura_obsoleta");
+      expect(callArgs[2].antiguedadS).toBeGreaterThanOrEqual(180);
+    });
   });
 });

@@ -3,13 +3,18 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 let cleanup: (() => void) | void;
 const mocks = vi.hoisted(() => ({
   enqueue: vi.fn(async () => true), sync: vi.fn(async () => 1),
+  count: vi.fn(async () => 0),
   position: vi.fn(async () => ({ lat: 19, lng: -99, capturedAt: "2026-10-30T15:00:00Z" })),
   stopWatch: vi.fn(),
   watch: vi.fn(),
   session: vi.fn(async () => ({ data: { session: { user: { id: "driver" } } } }))
 }));
 vi.mock("react", () => ({ useEffect: (fn: () => (() => void) | void) => { cleanup = fn(); } }));
-vi.mock("../src/lib/cola-telemetria-offline", () => ({ encolarPuntoTelemetria: mocks.enqueue, sincronizarColaTelemetria: mocks.sync }));
+vi.mock("../src/lib/cola-telemetria-offline", () => ({
+  encolarPuntoTelemetria: mocks.enqueue,
+  sincronizarColaTelemetria: mocks.sync,
+  contarColaTelemetria: (...args: unknown[]) => mocks.count(...args)
+}));
 vi.mock("../src/lib/supabase-browser", () => ({ tieneSupabaseConfigurado: () => true, crearClienteNavegador: () => ({ auth: { getSession: mocks.session } }) }));
 vi.mock("../src/lib/background-tracking", () => ({ soportaTrackingNativo: () => false }));
 vi.mock("../src/lib/ubicacion", () => ({ obtenerUbicacionActual: mocks.position, observarUbicacionActual: mocks.watch, distanciaMetrosEntre: () => 0 }));
@@ -55,5 +60,27 @@ describe("RR-REAL-002 web tracking lifecycle", () => {
     await vi.advanceTimersByTimeAsync(0);
     expect(mocks.stopWatch).toHaveBeenCalledOnce();
     expect(mocks.enqueue).not.toHaveBeenCalled();
+  });
+
+  it("H05: no anuncia señal enviada si sync retorna 0 puntos y la cola sigue pendiente", async () => {
+    mocks.sync.mockResolvedValueOnce(0);
+    mocks.count.mockResolvedValueOnce(3); // 3 pendientes en cola
+
+    let ultimoEventoWeb: any = null;
+    window.addEventListener("ruum:tracking-web", (e: any) => {
+      ultimoEventoWeb = e.detail;
+    });
+
+    useDriverLocationTracking(trip);
+    await vi.advanceTimersByTimeAsync(0);
+
+    expect(mocks.enqueue).toHaveBeenCalled();
+    expect(mocks.sync).toHaveBeenCalled();
+    expect(ultimoEventoWeb).not.toBeNull();
+    // lastAckAt y lastSentAt deben ser undefined porque no hubo ACK nuevo
+    expect(ultimoEventoWeb.lastAckAt).toBeUndefined();
+    expect(ultimoEventoWeb.lastSentAt).toBeUndefined();
+    expect(ultimoEventoWeb.pendingCount).toBe(3);
+    expect(ultimoEventoWeb.lastCapturedAt).toBeDefined();
   });
 });

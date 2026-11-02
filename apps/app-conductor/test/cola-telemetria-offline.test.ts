@@ -111,4 +111,24 @@ describe("Cola de Telemetría Offline (cola-telemetria-offline)", () => {
     expect(await sincronizarColaTelemetria(cliente)).toBe(0);
     expect(await contarColaTelemetria()).toBe(0);
   });
+
+  it("H02: cuenta y limpia telemetría por propietario preservando otros usuarios", async () => {
+    await encolarPuntoTelemetria("t-1", { lat: 19, lng: -99 }, { usuarioId: "user-1", localId: "p1" });
+    await encolarPuntoTelemetria("t-2", { lat: 20, lng: -100 }, { usuarioId: "user-2", localId: "p2" });
+
+    expect(await contarColaTelemetria()).toBe(2);
+    expect(await contarColaTelemetria({ usuarioId: "user-1" })).toBe(1);
+    expect(await contarColaTelemetria({ usuarioId: "user-2" })).toBe(1);
+
+    // Limpieza de user-1
+    await limpiarColaTelemetria("user-1");
+
+    expect(await contarColaTelemetria()).toBe(1);
+    expect(await contarColaTelemetria({ usuarioId: "user-1" })).toBe(0);
+    expect(await contarColaTelemetria({ usuarioId: "user-2" })).toBe(1);
+
+    const restante = await leerColaTelemetria();
+    expect(restante[0].localId).toBe("p2");
+    expect(restante[0].usuarioId).toBe("user-2");
+  });
 });

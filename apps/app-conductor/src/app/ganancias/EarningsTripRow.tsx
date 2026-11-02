@@ -9,14 +9,15 @@ interface ViajeResumen {
   fecha: string;
   fechaDate: Date;
   vehiculo: string;
+  vehiculoId?: string;
   origen: string;
   destino: string;
   montoGanado: number;
   precioBase: number;
-  comisionRuum: number;
-  gastosAutorizados: number;
-  bonos: number;
-  ajuste: number;
+  comisionRuum: number | null;
+  gastosAutorizados: number | null;
+  bonos: number | null;
+  ajuste: number | null;
   estatusEconomico: EstadoEconomicoExplicito;
   liberacion: string;
   estadoTraslado: string;
@@ -120,28 +121,32 @@ export function EarningsTripRow({
                     Bonos
                     <button
                       type="button"
-                      onClick={() => setInfoSheet({ titulo: "Bonos", texto: "Incentivos por puntualidad o campañas. Se suman." })}
+                      onClick={() => setInfoSheet({ titulo: "Bonos", texto: "Incentivos por puntualidad o campañas. Se liquidan en corte." })}
                       aria-label="Qué son los bonos, toca para ver explicación"
                       className="flex size-11 items-center justify-center rounded-full border border-border bg-surface text-xs font-bold text-text-tertiary focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-route-action"
                     >
                       ?
                     </button>
                   </span>
-                  <span className="font-display text-xs font-bold text-emerald-800 dark:text-emerald-300 tabular-nums">+ {formatearMoneda(viaje.bonos)}</span>
+                  <span className="font-display text-xs font-bold text-emerald-800 dark:text-emerald-300 tabular-nums">
+                    {viaje.bonos !== null ? `+ ${formatearMoneda(viaje.bonos)}` : "No desglosado"}
+                  </span>
                 </div>
                 <div className="flex items-center justify-between gap-3 px-3 py-2.5">
                   <span className="flex items-center gap-1.5 font-body text-xs font-semibold text-text-secondary">
                     Ajustes
                     <button
                       type="button"
-                      onClick={() => setInfoSheet({ titulo: "Ajustes", texto: "Correcciones operativas. Pueden ser positivas o negativas." })}
+                      onClick={() => setInfoSheet({ titulo: "Ajustes", texto: "Correcciones operativas. Se aplican en el corte de liquidación." })}
                       aria-label="Qué son los ajustes, toca para ver explicación"
                       className="flex size-11 items-center justify-center rounded-full border border-border bg-surface text-xs font-bold text-text-tertiary focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-route-action"
                     >
                       ?
                     </button>
                   </span>
-                  <span className="font-display text-xs font-bold text-text-primary tabular-nums">+ {formatearMoneda(viaje.ajuste)}</span>
+                  <span className="font-display text-xs font-bold text-text-primary tabular-nums">
+                    {viaje.ajuste !== null ? `+ ${formatearMoneda(viaje.ajuste)}` : "En corte"}
+                  </span>
                 </div>
                 <div className="flex items-center justify-between gap-3 px-3 py-2.5 bg-danger/5">
                   <span className="flex items-center gap-1.5 font-body text-xs font-semibold text-red-500">
@@ -155,27 +160,31 @@ export function EarningsTripRow({
                       ?
                     </button>
                   </span>
-                  <span className="font-display text-xs font-bold text-red-500 tabular-nums">− {formatearMoneda(viaje.comisionRuum)}</span>
+                  <span className="font-display text-xs font-bold text-red-500 tabular-nums">
+                    {viaje.comisionRuum !== null ? `− ${formatearMoneda(viaje.comisionRuum)}` : "No disponible"}
+                  </span>
                 </div>
                 <div className="flex items-center justify-between gap-3 px-3 py-2.5">
                   <span className="flex items-center gap-1.5 font-body text-xs font-semibold text-text-secondary">
                     Reembolso gastos (+)
                     <button
                       type="button"
-                      onClick={() => setInfoSheet({ titulo: "Reembolso de gastos", texto: "Gastos autorizados comprobados (peajes, combustible)." })}
+                      onClick={() => setInfoSheet({ titulo: "Reembolso de gastos", texto: "Gastos autorizados comprobados (peajes, combustible) reembolsados en corte." })}
                       aria-label="Qué es el reembolso, toca para ver explicación"
                       className="flex size-11 items-center justify-center rounded-full border border-border bg-surface text-xs font-bold text-text-tertiary focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-route-action"
                     >
                       ?
                     </button>
                   </span>
-                  <span className="font-display text-xs font-bold text-text-primary tabular-nums">+ {formatearMoneda(viaje.gastosAutorizados)}</span>
+                  <span className="font-display text-xs font-bold text-text-primary tabular-nums">
+                    {viaje.gastosAutorizados !== null ? `+ ${formatearMoneda(viaje.gastosAutorizados)}` : "Ver en corte"}
+                  </span>
                 </div>
               </div>
               <div className="flex items-center justify-between gap-2 rounded-lg bg-surface-elevated border border-border px-3 py-2">
-                <span className="font-body text-xs font-bold text-text-secondary">Aporte del viaje al depósito</span>
+                <span className="font-body text-xs font-bold text-text-secondary">Ganancia del viaje</span>
                 <span className="font-display text-xs font-black text-text-primary tabular-nums">
-                  {formatearMoneda(viaje.precioBase + viaje.bonos + viaje.ajuste - viaje.comisionRuum + viaje.gastosAutorizados)}
+                  {formatearMoneda(viaje.montoGanado)}
                 </span>
               </div>
             </div>

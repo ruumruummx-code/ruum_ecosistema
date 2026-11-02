@@ -182,4 +182,40 @@ describe("[UI/UX] Pantalla de Traslado Asignado Mobile-First", () => {
     );
     expect(within(mobileNav).getByRole("link", { name: "Cuenta" }).getAttribute("href")).toBe("/cuenta");
   });
+
+  it("muestra 'Por calcular' y no falsea 50.7 km cuando falta distancia_km (H12)", () => {
+    const pasaporteSinDistancia = {
+      ...pasaportePrototipo,
+      distancia_km: null,
+      origen_lat: null,
+      origen_lng: null,
+      destino_lat: null,
+      destino_lng: null
+    };
+
+    render(<TrasladoAsignadoDetails pasaporte={pasaporteSinDistancia as never} volver="/viajes" />);
+
+    const cardVehiculo = screen.getByLabelText("Vehículo a trasladar");
+    const metricas = within(cardVehiculo).getByLabelText("Métricas del viaje");
+    expect(within(metricas).getByText("Por calcular")).toBeTruthy();
+    expect(within(metricas).queryByText("50.7 km")).toBeNull();
+  });
+
+  it("calcula distancia estimada por Haversine si distancia_km es null pero hay coordenadas (H12)", () => {
+    const pasaporteConCoords = {
+      ...pasaportePrototipo,
+      distancia_km: null,
+      origen_lat: 19.4326,
+      origen_lng: -99.1332,
+      destino_lat: 19.2826,
+      destino_lng: -99.6557
+    };
+
+    render(<TrasladoAsignadoDetails pasaporte={pasaporteConCoords as never} volver="/viajes" />);
+
+    const cardVehiculo = screen.getByLabelText("Vehículo a trasladar");
+    const metricas = within(cardVehiculo).getByLabelText("Métricas del viaje");
+    expect(within(metricas).getByText(/km \(est\.\)/)).toBeTruthy();
+    expect(within(metricas).queryByText("50.7 km")).toBeNull();
+  });
 });

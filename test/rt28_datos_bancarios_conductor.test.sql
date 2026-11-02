@@ -1,8 +1,8 @@
 begin;
 
-select plan(5);
+select plan(6);
 
-insert into auth.users (id, email, email_confirmed_at, raw_app_meta_data, raw_user_meta_data, created_at, updated_at)
+insert into auth.users (id, email, email_confirmed_at, raw_app_meta_data, raw_user_meta_data, created_at, updated_at, last_sign_in_at)
 values (
   '92800000-0000-4000-8000-000000000001',
   'conductor-banco@example.test',
@@ -10,7 +10,8 @@ values (
   '{}'::jsonb,
   '{}'::jsonb,
   now(),
-  now()
+  now(),
+  now() - interval '1 hour'
 );
 
 insert into public.conductores (id, auth_user_id, nombre, estado)
@@ -24,6 +25,30 @@ values (
 set local role authenticated;
 select set_config('request.jwt.claim.sub', '92800000-0000-4000-8000-000000000001', true);
 
+-- H11: Con sesión vieja sin reautenticación reciente, la llamada directa debe fallar
+select throws_ok(
+  $$
+    select public.conductor_guarda_datos_bancarios(
+      'Conductor Banco',
+      'BBVA',
+      '012345678901234567',
+      '4111111111111111'
+    )
+  $$,
+  '42501',
+  'Se requiere confirmación reciente de contraseña para guardar datos bancarios.',
+  'rechaza llamada directa sin confirmación reciente de contraseña (H11)'
+);
+
+reset role;
+-- Simular reautenticación exitosa (signInWithPassword actualiza last_sign_in_at a now())
+update auth.users
+set last_sign_in_at = now()
+where id = '92800000-0000-4000-8000-000000000001';
+
+set local role authenticated;
+select set_config('request.jwt.claim.sub', '92800000-0000-4000-8000-000000000001', true);
+
 select lives_ok(
   $$
     select public.conductor_guarda_datos_bancarios(
@@ -33,7 +58,7 @@ select lives_ok(
       '4111111111111111'
     )
   $$,
-  'el conductor guarda sus datos bancarios desde el RPC'
+  'el conductor guarda sus datos bancarios tras reautenticarse'
 );
 
 select is(

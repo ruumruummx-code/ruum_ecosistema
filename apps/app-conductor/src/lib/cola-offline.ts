@@ -218,9 +218,9 @@ async function quitarDeColaEvidenciaInterna(localId: string): Promise<void> {
   await eliminarBinarioEvidencia(localId);
 }
 
-export async function contarColaEvidencia(trasladoId?: string): Promise<number> {
-  const cola = await leerColaEvidencia();
-  return trasladoId ? cola.filter((item) => item.trasladoId === trasladoId).length : cola.length;
+export async function contarColaEvidencia(trasladoId?: string, usuarioIdExplicito?: string): Promise<number> {
+  const cola = await leerColaEvidencia(trasladoId, usuarioIdExplicito);
+  return cola.length;
 }
 
 export async function leerColaEvidenciaDeTraslado(trasladoId: string): Promise<ItemColaEvidencia[]> {

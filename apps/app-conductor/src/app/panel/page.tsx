@@ -153,6 +153,8 @@ export default function PaginaPanel() {
     notificacionesCount = 0,
     gananciasHoy = 0,
     trasladosHoy = 0,
+    gananciasHoyEstimadas = false,
+    gananciasHoyDesconocidas = false,
     seleccionarDisponibilidad,
     persistirDisponibilidad,
     setDisponibilidadPendiente,
@@ -725,7 +727,12 @@ export default function PaginaPanel() {
                 )}
 
                 {/* 6. Tarjetas de Métricas (Footer) */}
-                <PanelMetrics gananciasHoy={gananciasHoy} trasladosHoy={trasladosHoy} />
+                <PanelMetrics
+                  gananciasHoy={gananciasHoy}
+                  trasladosHoy={trasladosHoy}
+                  gananciasEstimadas={gananciasHoyEstimadas}
+                  gananciasDesconocidas={gananciasHoyDesconocidas}
+                />
               </div>
             )}
           </div>

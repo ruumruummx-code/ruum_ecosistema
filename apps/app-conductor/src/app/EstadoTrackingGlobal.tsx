@@ -31,7 +31,13 @@ function etiqueta(status: BackgroundTrackingStatus): string {
 }
 
 export function EstadoTrackingGlobal() {
-  const [web, setWeb] = useState<{ active: boolean; lastSentAt?: number }>({ active: false });
+  const [web, setWeb] = useState<{
+    active: boolean;
+    lastSentAt?: number;
+    lastAckAt?: number;
+    lastCapturedAt?: number;
+    pendingCount?: number;
+  }>({ active: false });
   useEffect(() => {
     const listener = (event: Event) => setWeb((event as CustomEvent).detail);
     window.addEventListener("ruum:tracking-web", listener);
@@ -73,7 +79,21 @@ export function EstadoTrackingGlobal() {
     };
   }, []);
 
-  if (!soportaTrackingNativo() && web.active) return <output className="mx-auto mt-3 block rounded-xl border border-amber-500/40 bg-amber-500/10 px-4 py-2 text-sm">La web no garantiza GPS con pantalla bloqueada o en segundo plano. {web.lastSentAt && Date.now() - web.lastSentAt <= 120000 ? "Última señal enviada." : "Sin señal reciente: revisa permisos, conectividad y mantén la app abierta."} Para tracking continuo utiliza el cliente nativo validado.</output>;
+  if (!soportaTrackingNativo() && web.active) {
+    const hayAckReciente = web.lastSentAt && Date.now() - web.lastSentAt <= 120000;
+    const tienePendientes = (web.pendingCount ?? 0) > 0;
+    let mensaje = "Sin señal reciente: revisa permisos, conectividad y mantén la app abierta.";
+    if (hayAckReciente && !tienePendientes) {
+      mensaje = "Última señal enviada.";
+    } else if (tienePendientes) {
+      mensaje = `${web.pendingCount} ubicación(es) en cola pendientes de sincronizar.`;
+    }
+    return (
+      <output className="mx-auto mt-3 block rounded-xl border border-amber-500/40 bg-amber-500/10 px-4 py-2 text-sm">
+        La web no garantiza GPS con pantalla bloqueada o en segundo plano. {mensaje} Para tracking continuo utiliza el cliente nativo validado.
+      </output>
+    );
+  }
   if (!status?.active && !status?.lastError) {
     return null;
   }

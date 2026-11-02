@@ -65,11 +65,14 @@ export class IndexedDBTelemetryQueueStorage {
     return new Promise((resolve, reject) => {
       const transaccion = db.transaction([STORE_NAME], "readwrite");
       const store = transaccion.objectStore(STORE_NAME);
+      // Semántica de reemplazo consistente para evitar resucitar puntos confirmados (H03)
+      store.clear();
       for (const item of items) {
         store.put(item);
       }
       transaccion.oncomplete = () => resolve();
       transaccion.onerror = () => reject(transaccion.error);
+      transaccion.onabort = () => reject(transaccion.error || new Error("indexeddb_transaction_aborted"));
     });
   }
 
@@ -96,6 +99,10 @@ export class IndexedDBTelemetryQueueStorage {
       solicitud.onerror = () => reject(solicitud.error);
     });
   }
+}
+
+export function reiniciarBaseDeDatosParaTesting() {
+  dbPromise = null;
 }
 
 /**

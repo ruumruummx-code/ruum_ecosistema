@@ -20,6 +20,73 @@ type ActionPerformed = {
 };
 
 const DEVICE_KEY = "ruum_push_device_id";
+export const PUSH_APERTURAS_PENDIENTES_KEY = "ruum_push_aperturas_pendientes";
+
+export interface AperturaPushPendiente {
+  notificacionId: string;
+  deviceId: string;
+  intentos: number;
+  creadoEn: string;
+}
+
+export async function encolarAperturaPush(notificacionId: string, deviceId: string): Promise<void> {
+  const cola = (await leerJsonLocalSeguro<AperturaPushPendiente[]>(PUSH_APERTURAS_PENDIENTES_KEY)) || [];
+  cola.push({
+    notificacionId,
+    deviceId,
+    intentos: 0,
+    creadoEn: new Date().toISOString(),
+  });
+  await guardarJsonLocalSeguro(PUSH_APERTURAS_PENDIENTES_KEY, cola);
+}
+
+export async function sincronizarAperturasPushPendientes(): Promise<number> {
+  const cola = await leerJsonLocalSeguro<AperturaPushPendiente[]>(PUSH_APERTURAS_PENDIENTES_KEY);
+  if (!cola || cola.length === 0) return 0;
+
+  let cliente: ReturnType<typeof crearClienteNavegador>;
+  try {
+    cliente = crearClienteNavegador();
+  } catch {
+    return 0;
+  }
+
+  const pendientesRestantes: AperturaPushPendiente[] = [];
+  let sincronizados = 0;
+
+  for (const item of cola) {
+    try {
+      await registrarAperturaPush(cliente, {
+        notificacionId: item.notificacionId,
+        deviceId: item.deviceId,
+      });
+      sincronizados++;
+    } catch {
+      if (item.intentos < 5) {
+        pendientesRestantes.push({ ...item, intentos: item.intentos + 1 });
+      }
+    }
+  }
+
+  if (pendientesRestantes.length > 0) {
+    await guardarJsonLocalSeguro(PUSH_APERTURAS_PENDIENTES_KEY, pendientesRestantes);
+  } else {
+    await eliminarJsonLocalSeguro(PUSH_APERTURAS_PENDIENTES_KEY);
+  }
+
+  return sincronizados;
+}
+
+export async function registrarAperturaPushSegura(notificacionId: string): Promise<void> {
+  const deviceId = await uuidLocal();
+  try {
+    const cliente = crearClienteNavegador();
+    await registrarAperturaPush(cliente, { notificacionId, deviceId });
+  } catch (err) {
+    console.warn("[push] Falló registro de apertura push; encolando para reintento durable:", err);
+    await encolarAperturaPush(notificacionId, deviceId);
+  }
+}
 
 async function uuidLocal(): Promise<string> {
   const existente = await leerJsonLocalSeguro<string>(DEVICE_KEY);
@@ -74,7 +141,10 @@ export async function inicializarPush(onNavigate: (destino: string) => void) {
       if (!data.session) return;
       const estado = await PushNotifications.checkPermissions();
       const permiso = estado.receive === "prompt" ? await PushNotifications.requestPermissions() : estado;
-      if (permiso.receive === "granted") await PushNotifications.register();
+      if (permiso.receive === "granted") {
+        await PushNotifications.register();
+        void sincronizarAperturasPushPendientes();
+      }
     } catch (error) {
       void recordOperationalEvent("push_not_registered", { errorCode: error instanceof Error ? error.message : String(error) }, "error");
     }
@@ -94,13 +164,19 @@ export async function inicializarPush(onNavigate: (destino: string) => void) {
         void recordOperationalEvent("push_not_registered", { errorCode: error instanceof Error ? error.message : String(error) }, "error");
       }),
       PushNotifications.addListener("pushNotificationReceived", () => window.dispatchEvent(new Event("ruum:notificaciones-actualizar"))),
-      PushNotifications.addListener("pushNotificationActionPerformed", async ({ notification }: { notification: PushNotificationSchema }) => {
-        const cliente = crearClienteNavegador();
+      PushNotifications.addListener("pushNotificationActionPerformed", ({ notification }: { notification: PushNotificationSchema }) => {
+        // H13: Desacoplar navegación inmediata para que un fallo en la RPC de apertura no impida abrir el destino
+        const destino = destinoDesdePush(notification);
+        try {
+          onNavigate(destino);
+        } catch (navErr) {
+          console.error("[push] Error al navegar a destino desde push:", navErr);
+        }
+
         const notificacionId = notification.data?.notificacion_id;
         if (typeof notificacionId === "string") {
-          await registrarAperturaPush(cliente, { notificacionId, deviceId: await uuidLocal() });
+          void registrarAperturaPushSegura(notificacionId);
         }
-        onNavigate(destinoDesdePush(notification));
       })
     ]);
     const { data: authListener } = clienteSesion.auth.onAuthStateChange((event) => {

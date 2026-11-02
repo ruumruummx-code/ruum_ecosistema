@@ -9,6 +9,7 @@ import type { Database } from "@ruum/shared/types";
 import { traducirErrorOperativo } from "@ruum/shared/utils";
 import { crearClienteNavegador } from "@/lib/supabase-browser";
 import { avanzarEstadoTraslado, confirmarLlegadaDestino, obtenerPasaporteDigital } from "@ruum/api/services";
+import { distanciaMetrosEntre, obtenerUbicacionActualConEstado } from "@/lib/ubicacion";
 import { createNavigationOptions, type NavigationOption } from "@/lib/navigation-launcher";
 import { EmergencyPanel } from "./EmergencyPanel";
 import { SecondaryTripNavBar } from "./SecondaryTripNavBar";
@@ -178,7 +179,54 @@ export function ConduceADestinoDetails({
       }
 
       if (estadoDb === "traslado_en_curso") {
-        await confirmarLlegadaDestino(cliente, trasladoId, { fueraGeocerca: false, distanciaM: 0 });
+        let distanciaM: number | null = null;
+        let fueraGeocerca = false;
+        let precisionM: number | null = null;
+        let antiguedadS: number | null = null;
+        let motivoSinMedicion: string | null = null;
+
+        try {
+          const resUbicacion = await obtenerUbicacionActualConEstado();
+          if (resUbicacion.estado === "ok") {
+            const coords = resUbicacion.coordenadas;
+            precisionM = coords.precisionM ?? null;
+            const ahoraMs = Date.now();
+            const capturaMs = coords.capturedAt ? Date.parse(coords.capturedAt) : ahoraMs;
+            const edadMs = Math.max(0, ahoraMs - capturaMs);
+            antiguedadS = Math.round(edadMs / 1000);
+
+            // Si la lectura supera los 120s se cataloga como obsoleta (H06)
+            if (edadMs > 120_000) {
+              motivoSinMedicion = "lectura_obsoleta";
+            }
+
+            if (navigationTargetLat != null && navigationTargetLng != null) {
+              const d = distanciaMetrosEntre(
+                { lat: coords.lat, lng: coords.lng },
+                { lat: navigationTargetLat, lng: navigationTargetLng }
+              );
+              distanciaM = Math.round(d);
+              // Geocerca de llegada configurada en 500 metros
+              fueraGeocerca = distanciaM > 500;
+            } else {
+              motivoSinMedicion = motivoSinMedicion || "destino_sin_coordenadas";
+            }
+          } else if (resUbicacion.estado === "denegado") {
+            motivoSinMedicion = "gps_denegado";
+          } else {
+            motivoSinMedicion = "gps_no_disponible";
+          }
+        } catch {
+          motivoSinMedicion = "error_obtener_ubicacion";
+        }
+
+        await confirmarLlegadaDestino(cliente, trasladoId, {
+          fueraGeocerca,
+          distanciaM,
+          precisionM,
+          antiguedadS,
+          motivoSinMedicion
+        });
         await new Promise((resolve) => setTimeout(resolve, 300));
       }
 

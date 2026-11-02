@@ -3,7 +3,9 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 const mockContarColaEvidencia = vi.fn(async () => 0);
 const mockLimpiarColaEvidencia = vi.fn(async () => {});
 const mockLimpiarColaEvidenciaCompleta = vi.fn(async () => {});
+const mockContarColaTelemetria = vi.fn(async () => 0);
 const mockLimpiarColaTelemetria = vi.fn(async () => {});
+const mockLimpiarColaTelemetriaCompleta = vi.fn(async () => {});
 const mockDetenerTrackingNativo = vi.fn(async () => {});
 const mockLimpiarCredencialesTrackingNativo = vi.fn(async () => {});
 const mockObtenerEstadoTrackingNativo = vi.fn(async () => ({ pendingCount: 0 }));
@@ -34,13 +36,15 @@ vi.mock("../src/lib/borrador-registro", () => ({
 }));
 
 vi.mock("../src/lib/cola-offline", () => ({
-  contarColaEvidencia: () => mockContarColaEvidencia(),
+  contarColaEvidencia: (...args: unknown[]) => mockContarColaEvidencia(...args),
   limpiarColaEvidencia: (...args: unknown[]) => mockLimpiarColaEvidencia(...args),
   limpiarColaEvidenciaCompleta: () => mockLimpiarColaEvidenciaCompleta()
 }));
 
 vi.mock("../src/lib/cola-telemetria-offline", () => ({
-  limpiarColaTelemetria: () => mockLimpiarColaTelemetria()
+  contarColaTelemetria: (...args: unknown[]) => mockContarColaTelemetria(...args),
+  limpiarColaTelemetria: (...args: unknown[]) => mockLimpiarColaTelemetria(...args),
+  limpiarColaTelemetriaCompleta: () => mockLimpiarColaTelemetriaCompleta()
 }));
 
 vi.mock("../src/lib/observability", () => ({
@@ -70,9 +74,89 @@ describe("Limpieza Integral de Sesión (session-cleanup)", () => {
   it("inspecciona correctamente los pendientes de evidencia y telemetría", async () => {
     mockContarColaEvidencia.mockResolvedValueOnce(3);
     mockObtenerEstadoTrackingNativo.mockResolvedValueOnce({ pendingCount: 2 });
+    mockContarColaTelemetria.mockResolvedValueOnce(0);
 
     const pendientes = await inspeccionarPendientesAntesDeSalir();
-    expect(pendientes).toEqual({ pendingEvidence: 3, pendingTelemetry: 2 });
+    expect(pendientes).toMatchObject({
+      pendingEvidence: 3,
+      pendingTelemetry: 2,
+      pendingWebTelemetry: 0,
+      pendingNativeTelemetry: 2,
+      inspectionError: false
+    });
+  });
+
+  it("detecta telemetría web pendiente por usuario y bloquea el logout (H02)", async () => {
+    mockContarColaEvidencia.mockResolvedValueOnce(0);
+    mockObtenerEstadoTrackingNativo.mockResolvedValueOnce({ pendingCount: 0 });
+    mockContarColaTelemetria.mockResolvedValueOnce(2);
+
+    const resultado = await limpiarSesionIntegral({ force: false });
+    expect(resultado.ok).toBe(false);
+    expect(resultado.blocked).toBe(true);
+    expect(resultado.pendingTelemetry).toBe(2);
+    expect(resultado.pendingWebTelemetry).toBe(2);
+    expect(mockSignOut).not.toHaveBeenCalled();
+    expect(mockLimpiarColaTelemetria).not.toHaveBeenCalled();
+  });
+
+  it("bloquea el logout si falla la inspección del tracking nativo (H02: estado explícito de error)", async () => {
+    mockContarColaEvidencia.mockResolvedValueOnce(0);
+    mockContarColaTelemetria.mockResolvedValueOnce(0);
+    mockObtenerEstadoTrackingNativo.mockRejectedValueOnce(new Error("native_plugin_unresponsive"));
+
+    const pendientes = await inspeccionarPendientesAntesDeSalir();
+    expect(pendientes.inspectionError).toBe(true);
+    expect(pendientes.inspectionErrorReason).toBe("native_plugin_unresponsive");
+
+    mockObtenerEstadoTrackingNativo.mockRejectedValueOnce(new Error("native_plugin_unresponsive"));
+    const resultado = await limpiarSesionIntegral({ force: false });
+    expect(resultado.ok).toBe(false);
+    expect(resultado.blocked).toBe(true);
+    expect(resultado.inspectionError).toBe(true);
+    expect(mockSignOut).not.toHaveBeenCalled();
+    expect(mockLimpiarColaTelemetria).not.toHaveBeenCalled();
+  });
+
+  it("permite logout forzado con autorización ante error de inspección (H02)", async () => {
+    mockContarColaEvidencia.mockResolvedValueOnce(0);
+    mockContarColaTelemetria.mockResolvedValueOnce(0);
+    mockObtenerEstadoTrackingNativo.mockRejectedValueOnce(new Error("native_plugin_unresponsive"));
+
+    const resultado = await limpiarSesionIntegral({
+      force: true,
+      autorizacion: {
+        autorizadoPor: "soporte@ruum.mx",
+        motivo: "Reinicio forzado por fallo de plugin en campo",
+        ticketSoporte: "TICKET-7766",
+        confirmarPerdidaPendientes: true
+      }
+    });
+
+    expect(resultado.ok).toBe(true);
+    expect(resultado.blocked).toBe(false);
+    expect(mockRecordOperationalEvent).toHaveBeenCalledWith(
+      "session_force_logout",
+      expect.objectContaining({
+        ticketSoporte: "TICKET-7766",
+        inspectionError: true
+      })
+    );
+    expect(mockSignOut).toHaveBeenCalled();
+  });
+
+  it("preserva la telemetría de otros usuarios al limpiar sesión (H02: cambio de cuenta)", async () => {
+    mockContarColaEvidencia.mockResolvedValueOnce(0);
+    mockContarColaTelemetria.mockResolvedValueOnce(0);
+    mockObtenerEstadoTrackingNativo.mockResolvedValueOnce({ pendingCount: 0 });
+
+    const resultado = await limpiarSesionIntegral();
+    expect(resultado.ok).toBe(true);
+    expect(resultado.blocked).toBe(false);
+    // Limpieza scoped por usuario, nunca global si hay usuario autenticado
+    expect(mockLimpiarColaEvidencia).toHaveBeenCalledWith("user-1");
+    expect(mockLimpiarColaTelemetria).toHaveBeenCalledWith("user-1");
+    expect(mockLimpiarColaTelemetriaCompleta).not.toHaveBeenCalled();
   });
 
   it("bloquea el logout si hay pendientes y force no está habilitado", async () => {

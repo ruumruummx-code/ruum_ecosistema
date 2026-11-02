@@ -478,15 +478,46 @@ export async function avanzarEstadoTraslado(cliente: Cliente, trasladoId: string
 export async function confirmarLlegadaDestino(
   cliente: Cliente,
   trasladoId: string,
-  geocerca?: { fueraGeocerca?: boolean; distanciaM?: number | null }
+  geocerca?: {
+    fueraGeocerca?: boolean;
+    distanciaM?: number | null;
+    precisionM?: number | null;
+    antiguedadS?: number | null;
+    motivoSinMedicion?: string | null;
+  }
 ) {
-  const { data, error } = await rpcTipado(cliente, "conductor_confirmar_llegada_destino", {
+  const params: Record<string, unknown> = {
     p_traslado_id: trasladoId,
     p_fuera_geocerca: Boolean(geocerca?.fueraGeocerca),
-    ...(geocerca?.distanciaM !== null && geocerca?.distanciaM !== undefined ? { p_distancia_m: geocerca.distanciaM } : {})
-  });
+  };
+  if (geocerca?.distanciaM !== null && geocerca?.distanciaM !== undefined) {
+    params.p_distancia_m = geocerca.distanciaM;
+  }
+  if (geocerca?.precisionM !== null && geocerca?.precisionM !== undefined) {
+    params.p_precision_m = geocerca.precisionM;
+  }
+  if (geocerca?.antiguedadS !== null && geocerca?.antiguedadS !== undefined) {
+    params.p_antiguedad_s = geocerca.antiguedadS;
+  }
+  if (geocerca?.motivoSinMedicion) {
+    params.p_motivo_sin_medicion = geocerca.motivoSinMedicion;
+  }
 
-  if (error) throw error;
+  const { data, error } = await rpcTipado(cliente, "conductor_confirmar_llegada_destino", params);
+
+  if (error) {
+    // Si la función en el entorno no soporta parámetros extendidos, reintentar con la signatura base
+    if (params.p_precision_m !== undefined || params.p_antiguedad_s !== undefined || params.p_motivo_sin_medicion !== undefined) {
+      const fallback = await rpcTipado(cliente, "conductor_confirmar_llegada_destino", {
+        p_traslado_id: trasladoId,
+        p_fuera_geocerca: Boolean(geocerca?.fueraGeocerca),
+        ...(geocerca?.distanciaM !== null && geocerca?.distanciaM !== undefined ? { p_distancia_m: geocerca.distanciaM } : {})
+      });
+      if (fallback.error) throw fallback.error;
+      return fallback.data ?? "llegada_a_destino";
+    }
+    throw error;
+  }
   return data ?? "llegada_a_destino";
 }
 

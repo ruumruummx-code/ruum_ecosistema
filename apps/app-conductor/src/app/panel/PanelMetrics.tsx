@@ -2,9 +2,11 @@
 
 import Link from "next/link";
 
-interface PanelMetricsProps {
-  gananciasHoy: number;
-  trasladosHoy: number;
+export interface PanelMetricsProps {
+  gananciasHoy: number | null;
+  trasladosHoy: number | null;
+  gananciasEstimadas?: boolean;
+  gananciasDesconocidas?: boolean;
 }
 
 function BolsaDineroMovilIcono() {
@@ -31,13 +33,43 @@ function AutoIcono({ className = "size-5" }: { className?: string }) {
   );
 }
 
-export function PanelMetrics({ gananciasHoy, trasladosHoy }: PanelMetricsProps) {
-  const restantes = Math.max(0, 3 - trasladosHoy);
-  const ganancias = new Intl.NumberFormat("es-MX", {
-    style: "currency",
-    currency: "MXN",
-    maximumFractionDigits: 0,
-  }).format(gananciasHoy);
+export function PanelMetrics({
+  gananciasHoy,
+  trasladosHoy,
+  gananciasEstimadas = false,
+  gananciasDesconocidas = false,
+}: PanelMetricsProps) {
+  const tieneDatosGanancias = !gananciasDesconocidas && gananciasHoy !== null;
+  const tieneDatosTraslados = trasladosHoy !== null;
+
+  const restantes = tieneDatosTraslados ? Math.max(0, 3 - (trasladosHoy ?? 0)) : null;
+
+  const gananciasFormateadas = tieneDatosGanancias
+    ? new Intl.NumberFormat("es-MX", {
+        style: "currency",
+        currency: "MXN",
+        maximumFractionDigits: 0,
+      }).format(gananciasHoy ?? 0)
+    : "—";
+
+  const gananciasTexto = tieneDatosGanancias
+    ? gananciasEstimadas
+      ? `~ ${gananciasFormateadas}`
+      : gananciasFormateadas
+    : "—";
+
+  const subtextoGanancias = !tieneDatosGanancias
+    ? "No disponible"
+    : trasladosHoy === 0
+      ? "Sin cierres aún"
+      : `${trasladosHoy ?? 0} cierre${trasladosHoy === 1 ? "" : "s"} hoy${gananciasEstimadas ? " (est.)" : ""}`;
+
+  const trasladosTexto = tieneDatosTraslados ? `${trasladosHoy} / 3` : "—";
+  const subtextoTraslados = !tieneDatosTraslados
+    ? "No disponible"
+    : restantes === 0
+      ? "Bono disponible"
+      : `Faltan ${restantes} para bono`;
 
   return (
     <section className="driver-metrics grid grid-cols-2 gap-3 md:gap-5" aria-label="Resumen del día">
@@ -67,10 +99,10 @@ export function PanelMetrics({ gananciasHoy, trasladosHoy }: PanelMetricsProps) 
           </div>
 
           <strong className="mt-1.5 font-display text-2xl font-black leading-none text-[#0A2342] tabular-nums md:mt-1 md:text-3xl">
-            {ganancias}
+            {gananciasTexto}
           </strong>
           <p className="mt-1 font-body text-xs text-[#566889] md:text-[13px]">
-            {trasladosHoy === 0 ? "Sin cierres aún" : `${trasladosHoy} cierre${trasladosHoy === 1 ? "" : "s"} hoy`}
+            {subtextoGanancias}
           </p>
           <Link
             href="/ganancias"
@@ -108,10 +140,10 @@ export function PanelMetrics({ gananciasHoy, trasladosHoy }: PanelMetricsProps) 
           </div>
 
           <strong className="mt-1.5 font-display text-2xl font-black leading-none text-[#0A2342] tabular-nums md:mt-1 md:text-3xl">
-            {trasladosHoy} / 3
+            {trasladosTexto}
           </strong>
           <p className="mt-1 font-body text-xs text-[#566889] md:text-[13px]">
-            {restantes === 0 ? "Bono disponible" : `Faltan ${restantes} para bono`}
+            {subtextoTraslados}
           </p>
           <Link
             href="/viajes"

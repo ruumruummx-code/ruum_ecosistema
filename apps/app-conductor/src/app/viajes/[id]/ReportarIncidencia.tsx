@@ -170,6 +170,7 @@ export function ReportarIncidencia({ trasladoId }: { trasladoId: string }) {
   const [adjunto, setAdjunto] = useState<File | null>(null);
   const [procesando, setProcesando] = useState(false);
   const [mensaje, setMensaje] = useState<{ tono: "info" | "danger"; texto: string } | null>(null);
+  const [operacionId, setOperacionId] = useState<string>(() => crypto.randomUUID());
   const dialogRef = useRef<HTMLDialogElement>(null);
   const tituloRef = useRef<HTMLHeadingElement | null>(null);
   const elementoPrevioRef = useRef<HTMLElement | null>(null);
@@ -228,6 +229,9 @@ export function ReportarIncidencia({ trasladoId }: { trasladoId: string }) {
 
   function abrirSheet() {
     elementoPrevioRef.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    if (mensaje?.tono === "info") {
+      setOperacionId(crypto.randomUUID());
+    }
     setAbierto(true);
   }
 
@@ -247,10 +251,16 @@ export function ReportarIncidencia({ trasladoId }: { trasladoId: string }) {
         opcion.urgente ? "Escalamiento automático: caso urgente." : null
       ].filter(Boolean).join("\n\n");
 
-      await reportarIncidencia(cliente, trasladoId, opcion.tipo, opcion.momento, descripcion);
+      // H07: Operación transaccional e idempotente con operacionId
+      await reportarIncidencia(cliente, trasladoId, opcion.tipo, opcion.momento, descripcion, {
+        operacionId,
+        escalarUrgente: opcion.urgente
+      });
+
       if (opcion.urgente) {
         await activarSoporteEmergenciaConductor(cliente, trasladoId);
       }
+
       setMensaje({
         tono: "info",
         texto: opcion.urgente ? "Reporte urgente enviado. Operación lo atenderá con prioridad." : "Problema reportado. Operación dará seguimiento."
@@ -259,6 +269,7 @@ export function ReportarIncidencia({ trasladoId }: { trasladoId: string }) {
       setAdjunto(null);
       setProblema(null);
       setAbierto(false);
+      setOperacionId(crypto.randomUUID());
       router.refresh();
     } catch (err) {
       setMensaje({ tono: "danger", texto: traducirErrorOperativo(err, "No pudimos reportar el problema.") });

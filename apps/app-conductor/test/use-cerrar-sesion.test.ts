@@ -43,5 +43,18 @@ describe("use-cerrar-sesion.ts", () => {
       expect(mensaje).toContain("15 evidencia(s)");
       expect(mensaje).toContain("8 punto(s) de telemetría");
     });
+
+    it("maneja error explícito de inspección cuando los conteos son cero", () => {
+      const mensaje = mensajePendientesLogout({
+        ok: false,
+        blocked: true,
+        errorCount: 0,
+        pendingEvidence: 0,
+        pendingTelemetry: 0,
+        inspectionError: true
+      });
+
+      expect(mensaje).toContain("no fue posible verificar el estado del tracking");
+    });
   });
 });

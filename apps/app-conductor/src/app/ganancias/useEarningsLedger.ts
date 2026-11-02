@@ -17,19 +17,20 @@ type DatosBancarios = Database["public"]["Tables"]["datos_bancarios_conductor"][
 
 export type PeriodoActivo = "semana" | "mes" | "anio";
 
-interface RegistroViajeGanancia {
+export interface RegistroViajeGanancia {
   id: string;
   fecha: string;
   fechaDate: Date;
   vehiculo: string;
+  vehiculoId: string;
   origen: string;
   destino: string;
   montoGanado: number;
   precioBase: number;
-  comisionRuum: number;
-  gastosAutorizados: number;
-  bonos: number;
-  ajuste: number;
+  comisionRuum: number | null;
+  gastosAutorizados: number | null;
+  bonos: number | null;
+  ajuste: number | null;
   estatusEconomico: EstadoEconomicoExplicito;
   liberacion: string;
   payoutId?: string | null;
@@ -280,10 +281,13 @@ export function useEarningsLedger(): UseEarningsLedgerResult {
   const registrosTraslados = useMemo<RegistroViajeGanancia[]>(() => {
     return traslados.map((t) => {
       const payoutEnlazado = t.payout_id ? mapaPayouts.get(t.payout_id) : null;
+      const vehiculoKey = t.vehiculo_id || t.id;
       const vehiculoNombre = t.vehiculos ? `${t.vehiculos.marca} ${t.vehiculos.modelo} ${t.vehiculos.anio}` : "Vehículo trasladado";
       const montoEstimadoOGanado = Number(t.ganancia_conductor_congelada ?? 0);
       const precioBase = Number(t.precio_final ?? t.precio_cotizado ?? 0);
-      const comision = precioBase > 0 ? Math.max(0, precioBase - montoEstimadoOGanado) : 0;
+      const comision = precioBase > 0 && t.ganancia_conductor_congelada !== null
+        ? Math.max(0, precioBase - montoEstimadoOGanado)
+        : null;
       const fechaStr = t.cerrado_en ?? t.actualizado_en ?? t.creado_en;
       const fechaDate = toDateSafe(fechaStr) ?? new Date(fechaStr);
       return {
@@ -291,14 +295,15 @@ export function useEarningsLedger(): UseEarningsLedgerResult {
         fecha: fechaStr,
         fechaDate,
         vehiculo: vehiculoNombre,
+        vehiculoId: vehiculoKey,
         origen: t.origen_ciudad,
         destino: t.destino_ciudad,
         montoGanado: montoEstimadoOGanado,
         precioBase,
         comisionRuum: comision,
-        gastosAutorizados: 0,
-        bonos: 0,
-        ajuste: 0,
+        gastosAutorizados: null,
+        bonos: null,
+        ajuste: null,
         estatusEconomico: estatusViaje(t, payoutEnlazado),
         liberacion: payoutEnlazado?.pagado_en?.slice(0,10) ?? payoutEnlazado?.fecha_prevista ?? "Fecha pendiente de finanzas",
         payoutId: t.payout_id,
@@ -315,25 +320,26 @@ export function useEarningsLedger(): UseEarningsLedgerResult {
 
   const payoutsFiltrados = useMemo(() => {
     return payouts.filter((p) => {
-      const inicio = toDateSafe(p.periodo_inicio);
-      const fin = toDateSafe(p.periodo_fin);
-      if (!inicio || !fin) return false;
-      return fin.getTime() >= rangoActual.inicio.getTime() && inicio.getTime() <= rangoActual.fin.getTime();
+      // Fecha de imputación de ajustes: fecha en que se liquidó/pagó, o fecha prevista de corte
+      const fechaImputacionStr = p.pagado_en ?? p.fecha_prevista ?? p.periodo_fin;
+      const fechaImp = toDateSafe(fechaImputacionStr);
+      if (!fechaImp) return false;
+      return estaEnRango(fechaImp, rangoActual.inicio, rangoActual.fin);
     });
   }, [payouts, rangoActual]);
 
   const resumen = useMemo(() => {
     const precioBase = TrasladosFiltrados.filter(v => v.estatusEconomico !== "sin_calcular").reduce((tot, v) => tot + v.precioBase, 0);
-    const bonos = TrasladosFiltrados.reduce((tot, v) => tot + v.bonos, 0);
+    const bonos = TrasladosFiltrados.reduce((tot, v) => tot + (v.bonos ?? 0), 0);
     const ajuste = payoutsFiltrados.reduce((tot, p) => tot + Number(p.ajustes ?? 0), 0);
-    const comisionRuum = TrasladosFiltrados.filter(v => v.estatusEconomico !== "sin_calcular").reduce((tot, v) => tot + v.comisionRuum, 0);
-    const reembolsoGastos = TrasladosFiltrados.reduce((tot, v) => tot + v.gastosAutorizados, 0);
+    const comisionRuum = TrasladosFiltrados.filter(v => v.estatusEconomico !== "sin_calcular").reduce((tot, v) => tot + (v.comisionRuum ?? 0), 0);
+    const reembolsoGastos = TrasladosFiltrados.reduce((tot, v) => tot + (v.gastosAutorizados ?? 0), 0);
     const retenciones = TrasladosFiltrados
       .filter((v) => v.estatusEconomico === "rechazado" || v.estatusEconomico === "retenido")
       .reduce((tot, v) => tot + v.montoGanado, 0);
     const gananciaNeta = precioBase + bonos + ajuste - comisionRuum;
     const depositoAcumulado = Math.max(0, precioBase + bonos + ajuste - comisionRuum + reembolsoGastos - retenciones);
-    const totalVehiculos = new Set(TrasladosFiltrados.map((v) => v.vehiculo)).size;
+    const totalVehiculos = new Set(TrasladosFiltrados.map((v) => v.vehiculoId)).size;
     return {
       totalTraslados: TrasladosFiltrados.length,
       totalVehiculos: TrasladosFiltrados.length === 0 ? 0 : totalVehiculos,

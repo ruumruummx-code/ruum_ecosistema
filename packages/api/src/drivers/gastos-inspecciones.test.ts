@@ -45,6 +45,60 @@ describe("drivers gastos e inspecciones (Fase 6)", () => {
     await eliminarGastoTraslado(cliente as never, TRASLADO);
   });
 
+  it("recupera gasto existente si se proporciona id y ya existe (idempotencia)", async () => {
+    const gastoId = "00000000-0000-0000-0000-000000000099";
+    const filaExistente = { id: gastoId, monto: 250, tipo: "combustible" };
+    const cliente = {
+      from: vi.fn().mockReturnValue({
+        select: vi.fn().mockReturnValue({
+          eq: vi.fn().mockReturnValue({
+            maybeSingle: vi.fn().mockResolvedValue({ data: filaExistente, error: null })
+          })
+        }),
+        insert: vi.fn()
+      })
+    };
+    const res = await registrarGastoTraslado(cliente as never, {
+      id: gastoId,
+      trasladoId: TRASLADO,
+      tipo: "combustible",
+      monto: 250
+    });
+    expect(res).toEqual(filaExistente);
+    expect(cliente.from().insert).not.toHaveBeenCalled();
+  });
+
+  it("recupera gasto existente ante conflicto 23505 por respuesta perdida", async () => {
+    const gastoId = "00000000-0000-0000-0000-000000000099";
+    const filaExistente = { id: gastoId, monto: 250, tipo: "combustible" };
+    const maybeSingle = vi
+      .fn()
+      .mockResolvedValueOnce({ data: null, error: null })
+      .mockResolvedValueOnce({ data: filaExistente, error: null });
+
+    const cliente = {
+      from: vi.fn().mockReturnValue({
+        select: vi.fn().mockReturnValue({
+          eq: vi.fn().mockReturnValue({
+            maybeSingle
+          })
+        }),
+        insert: vi.fn().mockReturnValue({
+          select: vi.fn().mockReturnValue({
+            single: vi.fn().mockResolvedValue({ data: null, error: { code: "23505", message: "duplicate key" } })
+          })
+        })
+      })
+    };
+    const res = await registrarGastoTraslado(cliente as never, {
+      id: gastoId,
+      trasladoId: TRASLADO,
+      tipo: "combustible",
+      monto: 250
+    });
+    expect(res).toEqual(filaExistente);
+  });
+
   it("lista y obtiene inspecciones", async () => {
     const filas = [{ tipo: "inicial" }];
     const clienteLista = {

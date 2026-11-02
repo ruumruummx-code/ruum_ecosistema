@@ -127,7 +127,11 @@ export default function PaginaDatosBancarios() {
       setDatosBancarios(guardado);
       setEdicionAutorizada(false);
       router.push("/cuenta/certificacion");
-    } catch (error) {
+    } catch (error: unknown) {
+      const msg = error instanceof Error ? error.message : String(error);
+      if (msg.includes("confirmación reciente") || msg.includes("reautenticación")) {
+        setEdicionAutorizada(false);
+      }
       setMensaje(traducirErrorOperativo(error, "No pudimos guardar tus datos bancarios."));
     } finally {
       setGuardando(false);

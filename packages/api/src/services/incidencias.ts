@@ -64,17 +64,59 @@ export async function reportarIncidencia(
   trasladoId: string,
   tipo: TipoIncidencia,
   momento: MomentoIncidencia,
-  descripcion: string
+  descripcion: string,
+  opciones?: {
+    operacionId?: string;
+    escalarUrgente?: boolean;
+  }
 ) {
   const texto = descripcion.trim();
   if (texto.length < 10) {
     throw new Error("Describe el problema con al menos 10 caracteres.");
   }
 
+  // 1. Intentar reporte transaccional atómico e idempotente (H07)
+  try {
+    const { data: resRpc, error: errRpc } = await (cliente as any).rpc(
+      "conductor_reportar_incidencia_transaccional",
+      {
+        p_traslado_id: trasladoId,
+        p_tipo: tipo,
+        p_momento: momento,
+        p_descripcion: texto,
+        p_incidencia_id: opciones?.operacionId || null,
+        p_escalar_urgente: Boolean(opciones?.escalarUrgente)
+      }
+    );
+
+    if (!errRpc && resRpc) {
+      const parsed = typeof resRpc === "string" ? JSON.parse(resRpc) : resRpc;
+      return { id: parsed.id ?? opciones?.operacionId, reintentado: parsed.reintentado ?? false };
+    }
+  } catch {
+    // Continuar con fallback idempotente si la RPC no existe en el mock/entorno
+  }
+
+  // 2. Fallback idempotente cliente
   const { actor, actorId } = await resolverActorReporte(cliente, trasladoId);
+
+  // Comprobar si ya existe con el operacionId para evitar duplicados en reintentos
+  if (opciones?.operacionId) {
+    const { data: existente } = await cliente
+      .from("incidencias")
+      .select("id")
+      .eq("id", opciones.operacionId)
+      .maybeSingle();
+
+    if (existente?.id) {
+      return { id: existente.id, reintentado: true };
+    }
+  }
+
   const { data, error } = await cliente
     .from("incidencias")
     .insert({
+      ...(opciones?.operacionId ? { id: opciones.operacionId } : {}),
       traslado_id: trasladoId,
       tipo,
       momento,
@@ -86,14 +128,18 @@ export async function reportarIncidencia(
 
   if (error) throw error;
 
-  await registrarEvento(cliente, "reporte_incidencia", actor, actorId, {
-    traslado_id: trasladoId,
-    incidencia_id: data.id,
-    tipo,
-    momento
-  });
+  try {
+    await registrarEvento(cliente, "reporte_incidencia", actor, actorId, {
+      traslado_id: trasladoId,
+      incidencia_id: data.id,
+      tipo,
+      momento
+    });
+  } catch {
+    // Si la inserción ya fue exitosa, la auditoría no debe bloquear al usuario
+  }
 
-  return data;
+  return { id: data.id, reintentado: false };
 }
 
 export async function crearIncidenciaSistemaDanoNoReportado(cliente: Cliente, trasladoId: string, descripcion: string) {

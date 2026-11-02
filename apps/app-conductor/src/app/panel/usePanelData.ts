@@ -22,6 +22,15 @@ export type Disponibilidad = DriverAvailability;
 
 export type DocumentosStatus = "vigentes" | "por_vencer" | "bloqueantes";
 
+export interface FallosParcialesPanel {
+  aceptados?: boolean;
+  disponibles?: boolean;
+  disponibilidad?: boolean;
+  notificaciones?: boolean;
+  ganancias?: boolean;
+  documentos?: boolean;
+}
+
 function conductorOperativo(
   real: Awaited<ReturnType<typeof obtenerConductorActual>>,
   email?: string | null
@@ -58,11 +67,16 @@ export function usePanelData() {
   const [enRevision, setEnRevision] = useState<PanelReviewState | null>(null);
   const [documentos, setDocumentos] = useState<DocumentoConductorRow[]>([]);
   const [notificacionesCount, setNotificacionesCount] = useState(0);
-  const [gananciasHoy, setGananciasHoy] = useState<number>(0);
-  const [trasladosHoy, setTrasladosHoy] = useState<number>(0);
+  const [gananciasHoy, setGananciasHoy] = useState<number | null>(0);
+  const [trasladosHoy, setTrasladosHoy] = useState<number | null>(0);
+  const [gananciasHoyEstimadas, setGananciasHoyEstimadas] = useState(false);
+  const [gananciasHoyDesconocidas, setGananciasHoyDesconocidas] = useState(false);
+  const [fallosParciales, setFallosParciales] = useState<FallosParcialesPanel>({});
   const [cargando, setCargando] = useState(true);
   const [refrescando, setRefrescando] = useState(false);
   const [ultimaActualizacion, setUltimaActualizacion] = useState<Date | null>(null);
+  const aceptadosRef = useRef<PasaporteRow[]>([]);
+  const disponiblesRef = useRef<PasaporteRow[]>([]);
   const ultimoTriggerDisponibilidadRef = useRef(0);
   const recargaDebounceRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -129,32 +143,84 @@ export function usePanelData() {
         listarDocumentosConductor(cliente, real.id)
       ]);
 
-      const aceptados = resultados[0].status === "fulfilled" ? resultados[0].value : [];
-      const disponibles = resultados[1].status === "fulfilled" ? resultados[1].value : [];
-      const disponibilidadOperativa = resultados[2].status === "fulfilled"
-        ? resultados[2].value
-        : ("no_disponible" as const);
-      const countNoLeidas =
-        resultados[3].status === "fulfilled" ? resultados[3].value : 0;
-      const trasladosDelDia: Array<{ ganancia_conductor_congelada: number | null; precio_final: number | null; precio_cotizado: number | null }> =
-        resultados[4].status === "fulfilled" ? resultados[4].value : [];
-      const docsConductor: DocumentoConductorRow[] =
-        resultados[5].status === "fulfilled" ? resultados[5].value : [];
+      const [resAceptados, resDisponibles, resDisponibilidad, resNotificaciones, resGanancias, resDocs] = resultados;
 
-      const gananciaDelDia = trasladosDelDia.reduce((acc, t) => {
-        const monto = Number(t.ganancia_conductor_congelada ?? ((t.precio_final ?? t.precio_cotizado ?? 0) * 0.85));
-        return acc + monto;
-      }, 0);
+      const fallos: FallosParcialesPanel = {};
+      if (resAceptados.status === "rejected") fallos.aceptados = true;
+      if (resDisponibles.status === "rejected") fallos.disponibles = true;
+      if (resDisponibilidad.status === "rejected") fallos.disponibilidad = true;
+      if (resNotificaciones.status === "rejected") fallos.notificaciones = true;
+      if (resGanancias.status === "rejected") fallos.ganancias = true;
+      if (resDocs.status === "rejected") fallos.documentos = true;
 
-      setTrasladosAceptados(aceptados);
-      setTrasladosDisponibles(disponibles);
-      setNotificacionesCount(countNoLeidas);
-      setGananciasHoy(gananciaDelDia);
-      setTrasladosHoy(trasladosDelDia.length);
-      setDocumentos(docsConductor);
-      setDisponibilidad(aceptados.some((viaje) => viaje.estado === "traslado_en_curso") ? "en_viaje" : disponibilidadOperativa);
-      setUltimaActualizacion(new Date());
-      setErrorDisponibilidad(null);
+      setFallosParciales(fallos);
+
+      if (resAceptados.status === "fulfilled") {
+        aceptadosRef.current = resAceptados.value;
+        setTrasladosAceptados(resAceptados.value);
+      }
+
+      if (resDisponibles.status === "fulfilled") {
+        disponiblesRef.current = resDisponibles.value;
+        setTrasladosDisponibles(resDisponibles.value);
+      }
+
+      const enViaje = aceptadosRef.current.some((viaje) => viaje.estado === "traslado_en_curso");
+      if (resDisponibilidad.status === "fulfilled") {
+        setDisponibilidad(enViaje ? "en_viaje" : resDisponibilidad.value);
+      } else if (enViaje) {
+        setDisponibilidad("en_viaje");
+      }
+
+      if (resNotificaciones.status === "fulfilled") {
+        setNotificacionesCount(resNotificaciones.value);
+      }
+
+      if (resDocs.status === "fulfilled") {
+        setDocumentos(resDocs.value);
+      }
+
+      if (resGanancias.status === "fulfilled") {
+        const trasladosDelDia = resGanancias.value;
+        setTrasladosHoy(trasladosDelDia.length);
+        let tieneEstimadas = false;
+        const gananciaDelDia = trasladosDelDia.reduce((acc, t) => {
+          if (t.ganancia_conductor_congelada != null) {
+            return acc + Number(t.ganancia_conductor_congelada);
+          }
+          if (t.precio_final != null || t.precio_cotizado != null) {
+            tieneEstimadas = true;
+            return acc + Number((t.precio_final ?? t.precio_cotizado ?? 0) * 0.85);
+          }
+          return acc;
+        }, 0);
+        setGananciasHoy(gananciaDelDia);
+        setGananciasHoyEstimadas(tieneEstimadas);
+        setGananciasHoyDesconocidas(false);
+      } else {
+        setGananciasHoy((prev) => {
+          if (prev === null) setGananciasHoyDesconocidas(true);
+          return prev;
+        });
+      }
+
+      const numFallos = Object.keys(fallos).length;
+      if (numFallos === resultados.length) {
+        setErrorDisponibilidad("No se pudo cargar la información del panel. Conservando datos previos.");
+      } else if (numFallos > 0) {
+        const nombres: string[] = [];
+        if (fallos.aceptados) nombres.push("viajes activos");
+        if (fallos.disponibles) nombres.push("viajes disponibles");
+        if (fallos.disponibilidad) nombres.push("disponibilidad");
+        if (fallos.notificaciones) nombres.push("notificaciones");
+        if (fallos.ganancias) nombres.push("ganancias de hoy");
+        if (fallos.documentos) nombres.push("documentos");
+        setErrorDisponibilidad(`No se pudieron sincronizar algunos datos (${nombres.join(", ")}). Se conservan los últimos datos conocidos.`);
+        setUltimaActualizacion(new Date());
+      } else {
+        setErrorDisponibilidad(null);
+        setUltimaActualizacion(new Date());
+      }
     } catch (err) {
       setErrorDisponibilidad(traducirErrorOperativo(err, "No pudimos cargar tu información operativa."));
     } finally {
@@ -177,6 +243,7 @@ export function usePanelData() {
     } catch {
       return;
     }
+    if (!cliente || typeof cliente.channel !== "function") return;
 
     const triggerRecarga = () => {
       if (recargaDebounceRef.current) clearTimeout(recargaDebounceRef.current);
@@ -301,6 +368,9 @@ export function usePanelData() {
     notificacionesCount,
     gananciasHoy,
     trasladosHoy,
+    gananciasHoyEstimadas,
+    gananciasHoyDesconocidas,
+    fallosParciales,
     errorDisponibilidad,
     seleccionarDisponibilidad,
     persistirDisponibilidad,
