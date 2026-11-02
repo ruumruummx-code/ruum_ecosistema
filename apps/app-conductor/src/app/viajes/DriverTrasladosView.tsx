@@ -12,6 +12,7 @@ type Props = {
   online: boolean; refreshing: boolean; loading: boolean; notifications: number;
   offers: number; accepted: number; showingOffers: boolean; filtered: boolean; sortActive: boolean;
   calendar: DiaCalendario[]; selectedDay: string; today: string;
+  allDates?: boolean; onAllDates?: () => void;
   onSelectDay: (day: string) => void; onTab: (offers: boolean) => void;
   onRefresh: () => void; onHelp: () => void; onSort: () => void; onClear: () => void;
   filters: ReactNode; children?: ReactNode; notice?: string | null;
@@ -39,6 +40,7 @@ export function DriverTrasladosView(props: Props) {
         </div>
       </header>
       <TrasladosDateNavigator calendario={props.calendar} diaSeleccionado={props.selectedDay} diaHoy={props.today} onSelectDia={props.onSelectDay} />
+      <button type="button" className={styles.secondary} aria-pressed={props.allDates} onClick={props.onAllDates}>Todas las fechas</button>
       <div className={styles.tabs} role="tablist" aria-label="Vistas de traslados">
         <button type="button" role="tab" id="tab-ofertas" aria-controls="panel-traslados" aria-selected={props.showingOffers} onClick={() => props.onTab(true)}>Ofertas ({props.offers})</button>
         <button type="button" role="tab" id="tab-aceptados" aria-controls="panel-traslados" aria-selected={!props.showingOffers} onClick={() => props.onTab(false)}>Aceptados ({props.accepted})</button>
@@ -48,10 +50,10 @@ export function DriverTrasladosView(props: Props) {
       <section id="panel-traslados" role="tabpanel" aria-labelledby={props.showingOffers ? "tab-ofertas" : "tab-aceptados"} className={styles.content} aria-busy={props.loading}>
         {props.loading ? <output className={styles.loading}>Cargando traslados…</output> : props.children ?? <div className={styles.empty}>
           <TrasladosEmptyIllustration />
-          <h2>{props.filtered ? "Sin resultados con estos filtros" : "Sin traslados para este día"}</h2>
-          <p>{props.filtered ? "Ningún traslado coincide con tu búsqueda. Prueba otra fecha o limpia los filtros." : props.showingOffers ? "No hay ofertas programadas en esta fecha. Revisa otro día o cambia el orden a Mayor ganancia." : "No tienes traslados aceptados para esta fecha. Acepta una oferta para verla aquí."}</p>
+          <h2>{props.filtered ? "Sin resultados con estos filtros" : props.allDates ? "Sin traslados" : "Sin traslados para este día"}</h2>
+          <p>{props.filtered ? "Ningún traslado coincide con tu búsqueda. Prueba otra fecha o limpia los filtros." : props.showingOffers ? "No hay ofertas en esta vista. Consulta todas las fechas o recarga para actualizar." : "No tienes traslados aceptados en esta vista. Acepta una oferta para verla aquí."}</p>
           <div className={styles.emptyActions}>
-            <button type="button" className={styles.primary} aria-pressed={!props.filtered && props.showingOffers ? props.sortActive : undefined} onClick={props.filtered ? props.onClear : props.showingOffers ? props.onSort : () => props.onTab(true)}><TrasladosIcon name="sort" />{props.filtered ? "Limpiar filtros" : props.showingOffers ? "Ordenar por mayor ganancia" : "Buscar ofertas disponibles"}</button>
+            <button type="button" className={styles.primary} onClick={props.filtered ? props.onClear : props.showingOffers ? props.onAllDates : () => props.onTab(true)}><TrasladosIcon name="sort" />{props.filtered ? "Limpiar filtros" : props.showingOffers ? "Ver todas las fechas" : "Buscar ofertas disponibles"}</button>
             <Link className={styles.secondary} href="/panel" prefetch={false}>Volver al panel</Link>
           </div>
         </div>}
