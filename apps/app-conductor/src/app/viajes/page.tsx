@@ -29,6 +29,8 @@ import {
   claveDia,
   crearCalendario,
   detalleFallback,
+  esTrasladoAceptado,
+  listarViajesDeVista,
   normalizarVista,
   type DetalleOperativo,
   type PasaporteRow
@@ -250,7 +252,7 @@ export default function PaginaTraslados() {
         }
 
         setDisponibles(listaDisponibles);
-        setAceptados(listaAceptados);
+        setAceptados(listaAceptados.filter(esTrasladoAceptado));
         setHistorial(historialTraslados);
         if (!conductorActual) {
           setAviso("Inicia sesión como conductor para aceptar y ver tus traslados.");
@@ -359,16 +361,10 @@ export default function PaginaTraslados() {
   const calendario = useMemo(() => diaSeleccionado ? crearCalendario(disponiblesVisibles, aceptados, detalles, new Date(`${diaSeleccionado}T12:00:00Z`)) : [], [disponiblesVisibles, aceptados, detalles, diaSeleccionado]);
   const [paginaActual, setPaginaActual] = useState(0);
 
-  const diaCalendarioSeleccionado = calendario.find(({ dia }) => claveDia(dia) === diaSeleccionado) ?? calendario[0];
-
-  // Lista cruda del día seleccionado
-  const rawListToRender = useMemo(() => {
-    if (!diaCalendarioSeleccionado) return [];
-    return diaCalendarioSeleccionado.Traslados.filter((item) => {
-      if (vista === "disponibles") return item.tipo === "Ofertado";
-      return item.tipo !== "Ofertado";
-    });
-  }, [diaCalendarioSeleccionado, vista]);
+  const fechaFiltro = fechaUrl && /^\d{4}-\d{2}-\d{2}$/.test(fechaUrl) ? diaSeleccionado : null;
+  const rawListToRender = useMemo(() => listarViajesDeVista(
+    disponiblesVisibles, aceptados, detalles, vista, fechaFiltro
+  ), [disponiblesVisibles, aceptados, detalles, vista, fechaFiltro]);
 
   // Ciudades disponibles para el filtro
   const ciudadesDisponibles = useMemo(() => {
@@ -417,6 +413,7 @@ export default function PaginaTraslados() {
       offers={disponiblesVisibles.length} accepted={aceptados.length} showingOffers={vista === "disponibles"}
       filtered={Boolean(searchQuery.trim()) || ciudadFiltro !== "todas"}
       calendar={calendario} selectedDay={diaSeleccionado} today={diaHoy}
+      allDates={!fechaFiltro} onAllDates={() => actualizarUrl({ fecha: "" })}
       onSelectDay={(fecha) => { setDiaSeleccionado(fecha); actualizarUrl({ fecha }); }}
       onTab={(ofertas) => actualizarUrl({ vista: ofertas ? "disponibles" : "mis-Traslados" })}
       onRefresh={() => { setRefrescando(true); setRefreshCount((prev) => prev + 1); }}

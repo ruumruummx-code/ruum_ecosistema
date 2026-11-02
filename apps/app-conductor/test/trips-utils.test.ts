@@ -2,6 +2,8 @@ import { describe, expect, it } from "vitest";
 import {
   claveDia,
   crearCalendario,
+  esTrasladoAceptado,
+  listarViajesDeVista,
   diasSemanaActual,
   estaSemanaActual,
   formatearDistanciaAproximadaAlOrigen,
@@ -42,6 +44,33 @@ function detalle(fechaHora: string): DetalleOperativo {
 }
 
 describe("calendario móvil de Traslados", () => {
+  it("muestra ofertas de otras semanas al abrir sin filtro de fecha", () => {
+    const ofertas = [viaje("anterior", "2026-10-18T12:00:00Z"), viaje("otra", "2026-10-27T12:00:00Z")];
+    expect(listarViajesDeVista(ofertas, [], {}, "disponibles", null).map(({ viaje }) => viaje.traslado_id))
+      .toEqual(["anterior", "otra"]);
+    expect(listarViajesDeVista(ofertas, [], {}, "disponibles", "2026-11-01")).toEqual([]);
+    expect(listarViajesDeVista(ofertas, [], {}, "disponibles", "2026-10-27")).toHaveLength(1);
+  });
+
+  it("filtra por fecha programada con la zona de México", () => {
+    const oferta = viaje("programada", "2026-10-18T12:00:00Z");
+    const detalles = { programada: detalle("2026-11-02T04:30:00Z") };
+    expect(listarViajesDeVista([oferta], [], detalles, "disponibles", "2026-11-01")).toHaveLength(1);
+    expect(listarViajesDeVista([oferta], [], detalles, "disponibles", "2026-11-02")).toHaveLength(0);
+  });
+
+  it.each(["disputa_abierta", "reclamo_abierto", "reclamo_resuelto", "disputa_resuelta", "servicio_cerrado", "servicio_cancelado", "traslado_fallido", "pendiente_de_conductor"] as const)("no cuenta %s como traslado aceptado", (estado) => {
+    const expediente = { ...viaje("expediente", "2026-10-31T15:00:00Z"), estado };
+    expect(esTrasladoAceptado(expediente)).toBe(false);
+    expect(listarViajesDeVista([], [expediente], {}, "mis-Traslados", null)).toHaveLength(0);
+  });
+
+  it.each(["conductor_asignado", "traslado_en_curso", "entrega_confirmada", "pago_pendiente"] as const)("conserva %s entre los aceptados", (estado) => {
+    const aceptado = { ...viaje("aceptado", "2026-10-31T15:00:00Z"), estado };
+    expect(esTrasladoAceptado(aceptado)).toBe(true);
+    expect(listarViajesDeVista([], [aceptado], {}, "mis-Traslados", null)).toHaveLength(1);
+  });
+
   it("inicia la semana en domingo usando America/Mexico_City", () => {
     const dias = diasSemanaActual(new Date("2026-07-17T18:00:00.000Z")).map(claveDia);
 

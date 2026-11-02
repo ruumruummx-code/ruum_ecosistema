@@ -25,6 +25,21 @@ export type EstadoUbicacionOportunidades = "sin_solicitar" | "solicitando" | "li
 export type ViajeCalendario = { viaje: PasaporteRow; tipo: string };
 export type DiaCalendario = { dia: Date; Traslados: ViajeCalendario[] };
 
+// Los expedientes en revisión siguen accesibles desde el panel, pero no son viajes aceptados.
+export function esTrasladoAceptado(viaje: PasaporteRow) {
+  return Boolean(viaje.estado) && !ESTADOS_FINALIZADOS.has(viaje.estado as EstadoTraslado) &&
+    !["pendiente_de_conductor", "disputa_abierta", "reclamo_abierto",
+      "dano_no_reportado_en_revision", "cierre_operativo_con_incidencia_abierta"].includes(viaje.estado!);
+}
+
+export function listarViajesDeVista(disponibles: PasaporteRow[], aceptados: PasaporteRow[],
+  detalles: Record<string, DetalleOperativo>, vista: VistaTraslados, fecha: string | null) {
+  const viajes = vista === "disponibles" ? disponibles : aceptados.filter(esTrasladoAceptado);
+  return viajes.filter((viaje) => !fecha || claveDia(
+    (viaje.traslado_id ? detalles[viaje.traslado_id] : null)?.fechaHora ?? detalleFallback(viaje).fechaHora
+  ) === fecha).map((viaje) => ({ viaje, tipo: vista === "disponibles" ? "Ofertado" : GLOSARIO_OPERATIVO.aceptado }));
+}
+
 export const ZONA_HORARIA_VIAJE = "America/Mexico_City";
 
 export const VISTAS: { id: VistaTraslados; etiqueta: string }[] = [
