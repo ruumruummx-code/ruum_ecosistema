@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { validarFila } from "@/lib/carga-masiva";
 import { z } from "zod";
 import { crearClienteServidor } from "@/lib/supabase-server";
 import { rateLimitConVentana } from "@/lib/csp-rate-limit";
@@ -158,6 +159,15 @@ export async function POST(request: NextRequest) {
       rutas.set(fila.indice, { origen, destino, distanciaKm: ruta.distanciaKm, tiempoHoras: ruta.tiempoHoras });
     }
 
+    // Geocodificar el lote puede tardar varios minutos: una hora inicialmente
+    // válida puede haber vencido. Revalidar antes de cotizar y preparar el cobro.
+    for (const fila of filas) {
+      const errorFecha = validarFila(fila.datos, fila.indice).errores.fecha_hora_programada;
+      if (errorFecha) {
+        fila.errores.fecha_hora_programada = errorFecha;
+        fila.estado = "error";
+      }
+    }
     if (!permitirParcial && filas.some(f => f.estado === "error" || f.errorCotizacion)) return NextResponse.json({ filas });
     const filasParaTarifa = filas.filter(f => f.estado !== "error" && !f.errorCotizacion && rutas.has(f.indice));
     if (filasParaTarifa.length === 0) {

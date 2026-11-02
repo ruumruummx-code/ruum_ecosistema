@@ -6,6 +6,8 @@ El parseo de archivos Excel se delega a un Web Worker en segundo plano (`carga-m
 
 Las filas se corrigen u omiten en el panel. El servidor valida códigos postales y catálogo vehicular de nuevo antes de cotizar. Las rutas se obtienen de Mapbox y las tarifas de `usuario_previsualizar_tarifas_masivas`, usando el mismo cálculo normativo del wizard individual. Se cotiza el lote en una llamada, con un límite de cinco lotes por minuto, para evitar que el límite individual de 30 llamadas deje 70 filas sin precio. Los fallos de mapas o tarifa se muestran como incidencias de cotización; solo los errores del catálogo se asignan al vehículo.
 
+La modalidad `programado` exige una fecha y hora válidas con al menos 2 horas de anticipación, conforme a la regla del traslado individual. Se revisa al validar el archivo y de nuevo en el servidor al cotizar, también después de calcular las rutas. Las filas vencidas se señalan en `fecha_hora_programada` y no pasan al cobro; en pago parcial solo continúan las filas válidas. Las fechas ISO sin zona (`AAAA-MM-DDTHH:mm`) se interpretan en hora de Ciudad de México (`-06:00`); se respetan `Z` y los offsets explícitos. El ejemplo histórico de la plantilla debe actualizarse antes de enviarlo.
+
 ### Optimización y hardening de consultas a Mapbox (Fase 1 - A2)
 Para evitar saturar la cuota de Mapbox y el límite de tasa de la API:
 1. **Caché y deduplicación por CP**: Se extrae el conjunto de códigos postales únicos (origen y destino) y se geocodifican una sola vez por lote con caché en memoria del servidor.
