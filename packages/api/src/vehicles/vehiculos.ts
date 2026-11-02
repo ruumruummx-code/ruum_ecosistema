@@ -2,6 +2,17 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database, Json } from "@ruum/shared/types";
 import { assertAdminAnyPermission, assertAdminPermission } from "../services/permisos-admin";
 import { registrarEvento } from "../services/auditoria";
+import { rpcTipado } from "../supabase/funciones";
+import { esquemaVehiculoPerfil, type VehiculoPerfil } from "@ruum/shared/validacion";
+
+/** Alta independiente del cotizador: la RPC asigna propietario y valida en servidor. */
+export async function registrarVehiculoUsuario(cliente: SupabaseClient<Database>, id: string, entrada: VehiculoPerfil) {
+  const datos = esquemaVehiculoPerfil.parse(entrada);
+  const { data, error } = await rpcTipado(cliente, "usuario_registra_vehiculo", { p_id: id, p_datos: datos });
+  if (error) throw new Error("No pudimos registrar el vehículo. Revisa sus datos y si ya aparece en tu flota antes de reintentar.");
+  if (!data) throw new Error("No se confirmó el registro del vehículo.");
+  return data;
+}
 
 type Cliente = SupabaseClient<Database>;
 type VehiculoRow = Database["public"]["Tables"]["vehiculos"]["Row"];

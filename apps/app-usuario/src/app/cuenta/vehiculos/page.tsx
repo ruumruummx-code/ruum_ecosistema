@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { VehiculosDesktop } from "./VehiculosDesktop";
 import { construirNotificaciones } from "../../../lib/inicio";
 import { MobileShell } from "@ruum/ui";
@@ -27,6 +28,7 @@ export default async function PaginaVehiculos() {
           className="user-v2-scope user-vehicles-shell"
           contentClassName="user-vehicles-content"
         >
+          <Link href="/cuenta/vehiculos/nuevo" className="mb-4 block rounded-xl bg-blue-700 px-4 py-3 text-center font-semibold text-white">Registrar nuevo vehículo</Link>
           {cuenta.vehiculos.length > 0 ? (
             <ul
               aria-label="Vehículos guardados"
@@ -45,8 +47,7 @@ export default async function PaginaVehiculos() {
                 Sin vehículos registrados
               </h2>
               <p className="mx-auto mt-1 max-w-72 text-sm text-[var(--user-color-muted)]">
-                Usa el botón + para solicitar un traslado con un nuevo vehículo.
-                Se guardará para tus próximas solicitudes.
+                Registra tu vehículo desde esta sección para usarlo en próximas solicitudes.
               </p>
             </div>
           )}

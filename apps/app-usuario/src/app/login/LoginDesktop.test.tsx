@@ -101,7 +101,7 @@ describe("LoginDesktop — Pantalla de Inicio de Sesión de Escritorio", () => {
     // Campos del Formulario
     const inputEmail = within(seccionFormulario).getByLabelText("Correo electrónico");
     const inputPassword = within(seccionFormulario).getByLabelText(/^Contraseña/i);
-    expect(inputEmail).toHaveAttribute("placeholder", "lomelinhectorm@gmail.com");
+    expect(inputEmail).toHaveAttribute("placeholder", "tu@empresa.com");
     expect(inputPassword).toHaveAttribute("type", "password");
 
     // Enlace ¿La olvidaste?

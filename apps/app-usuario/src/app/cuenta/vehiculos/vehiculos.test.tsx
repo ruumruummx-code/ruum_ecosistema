@@ -84,13 +84,13 @@ describe("Mis vehículos", () => {
       PaginaDetalleVehiculo({ params: Promise.resolve({ id: "otro-auto" }) }),
     ).rejects.toThrow("NOT_FOUND");
   });
-  it("orienta al usuario sin vehículos hacia el único FAB", async () => {
+  it("permite registrar un vehículo desde el perfil móvil sin iniciar un traslado", async () => {
     cuenta.vehiculos = [];
     const { container } = render(await PaginaVehiculos());
     expect(
       screen.getAllByText("Sin vehículos registrados").length,
     ).toBeGreaterThanOrEqual(1);
     const mobileContent = container.querySelector(".user-vehicles-content");
-    expect(mobileContent?.querySelector("a")).toBeNull();
+    expect(mobileContent?.querySelector("a")).toHaveAttribute("href", "/cuenta/vehiculos/nuevo");
   });
 });

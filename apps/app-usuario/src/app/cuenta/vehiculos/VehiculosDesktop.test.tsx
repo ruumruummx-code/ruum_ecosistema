@@ -225,8 +225,8 @@ describe("Mis vehículos desktop", () => {
       ),
     ).toHaveTextContent("—");
     expect(
-      screen.getByRole("link", { name: /Crear primer traslado/ }),
-    ).toHaveAttribute("href", "/viajes/nuevo");
+      screen.getByRole("link", { name: /Registrar primer vehículo/ }),
+    ).toHaveAttribute("href", "/cuenta/vehiculos/nuevo");
     fireEvent.click(
       screen.getByRole("button", { name: "Actualizar vehículos" }),
     );

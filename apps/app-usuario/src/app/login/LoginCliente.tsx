@@ -622,7 +622,7 @@ export function LoginCliente({ motivo, siguiente, aviso }: LoginClienteProps) {
                     autoCapitalize="none"
                     spellCheck={false}
                     inputMode="email"
-                    placeholder="lomelinhectorm@gmail.com"
+                    placeholder="tu@empresa.com"
                     className={[
                       INPUT_BASE,
                       mostrarErrorCorreo
