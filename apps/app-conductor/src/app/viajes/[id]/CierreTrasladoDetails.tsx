@@ -1,14 +1,20 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { consultarResolucionInventarioLlaves, consultarResumenEvidenciaCierre, type ResumenEvidenciaCierre } from "@ruum/api/custody";
+import {
+  consultarAcuseRecepcion,
+  consultarResolucionInventarioLlaves,
+  consultarResumenEvidenciaCierre,
+  guardarAcuseRecepcion,
+  type ResumenEvidenciaCierre
+} from "@ruum/api/custody";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { TEXTOS_CARGANDO } from "@ruum/shared/constants";
 import type { Database } from "@ruum/shared/types";
 import { traducirErrorOperativo } from "@ruum/shared/utils";
 import { crearClienteNavegador } from "@/lib/supabase-browser";
-import { avanzarEstadoTraslado } from "@ruum/api/services";
+import { avanzarEstadoTraslado, extraerRutaComprobante } from "@ruum/api/services";
 import { listarInspeccionesTraslado } from "@ruum/api/drivers";
 import { EmergencyPanel } from "./EmergencyPanel";
 import { TripSupportDialog } from "./TripSupportDialog";
@@ -32,12 +38,18 @@ export function CierreTrasladoDetails({
   const [evidenciaCierre, setEvidenciaCierre] = useState<ResumenEvidenciaCierre | null>(null);
   const [llavesResueltas, setLlavesResueltas] = useState(false);
   const [inspeccionFinal, setInspeccionFinal] = useState<InspeccionData | null>(null);
+  const [acusePersistido, setAcusePersistido] = useState(false);
+  const [referenciaFirma, setReferenciaFirma] = useState<string | null>(null);
+  const [guardandoReporte, setGuardandoReporte] = useState(false);
+  const [tieneFirma, setTieneFirma] = useState(false);
+
   const inventarioValido = (valor: string | null | undefined) => typeof valor === "string" && /^[0-9]+$/.test(valor);
   const faltanLlaves = !inventarioValido(inspeccionInicial?.llaves_recibidas) || !inventarioValido(inspeccionFinal?.llaves_recibidas);
   const diferenciaLlaves = Number(inspeccionInicial?.llaves_recibidas) !== Number(inspeccionFinal?.llaves_recibidas);
   const bloqueoLlaves = faltanLlaves || (diferenciaLlaves && !llavesResueltas);
   const bloqueoEvidencia = !evidenciaCierre?.completa;
-  const bloqueoCierre = bloqueoLlaves || bloqueoEvidencia;
+  const bloqueoFirma = !tieneFirma && !acusePersistido;
+  const bloqueoCierre = bloqueoLlaves || bloqueoEvidencia || bloqueoFirma;
   const [cargando, setCargando] = useState(true);
   const [procesando, setProcesando] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -45,7 +57,9 @@ export function CierreTrasladoDetails({
   const [chatAbierto, setChatAbierto] = useState(false);
   const [soporteAbierto, setSoporteAbierto] = useState(false);
   const [modalConfirmacionAbierto, setModalConfirmacionAbierto] = useState(false);
-  const [tieneFirma, setTieneFirma] = useState(false);
+
+  // Trazabilidad de comprobante_ruta si aplica gasto al cierre con extraerRutaComprobante
+  const _comprobanteRutaSanitizada = (ruta?: string | null) => (ruta ? extraerRutaComprobante(null, ruta).ruta : null);
 
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const isDrawingRef = useRef(false);
@@ -68,8 +82,17 @@ export function CierreTrasladoDetails({
       if (!trasladoId) return;
       try {
         const cliente = crearClienteNavegador();
-        const [insps, resumen] = await Promise.all([listarInspeccionesTraslado(cliente, trasladoId), consultarResumenEvidenciaCierre(cliente, trasladoId)]);
+        const [insps, resumen, acuse] = await Promise.all([
+          listarInspeccionesTraslado(cliente, trasladoId),
+          consultarResumenEvidenciaCierre(cliente, trasladoId),
+          consultarAcuseRecepcion(cliente, trasladoId)
+        ]);
         setEvidenciaCierre(resumen);
+        if (acuse?.persistido) {
+          setAcusePersistido(true);
+          setTieneFirma(true);
+          if (acuse.referenciaFirma) setReferenciaFirma(acuse.referenciaFirma);
+        }
         if (insps) {
           const inicial = insps.find((i) => i.tipo === "inicial") as InspeccionData | undefined;
           if (inicial) setInspeccionInicial(inicial);
@@ -143,16 +166,60 @@ export function CierreTrasladoDetails({
     if (!ctx) return;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     setTieneFirma(false);
+    setAcusePersistido(false);
+    setReferenciaFirma(null);
   }
 
-  function handleGuardarReporte() {
-    setError("La recepción y la firma aún no se guardan en servidor. Operación debe confirmar el mecanismo de recepción antes de acreditar este flujo.");
+  async function handleGuardarReporte() {
+    if (guardandoReporte || procesando) return;
+    if (!tieneFirma && !acusePersistido) {
+      setError("Debes capturar la firma de conformidad del receptor antes de guardar el reporte.");
+      return;
+    }
+
+    setGuardandoReporte(true);
+    setError(null);
+    setAvisoExito(null);
+
+    try {
+      const cliente = crearClienteNavegador();
+      const canvas = canvasRef.current;
+      const firmaDataUrl = canvas ? canvas.toDataURL("image/png") : "";
+
+      const res = await guardarAcuseRecepcion(cliente, {
+        trasladoId,
+        receptorNombre: contactoNombre,
+        receptorTelefono: contactoTelefono,
+        firmaDataUrl,
+        odometro: inspeccionFinal?.kilometraje ?? null,
+        combustible: inspeccionFinal?.combustible ?? null,
+        notas: observacionesTexto !== "Ninguna" ? observacionesTexto : null
+      });
+
+      setAcusePersistido(true);
+      setTieneFirma(true);
+      if (res?.referencia) setReferenciaFirma(res.referencia);
+      setAvisoExito("Reporte de recepción y firma guardados exitosamente.");
+      setTimeout(() => setAvisoExito(null), 4000);
+    } catch (err) {
+      setError(traducirErrorOperativo(err, "No pudimos guardar el reporte de recepción. Intenta nuevamente."));
+    } finally {
+      setGuardandoReporte(false);
+    }
   }
 
   async function handleFinalizarTraslado() {
     if (procesando) return;
     if (cargando || bloqueoCierre) {
-      setError("Cierre pendiente: revisa inventario de llaves, fotografías obligatorias y conflictos con operación.");
+      if (bloqueoFirma) {
+        setError("Cierre bloqueado: se requiere la acreditación digital y la firma de conformidad del receptor.");
+      } else if (bloqueoLlaves) {
+        setError("Inventario de llaves pendiente. Documenta la diferencia con operación y solicita resolución de administración.");
+      } else if (bloqueoEvidencia) {
+        setError("Fotografías obligatorias incompletas o en conflicto.");
+      } else {
+        setError("Cierre pendiente: revisa inventario de llaves, fotografías obligatorias y firma del receptor.");
+      }
       return;
     }
     setProcesando(true);
@@ -161,6 +228,23 @@ export function CierreTrasladoDetails({
 
     try {
       const cliente = crearClienteNavegador();
+
+      // Garantizar que la recepción y firma queden persistidas en el servidor antes de autorizar la transición
+      if (!acusePersistido) {
+        const canvas = canvasRef.current;
+        const firmaDataUrl = canvas ? canvas.toDataURL("image/png") : "";
+        const res = await guardarAcuseRecepcion(cliente, {
+          trasladoId,
+          receptorNombre: contactoNombre,
+          receptorTelefono: contactoTelefono,
+          firmaDataUrl,
+          odometro: inspeccionFinal?.kilometraje ?? null,
+          combustible: inspeccionFinal?.combustible ?? null,
+          notas: observacionesTexto !== "Ninguna" ? observacionesTexto : null
+        });
+        setAcusePersistido(true);
+        if (res?.referencia) setReferenciaFirma(res.referencia);
+      }
 
       if (estadoActual === "evidencia_final_completada") {
         await avanzarEstadoTraslado(cliente, trasladoId, "evidencia_final_completada");
@@ -494,7 +578,20 @@ export function CierreTrasladoDetails({
             </button>
           </div>
 
-          <p className="text-xs text-amber-800">Trazo local sin guardar. Esta pantalla todavía no acredita la recepción ni una firma verificada en servidor.</p>
+          {acusePersistido ? (
+            <p className="font-body text-xs font-semibold text-[#15803D] flex items-center gap-1.5">
+              <span>✓</span>
+              <span>Recepción y firma acreditadas y guardadas en servidor.</span>
+            </p>
+          ) : tieneFirma ? (
+            <p className="font-body text-xs font-semibold text-[#0066FF]">
+              Firma capturada. Lista para guardar en reporte o finalizar traslado.
+            </p>
+          ) : (
+            <p className="font-body text-xs font-semibold text-[#B45309]">
+              Firma requerida: el receptor debe firmar en este recuadro para validar la entrega.
+            </p>
+          )}
           {/* Cuadro Canvas interactivo */}
           <div
             data-signature-canvas
@@ -528,7 +625,7 @@ export function CierreTrasladoDetails({
           className="shrink-0 flex flex-col gap-2 pt-0.5"
         >
           <p role="status" className="sr-only">
-            Cierre de traslado · Recepción pendiente de acreditación
+            Cierre de traslado · Recepción y firma requeridas para finalizar
           </p>
           {error && (
             <p role="alert" className="font-body text-xs font-semibold text-[#DC2626]">
@@ -544,15 +641,15 @@ export function CierreTrasladoDetails({
           {/* Botón Superior (Secundario): Guardar Reporte */}
           <button
             type="button"
-            onClick={handleGuardarReporte}
-            disabled={procesando}
+            onClick={() => void handleGuardarReporte()}
+            disabled={procesando || guardandoReporte}
             aria-label="Guardar Reporte"
             className="inline-flex min-h-[44px] w-full cursor-pointer items-center justify-center gap-2 rounded-xl border border-[#C5D7F2] bg-white px-4 py-2.5 font-display text-xs font-black text-[#0066FF] shadow-2xs transition hover:bg-[#F5F9FF] active:scale-[0.99] disabled:opacity-50"
           >
             <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
               <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2zM12 19a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM7 5v4h10V5H7z" />
             </svg>
-            <span>Consultar registro de recepción pendiente</span>
+            <span>{guardandoReporte ? "Guardando reporte y firma..." : acusePersistido ? "Recepción y firma guardadas ✓" : "Guardar reporte de recepción y firma"}</span>
           </button>
 
           {/* Botón Inferior (Primario Dominante): FINALIZAR TRASLADO */}
@@ -582,6 +679,7 @@ export function CierreTrasladoDetails({
       {/* Modal de Confirmación de Entrega */}
       {bloqueoEvidencia && <p role="alert" className="p-4 text-sm text-danger">Fotografías sincronizadas: origen {evidenciaCierre?.inicial ?? 0}/5, destino {evidenciaCierre?.final ?? 0}/5. {evidenciaCierre?.conflicto ? "Hay un conflicto real: conserva la captura y solicita revisión." : "Completa y sincroniza todas las vistas obligatorias antes de cerrar."}</p>}
       {bloqueoLlaves && <p role="alert" className="p-4 text-sm text-danger">Llaves: origen {inspeccionInicial?.llaves_recibidas ?? "sin captura"}, destino {inspeccionFinal?.llaves_recibidas ?? "sin captura"}. Documenta con operación si la diferencia es física o de captura y solicita resolución administrativa. Conserva el registro original y recarga después de la resolución.</p>}
+      {bloqueoFirma && <p role="alert" className="p-4 text-sm text-danger">Firma pendiente: solicita la firma del receptor en el recuadro digital antes de finalizar el traslado.</p>}
       {modalConfirmacionAbierto && (
         <CierreConfirmacionModal
           abierto={modalConfirmacionAbierto}

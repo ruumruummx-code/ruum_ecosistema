@@ -8,10 +8,14 @@ const pushMock = vi.fn();
 const refreshMock = vi.fn();
 const avanzarEstadoTrasladoMock = vi.fn();
 const listarInspeccionesTrasladoMock = vi.fn();
+const consultarAcuseRecepcionMock = vi.fn(async () => ({ persistido: false }));
+const guardarAcuseRecepcionMock = vi.fn(async () => ({ ok: true, referencia: "evidencia/firma.png" }));
 
 vi.mock("@ruum/api/custody", () => ({
   consultarResolucionInventarioLlaves: vi.fn(async () => null),
   consultarResumenEvidenciaCierre: vi.fn(async () => ({ inicial: 5, final: 5, conflicto: false, completa: true })),
+  consultarAcuseRecepcion: (...args: unknown[]) => consultarAcuseRecepcionMock(...args),
+  guardarAcuseRecepcion: (...args: unknown[]) => guardarAcuseRecepcionMock(...args),
 }));
 
 beforeAll(() => {
@@ -41,6 +45,8 @@ beforeAll(() => {
     width: 300,
     height: 100,
   });
+
+  HTMLCanvasElement.prototype.toDataURL = vi.fn().mockReturnValue("data:image/png;base64,mockedSignature");
 });
 
 vi.mock("next/navigation", () => ({
@@ -88,6 +94,8 @@ afterEach(() => {
   vi.clearAllMocks();
   vi.mocked(consultarResolucionInventarioLlaves).mockResolvedValue(null);
   vi.mocked(consultarResumenEvidenciaCierre).mockResolvedValue({ inicial: 5, final: 5, conflicto: false, completa: true });
+  consultarAcuseRecepcionMock.mockResolvedValue({ persistido: false });
+  guardarAcuseRecepcionMock.mockResolvedValue({ ok: true, referencia: "evidencia/firma.png" });
 });
 
 const pasaporteCierre: PasaporteRow = {
@@ -283,17 +291,35 @@ describe("[UI/UX] Pantalla de Cierre de Traslado (Conciliación y Firma) Mobile-
       expect(screen.queryByLabelText("Cargando cierre de traslado")).toBeNull();
     });
 
-    // Guardar Reporte
+    // 1. Sin firma, el botón FINALIZAR TRASLADO está bloqueado por falta de firma
+    const btnFinalizar = screen.getByRole("button", { name: /FINALIZAR TRASLADO/i });
+    expect((btnFinalizar as HTMLButtonElement).disabled).toBe(true);
+    expect(screen.getByText(/Firma requerida: el receptor debe firmar/i)).toBeDefined();
+
+    // 2. Intentar guardar reporte sin firma muestra error
     const btnGuardar = screen.getByRole("button", { name: "Guardar Reporte" });
     fireEvent.click(btnGuardar);
-    expect(screen.getByText(/La recepción y la firma aún no se guardan en servidor/)).toBeDefined();
-    expect(screen.queryByText("Reporte de cierre guardado exitosamente.")).toBeNull();
+    expect(screen.getByText(/Debes capturar la firma de conformidad/i)).toBeDefined();
 
-    // FINALIZAR TRASLADO
-    const btnFinalizar = screen.getByRole("button", { name: /FINALIZAR TRASLADO/i });
+    // 3. Capturar firma en canvas
+    const canvas = screen.getByLabelText("Lienzo de firma digital del cliente");
+    fireEvent.pointerDown(canvas, { clientX: 100, clientY: 120 });
+    fireEvent.pointerMove(canvas, { clientX: 110, clientY: 130 });
+    fireEvent.pointerUp(canvas);
+
+    // Con firma capturada, el botón de finalizar queda habilitado
+    expect((btnFinalizar as HTMLButtonElement).disabled).toBe(false);
+
+    // 4. Guardar reporte persiste en el servidor
+    fireEvent.click(btnGuardar);
+    await waitFor(() => {
+      expect(guardarAcuseRecepcionMock).toHaveBeenCalled();
+      expect(screen.getByText("Reporte de recepción y firma guardados exitosamente.")).toBeDefined();
+    });
+
+    // 5. FINALIZAR TRASLADO y confirmar en el modal
     fireEvent.click(btnFinalizar);
 
-    // Confirmar en el modal de entrega
     const btnConfirmar = await waitFor(() => screen.getByRole("button", { name: /SÍ, ENTREGAR/i }));
     fireEvent.click(btnConfirmar);
 
@@ -306,7 +332,28 @@ describe("[UI/UX] Pantalla de Cierre de Traslado (Conciliación y Firma) Mobile-
     });
   });
 
+  it("bloquea el cierre si no hay firma ni acuse persistido", async () => {
+    listarInspeccionesTrasladoMock.mockResolvedValueOnce([
+      { tipo: "inicial", llaves_recibidas: "2" },
+      { tipo: "final", llaves_recibidas: "2" },
+    ]);
+    consultarAcuseRecepcionMock.mockResolvedValueOnce({ persistido: false });
+
+    render(
+      <CierreTrasladoDetails pasaporte={pasaporteCierre} volver="/viajes/traslado-cierre-001" />
+    );
+
+    await waitFor(() => {
+      expect(screen.queryByLabelText("Cargando cierre de traslado")).toBeNull();
+    });
+
+    const boton = screen.getByRole("button", { name: /FINALIZAR TRASLADO/i });
+    expect((boton as HTMLButtonElement).disabled).toBe(true);
+    expect(screen.getByText(/Firma pendiente: solicita la firma del receptor/i)).toBeDefined();
+  });
+
   it("bloquea 2 a 1 después de recargar y habilita solo con resolución del servidor", async () => {
+    consultarAcuseRecepcionMock.mockResolvedValue({ persistido: true });
     listarInspeccionesTrasladoMock.mockResolvedValue([
       { tipo: "inicial", llaves_recibidas: "2" }, { tipo: "final", llaves_recibidas: "1" },
     ]);
@@ -329,6 +376,7 @@ describe("[UI/UX] Pantalla de Cierre de Traslado (Conciliación y Firma) Mobile-
     { inicial: 4, final: 5, conflicto: false, completa: false },
     { inicial: 5, final: 5, conflicto: true, completa: false },
   ])("no permite cerrar con fotografías incompletas o en conflicto: %j", async resumen => {
+    consultarAcuseRecepcionMock.mockResolvedValue({ persistido: true });
     listarInspeccionesTrasladoMock.mockResolvedValue([{ tipo: "inicial", llaves_recibidas: "2" }, { tipo: "final", llaves_recibidas: "2" }]);
     vi.mocked(consultarResumenEvidenciaCierre).mockResolvedValue(resumen);
     render(<CierreTrasladoDetails pasaporte={pasaporteCierre} volver="/viajes" />);
