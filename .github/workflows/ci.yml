@@ -369,7 +369,11 @@ jobs:
         with:
           version: 2.119.0
       - run: pnpm install --frozen-lockfile
-      - run: supabase start
+      - name: Iniciar Supabase con un puerto PostgreSQL libre
+        run: |
+          db_port=$(python3 -c 'import socket; s = socket.socket(); s.bind(("0.0.0.0", 0)); print(s.getsockname()[1])')
+          sed -i "s/^port = 54322$/port = ${db_port}/" supabase/config.toml
+          supabase start
       - run: pnpm test:sql
 
   tipos:
@@ -390,7 +394,11 @@ jobs:
         with:
           version: 2.119.0
       - run: pnpm install --frozen-lockfile
-      - run: supabase start
+      - name: Iniciar Supabase con un puerto PostgreSQL libre
+        run: |
+          db_port=$(python3 -c 'import socket; s = socket.socket(); s.bind(("0.0.0.0", 0)); print(s.getsockname()[1])')
+          sed -i "s/^port = 54322$/port = ${db_port}/" supabase/config.toml
+          supabase start
       - run: supabase gen types typescript --local > packages/shared/src/types/supabase.ts
       - run: git diff --exit-code packages/shared/src/types/supabase.ts
       - run: pnpm check:rpc-casts
