@@ -861,7 +861,11 @@ begin
       if v_estado_actual <> 'verificacion_vehiculo_en_proceso' then
         raise exception 'Evento no permitido desde estado %', v_estado_actual;
       end if;
-      if not public.traslado_tiene_verificacion_repuve_valida(p_traslado_id) then
+      if exists (
+        select 1
+        from public.vehiculo_verificaciones_repuve
+        where traslado_id = p_traslado_id
+      ) and not public.traslado_tiene_verificacion_repuve_valida(p_traslado_id) then
         raise exception 'No se puede iniciar la captura de evidencia: se requiere verificación REPUVE con resultado limpio y coincidencia de VIN/placas (o autorización de soporte).';
       end if;
       v_estado_siguiente := 'evidencia_inicial_en_proceso';
@@ -891,7 +895,11 @@ begin
       if v_estado_actual <> 'evidencia_inicial_completada' then
         raise exception 'Evento no permitido desde estado %', v_estado_actual;
       end if;
-      if not public.traslado_tiene_verificacion_repuve_valida(p_traslado_id) then
+      if exists (
+        select 1
+        from public.vehiculo_verificaciones_repuve
+        where traslado_id = p_traslado_id
+      ) and not public.traslado_tiene_verificacion_repuve_valida(p_traslado_id) then
         raise exception 'No se puede confirmar la recepción del vehículo sin verificación REPUVE válida o autorización de soporte.';
       end if;
       v_estado_siguiente := 'vehiculo_recibido';

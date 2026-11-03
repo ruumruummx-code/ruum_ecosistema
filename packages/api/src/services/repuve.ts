@@ -12,8 +12,6 @@ import { BUCKET_EVIDENCIA, resolverUrlEvidencia } from "./evidencia";
 
 type Cliente = SupabaseClient<Database>;
 
-const TABLA_VERIFICACIONES_REPUVE = "vehiculo_verificaciones_repuve" as never;
-
 function decodificarBase64ABytes(dataUrl: string): { bytes: Uint8Array; contentType: string; ext: string } {
   const match = dataUrl.match(/^data:(image\/[a-zA-Z0-9+.-]+);base64,(.+)$/);
   const contentType = match?.[1] ?? "image/jpeg";
@@ -129,25 +127,14 @@ export async function obtenerVerificacionesRepuveTraslado(
   cliente: Cliente,
   trasladoId: string
 ): Promise<VerificacionRepuve[]> {
-  const { data, error } = await (cliente as unknown as {
-    from: (t: never) => {
-      select: (c: string) => {
-        eq: (col: string, v: string) => {
-          order: (col: string, o: { ascending: boolean }) => Promise<{
-            data: VerificacionRepuve[] | null;
-            error: unknown;
-          }>;
-        };
-      };
-    };
-  })
-    .from(TABLA_VERIFICACIONES_REPUVE)
+  const { data, error } = await cliente
+    .from("vehiculo_verificaciones_repuve")
     .select("*")
     .eq("traslado_id", trasladoId)
     .order("creado_en", { ascending: false });
 
   if (error) throw error;
-  const filas = data ?? [];
+  const filas = (data ?? []) as unknown as VerificacionRepuve[];
 
   return Promise.all(
     filas.map(async (fila) => ({
@@ -229,25 +216,14 @@ export async function listarColaVerificacionesRepuveAdmin(
   filtro: FiltroColaRepuveAdmin = "todas",
   limite = 60
 ): Promise<VerificacionRepuve[]> {
-  const { data, error } = await (cliente as unknown as {
-    from: (t: never) => {
-      select: (c: string) => {
-        order: (col: string, o: { ascending: boolean }) => {
-          limit: (n: number) => Promise<{
-            data: VerificacionRepuve[] | null;
-            error: unknown;
-          }>;
-        };
-      };
-    };
-  })
-    .from(TABLA_VERIFICACIONES_REPUVE)
+  const { data, error } = await cliente
+    .from("vehiculo_verificaciones_repuve")
     .select("*")
     .order("creado_en", { ascending: false })
     .limit(limite);
 
   if (error) throw error;
-  let filas = data ?? [];
+  let filas = (data ?? []) as unknown as VerificacionRepuve[];
 
   if (filtro === "excepciones") {
     const trasladosConOverride = new Set(
