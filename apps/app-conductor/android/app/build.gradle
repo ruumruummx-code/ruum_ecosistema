@@ -1,12 +1,14 @@
+import groovy.json.JsonSlurper
+
 apply plugin: 'com.android.application'
 
-def ruumVersion = new groovy.json.JsonSlurper().parse(file('../../../../config/app-version.json'))
-def ruumRemoteUrl = providers.gradleProperty('ruumRemoteUrl').orElse(System.getenv('RUUM_REMOTE_URL') ?: 'https://www.concer.ruumruum-moviliax.online').get()
-if (!ruumRemoteUrl.startsWith('https://')) throw new GradleException('RUUM_REMOTE_URL must use https://')
+def rumVersion = new JsonSlurper().parse(file('../../../../config/app-version.json'))
+def rumRemoteUrl = providers.gradleProperty('rumRemoteUrl').orElse(System.getenv('RUUM_REMOTE_URL') ?: 'https://www.concer.ruumruum-moviliax.online').get()
+if (!rumRemoteUrl.startsWith('https://')) throw new GradleException('RUUM_REMOTE_URL must use https://')
 
 android {
     namespace = "com.moviliax.ruumruum.conductor"
-    compileSdk = rootProject.ext.compileSdkVersion
+    compileSdk = libs.versions.compileSdk.get().toInteger()
     buildFeatures {
         buildConfig = true
     }
@@ -14,10 +16,10 @@ android {
         applicationId "com.moviliax.ruumruum.conductor"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode ruumVersion.versionCode as int
-        versionName ruumVersion.version as String
+        versionCode rumVersion.versionCode as int
+        versionName rumVersion.version as String
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
-        buildConfigField "String", "RUUM_REMOTE_URL", "\"${ruumRemoteUrl}\""
+        buildConfigField "String", "RUUM_REMOTE_URL", "\"${rumRemoteUrl}\""
         androidResources {
              // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.
              // Default: https://android.googlesource.com/platform/frameworks/base/+/282e181b58cf72b6ca770dc7ca5f91f135444502/tools/aapt/AaptAssets.cpp#61
@@ -57,26 +59,26 @@ repositories {
 
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
-    implementation "androidx.appcompat:appcompat:$androidxAppCompatVersion"
-    implementation "androidx.coordinatorlayout:coordinatorlayout:$androidxCoordinatorLayoutVersion"
-    implementation "androidx.core:core-splashscreen:$coreSplashScreenVersion"
-    implementation "com.google.android.gms:play-services-location:21.3.0"
-    implementation "androidx.security:security-crypto:1.1.0-alpha06"
-    implementation "androidx.work:work-runtime:2.9.0"
+    implementation libs.androidx.appcompat
+    implementation libs.androidx.coordinatorlayout
+    implementation libs.androidx.core.splashscreen
+    implementation libs.play.services.location
+    implementation libs.androidx.security.crypto
+    implementation libs.androidx.work.runtime
     implementation project(':capacitor-android')
     
     // Unit testing
-    testImplementation "junit:junit:$junitVersion"
-    testImplementation "org.mockito:mockito-core:$mockitoVersion"
-    testImplementation "org.mockito.kotlin:mockito-kotlin:$mockitoKotlinVersion"
-    testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:$coroutinesTestVersion"
+    testImplementation libs.junit
+    testImplementation libs.mockito.core
+    testImplementation libs.mockito.kotlin
+    testImplementation libs.kotlinx.coroutines.test
     
     // Instrumentation testing
-    androidTestImplementation "androidx.test.ext:junit:$androidxJunitVersion"
-    androidTestImplementation "androidx.test.espresso:espresso-core:$androidxEspressoCoreVersion"
-    androidTestImplementation "androidx.test:core:$androidxTestCoreVersion"
-    androidTestImplementation "androidx.test:runner:$androidxTestRunnerVersion"
-    androidTestImplementation "androidx.test:rules:$androidxTestRulesVersion"
+    androidTestImplementation libs.androidx.junit
+    androidTestImplementation libs.androidx.espresso.core
+    androidTestImplementation libs.androidx.core
+    androidTestImplementation libs.androidx.runner
+    androidTestImplementation libs.androidx.rules
     
     implementation project(':capacitor-cordova-android-plugins')
 }
@@ -88,6 +90,6 @@ try {
     if (servicesJSON.text) {
         apply plugin: 'com.google.gms.google-services'
     }
-} catch(Exception e) {
+} catch(Exception ignored) {
     logger.info("google-services.json not found, google-services plugin not applied. Push Notifications won't work")
 }
