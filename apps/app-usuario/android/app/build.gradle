@@ -45,7 +45,9 @@ dependencies {
     androidTestImplementation libs.androidx.runner
     androidTestImplementation libs.androidx.rules
     
-    implementation project(':capacitor-cordova-android-plugins')
+    if (findProject(':capacitor-cordova-android-plugins') != null) {
+        implementation project(':capacitor-cordova-android-plugins')
+    }
 }
 
 apply from: 'capacitor.build.gradle'
