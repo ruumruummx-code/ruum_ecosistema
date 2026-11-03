@@ -1048,7 +1048,7 @@
   border-radius: 0;
   box-shadow: none;
 }
-@media (max-height: 700px) {
+@media (max-height: 800px) {
   .detail {
     gap: 8px;
     padding: 10px;

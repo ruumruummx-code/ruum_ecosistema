@@ -180,7 +180,7 @@ export function PreferenciasCliente({ cuenta }: PreferenciasClienteProps) {
          ───────────────────────────────────────────────────────────── */}
       <div className="hidden lg:flex min-h-screen bg-[#F4F8FD] dark:bg-[#070D18] text-slate-800 dark:text-slate-100 font-sans">
         {/* ── SIDEBAR IZQUIERDO FIJO ── */}
-        <aside className="w-64 bg-[#0A1325] text-white flex flex-col shrink-0 min-h-screen border-r border-[#16253B]">
+        <aside id="userDashboardSidebar" className="w-64 bg-[#0A1325] text-white flex flex-col shrink-0 min-h-screen border-r border-[#16253B]">
           {/* Logo Brand */}
           <div className="p-6 pb-5">
             <Link href="/" className="flex items-center gap-3 group">
@@ -248,7 +248,7 @@ export function PreferenciasCliente({ cuenta }: PreferenciasClienteProps) {
             </Link>
 
             <Link
-              href="/cuenta"
+              href="/ubicaciones"
               className="flex items-center gap-3.5 px-3.5 py-2.5 rounded-xl text-slate-400 hover:text-white hover:bg-white/5 font-medium text-sm transition"
             >
               <svg className="size-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
@@ -259,7 +259,7 @@ export function PreferenciasCliente({ cuenta }: PreferenciasClienteProps) {
             </Link>
 
             <Link
-              href="/carga-masiva"
+              href="/viajes/masivo"
               className="flex items-center gap-3.5 px-3.5 py-2.5 rounded-xl text-slate-400 hover:text-white hover:bg-white/5 font-medium text-sm transition"
             >
               <svg className="size-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
@@ -283,7 +283,7 @@ export function PreferenciasCliente({ cuenta }: PreferenciasClienteProps) {
             </Link>
 
             <Link
-              href="/cuenta/perfil"
+              href="/cuenta?seccion=perfil"
               className="flex items-center gap-3.5 px-3.5 py-2.5 rounded-xl text-slate-400 hover:text-white hover:bg-white/5 font-medium text-sm transition"
             >
               <svg className="size-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
@@ -295,6 +295,7 @@ export function PreferenciasCliente({ cuenta }: PreferenciasClienteProps) {
             {/* Activo: Mis preferencias */}
             <Link
               href="/cuenta/preferencias"
+              aria-current="page"
               className="flex items-center gap-3.5 px-3.5 py-2.5 rounded-xl bg-[#0066FF] text-white font-semibold text-sm shadow-md shadow-blue-500/25 transition"
             >
               <svg className="size-5 shrink-0 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
@@ -428,7 +429,7 @@ export function PreferenciasCliente({ cuenta }: PreferenciasClienteProps) {
           </header>
 
           {/* Área de Contenido con Scroll */}
-          <main className="flex-1 px-8 py-6 max-w-7xl w-full mx-auto pb-28">
+          <main id="userDashboardMainContent" className="flex-1 px-8 py-6 max-w-7xl w-full mx-auto pb-28">
             {/* Breadcrumb Enlace */}
             <div className="mb-2">
               <Link
