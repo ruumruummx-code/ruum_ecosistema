@@ -97,6 +97,40 @@ export interface FuncionesRpc {
     args: { p_version: number; p_canal: string; p_version_app: string; p_aceptado_en?: string };
     ret: Json;
   };
+  conductor_registra_verificacion_repuve: {
+    args: {
+      p_traslado_id: string;
+      p_vin_fisico: string;
+      p_placas_fisicas: string;
+      p_resultado: string;
+      p_captura_path: string;
+    };
+    ret: Json;
+  };
+  admin_override_verificacion_repuve: {
+    args: {
+      p_traslado_id: string;
+      p_motivo: string;
+      p_verificacion_origen_id?: string | null;
+    };
+    ret: Json;
+  };
+  admin_dictaminar_auditoria_repuve: {
+    args: {
+      p_verificacion_id: string;
+      p_dictamen: string;
+      p_notas?: string | null;
+    };
+    ret: Json;
+  };
+  obtener_resumen_verificacion_repuve: {
+    args: { p_traslado_id: string };
+    ret: Json;
+  };
+  traslado_tiene_verificacion_repuve_valida: {
+    args: { p_traslado_id: string };
+    ret: boolean;
+  };
 }
 
 export type NombreFuncionRpc = keyof FuncionesRpc;

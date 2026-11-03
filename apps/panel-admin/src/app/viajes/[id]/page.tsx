@@ -33,6 +33,7 @@ import {
 import { obtenerRutaMapbox, tieneMapboxConfigurado } from "@/lib/mapbox-rutas";
 import { obtenerVersionTraslado } from "@ruum/api/transfers";
 import { ResolucionLlaves } from "./ResolucionLlaves";
+import { VerificacionRepuveAdmin } from "./VerificacionRepuveAdmin";
 
 type PasaporteRow = Database["public"]["Views"]["pasaporte_digital"]["Row"];
 type ConductorRow = Database["public"]["Tables"]["conductores"]["Row"];
@@ -471,6 +472,7 @@ export default function PaginaDetalleViajeAdmin() {
         <EstadoStepper estado={pasaporte.estado} />
       </div>
       <ResolucionLlaves trasladoId={id} />
+      <VerificacionRepuveAdmin trasladoId={id} />
 
       {trazabilidadMasiva && (
         <div className="mt-6">

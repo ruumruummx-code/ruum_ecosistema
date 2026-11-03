@@ -12,6 +12,9 @@ beforeAll(() => {
 const pushMock = vi.fn();
 const refreshMock = vi.fn();
 const avanzarEstadoTrasladoMock = vi.fn();
+const obtenerResumenVerificacionRepuveMock = vi.fn();
+const registrarVerificacionRepuveConductorMock = vi.fn();
+const subirCapturaRepuveMock = vi.fn();
 
 vi.mock("next/navigation", () => ({
   useRouter: () => ({
@@ -56,6 +59,11 @@ vi.mock("@ruum/api/drivers", () => ({
 
 vi.mock("@ruum/api/services", () => ({
   avanzarEstadoTraslado: (...args: unknown[]) => avanzarEstadoTrasladoMock(...args),
+  obtenerResumenVerificacionRepuve: (...args: unknown[]) =>
+    obtenerResumenVerificacionRepuveMock(...args),
+  registrarVerificacionRepuveConductor: (...args: unknown[]) =>
+    registrarVerificacionRepuveConductorMock(...args),
+  subirCapturaRepuve: (...args: unknown[]) => subirCapturaRepuveMock(...args),
   extraerRutaComprobante: (desc: string | null, ruta: string | null) => ({
     ruta: ruta ?? null,
     texto: desc ?? null,
@@ -201,24 +209,121 @@ describe("[UI/UX] Pantalla de Traslado Activo: Recibe el Vehículo Mobile-First"
     expect(within(vehiculoSection).getByText("Stratus")).toBeTruthy();
   });
 
-  it("avanza estado y navega a evidencia al presionar el botón primario 'INICIAR INSPECCIÓN Y EVIDENCIA'", async () => {
+  it("avanza a verificacion_vehiculo_en_proceso, registra verificación REPUVE limpia y navega a evidencia", async () => {
+    obtenerResumenVerificacionRepuveMock.mockResolvedValue({
+      traslado_id: "traslado-recibe-001",
+      registrada: false,
+      valida_para_avanzar: false,
+      estatus_resumido: "pendiente",
+      coincide: null,
+      actualizado_en: null,
+    });
     avanzarEstadoTrasladoMock
       .mockResolvedValueOnce("verificacion_vehiculo_en_proceso")
-      .mockResolvedValueOnce("verificacion_vehiculo_en_proceso");
+      .mockResolvedValueOnce("evidencia_inicial_en_proceso");
+    subirCapturaRepuveMock.mockResolvedValue("auth-1/traslado-recibe-001/repuve/captura.jpg");
+    registrarVerificacionRepuveConductorMock.mockResolvedValue({
+      id: "verif-001",
+      traslado_id: "traslado-recibe-001",
+      coincide_vin: true,
+      coincide_placas: true,
+      coincide: true,
+      resultado: "limpio",
+      requiere_auditoria: false,
+      puede_avanzar: true,
+      creado_en: "2026-11-03T11:00:00Z",
+    });
 
     render(<LocalizarVehiculoDetails pasaporte={pasaporteRecibeVehiculo} volver="/viajes" />);
 
     const btnIniciar = screen.getByRole("button", {
       name: /INICIAR INSPECCIÓN Y EVIDENCIA/i,
     });
-    expect(btnIniciar).toBeTruthy();
-
     fireEvent.click(btnIniciar);
 
     await waitFor(() => {
-      expect(avanzarEstadoTrasladoMock).toHaveBeenCalled();
+      expect(avanzarEstadoTrasladoMock).toHaveBeenCalledWith(
+        expect.anything(),
+        "traslado-recibe-001",
+        "conductor_en_punto_de_recoleccion"
+      );
+      expect(screen.getByText("VERIFICACIÓN REPUVE OBLIGATORIA")).toBeTruthy();
+    });
+
+    fireEvent.change(screen.getByLabelText("VIN físico en unidad"), {
+      target: { value: "88888888888888888" },
+    });
+    fireEvent.change(screen.getByLabelText("Placas físicas"), {
+      target: { value: "POM365" },
+    });
+    const archivo = new File(["captura"], "repuve.png", { type: "image/png" });
+    fireEvent.change(screen.getByLabelText("Captura de pantalla REPUVE"), {
+      target: { files: [archivo] },
+    });
+
+    const btnConfirmarRepuve = screen.getByRole("button", {
+      name: /CONFIRMAR REPUVE E INICIAR EVIDENCIA/i,
+    });
+    fireEvent.click(btnConfirmarRepuve);
+
+    await waitFor(() => {
+      expect(subirCapturaRepuveMock).toHaveBeenCalled();
+      expect(registrarVerificacionRepuveConductorMock).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({
+          trasladoId: "traslado-recibe-001",
+          vinFisico: "88888888888888888",
+          placasFisicas: "POM365",
+          resultado: "limpio",
+        })
+      );
       expect(pushMock).toHaveBeenCalledWith("/viajes/traslado-recibe-001/evidencia");
     });
+  });
+
+  it("bloquea el avance y muestra 'Reportar a soporte' cuando el VIN físico no coincide o REPUVE no es limpio", () => {
+    render(
+      <LocalizarVehiculoDetails
+        pasaporte={{
+          ...pasaporteRecibeVehiculo,
+          estado: "verificacion_vehiculo_en_proceso",
+        }}
+        volver="/viajes"
+      />
+    );
+
+    fireEvent.change(screen.getByLabelText("VIN físico en unidad"), {
+      target: { value: "1HGCM82633A999999" },
+    });
+    fireEvent.change(screen.getByLabelText("Placas físicas"), {
+      target: { value: "POM365" },
+    });
+
+    expect(
+      screen.getByText(/El VIN físico no coincide con el registrado en el pasaporte digital/i)
+    ).toBeTruthy();
+    expect(screen.getByRole("button", { name: /^Reportar a soporte$/i })).toBeTruthy();
+  });
+
+  it("no muestra datos falsos ('POM365' ni '88888888888888888') y bloquea el paso si el pasaporte llega sin VIN o placas", () => {
+    render(
+      <LocalizarVehiculoDetails
+        pasaporte={{
+          ...pasaporteRecibeVehiculo,
+          vehiculo_placas: null,
+          vehiculo_vin: null,
+        }}
+        volver="/viajes"
+      />
+    );
+
+    expect(screen.queryByText("POM365")).toBeNull();
+    expect(screen.queryByText("88888888888888888")).toBeNull();
+    expect(screen.getByText("Sin placas registradas")).toBeTruthy();
+    expect(screen.getByText("Sin VIN registrado")).toBeTruthy();
+    expect(
+      screen.getByRole("button", { name: /REPORTAR A SOPORTE \(FALTAN VIN\/PLACAS\)/i })
+    ).toBeTruthy();
   });
 
   it("renderiza la barra de navegación inferior estándar fija con Traslados como página activa", () => {

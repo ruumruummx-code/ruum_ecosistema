@@ -1,5 +1,10 @@
 import { describe, it, expect } from "vitest";
-import { evidenciaCompleta, debeAbrirIncidenciaDanoNoReportado } from "./evidencia-requerida";
+import {
+  evidenciaCompleta,
+  debeAbrirIncidenciaDanoNoReportado,
+  normalizarIdentificadorVehicular,
+  evaluarVerificacionRepuveLocal
+} from "./evidencia-requerida";
 import type { FotoEvidencia } from "../types/evidencia";
 
 function foto(angulo: FotoEvidencia["angulo"], sincronizada = true): FotoEvidencia {
@@ -66,5 +71,49 @@ describe("debeAbrirIncidenciaDanoNoReportado — PRD §4.4", () => {
 
   it("no abre incidencia si no hay daño detectado en la evidencia final", () => {
     expect(debeAbrirIncidenciaDanoNoReportado(false, false, false)).toBe(false);
+  });
+});
+
+describe("evaluarVerificacionRepuveLocal — verificación REPUVE y VIN/placas", () => {
+  it("normaliza guiones y espacios en placas y VIN", () => {
+    expect(normalizarIdentificadorVehicular(" pom-365 a ")).toBe("POM365A");
+    const r = evaluarVerificacionRepuveLocal({
+      vinEsperado: "3N1AB7AP0HY123456",
+      placasEsperadas: "ABC-123-A",
+      vinFisico: "3n1ab7ap0hy123456",
+      placasFisicas: "ABC 123 A",
+      resultado: "limpio"
+    });
+    expect(r.coincideVin).toBe(true);
+    expect(r.coincidePlacas).toBe(true);
+    expect(r.coincide).toBe(true);
+    expect(r.puedeAvanzar).toBe(true);
+  });
+
+  it("bloquea el avance si el resultado REPUVE no es limpio aunque coincida el VIN", () => {
+    const r = evaluarVerificacionRepuveLocal({
+      vinEsperado: "3N1AB7AP0HY123456",
+      placasEsperadas: "ABC123A",
+      vinFisico: "3N1AB7AP0HY123456",
+      placasFisicas: "ABC123A",
+      resultado: "con_reporte_robo"
+    });
+    expect(r.coincide).toBe(true);
+    expect(r.puedeAvanzar).toBe(false);
+    expect(r.motivoBloqueo).toMatch(/REPUVE no es limpio/i);
+  });
+
+  it("bloquea el avance si hay discrepancia de VIN físico", () => {
+    const r = evaluarVerificacionRepuveLocal({
+      vinEsperado: "3N1AB7AP0HY123456",
+      placasEsperadas: "ABC123A",
+      vinFisico: "3N1AB7AP0HY999999",
+      placasFisicas: "ABC123A",
+      resultado: "limpio"
+    });
+    expect(r.coincideVin).toBe(false);
+    expect(r.coincide).toBe(false);
+    expect(r.puedeAvanzar).toBe(false);
+    expect(r.motivoBloqueo).toMatch(/VIN físico no coincide/i);
   });
 });

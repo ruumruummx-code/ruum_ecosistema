@@ -5,3 +5,4 @@ export * from "./custodia";
 export * from "./inventario-llaves";
 export * from "./resumen-cierre";
 export * from "./recepcion";
+export * from "../services/repuve";

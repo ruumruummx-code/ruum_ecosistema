@@ -1,14 +1,24 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { TEXTOS_CARGANDO } from "@ruum/shared/constants";
-import type { Database } from "@ruum/shared/types";
+import { evaluarVerificacionRepuveLocal } from "@ruum/shared/rules";
+import {
+  URL_PORTAL_REPUVE,
+  type Database,
+  type ResultadoVerificacionRepuveConductor,
+} from "@ruum/shared/types";
 import { traducirErrorOperativo } from "@ruum/shared/utils";
 import { crearClienteNavegador } from "@/lib/supabase-browser";
-import { avanzarEstadoTraslado } from "@ruum/api/services";
+import {
+  avanzarEstadoTraslado,
+  obtenerResumenVerificacionRepuve,
+  registrarVerificacionRepuveConductor,
+  subirCapturaRepuve,
+} from "@ruum/api/services";
 import { EmergencyPanel } from "./EmergencyPanel";
 import { SecondaryTripNavBar } from "./SecondaryTripNavBar";
 import { TripSupportDialog } from "./TripSupportDialog";
@@ -18,6 +28,17 @@ import { ChatViaje } from "./ChatViaje";
 type PasaporteRow = Database["public"]["Views"]["pasaporte_digital"]["Row"];
 type EstadoTraslado = Database["public"]["Enums"]["estado_traslado"];
 
+const OPCIONES_RESULTADO_REPUVE: {
+  valor: ResultadoVerificacionRepuveConductor;
+  etiqueta: string;
+}[] = [
+  { valor: "limpio", etiqueta: "Sin reporte de robo (Limpio)" },
+  { valor: "con_reporte_robo", etiqueta: "Con reporte de robo vigente" },
+  { valor: "con_aviso_recuperado", etiqueta: "Con aviso / recuperado / alerta" },
+  { valor: "no_encontrado", etiqueta: "No encontrado en REPUVE" },
+  { valor: "error_portal", etiqueta: "Portal REPUVE sin servicio" },
+];
+
 export function LocalizarVehiculoDetails({
   pasaporte,
   volver,
@@ -26,54 +47,191 @@ export function LocalizarVehiculoDetails({
   volver: string;
 }) {
   const router = useRouter();
+  const [estadoLocal, setEstadoLocal] = useState<EstadoTraslado>(
+    (pasaporte.estado || "conductor_en_punto_de_recoleccion") as EstadoTraslado
+  );
   const [procesando, setProcesando] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [aviso, setAviso] = useState<string | null>(null);
   const [chatAbierto, setChatAbierto] = useState(false);
   const [soporteAbierto, setSoporteAbierto] = useState(false);
 
+  // Estado del paso de verificación REPUVE
+  const [vinFisico, setVinFisico] = useState("");
+  const [placasFisicas, setPlacasFisicas] = useState("");
+  const [resultadoRepuve, setResultadoRepuve] =
+    useState<ResultadoVerificacionRepuveConductor>("limpio");
+  const [capturaArchivo, setCapturaArchivo] = useState<File | null>(null);
+  const [capturaPathSubida, setCapturaPathSubida] = useState<string | null>(null);
+  const [repuveValidoEnServidor, setRepuveValidoEnServidor] = useState(false);
+  const [estatusServidor, setEstatusServidor] = useState<string | null>(null);
+  const [intentoBloqueadoGuardado, setIntentoBloqueadoGuardado] = useState(false);
+
   const trasladoId = pasaporte.traslado_id!;
-  const estadoActual = (pasaporte.estado || "conductor_en_punto_de_recoleccion") as EstadoTraslado;
 
-  const placas = pasaporte.vehiculo_placas || "POM365";
-  const vin = pasaporte.vehiculo_vin || "88888888888888888";
+  // Sin fallbacks falsos: si el pasaporte llega sin VIN o placas reales, se bloquea el paso
+  const placasReales = pasaporte.vehiculo_placas?.trim() || "";
+  const vinReal = pasaporte.vehiculo_vin?.trim() || "";
+  const faltanDatosVehiculo = !vinReal || !placasReales;
+
+  const placas = placasReales || "Sin placas registradas";
+  const vin = vinReal || "Sin VIN registrado";
   const marca =
-    pasaporte.vehiculo_marca ||
-    (pasaporte.vehiculo_modelo ? pasaporte.vehiculo_modelo.split(" ")[0] : "Chrysler");
-  const modelo = pasaporte.vehiculo_modelo || "Stratus";
-  const anio = pasaporte.vehiculo_anio ? String(pasaporte.vehiculo_anio) : "2015";
-  const color = pasaporte.vehiculo_color || "Gris";
+    pasaporte.vehiculo_marca?.trim() ||
+    (pasaporte.vehiculo_modelo ? pasaporte.vehiculo_modelo.split(" ")[0] : "Sin marca");
+  const modelo = pasaporte.vehiculo_modelo?.trim() || "Sin modelo";
+  const anio = pasaporte.vehiculo_anio ? String(pasaporte.vehiculo_anio) : "S/D";
+  const color = pasaporte.vehiculo_color?.trim() || "S/D";
 
-  const contactoNombre = pasaporte.contacto_entrega_nombre || "Héctor Lomelín";
-  const contactoTelefono = pasaporte.contacto_entrega_telefono || "+525555555555";
+  const contactoNombre = pasaporte.contacto_entrega_nombre?.trim() || "Contacto no registrado";
+  const contactoTelefono = pasaporte.contacto_entrega_telefono?.trim() || "";
   const telefonoLimpio = contactoTelefono.replace(/[^0-9]/g, "");
 
+  const enPasoVerificacion = estadoLocal === "verificacion_vehiculo_en_proceso";
+
+  useEffect(() => {
+    setEstadoLocal((pasaporte.estado || "conductor_en_punto_de_recoleccion") as EstadoTraslado);
+  }, [pasaporte.estado]);
+
+  useEffect(() => {
+    let activo = true;
+    async function consultarEstatusRepuve() {
+      try {
+        const cliente = crearClienteNavegador();
+        const resumen = await obtenerResumenVerificacionRepuve(cliente, trasladoId);
+        if (!activo || !resumen) return;
+        setRepuveValidoEnServidor(Boolean(resumen.valida_para_avanzar));
+        setEstatusServidor(resumen.estatus_resumido ?? null);
+      } catch {
+        // En entorno sin RPC o test unitario sin mock, se mantiene en false
+      }
+    }
+    if (enPasoVerificacion) {
+      void consultarEstatusRepuve();
+    }
+    return () => {
+      activo = false;
+    };
+  }, [enPasoVerificacion, trasladoId]);
+
+  const evaluacionRepuve = evaluarVerificacionRepuveLocal({
+    vinEsperado: vinReal,
+    placasEsperadas: placasReales,
+    vinFisico,
+    placasFisicas,
+    resultado: resultadoRepuve,
+    tienePlacas: true,
+  });
+
+  const hayCamposIngresados =
+    vinFisico.trim().length > 0 && placasFisicas.trim().length > 0;
+  const detectaBloqueoOperativo =
+    !repuveValidoEnServidor &&
+    (resultadoRepuve !== "limpio" || (hayCamposIngresados && !evaluacionRepuve.coincide));
+
   async function handleIniciarInspeccion() {
+    if (faltanDatosVehiculo) {
+      setError(
+        "El pasaporte digital no tiene VIN o placas reales registrados. Reporta a soporte antes de continuar."
+      );
+      setSoporteAbierto(true);
+      return;
+    }
+
     setProcesando(true);
     setError(null);
+    setAviso(null);
     try {
       const cliente = crearClienteNavegador();
 
-      if (estadoActual === "conductor_en_punto_de_recoleccion") {
+      if (estadoLocal === "conductor_en_punto_de_recoleccion") {
         const siguiente = (await avanzarEstadoTraslado(
           cliente,
           trasladoId,
           "conductor_en_punto_de_recoleccion"
         )) as EstadoTraslado;
-        await new Promise((resolve) => setTimeout(resolve, 200));
-        await avanzarEstadoTraslado(cliente, trasladoId, siguiente);
-        router.push(`/viajes/${trasladoId}/evidencia`);
+        setEstadoLocal(siguiente || "verificacion_vehiculo_en_proceso");
+        setProcesando(false);
         return;
       }
 
-      if (estadoActual === "verificacion_vehiculo_en_proceso") {
+      if (estadoLocal === "verificacion_vehiculo_en_proceso" && repuveValidoEnServidor) {
         await avanzarEstadoTraslado(cliente, trasladoId, "verificacion_vehiculo_en_proceso");
         router.push(`/viajes/${trasladoId}/evidencia`);
         return;
       }
 
+      if (estadoLocal === "evidencia_inicial_en_proceso") {
+        router.push(`/viajes/${trasladoId}/evidencia`);
+        return;
+      }
+    } catch (err) {
+      setError(traducirErrorOperativo(err, "No pudimos iniciar la verificación del vehículo."));
+    } finally {
+      setProcesando(false);
+    }
+  }
+
+  async function handleRegistrarVerificacionRepuve() {
+    if (faltanDatosVehiculo) {
+      setError(
+        "El pasaporte digital no tiene VIN o placas reales registrados. Reporta a soporte antes de continuar."
+      );
+      return;
+    }
+
+    if (!vinFisico.trim() || !placasFisicas.trim()) {
+      setError("Captura el VIN físico y las placas físicas leídas directamente en el vehículo.");
+      return;
+    }
+
+    if (!capturaArchivo && !capturaPathSubida) {
+      setError("Adjunta la captura de pantalla de la consulta en el portal REPUVE.");
+      return;
+    }
+
+    setProcesando(true);
+    setError(null);
+    setAviso(null);
+
+    try {
+      const cliente = crearClienteNavegador();
+      let pathFinal = capturaPathSubida;
+      if (!pathFinal && capturaArchivo) {
+        pathFinal = await subirCapturaRepuve(cliente, trasladoId, capturaArchivo);
+        setCapturaPathSubida(pathFinal);
+      }
+
+      if (!pathFinal) {
+        throw new Error("No se pudo obtener la ruta de la captura REPUVE.");
+      }
+
+      const registro = await registrarVerificacionRepuveConductor(cliente, {
+        trasladoId,
+        vinFisico,
+        placasFisicas,
+        resultado: resultadoRepuve,
+        capturaPath: pathFinal,
+      });
+
+      if (!registro.puede_avanzar) {
+        setIntentoBloqueadoGuardado(true);
+        setRepuveValidoEnServidor(false);
+        setError(
+          evaluacionRepuve.motivoBloqueo ||
+            "La verificación REPUVE registró una alerta o discrepancia. Reporta a soporte para revisión."
+        );
+        return;
+      }
+
+      setRepuveValidoEnServidor(true);
+      await avanzarEstadoTraslado(cliente, trasladoId, "verificacion_vehiculo_en_proceso");
       router.push(`/viajes/${trasladoId}/evidencia`);
     } catch (err) {
-      setError(traducirErrorOperativo(err, "No pudimos iniciar la inspección del vehículo."));
+      setError(
+        traducirErrorOperativo(err, "No pudimos registrar la verificación REPUVE del vehículo.")
+      );
+    } finally {
       setProcesando(false);
     }
   }
@@ -81,12 +239,12 @@ export function LocalizarVehiculoDetails({
   return (
     <div
       data-recibe-vehiculo
-      className="mx-auto flex h-screen max-h-[100dvh] w-full max-w-md flex-col justify-between overflow-hidden bg-[#F4F8FD] text-[#0A1E3C] select-none"
+      className={`mx-auto flex h-screen max-h-[100dvh] w-full max-w-md flex-col justify-between ${
+        enPasoVerificacion ? "overflow-y-auto" : "overflow-hidden"
+      } bg-[#F4F8FD] text-[#0A1E3C] select-none`}
     >
-      {/* CONTENIDO PRINCIPAL COMPACTO SIN SCROLL */}
-      <div
-        className="flex min-h-0 flex-1 flex-col justify-between gap-2 px-4 pt-[max(10px,env(safe-area-inset-top))] pb-2.5"
-      >
+      {/* CONTENIDO PRINCIPAL */}
+      <div className="flex min-h-0 flex-1 flex-col justify-between gap-2 px-4 pt-[max(10px,env(safe-area-inset-top))] pb-2.5">
         {/* 1. HEADER Y PESTAÑAS DE GESTIÓN SUPERIOR */}
         <div className="flex shrink-0 flex-col gap-2">
           <header
@@ -118,7 +276,7 @@ export function LocalizarVehiculoDetails({
               Traslado activo
             </span>
 
-            <div className="flex items-center gap-1.5 shrink-0">
+            <div className="flex shrink-0 items-center gap-1.5">
               <button
                 type="button"
                 onClick={() => setSoporteAbierto(true)}
@@ -140,7 +298,7 @@ export function LocalizarVehiculoDetails({
           aria-label="Estado actual: En el origen. Ver detalles"
           className="flex shrink-0 items-center justify-between gap-3 rounded-2xl border border-[#DCE7F5] bg-[#E8F0FA] px-3.5 py-2.5 shadow-2xs transition hover:bg-[#E2EDFA] active:scale-[0.99]"
         >
-          <div className="flex items-center gap-3 min-w-0">
+          <div className="flex min-w-0 items-center gap-3">
             <div
               className="flex size-11 shrink-0 items-center justify-center rounded-full bg-[#CEEFF6] text-[#0097B2]"
               aria-hidden="true"
@@ -183,7 +341,7 @@ export function LocalizarVehiculoDetails({
             strokeWidth="2.2"
             strokeLinecap="round"
             strokeLinejoin="round"
-            className="text-[#7E92AB] shrink-0"
+            className="shrink-0 text-[#7E92AB]"
             aria-hidden="true"
           >
             <polyline points="9 18 15 12 9 6" />
@@ -200,15 +358,17 @@ export function LocalizarVehiculoDetails({
               TU PRÓXIMA ACCIÓN
             </span>
             <h1 className="mt-0.5 font-display text-[21px] font-black leading-tight text-[#0A1E3C]">
-              Recibe el vehículo
+              {enPasoVerificacion ? "Verifica REPUVE y VIN" : "Recibe el vehículo"}
             </h1>
             <p className="mt-0.5 font-body text-xs leading-snug text-[#4A5B78]">
-              Localiza la unidad e inicia la inspección física y fotográfica.
+              {enPasoVerificacion
+                ? "Compara VIN/placas físicos y adjunta la consulta limpia del REPUVE antes de tomar fotos."
+                : "Localiza la unidad e inicia la inspección física y fotográfica."}
             </p>
           </div>
 
           {/* Gráfico representativo del vehículo y checklist */}
-          <div className="shrink-0 flex items-center justify-end">
+          <div className="flex shrink-0 items-center justify-end">
             <Image
               src="/imagenes/inspeccion-checklist.svg"
               alt="Ilustración de inspección de vehículo con checklist"
@@ -216,7 +376,7 @@ export function LocalizarVehiculoDetails({
               height={78}
               priority
               data-inspection-illustration
-              className="h-auto w-[96px] sm:w-[104px] object-contain"
+              className="h-auto w-[96px] object-contain sm:w-[104px]"
             />
           </div>
         </section>
@@ -226,7 +386,7 @@ export function LocalizarVehiculoDetails({
           aria-label="Contacto de recolección"
           className="shrink-0 rounded-2xl border border-[#DCE7F5] bg-[#E8F0FA] p-3 shadow-2xs"
         >
-          <span className="font-display text-[9.5px] font-extrabold uppercase tracking-wider text-[#0057D9] block leading-none">
+          <span className="block font-display text-[9.5px] font-extrabold uppercase tracking-wider text-[#0057D9] leading-none">
             CONTACTO DE RECOLECCIÓN
           </span>
 
@@ -242,8 +402,8 @@ export function LocalizarVehiculoDetails({
                 <span className="truncate font-display text-xs font-black uppercase text-[#0A1E3C]">
                   {contactoNombre}
                 </span>
-                <span className="font-body text-xs text-[#5A6B87] leading-tight mt-0.5">
-                  {contactoTelefono}
+                <span className="mt-0.5 font-body text-xs text-[#5A6B87] leading-tight">
+                  {contactoTelefono || "Sin teléfono registrado"}
                 </span>
               </div>
             </div>
@@ -306,7 +466,7 @@ export function LocalizarVehiculoDetails({
             </span>
           </div>
 
-          <div className="mt-1.5 grid grid-cols-2 gap-2 flex-1">
+          <div className="mt-1.5 grid flex-1 grid-cols-2 gap-2">
             {/* Tarjeta 1: Placas */}
             <div className="flex items-center gap-2.5 rounded-xl border border-[#DCE5F2] bg-white p-2.5 shadow-2xs">
               <div
@@ -383,7 +543,7 @@ export function LocalizarVehiculoDetails({
               >
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.1" strokeLinecap="round" strokeLinejoin="round">
                   <circle cx="12" cy="12" r="3" />
-                  <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9c.26.6.77 1.02 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z" />
+                  <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9c.26.6.77 1.02 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z" />
                 </svg>
               </div>
               <div className="flex min-w-0 flex-col">
@@ -398,49 +558,242 @@ export function LocalizarVehiculoDetails({
           </div>
         </section>
 
+        {/* ALERTA SI FALTAN DATOS REALES DEL VEHÍCULO EN EL PASAPORTE */}
+        {faltanDatosVehiculo && (
+          <section
+            role="alert"
+            aria-label="Datos de vehículo incompletos"
+            className="shrink-0 rounded-2xl border border-amber-400 bg-amber-50 p-3 text-xs text-amber-950"
+          >
+            <p className="font-display font-bold">
+              Faltan datos oficiales del vehículo (VIN o placas) en el pasaporte.
+            </p>
+            <p className="mt-0.5">
+              Por seguridad no puedes consultar el REPUVE con datos incompletos. Reporta a soporte para que actualicen la unidad.
+            </p>
+          </section>
+        )}
+
+        {/* PASO DE VERIFICACIÓN FÍSICA Y CONSULTA REPUVE (en verificacion_vehiculo_en_proceso) */}
+        {enPasoVerificacion && !faltanDatosVehiculo && (
+          <section
+            data-verificacion-repuve
+            aria-label="Verificación REPUVE y lectura física"
+            className="shrink-0 rounded-2xl border border-[#DCE7F5] bg-white p-3 shadow-2xs"
+          >
+            <div className="flex items-center justify-between gap-2">
+              <span className="font-display text-[10px] font-extrabold uppercase tracking-wider text-[#0057D9]">
+                VERIFICACIÓN REPUVE OBLIGATORIA
+              </span>
+              <a
+                href={URL_PORTAL_REPUVE}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1 rounded-lg bg-[#E8F0FA] px-2.5 py-1 font-display text-[11px] font-bold text-[#0057D9] transition hover:bg-[#DCE7F5]"
+              >
+                Abrir portal REPUVE ↗
+              </a>
+            </div>
+
+            {repuveValidoEnServidor ? (
+              <div
+                role="status"
+                className="mt-2 rounded-xl border border-emerald-300 bg-emerald-50 p-2.5 text-xs text-emerald-950"
+              >
+                <p className="font-display font-bold">
+                  {estatusServidor === "autorizado_por_soporte"
+                    ? "Excepción REPUVE autorizada por soporte"
+                    : "Verificación REPUVE registrada y validada"}
+                </p>
+                <p className="mt-0.5">
+                  Ya puedes avanzar a la captura de las 5 fotografías de evidencia inicial.
+                </p>
+              </div>
+            ) : (
+              <div className="mt-2.5 flex flex-col gap-2">
+                <div className="grid grid-cols-2 gap-2">
+                  <label className="flex flex-col gap-1">
+                    <span className="font-body text-[10px] font-bold uppercase text-[#5A6B87]">
+                      VIN físico en unidad
+                    </span>
+                    <input
+                      type="text"
+                      value={vinFisico}
+                      onChange={(e) => setVinFisico(e.target.value.toUpperCase())}
+                      placeholder="17 caracteres"
+                      aria-label="VIN físico en unidad"
+                      className="rounded-xl border border-[#DCE5F2] bg-[#F8FAFC] px-2.5 py-1.5 font-mono text-xs font-bold uppercase text-[#0A1E3C]"
+                    />
+                  </label>
+
+                  <label className="flex flex-col gap-1">
+                    <span className="font-body text-[10px] font-bold uppercase text-[#5A6B87]">
+                      Placas físicas
+                    </span>
+                    <input
+                      type="text"
+                      value={placasFisicas}
+                      onChange={(e) => setPlacasFisicas(e.target.value.toUpperCase())}
+                      placeholder="Ej. ABC123A"
+                      aria-label="Placas físicas"
+                      className="rounded-xl border border-[#DCE5F2] bg-[#F8FAFC] px-2.5 py-1.5 font-display text-xs font-bold uppercase text-[#0A1E3C]"
+                    />
+                  </label>
+                </div>
+
+                <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                  <label className="flex flex-col gap-1">
+                    <span className="font-body text-[10px] font-bold uppercase text-[#5A6B87]">
+                      Resultado en REPUVE
+                    </span>
+                    <select
+                      value={resultadoRepuve}
+                      onChange={(e) =>
+                        setResultadoRepuve(e.target.value as ResultadoVerificacionRepuveConductor)
+                      }
+                      aria-label="Resultado en REPUVE"
+                      className="rounded-xl border border-[#DCE5F2] bg-[#F8FAFC] px-2.5 py-1.5 font-body text-xs font-semibold text-[#0A1E3C]"
+                    >
+                      {OPCIONES_RESULTADO_REPUVE.map((op) => (
+                        <option key={op.valor} value={op.valor}>
+                          {op.etiqueta}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+
+                  <label className="flex flex-col gap-1">
+                    <span className="font-body text-[10px] font-bold uppercase text-[#5A6B87]">
+                      Captura de pantalla REPUVE
+                    </span>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      aria-label="Captura de pantalla REPUVE"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0] ?? null;
+                        setCapturaArchivo(file);
+                        setCapturaPathSubida(null);
+                      }}
+                      className="rounded-xl border border-[#DCE5F2] bg-[#F8FAFC] px-2 py-1 font-body text-[11px] text-[#0A1E3C]"
+                    />
+                  </label>
+                </div>
+
+                {detectaBloqueoOperativo && (
+                  <div
+                    role="alert"
+                    className="rounded-xl border border-red-300 bg-red-50 p-2.5 text-xs text-red-900"
+                  >
+                    <p className="font-display font-bold">
+                      {evaluacionRepuve.motivoBloqueo ||
+                        "El resultado o los datos físicos no permiten continuar."}
+                    </p>
+                    {!intentoBloqueadoGuardado &&
+                      hayCamposIngresados &&
+                      Boolean(capturaArchivo || capturaPathSubida) && (
+                        <div className="mt-2 flex flex-wrap gap-2">
+                          <button
+                            type="button"
+                            disabled={procesando}
+                            onClick={handleRegistrarVerificacionRepuve}
+                            className="inline-flex items-center justify-center rounded-xl border border-red-400 bg-white px-3 py-1.5 font-display text-xs font-bold text-red-900 transition hover:bg-red-100 disabled:opacity-50"
+                          >
+                            Guardar evidencia de bloqueo
+                          </button>
+                        </div>
+                      )}
+                  </div>
+                )}
+              </div>
+            )}
+          </section>
+        )}
+
         {/* 6. BOTÓN DE ACCIÓN PRIMARIO (FIJO EN BASE) */}
         <section data-trip-primary aria-label="Acción principal del traslado" className="shrink-0 pt-0.5">
           <p role="status" className="sr-only">
             En el origen · Localiza la unidad e inicia la inspección física y fotográfica
           </p>
+          {aviso && (
+            <p role="status" className="mb-1.5 font-body text-xs font-semibold text-emerald-700">
+              {aviso}
+            </p>
+          )}
           {error && (
             <p role="alert" className="mb-1.5 font-body text-sm font-semibold text-danger">
               {error}
             </p>
           )}
-          <button
-            type="button"
-            onClick={handleIniciarInspeccion}
-            disabled={procesando}
-            className="inline-flex min-h-[48px] w-full cursor-pointer items-center justify-center gap-2 rounded-2xl bg-[#0066FF] px-4 py-3 font-display text-sm font-extrabold text-white shadow-[0_6px_18px_rgba(0,102,255,0.32)] transition hover:bg-[#0052CC] active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            {procesando ? (
-              TEXTOS_CARGANDO.actualizando
+
+          {faltanDatosVehiculo ? (
+            <button
+              type="button"
+              onClick={() => setSoporteAbierto(true)}
+              className="inline-flex min-h-[48px] w-full cursor-pointer items-center justify-center gap-2 rounded-2xl bg-amber-600 px-4 py-3 font-display text-sm font-extrabold text-white shadow-2xs transition hover:bg-amber-700"
+            >
+              <span>REPORTAR A SOPORTE (FALTAN VIN/PLACAS)</span>
+            </button>
+          ) : enPasoVerificacion && !repuveValidoEnServidor ? (
+            detectaBloqueoOperativo ? (
+              <button
+                type="button"
+                onClick={() => setSoporteAbierto(true)}
+                className="inline-flex min-h-[48px] w-full cursor-pointer items-center justify-center gap-2 rounded-2xl bg-red-700 px-4 py-3 font-display text-sm font-extrabold text-white shadow-2xs transition hover:bg-red-800"
+              >
+                <span>REPORTAR A SOPORTE</span>
+              </button>
             ) : (
-              <>
-                <span className="sr-only">📄 </span>
-                <svg
-                  width="18"
-                  height="18"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2.2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  aria-hidden="true"
-                  className="shrink-0"
-                >
-                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-                  <polyline points="14 2 14 8 20 8" />
-                  <path d="M9 15l2 2 4-4" />
-                </svg>
-                <span>INICIAR INSPECCIÓN Y EVIDENCIA</span>
-                <span className="sr-only"> CONTINUAR INSPECCIÓN</span>
-                <span aria-hidden="true">❯</span>
-              </>
-            )}
-          </button>
+              <button
+                type="button"
+                onClick={handleRegistrarVerificacionRepuve}
+                disabled={procesando}
+                className="inline-flex min-h-[48px] w-full cursor-pointer items-center justify-center gap-2 rounded-2xl bg-[#0066FF] px-4 py-3 font-display text-sm font-extrabold text-white shadow-[0_6px_18px_rgba(0,102,255,0.32)] transition hover:bg-[#0052CC] active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {procesando
+                  ? TEXTOS_CARGANDO.actualizando
+                  : "CONFIRMAR REPUVE E INICIAR EVIDENCIA ❯"}
+              </button>
+            )
+          ) : (
+            <button
+              type="button"
+              onClick={handleIniciarInspeccion}
+              disabled={procesando}
+              className="inline-flex min-h-[48px] w-full cursor-pointer items-center justify-center gap-2 rounded-2xl bg-[#0066FF] px-4 py-3 font-display text-sm font-extrabold text-white shadow-[0_6px_18px_rgba(0,102,255,0.32)] transition hover:bg-[#0052CC] active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {procesando ? (
+                TEXTOS_CARGANDO.actualizando
+              ) : (
+                <>
+                  <span className="sr-only">📄 </span>
+                  <svg
+                    width="18"
+                    height="18"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2.2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    aria-hidden="true"
+                    className="shrink-0"
+                  >
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                    <polyline points="14 2 14 8 20 8" />
+                    <path d="M9 15l2 2 4-4" />
+                  </svg>
+                  <span>
+                    {enPasoVerificacion
+                      ? "CONTINUAR A EVIDENCIA FOTOGRÁFICA"
+                      : "INICIAR INSPECCIÓN Y EVIDENCIA"}
+                  </span>
+                  <span className="sr-only"> CONTINUAR INSPECCIÓN</span>
+                  <span aria-hidden="true">❯</span>
+                </>
+              )}
+            </button>
+          )}
         </section>
       </div>
 
@@ -521,7 +874,7 @@ export function LocalizarVehiculoDetails({
       {/* Modal de Chat con el Contacto */}
       {chatAbierto && (
         <TripDialog title={`Chat · ${contactoNombre}`} onClose={() => setChatAbierto(false)}>
-          <ChatViaje trasladoId={trasladoId} estado={estadoActual} />
+          <ChatViaje trasladoId={trasladoId} estado={estadoLocal} />
         </TripDialog>
       )}
 

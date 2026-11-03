@@ -16,7 +16,8 @@ import {
   obtenerEvidenciaDeTraslado,
   confirmarEvidenciaCompleta,
   firmarUrlsEvidencia,
-  registrarEvento
+  registrarEvento,
+  obtenerResumenVerificacionRepuve
 } from "@ruum/api/services";
 import { useEvidenceQueue } from "./useEvidenceQueue";
 import { fotoSrc } from "./evidence-requirements";
@@ -240,6 +241,20 @@ export function useEvidenciaPageLogic(id: string): UseEvidenciaPageLogic {
         const cliente = crearClienteNavegador();
         const p = await obtenerPasaporteDigital(cliente, id);
         if (p) {
+          if (
+            p.estado === "conductor_en_punto_de_recoleccion" ||
+            p.estado === "verificacion_vehiculo_en_proceso"
+          ) {
+            try {
+              const resumenRepuve = await obtenerResumenVerificacionRepuve(cliente, id);
+              if (resumenRepuve && !resumenRepuve.valida_para_avanzar) {
+                router.push(`/viajes/${id}`);
+                return;
+              }
+            } catch {
+              // Continuar si el entorno no tiene el RPC disponible
+            }
+          }
           setPasaporte(p);
           setEstadoActual(p.estado as EstadoTraslado);
           const t = tipoEvidenciaPorEstado(p.estado as EstadoTraslado) || "inicial";

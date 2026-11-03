@@ -275,11 +275,17 @@ export async function confirmarEvidenciaCompleta(
     }
   } else if (tipo === "inicial" && (estadoActual === "verificacion_vehiculo_en_proceso" || estadoActual === "conductor_en_punto_de_recoleccion")) {
     try {
-      await cliente.rpc("conductor_avanza_traslado", {
+      const { error: errorInicio } = await cliente.rpc("conductor_avanza_traslado", {
         p_traslado_id: trasladoId,
         p_evento: "iniciar_evidencia_inicial"
       });
-    } catch {
+      if (errorInicio && /repuve/i.test(errorInicio.message ?? "")) {
+        throw errorInicio;
+      }
+    } catch (err) {
+      if (err && typeof err === "object" && "message" in err && typeof err.message === "string" && /repuve/i.test(err.message)) {
+        throw err;
+      }
       // Si falló por concurrencia, continuar
     }
   }
