@@ -112,11 +112,13 @@ export function registrarEventoUx(evento: EventoUxUsuario, propiedades: Propieda
   // A3: antes leía window.Sentry, que no es un global del SDK (@sentry/nextjs
   // v10 no lo expone): siempre era no-op aunque Sentry estuviera inicializado.
   // Se usa el SDK directamente con import dinámico para no crecer el chunk inicial.
-  try {
-    void import("@sentry/nextjs")
-      .then((Sentry) => Sentry.addBreadcrumb?.({ category: "ux", message: evento, data: base, level: "info" }))
-      .catch(() => {});
-  } catch {}
+  if (!process.env.VITEST) {
+    try {
+      void import("@sentry/nextjs")
+        .then((Sentry) => Sentry.addBreadcrumb?.({ category: "ux", message: evento, data: base, level: "info" }))
+        .catch(() => {});
+    } catch {}
+  }
 }
 
 // Helpers Fase 3 — tracking de duración por paso y abandono

@@ -50,8 +50,26 @@ export interface FuncionesRpc {
     ret: Database["public"]["Enums"]["estado_traslado"];
   };
   conductor_confirmar_llegada_destino: {
-    args: { p_traslado_id: string; p_fuera_geocerca?: boolean; p_distancia_m?: number };
+    args: {
+      p_traslado_id: string;
+      p_fuera_geocerca?: boolean;
+      p_distancia_m?: number;
+      p_precision_m?: number;
+      p_antiguedad_s?: number;
+      p_motivo_sin_medicion?: string;
+    };
     ret: Database["public"]["Enums"]["estado_traslado"];
+  };
+  conductor_reportar_incidencia_transaccional: {
+    args: {
+      p_traslado_id: string;
+      p_tipo: Database["public"]["Enums"]["tipo_incidencia"];
+      p_momento: Database["public"]["Enums"]["momento_incidencia"];
+      p_descripcion: string;
+      p_incidencia_id?: string | null;
+      p_escalar_urgente?: boolean;
+    };
+    ret: Json;
   };
   usuario_previsualizar_tarifa: {
     args: {

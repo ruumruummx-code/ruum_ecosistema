@@ -26,10 +26,12 @@ alter table public.conductores enable trigger inicializar_estado_expediente_cond
 insert into public.vehiculos (id, usuario_id, tipo, marca, modelo, anio, placas, tiene_tarjeta_circulacion, tiene_verificacion, tiene_placas, puede_circular_rodando)
 values ('95500000-0000-4000-8000-000000000301', '95500000-0000-4000-8000-000000000101', 'sedan', 'RT55', 'Modelo', 2026, 'RT55ABC', true, true, true, true);
 
+alter table public.traslados disable trigger validar_ocupacion_conductor;
 insert into public.traslados (id, estado, usuario_id, vehiculo_id, conductor_id, contacto_entrega_nombre, contacto_entrega_telefono, contacto_recepcion_nombre, contacto_recepcion_telefono, origen_lat, origen_lng, origen_direccion, origen_ciudad, destino_lat, destino_lng, destino_direccion, destino_ciudad, tipo_pago, clave_idempotencia)
 values
   ('95500000-0000-4000-8000-000000000401', 'conductor_asignado', '95500000-0000-4000-8000-000000000101', '95500000-0000-4000-8000-000000000301', '95500000-0000-4000-8000-000000000201', 'E', '+525500000001', 'R', '+525500000002', 19.4, -99.1, 'O', 'CDMX', 19.5, -99.2, 'D', 'CDMX', 'al_cierre', gen_random_uuid()),
   ('95500000-0000-4000-8000-000000000402', 'conductor_asignado', '95500000-0000-4000-8000-000000000102', '95500000-0000-4000-8000-000000000301', '95500000-0000-4000-8000-000000000201', 'E', '+525500000001', 'R', '+525500000002', 19.4, -99.1, 'O', 'CDMX', 19.5, -99.2, 'D', 'CDMX', 'al_cierre', gen_random_uuid());
+alter table public.traslados enable trigger validar_ocupacion_conductor;
 
 insert into public.evidencia_fotos (id, traslado_id, tipo, angulo, url, lat, lng)
 values
@@ -98,6 +100,7 @@ select is((select count(*) from public.custodia_eventos where traslado_id = '955
 reset role;
 
 -- 9.12/backfill vivo: avanzar estados genera eventos encadenados
+alter table public.traslados disable trigger validar_fotos_antes_de_cerrar;
 update public.traslados set estado = 'conductor_en_camino_al_origen' where id = '95500000-0000-4000-8000-000000000401';
 update public.traslados set estado = 'conductor_en_punto_de_recoleccion' where id = '95500000-0000-4000-8000-000000000401';
 update public.traslados set estado = 'verificacion_vehiculo_en_proceso' where id = '95500000-0000-4000-8000-000000000401';
@@ -105,6 +108,7 @@ update public.traslados set estado = 'evidencia_inicial_en_proceso' where id = '
 update public.traslados set estado = 'evidencia_inicial_completada' where id = '95500000-0000-4000-8000-000000000401';
 update public.traslados set estado = 'vehiculo_recibido' where id = '95500000-0000-4000-8000-000000000401';
 update public.traslados set estado = 'traslado_en_curso' where id = '95500000-0000-4000-8000-000000000401';
+alter table public.traslados enable trigger validar_fotos_antes_de_cerrar;
 select ok(
   (select count(*) from public.custodia_eventos where traslado_id = '95500000-0000-4000-8000-000000000401' and tipo = 'transfer_started')::int >= 1,
   'RT-55.14: avance genera evento de inicio'

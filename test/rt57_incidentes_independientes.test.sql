@@ -10,8 +10,8 @@ values
   ('95700000-0000-4000-8000-0000000000b2', 'rt57-conductor@local.test', now(), '{}', '{}', now(), now()),
   ('95700000-0000-4000-8000-0000000000b3', 'rt57-outsider@local.test', now(), '{}', '{}', now(), now());
 
-insert into public.admins (id, auth_user_id, nombre)
-values ('95700000-0000-4000-8000-0000000000aa', '95700000-0000-4000-8000-0000000000ad', 'Admin RT-57');
+insert into public.admins (id, auth_user_id, nombre, rol_operativo)
+values ('95700000-0000-4000-8000-0000000000aa', '95700000-0000-4000-8000-0000000000ad', 'Admin RT-57', 'supervisor');
 
 insert into public.usuarios (id, auth_user_id, tipo_cuenta, rol, estado_verificacion, metodo_pago_registrado)
 values
@@ -26,10 +26,12 @@ alter table public.conductores enable trigger inicializar_estado_expediente_cond
 insert into public.vehiculos (id, usuario_id, tipo, marca, modelo, anio, placas, tiene_tarjeta_circulacion, tiene_verificacion, tiene_placas, puede_circular_rodando)
 values ('95700000-0000-4000-8000-000000000301', '95700000-0000-4000-8000-000000000101', 'sedan', 'RT57', 'Modelo', 2026, 'RT57ABC', true, true, true, true);
 
-insert into public.traslados (id, estado, usuario_id, vehiculo_id, conductor_id, contacto_entrega_nombre, contacto_entrega_telefono, contacto_recepcion_nombre, contacto_recepcion_telefono, origen_lat, origen_lng, origen_direccion, origen_ciudad, destino_lat, destino_lng, destino_direccion, destino_ciudad, tipo_pago, clave_idempotencia)
+alter table public.traslados disable trigger validar_ocupacion_conductor;
+insert into public.traslados (id, estado, usuario_id, vehiculo_id, conductor_id, contacto_entrega_nombre, contacto_entrega_telefono, contacto_recepcion_nombre, contacto_recepcion_telefono, origen_lat, origen_lng, origen_direccion, origen_ciudad, destino_lat, destino_lng, destino_direccion, destino_ciudad, precio_cotizado, tipo_pago, clave_idempotencia)
 values
-  ('95700000-0000-4000-8000-000000000401', 'traslado_en_curso', '95700000-0000-4000-8000-000000000101', '95700000-0000-4000-8000-000000000301', '95700000-0000-4000-8000-000000000201', 'E', '+525500000001', 'R', '+525500000002', 19.4, -99.1, 'O', 'CDMX', 19.5, -99.2, 'D', 'CDMX', 'al_cierre', gen_random_uuid()),
-  ('95700000-0000-4000-8000-000000000402', 'traslado_en_curso', '95700000-0000-4000-8000-000000000101', '95700000-0000-4000-8000-000000000301', '95700000-0000-4000-8000-000000000201', 'E', '+525500000001', 'R', '+525500000002', 19.4, -99.1, 'O', 'CDMX', 19.5, -99.2, 'D', 'CDMX', 'al_cierre', gen_random_uuid());
+  ('95700000-0000-4000-8000-000000000401', 'traslado_en_curso', '95700000-0000-4000-8000-000000000101', '95700000-0000-4000-8000-000000000301', '95700000-0000-4000-8000-000000000201', 'E', '+525500000001', 'R', '+525500000002', 19.4, -99.1, 'O', 'CDMX', 19.5, -99.2, 'D', 'CDMX', 1200, 'al_cierre', gen_random_uuid()),
+  ('95700000-0000-4000-8000-000000000402', 'traslado_en_curso', '95700000-0000-4000-8000-000000000101', '95700000-0000-4000-8000-000000000301', '95700000-0000-4000-8000-000000000201', 'E', '+525500000001', 'R', '+525500000002', 19.4, -99.1, 'O', 'CDMX', 19.5, -99.2, 'D', 'CDMX', 1200, 'al_cierre', gen_random_uuid());
+alter table public.traslados enable trigger validar_ocupacion_conductor;
 
 insert into public.evidencia_fotos (id, traslado_id, tipo, angulo, url)
 values ('95700000-0000-4000-8000-000000000501', '95700000-0000-4000-8000-000000000401', 'inicial', 'frente', 'https://cdn.test/e1.jpg');
@@ -80,12 +82,16 @@ select throws_ok(
 reset role;
 
 -- disputa con estado mantenido (11.9): T2 en servicio_cerrado
+alter table public.traslados disable trigger validar_fotos_antes_de_cerrar;
+alter table public.traslados disable trigger validar_llaves_entrega;
 update public.traslados set estado = 'llegada_a_destino' where id = '95700000-0000-4000-8000-000000000402';
 update public.traslados set estado = 'evidencia_final_en_proceso' where id = '95700000-0000-4000-8000-000000000402';
 update public.traslados set estado = 'evidencia_final_completada' where id = '95700000-0000-4000-8000-000000000402';
 update public.traslados set estado = 'entrega_confirmada' where id = '95700000-0000-4000-8000-000000000402';
 update public.traslados set estado = 'pago_completado' where id = '95700000-0000-4000-8000-000000000402';
 update public.traslados set estado = 'servicio_cerrado' where id = '95700000-0000-4000-8000-000000000402';
+alter table public.traslados enable trigger validar_llaves_entrega;
+alter table public.traslados enable trigger validar_fotos_antes_de_cerrar;
 set local role authenticated;
 select set_config('request.jwt.claim.sub', '95700000-0000-4000-8000-0000000000b1', true);
 select public.abrir_disputa_traslado('95700000-0000-4000-8000-000000000402', 'usuario', 'cobro_incorrecto', 'Cobro duplicado en mi tarjeta, reclamo formal', true) as disp

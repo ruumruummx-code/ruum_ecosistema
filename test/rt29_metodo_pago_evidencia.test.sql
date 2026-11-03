@@ -27,6 +27,7 @@ begin
   values (p_usuario_id, 'sedan', 'RT29', 'Modelo', 2024, upper(substr(gen_random_uuid()::text, 1, 8)), true, true, true, true)
   returning id into v_vehiculo_id;
 
+  alter table public.traslados disable trigger validar_ocupacion_conductor;
   insert into public.traslados (
     estado, usuario_id, vehiculo_id, conductor_id,
     contacto_entrega_nombre, contacto_entrega_telefono,
@@ -44,6 +45,7 @@ begin
     1200, p_tipo_pago, gen_random_uuid()
   )
   returning id into v_traslado_id;
+  alter table public.traslados enable trigger validar_ocupacion_conductor;
 
   return v_traslado_id;
 end;
@@ -53,13 +55,21 @@ create or replace function pg_temp.insertar_evidencia_inicial_rt29(p_traslado_id
 returns void
 language sql
 as $$
+  insert into storage.objects (bucket_id, name)
+  values
+    ('evidencia', 'rt29://' || p_traslado_id || '/frente'),
+    ('evidencia', 'rt29://' || p_traslado_id || '/lado_piloto'),
+    ('evidencia', 'rt29://' || p_traslado_id || '/lado_copiloto'),
+    ('evidencia', 'rt29://' || p_traslado_id || '/trasera'),
+    ('evidencia', 'rt29://' || p_traslado_id || '/tablero');
+
   insert into public.evidencia_fotos (traslado_id, tipo, angulo, url, sincronizada)
   values
-    (p_traslado_id, 'inicial', 'frente', 'rt29://frente', true),
-    (p_traslado_id, 'inicial', 'lado_piloto', 'rt29://lado_piloto', true),
-    (p_traslado_id, 'inicial', 'lado_copiloto', 'rt29://lado_copiloto', true),
-    (p_traslado_id, 'inicial', 'trasera', 'rt29://trasera', true),
-    (p_traslado_id, 'inicial', 'tablero', 'rt29://tablero', true);
+    (p_traslado_id, 'inicial', 'frente', 'rt29://' || p_traslado_id || '/frente', true),
+    (p_traslado_id, 'inicial', 'lado_piloto', 'rt29://' || p_traslado_id || '/lado_piloto', true),
+    (p_traslado_id, 'inicial', 'lado_copiloto', 'rt29://' || p_traslado_id || '/lado_copiloto', true),
+    (p_traslado_id, 'inicial', 'trasera', 'rt29://' || p_traslado_id || '/trasera', true),
+    (p_traslado_id, 'inicial', 'tablero', 'rt29://' || p_traslado_id || '/tablero', true);
 $$;
 
 insert into auth.users (id, email, raw_app_meta_data, raw_user_meta_data, created_at, updated_at)

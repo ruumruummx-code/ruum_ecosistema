@@ -28,6 +28,7 @@ begin
   )
   returning id into v_vehiculo_id;
 
+  alter table public.traslados disable trigger validar_ocupacion_conductor;
   insert into public.traslados (
     estado, usuario_id, vehiculo_id, conductor_id,
     contacto_entrega_nombre, contacto_entrega_telefono,
@@ -45,6 +46,7 @@ begin
     1200, 'al_cierre', gen_random_uuid()
   )
   returning id into v_traslado_id;
+  alter table public.traslados enable trigger validar_ocupacion_conductor;
 
   return v_traslado_id;
 end;

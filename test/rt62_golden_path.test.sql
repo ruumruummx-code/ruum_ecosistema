@@ -157,6 +157,9 @@ select is((select estado::text from public.traslados where id = :'t1'::uuid), 'e
 reset role;
 
 -- evidencia inicial (5 ángulos sincronizados)
+insert into storage.objects (bucket_id, name)
+select 'evidencia', 'https://cdn.test/rt62-' || a || '.jpg'
+from unnest(array['frente','lado_piloto','lado_copiloto','trasera','tablero']) as a;
 insert into public.evidencia_fotos (traslado_id, tipo, angulo, url, sincronizada)
 select  :'t1'::uuid, 'inicial', a::public.angulo_evidencia, 'https://cdn.test/rt62-' || a || '.jpg', true
 from unnest(array['frente','lado_piloto','lado_copiloto','trasera','tablero']) as a;
@@ -217,15 +220,25 @@ select public.conductor_avanza_traslado(:'t1'::uuid, 'llegada_destino');
 select public.conductor_avanza_traslado(:'t1'::uuid, 'iniciar_evidencia_final');
 select is((select estado::text from public.traslados where id = :'t1'::uuid), 'evidencia_final_en_proceso', 'RT-62.14: T1 en evidencia final');
 reset role;
+insert into storage.objects (bucket_id, name)
+select 'evidencia', 'https://cdn.test/rt62-fin-' || a || '.jpg'
+from unnest(array['frente','lado_piloto','lado_copiloto','trasera','tablero']) as a;
 insert into public.evidencia_fotos (traslado_id, tipo, angulo, url, sincronizada)
 select  :'t1'::uuid, 'final', a::public.angulo_evidencia, 'https://cdn.test/rt62-fin-' || a || '.jpg', true
 from unnest(array['frente','lado_piloto','lado_copiloto','trasera','tablero']) as a;
+insert into public.evidencia_inspecciones (traslado_id, tipo, llaves_recibidas)
+values
+  (:'t1'::uuid, 'inicial', '2'),
+  (:'t1'::uuid, 'final', '2');
 set local role authenticated;
 select set_config('request.jwt.claim.sub', '96200000-0000-4000-8000-0000000000c1', true);
 select public.conductor_avanza_traslado(:'t1'::uuid, 'evidencia_final_completada');
 select public.conductor_avanza_traslado(:'t1'::uuid, 'confirmar_entrega');
 select is((select estado::text from public.traslados where id = :'t1'::uuid), 'entrega_confirmada', 'RT-62.15: entrega confirmada');
 reset role;
+
+insert into public.confirmaciones_recepcion (traslado_id, receptor_nombre, mecanismo, confirmante_auth_id, verificada, referencia)
+values (:'t1'::uuid, 'Recepcion Golden', 'firma', '96200000-0000-4000-8000-0000000000c1', true, 'firma://rt62/' || :'t1');
 
 -- el pago anticipado ya quedó reflejado; cierre del viaje por el conductor
 select is((select monto_pagado from public.pasaporte_digital where traslado_id = :'t1'::uuid)::numeric > 0, true, 'RT-62.16: pasaporte refleja el pago');

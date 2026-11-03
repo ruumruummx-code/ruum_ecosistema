@@ -2,7 +2,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database, Json, SolicitudAsignacionResultado } from "@ruum/shared/types";
 import { TRANSICIONES } from "@ruum/shared/states";
 import { esquemaPayloadCrearTraslado } from "@ruum/shared/validacion";
-import { rpcTipado } from "../supabase/funciones";
+import { rpcTipado, type FuncionesRpc } from "../supabase/funciones";
 import { registrarEvento } from "./auditoria";
 
 type Cliente = SupabaseClient<Database>;
@@ -486,7 +486,7 @@ export async function confirmarLlegadaDestino(
     motivoSinMedicion?: string | null;
   }
 ) {
-  const params: Record<string, unknown> = {
+  const params: FuncionesRpc["conductor_confirmar_llegada_destino"]["args"] = {
     p_traslado_id: trasladoId,
     p_fuera_geocerca: Boolean(geocerca?.fueraGeocerca),
   };
@@ -503,7 +503,7 @@ export async function confirmarLlegadaDestino(
     params.p_motivo_sin_medicion = geocerca.motivoSinMedicion;
   }
 
-  const { data, error } = await rpcTipado(cliente, "conductor_confirmar_llegada_destino", params as never);
+  const { data, error } = await rpcTipado(cliente, "conductor_confirmar_llegada_destino", params);
 
   if (error) {
     // Si la función en el entorno no soporta parámetros extendidos, reintentar con la signatura base

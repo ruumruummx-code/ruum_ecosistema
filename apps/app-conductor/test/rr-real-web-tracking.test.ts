@@ -66,9 +66,15 @@ describe("RR-REAL-002 web tracking lifecycle", () => {
     mocks.sync.mockResolvedValueOnce(0);
     mocks.count.mockResolvedValueOnce(3); // 3 pendientes en cola
 
-    let ultimoEventoWeb: any = null;
-    window.addEventListener("ruum:tracking-web", (e: any) => {
-      ultimoEventoWeb = e.detail;
+    interface EventoTrackingWebDetalle {
+      lastAckAt?: string;
+      lastSentAt?: string;
+      pendingCount?: number;
+      lastCapturedAt?: string;
+    }
+    let ultimoEventoWeb: EventoTrackingWebDetalle | null = null;
+    window.addEventListener("ruum:tracking-web", (e: Event) => {
+      ultimoEventoWeb = (e as CustomEvent<EventoTrackingWebDetalle>).detail;
     });
 
     useDriverLocationTracking(trip);
@@ -77,10 +83,11 @@ describe("RR-REAL-002 web tracking lifecycle", () => {
     expect(mocks.enqueue).toHaveBeenCalled();
     expect(mocks.sync).toHaveBeenCalled();
     expect(ultimoEventoWeb).not.toBeNull();
+    const detalle = ultimoEventoWeb as unknown as EventoTrackingWebDetalle;
     // lastAckAt y lastSentAt deben ser undefined porque no hubo ACK nuevo
-    expect(ultimoEventoWeb.lastAckAt).toBeUndefined();
-    expect(ultimoEventoWeb.lastSentAt).toBeUndefined();
-    expect(ultimoEventoWeb.pendingCount).toBe(3);
-    expect(ultimoEventoWeb.lastCapturedAt).toBeDefined();
+    expect(detalle.lastAckAt).toBeUndefined();
+    expect(detalle.lastSentAt).toBeUndefined();
+    expect(detalle.pendingCount).toBe(3);
+    expect(detalle.lastCapturedAt).toBeDefined();
   });
 });

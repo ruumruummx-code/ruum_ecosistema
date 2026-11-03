@@ -120,16 +120,11 @@ test("Mi cuenta: módulos sin scroll, datos, enlaces y sesiones autenticadas", a
     page.getByRole("dialog").getByText(/todavía no está disponible/),
   ).toBeVisible();
   await page.keyboard.press("Escape");
-  await account
-    .getByRole("navigation", { name: "Categorías de mi cuenta" })
-    .getByRole("button", { name: /Métodos de pago/ })
-    .click();
   await expect(
-    page
-      .getByRole("dialog")
-      .getByRole("link", { name: "Datos de facturación" }),
-  ).toHaveAttribute("href", "/cuenta/facturacion");
-  await page.keyboard.press("Escape");
+    account
+      .getByRole("navigation", { name: "Categorías de mi cuenta" })
+      .getByRole("link", { name: /Métodos de pago/ }),
+  ).toHaveAttribute("href", "/cuenta/metodos-pago");
   await expect(
     account.getByRole("link", { name: "Editar perfil", exact: true }),
   ).toHaveAttribute("href", "/cuenta/datos-personales");

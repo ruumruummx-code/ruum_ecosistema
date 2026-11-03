@@ -46,10 +46,12 @@ values
   ('96100000-0000-4000-8000-000000000002', 'OP-RT61-B', '96100000-0000-4000-8000-0000000000e2', 'Op B', 'flota', 'en_curso');
 
 alter table public.traslados disable trigger traslados_sincronizar_asignacion_insert;
+alter table public.traslados disable trigger validar_ocupacion_conductor;
 insert into public.traslados (id, estado, usuario_id, vehiculo_id, conductor_id, contacto_entrega_nombre, contacto_entrega_telefono, contacto_recepcion_nombre, contacto_recepcion_telefono, origen_lat, origen_lng, origen_direccion, origen_ciudad, destino_lat, destino_lng, destino_direccion, destino_ciudad, tipo_pago, clave_idempotencia, operation_id)
 values
   ('96100000-0000-4000-8000-000000000401', 'traslado_en_curso', '96100000-0000-4000-8000-000000000101', '96100000-0000-4000-8000-000000000301', '96100000-0000-4000-8000-000000000201', 'E', '+525500000001', 'R', '+525500000002', 19.4, -99.1, 'O', 'CDMX', 19.5, -99.2, 'D', 'CDMX', 'al_cierre', gen_random_uuid(), '96100000-0000-4000-8000-000000000001'),
   ('96100000-0000-4000-8000-000000000402', 'traslado_en_curso', '96100000-0000-4000-8000-000000000102', '96100000-0000-4000-8000-000000000302', '96100000-0000-4000-8000-000000000201', 'E', '+525500000001', 'R', '+525500000002', 19.4, -99.1, 'O', 'CDMX', 19.5, -99.2, 'D', 'CDMX', 'al_cierre', gen_random_uuid(), '96100000-0000-4000-8000-000000000002');
+alter table public.traslados enable trigger validar_ocupacion_conductor;
 alter table public.traslados enable trigger traslados_sincronizar_asignacion_insert;
 
 -- Organization: aislamiento entre empresas (traslados y operaciones)

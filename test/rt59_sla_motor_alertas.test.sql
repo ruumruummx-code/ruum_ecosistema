@@ -120,7 +120,9 @@ select ok((:'rep'::jsonb->'totales'->>'warnings')::int >= 1, 'RT-59.18: reporte 
 select ok((:'rep'::jsonb->'totales'->>'breaches')::int >= 2, 'RT-59.19: reporte cuenta breaches');
 
 -- recuperado: asignar conductor a T2 limpia su breach
+alter table public.traslados disable trigger validar_ocupacion_conductor;
 update public.traslados set conductor_id = '95900000-0000-4000-8000-000000000201', estado = 'conductor_asignado' where id = '95900000-0000-4000-8000-000000000402';
+alter table public.traslados enable trigger validar_ocupacion_conductor;
 select public.sla_evaluar_traslados(5000);
 select ok(exists(
   select 1 from public.sla_events

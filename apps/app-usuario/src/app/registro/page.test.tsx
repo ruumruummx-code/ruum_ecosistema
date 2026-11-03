@@ -19,6 +19,10 @@ vi.mock("@/lib/supabase-browser", () => ({
   tieneSupabaseConfigurado: () => true,
 }));
 
+vi.mock("../../lib/analytics", () => ({
+  registrarEventoUx: vi.fn(),
+}));
+
 import PaginaRegistro from "./page";
 
 describe("registro — accesibilidad de errores y flujo de verificación telefónica SMS", () => {

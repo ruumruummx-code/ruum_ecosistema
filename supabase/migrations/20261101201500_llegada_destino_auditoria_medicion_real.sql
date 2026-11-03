@@ -1,6 +1,8 @@
 -- H06: Registrar medicion real de distancia y geocerca en llegada a destino con precision y antiguedad.
 -- Si la ubicacion no pudo ser determinada, audita el motivo explicito sin afirmar distancia cero.
 
+drop function if exists public.conductor_confirmar_llegada_destino(uuid, boolean, numeric);
+
 create or replace function public.conductor_confirmar_llegada_destino(
   p_traslado_id uuid,
   p_fuera_geocerca boolean default false,

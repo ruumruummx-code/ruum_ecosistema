@@ -1,5 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@ruum/shared/types";
+import { rpcTipado } from "../supabase/funciones";
 import { registrarEvento } from "./auditoria";
 
 type Cliente = SupabaseClient<Database>;
@@ -77,7 +78,8 @@ export async function reportarIncidencia(
 
   // 1. Intentar reporte transaccional atómico e idempotente (H07)
   try {
-    const { data: resRpc, error: errRpc } = await (cliente as any).rpc(
+    const { data: resRpc, error: errRpc } = await rpcTipado(
+      cliente,
       "conductor_reportar_incidencia_transaccional",
       {
         p_traslado_id: trasladoId,
@@ -90,8 +92,14 @@ export async function reportarIncidencia(
     );
 
     if (!errRpc && resRpc) {
-      const parsed = typeof resRpc === "string" ? JSON.parse(resRpc) : resRpc;
-      return { id: parsed.id ?? opciones?.operacionId, reintentado: parsed.reintentado ?? false };
+      const parsed = (typeof resRpc === "string" ? JSON.parse(resRpc) : resRpc) as {
+        id?: string;
+        reintentado?: boolean;
+      };
+      const id = parsed.id ?? opciones?.operacionId;
+      if (id) {
+        return { id, reintentado: parsed.reintentado ?? false };
+      }
     }
   } catch {
     // Continuar con fallback idempotente si la RPC no existe en el mock/entorno

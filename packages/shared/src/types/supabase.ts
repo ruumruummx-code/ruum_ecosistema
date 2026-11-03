@@ -27,6 +27,7 @@ export type Database = {
                   Row: {
                     "admin_id": string,"capacidad": string,"concedida": boolean,"creada_en": string,"motivo": string | null,"otorgada_por": string | null
                   }
+                  ComputedFields: never
                   Insert: {
                     "admin_id": string,"capacidad": string,"concedida"?: boolean,"creada_en"?: string,"motivo"?: string | null,"otorgada_por"?: string | null
                   }
@@ -52,6 +53,7 @@ isOneToOne: false
                   Row: {
                     "auth_user_id": string | null,"creado_en": string,"id": string,"nombre": string,"rol_operativo": Database["public"]['Enums']["rol_admin_operativo"]
                   }
+                  ComputedFields: never
                   Insert: {
                     "auth_user_id"?: string | null,"creado_en"?: string,"id"?: string,"nombre": string,"rol_operativo"?: Database["public"]['Enums']["rol_admin_operativo"]
                   }
@@ -65,6 +67,7 @@ isOneToOne: false
                   Row: {
                     "accion": string,"admin_id": string | null,"alerta_id": string,"comentario": string | null,"creado_en": string,"datos": NonNullable<Json>,"estado_anterior": string | null,"estado_nuevo": string | null,"id": string,"responsable_anterior": string | null,"responsable_nuevo": string | null
                   }
+                  ComputedFields: never
                   Insert: {
                     "accion": string,"admin_id"?: string | null,"alerta_id": string,"comentario"?: string | null,"creado_en"?: string,"datos"?: NonNullable<Json>,"estado_anterior"?: string | null,"estado_nuevo"?: string | null,"id"?: string,"responsable_anterior"?: string | null,"responsable_nuevo"?: string | null
                   }
@@ -90,6 +93,7 @@ isOneToOne: false
                   Row: {
                     "actualizado_en": string,"acuse_en": string | null,"acuse_por_admin_id": string | null,"asignado_en": string | null,"asignado_por_admin_id": string | null,"categoria": string,"cerrado_en": string | null,"cerrado_por_admin_id": string | null,"creado_en": string,"dedupe_key": string,"descripcion": string,"entidad_id": string,"entidad_tipo": string,"escalado_en": string | null,"escalado_por_admin_id": string | null,"estado": string,"folio": string,"horas_limite": number,"horas_transcurridas": number,"id": string,"metadata": NonNullable<Json>,"notificacion_estado": string,"origen_creado_en": string,"porcentaje_consumido": number,"prioridad": number,"regla_id": string | null,"responsable": string | null,"resuelto_en": string | null,"resuelto_por_admin_id": string | null,"severidad": string,"sla_restante_horas": number,"traslado_id": string | null,"vence_en": string
                   }
+                  ComputedFields: never
                   Insert: {
                     "actualizado_en"?: string,"acuse_en"?: string | null,"acuse_por_admin_id"?: string | null,"asignado_en"?: string | null,"asignado_por_admin_id"?: string | null,"categoria": string,"cerrado_en"?: string | null,"cerrado_por_admin_id"?: string | null,"creado_en"?: string,"dedupe_key": string,"descripcion": string,"entidad_id": string,"entidad_tipo": string,"escalado_en"?: string | null,"escalado_por_admin_id"?: string | null,"estado"?: string,"folio": string,"horas_limite": number,"horas_transcurridas"?: number,"id"?: string,"metadata"?: NonNullable<Json>,"notificacion_estado"?: string,"origen_creado_en": string,"porcentaje_consumido"?: number,"prioridad"?: number,"regla_id"?: string | null,"responsable"?: string | null,"resuelto_en"?: string | null,"resuelto_por_admin_id"?: string | null,"severidad": string,"sla_restante_horas": number,"traslado_id"?: string | null,"vence_en": string
                   }
@@ -157,6 +161,7 @@ isOneToOne: false
                   Row: {
                     "aceptada_en": string | null,"actualizado_en": string,"asignada_en": string,"cancelada_en": string | null,"completada_en": string | null,"conductor_id": string,"creado_en": string,"estado": Database["public"]['Enums']["estado_asignacion"],"expira_en": string | null,"gestionada_por": string | null,"id": string,"iniciada_en": string | null,"metadata": NonNullable<Json>,"motivo": string | null,"ofrecida_en": string | null,"origen": string,"puntaje": number | null,"rechazada_en": string | null,"traslado_id": string
                   }
+                  ComputedFields: never
                   Insert: {
                     "aceptada_en"?: string | null,"actualizado_en"?: string,"asignada_en"?: string,"cancelada_en"?: string | null,"completada_en"?: string | null,"conductor_id": string,"creado_en"?: string,"estado"?: Database["public"]['Enums']["estado_asignacion"],"expira_en"?: string | null,"gestionada_por"?: string | null,"id"?: string,"iniciada_en"?: string | null,"metadata"?: NonNullable<Json>,"motivo"?: string | null,"ofrecida_en"?: string | null,"origen"?: string,"puntaje"?: number | null,"rechazada_en"?: string | null,"traslado_id": string
                   }
@@ -200,6 +205,7 @@ isOneToOne: false
                   Row: {
                     "accion": string | null,"admin_id": string | null,"auth_user_id": string | null,"creado_en": string,"datos": NonNullable<Json>,"id": string,"motivo": string | null,"recurso": string,"rol": string | null,"tipo": string
                   }
+                  ComputedFields: never
                   Insert: {
                     "accion"?: string | null,"admin_id"?: string | null,"auth_user_id"?: string | null,"creado_en"?: string,"datos"?: NonNullable<Json>,"id"?: string,"motivo"?: string | null,"recurso": string,"rol"?: string | null,"tipo": string
                   }
@@ -227,12 +233,13 @@ isOneToOne: false
                     "auth_user_id"?: string,"creado_en"?: string,"modo"?: string,"stripe_customer_id"?: string
                   }
                   Relationships: [
-
+                    
                   ]
                 },"calificaciones_traslado": {
                   Row: {
                     "calificado_en": string,"comentario": string | null,"conductor_id": string,"estrellas": number,"traslado_id": string
                   }
+                  ComputedFields: never
                   Insert: {
                     "calificado_en"?: string,"comentario"?: string | null,"conductor_id": string,"estrellas": number,"traslado_id": string
                   }
@@ -276,6 +283,7 @@ isOneToOne: true
                   Row: {
                     "actualizado_en": string,"conductor_id": string,"creado_en": string,"curso": string,"estado": string,"id": string,"puntaje": number | null
                   }
+                  ComputedFields: never
                   Insert: {
                     "actualizado_en"?: string,"conductor_id": string,"creado_en"?: string,"curso": string,"estado"?: string,"id"?: string,"puntaje"?: number | null
                   }
@@ -301,6 +309,7 @@ isOneToOne: false
                   Row: {
                     "cancelado_en": string | null,"cancelado_por": string | null,"creado_en": string,"creado_por_admin_id": string | null,"empresa_id": string | null,"estado": string,"filas_creadas": number,"filas_error": number,"filas_procesadas": number,"finalizado_en": string | null,"hash_archivo": string | null,"id": string,"iniciado_en": string | null,"mensaje_estado": string | null,"mime_type": string | null,"nombre_archivo": string,"operation_id": string | null,"reporte_errores_csv": string | null,"tamano_bytes": number,"total_filas": number,"usuario_id": string
                   }
+                  ComputedFields: never
                   Insert: {
                     "cancelado_en"?: string | null,"cancelado_por"?: string | null,"creado_en"?: string,"creado_por_admin_id"?: string | null,"empresa_id"?: string | null,"estado"?: string,"filas_creadas"?: number,"filas_error"?: number,"filas_procesadas"?: number,"finalizado_en"?: string | null,"hash_archivo"?: string | null,"id"?: string,"iniciado_en"?: string | null,"mensaje_estado"?: string | null,"mime_type"?: string | null,"nombre_archivo": string,"operation_id"?: string | null,"reporte_errores_csv"?: string | null,"tamano_bytes"?: number,"total_filas"?: number,"usuario_id": string
                   }
@@ -344,6 +353,7 @@ isOneToOne: false
                   Row: {
                     "categoria_tarifa": Database["public"]['Enums']["categoria_tarifa_vehiculo"],"gama": Database["public"]['Enums']["gama_vehiculo"],"id": string,"marca": string,"modelo": string
                   }
+                  ComputedFields: never
                   Insert: {
                     "categoria_tarifa": Database["public"]['Enums']["categoria_tarifa_vehiculo"],"gama": Database["public"]['Enums']["gama_vehiculo"],"id"?: string,"marca": string,"modelo": string
                   }
@@ -357,6 +367,7 @@ isOneToOne: false
                   Row: {
                     "actualizado_en": string,"actualizado_por_admin_id": string | null,"certificacion": Database["public"]['Enums']["certificacion_conductor"],"porcentaje": number
                   }
+                  ComputedFields: never
                   Insert: {
                     "actualizado_en"?: string,"actualizado_por_admin_id"?: string | null,"certificacion": Database["public"]['Enums']["certificacion_conductor"],"porcentaje": number
                   }
@@ -376,6 +387,7 @@ isOneToOne: false
                   Row: {
                     "conductor_id": string,"creada_en": string,"id": string,"revocada_en": string | null,"tipo": string,"vigente_desde": string,"vigente_hasta": string | null
                   }
+                  ComputedFields: never
                   Insert: {
                     "conductor_id": string,"creada_en"?: string,"id"?: string,"revocada_en"?: string | null,"tipo": string,"vigente_desde"?: string,"vigente_hasta"?: string | null
                   }
@@ -401,6 +413,7 @@ isOneToOne: false
                   Row: {
                     "auth_user_id": string,"carga_id": string | null,"cotizaciones": NonNullable<Json>,"creado_en": string,"expirado_en": string | null,"filas": NonNullable<Json>,"filas_pendientes_correccion": NonNullable<Json>,"id": string,"monto_centavos": number,"pagado_en": string | null,"stripe_payment_intent_id": string | null
                   }
+                  ComputedFields: never
                   Insert: {
                     "auth_user_id": string,"carga_id"?: string | null,"cotizaciones": NonNullable<Json>,"creado_en"?: string,"expirado_en"?: string | null,"filas": NonNullable<Json>,"filas_pendientes_correccion"?: NonNullable<Json>,"id": string,"monto_centavos": number,"pagado_en"?: string | null,"stripe_payment_intent_id"?: string | null
                   }
@@ -420,6 +433,7 @@ isOneToOne: false
                   Row: {
                     "clave": string,"creado_en": string,"entidad": string,"entidad_id": string | null,"expira_en": string,"id": string,"resultado": Json | null
                   }
+                  ComputedFields: never
                   Insert: {
                     "clave": string,"creado_en"?: string,"entidad": string,"entidad_id"?: string | null,"expira_en"?: string,"id"?: string,"resultado"?: Json | null
                   }
@@ -433,6 +447,7 @@ isOneToOne: false
                   Row: {
                     "abierta_en": string,"cierra_en": string,"conductor_seleccionado_id": string | null,"detalle_resolucion": NonNullable<Json>,"estado": string,"id": string,"politica_version": number,"resuelta_en": string | null,"traslado_id": string
                   }
+                  ComputedFields: never
                   Insert: {
                     "abierta_en"?: string,"cierra_en": string,"conductor_seleccionado_id"?: string | null,"detalle_resolucion"?: NonNullable<Json>,"estado"?: string,"id"?: string,"politica_version": number,"resuelta_en"?: string | null,"traslado_id": string
                   }
@@ -476,6 +491,7 @@ isOneToOne: false
                   Row: {
                     "actualizado_en": string,"auth_user_id": string | null,"autoriza_verificacion_antecedentes": boolean,"calificacion_promedio": number,"calle": string | null,"cancelaciones_sin_justificacion_count": number,"capacitacion_aprobada": boolean,"certificacion_pago": Database["public"]['Enums']["certificacion_conductor"],"ciudad_municipio": string | null,"codigo_postal": string | null,"colonia": string | null,"contacto_emergencia_nombre": string | null,"contacto_emergencia_telefono": string | null,"creado_en": string,"curp": string | null,"declara_sin_suspensiones": boolean,"documentos_vigentes": boolean,"empresa_id": string | null,"estado": Database["public"]['Enums']["estado_conductor"],"estado_expediente": Database["public"]['Enums']["estado_expediente_conductor"],"estado_residencia": string | null,"evaluacion_practica_aprobada": boolean,"foto_perfil_url": string | null,"id": string,"identidad_validada": boolean,"incidencias_graves_12m": number,"incidencias_graves_6m": number,"licencia_numero": string | null,"licencia_tipo": string | null,"licencia_validada": boolean,"licencia_vigencia": string | null,"licencia_vigente": boolean,"marca_terminos": string | null,"nivel_certificacion": number,"nivel_operativo_vigente": Database["public"]['Enums']["nivel_concer"] | null,"nivel_por_calificacion": Database["public"]['Enums']["nivel_concer"],"nivel_por_experiencia": Database["public"]['Enums']["nivel_concer"],"no_presentaciones_6m": number,"nombre": string,"numero": string | null,"prueba_manejo_aprobada": boolean,"referencias": string | null,"suspensiones_activas": number,"telefono": string | null,"terminos_aceptados_en": string | null,"traslados_completados": number,"version": number,"version_terminos_aceptada": number | null
                   }
+                  ComputedFields: never
                   Insert: {
                     "actualizado_en"?: string,"auth_user_id"?: string | null,"autoriza_verificacion_antecedentes"?: boolean,"calificacion_promedio"?: number,"calle"?: string | null,"cancelaciones_sin_justificacion_count"?: number,"capacitacion_aprobada"?: boolean,"certificacion_pago"?: Database["public"]['Enums']["certificacion_conductor"],"ciudad_municipio"?: string | null,"codigo_postal"?: string | null,"colonia"?: string | null,"contacto_emergencia_nombre"?: string | null,"contacto_emergencia_telefono"?: string | null,"creado_en"?: string,"curp"?: string | null,"declara_sin_suspensiones"?: boolean,"documentos_vigentes"?: boolean,"empresa_id"?: string | null,"estado"?: Database["public"]['Enums']["estado_conductor"],"estado_expediente"?: Database["public"]['Enums']["estado_expediente_conductor"],"estado_residencia"?: string | null,"evaluacion_practica_aprobada"?: boolean,"foto_perfil_url"?: string | null,"id"?: string,"identidad_validada"?: boolean,"incidencias_graves_12m"?: number,"incidencias_graves_6m"?: number,"licencia_numero"?: string | null,"licencia_tipo"?: string | null,"licencia_validada"?: boolean,"licencia_vigencia"?: string | null,"licencia_vigente"?: boolean,"marca_terminos"?: string | null,"nivel_certificacion"?: number,"nivel_operativo_vigente"?: never,"nivel_por_calificacion"?: Database["public"]['Enums']["nivel_concer"],"nivel_por_experiencia"?: Database["public"]['Enums']["nivel_concer"],"no_presentaciones_6m"?: number,"nombre": string,"numero"?: string | null,"prueba_manejo_aprobada"?: boolean,"referencias"?: string | null,"suspensiones_activas"?: number,"telefono"?: string | null,"terminos_aceptados_en"?: string | null,"traslados_completados"?: number,"version"?: number,"version_terminos_aceptada"?: number | null
                   }
@@ -495,6 +511,7 @@ isOneToOne: false
                   Row: {
                     "actualizada_en": string,"actualizada_por": string | null,"categoria": string,"clave": string,"descripcion": string,"nombre": string,"valor": NonNullable<Json>,"version": number
                   }
+                  ComputedFields: never
                   Insert: {
                     "actualizada_en"?: string,"actualizada_por"?: string | null,"categoria": string,"clave": string,"descripcion"?: string,"nombre": string,"valor"?: NonNullable<Json>,"version"?: number
                   }
@@ -514,6 +531,7 @@ isOneToOne: false
                   Row: {
                     "actualizado_en": string,"ambiente": string,"emergencia_telefono": string,"soporte_correo": string,"soporte_telefono": string
                   }
+                  ComputedFields: never
                   Insert: {
                     "actualizado_en"?: string,"ambiente": string,"emergencia_telefono": string,"soporte_correo": string,"soporte_telefono": string
                   }
@@ -523,10 +541,43 @@ isOneToOne: false
                   Relationships: [
                     
                   ]
+                },"confirmaciones_recepcion": {
+                  Row: {
+                    "confirmada_en": string,"confirmante_auth_id": string,"mecanismo": string,"receptor_nombre": string,"referencia": string | null,"traslado_id": string,"verificada": boolean
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "confirmada_en"?: string,"confirmante_auth_id": string,"mecanismo": string,"receptor_nombre": string,"referencia"?: string | null,"traslado_id": string,"verificada"?: boolean
+                  }
+                  Update: {
+                    "confirmada_en"?: string,"confirmante_auth_id"?: string,"mecanismo"?: string,"receptor_nombre"?: string,"referencia"?: string | null,"traslado_id"?: string,"verificada"?: boolean
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "confirmaciones_recepcion_traslado_id_fkey"
+      columns: ["traslado_id"]
+isOneToOne: true
+      referencedRelation: "obs_tracking_fallos"
+      referencedColumns: ["traslado_id"]
+    },{
+      foreignKeyName: "confirmaciones_recepcion_traslado_id_fkey"
+      columns: ["traslado_id"]
+isOneToOne: true
+      referencedRelation: "pasaporte_digital"
+      referencedColumns: ["traslado_id"]
+    },{
+      foreignKeyName: "confirmaciones_recepcion_traslado_id_fkey"
+      columns: ["traslado_id"]
+isOneToOne: true
+      referencedRelation: "traslados"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"consentimientos_usuario": {
                   Row: {
                     "aceptado_en": string,"auth_user_id": string,"canal": string,"hash_documento": string,"id": string,"solicitud_id": string | null,"tipo_documento": Database["public"]['Enums']["tipo_documento_consentimiento"],"version": number,"version_app": string
                   }
+                  ComputedFields: never
                   Insert: {
                     "aceptado_en"?: string,"auth_user_id": string,"canal": string,"hash_documento": string,"id"?: string,"solicitud_id"?: string | null,"tipo_documento": Database["public"]['Enums']["tipo_documento_consentimiento"],"version": number,"version_app": string
                   }
@@ -546,6 +597,7 @@ isOneToOne: false
                   Row: {
                     "aceptada_en": string | null,"emitida_en": string,"emitida_por_admin_id": string | null,"estado": string,"expira_en": string | null,"id": string,"moneda": string,"politica_tarifa_version": number | null,"precio": number,"reglas_snapshot": NonNullable<Json>,"traslado_id": string,"version": number
                   }
+                  ComputedFields: never
                   Insert: {
                     "aceptada_en"?: string | null,"emitida_en"?: string,"emitida_por_admin_id"?: string | null,"estado"?: string,"expira_en"?: string | null,"id"?: string,"moneda"?: string,"politica_tarifa_version"?: number | null,"precio": number,"reglas_snapshot"?: NonNullable<Json>,"traslado_id": string,"version": number
                   }
@@ -589,6 +641,7 @@ isOneToOne: false
                   Row: {
                     "evento_id": string,"foto_id": string
                   }
+                  ComputedFields: never
                   Insert: {
                     "evento_id": string,"foto_id": string
                   }
@@ -614,6 +667,7 @@ isOneToOne: false
                   Row: {
                     "actor_id": string | null,"actor_tipo": string,"combustible": string | null,"creado_en": string,"firma_metodo": string | null,"firma_referencia": string | null,"hash_cadena": string,"id": string,"inspeccion_id": string | null,"lat": number | null,"lng": number | null,"metadata": NonNullable<Json>,"n_orden": number,"notas": string | null,"ocurrido_en": string,"odometro": number | null,"pin_verificado": boolean,"prev_hash": string,"tipo": Database["public"]['Enums']["tipo_evento_custodia"],"traslado_id": string,"vehiculo_id": string | null
                   }
+                  ComputedFields: never
                   Insert: {
                     "actor_id"?: string | null,"actor_tipo"?: string,"combustible"?: string | null,"creado_en"?: string,"firma_metodo"?: string | null,"firma_referencia"?: string | null,"hash_cadena"?: string,"id"?: string,"inspeccion_id"?: string | null,"lat"?: number | null,"lng"?: number | null,"metadata"?: NonNullable<Json>,"n_orden"?: never,"notas"?: string | null,"ocurrido_en"?: string,"odometro"?: number | null,"pin_verificado"?: boolean,"prev_hash"?: string,"tipo": Database["public"]['Enums']["tipo_evento_custodia"],"traslado_id": string,"vehiculo_id"?: string | null
                   }
@@ -657,6 +711,7 @@ isOneToOne: false
                   Row: {
                     "actualizado_en": string,"banco": string,"clabe": string,"conductor_id": string,"creado_en": string,"estado": Database["public"]['Enums']["estado_datos_bancarios_conductor"],"id": string,"motivo_rechazo": string | null,"numero_tarjeta": string | null,"titular_cuenta": string
                   }
+                  ComputedFields: never
                   Insert: {
                     "actualizado_en"?: string,"banco": string,"clabe": string,"conductor_id": string,"creado_en"?: string,"estado"?: Database["public"]['Enums']["estado_datos_bancarios_conductor"],"id"?: string,"motivo_rechazo"?: string | null,"numero_tarjeta"?: string | null,"titular_cuenta": string
                   }
@@ -682,6 +737,7 @@ isOneToOne: true
                   Row: {
                     "activo": boolean,"actualizado_en": string,"creado_en": string,"device_id": string,"id": string,"modelo": string | null,"plataforma": string,"token_push": string,"ultimo_acceso": string,"usuario_id": string,"version_app": string | null,"version_so": string | null
                   }
+                  ComputedFields: never
                   Insert: {
                     "activo"?: boolean,"actualizado_en"?: string,"creado_en"?: string,"device_id": string,"id"?: string,"modelo"?: string | null,"plataforma": string,"token_push": string,"ultimo_acceso"?: string,"usuario_id": string,"version_app"?: string | null,"version_so"?: string | null
                   }
@@ -695,6 +751,7 @@ isOneToOne: true
                   Row: {
                     "abierta_en": string,"abierta_por": Database["public"]['Enums']["abierta_por_actor"],"descripcion": string,"escalada_en": string | null,"estado": Database["public"]['Enums']["estado_disputa"],"id": string,"resolucion": Database["public"]['Enums']["resolucion_disputa"] | null,"resolucion_detalle": string | null,"resuelta_en": string | null,"tipo": Database["public"]['Enums']["tipo_disputa"],"traslado_id": string
                   }
+                  ComputedFields: never
                   Insert: {
                     "abierta_en"?: string,"abierta_por": Database["public"]['Enums']["abierta_por_actor"],"descripcion"?: string,"escalada_en"?: string | null,"estado"?: Database["public"]['Enums']["estado_disputa"],"id"?: string,"resolucion"?: Database["public"]['Enums']["resolucion_disputa"] | null,"resolucion_detalle"?: string | null,"resuelta_en"?: string | null,"tipo": Database["public"]['Enums']["tipo_disputa"],"traslado_id": string
                   }
@@ -726,6 +783,7 @@ isOneToOne: false
                   Row: {
                     "destino": string,"origen": string
                   }
+                  ComputedFields: never
                   Insert: {
                     "destino": string,"origen": string
                   }
@@ -739,6 +797,7 @@ isOneToOne: false
                   Row: {
                     "actualizado_en": string,"conductor_id": string | null,"creado_en": string,"documento_anterior_id": string | null,"es_actual": boolean,"estado": string,"expira_en": string | null,"id": string,"motivo_rechazo": string | null,"nombre_archivo": string,"notas_admin": string | null,"reemplazado_en": string | null,"revisado_en": string | null,"revisado_por": string | null,"solicitud_id": string | null,"tipo": string,"url": string,"version": number
                   }
+                  ComputedFields: never
                   Insert: {
                     "actualizado_en"?: string,"conductor_id"?: string | null,"creado_en"?: string,"documento_anterior_id"?: string | null,"es_actual"?: boolean,"estado"?: string,"expira_en"?: string | null,"id"?: string,"motivo_rechazo"?: string | null,"nombre_archivo": string,"notas_admin"?: string | null,"reemplazado_en"?: string | null,"revisado_en"?: string | null,"revisado_por"?: string | null,"solicitud_id"?: string | null,"tipo": string,"url": string,"version"?: number
                   }
@@ -782,6 +841,7 @@ isOneToOne: false
                   Row: {
                     "estado": string,"id": string,"ruta": string,"subido_en": string,"tipo": string,"usuario_id": string
                   }
+                  ComputedFields: never
                   Insert: {
                     "estado"?: string,"id"?: string,"ruta": string,"subido_en"?: string,"tipo": string,"usuario_id": string
                   }
@@ -801,6 +861,7 @@ isOneToOne: false
                   Row: {
                     "auth_user_id": string,"consumido_en": string | null,"creado_en": string,"expira_en": string,"id": string,"mime": string,"ruta": string,"sha256": string,"tamano_bytes": number,"usuario_id": string
                   }
+                  ComputedFields: never
                   Insert: {
                     "auth_user_id": string,"consumido_en"?: string | null,"creado_en"?: string,"expira_en"?: string,"id"?: string,"mime": string,"ruta": string,"sha256": string,"tamano_bytes": number,"usuario_id": string
                   }
@@ -820,6 +881,7 @@ isOneToOne: false
                   Row: {
                     "creado_en": string,"documento_anterior_id": string | null,"eliminado_storage_en": string | null,"error_eliminacion": string | null,"es_actual": boolean,"estado": string,"id": string,"intentos_eliminacion": number,"mime": string,"reemplazado_en": string | null,"requiere_alerta_eliminacion": boolean,"ruta": string,"sello_id": string,"sha256": string,"tamano_bytes": number,"ultimo_intento_eliminacion_en": string | null,"usuario_id": string,"version": number
                   }
+                  ComputedFields: never
                   Insert: {
                     "creado_en"?: string,"documento_anterior_id"?: string | null,"eliminado_storage_en"?: string | null,"error_eliminacion"?: string | null,"es_actual"?: boolean,"estado"?: string,"id"?: string,"intentos_eliminacion"?: number,"mime": string,"reemplazado_en"?: string | null,"requiere_alerta_eliminacion"?: boolean,"ruta": string,"sello_id": string,"sha256": string,"tamano_bytes": number,"ultimo_intento_eliminacion_en"?: string | null,"usuario_id": string,"version": number
                   }
@@ -851,6 +913,7 @@ isOneToOne: false
                   Row: {
                     "auth_user_id": string,"consumido_en": string | null,"creado_en": string,"objetivo_id": string,"ruta": string,"sha256": string,"tipo": string
                   }
+                  ComputedFields: never
                   Insert: {
                     "auth_user_id": string,"consumido_en"?: string | null,"creado_en"?: string,"objetivo_id": string,"ruta": string,"sha256": string,"tipo": string
                   }
@@ -864,6 +927,7 @@ isOneToOne: false
                   Row: {
                     "attempts": number,"bucket": string,"rate_key": string,"window_started_at": string
                   }
+                  ComputedFields: never
                   Insert: {
                     "attempts": number,"bucket": string,"rate_key": string,"window_started_at": string
                   }
@@ -877,6 +941,7 @@ isOneToOne: false
                   Row: {
                     "actualizado_en": string,"creado_en": string,"empresa_id": string,"estado": string,"id": string,"invitado_por": string | null,"rol_clave": string,"usuario_id": string
                   }
+                  ComputedFields: never
                   Insert: {
                     "actualizado_en"?: string,"creado_en"?: string,"empresa_id": string,"estado"?: string,"id"?: string,"invitado_por"?: string | null,"rol_clave": string,"usuario_id": string
                   }
@@ -914,6 +979,7 @@ isOneToOne: false
                   Row: {
                     "permiso": string,"rol_clave": string
                   }
+                  ComputedFields: never
                   Insert: {
                     "permiso": string,"rol_clave": string
                   }
@@ -933,6 +999,7 @@ isOneToOne: false
                   Row: {
                     "clave": string,"descripcion": string | null,"es_sistema": boolean,"nombre": string
                   }
+                  ComputedFields: never
                   Insert: {
                     "clave": string,"descripcion"?: string | null,"es_sistema"?: boolean,"nombre": string
                   }
@@ -946,6 +1013,7 @@ isOneToOne: false
                   Row: {
                     "activo": boolean,"actualizado_en": string,"calle": string | null,"ciudad": string | null,"codigo_postal": string | null,"colonia": string | null,"contacto_nombre": string | null,"contacto_telefono": string | null,"creado_en": string,"direccion": string | null,"empresa_id": string,"es_principal": boolean,"estado": string | null,"id": string,"lat": number | null,"lng": number | null,"nombre": string,"numero": string | null,"referencias": string | null
                   }
+                  ComputedFields: never
                   Insert: {
                     "activo"?: boolean,"actualizado_en"?: string,"calle"?: string | null,"ciudad"?: string | null,"codigo_postal"?: string | null,"colonia"?: string | null,"contacto_nombre"?: string | null,"contacto_telefono"?: string | null,"creado_en"?: string,"direccion"?: string | null,"empresa_id": string,"es_principal"?: boolean,"estado"?: string | null,"id"?: string,"lat"?: number | null,"lng"?: number | null,"nombre": string,"numero"?: string | null,"referencias"?: string | null
                   }
@@ -965,6 +1033,7 @@ isOneToOne: false
                   Row: {
                     "actualizado_en": string,"codigo_postal_fiscal": string | null,"condiciones_pago": string | null,"correo_facturacion": string | null,"creado_en": string,"credito_disponible_mxn": number,"dias_credito": number,"estado_operativo": string,"estado_verificacion": Database["public"]['Enums']["estado_verificacion"],"id": string,"limite_credito_mxn": number,"motivo_suspension": string | null,"nombre": string,"razon_social": string | null,"regimen_fiscal": string | null,"requiere_orden_compra": boolean,"rfc": string | null,"suspendida_en": string | null,"suspendida_por": string | null,"uso_cfdi": string | null
                   }
+                  ComputedFields: never
                   Insert: {
                     "actualizado_en"?: string,"codigo_postal_fiscal"?: string | null,"condiciones_pago"?: string | null,"correo_facturacion"?: string | null,"creado_en"?: string,"credito_disponible_mxn"?: number,"dias_credito"?: number,"estado_operativo"?: string,"estado_verificacion"?: Database["public"]['Enums']["estado_verificacion"],"id"?: string,"limite_credito_mxn"?: number,"motivo_suspension"?: string | null,"nombre": string,"razon_social"?: string | null,"regimen_fiscal"?: string | null,"requiere_orden_compra"?: boolean,"rfc"?: string | null,"suspendida_en"?: string | null,"suspendida_por"?: string | null,"uso_cfdi"?: string | null
                   }
@@ -984,6 +1053,7 @@ isOneToOne: false
                   Row: {
                     "aprobado_por": string | null,"comentario_resolucion": string | null,"datos_anteriores": NonNullable<Json>,"datos_propuestos": NonNullable<Json>,"empresa_id": string,"estado": string,"id": string,"motivo": string,"resuelto_en": string | null,"solicitado_en": string,"solicitado_por": string,"tipo": string
                   }
+                  ComputedFields: never
                   Insert: {
                     "aprobado_por"?: string | null,"comentario_resolucion"?: string | null,"datos_anteriores"?: NonNullable<Json>,"datos_propuestos"?: NonNullable<Json>,"empresa_id": string,"estado"?: string,"id"?: string,"motivo": string,"resuelto_en"?: string | null,"solicitado_en"?: string,"solicitado_por": string,"tipo": string
                   }
@@ -1015,6 +1085,7 @@ isOneToOne: false
                   Row: {
                     "aprobado_por": string | null,"cambio_sensible_id": string | null,"condiciones_pago": string | null,"creado_en": string,"creado_por": string | null,"credito_disponible_mxn": number,"dias_credito": number,"empresa_id": string,"id": string,"limite_credito_mxn": number,"requiere_orden_compra": boolean,"version": number,"vigente_desde": string,"vigente_hasta": string | null
                   }
+                  ComputedFields: never
                   Insert: {
                     "aprobado_por"?: string | null,"cambio_sensible_id"?: string | null,"condiciones_pago"?: string | null,"creado_en"?: string,"creado_por"?: string | null,"credito_disponible_mxn"?: number,"dias_credito"?: number,"empresa_id": string,"id"?: string,"limite_credito_mxn"?: number,"requiere_orden_compra"?: boolean,"version": number,"vigente_desde"?: string,"vigente_hasta"?: string | null
                   }
@@ -1052,6 +1123,7 @@ isOneToOne: false
                   Row: {
                     "aprobado_por": string | null,"cambio_sensible_id": string | null,"codigo_postal_fiscal": string | null,"correo_facturacion": string | null,"creado_en": string,"creado_por": string | null,"empresa_id": string,"id": string,"razon_social": string | null,"regimen_fiscal": string | null,"rfc": string,"uso_cfdi": string | null,"version": number,"vigente_desde": string,"vigente_hasta": string | null
                   }
+                  ComputedFields: never
                   Insert: {
                     "aprobado_por"?: string | null,"cambio_sensible_id"?: string | null,"codigo_postal_fiscal"?: string | null,"correo_facturacion"?: string | null,"creado_en"?: string,"creado_por"?: string | null,"empresa_id": string,"id"?: string,"razon_social"?: string | null,"regimen_fiscal"?: string | null,"rfc": string,"uso_cfdi"?: string | null,"version": number,"vigente_desde"?: string,"vigente_hasta"?: string | null
                   }
@@ -1089,6 +1161,7 @@ isOneToOne: false
                   Row: {
                     "actualizado_en": string,"creado_en": string,"creado_por": string | null,"empresa_id": string,"estado": Database["public"]['Enums']["estado_verificacion"],"folio": string | null,"id": string,"nombre": string,"notas": string | null,"revisado_por": string | null,"tipo": string,"url": string | null,"vigente_desde": string | null,"vigente_hasta": string | null
                   }
+                  ComputedFields: never
                   Insert: {
                     "actualizado_en"?: string,"creado_en"?: string,"creado_por"?: string | null,"empresa_id": string,"estado"?: Database["public"]['Enums']["estado_verificacion"],"folio"?: string | null,"id"?: string,"nombre": string,"notas"?: string | null,"revisado_por"?: string | null,"tipo": string,"url"?: string | null,"vigente_desde"?: string | null,"vigente_hasta"?: string | null
                   }
@@ -1120,6 +1193,7 @@ isOneToOne: false
                   Row: {
                     "estado_actual": Database["public"]['Enums']["estado_operativo_traslado"],"estado_siguiente": Database["public"]['Enums']["estado_operativo_traslado"]
                   }
+                  ComputedFields: never
                   Insert: {
                     "estado_actual": Database["public"]['Enums']["estado_operativo_traslado"],"estado_siguiente": Database["public"]['Enums']["estado_operativo_traslado"]
                   }
@@ -1133,6 +1207,7 @@ isOneToOne: false
                   Row: {
                     "estado_actual": Database["public"]['Enums']["estado_traslado"],"estado_siguiente": Database["public"]['Enums']["estado_traslado"]
                   }
+                  ComputedFields: never
                   Insert: {
                     "estado_actual": Database["public"]['Enums']["estado_traslado"],"estado_siguiente": Database["public"]['Enums']["estado_traslado"]
                   }
@@ -1146,6 +1221,7 @@ isOneToOne: false
                   Row: {
                     "correlation_id": string | null,"creado_en": string,"datos": NonNullable<Json>,"duracion_ms": number | null,"id": number,"nivel": string,"nombre": string,"operacion_id": string | null,"servicio": string,"trace_id": string | null,"traslado_id": string | null,"usuario_id": string | null
                   }
+                  ComputedFields: never
                   Insert: {
                     "correlation_id"?: string | null,"creado_en"?: string,"datos"?: NonNullable<Json>,"duracion_ms"?: number | null,"id"?: number,"nivel": string,"nombre": string,"operacion_id"?: string | null,"servicio": string,"trace_id"?: string | null,"traslado_id"?: string | null,"usuario_id"?: string | null
                   }
@@ -1189,6 +1265,7 @@ isOneToOne: false
                   Row: {
                     "correlation_id": string | null,"creado_en": string,"detalle": NonNullable<Json>,"id": string,"plataforma": string,"tipo": string,"traslado_id": string | null,"usuario_id": string | null,"version_app": string
                   }
+                  ComputedFields: never
                   Insert: {
                     "correlation_id"?: string | null,"creado_en"?: string,"detalle"?: NonNullable<Json>,"id"?: string,"plataforma"?: string,"tipo": string,"traslado_id"?: string | null,"usuario_id"?: string | null,"version_app": string
                   }
@@ -1220,6 +1297,7 @@ isOneToOne: false
                   Row: {
                     "auth_user_id": string | null,"codigo": string | null,"creado_en": string,"duracion_ms": number | null,"empresa_id": string | null,"evento": string,"fuente": string | null,"id": string,"paso": number | null,"recibido_en": string,"sesion_id": string,"solicitud_id": string | null,"zona": string | null
                   }
+                  ComputedFields: never
                   Insert: {
                     "auth_user_id"?: string | null,"codigo"?: string | null,"creado_en"?: string,"duracion_ms"?: number | null,"empresa_id"?: string | null,"evento": string,"fuente"?: string | null,"id"?: string,"paso"?: number | null,"recibido_en"?: string,"sesion_id": string,"solicitud_id"?: string | null,"zona"?: string | null
                   }
@@ -1245,6 +1323,7 @@ isOneToOne: false
                   Row: {
                     "captura_id": string,"creado_en": string,"resuelto_en": string | null,"ruta": string,"sha256_esperado": string,"sha256_observado": string,"traslado_id": string
                   }
+                  ComputedFields: never
                   Insert: {
                     "captura_id": string,"creado_en"?: string,"resuelto_en"?: string | null,"ruta": string,"sha256_esperado": string,"sha256_observado": string,"traslado_id": string
                   }
@@ -1276,6 +1355,7 @@ isOneToOne: false
                   Row: {
                     "angulo": Database["public"]['Enums']["angulo_evidencia"],"capturada_en": string,"conflicto": boolean,"conflicto_detalle": string | null,"conflicto_detectado_en": string | null,"id": string,"lat": number | null,"lng": number | null,"local_path": string | null,"sha256": string | null,"sincronizada": boolean,"tipo": Database["public"]['Enums']["tipo_evidencia"],"traslado_id": string,"url": string | null
                   }
+                  ComputedFields: never
                   Insert: {
                     "angulo": Database["public"]['Enums']["angulo_evidencia"],"capturada_en"?: string,"conflicto"?: boolean,"conflicto_detalle"?: string | null,"conflicto_detectado_en"?: string | null,"id"?: string,"lat"?: number | null,"lng"?: number | null,"local_path"?: string | null,"sha256"?: string | null,"sincronizada"?: boolean,"tipo": Database["public"]['Enums']["tipo_evidencia"],"traslado_id": string,"url"?: string | null
                   }
@@ -1307,6 +1387,7 @@ isOneToOne: false
                   Row: {
                     "actualizado_en": string,"combustible": string | null,"creado_en": string,"holograma_verificacion": boolean | null,"id": string,"kilometraje": number | null,"llaves_recibidas": string | null,"notas": string | null,"placa_delantera": string | null,"placa_trasera": string | null,"talon_verificacion": string | null,"tarjeta_circulacion": string | null,"tipo": Database["public"]['Enums']["tipo_evidencia"],"traslado_id": string
                   }
+                  ComputedFields: never
                   Insert: {
                     "actualizado_en"?: string,"combustible"?: string | null,"creado_en"?: string,"holograma_verificacion"?: boolean | null,"id"?: string,"kilometraje"?: number | null,"llaves_recibidas"?: string | null,"notas"?: string | null,"placa_delantera"?: string | null,"placa_trasera"?: string | null,"talon_verificacion"?: string | null,"tarjeta_circulacion"?: string | null,"tipo": Database["public"]['Enums']["tipo_evidencia"],"traslado_id": string
                   }
@@ -1338,6 +1419,7 @@ isOneToOne: false
                   Row: {
                     "destino": Database["public"]['Enums']["estado_expediente_conductor"],"origen": Database["public"]['Enums']["estado_expediente_conductor"]
                   }
+                  ComputedFields: never
                   Insert: {
                     "destino": Database["public"]['Enums']["estado_expediente_conductor"],"origen": Database["public"]['Enums']["estado_expediente_conductor"]
                   }
@@ -1351,6 +1433,7 @@ isOneToOne: false
                   Row: {
                     "admin_id": string,"completada_en": string | null,"creada_en": string,"error_codigo": string | null,"estado": string,"filas": number,"filtros": NonNullable<Json>,"formato": string,"hash_sha256": string | null,"id": string,"recurso": string
                   }
+                  ComputedFields: never
                   Insert: {
                     "admin_id": string,"completada_en"?: string | null,"creada_en"?: string,"error_codigo"?: string | null,"estado"?: string,"filas"?: number,"filtros"?: NonNullable<Json>,"formato": string,"hash_sha256"?: string | null,"id"?: string,"recurso": string
                   }
@@ -1370,6 +1453,7 @@ isOneToOne: false
                   Row: {
                     "actualizado_en": string,"clave": string,"descripcion": string | null,"habilitada": boolean,"porcentaje_rollout": number,"versiones_permitidas": (string)[]
                   }
+                  ComputedFields: never
                   Insert: {
                     "actualizado_en"?: string,"clave": string,"descripcion"?: string | null,"habilitada"?: boolean,"porcentaje_rollout"?: number,"versiones_permitidas"?: (string)[]
                   }
@@ -1383,6 +1467,7 @@ isOneToOne: false
                   Row: {
                     "carga_id": string,"clave_idempotencia": string | null,"creado_en": string,"datos": NonNullable<Json>,"errores": (string)[],"estado": string,"hash_fila": string | null,"id": string,"numero_fila": number,"procesado_en": string | null,"referencia_externa": string | null,"sucursal_destino_id": string | null,"sucursal_origen_id": string | null,"traslado_id": string | null,"vehiculo_id": string | null
                   }
+                  ComputedFields: never
                   Insert: {
                     "carga_id": string,"clave_idempotencia"?: string | null,"creado_en"?: string,"datos": NonNullable<Json>,"errores"?: (string)[],"estado": string,"hash_fila"?: string | null,"id"?: string,"numero_fila": number,"procesado_en"?: string | null,"referencia_externa"?: string | null,"sucursal_destino_id"?: string | null,"sucursal_origen_id"?: string | null,"traslado_id"?: string | null,"vehiculo_id"?: string | null
                   }
@@ -1438,6 +1523,7 @@ isOneToOne: false
                   Row: {
                     "comprobante_ruta": string | null,"descripcion": string | null,"id": string,"monto": number,"registrado_en": string,"registrado_por": string | null,"tipo": string,"traslado_id": string
                   }
+                  ComputedFields: never
                   Insert: {
                     "comprobante_ruta"?: string | null,"descripcion"?: string | null,"id"?: string,"monto": number,"registrado_en"?: string,"registrado_por"?: string | null,"tipo": string,"traslado_id": string
                   }
@@ -1475,6 +1561,7 @@ isOneToOne: false
                   Row: {
                     "creado_en": string,"decision": string,"documento_id": string | null,"estado_anterior": Database["public"]['Enums']["estado_expediente_conductor"],"estado_nuevo": Database["public"]['Enums']["estado_expediente_conductor"],"id": string,"motivo": string | null,"revisado_en": string,"revisado_por": string | null,"solicitud_id": string
                   }
+                  ComputedFields: never
                   Insert: {
                     "creado_en"?: string,"decision": string,"documento_id"?: string | null,"estado_anterior": Database["public"]['Enums']["estado_expediente_conductor"],"estado_nuevo": Database["public"]['Enums']["estado_expediente_conductor"],"id"?: string,"motivo"?: string | null,"revisado_en"?: string,"revisado_por"?: string | null,"solicitud_id": string
                   }
@@ -1506,6 +1593,7 @@ isOneToOne: false
                   Row: {
                     "actor_id": string | null,"actor_tipo": string,"creado_en": string,"estado_anterior": Database["public"]['Enums']["estado_traslado"],"estado_nuevo": Database["public"]['Enums']["estado_traslado"],"id": string,"metadata": NonNullable<Json>,"motivo": string | null,"operativo_anterior": Database["public"]['Enums']["estado_operativo_traslado"],"operativo_nuevo": Database["public"]['Enums']["estado_operativo_traslado"],"traslado_id": string
                   }
+                  ComputedFields: never
                   Insert: {
                     "actor_id"?: string | null,"actor_tipo"?: string,"creado_en"?: string,"estado_anterior": Database["public"]['Enums']["estado_traslado"],"estado_nuevo": Database["public"]['Enums']["estado_traslado"],"id"?: string,"metadata"?: NonNullable<Json>,"motivo"?: string | null,"operativo_anterior": Database["public"]['Enums']["estado_operativo_traslado"],"operativo_nuevo": Database["public"]['Enums']["estado_operativo_traslado"],"traslado_id": string
                   }
@@ -1537,6 +1625,7 @@ isOneToOne: false
                   Row: {
                     "foto_id": string,"incidencia_id": string
                   }
+                  ComputedFields: never
                   Insert: {
                     "foto_id": string,"incidencia_id": string
                   }
@@ -1562,6 +1651,7 @@ isOneToOne: false
                   Row: {
                     "accion": string,"actor": string,"actor_id": string | null,"creado_en": string,"estado_anterior": string | null,"estado_nuevo": string | null,"id": string,"incidencia_id": string,"motivo": string | null
                   }
+                  ComputedFields: never
                   Insert: {
                     "accion": string,"actor"?: string,"actor_id"?: string | null,"creado_en"?: string,"estado_anterior"?: string | null,"estado_nuevo"?: string | null,"id"?: string,"incidencia_id": string,"motivo"?: string | null
                   }
@@ -1581,6 +1671,7 @@ isOneToOne: false
                   Row: {
                     "asignada_en": string | null,"creada_en": string,"descripcion": string,"escalada_en": string | null,"estado": string,"id": string,"momento": Database["public"]['Enums']["momento_incidencia"],"nivel_escalamiento": number,"reportada_por": Database["public"]['Enums']["actor_reporte"],"responsable_admin_id": string | null,"resuelta": boolean,"resuelta_en": string | null,"severidad": string,"sla_horas": number | null,"sla_vence_en": string | null,"tipo": Database["public"]['Enums']["tipo_incidencia"],"traslado_id": string
                   }
+                  ComputedFields: never
                   Insert: {
                     "asignada_en"?: string | null,"creada_en"?: string,"descripcion": string,"escalada_en"?: string | null,"estado"?: string,"id"?: string,"momento": Database["public"]['Enums']["momento_incidencia"],"nivel_escalamiento"?: number,"reportada_por": Database["public"]['Enums']["actor_reporte"],"responsable_admin_id"?: string | null,"resuelta"?: boolean,"resuelta_en"?: string | null,"severidad"?: string,"sla_horas"?: number | null,"sla_vence_en"?: string | null,"tipo": Database["public"]['Enums']["tipo_incidencia"],"traslado_id": string
                   }
@@ -1618,6 +1709,7 @@ isOneToOne: false
                   Row: {
                     "duracion_segundos": number | null,"finalizada_en": string | null,"id": string,"iniciada_en": string,"iniciada_por": Database["public"]['Enums']["remitente_chat"],"numero_virtual": string,"sesion_proxy_id": string | null,"traslado_id": string
                   }
+                  ComputedFields: never
                   Insert: {
                     "duracion_segundos"?: number | null,"finalizada_en"?: string | null,"id"?: string,"iniciada_en"?: string,"iniciada_por": Database["public"]['Enums']["remitente_chat"],"numero_virtual": string,"sesion_proxy_id"?: string | null,"traslado_id": string
                   }
@@ -1655,6 +1747,7 @@ isOneToOne: false
                   Row: {
                     "contenido": string,"enviado_en": string,"id": string,"remitente": Database["public"]['Enums']["remitente_chat"],"reportado": boolean,"traslado_id": string
                   }
+                  ComputedFields: never
                   Insert: {
                     "contenido": string,"enviado_en"?: string,"id"?: string,"remitente": Database["public"]['Enums']["remitente_chat"],"reportado"?: boolean,"traslado_id": string
                   }
@@ -1686,6 +1779,7 @@ isOneToOne: false
                   Row: {
                     "activo": boolean,"actualizado_en": string,"clave": string,"nombre": string,"objetivo": number,"operador": string,"severidad": string
                   }
+                  ComputedFields: never
                   Insert: {
                     "activo"?: boolean,"actualizado_en"?: string,"clave": string,"nombre": string,"objetivo": number,"operador": string,"severidad"?: string
                   }
@@ -1699,6 +1793,7 @@ isOneToOne: false
                   Row: {
                     "conductor_id": string,"finalizado_en": string | null,"id": string,"iniciado_en": string,"recuperado": boolean | null,"traslados_asignados": number,"traslados_completados": number
                   }
+                  ComputedFields: never
                   Insert: {
                     "conductor_id": string,"finalizado_en"?: string | null,"id"?: string,"iniciado_en"?: string,"recuperado"?: boolean | null,"traslados_asignados": number,"traslados_completados"?: number
                   }
@@ -1724,6 +1819,7 @@ isOneToOne: false
                   Row: {
                     "admin_id": string | null,"creado_en": string,"id": string,"mensaje": string,"solicitud_id": string
                   }
+                  ComputedFields: never
                   Insert: {
                     "admin_id"?: string | null,"creado_en"?: string,"id"?: string,"mensaje": string,"solicitud_id": string
                   }
@@ -1749,6 +1845,7 @@ isOneToOne: false
                   Row: {
                     "admin_id": string,"contenido": string,"creada_en": string,"id": string,"traslado_id": string
                   }
+                  ComputedFields: never
                   Insert: {
                     "admin_id": string,"contenido": string,"creada_en"?: string,"id"?: string,"traslado_id": string
                   }
@@ -1786,6 +1883,7 @@ isOneToOne: false
                   Row: {
                     "alerta_id": string | null,"canal": string,"creado_en": string,"cuerpo": string,"destinatario_rol": string,"enviado_en": string | null,"estado": string,"id": string,"titulo": string
                   }
+                  ComputedFields: never
                   Insert: {
                     "alerta_id"?: string | null,"canal"?: string,"creado_en"?: string,"cuerpo": string,"destinatario_rol"?: string,"enviado_en"?: string | null,"estado"?: string,"id"?: string,"titulo": string
                   }
@@ -1805,6 +1903,7 @@ isOneToOne: false
                   Row: {
                     "actualizado_en": string,"creado_en": string,"cuerpo": string,"datos": NonNullable<Json>,"destino": string,"entidad_id": string | null,"entidad_tipo": string | null,"enviada_en": string | null,"estado": string,"id": string,"idempotency_key": string,"leida_en": string | null,"prioridad": string,"tipo": string,"titulo": string,"usuario_id": string
                   }
+                  ComputedFields: never
                   Insert: {
                     "actualizado_en"?: string,"creado_en"?: string,"cuerpo": string,"datos"?: NonNullable<Json>,"destino": string,"entidad_id"?: string | null,"entidad_tipo"?: string | null,"enviada_en"?: string | null,"estado"?: string,"id"?: string,"idempotency_key": string,"leida_en"?: string | null,"prioridad"?: string,"tipo": string,"titulo": string,"usuario_id": string
                   }
@@ -1818,6 +1917,7 @@ isOneToOne: false
                   Row: {
                     "abierta_en": string | null,"actualizado_en": string,"codigo_error": string | null,"creado_en": string,"detalle_error": string | null,"dispositivo_id": string,"enviada_en": string | null,"estado": string,"fcm_message_id": string | null,"id": string,"notificacion_id": string,"recibida_en": string | null
                   }
+                  ComputedFields: never
                   Insert: {
                     "abierta_en"?: string | null,"actualizado_en"?: string,"codigo_error"?: string | null,"creado_en"?: string,"detalle_error"?: string | null,"dispositivo_id": string,"enviada_en"?: string | null,"estado"?: string,"fcm_message_id"?: string | null,"id"?: string,"notificacion_id": string,"recibida_en"?: string | null
                   }
@@ -1843,6 +1943,7 @@ isOneToOne: false
                   Row: {
                     "codigo": string,"correlation_id": string | null,"creado_en": string,"datos": NonNullable<Json>,"funcion": string,"id": number,"mensaje": string,"traslado_id": string | null
                   }
+                  ComputedFields: never
                   Insert: {
                     "codigo": string,"correlation_id"?: string | null,"creado_en"?: string,"datos"?: NonNullable<Json>,"funcion": string,"id"?: number,"mensaje": string,"traslado_id"?: string | null
                   }
@@ -1874,6 +1975,7 @@ isOneToOne: false
                   Row: {
                     "actualizado_en": string,"creado_en": string,"descripcion": string,"dias": number,"tabla": string
                   }
+                  ComputedFields: never
                   Insert: {
                     "actualizado_en"?: string,"creado_en"?: string,"descripcion"?: string,"dias": number,"tabla": string
                   }
@@ -1887,6 +1989,7 @@ isOneToOne: false
                   Row: {
                     "codigo_error": string | null,"correlation_id": string | null,"creado_en": string,"duracion_ms": number,"funcion": string,"id": number,"ok": boolean,"traslado_id": string | null
                   }
+                  ComputedFields: never
                   Insert: {
                     "codigo_error"?: string | null,"correlation_id"?: string | null,"creado_en"?: string,"duracion_ms": number,"funcion": string,"id"?: number,"ok"?: boolean,"traslado_id"?: string | null
                   }
@@ -1918,6 +2021,7 @@ isOneToOne: false
                   Row: {
                     "actualizado_en": string,"cliente_contacto_nombre": string | null,"cliente_contacto_telefono": string | null,"creado_en": string,"descripcion": string | null,"empresa_id": string | null,"estado": Database["public"]['Enums']["estado_operacion"],"folio": string,"id": string,"metadata": NonNullable<Json>,"nombre": string,"planned_end_at": string | null,"planned_start_at": string | null,"prioridad": string,"responsable_interno_admin_id": string | null,"sla_horas": number | null,"tipo": Database["public"]['Enums']["tipo_operacion"]
                   }
+                  ComputedFields: never
                   Insert: {
                     "actualizado_en"?: string,"cliente_contacto_nombre"?: string | null,"cliente_contacto_telefono"?: string | null,"creado_en"?: string,"descripcion"?: string | null,"empresa_id"?: string | null,"estado"?: Database["public"]['Enums']["estado_operacion"],"folio": string,"id"?: string,"metadata"?: NonNullable<Json>,"nombre": string,"planned_end_at"?: string | null,"planned_start_at"?: string | null,"prioridad"?: string,"responsable_interno_admin_id"?: string | null,"sla_horas"?: number | null,"tipo"?: Database["public"]['Enums']["tipo_operacion"]
                   }
@@ -1943,6 +2047,7 @@ isOneToOne: false
                   Row: {
                     "checkout_masivo_id": string | null,"comision_mxn": number | null,"estado": Database["public"]['Enums']["estado_pago"],"id": string,"metodo": string,"momento": Database["public"]['Enums']["momento_pago"],"monto": number,"registrado_en": string,"stripe_event_id": string | null,"stripe_livemode": boolean | null,"stripe_payment_intent_id": string | null,"stripe_verificado_en": string | null,"traslado_id": string
                   }
+                  ComputedFields: never
                   Insert: {
                     "checkout_masivo_id"?: string | null,"comision_mxn"?: number | null,"estado"?: Database["public"]['Enums']["estado_pago"],"id"?: string,"metodo": string,"momento": Database["public"]['Enums']["momento_pago"],"monto": number,"registrado_en"?: string,"stripe_event_id"?: string | null,"stripe_livemode"?: boolean | null,"stripe_payment_intent_id"?: string | null,"stripe_verificado_en"?: string | null,"traslado_id": string
                   }
@@ -1980,6 +2085,7 @@ isOneToOne: false
                   Row: {
                     "agregado_en": string,"ajuste": number,"ganancia_congelada": number,"payout_id": string,"traslado_id": string
                   }
+                  ComputedFields: never
                   Insert: {
                     "agregado_en"?: string,"ajuste"?: number,"ganancia_congelada": number,"payout_id": string,"traslado_id": string
                   }
@@ -2017,6 +2123,7 @@ isOneToOne: true
                   Row: {
                     "ajustes": number,"conductor_id": string,"creado_en": string,"estado": Database["public"]['Enums']["estado_payout"],"fecha_prevista": string | null,"id": string,"monto_bruto": number,"monto_neto": number,"pagado_en": string | null,"periodo_fin": string,"periodo_inicio": string,"procesado_en": string | null,"referencia_externa_validada": string | null,"referencia_pago": string | null
                   }
+                  ComputedFields: never
                   Insert: {
                     "ajustes"?: number,"conductor_id": string,"creado_en"?: string,"estado"?: Database["public"]['Enums']["estado_payout"],"fecha_prevista"?: string | null,"id"?: string,"monto_bruto": number,"monto_neto": number,"pagado_en"?: string | null,"periodo_fin": string,"periodo_inicio": string,"procesado_en"?: string | null,"referencia_externa_validada"?: string | null,"referencia_pago"?: string | null
                   }
@@ -2042,6 +2149,7 @@ isOneToOne: false
                   Row: {
                     "actualizado_en": string,"funcionalidades_incompatibles": (string)[],"mensaje": string | null,"plataforma": string,"version_minima": string,"version_recomendada": string,"version_vigente": string
                   }
+                  ComputedFields: never
                   Insert: {
                     "actualizado_en"?: string,"funcionalidades_incompatibles"?: (string)[],"mensaje"?: string | null,"plataforma": string,"version_minima": string,"version_recomendada": string,"version_vigente": string
                   }
@@ -2055,6 +2163,7 @@ isOneToOne: false
                   Row: {
                     "actualizado_en": string,"admin_id": string,"clave": string,"valor": NonNullable<Json>,"version": number
                   }
+                  ComputedFields: never
                   Insert: {
                     "actualizado_en"?: string,"admin_id": string,"clave": string,"valor"?: NonNullable<Json>,"version"?: number
                   }
@@ -2074,6 +2183,7 @@ isOneToOne: false
                   Row: {
                     "actualizado_en": string,"alertas_admin": boolean,"alertas_documentos": boolean,"alertas_pago": boolean,"alertas_viaje": boolean,"conductor_id": string,"modo_no_molestar": boolean,"notificaciones_push": boolean,"notificar_cambios_operativos": boolean,"notificar_documentos": boolean,"notificar_ganancias": boolean,"notificar_oportunidades": boolean,"notificar_promociones": boolean,"notificar_traslados_asignados": boolean,"traslados_empresariales": boolean,"traslados_foraneos": boolean,"traslados_locales": boolean,"traslados_nocturnos": boolean,"traslados_personales": boolean
                   }
+                  ComputedFields: never
                   Insert: {
                     "actualizado_en"?: string,"alertas_admin"?: boolean,"alertas_documentos"?: boolean,"alertas_pago"?: boolean,"alertas_viaje"?: boolean,"conductor_id": string,"modo_no_molestar"?: boolean,"notificaciones_push"?: boolean,"notificar_cambios_operativos"?: boolean,"notificar_documentos"?: boolean,"notificar_ganancias"?: boolean,"notificar_oportunidades"?: boolean,"notificar_promociones"?: boolean,"notificar_traslados_asignados"?: boolean,"traslados_empresariales"?: boolean,"traslados_foraneos"?: boolean,"traslados_locales"?: boolean,"traslados_nocturnos"?: boolean,"traslados_personales"?: boolean
                   }
@@ -2099,6 +2209,7 @@ isOneToOne: true
                   Row: {
                     "conductor_id": string,"confirmada_en": string | null,"confirmar_despues_de": string,"creada_en": string,"diferencia_min": number,"disputa_id": string | null,"estado": string,"llegada_real_en": string,"motivo_resolucion": string | null,"objetivo_llegada_en": string,"resultado": string,"tolerancia_min": number,"traslado_id": string
                   }
+                  ComputedFields: never
                   Insert: {
                     "conductor_id": string,"confirmada_en"?: string | null,"confirmar_despues_de": string,"creada_en"?: string,"diferencia_min": number,"disputa_id"?: string | null,"estado": string,"llegada_real_en": string,"motivo_resolucion"?: string | null,"objetivo_llegada_en": string,"resultado": string,"tolerancia_min": number,"traslado_id": string
                   }
@@ -2148,6 +2259,7 @@ isOneToOne: true
                   Row: {
                     "abierto_en": string,"estado": Database["public"]['Enums']["estado_reclamo_seguro"],"id": string,"notas_admin": string | null,"responsable_pago": string | null,"resuelto_en": string | null,"traslado_id": string,"version": number
                   }
+                  ComputedFields: never
                   Insert: {
                     "abierto_en"?: string,"estado"?: Database["public"]['Enums']["estado_reclamo_seguro"],"id"?: string,"notas_admin"?: string | null,"responsable_pago"?: string | null,"resuelto_en"?: string | null,"traslado_id": string,"version"?: number
                   }
@@ -2179,6 +2291,7 @@ isOneToOne: false
                   Row: {
                     "actor": Database["public"]['Enums']["actor_auditoria"],"actor_id": string,"correlation_id": string | null,"datos": NonNullable<Json>,"dispositivo": string | null,"evento": Database["public"]['Enums']["evento_auditable"],"id": string,"ip": unknown,"operacion_id": string | null,"timestamp": string,"traslado_id": string | null,"usuario_id": string | null
                   }
+                  ComputedFields: never
                   Insert: {
                     "actor": Database["public"]['Enums']["actor_auditoria"],"actor_id": string,"correlation_id"?: string | null,"datos"?: NonNullable<Json>,"dispositivo"?: string | null,"evento": Database["public"]['Enums']["evento_auditable"],"id"?: string,"ip"?: unknown,"operacion_id"?: string | null,"timestamp"?: string,"traslado_id"?: string | null,"usuario_id"?: string | null
                   }
@@ -2222,6 +2335,7 @@ isOneToOne: false
                   Row: {
                     "final": string | null,"inicial": string | null,"motivo": string,"responsable": string,"resuelta_en": string,"traslado_id": string
                   }
+                  ComputedFields: never
                   Insert: {
                     "final"?: string | null,"inicial"?: string | null,"motivo": string,"responsable": string,"resuelta_en"?: string,"traslado_id": string
                   }
@@ -2253,6 +2367,7 @@ isOneToOne: true
                   Row: {
                     "clave": string,"descripcion": string,"fisica": boolean,"moral": boolean,"vigente_desde": string,"vigente_hasta": string | null
                   }
+                  ComputedFields: never
                   Insert: {
                     "clave": string,"descripcion": string,"fisica": boolean,"moral": boolean,"vigente_desde": string,"vigente_hasta"?: string | null
                   }
@@ -2266,6 +2381,7 @@ isOneToOne: true
                   Row: {
                     "clave": string,"descripcion": string,"fisica": boolean,"moral": boolean,"regimenes": (string)[],"vigente_desde": string,"vigente_hasta": string | null
                   }
+                  ComputedFields: never
                   Insert: {
                     "clave": string,"descripcion": string,"fisica": boolean,"moral": boolean,"regimenes": (string)[],"vigente_desde": string,"vigente_hasta"?: string | null
                   }
@@ -2279,6 +2395,7 @@ isOneToOne: true
                   Row: {
                     "cerrada_en": string | null,"creada_en": string,"id": string,"numero_virtual": string,"participante_conductor_sid": string,"participante_usuario_sid": string,"traslado_id": string,"twilio_session_sid": string
                   }
+                  ComputedFields: never
                   Insert: {
                     "cerrada_en"?: string | null,"creada_en"?: string,"id"?: string,"numero_virtual": string,"participante_conductor_sid": string,"participante_usuario_sid": string,"traslado_id": string,"twilio_session_sid": string
                   }
@@ -2310,6 +2427,7 @@ isOneToOne: true
                   Row: {
                     "activo": boolean,"actualizado_en": string,"creado_en": string,"empresa_id": string,"horas_limite": number | null,"id": string,"policy_codigo": string,"prioridad_base": number | null,"severidad": string | null,"warning_pct": number | null
                   }
+                  ComputedFields: never
                   Insert: {
                     "activo"?: boolean,"actualizado_en"?: string,"creado_en"?: string,"empresa_id": string,"horas_limite"?: number | null,"id"?: string,"policy_codigo": string,"prioridad_base"?: number | null,"severidad"?: string | null,"warning_pct"?: number | null
                   }
@@ -2335,6 +2453,7 @@ isOneToOne: false
                   Row: {
                     "actualizado_en": string,"creado_en": string,"deadline": string,"empresa_id": string | null,"estado": string,"horas_limite": number,"horas_transcurridas": number,"id": string,"incidencia_id": string | null,"inicio": string,"operacion_id": string | null,"policy_codigo": string,"porcentaje": number,"traslado_id": string,"ultima_evaluacion_en": string
                   }
+                  ComputedFields: never
                   Insert: {
                     "actualizado_en"?: string,"creado_en"?: string,"deadline": string,"empresa_id"?: string | null,"estado"?: string,"horas_limite": number,"horas_transcurridas"?: number,"id"?: string,"incidencia_id"?: string | null,"inicio": string,"operacion_id"?: string | null,"policy_codigo": string,"porcentaje"?: number,"traslado_id": string,"ultima_evaluacion_en"?: string
                   }
@@ -2390,6 +2509,7 @@ isOneToOne: false
                   Row: {
                     "creado_en": string,"deadline": string,"empresa_id": string | null,"estado_traslado": string | null,"horas_limite": number,"horas_transcurridas": number,"id": string,"incidencia_id": string | null,"inicio": string,"metadata": NonNullable<Json>,"operacion_id": string | null,"policy_codigo": string,"porcentaje": number,"tipo_evento": string,"traslado_id": string
                   }
+                  ComputedFields: never
                   Insert: {
                     "creado_en"?: string,"deadline": string,"empresa_id"?: string | null,"estado_traslado"?: string | null,"horas_limite": number,"horas_transcurridas"?: number,"id"?: string,"incidencia_id"?: string | null,"inicio": string,"metadata"?: NonNullable<Json>,"operacion_id"?: string | null,"policy_codigo": string,"porcentaje"?: number,"tipo_evento": string,"traslado_id": string
                   }
@@ -2445,6 +2565,7 @@ isOneToOne: false
                   Row: {
                     "activo": boolean,"actualizado_en": string,"creado_en": string,"horas_limite": number | null,"id": string,"operacion_id": string,"policy_codigo": string,"prioridad_base": number | null,"severidad": string | null,"warning_pct": number | null
                   }
+                  ComputedFields: never
                   Insert: {
                     "activo"?: boolean,"actualizado_en"?: string,"creado_en"?: string,"horas_limite"?: number | null,"id"?: string,"operacion_id": string,"policy_codigo": string,"prioridad_base"?: number | null,"severidad"?: string | null,"warning_pct"?: number | null
                   }
@@ -2470,6 +2591,7 @@ isOneToOne: false
                   Row: {
                     "activo": boolean,"actualizado_en": string,"codigo": string,"creado_en": string,"descripcion": string,"horas_limite": number,"nombre": string,"prioridad_base": number,"severidad": string,"warning_pct": number
                   }
+                  ComputedFields: never
                   Insert: {
                     "activo"?: boolean,"actualizado_en"?: string,"codigo": string,"creado_en"?: string,"descripcion"?: string,"horas_limite": number,"nombre": string,"prioridad_base"?: number,"severidad"?: string,"warning_pct"?: number
                   }
@@ -2483,6 +2605,7 @@ isOneToOne: false
                   Row: {
                     "activo": boolean,"actualizado_en": string,"cliente_segmento": string,"creado_en": string,"horas_limite": number,"id": string,"pausa_fuera_horario": boolean,"prioridad": number,"severidad_base": string,"tipo_alerta": string,"tipo_servicio": string,"umbral_alerta_pct": number,"zona_horaria": string
                   }
+                  ComputedFields: never
                   Insert: {
                     "activo"?: boolean,"actualizado_en"?: string,"cliente_segmento"?: string,"creado_en"?: string,"horas_limite": number,"id"?: string,"pausa_fuera_horario"?: boolean,"prioridad"?: number,"severidad_base": string,"tipo_alerta": string,"tipo_servicio"?: string,"umbral_alerta_pct"?: number,"zona_horaria"?: string
                   }
@@ -2496,6 +2619,7 @@ isOneToOne: false
                   Row: {
                     "accion": string,"aprobada_por": string | null,"capacidad_requerida": string,"creada_en": string,"decidida_en": string | null,"ejecutada_en": string | null,"estado": string,"expira_en": string,"id": string,"motivo_decision": string | null,"payload": NonNullable<Json>,"recurso": string,"recurso_id": string | null,"solicitada_por": string,"tipo": string,"version": number
                   }
+                  ComputedFields: never
                   Insert: {
                     "accion": string,"aprobada_por"?: string | null,"capacidad_requerida": string,"creada_en"?: string,"decidida_en"?: string | null,"ejecutada_en"?: string | null,"estado"?: string,"expira_en"?: string,"id"?: string,"motivo_decision"?: string | null,"payload"?: NonNullable<Json>,"recurso": string,"recurso_id"?: string | null,"solicitada_por": string,"tipo": string,"version"?: number
                   }
@@ -2521,6 +2645,7 @@ isOneToOne: false
                   Row: {
                     "asignaciones_7d": number,"categoria_puntualidad": string,"clave_desempate": string,"competencia_id": string,"conductor_id": string,"distancia_origen_km": number | null,"elegibilidad_snapshot": NonNullable<Json>,"estado": string,"eta_aproximado_min": number | null,"id": string,"puntualidad_muestra": number,"puntualidad_porcentaje": number | null,"solicitada_en": string,"traslado_id": string,"ubicacion_lat": number | null,"ubicacion_lng": number | null,"ultima_asignacion_en": string | null,"viabilidad": string
                   }
+                  ComputedFields: never
                   Insert: {
                     "asignaciones_7d"?: number,"categoria_puntualidad": string,"clave_desempate": string,"competencia_id": string,"conductor_id": string,"distancia_origen_km"?: number | null,"elegibilidad_snapshot": NonNullable<Json>,"estado"?: string,"eta_aproximado_min"?: number | null,"id"?: string,"puntualidad_muestra"?: number,"puntualidad_porcentaje"?: number | null,"solicitada_en"?: string,"traslado_id": string,"ubicacion_lat"?: number | null,"ubicacion_lng"?: number | null,"ultima_asignacion_en"?: string | null,"viabilidad": string
                   }
@@ -2570,6 +2695,7 @@ isOneToOne: false
                   Row: {
                     "actualizado_en": string,"conductor_id": string,"creado_en": string,"estado": Database["public"]['Enums']["estado_solicitud_cambio_conductor"],"id": string,"motivo_rechazo": string | null,"payload_anterior": NonNullable<Json>,"payload_propuesto": NonNullable<Json>,"revisado_en": string | null,"revisado_por": string | null,"tipo": Database["public"]['Enums']["tipo_solicitud_cambio_conductor"]
                   }
+                  ComputedFields: never
                   Insert: {
                     "actualizado_en"?: string,"conductor_id": string,"creado_en"?: string,"estado"?: Database["public"]['Enums']["estado_solicitud_cambio_conductor"],"id"?: string,"motivo_rechazo"?: string | null,"payload_anterior": NonNullable<Json>,"payload_propuesto": NonNullable<Json>,"revisado_en"?: string | null,"revisado_por"?: string | null,"tipo": Database["public"]['Enums']["tipo_solicitud_cambio_conductor"]
                   }
@@ -2601,6 +2727,7 @@ isOneToOne: false
                   Row: {
                     "actualizado_en": string,"auth_user_id": string,"conductor_id": string | null,"contacto_emergencia": NonNullable<Json>,"creado_en": string,"curp_normalizada": string | null,"datos_personales": NonNullable<Json>,"domicilio": NonNullable<Json>,"enviado_en": string | null,"estado": Database["public"]['Enums']["estado_expediente_conductor"],"id": string,"licencia": NonNullable<Json>,"licencia_normalizada": string | null,"origen_modelo": string,"paso_actual": number,"telefono_normalizado": string | null,"version_registro": number
                   }
+                  ComputedFields: never
                   Insert: {
                     "actualizado_en"?: string,"auth_user_id": string,"conductor_id"?: string | null,"contacto_emergencia"?: NonNullable<Json>,"creado_en"?: string,"curp_normalizada"?: never,"datos_personales"?: NonNullable<Json>,"domicilio"?: NonNullable<Json>,"enviado_en"?: string | null,"estado"?: Database["public"]['Enums']["estado_expediente_conductor"],"id"?: string,"licencia"?: NonNullable<Json>,"licencia_normalizada"?: never,"origen_modelo"?: string,"paso_actual"?: number,"telefono_normalizado"?: never,"version_registro"?: number
                   }
@@ -2626,6 +2753,7 @@ isOneToOne: true
                   Row: {
                     "actualizada_en": string,"ambiente": string | null,"correo_entregado_en": string | null,"creada_en": string,"error_codigo": string | null,"error_detalle": string | null,"errores": NonNullable<Json>,"estado": string,"id": string,"intentos": number,"moneda": string,"monto": number,"pdf_ruta": string | null,"proveedor": string | null,"proveedor_id": string | null,"receptor": NonNullable<Json>,"respuesta_proveedor": Json | null,"traslado_id": string,"usuario_id": string,"uuid_fiscal": string | null,"xml_ruta": string | null
                   }
+                  ComputedFields: never
                   Insert: {
                     "actualizada_en"?: string,"ambiente"?: string | null,"correo_entregado_en"?: string | null,"creada_en"?: string,"error_codigo"?: string | null,"error_detalle"?: string | null,"errores"?: NonNullable<Json>,"estado": string,"id"?: string,"intentos"?: number,"moneda"?: string,"monto": number,"pdf_ruta"?: string | null,"proveedor"?: string | null,"proveedor_id"?: string | null,"receptor": NonNullable<Json>,"respuesta_proveedor"?: Json | null,"traslado_id": string,"usuario_id": string,"uuid_fiscal"?: string | null,"xml_ruta"?: string | null
                   }
@@ -2663,6 +2791,7 @@ isOneToOne: false
                   Row: {
                     "creada_en": string,"estado": string,"finalizada_en": string | null,"id": string,"nonce_hash": string,"request_id": number | null,"resultado": Json | null
                   }
+                  ComputedFields: never
                   Insert: {
                     "creada_en"?: string,"estado"?: string,"finalizada_en"?: string | null,"id"?: string,"nonce_hash": string,"request_id"?: number | null,"resultado"?: Json | null
                   }
@@ -2676,6 +2805,7 @@ isOneToOne: false
                   Row: {
                     "creado_en": string,"estado_proveedor": string,"id": string,"livemode": boolean,"moneda": string,"monto_centavos": number,"origen": string,"pago_id": string,"resultado": string
                   }
+                  ComputedFields: never
                   Insert: {
                     "creado_en"?: string,"estado_proveedor": string,"id": string,"livemode": boolean,"moneda": string,"monto_centavos": number,"origen": string,"pago_id": string,"resultado": string
                   }
@@ -2695,6 +2825,7 @@ isOneToOne: false
                   Row: {
                     "actualizado_en": string,"actualizado_por_admin_id": string | null,"condicion": Database["public"]['Enums']["condicion_vehiculo"],"factor": number
                   }
+                  ComputedFields: never
                   Insert: {
                     "actualizado_en"?: string,"actualizado_por_admin_id"?: string | null,"condicion": Database["public"]['Enums']["condicion_vehiculo"],"factor": number
                   }
@@ -2714,6 +2845,7 @@ isOneToOne: false
                   Row: {
                     "actualizado_en": string,"actualizado_por_admin_id": string | null,"estado": Database["public"]['Enums']["estado_politica_tarifaria"],"id": boolean,"nombre_version": string,"notas": string | null,"tarifa_hora": number,"tope_factor_variable": number,"vigente_desde": string
                   }
+                  ComputedFields: never
                   Insert: {
                     "actualizado_en"?: string,"actualizado_por_admin_id"?: string | null,"estado"?: Database["public"]['Enums']["estado_politica_tarifaria"],"id"?: boolean,"nombre_version"?: string,"notas"?: string | null,"tarifa_hora": number,"tope_factor_variable": number,"vigente_desde"?: string
                   }
@@ -2733,6 +2865,7 @@ isOneToOne: false
                   Row: {
                     "actualizado_en": string,"actualizado_por_admin_id": string | null,"dia": Database["public"]['Enums']["dia_traslado"],"factor": number
                   }
+                  ComputedFields: never
                   Insert: {
                     "actualizado_en"?: string,"actualizado_por_admin_id"?: string | null,"dia": Database["public"]['Enums']["dia_traslado"],"factor": number
                   }
@@ -2752,6 +2885,7 @@ isOneToOne: false
                   Row: {
                     "actualizado_en": string,"actualizado_por_admin_id": string | null,"factor": number,"gama": Database["public"]['Enums']["gama_vehiculo"]
                   }
+                  ComputedFields: never
                   Insert: {
                     "actualizado_en"?: string,"actualizado_por_admin_id"?: string | null,"factor": number,"gama": Database["public"]['Enums']["gama_vehiculo"]
                   }
@@ -2771,6 +2905,7 @@ isOneToOne: false
                   Row: {
                     "actualizado_en": string,"actualizado_por_admin_id": string | null,"factor": number,"horario": Database["public"]['Enums']["horario_traslado"]
                   }
+                  ComputedFields: never
                   Insert: {
                     "actualizado_en"?: string,"actualizado_por_admin_id"?: string | null,"factor": number,"horario": Database["public"]['Enums']["horario_traslado"]
                   }
@@ -2790,6 +2925,7 @@ isOneToOne: false
                   Row: {
                     "creada_en": string,"creada_por": string | null,"id": number,"snapshot": NonNullable<Json>,"xact_id": number
                   }
+                  ComputedFields: never
                   Insert: {
                     "creada_en"?: string,"creada_por"?: string | null,"id"?: never,"snapshot": NonNullable<Json>,"xact_id": number
                   }
@@ -2809,6 +2945,7 @@ isOneToOne: false
                   Row: {
                     "actualizado_en": string,"actualizado_por_admin_id": string | null,"base": number,"categoria": Database["public"]['Enums']["categoria_tarifa_vehiculo"],"id": string,"por_km": number,"rango": Database["public"]['Enums']["rango_distancia"]
                   }
+                  ComputedFields: never
                   Insert: {
                     "actualizado_en"?: string,"actualizado_por_admin_id"?: string | null,"base": number,"categoria": Database["public"]['Enums']["categoria_tarifa_vehiculo"],"id"?: string,"por_km": number,"rango": Database["public"]['Enums']["rango_distancia"]
                   }
@@ -2860,6 +2997,7 @@ isOneToOne: false
                   Row: {
                     "congelado_en": string,"cotizado": number,"fuente": string,"historico": boolean,"moneda": string,"total": number,"traslado_id": string
                   }
+                  ComputedFields: never
                   Insert: {
                     "congelado_en"?: string,"cotizado": number,"fuente": string,"historico"?: boolean,"moneda"?: string,"total": number,"traslado_id": string
                   }
@@ -2891,6 +3029,7 @@ isOneToOne: true
                   Row: {
                     "actualizado_en": string,"conductor_id": string,"fuente": string | null,"online": boolean | null,"precision_m": number | null,"traslado_id": string,"ultima_ubicacion_en": string | null,"ultimo_envio_en": string | null,"ultimo_punto_id": string | null
                   }
+                  ComputedFields: never
                   Insert: {
                     "actualizado_en"?: string,"conductor_id": string,"fuente"?: string | null,"online"?: boolean | null,"precision_m"?: number | null,"traslado_id": string,"ultima_ubicacion_en"?: string | null,"ultimo_envio_en"?: string | null,"ultimo_punto_id"?: string | null
                   }
@@ -2940,6 +3079,7 @@ isOneToOne: false
                   Row: {
                     "actualizado_en": string,"conductor_id": string,"creado_en": string,"desviacion_sospechosa": boolean,"estado": string,"finalizada_en": string | null,"id": string,"iniciada_en": string,"metadata": NonNullable<Json>,"plataforma": string | null,"traslado_id": string,"ultima_bateria_pct": number | null,"ultima_distancia_destino_km": number | null,"ultima_lat": number | null,"ultima_lng": number | null,"ultima_precision_m": number | null,"ultima_velocidad_mps": number | null,"ultimo_heartbeat_en": string | null
                   }
+                  ComputedFields: never
                   Insert: {
                     "actualizado_en"?: string,"conductor_id": string,"creado_en"?: string,"desviacion_sospechosa"?: boolean,"estado"?: string,"finalizada_en"?: string | null,"id"?: string,"iniciada_en"?: string,"metadata"?: NonNullable<Json>,"plataforma"?: string | null,"traslado_id": string,"ultima_bateria_pct"?: number | null,"ultima_distancia_destino_km"?: number | null,"ultima_lat"?: number | null,"ultima_lng"?: number | null,"ultima_precision_m"?: number | null,"ultima_velocidad_mps"?: number | null,"ultimo_heartbeat_en"?: string | null
                   }
@@ -2983,6 +3123,7 @@ isOneToOne: false
                   Row: {
                     "calle": string,"ciudad": string,"codigo_postal": string,"colonia": string,"contacto_nombre": string | null,"contacto_telefono": string | null,"creado_en": string,"direccion": string,"estado": string,"id": string,"instrucciones": string | null,"lat": number | null,"lng": number | null,"numero": string,"orden": number,"referencias": string | null,"requiere_evidencia": boolean,"tiempo_espera_min": number | null,"tipo": Database["public"]['Enums']["tipo_parada"],"tipo_tarea": Database["public"]['Enums']["tipo_tarea_parada"] | null,"traslado_id": string
                   }
+                  ComputedFields: never
                   Insert: {
                     "calle": string,"ciudad": string,"codigo_postal": string,"colonia": string,"contacto_nombre"?: string | null,"contacto_telefono"?: string | null,"creado_en"?: string,"direccion": string,"estado": string,"id"?: string,"instrucciones"?: string | null,"lat"?: number | null,"lng"?: number | null,"numero": string,"orden": number,"referencias"?: string | null,"requiere_evidencia"?: boolean,"tiempo_espera_min"?: number | null,"tipo": Database["public"]['Enums']["tipo_parada"],"tipo_tarea"?: Database["public"]['Enums']["tipo_tarea_parada"] | null,"traslado_id": string
                   }
@@ -3014,6 +3155,7 @@ isOneToOne: false
                   Row: {
                     "actualizado_en": string,"causa_fallido": Database["public"]['Enums']["causa_fallido"] | null,"cerrado_en": string | null,"clave_idempotencia": string,"conductor_id": string | null,"contacto_entrega_nombre": string,"contacto_entrega_telefono": string,"contacto_recepcion_nombre": string,"contacto_recepcion_telefono": string,"cotizacion_expira_en": string | null,"creado_en": string,"destino_ciudad": string,"destino_direccion": string,"destino_lat": number | null,"destino_lng": number | null,"destino_referencias": string | null,"distancia_km": number | null,"estado": Database["public"]['Enums']["estado_traslado"],"estado_operativo": Database["public"]['Enums']["estado_operativo_traslado"],"fecha_hora_programada": string | null,"ganancia_conductor_congelada": number | null,"id": string,"instrucciones_especiales": string | null,"modalidad_programacion": string | null,"motivo_servicio": string | null,"operation_id": string | null,"origen_ciudad": string,"origen_direccion": string,"origen_lat": number | null,"origen_lng": number | null,"origen_referencias": string | null,"payout_id": string | null,"precio_cotizado": number | null,"precio_final": number | null,"presupuesto_usuario": number | null,"tiempo_estimado_horas": number | null,"tiene_incidencia_abierta": boolean,"tipo_pago": Database["public"]['Enums']["tipo_pago"],"tipo_ruta": string | null,"tipo_servicio": string | null,"usuario_id": string,"vehiculo_id": string,"ventana_entrega": string | null,"ventana_recoleccion": string | null,"version": number
                   }
+                  ComputedFields: never
                   Insert: {
                     "actualizado_en"?: string,"causa_fallido"?: Database["public"]['Enums']["causa_fallido"] | null,"cerrado_en"?: string | null,"clave_idempotencia": string,"conductor_id"?: string | null,"contacto_entrega_nombre": string,"contacto_entrega_telefono": string,"contacto_recepcion_nombre": string,"contacto_recepcion_telefono": string,"cotizacion_expira_en"?: string | null,"creado_en"?: string,"destino_ciudad": string,"destino_direccion": string,"destino_lat"?: number | null,"destino_lng"?: number | null,"destino_referencias"?: string | null,"distancia_km"?: number | null,"estado"?: Database["public"]['Enums']["estado_traslado"],"estado_operativo"?: Database["public"]['Enums']["estado_operativo_traslado"],"fecha_hora_programada"?: string | null,"ganancia_conductor_congelada"?: number | null,"id"?: string,"instrucciones_especiales"?: string | null,"modalidad_programacion"?: string | null,"motivo_servicio"?: string | null,"operation_id"?: string | null,"origen_ciudad": string,"origen_direccion": string,"origen_lat"?: number | null,"origen_lng"?: number | null,"origen_referencias"?: string | null,"payout_id"?: string | null,"precio_cotizado"?: number | null,"precio_final"?: number | null,"presupuesto_usuario"?: number | null,"tiempo_estimado_horas"?: number | null,"tiene_incidencia_abierta"?: boolean,"tipo_pago"?: Database["public"]['Enums']["tipo_pago"],"tipo_ruta"?: string | null,"tipo_servicio"?: string | null,"usuario_id": string,"vehiculo_id": string,"ventana_entrega"?: string | null,"ventana_recoleccion"?: string | null,"version"?: number
                   }
@@ -3063,6 +3205,7 @@ isOneToOne: false
                   Row: {
                     "altitud_m": number | null,"bateria_pct": number | null,"conductor_id": string,"direccion_grados": number | null,"dispositivo_timestamp": string | null,"estado_viaje": string | null,"fuente": string,"id": string,"lat": number,"lng": number,"local_id": string | null,"online": boolean | null,"precision_m": number | null,"registrado_en": string,"servidor_timestamp": string,"traslado_id": string,"velocidad_mps": number | null
                   }
+                  ComputedFields: never
                   Insert: {
                     "altitud_m"?: number | null,"bateria_pct"?: number | null,"conductor_id": string,"direccion_grados"?: number | null,"dispositivo_timestamp"?: string | null,"estado_viaje"?: string | null,"fuente"?: string,"id"?: string,"lat": number,"lng": number,"local_id"?: string | null,"online"?: boolean | null,"precision_m"?: number | null,"registrado_en"?: string,"servidor_timestamp"?: string,"traslado_id": string,"velocidad_mps"?: number | null
                   }
@@ -3106,6 +3249,7 @@ isOneToOne: false
                   Row: {
                     "actualizado_en": string,"alertas_evidencia": boolean,"alertas_pago": boolean,"alertas_viaje": boolean,"auth_user_id": string | null,"calle": string | null,"ciudad": string | null,"codigo_postal": string | null,"codigo_postal_fiscal": string | null,"colonia": string | null,"correo_facturacion": string | null,"creado_en": string,"direccion_principal": string | null,"doc_identidad_subido_en": string | null,"doc_identidad_url": string | null,"empresa_id": string | null,"estado": string | null,"estado_cuenta": string,"estado_verificacion": Database["public"]['Enums']["estado_verificacion"],"fecha_nacimiento": string | null,"foto_url": string | null,"id": string,"metodo_pago_registrado": boolean,"nombre": string | null,"notificaciones_email": boolean,"notificaciones_promocionales": boolean,"notificaciones_push": boolean,"notificaciones_sms_whatsapp": boolean,"numero": string | null,"pais": string | null,"preferencias": NonNullable<Json>,"razon_social": string | null,"referencias": string | null,"regimen_fiscal": string | null,"rfc": string | null,"rol": Database["public"]['Enums']["rol_usuario"],"telefono": string | null,"terminos_aceptados_en": string | null,"tipo_cuenta": string,"traslados_completados_sin_incidencia": number,"uso_cfdi": string | null,"version_terminos_aceptada": number | null
                   }
+                  ComputedFields: never
                   Insert: {
                     "actualizado_en"?: string,"alertas_evidencia"?: boolean,"alertas_pago"?: boolean,"alertas_viaje"?: boolean,"auth_user_id"?: string | null,"calle"?: string | null,"ciudad"?: string | null,"codigo_postal"?: string | null,"codigo_postal_fiscal"?: string | null,"colonia"?: string | null,"correo_facturacion"?: string | null,"creado_en"?: string,"direccion_principal"?: string | null,"doc_identidad_subido_en"?: string | null,"doc_identidad_url"?: string | null,"empresa_id"?: string | null,"estado"?: string | null,"estado_cuenta"?: string,"estado_verificacion"?: Database["public"]['Enums']["estado_verificacion"],"fecha_nacimiento"?: string | null,"foto_url"?: string | null,"id"?: string,"metodo_pago_registrado"?: boolean,"nombre"?: string | null,"notificaciones_email"?: boolean,"notificaciones_promocionales"?: boolean,"notificaciones_push"?: boolean,"notificaciones_sms_whatsapp"?: boolean,"numero"?: string | null,"pais"?: string | null,"preferencias"?: NonNullable<Json>,"razon_social"?: string | null,"referencias"?: string | null,"regimen_fiscal"?: string | null,"rfc"?: string | null,"rol"?: Database["public"]['Enums']["rol_usuario"],"telefono"?: string | null,"terminos_aceptados_en"?: string | null,"tipo_cuenta": string,"traslados_completados_sin_incidencia"?: number,"uso_cfdi"?: string | null,"version_terminos_aceptada"?: number | null
                   }
@@ -3125,6 +3269,7 @@ isOneToOne: false
                   Row: {
                     "actualizado_en": string,"alias": string | null,"anio": number,"categoria_tarifa": Database["public"]['Enums']["categoria_tarifa_vehiculo"] | null,"color": string | null,"condicion": Database["public"]['Enums']["condicion_vehiculo"] | null,"creado_en": string,"empresa_id": string | null,"estado_general_declarado": string | null,"fotos_urls": (string)[],"gama": Database["public"]['Enums']["gama_vehiculo"] | null,"id": string,"marca": string,"modelo": string,"permiso_especial_vigente": string | null,"placas": string | null,"puede_circular_rodando": boolean,"tiene_placas": boolean,"tiene_tarjeta_circulacion": boolean,"tiene_verificacion": boolean,"tipo": Database["public"]['Enums']["tipo_vehiculo"],"transmision": string | null,"usuario_id": string,"version": number,"vin": string | null
                   }
+                  ComputedFields: never
                   Insert: {
                     "actualizado_en"?: string,"alias"?: string | null,"anio": number,"categoria_tarifa"?: Database["public"]['Enums']["categoria_tarifa_vehiculo"] | null,"color"?: string | null,"condicion"?: Database["public"]['Enums']["condicion_vehiculo"] | null,"creado_en"?: string,"empresa_id"?: string | null,"estado_general_declarado"?: string | null,"fotos_urls"?: (string)[],"gama"?: Database["public"]['Enums']["gama_vehiculo"] | null,"id"?: string,"marca": string,"modelo": string,"permiso_especial_vigente"?: string | null,"placas"?: string | null,"puede_circular_rodando"?: boolean,"tiene_placas"?: boolean,"tiene_tarjeta_circulacion"?: boolean,"tiene_verificacion"?: boolean,"tipo": Database["public"]['Enums']["tipo_vehiculo"],"transmision"?: string | null,"usuario_id": string,"version"?: number,"vin"?: string | null
                   }
@@ -3150,6 +3295,7 @@ isOneToOne: false
                   Row: {
                     "actualizado_en": string,"creado_en": string,"decision": Json | null,"estado": string,"id": string,"procesado_en": string | null,"session_id": string,"solicitud_id": string | null,"usuario_id": string | null,"workflow_id": string | null
                   }
+                  ComputedFields: never
                   Insert: {
                     "actualizado_en"?: string,"creado_en"?: string,"decision"?: Json | null,"estado"?: string,"id"?: string,"procesado_en"?: string | null,"session_id": string,"solicitud_id"?: string | null,"usuario_id"?: string | null,"workflow_id"?: string | null
                   }
@@ -3175,6 +3321,7 @@ isOneToOne: false
                   Row: {
                     "hash_documento": string,"referencia": string,"tipo_documento": Database["public"]['Enums']["tipo_documento_consentimiento"],"version": number,"vigente_desde": string,"vigente_hasta": string | null
                   }
+                  ComputedFields: never
                   Insert: {
                     "hash_documento": string,"referencia": string,"tipo_documento": Database["public"]['Enums']["tipo_documento_consentimiento"],"version": number,"vigente_desde": string,"vigente_hasta"?: string | null
                   }
@@ -3189,8 +3336,9 @@ isOneToOne: false
           Views: {
             "conductores_publicos": {
                   Row: {
-                    "calificacion_promedio": number | null,"estado": Database["public"]['Enums']["estado_conductor"] | null,"id": string | null,"nivel_operativo_vigente": Database["public"]['Enums']["nivel_concer"] | null
+                    "calificacion_promedio": number,"estado": Database["public"]['Enums']["estado_conductor"],"id": string,"nivel_operativo_vigente": Database["public"]['Enums']["nivel_concer"] | null
                   }
+                  ComputedFields: never
                   Insert: {
                            "calificacion_promedio"?: number | null,"estado"?: Database["public"]['Enums']["estado_conductor"] | null,"id"?: string | null,"nivel_operativo_vigente"?: Database["public"]['Enums']["nivel_concer"] | null
                          }
@@ -3204,20 +3352,23 @@ isOneToOne: false
                   Row: {
                     "dia": string | null,"edge_errores": number | null,"eventos_app": number | null,"latencias": number | null,"logs_error": number | null,"logs_info": number | null,"logs_warn": number | null
                   }
+                  ComputedFields: never
                   Relationships: [
                     
                   ]
                 },"obs_rpc_latencia_resumen": {
                   Row: {
-                    "errores_24h": number | null,"funcion": string | null,"llamadas_24h": number | null,"max_ms": number | null,"p95_ms": number | null,"promedio_ms": number | null
+                    "errores_24h": number | null,"funcion": string,"llamadas_24h": number | null,"max_ms": number | null,"p95_ms": number | null,"promedio_ms": number | null
                   }
+                  ComputedFields: never
                   Relationships: [
                     
                   ]
                 },"obs_tracking_fallos": {
                   Row: {
-                    "conductor_id": string | null,"desviacion_sospechosa": boolean | null,"empresa_id": string | null,"estado_operativo": Database["public"]['Enums']["estado_operativo_traslado"] | null,"estado_traslado": Database["public"]['Enums']["estado_traslado"] | null,"minutos_sin_senal": number | null,"operacion_id": string | null,"salud": string | null,"sin_sesion_activa": boolean | null,"traslado_id": string | null,"ultimo_envio_en": string | null
+                    "conductor_id": string | null,"desviacion_sospechosa": boolean | null,"empresa_id": string | null,"estado_operativo": Database["public"]['Enums']["estado_operativo_traslado"],"estado_traslado": Database["public"]['Enums']["estado_traslado"],"minutos_sin_senal": number | null,"operacion_id": string | null,"salud": string | null,"sin_sesion_activa": boolean | null,"traslado_id": string,"ultimo_envio_en": string | null
                   }
+                  ComputedFields: never
                   Relationships: [
                     {
       foreignKeyName: "traslados_conductor_id_fkey"
@@ -3247,8 +3398,9 @@ isOneToOne: false
                   ]
                 },"pasaporte_digital": {
                   Row: {
-                    "actualizado_en": string | null,"causa_fallido": Database["public"]['Enums']["causa_fallido"] | null,"cerrado_en": string | null,"conductor_calificacion": number | null,"conductor_estado": Database["public"]['Enums']["estado_conductor"] | null,"conductor_id": string | null,"conductor_nivel": Database["public"]['Enums']["nivel_concer"] | null,"conductor_nombre": string | null,"contacto_entrega_nombre": string | null,"contacto_entrega_telefono": string | null,"contacto_recepcion_nombre": string | null,"contacto_recepcion_telefono": string | null,"creado_en": string | null,"destino_ciudad": string | null,"destino_direccion": string | null,"destino_lat": number | null,"destino_lng": number | null,"destino_referencias": string | null,"distancia_km": number | null,"estado": Database["public"]['Enums']["estado_traslado"] | null,"estado_operativo": Database["public"]['Enums']["estado_operativo_traslado"] | null,"evidencia_final_fotos_sincronizadas": number | null,"evidencia_inicial_fotos_sincronizadas": number | null,"ganancia_conductor": number | null,"incidencias_abiertas": number | null,"monto_pagado": number | null,"origen_ciudad": string | null,"origen_direccion": string | null,"origen_lat": number | null,"origen_lng": number | null,"origen_referencias": string | null,"precio_cotizado": number | null,"precio_final": number | null,"tiempo_estimado_horas": number | null,"tiene_incidencia_abierta": boolean | null,"tipo_pago": Database["public"]['Enums']["tipo_pago"] | null,"traslado_id": string | null,"usuario_id": string | null,"vehiculo_anio": number | null,"vehiculo_categoria_tarifa": Database["public"]['Enums']["categoria_tarifa_vehiculo"] | null,"vehiculo_color": string | null,"vehiculo_condicion": Database["public"]['Enums']["condicion_vehiculo"] | null,"vehiculo_gama": Database["public"]['Enums']["gama_vehiculo"] | null,"vehiculo_id": string | null,"vehiculo_marca": string | null,"vehiculo_modelo": string | null,"vehiculo_placas": string | null,"vehiculo_tipo": Database["public"]['Enums']["tipo_vehiculo"] | null,"vehiculo_vin": string | null
+                    "actualizado_en": string,"causa_fallido": Database["public"]['Enums']["causa_fallido"] | null,"cerrado_en": string | null,"conductor_calificacion": number | null,"conductor_estado": Database["public"]['Enums']["estado_conductor"] | null,"conductor_id": string | null,"conductor_nivel": Database["public"]['Enums']["nivel_concer"] | null,"conductor_nombre": string | null,"contacto_entrega_nombre": string,"contacto_entrega_telefono": string,"contacto_recepcion_nombre": string,"contacto_recepcion_telefono": string,"creado_en": string,"destino_ciudad": string,"destino_direccion": string,"destino_lat": number | null,"destino_lng": number | null,"destino_referencias": string | null,"distancia_km": number | null,"estado": Database["public"]['Enums']["estado_traslado"],"estado_operativo": Database["public"]['Enums']["estado_operativo_traslado"],"evidencia_final_fotos_sincronizadas": number | null,"evidencia_inicial_fotos_sincronizadas": number | null,"ganancia_conductor": number | null,"incidencias_abiertas": number | null,"monto_pagado": number | null,"origen_ciudad": string,"origen_direccion": string,"origen_lat": number | null,"origen_lng": number | null,"origen_referencias": string | null,"precio_cotizado": number | null,"precio_final": number | null,"tiempo_estimado_horas": number | null,"tiene_incidencia_abierta": boolean,"tipo_pago": Database["public"]['Enums']["tipo_pago"],"traslado_id": string,"usuario_id": string,"vehiculo_anio": number | null,"vehiculo_categoria_tarifa": Database["public"]['Enums']["categoria_tarifa_vehiculo"] | null,"vehiculo_color": string | null,"vehiculo_condicion": Database["public"]['Enums']["condicion_vehiculo"] | null,"vehiculo_gama": Database["public"]['Enums']["gama_vehiculo"] | null,"vehiculo_id": string,"vehiculo_marca": string | null,"vehiculo_modelo": string | null,"vehiculo_placas": string | null,"vehiculo_tipo": Database["public"]['Enums']["tipo_vehiculo"] | null,"vehiculo_vin": string | null
                   }
+                  ComputedFields: never
                   Relationships: [
                     {
       foreignKeyName: "traslados_conductor_id_fkey"
@@ -3278,8 +3430,9 @@ isOneToOne: false
                   ]
                 },"sla_eventos_diario": {
                   Row: {
-                    "dia": string | null,"empresa_id": string | null,"operacion_id": string | null,"policy_codigo": string | null,"tipo_evento": string | null,"total": number | null
+                    "dia": string | null,"empresa_id": string | null,"operacion_id": string | null,"policy_codigo": string,"tipo_evento": string,"total": number | null
                   }
+                  ComputedFields: never
                   Relationships: [
                     {
       foreignKeyName: "sla_events_empresa_id_fkey"
@@ -3303,8 +3456,9 @@ isOneToOne: false
                   ]
                 },"sla_torre_cola": {
                   Row: {
-                    "deadline": string | null,"empresa_id": string | null,"estado": string | null,"estado_operativo": Database["public"]['Enums']["estado_operativo_traslado"] | null,"estado_traslado": Database["public"]['Enums']["estado_traslado"] | null,"horas_limite": number | null,"horas_transcurridas": number | null,"incidencia_id": string | null,"operacion_id": string | null,"policy_codigo": string | null,"porcentaje": number | null,"prioridad_torre": number | null,"severidad": string | null,"traslado_id": string | null,"ultima_evaluacion_en": string | null
+                    "deadline": string,"empresa_id": string | null,"estado": string,"estado_operativo": Database["public"]['Enums']["estado_operativo_traslado"],"estado_traslado": Database["public"]['Enums']["estado_traslado"],"horas_limite": number,"horas_transcurridas": number,"incidencia_id": string | null,"operacion_id": string | null,"policy_codigo": string,"porcentaje": number,"prioridad_torre": number | null,"severidad": string | null,"traslado_id": string,"ultima_evaluacion_en": string
                   }
+                  ComputedFields: never
                   Relationships: [
                     {
       foreignKeyName: "sla_evaluaciones_incidencia_id_fkey"
@@ -3546,13 +3700,13 @@ isOneToOne: false
               "conductor_id": string | null,
 "desviacion_sospechosa": boolean | null,
 "empresa_id": string | null,
-"estado_operativo": Database["public"]['Enums']["estado_operativo_traslado"] | null,
-"estado_traslado": Database["public"]['Enums']["estado_traslado"] | null,
+"estado_operativo": Database["public"]['Enums']["estado_operativo_traslado"],
+"estado_traslado": Database["public"]['Enums']["estado_traslado"],
 "minutos_sin_senal": number | null,
 "operacion_id": string | null,
 "salud": string | null,
 "sin_sesion_activa": boolean | null,
-"traslado_id": string | null,
+"traslado_id": string,
 "ultimo_envio_en": string | null
             }[]
                           SetofOptions: {
@@ -3635,21 +3789,21 @@ isOneToOne: false
       } },
 "admin_sla_cola_torre":
 { Args: { "p_empresa_id"?: string,"p_limite"?: number,"p_operacion_id"?: string }; Returns: {
-              "deadline": string | null,
+              "deadline": string,
 "empresa_id": string | null,
-"estado": string | null,
-"estado_operativo": Database["public"]['Enums']["estado_operativo_traslado"] | null,
-"estado_traslado": Database["public"]['Enums']["estado_traslado"] | null,
-"horas_limite": number | null,
-"horas_transcurridas": number | null,
+"estado": string,
+"estado_operativo": Database["public"]['Enums']["estado_operativo_traslado"],
+"estado_traslado": Database["public"]['Enums']["estado_traslado"],
+"horas_limite": number,
+"horas_transcurridas": number,
 "incidencia_id": string | null,
 "operacion_id": string | null,
-"policy_codigo": string | null,
-"porcentaje": number | null,
+"policy_codigo": string,
+"porcentaje": number,
 "prioridad_torre": number | null,
 "severidad": string | null,
-"traslado_id": string | null,
-"ultima_evaluacion_en": string | null
+"traslado_id": string,
+"ultima_evaluacion_en": string
             }[]
                           SetofOptions: {
         from: "*"
@@ -3753,7 +3907,7 @@ isOneToOne: false
 { Args: { "p_evento": string,"p_traslado_id": string }; Returns: Database["public"]['Enums']["estado_traslado"]
                            },
 "conductor_confirmar_llegada_destino":
-{ Args: { "p_distancia_m"?: number,"p_fuera_geocerca"?: boolean,"p_traslado_id": string }; Returns: Database["public"]['Enums']["estado_traslado"]
+{ Args: { "p_antiguedad_s"?: number,"p_distancia_m"?: number,"p_fuera_geocerca"?: boolean,"p_motivo_sin_medicion"?: string,"p_precision_m"?: number,"p_traslado_id": string }; Returns: Database["public"]['Enums']["estado_traslado"]
                            },
 "conductor_guarda_datos_bancarios":
 { Args: { "p_banco": string,"p_clabe": string,"p_numero_tarjeta"?: string,"p_titular_cuenta": string }; Returns: {
@@ -3779,6 +3933,9 @@ isOneToOne: false
                            },
 "conductor_operativamente_aprobado":
 { Args: { "p_auth_user_id"?: string }; Returns: boolean
+                           },
+"conductor_reportar_incidencia_transaccional":
+{ Args: { "p_descripcion": string,"p_escalar_urgente"?: boolean,"p_incidencia_id"?: string,"p_momento": Database["public"]['Enums']["momento_incidencia"],"p_tipo": Database["public"]['Enums']["tipo_incidencia"],"p_traslado_id": string }; Returns: Json
                            },
 "conductor_solicita_asignacion":
 { Args: { "p_lat"?: number,"p_lng"?: number,"p_traslado_id": string }; Returns: Json

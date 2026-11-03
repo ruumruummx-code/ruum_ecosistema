@@ -41,6 +41,24 @@ begin
   )
   returning id into v_traslado_id;
 
+  insert into storage.objects (bucket_id, name)
+  select 'evidencia', 'rt30://' || v_traslado_id || '/' || t || '/' || a
+  from unnest(array['inicial', 'final']) as t
+  cross join unnest(array['frente', 'lado_piloto', 'lado_copiloto', 'trasera', 'tablero']) as a;
+
+  insert into public.evidencia_fotos (traslado_id, tipo, angulo, url, sincronizada)
+  select v_traslado_id, t::public.tipo_evidencia, a::public.angulo_evidencia, 'rt30://' || v_traslado_id || '/' || t || '/' || a, true
+  from unnest(array['inicial', 'final']) as t
+  cross join unnest(array['frente', 'lado_piloto', 'lado_copiloto', 'trasera', 'tablero']) as a;
+
+  insert into public.evidencia_inspecciones (traslado_id, tipo, llaves_recibidas)
+  values
+    (v_traslado_id, 'inicial', '2'),
+    (v_traslado_id, 'final', '2');
+
+  insert into public.confirmaciones_recepcion (traslado_id, receptor_nombre, mecanismo, confirmante_auth_id, verificada, referencia)
+  values (v_traslado_id, 'Recepcion RT30', 'firma', '93000000-0000-4000-8000-0000000000cd', true, 'firma://rt30/' || v_traslado_id);
+
   return v_traslado_id;
 end;
 $$;

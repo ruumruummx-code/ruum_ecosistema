@@ -33,27 +33,57 @@ const puntoB: PuntoTelemetriaLocal = {
   attempts: 0
 };
 
+type GlobalConIDB = typeof globalThis & { indexedDB?: unknown };
+
+interface MockGetAllRequest {
+  onsuccess: (() => void) | null;
+  onerror: (() => void) | null;
+  result: PuntoTelemetriaLocal[];
+}
+
+interface MockTransaction {
+  objectStore: () => {
+    clear: () => void;
+    put: (item: PuntoTelemetriaLocal) => void;
+    delete: (id: string) => void;
+    getAll: () => MockGetAllRequest;
+  };
+  oncomplete: (() => void) | null;
+  onerror: (() => void) | null;
+  onabort: (() => void) | null;
+}
+
+interface MockOpenRequest {
+  onsuccess: ((ev: { target: MockOpenRequest }) => void) | null;
+  onerror: (() => void) | null;
+  onupgradeneeded: (() => void) | null;
+  result?: {
+    objectStoreNames: { contains: () => boolean };
+    transaction: (...args: unknown[]) => MockTransaction;
+  };
+}
+
 describe("H03 — Semántica de reemplazo en IndexedDB y no-resurrección tras ACK", () => {
   let storeMap: Map<string, PuntoTelemetriaLocal>;
   let originalIndexedDB: unknown;
 
   beforeEach(() => {
     storeMap = new Map();
-    originalIndexedDB = (globalThis as any).indexedDB;
+    originalIndexedDB = (globalThis as GlobalConIDB).indexedDB;
 
     const mockIDB = {
       open: vi.fn(() => {
-        const req: any = { onsuccess: null, onerror: null, onupgradeneeded: null };
+        const req: MockOpenRequest = { onsuccess: null, onerror: null, onupgradeneeded: null };
         queueMicrotask(() => {
-          req.result = {
+          const dbResult = {
             objectStoreNames: { contains: () => true },
-            transaction: () => ({
+            transaction: (): MockTransaction => ({
               objectStore: () => ({
                 clear: () => storeMap.clear(),
                 put: (item: PuntoTelemetriaLocal) => storeMap.set(item.localId, { ...item }),
                 delete: (id: string) => storeMap.delete(id),
                 getAll: () => {
-                  const getReq: any = { onsuccess: null, onerror: null, result: [] };
+                  const getReq: MockGetAllRequest = { onsuccess: null, onerror: null, result: [] };
                   queueMicrotask(() => {
                     getReq.result = Array.from(storeMap.values());
                     getReq.onsuccess?.();
@@ -61,30 +91,31 @@ describe("H03 — Semántica de reemplazo en IndexedDB y no-resurrección tras A
                   return getReq;
                 }
               }),
-              oncomplete: null as any,
-              onerror: null as any,
-              onabort: null as any
+              oncomplete: null,
+              onerror: null,
+              onabort: null
             })
           };
           // Disparar oncomplete en microtask tras operaciones de transaccion
-          const origTx = req.result.transaction;
-          req.result.transaction = (...args: any[]) => {
-            const tx = origTx.apply(req.result, args);
+          const origTx = dbResult.transaction;
+          dbResult.transaction = () => {
+            const tx = origTx();
             queueMicrotask(() => tx.oncomplete?.());
             return tx;
           };
+          req.result = dbResult;
           req.onsuccess?.({ target: req });
         });
         return req;
       })
     };
 
-    (globalThis as any).indexedDB = mockIDB;
+    (globalThis as GlobalConIDB).indexedDB = mockIDB;
     reiniciarBaseDeDatosParaTesting();
   });
 
   afterEach(() => {
-    (globalThis as any).indexedDB = originalIndexedDB;
+    (globalThis as GlobalConIDB).indexedDB = originalIndexedDB;
     reiniciarBaseDeDatosParaTesting();
   });
 

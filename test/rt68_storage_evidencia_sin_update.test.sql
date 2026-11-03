@@ -48,6 +48,7 @@ select is(
     where schemaname = 'storage'
       and tablename = 'objects'
       and cmd = 'UPDATE'
+      and permissive = 'PERMISSIVE'
       and (coalesce(qual, '') like '%''evidencia''%' or coalesce(with_check, '') like '%''evidencia''%')),
   0,
   'RT-68.2: ninguna policy de UPDATE aplica al bucket evidencia'

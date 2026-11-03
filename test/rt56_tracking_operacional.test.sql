@@ -26,10 +26,12 @@ alter table public.conductores enable trigger inicializar_estado_expediente_cond
 insert into public.vehiculos (id, usuario_id, tipo, marca, modelo, anio, placas, tiene_tarjeta_circulacion, tiene_verificacion, tiene_placas, puede_circular_rodando)
 values ('95600000-0000-4000-8000-000000000301', '95600000-0000-4000-8000-000000000101', 'sedan', 'RT56', 'Modelo', 2026, 'RT56ABC', true, true, true, true);
 
+alter table public.traslados disable trigger validar_ocupacion_conductor;
 insert into public.traslados (id, estado, usuario_id, vehiculo_id, conductor_id, contacto_entrega_nombre, contacto_entrega_telefono, contacto_recepcion_nombre, contacto_recepcion_telefono, origen_lat, origen_lng, origen_direccion, origen_ciudad, destino_lat, destino_lng, destino_direccion, destino_ciudad, tipo_pago, clave_idempotencia)
 values
   ('95600000-0000-4000-8000-000000000401', 'conductor_asignado', '95600000-0000-4000-8000-000000000101', '95600000-0000-4000-8000-000000000301', '95600000-0000-4000-8000-000000000201', 'E', '+525500000001', 'R', '+525500000002', 19.4000, -99.1000, 'O', 'CDMX', 19.5000, -99.2000, 'D', 'CDMX', 'al_cierre', gen_random_uuid()),
   ('95600000-0000-4000-8000-000000000402', 'conductor_asignado', '95600000-0000-4000-8000-000000000101', '95600000-0000-4000-8000-000000000301', '95600000-0000-4000-8000-000000000201', 'E', '+525500000001', 'R', '+525500000002', 19.4000, -99.1000, 'O', 'CDMX', 19.5000, -99.2000, 'D', 'CDMX', 'al_cierre', gen_random_uuid());
+alter table public.traslados enable trigger validar_ocupacion_conductor;
 
 -- 10.2: inicio explícito e idempotente (como conductor asignado)
 set local role authenticated;
@@ -68,6 +70,7 @@ select throws_ok(
 reset role;
 
 -- 10.8: STALE y OFFLINE por antigüedad
+select set_config('request.jwt.claim.sub', '95600000-0000-4000-8000-0000000000b2', true);
 update public.tracking_salud_traslado set ultimo_envio_en = now() - interval '10 minutes' where traslado_id = '95600000-0000-4000-8000-000000000401';
 select is((public.evaluar_salud_tracking('95600000-0000-4000-8000-000000000401')->>'estado'), 'STALE', 'RT-56.10: 10 min es STALE');
 update public.tracking_salud_traslado set ultimo_envio_en = now() - interval '20 minutes' where traslado_id = '95600000-0000-4000-8000-000000000401';

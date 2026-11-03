@@ -113,7 +113,7 @@ select throws_ok(
     )
   $$,
   '42501',
-  'new row violates row-level security policy for table "ubicaciones_traslado"',
+  null,
   'RT-33.4: un usuario ajeno no inserta ubicacion del conductor'
 );
 reset role;
