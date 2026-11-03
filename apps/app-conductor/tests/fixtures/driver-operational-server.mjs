@@ -49,10 +49,66 @@ createServer(async (request, response) => {
     };
     response.end(JSON.stringify(request.headers.accept?.includes("vnd.pgrst.object+json") ? trip : trip ? [trip] : [])); return;
   }
+  if (url.pathname === "/rest/v1/evidencia_inspecciones") {
+    const id = url.searchParams.get("traslado_id")?.replace(/^eq\./, "");
+    const rows = id?.endsWith("005")
+      ? [
+          { traslado_id: id, tipo: "inicial", llaves_recibidas: "2", kilometraje: 12000, combustible: "1/2", notas: null },
+          { traslado_id: id, tipo: "final", llaves_recibidas: "2", kilometraje: 12062, combustible: "1/2", notas: null },
+        ]
+      : [];
+    response.end(JSON.stringify(request.headers.accept?.includes("vnd.pgrst.object+json") ? (rows[0] ?? null) : rows)); return;
+  }
+  if (url.pathname === "/rest/v1/evidencia_fotos") {
+    const id = url.searchParams.get("traslado_id")?.replace(/^eq\./, "");
+    const rows = id?.endsWith("005")
+      ? ["inicial", "final"].flatMap(tipo =>
+          ["frente", "lado_piloto", "lado_copiloto", "trasera", "tablero"].map(angulo => ({
+            traslado_id: id,
+            tipo,
+            angulo,
+            sincronizada: true,
+            conflicto: false,
+            url: `evidencia/${id}/${tipo}/${angulo}.jpg`,
+          }))
+        )
+      : [];
+    response.end(JSON.stringify(rows)); return;
+  }
+  if (url.pathname === "/rest/v1/custodia_eventos") {
+    const id = url.searchParams.get("traslado_id")?.replace(/^eq\./, "");
+    const rows = id?.endsWith("005")
+      ? [
+          {
+            id: "00000000-0000-4000-8000-000000000095",
+            traslado_id: id,
+            tipo: "vehicle_delivered",
+            firma_metodo: "digital_canvas",
+            firma_referencia: "evidencia/firma.png",
+            metadata: { mecanismo: "firma", receptor_nombre: "Contacto de destino", firma_guardada: true },
+            ocurrido_en: "2026-10-23T14:00:00Z",
+          },
+        ]
+      : [];
+    response.end(JSON.stringify(rows)); return;
+  }
   if (url.pathname.includes("/rpc/")) {
     if (url.pathname.includes("avanzar_estado")) { response.writeHead(500).end('{"message":"No pudimos actualizar el traslado"}'); return; }
+    if (url.pathname.endsWith("/rpc/consultar_oportunidad_asignacion")) {
+      response.end(JSON.stringify({
+        modo: "competencia",
+        asignacion_id: null,
+        elegible: true,
+        motivos: [],
+        expira_en: null,
+        solicitud_estado: null,
+        cierra_en: null,
+        asignada_a_mi: false,
+        tomada: false,
+      })); return;
+    }
     response.end("null"); return;
   }
   response.setHeader("Content-Range", "*/0");
-  response.end("[]");
+  response.end(request.headers.accept?.includes("vnd.pgrst.object+json") ? "null" : "[]");
 }).listen(54329, "127.0.0.1");

@@ -131,7 +131,7 @@ export function TripOpportunityDetails({
   }, []);
 
   async function handleAceptar() {
-    if (procesando || !oportunidad?.elegible) return;
+    if (procesando || (oportunidad != null && !oportunidad.elegible)) return;
     setProcesando(true);
     setError(null);
 
@@ -149,7 +149,7 @@ export function TripOpportunityDetails({
       }
 
       setConductorId(conductorData.id);
-      if (oportunidad.modo === "dirigida") {
+      if (oportunidad?.modo === "dirigida") {
         if (!oportunidad.asignacion_id) throw new Error("Falta el identificador de la oferta dirigida.");
         await aceptarAsignacion(cliente, oportunidad.asignacion_id);
         router.replace(`/viajes/${trasladoId}`);

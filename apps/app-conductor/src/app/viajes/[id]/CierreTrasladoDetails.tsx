@@ -616,6 +616,9 @@ export function CierreTrasladoDetails({
           </div>
         </section>
 
+        {bloqueoEvidencia && <p role="alert" className="text-xs text-danger">Fotografías sincronizadas: origen {evidenciaCierre?.inicial ?? 0}/5, destino {evidenciaCierre?.final ?? 0}/5. {evidenciaCierre?.conflicto ? "Hay un conflicto real: conserva la captura y solicita revisión." : "Completa y sincroniza todas las vistas obligatorias antes de cerrar."}</p>}
+        {bloqueoLlaves && <p role="alert" className="text-xs text-danger">Llaves: origen {inspeccionInicial?.llaves_recibidas ?? "sin captura"}, destino {inspeccionFinal?.llaves_recibidas ?? "sin captura"}. Documenta con operación si la diferencia es física o de captura y solicita resolución administrativa. Conserva el registro original y recarga después de la resolución.</p>}
+        {bloqueoFirma && <p role="alert" className="text-xs text-danger">Firma pendiente: solicita la firma del receptor en el recuadro digital antes de finalizar el traslado.</p>}
         </div>
 
         {/* 6. FILA DE ACCIONES BASE (FIJOS EN BASE SIN NAVEGACIÓN INFERIOR) */}
@@ -677,9 +680,6 @@ export function CierreTrasladoDetails({
       </div>
 
       {/* Modal de Confirmación de Entrega */}
-      {bloqueoEvidencia && <p role="alert" className="p-4 text-sm text-danger">Fotografías sincronizadas: origen {evidenciaCierre?.inicial ?? 0}/5, destino {evidenciaCierre?.final ?? 0}/5. {evidenciaCierre?.conflicto ? "Hay un conflicto real: conserva la captura y solicita revisión." : "Completa y sincroniza todas las vistas obligatorias antes de cerrar."}</p>}
-      {bloqueoLlaves && <p role="alert" className="p-4 text-sm text-danger">Llaves: origen {inspeccionInicial?.llaves_recibidas ?? "sin captura"}, destino {inspeccionFinal?.llaves_recibidas ?? "sin captura"}. Documenta con operación si la diferencia es física o de captura y solicita resolución administrativa. Conserva el registro original y recarga después de la resolución.</p>}
-      {bloqueoFirma && <p role="alert" className="p-4 text-sm text-danger">Firma pendiente: solicita la firma del receptor en el recuadro digital antes de finalizar el traslado.</p>}
       {modalConfirmacionAbierto && (
         <CierreConfirmacionModal
           abierto={modalConfirmacionAbierto}

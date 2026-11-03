@@ -58,7 +58,7 @@ export function OpportunityDetailsView({ oportunidad, pasaporte, volver, procesa
       </div>
       {oportunidad && !oportunidad.elegible && <p role="alert">No puedes solicitar este traslado: {(oportunidad.motivos ?? []).map(m => m.replaceAll("_", " ")).join(", ")}. La disponibilidad se valida en el servidor.</p>}
       {oportunidad?.expira_en && <p>Oferta vigente hasta {new Date(oportunidad.expira_en).toLocaleString("es-MX")}</p>}
-      <button type="button" className={styles.accept} onClick={onAccept} disabled={disabled || !oportunidad?.elegible}>{procesando ? TEXTOS_CARGANDO.actualizando : solicitudEnviada ? "SOLICITUD REGISTRADA · ESPERANDO RESOLUCIÓN" : oportunidad?.modo === "dirigida" ? "ACEPTAR OFERTA DIRIGIDA" : "SOLICITAR ASIGNACIÓN"}</button>
+      <button type="button" className={styles.accept} onClick={onAccept} disabled={disabled || (oportunidad != null && !oportunidad.elegible)}>{procesando ? TEXTOS_CARGANDO.actualizando : solicitudEnviada ? "SOLICITUD REGISTRADA" : oportunidad?.modo === "dirigida" ? "ACEPTAR OFERTA DIRIGIDA" : "ACEPTAR TRASLADO"}</button>
       </div>
     </TripActionDock>
     {dialog === "messages" && <TripDialog title="Mensajes del traslado" onClose={() => setDialog(null)}>
