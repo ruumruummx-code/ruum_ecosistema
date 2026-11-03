@@ -79,6 +79,7 @@ export function MisViajesDesktop({
       idContenido="desktopMainContentTraslados"
       nombre={nombreUsuario}
       notificaciones={notificaciones}
+      fixedContent
       dashboardHeader
       padding="ninguno"
       classNameContenido={s.main}

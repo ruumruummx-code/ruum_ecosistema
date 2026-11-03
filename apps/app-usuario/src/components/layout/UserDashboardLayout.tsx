@@ -146,7 +146,7 @@ export function UserDashboardLayout({
         <main
           id={idContenido}
           aria-label="Contenido principal"
-          className={`min-h-0 flex-1 ${fixedContent ? "overflow-hidden lg:overflow-y-auto" : "overflow-y-auto"} overflow-x-hidden bg-[var(--rr-page-bg,#f5f8fc)] text-[var(--ruum-text)] ${PADDING[padding]} ${classNameContenido}`}
+          className={`min-h-0 flex-1 ${fixedContent ? "overflow-hidden" : "overflow-y-auto"} overflow-x-hidden bg-[var(--rr-page-bg,#f5f8fc)] text-[var(--ruum-text)] ${PADDING[padding]} ${classNameContenido}`}
         >
           {children}
         </main>
