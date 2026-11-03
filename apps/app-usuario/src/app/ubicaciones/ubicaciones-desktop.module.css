@@ -870,7 +870,7 @@
 }
 @media (min-width: 1024px) {
   .shellContent {
-    overflow-y: auto !important;
+    overflow: hidden !important;
   }
   .mobile {
     display: none;
