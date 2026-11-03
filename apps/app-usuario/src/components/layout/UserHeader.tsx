@@ -517,7 +517,7 @@ export function UserHeader({
 
               <span className="hidden text-left xl:block">
                 <span className="block text-xs font-bold leading-none text-[var(--ruum-text)]">
-                  {varianteDashboard ? nombreCompleto : `Hola, ${primerNombre}`}
+                  Hola, {primerNombre}
                 </span>
                 <span className="mt-1 block text-[11px] font-medium leading-none text-[var(--ruum-text-tertiary)]">
                   {rolUsuario}

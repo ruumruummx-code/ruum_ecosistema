@@ -103,7 +103,6 @@ export function CuentaDesktop({ cuenta, seccionInicial }: CuentaDesktopProps) {
       totalVehiculos={totalVehiculos}
       notificaciones={construirNotificaciones(usuario, cuenta.traslados ?? [])}
       onCerrarSesion={cerrarSesion}
-      fixedContent
       padding="ninguno"
       idContenido="contenido-cuenta"
     >

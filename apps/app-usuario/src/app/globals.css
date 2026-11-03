@@ -397,6 +397,37 @@ summary:focus-visible {
   }
 }
 
+/* =========================================================================
+   Escritorio (>= 1024px): scroll permitido en pantallas de usuario desktop.
+   La regla de no-scroll mobile first es exclusivamente para pantallas móviles.
+   ========================================================================= */
+@media (min-width: 1024px) {
+  html,
+  body {
+    height: auto;
+    min-height: 100dvh;
+    max-height: none;
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
+
+  #contenido-principal {
+    height: auto;
+    min-height: 100dvh;
+    max-height: none;
+    overflow: visible;
+  }
+
+  .ruum-screen,
+  .app-page,
+  .user-v2-page {
+    height: auto;
+    min-height: 100dvh;
+    max-height: none;
+    overflow: visible;
+  }
+}
+
 /* Scrollbar invisible pero accesible */
 .no-scrollbar {
   -ms-overflow-style: none;

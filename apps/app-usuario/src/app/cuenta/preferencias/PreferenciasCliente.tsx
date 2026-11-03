@@ -10,6 +10,8 @@ import { Preferencias as SeccionPreferencias } from "../Preferencias";
 import type { CuentaReal, Usuario } from "../cuenta-ui";
 import { crearClienteNavegador } from "../../../lib/supabase-browser";
 import { actualizarPreferenciasNotificaciones } from "@ruum/api/services";
+import { UserDashboardLayout } from "../../../components/layout/UserDashboardLayout";
+import { construirNotificaciones } from "../../../lib/inicio";
 
 interface PreferenciasClienteProps {
   cuenta: CuentaReal;
@@ -176,260 +178,23 @@ export function PreferenciasCliente({ cuenta }: PreferenciasClienteProps) {
       </div>
 
       {/* ─────────────────────────────────────────────────────────────
-          2. VISTA ESCRITORIO (>= 1024px): DASHBOARD REDISEÑADO
+          2. VISTA ESCRITORIO (>= 1024px): Shell unificado con UserSidebar y UserHeader
          ───────────────────────────────────────────────────────────── */}
-      <div className="hidden lg:flex min-h-screen bg-[#F4F8FD] dark:bg-[#070D18] text-slate-800 dark:text-slate-100 font-sans">
-        {/* ── SIDEBAR IZQUIERDO FIJO ── */}
-        <aside id="userDashboardSidebar" className="w-64 bg-[#0A1325] text-white flex flex-col shrink-0 min-h-screen border-r border-[#16253B]">
-          {/* Logo Brand */}
-          <div className="p-6 pb-5">
-            <Link href="/" className="flex items-center gap-3 group">
-              <div className="size-9 rounded-xl bg-gradient-to-tr from-[#0066FF] to-[#00B2FF] flex items-center justify-center p-1.5 shadow-md shadow-blue-500/20 group-hover:scale-105 transition-transform">
-                <svg viewBox="0 0 40 40" fill="none" className="w-full h-full text-white">
-                  <path
-                    d="M10 28C10 22 13 18 19 18C25 18 28 21 28 26C28 31 24 34 18 34H10V28Z"
-                    stroke="currentColor"
-                    strokeWidth="3.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                  <path
-                    d="M22 18C22 12 25 8 31 8C37 8 40 11 40 16C40 21 36 24 30 24H22V18Z"
-                    stroke="currentColor"
-                    strokeWidth="3.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-              </div>
-              <div>
-                <span className="font-display font-bold text-lg tracking-tight text-white block leading-tight">
-                  Ruum Ruum
-                </span>
-                <span className="text-[11px] font-medium text-[#38BDF8] block leading-tight">
-                  Tu traslado, en orden
-                </span>
-              </div>
-            </Link>
-          </div>
-
-          {/* Menú de Navegación Lateral */}
-          <nav className="flex-1 px-4 space-y-1 mt-2" aria-label="Navegación principal de escritorio">
-            <Link
-              href="/"
-              className="flex items-center gap-3.5 px-3.5 py-2.5 rounded-xl text-slate-400 hover:text-white hover:bg-white/5 font-medium text-sm transition"
-            >
-              <svg className="size-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-              </svg>
-              <span>Inicio</span>
-            </Link>
-
-            <Link
-              href="/mis-viajes"
-              className="flex items-center gap-3.5 px-3.5 py-2.5 rounded-xl text-slate-400 hover:text-white hover:bg-white/5 font-medium text-sm transition"
-            >
-              <svg className="size-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9C2.1 11.2 2 11.6 2 12v4c0 .6.4 1 1 1h2m14 0v2a1 1 0 01-1 1h-2a1 1 0 01-1-1v-2m-8 0v2a1 1 0 01-1 1H5a1 1 0 01-1-1v-2m4 0h8" />
-              </svg>
-              <span>Mis traslados</span>
-            </Link>
-
-            <Link
-              href="/cuenta/vehiculos"
-              className="flex items-center gap-3.5 px-3.5 py-2.5 rounded-xl text-slate-400 hover:text-white hover:bg-white/5 font-medium text-sm transition"
-            >
-              <svg className="size-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                <circle cx="7" cy="17" r="2" />
-                <circle cx="17" cy="17" r="2" />
-                <path strokeLinecap="round" strokeLinejoin="round" d="M5 17H3v-4l2-5h10l2 5v4h-2m-8 0h4" />
-              </svg>
-              <span>Mis vehículos</span>
-            </Link>
-
-            <Link
-              href="/ubicaciones"
-              className="flex items-center gap-3.5 px-3.5 py-2.5 rounded-xl text-slate-400 hover:text-white hover:bg-white/5 font-medium text-sm transition"
-            >
-              <svg className="size-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                <path strokeLinecap="round" strokeLinejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-              </svg>
-              <span>Mis ubicaciones</span>
-            </Link>
-
-            <Link
-              href="/viajes/masivo"
-              className="flex items-center gap-3.5 px-3.5 py-2.5 rounded-xl text-slate-400 hover:text-white hover:bg-white/5 font-medium text-sm transition"
-            >
-              <svg className="size-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-              </svg>
-              <span>Carga Masiva</span>
-            </Link>
-
-            <div className="py-2.5">
-              <div className="h-px bg-white/10 mx-2" />
-            </div>
-
-            <Link
-              href="/cuenta"
-              className="flex items-center gap-3.5 px-3.5 py-2.5 rounded-xl text-slate-400 hover:text-white hover:bg-white/5 font-medium text-sm transition"
-            >
-              <svg className="size-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-              </svg>
-              <span>Mi cuenta</span>
-            </Link>
-
-            <Link
-              href="/cuenta?seccion=perfil"
-              className="flex items-center gap-3.5 px-3.5 py-2.5 rounded-xl text-slate-400 hover:text-white hover:bg-white/5 font-medium text-sm transition"
-            >
-              <svg className="size-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              <span>Mi perfil</span>
-            </Link>
-
-            {/* Activo: Mis preferencias */}
-            <Link
-              href="/cuenta/preferencias"
-              aria-current="page"
-              className="flex items-center gap-3.5 px-3.5 py-2.5 rounded-xl bg-[#0066FF] text-white font-semibold text-sm shadow-md shadow-blue-500/25 transition"
-            >
-              <svg className="size-5 shrink-0 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-              </svg>
-              <span>Mis preferencias</span>
-            </Link>
-
-            <Link
-              href="/soporte"
-              className="flex items-center gap-3.5 px-3.5 py-2.5 rounded-xl text-slate-400 hover:text-white hover:bg-white/5 font-medium text-sm transition"
-            >
-              <svg className="size-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              <span>Ayuda</span>
-            </Link>
-          </nav>
-
-          {/* Tarjeta Promocional Inferior en Sidebar */}
-          <div className="p-4 mt-auto">
-            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-b from-[#13223A] to-[#0D182A] border border-[#1E304C] p-4 shadow-lg">
-              {/* Ilustración de auto sobre fondo estilizado */}
-              <div className="mb-3 flex justify-center">
-                <div className="relative w-full h-16 flex items-center justify-center">
-                  <svg className="w-32 h-14 text-white drop-shadow-md" viewBox="0 0 160 70" fill="none">
-                    <path
-                      d="M20 45 C35 45 40 25 65 22 C95 20 120 22 135 34 C145 42 150 48 152 50 C145 52 140 52 130 52 C125 45 115 45 110 52 L50 52 C45 45 35 45 30 52 L15 52 Z"
-                      fill="#FFFFFF"
-                      fillOpacity="0.9"
-                    />
-                    <circle cx="38" cy="52" r="8" fill="#1E293B" stroke="#00B2FF" strokeWidth="2" />
-                    <circle cx="122" cy="52" r="8" fill="#1E293B" stroke="#00B2FF" strokeWidth="2" />
-                    <path d="M55 26 L80 26 L80 38 L50 38 Z" fill="#0066FF" fillOpacity="0.3" />
-                    <path d="M85 26 L115 28 L115 38 L85 38 Z" fill="#0066FF" fillOpacity="0.3" />
-                  </svg>
-                </div>
-              </div>
-              <h4 className="font-display font-bold text-sm text-white leading-tight">
-                Mueve tu auto sin salir de casa
-              </h4>
-              <p className="text-[11px] text-[#8E9CAE] mt-1 leading-snug">
-                Un servicio confiable, seguro y en todo México.
-              </p>
-              <Link
-                href="/viajes/nuevo"
-                className="mt-3.5 flex items-center justify-center gap-1.5 w-full bg-[#0066FF] hover:bg-blue-600 text-white font-semibold text-xs py-2 px-3 rounded-xl transition shadow-sm"
-              >
-                <span>Registrar traslado</span>
-                <span aria-hidden="true">&rarr;</span>
-              </Link>
-            </div>
-          </div>
-        </aside>
-
-        {/* ── CONTENIDO PRINCIPAL Y BARRA SUPERIOR ── */}
-        <div className="flex-1 flex flex-col min-w-0">
-          {/* Top Navbar */}
-          <header className="h-16 bg-white dark:bg-[#0A1325] border-b border-slate-200 dark:border-[#16253B] px-8 flex items-center justify-between sticky top-0 z-20">
-            {/* Buscador Global con Badge Ctrl K */}
-            <div className="relative w-96">
-              <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
-                <svg className="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                  <circle cx="11" cy="11" r="8" />
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35" />
-                </svg>
-              </span>
-              <input
-                type="text"
-                placeholder="Buscar traslados, vehículos o ubicaciones..."
-                className="w-full bg-[#F1F5F9] dark:bg-[#16253B] text-slate-800 dark:text-slate-100 placeholder-slate-400 text-xs rounded-full pl-9 pr-14 py-2 border-0 focus:ring-2 focus:ring-[#0066FF] outline-none transition"
-              />
-              <span className="absolute inset-y-0 right-0 pr-2.5 flex items-center pointer-events-none">
-                <kbd className="bg-white dark:bg-[#0A1325] text-slate-500 dark:text-slate-400 text-[10px] font-semibold px-1.5 py-0.5 rounded border border-slate-200 dark:border-slate-700 shadow-2xs">
-                  Ctrl K
-                </kbd>
-              </span>
-            </div>
-
-            {/* Acciones del Navbar: Notificaciones, Tema y Usuario */}
-            <div className="flex items-center gap-4">
-              {/* Notificaciones */}
-              <button
-                type="button"
-                className="relative p-2 rounded-full text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/5 transition"
-                aria-label="Ver notificaciones"
-              >
-                <svg className="size-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-                </svg>
-                <span className="absolute top-1.5 right-1.5 size-2 bg-rose-500 rounded-full ring-2 ring-white dark:ring-[#0A1325]" />
-              </button>
-
-              {/* Toggle Tema (Luna / Sol) */}
-              <button
-                type="button"
-                onClick={alternar}
-                className="p-2 rounded-full text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/5 transition"
-                aria-label="Alternar tema claro y oscuro"
-                title={`Tema actual: ${textoTemaResumen}`}
-              >
-                {modo === "dark" ? (
-                  <svg className="size-5 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                    <circle cx="12" cy="12" r="5" />
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 1v2m0 18v2M4.22 4.22l1.42 1.42m12.72 12.72l1.42 1.42M1 12h2m18 0h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" />
-                  </svg>
-                ) : (
-                  <svg className="size-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
-                  </svg>
-                )}
-              </button>
-
-              {/* Perfil del Usuario */}
-              <div className="flex items-center gap-3 pl-2 border-l border-slate-200 dark:border-slate-800">
-                <div className="size-8 rounded-full bg-[#16253B] text-white flex items-center justify-center font-bold text-xs ring-1 ring-slate-200 dark:ring-slate-700">
-                  {usuario?.nombre ? usuario.nombre.charAt(0).toUpperCase() : "H"}
-                </div>
-                <div className="text-left">
-                  <p className="text-xs font-bold text-slate-900 dark:text-white leading-tight">
-                    Hola, {nombreUsuario}
-                  </p>
-                  <p className="text-[11px] text-slate-400 leading-tight">Usuario</p>
-                </div>
-                <svg className="size-3.5 text-slate-400 ml-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-                </svg>
-              </div>
-            </div>
-          </header>
-
-          {/* Área de Contenido con Scroll */}
-          <main id="userDashboardMainContent" className="flex-1 px-8 py-6 max-w-7xl w-full mx-auto pb-28">
+      <div className="hidden lg:flex h-full w-full">
+        <UserDashboardLayout
+          usuario={cuenta.usuario}
+          nombre={cuenta.usuario?.nombre}
+          correo={cuenta.correoRegistro}
+          totalVehiculos={cuenta.vehiculos?.length}
+          notificaciones={construirNotificaciones(
+            cuenta.usuario,
+            cuenta.traslados ?? []
+          )}
+          dashboardHeader
+          padding="ninguno"
+          idContenido="userDashboardMainContent"
+        >
+          <div className="flex-1 px-8 py-6 max-w-7xl w-full mx-auto pb-28">
             {/* Breadcrumb Enlace */}
             <div className="mb-2">
               <Link
@@ -1083,67 +848,66 @@ export function PreferenciasCliente({ cuenta }: PreferenciasClienteProps) {
                 </div>
               </section>
             </div>
-          </main>
-
-          {/* ── BARRA INFERIOR FIJA / STICKY ── */}
-          <footer className="fixed bottom-0 left-64 right-0 bg-white/95 dark:bg-[#0A1325]/95 backdrop-blur-md border-t border-slate-200 dark:border-[#16253B] px-8 py-3.5 flex items-center justify-between z-20 shadow-lg">
-            {/* Mensaje Informativo Izquierdo */}
-            <div className="flex items-center gap-3">
-              <div className="size-6 rounded-full bg-blue-50 dark:bg-blue-950/50 text-[#0066FF] flex items-center justify-center shrink-0">
-                <svg className="size-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
-                  <circle cx="12" cy="12" r="10" />
-                  <line x1="12" y1="16" x2="12" y2="12" />
-                  <line x1="12" y1="8" x2="12.01" y2="8" />
-                </svg>
-              </div>
-              <div>
-                <p className="text-xs font-bold text-slate-900 dark:text-white leading-tight">
-                  Recuerda guardar tus cambios
-                </p>
-                <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-tight">
-                  Las modificaciones se aplicarán a tu cuenta de inmediato.
-                </p>
-              </div>
-              {mensajeExito && (
-                <span className="ml-4 inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-600 bg-emerald-50 dark:bg-emerald-950/40 px-3 py-1 rounded-full border border-emerald-200 dark:border-emerald-800">
+            {/* ── BARRA INFERIOR STICKY ── */}
+            <footer className="sticky bottom-0 -mx-8 -mb-28 mt-8 bg-white/95 dark:bg-[#0A1325]/95 backdrop-blur-md border-t border-slate-200 dark:border-[#16253B] px-8 py-3.5 flex items-center justify-between z-20 shadow-lg">
+              {/* Mensaje Informativo Izquierdo */}
+              <div className="flex items-center gap-3">
+                <div className="size-6 rounded-full bg-blue-50 dark:bg-blue-950/50 text-[#0066FF] flex items-center justify-center shrink-0">
                   <svg className="size-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
-                    <polyline points="20 6 9 17 4 12" />
+                    <circle cx="12" cy="12" r="10" />
+                    <line x1="12" y1="16" x2="12" y2="12" />
+                    <line x1="12" y1="8" x2="12.01" y2="8" />
                   </svg>
-                  Cambios guardados con éxito
-                </span>
-              )}
-            </div>
-
-            {/* Botones de Acción Derecho */}
-            <div className="flex items-center gap-3">
-              <button
-                type="button"
-                onClick={handleRestablecer}
-                className="bg-white dark:bg-[#16253B] border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 text-xs font-semibold px-5 py-2.5 rounded-xl transition"
-              >
-                Restablecer
-              </button>
-              <button
-                type="button"
-                onClick={handleGuardarCambios}
-                disabled={guardando}
-                className="bg-[#0066FF] hover:bg-blue-600 active:scale-98 text-white text-xs font-semibold px-6 py-2.5 rounded-xl shadow-md shadow-blue-500/20 transition flex items-center gap-2 disabled:opacity-60"
-              >
-                {guardando ? (
-                  <>
-                    <svg className="animate-spin size-3.5 text-white" viewBox="0 0 24 24" fill="none">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                </div>
+                <div>
+                  <p className="text-xs font-bold text-slate-900 dark:text-white leading-tight">
+                    Recuerda guardar tus cambios
+                  </p>
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-tight">
+                    Las modificaciones se aplicarán a tu cuenta de inmediato.
+                  </p>
+                </div>
+                {mensajeExito && (
+                  <span className="ml-4 inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-600 bg-emerald-50 dark:bg-emerald-950/40 px-3 py-1 rounded-full border border-emerald-200 dark:border-emerald-800">
+                    <svg className="size-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                      <polyline points="20 6 9 17 4 12" />
                     </svg>
-                    <span>Guardando...</span>
-                  </>
-                ) : (
-                  <span>Guardar cambios</span>
+                    Cambios guardados con éxito
+                  </span>
                 )}
-              </button>
-            </div>
-          </footer>
-        </div>
+              </div>
+
+              {/* Botones de Acción Derecho */}
+              <div className="flex items-center gap-3">
+                <button
+                  type="button"
+                  onClick={handleRestablecer}
+                  className="bg-white dark:bg-[#16253B] border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 text-xs font-semibold px-5 py-2.5 rounded-xl transition"
+                >
+                  Restablecer
+                </button>
+                <button
+                  type="button"
+                  onClick={handleGuardarCambios}
+                  disabled={guardando}
+                  className="bg-[#0066FF] hover:bg-blue-600 active:scale-98 text-white text-xs font-semibold px-6 py-2.5 rounded-xl shadow-md shadow-blue-500/20 transition flex items-center gap-2 disabled:opacity-60"
+                >
+                  {guardando ? (
+                    <>
+                      <svg className="animate-spin size-3.5 text-white" viewBox="0 0 24 24" fill="none">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                      </svg>
+                      <span>Guardando...</span>
+                    </>
+                  ) : (
+                    <span>Guardar cambios</span>
+                  )}
+                </button>
+              </div>
+            </footer>
+          </div>
+        </UserDashboardLayout>
       </div>
 
       {/* ── MODAL DE SESIONES ACTIVAS ── */}

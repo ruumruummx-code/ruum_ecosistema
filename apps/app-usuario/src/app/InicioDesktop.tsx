@@ -153,7 +153,7 @@ export function InicioDesktop({ usuario, traslados, conductorFotoUrl = null, veh
     document.addEventListener("keydown", cerrar); document.addEventListener("click", fuera);
     return () => { document.removeEventListener("keydown", cerrar); document.removeEventListener("click", fuera); };
   }, [menuId]);
-  return <UserDashboardLayout usuario={usuario} nombre={usuario?.nombre} notificaciones={construirNotificaciones(usuario, traslados)} totalVehiculos={errorVehiculos ? undefined : vehiculos.length} idContenido="desktopMainContent" padding="ninguno" fixedContent dashboardHeader>
+  return <UserDashboardLayout usuario={usuario} nombre={usuario?.nombre} notificaciones={construirNotificaciones(usuario, traslados)} totalVehiculos={errorVehiculos ? undefined : vehiculos.length} idContenido="desktopMainContent" padding="ninguno" dashboardHeader>
     <div className={styles.dashboard} data-testid="desktop-dashboard">
       <header className={styles.welcome}><div><p>Bienvenido de nuevo, {nombre}</p><h1>Tu traslado, en orden.</h1><span>Gestiona, monitorea y da seguimiento a todos tus traslados de forma simple y segura.</span></div><Link href="/viajes/nuevo" className={styles.primary}><Icon name="plus" />Registrar nuevo traslado</Link></header>
       {errorVehiculos && <p role="alert" className={styles.loadError}>No pudimos cargar tus vehículos. <button onClick={() => router.refresh()}>Reintentar</button></p>}

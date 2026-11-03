@@ -27,6 +27,7 @@ Object.defineProperty(window, "localStorage", {
 // Mock de next/navigation
 vi.mock("next/navigation", () => ({
   usePathname: () => "/cuenta/preferencias",
+  useSearchParams: () => new URLSearchParams(),
   useRouter: () => ({ push: vi.fn(), refresh: vi.fn() }),
 }));
 
@@ -116,7 +117,7 @@ describe("PreferenciasCliente", () => {
     // Top Navbar
     expect(screen.getByPlaceholderText("Buscar traslados, vehículos o ubicaciones...")).toBeDefined();
     expect(screen.getByText("Ctrl K")).toBeDefined();
-    expect(screen.getByText("Hola, HECTOR")).toBeDefined();
+    expect(screen.getByText(/Hola,\s*Hector/i)).toBeDefined();
 
     // Header y Breadcrumb
     expect(screen.getByText("Volver a mi cuenta")).toBeDefined();
