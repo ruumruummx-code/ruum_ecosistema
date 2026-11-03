@@ -3150,6 +3150,55 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"vehiculo_verificaciones_repuve": {
+                  Row: {
+                    "actor_rol": string,"auditoria_dictamen": string | null,"auditoria_notas": string | null,"auditoria_revisada_en": string | null,"auditoria_revisada_por": string | null,"autorizado_por_auth_id": string | null,"captura_path": string | null,"coincide": boolean,"coincide_placas": boolean,"coincide_vin": boolean,"conductor_id": string | null,"creado_en": string,"es_override_admin": boolean,"id": string,"motivo_override": string | null,"placas_esperadas": string | null,"placas_fisicas": string | null,"requiere_auditoria": boolean,"resultado": string,"traslado_id": string,"vehiculo_id": string,"vin_esperado": string,"vin_fisico": string
+                  }
+                  Insert: {
+                    "actor_rol"?: string,"auditoria_dictamen"?: string | null,"auditoria_notas"?: string | null,"auditoria_revisada_en"?: string | null,"auditoria_revisada_por"?: string | null,"autorizado_por_auth_id"?: string | null,"captura_path"?: string | null,"coincide": boolean,"coincide_placas": boolean,"coincide_vin": boolean,"conductor_id"?: string | null,"creado_en"?: string,"es_override_admin"?: boolean,"id"?: string,"motivo_override"?: string | null,"placas_esperadas"?: string | null,"placas_fisicas"?: string | null,"requiere_auditoria"?: boolean,"resultado": string,"traslado_id": string,"vehiculo_id": string,"vin_esperado": string,"vin_fisico": string
+                  }
+                  Update: {
+                    "actor_rol"?: string,"auditoria_dictamen"?: string | null,"auditoria_notas"?: string | null,"auditoria_revisada_en"?: string | null,"auditoria_revisada_por"?: string | null,"autorizado_por_auth_id"?: string | null,"captura_path"?: string | null,"coincide"?: boolean,"coincide_placas"?: boolean,"coincide_vin"?: boolean,"conductor_id"?: string | null,"creado_en"?: string,"es_override_admin"?: boolean,"id"?: string,"motivo_override"?: string | null,"placas_esperadas"?: string | null,"placas_fisicas"?: string | null,"requiere_auditoria"?: boolean,"resultado"?: string,"traslado_id"?: string,"vehiculo_id"?: string,"vin_esperado"?: string,"vin_fisico"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "vehiculo_verificaciones_repuve_conductor_id_fkey"
+      columns: ["conductor_id"]
+isOneToOne: false
+      referencedRelation: "conductores"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "vehiculo_verificaciones_repuve_conductor_id_fkey"
+      columns: ["conductor_id"]
+isOneToOne: false
+      referencedRelation: "conductores_publicos"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "vehiculo_verificaciones_repuve_traslado_id_fkey"
+      columns: ["traslado_id"]
+isOneToOne: false
+      referencedRelation: "obs_tracking_fallos"
+      referencedColumns: ["traslado_id"]
+    },{
+      foreignKeyName: "vehiculo_verificaciones_repuve_traslado_id_fkey"
+      columns: ["traslado_id"]
+isOneToOne: false
+      referencedRelation: "pasaporte_digital"
+      referencedColumns: ["traslado_id"]
+    },{
+      foreignKeyName: "vehiculo_verificaciones_repuve_traslado_id_fkey"
+      columns: ["traslado_id"]
+isOneToOne: false
+      referencedRelation: "traslados"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "vehiculo_verificaciones_repuve_vehiculo_id_fkey"
+      columns: ["vehiculo_id"]
+isOneToOne: false
+      referencedRelation: "vehiculos"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"vehiculos": {
                   Row: {
                     "actualizado_en": string,"alias": string | null,"anio": number,"categoria_tarifa": Database["public"]['Enums']["categoria_tarifa_vehiculo"] | null,"color": string | null,"condicion": Database["public"]['Enums']["condicion_vehiculo"] | null,"creado_en": string,"empresa_id": string | null,"estado_general_declarado": string | null,"fotos_urls": (string)[],"gama": Database["public"]['Enums']["gama_vehiculo"] | null,"id": string,"marca": string,"modelo": string,"permiso_especial_vigente": string | null,"placas": string | null,"puede_circular_rodando": boolean,"tiene_placas": boolean,"tiene_tarjeta_circulacion": boolean,"tiene_verificacion": boolean,"tipo": Database["public"]['Enums']["tipo_vehiculo"],"transmision": string | null,"usuario_id": string,"version": number,"vin": string | null
@@ -3491,6 +3540,9 @@ isOneToOne: false
 "admin_decidir_aprobacion":
 { Args: { "p_aprobar": boolean,"p_motivo": string,"p_solicitud_id": string,"p_version_esperada": number }; Returns: undefined
                            },
+"admin_dictaminar_auditoria_repuve":
+{ Args: { "p_dictamen": string,"p_notas"?: string,"p_verificacion_id": string }; Returns: Json
+                           },
 "admin_ejecutar_aprobacion":
 { Args: { "p_aprobacion_id": string }; Returns: undefined
                            },
@@ -3592,6 +3644,9 @@ isOneToOne: false
       } },
 "admin_obtener_evidencia_vehiculo":
 { Args: { "p_vehiculo_id": string }; Returns: Json
+                           },
+"admin_override_verificacion_repuve":
+{ Args: { "p_motivo": string,"p_traslado_id": string,"p_verificacion_origen_id"?: string }; Returns: Json
                            },
 "admin_previsualizar_carga_masiva":
 { Args: { "p_empresa_id": string,"p_filas": Json,"p_usuario_id": string }; Returns: Json
@@ -3809,6 +3864,9 @@ isOneToOne: false
 "conductor_operativamente_aprobado":
 { Args: { "p_auth_user_id"?: string }; Returns: boolean
                            },
+"conductor_registra_verificacion_repuve":
+{ Args: { "p_captura_path": string,"p_placas_fisicas": string,"p_resultado": string,"p_traslado_id": string,"p_vin_fisico": string }; Returns: Json
+                           },
 "conductor_reportar_incidencia_transaccional":
 { Args: { "p_descripcion": string,"p_escalar_urgente"?: boolean,"p_incidencia_id"?: string,"p_momento": Database["public"]['Enums']["momento_incidencia"],"p_tipo": Database["public"]['Enums']["tipo_incidencia"],"p_traslado_id": string }; Returns: Json
                            },
@@ -4021,6 +4079,9 @@ isOneToOne: false
 "obtener_preferencia_admin":
 { Args: { "p_clave": string }; Returns: Json
                            },
+"obtener_resumen_verificacion_repuve":
+{ Args: { "p_traslado_id": string }; Returns: Json
+                           },
 "ofrecer_asignacion":
 { Args: { "p_conductor_id": string,"p_motivo"?: string,"p_traslado_id": string }; Returns: string
                            },
@@ -4175,6 +4236,9 @@ isOneToOne: false
 { Args: { "e": Database["public"]['Enums']["estado_traslado"] }; Returns: Database["public"]['Enums']["estado_operativo_traslado"]
                            },
 "traslado_tiene_metodo_pago_registrado":
+{ Args: { "p_traslado_id": string }; Returns: boolean
+                           },
+"traslado_tiene_verificacion_repuve_valida":
 { Args: { "p_traslado_id": string }; Returns: boolean
                            },
 "usuario_acepta_cotizacion":

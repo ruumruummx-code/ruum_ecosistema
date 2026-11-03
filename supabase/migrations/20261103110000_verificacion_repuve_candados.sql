@@ -871,9 +871,6 @@ begin
       if v_estado_actual <> 'evidencia_inicial_en_proceso' then
         raise exception 'Evento no permitido desde estado %', v_estado_actual;
       end if;
-      if not public.traslado_tiene_verificacion_repuve_valida(p_traslado_id) then
-        raise exception 'No se puede completar evidencia inicial sin verificación REPUVE válida.';
-      end if;
       if not public.traslado_tiene_metodo_pago_registrado(p_traslado_id) then
         raise exception 'No se puede completar evidencia inicial: falta pago anticipado completado o método de pago al cierre.';
       end if;

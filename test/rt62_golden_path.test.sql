@@ -152,6 +152,7 @@ select set_config('request.jwt.claim.sub', '96200000-0000-4000-8000-0000000000c1
 select public.conductor_avanza_traslado(:'t1'::uuid, 'conductor_en_camino');
 select public.conductor_avanza_traslado(:'t1'::uuid, 'llegada_origen');
 select public.conductor_avanza_traslado(:'t1'::uuid, 'iniciar_verificacion');
+select public.conductor_registra_verificacion_repuve(:'t1'::uuid, 'VING1', 'RT62-G1', 'limpio', '96200000-0000-4000-8000-0000000000c1/' || :'t1' || '/repuve/captura.jpg');
 select public.conductor_avanza_traslado(:'t1'::uuid, 'iniciar_evidencia_inicial');
 select is((select estado::text from public.traslados where id = :'t1'::uuid), 'evidencia_inicial_en_proceso', 'RT-62.9: T1 en evidencia inicial');
 reset role;
@@ -181,11 +182,18 @@ language plpgsql
 as $$
 declare
   v_ang text;
+  v_vin text;
+  v_placas text;
 begin
   perform set_config('request.jwt.claim.sub', p_auth, true);
   perform public.conductor_avanza_traslado(p_traslado, 'conductor_en_camino');
   perform public.conductor_avanza_traslado(p_traslado, 'llegada_origen');
   perform public.conductor_avanza_traslado(p_traslado, 'iniciar_verificacion');
+  select v.vin, v.placas into v_vin, v_placas
+  from public.traslados t
+  join public.vehiculos v on v.id = t.vehiculo_id
+  where t.id = p_traslado;
+  perform public.conductor_registra_verificacion_repuve(p_traslado, v_vin, v_placas, 'limpio', p_auth || '/' || p_traslado::text || '/repuve/captura.jpg');
   perform public.conductor_avanza_traslado(p_traslado, 'iniciar_evidencia_inicial');
   foreach v_ang in array array['frente','lado_piloto','lado_copiloto','trasera','tablero'] loop
     insert into public.evidencia_fotos (traslado_id, tipo, angulo, url, sincronizada)
