@@ -520,7 +520,9 @@
   list-style: none;
   display: flex;
   flex-direction: column;
-  flex: 0 0 auto;
+  flex: 0 1 auto;
+  min-height: 0;
+  overflow-y: auto;
 }
 .timeline li {
   display: flex;
