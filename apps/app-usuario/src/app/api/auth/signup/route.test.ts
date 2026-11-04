@@ -50,6 +50,9 @@ describe("POST /api/auth/signup — validaciones y duplicados", () => {
     const res = await POST(req(`individual-${String(tipoCuenta)}@ejemplo.com`, generarTokenTelefono("5512345678"), tipoCuenta));
     expect(res.status).toBe(200);
     expect(mockSignUp).toHaveBeenCalledWith(expect.objectContaining({ options: expect.objectContaining({ data: expect.objectContaining({ tipo_registro: "usuario", tipo_cuenta: "personal" }) }) }));
+    const metadata = mockSignUp.mock.calls[0]?.[0]?.options?.data as Record<string, unknown>;
+    expect(metadata.version_terminos_aceptada).toBeUndefined();
+    expect(metadata.terminos_aceptados_en).toBeUndefined();
   });
 
   it("rechaza registro sin token de verificación telefónica válido", async () => {

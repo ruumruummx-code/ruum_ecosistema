@@ -10,7 +10,6 @@ import {
   telefonoMx,
 } from "@/lib/registro-usuario";
 import { consumirTokenTelefono, bypassVerificacionTelefonoPermitido } from "@/lib/phone-verification";
-import { VERSION_TERMINOS_VIGENTE } from "@ruum/shared/constants";
 import { passwordCumpleRequisitos } from "@ruum/shared/utils";
 import { verificarCsrfORechazar } from "@/lib/csrf";
 
@@ -153,8 +152,9 @@ export async function POST(request: NextRequest) {
           telefono_verificado: telefonoVerificadoReal,
           telefono_verificado_en: telefonoVerificadoReal ? ahora : null,
           tipo_cuenta: "personal",
-          version_terminos_aceptada: VERSION_TERMINOS_VIGENTE,
-          terminos_aceptados_en: ahora,
+          // El consentimiento no se fabrica en metadata de Auth. Después de
+          // autenticar, el cliente debe invocar registrar_consentimiento_usuario
+          // para generar hashes, auditoría y versión canónica.
         },
         emailRedirectTo: `${request.nextUrl.origin}/auth/callback?next=%2F`,
       },

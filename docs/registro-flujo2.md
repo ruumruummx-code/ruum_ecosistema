@@ -11,7 +11,10 @@ marcar `reconciliacion_requerida`. Ninguna lectura crea perfiles.
 
 La compensación no elimina silenciosamente cuentas Auth: requiere reconciliar
 el perfil, conservar auditoría y aplicar el merge autorizado cuando exista
-duplicidad.
+duplicidad. El consumidor es `reconciliar_registro_saga_auth`, expuesto sólo a
+`service_role` y ejecutado por `apps/app-usuario/scripts/reconciliar-registro-saga.mjs`
+cada 5 minutos (límite 50 filas, `SKIP LOCKED`). Los fallos se marcan como
+`reconciliacion_requerida`, incrementan `intentos` y conservan `ultimo_error`.
 
 ## Teléfono (CB-2)
 
@@ -22,9 +25,16 @@ de traslados y auditoría; nunca se resuelve con `delete` automático. El índic
 es parcial para permitir teléfonos nulos y evita duplicados de formatos como
 `5512345678` y `+52 55 1234 5678`.
 
-El despliegue recomendado es: preflight en staging, respaldo, merge firmado,
-aplicar índice, verificar conteo y sólo entonces promover el registro. Si el
-índice falla, se revierte la migración antes de abrir tráfico.
+El despliegue recomendado es: preflight en staging o copia representativa,
+respaldo lógico, merge firmado, aplicar índice, verificar conteo y sólo entonces
+promover el registro. La cuenta canónica gana por esta precedencia auditable:
+`estado_verificacion = verificado`, después `estado = activo`, después la fecha
+`creado_en` más antigua; los empates se resuelven por UUID ascendente. Se
+conservan traslados, consentimientos y auditoría en la cuenta canónica; la
+cuenta absorbida queda deshabilitada, nunca eliminada sin retención. Si el
+índice falla, se restaura el respaldo y se repara la migración sólo con
+autorización de release. La ausencia de bloqueo debe verificarse con el plan
+de índice concurrente del proveedor antes de abrir tráfico.
 
 ## Redis y dependencias (CB-3)
 
@@ -41,4 +51,14 @@ de producción con `PHONE_VERIFY_BYPASS=true`. El token HMAC contiene nonce
 aleatorio y se consume una sola vez (`GETDEL` en Redis; memoria sólo en tests o
 desarrollo). La política actual de contraseña exige mayúscula, minúscula y
 número; la comprobación de contraseñas comprometidas queda como decisión
-posterior porque requiere dimensionar proveedor, latencia, privacidad y costo.
+fuera de esta entrega porque requiere dimensionar proveedor, latencia,
+privacidad y costo.
+
+## T9 — consentimiento canónico
+
+El signup ya no copia `version_terminos_aceptada` ni `terminos_aceptados_en` a
+metadata de Auth. El consentimiento se registra únicamente mediante la RPC
+`registrar_consentimiento_usuario`, que valida versión vigente, hashes, canal,
+versión de app, timestamp y auditoría. La aceptación visual del formulario no
+se presenta como consentimiento persistido hasta que la sesión autenticada
+ejecute esa RPC.
