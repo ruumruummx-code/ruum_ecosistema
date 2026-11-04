@@ -30,15 +30,15 @@ import {
    dejaba inalcanzable para su público — el usuario nuevo anónimo rebotaba a
    /login antes de verla. */
 const RUTAS_PROTEGIDAS_USUARIO = [
+  "/inicio",
   "/viajes",
   "/mis-viajes",
   "/cuenta",
   "/pasaporte",
-  "/verificacion",
-  "/soporte"
+  "/verificacion"
 ];
 
-function esRutaProtegidaUsuario(pathname: string): boolean {
+export function esRutaProtegidaUsuario(pathname: string): boolean {
   return RUTAS_PROTEGIDAS_USUARIO.some(
     (ruta) => pathname === ruta || pathname.startsWith(`${ruta}/`)
   );
@@ -51,6 +51,7 @@ function esRutaProtegidaUsuario(pathname: string): boolean {
 const RUTAS_DEPENDIENTES_DE_SESION = new Set<string>([
   "/login",
   "/registro",
+  "/inicio",
   "/cuenta",
   "/pasaporte",
   "/verificacion",
@@ -189,8 +190,8 @@ export async function middleware(request: NextRequest) {
      (este archivo no toca PostgREST directamente: check-fronteras exige 0
      `.from` en apps/*). Si es conductor en la app equivocada → 403.
      Si no existe en ninguna (alta en curso, trigger pendiente), se permite
-     el paso para no romper el onboarding: la página creará el perfil vía
-     obtenerUsuarioActual() y RLS sigue negando datos ajenos. */
+     el paso para no romper el onboarding: /inicio muestra un estado explícito
+     y ninguna lectura crea filas en usuarios. */
   if (user && esRutaProtegidaUsuario(pathname)) {
     const { clasificarRolApp } = await import("@ruum/api/identity");
     if ((await clasificarRolApp(supabase, user.id)) === "conductor") {

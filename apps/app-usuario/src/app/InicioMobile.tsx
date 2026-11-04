@@ -1,12 +1,15 @@
 "use client";
 
 import Link from "next/link";
+import { useEffect, useState } from "react";
 import type { Database } from "@ruum/shared/types";
 import { ETIQUETA_ESTADO_TRASLADO } from "@ruum/shared/states";
 import { indiceEtapaActual } from "@ruum/ui";
 import { obtenerViajeActivo } from "../lib/inicio";
 import { TERMINOLOGIA_USUARIO } from "../lib/glosario";
 import { ConductorAsignado } from "./ConductorAsignado";
+import { obtenerFotoPerfilConductor } from "@ruum/api/drivers";
+import { crearClienteNavegador } from "../lib/supabase-browser";
 
 type PasaporteRow = Database["public"]["Views"]["pasaporte_digital"]["Row"];
 type UsuarioRow = Database["public"]["Tables"]["usuarios"]["Row"];
@@ -151,6 +154,16 @@ function ProgresoInicio({ estado }: { estado: PasaporteRow["estado"] }) {
 
 export function InicioMobile({ usuario, traslados, conductorFotoUrl = null, vehiculos = [] }: InicioMobileProps) {
   const viaje = obtenerViajeActivo(traslados);
+  const [fotoDiferida, setFotoDiferida] = useState(conductorFotoUrl);
+  useEffect(() => {
+    let activo = true;
+    setFotoDiferida(conductorFotoUrl);
+    if (!viaje?.conductor_id || conductorFotoUrl) return () => { activo = false; };
+    void obtenerFotoPerfilConductor(crearClienteNavegador(), viaje.conductor_id)
+      .then((url) => { if (activo) setFotoDiferida(url); })
+      .catch(() => { /* el avatar con iniciales es un fallback válido */ });
+    return () => { activo = false; };
+  }, [conductorFotoUrl, viaje?.conductor_id]);
   const primerNombre = usuario?.nombre?.trim().split(/\s+/)[0];
   const nombre = primerNombre ? primerNombre.charAt(0).toUpperCase() + primerNombre.slice(1).toLowerCase() : null;
   const detalle = viaje?.traslado_id ? `/viajes/${viaje.traslado_id}` : "/mis-viajes";
@@ -210,7 +223,7 @@ export function InicioMobile({ usuario, traslados, conductorFotoUrl = null, vehi
               <ProgresoInicio estado={viaje.estado} />
             </div>
             {conductor ? (
-              <ConductorAsignado trasladoId={conductor.trasladoId} estado={conductor.estado} nombre={conductor.nombre} fotoUrl={conductorFotoUrl} compacto />
+              <ConductorAsignado trasladoId={conductor.trasladoId} estado={conductor.estado} nombre={conductor.nombre} fotoUrl={fotoDiferida} compacto />
             ) : (
               <div className="home-driver home-driver-pending">
                 <span className="home-driver-avatar">

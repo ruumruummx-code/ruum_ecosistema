@@ -9,12 +9,15 @@ vi.mock("next/navigation", () => ({
 }));
 
 vi.mock("../src/lib/supabase-server", () => ({
-  crearClienteServidor: vi.fn(async () => ({}))
+  crearClienteServidor: vi.fn(async () => ({
+    auth: { getUser: vi.fn(async () => ({ data: { user: null }, error: null })) }
+  }))
 }));
 
 vi.mock("@ruum/api/services", () => ({
   obtenerUsuarioActual: vi.fn(async () => null),
-  listarTrasladosDeUsuario: vi.fn(async () => [])
+  listarTrasladosDeUsuario: vi.fn(async () => []),
+  listarResumenTrasladosDeUsuario: vi.fn(async () => [])
 }));
 
 async function destinoDeLaRaiz(parametros: Record<string, string | string[] | undefined> = {}) {
@@ -41,9 +44,9 @@ describe("raíz de app-usuario (/)", () => {
     vi.unstubAllEnvs();
   });
 
-  it("sin sesión activa, redirige inmediatamente a /login", async () => {
+  it("sin sesión activa, muestra la landing pública sin redirigir", async () => {
     const destino = await destinoDeLaRaiz({});
-    expect(destino).toBe("/login");
+    expect(destino).toBeNull();
   });
 
   it("con ?landing=true explícito, no redirige y permite renderizar landing pública", async () => {

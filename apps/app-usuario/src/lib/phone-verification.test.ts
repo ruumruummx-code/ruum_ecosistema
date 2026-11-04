@@ -34,13 +34,14 @@ describe("phone-verification — generación y validación de tokens HMAC", () =
     );
   });
 
-  it("genera un token con formato valido de 3 segmentos", () => {
+    it("genera un token con formato valido y nonce", () => {
     const token = generarTokenTelefono("5512345678");
     const partes = token.split(":");
-    expect(partes).toHaveLength(3);
+    expect(partes).toHaveLength(4);
     expect(partes[0]).toBe("5512345678");
     expect(Number(partes[1])).toBeGreaterThan(0);
-    expect(partes[2]).toHaveLength(64); // SHA-256 hex digest
+    expect(partes[2].length).toBeGreaterThanOrEqual(12); // nonce aleatorio
+    expect(partes[3]).toHaveLength(64); // SHA-256 hex digest
   });
 
   it("valida correctamente un token generado para el mismo telefono", () => {

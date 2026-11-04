@@ -187,7 +187,31 @@ export async function listarTrasladosDeUsuario(cliente: Cliente, usuarioId: stri
     .order("creado_en", { ascending: false });
 
   if (error) throw error;
-  return data ?? [];
+  return (data ?? []) as unknown as PasaporteRow[];
+}
+
+export interface ResumenTrasladosUsuarioOpciones {
+  limite?: number;
+  desplazamiento?: number;
+}
+
+/** Resumen acotado para el dashboard. El historial completo usa otra ruta. */
+export async function listarResumenTrasladosDeUsuario(
+  cliente: Cliente,
+  usuarioId: string,
+  opciones: ResumenTrasladosUsuarioOpciones = {}
+): Promise<PasaporteRow[]> {
+  const limite = Math.min(Math.max(opciones.limite ?? 6, 1), 20);
+  const desplazamiento = Math.max(opciones.desplazamiento ?? 0, 0);
+  const { data, error } = await cliente
+    .from("pasaporte_digital")
+    .select("traslado_id,usuario_id,estado,estado_operativo,creado_en,cerrado_en,conductor_id,conductor_nombre,conductor_estado,conductor_calificacion,origen_ciudad,origen_direccion,destino_ciudad,destino_direccion,origen_lat,origen_lng,destino_lat,destino_lng,vehiculo_id,vehiculo_marca,vehiculo_modelo,vehiculo_anio,vehiculo_placas,vehiculo_tipo,tiempo_estimado_horas,distancia_km,monto_pagado,precio_cotizado,precio_final,tiene_incidencia_abierta,incidencias_abiertas,tipo_pago")
+    .eq("usuario_id", usuarioId)
+    .order("creado_en", { ascending: false })
+    .range(desplazamiento, desplazamiento + limite - 1);
+
+  if (error) throw error;
+  return (data ?? []) as unknown as PasaporteRow[];
 }
 
 /** Lista los traslados del usuario necesarios para construir su historial de facturación. */

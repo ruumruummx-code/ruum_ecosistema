@@ -1,6 +1,15 @@
 import { describe, expect, it, vi } from "vitest";
-import { crearTraslado, listarHistorialTraslado, listarTrasladosParaFacturacionUsuario, verificarPagoAnticipadoCompletado } from "./traslados";
+import { crearTraslado, listarHistorialTraslado, listarResumenTrasladosDeUsuario, listarTrasladosParaFacturacionUsuario, verificarPagoAnticipadoCompletado } from "./traslados";
 import { crearClienteFake } from "./__tests__/supabase-fake";
+
+describe("resumen paginado del dashboard", () => {
+  it("limita y desplaza la consulta del pasaporte", async () => {
+    const cliente = crearClienteFake({ tablas: { pasaporte_digital: { data: [{ traslado_id: "t1" }] } } });
+    const resultado = await listarResumenTrasladosDeUsuario(cliente as never, "u1", { limite: 6, desplazamiento: 12 });
+    expect(resultado).toHaveLength(1);
+    expect(cliente.from).toHaveBeenCalledWith("pasaporte_digital");
+  });
+});
 
 describe("crearTraslado service - validación preventiva", () => {
   const clienteMock = {

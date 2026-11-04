@@ -9,7 +9,7 @@ import {
   soloDigitos,
   telefonoMx,
 } from "@/lib/registro-usuario";
-import { validarTokenTelefono, bypassVerificacionTelefonoPermitido } from "@/lib/phone-verification";
+import { consumirTokenTelefono, bypassVerificacionTelefonoPermitido } from "@/lib/phone-verification";
 import { VERSION_TERMINOS_VIGENTE } from "@ruum/shared/constants";
 import { passwordCumpleRequisitos } from "@ruum/shared/utils";
 import { verificarCsrfORechazar } from "@/lib/csrf";
@@ -22,6 +22,20 @@ const MAX_POR_CORREO_HORA = 5;
 const VENTANA_MS = 60 * 60 * 1000;
 const MENSAJE_REGISTRO_NO_COMPLETADO =
   "No pudimos completar el registro. Si ya tienes una cuenta, inicia sesión o recupera tu contraseña.";
+
+async function conTimeout<T>(operacion: Promise<T>, milisegundos: number): Promise<T> {
+  let temporizador: ReturnType<typeof setTimeout> | undefined;
+  try {
+    return await Promise.race([
+      operacion,
+      new Promise<T>((_, reject) => {
+        temporizador = setTimeout(() => reject(new Error("AUTH_SIGNUP_TIMEOUT")), milisegundos);
+      }),
+    ]);
+  } finally {
+    if (temporizador) clearTimeout(temporizador);
+  }
+}
 
 /**
  * Alta de cuenta de usuario con rate limit de servidor.
@@ -75,7 +89,7 @@ export async function POST(request: NextRequest) {
     // Validación de verificación telefónica por SMS.
     // La suspensión explícita permite el alta sin acreditar la propiedad del teléfono.
     if (!bypassVerificacionTelefonoPermitido()) {
-      const verificacionTelefono = validarTokenTelefono(telefonoDigitos, tokenTelefono);
+      const verificacionTelefono = await consumirTokenTelefono(telefonoDigitos, tokenTelefono);
       if (!verificacionTelefono.valido) {
         return NextResponse.json(
           { error: verificacionTelefono.error || "Debes verificar tu número de teléfono celular por SMS antes de continuar." },
@@ -127,7 +141,8 @@ export async function POST(request: NextRequest) {
     // Con la verificación suspendida el teléfono NO quedó verificado: registrarlo
     // así en metadata para no contaminar datos con una verificación falsa.
     const telefonoVerificadoReal = !bypassVerificacionTelefonoPermitido();
-    const { data, error } = await supabase.auth.signUp({
+    const { data, error } = await conTimeout(
+      supabase.auth.signUp({
       email: correo,
       password,
       options: {
@@ -143,7 +158,9 @@ export async function POST(request: NextRequest) {
         },
         emailRedirectTo: `${request.nextUrl.origin}/auth/callback?next=%2F`,
       },
-    });
+      }),
+      10_000
+    );
 
     if (error) {
       // No revelar si el correo ya existe: mensaje genérico.

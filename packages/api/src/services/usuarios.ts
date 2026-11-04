@@ -7,10 +7,6 @@ import { registrarEvento } from "./auditoria";
 type Cliente = SupabaseClient<Database>;
 type UsuarioRow = Database["public"]["Tables"]["usuarios"]["Row"];
 
-function tipoCuentaDesdeMetadata(valor: unknown): "personal" | "empresa" {
-  return valor === "empresa" ? "empresa" : "personal";
-}
-
 function metadataString(metadata: Record<string, unknown> | undefined, campo: string) {
   return typeof metadata?.[campo] === "string" ? metadata[campo] : null;
 }
@@ -26,7 +22,13 @@ async function buscarUsuarioPorAuthId(cliente: Cliente, authUserId: string): Pro
   return data;
 }
 
-/** Usuario asociado a la sesión de Supabase Auth actual, si existe. */
+/** Usuario asociado a la sesión de Supabase Auth actual, si existe.
+ *
+ * Este lector es deliberadamente puro: ninguna lectura de sesión puede crear
+ * o mutar filas. La reparación de cuentas Auth antiguas vive en
+ * `crearPerfilUsuarioActual`, que debe invocarse desde un flujo explícito de
+ * onboarding/reconciliación y queda documentada como operación de escritura.
+ */
 export async function obtenerPreferenciasUsuarioActual(cliente: Cliente) {
   const { data: { user }, error: errorAuth } = await cliente.auth.getUser();
   if (errorAuth) throw errorAuth;
@@ -36,29 +38,34 @@ export async function obtenerPreferenciasUsuarioActual(cliente: Cliente) {
   return data;
 }
 
-/** Usuario asociado a la sesión, con respaldo de creación para cuentas antiguas. */
+/** Usuario asociado a la sesión de Auth actual, sin efectos secundarios. */
 export async function obtenerUsuarioActual(cliente: Cliente) {
   const { data: sesion } = await cliente.auth.getUser();
   if (!sesion.user) return null;
+  return buscarUsuarioPorAuthId(cliente, sesion.user.id);
+}
 
-  const usuario = await buscarUsuarioPorAuthId(cliente, sesion.user.id);
-  if (usuario) return usuario;
+/**
+ * Reparación explícita para una identidad Auth antigua que no tiene perfil.
+ *
+ * Contrato CB-1: la fila se crea con `sin_rol`, el mínimo privilegio del
+ * dominio. No se infiere rol de conductor desde metadata ni desde una lectura;
+ * la promoción debe ocurrir en el flujo documental/fiscal autorizado.
+ */
+export async function crearPerfilUsuarioActual(cliente: Cliente) {
+  const { data: sesion } = await cliente.auth.getUser();
+  if (!sesion.user) return null;
 
-  // Respaldo para cuentas Auth creadas antes de desplegar el trigger 0024/0025
-  // o en entornos donde las migraciones aún no corrieron completas. La policy
-  // 0021 permite insertar solo la fila propia (auth.uid() = auth_user_id).
-  const tipoCuenta = tipoCuentaDesdeMetadata(sesion.user.user_metadata?.tipo_cuenta);
+  const existente = await buscarUsuarioPorAuthId(cliente, sesion.user.id);
+  if (existente) return existente;
+
   const metadata = sesion.user.user_metadata;
-  // PR-07: No fabricar consentimiento sin acto explícito.
-  // La creación del perfil y el registro de consentimiento están separados.
-  // El consentimiento solo se registra vía registrarConsentimientoUsuario() con
-  // versión concreta, timestamp real, canal y auditoría. Nunca como default.
-  const { data: creado, error: errorInsert } = await cliente
+  const { data: creado, error } = await cliente
     .from("usuarios")
     .insert({
       auth_user_id: sesion.user.id,
-      tipo_cuenta: tipoCuenta,
-      rol: tipoCuenta === "empresa" ? "titular_empresa" : "personal",
+      tipo_cuenta: "personal",
+      rol: "sin_rol",
       estado_verificacion: "pendiente",
       telefono: metadataString(metadata, "telefono"),
       nombre: metadataString(metadata, "nombre"),
@@ -77,12 +84,10 @@ export async function obtenerUsuarioActual(cliente: Cliente) {
     .select("*")
     .single();
 
-  if (!errorInsert) return creado;
-
-  const usuarioCreadoEnParalelo = await buscarUsuarioPorAuthId(cliente, sesion.user.id);
-  if (usuarioCreadoEnParalelo) return usuarioCreadoEnParalelo;
-
-  throw errorInsert;
+  if (!error) return creado;
+  const paralelo = await buscarUsuarioPorAuthId(cliente, sesion.user.id);
+  if (paralelo) return paralelo;
+  throw error;
 }
 
 export type PerfilUsuarioActualizable = Pick<

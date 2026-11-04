@@ -2,7 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { NextRequest } from "next/server";
 import { POST as postSend } from "./send/route";
 import { POST as postVerify } from "./verify/route";
-import { validarTokenTelefono } from "@/lib/phone-verification";
+import { consumirTokenTelefono, validarTokenTelefono } from "@/lib/phone-verification";
 import { __clearCspRateLimitForTest } from "@/lib/csp-rate-limit";
 
 const TEST_SECRET = "secreto-para-tests-con-mas-de-32-caracteres-longitud-segura";
@@ -81,6 +81,15 @@ describe("POST /api/auth/phone-verify/verify", () => {
     // Comprobar que el token es criptográficamente válido
     const validacion = validarTokenTelefono("5512345678", json.token);
     expect(validacion.valido).toBe(true);
+  });
+
+  it("consume el nonce una sola vez y rechaza replay", async () => {
+    const res = await postVerify(reqVerify("5512345678", "123456"));
+    const { token } = await res.json() as { token: string };
+    expect((await consumirTokenTelefono("5512345678", token)).valido).toBe(true);
+    const replay = await consumirTokenTelefono("5512345678", token);
+    expect(replay.valido).toBe(false);
+    expect(replay.error).toMatch(/utilizado|expiró/i);
   });
 
   it("aplica rate limit por IP tras 15 intentos fallidos", async () => {

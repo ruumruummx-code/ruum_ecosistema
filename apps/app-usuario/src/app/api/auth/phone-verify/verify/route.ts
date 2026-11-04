@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { obtenerIp, rateLimitConVentana } from "@/lib/csp-rate-limit";
 import { soloDigitos } from "@/lib/registro-usuario";
-import { generarTokenTelefono, verificarCodigoTwilioVerify } from "@/lib/phone-verification";
+import { generarTokenTelefonoDurable, verificarCodigoTwilioVerify } from "@/lib/phone-verification";
 import { verificarCsrfORechazar } from "@/lib/csrf";
 
 export const dynamic = "force-dynamic";
@@ -76,7 +76,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Generar token criptográfico firmado para certificar la validación en el signup
-    const token = generarTokenTelefono(telefonoDigitos);
+    const token = await generarTokenTelefonoDurable(telefonoDigitos);
 
     return NextResponse.json({
       ok: true,

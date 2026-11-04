@@ -13,6 +13,7 @@ import { construirNotificaciones, obtenerViajeActivo, obtenerHistorial, progreso
 import { TERMINOLOGIA_USUARIO } from "../lib/glosario";
 import { CONTACTOS_SOPORTE_USUARIO } from "../lib/contactos-soporte";
 import { crearClienteNavegador } from "../lib/supabase-browser";
+import { obtenerFotoPerfilConductor } from "@ruum/api/drivers";
 import { UserDashboardLayout } from "../components/layout/UserDashboardLayout";
 import { DashboardIcon as Icon, type DashboardIconName } from "./dashboard/DashboardIcon";
 import { useDashboardTracking } from "./dashboard/useDashboardTracking";
@@ -127,6 +128,7 @@ export function InicioDesktop({ usuario, traslados, conductorFotoUrl = null, veh
   const router = useRouter();
   const [tip, setTip] = useState(0);
   const [desktopVisible, setDesktopVisible] = useState(false);
+  const [fotoDiferida, setFotoDiferida] = useState(conductorFotoUrl);
   useEffect(() => {
     const media = window.matchMedia?.("(min-width: 1024px)");
     if (!media) return;
@@ -137,6 +139,15 @@ export function InicioDesktop({ usuario, traslados, conductorFotoUrl = null, veh
   }, []);
   const [menuId, setMenuId] = useState<string | null>(null);
   const viaje = obtenerViajeActivo(traslados);
+  useEffect(() => {
+    let activo = true;
+    setFotoDiferida(conductorFotoUrl);
+    if (!viaje?.conductor_id || conductorFotoUrl) return () => { activo = false; };
+    void obtenerFotoPerfilConductor(crearClienteNavegador(), viaje.conductor_id)
+      .then((url) => { if (activo) setFotoDiferida(url); })
+      .catch(() => { /* avatar fallback */ });
+    return () => { activo = false; };
+  }, [conductorFotoUrl, viaje?.conductor_id]);
   const historial = obtenerHistorial(traslados).filter(t => t.traslado_id);
   const nombre = usuario?.nombre?.trim().split(/\s+/)[0] || "Usuario";
   useEffect(() => {
@@ -157,7 +168,7 @@ export function InicioDesktop({ usuario, traslados, conductorFotoUrl = null, veh
     <div className={styles.dashboard} data-testid="desktop-dashboard">
       <header className={styles.welcome}><div><p>Bienvenido de nuevo, {nombre}</p><h1>Tu traslado, en orden.</h1><span>Gestiona, monitorea y da seguimiento a todos tus traslados de forma simple y segura.</span></div><Link href="/viajes/nuevo" className={styles.primary}><Icon name="plus" />Registrar nuevo traslado</Link></header>
       {errorVehiculos && <p role="alert" className={styles.loadError}>No pudimos cargar tus vehículos. <button onClick={() => router.refresh()}>Reintentar</button></p>}
-      {viaje?.traslado_id ? <ActiveOverview key={viaje.traslado_id} viaje={viaje} vehiculos={vehiculos} foto={conductorFotoUrl} enabled={desktopVisible} /> : <section className={styles.emptyOverview} aria-label="Sin traslado activo"><div><p className={styles.eyebrow}><Icon name="car" />TU PRÓXIMO DESTINO EMPIEZA AQUÍ</p><h2>No tienes traslados activos</h2><p>Registra un nuevo traslado y sigue cada etapa de tu vehículo desde un solo lugar.</p><Link href="/viajes/nuevo" className={styles.primary}><Icon name="plus" />Registrar traslado</Link></div><Image src="/imagenes/dashboard-sedan.webp" width={720} height={400} alt="Ilustración de un sedán blanco" unoptimized priority={desktopVisible} /></section>}
+      {viaje?.traslado_id ? <ActiveOverview key={viaje.traslado_id} viaje={viaje} vehiculos={vehiculos} foto={fotoDiferida} enabled={desktopVisible} /> : <section className={styles.emptyOverview} aria-label="Sin traslado activo"><div><p className={styles.eyebrow}><Icon name="car" />TU PRÓXIMO DESTINO EMPIEZA AQUÍ</p><h2>No tienes traslados activos</h2><p>Registra un nuevo traslado y sigue cada etapa de tu vehículo desde un solo lugar.</p><Link href="/viajes/nuevo" className={styles.primary}><Icon name="plus" />Registrar traslado</Link></div><Image src="/imagenes/dashboard-sedan.webp" width={720} height={400} alt="Ilustración de un sedán blanco" unoptimized priority={desktopVisible} /></section>}
       <nav className={styles.quickActions} aria-label="Acciones rápidas">{actions.map(action => <Link key={action.href} href={action.href} data-tone={action.tone}><span className={styles.actionIcon}><Icon name={action.icon} /></span><div><strong>{action.title}</strong><p>{action.description}</p></div><Icon name="chevron" /></Link>)}</nav>
       <div className={styles.bottomRow}>
         <section className={`${styles.card} ${styles.recent}`} aria-label="Últimos traslados"><header className={styles.sectionHeading}><h2>Últimos traslados</h2><Link href="/mis-viajes">Ver todos</Link></header><div className={styles.recentScroll} tabIndex={0} aria-label="Tabla de últimos traslados"><table><thead><tr><th>VEHÍCULO</th><th>ORIGEN</th><th aria-label="Ruta" /><th>DESTINO</th><th>FECHA</th><th>ESTADO</th><th aria-label="Opciones" /></tr></thead><tbody>{historial.map(item => <tr key={item.traslado_id}><td><Link href={`/viajes/${item.traslado_id}`} className={styles.vehicleCell}><VehicleImage traslado={item} vehiculos={vehiculos} /><div><strong>{modelo(item)}</strong><small>{item.vehiculo_placas || "Sin placas"}</small></div></Link></td><td>{item.origen_ciudad || "Por confirmar"}</td><td><Icon name="arrow" /></td><td>{item.destino_ciudad || "Por confirmar"}</td><td>{item.creado_en && Number.isFinite(Date.parse(item.creado_en)) ? <time dateTime={item.creado_en}>{new Intl.DateTimeFormat("es-MX", { timeZone: "America/Mexico_City", day: "numeric", month: "short" }).format(new Date(item.creado_en))}<small>{new Intl.DateTimeFormat("es-MX", { timeZone: "America/Mexico_City", hour: "numeric", minute: "2-digit" }).format(new Date(item.creado_en))}</small></time> : "Sin fecha"}</td><td><span className={styles.status} data-tone={tono(item)}><i />{estadoTexto(item)}</span></td><td data-transfer-menu><button id={`opciones-${item.traslado_id}`} type="button" aria-label={`Opciones del traslado ${item.vehiculo_placas || item.traslado_id}`} aria-expanded={menuId === item.traslado_id} onClick={() => setMenuId(menuId === item.traslado_id ? null : item.traslado_id)}><Icon name="more" /></button>{menuId === item.traslado_id && <div className={styles.rowMenu}><Link href={`/viajes/${item.traslado_id}`}>Ver detalles</Link><Link href={`/soporte?traslado=${item.traslado_id}`}>Solicitar ayuda</Link></div>}</td></tr>)}</tbody></table>{!historial.length && <p className={styles.emptyHistory}>Aún no tienes traslados registrados. Aquí encontrarás tus próximos viajes.</p>}</div></section>

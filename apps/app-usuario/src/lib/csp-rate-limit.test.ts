@@ -56,17 +56,17 @@ describe("A2 rateLimitConVentana sin identificador — fail-open por dimension",
   });
 });
 
-describe("Fix C1: degradado (no bloqueo) en produccion sin Redis", () => {
-  it("permite y limita en memoria si NODE_ENV es production y Redis no esta configurado", async () => {
+describe("F2-001: fail closed en produccion sin Redis", () => {
+  it("falla cerrado si NODE_ENV es production y Redis no esta configurado", async () => {
     __clearCspRateLimitForTest();
     vi.stubEnv("NODE_ENV", "production");
     try {
       // Sin Redis: primera petición pasa (memoria por instancia), el exceso se
       // rechaza con 429 en vez de bloquear todo desde la primera petición.
       const primera = await rateLimitConVentana("1.2.3.4", "prueba-prod-sin-redis", 2, 60_000);
-      expect(primera.allowed).toBe(true);
+      expect(primera.allowed).toBe(false);
       const segunda = await rateLimitConVentana("1.2.3.4", "prueba-prod-sin-redis", 2, 60_000);
-      expect(segunda.allowed).toBe(true);
+      expect(segunda.allowed).toBe(false);
       const tercera = await rateLimitConVentana("1.2.3.4", "prueba-prod-sin-redis", 2, 60_000);
       expect(tercera.allowed).toBe(false);
       expect(tercera.retryAfterSec).toBeGreaterThan(0);

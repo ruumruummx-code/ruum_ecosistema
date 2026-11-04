@@ -8,9 +8,10 @@ import { NavegacionUsuario } from "./NavegacionUsuario";
 import { InicioMobile, InicioDesktop } from "./InicioUsuario";
 import { BotonReintentarSesion } from "./ReintentarSesion";
 import { EnlaceRecorridoGuiado } from "./EnlaceRecorridoGuiado";
-import { construirNotificaciones, obtenerViajeActivo } from "../lib/inicio";
+import { construirNotificaciones } from "../lib/inicio";
 import { logStructuredWarn } from "../lib/logger";
 import { botonAzul, botonContorno } from "./experiencia-publica";
+import { PUBLIC_CLAIMS, PUBLIC_CLAIMS_VERSION } from "../lib/public-claims";
 // RC-14: estilos responsivos del dashboard (ver InicioUsuario.css).
 import "./InicioUsuario.css";
 
@@ -19,6 +20,7 @@ type PasaporteRow = Database["public"]["Views"]["pasaporte_digital"]["Row"];
 type VehiculoRow = Database["public"]["Tables"]["vehiculos"]["Row"];
 
 interface ContextoSesion {
+  sesionActiva: boolean;
   usuario: UsuarioRow | null;
   traslados: PasaporteRow[];
   vehiculos: VehiculoRow[];
@@ -30,21 +32,22 @@ interface ContextoSesion {
 async function obtenerContextoSesion(): Promise<ContextoSesion> {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-  if (!url || !anonKey) return { usuario: null, traslados: [], vehiculos: [], conductorFotoUrl: null, error: "config_error" };
+  if (!url || !anonKey) return { sesionActiva: false, usuario: null, traslados: [], vehiculos: [], conductorFotoUrl: null, error: "config_error" };
 
   try {
     const { crearClienteServidor } = await import("../lib/supabase-server");
-    const { obtenerUsuarioActual, listarTrasladosDeUsuario } = await import("@ruum/api/services");
-    const { obtenerFotoPerfilConductor } = await import("@ruum/api/drivers");
+    const { obtenerUsuarioActual, listarResumenTrasladosDeUsuario } = await import("@ruum/api/services");
     const { listarVehiculosDeUsuario } = await import("@ruum/api/vehicles");
 
     const cliente = await crearClienteServidor();
+    const { data: { user } } = await cliente.auth.getUser();
+    if (!user) return { sesionActiva: false, usuario: null, traslados: [], vehiculos: [], conductorFotoUrl: null };
     const usuario = await obtenerUsuarioActual(cliente);
-    if (!usuario) return { usuario: null, traslados: [], vehiculos: [], conductorFotoUrl: null };
+    if (!usuario) return { sesionActiva: true, usuario: null, traslados: [], vehiculos: [], conductorFotoUrl: null };
 
     let errorVehiculos = false;
     const [traslados, vehiculos] = await Promise.all([
-      listarTrasladosDeUsuario(cliente, usuario.id),
+      listarResumenTrasladosDeUsuario(cliente, usuario.id, { limite: 6 }),
       listarVehiculosDeUsuario(cliente, usuario.id).catch((err) => {
         errorVehiculos = true;
         logStructuredWarn("obtenerContextoSesion", "vehiculos_no_disponibles", err, {
@@ -53,25 +56,14 @@ async function obtenerContextoSesion(): Promise<ContextoSesion> {
         return [];
       }),
     ]);
-    const viajeActivo = obtenerViajeActivo(traslados);
-    let conductorFotoUrl: string | null = null;
-
-    if (viajeActivo?.conductor_id) {
-      try {
-        conductorFotoUrl = await obtenerFotoPerfilConductor(cliente, viajeActivo.conductor_id);
-      } catch (error) {
-        console.warn("[app-usuario:obtenerContextoSesion] conductor_photo_unavailable", {
-          message: error instanceof Error ? error.message : String(error),
-        });
-      }
-    }
-
-    return { usuario, traslados, vehiculos, conductorFotoUrl, errorVehiculos, error: null };
+    // La foto del conductor se solicita de forma diferida desde el dashboard;
+    // no debe bloquear el primer render del resumen.
+    return { sesionActiva: true, usuario, traslados, vehiculos, conductorFotoUrl: null, errorVehiculos, error: null };
   } catch (err) {
     console.error("[app-usuario:obtenerContextoSesion] supabase_error", {
       message: err instanceof Error ? err.message : String(err),
     });
-    return { usuario: null, traslados: [], vehiculos: [], conductorFotoUrl: null, error: "supabase_error" };
+    return { sesionActiva: false, usuario: null, traslados: [], vehiculos: [], conductorFotoUrl: null, error: "supabase_error" };
   }
 }
 
@@ -81,11 +73,11 @@ export default async function PaginaInicio({
   searchParams?: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const params = (await searchParams) ?? {};
-  const { usuario, traslados, vehiculos, conductorFotoUrl, error, errorVehiculos } = await obtenerContextoSesion();
+  const { sesionActiva, usuario, traslados, vehiculos, conductorFotoUrl, error, errorVehiculos } = await obtenerContextoSesion();
   const forzarLanding = params.landing === "true";
 
   // C-08: no silenciar error de Supabase — mostrar Aviso en lugar de landing/redirect confuso
-  if (error && !usuario) {
+  if (error && sesionActiva && !usuario) {
     const esConfigError = error === "config_error";
     return (
       <>
@@ -166,13 +158,13 @@ export default async function PaginaInicio({
 
   // Si no hay sesión activa y no se solicitó la landing explícitamente (?landing=true),
   // redirigir directamente al inicio de sesión (/login)
-  if (!forzarLanding) {
-    redirect("/login");
+  if (sesionActiva && !usuario && !forzarLanding) {
+    redirect("/inicio");
   }
 
   // Experiencia Pública / Landing (Libro de Marca V2.1 cap. 32)
   return (
-    <div className="min-h-dvh bg-[var(--ruum-navy)] text-white">
+    <div className="min-h-dvh bg-[var(--ruum-navy)] text-white" data-claims-version={PUBLIC_CLAIMS_VERSION}>
       {/* Barra de Navegación Pública */}
       <header className="sticky top-0 z-40 border-b border-white/10 bg-[var(--ruum-navy)]/95 pt-[env(safe-area-inset-top)] backdrop-blur-md">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3.5 sm:px-6">
@@ -217,7 +209,7 @@ export default async function PaginaInicio({
         <div className="relative mx-auto max-w-4xl text-center">
           <div className="inline-flex items-center gap-2 rounded-full border border-[var(--ruum-teal)]/40 bg-[var(--ruum-teal)]/10 px-3.5 py-1 text-xs font-semibold text-[var(--ruum-teal)] mb-6">
             <span className="size-2 rounded-full bg-[var(--ruum-teal)] animate-pulse" />
-            Traslado vehicular con conductores certificados
+            {PUBLIC_CLAIMS.conductorCertificado}
           </div>
 
           <h1 className="font-display text-3xl font-extrabold tracking-tight text-white sm:text-5xl lg:text-6xl">
@@ -225,8 +217,7 @@ export default async function PaginaInicio({
           </h1>
 
           <p className="mx-auto mt-6 max-w-2xl font-body text-base text-[#C7D5E7] sm:text-lg">
-            Sabes quién lleva tu auto y qué evidencia queda de cada etapa: conductores certificados,
-            evidencia documentada y seguimiento durante el trayecto.
+            {PUBLIC_CLAIMS.hero}
           </p>
 
           <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
@@ -249,7 +240,7 @@ export default async function PaginaInicio({
           <div className="mt-10 flex items-center justify-center gap-2 font-mono-ruum text-xs uppercase tracking-widest text-[#5F6368]">
             <span>by MoviliaX</span>
             <span>•</span>
-            <span>Cobertura Local y Foránea</span>
+            <span>{PUBLIC_CLAIMS.cobertura}</span>
           </div>
         </div>
       </section>

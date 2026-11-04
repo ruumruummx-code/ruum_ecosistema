@@ -1,9 +1,12 @@
 import crypto from "crypto";
 import { soloDigitos, telefonoMx } from "./registro-usuario";
 import { logStructuredWarn } from "./logger";
+import { getRedis } from "./csp-rate-limit";
 
 const EXPIRACION_TOKEN_MS = 15 * 60 * 1000; // 15 minutos de vigencia para el token de registro
 const CODIGO_MOCK_DEV = "123456";
+const TOKEN_NONCE_TTL_SEC = 15 * 60;
+const noncesLocales = new Map<string, number>();
 
 /**
  * Obtiene la clave secreta para firmar tokens de verificación de teléfono.
@@ -25,18 +28,45 @@ export function generarTokenTelefono(telefonoDiezDigitos: string): string {
   const tel = soloDigitos(telefonoDiezDigitos, 10);
   const timestamp = Date.now().toString();
   const secreto = obtenerSecretoFirma();
+  const nonce = crypto.randomBytes(18).toString("base64url");
 
   const hmac = crypto
     .createHmac("sha256", secreto)
-    .update(`${tel}:${timestamp}`)
+    .update(`${tel}:${timestamp}:${nonce}`)
     .digest("hex");
 
-  return `${tel}:${timestamp}:${hmac}`;
+  const token = `${tel}:${timestamp}:${nonce}:${hmac}`;
+  const redis = getRedis();
+  if (redis) {
+    void redis.set(`phone-token:${nonce}`, "1", { nx: true, ex: TOKEN_NONCE_TTL_SEC }).catch(() => undefined);
+  } else {
+    noncesLocales.set(nonce, Date.now() + TOKEN_NONCE_TTL_SEC * 1000);
+  }
+  return token;
+}
+
+/** Variante usada por la ruta HTTP: espera la persistencia del nonce antes de responder. */
+export async function generarTokenTelefonoDurable(telefonoDiezDigitos: string): Promise<string> {
+  const token = generarTokenTelefono(telefonoDiezDigitos);
+  const nonce = token.split(":")[2];
+  const redis = getRedis();
+  if (!redis && process.env.NODE_ENV === "production") {
+    throw new Error("PHONE_NONCE_STORE_UNAVAILABLE");
+  }
+  if (redis) {
+    try {
+      await redis.set(`phone-token:${nonce}`, "1", { nx: true, ex: TOKEN_NONCE_TTL_SEC });
+    } catch (error) {
+      logStructuredWarn("auth/phone-verification", "nonce_redis_fallido", error);
+      throw new Error("PHONE_NONCE_STORE_UNAVAILABLE");
+    }
+  }
+  return token;
 }
 
 /**
  * Valida un token HMAC de teléfono firmado por este servidor:
- * 1. Verifica formato `${telefono}:${timestamp}:${hmac}`.
+ * 1. Verifica formato `${telefono}:${timestamp}:${nonce}:${hmac}`.
  * 2. Compara que coincida con el teléfono esperado.
  * 3. Valida que no haya expirado (máximo 15 minutos).
  * 4. Valida la firma HMAC en tiempo constante con crypto.timingSafeEqual.
@@ -51,11 +81,14 @@ export function validarTokenTelefono(
   }
 
   const partes = token.split(":");
-  if (partes.length !== 3) {
+  if (partes.length !== 4) {
     return { valido: false, error: "Token de verificación con formato inválido." };
   }
 
-  const [telToken, timestampStr, firmaRecibida] = partes;
+  const [telToken, timestampStr, nonce, firmaRecibida] = partes;
+  if (!nonce || !/^[A-Za-z0-9_-]{12,64}$/.test(nonce)) {
+    return { valido: false, error: "Nonce inválido en el token de verificación." };
+  }
   const telEsperado = soloDigitos(telefonoDiezDigitos, 10);
 
   if (telToken !== telEsperado) {
@@ -75,7 +108,7 @@ export function validarTokenTelefono(
   const secreto = obtenerSecretoFirma();
   const firmaEsperada = crypto
     .createHmac("sha256", secreto)
-    .update(`${telEsperado}:${timestampStr}`)
+    .update(`${telEsperado}:${timestampStr}:${nonce}`)
     .digest("hex");
 
   try {
@@ -91,6 +124,34 @@ export function validarTokenTelefono(
   }
 
   return { valido: true };
+}
+
+/** Consume el challenge exactamente una vez. En producción Redis es obligatorio. */
+export async function consumirTokenTelefono(
+  telefonoDiezDigitos: string,
+  token: string | null | undefined
+): Promise<{ valido: boolean; error?: string }> {
+  const validacion = validarTokenTelefono(telefonoDiezDigitos, token);
+  if (!validacion.valido || !token) return validacion;
+  const nonce = token.split(":")[2];
+  const redis = getRedis();
+  if (redis) {
+    try {
+      const consumido = await redis.getdel(`phone-token:${nonce}`);
+      return consumido ? { valido: true } : { valido: false, error: "El token ya fue utilizado o expiró." };
+    } catch (error) {
+      logStructuredWarn("auth/phone-verification", "nonce_redis_fallido", error);
+      return { valido: false, error: "Servicio de verificación no disponible. Intenta más tarde." };
+    }
+  }
+  if (process.env.NODE_ENV === "production") {
+    return { valido: false, error: "Servicio de verificación no disponible. Intenta más tarde." };
+  }
+  const expira = noncesLocales.get(nonce);
+  noncesLocales.delete(nonce);
+  return expira && expira > Date.now()
+    ? { valido: true }
+    : { valido: false, error: "El token ya fue utilizado o expiró." };
 }
 
 /**
@@ -115,10 +176,28 @@ function mockPermitido(): boolean {
 
 /** Suspensión explícita y reversible (activa por defecto temporalmente; usar "false" para reactivar). */
 export function bypassVerificacionTelefonoPermitido(): boolean {
-  if (process.env.PHONE_VERIFICATION_SUSPENDED === "false") {
-    return process.env.PHONE_VERIFY_BYPASS === "true" && process.env.NODE_ENV !== "production";
+  return process.env.PHONE_VERIFY_BYPASS === "true" && process.env.NODE_ENV !== "production";
+}
+
+const TWILIO_TIMEOUT_MS = 8_000;
+
+async function fetchConTimeout(url: string, init: RequestInit, reintentos = 1): Promise<Response> {
+  let ultimoError: unknown;
+  for (let intento = 0; intento <= reintentos; intento += 1) {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), TWILIO_TIMEOUT_MS);
+    try {
+      const respuesta = await fetch(url, { ...init, signal: controller.signal });
+      if (respuesta.status >= 500 && intento < reintentos) continue;
+      return respuesta;
+    } catch (error) {
+      ultimoError = error;
+      if (intento >= reintentos) throw error;
+    } finally {
+      clearTimeout(timeout);
+    }
   }
-  return true;
+  throw ultimoError instanceof Error ? ultimoError : new Error("Twilio no disponible");
 }
 
 /**
@@ -159,7 +238,7 @@ export async function enviarCodigoTwilioVerify(
   cuerpo.set("Channel", "sms");
 
   try {
-    const res = await fetch(url, {
+    const res = await fetchConTimeout(url, {
       method: "POST",
       headers: {
         Authorization: `Basic ${credenciales}`,
@@ -245,7 +324,7 @@ export async function verificarCodigoTwilioVerify(
   cuerpo.set("Code", codigoLimpio);
 
   try {
-    const res = await fetch(url, {
+    const res = await fetchConTimeout(url, {
       method: "POST",
       headers: {
         Authorization: `Basic ${credenciales}`,

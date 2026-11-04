@@ -31,6 +31,7 @@ class QueryFake {
   gte(...args: unknown[]) { return this.registrar("gte", args); }
   limit(...args: unknown[]) { return this.registrar("limit", args); }
   order(...args: unknown[]) { return this.registrar("order", args); }
+  range(...args: unknown[]) { return this.registrar("range", args); }
   or(...args: unknown[]) { return this.registrar("or", args); }
   is(...args: unknown[]) { return this.registrar("is", args); }
   lt(...args: unknown[]) { return this.registrar("lt", args); }

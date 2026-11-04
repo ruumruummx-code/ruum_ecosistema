@@ -1,6 +1,6 @@
 // PRD §3 — cuentas personales y empresa, máximo dos usuarios internos por empresa
 export type TipoCuenta = "personal" | "empresa";
-export type RolUsuario = "personal" | "titular_empresa" | "usuario_autorizado";
+export type RolUsuario = "personal" | "titular_empresa" | "usuario_autorizado" | "sin_rol";
 export type EstadoVerificacion = "pendiente" | "en_revision" | "verificado" | "rechazado";
 
 export interface Usuario {

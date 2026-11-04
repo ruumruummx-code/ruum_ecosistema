@@ -40,7 +40,6 @@ describe("T07 — Certificación de Autenticación, Sesión y Middleware (app-us
   describe("1. Middleware y Control de Acceso por Rol (Sin bucles ni acceso indebido)", () => {
     it.each([
       "/viajes/nuevo?vehiculo=auto-123&buscar_origen=Ciudad%20de%20M%C3%A9xico",
-      "/soporte?motivo=pagos&viaje=viaje-123&canal=telefono",
       "/mis-viajes?tab=programados&buscar=Quer%C3%A9taro",
     ])("conserva el contexto al autenticar %s", async ruta => {
       mockGetUser.mockResolvedValue({ data: { user: null } });
@@ -48,7 +47,15 @@ describe("T07 — Certificación de Autenticación, Sesión y Middleware (app-us
       const respuesta = await middleware(crearRequest(ruta));
       expect(new URL(respuesta.headers.get("location")!).searchParams.get("next")).toBe(ruta);
     });
-    const rutasProtegidas = ["/viajes", "/viajes/nuevo", "/mis-viajes", "/cuenta", "/pasaporte", "/verificacion", "/soporte"];
+    const rutasProtegidas = ["/viajes", "/viajes/nuevo", "/mis-viajes", "/cuenta", "/pasaporte", "/verificacion", "/inicio"];
+
+    it("soporte es público y no redirige a una ruta protegida", async () => {
+      mockGetUser.mockResolvedValue({ data: { user: null } });
+      const { middleware } = await import("../src/middleware");
+      const res = await middleware(crearRequest("/soporte?motivo=pagos"));
+      expect(res.status).toBe(200);
+      expect(res.headers.get("location")).toBeNull();
+    });
 
     it.each(rutasProtegidas)(
       "sin sesión activa o sesión expirada: bloquea %s y redirige a /login sin acceso indebido",

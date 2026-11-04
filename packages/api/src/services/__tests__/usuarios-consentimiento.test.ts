@@ -1,13 +1,12 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { crearClienteFake } from "./supabase-fake";
-import { obtenerUsuarioActual, registrarConsentimientoUsuario } from "../usuarios";
+import { crearPerfilUsuarioActual, obtenerUsuarioActual, registrarConsentimientoUsuario } from "../usuarios";
 
 // Mock para obtenerUsuarioActual fallback
 describe("PR-07 — No fabricar aceptación de términos (usuarios)", () => {
   beforeEach(() => vi.clearAllMocks());
 
-  it("fallback de creación de perfil NO fabrica consentimiento (version y fecha deben ser null)", async () => {
-    // Simular: auth.getUser retorna usuario sin fila en usuarios, fallback hace insert
+  it("la lectura de perfil es pura y no inserta una fila", async () => {
     const cliente = crearClienteFake({
       userId: "auth-user-123",
       tablas: {
@@ -15,8 +14,6 @@ describe("PR-07 — No fabricar aceptación de términos (usuarios)", () => {
       },
     }) as any;
 
-    // Mock para from("usuarios").insert(...).select().single()
-    // Necesitamos mockear el insert para capturar los valores
     const insertMock = vi.fn(async (payload: Record<string, unknown>) => {
       // Verificar que no se fabrica consentimiento
       expect(payload.version_terminos_aceptada).toBeNull();
@@ -46,11 +43,11 @@ describe("PR-07 — No fabricar aceptación de términos (usuarios)", () => {
     });
 
     const usuario = await obtenerUsuarioActual(cliente);
-    expect(usuario).toBeDefined();
-    expect(insertMock).toHaveBeenCalledOnce();
+    expect(usuario).toBeNull();
+    expect(insertMock).not.toHaveBeenCalled();
   });
 
-  it("fallback separa creación de registro de consentimiento (no inserta en consentimientos_usuario ni auditoría de aceptacion)", async () => {
+  it("la creación explícita usa rol mínimo sin consentimiento", async () => {
     // El fallback no debe insertar en consentimientos_usuario ni en registro_auditoria con evento aceptacion_terminos
     // Solo debe crear la fila básica
     const cliente = crearClienteFake({
@@ -76,8 +73,9 @@ describe("PR-07 — No fabricar aceptación de términos (usuarios)", () => {
       return { select: () => ({ eq: () => ({ maybeSingle: async () => ({ data: null, error: null }) }) }) } as any;
     });
 
-    await obtenerUsuarioActual(cliente);
+    await crearPerfilUsuarioActual(cliente);
     expect(insertPayload).not.toBeNull();
+    expect((insertPayload as any)?.rol).toBe("sin_rol");
     expect((insertPayload as any).version_terminos_aceptada).toBeNull();
     expect((insertPayload as any).terminos_aceptados_en).toBeNull();
     // No debe haber llamado a rpc registrar_consentimiento_usuario
@@ -176,7 +174,7 @@ describe("PR-07 — No fabricar aceptación de términos (usuarios)", () => {
         }
         return { select: () => ({ eq: () => ({ maybeSingle: async () => ({ data: null, error: null }) }) }) } as any;
       });
-      await obtenerUsuarioActual(cliente);
+      await crearPerfilUsuarioActual(cliente);
       expect((payloadInsert as any)?.version_terminos_aceptada).toBeNull();
       expect((payloadInsert as any)?.terminos_aceptados_en).toBeNull();
     });
