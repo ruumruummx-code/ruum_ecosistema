@@ -1,4 +1,3 @@
-import { consultarCatalogoVehiculoTarifa } from "@ruum/api/transfers";
 import { NextRequest, NextResponse } from "next/server";
 import { crearClienteServidor } from "@/lib/supabase-server";
 import { esquemaSolicitudTraslado } from "@ruum/shared/validacion";
@@ -10,12 +9,13 @@ import {
   VIAJES_CREAR_LIMITES,
   VIAJES_CREAR_VENTANA_MS,
 } from "@/lib/viajes-policy";
-import { obtenerRutaRecalculadaServidor } from "@/lib/ruta-cache";
+import { RutaNoDisponibleError } from "@/lib/ruta-cache";
+import { resolverRutaSolicitudServidor } from "@/lib/ruta-solicitud-servidor";
+import { cotizarSolicitudIndividual } from "@/lib/cotizacion-individual-servidor";
+import { construirPayloadCreacion } from "@/app/viajes/nuevo/adapters";
+import type { DatosFormulario } from "@/app/viajes/nuevo/types";
 import {
-  calcularTarifaServidor,
-  generarSnapshotFirmado,
   registrarDivergenciaTarifa,
-  type InputsTarifaSnapshot,
 } from "@/lib/tarifa-snapshot";
 
 // Sec3: validación servidor del wizard — rechazar si paso < 4 (PASOS.length = 4)
@@ -136,60 +136,30 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // RUUM-USR-F6-001 (CB-1 / CA-1 / T1 / T11): Recálculo server-side de ruta y monto como fuente de verdad
-    const origenCoords = {
-      lat: Number((body as Record<string, unknown>).origenLat ?? 19.385),
-      lng: Number((body as Record<string, unknown>).origenLng ?? -99.165),
-    };
-    const destinoCoords = {
-      lat: Number((body as Record<string, unknown>).destinoLat ?? 19.428),
-      lng: Number((body as Record<string, unknown>).destinoLng ?? -99.167),
-    };
-    const paradasCoords = (parsed.data.paradas ?? [])
-      .filter((p: unknown) => typeof (p as Record<string, unknown>)?.lat === "number" && typeof (p as Record<string, unknown>)?.lng === "number")
-      .map((p: unknown) => ({
-        lat: Number((p as Record<string, unknown>).lat),
-        lng: Number((p as Record<string, unknown>).lng),
-      }));
-
-    const rutaRecalculada = await obtenerRutaRecalculadaServidor(
-      origenCoords,
-      destinoCoords,
-      paradasCoords
-    );
-
-    // Resolver catálogo vehicular para cálculo oficial
-    let categoriaTarifa: "ligero_a" | "ligero_b" | "mediano" | "camion" = "ligero_b";
-    let gama: "entrada" | "media" | "alta" | "premium" = "media";
-
-    try {
-      if (typeof cliente.rpc === "function") {
-        const { data: catData } = await consultarCatalogoVehiculoTarifa(cliente, parsed.data.marca, parsed.data.modelo);
-        const primerRegistro = Array.isArray(catData) ? catData[0] : catData;
-        if (primerRegistro && typeof primerRegistro === "object" && "categoria_tarifa" in primerRegistro) {
-          const cat = primerRegistro as { categoria_tarifa?: "ligero_a" | "ligero_b" | "mediano" | "camion"; gama?: "entrada" | "media" | "alta" | "premium" };
-          if (cat.categoria_tarifa) {
-            categoriaTarifa = cat.categoria_tarifa;
-          }
-          if (cat.gama) {
-            gama = cat.gama;
-          }
-        }
-      }
-    } catch {
-      // Usar defaults de catálogo
+    // Resolver las direcciones en servidor: nunca usar coordenadas ni precio del navegador.
+    const tipo = (body as Record<string, unknown>).tipo;
+    if (!["sedan", "suv", "pick_up", "van", "luxury", "coleccion"].includes(String(tipo))) {
+      return NextResponse.json({ error: "Tipo de vehículo inválido." }, { status: 400 });
     }
-
-    // Calcular tarifa oficial server-side
-    const montoCalculado = calcularTarifaServidor({
-      categoria: categoriaTarifa,
-      gama,
-      condicion: parsed.data.condicion,
-      distanciaKm: rutaRecalculada.distanciaKm,
-      tiempoEstimadoHoras: rutaRecalculada.tiempoEstimadoHoras,
-      modalidad: parsed.data.modalidadProgramacion,
-      fechaHoraProgramada: parsed.data.fechaHoraProgramada,
-    });
+    const textoOpcional = (campo: string) => {
+      const valor = (body as Record<string, unknown>)[campo];
+      return typeof valor === "string" ? valor : "";
+    };
+    const formulario: DatosFormulario = {
+      ...parsed.data,
+      tipo: tipo as DatosFormulario["tipo"],
+      origenReferencias: textoOpcional("origenReferencias"),
+      destinoReferencias: textoOpcional("destinoReferencias"),
+      instruccionesEspeciales: textoOpcional("instruccionesEspeciales"),
+      ventanaRecoleccion: textoOpcional("ventanaRecoleccion"),
+      ventanaEntrega: textoOpcional("ventanaEntrega"),
+      paradas: parsed.data.paradas.map((p, i) => ({ ...p, id: String(i), referencias: p.referencias ?? "" })),
+    };
+    const rutaRecalculada = await resolverRutaSolicitudServidor(parsed.data);
+    const payload = construirPayloadCreacion(formulario, parsed.data.vehiculoSeleccionadoId, rutaRecalculada);
+    const solicitud = await cotizarSolicitudIndividual(user.id, payload);
+    const snapshot = solicitud.traslado.snapshot_tarifa as { monto: number };
+    const montoCalculado = snapshot.monto;
 
     // Detectar y registrar divergencia si el cliente envió datos manipulados (T4 / CA-1 / CA-C4)
     const clienteDistancia = typeof (body as Record<string, unknown>).distanciaKm === "number"
@@ -211,24 +181,6 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
-
-    // Generar snapshot firmado con TTL 15 min y anti-replay (T2, T3, CA-2, CA-3)
-    const inputsSnapshot: InputsTarifaSnapshot = {
-      origenCodigoPostal: parsed.data.origenCodigoPostal,
-      destinoCodigoPostal: parsed.data.destinoCodigoPostal,
-      origenCoords,
-      destinoCoords,
-      paradasCount: (parsed.data.paradas ?? []).length,
-      categoria: categoriaTarifa,
-      gama,
-      condicion: parsed.data.condicion,
-      modalidad: parsed.data.modalidadProgramacion,
-      fechaProgramada: parsed.data.fechaHoraProgramada,
-      distanciaKm: rutaRecalculada.distanciaKm,
-      tiempoEstimadoHoras: rutaRecalculada.tiempoEstimadoHoras,
-    };
-
-    const snapshotFirmado = generarSnapshotFirmado(inputsSnapshot, montoCalculado);
 
     // CB-3 / T9 / CA-8: Consentimiento vía escritor canónico de F2
     if (parsed.data.aceptaPoliticas) {
@@ -258,11 +210,16 @@ export async function POST(request: NextRequest) {
           precioCotizado: montoCalculado,
           fuente: rutaRecalculada.fuente,
         },
-        snapshot: snapshotFirmado,
+        // El nonce solo autoriza el payload exacto guardado en la base de datos.
+        snapshot: solicitud.traslado.snapshot_tarifa,
+        solicitud,
       },
       { status: 200 }
     );
   } catch (err) {
+    if (err instanceof RutaNoDisponibleError) {
+      return NextResponse.json({ error: err.message }, { status: 503 });
+    }
     console.warn("[api/viajes] error", err);
     return NextResponse.json({ error: "No se pudo procesar la solicitud. Intenta de nuevo más tarde." }, { status: 500 });
   }

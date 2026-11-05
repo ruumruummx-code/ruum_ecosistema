@@ -5,6 +5,7 @@
 create extension if not exists pgtap with schema extensions;
 
 begin;
+\ir ../tests/fixtures/sql/cotizacion-individual.sql
 
 select plan(10);
 
@@ -43,6 +44,7 @@ begin
   perform set_config('request.jwt.claim.sub', v_auth_id::text, true);
   perform set_config('role', 'authenticated', true);
 
+  v_traslado := pg_temp.cotizar_individual(null,v_vehiculo,v_traslado);
   v_respuesta := public.usuario_crea_traslado(null, v_vehiculo, v_traslado, v_clave_id, '[]'::jsonb);
   v_traslado_id := (v_respuesta->>'id')::uuid;
   v_precio := (v_respuesta->>'precio_cotizado')::numeric;

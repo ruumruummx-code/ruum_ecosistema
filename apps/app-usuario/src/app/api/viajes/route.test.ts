@@ -21,12 +21,24 @@ vi.mock("@ruum/api/services", () => ({
   registrarConsentimientoUsuario: mocksServicios.registrarConsentimiento,
 }));
 
+const mocksCotizacion = vi.hoisted(() => ({ ruta: vi.fn(), cotizar: vi.fn() }));
+vi.mock("@/lib/ruta-solicitud-servidor", () => ({ resolverRutaSolicitudServidor: mocksCotizacion.ruta }));
+vi.mock("@/lib/cotizacion-individual-servidor", () => ({ cotizarSolicitudIndividual: mocksCotizacion.cotizar }));
+
 let seq = 0;
 
 describe("Sec3 POST /api/viajes — validación paso servidor", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     seq++;
+    mocksCotizacion.ruta.mockResolvedValue({ distanciaKm: 12.5, tiempoEstimadoHoras: 0.6,
+      origenLat: 19.385, origenLng: -99.165, destinoLat: 19.428, destinoLng: -99.167,
+      paradasCoords: [], fuente: "mapbox" });
+    mocksCotizacion.cotizar.mockImplementation(async (_id, solicitud) => ({
+      ...solicitud, traslado: { ...solicitud.traslado, snapshot_tarifa: {
+        version: "2.1", monto: 850.5, nonce: "cotizacion-emitida-por-sql", expiraEn: new Date(Date.now()+900000).toISOString(),
+      } },
+    }));
     mockGetUser.mockResolvedValue({ data: { user: { id: `u-${seq}` } } });
     mocksServicios.obtenerUsuarioActual.mockResolvedValue({ id: `perfil-${seq}` });
     mocksServicios.listarVehiculos.mockResolvedValue([]);
@@ -36,7 +48,7 @@ describe("Sec3 POST /api/viajes — validación paso servidor", () => {
   function req(body: unknown, headers: Record<string, string> = {}) {
     return new NextRequest("http://localhost/api/viajes", {
       method: "POST",
-      body: JSON.stringify(body),
+      body: JSON.stringify({ tipo: "sedan", ...(body as Record<string, unknown>) }),
       headers: {
         "content-type": "application/json",
         "x-forwarded-for": `192.168.1.${seq}`,
@@ -330,8 +342,29 @@ describe("Sec3 POST /api/viajes — validación paso servidor", () => {
     expect(res.status).toBe(500);
   });
 
-  describe("RUUM-USR-F6-001 — Recálculo server-side, snapshot firmado y rate limiting", () => {
-    it("devuelve recalculo de distancia, tiempo y snapshot firmado en respuesta exitosa", async () => {
+  it("bloquea cobro si no se puede confirmar la ruta", async () => {
+    const { RutaNoDisponibleError } = await import("@/lib/ruta-cache");
+    mocksCotizacion.ruta.mockRejectedValueOnce(new RutaNoDisponibleError());
+    const { POST } = await import("./route");
+    const res = await POST(req(payloadValido()));
+    expect(res.status).toBe(503);
+    expect(mocksCotizacion.cotizar).not.toHaveBeenCalled();
+  });
+
+  it("propaga el importe SQL y sus coordenadas sin confiar en coordenadas cliente", async () => {
+    const { POST } = await import("./route");
+    mocksCotizacion.cotizar.mockImplementationOnce(async (_id, solicitud) => ({ ...solicitud,
+      traslado: { ...solicitud.traslado, snapshot_tarifa: { monto: 8864.5, nonce: "sql-camion" } } }));
+    const res = await POST(req(payloadValido({ origenLat: 0, origenLng: 0 })));
+    expect(res.status).toBe(200);
+    const json = await res.json();
+    expect(json.recalculo.precioCotizado).toBe(8864.5);
+    expect(json.solicitud.traslado.origen_lat).toBe(19.385);
+    expect(json.solicitud.traslado.snapshot_tarifa).toEqual(json.snapshot);
+  });
+
+  describe("RUUM-USR-F6-001 — Recálculo server-side, cotización persistida y rate limiting", () => {
+    it("devuelve recalculo de distancia, tiempo y cotización persistida en respuesta exitosa", async () => {
       const { POST } = await import("./route");
       const res = await POST(req(payloadValido({
         origenCoordenadas: [-99.1676, 19.4270],
@@ -353,9 +386,9 @@ describe("Sec3 POST /api/viajes — validación paso servidor", () => {
       };
       expect(json.ok).toBe(true);
       expect(json.recalculo.distanciaKm).toBeGreaterThan(0);
-      expect(json.snapshot.version).toBe("2.0");
+      expect(json.snapshot.version).toBe("2.1");
       expect(json.snapshot.monto).toBeGreaterThan(0);
-      expect(typeof json.snapshot.firma).toBe("string");
+
       expect(typeof json.snapshot.nonce).toBe("string");
     });
 

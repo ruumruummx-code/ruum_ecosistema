@@ -19,6 +19,7 @@
 create extension if not exists pgtap with schema extensions;
 
 begin;
+\ir ../tests/fixtures/sql/cotizacion-individual.sql
 
 select plan(16);
 
@@ -30,6 +31,7 @@ declare
   v_usuario_b uuid;
   v_vehiculo_a uuid;
   v_traslado_id uuid;
+  v_cotizado jsonb;
   v_respuesta jsonb;
   v_traslado_generico jsonb := jsonb_build_object(
     'contacto_entrega_nombre', 'A', 'contacto_entrega_telefono', '+520000000000',
@@ -66,7 +68,7 @@ begin
   perform set_config('request.jwt.claim.sub', v_auth_b::text, true);
   begin
     perform set_config('role', 'authenticated', true);
-    perform public.usuario_crea_traslado(v_vehiculo_a, null, v_traslado_generico, gen_random_uuid());
+    perform public.usuario_crea_traslado(v_vehiculo_a, null, v_traslado_generico, gen_random_uuid(), '[]');
     v_ok := true;
   exception when others then
     v_ok := false;
@@ -74,7 +76,7 @@ begin
   end;
   perform set_config('role', 'postgres', true);
   return next ok(not v_ok, 'B1.1: no se puede crear un traslado con el vehículo de otro usuario');
-  return next ok(v_msg ilike '%no existe o no pertenece%', 'B1.2: el rechazo es un mensaje de negocio, no un error crudo');
+  return next ok(v_msg ilike '%Cotización no emitida%', 'B1.2: el rechazo es un mensaje de negocio, no un error crudo');
 
   return next is(
     (select count(*) from public.traslados),
@@ -83,13 +85,15 @@ begin
   );
 
   -- 2) A crea un traslado con su propio vehículo guardado -> permitido.
+  update public.vehiculos set categoria_tarifa='ligero_a', gama='entrada', condicion='seminueva' where id=v_vehiculo_a;
   perform set_config('request.jwt.claim.sub', v_auth_a::text, true);
+  v_cotizado := pg_temp.cotizar_individual(v_vehiculo_a,null,v_traslado_generico || jsonb_build_object('tipo_pago','al_cierre'));
   perform set_config('role', 'authenticated', true);
   v_respuesta := public.usuario_crea_traslado(
     v_vehiculo_a,
     null,
-    v_traslado_generico || jsonb_build_object('tipo_pago', 'al_cierre'),
-    gen_random_uuid()
+    v_cotizado,
+    gen_random_uuid(), '[]'
   );
   v_traslado_id := (v_respuesta->>'id')::uuid;
   perform set_config('role', 'postgres', true);
@@ -119,7 +123,8 @@ begin
 
   -- 3) A crea un traslado con vehículo nuevo (incluye transmisión 'electrica').
   perform set_config('role', 'authenticated', true);
-  v_traslado_id := (public.usuario_crea_traslado(null, v_vehiculo_nuevo, v_traslado_generico, gen_random_uuid())->>'id')::uuid;
+  v_cotizado := pg_temp.cotizar_individual(null,v_vehiculo_nuevo,v_traslado_generico);
+  v_traslado_id := (public.usuario_crea_traslado(null, v_vehiculo_nuevo, v_cotizado, gen_random_uuid(), '[]')->>'id')::uuid;
   perform set_config('role', 'postgres', true);
 
   return next ok(v_traslado_id is not null, 'B1.10: se puede crear traslado + vehículo nuevo en un solo llamado');
@@ -144,7 +149,7 @@ begin
   perform set_config('request.jwt.claim.sub', v_auth_b::text, true);
   perform set_config('role', 'authenticated', true);
   begin
-    perform public.usuario_crea_traslado(v_vehiculo_a, null, v_traslado_generico, gen_random_uuid());
+    perform public.usuario_crea_traslado(v_vehiculo_a, null, v_traslado_generico, gen_random_uuid(), '[]');
     v_ok := true;
   exception when others then
     v_ok := false;
@@ -156,7 +161,7 @@ begin
   perform set_config('request.jwt.claim.sub', gen_random_uuid()::text, true);
   perform set_config('role', 'authenticated', true);
   begin
-    perform public.usuario_crea_traslado(v_vehiculo_a, null, v_traslado_generico, gen_random_uuid());
+    perform public.usuario_crea_traslado(v_vehiculo_a, null, v_traslado_generico, gen_random_uuid(), '[]');
     v_ok := true;
   exception when others then
     v_ok := false;
@@ -167,6 +172,7 @@ begin
 
   -- 5) El INSERT directo a traslados ya no es posible (RLS sin política de insert).
   perform set_config('request.jwt.claim.sub', v_auth_a::text, true);
+  v_cotizado := pg_temp.cotizar_individual(v_vehiculo_a,null,v_traslado_generico || jsonb_build_object('tipo_pago','al_cierre'));
   perform set_config('role', 'authenticated', true);
   begin
     insert into public.traslados (

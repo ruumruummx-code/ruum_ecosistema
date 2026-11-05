@@ -64,59 +64,6 @@ export function generarHashInputsTarifa(inputs: InputsTarifaSnapshot): string {
 }
 
 /**
- * RUUM-USR-F6-001 (CB-1 / CA-1): Recálculo de tarifa en el servidor como única fuente de verdad.
- * Replica el modelo tarifario v2 oficial de la base de datos (calcular_tarifa_traslado).
- */
-export function calcularTarifaServidor(params: {
-  categoria: "ligero_a" | "ligero_b" | "mediano" | "camion";
-  gama: "entrada" | "media" | "alta" | "premium";
-  condicion: "nueva" | "seminueva" | "rescate_mecanico";
-  distanciaKm: number;
-  tiempoEstimadoHoras: number;
-  modalidad: "lo_antes_posible" | "programado";
-  fechaHoraProgramada?: string | null;
-}): number {
-  const { categoria, gama, condicion, distanciaKm, tiempoEstimadoHoras, fechaHoraProgramada } = params;
-
-  // 1. Rango de distancia
-  const rango =
-    distanciaKm <= 50 ? "rango_1" : distanciaKm <= 150 ? "rango_2" : distanciaKm <= 350 ? "rango_3" : "rango_4";
-
-  // 2. Base y costo por km
-  const tablaTarifas: Record<string, Record<string, { base: number; porKm: number }>> = {
-    ligero_a: { rango_1: { base: 650, porKm: 7 }, rango_2: { base: 700, porKm: 7 }, rango_3: { base: 720, porKm: 7 }, rango_4: { base: 750, porKm: 7 } },
-    ligero_b: { rango_1: { base: 700, porKm: 7.5 }, rango_2: { base: 750, porKm: 7.5 }, rango_3: { base: 780, porKm: 7.5 }, rango_4: { base: 820, porKm: 7.5 } },
-    mediano: { rango_1: { base: 1100, porKm: 11 }, rango_2: { base: 1800, porKm: 11 }, rango_3: { base: 2600, porKm: 11 }, rango_4: { base: 3800, porKm: 11 } },
-    camion: { rango_1: { base: 1800, porKm: 16 }, rango_2: { base: 3200, porKm: 16 }, rango_3: { base: 4800, porKm: 16 }, rango_4: { base: 7200, porKm: 16 } },
-  };
-
-  const configCat = tablaTarifas[categoria]?.[rango] ?? tablaTarifas.ligero_b.rango_1;
-
-  // 3. Factores multiplicadores
-  const factorGama = { entrada: 1.0, media: 1.15, alta: 1.4, premium: 1.8 }[gama] ?? 1.0;
-  // CB-3 / T8: Rescate mecánico aplica recargo oficial de 1.25x
-  const factorCondicion = { nueva: 1.1, seminueva: 1.0, rescate_mecanico: 1.25 }[condicion] ?? 1.0;
-
-  const fechaRef = fechaHoraProgramada ? new Date(fechaHoraProgramada) : new Date();
-  const hora = fechaRef.getHours();
-  const esNocturno = hora >= 20 || hora < 6;
-  const factorHorario = esNocturno ? 1.15 : 1.0;
-
-  const diaSemana = fechaRef.getDay(); // 0 = domingo, 6 = sábado
-  const esFinSemana = diaSemana === 0 || diaSemana === 6;
-  const factorDia = esFinSemana ? 1.1 : 1.0;
-
-  const tarifaHora = 21.5;
-  const topeFactorVariable = 2.0;
-
-  const baseCategoria = configCat.base * factorGama;
-  const subtotal = baseCategoria + distanciaKm * configCat.porKm + tiempoEstimadoHoras * tarifaHora;
-  const factorVariable = Math.min(factorCondicion * factorHorario * factorDia, topeFactorVariable);
-
-  return Number((subtotal * factorVariable).toFixed(2));
-}
-
-/**
  * Genera la firma HMAC-SHA256 del snapshot.
  */
 function firmarPayload(payload: SnapshotTarifaPayload, secreto: string): string {

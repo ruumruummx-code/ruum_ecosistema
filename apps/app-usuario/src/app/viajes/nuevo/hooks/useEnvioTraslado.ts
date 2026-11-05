@@ -8,14 +8,8 @@ import { crearClienteNavegador, tieneSupabaseConfigurado } from "@/lib/supabase-
 import { crearTraslado } from "@ruum/api/services";
 import { registrarEventoUx } from "@/lib/analytics";
 import { obtenerHeadersCsrf } from "@/lib/csrf";
-import {
-  esErrorConfiguracionMapbox,
-  mensajeErrorMapbox,
-  tieneMapboxConfigurado
-} from "@/lib/mapbox";
 import { limpiarBorradorTrasladoLocal } from "@/lib/borrador-traslado";
-import { construirPayloadCreacion, type CoordenadasParada, type CoordenadasTraslado } from "../adapters";
-import { domicilioCompleto } from "../constants";
+import type { SolicitudCotizada } from "@/lib/cotizacion-individual-servidor";
 import {
   CAMPOS_PASO_VEHICULO_DETALLE,
   CAMPOS_RUTA_DESTINO_CONTACTOS,
@@ -86,11 +80,8 @@ export function useEnvioTraslado(params: ParametrosEnvioTraslado) {
     sesionReal,
     vehiculoSeleccionadoId,
     vehiculosGuardados,
-    rutaEstimacion,
     claveIdempotencia,
     resultadoValidacion,
-    geocodificarRuta,
-    geocodificarRutaConParadas,
     enfocarPrimerError,
     router,
     formEnviadoRef,
@@ -104,28 +95,24 @@ export function useEnvioTraslado(params: ParametrosEnvioTraslado) {
     setErrores,
     setDetallesVehiculoExpandido,
     setSubpasoRuta,
-    setRutaAviso,
     setTrasladoCreado
   } = setters;
 
   const envioEnCursoRef = useRef(false);
   const crear = useCallback(async (
     cliente: SupabaseClient<Database>,
-    datosForm: DatosFormulario,
-    vehiculoId: string,
-    coordenadas: CoordenadasTraslado & { paradasCoords?: CoordenadasParada[] },
+    payload: SolicitudCotizada,
     idempotenciaKey: string
   ) => {
     try {
       if (!idempotenciaKey) throw new Error("No se pudo generar la clave de seguridad de la solicitud.");
-      const payload = construirPayloadCreacion(datosForm, vehiculoId, coordenadas);
       const traslado = await crearTraslado(cliente, payload.vehiculo, payload.traslado, idempotenciaKey, payload.paradas);
       limpiarBorradorTrasladoLocal();
       return traslado;
     } catch (error) {
       Sentry.captureException(error, {
         tags: { componente: "NuevoTraslado", paso, etapa: "creacion" },
-        contexts: { traslado: { paso, tarifaPreviaAceptada, datosCompletos: Boolean(datosForm.marca && datosForm.modelo) } },
+        contexts: { traslado: { paso, tarifaPreviaAceptada, datosCompletos: Boolean(payload.vehiculo && payload.traslado) } },
       });
       throw error;
     }
@@ -215,6 +202,7 @@ export function useEnvioTraslado(params: ParametrosEnvioTraslado) {
         ok?: boolean;
         recalculo?: { distanciaKm: number; tiempoEstimadoHoras: number; precioCotizado: number };
         snapshot?: unknown;
+        solicitud?: SolicitudCotizada;
       } | null = null;
 
       try {
@@ -245,64 +233,12 @@ export function useEnvioTraslado(params: ParametrosEnvioTraslado) {
         console.warn("[traslados/nuevo] validación paso servidor fallida: se bloquea la creación", e);
         throw e instanceof Error ? e : new Error("No pudimos validar tu solicitud en el servidor. Intenta de nuevo.");
       }
+      // Se reenvía exactamente la solicitud cotizada; la RPC rechaza cualquier cambio.
+      if (!datosValidacionServidor?.ok || !datosValidacionServidor.solicitud?.traslado.snapshot_tarifa) {
+        throw new Error("No recibimos una cotización válida. Intenta nuevamente.");
+      }
       const cliente = crearClienteNavegador();
-      const origenDireccion = domicilioCompleto({
-        calle: datos.origenCalle,
-        numero: datos.origenNumero,
-        colonia: datos.origenColonia,
-        codigoPostal: datos.origenCodigoPostal,
-        ciudad: datos.origenCiudad,
-        estado: datos.origenEstado
-      });
-      const destinoDireccion = domicilioCompleto({
-        calle: datos.destinoCalle,
-        numero: datos.destinoNumero,
-        colonia: datos.destinoColonia,
-        codigoPostal: datos.destinoCodigoPostal,
-        ciudad: datos.destinoCiudad,
-        estado: datos.destinoEstado
-      });
-
-      let coordenadas: typeof rutaEstimacion & { snapshotTarifa?: unknown } = rutaEstimacion as typeof rutaEstimacion & { snapshotTarifa?: unknown };
-      if (!coordenadas) {
-        try {
-          const paradasDirs = (datos.paradas ?? []).map((p) => domicilioCompleto({
-            calle: p.calle, numero: p.numero, colonia: p.colonia, codigoPostal: p.codigoPostal, ciudad: p.ciudad, estado: p.estado
-          }));
-          const origenActual = datos.origenLat !== undefined && datos.origenLng !== undefined ? { lat: datos.origenLat, lng: datos.origenLng } : undefined;
-          const destinoActual = datos.destinoLat !== undefined && datos.destinoLng !== undefined ? { lat: datos.destinoLat, lng: datos.destinoLng } : undefined;
-          coordenadas = paradasDirs.length
-            ? await geocodificarRutaConParadas(origenDireccion, destinoDireccion, paradasDirs, origenActual, undefined, destinoActual)
-            : await geocodificarRuta(origenDireccion, destinoDireccion, origenActual, undefined, destinoActual);
-        } catch (error) {
-          if (!esErrorConfiguracionMapbox(error)) throw error;
-          setRutaAviso(mensajeErrorMapbox(error));
-          coordenadas = { incompletas: true };
-        }
-      }
-
-      // RUUM-USR-F6-001 (CB-1 / CA-1): El recálculo del servidor es la única fuente de verdad;
-      // se inyecta la distancia/tiempo recalculados y el snapshot firmado
-      if (datosValidacionServidor?.recalculo) {
-        coordenadas = {
-          ...coordenadas,
-          distanciaKm: datosValidacionServidor.recalculo.distanciaKm,
-          tiempoEstimadoHoras: datosValidacionServidor.recalculo.tiempoEstimadoHoras,
-          snapshotTarifa: datosValidacionServidor.snapshot,
-        };
-      } else if (datosValidacionServidor?.snapshot) {
-        coordenadas = {
-          ...coordenadas,
-          snapshotTarifa: datosValidacionServidor.snapshot,
-        };
-      }
-
-      if (coordenadas.incompletas && !tieneMapboxConfigurado()) {
-        // Sec2: log genérico sin exponer nombre de variable de entorno; detalle va a observabilidad
-        console.warn("[traslados/nuevo] servicio de mapas no configurado: origen/destino se guardan sin geocodificar.");
-      }
-
-      const nuevoTraslado = await crear(cliente, datos, vehiculoSeleccionadoId, coordenadas, claveIdempotencia);
+      const nuevoTraslado = await crear(cliente, datosValidacionServidor.solicitud, claveIdempotencia);
 
       setTrasladoCreado({
         id: nuevoTraslado.id,
@@ -360,10 +296,9 @@ export function useEnvioTraslado(params: ParametrosEnvioTraslado) {
   }, [
     aceptaPoliticasPagoCancelacion, cargandoSesion, claveIdempotencia, crear, datos, resultadoValidacion, enfocarPrimerError,
     formEnviadoRef,
-    geocodificarRuta, geocodificarRutaConParadas,
     paso, router, sesionReal, setDetallesVehiculoExpandido, setEnviando, setErrorPaso,
-    setErrores, setPaso, setResultado, setRutaAviso, setSubpasoRuta, setTrasladoCreado,
-    tarifaPreviaAceptada, vehiculoSeleccionadoId, vehiculosGuardados, rutaEstimacion
+    setErrores, setPaso, setResultado, setSubpasoRuta, setTrasladoCreado,
+    tarifaPreviaAceptada, vehiculoSeleccionadoId, vehiculosGuardados
   ]);
 
   return { crear, enviarSolicitud };
