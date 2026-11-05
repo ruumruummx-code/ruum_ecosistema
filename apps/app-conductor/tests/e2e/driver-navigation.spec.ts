@@ -41,17 +41,16 @@ for (const viewport of [{ width: 320, height: 568 }, { width: 390, height: 844 }
         await page.goto(route, { waitUntil: "domcontentloaded" });
         await expect(page.getByRole("heading", { level: 1 }).first()).toBeVisible({ timeout: 180_000 });
         await page.locator("nextjs-portal").evaluateAll(nodes => nodes.forEach(node => (node as HTMLElement).style.setProperty("display", "none", "important")));
-        const mobile = viewport.width < 768;
-        const navigation = page.getByRole("navigation", { name: mobile || route !== "/panel" ? "Navegación principal móvil" : "Navegación principal", exact: true });
+        const navigation = page.getByRole("navigation", { name: "Navegación principal móvil", exact: true });
         await expect(navigation).toBeVisible();
-        await expect(navigation.getByRole("link")).toHaveCount(route === "/panel" ? (mobile ? 3 : 7) : 3);
+        await expect(navigation.getByRole("link")).toHaveCount(3);
         await expect(navigation.locator('[aria-current="page"]')).toHaveCount(["/ganancias", "/notificaciones"].includes(route) ? 0 : 1);
         if (route !== "/panel") {
           await expect(page.locator("#contenido-principal nav[aria-label='Navegación principal']")).toHaveCount(0);
         }
         const main = page.locator("#contenido-principal");
         const header = route === "/panel"
-          ? (mobile ? page.locator('header[aria-label="Encabezado móvil del panel"]') : page.locator("[data-panel-desktop-header]"))
+          ? page.locator('header[aria-label="Encabezado del conductor"]')
           : page.locator("[data-conductor-header]");
         if (route !== "/panel") {
           await expect.poll(async () => main.evaluate(element => parseFloat(getComputedStyle(element).paddingTop))).toBeGreaterThanOrEqual(16);
@@ -69,7 +68,7 @@ for (const viewport of [{ width: 320, height: 568 }, { width: 390, height: 844 }
         }
         await expect(page.getByText("Acción requerida para continuar sincronización.", { exact: true })).toHaveCount(0);
         expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
-        if (mobile && viewport.height >= 568 && ["/panel", "/viajes", "/cuenta"].includes(route)) {
+        if (viewport.width < 768 && viewport.height >= 568 && ["/panel", "/viajes", "/cuenta"].includes(route)) {
           await expect.poll(() => page.evaluate(() => document.documentElement.scrollHeight)).toBeLessThanOrEqual(viewport.height);
         }
         expect(await page.evaluate(() => getComputedStyle(document.body).overflowY)).not.toBe("hidden");

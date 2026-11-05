@@ -53,7 +53,7 @@ export function ConductorNav({
   return (
     <>
       {mostrarMobileNav && (
-        <div ref={mobileNavRef} data-conductor-mobile-nav className="fixed bottom-0 inset-x-0 z-40 bg-surface/95 border-t border-border/20 backdrop-blur-md pb-[max(8px,env(safe-area-inset-bottom))] pt-2.5 shadow-[0_-8px_30px_rgba(13,43,94,0.10)] supports-[backdrop-filter]:bg-surface/80">
+        <div ref={mobileNavRef} data-conductor-mobile-nav className="conductor-bottom-nav">
           {viajeActivo && !pathname.startsWith("/viajes") && pathname !== "/panel" && (
             <div className="conductor-mobile-active-trip px-4 pb-3">
               <Link
@@ -93,7 +93,7 @@ export function ConductorNav({
                     aria-label={destino.etiqueta}
                     className={[
                       "relative flex flex-col items-center justify-center gap-0.5 rounded-xl px-0.5 py-1.5 min-h-[56px] font-body text-xs leading-none transition-colors duration-200 select-none",
-                      activo ? "text-text-primary dark:text-signal font-black bg-signal/20 dark:bg-signal/15 shadow-2xs" : "text-text-secondary hover:text-text-primary"
+                      activo ? "conductor-nav-selected font-semibold" : "text-text-secondary hover:text-text-primary"
                     ].join(" ")}
                   >
                     <div className="relative flex items-center justify-center p-1">

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import styles from "./panel.module.css";
 import Link from "next/link";
 import Image from "next/image";
 import { Aviso } from "@ruum/ui";
@@ -23,14 +24,14 @@ function PanelLoadingSkeleton() {
     <div className="flex w-full flex-col gap-4" aria-label="Cargando panel operativo" aria-busy="true">
       <div className="h-16 w-full animate-pulse rounded-2xl bg-slate-200/70" />
       <div className="h-24 w-full animate-pulse rounded-2xl bg-slate-200/70" />
-      <div className="grid grid-cols-4 gap-2 md:gap-4">
-        <div className="h-[88px] animate-pulse rounded-2xl bg-slate-200/70 md:h-[138px]" />
-        <div className="h-[88px] animate-pulse rounded-2xl bg-slate-200/70 md:h-[138px]" />
-        <div className="h-[88px] animate-pulse rounded-2xl bg-slate-200/70 md:h-[138px]" />
-        <div className="h-[88px] animate-pulse rounded-2xl bg-slate-200/70 md:h-[138px]" />
+      <div className="grid grid-cols-4 gap-2">
+        <div className="h-[88px] animate-pulse rounded-2xl bg-slate-200/70" />
+        <div className="h-[88px] animate-pulse rounded-2xl bg-slate-200/70" />
+        <div className="h-[88px] animate-pulse rounded-2xl bg-slate-200/70" />
+        <div className="h-[88px] animate-pulse rounded-2xl bg-slate-200/70" />
       </div>
-      <div className="h-[164px] animate-pulse rounded-2xl bg-slate-200/70 md:h-[190px]" />
-      <div className="grid grid-cols-2 gap-3 md:gap-5">
+      <div className="h-[164px] animate-pulse rounded-2xl bg-slate-200/70" />
+      <div className="grid grid-cols-2 gap-3">
         <div className="h-[136px] animate-pulse rounded-2xl bg-slate-200/70" />
         <div className="h-[136px] animate-pulse rounded-2xl bg-slate-200/70" />
       </div>
@@ -107,17 +108,10 @@ const MENU_LATERAL = [
   { href: "/cuenta/soporte", label: "Soporte", icon: "soporte", active: false },
 ] as const;
 
-const MENU_INFERIOR_MOVIL = [
-  { href: "/panel", label: "Inicio", icon: "inicio", active: true },
-  { href: "/viajes", label: "Traslados", icon: "traslados", active: false },
-  { href: "/cuenta", label: "Cuenta", icon: "cuenta", active: false },
-] as const;
-
 export default function PaginaPanel() {
   const { cerrarSesion, cerrandoSesion, errorCerrarSesion } = useCerrarSesion();
   const [soporteAbierto, setSoporteAbierto] = useState(false);
   const [menuAbierto, setMenuAbierto] = useState(false);
-  const [perfilMenuAbierto, setPerfilMenuAbierto] = useState(false);
   const [gpsActivo, setGpsActivo] = useState<boolean | null>(null);
   const [gpsUltimaSenal, setGpsUltimaSenal] = useState<Date | null>(null);
   const [pullOffset, setPullOffset] = useState(0);
@@ -292,7 +286,7 @@ export default function PaginaPanel() {
 
   return (
     <div
-      className={`driver-dashboard flex min-h-[100dvh] w-full flex-col overflow-x-hidden bg-white md:bg-[#EEF3FA] md:p-4 lg:p-6 ${
+      className={`${styles.screen} driver-dashboard ${
         viajeActivoPrincipal ? "" : "driver-dashboard-empty"
       }`}
     >
@@ -329,18 +323,17 @@ export default function PaginaPanel() {
         </div>
       )}
 
-      {/* Marco principal: fluido en móvil, contenedor de 2 columnas con header superior en Web Desktop */}
-      <div className="mx-auto flex w-full max-w-md flex-1 flex-col px-4 pb-[calc(88px+env(safe-area-inset-bottom))] md:max-w-[1220px] md:overflow-hidden md:rounded-[28px] md:border md:border-[#DCE7F5] md:bg-[#F9FBFE] md:px-0 md:pb-0 md:shadow-[0_12px_40px_rgba(10,35,66,0.06)]">
+      <div className={styles.frame}>
         {/* HEADER MÓVIL (< md) */}
         <header
-          className="grid min-h-16 grid-cols-[44px_1fr_88px] items-center gap-1 pt-[max(8px,env(safe-area-inset-top))] md:hidden"
-          aria-label="Encabezado móvil del panel"
+          className={styles.header}
+          aria-label="Encabezado del conductor"
         >
           <button
             type="button"
             onClick={() => setMenuAbierto(true)}
             aria-label="Abrir menú"
-            className="inline-flex min-h-11 min-w-11 cursor-pointer items-center justify-center rounded-full text-[#0A2342] transition hover:bg-slate-100 active:scale-95 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#0066FF]"
+            className="inline-flex min-h-11 min-w-11 cursor-pointer items-center justify-center rounded-full text-[var(--conductor-primary)] transition hover:bg-slate-100 active:scale-95 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#0066FF]"
           >
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.1" strokeLinecap="round" aria-hidden="true">
               <path d="M4 7h16M4 12h16M4 17h16" />
@@ -354,7 +347,7 @@ export default function PaginaPanel() {
           <div className="flex items-center justify-end gap-0.5">
             <Link
               href="/notificaciones"
-              className="relative inline-flex min-h-11 min-w-11 cursor-pointer items-center justify-center rounded-full text-[#0A2342] transition hover:bg-slate-100 active:scale-95 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#0066FF]"
+              className="relative inline-flex min-h-11 min-w-11 cursor-pointer items-center justify-center rounded-full text-[var(--conductor-primary)] transition hover:bg-slate-100 active:scale-95 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#0066FF]"
               aria-label={
                 notificacionesCount > 0
                   ? `Notificaciones (${notificacionesCount > 99 ? "99+" : notificacionesCount} sin leer)`
@@ -365,16 +358,13 @@ export default function PaginaPanel() {
                 <path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9" />
                 <path d="M10 21h4" />
               </svg>
-              <span
-                className="absolute right-2.5 top-2.5 size-2.5 rounded-full border-2 border-white bg-[#EF4444]"
-                aria-hidden="true"
-              />
+              {notificacionesCount > 0 && <span className="absolute right-2.5 top-2.5 size-2.5 rounded-full border-2 border-white bg-[#EF4444]" aria-hidden="true" />}
             </Link>
             <button
               type="button"
               onClick={() => setSoporteAbierto(true)}
               aria-label="Abrir soporte técnico"
-              className="inline-flex min-h-11 min-w-11 cursor-pointer items-center justify-center rounded-full text-[#0A2342] transition hover:bg-slate-100 active:scale-95 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#0066FF]"
+              className="inline-flex min-h-11 min-w-11 cursor-pointer items-center justify-center rounded-full text-[var(--conductor-primary)] transition hover:bg-slate-100 active:scale-95 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#0066FF]"
             >
               <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                 <path d="M4 13v-1a8 8 0 0 1 16 0v1" />
@@ -385,160 +375,9 @@ export default function PaginaPanel() {
           </div>
         </header>
 
-        {/* HEADER WEB / DESKTOP (md:) */}
-        <header
-          data-panel-desktop-header
-          className="hidden h-20 shrink-0 items-center justify-between border-b border-[#E5EEF8] bg-white px-7 lg:px-9 md:flex"
-          aria-label="Encabezado de escritorio"
-        >
-          <Link href="/panel" className="inline-flex cursor-pointer items-center" aria-label="Ruum Ruum, inicio">
-            <Image src="/imagenes/ruum-logo.svg" alt="Ruum Ruum" width={156} height={50} priority className="h-10 w-auto" />
-          </Link>
-
-          <div className="relative flex items-center gap-5">
-            <span className="h-9 w-px bg-[#E5EEF8]" aria-hidden="true" />
-            <button
-              type="button"
-              onClick={() => setPerfilMenuAbierto((prev) => !prev)}
-              aria-expanded={perfilMenuAbierto}
-              aria-haspopup="menu"
-              aria-label={`Menú de usuario: Hola, ${primerNombre}`}
-              className="flex cursor-pointer items-center gap-3.5 rounded-2xl px-3 py-2 text-left transition hover:bg-[#F3F7FC] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#0066FF]"
-            >
-              <span
-                className="inline-flex size-11 shrink-0 items-center justify-center rounded-full bg-[#DCE8FC] text-[#0066FF]"
-                aria-hidden="true"
-              >
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-                  <circle cx="12" cy="8" r="3.8" />
-                  <path d="M4 20c0-3.7 3.3-6.4 8-6.4s8 2.7 8 6.4" />
-                </svg>
-              </span>
-              <div className="min-w-0">
-                <div className="flex items-center justify-between gap-3">
-                  <span className="font-display text-base font-extrabold leading-tight text-[#0A2342]">
-                    Hola, {primerNombre}
-                  </span>
-                  <svg
-                    width="18"
-                    height="18"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2.4"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    className={`text-[#0A2342] transition-transform duration-200 ${perfilMenuAbierto ? "rotate-180" : ""}`}
-                    aria-hidden="true"
-                  >
-                    <path d="m6 9 6 6 6-6" />
-                  </svg>
-                </div>
-                <p className="mt-0.5 font-body text-xs text-[#566889]">
-                  Hoy es un gran día para conducir 🚀
-                </p>
-              </div>
-            </button>
-
-            {perfilMenuAbierto && (
-              <div
-                role="menu"
-                aria-label="Opciones del conductor"
-                className="absolute right-0 top-[calc(100%+8px)] z-50 w-56 rounded-2xl border border-[#DCE7F5] bg-white p-2 shadow-xl"
-              >
-                <Link
-                  href="/cuenta/perfil"
-                  role="menuitem"
-                  onClick={() => setPerfilMenuAbierto(false)}
-                  className="flex min-h-10 cursor-pointer items-center rounded-xl px-3 py-2 font-body text-sm font-semibold text-[#0A2342] transition hover:bg-[#F1F6FD]"
-                >
-                  Mi perfil
-                </Link>
-                <Link
-                  href="/cuenta"
-                  role="menuitem"
-                  onClick={() => setPerfilMenuAbierto(false)}
-                  className="flex min-h-10 cursor-pointer items-center rounded-xl px-3 py-2 font-body text-sm font-semibold text-[#0A2342] transition hover:bg-[#F1F6FD]"
-                >
-                  Cuenta
-                </Link>
-                <Link
-                  href="/cuenta/preferencias"
-                  role="menuitem"
-                  onClick={() => setPerfilMenuAbierto(false)}
-                  className="flex min-h-10 cursor-pointer items-center rounded-xl px-3 py-2 font-body text-sm font-semibold text-[#0A2342] transition hover:bg-[#F1F6FD]"
-                >
-                  Preferencias
-                </Link>
-                <div className="my-1 h-px bg-[#E5EEF8]" aria-hidden="true" />
-                <button
-                  type="button"
-                  role="menuitem"
-                  disabled={cerrandoSesion}
-                  onClick={() => {
-                    setPerfilMenuAbierto(false);
-                    void cerrarSesion();
-                  }}
-                  className="flex min-h-10 w-full cursor-pointer items-center rounded-xl px-3 py-2 text-left font-body text-sm font-bold text-danger transition hover:bg-danger-soft/30 disabled:opacity-50"
-                >
-                  {cerrandoSesion ? "Cerrando sesión…" : "Cerrar sesión"}
-                </button>
-              </div>
-            )}
-          </div>
-        </header>
-
-        {/* ESTRUCTURA DE DOS COLUMNAS EN DESKTOP / UNA COLUMNA EN MÓVIL */}
-        <div className="flex flex-1 flex-col md:grid md:grid-cols-[248px_1fr] lg:grid-cols-[264px_1fr]">
-          {/* MENÚ LATERAL IZQUIERDO PERSISTENTE (Web / Desktop) */}
-          <aside
-            data-panel-sidebar
-            aria-label="Barra lateral de navegación"
-            className="hidden flex-col justify-between border-r border-[#E5EEF8] bg-[#F5F9FE] px-4 py-6 md:flex lg:px-5"
-          >
-            <nav aria-label="Navegación principal" className="flex flex-col gap-1.5">
-              {MENU_LATERAL.map((item) => (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  aria-current={item.active ? "page" : undefined}
-                  className={`flex min-h-12 cursor-pointer items-center gap-3.5 rounded-2xl px-4 py-3 font-body text-[15px] transition-colors duration-150 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#0066FF] ${
-                    item.active
-                      ? "bg-[#DCE8FC] font-extrabold text-[#0057D9]"
-                      : "font-semibold text-[#0A2342] hover:bg-[#E7F0FD] hover:text-[#0057D9]"
-                  }`}
-                >
-                  <span className={item.active ? "text-[#0066FF]" : "text-[#0A2342]"}>
-                    <SidebarMenuIcon name={item.icon} active={item.active} />
-                  </span>
-                  <span>{item.label}</span>
-                  {item.icon === "notificaciones" && notificacionesCount > 0 && (
-                    <span className="ml-auto inline-flex min-w-5 items-center justify-center rounded-full bg-[#0066FF] px-1.5 py-0.5 text-[11px] font-bold text-white">
-                      {notificacionesCount > 99 ? "99+" : notificacionesCount}
-                    </span>
-                  )}
-                </Link>
-              ))}
-            </nav>
-
-            <footer className="mt-8 flex flex-col gap-2.5 px-3 pt-4">
-              <Link
-                href="/legal/terminos"
-                className="cursor-pointer font-body text-[12px] font-medium text-[#566889] transition hover:text-[#0057D9] hover:underline"
-              >
-                Términos y condiciones
-              </Link>
-              <Link
-                href="/legal/privacidad"
-                className="cursor-pointer font-body text-[12px] font-medium text-[#566889] transition hover:text-[#0057D9] hover:underline"
-              >
-                Política de privacidad
-              </Link>
-            </footer>
-          </aside>
-
+        <div className={styles.workspace}>
           {/* ÁREA DE CONTENIDO PRINCIPAL */}
-          <div className="flex min-w-0 flex-1 flex-col md:p-7 lg:p-10">
+          <div className={styles.main}>
             {/* Aviso Modo Offline — compacto */}
             {!estaOnline && (
               <div className="mb-3">
@@ -564,17 +403,17 @@ export default function PaginaPanel() {
             {cargando ? (
               <PanelLoadingSkeleton />
             ) : (
-              <div className="driver-dashboard-content flex flex-1 flex-col gap-3 pb-2 md:gap-5 md:pb-0">
+              <div className={`${styles.content} driver-dashboard-content`}>
                 {/* 1. Saludo y Avatar */}
                 <section
-                  className="driver-dashboard-welcome flex items-center gap-3.5 pt-1 md:gap-5 md:pt-0"
+                  className="driver-dashboard-welcome flex items-center gap-3.5 pt-1"
                   aria-labelledby="titulo-bienvenida"
                 >
                   <span
-                    className="inline-flex size-[58px] shrink-0 items-center justify-center rounded-full bg-[#DCE8FC] text-[#0066FF] md:size-[82px]"
+                    className="inline-flex size-[58px] shrink-0 items-center justify-center rounded-full bg-[var(--conductor-surface-secondary)] text-[var(--conductor-action)]"
                     aria-hidden="true"
                   >
-                    <svg className="size-8 md:size-11" viewBox="0 0 24 24" fill="currentColor">
+                    <svg className="size-8" viewBox="0 0 24 24" fill="currentColor">
                       <circle cx="12" cy="8" r="3.8" />
                       <path d="M4 20c0-3.7 3.3-6.4 8-6.4s8 2.7 8 6.4" />
                     </svg>
@@ -582,14 +421,14 @@ export default function PaginaPanel() {
                   <div className="min-w-0">
                     <h1
                       id="titulo-bienvenida"
-                      className="font-display text-[28px] font-black leading-none tracking-tight text-[#0A2342] md:text-[36px]"
+                      className="font-display text-[28px] font-black leading-none tracking-tight text-[var(--conductor-primary)]"
                     >
                       ¡Hola, {primerNombre}!
                     </h1>
-                    <p className="mt-1.5 font-body text-base leading-none text-[#566889] md:hidden">
+                    <p className="mt-1.5 font-body text-base leading-none text-[var(--conductor-muted)]">
                       Conduce, gana y avanza
                     </p>
-                    <p className="mt-2 hidden font-body text-lg leading-none text-[#566889] md:block">
+                    <p className="mt-2 hidden font-body text-lg leading-none text-[var(--conductor-muted)]">
                       Hoy es un gran día para conducir 🚀
                     </p>
                   </div>
@@ -597,16 +436,16 @@ export default function PaginaPanel() {
 
                 {/* 2. Fila de Estado (Switch de Disponibilidad) */}
                 <section
-                  className={`driver-availability-card rounded-2xl border p-4 shadow-[0_5px_20px_rgba(13,43,94,0.05)] transition-colors md:px-6 md:py-5 md:shadow-none ${
+                  className={`driver-availability-card rounded-2xl border p-4 shadow-[0_5px_20px_rgba(13,43,94,0.05)] transition-colors    ${
                     esDisponible
-                      ? "border-[#E4ECF7] bg-white md:border-[#CBEAD9] md:bg-[#EAF7F0]"
-                      : "border-[#E4ECF7] bg-white"
+                      ? "border-[var(--conductor-border)] bg-[var(--conductor-surface)]  "
+                      : "border-[var(--conductor-border)] bg-[var(--conductor-surface)]"
                   }`}
                   aria-labelledby="titulo-estado-conductor"
                 >
-                  <div className="flex items-center gap-3.5 md:gap-4">
+                  <div className="flex items-center gap-3.5">
                     <span
-                      className={`inline-flex size-13 shrink-0 items-center justify-center rounded-full text-white shadow-sm md:size-14 ${
+                      className={`inline-flex size-13 shrink-0 items-center justify-center rounded-full text-[var(--ruum-on-primary)] shadow-sm  ${
                         disponibilidad === "en_viaje"
                           ? "bg-amber-500"
                           : esDisponible
@@ -621,21 +460,21 @@ export default function PaginaPanel() {
                     </span>
 
                     <div className="min-w-0 flex-1">
-                      <p className="font-body text-xs font-semibold leading-none text-[#566889] md:hidden">
+                      <p className="font-body text-xs font-semibold leading-none text-[var(--conductor-muted)]">
                         Estado
                       </p>
                       <h2
                         id="titulo-estado-conductor"
-                        className="mt-1 font-display text-[22px] font-black leading-none text-[#0A2342] md:mt-0 md:text-2xl"
+                        className="mt-1 font-display text-[22px] font-black leading-none text-[var(--conductor-primary)]"
                       >
-                        <span className="md:hidden">
+                        <span className="">
                           {disponibilidad === "en_viaje"
                             ? "En viaje"
                             : esDisponible
                               ? "Disponible"
                               : "No disponible"}
                         </span>
-                        <span className="hidden md:inline">
+                        <span className="hidden">
                           {disponibilidad === "en_viaje" ? (
                             <>
                               Estás <span className="text-amber-600">en viaje</span>
@@ -651,15 +490,15 @@ export default function PaginaPanel() {
                           )}
                         </span>
                       </h2>
-                      <p className="mt-1 font-body text-xs sm:text-sm leading-none text-[#566889] md:mt-1.5 md:text-[15px]">
-                        <span className="md:hidden">
+                      <p className="mt-1 font-body text-xs sm:text-sm leading-none text-[var(--conductor-muted)]">
+                        <span className="">
                           {disponibilidad === "en_viaje"
                             ? "Traslado activo"
                             : esDisponible
                               ? "Recibiendo solicitudes"
                               : "Solicitudes pausadas"}
                         </span>
-                        <span className="hidden md:inline">
+                        <span className="hidden">
                           {disponibilidad === "en_viaje"
                             ? "Traslado activo en curso"
                             : esDisponible
@@ -677,22 +516,22 @@ export default function PaginaPanel() {
                       aria-label={esDisponible ? "Disponible: recibir traslados" : "No disponible: pausar traslados"}
                       onClick={alCambiarDisponibilidad}
                       disabled={disponibilidad === "en_viaje" || persistiendoDisponibilidad || !estaOnline}
-                      className={`relative inline-flex h-10 w-[68px] shrink-0 cursor-pointer items-center rounded-full border-2 p-1 transition-all duration-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0066FF] disabled:cursor-not-allowed disabled:opacity-50 md:h-11 md:w-[76px] ${
+                      className={`relative inline-flex h-10 w-[68px] shrink-0 cursor-pointer items-center rounded-full border-2 p-1 transition-all duration-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0066FF] disabled:cursor-not-allowed disabled:opacity-50   ${
                         esDisponible
-                          ? "border-[#0066FF] bg-[#0066FF] shadow-md shadow-[#0066FF]/20"
+                          ? "border-[var(--conductor-action)] bg-[var(--conductor-action)] shadow-none"
                           : "border-slate-300 bg-slate-200"
                       }`}
                     >
                       <span
-                        className={`inline-block size-7 transform rounded-full bg-white shadow-sm transition-transform duration-300 md:size-8 ${
-                          esDisponible ? "translate-x-7 md:translate-x-8" : "translate-x-0"
+                        className={`inline-block size-7 transform rounded-full bg-[var(--conductor-surface)] shadow-sm transition-transform duration-300  ${
+                          esDisponible ? "translate-x-7 " : "translate-x-0"
                         }`}
                         aria-hidden="true"
                       />
                     </button>
                   </div>
                   {persistiendoDisponibilidad && (
-                    <p className="mt-1 font-body text-[11px] text-[#566889]" aria-live="polite">
+                    <p className="mt-1 font-body text-[11px] text-[var(--conductor-muted)]" aria-live="polite">
                       Actualizando estado…
                     </p>
                   )}
@@ -741,32 +580,6 @@ export default function PaginaPanel() {
         </div>
       </div>
 
-      {/* BARRA DE NAVEGACIÓN INFERIOR FIJA EN MÓVIL (3 accesos rápidos: Inicio, Traslados, Cuenta) */}
-      <div
-        data-panel-mobile-nav
-        className="fixed inset-x-0 bottom-0 z-40 border-t border-[#E4ECF7] bg-white/95 pb-[max(8px,env(safe-area-inset-bottom))] pt-1.5 shadow-[0_-6px_24px_rgba(10,35,66,0.06)] backdrop-blur-md md:hidden"
-      >
-        <nav aria-label="Navegación principal móvil" className="mx-auto w-full max-w-md px-2">
-          <div className="grid grid-cols-3 gap-1">
-            {MENU_INFERIOR_MOVIL.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                aria-current={item.active ? "page" : undefined}
-                className={`flex min-h-[54px] cursor-pointer flex-col items-center justify-center gap-1 rounded-xl px-2 py-1 font-body text-xs transition active:scale-95 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#0066FF] ${
-                  item.active
-                    ? "font-extrabold text-[#0066FF]"
-                    : "font-medium text-[#566889] hover:text-[#0A2342]"
-                }`}
-              >
-                <SidebarMenuIcon name={item.icon} active={item.active} />
-                <span className="leading-none">{item.label}</span>
-              </Link>
-            ))}
-          </div>
-        </nav>
-      </div>
-
       {/* Menú Hamburguesa Móvil */}
       {menuAbierto && (
         <dialog
@@ -781,15 +594,15 @@ export default function PaginaPanel() {
             className="absolute inset-0 cursor-pointer bg-slate-950/40"
             aria-label="Cerrar menú"
           />
-          <section className="relative ml-3 mt-[max(12px,env(safe-area-inset-top))] w-[min(300px,calc(100vw-24px))] rounded-3xl bg-white p-5 shadow-2xl">
+          <section className="relative ml-3 mt-[max(12px,env(safe-area-inset-top))] w-[min(300px,calc(100vw-24px))] rounded-3xl bg-[var(--conductor-surface)] p-5 shadow-2xl">
             <div className="flex items-center justify-between gap-3">
-              <h2 id="titulo-menu-panel" className="font-display text-lg font-black text-[#0A2342]">
+              <h2 id="titulo-menu-panel" className="font-display text-lg font-black text-[var(--conductor-primary)]">
                 Menú
               </h2>
               <button
                 type="button"
                 onClick={() => setMenuAbierto(false)}
-                className="inline-flex size-11 cursor-pointer items-center justify-center rounded-full text-[#566889] hover:bg-slate-100"
+                className="inline-flex size-11 cursor-pointer items-center justify-center rounded-full text-[var(--conductor-muted)] hover:bg-slate-100"
                 aria-label="Cerrar menú"
               >
                 ×
@@ -803,8 +616,8 @@ export default function PaginaPanel() {
                   onClick={() => setMenuAbierto(false)}
                   className={`flex min-h-11 cursor-pointer items-center gap-3 rounded-xl px-3 font-body text-sm transition ${
                     item.active
-                      ? "bg-[#DCE8FC] font-extrabold text-[#0057D9]"
-                      : "font-semibold text-[#0A2342] hover:bg-slate-100"
+                      ? "bg-[var(--conductor-surface-secondary)] font-extrabold text-[var(--conductor-action)]"
+                      : "font-semibold text-[var(--conductor-primary)] hover:bg-slate-100"
                   }`}
                 >
                   <SidebarMenuIcon name={item.icon} active={item.active} />
@@ -816,14 +629,14 @@ export default function PaginaPanel() {
               <Link
                 href="/legal/terminos"
                 onClick={() => setMenuAbierto(false)}
-                className="cursor-pointer font-body text-[12px] font-medium text-[#566889] hover:text-[#0057D9]"
+                className="cursor-pointer font-body text-[12px] font-medium text-[var(--conductor-muted)] hover:text-[var(--conductor-action)]"
               >
                 Términos y condiciones
               </Link>
               <Link
                 href="/legal/privacidad"
                 onClick={() => setMenuAbierto(false)}
-                className="cursor-pointer font-body text-[12px] font-medium text-[#566889] hover:text-[#0057D9]"
+                className="cursor-pointer font-body text-[12px] font-medium text-[var(--conductor-muted)] hover:text-[var(--conductor-action)]"
               >
                 Política de privacidad
               </Link>

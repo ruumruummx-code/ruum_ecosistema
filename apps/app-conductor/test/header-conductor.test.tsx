@@ -26,7 +26,7 @@ describe("navegación del conductor sin header global", () => {
     expect(screen.getByRole("heading", { name: "Cuenta" })).toBeTruthy();
   });
 
-  it.each(["/viajes", "/cuenta", "/cuenta/perfil", "/ganancias", "/notificaciones"])(
+  it.each(["/panel", "/viajes", "/cuenta", "/cuenta/perfil", "/ganancias", "/notificaciones"])(
     "presenta solo tres destinos y ningún banner en %s", (pathname) => {
       route.pathname = pathname;
       render(<NavegacionConductor />);
@@ -38,13 +38,13 @@ describe("navegación del conductor sin header global", () => {
       expect(document.documentElement.style.getPropertyValue("--conductor-shell-header-height")).toBe("0px");
       const current = links.filter(link => link.getAttribute("aria-current") === "page");
       expect(current.map(link => link.textContent)).toEqual(
-        pathname.startsWith("/cuenta") ? ["Cuenta"] : pathname === "/viajes" ? ["Traslados"] : [],
+        pathname.startsWith("/cuenta") ? ["Cuenta"] : pathname === "/viajes" ? ["Traslados"] : pathname === "/panel" ? ["Inicio"] : [],
       );
     },
   );
 
-  it.each(["/panel", "/login", "/registro", "/onboarding"])(
-    "no duplica la navegación del panel ni la muestra en acceso: %s", (pathname) => {
+  it.each(["/login", "/registro", "/onboarding"])(
+    "no muestra navegación en acceso: %s", (pathname) => {
       route.pathname = pathname;
       render(<NavegacionConductor />);
       expect(screen.queryByRole("navigation")).toBeNull();

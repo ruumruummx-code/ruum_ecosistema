@@ -195,7 +195,7 @@
 .segmentedProgress { display: grid; gap: 8px; text-align: right; font-size: 12px; color: #52617b; }
 .segmentedProgress > div { display: flex; gap: 3px; }
 .segmentedProgress i { flex: 1; height: 5px; border-radius: 6px; background: #e1e5ec; }
-.segmentedProgress i[data-active="true"] { background: #0060ff; }
+.segmentedProgress i[data-active="true"] { background: var(--conductor-action); }
 .stepOne .form { justify-content: space-between; gap: 10px; }
 .accountIntro { padding-top: 16px; }
 .accountIntro h1 { margin: 0; font-size: 34px; line-height: 1.15; font-weight: 750; letter-spacing: -1px; }
@@ -217,10 +217,10 @@
 .stepOne .ruleIndicator { display: inline-grid; place-items: center; flex: 0 0 18px; height: 18px; margin: 0; border: 1.5px solid #7a88a0; border-radius: 50%; font-size: 12px; line-height: 1; transition: background 150ms ease, border-color 150ms ease; }
 .stepOne [data-met="true"] .ruleIndicator { background: #137b57; border-color: #137b57; color: white; }
 .accountLegal { display: flex; align-items: center; gap: 10px; min-height: 44px; font-size: 12px; line-height: 18px; color: #52617b; }
-.stepOne .form .accountLegal input { appearance: auto; flex: 0 0 22px; width: 22px; height: 22px; min-height: 0 !important; margin: 0; padding: 0; accent-color: #0060ff; cursor: pointer; }
+.stepOne .form .accountLegal input { appearance: auto; flex: 0 0 22px; width: 22px; height: 22px; min-height: 0 !important; margin: 0; padding: 0; accent-color: var(--conductor-action); cursor: pointer; }
 .accountLegal a { text-decoration: underline; text-underline-offset: 2px; }
 .stepOne .actionFooter { padding: 0; border: 0; margin: 0; }
-.stepOne .actionFooter .primary { gap: 10px; height: 56px; min-height: 44px; padding: 0 8px; border-radius: 16px; font-size: 16px; background: #0060ff; color: #fff; transition: background 150ms ease; }
+.stepOne .actionFooter .primary { gap: 10px; height: 56px; min-height: 44px; padding: 0 8px; border-radius: 16px; font-size: 16px; background: var(--conductor-action); color: #fff; transition: background 150ms ease; }
 .stepOne .actionFooter .primary:disabled { background: #e5eaf2; color: #53637d; cursor: not-allowed; }
 .stepOne .primary svg { flex-shrink: 0; }
 .accountLogin { display: flex; align-items: center; justify-content: center; gap: 5px; min-height: 44px; margin: 8px 0 0; text-align: center; font-size: 13px; line-height: 18px; color: #52617b; }
@@ -401,7 +401,7 @@
 .completionStep .segmentedProgress { gap: 8px; text-align: right; font-size: 12px; color: #52617b; }
 .completionStep .segmentedProgress > div { display: flex; gap: 3px; }
 .completionStep .segmentedProgress i { flex: 1; height: 6px; border-radius: 999px; background: #dfe5ef; }
-.completionStep .segmentedProgress i[data-active="true"] { background: #0060ff; }
+.completionStep .segmentedProgress i[data-active="true"] { background: var(--conductor-action); }
 .completionStep .accountLogo { width: min(100%, 150px); height: auto; justify-self: center; }
 .completionStep .documentsStep, .completionStep .reviewStep {
   width: 100%; max-width: none; margin: 0; padding: 8px 0 0; gap: 14px;
@@ -443,7 +443,7 @@
 .completionStep .actionFooter { display: grid; grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr); gap: 12px; padding: 12px 0 0; border: 0; }
 .completionStep .actionFooter .primary, .completionStep .actionFooter .secondaryAction { width: 100%; height: 56px; min-height: 44px; margin: 0; border-radius: 14px; font-size: 16px; }
 .completionStep .actionFooter .secondaryAction { border: 1px solid #b8c7dc; background: #fff; color: #081b37; font-weight: 700; }
-.completionStep .actionFooter .primary { background: #0060ff; }
+.completionStep .actionFooter .primary { background: var(--conductor-action); }
 .completionStep .actionFooter .primary[data-final-action="true"] { grid-column: 1 / -1; }
 .completionStep .reviewStep { justify-content: flex-start; }
 .completionStep .reviewRows { gap: 10px; }
@@ -458,7 +458,7 @@
 .completionStep .documentChecks b { display: grid; width: 18px; height: 18px; place-items: center; border-radius: 50%; background: #e2e8f0; color: #52617b; font-size: 12px; }
 .completionStep .documentChecks span[data-ready="true"] b { background: #13ad71; color: #fff; }
 .completionStep .reviewConsent { display: flex; align-items: flex-start; gap: 10px; min-height: 44px; margin-top: auto; padding-top: 4px; color: #52617b; font-size: 13px; line-height: 18px; }
-.completionStep .reviewConsent input { width: 28px; height: 28px; flex: 0 0 28px; margin: 0; accent-color: #0060ff; }
+.completionStep .reviewConsent input { width: 28px; height: 28px; flex: 0 0 28px; margin: 0; accent-color: var(--conductor-action); }
 .completionStep .reviewConsent a { color: #0060ee; text-decoration: underline; text-underline-offset: 2px; }
 .completionStep:has(.reviewStep) .actionFooter { grid-template-columns: 1fr; }
 

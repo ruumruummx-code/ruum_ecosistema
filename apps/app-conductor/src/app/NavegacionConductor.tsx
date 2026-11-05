@@ -5,7 +5,6 @@ import { useViajeActivo } from "./ViajeActivoContext";
 import { ConductorNav } from "./components/ConductorNav";
 
 const EXCLUIDOS_NAVEGACION = [
-  "/panel",
   "/login",
   "/registro",
   "/onboarding",

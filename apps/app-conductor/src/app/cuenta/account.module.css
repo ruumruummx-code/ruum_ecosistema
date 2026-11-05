@@ -1,11 +1,11 @@
-.screen { position: relative; margin-inline: auto; width: 100%; max-width: 440px; min-height: 0; display: flex; flex-direction: column; background: #fcfcfd; color: #0a2342; color-scheme: light; font-family: "Inter", ui-sans-serif, system-ui, sans-serif; }
+.screen { position: relative; margin-inline: auto; width: 100%; max-width: 440px; min-height: 0; display: flex; flex-direction: column; background: var(--conductor-surface); color: var(--conductor-primary); color-scheme: light; font-family: "Inter", ui-sans-serif, system-ui, sans-serif; }
 .screen *, .screen *::before, .screen *::after { box-sizing: border-box; }
 .screen :is(h1,h2,p,a,button,span,strong) { font-family: "Inter", ui-sans-serif, system-ui, sans-serif; }
 .screen :is(h1,h2,p) { margin: 0; }
 .screen :is(a,button) { -webkit-tap-highlight-color: transparent; transition: background-color .18s, border-color .18s, color .18s, transform .18s, box-shadow .18s; }
 .screen a { text-decoration: none; }
 .screen button { cursor: pointer; }
-.screen :is(a,button):focus-visible { outline: 3px solid #0066ff; outline-offset: 3px; }
+.screen :is(a,button):focus-visible { outline: 3px solid var(--conductor-action); outline-offset: 3px; }
 .screen :is(a,button):active { transform: translateY(1px); }
 .body { display: flex; flex: 1 0 auto; min-height: 0; flex-direction: column; justify-content: space-between; gap: 18px; padding: max(20px, env(safe-area-inset-top)) 22px 24px; }
 .header { display: flex; justify-content: space-between; align-items: center; flex-shrink: 0; gap: 14px; min-height: 54px; }
@@ -15,18 +15,18 @@
 .quickActions { display: flex; align-items: center; gap: 8px; }
 .quickActions :is(a,button) { position: relative; display: grid; place-items: center; flex-shrink: 0; width: 44px; min-height: 44px; padding: 0; border: 0; border-radius: 50%; background: #e9edf3; color: #0e2947; font-size: 17px; font-weight: 600; }
 .quickActions :is(a,button):hover { background: #dce7f6; }
-.notificationDot { position: absolute; width: 8px; height: 8px; border-radius: 50%; top: 5px; right: 6px; background: #ff474e; box-shadow: 0 0 0 3px #fcfcfd; }
+.notificationDot { position: absolute; width: 8px; height: 8px; border-radius: 50%; top: 5px; right: 6px; background: #ff474e; box-shadow: 0 0 0 3px var(--conductor-surface); }
 .heading { flex-shrink: 0; }
 .heading h1 { font-size: 34px; font-weight: 800; letter-spacing: -.9px; line-height: 1.15; }
-.heading p { color: #62728f; font-size: 15px; line-height: 1.4; margin-top: 6px; }
+.heading p { color: var(--conductor-muted); font-size: 15px; line-height: 1.4; margin-top: 6px; }
 .sync { display: flex; align-items: center; flex-shrink: 0; gap: 9px; min-height: 46px; padding: 10px 14px; background: #e8f7f5; border: 1px solid #a7e4e5; border-radius: 13px; color: #007b72; font-size: 13px; line-height: 1.4; }
 .sync > svg { width: 20px; height: 20px; flex-shrink: 0; }
 .sync > span:first-child { font-weight: 700; }
-.sync[data-state="loading"] { background: #edf2f8; border-color: #d9e2ee; color: #61738e; }
+.sync[data-state="loading"] { background: var(--conductor-surface-secondary); border-color: #d9e2ee; color: #61738e; }
 .sync:not([data-state="loading"]):not([data-state="todo_sincronizado"]) { background: #fff7e5; border-color: #f1d99c; color: #89620b; }
 .sync a { color: inherit; text-decoration: underline; margin-left: auto; display: flex; align-items: center; min-height: 28px; }
 .options { flex: 1; min-height: 0; max-height: 384px; display: grid; grid-template-rows: repeat(4, minmax(56px, 1fr)); gap: 12px; }
-.option { display: flex; align-items: center; gap: 15px; padding: 12px 16px; border: 1px solid #dce2ec; border-radius: 16px; background: white; box-shadow: 0 2px 7px #12315104; color: #0a2342; }
+.option { display: flex; align-items: center; gap: 15px; padding: 12px 16px; border: 1px solid #dce2ec; border-radius: 16px; background: white; box-shadow: 0 2px 7px #12315104; color: var(--conductor-primary); }
 .option:hover { background: #f5f9ff; border-color: #accbfa; box-shadow: 0 3px 10px #1231510a; }
 .optionIcon { flex-shrink: 0; display: grid; place-items: center; width: 30px; color: #662a8b; }
 .optionIcon[data-icon="user"] svg { fill: #662a8b; stroke-width: 1; }
@@ -40,15 +40,15 @@
 .logout { display: flex; justify-content: center; align-items: center; flex-shrink: 0; gap: 10px; width: 100%; min-height: 50px; padding: 9px; border: 1px solid #ff4a44; border-radius: 14px; background: white; color: #e7312c; font-size: 16px; font-weight: 700; line-height: 1.4; }
 .logout:hover { background: #fff1f0; border-color: #d72621; }
 
-.dialog { position: fixed; inset: 0; margin: auto; width: calc(100% - 28px); max-width: 410px; max-height: calc(100dvh - 28px); overflow: auto; padding: 22px; border: 1px solid #dfe6ef; border-radius: 20px; background: white; color: #0a2342; box-shadow: 0 20px 70px #09234e33; }
+.dialog { position: fixed; inset: 0; margin: auto; width: calc(100% - 28px); max-width: 410px; max-height: calc(100dvh - 28px); overflow: auto; padding: 22px; border: 1px solid #dfe6ef; border-radius: 20px; background: white; color: var(--conductor-primary); box-shadow: 0 20px 70px #09234e33; }
 .dialog::backdrop { background: #0a234266; backdrop-filter: blur(3px); }
 .dialog header { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
 .dialog h2 { font-size: 21px; font-weight: 750; }
-.dialog header button { width: 44px; min-height: 44px; border: 0; border-radius: 50%; background: #edf2f8; color: #0a2342; font-size: 25px; }
+.dialog header button { width: 44px; min-height: 44px; border: 0; border-radius: 50%; background: var(--conductor-surface-secondary); color: var(--conductor-primary); font-size: 25px; }
 .dialog p { font-size: 14px; line-height: 1.6; color: #63738e; margin-block: 14px; }
 .dialog .error { color: #b22630; }
 .dialog nav { display: flex; flex-direction: column; gap: 8px; margin-top: 14px; }
-.dialog nav a { display: flex; align-items: center; min-height: 48px; padding: 12px; border-radius: 12px; color: #005be8; background: #f0f5ff; font-size: 15px; }
+.dialog nav a { display: flex; align-items: center; min-height: 48px; padding: 12px; border-radius: 12px; color: var(--conductor-action); background: #f0f5ff; font-size: 15px; }
 .confirmLogout, .cancel { width: 100%; min-height: 46px; padding: 10px; border: 0; border-radius: 12px; font-size: 14px; font-weight: 650; }
 .confirmLogout { background: #dc302e; color: white; }
 .confirmLogout:hover { background: #bc2423; }

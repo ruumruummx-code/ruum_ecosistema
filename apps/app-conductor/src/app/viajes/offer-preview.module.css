@@ -1,4 +1,4 @@
-.card { flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 10px; padding: 12px; border: 1px solid #dce3ef; border-radius: 20px; background: #fff; box-shadow: 0 5px 18px #17345c09; color: #0b2143; }
+.card { flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 10px; padding: 12px; border: 1px solid #dce3ef; border-radius: 20px; background: #fff; box-shadow: 0 5px 18px #17345c09; color: var(--conductor-primary); }
 .card > :not(.previewMap) { flex-shrink: 0; }
 .top { display: flex; align-items: center; justify-content: space-between; gap: 4px; }
 .available { display: inline-flex; align-items: center; gap: 6px; padding: 5px 9px; border-radius: 12px; background: #dcf8ee; color: #087d4d; font-size: 12px; font-weight: 750; }
@@ -17,9 +17,9 @@
 .route > div::before { content: ""; position: absolute; top: 4px; left: 4px; width: 13px; height: 13px; border: 4px solid #00bebd; border-radius: 50%; background: #fff; z-index: 1; }
 .route > div:first-child::after { content: ""; position: absolute; top: 13px; bottom: -16px; left: 9px; width: 3px; background: #c0e7f2; }
 .route > div:last-child::before { border-color: #0866f5; }
-.route dt { font-size: 11px; font-weight: 650; line-height: 14px; color: #586b8e; }
+.route dt { font-size: 11px; font-weight: 650; line-height: 14px; color: var(--conductor-muted); }
 .route dd { margin: 0; font-size: 13px; line-height: 16px; font-weight: 600; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; overflow-wrap: anywhere; }
-.stats { display: grid; grid-template-columns: .8fr 1.15fr 1.15fr; align-items: center; gap: 5px; font-size: 11px; line-height: 14px; color: #586b8e; }
+.stats { display: grid; grid-template-columns: .8fr 1.15fr 1.15fr; align-items: center; gap: 5px; font-size: 11px; line-height: 14px; color: var(--conductor-muted); }
 .stats > span { display: flex; align-items: center; gap: 5px; min-width: 0; }
 .stats svg { flex-shrink: 0; width: 18px; height: 18px; }
 .previewMap { position: relative; flex: 1; min-height: 32px; max-height: 96px; overflow: hidden; border-radius: 12px; background: #eaf1e9; }
@@ -28,7 +28,7 @@
 .badges { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 5px; }
 .badges > span { display: flex; align-items: center; gap: 5px; min-width: 0; padding: 7px 5px; border-radius: 12px; background: #eef2f8; font-size: 9px; line-height: 12px; font-weight: 650; }
 .badges svg { flex-shrink: 0; width: 19px; height: 19px; }
-.badges small { display: block; font-size: 9px; font-weight: 400; color: #586b8e; }
+.badges small { display: block; font-size: 9px; font-weight: 400; color: var(--conductor-muted); }
 .action { display: flex; width: 100%; align-items: center; justify-content: center; gap: 8px; min-height: 46px; margin-top: auto; padding: 8px; border-radius: 14px; background: #0663ff; color: #fff; font-size: 14px; line-height: 18px; font-weight: 750; text-align: center; }
 .action:hover { background: #004ddb; }
 .card :is(a,button):focus-visible { outline: 3px solid #0866f5; outline-offset: 2px; }
@@ -115,7 +115,7 @@
 .available[data-tone="active"] { background: #e7f0ff; color: #0756c9; }
 .actionRow { display: flex; flex-shrink: 0; align-items: stretch; gap: 6px; margin-top: auto; }
 .actionRow > .action { flex: 1; min-width: 0; margin-top: 0; }
-.card .options { display: grid; flex-shrink: 0; place-items: center; width: 42px; min-height: 46px; border: 1px solid #d5e1f2; border-radius: 14px; background: #edf3fc; color: #0b2143; font-size: 16px; }
+.card .options { display: grid; flex-shrink: 0; place-items: center; width: 42px; min-height: 46px; border: 1px solid #d5e1f2; border-radius: 14px; background: #edf3fc; color: var(--conductor-primary); font-size: 16px; }
 @media (max-height: 740px) { .card .options { width: 38px; min-height: 40px; } }
 @media (max-height: 620px) { .card .options { width: 34px; min-height: 36px; border-radius: 9px; } }
 @media (max-height: 500px) { .actionRow { grid-column: 1 / -1; grid-row: 6; } .card .options { width: 32px; min-height: 32px; } }

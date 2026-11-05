@@ -74,56 +74,19 @@ export function PanelActiveTripCard({ viaje }: PanelActiveTripCardProps) {
   if (!viaje.estado) return null;
 
   return (
-    <article className="border border-border rounded-2xl bg-surface p-5 shadow-[0_6px_20px_rgba(13,43,94,0.07)] w-full flex flex-col gap-4 text-left relative">
-      {/* 1. Header: Traslado Activo */}
-      <div className="flex justify-between items-center w-full">
-        <span className="inline-flex min-h-[28px] items-center gap-1.5 rounded-full border border-blue-200 bg-blue-50 px-2.5 py-1 font-body text-xs font-semibold text-blue-900">
-          Traslado activo
-        </span>
-      </div>
-
-      {/* 2. #Traslado en grande */}
-      <div className="flex flex-col py-1">
-        <span className="text-[10px] font-bold text-text-tertiary uppercase tracking-wider">
-          Número de Traslado
-        </span>
-        <button
-          type="button"
-          onClick={() => {
-            if (navigator.clipboard) void navigator.clipboard.writeText(folioViaje(viaje));
-          }}
-          className="font-mono text-2xl sm:text-3xl font-black text-text-primary mt-0.5 tracking-tight text-left hover:text-route-action transition-colors focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-route-action rounded"
-          title="Copiar folio"
-          aria-label={`Copiar folio ${folioViaje(viaje)}`}
-        >
+    <article className="driver-active-trip-card" aria-label="Traslado activo">
+      <div className="flex items-center justify-between gap-2">
+        <span className="font-body text-xs font-semibold text-route-action">Traslado activo</span>
+        <button type="button" onClick={() => {
+          if (navigator.clipboard) void navigator.clipboard.writeText(folioViaje(viaje));
+        }} className="min-h-11 px-2 font-mono text-sm font-semibold" aria-label={`Copiar folio ${folioViaje(viaje)}`}>
           #{folioViaje(viaje)}
         </button>
       </div>
-
-      {/* 3. Paso Actual */}
-      <div className="border-t border-border/15 pt-3.5 flex items-center gap-3">
-        <div className="w-10 h-10 rounded-full bg-route-action/10 border border-route-action/20 flex items-center justify-center text-route-action shrink-0">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-            <path d="M18.92 6.01C18.72 5.42 18.16 5 17.5 5h-11c-.66 0-1.21.42-1.42 1.01L3 12v8c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h12v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-8l-2.08-5.99zM6.5 16c-.83 0-1.5-.67-1.5-1.5S5.67 13 6.5 13s1.5.67 1.5 1.5S7.33 16 6.5 16zm11 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z" />
-          </svg>
-        </div>
-        <div className="flex flex-col">
-          <span className="text-[9px] text-text-tertiary font-bold tracking-wider uppercase leading-none">Paso actual</span>
-          <div className="font-display text-sm font-black text-text-primary mt-0.5 leading-snug">
-            {getPasoActualLabel(viaje.estado)}
-          </div>
-          <span className="font-body text-[11px] text-text-secondary">
-            {getPasoActualDescription(viaje.estado)}
-          </span>
-        </div>
-      </div>
-
-      {/* 4. Botón de continuar traslado */}
-      <Link
-        href={getContinuarTrasladoHref(viaje)}
-        className="inline-flex min-h-11 w-full items-center justify-center rounded-xl bg-[var(--ruum-action)] px-5 py-3 font-body text-base font-semibold text-white transition hover:brightness-105 mt-1"
-      >
-        Continuar traslado →
+      <p className="font-display text-base font-semibold">{getPasoActualLabel(viaje.estado)}</p>
+      <p className="font-body text-xs text-text-secondary">{getPasoActualDescription(viaje.estado)}</p>
+      <Link href={getContinuarTrasladoHref(viaje)} className="conductor-active-trip-action">
+        Continuar traslado <span aria-hidden="true">→</span>
       </Link>
     </article>
   );
