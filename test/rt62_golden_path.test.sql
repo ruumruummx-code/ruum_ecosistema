@@ -5,6 +5,7 @@
 -- conductor) y las RPC de dominio.
 create extension if not exists pgtap with schema extensions;
 begin;
+\ir ../tests/fixtures/sql/cotizacion-individual.sql
 select plan(30);
 
 insert into auth.users (id, email, email_confirmed_at, raw_app_meta_data, raw_user_meta_data, created_at, updated_at)
@@ -64,7 +65,8 @@ begin
   return (public.usuario_crea_traslado(
     null,
     jsonb_build_object('tipo','sedan','transmision','manual','marca','Nissan','modelo','Versa','condicion','nueva','anio',2022,'color','gris','placas',p_placa,'vin',p_vin,'estado_general_declarado','Bien','tiene_tarjeta_circulacion',true,'tiene_verificacion',true,'tiene_placas',true,'puede_circular_rodando',true),
-    jsonb_build_object('contacto_entrega_nombre','A','contacto_entrega_telefono','+520000000000','contacto_recepcion_nombre','B','contacto_recepcion_telefono','+520000000001','origen_lat',19.0,'origen_lng',-99.0,'origen_direccion','origen','origen_ciudad','CDMX','destino_lat',19.5,'destino_lng',-99.5,'destino_direccion','destino','destino_ciudad','CDMX','presupuesto_usuario',1000,'tipo_pago','anticipado','modalidad_programacion','lo_antes_posible','distancia_km',18.42,'tiempo_estimado_horas',0.73),
+    pg_temp.cotizar_individual(null, jsonb_build_object('tipo','sedan','transmision','manual','marca','Nissan','modelo','Versa','condicion','nueva','anio',2022,'color','gris','placas',p_placa,'vin',p_vin,'estado_general_declarado','Bien','tiene_tarjeta_circulacion',true,'tiene_verificacion',true,'tiene_placas',true,'puede_circular_rodando',true),
+    jsonb_build_object('contacto_entrega_nombre','A','contacto_entrega_telefono','+520000000000','contacto_recepcion_nombre','B','contacto_recepcion_telefono','+520000000001','origen_lat',19.0,'origen_lng',-99.0,'origen_direccion','origen','origen_ciudad','CDMX','destino_lat',19.5,'destino_lng',-99.5,'destino_direccion','destino','destino_ciudad','CDMX','presupuesto_usuario',1000,'tipo_pago','anticipado','modalidad_programacion','lo_antes_posible','distancia_km',18.42,'tiempo_estimado_horas',0.73)),
     p_clave, '[]'::jsonb
   )->>'id')::uuid;
 end;

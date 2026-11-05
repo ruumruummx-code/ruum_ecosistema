@@ -1,6 +1,5 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
 import {
-  calcularTarifaServidor,
   generarHashInputsTarifa,
   generarSnapshotFirmado,
   verificarSnapshotFirmado,
@@ -38,42 +37,6 @@ describe("tarifa-snapshot — RUUM-USR-F6-001 (CB-1)", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockRedisSet.mockResolvedValue("OK");
-  });
-
-  it("calcula la tarifa del servidor reproduciendo la fórmula oficial v2", () => {
-    const tarifa = calcularTarifaServidor({
-      categoria: "ligero_a",
-      gama: "media",
-      condicion: "seminueva",
-      distanciaKm: 12.5,
-      tiempoEstimadoHoras: 0.6,
-      modalidad: "lo_antes_posible",
-    });
-    expect(tarifa).toBeGreaterThan(0);
-    expect(Number.isFinite(tarifa)).toBe(true);
-  });
-
-  it("aplica recargo de 1.25 a rescate_mecanico en el cálculo de servidor (CB-3 / T8)", () => {
-    const tarifaSeminueva = calcularTarifaServidor({
-      categoria: "ligero_b",
-      gama: "media",
-      condicion: "seminueva",
-      distanciaKm: 50,
-      tiempoEstimadoHoras: 1.5,
-      modalidad: "lo_antes_posible",
-    });
-
-    const tarifaRescate = calcularTarifaServidor({
-      categoria: "ligero_b",
-      gama: "media",
-      condicion: "rescate_mecanico",
-      distanciaKm: 50,
-      tiempoEstimadoHoras: 1.5,
-      modalidad: "lo_antes_posible",
-    });
-
-    // rescate_mecanico factor 1.25 vs seminueva 1.0 -> exactamente 1.25x
-    expect(tarifaRescate).toBe(Number((tarifaSeminueva * 1.25).toFixed(2)));
   });
 
   it("genera un snapshot firmado reproducible con hash, versión, monto, timestamp y nonce (CA-2)", () => {

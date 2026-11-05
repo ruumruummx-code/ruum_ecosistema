@@ -34,6 +34,11 @@ import { VALORES_INICIALES } from "../constants";
 import { NextRequest } from "next/server";
 import { validarCsrfRequest } from "@/lib/csrf";
 
+const solicitudServidor = {
+  vehiculo: { vehiculoId: "123e4567-e89b-42d3-a456-426614174000" },
+  traslado: { snapshot_tarifa: { nonce: "nonce-sql", monto: 8864.5 }, distancia_km: 100, tiempo_estimado_horas: 3 },
+  paradas: [],
+};
 function crearParams(overrides: Partial<ParametrosEnvioTraslado> = {}): ParametrosEnvioTraslado {
   return {
     paso: 4,
@@ -112,7 +117,7 @@ describe("useEnvioTraslado", () => {
   });
 
   it("impide crear dos solicitudes ante llamadas simultáneas y reutiliza la creada", async () => {
-    vi.spyOn(globalThis, "fetch").mockResolvedValue(Response.json({ ok: true }));
+    vi.spyOn(globalThis, "fetch").mockResolvedValue(Response.json({ ok: true, solicitud: solicitudServidor }));
     crearTrasladoMock.mockResolvedValue({ id: "unico", tipo_pago: "anticipado", precio_cotizado: 500 });
     const params = crearParams();
     const { result } = renderHook(() => useEnvioTraslado(params));
@@ -135,7 +140,7 @@ describe("useEnvioTraslado", () => {
       if (!validarCsrfRequest(request).valido) {
         return Response.json({ error: "Token CSRF inválido o ausente.", code: "CSRF_INVALID" }, { status: 403 });
       }
-      return Response.json({ ok: true });
+      return Response.json({ ok: true, solicitud: solicitudServidor });
     });
     crearTrasladoMock.mockResolvedValueOnce({ id: "traslado-csrf", tipo_pago: "anticipado", precio_cotizado: 3200 });
     const params = crearParams({ paso: 3 });
@@ -211,10 +216,7 @@ describe("useEnvioTraslado", () => {
   });
 
   it("ejecuta validación servidor, geocodifica ruta y crea traslado exitosamente o captura errores", async () => {
-    vi.spyOn(globalThis, "fetch").mockResolvedValueOnce({
-      ok: true,
-      json: async () => ({ ok: true }),
-    } as Response);
+    vi.spyOn(globalThis, "fetch").mockResolvedValueOnce(Response.json({ ok: true, solicitud: solicitudServidor }));
     crearTrasladoMock.mockResolvedValueOnce({
       id: "traslado-999",
       tipo_pago: "anticipado",
@@ -252,4 +254,13 @@ describe("useEnvioTraslado", () => {
       expect.objectContaining({ ok: false })
     );
   });
+});
+
+it("bloquea creación si falta el payload autorizado por SQL", async () => {
+  const params = crearParams();
+  vi.spyOn(globalThis, "fetch").mockResolvedValueOnce(Response.json({ ok: true, snapshot: { monto: 1 } }));
+  const { result } = renderHook(() => useEnvioTraslado(params));
+  await act(async () => { await result.current.enviarSolicitud(); });
+  expect(crearTrasladoMock).not.toHaveBeenCalled();
+  expect(params.setters.setResultado).toHaveBeenCalledWith(expect.objectContaining({ ok: false }));
 });

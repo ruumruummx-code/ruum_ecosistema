@@ -17,6 +17,10 @@ import type { Database, Json } from "@ruum/shared/types";
  * validadas en runtime por cada servicio.
  */
 export interface FuncionesRpc {
+  servidor_cotizar_traslado_individual: {
+    args: Omit<Database["public"]["Functions"]["servidor_cotizar_traslado_individual"]["Args"], "p_vehiculo_id"> & { p_vehiculo_id: string | null };
+    ret: Json;
+  };
   encolar_limpieza_foto_perfil: {
     args: Database["public"]["Functions"]["encolar_limpieza_foto_perfil"]["Args"];
     ret: Database["public"]["Functions"]["encolar_limpieza_foto_perfil"]["Returns"];

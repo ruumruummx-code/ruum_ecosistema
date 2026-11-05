@@ -30,3 +30,5 @@ export * from "./checkout-masivo";
 export * from "./billetera";
 export * from "./tickets-soporte";
 export * from "./repuve";
+
+export * from "./cotizacion-individual";

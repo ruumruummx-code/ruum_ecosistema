@@ -4357,6 +4357,9 @@ isOneToOne: false
 "ruta_identidad_validada_para_auth":
 { Args: { "p_ruta": string }; Returns: boolean
                            },
+"servidor_cotizar_traslado_individual":
+{ Args: { "p_auth_user_id": string,"p_paradas": Json,"p_traslado": Json,"p_vehiculo": Json,"p_vehiculo_id": string }; Returns: Json
+                           },
 "sla_categoria_desde_tipo":
 { Args: { "p_tipo": string,"p_vencido": boolean }; Returns: string
                            },

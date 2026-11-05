@@ -3,6 +3,10 @@ import { getRedis } from "@/lib/csp-rate-limit";
 import { logStructuredWarn } from "@/lib/logger";
 import { obtenerRutaDirectionsMapboxConParadas } from "@ruum/shared/utils";
 
+export class RutaNoDisponibleError extends Error {
+  constructor() { super("No pudimos confirmar la ruta. Intenta cotizar nuevamente."); }
+}
+
 export const RUTA_CACHE_TTL_SEG = 86_400; // 24 horas
 
 export interface CoordenadaPunto {
@@ -13,7 +17,7 @@ export interface CoordenadaPunto {
 export interface ResultadoRutaRecalculada {
   distanciaKm: number;
   tiempoEstimadoHoras: number;
-  fuente: "cache" | "mapbox" | "estimacion_fallback";
+  fuente: "cache" | "mapbox";
 }
 
 /**
@@ -49,7 +53,8 @@ export async function consultarRutaEnCache(
       cached &&
       typeof cached.distanciaKm === "number" &&
       typeof cached.tiempoEstimadoHoras === "number" &&
-      cached.distanciaKm > 0
+      Number.isFinite(cached.distanciaKm) && cached.distanciaKm > 0 && cached.distanciaKm <= 20000 &&
+      Number.isFinite(cached.tiempoEstimadoHoras) && cached.tiempoEstimadoHoras > 0 && cached.tiempoEstimadoHoras <= 720
     ) {
       return cached;
     }
@@ -81,6 +86,10 @@ export async function obtenerRutaRecalculadaServidor(
   destino: CoordenadaPunto,
   paradas: CoordenadaPunto[] = []
 ): Promise<ResultadoRutaRecalculada> {
+  if ([origen, ...paradas, destino].some((p) =>
+    !Number.isFinite(p.lat) || !Number.isFinite(p.lng) || Math.abs(p.lat) > 90 || Math.abs(p.lng) > 180)) {
+    throw new RutaNoDisponibleError();
+  }
   const cacheKey = generarClaveCacheRuta(origen, destino, paradas);
 
   // 1. Verificar si existe en la caché de Redis
@@ -111,7 +120,8 @@ export async function obtenerRutaRecalculadaServidor(
         }
       );
 
-      if (ruta && ruta.distanciaKm != null && ruta.tiempoHoras != null) {
+      if (ruta && ruta.distanciaKm != null && ruta.tiempoHoras != null && Number.isFinite(ruta.distanciaKm) && ruta.distanciaKm > 0 && ruta.distanciaKm <= 20000 &&
+          Number.isFinite(ruta.tiempoHoras) && ruta.tiempoHoras > 0 && ruta.tiempoHoras <= 720) {
         const distanciaKm = Number(Number(ruta.distanciaKm).toFixed(2));
         const tiempoEstimadoHoras = Number(Number(ruta.tiempoHoras).toFixed(2));
         await guardarRutaEnCache(cacheKey, { distanciaKm, tiempoEstimadoHoras });
@@ -122,20 +132,6 @@ export async function obtenerRutaRecalculadaServidor(
     }
   }
 
-  // 3. Fallback geodésico Haversine + factor de ruta terrestre (1.3)
-  const R = 6371; // Radio de la Tierra en km
-  const dLat = ((destino.lat - origen.lat) * Math.PI) / 180;
-  const dLng = ((destino.lng - origen.lng) * Math.PI) / 180;
-  const a =
-    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-    Math.cos((origen.lat * Math.PI) / 180) *
-      Math.cos((destino.lat * Math.PI) / 180) *
-      Math.sin(dLng / 2) *
-      Math.sin(dLng / 2);
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-  const distanciaLineal = R * c;
-  const distanciaKm = Math.max(1, Number((distanciaLineal * 1.3).toFixed(2)));
-  const tiempoEstimadoHoras = Math.max(0.2, Number((distanciaKm / 35).toFixed(2))); // ~35 km/h promedio urbano
-
-  return { distanciaKm, tiempoEstimadoHoras, fuente: "estimacion_fallback" };
+  // Una estimación geodésica no autoriza un cobro ni puede omitir escalas.
+  throw new RutaNoDisponibleError();
 }
