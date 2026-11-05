@@ -3,6 +3,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useCuentaUsuario } from "./useCuentaUsuario";
 import type { CuentaReal } from "./cuenta-ui";
+import { enmascararRfc } from "@ruum/api/services";
 import { construirNotificaciones } from "../../lib/inicio";
 import { construirUbicaciones } from "../ubicaciones/ubicaciones-usuario";
 import { UserDashboardLayout } from "../../components/layout/UserDashboardLayout";
@@ -37,6 +38,8 @@ const modos: ModalCuenta[] = [
 export function CuentaDesktop({ cuenta, seccionInicial }: CuentaDesktopProps) {
   const {
     cerrarSesion,
+    cerrarSesionLocal,
+    cerrarSesionGlobal,
     cerrandoSesion,
     errorSesion,
     nombreCompleto,
@@ -46,6 +49,7 @@ export function CuentaDesktop({ cuenta, seccionInicial }: CuentaDesktopProps) {
     telefono,
     esVerificado,
     etiquetaVerificacion,
+    esSolicitudConductorPendiente,
     totalIncidencias,
     totalTraslados,
     totalVehiculos,
@@ -125,6 +129,33 @@ export function CuentaDesktop({ cuenta, seccionInicial }: CuentaDesktopProps) {
           </div>
           <CabeceraCuentaArte />
         </header>
+        {esSolicitudConductorPendiente && (
+          <div
+            role="region"
+            aria-label="Estado de solicitud de conductor"
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "0.875rem",
+              padding: "1rem 1.25rem",
+              background: "#fffbeb",
+              border: "1px solid #fde68a",
+              borderRadius: "1rem",
+              marginBottom: "1rem",
+              color: "#92400e",
+            }}
+          >
+            <Icon name="shield" />
+            <div>
+              <strong style={{ display: "block", fontSize: "0.875rem" }}>
+                Solicitud de conductor en revisión
+              </strong>
+              <span style={{ fontSize: "0.8125rem", color: "#b45309" }}>
+                Tu postulación como conductor está en proceso de validación operativa.
+              </span>
+            </div>
+          </div>
+        )}
         <div className={s.banners}>
           <section className={s.profile} aria-label="Resumen de perfil">
             <div className={s.profileTop}>
@@ -325,7 +356,7 @@ export function CuentaDesktop({ cuenta, seccionInicial }: CuentaDesktopProps) {
                       {fiscal.razon_social?.trim() ||
                         "Nombre fiscal no registrado"}
                     </p>
-                    <p>RFC: {fiscal.rfc?.trim() || "No registrado"}</p>
+                    <p>RFC: {fiscal.rfc ? enmascararRfc(fiscal.rfc) : "No registrado"}</p>
                     <p>
                       Régimen fiscal:{" "}
                       {fiscal.regimen_fiscal?.trim() || "No registrado"}
@@ -444,7 +475,8 @@ export function CuentaDesktop({ cuenta, seccionInicial }: CuentaDesktopProps) {
           cambiar={setModal}
           metodoPago={usuario.metodo_pago_registrado === true}
           correo={correo}
-          cerrarSesion={cerrarSesion}
+          cerrarSesion={cerrarSesionLocal}
+          cerrarSesionGlobal={cerrarSesionGlobal}
           cerrandoSesion={cerrandoSesion}
           errorSesion={errorSesion}
         />

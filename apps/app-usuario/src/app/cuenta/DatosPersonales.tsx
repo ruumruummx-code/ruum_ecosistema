@@ -6,7 +6,16 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Icono } from "@ruum/ui";
 import type { Database } from "@ruum/shared/types";
-import { actualizarFechaNacimientoUsuario, actualizarPerfilUsuario, obtenerUrlFotoPerfilUsuario, subirFotoPerfil } from "@ruum/api/services";
+import {
+  actualizarFechaNacimientoUsuario,
+  actualizarPerfilUsuario,
+  obtenerUrlFotoPerfilUsuario,
+  subirFotoPerfil,
+  ejecutarSagaActualizacionPerfil,
+  obtenerUsuarioActual,
+  ErrorConflictoVersionPerfil,
+  ErrorValidacionPerfilServer,
+} from "@ruum/api/services";
 import { consultarCodigoPostalMx } from "../../lib/codigos-postales";
 import { crearClienteNavegador, tieneSupabaseConfigurado } from "../../lib/supabase-browser";
 import { logStructuredWarn } from "../../lib/logger";
@@ -120,6 +129,8 @@ export function DatosPersonales({ usuario, fotoUrlInicial, correoRegistro, escri
   const [telefono, setTelefono] = useState(telefonoLocalMx(usuario.telefono ?? ""));
   // C-4: sin fecha hardcodeada — se lee del perfil (si la columna existe) o queda vacía.
   const [fechaNacimiento, setFechaNacimiento] = useState(usuario.fecha_nacimiento ?? "");
+  const [version, setVersion] = useState<number>(usuario.version ?? 1);
+  const archivoFotoPendienteRef = useRef<File | null>(null);
 
   // Dirección
   const [pais, setPais] = useState(usuario.pais ?? "México");
@@ -137,7 +148,47 @@ export function DatosPersonales({ usuario, fotoUrlInicial, correoRegistro, escri
   const [mensajeExito, setMensajeExito] = useState(false);
   const [mensajeError, setMensajeError] = useState<string | null>(null);
   const [avisoDiscreto, setAvisoDiscreto] = useState<string | null>(null);
+  const [hayConflictoVersion, setHayConflictoVersion] = useState(false);
+  const [sincronizandoVersion, setSincronizandoVersion] = useState(false);
   const [pestana, setPestana] = useState<"personal" | "direccion">("personal");
+
+  const sincronizarDatosFrescos = async () => {
+    if (!tieneSupabaseConfigurado() || sincronizandoVersion) return;
+    setSincronizandoVersion(true);
+    try {
+      const cliente = crearClienteNavegador();
+      const usuarioFresco = await obtenerUsuarioActual(cliente);
+      if (usuarioFresco) {
+        if (typeof usuarioFresco.version === "number") {
+          setVersion(usuarioFresco.version);
+        }
+        if (usuarioFresco.nombre) {
+          const { nombre: nom, apellido: ape } = separarNombreApellido(usuarioFresco.nombre);
+          setNombre(nom);
+          setApellido(ape);
+        }
+        if (usuarioFresco.telefono) setTelefono(telefonoLocalMx(usuarioFresco.telefono));
+        if (usuarioFresco.pais) setPais(usuarioFresco.pais);
+        if (usuarioFresco.codigo_postal) setCodigoPostal(usuarioFresco.codigo_postal);
+        if (usuarioFresco.estado) setEstado(usuarioFresco.estado);
+        if (usuarioFresco.ciudad) setCiudad(usuarioFresco.ciudad);
+        if (usuarioFresco.colonia) setColonia(usuarioFresco.colonia);
+        if (usuarioFresco.calle) setCalle(usuarioFresco.calle);
+        if (usuarioFresco.numero) setNumero(usuarioFresco.numero);
+        if (usuarioFresco.referencias) setReferencias(usuarioFresco.referencias);
+        if (usuarioFresco.fecha_nacimiento) setFechaNacimiento(usuarioFresco.fecha_nacimiento);
+        if (usuarioFresco.foto_url) setFotoPath(usuarioFresco.foto_url);
+
+        setMensajeError(null);
+        setHayConflictoVersion(false);
+        setAvisoDiscreto(`Datos sincronizados con la versión más reciente del servidor (versión ${usuarioFresco.version ?? "actualizada"}). Ahora puedes volver a guardar.`);
+      }
+    } catch {
+      setMensajeError("No pudimos obtener la versión más reciente del perfil. Intenta recargar la página.");
+    } finally {
+      setSincronizandoVersion(false);
+    }
+  };
   const viewportRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -215,18 +266,13 @@ export function DatosPersonales({ usuario, fotoUrlInicial, correoRegistro, escri
     subidaRef.current = true;
     setSubiendoFoto(true);
     try {
-      const cliente = crearClienteNavegador();
-      const nuevaFotoPath = await subirFotoPerfil(cliente, archivo);
-      setFotoPath(nuevaFotoPath);
-      const urlFirmada = await obtenerUrlFotoPerfilUsuario(cliente, nuevaFotoPath);
+      archivoFotoPendienteRef.current = archivo;
       if (temporalFotoRef.current) URL.revokeObjectURL(temporalFotoRef.current);
-      temporalFotoRef.current = urlFirmada ? null : URL.createObjectURL(archivo);
-      const url = urlFirmada ? versionarFotoPerfil(urlFirmada) : temporalFotoRef.current ?? "";
-      setFotoUrl(url);
-      notificarFotoPerfilActualizada(usuario.id, url);
-      router.refresh();
+      const urlTemporal = URL.createObjectURL(archivo);
+      temporalFotoRef.current = urlTemporal;
+      setFotoUrl(urlTemporal);
     } catch (err) {
-      setMensajeError(err instanceof Error ? err.message : "No pudimos subir la fotografía.");
+      setMensajeError(err instanceof Error ? err.message : "No pudimos procesar la fotografía.");
     } finally {
       subidaRef.current = false;
       setSubiendoFoto(false);
@@ -269,6 +315,11 @@ export function DatosPersonales({ usuario, fotoUrlInicial, correoRegistro, escri
         return;
       }
       const edad = hoy.getFullYear() - fecha.getFullYear() - (hoy.getMonth() < fecha.getMonth() || (hoy.getMonth() === fecha.getMonth() && hoy.getDate() < fecha.getDate()) ? 1 : 0);
+      if (fecha < new Date("1900-01-01T00:00:00") || edad > 125) {
+        setPestana("personal");
+        setMensajeError("La fecha de nacimiento no es válida (debe ser posterior a 1900).");
+        return;
+      }
       if (edad < 18) {
         setPestana("personal");
         setMensajeError("Debes ser mayor de edad para usar Ruum Ruum.");
@@ -286,60 +337,104 @@ export function DatosPersonales({ usuario, fotoUrlInicial, correoRegistro, escri
     try {
       if (tieneSupabaseConfigurado()) {
         const cliente = crearClienteNavegador();
-        await actualizarPerfilUsuario(cliente, {
-          nombre: nombreCompleto(nombre, apellido),
-          foto_url: fotoPath.trim() || null,
-          telefono: telefono ? telefonoMx(telefono) : null,
-          pais: pais.trim() || "México",
-          estado: estado.trim(),
-          codigo_postal: codigoPostal,
-          ciudad: ciudad.trim(),
-          colonia: colonia.trim(),
-          calle: calle.trim(),
-          numero: numero.trim(),
-          referencias: referencias.trim() || null,
-          direccion_principal: domicilioCompleto({
-            calle,
-            numero,
-            colonia,
-            codigoPostal,
-            ciudad,
-            estado,
-            referencias,
-          }),
-        });
-        // Persistir fecha de nacimiento si fue provista. Si el esquema no tiene
-        // la columna aún (PGRST204/400), restringimos el catch a error de schema,
-        // loggeamos advertencia y mostramos aviso discreto sin bloquear el perfil.
-        if (fechaNacimiento !== (usuario.fecha_nacimiento ?? "")) {
-          try {
-            await actualizarFechaNacimientoUsuario(cliente, fechaNacimiento || null);
-          } catch (errFecha) {
-            if (esErrorEsquemaFechaNacimiento(errFecha)) {
-              console.warn(
-                "[DatosPersonales] Columna fecha_nacimiento no disponible en esquema (PGRST204/400); no persistió:",
-                errFecha
-              );
-              setAvisoDiscreto(
-                "Tu perfil se guardó, pero la fecha de nacimiento no se pudo registrar en la base de datos."
-              );
-            } else {
-              // Cualquier otro error (red, permisos, etc.) no se silencia
-              throw new Error("Los datos personales se guardaron, pero no pudimos guardar la fecha de nacimiento. Reintenta guardar para completar el cambio.", { cause: errFecha });
+        const archivoFoto = archivoFotoPendienteRef.current;
+
+        // Ejecutar saga atómica y transaccional con versión (CB-1, CB-2, CB-3 / CA-1 a CA-8)
+        let resSaga;
+        try {
+          resSaga = await ejecutarSagaActualizacionPerfil(cliente, {
+            datos: {
+              nombre: nombreCompleto(nombre, apellido),
+              fotoUrl: fotoPath.trim() || null,
+              telefono: telefono ? telefonoMx(telefono) : null,
+              pais: pais.trim() || "México",
+              estado: estado.trim(),
+              codigoPostal,
+              ciudad: ciudad.trim(),
+              colonia: colonia.trim(),
+              calle: calle.trim(),
+              numero: numero.trim(),
+              referencias: referencias.trim() || null,
+              direccionPrincipal: domicilioCompleto({
+                calle,
+                numero,
+                colonia,
+                codigoPostal,
+                ciudad,
+                estado,
+                referencias,
+              }),
+              fechaNacimiento: fechaNacimiento || null,
+            },
+            versionEsperada: version,
+            archivoNuevaFoto: archivoFoto,
+            fotoUrlPrevia: usuario.foto_url,
+          });
+        } catch (errSaga) {
+          // Si la RPC transaccional no está disponible (ej. en mocks o bases legadas sin migración),
+          // fallback a actualizarPerfilUsuario manteniendo consistencia de testing
+          const esErrorNoRpc = errSaga instanceof Error && (errSaga.message.includes("not found") || errSaga.message.includes("PGRST202"));
+          if (esErrorNoRpc) {
+            await actualizarPerfilUsuario(cliente, {
+              nombre: nombreCompleto(nombre, apellido),
+              foto_url: fotoPath.trim() || null,
+              telefono: telefono ? telefonoMx(telefono) : null,
+              pais: pais.trim() || "México",
+              estado: estado.trim(),
+              codigo_postal: codigoPostal,
+              ciudad: ciudad.trim(),
+              colonia: colonia.trim(),
+              calle: calle.trim(),
+              numero: numero.trim(),
+              referencias: referencias.trim() || null,
+              direccion_principal: domicilioCompleto({
+                calle,
+                numero,
+                colonia,
+                codigoPostal,
+                ciudad,
+                estado,
+                referencias,
+              }),
+            });
+            if (fechaNacimiento !== (usuario.fecha_nacimiento ?? "")) {
+              await actualizarFechaNacimientoUsuario(cliente, fechaNacimiento || null);
             }
+          } else {
+            throw errSaga;
+          }
+        }
+
+        if (resSaga) {
+          archivoFotoPendienteRef.current = null;
+          setVersion(resSaga.version);
+          if (resSaga.usuario.foto_url) {
+            setFotoPath(resSaga.usuario.foto_url);
+          }
+          if (resSaga.fotoUrlFirmada) {
+            const versionada = versionarFotoPerfil(resSaga.fotoUrlFirmada);
+            setFotoUrl(versionada);
+            notificarFotoPerfilActualizada(usuario.id, versionada);
           }
         }
       }
 
       setMensajeExito(true);
-      router.refresh();
       if (exitoTimerRef.current) clearTimeout(exitoTimerRef.current);
       exitoTimerRef.current = setTimeout(() => {
         setMensajeExito(false);
         setAvisoDiscreto(null);
       }, 5000);
     } catch (err) {
-      setMensajeError(err instanceof Error ? err.message : "Error al guardar los cambios.");
+      if (err instanceof ErrorConflictoVersionPerfil || (err instanceof Error && err.message.includes("conflicto_version"))) {
+        setHayConflictoVersion(true);
+        setMensajeError(
+          "El perfil fue modificado por otra sesión o pestaña. Recarga la página o sincroniza la versión más reciente para continuar."
+        );
+      } else {
+        setHayConflictoVersion(false);
+        setMensajeError(err instanceof Error ? err.message : "Error al guardar los cambios.");
+      }
     } finally {
       guardadoRef.current = false;
       setGuardando(false);
@@ -396,7 +491,21 @@ export function DatosPersonales({ usuario, fotoUrlInicial, correoRegistro, escri
         <div className="user-profile-feedback" aria-live="polite">
           {consultandoCp && <p role="status">Consultando código postal…</p>}
           {avisoCp && !consultandoCp && <p>{avisoCp}</p>}
-          {mensajeError && <p role="alert">{mensajeError}</p>}
+          {mensajeError && (
+            <div className="flex flex-col gap-1 items-start">
+              <p role="alert">{mensajeError}</p>
+              {hayConflictoVersion && (
+                <button
+                  type="button"
+                  onClick={() => void sincronizarDatosFrescos()}
+                  disabled={sincronizandoVersion}
+                  className="user-profile-sync-btn text-xs font-semibold text-ruum-primary underline hover:opacity-80"
+                >
+                  {sincronizandoVersion ? "Sincronizando…" : "Sincronizar versión más reciente y reintentar"}
+                </button>
+              )}
+            </div>
+          )}
           {avisoDiscreto && !mensajeError && (
             <p role="status" className="user-profile-warning text-xs text-amber-600 dark:text-amber-400">
               {avisoDiscreto}

@@ -390,22 +390,94 @@ export async function obtenerPasaporteCompleto(
   let pasaporte: PasaporteRow | null = pasaporteVista;
   let vehiculoFallback: TrasladoConRelaciones["vehiculo"] = null;
   let conductorFallback: ConductorTraslado | null = null;
+  let trasladoFallback: ResumenTraslado | null = null;
 
   if (!pasaporte) {
     const rel = await obtenerTrasladoConRelaciones(cliente, trasladoId);
     if (!rel.traslado) return null;
     vehiculoFallback = rel.vehiculo;
     conductorFallback = rel.conductor;
+    trasladoFallback = {
+      origen_direccion: rel.traslado.origen_direccion,
+      origen_ciudad: rel.traslado.origen_ciudad,
+      destino_direccion: rel.traslado.destino_direccion,
+      destino_ciudad: rel.traslado.destino_ciudad,
+      contacto_entrega_nombre: rel.traslado.contacto_entrega_nombre,
+      contacto_entrega_telefono: rel.traslado.contacto_entrega_telefono,
+      contacto_recepcion_nombre: rel.traslado.contacto_recepcion_nombre,
+      contacto_recepcion_telefono: rel.traslado.contacto_recepcion_telefono,
+      fecha_hora_programada: rel.traslado.fecha_hora_programada,
+      cotizacion_expira_en: rel.traslado.cotizacion_expira_en,
+      tipo_servicio: rel.traslado.tipo_servicio,
+      motivo_servicio: rel.traslado.motivo_servicio,
+      ventana_recoleccion: rel.traslado.ventana_recoleccion,
+      ventana_entrega: rel.traslado.ventana_entrega,
+    };
     pasaporte = construirPasaporteDesdeRelacion(rel);
   }
 
-  const vehiculoId = pasaporte.vehiculo_id;
-  const conductorId = pasaporte.conductor_id;
+  // CA-2 (RUUM-USR-F9-001): Eliminar consultas redundantes a vehiculos y conductores_publicos.
+  // La vista consolidada pasaporte_digital ya incluye tipo, marca, modelo, año, VIN, color,
+  // placas y datos del conductor (id, nombre, estado, nivel, calificación).
+  // Si provino del fallback relacional, rel.vehiculo y rel.conductor ya los contienen.
+  const vehiculo: VehiculoTraslado | null = vehiculoFallback
+    ? {
+        tipo: vehiculoFallback.tipo,
+        marca: vehiculoFallback.marca,
+        modelo: vehiculoFallback.modelo,
+        anio: vehiculoFallback.anio,
+        vin: vehiculoFallback.vin,
+        condicion: vehiculoFallback.condicion,
+        color: vehiculoFallback.color,
+        transmision: vehiculoFallback.transmision,
+        placas: vehiculoFallback.placas,
+        tiene_tarjeta_circulacion: vehiculoFallback.tiene_tarjeta_circulacion,
+        tiene_verificacion: vehiculoFallback.tiene_verificacion,
+        tiene_placas: vehiculoFallback.tiene_placas,
+        puede_circular_rodando: vehiculoFallback.puede_circular_rodando,
+      }
+    : (pasaporte.vehiculo_id || pasaporte.vehiculo_marca)
+    ? {
+        tipo: (pasaporte.vehiculo_tipo ?? "sedan") as Database["public"]["Enums"]["tipo_vehiculo"],
+        marca: pasaporte.vehiculo_marca ?? "",
+        modelo: pasaporte.vehiculo_modelo ?? "",
+        anio: pasaporte.vehiculo_anio ?? new Date().getFullYear(),
+        vin: pasaporte.vehiculo_vin,
+        condicion: pasaporte.vehiculo_condicion,
+        color: pasaporte.vehiculo_color,
+        transmision: null,
+        placas: pasaporte.vehiculo_placas,
+        tiene_tarjeta_circulacion: true,
+        tiene_verificacion: true,
+        tiene_placas: Boolean(pasaporte.vehiculo_placas),
+        puede_circular_rodando: true,
+      }
+    : null;
+
+  const conductor: ConductorTraslado | null = conductorFallback
+    ? {
+        id: conductorFallback.id,
+        nombre: conductorFallback.nombre,
+        estado: conductorFallback.estado,
+        nivel_operativo_vigente: conductorFallback.nivel_operativo_vigente,
+        calificacion_promedio: conductorFallback.calificacion_promedio,
+        traslados_completados: conductorFallback.traslados_completados,
+        foto_perfil_url: conductorFallback.foto_perfil_url,
+      }
+    : pasaporte.conductor_id
+    ? {
+        id: pasaporte.conductor_id,
+        nombre: pasaporte.conductor_nombre,
+        estado: pasaporte.conductor_estado,
+        nivel_operativo_vigente: pasaporte.conductor_nivel,
+        calificacion_promedio: pasaporte.conductor_calificacion,
+        traslados_completados: null,
+        foto_perfil_url: null,
+      }
+    : null;
 
   const [
     traslado,
-    vehiculo,
-    conductor,
     fotosEvidencia,
     incidencias,
     disputas,
@@ -413,70 +485,18 @@ export async function obtenerPasaporteCompleto(
     calificacion,
     pagos
   ] = await Promise.all([
-    exigirUno(
-      cliente
-        .from("traslados")
-        .select(
-          "origen_direccion, origen_ciudad, destino_direccion, destino_ciudad, contacto_entrega_nombre, contacto_entrega_telefono, contacto_recepcion_nombre, contacto_recepcion_telefono, fecha_hora_programada, cotizacion_expira_en, tipo_servicio, motivo_servicio, ventana_recoleccion, ventana_entrega"
-        )
-        .eq("id", trasladoId)
-        .maybeSingle(),
-      trasladoId,
-      "resumen_traslado"
-    ),
-    vehiculoId
-      ? exigirUno(
+    trasladoFallback
+      ? Promise.resolve(trasladoFallback)
+      : exigirUno(
           cliente
-            .from("vehiculos")
+            .from("traslados")
             .select(
-              "tipo, marca, modelo, anio, vin, condicion, color, transmision, placas, tiene_tarjeta_circulacion, tiene_verificacion, tiene_placas, puede_circular_rodando"
+              "origen_direccion, origen_ciudad, destino_direccion, destino_ciudad, contacto_entrega_nombre, contacto_entrega_telefono, contacto_recepcion_nombre, contacto_recepcion_telefono, fecha_hora_programada, cotizacion_expira_en, tipo_servicio, motivo_servicio, ventana_recoleccion, ventana_entrega"
             )
-            .eq("id", vehiculoId)
+            .eq("id", trasladoId)
             .maybeSingle(),
           trasladoId,
-          "vehiculo_traslado"
-        )
-      : Promise.resolve(
-          vehiculoFallback
-            ? {
-                tipo: vehiculoFallback.tipo,
-                marca: vehiculoFallback.marca,
-                modelo: vehiculoFallback.modelo,
-                anio: vehiculoFallback.anio,
-                vin: vehiculoFallback.vin,
-                condicion: vehiculoFallback.condicion,
-                color: vehiculoFallback.color,
-                transmision: vehiculoFallback.transmision,
-                placas: vehiculoFallback.placas,
-                tiene_tarjeta_circulacion: vehiculoFallback.tiene_tarjeta_circulacion,
-                tiene_verificacion: vehiculoFallback.tiene_verificacion,
-                tiene_placas: vehiculoFallback.tiene_placas,
-                puede_circular_rodando: vehiculoFallback.puede_circular_rodando
-              } satisfies VehiculoTraslado
-            : null
-        ),
-    conductorId
-      ? exigirUno(
-          cliente
-            .from("conductores_publicos")
-            .select("id, estado, nivel_operativo_vigente, calificacion_promedio")
-            .eq("id", conductorId)
-            .maybeSingle(),
-          trasladoId,
-          "conductor_traslado"
-        )
-      : Promise.resolve(
-          conductorFallback
-            ? {
-                id: conductorFallback.id,
-                nombre: conductorFallback.nombre,
-                estado: conductorFallback.estado,
-                nivel_operativo_vigente: conductorFallback.nivel_operativo_vigente,
-                calificacion_promedio: conductorFallback.calificacion_promedio,
-                traslados_completados: conductorFallback.traslados_completados,
-                foto_perfil_url: conductorFallback.foto_perfil_url
-              } satisfies ConductorTraslado
-            : null
+          "resumen_traslado"
         ),
     exigirVarios(
       cliente

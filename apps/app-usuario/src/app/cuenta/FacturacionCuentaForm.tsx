@@ -32,15 +32,62 @@ function datoFiscal(usuario: Usuario, empresa: Empresa | null, campo: CampoFisca
 
 export type DatosFiscalesGuardados = { rfc: string; razon_social: string | null; regimen_fiscal: string | null; codigo_postal_fiscal: string; uso_cfdi: string | null; correo_facturacion: string | null };
 
-const DRAFT_FISCAL_KEY = "ruum:draft:fiscal";
+export const DRAFT_FISCAL_TTL_MS = 24 * 60 * 60 * 1000; // 24 horas
 
-function leerDraftFiscal(): Partial<DatosFiscalesGuardados> | null {
+export function obtenerClaveDraftFiscal(usuarioId?: string | null): string {
+  return usuarioId ? `ruum_draft_fiscal_${usuarioId}` : "ruum_draft_fiscal_default";
+}
+
+export type DraftFiscalEnvelope = {
+  datos: Partial<DatosFiscalesGuardados>;
+  timestamp: number;
+};
+
+export function leerDraftFiscal(usuarioId?: string | null): Partial<DatosFiscalesGuardados> | null {
   if (typeof window === "undefined") return null;
   try {
-    const raw = window.localStorage.getItem(DRAFT_FISCAL_KEY);
-    return raw ? (JSON.parse(raw) as Partial<DatosFiscalesGuardados>) : null;
+    const clave = obtenerClaveDraftFiscal(usuarioId);
+    const raw = window.localStorage.getItem(clave) || window.localStorage.getItem("ruum:draft:fiscal");
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    if (parsed && typeof parsed === "object") {
+      if ("timestamp" in parsed && typeof parsed.timestamp === "number" && "datos" in parsed) {
+        if (Date.now() - parsed.timestamp > DRAFT_FISCAL_TTL_MS) {
+          window.localStorage.removeItem(clave);
+          window.localStorage.removeItem("ruum:draft:fiscal");
+          return null;
+        }
+        return parsed.datos as Partial<DatosFiscalesGuardados>;
+      }
+      return parsed as Partial<DatosFiscalesGuardados>;
+    }
+    return null;
   } catch {
     return null;
+  }
+}
+
+export function guardarDraftFiscal(usuarioId: string | null | undefined, datos: Partial<DatosFiscalesGuardados>): void {
+  if (typeof window === "undefined") return;
+  try {
+    const clave = obtenerClaveDraftFiscal(usuarioId);
+    const envelope: DraftFiscalEnvelope = {
+      datos,
+      timestamp: Date.now(),
+    };
+    window.localStorage.setItem(clave, JSON.stringify(envelope));
+  } catch {
+    // ignore
+  }
+}
+
+export function limpiarDraftFiscal(usuarioId?: string | null): void {
+  if (typeof window === "undefined") return;
+  try {
+    window.localStorage.removeItem(obtenerClaveDraftFiscal(usuarioId));
+    window.localStorage.removeItem("ruum:draft:fiscal");
+  } catch {
+    // ignore
   }
 }
 
@@ -50,7 +97,7 @@ export function FacturacionCuentaForm({ usuario, empresa, onActualizado, compact
   const bloqueo = useRef(false);
   const draftInicial = useRef<Partial<DatosFiscalesGuardados> | null>(null);
   if (draftInicial.current === null && typeof window !== "undefined") {
-    draftInicial.current = leerDraftFiscal();
+    draftInicial.current = leerDraftFiscal(usuario?.id);
   }
 
   const [rfc, setRfc] = useState(() => datoFiscal(usuario, empresa, "rfc") || (draftInicial.current?.rfc ?? ""));
@@ -62,21 +109,21 @@ export function FacturacionCuentaForm({ usuario, empresa, onActualizado, compact
   const [guardando, setGuardando] = useState(false);
   const [mensaje, setMensaje] = useState<{ tono: "info" | "danger"; texto: string } | null>(null);
 
-  // Autosave del borrador fiscal local
+  // Autosave del borrador fiscal local con namespace y TTL de 24h
   useEffect(() => {
     const timer = setTimeout(() => {
       try {
         if (typeof window !== "undefined") {
           const hayDatos = Boolean(rfc || razonSocial || regimenFiscal || codigoPostalFiscal || usoCfdi || correoFacturacion);
           if (hayDatos) {
-            window.localStorage.setItem(DRAFT_FISCAL_KEY, JSON.stringify({
+            guardarDraftFiscal(usuario?.id, {
               rfc,
               razon_social: razonSocial,
               regimen_fiscal: regimenFiscal,
               codigo_postal_fiscal: codigoPostalFiscal,
               uso_cfdi: usoCfdi,
               correo_facturacion: correoFacturacion,
-            }));
+            });
           }
         }
       } catch {
@@ -84,7 +131,7 @@ export function FacturacionCuentaForm({ usuario, empresa, onActualizado, compact
       }
     }, 300);
     return () => clearTimeout(timer);
-  }, [rfc, razonSocial, regimenFiscal, codigoPostalFiscal, usoCfdi, correoFacturacion]);
+  }, [usuario?.id, rfc, razonSocial, regimenFiscal, codigoPostalFiscal, usoCfdi, correoFacturacion]);
 
   const persona = cuentaIndividual ? "fisica" : rfc.length === 12 ? "moral" : rfc.length === 13 ? "fisica" : undefined;
   function cambiarRfc(valor: string) {
@@ -142,9 +189,7 @@ export function FacturacionCuentaForm({ usuario, empresa, onActualizado, compact
       const cliente = crearClienteNavegador();
       await actualizarFacturacionUsuario(cliente, datos);
       try {
-        if (typeof window !== "undefined") {
-          window.localStorage.removeItem(DRAFT_FISCAL_KEY);
-        }
+        limpiarDraftFiscal(usuario?.id);
       } catch {}
       setMensaje({ tono: "info", texto: "Datos de facturación actualizados." });
       onActualizado?.(datos);

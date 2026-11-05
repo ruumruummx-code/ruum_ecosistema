@@ -4,7 +4,11 @@ import { puedeAbrirseDisputa, slaRevisionAdmin, slaResolucionDisputa, puedeEscal
 describe("puedeAbrirseDisputa — PRD §4.14 (72 horas post-cierre)", () => {
   it("dentro de las 72 horas", () => expect(puedeAbrirseDisputa(71)).toBe(true));
   it("exactamente en el límite", () => expect(puedeAbrirseDisputa(72)).toBe(true));
-  it("fuera del plazo", () => expect(puedeAbrirseDisputa(73)).toBe(false));
+  it("dentro del margen de gracia técnico de 15 min (72.15h)", () => expect(puedeAbrirseDisputa(72.15)).toBe(true));
+  it("fuera del plazo con gracia (72.3h / 73h)", () => {
+    expect(puedeAbrirseDisputa(72.3)).toBe(false);
+    expect(puedeAbrirseDisputa(73)).toBe(false);
+  });
 });
 
 describe("slaRevisionAdmin — PRD §4.14 (48 horas)", () => {

@@ -15,7 +15,7 @@ describe("CuentaCliente — RR-2026-003", () => {
     cuenta();
     expect(screen.getByText("Carlos Ramos")).toBeInTheDocument();
     expect(screen.getByText("registro@ruum.test")).toBeInTheDocument();
-    expect(screen.getByText("+52 55 1234 5678")).toBeInTheDocument();
+    expect(screen.getByText("+52 •••••• 5678")).toBeInTheDocument();
     expect(screen.getByText("15")).toBeInTheDocument();
     expect(screen.getByText("2")).toBeInTheDocument();
     expect(screen.getByText("1")).toBeInTheDocument();
@@ -65,10 +65,10 @@ describe("CuentaCliente — RR-2026-003", () => {
     expect(await screen.findByRole("dialog", { name: "Perfil" })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Datos personales" })).toHaveAttribute("href", "/cuenta/datos-personales");
   });
-  it("cierra sesión inmediatamente y redirige al Login", async () => {
+  it("cierra sesión inmediatamente con scope local y redirige al Login", async () => {
     const user = userEvent.setup(); cuenta();
     await user.click(screen.getByRole("button", { name: "Cerrar sesión" }));
-    expect(signOut).toHaveBeenCalledTimes(1);
+    expect(signOut).toHaveBeenCalledWith({ scope: "local" });
     expect(replace).toHaveBeenCalledWith("/login");
     expect(refresh).toHaveBeenCalledTimes(1);
   });
@@ -80,5 +80,44 @@ describe("CuentaCliente — RR-2026-003", () => {
     expect(await screen.findByRole("alert")).toHaveTextContent("No pudimos cerrar tu sesión");
     expect(replace).not.toHaveBeenCalled();
     expect(screen.getByRole("button", { name: "Cerrar sesión" })).toBeEnabled();
+  });
+  it.each([
+    ["verificado", "Verificado"],
+    ["en_revision", "En revisión"],
+    ["rechazado", "Rechazado"],
+    ["pendiente", "Pendiente"],
+    [undefined, "Pendiente"],
+  ])("renderiza badge honesto diferenciado para estado '%s': %s", (estado, esperado) => {
+    render(
+      <CuentaCliente
+        usuario={{ ...usuario, estado_verificacion: estado as any }}
+        correoRegistro="registro@ruum.test"
+      />
+    );
+    expect(screen.getByText(esperado)).toBeInTheDocument();
+  });
+  it("muestra el aviso accesible de solicitud de conductor en revisión cuando está pendiente", () => {
+    render(
+      <CuentaCliente
+        usuario={usuario}
+        correoRegistro="registro@ruum.test"
+        rolInfo={{
+          rolBaseUsuario: "sin_rol",
+          rolEfectivo: "sin_rol",
+          esConductorAprobado: false,
+          estadoConductor: "solicitud_pendiente",
+          solicitudConductor: {
+            id: "sol-10",
+            estado: "en_revision",
+            pasoActual: 3,
+            enviadoEn: "2026-11-04T12:00:00Z",
+            actualizadoEn: "2026-11-04T12:00:00Z",
+            esPendiente: true,
+          },
+        }}
+      />
+    );
+    expect(screen.getByRole("region", { name: "Estado de solicitud de conductor" })).toBeInTheDocument();
+    expect(screen.getByText("Solicitud de conductor en revisión")).toBeInTheDocument();
   });
 });

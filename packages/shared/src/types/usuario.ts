@@ -15,4 +15,5 @@ export interface Usuario {
   fecha_nacimiento?: string | null;
   preferencias?: Record<string, unknown> | null;
   creado_en: string;
+  version?: number;
 }

@@ -30,6 +30,7 @@ export default async function PaginaCuenta({ searchParams }: { searchParams?: Pr
             totalVehiculos={cuenta.vehiculos.length}
             incidenciasAbiertas={cuenta.incidenciasAbiertas}
             totalTraslados={cuenta.totalTraslados}
+            rolInfo={cuenta.rolInfo}
           />
         </MobileShell>
       </div>

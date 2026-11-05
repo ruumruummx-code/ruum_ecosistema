@@ -23,15 +23,27 @@ const listarTrasladosDeUsuarioMock = vi.fn();
 const actualizarPerfilUsuarioMock = vi.fn();
 const subirFotoPerfilMock = vi.fn();
 const solicitarRestablecimientoPasswordUsuarioMock = vi.fn();
-
-vi.mock("@ruum/api/services", () => ({
-  obtenerUsuarioActual: (...args: unknown[]) => obtenerUsuarioActualMock(...args),
-  obtenerUrlFotoPerfilUsuario: (...args: unknown[]) => obtenerUrlFotoPerfilUsuarioMock(...args),
-  listarTrasladosDeUsuario: (...args: unknown[]) => listarTrasladosDeUsuarioMock(...args),
-  actualizarPerfilUsuario: (...args: unknown[]) => actualizarPerfilUsuarioMock(...args),
-  subirFotoPerfil: (...args: unknown[]) => subirFotoPerfilMock(...args),
-  solicitarRestablecimientoPasswordUsuario: (...args: unknown[]) => solicitarRestablecimientoPasswordUsuarioMock(...args),
+const obtenerRolEfectivoUsuarioMock = vi.fn(async (..._args: any[]) => ({
+  rolBaseUsuario: "sin_rol" as const,
+  rolEfectivo: "sin_rol" as const,
+  esConductorAprobado: false,
+  estadoConductor: "sin_solicitud" as const,
+  solicitudConductor: null,
 }));
+
+vi.mock("@ruum/api/services", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@ruum/api/services")>();
+  return {
+    ...actual,
+    obtenerUsuarioActual: (cliente: any) => obtenerUsuarioActualMock(cliente),
+    obtenerUrlFotoPerfilUsuario: (cliente: any, ruta: any) => obtenerUrlFotoPerfilUsuarioMock(cliente, ruta),
+    listarTrasladosDeUsuario: (cliente: any, usuarioId: any) => listarTrasladosDeUsuarioMock(cliente, usuarioId),
+    actualizarPerfilUsuario: (...args: any[]) => (actualizarPerfilUsuarioMock as any)(...args),
+    subirFotoPerfil: (...args: any[]) => (subirFotoPerfilMock as any)(...args),
+    solicitarRestablecimientoPasswordUsuario: (...args: any[]) => (solicitarRestablecimientoPasswordUsuarioMock as any)(...args),
+    obtenerRolEfectivoUsuario: (cliente: any, authUserId: any) => obtenerRolEfectivoUsuarioMock(cliente, authUserId),
+  };
+});
 
 const listarVehiculosDeUsuarioMock = vi.fn();
 vi.mock("@ruum/api/vehicles", () => ({

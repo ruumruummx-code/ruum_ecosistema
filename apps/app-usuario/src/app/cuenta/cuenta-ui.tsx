@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 import { Aviso, Button, Icono, PassportCard, SENDAS_ICONO, MobileShell } from "@ruum/ui";
 import { ETIQUETA_TIPO_VEHICULO } from "@ruum/shared/constants";
 import type { Database } from "@ruum/shared/types";
+import type { RolEfectivoCuentaDTO } from "@ruum/api/services";
 import { PerfilCuentaForm } from "./PerfilCuentaForm";
 import { BotonResetPassword } from "./BotonResetPassword";
 import { FacturacionCuentaForm } from "./FacturacionCuentaForm";
@@ -12,6 +13,13 @@ import { BotonReintentarSesion } from "../ReintentarSesion";
 import { NavegacionUsuario } from "../NavegacionUsuario";
 
 export { iniciales } from "./cuenta-utils";
+export {
+  enmascararRfc,
+  enmascararVin,
+  enmascararTelefono,
+  enmascararCreditoEmpresarial,
+  enmascararDireccionResumen,
+} from "@ruum/api/services";
 
 export type Usuario = Database["public"]["Tables"]["usuarios"]["Row"];
 export type Vehiculo = Database["public"]["Tables"]["vehiculos"]["Row"];
@@ -25,9 +33,11 @@ export interface CuentaReal {
   empresa: Empresa | null;
   totalTraslados: number;
   datosAuxiliaresCargados?: boolean;
+  auxiliaresConFallo?: string[];
   fotoPerfilNoDisponible?: boolean;
   incidenciasAbiertas?: number;
   traslados?: Database["public"]["Views"]["pasaporte_digital"]["Row"][];
+  rolInfo?: RolEfectivoCuentaDTO;
 }
 
 const LINKS_CUENTA = [
@@ -89,7 +99,12 @@ export async function obtenerCuenta({ carga = "completa" }: OpcionesCuenta = {})
 
   try {
     const { crearClienteServidor } = await import("../../lib/supabase-server");
-    const { obtenerUrlFotoPerfilUsuario, obtenerUsuarioActual, listarTrasladosDeUsuario } = await import("@ruum/api/services");
+    const {
+      obtenerUrlFotoPerfilUsuario,
+      obtenerUsuarioActual,
+      listarTrasladosDeUsuario,
+      obtenerRolEfectivoUsuario,
+    } = await import("@ruum/api/services");
     const { listarVehiculosDeUsuario } = await import("@ruum/api/vehicles");
     const { obtenerEmpresaVisible } = await import("@ruum/api/organizations");
     const cliente = await crearClienteServidor();
@@ -111,14 +126,40 @@ export async function obtenerCuenta({ carga = "completa" }: OpcionesCuenta = {})
     // Editar el perfil o preferencias no depende del historial, garaje o empresa.
     if (carga !== "completa") return {
       estado: "ok",
-      cuenta: { usuario, correoRegistro: auth.user.email ?? null, fotoPerfilUrl, fotoPerfilNoDisponible, vehiculos: [], empresa: null, totalTraslados: 0, datosAuxiliaresCargados: false },
+      cuenta: {
+        usuario,
+        correoRegistro: auth.user.email ?? null,
+        fotoPerfilUrl,
+        fotoPerfilNoDisponible,
+        vehiculos: [],
+        empresa: null,
+        totalTraslados: 0,
+        datosAuxiliaresCargados: false,
+        auxiliaresConFallo: [],
+      },
     };
 
-    const [vehiculos, empresa, trasladosPropios] = await Promise.all([
+    // Orden de carga: esencial resuelto (usuario + auth), diferido en paralelo resiliente (Promise.allSettled)
+    const [resVehiculos, resEmpresa, resTraslados, resRol] = await Promise.allSettled([
       listarVehiculosDeUsuario(cliente, usuario.id),
       usuario.empresa_id ? obtenerEmpresaVisible(cliente, usuario.empresa_id) : Promise.resolve(null),
       listarTrasladosDeUsuario(cliente, usuario.id),
+      obtenerRolEfectivoUsuario(cliente, auth.user.id),
     ]);
+
+    const auxiliaresConFallo: string[] = [];
+
+    const vehiculos = resVehiculos.status === "fulfilled" ? resVehiculos.value : (auxiliaresConFallo.push("vehiculos"), []);
+    const empresa = resEmpresa.status === "fulfilled" ? resEmpresa.value : (auxiliaresConFallo.push("empresa"), null);
+    const trasladosPropios = resTraslados.status === "fulfilled" ? resTraslados.value : (auxiliaresConFallo.push("traslados"), []);
+    const rolInfo = resRol.status === "fulfilled" ? resRol.value : (auxiliaresConFallo.push("rol"), undefined);
+
+    if (auxiliaresConFallo.length > 0) {
+      console.warn("[cuenta] servicios_auxiliares_con_fallo_diferido", {
+        usuario_id: usuario.id,
+        fallos: auxiliaresConFallo,
+      });
+    }
 
     return {
       estado: "ok",
@@ -131,6 +172,9 @@ export async function obtenerCuenta({ carga = "completa" }: OpcionesCuenta = {})
         totalTraslados: trasladosPropios.length,
         incidenciasAbiertas: trasladosPropios.reduce((total, traslado) => total + (traslado.incidencias_abiertas ?? 0), 0),
         traslados: trasladosPropios,
+        datosAuxiliaresCargados: auxiliaresConFallo.length === 0,
+        auxiliaresConFallo,
+        rolInfo,
       }
     };
   } catch (err) {

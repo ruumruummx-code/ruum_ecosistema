@@ -4,6 +4,26 @@ import { validarSeleccionFiscalSat } from "@ruum/shared/catalogos";
 import { rpcTipado } from "../supabase/funciones";
 import { registrarEvento } from "./auditoria";
 
+export {
+  enmascararRfc,
+  enmascararVin,
+  enmascararTelefono,
+  enmascararCreditoEmpresarial,
+  enmascararDireccionResumen,
+  obtenerRolEfectivoUsuario,
+  obtenerUrlDocumentoBajoDemanda,
+  obtenerCuentaUsuarioDTO,
+  registrarAuditoriaAccesoPii,
+  type IdentidadCuentaDTO,
+  type VehiculoCuentaDTO,
+  type TrasladosResumenCuentaDTO,
+  type EmpresaCuentaDTO,
+  type DocumentoCuentaDTO,
+  type CuentaUsuarioDTO,
+  type RolEfectivoCuentaDTO,
+  type SolicitudConductorResumenDTO,
+} from "./cuenta-dto";
+
 type Cliente = SupabaseClient<Database>;
 type UsuarioRow = Database["public"]["Tables"]["usuarios"]["Row"];
 
@@ -191,7 +211,7 @@ export async function actualizarPreferenciasGeneralesUsuario(
 
 function rutaFotoPerfilUsuario(valor: string | null | undefined, authUserId: string): string | null {
   if (!valor) return null;
-  const rutaEsperada = new RegExp(`^${authUserId}/perfil\\.(?:jpe?g|png|webp)$`, "i");
+  const rutaEsperada = new RegExp(`^${authUserId}/perfil(?:_[^/]+)?\\.(?:jpe?g|png|webp)$`, "i");
   if (rutaEsperada.test(valor)) return valor;
   try {
     const url = new URL(valor);
@@ -226,6 +246,7 @@ export type FacturacionActualizable = {
   codigo_postal_fiscal: string | null;
   uso_cfdi: string | null;
   correo_facturacion: string | null;
+  estado_validacion_fiscal?: string | null;
 };
 
 export async function actualizarFacturacionUsuario(cliente: Cliente, datos: FacturacionActualizable): Promise<void> {
@@ -244,6 +265,7 @@ export async function actualizarFacturacionUsuario(cliente: Cliente, datos: Fact
     p_codigo_postal_fiscal: datos.codigo_postal_fiscal ?? null,
     p_uso_cfdi: datos.uso_cfdi ?? null,
     p_correo_facturacion: datos.correo_facturacion ?? null,
+    p_estado_validacion_fiscal: datos.estado_validacion_fiscal ?? "pendiente_de_validacion_fiscal",
   });
 
   if (error) throw error;
@@ -406,12 +428,15 @@ export async function subirDocumentoIdentidad(
   return data;
 }
 
+export type EstadoDocumentoCuenta = "recibido" | "en_revision" | "verificado" | "rechazado" | "expirado";
 export type TipoDocumentoCuenta = "comprobante" | "constancia";
 export type DocumentoCuenta = {
   tipo: TipoDocumentoCuenta;
   ruta: string;
-  estado: "en_revision" | "verificado" | "rechazado";
+  estado: EstadoDocumentoCuenta;
   subido_en: string;
+  motivo_rechazo?: string | null;
+  expira_en?: string | null;
 };
 
 export async function listarDocumentosCuentaUsuario(cliente: Cliente): Promise<DocumentoCuenta[]> {
@@ -440,10 +465,46 @@ export async function subirDocumentoCuentaUsuario(cliente: Cliente, tipo: TipoDo
   body.append("archivo", new File([bytes], archivo.name, { type: archivo.type, lastModified: archivo.lastModified }));
   const { data, error } = await cliente.functions.invoke<DocumentoCuenta>("documentos-cuenta-usuario", { body });
   if (error) throw new Error(await mensajeErrorFuncion(error));
-  if (!data?.ruta || data.tipo !== tipo || data.estado !== "en_revision" || !data.subido_en) {
+  if (!data?.ruta || data.tipo !== tipo || !["recibido", "en_revision"].includes(data.estado) || !data.subido_en) {
     throw new Error("El servidor no confirmó el registro del documento.");
   }
   return data;
+}
+
+/**
+ * Solicita la supresión de documentos bajo ejercicio de derechos ARCO.
+ * Solo procede si el usuario no tiene traslados activos ni adeudos.
+ */
+export async function solicitarSupresionDocumentosArco(
+  cliente: Cliente,
+  tipoDocumento?: TipoDocumentoCuenta
+): Promise<{ ok: boolean; documentos_encolados: number }> {
+  const { data, error } = await rpcTipado(cliente, "solicitar_supresion_documentos_arco", {
+    p_tipo_documento: tipoDocumento ?? null,
+  });
+  if (error) throw error;
+  return data as { ok: boolean; documentos_encolados: number };
+}
+
+/**
+ * Registra en bitácora de auditoría el acceso administrativo a documentos con PII.
+ */
+export async function auditarAccesoDocumentoPii(
+  cliente: Cliente,
+  params: {
+    usuarioObjetivoId: string;
+    documentoId: string;
+    tipoDocumento: string;
+    justificacion: string;
+  }
+): Promise<void> {
+  const { error } = await rpcTipado(cliente, "auditar_acceso_documento_pii", {
+    p_usuario_objetivo_id: params.usuarioObjetivoId,
+    p_documento_id: params.documentoId,
+    p_tipo_documento: params.tipoDocumento,
+    p_justificacion: params.justificacion,
+  });
+  if (error) throw error;
 }
 
 /**
@@ -680,3 +741,15 @@ export async function registrarConsentimientoUsuario(
 
   return { version, aceptado_en: aceptado };
 }
+
+export {
+  ErrorConflictoVersionPerfil,
+  ErrorValidacionPerfilServer,
+  validarLimitesDatosPersonalesServer,
+  actualizarPerfilTransaccionalRpc,
+  ejecutarSagaActualizacionPerfil,
+  type DatosActualizarPerfilTransaccional,
+  type ParametrosSagaPerfil,
+  type ResultadoPerfilActualizado,
+} from "./perfil-transaccional";
+

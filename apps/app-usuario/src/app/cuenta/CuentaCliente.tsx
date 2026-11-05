@@ -9,6 +9,8 @@ import type { Database } from "@ruum/shared/types";
 import { crearClienteNavegador } from "../../lib/supabase-browser";
 import { logStructuredError } from "../../lib/logger";
 import { iniciales } from "./cuenta-utils";
+import { enmascararTelefono } from "@ruum/api/services";
+import type { RolEfectivoCuentaDTO } from "@ruum/api/services";
 
 type Usuario = Database["public"]["Tables"]["usuarios"]["Row"];
 type SeccionCuenta = "perfil" | "soporte" | "legal";
@@ -21,6 +23,7 @@ export interface CuentaClienteProps {
   totalVehiculos?: number;
   totalTraslados?: number;
   incidenciasAbiertas?: number;
+  rolInfo?: RolEfectivoCuentaDTO;
 }
 
 const SECCIONES = {
@@ -74,16 +77,59 @@ function Chevron({ className = "size-4 text-[#94a3b8]" }: { className?: string }
 }
 
 function BadgeVerificacion({ estado }: { estado: Usuario["estado_verificacion"] | undefined }) {
-  const texto = estado === "verificado" ? "Verificado" : estado === "en_revision" ? "En revisión" : estado === "rechazado" ? "Rechazado" : "Pendiente";
+  const est = estado ?? "pendiente";
+  if (est === "verificado") {
+    return (
+      <span
+        className="inline-flex items-center gap-1 rounded-full bg-[#eaf8f0] px-2.5 py-0.5 text-[11px] font-bold text-[#10b981] dark:bg-[#09281e] dark:text-[#34d399]"
+        title="Verificado"
+      >
+        <svg className="size-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <polyline points="20 6 9 17 4 12" />
+        </svg>
+        Verificado
+      </span>
+    );
+  }
+  if (est === "en_revision") {
+    return (
+      <span
+        className="inline-flex items-center gap-1 rounded-full bg-blue-50 px-2.5 py-0.5 text-[11px] font-bold text-blue-600 dark:bg-blue-950/50 dark:text-blue-400"
+        title="En revisión"
+      >
+        <svg className="size-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <circle cx="12" cy="12" r="10" />
+          <polyline points="12 6 12 12 16 14" />
+        </svg>
+        En revisión
+      </span>
+    );
+  }
+  if (est === "rechazado") {
+    return (
+      <span
+        className="inline-flex items-center gap-1 rounded-full bg-red-50 px-2.5 py-0.5 text-[11px] font-bold text-red-600 dark:bg-red-950/50 dark:text-red-400"
+        title="Documentación rechazada"
+      >
+        <svg className="size-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <line x1="18" y1="6" x2="6" y2="18" />
+          <line x1="6" y1="6" x2="18" y2="18" />
+        </svg>
+        Rechazado
+      </span>
+    );
+  }
   return (
     <span
-      className="inline-flex items-center gap-1 rounded-full bg-[#eaf8f0] px-2.5 py-0.5 text-[11px] font-bold text-[#10b981] dark:bg-[#09281e] dark:text-[#34d399]"
-      title={texto}
+      className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2.5 py-0.5 text-[11px] font-bold text-slate-600 dark:bg-slate-800 dark:text-slate-300"
+      title="Pendiente de verificación"
     >
-      <svg className="size-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-        <polyline points="20 6 9 17 4 12" />
+      <svg className="size-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+        <circle cx="12" cy="12" r="10" />
+        <line x1="12" y1="8" x2="12" y2="12" />
+        <line x1="12" y1="16" x2="12.01" y2="16" />
       </svg>
-      {texto}
+      Pendiente
     </span>
   );
 }
@@ -221,6 +267,7 @@ export function CuentaCliente({
   totalVehiculos = 0,
   totalTraslados = 0,
   incidenciasAbiertas = 0,
+  rolInfo,
 }: CuentaClienteProps) {
   const router = useRouter();
   const [seccion, setSeccion] = useState<SeccionCuenta | null>(seccionInicial);
@@ -230,7 +277,7 @@ export function CuentaCliente({
   const cerrarHoja = useCallback(() => setSeccion(null), []);
   const nombre = usuario?.nombre?.trim() || "Mi cuenta";
   const correo = correoRegistro?.trim() || "Sin correo registrado";
-  const telefono = usuario?.telefono?.trim() || "Sin teléfono registrado";
+  const telefono = usuario?.telefono?.trim() ? enmascararTelefono(usuario.telefono) : "Sin teléfono registrado";
 
   async function cerrarSesion() {
     if (salidaRef.current) return;
@@ -238,7 +285,7 @@ export function CuentaCliente({
     setCerrandoSesion(true);
     setErrorSesion(null);
     try {
-      const { error } = await crearClienteNavegador().auth.signOut();
+      const { error } = await crearClienteNavegador().auth.signOut({ scope: "local" });
       if (error) throw error;
 
       try {
@@ -286,11 +333,6 @@ export function CuentaCliente({
                   {iniciales(usuario?.nombre)}
                 </span>
               )}
-              {/* Indicador en línea verde */}
-              <span
-                className="absolute bottom-0 right-0 size-3.5 rounded-full bg-[#22c55e] ring-2 ring-[#0c2340]"
-                aria-hidden="true"
-              />
             </div>
 
             {/* Información del usuario */}
@@ -307,9 +349,9 @@ export function CuentaCliente({
             </div>
           </div>
 
-          {/* Badge de Verificado */}
+          {/* Badge de Verificación honesto (sin fail-open ni fallback falso a verificado) */}
           <div className="shrink-0">
-            <BadgeVerificacion estado={usuario?.estado_verificacion ?? "verificado"} />
+            <BadgeVerificacion estado={usuario?.estado_verificacion ?? "pendiente"} />
           </div>
         </div>
 
@@ -362,6 +404,25 @@ export function CuentaCliente({
           </div>
         </dl>
       </section>
+
+      {/* Banner de estado de solicitud de conductor (CB-2: estado explícito, no ausencia de rol) */}
+      {rolInfo?.estadoConductor === "solicitud_pendiente" && (
+        <section
+          role="region"
+          aria-label="Estado de solicitud de conductor"
+          className="flex items-center gap-3.5 rounded-2xl border border-amber-300 bg-amber-50 p-4 text-amber-900 shadow-xs dark:border-amber-800/60 dark:bg-amber-950/40 dark:text-amber-200"
+        >
+          <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-amber-100 text-amber-700 dark:bg-amber-900/60 dark:text-amber-300">
+            <Icono d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" className="size-5" />
+          </span>
+          <div className="min-w-0 flex-1">
+            <h3 className="font-display text-[14px] font-bold">Solicitud de conductor en revisión</h3>
+            <p className="text-[12px] font-medium text-amber-800 dark:text-amber-300/90">
+              Tu postulación como conductor está en validación. Te notificaremos cuando se complete.
+            </p>
+          </div>
+        </section>
+      )}
 
       {/* Menú de Tarjetas Independientes (Perfil, Soporte, Legal y Cerrar sesión) */}
       <nav aria-label="Ajustes de cuenta" className="flex flex-col gap-2.5">

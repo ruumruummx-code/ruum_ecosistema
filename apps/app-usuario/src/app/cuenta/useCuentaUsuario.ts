@@ -9,6 +9,7 @@ import { useTema } from "../TemaProvider";
 import { ETIQUETA_ESTADO_TRASLADO } from "@ruum/shared/states";
 import { TERMINOLOGIA_USUARIO } from "../../lib/glosario";
 import type { CuentaReal } from "./cuenta-ui";
+import { enmascararTelefono } from "@ruum/api/services";
 
 export interface ActividadItem {
   id: string;
@@ -44,14 +45,16 @@ export function useCuentaUsuario(cuenta: CuentaReal) {
     setTipIndex((prev) => (prev + 1) % TIPS_SEMANA.length);
   }, []);
 
-  const cerrarSesion = useCallback(async () => {
+  const cerrarSesion = useCallback(async (opciones?: { global?: boolean; scope?: "local" | "global" | "others" }) => {
     if (salidaRef.current) return;
     salidaRef.current = true;
     setCerrandoSesion(true);
     setErrorSesion(null);
 
+    const scope = opciones?.scope ?? (opciones?.global ? "global" : "local");
+
     try {
-      const { error } = await crearClienteNavegador().auth.signOut();
+      const { error } = await crearClienteNavegador().auth.signOut({ scope });
       if (error) throw error;
 
       try {
@@ -76,13 +79,22 @@ export function useCuentaUsuario(cuenta: CuentaReal) {
     }
   }, [router]);
 
+  const cerrarSesionLocal = useCallback(() => cerrarSesion({ scope: "local" }), [cerrarSesion]);
+  const cerrarSesionGlobal = useCallback(() => cerrarSesion({ scope: "global" }), [cerrarSesion]);
+
   const usuario = cuenta.usuario;
   const nombreCompleto = usuario?.nombre?.trim() || "Usuario";
   const primerNombre = nombreCompleto.split(/\s+/)[0] || "Usuario";
   const inicialesUsuario = iniciales(nombreCompleto, "US");
   const correo = cuenta.correoRegistro?.trim() || "Sin correo registrado";
-  const telefono = usuario?.telefono?.trim() || "Sin teléfono registrado";
+  const telefonoCrudo = usuario?.telefono?.trim();
+  const telefonoEnmascarado = telefonoCrudo ? enmascararTelefono(telefonoCrudo) : "Sin teléfono registrado";
+  const telefono = telefonoEnmascarado;
   const esVerificado = usuario?.estado_verificacion === "verificado";
+
+  const rolInfo = cuenta.rolInfo;
+  const esSolicitudConductorPendiente = rolInfo?.estadoConductor === "solicitud_pendiente";
+  const solicitudConductor = rolInfo?.solicitudConductor ?? null;
 
   const totalIncidencias = cuenta.incidenciasAbiertas ?? 0;
   const totalTraslados = cuenta.totalTraslados ?? 0;
@@ -107,6 +119,8 @@ export function useCuentaUsuario(cuenta: CuentaReal) {
   return {
     // Estado de sesión
     cerrarSesion,
+    cerrarSesionLocal,
+    cerrarSesionGlobal,
     cerrandoSesion,
     errorSesion,
     // Perfil y métricas
@@ -116,8 +130,15 @@ export function useCuentaUsuario(cuenta: CuentaReal) {
     inicialesUsuario,
     correo,
     telefono,
+    telefonoCrudo,
+    telefonoEnmascarado,
     esVerificado,
     etiquetaVerificacion,
+    rolInfo,
+    esSolicitudConductorPendiente,
+    solicitudConductor,
+    datosAuxiliaresCargados: cuenta.datosAuxiliaresCargados ?? true,
+    auxiliaresConFallo: cuenta.auxiliaresConFallo ?? [],
     totalIncidencias,
     totalTraslados,
     totalVehiculos,

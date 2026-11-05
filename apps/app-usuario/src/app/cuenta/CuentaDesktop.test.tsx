@@ -131,7 +131,7 @@ describe("Mi cuenta desktop", () => {
     );
     expect(direccion.getByText("Los Serranos 225")).toBeInTheDocument();
     expect(direccion.getByText("Empresa Real")).toBeInTheDocument();
-    expect(direccion.getByText("RFC: EMP010101XX1")).toBeInTheDocument();
+    expect(direccion.getByText("RFC: EMP0••••••X1")).toBeInTheDocument();
     expect(direccion.getByRole("link", { name: "Editar" })).toHaveAttribute(
       "href",
       "/cuenta/facturacion",
@@ -157,6 +157,35 @@ describe("Mi cuenta desktop", () => {
       ),
     ).toBe("2 años");
     expect(antiguedadCuenta(undefined)).toBe("—");
+  });
+  it("muestra el banner accesible de solicitud de conductor pendiente cuando aplica", () => {
+    render(
+      <CuentaDesktop
+        cuenta={{
+          ...cuenta,
+          rolInfo: {
+            rolBaseUsuario: "sin_rol",
+            rolEfectivo: "sin_rol",
+            esConductorAprobado: false,
+            estadoConductor: "solicitud_pendiente",
+            solicitudConductor: {
+              id: "sol-1",
+              estado: "en_revision",
+              pasoActual: 3,
+              enviadoEn: "2026-11-04T12:00:00Z",
+              actualizadoEn: "2026-11-04T12:00:00Z",
+              esPendiente: true,
+            },
+          },
+        }}
+      />,
+    );
+    expect(
+      screen.getByRole("region", { name: "Estado de solicitud de conductor" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText("Solicitud de conductor en revisión"),
+    ).toBeInTheDocument();
   });
   it("ordena actividad real de vehículos y traslados sin alterar las listas originales", () => {
     const datos = {
@@ -271,11 +300,11 @@ describe("Mi cuenta desktop", () => {
     signOut.mockResolvedValueOnce({ error: new Error("sin red") });
     render(<CuentaDesktop cuenta={cuenta} seccionInicial="sesiones" />);
     const dialog = within(screen.getByRole("dialog"));
-    fireEvent.click(dialog.getByRole("button", { name: "Cerrar sesión" }));
+    fireEvent.click(dialog.getByRole("button", { name: "Cerrar sesión en este dispositivo" }));
     expect(await dialog.findByRole("alert")).toHaveTextContent(
       "No pudimos cerrar tu sesión",
     );
-    fireEvent.click(dialog.getByRole("button", { name: "Cerrar sesión" }));
+    fireEvent.click(dialog.getByRole("button", { name: "Cerrar sesión en este dispositivo" }));
     await waitFor(() => expect(replace).toHaveBeenCalledWith("/login"));
   });
   it("muestra iniciales al fallar la foto y enfoca perfil sin desplazar la pantalla", () => {

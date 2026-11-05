@@ -35,6 +35,11 @@ export function DocumentoCuentaTarjeta({ tipo, titulo, descripcion, documento, c
     <p>{descripcion} PDF, JPG o PNG, máximo 10 MB.</p>
     {documento?.subido_en && <p>Última carga: {new Date(documento.subido_en).toLocaleDateString("es-MX", { timeZone: "America/Mexico_City" })}</p>}
     <p className="user-document-name" title={nombreArchivo ?? documento?.ruta.split("/").at(-1)}>{nombreArchivo ?? documento?.ruta.split("/").at(-1) ?? "Sin archivo cargado"}</p>
+    {documento?.motivo_rechazo && (
+      <div className="mt-2 rounded-lg border border-red-500/40 bg-red-500/10 p-2.5 text-xs text-red-800 dark:text-red-200" role="alert">
+        <strong>Motivo del rechazo:</strong> {documento.motivo_rechazo}
+      </div>
+    )}
     {documento?.ruta && (
       <div className="mt-2 rounded-lg border border-amber-500/40 bg-amber-500/10 p-2.5 text-xs text-amber-800 dark:text-amber-200" role="note">
         ⚠️ <strong>Aviso:</strong> Al reemplazarlo, el documento quedará pendiente de validación.

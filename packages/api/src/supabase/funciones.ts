@@ -90,6 +90,23 @@ export interface FuncionesRpc {
       p_codigo_postal_fiscal?: string | null;
       p_uso_cfdi?: string | null;
       p_correo_facturacion?: string | null;
+      p_estado_validacion_fiscal?: string | null;
+    };
+    ret: Json;
+  };
+  solicitar_supresion_documentos_arco: {
+    args: {
+      p_tipo_documento?: string | null;
+    };
+    ret: Json;
+  };
+  auditar_acceso_documento_pii: {
+    args: {
+      p_usuario_objetivo_id: string;
+      p_documento_id: string;
+      p_tipo_documento: string;
+      p_justificacion: string;
+      p_ip?: string | null;
     };
     ret: Json;
   };
@@ -130,6 +147,10 @@ export interface FuncionesRpc {
   traslado_tiene_verificacion_repuve_valida: {
     args: { p_traslado_id: string };
     ret: boolean;
+  };
+  usuario_actualiza_perfil_transaccional: {
+    args: { p_datos: Json; p_version_esperada?: number | null };
+    ret: Json;
   };
 }
 

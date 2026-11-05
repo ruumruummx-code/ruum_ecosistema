@@ -31,7 +31,23 @@ function estadoDocumento(documento: Omit<DocumentoCuenta, "tipo"> | undefined, p
   if (!documento) return { texto: "Sin cargar", tono: "neutral" };
   if (documento.estado === "verificado") return { texto: "Verificado", tono: "success" };
   if (documento.estado === "rechazado") return { texto: "Rechazado", tono: "error" };
+  if (documento.estado === "expirado") return { texto: "Expirado", tono: "error" };
+  if (documento.estado === "recibido") return { texto: "Recibido", tono: "pending" };
   return { texto: revisionIdentidad ? "En revisión" : "Recibido", tono: "pending" };
+}
+
+function estadoFiscal(usuario: Usuario, empresa: Empresa | null, fiscalConfigurado: boolean) {
+  const estadoValidacion = (usuario as unknown as { estado_validacion_fiscal?: string | null })?.estado_validacion_fiscal;
+  if (estadoValidacion === "pendiente_de_validacion_fiscal" || estadoValidacion === "error_temporal_sat") {
+    return { texto: "Pendiente SAT", tono: "pending" };
+  }
+  if (estadoValidacion === "rechazado") {
+    return { texto: "Rechazado SAT", tono: "error" };
+  }
+  if (estadoValidacion === "validado" || fiscalConfigurado) {
+    return { texto: "Configurado", tono: "success" };
+  }
+  return { texto: "Sin configurar", tono: "neutral" };
 }
 export function VerificacionDocumentos({ usuario, empresa = null }: VerificacionDocumentosProps) {
   const [documentos, setDocumentos] = useState<DocumentoCuenta[]>([]);
@@ -91,7 +107,7 @@ export function VerificacionDocumentos({ usuario, empresa = null }: Verificacion
         </h2>
         <div className="user-verification-tasks">
           {TAREAS_FISCAL.map(item => {
-            const estado = { texto: fiscalConfigurado ? "Configurado" : "Sin configurar", tono: fiscalConfigurado ? "success" : "neutral" };
+            const estado = estadoFiscal(usuario, empresa, fiscalConfigurado);
             return <button key={item.id} type="button" aria-haspopup="dialog" aria-label={`${item.titulo} ${estado.texto}`} onClick={() => setTarea(item.id)} className="user-verification-task"><Icono d={item.icono} className="size-5 shrink-0" /><span title={item.titulo}>{item.titulo}</span><span className={`user-task-badge is-${estado.tono}`}>{estado.texto}</span></button>;
           })}
         </div>

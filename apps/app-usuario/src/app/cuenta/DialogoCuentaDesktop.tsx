@@ -32,6 +32,7 @@ export function DialogoCuentaDesktop({
   metodoPago,
   correo,
   cerrarSesion,
+  cerrarSesionGlobal,
   cerrandoSesion,
   errorSesion,
 }: {
@@ -41,6 +42,7 @@ export function DialogoCuentaDesktop({
   metodoPago: boolean;
   correo: string;
   cerrarSesion: () => Promise<void>;
+  cerrarSesionGlobal?: () => Promise<void>;
   cerrandoSesion: boolean;
   errorSesion?: string | null;
 }) {
@@ -201,14 +203,27 @@ export function DialogoCuentaDesktop({
               Cerrar otras sesiones
             </button>
           )}
-          <button
-            className={s.textButton}
-            disabled={cerrandoSesion || ocupado}
-            onClick={() => void cerrarSesion()}
-          >
-            <Icon name="logout" />
-            {cerrandoSesion ? "Cerrando sesión…" : "Cerrar sesión"}
-          </button>
+          <div style={{ display: "flex", flexDirection: "column", gap: "0.25rem", marginTop: "0.5rem" }}>
+            <button
+              className={s.textButton}
+              disabled={cerrandoSesion || ocupado}
+              onClick={() => void cerrarSesion()}
+            >
+              <Icon name="logout" />
+              {cerrandoSesion ? "Cerrando sesión…" : "Cerrar sesión en este dispositivo"}
+            </button>
+            {cerrarSesionGlobal && (
+              <button
+                className={s.textButton}
+                style={{ color: "#ef4444" }}
+                disabled={cerrandoSesion || ocupado}
+                onClick={() => void cerrarSesionGlobal()}
+              >
+                <Icon name="logout" />
+                {cerrandoSesion ? "Cerrando sesión…" : "Cerrar sesión en todos los dispositivos"}
+              </button>
+            )}
+          </div>
         </>
       ) : modo === "mfa" ? (
         <>

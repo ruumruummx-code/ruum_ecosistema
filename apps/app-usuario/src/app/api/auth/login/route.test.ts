@@ -116,4 +116,21 @@ describe("POST /api/auth/login", () => {
     expect(mocks.signIn).not.toHaveBeenCalled();
     expect(mocks.rateLimit).toHaveBeenCalledTimes(3);
   });
+
+  it("falla cerrado con 429 y Retry-After si Redis no está disponible en producción (CA-4 / CB-2)", async () => {
+    mocks.rateLimit.mockResolvedValueOnce({ allowed: false, restantes: 0, retryAfterSec: 60 });
+    const response = await POST(request({ email: "persona@ejemplo.com", password: "secreta" }));
+    expect(response.status).toBe(429);
+    expect(response.headers.get("retry-after")).toBe("60");
+    expect(mocks.signIn).not.toHaveBeenCalled();
+  });
+
+  it("devuelve 503 con Retry-After sin almacenar contraseñas si Auth está caído (CB-1 / CA-2)", async () => {
+    mocks.signIn.mockRejectedValueOnce(new Error("Conexión perdida con Supabase Auth"));
+    const response = await POST(request({ email: "persona@ejemplo.com", password: "secreta" }));
+    expect(response.status).toBe(503);
+    expect(response.headers.get("retry-after")).toBe("30");
+    const json = await response.json();
+    expect(json.error).toMatch(/servicio de acceso está temporalmente no disponible/i);
+  });
 });

@@ -1,6 +1,7 @@
 "use client";
 
 import { IconoEscudoGnp, IconoTelefonoAccion } from "./iconos-pasaporte";
+import { validarVentana72Horas } from "@/lib/flujo10-transiciones-policy";
 
 
 
@@ -95,8 +96,10 @@ export function DetallesPasaporte({
   const vehiculoNombre = [pasaporte.vehiculo_marca, pasaporte.vehiculo_modelo, pasaporte.vehiculo_anio]
     .filter(Boolean)
     .join(" ");
-  const horasDesdeCierre = calcularHorasDesdeCierre(pasaporte.actualizado_en);
-  const dentroDeVentanaPostCierre = horasDesdeCierre <= 72;
+  const fechaCierreReferencia = pasaporte.cerrado_en ?? pasaporte.actualizado_en;
+  const ventana72h = validarVentana72Horas(fechaCierreReferencia);
+  const dentroDeVentanaPostCierre = ventana72h.permitido;
+  const horasDesdeCierre = ventana72h.horasDesdeCierre;
   const mostrarPromptCalificacion =
     estado ==="servicio_cerrado" &&
     !calificacion &&
@@ -495,6 +498,7 @@ export function DetallesPasaporte({
                 <AceptarCotizacion
                   trasladoId={trasladoId}
                   tipoPago={pasaporte.tipo_pago ??"anticipado"}
+                  estadoActual={estado}
                 />
               </div>
             )}

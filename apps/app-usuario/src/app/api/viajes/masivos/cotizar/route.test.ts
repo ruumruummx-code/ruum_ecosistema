@@ -216,4 +216,32 @@ describe("cotización de 100 traslados", () => {
     expect(dataConParcial.parcial).toBe(true);
     expect(mocks.guardar).toHaveBeenCalledTimes(1);
   });
+
+  it("CB-2: segunda solicitud en vuelo con misma idempotency_key devuelve 409 sin crear segundo PaymentIntent", async () => {
+    mocks.reservar.mockResolvedValueOnce({ estado: "en_progreso" });
+    const respuesta = await POST(peticion());
+    expect(respuesta.status).toBe(409);
+    const data = await respuesta.json();
+    expect(data.error).toContain("ya está siendo procesada");
+    expect(mocks.stripe).not.toHaveBeenCalled();
+  });
+
+  it("CB-2: solicitud repetida con PaymentIntent existente recupera el intent previo sin crear uno nuevo", async () => {
+    mocks.reservar.mockResolvedValueOnce({
+      estado: "payment_intent_existente",
+      payment_intent_id: "pi_existente_123",
+    });
+    mocks.stripe.mockResolvedValueOnce({
+      id: "pi_existente_123",
+      client_secret: "cs_existente_123",
+    });
+
+    const respuesta = await POST(peticion());
+    expect(respuesta.status).toBe(200);
+    const data = await respuesta.json();
+    expect(data.clientSecret).toBe("cs_existente_123");
+    // Se invoca Stripe únicamente para consultar el intent existente, no para crear uno nuevo
+    expect(mocks.stripe).toHaveBeenCalledTimes(1);
+    expect(mocks.stripe).toHaveBeenCalledWith("payment_intents/pi_existente_123");
+  });
 });

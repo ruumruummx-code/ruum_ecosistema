@@ -49,17 +49,73 @@ const usuarioMock: Usuario = {
   direccion_principal: "Av. Álvaro Obregón 145, Int. 3, Col. Roma Norte, CP 06700, Ciudad de México, Ciudad de México",
   fecha_nacimiento: null,
   preferencias: {},
+  version: 1,
 };
 
+const { refreshMock, ejecutarSagaMock, obtenerUsuarioActualMock, guardar, guardarFecha, ErrorConflictoVersionPerfil, ErrorValidacionPerfilServer } = vi.hoisted(() => {
+  class ErrorConflictoVersionPerfil extends Error {
+    constructor(msg = "conflicto_version") {
+      super(msg);
+      this.name = "ErrorConflictoVersionPerfil";
+    }
+  }
+  class ErrorValidacionPerfilServer extends Error {
+    constructor(msg: string) {
+      super(msg);
+      this.name = "ErrorValidacionPerfilServer";
+    }
+  }
+  return {
+    refreshMock: vi.fn(),
+    ejecutarSagaMock: vi.fn(),
+    obtenerUsuarioActualMock: vi.fn(),
+    guardar: vi.fn(),
+    guardarFecha: vi.fn(),
+    ErrorConflictoVersionPerfil,
+    ErrorValidacionPerfilServer,
+  };
+});
 
-vi.mock("next/navigation", () => ({ useRouter: () => ({ refresh: vi.fn() }) }));
+vi.mock("next/navigation", () => ({ useRouter: () => ({ refresh: refreshMock }) }));
 
-const { guardar, guardarFecha } = vi.hoisted(() => ({ guardar: vi.fn(), guardarFecha: vi.fn() }));
-vi.mock("@ruum/api/services", () => ({ actualizarPerfilUsuario: guardar, actualizarFechaNacimientoUsuario: guardarFecha, obtenerUrlFotoPerfilUsuario: vi.fn(), subirFotoPerfil: vi.fn() }));
-vi.mock("../../../lib/supabase-browser", () => ({ tieneSupabaseConfigurado: () => true, crearClienteNavegador: () => ({}) }));
-vi.mock("../../../lib/codigos-postales", () => ({ consultarCodigoPostalMx: vi.fn().mockResolvedValue(null) }));
-beforeEach(() => { vi.clearAllMocks(); guardar.mockResolvedValue(undefined); guardarFecha.mockResolvedValue(undefined); });
-describe("DatosPersonales — RR-2026-004", () => {
+vi.mock("@ruum/api/services", () => ({
+  actualizarPerfilUsuario: guardar,
+  actualizarFechaNacimientoUsuario: guardarFecha,
+  obtenerUrlFotoPerfilUsuario: vi.fn(),
+  subirFotoPerfil: vi.fn(),
+  ejecutarSagaActualizacionPerfil: ejecutarSagaMock,
+  obtenerUsuarioActual: obtenerUsuarioActualMock,
+  ErrorConflictoVersionPerfil,
+  ErrorValidacionPerfilServer,
+}));
+
+vi.mock("../../../lib/supabase-browser", () => ({
+  tieneSupabaseConfigurado: () => true,
+  crearClienteNavegador: () => ({ auth: { getUser: vi.fn().mockResolvedValue({ data: { user: { id: "auth-456" } } }) } }),
+}));
+
+vi.mock("../../../lib/codigos-postales", () => ({
+  consultarCodigoPostalMx: vi.fn().mockResolvedValue(null),
+}));
+
+beforeEach(() => {
+  vi.clearAllMocks();
+  ejecutarSagaMock.mockResolvedValue({
+    exito: true,
+    version: 2,
+    usuario: {
+      id: "usr-456",
+      nombre: "Ana María Martínez Ruiz",
+      calle: "Calle nueva",
+      version: 2,
+    },
+    fotoUrlFirmada: null,
+  });
+  guardar.mockResolvedValue(undefined);
+  guardarFecha.mockResolvedValue(undefined);
+});
+
+describe("DatosPersonales — RUUM-USR-F12-001", () => {
   it("presenta el App Bar secundario, foto y campos personales sin navegación principal", () => {
     render(<DatosPersonales correoRegistro="registro@ruum.test" usuario={usuarioMock} />);
     expect(screen.getByRole("heading", { name: "Editar Perfil", level: 1 })).toBeInTheDocument();
@@ -71,7 +127,8 @@ describe("DatosPersonales — RR-2026-004", () => {
     expect(screen.getByLabelText("Correo electrónico")).toBeDisabled();
     expect(screen.queryByText("Zona de riesgo")).not.toBeInTheDocument();
   });
-  it("alterna paneles conservando los cambios de ambas pestañas y el mismo botón Guardar", async () => {
+
+  it("alterna paneles conservando los cambios de ambas pestañas y guarda atómicamente", async () => {
     render(<DatosPersonales usuario={usuarioMock} />);
     const boton = screen.getByRole("button", { name: "Guardar cambios" });
     fireEvent.change(screen.getByLabelText("Nombre(s)"), { target: { value: "Ana María" } });
@@ -82,12 +139,24 @@ describe("DatosPersonales — RR-2026-004", () => {
     fireEvent.change(screen.getByLabelText("Calle"), { target: { value: "Calle nueva" } });
     fireEvent.click(boton);
     await screen.findByRole("status");
-    expect(guardar).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({ nombre: "Ana María Martínez Ruiz", calle: "Calle nueva", telefono: "+525512345678" }));
+    expect(ejecutarSagaMock).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({
+        datos: expect.objectContaining({
+          nombre: "Ana María Martínez Ruiz",
+          calle: "Calle nueva",
+          telefono: "+525512345678",
+        }),
+      })
+    );
     expect(screen.getByRole("tab", { name: "Dirección" })).toHaveAttribute("aria-selected", "true");
     expect(screen.getByRole("button", { name: "Guardar cambios" })).toBe(boton);
     fireEvent.click(screen.getByRole("tab", { name: "Personal" }));
     expect(screen.getByLabelText("Nombre(s)")).toHaveValue("Ana María");
+    // Verifica que no recargue ciegamente la página completa
+    expect(refreshMock).not.toHaveBeenCalled();
   });
+
   it("lleva al panel Personal si un campo oculto es inválido", async () => {
     render(<DatosPersonales usuario={usuarioMock} />);
     fireEvent.change(screen.getByLabelText("Nombre(s)"), { target: { value: "" } });
@@ -95,19 +164,21 @@ describe("DatosPersonales — RR-2026-004", () => {
     fireEvent.click(screen.getByRole("button", { name: "Guardar cambios" }));
     expect(await screen.findByRole("alert")).toHaveTextContent("Ingresa tu nombre");
     expect(screen.getByRole("tab", { name: "Personal" })).toHaveAttribute("aria-selected", "true");
-    expect(guardar).not.toHaveBeenCalled();
+    expect(ejecutarSagaMock).not.toHaveBeenCalled();
   });
+
   it("valida fecha y muestra fallos del guardado sin anunciar éxito", async () => {
     render(<DatosPersonales usuario={usuarioMock} />);
     fireEvent.change(screen.getByLabelText("Fecha de nacimiento"), { target: { value: "2099-01-01" } });
     fireEvent.click(screen.getByRole("button", { name: "Guardar cambios" }));
     expect(await screen.findByRole("alert")).toHaveTextContent("no puede ser futura");
     fireEvent.change(screen.getByLabelText("Fecha de nacimiento"), { target: { value: "1990-01-01" } });
-    guardar.mockRejectedValueOnce(new Error("No se pudo guardar"));
+    ejecutarSagaMock.mockRejectedValueOnce(new Error("No se pudo guardar"));
     fireEvent.click(screen.getByRole("button", { name: "Guardar cambios" }));
     await waitFor(() => expect(screen.getByRole("alert")).toHaveTextContent("No se pudo guardar"));
     expect(screen.queryByRole("status")).not.toBeInTheDocument();
   });
+
   it("permite cambiar pestañas con flechas y conserva su foco", () => {
     render(<DatosPersonales usuario={usuarioMock} />);
     const personal = screen.getByRole("tab", { name: "Personal" });
@@ -116,18 +187,86 @@ describe("DatosPersonales — RR-2026-004", () => {
     expect(screen.getByRole("tab", { name: "Dirección" })).toHaveFocus();
     expect(screen.getByRole("tab", { name: "Dirección" })).toHaveAttribute("aria-selected", "true");
   });
-  it("permite eliminar una fecha de nacimiento previamente guardada", async () => {
+
+  it("permite eliminar una fecha de nacimiento previamente guardada atómicamente", async () => {
     render(<DatosPersonales usuario={{ ...usuarioMock, fecha_nacimiento: "1990-05-15" }} />);
     fireEvent.change(screen.getByLabelText("Fecha de nacimiento"), { target: { value: "" } });
     fireEvent.click(screen.getByRole("button", { name: "Guardar cambios" }));
-    await waitFor(() => expect(guardarFecha).toHaveBeenCalledWith(expect.anything(), null));
+    await waitFor(() =>
+      expect(ejecutarSagaMock).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({
+          datos: expect.objectContaining({
+            fechaNacimiento: null,
+          }),
+        })
+      )
+    );
   });
-  it("informa un guardado parcial cuando falla la fecha sin ocultar un error 400", async () => {
-    guardarFecha.mockRejectedValueOnce({ status: 400, message: "Fecha rechazada por validación" });
+
+  it("garantiza atomicidad: si la RPC o validación falla, no existe guardado parcial y muestra alerta", async () => {
+    ejecutarSagaMock.mockRejectedValueOnce(
+      new ErrorValidacionPerfilServer("El usuario debe ser mayor de 18 años")
+    );
     render(<DatosPersonales usuario={usuarioMock} />);
-    fireEvent.change(screen.getByLabelText("Fecha de nacimiento"), { target: { value: "1990-05-15" } });
+    fireEvent.change(screen.getByLabelText("Fecha de nacimiento"), { target: { value: "1995-05-15" } });
     fireEvent.click(screen.getByRole("button", { name: "Guardar cambios" }));
-    expect(await screen.findByRole("alert")).toHaveTextContent("Los datos personales se guardaron, pero");
-    expect(guardar).toHaveBeenCalledTimes(1);
+    expect(await screen.findByRole("alert")).toHaveTextContent("El usuario debe ser mayor de 18 años");
+    expect(screen.queryByRole("status")).not.toBeInTheDocument();
+  });
+
+  it("notifica conflicto de versión optimista (lost-update) de forma honesta y permite sincronizar versión fresca (CB-1)", async () => {
+    ejecutarSagaMock.mockRejectedValueOnce(new ErrorConflictoVersionPerfil());
+    obtenerUsuarioActualMock.mockResolvedValueOnce({
+      ...usuarioMock,
+      nombre: "Laura Elena Martínez Ruiz",
+      version: 3,
+    });
+
+    render(<DatosPersonales usuario={usuarioMock} />);
+    fireEvent.change(screen.getByLabelText("Nombre(s)"), { target: { value: "Laura Elena" } });
+    fireEvent.click(screen.getByRole("button", { name: "Guardar cambios" }));
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "El perfil fue modificado por otra sesión o pestaña"
+    );
+    expect(screen.queryByRole("status")).not.toBeInTheDocument();
+    expect(refreshMock).not.toHaveBeenCalled();
+
+    // Botón de resolución de conflicto de versión activo
+    const botonSync = screen.getByRole("button", { name: "Sincronizar versión más reciente y reintentar" });
+    expect(botonSync).toBeInTheDocument();
+    fireEvent.click(botonSync);
+
+    await waitFor(() => {
+      expect(screen.getByRole("status")).toHaveTextContent("Datos sincronizados con la versión más reciente");
+    });
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+  });
+
+  it("rechaza fecha de nacimiento imposible anterior a 1900 (CB-3)", async () => {
+    render(<DatosPersonales usuario={usuarioMock} />);
+    fireEvent.change(screen.getByLabelText("Fecha de nacimiento"), { target: { value: "1850-05-15" } });
+    fireEvent.click(screen.getByRole("button", { name: "Guardar cambios" }));
+    expect(await screen.findByRole("alert")).toHaveTextContent("debe ser posterior a 1900");
+    expect(ejecutarSagaMock).not.toHaveBeenCalled();
+  });
+
+  it("actualiza versión y foto localmente sin router.refresh() (CB-3)", async () => {
+    ejecutarSagaMock.mockResolvedValueOnce({
+      exito: true,
+      version: 5,
+      usuario: {
+        id: "usr-456",
+        nombre: "Laura Martínez",
+        foto_url: "usr-456/perfil_123.jpg",
+        version: 5,
+      },
+      fotoUrlFirmada: "https://storage.signed/url?ttl=900",
+    });
+    render(<DatosPersonales usuario={usuarioMock} />);
+    fireEvent.click(screen.getByRole("button", { name: "Guardar cambios" }));
+    await screen.findByRole("status");
+    expect(screen.getByRole("status")).toHaveTextContent("Tus datos se guardaron correctamente");
+    expect(refreshMock).not.toHaveBeenCalled();
   });
 });

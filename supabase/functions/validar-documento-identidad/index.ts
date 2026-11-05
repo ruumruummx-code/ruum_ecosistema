@@ -5,6 +5,7 @@ import { createClient } from "npm:@supabase/supabase-js@2";
 import { TAMANO_MAXIMO, validarDocumento } from "../_shared/validacion-documento.ts";
 import { leerFormularioLimitado } from "../_shared/multipart-limitado.ts";
 import { consumirRateLimit } from "../_shared/rate-limit.ts";
+import { construirCabecerasCors } from "../_shared/cors-documentos.ts";
 
 const BUCKET = "documentos-identidad";
 const FORMATOS_IDENTIDAD = new Set(["jpeg", "png", "pdf"] as const);
@@ -14,14 +15,13 @@ type RegistroIdentidad = {
   subido_en: string;
   ruta_anterior: string | null;
 };
-const CORS = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, apikey, content-type, x-client-info",
-  "Access-Control-Allow-Methods": "POST, OPTIONS"
-};
 
-function json(body: Record<string, unknown>, status = 200, extraHeaders: Record<string, string> = {}) {
-  return new Response(JSON.stringify(body), { status, headers: { ...CORS, ...extraHeaders, "Content-Type": "application/json" } });
+function json(req: Request, body: Record<string, unknown>, status = 200, extraHeaders: Record<string, string> = {}) {
+  const cors = construirCabecerasCors(req);
+  return new Response(JSON.stringify(body), {
+    status,
+    headers: { ...cors, ...extraHeaders, "Content-Type": "application/json" },
+  });
 }
 
 function codigoSeguro(error: unknown) {
@@ -34,54 +34,53 @@ function codigoSeguro(error: unknown) {
 }
 
 Deno.serve(async (req) => {
-  /* 204 explícito: algunos gateways/proxies no tratan el 200 implícito de
-     `new Response(null, ...)` como preflight válido. */
-  if (req.method === "OPTIONS") return new Response(null, { status: 204, headers: CORS });
-  if (req.method !== "POST") return json({ error: "Método no permitido." }, 405);
+  const cors = construirCabecerasCors(req);
+  if (req.method === "OPTIONS") return new Response(null, { status: 204, headers: cors });
+  if (req.method !== "POST") return json(req, { error: "Método no permitido." }, 405);
 
   const authorization = req.headers.get("Authorization");
-  if (!authorization) return json({ error: "Inicia sesión para subir tu identificación." }, 401);
+  if (!authorization) return json(req, { error: "Inicia sesión para subir tu identificación." }, 401);
   const url = Deno.env.get("SUPABASE_URL") ?? "";
   const anon = Deno.env.get("SUPABASE_ANON_KEY") ?? "";
   if (!url || !anon) {
     console.error("validar-documento-identidad: configuración base ausente");
-    return json({ error: "Servicio temporalmente no disponible." }, 503);
+    return json(req, { error: "Servicio temporalmente no disponible." }, 503);
   }
 
   const usuario = createClient(url, anon, { global: { headers: { Authorization: authorization } } });
   const { data: sesion, error: errorSesion } = await usuario.auth.getUser();
-  if (errorSesion || !sesion.user) return json({ error: "La sesión no es válida." }, 401);
+  if (errorSesion || !sesion?.user) return json(req, { error: "La sesión no es válida." }, 401);
 
   const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
   if (!serviceKey) {
     console.error("validar-documento-identidad: SUPABASE_SERVICE_ROLE_KEY ausente");
-    return json({ error: "Servicio temporalmente no disponible." }, 503);
+    return json(req, { error: "Servicio temporalmente no disponible." }, 503);
   }
   const servicio = createClient(url, serviceKey);
   try {
     const limite = await consumirRateLimit(servicio, "validar-documento-identidad", sesion.user.id, 5, 600);
     if (!limite.permitido) {
-      return json({ error: "Demasiados intentos. Espera unos minutos y vuelve a probar." }, 429, { "Retry-After": String(limite.reintentarEn) });
+      return json(req, { error: "Demasiados intentos. Espera unos minutos y vuelve a probar." }, 429, { "Retry-After": String(limite.reintentarEn) });
     }
   } catch (error) {
     console.error("validar-documento-identidad: rate limit no disponible", error instanceof Error ? error.message : error);
-    return json({ error: "Servicio temporalmente no disponible." }, 503);
+    return json(req, { error: "Servicio temporalmente no disponible." }, 503);
   }
 
   let form: FormData;
   try {
     form = await leerFormularioLimitado(req, TAMANO_MAXIMO);
   } catch (error) {
-    return json({ error: error instanceof Error ? error.message : "Formulario inválido." }, 413);
+    return json(req, { error: error instanceof Error ? error.message : "Formulario inválido." }, 413);
   }
   const archivo = form.get("archivo");
-  if (!(archivo instanceof File)) return json({ error: "Falta el archivo de identidad." }, 400);
+  if (!(archivo instanceof File)) return json(req, { error: "Falta el archivo de identidad." }, 400);
 
   let validado;
   try {
     validado = validarDocumento(new Uint8Array(await archivo.arrayBuffer()), archivo.name, FORMATOS_IDENTIDAD);
   } catch (error) {
-    return json({ error: error instanceof Error ? error.message : "Archivo inválido." }, 422);
+    return json(req, { error: error instanceof Error ? error.message : "Archivo inválido." }, 422);
   }
 
   const contenidoHash = new ArrayBuffer(validado.bytes.byteLength);
@@ -92,7 +91,7 @@ Deno.serve(async (req) => {
 
   const { data: perfil, error: errorPerfil } = await usuario.from("usuarios")
     .select("id").eq("auth_user_id", sesion.user.id).single();
-  if (errorPerfil || !perfil) return json({ error: "No se encontró el perfil del usuario autenticado." }, 409);
+  if (errorPerfil || !perfil) return json(req, { error: "No se encontró el perfil del usuario autenticado." }, 409);
 
   const { data: sello, error: errorSello } = await servicio.from("documentos_identidad_storage_validados").insert({
     ruta,
@@ -105,7 +104,7 @@ Deno.serve(async (req) => {
   }).select("id").single();
   if (errorSello || !sello) {
     console.error("Error creando sello de identidad", { codigo: codigoSeguro(errorSello) });
-    return json({ error: "No fue posible autorizar la carga validada." }, 500);
+    return json(req, { error: "No fue posible autorizar la carga validada." }, 500);
   }
 
   const { error: errorUpload } = await usuario.storage.from(BUCKET).upload(ruta, validado.bytes, {
@@ -116,7 +115,7 @@ Deno.serve(async (req) => {
   if (errorUpload) {
     await servicio.from("documentos_identidad_storage_validados").delete().eq("ruta", ruta);
     console.error("Error almacenando identidad", { codigo: codigoSeguro(errorUpload) });
-    return json({ error: "No fue posible almacenar el documento. Intenta nuevamente." }, 500);
+    return json(req, { error: "No fue posible almacenar el documento. Intenta nuevamente." }, 500);
   }
 
   const { data: registroSinTipo, error: errorRpc } = await usuario.rpc("registrar_documento_identidad", {
@@ -126,9 +125,21 @@ Deno.serve(async (req) => {
   }).single();
   const registro = registroSinTipo as RegistroIdentidad | null;
   if (errorRpc || !registro) {
-    await servicio.storage.from(BUCKET).remove([ruta]);
+    const { error: errorCompensacion } = await servicio.storage.from(BUCKET).remove([ruta]);
+    if (errorCompensacion) {
+      try {
+        await servicio.rpc("encolar_limpieza_documento", {
+          p_usuario_id: perfil.id,
+          p_bucket: BUCKET,
+          p_storage_path: ruta,
+          p_motivo: "compensacion_fallida",
+        });
+      } catch {
+        console.error("validar-documento-identidad: fallo encolando compensacion_fallida");
+      }
+    }
     await servicio.from("documentos_identidad_storage_validados").delete().eq("ruta", ruta);
-    return json({ error: errorRpc?.message ?? "La RPC no devolvió el documento registrado." }, 409);
+    return json(req, { error: errorRpc?.message ?? "La RPC no devolvió el documento registrado." }, 409);
   }
 
   let limpiezaPendiente = false;
@@ -140,6 +151,16 @@ Deno.serve(async (req) => {
       console.error("PII anterior pendiente de eliminación", { codigo });
       await servicio.from("documentos_identidad_usuario").update({ error_eliminacion: codigo })
         .eq("ruta", registro.ruta_anterior);
+      try {
+        await servicio.rpc("encolar_limpieza_documento", {
+          p_usuario_id: perfil.id,
+          p_bucket: BUCKET,
+          p_storage_path: registro.ruta_anterior,
+          p_motivo: "reemplazo",
+        });
+      } catch {
+        console.error("validar-documento-identidad: fallo encolando limpieza anterior");
+      }
     } else {
       await servicio.from("documentos_identidad_usuario").update({
         eliminado_storage_en: new Date().toISOString(), error_eliminacion: null
@@ -147,7 +168,7 @@ Deno.serve(async (req) => {
     }
   }
 
-  return json({
+  return json(req, {
     ruta: registro.ruta,
     estado: registro.estado,
     subidoEn: registro.subido_en,

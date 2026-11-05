@@ -10,6 +10,11 @@ import { calcularCargoCancelacion } from "@ruum/shared/rules";
 import type { Database } from "@ruum/shared/types";
 import { cancelarTraslado, usuarioPuedeCancelar } from "@ruum/api/services";
 import { crearClienteNavegador, tieneSupabaseConfigurado } from "@/lib/supabase-browser";
+import {
+  validarTransicionFlujo10,
+  calcularPenalizacionCancelacionF10,
+  registrarAuditoriaAccionF10,
+} from "@/lib/flujo10-transiciones-policy";
 
 type EstadoTraslado = Database["public"]["Enums"]["estado_traslado"];
 
@@ -44,12 +49,18 @@ export function CancelarTraslado({
   const terminal = ["servicio_cerrado", "servicio_cancelado", "traslado_fallido"].includes(estado);
   if (terminal || cerrado) return null;
 
-  if (!usuarioPuedeCancelar(estado)) {
+  // CB-2 / CA-4: Validación de transición contra máquina de estados de Flujo 10 y F8
+  const validacionF10 = validarTransicionFlujo10("cancelar_traslado", estado, { trasladoId });
+
+  if (!usuarioPuedeCancelar(estado) || !validacionF10.permitida) {
+    const mensajeBloqueo = validacionF10.motivoBloqueo ??
+      `La cancelación desde la aplicación no está habilitada para el estado actual: ${estado.replaceAll("_", " ")}. Contacta a Soporte para revisar tu solicitud.`;
+
     return (
       <div className="mt-5 rounded-lg border border-ink/15 bg-mist p-4">
         <p className="font-body text-xs font-semibold uppercase tracking-wider text-ink/60">Cancelación no disponible</p>
         <p className="mt-1 font-body text-sm text-ink/80">
-          La cancelación desde la aplicación no está habilitada para el estado actual: {estado.replaceAll("_", " ")}. Contacta a Soporte para revisar tu solicitud.
+          {mensajeBloqueo}
         </p>
         <p className="mt-2 font-body text-xs text-ink/60">
           Si requieres asistencia urgente o surge alguna eventualidad, por favor{" "}
@@ -60,7 +71,7 @@ export function CancelarTraslado({
     );
   }
 
-  const cargo = calcularCargoCancelacion(
+  const cargo = calcularPenalizacionCancelacionF10(
     precio,
     horasRestantes(fechaProgramada),
     conductorAsignado,
@@ -78,6 +89,22 @@ export function CancelarTraslado({
       }
       const cliente = crearClienteNavegador();
       const resultado = await cancelarTraslado(cliente, trasladoId, motivo);
+
+      // CB-3 / T10 / CA-8: Registro de auditoría
+      registrarAuditoriaAccionF10({
+        trasladoId,
+        usuarioId: "cliente_sesion",
+        accion: "cancelar_traslado",
+        estadoAnterior: estado,
+        estadoNuevo: "servicio_cancelado",
+        timestamp: new Date().toISOString(),
+        metadata: {
+          motivo: motivo.trim(),
+          porcentajeCargo: resultado.porcentaje_cargo,
+          montoCargo: resultado.monto_cargo,
+        },
+      });
+
       setMensaje({
         tono: "info",
         texto: `Traslado cancelado. Cargo registrado: ${formatearPrecio(resultado.monto_cargo)}.`,

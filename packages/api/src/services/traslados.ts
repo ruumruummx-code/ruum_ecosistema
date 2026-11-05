@@ -143,6 +143,26 @@ export async function crearTraslado(cliente: Cliente, vehiculo: DatosVehiculoPar
 }
 
 export async function aceptarCotizacionUsuario(cliente: Cliente, trasladoId: string) {
+  // CB-3 / T9 / CA-7: Ownership repetido en cada mutación
+  let usuarioId: string | null = null;
+  try {
+    usuarioId = await obtenerUsuarioIdActual(cliente);
+  } catch {
+    usuarioId = null;
+  }
+
+  if (usuarioId) {
+    const { data: traslado } = await cliente
+      .from("traslados")
+      .select("id, usuario_id")
+      .eq("id", trasladoId)
+      .maybeSingle();
+
+    if (traslado && traslado.usuario_id && traslado.usuario_id !== usuarioId) {
+      throw new Error("No autorizado para aceptar la cotización: no eres el titular de este traslado.");
+    }
+  }
+
   const { data, error } = await rpcTipado(cliente, "usuario_acepta_cotizacion", { p_traslado_id: trasladoId });
   if (error) throw error;
   return data;
@@ -375,14 +395,26 @@ export async function cancelarTraslado(
   trasladoId: string,
   motivo: string
 ): Promise<CargoCancelacionAplicado> {
+  // CB-3 / T9 / CA-7: Ownership repetido en cada mutación
+  let usuarioId: string | null = null;
+  try {
+    usuarioId = await obtenerUsuarioIdActual(cliente);
+  } catch {
+    usuarioId = null;
+  }
+
   const { data: traslado, error } = await cliente
     .from("traslados")
-    .select("id, estado")
+    .select("id, usuario_id, estado")
     .eq("id", trasladoId)
     .maybeSingle();
 
   if (error) throw error;
   if (!traslado) throw new Error("No se encontró el traslado para cancelar.");
+
+  if (usuarioId && traslado.usuario_id && traslado.usuario_id !== usuarioId) {
+    throw new Error("No autorizado para cancelar este traslado: solo el titular puede cancelar.");
+  }
 
   // Pre-chequeo solo UX (defensa en profundidad): la fuente de verdad es la
   // RPC, que revalida el estado y calcula el cargo bajo FOR UPDATE.
@@ -424,20 +456,30 @@ export async function crearCalificacion(
     throw new Error("La calificación debe estar entre 1 y 5 estrellas.");
   }
 
+  // CB-3 / T9 / CA-7: Ownership repetido en cada mutación
+  const usuarioId = await obtenerUsuarioIdActual(cliente);
+
   const { data: traslado, error: errorTraslado } = await cliente
     .from("traslados")
-    .select("id, estado, actualizado_en")
+    .select("id, usuario_id, estado, cerrado_en, actualizado_en")
     .eq("id", trasladoId)
     .maybeSingle();
 
   if (errorTraslado) throw errorTraslado;
   if (!traslado) throw new Error("No se encontró el traslado a calificar.");
+
+  if (traslado.usuario_id && traslado.usuario_id !== usuarioId) {
+    throw new Error("No autorizado para calificar este traslado: solo el titular del servicio puede calificar.");
+  }
+
   if (traslado.estado !== "servicio_cerrado") {
     throw new Error("Solo se puede calificar un traslado finalizado.");
   }
 
-  const horasDesdeCierre = (Date.now() - new Date(traslado.actualizado_en).getTime()) / (1000 * 60 * 60);
-  if (horasDesdeCierre > 72) {
+  // CB-3 / T8 / CA-6: Ventana de 72 horas con margen de gracia técnico de 15 minutos (72.25h)
+  const fechaRef = traslado.cerrado_en ?? traslado.actualizado_en;
+  const horasDesdeCierre = (Date.now() - new Date(fechaRef).getTime()) / (1000 * 60 * 60);
+  if (horasDesdeCierre > 72.25) {
     throw new Error("El plazo de 72 horas para calificar este traslado ya venció.");
   }
 
@@ -450,7 +492,6 @@ export async function crearCalificacion(
 
   if (error) throw error;
 
-  const usuarioId = await obtenerUsuarioIdActual(cliente);
   await registrarEvento(cliente, "calificacion_conductor", "usuario", usuarioId, {
     traslado_id: trasladoId,
     conductor_id: conductorId,
