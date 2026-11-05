@@ -1,3 +1,4 @@
+import { consultarPermisoTarifaTraslado } from "@ruum/api/transfers";
 import { NextResponse } from "next/server";
 import { crearClienteServidor } from "@/lib/supabase-server";
 import { obtenerUsuarioIdPorAuth } from "@ruum/api/identity";
@@ -48,10 +49,7 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
     // CB-3 / T10 / CA-8: Verificación fail-closed de permisos de tarifa
     let puedeVerTarifa = false;
     try {
-      const { data: tienePermiso, error: rpcError } = await cliente.rpc(
-        "puede_ver_tarifa_traslado",
-        { p_usuario_id: datos.pasaporte.usuario_id }
-      );
+      const { data: tienePermiso, error: rpcError } = await consultarPermisoTarifaTraslado(cliente, datos.pasaporte.usuario_id);
       puedeVerTarifa = !rpcError && tienePermiso === true;
     } catch (err) {
       logStructuredWarn("pasaporte/route", "verificar_tarifa_fallido_fail_closed", err, {

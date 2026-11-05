@@ -17,7 +17,7 @@ const RAIZ = join(dirname(fileURLToPath(import.meta.url)), "..");
 const DIRS = ["packages/api/src", "packages/shared/src", "packages/ui/src"];
 
 // Línea base 2026-10-15 (tras migrar traslados.ts + tarifas.ts a rpcTipado).
-const BASELINE_TOTAL = 47;
+const BASELINE_TOTAL = 46;
 
 const TOLERANCIA_CERO = [
   "packages/api/src/services/traslados.ts",

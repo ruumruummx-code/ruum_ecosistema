@@ -247,7 +247,8 @@ function etiquetaRol(rol: UsuarioRow["rol"]) {
   const etiquetas: Record<UsuarioRow["rol"], string> = {
     personal: "Personal",
     titular_empresa: "Titular empresa",
-    usuario_autorizado: "Usuario autorizado"
+    usuario_autorizado: "Usuario autorizado",
+    sin_rol: "Sin rol"
   };
   return etiquetas[rol] ?? rol.replaceAll("_", " ");
 }

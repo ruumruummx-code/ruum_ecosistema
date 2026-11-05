@@ -1,3 +1,4 @@
+import { consultarCatalogoVehiculoTarifa } from "@ruum/api/transfers";
 import { NextRequest, NextResponse } from "next/server";
 import { crearClienteServidor } from "@/lib/supabase-server";
 import { esquemaSolicitudTraslado } from "@ruum/shared/validacion";
@@ -163,10 +164,7 @@ export async function POST(request: NextRequest) {
 
     try {
       if (typeof cliente.rpc === "function") {
-        const { data: catData } = await cliente.rpc("catalogar_vehiculo_para_tarifa", {
-          p_marca: parsed.data.marca,
-          p_modelo: parsed.data.modelo,
-        });
+        const { data: catData } = await consultarCatalogoVehiculoTarifa(cliente, parsed.data.marca, parsed.data.modelo);
         const primerRegistro = Array.isArray(catData) ? catData[0] : catData;
         if (primerRegistro && typeof primerRegistro === "object" && "categoria_tarifa" in primerRegistro) {
           const cat = primerRegistro as { categoria_tarifa?: "ligero_a" | "ligero_b" | "mediano" | "camion"; gama?: "entrada" | "media" | "alta" | "premium" };

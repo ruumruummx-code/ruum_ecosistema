@@ -14,6 +14,7 @@ const usuarioMock: Usuario = {
   telefono: "+52 55 1234 5678",
   tipo_cuenta: "particular",
   estado_verificacion: "verificado",
+  estado_validacion_fiscal: "pendiente_de_validacion_fiscal",
   rfc: "MARL900515XYZ",
   regimen_fiscal: "605",
   creado_en: "2026-01-01T00:00:00Z",

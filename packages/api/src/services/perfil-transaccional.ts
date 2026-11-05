@@ -271,7 +271,7 @@ export async function ejecutarSagaActualizacionPerfil(
         });
         // Reconciliación durable outbox: se encola el huérfano para el worker/cron (CB-2)
         try {
-          await (cliente as any).rpc("encolar_limpieza_foto_perfil", {
+          await rpcTipado(cliente, "encolar_limpieza_foto_perfil", {
             p_usuario_id: authUserId,
             p_storage_path: nuevaFotoPath,
             p_motivo: "compensacion_fallida_huerfano",
@@ -297,7 +297,7 @@ export async function ejecutarSagaActualizacionPerfil(
             error: errRemove.message,
           });
           // Si el borrado directo falla, se transfiere a la cola durable
-          void (cliente as any).rpc("encolar_limpieza_foto_perfil", {
+          void rpcTipado(cliente, "encolar_limpieza_foto_perfil", {
             p_usuario_id: resultadoRpc.usuario.id,
             p_storage_path: pathAnterior,
             p_motivo: "reemplazo_foto_previa",
@@ -311,7 +311,7 @@ export async function ejecutarSagaActualizacionPerfil(
           error: errLimpieza instanceof Error ? errLimpieza.message : String(errLimpieza),
         });
         // Si el borrado directo falla con excepción, se transfiere a la cola durable
-        void (cliente as any).rpc("encolar_limpieza_foto_perfil", {
+        void rpcTipado(cliente, "encolar_limpieza_foto_perfil", {
           p_usuario_id: resultadoRpc.usuario.id,
           p_storage_path: pathAnterior,
           p_motivo: "reemplazo_foto_previa",

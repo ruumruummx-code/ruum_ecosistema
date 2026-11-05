@@ -732,7 +732,7 @@ export async function registrarConsentimientoUsuario(
 
   if (errorUpdate) throw errorUpdate;
 
-  await registrarEvento(cliente, "aceptacion_terminos" as never, "usuario" as never, usuario.id, {
+  await registrarEvento(cliente, "aceptacion_terminos", "usuario", usuario.id, {
     version_terminos_aceptada: version,
     terminos_aceptados_en: aceptado,
     canal,

@@ -396,15 +396,34 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
-                },"checkout_traslados_masivos": {
+                },"checkout_masivo_checkpoints": {
                   Row: {
-                    "auth_user_id": string,"carga_id": string | null,"cotizaciones": NonNullable<Json>,"creado_en": string,"expirado_en": string | null,"filas": NonNullable<Json>,"filas_pendientes_correccion": NonNullable<Json>,"id": string,"monto_centavos": number,"pagado_en": string | null,"stripe_payment_intent_id": string | null
+                    "actualizado_en": string,"bloqueado_hasta": string | null,"checkout_id": string,"disponible_en": string,"estado": string,"intentos": number,"ultimo_error": string | null
                   }
                   Insert: {
-                    "auth_user_id": string,"carga_id"?: string | null,"cotizaciones": NonNullable<Json>,"creado_en"?: string,"expirado_en"?: string | null,"filas": NonNullable<Json>,"filas_pendientes_correccion"?: NonNullable<Json>,"id": string,"monto_centavos": number,"pagado_en"?: string | null,"stripe_payment_intent_id"?: string | null
+                    "actualizado_en"?: string,"bloqueado_hasta"?: string | null,"checkout_id": string,"disponible_en"?: string,"estado"?: string,"intentos"?: number,"ultimo_error"?: string | null
                   }
                   Update: {
-                    "auth_user_id"?: string,"carga_id"?: string | null,"cotizaciones"?: NonNullable<Json>,"creado_en"?: string,"expirado_en"?: string | null,"filas"?: NonNullable<Json>,"filas_pendientes_correccion"?: NonNullable<Json>,"id"?: string,"monto_centavos"?: number,"pagado_en"?: string | null,"stripe_payment_intent_id"?: string | null
+                    "actualizado_en"?: string,"bloqueado_hasta"?: string | null,"checkout_id"?: string,"disponible_en"?: string,"estado"?: string,"intentos"?: number,"ultimo_error"?: string | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "checkout_masivo_checkpoints_checkout_id_fkey"
+      columns: ["checkout_id"]
+isOneToOne: true
+      referencedRelation: "checkout_traslados_masivos"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"checkout_traslados_masivos": {
+                  Row: {
+                    "auth_user_id": string,"carga_id": string | null,"cotizaciones": NonNullable<Json>,"creado_en": string,"expirado_en": string | null,"filas": NonNullable<Json>,"filas_pendientes_correccion": NonNullable<Json>,"id": string,"idempotency_key": string,"monto_centavos": number,"pagado_en": string | null,"pago_reservado_en": string | null,"route_hash": string,"stripe_payment_intent_id": string | null,"workflow_actualizado_en": string,"workflow_estado": string,"workflow_ultimo_error": string | null
+                  }
+                  Insert: {
+                    "auth_user_id": string,"carga_id"?: string | null,"cotizaciones": NonNullable<Json>,"creado_en"?: string,"expirado_en"?: string | null,"filas": NonNullable<Json>,"filas_pendientes_correccion"?: NonNullable<Json>,"id": string,"idempotency_key": string,"monto_centavos": number,"pagado_en"?: string | null,"pago_reservado_en"?: string | null,"route_hash": string,"stripe_payment_intent_id"?: string | null,"workflow_actualizado_en"?: string,"workflow_estado"?: string,"workflow_ultimo_error"?: string | null
+                  }
+                  Update: {
+                    "auth_user_id"?: string,"carga_id"?: string | null,"cotizaciones"?: NonNullable<Json>,"creado_en"?: string,"expirado_en"?: string | null,"filas"?: NonNullable<Json>,"filas_pendientes_correccion"?: NonNullable<Json>,"id"?: string,"idempotency_key"?: string,"monto_centavos"?: number,"pagado_en"?: string | null,"pago_reservado_en"?: string | null,"route_hash"?: string,"stripe_payment_intent_id"?: string | null,"workflow_actualizado_en"?: string,"workflow_estado"?: string,"workflow_ultimo_error"?: string | null
                   }
                   Relationships: [
                     {
@@ -427,6 +446,44 @@ isOneToOne: false
                   }
                   Relationships: [
                     
+                  ]
+                },"cola_limpieza_documentos": {
+                  Row: {
+                    "bucket": string,"creado_en": string,"estado": string,"id": string,"intentos": number,"max_intentos": number,"motivo": string,"procesado_en": string | null,"proximo_intento_en": string,"storage_path": string,"ultimo_error": string | null,"usuario_id": string
+                  }
+                  Insert: {
+                    "bucket": string,"creado_en"?: string,"estado"?: string,"id"?: string,"intentos"?: number,"max_intentos"?: number,"motivo": string,"procesado_en"?: string | null,"proximo_intento_en"?: string,"storage_path": string,"ultimo_error"?: string | null,"usuario_id": string
+                  }
+                  Update: {
+                    "bucket"?: string,"creado_en"?: string,"estado"?: string,"id"?: string,"intentos"?: number,"max_intentos"?: number,"motivo"?: string,"procesado_en"?: string | null,"proximo_intento_en"?: string,"storage_path"?: string,"ultimo_error"?: string | null,"usuario_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "cola_limpieza_documentos_usuario_id_fkey"
+      columns: ["usuario_id"]
+isOneToOne: false
+      referencedRelation: "usuarios"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"cola_limpieza_fotos_perfil": {
+                  Row: {
+                    "creado_en": string,"estado": string,"id": string,"intentos": number,"max_intentos": number,"motivo": string,"procesado_en": string | null,"proximo_intento_en": string,"storage_path": string,"ultimo_error": string | null,"usuario_id": string
+                  }
+                  Insert: {
+                    "creado_en"?: string,"estado"?: string,"id"?: string,"intentos"?: number,"max_intentos"?: number,"motivo": string,"procesado_en"?: string | null,"proximo_intento_en"?: string,"storage_path": string,"ultimo_error"?: string | null,"usuario_id": string
+                  }
+                  Update: {
+                    "creado_en"?: string,"estado"?: string,"id"?: string,"intentos"?: number,"max_intentos"?: number,"motivo"?: string,"procesado_en"?: string | null,"proximo_intento_en"?: string,"storage_path"?: string,"ultimo_error"?: string | null,"usuario_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "cola_limpieza_fotos_perfil_usuario_id_fkey"
+      columns: ["usuario_id"]
+isOneToOne: false
+      referencedRelation: "usuarios"
+      referencedColumns: ["id"]
+    }
                   ]
                 },"competencias_asignacion": {
                   Row: {
@@ -810,16 +867,22 @@ isOneToOne: false
                   ]
                 },"documentos_cuenta_usuario": {
                   Row: {
-                    "estado": string,"id": string,"ruta": string,"subido_en": string,"tipo": string,"usuario_id": string
+                    "actualizado_en": string,"estado": string,"expira_en": string | null,"id": string,"motivo_rechazo": string | null,"revisado_en": string | null,"revisado_por": string | null,"ruta": string,"subido_en": string,"tipo": string,"usuario_id": string
                   }
                   Insert: {
-                    "estado"?: string,"id"?: string,"ruta": string,"subido_en"?: string,"tipo": string,"usuario_id": string
+                    "actualizado_en"?: string,"estado"?: string,"expira_en"?: string | null,"id"?: string,"motivo_rechazo"?: string | null,"revisado_en"?: string | null,"revisado_por"?: string | null,"ruta": string,"subido_en"?: string,"tipo": string,"usuario_id": string
                   }
                   Update: {
-                    "estado"?: string,"id"?: string,"ruta"?: string,"subido_en"?: string,"tipo"?: string,"usuario_id"?: string
+                    "actualizado_en"?: string,"estado"?: string,"expira_en"?: string | null,"id"?: string,"motivo_rechazo"?: string | null,"revisado_en"?: string | null,"revisado_por"?: string | null,"ruta"?: string,"subido_en"?: string,"tipo"?: string,"usuario_id"?: string
                   }
                   Relationships: [
                     {
+      foreignKeyName: "documentos_cuenta_usuario_revisado_por_fkey"
+      columns: ["revisado_por"]
+isOneToOne: false
+      referencedRelation: "usuarios"
+      referencedColumns: ["id"]
+    },{
       foreignKeyName: "documentos_cuenta_usuario_usuario_id_fkey"
       columns: ["usuario_id"]
 isOneToOne: false
@@ -1498,6 +1561,31 @@ isOneToOne: false
       columns: ["traslado_id"]
 isOneToOne: false
       referencedRelation: "traslados"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"historial_estados_documentos_cuenta": {
+                  Row: {
+                    "actor": string,"actor_id": string | null,"creado_en": string,"documento_id": string,"estado_anterior": string | null,"estado_nuevo": string,"id": string,"motivo": string | null,"tipo": string,"usuario_id": string
+                  }
+                  Insert: {
+                    "actor": string,"actor_id"?: string | null,"creado_en"?: string,"documento_id": string,"estado_anterior"?: string | null,"estado_nuevo": string,"id"?: string,"motivo"?: string | null,"tipo": string,"usuario_id": string
+                  }
+                  Update: {
+                    "actor"?: string,"actor_id"?: string | null,"creado_en"?: string,"documento_id"?: string,"estado_anterior"?: string | null,"estado_nuevo"?: string,"id"?: string,"motivo"?: string | null,"tipo"?: string,"usuario_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "historial_estados_documentos_cuenta_documento_id_fkey"
+      columns: ["documento_id"]
+isOneToOne: false
+      referencedRelation: "documentos_cuenta_usuario"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "historial_estados_documentos_cuenta_usuario_id_fkey"
+      columns: ["usuario_id"]
+isOneToOne: false
+      referencedRelation: "usuarios"
       referencedColumns: ["id"]
     }
                   ]
@@ -2247,6 +2335,19 @@ isOneToOne: false
       referencedRelation: "usuarios"
       referencedColumns: ["id"]
     }
+                  ]
+                },"registro_saga_auth": {
+                  Row: {
+                    "actualizado_en": string,"auth_user_id": string,"creado_en": string,"estado": string,"intentos": number,"ultimo_error": string | null
+                  }
+                  Insert: {
+                    "actualizado_en"?: string,"auth_user_id": string,"creado_en"?: string,"estado": string,"intentos"?: number,"ultimo_error"?: string | null
+                  }
+                  Update: {
+                    "actualizado_en"?: string,"auth_user_id"?: string,"creado_en"?: string,"estado"?: string,"intentos"?: number,"ultimo_error"?: string | null
+                  }
+                  Relationships: [
+                    
                   ]
                 },"resoluciones_inventario_llaves": {
                   Row: {
@@ -3041,13 +3142,13 @@ isOneToOne: false
                   ]
                 },"traslados": {
                   Row: {
-                    "actualizado_en": string,"causa_fallido": Database["public"]['Enums']["causa_fallido"] | null,"cerrado_en": string | null,"clave_idempotencia": string,"conductor_id": string | null,"contacto_entrega_nombre": string,"contacto_entrega_telefono": string,"contacto_recepcion_nombre": string,"contacto_recepcion_telefono": string,"cotizacion_expira_en": string | null,"creado_en": string,"destino_ciudad": string,"destino_direccion": string,"destino_lat": number | null,"destino_lng": number | null,"destino_referencias": string | null,"distancia_km": number | null,"estado": Database["public"]['Enums']["estado_traslado"],"estado_operativo": Database["public"]['Enums']["estado_operativo_traslado"],"fecha_hora_programada": string | null,"ganancia_conductor_congelada": number | null,"id": string,"instrucciones_especiales": string | null,"modalidad_programacion": string | null,"motivo_servicio": string | null,"operation_id": string | null,"origen_ciudad": string,"origen_direccion": string,"origen_lat": number | null,"origen_lng": number | null,"origen_referencias": string | null,"payout_id": string | null,"precio_cotizado": number | null,"precio_final": number | null,"presupuesto_usuario": number | null,"tiempo_estimado_horas": number | null,"tiene_incidencia_abierta": boolean,"tipo_pago": Database["public"]['Enums']["tipo_pago"],"tipo_ruta": string | null,"tipo_servicio": string | null,"usuario_id": string,"vehiculo_id": string,"ventana_entrega": string | null,"ventana_recoleccion": string | null,"version": number
+                    "actualizado_en": string,"causa_fallido": Database["public"]['Enums']["causa_fallido"] | null,"cerrado_en": string | null,"clave_idempotencia": string,"conductor_id": string | null,"contacto_entrega_nombre": string,"contacto_entrega_telefono": string,"contacto_recepcion_nombre": string,"contacto_recepcion_telefono": string,"cotizacion_expira_en": string | null,"creado_en": string,"destino_ciudad": string,"destino_direccion": string,"destino_lat": number | null,"destino_lng": number | null,"destino_referencias": string | null,"distancia_km": number | null,"estado": Database["public"]['Enums']["estado_traslado"],"estado_operativo": Database["public"]['Enums']["estado_operativo_traslado"],"fecha_hora_programada": string | null,"ganancia_conductor_congelada": number | null,"id": string,"instrucciones_especiales": string | null,"modalidad_programacion": string | null,"motivo_servicio": string | null,"operation_id": string | null,"origen_ciudad": string,"origen_direccion": string,"origen_lat": number | null,"origen_lng": number | null,"origen_referencias": string | null,"payout_id": string | null,"precio_cotizado": number | null,"precio_final": number | null,"presupuesto_usuario": number | null,"snapshot_tarifa": Json | null,"tiempo_estimado_horas": number | null,"tiene_incidencia_abierta": boolean,"tipo_pago": Database["public"]['Enums']["tipo_pago"],"tipo_ruta": string | null,"tipo_servicio": string | null,"usuario_id": string,"vehiculo_id": string,"ventana_entrega": string | null,"ventana_recoleccion": string | null,"version": number
                   }
                   Insert: {
-                    "actualizado_en"?: string,"causa_fallido"?: Database["public"]['Enums']["causa_fallido"] | null,"cerrado_en"?: string | null,"clave_idempotencia": string,"conductor_id"?: string | null,"contacto_entrega_nombre": string,"contacto_entrega_telefono": string,"contacto_recepcion_nombre": string,"contacto_recepcion_telefono": string,"cotizacion_expira_en"?: string | null,"creado_en"?: string,"destino_ciudad": string,"destino_direccion": string,"destino_lat"?: number | null,"destino_lng"?: number | null,"destino_referencias"?: string | null,"distancia_km"?: number | null,"estado"?: Database["public"]['Enums']["estado_traslado"],"estado_operativo"?: Database["public"]['Enums']["estado_operativo_traslado"],"fecha_hora_programada"?: string | null,"ganancia_conductor_congelada"?: number | null,"id"?: string,"instrucciones_especiales"?: string | null,"modalidad_programacion"?: string | null,"motivo_servicio"?: string | null,"operation_id"?: string | null,"origen_ciudad": string,"origen_direccion": string,"origen_lat"?: number | null,"origen_lng"?: number | null,"origen_referencias"?: string | null,"payout_id"?: string | null,"precio_cotizado"?: number | null,"precio_final"?: number | null,"presupuesto_usuario"?: number | null,"tiempo_estimado_horas"?: number | null,"tiene_incidencia_abierta"?: boolean,"tipo_pago"?: Database["public"]['Enums']["tipo_pago"],"tipo_ruta"?: string | null,"tipo_servicio"?: string | null,"usuario_id": string,"vehiculo_id": string,"ventana_entrega"?: string | null,"ventana_recoleccion"?: string | null,"version"?: number
+                    "actualizado_en"?: string,"causa_fallido"?: Database["public"]['Enums']["causa_fallido"] | null,"cerrado_en"?: string | null,"clave_idempotencia": string,"conductor_id"?: string | null,"contacto_entrega_nombre": string,"contacto_entrega_telefono": string,"contacto_recepcion_nombre": string,"contacto_recepcion_telefono": string,"cotizacion_expira_en"?: string | null,"creado_en"?: string,"destino_ciudad": string,"destino_direccion": string,"destino_lat"?: number | null,"destino_lng"?: number | null,"destino_referencias"?: string | null,"distancia_km"?: number | null,"estado"?: Database["public"]['Enums']["estado_traslado"],"estado_operativo"?: Database["public"]['Enums']["estado_operativo_traslado"],"fecha_hora_programada"?: string | null,"ganancia_conductor_congelada"?: number | null,"id"?: string,"instrucciones_especiales"?: string | null,"modalidad_programacion"?: string | null,"motivo_servicio"?: string | null,"operation_id"?: string | null,"origen_ciudad": string,"origen_direccion": string,"origen_lat"?: number | null,"origen_lng"?: number | null,"origen_referencias"?: string | null,"payout_id"?: string | null,"precio_cotizado"?: number | null,"precio_final"?: number | null,"presupuesto_usuario"?: number | null,"snapshot_tarifa"?: Json | null,"tiempo_estimado_horas"?: number | null,"tiene_incidencia_abierta"?: boolean,"tipo_pago"?: Database["public"]['Enums']["tipo_pago"],"tipo_ruta"?: string | null,"tipo_servicio"?: string | null,"usuario_id": string,"vehiculo_id": string,"ventana_entrega"?: string | null,"ventana_recoleccion"?: string | null,"version"?: number
                   }
                   Update: {
-                    "actualizado_en"?: string,"causa_fallido"?: Database["public"]['Enums']["causa_fallido"] | null,"cerrado_en"?: string | null,"clave_idempotencia"?: string,"conductor_id"?: string | null,"contacto_entrega_nombre"?: string,"contacto_entrega_telefono"?: string,"contacto_recepcion_nombre"?: string,"contacto_recepcion_telefono"?: string,"cotizacion_expira_en"?: string | null,"creado_en"?: string,"destino_ciudad"?: string,"destino_direccion"?: string,"destino_lat"?: number | null,"destino_lng"?: number | null,"destino_referencias"?: string | null,"distancia_km"?: number | null,"estado"?: Database["public"]['Enums']["estado_traslado"],"estado_operativo"?: Database["public"]['Enums']["estado_operativo_traslado"],"fecha_hora_programada"?: string | null,"ganancia_conductor_congelada"?: number | null,"id"?: string,"instrucciones_especiales"?: string | null,"modalidad_programacion"?: string | null,"motivo_servicio"?: string | null,"operation_id"?: string | null,"origen_ciudad"?: string,"origen_direccion"?: string,"origen_lat"?: number | null,"origen_lng"?: number | null,"origen_referencias"?: string | null,"payout_id"?: string | null,"precio_cotizado"?: number | null,"precio_final"?: number | null,"presupuesto_usuario"?: number | null,"tiempo_estimado_horas"?: number | null,"tiene_incidencia_abierta"?: boolean,"tipo_pago"?: Database["public"]['Enums']["tipo_pago"],"tipo_ruta"?: string | null,"tipo_servicio"?: string | null,"usuario_id"?: string,"vehiculo_id"?: string,"ventana_entrega"?: string | null,"ventana_recoleccion"?: string | null,"version"?: number
+                    "actualizado_en"?: string,"causa_fallido"?: Database["public"]['Enums']["causa_fallido"] | null,"cerrado_en"?: string | null,"clave_idempotencia"?: string,"conductor_id"?: string | null,"contacto_entrega_nombre"?: string,"contacto_entrega_telefono"?: string,"contacto_recepcion_nombre"?: string,"contacto_recepcion_telefono"?: string,"cotizacion_expira_en"?: string | null,"creado_en"?: string,"destino_ciudad"?: string,"destino_direccion"?: string,"destino_lat"?: number | null,"destino_lng"?: number | null,"destino_referencias"?: string | null,"distancia_km"?: number | null,"estado"?: Database["public"]['Enums']["estado_traslado"],"estado_operativo"?: Database["public"]['Enums']["estado_operativo_traslado"],"fecha_hora_programada"?: string | null,"ganancia_conductor_congelada"?: number | null,"id"?: string,"instrucciones_especiales"?: string | null,"modalidad_programacion"?: string | null,"motivo_servicio"?: string | null,"operation_id"?: string | null,"origen_ciudad"?: string,"origen_direccion"?: string,"origen_lat"?: number | null,"origen_lng"?: number | null,"origen_referencias"?: string | null,"payout_id"?: string | null,"precio_cotizado"?: number | null,"precio_final"?: number | null,"presupuesto_usuario"?: number | null,"snapshot_tarifa"?: Json | null,"tiempo_estimado_horas"?: number | null,"tiene_incidencia_abierta"?: boolean,"tipo_pago"?: Database["public"]['Enums']["tipo_pago"],"tipo_ruta"?: string | null,"tipo_servicio"?: string | null,"usuario_id"?: string,"vehiculo_id"?: string,"ventana_entrega"?: string | null,"ventana_recoleccion"?: string | null,"version"?: number
                   }
                   Relationships: [
                     {
@@ -3133,13 +3234,13 @@ isOneToOne: false
                   ]
                 },"usuarios": {
                   Row: {
-                    "actualizado_en": string,"alertas_evidencia": boolean,"alertas_pago": boolean,"alertas_viaje": boolean,"auth_user_id": string | null,"calle": string | null,"ciudad": string | null,"codigo_postal": string | null,"codigo_postal_fiscal": string | null,"colonia": string | null,"correo_facturacion": string | null,"creado_en": string,"direccion_principal": string | null,"doc_identidad_subido_en": string | null,"doc_identidad_url": string | null,"empresa_id": string | null,"estado": string | null,"estado_cuenta": string,"estado_verificacion": Database["public"]['Enums']["estado_verificacion"],"fecha_nacimiento": string | null,"foto_url": string | null,"id": string,"metodo_pago_registrado": boolean,"nombre": string | null,"notificaciones_email": boolean,"notificaciones_promocionales": boolean,"notificaciones_push": boolean,"notificaciones_sms_whatsapp": boolean,"numero": string | null,"pais": string | null,"preferencias": NonNullable<Json>,"razon_social": string | null,"referencias": string | null,"regimen_fiscal": string | null,"rfc": string | null,"rol": Database["public"]['Enums']["rol_usuario"],"telefono": string | null,"terminos_aceptados_en": string | null,"tipo_cuenta": string,"traslados_completados_sin_incidencia": number,"uso_cfdi": string | null,"version": number,"version_terminos_aceptada": number | null
+                    "actualizado_en": string,"alertas_evidencia": boolean,"alertas_pago": boolean,"alertas_viaje": boolean,"auth_user_id": string | null,"calle": string | null,"ciudad": string | null,"codigo_postal": string | null,"codigo_postal_fiscal": string | null,"colonia": string | null,"correo_facturacion": string | null,"creado_en": string,"direccion_principal": string | null,"doc_identidad_subido_en": string | null,"doc_identidad_url": string | null,"empresa_id": string | null,"estado": string | null,"estado_cuenta": string,"estado_validacion_fiscal": string,"estado_verificacion": Database["public"]['Enums']["estado_verificacion"],"fecha_nacimiento": string | null,"foto_url": string | null,"id": string,"metodo_pago_registrado": boolean,"nombre": string | null,"notificaciones_email": boolean,"notificaciones_promocionales": boolean,"notificaciones_push": boolean,"notificaciones_sms_whatsapp": boolean,"numero": string | null,"pais": string | null,"preferencias": NonNullable<Json>,"razon_social": string | null,"referencias": string | null,"regimen_fiscal": string | null,"rfc": string | null,"rol": Database["public"]['Enums']["rol_usuario"],"telefono": string | null,"terminos_aceptados_en": string | null,"tipo_cuenta": string,"traslados_completados_sin_incidencia": number,"uso_cfdi": string | null,"version": number,"version_terminos_aceptada": number | null
                   }
                   Insert: {
-                    "actualizado_en"?: string,"alertas_evidencia"?: boolean,"alertas_pago"?: boolean,"alertas_viaje"?: boolean,"auth_user_id"?: string | null,"calle"?: string | null,"ciudad"?: string | null,"codigo_postal"?: string | null,"codigo_postal_fiscal"?: string | null,"colonia"?: string | null,"correo_facturacion"?: string | null,"creado_en"?: string,"direccion_principal"?: string | null,"doc_identidad_subido_en"?: string | null,"doc_identidad_url"?: string | null,"empresa_id"?: string | null,"estado"?: string | null,"estado_cuenta"?: string,"estado_verificacion"?: Database["public"]['Enums']["estado_verificacion"],"fecha_nacimiento"?: string | null,"foto_url"?: string | null,"id"?: string,"metodo_pago_registrado"?: boolean,"nombre"?: string | null,"notificaciones_email"?: boolean,"notificaciones_promocionales"?: boolean,"notificaciones_push"?: boolean,"notificaciones_sms_whatsapp"?: boolean,"numero"?: string | null,"pais"?: string | null,"preferencias"?: NonNullable<Json>,"razon_social"?: string | null,"referencias"?: string | null,"regimen_fiscal"?: string | null,"rfc"?: string | null,"rol"?: Database["public"]['Enums']["rol_usuario"],"telefono"?: string | null,"terminos_aceptados_en"?: string | null,"tipo_cuenta": string,"traslados_completados_sin_incidencia"?: number,"uso_cfdi"?: string | null,"version"?: number,"version_terminos_aceptada"?: number | null
+                    "actualizado_en"?: string,"alertas_evidencia"?: boolean,"alertas_pago"?: boolean,"alertas_viaje"?: boolean,"auth_user_id"?: string | null,"calle"?: string | null,"ciudad"?: string | null,"codigo_postal"?: string | null,"codigo_postal_fiscal"?: string | null,"colonia"?: string | null,"correo_facturacion"?: string | null,"creado_en"?: string,"direccion_principal"?: string | null,"doc_identidad_subido_en"?: string | null,"doc_identidad_url"?: string | null,"empresa_id"?: string | null,"estado"?: string | null,"estado_cuenta"?: string,"estado_validacion_fiscal"?: string,"estado_verificacion"?: Database["public"]['Enums']["estado_verificacion"],"fecha_nacimiento"?: string | null,"foto_url"?: string | null,"id"?: string,"metodo_pago_registrado"?: boolean,"nombre"?: string | null,"notificaciones_email"?: boolean,"notificaciones_promocionales"?: boolean,"notificaciones_push"?: boolean,"notificaciones_sms_whatsapp"?: boolean,"numero"?: string | null,"pais"?: string | null,"preferencias"?: NonNullable<Json>,"razon_social"?: string | null,"referencias"?: string | null,"regimen_fiscal"?: string | null,"rfc"?: string | null,"rol"?: Database["public"]['Enums']["rol_usuario"],"telefono"?: string | null,"terminos_aceptados_en"?: string | null,"tipo_cuenta": string,"traslados_completados_sin_incidencia"?: number,"uso_cfdi"?: string | null,"version"?: number,"version_terminos_aceptada"?: number | null
                   }
                   Update: {
-                    "actualizado_en"?: string,"alertas_evidencia"?: boolean,"alertas_pago"?: boolean,"alertas_viaje"?: boolean,"auth_user_id"?: string | null,"calle"?: string | null,"ciudad"?: string | null,"codigo_postal"?: string | null,"codigo_postal_fiscal"?: string | null,"colonia"?: string | null,"correo_facturacion"?: string | null,"creado_en"?: string,"direccion_principal"?: string | null,"doc_identidad_subido_en"?: string | null,"doc_identidad_url"?: string | null,"empresa_id"?: string | null,"estado"?: string | null,"estado_cuenta"?: string,"estado_verificacion"?: Database["public"]['Enums']["estado_verificacion"],"fecha_nacimiento"?: string | null,"foto_url"?: string | null,"id"?: string,"metodo_pago_registrado"?: boolean,"nombre"?: string | null,"notificaciones_email"?: boolean,"notificaciones_promocionales"?: boolean,"notificaciones_push"?: boolean,"notificaciones_sms_whatsapp"?: boolean,"numero"?: string | null,"pais"?: string | null,"preferencias"?: NonNullable<Json>,"razon_social"?: string | null,"referencias"?: string | null,"regimen_fiscal"?: string | null,"rfc"?: string | null,"rol"?: Database["public"]['Enums']["rol_usuario"],"telefono"?: string | null,"terminos_aceptados_en"?: string | null,"tipo_cuenta"?: string,"traslados_completados_sin_incidencia"?: number,"uso_cfdi"?: string | null,"version"?: number,"version_terminos_aceptada"?: number | null
+                    "actualizado_en"?: string,"alertas_evidencia"?: boolean,"alertas_pago"?: boolean,"alertas_viaje"?: boolean,"auth_user_id"?: string | null,"calle"?: string | null,"ciudad"?: string | null,"codigo_postal"?: string | null,"codigo_postal_fiscal"?: string | null,"colonia"?: string | null,"correo_facturacion"?: string | null,"creado_en"?: string,"direccion_principal"?: string | null,"doc_identidad_subido_en"?: string | null,"doc_identidad_url"?: string | null,"empresa_id"?: string | null,"estado"?: string | null,"estado_cuenta"?: string,"estado_validacion_fiscal"?: string,"estado_verificacion"?: Database["public"]['Enums']["estado_verificacion"],"fecha_nacimiento"?: string | null,"foto_url"?: string | null,"id"?: string,"metodo_pago_registrado"?: boolean,"nombre"?: string | null,"notificaciones_email"?: boolean,"notificaciones_promocionales"?: boolean,"notificaciones_push"?: boolean,"notificaciones_sms_whatsapp"?: boolean,"numero"?: string | null,"pais"?: string | null,"preferencias"?: NonNullable<Json>,"razon_social"?: string | null,"referencias"?: string | null,"regimen_fiscal"?: string | null,"rfc"?: string | null,"rol"?: Database["public"]['Enums']["rol_usuario"],"telefono"?: string | null,"terminos_aceptados_en"?: string | null,"tipo_cuenta"?: string,"traslados_completados_sin_incidencia"?: number,"uso_cfdi"?: string | null,"version"?: number,"version_terminos_aceptada"?: number | null
                   }
                   Relationships: [
                     {
@@ -3226,13 +3327,13 @@ isOneToOne: false
                   ]
                 },"verificaciones_identidad_didit": {
                   Row: {
-                    "actualizado_en": string,"creado_en": string,"decision": Json | null,"estado": string,"id": string,"procesado_en": string | null,"session_id": string,"solicitud_id": string | null,"usuario_id": string | null,"workflow_id": string | null
+                    "actualizado_en": string,"creado_en": string,"decision": Json | null,"estado": string,"id": string,"procesado_en": string | null,"reintentos_webhook": number,"session_id": string,"solicitud_id": string | null,"ultimo_error_webhook": string | null,"ultimo_intento_webhook": string | null,"usuario_id": string | null,"workflow_id": string | null
                   }
                   Insert: {
-                    "actualizado_en"?: string,"creado_en"?: string,"decision"?: Json | null,"estado"?: string,"id"?: string,"procesado_en"?: string | null,"session_id": string,"solicitud_id"?: string | null,"usuario_id"?: string | null,"workflow_id"?: string | null
+                    "actualizado_en"?: string,"creado_en"?: string,"decision"?: Json | null,"estado"?: string,"id"?: string,"procesado_en"?: string | null,"reintentos_webhook"?: number,"session_id": string,"solicitud_id"?: string | null,"ultimo_error_webhook"?: string | null,"ultimo_intento_webhook"?: string | null,"usuario_id"?: string | null,"workflow_id"?: string | null
                   }
                   Update: {
-                    "actualizado_en"?: string,"creado_en"?: string,"decision"?: Json | null,"estado"?: string,"id"?: string,"procesado_en"?: string | null,"session_id"?: string,"solicitud_id"?: string | null,"usuario_id"?: string | null,"workflow_id"?: string | null
+                    "actualizado_en"?: string,"creado_en"?: string,"decision"?: Json | null,"estado"?: string,"id"?: string,"procesado_en"?: string | null,"reintentos_webhook"?: number,"session_id"?: string,"solicitud_id"?: string | null,"ultimo_error_webhook"?: string | null,"ultimo_intento_webhook"?: string | null,"usuario_id"?: string | null,"workflow_id"?: string | null
                   }
                   Relationships: [
                     {
@@ -3440,7 +3541,7 @@ isOneToOne: false
 { Args: { "p_asignacion_id": string }; Returns: undefined
                            },
 "actualizar_datos_facturacion":
-{ Args: { "p_codigo_postal_fiscal"?: string,"p_correo_facturacion"?: string,"p_razon_social"?: string,"p_regimen_fiscal"?: string,"p_rfc"?: string,"p_uso_cfdi"?: string }; Returns: Json
+{ Args: { "p_codigo_postal_fiscal"?: string,"p_correo_facturacion"?: string,"p_estado_validacion_fiscal"?: string,"p_razon_social"?: string,"p_regimen_fiscal"?: string,"p_rfc"?: string,"p_uso_cfdi"?: string }; Returns: Json
                            },
 "admin_accion_masiva":
 { Args: { "p_accion": string,"p_payload"?: Json,"p_traslado_ids": (string)[] }; Returns: Json
@@ -3783,6 +3884,9 @@ isOneToOne: false
 "asignar_incidencia":
 { Args: { "p_admin_id": string,"p_incidencia_id": string,"p_severidad"?: string }; Returns: undefined
                            },
+"auditar_acceso_documento_pii":
+{ Args: { "p_documento_id": string,"p_ip"?: unknown,"p_justificacion": string,"p_tipo_documento": string,"p_usuario_objetivo_id": string }; Returns: Json
+                           },
 "auth_es_conductor_de_traslado":
 { Args: { "p_conductor_id": string,"p_traslado_id": string }; Returns: boolean
                            },
@@ -3923,6 +4027,12 @@ isOneToOne: false
 "empresa_tiene_permiso":
 { Args: { "p_empresa_id": string,"p_permiso": string }; Returns: boolean
                            },
+"encolar_limpieza_documento":
+{ Args: { "p_bucket": string,"p_motivo": string,"p_storage_path": string,"p_usuario_id": string }; Returns: string
+                           },
+"encolar_limpieza_foto_perfil":
+{ Args: { "p_motivo": string,"p_storage_path": string,"p_usuario_id": string }; Returns: string
+                           },
 "encolar_notificacion_conductor":
 { Args: { "p_cuerpo": string,"p_datos"?: Json,"p_destino": string,"p_entidad_id"?: string,"p_entidad_tipo"?: string,"p_idempotency_key": string,"p_prioridad"?: string,"p_tipo": string,"p_titulo": string,"p_usuario_id": string }; Returns: string
                            },
@@ -4000,6 +4110,9 @@ isOneToOne: false
                            },
 "listar_usuarios_admin_paginados":
 { Args: { "p_busqueda"?: string,"p_pagina"?: number,"p_tamano"?: number }; Returns: Json
+                           },
+"marcar_checkpoint_checkout_masivo":
+{ Args: { "p_error"?: string,"p_estado": string,"p_id": string,"p_reintentar_en"?: string }; Returns: undefined
                            },
 "marcar_notificacion_leida":
 { Args: { "p_notificacion_id": string }; Returns: undefined
@@ -4121,13 +4234,42 @@ isOneToOne: false
 "rechazar_usuario_por_verificacion_sistema":
 { Args: { "p_motivo"?: string,"p_usuario_id": string,"p_verificacion_id": string }; Returns: undefined
                            },
+"reclamar_checkpoints_checkout_masivo":
+{ Args: { "p_lote"?: number }; Returns: {
+              "checkout_id": string,"intent_id": string,"intentos": number
+            }[]
+                           },
 "reclamar_limpieza_documentos_identidad":
 { Args: { "p_limite"?: number }; Returns: {
               "documento_id": string,"intento": number,"ruta": string
             }[]
                            },
+"reclamar_lote_limpieza_documentos":
+{ Args: { "p_limite"?: number }; Returns: {
+              "bucket": string,"id": string,"intentos": number,"motivo": string,"storage_path": string,"usuario_id": string
+            }[]
+                           },
+"reclamar_lote_limpieza_fotos_perfil":
+{ Args: { "p_limite"?: number }; Returns: {
+              "id": string,"intentos": number,"motivo": string,"storage_path": string,"usuario_id": string
+            }[]
+                           },
 "reconciliar_pagos_stripe":
 { Args: Record<PropertyKey, never>; Returns: string
+                           },
+"reconciliar_registro_saga_auth":
+{ Args: { "p_limite"?: number }; Returns: Json
+                           },
+"reconciliar_saga_traslados_individuales":
+{ Args: { "p_limite"?: number }; Returns: Json
+                           },
+"reconciliar_usuarios_validacion_fiscal_sat":
+{ Args: { "p_limite"?: number }; Returns: {
+              "estado_anterior": string,"estado_nuevo": string,"rfc": string,"usuario_id": string
+            }[]
+                           },
+"reconciliar_verificacion_didit_resultado":
+{ Args: { "p_decision": string,"p_motivo"?: string,"p_session_id": string }; Returns: Json
                            },
 "reemplazar_documento_conductor":
 { Args: { "p_documento_anterior_id": string,"p_nombre_archivo": string,"p_ruta": string }; Returns: string
@@ -4137,6 +4279,9 @@ isOneToOne: false
                            },
 "registrar_apertura_push":
 { Args: { "p_device_id": string,"p_notificacion_id": string }; Returns: undefined
+                           },
+"registrar_checkout_pago_confirmado":
+{ Args: { "p_id": string,"p_intent": string }; Returns: boolean
                            },
 "registrar_consentimiento_usuario":
 { Args: { "p_aceptado_en"?: string,"p_canal": string,"p_version": number,"p_version_app": string }; Returns: Json
@@ -4182,8 +4327,17 @@ isOneToOne: false
 "registrar_resultado_idempotente":
 { Args: { "p_clave": string,"p_entidad": string,"p_entidad_id": string,"p_resultado": Json }; Returns: undefined
                            },
+"registrar_resultado_limpieza_documento":
+{ Args: { "p_error"?: string,"p_exito": boolean,"p_id": string }; Returns: Json
+                           },
+"registrar_resultado_limpieza_foto_perfil":
+{ Args: { "p_error"?: string,"p_exito": boolean,"p_id": string }; Returns: undefined
+                           },
 "registrar_telemetria_lote":
 { Args: { "p_puntos": Json,"p_traslado_id": string }; Returns: Json
+                           },
+"reservar_checkout_masivo":
+{ Args: { "p_auth_user_id": string,"p_id": string,"p_idempotency_key": string,"p_monto_centavos": number,"p_route_hash": string }; Returns: Json
                            },
 "resolver_incidencia":
 { Args: { "p_incidencia_id": string,"p_motivo"?: string,"p_severidad"?: string }; Returns: undefined
@@ -4223,6 +4377,9 @@ isOneToOne: false
 "solicitar_factura_traslado":
 { Args: { "p_traslado_id": string }; Returns: Json
                            },
+"solicitar_supresion_documentos_arco":
+{ Args: { "p_tipo_documento"?: string }; Returns: Json
+                           },
 "solicitud_conductor_datos_completos":
 { Args: { "p_solicitud_id": string }; Returns: boolean
                            },
@@ -4235,6 +4392,9 @@ isOneToOne: false
 "traducir_estado_operativo":
 { Args: { "e": Database["public"]['Enums']["estado_traslado"] }; Returns: Database["public"]['Enums']["estado_operativo_traslado"]
                            },
+"transicionar_estado_documento_cuenta":
+{ Args: { "p_actor": string,"p_actor_id"?: string,"p_documento_id": string,"p_expira_en"?: string,"p_motivo"?: string,"p_nuevo_estado": string }; Returns: Json
+                           },
 "traslado_tiene_metodo_pago_registrado":
 { Args: { "p_traslado_id": string }; Returns: boolean
                            },
@@ -4243,6 +4403,9 @@ isOneToOne: false
                            },
 "usuario_acepta_cotizacion":
 { Args: { "p_traslado_id": string }; Returns: Database["public"]['Enums']["estado_traslado"]
+                           },
+"usuario_actualiza_perfil_transaccional":
+{ Args: { "p_datos": Json,"p_version_esperada"?: number }; Returns: Json
                            },
 "usuario_cancela_traslado":
 { Args: { "p_motivo": string,"p_traslado_id": string }; Returns: Json
@@ -4278,10 +4441,13 @@ isOneToOne: false
                            },
 "verificar_cadena_custodia":
 { Args: { "p_traslado_id": string }; Returns: boolean
+                           },
+"vincular_checkout_masivo_payment_intent":
+{ Args: { "p_auth_user_id": string,"p_id": string,"p_intent": string }; Returns: boolean
                            }
           }
           Enums: {
-            "abierta_por_actor": "usuario"|"conductor","actor_auditoria": "usuario"|"conductor"|"admin"|"sistema","actor_reporte": "usuario"|"conductor"|"admin"|"sistema","angulo_evidencia": "frente"|"lado_piloto"|"lado_copiloto"|"trasera"|"tablero"|"dano_previo"|"adicional","categoria_tarifa_vehiculo": "ligero_a"|"ligero_b"|"mediano"|"camion","causa_fallido": "imputable_cliente"|"operativo"|"fuerza_mayor"|"documentacion"|"vehiculo_no_circulable","certificacion_conductor": "estandar"|"tipo_b"|"federal"|"premium","condicion_vehiculo": "nueva"|"seminueva"|"rescate_mecanico","dia_traslado": "entre_semana"|"fin_semana","estado_asignacion": "pendiente"|"ofrecida"|"aceptada"|"rechazada"|"cancelada"|"activa"|"completada","estado_conductor": "activo"|"suspendido_7d"|"suspendido_14d"|"suspendido_30d"|"suspendido_indefinido"|"bloqueado_permanente"|"modo_prueba_supervisada"|"pendiente_verificacion","estado_datos_bancarios_conductor": "en_revision"|"verificada"|"rechazada","estado_disputa": "abierta"|"en_revision"|"resuelta"|"escalada"|"resuelta_senior","estado_expediente_conductor": "borrador"|"correo_pendiente"|"datos_incompletos"|"documentos_pendientes"|"listo_para_enviar"|"en_revision"|"requiere_correccion"|"aprobado"|"rechazado"|"suspendido","estado_operacion": "borrador"|"planificada"|"en_curso"|"pausada"|"cerrada"|"cancelada","estado_operativo_traslado": "draft"|"requested"|"confirmed"|"planned"|"assigned"|"pickup_in_progress"|"vehicle_received"|"in_transit"|"delivery_in_progress"|"delivered"|"closed"|"cancelled"|"failed","estado_pago": "pendiente"|"completado"|"reembolsado"|"fallido","estado_payout": "pendiente"|"procesado"|"fallido","estado_politica_tarifaria": "borrador"|"vigente"|"archivada","estado_reclamo_seguro": "abierto"|"en_revision"|"resuelto","estado_solicitud_cambio_conductor": "pendiente"|"aprobado"|"rechazado"|"cancelado","estado_traslado": "usuario_pendiente_verificacion"|"usuario_verificado"|"solicitud_creada"|"documentacion_pendiente"|"documentacion_en_revision"|"documentacion_validada"|"cotizacion_generada"|"cotizacion_aceptada"|"servicio_confirmado"|"pendiente_de_conductor"|"conductor_asignado"|"conductor_en_camino_al_origen"|"conductor_en_punto_de_recoleccion"|"verificacion_vehiculo_en_proceso"|"evidencia_inicial_en_proceso"|"evidencia_inicial_completada"|"vehiculo_recibido"|"traslado_en_curso"|"incidencia_reportada"|"llegada_a_destino"|"evidencia_final_en_proceso"|"evidencia_final_completada"|"entrega_confirmada"|"pago_pendiente"|"pago_completado"|"servicio_cerrado"|"servicio_cancelado"|"traslado_fallido"|"dano_no_reportado_en_revision"|"reclamo_abierto"|"reclamo_resuelto"|"cierre_operativo_con_incidencia_abierta"|"disputa_abierta"|"disputa_resuelta","estado_verificacion": "pendiente"|"en_revision"|"verificado"|"rechazado","evento_auditable": "creacion_cuenta"|"verificacion_cuenta"|"carga_documentos"|"validacion_documentos"|"creacion_solicitud_traslado"|"generacion_cotizacion"|"confirmacion_servicio"|"asignacion_conductor"|"aceptacion_traslado_conductor"|"llegada_conductor_origen"|"captura_evidencia_inicial"|"confirmacion_vehiculo_recibido"|"inicio_traslado"|"reporte_incidencia"|"llegada_destino"|"captura_evidencia_final"|"confirmacion_entrega"|"registro_pago"|"cierre_traslado"|"cancelacion_traslado"|"apertura_disputa"|"resolucion_disputa"|"apertura_reclamo_seguro"|"resolucion_reclamo_seguro"|"suspension_conductor"|"modificacion_traslado_activo"|"activacion_soporte_emergencia"|"comunicacion_usuario_conductor"|"calificacion_conductor"|"exportacion_pasaporte_pdf"|"asignacion_modo_prueba_supervisada"|"resultado_modo_prueba_supervisada"|"aceptacion_terminos"|"carga_documento_identidad"|"actualizacion_datos_bancarios_conductor"|"modificacion_masiva_traslados"|"modificacion_vehiculo"|"consulta_evidencia_vehiculo"|"actualizacion_usuario"|"actualizacion_conductor"|"accion_masiva_admin"|"solicitud_cambio_conductor_creada"|"solicitud_cambio_conductor_aprobada"|"solicitud_cambio_conductor_rechazada"|"solicitud_cambio_conductor_cancelada"|"actualizacion_perfil_conductor"|"oferta_asignacion"|"aceptacion_asignacion"|"rechazo_asignacion"|"cancelacion_asignacion"|"reasignacion_conductor"|"consulta_dato_sensible"|"acceso_torre"|"purga_observabilidad","gama_vehiculo": "entrada"|"media"|"alta"|"premium","horario_traslado": "diurno"|"nocturno","momento_incidencia": "recoleccion"|"durante_traslado"|"entrega"|"post_cierre","momento_pago": "anticipado"|"al_cierre","nivel_concer": "basico"|"ejecutivo"|"luxury"|"coleccion","rango_distancia": "rango_1"|"rango_2"|"rango_3"|"rango_4","remitente_chat": "usuario"|"conductor","resolucion_disputa": "favor_reclamante"|"en_contra"|"solucion_parcial","rol_admin_operativo": "operador"|"supervisor"|"finanzas"|"compliance"|"direccion","rol_usuario": "personal"|"titular_empresa"|"usuario_autorizado"|"sin_rol","tipo_disputa": "cobro_incorrecto"|"cancelacion_fuera_de_politica"|"dano_no_reconocido"|"no_presentacion"|"calificacion_injusta","tipo_documento_consentimiento": "terminos_servicio"|"aviso_privacidad"|"autorizacion_antecedentes"|"declaracion_suspensiones","tipo_evento_custodia": "pickup_started"|"vehicle_inspected"|"vehicle_received"|"transfer_started"|"stop_registered"|"incident_reported"|"destination_reached"|"delivery_inspection"|"vehicle_delivered"|"delivery_accepted","tipo_evidencia": "inicial"|"final","tipo_incidencia": "vehiculo_no_enciende"|"contacto_no_localizado"|"documentacion_incompleta"|"dano_previo_relevante"|"colision_robo_asalto"|"emergencia_medica_conductor"|"descompostura_en_ruta"|"infraccion_autoridad_vial"|"conductor_enfermo"|"perdida_conectividad"|"dano_no_reportado"|"conflicto_evidencia","tipo_operacion": "corporativa"|"flota"|"evento"|"masiva"|"interna","tipo_pago": "anticipado"|"al_cierre","tipo_parada": "escala"|"tarea","tipo_solicitud_cambio_conductor": "perfil"|"curp"|"licencia"|"licencia_vigencia"|"domicilio"|"contacto_emergencia"|"identidad"|"documento"|"datos_bancarios"|"empresa"|"legal"|"foto_perfil","tipo_tarea_parada": "entrega_parcial"|"recoleccion"|"tramite"|"inspeccion"|"carga_descarga"|"otro","tipo_vehiculo": "sedan"|"suv"|"pick_up"|"van"|"luxury"|"coleccion"
+            "abierta_por_actor": "usuario"|"conductor","actor_auditoria": "usuario"|"conductor"|"admin"|"sistema","actor_reporte": "usuario"|"conductor"|"admin"|"sistema","angulo_evidencia": "frente"|"lado_piloto"|"lado_copiloto"|"trasera"|"tablero"|"dano_previo"|"adicional","categoria_tarifa_vehiculo": "ligero_a"|"ligero_b"|"mediano"|"camion","causa_fallido": "imputable_cliente"|"operativo"|"fuerza_mayor"|"documentacion"|"vehiculo_no_circulable","certificacion_conductor": "estandar"|"tipo_b"|"federal"|"premium","condicion_vehiculo": "nueva"|"seminueva"|"rescate_mecanico","dia_traslado": "entre_semana"|"fin_semana","estado_asignacion": "pendiente"|"ofrecida"|"aceptada"|"rechazada"|"cancelada"|"activa"|"completada","estado_conductor": "activo"|"suspendido_7d"|"suspendido_14d"|"suspendido_30d"|"suspendido_indefinido"|"bloqueado_permanente"|"modo_prueba_supervisada"|"pendiente_verificacion","estado_datos_bancarios_conductor": "en_revision"|"verificada"|"rechazada","estado_disputa": "abierta"|"en_revision"|"resuelta"|"escalada"|"resuelta_senior","estado_expediente_conductor": "borrador"|"correo_pendiente"|"datos_incompletos"|"documentos_pendientes"|"listo_para_enviar"|"en_revision"|"requiere_correccion"|"aprobado"|"rechazado"|"suspendido","estado_operacion": "borrador"|"planificada"|"en_curso"|"pausada"|"cerrada"|"cancelada","estado_operativo_traslado": "draft"|"requested"|"confirmed"|"planned"|"assigned"|"pickup_in_progress"|"vehicle_received"|"in_transit"|"delivery_in_progress"|"delivered"|"closed"|"cancelled"|"failed","estado_pago": "pendiente"|"completado"|"reembolsado"|"fallido","estado_payout": "pendiente"|"procesado"|"fallido","estado_politica_tarifaria": "borrador"|"vigente"|"archivada","estado_reclamo_seguro": "abierto"|"en_revision"|"resuelto","estado_solicitud_cambio_conductor": "pendiente"|"aprobado"|"rechazado"|"cancelado","estado_traslado": "usuario_pendiente_verificacion"|"usuario_verificado"|"solicitud_creada"|"documentacion_pendiente"|"documentacion_en_revision"|"documentacion_validada"|"cotizacion_generada"|"cotizacion_aceptada"|"servicio_confirmado"|"pendiente_de_conductor"|"conductor_asignado"|"conductor_en_camino_al_origen"|"conductor_en_punto_de_recoleccion"|"verificacion_vehiculo_en_proceso"|"evidencia_inicial_en_proceso"|"evidencia_inicial_completada"|"vehiculo_recibido"|"traslado_en_curso"|"incidencia_reportada"|"llegada_a_destino"|"evidencia_final_en_proceso"|"evidencia_final_completada"|"entrega_confirmada"|"pago_pendiente"|"pago_completado"|"servicio_cerrado"|"servicio_cancelado"|"traslado_fallido"|"dano_no_reportado_en_revision"|"reclamo_abierto"|"reclamo_resuelto"|"cierre_operativo_con_incidencia_abierta"|"disputa_abierta"|"disputa_resuelta","estado_verificacion": "pendiente"|"en_revision"|"verificado"|"rechazado","evento_auditable": "creacion_cuenta"|"verificacion_cuenta"|"carga_documentos"|"validacion_documentos"|"creacion_solicitud_traslado"|"generacion_cotizacion"|"confirmacion_servicio"|"asignacion_conductor"|"aceptacion_traslado_conductor"|"llegada_conductor_origen"|"captura_evidencia_inicial"|"confirmacion_vehiculo_recibido"|"inicio_traslado"|"reporte_incidencia"|"llegada_destino"|"captura_evidencia_final"|"confirmacion_entrega"|"registro_pago"|"cierre_traslado"|"cancelacion_traslado"|"apertura_disputa"|"resolucion_disputa"|"apertura_reclamo_seguro"|"resolucion_reclamo_seguro"|"suspension_conductor"|"modificacion_traslado_activo"|"activacion_soporte_emergencia"|"comunicacion_usuario_conductor"|"calificacion_conductor"|"exportacion_pasaporte_pdf"|"asignacion_modo_prueba_supervisada"|"resultado_modo_prueba_supervisada"|"aceptacion_terminos"|"carga_documento_identidad"|"actualizacion_datos_bancarios_conductor"|"modificacion_masiva_traslados"|"modificacion_vehiculo"|"consulta_evidencia_vehiculo"|"actualizacion_usuario"|"actualizacion_conductor"|"accion_masiva_admin"|"solicitud_cambio_conductor_creada"|"solicitud_cambio_conductor_aprobada"|"solicitud_cambio_conductor_rechazada"|"solicitud_cambio_conductor_cancelada"|"actualizacion_perfil_conductor"|"oferta_asignacion"|"aceptacion_asignacion"|"rechazo_asignacion"|"cancelacion_asignacion"|"reasignacion_conductor"|"consulta_dato_sensible"|"acceso_torre"|"purga_observabilidad"|"consulta_documento_pii"|"solicitud_supresion_arco","gama_vehiculo": "entrada"|"media"|"alta"|"premium","horario_traslado": "diurno"|"nocturno","momento_incidencia": "recoleccion"|"durante_traslado"|"entrega"|"post_cierre","momento_pago": "anticipado"|"al_cierre","nivel_concer": "basico"|"ejecutivo"|"luxury"|"coleccion","rango_distancia": "rango_1"|"rango_2"|"rango_3"|"rango_4","remitente_chat": "usuario"|"conductor","resolucion_disputa": "favor_reclamante"|"en_contra"|"solucion_parcial","rol_admin_operativo": "operador"|"supervisor"|"finanzas"|"compliance"|"direccion","rol_usuario": "personal"|"titular_empresa"|"usuario_autorizado"|"sin_rol","tipo_disputa": "cobro_incorrecto"|"cancelacion_fuera_de_politica"|"dano_no_reconocido"|"no_presentacion"|"calificacion_injusta","tipo_documento_consentimiento": "terminos_servicio"|"aviso_privacidad"|"autorizacion_antecedentes"|"declaracion_suspensiones","tipo_evento_custodia": "pickup_started"|"vehicle_inspected"|"vehicle_received"|"transfer_started"|"stop_registered"|"incident_reported"|"destination_reached"|"delivery_inspection"|"vehicle_delivered"|"delivery_accepted","tipo_evidencia": "inicial"|"final","tipo_incidencia": "vehiculo_no_enciende"|"contacto_no_localizado"|"documentacion_incompleta"|"dano_previo_relevante"|"colision_robo_asalto"|"emergencia_medica_conductor"|"descompostura_en_ruta"|"infraccion_autoridad_vial"|"conductor_enfermo"|"perdida_conectividad"|"dano_no_reportado"|"conflicto_evidencia","tipo_operacion": "corporativa"|"flota"|"evento"|"masiva"|"interna","tipo_pago": "anticipado"|"al_cierre","tipo_parada": "escala"|"tarea","tipo_solicitud_cambio_conductor": "perfil"|"curp"|"licencia"|"licencia_vigencia"|"domicilio"|"contacto_emergencia"|"identidad"|"documento"|"datos_bancarios"|"empresa"|"legal"|"foto_perfil","tipo_tarea_parada": "entrega_parcial"|"recoleccion"|"tramite"|"inspeccion"|"carga_descarga"|"otro","tipo_vehiculo": "sedan"|"suv"|"pick_up"|"van"|"luxury"|"coleccion"
           }
           CompositeTypes: {
             [_ in never]: never
@@ -4401,7 +4567,7 @@ export const Constants = {
           }
         },"public": {
           Enums: {
-            "abierta_por_actor": ["usuario", "conductor"],"actor_auditoria": ["usuario", "conductor", "admin", "sistema"],"actor_reporte": ["usuario", "conductor", "admin", "sistema"],"angulo_evidencia": ["frente", "lado_piloto", "lado_copiloto", "trasera", "tablero", "dano_previo", "adicional"],"categoria_tarifa_vehiculo": ["ligero_a", "ligero_b", "mediano", "camion"],"causa_fallido": ["imputable_cliente", "operativo", "fuerza_mayor", "documentacion", "vehiculo_no_circulable"],"certificacion_conductor": ["estandar", "tipo_b", "federal", "premium"],"condicion_vehiculo": ["nueva", "seminueva", "rescate_mecanico"],"dia_traslado": ["entre_semana", "fin_semana"],"estado_asignacion": ["pendiente", "ofrecida", "aceptada", "rechazada", "cancelada", "activa", "completada"],"estado_conductor": ["activo", "suspendido_7d", "suspendido_14d", "suspendido_30d", "suspendido_indefinido", "bloqueado_permanente", "modo_prueba_supervisada", "pendiente_verificacion"],"estado_datos_bancarios_conductor": ["en_revision", "verificada", "rechazada"],"estado_disputa": ["abierta", "en_revision", "resuelta", "escalada", "resuelta_senior"],"estado_expediente_conductor": ["borrador", "correo_pendiente", "datos_incompletos", "documentos_pendientes", "listo_para_enviar", "en_revision", "requiere_correccion", "aprobado", "rechazado", "suspendido"],"estado_operacion": ["borrador", "planificada", "en_curso", "pausada", "cerrada", "cancelada"],"estado_operativo_traslado": ["draft", "requested", "confirmed", "planned", "assigned", "pickup_in_progress", "vehicle_received", "in_transit", "delivery_in_progress", "delivered", "closed", "cancelled", "failed"],"estado_pago": ["pendiente", "completado", "reembolsado", "fallido"],"estado_payout": ["pendiente", "procesado", "fallido"],"estado_politica_tarifaria": ["borrador", "vigente", "archivada"],"estado_reclamo_seguro": ["abierto", "en_revision", "resuelto"],"estado_solicitud_cambio_conductor": ["pendiente", "aprobado", "rechazado", "cancelado"],"estado_traslado": ["usuario_pendiente_verificacion", "usuario_verificado", "solicitud_creada", "documentacion_pendiente", "documentacion_en_revision", "documentacion_validada", "cotizacion_generada", "cotizacion_aceptada", "servicio_confirmado", "pendiente_de_conductor", "conductor_asignado", "conductor_en_camino_al_origen", "conductor_en_punto_de_recoleccion", "verificacion_vehiculo_en_proceso", "evidencia_inicial_en_proceso", "evidencia_inicial_completada", "vehiculo_recibido", "traslado_en_curso", "incidencia_reportada", "llegada_a_destino", "evidencia_final_en_proceso", "evidencia_final_completada", "entrega_confirmada", "pago_pendiente", "pago_completado", "servicio_cerrado", "servicio_cancelado", "traslado_fallido", "dano_no_reportado_en_revision", "reclamo_abierto", "reclamo_resuelto", "cierre_operativo_con_incidencia_abierta", "disputa_abierta", "disputa_resuelta"],"estado_verificacion": ["pendiente", "en_revision", "verificado", "rechazado"],"evento_auditable": ["creacion_cuenta", "verificacion_cuenta", "carga_documentos", "validacion_documentos", "creacion_solicitud_traslado", "generacion_cotizacion", "confirmacion_servicio", "asignacion_conductor", "aceptacion_traslado_conductor", "llegada_conductor_origen", "captura_evidencia_inicial", "confirmacion_vehiculo_recibido", "inicio_traslado", "reporte_incidencia", "llegada_destino", "captura_evidencia_final", "confirmacion_entrega", "registro_pago", "cierre_traslado", "cancelacion_traslado", "apertura_disputa", "resolucion_disputa", "apertura_reclamo_seguro", "resolucion_reclamo_seguro", "suspension_conductor", "modificacion_traslado_activo", "activacion_soporte_emergencia", "comunicacion_usuario_conductor", "calificacion_conductor", "exportacion_pasaporte_pdf", "asignacion_modo_prueba_supervisada", "resultado_modo_prueba_supervisada", "aceptacion_terminos", "carga_documento_identidad", "actualizacion_datos_bancarios_conductor", "modificacion_masiva_traslados", "modificacion_vehiculo", "consulta_evidencia_vehiculo", "actualizacion_usuario", "actualizacion_conductor", "accion_masiva_admin", "solicitud_cambio_conductor_creada", "solicitud_cambio_conductor_aprobada", "solicitud_cambio_conductor_rechazada", "solicitud_cambio_conductor_cancelada", "actualizacion_perfil_conductor", "oferta_asignacion", "aceptacion_asignacion", "rechazo_asignacion", "cancelacion_asignacion", "reasignacion_conductor", "consulta_dato_sensible", "acceso_torre", "purga_observabilidad"],"gama_vehiculo": ["entrada", "media", "alta", "premium"],"horario_traslado": ["diurno", "nocturno"],"momento_incidencia": ["recoleccion", "durante_traslado", "entrega", "post_cierre"],"momento_pago": ["anticipado", "al_cierre"],"nivel_concer": ["basico", "ejecutivo", "luxury", "coleccion"],"rango_distancia": ["rango_1", "rango_2", "rango_3", "rango_4"],"remitente_chat": ["usuario", "conductor"],"resolucion_disputa": ["favor_reclamante", "en_contra", "solucion_parcial"],"rol_admin_operativo": ["operador", "supervisor", "finanzas", "compliance", "direccion"],"rol_usuario": ["personal", "titular_empresa", "usuario_autorizado", "sin_rol"],"tipo_disputa": ["cobro_incorrecto", "cancelacion_fuera_de_politica", "dano_no_reconocido", "no_presentacion", "calificacion_injusta"],"tipo_documento_consentimiento": ["terminos_servicio", "aviso_privacidad", "autorizacion_antecedentes", "declaracion_suspensiones"],"tipo_evento_custodia": ["pickup_started", "vehicle_inspected", "vehicle_received", "transfer_started", "stop_registered", "incident_reported", "destination_reached", "delivery_inspection", "vehicle_delivered", "delivery_accepted"],"tipo_evidencia": ["inicial", "final"],"tipo_incidencia": ["vehiculo_no_enciende", "contacto_no_localizado", "documentacion_incompleta", "dano_previo_relevante", "colision_robo_asalto", "emergencia_medica_conductor", "descompostura_en_ruta", "infraccion_autoridad_vial", "conductor_enfermo", "perdida_conectividad", "dano_no_reportado", "conflicto_evidencia"],"tipo_operacion": ["corporativa", "flota", "evento", "masiva", "interna"],"tipo_pago": ["anticipado", "al_cierre"],"tipo_parada": ["escala", "tarea"],"tipo_solicitud_cambio_conductor": ["perfil", "curp", "licencia", "licencia_vigencia", "domicilio", "contacto_emergencia", "identidad", "documento", "datos_bancarios", "empresa", "legal", "foto_perfil"],"tipo_tarea_parada": ["entrega_parcial", "recoleccion", "tramite", "inspeccion", "carga_descarga", "otro"],"tipo_vehiculo": ["sedan", "suv", "pick_up", "van", "luxury", "coleccion"]
+            "abierta_por_actor": ["usuario", "conductor"],"actor_auditoria": ["usuario", "conductor", "admin", "sistema"],"actor_reporte": ["usuario", "conductor", "admin", "sistema"],"angulo_evidencia": ["frente", "lado_piloto", "lado_copiloto", "trasera", "tablero", "dano_previo", "adicional"],"categoria_tarifa_vehiculo": ["ligero_a", "ligero_b", "mediano", "camion"],"causa_fallido": ["imputable_cliente", "operativo", "fuerza_mayor", "documentacion", "vehiculo_no_circulable"],"certificacion_conductor": ["estandar", "tipo_b", "federal", "premium"],"condicion_vehiculo": ["nueva", "seminueva", "rescate_mecanico"],"dia_traslado": ["entre_semana", "fin_semana"],"estado_asignacion": ["pendiente", "ofrecida", "aceptada", "rechazada", "cancelada", "activa", "completada"],"estado_conductor": ["activo", "suspendido_7d", "suspendido_14d", "suspendido_30d", "suspendido_indefinido", "bloqueado_permanente", "modo_prueba_supervisada", "pendiente_verificacion"],"estado_datos_bancarios_conductor": ["en_revision", "verificada", "rechazada"],"estado_disputa": ["abierta", "en_revision", "resuelta", "escalada", "resuelta_senior"],"estado_expediente_conductor": ["borrador", "correo_pendiente", "datos_incompletos", "documentos_pendientes", "listo_para_enviar", "en_revision", "requiere_correccion", "aprobado", "rechazado", "suspendido"],"estado_operacion": ["borrador", "planificada", "en_curso", "pausada", "cerrada", "cancelada"],"estado_operativo_traslado": ["draft", "requested", "confirmed", "planned", "assigned", "pickup_in_progress", "vehicle_received", "in_transit", "delivery_in_progress", "delivered", "closed", "cancelled", "failed"],"estado_pago": ["pendiente", "completado", "reembolsado", "fallido"],"estado_payout": ["pendiente", "procesado", "fallido"],"estado_politica_tarifaria": ["borrador", "vigente", "archivada"],"estado_reclamo_seguro": ["abierto", "en_revision", "resuelto"],"estado_solicitud_cambio_conductor": ["pendiente", "aprobado", "rechazado", "cancelado"],"estado_traslado": ["usuario_pendiente_verificacion", "usuario_verificado", "solicitud_creada", "documentacion_pendiente", "documentacion_en_revision", "documentacion_validada", "cotizacion_generada", "cotizacion_aceptada", "servicio_confirmado", "pendiente_de_conductor", "conductor_asignado", "conductor_en_camino_al_origen", "conductor_en_punto_de_recoleccion", "verificacion_vehiculo_en_proceso", "evidencia_inicial_en_proceso", "evidencia_inicial_completada", "vehiculo_recibido", "traslado_en_curso", "incidencia_reportada", "llegada_a_destino", "evidencia_final_en_proceso", "evidencia_final_completada", "entrega_confirmada", "pago_pendiente", "pago_completado", "servicio_cerrado", "servicio_cancelado", "traslado_fallido", "dano_no_reportado_en_revision", "reclamo_abierto", "reclamo_resuelto", "cierre_operativo_con_incidencia_abierta", "disputa_abierta", "disputa_resuelta"],"estado_verificacion": ["pendiente", "en_revision", "verificado", "rechazado"],"evento_auditable": ["creacion_cuenta", "verificacion_cuenta", "carga_documentos", "validacion_documentos", "creacion_solicitud_traslado", "generacion_cotizacion", "confirmacion_servicio", "asignacion_conductor", "aceptacion_traslado_conductor", "llegada_conductor_origen", "captura_evidencia_inicial", "confirmacion_vehiculo_recibido", "inicio_traslado", "reporte_incidencia", "llegada_destino", "captura_evidencia_final", "confirmacion_entrega", "registro_pago", "cierre_traslado", "cancelacion_traslado", "apertura_disputa", "resolucion_disputa", "apertura_reclamo_seguro", "resolucion_reclamo_seguro", "suspension_conductor", "modificacion_traslado_activo", "activacion_soporte_emergencia", "comunicacion_usuario_conductor", "calificacion_conductor", "exportacion_pasaporte_pdf", "asignacion_modo_prueba_supervisada", "resultado_modo_prueba_supervisada", "aceptacion_terminos", "carga_documento_identidad", "actualizacion_datos_bancarios_conductor", "modificacion_masiva_traslados", "modificacion_vehiculo", "consulta_evidencia_vehiculo", "actualizacion_usuario", "actualizacion_conductor", "accion_masiva_admin", "solicitud_cambio_conductor_creada", "solicitud_cambio_conductor_aprobada", "solicitud_cambio_conductor_rechazada", "solicitud_cambio_conductor_cancelada", "actualizacion_perfil_conductor", "oferta_asignacion", "aceptacion_asignacion", "rechazo_asignacion", "cancelacion_asignacion", "reasignacion_conductor", "consulta_dato_sensible", "acceso_torre", "purga_observabilidad", "consulta_documento_pii", "solicitud_supresion_arco"],"gama_vehiculo": ["entrada", "media", "alta", "premium"],"horario_traslado": ["diurno", "nocturno"],"momento_incidencia": ["recoleccion", "durante_traslado", "entrega", "post_cierre"],"momento_pago": ["anticipado", "al_cierre"],"nivel_concer": ["basico", "ejecutivo", "luxury", "coleccion"],"rango_distancia": ["rango_1", "rango_2", "rango_3", "rango_4"],"remitente_chat": ["usuario", "conductor"],"resolucion_disputa": ["favor_reclamante", "en_contra", "solucion_parcial"],"rol_admin_operativo": ["operador", "supervisor", "finanzas", "compliance", "direccion"],"rol_usuario": ["personal", "titular_empresa", "usuario_autorizado", "sin_rol"],"tipo_disputa": ["cobro_incorrecto", "cancelacion_fuera_de_politica", "dano_no_reconocido", "no_presentacion", "calificacion_injusta"],"tipo_documento_consentimiento": ["terminos_servicio", "aviso_privacidad", "autorizacion_antecedentes", "declaracion_suspensiones"],"tipo_evento_custodia": ["pickup_started", "vehicle_inspected", "vehicle_received", "transfer_started", "stop_registered", "incident_reported", "destination_reached", "delivery_inspection", "vehicle_delivered", "delivery_accepted"],"tipo_evidencia": ["inicial", "final"],"tipo_incidencia": ["vehiculo_no_enciende", "contacto_no_localizado", "documentacion_incompleta", "dano_previo_relevante", "colision_robo_asalto", "emergencia_medica_conductor", "descompostura_en_ruta", "infraccion_autoridad_vial", "conductor_enfermo", "perdida_conectividad", "dano_no_reportado", "conflicto_evidencia"],"tipo_operacion": ["corporativa", "flota", "evento", "masiva", "interna"],"tipo_pago": ["anticipado", "al_cierre"],"tipo_parada": ["escala", "tarea"],"tipo_solicitud_cambio_conductor": ["perfil", "curp", "licencia", "licencia_vigencia", "domicilio", "contacto_emergencia", "identidad", "documento", "datos_bancarios", "empresa", "legal", "foto_perfil"],"tipo_tarea_parada": ["entrega_parcial", "recoleccion", "tramite", "inspeccion", "carga_descarga", "otro"],"tipo_vehiculo": ["sedan", "suv", "pick_up", "van", "luxury", "coleccion"]
           }
         }
 } as const

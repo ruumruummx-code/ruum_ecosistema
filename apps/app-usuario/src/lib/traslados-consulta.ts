@@ -1,3 +1,9 @@
+import {
+  consultarInventarioPasaportesUsuario,
+  consultarPaginaPasaportesUsuario,
+  consultarTrasladosPaginaUsuario,
+  consultarMontosPagosCompletados,
+} from "@ruum/api/transfers";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@ruum/shared/types";
 import {
@@ -285,11 +291,7 @@ export async function obtenerListaTrasladosConsolidadaUsuario(
   const desplazamiento = (pagina - 1) * limite;
 
   // 1. Inventario liviano para conteos globales y snapshotVersion (evita cargar miles de filas completas)
-  const { data: inventarioRaw, error: errInventario } = await cliente
-    .from("pasaporte_digital")
-    .select("traslado_id, estado, estado_operativo, cerrado_en, creado_en")
-    .eq("usuario_id", usuarioId)
-    .order("creado_en", { ascending: false });
+  const { data: inventarioRaw, error: errInventario } = await consultarInventarioPasaportesUsuario(cliente, usuarioId);
 
   if (errInventario) {
     throw errInventario;
@@ -330,12 +332,7 @@ export async function obtenerListaTrasladosConsolidadaUsuario(
   }
 
   // 2. Consulta paginada server-side: SOLO los registros del rango [desplazamiento, desplazamiento + limite - 1] (CA-1)
-  const { data: pasaportesPaginadosRaw, error: errPaginados } = await cliente
-    .from("pasaporte_digital")
-    .select("*")
-    .eq("usuario_id", usuarioId)
-    .order("creado_en", { ascending: false })
-    .range(desplazamiento, desplazamiento + limite - 1);
+  const { data: pasaportesPaginadosRaw, error: errPaginados } = await consultarPaginaPasaportesUsuario(cliente, usuarioId, desplazamiento, limite);
 
   if (errPaginados) {
     throw errPaginados;
@@ -349,10 +346,7 @@ export async function obtenerListaTrasladosConsolidadaUsuario(
   // 3. Consultar traslados asociados ÚNICAMENTE para los ítems de esta página
   let trasladosPorId = new Map<string, Traslado>();
   if (idsPagina.length > 0) {
-    const { data: trasladosRaw, error: errTraslados } = await cliente
-      .from("traslados")
-      .select("id, origen_direccion, origen_ciudad, destino_direccion, destino_ciudad, fecha_hora_programada")
-      .in("id", idsPagina);
+    const { data: trasladosRaw, error: errTraslados } = await consultarTrasladosPaginaUsuario(cliente, idsPagina);
 
     if (errTraslados) {
       logStructuredWarn("traslados-consulta", "error_cargar_traslados_asociados", errTraslados, {
@@ -373,10 +367,7 @@ export async function obtenerListaTrasladosConsolidadaUsuario(
   // 5. Total de gasto confirmado en servidor (CB-1)
   let gastoConfirmadoTotal = 0;
   try {
-    const { data: pagos, error: errPagos } = await cliente
-      .from("pagos")
-      .select("monto")
-      .eq("estado", "completado");
+    const { data: pagos, error: errPagos } = await consultarMontosPagosCompletados(cliente);
 
     if (!errPagos && pagos && pagos.length > 0) {
       gastoConfirmadoTotal = pagos.reduce((acc, p) => acc + (Number(p.monto) || 0), 0);

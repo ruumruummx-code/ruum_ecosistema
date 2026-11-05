@@ -6,7 +6,15 @@ create extension if not exists pgtap with schema extensions;
 
 begin;
 
-select plan(5);
+select plan(8);
+
+-- Regresión: las llamadas de seis argumentos usan la nueva firma con defaults.
+select is(
+  (select count(*)::int from pg_proc p join pg_namespace n on n.oid = p.pronamespace
+   where n.nspname = 'public' and p.proname = 'actualizar_datos_facturacion'),
+  1,
+  'PR-08: existe una sola firma de facturación para evitar llamadas ambiguas'
+);
 
 -- 1. Setup Fixtures
 insert into auth.users (id, email, email_confirmed_at, raw_app_meta_data, raw_user_meta_data, created_at, updated_at) values
@@ -76,7 +84,7 @@ reset role;
 -- Creamos un trigger temporal que falla al actualizar empresas con un valor específico
 create or replace function pg_temp.trigger_fallo_empresa() returns trigger as $$
 begin
-  if NEW.rfc = 'FAIL_EMPRESA' then
+  if NEW.rfc = 'ERR800101AB2' then
     raise exception 'Fallo simulado en tabla empresas';
   end if;
   return NEW;
@@ -90,30 +98,30 @@ create trigger trg_fallo_empresa_pr08
 set local role authenticated;
 select set_config('request.jwt.claim.sub', '90800000-0000-4000-8000-000000000001', true);
 
--- Intento de actualización con fallo simulado
-do $$
-begin
-  perform public.actualizar_datos_facturacion(
-    'FAIL_EMPRESA',
-    'Razon Fallida',
-    '601',
-    '99999',
-    'G03',
-    'fail@test.com'
-  );
-  raise exception 'No debía permitirse la transacción';
-exception
-  when others then
-    -- Excepción capturada esperada
-    null;
-end $$;
+-- El RFC es válido: el error debe proceder del trigger de empresas.
+select throws_ok(
+  $sql$
+    select public.actualizar_datos_facturacion(
+      'ERR800101AB2', 'Razon Fallida', '601', '99999', 'G03', 'fail@test.com'
+    );
+  $sql$,
+  'P0001',
+  'Fallo simulado en tabla empresas',
+  'PR-08: el fallo procede de la segunda actualización'
+);
 reset role;
 
--- Comprobar que la tabla usuarios NO quedó con 'FAIL_EMPRESA' (rollback íntegro de la transacción)
+-- Comprobar que la tabla usuarios NO quedó con 'ERR800101AB2' (rollback íntegro de la transacción)
 select is(
   (select rfc from public.usuarios where id = '90800000-0000-4000-8000-000000000001'),
   'NUE800101AB2',
   'PR-08.5: fallo en empresas revierte también los cambios en usuarios (rollback atómico)'
+);
+
+select is(
+  (select rfc from public.empresas where id = '90800000-0000-4000-8000-000000000e01'),
+  'NUE800101AB2',
+  'PR-08: empresas también conserva su estado anterior tras el fallo'
 );
 
 select * from finish();

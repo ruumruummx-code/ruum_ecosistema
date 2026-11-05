@@ -17,6 +17,10 @@ import type { Database, Json } from "@ruum/shared/types";
  * validadas en runtime por cada servicio.
  */
 export interface FuncionesRpc {
+  encolar_limpieza_foto_perfil: {
+    args: Database["public"]["Functions"]["encolar_limpieza_foto_perfil"]["Args"];
+    ret: Database["public"]["Functions"]["encolar_limpieza_foto_perfil"]["Returns"];
+  };
   usuario_registra_vehiculo: { args: { p_id: string; p_datos: Json }; ret: string };
   usuario_previsualizar_tarifas_masivas: {
     args: { p_filas: Json };

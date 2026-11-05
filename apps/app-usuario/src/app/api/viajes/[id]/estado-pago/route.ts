@@ -1,3 +1,8 @@
+import {
+  consultarTrasladoEstadoPago,
+  consultarPagoCompletadoTraslado,
+  consultarEstadoTrasladoReconciliado,
+} from "@ruum/api/transfers";
 import { type NextRequest, NextResponse } from "next/server";
 import { crearClienteServidor } from "@/lib/supabase-server";
 import { obtenerUsuarioIdPorAuth } from "@ruum/api/identity";
@@ -51,23 +56,14 @@ export async function GET(
     const perfilId = await obtenerUsuarioIdPorAuth(cliente, user.id);
 
     // CB-3 / T9 / CA-7: Ownership estricto (Anti-IDOR)
-    const { data: traslado, error: errTraslado } = await cliente
-      .from("traslados")
-      .select("id, usuario_id, estado, precio_final, precio_cotizado, tipo_pago")
-      .eq("id", id)
-      .maybeSingle();
+    const { data: traslado, error: errTraslado } = await consultarTrasladoEstadoPago(cliente, id);
 
     if (errTraslado || !traslado || !perfilId || traslado.usuario_id !== perfilId) {
       return NextResponse.json({ error: "Traslado no encontrado." }, { status: 404 });
     }
 
     // 1. Verificación en tabla de pagos completados
-    const { data: pagos, error: errPagos } = await cliente
-      .from("pagos")
-      .select("id, monto, registrado_en, estado")
-      .eq("traslado_id", id)
-      .eq("estado", "completado")
-      .limit(1);
+    const { data: pagos, error: errPagos } = await consultarPagoCompletadoTraslado(cliente, id);
 
     if (!errPagos && pagos && pagos.length > 0) {
       return NextResponse.json({
@@ -113,11 +109,7 @@ export async function GET(
         });
 
         // Reconsultar estado del traslado tras reconciliación
-        const { data: trasladoActualizado } = await cliente
-          .from("traslados")
-          .select("estado")
-          .eq("id", id)
-          .maybeSingle();
+        const { data: trasladoActualizado } = await consultarEstadoTrasladoReconciliado(cliente, id);
 
         if (trasladoActualizado && estadosConfirmados.includes(trasladoActualizado.estado)) {
           return NextResponse.json({
