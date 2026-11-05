@@ -20,6 +20,8 @@ export async function conciliarCheckouts(db: SupabaseClient, clave: string) {
         if (intent.metadata.carga_masiva_id !== checkout.id || intent.currency !== "mxn" || intent.amount !== Number(checkout.monto_centavos)) throw new Error("bulk_checkout_identity_mismatch");
         if (intent.status === "succeeded") {
           if (intent.amount_received !== Number(checkout.monto_centavos)) throw new Error("bulk_checkout_amount_mismatch");
+          const checkpoint = await db.rpc("registrar_checkout_pago_confirmado", { p_id: checkout.id, p_intent: intent.id });
+          if (checkpoint.error) throw new Error("bulk_checkout_checkpoint_failed");
           const result = await db.rpc("confirmar_checkout_masivo", { p_id: checkout.id, p_intent: intent.id, p_monto: intent.amount_received, p_moneda: intent.currency });
           if (result.error || result.data?.ok === false) throw new Error("bulk_checkout_confirmation_failed");
           confirmados++;

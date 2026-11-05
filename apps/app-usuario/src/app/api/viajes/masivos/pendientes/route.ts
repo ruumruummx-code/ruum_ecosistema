@@ -7,8 +7,9 @@ import {
   obtenerCheckoutMasivoServidor,
   descartarCheckoutMasivoServidor,
   confirmarPagoMasivoServidor,
+  registrarCheckoutPagoConfirmadoServidor,
 } from "@ruum/api/services";
-import { rateLimitConVentana } from "@/lib/csp-rate-limit";
+import { rateLimitMasivo } from "@/lib/rate-limit-masivos";
 import { logStructuredError, logStructuredWarn } from "@/lib/logger";
 import { verificarCsrfORechazar } from "@/lib/csrf";
 
@@ -19,8 +20,8 @@ export async function GET(request: NextRequest) {
   const { data: { user } } = await cliente.auth.getUser();
   if (!user) return NextResponse.json({ error: "No autenticado" }, { status: 401 });
 
-  const limite = await rateLimitConVentana(`uid:${user.id}`, "masivos-pendientes-get", 60, 60000);
-  if (!limite.allowed) return NextResponse.json({ error: "Demasiadas consultas. Espera un momento." }, { status: 429 });
+  const limite = await rateLimitMasivo(request, user.id, "masivos-pendientes-get", 60);
+  if (!limite.allowed) return NextResponse.json({ error: "Demasiadas consultas. Espera un momento." }, { status: 429, headers: { "Retry-After": String(limite.retryAfterSec) } });
 
   const idParam = request.nextUrl.searchParams.get("id");
   const servicio = clienteMasivoServicio();
@@ -47,6 +48,7 @@ export async function GET(request: NextRequest) {
       const intent = await stripeMasivo(`payment_intents/${encodeURIComponent(carga.stripe_payment_intent_id)}`);
       if (intent.status === "succeeded") {
         try {
+          await registrarCheckoutPagoConfirmadoServidor(servicio, carga.id, intent.id);
           await confirmarPagoMasivoServidor(servicio, carga.id, intent.id, intent.amount_received, intent.currency);
         } catch (err) {
           logStructuredError("api/viajes/masivos/pendientes", "pago_cobrado_conciliacion_pendiente", err, { cargaId: carga.id, usuarioId: user.id });

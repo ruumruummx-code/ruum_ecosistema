@@ -1,13 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
+import { createHash } from "node:crypto";
 import { validarFila } from "@/lib/carga-masiva";
 import { z } from "zod";
 import { crearClienteServidor } from "@/lib/supabase-server";
-import { rateLimitConVentana } from "@/lib/csp-rate-limit";
+import { rateLimitMasivo } from "@/lib/rate-limit-masivos";
 import { logStructuredError, logStructuredWarn } from "@/lib/logger";
 import { registrarMetricaCotizacion } from "@/lib/carga-masiva-telemetria";
 import { verificarCsrfORechazar } from "@/lib/csrf";
 import { clienteMasivoServicio, stripeMasivo, validarFilasServidor } from "@/lib/carga-masiva-server";
-import { previsualizarTarifasMasivasUsuario, verificarUsuarioMasivo, guardarCheckoutMasivoServidor, vincularPagoMasivoServidor, eliminarCheckoutMasivoServidor, obtenerClienteBilleteraServidor } from "@ruum/api/services";
+import { previsualizarTarifasMasivasUsuario, verificarUsuarioMasivo, guardarCheckoutMasivoServidor, reservarCheckoutMasivoServidor, vincularPagoMasivoServidor, eliminarCheckoutMasivoServidor, obtenerClienteBilleteraServidor } from "@ruum/api/services";
 import { coordenadaPostalMasiva, ErrorServicioCotizacion } from "@/lib/mapbox-masivo";
 import { tipoSugeridoParaVehiculo } from "@ruum/shared/catalogos";
 import { obtenerRutaDirectionsMapboxConParadas } from "@ruum/shared/utils";
@@ -18,18 +19,41 @@ const esquema = z.object({
   clave: z.string().uuid(),
   permitirParcial: z.boolean().optional(),
 });
+const LIMITE_CELDAS = 4000;
+const LIMITE_BYTES_JSON = 5 * 1024 * 1024;
+const LIMITE_CPU_MS = 240_000;
+
+function hashRuta(filas: Record<string, string>[]): string {
+  const entradas = filas.map((fila) => ({
+    origen: [fila.origenCodigoPostal, fila.origen_calle, fila.origen_numero, fila.origen_colonia],
+    destino: [fila.destinoCodigoPostal, fila.destino_calle, fila.destino_numero, fila.destino_colonia],
+    marca: fila.marca, modelo: fila.modelo, anio: fila.anio, condicion: fila.condicion,
+    modalidad: fila.modalidad_programacion, fecha: fila.fecha_hora_programada,
+  }));
+  return createHash("sha256").update(JSON.stringify(entradas)).digest("hex");
+}
+
 export async function POST(request: NextRequest) {
   const rechazoCsrf = verificarCsrfORechazar(request);
   if (rechazoCsrf) return rechazoCsrf;
   const cliente = await crearClienteServidor();
   const { data: { user } } = await cliente.auth.getUser();
   if (!user) return NextResponse.json({ error: "No autenticado" }, { status: 401 });
-  const limite = await rateLimitConVentana(`uid:${user.id}`, "masivos-cotizar", 5, 60000);
-  if (!limite.allowed) return NextResponse.json({ error: "Espera antes de cotizar otra carga." }, { status: 429 });
-  const body = esquema.safeParse(await request.json().catch(() => null));
+  const limite = await rateLimitMasivo(request, user.id, "masivos-cotizar", 5);
+  if (!limite.allowed) return NextResponse.json({ error: "Espera antes de cotizar otra carga." }, { status: 429, headers: { "Retry-After": String(limite.retryAfterSec) } });
+  const raw = await request.text().catch(() => "");
+  if (new TextEncoder().encode(raw).length > LIMITE_BYTES_JSON) return NextResponse.json({ error: "La carga excede el límite de tamaño permitido." }, { status: 413 });
+  let payload: unknown = null;
+  try { payload = JSON.parse(raw || "null"); } catch { return NextResponse.json({ error: "La carga no es válida." }, { status: 400 }); }
+  const body = esquema.safeParse(payload);
   if (!body.success) return NextResponse.json({ error: "La carga no es válida." }, { status: 400 });
+  const totalCeldas = body.data.filas.reduce((total, fila) => total + Object.keys(fila).length, 0);
+  if (totalCeldas > LIMITE_CELDAS) return NextResponse.json({ error: `La carga supera el máximo de ${LIMITE_CELDAS} celdas.` }, { status: 413 });
   const permitirParcial = Boolean(body.data.permitirParcial);
   const inicioCotizacion = performance.now();
+  const assertBudget = () => {
+    if (performance.now() - inicioCotizacion > LIMITE_CPU_MS) throw new Error("MASIVOS_CPU_BUDGET_EXCEEDED");
+  };
   try {
     if (!await verificarUsuarioMasivo(cliente, user.id)) return NextResponse.json({ error: "Verifica tu cuenta antes de pagar." }, { status: 403 });
     const filas = await validarFilasServidor(body.data.filas);
@@ -50,6 +74,7 @@ export async function POST(request: NextRequest) {
     const coordenadasPorCP = new Map<string, [number, number] | null>();
     const TAMANIO_LOTE_CP = 10;
     for (let i = 0; i < cpsUnicos.length; i += TAMANIO_LOTE_CP) {
+      assertBudget();
       const loteCP = cpsUnicos.slice(i, i + TAMANIO_LOTE_CP);
       await Promise.all(
         loteCP.map(async (cp) => {
@@ -97,6 +122,7 @@ export async function POST(request: NextRequest) {
     const paresLista = Array.from(paresUnicos.entries());
     const TAMANIO_LOTE_RUTAS = 10;
     for (let i = 0; i < paresLista.length; i += TAMANIO_LOTE_RUTAS) {
+      assertBudget();
       const lotePares = paresLista.slice(i, i + TAMANIO_LOTE_RUTAS);
       await Promise.all(
         lotePares.map(async ([clavePar, par]) => {
@@ -143,6 +169,7 @@ export async function POST(request: NextRequest) {
     }
 
     for (const fila of filas) {
+      assertBudget();
       if (fila.estado === "error") continue;
       const clavePar = `${fila.datos.origenCodigoPostal}:${fila.datos.destinoCodigoPostal}`;
       const ruta = rutasPorPar.get(clavePar);
@@ -215,6 +242,7 @@ export async function POST(request: NextRequest) {
     if (normalizadas.length === 0) return NextResponse.json({ filas, error: "Ninguna fila pudo cotizarse." }, { status: 422 });
     const servicio = clienteMasivoServicio();
     const id = body.data.clave;
+    const routeHash = hashRuta(normalizadas);
     const filasErroneas = filas.filter(f => f.estado === "error" || f.errorCotizacion);
     const filasPendientesCorreccion = filasErroneas.map(f => f.datos);
     const guardado = await guardarCheckoutMasivoServidor(servicio, {
@@ -224,16 +252,35 @@ export async function POST(request: NextRequest) {
       cotizaciones,
       monto_centavos: centavos,
       filas_pendientes_correccion: filasPendientesCorreccion,
+      idempotency_key: id,
+      route_hash: routeHash,
     });
     let intent;
+    let stripeCreado = false;
     try {
+      const reserva = await reservarCheckoutMasivoServidor(servicio, {
+        id,
+        authId: user.id,
+        idempotencyKey: id,
+        routeHash,
+        montoCentavos: guardado.monto_centavos,
+      });
+      if (reserva.estado === "en_progreso") {
+        return NextResponse.json({ error: "Esta carga ya está siendo procesada. Consulta su estado antes de reintentar." }, { status: 409 });
+      }
+      if (reserva.estado === "payment_intent_existente") {
+        intent = await stripeMasivo(`payment_intents/${encodeURIComponent(reserva.payment_intent_id)}`);
+        return NextResponse.json({ id, clientSecret: intent.client_secret, totalMXN: guardado.monto_centavos / 100, cotizaciones: guardado.cotizaciones, filasConError: filasErroneas, filasPendientesCorreccion, parcial: permitirParcial && filasErroneas.length > 0 });
+      }
       const customer = await obtenerClienteBilleteraServidor(servicio, user.id, /^(sk|rk)_test_/.test(process.env.STRIPE_SECRET_KEY ?? "") ? "test" : "live");
       intent = await stripeMasivo("payment_intents", new URLSearchParams({ amount: String(guardado.monto_centavos), currency: "mxn", "automatic_payment_methods[enabled]": "true", "metadata[carga_masiva_id]": id, ...(customer ? { customer } : {}) }), `carga-masiva-${id}`);
+      stripeCreado = true;
       await vincularPagoMasivoServidor(servicio, id, user.id, intent.id);
     } catch (stripeErr) {
       // Transacción de compensación: si falla Stripe al crear o vincular el PaymentIntent,
       // eliminamos de inmediato el registro en base de datos para no dejar checkouts huérfanos sin pago.
       try {
+        if (stripeCreado) throw stripeErr;
         await eliminarCheckoutMasivoServidor(servicio, id, user.id);
       } catch (compensacionErr) {
         logStructuredError("api/viajes/masivos/cotizar", "compensacion_checkout_fallida", compensacionErr, {
@@ -269,6 +316,7 @@ export async function POST(request: NextRequest) {
       usuarioId: user.id,
     });
     if (err instanceof ErrorServicioCotizacion) return NextResponse.json({ error: err.message }, { status: err.status });
+    if (err instanceof Error && err.message === "MASIVOS_CPU_BUDGET_EXCEEDED") return NextResponse.json({ error: "La carga excedió el tiempo máximo de procesamiento. Reduce el lote e intenta de nuevo." }, { status: 503, headers: { "Retry-After": "60" } });
     if (err && typeof err === "object" && "message" in err && String(err.message).includes("RATE_LIMITED")) return NextResponse.json({ error: "Alcanzaste el límite de cotizaciones masivas. Espera un minuto y reintenta." }, { status: 429, headers: { "Retry-After": "60" } });
     return NextResponse.json({ error: err instanceof Error ? err.message : "No se pudo cotizar la carga." }, { status: 503 });
   }

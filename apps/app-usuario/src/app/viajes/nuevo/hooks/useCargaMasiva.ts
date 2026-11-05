@@ -3,8 +3,10 @@ import { useCallback, useEffect, useReducer, useRef, useState } from "react";
 import { validarFila, parsearArchivoPlantilla, type FilaValidada } from "@/lib/carga-masiva";
 import { logStructuredWarn } from "@/lib/logger";
 import { obtenerHeadersCsrfAsync, obtenerTokenCsrfCliente } from "@/lib/csrf";
+import { crearClienteNavegador } from "@/lib/supabase-browser";
 
 export const STORAGE_KEY_CARGA_ACTIVA = "ruum_carga_masiva_activa_id";
+export const STORAGE_KEY_CARGA_MASIVA_PREFIJO = "ruum:carga-masiva";
 
 /**
  * Realiza fetch con reintentos automáticos y backoff exponencial ante errores de red,
@@ -194,10 +196,26 @@ export function useCargaMasiva() {
   const claveCobro = useRef<string | null>(null);
   const correcciones = useRef(new Map<number, AbortController>());
   const [cargaPendienteStorage, setCargaPendienteStorage] = useState<string | null>(null);
+  const storageKeyRef = useRef(STORAGE_KEY_CARGA_ACTIVA);
 
   useEffect(() => {
+    let activo = true;
     try {
-      const guardada = localStorage.getItem(STORAGE_KEY_CARGA_ACTIVA);
+      void crearClienteNavegador().auth.getUser().then(({ data }) => {
+      if (!activo || !data.user?.id) return;
+      const scopedKey = `${STORAGE_KEY_CARGA_MASIVA_PREFIJO}:${data.user.id}:activa`;
+      storageKeyRef.current = scopedKey;
+      try {
+        const legado = localStorage.getItem(STORAGE_KEY_CARGA_ACTIVA);
+        if (legado && !localStorage.getItem(scopedKey)) localStorage.setItem(scopedKey, legado);
+        localStorage.removeItem(STORAGE_KEY_CARGA_ACTIVA);
+        const guardada = localStorage.getItem(scopedKey);
+        if (guardada) setCargaPendienteStorage(guardada);
+      } catch { /* almacenamiento no disponible */ }
+      }).catch(() => undefined);
+    } catch { /* Supabase puede no estar configurado durante hidratación/pruebas */ }
+    try {
+      const guardada = localStorage.getItem(storageKeyRef.current);
       if (guardada) setCargaPendienteStorage(guardada);
     } catch {
       // Ignore storage access error
@@ -206,6 +224,7 @@ export function useCargaMasiva() {
     if (typeof window !== "undefined" && !obtenerTokenCsrfCliente() && !process.env.VITEST) {
       void fetch("/api/csrf", { method: "GET", cache: "no-store" });
     }
+    return () => { activo = false; };
   }, []);
 
   useEffect(() => {
@@ -215,7 +234,7 @@ export function useCargaMasiva() {
 
   const cancelar = useCallback(() => {
     try {
-      localStorage.removeItem(STORAGE_KEY_CARGA_ACTIVA);
+      localStorage.removeItem(storageKeyRef.current);
     } catch {
       // Ignore
     }
@@ -348,7 +367,7 @@ export function useCargaMasiva() {
         return;
       }
       try {
-        localStorage.setItem(STORAGE_KEY_CARGA_ACTIVA, resultado.id);
+        localStorage.setItem(storageKeyRef.current, resultado.id);
       } catch {
         // Ignore
       }
@@ -369,7 +388,7 @@ export function useCargaMasiva() {
   /** Llama cuando Stripe confirma el pago */
   const confirmarPago = useCallback(() => {
     try {
-      localStorage.removeItem(STORAGE_KEY_CARGA_ACTIVA);
+      localStorage.removeItem(storageKeyRef.current);
     } catch {
       // Ignore
     }
@@ -393,20 +412,20 @@ export function useCargaMasiva() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "No se pudo recuperar la carga pendiente.");
       if (data.pagado) {
-        try { localStorage.removeItem(STORAGE_KEY_CARGA_ACTIVA); } catch {}
+        try { localStorage.removeItem(storageKeyRef.current); } catch {}
         setCargaPendienteStorage(null);
         dispatch({ type: "PAGO_OK" });
         return true;
       }
       if (data.expirado) {
-        try { localStorage.removeItem(STORAGE_KEY_CARGA_ACTIVA); } catch {}
+        try { localStorage.removeItem(storageKeyRef.current); } catch {}
         setCargaPendienteStorage(null);
         dispatch({ type: "ERROR", mensaje: data.error ?? "La carga masiva ya no está disponible." });
         return false;
       }
       if (!data.clientSecret && !data.cobrado) throw new Error("No se pudo obtener la sesión de pago de la carga.");
 
-      try { localStorage.setItem(STORAGE_KEY_CARGA_ACTIVA, id); } catch {}
+      try { localStorage.setItem(storageKeyRef.current, id); } catch {}
       setCargaPendienteStorage(id);
       const filasCarga = Array.isArray(data.cotizaciones) && data.cotizaciones.length > 0
         ? data.cotizaciones
@@ -444,7 +463,7 @@ export function useCargaMasiva() {
       logStructuredWarn("viajes/useCargaMasiva", "descartar_carga_red_fallido", err, { cargaId: id });
       throw err;
     }
-    try { localStorage.removeItem(STORAGE_KEY_CARGA_ACTIVA); } catch {}
+    try { localStorage.removeItem(storageKeyRef.current); } catch {}
     setCargaPendienteStorage(null);
     claveCobro.current = null;
     dispatch({ type: "RESET" });

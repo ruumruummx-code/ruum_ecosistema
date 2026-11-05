@@ -6,6 +6,7 @@ const mocksServicios = vi.hoisted(() => ({
   listarVehiculos: vi.fn(async (_cliente: unknown, _usuarioId: string): Promise<Array<{ id: string }>> => []),
   // RC-07: el route resuelve el perfil de la sesión vía servicio de @ruum/api.
   obtenerUsuarioActual: vi.fn(async (): Promise<{ id: string } | null> => ({ id: "perfil-1" })),
+  registrarConsentimiento: vi.fn(async () => ({ ok: true })),
 }));
 
 vi.mock("@/lib/supabase-server", () => ({
@@ -17,21 +18,31 @@ vi.mock("@/lib/supabase-server", () => ({
 vi.mock("@ruum/api/services", () => ({
   listarVehiculosDeUsuario: mocksServicios.listarVehiculos,
   obtenerUsuarioActual: mocksServicios.obtenerUsuarioActual,
+  registrarConsentimientoUsuario: mocksServicios.registrarConsentimiento,
 }));
+
+let seq = 0;
 
 describe("Sec3 POST /api/viajes — validación paso servidor", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    // Perfil del usuario autenticado: auth_user_id "u1" -> perfil interno "perfil-1".
-    mocksServicios.obtenerUsuarioActual.mockResolvedValue({ id: "perfil-1" });
+    seq++;
+    mockGetUser.mockResolvedValue({ data: { user: { id: `u-${seq}` } } });
+    mocksServicios.obtenerUsuarioActual.mockResolvedValue({ id: `perfil-${seq}` });
     mocksServicios.listarVehiculos.mockResolvedValue([]);
+    mocksServicios.registrarConsentimiento.mockResolvedValue({ ok: true });
   });
 
   function req(body: unknown, headers: Record<string, string> = {}) {
     return new NextRequest("http://localhost/api/viajes", {
       method: "POST",
       body: JSON.stringify(body),
-      headers: { "content-type": "application/json", ...headers },
+      headers: {
+        "content-type": "application/json",
+        "x-forwarded-for": `192.168.1.${seq}`,
+        "x-device-id": `dev-${seq}`,
+        ...headers,
+      },
     });
   }
 
@@ -89,7 +100,7 @@ describe("Sec3 POST /api/viajes — validación paso servidor", () => {
   });
 
   it("rechaza paso <4 (0 como 5 falsificado) → 400", async () => {
-    mockGetUser.mockResolvedValue({ data: { user: { id: "u1" } } });
+    mockGetUser.mockResolvedValue({ data: { user: { id: `u-${seq}` } } });
     const { POST } = await import("./route");
     // paso 0 (índice) -> contador 1 <4 -> 400
     expect((await POST(req({ paso: 0 }))).status).toBe(400);
@@ -104,7 +115,7 @@ describe("Sec3 POST /api/viajes — validación paso servidor", () => {
   });
 
   it("rechaza payload incompleto aunque paso sea 4 → 400 por esquema", async () => {
-    mockGetUser.mockResolvedValue({ data: { user: { id: "u1" } } });
+    mockGetUser.mockResolvedValue({ data: { user: { id: `u-${seq}` } } });
     const { POST } = await import("./route");
     // paso 4 pasa el check de paso, pero falta marca/modelo -> esquema falla
     const res = await POST(req({ paso: 4, marca: "" }));
@@ -114,7 +125,7 @@ describe("Sec3 POST /api/viajes — validación paso servidor", () => {
   });
 
   it("acepta paso 3 índice (→4) con payload válido → 200", async () => {
-    mockGetUser.mockResolvedValue({ data: { user: { id: "u1" } } });
+    mockGetUser.mockResolvedValue({ data: { user: { id: `u-${seq}` } } });
     const { POST } = await import("./route");
     const valido = {
       paso: 3, // índice 3 -> contador 4
@@ -165,7 +176,7 @@ describe("Sec3 POST /api/viajes — validación paso servidor", () => {
   });
 
   it("acepta paso 4 contador directo → 200 y mensaje genérico en error 500 no expone env", async () => {
-    mockGetUser.mockResolvedValue({ data: { user: { id: "u1" } } });
+    mockGetUser.mockResolvedValue({ data: { user: { id: `u-${seq}` } } });
     const { POST } = await import("./route");
     // Forzar error interno simulando body no JSON? Ya probamos 500 es genérico
     const bad = new NextRequest("http://localhost/api/viajes", { method: "POST", body: "not json", headers: { "content-type": "application/json" } });
@@ -183,7 +194,7 @@ describe("Sec3 POST /api/viajes — validación paso servidor", () => {
 
   describe("T01 — Aceptación de políticas", () => {
     it("rechaza cuando el campo aceptaPoliticas está ausente → 400", async () => {
-      mockGetUser.mockResolvedValue({ data: { user: { id: "u1" } } });
+      mockGetUser.mockResolvedValue({ data: { user: { id: `u-${seq}` } } });
       const { POST } = await import("./route");
       const payload = payloadValido();
       delete (payload as Record<string, unknown>).aceptaPoliticas;
@@ -195,7 +206,7 @@ describe("Sec3 POST /api/viajes — validación paso servidor", () => {
     });
 
     it("rechaza cuando aceptaPoliticas es false → 400", async () => {
-      mockGetUser.mockResolvedValue({ data: { user: { id: "u1" } } });
+      mockGetUser.mockResolvedValue({ data: { user: { id: `u-${seq}` } } });
       const { POST } = await import("./route");
       const res = await POST(req(payloadValido({ aceptaPoliticas: false })));
       expect(res.status).toBe(400);
@@ -205,7 +216,7 @@ describe("Sec3 POST /api/viajes — validación paso servidor", () => {
     });
 
     it("rechaza cuando aceptaPoliticas es null → 400", async () => {
-      mockGetUser.mockResolvedValue({ data: { user: { id: "u1" } } });
+      mockGetUser.mockResolvedValue({ data: { user: { id: `u-${seq}` } } });
       const { POST } = await import("./route");
       const res = await POST(req(payloadValido({ aceptaPoliticas: null })));
       expect(res.status).toBe(400);
@@ -215,7 +226,7 @@ describe("Sec3 POST /api/viajes — validación paso servidor", () => {
     });
 
     it("acepta cuando aceptaPoliticas es true con payload válido → 200", async () => {
-      mockGetUser.mockResolvedValue({ data: { user: { id: "u1" } } });
+      mockGetUser.mockResolvedValue({ data: { user: { id: `u-${seq}` } } });
       const { POST } = await import("./route");
       const res = await POST(req(payloadValido({ aceptaPoliticas: true })));
       expect(res.status).toBe(200);
@@ -274,7 +285,7 @@ describe("Sec3 POST /api/viajes — validación paso servidor", () => {
   }
 
   it("rechaza vehiculo ajeno aunque venga en el array del cliente → 403", async () => {
-    mockGetUser.mockResolvedValue({ data: { user: { id: "u1" } } });
+    mockGetUser.mockResolvedValue({ data: { user: { id: `u-${seq}` } } });
     mocksServicios.listarVehiculos.mockResolvedValue([]);
     const { POST } = await import("./route");
     const res = await POST(req(payloadConVehiculo(UUID_AJENO)));
@@ -284,7 +295,7 @@ describe("Sec3 POST /api/viajes — validación paso servidor", () => {
   });
 
   it("acepta vehiculo propio verificado en BD → 200", async () => {
-    mockGetUser.mockResolvedValue({ data: { user: { id: "u1" } } });
+    mockGetUser.mockResolvedValue({ data: { user: { id: `u-${seq}` } } });
     mocksServicios.listarVehiculos.mockResolvedValue([{ id: UUID_AJENO }]);
     const { POST } = await import("./route");
     const res = await POST(req(payloadConVehiculo(UUID_AJENO)));
@@ -294,17 +305,17 @@ describe("Sec3 POST /api/viajes — validación paso servidor", () => {
   /* RC-07: el Auth ID (auth_user_id) no es el ID interno del perfil. El route
      debe resolver el perfil y pasar su id interno a listarVehiculosDeUsuario. */
   it("RC-07: usa el id interno del perfil, no el Auth ID", async () => {
-    mockGetUser.mockResolvedValue({ data: { user: { id: "auth-u1" } } });
-    mocksServicios.obtenerUsuarioActual.mockResolvedValue({ id: "perfil-interno-9" });
+    mockGetUser.mockResolvedValue({ data: { user: { id: `auth-u-${seq}` } } });
+    mocksServicios.obtenerUsuarioActual.mockResolvedValue({ id: `perfil-interno-${seq}` });
     mocksServicios.listarVehiculos.mockResolvedValue([{ id: UUID_AJENO }]);
     const { POST } = await import("./route");
     const res = await POST(req(payloadConVehiculo(UUID_AJENO)));
     expect(res.status).toBe(200);
-    expect(mocksServicios.listarVehiculos).toHaveBeenCalledWith(expect.anything(), "perfil-interno-9");
+    expect(mocksServicios.listarVehiculos).toHaveBeenCalledWith(expect.anything(), `perfil-interno-${seq}`);
   });
 
   it("RC-07: falla cerrado (500) si no se puede resolver el perfil", async () => {
-    mockGetUser.mockResolvedValue({ data: { user: { id: "auth-u1" } } });
+    mockGetUser.mockResolvedValue({ data: { user: { id: `auth-u-${seq}` } } });
     mocksServicios.obtenerUsuarioActual.mockResolvedValue(null);
     const { POST } = await import("./route");
     const res = await POST(req(payloadConVehiculo(UUID_AJENO)));
@@ -312,10 +323,102 @@ describe("Sec3 POST /api/viajes — validación paso servidor", () => {
   });
 
   it("RC-07: falla cerrado (500) si el servicio de perfil lanza", async () => {
-    mockGetUser.mockResolvedValue({ data: { user: { id: "auth-u1" } } });
+    mockGetUser.mockResolvedValue({ data: { user: { id: `auth-u-${seq}` } } });
     mocksServicios.obtenerUsuarioActual.mockRejectedValue(new Error("db caída"));
     const { POST } = await import("./route");
     const res = await POST(req(payloadConVehiculo(UUID_AJENO)));
     expect(res.status).toBe(500);
+  });
+
+  describe("RUUM-USR-F6-001 — Recálculo server-side, snapshot firmado y rate limiting", () => {
+    it("devuelve recalculo de distancia, tiempo y snapshot firmado en respuesta exitosa", async () => {
+      const { POST } = await import("./route");
+      const res = await POST(req(payloadValido({
+        origenCoordenadas: [-99.1676, 19.4270],
+        destinoCoordenadas: [-99.1332, 19.4326],
+      })));
+
+      expect(res.status).toBe(200);
+      const json = await res.json() as {
+        ok: boolean;
+        pasoValidado: number;
+        recalculo: { distanciaKm: number; duracionHoras: number };
+        snapshot: {
+          version: string;
+          monto: number;
+          firma: string;
+          nonce: string;
+          expiraEn: string;
+        };
+      };
+      expect(json.ok).toBe(true);
+      expect(json.recalculo.distanciaKm).toBeGreaterThan(0);
+      expect(json.snapshot.version).toBe("2.0");
+      expect(json.snapshot.monto).toBeGreaterThan(0);
+      expect(typeof json.snapshot.firma).toBe("string");
+      expect(typeof json.snapshot.nonce).toBe("string");
+    });
+
+    it("registra consentimiento canónico con versión fija usando el escritor de F2", async () => {
+      const { POST } = await import("./route");
+      const res = await POST(req(payloadValido()));
+      expect(res.status).toBe(200);
+      expect(mocksServicios.registrarConsentimiento).toHaveBeenCalledWith(
+        expect.anything(),
+        {
+          version: 1,
+          canal: "web",
+          versionApp: "1.0.0",
+        }
+      );
+    });
+
+    it("aplica rate limit compuesto por cuenta (máximo 5 solicitudes) retornando 429", async () => {
+      const { POST } = await import("./route");
+      const fixedUserId = "usuario-rate-limit-test";
+      mockGetUser.mockResolvedValue({ data: { user: { id: fixedUserId } } });
+      mocksServicios.obtenerUsuarioActual.mockResolvedValue({ id: "perfil-rl" });
+
+      // Hacer 5 peticiones exitosas (límite de cuenta es 5)
+      for (let i = 0; i < 5; i++) {
+        const res = await POST(req(payloadValido(), { "x-forwarded-for": `200.1.1.${i}` }));
+        expect(res.status).toBe(200);
+      }
+
+      // La 6ta petición debe ser bloqueada con 429 y Retry-After
+      const blockedRes = await POST(req(payloadValido(), { "x-forwarded-for": "200.1.1.99" }));
+      expect(blockedRes.status).toBe(429);
+      expect(blockedRes.headers.get("Retry-After")).toBeDefined();
+      const json = await blockedRes.json() as { error: string };
+      expect(json.error).toMatch(/Demasiadas solicitudes/i);
+    });
+
+    it("D1: caso negativo de rescate_mecanico sin documentación vigente es rechazado con 400 (CA-C5)", async () => {
+      const { POST } = await import("./route");
+      // Condición rescate_mecanico pero sin tarjeta de circulación vigente (tieneTarjeta: false)
+      const res = await POST(req(payloadValido({
+        condicion: "rescate_mecanico",
+        puedeCircular: false,
+        tieneTarjeta: false, // Invalida la documentación obligatoria
+      })));
+
+      expect(res.status).toBe(400);
+      const json = await res.json() as { error: string; detalles?: string[] };
+      expect(json.error).toMatch(/inválidos/i);
+      expect(json.detalles?.some((d) => /tarjeta de circulación/i.test(d))).toBe(true);
+    });
+
+    it("D3: rechaza con 400 cuando se detecta divergencia crítica >50% entre cliente y recálculo servidor (C2 / CA-C4)", async () => {
+      const { POST } = await import("./route");
+      // Servidor calculará distancia real (~6 km en CDMX), pero cliente inyecta datos burdamente manipulados
+      const res = await POST(req(payloadValido({
+        distanciaKm: 0.1, // >50% de diferencia con respecto al recálculo
+        precioCotizado: 50.0, // precio artificialmente bajo
+      })));
+
+      expect(res.status).toBe(400);
+      const json = await res.json() as { error: string };
+      expect(json.error).toMatch(/divergencia crítica detectada/i);
+    });
   });
 });

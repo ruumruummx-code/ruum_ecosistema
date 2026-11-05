@@ -211,10 +211,20 @@ export function useEnvioTraslado(params: ParametrosEnvioTraslado) {
       // M9: fail-closed. Antes un 5xx o un error de red caía en console.warn y
       // el flujo continuaba sin validación: provocar el error la evitaba.
       // Ahora cualquier fallo de validación bloquea la creación.
+      let datosValidacionServidor: {
+        ok?: boolean;
+        recalculo?: { distanciaKm: number; tiempoEstimadoHoras: number; precioCotizado: number };
+        snapshot?: unknown;
+      } | null = null;
+
       try {
+        const deviceId = typeof window !== "undefined" ? window.localStorage.getItem("ruum:device-id") || "" : "";
         const respPaso = await fetch("/api/viajes", {
           method: "POST",
-          headers: obtenerHeadersCsrf({ "Content-Type": "application/json" }),
+          headers: obtenerHeadersCsrf({
+            "Content-Type": "application/json",
+            ...(deviceId ? { "x-device-id": deviceId } : {}),
+          }),
           body: JSON.stringify({
             paso,
             wizardPaso: paso,
@@ -230,6 +240,7 @@ export function useEnvioTraslado(params: ParametrosEnvioTraslado) {
           const j = await respPaso.json().catch(() => null) as { error?: string } | null;
           throw new Error(j?.error || `No pudimos validar tu solicitud en el servidor (código ${respPaso.status}). Intenta de nuevo.`);
         }
+        datosValidacionServidor = await respPaso.json().catch(() => null);
       } catch (e) {
         console.warn("[traslados/nuevo] validación paso servidor fallida: se bloquea la creación", e);
         throw e instanceof Error ? e : new Error("No pudimos validar tu solicitud en el servidor. Intenta de nuevo.");
@@ -252,7 +263,7 @@ export function useEnvioTraslado(params: ParametrosEnvioTraslado) {
         estado: datos.destinoEstado
       });
 
-      let coordenadas: typeof rutaEstimacion = rutaEstimacion as typeof rutaEstimacion;
+      let coordenadas: typeof rutaEstimacion & { snapshotTarifa?: unknown } = rutaEstimacion as typeof rutaEstimacion & { snapshotTarifa?: unknown };
       if (!coordenadas) {
         try {
           const paradasDirs = (datos.paradas ?? []).map((p) => domicilioCompleto({
@@ -268,6 +279,22 @@ export function useEnvioTraslado(params: ParametrosEnvioTraslado) {
           setRutaAviso(mensajeErrorMapbox(error));
           coordenadas = { incompletas: true };
         }
+      }
+
+      // RUUM-USR-F6-001 (CB-1 / CA-1): El recálculo del servidor es la única fuente de verdad;
+      // se inyecta la distancia/tiempo recalculados y el snapshot firmado
+      if (datosValidacionServidor?.recalculo) {
+        coordenadas = {
+          ...coordenadas,
+          distanciaKm: datosValidacionServidor.recalculo.distanciaKm,
+          tiempoEstimadoHoras: datosValidacionServidor.recalculo.tiempoEstimadoHoras,
+          snapshotTarifa: datosValidacionServidor.snapshot,
+        };
+      } else if (datosValidacionServidor?.snapshot) {
+        coordenadas = {
+          ...coordenadas,
+          snapshotTarifa: datosValidacionServidor.snapshot,
+        };
       }
 
       if (coordenadas.incompletas && !tieneMapboxConfigurado()) {

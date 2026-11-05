@@ -8,6 +8,7 @@ export interface CoordenadasTraslado {
   destinoLng?: number;
   distanciaKm?: number;
   tiempoEstimadoHoras?: number;
+  snapshotTarifa?: unknown;
 }
 const nombre = (n: string, a: string) => [n.trim(), a.trim()].filter(Boolean).join(" ");
 const telefono = (v: string) => `+52${v.replace(/\D/g, "").slice(0, 10)}`;
@@ -60,6 +61,7 @@ export function construirPayloadCreacion(datos: DatosFormulario, vehiculoSelecci
     destino_referencias: datos.destinoReferencias || null, instrucciones_especiales: datos.instruccionesEspeciales,
     modalidad_programacion: datos.modalidadProgramacion, fecha_hora_programada: datos.fechaHoraProgramada ? new Date(datos.fechaHoraProgramada).toISOString() : null,
     tipo_ruta: datos.tipoRuta, ventana_recoleccion: datos.ventanaRecoleccion, ventana_entrega: datos.ventanaEntrega,
-    distancia_km: normalizarNoNegativo(coords.distanciaKm), tiempo_estimado_horas: normalizarNoNegativo(coords.tiempoEstimadoHoras)
+    distancia_km: normalizarNoNegativo(coords.distanciaKm), tiempo_estimado_horas: normalizarNoNegativo(coords.tiempoEstimadoHoras),
+    snapshot_tarifa: coords.snapshotTarifa ?? null
   }, paradas };
 }

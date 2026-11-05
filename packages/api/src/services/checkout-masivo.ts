@@ -39,6 +39,71 @@ export interface CheckoutMasivoGuardado {
   id: string; auth_user_id: string; filas: Record<string, string>[]; cotizaciones: unknown[];
   monto_centavos: number; stripe_payment_intent_id?: string; pagado_en?: string; expirado_en?: string | null; creado_en?: string;
   filas_pendientes_correccion?: Record<string, string>[] | unknown[];
+  idempotency_key?: string;
+  route_hash?: string;
+}
+
+export type ReservaCheckoutMasivo =
+  | { estado: "reservado" }
+  | { estado: "en_progreso" }
+  | { estado: "payment_intent_existente"; payment_intent_id: string };
+
+/** Reserva atómica de la única creación de PaymentIntent para un checkout. */
+export async function reservarCheckoutMasivoServidor(
+  cliente: SupabaseClient,
+  datos: { id: string; authId: string; idempotencyKey: string; routeHash: string; montoCentavos: number },
+): Promise<ReservaCheckoutMasivo> {
+  const { data, error } = await cliente.rpc("reservar_checkout_masivo", {
+    p_id: datos.id,
+    p_auth_user_id: datos.authId,
+    p_idempotency_key: datos.idempotencyKey,
+    p_route_hash: datos.routeHash,
+    p_monto_centavos: datos.montoCentavos,
+  });
+  if (error) throw error;
+  return data as unknown as ReservaCheckoutMasivo;
+}
+
+export async function vincularCheckoutMasivoPaymentIntentServidor(
+  cliente: SupabaseClient,
+  id: string,
+  authId: string,
+  intent: string,
+): Promise<boolean> {
+  const { data, error } = await cliente.rpc("vincular_checkout_masivo_payment_intent", {
+    p_id: id,
+    p_auth_user_id: authId,
+    p_intent: intent,
+  });
+  if (error) throw error;
+  return data === true;
+}
+
+export async function registrarCheckoutPagoConfirmadoServidor(cliente: SupabaseClient, id: string, intent: string) {
+  const { error } = await cliente.rpc("registrar_checkout_pago_confirmado", { p_id: id, p_intent: intent });
+  if (error) throw error;
+}
+
+export async function reclamarCheckpointsCheckoutMasivoServidor(cliente: SupabaseClient, lote = 25) {
+  const { data, error } = await cliente.rpc("reclamar_checkpoints_checkout_masivo", { p_lote: lote });
+  if (error) throw error;
+  return (data ?? []) as Array<{ checkout_id: string; intent_id: string; intentos: number }>;
+}
+
+export async function marcarCheckpointCheckoutMasivoServidor(
+  cliente: SupabaseClient,
+  id: string,
+  estado: string,
+  error?: string,
+  reintentarEn?: string,
+) {
+  const { error: rpcError } = await cliente.rpc("marcar_checkpoint_checkout_masivo", {
+    p_id: id,
+    p_estado: estado,
+    p_error: error ?? null,
+    p_reintentar_en: reintentarEn ?? null,
+  });
+  if (rpcError) throw rpcError;
 }
 /** Solo para rutas autenticadas de servidor que ya poseen el cliente de servicio. */
 export async function guardarCheckoutMasivoServidor(cliente: SupabaseClient, datos: CheckoutMasivoGuardado) {
@@ -110,8 +175,8 @@ export async function limpiarCheckoutsMasivosSinIntentServidor(cliente: Supabase
   return Number(data ?? 0);
 }
 export async function vincularPagoMasivoServidor(cliente: SupabaseClient, id: string, authId: string, intent: string) {
-  const { error } = await cliente.from("checkout_traslados_masivos").update({ stripe_payment_intent_id: intent }).eq("id", id).eq("auth_user_id", authId);
-  if (error) throw error;
+  const vinculado = await vincularCheckoutMasivoPaymentIntentServidor(cliente, id, authId, intent);
+  if (!vinculado) throw new Error("checkout_payment_intent_already_linked");
 }
 export async function confirmarPagoMasivoServidor(cliente: SupabaseClient, id: string, intent: string, monto: number, moneda: string) {
   const { error } = await cliente.rpc("confirmar_checkout_masivo", { p_id: id, p_intent: intent, p_monto: monto, p_moneda: moneda });

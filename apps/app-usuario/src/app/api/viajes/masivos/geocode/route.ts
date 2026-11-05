@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { crearClienteServidor } from "@/lib/supabase-server";
-import { obtenerIp, rateLimitConVentana } from "@/lib/csp-rate-limit";
+import { rateLimitMasivo } from "@/lib/rate-limit-masivos";
 import { logStructuredError, logStructuredWarn } from "@/lib/logger";
 import { verificarCsrfORechazar } from "@/lib/csrf";
 import { obtenerRutaDirectionsMapboxConParadas } from "@ruum/shared/utils";
@@ -48,17 +48,8 @@ export async function POST(request: NextRequest) {
     const { data: { user } } = await cliente.auth.getUser();
     if (!user) return NextResponse.json({ error: "No autenticado" }, { status: 401 });
 
-    const porUsuario = await rateLimitConVentana(`uid:${user.id}`, "api-masivos-geocode", MAX_POR_MINUTO, VENTANA_MS);
-    if (!porUsuario.allowed) {
-      return NextResponse.json({ error: "Límite alcanzado." }, { status: 429, headers: { "Retry-After": String(porUsuario.retryAfterSec ?? 60) } });
-    }
-    const ip = obtenerIp(request);
-    if (ip) {
-      const porIp = await rateLimitConVentana(ip, "api-masivos-geocode-ip", MAX_POR_MINUTO, VENTANA_MS);
-      if (!porIp.allowed) {
-        return NextResponse.json({ error: "Límite alcanzado." }, { status: 429, headers: { "Retry-After": String(porIp.retryAfterSec ?? 60) } });
-      }
-    }
+    const limite = await rateLimitMasivo(request, user.id, "api-masivos-geocode", MAX_POR_MINUTO, VENTANA_MS);
+    if (!limite.allowed) return NextResponse.json({ error: "Límite alcanzado." }, { status: 429, headers: { "Retry-After": String(limite.retryAfterSec) } });
 
     // 2. Leer texto del cuerpo y validar tamaño
     let raw: string;

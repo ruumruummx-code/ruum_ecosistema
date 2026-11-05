@@ -1,17 +1,18 @@
 import { beforeEach, afterEach, describe, expect, it, vi } from "vitest";
 import { NextRequest } from "next/server";
 import { normalizarFilaPlantilla, validarFila } from "@/lib/carga-masiva";
-const mocks = vi.hoisted(() => ({ cotizar: vi.fn(), guardar: vi.fn(), stripe: vi.fn(), ruta: vi.fn(), eliminar: vi.fn() }));
+const mocks = vi.hoisted(() => ({ cotizar: vi.fn(), guardar: vi.fn(), reservar: vi.fn(), stripe: vi.fn(), ruta: vi.fn(), eliminar: vi.fn() }));
 vi.mock("server-only", () => ({}));
 vi.mock("@/lib/supabase-server", () => ({ crearClienteServidor: async () => ({ auth: { getUser: async () => ({ data: { user: { id: "usuario" } } }) } }) }));
 vi.mock("@/lib/csp-rate-limit", () => ({ rateLimitConVentana: async () => ({ allowed: true }) }));
+vi.mock("@/lib/rate-limit-masivos", () => ({ rateLimitMasivo: async () => ({ allowed: true }) }));
 vi.mock("@/lib/carga-masiva-server", () => ({
   clienteMasivoServicio: () => ({}), stripeMasivo: mocks.stripe,
   validarFilasServidor: async (filas: Record<string,string>[]) => filas.map(validarFila),
 }));
 vi.mock("@ruum/api/services", () => ({
   previsualizarTarifasMasivasUsuario: mocks.cotizar, verificarUsuarioMasivo: async () => true,
-  guardarCheckoutMasivoServidor: mocks.guardar, vincularPagoMasivoServidor: async () => undefined,
+  guardarCheckoutMasivoServidor: mocks.guardar, reservarCheckoutMasivoServidor: mocks.reservar.mockResolvedValue({ estado: "reservado" }), vincularPagoMasivoServidor: async () => undefined,
   eliminarCheckoutMasivoServidor: mocks.eliminar,
   obtenerClienteBilleteraServidor: async () => undefined,
 }));
@@ -30,6 +31,7 @@ describe("cotización de 100 traslados", () => {
     mocks.ruta.mockReset().mockResolvedValue({ distanciaKm: 50, tiempoHoras: 1 });
     mocks.cotizar.mockReset().mockImplementation(async (_cliente, entradas: Array<{ indice: number }>) => entradas.map(f => ({ indice: f.indice, disponible: true, tarifa: 1234.56, categoria_tarifa: "ligero_b", gama: "media" })));
     mocks.guardar.mockReset().mockImplementation(async (_cliente, carga) => carga);
+    mocks.reservar.mockReset().mockResolvedValue({ estado: "reservado" });
     mocks.stripe.mockReset().mockResolvedValue({ id: "pi_prueba", client_secret: "cs_prueba" });
     mocks.eliminar.mockReset().mockResolvedValue(undefined);
   });

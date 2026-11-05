@@ -3,20 +3,23 @@ import { crearClienteServidor } from "@/lib/supabase-server";
 import { esquemaSolicitudTraslado } from "@ruum/shared/validacion";
 import { obtenerIp, rateLimitConVentana } from "@/lib/csp-rate-limit";
 import { verificarCsrfORechazar } from "@/lib/csrf";
+import { logStructuredWarn } from "@/lib/logger";
+import {
+  hashPseudonimoViajes,
+  VIAJES_CREAR_LIMITES,
+  VIAJES_CREAR_VENTANA_MS,
+} from "@/lib/viajes-policy";
+import { obtenerRutaRecalculadaServidor } from "@/lib/ruta-cache";
+import {
+  calcularTarifaServidor,
+  generarSnapshotFirmado,
+  registrarDivergenciaTarifa,
+  type InputsTarifaSnapshot,
+} from "@/lib/tarifa-snapshot";
 
 // Sec3: validación servidor del wizard — rechazar si paso < 4 (PASOS.length = 4)
 // El cliente no debe poder crear traslado enviando paso 0 como si fuera paso 5.
 const PASOS_REQUERIDOS = 4;
-
-/* CORRECCIÓN (auditoría S-7): este endpoint no tenía rate limit, a diferencia de
-   /api/csp-report. El wizard reintenta en cada paso. */
-const MAX_POR_MINUTO = 60;
-const VENTANA_MS = 60_000;
-
-function esPasoValido(paso: unknown): boolean {
-  const n = typeof paso === "string" ? Number(paso) : typeof paso === "number" ? paso : NaN;
-  return Number.isInteger(n) && n >= PASOS_REQUERIDOS;
-}
 
 export async function POST(request: NextRequest) {
   try {
@@ -29,32 +32,38 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "No autenticado" }, { status: 401 });
     }
 
-    /* A2: el bucket principal es por usuario autenticado, no por IP sin validar.
-       Con IP como única clave, todos los clientes sin cabecera confiable
-       compartían un bucket de 60 req/min: uno solo podía negarle el servicio
-       a los demás. La IP (validada por plataforma) queda como segunda capa. */
-    const porUsuario = await rateLimitConVentana(
-      `uid:${user.id}`,
-      "api-viajes-usuario",
-      MAX_POR_MINUTO,
-      VENTANA_MS
-    );
-    if (!porUsuario.allowed) {
-      return NextResponse.json(
-        { error: "Demasiadas solicitudes. Espera un momento e inténtalo de nuevo." },
-        { status: 429, headers: { "Retry-After": String(porUsuario.retryAfterSec ?? 60) } }
-      );
-    }
+    // RUUM-USR-F6-001 (CA-9 / T10): Rate limit de creación con clave compuesta de F3
+    // sobre Redis de F2 (IP + cuenta + dispositivo)
+    const userHash = hashPseudonimoViajes(user.id);
+    const ip = obtenerIp(request) || "127.0.0.1";
+    const deviceIdRaw = request.headers.get("x-device-id") || "";
+    const deviceHash = hashPseudonimoViajes(deviceIdRaw);
 
-    const ip = obtenerIp(request);
-    if (ip) {
-      const porIp = await rateLimitConVentana(ip, "api-viajes-ip", MAX_POR_MINUTO, VENTANA_MS);
-      if (!porIp.allowed) {
-        return NextResponse.json(
-          { error: "Demasiadas solicitudes. Espera un momento e inténtalo de nuevo." },
-          { status: 429, headers: { "Retry-After": String(porIp.retryAfterSec ?? 60) } }
-        );
-      }
+    const [rlIp, rlCuenta, rlDevice] = await Promise.all([
+      rateLimitConVentana(ip, "viajes-crear-ip", VIAJES_CREAR_LIMITES.ip, VIAJES_CREAR_VENTANA_MS),
+      rateLimitConVentana(userHash, "viajes-crear-cuenta", VIAJES_CREAR_LIMITES.cuenta, VIAJES_CREAR_VENTANA_MS),
+      rateLimitConVentana(deviceHash, "viajes-crear-device", VIAJES_CREAR_LIMITES.dispositivo, VIAJES_CREAR_VENTANA_MS),
+    ]);
+
+    const bloqueado = !rlIp.allowed || !rlCuenta.allowed || !rlDevice.allowed;
+    if (bloqueado) {
+      const retryAfter = Math.max(
+        rlIp.retryAfterSec ?? 60,
+        rlCuenta.retryAfterSec ?? 60,
+        rlDevice.retryAfterSec ?? 60
+      );
+      logStructuredWarn("api/viajes", "viajes_crear_rate_limited", undefined, {
+        userIdHash: userHash,
+        dimensiones: [
+          !rlIp.allowed && "ip",
+          !rlCuenta.allowed && "cuenta",
+          !rlDevice.allowed && "dispositivo",
+        ].filter(Boolean),
+      });
+      return NextResponse.json(
+        { error: "Demasiadas solicitudes de traslado. Por favor espera unos minutos." },
+        { status: 429, headers: { "Retry-After": String(retryAfter) } }
+      );
     }
 
     const body = await request.json().catch(() => null) as Record<string, unknown> | null;
@@ -63,8 +72,6 @@ export async function POST(request: NextRequest) {
     }
 
     // Sec3: validar paso — soporta 0-3 (índice) o 1-4 (contador). Normalizamos a contador 1-4.
-    // Si el cliente manda paso índice 0-3, lo convertimos a contador +1.
-    // Si manda paso contador 1-4, lo usamos directo. En ambos casos, <4 es incompleto.
     const rawPaso = (body as Record<string, unknown>).paso
       ?? (body as Record<string, unknown>).wizardPaso
       ?? (body as Record<string, unknown>).step;
@@ -84,13 +91,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    /* Validación completa del payload con esquema compartido (defensa en profundidad).
-       CORRECCIÓN (auditoría S-7): antes solo validaba si venía "marca" u
-       "origenCodigoPostal", así que un body { paso: 4 } se saltaba el zod por
-       completo. Ahora se aplica el esquema siempre, con defaults. */
+    /* Validación completa del payload con esquema compartido (defensa en profundidad). */
     const parsed = esquemaSolicitudTraslado.safeParse({
       ...body,
-      // defaults para campos no enviados por el API pero requeridos por el esquema
       vehiculoSeleccionadoId: (body as Record<string, unknown>).vehiculoSeleccionadoId ?? "",
       vehiculosUsuarioIds: (body as Record<string, unknown>).vehiculosUsuarioIds ?? [],
       zonaHoraria: (body as Record<string, unknown>).zonaHoraria ?? "America/Mexico_City",
@@ -103,19 +106,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    /* M10: el superRefine de Zod solo comprueba vehiculoSeleccionadoId contra
-       vehiculosUsuarioIds, un array que envía el propio cliente. La pertenencia
-       real se verifica aquí contra la BD (RLS): un id ajeno o inventado se
-       rechaza con 403 aunque venga en el array del cliente.
-
-       RC-07: user.id es el Auth ID (auth_user_id), pero vehiculos.usuario_id
-       es el ID interno del perfil. Es necesario resolver el perfil primero. */
+    /* Verificación de propiedad del vehículo en BD (RLS) */
     if (parsed.data.vehiculoSeleccionadoId) {
       const { listarVehiculosDeUsuario, obtenerUsuarioActual } = await import("@ruum/api/services");
 
-      // RC-07: user.id es el Auth ID (auth_user_id), pero vehiculos.usuario_id
-      // es el ID interno del perfil. El servicio resuelve el perfil de la sesión
-      // (buscándolo por auth_user_id) y devuelve su id interno.
       let perfil: { id: string } | null = null;
       try {
         perfil = await obtenerUsuarioActual(cliente);
@@ -130,7 +124,6 @@ export async function POST(request: NextRequest) {
         );
       }
 
-      // Usar el ID interno del perfil para listar los vehículos
       const propios = await listarVehiculosDeUsuario(cliente, perfil.id);
       const esPropio = propios.some((v) => v.id === parsed.data.vehiculoSeleccionadoId);
       if (!esPropio) {
@@ -142,12 +135,137 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Si la validación pasa, el cliente debe usar el flujo normal (RPC) o este endpoint puede crear directamente.
-    // Por ahora retornamos 200 para indicar que el paso fue validado; la creación real sigue vía RPC con validación de esquema.
-    return NextResponse.json({ ok: true, pasoValidado: pasoContador }, { status: 200 });
+    // RUUM-USR-F6-001 (CB-1 / CA-1 / T1 / T11): Recálculo server-side de ruta y monto como fuente de verdad
+    const origenCoords = {
+      lat: Number((body as Record<string, unknown>).origenLat ?? 19.385),
+      lng: Number((body as Record<string, unknown>).origenLng ?? -99.165),
+    };
+    const destinoCoords = {
+      lat: Number((body as Record<string, unknown>).destinoLat ?? 19.428),
+      lng: Number((body as Record<string, unknown>).destinoLng ?? -99.167),
+    };
+    const paradasCoords = (parsed.data.paradas ?? [])
+      .filter((p: unknown) => typeof (p as Record<string, unknown>)?.lat === "number" && typeof (p as Record<string, unknown>)?.lng === "number")
+      .map((p: unknown) => ({
+        lat: Number((p as Record<string, unknown>).lat),
+        lng: Number((p as Record<string, unknown>).lng),
+      }));
+
+    const rutaRecalculada = await obtenerRutaRecalculadaServidor(
+      origenCoords,
+      destinoCoords,
+      paradasCoords
+    );
+
+    // Resolver catálogo vehicular para cálculo oficial
+    let categoriaTarifa: "ligero_a" | "ligero_b" | "mediano" | "camion" = "ligero_b";
+    let gama: "entrada" | "media" | "alta" | "premium" = "media";
+
+    try {
+      if (typeof cliente.rpc === "function") {
+        const { data: catData } = await cliente.rpc("catalogar_vehiculo_para_tarifa", {
+          p_marca: parsed.data.marca,
+          p_modelo: parsed.data.modelo,
+        });
+        const primerRegistro = Array.isArray(catData) ? catData[0] : catData;
+        if (primerRegistro && typeof primerRegistro === "object" && "categoria_tarifa" in primerRegistro) {
+          const cat = primerRegistro as { categoria_tarifa?: "ligero_a" | "ligero_b" | "mediano" | "camion"; gama?: "entrada" | "media" | "alta" | "premium" };
+          if (cat.categoria_tarifa) {
+            categoriaTarifa = cat.categoria_tarifa;
+          }
+          if (cat.gama) {
+            gama = cat.gama;
+          }
+        }
+      }
+    } catch {
+      // Usar defaults de catálogo
+    }
+
+    // Calcular tarifa oficial server-side
+    const montoCalculado = calcularTarifaServidor({
+      categoria: categoriaTarifa,
+      gama,
+      condicion: parsed.data.condicion,
+      distanciaKm: rutaRecalculada.distanciaKm,
+      tiempoEstimadoHoras: rutaRecalculada.tiempoEstimadoHoras,
+      modalidad: parsed.data.modalidadProgramacion,
+      fechaHoraProgramada: parsed.data.fechaHoraProgramada,
+    });
+
+    // Detectar y registrar divergencia si el cliente envió datos manipulados (T4 / CA-1 / CA-C4)
+    const clienteDistancia = typeof (body as Record<string, unknown>).distanciaKm === "number"
+      ? (body as Record<string, unknown>).distanciaKm as number
+      : null;
+    const clienteMonto = typeof (body as Record<string, unknown>).precioCotizado === "number"
+      ? (body as Record<string, unknown>).precioCotizado as number
+      : null;
+
+    const evaluacionDivergencia = registrarDivergenciaTarifa(
+      { distanciaKm: clienteDistancia, monto: clienteMonto },
+      { distanciaKm: rutaRecalculada.distanciaKm, tiempoHoras: rutaRecalculada.tiempoEstimadoHoras, monto: montoCalculado },
+      user.id
+    );
+
+    if (evaluacionDivergencia.accionOperativa === "rechazo_bloqueo") {
+      return NextResponse.json(
+        { error: "Divergencia crítica detectada en los parámetros de ruta y tarifa. Por favor actualiza la cotización." },
+        { status: 400 }
+      );
+    }
+
+    // Generar snapshot firmado con TTL 15 min y anti-replay (T2, T3, CA-2, CA-3)
+    const inputsSnapshot: InputsTarifaSnapshot = {
+      origenCodigoPostal: parsed.data.origenCodigoPostal,
+      destinoCodigoPostal: parsed.data.destinoCodigoPostal,
+      origenCoords,
+      destinoCoords,
+      paradasCount: (parsed.data.paradas ?? []).length,
+      categoria: categoriaTarifa,
+      gama,
+      condicion: parsed.data.condicion,
+      modalidad: parsed.data.modalidadProgramacion,
+      fechaProgramada: parsed.data.fechaHoraProgramada,
+      distanciaKm: rutaRecalculada.distanciaKm,
+      tiempoEstimadoHoras: rutaRecalculada.tiempoEstimadoHoras,
+    };
+
+    const snapshotFirmado = generarSnapshotFirmado(inputsSnapshot, montoCalculado);
+
+    // CB-3 / T9 / CA-8: Consentimiento vía escritor canónico de F2
+    if (parsed.data.aceptaPoliticas) {
+      try {
+        const { registrarConsentimientoUsuario } = await import("@ruum/api/services");
+        if (typeof registrarConsentimientoUsuario === "function") {
+          await registrarConsentimientoUsuario(cliente, {
+            version: 1,
+            canal: "web",
+            versionApp: "1.0.0",
+          });
+        }
+      } catch (errConsent) {
+        logStructuredWarn("api/viajes", "registro_consentimiento_canonico_nota", errConsent, {
+          userIdHash: userHash,
+        });
+      }
+    }
+
+    return NextResponse.json(
+      {
+        ok: true,
+        pasoValidado: pasoContador,
+        recalculo: {
+          distanciaKm: rutaRecalculada.distanciaKm,
+          tiempoEstimadoHoras: rutaRecalculada.tiempoEstimadoHoras,
+          precioCotizado: montoCalculado,
+          fuente: rutaRecalculada.fuente,
+        },
+        snapshot: snapshotFirmado,
+      },
+      { status: 200 }
+    );
   } catch (err) {
     console.warn("[api/viajes] error", err);
-    // Sec2: mensaje genérico, nunca exponer env vars ni detalles internos
     return NextResponse.json({ error: "No se pudo procesar la solicitud. Intenta de nuevo más tarde." }, { status: 500 });
   }
 }

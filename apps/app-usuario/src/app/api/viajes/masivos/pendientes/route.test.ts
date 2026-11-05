@@ -6,6 +6,7 @@ const mocks = vi.hoisted(() => ({
   obtener: vi.fn(),
   descartar: vi.fn(),
   confirmar: vi.fn(),
+  registrarCheckpoint: vi.fn(),
   stripe: vi.fn(),
 }));
 
@@ -16,6 +17,7 @@ vi.mock("@/lib/supabase-server", () => ({
   }),
 }));
 vi.mock("@/lib/csp-rate-limit", () => ({ rateLimitConVentana: async () => ({ allowed: true }) }));
+vi.mock("@/lib/rate-limit-masivos", () => ({ rateLimitMasivo: async () => ({ allowed: true }) }));
 vi.mock("@/lib/carga-masiva-server", () => ({
   clienteMasivoServicio: () => ({}),
   stripeMasivo: mocks.stripe,
@@ -25,6 +27,7 @@ vi.mock("@ruum/api/services", () => ({
   obtenerCheckoutMasivoServidor: mocks.obtener,
   descartarCheckoutMasivoServidor: mocks.descartar,
   confirmarPagoMasivoServidor: mocks.confirmar,
+  registrarCheckoutPagoConfirmadoServidor: mocks.registrarCheckpoint,
 }));
 
 import { GET, DELETE } from "./route";
@@ -37,6 +40,7 @@ describe("API /api/viajes/masivos/pendientes", () => {
     mocks.obtener.mockReset();
     mocks.descartar.mockReset();
     mocks.confirmar.mockReset();
+    mocks.registrarCheckpoint.mockReset().mockResolvedValue(undefined);
     mocks.stripe.mockReset();
   });
   afterEach(() => {

@@ -16,6 +16,7 @@ vi.mock("@/lib/csp-rate-limit", () => ({
   obtenerIp: vi.fn(() => "127.0.0.1"),
   rateLimitConVentana: vi.fn(async () => ({ allowed: true })),
 }));
+vi.mock("@/lib/rate-limit-masivos", () => ({ rateLimitMasivo: async () => ({ allowed: true }) }));
 
 vi.mock("@ruum/shared/utils", () => ({
   obtenerRutaDirectionsMapboxConParadas: (...args: unknown[]) => mockRutaMapbox(...args),

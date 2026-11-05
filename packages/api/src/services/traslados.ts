@@ -59,6 +59,7 @@ export interface DatosNuevoTraslado {
   presupuesto_usuario?: number | null;
   distancia_km?: number | null;
   tiempo_estimado_horas?: number | null;
+  snapshot_tarifa?: unknown;
 }
 
 export interface TrasladoCreado {
@@ -586,4 +587,30 @@ export async function listarHistorialTraslado(
 
   if (error) throw error;
   return data ?? [];
+}
+
+export interface ResultadoReconciliacionSagaF6 {
+  confirmados: number;
+  compensados: number;
+  errores: number;
+}
+
+/**
+ * RUUM-USR-F6-001 (CB-2 / Bloque B): Reconciliador y compensador durable de la saga de traslados individuales.
+ * Transiciona a servicio_confirmado si el pago ya se aprobó, o compensa a servicio_cancelado (pago_fallido_compensacion)
+ * si pasaron más de 15 minutos sin pago.
+ */
+export async function reconciliarSagaTrasladosIndividualesServidor(
+  cliente: Cliente,
+  limite: number = 50
+): Promise<ResultadoReconciliacionSagaF6> {
+  const { data, error } = await (cliente as unknown as {
+    rpc: (fn: string, args: { p_limite: number }) => Promise<{
+      data: ResultadoReconciliacionSagaF6 | null;
+      error: unknown;
+    }>;
+  }).rpc("reconciliar_saga_traslados_individuales", { p_limite: limite });
+
+  if (error) throw error;
+  return data ?? { confirmados: 0, compensados: 0, errores: 0 };
 }

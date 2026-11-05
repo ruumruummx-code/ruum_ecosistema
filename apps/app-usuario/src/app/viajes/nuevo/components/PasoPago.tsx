@@ -224,7 +224,7 @@ export const PasoPago = memo(function PasoPago({
         </div>
       </section>
 
-      {/* Tabs de métodos de pago */}
+      {/* Tabs de métodos de pago (RUUM-USR-F6-001 CA-7 / T8: MVP solo admite Tarjeta vía Stripe; otros métodos deshabilitados con badge) */}
       <div
         className={styles.paymentMethodTabs}
         role="tablist"
@@ -255,7 +255,10 @@ export const PasoPago = memo(function PasoPago({
           type="button"
           role="tab"
           aria-selected="false"
-          className={styles.paymentTab}
+          aria-disabled="true"
+          disabled
+          className={`${styles.paymentTab} opacity-60 cursor-not-allowed`}
+          title="Método no disponible en MVP — Próximamente"
         >
           <svg
             viewBox="0 0 24 24"
@@ -271,12 +274,16 @@ export const PasoPago = memo(function PasoPago({
             <polyline points="9 22 9 12 15 12 15 22" />
           </svg>
           <span>OXXO</span>
+          <span className="ml-1 rounded bg-slate-100 px-1 py-0.5 text-[10px] font-medium text-slate-500">Próximamente</span>
         </button>
         <button
           type="button"
           role="tab"
           aria-selected="false"
-          className={styles.paymentTab}
+          aria-disabled="true"
+          disabled
+          className={`${styles.paymentTab} opacity-60 cursor-not-allowed`}
+          title="Método no disponible en MVP — Próximamente"
         >
           <svg
             viewBox="0 0 24 24"
@@ -292,6 +299,7 @@ export const PasoPago = memo(function PasoPago({
             <line x1="12" y1="18" x2="12.01" y2="18" />
           </svg>
           <span>Google Pay</span>
+          <span className="ml-1 rounded bg-slate-100 px-1 py-0.5 text-[10px] font-medium text-slate-500">Próximamente</span>
         </button>
       </div>
 

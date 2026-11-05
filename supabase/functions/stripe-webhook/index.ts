@@ -47,6 +47,8 @@ Deno.serve(async (req: Request) => {
     }
     if (intent.metadata.carga_masiva_id) {
       if (intent.status === "succeeded") {
+        const checkpoint = await db.rpc("registrar_checkout_pago_confirmado", { p_id: intent.metadata.carga_masiva_id, p_intent: intent.id });
+        if (checkpoint.error) throw new Error("bulk_checkout_checkpoint_failed");
         const result = await db.rpc("confirmar_checkout_masivo", { p_id: intent.metadata.carga_masiva_id, p_intent: intent.id, p_monto: intent.amount_received, p_moneda: intent.currency });
         if (result.error || result.data?.ok === false) throw new Error("bulk_checkout_reconciliation_failed");
       } else if (["canceled", "requires_payment_method"].includes(intent.status)) {

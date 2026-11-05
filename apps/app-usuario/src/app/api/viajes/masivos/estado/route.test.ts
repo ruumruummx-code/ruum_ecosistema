@@ -4,6 +4,7 @@ import { NextRequest } from "next/server";
 const mocks = vi.hoisted(() => ({
   obtener: vi.fn(),
   confirmar: vi.fn(),
+  registrarCheckpoint: vi.fn(),
   stripe: vi.fn(),
 }));
 
@@ -16,6 +17,7 @@ vi.mock("@/lib/supabase-server", () => ({
 vi.mock("@/lib/csp-rate-limit", () => ({
   rateLimitConVentana: async () => ({ allowed: true }),
 }));
+vi.mock("@/lib/rate-limit-masivos", () => ({ rateLimitMasivo: async () => ({ allowed: true }) }));
 vi.mock("@/lib/carga-masiva-server", () => ({
   clienteMasivoServicio: () => ({}),
   stripeMasivo: mocks.stripe,
@@ -23,6 +25,7 @@ vi.mock("@/lib/carga-masiva-server", () => ({
 vi.mock("@ruum/api/services", () => ({
   obtenerCheckoutMasivoServidor: mocks.obtener,
   confirmarPagoMasivoServidor: mocks.confirmar,
+  registrarCheckoutPagoConfirmadoServidor: mocks.registrarCheckpoint,
 }));
 
 import { GET } from "./route";
@@ -38,6 +41,7 @@ describe("GET /api/viajes/masivos/estado — Conciliación de pago masivo", () =
   });
   beforeEach(() => {
     vi.clearAllMocks();
+    mocks.registrarCheckpoint.mockResolvedValue(undefined);
   });
 
   it("retorna pagado: true con fuente: 'webhook' de inmediato sin invocar a Stripe si ya tiene pagado_en", async () => {

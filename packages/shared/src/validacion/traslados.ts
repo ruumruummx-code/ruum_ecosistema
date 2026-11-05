@@ -202,7 +202,8 @@ export const esquemaPayloadCrearTraslado = z.object({
     modalidad_programacion: z.enum(["lo_antes_posible", "programado"]).optional().nullable(),
     fecha_hora_programada: z.string().optional().nullable(),
     distancia_km: z.number().min(0).max(20000).optional().nullable(),
-    tiempo_estimado_horas: z.number().min(0).max(720).optional().nullable()
+    tiempo_estimado_horas: z.number().min(0).max(720).optional().nullable(),
+    snapshot_tarifa: z.unknown().optional(),
   }).superRefine((t, ctx) => {
     if (t.modalidad_programacion === "programado") {
       if (!t.fecha_hora_programada) {
