@@ -24,6 +24,8 @@ export interface MisViajesDesktopProps {
   pestanaInicial?: PestañaFiltro;
   busquedaInicial?: string;
   notificaciones?: NotificacionHeader[];
+  gastoConfirmadoServidor?: number;
+  snapshotVersion?: string;
 }
 export const etiquetas = {
   todos: "Todos",
@@ -31,6 +33,7 @@ export const etiquetas = {
   programados: "Programados",
   finalizados: "Completados",
   cancelados: "Cancelados",
+  en_revision: "En revisión",
 };
 export function MisViajesDesktop({
   traslados,
@@ -38,8 +41,15 @@ export function MisViajesDesktop({
   pestanaInicial = "todos",
   busquedaInicial = "",
   notificaciones = [],
+  gastoConfirmadoServidor,
+  snapshotVersion,
 }: MisViajesDesktopProps) {
-  const g = useGestionTraslados({ traslados, pestanaInicial, busquedaInicial });
+  const g = useGestionTraslados({
+    traslados,
+    pestanaInicial,
+    busquedaInicial,
+    gastoConfirmadoServidor,
+  });
   const router = useRouter();
   const [seleccion, setSeleccion] = useState<string | null>(null);
   const [cerrado, setCerrado] = useState(false);
@@ -358,7 +368,9 @@ export function MisViajesDesktop({
                                     Abrir detalle completo
                                   </Link>
                                 ) : (
-                                  <span>Detalle no disponible</span>
+                                  <Link href={`/soporte?asunto=traslado_en_revision&folio=${p.creado_en ?? ""}`}>
+                                    Contactar soporte
+                                  </Link>
                                 )}
                               </div>
                             )}

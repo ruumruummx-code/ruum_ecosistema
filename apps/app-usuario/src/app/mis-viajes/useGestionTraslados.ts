@@ -3,6 +3,17 @@
 import { useMemo, useState, useEffect, useTransition } from "react";
 import type { Database } from "@ruum/shared/types";
 import { ETIQUETA_TIPO_VEHICULO } from "@ruum/shared/constants";
+import {
+  clasificarEstadoTraslado,
+  type CategoriaPestana,
+} from "../../lib/estados-traslado-policy";
+import {
+  perteneceAHoy,
+  perteneceASemanaCalendario,
+  perteneceAMes,
+  obtenerDiaCalendario,
+  ZONA_HORARIA_CANONICA,
+} from "../../lib/zona-horaria-traslados";
 
 export type Pasaporte = Database["public"]["Views"]["pasaporte_digital"]["Row"];
 export type Traslado = Pick<
@@ -10,7 +21,11 @@ export type Traslado = Pick<
   "id" | "origen_direccion" | "origen_ciudad" | "destino_direccion" | "destino_ciudad" | "fecha_hora_programada"
 >;
 
-export type PestañaTraslados = "activos" | "programados" | "finalizados" | "cancelados";
+/**
+ * RUUM-USR-F8-001 (CB-2 / T5): Categorías exhaustivas de navegación.
+ * 'en_revision' previene fail-open de estados anómalos o huérfanos.
+ */
+export type PestañaTraslados = CategoriaPestana;
 export type PestañaFiltro = "todos" | PestañaTraslados;
 
 export interface ViajeLista {
@@ -50,31 +65,26 @@ export function vehiculoTipo(p: Pasaporte): string {
   return ETIQUETA_TIPO_VEHICULO[p.vehiculo_tipo] ?? p.vehiculo_tipo;
 }
 
+/**
+ * RUUM-USR-F8-001 (CB-2 / T5): Clasificación canónica fail-closed delegada a policy.
+ * NUNCA cae por defecto en 'activos'.
+ */
 export function pestañaDeViaje(p: Pasaporte): PestañaTraslados {
-  const estado = String(p.estado ?? "");
-  if (estado === "servicio_cancelado" || estado === "traslado_fallido") return "cancelados";
-  if (p.cerrado_en || p.estado_operativo === "closed") return "finalizados";
-  if (["servicio_cerrado", "reclamo_resuelto", "disputa_resuelta", "cierre_operativo_con_incidencia_abierta"].includes(estado)) return "finalizados";
-  if ([
-    "solicitud_creada",
-    "documentacion_pendiente",
-    "documentacion_en_revision",
-    "documentacion_validada",
-    "cotizacion_generada",
-    "cotizacion_aceptada",
-    "servicio_confirmado",
-    "pendiente_de_conductor",
-  ].includes(estado)) return "programados";
-  return "activos";
+  return clasificarEstadoTraslado(
+    p.estado,
+    p.estado_operativo,
+    p.cerrado_en,
+    p.traslado_id
+  );
 }
 
-const ZONA_HORARIA = "America/Mexico_City";
-function diaCalendario(fecha: Date): string {
-  const partes = new Intl.DateTimeFormat("en-CA", { timeZone: ZONA_HORARIA, year: "numeric", month: "2-digit", day: "2-digit" }).formatToParts(fecha);
-  return ["year", "month", "day"].map(tipo => partes.find(p => p.type === tipo)!.value).join("-");
-}
-
-export function fechaProgramada(fecha: string | null): { fecha: string; hora: string; diaSemana: string; diaNumero: string; mesTexto: string } {
+export function fechaProgramada(fecha: string | null): {
+  fecha: string;
+  hora: string;
+  diaSemana: string;
+  diaNumero: string;
+  mesTexto: string;
+} {
   if (!fecha) {
     return { fecha: "Fecha pendiente", hora: "Hora pendiente", diaSemana: "S/F", diaNumero: "—", mesTexto: "—" };
   }
@@ -83,14 +93,31 @@ export function fechaProgramada(fecha: string | null): { fecha: string; hora: st
     return { fecha: "Fecha pendiente", hora: "Hora pendiente", diaSemana: "S/F", diaNumero: "—", mesTexto: "—" };
   }
 
-  const hoy = new Date();
-  const esHoy = diaCalendario(date) === diaCalendario(hoy);
-  const fechaTexto = new Intl.DateTimeFormat("es-MX", { timeZone: ZONA_HORARIA, day: "numeric", month: "short", year: "numeric" }).format(date);
-  const horaTexto = new Intl.DateTimeFormat("es-MX", { timeZone: ZONA_HORARIA, hour: "numeric", minute: "2-digit" }).format(date);
-  
-  const diaSemana = new Intl.DateTimeFormat("es-MX", { timeZone: ZONA_HORARIA, weekday: "short" }).format(date).toUpperCase().replace(".", "");
-  const diaNumero = new Intl.DateTimeFormat("es-MX", { timeZone: ZONA_HORARIA, day: "numeric" }).format(date);
-  const mesTexto = new Intl.DateTimeFormat("es-MX", { timeZone: ZONA_HORARIA, month: "short" }).format(date).toUpperCase().replace(".", "");
+  const esHoy = perteneceAHoy(date);
+  const fechaTexto = new Intl.DateTimeFormat("es-MX", {
+    timeZone: ZONA_HORARIA_CANONICA,
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  }).format(date);
+  const horaTexto = new Intl.DateTimeFormat("es-MX", {
+    timeZone: ZONA_HORARIA_CANONICA,
+    hour: "numeric",
+    minute: "2-digit",
+  }).format(date);
+
+  const diaSemana = new Intl.DateTimeFormat("es-MX", {
+    timeZone: ZONA_HORARIA_CANONICA,
+    weekday: "short",
+  }).format(date).toUpperCase().replace(".", "");
+  const diaNumero = new Intl.DateTimeFormat("es-MX", {
+    timeZone: ZONA_HORARIA_CANONICA,
+    day: "numeric",
+  }).format(date);
+  const mesTexto = new Intl.DateTimeFormat("es-MX", {
+    timeZone: ZONA_HORARIA_CANONICA,
+    month: "short",
+  }).format(date).toUpperCase().replace(".", "");
 
   return {
     fecha: esHoy ? `Hoy, ${fechaTexto}` : fechaTexto,
@@ -106,12 +133,18 @@ export interface UseGestionTrasladosOptions<T extends PestañaFiltro = PestañaF
   pestanaInicial?: T;
   /** Término proveniente del buscador global (`/mis-viajes?buscar=...`). */
   busquedaInicial?: string;
+  /** Gasto total confirmado provisto por el servidor (CB-1) */
+  gastoConfirmadoServidor?: number;
+  /** Estado de sincronización en segundo plano */
+  sincronizando?: boolean;
 }
 
 export function useGestionTraslados<T extends PestañaFiltro = PestañaFiltro>({
   traslados,
   pestanaInicial = "activos" as T,
   busquedaInicial = "",
+  gastoConfirmadoServidor,
+  sincronizando = false,
 }: UseGestionTrasladosOptions<T>) {
   const [pestana, setPestana] = useState<T>(pestanaInicial);
   const [busquedaInput, setBusquedaInput] = useState(busquedaInicial);
@@ -139,7 +172,7 @@ export function useGestionTraslados<T extends PestañaFiltro = PestañaFiltro>({
     return () => clearTimeout(t);
   }, [busquedaInput, busqueda]);
 
-  // Conteos por estado
+  // Conteos por estado (incluyendo 'en_revision')
   const conteos = useMemo(() => {
     const counts: Record<PestañaFiltro, number> = {
       todos: traslados.length,
@@ -147,10 +180,11 @@ export function useGestionTraslados<T extends PestañaFiltro = PestañaFiltro>({
       programados: 0,
       finalizados: 0,
       cancelados: 0,
+      en_revision: 0,
     };
     for (const viaje of traslados) {
       const p = pestañaDeViaje(viaje.pasaporte);
-      counts[p]++;
+      counts[p] = (counts[p] ?? 0) + 1;
     }
     return counts;
   }, [traslados]);
@@ -162,10 +196,30 @@ export function useGestionTraslados<T extends PestañaFiltro = PestañaFiltro>({
     );
   }, [traslados]);
 
-  // Gasto acumulado total
+  // Gasto acumulado total confirmado (CB-1)
   const gastoTotal = useMemo(() => {
-    return traslados.reduce((acc, { pasaporte }) => acc + (Number(pasaporte.monto_pagado) || 0), 0);
-  }, [traslados]);
+    if (gastoConfirmadoServidor !== undefined) {
+      return gastoConfirmadoServidor;
+    }
+    // Fallback del cliente con rigor de pagos confirmados
+    return traslados.reduce((acc, { pasaporte }) => {
+      const estado = String(pasaporte.estado ?? "");
+      const esCancelado = estado === "servicio_cancelado" || estado === "traslado_fallido";
+      if (!esCancelado && pasaporte.monto_pagado && Number(pasaporte.monto_pagado) > 0) {
+        const cat = pestañaDeViaje(pasaporte);
+        const esConfirmado =
+          estado === "pago_completado" ||
+          estado === "servicio_confirmado" ||
+          cat === "finalizados" ||
+          Boolean(pasaporte.cerrado_en) ||
+          pasaporte.estado_operativo === "closed";
+        if (esConfirmado) {
+          return acc + Number(pasaporte.monto_pagado);
+        }
+      }
+      return acc;
+    }, 0);
+  }, [traslados, gastoConfirmadoServidor]);
 
   // Lista filtrada
   const filtrados = useMemo(() => {
@@ -186,26 +240,21 @@ export function useGestionTraslados<T extends PestañaFiltro = PestañaFiltro>({
       lista = lista.filter(({ pasaporte }) => vehiculoTipo(pasaporte) === tipoVehiculoSeleccionado);
     }
 
-    // Filtro por fecha (todas / hoy / semana / mes)
+    // Filtro por fecha (todas / hoy / semana / mes) usando zona horaria canónica (CB-3)
     if (filtroFecha !== "todas") {
-      const ahora = new Date();
       lista = lista.filter(({ traslado }) => {
         const fechaStr = traslado?.fecha_hora_programada;
         if (!fechaStr) return false;
-        const fecha = new Date(fechaStr);
-        if (Number.isNaN(fecha.getTime())) return false;
 
-        const dia = diaCalendario(fecha);
-        const hoy = diaCalendario(ahora);
-        if (filtroFecha === "hoy") return dia === hoy;
-        if (filtroFecha === "semana") {
-          const inicio = new Date(hoy + "T00:00:00Z");
-          inicio.setUTCDate(inicio.getUTCDate() - (inicio.getUTCDay() + 6) % 7);
-          const fin = new Date(inicio);
-          fin.setUTCDate(fin.getUTCDate() + 7);
-          return dia >= inicio.toISOString().slice(0, 10) && dia < fin.toISOString().slice(0, 10);
+        if (filtroFecha === "hoy") {
+          return perteneceAHoy(fechaStr);
         }
-        if (filtroFecha === "mes") return dia.slice(0, 7) === hoy.slice(0, 7);
+        if (filtroFecha === "semana") {
+          return perteneceASemanaCalendario(fechaStr);
+        }
+        if (filtroFecha === "mes") {
+          return perteneceAMes(fechaStr);
+        }
         return true;
       });
     }
@@ -268,5 +317,7 @@ export function useGestionTraslados<T extends PestañaFiltro = PestañaFiltro>({
     gastoFormateado: formatoGastado(gastoTotal),
     filtrados,
     limpiarFiltros,
+    sincronizando,
+    estadoSincronizacion: sincronizando ? ("actualizando" as const) : ("sincronizado" as const),
   };
 }

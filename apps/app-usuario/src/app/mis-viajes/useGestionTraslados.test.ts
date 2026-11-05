@@ -45,3 +45,50 @@ it("mantiene en finalizados una disputa posterior al cierre operativo", () => {
   expect(pestañaDeViaje({ estado: "disputa_abierta", estado_operativo: "closed", cerrado_en: "2026-10-30T15:00:00Z" } as Pasaporte)).toBe("finalizados");
   expect(pestañaDeViaje({ estado: "disputa_abierta", estado_operativo: "in_transit", cerrado_en: null } as Pasaporte)).toBe("activos");
 });
+
+describe("endurecimiento de consistencia y fail-closed (RUUM-USR-F8-001)", () => {
+  it("clasifica estado desconocido como 'en_revision' (fail-closed, nunca en 'activos')", () => {
+    const desconocido = { estado: "estado_corrupto_inesperado" } as unknown as Pasaporte;
+    expect(pestañaDeViaje(desconocido)).toBe("en_revision");
+  });
+
+  it("prioriza gastoConfirmadoServidor cuando es provisto (CB-1)", () => {
+    const { result } = renderHook(() =>
+      useGestionTraslados({
+        pestanaInicial: "todos",
+        traslados: [viaje("servicio_cerrado", "t-1")],
+        gastoConfirmadoServidor: 45000,
+      })
+    );
+    expect(result.current.gastoTotal).toBe(45000);
+    expect(result.current.gastoFormateado).toBe("$45k");
+  });
+
+  it("calcula conteos incluyendo la categoría 'en_revision'", () => {
+    function viajeConEstado(id: string, estado: string): ViajeLista {
+      return {
+        pasaporte: { traslado_id: id, estado, creado_en: "2026-10-27T12:00:00Z" },
+        traslado: { id, fecha_hora_programada: null },
+      } as unknown as ViajeLista;
+    }
+
+    const { result } = renderHook(() =>
+      useGestionTraslados({
+        pestanaInicial: "todos",
+        traslados: [
+          viajeConEstado("t-prog", "solicitud_creada"),
+          viajeConEstado("t-act", "traslado_en_curso"),
+          viajeConEstado("t-fin", "servicio_cerrado"),
+          viajeConEstado("t-canc", "servicio_cancelado"),
+          viajeConEstado("t-rev", "estado_inexistente"),
+        ],
+      })
+    );
+    expect(result.current.conteos.programados).toBe(1);
+    expect(result.current.conteos.activos).toBe(1);
+    expect(result.current.conteos.finalizados).toBe(1);
+    expect(result.current.conteos.cancelados).toBe(1);
+    expect(result.current.conteos.en_revision).toBe(1);
+    expect(result.current.conteos.todos).toBe(5);
+  });
+});

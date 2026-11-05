@@ -23,7 +23,7 @@ import {
 
 export type { ViajeLista, Pasaporte, Traslado, PestañaTraslados };
 
-type TonoPildora = "active" | "scheduled" | "completed" | "cancelled";
+type TonoPildora = "active" | "scheduled" | "completed" | "cancelled" | "review";
 
 function IconoBuscar({ className = "size-5" }: { className?: string }) {
   return (
@@ -118,6 +118,7 @@ const PILDORA_POR_PESTAÑA: Record<PestañaTraslados, { tono: TonoPildora; borde
   programados: { tono: "scheduled", borde: "border-l-amber-500" },
   finalizados: { tono: "completed", borde: "border-l-slate-400" },
   cancelados: { tono: "cancelled", borde: "border-l-rose-500" },
+  en_revision: { tono: "review", borde: "border-l-indigo-500" },
 };
 
 const PILDORA_CLASE: Record<TonoPildora, string> = {
@@ -125,6 +126,7 @@ const PILDORA_CLASE: Record<TonoPildora, string> = {
   scheduled: "bg-[#fef4e6] text-[#765100] border border-[#f3d8a2] dark:bg-[#3d2e00] dark:text-[#ffc933] dark:border-[#664d00]",
   completed: "bg-[#eff3f8] text-[#3b4c68] border border-[#d7e1ee] dark:bg-[#1a2e4a] dark:text-[#a8b5cc] dark:border-[#2d476e]",
   cancelled: "bg-[#fdeaea] text-[#9a2637] border border-[#f6ccd2] dark:bg-[#3d0f1a] dark:text-[#ff6b7a] dark:border-[#661a29]",
+  review: "bg-[#eef2ff] text-[#4338ca] border border-[#c7d2fe] dark:bg-[#1e1b4b] dark:text-[#a5b4fc] dark:border-[#3730a3]",
 };
 
 function estadoVisual(p: Pasaporte): { label: string } {
@@ -221,6 +223,7 @@ function FichaVacia({ hayBusqueda, hayFiltro, pestana, onLimpiar }: { hayBusqued
     programados: "Por iniciar",
     finalizados: "Historial",
     cancelados: "Cancelados",
+    en_revision: "En revisión",
   };
   const titulo = hayBusqueda || hayFiltro ? "No se encontraron traslados" : `Sin traslados · ${etiquetasPestana[pestana]}`;
   const descripcion = hayBusqueda || hayFiltro
@@ -283,14 +286,19 @@ const PESTAÑAS: { id: PestañaTraslados; etiqueta: string }[] = [
   { id: "programados", etiqueta: "Programados" },
   { id: "finalizados", etiqueta: "Finalizados" },
   { id: "cancelados", etiqueta: "Cancelados" },
+  { id: "en_revision", etiqueta: "En revisión" },
 ];
 
 export function MisTrasladosCliente({
   Traslados,
   pestanaInicial,
+  gastoConfirmadoServidor,
+  snapshotVersion,
 }: {
   Traslados: ViajeLista[];
   pestanaInicial: PestañaTraslados;
+  gastoConfirmadoServidor?: number;
+  snapshotVersion?: string;
 }) {
   const {
     pestana,
@@ -308,7 +316,12 @@ export function MisTrasladosCliente({
     gastoFormateado,
     filtrados,
     limpiarFiltros,
-  } = useGestionTraslados<PestañaTraslados>({ traslados: Traslados, pestanaInicial });
+    estadoSincronizacion,
+  } = useGestionTraslados<PestañaTraslados>({
+    traslados: Traslados,
+    pestanaInicial,
+    gastoConfirmadoServidor,
+  });
   const [isPending, startTransition] = useTransition();
   const tablistRef = useRef<HTMLDivElement>(null);
 
@@ -348,7 +361,9 @@ export function MisTrasladosCliente({
         onKeyDown={handleTablistKeyDown}
         className="flex gap-1 overflow-x-auto rounded-full bg-[#f1f5fa] p-1 dark:bg-[#0c233f]"
       >
-        {PESTAÑAS.map(({ id, etiqueta }) => {
+        {PESTAÑAS.filter(
+          (p) => p.id !== "en_revision" || (conteos.en_revision > 0) || pestana === "en_revision"
+        ).map(({ id, etiqueta }) => {
           const activo = pestana === id;
           return (
             <button
@@ -533,13 +548,19 @@ export function MisTrasladosCliente({
               </Link>
             </div>
             {filtrados.map(({ pasaporte, traslado }) => {
-              const { label } = estadoVisual(pasaporte);
-              const { tono, borde } = PILDORA_POR_PESTAÑA[pestana];
+              const cat = pestañaDeViaje(pasaporte);
+              const esHuerfano = !pasaporte.traslado_id || !traslado;
+              const { label } = esHuerfano
+                ? { label: "En verificación técnica" }
+                : estadoVisual(pasaporte);
+              const { tono, borde } = PILDORA_POR_PESTAÑA[cat] ?? PILDORA_POR_PESTAÑA.en_revision;
               const folio = folioCorto(pasaporte.traslado_id);
-              const urlViaje = pasaporte.traslado_id ? `/viajes/${pasaporte.traslado_id}` : "/mis-viajes";
+              const urlViaje = esHuerfano || cat === "en_revision"
+                ? `/soporte?asunto=traslado_en_revision&folio=${pasaporte.traslado_id ?? pasaporte.creado_en ?? ""}`
+                : pasaporte.traslado_id ? `/viajes/${pasaporte.traslado_id}` : "/mis-viajes";
               const nombreVehiculo = vehiculoNombre(pasaporte);
-              const origenCiudad = pasaporte.origen_ciudad ?? traslado?.origen_ciudad;
-              const destinoCiudad = pasaporte.destino_ciudad ?? traslado?.destino_ciudad;
+              const origenCiudad = pasaporte.origen_ciudad ?? traslado?.origen_ciudad ?? "Origen pendiente";
+              const destinoCiudad = pasaporte.destino_ciudad ?? traslado?.destino_ciudad ?? "Destino pendiente";
               const esPagoPendiente = pasaporte.estado === "cotizacion_aceptada" || pasaporte.estado === "pago_pendiente";
               const esActiva = tono === "active";
               const conductor = primerNombre(pasaporte.conductor_nombre) ?? "Por asignar";
@@ -549,7 +570,13 @@ export function MisTrasladosCliente({
                 : null;
               const fecha = fechaProgramada(traslado?.fecha_hora_programada ?? null);
               const datoSecundario = duracion ?? distancia ?? fecha.fecha;
-              const etiquetaBoton = esActiva ? "Pasaporte" : esPagoPendiente ? "Completar pago" : "Detalle";
+              const etiquetaBoton = esHuerfano || cat === "en_revision"
+                ? "Atención técnica"
+                : esActiva
+                ? "Pasaporte"
+                : esPagoPendiente
+                ? "Completar pago"
+                : "Detalle";
 
               return (
                 <article

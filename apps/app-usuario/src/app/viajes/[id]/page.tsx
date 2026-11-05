@@ -26,35 +26,37 @@ export default async function PaginaTraslado({ params }: { params: Promise<{ id:
     ultimaUbicacion,
   } = await obtenerDatos(id);
 
-  // R2 defense-in-depth: verificar que el traslado pertenece al usuario autenticado (RLS puede fallar)
-  if (pasaporte?.usuario_id) {
-    try {
-      const { crearClienteServidor: crearClienteAuth } = await import("@/lib/supabase-server");
-      const clienteAuth = await crearClienteAuth();
-      const {
-        data: { user },
-      } = await clienteAuth.auth.getUser();
-      if (!user) {
-        // Tratar como no encontrado para no filtrar existencia (IDOR)
-        return <TrasladoNoEncontrado />;
-      }
-
-      // `pasaporte.usuario_id` referencia public.usuarios.id; no es el mismo
-      // UUID que auth.users.id. Resolver primero el perfil evita rechazar
-      // traslados legítimos como "no encontrados".
-      const { obtenerUsuarioIdPorAuth } = await import("@ruum/api/identity");
-      const perfilId = await obtenerUsuarioIdPorAuth(clienteAuth, user.id);
-      if (!perfilId || perfilId !== pasaporte.usuario_id) {
-        // Tratar como no encontrado para no filtrar existencia (IDOR)
-        return <TrasladoNoEncontrado />;
-      }
-    } catch (err) {
-      // Si falla la verificación de sesión, no exponer datos
-      logStructuredError("viajes/detalle", "verificacion_propietario_fallida", err, {
-        trasladoId: id,
-      });
-      return <TrasladoNoEncontrado variante="sesion" />;
+  // RUUM-USR-F8-001 (CB-3 / T10 / CA-9): Verificación estricta de ownership / defensa contra IDOR
+  try {
+    const { crearClienteServidor: crearClienteAuth } = await import("@/lib/supabase-server");
+    const clienteAuth = await crearClienteAuth();
+    const {
+      data: { user },
+    } = await clienteAuth.auth.getUser();
+    if (!user) {
+      // Tratar como no encontrado para no filtrar existencia (IDOR)
+      return <TrasladoNoEncontrado />;
     }
+
+    // `pasaporte.usuario_id` referencia public.usuarios.id; no es el mismo
+    // UUID que auth.users.id. Resolver primero el perfil evita rechazar
+    // traslados legítimos como "no encontrados".
+    const { obtenerUsuarioIdPorAuth } = await import("@ruum/api/identity");
+    const perfilId = await obtenerUsuarioIdPorAuth(clienteAuth, user.id);
+    if (!perfilId) {
+      return <TrasladoNoEncontrado />;
+    }
+
+    // Si no existe pasaporte o no pertenece al usuario autenticado, fail-closed a no encontrado
+    if (!pasaporte || pasaporte.usuario_id !== perfilId) {
+      return <TrasladoNoEncontrado conInicio={!pasaporte} />;
+    }
+  } catch (err) {
+    // Si falla la verificación de sesión, no exponer datos
+    logStructuredError("viajes/detalle", "verificacion_propietario_fallida", err, {
+      trasladoId: id,
+    });
+    return <TrasladoNoEncontrado variante="sesion" />;
   }
 
   if (!pasaporte) {
