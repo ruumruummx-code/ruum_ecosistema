@@ -21,6 +21,7 @@ const PORT = Number(process.env.PLAYWRIGHT_PORT ?? 3012);
  * (o `NEXT_PUBLIC_SUPABASE_URL`) apunta la suite a un proyecto real.
  */
 const E2E_SUPABASE_REAL = process.env.PLAYWRIGHT_E2E_SUPABASE_REAL === '1';
+const MOCK_REDIS_PUERTO = Number(process.env.PLAYWRIGHT_MOCK_REDIS_PORT ?? 54400);
 const MOCK_SUPABASE_PUERTO = Number(process.env.PLAYWRIGHT_MOCK_SUPABASE_PORT ?? 54399);
 const SUPABASE_URL = E2E_SUPABASE_REAL
   ? process.env.PLAYWRIGHT_SUPABASE_URL ?? process.env.NEXT_PUBLIC_SUPABASE_URL
@@ -50,6 +51,13 @@ function crearWebServers(): NonNullable<Parameters<typeof defineConfig>[0]['webS
 
   if (!E2E_SUPABASE_REAL) {
     servidores.push({
+      command: 'node tests/e2e/fixtures/mock-redis.mjs',
+      env: { PLAYWRIGHT_MOCK_REDIS_PORT: String(MOCK_REDIS_PUERTO) },
+      url: `http://127.0.0.1:${MOCK_REDIS_PUERTO}`,
+      reuseExistingServer: !process.env.CI,
+      timeout: 30_000
+    });
+    servidores.push({
       command: 'node tests/e2e/fixtures/mock-supabase.mjs',
       env: { PLAYWRIGHT_MOCK_SUPABASE_PORT: String(MOCK_SUPABASE_PUERTO) },
       url: `http://127.0.0.1:${MOCK_SUPABASE_PUERTO}/`,
@@ -66,6 +74,8 @@ function crearWebServers(): NonNullable<Parameters<typeof defineConfig>[0]['webS
     env: E2E_SUPABASE_REAL
       ? {}
       : {
+          UPSTASH_REDIS_REST_URL: `http://127.0.0.1:${MOCK_REDIS_PUERTO}`,
+          UPSTASH_REDIS_REST_TOKEN: 'e2e-redis-token',
           NEXT_PUBLIC_SUPABASE_URL: SUPABASE_URL,
           // La anon key del doble no valida nada (no hay backend real); solo hace
           // falta que exista para que createServerClient/crearClienteNavegador

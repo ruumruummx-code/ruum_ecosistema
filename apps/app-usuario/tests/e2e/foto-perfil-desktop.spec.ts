@@ -22,16 +22,23 @@ test("la fotografía desktop se sube, persiste y aparece en perfil, cuenta y bar
   const png = Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aD1sAAAAASUVORK5CYII=", "base64");
   await page.getByLabel("Archivo de foto de perfil").setInputFiles({ name: "mi-foto.png", mimeType: "image/png", buffer: png });
   await expect(foto).toBeVisible();
+  // La selección solo previsualiza; la saga persiste al guardar.
+  await expect(cabecera.getByRole("img", { name: "Prueba", exact: true })).toHaveCount(0);
+  await page.getByLabel("Apellidos", { exact: true }).fill("E2E");
+  await page.getByRole("button", { name: "Guardar cambios", exact: true }).click();
+  await expect(page.getByText("Tus datos se guardaron correctamente", { exact: true })).toBeVisible();
   await expect(cabecera.getByRole("img", { name: "Prueba", exact: true })).toBeVisible();
   await expect.poll(() => foto.evaluate((img: HTMLImageElement) => img.naturalWidth)).toBe(1);
   const descargar = await request.get((await foto.getAttribute("src"))!);
   expect(await descargar.body()).toEqual(png);
 
-  // Reemplazar el mismo objeto debe mostrar sus nuevos bytes, sin caché anterior.
+  // Reemplazar la fotografía crea una ruta nueva y muestra los bytes sin caché anterior.
   const srcAnterior = (await foto.getAttribute("src"))!;
   const reemplazo = Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=", "base64");
   await page.getByLabel("Archivo de foto de perfil").setInputFiles({ name: "otra-foto.png", mimeType: "image/png", buffer: reemplazo });
+  await page.getByRole("button", { name: "Guardar cambios", exact: true }).click();
   await expect(foto).not.toHaveAttribute("src", srcAnterior);
+  await expect(foto).not.toHaveAttribute("src", /^blob:/);
   await expect.poll(() => foto.evaluate((img: HTMLImageElement) => img.naturalWidth)).toBe(1);
   const srcNuevo = (await foto.getAttribute("src"))!;
   const nuevaDescarga = await request.get(srcNuevo);
@@ -42,7 +49,7 @@ test("la fotografía desktop se sube, persiste y aparece en perfil, cuenta y bar
   await page.getByRole("button", { name: "Guardar cambios", exact: true }).click();
   await expect(page.getByText("Tus datos se guardaron correctamente", { exact: true })).toBeVisible();
   const perfil = await request.get(`${urlSupabaseE2E()}/rest/v1/usuarios`, { headers });
-  expect((await perfil.json())[0].foto_url).toBe(`${USUARIO_ID_E2E}/perfil.png`);
+  expect((await perfil.json())[0].foto_url).toMatch(new RegExp("^" + USUARIO_ID_E2E + "/perfil_[0-9]+[.]png$"));
   await page.reload({ waitUntil: "domcontentloaded" });
   await expect(foto).toBeVisible();
   await expect.poll(() => foto.evaluate((img: HTMLImageElement) => img.naturalWidth)).toBe(1);

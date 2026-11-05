@@ -131,6 +131,7 @@ function tokenDe(req) {
   return token ?? null;
 }
 
+const recuperaciones = new Map();
 const servidor = createServer(async (req, res) => {
   const url = new URL(req.url ?? "/", `http://127.0.0.1:${MOCK_SUPABASE_PUERTO}`);
   const ruta = url.pathname;
@@ -152,6 +153,27 @@ const servidor = createServer(async (req, res) => {
     return;
   }
 
+  if (ruta === "/auth/v1/recover" && req.method === "POST") {
+    const cuerpo = JSON.parse(await leerCuerpo(req));
+    recuperaciones.set(cuerpo.email, { redirectTo: url.searchParams.get("redirect_to") });
+    responder(res, 200, {});
+    return;
+  }
+  if (ruta === "/__e2e/recovery" && req.method === "GET") {
+    responder(res, 200, recuperaciones.get(url.searchParams.get("email")) ?? null);
+    return;
+  }
+  if (ruta === "/rest/v1/rpc/usuario_actualiza_perfil_transaccional") {
+    const { p_datos, p_version_esperada } = JSON.parse(await leerCuerpo(req));
+    const fila = SESIONES.get(tokenDe(req));
+    if (!fila) { responder(res, 401, {}); return; }
+    if (p_version_esperada != null && p_version_esperada !== (fila.version ?? 1)) {
+      responder(res, 409, { message: "conflicto_version" }); return;
+    }
+    Object.assign(fila, p_datos, { version: (fila.version ?? 1) + 1, actualizado_en: new Date().toISOString() });
+    responder(res, 200, { ok: true, version: fila.version, usuario: fila });
+    return;
+  }
   // Raíz: health-check del `webServer` de Playwright (debe responder 2xx).
   if (ruta === "/" || ruta === "/health") {
     responder(res, 200, { mock: "supabase", puerto: MOCK_SUPABASE_PUERTO });
@@ -174,8 +196,8 @@ const servidor = createServer(async (req, res) => {
     const cuerpo = JSON.parse((await leerCuerpo(req)) || "{}");
     if (
       tipo === "password" &&
-      cuerpo.email === "usuario.e2e@correo.test" &&
-      cuerpo.password === "ClaveE2E123!"
+      ((cuerpo.email === "usuario.e2e@correo.test" && cuerpo.password === "ClaveE2E123!") ||
+       (cuerpo.email === "usuario-e2e@ruum.test" && cuerpo.password === "NuevaSegura123"))
     ) {
       responder(res, 200, {
         access_token: ACCESS_TOKEN,

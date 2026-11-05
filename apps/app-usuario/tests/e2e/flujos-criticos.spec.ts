@@ -113,7 +113,7 @@ test.describe("Flujos críticos de la aplicación", () => {
     await page.locator("#login-password").fill("ClaveIncorrecta123");
     await page.getByRole("button", { name: "Iniciar sesión" }).click();
 
-    await expect(page.getByText("Correo o contraseña incorrectos.")).toBeVisible({ timeout: 30_000 });
+    await expect(page.getByText("No pudimos iniciar sesión. Verifica tus datos e intenta de nuevo.")).toBeVisible({ timeout: 30_000 });
   });
 
   test("el registro de usuario muestra el formulario con los campos correctos", async ({ page }) => {

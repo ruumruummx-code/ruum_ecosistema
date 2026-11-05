@@ -1,3 +1,4 @@
+import { urlSupabaseE2E } from "./fixtures/sesion";
 import { test, expect } from "@playwright/test";
 import { config as loadDotenv } from "dotenv";
 import path from "node:path";
@@ -51,24 +52,6 @@ async function fulfillAuthRoute(
  */
 
 // Helpers para mockear endpoints
-async function mockRecover(page: import("@playwright/test").Page, handler?: (route: import("@playwright/test").Route) => void) {
-  await page.route("**/auth/v1/recover**", async (route) => {
-    if (route.request().method() === "OPTIONS") {
-      await fulfillAuthRoute(route, { status: 200 });
-      return;
-    }
-    if (handler) return handler(route);
-    // verificar redirectTo contiene callback recovery
-    const req = route.request();
-    let body: unknown = {};
-    try { body = JSON.parse(req.postData() || "{}"); } catch {}
-    const redirectTo = (body as Record<string, unknown>).redirectTo as string | undefined
-      ?? (body as Record<string, unknown>).gotrue_meta_security as string | undefined;
-    // No bloqueamos si no contiene, pero registramos
-    await fulfillAuthRoute(route, { status: 200, contentType: "application/json", body: JSON.stringify({}) });
-  });
-}
-
 async function mockVerify(page: import("@playwright/test").Page, authorized: boolean, reason = authorized ? "ok" : "no_cookie") {
   await page.route("**/api/recovery/verify**", async (route) => {
     await route.fulfill({
@@ -159,28 +142,14 @@ async function mockAuthTokenPkce(page: import("@playwright/test").Page, succeed 
 
 test.describe("PR-02 Recuperación PKCE — app-usuario", () => {
   test("happy: solicitud enlace muestra correo enviado y redirectTo correcto", async ({ page }) => {
-    let redirectToCapturado: string | null = null;
-    await mockRecover(page, async (route) => {
-      console.log("E2E recover request", route.request().url(), route.request().postData(), route.request().headers());
-      const body = JSON.parse(route.request().postData() || "{}");
-      redirectToCapturado = new URL(route.request().url()).searchParams.get("redirect_to")
-        ?? (body as Record<string, unknown>).redirectTo as string
-        ?? (body as Record<string, unknown>).redirect_to as string
-        ?? null;
-      if (!redirectToCapturado) {
-        const opts = (body as Record<string, unknown>).options as Record<string, unknown> | undefined;
-        redirectToCapturado = opts?.redirectTo as string ?? null;
-      }
-      await fulfillAuthRoute(route, { status: 200, contentType: "application/json", body: JSON.stringify({}) });
-    });
-
     await page.goto("/recuperar-password");
     await expect(page.getByRole("heading", { name: /recuperar contraseña/i })).toBeVisible();
     await page.getByLabel(/correo electrónico/i).fill("usuario@ejemplo.com");
     await page.getByRole("button", { name: /enviar enlace/i }).click();
 
     await expect(page.getByRole("heading", { name: /correo enviado/i })).toBeVisible();
-    expect(redirectToCapturado).toContain("/auth/callback?type=recovery&next=/nueva-password");
+    const enviada = await page.request.get(`${urlSupabaseE2E()}/__e2e/recovery?email=usuario%40ejemplo.com`);
+    expect((await enviada.json()).redirectTo).toContain("/auth/callback?type=recovery&next=/nueva-password");
     await expect(page.getByText("usuario@ejemplo.com")).toBeVisible();
     // Verificar que el enlace expira en 60m se muestra
     await expect(page.getByText(/60 minutos/i)).toBeVisible();
@@ -227,7 +196,6 @@ test.describe("PR-02 Recuperación PKCE — app-usuario", () => {
 
   test("E2E completo: solicitud -> callback PKCE -> nueva-password -> update -> logout -> login nueva contraseña", async ({ page }) => {
     // Paso 1: solicitud
-    await mockRecover(page);
     await page.goto("/recuperar-password");
     await page.getByLabel(/correo electrónico/i).fill("usuario-e2e@ruum.test");
     await page.getByRole("button", { name: /enviar enlace/i }).click();
@@ -241,21 +209,6 @@ test.describe("PR-02 Recuperación PKCE — app-usuario", () => {
     await page.route("**/auth/v1/logout**", async (route) => {
       await route.fulfill({ status: 204, body: "" });
     });
-    let loginCapturado = false;
-    await page.route("**/auth/v1/token*grant_type=password**", async (route) => {
-      const body = JSON.parse(route.request().postData() || "{}");
-      if (body.password === "NuevaSegura123") {
-        loginCapturado = true;
-        await route.fulfill({
-          status: 200,
-          contentType: "application/json",
-          body: JSON.stringify({ access_token: "new_token", user: { id: "user-1", email: "usuario-e2e@ruum.test" } }),
-        });
-      } else {
-        await route.fulfill({ status: 400, contentType: "application/json", body: JSON.stringify({ error: "invalid_grant" }) });
-      }
-    });
-
     // Simular que el usuario hace clic en enlace del correo -> /auth/callback?code=mock_code&type=recovery
     // En vez de ir al callback real (que haría fetch Supabase), mockeamos verify para que autorice
     await page.goto("/nueva-password");
@@ -283,10 +236,8 @@ test.describe("PR-02 Recuperación PKCE — app-usuario", () => {
     await passInput.fill("NuevaSegura123");
     const entrar = page.getByRole("button", { name: /entrar|iniciar sesión/i });
     await entrar.click();
-    // No validamos redirect final porque depende de mock, pero el login con
-    // la nueva contraseña sí debe haberse invocado.
-    await page.waitForTimeout(500);
-    expect(loginCapturado).toBe(true);
+    // La API de login valida la contraseña contra el doble del servidor.
+    await page.waitForURL("/", { waitUntil: "domcontentloaded" });
   });
 
   test("negativo: enlace expirado muestra error y no autoriza formulario", async ({ page }) => {
