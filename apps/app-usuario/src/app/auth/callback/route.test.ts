@@ -46,17 +46,23 @@ describe("GET /auth/callback", () => {
     expect(res.headers.get("location")).toContain("/recuperar-password?error=enlace_invalido");
   });
 
-  it("intercambia code en flujo recovery y detecta cambio de cuenta previa", async () => {
-    getUserMock
-      .mockResolvedValueOnce({ data: { user: { id: "u-previo", email: "previo@ruum.mx" } } })
-      .mockResolvedValueOnce({ data: { user: { id: "u-nuevo", email: "nuevo@ruum.mx" } } })
-      .mockResolvedValueOnce({ data: { user: { id: "u-nuevo", email: "nuevo@ruum.mx" } } });
-    exchangeCodeForSessionMock.mockResolvedValueOnce({ error: null });
+  it("intercambia code en flujo recovery, consolida getUser() a una sola llamada y detecta cambio de cuenta previa", async () => {
+    getUserMock.mockResolvedValueOnce({ data: { user: { id: "u-previo", email: "previo@ruum.mx" } } });
+    exchangeCodeForSessionMock.mockResolvedValueOnce({
+      data: { user: { id: "u-nuevo", email: "nuevo@ruum.mx" } },
+      error: null,
+    });
 
     const req = new NextRequest("https://app.ruum.mx/auth/callback?code=pkce-code&type=recovery");
     const res = await GET(req);
     expect(res.headers.get("location")).toContain("/nueva-password?cuenta_distinta=1");
-    expect(cookieSetMock).toHaveBeenCalled();
+    // T5 / CB-2: Se consolida getUser a una sola llamada (la inicial para detectar cuenta previa)
+    expect(getUserMock).toHaveBeenCalledTimes(1);
+    expect(cookieSetMock).toHaveBeenCalledWith(
+      "ruum_rec_usuario",
+      "u-nuevo",
+      expect.objectContaining({ httpOnly: true, path: "/" })
+    );
   });
 
   it("clasifica errores de code expirado, otro dispositivo y reutilizado", async () => {

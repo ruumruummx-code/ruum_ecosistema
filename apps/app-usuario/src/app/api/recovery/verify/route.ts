@@ -3,50 +3,63 @@ import { cookies } from "next/headers";
 import { COOKIE_RECOVERY_USUARIO } from "@ruum/shared/utils";
 import { crearClienteServidor } from "@/lib/supabase-server";
 import { obtenerIp, rateLimitConVentana } from "@/lib/csp-rate-limit";
+import {
+  hashIdentificador,
+  RECOVERY_VENTANA_MS,
+  RECOVERY_VERIFY_LIMITES,
+} from "@/lib/recovery-policy";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
-// M8: como el resto de endpoints de auth. La página lo llama una vez por
-// carga; 30/hora por IP deja margen a reintentos sin abrir abuso.
-const MAX_POR_HORA = 30;
-const VENTANA_MS = 60 * 60 * 1000;
-
 /**
- * PR-02 P0 — Verifica autorización de recuperación.
+ * RUUM-USR-F4-001 (CB-1) & PR-02 P0 — Verifica autorización de recuperación.
  * Retorna { authorized: true } solo si:
  *  - existe cookie httpOnly ruum_rec_usuario (seteada por /auth/callback tras PKCE recovery)
  *  - existe sesión válida (supabase.auth.getUser)
- *  - la cookie contiene el userId (UUID) y debe coincidir con el user actual
+ *  - la cookie contiene el userId (UUID) y coincide con el user actual
  *
- * Así la autorización sobrevive al callback server-side sin depender de PASSWORD_RECOVERY,
- * y no permite a cualquier usuario autenticado cambiar password sin haber pasado por el enlace.
- *
- * A5: respuesta mínima { authorized } sin `reason` ni `error`. El detalle del
- * fallo iba al cliente (oráculo de estado de sesión + mensajes internos de
- * Supabase vía String(e)); ahora solo va al log del servidor.
+ * Rate Limit con clave compuesta (IP + cuenta/marcador + dispositivo) con
+ * umbrales diferenciados para mitigar falsos positivos en CGNAT de México.
  */
 export async function GET(request: NextRequest) {
   const sinCache = { "Cache-Control": "no-store" };
 
-  // M8: este endpoint decide si se puede cambiar la contraseña; sin límite un
-  // script podía sondearlo sin restricción de aplicación.
-  const limite = await rateLimitConVentana(obtenerIp(request), "recovery-verify-ip", MAX_POR_HORA, VENTANA_MS);
-  if (!limite.allowed) {
-    return NextResponse.json(
-      { authorized: false },
-      { status: 429, headers: { ...sinCache, "Retry-After": String(limite.retryAfterSec ?? 3600) } }
-    );
-  }
-
   try {
     const cookieStore = await cookies();
     const marcador = cookieStore.get(COOKIE_RECOVERY_USUARIO)?.value ?? null;
+    const ip = obtenerIp(request);
+    const dispositivo = request.headers.get("x-device-id")?.trim().slice(0, 128) || null;
 
-    /* CORRECCIÓN: se elimina la lectura de la cookie legacy "ruum_recovery" y
-       cualquier autorización basada en sesión sin cookie válida. Antes un
-       marcador "1" (fallback antiguo) autorizaba a cualquier usuario con
-       sesión activa a cambiar su contraseña sin pasar por el enlace. */
+    // Rate Limit Compuesto (CB-1): IP + Cuenta/UUID + Dispositivo
+    const dimensiones = await Promise.all([
+      rateLimitConVentana(ip, "recovery-verify-ip", RECOVERY_VERIFY_LIMITES.ip, RECOVERY_VENTANA_MS),
+      rateLimitConVentana(
+        marcador ? hashIdentificador(marcador) : null,
+        "recovery-verify-account",
+        RECOVERY_VERIFY_LIMITES.cuenta,
+        RECOVERY_VENTANA_MS
+      ),
+      rateLimitConVentana(
+        dispositivo ? hashIdentificador(dispositivo) : null,
+        "recovery-verify-device",
+        RECOVERY_VERIFY_LIMITES.dispositivo,
+        RECOVERY_VENTANA_MS
+      ),
+    ]);
+
+    const retryAfter = Math.max(
+      dimensiones[0].retryAfterSec ?? 0,
+      dimensiones[1].retryAfterSec ?? 0,
+      dimensiones[2].retryAfterSec ?? 0
+    );
+
+    if (dimensiones.some((d) => !d.allowed)) {
+      return NextResponse.json(
+        { authorized: false },
+        { status: 429, headers: { ...sinCache, "Retry-After": String(retryAfter || 60) } }
+      );
+    }
 
     if (!marcador) {
       return NextResponse.json({ authorized: false }, { status: 200, headers: sinCache });
@@ -75,6 +88,6 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ authorized: true }, { status: 200, headers: sinCache });
   } catch (e) {
     console.warn("[recovery/verify] error inesperado", e);
-    return NextResponse.json({ authorized: false }, { status: 200, headers: { "Cache-Control": "no-store" } });
+    return NextResponse.json({ authorized: false }, { status: 200, headers: sinCache });
   }
 }

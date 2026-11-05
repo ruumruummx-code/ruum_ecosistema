@@ -172,9 +172,81 @@ describe("VerificacionForm", () => {
     await user.click(screen.getByRole("button", { name: "Enviar para revisión manual" }));
 
     await waitFor(() => {
+      expect(subirDocumentoIdentidadMock).toHaveBeenCalled();
       expect(actualizarPerfilUsuarioMock).toHaveBeenCalled();
+    });
+    expect(await screen.findByText("Documentación enviada")).toBeInTheDocument();
+  });
+
+  it("Saga KYC Paso 1: Si falla la subida del documento, NO se muta el domicilio del usuario", async () => {
+    const user = userEvent.setup();
+    subirDocumentoIdentidadMock.mockRejectedValueOnce(new Error("Documento corrupto o rechazado"));
+
+    render(<VerificacionForm />);
+    await user.click(screen.getByText(/prefiero subir mis documentos manualmente/i));
+
+    const input = screen.getByLabelText("Subir identificación oficial") as HTMLInputElement;
+    fireEvent.change(input, {
+      target: { files: [new File(["jpg"], "ine.jpg", { type: "image/jpeg" })] },
+    });
+
+    await user.type(screen.getByPlaceholderText("06600"), "06600");
+    await waitFor(() => expect(consultarCodigoPostalMxMock).toHaveBeenCalledWith("06600"));
+
+    await user.type(screen.getByPlaceholderText("Av. Insurgentes"), "Av. Reforma");
+    await user.type(screen.getByPlaceholderText("123"), "222");
+
+    await user.click(screen.getByRole("button", { name: "Enviar para revisión manual" }));
+
+    await waitFor(() => {
       expect(subirDocumentoIdentidadMock).toHaveBeenCalled();
     });
+    // Verificación crítica de CB-1: el perfil jamás se actualizó
+    expect(actualizarPerfilUsuarioMock).not.toHaveBeenCalled();
+    expect(await screen.findByText(/Documento corrupto o rechazado/i)).toBeInTheDocument();
+  });
+
+  it("Saga KYC Paso 2: Si el documento sube pero falla el domicilio, entra en estado intermedio y permite reintentar sin re-subir documento", async () => {
+    const user = userEvent.setup();
+    subirDocumentoIdentidadMock.mockResolvedValueOnce("docs/ine-ok.jpg");
+    actualizarPerfilUsuarioMock.mockRejectedValueOnce(new Error("Fallo de red en guardado de domicilio"));
+
+    render(<VerificacionForm />);
+    await user.click(screen.getByText(/prefiero subir mis documentos manualmente/i));
+
+    const input = screen.getByLabelText("Subir identificación oficial") as HTMLInputElement;
+    fireEvent.change(input, {
+      target: { files: [new File(["jpg"], "ine.jpg", { type: "image/jpeg" })] },
+    });
+
+    await user.type(screen.getByPlaceholderText("06600"), "06600");
+    await waitFor(() => expect(consultarCodigoPostalMxMock).toHaveBeenCalledWith("06600"));
+
+    await user.type(screen.getByPlaceholderText("Av. Insurgentes"), "Av. Reforma");
+    await user.type(screen.getByPlaceholderText("123"), "222");
+
+    await user.click(screen.getByRole("button", { name: "Enviar para revisión manual" }));
+
+    // Paso 1 subió, Paso 2 falló
+    await waitFor(() => {
+      expect(subirDocumentoIdentidadMock).toHaveBeenCalledTimes(1);
+      expect(actualizarPerfilUsuarioMock).toHaveBeenCalledTimes(1);
+    });
+
+    // Se muestra el estado intermedio y el botón de reintento específico
+    expect(await screen.findByText(/Identificación cargada y validada en el servidor/i)).toBeInTheDocument();
+    const retryBtn = await screen.findByRole("button", { name: "Reintentar guardar domicilio" });
+    expect(retryBtn).toBeInTheDocument();
+
+    // Reintento: resolver exitosamente actualizarPerfilUsuario
+    actualizarPerfilUsuarioMock.mockResolvedValueOnce({});
+    await user.click(retryBtn);
+
+    await waitFor(() => {
+      expect(actualizarPerfilUsuarioMock).toHaveBeenCalledTimes(2);
+    });
+    // No volvió a subir el documento porque ya estaba validado en el servidor
+    expect(subirDocumentoIdentidadMock).toHaveBeenCalledTimes(1);
     expect(await screen.findByText("Documentación enviada")).toBeInTheDocument();
   });
 });

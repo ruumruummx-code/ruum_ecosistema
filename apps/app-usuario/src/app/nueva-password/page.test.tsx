@@ -97,6 +97,11 @@ describe("FormularioRecuperarPassword", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     tieneSupabaseMock.mockReturnValue(true);
+    vi.spyOn(globalThis, "fetch").mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => ({ ok: true }),
+    } as Response);
   });
 
   it("valida correo vacío/inválido, envía enlace, aplica cooldown y permite solicitar otro", async () => {

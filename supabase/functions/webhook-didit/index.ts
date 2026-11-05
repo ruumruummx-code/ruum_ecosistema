@@ -214,14 +214,43 @@ Deno.serve(async (req) => {
       }
     }
   } catch (error) {
+    const mensajeError = error instanceof Error ? error.message : String(error);
     console.error(
       "Error aplicando decisión Didit",
-      error instanceof Error ? error.message : error,
+      mensajeError,
     );
+
+    const reintentos = ((verificacion as { reintentos_webhook?: number }).reintentos_webhook ?? 0) + 1;
+    const esExcesoReintentos = reintentos >= 5;
+
+    // Actualizar métricas de reintento y error
     await servicio.from("verificaciones_identidad_didit").update({
-      estado: "error",
+      reintentos_webhook: reintentos,
+      ultimo_error_webhook: mensajeError.slice(0, 500),
+      ultimo_intento_webhook: new Date().toISOString(),
+      estado: esExcesoReintentos ? "error" : verificacion.estado,
     }).eq("id", verificacion.id);
-    return json({ recibido: true, error_procesando: true }, 200);
+
+    // Si excede el umbral de reintentos, enviar a Dead Letter Queue (DLQ) en auditoría
+    if (esExcesoReintentos) {
+      await servicio.from("registro_auditoria").insert({
+        evento: "webhook_didit_dlq",
+        actor: "sistema",
+        actor_id: "00000000-0000-4000-8000-000000000001",
+        datos: {
+          session_id: sessionId,
+          verificacion_id: verificacion.id,
+          reintentos,
+          error: mensajeError,
+          estado_intentado: estadoInterno,
+        },
+      });
+      // Retornar 200 para frenar el reenvío de Didit tras agotar el ciclo
+      return json({ recibido: true, dlq: true, error_procesando: mensajeError }, 200);
+    }
+
+    // Retornar 503 para que el proveedor Didit reintente la entrega del webhook
+    return json({ error: "Fallo transitorio aplicando decisión. Reintentar.", reintentos }, 503);
   }
 
   return json({ recibido: true, estado: estadoInterno }, 200);

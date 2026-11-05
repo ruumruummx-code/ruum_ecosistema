@@ -16,6 +16,7 @@ import {
 } from "@ruum/api/services";
 import { consultarCodigoPostalMx } from "../../lib/codigos-postales";
 import { logStructuredWarn } from "../../lib/logger";
+import { esperarResultadoDidit } from "../../lib/didit-realtime";
 import { VerificationSheet } from "./VerificationSheet";
 import { DiditVerificationModal } from "./DiditVerificationModal";
 
@@ -177,6 +178,8 @@ export function VerificacionForm({ fotoPerfilInicial, soloDidit = false, destino
   const [enviando, setEnviando] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [enviado, setEnviado] = useState(false);
+  const [documentoSubidoExitoso, setDocumentoSubidoExitoso] = useState(false);
+  const [falloDomicilioParcial, setFalloDomicilioParcial] = useState(false);
 
   /* Funciones Didit */
   async function iniciarDidit() {
@@ -187,10 +190,41 @@ export function VerificacionForm({ fotoPerfilInicial, soloDidit = false, destino
     setSessionIdDidit(null);
     setMostrarDiditModal(true);
     try {
-      const cliente = crearClienteNavegador();
-      const { url, sessionId } = await iniciarVerificacionDiditUsuario(cliente);
-      setUrlDidit(url);
-      setSessionIdDidit(sessionId ?? null);
+      // RUUM-USR-F5-001 (CB-3): Intentar iniciar sesión mediante endpoint con rate limit de clave compuesta
+      let sesionIniciada = false;
+      try {
+        const res = await fetch("/api/verificacion/didit/iniciar", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "x-device-id":
+              typeof window !== "undefined"
+                ? window.localStorage.getItem("ruum:didit-device") || ""
+                : "",
+          },
+        });
+        if (res.ok) {
+          const datos = (await res.json()) as { url: string; sessionId?: string };
+          setUrlDidit(datos.url);
+          setSessionIdDidit(datos.sessionId ?? null);
+          sesionIniciada = true;
+        } else if (res.status === 429) {
+          const errJson = await res.json().catch(() => null);
+          throw new Error(errJson?.error ?? "Demasiados intentos. Espera unos minutos y vuelve a probar.");
+        }
+      } catch (errFetch) {
+        if (errFetch instanceof Error && errFetch.message.includes("Demasiados intentos")) {
+          throw errFetch;
+        }
+      }
+
+      if (!sesionIniciada) {
+        // Respaldo de llamada directa si el endpoint de aplicación no está disponible
+        const cliente = crearClienteNavegador();
+        const { url, sessionId } = await iniciarVerificacionDiditUsuario(cliente);
+        setUrlDidit(url);
+        setSessionIdDidit(sessionId ?? null);
+      }
     } catch (err) {
       setErrorDidit(
         err instanceof Error ? err.message : "No fue posible conectar con el servicio de verificación de Didit."
@@ -295,31 +329,12 @@ export function VerificacionForm({ fotoPerfilInicial, soloDidit = false, destino
     setErrorDidit(null);
     try {
       const cliente = crearClienteNavegador();
-      let resultado: "verificado" | "rechazado" | "pendiente" = "pendiente";
-
-      // El mensaje del iframe sólo indica que Didit terminó. El webhook puede
-      // tardar unos segundos; esperar la actualización canónica evita mostrar
-      // éxito mientras la cuenta todavía sigue pendiente.
-      for (let intento = 0; intento < 12; intento += 1) {
-        const usuario = await obtenerUsuarioActual(cliente);
-        const verificacion = await obtenerEstadoVerificacionDiditUsuario(cliente, sid);
-
-        if (usuario?.estado_verificacion === "verificado") {
-          resultado = "verificado";
-          break;
-        }
-        /* Solo cuenta la fila de ESTA sesión: si el servicio devolvió otra
-           (p. ej. por condición de carrera), se ignora y se sigue esperando. */
-        if (verificacion && verificacion.session_id !== sid) {
-          if (intento < 11) await new Promise((resolve) => window.setTimeout(resolve, 1000));
-          continue;
-        }
-        if (["rechazado", "error", "expirado", "cancelado"].includes(verificacion?.estado ?? "")) {
-          resultado = "rechazado";
-          break;
-        }
-        if (intento < 11) await new Promise((resolve) => window.setTimeout(resolve, 1000));
-      }
+      // RUUM-USR-F5-001 (CB-2): Reemplazo de sondeo agresivo (12s x 2 qps) por Supabase Realtime con fallback
+      const resultado = await esperarResultadoDidit({
+        cliente,
+        sessionId: sid,
+        tiempoEsperaMaximoMs: 20000,
+      });
 
       if (resultado === "verificado") {
         setMostrarDiditModal(false);
@@ -428,13 +443,15 @@ export function VerificacionForm({ fotoPerfilInicial, soloDidit = false, destino
       setDocAviso(null);
     }
     setDocumento(archivo);
+    setDocumentoSubidoExitoso(false);
+    setFalloDomicilioParcial(false);
   }
 
   async function enviarManual(e: React.FormEvent) {
     e.preventDefault();
     if (enviando) return;
 
-    if (!documento) {
+    if (!documento && !documentoSubidoExitoso) {
       setError("Adjunta tu identificación oficial para continuar.");
       return;
     }
@@ -454,10 +471,25 @@ export function VerificacionForm({ fotoPerfilInicial, soloDidit = false, destino
 
     setEnviando(true);
     setError(null);
-    setDocAviso("Validando el contenido y enviando de forma segura…");
 
     try {
       const cliente = crearClienteNavegador();
+
+      // PASO 1 (SAGA KYC - CB-1): Subir y validar documento primero si aún no ha sido validado.
+      // Si el archivo falla la validación binaria, magic bytes, cuota o red, jamás se muta el perfil ni la dirección.
+      if (!documentoSubidoExitoso) {
+        if (!documento) {
+          setError("Adjunta tu identificación oficial para continuar.");
+          setEnviando(false);
+          return;
+        }
+        setDocAviso("Validando el contenido del documento y enviando de forma segura…");
+        await subirDocumentoIdentidad(cliente, documento);
+        setDocumentoSubidoExitoso(true);
+      }
+
+      // PASO 2 (SAGA KYC - CB-1): Guardar domicilio una vez que el documento fue confirmado.
+      setDocAviso("Identificación validada. Guardando domicilio…");
 
       const direccionPrincipal = [
         [calle.trim(), numero.trim()].filter(Boolean).join(" "),
@@ -469,24 +501,37 @@ export function VerificacionForm({ fotoPerfilInicial, soloDidit = false, destino
         .filter(Boolean)
         .join(", ");
 
-      await actualizarPerfilUsuario(cliente, {
-        pais: "México",
-        estado: estadoMx.trim(),
-        codigo_postal: soloDigitos(codigoPostal, 5),
-        ciudad: ciudad.trim(),
-        colonia: colonia.trim(),
-        calle: calle.trim(),
-        numero: numero.trim() || null,
-        referencias: referencias.trim() || null,
-        direccion_principal: direccionPrincipal,
-      } as PerfilUsuarioActualizable);
+      try {
+        await actualizarPerfilUsuario(cliente, {
+          pais: "México",
+          estado: estadoMx.trim(),
+          codigo_postal: soloDigitos(codigoPostal, 5),
+          ciudad: ciudad.trim(),
+          colonia: colonia.trim(),
+          calle: calle.trim(),
+          numero: numero.trim() || null,
+          referencias: referencias.trim() || null,
+          direccion_principal: direccionPrincipal,
+        } as PerfilUsuarioActualizable);
 
-      await subirDocumentoIdentidad(cliente, documento);
-      setDocAviso("Identificación recibida correctamente y enviada a revisión.");
-      setEnviado(true);
-      router.refresh();
+        setFalloDomicilioParcial(false);
+        setDocAviso("Identificación recibida correctamente y enviada a revisión.");
+        setEnviado(true);
+        router.refresh();
+      } catch (errPerfil) {
+        // Fallo parcial: el documento ya está en 'en_revision' en Storage/BD,
+        // pero la dirección falló. No revertimos documento; marcamos estado intermedio explícito.
+        setFalloDomicilioParcial(true);
+        const mensaje = esErrorRed(errPerfil)
+          ? "Tu documento fue recibido y validado, pero hubo un error de red al guardar tu domicilio. Haz clic en 'Reintentar guardar domicilio' sin volver a subir tu documento."
+          : errPerfil instanceof Error
+          ? `Tu documento fue recibido, pero ocurrió un error al guardar tu domicilio: ${errPerfil.message}. Haz clic en 'Reintentar guardar domicilio'.`
+          : "Tu documento fue recibido, pero no se pudo guardar tu domicilio. Haz clic en 'Reintentar guardar domicilio'.";
+        setError(mensaje);
+        logStructuredWarn("verificacion/VerificacionForm", "saga_domicilio_fallido_tras_documento", errPerfil);
+      }
     } catch (err) {
-      setDocAviso("La carga no se completó. Tu archivo sigue seleccionado para que puedas reintentar.");
+      setDocAviso("La carga del documento no se completó. Tu archivo sigue seleccionado para que puedas reintentar.");
       setError(
         esErrorRed(err)
           ? "Error de red. Acción: revisa tu conexión y reintenta la carga."
@@ -791,6 +836,12 @@ export function VerificacionForm({ fotoPerfilInicial, soloDidit = false, destino
                 )}
               </fieldset>
 
+              {documentoSubidoExitoso && (
+                <div className="rounded-xl bg-[#e9f3ee] p-3 text-xs font-semibold text-[#08705f] dark:bg-[#0a2e1f] dark:text-[#4dd9a3]">
+                  ✓ Identificación cargada y validada en el servidor.
+                </div>
+              )}
+
               {error && (
                 <div role="alert" aria-live="assertive">
                   <Aviso tono="danger">{error}</Aviso>
@@ -803,7 +854,9 @@ export function VerificacionForm({ fotoPerfilInicial, soloDidit = false, destino
                 loading={enviando}
                 className="w-full"
               >
-                Enviar para revisión manual
+                {falloDomicilioParcial
+                  ? "Reintentar guardar domicilio"
+                  : "Enviar para revisión manual"}
               </MobileButton>
             </MobileCard>
           </form>

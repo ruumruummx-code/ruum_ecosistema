@@ -47,14 +47,14 @@ describe("GET /api/recovery/verify", () => {
     expect(await res.json()).toEqual({ authorized: true });
   });
 
-  it("limita por IP tras 30 lecturas en la hora", async () => {
+  it("limita con clave compuesta tras agotar umbral de lecturas (RUUM-USR-F4-001)", async () => {
     const ip = "203.0.113.77";
     const req = () =>
       new NextRequest("http://localhost/api/recovery/verify", {
         headers: { "x-real-ip": ip },
       });
     let ultimo = await GET(req());
-    for (let i = 0; i < 30; i += 1) ultimo = await GET(req());
+    for (let i = 0; i < 60; i += 1) ultimo = await GET(req());
     expect(ultimo.status).toBe(429);
     expect(await ultimo.json()).toEqual({ authorized: false });
   });

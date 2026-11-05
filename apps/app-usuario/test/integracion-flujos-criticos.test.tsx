@@ -26,6 +26,7 @@ const entorno = vi.hoisted(() => {
     signUpServerMock: vi.fn(),
     getUserServerMock: vi.fn(),
     signInWithPasswordBrowserMock: vi.fn(),
+    loginFetchMock: vi.fn(),
     getSessionBrowserMock: vi.fn(),
     clasificarRolAppMock: vi.fn(),
     obtenerRutaMapboxMock: vi.fn(),
@@ -235,6 +236,7 @@ describe("Integración de flujos críticos en @ruum/app-usuario (signup, login, 
     entorno.signUpServerMock.mockReset();
     entorno.getUserServerMock.mockReset();
     entorno.signInWithPasswordBrowserMock.mockReset();
+    entorno.loginFetchMock.mockReset();
     entorno.getSessionBrowserMock.mockReset();
     entorno.clasificarRolAppMock.mockReset();
     entorno.obtenerRutaMapboxMock.mockReset();
@@ -261,6 +263,10 @@ describe("Integración de flujos críticos en @ruum/app-usuario (signup, login, 
       },
       error: null,
     });
+    entorno.loginFetchMock.mockResolvedValue(
+      new Response(JSON.stringify({ ok: true }), { status: 200 }),
+    );
+    vi.stubGlobal("fetch", (...args: unknown[]) => entorno.loginFetchMock(...args));
     entorno.getSessionBrowserMock.mockResolvedValue({
       data: { session: { access_token: "jwt-sesion-activa" } },
       error: null,
@@ -509,11 +515,11 @@ describe("Integración de flujos críticos en @ruum/app-usuario (signup, login, 
         screen.getByRole("button", { name: /iniciar sesión/i }),
       );
 
-      await waitFor(() => {
-        expect(entorno.signInWithPasswordBrowserMock).toHaveBeenCalledWith({
-          email: "cliente@ruum.mx",
-          password: "MiClaveSegura123",
-        });
+      await waitFor(() => expect(entorno.loginFetchMock).toHaveBeenCalled());
+      expect(entorno.loginFetchMock.mock.calls[0][0]).toBe("/api/auth/login");
+      expect(JSON.parse(entorno.loginFetchMock.mock.calls[0][1].body)).toMatchObject({
+        email: "cliente@ruum.mx",
+        password: "MiClaveSegura123",
       });
 
       expect(entorno.routerPush).toHaveBeenCalledWith("/viajes/nuevo");
@@ -521,10 +527,11 @@ describe("Integración de flujos críticos en @ruum/app-usuario (signup, login, 
     });
 
     it("bloquea intentos de Open Redirect en ?next= y traduce errores de credenciales o correo no confirmado", async () => {
-      entorno.signInWithPasswordBrowserMock.mockResolvedValueOnce({
-        data: { user: null, session: null },
-        error: new Error("Invalid login credentials"),
-      });
+      entorno.loginFetchMock
+        .mockResolvedValueOnce(
+          new Response(JSON.stringify({ error: "Correo o contraseña incorrectos." }), { status: 401 }),
+        )
+        .mockResolvedValueOnce(new Response(JSON.stringify({ ok: true }), { status: 200 }));
 
       const elementoPagina = await PaginaLogin({
         searchParams: Promise.resolve({

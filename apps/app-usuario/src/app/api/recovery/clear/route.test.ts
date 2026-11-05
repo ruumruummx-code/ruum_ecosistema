@@ -37,10 +37,10 @@ describe("POST /api/recovery/clear", () => {
     expect(res.status).toBe(200);
   });
 
-  it("limita a 20/hora por IP", async () => {
+  it("limita con clave compuesta por IP o dispositivo (RUUM-USR-F4-001)", async () => {
     const ip = "203.0.113.84";
     let ultimo = await POST(req(undefined, ip));
-    for (let i = 0; i < 20; i += 1) ultimo = await POST(req(undefined, ip));
+    for (let i = 0; i < 40; i += 1) ultimo = await POST(req(undefined, ip));
     expect(ultimo.status).toBe(429);
   });
 

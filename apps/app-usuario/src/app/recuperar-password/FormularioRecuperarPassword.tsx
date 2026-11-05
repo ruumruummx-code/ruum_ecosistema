@@ -7,7 +7,7 @@ import { Aviso, MobileShell, MobileCard } from "@ruum/ui";
 import { TEXTOS_CARGANDO } from "@ruum/shared/constants";
 import { traducirErrorAuth } from "@ruum/shared/utils";
 import { registrarEventoUx } from "../../lib/analytics";
-import { crearClienteNavegador, tieneSupabaseConfigurado } from "../../lib/supabase-browser";
+import { obtenerHeadersCsrf } from "../../lib/csrf";
 
 function IconoCorreo({ className = "size-4 text-[#566889]" }: { className?: string }) {
   return (
@@ -143,15 +143,28 @@ export function FormularioRecuperarPassword({
     registrarEventoUx("recuperacion_enviada");
 
     try {
-      if (!tieneSupabaseConfigurado()) {
-        throw new Error("Supabase no está configurado en este entorno.");
+      const headersCsrf = obtenerHeadersCsrf();
+      const res = await fetch("/api/recovery/request", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...headersCsrf,
+        },
+        body: JSON.stringify({ email: correo }),
+      });
+
+      const data = (await res.json().catch(() => ({}))) as { error?: string; captchaRequerido?: boolean };
+
+      if (res.status === 428 && data.captchaRequerido) {
+        setError(data.error || "Por seguridad, confirma la verificación humana para continuar.");
+        registrarEventoUx("recuperacion_error", { motivo: "captcha_requerido" });
+        return;
       }
-      const cliente = crearClienteNavegador();
-      const { error: errorAuth } = await cliente.auth.resetPasswordForEmail(
-        correo,
-        { redirectTo: `${window.location.origin}/auth/callback?type=recovery&next=/nueva-password` }
-      );
-      if (errorAuth) throw errorAuth;
+
+      if (!res.ok) {
+        throw new Error(data.error || "No pudimos enviar el correo. Intenta de nuevo.");
+      }
+
       setEnviado(true);
       registrarEventoUx("recuperacion_exitosa");
     } catch (err) {

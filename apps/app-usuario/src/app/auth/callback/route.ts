@@ -30,14 +30,18 @@ function opcionesCookieRecovery() {
   };
 }
 
-async function setRecoveryCookie(cookieStore: Awaited<ReturnType<typeof cookies>>, supabase: ReturnType<typeof crearClienteServidor>) {
+async function setRecoveryCookie(
+  cookieStore: Awaited<ReturnType<typeof cookies>>,
+  supabase: ReturnType<typeof crearClienteServidor>,
+  userDirecto?: { id?: string } | null
+) {
   try {
-    const { data } = await supabase.auth.getUser();
+    const userId = userDirecto?.id ?? (await supabase.auth.getUser()).data.user?.id;
     /* CORRECCIÓN: antes, si getUser() fallaba, se seteaba la cookie con "1" y
        /api/recovery/verify la aceptaba sin validar userId. Ahora solo se
        marca autorización cuando el usuario es conocido. */
-    if (!data.user?.id) return;
-    cookieStore.set(COOKIE_RECOVERY, data.user.id, opcionesCookieRecovery());
+    if (!userId) return;
+    cookieStore.set(COOKIE_RECOVERY, userId, opcionesCookieRecovery());
   } catch (err) {
     // No se setea marcador: /nueva-password rechazará el acceso.
     logStructuredWarn("auth/callback", "set_recovery_cookie_fallido", err);
@@ -146,14 +150,14 @@ function clasificarCausaError(error: unknown, searchParams: URLSearchParams): "e
 
   // 1. Flujo PKCE (autorización por código)
   if (code) {
-    const { error } = await supabase.auth.exchangeCodeForSession(code);
+    const { data: dataAuth, error } = await supabase.auth.exchangeCodeForSession(code);
     if (!error) {
       let queryMismatch = "";
       if (type === "recovery") {
-        await setRecoveryCookie(cookieStore, supabase);
+        // T5: Consolidación de getUser() - reusar dataAuth.user para evitar 2 round-trips extra a GoTrue
+        const nuevoUser = dataAuth?.user ?? (await supabase.auth.getUser().then((r) => r.data?.user).catch(() => null));
+        await setRecoveryCookie(cookieStore, supabase, nuevoUser);
         try {
-          const { data: dataNueva } = await supabase.auth.getUser();
-          const nuevoUser = dataNueva?.user;
           if (usuarioPrevioId && nuevoUser && nuevoUser.id !== usuarioPrevioId) {
             queryMismatch = `?cuenta_distinta=1&anterior=${encodeURIComponent(usuarioPrevioEmail || "")}&nueva=${encodeURIComponent(nuevoUser.email || "")}`;
           }
@@ -177,17 +181,17 @@ function clasificarCausaError(error: unknown, searchParams: URLSearchParams): "e
 
   // 2. Flujo OTP / Hash (verificación de token por correo)
   if (tokenHash) {
-    const { error } = await supabase.auth.verifyOtp({
+    const { data: dataAuth, error } = await supabase.auth.verifyOtp({
       type,
       token_hash: tokenHash,
     });
     if (!error) {
       let queryMismatch = "";
       if (type === "recovery") {
-        await setRecoveryCookie(cookieStore, supabase);
+        // T5: Consolidación de getUser() - reusar dataAuth.user
+        const nuevoUser = dataAuth?.user ?? (await supabase.auth.getUser().then((r) => r.data?.user).catch(() => null));
+        await setRecoveryCookie(cookieStore, supabase, nuevoUser);
         try {
-          const { data: dataNueva } = await supabase.auth.getUser();
-          const nuevoUser = dataNueva?.user;
           if (usuarioPrevioId && nuevoUser && nuevoUser.id !== usuarioPrevioId) {
             queryMismatch = `?cuenta_distinta=1&anterior=${encodeURIComponent(usuarioPrevioEmail || "")}&nueva=${encodeURIComponent(nuevoUser.email || "")}`;
           }

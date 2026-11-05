@@ -8,6 +8,7 @@ const mocks = vi.hoisted(() => ({
   signIn: vi.fn(),
   push: vi.fn(),
   refresh: vi.fn(),
+  fetch: vi.fn(),
 }));
 
 vi.mock("next/navigation", () => ({
@@ -27,6 +28,8 @@ describe("LoginDesktop — Pantalla de Inicio de Sesión de Escritorio", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mocks.signIn.mockResolvedValue({ error: null });
+    mocks.fetch.mockResolvedValue(new Response(JSON.stringify({ ok: true }), { status: 200 }));
+    vi.stubGlobal("fetch", mocks.fetch);
   });
 
   it("renderiza la barra de navegación superior de escritorio con logo, enlace, botón de registro y selector de idioma", () => {
@@ -144,7 +147,11 @@ describe("LoginDesktop — Pantalla de Inicio de Sesión de Escritorio", () => {
     await user.type(inputPassword, "password123");
     await user.click(btnSubmit);
 
-    expect(mocks.signIn).toHaveBeenCalledWith({
+    expect(mocks.fetch).toHaveBeenCalledWith(
+      "/api/auth/login",
+      expect.objectContaining({ method: "POST" }),
+    );
+    expect(JSON.parse(mocks.fetch.mock.calls[0][1].body)).toMatchObject({
       email: "lomelinhectorm@gmail.com",
       password: "password123",
     });

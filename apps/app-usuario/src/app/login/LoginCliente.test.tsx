@@ -6,16 +6,20 @@ import { cleanup, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { LoginCliente } from "./LoginCliente";
 
-const mocks = vi.hoisted(() => ({ signIn: vi.fn(), push: vi.fn(), refresh: vi.fn() }));
+const mocks = vi.hoisted(() => ({ push: vi.fn(), refresh: vi.fn(), fetch: vi.fn() }));
 vi.mock("next/navigation", () => ({ useRouter: () => ({ push: mocks.push, refresh: mocks.refresh }) }));
 vi.mock("../../lib/analytics", () => ({ registrarEventoUx: vi.fn() }));
 vi.mock("../../lib/supabase-browser", () => ({
   tieneSupabaseConfigurado: () => true,
-  crearClienteNavegador: () => ({ auth: { signInWithPassword: mocks.signIn } }),
 }));
 
 describe("LoginCliente", () => {
-  beforeEach(() => { cleanup(); vi.clearAllMocks(); mocks.signIn.mockResolvedValue({ error: null }); });
+  beforeEach(() => {
+    cleanup();
+    vi.clearAllMocks();
+    mocks.fetch.mockResolvedValue(new Response(JSON.stringify({ ok: true }), { status: 200 }));
+    vi.stubGlobal("fetch", mocks.fetch);
+  });
 
   it("valida antes de enviar, enfoca el primer error y lo elimina al corregir", async () => {
     const user = userEvent.setup();
@@ -24,7 +28,7 @@ describe("LoginCliente", () => {
     await user.click(screen.getByRole("button", { name: "Iniciar sesión" }));
     expect(correo).toHaveFocus();
     expect(correo).toHaveAttribute("aria-invalid", "true");
-    expect(mocks.signIn).not.toHaveBeenCalled();
+    expect(mocks.fetch).not.toHaveBeenCalled();
     await user.type(correo, "invalido");
     expect(screen.getByText(/Introduce un correo válido/)).toBeInTheDocument();
     await user.clear(correo);
@@ -33,7 +37,8 @@ describe("LoginCliente", () => {
     await user.type(screen.getByLabelText(/^Contraseña/, { selector: "input" }), "clave-existente");
     await user.click(screen.getByRole("button", { name: "Iniciar sesión" }));
     await waitFor(() => expect(mocks.push).toHaveBeenCalledWith("/"));
-    expect(mocks.signIn).toHaveBeenCalledWith({ email: "persona@ejemplo.com", password: "clave-existente" });
+    expect(mocks.fetch).toHaveBeenCalledWith("/api/auth/login", expect.objectContaining({ method: "POST" }));
+    expect(JSON.parse(mocks.fetch.mock.calls[0][1].body)).toMatchObject({ email: "persona@ejemplo.com", password: "clave-existente" });
   });
 
   it("permite mostrar y ocultar la contraseña sin enviar el formulario", async () => {
@@ -46,7 +51,7 @@ describe("LoginCliente", () => {
     expect(password).toHaveValue("mi-clave");
     await user.click(screen.getByRole("button", { name: "Ocultar contraseña" }));
     expect(password).toHaveAttribute("type", "password");
-    expect(mocks.signIn).not.toHaveBeenCalled();
+    expect(mocks.fetch).not.toHaveBeenCalled();
   });
 
   it("mantiene el destino solicitado después de autenticar", async () => {

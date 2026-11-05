@@ -12,7 +12,8 @@ import {
 import { traducirErrorAuth } from "@ruum/shared/utils";
 import { normalizarCorreoRegistro } from "../../lib/registro-usuario";
 import { registrarEventoUx } from "../../lib/analytics";
-import { crearClienteNavegador, tieneSupabaseConfigurado } from "../../lib/supabase-browser";
+import { obtenerHeadersCsrf } from "../../lib/csrf";
+import { tieneSupabaseConfigurado } from "../../lib/supabase-browser";
 import { LogoRuum } from "../experiencia-publica";
 
 interface LoginClienteProps {
@@ -314,13 +315,35 @@ export function LoginCliente({ motivo, siguiente, aviso }: LoginClienteProps) {
     registrarEventoUx("login_enviado", { reason: motivo });
 
     try {
-      const cliente = crearClienteNavegador();
       const emailNormalizado = normalizarCorreoRegistro(email);
-      const { error: errorAuth } = await cliente.auth.signInWithPassword({
-        email: emailNormalizado,
-        password,
+      let dispositivo = "";
+      try {
+        dispositivo = window.localStorage.getItem("ruum:login-device") ??
+          (typeof globalThis.crypto?.randomUUID === "function"
+            ? globalThis.crypto.randomUUID()
+            : `device-${Date.now()}`);
+        window.localStorage.setItem("ruum:login-device", dispositivo);
+      } catch {
+        dispositivo = "";
+      }
+      const res = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: obtenerHeadersCsrf({
+          "Content-Type": "application/json",
+          "x-device-id": dispositivo,
+        }),
+        body: JSON.stringify({
+          email: emailNormalizado,
+          password,
+          captchaToken:
+            typeof window !== "undefined"
+              ? (window as Window & { __RUUM_TURNSTILE_TOKEN__?: string }).__RUUM_TURNSTILE_TOKEN__
+              : undefined,
+        }),
+        signal: AbortSignal.timeout(12_000),
       });
-      if (errorAuth) throw errorAuth;
+      const cuerpo = (await res.json().catch(() => null)) as { error?: string } | null;
+      if (!res.ok) throw new Error(cuerpo?.error ?? "No pudimos iniciar sesión.");
       registrarEventoUx("login_exitoso", {
         reason: motivo,
         destino_protegido: siguiente !== "/",
@@ -328,7 +351,7 @@ export function LoginCliente({ motivo, siguiente, aviso }: LoginClienteProps) {
       router.push(siguiente);
       router.refresh();
     } catch (err) {
-      setError(traducirErrorAuth(err));
+      setError(err instanceof Error ? err.message : traducirErrorAuth(err));
       registrarEventoUx("login_error", { reason: motivo });
     } finally {
       setEnviando(false);
