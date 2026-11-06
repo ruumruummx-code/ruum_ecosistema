@@ -105,13 +105,6 @@ function IconoUsuarioConfiable({ className = "size-5" }: { className?: string })
   );
 }
 
-function IconoChevronAbajo({ className = "size-3.5" }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden="true">
-      <path d="m6 9 6 6 6-6" />
-    </svg>
-  );
-}
 
 function IlustracionHeroLogin({ className = "w-full max-w-lg h-auto" }: { className?: string }) {
   return (
@@ -280,8 +273,6 @@ export function LoginCliente({ motivo, siguiente, aviso }: LoginClienteProps) {
   const [enviando, setEnviando] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [tocados, setTocados] = useState({ email: false, password: false });
-  const [idioma, setIdioma] = useState<"ES" | "EN">("ES");
-  const [menuIdiomaAbierto, setMenuIdiomaAbierto] = useState(false);
   const correoRef = useRef<HTMLInputElement>(null);
   const passwordRef = useRef<HTMLInputElement>(null);
 
@@ -365,7 +356,6 @@ export function LoginCliente({ motivo, siguiente, aviso }: LoginClienteProps) {
         variant="compact"
         padding="md"
         className="login-usuario login-container h-dvh max-h-dvh overflow-hidden !pb-0"
-        style={{ height: "100dvh", maxHeight: "100dvh", overflow: "hidden" }}
       >
         <div className="flex min-h-[80dvh] flex-col items-center justify-center text-center">
           <div className="login-usuario__brand login-logo mx-auto h-9 w-auto md:h-16 flex items-center justify-center" aria-label="Ruum Ruum">
@@ -399,7 +389,6 @@ export function LoginCliente({ motivo, siguiente, aviso }: LoginClienteProps) {
       conFondoCanvas
       className="login-usuario login-container relative h-dvh max-h-dvh overflow-hidden !pb-0 bg-[#f4f7fb] dark:bg-[#061529] flex flex-col"
       contentClassName="h-full justify-between sm:justify-center relative z-10 max-w-[480px] lg:max-w-none lg:w-full lg:p-0"
-      style={{ height: "100dvh", maxHeight: "100dvh", overflow: "hidden" }}
     >
       {/* Elemento gráfico decorativo superior móvil */}
       <div className="pointer-events-none absolute right-0 top-0 h-44 w-44 select-none opacity-40 dark:opacity-20 sm:h-56 sm:w-56 lg:hidden" aria-hidden="true">
@@ -452,40 +441,10 @@ export function LoginCliente({ motivo, siguiente, aviso }: LoginClienteProps) {
           <span>¿Primera vez aquí?</span>
           <Link
             href="/registro"
-            className="rounded-xl border border-[#0066FF] px-4 py-1.5 font-display text-xs xl:text-sm font-bold text-[#0066FF] transition hover:bg-[#0066FF] hover:text-white dark:border-[#4d94ff] dark:text-[#4d94ff] dark:hover:bg-[#4d94ff] dark:hover:text-[#061529]"
+            className="rounded-xl border border-[#0066FF] px-4 py-1.5 font-display text-xs xl:text-sm font-bold user-essential-link transition hover:bg-[#0066FF] hover:text-white dark:border-[#4d94ff] dark:hover:bg-[#4d94ff] dark:hover:text-[#061529]"
           >
             Regístrate gratis
           </Link>
-          <div className="relative">
-            <button
-              type="button"
-              onClick={() => setMenuIdiomaAbierto(!menuIdiomaAbierto)}
-              className="flex items-center gap-1 rounded-lg px-2 py-1 font-semibold text-slate-700 hover:bg-slate-100 transition dark:text-slate-200 dark:hover:bg-slate-800 cursor-pointer"
-              aria-label="Seleccionar idioma"
-              aria-expanded={menuIdiomaAbierto}
-            >
-              <span>{idioma}</span>
-              <IconoChevronAbajo className="size-3 text-slate-500" />
-            </button>
-            {menuIdiomaAbierto && (
-              <div className="absolute right-0 mt-1 w-20 rounded-xl border border-slate-200 bg-white p-1 shadow-lg dark:border-slate-700 dark:bg-[#0a2342] z-30">
-                <button
-                  type="button"
-                  onClick={() => { setIdioma("ES"); setMenuIdiomaAbierto(false); }}
-                  className={`w-full rounded-lg px-2.5 py-1 text-left text-xs font-semibold ${idioma === "ES" ? "bg-blue-50 text-[#0066FF] dark:bg-blue-950 dark:text-blue-300" : "text-slate-700 hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-slate-800"}`}
-                >
-                  ES
-                </button>
-                <button
-                  type="button"
-                  onClick={() => { setIdioma("EN"); setMenuIdiomaAbierto(false); }}
-                  className={`w-full rounded-lg px-2.5 py-1 text-left text-xs font-semibold ${idioma === "EN" ? "bg-blue-50 text-[#0066FF] dark:bg-blue-950 dark:text-blue-300" : "text-slate-700 hover:bg-slate-50 dark:text-slate-300 dark:hover:bg-slate-800"}`}
-                >
-                  EN
-                </button>
-              </div>
-            )}
-          </div>
         </div>
       </header>
 
@@ -500,19 +459,19 @@ export function LoginCliente({ motivo, siguiente, aviso }: LoginClienteProps) {
           <div>
             <div className="flex items-center gap-2">
               <span className="h-0.5 w-7 rounded-full bg-[#00D1D1]" aria-hidden="true" />
-              <span className="font-display text-[11px] font-extrabold uppercase tracking-widest text-[#008B8B] dark:text-[#00D1D1]">
+              <span className="font-display text-[11px] font-extrabold uppercase tracking-widest user-essential-teal">
                 MOVILIDAD INTELIGENTE
               </span>
             </div>
             <h1 className="mt-2.5 font-display text-4xl xl:text-5xl font-black tracking-tight text-[#0a2342] dark:text-white leading-[1.12]">
               Tu traslado, <br />
-              <span className="text-[#0066FF] dark:text-[#38bdf8]">en orden.</span>
+              <span className="user-essential-link">en orden.</span>
             </h1>
 
             {/* Fila de 3 Pilares: Rápido, Seguro, Confiable */}
             <div className="mt-5 flex items-center gap-8 xl:gap-10">
               <div className="flex flex-col items-center">
-                <span className="flex size-11 items-center justify-center rounded-full bg-blue-100/70 text-[#0066FF] shadow-2xs dark:bg-blue-950/60 dark:text-[#38bdf8]">
+                <span className="flex size-11 items-center justify-center rounded-full bg-blue-100/70 user-essential-link shadow-2xs dark:bg-blue-950/60">
                   <IconoRayo className="size-5" />
                 </span>
                 <span className="mt-1.5 text-xs font-bold text-slate-800 dark:text-slate-200">
@@ -520,7 +479,7 @@ export function LoginCliente({ motivo, siguiente, aviso }: LoginClienteProps) {
                 </span>
               </div>
               <div className="flex flex-col items-center">
-                <span className="flex size-11 items-center justify-center rounded-full bg-blue-100/70 text-[#0066FF] shadow-2xs dark:bg-blue-950/60 dark:text-[#38bdf8]">
+                <span className="flex size-11 items-center justify-center rounded-full bg-blue-100/70 user-essential-link shadow-2xs dark:bg-blue-950/60">
                   <IconoEscudoCheck className="size-5" />
                 </span>
                 <span className="mt-1.5 text-xs font-bold text-slate-800 dark:text-slate-200">
@@ -528,7 +487,7 @@ export function LoginCliente({ motivo, siguiente, aviso }: LoginClienteProps) {
                 </span>
               </div>
               <div className="flex flex-col items-center">
-                <span className="flex size-11 items-center justify-center rounded-full bg-blue-100/70 text-[#0066FF] shadow-2xs dark:bg-blue-950/60 dark:text-[#38bdf8]">
+                <span className="flex size-11 items-center justify-center rounded-full bg-blue-100/70 user-essential-link shadow-2xs dark:bg-blue-950/60">
                   <IconoUsuarioConfiable className="size-5" />
                 </span>
                 <span className="mt-1.5 text-xs font-bold text-slate-800 dark:text-slate-200">
@@ -544,7 +503,7 @@ export function LoginCliente({ motivo, siguiente, aviso }: LoginClienteProps) {
           </div>
 
           {/* Footer Inferior Izquierdo */}
-          <p className="mt-auto pt-2 text-[10px] xl:text-[11px] font-bold tracking-widest text-slate-400 dark:text-slate-500 uppercase">
+          <p className="mt-auto pt-2 text-[10px] xl:text-[11px] font-bold tracking-widest user-essential-muted uppercase">
             PERSONAS &bull; EMPRESAS &bull; CIUDADES EN MOVIMIENTO
           </p>
         </section>
@@ -672,7 +631,7 @@ export function LoginCliente({ motivo, siguiente, aviso }: LoginClienteProps) {
                   </label>
                   <Link
                     href="/recuperar-password"
-                    className="text-[12px] font-bold text-[#0066FF] hover:underline dark:text-[#4d94ff] sm:text-[12.5px]"
+                    className="text-[12px] font-bold user-essential-link hover:underline sm:text-[12.5px]"
                   >
                     ¿La olvidaste?
                   </Link>
@@ -762,13 +721,13 @@ export function LoginCliente({ motivo, siguiente, aviso }: LoginClienteProps) {
             <div className="flex flex-col gap-1 text-center text-[12.5px] font-medium text-[#4e5f80] dark:text-[#a8b5cc] sm:gap-1.5 sm:text-[13px]">
               <p>
                 ¿No tienes cuenta?{" "}
-                <Link href="/registro" className="font-bold text-[#0066FF] hover:underline dark:text-[#4d94ff]">
+                <Link href="/registro" className="font-bold user-essential-link hover:underline">
                   Regístrate gratis
                 </Link>
               </p>
               <p className="text-[12px] sm:text-[12.5px]">
                 ¿Primera vez aquí?{" "}
-                <Link href="/onboarding" className="font-bold text-[#0066FF] hover:underline dark:text-[#4d94ff]">
+                <Link href="/onboarding" className="font-bold user-essential-link hover:underline">
                   Conoce cómo funciona Ruum
                 </Link>
               </p>
@@ -785,24 +744,24 @@ export function LoginCliente({ motivo, siguiente, aviso }: LoginClienteProps) {
                 Datos protegidos
               </span>
               <span className="inline-flex items-center gap-1.5">
-                <span className="text-[#008B8B] dark:text-[#00D1D1]"><IconoCandado className="size-3.5 text-[#008B8B] dark:text-[#00D1D1]" /></span>
+                <span className="user-essential-teal"><IconoCandado className="size-3.5 user-essential-teal" /></span>
                 Cifrado TLS/SSL
               </span>
               <span className="inline-flex items-center gap-1.5">
-                <span className="text-[#0066FF] dark:text-[#4d94ff]"><IconoUsuarioSeguro /></span>
+                <span className="user-essential-link"><IconoUsuarioSeguro /></span>
                 Tu información segura
               </span>
             </div>
           </div>
 
           {/* Términos y privacidad */}
-          <p className="mt-2.5 pb-0.5 text-center text-[10.5px] font-medium leading-relaxed text-[#8b9bb0] dark:text-[#6b7a99] sm:text-[11px]">
+          <p className="mt-2.5 pb-0.5 text-center text-[10.5px] font-medium leading-relaxed user-essential-muted sm:text-[11px]">
             Al continuar, aceptas nuestros{" "}
-            <Link href="/legal/terminos" className="font-semibold text-[#0066FF] hover:underline dark:text-[#4d94ff]">
+            <Link href="/legal/terminos" className="font-semibold user-essential-link hover:underline">
               Términos y condiciones
             </Link>{" "}
             y{" "}
-            <Link href="/legal/privacidad" className="font-semibold text-[#0066FF] hover:underline dark:text-[#4d94ff]">
+            <Link href="/legal/privacidad" className="font-semibold user-essential-link hover:underline">
               Aviso de privacidad
             </Link>
           </p>

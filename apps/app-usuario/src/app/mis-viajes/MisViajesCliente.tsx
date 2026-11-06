@@ -259,21 +259,21 @@ function FichaVacia({ hayBusqueda, hayFiltro, pestana, onLimpiar }: { hayBusqued
               <IconoCalendarioPlus />
             </span>
             <span className="mt-2 text-[11.5px] font-bold text-[#0a2342] dark:text-[#f6f8fb]">Programa</span>
-            <span className="text-[10.5px] text-[#64748b] dark:text-[#a8b5cc]">tus viajes</span>
+            <span className="text-[10.5px] user-essential-muted">tus viajes</span>
           </div>
           <div className="flex flex-col items-center text-center">
             <span className="flex size-9 items-center justify-center rounded-xl bg-[#edf4fe] text-[#2563eb] dark:bg-[#0f2d52] dark:text-[#6ba8ff]">
               <IconoPinRuta />
             </span>
             <span className="mt-2 text-[11.5px] font-bold text-[#0a2342] dark:text-[#f6f8fb]">Gestiona</span>
-            <span className="text-[10.5px] text-[#64748b] dark:text-[#a8b5cc]">tus rutas</span>
+            <span className="text-[10.5px] user-essential-muted">tus rutas</span>
           </div>
           <div className="flex flex-col items-center text-center">
             <span className="flex size-9 items-center justify-center rounded-xl bg-[#edf4fe] text-[#2563eb] dark:bg-[#0f2d52] dark:text-[#6ba8ff]">
               <IconoGraficoBarras />
             </span>
             <span className="mt-2 text-[11.5px] font-bold text-[#0a2342] dark:text-[#f6f8fb]">Lleva un</span>
-            <span className="text-[10.5px] text-[#64748b] dark:text-[#a8b5cc]">mejor control</span>
+            <span className="text-[10.5px] user-essential-muted">mejor control</span>
           </div>
         </div>
       )}
@@ -376,7 +376,7 @@ export function MisTrasladosCliente({
               className={`flex-1 min-w-[84px] py-2 px-3 text-[13px] font-bold rounded-full transition-all cursor-pointer text-center ${
                 activo
                   ? "bg-[#0052cc] text-white shadow-sm"
-                  : "text-[#64748b] hover:text-[#0a2342] dark:text-[#94a3b8] dark:hover:text-white"
+                  : "user-essential-muted hover:text-[#0a2342] dark:hover:text-white"
               }`}
             >
               {etiqueta}
@@ -403,7 +403,7 @@ export function MisTrasladosCliente({
           <dd className="mt-1 text-[22px] font-extrabold tracking-tight text-[#0a2342] dark:text-[#f6f8fb]">
             {Traslados.length}
           </dd>
-          <dt className="text-[11.5px] font-semibold text-[#64748b] dark:text-[#a8b5cc]">Total</dt>
+          <dt className="text-[11.5px] font-semibold user-essential-muted">Total</dt>
         </div>
 
         {/* Activos (Verde) */}
@@ -414,7 +414,7 @@ export function MisTrasladosCliente({
           <dd className="mt-1 text-[22px] font-extrabold tracking-tight text-[#0a2342] dark:text-[#f6f8fb]">
             {conteos.activos}
           </dd>
-          <dt className="text-[11.5px] font-semibold text-[#64748b] dark:text-[#a8b5cc]">Activos</dt>
+          <dt className="text-[11.5px] font-semibold user-essential-muted">Activos</dt>
         </div>
 
         {/* Gastado (Coral/Rosa) */}
@@ -425,14 +425,14 @@ export function MisTrasladosCliente({
           <dd className="mt-1 text-[22px] font-extrabold tracking-tight text-[#0a2342] dark:text-[#f6f8fb]">
             {gastoFormateado}
           </dd>
-          <dt className="text-[11.5px] font-semibold text-[#64748b] dark:text-[#a8b5cc]">Gastado</dt>
+          <dt className="text-[11.5px] font-semibold user-essential-muted">Gastado</dt>
         </div>
       </dl>
 
       {/* Buscador y botón de filtro */}
       <section aria-label="Buscar y filtrar traslados" className="flex flex-col gap-1.5">
         <div className="flex items-center gap-2.5 rounded-2xl border border-[#e2e8f0] bg-white px-4 py-3 shadow-xs dark:border-[#1a3a5c] dark:bg-[#0a2342]">
-          <IconoBuscar className="size-4.5 shrink-0 text-[#64748b] dark:text-[#a8b5cc]" />
+          <IconoBuscar className="size-4.5 shrink-0 user-essential-muted" />
           <label htmlFor="buscar-traslado" className="sr-only">
             Buscar traslado
           </label>
@@ -456,7 +456,7 @@ export function MisTrasladosCliente({
               "flex size-10 shrink-0 items-center justify-center rounded-xl transition-colors cursor-pointer",
               filtroAbierto || tipoVehiculoSeleccionado
                 ? "bg-[#0052cc] text-white dark:bg-[#4d94ff] dark:text-[#061529]"
-                : "text-[#64748b] hover:bg-[#edf4fe] hover:text-[#0052cc] dark:text-[#a8b5cc] dark:hover:bg-[#0f2d52] dark:hover:text-[#f6f8fb]",
+                : "user-essential-muted hover:bg-[#edf4fe] hover:text-[#0052cc] dark:hover:bg-[#0f2d52] dark:hover:text-[#f6f8fb]",
             ].join(" ")}
           >
             <IconoFiltro className="size-4.5" />
@@ -536,7 +536,7 @@ export function MisTrasladosCliente({
           />
         ) : (
           <>
-            <div className="flex items-center justify-between px-1 text-[13px] font-semibold text-[#64748b] dark:text-[#a8b5cc]">
+            <div className="flex items-center justify-between px-1 text-[13px] font-semibold user-essential-muted">
               <span>
                 {filtrados.length} {filtrados.length === 1 ? "traslado" : "traslados"}
               </span>
@@ -605,14 +605,14 @@ export function MisTrasladosCliente({
                       <h3 className="truncate text-[15px] font-bold text-[#0a2342] dark:text-[#f6f8fb]">
                         {nombreVehiculo}
                       </h3>
-                      <p className="truncate text-[12.5px] font-medium text-[#64748b] dark:text-[#a8b5cc]">
+                      <p className="truncate text-[12.5px] font-medium user-essential-muted">
                         {origenCiudad} → {destinoCiudad}
                       </p>
                     </div>
                   </div>
 
                   {/* Trayecto / Datos secundarios */}
-                  <div className="flex items-center justify-between border-t border-[#f1f5fa] pt-3 text-[12px] font-medium text-[#64748b] dark:border-[#1a3a5c] dark:text-[#a8b5cc]">
+                  <div className="flex items-center justify-between border-t border-[#f1f5fa] pt-3 text-[12px] font-medium user-essential-muted dark:border-[#1a3a5c]">
                     <span>Conductor: <strong className="font-semibold text-[#0a2342] dark:text-[#f6f8fb]">{conductor}</strong></span>
                     <span>{datoSecundario}</span>
                   </div>

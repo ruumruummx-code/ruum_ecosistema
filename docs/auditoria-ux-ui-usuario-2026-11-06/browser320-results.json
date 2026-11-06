@@ -1,0 +1,112 @@
+[
+  {
+    "id": "320-_login",
+    "route": "/login",
+    "width": 320,
+    "status": 200,
+    "url": "/login",
+    "title": "Ruum Ruum",
+    "h1": [
+      "Tu traslado, en orden."
+    ],
+    "scrollWidth": 320,
+    "text": "Saltar al contenido principal\nRuum Ruum\n\nTu traslado, en orden.\n\nInicia sesión\n— Iniciar sesión | Bienvenido de nuevo\n\nAccede a tu cuenta para continuar\n\nCorreo electrónico\nContraseña\n¿La olvidaste?\nIniciar sesión\n\n¿No tienes cuenta? Regístrate gratis\n\n¿Primera vez aquí? Conoce cómo funciona Ruum\n\nDatos protegidos\nCifrado TLS/SSL\nTu información segura\n\nAl continuar, aceptas nuestros Términos y condiciones y Aviso de privacidad",
+    "smallTargets": [
+      {
+        "text": "¿La olvidaste?",
+        "height": 18
+      },
+      {
+        "text": "Regístrate gratis",
+        "height": 16
+      },
+      {
+        "text": "Términos y condiciones",
+        "height": 14
+      },
+      {
+        "text": "Aviso de privacidad",
+        "height": 14
+      }
+    ],
+    "errors": [],
+    "violations": [
+      {
+        "id": "color-contrast",
+        "impact": "serious",
+        "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+        "help": "Elements must meet minimum color contrast ratio thresholds",
+        "nodes": [
+          {
+            "target": [
+              ".pb-0\\.5"
+            ],
+            "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.63 (foreground color: #8b9bb0, background color: #f4f7fb, font size: 7.9pt (10.5px), font weight: normal). Expected contrast ratio of 4.5:1",
+            "html": "<p class=\"mt-2.5 pb-0.5 text-center text-[10.5px] font-medium leading-relaxed text-[#8b9bb0] dark:text-[#6b7a99] sm:text-[11px]\">"
+          },
+          {
+            "target": [
+              "a[href$=\"terminos\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.49 (foreground color: #0066ff, background color: #f4f7fb, font size: 7.9pt (10.5px), font weight: normal). Expected contrast ratio of 4.5:1",
+            "html": "<a class=\"font-semibold text-[#0066FF] hover:underline dark:text-[#4d94ff]\" href=\"/legal/terminos\">Términos y condiciones</a>"
+          },
+          {
+            "target": [
+              "a[href$=\"privacidad\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.49 (foreground color: #0066ff, background color: #f4f7fb, font size: 7.9pt (10.5px), font weight: normal). Expected contrast ratio of 4.5:1",
+            "html": "<a class=\"font-semibold text-[#0066FF] hover:underline dark:text-[#4d94ff]\" href=\"/legal/privacidad\">Aviso de privacidad</a>"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "320-_registro",
+    "route": "/registro",
+    "width": 320,
+    "status": 200,
+    "url": "/registro",
+    "title": "Ruum Ruum",
+    "h1": [
+      "Crear cuenta"
+    ],
+    "scrollWidth": 320,
+    "text": "Saltar al contenido principal\nCrear cuenta\n\nPaso 1 de 3\n\n33%\n\nNombre\nApellido\nTeléfono celular\n🇲🇽 +52 |\n\nNunca compartiremos tu número. Solo lo usaremos para notificaciones de traslado y verificar tu cuenta por SMS.\n\nContinuar\nLa verificación por SMS está suspendida temporalmente. Puedes continuar con tu registro.\n¿Ya tienes cuenta?\nInicia sesión",
+    "smallTargets": [],
+    "errors": [],
+    "violations": []
+  },
+  {
+    "id": "320-_cuenta_preferencias",
+    "route": "/cuenta/preferencias",
+    "width": 320,
+    "status": 200,
+    "url": "/cuenta/preferencias",
+    "title": "Mis Preferencias — Ruum Ruum",
+    "h1": [
+      "Preferencias",
+      "Preferencias",
+      "Mis preferencias"
+    ],
+    "scrollWidth": 320,
+    "text": "Saltar al contenido principal\n‹ Atrás\nPreferencias\nApariencia\n\nElige tema claro u oscuro. Respetamos tu sistema por defecto y lo recordamos.\n\nApariencia\nClaro\nOscuro\nAutomático (sistema)\nNavy profundo · texto humo · acento teal\n‹ Atrás\nPreferencias\nIDIOMA\nIdioma\nEspañol\nEnglish\nAPLICACIÓN\nNotificaciones y alertas\n›\nTema\nClaro\nOscuro\nAutomático\nUnidades\nMétrico\nImperial\nAccesibilidad\nEstándar\nTexto grande\nAlto contraste\nPRIVACIDAD\nBiometría\nNo disponible en esta aplicación\nUbicación\nSe autoriza desde el mapa y el navegador\nUso de datos\nActivado\nDesactivado",
+    "smallTargets": [
+      {
+        "text": "",
+        "height": 20
+      },
+      {
+        "text": "",
+        "height": 20
+      },
+      {
+        "text": "",
+        "height": 20
+      }
+    ],
+    "errors": [],
+    "violations": []
+  }
+]

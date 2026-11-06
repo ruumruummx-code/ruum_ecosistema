@@ -1,0 +1,30 @@
+{
+  "visitasRegistradas": 26,
+  "analisisCompletados": 21,
+  "visitasSinAnalisisCompleto": 5,
+  "instanciasDeReglas": 21,
+  "nodosMarcadosConRepeticionesEntrePantallas": 115,
+  "rutasCompletadas": [
+    "/login",
+    "/registro",
+    "/",
+    "/mis-viajes",
+    "/cuenta",
+    "/cuenta/preferencias",
+    "/soporte",
+    "/ubicaciones",
+    "/pasaporte",
+    "/viajes/10000000-0000-4000-8000-000000000001"
+  ],
+  "anchosCompletados": [
+    390,
+    1440,
+    320
+  ],
+  "pruebasComponentes": {
+    "archivos": 3,
+    "aprobadas": 32
+  },
+  "typecheck": "aprobado en segundo intento",
+  "dictamen": "NO GO"
+}

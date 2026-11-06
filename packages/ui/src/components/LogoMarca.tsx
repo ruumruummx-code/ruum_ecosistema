@@ -61,6 +61,26 @@ const ALT: Record<LogoVariante, string> = {
   "version-navy": "Ruum Ruum — versión blanca sobre navy",
 };
 
+const CLASE_ALTO_POR_TAMANO: Record<number, string> = {
+  24: "h-[24px] max-h-[24px]",
+  28: "h-[28px] max-h-[28px]",
+  30: "h-[30px] max-h-[30px]",
+  32: "h-[32px] max-h-[32px]",
+  34: "h-[34px] max-h-[34px]",
+  36: "h-[36px] max-h-[36px]",
+  40: "h-[40px] max-h-[40px]",
+  48: "h-[48px] max-h-[48px]",
+  72: "h-[72px] max-h-[72px]",
+  80: "h-[80px] max-h-[80px]",
+  96: "h-[96px] max-h-[96px]",
+  128: "h-[128px] max-h-[128px]",
+  160: "h-[160px] max-h-[160px]",
+};
+
+function resolverClaseAlto(tamano: number): string {
+  return CLASE_ALTO_POR_TAMANO[tamano] ?? "h-[36px] max-h-[36px]";
+}
+
 function ImagenAdaptativa({
   variante,
   tamano,
@@ -72,9 +92,13 @@ function ImagenAdaptativa({
   className?: string;
   eager?: boolean;
 }) {
+  const altoAttr = variante === "horizontal" ? Math.round(tamano * 0.326) : tamano;
+  const anchoAttr = variante === "horizontal" ? Math.round(tamano * 2.8) : variante === "simbolo" ? tamano : undefined;
+  const claseAlto = resolverClaseAlto(tamano);
   const base: ImgHTMLAttributes<HTMLImageElement> = {
     alt: ALT[variante],
-    height: variante === "horizontal" ? Math.round(tamano * 0.326) : tamano,
+    height: altoAttr,
+    width: anchoAttr,
     decoding: eager ? "sync" : "async",
   };
   // Lockups horizontal/vertical: SVG/PNG navy en claro, versión blanca en oscuro.
@@ -84,8 +108,7 @@ function ImagenAdaptativa({
         <img
           {...base}
           src={SRC.horizontal}
-          className="ruum-logo-light block h-auto w-auto object-contain"
-          style={{ height: `${tamano}px`, width: "auto", maxWidth: "min(68vw, 320px)" }}
+          className={`ruum-logo-light ruum-logo-img block w-auto max-w-[min(68vw,320px)] object-contain ${claseAlto}`}
         />
         <img
           {...base}
@@ -93,8 +116,7 @@ function ImagenAdaptativa({
           aria-hidden
           role="presentation"
           src={SRC["horizontal-dark"]}
-          className="ruum-logo-dark h-auto w-auto object-contain"
-          style={{ height: `${tamano}px`, width: "auto", maxWidth: "min(68vw, 320px)" }}
+          className={`ruum-logo-dark ruum-logo-img block w-auto max-w-[min(68vw,320px)] object-contain ${claseAlto}`}
         />
       </span>
     );
@@ -105,8 +127,7 @@ function ImagenAdaptativa({
         <img
           {...base}
           src={SRC.vertical}
-          className="ruum-logo-light block h-auto w-auto object-contain"
-          style={{ height: `${tamano}px`, width: "auto", maxWidth: "min(68vw, 320px)" }}
+          className={`ruum-logo-light ruum-logo-img block w-auto max-w-[min(68vw,320px)] object-contain ${claseAlto}`}
         />
         <img
           {...base}
@@ -114,8 +135,7 @@ function ImagenAdaptativa({
           aria-hidden
           role="presentation"
           src={SRC["version-navy"]}
-          className="ruum-logo-dark h-auto w-auto object-contain"
-          style={{ height: `${tamano}px`, width: "auto", maxWidth: "min(68vw, 320px)" }}
+          className={`ruum-logo-dark ruum-logo-img block w-auto max-w-[min(68vw,320px)] object-contain ${claseAlto}`}
         />
       </span>
     );
@@ -124,8 +144,7 @@ function ImagenAdaptativa({
     <img
       {...base}
       src={SRC[variante]}
-      className={`block h-auto w-auto shrink-0 object-contain ${className ?? ""}`}
-      style={{ height: `${tamano}px`, width: "auto" }}
+      className={`ruum-logo-img block w-auto shrink-0 object-contain ${claseAlto} ${className ?? ""}`}
     />
   );
 }

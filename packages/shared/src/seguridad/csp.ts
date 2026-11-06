@@ -90,8 +90,8 @@ export function buildCsp(options: BuildCspOptions): string {
       : isProd && strictStyles
         ? `style-src 'self'`
         : nonce
-          ? `style-src 'self' 'unsafe-inline' 'nonce-${nonce}'`
-          : `style-src 'self' 'unsafe-inline'`;
+          ? `style-src 'self' 'unsafe-inline' 'nonce-${nonce}'; style-src-attr 'unsafe-inline'`
+          : `style-src 'self' 'unsafe-inline'; style-src-attr 'unsafe-inline'`;
 
   const connectSrc =
     `connect-src 'self' ${joinOrigins(CSP_ORIGINS.supabase)} ${joinOrigins(CSP_ORIGINS.mapbox)} ${joinOrigins(CSP_ORIGINS.sentry)} ${joinOrigins(CSP_ORIGINS.didit)}${configuredSupabaseOrigin}${extraConnect}` +

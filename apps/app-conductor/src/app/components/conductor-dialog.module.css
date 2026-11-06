@@ -1,0 +1,27 @@
+.dialog {
+  position: fixed;
+  inset: var(--conductor-visible-top, 0px) 0 var(--conductor-visible-bottom, 0px);
+  width: min(440px, calc(100% - 16px));
+  max-width: none;
+  max-height: calc(var(--conductor-visible-height, 100dvh) - 16px - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
+  margin: auto;
+  padding: 0;
+  border: 1px solid var(--conductor-border);
+  border-radius: 20px;
+  background: var(--conductor-surface);
+  color: var(--conductor-primary);
+  overflow: hidden;
+}
+.dialog[open] { display: flex; flex-direction: column; }
+.dialog::backdrop { background: rgb(0 0 0 / 60%); }
+.closeRow { display: flex; justify-content: flex-end; flex-shrink: 0; padding: 4px 8px; border-bottom: 1px solid var(--conductor-border); }
+.closeRow button {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: 48px; min-height: 48px; font-size: 24px;
+  border-radius: 12px; background: var(--conductor-surface); color: var(--conductor-primary);
+}
+.content { min-height: 0; overflow: auto; overscroll-behavior: contain; padding: 16px; overflow-wrap: anywhere; }
+.content :is(button, a) { min-height: 48px; min-width: 48px; }
+.content a { display: inline-flex; align-items: center; }
+.dialog :is(button, a):focus-visible { outline: 3px solid var(--conductor-focus); outline-offset: -3px; }
+.content:focus-visible { outline: 3px solid var(--conductor-focus); outline-offset: -3px; }

@@ -1,0 +1,631 @@
+
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Informe Técnico — apps/app-usuario</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --navy:#0d2b5e;--teal:#00c2b8;--blue:#1677ff;--green:#13b89b;
+  --amber:#f5b400;--red:#d94b5b;--purple:#7c3aed;
+  --surface:#f6f8fb;--border:#e6f0ff;--text:#1a2540;--muted:#5f7192;--white:#fff;
+}
+body{font-family:-apple-system,"Segoe UI",system-ui,sans-serif;font-size:13.5px;line-height:1.6;color:var(--text);background:#fff}
+.wrap{max-width:780px;margin:0 auto;padding:36px 22px 60px}
+
+/* HERO */
+.hero{background:linear-gradient(135deg,#0a1f47 0%,#0c3060 55%,#074060 100%);color:#fff;padding:32px 28px 28px;border-radius:14px;margin-bottom:32px}
+.hero-eye{font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#7ec8e3;margin-bottom:10px}
+.hero h1{font-size:24px;font-weight:800;line-height:1.15;margin-bottom:8px}
+.hero p{font-size:13px;color:#b0cce0;line-height:1.55}
+.hero-pills{display:flex;flex-wrap:wrap;gap:8px;margin-top:18px}
+.pill{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.18);border-radius:999px;padding:3px 11px;font-size:11px;font-weight:600;color:#ddeeff}
+
+/* SUMARIO */
+.summary{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:32px}
+.sum-card{background:var(--surface);border:1px solid var(--border);border-radius:11px;padding:14px 10px;text-align:center}
+.sum-val{font-size:26px;font-weight:800;line-height:1;margin-bottom:3px}
+.sum-lbl{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.c-blue{color:var(--blue)}.c-green{color:var(--green)}.c-amber{color:var(--amber)}.c-red{color:var(--red)}.c-teal{color:var(--teal)}.c-purple{color:var(--purple)}
+
+/* SECCIÓN */
+.sec{margin-bottom:36px}
+.sec-head{display:flex;align-items:center;gap:9px;margin-bottom:16px;padding-bottom:8px;border-bottom:2px solid var(--border)}
+.sec-icon{width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0}
+.i-blue{background:#deeeff}.i-green{background:#d6f5ee}.i-amber{background:#fff5cc}.i-red{background:#fdeaea}.i-navy{background:#e8edf8}.i-purple{background:#ede9fb}.i-teal{background:#d6f5f4}
+.sec-title{font-size:16px;font-weight:700;color:var(--navy)}
+
+/* TABLA */
+table{width:100%;border-collapse:collapse;margin-bottom:14px;font-size:12.5px}
+th{text-align:left;padding:7px 10px;background:var(--surface);color:var(--muted);font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;border-bottom:2px solid var(--border)}
+td{padding:8px 10px;border-bottom:1px solid var(--border);vertical-align:top}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:var(--surface)}
+
+/* CAJA */
+.box{border:1px solid var(--border);border-radius:11px;margin-bottom:10px;background:#fff;overflow:hidden}
+.box-head{display:grid;grid-template-columns:auto 1fr auto;align-items:start;gap:10px;padding:12px 14px}
+.box-num{width:26px;height:26px;border-radius:999px;display:flex;align-items:center;justify-content:center;font-size:10.5px;font-weight:800;flex-shrink:0}
+.n-ok{background:#d6f5ee;color:#065f46}.n-warn{background:#fff3e0;color:#92400e}.n-bad{background:#fee2e2;color:#991b1b}.n-info{background:#dbeafe;color:#1e3a8a}
+.box-body{min-width:0}
+.box-title{font-size:13.5px;font-weight:700;color:var(--navy);margin-bottom:3px}
+.box-desc{font-size:12.5px;color:var(--muted);line-height:1.45}
+.badge{flex-shrink:0;padding:2px 9px;border-radius:999px;font-size:10px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;white-space:nowrap;margin-top:1px}
+.bg-ok{background:#d6f5ee;color:#065f46}.bg-warn{background:#fff3e0;color:#92400e}.bg-bad{background:#fee2e2;color:#991b1b}.bg-info{background:#dbeafe;color:#1e3a8a}
+.box-detail{background:var(--surface);border-top:1px solid var(--border);padding:10px 14px 12px;font-size:12px;color:var(--text);line-height:1.5}
+.box-detail strong{color:var(--navy)}
+.code{display:inline-block;background:#eef2f7;border-radius:4px;padding:1px 5px;font-family:monospace;font-size:11px;color:#2d3a52}
+
+/* ÁRBOL DE DIRECTORIOS */
+.tree{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px 16px;font-family:monospace;font-size:12px;line-height:1.75;overflow-x:auto}
+.tree-dir{color:var(--navy);font-weight:700}
+.tree-file{color:var(--muted)}
+.tree-note{color:var(--teal);font-size:11px}
+
+/* LISTA */
+.check-list{list-style:none;display:flex;flex-direction:column;gap:7px}
+.check-list li{display:flex;align-items:flex-start;gap:9px;padding:9px 12px;background:var(--surface);border:1px solid var(--border);border-radius:9px;font-size:12.5px;line-height:1.45}
+.ck{width:20px;height:20px;border-radius:999px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;flex-shrink:0;margin-top:1px}
+.ck-ok{background:#d6f5ee;color:#065f46}.ck-warn{background:#fff3e0;color:#92400e}.ck-bad{background:#fee2e2;color:#991b1b}
+
+hr{border:none;border-top:1px solid var(--border);margin:28px 0}
+.footer{margin-top:44px;padding-top:18px;border-top:1px solid var(--border);text-align:center;font-size:11.5px;color:var(--muted)}
+
+@media(max-width:560px){
+  .summary{grid-template-columns:repeat(2,1fr)}
+  .hero h1{font-size:19px}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+
+<div class="hero">
+  <p class="hero-eye">Informe Técnico de Codebase · Noviembre 2026</p>
+  <h1>apps/app-usuario<br />Ruum Ruum Ecosistema</h1>
+  <p>Análisis exhaustivo del código fuente: arquitectura, dependencias, seguridad, patrones de ingeniería, calidad y deuda técnica. Basado en inspección estática del repositorio <code style="background:rgba(255,255,255,.15);padding:1px 6px;border-radius:4px;font-size:12px">c:/ruum_ecosistema-main/apps/app-usuario</code>.</p>
+  <div class="hero-pills">
+    <span class="pill">Next.js 15.5.28</span>
+    <span class="pill">React 19</span>
+    <span class="pill">TypeScript 5.7</span>
+    <span class="pill">Tailwind CSS 4</span>
+    <span class="pill">Supabase 2.47</span>
+    <span class="pill">Capacitor 8 (Android)</span>
+    <span class="pill">Stripe 23</span>
+    <span class="pill">Mapbox GL 3.32</span>
+    <span class="pill">Sentry 10.75</span>
+    <span class="pill">Vitest 3.2.6</span>
+    <span class="pill">Playwright E2E</span>
+    <span class="pill">Zod 4.6</span>
+  </div>
+</div>
+
+
+<div class="summary">
+  <div class="sum-card"><div class="sum-val c-blue">288</div><div class="sum-lbl">Archivos fuente (.ts/.tsx)</div></div>
+  <div class="sum-card"><div class="sum-val c-green">153</div><div class="sum-lbl">Tests unitarios</div></div>
+  <div class="sum-card"><div class="sum-val c-amber">14</div><div class="sum-lbl">Tests E2E (Playwright)</div></div>
+  <div class="sum-card"><div class="sum-val c-teal">28</div><div class="sum-lbl">Rutas API (Route Handlers)</div></div>
+  <div class="sum-card"><div class="sum-val c-purple">27</div><div class="sum-lbl">Contratos de flujo (.md)</div></div>
+  <div class="sum-card"><div class="sum-val c-navy" style="color:#0d2b5e">9</div><div class="sum-lbl">CSS Modules</div></div>
+  <div class="sum-card"><div class="sum-val c-green">70%</div><div class="sum-lbl">Gate cobertura (lines)</div></div>
+  <div class="sum-card"><div class="sum-val c-amber">5</div><div class="sum-lbl">Feature flags activos</div></div>
+</div>
+
+
+<div class="sec">
+  <div class="sec-head">
+    <div class="sec-icon i-blue">⚙️</div>
+    <span class="sec-title">1. Stack Tecnológico y Dependencias</span>
+  </div>
+
+  <table>
+    <thead><tr><th>Categoría</th><th>Tecnología</th><th>Versión</th><th>Rol</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Framework</strong></td><td>Next.js (App Router)</td><td>15.5.28</td><td>Rendering SSR/SSG/RSC, routing, middleware Edge</td></tr>
+      <tr><td><strong>UI Runtime</strong></td><td>React</td><td>19.0</td><td>Componentes cliente y servidor</td></tr>
+      <tr><td><strong>Tipado</strong></td><td>TypeScript</td><td>5.7.2 · strict</td><td>Type-safety completo, <code>noEmit: true</code></td></tr>
+      <tr><td><strong>Estilos</strong></td><td>Tailwind CSS + CSS Modules</td><td>4.0</td><td>Utility-first + módulos para animaciones complejas</td></tr>
+      <tr><td><strong>BaaS</strong></td><td>Supabase</td><td>2.47</td><td>Auth, Postgres, Realtime WebSockets, Storage</td></tr>
+      <tr><td><strong>Pagos</strong></td><td>Stripe</td><td>23.1 (SDK) / 6.6 (React)</td><td>Checkout, Elements, webhooks de pago</td></tr>
+      <tr><td><strong>Mapas</strong></td><td>Mapbox GL JS</td><td>3.32</td><td>Mapa de seguimiento, geocodificación, rutas</td></tr>
+      <tr><td><strong>Monitoreo</strong></td><td>Sentry</td><td>10.75.2</td><td>Errores, traces distribuidos, spans</td></tr>
+      <tr><td><strong>Caché/Rate-limit</strong></td><td>Upstash Redis</td><td>1.38</td><td>Rate limiting multidimensional, caché de rutas</td></tr>
+      <tr><td><strong>Mobile</strong></td><td>Capacitor 8</td><td>8.5.2</td><td>PWA → APK Android; WebView remota a producción</td></tr>
+      <tr><td><strong>PDF</strong></td><td>pdf-lib</td><td>1.17.1</td><td>Generación de pasaporte digital en servidor</td></tr>
+      <tr><td><strong>Excel</strong></td><td>ExcelJS</td><td>4.4.0</td><td>Importación/exportación carga masiva</td></tr>
+      <tr><td><strong>Validación</strong></td><td>Zod</td><td>4.6.6</td><td>Schemas de formulario y API routes</td></tr>
+      <tr><td><strong>KYC</strong></td><td>Didit</td><td>Interno @ruum/api</td><td>Verificación de identidad y documentos</td></tr>
+    </tbody>
+  </table>
+</div>
+
+
+<div class="sec">
+  <div class="sec-head">
+    <div class="sec-icon i-navy">🏗️</div>
+    <span class="sec-title">2. Arquitectura del Proyecto</span>
+  </div>
+
+  <div class="tree">
+<span class="tree-dir">apps/app-usuario/</span>
+├── <span class="tree-dir">src/</span>
+│   ├── <span class="tree-dir">app/</span>           <span class="tree-note">← Next.js App Router (páginas + API Routes)</span>
+│   │   ├── <span class="tree-dir">api/</span>        <span class="tree-note">← 28 Route Handlers (auth, viajes, cuenta, mapas…)</span>
+│   │   ├── <span class="tree-dir">viajes/</span>     <span class="tree-note">← Flujo nuevo traslado (wizard 5 pasos), masivo, [id]</span>
+│   │   ├── <span class="tree-dir">mis-viajes/</span> <span class="tree-note">← Listado con tabs + filtros + bottom sheet</span>
+│   │   ├── <span class="tree-dir">cuenta/</span>     <span class="tree-note">← Perfil, vehículos, facturación, verificación</span>
+│   │   ├── <span class="tree-dir">login/ registro/ onboarding/</span>
+│   │   ├── <span class="tree-dir">pasaporte/ soporte/ legal/</span>
+│   │   ├── <span class="tree-file">layout.tsx</span>  <span class="tree-note">← Root layout: fonts, LiveRegion, TemaProvider, CSP nonce</span>
+│   │   └── <span class="tree-file">middleware.ts</span> <span class="tree-note">← Edge: CSP, CSRF, sesión, rol, tracing</span>
+│   ├── <span class="tree-dir">components/</span>     <span class="tree-note">← Componentes compartidos (ConsentimientoTerminos, MobileBottomSheet…)</span>
+│   ├── <span class="tree-dir">lib/</span>            <span class="tree-note">← ~90 módulos: csp, csrf, mapbox, pdf, feature-flags, logger…</span>
+│   ├── <span class="tree-dir">state/</span>          <span class="tree-note">← Reducers puros (nuevoTraslado, realtimeTraslados)</span>
+│   └── <span class="tree-dir">types/</span>          <span class="tree-note">← Declaraciones globales (global.d.ts)</span>
+├── <span class="tree-dir">tests/</span>              <span class="tree-note">← E2E Playwright (14 specs, mock-supabase, mock-redis)</span>
+├── <span class="tree-dir">test/</span>               <span class="tree-note">← Tests de carga (vitest + k6 + Artillery)</span>
+├── <span class="tree-dir">android/</span>            <span class="tree-note">← Proyecto Gradle generado por Capacitor</span>
+├── <span class="tree-file">capacitor.config.ts</span> <span class="tree-note">← WebView → producción; schemata: https/capacitor</span>
+├── <span class="tree-file">next.config.ts</span>     <span class="tree-note">← Sentry wrap, IMAGES, redirects, security headers</span>
+├── <span class="tree-file">vitest.config.ts</span>   <span class="tree-note">← Coverage V8, thresholds 70/60/70/70</span>
+└── <span class="tree-file">lighthouserc.js</span>    <span class="tree-note">← LHCI: scores ≥0.9 performance/a11y/best-practices/seo</span>
+  </div>
+
+  <p style="font-size:12.5px;color:var(--muted);margin-top:10px">La app es un <strong>monorepo workspace</strong> que consume tres paquetes internos: <code class="code">@ruum/api</code> (lógica de negocio, Supabase client, identidad), <code class="code">@ruum/shared</code> (types, estados, seguridad) y <code class="code">@ruum/ui</code> (Design System, componentes).</p>
+</div>
+
+
+<div class="sec">
+  <div class="sec-head">
+    <div class="sec-icon i-red">🔒</div>
+    <span class="sec-title">3. Modelo de Seguridad</span>
+  </div>
+
+  <div class="box">
+    <div class="box-head">
+      <div class="box-num n-ok">✓</div>
+      <div class="box-body">
+        <div class="box-title">Content Security Policy con nonce por request (Edge Middleware)</div>
+        <div class="box-desc">La CSP se genera en <code class="code">middleware.ts</code> con un nonce criptográfico único por request (<code class="code">crypto.randomUUID()</code> → base64). En producción usa <code class="code">strict-dynamic</code> sin <code class="code">unsafe-inline</code>. El nonce se inyecta en los scripts del servidor vía <code class="code">x-nonce</code> header.</div>
+      </div>
+      <span class="badge bg-ok">Fortaleza</span>
+    </div>
+    <div class="box-detail">
+      <strong>Fuente canónica:</strong> <code class="code">@ruum/shared/seguridad</code> exportada como fachada en <code class="code">lib/csp.ts</code>. Corrección ARQ-4 documentada: elimina la doble emisión CSP estática + dinámica que bloqueaba el bundle en producción. <strong>Staging</strong> emite <code class="code">Content-Security-Policy-Report-Only</code> además de la política estricta para detectar regresiones antes de producción.
+    </div>
+  </div>
+
+  <div class="box">
+    <div class="box-head">
+      <div class="box-num n-ok">✓</div>
+      <div class="box-body">
+        <div class="box-title">CSRF Double-Submit con validación en tiempo constante</div>
+        <div class="box-desc">Implementación completa en <code class="code">lib/csrf.ts</code>: cookie <code class="code">ruum_csrf_token</code> + header <code class="code">x-csrf-token</code> comparados con <code class="code">compararTiempoConstante()</code> para prevenir ataques de timing. Se valida también <code class="code">Sec-Fetch-Site</code>, <code class="code">Origin</code> y <code class="code">Referer</code>.</div>
+      </div>
+      <span class="badge bg-ok">Fortaleza</span>
+    </div>
+  </div>
+
+  <div class="box">
+    <div class="box-head">
+      <div class="box-num n-ok">✓</div>
+      <div class="box-body">
+        <div class="box-title">Gate de rol en middleware: conductores bloqueados de rutas de usuario</div>
+        <div class="box-desc">Corrección FIX C1: un JWT válido de conductor que intente acceder a <code class="code">/viajes/*</code>, <code class="code">/cuenta</code>, etc. recibe un redirect 303 → <code class="code">/403?reason=rol_conductor</code>. La clasificación se delega a <code class="code">@ruum/api/identity</code> para no romper la separación de capas.</div>
+      </div>
+      <span class="badge bg-ok">Fortaleza</span>
+    </div>
+  </div>
+
+  <div class="box">
+    <div class="box-head">
+      <div class="box-num n-ok">✓</div>
+      <div class="box-body">
+        <div class="box-title">Rate limiting multidimensional con Redis (usuario + IP + dispositivo)</div>
+        <div class="box-desc"><code class="code">lib/rate-limit-masivos.ts</code> aplica ventanas deslizantes en Redis por tres dimensiones simultáneas. El identificador de dispositivo se hashea antes de almacenarse. También implementado para rutas individuales en <code class="code">lib/csp-rate-limit.ts</code>.</div>
+      </div>
+      <span class="badge bg-ok">Fortaleza</span>
+    </div>
+  </div>
+
+  <div class="box">
+    <div class="box-head">
+      <div class="box-num n-ok">✓</div>
+      <div class="box-body">
+        <div class="box-title">Headers HTTP defensivos: HSTS, X-Frame-Options, nosniff, Permissions-Policy</div>
+        <div class="box-desc">Definidos en fuente única <code class="code">lib/csp.ts → headersSeguridadEstaticos()</code>. HSTS solo en producción. Sin <code class="code">X-Powered-By</code> (<code class="code">poweredByHeader: false</code> en next.config). Los headers estáticos son la intersección segura sin nonce; el middleware agrega la CSP dinámica.</div>
+      </div>
+      <span class="badge bg-ok">Fortaleza</span>
+    </div>
+  </div>
+
+  <div class="box">
+    <div class="box-head">
+      <div class="box-num n-warn">!</div>
+      <div class="box-body">
+        <div class="box-title">La optimización S-5 podría omitir el refresco de sesión en rutas no listadas explícitamente</div>
+        <div class="box-desc">El middleware solo llama a <code class="code">supabase.auth.getUser()</code> si la ruta está en <code class="code">RUTAS_DEPENDIENTES_DE_SESION</code>. Rutas nuevas añadidas sin actualizar este set recibirían headers CSP correctos pero no refrescarían la sesión/cookie, lo que podría resultar en sesiones expiradas silenciosas.</div>
+      </div>
+      <span class="badge bg-warn">Atención</span>
+    </div>
+    <div class="box-detail">
+      <strong>Mitigación recomendada:</strong> Documentar explícitamente que toda nueva ruta autenticada debe añadirse a ambos sets (<code class="code">RUTAS_PROTEGIDAS_USUARIO</code> y <code class="code">RUTAS_DEPENDIENTES_DE_SESION</code>). Añadir un test de contrato que verifique que ambos sets estén sincronizados.
+    </div>
+  </div>
+</div>
+
+
+<div class="sec">
+  <div class="sec-head">
+    <div class="sec-icon i-purple">🔄</div>
+    <span class="sec-title">4. Gestión de Estado</span>
+  </div>
+
+  <table>
+    <thead><tr><th>Capa</th><th>Mecanismo</th><th>Alcance</th><th>Descripción</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Server State</strong></td><td>Next.js RSC + fetch</td><td>Request</td><td>Datos de Supabase cargados en Server Components, sin re-fetching en cliente</td></tr>
+      <tr><td><strong>Wizard Traslado</strong></td><td>useReducer puro</td><td>Componente</td><td><code class="code">NuevoTrasladoState</code> (30+ campos) con <code class="code">nuevoTrasladoReducer</code>. Acciones <code class="code">set</code> y <code class="code">reset</code>. Object.is() para evitar renders innecesarios.</td></tr>
+      <tr><td><strong>Realtime Traslados</strong></td><td>useReducer + Supabase Realtime</td><td>Global (Context)</td><td><code class="code">RealtimeTrasladosState</code>: mapa por <code class="code">trasladoId</code>. Fusión deduplicada de mensajes de chat. Reset en cambio de sesión (RC-12).</td></tr>
+      <tr><td><strong>Borrador Local</strong></td><td>localStorage + TTL 24h</td><td>Dispositivo</td><td>Persistencia no sensible del wizard con esquema v2 y validación estricta al leer. Coordenadas ofuscadas, sin domicilios ni VIN.</td></tr>
+      <tr><td><strong>Feature Flags</strong></td><td>Supabase + caché TTL</td><td>Global</td><td>Rollout porcentual determinista con bucketing <code class="code">hash(key:userId) % 100</code>. Kill-switch por env. Tags Sentry automáticos.</td></tr>
+      <tr><td><strong>Preferencias App</strong></td><td>localStorage + context</td><td>Dispositivo</td><td>Tema claro/oscuro, preferencias de notificación. Gestionado por <code class="code">TemaProvider</code>.</td></tr>
+      <tr><td><strong>Sesión Auth</strong></td><td>Supabase cookies (HttpOnly)</td><td>Servidor+cliente</td><td>Cookie httpOnly gestionada por <code class="code">@ruum/api/supabase</code>. Refresco automático en middleware Edge.</td></tr>
+    </tbody>
+  </table>
+</div>
+
+
+<div class="sec">
+  <div class="sec-head">
+    <div class="sec-icon i-teal">🚀</div>
+    <span class="sec-title">5. Flujos Principales de Negocio</span>
+  </div>
+
+  <table>
+    <thead><tr><th>Flujo</th><th>Componentes/Hooks clave</th><th>Contrato documentado</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Solicitud de Traslado</strong></td><td><code class="code">NuevoTrasladoForm</code> → <code class="code">CotizadorPortal</code> / <code class="code">NuevoTrasladoDesktop</code> → 5 pasos: Ruta · Vehículo · Detalles · Tarifa · Pago</td><td>flujo9-ownership-tarifa · flujo9-consolidacion</td></tr>
+      <tr><td><strong>Carga Masiva</strong></td><td><code class="code">useCargaMasiva</code> → Worker thread (<code class="code">carga-masiva.worker.ts</code>) → API masivos/validate · /geocode · /cotizar · /estado</td><td>flujo12-rpc-transaccional · flujo12-saga-foto</td></tr>
+      <tr><td><strong>Pago individual</strong></td><td><code class="code">PasosPago</code> → Stripe Elements v2 → <code class="code">api/viajes/[id]/estado-pago</code> → saga de confirmación</td><td>pago-individual-saga-contract · flujo10-resolucion-pago</td></tr>
+      <tr><td><strong>Seguimiento Realtime</strong></td><td><code class="code">SeguimientoTrasladoTiempoReal</code> → Supabase Realtime → <code class="code">useDashboardTracking</code> → LiveMap</td><td>flujo13-maquina-estados-f5 (tracking_realtime_v2 flag)</td></tr>
+      <tr><td><strong>Pasaporte Digital PDF</strong></td><td><code class="code">ExportarPasaportePdf</code> → <code class="code">api/viajes/[id]/pasaporte</code> → <code class="code">lib/pasaporte-pdf.ts</code> → pdf-lib</td><td>flujo9-pdf-oom · pdf-concurrency-semaphore</td></tr>
+      <tr><td><strong>Verificación KYC</strong></td><td><code class="code">VerificacionDocumentos</code> → Didit API (<code class="code">lib/didit.ts</code>) → <code class="code">lib/didit-realtime.ts</code></td><td>kyc-saga-contract · kyc-production-verification</td></tr>
+      <tr><td><strong>Autenticación</strong></td><td><code class="code">LoginCliente</code> → <code class="code">api/auth/login</code> → Supabase GoTrue → middleware refresco</td><td>flujo11-sesion-estados · recovery-cross-device</td></tr>
+      <tr><td><strong>Registro usuario</strong></td><td><code class="code">lib/registro-usuario.ts</code> → Supabase Auth → trigger tabla <code class="code">usuarios</code></td><td>flujo11-dto-pii · flujo6-consent</td></tr>
+    </tbody>
+  </table>
+</div>
+
+
+<div class="sec">
+  <div class="sec-head">
+    <div class="sec-icon i-green">📡</div>
+    <span class="sec-title">6. Observabilidad y Trazabilidad Distribuida</span>
+  </div>
+
+  <div class="box">
+    <div class="box-head">
+      <div class="box-num n-ok">✓</div>
+      <div class="box-body">
+        <div class="box-title">Trazado distribuido W3C TraceContext + Sentry en cada request</div>
+        <div class="box-desc">El middleware genera o propaga <code class="code">traceparent</code> (W3C), <code class="code">sentry-trace</code>, <code class="code">baggage</code>, <code class="code">x-trace-id</code> y <code class="code">x-span-id</code>. Todos los Route Handlers pueden continuar la traza entrante vía <code class="code">trazarRutaApi()</code>. Sentry <code class="code">continueTrace()</code> conecta spans frontend ↔ backend.</div>
+      </div>
+      <span class="badge bg-ok">Producción-ready</span>
+    </div>
+  </div>
+
+  <div class="box">
+    <div class="box-head">
+      <div class="box-num n-ok">✓</div>
+      <div class="box-body">
+        <div class="box-title">Structured logging con sanitización de PII</div>
+        <div class="box-desc"><code class="code">lib/logger.ts</code> emite objetos JSON con campos estandarizados (scope, event, level, timestamp). Todos los payloads pasan por <code class="code">sanitizeDetails()</code> de <code class="code">@ruum/api/observability</code> para eliminar datos sensibles antes de registrar.</div>
+      </div>
+      <span class="badge bg-ok">Fortaleza</span>
+    </div>
+  </div>
+
+  <div class="box">
+    <div class="box-head">
+      <div class="box-num n-ok">✓</div>
+      <div class="box-body">
+        <div class="box-title">Feature flags etiquetados automáticamente en Sentry</div>
+        <div class="box-desc">Cada evaluación de feature flag llama a <code class="code">Sentry.setTag("ff.{key}", enabled)</code> y <code class="code">Sentry.setTag("ff_stage.{key}", stage)</code>, permitiendo correlacionar errores con el anillo de rollout exacto (<code class="code">canary</code>, <code class="code">ring_1_early_adopters</code>, etc.).</div>
+      </div>
+      <span class="badge bg-ok">Fortaleza</span>
+    </div>
+  </div>
+
+  <div class="box">
+    <div class="box-head">
+      <div class="box-num n-ok">✓</div>
+      <div class="box-body">
+        <div class="box-title">Analytics UX con eventos estructurados</div>
+        <div class="box-desc"><code class="code">lib/analytics.ts</code> registra eventos de UX (<code class="code">login_visto</code>, <code class="code">login_enviado</code>, <code class="code">login_exitoso</code>, etc.) en cada flujo crítico. Implementado en login, registro, wizard de traslado.</div>
+      </div>
+      <span class="badge bg-ok">Buena práctica</span>
+    </div>
+  </div>
+
+  <div class="box">
+    <div class="box-head">
+      <div class="box-num n-warn">!</div>
+      <div class="box-body">
+        <div class="box-title">El semáforo de concurrencia PDF no tiene timeout de adquisición documentado</div>
+        <div class="box-desc"><code class="code">lib/pdf-concurrency-semaphore.ts</code> gestiona concurrencia de generación de PDFs. Sin un timeout máximo de espera, un PDF que falle en generar podría bloquear indefinidamente el semáforo para el siguiente request.</div>
+      </div>
+      <span class="badge bg-warn">Atención</span>
+    </div>
+    <div class="box-detail">
+      <strong>Recomendación:</strong> Añadir un timeout de liberación automática al semáforo (e.g. 30 segundos) y registrar en Sentry cuando se libera por timeout vs por finalización normal.
+    </div>
+  </div>
+</div>
+
+
+<div class="sec">
+  <div class="sec-head">
+    <div class="sec-icon i-amber">🧪</div>
+    <span class="sec-title">7. Calidad y Estrategia de Testing</span>
+  </div>
+
+  <table>
+    <thead><tr><th>Nivel</th><th>Herramienta</th><th>Cantidad</th><th>Cobertura / Umbrales</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Unitario</strong></td><td>Vitest 3.2.6 + Testing Library + jsdom</td><td>153 archivos .test.ts/tsx</td><td>Lines ≥70%, Branches ≥60%, Functions ≥70%</td></tr>
+      <tr><td><strong>E2E</strong></td><td>Playwright (Chromium)</td><td>14 specs</td><td>Flujos: auth, wizard, onboarding, registro, accesibilidad básica</td></tr>
+      <tr><td><strong>Rendimiento</strong></td><td>Lighthouse CI</td><td>3 URLs</td><td>Performance / A11y / Best-practices / SEO ≥ 0.9 en /login, /registro, /legal/privacidad</td></tr>
+      <tr><td><strong>Carga</strong></td><td>k6 + Artillery + Vitest</td><td>1 suite por herramienta</td><td>Flujos críticos bajo carga concurrente</td></tr>
+    </tbody>
+  </table>
+
+  <div class="box">
+    <div class="box-head">
+      <div class="box-num n-ok">✓</div>
+      <div class="box-body">
+        <div class="box-title">Suite E2E hermética: dobles de Supabase y Redis locales</div>
+        <div class="box-desc">El config de Playwright levanta <code class="code">mock-supabase.mjs</code> y <code class="code">mock-redis.mjs</code> como servidores locales. Opt-in a Supabase real vía <code class="code">PLAYWRIGHT_E2E_SUPABASE_REAL=1</code>. Evita dependencia de red externa en CI y credenciales reales.</div>
+      </div>
+      <span class="badge bg-ok">Fortaleza</span>
+    </div>
+  </div>
+
+  <div class="box">
+    <div class="box-head">
+      <div class="box-num n-ok">✓</div>
+      <div class="box-body">
+        <div class="box-title">Contratos de flujo documentados como archivos .md en lib/</div>
+        <div class="box-desc">27 documentos de contrato para flujos 6–13 (pagos, KYC, saga de reemplazo, estados huérfanos, retención fiscal, etc.). Cada contrato define precondiciones, postcondiciones y comportamiento en error, usados como referencia para los tests y code reviews.</div>
+      </div>
+      <span class="badge bg-ok">Documentación</span>
+    </div>
+  </div>
+
+  <div class="box">
+    <div class="box-head">
+      <div class="box-num n-warn">!</div>
+      <div class="box-body">
+        <div class="box-title">LHCI solo cubre 3 rutas públicas (login, registro, privacidad)</div>
+        <div class="box-desc">Las rutas autenticadas (dashboard, mis-viajes, cuenta) no están cubiertas por Lighthouse CI, por lo que el rendimiento y accesibilidad de las pantallas más usadas no tienen gate automático.</div>
+      </div>
+      <span class="badge bg-warn">Brecha</span>
+    </div>
+    <div class="box-detail">
+      <strong>Recomendación:</strong> Extender <code class="code">lighthouserc.js</code> con al menos una ruta autenticada usando la fixture de sesión existente del setup E2E. Candidatas: <code class="code">/inicio</code> (dashboard) y <code class="code">/mis-viajes</code>.
+    </div>
+  </div>
+
+  <div class="box">
+    <div class="box-head">
+      <div class="box-num n-warn">!</div>
+      <div class="box-body">
+        <div class="box-title">Timeout de 30s en Vitest puede ocultar tests lentos</div>
+        <div class="box-desc">El <code class="code">testTimeout: 30_000</code> fue aumentado por un debounce de 300ms en un buscador (RC-09). Este umbral elevado puede ocultar tests genuinamente lentos. 30 tests podrían pasar aunque tarden 25 segundos cada uno sin disparar ninguna alerta.</div>
+      </div>
+      <span class="badge bg-warn">Atención</span>
+    </div>
+    <div class="box-detail">
+      <strong>Recomendación:</strong> Añadir <code class="code">slowTestThreshold: 5000</code> para reportar tests lentos sin fallarlos, y restaurar el timeout a 15s mientras se investigan los lentos.
+    </div>
+  </div>
+</div>
+
+
+<div class="sec">
+  <div class="sec-head">
+    <div class="sec-icon i-teal">🛠️</div>
+    <span class="sec-title">8. Patrones de Ingeniería Destacados</span>
+  </div>
+
+  <ul class="check-list">
+    <li>
+      <div class="ck ck-ok">✓</div>
+      <div><strong>Facade Pattern para Supabase:</strong> <code class="code">lib/supabase-browser.ts</code> y <code class="code">lib/supabase-server.ts</code> son fachadas delgadas sobre <code class="code">@ruum/api/next-browser</code>. Permite cambiar la implementación sin tocar los 50+ call sites en la app.</div>
+    </li>
+    <li>
+      <div class="ck ck-ok">✓</div>
+      <div><strong>Reducer puro testeable:</strong> <code class="code">nuevoTrasladoReducer</code> y <code class="code">realtimeTrasladosReducer</code> son funciones puras sin efectos secundarios. Optimización <code class="code">Object.is()</code> previene renders redundantes en actualizaciones no-op.</div>
+    </li>
+    <li>
+      <div class="ck ck-ok">✓</div>
+      <div><strong>Saga pattern para flujos de pago:</strong> Los contratos <code class="code">pago-individual-saga-contract.md</code> y <code class="code">flujo10-transiciones-policy.ts</code> implementan sagas transaccionales con estados compensatorios para roll-back de operaciones parciales.</div>
+    </li>
+    <li>
+      <div class="ck ck-ok">✓</div>
+      <div><strong>Worker thread para procesamiento masivo:</strong> <code class="code">carga-masiva.worker.ts</code> mueve el parsing y validación de Excel/CSV a un worker separado, evitando bloqueo del hilo principal en cargas de cientos de registros.</div>
+    </li>
+    <li>
+      <div class="ck ck-ok">✓</div>
+      <div><strong>Borrador con PII reducido al mínimo:</strong> El módulo <code class="code">borrador-traslado.ts</code> excluye explícitamente domicilios precisos, VINs, placas y teléfonos de terceros del almacenamiento local. Las coordenadas se redondean a 2 decimales (~1.1 km de precisión) antes de persistir.</div>
+    </li>
+    <li>
+      <div class="ck ck-ok">✓</div>
+      <div><strong>Feature flags con 6 capas de evaluación:</strong> Kill-switch env → Canary allowlist → Consulta remota con caché → Gate de versión → Rollout 100% → Rollout porcentual. Bucketing determinista garantiza que el mismo usuario permanezca en el mismo anillo durante un rollout.</div>
+    </li>
+    <li>
+      <div class="ck ck-ok">✓</div>
+      <div><strong>Capacitor WebView remota (ADR 002):</strong> El build de Android apunta a <code class="code">usuario.ruumruum-moviliax.online</code> en producción, no a un bundle local. Las actualizaciones de la web son inmediatas sin publicar en Play Store. WebContents debugging deshabilitado en producción.</div>
+    </li>
+    <li>
+      <div class="ck ck-warn">!</div>
+      <div><strong>Hardcoded color values en componentes junto a tokens del Design System:</strong> <code class="code">CuentaCliente.tsx</code>, <code class="code">NavegacionUsuario.tsx</code> y <code class="code">MisViajesCliente.tsx</code> mezclan <code class="code">bg-[#0c2340]</code> / <code class="code">text-[#4e5f80]</code> con <code class="code">var(--user-color-*)</code>. Hace difícil cambiar la paleta globalmente.</div>
+    </li>
+    <li>
+      <div class="ck ck-warn">!</div>
+      <div><strong>Mezcla de estrategias de estilado:</strong> CSS Modules en dashboard e <code class="code">InicioDesktop.tsx</code>, Tailwind en <code class="code">CuentaCliente.tsx</code>, y clases BEM propias (<code class="code">user-v2-*</code>) en <code class="code">NavegacionUsuario.tsx</code>. Tres convenciones coexisten sin guía de elección documentada.</div>
+    </li>
+  </ul>
+</div>
+
+
+<div class="sec">
+  <div class="sec-head">
+    <div class="sec-icon i-red">🔧</div>
+    <span class="sec-title">9. Deuda Técnica Identificada</span>
+  </div>
+
+  <table>
+    <thead><tr><th>ID</th><th>Descripción</th><th>Severidad</th><th>Archivos</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><strong>DT-01</strong></td>
+        <td>Títulos de appbar secundario generados por cadena de condicionales de 6 rutas en <code class="code">NavegacionUsuario</code>. Toda ruta nueva requiere actualización manual aquí o muestra el saludo como título.</td>
+        <td><span class="badge bg-warn">Media</span></td>
+        <td><code class="code">NavegacionUsuario.tsx:151</code></td>
+      </tr>
+      <tr>
+        <td><strong>DT-02</strong></td>
+        <td>Lógica de ocultación del FAB "Solicitar traslado" basada en lista negra de 5 condiciones negativadas. Frágil ante nuevas rutas.</td>
+        <td><span class="badge bg-warn">Media</span></td>
+        <td><code class="code">NavegacionUsuario.tsx:243</code></td>
+      </tr>
+      <tr>
+        <td><strong>DT-03</strong></td>
+        <td>El componente <code class="code">InicioUsuario</code> siempre renderiza <code class="code">InicioMobile</code> incondicionalmente. La selección Mobile/Desktop depende del consumidor. Fácil de introducir regresiones.</td>
+        <td><span class="badge bg-warn">Media</span></td>
+        <td><code class="code">InicioUsuario.tsx:10</code></td>
+      </tr>
+      <tr>
+        <td><strong>DT-04</strong></td>
+        <td>Selector de idioma (ES/EN) en <code class="code">LoginCliente</code> sin implementación real de i18n. Estado <code class="code">idioma</code> y menú completo son ruido que induce expectativa incorrecta.</td>
+        <td><span class="badge bg-bad">Alta</span></td>
+        <td><code class="code">LoginCliente.tsx:283</code></td>
+      </tr>
+      <tr>
+        <td><strong>DT-05</strong></td>
+        <td>Colores hardcoded en <code class="code">CuentaCliente.tsx</code> (<code class="code">bg-[#0c2340]</code>, <code class="code">dark:bg-[#081a2e]</code>) duplican lógica ya cubierta por tokens del Design System V2.</td>
+        <td><span class="badge bg-warn">Media</span></td>
+        <td><code class="code">CuentaCliente.tsx:316</code></td>
+      </tr>
+      <tr>
+        <td><strong>DT-06</strong></td>
+        <td>El semáforo de concurrencia PDF carece de timeout de liberación automática. Riesgo de bloqueo en caso de error no manejado durante generación.</td>
+        <td><span class="badge bg-bad">Alta</span></td>
+        <td><code class="code">lib/pdf-concurrency-semaphore.ts</code></td>
+      </tr>
+      <tr>
+        <td><strong>DT-07</strong></td>
+        <td>LHCI solo cubre 3 rutas públicas. Rutas autenticadas (dashboard, mis-viajes) sin gate de performance/a11y automatizado.</td>
+        <td><span class="badge bg-warn">Media</span></td>
+        <td><code class="code">lighthouserc.js</code></td>
+      </tr>
+      <tr>
+        <td><strong>DT-08</strong></td>
+        <td><code class="code">RUTAS_DEPENDIENTES_DE_SESION</code> debe mantenerse sincronizado con <code class="code">RUTAS_PROTEGIDAS_USUARIO</code> manualmente. Sin test de contrato que lo garantice.</td>
+        <td><span class="badge bg-warn">Media</span></td>
+        <td><code class="code">middleware.ts:32–61</code></td>
+      </tr>
+      <tr>
+        <td><strong>DT-09</strong></td>
+        <td>5 tabs en <code class="code">MisViajesCliente</code> con texto truncado en dispositivos de 360px. La pestaña "En revisión" tiene muy baja frecuencia de uso pero igual peso visual.</td>
+        <td><span class="badge bg-warn">Media</span></td>
+        <td><code class="code">MisViajesCliente.tsx:284</code></td>
+      </tr>
+      <tr>
+        <td><strong>DT-10</strong></td>
+        <td>La referencia del path a <code class="code">packages/shared/src/seguridad/index</code> en <code class="code">lib/csp.ts</code> es una ruta relativa física que rompe si se reorganiza el monorepo. Debería importar por alias del workspace.</td>
+        <td><span class="badge bg-bad">Alta</span></td>
+        <td><code class="code">lib/csp.ts:16</code></td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+
+<div class="sec">
+  <div class="sec-head">
+    <div class="sec-icon i-green">🌟</div>
+    <span class="sec-title">10. Capacidades Técnicas Destacadas</span>
+  </div>
+
+  <ul class="check-list">
+    <li><div class="ck ck-ok">✓</div><div><strong>PWA + Android nativo (Capacitor):</strong> App desplegable en Play Store con WebView remota. Soporte geolocalización nativa, splash screen inmersivo, esquema <code class="code">https</code> en Android.</div></li>
+    <li><div class="ck ck-ok">✓</div><div><strong>Carga masiva con Web Worker:</strong> Procesamiento off-thread de archivos Excel/CSV de cientos de registros con geocodificación incremental por lotes y cotización masiva vía API.</div></li>
+    <li><div class="ck ck-ok">✓</div><div><strong>Pasaporte digital PDF en servidor:</strong> Generación server-side de documentos PDF con evidencias fotográficas, firma y datos del traslado. Semáforo de concurrencia para prevenir OOM bajo carga.</div></li>
+    <li><div class="ck ck-ok">✓</div><div><strong>Seguimiento GPS en tiempo real:</strong> Integración Supabase Realtime con Mapbox GL para mostrar la posición del vehículo en tránsito. Auto-actualización cada 30s + on focus.</div></li>
+    <li><div class="ck ck-ok">✓</div><div><strong>KYC integrado con Didit:</strong> Verificación de identidad con realtime polling, estados de revisión y lógica de saga para manejo de estados intermedios y rollback.</div></li>
+    <li><div class="ck ck-ok">✓</div><div><strong>Facturación fiscal SAT:</strong> Selector de régimen fiscal, CFDI, módulo de facturación completo con validación contra catálogos del SAT de México.</div></li>
+    <li><div class="ck ck-ok">✓</div><div><strong>Arquitectura Mobile-first estricta:</strong> <code class="code">100dvh</code> para compatibilidad Safari/Chrome móvil con barras dinámicas. Scroll únicamente en <code class="code">.scrollable-content</code>. Safe-area-inset en todos los elementos fijos.</div></li>
+    <li><div class="ck ck-ok">✓</div><div><strong>Dark mode completo auditado:</strong> Design System V2 con tokens semánticos para ambos temas. Correcciones de contraste documentadas (ACC-8) para cumplir WCAG 2.1 AA.</div></li>
+  </ul>
+</div>
+
+
+<div class="sec">
+  <div class="sec-head">
+    <div class="sec-icon i-blue">🔑</div>
+    <span class="sec-title">11. Variables de Entorno Requeridas</span>
+  </div>
+  <table>
+    <thead><tr><th>Variable</th><th>Tipo</th><th>Descripción</th></tr></thead>
+    <tbody>
+      <tr><td><code class="code">NEXT_PUBLIC_SUPABASE_URL</code></td><td>Requerida</td><td>URL del proyecto Supabase</td></tr>
+      <tr><td><code class="code">NEXT_PUBLIC_SUPABASE_ANON_KEY</code></td><td>Requerida</td><td>Clave pública anónima de Supabase</td></tr>
+      <tr><td><code class="code">NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN</code></td><td>Requerida</td><td>Token de acceso Mapbox (debe iniciar con <code class="code">pk.</code>)</td></tr>
+      <tr><td><code class="code">STRIPE_SECRET_KEY</code></td><td>Requerida prod</td><td>Clave secreta Stripe (server-only)</td></tr>
+      <tr><td><code class="code">NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY</code></td><td>Requerida prod</td><td>Clave pública Stripe</td></tr>
+      <tr><td><code class="code">UPSTASH_REDIS_REST_URL</code></td><td>Requerida prod</td><td>Endpoint REST Upstash Redis</td></tr>
+      <tr><td><code class="code">UPSTASH_REDIS_REST_TOKEN</code></td><td>Requerida prod</td><td>Token de autenticación Redis</td></tr>
+      <tr><td><code class="code">SENTRY_DSN</code></td><td>Opcional</td><td>DSN de Sentry; sin él el SDK es no-op</td></tr>
+      <tr><td><code class="code">NEXT_PUBLIC_RUUM_AMBIENTE</code></td><td>Opcional</td><td><code class="code">staging</code> activa CSP Report-Only</td></tr>
+      <tr><td><code class="code">CSRF_STRICT</code></td><td>Opcional</td><td><code class="code">true</code> exige token CSRF en todas las mutaciones</td></tr>
+      <tr><td><code class="code">NEXT_PUBLIC_FF_*</code></td><td>Opcional</td><td>Kill-switch / override de feature flags por entorno</td></tr>
+    </tbody>
+  </table>
+</div>
+
+
+<hr />
+<div class="sec">
+  <div class="sec-head">
+    <div class="sec-icon i-navy">📋</div>
+    <span class="sec-title">12. Resumen Ejecutivo</span>
+  </div>
+
+  <table>
+    <thead><tr><th>Dimensión</th><th>Estado</th><th>Nota</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Arquitectura</strong></td><td><span class="badge bg-ok">Sólida</span></td><td>App Router + RSC bien utilizado. Separación clara de capas con monorepo.</td></tr>
+      <tr><td><strong>Seguridad</strong></td><td><span class="badge bg-ok">Alta</span></td><td>CSP con nonce, CSRF, rate-limit multidimensional, gate de rol en Edge.</td></tr>
+      <tr><td><strong>Observabilidad</strong></td><td><span class="badge bg-ok">Buena</span></td><td>Tracing distribuido W3C + Sentry, logs estructurados, analytics UX.</td></tr>
+      <tr><td><strong>Testing</strong></td><td><span class="badge bg-warn">Mejorable</span></td><td>153 tests + E2E hermético, pero LHCI limitado a rutas públicas y timeout elevado.</td></tr>
+      <tr><td><strong>Consistencia UI</strong></td><td><span class="badge bg-warn">Parcial</span></td><td>Design System V2 bien definido pero con colores hardcoded y 3 estrategias de estilo coexistiendo.</td></tr>
+      <tr><td><strong>Documentación</strong></td><td><span class="badge bg-ok">Buena</span></td><td>27 contratos de flujo, ADRs inline en el código, comentarios de correcciones de auditoría.</td></tr>
+      <tr><td><strong>Deuda técnica</strong></td><td><span class="badge bg-warn">Controlada</span></td><td>10 ítems identificados, 3 de alta severidad. Ninguno bloquea la operación actual.</td></tr>
+      <tr><td><strong>Mobile/PWA</strong></td><td><span class="badge bg-ok">Completo</span></td><td>100dvh, safe-area-inset, Capacitor Android, dark mode auditado WCAG AA.</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="footer">
+  <p>Informe generado por análisis estático del código fuente · apps/app-usuario · Ruum Ruum Ecosistema · Noviembre 2026</p>
+  <p style="margin-top:6px">Made with IBM Bob</p>
+</div>
+
+</div>
+</body>
+</html>

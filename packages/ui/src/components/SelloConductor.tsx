@@ -61,6 +61,15 @@ export function SelloConductor({
     );
   }
 
+  const claseDimension =
+    dimension === 72
+      ? "h-[72px] w-[72px]"
+      : dimension === 96
+        ? "h-[96px] w-[96px]"
+        : dimension === 128
+          ? "h-[128px] w-[128px]"
+          : "h-[96px] w-[96px]";
+
   return (
     <div className={`inline-flex flex-col items-center justify-center ${className}`} role="img" aria-label="Sello conductor certificado Ruum Ruum">
       <img
@@ -68,8 +77,7 @@ export function SelloConductor({
         alt="Sello conductor certificado Ruum Ruum"
         width={dimension}
         height={dimension}
-        className={`block h-auto w-auto object-contain ${enOscuro ? "rounded-full bg-[#0A2342] p-1 ring-1 ring-white/20" : ""}`}
-        style={{ height: `${dimension}px`, width: "auto" }}
+        className={`block object-contain ${claseDimension} ${enOscuro ? "rounded-full bg-[#0A2342] p-1 ring-1 ring-white/20" : ""}`}
         decoding="async"
       />
       {lema ? (

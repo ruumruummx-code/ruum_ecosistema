@@ -1,0 +1,1465 @@
+[
+  {
+    "id": "390-_login",
+    "route": "/login",
+    "width": 390,
+    "status": 200,
+    "url": "/login",
+    "title": "Ruum Ruum",
+    "h1": [
+      "Tu traslado, en orden."
+    ],
+    "scrollWidth": 390,
+    "text": "Saltar al contenido principal\nRuum Ruum\n\nTu traslado, en orden.\n\nInicia sesión\n— Iniciar sesión | Bienvenido de nuevo\n\nAccede a tu cuenta para continuar\n\nCorreo electrónico\nContraseña\n¿La olvidaste?\nIniciar sesión\n\n¿No tienes cuenta? Regístrate gratis\n\n¿Primera vez aquí? Conoce cómo funciona Ruum\n\nDatos protegidos\nCifrado TLS/SSL\nTu información segura\n\nAl continuar, aceptas nuestros Términos y condiciones y Aviso de privacidad",
+    "smallTargets": [
+      {
+        "text": "¿La olvidaste?",
+        "height": 18
+      },
+      {
+        "text": "Regístrate gratis",
+        "height": 16
+      },
+      {
+        "text": "Conoce cómo funciona Ruum",
+        "height": 16
+      },
+      {
+        "text": "Términos y condiciones",
+        "height": 14
+      }
+    ],
+    "errors": [],
+    "violations": [
+      {
+        "id": "color-contrast",
+        "impact": "serious",
+        "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+        "help": "Elements must meet minimum color contrast ratio thresholds",
+        "nodes": [
+          {
+            "target": [
+              ".pb-0\\.5"
+            ],
+            "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.63 (foreground color: #8b9bb0, background color: #f4f7fb, font size: 7.9pt (10.5px), font weight: normal). Expected contrast ratio of 4.5:1",
+            "html": "<p class=\"mt-2.5 pb-0.5 text-center text-[10.5px] font-medium leading-relaxed text-[#8b9bb0] dark:text-[#6b7a99] sm:text-[11px]\">"
+          },
+          {
+            "target": [
+              "a[href$=\"terminos\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.49 (foreground color: #0066ff, background color: #f4f7fb, font size: 7.9pt (10.5px), font weight: normal). Expected contrast ratio of 4.5:1",
+            "html": "<a class=\"font-semibold text-[#0066FF] hover:underline dark:text-[#4d94ff]\" href=\"/legal/terminos\">Términos y condiciones</a>"
+          },
+          {
+            "target": [
+              "a[href$=\"privacidad\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.49 (foreground color: #0066ff, background color: #f4f7fb, font size: 7.9pt (10.5px), font weight: normal). Expected contrast ratio of 4.5:1",
+            "html": "<a class=\"font-semibold text-[#0066FF] hover:underline dark:text-[#4d94ff]\" href=\"/legal/privacidad\">Aviso de privacidad</a>"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "390-_registro",
+    "route": "/registro",
+    "width": 390,
+    "status": 200,
+    "url": "/registro",
+    "title": "Ruum Ruum",
+    "h1": [
+      "Crear cuenta"
+    ],
+    "scrollWidth": 390,
+    "text": "Saltar al contenido principal\nCrear cuenta\n\nPaso 1 de 3\n\n33%\n\nNombre\nApellido\nTeléfono celular\n🇲🇽 +52 |\n\nNunca compartiremos tu número. Solo lo usaremos para notificaciones de traslado y verificar tu cuenta por SMS.\n\nContinuar\nLa verificación por SMS está suspendida temporalmente. Puedes continuar con tu registro.\n¿Ya tienes cuenta?\nInicia sesión",
+    "smallTargets": [],
+    "errors": [],
+    "violations": []
+  },
+  {
+    "id": "390-_",
+    "route": "/",
+    "width": 390,
+    "status": 200,
+    "url": "/",
+    "title": "Ruum Ruum",
+    "h1": [
+      "Hola, Carlos",
+      "Tu traslado, en orden."
+    ],
+    "scrollWidth": 390,
+    "text": "Saltar al contenido principal\nRuum Ruum\nUSUARIO\nSin notificaciones pendientes\nSoporte y ayuda\nInicio\nTraslados\nCarga Masiva\nCuenta\nHola, Carlos\n\nAquí va el estatus de tu traslado.\n\nTRASLADO ACTIVO\nChrysler Cirrus 2024\n\nSan Mateo Atenco ➜\nhacia\n Lerma de Villada\n\nPlacas PEM789\nEn camino a destino\nETA 24m\n1. Recolección\nCompletada\n2. En tránsito\nActual\n3. Entrega\nPendiente\n\nTu conductor\n\nJorge Ramírez\nAcciones rápidas\nMis vehículos\n3 registrados\nPasaporte\nDigital\n¿Necesitas ayuda?\nSoporte 24/7",
+    "smallTargets": [],
+    "errors": [],
+    "violations": [
+      {
+        "id": "color-contrast",
+        "impact": "serious",
+        "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+        "help": "Elements must meet minimum color contrast ratio thresholds",
+        "nodes": [
+          {
+            "target": [
+              ".hover\\:text-\\[\\#0a2342\\].dark\\:hover\\:text-white.user-v2-nav-link:nth-child(2) > .sm\\:text-\\[12px\\].px-0\\.5.text-\\[11px\\]"
+            ],
+            "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.08 (foreground color: #8293b0, background color: #fefeff, font size: 8.3pt (11px), font weight: normal). Expected contrast ratio of 4.5:1",
+            "html": "<span class=\"transition-colors text-[11px] sm:text-[12px] truncate px-0.5 font-medium text-[#8293b0] group-hover:text-[#0a2342] dark:text-slate-400 dark:group-hover:text-white\">Traslados</span>"
+          },
+          {
+            "target": [
+              ".hover\\:text-\\[\\#0a2342\\].dark\\:hover\\:text-white[href$=\"masivo\"] > .sm\\:text-\\[12px\\].px-0\\.5.text-\\[11px\\]"
+            ],
+            "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.08 (foreground color: #8293b0, background color: #fefeff, font size: 8.3pt (11px), font weight: normal). Expected contrast ratio of 4.5:1",
+            "html": "<span class=\"transition-colors text-[11px] sm:text-[12px] truncate px-0.5 font-medium text-[#8293b0] group-hover:text-[#0a2342] dark:text-slate-400 dark:group-hover:text-white\">Carga Masiva</span>"
+          },
+          {
+            "target": [
+              ".hover\\:text-\\[\\#0a2342\\].dark\\:hover\\:text-white[href$=\"cuenta\"] > .sm\\:text-\\[12px\\].px-0\\.5.text-\\[11px\\]"
+            ],
+            "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.08 (foreground color: #8293b0, background color: #fefeff, font size: 8.3pt (11px), font weight: normal). Expected contrast ratio of 4.5:1",
+            "html": "<span class=\"transition-colors text-[11px] sm:text-[12px] truncate px-0.5 font-medium text-[#8293b0] group-hover:text-[#0a2342] dark:text-slate-400 dark:group-hover:text-white\">Cuenta</span>"
+          },
+          {
+            "target": [
+              ".home-progress-heading > span:nth-child(1)"
+            ],
+            "summary": "Fix any of the following:\n  Element has insufficient color contrast of 1.28 (foreground color: #c8d4e2, background color: #e8eef4, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1",
+            "html": "<span>En camino a destino</span>"
+          },
+          {
+            "target": [
+              "span[title=\"Duración estimada del trayecto\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element has insufficient color contrast of 1.37 (foreground color: #2ee6b6, background color: #e8eef4, font size: 9.0pt (12px), font weight: bold). Expected contrast ratio of 4.5:1",
+            "html": "<span title=\"Duración estimada del trayecto\">ETA 24m</span>"
+          },
+          {
+            "target": [
+              ".is-complete > .home-step-status"
+            ],
+            "summary": "Fix any of the following:\n  Element has insufficient color contrast of 1.08 (foreground color: #e7f9f5, background color: #ffffff, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1",
+            "html": "<span class=\"home-step-status\">Completada</span>"
+          },
+          {
+            "target": [
+              ".is-pending > .home-step-name"
+            ],
+            "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.23 (foreground color: #a0afc0, background color: #ffffff, font size: 9.0pt (12px), font weight: bold). Expected contrast ratio of 4.5:1",
+            "html": "<span class=\"home-step-name\">3<!-- -->. <!-- -->Entrega</span>"
+          },
+          {
+            "target": [
+              ".is-pending > .home-step-status"
+            ],
+            "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.23 (foreground color: #a0afc0, background color: #ffffff, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1",
+            "html": "<span class=\"home-step-status\">Pendiente</span>"
+          },
+          {
+            "target": [
+              "#assignedDriverCommunication > div > p"
+            ],
+            "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.02 (foreground color: #a8b8cb, background color: #ffffff, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1",
+            "html": "<p>Tu conductor</p>"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "390-_mis-viajes",
+    "route": "/mis-viajes",
+    "width": 390,
+    "status": 200,
+    "url": "/mis-viajes",
+    "title": "Mis Traslados — Ruum Ruum",
+    "h1": [
+      "Mis traslados"
+    ],
+    "scrollWidth": 390,
+    "text": "Saltar al contenido principal\nRuum Ruum\nUSUARIO\nSin notificaciones pendientes\nSoporte y ayuda\nInicio\nTraslados\nCarga Masiva\nCuenta\nActivos\nProgramados1\nFinalizados\nCancelados\n10\nTotal\n1\nActivos\n$0\nGastado\nBuscar traslado\n\nFolio, placa, vehículo, ciudad o conductor\n\n1 traslado\n＋ Crear traslado\nEn camino al destino\n#RR-1000\nChrysler Cirrus 2024\n\nSan Mateo Atenco → Lerma de Villada\n\nConductor: Jorge.\n24m\nPasaporte",
+    "smallTargets": [
+      {
+        "text": "＋ Crear traslado",
+        "height": 19.5
+      }
+    ],
+    "errors": [],
+    "violations": [
+      {
+        "id": "color-contrast",
+        "impact": "serious",
+        "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+        "help": "Elements must meet minimum color contrast ratio thresholds",
+        "nodes": [
+          {
+            "target": [
+              ".user-v2-nav-link.group.select-none:nth-child(1) > .sm\\:text-\\[12px\\].px-0\\.5.text-\\[11px\\]"
+            ],
+            "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.11 (foreground color: #8293b0, background color: #ffffff, font size: 8.3pt (11px), font weight: normal). Expected contrast ratio of 4.5:1",
+            "html": "<span class=\"transition-colors text-[11px] sm:text-[12px] truncate px-0.5 font-medium text-[#8293b0] group-hover:text-[#0a2342] dark:text-slate-400 dark:group-hover:text-white\">Inicio</span>"
+          },
+          {
+            "target": [
+              ".user-v2-nav-link.group[href$=\"masivo\"] > .sm\\:text-\\[12px\\].px-0\\.5.text-\\[11px\\]"
+            ],
+            "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.11 (foreground color: #8293b0, background color: #ffffff, font size: 8.3pt (11px), font weight: normal). Expected contrast ratio of 4.5:1",
+            "html": "<span class=\"transition-colors text-[11px] sm:text-[12px] truncate px-0.5 font-medium text-[#8293b0] group-hover:text-[#0a2342] dark:text-slate-400 dark:group-hover:text-white\">Carga Masiva</span>"
+          },
+          {
+            "target": [
+              ".user-v2-nav-link.group[href$=\"cuenta\"] > .sm\\:text-\\[12px\\].px-0\\.5.text-\\[11px\\]"
+            ],
+            "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.11 (foreground color: #8293b0, background color: #ffffff, font size: 8.3pt (11px), font weight: normal). Expected contrast ratio of 4.5:1",
+            "html": "<span class=\"transition-colors text-[11px] sm:text-[12px] truncate px-0.5 font-medium text-[#8293b0] group-hover:text-[#0a2342] dark:text-slate-400 dark:group-hover:text-white\">Cuenta</span>"
+          },
+          {
+            "target": [
+              "button[data-pestana=\"programados\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.34 (foreground color: #64748b, background color: #f1f5fa, font size: 12.0pt (16px), font weight: normal). Expected contrast ratio of 4.5:1",
+            "html": "<button type=\"button\" aria-pressed=\"false\" data-pestana=\"programados\" tabindex=\"-1\" class=\"flex-1 min-w-[84px] py-2 px-3 text-[13px] font-bold rounded-full transition-all cursor-pointer text-center text-[#64748b] hover:text-[#0a2342] dark:text-[#94a3b8] dark:hover:text-white\">"
+          },
+          {
+            "target": [
+              "button[data-pestana=\"finalizados\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.34 (foreground color: #64748b, background color: #f1f5fa, font size: 12.0pt (16px), font weight: normal). Expected contrast ratio of 4.5:1",
+            "html": "<button type=\"button\" aria-pressed=\"false\" data-pestana=\"finalizados\" tabindex=\"-1\" class=\"flex-1 min-w-[84px] py-2 px-3 text-[13px] font-bold rounded-full transition-all cursor-pointer text-center text-[#64748b] hover:text-[#0a2342] dark:text-[#94a3b8] dark:hover:text-white\">Finalizados</button>"
+          },
+          {
+            "target": [
+              "button[data-pestana=\"cancelados\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.34 (foreground color: #64748b, background color: #f1f5fa, font size: 12.0pt (16px), font weight: normal). Expected contrast ratio of 4.5:1",
+            "html": "<button type=\"button\" aria-pressed=\"false\" data-pestana=\"cancelados\" tabindex=\"-1\" class=\"flex-1 min-w-[84px] py-2 px-3 text-[13px] font-bold rounded-full transition-all cursor-pointer text-center text-[#64748b] hover:text-[#0a2342] dark:text-[#94a3b8] dark:hover:text-white\">Cancelados</button>"
+          },
+          {
+            "target": [
+              ".border-\\[\\#d6e4f8\\] > dt"
+            ],
+            "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.29 (foreground color: #64748b, background color: #edf4fe, font size: 8.6pt (11.5px), font weight: normal). Expected contrast ratio of 4.5:1",
+            "html": "<dt class=\"text-[11.5px] font-semibold text-[#64748b] dark:text-[#a8b5cc]\">Total</dt>"
+          },
+          {
+            "target": [
+              ".border-\\[\\#cbeed9\\] > dt"
+            ],
+            "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.34 (foreground color: #64748b, background color: #eaf8f0, font size: 8.6pt (11.5px), font weight: normal). Expected contrast ratio of 4.5:1",
+            "html": "<dt class=\"text-[11.5px] font-semibold text-[#64748b] dark:text-[#a8b5cc]\">Activos</dt>"
+          },
+          {
+            "target": [
+              ".border-\\[\\#f9d7d7\\] > dt"
+            ],
+            "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.28 (foreground color: #64748b, background color: #fdf0f0, font size: 8.6pt (11.5px), font weight: normal). Expected contrast ratio of 4.5:1",
+            "html": "<dt class=\"text-[11.5px] font-semibold text-[#64748b] dark:text-[#a8b5cc]\">Gastado</dt>"
+          },
+          {
+            "target": [
+              ".px-1.text-\\[13px\\].font-semibold > span"
+            ],
+            "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.07 (foreground color: #64748b, background color: #e8eef4, font size: 9.8pt (13px), font weight: normal). Expected contrast ratio of 4.5:1",
+            "html": "<span>1<!-- --> <!-- -->traslado</span>"
+          }
+        ]
+      },
+      {
+        "id": "definition-list",
+        "impact": "serious",
+        "description": "Ensure <dl> elements are structured correctly",
+        "help": "<dl> elements must only directly contain properly-ordered <dt> and <dd> groups, <script>, <template> or <div> elements",
+        "nodes": [
+          {
+            "target": [
+              "dl"
+            ],
+            "summary": "Fix all of the following:\n  dl element has direct children that are not allowed: div > span",
+            "html": "<dl aria-label=\"Resumen de traslados\" class=\"grid grid-cols-3 gap-2.5 sm:gap-3.5\">"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "390-_viajes_nuevo",
+    "route": "/viajes/nuevo",
+    "width": 390,
+    "error": "page.goto: Timeout 90000ms exceeded.\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3012/viajes/nuevo\", waiting until \"domcontentloaded\"\u001b[22m\n",
+    "errors": []
+  },
+  {
+    "id": "390-_viajes_masivo",
+    "route": "/viajes/masivo",
+    "width": 390,
+    "error": "page.goto: Timeout 90000ms exceeded.\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3012/viajes/masivo\", waiting until \"domcontentloaded\"\u001b[22m\n",
+    "errors": []
+  },
+  {
+    "id": "390-_cuenta",
+    "route": "/cuenta",
+    "width": 390,
+    "status": 200,
+    "url": "/cuenta",
+    "title": "Mi cuenta — Ruum Ruum",
+    "h1": [
+      "Hola, Carlos 👋"
+    ],
+    "scrollWidth": 390,
+    "text": "Saltar al contenido principal\nRuum Ruum\nUSUARIO\nSin notificaciones pendientes\nSoporte y ayuda\nInicio\nTraslados\nCarga Masiva\nCuenta\nCM\nCARLOS MENDOZA\n\nusuario@ejemplo.com\n\n+52 •••••• 5678\n\nVerificado\n0\nIncidencias\n10\nTraslados\n3\nVehículos\nPerfil\nEdita tu información personal\nSoporte\nObtén ayuda y contáctanos\nLegal y cuenta\nTérminos, privacidad y seguridad\nCerrar sesión\nFinaliza tu sesión de forma segura",
+    "smallTargets": [],
+    "errors": [],
+    "violations": [
+      {
+        "id": "color-contrast",
+        "impact": "serious",
+        "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+        "help": "Elements must meet minimum color contrast ratio thresholds",
+        "nodes": [
+          {
+            "target": [
+              ".hover\\:text-\\[\\#0a2342\\].dark\\:hover\\:text-white.user-v2-nav-link:nth-child(1) > .sm\\:text-\\[12px\\].px-0\\.5.group-hover\\:text-\\[\\#0a2342\\]"
+            ],
+            "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.09 (foreground color: #8293b0, background color: #fffefe, font size: 8.3pt (11px), font weight: normal). Expected contrast ratio of 4.5:1",
+            "html": "<span class=\"transition-colors text-[11px] sm:text-[12px] truncate px-0.5 font-medium text-[#8293b0] group-hover:text-[#0a2342] dark:text-slate-400 dark:group-hover:text-white\">Inicio</span>"
+          },
+          {
+            "target": [
+              ".hover\\:text-\\[\\#0a2342\\].dark\\:hover\\:text-white.user-v2-nav-link:nth-child(2) > .sm\\:text-\\[12px\\].px-0\\.5.group-hover\\:text-\\[\\#0a2342\\]"
+            ],
+            "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.11 (foreground color: #8293b0, background color: #ffffff, font size: 8.3pt (11px), font weight: normal). Expected contrast ratio of 4.5:1",
+            "html": "<span class=\"transition-colors text-[11px] sm:text-[12px] truncate px-0.5 font-medium text-[#8293b0] group-hover:text-[#0a2342] dark:text-slate-400 dark:group-hover:text-white\">Traslados</span>"
+          },
+          {
+            "target": [
+              ".hover\\:text-\\[\\#0a2342\\].dark\\:hover\\:text-white[href$=\"masivo\"] > .sm\\:text-\\[12px\\].px-0\\.5.group-hover\\:text-\\[\\#0a2342\\]"
+            ],
+            "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.11 (foreground color: #8293b0, background color: #ffffff, font size: 8.3pt (11px), font weight: normal). Expected contrast ratio of 4.5:1",
+            "html": "<span class=\"transition-colors text-[11px] sm:text-[12px] truncate px-0.5 font-medium text-[#8293b0] group-hover:text-[#0a2342] dark:text-slate-400 dark:group-hover:text-white\">Carga Masiva</span>"
+          },
+          {
+            "target": [
+              ".bg-\\[\\#eaf8f0\\]"
+            ],
+            "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.31 (foreground color: #10b981, background color: #eaf8f0, font size: 8.3pt (11px), font weight: bold). Expected contrast ratio of 4.5:1",
+            "html": "<span class=\"inline-flex items-center gap-1 rounded-full bg-[#eaf8f0] px-2.5 py-0.5 text-[11px] font-bold text-[#10b981] dark:bg-[#09281e] dark:text-[#34d399]\" title=\"Verificado\">"
+          },
+          {
+            "target": [
+              ".text-\\[\\#ef4444\\].dark\\:text-\\[\\#f87171\\].text-\\[14\\.5px\\]"
+            ],
+            "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.76 (foreground color: #ef4444, background color: #ffffff, font size: 10.9pt (14.5px), font weight: bold). Expected contrast ratio of 4.5:1",
+            "html": "<span class=\"block font-display text-[14.5px] font-bold text-[#ef4444] dark:text-[#f87171]\">Cerrar sesión</span>"
+          }
+        ]
+      },
+      {
+        "id": "definition-list",
+        "impact": "serious",
+        "description": "Ensure <dl> elements are structured correctly",
+        "help": "<dl> elements must only directly contain properly-ordered <dt> and <dd> groups, <script>, <template> or <div> elements",
+        "nodes": [
+          {
+            "target": [
+              ".grid-cols-3"
+            ],
+            "summary": "Fix all of the following:\n  dl element has direct children that are not allowed: div > div",
+            "html": "<dl class=\"grid grid-cols-3 divide-x divide-white/10 text-center\">"
+          }
+        ]
+      },
+      {
+        "id": "dlitem",
+        "impact": "serious",
+        "description": "Ensure <dt> and <dd> elements are contained by a <dl>",
+        "help": "<dt> and <dd> elements must be contained by a <dl>",
+        "nodes": [
+          {
+            "target": [
+              ".px-2:nth-child(1) > .gap-1\\.5.justify-center.items-center > .text-\\[16px\\].text-white"
+            ],
+            "summary": "Fix any of the following:\n  Description list item does not have a <dl> parent element",
+            "html": "<dd class=\"font-display text-[16px] font-bold text-white\">0</dd>"
+          },
+          {
+            "target": [
+              ".px-2:nth-child(2) > .gap-1\\.5.justify-center.items-center > .text-\\[16px\\].text-white"
+            ],
+            "summary": "Fix any of the following:\n  Description list item does not have a <dl> parent element",
+            "html": "<dd class=\"font-display text-[16px] font-bold text-white\">10</dd>"
+          },
+          {
+            "target": [
+              ".px-2:nth-child(3) > .gap-1\\.5.justify-center.items-center > .text-\\[16px\\].text-white"
+            ],
+            "summary": "Fix any of the following:\n  Description list item does not have a <dl> parent element",
+            "html": "<dd class=\"font-display text-[16px] font-bold text-white\">3</dd>"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "390-_cuenta_preferencias",
+    "route": "/cuenta/preferencias",
+    "width": 390,
+    "status": 200,
+    "url": "/cuenta/preferencias",
+    "title": "Mis Preferencias — Ruum Ruum",
+    "h1": [
+      "Preferencias",
+      "Preferencias",
+      "Mis preferencias"
+    ],
+    "scrollWidth": 390,
+    "text": "Saltar al contenido principal\n‹ Atrás\nPreferencias\nApariencia\n\nElige tema claro u oscuro. Respetamos tu sistema por defecto y lo recordamos.\n\nApariencia\nClaro\nOscuro\nAutomático (sistema)\nNavy profundo · texto humo · acento teal\n‹ Atrás\nPreferencias\nIDIOMA\nIdioma\nEspañol\nEnglish\nAPLICACIÓN\nNotificaciones y alertas\n›\nTema\nClaro\nOscuro\nAutomático\nUnidades\nMétrico\nImperial\nAccesibilidad\nEstándar\nTexto grande\nAlto contraste\nPRIVACIDAD\nBiometría\nNo disponible en esta aplicación\nUbicación\nSe autoriza desde el mapa y el navegador\nUso de datos\nActivado\nDesactivado",
+    "smallTargets": [
+      {
+        "text": "",
+        "height": 20
+      },
+      {
+        "text": "",
+        "height": 20
+      },
+      {
+        "text": "",
+        "height": 20
+      }
+    ],
+    "errors": [],
+    "violations": []
+  },
+  {
+    "id": "390-_soporte",
+    "route": "/soporte",
+    "width": 390,
+    "status": 200,
+    "url": "/soporte",
+    "title": "Ayuda y soporte — Ruum Ruum",
+    "h1": [
+      "Soporte",
+      "Soporte"
+    ],
+    "scrollWidth": 390,
+    "text": "Saltar al contenido principal\n‹ Atrás\nSoporte\n‹ Atrás\nSoporte\n\nCanales de soporte\n•\nTraslado #10000000\n\nCrear reporte\nLlamada\nWhatsApp\nCorreo\nTEMAS FRECUENTES\nProblema con un traslado\nReportar daño o incidente\nAyuda con pagos\nAyuda con evidencia\nPreguntas frecuentes",
+    "smallTargets": [],
+    "errors": [],
+    "violations": []
+  },
+  {
+    "id": "390-_ubicaciones",
+    "route": "/ubicaciones",
+    "width": 390,
+    "status": 200,
+    "url": "/ubicaciones",
+    "title": "Mis ubicaciones — Ruum Ruum",
+    "h1": [
+      "Mis ubicaciones",
+      "Mis ubicaciones"
+    ],
+    "scrollWidth": 390,
+    "text": "Saltar al contenido principal\nRuum Ruum\nTu traslado, en orden\nInicio\nMis traslados\nMis vehículos\nMis ubicaciones\nCarga Masiva\nMi cuenta\nMi perfil\nMis preferencias\nAyuda\n\nMueve tu auto sin salir de casa\n\nUn servicio confiable, seguro y en todo México.\n\nRegistrar traslado\nCM\nMis ubicaciones\n\nConsulta las direcciones de tu perfil y de tus traslados. Puedes buscarlas al cotizar un nuevo servicio.\n\nActualizar ubicaciones\nNuevo traslado\nEl domicilio de tu perfil se modifica en Datos personales. Las direcciones del historial corresponden a servicios registrados; no se modifican ni eliminan desde esta pantalla.\nBuscar dirección o ciudad\nMostrar\nTodas las ubicaciones\nDomicilio del perfil\nOrigen de traslado\nDestino de traslado\nTrabajo\nOtro\nLimpiar filtros\n\nMostrando 6 de 6 ubicaciones\n\nOrigen de traslado\nEstado de México\n\nSan Mateo Atenco\n\nÚltimo traslado registrado: 27 oct 2026\n\nBuscar como origen\nBuscar como destino\n\nSelecciona y confirma la dirección sugerida en el cotizador antes de continuar.\n\nDestino de traslado\nEstado de México\n\nLerma de Villada\n\nÚltimo traslado registrado: 27 oct 2026\n\nBuscar como origen\nBuscar como destino\n\nSelecciona y confirma la dirección sugerida en el cotizador antes de continuar.\n\nOrigen de traslado\nEstado de México\n\nToluca\n\nÚltimo traslado registrado: 26 oct 2026\n\nBuscar como origen\nBuscar como destino\n\nSelecciona y confirma la dirección sugerida en el cotizador antes de continuar.\n\nDestino de traslado\nEstado de México\n\nNaucalpan\n\nÚltimo traslado registrado: 26 oct 2026\n\nBuscar como origen\nBuscar como destino\n\nSelecciona y confirma la dirección sugerida en el cotizador antes de continuar.\n\nOrigen de traslado\nEstado de México\n\nMetepec\n\nÚltimo traslado registrado: 25 oct 2026\n\nBuscar como origen\nBuscar como destino\n\nSelecciona y confirma la dirección sugerida en el cotizador antes de continuar.\n\nDestino de traslado\nEstado de México\n\nCDMX\n\nÚltimo traslado registrado: 25 oct 2026\n\nBuscar como origen\nBuscar como destino\n\nSelecciona y confirma la dirección sugerida en el cotizador antes de continuar.",
+    "smallTargets": [
+      {
+        "text": "Buscar como origen",
+        "height": 20
+      },
+      {
+        "text": "Buscar como destino",
+        "height": 20
+      },
+      {
+        "text": "Buscar como origen",
+        "height": 20
+      },
+      {
+        "text": "Buscar como destino",
+        "height": 20
+      },
+      {
+        "text": "Buscar como origen",
+        "height": 20
+      },
+      {
+        "text": "Buscar como destino",
+        "height": 20
+      },
+      {
+        "text": "Buscar como origen",
+        "height": 20
+      },
+      {
+        "text": "Buscar como destino",
+        "height": 20
+      },
+      {
+        "text": "Buscar como origen",
+        "height": 20
+      },
+      {
+        "text": "Buscar como destino",
+        "height": 20
+      },
+      {
+        "text": "Buscar como origen",
+        "height": 20
+      },
+      {
+        "text": "Buscar como destino",
+        "height": 20
+      }
+    ],
+    "errors": [],
+    "violations": []
+  },
+  {
+    "id": "390-_pasaporte",
+    "route": "/pasaporte",
+    "width": 390,
+    "status": 200,
+    "url": "/pasaporte",
+    "title": "Ruum Ruum",
+    "h1": [],
+    "scrollWidth": 390,
+    "text": "Saltar al contenido principal\nRuum Ruum\nUSUARIO\nSin notificaciones pendientes\nSoporte y ayuda\nInicio\nTraslados\nCarga Masiva\nCuenta\nCargando…",
+    "smallTargets": [],
+    "errors": [],
+    "violations": [
+      {
+        "id": "color-contrast",
+        "impact": "serious",
+        "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+        "help": "Elements must meet minimum color contrast ratio thresholds",
+        "nodes": [
+          {
+            "target": [
+              ".user-v2-nav-link.group[href=\"/\"] > .sm\\:text-\\[12px\\].px-0\\.5.text-\\[11px\\]"
+            ],
+            "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.11 (foreground color: #8293b0, background color: #ffffff, font size: 8.3pt (11px), font weight: normal). Expected contrast ratio of 4.5:1",
+            "html": "<span class=\"transition-colors text-[11px] sm:text-[12px] truncate px-0.5 font-medium text-[#8293b0] group-hover:text-[#0a2342] dark:text-slate-400 dark:group-hover:text-white\">Inicio</span>"
+          },
+          {
+            "target": [
+              "a[href$=\"mis-viajes\"] > .sm\\:text-\\[12px\\].px-0\\.5.text-\\[11px\\]"
+            ],
+            "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.11 (foreground color: #8293b0, background color: #ffffff, font size: 8.3pt (11px), font weight: normal). Expected contrast ratio of 4.5:1",
+            "html": "<span class=\"transition-colors text-[11px] sm:text-[12px] truncate px-0.5 font-medium text-[#8293b0] group-hover:text-[#0a2342] dark:text-slate-400 dark:group-hover:text-white\">Traslados</span>"
+          },
+          {
+            "target": [
+              "a[href$=\"masivo\"] > .sm\\:text-\\[12px\\].px-0\\.5.text-\\[11px\\]"
+            ],
+            "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.11 (foreground color: #8293b0, background color: #ffffff, font size: 8.3pt (11px), font weight: normal). Expected contrast ratio of 4.5:1",
+            "html": "<span class=\"transition-colors text-[11px] sm:text-[12px] truncate px-0.5 font-medium text-[#8293b0] group-hover:text-[#0a2342] dark:text-slate-400 dark:group-hover:text-white\">Carga Masiva</span>"
+          },
+          {
+            "target": [
+              "a[href$=\"cuenta\"] > .sm\\:text-\\[12px\\].px-0\\.5.text-\\[11px\\]"
+            ],
+            "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.11 (foreground color: #8293b0, background color: #ffffff, font size: 8.3pt (11px), font weight: normal). Expected contrast ratio of 4.5:1",
+            "html": "<span class=\"transition-colors text-[11px] sm:text-[12px] truncate px-0.5 font-medium text-[#8293b0] group-hover:text-[#0a2342] dark:text-slate-400 dark:group-hover:text-white\">Cuenta</span>"
+          }
+        ]
+      },
+      {
+        "id": "meta-refresh",
+        "impact": "critical",
+        "description": "Ensure <meta http-equiv=\"refresh\"> is not used for delayed refresh",
+        "help": "Delayed refresh under 20 hours must not be used",
+        "nodes": [
+          {
+            "target": [
+              "#__next-page-redirect"
+            ],
+            "summary": "Fix any of the following:\n  <meta> tag forces timed refresh of page (less than 20 hours)",
+            "html": "<meta id=\"__next-page-redirect\" http-equiv=\"refresh\" content=\"1;url=/viajes/10000000-0000-4000-8000-000000000001\">"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "390-_viajes_10000000-0000-4000-8000-000000000001",
+    "route": "/viajes/10000000-0000-4000-8000-000000000001",
+    "width": 390,
+    "status": 200,
+    "url": "/viajes/10000000-0000-4000-8000-000000000001",
+    "title": "Ruum Ruum",
+    "h1": [
+      "Pasaporte #RR-1000"
+    ],
+    "scrollWidth": 390,
+    "text": "Saltar al contenido principal\n‹ Atrás\nPasaporte #RR-1000\nChrysler Cirrus 2024 · PEM789\nSan Mateo Atenco ➔ Lerma de Villada\nEn Ruta\nFotos\nChat\n↻ Actualizar\n\nEn camino al destino\n\nActualizado 6 nov 2026, 12:50 a.m.\nDatos y recibo\n⚠ Asistencia 24/7\nExportar pasaporte completo\nFactura fiscal\n\nEl pago del servicio no equivale a una factura emitida.\n\nFacturación pendiente/no ejercitada.\n\nRevisar datos fiscalesSolicitar factura",
+    "smallTargets": [
+      {
+        "text": "Revisar datos fiscales",
+        "height": 21
+      }
+    ],
+    "errors": [],
+    "violations": [
+      {
+        "id": "aria-prohibited-attr",
+        "impact": "serious",
+        "description": "Ensure ARIA attributes are not prohibited for an element's role",
+        "help": "Elements must only use permitted ARIA attributes",
+        "nodes": [
+          {
+            "target": [
+              ".pasaporte-module__E_ynPq__map"
+            ],
+            "summary": "Fix all of the following:\n  aria-label attribute cannot be used on \"div\" elements with no valid role attribute.",
+            "html": "<div class=\"pasaporte-module__E_ynPq__map\" aria-label=\"Mapa interactivo del traslado\"></div>"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "1440-_login",
+    "route": "/login",
+    "width": 1440,
+    "status": 200,
+    "url": "/login",
+    "title": "Ruum Ruum",
+    "h1": [
+      "Tu traslado, en orden."
+    ],
+    "scrollWidth": 1440,
+    "text": "Saltar al contenido principal\n¿Primera vez aquí?\nRegístrate gratis\nES\nMOVILIDAD INTELIGENTE\nTu traslado,\nen orden.\nRápido\nSeguro\nConfiable\n\nPERSONAS • EMPRESAS • CIUDADES EN MOVIMIENTO\n\nRuum Ruum\n\nTu traslado, en orden.\n\nInicia sesión\n— Iniciar sesión | Bienvenido de nuevo\n\nAccede a tu cuenta para continuar\n\nCorreo electrónico\nContraseña\n¿La olvidaste?\nIniciar sesión\n\n¿No tienes cuenta? Regístrate gratis\n\n¿Primera vez aquí? Conoce cómo funciona Ruum\n\nDatos protegidos\nCifrado TLS/SSL\nTu información segura\n\nAl continuar, aceptas nuestros Términos y condiciones y Aviso de privacidad",
+    "smallTargets": [
+      {
+        "text": "¿La olvidaste?",
+        "height": 18.75
+      },
+      {
+        "text": "Regístrate gratis",
+        "height": 17
+      },
+      {
+        "text": "Conoce cómo funciona Ruum",
+        "height": 16
+      },
+      {
+        "text": "Términos y condiciones",
+        "height": 15
+      },
+      {
+        "text": "Aviso de privacidad",
+        "height": 15
+      }
+    ],
+    "errors": [],
+    "violations": [
+      {
+        "id": "color-contrast",
+        "impact": "serious",
+        "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+        "help": "Elements must meet minimum color contrast ratio thresholds",
+        "nodes": [
+          {
+            "target": [
+              ".text-\\[11px\\].uppercase.tracking-widest"
+            ],
+            "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.85 (foreground color: #008b8b, background color: #f4f7fb, font size: 8.3pt (11px), font weight: bold). Expected contrast ratio of 4.5:1",
+            "html": "<span class=\"font-display text-[11px] font-extrabold uppercase tracking-widest text-[#008B8B] dark:text-[#00D1D1]\">MOVILIDAD INTELIGENTE</span>"
+          },
+          {
+            "target": [
+              ".mt-auto"
+            ],
+            "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.44 (foreground color: #90a1b9, background color: #f4f7fb, font size: 8.3pt (11px), font weight: bold). Expected contrast ratio of 4.5:1",
+            "html": "<p class=\"mt-auto pt-2 text-[10px] xl:text-[11px] font-bold tracking-widest text-slate-400 dark:text-slate-500 uppercase\">PERSONAS • EMPRESAS • CIUDADES EN MOVIMIENTO</p>"
+          },
+          {
+            "target": [
+              ".pb-0\\.5"
+            ],
+            "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.63 (foreground color: #8b9bb0, background color: #f4f7fb, font size: 8.3pt (11px), font weight: normal). Expected contrast ratio of 4.5:1",
+            "html": "<p class=\"mt-2.5 pb-0.5 text-center text-[10.5px] font-medium leading-relaxed text-[#8b9bb0] dark:text-[#6b7a99] sm:text-[11px]\">"
+          },
+          {
+            "target": [
+              "a[href$=\"terminos\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.49 (foreground color: #0066ff, background color: #f4f7fb, font size: 8.3pt (11px), font weight: normal). Expected contrast ratio of 4.5:1",
+            "html": "<a class=\"font-semibold text-[#0066FF] hover:underline dark:text-[#4d94ff]\" href=\"/legal/terminos\">Términos y condiciones</a>"
+          },
+          {
+            "target": [
+              "a[href$=\"privacidad\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.49 (foreground color: #0066ff, background color: #f4f7fb, font size: 8.3pt (11px), font weight: normal). Expected contrast ratio of 4.5:1",
+            "html": "<a class=\"font-semibold text-[#0066FF] hover:underline dark:text-[#4d94ff]\" href=\"/legal/privacidad\">Aviso de privacidad</a>"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "1440-_registro",
+    "route": "/registro",
+    "width": 1440,
+    "status": 200,
+    "url": "/registro",
+    "title": "Ruum Ruum",
+    "h1": [
+      "Crear cuenta"
+    ],
+    "scrollWidth": 1440,
+    "text": "Saltar al contenido principal\nCrear cuenta\n\nPaso 1 de 3\n\n33%\n\nNombre\nApellido\nTeléfono celular\n🇲🇽 +52 |\n\nNunca compartiremos tu número. Solo lo usaremos para notificaciones de traslado y verificar tu cuenta por SMS.\n\nContinuar\nLa verificación por SMS está suspendida temporalmente. Puedes continuar con tu registro.\n¿Ya tienes cuenta?\nInicia sesión",
+    "smallTargets": [],
+    "errors": [
+      "Hydration failed because the server rendered HTML didn't match the client. As a result this tree will be regenerated on the client. This can happen if a SSR-ed Client Component used:\n\n- A server/client branch `if (typeof window !== 'undefined')`.\n- Variable input such as `Date.now()` or `Math.random()` which changes each time it's called.\n- Date formatting in a user's locale which doesn't match the server.\n- External changing data without sending a snapshot of it along with the HTML.\n- Invalid HTML tag nesting.\n\nIt can also happen if the client has a browser extension installed which messes with the HTML before React loaded.\n\nhttps://react.dev/link/hydration-mismatch\n\n  ...\n    <HotReload assetPrefix=\"\" globalError={[...]}>\n      <AppDevOverlayErrorBoundary globalError={[...]}>\n        <ReplaySsrOnlyErrors>\n        <DevRootHTTPAccessFallbackBoundary>\n          <HTTPAccessFallbackBoundary notFound={<NotAllowedRootHTTPFallbackError>}>\n            <HTTPAccessFallbackErrorBoundary pathname=\"/registro\" notFound={<NotAllowedRootHTTPFallbackError>} ...>\n              <RedirectBoundary>\n                <RedirectErrorBoundary router={{...}}>\n                  <Head>\n                  <__next_root_layout_boundary__>\n                    <SegmentViewNode type=\"layout\" pagePath=\"/apps/app-...\">\n                      <SegmentTrieNode>\n                      <link>\n                      <script>\n                      <script>\n                      <script>\n                      <script>\n                      <script>\n                      <script>\n                      <script>\n                      <script>\n                      <RootLayout>\n                        <html lang=\"es\" dir=\"ltr\" suppressHydrationWarning={true}>\n                          <head>\n                            <Script src=\"/theme-ini...\" strategy=\"beforeInte...\" nonce=\"Yzc2MTQwYz...\">\n                              <script\n+                               nonce=\"Yzc2MTQwYzQtODhjNy00ZDJiLWE0YWItNzk1ZGQwOTE3ZjAx\"\n-                               nonce=\"\"\n                                dangerouslySetInnerHTML={{__html:\"(self.__ne...\"}}\n                              >\n                          ...\n                            <PuertaConsentimiento>\n+                           <div\n+                             id=\"contenido-principal\"\n+                             tabIndex={-1}\n+                             className=\"outline-none focus-visible:outline focus-visible:outline-[3px] focus-visible:...\"\n+                           >\n-                           <Suspense>\n                  ...\n"
+    ],
+    "violations": []
+  },
+  {
+    "id": "1440-_",
+    "route": "/",
+    "width": 1440,
+    "status": 200,
+    "url": "/",
+    "title": "Ruum Ruum",
+    "h1": [
+      "Hola, Carlos",
+      "Tu traslado, en orden."
+    ],
+    "scrollWidth": 1440,
+    "text": "Saltar al contenido principal\nRuum Ruum\nTu traslado, en orden\nInicio\nMis traslados\nMis vehículos\nMis ubicaciones\nCarga Masiva\nMi cuenta\nMi perfil\nMis preferencias\nAyuda\n\nMueve tu auto sin salir de casa\n\nUn servicio confiable, seguro y en todo México.\n\nRegistrar traslado\nCM\nHola, Carlos\nUsuario\n\nBienvenido de nuevo, Carlos\n\nTu traslado, en orden.\nGestiona, monitorea y da seguimiento a todos tus traslados de forma simple y segura.\nRegistrar nuevo traslado\n\nTRASLADO ACTIVO\n\nChrysler Cirrus 2024\nPEM789\nPlacas: PEM789\nSan Mateo Atenco\nEstado de México\nLerma de Villada\nEstado de México\nESTADO ACTUAL\nEn tránsito\nTIEMPO RESTANTE\nPor confirmar\nDISTANCIA RESTANTE\nPor confirmar\n1. Recolección\nCompletada\n2. En tránsito\nEn curso\n3. Entrega\nPendiente\nVer detalles del traslado\nSeguimiento en vivo\nAbrir en mapa\n\nRuta por confirmar\nEl mapa aparecerá cuando se confirmen los puntos del traslado.\n\nEsperando ubicación GPS\nConductor asignado\nJorge Ramírez\n4.9\n\nConductor verificado\n\nComunicación segura en tu traslado\nLlamar\nWhatsApp\nsoporte\nMensaje\nRegistrar nuevo traslado\n\nMoviliza un vehículo de forma segura.\n\nCarga masiva de traslados\n\nRegistra varios traslados desde un archivo.\n\nMis vehículos registrados\n\nAdministra tu flota de vehículos.\n\nVer historial de traslados\n\nConsulta tus traslados anteriores.\n\nÚltimos traslados\nVer todos\nVEHÍCULO\tORIGEN\t\tDESTINO\tFECHA\tESTADO\t\n\nChrysler Cirrus 2024\nPEM789\n\tSan Mateo Atenco\t\n\tLerma de Villada\t27 oct\n10:42 a.m.\n\t\nEn tránsito\t\n\n\nToyota RAV4 2023\nPZM456\n\tToluca\t\n\tNaucalpan\t26 oct\n4:18 p.m.\n\t\nCompletado\t\n\n\nRAM 1500 2024\nRTM321\n\tMetepec\t\n\tCDMX\t25 oct\n11:05 a.m.\n\t\nEn preparación\t\n\n\nChrysler Cirrus 2024\nPEM789\n\tSan Mateo Atenco\t\n\tLerma de Villada\t24 oct\n10:00 a.m.\n\t\nCompletado\t\n\n\nChrysler Cirrus 2024\nPEM789\n\tSan Mateo Atenco\t\n\tLerma de Villada\t23 oct\n10:00 a.m.\n\t\nCompletado\t\n\n\nChrysler Cirrus 2024\nPEM789\n\tSan Mateo Atenco\t\n\tLerma de Villada\t22 oct\n10:00 a.m.\n\t\nCompletado\t\n\n\nChrysler Cirrus 2024\nPEM789\n\tSan Mateo Atenco\t\n\tLerma de Villada\t21 oct\n10:00 a.m.\n\t\nCompletado\t\n\n\nChrysler Cirrus 2024\nPEM789\n\tSan Mateo Atenco\t\n\tLerma de Villada\t20 oct\n10:00 a.m.\n\t\nCompletado\t\n\n\nChrysler Cirrus 2024\nPEM789\n\tSan Mateo Atenco\t\n\tLerma de Villada\t19 oct\n10:00 a.m.\n\t\nCompletado\t\n\n\nChrysler Cirrus 2024\nPEM789\n\tSan Mateo Atenco\t\n\tLerma de Villada\t18 oct\n10:00 a.m.\n\t\nCompletado\t\n¿Necesitas ayuda?\n\nNuestro equipo está listo para apoyarte en todo momento.\n\nContactar soporte\nTips Ruum Ruum\nOptimiza tus traslados\n\nRegistra varios vehículos en una carga masiva y ahorra tiempo.",
+    "smallTargets": [
+      {
+        "text": "Ver todos",
+        "height": 18
+      },
+      {
+        "text": "Ver tip 1",
+        "height": 20
+      },
+      {
+        "text": "Ver tip 2",
+        "height": 20
+      },
+      {
+        "text": "Ver tip 3",
+        "height": 20
+      },
+      {
+        "text": "Tip anterior",
+        "height": 22
+      },
+      {
+        "text": "Tip siguiente",
+        "height": 22
+      }
+    ],
+    "errors": [],
+    "violations": [
+      {
+        "id": "color-contrast",
+        "impact": "serious",
+        "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+        "help": "Elements must meet minimum color contrast ratio thresholds",
+        "nodes": [
+          {
+            "target": [
+              "tr:nth-child(1) > td:nth-child(1) > .dashboard-module__IvZcXq__vehicleCell > div > small"
+            ],
+            "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.18 (foreground color: #6b7ca1, background color: #ffffff, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1",
+            "html": "<small>PEM789</small>"
+          },
+          {
+            "target": [
+              "time[datetime=\"2026-10-27T16:42:00Z\"] > small"
+            ],
+            "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.18 (foreground color: #6b7ca1, background color: #ffffff, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1",
+            "html": "<small>10:42 a.m.</small>"
+          },
+          {
+            "target": [
+              "td:nth-child(6) > .dashboard-module__IvZcXq__status[data-tone=\"green\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.3 (foreground color: #009869, background color: #e0f8ee, font size: 7.6pt (10.08px), font weight: normal). Expected contrast ratio of 4.5:1",
+            "html": "<span class=\"dashboard-module__IvZcXq__status\" data-tone=\"green\"><i></i>En tránsito</span>"
+          },
+          {
+            "target": [
+              "tr:nth-child(2) > td:nth-child(1) > .dashboard-module__IvZcXq__vehicleCell > div > small"
+            ],
+            "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.18 (foreground color: #6b7ca1, background color: #ffffff, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1",
+            "html": "<small>PZM456</small>"
+          },
+          {
+            "target": [
+              "time[datetime=\"2026-10-26T22:18:00Z\"] > small"
+            ],
+            "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.18 (foreground color: #6b7ca1, background color: #ffffff, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1",
+            "html": "<small>4:18 p.m.</small>"
+          },
+          {
+            "target": [
+              "tr:nth-child(2) > td:nth-child(6) > .dashboard-module__IvZcXq__status[data-tone=\"blue\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.35 (foreground color: #0061ff, background color: #e4efff, font size: 7.6pt (10.08px), font weight: normal). Expected contrast ratio of 4.5:1",
+            "html": "<span class=\"dashboard-module__IvZcXq__status\" data-tone=\"blue\"><i></i>Completado</span>"
+          },
+          {
+            "target": [
+              "tr:nth-child(3) > td:nth-child(1) > .dashboard-module__IvZcXq__vehicleCell > div > small"
+            ],
+            "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.18 (foreground color: #6b7ca1, background color: #ffffff, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1",
+            "html": "<small>RTM321</small>"
+          },
+          {
+            "target": [
+              "time[datetime=\"2026-10-25T17:05:00Z\"] > small"
+            ],
+            "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.18 (foreground color: #6b7ca1, background color: #ffffff, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1",
+            "html": "<small>11:05 a.m.</small>"
+          },
+          {
+            "target": [
+              ".dashboard-module__IvZcXq__status[data-tone=\"orange\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.78 (foreground color: #d87c00, background color: #fff2d8, font size: 7.6pt (10.08px), font weight: normal). Expected contrast ratio of 4.5:1",
+            "html": "<span class=\"dashboard-module__IvZcXq__status\" data-tone=\"orange\"><i></i>En preparación</span>"
+          },
+          {
+            "target": [
+              "tr:nth-child(4) > td:nth-child(6) > .dashboard-module__IvZcXq__status[data-tone=\"blue\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.35 (foreground color: #0061ff, background color: #e4efff, font size: 7.6pt (10.08px), font weight: normal). Expected contrast ratio of 4.5:1",
+            "html": "<span class=\"dashboard-module__IvZcXq__status\" data-tone=\"blue\"><i></i>Completado</span>"
+          }
+        ]
+      },
+      {
+        "id": "target-size",
+        "impact": "serious",
+        "description": "Ensure touch targets have sufficient size and space",
+        "help": "All touch targets must be 24px large, or leave sufficient space",
+        "nodes": [
+          {
+            "target": [
+              "button[aria-label=\"Ver tip 1\"]"
+            ],
+            "summary": "Fix any of the following:\n  Target has insufficient size (16px by 20px, should be at least 24px by 24px)\n  Target has insufficient space to its closest neighbors. Safe clickable space has a diameter of 8px instead of at least 24px.",
+            "html": "<button type=\"button\" aria-label=\"Ver tip 1\" aria-current=\"true\"><i></i></button>"
+          },
+          {
+            "target": [
+              "button[aria-label=\"Ver tip 2\"]"
+            ],
+            "summary": "Fix any of the following:\n  Target has insufficient size (16px by 20px, should be at least 24px by 24px)\n  Target has insufficient space to its closest neighbors. Safe clickable space has a diameter of 8px instead of at least 24px.",
+            "html": "<button type=\"button\" aria-label=\"Ver tip 2\"><i></i></button>"
+          },
+          {
+            "target": [
+              "button[aria-label=\"Ver tip 3\"]"
+            ],
+            "summary": "Fix any of the following:\n  Target has insufficient size (16px by 20px, should be at least 24px by 24px)\n  Target has insufficient space to its closest neighbors. Safe clickable space has a diameter of 8px instead of at least 24px.",
+            "html": "<button type=\"button\" aria-label=\"Ver tip 3\"><i></i></button>"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "1440-_mis-viajes",
+    "route": "/mis-viajes",
+    "width": 1440,
+    "status": 200,
+    "url": "/mis-viajes",
+    "title": "Mis Traslados — Ruum Ruum",
+    "h1": [
+      "Mis traslados"
+    ],
+    "scrollWidth": 1440,
+    "text": "Saltar al contenido principal\nRuum Ruum\nTu traslado, en orden\nInicio\nMis traslados\nMis vehículos\nMis ubicaciones\nCarga Masiva\nMi cuenta\nMi perfil\nMis preferencias\nAyuda\n\nMueve tu auto sin salir de casa\n\nUn servicio confiable, seguro y en todo México.\n\nRegistrar traslado\nCM\nHola, Carlos\nUsuario\n\nMis traslados\n\nMis traslados\nGestiona, filtra y da seguimiento a todos tus servicios de traslado.\nCrear traslado\n10\nTotal de traslados\n8\nCompletados\n80%\n1\nEn curso\n10%\n1\nProgramados\n10%\nFecha: Todas\nHoy\nEsta semana\nEste mes\nEstado: Todos\nEn curso\nProgramados\nCompletados\nCancelados\nEn revisión\nMás filtros\nLimpiar filtros\nTodos (10)\nEn curso (1)\nProgramados (1)\nCompletados (8)\nCancelados (0)\nEn revisión (0)\nVEHÍCULO\tORIGEN\t\tDESTINO\tFECHA\tESTADO\tACCIONES\n\nChrysler Cirrus 2024\nPEM789\n\tSan Mateo Atenco\t\n\tLerma de Villada\tFecha pendiente\nHora pendiente\n\t\nEn tránsito\t\nVer\n\n\nToyota RAV4 2023\nPZM456\n\tToluca\t\n\tNaucalpan\tFecha pendiente\nHora pendiente\n\t\nCompletado\t\nVer\n\n\nRAM 1500 2024\nRTM321\n\tMetepec\t\n\tCDMX\tFecha pendiente\nHora pendiente\n\t\nProgramado\t\nVer\n\n\nChrysler Cirrus 2024\nPEM789\n\tSan Mateo Atenco\t\n\tLerma de Villada\tFecha pendiente\nHora pendiente\n\t\nCompletado\t\nVer\n\n\nChrysler Cirrus 2024\nPEM789\n\tSan Mateo Atenco\t\n\tLerma de Villada\tFecha pendiente\nHora pendiente\n\t\nCompletado\t\nVer\n\n\nChrysler Cirrus 2024\nPEM789\n\tSan Mateo Atenco\t\n\tLerma de Villada\tFecha pendiente\nHora pendiente\n\t\nCompletado\t\nVer\n\n\nChrysler Cirrus 2024\nPEM789\n\tSan Mateo Atenco\t\n\tLerma de Villada\tFecha pendiente\nHora pendiente\n\t\nCompletado\t\nVer\n\n\nChrysler Cirrus 2024\nPEM789\n\tSan Mateo Atenco\t\n\tLerma de Villada\tFecha pendiente\nHora pendiente\n\t\nCompletado\t\nVer\n‹\n1\n2\n›\nMostrando 1–8 de 10 traslados\nChrysler Cirrus 2024\nPEM789\nEn tránsito\nSeguimiento\nDetalles\nHistorial\nAbrir en mapa\nRecolección completada\n\nEstado de México\n\nProgramado: Fecha pendiente, Hora pendiente\nEn curso\n\nUbicación actualizada\n\n12:50 a.m.\nEntrega pendiente\n\nEstado de México\n\nConsulta el detalle para más información\nConductor asignado\nJorge Ramírez\n4.9\nConductor verificado\nExportar pasaporte completo\nCancelar traslado\nContactar soporte",
+    "smallTargets": [
+      {
+        "text": "Cerrar detalle",
+        "height": 20
+      }
+    ],
+    "errors": [],
+    "violations": [
+      {
+        "id": "aria-prohibited-attr",
+        "impact": "serious",
+        "description": "Ensure ARIA attributes are not prohibited for an element's role",
+        "help": "Elements must only use permitted ARIA attributes",
+        "nodes": [
+          {
+            "target": [
+              ".pasaporte-module__E_ynPq__map"
+            ],
+            "summary": "Fix all of the following:\n  aria-label attribute cannot be used on \"div\" elements with no valid role attribute.",
+            "html": "<div class=\"pasaporte-module__E_ynPq__map\" aria-label=\"Mapa interactivo del traslado\"></div>"
+          }
+        ]
+      },
+      {
+        "id": "color-contrast",
+        "impact": "serious",
+        "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+        "help": "Elements must meet minimum color contrast ratio thresholds",
+        "nodes": [
+          {
+            "target": [
+              "td:nth-child(6) > .traslados-desktop-module__rKP2HW__badge[data-status=\"activos\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.66 (foreground color: #00ac7b, background color: #e3faef, font size: 8.3pt (11px), font weight: normal). Expected contrast ratio of 4.5:1",
+            "html": "<span class=\"traslados-desktop-module__rKP2HW__badge\" data-status=\"activos\"><i></i>En tránsito</span>"
+          },
+          {
+            "target": [
+              "span[data-status=\"programados\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.39 (foreground color: #f68000, background color: #fff3e4, font size: 8.3pt (11px), font weight: normal). Expected contrast ratio of 4.5:1",
+            "html": "<span class=\"traslados-desktop-module__rKP2HW__badge\" data-status=\"programados\"><i></i>Programado</span>"
+          },
+          {
+            "target": [
+              "div > .traslados-desktop-module__rKP2HW__badge[data-status=\"activos\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.66 (foreground color: #00ac7b, background color: #e3faef, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1",
+            "html": "<span class=\"traslados-desktop-module__rKP2HW__badge\" data-status=\"activos\"><i></i>En tránsito</span>"
+          },
+          {
+            "target": [
+              ".traslados-desktop-module__rKP2HW__danger"
+            ],
+            "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.4 (foreground color: #e12546, background color: #fff8f9, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1",
+            "html": "<button class=\"traslados-desktop-module__rKP2HW__danger\">Cancelar traslado</button>"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "1440-_viajes_nuevo",
+    "route": "/viajes/nuevo",
+    "width": 1440,
+    "error": "page.goto: Timeout 90000ms exceeded.\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3012/viajes/nuevo\", waiting until \"domcontentloaded\"\u001b[22m\n",
+    "errors": []
+  },
+  {
+    "id": "1440-_viajes_masivo",
+    "route": "/viajes/masivo",
+    "width": 1440,
+    "error": "page.goto: Timeout 90000ms exceeded.\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3012/viajes/masivo\", waiting until \"domcontentloaded\"\u001b[22m\n",
+    "errors": []
+  },
+  {
+    "id": "1440-_cuenta",
+    "route": "/cuenta",
+    "width": 1440,
+    "status": 200,
+    "url": "/cuenta",
+    "title": "Mi cuenta — Ruum Ruum",
+    "h1": [
+      "Hola, Carlos 👋"
+    ],
+    "scrollWidth": 1440,
+    "text": "Saltar al contenido principal\nRuum Ruum\nTu traslado, en orden\nInicio\nMis traslados\nMis vehículos\nMis ubicaciones\nCarga Masiva\nMi cuenta\nMi perfil\nMis preferencias\nAyuda\n\nMueve tu auto sin salir de casa\n\nUn servicio confiable, seguro y en todo México.\n\nRegistrar traslado\nCtrl K\nCM\nHola, Carlos\nUsuario\n\nMi cuenta\n\nHola, Carlos 👋\nAquí puedes gestionar tu información, seguridad y configuración.\nCM\nCarlos Mendoza\nVerificado\n\nusuario@ejemplo.com\n\n+52 •••••• 5678\n\nEditar perfil\n0\nIncidencias\n10\nTraslados\n3\nVehículos\n6\nUbicaciones\n—\nCliente desde\nTu cuenta está verificada\n\nConsulta tus datos y el estado de tus servicios.\n\nVer consejos de seguridad\nDatos personales\nConsulta y actualiza tu información.\nSeguridad\nContraseña y verificación.\nMétodos de pago\nTarjetas y facturación.\nPreferencias\nNotificaciones y experiencia.\nInformación personal\nEditar\nNombre completo\nCarlos Mendoza\nCorreo electrónico\nusuario@ejemplo.com\nTeléfono\n+52 •••••• 5678\nPaís\nPaís no registrado\nZona horaria del servicio\n(UTC-06:00) Ciudad de México\nDirección y facturación\nEditar\nDirección principal\n\nAgrega tu dirección principal.\n\nDatos de facturación\n\nNombre fiscal no registrado\n\nRFC: No registrado\n\nRégimen fiscal: No registrado\n\nCP: No registrado\n\nActividad reciente\nVer toda\nTraslado Chrysler Cirrus 2024\n27 oct 2026, 10:42 a.m.\nEn tránsito\nVehículo registrado · Chrysler Cirrus\n27 oct 2026, 10:42 a.m.\nRegistrado\nTraslado Toyota RAV4 2023\n26 oct 2026, 4:18 p.m.\nCompletado\nVehículo registrado · Toyota RAV4\n26 oct 2026, 4:18 p.m.\nRegistrado\nSeguridad de la cuenta\nVer detalles\nContraseña\nActualízala periódicamente\nCambiar\nVerificación en dos pasos\nAgregar una capa extra de seguridad\nActivar\nDispositivos activos\nGestiona tus sesiones iniciadas\nAdministrar",
+    "smallTargets": [
+      {
+        "text": "Editar",
+        "height": 23.1875
+      },
+      {
+        "text": "Editar",
+        "height": 23.1875
+      },
+      {
+        "text": "Ver toda",
+        "height": 16.5
+      },
+      {
+        "text": "Ver detalles",
+        "height": 16.5
+      },
+      {
+        "text": "Cambiar",
+        "height": 23.1875
+      },
+      {
+        "text": "Activar",
+        "height": 23.1875
+      },
+      {
+        "text": "Administrar",
+        "height": 23.1875
+      }
+    ],
+    "errors": [],
+    "violations": [
+      {
+        "id": "color-contrast",
+        "impact": "serious",
+        "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+        "help": "Elements must meet minimum color contrast ratio thresholds",
+        "nodes": [
+          {
+            "target": [
+              ".cuenta-desktop-module__eNkNrG__verification"
+            ],
+            "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.93 (foreground color: #00a574, background color: #d9ffed, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1",
+            "html": "<span class=\"cuenta-desktop-module__eNkNrG__verification\" data-verified=\"true\">"
+          },
+          {
+            "target": [
+              "li:nth-child(1) > a > div > time[datetime=\"2026-10-27T16:42:00Z\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.29 (foreground color: #607ba7, background color: #ffffff, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1",
+            "html": "<time datetime=\"2026-10-27T16:42:00Z\">27 oct 2026, 10:42 a.m.</time>"
+          },
+          {
+            "target": [
+              "li:nth-child(1) > a > .cuenta-desktop-module__eNkNrG__activityStatus[data-tone=\"green\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.6 (foreground color: #00ae7b, background color: #e1faef, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1",
+            "html": "<span class=\"cuenta-desktop-module__eNkNrG__activityStatus\" data-tone=\"green\">"
+          },
+          {
+            "target": [
+              "li:nth-child(2) > a > div > time[datetime=\"2026-10-27T16:42:00Z\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.29 (foreground color: #607ba7, background color: #ffffff, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1",
+            "html": "<time datetime=\"2026-10-27T16:42:00Z\">27 oct 2026, 10:42 a.m.</time>"
+          },
+          {
+            "target": [
+              "li:nth-child(3) > a > div > time[datetime=\"2026-10-26T22:18:00Z\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.29 (foreground color: #607ba7, background color: #ffffff, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1",
+            "html": "<time datetime=\"2026-10-26T22:18:00Z\">26 oct 2026, 4:18 p.m.</time>"
+          },
+          {
+            "target": [
+              "li:nth-child(3) > a > .cuenta-desktop-module__eNkNrG__activityStatus[data-tone=\"green\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.6 (foreground color: #00ae7b, background color: #e1faef, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1",
+            "html": "<span class=\"cuenta-desktop-module__eNkNrG__activityStatus\" data-tone=\"green\">"
+          },
+          {
+            "target": [
+              "li:nth-child(4) > a > div > time[datetime=\"2026-10-26T22:18:00Z\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.29 (foreground color: #607ba7, background color: #ffffff, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1",
+            "html": "<time datetime=\"2026-10-26T22:18:00Z\">26 oct 2026, 4:18 p.m.</time>"
+          },
+          {
+            "target": [
+              "div:nth-child(1) > div > small"
+            ],
+            "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.8 (foreground color: #7083aa, background color: #ffffff, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1",
+            "html": "<small>Actualízala periódicamente</small>"
+          },
+          {
+            "target": [
+              "div:nth-child(2) > div > small"
+            ],
+            "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.8 (foreground color: #7083aa, background color: #ffffff, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1",
+            "html": "<small>Agregar una capa extra de seguridad</small>"
+          },
+          {
+            "target": [
+              "div:nth-child(3) > div > small"
+            ],
+            "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.8 (foreground color: #7083aa, background color: #ffffff, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1",
+            "html": "<small>Gestiona tus sesiones iniciadas</small>"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "1440-_cuenta_preferencias",
+    "route": "/cuenta/preferencias",
+    "width": 1440,
+    "status": 200,
+    "url": "/cuenta/preferencias",
+    "title": "Mis Preferencias — Ruum Ruum",
+    "h1": [
+      "Preferencias",
+      "Preferencias",
+      "Mis preferencias"
+    ],
+    "scrollWidth": 1440,
+    "text": "Saltar al contenido principal\nRuum Ruum\nTu traslado, en orden\nInicio\nMis traslados\nMis vehículos\nMis ubicaciones\nCarga Masiva\nMi cuenta\nMi perfil\nMis preferencias\nAyuda\n\nMueve tu auto sin salir de casa\n\nUn servicio confiable, seguro y en todo México.\n\nRegistrar traslado\nCM\nHola, Carlos\nUsuario\n←\nVolver a mi cuenta\nMis preferencias\n\nConfigura notificaciones, apariencia, privacidad y preferencias de uso.\n\nIdioma\n\nEspañol\n\nTema\n\nClaro\n\nNotificaciones\n\nActivadas\n\nPrivacidad\n\nConfigurada\n\nIdioma y región\n\nConfigura el idioma, tu zona horaria y el sistema de unidades.\n\nIdioma\n\nDefine el idioma de la aplicación.\n\nEspañol\nEnglish\n\nZona horaria\n\nSe usará para mostrar fechas y horarios de tus traslados.\n\n(UTC-06:00) Ciudad de México\n(UTC-05:00) Cancún / Este\n(UTC-07:00) Mazatlán / Pacífico\n(UTC-08:00) Tijuana / Noroeste\n\nUnidades\n\nDefine el sistema de unidades para distancias, peso y consumo.\n\nMétrico\nImperial\nAplicación\n\nPersonaliza la apariencia y el comportamiento de la plataforma.\n\nTema\n\nElige el tema que mejor se adapte a ti.\n\nClaro\nOscuro\nAutomático\n\nNotificaciones y alertas\n\nRecibe avisos importantes sobre tus traslados y actividad.\n\nAccesibilidad\n\nAjustes de contraste, tamaño de letra y otras opciones de accesibilidad.\n\nEstándar\nAlto contraste\nTexto grande\n\nUnidades\n\nSistema de unidades en la aplicación.\n\nMétrico\nImperial\nNotificaciones\n\nElige qué tipo de notificaciones quieres recibir y por qué medio.\n\nEmail\nWeb / Push\n\nRecordatorios de traslados\n\nAvisos previos a tus traslados programados.\n\nCambios de estado\n\nNotificaciones sobre el estado de tus traslados.\n\nPagos y facturación\n\nConfirmaciones, comprobantes y avisos de pago.\n\nPromociones y novedades\n\nNoticias, promociones y nuevos servicios.\n\nPrivacidad y permisos\n\nControla el uso de tu información y los permisos del dispositivo.\n\nUbicación\n\nSe autoriza desde el mapa y el navegador cuando usas servicios de traslado.\n\nSe solicita cuando usas el mapa o servicios de traslado.\n\nUso de datos\n\nConfigura el uso de datos de la aplicación.\n\nActivado\nSolo esenciales\nDesactivado\n\nBiometría\n\nLa autenticación biométrica no está disponible en la versión web. Puedes usarla en nuestras apps móviles.\n\nNo disponible en web\n\nSesiones activas\n\nAdministra los dispositivos donde has iniciado sesión.\n\nVer sesiones\n\nRecuerda guardar tus cambios\n\nLas modificaciones se aplicarán a tu cuenta de inmediato.\n\nRestablecer\nGuardar cambios",
+    "smallTargets": [
+      {
+        "text": "←\nVolver a mi cuenta",
+        "height": 16
+      }
+    ],
+    "errors": [],
+    "violations": [
+      {
+        "id": "button-name",
+        "impact": "critical",
+        "description": "Ensure buttons have discernible text",
+        "help": "Buttons must have discernible text",
+        "nodes": [
+          {
+            "target": [
+              ".py-4.gap-4.justify-between:nth-child(2) > .h-6.border-2.border-transparent"
+            ],
+            "summary": "Fix any of the following:\n  Element does not have inner text that is visible to screen readers\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty\n  Element has no title attribute\n  Element does not have an implicit (wrapped) <label>\n  Element does not have an explicit <label>\n  Element's default semantics were not overridden with role=\"none\" or role=\"presentation\"",
+            "html": "<button type=\"button\" role=\"switch\" aria-checked=\"true\" class=\"relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-[#0066FF] bg-[#0066FF]\">"
+          },
+          {
+            "target": [
+              ".py-4.gap-4.justify-between:nth-child(1) > .gap-8.shrink-0.items-center > .h-6.border-2.border-transparent:nth-child(1)"
+            ],
+            "summary": "Fix any of the following:\n  Element does not have inner text that is visible to screen readers\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty\n  Element has no title attribute\n  Element does not have an implicit (wrapped) <label>\n  Element does not have an explicit <label>\n  Element's default semantics were not overridden with role=\"none\" or role=\"presentation\"",
+            "html": "<button type=\"button\" role=\"switch\" aria-checked=\"true\" class=\"relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-[#0066FF] bg-[#0066FF]\">"
+          },
+          {
+            "target": [
+              ".py-4.gap-4.justify-between:nth-child(1) > .gap-8.shrink-0.items-center > .h-6.border-2.border-transparent:nth-child(2)"
+            ],
+            "summary": "Fix any of the following:\n  Element does not have inner text that is visible to screen readers\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty\n  Element has no title attribute\n  Element does not have an implicit (wrapped) <label>\n  Element does not have an explicit <label>\n  Element's default semantics were not overridden with role=\"none\" or role=\"presentation\"",
+            "html": "<button type=\"button\" role=\"switch\" aria-checked=\"true\" class=\"relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-[#0066FF] bg-[#0066FF]\">"
+          },
+          {
+            "target": [
+              ".py-4.gap-4.justify-between:nth-child(2) > .gap-8.shrink-0.items-center > .h-6.border-2.border-transparent:nth-child(1)"
+            ],
+            "summary": "Fix any of the following:\n  Element does not have inner text that is visible to screen readers\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty\n  Element has no title attribute\n  Element does not have an implicit (wrapped) <label>\n  Element does not have an explicit <label>\n  Element's default semantics were not overridden with role=\"none\" or role=\"presentation\"",
+            "html": "<button type=\"button\" role=\"switch\" aria-checked=\"true\" class=\"relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-[#0066FF] bg-[#0066FF]\">"
+          },
+          {
+            "target": [
+              ".py-4.gap-4.justify-between:nth-child(2) > .gap-8.shrink-0.items-center > .h-6.border-2.border-transparent:nth-child(2)"
+            ],
+            "summary": "Fix any of the following:\n  Element does not have inner text that is visible to screen readers\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty\n  Element has no title attribute\n  Element does not have an implicit (wrapped) <label>\n  Element does not have an explicit <label>\n  Element's default semantics were not overridden with role=\"none\" or role=\"presentation\"",
+            "html": "<button type=\"button\" role=\"switch\" aria-checked=\"true\" class=\"relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-[#0066FF] bg-[#0066FF]\">"
+          },
+          {
+            "target": [
+              ".py-4.gap-4.justify-between:nth-child(3) > .gap-8.shrink-0.items-center > .h-6.border-2.border-transparent:nth-child(1)"
+            ],
+            "summary": "Fix any of the following:\n  Element does not have inner text that is visible to screen readers\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty\n  Element has no title attribute\n  Element does not have an implicit (wrapped) <label>\n  Element does not have an explicit <label>\n  Element's default semantics were not overridden with role=\"none\" or role=\"presentation\"",
+            "html": "<button type=\"button\" role=\"switch\" aria-checked=\"true\" class=\"relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-[#0066FF] bg-[#0066FF]\">"
+          },
+          {
+            "target": [
+              ".py-4.gap-4.justify-between:nth-child(3) > .gap-8.shrink-0.items-center > .h-6.border-2.border-transparent:nth-child(2)"
+            ],
+            "summary": "Fix any of the following:\n  Element does not have inner text that is visible to screen readers\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty\n  Element has no title attribute\n  Element does not have an implicit (wrapped) <label>\n  Element does not have an explicit <label>\n  Element's default semantics were not overridden with role=\"none\" or role=\"presentation\"",
+            "html": "<button type=\"button\" role=\"switch\" aria-checked=\"true\" class=\"relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-[#0066FF] bg-[#0066FF]\">"
+          },
+          {
+            "target": [
+              ".bg-slate-300.dark\\:bg-slate-700.h-6:nth-child(1)"
+            ],
+            "summary": "Fix any of the following:\n  Element does not have inner text that is visible to screen readers\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty\n  Element has no title attribute\n  Element does not have an implicit (wrapped) <label>\n  Element does not have an explicit <label>\n  Element's default semantics were not overridden with role=\"none\" or role=\"presentation\"",
+            "html": "<button type=\"button\" role=\"switch\" aria-checked=\"false\" class=\"relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-[#0066FF] bg-slate-300 dark:bg-slate-700\">"
+          },
+          {
+            "target": [
+              ".bg-slate-300.dark\\:bg-slate-700.h-6:nth-child(2)"
+            ],
+            "summary": "Fix any of the following:\n  Element does not have inner text that is visible to screen readers\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty\n  Element has no title attribute\n  Element does not have an implicit (wrapped) <label>\n  Element does not have an explicit <label>\n  Element's default semantics were not overridden with role=\"none\" or role=\"presentation\"",
+            "html": "<button type=\"button\" role=\"switch\" aria-checked=\"false\" class=\"relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-[#0066FF] bg-slate-300 dark:bg-slate-700\">"
+          }
+        ]
+      },
+      {
+        "id": "color-contrast",
+        "impact": "serious",
+        "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+        "help": "Elements must meet minimum color contrast ratio thresholds",
+        "nodes": [
+          {
+            "target": [
+              ".mt-1.text-slate-500.dark\\:text-slate-400"
+            ],
+            "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.47 (foreground color: #62748e, background color: #f5f8fc, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1",
+            "html": "<p class=\"text-xs text-slate-500 dark:text-slate-400 mt-1\">Configura notificaciones, apariencia, privacidad y preferencias de uso.</p>"
+          },
+          {
+            "target": [
+              ".p-4.dark\\:bg-\\[\\#0A1325\\].rounded-2xl:nth-child(1) > .gap-3.items-center.flex > div:nth-child(2) > .text-slate-400"
+            ],
+            "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.63 (foreground color: #90a1b9, background color: #ffffff, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1",
+            "html": "<p class=\"text-xs text-slate-400\">Español</p>"
+          },
+          {
+            "target": [
+              ".p-4.dark\\:bg-\\[\\#0A1325\\].rounded-2xl:nth-child(2) > .gap-3.items-center.flex > div:nth-child(2) > .text-slate-400"
+            ],
+            "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.63 (foreground color: #90a1b9, background color: #ffffff, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1",
+            "html": "<p class=\"text-xs text-slate-400\">Claro</p>"
+          },
+          {
+            "target": [
+              ".p-4.dark\\:bg-\\[\\#0A1325\\].rounded-2xl:nth-child(3) > .gap-3.items-center.flex > div:nth-child(2) > .text-slate-400"
+            ],
+            "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.63 (foreground color: #90a1b9, background color: #ffffff, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1",
+            "html": "<p class=\"text-xs text-slate-400\">Activadas</p>"
+          },
+          {
+            "target": [
+              ".p-4.dark\\:bg-\\[\\#0A1325\\].rounded-2xl:nth-child(4) > .gap-3.items-center.flex > div:nth-child(2) > .text-slate-400"
+            ],
+            "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.63 (foreground color: #90a1b9, background color: #ffffff, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1",
+            "html": "<p class=\"text-xs text-slate-400\">Configurada</p>"
+          },
+          {
+            "target": [
+              "section:nth-child(1) > .pb-5.border-slate-100.dark\\:border-slate-800 > div:nth-child(2) > .text-\\[11px\\].text-slate-400"
+            ],
+            "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.63 (foreground color: #90a1b9, background color: #ffffff, font size: 8.3pt (11px), font weight: normal). Expected contrast ratio of 4.5:1",
+            "html": "<p class=\"text-[11px] text-slate-400\">Configura el idioma, tu zona horaria y el sistema de unidades.</p>"
+          },
+          {
+            "target": [
+              "section:nth-child(1) > .divide-y.divide-slate-100.dark\\:divide-slate-800\\/80 > .py-4.gap-4.justify-between:nth-child(1) > .items-start.min-w-0.gap-3 > div > .text-\\[11px\\].text-slate-400"
+            ],
+            "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.63 (foreground color: #90a1b9, background color: #ffffff, font size: 8.3pt (11px), font weight: normal). Expected contrast ratio of 4.5:1",
+            "html": "<p class=\"text-[11px] text-slate-400\">Define el idioma de la aplicación.</p>"
+          },
+          {
+            "target": [
+              "section:nth-child(1) > .divide-y.divide-slate-100.dark\\:divide-slate-800\\/80 > .py-4.gap-4.justify-between:nth-child(2) > .items-start.min-w-0.gap-3 > div > .text-\\[11px\\].text-slate-400"
+            ],
+            "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.63 (foreground color: #90a1b9, background color: #ffffff, font size: 8.3pt (11px), font weight: normal). Expected contrast ratio of 4.5:1",
+            "html": "<p class=\"text-[11px] text-slate-400\">Se usará para mostrar fechas y horarios de tus traslados.</p>"
+          },
+          {
+            "target": [
+              "section:nth-child(1) > .divide-y.divide-slate-100.dark\\:divide-slate-800\\/80 > .py-4.gap-4.justify-between:nth-child(3) > .items-start.min-w-0.gap-3 > div > .text-\\[11px\\].text-slate-400"
+            ],
+            "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.63 (foreground color: #90a1b9, background color: #ffffff, font size: 8.3pt (11px), font weight: normal). Expected contrast ratio of 4.5:1",
+            "html": "<p class=\"text-[11px] text-slate-400\">Define el sistema de unidades para distancias, peso y consumo.</p>"
+          },
+          {
+            "target": [
+              "section:nth-child(2) > .pb-5.border-slate-100.dark\\:border-slate-800 > div:nth-child(2) > .text-\\[11px\\].text-slate-400"
+            ],
+            "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.63 (foreground color: #90a1b9, background color: #ffffff, font size: 8.3pt (11px), font weight: normal). Expected contrast ratio of 4.5:1",
+            "html": "<p class=\"text-[11px] text-slate-400\">Personaliza la apariencia y el comportamiento de la plataforma.</p>"
+          },
+          {
+            "target": [
+              "section:nth-child(2) > .divide-y.divide-slate-100.dark\\:divide-slate-800\\/80 > .py-4.gap-4.justify-between:nth-child(1) > .items-start.min-w-0.gap-3 > div > .text-\\[11px\\].text-slate-400"
+            ],
+            "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.63 (foreground color: #90a1b9, background color: #ffffff, font size: 8.3pt (11px), font weight: normal). Expected contrast ratio of 4.5:1",
+            "html": "<p class=\"text-[11px] text-slate-400\">Elige el tema que mejor se adapte a ti.</p>"
+          },
+          {
+            "target": [
+              "section:nth-child(2) > .divide-y.divide-slate-100.dark\\:divide-slate-800\\/80 > .py-4.gap-4.justify-between:nth-child(2) > .items-start.min-w-0.gap-3 > div > .text-\\[11px\\].text-slate-400"
+            ],
+            "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.63 (foreground color: #90a1b9, background color: #ffffff, font size: 8.3pt (11px), font weight: normal). Expected contrast ratio of 4.5:1",
+            "html": "<p class=\"text-[11px] text-slate-400\">Recibe avisos importantes sobre tus traslados y actividad.</p>"
+          },
+          {
+            "target": [
+              "section:nth-child(2) > .divide-y.divide-slate-100.dark\\:divide-slate-800\\/80 > .py-4.gap-4.justify-between:nth-child(3) > .items-start.min-w-0.gap-3 > div > .text-\\[11px\\].text-slate-400"
+            ],
+            "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.63 (foreground color: #90a1b9, background color: #ffffff, font size: 8.3pt (11px), font weight: normal). Expected contrast ratio of 4.5:1",
+            "html": "<p class=\"text-[11px] text-slate-400\">Ajustes de contraste, tamaño de letra y otras opciones de accesibilidad.</p>"
+          },
+          {
+            "target": [
+              "section:nth-child(2) > .divide-y.divide-slate-100.dark\\:divide-slate-800\\/80 > .py-4.gap-4.justify-between:nth-child(4) > .items-start.min-w-0.gap-3 > div > .text-\\[11px\\].text-slate-400"
+            ],
+            "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.63 (foreground color: #90a1b9, background color: #ffffff, font size: 8.3pt (11px), font weight: normal). Expected contrast ratio of 4.5:1",
+            "html": "<p class=\"text-[11px] text-slate-400\">Sistema de unidades en la aplicación.</p>"
+          },
+          {
+            "target": [
+              ".pb-5.border-slate-100.dark\\:border-slate-800 > .gap-3.items-center.flex > div:nth-child(2) > .text-\\[11px\\].text-slate-400"
+            ],
+            "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.63 (foreground color: #90a1b9, background color: #ffffff, font size: 8.3pt (11px), font weight: normal). Expected contrast ratio of 4.5:1",
+            "html": "<p class=\"text-[11px] text-slate-400\">Elige qué tipo de notificaciones quieres recibir y por qué medio.</p>"
+          },
+          {
+            "target": [
+              "section:nth-child(3) > .divide-y.divide-slate-100.dark\\:divide-slate-800\\/80 > .py-4.gap-4.justify-between:nth-child(1) > .items-start.min-w-0.gap-3 > div > .text-\\[11px\\].text-slate-400"
+            ],
+            "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.63 (foreground color: #90a1b9, background color: #ffffff, font size: 8.3pt (11px), font weight: normal). Expected contrast ratio of 4.5:1",
+            "html": "<p class=\"text-[11px] text-slate-400\">Avisos previos a tus traslados programados.</p>"
+          },
+          {
+            "target": [
+              "section:nth-child(4) > .pb-5.border-slate-100.dark\\:border-slate-800 > div:nth-child(2) > .text-\\[11px\\].text-slate-400"
+            ],
+            "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.63 (foreground color: #90a1b9, background color: #ffffff, font size: 8.3pt (11px), font weight: normal). Expected contrast ratio of 4.5:1",
+            "html": "<p class=\"text-[11px] text-slate-400\">Controla el uso de tu información y los permisos del dispositivo.</p>"
+          },
+          {
+            "target": [
+              "section:nth-child(4) > .divide-y.divide-slate-100.dark\\:divide-slate-800\\/80 > .py-4.gap-4.justify-between:nth-child(1) > .items-start.min-w-0.gap-3 > div > .text-\\[11px\\].text-slate-400"
+            ],
+            "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.63 (foreground color: #90a1b9, background color: #ffffff, font size: 8.3pt (11px), font weight: normal). Expected contrast ratio of 4.5:1",
+            "html": "<p class=\"text-[11px] text-slate-400\">Se autoriza desde el mapa y el navegador cuando usas servicios de traslado.</p>"
+          },
+          {
+            "target": [
+              ".bg-sky-50 > span"
+            ],
+            "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.77 (foreground color: #0084d1, background color: #f0f9ff, font size: 8.3pt (11px), font weight: normal). Expected contrast ratio of 4.5:1",
+            "html": "<span>Se solicita cuando usas el mapa o servicios de traslado.</span>"
+          }
+        ]
+      },
+      {
+        "id": "select-name",
+        "impact": "critical",
+        "description": "Ensure select element has an accessible name",
+        "help": "Select element must have an accessible name",
+        "nodes": [
+          {
+            "target": [
+              "section:nth-child(1) > .divide-y.divide-slate-100.dark\\:divide-slate-800\\/80 > .py-4.gap-4.justify-between:nth-child(2) > .dark\\:border-slate-700.dark\\:text-slate-200.px-3"
+            ],
+            "summary": "Fix any of the following:\n  Element does not have an implicit (wrapped) <label>\n  Element does not have an explicit <label>\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty\n  Element has no title attribute\n  Element's default semantics were not overridden with role=\"none\" or role=\"presentation\"",
+            "html": "<select class=\"bg-white dark:bg-[#16253B] border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200 text-xs rounded-xl px-3 py-1.5 outline-none focus:ring-2 focus:ring-[#0066FF] shrink-0\">"
+          },
+          {
+            "target": [
+              "section:nth-child(1) > .divide-y.divide-slate-100.dark\\:divide-slate-800\\/80 > .py-4.gap-4.justify-between:nth-child(3) > .dark\\:border-slate-700.dark\\:text-slate-200.px-3"
+            ],
+            "summary": "Fix any of the following:\n  Element does not have an implicit (wrapped) <label>\n  Element does not have an explicit <label>\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty\n  Element has no title attribute\n  Element's default semantics were not overridden with role=\"none\" or role=\"presentation\"",
+            "html": "<select class=\"bg-white dark:bg-[#16253B] border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200 text-xs rounded-xl px-3 py-1.5 outline-none focus:ring-2 focus:ring-[#0066FF] shrink-0\">"
+          },
+          {
+            "target": [
+              "section:nth-child(2) > .divide-y.divide-slate-100.dark\\:divide-slate-800\\/80 > .py-4.gap-4.justify-between:nth-child(3) > .dark\\:border-slate-700.dark\\:text-slate-200.px-3"
+            ],
+            "summary": "Fix any of the following:\n  Element does not have an implicit (wrapped) <label>\n  Element does not have an explicit <label>\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty\n  Element has no title attribute\n  Element's default semantics were not overridden with role=\"none\" or role=\"presentation\"",
+            "html": "<select class=\"bg-white dark:bg-[#16253B] border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200 text-xs rounded-xl px-3 py-1.5 outline-none focus:ring-2 focus:ring-[#0066FF] shrink-0\">"
+          },
+          {
+            "target": [
+              ".py-4.gap-4.justify-between:nth-child(4) > .dark\\:border-slate-700.dark\\:text-slate-200.px-3"
+            ],
+            "summary": "Fix any of the following:\n  Element does not have an implicit (wrapped) <label>\n  Element does not have an explicit <label>\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty\n  Element has no title attribute\n  Element's default semantics were not overridden with role=\"none\" or role=\"presentation\"",
+            "html": "<select class=\"bg-white dark:bg-[#16253B] border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200 text-xs rounded-xl px-3 py-1.5 outline-none focus:ring-2 focus:ring-[#0066FF] shrink-0\">"
+          },
+          {
+            "target": [
+              "section:nth-child(4) > .divide-y.divide-slate-100.dark\\:divide-slate-800\\/80 > .py-4.gap-4.justify-between:nth-child(2) > .dark\\:border-slate-700.dark\\:text-slate-200.px-3"
+            ],
+            "summary": "Fix any of the following:\n  Element does not have an implicit (wrapped) <label>\n  Element does not have an explicit <label>\n  aria-label attribute does not exist or is empty\n  aria-labelledby attribute does not exist, references elements that do not exist or references elements that are empty\n  Element has no title attribute\n  Element's default semantics were not overridden with role=\"none\" or role=\"presentation\"",
+            "html": "<select class=\"bg-white dark:bg-[#16253B] border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200 text-xs rounded-xl px-3 py-1.5 outline-none focus:ring-2 focus:ring-[#0066FF] shrink-0\">"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "1440-_soporte",
+    "route": "/soporte",
+    "width": 1440,
+    "status": 200,
+    "url": "/soporte",
+    "title": "Ayuda y soporte — Ruum Ruum",
+    "h1": [
+      "Ayuda y soporte",
+      "Soporte"
+    ],
+    "scrollWidth": 1440,
+    "text": "Saltar al contenido principal\nRuum Ruum\nTu traslado, en orden\nInicio\nMis traslados\nMis vehículos\nMis ubicaciones\nCarga Masiva\nMi cuenta\nMi perfil\nMis preferencias\nAyuda\n\nMueve tu auto sin salir de casa\n\nUn servicio confiable, seguro y en todo México.\n\nRegistrar traslado\nCtrl K\nCM\nHola, Carlos\nUsuario\nAyuda y soporte\n\nConsulta las preguntas frecuentes, contacta a soporte o crea un reporte.\n\nCanales de soporte\n•\nTraslado #10000000\n\nCrear reporte\nLlamada\nWhatsApp\nCorreo\nTEMAS FRECUENTES\nProblema con un traslado\nReportar daño o incidente\nAyuda con pagos\nAyuda con evidencia\nPreguntas frecuentes",
+    "smallTargets": [],
+    "errors": [],
+    "violations": []
+  },
+  {
+    "id": "1440-_ubicaciones",
+    "route": "/ubicaciones",
+    "width": 1440,
+    "status": 200,
+    "url": "/ubicaciones",
+    "title": "Mis ubicaciones — Ruum Ruum",
+    "h1": [
+      "Mis ubicaciones",
+      "Mis ubicaciones"
+    ],
+    "scrollWidth": 1440,
+    "text": "Saltar al contenido principal\nRuum Ruum\nTu traslado, en orden\nInicio\nMis traslados\nMis vehículos\nMis ubicaciones\nCarga Masiva\nMi cuenta\nMi perfil\nMis preferencias\nAyuda\n\nMueve tu auto sin salir de casa\n\nUn servicio confiable, seguro y en todo México.\n\nRegistrar traslado\nCM\nHola, Carlos\nUsuario\n\nMis ubicaciones\n\nMis ubicaciones\nConsulta, administra y usa tus direcciones para cotizar y registrar traslados más rápido.\nActualizar ubicaciones\nNueva ubicación\n6\nUbicaciones registradas\n0\nDomicilios del perfil\n0\nFrecuentes\nTipo de ubicación\nTodas\nDomicilio del perfil\nOrigen de traslado\nDestino de traslado\nTrabajo\nOtro\nCiudad o estado\nTodas\nCDMX\nLerma de Villada\nMetepec\nNaucalpan\nSan Mateo Atenco\nToluca\nMás filtros\nTodas (6)\nDomicilio del perfil (0)\nFrecuentes (0)\nTrabajo (0)\nOtros (6)\nEstado de México\nEstado de México\nSan Mateo Atenco\nOrigen de traslado\nUsar\nEstado de México\nEstado de México\nLerma de Villada\nDestino de traslado\nUsar\nEstado de México\nEstado de México\nToluca\nOrigen de traslado\nUsar\nEstado de México\nEstado de México\nNaucalpan\nDestino de traslado\nUsar\nEstado de México\nEstado de México\nMetepec\nOrigen de traslado\nUsar\nEstado de México\nEstado de México\nCDMX\nDestino de traslado\nUsar\n1\nMostrando 1–6 de 6 ubicaciones\nEstado de México\nOrigen de traslado\n\nEstado de México, San Mateo Atenco\n\nCargando mapa…\nAbrir en mapa\nUsar en traslado\nCopiar dirección\nEditar\nEliminar\nTipo de ubicación\nOrigen de traslado\nCiudad\nSan Mateo Atenco\nEstado\nNo registrado\nCódigo postal\nNo registrado\nCoordenadas\n19.266, -99.531\nReferencia\nSin referencia\nEditar información",
+    "smallTargets": [],
+    "errors": [],
+    "violations": [
+      {
+        "id": "color-contrast",
+        "impact": "serious",
+        "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+        "help": "Elements must meet minimum color contrast ratio thresholds",
+        "nodes": [
+          {
+            "target": [
+              "li[data-selected=\"true\"] > .ubicaciones-desktop-module__lOLZXG__tag[data-type=\"origen\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.32 (foreground color: #009a57, background color: #defbef, font size: 8.3pt (11px), font weight: normal). Expected contrast ratio of 4.5:1",
+            "html": "<span class=\"ubicaciones-desktop-module__lOLZXG__tag\" data-type=\"origen\">Origen de traslado</span>"
+          },
+          {
+            "target": [
+              "li[data-selected=\"false\"]:nth-child(2) > .ubicaciones-desktop-module__lOLZXG__tag[data-type=\"destino\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.44 (foreground color: #0061ff, background color: #e8f1ff, font size: 8.3pt (11px), font weight: normal). Expected contrast ratio of 4.5:1",
+            "html": "<span class=\"ubicaciones-desktop-module__lOLZXG__tag\" data-type=\"destino\">Destino de traslado</span>"
+          },
+          {
+            "target": [
+              "li[data-selected=\"false\"]:nth-child(3) > .ubicaciones-desktop-module__lOLZXG__tag[data-type=\"origen\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.32 (foreground color: #009a57, background color: #defbef, font size: 8.3pt (11px), font weight: normal). Expected contrast ratio of 4.5:1",
+            "html": "<span class=\"ubicaciones-desktop-module__lOLZXG__tag\" data-type=\"origen\">Origen de traslado</span>"
+          },
+          {
+            "target": [
+              "li[data-selected=\"false\"]:nth-child(4) > .ubicaciones-desktop-module__lOLZXG__tag[data-type=\"destino\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.44 (foreground color: #0061ff, background color: #e8f1ff, font size: 8.3pt (11px), font weight: normal). Expected contrast ratio of 4.5:1",
+            "html": "<span class=\"ubicaciones-desktop-module__lOLZXG__tag\" data-type=\"destino\">Destino de traslado</span>"
+          },
+          {
+            "target": [
+              "li[data-selected=\"false\"]:nth-child(5) > .ubicaciones-desktop-module__lOLZXG__tag[data-type=\"origen\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.32 (foreground color: #009a57, background color: #defbef, font size: 8.3pt (11px), font weight: normal). Expected contrast ratio of 4.5:1",
+            "html": "<span class=\"ubicaciones-desktop-module__lOLZXG__tag\" data-type=\"origen\">Origen de traslado</span>"
+          },
+          {
+            "target": [
+              "li[data-selected=\"false\"]:nth-child(6) > .ubicaciones-desktop-module__lOLZXG__tag[data-type=\"destino\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.44 (foreground color: #0061ff, background color: #e8f1ff, font size: 8.3pt (11px), font weight: normal). Expected contrast ratio of 4.5:1",
+            "html": "<span class=\"ubicaciones-desktop-module__lOLZXG__tag\" data-type=\"destino\">Destino de traslado</span>"
+          },
+          {
+            "target": [
+              "div > .ubicaciones-desktop-module__lOLZXG__tag[data-type=\"origen\"]"
+            ],
+            "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.32 (foreground color: #009a57, background color: #defbef, font size: 6.8pt (9px), font weight: normal). Expected contrast ratio of 4.5:1",
+            "html": "<span class=\"ubicaciones-desktop-module__lOLZXG__tag\" data-type=\"origen\">Origen de traslado</span>"
+          },
+          {
+            "target": [
+              ".ubicaciones-desktop-module__lOLZXG__delete"
+            ],
+            "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.01 (foreground color: #ef343f, background color: #ffffff, font size: 8.3pt (11px), font weight: normal). Expected contrast ratio of 4.5:1",
+            "html": "<button class=\"ubicaciones-desktop-module__lOLZXG__delete\">"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "1440-_pasaporte",
+    "route": "/pasaporte",
+    "width": 1440,
+    "error": "page.evaluate: Execution context was destroyed, most likely because of a navigation",
+    "errors": []
+  }
+]

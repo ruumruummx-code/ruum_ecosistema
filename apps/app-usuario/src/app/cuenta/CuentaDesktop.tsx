@@ -133,24 +133,14 @@ export function CuentaDesktop({ cuenta, seccionInicial }: CuentaDesktopProps) {
           <div
             role="region"
             aria-label="Estado de solicitud de conductor"
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "0.875rem",
-              padding: "1rem 1.25rem",
-              background: "#fffbeb",
-              border: "1px solid #fde68a",
-              borderRadius: "1rem",
-              marginBottom: "1rem",
-              color: "#92400e",
-            }}
+            className="flex items-center gap-3.5 px-5 py-4 bg-[#fffbeb] border border-[#fde68a] rounded-2xl mb-4 text-[#92400e]"
           >
             <Icon name="shield" />
             <div>
-              <strong style={{ display: "block", fontSize: "0.875rem" }}>
+              <strong className="block text-sm">
                 Solicitud de conductor en revisión
               </strong>
-              <span style={{ fontSize: "0.8125rem", color: "#b45309" }}>
+              <span className="text-[0.8125rem] text-[#b45309]">
                 Tu postulación como conductor está en proceso de validación operativa.
               </span>
             </div>

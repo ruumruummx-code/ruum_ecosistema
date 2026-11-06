@@ -36,8 +36,12 @@ vi.mock("../../../lib/supabase-browser", () => ({
   crearClienteNavegador: () => ({}),
 }));
 
+const mockActualizarNotificaciones = vi.fn(() => Promise.resolve({ data: null, error: null }));
+const mockActualizarGenerales = vi.fn(() => Promise.resolve());
+
 vi.mock("@ruum/api/services", () => ({
-  actualizarPreferenciasNotificaciones: vi.fn(() => Promise.resolve({ data: null, error: null })),
+  actualizarPreferenciasNotificaciones: (...args: unknown[]) => mockActualizarNotificaciones(...args),
+  actualizarPreferenciasGeneralesUsuario: (...args: unknown[]) => mockActualizarGenerales(...args),
 }));
 
 // Mock de useTema
@@ -176,7 +180,10 @@ describe("PreferenciasCliente", () => {
     fireEvent.click(botonCerrar);
   });
 
-  it("guarda las preferencias en localStorage y muestra feedback al presionar 'Guardar cambios'", async () => {
+  it("guarda las preferencias en localStorage aislado por usuario y muestra feedback de éxito al sincronizar", async () => {
+    mockActualizarNotificaciones.mockResolvedValueOnce({ data: null, error: null });
+    mockActualizarGenerales.mockResolvedValueOnce(undefined);
+
     render(<PreferenciasCliente cuenta={mockCuenta} />);
 
     const botonGuardar = screen.getByRole("button", { name: "Guardar cambios" });
@@ -184,8 +191,73 @@ describe("PreferenciasCliente", () => {
 
     expect(await screen.findByText("Cambios guardados con éxito")).toBeDefined();
     expect(mockLocalStorage.setItem).toHaveBeenCalledWith(
-      "ruum-usuario-preferencias",
+      "ruum:pref:usuario:user-123",
       expect.stringContaining('"idioma":"es"')
     );
+  });
+
+  it("RUUM-UX-011 AC-1: ante un fallo 503 remoto NO anuncia éxito y muestra estado de error con reintento", async () => {
+    const error503 = new Error("fallo_controlado_auditoria (503 Service Unavailable)");
+    (error503 as unknown as { status: number }).status = 503;
+    mockActualizarNotificaciones.mockRejectedValueOnce(error503);
+
+    render(<PreferenciasCliente cuenta={mockCuenta} />);
+
+    const botonGuardar = screen.getByRole("button", { name: "Guardar cambios" });
+    fireEvent.click(botonGuardar);
+
+    // Debe mostrar alerta de error
+    const alerta = await screen.findByRole("alert");
+    expect(alerta).toHaveTextContent(/503|Servicio no disponible/i);
+
+    // CRÍTICO: NUNCA debe decir "Cambios guardados con éxito"
+    expect(screen.queryByText("Cambios guardados con éxito")).toBeNull();
+
+    // Debe ofrecer botón de reintento
+    const botonReintentar = screen.getByRole("button", { name: "Reintentar" });
+    expect(botonReintentar).toBeDefined();
+
+    // Al reintentar con éxito, ahora sí se limpia el error y se confirma
+    mockActualizarNotificaciones.mockResolvedValueOnce({ data: null, error: null });
+    mockActualizarGenerales.mockResolvedValueOnce(undefined);
+    fireEvent.click(botonReintentar);
+
+    expect(await screen.findByText("Cambios guardados con éxito")).toBeDefined();
+    expect(screen.queryByRole("alert")).toBeNull();
+  });
+
+  it("RUUM-UX-011 AC-2: ante error de red/offline NO anuncia éxito y muestra sincronización pendiente", async () => {
+    mockActualizarNotificaciones.mockRejectedValueOnce(new Error("Failed to fetch (sin red)"));
+
+    render(<PreferenciasCliente cuenta={mockCuenta} />);
+
+    const botonGuardar = screen.getByRole("button", { name: "Guardar cambios" });
+    fireEvent.click(botonGuardar);
+
+    // Estado pendiente
+    expect(await screen.findByText(/Sin conexión|sincronización pendiente/i)).toBeDefined();
+    expect(screen.queryByText("Cambios guardados con éxito")).toBeNull();
+  });
+
+  it("RUUM-UX-011 AC-3: aísla las preferencias por usuario y evita fuga entre cuentas", () => {
+    const cuentaA = {
+      ...mockCuenta,
+      usuario: { ...mockCuenta.usuario, id: "cuenta-aaa" },
+    } as unknown as CuentaReal;
+
+    const cuentaB = {
+      ...mockCuenta,
+      usuario: { ...mockCuenta.usuario, id: "cuenta-bbb" },
+    } as unknown as CuentaReal;
+
+    mockStore["ruum:pref:usuario:cuenta-aaa"] = JSON.stringify({ idioma: "en", unidades: "Imperial" });
+    mockStore["ruum:pref:usuario:cuenta-bbb"] = JSON.stringify({ idioma: "es", unidades: "Métrico" });
+
+    const { unmount } = render(<PreferenciasCliente cuenta={cuentaA} />);
+    expect(screen.getAllByText("English").length).toBeGreaterThanOrEqual(1);
+    unmount();
+
+    render(<PreferenciasCliente cuenta={cuentaB} />);
+    expect(screen.getAllByText("Español").length).toBeGreaterThanOrEqual(1);
   });
 });

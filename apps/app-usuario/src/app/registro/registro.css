@@ -1,6 +1,6 @@
 /* Sólo el registro: el módulo de facturación conserva su propia maquetación. */
 .registro-usuario { height: 100dvh; max-height: 100dvh; min-height: 0; padding: max(8px, env(safe-area-inset-top)) 8px max(8px, env(safe-area-inset-bottom)); }
-.registro-usuario .registro-shell { height: 100%; max-height: 760px; min-height: 0; }
+.registro-usuario .registro-shell { --ruum-text-primary: var(--user-on-light-primary); height: 100%; max-height: 760px; min-height: 0; }
 .registro-shell > header { min-height: 52px; padding-block: 6px; }
 .registro-progreso { padding-top: 4px; }
 .registro-progreso > [role="progressbar"] { height: 6px; margin-bottom: 2px; }

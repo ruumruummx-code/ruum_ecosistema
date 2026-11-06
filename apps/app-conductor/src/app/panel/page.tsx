@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import styles from "./panel.module.css";
 import Link from "next/link";
+import { ConductorDialog } from "../components/ConductorDialog";
 import Image from "next/image";
 import { Aviso } from "@ruum/ui";
 import { ConfirmarDisponibilidad } from "../ConfirmarDisponibilidad";
@@ -582,31 +583,12 @@ export default function PaginaPanel() {
 
       {/* Menú Hamburguesa Móvil */}
       {menuAbierto && (
-        <dialog
-          open
-          className="fixed inset-0 z-[60] m-0 flex h-[100dvh] w-full max-w-none items-start border-0 bg-transparent p-0"
-          aria-modal="true"
-          aria-labelledby="titulo-menu-panel"
-        >
-          <button
-            type="button"
-            onClick={() => setMenuAbierto(false)}
-            className="absolute inset-0 cursor-pointer bg-slate-950/40"
-            aria-label="Cerrar menú"
-          />
-          <section className="relative ml-3 mt-[max(12px,env(safe-area-inset-top))] w-[min(300px,calc(100vw-24px))] rounded-3xl bg-[var(--conductor-surface)] p-5 shadow-2xl">
+        <ConductorDialog open={menuAbierto} onClose={() => setMenuAbierto(false)} labelledBy="titulo-menu-panel">
+          <section className="bg-[var(--conductor-surface)]">
             <div className="flex items-center justify-between gap-3">
               <h2 id="titulo-menu-panel" className="font-display text-lg font-black text-[var(--conductor-primary)]">
                 Menú
               </h2>
-              <button
-                type="button"
-                onClick={() => setMenuAbierto(false)}
-                className="inline-flex size-11 cursor-pointer items-center justify-center rounded-full text-[var(--conductor-muted)] hover:bg-slate-100"
-                aria-label="Cerrar menú"
-              >
-                ×
-              </button>
             </div>
             <nav className="mt-3 grid gap-1" aria-label="Menú del conductor">
               {MENU_LATERAL.map((item) => (
@@ -650,7 +632,7 @@ export default function PaginaPanel() {
               {cerrandoSesion ? "Cerrando sesión…" : "Cerrar sesión"}
             </button>
           </section>
-        </dialog>
+        </ConductorDialog>
       )}
 
       {/* Modal de Confirmación de Disponibilidad */}

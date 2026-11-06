@@ -490,18 +490,15 @@ export function Facturacion({ usuario, empresa, facturasIniciales }: Facturacion
       {/* Hero fiscal con gradiente oscuro */}
       <section
         aria-label="Resumen de facturación electrónica"
-        className="relative overflow-hidden rounded-[26px] p-6 text-[#fff] shadow-[0_16px_32px_-12px_rgba(11,30,51,0.4)]"
-        style={{ background: "linear-gradient(135deg, #0a2342 0%, #143560 100%)" }}
+        className="relative overflow-hidden rounded-[26px] p-6 text-[#fff] shadow-[0_16px_32px_-12px_rgba(11,30,51,0.4)] bg-gradient-to-br from-[#0a2342] to-[#143560]"
       >
         <span
           aria-hidden="true"
-          className="pointer-events-none absolute -right-12 -top-12 size-44 rounded-full"
-          style={{ background: "radial-gradient(circle, rgba(255,255,255,0.08) 0%, transparent 70%)" }}
+          className="pointer-events-none absolute -right-12 -top-12 size-44 rounded-full bg-white/10 blur-xl"
         />
         <span
           aria-hidden="true"
-          className="pointer-events-none absolute -bottom-16 -left-10 size-40 rounded-full"
-          style={{ background: "radial-gradient(circle, rgba(255,255,255,0.05) 0%, transparent 70%)" }}
+          className="pointer-events-none absolute -bottom-16 -left-10 size-40 rounded-full bg-white/5 blur-xl"
         />
 
         <div className="relative z-[1]">

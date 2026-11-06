@@ -13,6 +13,28 @@ test.beforeEach(async ({ page, context }) => {
 });
 
 for (const viewport of [{ width: 320, height: 568 }, { width: 390, height: 844 }, { width: 1280, height: 960 }]) {
+  test(`diálogos de Inicio conservan modalidad y foco en ${viewport.width}×${viewport.height}`, async ({ page }) => {
+    await page.setViewportSize(viewport);
+    await page.goto("/panel", { waitUntil: "domcontentloaded" });
+    // El encabezado viene del servidor; esperar los datos evita pulsarlo
+    // antes de que termine la hidratación y se conecten sus eventos.
+    await expect(page.getByRole("link", { name: /^Ver balance:/ })).toBeVisible();
+    for (const name of ["Abrir menú", "Documentos: Todo en orden"]) {
+      const trigger = page.getByRole("button", { name, exact: true });
+      await trigger.click();
+      const dialog = page.getByRole("dialog");
+      await expect(dialog).toBeVisible();
+      expect(await dialog.evaluate(node => node.matches(":modal"))).toBe(true);
+      await expect(dialog.getByRole("button", { name: "Cerrar diálogo", exact: true }).first()).toBeFocused();
+      for (let index = 0; index < 20; index++) {
+        await page.keyboard.press("Tab");
+        expect(await dialog.evaluate(node => node.contains(document.activeElement))).toBe(true);
+      }
+      await page.keyboard.press("Escape");
+      await expect(dialog).toHaveCount(0);
+      await expect(trigger).toBeFocused();
+    }
+  });
   test(`un solo marco móvil y acciones visibles en ${viewport.width}×${viewport.height}`, async ({ page }, info) => {
     await page.setViewportSize(viewport);
     for (const path of ["/panel", "/cuenta", "/viajes", "/ganancias"]) {

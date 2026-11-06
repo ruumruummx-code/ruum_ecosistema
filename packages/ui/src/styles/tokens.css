@@ -101,6 +101,17 @@
   color: var(--ruum-text-disabled);
 }
 
+/* RUUM-UX-001: Seguridad dimensional de logotipo e imagotipo sin dependencia de estilos inline */
+.ruum-logo-img,
+.ruum-header__logo-img,
+.ruum-header__logo img {
+  height: 36px;
+  max-height: 36px;
+  width: auto;
+  max-width: 100%;
+  object-fit: contain;
+}
+
 /* Modo calle (conductor en traslado activo): botones ≥56px, texto ≥17px. */
 .ruum-street,
 [data-street="true"] {

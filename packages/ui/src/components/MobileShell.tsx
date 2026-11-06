@@ -50,7 +50,6 @@ export function MobileShell({
       ].join(" ")}
     >
       <div
-        style={{ WebkitOverflowScrolling: "touch" }}
         className={[
           "scrollable-content mx-auto flex w-full min-h-0 flex-1 flex-col overflow-y-auto overscroll-contain",
           ANCHO_VARIANTE[variant],

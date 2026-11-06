@@ -3,12 +3,14 @@
 import { useLayoutEffect, useRef, type ReactNode } from "react";
 import { usePathname } from "next/navigation";
 import styles from "./contained-scroll.module.css";
+import { useVisibleViewport } from "./useVisibleViewport";
 
 /** Un único scroll por vista larga; el retorno y el shell conservan su sitio. */
 export function ContainedScrollView({ header, children, label, className, detailsKind }: {
   header: ReactNode; children: ReactNode; label: string; className?: string; detailsKind?: "documents" | "certification" | "bank";
 }) {
   const frame = useRef<HTMLDivElement>(null);
+  useVisibleViewport(frame);
   const heading = useRef<HTMLDivElement>(null);
   const scroll = useRef<HTMLDivElement>(null);
   const content = useRef<HTMLDivElement>(null);

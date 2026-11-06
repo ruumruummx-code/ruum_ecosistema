@@ -25,8 +25,7 @@ export function EstadoBadge({ estado, conTexto = true }: EstadoBadgeProps) {
       className={`inline-flex min-h-7 items-center gap-1.5 rounded-full border px-2.5 py-1 font-body text-xs font-semibold ${estilo}`}
     >
       <span
-        className={`size-1.5 rounded-full ${categoria === "activo" ? "animate-pulse" : ""}`}
-        style={{ backgroundColor: "currentColor" }}
+        className={`size-1.5 rounded-full bg-current ${categoria === "activo" ? "animate-pulse" : ""}`}
         aria-hidden
       />
       {conTexto && ETIQUETA_ESTADO_TRASLADO[estado]}

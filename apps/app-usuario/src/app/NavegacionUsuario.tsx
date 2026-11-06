@@ -192,7 +192,7 @@ export function NavegacionUsuario({
                           : esMasivo
                             ? "!text-[#0066FF] dark:!text-[#4d94ff]"
                             : "!text-[#0a2342] dark:!text-[#f6f8fb]"
-                        : "text-[#8293b0] hover:text-[#0a2342] dark:text-slate-400 dark:hover:text-white"
+                        : "user-essential-muted hover:text-[#0a2342] dark:hover:text-white"
                     }`}
                   >
                     <span
@@ -217,7 +217,7 @@ export function NavegacionUsuario({
                             : esMasivo
                               ? "scale-105 stroke-[2.3] text-[#0066FF] dark:text-[#4d94ff]"
                               : "scale-105 stroke-[2.3] text-[#0a2342] dark:text-[#f6f8fb]"
-                          : "text-[#8293b0] group-hover:text-[#0a2342] dark:text-slate-400 dark:group-hover:text-white"
+                          : "user-essential-muted group-hover:text-[#0a2342] dark:group-hover:text-white"
                       }`}
                     />
                     <span
@@ -228,7 +228,7 @@ export function NavegacionUsuario({
                             : esMasivo
                               ? "font-extrabold text-[#0066FF] dark:text-[#4d94ff]"
                               : "font-extrabold text-[#0a2342] dark:text-[#f6f8fb]"
-                          : "font-medium text-[#8293b0] group-hover:text-[#0a2342] dark:text-slate-400 dark:group-hover:text-white"
+                          : "font-medium user-essential-muted group-hover:text-[#0a2342] dark:group-hover:text-white"
                       }`}
                     >
                       {destino.etiqueta}

@@ -36,7 +36,7 @@ const SECCIONES = {
   soporte: {
     titulo: "Soporte",
     descripcion: "Obtén ayuda y contáctanos",
-    colorBg: "bg-[#ecfdf5] text-[#10b981] dark:bg-[#09281e] dark:text-[#34d399]",
+    colorBg: "bg-[#ecfdf5] user-essential-success dark:bg-[#09281e] ",
     icono: "M4 13v-1a8 8 0 0 1 16 0v1 M4 13h3v6H4v-6Z M20 13h-3v6h3v-6Z",
   },
   legal: {
@@ -81,7 +81,7 @@ function BadgeVerificacion({ estado }: { estado: Usuario["estado_verificacion"] 
   if (est === "verificado") {
     return (
       <span
-        className="inline-flex items-center gap-1 rounded-full bg-[#eaf8f0] px-2.5 py-0.5 text-[11px] font-bold text-[#10b981] dark:bg-[#09281e] dark:text-[#34d399]"
+        className="inline-flex items-center gap-1 rounded-full bg-[#eaf8f0] px-2.5 py-0.5 text-[11px] font-bold user-essential-success dark:bg-[#09281e] "
         title="Verificado"
       >
         <svg className="size-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -464,11 +464,11 @@ export function CuentaCliente({
           className="is-destructive flex w-full items-center justify-between rounded-2xl border border-[#fee2e2] bg-white p-3.5 shadow-xs transition hover:bg-[#fef2f2] active:scale-[0.99] cursor-pointer dark:border-[#591d24] dark:bg-[#0a2342] dark:hover:bg-[#1f0d11] sm:p-4"
         >
           <div className="flex items-center gap-3.5">
-            <span className="flex size-10.5 shrink-0 items-center justify-center rounded-xl bg-[#fef2f2] text-[#ef4444] dark:bg-[#331418] dark:text-[#f87171]">
+            <span className="flex size-10.5 shrink-0 items-center justify-center rounded-xl bg-[#fef2f2] user-essential-danger dark:bg-[#331418] ">
               <Icono d="M9 21H3V3h6 M16 17l5-5-5-5 M21 12H9" className="size-5" />
             </span>
             <div className="text-left">
-              <span className="block font-display text-[14.5px] font-bold text-[#ef4444] dark:text-[#f87171]">
+              <span className="block font-display text-[14.5px] font-bold user-essential-danger ">
                 {cerrandoSesion ? "Cerrando sesión…" : "Cerrar sesión"}
               </span>
               <span aria-hidden="true" className="block text-[12px] font-medium text-[#64748b] dark:text-[#94a3b8]">
@@ -476,7 +476,7 @@ export function CuentaCliente({
               </span>
             </div>
           </div>
-          <Chevron className="size-4 text-[#ef4444] dark:text-[#f87171]" />
+          <Chevron className="size-4 user-essential-danger " />
         </button>
       </nav>
 

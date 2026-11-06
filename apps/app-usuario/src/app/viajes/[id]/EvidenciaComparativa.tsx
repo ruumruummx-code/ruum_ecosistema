@@ -156,7 +156,6 @@ export function EvidenciaComparativa({
                   src={parActivo.ini.url_visual}
                   alt={`Foto inicial de ${ETIQUETA_ANGULO[anguloActivo]}`}
                   className="h-full w-full object-cover max-w-none"
-                  style={{ width: "100%", height: "100%" }}
                 />
               ) : (
                 <div className="p-4 text-center text-slate-400 font-body text-xs min-w-[280px]">

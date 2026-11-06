@@ -7,6 +7,12 @@
  *    de PDF por instancia Node.js (por defecto 2). Si se supera, rechaza fail-fast con 503.
  * 2. Pool intra-petición: limita la descarga concurrente de imágenes a máx 2 paralelas,
  *    evitando acumular múltiples buffers pesados en memoria de forma simultánea.
+ *
+ * DT-06: `ejecutarConSemaforoPdf` tiene un timeout máximo de ejecución configurable
+ * (por defecto 30 s, variable de entorno `PDF_GENERATION_TIMEOUT_MS`). Si la tarea
+ * supera ese tiempo, el semáforo se libera automáticamente y se lanza
+ * `SemaforoPdfTimeoutError`. Esto previene que un error no manejado durante la
+ * generación bloquee el slot indefinidamente y cause timeouts en cascada.
  */
 
 export class SemaforoPdfOcupadoError extends Error {
@@ -19,6 +25,19 @@ export class SemaforoPdfOcupadoError extends Error {
     super(mensaje);
     this.name = "SemaforoPdfOcupadoError";
     this.retryAfterSegundos = retryAfterSegundos;
+  }
+}
+
+/** Lanzado cuando la generación de PDF supera el timeout máximo configurado. */
+export class SemaforoPdfTimeoutError extends Error {
+  readonly timeoutMs: number;
+
+  constructor(timeoutMs: number) {
+    super(
+      `La generación del PDF superó el límite de ${timeoutMs / 1000} segundos y fue cancelada para liberar recursos.`
+    );
+    this.name = "SemaforoPdfTimeoutError";
+    this.timeoutMs = timeoutMs;
   }
 }
 
@@ -64,19 +83,57 @@ class SemaforoGlobalPdf {
 
 export const semaforoPdfGlobal = new SemaforoGlobalPdf();
 
+/** Tiempo máximo de ejecución por defecto para una generación de PDF (30 s). */
+const PDF_TIMEOUT_MS_DEFAULT = 30_000;
+
+function leerTimeoutPdf(): number {
+  const env = process.env.PDF_GENERATION_TIMEOUT_MS;
+  if (env) {
+    const parsed = parseInt(env, 10);
+    if (!Number.isNaN(parsed) && parsed > 0) return parsed;
+  }
+  return PDF_TIMEOUT_MS_DEFAULT;
+}
+
 /**
  * Envoltorio que ejecuta una tarea de generación de PDF protegiendo la instancia Node
- * contra agotamiento de memoria. Lanza SemaforoPdfOcupadoError si no hay cupo.
+ * contra agotamiento de memoria.
+ * - Lanza `SemaforoPdfOcupadoError` si no hay cupo disponible (fail-fast 503).
+ * - Lanza `SemaforoPdfTimeoutError` si la tarea supera el timeout configurado,
+ *   liberando el slot automáticamente para no bloquear las siguientes peticiones.
  */
 export async function ejecutarConSemaforoPdf<T>(fn: () => Promise<T>): Promise<T> {
   const adquirido = semaforoPdfGlobal.adquirir();
   if (!adquirido) {
     throw new SemaforoPdfOcupadoError();
   }
+
+  const timeoutMs = leerTimeoutPdf();
+
+  // liberado: garantiza que el slot se decrementa exactamente una vez,
+  // ya sea porque la tarea terminó o porque disparó el timeout.
+  let liberado = false;
+  function liberarUnaVez() {
+    if (!liberado) {
+      liberado = true;
+      semaforoPdfGlobal.liberar();
+    }
+  }
+
+  let timeoutHandle: ReturnType<typeof setTimeout> | undefined;
+  const timeoutPromise = new Promise<never>((_resolve, reject) => {
+    timeoutHandle = setTimeout(() => {
+      liberarUnaVez();
+      reject(new SemaforoPdfTimeoutError(timeoutMs));
+    }, timeoutMs);
+  });
+
   try {
-    return await fn();
+    const resultado = await Promise.race([fn(), timeoutPromise]);
+    return resultado;
   } finally {
-    semaforoPdfGlobal.liberar();
+    clearTimeout(timeoutHandle);
+    liberarUnaVez();
   }
 }
 

@@ -8,6 +8,7 @@
   display: none;
 }
 .page {
+  --ruum-text-primary: var(--user-on-light-primary);
   height: 100%;
   min-height: 0;
   display: flex;
@@ -46,6 +47,7 @@
   cursor: not-allowed;
 }
 .heading {
+  color: var(--user-text-primary);
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -58,6 +60,7 @@
   margin: 0 0 3px;
 }
 .heading h1 {
+  color: var(--user-text-primary);
   font-size: 38px;
   line-height: 1.15;
   letter-spacing: -1.3px;
@@ -65,7 +68,7 @@
   margin: 0 0 4px;
 }
 .heading span {
-  color: #4b6492;
+  color: var(--user-text-essential);
   font-size: 14px;
 }
 .headingActions {
@@ -86,7 +89,7 @@
   border-radius: 8px;
   padding: 10px 17px;
   font-weight: 600;
-  color: #0061ff;
+  color: var(--user-on-light-link);
   background: #fff;
   white-space: nowrap;
   text-decoration: none;
@@ -160,7 +163,7 @@
 }
 .metrics > div[data-tone="profile"] > span,
 .locationIcon[data-type="perfil"] {
-  color: #0061ff;
+  color: var(--user-on-light-link);
   background: #e5efff;
 }
 .metrics > div[data-tone="favorite"] > span {
@@ -271,7 +274,7 @@
 }
 .tabs button[aria-selected="true"] {
   border-color: #0061ff;
-  color: #0061ff;
+  color: var(--user-on-light-link);
   background: #f7fbff;
   font-weight: 600;
 }
@@ -357,7 +360,7 @@
   align-items: center;
   border-radius: 6px;
   background: #e8f1ff;
-  color: #0061ff;
+  color: var(--user-on-light-link);
   padding: 6px 9px;
   font-size: 10px;
   white-space: nowrap;
@@ -368,11 +371,11 @@
 }
 .tag[data-type="origen"] {
   background: #defbef;
-  color: #009a57;
+  color: var(--user-success-essential);
 }
 .tag[data-type="destino"] {
   background: #e8f1ff;
-  color: #0061ff;
+  color: var(--user-on-light-link);
 }
 .tag[data-type="otro"] {
   background: #f3e4ff;
@@ -466,7 +469,7 @@
   align-items: center;
   justify-content: space-between;
   gap: 8px;
-  color: #4b6492;
+  color: var(--user-text-essential);
   flex-shrink: 0;
   font-size: 11px;
   min-height: 34px;
@@ -493,7 +496,7 @@
 }
 .pagination button:hover {
   background: #e8f1ff;
-  color: #0061ff;
+  color: var(--user-on-light-link);
 }
 .previous {
   transform: rotate(180deg);
@@ -504,7 +507,7 @@
   bottom: 39px;
   border: 0;
   background: #fff;
-  color: #0061ff;
+  color: var(--user-on-light-link);
   border-radius: 5px;
   padding: 4px 8px;
   font-size: 10px;
@@ -597,7 +600,7 @@
   gap: 8px;
 }
 .mapMessage button {
-  color: #0061ff;
+  color: var(--user-on-light-link);
   border: 1px solid #bed2ef;
   padding: 6px 10px;
   border-radius: 6px;
@@ -651,7 +654,7 @@
   border-radius: 50%;
   width: 46px;
   height: 46px;
-  color: #0061ff;
+  color: var(--user-on-light-link);
   transition: background 0.18s;
 }
 .quickActions > a:first-child span {
@@ -663,10 +666,10 @@
   background: #edf5ff;
 }
 .quickActions .delete {
-  color: #ef343f;
+  color: var(--user-danger-essential);
 }
 .quickActions .delete span {
-  color: #ef343f;
+  color: var(--user-danger-essential);
   background: #fff0f2;
   border-color: #fff0f2;
 }
@@ -722,7 +725,7 @@
 .empty > svg {
   width: 36px;
   height: 36px;
-  color: #0061ff;
+  color: var(--user-on-light-link);
 }
 .empty h2 {
   font-size: 18px;
@@ -734,7 +737,7 @@
 }
 .empty button,
 .empty a {
-  color: #0061ff;
+  color: var(--user-on-light-link);
   border: 0;
   background: #edf5ff;
   padding: 9px 12px;

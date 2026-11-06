@@ -1,0 +1,2 @@
+const {chromium}=require('@playwright/test');const fs=require('node:fs');
+(async()=>{const b=await chromium.launch();const p=await b.newPage();const logs=[];p.on('console',m=>{if(m.type()==='error')logs.push(m.text())});const r=await p.goto('http://localhost:3012/login',{waitUntil:'load',timeout:120000});await p.waitForTimeout(2500);fs.writeFileSync('docs/auditoria-ux-ui-usuario-2026-11-06/csp-browser.json',JSON.stringify({headers:await r.allHeaders(),logs},null,2));await b.close()})().catch(console.error);

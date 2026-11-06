@@ -67,9 +67,9 @@
 .vehicle { display: flex; align-items: center; gap: 10px; min-width: 0; }
 .vehicle strong { font-size: 11px; color: #101e40; font-weight: 700; display: block; }
 .table small { display: block; font-size: 11px; margin-top: 2px; } .car { width: 65px; height: 39px; object-fit: contain; flex-shrink: 0; }
-.badge { display: inline-flex; align-items: center; gap: 6px; border-radius: 20px; padding: 6px 10px; background: #e3faef; color: #00ac7b; font-size: 11px; white-space: nowrap; }
+.badge { display: inline-flex; align-items: center; gap: 6px; border-radius: 20px; padding: 6px 10px; background: #e3faef; color: var(--user-success-essential); font-size: 11px; white-space: nowrap; }
 .badge i { height: 8px; width: 8px; background: currentColor; border-radius: 50%; flex-shrink: 0; }
-.badge[data-status="finalizados"] { color: #005bff; background: #eaf3ff; } .badge[data-status="programados"] { color: #f68000; background: #fff3e4; } .badge[data-status="cancelados"] { color: #596b89; background: #f0f3f7; }
+.badge[data-status="finalizados"] { color: #005bff; background: #eaf3ff; } .badge[data-status="programados"] { color: var(--user-warning-essential); background: #fff3e4; } .badge[data-status="cancelados"] { color: #596b89; background: #f0f3f7; }
 .actions { display: flex; align-items: center; gap: 7px; }
 .actions button { height: 31px; min-width: 33px; border: 1px solid #dbe5f4; border-radius: 6px; color: #0043a4; background: #fff; font-size: 10px; }
 .actions button:hover { border-color: #005cff; background: #e6efff; } .actions svg { width: 17px; height: 17px; } .actions .menu button { border-color: transparent; }
@@ -84,7 +84,7 @@
 .detail { display: flex; flex-direction: column; gap: 14px; min-height: 0; min-width: 0; height: 100%; max-height: 100%; overflow: hidden; padding: 16px; border: 1px solid #e1e8f3; border-radius: 15px; background: #ffffffed; }
 .detailHeading { display: flex; align-items: center; gap: 12px; position: relative; min-height: 58px; padding-right: 20px; flex: 0 0 auto; }
 .detailHeading h2 { font-size: 15px; line-height: 1.3; margin: 0 0 5px; font-weight: 750; letter-spacing: -0.3px; }
-.detailHeading > div > span { font-size: 12px; color: #596e92; margin-right: 8px; } .detailHeading > div .badge { color: #00ac7b; font-size: 10px; padding: 4px 8px; }
+.detailHeading > div > span { font-size: 12px; color: #596e92; margin-right: 8px; } .detailHeading > div .badge { color: var(--user-success-essential); font-size: 10px; padding: 4px 8px; }
 .heroCar { width: 100px; height: 62px; object-fit: contain; flex-shrink: 0; } .detailHeading > button { position: absolute; right: 0; top: 0; color: #566d94; }
 .detailTabs { display: flex; flex: 0 0 auto; background: #f1f4f9; border-radius: 13px; padding: 2px; }
 .detailTabs button { flex: 1; height: 33px; border-radius: 11px; color: #3f557e; font-size: 12px; } .detailTabs button:hover { background: #e4edfc; }
@@ -112,12 +112,12 @@
 .driverName small svg { width: 13px; height: 13px; color: #00b9e7; }
 .rating { display: inline-flex; align-items: center; gap: 3px; margin-left: 6px; } .rating svg { width: 14px; height: 14px; fill: #ffad00; stroke: #ffad00; }
 .contacts { display: flex; gap: 7px; }
-.contacts button, .contacts a { width: 35px; height: 35px; border-radius: 50%; border: 1px solid #dce6f5; display: grid; place-items: center; color: #0061ff; }
+.contacts button, .contacts a { width: 35px; height: 35px; border-radius: 50%; border: 1px solid #dce6f5; display: grid; place-items: center; color: var(--user-on-light-link); }
 .contacts svg { width: 18px; height: 18px; } .contacts a[title] { color: #00bb78; }
 .contacts button:hover, .contacts a:hover { background: #edf4ff; border-color: #82acff; box-shadow: 0 2px 8px #0061ff16; }
 .detailActions { display: flex; gap: 10px; flex: 0 0 auto; }
 .detailActions > * { flex: 1; display: flex; align-items: center; justify-content: center; text-align: center; border: 1px solid #4785ff; color: #005cff; border-radius: 8px; padding: 10px 4px; font-size: 12px; }
-.detailActions .danger { color: #e12546; border-color: #f38798; background: #fff8f9; }
+.detailActions .danger { color: var(--user-danger-essential); border-color: #f38798; background: #fff8f9; }
 .detailActions > *:hover { background: #edf4ff; } .detailActions .danger:hover { background: #ffe9ee; }
 .facts { display: grid; grid-template-columns: 100px minmax(0, 1fr); gap: 12px; font-size: 12px; min-height: 0; overflow: auto; margin: 0; padding: 5px; }
 .facts dt { color: #667b9b; } .facts dd { margin: 0; color: #243c61; overflow-wrap: anywhere; }

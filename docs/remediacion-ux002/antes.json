@@ -1,0 +1,737 @@
+[
+  {
+    "route": "/login",
+    "width": 390,
+    "nodes": [
+      {
+        "target": [
+          ".pb-0\\.5"
+        ],
+        "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.63 (foreground color: #8b9bb0, background color: #f4f7fb, font size: 7.9pt (10.5px), font weight: normal). Expected contrast ratio of 4.5:1",
+        "html": "<p class=\"mt-2.5 pb-0.5 text-center text-[10.5px] font-medium leading-relaxed text-[#8b9bb0] dark:text-[#6b7a99] sm:text-[11px]\">"
+      },
+      {
+        "target": [
+          "a[href$=\"terminos\"]"
+        ],
+        "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.49 (foreground color: #0066ff, background color: #f4f7fb, font size: 7.9pt (10.5px), font weight: normal). Expected contrast ratio of 4.5:1",
+        "html": "<a class=\"font-semibold text-[#0066FF] hover:underline dark:text-[#4d94ff]\" href=\"/legal/terminos\">Términos y condiciones</a>"
+      },
+      {
+        "target": [
+          "a[href$=\"privacidad\"]"
+        ],
+        "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.49 (foreground color: #0066ff, background color: #f4f7fb, font size: 7.9pt (10.5px), font weight: normal). Expected contrast ratio of 4.5:1",
+        "html": "<a class=\"font-semibold text-[#0066FF] hover:underline dark:text-[#4d94ff]\" href=\"/legal/privacidad\">Aviso de privacidad</a>"
+      }
+    ]
+  },
+  {
+    "route": "/registro",
+    "width": 390,
+    "nodes": []
+  },
+  {
+    "route": "/",
+    "width": 390,
+    "nodes": [
+      {
+        "target": [
+          ".hover\\:text-\\[\\#0a2342\\].dark\\:hover\\:text-white.user-v2-nav-link:nth-child(2) > .sm\\:text-\\[12px\\].px-0\\.5.text-\\[11px\\]"
+        ],
+        "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.08 (foreground color: #8293b0, background color: #fefeff, font size: 8.3pt (11px), font weight: normal). Expected contrast ratio of 4.5:1",
+        "html": "<span class=\"transition-colors text-[11px] sm:text-[12px] truncate px-0.5 font-medium text-[#8293b0] group-hover:text-[#0a2342] dark:text-slate-400 dark:group-hover:text-white\">Traslados</span>"
+      },
+      {
+        "target": [
+          ".hover\\:text-\\[\\#0a2342\\].dark\\:hover\\:text-white[href$=\"masivo\"] > .sm\\:text-\\[12px\\].px-0\\.5.text-\\[11px\\]"
+        ],
+        "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.08 (foreground color: #8293b0, background color: #fefeff, font size: 8.3pt (11px), font weight: normal). Expected contrast ratio of 4.5:1",
+        "html": "<span class=\"transition-colors text-[11px] sm:text-[12px] truncate px-0.5 font-medium text-[#8293b0] group-hover:text-[#0a2342] dark:text-slate-400 dark:group-hover:text-white\">Carga Masiva</span>"
+      },
+      {
+        "target": [
+          ".hover\\:text-\\[\\#0a2342\\].dark\\:hover\\:text-white[href$=\"cuenta\"] > .sm\\:text-\\[12px\\].px-0\\.5.text-\\[11px\\]"
+        ],
+        "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.08 (foreground color: #8293b0, background color: #fefeff, font size: 8.3pt (11px), font weight: normal). Expected contrast ratio of 4.5:1",
+        "html": "<span class=\"transition-colors text-[11px] sm:text-[12px] truncate px-0.5 font-medium text-[#8293b0] group-hover:text-[#0a2342] dark:text-slate-400 dark:group-hover:text-white\">Cuenta</span>"
+      },
+      {
+        "target": [
+          ".home-progress-heading > span:nth-child(1)"
+        ],
+        "summary": "Fix any of the following:\n  Element has insufficient color contrast of 1.28 (foreground color: #c8d4e2, background color: #e8eef4, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1",
+        "html": "<span>En camino a destino</span>"
+      },
+      {
+        "target": [
+          "span[title=\"Duración estimada del trayecto\"]"
+        ],
+        "summary": "Fix any of the following:\n  Element has insufficient color contrast of 1.37 (foreground color: #2ee6b6, background color: #e8eef4, font size: 9.0pt (12px), font weight: bold). Expected contrast ratio of 4.5:1",
+        "html": "<span title=\"Duración estimada del trayecto\">ETA 24m</span>"
+      },
+      {
+        "target": [
+          ".is-complete > .home-step-status"
+        ],
+        "summary": "Fix any of the following:\n  Element has insufficient color contrast of 1.08 (foreground color: #e7f9f5, background color: #ffffff, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1",
+        "html": "<span class=\"home-step-status\">Completada</span>"
+      },
+      {
+        "target": [
+          ".is-pending > .home-step-name"
+        ],
+        "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.23 (foreground color: #a0afc0, background color: #ffffff, font size: 9.0pt (12px), font weight: bold). Expected contrast ratio of 4.5:1",
+        "html": "<span class=\"home-step-name\">3<!-- -->. <!-- -->Entrega</span>"
+      },
+      {
+        "target": [
+          ".is-pending > .home-step-status"
+        ],
+        "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.23 (foreground color: #a0afc0, background color: #ffffff, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1",
+        "html": "<span class=\"home-step-status\">Pendiente</span>"
+      },
+      {
+        "target": [
+          "#assignedDriverCommunication > div > p"
+        ],
+        "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.02 (foreground color: #a8b8cb, background color: #ffffff, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1",
+        "html": "<p>Tu conductor</p>"
+      }
+    ]
+  },
+  {
+    "route": "/mis-viajes",
+    "width": 390,
+    "nodes": [
+      {
+        "target": [
+          ".user-v2-nav-link.group.select-none:nth-child(1) > .sm\\:text-\\[12px\\].px-0\\.5.text-\\[11px\\]"
+        ],
+        "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.11 (foreground color: #8293b0, background color: #ffffff, font size: 8.3pt (11px), font weight: normal). Expected contrast ratio of 4.5:1",
+        "html": "<span class=\"transition-colors text-[11px] sm:text-[12px] truncate px-0.5 font-medium text-[#8293b0] group-hover:text-[#0a2342] dark:text-slate-400 dark:group-hover:text-white\">Inicio</span>"
+      },
+      {
+        "target": [
+          ".user-v2-nav-link.group[href$=\"masivo\"] > .sm\\:text-\\[12px\\].px-0\\.5.text-\\[11px\\]"
+        ],
+        "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.11 (foreground color: #8293b0, background color: #ffffff, font size: 8.3pt (11px), font weight: normal). Expected contrast ratio of 4.5:1",
+        "html": "<span class=\"transition-colors text-[11px] sm:text-[12px] truncate px-0.5 font-medium text-[#8293b0] group-hover:text-[#0a2342] dark:text-slate-400 dark:group-hover:text-white\">Carga Masiva</span>"
+      },
+      {
+        "target": [
+          ".user-v2-nav-link.group[href$=\"cuenta\"] > .sm\\:text-\\[12px\\].px-0\\.5.text-\\[11px\\]"
+        ],
+        "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.11 (foreground color: #8293b0, background color: #ffffff, font size: 8.3pt (11px), font weight: normal). Expected contrast ratio of 4.5:1",
+        "html": "<span class=\"transition-colors text-[11px] sm:text-[12px] truncate px-0.5 font-medium text-[#8293b0] group-hover:text-[#0a2342] dark:text-slate-400 dark:group-hover:text-white\">Cuenta</span>"
+      },
+      {
+        "target": [
+          "button[data-pestana=\"programados\"]"
+        ],
+        "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.34 (foreground color: #64748b, background color: #f1f5fa, font size: 12.0pt (16px), font weight: normal). Expected contrast ratio of 4.5:1",
+        "html": "<button type=\"button\" aria-pressed=\"false\" data-pestana=\"programados\" tabindex=\"-1\" class=\"flex-1 min-w-[84px] py-2 px-3 text-[13px] font-bold rounded-full transition-all cursor-pointer text-center text-[#64748b] hover:text-[#0a2342] dark:text-[#94a3b8] dark:hover:text-white\">"
+      },
+      {
+        "target": [
+          "button[data-pestana=\"finalizados\"]"
+        ],
+        "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.34 (foreground color: #64748b, background color: #f1f5fa, font size: 12.0pt (16px), font weight: normal). Expected contrast ratio of 4.5:1",
+        "html": "<button type=\"button\" aria-pressed=\"false\" data-pestana=\"finalizados\" tabindex=\"-1\" class=\"flex-1 min-w-[84px] py-2 px-3 text-[13px] font-bold rounded-full transition-all cursor-pointer text-center text-[#64748b] hover:text-[#0a2342] dark:text-[#94a3b8] dark:hover:text-white\">Finalizados</button>"
+      },
+      {
+        "target": [
+          "button[data-pestana=\"cancelados\"]"
+        ],
+        "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.34 (foreground color: #64748b, background color: #f1f5fa, font size: 12.0pt (16px), font weight: normal). Expected contrast ratio of 4.5:1",
+        "html": "<button type=\"button\" aria-pressed=\"false\" data-pestana=\"cancelados\" tabindex=\"-1\" class=\"flex-1 min-w-[84px] py-2 px-3 text-[13px] font-bold rounded-full transition-all cursor-pointer text-center text-[#64748b] hover:text-[#0a2342] dark:text-[#94a3b8] dark:hover:text-white\">Cancelados</button>"
+      },
+      {
+        "target": [
+          ".border-\\[\\#d6e4f8\\] > dt"
+        ],
+        "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.29 (foreground color: #64748b, background color: #edf4fe, font size: 8.6pt (11.5px), font weight: normal). Expected contrast ratio of 4.5:1",
+        "html": "<dt class=\"text-[11.5px] font-semibold text-[#64748b] dark:text-[#a8b5cc]\">Total</dt>"
+      },
+      {
+        "target": [
+          ".border-\\[\\#cbeed9\\] > dt"
+        ],
+        "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.34 (foreground color: #64748b, background color: #eaf8f0, font size: 8.6pt (11.5px), font weight: normal). Expected contrast ratio of 4.5:1",
+        "html": "<dt class=\"text-[11.5px] font-semibold text-[#64748b] dark:text-[#a8b5cc]\">Activos</dt>"
+      },
+      {
+        "target": [
+          ".border-\\[\\#f9d7d7\\] > dt"
+        ],
+        "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.28 (foreground color: #64748b, background color: #fdf0f0, font size: 8.6pt (11.5px), font weight: normal). Expected contrast ratio of 4.5:1",
+        "html": "<dt class=\"text-[11.5px] font-semibold text-[#64748b] dark:text-[#a8b5cc]\">Gastado</dt>"
+      },
+      {
+        "target": [
+          ".px-1.text-\\[13px\\].font-semibold > span"
+        ],
+        "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.07 (foreground color: #64748b, background color: #e8eef4, font size: 9.8pt (13px), font weight: normal). Expected contrast ratio of 4.5:1",
+        "html": "<span>1<!-- --> <!-- -->traslado</span>"
+      }
+    ]
+  },
+  {
+    "route": "/viajes/nuevo",
+    "width": 390,
+    "nodes": []
+  },
+  {
+    "route": "/viajes/masivo",
+    "width": 390,
+    "nodes": []
+  },
+  {
+    "route": "/cuenta",
+    "width": 390,
+    "nodes": [
+      {
+        "target": [
+          ".hover\\:text-\\[\\#0a2342\\].dark\\:hover\\:text-white.user-v2-nav-link:nth-child(1) > .sm\\:text-\\[12px\\].px-0\\.5.group-hover\\:text-\\[\\#0a2342\\]"
+        ],
+        "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.09 (foreground color: #8293b0, background color: #fffefe, font size: 8.3pt (11px), font weight: normal). Expected contrast ratio of 4.5:1",
+        "html": "<span class=\"transition-colors text-[11px] sm:text-[12px] truncate px-0.5 font-medium text-[#8293b0] group-hover:text-[#0a2342] dark:text-slate-400 dark:group-hover:text-white\">Inicio</span>"
+      },
+      {
+        "target": [
+          ".hover\\:text-\\[\\#0a2342\\].dark\\:hover\\:text-white.user-v2-nav-link:nth-child(2) > .sm\\:text-\\[12px\\].px-0\\.5.group-hover\\:text-\\[\\#0a2342\\]"
+        ],
+        "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.11 (foreground color: #8293b0, background color: #ffffff, font size: 8.3pt (11px), font weight: normal). Expected contrast ratio of 4.5:1",
+        "html": "<span class=\"transition-colors text-[11px] sm:text-[12px] truncate px-0.5 font-medium text-[#8293b0] group-hover:text-[#0a2342] dark:text-slate-400 dark:group-hover:text-white\">Traslados</span>"
+      },
+      {
+        "target": [
+          ".hover\\:text-\\[\\#0a2342\\].dark\\:hover\\:text-white[href$=\"masivo\"] > .sm\\:text-\\[12px\\].px-0\\.5.group-hover\\:text-\\[\\#0a2342\\]"
+        ],
+        "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.11 (foreground color: #8293b0, background color: #ffffff, font size: 8.3pt (11px), font weight: normal). Expected contrast ratio of 4.5:1",
+        "html": "<span class=\"transition-colors text-[11px] sm:text-[12px] truncate px-0.5 font-medium text-[#8293b0] group-hover:text-[#0a2342] dark:text-slate-400 dark:group-hover:text-white\">Carga Masiva</span>"
+      },
+      {
+        "target": [
+          ".bg-\\[\\#eaf8f0\\]"
+        ],
+        "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.31 (foreground color: #10b981, background color: #eaf8f0, font size: 8.3pt (11px), font weight: bold). Expected contrast ratio of 4.5:1",
+        "html": "<span class=\"inline-flex items-center gap-1 rounded-full bg-[#eaf8f0] px-2.5 py-0.5 text-[11px] font-bold text-[#10b981] dark:bg-[#09281e] dark:text-[#34d399]\" title=\"Verificado\">"
+      },
+      {
+        "target": [
+          ".text-\\[\\#ef4444\\].dark\\:text-\\[\\#f87171\\].text-\\[14\\.5px\\]"
+        ],
+        "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.76 (foreground color: #ef4444, background color: #ffffff, font size: 10.9pt (14.5px), font weight: bold). Expected contrast ratio of 4.5:1",
+        "html": "<span class=\"block font-display text-[14.5px] font-bold text-[#ef4444] dark:text-[#f87171]\">Cerrar sesión</span>"
+      }
+    ]
+  },
+  {
+    "route": "/cuenta/preferencias",
+    "width": 390,
+    "nodes": []
+  },
+  {
+    "route": "/soporte",
+    "width": 390,
+    "nodes": []
+  },
+  {
+    "route": "/ubicaciones",
+    "width": 390,
+    "nodes": []
+  },
+  {
+    "route": "/pasaporte",
+    "width": 390,
+    "nodes": [
+      {
+        "target": [
+          ".user-v2-nav-link.group[href=\"/\"] > .sm\\:text-\\[12px\\].px-0\\.5.text-\\[11px\\]"
+        ],
+        "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.11 (foreground color: #8293b0, background color: #ffffff, font size: 8.3pt (11px), font weight: normal). Expected contrast ratio of 4.5:1",
+        "html": "<span class=\"transition-colors text-[11px] sm:text-[12px] truncate px-0.5 font-medium text-[#8293b0] group-hover:text-[#0a2342] dark:text-slate-400 dark:group-hover:text-white\">Inicio</span>"
+      },
+      {
+        "target": [
+          "a[href$=\"mis-viajes\"] > .sm\\:text-\\[12px\\].px-0\\.5.text-\\[11px\\]"
+        ],
+        "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.11 (foreground color: #8293b0, background color: #ffffff, font size: 8.3pt (11px), font weight: normal). Expected contrast ratio of 4.5:1",
+        "html": "<span class=\"transition-colors text-[11px] sm:text-[12px] truncate px-0.5 font-medium text-[#8293b0] group-hover:text-[#0a2342] dark:text-slate-400 dark:group-hover:text-white\">Traslados</span>"
+      },
+      {
+        "target": [
+          "a[href$=\"masivo\"] > .sm\\:text-\\[12px\\].px-0\\.5.text-\\[11px\\]"
+        ],
+        "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.11 (foreground color: #8293b0, background color: #ffffff, font size: 8.3pt (11px), font weight: normal). Expected contrast ratio of 4.5:1",
+        "html": "<span class=\"transition-colors text-[11px] sm:text-[12px] truncate px-0.5 font-medium text-[#8293b0] group-hover:text-[#0a2342] dark:text-slate-400 dark:group-hover:text-white\">Carga Masiva</span>"
+      },
+      {
+        "target": [
+          "a[href$=\"cuenta\"] > .sm\\:text-\\[12px\\].px-0\\.5.text-\\[11px\\]"
+        ],
+        "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.11 (foreground color: #8293b0, background color: #ffffff, font size: 8.3pt (11px), font weight: normal). Expected contrast ratio of 4.5:1",
+        "html": "<span class=\"transition-colors text-[11px] sm:text-[12px] truncate px-0.5 font-medium text-[#8293b0] group-hover:text-[#0a2342] dark:text-slate-400 dark:group-hover:text-white\">Cuenta</span>"
+      }
+    ]
+  },
+  {
+    "route": "/viajes/10000000-0000-4000-8000-000000000001",
+    "width": 390,
+    "nodes": []
+  },
+  {
+    "route": "/login",
+    "width": 1440,
+    "nodes": [
+      {
+        "target": [
+          ".text-\\[11px\\].uppercase.tracking-widest"
+        ],
+        "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.85 (foreground color: #008b8b, background color: #f4f7fb, font size: 8.3pt (11px), font weight: bold). Expected contrast ratio of 4.5:1",
+        "html": "<span class=\"font-display text-[11px] font-extrabold uppercase tracking-widest text-[#008B8B] dark:text-[#00D1D1]\">MOVILIDAD INTELIGENTE</span>"
+      },
+      {
+        "target": [
+          ".mt-auto"
+        ],
+        "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.44 (foreground color: #90a1b9, background color: #f4f7fb, font size: 8.3pt (11px), font weight: bold). Expected contrast ratio of 4.5:1",
+        "html": "<p class=\"mt-auto pt-2 text-[10px] xl:text-[11px] font-bold tracking-widest text-slate-400 dark:text-slate-500 uppercase\">PERSONAS • EMPRESAS • CIUDADES EN MOVIMIENTO</p>"
+      },
+      {
+        "target": [
+          ".pb-0\\.5"
+        ],
+        "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.63 (foreground color: #8b9bb0, background color: #f4f7fb, font size: 8.3pt (11px), font weight: normal). Expected contrast ratio of 4.5:1",
+        "html": "<p class=\"mt-2.5 pb-0.5 text-center text-[10.5px] font-medium leading-relaxed text-[#8b9bb0] dark:text-[#6b7a99] sm:text-[11px]\">"
+      },
+      {
+        "target": [
+          "a[href$=\"terminos\"]"
+        ],
+        "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.49 (foreground color: #0066ff, background color: #f4f7fb, font size: 8.3pt (11px), font weight: normal). Expected contrast ratio of 4.5:1",
+        "html": "<a class=\"font-semibold text-[#0066FF] hover:underline dark:text-[#4d94ff]\" href=\"/legal/terminos\">Términos y condiciones</a>"
+      },
+      {
+        "target": [
+          "a[href$=\"privacidad\"]"
+        ],
+        "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.49 (foreground color: #0066ff, background color: #f4f7fb, font size: 8.3pt (11px), font weight: normal). Expected contrast ratio of 4.5:1",
+        "html": "<a class=\"font-semibold text-[#0066FF] hover:underline dark:text-[#4d94ff]\" href=\"/legal/privacidad\">Aviso de privacidad</a>"
+      }
+    ]
+  },
+  {
+    "route": "/registro",
+    "width": 1440,
+    "nodes": []
+  },
+  {
+    "route": "/",
+    "width": 1440,
+    "nodes": [
+      {
+        "target": [
+          "tr:nth-child(1) > td:nth-child(1) > .dashboard-module__IvZcXq__vehicleCell > div > small"
+        ],
+        "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.18 (foreground color: #6b7ca1, background color: #ffffff, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1",
+        "html": "<small>PEM789</small>"
+      },
+      {
+        "target": [
+          "time[datetime=\"2026-10-27T16:42:00Z\"] > small"
+        ],
+        "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.18 (foreground color: #6b7ca1, background color: #ffffff, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1",
+        "html": "<small>10:42 a.m.</small>"
+      },
+      {
+        "target": [
+          "td:nth-child(6) > .dashboard-module__IvZcXq__status[data-tone=\"green\"]"
+        ],
+        "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.3 (foreground color: #009869, background color: #e0f8ee, font size: 7.6pt (10.08px), font weight: normal). Expected contrast ratio of 4.5:1",
+        "html": "<span class=\"dashboard-module__IvZcXq__status\" data-tone=\"green\"><i></i>En tránsito</span>"
+      },
+      {
+        "target": [
+          "tr:nth-child(2) > td:nth-child(1) > .dashboard-module__IvZcXq__vehicleCell > div > small"
+        ],
+        "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.18 (foreground color: #6b7ca1, background color: #ffffff, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1",
+        "html": "<small>PZM456</small>"
+      },
+      {
+        "target": [
+          "time[datetime=\"2026-10-26T22:18:00Z\"] > small"
+        ],
+        "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.18 (foreground color: #6b7ca1, background color: #ffffff, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1",
+        "html": "<small>4:18 p.m.</small>"
+      },
+      {
+        "target": [
+          "tr:nth-child(2) > td:nth-child(6) > .dashboard-module__IvZcXq__status[data-tone=\"blue\"]"
+        ],
+        "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.35 (foreground color: #0061ff, background color: #e4efff, font size: 7.6pt (10.08px), font weight: normal). Expected contrast ratio of 4.5:1",
+        "html": "<span class=\"dashboard-module__IvZcXq__status\" data-tone=\"blue\"><i></i>Completado</span>"
+      },
+      {
+        "target": [
+          "tr:nth-child(3) > td:nth-child(1) > .dashboard-module__IvZcXq__vehicleCell > div > small"
+        ],
+        "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.18 (foreground color: #6b7ca1, background color: #ffffff, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1",
+        "html": "<small>RTM321</small>"
+      },
+      {
+        "target": [
+          "time[datetime=\"2026-10-25T17:05:00Z\"] > small"
+        ],
+        "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.18 (foreground color: #6b7ca1, background color: #ffffff, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1",
+        "html": "<small>11:05 a.m.</small>"
+      },
+      {
+        "target": [
+          ".dashboard-module__IvZcXq__status[data-tone=\"orange\"]"
+        ],
+        "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.78 (foreground color: #d87c00, background color: #fff2d8, font size: 7.6pt (10.08px), font weight: normal). Expected contrast ratio of 4.5:1",
+        "html": "<span class=\"dashboard-module__IvZcXq__status\" data-tone=\"orange\"><i></i>En preparación</span>"
+      },
+      {
+        "target": [
+          "tr:nth-child(4) > td:nth-child(6) > .dashboard-module__IvZcXq__status[data-tone=\"blue\"]"
+        ],
+        "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.35 (foreground color: #0061ff, background color: #e4efff, font size: 7.6pt (10.08px), font weight: normal). Expected contrast ratio of 4.5:1",
+        "html": "<span class=\"dashboard-module__IvZcXq__status\" data-tone=\"blue\"><i></i>Completado</span>"
+      }
+    ]
+  },
+  {
+    "route": "/mis-viajes",
+    "width": 1440,
+    "nodes": [
+      {
+        "target": [
+          "td:nth-child(6) > .traslados-desktop-module__rKP2HW__badge[data-status=\"activos\"]"
+        ],
+        "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.66 (foreground color: #00ac7b, background color: #e3faef, font size: 8.3pt (11px), font weight: normal). Expected contrast ratio of 4.5:1",
+        "html": "<span class=\"traslados-desktop-module__rKP2HW__badge\" data-status=\"activos\"><i></i>En tránsito</span>"
+      },
+      {
+        "target": [
+          "span[data-status=\"programados\"]"
+        ],
+        "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.39 (foreground color: #f68000, background color: #fff3e4, font size: 8.3pt (11px), font weight: normal). Expected contrast ratio of 4.5:1",
+        "html": "<span class=\"traslados-desktop-module__rKP2HW__badge\" data-status=\"programados\"><i></i>Programado</span>"
+      },
+      {
+        "target": [
+          "div > .traslados-desktop-module__rKP2HW__badge[data-status=\"activos\"]"
+        ],
+        "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.66 (foreground color: #00ac7b, background color: #e3faef, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1",
+        "html": "<span class=\"traslados-desktop-module__rKP2HW__badge\" data-status=\"activos\"><i></i>En tránsito</span>"
+      },
+      {
+        "target": [
+          ".traslados-desktop-module__rKP2HW__danger"
+        ],
+        "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.4 (foreground color: #e12546, background color: #fff8f9, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1",
+        "html": "<button class=\"traslados-desktop-module__rKP2HW__danger\">Cancelar traslado</button>"
+      }
+    ]
+  },
+  {
+    "route": "/viajes/nuevo",
+    "width": 1440,
+    "nodes": []
+  },
+  {
+    "route": "/viajes/masivo",
+    "width": 1440,
+    "nodes": []
+  },
+  {
+    "route": "/cuenta",
+    "width": 1440,
+    "nodes": [
+      {
+        "target": [
+          ".cuenta-desktop-module__eNkNrG__verification"
+        ],
+        "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.93 (foreground color: #00a574, background color: #d9ffed, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1",
+        "html": "<span class=\"cuenta-desktop-module__eNkNrG__verification\" data-verified=\"true\">"
+      },
+      {
+        "target": [
+          "li:nth-child(1) > a > div > time[datetime=\"2026-10-27T16:42:00Z\"]"
+        ],
+        "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.29 (foreground color: #607ba7, background color: #ffffff, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1",
+        "html": "<time datetime=\"2026-10-27T16:42:00Z\">27 oct 2026, 10:42 a.m.</time>"
+      },
+      {
+        "target": [
+          "li:nth-child(1) > a > .cuenta-desktop-module__eNkNrG__activityStatus[data-tone=\"green\"]"
+        ],
+        "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.6 (foreground color: #00ae7b, background color: #e1faef, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1",
+        "html": "<span class=\"cuenta-desktop-module__eNkNrG__activityStatus\" data-tone=\"green\">"
+      },
+      {
+        "target": [
+          "li:nth-child(2) > a > div > time[datetime=\"2026-10-27T16:42:00Z\"]"
+        ],
+        "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.29 (foreground color: #607ba7, background color: #ffffff, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1",
+        "html": "<time datetime=\"2026-10-27T16:42:00Z\">27 oct 2026, 10:42 a.m.</time>"
+      },
+      {
+        "target": [
+          "li:nth-child(3) > a > div > time[datetime=\"2026-10-26T22:18:00Z\"]"
+        ],
+        "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.29 (foreground color: #607ba7, background color: #ffffff, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1",
+        "html": "<time datetime=\"2026-10-26T22:18:00Z\">26 oct 2026, 4:18 p.m.</time>"
+      },
+      {
+        "target": [
+          "li:nth-child(3) > a > .cuenta-desktop-module__eNkNrG__activityStatus[data-tone=\"green\"]"
+        ],
+        "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.6 (foreground color: #00ae7b, background color: #e1faef, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1",
+        "html": "<span class=\"cuenta-desktop-module__eNkNrG__activityStatus\" data-tone=\"green\">"
+      },
+      {
+        "target": [
+          "li:nth-child(4) > a > div > time[datetime=\"2026-10-26T22:18:00Z\"]"
+        ],
+        "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.29 (foreground color: #607ba7, background color: #ffffff, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1",
+        "html": "<time datetime=\"2026-10-26T22:18:00Z\">26 oct 2026, 4:18 p.m.</time>"
+      },
+      {
+        "target": [
+          "div:nth-child(1) > div > small"
+        ],
+        "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.8 (foreground color: #7083aa, background color: #ffffff, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1",
+        "html": "<small>Actualízala periódicamente</small>"
+      },
+      {
+        "target": [
+          "div:nth-child(2) > div > small"
+        ],
+        "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.8 (foreground color: #7083aa, background color: #ffffff, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1",
+        "html": "<small>Agregar una capa extra de seguridad</small>"
+      },
+      {
+        "target": [
+          "div:nth-child(3) > div > small"
+        ],
+        "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.8 (foreground color: #7083aa, background color: #ffffff, font size: 7.5pt (10px), font weight: normal). Expected contrast ratio of 4.5:1",
+        "html": "<small>Gestiona tus sesiones iniciadas</small>"
+      }
+    ]
+  },
+  {
+    "route": "/cuenta/preferencias",
+    "width": 1440,
+    "nodes": [
+      {
+        "target": [
+          ".mt-1.text-slate-500.dark\\:text-slate-400"
+        ],
+        "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.47 (foreground color: #62748e, background color: #f5f8fc, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1",
+        "html": "<p class=\"text-xs text-slate-500 dark:text-slate-400 mt-1\">Configura notificaciones, apariencia, privacidad y preferencias de uso.</p>"
+      },
+      {
+        "target": [
+          ".p-4.dark\\:bg-\\[\\#0A1325\\].rounded-2xl:nth-child(1) > .gap-3.items-center.flex > div:nth-child(2) > .text-slate-400"
+        ],
+        "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.63 (foreground color: #90a1b9, background color: #ffffff, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1",
+        "html": "<p class=\"text-xs text-slate-400\">Español</p>"
+      },
+      {
+        "target": [
+          ".p-4.dark\\:bg-\\[\\#0A1325\\].rounded-2xl:nth-child(2) > .gap-3.items-center.flex > div:nth-child(2) > .text-slate-400"
+        ],
+        "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.63 (foreground color: #90a1b9, background color: #ffffff, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1",
+        "html": "<p class=\"text-xs text-slate-400\">Claro</p>"
+      },
+      {
+        "target": [
+          ".p-4.dark\\:bg-\\[\\#0A1325\\].rounded-2xl:nth-child(3) > .gap-3.items-center.flex > div:nth-child(2) > .text-slate-400"
+        ],
+        "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.63 (foreground color: #90a1b9, background color: #ffffff, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1",
+        "html": "<p class=\"text-xs text-slate-400\">Activadas</p>"
+      },
+      {
+        "target": [
+          ".p-4.dark\\:bg-\\[\\#0A1325\\].rounded-2xl:nth-child(4) > .gap-3.items-center.flex > div:nth-child(2) > .text-slate-400"
+        ],
+        "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.63 (foreground color: #90a1b9, background color: #ffffff, font size: 9.0pt (12px), font weight: normal). Expected contrast ratio of 4.5:1",
+        "html": "<p class=\"text-xs text-slate-400\">Configurada</p>"
+      },
+      {
+        "target": [
+          "section:nth-child(1) > .pb-5.border-slate-100.dark\\:border-slate-800 > div:nth-child(2) > .text-\\[11px\\].text-slate-400"
+        ],
+        "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.63 (foreground color: #90a1b9, background color: #ffffff, font size: 8.3pt (11px), font weight: normal). Expected contrast ratio of 4.5:1",
+        "html": "<p class=\"text-[11px] text-slate-400\">Configura el idioma, tu zona horaria y el sistema de unidades.</p>"
+      },
+      {
+        "target": [
+          "section:nth-child(1) > .divide-y.divide-slate-100.dark\\:divide-slate-800\\/80 > .py-4.gap-4.justify-between:nth-child(1) > .items-start.min-w-0.gap-3 > div > .text-\\[11px\\].text-slate-400"
+        ],
+        "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.63 (foreground color: #90a1b9, background color: #ffffff, font size: 8.3pt (11px), font weight: normal). Expected contrast ratio of 4.5:1",
+        "html": "<p class=\"text-[11px] text-slate-400\">Define el idioma de la aplicación.</p>"
+      },
+      {
+        "target": [
+          "section:nth-child(1) > .divide-y.divide-slate-100.dark\\:divide-slate-800\\/80 > .py-4.gap-4.justify-between:nth-child(2) > .items-start.min-w-0.gap-3 > div > .text-\\[11px\\].text-slate-400"
+        ],
+        "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.63 (foreground color: #90a1b9, background color: #ffffff, font size: 8.3pt (11px), font weight: normal). Expected contrast ratio of 4.5:1",
+        "html": "<p class=\"text-[11px] text-slate-400\">Se usará para mostrar fechas y horarios de tus traslados.</p>"
+      },
+      {
+        "target": [
+          "section:nth-child(1) > .divide-y.divide-slate-100.dark\\:divide-slate-800\\/80 > .py-4.gap-4.justify-between:nth-child(3) > .items-start.min-w-0.gap-3 > div > .text-\\[11px\\].text-slate-400"
+        ],
+        "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.63 (foreground color: #90a1b9, background color: #ffffff, font size: 8.3pt (11px), font weight: normal). Expected contrast ratio of 4.5:1",
+        "html": "<p class=\"text-[11px] text-slate-400\">Define el sistema de unidades para distancias, peso y consumo.</p>"
+      },
+      {
+        "target": [
+          "section:nth-child(2) > .pb-5.border-slate-100.dark\\:border-slate-800 > div:nth-child(2) > .text-\\[11px\\].text-slate-400"
+        ],
+        "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.63 (foreground color: #90a1b9, background color: #ffffff, font size: 8.3pt (11px), font weight: normal). Expected contrast ratio of 4.5:1",
+        "html": "<p class=\"text-[11px] text-slate-400\">Personaliza la apariencia y el comportamiento de la plataforma.</p>"
+      },
+      {
+        "target": [
+          "section:nth-child(2) > .divide-y.divide-slate-100.dark\\:divide-slate-800\\/80 > .py-4.gap-4.justify-between:nth-child(1) > .items-start.min-w-0.gap-3 > div > .text-\\[11px\\].text-slate-400"
+        ],
+        "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.63 (foreground color: #90a1b9, background color: #ffffff, font size: 8.3pt (11px), font weight: normal). Expected contrast ratio of 4.5:1",
+        "html": "<p class=\"text-[11px] text-slate-400\">Elige el tema que mejor se adapte a ti.</p>"
+      },
+      {
+        "target": [
+          "section:nth-child(2) > .divide-y.divide-slate-100.dark\\:divide-slate-800\\/80 > .py-4.gap-4.justify-between:nth-child(2) > .items-start.min-w-0.gap-3 > div > .text-\\[11px\\].text-slate-400"
+        ],
+        "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.63 (foreground color: #90a1b9, background color: #ffffff, font size: 8.3pt (11px), font weight: normal). Expected contrast ratio of 4.5:1",
+        "html": "<p class=\"text-[11px] text-slate-400\">Recibe avisos importantes sobre tus traslados y actividad.</p>"
+      },
+      {
+        "target": [
+          "section:nth-child(2) > .divide-y.divide-slate-100.dark\\:divide-slate-800\\/80 > .py-4.gap-4.justify-between:nth-child(3) > .items-start.min-w-0.gap-3 > div > .text-\\[11px\\].text-slate-400"
+        ],
+        "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.63 (foreground color: #90a1b9, background color: #ffffff, font size: 8.3pt (11px), font weight: normal). Expected contrast ratio of 4.5:1",
+        "html": "<p class=\"text-[11px] text-slate-400\">Ajustes de contraste, tamaño de letra y otras opciones de accesibilidad.</p>"
+      },
+      {
+        "target": [
+          "section:nth-child(2) > .divide-y.divide-slate-100.dark\\:divide-slate-800\\/80 > .py-4.gap-4.justify-between:nth-child(4) > .items-start.min-w-0.gap-3 > div > .text-\\[11px\\].text-slate-400"
+        ],
+        "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.63 (foreground color: #90a1b9, background color: #ffffff, font size: 8.3pt (11px), font weight: normal). Expected contrast ratio of 4.5:1",
+        "html": "<p class=\"text-[11px] text-slate-400\">Sistema de unidades en la aplicación.</p>"
+      },
+      {
+        "target": [
+          ".pb-5.border-slate-100.dark\\:border-slate-800 > .gap-3.items-center.flex > div:nth-child(2) > .text-\\[11px\\].text-slate-400"
+        ],
+        "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.63 (foreground color: #90a1b9, background color: #ffffff, font size: 8.3pt (11px), font weight: normal). Expected contrast ratio of 4.5:1",
+        "html": "<p class=\"text-[11px] text-slate-400\">Elige qué tipo de notificaciones quieres recibir y por qué medio.</p>"
+      },
+      {
+        "target": [
+          "section:nth-child(3) > .divide-y.divide-slate-100.dark\\:divide-slate-800\\/80 > .py-4.gap-4.justify-between:nth-child(1) > .items-start.min-w-0.gap-3 > div > .text-\\[11px\\].text-slate-400"
+        ],
+        "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.63 (foreground color: #90a1b9, background color: #ffffff, font size: 8.3pt (11px), font weight: normal). Expected contrast ratio of 4.5:1",
+        "html": "<p class=\"text-[11px] text-slate-400\">Avisos previos a tus traslados programados.</p>"
+      },
+      {
+        "target": [
+          "section:nth-child(4) > .pb-5.border-slate-100.dark\\:border-slate-800 > div:nth-child(2) > .text-\\[11px\\].text-slate-400"
+        ],
+        "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.63 (foreground color: #90a1b9, background color: #ffffff, font size: 8.3pt (11px), font weight: normal). Expected contrast ratio of 4.5:1",
+        "html": "<p class=\"text-[11px] text-slate-400\">Controla el uso de tu información y los permisos del dispositivo.</p>"
+      },
+      {
+        "target": [
+          "section:nth-child(4) > .divide-y.divide-slate-100.dark\\:divide-slate-800\\/80 > .py-4.gap-4.justify-between:nth-child(1) > .items-start.min-w-0.gap-3 > div > .text-\\[11px\\].text-slate-400"
+        ],
+        "summary": "Fix any of the following:\n  Element has insufficient color contrast of 2.63 (foreground color: #90a1b9, background color: #ffffff, font size: 8.3pt (11px), font weight: normal). Expected contrast ratio of 4.5:1",
+        "html": "<p class=\"text-[11px] text-slate-400\">Se autoriza desde el mapa y el navegador cuando usas servicios de traslado.</p>"
+      },
+      {
+        "target": [
+          ".bg-sky-50 > span"
+        ],
+        "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.77 (foreground color: #0084d1, background color: #f0f9ff, font size: 8.3pt (11px), font weight: normal). Expected contrast ratio of 4.5:1",
+        "html": "<span>Se solicita cuando usas el mapa o servicios de traslado.</span>"
+      }
+    ]
+  },
+  {
+    "route": "/soporte",
+    "width": 1440,
+    "nodes": []
+  },
+  {
+    "route": "/ubicaciones",
+    "width": 1440,
+    "nodes": [
+      {
+        "target": [
+          "li[data-selected=\"true\"] > .ubicaciones-desktop-module__lOLZXG__tag[data-type=\"origen\"]"
+        ],
+        "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.32 (foreground color: #009a57, background color: #defbef, font size: 8.3pt (11px), font weight: normal). Expected contrast ratio of 4.5:1",
+        "html": "<span class=\"ubicaciones-desktop-module__lOLZXG__tag\" data-type=\"origen\">Origen de traslado</span>"
+      },
+      {
+        "target": [
+          "li[data-selected=\"false\"]:nth-child(2) > .ubicaciones-desktop-module__lOLZXG__tag[data-type=\"destino\"]"
+        ],
+        "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.44 (foreground color: #0061ff, background color: #e8f1ff, font size: 8.3pt (11px), font weight: normal). Expected contrast ratio of 4.5:1",
+        "html": "<span class=\"ubicaciones-desktop-module__lOLZXG__tag\" data-type=\"destino\">Destino de traslado</span>"
+      },
+      {
+        "target": [
+          "li[data-selected=\"false\"]:nth-child(3) > .ubicaciones-desktop-module__lOLZXG__tag[data-type=\"origen\"]"
+        ],
+        "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.32 (foreground color: #009a57, background color: #defbef, font size: 8.3pt (11px), font weight: normal). Expected contrast ratio of 4.5:1",
+        "html": "<span class=\"ubicaciones-desktop-module__lOLZXG__tag\" data-type=\"origen\">Origen de traslado</span>"
+      },
+      {
+        "target": [
+          "li[data-selected=\"false\"]:nth-child(4) > .ubicaciones-desktop-module__lOLZXG__tag[data-type=\"destino\"]"
+        ],
+        "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.44 (foreground color: #0061ff, background color: #e8f1ff, font size: 8.3pt (11px), font weight: normal). Expected contrast ratio of 4.5:1",
+        "html": "<span class=\"ubicaciones-desktop-module__lOLZXG__tag\" data-type=\"destino\">Destino de traslado</span>"
+      },
+      {
+        "target": [
+          "li[data-selected=\"false\"]:nth-child(5) > .ubicaciones-desktop-module__lOLZXG__tag[data-type=\"origen\"]"
+        ],
+        "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.32 (foreground color: #009a57, background color: #defbef, font size: 8.3pt (11px), font weight: normal). Expected contrast ratio of 4.5:1",
+        "html": "<span class=\"ubicaciones-desktop-module__lOLZXG__tag\" data-type=\"origen\">Origen de traslado</span>"
+      },
+      {
+        "target": [
+          "li[data-selected=\"false\"]:nth-child(6) > .ubicaciones-desktop-module__lOLZXG__tag[data-type=\"destino\"]"
+        ],
+        "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.44 (foreground color: #0061ff, background color: #e8f1ff, font size: 8.3pt (11px), font weight: normal). Expected contrast ratio of 4.5:1",
+        "html": "<span class=\"ubicaciones-desktop-module__lOLZXG__tag\" data-type=\"destino\">Destino de traslado</span>"
+      },
+      {
+        "target": [
+          "div > .ubicaciones-desktop-module__lOLZXG__tag[data-type=\"origen\"]"
+        ],
+        "summary": "Fix any of the following:\n  Element has insufficient color contrast of 3.32 (foreground color: #009a57, background color: #defbef, font size: 6.8pt (9px), font weight: normal). Expected contrast ratio of 4.5:1",
+        "html": "<span class=\"ubicaciones-desktop-module__lOLZXG__tag\" data-type=\"origen\">Origen de traslado</span>"
+      },
+      {
+        "target": [
+          ".ubicaciones-desktop-module__lOLZXG__delete"
+        ],
+        "summary": "Fix any of the following:\n  Element has insufficient color contrast of 4.01 (foreground color: #ef343f, background color: #ffffff, font size: 8.3pt (11px), font weight: normal). Expected contrast ratio of 4.5:1",
+        "html": "<button class=\"ubicaciones-desktop-module__lOLZXG__delete\">"
+      }
+    ]
+  },
+  {
+    "route": "/pasaporte",
+    "width": 1440,
+    "nodes": []
+  }
+]

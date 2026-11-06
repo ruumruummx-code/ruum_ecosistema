@@ -1,6 +1,7 @@
 @import "tailwindcss";
 
 @import "@ruum/ui/styles/tokens.css";
+@import "./contrast-tokens.css";
 
 /*
  * App Usuario — DESIGN SYSTEM V2 (Septiembre 2026)
@@ -1428,6 +1429,18 @@ summary:focus-visible {
   background: rgba(255, 255, 255, 0.95);
   padding-top: env(safe-area-inset-top);
   backdrop-filter: blur(14px);
+}
+
+/* RUUM-UX-001: Encabezado móvil compacto y contención estricta del imagotipo */
+.user-v2-shell-header #homeHeader img,
+.user-v2-shell-header .ruum-header__logo-img,
+.user-v2-shell-header .ruum-header__logo img,
+#homeHeader img {
+  height: 36px;
+  max-height: 36px;
+  width: auto;
+  max-width: 100%;
+  object-fit: contain;
 }
 
 /* Heights are measured by NavegacionUsuario; fallbacks cover the initial render. */

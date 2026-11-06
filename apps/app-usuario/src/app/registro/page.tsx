@@ -429,10 +429,9 @@ export default function PaginaRegistro() {
           <div role="progressbar" aria-label="Progreso del registro" aria-valuemin={0} aria-valuemax={3} aria-valuenow={paso} aria-valuetext={`Paso ${paso} de 3`} className="h-2 w-full overflow-hidden rounded-full bg-[#e8eef6] mb-2">
             <div
               className={[
-                "h-full rounded-full transition-all duration-300",
+                "h-full rounded-full transition-all duration-300 bg-gradient-to-r from-[#0a2342] to-[#2e5a88]",
                 paso === 1 ? "w-1/3" : "w-2/3",
               ].join(" ")}
-              style={{ background: "linear-gradient(90deg, #0a2342, #2e5a88)" }}
             />
           </div>
 
@@ -552,7 +551,7 @@ export default function PaginaRegistro() {
                     Teléfono celular
                   </label>
                   <div className="relative">
-                    <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 font-semibold text-[14.5px] text-[#4e5f80]">
+                    <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 font-semibold text-[14.5px] user-essential-muted">
                       <span aria-hidden="true">🇲🇽</span> +52 |
                     </span>
                     <input

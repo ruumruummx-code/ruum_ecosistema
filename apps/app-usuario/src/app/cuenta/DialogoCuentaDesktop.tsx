@@ -203,7 +203,7 @@ export function DialogoCuentaDesktop({
               Cerrar otras sesiones
             </button>
           )}
-          <div style={{ display: "flex", flexDirection: "column", gap: "0.25rem", marginTop: "0.5rem" }}>
+          <div className="flex flex-col gap-1 mt-2">
             <button
               className={s.textButton}
               disabled={cerrandoSesion || ocupado}
@@ -214,8 +214,7 @@ export function DialogoCuentaDesktop({
             </button>
             {cerrarSesionGlobal && (
               <button
-                className={s.textButton}
-                style={{ color: "#ef4444" }}
+                className={`${s.textButton} text-red-500`}
                 disabled={cerrandoSesion || ocupado}
                 onClick={() => void cerrarSesionGlobal()}
               >

@@ -127,6 +127,16 @@ export function Sidebar({ grupos, className = "" }: { grupos: SidebarGrupo[]; cl
 }
 
 /** Avatar — circle/rounded, símbolo 50–60%, con estado opcional. */
+const CLASE_TAMANO_AVATAR: Record<number, string> = {
+  28: "size-7",
+  32: "size-8",
+  36: "size-9",
+  40: "size-10",
+  48: "size-12",
+  56: "size-14",
+  64: "size-16",
+};
+
 export function Avatar({
   nombre,
   src,
@@ -143,18 +153,18 @@ export function Avatar({
   className?: string;
 }) {
   const iniciales = nombre.split(" ").map((p) => p[0]).slice(0, 2).join("").toUpperCase();
+  const claseTamano = CLASE_TAMANO_AVATAR[tamano] ?? "size-10";
   return (
     <span className={`relative inline-flex shrink-0 ${className}`} role="img" aria-label={`Avatar de ${nombre}`}>
       {src ? (
         // <img> a propósito: avatar con URL firmada y tamaño inline; ver nota en
         // CredencialConductor (sin next/image para no exigir remotePatterns).
         // eslint-disable-next-line @next/next/no-img-element
-        <img src={src} alt="" width={tamano} height={tamano} style={{ width: tamano, height: tamano }} className={`object-cover ${forma === "circle" ? "rounded-full" : "rounded-[24%]"}`} />
+        <img src={src} alt="" width={tamano} height={tamano} className={`object-cover ${claseTamano} ${forma === "circle" ? "rounded-full" : "rounded-[24%]"}`} />
       ) : (
         <span
           aria-hidden
-          style={{ width: tamano, height: tamano }}
-          className={`flex items-center justify-center bg-[var(--ruum-navy)] font-body text-sm font-bold text-white ${forma === "circle" ? "rounded-full" : "rounded-[24%]"}`}
+          className={`flex items-center justify-center bg-[var(--ruum-navy)] font-body text-sm font-bold text-white ${claseTamano} ${forma === "circle" ? "rounded-full" : "rounded-[24%]"}`}
         >
           {iniciales}
         </span>

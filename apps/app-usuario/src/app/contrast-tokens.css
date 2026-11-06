@@ -1,0 +1,35 @@
+/* RUUM-UX-002: pares semánticos de contenido esencial, aislados de otras apps. */
+:root, [data-theme="light"] {
+  --user-on-light-primary: #0a2342;
+  --user-text-primary: var(--user-on-light-primary);
+  --user-on-light-muted: #52617a;
+  --user-on-light-link: #0052cc;
+  --user-text-essential: var(--user-on-light-muted);
+  --user-link-essential: var(--user-on-light-link);
+  --user-success-essential: #086344;
+  --user-warning-essential: #784600;
+  --user-danger-essential: #b3263e;
+  --user-teal-essential: #006b6b;
+  --user-success-content: var(--user-success-essential);
+  --user-danger-content: var(--user-danger-essential);
+  --user-on-accent: #0d1b2a;
+  --user-on-dark-essential: #d6e2ef;
+  --user-on-dark-accent: #61efcd;
+}
+[data-theme="dark"] {
+  --user-text-primary: #f6f8fb;
+  --user-success-content: #65e4b5;
+  --user-danger-content: #ff9da9;
+  --user-text-essential: #b8c8df;
+  --user-link-essential: #8cbeff;
+  --user-teal-essential: #65e2dc;
+}
+/* Los módulos de escritorio conservan superficies claras en ambos temas. */
+@layer utilities {
+  .user-essential-muted { color: var(--user-text-essential); }
+  .user-essential-link { color: var(--user-link-essential); }
+  .user-essential-teal { color: var(--user-teal-essential); }
+
+  .user-essential-success { color: var(--user-success-content); }
+  .user-essential-danger { color: var(--user-danger-content); }
+}

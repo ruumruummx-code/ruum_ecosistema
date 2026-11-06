@@ -65,8 +65,7 @@ export function Chat({ propio, mensajes, onEnviar, deshabilitado, mensajeDeshabi
         aria-atomic="false"
         aria-relevant="additions"
         aria-label="Mensajes del chat"
-        className="flex-1 space-y-3 overflow-y-auto p-4"
-        style={{ maxHeight: 360, minHeight: 180 }}
+        className="flex-1 space-y-3 overflow-y-auto p-4 max-h-[360px] min-h-[180px]"
       >
         {mensajes.length === 0 ? (
           <p className="font-body text-sm text-text-secondary">Todavía no hay mensajes.</p>

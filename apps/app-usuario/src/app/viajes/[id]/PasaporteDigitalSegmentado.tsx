@@ -91,7 +91,7 @@ export function PasaporteDigitalSegmentado(props: PasaporteDigitalSegmentadoProp
     <div className={styles.content}>
       <section role="tabpanel" id={`${id}-panel-en_ruta`} aria-labelledby={`${id}-en_ruta`} hidden={tab !== "en_ruta"} className={styles.panel}>
         <SeguimientoTrasladoTiempoReal cerrado={Boolean(p.cerrado_en) || p.estado_operativo === "closed"} trasladoId={p.traslado_id ?? ""} estado={p.estado} actualizadoEn={p.actualizado_en} origen={{ lat: p.origen_lat, lng: p.origen_lng }} destino={{ lat: p.destino_lat, lng: p.destino_lng }} ubicacionInicial={ultimaUbicacion} activo={tab === "en_ruta"}/>
-        <div className={styles.tools} style={{ left: "auto" }}><button type="button" onClick={() => setDetails("unidad")}>Datos y recibo</button></div>
+        <div className={`${styles.tools} !left-auto`}><button type="button" onClick={() => setDetails("unidad")}>Datos y recibo</button></div>
       </section>
       <section role="tabpanel" id={`${id}-panel-fotos`} aria-labelledby={`${id}-fotos`} hidden={tab !== "fotos"} className={styles.panel}>
         {evidencia.length ? <div className={styles.photos}>{evidencia.slice(0, 6).map(f => <button key={f.id} type="button" onClick={() => setPhoto(f)} aria-label={`Abrir foto ${f.tipo} ${f.angulo}`}>

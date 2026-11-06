@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { ConductorDialog } from "../components/ConductorDialog";
 import { useState } from "react";
 
 interface PanelOperationalHealthProps {
@@ -181,19 +182,8 @@ export function PanelStatusRow({
 
       {/* BottomSheet / Modal detalle — se despliega al hacer tap/clic en el StatusRow */}
       {sheetAbierto && (
-        <dialog
-          open
-          className="fixed inset-0 z-50 m-0 flex h-[100dvh] w-[100vw] max-h-none max-w-none items-end justify-center border-0 bg-transparent p-0"
-          aria-modal="true"
-          aria-labelledby="titulo-salud-sheet"
-        >
-          <button
-            type="button"
-            className="absolute inset-0 cursor-pointer bg-black/50 backdrop-blur-[2px]"
-            onClick={() => setSheetAbierto(false)}
-            aria-label="Cerrar diálogo"
-          />
-          <div className="relative w-full max-w-md rounded-t-[1.75rem] border-t border-border/40 bg-[var(--conductor-surface)] p-5 pb-[calc(20px+env(safe-area-inset-bottom))] shadow-2xl">
+        <ConductorDialog open={sheetAbierto} onClose={() => setSheetAbierto(false)} labelledBy="titulo-salud-sheet">
+          <div className="bg-[var(--conductor-surface)]">
             <div className="mx-auto mb-4 h-1 w-10 rounded-full bg-slate-200" aria-hidden="true" />
             <h2 id="titulo-salud-sheet" className="font-display text-base font-black text-[var(--conductor-primary)]">
               Salud operacional
@@ -259,7 +249,7 @@ export function PanelStatusRow({
               </button>
             </div>
           </div>
-        </dialog>
+        </ConductorDialog>
       )}
     </>
   );

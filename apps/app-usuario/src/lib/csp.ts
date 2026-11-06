@@ -3,6 +3,12 @@
  * Delega en `@ruum/shared/seguridad` (mismo builder que conductor y panel).
  * Se mantiene este módulo como fachada para no romper imports existentes
  * (`./lib/csp`, `../src/middleware`, tests PR-12).
+ *
+ * DT-10: se migró el import de la ruta física relativa
+ * (`../../../../packages/shared/src/seguridad/index`) al alias del workspace
+ * (`@ruum/shared/seguridad`), que está declarado en
+ * `packages/shared/package.json#exports["./seguridad"]`. Esto elimina
+ * el acoplamiento a la estructura de directorios del monorepo.
  */
 
 import {

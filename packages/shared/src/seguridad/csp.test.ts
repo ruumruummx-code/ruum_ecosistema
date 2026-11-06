@@ -60,6 +60,18 @@ describe("seguridad/csp — invariantes SEC-002/SEC-003", () => {
     });
     const style = csp.split(";").find((d) => d.trim().startsWith("style-src")) ?? "";
     expect(style).not.toContain("'unsafe-inline'");
+    expect(csp).not.toContain("style-src-attr");
+  });
+
+  it("permite atributos de estilo con style-src-attr 'unsafe-inline' cuando no es strictStyles", () => {
+    const csp = buildCsp({
+      nonce: "n123",
+      isProd: true,
+      strictStyles: false,
+      extras: CSP_PRESETS.usuario,
+    });
+    expect(csp).toContain("style-src 'self' 'unsafe-inline' 'nonce-n123'");
+    expect(csp).toContain("style-src-attr 'unsafe-inline'");
   });
 
   it("images unificado cubre supabase/mapbox/didit/stripe", () => {

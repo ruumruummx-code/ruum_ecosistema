@@ -60,6 +60,7 @@ describe("PR-12 — CSP + HSTS en app-usuario", () => {
       delete process.env.CSP_STRICT_STYLES;
       const cspNormal = buildCspUsuario(nonce, true, false);
       expect(cspNormal).toContain(`style-src 'self' 'unsafe-inline' 'nonce-${nonce}'`);
+      expect(cspNormal).toContain("style-src-attr 'unsafe-inline'");
     });
   });
 
