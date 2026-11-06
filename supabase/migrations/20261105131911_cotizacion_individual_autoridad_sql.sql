@@ -327,5 +327,12 @@ revoke all on function public.usuario_crea_traslado(uuid, jsonb, jsonb, uuid, js
 grant execute on function public.usuario_crea_traslado(uuid, jsonb, jsonb, uuid, jsonb) to authenticated;
 
 -- Cerrar la firma antigua: omitir p_paradas no puede eludir la cotización.
-revoke all on function public.usuario_crea_traslado(uuid, jsonb, jsonb, uuid) from public, anon, authenticated, service_role;
+-- La migración 20260904014259 ya la elimina al reconstruir la base desde cero.
+do $$
+begin
+  if to_regprocedure('public.usuario_crea_traslado(uuid,jsonb,jsonb,uuid)') is not null then
+    revoke all on function public.usuario_crea_traslado(uuid, jsonb, jsonb, uuid) from public, anon, authenticated, service_role;
+  end if;
+end;
+$$;
 notify pgrst, 'reload schema';

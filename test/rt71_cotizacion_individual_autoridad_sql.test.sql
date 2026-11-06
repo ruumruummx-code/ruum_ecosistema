@@ -49,7 +49,7 @@ begin
   return next ok(not has_function_privilege('anon','public.servidor_cotizar_traslado_individual(uuid,uuid,jsonb,jsonb,jsonb)','EXECUTE'),'anon no puede emitir cotizaciones');
   return next ok(has_function_privilege('service_role','public.servidor_cotizar_traslado_individual(uuid,uuid,jsonb,jsonb,jsonb)','EXECUTE'),'servidor sí puede emitir cotizaciones');
   return next ok(not has_table_privilege('authenticated','private.cotizaciones_individuales','SELECT,INSERT,UPDATE,DELETE'),'usuario no puede leer ni modificar evidencia privada');
-  return next ok(not has_function_privilege('authenticated','public.usuario_crea_traslado(uuid,jsonb,jsonb,uuid)','EXECUTE'),'firma antigua no permite eludir la cotización');
+  return next ok(coalesce(not has_function_privilege('authenticated',to_regprocedure('public.usuario_crea_traslado(uuid,jsonb,jsonb,uuid)'), 'EXECUTE'), true),'firma antigua ausente o sin permisos para eludir la cotización');
 
   perform set_config('request.jwt.claim.sub',v_auth::text,true);
   perform set_config('request.jwt.claims',jsonb_build_object('sub',v_auth,'role','authenticated')::text,true);
