@@ -1,5 +1,5 @@
 {
-  "$schema": "https://v2-10-5.turborepo.dev/schema.json",
+  "$schema": "https://turborepo.dev",
   "ui": "stream",
   "tasks": {
     "build": {
@@ -24,8 +24,6 @@
     "typecheck": {
       "outputs": []
     },
-    
-    "// --- CAPA DE TESTING OPTIMIZADA CON CACHÉ ---": "",
     "test": {
       "dependsOn": ["build"],
       "outputs": []
