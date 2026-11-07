@@ -18,8 +18,29 @@
       "cache": false,
       "persistent": true
     },
-    "lint": {},
-    "typecheck": {},
-    "test": {}
+    "lint": {
+      "outputs": []
+    },
+    "typecheck": {
+      "outputs": []
+    },
+    
+    "// --- CAPA DE TESTING OPTIMIZADA CON CACHÉ ---": "",
+    "test": {
+      "dependsOn": ["build"],
+      "outputs": []
+    },
+    "test:unit": {
+      "dependsOn": ["^build"],
+      "outputs": []
+    },
+    "test:e2e": {
+      "cache": false,
+      "dependsOn": ["build"]
+    },
+    "test:a11y": {
+      "dependsOn": ["build"],
+      "outputs": []
+    }
   }
 }

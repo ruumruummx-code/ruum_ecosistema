@@ -38,7 +38,7 @@ export function DriverEarningsView({ data, summary, period, onPeriod, loading, e
     <div className={styles.tabs} role="group" aria-label="Periodo de ganancias">
       {([['semana', 'Esta semana'], ['mes', 'Este mes']] as const).map(([id, label]) => <button key={id}  type="button"  aria-pressed={period === id}  onClick={() => onPeriod(id)}>{label}</button>)}
     </div>
-    <section id="resumen-ganancias" role="region" aria-label="Resultados del filtro"  aria-busy={loading} className={styles.summary}>
+    <section id="resumen-ganancias" aria-label="Resultados del filtro"  aria-busy={loading} className={styles.summary}>
       <div className={styles.total}>
         <div><p>Ganancias totales</p><h2 data-testid="earnings-total">{ready ? `$${money(summary.amount)}` : "—"}<small>MXN</small></h2></div>
         <span className={styles.chart}><Icon name="chart" /></span>
