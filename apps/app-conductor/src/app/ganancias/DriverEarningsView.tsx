@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import type { DatosGananciasConductor } from "@ruum/api/services";
@@ -8,6 +8,7 @@ import { CONTACTOS_SOPORTE_CONDUCTOR } from "../../lib/contactos-soporte";
 import { ConductorIcon } from "@/components/icons";
 import type { EarningsPeriod, summarizeEarnings } from "./earnings-summary";
 import styles from "./earnings.module.css";
+import { ConductorDialog } from "../components/ConductorDialog";
 
 type IconName = "bell" | "chart" | "car" | "clock" | "bank";
 function Icon({ name }: { name: IconName }) {
@@ -21,9 +22,7 @@ const paymentDate = (value: string) => {
 type Props = { data: DatosGananciasConductor | null; summary: ReturnType<typeof summarizeEarnings> | null; period: EarningsPeriod; onPeriod: (period: EarningsPeriod) => void; loading: boolean; error: string | null };
 
 export function DriverEarningsView({ data, summary, period, onPeriod, loading, error }: Props) {
-  const dialog = useRef<HTMLDialogElement>(null);
   const [requestOpen, setRequestOpen] = useState(false);
-  useEffect(() => { if (requestOpen) dialog.current?.showModal(); else dialog.current?.close(); }, [requestOpen]);
   const payments = [...(data?.payouts ?? [])].sort((a, b) => (b.procesado_en ?? b.creado_en).localeCompare(a.procesado_en ?? a.creado_en)).slice(0, 2);
   const ready = !loading && !error && summary;
   const bank = data?.datosBancarios;
@@ -62,8 +61,7 @@ export function DriverEarningsView({ data, summary, period, onPeriod, loading, e
       </div>
     </section>
     <button type="button" className={styles.primary} aria-haspopup="dialog" disabled={loading || !!error} onClick={() => setRequestOpen(true)}>Consultar programación de pago <span aria-hidden="true">→</span></button>
-    <dialog ref={dialog} className={styles.dialog} aria-labelledby="programacion-pago-dialogo" onCancel={() => setRequestOpen(false)} onClose={() => setRequestOpen(false)}>
-      <header><h2 id="programacion-pago-dialogo">Programación de pago</h2><button type="button" aria-label="Cerrar programación de pago" onClick={() => setRequestOpen(false)}>×</button></header>
+    <ConductorDialog open={requestOpen} title="Programación de pago" labelledBy="programacion-pago-dialogo" onClose={() => setRequestOpen(false)}>
     <section className={styles.paymentInfo} aria-labelledby="programacion-pago-titulo" id="condiciones-pago">
       <h2 id="programacion-pago-titulo">Programación de pagos</h2>
       <p>Para recibir un depósito necesitas saldo pendiente confirmado por el equipo operativo y una cuenta bancaria verificada.</p>
@@ -74,6 +72,6 @@ export function DriverEarningsView({ data, summary, period, onPeriod, loading, e
     </section>
       <p>Consulta con soporte el saldo confirmado y la fecha prevista. El equipo operativo revisa y programa los pagos; abrir esta consulta no genera un depósito ni un retiro inmediato.</p>
       <a href={CONTACTOS_SOPORTE_CONDUCTOR.soporte.whatsapp.href} target="_blank" rel="noopener noreferrer" className={styles.primary}>Contactar a soporte</a>
-    </dialog>
+    </ConductorDialog>
   </div>;
 }

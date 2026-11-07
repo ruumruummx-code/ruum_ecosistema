@@ -24,7 +24,7 @@ export function DriverBankDetailsView(props: Props) {
   useEffect(() => { if (authorized) setAuthOpen(false); }, [authorized]);
   const banks = [...new Set([...Object.values(CATALOGO_BANCOS_SPEI), ...(formulario.banco ? [formulario.banco] : [])])];
   const valid = authorized && !loading && !error && formulario.titularCuenta.trim().length >= 3 && !!formulario.banco.trim() && /^\d{18}$/.test(formulario.clabe);
-  return <DriverDetailsShell kind="bank">
+  return <DriverDetailsShell kind="bank" footer={<button className={styles.primary} type="submit" form="bank-details" disabled={!valid || saving}>{saving ? "Guardando…" : "Guardar y continuar"}<span aria-hidden="true">→</span></button>}>
     <section className={styles.heading}><h1>Datos bancarios</h1><p>Registra tu cuenta para recibir el depósito de tus ganancias.</p></section>
     <form id="bank-details" className={bank.form} data-authorized={authorized} aria-label="Datos para depósito" aria-busy={loading} onSubmit={event => { event.preventDefault(); if (valid && !saving) void props.onSave(); }}>
       <div className={styles.fields}>
@@ -46,7 +46,7 @@ export function DriverBankDetailsView(props: Props) {
       <ServiceIcon name="warning"/><p>{authorized ? "Confirma que la cuenta pertenezca al titular registrado antes de guardar." : <>{status ? `${status}. ` : "Aún no has registrado tus datos bancarios para depósito. "}<button type="button" aria-label="Confirma tu sesión" onClick={() => setAuthOpen(true)}>Confirma tu sesión</button>{status ? " para consultar o actualizar tu cuenta de depósito." : " a continuación para capturarlos."}</>}</p>
     </div>}
     {props.message && !authOpen && <DetailsNotice message={props.message}/>}
-    <button className={styles.primary} type="submit" form="bank-details" disabled={!valid || saving}>{saving ? "Guardando…" : "Guardar y continuar"}<span aria-hidden="true">→</span></button>
+
     <p className={bank.seal}><ServiceIcon name="shield"/>Tu información está protegida</p>
     <DetailsDialog open={authOpen} title="Confirma tu sesión" onClose={() => { if (!props.authorizing) { setAuthOpen(false); props.onPassword(""); } }}>
       <p>Ingresa tu contraseña para consultar y editar los datos de tu cuenta de depósito.</p>

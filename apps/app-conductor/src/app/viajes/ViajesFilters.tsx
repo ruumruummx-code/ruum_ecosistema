@@ -50,16 +50,16 @@ export function TrasladosFilters({
     <div className="mt-3 flex flex-col gap-2.5 select-none">
       {/* Orden — chips horizontales scrolleables, 1-tap */}
       <div className="flex items-center gap-2">
-        <span className="font-body text-[10px] font-bold uppercase tracking-wider text-text-tertiary shrink-0">Orden:</span>
-        <div className="flex gap-2 overflow-x-auto scrollbar-none flex-1 py-1" role="group" aria-label="Ordenar ofertas">
+        <span className="font-body text-sm font-bold uppercase tracking-wider text-text-tertiary shrink-0">Orden:</span>
+        <div className="flex flex-wrap gap-2 flex-1 py-1" role="group" aria-label="Ordenar ofertas">
           {ORDENES.map((o) => (
             <button
               key={o.valor}
               type="button"
               onClick={() => onCambiarOrden(o.valor)}
               aria-pressed={orden === o.valor}
-              className={`shrink-0 inline-flex items-center gap-1.5 rounded-full border px-3 py-2 font-body text-xs font-bold transition-all min-h-9 focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-route-action ${
-                orden === o.valor ? "bg-signal border-signal text-slate-950 shadow-sm" : "bg-surface-elevated border-border/40 text-text-secondary hover:border-route-action/30 hover:text-text-primary"
+              className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-2 font-body text-sm font-bold transition-all min-h-12 focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-route-action ${
+                orden === o.valor ? "bg-route-action border-route-action text-white shadow-sm" : "bg-surface-elevated border-border/40 text-text-secondary hover:border-route-action/30 hover:text-text-primary"
               }`}
             >
               <IconOrden valor={o.valor} />
@@ -72,13 +72,13 @@ export function TrasladosFilters({
       {/* Ciudad — chips (solo si hay >1) */}
       {ciudadesDisponibles.length > 1 && (
         <div className="flex items-center gap-2">
-          <span className="font-body text-[10px] font-bold uppercase tracking-wider text-text-tertiary shrink-0">Ciudad:</span>
-          <div className="flex gap-2 overflow-x-auto scrollbar-none flex-1 py-1" role="group" aria-label="Filtrar por ciudad">
+          <span className="font-body text-sm font-bold uppercase tracking-wider text-text-tertiary shrink-0">Ciudad:</span>
+          <div className="flex flex-wrap gap-2 flex-1 py-1" role="group" aria-label="Filtrar por ciudad">
             <button
               type="button"
               onClick={() => onCambiarCiudad("todas")}
               aria-pressed={ciudadFiltro === "todas"}
-              className={`shrink-0 rounded-full border px-3 py-2 font-body text-xs font-bold transition-all min-h-9 focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-route-action ${
+              className={`rounded-full border px-3 py-2 font-body text-sm font-bold transition-all min-h-12 focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-route-action ${
                 ciudadFiltro === "todas" ? "bg-surface border-text-primary text-text-primary" : "bg-surface-elevated border-border/40 text-text-tertiary hover:text-text-primary"
               }`}
             >
@@ -90,8 +90,8 @@ export function TrasladosFilters({
                 type="button"
                 onClick={() => onCambiarCiudad(ciudad)}
                 aria-pressed={ciudadFiltro === ciudad}
-                className={`shrink-0 rounded-full border px-3 py-2 font-body text-xs font-bold transition-all min-h-9 max-w-[160px] truncate focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-route-action ${
-                  ciudadFiltro === ciudad ? "bg-signal border-signal text-slate-950 shadow-sm" : "bg-surface-elevated border-border/40 text-text-secondary hover:border-route-action/30 hover:text-text-primary"
+                className={`rounded-full border px-3 py-2 font-body text-sm font-bold transition-all min-h-12 max-w-full break-words focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-route-action ${
+                  ciudadFiltro === ciudad ? "bg-route-action border-route-action text-white shadow-sm" : "bg-surface-elevated border-border/40 text-text-secondary hover:border-route-action/30 hover:text-text-primary"
                 }`}
                 title={ciudad}
               >

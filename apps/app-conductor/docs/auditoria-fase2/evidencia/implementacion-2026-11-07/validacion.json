@@ -1,0 +1,39 @@
+{
+  "base": "fd0692a3",
+  "date": "2026-11-07",
+  "build": "passed: Next.js production, 31 pages",
+  "typecheck": "passed as part of production build",
+  "targetedLint": "passed, zero errors/warnings in new components and contract tests",
+  "browser": {
+    "engine": "Chromium 155, Linux",
+    "sizes": [
+      "320x568",
+      "390x844"
+    ],
+    "standard": {
+      "passed": 8,
+      "failed": 0,
+      "seconds": 32.1
+    },
+    "stress": {
+      "passed": 2,
+      "failed": 0,
+      "seconds": 8.6
+    },
+    "data": "loopback fixtures only",
+    "keyboard": "visualViewport simulation; not physical Android",
+    "text": "DOM font amplification; not native accessibility zoom"
+  },
+  "sourceSha256": {
+    "src/app/components/ConductorScreen.tsx": "4bab092100bb33df1a2d61b9874603a5fcdd311f66dae002578a74169cf29862",
+    "src/app/components/conductor-screen.module.css": "8d5d1e9865de83a2bc6fe01e16ddffb8cf6e1c79be1906f284b8ddabdf01e5ea",
+    "src/app/components/ConductorShellBridge.tsx": "6ec04281e58d0acbabf2ed1ea292c39c30e7d176dcc5d7a6488bfed2e0cc8f63",
+    "src/app/components/useVisibleViewport.ts": "f36d6233808319d7a92104845abc85be32a311c8921b72b2ffe473dbd4ab0be2",
+    "src/app/components/ConductorNavigation.tsx": "bf58ff6e686351609ff5046a92eae2e7762b9aac407f58795ec3fdf96ab2452c",
+    "src/app/components/route-contract.ts": "dcef747a8ac3b3bd3150ce3af309489f23f5249e49d827e63117b6b80652681e",
+    "src/app/components/ConductorDialog.tsx": "84953975cbe40f18b1f58e06bc992449a6cdc3d539e6ee87eb27f8662c486df5",
+    "src/app/shell-contract.css": "263ca9389b1b74a2ea9d9e7cf2df0e02b6eeec731c960ccb2cf9b941e9644610",
+    "tests/interface/shell.spec.ts": "aef2bac71b03448f406c5c54c0faea5753085a719ac5fa107a08ef88e6cbc138",
+    "playwright.interface.config.ts": "1ac9c734fe36267e252617abbabc9647773aa127bdd9768c3f72e19b4a65c441"
+  }
+}

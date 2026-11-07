@@ -1,32 +1,39 @@
 "use client";
-
 import { useLayoutEffect, type RefObject } from "react";
 
-/** Contrato local al marco; no modifica el viewport ni las variables de otra vista. */
-export function useVisibleViewport(ref: RefObject<HTMLElement | null>) {
+/** Una implementación compartida; sin cálculos particulares por pantalla. */
+export function useVisibleViewport(ref?: RefObject<HTMLElement | null>) {
   useLayoutEffect(() => {
-    const node = ref.current;
+    const node = ref ? ref.current : document.documentElement;
     if (!node) return;
     const viewport = window.visualViewport;
+    let pending = 0;
     const measure = () => {
       const top = viewport?.offsetTop ?? 0;
-      const height = viewport?.height ?? window.innerHeight;
+      const height = viewport?.height ?? innerHeight;
+      const bottom = Math.max(0, innerHeight - height - top);
       node.style.setProperty("--conductor-visible-top", `${top}px`);
       node.style.setProperty("--conductor-visible-height", `${height}px`);
-      node.style.setProperty("--conductor-visible-bottom", `${Math.max(0, window.innerHeight - height - top)}px`);
+      node.style.setProperty("--conductor-visible-bottom", `${bottom}px`);
       const active = document.activeElement;
-      if (active instanceof HTMLElement && node.contains(active) && active.matches("input, textarea, select")) {
-        active.scrollIntoView({ block: "nearest", inline: "nearest" });
+      const editing = active instanceof HTMLElement && active.matches("input,textarea,select,[contenteditable=true]");
+      if (!ref) {
+        const keyboard = editing && innerHeight - height > 100;
+        node.dataset.conductorKeyboard = String(keyboard);
+        node.dataset.tripKeyboard = String(keyboard);
       }
+      cancelAnimationFrame(pending);
+      if (editing && node.contains(active)) pending = requestAnimationFrame(() => active.scrollIntoView({ block: "nearest", inline: "nearest", behavior: "instant" }));
     };
     measure();
-    viewport?.addEventListener("resize", measure);
-    viewport?.addEventListener("scroll", measure);
-    window.addEventListener("resize", measure);
+    viewport?.addEventListener("resize", measure); viewport?.addEventListener("scroll", measure);
+    window.addEventListener("resize", measure); document.addEventListener("focusin", measure); document.addEventListener("focusout", measure);
     return () => {
-      viewport?.removeEventListener("resize", measure);
-      viewport?.removeEventListener("scroll", measure);
-      window.removeEventListener("resize", measure);
+      cancelAnimationFrame(pending);
+      viewport?.removeEventListener("resize", measure); viewport?.removeEventListener("scroll", measure);
+      window.removeEventListener("resize", measure); document.removeEventListener("focusin", measure); document.removeEventListener("focusout", measure);
+      for (const name of ["--conductor-visible-top", "--conductor-visible-height", "--conductor-visible-bottom"]) node.style.removeProperty(name);
+      if (!ref) { delete node.dataset.conductorKeyboard; delete node.dataset.tripKeyboard; }
     };
   }, [ref]);
 }

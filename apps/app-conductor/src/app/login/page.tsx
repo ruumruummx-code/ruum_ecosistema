@@ -167,30 +167,7 @@ function FormularioLogin() {
 export default function PaginaLogin() {
   const screenRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    const screen = screenRef.current;
-    const viewport = window.visualViewport;
-    if (!screen || !viewport) return;
-    let frame = 0;
-    const update = () => {
-      cancelAnimationFrame(frame);
-      frame = requestAnimationFrame(() => {
-        // iOS pans on focus; Android may resize only the visual viewport.
-        screen.style.setProperty("--login-height", viewport.height + "px");
-        screen.style.setProperty("--login-top", viewport.offsetTop + "px");
-      });
-    };
-    update();
-    viewport.addEventListener("resize", update);
-    viewport.addEventListener("scroll", update);
-    window.addEventListener("resize", update);
-    return () => {
-      cancelAnimationFrame(frame);
-      viewport.removeEventListener("resize", update);
-      viewport.removeEventListener("scroll", update);
-      window.removeEventListener("resize", update);
-    };
-  }, []);
+
 
   return (
     <div ref={screenRef} className={styles.screen} data-conductor-login>

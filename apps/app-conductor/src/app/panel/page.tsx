@@ -117,12 +117,11 @@ export default function PaginaPanel() {
   const [gpsUltimaSenal, setGpsUltimaSenal] = useState<Date | null>(null);
   const [pullOffset, setPullOffset] = useState(0);
   const [avisoPullBloqueado, setAvisoPullBloqueado] = useState(false);
-  const [estaOnline, setEstaOnline] = useState(
-    typeof navigator !== "undefined" ? navigator.onLine : true
-  );
+  const [estaOnline, setEstaOnline] = useState(true);
 
   useEffect(() => {
     const actualizar = () => setEstaOnline(navigator.onLine);
+    actualizar();
     window.addEventListener("online", actualizar);
     window.addEventListener("offline", actualizar);
     return () => {

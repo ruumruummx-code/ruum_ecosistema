@@ -1,0 +1,25 @@
+.frame[data-conductor-screen] {
+  position: fixed;
+  top: calc(var(--conductor-visible-top, 0px) + env(safe-area-inset-top, 0px));
+  bottom: max(var(--conductor-visible-bottom, 0px), var(--conductor-shell-bottom-height, 0px));
+  left: 50%; transform: translateX(-50%);
+  width: min(100%, var(--conductor-operation-width, 440px));
+  max-height: var(--conductor-visible-height, 100dvh);
+  min-height: 0; display: flex; flex-direction: column; overflow: hidden;
+  background: var(--conductor-surface); color: var(--conductor-primary);
+  font-family: var(--font-body); font-size: 16px; line-height: 1.5;
+}
+.header { flex: 0 0 auto; min-width: 0; padding: 8px 16px; border-bottom: 1px solid var(--conductor-border); }
+.body { flex: 1; min-width: 0; min-height: 0; overflow: auto; overscroll-behavior: contain; padding: 16px; scroll-padding-block: 16px; overflow-wrap: anywhere; }
+.flow { display: flex; min-width: 0; flex-direction: column; gap: 16px; }
+.flow > * { flex-shrink: 0; min-width: 0; }
+.footer { flex: 0 0 auto; padding: 8px 16px max(8px, env(safe-area-inset-bottom)); border-top: 1px solid var(--conductor-border); background: var(--conductor-surface); }
+.frame :is(button, input:not([type=checkbox]):not([type=radio]):not([type=file]), select, summary) { min-height: 48px; min-width: 48px; }
+.frame :is(input, select, textarea) { font-size: 16px; }
+.frame a { min-height: 48px; min-width: 48px; }
+.header a, .footer a, .flow > a { display: inline-flex; align-items: center; }
+.frame :is(a, button, input, select, textarea):focus-visible, .body:focus-visible { outline: 3px solid var(--conductor-focus); outline-offset: -3px; }
+.pageHeader a { display: inline-flex; align-items: center; gap: 8px; font-size: 14px; color: var(--conductor-action); }
+.pageHeader h1 { margin: 0; font-size: 20px; line-height: 1.25; font-weight: 700; overflow-wrap: anywhere; }
+.pageHeader p { margin: 6px 0 0; font-size: 14px; color: var(--conductor-muted); }
+@media (max-height: 500px) { .header { padding-block: 4px; } .body { padding-block: 12px; } }

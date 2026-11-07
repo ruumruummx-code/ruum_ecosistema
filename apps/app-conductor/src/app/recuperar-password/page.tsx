@@ -1,8 +1,8 @@
 "use client";
+import { ConductorScreen, ConductorPageHeader } from "../components/ConductorScreen";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
-import { Button, Field, Aviso, LogoMarca } from "@ruum/ui";
+import { Button, Field, Aviso } from "@ruum/ui";
 import { crearClienteNavegador, tieneSupabaseConfigurado, obtenerOriginApp } from "../../lib/supabase-browser";
 import { traducirErrorAuth } from "@ruum/shared/utils";
 
@@ -43,17 +43,8 @@ export default function PaginaRecuperarPasswordConductor() {
   }
 
   return (
-    <div className="conductor-auth-shell flex items-center justify-center px-4 py-10 sm:px-6">
-      <section className="conductor-auth-card p-6 sm:p-8" aria-labelledby="titulo-recuperar">
-        <div className="flex items-center gap-3">
-          <LogoMarca tamano={34} color="signal" mostrarRespaldo={false} subtitulo="Conductor" />
-        </div>
-        <p className="mt-2 font-body text-[11px] font-medium tracking-wide text-text-tertiary">Seguridad, evidencia y trazabilidad en cada viaje.</p>
-        <div className="conductor-ruta-divider mt-3" aria-hidden />
-
-        <h1 id="titulo-recuperar" className="mt-6 font-display text-2xl font-bold tracking-tight text-text-primary">
-          Recuperar contraseña
-        </h1>
+    <ConductorScreen variant="access" label="Recuperar acceso" header={<ConductorPageHeader title="Recuperar contraseña" backHref="/login" backLabel="Volver al inicio de sesión" />} footer={!enviado && <Button type="submit" form="conductor-recovery" loading={enviando} className="w-full">Enviar enlace</Button>}>
+      <section aria-label="Solicitud de enlace de recuperación">
          <p className="mt-1 font-body text-sm leading-6 text-text-secondary">
            Escribe el correo con el que te registraste y te enviamos un enlace seguro.
          </p>
@@ -80,7 +71,7 @@ export default function PaginaRecuperarPasswordConductor() {
             </button>
           </div>
         ) : (
-          <form className="mt-7 grid gap-4" onSubmit={enviar}>
+          <form id="conductor-recovery" className="mt-7 grid gap-4" onSubmit={enviar}>
             <Field
               etiqueta="Correo electrónico"
               type="email"
@@ -94,18 +85,10 @@ export default function PaginaRecuperarPasswordConductor() {
                 <Aviso tono="danger">{error}</Aviso>
               </output>
             )}
-            <Button type="submit" loading={enviando} className="mt-2 w-full">
-              Enviar enlace
-            </Button>
           </form>
         )}
 
-        <p className="mt-6 text-center font-body text-sm text-text-tertiary/80">
-          <Link href="/login" className="font-semibold text-route-action hover:underline">
-            ← Volver al inicio de sesión
-          </Link>
-        </p>
       </section>
-    </div>
+    </ConductorScreen>
   );
 }

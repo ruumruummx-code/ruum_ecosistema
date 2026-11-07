@@ -27,24 +27,24 @@ export function TabItinerario({
         </div>
         <div className="flex flex-col justify-between py-0.5 min-w-0">
           <div className="flex flex-col mb-3">
-            <span className="font-display text-[9px] font-bold text-emerald-600 dark:text-emerald-400 tracking-widest uppercase">
+            <span className="font-display text-sm font-bold text-emerald-600 dark:text-emerald-400 tracking-normal uppercase">
               PUNTO DE RECOLECCIÓN
             </span>
             <span className="font-display text-base font-black text-text-primary leading-tight mt-0.5">
               {origenCiudad}
             </span>
-            <span className="font-body text-xs text-text-secondary mt-0.5 leading-snug">
+            <span className="font-body text-sm text-text-secondary mt-0.5 leading-snug">
               {origenDir}
             </span>
           </div>
           <div className="flex flex-col">
-            <span className="font-display text-[9px] font-bold text-route-action tracking-widest uppercase">
+            <span className="font-display text-sm font-bold text-route-action tracking-normal uppercase">
               PUNTO DE ENTREGA
             </span>
             <span className="font-display text-base font-black text-text-primary leading-tight mt-0.5">
               {destinoCiudad}
             </span>
-            <span className="font-body text-xs text-text-secondary mt-0.5 leading-snug">
+            <span className="font-body text-sm text-text-secondary mt-0.5 leading-snug">
               {destinoDir}
             </span>
           </div>
@@ -55,7 +55,7 @@ export function TabItinerario({
 
       <div className="grid grid-cols-2 gap-4">
         <div className="flex flex-col">
-          <span className="text-[10px] text-text-tertiary font-bold uppercase tracking-widest">
+          <span className="text-sm text-text-tertiary font-bold uppercase tracking-normal">
             Distancia estimada
           </span>
           <span className="font-display text-base font-black text-text-primary mt-0.5 tabular-nums">
@@ -63,7 +63,7 @@ export function TabItinerario({
           </span>
         </div>
         <div className="flex flex-col text-right">
-          <span className="text-[10px] text-text-tertiary font-bold uppercase tracking-widest">
+          <span className="text-sm text-text-tertiary font-bold uppercase tracking-normal">
             Tiempo estimado
           </span>
           <span className="font-display text-base font-black text-text-primary mt-0.5 tabular-nums">

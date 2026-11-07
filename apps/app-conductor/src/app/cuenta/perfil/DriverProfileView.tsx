@@ -15,7 +15,7 @@ type Props = {
 };
 export function DriverProfileView(props: Props) {
   const file = useRef<HTMLInputElement>(null);
-  return <DriverDetailsShell kind="profile">
+  return <DriverDetailsShell kind="profile" footer={<button type="button" className={styles.primary} onClick={props.onSave} disabled={props.saveDisabled} aria-busy={props.busy}>{props.busy ? "Guardando cambios…" : "Guardar cambios"}<span aria-hidden="true">→</span></button>}>
     <div className={styles.heading}><h1>Perfil del Conductor</h1><p>Administra tus datos personales y contactos operativos.</p></div>
     <section className={styles.identityCard} aria-label="Identificación del conductor">
       <div className={styles.avatar}>{props.photo ? <Image src={props.photo} alt="Fotografía del conductor" width={70} height={70} unoptimized /> : props.initials}</div>
@@ -26,6 +26,6 @@ export function DriverProfileView(props: Props) {
     <Tabs tabs={[{id:"identidad",etiqueta:"Identidad"},{id:"documentacion",etiqueta:"Documentación"},{id:"ubicacion",etiqueta:"Ubicación"}]} value={props.tab} onSeleccion={id=>props.onTab(id as typeof props.tab)} etiqueta="Secciones del perfil" renderPanel={()=>( <div className={styles.fieldsArea}   >{props.children}</div> )} />
 
     {props.feedback}
-    <button type="button" className={styles.primary} onClick={props.onSave} disabled={props.saveDisabled} aria-busy={props.busy}>{props.busy ? "Guardando cambios…" : "Guardar cambios"}<span aria-hidden="true">→</span></button>
+
   </DriverDetailsShell>;
 }

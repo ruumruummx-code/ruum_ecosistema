@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
+import { ConductorScreen, ConductorPageHeader } from "../../../components/ConductorScreen";
+import styles from "./details-tabs.module.css";
 import { ETIQUETA_TIPO_VEHICULO } from "@ruum/shared/constants";
 import type { Database } from "@ruum/shared/types";
 import { crearClienteNavegador } from "@/lib/supabase-browser";
@@ -148,18 +149,9 @@ export function TripDetailsTabs({ pasaporte }: { pasaporte: PasaporteRow }) {
   const depositoPago = Math.max(0, precioBasePago + bonosPago + ajustesPago - tasaPago + reembolsoPago);
 
   return (
-    <div className="mx-auto w-full max-w-md bg-surface min-h-screen flex flex-col text-text-primary pb-6 px-4">
-      {/* HEADER */}
-      <header className="flex items-center justify-between py-4 border-b border-border/15">
-        <Link href={`/viajes/${trasladoId}`} className="p-2 -ml-2 min-h-[44px] min-w-[44px] flex items-center justify-center text-text-secondary hover:text-text-primary transition-colors rounded-full hover:bg-surface-elevated">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="19" y1="12" x2="5" y2="12" /><polyline points="12 19 5 12 12 5" /></svg>
-        </Link>
-        <span className="font-display text-xs font-black uppercase tracking-widest text-text-primary">DETALLES DEL TRASLADO</span>
-        <div className="w-10" />
-      </header>
-
-      {/* TABS */}
-      <div className="mt-4 flex w-full rounded-full border border-border/20 bg-surface-elevated p-1 select-none overflow-x-auto no-scrollbar">
+    <div data-trip-stage><ConductorScreen variant="detail" label="Expediente del traslado" header={<>
+      <ConductorPageHeader title="Detalles del traslado" backHref={`/viajes/${trasladoId}`} backLabel="Volver al traslado" />
+      <div className={styles.tabs} role="tablist" aria-label="Secciones del expediente">
         {[
           { id: "itinerario", label: "Ruta" },
           { id: "vehiculo", label: "Vehículo" },
@@ -168,21 +160,27 @@ export function TripDetailsTabs({ pasaporte }: { pasaporte: PasaporteRow }) {
         ].map((tab) => (
           <button
             key={tab.id}
+            id={`tab-${tab.id}`} role="tab" aria-selected={activeTab === tab.id} aria-controls={`panel-${tab.id}`}
+            tabIndex={activeTab === tab.id ? 0 : -1}
+            onKeyDown={event => {
+              const ids: TabId[] = ["itinerario", "vehiculo", "pago", "operacion"];
+              const index = ids.indexOf(activeTab);
+              const next = event.key === "ArrowRight" ? (index + 1) % 4 : event.key === "ArrowLeft" ? (index + 3) % 4 : event.key === "Home" ? 0 : event.key === "End" ? 3 : null;
+              if (next == null) return;
+              event.preventDefault(); const target = ids.at(next)!; setActiveTab(target); document.getElementById(`tab-${target}`)?.focus();
+            }}
             type="button"
             onClick={() => setActiveTab(tab.id as TabId)}
-            className={`flex-1 rounded-full px-3 py-2 text-center text-[10px] font-black uppercase tracking-widest transition-all duration-200 cursor-pointer min-w-max ${
-              activeTab === tab.id
-                ? "bg-route-action text-white shadow-md"
-                : "text-text-secondary hover:text-text-primary"
-            }`}
           >
             {tab.label}
           </button>
         ))}
       </div>
 
-      {/* CONTENT */}
-      <div className="mt-5 flex-1 animate-in fade-in slide-in-from-bottom-2 duration-300">
+    </>}>
+      <div>
+        {/* eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex -- Panel de pestaña accesible con teclado. */}
+        <div id="panel-itinerario" role="tabpanel" aria-labelledby="tab-itinerario" hidden={activeTab !== "itinerario"} tabIndex={0}>
         {activeTab === "itinerario" && (
           <TabItinerario
             origenCiudad={origenCiudad}
@@ -193,7 +191,10 @@ export function TripDetailsTabs({ pasaporte }: { pasaporte: PasaporteRow }) {
             tiempoEstimado={tiempoEstimado}
           />
         )}
+        </div>
 
+        {/* eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex -- Panel de pestaña accesible con teclado. */}
+        <div id="panel-vehiculo" role="tabpanel" aria-labelledby="tab-vehiculo" hidden={activeTab !== "vehiculo"} tabIndex={0}>
         {activeTab === "vehiculo" && (
           <TabVehiculo
             vehiculo={vehiculo}
@@ -214,7 +215,10 @@ export function TripDetailsTabs({ pasaporte }: { pasaporte: PasaporteRow }) {
             setCopiado={setCopiado}
           />
         )}
+        </div>
 
+        {/* eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex -- Panel de pestaña accesible con teclado. */}
+        <div id="panel-pago" role="tabpanel" aria-labelledby="tab-pago" hidden={activeTab !== "pago"} tabIndex={0}>
         {activeTab === "pago" && (
           <TabPago
             depositoPago={depositoPago}
@@ -229,7 +233,10 @@ export function TripDetailsTabs({ pasaporte }: { pasaporte: PasaporteRow }) {
             setCopiado={setCopiado}
           />
         )}
+        </div>
 
+        {/* eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex -- Panel de pestaña accesible con teclado. */}
+        <div id="panel-operacion" role="tabpanel" aria-labelledby="tab-operacion" hidden={activeTab !== "operacion"} tabIndex={0}>
         {activeTab === "operacion" && (
           <TabOperacion
             folio={folio}
@@ -250,7 +257,8 @@ export function TripDetailsTabs({ pasaporte }: { pasaporte: PasaporteRow }) {
             setCopiado={setCopiado}
           />
         )}
+        </div>
       </div>
-    </div>
+    </ConductorScreen></div>
   );
 }

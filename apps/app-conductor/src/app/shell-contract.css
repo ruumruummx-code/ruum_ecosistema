@@ -1,0 +1,42 @@
+/* Contrato de fase 2. Los adaptadores heredados usan la misma área visible. */
+:root {
+  --conductor-touch-size: 48px;
+  --conductor-text-body: 16px;
+  --conductor-text-support: 14px;
+  --trip-visible-top: var(--conductor-visible-top, 0px);
+  --trip-visible-height: var(--conductor-visible-height, 100dvh);
+  --trip-keyboard-inset: var(--conductor-visible-bottom, 0px);
+  --trip-nav-reserve: var(--conductor-shell-bottom-height, 0px);
+}
+html:has([data-conductor-screen]), html:has([data-conductor-screen]) body { height: 100%; overflow: hidden; }
+html:has([data-conductor-screen]) .conductor-safe-content { min-height: 0; padding: 0; }
+html[data-conductor-keyboard="true"] { --trip-nav-reserve: 0px; }
+html[data-conductor-keyboard="true"] :is([data-conductor-mobile-nav], [data-conductor-local-nav]) { display: none; }
+.conductor-local-nav { flex-shrink: 0; border-top: 1px solid var(--conductor-border); background: var(--conductor-surface); padding: 4px 8px max(8px, env(safe-area-inset-bottom)); }
+.conductor-bottom-nav a, .conductor-local-nav a { min-width: 48px; min-height: 56px; }
+[data-trip-safety-bar] { flex-wrap: wrap; }
+[data-trip-safety-bar] :is(a, button) { min-height: 48px; min-width: 48px; font-size: 14px; }
+html:has([data-opportunity-detail]) [data-trip-safety-bar] > :is(a, button),
+html:has([data-opportunity-detail]) [data-trip-safety-bar] #emergencia > div > button { min-height: 48px; font-size: 14px; }
+/* Dos filas antes que desplazar o recortar el control de emergencia. */
+[data-trip-header] { display: grid; grid-template-columns: 48px minmax(0, 1fr); gap: 8px; min-width: 0; }
+[data-trip-header] > :is(span, h1) { min-width: 0; white-space: normal; overflow-wrap: anywhere; }
+[data-trip-header] > div:last-child { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+[data-trip-header] > :nth-child(3):is(button) { grid-column: 1; }
+[data-trip-header] :is(a, button) { min-height: 48px; min-width: 48px; height: auto; white-space: normal; overflow-wrap: anywhere; }
+[data-trip-header] #emergencia button { width: 100%; }
+[data-trip-primary] button { min-height: 48px; font-size: 14px; }
+/* El marco se adapta al teclado; las etapas conservan sus estados y datos. */
+html[data-conductor-keyboard="true"] [data-trip-scroll] > :is([data-assigned-trip], [data-en-camino-origen], [data-recibe-vehiculo], [data-inicia-trayecto], [data-en-traslado], [data-cierre-traslado]) { height: 100%; max-height: 100%; }
+
+[data-trip-header="brand"] { grid-template-columns: minmax(0, 1fr); }
+[data-trip-header="brand"] > a { justify-self: start; }
+[data-trip-header="brand"] img { max-width: 150px; height: auto; }
+[data-trip-header] #emergencia > div > button { min-height: 48px; min-width: 48px; }
+
+/* Las etapas de fase 3 usan ConductorScreen; el marco anterior queda como
+   adaptador de las subrutas y formularios todavía pendientes de fase 4. */
+[data-trip-frame]:has([data-trip-stage]) { display: contents; position: static; transform: none; }
+[data-trip-frame]:has([data-trip-stage]) > [data-trip-safety-bar],
+[data-trip-frame]:has([data-trip-stage]) > [data-trip-dock] { display: none; }
+[data-trip-frame]:has([data-trip-stage]) > [data-trip-scroll] { display: contents; }

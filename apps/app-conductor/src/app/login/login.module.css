@@ -13,9 +13,9 @@
 
 .screen {
   position: fixed;
-  inset: var(--login-top, 0px) 0 auto;
+  inset: var(--conductor-visible-top, 0px) 0 auto;
   box-sizing: border-box;
-  height: var(--login-height, 100dvh);
+  height: var(--conductor-visible-height, 100dvh);
   overflow: hidden;
   background: #fff;
   color: #071d49;

@@ -45,6 +45,7 @@ function getEstadoCardInfo(estado: string) {
         descripcion: "Entrega la unidad y registra la evidencia final."
       };
     case "entrega_confirmada":
+      return { status: "active" as const, titulo: "CIERRE PENDIENTE", descripcion: "Revisa y finaliza el servicio." };
     case "servicio_cerrado":
       return {
         status: "success" as const,
@@ -52,11 +53,7 @@ function getEstadoCardInfo(estado: string) {
         descripcion: "El traslado ha sido concluido."
       };
     default:
-      return {
-        status: "pending" as const,
-        titulo: "PENDIENTE DE INICIO",
-        descripcion: "Dirígete al punto de origen."
-      };
+      return { status: "pending" as const, titulo: "CONSULTAR ESTADO", descripcion: "Revisa el estado del traslado antes de continuar." };
   }
 }
 
@@ -93,7 +90,8 @@ export function AcceptedTripCard({
   mapPreview,
 }: AcceptedTripCardProps) {
   const cardInfo = getEstadoCardInfo(viaje.estado || "");
-  if (compact) return <TripPreviewCard viaje={viaje} detalle={detalle} hrefDetalle={hrefDetalle} mapPreview={mapPreview} accepted={{ label: cardInfo.titulo, tone: cardInfo.status, onReject: () => onReject(viaje) }} />;
+  const readOnly = !["conductor_asignado", "conductor_en_camino_al_origen", "conductor_en_punto_de_recoleccion", "verificacion_vehiculo_en_proceso", "evidencia_inicial_en_proceso", "evidencia_inicial_completada", "vehiculo_recibido", "traslado_en_curso", "llegada_a_destino", "evidencia_final_en_proceso", "evidencia_final_completada", "entrega_confirmada"].includes(viaje.estado || "");
+  if (compact) return <TripPreviewCard viaje={viaje} detalle={detalle} hrefDetalle={hrefDetalle} mapPreview={mapPreview} accepted={{ label: cardInfo.titulo, tone: cardInfo.status, readOnly, onReject: !readOnly ? () => onReject(viaje) : undefined }} />;
   const folio = viaje.traslado_id ? viaje.traslado_id.slice(0, 8).toUpperCase() : "POR CONFIRMAR";
   const ganancia = viaje.ganancia_conductor != null
     ? `$${viaje.ganancia_conductor.toLocaleString("es-MX", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`

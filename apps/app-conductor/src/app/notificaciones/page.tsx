@@ -1,4 +1,5 @@
 "use client";
+import { ConductorScreen } from "../components/ConductorScreen";
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import Image from "next/image";
@@ -91,13 +92,13 @@ export default function CentroNotificaciones() {
   const esVacio = !cargando && !errorCarga && visibles.length === 0;
 
   return (
-    <div className={styles.screen}>
+    <ConductorScreen variant="list" label="Avisos del conductor" header={<>
       <header className={styles.appBar}>
         <Link href="/panel" aria-label="Ruum Ruum, inicio" className={styles.brand}><Image src="/imagenes/ruum-logo.svg" alt="Ruum Ruum" width={170} height={55} priority /></Link>
         <Link href="/cuenta" className={styles.profile} aria-label="Abrir cuenta"><svg width="27" height="27" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round"><circle cx="12" cy="8" r="3.6" /><path d="M4.5 20c0-3.7 3.3-6.2 7.5-6.2s7.5 2.5 7.5 6.2" /></svg></Link>
       </header>
 
-      <div className={styles.content}>
+
         <section className={styles.heading} aria-labelledby="titulo-notificaciones">
           <h1 id="titulo-notificaciones">Notificaciones y Avisos</h1>
           <p>Tus avisos y alertas operativas permanecen guardados en este centro.</p>
@@ -110,6 +111,8 @@ export default function CentroNotificaciones() {
           })}
         </nav>
 
+
+</>}>
         {errorCarga && <div className={styles.readError} role="alert"><p>{errorCarga}</p><button type="button" onClick={() => void cargar()}>Reintentar carga de avisos</button></div>}
 
         {esVacio ? (
@@ -136,8 +139,6 @@ export default function CentroNotificaciones() {
             </article>)}
           </section>
         )}
-      </div>
-
-      </div>
+      </ConductorScreen>
   );
 }

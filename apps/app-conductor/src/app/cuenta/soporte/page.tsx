@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { Card } from "@ruum/ui";
 import { CONTACTOS_SOPORTE_CONDUCTOR } from "@/lib/contactos-soporte";
-import { CuentaHeader } from "../CuentaHeader";
+import { ConductorScreen, ConductorPageHeader } from "../../components/ConductorScreen";
 
 export default function PaginaSoporteCuenta() {
   const whatsapp = CONTACTOS_SOPORTE_CONDUCTOR.soporte.whatsapp;
@@ -12,11 +12,8 @@ export default function PaginaSoporteCuenta() {
   const bajaCuenta = CONTACTOS_SOPORTE_CONDUCTOR.soporte.bajaCuenta;
 
   return (
-    <div className="mx-auto w-full max-w-3xl px-4 py-8 sm:px-6 sm:py-12">
-      <CuentaHeader
-        titulo="Centro de Soporte"
-        descripcion="Canales oficiales de asistencia operativa, ayuda en ruta y gestión de tu cuenta."
-      />
+    <ConductorScreen variant="detail" label="Contenido de Centro de Soporte" header={<ConductorPageHeader title="Centro de Soporte" description="Canales oficiales de asistencia operativa, ayuda en ruta y gestión de tu cuenta." />}>
+
 
       <div className="mt-6 grid gap-6">
         {/* 3. Banner Destacado Superior: Contexto de Ayuda en Viaje Actual */}
@@ -179,6 +176,6 @@ export default function PaginaSoporteCuenta() {
           </a>
         </Card>
       </div>
-    </div>
+    </ConductorScreen>
   );
 }

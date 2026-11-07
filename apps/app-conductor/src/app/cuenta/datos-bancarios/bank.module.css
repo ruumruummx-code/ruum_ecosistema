@@ -27,3 +27,7 @@
   .form > div > div { padding-block: 2px; }
   .form[data-authorized="true"] ~ .warning, .form[data-authorized="true"] ~ .seal { display: none; }
 }
+
+.form > div { grid-auto-rows: auto; }
+.form > div > div { padding-block: 12px; }
+.warning p, .seal { font-size: 14px; line-height: 1.5; }

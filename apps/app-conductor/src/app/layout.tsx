@@ -2,6 +2,8 @@ import type { Metadata, Viewport } from "next";
 import { headers } from "next/headers";
 import { TextInputUppercaseBridge } from "@ruum/ui";
 import "./globals.css";
+import "./shell-contract.css";
+import { ConductorShellBridge } from "./components/ConductorShellBridge";
 import { NavegacionConductor } from "./NavegacionConductor";
 import { ViajeActivoProvider } from "./ViajeActivoContext";
 import { ModoCalleActivador } from "./ModoCalleActivador";
@@ -49,6 +51,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           <ErrorBoundaryConductor scope="global">
             <ViajeActivoProvider>
               <SincronizadorEvidenciaOffline />
+              <ConductorShellBridge />
               <NavegacionConductor />
               <ModoCalleActivador />
               <EstadoSincronizacionGlobal />

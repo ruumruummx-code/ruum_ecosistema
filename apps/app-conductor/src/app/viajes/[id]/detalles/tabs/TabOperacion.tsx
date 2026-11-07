@@ -44,14 +44,14 @@ export function TabOperacion({
       {/* Cabecera de Operación */}
       <div className="flex items-center justify-between">
         <div className="flex flex-col">
-          <span className="text-[10px] text-text-tertiary font-extrabold uppercase tracking-widest">
+          <span className="text-sm text-text-tertiary font-extrabold uppercase tracking-normal">
             Operación y Despacho
           </span>
           <span className="font-display text-lg font-black text-text-primary mt-0.5">
             #TR-{folio}
           </span>
         </div>
-        <span className="px-2.5 py-1 rounded-lg bg-surface border border-border/30 text-[10px] font-black text-route-action uppercase tracking-wider">
+        <span className="px-2.5 py-1 rounded-lg bg-surface border border-border/30 text-sm font-black text-route-action uppercase tracking-wider">
           Certificado
         </span>
       </div>
@@ -59,52 +59,52 @@ export function TabOperacion({
       {/* Grid de tiempos y ventanas operativas */}
       <div className="grid grid-cols-2 gap-2.5 mt-1">
         <div className="flex flex-col bg-surface p-3 rounded-xl border border-border/15">
-          <span className="text-[9px] text-text-tertiary font-bold uppercase tracking-widest">
+          <span className="text-sm text-text-tertiary font-bold uppercase tracking-normal">
             # Traslado
           </span>
-          <span className="font-mono text-xs font-black mt-0.5 text-text-primary">
+          <span className="font-mono text-sm font-black mt-0.5 text-text-primary">
             #TR-{folio}
           </span>
         </div>
 
         <div className="flex flex-col bg-surface p-3 rounded-xl border border-border/15">
-          <span className="text-[9px] text-text-tertiary font-bold uppercase tracking-widest">
+          <span className="text-sm text-text-tertiary font-bold uppercase tracking-normal">
             Fecha de Traslado
           </span>
-          <span className="font-semibold text-xs mt-0.5 text-text-primary capitalize">
+          <span className="font-semibold text-sm mt-0.5 text-text-primary capitalize">
             {fecha}
           </span>
         </div>
 
         <div className="flex flex-col bg-surface p-3 rounded-xl border border-border/15">
-          <span className="text-[9px] text-text-tertiary font-bold uppercase tracking-widest">
+          <span className="text-sm text-text-tertiary font-bold uppercase tracking-normal">
             Hora de Inicio
           </span>
-          <span className="font-semibold text-xs mt-0.5 text-text-primary tabular-nums">
+          <span className="font-semibold text-sm mt-0.5 text-text-primary tabular-nums">
             {horaInicio}
           </span>
         </div>
 
         <div className="flex flex-col bg-surface p-3 rounded-xl border border-border/15">
-          <span className="text-[9px] text-text-tertiary font-bold uppercase tracking-widest">
+          <span className="text-sm text-text-tertiary font-bold uppercase tracking-normal">
             Ventana de Recolección
           </span>
-          <span className="font-semibold text-xs mt-0.5 text-text-primary">
+          <span className="font-semibold text-sm mt-0.5 text-text-primary">
             {ventanaRecoleccion ?? "No especificada"}
           </span>
-          <span className="font-body text-[10px] text-text-tertiary">
+          <span className="font-body text-sm text-text-tertiary">
             Según formulario de solicitud
           </span>
         </div>
 
         <div className="flex flex-col col-span-2 bg-surface p-3 rounded-xl border border-border/15">
-          <span className="text-[9px] text-text-tertiary font-bold uppercase tracking-widest">
+          <span className="text-sm text-text-tertiary font-bold uppercase tracking-normal">
             Ventana de Entrega
           </span>
-          <span className="font-semibold text-xs mt-0.5 text-text-primary">
+          <span className="font-semibold text-sm mt-0.5 text-text-primary">
             {ventanaEntrega ?? "No especificada"}
           </span>
-          <span className="font-body text-[10px] text-text-tertiary">
+          <span className="font-body text-sm text-text-tertiary">
             Según formulario de solicitud
           </span>
         </div>
@@ -114,7 +114,7 @@ export function TabOperacion({
 
       {/* Directorio de Contactos con Llamada y WhatsApp */}
       <div className="flex flex-col gap-3">
-        <span className="text-[10px] text-text-tertiary font-extrabold uppercase tracking-widest">
+        <span className="text-sm text-text-tertiary font-extrabold uppercase tracking-normal">
           Contactos Operativos
         </span>
 
@@ -125,13 +125,13 @@ export function TabOperacion({
               {solicitanteNombre.charAt(0).toUpperCase()}
             </div>
             <div className="flex flex-col min-w-0">
-              <span className="text-[9px] text-route-action font-bold uppercase tracking-wider">
+              <span className="text-sm text-route-action font-bold uppercase tracking-wider">
                 Solicitante del Servicio
               </span>
-              <span className="font-bold text-xs text-text-primary truncate">
+              <span className="font-bold text-sm text-text-primary break-words">
                 {solicitanteNombre}
               </span>
-              <span className="font-mono text-[11px] text-text-secondary flex items-center gap-1">
+              <span className="font-mono text-sm text-text-secondary flex items-center gap-1">
                 {solicitanteTelefono || "Teléfono no disponible"}
                 {solicitanteTelefono && (
                   <button
@@ -141,7 +141,7 @@ export function TabOperacion({
                       setCopiado("sol");
                       setTimeout(() => setCopiado(null), 1200);
                     }}
-                    className="text-[10px] font-bold text-route-action hover:underline px-1"
+                    className="text-sm font-bold text-route-action hover:underline px-1"
                   >
                     {copiado === "sol" ? "Copiado" : "Copiar"}
                   </button>
@@ -187,13 +187,13 @@ export function TabOperacion({
               {entregaNombre.charAt(0).toUpperCase()}
             </div>
             <div className="flex flex-col min-w-0">
-              <span className="text-[9px] text-emerald-600 dark:text-emerald-400 font-bold uppercase tracking-wider">
+              <span className="text-sm text-emerald-600 dark:text-emerald-400 font-bold uppercase tracking-wider">
                 Persona quien Entrega (Origen)
               </span>
-              <span className="font-bold text-xs text-text-primary truncate">
+              <span className="font-bold text-sm text-text-primary break-words">
                 {entregaNombre}
               </span>
-              <span className="font-mono text-[11px] text-text-secondary flex items-center gap-1">
+              <span className="font-mono text-sm text-text-secondary flex items-center gap-1">
                 {entregaTelefono || "Teléfono no disponible"}
                 {entregaTelefono && (
                   <button
@@ -203,7 +203,7 @@ export function TabOperacion({
                       setCopiado("ent");
                       setTimeout(() => setCopiado(null), 1200);
                     }}
-                    className="text-[10px] font-bold text-route-action hover:underline px-1"
+                    className="text-sm font-bold text-route-action hover:underline px-1"
                   >
                     {copiado === "ent" ? "Copiado" : "Copiar"}
                   </button>
@@ -249,13 +249,13 @@ export function TabOperacion({
               {recepcionNombre.charAt(0).toUpperCase()}
             </div>
             <div className="flex flex-col min-w-0">
-              <span className="text-[9px] text-text-secondary font-bold uppercase tracking-wider">
+              <span className="text-sm text-text-secondary font-bold uppercase tracking-wider">
                 Persona quien Recibe (Destino)
               </span>
-              <span className="font-bold text-xs text-text-primary truncate">
+              <span className="font-bold text-sm text-text-primary break-words">
                 {recepcionNombre}
               </span>
-              <span className="font-mono text-[11px] text-text-secondary flex items-center gap-1">
+              <span className="font-mono text-sm text-text-secondary flex items-center gap-1">
                 {recepcionTelefono || "Teléfono no disponible"}
                 {recepcionTelefono && (
                   <button
@@ -265,7 +265,7 @@ export function TabOperacion({
                       setCopiado("rec");
                       setTimeout(() => setCopiado(null), 1200);
                     }}
-                    className="text-[10px] font-bold text-route-action hover:underline px-1"
+                    className="text-sm font-bold text-route-action hover:underline px-1"
                   >
                     {copiado === "rec" ? "Copiado" : "Copiar"}
                   </button>
@@ -309,7 +309,7 @@ export function TabOperacion({
 
       {/* Notas Operativas: Recogida y Entrega */}
       <div className="flex flex-col gap-3">
-        <span className="text-[10px] text-text-tertiary font-extrabold uppercase tracking-widest">
+        <span className="text-sm text-text-tertiary font-extrabold uppercase tracking-normal">
           Notas y Referencias
         </span>
 
@@ -317,11 +317,11 @@ export function TabOperacion({
         <div className="flex flex-col bg-surface p-3.5 rounded-2xl border border-border/15">
           <div className="flex items-center gap-1.5 mb-1">
             <span className="h-2 w-2 rounded-full bg-emerald-500" />
-            <span className="text-[9px] text-emerald-600 dark:text-emerald-400 font-bold uppercase tracking-widest">
+            <span className="text-sm text-emerald-600 dark:text-emerald-400 font-bold uppercase tracking-normal">
               Notas de Recogida (Origen)
             </span>
           </div>
-          <span className="font-body text-xs text-text-secondary leading-relaxed whitespace-pre-wrap">
+          <span className="font-body text-sm text-text-secondary leading-relaxed whitespace-pre-wrap">
             {notasRecogida}
           </span>
         </div>
@@ -330,11 +330,11 @@ export function TabOperacion({
         <div className="flex flex-col bg-surface p-3.5 rounded-2xl border border-border/15">
           <div className="flex items-center gap-1.5 mb-1">
             <span className="h-2 w-2 rounded-full bg-route-action" />
-            <span className="text-[9px] text-route-action font-bold uppercase tracking-widest">
+            <span className="text-sm text-route-action font-bold uppercase tracking-normal">
               Notas de Entrega (Destino)
             </span>
           </div>
-          <span className="font-body text-xs text-text-secondary leading-relaxed whitespace-pre-wrap">
+          <span className="font-body text-sm text-text-secondary leading-relaxed whitespace-pre-wrap">
             {notasEntrega}
           </span>
         </div>

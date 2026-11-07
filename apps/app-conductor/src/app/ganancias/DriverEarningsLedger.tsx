@@ -1,4 +1,5 @@
 "use client";
+import { ConductorScreen, ConductorPageHeader } from "../components/ConductorScreen";
 
 import { useState } from "react";
 import Link from "next/link";
@@ -57,26 +58,8 @@ export default function PaginaGanancias() {
   const montoPendiente = resumen.depositoAcumulado;
 
   return (
-    <div className="mx-auto max-w-5xl px-4 py-6 pb-24 sm:px-6 sm:py-8 sm:pb-12">
-      {/* Header */}
-      <header className="flex items-start justify-between gap-3 border-b border-border/40 pb-5">
-        <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-2">
-            <Link href="/ganancias" className="font-body text-xs text-text-tertiary hover:underline">
-              ← Volver a Mis ganancias
-            </Link>
-          </div>
-          <h1 className="mt-1 font-display text-2xl sm:text-3xl font-bold tracking-tight text-text-primary">
-            Mis ganancias y pagos
-          </h1>
-          <p className="mt-1 font-body text-sm text-text-secondary">
-            Evidencia financiera de cada traslado. Trazabilidad y cierre documentado.
-          </p>
-          <div className="conductor-ruta-divider mt-3 max-w-[280px]" aria-hidden />
-        </div>
-
-        <div className="flex shrink-0 items-center gap-2">
-          <button
+    <ConductorScreen variant="list" label="Historial de ganancias y pagos" header={<ConductorPageHeader title="Mis ganancias y pagos" backHref="/ganancias" backLabel="Volver a Mis ganancias" />}>
+      <div className="flex justify-end"><button
             type="button"
             onClick={() => setSoporteAbierto(true)}
             aria-label="Ayuda y soporte operativo"
@@ -85,10 +68,7 @@ export default function PaginaGanancias() {
             <span className="font-display text-sm font-black" aria-hidden>
               ?
             </span>
-          </button>
-        </div>
-      </header>
-
+          </button></div>
       {error && (
         <div className="mt-6">
           <Aviso tono="danger">{error}</Aviso>
@@ -223,6 +203,6 @@ export default function PaginaGanancias() {
           onCerrar={() => setInfoSheetLocal(null)}
         />
       )}
-    </div>
+    </ConductorScreen>
   );
 }

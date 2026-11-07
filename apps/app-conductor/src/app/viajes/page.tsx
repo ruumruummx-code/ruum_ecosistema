@@ -438,8 +438,8 @@ export default function PaginaTraslados() {
           <button type="button" disabled={indiceTarjeta === listToRender.length - 1} onClick={() => setPaginaActual(indiceTarjeta + 1)}>Siguiente</button>
         </div>}
         <div key={item.viaje.traslado_id} className={styles.resultCard}>
-          {vista === "disponibles" ? <OfertaCard compact viaje={item.viaje} detalle={detalles[item.viaje.traslado_id ?? ""] ?? detalleFallback(item.viaje)} hrefDetalle={hrefDetalle(item.viaje)} mapPreview={modoMapa === "mapa" ? <TrasladosMapa Traslados={listToRender.map((it) => it.viaje)} onSelect={(viaje) => router.push(hrefDetalle(viaje))} vistaId={rutaActual} /> : undefined} />
-            : <AcceptedTripCard compact viaje={item.viaje} detalle={detalles[item.viaje.traslado_id ?? ""] ?? detalleFallback(item.viaje)} hrefDetalle={hrefDetalle(item.viaje)} onReject={setViajeParaRechazar} mapPreview={modoMapa === "mapa" ? <TrasladosMapa Traslados={listToRender.map((it) => it.viaje)} onSelect={(viaje) => router.push(hrefDetalle(viaje))} vistaId={rutaActual} /> : undefined} />}
+          {vista === "disponibles" ? <OfertaCard compact viaje={item.viaje} detalle={detalles[item.viaje.traslado_id ?? ""] ?? detalleFallback(item.viaje)} hrefDetalle={hrefDetalle(item.viaje)} mapPreview={modoMapa === "mapa" ? <TrasladosMapa onReturnToList={() => cambiarModo("lista")} Traslados={listToRender.map((it) => it.viaje)} onSelect={(viaje) => router.push(hrefDetalle(viaje))} vistaId={rutaActual} /> : undefined} />
+            : <AcceptedTripCard compact viaje={item.viaje} detalle={detalles[item.viaje.traslado_id ?? ""] ?? detalleFallback(item.viaje)} hrefDetalle={hrefDetalle(item.viaje)} onReject={setViajeParaRechazar} mapPreview={modoMapa === "mapa" ? <TrasladosMapa onReturnToList={() => cambiarModo("lista")} Traslados={listToRender.map((it) => it.viaje)} onSelect={(viaje) => router.push(hrefDetalle(viaje))} vistaId={rutaActual} /> : undefined} />}
         </div>
       </div> : undefined}
     </DriverTrasladosView>

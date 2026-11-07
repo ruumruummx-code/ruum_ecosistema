@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { usePathname } from "next/navigation";
 import { SafetyButton, useStreetMode } from "@ruum/ui";
 import { useViajeActivo } from "./ViajeActivoContext";
 
@@ -9,6 +10,7 @@ import { useViajeActivo } from "./ViajeActivoContext";
  * Botones ≥56px, texto ≥17px, botón de seguridad persistente ≤1 toque.
  */
 export function ModoCalleActivador() {
+  const pathname = usePathname();
   const { viajeActivo } = useViajeActivo();
   const activo = Boolean(viajeActivo);
   useStreetMode(activo);
@@ -20,6 +22,7 @@ export function ModoCalleActivador() {
     };
   }, [activo]);
 
-  if (!activo) return null;
+  // Las vistas de Traslados integran su propio acceso de seguridad en el marco.
+  if (!activo || pathname === "/viajes" || pathname.startsWith("/viajes/")) return null;
   return <SafetyButton />;
 }

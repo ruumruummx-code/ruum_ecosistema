@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { Card } from "@ruum/ui";
-import { CuentaHeader } from "../CuentaHeader";
+import { ConductorScreen, ConductorPageHeader } from "../../components/ConductorScreen";
 
 type DocumentoLegalId = "terminos" | "privacidad";
 
@@ -32,11 +32,8 @@ export default function PaginaLegalCuenta() {
   const [docAbierto, setDocAbierto] = useState<DocumentoLegalId | null>(null);
 
   return (
-    <div className="mx-auto w-full max-w-3xl px-4 py-8 sm:px-6 sm:py-12">
-      <CuentaHeader
-        titulo="Marco Legal y Privacidad"
-        descripcion="Consulta los términos operativos vigentes y el aviso de privacidad de tus datos personales."
-      />
+    <ConductorScreen variant="detail" label="Contenido de Marco Legal y Privacidad" header={<ConductorPageHeader title="Marco Legal y Privacidad" description="Consulta los términos operativos vigentes y el aviso de privacidad de tus datos personales." />}>
+
 
       <div className="mt-6 grid gap-6">
         <Card>
@@ -176,6 +173,6 @@ export default function PaginaLegalCuenta() {
           </div>
         </div>
       )}
-    </div>
+    </ConductorScreen>
   );
 }

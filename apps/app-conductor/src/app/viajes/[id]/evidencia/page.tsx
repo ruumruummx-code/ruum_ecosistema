@@ -1,4 +1,5 @@
 "use client";
+import { ConductorNavigation } from "../../../components/ConductorNavigation";
 
 import { Tabs } from "@ruum/ui";
 
@@ -174,7 +175,7 @@ export default function PaginaEvidencia() {
         className="flex min-h-0 flex-1 flex-col justify-between gap-2 px-4 pt-[max(10px,env(safe-area-inset-top))] pb-2.5"
       >
         {/* 1. HEADER TÉCNICO */}
-        <header
+        <header data-trip-header
           aria-label="Encabezado técnico de evidencias"
           className="grid grid-cols-[auto_1fr_auto_auto] items-center gap-2 shrink-0"
         >
@@ -758,78 +759,7 @@ export default function PaginaEvidencia() {
       </div>
 
       {/* 7. NAVEGACIÓN INFERIOR ESTÁNDAR */}
-      <nav
-        aria-label="Navegación principal móvil"
-        className="shrink-0 border-t border-[#DCE7F5] bg-white/95 px-3 pt-1.5 pb-[max(8px,env(safe-area-inset-bottom))] shadow-[0_-4px_20px_rgba(10,35,66,0.06)] backdrop-blur-md"
-      >
-        <div className="mx-auto grid max-w-md grid-cols-3 gap-2">
-          <Link
-            href="/panel"
-            className="flex min-h-[50px] flex-col items-center justify-center gap-0.5 rounded-xl px-2 py-1 font-body text-xs font-medium text-[#5A6B87] transition hover:text-[#0A1E3C]"
-          >
-            <svg
-              width="20"
-              height="20"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.9"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              aria-hidden="true"
-            >
-              <path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V10Z" />
-              <path d="M9 21v-7h6v7" />
-            </svg>
-            <span className="leading-none">Inicio</span>
-          </Link>
-
-          <Link
-            href="/viajes"
-            aria-current="page"
-            className="flex min-h-[50px] flex-col items-center justify-center gap-0.5 rounded-xl bg-[#CBF2F5] px-2 py-1 font-display text-xs font-extrabold text-[#0A1E3C]"
-          >
-            <svg
-              width="20"
-              height="20"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.9"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              aria-hidden="true"
-            >
-              <rect x="2" y="5" width="12" height="12" rx="2" />
-              <path d="M14 9h4l4 4v4h-8M17 9v5h5" />
-              <circle cx="6" cy="18" r="2" />
-              <circle cx="18" cy="18" r="2" />
-            </svg>
-            <span className="leading-none">Traslados</span>
-          </Link>
-
-          <Link
-            href="/cuenta"
-            className="flex min-h-[50px] flex-col items-center justify-center gap-0.5 rounded-xl px-2 py-1 font-body text-xs font-medium text-[#5A6B87] transition hover:text-[#0A1E3C]"
-          >
-            <svg
-              width="20"
-              height="20"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.9"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              aria-hidden="true"
-            >
-              <circle cx="12" cy="8" r="3.8" />
-              <path d="M4 20c0-3.7 3.4-6.2 8-6.2s8 2.5 8 6.2" />
-            </svg>
-            <span className="leading-none">Mi cuenta</span>
-          </Link>
-        </div>
-      </nav>
+      <ConductorNavigation embedded />
 
       {/* R5 — CSAT/CES Bottom Sheet */}
       <EvidenciaCsatSheet

@@ -2,18 +2,15 @@
 
 import Link from "next/link";
 import { Aviso, Card } from "@ruum/ui";
-import { CuentaHeader } from "../CuentaHeader";
+import { ConductorScreen, ConductorPageHeader } from "../../components/ConductorScreen";
 import { useCerrarSesion } from "@/lib/use-cerrar-sesion";
 
 export default function PaginaSeguridadCuenta() {
   const { cerrarSesion, cerrandoSesion, errorCerrarSesion } = useCerrarSesion();
 
   return (
-    <div className="mx-auto w-full max-w-3xl px-4 py-8 sm:px-6 sm:py-12">
-      <CuentaHeader
-        titulo="Seguridad y Sesión"
-        descripcion="Administra tus credenciales de acceso, dispositivos y la sesión de tu cuenta."
-      />
+    <ConductorScreen variant="detail" label="Contenido de Seguridad y Sesión" header={<ConductorPageHeader title="Seguridad y Sesión" description="Administra tus credenciales de acceso, dispositivos y la sesión de tu cuenta." />}>
+
 
       {errorCerrarSesion && (
         <div className="mt-5">
@@ -126,6 +123,6 @@ export default function PaginaSeguridadCuenta() {
           </div>
         </Card>
       </div>
-    </div>
+    </ConductorScreen>
   );
 }

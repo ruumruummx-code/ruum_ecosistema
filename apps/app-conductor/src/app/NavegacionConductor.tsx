@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import { useViajeActivo } from "./ViajeActivoContext";
+import { CONDUCTOR_DESTINATIONS } from "./components/ConductorNavigation";
 import { ConductorNav } from "./components/ConductorNav";
 
 const EXCLUIDOS_NAVEGACION = [
@@ -12,12 +13,6 @@ const EXCLUIDOS_NAVEGACION = [
   "/nueva-password",
   "/actualizacion-requerida",
   "/auth/",
-];
-
-const DESTINOS_CONDUCTOR: { href: string; etiqueta: string }[] = [
-  { href: "/panel", etiqueta: "Inicio" },
-  { href: "/viajes", etiqueta: "Traslados" },
-  { href: "/cuenta", etiqueta: "Cuenta" },
 ];
 
 /**
@@ -34,7 +29,7 @@ export function NavegacionConductor() {
 
   return (
     <ConductorNav
-      destinos={DESTINOS_CONDUCTOR}
+      destinos={CONDUCTOR_DESTINATIONS}
       excluidos={EXCLUIDOS_NAVEGACION}
       mostrarMobileNav
       viajeActivo={viajeActivo}

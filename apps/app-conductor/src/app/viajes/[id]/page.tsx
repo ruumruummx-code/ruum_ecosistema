@@ -8,6 +8,7 @@ import { ConduceADestinoDetails } from "./ConduceADestinoDetails";
 import { CierreTrasladoDetails } from "./CierreTrasladoDetails";
 import { DirigeteAOrigenDetails } from "./DirigeteAOrigenDetails";
 import { TrasladoAsignadoDetails } from "./TrasladoAsignadoDetails";
+import { TripStatusSummary } from "./TripStatusSummary";
 import { IniciaTrayectoDetails } from "./IniciaTrayectoDetails";
 export const metadata: Metadata = {
   robots: { index: false, follow: false },
@@ -40,10 +41,11 @@ export default async function PaginaDetalleViaje({
   searchParams
 }: {
   params: Promise<{ id: string }>;
-  searchParams?: Promise<{ volver?: string }>;
+  searchParams?: Promise<{ volver?: string; cierre?: string }>;
 }) {
   const { id } = await params;
-  const volver = rutaVolverTraslados((await searchParams)?.volver);
+  const consulta = await searchParams;
+  const volver = rutaVolverTraslados(consulta?.volver);
   const { pasaporte } = await obtenerDatos(id);
 
   if (!pasaporte) {
@@ -116,40 +118,16 @@ export default async function PaginaDetalleViaje({
     );
   }
 
-  if (
-    pasaporte.estado === "evidencia_final_completada" ||
-    pasaporte.estado === "entrega_confirmada" ||
-    pasaporte.estado === "servicio_cerrado"
-  ) {
-    return (
-      <CierreTrasladoDetails pasaporte={pasaporte} volver={volver} />
-    );
+  if (pasaporte.estado === "evidencia_final_completada" || pasaporte.estado === "entrega_confirmada") {
+    return consulta?.cierre === "1"
+      ? <CierreTrasladoDetails pasaporte={pasaporte} volver={volver} />
+      : <TripStatusSummary pasaporte={pasaporte} volver={volver} closing />;
   }
 
-  if (
-    pasaporte.estado === "servicio_cancelado" ||
-    pasaporte.estado === "traslado_fallido"
-  ) {
-    return (
-      <EstadoError
-        titulo="Traslado concluido o cancelado"
-        descripcion="Este traslado ya no está activo en la plataforma."
-        acciones={[
-          { etiqueta: "Ver mis Traslados", href: "/viajes", variant: "primary" },
-          { etiqueta: "Volver al panel", href: "/panel", variant: "quiet" }
-        ]}
-      />
-    );
+  if (pasaporte.estado === "pendiente_de_conductor" && !pasaporte.conductor_id) {
+    return <TripOpportunityDetails pasaporte={pasaporte} volver={volver} />;
   }
 
-  // Si ya tiene conductor_id asignado de cualquier forma, mostrar TrasladoAsignadoDetails
-  if (pasaporte.conductor_id) {
-    return (
-      <TrasladoAsignadoDetails pasaporte={pasaporte} volver={volver} />
-    );
-  }
-
-  return (
-    <TripOpportunityDetails pasaporte={pasaporte} volver={volver} />
-  );
+  // Estados cerrados, en revisión o desconocidos nunca vuelven a ofrecer el inicio.
+  return <TripStatusSummary pasaporte={pasaporte} volver={volver} />;
 }

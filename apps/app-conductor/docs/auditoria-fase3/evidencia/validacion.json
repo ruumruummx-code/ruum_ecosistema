@@ -1,0 +1,276 @@
+{
+  "phase": 3,
+  "recorded_at": "2026-11-07T22:40:02.998121+00:00",
+  "workspace": "/workspace/ruum-fase2",
+  "branch": "codex/conductor-fase2",
+  "base_head": "fd0692a3f0c85c76c3c2eaf07550ba5af88997c5",
+  "delivery": "Entrega conjunta de las fases 2 y 3: implementación, pruebas y evidencias; publicación referenciada en el historial Git.",
+  "verification": {
+    "production_build": "passed; 31 páginas generadas; advertencias ESLint preexistentes registradas",
+    "typescript": "passed",
+    "targeted_eslint": "passed; sin salida en lint-final.log",
+    "playwright": {
+      "passed": 23,
+      "failed": 0,
+      "browser": "Chromium 155 / Playwright 1.64.1",
+      "viewports": [
+        {
+          "width": 320,
+          "height": 568
+        },
+        {
+          "width": 390,
+          "height": 844
+        }
+      ],
+      "stage_cases_per_viewport": 19,
+      "fixture": "API HTTP local; cookies y datos ficticios; sin backend real"
+    }
+  },
+  "first_load_js_kb": {
+    "viajes": 332,
+    "viajes_id": 341,
+    "detalles": 269,
+    "evidencia": 326,
+    "soporte": 300
+  },
+  "phase2_first_load_js_kb": {
+    "viajes": 320,
+    "viajes_id": 354,
+    "detalles": 268,
+    "evidencia": 327,
+    "soporte": 311
+  },
+  "limitations": [
+    "Sin validación física Android/iOS ni lector de pantalla",
+    "Sin cartografía real de Mapbox; recuperación de ausencia de proveedor verificada",
+    "Sin integración real RLS/RPC/storage; servicios, esquemas y políticas sin cambios",
+    "Formularios completos de evidencia/cámara/firma/cierre corresponden a fase 4",
+    "LCP, INP, CLS y batería reales pendientes de fase 6"
+  ],
+  "screenshots": [
+    "direccion-completa-320.png",
+    "direccion-completa-390.png",
+    "estado-1-320.png",
+    "estado-1-390.png",
+    "estado-12-320.png",
+    "estado-12-390.png",
+    "estado-14-320.png",
+    "estado-14-390.png",
+    "estado-18-320.png",
+    "estado-18-390.png",
+    "lista-320.png",
+    "lista-390.png"
+  ],
+  "sources": [
+    {
+      "path": "playwright.interface.config.ts",
+      "sha256": "1ac9c734fe36267e252617abbabc9647773aa127bdd9768c3f72e19b4a65c441"
+    },
+    {
+      "path": "src/app/ModoCalleActivador.tsx",
+      "sha256": "a66c7ec6328921bf3b4c60d4877d56b67a9410d20437528a23cf4d7b329aaaba"
+    },
+    {
+      "path": "src/app/components/ConductorDialog.tsx",
+      "sha256": "84953975cbe40f18b1f58e06bc992449a6cdc3d539e6ee87eb27f8662c486df5"
+    },
+    {
+      "path": "src/app/components/ConductorScreen.tsx",
+      "sha256": "4bab092100bb33df1a2d61b9874603a5fcdd311f66dae002578a74169cf29862"
+    },
+    {
+      "path": "src/app/shell-contract.css",
+      "sha256": "8f3fa2ff064fe3e07386e73b52e198fe828e7979bea741a79716ca1001c5c60b"
+    },
+    {
+      "path": "src/app/viajes/AcceptedTripCard.tsx",
+      "sha256": "50376d116068dada7e2a6bcd2a449c02349546c28e2b43a071ca1d63b811d243"
+    },
+    {
+      "path": "src/app/viajes/DriverTrasladosView.tsx",
+      "sha256": "617b217204ec2396f04d2301d731aec3d9eac91501492f9825a856c7fc3ffdc0"
+    },
+    {
+      "path": "src/app/viajes/OfferPreviewCard.tsx",
+      "sha256": "98282caa9a9c59c27047f6fa938df13f4e050cfabfb9b8fb5679bdf1461233db"
+    },
+    {
+      "path": "src/app/viajes/ViajesFilters.tsx",
+      "sha256": "3919532195e43544f2dc8723586616ec9de93e4711c96dec63f7f7d041fa3302"
+    },
+    {
+      "path": "src/app/viajes/ViajesMapa.tsx",
+      "sha256": "193b2c2c87636b7be5baca1db800ecd2ed633ecd1c43a91bb647c914a2395c8f"
+    },
+    {
+      "path": "src/app/viajes/[id]/ConduceADestinoDetails.tsx",
+      "sha256": "fa4ebee4bc367a6342c001f888a7fe9e94cc252c0904f12ba25f51eef185eaf2"
+    },
+    {
+      "path": "src/app/viajes/[id]/DirigeteAOrigenDetails.tsx",
+      "sha256": "36a53c868899b0d9901ba99521d7c21d09bcc622a44799da0cbd8f96ea8c228e"
+    },
+    {
+      "path": "src/app/viajes/[id]/IniciaTrayectoDetails.tsx",
+      "sha256": "e09835e99a9e35c209ff6711190d605b6c2c9e071a3f9693460e9026991700f0"
+    },
+    {
+      "path": "src/app/viajes/[id]/LocalizarVehiculoDetails.tsx",
+      "sha256": "f93cc05ce44df049b1a0d12a6cb58d2fc46adcaaad5248353ce90358375a6be9"
+    },
+    {
+      "path": "src/app/viajes/[id]/OpportunityDetailsView.tsx",
+      "sha256": "85cab064780126baf6097abb9cce7af5f25b2032add48ea668136eec65d559a1"
+    },
+    {
+      "path": "src/app/viajes/[id]/TrasladoAsignadoDetails.tsx",
+      "sha256": "0db7f0f168896e8b0ecb770d092b9e465f7fae8fd9a8bdc3642db97443eaccd8"
+    },
+    {
+      "path": "src/app/viajes/[id]/TripStage.tsx",
+      "sha256": "06d0bd9500376e50b6bbd28e1e579944b9d002ad4277d2bce5032f5ffd7f26c2"
+    },
+    {
+      "path": "src/app/viajes/[id]/TripStatusSummary.tsx",
+      "sha256": "eb54596d1da68a8a33a78254282fb1d16bc1dbd5aa69955c70f039586199def3"
+    },
+    {
+      "path": "src/app/viajes/[id]/detalles/TripDetailsTabs.tsx",
+      "sha256": "6a65932035c555ea065a879f189e2e2e7e3ee8d243856722314191b70c9d68bc"
+    },
+    {
+      "path": "src/app/viajes/[id]/detalles/details-tabs.module.css",
+      "sha256": "10e9e399177eeef600a315ea2dfd81cf2d98a5fea2369276d1d0a368094a1434"
+    },
+    {
+      "path": "src/app/viajes/[id]/detalles/tabs/TabItinerario.tsx",
+      "sha256": "2783dfac54477f2b1aa8ab85c06ab7a34d765e47e4fd36a42d1d8e36d65fa83a"
+    },
+    {
+      "path": "src/app/viajes/[id]/detalles/tabs/TabOperacion.tsx",
+      "sha256": "d5bac7ba20f1d007c9795d1850345e15db5716a152e4384c4f47f9d1e67f689f"
+    },
+    {
+      "path": "src/app/viajes/[id]/detalles/tabs/TabPago.tsx",
+      "sha256": "392f3d71eb123c67be4ed5b5d9df261e8c407155f4cbee47aa53c609665c5a73"
+    },
+    {
+      "path": "src/app/viajes/[id]/detalles/tabs/TabVehiculo.tsx",
+      "sha256": "0c948675cac0fd649c34a9a17f71dbcceb6d44fe0250b2e260ced2e5b3a3dcc6"
+    },
+    {
+      "path": "src/app/viajes/[id]/page.tsx",
+      "sha256": "4d4e9bbdef7af556757e75e106e537d32b7dddeab94d7c446aaf5b7f3e9246e0"
+    },
+    {
+      "path": "src/app/viajes/[id]/soporte/page.tsx",
+      "sha256": "03019ce1947c738e7aebf02b2076c45ef5c5f3e58264338914ef486aad6dd12f"
+    },
+    {
+      "path": "src/app/viajes/[id]/trip-stage.module.css",
+      "sha256": "cf4b41b2e8f60031e63a9956cce8f2dee480b38bba0f0d2246ce6f926000990c"
+    },
+    {
+      "path": "src/app/viajes/offer-preview.module.css",
+      "sha256": "d47949a0a8cce9ac5d84f32e1d47f6db616772b476ab44b10aae91f685012656"
+    },
+    {
+      "path": "src/app/viajes/page.tsx",
+      "sha256": "80662c4edb984ec4201eaa0f43e9b93685a11f8994a39b0562c16a3ead2a056d"
+    },
+    {
+      "path": "src/app/viajes/traslados.module.css",
+      "sha256": "c6b6e861b10e2d057ba19f225814af66629888c86398727f5404825a63f81adc"
+    },
+    {
+      "path": "tests/interface/fixture.mjs",
+      "sha256": "2dabb4a13c79a1b2379dee8a4e35fcedcf6fe8f9bf9e5664cd28af18a6d3b643"
+    },
+    {
+      "path": "tests/interface/shell.spec.ts",
+      "sha256": "10a9241685c7cfd7797a1ec00c845db76d62bb2008dd0cca401756957dd2dd86"
+    },
+    {
+      "path": "tests/interface/stages.spec.ts",
+      "sha256": "5cbaa4e520d8b3ec8992fe262ad7a5139c67efa0870e2f4e09a0e73364d5b86f"
+    }
+  ],
+  "artifacts": [
+    {
+      "path": "browser.log",
+      "sha256": "b2d3a85758f8ffdf063534b9677fdc2e5a8e72c2b15082b5936b28118ac05e91"
+    },
+    {
+      "path": "build.log",
+      "sha256": "766a4c73620801985c07783565203093a4752c7a62bfceaee62bf4f006fea264"
+    },
+    {
+      "path": "direccion-completa-320.png",
+      "sha256": "b0830b1d5fe34e5587e8feec7f9287654d2d8605a2643ff8377b73e10a55c1e0"
+    },
+    {
+      "path": "direccion-completa-390.png",
+      "sha256": "69fa0d385bceded003f3b7757bb60729811d9f2454f954e9fdca9d078640458b"
+    },
+    {
+      "path": "estado-1-320.png",
+      "sha256": "19d4e01bdfc4bdfd6fd27676b563bf47d2858b3554a326703daf40451e347594"
+    },
+    {
+      "path": "estado-1-390.png",
+      "sha256": "c5b98cc118a2e989f7a2b35de3d306d23f7f41d8d7ac290e2acbb2831bd21b11"
+    },
+    {
+      "path": "estado-12-320.png",
+      "sha256": "4887de168f54bd1014884f467cca1eec99fe9c97439682abd2b43fd660fe9434"
+    },
+    {
+      "path": "estado-12-390.png",
+      "sha256": "7e8ac3cccf6e5c5206217b4bb7768024564cb45e090bc5c4c00457029ae6e8c2"
+    },
+    {
+      "path": "estado-14-320.png",
+      "sha256": "bdae663c79b83272e0a681d3500755963202125939d37f84fbe5f77c3c9bccbc"
+    },
+    {
+      "path": "estado-14-390.png",
+      "sha256": "9b8f257ec44a3dc1f06e39fba7092667f28dc55b2ba2dfb85f8d380123c0c89a"
+    },
+    {
+      "path": "estado-18-320.png",
+      "sha256": "8e564c20b4be0540e74a73f3281c909e3f13f48459639e2a4a761ccba72608ec"
+    },
+    {
+      "path": "estado-18-390.png",
+      "sha256": "5a31d8d9cc3c28d1751e5e278d5a2989a5354230e22499b57767aa66d7df7652"
+    },
+    {
+      "path": "lint-final.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "lista-320.png",
+      "sha256": "8dcfdefa60d82bc62f8fcad2874dca56dc44de05ad79a54eb4cef5fedb97994b"
+    },
+    {
+      "path": "lista-390.png",
+      "sha256": "5b365c0e8f27d1b79f1201b39ccdb4ea577e91f852acf51ef402ddb598df65cc"
+    },
+    {
+      "path": "types.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "pre-commit.log",
+      "sha256": "2cabe6094d880176e28d6b96a6c074e2be2f329e49be6cc8e35bea096cb5ca34"
+    }
+  ],
+  "log_normalization": "build.log: finales de línea LF y eliminación de espacios finales; contenido del resultado sin cambios.",
+  "publication_checks": {
+    "global_pre_commit": "blocked by existing @ruum/ui test command: no test files",
+    "shared_unit_tests": "4 passed",
+    "commit_message": "validated separately with repository script",
+    "hook_configuration": "unchanged; automatic hook skipped only for delivery commit"
+  }
+}

@@ -1,0 +1,65 @@
+
+> test
+> turbo run test
+
+
+   • turbo 2.11.10
+   • Packages in scope: @ruum/api, @ruum/app-conductor, @ruum/app-usuario, @ruum/panel-admin, @ruum/shared, @ruum/ui
+   • Running test in 6 packages
+   • Remote caching disabled, using shared worktree cache
+
+@ruum/shared:build: cache miss, executing 6e7019ecffd8107b
+@ruum/shared:build:
+@ruum/shared:build: > @ruum/shared@0.0.1 build /workspace/ruum-fase2/packages/shared
+@ruum/shared:build: > tsc --noEmit
+@ruum/shared:build:
+@ruum/api:build: cache miss, executing 3e8b69c07d580c77
+@ruum/shared:test: cache miss, executing 505f888e4ac008f8
+@ruum/ui:build: cache miss, executing a626015c0c87e6c7
+@ruum/ui:build:
+@ruum/ui:build: > @ruum/ui@0.0.1 build /workspace/ruum-fase2/packages/ui
+@ruum/ui:build: > tsc --noEmit
+@ruum/ui:build:
+@ruum/shared:test:
+@ruum/shared:test: > @ruum/shared@0.0.1 test /workspace/ruum-fase2/packages/shared
+@ruum/shared:test: > vitest run
+@ruum/shared:test:
+@ruum/api:build:
+@ruum/api:build: > @ruum/api@0.0.1 build /workspace/ruum-fase2/packages/api
+@ruum/api:build: > tsc --noEmit
+@ruum/api:build:
+@ruum/shared:test:
+@ruum/shared:test:  RUN  v3.2.6 /workspace/ruum-fase2/packages/shared
+@ruum/shared:test:
+@ruum/shared:test:  ✓ src/seguridad/csp.test.ts (4 tests) 24ms
+@ruum/shared:test:
+@ruum/shared:test:  Test Files  1 passed (1)
+@ruum/shared:test:       Tests  4 passed (4)
+@ruum/shared:test:    Start at  22:43:12
+@ruum/shared:test:    Duration  1.23s (transform 368ms, setup 0ms, collect 324ms, tests 24ms, environment 0ms, prepare 401ms)
+@ruum/shared:test:
+@ruum/ui:test: cache miss, executing 908b79a20f82ba32
+@ruum/ui:test:
+@ruum/ui:test: > @ruum/ui@0.0.1 test /workspace/ruum-fase2/packages/ui
+@ruum/ui:test: > vitest run
+@ruum/ui:test:
+@ruum/ui:test:
+@ruum/ui:test:  RUN  v3.2.6 /workspace/ruum-fase2/packages/ui
+@ruum/ui:test:
+@ruum/ui:test: No test files found, exiting with code 1
+@ruum/ui:test:
+@ruum/ui:test: include: src/**/*.test.ts, src/**/*.test.tsx
+@ruum/ui:test: exclude:  node_modules/**, dist/**
+@ruum/ui:test:
+@ruum/ui:test:  ELIFECYCLE  Test failed. See above for more details.
+@ruum/ui#test:  ERROR  command (/workspace/ruum-fase2/packages/ui) /tmp/ruum-pnpm-bin/pnpm run test exited (1)
+
+ Tasks:    3 successful, 5 total
+Cached:    0 cached, 5 total
+  Time:    11.862s
+Failed:    @ruum/ui#test
+
+ WARNING  no output files found for task @ruum/shared#build. Please check your `outputs` key in `turbo.json`
+ WARNING  no output files found for task @ruum/ui#build. Please check your `outputs` key in `turbo.json`
+ ERROR  run failed: command  exited (1)
+husky - pre-commit script failed (code 1)

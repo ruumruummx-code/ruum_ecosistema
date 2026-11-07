@@ -1,3 +1,11 @@
+# Estado actual de la fase 2
+
+La implementación del 7 de noviembre completa el marco común, la adopción de las siete rutas con scroll raíz y las pruebas de producción pendientes. Ver [IMPLEMENTACION-2026-11-07.md](IMPLEMENTACION-2026-11-07.md) para componentes, mapa de las 30 rutas, resultados y límites actuales.
+
+El contenido que sigue es el **registro histórico de la primera adopción del 6 de noviembre**; sus pendientes y bloqueos no describen por sí solos el estado actual.
+
+---
+
 # Fase 2 — Contrato común y migración móvil
 
 Fecha: 6 de noviembre de 2026. Diagnóstico de origen: `../auditoria-fase1/README.md` sobre d1537a4; implementación iniciada sobre b6e8a27. La revisión anterior y el inventario de estados se conservan como antecedentes, no como pruebas aprobadas en esta revisión.

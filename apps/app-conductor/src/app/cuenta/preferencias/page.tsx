@@ -1,4 +1,5 @@
 "use client";
+import { ConductorScreen, ConductorPageHeader } from "../../components/ConductorScreen";
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Aviso } from "@ruum/ui";
@@ -187,12 +188,7 @@ export default function PaginaPreferenciasCuenta() {
   );
 
   return (
-    <div className="mx-auto w-full max-w-md px-4 pb-[calc(88px+env(safe-area-inset-bottom))]">
-      {/* Header mínimo */}
-      <header className="flex items-center justify-between gap-2 px-4 pt-4 pb-2 border-b border-border/30">
-        <h1 className="font-display text-xl font-extrabold tracking-tight text-text-primary">Preferencias</h1>
-      </header>
-
+    <ConductorScreen variant="detail" label="Preferencias del conductor" header={<ConductorPageHeader title="Preferencias" />}>
       {notificacion && (
         <div className="mx-4 mt-3">
           <Aviso tono={notificacion.tipo === "success" ? "success" : "danger"}>{notificacion.mensaje}</Aviso>
@@ -355,6 +351,6 @@ export default function PaginaPreferenciasCuenta() {
           <span className="text-[10px] font-bold text-route-action animate-pulse">Sincronizando…</span>
         </div>
       )}
-    </div>
+    </ConductorScreen>
   );
 }

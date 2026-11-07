@@ -2,15 +2,13 @@
 
 import { useLayoutEffect, useRef, type ReactNode } from "react";
 import { usePathname } from "next/navigation";
-import styles from "./contained-scroll.module.css";
-import { useVisibleViewport } from "./useVisibleViewport";
+import { ConductorScreen } from "./ConductorScreen";
 
 /** Un único scroll por vista larga; el retorno y el shell conservan su sitio. */
-export function ContainedScrollView({ header, children, label, className, detailsKind }: {
-  header: ReactNode; children: ReactNode; label: string; className?: string; detailsKind?: "documents" | "certification" | "bank";
+export function ContainedScrollView({ header, children, label, className, detailsKind, footer }: {
+  header: ReactNode; children: ReactNode; label: string; className?: string; detailsKind?: "profile" | "documents" | "certification" | "bank"; footer?: ReactNode;
 }) {
   const frame = useRef<HTMLDivElement>(null);
-  useVisibleViewport(frame);
   const heading = useRef<HTMLDivElement>(null);
   const scroll = useRef<HTMLDivElement>(null);
   const content = useRef<HTMLDivElement>(null);
@@ -59,13 +57,7 @@ export function ContainedScrollView({ header, children, label, className, detail
     };
   }, [pathname]);
 
-  return <div ref={frame} className={`${styles.frame} ${className ?? ""}`} data-contained-view data-driver-details={detailsKind}>
-    <div className={styles.layout}>
-      <div ref={heading} className={styles.header} data-contained-return>{header}</div>
-      {/* eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex -- Región desplazable mediante teclado, además de rueda y táctil. */}
-      <div ref={scroll} className={styles.content} data-contained-scroll role="region" aria-label={label} tabIndex={0}>
-        <div ref={content} className={styles.flow}>{children}</div>
-      </div>
-    </div>
-  </div>;
+  return <ConductorScreen variant={detailsKind === "bank" || detailsKind === "profile" ? "form" : "detail"} label={label}
+    header={header} footer={footer} frameRef={frame} headerRef={heading} bodyRef={scroll} flowRef={content}
+    className={className} detailsKind={detailsKind} contained>{children}</ConductorScreen>;
 }

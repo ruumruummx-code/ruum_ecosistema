@@ -1,30 +1,10 @@
-import { useEffect, useRef } from "react";
+import { useRef } from "react";
 import styles from "./registration.module.css";
 import Image from "next/image";
 import { LogoMarca } from "@ruum/ui";
 
 export function RegistrationShell({ children, compact = false, account = false, identity = false, completion = false }: { children: React.ReactNode; compact?: boolean; account?: boolean; identity?: boolean; completion?: boolean }) {
   const screenRef = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    const screen = screenRef.current;
-    const viewport = window.visualViewport;
-    if (!compact || !screen || !viewport) return;
-    // Se aplica de forma síncrona: difundirlo en requestAnimationFrame deja el marco
-    // con el alto del viewport anterior hasta el siguiente cuadro.
-    const update = () => {
-      screen.style.setProperty("--registration-height", viewport.height + "px");
-      screen.style.setProperty("--registration-top", viewport.offsetTop + "px");
-    };
-    update();
-    viewport.addEventListener("resize", update);
-    viewport.addEventListener("scroll", update);
-    window.addEventListener("resize", update);
-    return () => {
-      viewport.removeEventListener("resize", update);
-      viewport.removeEventListener("scroll", update);
-      window.removeEventListener("resize", update);
-    };
-  }, [compact]);
   if (compact) return <div ref={screenRef} className={[styles.screen, account || identity ? styles.stepOne : "", identity ? styles.identity : "", completion ? styles.completionStep : ""].join(" ")} data-conductor-registration>{children}</div>;
   return (
     <div className="conductor-auth-shell flex items-center justify-center px-4 py-10 sm:px-6">

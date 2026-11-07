@@ -26,42 +26,6 @@ export function TripOperationalFrame({ children }: { children: ReactNode }) {
   const [support, setSupport] = useState(false);
   const [returnPath, setReturnPath] = useState<string | null>(null);
 
-  useLayoutEffect(() => {
-    const root = document.documentElement;
-    const viewport = window.visualViewport;
-    const fullHeight = Math.max(innerHeight, viewport?.height ?? 0);
-    const measure = () => {
-      const height = viewport?.height ?? innerHeight;
-      const top = viewport?.offsetTop ?? 0;
-      const editing = document.activeElement?.matches("input,textarea,select,[contenteditable='true']");
-      const keyboard = !!editing && fullHeight - height > 100;
-      root.dataset.tripKeyboard = String(keyboard);
-      root.style.setProperty("--trip-visible-top", `${top}px`);
-      root.style.setProperty("--trip-visible-height", `${height}px`);
-      root.style.setProperty("--trip-keyboard-inset", `${Math.max(0, innerHeight - height - top)}px`);
-      root.style.setProperty("--trip-nav-reserve", keyboard ? "0px" : "var(--conductor-shell-bottom-height, 0px)");
-      if (editing) requestAnimationFrame(() => {
-        const active = document.activeElement;
-        if (active instanceof HTMLElement && scrollRef.current?.contains(active)) active.scrollIntoView({ block: "center", behavior: "instant" });
-      });
-    };
-    measure();
-    viewport?.addEventListener("resize", measure);
-    viewport?.addEventListener("scroll", measure);
-    window.addEventListener("resize", measure);
-    document.addEventListener("focusin", measure);
-    document.addEventListener("focusout", measure);
-    return () => {
-      viewport?.removeEventListener("resize", measure);
-      viewport?.removeEventListener("scroll", measure);
-      window.removeEventListener("resize", measure);
-      document.removeEventListener("focusin", measure);
-      document.removeEventListener("focusout", measure);
-      for (const property of ["--trip-visible-top", "--trip-visible-height", "--trip-keyboard-inset", "--trip-nav-reserve"]) root.style.removeProperty(property);
-      delete root.dataset.tripKeyboard;
-    };
-  }, []);
-
   useLayoutEffect(() => { scrollRef.current?.scrollTo({ top: 0 }); }, [pathname]);
 
   return <DockContext.Provider value={{ primary, quick, setReturnPath }}>

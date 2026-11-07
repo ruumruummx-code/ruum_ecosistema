@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { PasaporteRow } from "./trips-utils";
 import { tieneMapboxConfigurado } from "../../lib/mapbox-rutas";
 
@@ -8,15 +8,16 @@ interface TrasladosMapaProps {
   Traslados: PasaporteRow[];
   onSelect: (viaje: PasaporteRow) => void;
   vistaId?: string;
+  onReturnToList?: () => void;
 }
 
-export function TrasladosMapa({ Traslados, onSelect, vistaId }: TrasladosMapaProps) {
+export function TrasladosMapa({ Traslados, onSelect, vistaId, onReturnToList }: TrasladosMapaProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<unknown>(null);
   const [errorMapa, setErrorMapa] = useState<string | null>(null);
   const [cargandoMapa, setCargandoMapa] = useState(true);
 
-  const TrasladosConCoords = Traslados.filter((v) => v.origen_lng != null && v.origen_lat != null) as Array<PasaporteRow & { origen_lng: number; origen_lat: number }>;
+  const TrasladosConCoords = useMemo(() => Traslados.filter((v): v is PasaporteRow & { origen_lng: number; origen_lat: number } => v.origen_lng != null && v.origen_lat != null), [Traslados]);
 
   useEffect(() => {
     if (!tieneMapboxConfigurado()) {
@@ -82,7 +83,7 @@ export function TrasladosMapa({ Traslados, onSelect, vistaId }: TrasladosMapaPro
           const el = document.createElement("div");
           el.className = "ruum-map-pin";
           el.style.cssText =
-            "width:32px;height:32px;border-radius:50%;background:#FFC400;border:3px solid #0f172a;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:900;color:#0f172a;box-shadow:0 4px 12px rgba(0,0,0,0.25);cursor:pointer;transform:translate(-50%,-50%)";
+            "width:48px;height:48px;border-radius:50%;background:#FFC400;border:3px solid #0f172a;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:900;color:#0f172a;box-shadow:0 4px 12px rgba(0,0,0,0.25);cursor:pointer;transform:translate(-50%,-50%)";
           el.textContent = "📍";
           el.setAttribute("role", "button");
           el.setAttribute("aria-label", `Ver oferta ${viaje.origen_ciudad ?? ""} — ${viaje.ganancia_conductor ? "$" + Math.round(viaje.ganancia_conductor) : ""}`);
@@ -90,9 +91,17 @@ export function TrasladosMapa({ Traslados, onSelect, vistaId }: TrasladosMapaPro
 
           const precio = viaje.ganancia_conductor != null ? new Intl.NumberFormat("es-MX", { style: "currency", currency: "MXN", maximumFractionDigits: 0 }).format(viaje.ganancia_conductor) : "—";
           const distancia = viaje.distancia_km != null ? `${viaje.distancia_km.toFixed(1)} km` : "";
-          const popupHtml = `<div class="conductor-map-popup"><div class="conductor-map-popup__eyebrow">OFERTA</div><div class="conductor-map-popup__route">${viaje.origen_ciudad ?? "Origen"} → ${viaje.destino_ciudad ?? "Destino"}</div><div class="conductor-map-popup__meta">${precio} · ${distancia}</div><div class="conductor-map-popup__action">Toca para ver →</div></div>`;
-
-          const popup = new mapboxgl.Popup({ offset: 18, closeButton: false, maxWidth: "220px" }).setHTML(popupHtml);
+          const popupContent = document.createElement("div");
+          popupContent.className = "conductor-map-popup";
+          for (const [className, text] of [
+            ["conductor-map-popup__eyebrow", "Traslado"],
+            ["conductor-map-popup__route", `${viaje.origen_ciudad ?? "Origen"} → ${viaje.destino_ciudad ?? "Destino"}`],
+            ["conductor-map-popup__meta", `${precio} · ${distancia}`],
+            ["conductor-map-popup__action", "Toca para ver →"]
+          ]) {
+            const line = document.createElement("div"); line.className = className; line.textContent = text; popupContent.append(line);
+          }
+          const popup = new mapboxgl.Popup({ offset: 18, closeButton: false, maxWidth: "220px" }).setDOMContent(popupContent);
 
           const marker = new mapboxgl.Marker({ element: el, anchor: "center" }).setLngLat([viaje.origen_lng, viaje.origen_lat]).setPopup(popup).addTo(m);
 
@@ -129,29 +138,13 @@ export function TrasladosMapa({ Traslados, onSelect, vistaId }: TrasladosMapaPro
     };
   }, [TrasladosConCoords, onSelect, vistaId]);
 
-  if (!tieneMapboxConfigurado()) {
-    return (
-      <div className="rounded-2xl border border-border bg-surface-elevated p-6 text-center flex flex-col items-center gap-3">
-        <span className="text-2xl" aria-hidden>
-          🗺️
-        </span>
-        <p className="font-display text-sm font-bold text-text-primary">Mapa no configurado</p>
-        <p className="font-body text-xs text-text-secondary max-w-[280px]">Configura NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN para ver la densidad geográfica. Mientras tanto usa la lista.</p>
-      </div>
-    );
-  }
-
-  if (Traslados.length === 0) {
-    return null;
-  }
-
-  if (TrasladosConCoords.length === 0) {
-    return (
-      <div className="rounded-2xl border border-border bg-surface-elevated p-6 text-center">
-        <p className="font-body text-sm text-text-secondary">Estas ofertas aún no tienen coordenadas. Usa la lista para revisarlas.</p>
-      </div>
-    );
-  }
+  const fallback = (message: string) => <div className="flex h-full flex-col justify-center gap-2 rounded-xl border border-border bg-surface-elevated p-3 text-center">
+    <p className="text-sm">{message}</p>
+    {onReturnToList && <button type="button" className="min-h-12 rounded-xl border border-border p-2 text-sm" onClick={onReturnToList}>Volver a lista</button>}
+  </div>;
+  if (!tieneMapboxConfigurado()) return fallback("Mapa no disponible. Puedes revisar los traslados en la lista.");
+  if (Traslados.length === 0) return null;
+  if (TrasladosConCoords.length === 0) return fallback("Estos traslados aún no tienen coordenadas. Usa la lista para revisarlos.");
 
   return (
     <div className="relative overflow-hidden rounded-2xl border border-border shadow-xs bg-surface" aria-label="Mapa de ofertas">
@@ -159,18 +152,18 @@ export function TrasladosMapa({ Traslados, onSelect, vistaId }: TrasladosMapaPro
         <div className="absolute inset-0 z-10 flex items-center justify-center bg-surface/70 backdrop-blur-sm">
           <div className="flex flex-col items-center gap-2">
             <div className="size-7 rounded-full border-3 border-border border-t-signal animate-spin" aria-hidden />
-            <span className="font-body text-xs font-semibold text-text-secondary">Cargando mapa…</span>
+            <span className="font-body text-sm font-semibold text-text-secondary">Cargando mapa…</span>
           </div>
         </div>
       )}
       {errorMapa && (
-        <div className="absolute top-3 left-3 right-3 z-10 rounded-xl border border-amber-500/30 bg-amber-500/10 px-3 py-2 font-body text-xs font-semibold text-amber-600">
+        <div className="absolute top-3 left-3 right-3 z-10 rounded-xl border border-amber-500/30 bg-amber-500/10 px-3 py-2 font-body text-sm font-semibold text-amber-600">
           {errorMapa} — usa la lista
         </div>
       )}
-      <div ref={containerRef} className="h-[420px] w-full sm:h-[480px]" role="application" aria-label="Mapa interactivo de ofertas, usa lista para accesibilidad" />
+      <div ref={containerRef} className="h-full min-h-[150px] w-full" role="application" aria-label="Mapa interactivo de ofertas, usa lista para accesibilidad" />
       <div className="absolute bottom-2 left-2 right-2 flex justify-center pointer-events-none">
-        <span className="rounded-full bg-surface-elevated/90 backdrop-blur border border-border/40 px-3 py-1.5 font-body text-[11px] font-semibold text-text-secondary shadow-sm">
+        <span className="rounded-full bg-surface-elevated/90 backdrop-blur border border-border/40 px-3 py-1.5 font-body text-sm font-semibold text-text-secondary shadow-sm">
           {TrasladosConCoords.length} ofertas en mapa · Toca un pin para ver detalle
         </span>
       </div>
