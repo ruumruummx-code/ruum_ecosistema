@@ -11,6 +11,7 @@ import type { CuentaReal, Usuario } from "../cuenta-ui";
 import { crearClienteNavegador } from "../../../lib/supabase-browser";
 import { UserDashboardLayout } from "../../../components/layout/UserDashboardLayout";
 import { construirNotificaciones } from "../../../lib/inicio";
+import { InterruptorPreferencia, SelectorPreferencia } from "./ControlesPreferencias";
 import {
   obtenerPreferenciasIniciales,
   guardarPreferenciasLocales,
@@ -71,7 +72,7 @@ export function PreferenciasCliente({ cuenta }: PreferenciasClienteProps) {
     setNotifPromocionesEmail(p.notifPromocionesEmail);
     setNotifPromocionesPush(p.notifPromocionesPush);
     aplicarEfectosReales(p);
-  }, [usuario?.id]);
+  }, [usuario]);
 
   const handleGuardarCambios = async () => {
     setGuardando(true);
@@ -417,16 +418,18 @@ export function PreferenciasCliente({ cuenta }: PreferenciasClienteProps) {
                         <p className="text-[11px] user-essential-muted">Se usará para mostrar fechas y horarios de tus traslados.</p>
                       </div>
                     </div>
-                    <select
+                    <SelectorPreferencia
+                      id="preferencias-zona-horaria"
+                      etiquetaVisible="Zona horaria"
+                      nombreAccesible="Zona horaria para mostrar fechas y horarios de traslados"
                       value={zonaHoraria}
                       onChange={(e) => setZonaHoraria(e.target.value)}
-                      className="bg-white dark:bg-[#16253B] border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200 text-xs rounded-xl px-3 py-1.5 outline-none focus:ring-2 focus:ring-[#0066FF] shrink-0"
                     >
                       <option value="(UTC-06:00) Ciudad de México">(UTC-06:00) Ciudad de México</option>
                       <option value="(UTC-05:00) Cancún / Este">(UTC-05:00) Cancún / Este</option>
                       <option value="(UTC-07:00) Mazatlán / Pacífico">(UTC-07:00) Mazatlán / Pacífico</option>
                       <option value="(UTC-08:00) Tijuana / Noroeste">(UTC-08:00) Tijuana / Noroeste</option>
-                    </select>
+                    </SelectorPreferencia>
                   </div>
 
                   {/* Fila Unidades */}
@@ -444,14 +447,16 @@ export function PreferenciasCliente({ cuenta }: PreferenciasClienteProps) {
                         <p className="text-[11px] user-essential-muted">Define el sistema de unidades para distancias, peso y consumo.</p>
                       </div>
                     </div>
-                    <select
+                    <SelectorPreferencia
+                      id="preferencias-unidades-region"
+                      etiquetaVisible="Unidades"
+                      nombreAccesible="Sistema de unidades para distancias, peso y consumo"
                       value={unidades}
-                      onChange={(e) => setUnidades(e.target.value)}
-                      className="bg-white dark:bg-[#16253B] border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200 text-xs rounded-xl px-3 py-1.5 outline-none focus:ring-2 focus:ring-[#0066FF] shrink-0"
+                      onChange={(e) => setUnidades(e.target.value as "Métrico" | "Imperial")}
                     >
                       <option value="Métrico">Métrico</option>
                       <option value="Imperial">Imperial</option>
-                    </select>
+                    </SelectorPreferencia>
                   </div>
                 </div>
               </section>
@@ -539,21 +544,12 @@ export function PreferenciasCliente({ cuenta }: PreferenciasClienteProps) {
                       </div>
                     </div>
                     {/* Toggle Switch */}
-                    <button
-                      type="button"
-                      role="switch"
-                      aria-checked={alertasGenerales}
-                      onClick={() => setAlertasGenerales(!alertasGenerales)}
-                      className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-[#0066FF] ${
-                        alertasGenerales ? "bg-[#0066FF]" : "bg-slate-300 dark:bg-slate-700"
-                      }`}
-                    >
-                      <span
-                        className={`pointer-events-none inline-block size-5 transform rounded-full bg-white shadow-md ring-0 transition duration-200 ease-in-out ${
-                          alertasGenerales ? "translate-x-5" : "translate-x-0"
-                        }`}
-                      />
-                    </button>
+                    <InterruptorPreferencia
+                      id="preferencias-alertas-generales"
+                      evento="Notificaciones y alertas generales"
+                      activo={alertasGenerales}
+                      onAlternar={() => setAlertasGenerales(!alertasGenerales)}
+                    />
                   </div>
 
                   {/* Fila Accesibilidad */}
@@ -568,15 +564,17 @@ export function PreferenciasCliente({ cuenta }: PreferenciasClienteProps) {
                         <p className="text-[11px] user-essential-muted">Ajustes de contraste, tamaño de letra y otras opciones de accesibilidad.</p>
                       </div>
                     </div>
-                    <select
+                    <SelectorPreferencia
+                      id="preferencias-accesibilidad"
+                      etiquetaVisible="Accesibilidad"
+                      nombreAccesible="Ajustes de contraste, tamaño de letra y accesibilidad"
                       value={accesibilidad}
-                      onChange={(e) => setAccesibilidad(e.target.value)}
-                      className="bg-white dark:bg-[#16253B] border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200 text-xs rounded-xl px-3 py-1.5 outline-none focus:ring-2 focus:ring-[#0066FF] shrink-0"
+                      onChange={(e) => setAccesibilidad(e.target.value as "Estándar" | "Alto contraste" | "Texto grande")}
                     >
                       <option value="Estándar">Estándar</option>
                       <option value="Alto contraste">Alto contraste</option>
                       <option value="Texto grande">Texto grande</option>
-                    </select>
+                    </SelectorPreferencia>
                   </div>
 
                   {/* Fila Unidades repetida según diseño */}
@@ -593,14 +591,16 @@ export function PreferenciasCliente({ cuenta }: PreferenciasClienteProps) {
                         <p className="text-[11px] user-essential-muted">Sistema de unidades en la aplicación.</p>
                       </div>
                     </div>
-                    <select
+                    <SelectorPreferencia
+                      id="preferencias-unidades-app"
+                      etiquetaVisible="Unidades"
+                      nombreAccesible="Sistema de unidades en la aplicación"
                       value={unidades}
-                      onChange={(e) => setUnidades(e.target.value)}
-                      className="bg-white dark:bg-[#16253B] border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200 text-xs rounded-xl px-3 py-1.5 outline-none focus:ring-2 focus:ring-[#0066FF] shrink-0"
+                      onChange={(e) => setUnidades(e.target.value as "Métrico" | "Imperial")}
                     >
                       <option value="Métrico">Métrico</option>
                       <option value="Imperial">Imperial</option>
-                    </select>
+                    </SelectorPreferencia>
                   </div>
                 </div>
               </section>
@@ -649,29 +649,21 @@ export function PreferenciasCliente({ cuenta }: PreferenciasClienteProps) {
                     </div>
                     <div className="flex items-center gap-8 shrink-0">
                       {/* Email Toggle */}
-                      <button
-                        type="button"
-                        role="switch"
-                        aria-checked={notifRecordatoriosEmail}
-                        onClick={() => setNotifRecordatoriosEmail(!notifRecordatoriosEmail)}
-                        className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-[#0066FF] ${
-                          notifRecordatoriosEmail ? "bg-[#0066FF]" : "bg-slate-300 dark:bg-slate-700"
-                        }`}
-                      >
-                        <span className={`pointer-events-none inline-block size-5 transform rounded-full bg-white shadow-md ring-0 transition duration-200 ease-in-out ${notifRecordatoriosEmail ? "translate-x-5" : "translate-x-0"}`} />
-                      </button>
+                      <InterruptorPreferencia
+                        id="preferencias-recordatorios-email"
+                        evento="Recordatorios de traslados"
+                        canal="Email"
+                        activo={notifRecordatoriosEmail}
+                        onAlternar={() => setNotifRecordatoriosEmail(!notifRecordatoriosEmail)}
+                      />
                       {/* Push Toggle */}
-                      <button
-                        type="button"
-                        role="switch"
-                        aria-checked={notifRecordatoriosPush}
-                        onClick={() => setNotifRecordatoriosPush(!notifRecordatoriosPush)}
-                        className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-[#0066FF] ${
-                          notifRecordatoriosPush ? "bg-[#0066FF]" : "bg-slate-300 dark:bg-slate-700"
-                        }`}
-                      >
-                        <span className={`pointer-events-none inline-block size-5 transform rounded-full bg-white shadow-md ring-0 transition duration-200 ease-in-out ${notifRecordatoriosPush ? "translate-x-5" : "translate-x-0"}`} />
-                      </button>
+                      <InterruptorPreferencia
+                        id="preferencias-recordatorios-push"
+                        evento="Recordatorios de traslados"
+                        canal="Web y Push"
+                        activo={notifRecordatoriosPush}
+                        onAlternar={() => setNotifRecordatoriosPush(!notifRecordatoriosPush)}
+                      />
                     </div>
                   </div>
 
@@ -687,28 +679,20 @@ export function PreferenciasCliente({ cuenta }: PreferenciasClienteProps) {
                       </div>
                     </div>
                     <div className="flex items-center gap-8 shrink-0">
-                      <button
-                        type="button"
-                        role="switch"
-                        aria-checked={notifCambiosEstadoEmail}
-                        onClick={() => setNotifCambiosEstadoEmail(!notifCambiosEstadoEmail)}
-                        className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-[#0066FF] ${
-                          notifCambiosEstadoEmail ? "bg-[#0066FF]" : "bg-slate-300 dark:bg-slate-700"
-                        }`}
-                      >
-                        <span className={`pointer-events-none inline-block size-5 transform rounded-full bg-white shadow-md ring-0 transition duration-200 ease-in-out ${notifCambiosEstadoEmail ? "translate-x-5" : "translate-x-0"}`} />
-                      </button>
-                      <button
-                        type="button"
-                        role="switch"
-                        aria-checked={notifCambiosEstadoPush}
-                        onClick={() => setNotifCambiosEstadoPush(!notifCambiosEstadoPush)}
-                        className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-[#0066FF] ${
-                          notifCambiosEstadoPush ? "bg-[#0066FF]" : "bg-slate-300 dark:bg-slate-700"
-                        }`}
-                      >
-                        <span className={`pointer-events-none inline-block size-5 transform rounded-full bg-white shadow-md ring-0 transition duration-200 ease-in-out ${notifCambiosEstadoPush ? "translate-x-5" : "translate-x-0"}`} />
-                      </button>
+                      <InterruptorPreferencia
+                        id="preferencias-cambios-estado-email"
+                        evento="Cambios de estado de traslados"
+                        canal="Email"
+                        activo={notifCambiosEstadoEmail}
+                        onAlternar={() => setNotifCambiosEstadoEmail(!notifCambiosEstadoEmail)}
+                      />
+                      <InterruptorPreferencia
+                        id="preferencias-cambios-estado-push"
+                        evento="Cambios de estado de traslados"
+                        canal="Web y Push"
+                        activo={notifCambiosEstadoPush}
+                        onAlternar={() => setNotifCambiosEstadoPush(!notifCambiosEstadoPush)}
+                      />
                     </div>
                   </div>
 
@@ -725,28 +709,20 @@ export function PreferenciasCliente({ cuenta }: PreferenciasClienteProps) {
                       </div>
                     </div>
                     <div className="flex items-center gap-8 shrink-0">
-                      <button
-                        type="button"
-                        role="switch"
-                        aria-checked={notifPagosEmail}
-                        onClick={() => setNotifPagosEmail(!notifPagosEmail)}
-                        className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-[#0066FF] ${
-                          notifPagosEmail ? "bg-[#0066FF]" : "bg-slate-300 dark:bg-slate-700"
-                        }`}
-                      >
-                        <span className={`pointer-events-none inline-block size-5 transform rounded-full bg-white shadow-md ring-0 transition duration-200 ease-in-out ${notifPagosEmail ? "translate-x-5" : "translate-x-0"}`} />
-                      </button>
-                      <button
-                        type="button"
-                        role="switch"
-                        aria-checked={notifPagosPush}
-                        onClick={() => setNotifPagosPush(!notifPagosPush)}
-                        className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-[#0066FF] ${
-                          notifPagosPush ? "bg-[#0066FF]" : "bg-slate-300 dark:bg-slate-700"
-                        }`}
-                      >
-                        <span className={`pointer-events-none inline-block size-5 transform rounded-full bg-white shadow-md ring-0 transition duration-200 ease-in-out ${notifPagosPush ? "translate-x-5" : "translate-x-0"}`} />
-                      </button>
+                      <InterruptorPreferencia
+                        id="preferencias-pagos-email"
+                        evento="Pagos y facturación"
+                        canal="Email"
+                        activo={notifPagosEmail}
+                        onAlternar={() => setNotifPagosEmail(!notifPagosEmail)}
+                      />
+                      <InterruptorPreferencia
+                        id="preferencias-pagos-push"
+                        evento="Pagos y facturación"
+                        canal="Web y Push"
+                        activo={notifPagosPush}
+                        onAlternar={() => setNotifPagosPush(!notifPagosPush)}
+                      />
                     </div>
                   </div>
 
@@ -762,28 +738,20 @@ export function PreferenciasCliente({ cuenta }: PreferenciasClienteProps) {
                       </div>
                     </div>
                     <div className="flex items-center gap-8 shrink-0">
-                      <button
-                        type="button"
-                        role="switch"
-                        aria-checked={notifPromocionesEmail}
-                        onClick={() => setNotifPromocionesEmail(!notifPromocionesEmail)}
-                        className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-[#0066FF] ${
-                          notifPromocionesEmail ? "bg-[#0066FF]" : "bg-slate-300 dark:bg-slate-700"
-                        }`}
-                      >
-                        <span className={`pointer-events-none inline-block size-5 transform rounded-full bg-white shadow-md ring-0 transition duration-200 ease-in-out ${notifPromocionesEmail ? "translate-x-5" : "translate-x-0"}`} />
-                      </button>
-                      <button
-                        type="button"
-                        role="switch"
-                        aria-checked={notifPromocionesPush}
-                        onClick={() => setNotifPromocionesPush(!notifPromocionesPush)}
-                        className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-[#0066FF] ${
-                          notifPromocionesPush ? "bg-[#0066FF]" : "bg-slate-300 dark:bg-slate-700"
-                        }`}
-                      >
-                        <span className={`pointer-events-none inline-block size-5 transform rounded-full bg-white shadow-md ring-0 transition duration-200 ease-in-out ${notifPromocionesPush ? "translate-x-5" : "translate-x-0"}`} />
-                      </button>
+                      <InterruptorPreferencia
+                        id="preferencias-promociones-email"
+                        evento="Promociones y novedades"
+                        canal="Email"
+                        activo={notifPromocionesEmail}
+                        onAlternar={() => setNotifPromocionesEmail(!notifPromocionesEmail)}
+                      />
+                      <InterruptorPreferencia
+                        id="preferencias-promociones-push"
+                        evento="Promociones y novedades"
+                        canal="Web y Push"
+                        activo={notifPromocionesPush}
+                        onAlternar={() => setNotifPromocionesPush(!notifPromocionesPush)}
+                      />
                     </div>
                   </div>
                 </div>
@@ -845,15 +813,17 @@ export function PreferenciasCliente({ cuenta }: PreferenciasClienteProps) {
                         <p className="text-[11px] user-essential-muted">Configura el uso de datos de la aplicación.</p>
                       </div>
                     </div>
-                    <select
+                    <SelectorPreferencia
+                      id="preferencias-uso-datos"
+                      etiquetaVisible="Uso de datos"
+                      nombreAccesible="Configuración de uso de datos de la aplicación"
                       value={usoDatos}
-                      onChange={(e) => setUsoDatos(e.target.value)}
-                      className="bg-white dark:bg-[#16253B] border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200 text-xs rounded-xl px-3 py-1.5 outline-none focus:ring-2 focus:ring-[#0066FF] shrink-0"
+                      onChange={(e) => setUsoDatos(e.target.value as "Activado" | "Solo esenciales" | "Desactivado")}
                     >
                       <option value="Activado">Activado</option>
                       <option value="Solo esenciales">Solo esenciales</option>
                       <option value="Desactivado">Desactivado</option>
-                    </select>
+                    </SelectorPreferencia>
                   </div>
 
                   {/* Fila 3: Biometría */}

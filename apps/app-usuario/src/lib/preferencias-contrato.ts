@@ -309,7 +309,19 @@ export async function sincronizarPreferenciasRemotas(
     guardarPendientes(userId, { general: {}, notificacion: {} });
     return { exito: true };
   } catch (err: unknown) {
-    const mensaje = err instanceof Error ? err.message : String(err);
+    let mensaje = "Error al sincronizar con el servidor";
+    if (err instanceof Error) {
+      mensaje = err.message;
+    } else if (typeof err === "object" && err !== null) {
+      const e = err as Record<string, unknown>;
+      if (typeof e.message === "string") mensaje = e.message;
+      else if (typeof e.error === "string") mensaje = e.error;
+      else if (typeof e.details === "string") mensaje = e.details;
+      else mensaje = JSON.stringify(err);
+    } else {
+      mensaje = String(err);
+    }
+
     const errObj = err as Record<string, unknown> | null;
     const status = typeof errObj?.status === "number" ? errObj.status : 0;
     const es503 = status === 503 || mensaje.includes("503") || mensaje.includes("fallo_controlado_auditoria");

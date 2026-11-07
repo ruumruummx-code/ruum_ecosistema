@@ -136,7 +136,12 @@ export function MapaUbicacion({
     };
   }, [coordenadas, ampliado, revision]);
   return (
-    <div className={s.mapFrame} aria-label={`Mapa de ${direccion}`}>
+    <div
+      role="region"
+      tabIndex={0}
+      className={s.mapFrame}
+      aria-label={`Mapa de ubicación: ${direccion}`}
+    >
       <div ref={contenedor} className={s.mapCanvas} />
       {estado !== "listo" && (
         <div className={s.mapMessage} role="status">

@@ -53,6 +53,9 @@ describe("MisTrasladosCliente", () => {
     cerrado.pasaporte.monto_pagado = 229000;
     render(<MisTrasladosCliente Traslados={[viaje("solicitud_creada"), viaje("traslado_en_curso", "activo"), cerrado]} pestanaInicial="activos" />);
     const resumen = screen.getByLabelText("Resumen de traslados");
+    expect([...resumen.children].map(group => [...group.children].map(el => el.tagName))).toEqual([['DT', 'DD'], ['DT', 'DD'], ['DT', 'DD']]);
+    expect([...resumen.querySelectorAll('dt')].map(el => el.textContent)).toEqual(['Total', 'Activos', 'Gastado']);
+    for (const icon of resumen.querySelectorAll('svg')) expect(icon.closest('[aria-hidden="true"]')).not.toBeNull();
     expect(within(resumen).getByText("$229k")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /^Programados/ })).toHaveTextContent("1");
     expect(within(resumen).getByText("3")).toBeInTheDocument();

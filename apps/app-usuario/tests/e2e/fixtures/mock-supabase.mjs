@@ -78,6 +78,8 @@ export const FILA_USUARIO_E2E = {
   foto_url: "https://cdn.test/foto-perfil-e2e.jpg",
   estado_cuenta: "activa",
   version_terminos_aceptada: 1,
+  actualizado_en: "2026-01-01T00:00:00.000Z",
+  preferencias: {},
   created_at: "2026-01-01T00:00:00.000Z",
   updated_at: "2026-01-01T00:00:00.000Z"
 };
@@ -96,7 +98,14 @@ const SESIONES = new Map([
   [ACCOUNT_TOKEN, { ...FILA_USUARIO_E2E, ...ACCOUNT_PROFILE }],
   [LOCATIONS_TOKEN, { ...FILA_USUARIO_E2E, ...LOCATIONS_PROFILE }],
   [ACCESS_TOKEN_PENDIENTE, FILA_USUARIO_PENDIENTE],
-  ["mock_access_token_foto_perfil", { ...FILA_USUARIO_E2E, foto_url: null }]
+  ["mock_access_token_foto_perfil", { ...FILA_USUARIO_E2E, foto_url: null }],
+  ["mock_access_token_user_b", {
+    ...FILA_USUARIO_E2E,
+    id: "00000000-0000-4000-8000-0000000000f2",
+    auth_user_id: "00000000-0000-4000-8000-00000000e002",
+    email: "usuarioB@ejemplo.com",
+    nombre: "Usuario B"
+  }]
 ]);
 const fotosPerfil = new Map();
 
@@ -309,17 +318,17 @@ const servidor = createServer(async (req, res) => {
       return;
     }
     const cuerpo = await leerCuerpo(req);
-    if (req.method === "PATCH" && ruta === "/rest/v1/usuarios" && tokenDe(req) === "mock_access_token_foto_perfil") {
-      const fila = SESIONES.get(tokenDe(req));
-      Object.assign(fila, JSON.parse(cuerpo));
-      responder(res, 200, fila);
-      return;
-    }
-    if (req.method === "PATCH" && ruta === "/rest/v1/usuarios" && tokenDe(req) === LOCATIONS_TOKEN) {
-      const fila=SESIONES.get(LOCATIONS_TOKEN);
-      const coincide=['id','auth_user_id','actualizado_en'].every(k=>url.searchParams.get(k)===`eq.${fila[k]}`);
-      if(coincide)Object.assign(fila,JSON.parse(cuerpo));
-      responder(res,200,coincide?{id:fila.id}:null);return;
+    if (req.method === "PATCH" && ruta === "/rest/v1/usuarios") {
+      const token = tokenDe(req);
+      const fila = SESIONES.get(token);
+      if (fila) {
+        try {
+          Object.assign(fila, JSON.parse(cuerpo));
+        } catch {}
+        const singular = (req.headers.accept ?? "").includes("vnd.pgrst.object");
+        responder(res, 200, singular ? fila : [fila]);
+        return;
+      }
     }
     // `public.usuarios` es el único con datos: `obtenerUsuarioActual` y
     // `clasificarRolApp` lo leen desde el servidor (middleware y RSC). Cualquier

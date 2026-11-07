@@ -397,35 +397,41 @@ export function MisTrasladosCliente({
       <dl aria-label="Resumen de traslados" className="grid grid-cols-3 gap-2.5 sm:gap-3.5">
         {/* Total (Azul) */}
         <div className="flex flex-col items-center justify-center rounded-2xl border border-[#d6e4f8] bg-[#edf4fe] p-3 text-center dark:border-[#1a3a60] dark:bg-[#0c2646]">
-          <span className="text-[#2563eb] dark:text-[#4d94ff]">
-            <IconoCarroFrente className="size-5" />
-          </span>
-          <dd className="mt-1 text-[22px] font-extrabold tracking-tight text-[#0a2342] dark:text-[#f6f8fb]">
-            {Traslados.length}
+          <dt className="order-2 text-[11.5px] font-semibold user-essential-muted">Total</dt>
+          <dd className="order-1 flex flex-col items-center">
+            <span aria-hidden="true" className="text-[#2563eb] dark:text-[#4d94ff]">
+              <IconoCarroFrente className="size-5" />
+            </span>
+            <span className="mt-1 text-[22px] font-extrabold tracking-tight text-[#0a2342] dark:text-[#f6f8fb]">
+              {Traslados.length}
+            </span>
           </dd>
-          <dt className="text-[11.5px] font-semibold user-essential-muted">Total</dt>
         </div>
 
         {/* Activos (Verde) */}
         <div className="flex flex-col items-center justify-center rounded-2xl border border-[#cbeed9] bg-[#eaf8f0] p-3 text-center dark:border-[#135939] dark:bg-[#09281e]">
-          <span className="text-[#10b981] dark:text-[#34d399]">
-            <IconoRelojVerde className="size-5" />
-          </span>
-          <dd className="mt-1 text-[22px] font-extrabold tracking-tight text-[#0a2342] dark:text-[#f6f8fb]">
-            {conteos.activos}
+          <dt className="order-2 text-[11.5px] font-semibold user-essential-muted">Activos</dt>
+          <dd className="order-1 flex flex-col items-center">
+            <span aria-hidden="true" className="text-[#10b981] dark:text-[#34d399]">
+              <IconoRelojVerde className="size-5" />
+            </span>
+            <span className="mt-1 text-[22px] font-extrabold tracking-tight text-[#0a2342] dark:text-[#f6f8fb]">
+              {conteos.activos}
+            </span>
           </dd>
-          <dt className="text-[11.5px] font-semibold user-essential-muted">Activos</dt>
         </div>
 
         {/* Gastado (Coral/Rosa) */}
         <div className="flex flex-col items-center justify-center rounded-2xl border border-[#f9d7d7] bg-[#fdf0f0] p-3 text-center dark:border-[#591d24] dark:bg-[#331418]">
-          <span className="text-[#ef4444] dark:text-[#f87171]">
-            <IconoDolarCoral className="size-5" />
-          </span>
-          <dd className="mt-1 text-[22px] font-extrabold tracking-tight text-[#0a2342] dark:text-[#f6f8fb]">
-            {gastoFormateado}
+          <dt className="order-2 text-[11.5px] font-semibold user-essential-muted">Gastado</dt>
+          <dd className="order-1 flex flex-col items-center">
+            <span aria-hidden="true" className="text-[#ef4444] dark:text-[#f87171]">
+              <IconoDolarCoral className="size-5" />
+            </span>
+            <span className="mt-1 text-[22px] font-extrabold tracking-tight text-[#0a2342] dark:text-[#f6f8fb]">
+              {gastoFormateado}
+            </span>
           </dd>
-          <dt className="text-[11.5px] font-semibold user-essential-muted">Gastado</dt>
         </div>
       </dl>
 

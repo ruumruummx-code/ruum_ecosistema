@@ -359,48 +359,48 @@ export function CuentaCliente({
         <div className="my-3.5 border-t border-white/10" />
 
         {/* 3 Métricas en fila horizontal */}
-        <dl className="grid grid-cols-3 divide-x divide-white/10 text-center">
+        <dl aria-label="Resumen de cuenta" className="grid grid-cols-3 divide-x divide-white/10 text-center">
           {/* Incidencias */}
-          <div className="px-2">
-            <div className="flex items-center justify-center gap-1.5">
+          <div className="flex flex-col px-2">
+            <dt className="order-2 text-[11px] font-medium text-slate-300">Incidencias</dt>
+            <dd className="order-1 flex items-center justify-center gap-1.5">
               <svg className="size-3.5 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                 <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
                 <polyline points="14 2 14 8 20 8" />
               </svg>
-              <dd className="font-display text-[16px] font-bold text-white">
+              <span className="font-display text-[16px] font-bold text-white">
                 {incidenciasAbiertas}
-              </dd>
-            </div>
-            <dt className="text-[11px] font-medium text-slate-300">Incidencias</dt>
+              </span>
+            </dd>
           </div>
 
           {/* Traslados */}
-          <div className="px-2">
-            <div className="flex items-center justify-center gap-1.5">
+          <div className="flex flex-col px-2">
+            <dt className="order-2 text-[11px] font-medium text-slate-300">Traslados</dt>
+            <dd className="order-1 flex items-center justify-center gap-1.5">
               <svg className="size-3.5 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                 <path d="M12 2a8 8 0 0 0-8 8c0 5.25 8 12 8 12s8-6.75 8-12a8 8 0 0 0-8-8z" />
                 <circle cx="12" cy="10" r="2.5" />
               </svg>
-              <dd className="font-display text-[16px] font-bold text-white">
+              <span className="font-display text-[16px] font-bold text-white">
                 {totalTraslados}
-              </dd>
-            </div>
-            <dt className="text-[11px] font-medium text-slate-300">Traslados</dt>
+              </span>
+            </dd>
           </div>
 
           {/* Vehículos */}
-          <div className="px-2">
-            <div className="flex items-center justify-center gap-1.5">
+          <div className="flex flex-col px-2">
+            <dt className="order-2 text-[11px] font-medium text-slate-300">Vehículos</dt>
+            <dd className="order-1 flex items-center justify-center gap-1.5">
               <svg className="size-3.5 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                 <path d="M5 11l1.5-4.5h11L19 11M4 11h16v6a1 1 0 0 1-1 1h-1a2 2 0 0 1-4 0H10a2 2 0 0 1-4 0H5a1 1 0 0 1-1-1v-6z" />
                 <circle cx="7.5" cy="17.5" r="1.5" />
                 <circle cx="16.5" cy="17.5" r="1.5" />
               </svg>
-              <dd className="font-display text-[16px] font-bold text-white">
+              <span className="font-display text-[16px] font-bold text-white">
                 {totalVehiculos}
-              </dd>
-            </div>
-            <dt className="text-[11px] font-medium text-slate-300">Vehículos</dt>
+              </span>
+            </dd>
           </div>
         </dl>
       </section>

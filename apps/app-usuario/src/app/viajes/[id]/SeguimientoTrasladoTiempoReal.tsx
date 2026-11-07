@@ -201,7 +201,17 @@ export function SeguimientoTrasladoTiempoReal({
   }
 
   return <div className={styles.panel}>
-    <MapaPasaporte origen={origen} destino={destino} ubicacion={ubicacionDiferida} activo={activo} haciaOrigen={estadoEnVivo === "conductor_en_camino_al_origen"} seguirUbicacion={!cerrado && (estadoEnVivo === "traslado_en_curso" || estadoEnVivo === "conductor_en_camino_al_origen")} onEta={setEta} />
+    <MapaPasaporte
+      origen={origen}
+      destino={destino}
+      ubicacion={ubicacionDiferida}
+      activo={activo}
+      haciaOrigen={estadoEnVivo === "conductor_en_camino_al_origen"}
+      seguirUbicacion={!cerrado && (estadoEnVivo === "traslado_en_curso" || estadoEnVivo === "conductor_en_camino_al_origen")}
+      onEta={setEta}
+      estadoTexto={cerrado ? "Finalizado" : estadoEnVivo ? ETIQUETA_ESTADO_TRASLADO[estadoEnVivo] : "Buscando conductor"}
+      actualizadoEn={estadoActualizadoEn ?? ubicacion?.registrado_en ?? undefined}
+    />
     <div className={styles.tools}><button type="button" onClick={refrescar} disabled={cargando}>{cargando ? "Actualizando…" : "↻ Actualizar"}</button></div>
     <div className={styles.status} role="status" aria-live="polite">
       <progress aria-label="Progreso del traslado" max={ESTADOS_VISIBLES.length} value={cerrado ? ESTADOS_VISIBLES.length : Math.max(0, ESTADOS_VISIBLES.indexOf(estadoEnVivo as EstadoTraslado) + 1)} />

@@ -1,0 +1,80 @@
+{
+  "phase": "after",
+  "width": 390,
+  "route": "/mis-viajes",
+  "violations": [],
+  "incomplete": [],
+  "lists": [
+    {
+      "label": "Resumen de traslados",
+      "html": "<dl aria-label=\"Resumen de traslados\" class=\"grid grid-cols-3 gap-2.5 sm:gap-3.5\"><div class=\"flex flex-col items-center justify-center rounded-2xl border border-[#d6e4f8] bg-[#edf4fe] p-3 text-center dark:border-[#1a3a60] dark:bg-[#0c2646]\"><dt class=\"order-2 text-[11.5px] font-semibold user-essential-muted\">Total</dt><dd class=\"order-1 flex flex-col items-center\"><span aria-hidden=\"true\" class=\"text-[#2563eb] dark:text-[#4d94ff]\"><svg class=\"size-5\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M5 11l1.5-4.5h11L19 11M4 11h16v6a1 1 0 0 1-1 1h-1a2 2 0 0 1-4 0H10a2 2 0 0 1-4 0H5a1 1 0 0 1-1-1v-6z\"></path><circle cx=\"7.5\" cy=\"17.5\" r=\"1.5\"></circle><circle cx=\"16.5\" cy=\"17.5\" r=\"1.5\"></circle></svg></span><span class=\"mt-1 text-[22px] font-extrabold tracking-tight text-[#0a2342] dark:text-[#f6f8fb]\">10</span></dd></div><div class=\"flex flex-col items-center justify-center rounded-2xl border border-[#cbeed9] bg-[#eaf8f0] p-3 text-center dark:border-[#135939] dark:bg-[#09281e]\"><dt class=\"order-2 text-[11.5px] font-semibold user-essential-muted\">Activos</dt><dd class=\"order-1 flex flex-col items-center\"><span aria-hidden=\"true\" class=\"text-[#10b981] dark:text-[#34d399]\"><svg class=\"size-5\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><circle cx=\"12\" cy=\"12\" r=\"9\"></circle><polyline points=\"12 6 12 12 15 15\"></polyline></svg></span><span class=\"mt-1 text-[22px] font-extrabold tracking-tight text-[#0a2342] dark:text-[#f6f8fb]\">1</span></dd></div><div class=\"flex flex-col items-center justify-center rounded-2xl border border-[#f9d7d7] bg-[#fdf0f0] p-3 text-center dark:border-[#591d24] dark:bg-[#331418]\"><dt class=\"order-2 text-[11.5px] font-semibold user-essential-muted\">Gastado</dt><dd class=\"order-1 flex flex-col items-center\"><span aria-hidden=\"true\" class=\"text-[#ef4444] dark:text-[#f87171]\"><svg class=\"size-5\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><line x1=\"12\" y1=\"2\" x2=\"12\" y2=\"22\"></line><path d=\"M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6\"></path></svg></span><span class=\"mt-1 text-[22px] font-extrabold tracking-tight text-[#0a2342] dark:text-[#f6f8fb]\">$0</span></dd></div></dl>",
+      "groups": [
+        {
+          "tag": "DIV",
+          "children": [
+            "DT",
+            "DD"
+          ],
+          "text": "Total10"
+        },
+        {
+          "tag": "DIV",
+          "children": [
+            "DT",
+            "DD"
+          ],
+          "text": "Activos1"
+        },
+        {
+          "tag": "DIV",
+          "children": [
+            "DT",
+            "DD"
+          ],
+          "text": "Gastado$0"
+        }
+      ],
+      "metrics": [
+        {
+          "tag": "DT",
+          "text": "Total",
+          "x": 59.6875,
+          "y": 228
+        },
+        {
+          "tag": "DD",
+          "text": "10",
+          "x": 60.96875,
+          "y": 195
+        },
+        {
+          "tag": "DT",
+          "text": "Activos",
+          "x": 176.0625,
+          "y": 228
+        },
+        {
+          "tag": "DD",
+          "text": "1",
+          "x": 189.9375,
+          "y": 195
+        },
+        {
+          "tag": "DT",
+          "text": "Gastado",
+          "x": 296.1875,
+          "y": 228
+        },
+        {
+          "tag": "DD",
+          "text": "$0",
+          "x": 305.015625,
+          "y": 195
+        }
+      ]
+    }
+  ],
+  "reading": [
+    "- term: Total\n- definition: \"10\"\n- term: Activos\n- definition: \"1\"\n- term: Gastado\n- definition: $0"
+  ]
+}

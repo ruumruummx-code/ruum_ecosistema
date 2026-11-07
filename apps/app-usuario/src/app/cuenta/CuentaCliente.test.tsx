@@ -13,6 +13,10 @@ beforeEach(() => { vi.clearAllMocks(); signOut.mockResolvedValue({ error: null }
 describe("CuentaCliente — RR-2026-003", () => {
   it("muestra perfil compacto, contadores y logout final sin gestión de vehículos ni submenús en el lienzo", () => {
     cuenta();
+    const resumen = screen.getByLabelText('Resumen de cuenta');
+    expect([...resumen.children].map(group => [...group.children].map(el => el.tagName))).toEqual([['DT', 'DD'], ['DT', 'DD'], ['DT', 'DD']]);
+    expect([...resumen.children].map(group => [group.querySelector('dt')?.textContent, group.querySelector('dd')?.textContent?.trim()])).toEqual([['Incidencias', '1'], ['Traslados', '15'], ['Vehículos', '2']]);
+    for (const icon of resumen.querySelectorAll('svg')) expect(icon.closest('[aria-hidden="true"]')).not.toBeNull();
     expect(screen.getByText("Carlos Ramos")).toBeInTheDocument();
     expect(screen.getByText("registro@ruum.test")).toBeInTheDocument();
     expect(screen.getByText("+52 •••••• 5678")).toBeInTheDocument();

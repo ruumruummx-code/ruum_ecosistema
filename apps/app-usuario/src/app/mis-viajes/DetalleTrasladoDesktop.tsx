@@ -206,6 +206,10 @@ export function DetalleTrasladoDesktop({
                   compact
                   seguirUbicacion={activo && Boolean(tracking.ubicacion)}
                   onEta={setEta}
+                  origenCiudad={p.origen_ciudad ?? undefined}
+                  destinoCiudad={p.destino_ciudad ?? undefined}
+                  estadoTexto={p.estado ?? undefined}
+                  actualizadoEn={tracking.ubicacion?.registrado_en || p.actualizado_en || undefined}
                 />
               ) : (
                 <div className={s.mapEmpty}>

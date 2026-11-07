@@ -1,0 +1,11 @@
+{
+  "accountMobileIdentical": true,
+  "accountDesktopIdentical": true,
+  "tripMobileRegion": {
+    "left": 16,
+    "top": 159,
+    "width": 358,
+    "height": 99
+  },
+  "tripMobileIdentical": true
+}

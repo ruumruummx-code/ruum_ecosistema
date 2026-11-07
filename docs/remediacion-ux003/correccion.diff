@@ -1,0 +1,165 @@
+diff --git a/apps/app-usuario/src/app/cuenta/CuentaCliente.test.tsx b/apps/app-usuario/src/app/cuenta/CuentaCliente.test.tsx
+index 1b02b10..357732c 100644
+--- a/apps/app-usuario/src/app/cuenta/CuentaCliente.test.tsx
++++ b/apps/app-usuario/src/app/cuenta/CuentaCliente.test.tsx
+@@ -13,6 +13,10 @@ beforeEach(() => { vi.clearAllMocks(); signOut.mockResolvedValue({ error: null }
+ describe("CuentaCliente — RR-2026-003", () => {
+   it("muestra perfil compacto, contadores y logout final sin gestión de vehículos ni submenús en el lienzo", () => {
+     cuenta();
++    const resumen = screen.getByLabelText('Resumen de cuenta');
++    expect([...resumen.children].map(group => [...group.children].map(el => el.tagName))).toEqual([['DT', 'DD'], ['DT', 'DD'], ['DT', 'DD']]);
++    expect([...resumen.children].map(group => [group.querySelector('dt')?.textContent, group.querySelector('dd')?.textContent?.trim()])).toEqual([['Incidencias', '1'], ['Traslados', '15'], ['Vehículos', '2']]);
++    for (const icon of resumen.querySelectorAll('svg')) expect(icon.closest('[aria-hidden="true"]')).not.toBeNull();
+     expect(screen.getByText("Carlos Ramos")).toBeInTheDocument();
+     expect(screen.getByText("registro@ruum.test")).toBeInTheDocument();
+     expect(screen.getByText("+52 •••••• 5678")).toBeInTheDocument();
+diff --git a/apps/app-usuario/src/app/cuenta/CuentaCliente.tsx b/apps/app-usuario/src/app/cuenta/CuentaCliente.tsx
+index 645a4a8..9734084 100644
+--- a/apps/app-usuario/src/app/cuenta/CuentaCliente.tsx
++++ b/apps/app-usuario/src/app/cuenta/CuentaCliente.tsx
+@@ -359,48 +359,48 @@ export function CuentaCliente({
+         <div className="my-3.5 border-t border-white/10" />
+ 
+         {/* 3 Métricas en fila horizontal */}
+-        <dl className="grid grid-cols-3 divide-x divide-white/10 text-center">
++        <dl aria-label="Resumen de cuenta" className="grid grid-cols-3 divide-x divide-white/10 text-center">
+           {/* Incidencias */}
+-          <div className="px-2">
+-            <div className="flex items-center justify-center gap-1.5">
++          <div className="flex flex-col px-2">
++            <dt className="order-2 text-[11px] font-medium text-slate-300">Incidencias</dt>
++            <dd className="order-1 flex items-center justify-center gap-1.5">
+               <svg className="size-3.5 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                 <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                 <polyline points="14 2 14 8 20 8" />
+               </svg>
+-              <dd className="font-display text-[16px] font-bold text-white">
++              <span className="font-display text-[16px] font-bold text-white">
+                 {incidenciasAbiertas}
+-              </dd>
+-            </div>
+-            <dt className="text-[11px] font-medium text-slate-300">Incidencias</dt>
++              </span>
++            </dd>
+           </div>
+ 
+           {/* Traslados */}
+-          <div className="px-2">
+-            <div className="flex items-center justify-center gap-1.5">
++          <div className="flex flex-col px-2">
++            <dt className="order-2 text-[11px] font-medium text-slate-300">Traslados</dt>
++            <dd className="order-1 flex items-center justify-center gap-1.5">
+               <svg className="size-3.5 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                 <path d="M12 2a8 8 0 0 0-8 8c0 5.25 8 12 8 12s8-6.75 8-12a8 8 0 0 0-8-8z" />
+                 <circle cx="12" cy="10" r="2.5" />
+               </svg>
+-              <dd className="font-display text-[16px] font-bold text-white">
++              <span className="font-display text-[16px] font-bold text-white">
+                 {totalTraslados}
+-              </dd>
+-            </div>
+-            <dt className="text-[11px] font-medium text-slate-300">Traslados</dt>
++              </span>
++            </dd>
+           </div>
+ 
+           {/* Vehículos */}
+-          <div className="px-2">
+-            <div className="flex items-center justify-center gap-1.5">
++          <div className="flex flex-col px-2">
++            <dt className="order-2 text-[11px] font-medium text-slate-300">Vehículos</dt>
++            <dd className="order-1 flex items-center justify-center gap-1.5">
+               <svg className="size-3.5 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                 <path d="M5 11l1.5-4.5h11L19 11M4 11h16v6a1 1 0 0 1-1 1h-1a2 2 0 0 1-4 0H10a2 2 0 0 1-4 0H5a1 1 0 0 1-1-1v-6z" />
+                 <circle cx="7.5" cy="17.5" r="1.5" />
+                 <circle cx="16.5" cy="17.5" r="1.5" />
+               </svg>
+-              <dd className="font-display text-[16px] font-bold text-white">
++              <span className="font-display text-[16px] font-bold text-white">
+                 {totalVehiculos}
+-              </dd>
+-            </div>
+-            <dt className="text-[11px] font-medium text-slate-300">Vehículos</dt>
++              </span>
++            </dd>
+           </div>
+         </dl>
+       </section>
+diff --git a/apps/app-usuario/src/app/mis-viajes/MisViajesCliente.test.tsx b/apps/app-usuario/src/app/mis-viajes/MisViajesCliente.test.tsx
+index 43ecb85..bb788d0 100644
+--- a/apps/app-usuario/src/app/mis-viajes/MisViajesCliente.test.tsx
++++ b/apps/app-usuario/src/app/mis-viajes/MisViajesCliente.test.tsx
+@@ -53,6 +53,9 @@ describe("MisTrasladosCliente", () => {
+     cerrado.pasaporte.monto_pagado = 229000;
+     render(<MisTrasladosCliente Traslados={[viaje("solicitud_creada"), viaje("traslado_en_curso", "activo"), cerrado]} pestanaInicial="activos" />);
+     const resumen = screen.getByLabelText("Resumen de traslados");
++    expect([...resumen.children].map(group => [...group.children].map(el => el.tagName))).toEqual([['DT', 'DD'], ['DT', 'DD'], ['DT', 'DD']]);
++    expect([...resumen.querySelectorAll('dt')].map(el => el.textContent)).toEqual(['Total', 'Activos', 'Gastado']);
++    for (const icon of resumen.querySelectorAll('svg')) expect(icon.closest('[aria-hidden="true"]')).not.toBeNull();
+     expect(within(resumen).getByText("$229k")).toBeInTheDocument();
+     expect(screen.getByRole("button", { name: /^Programados/ })).toHaveTextContent("1");
+     expect(within(resumen).getByText("3")).toBeInTheDocument();
+diff --git a/apps/app-usuario/src/app/mis-viajes/MisViajesCliente.tsx b/apps/app-usuario/src/app/mis-viajes/MisViajesCliente.tsx
+index 55ea5c6..6ceb06b 100644
+--- a/apps/app-usuario/src/app/mis-viajes/MisViajesCliente.tsx
++++ b/apps/app-usuario/src/app/mis-viajes/MisViajesCliente.tsx
+@@ -397,35 +397,41 @@ export function MisTrasladosCliente({
+       <dl aria-label="Resumen de traslados" className="grid grid-cols-3 gap-2.5 sm:gap-3.5">
+         {/* Total (Azul) */}
+         <div className="flex flex-col items-center justify-center rounded-2xl border border-[#d6e4f8] bg-[#edf4fe] p-3 text-center dark:border-[#1a3a60] dark:bg-[#0c2646]">
+-          <span className="text-[#2563eb] dark:text-[#4d94ff]">
+-            <IconoCarroFrente className="size-5" />
+-          </span>
+-          <dd className="mt-1 text-[22px] font-extrabold tracking-tight text-[#0a2342] dark:text-[#f6f8fb]">
+-            {Traslados.length}
++          <dt className="order-2 text-[11.5px] font-semibold user-essential-muted">Total</dt>
++          <dd className="order-1 flex flex-col items-center">
++            <span aria-hidden="true" className="text-[#2563eb] dark:text-[#4d94ff]">
++              <IconoCarroFrente className="size-5" />
++            </span>
++            <span className="mt-1 text-[22px] font-extrabold tracking-tight text-[#0a2342] dark:text-[#f6f8fb]">
++              {Traslados.length}
++            </span>
+           </dd>
+-          <dt className="text-[11.5px] font-semibold user-essential-muted">Total</dt>
+         </div>
+ 
+         {/* Activos (Verde) */}
+         <div className="flex flex-col items-center justify-center rounded-2xl border border-[#cbeed9] bg-[#eaf8f0] p-3 text-center dark:border-[#135939] dark:bg-[#09281e]">
+-          <span className="text-[#10b981] dark:text-[#34d399]">
+-            <IconoRelojVerde className="size-5" />
+-          </span>
+-          <dd className="mt-1 text-[22px] font-extrabold tracking-tight text-[#0a2342] dark:text-[#f6f8fb]">
+-            {conteos.activos}
++          <dt className="order-2 text-[11.5px] font-semibold user-essential-muted">Activos</dt>
++          <dd className="order-1 flex flex-col items-center">
++            <span aria-hidden="true" className="text-[#10b981] dark:text-[#34d399]">
++              <IconoRelojVerde className="size-5" />
++            </span>
++            <span className="mt-1 text-[22px] font-extrabold tracking-tight text-[#0a2342] dark:text-[#f6f8fb]">
++              {conteos.activos}
++            </span>
+           </dd>
+-          <dt className="text-[11.5px] font-semibold user-essential-muted">Activos</dt>
+         </div>
+ 
+         {/* Gastado (Coral/Rosa) */}
+         <div className="flex flex-col items-center justify-center rounded-2xl border border-[#f9d7d7] bg-[#fdf0f0] p-3 text-center dark:border-[#591d24] dark:bg-[#331418]">
+-          <span className="text-[#ef4444] dark:text-[#f87171]">
+-            <IconoDolarCoral className="size-5" />
+-          </span>
+-          <dd className="mt-1 text-[22px] font-extrabold tracking-tight text-[#0a2342] dark:text-[#f6f8fb]">
+-            {gastoFormateado}
++          <dt className="order-2 text-[11.5px] font-semibold user-essential-muted">Gastado</dt>
++          <dd className="order-1 flex flex-col items-center">
++            <span aria-hidden="true" className="text-[#ef4444] dark:text-[#f87171]">
++              <IconoDolarCoral className="size-5" />
++            </span>
++            <span className="mt-1 text-[22px] font-extrabold tracking-tight text-[#0a2342] dark:text-[#f6f8fb]">
++              {gastoFormateado}
++            </span>
+           </dd>
+-          <dt className="text-[11.5px] font-semibold user-essential-muted">Gastado</dt>
+         </div>
+       </dl>
+ 

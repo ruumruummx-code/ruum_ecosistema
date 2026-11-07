@@ -260,4 +260,56 @@ describe("PreferenciasCliente", () => {
     render(<PreferenciasCliente cuenta={cuentaB} />);
     expect(screen.getAllByText("Español").length).toBeGreaterThanOrEqual(1);
   });
+
+  it("RUUM-UX-010 AC-1 & AC-3: los 9 interruptores tienen nombre accesible único con evento y canal", () => {
+    render(<PreferenciasCliente cuenta={mockCuenta} />);
+
+    // 1 general + 4 filas x 2 canales = 9 switches
+    const switchNombresEsperados = [
+      "Notificaciones y alertas generales",
+      "Recordatorios de traslados · Email",
+      "Recordatorios de traslados · Web y Push",
+      "Cambios de estado de traslados · Email",
+      "Cambios de estado de traslados · Web y Push",
+      "Pagos y facturación · Email",
+      "Pagos y facturación · Web y Push",
+      "Promociones y novedades · Email",
+      "Promociones y novedades · Web y Push",
+    ];
+
+    for (const nombre of switchNombresEsperados) {
+      const sw = screen.getByRole("switch", { name: new RegExp(nombre, "i") });
+      expect(sw).toBeInTheDocument();
+      expect(sw).toHaveAttribute("aria-checked");
+    }
+  });
+
+  it("RUUM-UX-010 AC-2: los 5 selectores tienen nombre accesible único y etiqueta asociada", () => {
+    render(<PreferenciasCliente cuenta={mockCuenta} />);
+
+    const selectNombresEsperados = [
+      "Zona horaria para mostrar fechas y horarios de traslados",
+      "Sistema de unidades para distancias, peso y consumo",
+      "Ajustes de contraste, tamaño de letra y accesibilidad",
+      "Sistema de unidades en la aplicación",
+      "Configuración de uso de datos de la aplicación",
+    ];
+
+    for (const nombre of selectNombresEsperados) {
+      const sel = screen.getByRole("combobox", { name: new RegExp(nombre, "i") });
+      expect(sel).toBeInTheDocument();
+      expect(sel.id).toBeTruthy();
+    }
+  });
+
+  it("RUUM-UX-010 AC-4: los interruptores actualizan aria-checked y anuncian estado", () => {
+    render(<PreferenciasCliente cuenta={mockCuenta} />);
+
+    const sw = screen.getByRole("switch", { name: /Recordatorios de traslados · Email/i });
+    const estadoInicial = sw.getAttribute("aria-checked");
+
+    fireEvent.click(sw);
+    const estadoNuevo = sw.getAttribute("aria-checked");
+    expect(estadoNuevo).not.toBe(estadoInicial);
+  });
 });

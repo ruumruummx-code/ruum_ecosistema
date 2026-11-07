@@ -13,7 +13,40 @@ function valid(p: Point): p is {
     lat: number;
     lng: number;
 } { return typeof p.lat === "number" && typeof p.lng === "number" && Number.isFinite(p.lat) && Number.isFinite(p.lng) && Math.abs(p.lat) <= 90 && Math.abs(p.lng) <= 180; }
-export function MapaPasaporte({ origen: originProp, destino: destinationProp, ubicacion, activo, haciaOrigen = false, seguirUbicacion = false, compact = false, onDistance, onEta }: {
+
+function formatearAntiguedad(fechaIso?: string | null): string {
+    if (!fechaIso) return "reciente";
+    try {
+        const d = new Date(fechaIso);
+        if (isNaN(d.getTime())) return "reciente";
+        const segundos = Math.max(0, Math.floor((Date.now() - d.getTime()) / 1000));
+        if (segundos < 60) return "hace menos de un minuto";
+        const minutos = Math.floor(segundos / 60);
+        if (minutos < 60) return `hace ${minutos} minuto${minutos === 1 ? "" : "s"}`;
+        const horas = Math.floor(minutos / 60);
+        if (horas < 24) return `hace ${horas} hora${horas === 1 ? "" : "s"}`;
+        return d.toLocaleDateString("es-MX", { day: "numeric", month: "short" });
+    } catch {
+        return "reciente";
+    }
+}
+
+export function MapaPasaporte({
+    origen: originProp,
+    destino: destinationProp,
+    ubicacion,
+    activo,
+    haciaOrigen = false,
+    seguirUbicacion = false,
+    compact = false,
+    onDistance,
+    onEta,
+    etiquetaAccesible,
+    origenCiudad,
+    destinoCiudad,
+    estadoTexto,
+    actualizadoEn,
+}: {
     origen: Point;
     destino: Point;
     ubicacion: UbicacionTraslado | null;
@@ -23,6 +56,11 @@ export function MapaPasaporte({ origen: originProp, destino: destinationProp, ub
     onEta: (minutes: number | null) => void;
     onDistance?: (km: number | null) => void;
     compact?: boolean;
+    etiquetaAccesible?: string;
+    origenCiudad?: string;
+    destinoCiudad?: string;
+    estadoTexto?: string;
+    actualizadoEn?: string;
 }) {
     const origen = useMemo(() => ({ lat: originProp.lat, lng: originProp.lng }), [originProp.lat, originProp.lng]);
     const destino = useMemo(() => ({ lat: destinationProp.lat, lng: destinationProp.lng }), [destinationProp.lat, destinationProp.lng]);
@@ -110,5 +148,50 @@ export function MapaPasaporte({ origen: originProp, destino: destinationProp, ub
         } });
         return () => abort.abort();
     }, [ready, token, origen, destino, driverLat, driverLng, ubicacion, haciaOrigen, seguirUbicacion, onEta, onDistance]);
-    return <><div ref={container} className={styles.map} aria-label="Mapa interactivo del traslado">{!token && <div className={styles.empty}>El mapa no está disponible por ahora. El estado de tu traslado sigue actualizándose.</div>}</div>{error && <p className={styles.mapError} role="status">{error}</p>}</>;
+    const nombreMapa =
+        etiquetaAccesible ||
+        (origenCiudad && destinoCiudad
+            ? `Mapa de seguimiento en vivo del traslado de ${origenCiudad} a ${destinoCiudad}`
+            : "Mapa de seguimiento en vivo de la ruta del traslado");
+
+    const textoUbicacionConductor = ubicacion && valid({ lat: driverLat, lng: driverLng })
+        ? `Última posición registrada del conductor: latitud ${driverLat!.toFixed(4)}, longitud ${driverLng!.toFixed(4)}.`
+        : valid(origen)
+            ? `Punto de partida: latitud ${origen.lat.toFixed(4)}, longitud ${origen.lng.toFixed(4)}.`
+            : "Punto de partida pendiente de confirmación.";
+
+    const textoDestino = valid(destino)
+        ? `Destino: latitud ${destino.lat.toFixed(4)}, longitud ${destino.lng.toFixed(4)}.`
+        : "";
+
+    const antiguedad = formatearAntiguedad(actualizadoEn || ubicacion?.registrado_en);
+
+    return (
+        <>
+            <div
+                ref={container}
+                role="region"
+                aria-label={nombreMapa}
+                tabIndex={0}
+                className={styles.map}
+            >
+                {!token && (
+                    <div className={styles.empty}>
+                        El mapa no está disponible por ahora. El estado de tu traslado sigue actualizándose.
+                    </div>
+                )}
+                {/* Información textual de estado, ubicación y antigüedad (AC-4) */}
+                <div className="sr-only" role="status" aria-live="polite">
+                    <p>
+                        {`Estado: ${estadoTexto || (activo ? "En curso" : "Programado")}. ${textoUbicacionConductor} ${textoDestino} Actualizado ${antiguedad}.`}
+                    </p>
+                </div>
+            </div>
+            {error && (
+                <p className={styles.mapError} role="status">
+                    {error}
+                </p>
+            )}
+        </>
+    );
 }

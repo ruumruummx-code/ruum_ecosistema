@@ -1,0 +1,67 @@
+{
+  "timestamp": "2026-11-06T23:50:56.718Z",
+  "movilViajesId": {
+    "url": "http://localhost:3012/viajes/10000000-0000-4000-8000-000000000001",
+    "ariaProhibitedViolations": 0,
+    "violacionesDetalle": [],
+    "mapa": {
+      "encontrado": true,
+      "role": "region",
+      "ariaLabel": "Mapa de seguimiento en vivo de la ruta del traslado",
+      "tabIndex": "0",
+      "tieneFoco": true,
+      "srStatus": {
+        "existe": true,
+        "ariaLive": "polite",
+        "texto": "Estado: En curso. Última posición registrada del conductor: latitud 19.2740, longitud -99.5240. Destino: latitud 19.2860, longitud -99.5100. Actualizado hace menos de un minuto."
+      }
+    }
+  },
+  "escritorioMisViajes": {
+    "url": "http://localhost:3012/mis-viajes",
+    "ariaProhibitedViolations": 0,
+    "violacionesDetalle": [],
+    "mapa": {
+      "encontrado": true,
+      "role": "region",
+      "ariaLabel": "Mapa de seguimiento en vivo del traslado de San Mateo Atenco a Lerma de Villada",
+      "tabIndex": "0",
+      "tieneFoco": true,
+      "srStatus": {
+        "existe": true,
+        "ariaLive": "polite",
+        "texto": "Estado: traslado_en_curso. Última posición registrada del conductor: latitud 19.2740, longitud -99.5240. Destino: latitud 19.2860, longitud -99.5100. Actualizado hace menos de un minuto."
+      }
+    }
+  },
+  "criteriosAceptacion": {
+    "AC-1_RolValido_SinAriaProhibitedAttr": {
+      "cumplido": true,
+      "detalle": "Móvil violaciones: 0, Escritorio violaciones: 0. Ambos usan role=\"region\"."
+    },
+    "AC-2_NombreAccesibleContextual": {
+      "cumplido": true,
+      "detalle": "Móvil: \"Mapa de seguimiento en vivo de la ruta del traslado\". Escritorio: \"Mapa de seguimiento en vivo del traslado de San Mateo Atenco a Lerma de Villada\"."
+    },
+    "AC-3_ControlesInteractivosNoOcultos": {
+      "cumplido": true,
+      "detalle": "No se utilizó aria-hidden=\"true\" en el contenedor ni en sus controles hijos; no se utilizó role=\"application\"."
+    },
+    "AC-4_InformacionTextualComplementaria": {
+      "cumplido": true,
+      "detalle": "Texto complementario presente con role=\"status\" y aria-live=\"polite\". Móvil: \"Estado: En curso. Última posición registrada del conductor: latitud 19.2740, longitud -99.5240. Destino: latitud 19.2860, longitud -99.5100. Actualizado hace menos de un minuto.\""
+    },
+    "AC-5_NavegacionPorTecladoOperativa": {
+      "cumplido": true,
+      "detalle": "Ambos contenedores tienen tabIndex=\"0\" y reciben foco correctamente."
+    },
+    "AC-6_VerificacionEnRutasAuditadas": {
+      "cumplido": true,
+      "detalle": "Verificado con éxito en /viajes/10000000-0000-4000-8000-000000000001 y /mis-viajes."
+    },
+    "AC-7_SinRegresionVisual": {
+      "cumplido": true,
+      "detalle": "Capturas de pantalla generadas sin alteraciones en estilos ni layout del mapa."
+    }
+  }
+}
