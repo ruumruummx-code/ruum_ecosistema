@@ -1,0 +1,192 @@
+{
+  "ticket": "SD-REM-002",
+  "criterio": "SD-REM-002-AC-5",
+  "timestamp": "2026-11-07T07:06:06.953Z",
+  "viewportsVerificados": [
+    {
+      "viewportWidth": 320,
+      "theme": "light",
+      "screenshot": "modal-long--light--320px.png",
+      "closeButtonPosition": {
+        "x": 243,
+        "y": 37,
+        "width": 44,
+        "height": 44,
+        "isInViewport": true
+      },
+      "dialogGeometry": {
+        "overflowY": "auto",
+        "maxHeight": "868px",
+        "top": 16,
+        "height": 868
+      },
+      "axeViolations": 0,
+      "tree": "- dialog \"Confirmar operación\":\n  - heading \"Confirmar operación\" [level=2]\n  - button \"Cerrar diálogo\"\n  - paragraph: Información importante del traslado con una descripción extensa que debe permanecer legible y operable al ampliar el texto y reducir el ancho de la pantalla.\n  - paragraph: Información importante del traslado con una descripción extensa que debe permanecer legible y operable al ampliar el texto y reducir el ancho de la pantalla.\n  - paragraph: Información importante del traslado con una descripción extensa que debe permanecer legible y operable al ampliar el texto y reducir el ancho de la pantalla.\n  - paragraph: Información importante del traslado con una descripción extensa que debe permanecer legible y operable al ampliar el texto y reducir el ancho de la pantalla.\n  - paragraph: Información importante del traslado con una descripción extensa que debe permanecer legible y operable al ampliar el texto y reducir el ancho de la pantalla.\n  - paragraph: Información importante del traslado con una descripción extensa que debe permanecer legible y operable al ampliar el texto y reducir el ancho de la pantalla.\n  - paragraph: Información importante del traslado con una descripción extensa que debe permanecer legible y operable al ampliar el texto y reducir el ancho de la pantalla.\n  - paragraph: Información importante del traslado con una descripción extensa que debe permanecer legible y operable al ampliar el texto y reducir el ancho de la pantalla.\n  - paragraph: Información importante del traslado con una descripción extensa que debe permanecer legible y operable al ampliar el texto y reducir el ancho de la pantalla.\n  - paragraph: Información importante del traslado con una descripción extensa que debe permanecer legible y operable al ampliar el texto y reducir el ancho de la pantalla.\n  - paragraph: Información importante del traslado con una descripción extensa que debe permanecer legible y operable al ampliar el texto y reducir el ancho de la pantalla.\n  - paragraph: Información importante del traslado con una descripción extensa que debe permanecer legible y operable al ampliar el texto y reducir el ancho de la pantalla.\n  - paragraph: Información importante del traslado con una descripción extensa que debe permanecer legible y operable al ampliar el texto y reducir el ancho de la pantalla.\n  - paragraph: Información importante del traslado con una descripción extensa que debe permanecer legible y operable al ampliar el texto y reducir el ancho de la pantalla.\n  - paragraph: Información importante del traslado con una descripción extensa que debe permanecer legible y operable al ampliar el texto y reducir el ancho de la pantalla.\n  - paragraph: Información importante del traslado con una descripción extensa que debe permanecer legible y operable al ampliar el texto y reducir el ancho de la pantalla.\n  - paragraph: Información importante del traslado con una descripción extensa que debe permanecer legible y operable al ampliar el texto y reducir el ancho de la pantalla.\n  - paragraph: Información importante del traslado con una descripción extensa que debe permanecer legible y operable al ampliar el texto y reducir el ancho de la pantalla.\n  - paragraph: Información importante del traslado con una descripción extensa que debe permanecer legible y operable al ampliar el texto y reducir el ancho de la pantalla.\n  - paragraph: Información importante del traslado con una descripción extensa que debe permanecer legible y operable al ampliar el texto y reducir el ancho de la pantalla.\n  - paragraph: Información importante del traslado con una descripción extensa que debe permanecer legible y operable al ampliar el texto y reducir el ancho de la pantalla.\n  - button \"Aceptar\"\n  - button \"Mantener\""
+    },
+    {
+      "viewportWidth": 320,
+      "theme": "dark",
+      "screenshot": "modal-long--dark--320px.png",
+      "closeButtonPosition": {
+        "x": 243,
+        "y": 37,
+        "width": 44,
+        "height": 44,
+        "isInViewport": true
+      },
+      "dialogGeometry": {
+        "overflowY": "auto",
+        "maxHeight": "868px",
+        "top": 16,
+        "height": 868
+      },
+      "axeViolations": 0,
+      "tree": "- dialog \"Confirmar operación\":\n  - heading \"Confirmar operación\" [level=2]\n  - button \"Cerrar diálogo\"\n  - paragraph: Información importante del traslado con una descripción extensa que debe permanecer legible y operable al ampliar el texto y reducir el ancho de la pantalla.\n  - paragraph: Información importante del traslado con una descripción extensa que debe permanecer legible y operable al ampliar el texto y reducir el ancho de la pantalla.\n  - paragraph: Información importante del traslado con una descripción extensa que debe permanecer legible y operable al ampliar el texto y reducir el ancho de la pantalla.\n  - paragraph: Información importante del traslado con una descripción extensa que debe permanecer legible y operable al ampliar el texto y reducir el ancho de la pantalla.\n  - paragraph: Información importante del traslado con una descripción extensa que debe permanecer legible y operable al ampliar el texto y reducir el ancho de la pantalla.\n  - paragraph: Información importante del traslado con una descripción extensa que debe permanecer legible y operable al ampliar el texto y reducir el ancho de la pantalla.\n  - paragraph: Información importante del traslado con una descripción extensa que debe permanecer legible y operable al ampliar el texto y reducir el ancho de la pantalla.\n  - paragraph: Información importante del traslado con una descripción extensa que debe permanecer legible y operable al ampliar el texto y reducir el ancho de la pantalla.\n  - paragraph: Información importante del traslado con una descripción extensa que debe permanecer legible y operable al ampliar el texto y reducir el ancho de la pantalla.\n  - paragraph: Información importante del traslado con una descripción extensa que debe permanecer legible y operable al ampliar el texto y reducir el ancho de la pantalla.\n  - paragraph: Información importante del traslado con una descripción extensa que debe permanecer legible y operable al ampliar el texto y reducir el ancho de la pantalla.\n  - paragraph: Información importante del traslado con una descripción extensa que debe permanecer legible y operable al ampliar el texto y reducir el ancho de la pantalla.\n  - paragraph: Información importante del traslado con una descripción extensa que debe permanecer legible y operable al ampliar el texto y reducir el ancho de la pantalla.\n  - paragraph: Información importante del traslado con una descripción extensa que debe permanecer legible y operable al ampliar el texto y reducir el ancho de la pantalla.\n  - paragraph: Información importante del traslado con una descripción extensa que debe permanecer legible y operable al ampliar el texto y reducir el ancho de la pantalla.\n  - paragraph: Información importante del traslado con una descripción extensa que debe permanecer legible y operable al ampliar el texto y reducir el ancho de la pantalla.\n  - paragraph: Información importante del traslado con una descripción extensa que debe permanecer legible y operable al ampliar el texto y reducir el ancho de la pantalla.\n  - paragraph: Información importante del traslado con una descripción extensa que debe permanecer legible y operable al ampliar el texto y reducir el ancho de la pantalla.\n  - paragraph: Información importante del traslado con una descripción extensa que debe permanecer legible y operable al ampliar el texto y reducir el ancho de la pantalla.\n  - paragraph: Información importante del traslado con una descripción extensa que debe permanecer legible y operable al ampliar el texto y reducir el ancho de la pantalla.\n  - paragraph: Información importante del traslado con una descripción extensa que debe permanecer legible y operable al ampliar el texto y reducir el ancho de la pantalla.\n  - button \"Aceptar\"\n  - button \"Mantener\""
+    },
+    {
+      "viewportWidth": 390,
+      "theme": "light",
+      "screenshot": "modal-long--light--390px.png",
+      "closeButtonPosition": {
+        "x": 313,
+        "y": 37,
+        "width": 44,
+        "height": 44,
+        "isInViewport": true
+      },
+      "dialogGeometry": {
+        "overflowY": "auto",
+        "maxHeight": "868px",
+        "top": 16,
+        "height": 868
+      },
+      "axeViolations": 0,
+      "tree": "- dialog \"Confirmar operación\":\n  - heading \"Confirmar operación\" [level=2]\n  - button \"Cerrar diálogo\"\n  - paragraph: Información importante del traslado con una descripción extensa que debe permanecer legible y operable al ampliar el texto y reducir el ancho de la pantalla.\n  - paragraph: Información importante del traslado con una descripción extensa que debe permanecer legible y operable al ampliar el texto y reducir el ancho de la pantalla.\n  - paragraph: Información importante del traslado con una descripción extensa que debe permanecer legible y operable al ampliar el texto y reducir el ancho de la pantalla.\n  - paragraph: Información importante del traslado con una descripción extensa que debe permanecer legible y operable al ampliar el texto y reducir el ancho de la pantalla.\n  - paragraph: Información importante del traslado con una descripción extensa que debe permanecer legible y operable al ampliar el texto y reducir el ancho de la pantalla.\n  - paragraph: Información importante del traslado con una descripción extensa que debe permanecer legible y operable al ampliar el texto y reducir el ancho de la pantalla.\n  - paragraph: Información importante del traslado con una descripción extensa que debe permanecer legible y operable al ampliar el texto y reducir el ancho de la pantalla.\n  - paragraph: Información importante del traslado con una descripción extensa que debe permanecer legible y operable al ampliar el texto y reducir el ancho de la pantalla.\n  - paragraph: Información importante del traslado con una descripción extensa que debe permanecer legible y operable al ampliar el texto y reducir el ancho de la pantalla.\n  - paragraph: Información importante del traslado con una descripción extensa que debe permanecer legible y operable al ampliar el texto y reducir el ancho de la pantalla.\n  - paragraph: Información importante del traslado con una descripción extensa que debe permanecer legible y operable al ampliar el texto y reducir el ancho de la pantalla.\n  - paragraph: Información importante del traslado con una descripción extensa que debe permanecer legible y operable al ampliar el texto y reducir el ancho de la pantalla.\n  - paragraph: Información importante del traslado con una descripción extensa que debe permanecer legible y operable al ampliar el texto y reducir el ancho de la pantalla.\n  - paragraph: Información importante del traslado con una descripción extensa que debe permanecer legible y operable al ampliar el texto y reducir el ancho de la pantalla.\n  - paragraph: Información importante del traslado con una descripción extensa que debe permanecer legible y operable al ampliar el texto y reducir el ancho de la pantalla.\n  - paragraph: Información importante del traslado con una descripción extensa que debe permanecer legible y operable al ampliar el texto y reducir el ancho de la pantalla.\n  - paragraph: Información importante del traslado con una descripción extensa que debe permanecer legible y operable al ampliar el texto y reducir el ancho de la pantalla.\n  - paragraph: Información importante del traslado con una descripción extensa que debe permanecer legible y operable al ampliar el texto y reducir el ancho de la pantalla.\n  - paragraph: Información importante del traslado con una descripción extensa que debe permanecer legible y operable al ampliar el texto y reducir el ancho de la pantalla.\n  - paragraph: Información importante del traslado con una descripción extensa que debe permanecer legible y operable al ampliar el texto y reducir el ancho de la pantalla.\n  - paragraph: Información importante del traslado con una descripción extensa que debe permanecer legible y operable al ampliar el texto y reducir el ancho de la pantalla.\n  - button \"Aceptar\"\n  - button \"Mantener\""
+    },
+    {
+      "viewportWidth": 390,
+      "theme": "dark",
+      "screenshot": "modal-long--dark--390px.png",
+      "closeButtonPosition": {
+        "x": 313,
+        "y": 37,
+        "width": 44,
+        "height": 44,
+        "isInViewport": true
+      },
+      "dialogGeometry": {
+        "overflowY": "auto",
+        "maxHeight": "868px",
+        "top": 16,
+        "height": 868
+      },
+      "axeViolations": 0,
+      "tree": "- dialog \"Confirmar operación\":\n  - heading \"Confirmar operación\" [level=2]\n  - button \"Cerrar diálogo\"\n  - paragraph: Información importante del traslado con una descripción extensa que debe permanecer legible y operable al ampliar el texto y reducir el ancho de la pantalla.\n  - paragraph: Información importante del traslado con una descripción extensa que debe permanecer legible y operable al ampliar el texto y reducir el ancho de la pantalla.\n  - paragraph: Información importante del traslado con una descripción extensa que debe permanecer legible y operable al ampliar el texto y reducir el ancho de la pantalla.\n  - paragraph: Información importante del traslado con una descripción extensa que debe permanecer legible y operable al ampliar el texto y reducir el ancho de la pantalla.\n  - paragraph: Información importante del traslado con una descripción extensa que debe permanecer legible y operable al ampliar el texto y reducir el ancho de la pantalla.\n  - paragraph: Información importante del traslado con una descripción extensa que debe permanecer legible y operable al ampliar el texto y reducir el ancho de la pantalla.\n  - paragraph: Información importante del traslado con una descripción extensa que debe permanecer legible y operable al ampliar el texto y reducir el ancho de la pantalla.\n  - paragraph: Información importante del traslado con una descripción extensa que debe permanecer legible y operable al ampliar el texto y reducir el ancho de la pantalla.\n  - paragraph: Información importante del traslado con una descripción extensa que debe permanecer legible y operable al ampliar el texto y reducir el ancho de la pantalla.\n  - paragraph: Información importante del traslado con una descripción extensa que debe permanecer legible y operable al ampliar el texto y reducir el ancho de la pantalla.\n  - paragraph: Información importante del traslado con una descripción extensa que debe permanecer legible y operable al ampliar el texto y reducir el ancho de la pantalla.\n  - paragraph: Información importante del traslado con una descripción extensa que debe permanecer legible y operable al ampliar el texto y reducir el ancho de la pantalla.\n  - paragraph: Información importante del traslado con una descripción extensa que debe permanecer legible y operable al ampliar el texto y reducir el ancho de la pantalla.\n  - paragraph: Información importante del traslado con una descripción extensa que debe permanecer legible y operable al ampliar el texto y reducir el ancho de la pantalla.\n  - paragraph: Información importante del traslado con una descripción extensa que debe permanecer legible y operable al ampliar el texto y reducir el ancho de la pantalla.\n  - paragraph: Información importante del traslado con una descripción extensa que debe permanecer legible y operable al ampliar el texto y reducir el ancho de la pantalla.\n  - paragraph: Información importante del traslado con una descripción extensa que debe permanecer legible y operable al ampliar el texto y reducir el ancho de la pantalla.\n  - paragraph: Información importante del traslado con una descripción extensa que debe permanecer legible y operable al ampliar el texto y reducir el ancho de la pantalla.\n  - paragraph: Información importante del traslado con una descripción extensa que debe permanecer legible y operable al ampliar el texto y reducir el ancho de la pantalla.\n  - paragraph: Información importante del traslado con una descripción extensa que debe permanecer legible y operable al ampliar el texto y reducir el ancho de la pantalla.\n  - paragraph: Información importante del traslado con una descripción extensa que debe permanecer legible y operable al ampliar el texto y reducir el ancho de la pantalla.\n  - button \"Aceptar\"\n  - button \"Mantener\""
+    },
+    {
+      "viewportWidth": 768,
+      "theme": "light",
+      "screenshot": "modal-long--light--768px.png",
+      "closeButtonPosition": {
+        "x": 571,
+        "y": 41,
+        "width": 44,
+        "height": 44,
+        "isInViewport": true
+      },
+      "dialogGeometry": {
+        "overflowY": "auto",
+        "maxHeight": "868px",
+        "top": 16,
+        "height": 868
+      },
+      "axeViolations": 0,
+      "tree": "- dialog \"Confirmar operación\":\n  - heading \"Confirmar operación\" [level=2]\n  - button \"Cerrar diálogo\"\n  - paragraph: Información importante del traslado con una descripción extensa que debe permanecer legible y operable al ampliar el texto y reducir el ancho de la pantalla.\n  - paragraph: Información importante del traslado con una descripción extensa que debe permanecer legible y operable al ampliar el texto y reducir el ancho de la pantalla.\n  - paragraph: Información importante del traslado con una descripción extensa que debe permanecer legible y operable al ampliar el texto y reducir el ancho de la pantalla.\n  - paragraph: Información importante del traslado con una descripción extensa que debe permanecer legible y operable al ampliar el texto y reducir el ancho de la pantalla.\n  - paragraph: Información importante del traslado con una descripción extensa que debe permanecer legible y operable al ampliar el texto y reducir el ancho de la pantalla.\n  - paragraph: Información importante del traslado con una descripción extensa que debe permanecer legible y operable al ampliar el texto y reducir el ancho de la pantalla.\n  - paragraph: Información importante del traslado con una descripción extensa que debe permanecer legible y operable al ampliar el texto y reducir el ancho de la pantalla.\n  - paragraph: Información importante del traslado con una descripción extensa que debe permanecer legible y operable al ampliar el texto y reducir el ancho de la pantalla.\n  - paragraph: Información importante del traslado con una descripción extensa que debe permanecer legible y operable al ampliar el texto y reducir el ancho de la pantalla.\n  - paragraph: Información importante del traslado con una descripción extensa que debe permanecer legible y operable al ampliar el texto y reducir el ancho de la pantalla.\n  - paragraph: Información importante del traslado con una descripción extensa que debe permanecer legible y operable al ampliar el texto y reducir el ancho de la pantalla.\n  - paragraph: Información importante del traslado con una descripción extensa que debe permanecer legible y operable al ampliar el texto y reducir el ancho de la pantalla.\n  - paragraph: Información importante del traslado con una descripción extensa que debe permanecer legible y operable al ampliar el texto y reducir el ancho de la pantalla.\n  - paragraph: Información importante del traslado con una descripción extensa que debe permanecer legible y operable al ampliar el texto y reducir el ancho de la pantalla.\n  - paragraph: Información importante del traslado con una descripción extensa que debe permanecer legible y operable al ampliar el texto y reducir el ancho de la pantalla.\n  - paragraph: Información importante del traslado con una descripción extensa que debe permanecer legible y operable al ampliar el texto y reducir el ancho de la pantalla.\n  - paragraph: Información importante del traslado con una descripción extensa que debe permanecer legible y operable al ampliar el texto y reducir el ancho de la pantalla.\n  - paragraph: Información importante del traslado con una descripción extensa que debe permanecer legible y operable al ampliar el texto y reducir el ancho de la pantalla.\n  - paragraph: Información importante del traslado con una descripción extensa que debe permanecer legible y operable al ampliar el texto y reducir el ancho de la pantalla.\n  - paragraph: Información importante del traslado con una descripción extensa que debe permanecer legible y operable al ampliar el texto y reducir el ancho de la pantalla.\n  - paragraph: Información importante del traslado con una descripción extensa que debe permanecer legible y operable al ampliar el texto y reducir el ancho de la pantalla.\n  - button \"Aceptar\"\n  - button \"Mantener\""
+    },
+    {
+      "viewportWidth": 768,
+      "theme": "dark",
+      "screenshot": "modal-long--dark--768px.png",
+      "closeButtonPosition": {
+        "x": 571,
+        "y": 41,
+        "width": 44,
+        "height": 44,
+        "isInViewport": true
+      },
+      "dialogGeometry": {
+        "overflowY": "auto",
+        "maxHeight": "868px",
+        "top": 16,
+        "height": 868
+      },
+      "axeViolations": 0,
+      "tree": "- dialog \"Confirmar operación\":\n  - heading \"Confirmar operación\" [level=2]\n  - button \"Cerrar diálogo\"\n  - paragraph: Información importante del traslado con una descripción extensa que debe permanecer legible y operable al ampliar el texto y reducir el ancho de la pantalla.\n  - paragraph: Información importante del traslado con una descripción extensa que debe permanecer legible y operable al ampliar el texto y reducir el ancho de la pantalla.\n  - paragraph: Información importante del traslado con una descripción extensa que debe permanecer legible y operable al ampliar el texto y reducir el ancho de la pantalla.\n  - paragraph: Información importante del traslado con una descripción extensa que debe permanecer legible y operable al ampliar el texto y reducir el ancho de la pantalla.\n  - paragraph: Información importante del traslado con una descripción extensa que debe permanecer legible y operable al ampliar el texto y reducir el ancho de la pantalla.\n  - paragraph: Información importante del traslado con una descripción extensa que debe permanecer legible y operable al ampliar el texto y reducir el ancho de la pantalla.\n  - paragraph: Información importante del traslado con una descripción extensa que debe permanecer legible y operable al ampliar el texto y reducir el ancho de la pantalla.\n  - paragraph: Información importante del traslado con una descripción extensa que debe permanecer legible y operable al ampliar el texto y reducir el ancho de la pantalla.\n  - paragraph: Información importante del traslado con una descripción extensa que debe permanecer legible y operable al ampliar el texto y reducir el ancho de la pantalla.\n  - paragraph: Información importante del traslado con una descripción extensa que debe permanecer legible y operable al ampliar el texto y reducir el ancho de la pantalla.\n  - paragraph: Información importante del traslado con una descripción extensa que debe permanecer legible y operable al ampliar el texto y reducir el ancho de la pantalla.\n  - paragraph: Información importante del traslado con una descripción extensa que debe permanecer legible y operable al ampliar el texto y reducir el ancho de la pantalla.\n  - paragraph: Información importante del traslado con una descripción extensa que debe permanecer legible y operable al ampliar el texto y reducir el ancho de la pantalla.\n  - paragraph: Información importante del traslado con una descripción extensa que debe permanecer legible y operable al ampliar el texto y reducir el ancho de la pantalla.\n  - paragraph: Información importante del traslado con una descripción extensa que debe permanecer legible y operable al ampliar el texto y reducir el ancho de la pantalla.\n  - paragraph: Información importante del traslado con una descripción extensa que debe permanecer legible y operable al ampliar el texto y reducir el ancho de la pantalla.\n  - paragraph: Información importante del traslado con una descripción extensa que debe permanecer legible y operable al ampliar el texto y reducir el ancho de la pantalla.\n  - paragraph: Información importante del traslado con una descripción extensa que debe permanecer legible y operable al ampliar el texto y reducir el ancho de la pantalla.\n  - paragraph: Información importante del traslado con una descripción extensa que debe permanecer legible y operable al ampliar el texto y reducir el ancho de la pantalla.\n  - paragraph: Información importante del traslado con una descripción extensa que debe permanecer legible y operable al ampliar el texto y reducir el ancho de la pantalla.\n  - paragraph: Información importante del traslado con una descripción extensa que debe permanecer legible y operable al ampliar el texto y reducir el ancho de la pantalla.\n  - button \"Aceptar\"\n  - button \"Mantener\""
+    },
+    {
+      "viewportWidth": 1440,
+      "theme": "light",
+      "screenshot": "modal-long--light--1440px.png",
+      "closeButtonPosition": {
+        "x": 907,
+        "y": 41,
+        "width": 44,
+        "height": 44,
+        "isInViewport": true
+      },
+      "dialogGeometry": {
+        "overflowY": "auto",
+        "maxHeight": "868px",
+        "top": 16,
+        "height": 868
+      },
+      "axeViolations": 0,
+      "tree": "- dialog \"Confirmar operación\":\n  - heading \"Confirmar operación\" [level=2]\n  - button \"Cerrar diálogo\"\n  - paragraph: Información importante del traslado con una descripción extensa que debe permanecer legible y operable al ampliar el texto y reducir el ancho de la pantalla.\n  - paragraph: Información importante del traslado con una descripción extensa que debe permanecer legible y operable al ampliar el texto y reducir el ancho de la pantalla.\n  - paragraph: Información importante del traslado con una descripción extensa que debe permanecer legible y operable al ampliar el texto y reducir el ancho de la pantalla.\n  - paragraph: Información importante del traslado con una descripción extensa que debe permanecer legible y operable al ampliar el texto y reducir el ancho de la pantalla.\n  - paragraph: Información importante del traslado con una descripción extensa que debe permanecer legible y operable al ampliar el texto y reducir el ancho de la pantalla.\n  - paragraph: Información importante del traslado con una descripción extensa que debe permanecer legible y operable al ampliar el texto y reducir el ancho de la pantalla.\n  - paragraph: Información importante del traslado con una descripción extensa que debe permanecer legible y operable al ampliar el texto y reducir el ancho de la pantalla.\n  - paragraph: Información importante del traslado con una descripción extensa que debe permanecer legible y operable al ampliar el texto y reducir el ancho de la pantalla.\n  - paragraph: Información importante del traslado con una descripción extensa que debe permanecer legible y operable al ampliar el texto y reducir el ancho de la pantalla.\n  - paragraph: Información importante del traslado con una descripción extensa que debe permanecer legible y operable al ampliar el texto y reducir el ancho de la pantalla.\n  - paragraph: Información importante del traslado con una descripción extensa que debe permanecer legible y operable al ampliar el texto y reducir el ancho de la pantalla.\n  - paragraph: Información importante del traslado con una descripción extensa que debe permanecer legible y operable al ampliar el texto y reducir el ancho de la pantalla.\n  - paragraph: Información importante del traslado con una descripción extensa que debe permanecer legible y operable al ampliar el texto y reducir el ancho de la pantalla.\n  - paragraph: Información importante del traslado con una descripción extensa que debe permanecer legible y operable al ampliar el texto y reducir el ancho de la pantalla.\n  - paragraph: Información importante del traslado con una descripción extensa que debe permanecer legible y operable al ampliar el texto y reducir el ancho de la pantalla.\n  - paragraph: Información importante del traslado con una descripción extensa que debe permanecer legible y operable al ampliar el texto y reducir el ancho de la pantalla.\n  - paragraph: Información importante del traslado con una descripción extensa que debe permanecer legible y operable al ampliar el texto y reducir el ancho de la pantalla.\n  - paragraph: Información importante del traslado con una descripción extensa que debe permanecer legible y operable al ampliar el texto y reducir el ancho de la pantalla.\n  - paragraph: Información importante del traslado con una descripción extensa que debe permanecer legible y operable al ampliar el texto y reducir el ancho de la pantalla.\n  - paragraph: Información importante del traslado con una descripción extensa que debe permanecer legible y operable al ampliar el texto y reducir el ancho de la pantalla.\n  - paragraph: Información importante del traslado con una descripción extensa que debe permanecer legible y operable al ampliar el texto y reducir el ancho de la pantalla.\n  - button \"Aceptar\"\n  - button \"Mantener\""
+    },
+    {
+      "viewportWidth": 1440,
+      "theme": "dark",
+      "screenshot": "modal-long--dark--1440px.png",
+      "closeButtonPosition": {
+        "x": 907,
+        "y": 41,
+        "width": 44,
+        "height": 44,
+        "isInViewport": true
+      },
+      "dialogGeometry": {
+        "overflowY": "auto",
+        "maxHeight": "868px",
+        "top": 16,
+        "height": 868
+      },
+      "axeViolations": 0,
+      "tree": "- dialog \"Confirmar operación\":\n  - heading \"Confirmar operación\" [level=2]\n  - button \"Cerrar diálogo\"\n  - paragraph: Información importante del traslado con una descripción extensa que debe permanecer legible y operable al ampliar el texto y reducir el ancho de la pantalla.\n  - paragraph: Información importante del traslado con una descripción extensa que debe permanecer legible y operable al ampliar el texto y reducir el ancho de la pantalla.\n  - paragraph: Información importante del traslado con una descripción extensa que debe permanecer legible y operable al ampliar el texto y reducir el ancho de la pantalla.\n  - paragraph: Información importante del traslado con una descripción extensa que debe permanecer legible y operable al ampliar el texto y reducir el ancho de la pantalla.\n  - paragraph: Información importante del traslado con una descripción extensa que debe permanecer legible y operable al ampliar el texto y reducir el ancho de la pantalla.\n  - paragraph: Información importante del traslado con una descripción extensa que debe permanecer legible y operable al ampliar el texto y reducir el ancho de la pantalla.\n  - paragraph: Información importante del traslado con una descripción extensa que debe permanecer legible y operable al ampliar el texto y reducir el ancho de la pantalla.\n  - paragraph: Información importante del traslado con una descripción extensa que debe permanecer legible y operable al ampliar el texto y reducir el ancho de la pantalla.\n  - paragraph: Información importante del traslado con una descripción extensa que debe permanecer legible y operable al ampliar el texto y reducir el ancho de la pantalla.\n  - paragraph: Información importante del traslado con una descripción extensa que debe permanecer legible y operable al ampliar el texto y reducir el ancho de la pantalla.\n  - paragraph: Información importante del traslado con una descripción extensa que debe permanecer legible y operable al ampliar el texto y reducir el ancho de la pantalla.\n  - paragraph: Información importante del traslado con una descripción extensa que debe permanecer legible y operable al ampliar el texto y reducir el ancho de la pantalla.\n  - paragraph: Información importante del traslado con una descripción extensa que debe permanecer legible y operable al ampliar el texto y reducir el ancho de la pantalla.\n  - paragraph: Información importante del traslado con una descripción extensa que debe permanecer legible y operable al ampliar el texto y reducir el ancho de la pantalla.\n  - paragraph: Información importante del traslado con una descripción extensa que debe permanecer legible y operable al ampliar el texto y reducir el ancho de la pantalla.\n  - paragraph: Información importante del traslado con una descripción extensa que debe permanecer legible y operable al ampliar el texto y reducir el ancho de la pantalla.\n  - paragraph: Información importante del traslado con una descripción extensa que debe permanecer legible y operable al ampliar el texto y reducir el ancho de la pantalla.\n  - paragraph: Información importante del traslado con una descripción extensa que debe permanecer legible y operable al ampliar el texto y reducir el ancho de la pantalla.\n  - paragraph: Información importante del traslado con una descripción extensa que debe permanecer legible y operable al ampliar el texto y reducir el ancho de la pantalla.\n  - paragraph: Información importante del traslado con una descripción extensa que debe permanecer legible y operable al ampliar el texto y reducir el ancho de la pantalla.\n  - paragraph: Información importante del traslado con una descripción extensa que debe permanecer legible y operable al ampliar el texto y reducir el ancho de la pantalla.\n  - button \"Aceptar\"\n  - button \"Mantener\""
+    }
+  ],
+  "focusTrapPruebas": {
+    "triggerInitialActive": true,
+    "initialDialogFocus": {
+      "insideDialog": true,
+      "tag": "BUTTON",
+      "ariaLabel": "Cerrar diálogo",
+      "text": ""
+    },
+    "focusSequenceForward": [
+      "Aceptar",
+      "Mantener",
+      "Cerrar diálogo",
+      "Aceptar",
+      "Mantener",
+      "Cerrar diálogo"
+    ],
+    "focusSequenceBackward": [
+      "Mantener",
+      "Aceptar",
+      "Cerrar diálogo",
+      "Mantener"
+    ],
+    "escapeClosesModal": true,
+    "focusRestoredToTrigger": true
+  }
+}

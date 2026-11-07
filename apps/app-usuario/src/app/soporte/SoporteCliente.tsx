@@ -6,6 +6,7 @@ import type { Database } from "@ruum/shared/types";
 import { HojaTareaCuenta } from "../cuenta/HojaTareaCuenta";
 import { obtenerViajeActivo } from "../../lib/inicio";
 import { CONTACTOS_SOPORTE_USUARIO } from "../../lib/contactos-soporte";
+import { InformacionSoporte } from "./InformacionSoporte";
 import { FormularioSoporte } from "./FormularioSoporte";
 
 type Pasaporte = Database["public"]["Views"]["pasaporte_digital"]["Row"];
@@ -195,6 +196,7 @@ export function SoporteCliente({
     <header className="user-profile-appbar"><Link href="/cuenta?seccion=soporte" aria-label="Volver a mi cuenta" className="user-profile-back">‹ Atrás</Link><h1>Soporte</h1><span aria-hidden="true" /></header>
     <p className="user-support-status">Canales de soporte <span aria-hidden="true">•</span> {folioActivo ? `Traslado ${folioActivo}` : "Sin traslado activo"}</p>
     {viajePreseleccionado && !viajeActivo && <p role="alert" className="mx-3 text-sm">No encontramos el traslado solicitado entre tus viajes. Selecciona otro al crear el reporte.</p>}
+    <InformacionSoporte />
     <section className="user-support-channels" aria-label="Canales de atención">
       <button type="button" onClick={() => abrirReporte()}><IconoSvg nombre="chat" /><span>Crear reporte</span></button>
       <button type="button" onClick={() => setModalTelefonoAbierto(true)}><IconoSvg nombre="phone" /><span>Llamada</span></button>

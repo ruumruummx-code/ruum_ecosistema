@@ -45,7 +45,7 @@ const ESTILO_ESTATUS_FINANCIERO: Record<EstadoEconomicoExplicito, string> = {
   programado: "border-route-action/30 bg-route-action/10 text-route-action",
   pagado: "border-emerald-500/30 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300",
   retenido: "border-amber-500/30 bg-amber-500/10 text-amber-700 dark:text-amber-300",
-  rechazado: "border-danger-action/34 bg-danger-action/12 text-danger-action"
+  rechazado: "border-danger-action/34 bg-danger-action/12 text-rose-700 dark:text-rose-300"
 };
 
 function formatearMoneda(amount: number, currency: string) {

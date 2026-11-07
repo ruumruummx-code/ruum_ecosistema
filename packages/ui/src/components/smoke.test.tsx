@@ -9,6 +9,8 @@ import { Button } from "./Button";
 import { Card } from "./Card";
 import { Aviso } from "./Aviso";
 import { EmptyState } from "./EmptyState";
+import { Modal } from "./Modal";
+import { MobileButton } from "./MobileButton";
 import { StatusChip, type StatusChipProps } from "./StatusChip";
 
 describe("ui smoke — Button", () => {
@@ -71,5 +73,42 @@ describe("ui smoke — StatusChip", () => {
       expect(html).toContain('role="status"');
       expect(html.includes(etiqueta), estado).toBe(true);
     }
+  });
+});
+
+describe("ui smoke — Modal", () => {
+  it("cuando no está abierto no renderiza contenido", () => {
+    const html = renderToStaticMarkup(h(Modal, { abierto: false, onCerrar: () => {}, titulo: "Prueba", children: "Cuerpo" }));
+    expect(html).toBe("");
+  });
+
+  it("cuando está abierto renderiza role=dialog, aria-modal=true y botón de cierre", () => {
+    const html = renderToStaticMarkup(h(Modal, { abierto: true, onCerrar: () => {}, titulo: "Confirmar viaje", children: "Detalle" }));
+    expect(html).toContain('role="dialog"');
+    expect(html).toContain('aria-modal="true"');
+    expect(html).toContain('aria-labelledby=');
+    expect(html).toContain("Confirmar viaje");
+    expect(html).toContain('aria-label="Cerrar diálogo"');
+    expect(html).toContain("overflow-y-auto");
+    expect(html).toContain("Detalle");
+  });
+});
+
+describe("ui smoke — MobileButton (SD-REM-003)", () => {
+  it("renderiza hijos y atributos por defecto", () => {
+    const html = renderToStaticMarkup(h(MobileButton, { children: "Confirmar entrega" }));
+    expect(html).toContain("<button");
+    expect(html).toContain("Confirmar entrega");
+    expect(html).not.toMatch(/\sdisabled([=\s>])/);
+    expect(html).not.toContain('aria-busy="true"');
+  });
+
+  it("preserva el nombre accesible (children) y activa aria-busy y disabled durante loading", () => {
+    const html = renderToStaticMarkup(h(MobileButton, { loading: true, children: "Guardando cambios" }));
+    expect(html).toContain("Guardando cambios");
+    expect(html).toContain('aria-busy="true"');
+    expect(html).toContain("disabled");
+    expect(html).toContain('aria-hidden="true"');
+    expect(html).toContain("animate-spin");
   });
 });

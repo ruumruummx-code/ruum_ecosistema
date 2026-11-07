@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { PROMESA_SOPORTE } from "../lib/promesa-soporte";
 import { useEffect, useState } from "react";
 import type { Database } from "@ruum/shared/types";
 import { ETIQUETA_ESTADO_TRASLADO } from "@ruum/shared/states";
@@ -292,14 +293,14 @@ export function InicioMobile({ usuario, traslados, conductorFotoUrl = null, vehi
         </Link>
       </section>
 
-      {/* Tarjeta de Soporte 24/7 unificada */}
-      <Link href="/soporte" className="home-support" aria-label="¿Necesitas ayuda? Soporte 24/7">
+      {/* Tarjeta de soporte con disponibilidad diferenciada */}
+      <Link href="/soporte" className="home-support" aria-label={`¿Necesitas ayuda? ${PROMESA_SOPORTE.acceso}. ${PROMESA_SOPORTE.atencion} ${PROMESA_SOPORTE.respuesta} ${PROMESA_SOPORTE.emergencia}`}>
         <span className="home-module-icon home-icon-purple">
           <IconoInicio tipo="soporte" />
         </span>
         <span className="home-module-copy">
           <strong>¿Necesitas ayuda?</strong>
-          <span>Soporte 24/7</span>
+          <span>{PROMESA_SOPORTE.acceso}</span><span>{PROMESA_SOPORTE.atencion}</span><span>{PROMESA_SOPORTE.respuesta}</span><span>{PROMESA_SOPORTE.emergencia}</span>
         </span>
         <span className="home-module-chevron">
           <Chevron />

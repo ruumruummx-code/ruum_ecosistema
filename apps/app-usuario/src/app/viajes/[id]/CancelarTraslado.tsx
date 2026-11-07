@@ -1,12 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Aviso, Button, Field } from "@ruum/ui";
 import { MENSAJES_CLAVE_UX } from "@ruum/shared/constants";
 import { formatearPrecio } from "@ruum/shared/utils";
-import { calcularCargoCancelacion } from "@ruum/shared/rules";
 import type { Database } from "@ruum/shared/types";
 import { cancelarTraslado, usuarioPuedeCancelar } from "@ruum/api/services";
 import { crearClienteNavegador, tieneSupabaseConfigurado } from "@/lib/supabase-browser";
@@ -46,6 +45,24 @@ export function CancelarTraslado({
   const [mensaje, setMensaje] = useState<{ tono: "info" | "danger"; texto: string } | null>(null);
   const [confirmando, setConfirmando] = useState(false);
 
+  const contenedor = useRef<HTMLDivElement>(null);
+  const bloqueo = useRef(false);
+  const restaurarFoco = useRef(false);
+  const [cancelado, setCancelado] = useState(false);
+  const tituloId = useId();
+  const consecuenciasId = useId();
+
+  useEffect(() => {
+    if (mensaje) {
+      contenedor.current?.querySelector<HTMLElement>("[data-resultado]")?.focus();
+    } else if (confirmando) {
+      contenedor.current?.querySelector<HTMLElement>("[data-confirmacion]")?.focus();
+    } else if (restaurarFoco.current) {
+      contenedor.current?.querySelector<HTMLButtonElement>("[data-abrir-confirmacion]")?.focus();
+      restaurarFoco.current = false;
+    }
+  }, [confirmando, mensaje]);
+
   const terminal = ["servicio_cerrado", "servicio_cancelado", "traslado_fallido"].includes(estado);
   if (terminal || cerrado) return null;
 
@@ -79,9 +96,10 @@ export function CancelarTraslado({
   );
 
   async function cancelar() {
+    if (bloqueo.current) return;
+    bloqueo.current = true;
     setProcesando(true);
     setMensaje(null);
-    setConfirmando(false);
     try {
       if (!tieneSupabaseConfigurado()) {
         setMensaje({ tono: "danger", texto: "Supabase no está configurado. No se puede cancelar el traslado." });
@@ -105,6 +123,8 @@ export function CancelarTraslado({
         },
       });
 
+      setCancelado(true);
+      setConfirmando(false);
       setMensaje({
         tono: "info",
         texto: `Traslado cancelado. Cargo registrado: ${formatearPrecio(resultado.monto_cargo)}.`,
@@ -113,30 +133,30 @@ export function CancelarTraslado({
     } catch (err) {
       setMensaje({ tono: "danger", texto: err instanceof Error ? err.message : "No pudimos cancelar el traslado." });
     } finally {
+      bloqueo.current = false;
       setProcesando(false);
     }
   }
 
   return (
-    <div className="mt-5 rounded-lg border border-danger/25 bg-danger-soft px-4 py-4">
+    <div ref={contenedor} aria-busy={procesando} className="mt-5 rounded-lg border border-danger/25 bg-danger-soft px-4 py-4">
       <p className="font-body text-sm font-semibold text-danger">Cancelar viaje</p>
       <p className="mt-1 font-body text-sm text-ink/65">
         {MENSAJES_CLAVE_UX.cancelacion} {cargo.mensaje}
       </p>
 
-      {mensaje && (
-        <div className="mt-3" aria-live="polite" aria-atomic="true">
-          <Aviso tono={mensaje.tono}>{mensaje.texto}</Aviso>
-        </div>
-      )}
+      <div role="status" aria-live="polite" aria-atomic="true">
+        {confirmando && <span className="sr-only">Confirmación de cancelación. {cargo.mensaje} Esta acción no se puede deshacer.</span>}
+        {mensaje && <div className="mt-3" data-resultado tabIndex={-1}><Aviso tono={mensaje.tono}>{mensaje.texto}</Aviso></div>}
+      </div>
 
-      {/* Modal de confirmación inline — reemplaza window.confirm() */}
+      {/* Confirmación inline: foco en el contexto y anuncio sin interrumpir. */}
       {confirmando ? (
-        <div className="mt-4 rounded-lg border border-danger/30 bg-danger-soft/60 p-4">
-          <p className="font-body text-sm font-semibold text-danger">
+        <div data-confirmacion tabIndex={-1} role="group" aria-labelledby={tituloId} aria-describedby={consecuenciasId} className="mt-4 rounded-lg border border-danger/30 bg-danger-soft/60 p-4">
+          <p id={tituloId} className="font-body text-sm font-semibold text-danger">
             ¿Confirmar cancelación?
           </p>
-          <p className="mt-1 font-body text-sm leading-5 text-ink/70">
+          <p id={consecuenciasId} className="mt-1 font-body text-sm leading-5 text-ink/70">
             {cargo.mensaje} Esta acción no se puede deshacer.
           </p>
           {motivo.trim() && (
@@ -154,7 +174,7 @@ export function CancelarTraslado({
             </Button>
             <Button
               variant="secondary"
-              onClick={() => setConfirmando(false)}
+              onClick={() => { restaurarFoco.current = true; setMensaje(null); setConfirmando(false); }}
               disabled={procesando}
             >
               No, mantener
@@ -171,8 +191,9 @@ export function CancelarTraslado({
           />
           <Button
             variant="danger"
-            onClick={() => setConfirmando(true)}
-            disabled={procesando}
+            data-abrir-confirmacion
+            onClick={() => { setMensaje(null); setConfirmando(true); }}
+            disabled={procesando || cancelado}
           >
             Cancelar viaje
           </Button>

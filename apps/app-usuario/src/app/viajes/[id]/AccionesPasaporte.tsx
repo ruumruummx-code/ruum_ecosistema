@@ -1,5 +1,6 @@
 "use client";
 import Link from "next/link";
+import { PROMESA_SOPORTE } from "../../../lib/promesa-soporte";
 import { CompartirPasaporte } from "./CompartirPasaporte";
 import { IconoSosAccion } from "./iconos-pasaporte";
 
@@ -11,7 +12,7 @@ export function AccionesPasaporte({ soporteHref, folioCorto }: { soporteHref: st
           className="flex-1 inline-flex min-h-[48px] items-center justify-center gap-1.5 rounded-xl border border-[var(--user-color-border)] bg-[var(--user-color-surface-soft)] px-3 font-body text-[12.5px] font-bold text-[var(--user-color-primary)] transition-transform active:scale-95 hover:bg-[var(--user-color-surface-soft)] dark:border-[var(--user-color-border)]"
         >
           <IconoSosAccion className="text-amber-600 dark:text-amber-400" />
-          <span>Asistencia 24/7</span>
+          <span>{PROMESA_SOPORTE.acceso}</span>
         </Link>
         <div className="flex-1 [&>*]:w-full [&_button]:min-h-[48px]">
           <CompartirPasaporte folio={folioCorto} />

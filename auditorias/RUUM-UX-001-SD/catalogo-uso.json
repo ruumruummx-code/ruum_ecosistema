@@ -1,0 +1,350 @@
+{
+  "Button": {
+    "purpose": "Ejecutar una acción con variante semántica.",
+    "correct": "<Button onClick={continuar}>Continuar</Button>",
+    "incorrect": "<Button />",
+    "notes": "Conservar nombre durante loading; confirmar acciones destructivas en el consumidor."
+  },
+  "ButtonPrimary": {
+    "purpose": "Representar el CTA principal del bloque.",
+    "correct": "<ButtonPrimary onClick={continuar}>Aceptar</ButtonPrimary>",
+    "incorrect": "<ButtonPrimary aria-label=\"\" />",
+    "notes": "Comparte implementación de Button y su gradiente."
+  },
+  "ButtonSecondary": {
+    "purpose": "Representar una acción de apoyo.",
+    "correct": "<ButtonSecondary>Ver detalle</ButtonSecondary>",
+    "incorrect": "<ButtonSecondary> </ButtonSecondary>",
+    "notes": "No sustituye un enlace con destino."
+  },
+  "ButtonText": {
+    "purpose": "Representar una acción de menor prioridad.",
+    "correct": "<ButtonText conChevron>Consultar</ButtonText>",
+    "incorrect": "<ButtonText><Icono nombre=\"atras\" /></ButtonText>",
+    "notes": "Un icono decorativo solo no da nombre al botón."
+  },
+  "MobileButton": {
+    "purpose": "Ejecutar una acción móvil con destino táctil amplio.",
+    "correct": "<MobileButton>Enviar reporte</MobileButton>",
+    "incorrect": "<MobileButton loading />",
+    "notes": "El estado loading actual pierde el nombre; requiere remediación."
+  },
+  "Input": {
+    "purpose": "Entrada nativa con etiqueta y validación.",
+    "correct": "<Input id=\"contacto\" etiqueta=\"Contacto\" />",
+    "incorrect": "<><Input etiqueta=\"Uno\" /><Input etiqueta=\"Dos\" /></>",
+    "notes": "Sin id/name genera IDs repetidos; ayuda no asociada programáticamente."
+  },
+  "Field": {
+    "purpose": "Entrada etiquetada, ayuda asociada y contraseña con visibilidad.",
+    "correct": "<Field etiqueta=\"Correo\" type=\"email\" ayuda=\"Usa tu correo registrado\" />",
+    "incorrect": "<Field etiqueta=\"\" />",
+    "notes": "useId cubre omisión de id; validar colisiones si se fuerza el mismo name/id."
+  },
+  "Select": {
+    "purpose": "Seleccionar una opción con etiqueta visible.",
+    "correct": "<Select id=\"unidad\" etiqueta=\"Unidad\"><option>Métrico</option></Select>",
+    "incorrect": "<Select etiqueta=\"\" />",
+    "notes": "Requiere ID único; revisar asociación del mensaje de error."
+  },
+  "Textarea": {
+    "purpose": "Capturar texto de varias líneas.",
+    "correct": "<Textarea id=\"descripcion\" etiqueta=\"Descripción\" />",
+    "incorrect": "<Textarea etiqueta=\"\" />",
+    "notes": "Requiere ID único; revisar asociación de error y conservación del texto."
+  },
+  "Checkbox": {
+    "purpose": "Seleccionar una condición independiente.",
+    "correct": "<Checkbox etiqueta=\"Acepto los términos\" />",
+    "incorrect": "<Checkbox etiqueta=\"\" />",
+    "notes": "Agrupar con fieldset y legend cuando exista una pregunta común."
+  },
+  "Radio": {
+    "purpose": "Seleccionar una alternativa de un grupo.",
+    "correct": "<Radio etiqueta=\"Español\" name=\"idioma\" value=\"es\" />",
+    "incorrect": "<Radio etiqueta=\"Español\" />",
+    "notes": "El consumidor debe compartir name y aportar leyenda al grupo."
+  },
+  "Toggle": {
+    "purpose": "Cambiar un valor booleano con semántica switch.",
+    "correct": "<Toggle etiqueta=\"Notificaciones\" checked={activo} onCheckedChange={setActivo} />",
+    "incorrect": "<Toggle etiqueta=\"\" checked={activo} />",
+    "notes": "Estado controlado; checked no acredita persistencia remota."
+  },
+  "Alert": {
+    "purpose": "Anunciar feedback con icono y texto.",
+    "correct": "<Alert tono=\"error\">No se pudo guardar.</Alert>",
+    "incorrect": "<Alert tono=\"error\" />",
+    "notes": "Error usa alert; el resto status. No desaparecer antes de lectura."
+  },
+  "Toast": {
+    "purpose": "Presentar feedback flotante sin retirar el contexto.",
+    "correct": "<Toast tono=\"success\">Cambios guardados.</Toast>",
+    "incorrect": "<Toast> </Toast>",
+    "notes": "Anuncio cortés; no administra tiempo, portal ni foco."
+  },
+  "Aviso": {
+    "purpose": "Mostrar información, éxito, advertencia o error.",
+    "correct": "<Aviso tono=\"danger\">Revisa la solicitud.</Aviso>",
+    "incorrect": "<Aviso tono=\"danger\" />",
+    "notes": "Icono y texto evitan depender solo del color."
+  },
+  "Card": {
+    "purpose": "Agrupar contenido sobre una superficie.",
+    "correct": "<Card><h2>Resumen</h2><p>Datos del traslado</p></Card>",
+    "incorrect": "<Card onClick={continuar}>Abrir</Card>",
+    "notes": "No admite onClick en su contrato; usar un control real dentro."
+  },
+  "OperationalCard": {
+    "purpose": "Agrupar instrucciones operativas.",
+    "correct": "<OperationalCard><h2>Siguiente paso</h2></OperationalCard>",
+    "incorrect": "<OperationalCard> </OperationalCard>",
+    "notes": "El título y orden de lectura pertenecen a la composición."
+  },
+  "TripCard": {
+    "purpose": "Agrupar información de un traslado y folio.",
+    "correct": "<TripCard folio=\"TR-123\"><h2>Traslado</h2></TripCard>",
+    "incorrect": "<TripCard folio=\"TR-123\"> </TripCard>",
+    "notes": "Folio absoluto puede colisionar con contenido; probar textos largos."
+  },
+  "FinancialCard": {
+    "purpose": "Agrupar información económica oficial.",
+    "correct": "<FinancialCard><FinancialAmount status=\"confirmado\" amount={1000} /></FinancialCard>",
+    "incorrect": "<FinancialCard>$0 confirmado</FinancialCard>",
+    "notes": "No inventar monto para datos desconocidos."
+  },
+  "AlertCard": {
+    "purpose": "Destacar un bloque que requiere atención.",
+    "correct": "<AlertCard><h2>Revisión pendiente</h2></AlertCard>",
+    "incorrect": "<AlertCard> </AlertCard>",
+    "notes": "El fondo no reemplaza explicación o semántica de error."
+  },
+  "PassportCard": {
+    "purpose": "Agrupar expediente documental con folio.",
+    "correct": "<PassportCard folio=\"TR-123\"><h2>Pasaporte</h2></PassportCard>",
+    "incorrect": "<PassportCard clip><button> </button></PassportCard>",
+    "notes": "clip puede cortar overlays; documentar necesidad de clip=false."
+  },
+  "MobileCard": {
+    "purpose": "Contener contenido móvil con padding y radio.",
+    "correct": "<MobileCard><h2>Mi cuenta</h2></MobileCard>",
+    "incorrect": "<MobileCard as=\"button\"><button>Abrir</button></MobileCard>",
+    "notes": "as no debe crear controles anidados."
+  },
+  "StatusChip": {
+    "purpose": "Representar un estado operativo con icono y texto.",
+    "correct": "<StatusChip estado=\"en-ruta\" />",
+    "incorrect": "<StatusChip estado=\"desconocido\" />",
+    "notes": "Usar enum del contrato; status puede anunciar cambios."
+  },
+  "EstadoBadge": {
+    "purpose": "Representar el estado técnico como etiqueta humana.",
+    "correct": "<EstadoBadge estado=\"traslado_en_curso\" />",
+    "incorrect": "<EstadoBadge estado=\"traslado_en_curso\" conTexto={false} />",
+    "notes": "conTexto=false carece de equivalente accesible si es la única explicación del estado."
+  },
+  "MobileBadge": {
+    "purpose": "Presentar una etiqueta semántica móvil.",
+    "correct": "<MobileBadge variante=\"exito\" texto=\"Verificado\" punto />",
+    "incorrect": "<MobileBadge variante=\"exito\" texto=\"\" punto />",
+    "notes": "El punto es decorativo; texto debe expresar el significado."
+  },
+  "FinancialAmount": {
+    "purpose": "Presentar importe y estado económico sin inventar datos.",
+    "correct": "<FinancialAmount status=\"sin_calcular\" amount={null} />",
+    "incorrect": "<FinancialAmount status=\"confirmado\" amount={0} />",
+    "notes": "El ejemplo incorrecto aplica cuando cero sustituye ausencia; cero real sí es válido."
+  },
+  "DriverEarning": {
+    "purpose": "Presentar ganancia oficial o pendiente del conductor.",
+    "correct": "<DriverEarning status=\"sin_calcular\" amount={null} />",
+    "incorrect": "<DriverEarning status=\"pagado\" amount={0} />",
+    "notes": "No usar cero como sustituto de ausencia. Reutiliza FinancialAmount."
+  },
+  "EstatusBadgeEconomico": {
+    "purpose": "Nombrar el estado económico con estilo compartido.",
+    "correct": "<EstatusBadgeEconomico estatus=\"pagado\" />",
+    "incorrect": "<EstatusBadgeEconomico estatus=\"desconocido\" />",
+    "notes": "No acredita pago efectivo; depende del dato recibido."
+  },
+  "MobileProgress": {
+    "purpose": "Mostrar progreso compacto y desglose opcional.",
+    "correct": "<MobileProgress estado=\"traslado_en_curso\" />",
+    "incorrect": "<MobileProgress estado=\"desconocido\" />",
+    "notes": "Se oculta desde md; summary tiene discrepancia entre texto visible y nombre."
+  },
+  "DesktopStateStepper": {
+    "purpose": "Mostrar etapas en una franja de escritorio.",
+    "correct": "<DesktopStateStepper estado=\"traslado_en_curso\" />",
+    "incorrect": "<DesktopStateStepper estado=\"desconocido\" />",
+    "notes": "Se oculta bajo md; usar EstadoStepper para composición responsive."
+  },
+  "EstadoStepper": {
+    "purpose": "Alternar progreso móvil y de escritorio.",
+    "correct": "<EstadoStepper estado=\"traslado_en_curso\" />",
+    "incorrect": "<EstadoStepper estado=\"desconocido\" />",
+    "notes": "Comparte hallazgos de MobileProgress y DesktopStateStepper."
+  },
+  "BottomNav": {
+    "purpose": "Navegar entre cuatro destinos principales.",
+    "correct": "<BottomNav items={itemsDeNavegacion} />",
+    "incorrect": "<BottomNav items={[{id:'x',etiqueta:'',href:'#',icono:null}]} />",
+    "notes": "aria-current identifica el destino activo; validar contraste del activo."
+  },
+  "Sidebar": {
+    "purpose": "Navegar por grupos y contadores.",
+    "correct": "<Sidebar grupos={gruposDeCuenta} />",
+    "incorrect": "<Sidebar grupos={[{titulo:'',items:[]}]} />",
+    "notes": "Etiquetas, href y estado activo requieren datos del consumidor."
+  },
+  "Tabs": {
+    "purpose": "Seleccionar una pestaña o filtro.",
+    "correct": "<Tabs tabs={pestanas} onSeleccion={seleccionar} />",
+    "incorrect": "<Tabs tabs={pestanas} />",
+    "notes": "Patrón tab incompleto: revisar flechas, tabindex y relación con paneles o cambiar semántica."
+  },
+  "Avatar": {
+    "purpose": "Representar visualmente una identidad con nombre accesible.",
+    "correct": "<Avatar nombre=\"María González\" />",
+    "incorrect": "<Avatar nombre=\"\" />",
+    "notes": "El estado del punto es decorativo; no usarlo como única información de disponibilidad."
+  },
+  "EmptyState": {
+    "purpose": "Explicar ausencia de datos y siguiente expectativa.",
+    "correct": "<EmptyState titulo=\"Sin traslados\" descripcion=\"Aquí aparecerán tus viajes.\" />",
+    "incorrect": "<EmptyState titulo=\"\" descripcion=\"\" />",
+    "notes": "El h3 fijo depende de jerarquía del consumidor."
+  },
+  "Skeleton": {
+    "purpose": "Mostrar estado de carga sin contenido ficticio.",
+    "correct": "<Skeleton tipo=\"card\" />",
+    "incorrect": "<Skeleton tipo=\"card\" aria-hidden />",
+    "notes": "Expone status Cargando; no indica progreso real."
+  },
+  "MobileHeader": {
+    "purpose": "Encabezar una pantalla móvil con retorno opcional.",
+    "correct": "<MobileHeader titulo=\"Mis traslados\" onAtras={volver} />",
+    "incorrect": "<MobileHeader titulo=\"\" />",
+    "notes": "Texto largo se trunca sin alternativa visible completa en el componente."
+  },
+  "RuumHeader": {
+    "purpose": "Presentar marca, rol y acciones de soporte/notificaciones.",
+    "correct": "<RuumHeader rol=\"usuario\" onSoporte={abrirSoporte} />",
+    "incorrect": "<RuumHeader rol=\"usuario\" onSoporte={undefined} />",
+    "notes": "Ejemplo incorrecto si se requiere ofrecer soporte: omisión retira acción. Revisar nombre del enlace de marca."
+  },
+  "MobileRow": {
+    "purpose": "Presentar una fila estática, botón o enlace.",
+    "correct": "<MobileRow titulo=\"Preferencias\" href=\"/cuenta/preferencias\" />",
+    "incorrect": "<MobileRow titulo=\"Preferencias\" href=\"/cuenta\" disabled />",
+    "notes": "disabled no bloquea la rama de enlace; requiere corrección base."
+  },
+  "MobileListGroup": {
+    "purpose": "Agrupar filas y opcionalmente navegar.",
+    "correct": "<MobileListGroup as=\"nav\" tituloSeccion=\"Cuenta\"><MobileRow titulo=\"Soporte\" href=\"/soporte\" /></MobileListGroup>",
+    "incorrect": "<MobileListGroup as=\"nav\" />",
+    "notes": "Aportar ariaLabel o tituloSeccion para nombrar navegación."
+  },
+  "MobileShell": {
+    "purpose": "Proveer viewport móvil y área de contenido desplazable.",
+    "correct": "<MobileShell navInferiorVisible><h1>Cuenta</h1></MobileShell>",
+    "incorrect": "<MobileShell><main><main>Contenido</main></main></MobileShell>",
+    "notes": "Scroll interno y alturas dvh requieren prueba en navegador móvil físico."
+  },
+  "NextOperationalAction": {
+    "purpose": "Presentar siguiente paso con CTA, carga y error.",
+    "correct": "<NextOperationalAction title=\"Continuar\" instruction=\"Revisa los datos\" primaryCta={{label:'Revisar',onClick:revisar}} />",
+    "incorrect": "<NextOperationalAction title=\"Continuar\" instruction=\"Revisa\" primaryCta={{label:'Ir',href:'/paso',disabled:true}} />",
+    "notes": "El enlace disabled sigue activable por teclado; bloquear en el componente."
+  },
+  "Chat": {
+    "purpose": "Mostrar conversación y enviar texto mediante callback.",
+    "correct": "<Chat propio=\"usuario\" mensajes={mensajes} onEnviar={enviar} />",
+    "incorrect": "<Chat propio=\"usuario\" mensajes={[]} onEnviar={() => {}} />",
+    "notes": "Ejemplo incorrecto para producción: no confirma persistencia. Revisar nombre explícito, error y foco por instancia."
+  },
+  "Modal": {
+    "purpose": "Presentar una decisión modal con cierre.",
+    "correct": "<Modal abierto={abierto} onCerrar={cerrar} titulo=\"Confirmar\"><Button onClick={cerrar}>Mantener</Button></Modal>",
+    "incorrect": "<Modal abierto onCerrar={() => {}} titulo=\"\" />",
+    "notes": "API válida no garantiza conformidad: falta contención y restauración de foco; revisar contenido largo."
+  },
+  "BannerDemo": {
+    "purpose": "Avisar que se muestran datos de ejemplo.",
+    "correct": "<BannerDemo hrefLogin=\"/login\" />",
+    "incorrect": "<BannerDemo hrefLogin=\"#\" />",
+    "notes": "Validar contraste de route-action sobre route-soft."
+  },
+  "LogoMarca": {
+    "purpose": "Mostrar una variante oficial de la marca.",
+    "correct": "<LogoMarca variante=\"horizontal\" tema=\"auto\" />",
+    "incorrect": "<LogoMarca variante=\"version-navy\" tema=\"claro\" />",
+    "notes": "Respetar fondos y mínimos de marca; revisar exenciones de contraste solo cuando correspondan."
+  },
+  "SimboloVectorial": {
+    "purpose": "Mostrar símbolo oficial como SVG.",
+    "correct": "<SimboloVectorial tamano={72} />",
+    "incorrect": "<button><SimboloVectorial /></button>",
+    "notes": "Si es único contenido de una acción, el botón requiere nombre explícito."
+  },
+  "Icono": {
+    "purpose": "Mostrar un glifo decorativo reutilizable.",
+    "correct": "<Button>Volver<Icono nombre=\"atras\" /></Button>",
+    "incorrect": "<button><Icono nombre=\"atras\" /></button>",
+    "notes": "aria-hidden: no aporta nombre al control contenedor."
+  },
+  "SelloConductor": {
+    "purpose": "Mostrar certificación vigente con sello oficial.",
+    "correct": "<SelloConductor lema=\"Certificación vigente\" />",
+    "incorrect": "<SelloConductor tema=\"dorado\" />",
+    "notes": "No usar sello con certificación vencida; dorado solo compatibilidad."
+  },
+  "CredencialConductor": {
+    "purpose": "Presentar identificación del conductor certificado.",
+    "correct": "<CredencialConductor nombreConductor=\"María\" folioInterno=\"C-1\" vigencia=\"31/12/2026\" />",
+    "incorrect": "<CredencialConductor nombreConductor=\"\" folioInterno=\"\" vigencia=\"\" />",
+    "notes": "Documento fuerza modo claro; no publicar valores operativos ficticios por defecto."
+  },
+  "ReporteTraslado": {
+    "purpose": "Presentar reporte documental de un traslado.",
+    "correct": "<ReporteTraslado {...datosReporte} />",
+    "incorrect": "<ReporteTraslado {...datosInventados} />",
+    "notes": "Documento claro; datos, folio y estado deben ser oficiales."
+  },
+  "ActaEntrega": {
+    "purpose": "Presentar entrega-recepción documental.",
+    "correct": "<ActaEntrega folio=\"TR-1\" vehiculo=\"Sedán\" origen=\"CDMX\" destino=\"Puebla\" />",
+    "incorrect": "<ActaEntrega folio=\"\" vehiculo=\"\" origen=\"\" destino=\"\" />",
+    "notes": "Responsables y firmas no se completan ni validan en UI."
+  },
+  "EstadoPagoConductor": {
+    "purpose": "Presentar estado documental del pago.",
+    "correct": "<EstadoPagoConductor folio=\"TR-1\" base=\"$1000\" reembolsables=\"$200\" fechaEstimada=\"8/11/2026\" estatus=\"Programado\" />",
+    "incorrect": "<EstadoPagoConductor folio=\"TR-1\" base=\"$0\" reembolsables=\"$0\" fechaEstimada=\"Hoy\" estatus=\"Pagado\" />",
+    "notes": "Incorrecto si inventa datos; no ejecuta ni acredita pago."
+  },
+  "MapaEstatico": {
+    "purpose": "Mostrar mapa o evidencia como imagen Next/Image.",
+    "correct": "<MapaEstatico src={urlMapa} alt=\"Ruta de CDMX a Puebla\" width={240} height={120} />",
+    "incorrect": "<MapaEstatico src={urlMapa} alt=\"\" />",
+    "notes": "fill necesita padre relative con dimensiones; optimización remota depende de Next config."
+  },
+  "StreetContainer": {
+    "purpose": "Aplicar modo calle a una región.",
+    "correct": "<StreetContainer activo><Button>Continuar</Button></StreetContainer>",
+    "incorrect": "<StreetContainer activo={false}><button>Seguridad</button></StreetContainer>",
+    "notes": "No acredita legibilidad bajo sol; no reemplaza medición de foco y objetivos."
+  },
+  "SafetyButton": {
+    "purpose": "Ofrecer acceso persistente al canal de seguridad.",
+    "correct": "<SafetyButton onActivar={abrirEmergencia} />",
+    "incorrect": "<SafetyButton />",
+    "notes": "Sin handler solo apunta a #emergencia; consumidor debe conectar canal real y evitar oscurecer controles."
+  },
+  "TextInputUppercaseBridge": {
+    "purpose": "Normalizar texto permitido preservando exclusiones.",
+    "correct": "<><TextInputUppercaseBridge /><Field etiqueta=\"Nombre completo\" /></>",
+    "incorrect": "<input data-ruum-uppercase=\"on\" type=\"email\" />",
+    "notes": "No visual. Validar IME, cursor y exclusiones de identificadores; no garantiza normalización del backend."
+  }
+}

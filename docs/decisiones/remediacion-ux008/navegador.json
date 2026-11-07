@@ -1,0 +1,926 @@
+[
+  {
+    "width": 390,
+    "focusEntry": true,
+    "tabOrder": [
+      "Sí, cancelar el viaje",
+      "No, mantener"
+    ],
+    "focusReturn": true,
+    "callsIncludingOneFailedAttempt": 2,
+    "reading": "- group \"¿Confirmar cancelación?\":\n  - paragraph: ¿Confirmar cancelación?\n  - paragraph: Cancelar ahora genera un cargo del 20%. ¿Deseas continuar? Esta acción no se puede deshacer.\n  - button \"Sí, cancelar el viaje\"\n  - button \"No, mantener\"",
+    "axe": {
+      "testEngine": {
+        "name": "axe-core",
+        "version": "4.14.0"
+      },
+      "testRunner": {
+        "name": "axe"
+      },
+      "testEnvironment": {
+        "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/156.0.8078.4 Safari/537.36",
+        "windowWidth": 390,
+        "windowHeight": 900,
+        "orientationAngle": 0,
+        "orientationType": "landscape-primary"
+      },
+      "timestamp": "2026-11-07T04:57:49.181Z",
+      "url": "file:///C:/ruum_ecosistema-main/docs/remediacion-ux008/fixture.html",
+      "toolOptions": {
+        "runOnly": {
+          "type": "rule",
+          "values": [
+            "color-contrast",
+            "button-name",
+            "aria-valid-attr",
+            "aria-valid-attr-value"
+          ]
+        },
+        "reporter": "v1"
+      },
+      "inapplicable": [],
+      "passes": [
+        {
+          "id": "aria-valid-attr-value",
+          "impact": null,
+          "tags": [
+            "cat.aria",
+            "wcag2a",
+            "wcag412",
+            "EN-301-549",
+            "EN-9.4.1.2",
+            "RGAAv4",
+            "RGAA-7.1.1"
+          ],
+          "description": "Ensure all ARIA attributes have valid values",
+          "help": "ARIA attributes must conform to valid values",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.14/aria-valid-attr-value?application=axeAPI",
+          "nodes": [
+            {
+              "any": [],
+              "all": [
+                {
+                  "id": "aria-valid-attr-value",
+                  "data": null,
+                  "relatedNodes": [],
+                  "impact": "critical",
+                  "message": "ARIA attribute values are valid"
+                },
+                {
+                  "id": "aria-errormessage",
+                  "data": null,
+                  "relatedNodes": [],
+                  "impact": "critical",
+                  "message": "aria-errormessage exists and references elements visible to screen readers that use a supported aria-errormessage technique"
+                },
+                {
+                  "id": "aria-level",
+                  "data": null,
+                  "relatedNodes": [],
+                  "impact": "critical",
+                  "message": "aria-level values are valid"
+                }
+              ],
+              "none": [],
+              "impact": null,
+              "html": "<div aria-busy=\"false\" class=\"mt-5 rounded-lg border border-danger/25 bg-danger-soft px-4 py-4\">",
+              "target": [
+                ".mt-5"
+              ]
+            },
+            {
+              "any": [],
+              "all": [
+                {
+                  "id": "aria-valid-attr-value",
+                  "data": null,
+                  "relatedNodes": [],
+                  "impact": "critical",
+                  "message": "ARIA attribute values are valid"
+                },
+                {
+                  "id": "aria-errormessage",
+                  "data": null,
+                  "relatedNodes": [],
+                  "impact": "critical",
+                  "message": "aria-errormessage exists and references elements visible to screen readers that use a supported aria-errormessage technique"
+                },
+                {
+                  "id": "aria-level",
+                  "data": null,
+                  "relatedNodes": [],
+                  "impact": "critical",
+                  "message": "aria-level values are valid"
+                }
+              ],
+              "none": [],
+              "impact": null,
+              "html": "<div role=\"status\" aria-live=\"polite\" aria-atomic=\"true\"><span class=\"sr-only\">Confirmación de cancelación. Cancelar ahora genera un cargo del 20%. ¿Deseas continuar? Esta acción no se puede deshacer.</span></div>",
+              "target": [
+                "div[role=\"status\"]"
+              ]
+            },
+            {
+              "any": [],
+              "all": [
+                {
+                  "id": "aria-valid-attr-value",
+                  "data": null,
+                  "relatedNodes": [],
+                  "impact": "critical",
+                  "message": "ARIA attribute values are valid"
+                },
+                {
+                  "id": "aria-errormessage",
+                  "data": null,
+                  "relatedNodes": [],
+                  "impact": "critical",
+                  "message": "aria-errormessage exists and references elements visible to screen readers that use a supported aria-errormessage technique"
+                },
+                {
+                  "id": "aria-level",
+                  "data": null,
+                  "relatedNodes": [],
+                  "impact": "critical",
+                  "message": "aria-level values are valid"
+                }
+              ],
+              "none": [],
+              "impact": null,
+              "html": "<div class=\"mt-4 rounded-lg border border-danger/30 bg-danger-soft/60 p-4\" data-confirmacion=\"true\" tabindex=\"-1\" role=\"group\" aria-labelledby=\"_r_0_\" aria-describedby=\"_r_1_\">",
+              "target": [
+                ".border-danger\\/30"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "aria-valid-attr",
+          "impact": null,
+          "tags": [
+            "cat.aria",
+            "wcag2a",
+            "wcag412",
+            "EN-301-549",
+            "EN-9.4.1.2",
+            "RGAAv4",
+            "RGAA-7.1.1"
+          ],
+          "description": "Ensure attributes that begin with aria- are valid ARIA attributes",
+          "help": "ARIA attributes must conform to valid names",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.14/aria-valid-attr?application=axeAPI",
+          "nodes": [
+            {
+              "any": [
+                {
+                  "id": "aria-valid-attr",
+                  "data": null,
+                  "relatedNodes": [],
+                  "impact": "critical",
+                  "message": "ARIA attribute name is valid"
+                }
+              ],
+              "all": [],
+              "none": [],
+              "impact": null,
+              "html": "<div aria-busy=\"false\" class=\"mt-5 rounded-lg border border-danger/25 bg-danger-soft px-4 py-4\">",
+              "target": [
+                ".mt-5"
+              ]
+            },
+            {
+              "any": [
+                {
+                  "id": "aria-valid-attr",
+                  "data": null,
+                  "relatedNodes": [],
+                  "impact": "critical",
+                  "message": "ARIA attribute name is valid"
+                }
+              ],
+              "all": [],
+              "none": [],
+              "impact": null,
+              "html": "<div role=\"status\" aria-live=\"polite\" aria-atomic=\"true\"><span class=\"sr-only\">Confirmación de cancelación. Cancelar ahora genera un cargo del 20%. ¿Deseas continuar? Esta acción no se puede deshacer.</span></div>",
+              "target": [
+                "div[role=\"status\"]"
+              ]
+            },
+            {
+              "any": [
+                {
+                  "id": "aria-valid-attr",
+                  "data": null,
+                  "relatedNodes": [],
+                  "impact": "critical",
+                  "message": "ARIA attribute name is valid"
+                }
+              ],
+              "all": [],
+              "none": [],
+              "impact": null,
+              "html": "<div class=\"mt-4 rounded-lg border border-danger/30 bg-danger-soft/60 p-4\" data-confirmacion=\"true\" tabindex=\"-1\" role=\"group\" aria-labelledby=\"_r_0_\" aria-describedby=\"_r_1_\">",
+              "target": [
+                ".border-danger\\/30"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "button-name",
+          "impact": null,
+          "tags": [
+            "cat.name-role-value",
+            "wcag2a",
+            "wcag412",
+            "section508",
+            "section508.22.a",
+            "TTv5",
+            "TT6.a",
+            "EN-301-549",
+            "EN-9.4.1.2",
+            "ACT",
+            "RGAAv4",
+            "RGAA-11.9.1"
+          ],
+          "description": "Ensure buttons have discernible text",
+          "help": "Buttons must have discernible text",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.14/button-name?application=axeAPI",
+          "nodes": [
+            {
+              "any": [
+                {
+                  "id": "button-has-visible-text",
+                  "data": null,
+                  "relatedNodes": [],
+                  "impact": "critical",
+                  "message": "Element has inner text that is visible to screen readers"
+                }
+              ],
+              "all": [],
+              "none": [],
+              "impact": null,
+              "html": "<button class=\"inline-flex min-h-[v...\">",
+              "target": [
+                ".border-danger-action"
+              ]
+            },
+            {
+              "any": [
+                {
+                  "id": "button-has-visible-text",
+                  "data": null,
+                  "relatedNodes": [],
+                  "impact": "critical",
+                  "message": "Element has inner text that is visible to screen readers"
+                }
+              ],
+              "all": [],
+              "none": [],
+              "impact": null,
+              "html": "<button class=\"inline-flex min-h-[v...\">",
+              "target": [
+                ".border-border-strong"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "color-contrast",
+          "impact": null,
+          "tags": [
+            "cat.color",
+            "wcag2aa",
+            "wcag143",
+            "TTv5",
+            "TT13.c",
+            "EN-301-549",
+            "EN-9.1.4.3",
+            "ACT",
+            "RGAAv4",
+            "RGAA-3.2.1"
+          ],
+          "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.14/color-contrast?application=axeAPI",
+          "nodes": [
+            {
+              "any": [
+                {
+                  "id": "color-contrast",
+                  "data": {
+                    "fgColor": "#c23648",
+                    "bgColor": "#fdecef",
+                    "contrastRatio": 4.7,
+                    "fontSize": "10.5pt (14px)",
+                    "fontWeight": "normal",
+                    "expectedContrastRatio": "4.5:1"
+                  },
+                  "relatedNodes": [],
+                  "impact": "serious",
+                  "message": "Element has sufficient color contrast of 4.7"
+                }
+              ],
+              "all": [],
+              "none": [],
+              "impact": null,
+              "html": "<p class=\"font-body text-sm font-semibold text-danger\">Cancelar viaje</p>",
+              "target": [
+                ".mt-5 > .text-danger"
+              ]
+            },
+            {
+              "any": [
+                {
+                  "id": "color-contrast",
+                  "data": {
+                    "fgColor": "#0a2342",
+                    "bgColor": "#fdecef",
+                    "contrastRatio": 13.82,
+                    "fontSize": "10.5pt (14px)",
+                    "fontWeight": "normal",
+                    "expectedContrastRatio": "4.5:1"
+                  },
+                  "relatedNodes": [],
+                  "impact": "serious",
+                  "message": "Element has sufficient color contrast of 13.82"
+                }
+              ],
+              "all": [],
+              "none": [],
+              "impact": null,
+              "html": "<p class=\"mt-1 font-body text-sm text-ink/65\">Cancelar ahora puede generar un cargo según el avance operativo del servicio. Cancelar ahora genera un cargo del 20%. ¿Deseas continuar?</p>",
+              "target": [
+                ".text-ink\\/65"
+              ]
+            },
+            {
+              "any": [
+                {
+                  "id": "color-contrast",
+                  "data": {
+                    "fgColor": "#c23648",
+                    "bgColor": "#fdecef",
+                    "contrastRatio": 4.7,
+                    "fontSize": "10.5pt (14px)",
+                    "fontWeight": "normal",
+                    "expectedContrastRatio": "4.5:1"
+                  },
+                  "relatedNodes": [],
+                  "impact": "serious",
+                  "message": "Element has sufficient color contrast of 4.7"
+                }
+              ],
+              "all": [],
+              "none": [],
+              "impact": null,
+              "html": "<p id=\"_r_0_\" class=\"font-body text-sm font-semibold text-danger\">¿Confirmar cancelación?</p>",
+              "target": [
+                "#_r_0_"
+              ]
+            },
+            {
+              "any": [
+                {
+                  "id": "color-contrast",
+                  "data": {
+                    "fgColor": "#535f76",
+                    "bgColor": "#fdecef",
+                    "contrastRatio": 5.63,
+                    "fontSize": "10.5pt (14px)",
+                    "fontWeight": "normal",
+                    "expectedContrastRatio": "4.5:1"
+                  },
+                  "relatedNodes": [],
+                  "impact": "serious",
+                  "message": "Element has sufficient color contrast of 5.63"
+                }
+              ],
+              "all": [],
+              "none": [],
+              "impact": null,
+              "html": "<p id=\"_r_1_\" class=\"mt-1 font-body text-sm leading-5 text-ink/70\">Cancelar ahora genera un cargo del 20%. ¿Deseas continuar? Esta acción no se puede deshacer.</p>",
+              "target": [
+                "#_r_1_"
+              ]
+            },
+            {
+              "any": [
+                {
+                  "id": "color-contrast",
+                  "data": {
+                    "fgColor": "#ffffff",
+                    "bgColor": "#c23648",
+                    "contrastRatio": 5.36,
+                    "fontSize": "12.0pt (16px)",
+                    "fontWeight": "normal",
+                    "expectedContrastRatio": "4.5:1"
+                  },
+                  "relatedNodes": [],
+                  "impact": "serious",
+                  "message": "Element has sufficient color contrast of 5.36"
+                }
+              ],
+              "all": [],
+              "none": [],
+              "impact": null,
+              "html": "<button class=\"inline-flex min-h-[v...\">",
+              "target": [
+                ".border-danger-action"
+              ]
+            },
+            {
+              "any": [
+                {
+                  "id": "color-contrast",
+                  "data": {
+                    "fgColor": "#0a2342",
+                    "bgColor": "#ffffff",
+                    "contrastRatio": 15.76,
+                    "fontSize": "12.0pt (16px)",
+                    "fontWeight": "normal",
+                    "expectedContrastRatio": "4.5:1"
+                  },
+                  "relatedNodes": [],
+                  "impact": "serious",
+                  "message": "Element has sufficient color contrast of 15.76"
+                }
+              ],
+              "all": [],
+              "none": [],
+              "impact": null,
+              "html": "<button class=\"inline-flex min-h-[v...\">",
+              "target": [
+                ".border-border-strong"
+              ]
+            }
+          ]
+        }
+      ],
+      "incomplete": [],
+      "violations": []
+    }
+  },
+  {
+    "width": 1440,
+    "focusEntry": true,
+    "tabOrder": [
+      "Sí, cancelar el viaje",
+      "No, mantener"
+    ],
+    "focusReturn": true,
+    "callsIncludingOneFailedAttempt": 2,
+    "reading": "- group \"¿Confirmar cancelación?\":\n  - paragraph: ¿Confirmar cancelación?\n  - paragraph: Cancelar ahora genera un cargo del 20%. ¿Deseas continuar? Esta acción no se puede deshacer.\n  - button \"Sí, cancelar el viaje\"\n  - button \"No, mantener\"",
+    "axe": {
+      "testEngine": {
+        "name": "axe-core",
+        "version": "4.14.0"
+      },
+      "testRunner": {
+        "name": "axe"
+      },
+      "testEnvironment": {
+        "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/156.0.8078.4 Safari/537.36",
+        "windowWidth": 1440,
+        "windowHeight": 900,
+        "orientationAngle": 0,
+        "orientationType": "landscape-primary"
+      },
+      "timestamp": "2026-11-07T04:57:52.716Z",
+      "url": "file:///C:/ruum_ecosistema-main/docs/remediacion-ux008/fixture.html",
+      "toolOptions": {
+        "runOnly": {
+          "type": "rule",
+          "values": [
+            "color-contrast",
+            "button-name",
+            "aria-valid-attr",
+            "aria-valid-attr-value"
+          ]
+        },
+        "reporter": "v1"
+      },
+      "inapplicable": [],
+      "passes": [
+        {
+          "id": "aria-valid-attr-value",
+          "impact": null,
+          "tags": [
+            "cat.aria",
+            "wcag2a",
+            "wcag412",
+            "EN-301-549",
+            "EN-9.4.1.2",
+            "RGAAv4",
+            "RGAA-7.1.1"
+          ],
+          "description": "Ensure all ARIA attributes have valid values",
+          "help": "ARIA attributes must conform to valid values",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.14/aria-valid-attr-value?application=axeAPI",
+          "nodes": [
+            {
+              "any": [],
+              "all": [
+                {
+                  "id": "aria-valid-attr-value",
+                  "data": null,
+                  "relatedNodes": [],
+                  "impact": "critical",
+                  "message": "ARIA attribute values are valid"
+                },
+                {
+                  "id": "aria-errormessage",
+                  "data": null,
+                  "relatedNodes": [],
+                  "impact": "critical",
+                  "message": "aria-errormessage exists and references elements visible to screen readers that use a supported aria-errormessage technique"
+                },
+                {
+                  "id": "aria-level",
+                  "data": null,
+                  "relatedNodes": [],
+                  "impact": "critical",
+                  "message": "aria-level values are valid"
+                }
+              ],
+              "none": [],
+              "impact": null,
+              "html": "<div aria-busy=\"false\" class=\"mt-5 rounded-lg border border-danger/25 bg-danger-soft px-4 py-4\">",
+              "target": [
+                ".mt-5"
+              ]
+            },
+            {
+              "any": [],
+              "all": [
+                {
+                  "id": "aria-valid-attr-value",
+                  "data": null,
+                  "relatedNodes": [],
+                  "impact": "critical",
+                  "message": "ARIA attribute values are valid"
+                },
+                {
+                  "id": "aria-errormessage",
+                  "data": null,
+                  "relatedNodes": [],
+                  "impact": "critical",
+                  "message": "aria-errormessage exists and references elements visible to screen readers that use a supported aria-errormessage technique"
+                },
+                {
+                  "id": "aria-level",
+                  "data": null,
+                  "relatedNodes": [],
+                  "impact": "critical",
+                  "message": "aria-level values are valid"
+                }
+              ],
+              "none": [],
+              "impact": null,
+              "html": "<div role=\"status\" aria-live=\"polite\" aria-atomic=\"true\"><span class=\"sr-only\">Confirmación de cancelación. Cancelar ahora genera un cargo del 20%. ¿Deseas continuar? Esta acción no se puede deshacer.</span></div>",
+              "target": [
+                "div[role=\"status\"]"
+              ]
+            },
+            {
+              "any": [],
+              "all": [
+                {
+                  "id": "aria-valid-attr-value",
+                  "data": null,
+                  "relatedNodes": [],
+                  "impact": "critical",
+                  "message": "ARIA attribute values are valid"
+                },
+                {
+                  "id": "aria-errormessage",
+                  "data": null,
+                  "relatedNodes": [],
+                  "impact": "critical",
+                  "message": "aria-errormessage exists and references elements visible to screen readers that use a supported aria-errormessage technique"
+                },
+                {
+                  "id": "aria-level",
+                  "data": null,
+                  "relatedNodes": [],
+                  "impact": "critical",
+                  "message": "aria-level values are valid"
+                }
+              ],
+              "none": [],
+              "impact": null,
+              "html": "<div class=\"mt-4 rounded-lg border border-danger/30 bg-danger-soft/60 p-4\" data-confirmacion=\"true\" tabindex=\"-1\" role=\"group\" aria-labelledby=\"_r_0_\" aria-describedby=\"_r_1_\">",
+              "target": [
+                ".border-danger\\/30"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "aria-valid-attr",
+          "impact": null,
+          "tags": [
+            "cat.aria",
+            "wcag2a",
+            "wcag412",
+            "EN-301-549",
+            "EN-9.4.1.2",
+            "RGAAv4",
+            "RGAA-7.1.1"
+          ],
+          "description": "Ensure attributes that begin with aria- are valid ARIA attributes",
+          "help": "ARIA attributes must conform to valid names",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.14/aria-valid-attr?application=axeAPI",
+          "nodes": [
+            {
+              "any": [
+                {
+                  "id": "aria-valid-attr",
+                  "data": null,
+                  "relatedNodes": [],
+                  "impact": "critical",
+                  "message": "ARIA attribute name is valid"
+                }
+              ],
+              "all": [],
+              "none": [],
+              "impact": null,
+              "html": "<div aria-busy=\"false\" class=\"mt-5 rounded-lg border border-danger/25 bg-danger-soft px-4 py-4\">",
+              "target": [
+                ".mt-5"
+              ]
+            },
+            {
+              "any": [
+                {
+                  "id": "aria-valid-attr",
+                  "data": null,
+                  "relatedNodes": [],
+                  "impact": "critical",
+                  "message": "ARIA attribute name is valid"
+                }
+              ],
+              "all": [],
+              "none": [],
+              "impact": null,
+              "html": "<div role=\"status\" aria-live=\"polite\" aria-atomic=\"true\"><span class=\"sr-only\">Confirmación de cancelación. Cancelar ahora genera un cargo del 20%. ¿Deseas continuar? Esta acción no se puede deshacer.</span></div>",
+              "target": [
+                "div[role=\"status\"]"
+              ]
+            },
+            {
+              "any": [
+                {
+                  "id": "aria-valid-attr",
+                  "data": null,
+                  "relatedNodes": [],
+                  "impact": "critical",
+                  "message": "ARIA attribute name is valid"
+                }
+              ],
+              "all": [],
+              "none": [],
+              "impact": null,
+              "html": "<div class=\"mt-4 rounded-lg border border-danger/30 bg-danger-soft/60 p-4\" data-confirmacion=\"true\" tabindex=\"-1\" role=\"group\" aria-labelledby=\"_r_0_\" aria-describedby=\"_r_1_\">",
+              "target": [
+                ".border-danger\\/30"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "button-name",
+          "impact": null,
+          "tags": [
+            "cat.name-role-value",
+            "wcag2a",
+            "wcag412",
+            "section508",
+            "section508.22.a",
+            "TTv5",
+            "TT6.a",
+            "EN-301-549",
+            "EN-9.4.1.2",
+            "ACT",
+            "RGAAv4",
+            "RGAA-11.9.1"
+          ],
+          "description": "Ensure buttons have discernible text",
+          "help": "Buttons must have discernible text",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.14/button-name?application=axeAPI",
+          "nodes": [
+            {
+              "any": [
+                {
+                  "id": "button-has-visible-text",
+                  "data": null,
+                  "relatedNodes": [],
+                  "impact": "critical",
+                  "message": "Element has inner text that is visible to screen readers"
+                }
+              ],
+              "all": [],
+              "none": [],
+              "impact": null,
+              "html": "<button class=\"inline-flex min-h-[v...\">",
+              "target": [
+                ".border-danger-action"
+              ]
+            },
+            {
+              "any": [
+                {
+                  "id": "button-has-visible-text",
+                  "data": null,
+                  "relatedNodes": [],
+                  "impact": "critical",
+                  "message": "Element has inner text that is visible to screen readers"
+                }
+              ],
+              "all": [],
+              "none": [],
+              "impact": null,
+              "html": "<button class=\"inline-flex min-h-[v...\">",
+              "target": [
+                ".border-border-strong"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "color-contrast",
+          "impact": null,
+          "tags": [
+            "cat.color",
+            "wcag2aa",
+            "wcag143",
+            "TTv5",
+            "TT13.c",
+            "EN-301-549",
+            "EN-9.1.4.3",
+            "ACT",
+            "RGAAv4",
+            "RGAA-3.2.1"
+          ],
+          "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.14/color-contrast?application=axeAPI",
+          "nodes": [
+            {
+              "any": [
+                {
+                  "id": "color-contrast",
+                  "data": {
+                    "fgColor": "#c23648",
+                    "bgColor": "#fdecef",
+                    "contrastRatio": 4.7,
+                    "fontSize": "10.5pt (14px)",
+                    "fontWeight": "normal",
+                    "expectedContrastRatio": "4.5:1"
+                  },
+                  "relatedNodes": [],
+                  "impact": "serious",
+                  "message": "Element has sufficient color contrast of 4.7"
+                }
+              ],
+              "all": [],
+              "none": [],
+              "impact": null,
+              "html": "<p class=\"font-body text-sm font-semibold text-danger\">Cancelar viaje</p>",
+              "target": [
+                ".mt-5 > .text-danger"
+              ]
+            },
+            {
+              "any": [
+                {
+                  "id": "color-contrast",
+                  "data": {
+                    "fgColor": "#0a2342",
+                    "bgColor": "#fdecef",
+                    "contrastRatio": 13.82,
+                    "fontSize": "10.5pt (14px)",
+                    "fontWeight": "normal",
+                    "expectedContrastRatio": "4.5:1"
+                  },
+                  "relatedNodes": [],
+                  "impact": "serious",
+                  "message": "Element has sufficient color contrast of 13.82"
+                }
+              ],
+              "all": [],
+              "none": [],
+              "impact": null,
+              "html": "<p class=\"mt-1 font-body text-sm text-ink/65\">Cancelar ahora puede generar un cargo según el avance operativo del servicio. Cancelar ahora genera un cargo del 20%. ¿Deseas continuar?</p>",
+              "target": [
+                ".text-ink\\/65"
+              ]
+            },
+            {
+              "any": [
+                {
+                  "id": "color-contrast",
+                  "data": {
+                    "fgColor": "#c23648",
+                    "bgColor": "#fdecef",
+                    "contrastRatio": 4.7,
+                    "fontSize": "10.5pt (14px)",
+                    "fontWeight": "normal",
+                    "expectedContrastRatio": "4.5:1"
+                  },
+                  "relatedNodes": [],
+                  "impact": "serious",
+                  "message": "Element has sufficient color contrast of 4.7"
+                }
+              ],
+              "all": [],
+              "none": [],
+              "impact": null,
+              "html": "<p id=\"_r_0_\" class=\"font-body text-sm font-semibold text-danger\">¿Confirmar cancelación?</p>",
+              "target": [
+                "#_r_0_"
+              ]
+            },
+            {
+              "any": [
+                {
+                  "id": "color-contrast",
+                  "data": {
+                    "fgColor": "#535f76",
+                    "bgColor": "#fdecef",
+                    "contrastRatio": 5.63,
+                    "fontSize": "10.5pt (14px)",
+                    "fontWeight": "normal",
+                    "expectedContrastRatio": "4.5:1"
+                  },
+                  "relatedNodes": [],
+                  "impact": "serious",
+                  "message": "Element has sufficient color contrast of 5.63"
+                }
+              ],
+              "all": [],
+              "none": [],
+              "impact": null,
+              "html": "<p id=\"_r_1_\" class=\"mt-1 font-body text-sm leading-5 text-ink/70\">Cancelar ahora genera un cargo del 20%. ¿Deseas continuar? Esta acción no se puede deshacer.</p>",
+              "target": [
+                "#_r_1_"
+              ]
+            },
+            {
+              "any": [
+                {
+                  "id": "color-contrast",
+                  "data": {
+                    "fgColor": "#ffffff",
+                    "bgColor": "#c23648",
+                    "contrastRatio": 5.36,
+                    "fontSize": "12.0pt (16px)",
+                    "fontWeight": "normal",
+                    "expectedContrastRatio": "4.5:1"
+                  },
+                  "relatedNodes": [],
+                  "impact": "serious",
+                  "message": "Element has sufficient color contrast of 5.36"
+                }
+              ],
+              "all": [],
+              "none": [],
+              "impact": null,
+              "html": "<button class=\"inline-flex min-h-[v...\">",
+              "target": [
+                ".border-danger-action"
+              ]
+            },
+            {
+              "any": [
+                {
+                  "id": "color-contrast",
+                  "data": {
+                    "fgColor": "#0a2342",
+                    "bgColor": "#ffffff",
+                    "contrastRatio": 15.76,
+                    "fontSize": "12.0pt (16px)",
+                    "fontWeight": "normal",
+                    "expectedContrastRatio": "4.5:1"
+                  },
+                  "relatedNodes": [],
+                  "impact": "serious",
+                  "message": "Element has sufficient color contrast of 15.76"
+                }
+              ],
+              "all": [],
+              "none": [],
+              "impact": null,
+              "html": "<button class=\"inline-flex min-h-[v...\">",
+              "target": [
+                ".border-border-strong"
+              ]
+            }
+          ]
+        }
+      ],
+      "incomplete": [],
+      "violations": []
+    }
+  }
+]

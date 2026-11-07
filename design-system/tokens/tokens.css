@@ -22,7 +22,7 @@
   /* Color — marca */
   --navy: #0A2342;
   --teal: #00D1D1;
-  --teal-deep: #008B8B;
+  --teal-deep: #007575;
   --action: #0066FF;
   --action-hover: #3D7FFF;
 
@@ -41,7 +41,7 @@
   --emergency: #B3261E;
 
   /* Gradientes */
-  --gradient-cta: linear-gradient(90deg, #008B8B 0%, #0066FF 100%);
+  --gradient-cta: linear-gradient(90deg, #007575 0%, #0066FF 100%);
   --gradient-route: linear-gradient(90deg, #00D1D1 0%, #0066FF 100%);
 
   /* Elevación */
@@ -88,7 +88,7 @@
     --surface: #0A2342;
     --surface-elevated: #0F2D52;
     --border: #1A3A5C;
-    --border-input: #2D4F73;
+    --border-input: #527CA8;
     --text-primary: #F6F8FB;
     --text-secondary: #A8B5CC;
 
@@ -127,7 +127,7 @@
   --surface: #0A2342;
   --surface-elevated: #0F2D52;
   --border: #1A3A5C;
-  --border-input: #2D4F73;
+  --border-input: #527CA8;
   --text-primary: #F6F8FB;
   --text-secondary: #A8B5CC;
 

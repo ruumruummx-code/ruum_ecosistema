@@ -78,13 +78,13 @@ export function Chat({ propio, mensajes, onEnviar, deshabilitado, mensajeDeshabi
                 <div
                   className={[
                     "max-w-[75%] rounded-xl px-3.5 py-2.5 font-body text-sm leading-5 shadow-[0_1px_1px_rgba(26,31,46,0.06)]",
-                    esPropio ? "bg-signal text-text-primary" : "bg-surface-elevated text-text-primary",
-                    pendiente ? "opacity-60" : "",
+                    esPropio ? "bg-signal text-[#0a2342]" : "bg-surface-elevated text-text-primary",
+                    pendiente ? "border border-dashed border-[#0a2342]/40" : "",
                   ].join(" ")}
                   aria-label={pendiente ? "Mensaje enviando" : undefined}
                 >
                   <p>{m.contenido}</p>
-                  <p className="mt-1 flex items-center gap-1 text-xs text-text-secondary">
+                  <p className={`mt-1 flex items-center gap-1 text-xs ${esPropio ? "text-[#0a2342]/75" : "text-text-secondary"}`}>
                     <span>{new Date(m.enviado_en).toLocaleTimeString("es-MX", { hour: "2-digit", minute: "2-digit" })}</span>
                     {pendiente && <span aria-hidden="true"> · enviando…</span>}
                   </p>

@@ -11,6 +11,19 @@ beforeEach(() => { localStorage.clear(); vi.clearAllMocks(); guardar.mockResolve
 const usuario = { id: "u1", preferencias: {} } as Usuario;
 
 describe("persistencia de preferencias", () => {
+  it('UX-006 conserva el 503 y normaliza EN heredado al guardar otra preferencia', async () => {
+    guardar.mockRejectedValueOnce(Object.assign(new Error('Service Unavailable'), { status: 503 }));
+    render(<Preferencias usuario={{ ...usuario, preferencias: { idioma: 'en' } }} />);
+    fireEvent.change(screen.getByLabelText('Unidades de medida'), { target: { value: 'Imperial' } });
+    expect(await screen.findByRole('alert')).toHaveTextContent('pendientes de sincronizar');
+    expect(guardar).toHaveBeenCalledWith(expect.anything(), { unidades: 'Imperial', idioma: 'es' });
+    expect(document.documentElement.lang).toBe('es-MX');
+    expect(screen.queryByText(/guardad[oa]s? con éxito/i)).not.toBeInTheDocument();
+    expect(JSON.parse(localStorage.getItem('ruum:preferencias-pendientes:u1')!).general.idioma).toBe('es');
+    fireEvent.click(screen.getByRole('button', { name: 'Reintentar guardado' }));
+    await waitFor(() => expect(localStorage.getItem('ruum:preferencias-pendientes:u1')).toBeNull());
+  });
+
   it("no borra una edición nueva al confirmar una petición anterior después de navegar", async () => {
     let resolver!: () => void;
     guardar.mockReturnValueOnce(new Promise<void>(resolve => { resolver = resolve; }));

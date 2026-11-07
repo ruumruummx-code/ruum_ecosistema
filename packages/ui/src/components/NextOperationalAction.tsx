@@ -32,20 +32,30 @@ function CtaLink({ cta, primary = false }: { cta: OperationalActionCta; primary?
     "inline-flex min-h-12 min-w-12 w-full items-center justify-center gap-2 rounded-xl px-5 py-3",
     "font-body text-sm font-semibold leading-5 transition-all duration-200",
     "focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-2",
-    variant === "primary"
+    cta.disabled
+      ? "cursor-not-allowed border border-border bg-surface-elevated text-disabled"
+      : variant === "primary"
       ? "border-transparent bg-[image:var(--ruum-gradient-action)] text-white shadow-xs hover:brightness-105 active:scale-[0.98] focus-visible:outline-route-action"
       : variant === "danger" || variant === "emergency"
         ? "border border-danger-action bg-danger-action text-white shadow-xs hover:brightness-105 active:scale-[0.98] focus-visible:outline-danger-action"
       : "border border-border-strong bg-surface text-primary shadow-xs hover:border-brand hover:bg-surface-elevated hover:text-primary active:scale-[0.98] focus-visible:outline-route-action"
   ].join(" ");
 
+  // SD-REM-007: no se monta un ancla ni un destino activable mientras está bloqueado.
+  if (cta.disabled) {
+    return (
+      <span role="link" aria-disabled="true" className={classes}>
+        {cta.label}
+      </span>
+    );
+  }
+
   return (
     <a
       href={cta.href}
       target={cta.external ? "_blank" : undefined}
       rel={cta.external ? "noreferrer" : undefined}
-      aria-disabled={cta.disabled || undefined}
-      className={cta.disabled ? `${classes} pointer-events-none border-border bg-surface-elevated text-disabled` : classes}
+      className={classes}
     >
       {cta.label}
     </a>
@@ -69,6 +79,7 @@ function ActionButton({
       variant={cta.variant ?? (primary ? "primary" : "secondary")}
       onClick={cta.onClick}
       disabled={cta.disabled}
+      aria-disabled={cta.disabled || undefined}
       loading={loading}
     >
       {cta.label}

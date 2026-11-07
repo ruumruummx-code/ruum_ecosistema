@@ -100,13 +100,16 @@ describe("PagoStripe — cobro real con Elements mockeado en el borde", () => {
     expect(fetchMock).not.toHaveBeenCalled();
   });
 
-  it("pide configurar la clave pública si falta", async () => {
+  it("muestra mensaje amigable al usuario sin nombres técnicos si falta la clave pública (AC-6)", async () => {
     vi.stubEnv("NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY", "");
     const PagoStripe = await importarPagoStripe();
     render(<PagoStripe trasladoId="t-1" monto={500} onPagado={vi.fn()} />);
     expect(
-      await screen.findByText(/NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY/),
+      await screen.findByText(/pasarela de pago seguro no está disponible temporalmente/i),
     ).toBeInTheDocument();
+    expect(
+      screen.queryByText(/NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY/),
+    ).not.toBeInTheDocument();
   });
 
   it("reconcilia pago ya confirmado sin montar Elements y avisa una vez", async () => {
@@ -263,5 +266,64 @@ describe("PagoStripe — cobro real con Elements mockeado en el borde", () => {
     expect(await screen.findByText(/caída de red/i)).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: /reintentar/i }));
     expect(await screen.findByTestId("payment-element")).toBeInTheDocument();
+  });
+
+  it("ofrece salida contextual completa ante agotamiento del plazo de espera (AC-1, AC-3)", async () => {
+    // Simular conexión estancada que nunca responde
+    vi.stubGlobal("fetch", vi.fn(() => new Promise(() => {})));
+    const PagoStripe = await importarPagoStripe();
+    render(<PagoStripe trasladoId="t-1" monto={500} timeoutMs={80} onPagado={vi.fn()} />);
+
+    // Durante la espera muestra mensaje útil (AC-2)
+    expect(screen.getByText(/conectando con la pasarela de pagos segura/i)).toBeInTheDocument();
+
+    // Al agotarse el plazo, muestra salida contextual (AC-3)
+    expect(await screen.findByText(/la conexión tardó más de lo esperado/i)).toBeInTheDocument();
+    expect(screen.getByText(/no se realizó ningún cargo a tu cuenta/i)).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /reintentar conexión/i })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /volver a mis traslados/i })).toHaveAttribute("href", "/mis-viajes");
+    expect(screen.getByRole("link", { name: /contactar a soporte/i })).toHaveAttribute("href", expect.stringContaining("/soporte?motivo=pago"));
+  });
+
+  it("consulta el estado previo antes de cobrar y confirma de inmediato si ya estaba pagado (AC-4, AC-5)", async () => {
+    const uuidTraslado = "10000000-0000-4000-8000-000000000001";
+    // El endpoint de estado responde que el traslado ya está pagado
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockImplementation((url: string) => {
+        if (url.includes("/api/viajes/")) {
+          return Promise.resolve(new Response(JSON.stringify({ pagado: true, monto: 500 })));
+        }
+        return Promise.resolve(new Response(JSON.stringify({ clientSecret: "cs_no_usado" })));
+      }),
+    );
+    const onPagado = vi.fn();
+    const PagoStripe = await importarPagoStripe();
+    render(<PagoStripe trasladoId={uuidTraslado} monto={500} onPagado={onPagado} />);
+
+    // Se detecta el pago previo y no se intenta crear un cobro duplicado
+    expect(await screen.findByText(/pago ya confirmado previamente/i)).toBeInTheDocument();
+    expect(screen.getByText(/no se realizó ningún cargo duplicado/i)).toBeInTheDocument();
+    expect(screen.getByText(new RegExp(uuidTraslado))).toBeInTheDocument();
+    expect(onPagado).toHaveBeenCalledTimes(1);
+    expect(screen.queryByTestId("payment-element")).not.toBeInTheDocument();
+  });
+
+  it("muestra comprobante digital recuperable cuando el pago es aprobado (AC-9)", async () => {
+    const PagoStripe = await importarPagoStripe();
+    const onPagado = vi.fn();
+    const user = userEvent.setup();
+    render(<PagoStripe trasladoId="t-comprobante-123" monto={850} onPagado={onPagado} />);
+
+    await screen.findByTestId("payment-element");
+    await user.click(screen.getByRole("button", { name: /pagar y confirmar traslado/i }));
+
+    expect(await screen.findByRole("heading", { name: /stripe aprobó tu pago/i })).toBeInTheDocument();
+    expect(screen.getByText(/t-comprobante-123/)).toBeInTheDocument();
+    expect(screen.getByText(/\$850\.00 MXN/)).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /ver detalles del traslado/i })).toHaveAttribute(
+      "href",
+      "/viajes/t-comprobante-123?pago=exitoso",
+    );
   });
 });

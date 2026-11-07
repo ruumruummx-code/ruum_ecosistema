@@ -1,5 +1,7 @@
+import { aplicarIdiomaDisponible } from "./idioma-aplicacion";
 export function aplicarPreferenciasAplicacion(pref: Record<string, unknown>) {
   const raiz = document.documentElement;
+  aplicarIdiomaDisponible();
   raiz.setAttribute("data-units", pref.unidades === "Imperial" ? "imperial" : "metric");
   raiz.style.fontSize = pref.accesibilidad === "Texto grande" ? "18px" : "";
   if (pref.accesibilidad === "Alto contraste") raiz.setAttribute("data-a11y-contrast", "high");

@@ -36,8 +36,8 @@ vi.mock("../../../lib/supabase-browser", () => ({
   crearClienteNavegador: () => ({}),
 }));
 
-const mockActualizarNotificaciones = vi.fn(() => Promise.resolve({ data: null, error: null }));
-const mockActualizarGenerales = vi.fn(() => Promise.resolve());
+const mockActualizarNotificaciones = vi.fn<(...args: unknown[]) => Promise<{ data: null; error: null }>>(() => Promise.resolve({ data: null, error: null }));
+const mockActualizarGenerales = vi.fn<(...args: unknown[]) => Promise<void>>(() => Promise.resolve());
 
 vi.mock("@ruum/api/services", () => ({
   actualizarPreferenciasNotificaciones: (...args: unknown[]) => mockActualizarNotificaciones(...args),
@@ -156,11 +156,15 @@ describe("PreferenciasCliente", () => {
     expect(screen.getByText("Guardar cambios")).toBeDefined();
   });
 
-  it("permite interactuar con el selector de idioma y el selector de tema", () => {
+  it("deshabilita English con explicación y conserva el selector de tema", () => {
     render(<PreferenciasCliente cuenta={mockCuenta} />);
 
     const botonEnglish = screen.getByRole("button", { name: "English" });
+    expect(botonEnglish).toBeDisabled();
+    expect(botonEnglish).toHaveAccessibleDescription(/únicamente en español/);
     fireEvent.click(botonEnglish);
+    expect(botonEnglish).toHaveAttribute("aria-pressed", "false");
+    expect(document.documentElement.lang).toBe("es-MX");
 
     // Selección de tema
     const botonOscuro = screen.getByRole("button", { name: "Oscuro" });
@@ -254,11 +258,14 @@ describe("PreferenciasCliente", () => {
     mockStore["ruum:pref:usuario:cuenta-bbb"] = JSON.stringify({ idioma: "es", unidades: "Métrico" });
 
     const { unmount } = render(<PreferenciasCliente cuenta={cuentaA} />);
-    expect(screen.getAllByText("English").length).toBeGreaterThanOrEqual(1);
+    expect(screen.getByRole("button", { name: "English" })).toBeDisabled();
+    expect(JSON.parse(mockStore["ruum:pref:usuario:cuenta-aaa"]).idioma).toBe("es");
+    expect(screen.getByRole("button", { name: "Español" })).toHaveAttribute("aria-pressed", "true");
     unmount();
 
     render(<PreferenciasCliente cuenta={cuentaB} />);
-    expect(screen.getAllByText("Español").length).toBeGreaterThanOrEqual(1);
+    expect(screen.getByRole("button", { name: "Español" })).toHaveAttribute("aria-pressed", "true");
+    expect(JSON.parse(mockStore["ruum:pref:usuario:cuenta-bbb"]).unidades).toBe("Métrico");
   });
 
   it("RUUM-UX-010 AC-1 & AC-3: los 9 interruptores tienen nombre accesible único con evento y canal", () => {

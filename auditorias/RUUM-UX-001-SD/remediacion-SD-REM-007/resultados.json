@@ -1,0 +1,495 @@
+{
+  "ticket": "SD-REM-007",
+  "pattern": "A: span role=link aria-disabled=true sin href, tabindex ni eventos",
+  "keyboard": [
+    {
+      "name": "Cancelar traslado",
+      "tag": "SPAN",
+      "disabled": "true",
+      "href": null,
+      "tabindex": null,
+      "programmaticFocus": "rechazado",
+      "dispatchedEnterSpaceClick": "sin activación"
+    },
+    {
+      "name": "Confirmar con adaptador",
+      "tag": "SPAN",
+      "disabled": "true",
+      "href": null,
+      "tabindex": null,
+      "programmaticFocus": "rechazado",
+      "dispatchedEnterSpaceClick": "sin activación"
+    },
+    {
+      "name": "Pagar con alias",
+      "tag": "SPAN",
+      "disabled": "true",
+      "href": null,
+      "tabindex": null,
+      "programmaticFocus": "rechazado",
+      "dispatchedEnterSpaceClick": "sin activación"
+    },
+    {
+      "name": "Confirmar pago",
+      "tag": "SPAN",
+      "disabled": "true",
+      "href": null,
+      "tabindex": null,
+      "programmaticFocus": "rechazado",
+      "dispatchedEnterSpaceClick": "sin activación"
+    },
+    {
+      "name": "Cancelar operación",
+      "tag": "SPAN",
+      "disabled": "true",
+      "href": null,
+      "tabindex": null,
+      "programmaticFocus": "rechazado",
+      "dispatchedEnterSpaceClick": "sin activación"
+    }
+  ],
+  "tab": "Salta los cinco enlaces y el botón nativo deshabilitados; Shift+Tab regresa al centinela inicial",
+  "physicalEnterSpace": "Sin navegación ni acciones desde el centinela final",
+  "disabledCounters": [
+    0,
+    0
+  ],
+  "disabledPopups": 0,
+  "enabledRegression": "Enter navega en fila, dos adaptadores y CTA; Enter/Space activan botón; al volver a deshabilitar se retiran enlaces",
+  "axe": {
+    "testEngine": {
+      "name": "axe-core",
+      "version": "4.14.0"
+    },
+    "testRunner": {
+      "name": "axe"
+    },
+    "testEnvironment": {
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/156.0.8078.4 Safari/537.36",
+      "windowWidth": 480,
+      "windowHeight": 1000,
+      "orientationAngle": 0,
+      "orientationType": "landscape-primary"
+    },
+    "timestamp": "2026-11-07T07:04:32.776Z",
+    "url": "http://127.0.0.1:59651/remediacion-SD-REM-007/formulario.html",
+    "toolOptions": {
+      "runOnly": {
+        "type": "rule",
+        "values": [
+          "aria-allowed-attr",
+          "button-name",
+          "link-name"
+        ]
+      },
+      "reporter": "v1"
+    },
+    "inapplicable": [
+      {
+        "id": "link-name",
+        "impact": null,
+        "tags": [
+          "cat.name-role-value",
+          "wcag2a",
+          "wcag244",
+          "wcag412",
+          "section508",
+          "section508.22.a",
+          "TTv5",
+          "TT6.a",
+          "EN-301-549",
+          "EN-9.2.4.4",
+          "EN-9.4.1.2",
+          "ACT",
+          "RGAAv4",
+          "RGAA-6.2.1"
+        ],
+        "description": "Ensure links have discernible text",
+        "help": "Links must have discernible text",
+        "helpUrl": "https://dequeuniversity.com/rules/axe/4.14/link-name?application=axeAPI",
+        "nodes": []
+      }
+    ],
+    "passes": [
+      {
+        "id": "aria-allowed-attr",
+        "impact": null,
+        "tags": [
+          "cat.aria",
+          "wcag2a",
+          "wcag412",
+          "EN-301-549",
+          "EN-9.4.1.2",
+          "RGAAv4",
+          "RGAA-7.1.1"
+        ],
+        "description": "Ensure an element's role supports its ARIA attributes",
+        "help": "Elements must only use supported ARIA attributes",
+        "helpUrl": "https://dequeuniversity.com/rules/axe/4.14/aria-allowed-attr?application=axeAPI",
+        "nodes": [
+          {
+            "any": [],
+            "all": [
+              {
+                "id": "aria-allowed-attr",
+                "data": null,
+                "relatedNodes": [],
+                "impact": "critical",
+                "message": "ARIA attributes are used correctly for the defined role"
+              },
+              {
+                "id": "aria-allowed-attr-elm",
+                "data": null,
+                "relatedNodes": [],
+                "message": "ARIA attributes are allowed for this element",
+                "impact": "critical"
+              },
+              {
+                "id": "aria-no-deprecated-attr",
+                "data": null,
+                "relatedNodes": [],
+                "impact": "critical",
+                "message": "No deprecated ARIA attributes are used"
+              }
+            ],
+            "none": [
+              {
+                "id": "aria-unsupported-attr",
+                "data": null,
+                "relatedNodes": [],
+                "impact": "critical",
+                "message": "ARIA attribute is supported"
+              }
+            ],
+            "impact": null,
+            "html": "<span role=\"link\" aria-disabled=\"true\" class=\"relative flex min-h-[54px] w-full items-center gap-3.5 px-4 py-3.5 text-left transition-colors  opacity-60 pointer-events-none \">",
+            "target": [
+              ".relative.flex.min-h-\\[54px\\]:nth-child(3)"
+            ]
+          },
+          {
+            "any": [],
+            "all": [
+              {
+                "id": "aria-allowed-attr",
+                "data": null,
+                "relatedNodes": [],
+                "impact": "critical",
+                "message": "ARIA attributes are used correctly for the defined role"
+              },
+              {
+                "id": "aria-allowed-attr-elm",
+                "data": null,
+                "relatedNodes": [],
+                "message": "ARIA attributes are allowed for this element",
+                "impact": "critical"
+              },
+              {
+                "id": "aria-no-deprecated-attr",
+                "data": null,
+                "relatedNodes": [],
+                "impact": "critical",
+                "message": "No deprecated ARIA attributes are used"
+              }
+            ],
+            "none": [
+              {
+                "id": "aria-unsupported-attr",
+                "data": null,
+                "relatedNodes": [],
+                "impact": "critical",
+                "message": "ARIA attribute is supported"
+              }
+            ],
+            "impact": null,
+            "html": "<span role=\"link\" aria-disabled=\"true\" class=\"relative flex min-h-[54px] w-full items-center gap-3.5 px-4 py-3.5 text-left transition-colors  opacity-60 pointer-events-none \">",
+            "target": [
+              ".relative.flex.min-h-\\[54px\\]:nth-child(4)"
+            ]
+          },
+          {
+            "any": [],
+            "all": [
+              {
+                "id": "aria-allowed-attr",
+                "data": null,
+                "relatedNodes": [],
+                "impact": "critical",
+                "message": "ARIA attributes are used correctly for the defined role"
+              },
+              {
+                "id": "aria-allowed-attr-elm",
+                "data": null,
+                "relatedNodes": [],
+                "message": "ARIA attributes are allowed for this element",
+                "impact": "critical"
+              },
+              {
+                "id": "aria-no-deprecated-attr",
+                "data": null,
+                "relatedNodes": [],
+                "impact": "critical",
+                "message": "No deprecated ARIA attributes are used"
+              }
+            ],
+            "none": [
+              {
+                "id": "aria-unsupported-attr",
+                "data": null,
+                "relatedNodes": [],
+                "impact": "critical",
+                "message": "ARIA attribute is supported"
+              }
+            ],
+            "impact": null,
+            "html": "<span role=\"link\" aria-disabled=\"true\" class=\"relative flex min-h-[54px] w-full items-center gap-3.5 px-4 py-3.5 text-left transition-colors  opacity-60 pointer-events-none \">",
+            "target": [
+              ".relative.flex.min-h-\\[54px\\]:nth-child(5)"
+            ]
+          },
+          {
+            "any": [],
+            "all": [
+              {
+                "id": "aria-allowed-attr",
+                "data": null,
+                "relatedNodes": [],
+                "impact": "critical",
+                "message": "ARIA attributes are used correctly for the defined role"
+              },
+              {
+                "id": "aria-allowed-attr-elm",
+                "data": null,
+                "relatedNodes": [],
+                "message": "ARIA attributes are allowed for this element",
+                "impact": "critical"
+              },
+              {
+                "id": "aria-no-deprecated-attr",
+                "data": null,
+                "relatedNodes": [],
+                "impact": "critical",
+                "message": "No deprecated ARIA attributes are used"
+              }
+            ],
+            "none": [
+              {
+                "id": "aria-unsupported-attr",
+                "data": null,
+                "relatedNodes": [],
+                "impact": "critical",
+                "message": "ARIA attribute is supported"
+              }
+            ],
+            "impact": null,
+            "html": "<button type=\"button\" disabled=\"\" aria-disabled=\"true\" class=\"relative flex min-h-[54px] w-full items-center gap-3.5 px-4 py-3.5 text-left transition-colors  opacity-60 pointer-events-none \">",
+            "target": [
+              "button[type=\"button\"]"
+            ]
+          },
+          {
+            "any": [],
+            "all": [
+              {
+                "id": "aria-allowed-attr",
+                "data": null,
+                "relatedNodes": [],
+                "impact": "critical",
+                "message": "ARIA attributes are used correctly for the defined role"
+              },
+              {
+                "id": "aria-allowed-attr-elm",
+                "data": null,
+                "relatedNodes": [],
+                "message": "ARIA attributes are allowed for this element",
+                "impact": "critical"
+              },
+              {
+                "id": "aria-no-deprecated-attr",
+                "data": null,
+                "relatedNodes": [],
+                "impact": "critical",
+                "message": "No deprecated ARIA attributes are used"
+              }
+            ],
+            "none": [
+              {
+                "id": "aria-unsupported-attr",
+                "data": null,
+                "relatedNodes": [],
+                "impact": "critical",
+                "message": "ARIA attribute is supported"
+              }
+            ],
+            "impact": null,
+            "html": "<section class=\"rounded-2xl border border-border-strong bg-surface-elevated p-4 text-text-primary shadow-2 sm:p-5 mx-auto w-full max-w-full overflow-hidden \" aria-labelledby=\"next-operational-action-title\">",
+            "target": [
+              "section"
+            ]
+          },
+          {
+            "any": [],
+            "all": [
+              {
+                "id": "aria-allowed-attr",
+                "data": null,
+                "relatedNodes": [],
+                "impact": "critical",
+                "message": "ARIA attributes are used correctly for the defined role"
+              },
+              {
+                "id": "aria-allowed-attr-elm",
+                "data": null,
+                "relatedNodes": [],
+                "message": "ARIA attributes are allowed for this element",
+                "impact": "critical"
+              },
+              {
+                "id": "aria-no-deprecated-attr",
+                "data": null,
+                "relatedNodes": [],
+                "impact": "critical",
+                "message": "No deprecated ARIA attributes are used"
+              }
+            ],
+            "none": [
+              {
+                "id": "aria-unsupported-attr",
+                "data": null,
+                "relatedNodes": [],
+                "impact": "critical",
+                "message": "ARIA attribute is supported"
+              }
+            ],
+            "impact": null,
+            "html": "<span role=\"link\" aria-disabled=\"true\" class=\"inline-flex min-h-12...\">",
+            "target": [
+              ".inline-flex.min-h-12.min-w-12:nth-child(1)"
+            ]
+          },
+          {
+            "any": [],
+            "all": [
+              {
+                "id": "aria-allowed-attr",
+                "data": null,
+                "relatedNodes": [],
+                "impact": "critical",
+                "message": "ARIA attributes are used correctly for the defined role"
+              },
+              {
+                "id": "aria-allowed-attr-elm",
+                "data": null,
+                "relatedNodes": [],
+                "message": "ARIA attributes are allowed for this element",
+                "impact": "critical"
+              },
+              {
+                "id": "aria-no-deprecated-attr",
+                "data": null,
+                "relatedNodes": [],
+                "impact": "critical",
+                "message": "No deprecated ARIA attributes are used"
+              }
+            ],
+            "none": [
+              {
+                "id": "aria-unsupported-attr",
+                "data": null,
+                "relatedNodes": [],
+                "impact": "critical",
+                "message": "ARIA attribute is supported"
+              }
+            ],
+            "impact": null,
+            "html": "<span role=\"link\" aria-disabled=\"true\" class=\"inline-flex min-h-12...\">",
+            "target": [
+              ".inline-flex.min-h-12.min-w-12:nth-child(2)"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "button-name",
+        "impact": null,
+        "tags": [
+          "cat.name-role-value",
+          "wcag2a",
+          "wcag412",
+          "section508",
+          "section508.22.a",
+          "TTv5",
+          "TT6.a",
+          "EN-301-549",
+          "EN-9.4.1.2",
+          "ACT",
+          "RGAAv4",
+          "RGAA-11.9.1"
+        ],
+        "description": "Ensure buttons have discernible text",
+        "help": "Buttons must have discernible text",
+        "helpUrl": "https://dequeuniversity.com/rules/axe/4.14/button-name?application=axeAPI",
+        "nodes": [
+          {
+            "any": [
+              {
+                "id": "button-has-visible-text",
+                "data": null,
+                "relatedNodes": [],
+                "impact": "critical",
+                "message": "Element has inner text that is visible to screen readers"
+              }
+            ],
+            "all": [],
+            "none": [],
+            "impact": null,
+            "html": "<button id=\"before\">Alternar disponibilidad</button>",
+            "target": [
+              "#before"
+            ]
+          },
+          {
+            "any": [
+              {
+                "id": "button-has-visible-text",
+                "data": null,
+                "relatedNodes": [],
+                "impact": "critical",
+                "message": "Element has inner text that is visible to screen readers"
+              }
+            ],
+            "all": [],
+            "none": [],
+            "impact": null,
+            "html": "<button type=\"button\" disabled=\"\" aria-disabled=\"true\" class=\"relative flex min-h-[54px] w-full items-center gap-3.5 px-4 py-3.5 text-left transition-colors  opacity-60 pointer-events-none \">",
+            "target": [
+              "button[type=\"button\"]"
+            ]
+          },
+          {
+            "any": [
+              {
+                "id": "button-has-visible-text",
+                "data": null,
+                "relatedNodes": [],
+                "impact": "critical",
+                "message": "Element has inner text that is visible to screen readers"
+              }
+            ],
+            "all": [],
+            "none": [],
+            "impact": null,
+            "html": "<button id=\"after\">Fin de recorrido</button>",
+            "target": [
+              "#after"
+            ]
+          }
+        ]
+      }
+    ],
+    "incomplete": [],
+    "violations": []
+  },
+  "errors": [],
+  "screenReader": "PENDIENTE NVDA/VoiceOver"
+}

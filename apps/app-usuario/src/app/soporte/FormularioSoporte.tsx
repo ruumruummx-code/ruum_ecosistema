@@ -1,7 +1,8 @@
 "use client";
 import { useRef, useState } from "react";
 import { obtenerHeadersCsrfAsync } from "../../lib/csrf";
-import Link from "next/link";
+import { RESUMEN_SOPORTE } from "../../lib/promesa-soporte";
+import { InformacionSoporte } from "./InformacionSoporte";
 import { Aviso, MobileButton } from "@ruum/ui";
 import { reportarIncidencia } from "@ruum/api/services";
 import { ETIQUETA_TIPO_INCIDENCIA } from "@ruum/shared/constants";
@@ -27,13 +28,6 @@ const MOTIVOS = [
   "Cancelaciones o reprogramación",
   "Consulta general u otro",
 ] as const;
-
-const HORARIO_SOPORTE = {
-  dias: "Lunes a Viernes",
-  horas: "8:00–20:00 (hora CDMX)",
-  sla: "<30 min",
-  slaFueraHorario: "<2 horas",
-};
 
 const CORREO_SOPORTE = CONTACTOS_SOPORTE_USUARIO.soporte.correo.valor;
 
@@ -94,7 +88,7 @@ export function FormularioSoporte({ traslados, preseleccionado, emailUsuario, mo
         const folio = `INC-${data.id.slice(0, 8).toUpperCase()}`;
         setResultado({
           ok: true,
-          msg: `Reporte registrado. Folio: ${folio}. Nuestro equipo dará seguimiento desde tu expediente. Tiempo estimado: ${HORARIO_SOPORTE.sla} (${HORARIO_SOPORTE.dias} ${HORARIO_SOPORTE.horas}) o ${HORARIO_SOPORTE.slaFueraHorario} fuera de horario.`,
+          msg: `Reporte registrado. Folio: ${folio}. Nuestro equipo dará seguimiento desde tu expediente. ${RESUMEN_SOPORTE}`,
           folio
         });
         setDescripcion("");
@@ -112,7 +106,7 @@ export function FormularioSoporte({ traslados, preseleccionado, emailUsuario, mo
       const datos = await respuesta.json();
       if (!respuesta.ok || !datos.id) throw new Error(datos.error ?? "No se confirmó el ticket.");
       const folio = `SOP-${datos.id.toUpperCase()}`;
-      setResultado({ ok: true, msg: "Tu consulta quedó registrada. Nuestro equipo la atenderá desde la bandeja de soporte.", folio });
+      setResultado({ ok: true, msg: `Tu consulta quedó registrada. Nuestro equipo la atenderá desde la bandeja de soporte. ${RESUMEN_SOPORTE}`, folio });
       ticketRef.current = null;
       setDescripcion("");
     } catch (err) {
@@ -131,27 +125,7 @@ export function FormularioSoporte({ traslados, preseleccionado, emailUsuario, mo
 
   return (
     <form onSubmit={onSubmit} className="grid gap-4 sm:grid-cols-2">
-      {/* SLA y horario - SIEMPRE VISIBLE */}
-      <div className="sm:col-span-2 rounded-2xl border border-[#c8dcf8] bg-[#edf4fe] dark:border-[#1d4576] dark:bg-[#0f2d52]/50 p-4">
-        <div className="flex items-start gap-3">
-          <svg className="size-6 text-[#104ca0] dark:text-[#6ba8ff] flex-shrink-0 mt-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
-            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-            <path d="m9 12 2 2 4-4"/>
-          </svg>
-          <div>
-            <p className="text-[12px] font-bold uppercase tracking-wider text-[#104ca0] dark:text-[#6ba8ff]">Atención al cliente</p>
-            <p className="mt-1 text-[13.5px] text-[#0a2342] dark:text-white">
-              <span className="font-bold">Horario:</span> {HORARIO_SOPORTE.dias} {HORARIO_SOPORTE.horas}
-            </p>
-            <p className="mt-0.5 text-[13.5px] text-[#0a2342] dark:text-white">
-              <span className="font-bold">Tiempo estimado de respuesta:</span> {HORARIO_SOPORTE.sla} en horario, {HORARIO_SOPORTE.slaFueraHorario} fuera de horario
-            </p>
-            <p className="mt-0.5 text-[12px] text-[#4e5f80] dark:text-[#a8b5cc]">
-              Correo: <span className="font-semibold text-[#0a2342] dark:text-white">{CORREO_SOPORTE}</span>
-            </p>
-          </div>
-        </div>
-      </div>
+      <div className="sm:col-span-2"><InformacionSoporte /></div>
 
       <label className="flex flex-col gap-1.5">
         <span className="text-[12px] font-bold uppercase tracking-wider text-[#4e5f80] dark:text-[#a8b5cc]">
@@ -262,16 +236,7 @@ export function FormularioSoporte({ traslados, preseleccionado, emailUsuario, mo
           </div>
         )}
 
-        {/* Ayuda adicional */}
-        {!resultado && (
-          <p className="mt-4 text-xs leading-5 text-[#4e5f80] dark:text-[#a8b5cc]">
-            <span className="font-semibold text-[#0a2342] dark:text-white">¿Necesitas ayuda inmediata?</span>{" "}
-            Si es una emergencia con daño o seguridad durante el traslado, usa el{" "}
-            <Link href={viajeId ? `/viajes/${viajeId}#chat-conductor` : "/mis-viajes"} className="font-semibold text-[#0066ff] dark:text-[#4d94ff] underline-offset-2 hover:underline">
-              chat del Pasaporte Digital
-            </Link>.
-          </p>
-        )}
+
       </div>
     </form>
   );

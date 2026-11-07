@@ -156,13 +156,51 @@
 .support a:hover { background: #e7f0ff; }
 .support a svg { width: 14px; height: 14px; }
 .tips { padding: 0 10px 5px; display: flex; flex-direction: column; }
-.tips>header { display: flex; align-items: center; justify-content: space-between; min-height: 24px; }
+.tips>header { display: flex; align-items: center; justify-content: space-between; min-height: 28px; }
 .tips h2 { display: flex; align-items: center; gap: 6px; font-size: 10px; font-weight: 600; }
 .tips h2 svg { color: #ffac00; width: 13px; height: 13px; }
-.tips header>div { display: flex; }
-.tips header button { width: 16px; height: 20px; display: grid; place-items: center; }
-.tips header i { width: 5px; height: 5px; border-radius: 50%; border: 1px solid #b4c8e5; }
-.tips header button[aria-current=true] i { background: #0061ff; border-color: #0061ff; }
+.tips header>div { display: flex; align-items: center; gap: 8px; }
+.tips header button {
+  width: 28px;
+  height: 28px;
+  min-width: 28px;
+  min-height: 28px;
+  display: grid;
+  place-items: center;
+  background: transparent;
+  border: none;
+  padding: 0;
+  border-radius: 6px;
+  cursor: pointer;
+}
+.tips header button:focus-visible {
+  outline: 2px solid var(--user-on-light-link, #0052cc);
+  outline-offset: 2px;
+}
+.tips header i {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  border: 1px solid var(--user-on-light-muted, #52617a);
+  background: transparent;
+  display: block;
+  pointer-events: none;
+  transition: all 0.2s ease;
+}
+.tips header button[aria-current=true] i {
+  background: var(--user-on-light-link, #0052cc);
+  border-color: var(--user-on-light-link, #0052cc);
+  transform: scale(1.15);
+}
+@media (pointer: coarse) {
+  .tips header>div { gap: 4px; }
+  .tips header button {
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    min-height: 44px;
+  }
+}
 .tipContent { display: flex; align-items: center; gap: 12px; padding: 5px 10px; flex: 1; min-height: 0; border-radius: 8px; color: #fff; background: #001c34 url('/imagenes/dashboard-tips.webp') center / cover; }
 .tipContent>div { flex: 1; min-width: 0; }
 .tipContent h3 { color: #fff; line-height: 1.2; font-size: 11px; font-weight: 650; }
@@ -203,7 +241,7 @@
   .support h2 { font-size: 12px; line-height: 1.1; }
   .support p { font-size: 9px; line-height: 1.1; margin-top: 2px; }
   .support a { font-size: 10px; line-height: 1.1; padding: 4px 8px; margin-top: 3px; min-width: 115px; }
-  .tips>header { min-height: 18px; }
+  .tips>header { min-height: 28px; }
   .tipContent { padding-block: 3px; gap: 6px; }
   .tipContent h3 { font-size: 10px; line-height: 1.1; }
   .tipContent p { font-size: 9px; line-height: 1.05; margin-top: 2px; max-width: 100%; }
@@ -224,6 +262,6 @@
   .sectionHeading { min-height: 30px; }.sectionHeading h2 { font-size: 13px; }.sectionHeading a { font-size: 10px; }
   .recent th { padding-block: 4px; }.recent td { padding-block: 3px; }.vehicleThumb { height: 26px; }
   .support h2 { font-size: 12px; }.support p { font-size: 9px; line-height: 1.1; margin-top: 2px; }.support a { padding-block: 3px; line-height: 1.1; margin-top: 3px; }.supportIcon { width: 28px; height: 28px; }
-  .tips>header { min-height: 18px; }.tipContent { padding-block: 3px; }.tipContent h3 { font-size: 10px; line-height: 1.1; }.tipContent p { font-size: 9px; line-height: 1.05; margin-top: 2px; max-width: 100%; }
+  .tips>header { min-height: 28px; }.tipContent { padding-block: 3px; }.tipContent h3 { font-size: 10px; line-height: 1.1; }.tipContent p { font-size: 9px; line-height: 1.05; margin-top: 2px; max-width: 100%; }
 }
 @media(prefers-reduced-motion: reduce) { .dashboard a, .dashboard button { transition: none; }.liveBadge i { animation: none; } }

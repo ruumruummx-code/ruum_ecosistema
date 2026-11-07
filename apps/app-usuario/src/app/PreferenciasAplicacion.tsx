@@ -3,6 +3,7 @@ import { useEffect } from "react";
 import { obtenerPreferenciasUsuarioActual } from "@ruum/api/services";
 import { crearClienteNavegador, tieneSupabaseConfigurado } from "../lib/supabase-browser";
 import { aplicarPreferenciasAplicacion } from "../lib/preferencias-aplicacion";
+import { normalizarIdiomaLocal } from "../lib/idioma-aplicacion";
 import { leerPendientes } from "../lib/preferencias-pendientes";
 
 /** Restaura preferencias al entrar por cualquier pantalla y al cambiar de cuenta. */
@@ -26,6 +27,7 @@ export function PreferenciasAplicacion() {
       // Consultar fuera del callback de Auth evita bloquear su renovación de sesión.
       void Promise.resolve().then(() => obtenerPreferenciasUsuarioActual(cliente)).then(usuario => {
         if (actual !== revision || edicionInicial !== ediciones || !usuario) return;
+        normalizarIdiomaLocal(usuario.id);
         const preferencias = usuario.preferencias && typeof usuario.preferencias === "object" && !Array.isArray(usuario.preferencias) ? usuario.preferencias : {};
         aplicarPreferenciasAplicacion({ ...preferencias, ...leerPendientes(usuario.id).general });
       }).catch(() => { /* No impedir el uso de la pantalla cuando falla la consulta auxiliar. */ });

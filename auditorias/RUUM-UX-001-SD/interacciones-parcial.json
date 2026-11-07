@@ -1,0 +1,356 @@
+[
+  {
+    "component": "Alert",
+    "theme": "light",
+    "interaction": "no-aplica-sin-control-visible"
+  },
+  {
+    "component": "Toast",
+    "theme": "light",
+    "interaction": "no-aplica-sin-control-visible"
+  },
+  {
+    "component": "Aviso",
+    "theme": "light",
+    "interaction": "no-aplica-sin-control-visible"
+  },
+  {
+    "component": "StatusChip",
+    "theme": "light",
+    "interaction": "no-aplica-sin-control-visible"
+  },
+  {
+    "component": "EstadoBadge",
+    "theme": "light",
+    "interaction": "no-aplica-sin-control-visible"
+  },
+  {
+    "component": "MobileBadge",
+    "theme": "light",
+    "interaction": "no-aplica-sin-control-visible"
+  },
+  {
+    "component": "FinancialAmount",
+    "theme": "light",
+    "interaction": "no-aplica-sin-control-visible"
+  },
+  {
+    "component": "DriverEarning",
+    "theme": "light",
+    "interaction": "no-aplica-sin-control-visible"
+  },
+  {
+    "component": "EstatusBadgeEconomico",
+    "theme": "light",
+    "interaction": "no-aplica-sin-control-visible"
+  },
+  {
+    "component": "DesktopStateStepper",
+    "theme": "light",
+    "interaction": "no-aplica-sin-control-visible"
+  },
+  {
+    "component": "Avatar",
+    "theme": "light",
+    "interaction": "no-aplica-sin-control-visible"
+  },
+  {
+    "component": "EmptyState",
+    "theme": "light",
+    "interaction": "no-aplica-sin-control-visible"
+  },
+  {
+    "component": "Skeleton",
+    "theme": "light",
+    "interaction": "no-aplica-sin-control-visible"
+  },
+  {
+    "component": "LogoMarca",
+    "theme": "light",
+    "interaction": "no-aplica-sin-control-visible"
+  },
+  {
+    "component": "SimboloVectorial",
+    "theme": "light",
+    "interaction": "no-aplica-sin-control-visible"
+  },
+  {
+    "component": "Icono",
+    "theme": "light",
+    "interaction": "no-aplica-sin-control-visible"
+  },
+  {
+    "component": "SelloConductor",
+    "theme": "light",
+    "interaction": "no-aplica-sin-control-visible"
+  },
+  {
+    "component": "CredencialConductor",
+    "theme": "light",
+    "interaction": "no-aplica-sin-control-visible"
+  },
+  {
+    "component": "ReporteTraslado",
+    "theme": "light",
+    "interaction": "no-aplica-sin-control-visible"
+  },
+  {
+    "component": "ActaEntrega",
+    "theme": "light",
+    "interaction": "no-aplica-sin-control-visible"
+  },
+  {
+    "component": "EstadoPagoConductor",
+    "theme": "light",
+    "interaction": "no-aplica-sin-control-visible"
+  },
+  {
+    "component": "MapaEstatico",
+    "theme": "light",
+    "interaction": "no-aplica-sin-control-visible"
+  },
+  {
+    "component": "Modal",
+    "theme": "light",
+    "interaction": "dialog-keyboard",
+    "initial": true,
+    "trappedForward": true,
+    "trappedBackward": true,
+    "escapeCloses": true,
+    "restored": true
+  },
+  {
+    "component": "useDialogAccesible",
+    "theme": "light",
+    "interaction": "dialog-keyboard",
+    "initial": true,
+    "trappedForward": true,
+    "trappedBackward": true,
+    "escapeCloses": true,
+    "restored": true
+  },
+  {
+    "component": "MobileRow",
+    "theme": "light",
+    "interaction": "disabled-link-enter",
+    "activated": false,
+    "ariaDisabled": "true"
+  },
+  {
+    "component": "NextOperationalAction",
+    "theme": "light",
+    "interaction": "disabled-link-enter",
+    "activated": true,
+    "ariaDisabled": "true"
+  },
+  {
+    "component": "Tabs",
+    "theme": "light",
+    "interaction": "arrow-right",
+    "movesToNext": false,
+    "selected": "false"
+  },
+  {
+    "component": "Tabs",
+    "theme": "light",
+    "interaction": "space",
+    "selectedFirst": "true"
+  },
+  {
+    "component": "Toggle",
+    "theme": "light",
+    "interaction": "space",
+    "checked": "true"
+  },
+  {
+    "component": "Field",
+    "theme": "light",
+    "interaction": "password-toggle",
+    "type": "text",
+    "buttonName": "Ocultar contraseña"
+  },
+  {
+    "component": "TextInputUppercaseBridge",
+    "theme": "light",
+    "interaction": "typing",
+    "name": "MARÍA",
+    "email": "correo@example.test"
+  },
+  {
+    "component": "Alert",
+    "theme": "dark",
+    "interaction": "no-aplica-sin-control-visible"
+  },
+  {
+    "component": "Toast",
+    "theme": "dark",
+    "interaction": "no-aplica-sin-control-visible"
+  },
+  {
+    "component": "Aviso",
+    "theme": "dark",
+    "interaction": "no-aplica-sin-control-visible"
+  },
+  {
+    "component": "StatusChip",
+    "theme": "dark",
+    "interaction": "no-aplica-sin-control-visible"
+  },
+  {
+    "component": "EstadoBadge",
+    "theme": "dark",
+    "interaction": "no-aplica-sin-control-visible"
+  },
+  {
+    "component": "MobileBadge",
+    "theme": "dark",
+    "interaction": "no-aplica-sin-control-visible"
+  },
+  {
+    "component": "FinancialAmount",
+    "theme": "dark",
+    "interaction": "no-aplica-sin-control-visible"
+  },
+  {
+    "component": "DriverEarning",
+    "theme": "dark",
+    "interaction": "no-aplica-sin-control-visible"
+  },
+  {
+    "component": "EstatusBadgeEconomico",
+    "theme": "dark",
+    "interaction": "no-aplica-sin-control-visible"
+  },
+  {
+    "component": "DesktopStateStepper",
+    "theme": "dark",
+    "interaction": "no-aplica-sin-control-visible"
+  },
+  {
+    "component": "Avatar",
+    "theme": "dark",
+    "interaction": "no-aplica-sin-control-visible"
+  },
+  {
+    "component": "EmptyState",
+    "theme": "dark",
+    "interaction": "no-aplica-sin-control-visible"
+  },
+  {
+    "component": "Skeleton",
+    "theme": "dark",
+    "interaction": "no-aplica-sin-control-visible"
+  },
+  {
+    "component": "LogoMarca",
+    "theme": "dark",
+    "interaction": "no-aplica-sin-control-visible"
+  },
+  {
+    "component": "SimboloVectorial",
+    "theme": "dark",
+    "interaction": "no-aplica-sin-control-visible"
+  },
+  {
+    "component": "Icono",
+    "theme": "dark",
+    "interaction": "no-aplica-sin-control-visible"
+  },
+  {
+    "component": "SelloConductor",
+    "theme": "dark",
+    "interaction": "no-aplica-sin-control-visible"
+  },
+  {
+    "component": "CredencialConductor",
+    "theme": "dark",
+    "interaction": "no-aplica-sin-control-visible"
+  },
+  {
+    "component": "ReporteTraslado",
+    "theme": "dark",
+    "interaction": "no-aplica-sin-control-visible"
+  },
+  {
+    "component": "ActaEntrega",
+    "theme": "dark",
+    "interaction": "no-aplica-sin-control-visible"
+  },
+  {
+    "component": "EstadoPagoConductor",
+    "theme": "dark",
+    "interaction": "no-aplica-sin-control-visible"
+  },
+  {
+    "component": "MapaEstatico",
+    "theme": "dark",
+    "interaction": "no-aplica-sin-control-visible"
+  },
+  {
+    "component": "Modal",
+    "theme": "dark",
+    "interaction": "dialog-keyboard",
+    "initial": true,
+    "trappedForward": true,
+    "trappedBackward": true,
+    "escapeCloses": true,
+    "restored": true
+  },
+  {
+    "component": "useDialogAccesible",
+    "theme": "dark",
+    "interaction": "dialog-keyboard",
+    "initial": true,
+    "trappedForward": true,
+    "trappedBackward": true,
+    "escapeCloses": true,
+    "restored": true
+  },
+  {
+    "component": "MobileRow",
+    "theme": "dark",
+    "interaction": "disabled-link-enter",
+    "activated": false,
+    "ariaDisabled": "true"
+  },
+  {
+    "component": "NextOperationalAction",
+    "theme": "dark",
+    "interaction": "disabled-link-enter",
+    "activated": false,
+    "ariaDisabled": "true"
+  },
+  {
+    "component": "Tabs",
+    "theme": "dark",
+    "interaction": "arrow-right",
+    "movesToNext": false,
+    "selected": "false"
+  },
+  {
+    "component": "Tabs",
+    "theme": "dark",
+    "interaction": "space",
+    "selectedFirst": "true"
+  },
+  {
+    "component": "Toggle",
+    "theme": "dark",
+    "interaction": "space",
+    "checked": "true"
+  },
+  {
+    "component": "Field",
+    "theme": "dark",
+    "interaction": "password-toggle",
+    "type": "text",
+    "buttonName": "Ocultar contraseña"
+  },
+  {
+    "component": "TextInputUppercaseBridge",
+    "theme": "dark",
+    "interaction": "typing",
+    "name": "MARÍA",
+    "email": "correo@example.test"
+  }
+]

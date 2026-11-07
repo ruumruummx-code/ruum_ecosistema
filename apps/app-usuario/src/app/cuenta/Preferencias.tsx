@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback, type ReactNode } from "react";
+import { useState, useEffect, useRef, useCallback, useId, type ReactNode } from "react";
 import Link from "next/link";
 import { leerPendientes, guardarPendientes, serializarPreferencias } from "../../lib/preferencias-pendientes";
+import { AVISO_IDIOMA, IDIOMA_DISPONIBLE, aplicarIdiomaDisponible, normalizarIdiomaLocal, normalizarIdiomaPreferencias } from "../../lib/idioma-aplicacion";
 import { useTema } from "../TemaProvider";
 import { Icono } from "@ruum/ui";
 import { HojaTareaCuenta } from "./HojaTareaCuenta";
@@ -101,15 +102,6 @@ function aplicarAccesibilidadEnDocumento(acc: "Estándar" | "Texto grande" | "Al
   }
 }
 
-function aplicarIdiomaEnDocumento(_id: "es" | "en") {
-  if (typeof window === "undefined" || typeof document === "undefined") return;
-  try {
-    document.documentElement.setAttribute("lang", "es-MX");
-  } catch {
-    // ignore
-  }
-}
-
 function aplicarUnidadesEnDocumento(u: "Métrico" | "Imperial") {
   if (typeof window === "undefined" || typeof document === "undefined") return;
   try {
@@ -139,6 +131,7 @@ function aplicarUsoDatosEnDocumento(datos: "Activado" | "Desactivado") {
 
 export function Preferencias({ usuario, escritorio = false }: PreferenciasProps) {
   const { fijarModo, modo } = useTema();
+  const idiomaAvisoId = useId();
   const modoAnterior = useRef(modo);
   // C-3: preferencias sin columna en BD (tema, idioma, etc.) se persisten en
   // localStorage; las de notificación/alerta van a Supabase + localStorage.
@@ -181,8 +174,6 @@ export function Preferencias({ usuario, escritorio = false }: PreferenciasProps)
   const [alertaPago, setAlertaPago] = useState(typeof notificacionesIniciales.alertas_pago === "boolean" ? notificacionesIniciales.alertas_pago : true);
   const [alertaIncidente, setAlertaIncidente] = useState(() => (typeof prefBD.alertaIncidente === "boolean" ? prefBD.alertaIncidente : leerLocal("ruum:pref:alertaIncidente", true)));
 
-  // Idioma
-  const [idioma, setIdioma] = useState<"es" | "en">(() => leerOpcion("ruum:pref:idioma", prefBD.idioma, ["es", "en"] as const, "es"));
 
   // Preferencias de la app
   const [tema, setTema] = useState<"Claro" | "Oscuro" | "Automático">(() => leerOpcion("ruum:pref:tema", prefBD.tema, ["Claro", "Oscuro", "Automático"] as const, "Claro"));
@@ -204,7 +195,7 @@ export function Preferencias({ usuario, escritorio = false }: PreferenciasProps)
   useEffect(() => { fijarModo(tema === "Automático" ? "auto" : tema === "Oscuro" ? "dark" : "light"); aplicarTemaEnDocumento(tema); }, [tema, fijarModo]);
   useEffect(() => { if (modoAnterior.current !== modo) { modoAnterior.current = modo; setTema(modo === "auto" ? "Automático" : modo === "dark" ? "Oscuro" : "Claro"); } }, [modo]);
   useEffect(() => aplicarAccesibilidadEnDocumento(accesibilidad), [accesibilidad]);
-  useEffect(() => aplicarIdiomaEnDocumento(idioma), [idioma]);
+  useEffect(() => { normalizarIdiomaLocal(usuario?.id); aplicarIdiomaDisponible(); }, [usuario?.id]);
   useEffect(() => aplicarUnidadesEnDocumento(unidades), [unidades]);
   useEffect(() => aplicarUsoDatosEnDocumento(usoDatos), [usoDatos]);
   useEffect(() => { if (!toastMensaje) return; const t = setTimeout(() => setToastMensaje(null), 3000); return () => clearTimeout(t); }, [toastMensaje]);
@@ -214,7 +205,9 @@ export function Preferencias({ usuario, escritorio = false }: PreferenciasProps)
     Object.assign(pendientes, cambios);
     const id = usuario?.id ?? "local";
     const persistidos = leerPendientes(id);
-    const payload = { ...persistidos[tipo], ...pendientes };
+    const combinados = { ...persistidos[tipo], ...pendientes };
+    if (tipo === "general" && Object.prototype.hasOwnProperty.call(prefBD, "idioma") && prefBD.idioma !== IDIOMA_DISPONIBLE) combinados.idioma = IDIOMA_DISPONIBLE;
+    const payload = tipo === "general" ? normalizarIdiomaPreferencias(combinados) : combinados;
     guardarPendientes(id, { ...persistidos, [tipo]: payload });
     if (!tieneSupabaseConfigurado()) { setErrorGuardado("No hay conexión configurada para sincronizar tus preferencias."); return; }
     setGuardadosPendientes(n => n + 1);
@@ -329,14 +322,6 @@ export function Preferencias({ usuario, escritorio = false }: PreferenciasProps)
     setToastMensaje(nuevo ? "Alertas de incidentes activadas" : "Alertas de incidentes desactivadas");
   }
 
-  function handleCambiarIdioma(nuevo: "es" | "en") {
-    setIdioma(nuevo);
-    guardarLocal("ruum:pref:idioma", nuevo);
-    aplicarIdiomaEnDocumento(nuevo);
-    programarSincronizacionGeneral({ idioma: nuevo });
-    setToastMensaje("Preferencia de idioma guardada. La interfaz está disponible en español.");
-  }
-
   const notificaciones = [
     ["Notificaciones push", notifPush, handleTogglePush], ["Correo electrónico", notifEmail, handleToggleEmail],
     ["WhatsApp / SMS", notifWhatsapp, handleToggleWhatsapp], ["Promociones", notifPromo, handleTogglePromo],
@@ -347,8 +332,9 @@ export function Preferencias({ usuario, escritorio = false }: PreferenciasProps)
     <header className="user-profile-appbar"><Link href="/cuenta?seccion=perfil" aria-label="Volver a mi cuenta" className="user-profile-back">‹ Atrás</Link><h1>Preferencias</h1><span aria-hidden="true" /></header>
     <div className="user-preferences-list">
       <h2>IDIOMA</h2>
+      <p id={idiomaAvisoId} className="user-essential-muted px-5 py-2 text-xs">{AVISO_IDIOMA}</p>
       <FilaPreferencia titulo="Idioma" icono="M3 5h12 M9 3v2 M5 8c1 4 4 7 8 9 M13 8c-1 4-4 7-8 9 M15 21l4-11 4 11 M17 17h4">
-        <div className="user-language-segments" role="radiogroup" aria-label="Idioma">{([["es", "Español", "Español (México)"], ["en", "English", "English (US)"]] as const).map(([valor, texto, label]) => <button key={valor} type="button" role="radio" aria-label={label} aria-checked={idioma === valor} onClick={() => handleCambiarIdioma(valor)}>{texto}</button>)}</div>
+        <div className="user-language-segments" role="radiogroup" aria-label="Idioma" aria-describedby={idiomaAvisoId}><button type="button" role="radio" aria-label="Español (México)" aria-checked="true">Español</button><button type="button" role="radio" aria-label="English (US)" aria-checked="false" aria-describedby={idiomaAvisoId} disabled lang="en" className="cursor-not-allowed opacity-60">English</button></div>
       </FilaPreferencia>
       <h2>APLICACIÓN</h2>
       <button type="button" className="user-preference-row" onClick={() => setNotificacionesAbiertas(true)} aria-haspopup="dialog"><Icono d="M6 8a6 6 0 0 1 12 0v8l3 2H3l3-2V8Z M10 21h4" className="size-4 shrink-0" /><span>Notificaciones y alertas</span><span aria-hidden="true">›</span></button>

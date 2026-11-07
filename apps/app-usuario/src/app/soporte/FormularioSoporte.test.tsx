@@ -19,6 +19,7 @@ vi.mock("../../lib/analytics", () => ({
   registrarEventoUx: vi.fn(),
 }));
 
+import { RESUMEN_SOPORTE, PROMESA_SOPORTE } from "../../lib/promesa-soporte";
 import { FormularioSoporte } from "./FormularioSoporte";
 import { BotonTema, TemaProvider, useTema } from "../TemaProvider";
 
@@ -59,6 +60,9 @@ describe("FormularioSoporte", () => {
       />
     );
 
+    expect(screen.getByText(PROMESA_SOPORTE.recepcion)).toBeInTheDocument();
+    expect(screen.getByText(PROMESA_SOPORTE.atencion)).toBeInTheDocument();
+    expect(screen.getByText(PROMESA_SOPORTE.respuesta)).toBeInTheDocument();
     const textarea = screen.getByLabelText(/Descripción/i);
     await user.type(textarea, "Corto");
     expect(screen.getByText("Mínimo 10 caracteres")).toBeInTheDocument();
@@ -80,12 +84,14 @@ describe("FormularioSoporte", () => {
       );
     });
     expect((await screen.findAllByText(/INC-ABCDEF12/)).length).toBeGreaterThan(0);
+    expect(screen.getByRole("status")).toHaveTextContent(RESUMEN_SOPORTE);
 
     // Sin viaje seleccionado -> mailto
     await user.selectOptions(screen.getByLabelText(/Viaje relacionado/i), "");
     await user.type(textarea, "Consulta general sobre facturación mensual.");
     await user.click(screen.getByRole("button", { name: "Enviar a soporte" }));
     expect((await screen.findAllByText(/SOP-11111111/)).length).toBeGreaterThan(0);
+    expect(screen.getByRole("status")).toHaveTextContent(RESUMEN_SOPORTE);
 
     // Con viaje pero error en BD -> fallback a mailto
     reportarIncidenciaMock.mockRejectedValueOnce(new Error("DB error"));
@@ -103,6 +109,7 @@ describe("FormularioSoporte", () => {
     render(<FormularioSoporte traslados={[{ id: "viaje-1", label: "Viaje 1" }]} preseleccionado="viaje-1" motivoInicial="Ayuda con pagos o facturación" descripcionInicial="Necesito una aclaración de mi factura." />);
     fireEvent.click(screen.getByRole("button", { name: "Enviar a soporte" }));
     expect((await screen.findAllByText(/SOP-11111111/)).length).toBeGreaterThan(0);
+    expect(screen.getByRole("status")).toHaveTextContent(RESUMEN_SOPORTE);
     expect(reportarIncidenciaMock).not.toHaveBeenCalled();
     expect(fetch).toHaveBeenCalledWith("/api/soporte", expect.objectContaining({ body: expect.stringContaining('"trasladoId":"viaje-1"') }));
   });

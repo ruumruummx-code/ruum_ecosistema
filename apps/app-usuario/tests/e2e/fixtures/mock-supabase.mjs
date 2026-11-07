@@ -343,7 +343,14 @@ const servidor = createServer(async (req, res) => {
     return;
   }
 
-  // ── Edge Functions (Didit) ──
+  // ── Edge Functions (Stripe / Didit) ──
+  if (ruta === "/functions/v1/crear-payment-intent") {
+    const cuerpo = JSON.parse((await leerCuerpo(req)) || "{}");
+    responder(res, 200, {
+      clientSecret: `pi_mock_${cuerpo.traslado_id || "e2e"}_secret_e2e_mock_123`,
+    });
+    return;
+  }
   if (ruta === "/functions/v1/iniciar-verificacion-didit") {
     await leerCuerpo(req);
     responder(res, 200, {

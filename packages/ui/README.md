@@ -1,5 +1,7 @@
 # @ruum/ui
 
+Documentación de [MobileButton y su estado de carga](docs/mobile-button.md).
+
 Componentes compartidos para las apps de Ruum. Este paquete define el vocabulario visual y operativo que deben usar frontend, backend visible y operación cuando una pantalla necesita botones, tarjetas, estados, acciones de viaje, avisos, formularios, chat o importes.
 
 La fuente pública del paquete es:
@@ -727,3 +729,16 @@ Accesibilidad:
 - Las acciones sticky respetan `env(safe-area-inset-bottom)`.
 - El modo offline muestra estado real y no promete confirmacion remota.
 - Los datos sensibles se enmascaran fuera del formulario de captura.
+
+
+## Enlaces deshabilitados · SD-REM-007
+
+`MobileRow` con `href` y `disabled`, y los CTA de navegación deshabilitados de
+`NextOperationalAction`, usan la opción A: `<span role="link" aria-disabled="true">`.
+El rol conserva el nombre y estado en el árbol accesible; el elemento no tiene
+`href`, `tabIndex` ni manejadores de activación, y queda fuera del recorrido de Tab.
+En MobileRow tampoco se monta `enlaceComponente`/`linkComponent` mientras está bloqueado.
+Al habilitar se vuelve a renderizar el enlace habitual, incluidos los adaptadores.
+Las acciones sin navegación mantienen un botón nativo `disabled`.
+No colocar controles interactivos dentro de `titulo`, `subtitulo`, `badge` o `derecha`
+de una fila interactiva/deshabilitada; usar filas independientes para esas acciones.

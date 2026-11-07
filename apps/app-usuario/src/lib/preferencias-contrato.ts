@@ -15,12 +15,13 @@ import {
   type Pendientes,
 } from "./preferencias-pendientes";
 import { desactivarTelemetriaActiva } from "./analytics";
+import { IDIOMA_DISPONIBLE, aplicarIdiomaDisponible, normalizarIdiomaLocal } from "./idioma-aplicacion";
 
 export type UsuarioRow = Database["public"]["Tables"]["usuarios"]["Row"];
 
 export interface PreferenciasUsuarioContrato {
   // Preferencias generales (almacenadas en usuarios.preferencias JSONB)
-  idioma: "es" | "en";
+  idioma: typeof IDIOMA_DISPONIBLE;
   zonaHoraria: string;
   unidades: "Métrico" | "Imperial";
   tema: "Claro" | "Oscuro" | "Automático";
@@ -106,7 +107,7 @@ export function obtenerPreferenciasIniciales(
       ? (usuario.preferencias as Record<string, unknown>)
       : {};
 
-    if (prefBD.idioma === "es" || prefBD.idioma === "en") defecto.idioma = prefBD.idioma;
+    // El idioma efectivo es español, incluso para preferencias heredadas en EN.
     if (typeof prefBD.zonaHoraria === "string") defecto.zonaHoraria = prefBD.zonaHoraria;
     if (prefBD.unidades === "Métrico" || prefBD.unidades === "Imperial") defecto.unidades = prefBD.unidades;
     if (prefBD.tema === "Claro" || prefBD.tema === "Oscuro" || prefBD.tema === "Automático") defecto.tema = prefBD.tema;
@@ -117,6 +118,7 @@ export function obtenerPreferenciasIniciales(
 
   if (typeof window === "undefined") return defecto;
 
+  normalizarIdiomaLocal(userId);
   try {
     // 1. Verificar si hay cambios pendientes no sincronizados
     const pendientes = leerPendientes(userId ?? "local");
@@ -144,6 +146,7 @@ export function obtenerPreferenciasIniciales(
       ...defecto,
       ...localObj,
       ...cambiosGenerales,
+      idioma: IDIOMA_DISPONIBLE,
     };
 
     if (typeof cambiosNotif.notificaciones_push === "boolean") {
@@ -179,10 +182,10 @@ export function guardarPreferenciasLocales(
   if (typeof window === "undefined") return;
   try {
     const claveAislada = claveLocalUsuario(usuarioId);
-    window.localStorage.setItem(claveAislada, JSON.stringify(prefs));
+    window.localStorage.setItem(claveAislada, JSON.stringify({ ...prefs, idioma: IDIOMA_DISPONIBLE }));
 
     // También actualizar claves atómicas compartidas con la variante móvil
-    window.localStorage.setItem(claveOpcionUsuario("idioma", usuarioId), JSON.stringify(prefs.idioma));
+    window.localStorage.setItem(claveOpcionUsuario("idioma", usuarioId), JSON.stringify(IDIOMA_DISPONIBLE));
     window.localStorage.setItem(claveOpcionUsuario("unidades", usuarioId), JSON.stringify(prefs.unidades));
     window.localStorage.setItem(claveOpcionUsuario("tema", usuarioId), JSON.stringify(prefs.tema));
     window.localStorage.setItem(claveOpcionUsuario("accesibilidad", usuarioId), JSON.stringify(prefs.accesibilidad));
@@ -201,10 +204,8 @@ export function aplicarEfectosReales(prefs: Partial<PreferenciasUsuarioContrato>
   try {
     const raiz = document.documentElement;
 
-    // 1. Idioma
-    if (prefs.idioma) {
-      raiz.setAttribute("lang", prefs.idioma === "en" ? "en" : "es-MX");
-    }
+    // Idioma del contenido real; no depende de una selección inexistente.
+    aplicarIdiomaDisponible();
 
     // 2. Unidades
     if (prefs.unidades) {
@@ -272,7 +273,7 @@ export async function sincronizarPreferenciasRemotas(
   };
 
   const payloadGenerales = {
-    idioma: prefs.idioma,
+    idioma: IDIOMA_DISPONIBLE,
     zonaHoraria: prefs.zonaHoraria,
     unidades: prefs.unidades,
     tema: prefs.tema,

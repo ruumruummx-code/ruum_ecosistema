@@ -1,0 +1,2198 @@
+{
+  "generatedAt": "2026-11-07T05:32:32.693Z",
+  "revision": "a851c21ec918eab3640697e5d812ecf4973f2282",
+  "node": "v24.13.0",
+  "components": [
+    {
+      "name": "Alert",
+      "file": "packages/ui/src/components/Alert.tsx",
+      "line": 36,
+      "signature": "export function Alert({ tono = \"info\", titulo, children, className = \"\" }: AlertProps) {",
+      "declarations": "export type AlertTono = \"success\" | \"error\" | \"warning\" | \"info\";\n\nexport interface AlertProps {\n  tono?: AlertTono;\n  titulo?: string;\n  children: ReactNode;\n  className?: string;\n}"
+    },
+    {
+      "name": "Toast",
+      "file": "packages/ui/src/components/Alert.tsx",
+      "line": 52,
+      "signature": "export function Toast({ tono = \"info\", children, className = \"\" }: AlertProps) {\n  return (\n    <div\n      role=\"status\"",
+      "declarations": "export type AlertTono = \"success\" | \"error\" | \"warning\" | \"info\";\n\nexport interface AlertProps {\n  tono?: AlertTono;\n  titulo?: string;\n  children: ReactNode;\n  className?: string;\n}"
+    },
+    {
+      "name": "Aviso",
+      "file": "packages/ui/src/components/Aviso.tsx",
+      "line": 34,
+      "signature": "export function Aviso({ tono = \"info\", titulo, children, className = \"\" }: AvisoProps) {\n  const danger = tono === \"danger\" || tono === \"error\";\n  ret",
+      "declarations": "export interface AvisoProps {\n  tono?: \"info\" | \"success\" | \"atencion\" | \"warning\" | \"danger\" | \"error\";\n  titulo?: string;\n  children: ReactNode;\n  className?: string;\n}"
+    },
+    {
+      "name": "BannerDemo",
+      "file": "packages/ui/src/components/BannerDemo.tsx",
+      "line": 5,
+      "signature": "export function BannerDemo({ hrefLogin = \"/login\" }: BannerDemoProps) {",
+      "declarations": "export interface BannerDemoProps {\n  hrefLogin?: string;\n}"
+    },
+    {
+      "name": "Button",
+      "file": "packages/ui/src/components/Button.tsx",
+      "line": 43,
+      "signature": "export function Button({ variant = \"primary\", icon, loading = false, disabled, className = \"\", children, ...props }: ButtonProps) {",
+      "declarations": "export type ButtonVariant = \"primary\" | \"secondary\" | \"quiet\" | \"danger\" | \"emergency\";\n\nexport type ButtonIcon = \"arrow\" | \"check\" | \"warning\" | \"phone\" | \"send\" | \"none\";\n\nexport interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {\n  variant?: ButtonVariant;\n  icon?: ButtonIcon;\n  loading?: boolean;\n  children: ReactNode;\n}"
+    },
+    {
+      "name": "ButtonPrimary",
+      "file": "packages/ui/src/components/Buttons.tsx",
+      "line": 27,
+      "signature": "export function ButtonPrimary({ children, street, className = \"\", ...props }: SystemButtonProps) {",
+      "declarations": "interface SystemButtonProps extends Omit<ButtonProps, \"variant\"> {\n  children: ReactNode;\n  street?: boolean;\n}"
+    },
+    {
+      "name": "ButtonSecondary",
+      "file": "packages/ui/src/components/Buttons.tsx",
+      "line": 40,
+      "signature": "export function ButtonSecondary({ children, street, className = \"\", ...props }: SystemButtonProps) {",
+      "declarations": "interface SystemButtonProps extends Omit<ButtonProps, \"variant\"> {\n  children: ReactNode;\n  street?: boolean;\n}"
+    },
+    {
+      "name": "ButtonText",
+      "file": "packages/ui/src/components/Buttons.tsx",
+      "line": 56,
+      "signature": "export function ButtonText({\n  children,\n  conChevron = false,\n  className = \"\",\n  ...props\n}: SystemButtonProps & { conChevron?: boolean }) {",
+      "declarations": "interface SystemButtonProps extends Omit<ButtonProps, \"variant\"> {\n  children: ReactNode;\n  street?: boolean;\n}"
+    },
+    {
+      "name": "Card",
+      "file": "packages/ui/src/components/Card.tsx",
+      "line": 29,
+      "signature": "export function Card({ children, className = \"\", padding = \"md\", elevated = false }: CardProps) {",
+      "declarations": "type CardPadding = \"none\" | \"sm\" | \"md\" | \"lg\";\n\nexport interface CardProps {\n  children: ReactNode;\n  className?: string;\n  padding?: CardPadding;\n  elevated?: boolean;\n}\n\ntype VariantCardProps = Omit<CardProps, \"elevated\">;\n\nexport interface TripCardProps extends VariantCardProps {\n  folio?: string;\n}"
+    },
+    {
+      "name": "OperationalCard",
+      "file": "packages/ui/src/components/Card.tsx",
+      "line": 44,
+      "signature": "export function OperationalCard({ children, className = \"\", padding = \"md\" }: VariantCardProps) {",
+      "declarations": "type CardPadding = \"none\" | \"sm\" | \"md\" | \"lg\";\n\nexport interface CardProps {\n  children: ReactNode;\n  className?: string;\n  padding?: CardPadding;\n  elevated?: boolean;\n}\n\ntype VariantCardProps = Omit<CardProps, \"elevated\">;\n\nexport interface TripCardProps extends VariantCardProps {\n  folio?: string;\n}"
+    },
+    {
+      "name": "TripCard",
+      "file": "packages/ui/src/components/Card.tsx",
+      "line": 58,
+      "signature": "export function TripCard({ children, className = \"\", padding = \"md\", folio }: TripCardProps) {",
+      "declarations": "type CardPadding = \"none\" | \"sm\" | \"md\" | \"lg\";\n\nexport interface CardProps {\n  children: ReactNode;\n  className?: string;\n  padding?: CardPadding;\n  elevated?: boolean;\n}\n\ntype VariantCardProps = Omit<CardProps, \"elevated\">;\n\nexport interface TripCardProps extends VariantCardProps {\n  folio?: string;\n}"
+    },
+    {
+      "name": "FinancialCard",
+      "file": "packages/ui/src/components/Card.tsx",
+      "line": 78,
+      "signature": "export function FinancialCard({ children, className = \"\", padding = \"md\" }: VariantCardProps) {",
+      "declarations": "type CardPadding = \"none\" | \"sm\" | \"md\" | \"lg\";\n\nexport interface CardProps {\n  children: ReactNode;\n  className?: string;\n  padding?: CardPadding;\n  elevated?: boolean;\n}\n\ntype VariantCardProps = Omit<CardProps, \"elevated\">;\n\nexport interface TripCardProps extends VariantCardProps {\n  folio?: string;\n}"
+    },
+    {
+      "name": "AlertCard",
+      "file": "packages/ui/src/components/Card.tsx",
+      "line": 92,
+      "signature": "export function AlertCard({ children, className = \"\", padding = \"md\" }: VariantCardProps) {",
+      "declarations": "type CardPadding = \"none\" | \"sm\" | \"md\" | \"lg\";\n\nexport interface CardProps {\n  children: ReactNode;\n  className?: string;\n  padding?: CardPadding;\n  elevated?: boolean;\n}\n\ntype VariantCardProps = Omit<CardProps, \"elevated\">;\n\nexport interface TripCardProps extends VariantCardProps {\n  folio?: string;\n}"
+    },
+    {
+      "name": "Chat",
+      "file": "packages/ui/src/components/Chat.tsx",
+      "line": 28,
+      "signature": "export function Chat({ propio, mensajes, onEnviar, deshabilitado, mensajeDeshabilitado }: ChatProps) {\n  const [borrador, setBorrador] = useState(\"\");\n  const [enviando, setEnviando] = useState(false);\n  const listaRef = useRef<HTMLDivElement>(null);\n  const ultimoIdRef = useRef<string | null>(null);\n\n  // C-06: auto-scroll al",
+      "declarations": "export interface MensajeChat {\n  id: string;\n  remitente: \"usuario\" | \"conductor\";\n  contenido: string;\n  enviado_en: string;\n  pendiente?: boolean;\n}\n\nexport interface ChatProps {\n  /** Quién ve esta pantalla — alinea sus propios mensajes a la derecha, igual que cualquier chat. */\n  propio: \"usuario\" | \"conductor\";\n  mensajes: MensajeChat[];\n  onEnviar: (contenido: string) => void | Promise<void>;\n  deshabilitado?: boolean;\n  mensajeDeshabilitado?: string;\n}"
+    },
+    {
+      "name": "Input",
+      "file": "packages/ui/src/components/Controls.tsx",
+      "line": 18,
+      "signature": "export function Input({\n  etiqueta,\n  error,\n  ayuda,\n  id,\n  className = \"\",\n  ...props\n}: React.InputHTMLAttributes<HTMLInputElement> & { etiqueta: string; error?: string; ayuda?: ReactNode }) {",
+      "declarations": ""
+    },
+    {
+      "name": "Select",
+      "file": "packages/ui/src/components/Controls.tsx",
+      "line": 39,
+      "signature": "export function Select({\n  etiqueta,\n  error,\n  children,\n  id,\n  className = \"\",\n  ...props\n}: React.SelectHTMLAttributes<HTMLSelectElement> & { etiqueta: string; error?: string; children: ReactNode }) {",
+      "declarations": ""
+    },
+    {
+      "name": "Textarea",
+      "file": "packages/ui/src/components/Controls.tsx",
+      "line": 61,
+      "signature": "export function Textarea({\n  etiqueta,\n  error,\n  id,\n  className = \"\",\n  ...props\n}: React.TextareaHTMLAttributes<HTMLTextAreaElement> & { etiqueta: string; error?: string }) {",
+      "declarations": ""
+    },
+    {
+      "name": "Checkbox",
+      "file": "packages/ui/src/components/Controls.tsx",
+      "line": 80,
+      "signature": "export function Checkbox({ etiqueta, className = \"\", ...props }: React.InputHTMLAttributes<HTMLInputElement> & { etiqueta: ReactNode }) {",
+      "declarations": ""
+    },
+    {
+      "name": "Radio",
+      "file": "packages/ui/src/components/Controls.tsx",
+      "line": 89,
+      "signature": "export function Radio({ etiqueta, className = \"\", ...props }: React.InputHTMLAttributes<HTMLInputElement> & { etiqueta: ReactNode }) {",
+      "declarations": ""
+    },
+    {
+      "name": "Toggle",
+      "file": "packages/ui/src/components/Controls.tsx",
+      "line": 98,
+      "signature": "export function Toggle({\n  etiqueta,\n  checked,\n  onCheckedChange,\n  disabled,\n  className = \"\",\n}: {\n  etiqueta: string;\n  checked: boolean;\n  onCheckedChange?: (v: boolean) => void;\n  disabled?: boolean;\n  className?: string;\n}) {",
+      "declarations": ""
+    },
+    {
+      "name": "CredencialConductor",
+      "file": "packages/ui/src/components/CredencialConductor.tsx",
+      "line": 21,
+      "signature": "export function CredencialConductor({\n  nombreConductor,\n  folioInterno,\n  vigencia,\n  fotoUrl,\n  telefonoOperativo = \"+52 55 1234 5678\",\n  nivelCertificacion = \"Nivel 1 · Básico\",\n  className = \"\"\n}: CredencialConductorProps) {\n  return (\n    <div\n      className={`relative w-full max-w-sm overflow-hidden ruum-force-light rounded-[20px] border border-[var(--ruum-border)] bg-white p-5 text-[var(--ruum-navy)] shadow-[var(--ruum-elevation-2)] ${className}`}\n    >\n      {/* Cabecera institucional: lockup + sello (s",
+      "declarations": "export interface CredencialConductorProps {\n  nombreConductor: string;\n  folioInterno: string;\n  vigencia: string;\n  fotoUrl?: string;\n  telefonoOperativo?: string;\n  nivelCertificacion?: string;\n  qrValor?: string;\n  className?: string;\n}"
+    },
+    {
+      "name": "ReporteTraslado",
+      "file": "packages/ui/src/components/Documentos.tsx",
+      "line": 57,
+      "signature": "export function ReporteTraslado(props: ReporteTrasladoProps) {",
+      "declarations": "export interface ReporteTrasladoProps {\n  folio: string;\n  cliente: string;\n  servicio: string;\n  vehiculo: string;\n  ruta: string;\n  conductor: string;\n  nivel: string;\n  estado: EstadoVisualTraslado;\n  tiempos?: string;\n  odometro?: string;\n  combustible?: string;\n}"
+    },
+    {
+      "name": "ActaEntrega",
+      "file": "packages/ui/src/components/Documentos.tsx",
+      "line": 79,
+      "signature": "export function ActaEntrega({ folio, vehiculo, origen, destino }: { folio: string; vehiculo: string; origen: string; destino: string }) {",
+      "declarations": "export interface ReporteTrasladoProps {\n  folio: string;\n  cliente: string;\n  servicio: string;\n  vehiculo: string;\n  ruta: string;\n  conductor: string;\n  nivel: string;\n  estado: EstadoVisualTraslado;\n  tiempos?: string;\n  odometro?: string;\n  combustible?: string;\n}"
+    },
+    {
+      "name": "EstadoPagoConductor",
+      "file": "packages/ui/src/components/Documentos.tsx",
+      "line": 104,
+      "signature": "export function EstadoPagoConductor({\n  folio,\n  base,\n  reembolsables,\n  fechaEstimada,\n  estatus,\n  causa,\n}: {\n  folio: string;\n  base: string;\n  reembolsables: string;\n  fechaEstimada: string;\n  estatus: string;\n  causa?: string;\n}) {",
+      "declarations": "export interface ReporteTrasladoProps {\n  folio: string;\n  cliente: string;\n  servicio: string;\n  vehiculo: string;\n  ruta: string;\n  conductor: string;\n  nivel: string;\n  estado: EstadoVisualTraslado;\n  tiempos?: string;\n  odometro?: string;\n  combustible?: string;\n}"
+    },
+    {
+      "name": "DriverEarning",
+      "file": "packages/ui/src/components/DriverEarning.tsx",
+      "line": 5,
+      "signature": "export function DriverEarning(props: DriverEarningProps) {",
+      "declarations": "export type DriverEarningProps = FinancialAmountProps;"
+    },
+    {
+      "name": "EmptyState",
+      "file": "packages/ui/src/components/EmptyState.tsx",
+      "line": 4,
+      "signature": "export function EmptyState({\n  titulo,\n  descripcion,\n  children,\n  className = \"\",\n}: {\n  titulo: string;\n  descripcion: string;\n  children?: ReactNode;\n  className?: string;\n}) {\n  return (\n    <div className={`flex flex-col items-center rounded-[20px] border bor",
+      "declarations": ""
+    },
+    {
+      "name": "Skeleton",
+      "file": "packages/ui/src/components/EmptyState.tsx",
+      "line": 30,
+      "signature": "export function Skeleton({ tipo = \"text\", className = \"\" }: { tipo?: \"text\" | \"card\" | \"list\"; className?: string }) {\n  if (tipo === \"card\") {\n    return (\n      <div role=\"status\" aria-label=\"Cargan",
+      "declarations": ""
+    },
+    {
+      "name": "EstadoBadge",
+      "file": "packages/ui/src/components/EstadoBadge.tsx",
+      "line": 19,
+      "signature": "export function EstadoBadge({ estado, conTexto = true }: EstadoBadgeProps) {",
+      "declarations": "export interface EstadoBadgeProps {\n  estado: EstadoTraslado;\n  /** Si es false, muestra solo el indicador de color sin el texto. */\n  conTexto?: boolean;\n}"
+    },
+    {
+      "name": "MobileProgress",
+      "file": "packages/ui/src/components/EstadoStepper.tsx",
+      "line": 23,
+      "signature": "export function MobileProgress({ estado, currentLabel }: EstadoStepperProps) {\n  const { esRamificado, indiceActual, total, etapaActual } = getProgressData(estado);\n  const paso = indiceActual + 1;\n  const nombre = currentLabel ?? (esRamif",
+      "declarations": "export interface EstadoStepperProps {\n  estado: EstadoTraslado;\n  currentLabel?: string;\n}"
+    },
+    {
+      "name": "DesktopStateStepper",
+      "file": "packages/ui/src/components/EstadoStepper.tsx",
+      "line": 120,
+      "signature": "export function DesktopStateStepper({ estado, currentLabel }: EstadoStepperProps) {\n  const { esRamificado, indiceActual, total, etapaActual } = getProgressData(estado);\n  const paso = indiceActual + 1;\n  const nombre = currentL",
+      "declarations": "export interface EstadoStepperProps {\n  estado: EstadoTraslado;\n  currentLabel?: string;\n}"
+    },
+    {
+      "name": "EstadoStepper",
+      "file": "packages/ui/src/components/EstadoStepper.tsx",
+      "line": 181,
+      "signature": "export function EstadoStepper({ estado, currentLabel }: EstadoStepperProps) {",
+      "declarations": "export interface EstadoStepperProps {\n  estado: EstadoTraslado;\n  currentLabel?: string;\n}"
+    },
+    {
+      "name": "EstatusBadgeEconomico",
+      "file": "packages/ui/src/components/EstatusBadgeEconomico.tsx",
+      "line": 8,
+      "signature": "export function EstatusBadgeEconomico({ estatus, className = \"\" }: EstatusBadgeEconomicoProps) {",
+      "declarations": "export interface EstatusBadgeEconomicoProps {\n  estatus: EstatusEconomico;\n  className?: string;\n}"
+    },
+    {
+      "name": "Field",
+      "file": "packages/ui/src/components/Field.tsx",
+      "line": 15,
+      "signature": "forwardRef<HTMLInputElement, FieldProps>",
+      "declarations": "export interface FieldProps extends InputHTMLAttributes<HTMLInputElement> {\n  etiqueta: string;\n  etiquetaClassName?: string;\n  passwordToggleClassName?: string;\n  error?: string | undefined;\n  ayuda?: ReactNode;\n}"
+    },
+    {
+      "name": "FinancialAmount",
+      "file": "packages/ui/src/components/FinancialAmount.tsx",
+      "line": 59,
+      "signature": "export function FinancialAmount({\n  amount,\n  status,\n  currency = \"MXN\",\n  className = \"\",\n  amountClassName = \"\",\n  auxiliaryText,\n  pendingText = \"Importe por confirmar\"\n}: FinancialAmountProps) {",
+      "declarations": "export type FinancialAmountStatus = EstadoEconomicoExplicito | \"estimated\" | \"pending_confirmation\";\n\nexport interface FinancialAmountProps {\n  amount?: number | null;\n  status: FinancialAmountStatus;\n  currency?: \"MXN\" | string;\n  className?: string;\n  amountClassName?: string;\n  auxiliaryText?: string;\n  pendingText?: string;\n}"
+    },
+    {
+      "name": "Icono",
+      "file": "packages/ui/src/components/Icono.tsx",
+      "line": 33,
+      "signature": "export function Icono({ nombre, d, className = \"size-5\", strokeWidth = 1.8, style }: IconoProps) {\n  const senda = d ?? (nombre ? SENDAS_ICONO[nombre] : \"\");\n  return (\n    <svg\n      className={className}\n      viewBox=\"0 0 24 24\"\n      fill=\"none\"\n      stroke=\"currentColor\"\n      strokeWidth={strokeWidth}\n      strokeL",
+      "declarations": "export type NombreIcono = keyof typeof SENDAS_ICONO;\n\ninterface IconoProps {\n  /** Glifo del registro compartido. */\n  nombre?: NombreIcono;\n  /** Senda libre (migración de wrappers `Icono({d})` locales). */\n  d?: string;\n  className?: string;\n  strokeWidth?: number | string;\n  style?: CSSProperties;\n}"
+    },
+    {
+      "name": "SimboloVectorial",
+      "file": "packages/ui/src/components/LogoMarca.tsx",
+      "line": 157,
+      "signature": "export function SimboloVectorial({\n  tamano = 36,\n  tema = \"auto\",\n  colorDestino = \"#00D1D1\",\n  className = \"\",\n  ...props\n}: SVGProps<SVGSVGElement> & {\n  tamano?: number;\n  tema?: LogoTema;\n  colorDestino?: string;\n  className?: string;\n}) {\n  const esClaro = tema === \"claro\";\n  const esOscuro = tema === \"oscuro\";\n  const esMono = tema === \"monocromatico\";\n\n  const navy = \"#0A2342\";\n  const teal = \"#00D1D1\";\n  const white = \"#FFFFFF\";\n  const colorFo",
+      "declarations": "export type LogoVariante = \"horizontal\" | \"vertical\" | \"simbolo\" | \"avatar\" | \"sello\" | \"version-navy\";\n\nexport type LogoTema = \"oscuro\" | \"claro\" | \"monocromatico\" | \"auto\";\n\nexport interface LogoMarcaProps {\n  /**\n   * Variante gráfica del logotipo (Libro de marca, `ruum-ruum-versiones-marca.png`):\n   * - \"horizontal\": símbolo + Ruum Ruum + DRIVEAWAY SERVICE. B2B / contratos / web / encabezados.\n   * - \"vertical\": símbolo arriba + nombre + firma. Portadas / carteles.\n   * - \"simbolo\": solo monograma RR con swoosh turquesa + pin. Avatar / app-icon / favicon.\n   * - \"avatar\": símbolo sobre superficie clara, radio ≈24%. WhatsApp / redes / perfiles.\n   * - \"sello\": anillo CONDUCTOR CERTIFICADO RUUM RUUM + símbolo. Solo certificación vigente.\n   * - \"version-navy\": lockup blanco sobre navy. Solo piezas institucionales sobre oscuro.\n   *\n   * Mínimos: símbolo 32px · horizontal sin firma 96px · con firma 160px ·\n   * sello 72px · avatar 48px. Área de seguridad = x (altura R) por lado.\n   */\n  variante?: LogoVariante;\n  /**\n   * Contraste:\n   * - \"auto\": adapta navy→blanco según `[data-theme]` (por defecto).\n   * - \"oscuro\": fuerza versión clara (para fondos oscuros / navy).\n   * - \"claro\": fuerza versión navy (para fondos claros).\n   * - \"monocromatico\": un solo tono neutro.\n   */\n  tema?: LogoTema;\n  /** Alto objetivo en px del lockup. La firma corta solo se muestra ≥160px. */\n  tamano?: number;\n  /** Respaldo 'by MoviliaX' (documentos formales). */\n  mostrarRespaldo?: boolean;\n  /** Firma corta oficial. Por defecto 'DRIVEAWAY SERVICE'. */\n  mostrarDescriptor?: boolean;\n  /** Texto personalizado para la firma (por defecto 'DRIVEAWAY SERVICE'). */\n  descriptor?: string;\n  /** Subtítulo o lema adicional. */\n  subtitulo?: string;\n  /** Color de apoyo para el pin (compatibilidad; por defecto teal gráfico). */\n  color?: \"signal\" | \"route\" | \"control\";\n  className?: string;\n  /** Conservado por compatibilidad; el símbolo oficial no usa progreso. */\n  progreso?: number;\n}"
+    },
+    {
+      "name": "LogoMarca",
+      "file": "packages/ui/src/components/LogoMarca.tsx",
+      "line": 239,
+      "signature": "export function LogoMarca({\n  variante = \"horizontal\",\n  tema = \"auto\",\n  tamano,\n  mostrarRespaldo = false,\n  mostrarDescriptor = true,\n  descriptor = \"DRIVEAWAY SERVICE\",\n  subtitulo,\n  color = \"signal\",\n  className = \"\"\n}: LogoMarcaProps) {",
+      "declarations": "export type LogoVariante = \"horizontal\" | \"vertical\" | \"simbolo\" | \"avatar\" | \"sello\" | \"version-navy\";\n\nexport type LogoTema = \"oscuro\" | \"claro\" | \"monocromatico\" | \"auto\";\n\nexport interface LogoMarcaProps {\n  /**\n   * Variante gráfica del logotipo (Libro de marca, `ruum-ruum-versiones-marca.png`):\n   * - \"horizontal\": símbolo + Ruum Ruum + DRIVEAWAY SERVICE. B2B / contratos / web / encabezados.\n   * - \"vertical\": símbolo arriba + nombre + firma. Portadas / carteles.\n   * - \"simbolo\": solo monograma RR con swoosh turquesa + pin. Avatar / app-icon / favicon.\n   * - \"avatar\": símbolo sobre superficie clara, radio ≈24%. WhatsApp / redes / perfiles.\n   * - \"sello\": anillo CONDUCTOR CERTIFICADO RUUM RUUM + símbolo. Solo certificación vigente.\n   * - \"version-navy\": lockup blanco sobre navy. Solo piezas institucionales sobre oscuro.\n   *\n   * Mínimos: símbolo 32px · horizontal sin firma 96px · con firma 160px ·\n   * sello 72px · avatar 48px. Área de seguridad = x (altura R) por lado.\n   */\n  variante?: LogoVariante;\n  /**\n   * Contraste:\n   * - \"auto\": adapta navy→blanco según `[data-theme]` (por defecto).\n   * - \"oscuro\": fuerza versión clara (para fondos oscuros / navy).\n   * - \"claro\": fuerza versión navy (para fondos claros).\n   * - \"monocromatico\": un solo tono neutro.\n   */\n  tema?: LogoTema;\n  /** Alto objetivo en px del lockup. La firma corta solo se muestra ≥160px. */\n  tamano?: number;\n  /** Respaldo 'by MoviliaX' (documentos formales). */\n  mostrarRespaldo?: boolean;\n  /** Firma corta oficial. Por defecto 'DRIVEAWAY SERVICE'. */\n  mostrarDescriptor?: boolean;\n  /** Texto personalizado para la firma (por defecto 'DRIVEAWAY SERVICE'). */\n  descriptor?: string;\n  /** Subtítulo o lema adicional. */\n  subtitulo?: string;\n  /** Color de apoyo para el pin (compatibilidad; por defecto teal gráfico). */\n  color?: \"signal\" | \"route\" | \"control\";\n  className?: string;\n  /** Conservado por compatibilidad; el símbolo oficial no usa progreso. */\n  progreso?: number;\n}"
+    },
+    {
+      "name": "MapaEstatico",
+      "file": "packages/ui/src/components/MapaEstatico.tsx",
+      "line": 22,
+      "signature": "export function MapaEstatico({\n  src,\n  alt,\n  className,\n  sizes,\n  eager,\n  onLoad,\n  style,\n  width,\n  height\n}: MapaEstaticoProps) {\n  const local = src.startsWith(\"blob:\") || src.startsWith(\"data:\");\n  const fijo = width != null && height != null;\n  return (\n    <Image\n      src={src}\n      alt={alt}\n      {...(fijo ? { width, height } : { fill: true })}\n      sizes",
+      "declarations": "export interface MapaEstaticoProps {\n  src: string;\n  alt: string;\n  className?: string;\n  sizes?: string;\n  eager?: boolean;\n  onLoad?: (e: SyntheticEvent<HTMLImageElement>) => void;\n  style?: CSSProperties;\n  /** Dimensiones fijas (miniaturas). Sin ellas usa `fill`: el padre debe ser `relative` con caja definida. */\n  width?: number;\n  height?: number;\n}"
+    },
+    {
+      "name": "MobileBadge",
+      "file": "packages/ui/src/components/MobileBadge.tsx",
+      "line": 59,
+      "signature": "export function MobileBadge({\n  variante,\n  texto,\n  punto = false,\n  icono,\n  size = \"md\",\n  className = \"\",\n}: MobileBadgeProps) {",
+      "declarations": "export type MobileBadgeVariante = \"exito\" | \"en_ruta\" | \"pendiente\" | \"error\" | \"neutro\";\n\nexport type MobileBadgeTamano = \"sm\" | \"md\";\n\nexport interface MobileBadgeProps {\n  variante: MobileBadgeVariante;\n  texto: string;\n  punto?: boolean;\n  icono?: ReactNode;\n  size?: MobileBadgeTamano;\n  className?: string;\n}"
+    },
+    {
+      "name": "MobileButton",
+      "file": "packages/ui/src/components/MobileButton.tsx",
+      "line": 27,
+      "signature": "export function MobileButton({\n  children,\n  variant = \"primary\",\n  stickyBottom = false,\n  loading = false,\n  icon,\n  iconRight,\n  fullWidth = true,\n  disabled,\n  className = \"\",\n  ...props\n}: MobileButtonProps) {",
+      "declarations": "export type MobileButtonVariant = \"primary\" | \"secondary\" | \"quiet\" | \"danger\";\n\nexport interface MobileButtonProps\n  extends ButtonHTMLAttributes<HTMLButtonElement> {\n  children: ReactNode;\n  variant?: MobileButtonVariant;\n  stickyBottom?: boolean;\n  loading?: boolean;\n  icon?: ReactNode;\n  iconRight?: ReactNode;\n  fullWidth?: boolean;\n}"
+    },
+    {
+      "name": "MobileCard",
+      "file": "packages/ui/src/components/MobileCard.tsx",
+      "line": 29,
+      "signature": "export function MobileCard({\n  children,\n  className = \"\",\n  as: Component = \"section\",\n  padding = \"md\",\n  elevated = false,\n  radius = \"2xl\",\n}: MobileCardProps) {",
+      "declarations": "export type MobileCardPadding = \"none\" | \"sm\" | \"md\" | \"lg\";\n\nexport type MobileCardRadius = \"md\" | \"lg\" | \"xl\" | \"2xl\";\n\nexport interface MobileCardProps {\n  children: ReactNode;\n  className?: string;\n  as?: ElementType;\n  padding?: MobileCardPadding;\n  elevated?: boolean;\n  radius?: MobileCardRadius;\n}"
+    },
+    {
+      "name": "MobileHeader",
+      "file": "packages/ui/src/components/MobileHeader.tsx",
+      "line": 31,
+      "signature": "export function MobileHeader({\n  titulo,\n  subtitulo,\n  enlaceAtras,\n  onAtras,\n  etiquetaAtras = \"Regresar\",\n  accionDerecha,\n  conBorde = true,\n  className = \"\",\n}: MobileHeaderProps) {",
+      "declarations": "export interface MobileHeaderProps {\n  titulo: string;\n  subtitulo?: string;\n  enlaceAtras?: string;\n  onAtras?: () => void;\n  etiquetaAtras?: string;\n  accionDerecha?: ReactNode;\n  conBorde?: boolean;\n  className?: string;\n}"
+    },
+    {
+      "name": "MobileRow",
+      "file": "packages/ui/src/components/MobileRow.tsx",
+      "line": 57,
+      "signature": "export function MobileRow({\n  titulo,\n  subtitulo,\n  icono,\n  tonoIcono = \"base\",\n  href,\n  enlaceComponente,\n  linkComponent,\n  onClick,\n  disabled = false,\n  badge,\n  derecha,\n  mostrarChevron,\n  destructivo = false,\n  conDivisor = true,\n  className = \"\",\n}: MobileRowProps) {",
+      "declarations": "export type MobileRowTonoIcono =\n  | \"base\"\n  | \"verde\"\n  | \"azul\"\n  | \"ambar\"\n  | \"rojo\"\n  | \"morado\"\n  | \"neutro\";\n\nexport interface MobileRowProps {\n  titulo: ReactNode;\n  subtitulo?: ReactNode;\n  icono?: ReactNode;\n  tonoIcono?: MobileRowTonoIcono;\n  href?: string;\n  enlaceComponente?: React.ComponentType<any>;\n  linkComponent?: React.ComponentType<any>;\n  onClick?: () => void;\n  disabled?: boolean;\n  badge?: ReactNode;\n  derecha?: ReactNode;\n  mostrarChevron?: boolean;\n  destructivo?: boolean;\n  conDivisor?: boolean;\n  className?: string;\n}\n\nexport interface MobileListGroupProps {\n  children?: ReactNode;\n  tituloSeccion?: string;\n  ariaLabel?: string;\n  as?: \"div\" | \"nav\";\n  className?: string;\n}"
+    },
+    {
+      "name": "MobileListGroup",
+      "file": "packages/ui/src/components/MobileRow.tsx",
+      "line": 159,
+      "signature": "export function MobileListGroup({\n  children,\n  tituloSeccion,\n  ariaLabel,\n  as = \"div\",\n  className = \"\",\n}: MobileListGroupProps) {",
+      "declarations": "export type MobileRowTonoIcono =\n  | \"base\"\n  | \"verde\"\n  | \"azul\"\n  | \"ambar\"\n  | \"rojo\"\n  | \"morado\"\n  | \"neutro\";\n\nexport interface MobileRowProps {\n  titulo: ReactNode;\n  subtitulo?: ReactNode;\n  icono?: ReactNode;\n  tonoIcono?: MobileRowTonoIcono;\n  href?: string;\n  enlaceComponente?: React.ComponentType<any>;\n  linkComponent?: React.ComponentType<any>;\n  onClick?: () => void;\n  disabled?: boolean;\n  badge?: ReactNode;\n  derecha?: ReactNode;\n  mostrarChevron?: boolean;\n  destructivo?: boolean;\n  conDivisor?: boolean;\n  className?: string;\n}\n\nexport interface MobileListGroupProps {\n  children?: ReactNode;\n  tituloSeccion?: string;\n  ariaLabel?: string;\n  as?: \"div\" | \"nav\";\n  className?: string;\n}"
+    },
+    {
+      "name": "MobileShell",
+      "file": "packages/ui/src/components/MobileShell.tsx",
+      "line": 30,
+      "signature": "export function MobileShell({\n  children,\n  variant = \"compact\",\n  padding = \"md\",\n  conFondoCanvas = true,\n  navInferiorVisible = false,\n  as: Component = \"div\",\n  className = \"\",\n  contentClassName = \"\",\n  style,\n}: MobileShellProps) {",
+      "declarations": "export type MobileShellVariant = \"compact\" | \"wide\";\n\nexport type MobileShellPadding = \"none\" | \"sm\" | \"md\" | \"lg\";\n\nexport interface MobileShellProps {\n  children: ReactNode;\n  variant?: MobileShellVariant;\n  padding?: MobileShellPadding;\n  conFondoCanvas?: boolean;\n  navInferiorVisible?: boolean;\n  as?: ElementType;\n  className?: string;\n  contentClassName?: string;\n  style?: CSSProperties;\n}"
+    },
+    {
+      "name": "Modal",
+      "file": "packages/ui/src/components/Modal.tsx",
+      "line": 15,
+      "signature": "export function Modal({ abierto, onCerrar, titulo, children, estado = \"default\", className = \"\" }: ModalProps) {",
+      "declarations": "export interface ModalProps {\n  abierto: boolean;\n  onCerrar: () => void;\n  titulo: string;\n  children: ReactNode;\n  estado?: \"default\" | \"loading\" | \"error\";\n  className?: string;\n}"
+    },
+    {
+      "name": "BottomNav",
+      "file": "packages/ui/src/components/Navigation.tsx",
+      "line": 35,
+      "signature": "export function BottomNav({ items, className = \"\" }: { items: NavItem[]; className?: string }) {",
+      "declarations": "export interface NavItem {\n  id: string;\n  etiqueta: string;\n  href: string;\n  activo?: boolean;\n  icono: ReactNode;\n}\n\nexport interface TabItem {\n  id: string;\n  etiqueta: string;\n  conteo?: number;\n  activo?: boolean;\n}\n\nexport interface SidebarGrupo {\n  titulo: string;\n  items: { id: string; etiqueta: string; href: string; activo?: boolean; contador?: number }[];\n}"
+    },
+    {
+      "name": "Tabs",
+      "file": "packages/ui/src/components/Navigation.tsx",
+      "line": 66,
+      "signature": "export function Tabs({ tabs, onSeleccion, className = \"\" }: { tabs: TabItem[]; onSeleccion?: (id: string) => void; className?: string }) {",
+      "declarations": "export interface NavItem {\n  id: string;\n  etiqueta: string;\n  href: string;\n  activo?: boolean;\n  icono: ReactNode;\n}\n\nexport interface TabItem {\n  id: string;\n  etiqueta: string;\n  conteo?: number;\n  activo?: boolean;\n}\n\nexport interface SidebarGrupo {\n  titulo: string;\n  items: { id: string; etiqueta: string; href: string; activo?: boolean; contador?: number }[];\n}"
+    },
+    {
+      "name": "Sidebar",
+      "file": "packages/ui/src/components/Navigation.tsx",
+      "line": 99,
+      "signature": "export function Sidebar({ grupos, className = \"\" }: { grupos: SidebarGrupo[]; className?: string }) {",
+      "declarations": "export interface NavItem {\n  id: string;\n  etiqueta: string;\n  href: string;\n  activo?: boolean;\n  icono: ReactNode;\n}\n\nexport interface TabItem {\n  id: string;\n  etiqueta: string;\n  conteo?: number;\n  activo?: boolean;\n}\n\nexport interface SidebarGrupo {\n  titulo: string;\n  items: { id: string; etiqueta: string; href: string; activo?: boolean; contador?: number }[];\n}"
+    },
+    {
+      "name": "Avatar",
+      "file": "packages/ui/src/components/Navigation.tsx",
+      "line": 140,
+      "signature": "export function Avatar({\n  nombre,\n  src,\n  forma = \"circle\",\n  conEstado,\n  tamano = 40,\n  className = \"\",\n}: {\n  nombre: string;\n  src?: string;\n  forma?: \"circle\" | \"rounded\";\n  conEstado?: \"activo\" | \"inactivo\";\n  tamano?: number;\n  className?: string;\n}) {",
+      "declarations": "export interface NavItem {\n  id: string;\n  etiqueta: string;\n  href: string;\n  activo?: boolean;\n  icono: ReactNode;\n}\n\nexport interface TabItem {\n  id: string;\n  etiqueta: string;\n  conteo?: number;\n  activo?: boolean;\n}\n\nexport interface SidebarGrupo {\n  titulo: string;\n  items: { id: string; etiqueta: string; href: string; activo?: boolean; contador?: number }[];\n}"
+    },
+    {
+      "name": "NextOperationalAction",
+      "file": "packages/ui/src/components/NextOperationalAction.tsx",
+      "line": 79,
+      "signature": "export function NextOperationalAction({\n  title,\n  instruction,\n  context,\n  eta,\n  primaryCta,\n  secondaryCta,\n  loading = false,\n  error,\n  nextStep,\n  stageLabel,\n  className = \"\"\n}: NextOperationalActionProps) {",
+      "declarations": "export type OperationalActionCta = {\n  label: string;\n  href?: string;\n  onClick?: MouseEventHandler<HTMLButtonElement>;\n  disabled?: boolean;\n  external?: boolean;\n  variant?: ButtonVariant;\n};\n\nexport interface NextOperationalActionProps {\n  title: string;\n  instruction: string;\n  context?: ReactNode;\n  eta?: string | null;\n  primaryCta: OperationalActionCta;\n  secondaryCta?: OperationalActionCta;\n  loading?: boolean;\n  error?: ReactNode;\n  nextStep?: string;\n  stageLabel?: string;\n  className?: string;\n}"
+    },
+    {
+      "name": "PassportCard",
+      "file": "packages/ui/src/components/PassportCard.tsx",
+      "line": 15,
+      "signature": "export function PassportCard({ children, folio, acento = false, clip = true, className = \"\" }: PassportCardProps) {\n  return (\n    <div\n      className={[\n        \"relative rounded-card border border-border bg-surface shadow",
+      "declarations": "export interface PassportCardProps {\n  children: ReactNode;\n  /** Folio o identificador corto a mostrar en la esquina, estilo sello. */\n  folio?: string;\n  /** Acento documental para registros que requieren atención visual. */\n  acento?: boolean;\n  /** Permite contenido sticky o overlays que deben sobresalir de la tarjeta. */\n  clip?: boolean;\n  className?: string;\n}"
+    },
+    {
+      "name": "RuumHeader",
+      "file": "packages/ui/src/components/RuumHeader.tsx",
+      "line": 79,
+      "signature": "export function RuumHeader({\n  rol = \"usuario\",\n  notificacionesCount = 0,\n  onNotificaciones,\n  onSoporte,\n  accionIzquierda,\n  hrefLogo = \"/\",\n  className = \"\",\n}: RuumHeaderProps) {\n  const esConductor = rol === \"conductor\";\n  const roleLabel = esConductor ? \"conductor\" : \"Usuario\";\n  const tieneNotificaciones = notificacionesCount > 0;\n  const ariaLabelNotificaciones = tieneNotificaciones\n    ? `Notificaciones (${notificacionesCount} pendientes)`\n    : \"Notificaciones\";\n\n  return (\n    <header\n      className={[\n        // Fondo blanco, esquinas redondeadas en bordes exteriores (top), sticky y sombra suave.\n        \"sticky top-0 z-30 flex w-full shrink-0 items-center justify-between gap-3 bg-white rounded-tl-[24px] rounded-tr-[24px] border-b border-[#e6f0ff] shadow-[0_2px_10",
+      "declarations": "export type RolHeader = \"conductor\" | \"usuario\";\n\nexport interface RuumHeaderProps {\n  /**\n   * Rol de la aplicación. Define la etiqueta que se muestra debajo del nombre\n   * de la marca: `\"conductor\"` para Ruum Ruum Conductor y `\"Usuario\"` para\n   * Ruum Ruum Usuario.\n   */\n  rol?: RolHeader;\n  /** Cantidad de notificaciones pendientes. Si es mayor a 0 se muestra el punto de alerta. */\n  notificacionesCount?: number;\n  /** Acción del botón de notificaciones (campana). */\n  onNotificaciones?: () => void;\n  /** Acción del botón de soporte/ayuda (audífonos). */\n  onSoporte?: () => void;\n  /** Acción adicional colocada a la izquierda del branding (p. ej. menú del conductor). */\n  accionIzquierda?: ReactNode;\n  /** Destino del logotipo (por defecto \"/\" — inicio de la app). */\n  hrefLogo?: string;\n  className?: string;\n}"
+    },
+    {
+      "name": "SelloConductor",
+      "file": "packages/ui/src/components/SelloConductor.tsx",
+      "line": 31,
+      "signature": "export function SelloConductor({\n  tema = \"certificado\",\n  tamano = \"md\",\n  compacto = false,\n  lema = \"\",\n  className = \"\",\n}: SelloConductorProps) {\n  const dimension = Math.max(typeof tamano === \"number\" ? tamano : TAMANOS[tamano], 72);\n  const esDorado = tema === \"dorado\";\n  const enOscuro = tema === \"oscuro\";\n\n  if (compacto) {\n    return (\n      <div\n        cla",
+      "declarations": "export type SelloTema = \"certificado\" | \"oscuro\" | \"claro\" | \"dorado\";\n\nexport type SelloTamano = \"sm\" | \"md\" | \"lg\";\n\nexport interface SelloConductorProps {\n  /**\n   * Tema visual (Libro de marca 05-sello-conductor-certificado.png):\n   * \"certificado\" = anillo navy + símbolo RR + swoosh teal sobre claro (vigente).\n   * \"oscuro\" = anillo blanco sobre navy. \"claro\" = alias de certificado.\n   * \"dorado\" solo compatibilidad (no usar en piezas nuevas: amarillo es semántico).\n   */\n  tema?: SelloTema;\n  tamano?: SelloTamano | number;\n  compacto?: boolean;\n  lema?: string;\n  className?: string;\n}"
+    },
+    {
+      "name": "StatusChip",
+      "file": "packages/ui/src/components/StatusChip.tsx",
+      "line": 64,
+      "signature": "export function StatusChip({ estado, className = \"\" }: StatusChipProps) {\n  const meta = META[estado];\n  return (\n    <span\n      ro",
+      "declarations": "export type TonoChip = \"neutro\" | \"accion\" | \"pendiente\" | \"exito\" | \"error\" | \"emergencia\";\n\ninterface MetaChip {\n  etiqueta: string;\n  tono: TonoChip;\n  icono: ReactNode;\n}\n\nexport interface StatusChipProps {\n  estado: EstadoVisualTraslado;\n  className?: string;\n}"
+    },
+    {
+      "name": "StreetContainer",
+      "file": "packages/ui/src/components/StreetMode.tsx",
+      "line": 30,
+      "signature": "export function StreetContainer({ activo, children, className = \"\" }: { activo: boolean; children: ReactNode; className?: string }) {",
+      "declarations": ""
+    },
+    {
+      "name": "SafetyButton",
+      "file": "packages/ui/src/components/StreetMode.tsx",
+      "line": 39,
+      "signature": "export function SafetyButton({\n  onActivar,\n  etiqueta = \"Seguridad\",\n  className = \"\",\n}: {\n  onActivar?: () => void;\n  etiqueta?: string;\n  className?: string;\n}) {\n  return (\n    <a\n      href=\"#emergencia\"\n      onClick={onActivar}\n      aria-label={`${e",
+      "declarations": ""
+    },
+    {
+      "name": "TextInputUppercaseBridge",
+      "file": "packages/ui/src/components/TextInputUppercaseBridge.tsx",
+      "line": 61,
+      "signature": "export function TextInputUppercaseBridge() {",
+      "declarations": ""
+    }
+  ],
+  "utilities": [
+    {
+      "name": "indiceEtapaActual",
+      "file": "packages/ui/src/components/etapas.ts",
+      "line": 80,
+      "signature": "export function indiceEtapaActual(estado: EstadoTraslado): number {",
+      "declarations": "export interface EtapaTraslado {\n  id: string;\n  etiqueta: string;\n  estados: EstadoTraslado[];\n}"
+    },
+    {
+      "name": "estadoVisualDesdeTecnico",
+      "file": "packages/ui/src/components/status-mapping.ts",
+      "line": 16,
+      "signature": "export function estadoVisualDesdeTecnico(tecnico: string): EstadoVisualTraslado {\n  switch (tecnico) {\n    case \"cotizacion_generada\":\n    case \"cotizacion_aceptada\":\n    case \"servicio_confirmado\":\n      return \"c",
+      "declarations": "export type EstadoVisualTraslado =\n  | \"solicitado\"\n  | \"cotizacion-confirmada\"\n  | \"pendiente-conductor\"\n  | \"conductor-asignado\"\n  | \"evidencia-inicial-completa\"\n  | \"en-ruta\"\n  | \"entrega-confirmada\"\n  | \"cerrado\"\n  | \"evidencia-pendiente\"\n  | \"incidente-abierto\"\n  | \"cancelado\"\n  | \"pago-detenido\";"
+    },
+    {
+      "name": "useStreetMode",
+      "file": "packages/ui/src/components/StreetMode.tsx",
+      "line": 12,
+      "signature": "export function useStreetMode(trasladoActivo: boolean) {\n  const [reducirMovimiento, setReducirMovimiento] = useState(false);\n  useEffect(() => {\n    const mq = window.matchMedia(\"(prefers-reduced-motion: reduce)\");\n    setReducirMovimiento(mq.matches);\n    const onChange = (e: MediaQueryListEvent) => setReducirMovimiento(e.mat",
+      "declarations": ""
+    },
+    {
+      "name": "useRuumTheme",
+      "file": "packages/ui/src/components/Theme.tsx",
+      "line": 39,
+      "signature": "export function useRuumTheme() {",
+      "declarations": "export type RuumTheme = \"light\" | \"dark\";\n\nexport type RuumThemeMode = \"auto\" | RuumTheme;"
+    },
+    {
+      "name": "useDialogAccesible",
+      "file": "packages/ui/src/components/useDialogAccesible.ts",
+      "line": 26,
+      "signature": "export function useDialogAccesible({\n  abierto = true,\n  focoInicial,\n  alCancelar,\n}: OpcionesDialogAccesible = {}) {\n  const dialogRef = useRef<HTMLDialogElement>(null);\n  const previoFocoRef = useRef<HTMLElement | null>(null);\n\n  useEffect(() => {\n    const dialog = dialogRef.current;\n    if (!dialog) return;\n\n    if (!abierto) {\n      if (dialog.open) dialog.close();\n      previoFocoRef.current?.focus?.();\n      return;\n    }\n\n    previoFocoRef.current = document.activeElement as HTMLElement | null;\n    if (!dialog.open) {",
+      "declarations": "export interface OpcionesDialogAccesible {\n  /** Mostrar el diálogo. Por defecto true (montar = abrir). */\n  abierto?: boolean;\n  /** Elemento que recibe el foco inicial (p. ej. cerrar o checkbox). */\n  focoInicial?: RefObject<HTMLElement | null>;\n  /** Cancel nativo (ESC): se hace preventDefault y se delega aquí. */\n  alCancelar?: () => void;\n}"
+    }
+  ],
+  "sources": [
+    {
+      "file": "packages/ui/src/components/Alert.tsx",
+      "sha256": "7a9d0f0d92fdfa48719915bf0654f22503ef538ebc1c6be9b792c5614369ac2d"
+    },
+    {
+      "file": "packages/ui/src/components/Aviso.tsx",
+      "sha256": "41877959ec43d6aa43908f54425bb4dbe589db2ff43ba9e98e62949a76fd66df"
+    },
+    {
+      "file": "packages/ui/src/components/BannerDemo.tsx",
+      "sha256": "c711b9fc7fdf29354fd99a150402c7f68c2bb03e840d81fa067aaef62881cece"
+    },
+    {
+      "file": "packages/ui/src/components/Button.tsx",
+      "sha256": "932ec4cd0da0335c5f739d54dd7c82c2e566bd7d9c286704433e729a0f8b00e2"
+    },
+    {
+      "file": "packages/ui/src/components/Buttons.tsx",
+      "sha256": "baa23e2b4d2a4d9a2ea3262f0e4bebac25c2c961026e25a114c430f8731712a3"
+    },
+    {
+      "file": "packages/ui/src/components/Card.tsx",
+      "sha256": "fa8103cedc4ef653b836c0855858897678a7b7ae35929b36aa0d1de9fdbce14e"
+    },
+    {
+      "file": "packages/ui/src/components/Chat.tsx",
+      "sha256": "7536f765145c195616463e2c7f8df1d43a673b8b2e59cf0e6d189d4f05851c10"
+    },
+    {
+      "file": "packages/ui/src/components/Controls.tsx",
+      "sha256": "85bf1d6546ee0e7422f9218855f8513208462041bd0a54b6eab601d8f16bd643"
+    },
+    {
+      "file": "packages/ui/src/components/CredencialConductor.tsx",
+      "sha256": "72443de8cbbf689ea3f22d8851caad0f173dec8dd2964c241c08ec635961b010"
+    },
+    {
+      "file": "packages/ui/src/components/Documentos.tsx",
+      "sha256": "dc26aa4de0b1f4f378e86873898a44fc8d82a9cc6ca586a1387c2d299c642338"
+    },
+    {
+      "file": "packages/ui/src/components/DriverEarning.tsx",
+      "sha256": "84c7b170f2cc2c920bf4d7491605d99abfa5c091d10de3d18a4a5dfdd4a3f5b9"
+    },
+    {
+      "file": "packages/ui/src/components/EmptyState.tsx",
+      "sha256": "7902dcbc9f545fbc8fd628edecb9eda514297504a78557ff4ed416ffa71bc775"
+    },
+    {
+      "file": "packages/ui/src/components/estado-visual.ts",
+      "sha256": "d183f8b6e52c68b4fa26513ff998f3f84429ce89f7a5d693a68121c9d932fef0"
+    },
+    {
+      "file": "packages/ui/src/components/EstadoBadge.tsx",
+      "sha256": "5692638b1db43301c6cd1ca7e3e2cfd2a4b5c6255f86ff7472f98bcdf2d4d9d9"
+    },
+    {
+      "file": "packages/ui/src/components/EstadoStepper.tsx",
+      "sha256": "177dc129ecb4cf7e3f90c4bd5129f82f91bbfe809c72719013b58bff18f69e4d"
+    },
+    {
+      "file": "packages/ui/src/components/EstatusBadgeEconomico.tsx",
+      "sha256": "bfa2ef61f3b15a83f3d39d335739e8b17a2d85ff14f209106fa55eb687996460"
+    },
+    {
+      "file": "packages/ui/src/components/etapas.ts",
+      "sha256": "b4bc3adcc98be786331a3595eabc9d642c84b938eea4ea928db7d64c998ae86c"
+    },
+    {
+      "file": "packages/ui/src/components/Field.tsx",
+      "sha256": "49f02db9a00726d0a9e8671661cdc8c535f9fb385ff0d1d6dd9f3baebecd2478"
+    },
+    {
+      "file": "packages/ui/src/components/FinancialAmount.tsx",
+      "sha256": "631cf8036fe235f6ed09e8b27aca94da193613c45871cb6d88eb4800a2ba063b"
+    },
+    {
+      "file": "packages/ui/src/components/Icono.tsx",
+      "sha256": "4852312fccea04c7033d9bdf5620989dbd0db65abd64df738060ae1bb2ae186c"
+    },
+    {
+      "file": "packages/ui/src/components/index.ts",
+      "sha256": "fd0e38f5fbffa24764415319ace7a011771b7dcf1500df0983f81ff0eecae471"
+    },
+    {
+      "file": "packages/ui/src/components/LogoMarca.tsx",
+      "sha256": "60c9b903506eafcfce064976c5d9d2c8146d3e5e68f8bc5ee87d6dcd0f6b7f31"
+    },
+    {
+      "file": "packages/ui/src/components/MapaEstatico.tsx",
+      "sha256": "b975105a0ce13e2e694948ea2387977962f2463ae6f24c6a98cee395b0c904ab"
+    },
+    {
+      "file": "packages/ui/src/components/MobileBadge.tsx",
+      "sha256": "2e73d5e8b4873b79b2c049e7491e1d23f39872042866ce15831dd64233238fb5"
+    },
+    {
+      "file": "packages/ui/src/components/MobileButton.tsx",
+      "sha256": "1c0665e3436736f5df3e5f11d6595288805bf4bb93fbb44fea4f4f9ef6e02bdf"
+    },
+    {
+      "file": "packages/ui/src/components/MobileCard.tsx",
+      "sha256": "70cd72296700c4ec90699661ecd298abe3516037e2a7ef75fad4e834ae1af0d6"
+    },
+    {
+      "file": "packages/ui/src/components/MobileHeader.tsx",
+      "sha256": "121085e1c6cca938065bbf5a33012cc357382d75b89e99cd6e9a2f517d75b63b"
+    },
+    {
+      "file": "packages/ui/src/components/MobileRow.tsx",
+      "sha256": "50d7c174a9ee781d7f85b68627e639e8c4848416551f4ea15a8a927c1ba3eebe"
+    },
+    {
+      "file": "packages/ui/src/components/MobileShell.tsx",
+      "sha256": "98b97ae6ea87d0351df27e360899ea54173ccdb73b29e1401c808eab72368343"
+    },
+    {
+      "file": "packages/ui/src/components/Modal.tsx",
+      "sha256": "4ec4f342a0a88203636f16822ea07b3d727fc89d24a4767b85356f3501fb59b4"
+    },
+    {
+      "file": "packages/ui/src/components/Navigation.tsx",
+      "sha256": "f6993c09634560f56a0f3f72595b28dd951167dcb14d6974205e1b035108bf8d"
+    },
+    {
+      "file": "packages/ui/src/components/NextOperationalAction.tsx",
+      "sha256": "c68e344bc66ae3a44d5a6376c1a0809b54cd91b02aaf9067dd7e4d965f949957"
+    },
+    {
+      "file": "packages/ui/src/components/PassportCard.tsx",
+      "sha256": "871013c993d747275f0df55d27dea56e65133078cb0c5b09acece002d96a076e"
+    },
+    {
+      "file": "packages/ui/src/components/RuumHeader.tsx",
+      "sha256": "13a98077e144b81cfe502717abd45cadd5f3d796be74a360235213d3804b21b0"
+    },
+    {
+      "file": "packages/ui/src/components/SelloConductor.tsx",
+      "sha256": "fba986ef6a0f984215ef6a4923ca6714c63dada80faa3d14b22ec45b5dee2120"
+    },
+    {
+      "file": "packages/ui/src/components/status-mapping.ts",
+      "sha256": "f5fb81ad86da72eac4dd7824ac5e7cf862be017d53767134b005457759c97d80"
+    },
+    {
+      "file": "packages/ui/src/components/StatusChip.tsx",
+      "sha256": "edb1d1af5b12fcebae3f8f624e0af1e4e030a56f6b1786f45d9657b8fdfde56e"
+    },
+    {
+      "file": "packages/ui/src/components/StreetMode.tsx",
+      "sha256": "ee9f2251f819be2e7abcb7e347d8a8fb5ecfa18eef387733eb4c955f28674824"
+    },
+    {
+      "file": "packages/ui/src/components/TextInputUppercaseBridge.tsx",
+      "sha256": "34123a135d7da254214d93ddeef5fced6c13d5268e0d11c0fb80edd124dc8b4f"
+    },
+    {
+      "file": "packages/ui/src/components/Theme.tsx",
+      "sha256": "eb6b74667980316e602b4b50e73ab34f90ca69b8d109fb0398b056b888e36fc5"
+    },
+    {
+      "file": "packages/ui/src/components/useDialogAccesible.ts",
+      "sha256": "2b3dd636cd57228c410d4b34b39a4f1a3eaa7cbc9ca778f8f7cf3760c10e08c7"
+    }
+  ],
+  "tokens": [
+    {
+      "name": "--color-navy",
+      "value": "#0a2342",
+      "line": 17
+    },
+    {
+      "name": "--color-teal-deep",
+      "value": "#007575",
+      "line": 20
+    },
+    {
+      "name": "--color-ink",
+      "value": "#0a2342",
+      "line": 21
+    },
+    {
+      "name": "--color-ink-soft",
+      "value": "#566889",
+      "line": 22
+    },
+    {
+      "name": "--color-asphalt",
+      "value": "#0a2342",
+      "line": 23
+    },
+    {
+      "name": "--color-steel",
+      "value": "#566889",
+      "line": 24
+    },
+    {
+      "name": "--color-mist",
+      "value": "#ffffff",
+      "line": 25
+    },
+    {
+      "name": "--color-mist-dim",
+      "value": "#e8eef4",
+      "line": 26
+    },
+    {
+      "name": "--color-signal",
+      "value": "#00d1d1",
+      "line": 27
+    },
+    {
+      "name": "--color-signal-soft",
+      "value": "#e8f0fe",
+      "line": 28
+    },
+    {
+      "name": "--color-route",
+      "value": "#0066ff",
+      "line": 29
+    },
+    {
+      "name": "--color-route-dark",
+      "value": "#0043a8",
+      "line": 30
+    },
+    {
+      "name": "--color-route-soft",
+      "value": "#e8f0fe",
+      "line": 31
+    },
+    {
+      "name": "--color-control",
+      "value": "#16805a",
+      "line": 32
+    },
+    {
+      "name": "--color-control-soft",
+      "value": "#e6f6ee",
+      "line": 33
+    },
+    {
+      "name": "--color-warn",
+      "value": "#f5b400",
+      "line": 34
+    },
+    {
+      "name": "--color-warn-soft",
+      "value": "#fff4d6",
+      "line": 35
+    },
+    {
+      "name": "--color-danger",
+      "value": "#c23648",
+      "line": 36
+    },
+    {
+      "name": "--color-danger-soft",
+      "value": "#fdecef",
+      "line": 37
+    },
+    {
+      "name": "--color-primary",
+      "value": "var(--ruum-text-primary)",
+      "line": 40
+    },
+    {
+      "name": "--color-secondary",
+      "value": "var(--ruum-text-secondary)",
+      "line": 41
+    },
+    {
+      "name": "--color-tertiary",
+      "value": "var(--ruum-text-tertiary)",
+      "line": 42
+    },
+    {
+      "name": "--color-disabled",
+      "value": "var(--ruum-text-disabled)",
+      "line": 43
+    },
+    {
+      "name": "--color-text-primary",
+      "value": "var(--ruum-text-primary)",
+      "line": 44
+    },
+    {
+      "name": "--color-text-secondary",
+      "value": "var(--ruum-text-secondary)",
+      "line": 45
+    },
+    {
+      "name": "--color-text-tertiary",
+      "value": "var(--ruum-text-tertiary)",
+      "line": 46
+    },
+    {
+      "name": "--color-text-disabled",
+      "value": "var(--ruum-text-disabled)",
+      "line": 47
+    },
+    {
+      "name": "--color-surface",
+      "value": "var(--ruum-surface)",
+      "line": 48
+    },
+    {
+      "name": "--color-surface-elevated",
+      "value": "var(--ruum-surface-elevated)",
+      "line": 49
+    },
+    {
+      "name": "--color-border",
+      "value": "var(--ruum-border)",
+      "line": 50
+    },
+    {
+      "name": "--color-border-strong",
+      "value": "var(--ruum-border-strong)",
+      "line": 51
+    },
+    {
+      "name": "--color-action-primary",
+      "value": "var(--ruum-action-primary)",
+      "line": 52
+    },
+    {
+      "name": "--color-action-primary-hover",
+      "value": "var(--ruum-action-primary-hover)",
+      "line": 53
+    },
+    {
+      "name": "--color-action-primary-active",
+      "value": "var(--ruum-action-primary-active)",
+      "line": 54
+    },
+    {
+      "name": "--color-route-action",
+      "value": "var(--ruum-route)",
+      "line": 55
+    },
+    {
+      "name": "--color-route-action-hover",
+      "value": "var(--ruum-route-hover)",
+      "line": 56
+    },
+    {
+      "name": "--color-route-action-active",
+      "value": "var(--ruum-route-active)",
+      "line": 57
+    },
+    {
+      "name": "--color-success",
+      "value": "var(--ruum-success)",
+      "line": 58
+    },
+    {
+      "name": "--color-warning",
+      "value": "var(--ruum-warning)",
+      "line": 59
+    },
+    {
+      "name": "--color-danger-action",
+      "value": "var(--ruum-danger)",
+      "line": 60
+    },
+    {
+      "name": "--color-danger-action-hover",
+      "value": "var(--ruum-danger-hover)",
+      "line": 61
+    },
+    {
+      "name": "--color-danger-action-active",
+      "value": "var(--ruum-danger-active)",
+      "line": 62
+    },
+    {
+      "name": "--color-on-primary",
+      "value": "var(--ruum-on-primary)",
+      "line": 63
+    },
+    {
+      "name": "--color-on-danger",
+      "value": "var(--ruum-on-danger)",
+      "line": 64
+    },
+    {
+      "name": "--color-surface-muted",
+      "value": "var(--ruum-surface-subtle)",
+      "line": 65
+    },
+    {
+      "name": "--color-overlay",
+      "value": "var(--ruum-overlay)",
+      "line": 66
+    },
+    {
+      "name": "--color-focus",
+      "value": "var(--ruum-focus)",
+      "line": 67
+    },
+    {
+      "name": "--color-paper",
+      "value": "var(--color-mist)",
+      "line": 70
+    },
+    {
+      "name": "--color-paper-dim",
+      "value": "var(--color-mist-dim)",
+      "line": 71
+    },
+    {
+      "name": "--color-evidence",
+      "value": "var(--color-mist-dim)",
+      "line": 72
+    },
+    {
+      "name": "--color-ok",
+      "value": "var(--color-control)",
+      "line": 73
+    },
+    {
+      "name": "--color-ok-soft",
+      "value": "var(--color-control-soft)",
+      "line": 74
+    },
+    {
+      "name": "--font-display",
+      "value": "var(--font-body-loaded), \"Inter\", ui-sans-serif, system-ui, sans-serif",
+      "line": 76
+    },
+    {
+      "name": "--font-body",
+      "value": "var(--font-body-loaded), \"Inter\", ui-sans-serif, system-ui, sans-serif",
+      "line": 77
+    },
+    {
+      "name": "--font-mono-ruum",
+      "value": "var(--font-mono-loaded), \"IBM Plex Mono\", ui-monospace, monospace",
+      "line": 78
+    },
+    {
+      "name": "--radius-card",
+      "value": "1rem",
+      "line": 80
+    },
+    {
+      "name": "--shadow-1",
+      "value": "0 1px 2px rgba(13, 43, 94, 0.04)",
+      "line": 82
+    },
+    {
+      "name": "--shadow-2",
+      "value": "0 4px 12px rgba(13, 43, 94, 0.06)",
+      "line": 83
+    },
+    {
+      "name": "--shadow-3",
+      "value": "0 10px 28px rgba(13, 43, 94, 0.10)",
+      "line": 84
+    },
+    {
+      "name": "--shadow-4",
+      "value": "0 20px 48px rgba(13, 43, 94, 0.14)",
+      "line": 85
+    },
+    {
+      "name": "--ruum-button-height",
+      "value": "var(--ruum-button-height-street)",
+      "line": 118
+    },
+    {
+      "name": "--ruum-navy",
+      "value": "#0a2342",
+      "line": 145
+    },
+    {
+      "name": "--ruum-teal",
+      "value": "#00d1d1",
+      "line": 146
+    },
+    {
+      "name": "--ruum-teal-deep",
+      "value": "#008b8b",
+      "line": 147
+    },
+    {
+      "name": "--ruum-blue",
+      "value": "#0066ff",
+      "line": 148
+    },
+    {
+      "name": "--ruum-muted",
+      "value": "#566889",
+      "line": 149
+    },
+    {
+      "name": "--ruum-neutral-bg",
+      "value": "#eef2f8",
+      "line": 150
+    },
+    {
+      "name": "--ruum-neutral-text",
+      "value": "#566889",
+      "line": 151
+    },
+    {
+      "name": "--ruum-action-bg",
+      "value": "#e8f0fe",
+      "line": 152
+    },
+    {
+      "name": "--ruum-action-text",
+      "value": "#1461e0",
+      "line": 153
+    },
+    {
+      "name": "--ruum-warning-bg",
+      "value": "#fff4d6",
+      "line": 154
+    },
+    {
+      "name": "--ruum-warning-text",
+      "value": "#7a4f00",
+      "line": 155
+    },
+    {
+      "name": "--ruum-success-bg",
+      "value": "#e6f6ee",
+      "line": 156
+    },
+    {
+      "name": "--ruum-success-text",
+      "value": "#0f6b48",
+      "line": 157
+    },
+    {
+      "name": "--ruum-error-bg",
+      "value": "#fdecef",
+      "line": 158
+    },
+    {
+      "name": "--ruum-error-text",
+      "value": "#c23648",
+      "line": 159
+    },
+    {
+      "name": "--ruum-emergency-bg",
+      "value": "#fdecef",
+      "line": 160
+    },
+    {
+      "name": "--ruum-emergency-text",
+      "value": "#b3261e",
+      "line": 161
+    },
+    {
+      "name": "--ruum-safety-button-bg",
+      "value": "#b3261e",
+      "line": 162
+    },
+    {
+      "name": "--ruum-safety-button-text",
+      "value": "#ffffff",
+      "line": 163
+    },
+    {
+      "name": "--ruum-gradient-cta",
+      "value": "linear-gradient(90deg, #008b8b 0%, #0066ff 100%)",
+      "line": 164
+    },
+    {
+      "name": "--ruum-gradient-route",
+      "value": "linear-gradient(90deg, #00d1d1 0%, #0066ff 100%)",
+      "line": 165
+    },
+    {
+      "name": "--ruum-font-family",
+      "value": "\"Inter\", Arial, Calibri, sans-serif",
+      "line": 166
+    },
+    {
+      "name": "--ruum-font-display",
+      "value": "40px",
+      "line": 167
+    },
+    {
+      "name": "--ruum-font-h1",
+      "value": "32px",
+      "line": 168
+    },
+    {
+      "name": "--ruum-font-h2",
+      "value": "24px",
+      "line": 169
+    },
+    {
+      "name": "--ruum-font-h3",
+      "value": "18px",
+      "line": 170
+    },
+    {
+      "name": "--ruum-font-body-size",
+      "value": "16px",
+      "line": 171
+    },
+    {
+      "name": "--ruum-font-small",
+      "value": "14px",
+      "line": 172
+    },
+    {
+      "name": "--ruum-font-caption",
+      "value": "12px",
+      "line": 173
+    },
+    {
+      "name": "--ruum-space-4",
+      "value": "4px",
+      "line": 174
+    },
+    {
+      "name": "--ruum-space-8",
+      "value": "8px",
+      "line": 175
+    },
+    {
+      "name": "--ruum-space-12",
+      "value": "12px",
+      "line": 176
+    },
+    {
+      "name": "--ruum-space-16",
+      "value": "16px",
+      "line": 177
+    },
+    {
+      "name": "--ruum-space-20",
+      "value": "20px",
+      "line": 178
+    },
+    {
+      "name": "--ruum-space-24",
+      "value": "24px",
+      "line": 179
+    },
+    {
+      "name": "--ruum-space-32",
+      "value": "32px",
+      "line": 180
+    },
+    {
+      "name": "--ruum-space-40",
+      "value": "40px",
+      "line": 181
+    },
+    {
+      "name": "--ruum-space-48",
+      "value": "48px",
+      "line": 182
+    },
+    {
+      "name": "--ruum-elevation-1",
+      "value": "0 2px 10px rgba(13, 43, 94, 0.05)",
+      "line": 183
+    },
+    {
+      "name": "--ruum-elevation-2",
+      "value": "0 8px 24px rgba(13, 43, 94, 0.1)",
+      "line": 184
+    },
+    {
+      "name": "--ruum-touch",
+      "value": "44px",
+      "line": 185
+    },
+    {
+      "name": "--ruum-touch-street",
+      "value": "56px",
+      "line": 186
+    },
+    {
+      "name": "--ruum-button-height",
+      "value": "52px",
+      "line": 187
+    },
+    {
+      "name": "--ruum-button-height-street",
+      "value": "56px",
+      "line": 188
+    },
+    {
+      "name": "--ruum-input-height",
+      "value": "48px",
+      "line": 189
+    },
+    {
+      "name": "--ruum-motion-micro",
+      "value": "150ms",
+      "line": 190
+    },
+    {
+      "name": "--ruum-motion-transition",
+      "value": "250ms",
+      "line": 191
+    },
+    {
+      "name": "--ruum-motion-easing",
+      "value": "ease-out",
+      "line": 192
+    },
+    {
+      "name": "--ruum-primary",
+      "value": "#0a2342",
+      "line": 195
+    },
+    {
+      "name": "--ruum-brand",
+      "value": "#00d1d1",
+      "line": 196
+    },
+    {
+      "name": "--ruum-brand-dark",
+      "value": "#008b8b",
+      "line": 197
+    },
+    {
+      "name": "--ruum-brand-soft",
+      "value": "#e6f6ee",
+      "line": 198
+    },
+    {
+      "name": "--ruum-action",
+      "value": "#0066ff",
+      "line": 199
+    },
+    {
+      "name": "--ruum-action-hover",
+      "value": "#0052cc",
+      "line": 200
+    },
+    {
+      "name": "--ruum-action-active",
+      "value": "#0043a8",
+      "line": 201
+    },
+    {
+      "name": "--ruum-canvas",
+      "value": "#ffffff",
+      "line": 204
+    },
+    {
+      "name": "--ruum-surface",
+      "value": "#ffffff",
+      "line": 205
+    },
+    {
+      "name": "--ruum-surface-elevated",
+      "value": "#e8eef4",
+      "line": 206
+    },
+    {
+      "name": "--ruum-surface-subtle",
+      "value": "#eef2f8",
+      "line": 207
+    },
+    {
+      "name": "--ruum-surface-strong",
+      "value": "#0a2342",
+      "line": 208
+    },
+    {
+      "name": "--ruum-border",
+      "value": "#e6f0ff",
+      "line": 209
+    },
+    {
+      "name": "--ruum-border-strong",
+      "value": "#7a8dae",
+      "line": 210
+    },
+    {
+      "name": "--ruum-border-input",
+      "value": "#7a8dae",
+      "line": 211
+    },
+    {
+      "name": "--ruum-text-primary",
+      "value": "#0a2342",
+      "line": 214
+    },
+    {
+      "name": "--ruum-text",
+      "value": "#0a2342",
+      "line": 215
+    },
+    {
+      "name": "--ruum-text-secondary",
+      "value": "#566889",
+      "line": 216
+    },
+    {
+      "name": "--ruum-text-tertiary",
+      "value": "#566889",
+      "line": 217
+    },
+    {
+      "name": "--ruum-text-disabled",
+      "value": "#7a8dae",
+      "line": 218
+    },
+    {
+      "name": "--ruum-dark-text-secondary",
+      "value": "#c9cfda",
+      "line": 219
+    },
+    {
+      "name": "--ruum-dark-text-tertiary",
+      "value": "#9aa2b5",
+      "line": 220
+    },
+    {
+      "name": "--ruum-focus",
+      "value": "#0066ff",
+      "line": 223
+    },
+    {
+      "name": "--ruum-focus-ring",
+      "value": "rgba(0, 102, 255, 0.24)",
+      "line": 224
+    },
+    {
+      "name": "--ruum-action-primary",
+      "value": "#0066ff",
+      "line": 227
+    },
+    {
+      "name": "--ruum-on-primary",
+      "value": "#ffffff",
+      "line": 228
+    },
+    {
+      "name": "--ruum-on-danger",
+      "value": "#ffffff",
+      "line": 229
+    },
+    {
+      "name": "--ruum-overlay",
+      "value": "rgba(10, 35, 66, 0.6)",
+      "line": 230
+    },
+    {
+      "name": "--ruum-action-primary-hover",
+      "value": "#0052cc",
+      "line": 231
+    },
+    {
+      "name": "--ruum-action-primary-active",
+      "value": "#0043a8",
+      "line": 232
+    },
+    {
+      "name": "--ruum-gradient-action",
+      "value": "var(--ruum-gradient-cta)",
+      "line": 233
+    },
+    {
+      "name": "--ruum-route",
+      "value": "#0066ff",
+      "line": 236
+    },
+    {
+      "name": "--ruum-route-contrast",
+      "value": "#0043a8",
+      "line": 237
+    },
+    {
+      "name": "--ruum-route-hover",
+      "value": "#0052cc",
+      "line": 238
+    },
+    {
+      "name": "--ruum-route-active",
+      "value": "#0043a8",
+      "line": 239
+    },
+    {
+      "name": "--ruum-success",
+      "value": "#16805a",
+      "line": 240
+    },
+    {
+      "name": "--ruum-warning",
+      "value": "#f5b400",
+      "line": 241
+    },
+    {
+      "name": "--ruum-danger",
+      "value": "#c23648",
+      "line": 242
+    },
+    {
+      "name": "--ruum-danger-hover",
+      "value": "#a32c3c",
+      "line": 243
+    },
+    {
+      "name": "--ruum-danger-active",
+      "value": "#86232f",
+      "line": 244
+    },
+    {
+      "name": "--ruum-error",
+      "value": "#c23648",
+      "line": 245
+    },
+    {
+      "name": "--ruum-emergency",
+      "value": "#b3261e",
+      "line": 246
+    },
+    {
+      "name": "--ruum-pulse",
+      "value": "#00d1d1",
+      "line": 249
+    },
+    {
+      "name": "--ruum-pulse-soft",
+      "value": "#e8f0fe",
+      "line": 250
+    },
+    {
+      "name": "--ruum-pulse-ink",
+      "value": "#008b8b",
+      "line": 251
+    },
+    {
+      "name": "--ruum-logo-rr",
+      "value": "#0a2342",
+      "line": 254
+    },
+    {
+      "name": "--ruum-logo-bg",
+      "value": "#ffffff",
+      "line": 255
+    },
+    {
+      "name": "--ruum-logo-text",
+      "value": "#0a2342",
+      "line": 256
+    },
+    {
+      "name": "--ruum-logo-descriptor",
+      "value": "#008b8b",
+      "line": 257
+    },
+    {
+      "name": "--ruum-radius-sm",
+      "value": "8px",
+      "line": 260
+    },
+    {
+      "name": "--ruum-radius-md",
+      "value": "12px",
+      "line": 261
+    },
+    {
+      "name": "--ruum-radius-lg",
+      "value": "16px",
+      "line": 262
+    },
+    {
+      "name": "--ruum-radius-xl",
+      "value": "24px",
+      "line": 263
+    },
+    {
+      "name": "--ruum-radius-2xl",
+      "value": "24px",
+      "line": 264
+    },
+    {
+      "name": "--ruum-radius-full",
+      "value": "999px",
+      "line": 265
+    },
+    {
+      "name": "--ruum-radius-button",
+      "value": "14px",
+      "line": 266
+    },
+    {
+      "name": "--ruum-radius-field",
+      "value": "12px",
+      "line": 267
+    },
+    {
+      "name": "--ruum-radius-card",
+      "value": "20px",
+      "line": 268
+    },
+    {
+      "name": "--ruum-radius-modal",
+      "value": "20px",
+      "line": 269
+    },
+    {
+      "name": "--ruum-shadow-xs",
+      "value": "var(--ruum-elevation-1)",
+      "line": 272
+    },
+    {
+      "name": "--ruum-shadow-sm",
+      "value": "var(--ruum-elevation-1)",
+      "line": 273
+    },
+    {
+      "name": "--ruum-shadow-md",
+      "value": "var(--ruum-elevation-2)",
+      "line": 274
+    },
+    {
+      "name": "--ruum-shadow-1",
+      "value": "var(--ruum-elevation-1)",
+      "line": 275
+    },
+    {
+      "name": "--ruum-shadow-2",
+      "value": "var(--ruum-elevation-2)",
+      "line": 276
+    },
+    {
+      "name": "--ruum-shadow-3",
+      "value": "var(--ruum-elevation-2)",
+      "line": 277
+    },
+    {
+      "name": "--ruum-shadow-4",
+      "value": "0 20px 48px rgba(13, 43, 94, 0.14)",
+      "line": 278
+    },
+    {
+      "name": "--ruum-navy",
+      "value": "#0a2342",
+      "line": 286
+    },
+    {
+      "name": "--ruum-teal",
+      "value": "#00d1d1",
+      "line": 287
+    },
+    {
+      "name": "--ruum-teal-deep",
+      "value": "#00b3b3",
+      "line": 288
+    },
+    {
+      "name": "--ruum-blue",
+      "value": "#4d94ff",
+      "line": 289
+    },
+    {
+      "name": "--ruum-action",
+      "value": "#4d94ff",
+      "line": 290
+    },
+    {
+      "name": "--ruum-action-hover",
+      "value": "#6ba8ff",
+      "line": 291
+    },
+    {
+      "name": "--ruum-action-active",
+      "value": "#6ba8ff",
+      "line": 292
+    },
+    {
+      "name": "--ruum-surface-brand",
+      "value": "#0a2342",
+      "line": 293
+    },
+    {
+      "name": "--ruum-muted",
+      "value": "#a8b5cc",
+      "line": 294
+    },
+    {
+      "name": "--ruum-border-input",
+      "value": "#2d4f73",
+      "line": 295
+    },
+    {
+      "name": "--ruum-border",
+      "value": "#1a3a5c",
+      "line": 296
+    },
+    {
+      "name": "--ruum-neutral-bg",
+      "value": "#1a2e4a",
+      "line": 298
+    },
+    {
+      "name": "--ruum-neutral-text",
+      "value": "#a8b5cc",
+      "line": 299
+    },
+    {
+      "name": "--ruum-action-bg",
+      "value": "#0f2d52",
+      "line": 300
+    },
+    {
+      "name": "--ruum-action-text",
+      "value": "#6ba8ff",
+      "line": 301
+    },
+    {
+      "name": "--ruum-warning",
+      "value": "#ffc933",
+      "line": 302
+    },
+    {
+      "name": "--ruum-warning-bg",
+      "value": "#3d2e00",
+      "line": 303
+    },
+    {
+      "name": "--ruum-warning-text",
+      "value": "#ffc933",
+      "line": 304
+    },
+    {
+      "name": "--ruum-success",
+      "value": "#4dd9a3",
+      "line": 305
+    },
+    {
+      "name": "--ruum-success-bg",
+      "value": "#0a2e1f",
+      "line": 306
+    },
+    {
+      "name": "--ruum-success-text",
+      "value": "#4dd9a3",
+      "line": 307
+    },
+    {
+      "name": "--ruum-error",
+      "value": "#ff6b7a",
+      "line": 308
+    },
+    {
+      "name": "--ruum-error-bg",
+      "value": "#3d0f1a",
+      "line": 309
+    },
+    {
+      "name": "--ruum-error-text",
+      "value": "#ff6b7a",
+      "line": 310
+    },
+    {
+      "name": "--ruum-emergency",
+      "value": "#ff4d3d",
+      "line": 311
+    },
+    {
+      "name": "--ruum-emergency-bg",
+      "value": "#3d0a05",
+      "line": 312
+    },
+    {
+      "name": "--ruum-emergency-text",
+      "value": "#ff4d3d",
+      "line": 313
+    },
+    {
+      "name": "--ruum-safety-button-bg",
+      "value": "#ff4d3d",
+      "line": 314
+    },
+    {
+      "name": "--ruum-safety-button-text",
+      "value": "#061529",
+      "line": 315
+    },
+    {
+      "name": "--ruum-gradient-cta",
+      "value": "linear-gradient(90deg, #00b3b3 0%, #4d94ff 100%)",
+      "line": 317
+    },
+    {
+      "name": "--ruum-gradient-route",
+      "value": "linear-gradient(90deg, #00d1d1 0%, #4d94ff 100%)",
+      "line": 318
+    },
+    {
+      "name": "--ruum-canvas",
+      "value": "#061529",
+      "line": 320
+    },
+    {
+      "name": "--ruum-surface",
+      "value": "#0a2342",
+      "line": 321
+    },
+    {
+      "name": "--ruum-surface-raised",
+      "value": "#0f2d52",
+      "line": 322
+    },
+    {
+      "name": "--ruum-surface-soft",
+      "value": "#0f2d52",
+      "line": 323
+    },
+    {
+      "name": "--ruum-surface-elevated",
+      "value": "#0f2d52",
+      "line": 324
+    },
+    {
+      "name": "--ruum-surface-subtle",
+      "value": "#0f2d52",
+      "line": 325
+    },
+    {
+      "name": "--ruum-surface-strong",
+      "value": "#0a2342",
+      "line": 326
+    },
+    {
+      "name": "--ruum-text",
+      "value": "#f6f8fb",
+      "line": 328
+    },
+    {
+      "name": "--ruum-text-primary",
+      "value": "#f6f8fb",
+      "line": 329
+    },
+    {
+      "name": "--ruum-text-secondary",
+      "value": "#a8b5cc",
+      "line": 330
+    },
+    {
+      "name": "--ruum-text-tertiary",
+      "value": "#a8b5cc",
+      "line": 331
+    },
+    {
+      "name": "--ruum-text-muted",
+      "value": "#8293b0",
+      "line": 332
+    },
+    {
+      "name": "--ruum-text-disabled",
+      "value": "#6b7a99",
+      "line": 333
+    },
+    {
+      "name": "--ruum-muted",
+      "value": "#a8b5cc",
+      "line": 334
+    },
+    {
+      "name": "--ruum-dark-text-secondary",
+      "value": "#a8b5cc",
+      "line": 335
+    },
+    {
+      "name": "--ruum-dark-text-tertiary",
+      "value": "#6b7a99",
+      "line": 336
+    },
+    {
+      "name": "--ruum-border-strong",
+      "value": "#2d4f73",
+      "line": 338
+    },
+    {
+      "name": "--ruum-brand",
+      "value": "#00d1d1",
+      "line": 340
+    },
+    {
+      "name": "--ruum-brand-dark",
+      "value": "#00b3b3",
+      "line": 341
+    },
+    {
+      "name": "--ruum-brand-soft",
+      "value": "#0f2d52",
+      "line": 342
+    },
+    {
+      "name": "--ruum-action-primary",
+      "value": "#4d94ff",
+      "line": 344
+    },
+    {
+      "name": "--ruum-action-primary-hover",
+      "value": "#6ba8ff",
+      "line": 345
+    },
+    {
+      "name": "--ruum-action-primary-active",
+      "value": "#6ba8ff",
+      "line": 346
+    },
+    {
+      "name": "--ruum-on-primary",
+      "value": "#061529",
+      "line": 347
+    },
+    {
+      "name": "--ruum-on-danger",
+      "value": "#ffffff",
+      "line": 348
+    },
+    {
+      "name": "--ruum-primary",
+      "value": "#f6f8fb",
+      "line": 350
+    },
+    {
+      "name": "--ruum-focus",
+      "value": "#4d94ff",
+      "line": 352
+    },
+    {
+      "name": "--ruum-focus-ring",
+      "value": "rgba(77, 148, 255, 0.35)",
+      "line": 353
+    },
+    {
+      "name": "--ruum-route",
+      "value": "#4d94ff",
+      "line": 355
+    },
+    {
+      "name": "--ruum-route-contrast",
+      "value": "#6ba8ff",
+      "line": 356
+    },
+    {
+      "name": "--ruum-route-hover",
+      "value": "#6ba8ff",
+      "line": 357
+    },
+    {
+      "name": "--ruum-route-active",
+      "value": "#6ba8ff",
+      "line": 358
+    },
+    {
+      "name": "--ruum-danger",
+      "value": "#ff6b7a",
+      "line": 360
+    },
+    {
+      "name": "--ruum-danger-hover",
+      "value": "#ff6b7a",
+      "line": 361
+    },
+    {
+      "name": "--ruum-danger-active",
+      "value": "#ff6b7a",
+      "line": 362
+    },
+    {
+      "name": "--ruum-info",
+      "value": "#6ba8ff",
+      "line": 363
+    },
+    {
+      "name": "--ruum-gradient-action",
+      "value": "var(--ruum-gradient-cta)",
+      "line": 365
+    },
+    {
+      "name": "--ruum-gradient-highlight",
+      "value": "linear-gradient(135deg, rgba(0, 209, 209, 0.10), rgba(77, 148, 255, 0.08))",
+      "line": 366
+    },
+    {
+      "name": "--ruum-pulse",
+      "value": "#00d1d1",
+      "line": 368
+    },
+    {
+      "name": "--ruum-pulse-soft",
+      "value": "#0f2d52",
+      "line": 369
+    },
+    {
+      "name": "--ruum-pulse-ink",
+      "value": "#a8b5cc",
+      "line": 370
+    },
+    {
+      "name": "--ruum-logo-rr",
+      "value": "#ffffff",
+      "line": 373
+    },
+    {
+      "name": "--ruum-logo-bg",
+      "value": "#0a2342",
+      "line": 374
+    },
+    {
+      "name": "--ruum-logo-text",
+      "value": "#ffffff",
+      "line": 375
+    },
+    {
+      "name": "--ruum-logo-descriptor",
+      "value": "#00d1d1",
+      "line": 376
+    },
+    {
+      "name": "--ruum-overlay",
+      "value": "rgba(0, 0, 0, 0.7)",
+      "line": 378
+    },
+    {
+      "name": "--ruum-shadow-xs",
+      "value": "0 2px 10px rgba(0, 0, 0, 0.3)",
+      "line": 381
+    },
+    {
+      "name": "--ruum-shadow-sm",
+      "value": "0 2px 10px rgba(0, 0, 0, 0.3)",
+      "line": 382
+    },
+    {
+      "name": "--ruum-shadow-md",
+      "value": "0 8px 24px rgba(0, 0, 0, 0.4)",
+      "line": 383
+    },
+    {
+      "name": "--ruum-shadow-1",
+      "value": "0 2px 10px rgba(0, 0, 0, 0.3)",
+      "line": 384
+    },
+    {
+      "name": "--ruum-shadow-2",
+      "value": "0 8px 24px rgba(0, 0, 0, 0.4)",
+      "line": 385
+    },
+    {
+      "name": "--ruum-shadow-3",
+      "value": "0 8px 24px rgba(0, 0, 0, 0.4)",
+      "line": 386
+    },
+    {
+      "name": "--ruum-shadow-4",
+      "value": "0 16px 36px rgba(0, 0, 0, 0.45)",
+      "line": 387
+    },
+    {
+      "name": "--color-ink",
+      "value": "#f6f8fb",
+      "line": 390
+    },
+    {
+      "name": "--color-ink-soft",
+      "value": "#a8b5cc",
+      "line": 391
+    },
+    {
+      "name": "--color-asphalt",
+      "value": "#0a2342",
+      "line": 392
+    },
+    {
+      "name": "--color-steel",
+      "value": "#a8b5cc",
+      "line": 393
+    },
+    {
+      "name": "--color-mist",
+      "value": "#0a2342",
+      "line": 394
+    },
+    {
+      "name": "--color-mist-dim",
+      "value": "#061529",
+      "line": 395
+    },
+    {
+      "name": "--color-signal",
+      "value": "#00d1d1",
+      "line": 396
+    },
+    {
+      "name": "--color-signal-soft",
+      "value": "#0f2d52",
+      "line": 397
+    },
+    {
+      "name": "--color-route",
+      "value": "#4d94ff",
+      "line": 398
+    },
+    {
+      "name": "--color-route-dark",
+      "value": "#6ba8ff",
+      "line": 399
+    },
+    {
+      "name": "--color-route-soft",
+      "value": "#0f2d52",
+      "line": 400
+    },
+    {
+      "name": "--color-control",
+      "value": "#4dd9a3",
+      "line": 401
+    },
+    {
+      "name": "--color-control-soft",
+      "value": "#0a2e1f",
+      "line": 402
+    },
+    {
+      "name": "--color-warn",
+      "value": "#ffc933",
+      "line": 403
+    },
+    {
+      "name": "--color-warn-soft",
+      "value": "#3d2e00",
+      "line": 404
+    },
+    {
+      "name": "--color-danger",
+      "value": "#ff6b7a",
+      "line": 405
+    },
+    {
+      "name": "--color-danger-soft",
+      "value": "#3d0f1a",
+      "line": 406
+    },
+    {
+      "name": "--ruum-canvas",
+      "value": "#ffffff",
+      "line": 412
+    },
+    {
+      "name": "--ruum-muted",
+      "value": "#566889",
+      "line": 413
+    },
+    {
+      "name": "--ruum-surface",
+      "value": "#ffffff",
+      "line": 414
+    },
+    {
+      "name": "--ruum-surface-elevated",
+      "value": "#e8eef4",
+      "line": 415
+    },
+    {
+      "name": "--ruum-surface-subtle",
+      "value": "#eef2f8",
+      "line": 416
+    },
+    {
+      "name": "--ruum-surface-strong",
+      "value": "#0a2342",
+      "line": 417
+    },
+    {
+      "name": "--ruum-text",
+      "value": "#0a2342",
+      "line": 418
+    },
+    {
+      "name": "--ruum-text-primary",
+      "value": "#0a2342",
+      "line": 419
+    },
+    {
+      "name": "--ruum-text-secondary",
+      "value": "#566889",
+      "line": 420
+    },
+    {
+      "name": "--ruum-text-tertiary",
+      "value": "#566889",
+      "line": 421
+    },
+    {
+      "name": "--ruum-text-disabled",
+      "value": "#7a8dae",
+      "line": 422
+    },
+    {
+      "name": "--ruum-border",
+      "value": "#e6f0ff",
+      "line": 423
+    },
+    {
+      "name": "--ruum-border-input",
+      "value": "#7a8dae",
+      "line": 424
+    },
+    {
+      "name": "--ruum-neutral-bg",
+      "value": "#eef2f8",
+      "line": 425
+    },
+    {
+      "name": "--ruum-neutral-text",
+      "value": "#566889",
+      "line": 426
+    },
+    {
+      "name": "--ruum-action",
+      "value": "#0066ff",
+      "line": 427
+    },
+    {
+      "name": "--ruum-action-bg",
+      "value": "#e8f0fe",
+      "line": 428
+    },
+    {
+      "name": "--ruum-action-text",
+      "value": "#1461e0",
+      "line": 429
+    },
+    {
+      "name": "--ruum-warning-bg",
+      "value": "#fff4d6",
+      "line": 430
+    },
+    {
+      "name": "--ruum-warning-text",
+      "value": "#7a4f00",
+      "line": 431
+    },
+    {
+      "name": "--ruum-success-bg",
+      "value": "#e6f6ee",
+      "line": 432
+    },
+    {
+      "name": "--ruum-success-text",
+      "value": "#0f6b48",
+      "line": 433
+    },
+    {
+      "name": "--ruum-error-bg",
+      "value": "#fdecef",
+      "line": 434
+    },
+    {
+      "name": "--ruum-error-text",
+      "value": "#c23648",
+      "line": 435
+    },
+    {
+      "name": "--ruum-emergency-bg",
+      "value": "#fdecef",
+      "line": 436
+    },
+    {
+      "name": "--ruum-emergency-text",
+      "value": "#b3261e",
+      "line": 437
+    },
+    {
+      "name": "--ruum-safety-button-bg",
+      "value": "#b3261e",
+      "line": 438
+    },
+    {
+      "name": "--ruum-safety-button-text",
+      "value": "#ffffff",
+      "line": 439
+    },
+    {
+      "name": "--ruum-teal-deep",
+      "value": "#008b8b",
+      "line": 440
+    },
+    {
+      "name": "--ruum-focus",
+      "value": "#0066ff",
+      "line": 441
+    },
+    {
+      "name": "--ruum-gradient-cta",
+      "value": "linear-gradient(90deg, #008b8b 0%, #0066ff 100%)",
+      "line": 442
+    },
+    {
+      "name": "--ruum-gradient-action",
+      "value": "var(--ruum-gradient-cta)",
+      "line": 443
+    },
+    {
+      "name": "--ruum-overlay",
+      "value": "rgba(10, 35, 66, 0.6)",
+      "line": 444
+    },
+    {
+      "name": "--ruum-focus-ring",
+      "value": "rgba(77, 148, 255, 0.45)",
+      "line": 456
+    },
+    {
+      "name": "--ruum-text-secondary",
+      "value": "#3d4f6b",
+      "line": 466
+    },
+    {
+      "name": "--ruum-border-strong",
+      "value": "#566889",
+      "line": 467
+    },
+    {
+      "name": "--ruum-text-secondary",
+      "value": "#c9d5e8",
+      "line": 470
+    },
+    {
+      "name": "--ruum-text-muted",
+      "value": "#a8b5cc",
+      "line": 471
+    },
+    {
+      "name": "--ruum-border",
+      "value": "#2d4f73",
+      "line": 472
+    },
+    {
+      "name": "--ruum-border-input",
+      "value": "#4a6b8f",
+      "line": 473
+    }
+  ]
+}

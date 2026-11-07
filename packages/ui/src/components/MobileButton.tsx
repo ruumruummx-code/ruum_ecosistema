@@ -46,22 +46,19 @@ export function MobileButton({
         ESTILOS_VARIANTE[variant],
         className,
       ].join(" ")}
-      disabled={disabled || loading}
-      aria-busy={loading ? "true" : undefined}
       {...props}
+      disabled={disabled || loading}
+      aria-busy={loading ? "true" : props["aria-busy"]}
     >
-      {loading ? (
+      {loading && (
         <span
           className="size-5 animate-spin rounded-full border-2 border-current border-t-transparent"
           aria-hidden="true"
         />
-      ) : (
-        <>
-          {icon && <span className="shrink-0" aria-hidden="true">{icon}</span>}
-          <span>{children}</span>
-          {iconRight && <span className="shrink-0" aria-hidden="true">{iconRight}</span>}
-        </>
       )}
+      {!loading && icon && <span className="shrink-0" aria-hidden="true">{icon}</span>}
+      <span>{children}</span>
+      {!loading && iconRight && <span className="shrink-0" aria-hidden="true">{iconRight}</span>}
     </button>
   );
 

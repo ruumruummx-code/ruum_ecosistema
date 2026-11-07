@@ -1,0 +1,97 @@
+{
+  "width": 1440,
+  "initial": {
+    "violations": [],
+    "incomplete": []
+  },
+  "final": {
+    "violations": [],
+    "incomplete": []
+  },
+  "notifications": {
+    "violations": []
+  },
+  "notificationNames": [
+    "Notificaciones y alertas generales",
+    "Recordatorios de traslados · Email",
+    "Recordatorios de traslados · Web y Push",
+    "Cambios de estado de traslados · Email",
+    "Cambios de estado de traslados · Web y Push",
+    "Pagos y facturación · Email",
+    "Pagos y facturación · Web y Push",
+    "Promociones y novedades · Email",
+    "Promociones y novedades · Web y Push"
+  ],
+  "attempts": [
+    {
+      "failed": true,
+      "body": {
+        "notificaciones_push": true,
+        "notificaciones_email": true,
+        "alertas_pago": true,
+        "notificaciones_promocionales": false,
+        "alertas_viaje": true,
+        "alertas_evidencia": true
+      }
+    },
+    {
+      "failed": true,
+      "body": {
+        "preferencias": {
+          "idioma": "es",
+          "zonaHoraria": "(UTC-06:00) Ciudad de México",
+          "unidades": "Métrico",
+          "tema": "Claro",
+          "accesibilidad": "Estándar",
+          "usoDatos": "Activado",
+          "alertasGenerales": true,
+          "notifRecordatoriosEmail": true,
+          "notifRecordatoriosPush": true,
+          "notifCambiosEstadoEmail": true,
+          "notifCambiosEstadoPush": true,
+          "notifPagosEmail": true,
+          "notifPagosPush": true,
+          "notifPromocionesEmail": false,
+          "notifPromocionesPush": false
+        },
+        "actualizado_en": "2026-11-07T00:24:33.431Z"
+      }
+    },
+    {
+      "failed": false,
+      "body": {
+        "notificaciones_push": true,
+        "notificaciones_email": true,
+        "alertas_pago": true,
+        "notificaciones_promocionales": false,
+        "alertas_viaje": true,
+        "alertas_evidencia": true
+      }
+    },
+    {
+      "failed": false,
+      "body": {
+        "preferencias": {
+          "idioma": "es",
+          "zonaHoraria": "(UTC-06:00) Ciudad de México",
+          "unidades": "Métrico",
+          "tema": "Claro",
+          "accesibilidad": "Estándar",
+          "usoDatos": "Activado",
+          "alertasGenerales": true,
+          "notifRecordatoriosEmail": true,
+          "notifRecordatoriosPush": true,
+          "notifCambiosEstadoEmail": true,
+          "notifCambiosEstadoPush": true,
+          "notifPagosEmail": true,
+          "notifPagosPush": true,
+          "notifPromocionesEmail": false,
+          "notifPromocionesPush": false
+        },
+        "actualizado_en": "2026-11-07T00:24:34.138Z"
+      }
+    }
+  ],
+  "language": "es-MX",
+  "reload": true
+}

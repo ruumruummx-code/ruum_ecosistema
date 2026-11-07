@@ -205,7 +205,7 @@ describe("InicioUsuario", () => {
     expect(screen.queryByText("Nissan Versa 2020")).not.toBeInTheDocument();
 
     // Soporte
-    const soporte = screen.getByRole("link", { name: /¿Necesitas ayuda\? Soporte 24\/7/i });
+    const soporte = screen.getByRole("link", { name: /¿Necesitas ayuda\? Soporte · recepción de reportes 24\/7/i });
     expect(soporte).toHaveAttribute("href", "/soporte");
   });
 });

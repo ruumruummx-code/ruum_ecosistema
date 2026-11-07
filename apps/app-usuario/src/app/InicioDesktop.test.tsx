@@ -55,6 +55,30 @@ describe("Inicio desktop", () => {
     await userEvent.click(screen.getByRole("button", { name: "Tip anterior" }));
     expect(screen.getByRole("heading", { name: "Optimiza tus traslados" })).toBeVisible();
   });
+  it("ofrece nombres accesibles distinguibles en los indicadores de tips y permite seleccionar directamente", async () => {
+    render(<InicioDesktop usuario={null} traslados={[]} />);
+    const btn1 = screen.getByRole("button", { name: "Ver tip 1: Optimiza tus traslados" });
+    const btn2 = screen.getByRole("button", { name: "Ver tip 2: Tu traslado, siempre a la vista" });
+    const btn3 = screen.getByRole("button", { name: "Ver tip 3: Ten tus documentos a mano" });
+
+    expect(btn1).toBeInTheDocument();
+    expect(btn2).toBeInTheDocument();
+    expect(btn3).toBeInTheDocument();
+
+    expect(btn1).toHaveAttribute("aria-current", "true");
+    expect(btn2).not.toHaveAttribute("aria-current");
+    expect(btn3).not.toHaveAttribute("aria-current");
+
+    await userEvent.click(btn3);
+    expect(btn3).toHaveAttribute("aria-current", "true");
+    expect(btn1).not.toHaveAttribute("aria-current");
+    expect(screen.getByRole("heading", { name: "Ten tus documentos a mano" })).toBeVisible();
+
+    await userEvent.click(btn2);
+    expect(btn2).toHaveAttribute("aria-current", "true");
+    expect(btn3).not.toHaveAttribute("aria-current");
+    expect(screen.getByRole("heading", { name: "Tu traslado, siempre a la vista" })).toBeVisible();
+  });
   it("el menú de una fila abre destinos del mismo traslado y cierra con Escape", async () => {
     render(<InicioDesktop usuario={null} traslados={[viaje]} />);
     const boton = screen.getByRole("button", { name: "Opciones del traslado PEM789" });

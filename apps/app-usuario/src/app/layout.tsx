@@ -41,7 +41,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const nonce = (await headers()).get("x-nonce") ?? undefined;
 
   return (
-    <html lang="es" dir="ltr" suppressHydrationWarning>
+    <html lang="es-MX" dir="ltr" suppressHydrationWarning>
       <head>
         <Script src="/theme-init.js" strategy="beforeInteractive" nonce={nonce} />
       </head>

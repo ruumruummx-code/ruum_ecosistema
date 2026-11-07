@@ -1,0 +1,2698 @@
+[
+  {
+    "width": 390,
+    "theme": "light",
+    "general": "¡Mensaje recibido con éxito!\nFolio: SOP-FOLIO-PRUEBA\nTu consulta quedó registrada. Nuestro equipo la atenderá desde la bandeja de soporte. Formulario: recepción de reportes las 24 horas, todos los días. Atención: lunes a viernes de 8:00 a 20:00, hora de Ciudad de México. Primera respuesta estimada a reportes: menos de 30 minutos en horario de atención y menos de 2 horas fuera de horario. Emergencias: correo a soporte las 24 horas, todos los días. Este canal no implica respuesta inmediata.",
+    "incidencia": "¡Mensaje recibido con éxito!\nFolio: INC-ABCDEF12\nReporte registrado. Folio: INC-ABCDEF12. Nuestro equipo dará seguimiento desde tu expediente. Formulario: recepción de reportes las 24 horas, todos los días. Atención: lunes a viernes de 8:00 a 20:00, hora de Ciudad de México. Primera respuesta estimada a reportes: menos de 30 minutos en horario de atención y menos de 2 horas fuera de horario. Emergencias: correo a soporte las 24 horas, todos los días. Este canal no implica respuesta inmediata.",
+    "axe": {
+      "testEngine": {
+        "name": "axe-core",
+        "version": "4.14.0"
+      },
+      "testRunner": {
+        "name": "axe"
+      },
+      "testEnvironment": {
+        "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/156.0.8078.4 Safari/537.36",
+        "windowWidth": 390,
+        "windowHeight": 1000,
+        "orientationAngle": 0,
+        "orientationType": "landscape-primary"
+      },
+      "timestamp": "2026-11-07T05:23:55.565Z",
+      "url": "file:///C:/ruum_ecosistema-main/docs/remediacion-ux009/fixture.html",
+      "toolOptions": {
+        "runOnly": {
+          "type": "rule",
+          "values": [
+            "color-contrast",
+            "link-name"
+          ]
+        },
+        "reporter": "v1"
+      },
+      "inapplicable": [],
+      "passes": [
+        {
+          "id": "color-contrast",
+          "impact": null,
+          "tags": [
+            "cat.color",
+            "wcag2aa",
+            "wcag143",
+            "TTv5",
+            "TT13.c",
+            "EN-301-549",
+            "EN-9.1.4.3",
+            "ACT",
+            "RGAAv4",
+            "RGAA-3.2.1"
+          ],
+          "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.14/color-contrast?application=axeAPI",
+          "nodes": [
+            {
+              "any": [
+                {
+                  "id": "color-contrast",
+                  "data": {
+                    "fgColor": "#0a2342",
+                    "bgColor": "#ffffff",
+                    "contrastRatio": 15.76,
+                    "fontSize": "10.5pt (14px)",
+                    "fontWeight": "bold",
+                    "expectedContrastRatio": "4.5:1"
+                  },
+                  "relatedNodes": [],
+                  "impact": "serious",
+                  "message": "Element has sufficient color contrast of 15.76"
+                }
+              ],
+              "all": [],
+              "none": [],
+              "impact": null,
+              "html": "<strong>¿Necesitas ayuda?</strong>",
+              "target": [
+                ".home-support > .home-module-copy > strong"
+              ]
+            },
+            {
+              "any": [
+                {
+                  "id": "color-contrast",
+                  "data": {
+                    "fgColor": "#64748b",
+                    "bgColor": "#ffffff",
+                    "contrastRatio": 4.75,
+                    "fontSize": "9.0pt (12px)",
+                    "fontWeight": "normal",
+                    "expectedContrastRatio": "4.5:1"
+                  },
+                  "relatedNodes": [],
+                  "impact": "serious",
+                  "message": "Element has sufficient color contrast of 4.75"
+                }
+              ],
+              "all": [],
+              "none": [],
+              "impact": null,
+              "html": "<span>Soporte · recepción de reportes 24/7</span>",
+              "target": [
+                ".home-support > .home-module-copy > span:nth-child(2)"
+              ]
+            },
+            {
+              "any": [
+                {
+                  "id": "color-contrast",
+                  "data": {
+                    "fgColor": "#64748b",
+                    "bgColor": "#ffffff",
+                    "contrastRatio": 4.75,
+                    "fontSize": "9.0pt (12px)",
+                    "fontWeight": "normal",
+                    "expectedContrastRatio": "4.5:1"
+                  },
+                  "relatedNodes": [],
+                  "impact": "serious",
+                  "message": "Element has sufficient color contrast of 4.75"
+                }
+              ],
+              "all": [],
+              "none": [],
+              "impact": null,
+              "html": "<span>Atención: lunes a viernes de 8:00 a 20:00, hora de Ciudad de México.</span>",
+              "target": [
+                ".home-module-copy > span:nth-child(3)"
+              ]
+            },
+            {
+              "any": [
+                {
+                  "id": "color-contrast",
+                  "data": {
+                    "fgColor": "#64748b",
+                    "bgColor": "#ffffff",
+                    "contrastRatio": 4.75,
+                    "fontSize": "9.0pt (12px)",
+                    "fontWeight": "normal",
+                    "expectedContrastRatio": "4.5:1"
+                  },
+                  "relatedNodes": [],
+                  "impact": "serious",
+                  "message": "Element has sufficient color contrast of 4.75"
+                }
+              ],
+              "all": [],
+              "none": [],
+              "impact": null,
+              "html": "<span>Primera respuesta estimada a reportes: menos de 30 minutos en horario de atención y menos de 2 horas fuera de horario.</span>",
+              "target": [
+                "span:nth-child(4)"
+              ]
+            },
+            {
+              "any": [
+                {
+                  "id": "color-contrast",
+                  "data": {
+                    "fgColor": "#64748b",
+                    "bgColor": "#ffffff",
+                    "contrastRatio": 4.75,
+                    "fontSize": "9.0pt (12px)",
+                    "fontWeight": "normal",
+                    "expectedContrastRatio": "4.5:1"
+                  },
+                  "relatedNodes": [],
+                  "impact": "serious",
+                  "message": "Element has sufficient color contrast of 4.75"
+                }
+              ],
+              "all": [],
+              "none": [],
+              "impact": null,
+              "html": "<span>Emergencias: correo a soporte las 24 horas, todos los días. Este canal no implica respuesta inmediata.</span>",
+              "target": [
+                "span:nth-child(5)"
+              ]
+            },
+            {
+              "any": [
+                {
+                  "id": "color-contrast",
+                  "data": {
+                    "fgColor": "#0a2342",
+                    "bgColor": "#ffffff",
+                    "contrastRatio": 15.76,
+                    "fontSize": "10.5pt (14px)",
+                    "fontWeight": "normal",
+                    "expectedContrastRatio": "4.5:1"
+                  },
+                  "relatedNodes": [],
+                  "impact": "serious",
+                  "message": "Element has sufficient color contrast of 15.76"
+                }
+              ],
+              "all": [],
+              "none": [],
+              "impact": null,
+              "html": "<p>Formulario: recepción de reportes las 24 horas, todos los días.</p>",
+              "target": [
+                "#root > .border-border.bg-surface.p-4 > p:nth-child(1)"
+              ]
+            },
+            {
+              "any": [
+                {
+                  "id": "color-contrast",
+                  "data": {
+                    "fgColor": "#0a2342",
+                    "bgColor": "#ffffff",
+                    "contrastRatio": 15.76,
+                    "fontSize": "10.5pt (14px)",
+                    "fontWeight": "normal",
+                    "expectedContrastRatio": "4.5:1"
+                  },
+                  "relatedNodes": [],
+                  "impact": "serious",
+                  "message": "Element has sufficient color contrast of 15.76"
+                }
+              ],
+              "all": [],
+              "none": [],
+              "impact": null,
+              "html": "<p>Atención: lunes a viernes de 8:00 a 20:00, hora de Ciudad de México.</p>",
+              "target": [
+                "#root > .border-border.bg-surface.p-4 > p:nth-child(2)"
+              ]
+            },
+            {
+              "any": [
+                {
+                  "id": "color-contrast",
+                  "data": {
+                    "fgColor": "#0a2342",
+                    "bgColor": "#ffffff",
+                    "contrastRatio": 15.76,
+                    "fontSize": "10.5pt (14px)",
+                    "fontWeight": "normal",
+                    "expectedContrastRatio": "4.5:1"
+                  },
+                  "relatedNodes": [],
+                  "impact": "serious",
+                  "message": "Element has sufficient color contrast of 15.76"
+                }
+              ],
+              "all": [],
+              "none": [],
+              "impact": null,
+              "html": "<p>Primera respuesta estimada a reportes: menos de 30 minutos en horario de atención y menos de 2 horas fuera de horario.</p>",
+              "target": [
+                "#root > .border-border.bg-surface.p-4 > p:nth-child(3)"
+              ]
+            },
+            {
+              "any": [
+                {
+                  "id": "color-contrast",
+                  "data": {
+                    "fgColor": "#0a2342",
+                    "bgColor": "#ffffff",
+                    "contrastRatio": 15.76,
+                    "fontSize": "10.5pt (14px)",
+                    "fontWeight": "normal",
+                    "expectedContrastRatio": "4.5:1"
+                  },
+                  "relatedNodes": [],
+                  "impact": "serious",
+                  "message": "Element has sufficient color contrast of 15.76"
+                }
+              ],
+              "all": [],
+              "none": [],
+              "impact": null,
+              "html": "<p>Emergencias: correo a soporte las 24 horas, todos los días. Este canal no implica respuesta inmediata. <a class=\"font-semibold text-route-action underline\" href=\"mailto:soporte-conductores-pruebas@example.test?subject=Soporte%20conductor\">soporte-conductores-pruebas@example.test</a></p>",
+              "target": [
+                "#root > .border-border.bg-surface.p-4 > p:nth-child(4)"
+              ]
+            },
+            {
+              "any": [
+                {
+                  "id": "color-contrast",
+                  "data": {
+                    "fgColor": "#0066ff",
+                    "bgColor": "#ffffff",
+                    "contrastRatio": 4.83,
+                    "fontSize": "10.5pt (14px)",
+                    "fontWeight": "normal",
+                    "expectedContrastRatio": "4.5:1"
+                  },
+                  "relatedNodes": [],
+                  "impact": "serious",
+                  "message": "Element has sufficient color contrast of 4.83"
+                }
+              ],
+              "all": [],
+              "none": [],
+              "impact": null,
+              "html": "<a class=\"font-semibold text-route-action underline\" href=\"mailto:soporte-conductores-pruebas@example.test?subject=Soporte%20conductor\">soporte-conductores-pruebas@example.test</a>",
+              "target": [
+                "#root > .border-border.bg-surface.p-4 > p:nth-child(4) > .font-semibold.text-route-action.underline"
+              ]
+            },
+            {
+              "any": [
+                {
+                  "id": "color-contrast",
+                  "data": {
+                    "fgColor": "#0a2342",
+                    "bgColor": "#ffffff",
+                    "contrastRatio": 15.76,
+                    "fontSize": "10.5pt (14px)",
+                    "fontWeight": "normal",
+                    "expectedContrastRatio": "4.5:1"
+                  },
+                  "relatedNodes": [],
+                  "impact": "serious",
+                  "message": "Element has sufficient color contrast of 15.76"
+                }
+              ],
+              "all": [],
+              "none": [],
+              "impact": null,
+              "html": "<p>Los tiempos indicados corresponden a reportes. Consulta la disponibilidad de llamada y WhatsApp con soporte.</p>",
+              "target": [
+                "#root > .border-border.bg-surface.p-4 > p:nth-child(5)"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "link-name",
+          "impact": null,
+          "tags": [
+            "cat.name-role-value",
+            "wcag2a",
+            "wcag244",
+            "wcag412",
+            "section508",
+            "section508.22.a",
+            "TTv5",
+            "TT6.a",
+            "EN-301-549",
+            "EN-9.2.4.4",
+            "EN-9.4.1.2",
+            "ACT",
+            "RGAAv4",
+            "RGAA-6.2.1"
+          ],
+          "description": "Ensure links have discernible text",
+          "help": "Links must have discernible text",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.14/link-name?application=axeAPI",
+          "nodes": [
+            {
+              "any": [
+                {
+                  "id": "has-visible-text",
+                  "data": null,
+                  "relatedNodes": [],
+                  "impact": "serious",
+                  "message": "Element has text that is visible to screen readers"
+                },
+                {
+                  "id": "aria-label",
+                  "data": null,
+                  "relatedNodes": [],
+                  "impact": "serious",
+                  "message": "aria-label attribute exists and is not empty"
+                }
+              ],
+              "all": [],
+              "none": [
+                {
+                  "id": "focusable-no-name",
+                  "data": null,
+                  "relatedNodes": [],
+                  "impact": "serious",
+                  "message": "Element is not in tab order or has accessible text"
+                }
+              ],
+              "impact": null,
+              "html": "<a href=\"/soporte\" class=\"home-support\" aria-label=\"¿Necesitas ayuda? So...\">",
+              "target": [
+                ".home-support"
+              ]
+            },
+            {
+              "any": [
+                {
+                  "id": "has-visible-text",
+                  "data": null,
+                  "relatedNodes": [],
+                  "impact": "serious",
+                  "message": "Element has text that is visible to screen readers"
+                }
+              ],
+              "all": [],
+              "none": [
+                {
+                  "id": "focusable-no-name",
+                  "data": null,
+                  "relatedNodes": [],
+                  "impact": "serious",
+                  "message": "Element is not in tab order or has accessible text"
+                }
+              ],
+              "impact": null,
+              "html": "<a class=\"font-semibold text-route-action underline\" href=\"mailto:soporte-conductores-pruebas@example.test?subject=Soporte%20conductor\">soporte-conductores-pruebas@example.test</a>",
+              "target": [
+                "#root > .border-border.bg-surface.p-4 > p:nth-child(4) > .font-semibold.text-route-action.underline"
+              ]
+            },
+            {
+              "any": [
+                {
+                  "id": "has-visible-text",
+                  "data": null,
+                  "relatedNodes": [],
+                  "impact": "serious",
+                  "message": "Element has text that is visible to screen readers"
+                }
+              ],
+              "all": [],
+              "none": [
+                {
+                  "id": "focusable-no-name",
+                  "data": null,
+                  "relatedNodes": [],
+                  "impact": "serious",
+                  "message": "Element is not in tab order or has accessible text"
+                }
+              ],
+              "impact": null,
+              "html": "<a class=\"font-semibold text-route-action underline\" href=\"mailto:soporte-conductores-pruebas@example.test?subject=Soporte%20conductor\">soporte-conductores-pruebas@example.test</a>",
+              "target": [
+                ".sm\\:col-span-2:nth-child(1) > .border-border.bg-surface.p-4 > p:nth-child(4) > .font-semibold.text-route-action.underline"
+              ]
+            }
+          ]
+        }
+      ],
+      "incomplete": [],
+      "violations": []
+    },
+    "axeGeneral": {
+      "testEngine": {
+        "name": "axe-core",
+        "version": "4.14.0"
+      },
+      "testRunner": {
+        "name": "axe"
+      },
+      "testEnvironment": {
+        "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/156.0.8078.4 Safari/537.36",
+        "windowWidth": 390,
+        "windowHeight": 1000,
+        "orientationAngle": 0,
+        "orientationType": "landscape-primary"
+      },
+      "timestamp": "2026-11-07T05:23:55.948Z",
+      "url": "file:///C:/ruum_ecosistema-main/docs/remediacion-ux009/fixture.html",
+      "toolOptions": {
+        "runOnly": {
+          "type": "rule",
+          "values": [
+            "color-contrast",
+            "link-name"
+          ]
+        },
+        "reporter": "v1"
+      },
+      "inapplicable": [
+        {
+          "id": "color-contrast",
+          "impact": null,
+          "tags": [
+            "cat.color",
+            "wcag2aa",
+            "wcag143",
+            "TTv5",
+            "TT13.c",
+            "EN-301-549",
+            "EN-9.1.4.3",
+            "ACT",
+            "RGAAv4",
+            "RGAA-3.2.1"
+          ],
+          "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.14/color-contrast?application=axeAPI",
+          "nodes": []
+        },
+        {
+          "id": "link-name",
+          "impact": null,
+          "tags": [
+            "cat.name-role-value",
+            "wcag2a",
+            "wcag244",
+            "wcag412",
+            "section508",
+            "section508.22.a",
+            "TTv5",
+            "TT6.a",
+            "EN-301-549",
+            "EN-9.2.4.4",
+            "EN-9.4.1.2",
+            "ACT",
+            "RGAAv4",
+            "RGAA-6.2.1"
+          ],
+          "description": "Ensure links have discernible text",
+          "help": "Links must have discernible text",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.14/link-name?application=axeAPI",
+          "nodes": []
+        }
+      ],
+      "passes": [],
+      "incomplete": [],
+      "violations": []
+    },
+    "axeIncidencia": {
+      "testEngine": {
+        "name": "axe-core",
+        "version": "4.14.0"
+      },
+      "testRunner": {
+        "name": "axe"
+      },
+      "testEnvironment": {
+        "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/156.0.8078.4 Safari/537.36",
+        "windowWidth": 390,
+        "windowHeight": 1000,
+        "orientationAngle": 0,
+        "orientationType": "landscape-primary"
+      },
+      "timestamp": "2026-11-07T05:23:56.531Z",
+      "url": "file:///C:/ruum_ecosistema-main/docs/remediacion-ux009/fixture.html#incidencia",
+      "toolOptions": {
+        "runOnly": {
+          "type": "rule",
+          "values": [
+            "color-contrast",
+            "link-name"
+          ]
+        },
+        "reporter": "v1"
+      },
+      "inapplicable": [
+        {
+          "id": "color-contrast",
+          "impact": null,
+          "tags": [
+            "cat.color",
+            "wcag2aa",
+            "wcag143",
+            "TTv5",
+            "TT13.c",
+            "EN-301-549",
+            "EN-9.1.4.3",
+            "ACT",
+            "RGAAv4",
+            "RGAA-3.2.1"
+          ],
+          "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.14/color-contrast?application=axeAPI",
+          "nodes": []
+        },
+        {
+          "id": "link-name",
+          "impact": null,
+          "tags": [
+            "cat.name-role-value",
+            "wcag2a",
+            "wcag244",
+            "wcag412",
+            "section508",
+            "section508.22.a",
+            "TTv5",
+            "TT6.a",
+            "EN-301-549",
+            "EN-9.2.4.4",
+            "EN-9.4.1.2",
+            "ACT",
+            "RGAAv4",
+            "RGAA-6.2.1"
+          ],
+          "description": "Ensure links have discernible text",
+          "help": "Links must have discernible text",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.14/link-name?application=axeAPI",
+          "nodes": []
+        }
+      ],
+      "passes": [],
+      "incomplete": [],
+      "violations": []
+    }
+  },
+  {
+    "width": 390,
+    "theme": "dark",
+    "general": "¡Mensaje recibido con éxito!\nFolio: SOP-FOLIO-PRUEBA\nTu consulta quedó registrada. Nuestro equipo la atenderá desde la bandeja de soporte. Formulario: recepción de reportes las 24 horas, todos los días. Atención: lunes a viernes de 8:00 a 20:00, hora de Ciudad de México. Primera respuesta estimada a reportes: menos de 30 minutos en horario de atención y menos de 2 horas fuera de horario. Emergencias: correo a soporte las 24 horas, todos los días. Este canal no implica respuesta inmediata.",
+    "incidencia": "¡Mensaje recibido con éxito!\nFolio: INC-ABCDEF12\nReporte registrado. Folio: INC-ABCDEF12. Nuestro equipo dará seguimiento desde tu expediente. Formulario: recepción de reportes las 24 horas, todos los días. Atención: lunes a viernes de 8:00 a 20:00, hora de Ciudad de México. Primera respuesta estimada a reportes: menos de 30 minutos en horario de atención y menos de 2 horas fuera de horario. Emergencias: correo a soporte las 24 horas, todos los días. Este canal no implica respuesta inmediata.",
+    "axe": {
+      "testEngine": {
+        "name": "axe-core",
+        "version": "4.14.0"
+      },
+      "testRunner": {
+        "name": "axe"
+      },
+      "testEnvironment": {
+        "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/156.0.8078.4 Safari/537.36",
+        "windowWidth": 390,
+        "windowHeight": 1000,
+        "orientationAngle": 0,
+        "orientationType": "landscape-primary"
+      },
+      "timestamp": "2026-11-07T05:23:57.599Z",
+      "url": "file:///C:/ruum_ecosistema-main/docs/remediacion-ux009/fixture.html",
+      "toolOptions": {
+        "runOnly": {
+          "type": "rule",
+          "values": [
+            "color-contrast",
+            "link-name"
+          ]
+        },
+        "reporter": "v1"
+      },
+      "inapplicable": [],
+      "passes": [
+        {
+          "id": "color-contrast",
+          "impact": null,
+          "tags": [
+            "cat.color",
+            "wcag2aa",
+            "wcag143",
+            "TTv5",
+            "TT13.c",
+            "EN-301-549",
+            "EN-9.1.4.3",
+            "ACT",
+            "RGAAv4",
+            "RGAA-3.2.1"
+          ],
+          "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.14/color-contrast?application=axeAPI",
+          "nodes": [
+            {
+              "any": [
+                {
+                  "id": "color-contrast",
+                  "data": {
+                    "fgColor": "#f6f8fb",
+                    "bgColor": "#0c223c",
+                    "contrastRatio": 15.07,
+                    "fontSize": "10.5pt (14px)",
+                    "fontWeight": "bold",
+                    "expectedContrastRatio": "4.5:1"
+                  },
+                  "relatedNodes": [],
+                  "impact": "serious",
+                  "message": "Element has sufficient color contrast of 15.07"
+                }
+              ],
+              "all": [],
+              "none": [],
+              "impact": null,
+              "html": "<strong>¿Necesitas ayuda?</strong>",
+              "target": [
+                ".home-support > .home-module-copy > strong"
+              ]
+            },
+            {
+              "any": [
+                {
+                  "id": "color-contrast",
+                  "data": {
+                    "fgColor": "#94a3b8",
+                    "bgColor": "#0c223c",
+                    "contrastRatio": 6.25,
+                    "fontSize": "9.0pt (12px)",
+                    "fontWeight": "normal",
+                    "expectedContrastRatio": "4.5:1"
+                  },
+                  "relatedNodes": [],
+                  "impact": "serious",
+                  "message": "Element has sufficient color contrast of 6.25"
+                }
+              ],
+              "all": [],
+              "none": [],
+              "impact": null,
+              "html": "<span>Soporte · recepción de reportes 24/7</span>",
+              "target": [
+                ".home-support > .home-module-copy > span:nth-child(2)"
+              ]
+            },
+            {
+              "any": [
+                {
+                  "id": "color-contrast",
+                  "data": {
+                    "fgColor": "#94a3b8",
+                    "bgColor": "#0c223c",
+                    "contrastRatio": 6.25,
+                    "fontSize": "9.0pt (12px)",
+                    "fontWeight": "normal",
+                    "expectedContrastRatio": "4.5:1"
+                  },
+                  "relatedNodes": [],
+                  "impact": "serious",
+                  "message": "Element has sufficient color contrast of 6.25"
+                }
+              ],
+              "all": [],
+              "none": [],
+              "impact": null,
+              "html": "<span>Atención: lunes a viernes de 8:00 a 20:00, hora de Ciudad de México.</span>",
+              "target": [
+                ".home-module-copy > span:nth-child(3)"
+              ]
+            },
+            {
+              "any": [
+                {
+                  "id": "color-contrast",
+                  "data": {
+                    "fgColor": "#94a3b8",
+                    "bgColor": "#0c223c",
+                    "contrastRatio": 6.25,
+                    "fontSize": "9.0pt (12px)",
+                    "fontWeight": "normal",
+                    "expectedContrastRatio": "4.5:1"
+                  },
+                  "relatedNodes": [],
+                  "impact": "serious",
+                  "message": "Element has sufficient color contrast of 6.25"
+                }
+              ],
+              "all": [],
+              "none": [],
+              "impact": null,
+              "html": "<span>Primera respuesta estimada a reportes: menos de 30 minutos en horario de atención y menos de 2 horas fuera de horario.</span>",
+              "target": [
+                "span:nth-child(4)"
+              ]
+            },
+            {
+              "any": [
+                {
+                  "id": "color-contrast",
+                  "data": {
+                    "fgColor": "#94a3b8",
+                    "bgColor": "#0c223c",
+                    "contrastRatio": 6.25,
+                    "fontSize": "9.0pt (12px)",
+                    "fontWeight": "normal",
+                    "expectedContrastRatio": "4.5:1"
+                  },
+                  "relatedNodes": [],
+                  "impact": "serious",
+                  "message": "Element has sufficient color contrast of 6.25"
+                }
+              ],
+              "all": [],
+              "none": [],
+              "impact": null,
+              "html": "<span>Emergencias: correo a soporte las 24 horas, todos los días. Este canal no implica respuesta inmediata.</span>",
+              "target": [
+                "span:nth-child(5)"
+              ]
+            },
+            {
+              "any": [
+                {
+                  "id": "color-contrast",
+                  "data": {
+                    "fgColor": "#f6f8fb",
+                    "bgColor": "#0a2342",
+                    "contrastRatio": 14.81,
+                    "fontSize": "10.5pt (14px)",
+                    "fontWeight": "normal",
+                    "expectedContrastRatio": "4.5:1"
+                  },
+                  "relatedNodes": [],
+                  "impact": "serious",
+                  "message": "Element has sufficient color contrast of 14.81"
+                }
+              ],
+              "all": [],
+              "none": [],
+              "impact": null,
+              "html": "<p>Formulario: recepción de reportes las 24 horas, todos los días.</p>",
+              "target": [
+                "#root > .border-border.bg-surface.p-4 > p:nth-child(1)"
+              ]
+            },
+            {
+              "any": [
+                {
+                  "id": "color-contrast",
+                  "data": {
+                    "fgColor": "#f6f8fb",
+                    "bgColor": "#0a2342",
+                    "contrastRatio": 14.81,
+                    "fontSize": "10.5pt (14px)",
+                    "fontWeight": "normal",
+                    "expectedContrastRatio": "4.5:1"
+                  },
+                  "relatedNodes": [],
+                  "impact": "serious",
+                  "message": "Element has sufficient color contrast of 14.81"
+                }
+              ],
+              "all": [],
+              "none": [],
+              "impact": null,
+              "html": "<p>Atención: lunes a viernes de 8:00 a 20:00, hora de Ciudad de México.</p>",
+              "target": [
+                "#root > .border-border.bg-surface.p-4 > p:nth-child(2)"
+              ]
+            },
+            {
+              "any": [
+                {
+                  "id": "color-contrast",
+                  "data": {
+                    "fgColor": "#f6f8fb",
+                    "bgColor": "#0a2342",
+                    "contrastRatio": 14.81,
+                    "fontSize": "10.5pt (14px)",
+                    "fontWeight": "normal",
+                    "expectedContrastRatio": "4.5:1"
+                  },
+                  "relatedNodes": [],
+                  "impact": "serious",
+                  "message": "Element has sufficient color contrast of 14.81"
+                }
+              ],
+              "all": [],
+              "none": [],
+              "impact": null,
+              "html": "<p>Primera respuesta estimada a reportes: menos de 30 minutos en horario de atención y menos de 2 horas fuera de horario.</p>",
+              "target": [
+                "#root > .border-border.bg-surface.p-4 > p:nth-child(3)"
+              ]
+            },
+            {
+              "any": [
+                {
+                  "id": "color-contrast",
+                  "data": {
+                    "fgColor": "#f6f8fb",
+                    "bgColor": "#0a2342",
+                    "contrastRatio": 14.81,
+                    "fontSize": "10.5pt (14px)",
+                    "fontWeight": "normal",
+                    "expectedContrastRatio": "4.5:1"
+                  },
+                  "relatedNodes": [],
+                  "impact": "serious",
+                  "message": "Element has sufficient color contrast of 14.81"
+                }
+              ],
+              "all": [],
+              "none": [],
+              "impact": null,
+              "html": "<p>Emergencias: correo a soporte las 24 horas, todos los días. Este canal no implica respuesta inmediata. <a class=\"font-semibold text-route-action underline\" href=\"mailto:soporte-conductores-pruebas@example.test?subject=Soporte%20conductor\">soporte-conductores-pruebas@example.test</a></p>",
+              "target": [
+                "#root > .border-border.bg-surface.p-4 > p:nth-child(4)"
+              ]
+            },
+            {
+              "any": [
+                {
+                  "id": "color-contrast",
+                  "data": {
+                    "fgColor": "#4d94ff",
+                    "bgColor": "#0a2342",
+                    "contrastRatio": 5.25,
+                    "fontSize": "10.5pt (14px)",
+                    "fontWeight": "normal",
+                    "expectedContrastRatio": "4.5:1"
+                  },
+                  "relatedNodes": [],
+                  "impact": "serious",
+                  "message": "Element has sufficient color contrast of 5.25"
+                }
+              ],
+              "all": [],
+              "none": [],
+              "impact": null,
+              "html": "<a class=\"font-semibold text-route-action underline\" href=\"mailto:soporte-conductores-pruebas@example.test?subject=Soporte%20conductor\">soporte-conductores-pruebas@example.test</a>",
+              "target": [
+                "#root > .border-border.bg-surface.p-4 > p:nth-child(4) > .font-semibold.text-route-action.underline"
+              ]
+            },
+            {
+              "any": [
+                {
+                  "id": "color-contrast",
+                  "data": {
+                    "fgColor": "#f6f8fb",
+                    "bgColor": "#0a2342",
+                    "contrastRatio": 14.81,
+                    "fontSize": "10.5pt (14px)",
+                    "fontWeight": "normal",
+                    "expectedContrastRatio": "4.5:1"
+                  },
+                  "relatedNodes": [],
+                  "impact": "serious",
+                  "message": "Element has sufficient color contrast of 14.81"
+                }
+              ],
+              "all": [],
+              "none": [],
+              "impact": null,
+              "html": "<p>Los tiempos indicados corresponden a reportes. Consulta la disponibilidad de llamada y WhatsApp con soporte.</p>",
+              "target": [
+                "#root > .border-border.bg-surface.p-4 > p:nth-child(5)"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "link-name",
+          "impact": null,
+          "tags": [
+            "cat.name-role-value",
+            "wcag2a",
+            "wcag244",
+            "wcag412",
+            "section508",
+            "section508.22.a",
+            "TTv5",
+            "TT6.a",
+            "EN-301-549",
+            "EN-9.2.4.4",
+            "EN-9.4.1.2",
+            "ACT",
+            "RGAAv4",
+            "RGAA-6.2.1"
+          ],
+          "description": "Ensure links have discernible text",
+          "help": "Links must have discernible text",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.14/link-name?application=axeAPI",
+          "nodes": [
+            {
+              "any": [
+                {
+                  "id": "has-visible-text",
+                  "data": null,
+                  "relatedNodes": [],
+                  "impact": "serious",
+                  "message": "Element has text that is visible to screen readers"
+                },
+                {
+                  "id": "aria-label",
+                  "data": null,
+                  "relatedNodes": [],
+                  "impact": "serious",
+                  "message": "aria-label attribute exists and is not empty"
+                }
+              ],
+              "all": [],
+              "none": [
+                {
+                  "id": "focusable-no-name",
+                  "data": null,
+                  "relatedNodes": [],
+                  "impact": "serious",
+                  "message": "Element is not in tab order or has accessible text"
+                }
+              ],
+              "impact": null,
+              "html": "<a href=\"/soporte\" class=\"home-support\" aria-label=\"¿Necesitas ayuda? So...\">",
+              "target": [
+                ".home-support"
+              ]
+            },
+            {
+              "any": [
+                {
+                  "id": "has-visible-text",
+                  "data": null,
+                  "relatedNodes": [],
+                  "impact": "serious",
+                  "message": "Element has text that is visible to screen readers"
+                }
+              ],
+              "all": [],
+              "none": [
+                {
+                  "id": "focusable-no-name",
+                  "data": null,
+                  "relatedNodes": [],
+                  "impact": "serious",
+                  "message": "Element is not in tab order or has accessible text"
+                }
+              ],
+              "impact": null,
+              "html": "<a class=\"font-semibold text-route-action underline\" href=\"mailto:soporte-conductores-pruebas@example.test?subject=Soporte%20conductor\">soporte-conductores-pruebas@example.test</a>",
+              "target": [
+                "#root > .border-border.bg-surface.p-4 > p:nth-child(4) > .font-semibold.text-route-action.underline"
+              ]
+            },
+            {
+              "any": [
+                {
+                  "id": "has-visible-text",
+                  "data": null,
+                  "relatedNodes": [],
+                  "impact": "serious",
+                  "message": "Element has text that is visible to screen readers"
+                }
+              ],
+              "all": [],
+              "none": [
+                {
+                  "id": "focusable-no-name",
+                  "data": null,
+                  "relatedNodes": [],
+                  "impact": "serious",
+                  "message": "Element is not in tab order or has accessible text"
+                }
+              ],
+              "impact": null,
+              "html": "<a class=\"font-semibold text-route-action underline\" href=\"mailto:soporte-conductores-pruebas@example.test?subject=Soporte%20conductor\">soporte-conductores-pruebas@example.test</a>",
+              "target": [
+                ".sm\\:col-span-2:nth-child(1) > .border-border.bg-surface.p-4 > p:nth-child(4) > .font-semibold.text-route-action.underline"
+              ]
+            }
+          ]
+        }
+      ],
+      "incomplete": [],
+      "violations": []
+    },
+    "axeGeneral": {
+      "testEngine": {
+        "name": "axe-core",
+        "version": "4.14.0"
+      },
+      "testRunner": {
+        "name": "axe"
+      },
+      "testEnvironment": {
+        "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/156.0.8078.4 Safari/537.36",
+        "windowWidth": 390,
+        "windowHeight": 1000,
+        "orientationAngle": 0,
+        "orientationType": "landscape-primary"
+      },
+      "timestamp": "2026-11-07T05:23:57.915Z",
+      "url": "file:///C:/ruum_ecosistema-main/docs/remediacion-ux009/fixture.html",
+      "toolOptions": {
+        "runOnly": {
+          "type": "rule",
+          "values": [
+            "color-contrast",
+            "link-name"
+          ]
+        },
+        "reporter": "v1"
+      },
+      "inapplicable": [
+        {
+          "id": "color-contrast",
+          "impact": null,
+          "tags": [
+            "cat.color",
+            "wcag2aa",
+            "wcag143",
+            "TTv5",
+            "TT13.c",
+            "EN-301-549",
+            "EN-9.1.4.3",
+            "ACT",
+            "RGAAv4",
+            "RGAA-3.2.1"
+          ],
+          "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.14/color-contrast?application=axeAPI",
+          "nodes": []
+        },
+        {
+          "id": "link-name",
+          "impact": null,
+          "tags": [
+            "cat.name-role-value",
+            "wcag2a",
+            "wcag244",
+            "wcag412",
+            "section508",
+            "section508.22.a",
+            "TTv5",
+            "TT6.a",
+            "EN-301-549",
+            "EN-9.2.4.4",
+            "EN-9.4.1.2",
+            "ACT",
+            "RGAAv4",
+            "RGAA-6.2.1"
+          ],
+          "description": "Ensure links have discernible text",
+          "help": "Links must have discernible text",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.14/link-name?application=axeAPI",
+          "nodes": []
+        }
+      ],
+      "passes": [],
+      "incomplete": [],
+      "violations": []
+    },
+    "axeIncidencia": {
+      "testEngine": {
+        "name": "axe-core",
+        "version": "4.14.0"
+      },
+      "testRunner": {
+        "name": "axe"
+      },
+      "testEnvironment": {
+        "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/156.0.8078.4 Safari/537.36",
+        "windowWidth": 390,
+        "windowHeight": 1000,
+        "orientationAngle": 0,
+        "orientationType": "landscape-primary"
+      },
+      "timestamp": "2026-11-07T05:23:58.788Z",
+      "url": "file:///C:/ruum_ecosistema-main/docs/remediacion-ux009/fixture.html#incidencia",
+      "toolOptions": {
+        "runOnly": {
+          "type": "rule",
+          "values": [
+            "color-contrast",
+            "link-name"
+          ]
+        },
+        "reporter": "v1"
+      },
+      "inapplicable": [
+        {
+          "id": "color-contrast",
+          "impact": null,
+          "tags": [
+            "cat.color",
+            "wcag2aa",
+            "wcag143",
+            "TTv5",
+            "TT13.c",
+            "EN-301-549",
+            "EN-9.1.4.3",
+            "ACT",
+            "RGAAv4",
+            "RGAA-3.2.1"
+          ],
+          "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.14/color-contrast?application=axeAPI",
+          "nodes": []
+        },
+        {
+          "id": "link-name",
+          "impact": null,
+          "tags": [
+            "cat.name-role-value",
+            "wcag2a",
+            "wcag244",
+            "wcag412",
+            "section508",
+            "section508.22.a",
+            "TTv5",
+            "TT6.a",
+            "EN-301-549",
+            "EN-9.2.4.4",
+            "EN-9.4.1.2",
+            "ACT",
+            "RGAAv4",
+            "RGAA-6.2.1"
+          ],
+          "description": "Ensure links have discernible text",
+          "help": "Links must have discernible text",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.14/link-name?application=axeAPI",
+          "nodes": []
+        }
+      ],
+      "passes": [],
+      "incomplete": [],
+      "violations": []
+    }
+  },
+  {
+    "width": 1440,
+    "theme": "light",
+    "general": "¡Mensaje recibido con éxito!\nFolio: SOP-FOLIO-PRUEBA\nTu consulta quedó registrada. Nuestro equipo la atenderá desde la bandeja de soporte. Formulario: recepción de reportes las 24 horas, todos los días. Atención: lunes a viernes de 8:00 a 20:00, hora de Ciudad de México. Primera respuesta estimada a reportes: menos de 30 minutos en horario de atención y menos de 2 horas fuera de horario. Emergencias: correo a soporte las 24 horas, todos los días. Este canal no implica respuesta inmediata.",
+    "incidencia": "¡Mensaje recibido con éxito!\nFolio: INC-ABCDEF12\nReporte registrado. Folio: INC-ABCDEF12. Nuestro equipo dará seguimiento desde tu expediente. Formulario: recepción de reportes las 24 horas, todos los días. Atención: lunes a viernes de 8:00 a 20:00, hora de Ciudad de México. Primera respuesta estimada a reportes: menos de 30 minutos en horario de atención y menos de 2 horas fuera de horario. Emergencias: correo a soporte las 24 horas, todos los días. Este canal no implica respuesta inmediata.",
+    "axe": {
+      "testEngine": {
+        "name": "axe-core",
+        "version": "4.14.0"
+      },
+      "testRunner": {
+        "name": "axe"
+      },
+      "testEnvironment": {
+        "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/156.0.8078.4 Safari/537.36",
+        "windowWidth": 1440,
+        "windowHeight": 1000,
+        "orientationAngle": 0,
+        "orientationType": "landscape-primary"
+      },
+      "timestamp": "2026-11-07T05:24:00.238Z",
+      "url": "file:///C:/ruum_ecosistema-main/docs/remediacion-ux009/fixture.html",
+      "toolOptions": {
+        "runOnly": {
+          "type": "rule",
+          "values": [
+            "color-contrast",
+            "link-name"
+          ]
+        },
+        "reporter": "v1"
+      },
+      "inapplicable": [],
+      "passes": [
+        {
+          "id": "color-contrast",
+          "impact": null,
+          "tags": [
+            "cat.color",
+            "wcag2aa",
+            "wcag143",
+            "TTv5",
+            "TT13.c",
+            "EN-301-549",
+            "EN-9.1.4.3",
+            "ACT",
+            "RGAAv4",
+            "RGAA-3.2.1"
+          ],
+          "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.14/color-contrast?application=axeAPI",
+          "nodes": [
+            {
+              "any": [
+                {
+                  "id": "color-contrast",
+                  "data": {
+                    "fgColor": "#0a2342",
+                    "bgColor": "#ffffff",
+                    "contrastRatio": 15.76,
+                    "fontSize": "10.5pt (14px)",
+                    "fontWeight": "bold",
+                    "expectedContrastRatio": "4.5:1"
+                  },
+                  "relatedNodes": [],
+                  "impact": "serious",
+                  "message": "Element has sufficient color contrast of 15.76"
+                }
+              ],
+              "all": [],
+              "none": [],
+              "impact": null,
+              "html": "<strong>¿Necesitas ayuda?</strong>",
+              "target": [
+                ".home-support > .home-module-copy > strong"
+              ]
+            },
+            {
+              "any": [
+                {
+                  "id": "color-contrast",
+                  "data": {
+                    "fgColor": "#64748b",
+                    "bgColor": "#ffffff",
+                    "contrastRatio": 4.75,
+                    "fontSize": "9.0pt (12px)",
+                    "fontWeight": "normal",
+                    "expectedContrastRatio": "4.5:1"
+                  },
+                  "relatedNodes": [],
+                  "impact": "serious",
+                  "message": "Element has sufficient color contrast of 4.75"
+                }
+              ],
+              "all": [],
+              "none": [],
+              "impact": null,
+              "html": "<span>Soporte · recepción de reportes 24/7</span>",
+              "target": [
+                ".home-support > .home-module-copy > span:nth-child(2)"
+              ]
+            },
+            {
+              "any": [
+                {
+                  "id": "color-contrast",
+                  "data": {
+                    "fgColor": "#64748b",
+                    "bgColor": "#ffffff",
+                    "contrastRatio": 4.75,
+                    "fontSize": "9.0pt (12px)",
+                    "fontWeight": "normal",
+                    "expectedContrastRatio": "4.5:1"
+                  },
+                  "relatedNodes": [],
+                  "impact": "serious",
+                  "message": "Element has sufficient color contrast of 4.75"
+                }
+              ],
+              "all": [],
+              "none": [],
+              "impact": null,
+              "html": "<span>Atención: lunes a viernes de 8:00 a 20:00, hora de Ciudad de México.</span>",
+              "target": [
+                ".home-module-copy > span:nth-child(3)"
+              ]
+            },
+            {
+              "any": [
+                {
+                  "id": "color-contrast",
+                  "data": {
+                    "fgColor": "#64748b",
+                    "bgColor": "#ffffff",
+                    "contrastRatio": 4.75,
+                    "fontSize": "9.0pt (12px)",
+                    "fontWeight": "normal",
+                    "expectedContrastRatio": "4.5:1"
+                  },
+                  "relatedNodes": [],
+                  "impact": "serious",
+                  "message": "Element has sufficient color contrast of 4.75"
+                }
+              ],
+              "all": [],
+              "none": [],
+              "impact": null,
+              "html": "<span>Primera respuesta estimada a reportes: menos de 30 minutos en horario de atención y menos de 2 horas fuera de horario.</span>",
+              "target": [
+                "span:nth-child(4)"
+              ]
+            },
+            {
+              "any": [
+                {
+                  "id": "color-contrast",
+                  "data": {
+                    "fgColor": "#64748b",
+                    "bgColor": "#ffffff",
+                    "contrastRatio": 4.75,
+                    "fontSize": "9.0pt (12px)",
+                    "fontWeight": "normal",
+                    "expectedContrastRatio": "4.5:1"
+                  },
+                  "relatedNodes": [],
+                  "impact": "serious",
+                  "message": "Element has sufficient color contrast of 4.75"
+                }
+              ],
+              "all": [],
+              "none": [],
+              "impact": null,
+              "html": "<span>Emergencias: correo a soporte las 24 horas, todos los días. Este canal no implica respuesta inmediata.</span>",
+              "target": [
+                "span:nth-child(5)"
+              ]
+            },
+            {
+              "any": [
+                {
+                  "id": "color-contrast",
+                  "data": {
+                    "fgColor": "#0a2342",
+                    "bgColor": "#ffffff",
+                    "contrastRatio": 15.76,
+                    "fontSize": "10.5pt (14px)",
+                    "fontWeight": "normal",
+                    "expectedContrastRatio": "4.5:1"
+                  },
+                  "relatedNodes": [],
+                  "impact": "serious",
+                  "message": "Element has sufficient color contrast of 15.76"
+                }
+              ],
+              "all": [],
+              "none": [],
+              "impact": null,
+              "html": "<p>Formulario: recepción de reportes las 24 horas, todos los días.</p>",
+              "target": [
+                "#root > .border-border.bg-surface.p-4 > p:nth-child(1)"
+              ]
+            },
+            {
+              "any": [
+                {
+                  "id": "color-contrast",
+                  "data": {
+                    "fgColor": "#0a2342",
+                    "bgColor": "#ffffff",
+                    "contrastRatio": 15.76,
+                    "fontSize": "10.5pt (14px)",
+                    "fontWeight": "normal",
+                    "expectedContrastRatio": "4.5:1"
+                  },
+                  "relatedNodes": [],
+                  "impact": "serious",
+                  "message": "Element has sufficient color contrast of 15.76"
+                }
+              ],
+              "all": [],
+              "none": [],
+              "impact": null,
+              "html": "<p>Atención: lunes a viernes de 8:00 a 20:00, hora de Ciudad de México.</p>",
+              "target": [
+                "#root > .border-border.bg-surface.p-4 > p:nth-child(2)"
+              ]
+            },
+            {
+              "any": [
+                {
+                  "id": "color-contrast",
+                  "data": {
+                    "fgColor": "#0a2342",
+                    "bgColor": "#ffffff",
+                    "contrastRatio": 15.76,
+                    "fontSize": "10.5pt (14px)",
+                    "fontWeight": "normal",
+                    "expectedContrastRatio": "4.5:1"
+                  },
+                  "relatedNodes": [],
+                  "impact": "serious",
+                  "message": "Element has sufficient color contrast of 15.76"
+                }
+              ],
+              "all": [],
+              "none": [],
+              "impact": null,
+              "html": "<p>Primera respuesta estimada a reportes: menos de 30 minutos en horario de atención y menos de 2 horas fuera de horario.</p>",
+              "target": [
+                "#root > .border-border.bg-surface.p-4 > p:nth-child(3)"
+              ]
+            },
+            {
+              "any": [
+                {
+                  "id": "color-contrast",
+                  "data": {
+                    "fgColor": "#0a2342",
+                    "bgColor": "#ffffff",
+                    "contrastRatio": 15.76,
+                    "fontSize": "10.5pt (14px)",
+                    "fontWeight": "normal",
+                    "expectedContrastRatio": "4.5:1"
+                  },
+                  "relatedNodes": [],
+                  "impact": "serious",
+                  "message": "Element has sufficient color contrast of 15.76"
+                }
+              ],
+              "all": [],
+              "none": [],
+              "impact": null,
+              "html": "<p>Emergencias: correo a soporte las 24 horas, todos los días. Este canal no implica respuesta inmediata. <a class=\"font-semibold text-route-action underline\" href=\"mailto:soporte-conductores-pruebas@example.test?subject=Soporte%20conductor\">soporte-conductores-pruebas@example.test</a></p>",
+              "target": [
+                "#root > .border-border.bg-surface.p-4 > p:nth-child(4)"
+              ]
+            },
+            {
+              "any": [
+                {
+                  "id": "color-contrast",
+                  "data": {
+                    "fgColor": "#0066ff",
+                    "bgColor": "#ffffff",
+                    "contrastRatio": 4.83,
+                    "fontSize": "10.5pt (14px)",
+                    "fontWeight": "normal",
+                    "expectedContrastRatio": "4.5:1"
+                  },
+                  "relatedNodes": [],
+                  "impact": "serious",
+                  "message": "Element has sufficient color contrast of 4.83"
+                }
+              ],
+              "all": [],
+              "none": [],
+              "impact": null,
+              "html": "<a class=\"font-semibold text-route-action underline\" href=\"mailto:soporte-conductores-pruebas@example.test?subject=Soporte%20conductor\">soporte-conductores-pruebas@example.test</a>",
+              "target": [
+                "#root > .border-border.bg-surface.p-4 > p:nth-child(4) > .font-semibold.text-route-action.underline"
+              ]
+            },
+            {
+              "any": [
+                {
+                  "id": "color-contrast",
+                  "data": {
+                    "fgColor": "#0a2342",
+                    "bgColor": "#ffffff",
+                    "contrastRatio": 15.76,
+                    "fontSize": "10.5pt (14px)",
+                    "fontWeight": "normal",
+                    "expectedContrastRatio": "4.5:1"
+                  },
+                  "relatedNodes": [],
+                  "impact": "serious",
+                  "message": "Element has sufficient color contrast of 15.76"
+                }
+              ],
+              "all": [],
+              "none": [],
+              "impact": null,
+              "html": "<p>Los tiempos indicados corresponden a reportes. Consulta la disponibilidad de llamada y WhatsApp con soporte.</p>",
+              "target": [
+                "#root > .border-border.bg-surface.p-4 > p:nth-child(5)"
+              ]
+            },
+            {
+              "any": [
+                {
+                  "id": "color-contrast",
+                  "data": {
+                    "fgColor": "#0a2342",
+                    "bgColor": "#ffffff",
+                    "contrastRatio": 15.76,
+                    "fontSize": "10.5pt (14px)",
+                    "fontWeight": "normal",
+                    "expectedContrastRatio": "4.5:1"
+                  },
+                  "relatedNodes": [],
+                  "impact": "serious",
+                  "message": "Element has sufficient color contrast of 15.76"
+                }
+              ],
+              "all": [],
+              "none": [],
+              "impact": null,
+              "html": "<p>Formulario: recepción de reportes las 24 horas, todos los días.</p>",
+              "target": [
+                ".sm\\:col-span-2:nth-child(1) > .border-border.bg-surface.p-4 > p:nth-child(1)"
+              ]
+            },
+            {
+              "any": [
+                {
+                  "id": "color-contrast",
+                  "data": {
+                    "fgColor": "#0a2342",
+                    "bgColor": "#ffffff",
+                    "contrastRatio": 15.76,
+                    "fontSize": "10.5pt (14px)",
+                    "fontWeight": "normal",
+                    "expectedContrastRatio": "4.5:1"
+                  },
+                  "relatedNodes": [],
+                  "impact": "serious",
+                  "message": "Element has sufficient color contrast of 15.76"
+                }
+              ],
+              "all": [],
+              "none": [],
+              "impact": null,
+              "html": "<p>Atención: lunes a viernes de 8:00 a 20:00, hora de Ciudad de México.</p>",
+              "target": [
+                ".sm\\:col-span-2:nth-child(1) > .border-border.bg-surface.p-4 > p:nth-child(2)"
+              ]
+            },
+            {
+              "any": [
+                {
+                  "id": "color-contrast",
+                  "data": {
+                    "fgColor": "#0a2342",
+                    "bgColor": "#ffffff",
+                    "contrastRatio": 15.76,
+                    "fontSize": "10.5pt (14px)",
+                    "fontWeight": "normal",
+                    "expectedContrastRatio": "4.5:1"
+                  },
+                  "relatedNodes": [],
+                  "impact": "serious",
+                  "message": "Element has sufficient color contrast of 15.76"
+                }
+              ],
+              "all": [],
+              "none": [],
+              "impact": null,
+              "html": "<p>Primera respuesta estimada a reportes: menos de 30 minutos en horario de atención y menos de 2 horas fuera de horario.</p>",
+              "target": [
+                ".sm\\:col-span-2:nth-child(1) > .border-border.bg-surface.p-4 > p:nth-child(3)"
+              ]
+            },
+            {
+              "any": [
+                {
+                  "id": "color-contrast",
+                  "data": {
+                    "fgColor": "#0a2342",
+                    "bgColor": "#ffffff",
+                    "contrastRatio": 15.76,
+                    "fontSize": "10.5pt (14px)",
+                    "fontWeight": "normal",
+                    "expectedContrastRatio": "4.5:1"
+                  },
+                  "relatedNodes": [],
+                  "impact": "serious",
+                  "message": "Element has sufficient color contrast of 15.76"
+                }
+              ],
+              "all": [],
+              "none": [],
+              "impact": null,
+              "html": "<p>Emergencias: correo a soporte las 24 horas, todos los días. Este canal no implica respuesta inmediata. <a class=\"font-semibold text-route-action underline\" href=\"mailto:soporte-conductores-pruebas@example.test?subject=Soporte%20conductor\">soporte-conductores-pruebas@example.test</a></p>",
+              "target": [
+                ".sm\\:col-span-2:nth-child(1) > .border-border.bg-surface.p-4 > p:nth-child(4)"
+              ]
+            },
+            {
+              "any": [
+                {
+                  "id": "color-contrast",
+                  "data": {
+                    "fgColor": "#0066ff",
+                    "bgColor": "#ffffff",
+                    "contrastRatio": 4.83,
+                    "fontSize": "10.5pt (14px)",
+                    "fontWeight": "normal",
+                    "expectedContrastRatio": "4.5:1"
+                  },
+                  "relatedNodes": [],
+                  "impact": "serious",
+                  "message": "Element has sufficient color contrast of 4.83"
+                }
+              ],
+              "all": [],
+              "none": [],
+              "impact": null,
+              "html": "<a class=\"font-semibold text-route-action underline\" href=\"mailto:soporte-conductores-pruebas@example.test?subject=Soporte%20conductor\">soporte-conductores-pruebas@example.test</a>",
+              "target": [
+                ".sm\\:col-span-2:nth-child(1) > .border-border.bg-surface.p-4 > p:nth-child(4) > .font-semibold.text-route-action.underline"
+              ]
+            },
+            {
+              "any": [
+                {
+                  "id": "color-contrast",
+                  "data": {
+                    "fgColor": "#0a2342",
+                    "bgColor": "#ffffff",
+                    "contrastRatio": 15.76,
+                    "fontSize": "10.5pt (14px)",
+                    "fontWeight": "normal",
+                    "expectedContrastRatio": "4.5:1"
+                  },
+                  "relatedNodes": [],
+                  "impact": "serious",
+                  "message": "Element has sufficient color contrast of 15.76"
+                }
+              ],
+              "all": [],
+              "none": [],
+              "impact": null,
+              "html": "<p>Los tiempos indicados corresponden a reportes. Consulta la disponibilidad de llamada y WhatsApp con soporte.</p>",
+              "target": [
+                ".sm\\:col-span-2:nth-child(1) > .border-border.bg-surface.p-4 > p:nth-child(5)"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "link-name",
+          "impact": null,
+          "tags": [
+            "cat.name-role-value",
+            "wcag2a",
+            "wcag244",
+            "wcag412",
+            "section508",
+            "section508.22.a",
+            "TTv5",
+            "TT6.a",
+            "EN-301-549",
+            "EN-9.2.4.4",
+            "EN-9.4.1.2",
+            "ACT",
+            "RGAAv4",
+            "RGAA-6.2.1"
+          ],
+          "description": "Ensure links have discernible text",
+          "help": "Links must have discernible text",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.14/link-name?application=axeAPI",
+          "nodes": [
+            {
+              "any": [
+                {
+                  "id": "has-visible-text",
+                  "data": null,
+                  "relatedNodes": [],
+                  "impact": "serious",
+                  "message": "Element has text that is visible to screen readers"
+                },
+                {
+                  "id": "aria-label",
+                  "data": null,
+                  "relatedNodes": [],
+                  "impact": "serious",
+                  "message": "aria-label attribute exists and is not empty"
+                }
+              ],
+              "all": [],
+              "none": [
+                {
+                  "id": "focusable-no-name",
+                  "data": null,
+                  "relatedNodes": [],
+                  "impact": "serious",
+                  "message": "Element is not in tab order or has accessible text"
+                }
+              ],
+              "impact": null,
+              "html": "<a href=\"/soporte\" class=\"home-support\" aria-label=\"¿Necesitas ayuda? So...\">",
+              "target": [
+                ".home-support"
+              ]
+            },
+            {
+              "any": [
+                {
+                  "id": "has-visible-text",
+                  "data": null,
+                  "relatedNodes": [],
+                  "impact": "serious",
+                  "message": "Element has text that is visible to screen readers"
+                }
+              ],
+              "all": [],
+              "none": [
+                {
+                  "id": "focusable-no-name",
+                  "data": null,
+                  "relatedNodes": [],
+                  "impact": "serious",
+                  "message": "Element is not in tab order or has accessible text"
+                }
+              ],
+              "impact": null,
+              "html": "<a class=\"font-semibold text-route-action underline\" href=\"mailto:soporte-conductores-pruebas@example.test?subject=Soporte%20conductor\">soporte-conductores-pruebas@example.test</a>",
+              "target": [
+                "#root > .border-border.bg-surface.p-4 > p:nth-child(4) > .font-semibold.text-route-action.underline"
+              ]
+            },
+            {
+              "any": [
+                {
+                  "id": "has-visible-text",
+                  "data": null,
+                  "relatedNodes": [],
+                  "impact": "serious",
+                  "message": "Element has text that is visible to screen readers"
+                }
+              ],
+              "all": [],
+              "none": [
+                {
+                  "id": "focusable-no-name",
+                  "data": null,
+                  "relatedNodes": [],
+                  "impact": "serious",
+                  "message": "Element is not in tab order or has accessible text"
+                }
+              ],
+              "impact": null,
+              "html": "<a class=\"font-semibold text-route-action underline\" href=\"mailto:soporte-conductores-pruebas@example.test?subject=Soporte%20conductor\">soporte-conductores-pruebas@example.test</a>",
+              "target": [
+                ".sm\\:col-span-2:nth-child(1) > .border-border.bg-surface.p-4 > p:nth-child(4) > .font-semibold.text-route-action.underline"
+              ]
+            }
+          ]
+        }
+      ],
+      "incomplete": [],
+      "violations": []
+    },
+    "axeGeneral": {
+      "testEngine": {
+        "name": "axe-core",
+        "version": "4.14.0"
+      },
+      "testRunner": {
+        "name": "axe"
+      },
+      "testEnvironment": {
+        "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/156.0.8078.4 Safari/537.36",
+        "windowWidth": 1440,
+        "windowHeight": 1000,
+        "orientationAngle": 0,
+        "orientationType": "landscape-primary"
+      },
+      "timestamp": "2026-11-07T05:24:00.856Z",
+      "url": "file:///C:/ruum_ecosistema-main/docs/remediacion-ux009/fixture.html",
+      "toolOptions": {
+        "runOnly": {
+          "type": "rule",
+          "values": [
+            "color-contrast",
+            "link-name"
+          ]
+        },
+        "reporter": "v1"
+      },
+      "inapplicable": [
+        {
+          "id": "color-contrast",
+          "impact": null,
+          "tags": [
+            "cat.color",
+            "wcag2aa",
+            "wcag143",
+            "TTv5",
+            "TT13.c",
+            "EN-301-549",
+            "EN-9.1.4.3",
+            "ACT",
+            "RGAAv4",
+            "RGAA-3.2.1"
+          ],
+          "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.14/color-contrast?application=axeAPI",
+          "nodes": []
+        },
+        {
+          "id": "link-name",
+          "impact": null,
+          "tags": [
+            "cat.name-role-value",
+            "wcag2a",
+            "wcag244",
+            "wcag412",
+            "section508",
+            "section508.22.a",
+            "TTv5",
+            "TT6.a",
+            "EN-301-549",
+            "EN-9.2.4.4",
+            "EN-9.4.1.2",
+            "ACT",
+            "RGAAv4",
+            "RGAA-6.2.1"
+          ],
+          "description": "Ensure links have discernible text",
+          "help": "Links must have discernible text",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.14/link-name?application=axeAPI",
+          "nodes": []
+        }
+      ],
+      "passes": [],
+      "incomplete": [],
+      "violations": []
+    },
+    "axeIncidencia": {
+      "testEngine": {
+        "name": "axe-core",
+        "version": "4.14.0"
+      },
+      "testRunner": {
+        "name": "axe"
+      },
+      "testEnvironment": {
+        "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/156.0.8078.4 Safari/537.36",
+        "windowWidth": 1440,
+        "windowHeight": 1000,
+        "orientationAngle": 0,
+        "orientationType": "landscape-primary"
+      },
+      "timestamp": "2026-11-07T05:24:01.822Z",
+      "url": "file:///C:/ruum_ecosistema-main/docs/remediacion-ux009/fixture.html#incidencia",
+      "toolOptions": {
+        "runOnly": {
+          "type": "rule",
+          "values": [
+            "color-contrast",
+            "link-name"
+          ]
+        },
+        "reporter": "v1"
+      },
+      "inapplicable": [
+        {
+          "id": "color-contrast",
+          "impact": null,
+          "tags": [
+            "cat.color",
+            "wcag2aa",
+            "wcag143",
+            "TTv5",
+            "TT13.c",
+            "EN-301-549",
+            "EN-9.1.4.3",
+            "ACT",
+            "RGAAv4",
+            "RGAA-3.2.1"
+          ],
+          "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.14/color-contrast?application=axeAPI",
+          "nodes": []
+        },
+        {
+          "id": "link-name",
+          "impact": null,
+          "tags": [
+            "cat.name-role-value",
+            "wcag2a",
+            "wcag244",
+            "wcag412",
+            "section508",
+            "section508.22.a",
+            "TTv5",
+            "TT6.a",
+            "EN-301-549",
+            "EN-9.2.4.4",
+            "EN-9.4.1.2",
+            "ACT",
+            "RGAAv4",
+            "RGAA-6.2.1"
+          ],
+          "description": "Ensure links have discernible text",
+          "help": "Links must have discernible text",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.14/link-name?application=axeAPI",
+          "nodes": []
+        }
+      ],
+      "passes": [],
+      "incomplete": [],
+      "violations": []
+    }
+  },
+  {
+    "width": 1440,
+    "theme": "dark",
+    "general": "¡Mensaje recibido con éxito!\nFolio: SOP-FOLIO-PRUEBA\nTu consulta quedó registrada. Nuestro equipo la atenderá desde la bandeja de soporte. Formulario: recepción de reportes las 24 horas, todos los días. Atención: lunes a viernes de 8:00 a 20:00, hora de Ciudad de México. Primera respuesta estimada a reportes: menos de 30 minutos en horario de atención y menos de 2 horas fuera de horario. Emergencias: correo a soporte las 24 horas, todos los días. Este canal no implica respuesta inmediata.",
+    "incidencia": "¡Mensaje recibido con éxito!\nFolio: INC-ABCDEF12\nReporte registrado. Folio: INC-ABCDEF12. Nuestro equipo dará seguimiento desde tu expediente. Formulario: recepción de reportes las 24 horas, todos los días. Atención: lunes a viernes de 8:00 a 20:00, hora de Ciudad de México. Primera respuesta estimada a reportes: menos de 30 minutos en horario de atención y menos de 2 horas fuera de horario. Emergencias: correo a soporte las 24 horas, todos los días. Este canal no implica respuesta inmediata.",
+    "axe": {
+      "testEngine": {
+        "name": "axe-core",
+        "version": "4.14.0"
+      },
+      "testRunner": {
+        "name": "axe"
+      },
+      "testEnvironment": {
+        "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/156.0.8078.4 Safari/537.36",
+        "windowWidth": 1440,
+        "windowHeight": 1000,
+        "orientationAngle": 0,
+        "orientationType": "landscape-primary"
+      },
+      "timestamp": "2026-11-07T05:24:03.217Z",
+      "url": "file:///C:/ruum_ecosistema-main/docs/remediacion-ux009/fixture.html",
+      "toolOptions": {
+        "runOnly": {
+          "type": "rule",
+          "values": [
+            "color-contrast",
+            "link-name"
+          ]
+        },
+        "reporter": "v1"
+      },
+      "inapplicable": [],
+      "passes": [
+        {
+          "id": "color-contrast",
+          "impact": null,
+          "tags": [
+            "cat.color",
+            "wcag2aa",
+            "wcag143",
+            "TTv5",
+            "TT13.c",
+            "EN-301-549",
+            "EN-9.1.4.3",
+            "ACT",
+            "RGAAv4",
+            "RGAA-3.2.1"
+          ],
+          "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.14/color-contrast?application=axeAPI",
+          "nodes": [
+            {
+              "any": [
+                {
+                  "id": "color-contrast",
+                  "data": {
+                    "fgColor": "#f6f8fb",
+                    "bgColor": "#0c223c",
+                    "contrastRatio": 15.07,
+                    "fontSize": "10.5pt (14px)",
+                    "fontWeight": "bold",
+                    "expectedContrastRatio": "4.5:1"
+                  },
+                  "relatedNodes": [],
+                  "impact": "serious",
+                  "message": "Element has sufficient color contrast of 15.07"
+                }
+              ],
+              "all": [],
+              "none": [],
+              "impact": null,
+              "html": "<strong>¿Necesitas ayuda?</strong>",
+              "target": [
+                ".home-support > .home-module-copy > strong"
+              ]
+            },
+            {
+              "any": [
+                {
+                  "id": "color-contrast",
+                  "data": {
+                    "fgColor": "#94a3b8",
+                    "bgColor": "#0c223c",
+                    "contrastRatio": 6.25,
+                    "fontSize": "9.0pt (12px)",
+                    "fontWeight": "normal",
+                    "expectedContrastRatio": "4.5:1"
+                  },
+                  "relatedNodes": [],
+                  "impact": "serious",
+                  "message": "Element has sufficient color contrast of 6.25"
+                }
+              ],
+              "all": [],
+              "none": [],
+              "impact": null,
+              "html": "<span>Soporte · recepción de reportes 24/7</span>",
+              "target": [
+                ".home-support > .home-module-copy > span:nth-child(2)"
+              ]
+            },
+            {
+              "any": [
+                {
+                  "id": "color-contrast",
+                  "data": {
+                    "fgColor": "#94a3b8",
+                    "bgColor": "#0c223c",
+                    "contrastRatio": 6.25,
+                    "fontSize": "9.0pt (12px)",
+                    "fontWeight": "normal",
+                    "expectedContrastRatio": "4.5:1"
+                  },
+                  "relatedNodes": [],
+                  "impact": "serious",
+                  "message": "Element has sufficient color contrast of 6.25"
+                }
+              ],
+              "all": [],
+              "none": [],
+              "impact": null,
+              "html": "<span>Atención: lunes a viernes de 8:00 a 20:00, hora de Ciudad de México.</span>",
+              "target": [
+                ".home-module-copy > span:nth-child(3)"
+              ]
+            },
+            {
+              "any": [
+                {
+                  "id": "color-contrast",
+                  "data": {
+                    "fgColor": "#94a3b8",
+                    "bgColor": "#0c223c",
+                    "contrastRatio": 6.25,
+                    "fontSize": "9.0pt (12px)",
+                    "fontWeight": "normal",
+                    "expectedContrastRatio": "4.5:1"
+                  },
+                  "relatedNodes": [],
+                  "impact": "serious",
+                  "message": "Element has sufficient color contrast of 6.25"
+                }
+              ],
+              "all": [],
+              "none": [],
+              "impact": null,
+              "html": "<span>Primera respuesta estimada a reportes: menos de 30 minutos en horario de atención y menos de 2 horas fuera de horario.</span>",
+              "target": [
+                "span:nth-child(4)"
+              ]
+            },
+            {
+              "any": [
+                {
+                  "id": "color-contrast",
+                  "data": {
+                    "fgColor": "#94a3b8",
+                    "bgColor": "#0c223c",
+                    "contrastRatio": 6.25,
+                    "fontSize": "9.0pt (12px)",
+                    "fontWeight": "normal",
+                    "expectedContrastRatio": "4.5:1"
+                  },
+                  "relatedNodes": [],
+                  "impact": "serious",
+                  "message": "Element has sufficient color contrast of 6.25"
+                }
+              ],
+              "all": [],
+              "none": [],
+              "impact": null,
+              "html": "<span>Emergencias: correo a soporte las 24 horas, todos los días. Este canal no implica respuesta inmediata.</span>",
+              "target": [
+                "span:nth-child(5)"
+              ]
+            },
+            {
+              "any": [
+                {
+                  "id": "color-contrast",
+                  "data": {
+                    "fgColor": "#f6f8fb",
+                    "bgColor": "#0a2342",
+                    "contrastRatio": 14.81,
+                    "fontSize": "10.5pt (14px)",
+                    "fontWeight": "normal",
+                    "expectedContrastRatio": "4.5:1"
+                  },
+                  "relatedNodes": [],
+                  "impact": "serious",
+                  "message": "Element has sufficient color contrast of 14.81"
+                }
+              ],
+              "all": [],
+              "none": [],
+              "impact": null,
+              "html": "<p>Formulario: recepción de reportes las 24 horas, todos los días.</p>",
+              "target": [
+                "#root > .border-border.bg-surface.p-4 > p:nth-child(1)"
+              ]
+            },
+            {
+              "any": [
+                {
+                  "id": "color-contrast",
+                  "data": {
+                    "fgColor": "#f6f8fb",
+                    "bgColor": "#0a2342",
+                    "contrastRatio": 14.81,
+                    "fontSize": "10.5pt (14px)",
+                    "fontWeight": "normal",
+                    "expectedContrastRatio": "4.5:1"
+                  },
+                  "relatedNodes": [],
+                  "impact": "serious",
+                  "message": "Element has sufficient color contrast of 14.81"
+                }
+              ],
+              "all": [],
+              "none": [],
+              "impact": null,
+              "html": "<p>Atención: lunes a viernes de 8:00 a 20:00, hora de Ciudad de México.</p>",
+              "target": [
+                "#root > .border-border.bg-surface.p-4 > p:nth-child(2)"
+              ]
+            },
+            {
+              "any": [
+                {
+                  "id": "color-contrast",
+                  "data": {
+                    "fgColor": "#f6f8fb",
+                    "bgColor": "#0a2342",
+                    "contrastRatio": 14.81,
+                    "fontSize": "10.5pt (14px)",
+                    "fontWeight": "normal",
+                    "expectedContrastRatio": "4.5:1"
+                  },
+                  "relatedNodes": [],
+                  "impact": "serious",
+                  "message": "Element has sufficient color contrast of 14.81"
+                }
+              ],
+              "all": [],
+              "none": [],
+              "impact": null,
+              "html": "<p>Primera respuesta estimada a reportes: menos de 30 minutos en horario de atención y menos de 2 horas fuera de horario.</p>",
+              "target": [
+                "#root > .border-border.bg-surface.p-4 > p:nth-child(3)"
+              ]
+            },
+            {
+              "any": [
+                {
+                  "id": "color-contrast",
+                  "data": {
+                    "fgColor": "#f6f8fb",
+                    "bgColor": "#0a2342",
+                    "contrastRatio": 14.81,
+                    "fontSize": "10.5pt (14px)",
+                    "fontWeight": "normal",
+                    "expectedContrastRatio": "4.5:1"
+                  },
+                  "relatedNodes": [],
+                  "impact": "serious",
+                  "message": "Element has sufficient color contrast of 14.81"
+                }
+              ],
+              "all": [],
+              "none": [],
+              "impact": null,
+              "html": "<p>Emergencias: correo a soporte las 24 horas, todos los días. Este canal no implica respuesta inmediata. <a class=\"font-semibold text-route-action underline\" href=\"mailto:soporte-conductores-pruebas@example.test?subject=Soporte%20conductor\">soporte-conductores-pruebas@example.test</a></p>",
+              "target": [
+                "#root > .border-border.bg-surface.p-4 > p:nth-child(4)"
+              ]
+            },
+            {
+              "any": [
+                {
+                  "id": "color-contrast",
+                  "data": {
+                    "fgColor": "#4d94ff",
+                    "bgColor": "#0a2342",
+                    "contrastRatio": 5.25,
+                    "fontSize": "10.5pt (14px)",
+                    "fontWeight": "normal",
+                    "expectedContrastRatio": "4.5:1"
+                  },
+                  "relatedNodes": [],
+                  "impact": "serious",
+                  "message": "Element has sufficient color contrast of 5.25"
+                }
+              ],
+              "all": [],
+              "none": [],
+              "impact": null,
+              "html": "<a class=\"font-semibold text-route-action underline\" href=\"mailto:soporte-conductores-pruebas@example.test?subject=Soporte%20conductor\">soporte-conductores-pruebas@example.test</a>",
+              "target": [
+                "#root > .border-border.bg-surface.p-4 > p:nth-child(4) > .font-semibold.text-route-action.underline"
+              ]
+            },
+            {
+              "any": [
+                {
+                  "id": "color-contrast",
+                  "data": {
+                    "fgColor": "#f6f8fb",
+                    "bgColor": "#0a2342",
+                    "contrastRatio": 14.81,
+                    "fontSize": "10.5pt (14px)",
+                    "fontWeight": "normal",
+                    "expectedContrastRatio": "4.5:1"
+                  },
+                  "relatedNodes": [],
+                  "impact": "serious",
+                  "message": "Element has sufficient color contrast of 14.81"
+                }
+              ],
+              "all": [],
+              "none": [],
+              "impact": null,
+              "html": "<p>Los tiempos indicados corresponden a reportes. Consulta la disponibilidad de llamada y WhatsApp con soporte.</p>",
+              "target": [
+                "#root > .border-border.bg-surface.p-4 > p:nth-child(5)"
+              ]
+            },
+            {
+              "any": [
+                {
+                  "id": "color-contrast",
+                  "data": {
+                    "fgColor": "#f6f8fb",
+                    "bgColor": "#0a2342",
+                    "contrastRatio": 14.81,
+                    "fontSize": "10.5pt (14px)",
+                    "fontWeight": "normal",
+                    "expectedContrastRatio": "4.5:1"
+                  },
+                  "relatedNodes": [],
+                  "impact": "serious",
+                  "message": "Element has sufficient color contrast of 14.81"
+                }
+              ],
+              "all": [],
+              "none": [],
+              "impact": null,
+              "html": "<p>Formulario: recepción de reportes las 24 horas, todos los días.</p>",
+              "target": [
+                ".sm\\:col-span-2:nth-child(1) > .border-border.bg-surface.p-4 > p:nth-child(1)"
+              ]
+            },
+            {
+              "any": [
+                {
+                  "id": "color-contrast",
+                  "data": {
+                    "fgColor": "#f6f8fb",
+                    "bgColor": "#0a2342",
+                    "contrastRatio": 14.81,
+                    "fontSize": "10.5pt (14px)",
+                    "fontWeight": "normal",
+                    "expectedContrastRatio": "4.5:1"
+                  },
+                  "relatedNodes": [],
+                  "impact": "serious",
+                  "message": "Element has sufficient color contrast of 14.81"
+                }
+              ],
+              "all": [],
+              "none": [],
+              "impact": null,
+              "html": "<p>Atención: lunes a viernes de 8:00 a 20:00, hora de Ciudad de México.</p>",
+              "target": [
+                ".sm\\:col-span-2:nth-child(1) > .border-border.bg-surface.p-4 > p:nth-child(2)"
+              ]
+            },
+            {
+              "any": [
+                {
+                  "id": "color-contrast",
+                  "data": {
+                    "fgColor": "#f6f8fb",
+                    "bgColor": "#0a2342",
+                    "contrastRatio": 14.81,
+                    "fontSize": "10.5pt (14px)",
+                    "fontWeight": "normal",
+                    "expectedContrastRatio": "4.5:1"
+                  },
+                  "relatedNodes": [],
+                  "impact": "serious",
+                  "message": "Element has sufficient color contrast of 14.81"
+                }
+              ],
+              "all": [],
+              "none": [],
+              "impact": null,
+              "html": "<p>Primera respuesta estimada a reportes: menos de 30 minutos en horario de atención y menos de 2 horas fuera de horario.</p>",
+              "target": [
+                ".sm\\:col-span-2:nth-child(1) > .border-border.bg-surface.p-4 > p:nth-child(3)"
+              ]
+            },
+            {
+              "any": [
+                {
+                  "id": "color-contrast",
+                  "data": {
+                    "fgColor": "#f6f8fb",
+                    "bgColor": "#0a2342",
+                    "contrastRatio": 14.81,
+                    "fontSize": "10.5pt (14px)",
+                    "fontWeight": "normal",
+                    "expectedContrastRatio": "4.5:1"
+                  },
+                  "relatedNodes": [],
+                  "impact": "serious",
+                  "message": "Element has sufficient color contrast of 14.81"
+                }
+              ],
+              "all": [],
+              "none": [],
+              "impact": null,
+              "html": "<p>Emergencias: correo a soporte las 24 horas, todos los días. Este canal no implica respuesta inmediata. <a class=\"font-semibold text-route-action underline\" href=\"mailto:soporte-conductores-pruebas@example.test?subject=Soporte%20conductor\">soporte-conductores-pruebas@example.test</a></p>",
+              "target": [
+                ".sm\\:col-span-2:nth-child(1) > .border-border.bg-surface.p-4 > p:nth-child(4)"
+              ]
+            },
+            {
+              "any": [
+                {
+                  "id": "color-contrast",
+                  "data": {
+                    "fgColor": "#4d94ff",
+                    "bgColor": "#0a2342",
+                    "contrastRatio": 5.25,
+                    "fontSize": "10.5pt (14px)",
+                    "fontWeight": "normal",
+                    "expectedContrastRatio": "4.5:1"
+                  },
+                  "relatedNodes": [],
+                  "impact": "serious",
+                  "message": "Element has sufficient color contrast of 5.25"
+                }
+              ],
+              "all": [],
+              "none": [],
+              "impact": null,
+              "html": "<a class=\"font-semibold text-route-action underline\" href=\"mailto:soporte-conductores-pruebas@example.test?subject=Soporte%20conductor\">soporte-conductores-pruebas@example.test</a>",
+              "target": [
+                ".sm\\:col-span-2:nth-child(1) > .border-border.bg-surface.p-4 > p:nth-child(4) > .font-semibold.text-route-action.underline"
+              ]
+            },
+            {
+              "any": [
+                {
+                  "id": "color-contrast",
+                  "data": {
+                    "fgColor": "#f6f8fb",
+                    "bgColor": "#0a2342",
+                    "contrastRatio": 14.81,
+                    "fontSize": "10.5pt (14px)",
+                    "fontWeight": "normal",
+                    "expectedContrastRatio": "4.5:1"
+                  },
+                  "relatedNodes": [],
+                  "impact": "serious",
+                  "message": "Element has sufficient color contrast of 14.81"
+                }
+              ],
+              "all": [],
+              "none": [],
+              "impact": null,
+              "html": "<p>Los tiempos indicados corresponden a reportes. Consulta la disponibilidad de llamada y WhatsApp con soporte.</p>",
+              "target": [
+                ".sm\\:col-span-2:nth-child(1) > .border-border.bg-surface.p-4 > p:nth-child(5)"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "link-name",
+          "impact": null,
+          "tags": [
+            "cat.name-role-value",
+            "wcag2a",
+            "wcag244",
+            "wcag412",
+            "section508",
+            "section508.22.a",
+            "TTv5",
+            "TT6.a",
+            "EN-301-549",
+            "EN-9.2.4.4",
+            "EN-9.4.1.2",
+            "ACT",
+            "RGAAv4",
+            "RGAA-6.2.1"
+          ],
+          "description": "Ensure links have discernible text",
+          "help": "Links must have discernible text",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.14/link-name?application=axeAPI",
+          "nodes": [
+            {
+              "any": [
+                {
+                  "id": "has-visible-text",
+                  "data": null,
+                  "relatedNodes": [],
+                  "impact": "serious",
+                  "message": "Element has text that is visible to screen readers"
+                },
+                {
+                  "id": "aria-label",
+                  "data": null,
+                  "relatedNodes": [],
+                  "impact": "serious",
+                  "message": "aria-label attribute exists and is not empty"
+                }
+              ],
+              "all": [],
+              "none": [
+                {
+                  "id": "focusable-no-name",
+                  "data": null,
+                  "relatedNodes": [],
+                  "impact": "serious",
+                  "message": "Element is not in tab order or has accessible text"
+                }
+              ],
+              "impact": null,
+              "html": "<a href=\"/soporte\" class=\"home-support\" aria-label=\"¿Necesitas ayuda? So...\">",
+              "target": [
+                ".home-support"
+              ]
+            },
+            {
+              "any": [
+                {
+                  "id": "has-visible-text",
+                  "data": null,
+                  "relatedNodes": [],
+                  "impact": "serious",
+                  "message": "Element has text that is visible to screen readers"
+                }
+              ],
+              "all": [],
+              "none": [
+                {
+                  "id": "focusable-no-name",
+                  "data": null,
+                  "relatedNodes": [],
+                  "impact": "serious",
+                  "message": "Element is not in tab order or has accessible text"
+                }
+              ],
+              "impact": null,
+              "html": "<a class=\"font-semibold text-route-action underline\" href=\"mailto:soporte-conductores-pruebas@example.test?subject=Soporte%20conductor\">soporte-conductores-pruebas@example.test</a>",
+              "target": [
+                "#root > .border-border.bg-surface.p-4 > p:nth-child(4) > .font-semibold.text-route-action.underline"
+              ]
+            },
+            {
+              "any": [
+                {
+                  "id": "has-visible-text",
+                  "data": null,
+                  "relatedNodes": [],
+                  "impact": "serious",
+                  "message": "Element has text that is visible to screen readers"
+                }
+              ],
+              "all": [],
+              "none": [
+                {
+                  "id": "focusable-no-name",
+                  "data": null,
+                  "relatedNodes": [],
+                  "impact": "serious",
+                  "message": "Element is not in tab order or has accessible text"
+                }
+              ],
+              "impact": null,
+              "html": "<a class=\"font-semibold text-route-action underline\" href=\"mailto:soporte-conductores-pruebas@example.test?subject=Soporte%20conductor\">soporte-conductores-pruebas@example.test</a>",
+              "target": [
+                ".sm\\:col-span-2:nth-child(1) > .border-border.bg-surface.p-4 > p:nth-child(4) > .font-semibold.text-route-action.underline"
+              ]
+            }
+          ]
+        }
+      ],
+      "incomplete": [],
+      "violations": []
+    },
+    "axeGeneral": {
+      "testEngine": {
+        "name": "axe-core",
+        "version": "4.14.0"
+      },
+      "testRunner": {
+        "name": "axe"
+      },
+      "testEnvironment": {
+        "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/156.0.8078.4 Safari/537.36",
+        "windowWidth": 1440,
+        "windowHeight": 1000,
+        "orientationAngle": 0,
+        "orientationType": "landscape-primary"
+      },
+      "timestamp": "2026-11-07T05:24:04.112Z",
+      "url": "file:///C:/ruum_ecosistema-main/docs/remediacion-ux009/fixture.html",
+      "toolOptions": {
+        "runOnly": {
+          "type": "rule",
+          "values": [
+            "color-contrast",
+            "link-name"
+          ]
+        },
+        "reporter": "v1"
+      },
+      "inapplicable": [
+        {
+          "id": "color-contrast",
+          "impact": null,
+          "tags": [
+            "cat.color",
+            "wcag2aa",
+            "wcag143",
+            "TTv5",
+            "TT13.c",
+            "EN-301-549",
+            "EN-9.1.4.3",
+            "ACT",
+            "RGAAv4",
+            "RGAA-3.2.1"
+          ],
+          "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.14/color-contrast?application=axeAPI",
+          "nodes": []
+        },
+        {
+          "id": "link-name",
+          "impact": null,
+          "tags": [
+            "cat.name-role-value",
+            "wcag2a",
+            "wcag244",
+            "wcag412",
+            "section508",
+            "section508.22.a",
+            "TTv5",
+            "TT6.a",
+            "EN-301-549",
+            "EN-9.2.4.4",
+            "EN-9.4.1.2",
+            "ACT",
+            "RGAAv4",
+            "RGAA-6.2.1"
+          ],
+          "description": "Ensure links have discernible text",
+          "help": "Links must have discernible text",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.14/link-name?application=axeAPI",
+          "nodes": []
+        }
+      ],
+      "passes": [],
+      "incomplete": [],
+      "violations": []
+    },
+    "axeIncidencia": {
+      "testEngine": {
+        "name": "axe-core",
+        "version": "4.14.0"
+      },
+      "testRunner": {
+        "name": "axe"
+      },
+      "testEnvironment": {
+        "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/156.0.8078.4 Safari/537.36",
+        "windowWidth": 1440,
+        "windowHeight": 1000,
+        "orientationAngle": 0,
+        "orientationType": "landscape-primary"
+      },
+      "timestamp": "2026-11-07T05:24:05.094Z",
+      "url": "file:///C:/ruum_ecosistema-main/docs/remediacion-ux009/fixture.html#incidencia",
+      "toolOptions": {
+        "runOnly": {
+          "type": "rule",
+          "values": [
+            "color-contrast",
+            "link-name"
+          ]
+        },
+        "reporter": "v1"
+      },
+      "inapplicable": [
+        {
+          "id": "color-contrast",
+          "impact": null,
+          "tags": [
+            "cat.color",
+            "wcag2aa",
+            "wcag143",
+            "TTv5",
+            "TT13.c",
+            "EN-301-549",
+            "EN-9.1.4.3",
+            "ACT",
+            "RGAAv4",
+            "RGAA-3.2.1"
+          ],
+          "description": "Ensure the contrast between foreground and background colors meets WCAG 2 AA minimum contrast ratio thresholds",
+          "help": "Elements must meet minimum color contrast ratio thresholds",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.14/color-contrast?application=axeAPI",
+          "nodes": []
+        },
+        {
+          "id": "link-name",
+          "impact": null,
+          "tags": [
+            "cat.name-role-value",
+            "wcag2a",
+            "wcag244",
+            "wcag412",
+            "section508",
+            "section508.22.a",
+            "TTv5",
+            "TT6.a",
+            "EN-301-549",
+            "EN-9.2.4.4",
+            "EN-9.4.1.2",
+            "ACT",
+            "RGAAv4",
+            "RGAA-6.2.1"
+          ],
+          "description": "Ensure links have discernible text",
+          "help": "Links must have discernible text",
+          "helpUrl": "https://dequeuniversity.com/rules/axe/4.14/link-name?application=axeAPI",
+          "nodes": []
+        }
+      ],
+      "passes": [],
+      "incomplete": [],
+      "violations": []
+    }
+  }
+]

@@ -458,7 +458,7 @@
   color: #061525;
 }
 
-/* Accesos Rápidos (Grid de Mis vehículos, Pasaporte y Soporte 24/7) */
+/* Accesos Rápidos (Grid de Mis vehículos, Pasaporte y Soporte) */
 .home-quick-actions {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -547,7 +547,7 @@
   stroke-width: 2.2;
 }
 
-/* Soporte 24/7 (Fila completa) */
+/* Soporte con disponibilidad diferenciada (Fila completa) */
 .home-support {
   padding: 12px 14px;
 }

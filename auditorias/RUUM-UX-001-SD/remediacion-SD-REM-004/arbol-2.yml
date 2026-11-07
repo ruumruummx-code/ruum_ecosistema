@@ -1,0 +1,31 @@
+- form "Verificación de controles":
+  - text: Input 1
+  - textbox "Input 1" [invalid]
+  - alert: Error del campo
+  - text: Input 2
+  - textbox "Input 2" [invalid]
+  - alert: Error del campo
+  - text: Input 3
+  - textbox "Input 3" [invalid]
+  - alert: Error del campo
+  - text: Select 1
+  - combobox "Select 1" [invalid]:
+    - option "Opción" [selected]
+  - alert: Error del campo
+  - text: Select 2
+  - combobox "Select 2" [invalid]:
+    - option "Opción" [selected]
+  - alert: Error del campo
+  - text: Select 3
+  - combobox "Select 3" [invalid]:
+    - option "Opción" [selected]
+  - alert: Error del campo
+  - text: Textarea 1
+  - textbox "Textarea 1" [invalid]
+  - alert: Error del campo
+  - text: Textarea 2
+  - textbox "Textarea 2" [invalid]
+  - alert: Error del campo
+  - text: Textarea 3
+  - textbox "Textarea 3" [invalid]
+  - alert: Error del campo

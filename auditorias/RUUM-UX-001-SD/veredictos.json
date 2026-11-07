@@ -1,0 +1,1055 @@
+[
+  {
+    "component": "Alert",
+    "verdict": "conforme con condiciones",
+    "violations": [],
+    "incomplete": [],
+    "tickets": [
+      "SD-REM-012"
+    ],
+    "conditions": [
+      "Co-revisión nominal de Diseño de Sistemas y aceptación de condiciones.",
+      "Zoom nativo, tecnología asistiva y composición final pendientes.",
+      "Tipografía y escalas: SD-REM-009.",
+      "Adjudicar candidatos de recorte/desbordamiento, distinguiendo scroll intencionado."
+    ],
+    "cases": 18,
+    "interactiveStates": 0
+  },
+  {
+    "component": "Toast",
+    "verdict": "conforme con condiciones",
+    "violations": [],
+    "incomplete": [],
+    "tickets": [
+      "SD-REM-012"
+    ],
+    "conditions": [
+      "Co-revisión nominal de Diseño de Sistemas y aceptación de condiciones.",
+      "Zoom nativo, tecnología asistiva y composición final pendientes.",
+      "Tipografía y escalas: SD-REM-009.",
+      "Adjudicar candidatos de recorte/desbordamiento, distinguiendo scroll intencionado."
+    ],
+    "cases": 18,
+    "interactiveStates": 0
+  },
+  {
+    "component": "Aviso",
+    "verdict": "conforme con condiciones",
+    "violations": [],
+    "incomplete": [],
+    "tickets": [
+      "SD-REM-012"
+    ],
+    "conditions": [
+      "Co-revisión nominal de Diseño de Sistemas y aceptación de condiciones.",
+      "Zoom nativo, tecnología asistiva y composición final pendientes.",
+      "Tipografía y escalas: SD-REM-009.",
+      "Adjudicar candidatos de recorte/desbordamiento, distinguiendo scroll intencionado."
+    ],
+    "cases": 22,
+    "interactiveStates": 0
+  },
+  {
+    "component": "BannerDemo",
+    "verdict": "conforme con condiciones",
+    "violations": [],
+    "incomplete": [],
+    "tickets": [
+      "SD-REM-012"
+    ],
+    "conditions": [
+      "Co-revisión nominal de Diseño de Sistemas y aceptación de condiciones.",
+      "Zoom nativo, tecnología asistiva y composición final pendientes.",
+      "Tipografía y escalas: SD-REM-009.",
+      "Adjudicar candidatos de recorte/desbordamiento, distinguiendo scroll intencionado."
+    ],
+    "cases": 12,
+    "interactiveStates": 8
+  },
+  {
+    "component": "Button",
+    "verdict": "no conforme",
+    "violations": [],
+    "incomplete": [
+      "color-contrast"
+    ],
+    "tickets": [
+      "SD-REM-001"
+    ],
+    "conditions": [
+      "Co-revisión nominal de Diseño de Sistemas y aceptación de condiciones.",
+      "Zoom nativo, tecnología asistiva y composición final pendientes.",
+      "Tipografía y escalas: SD-REM-009.",
+      "Adjudicar incomplete de axe: color-contrast.",
+      "Adjudicar candidatos de recorte/desbordamiento, distinguiendo scroll intencionado."
+    ],
+    "cases": 40,
+    "interactiveStates": 8
+  },
+  {
+    "component": "ButtonPrimary",
+    "verdict": "no conforme",
+    "violations": [],
+    "incomplete": [
+      "color-contrast"
+    ],
+    "tickets": [
+      "SD-REM-001"
+    ],
+    "conditions": [
+      "Co-revisión nominal de Diseño de Sistemas y aceptación de condiciones.",
+      "Zoom nativo, tecnología asistiva y composición final pendientes.",
+      "Tipografía y escalas: SD-REM-009.",
+      "Adjudicar incomplete de axe: color-contrast.",
+      "Adjudicar candidatos de recorte/desbordamiento, distinguiendo scroll intencionado."
+    ],
+    "cases": 16,
+    "interactiveStates": 8
+  },
+  {
+    "component": "ButtonSecondary",
+    "verdict": "conforme con condiciones",
+    "violations": [],
+    "incomplete": [],
+    "tickets": [
+      "SD-REM-012"
+    ],
+    "conditions": [
+      "Co-revisión nominal de Diseño de Sistemas y aceptación de condiciones.",
+      "Zoom nativo, tecnología asistiva y composición final pendientes.",
+      "Tipografía y escalas: SD-REM-009.",
+      "Adjudicar candidatos de recorte/desbordamiento, distinguiendo scroll intencionado."
+    ],
+    "cases": 16,
+    "interactiveStates": 8
+  },
+  {
+    "component": "ButtonText",
+    "verdict": "conforme con condiciones",
+    "violations": [],
+    "incomplete": [],
+    "tickets": [
+      "SD-REM-012"
+    ],
+    "conditions": [
+      "Co-revisión nominal de Diseño de Sistemas y aceptación de condiciones.",
+      "Zoom nativo, tecnología asistiva y composición final pendientes.",
+      "Tipografía y escalas: SD-REM-009.",
+      "Adjudicar candidatos de recorte/desbordamiento, distinguiendo scroll intencionado."
+    ],
+    "cases": 16,
+    "interactiveStates": 8
+  },
+  {
+    "component": "Card",
+    "verdict": "conforme con condiciones",
+    "violations": [],
+    "incomplete": [],
+    "tickets": [
+      "SD-REM-012"
+    ],
+    "conditions": [
+      "Co-revisión nominal de Diseño de Sistemas y aceptación de condiciones.",
+      "Zoom nativo, tecnología asistiva y composición final pendientes.",
+      "Tipografía y escalas: SD-REM-009.",
+      "Adjudicar candidatos de recorte/desbordamiento, distinguiendo scroll intencionado."
+    ],
+    "cases": 14,
+    "interactiveStates": 8
+  },
+  {
+    "component": "OperationalCard",
+    "verdict": "conforme con condiciones",
+    "violations": [],
+    "incomplete": [],
+    "tickets": [
+      "SD-REM-012"
+    ],
+    "conditions": [
+      "Co-revisión nominal de Diseño de Sistemas y aceptación de condiciones.",
+      "Zoom nativo, tecnología asistiva y composición final pendientes.",
+      "Tipografía y escalas: SD-REM-009.",
+      "Adjudicar candidatos de recorte/desbordamiento, distinguiendo scroll intencionado."
+    ],
+    "cases": 14,
+    "interactiveStates": 8
+  },
+  {
+    "component": "TripCard",
+    "verdict": "conforme con condiciones",
+    "violations": [],
+    "incomplete": [],
+    "tickets": [
+      "SD-REM-012"
+    ],
+    "conditions": [
+      "Co-revisión nominal de Diseño de Sistemas y aceptación de condiciones.",
+      "Zoom nativo, tecnología asistiva y composición final pendientes.",
+      "Tipografía y escalas: SD-REM-009.",
+      "Adjudicar candidatos de recorte/desbordamiento, distinguiendo scroll intencionado."
+    ],
+    "cases": 14,
+    "interactiveStates": 8
+  },
+  {
+    "component": "FinancialCard",
+    "verdict": "conforme con condiciones",
+    "violations": [],
+    "incomplete": [],
+    "tickets": [
+      "SD-REM-012"
+    ],
+    "conditions": [
+      "Co-revisión nominal de Diseño de Sistemas y aceptación de condiciones.",
+      "Zoom nativo, tecnología asistiva y composición final pendientes.",
+      "Tipografía y escalas: SD-REM-009.",
+      "Adjudicar candidatos de recorte/desbordamiento, distinguiendo scroll intencionado."
+    ],
+    "cases": 14,
+    "interactiveStates": 8
+  },
+  {
+    "component": "AlertCard",
+    "verdict": "conforme con condiciones",
+    "violations": [],
+    "incomplete": [],
+    "tickets": [
+      "SD-REM-012"
+    ],
+    "conditions": [
+      "Co-revisión nominal de Diseño de Sistemas y aceptación de condiciones.",
+      "Zoom nativo, tecnología asistiva y composición final pendientes.",
+      "Tipografía y escalas: SD-REM-009.",
+      "Adjudicar candidatos de recorte/desbordamiento, distinguiendo scroll intencionado."
+    ],
+    "cases": 14,
+    "interactiveStates": 8
+  },
+  {
+    "component": "Chat",
+    "verdict": "no conforme",
+    "violations": [
+      "label-title-only"
+    ],
+    "incomplete": [
+      "aria-prohibited-attr"
+    ],
+    "tickets": [
+      "SD-REM-008"
+    ],
+    "conditions": [
+      "Co-revisión nominal de Diseño de Sistemas y aceptación de condiciones.",
+      "Zoom nativo, tecnología asistiva y composición final pendientes.",
+      "Tipografía y escalas: SD-REM-009.",
+      "Adjudicar incomplete de axe: aria-prohibited-attr.",
+      "Adjudicar candidatos de recorte/desbordamiento, distinguiendo scroll intencionado."
+    ],
+    "cases": 20,
+    "interactiveStates": 8
+  },
+  {
+    "component": "Input",
+    "verdict": "no conforme",
+    "violations": [],
+    "incomplete": [
+      "duplicate-id-aria",
+      "form-field-multiple-labels"
+    ],
+    "tickets": [
+      "SD-REM-004"
+    ],
+    "conditions": [
+      "Co-revisión nominal de Diseño de Sistemas y aceptación de condiciones.",
+      "Zoom nativo, tecnología asistiva y composición final pendientes.",
+      "Tipografía y escalas: SD-REM-009.",
+      "Adjudicar incomplete de axe: duplicate-id-aria, form-field-multiple-labels.",
+      "Adjudicar candidatos de recorte/desbordamiento, distinguiendo scroll intencionado."
+    ],
+    "cases": 22,
+    "interactiveStates": 8
+  },
+  {
+    "component": "Select",
+    "verdict": "no conforme",
+    "violations": [],
+    "incomplete": [
+      "duplicate-id-aria",
+      "form-field-multiple-labels"
+    ],
+    "tickets": [
+      "SD-REM-004"
+    ],
+    "conditions": [
+      "Co-revisión nominal de Diseño de Sistemas y aceptación de condiciones.",
+      "Zoom nativo, tecnología asistiva y composición final pendientes.",
+      "Tipografía y escalas: SD-REM-009.",
+      "Adjudicar incomplete de axe: duplicate-id-aria, form-field-multiple-labels.",
+      "Adjudicar candidatos de recorte/desbordamiento, distinguiendo scroll intencionado."
+    ],
+    "cases": 22,
+    "interactiveStates": 8
+  },
+  {
+    "component": "Textarea",
+    "verdict": "no conforme",
+    "violations": [],
+    "incomplete": [
+      "color-contrast",
+      "duplicate-id-aria",
+      "form-field-multiple-labels"
+    ],
+    "tickets": [
+      "SD-REM-004"
+    ],
+    "conditions": [
+      "Co-revisión nominal de Diseño de Sistemas y aceptación de condiciones.",
+      "Zoom nativo, tecnología asistiva y composición final pendientes.",
+      "Tipografía y escalas: SD-REM-009.",
+      "Adjudicar incomplete de axe: color-contrast, duplicate-id-aria, form-field-multiple-labels.",
+      "Adjudicar candidatos de recorte/desbordamiento, distinguiendo scroll intencionado."
+    ],
+    "cases": 22,
+    "interactiveStates": 8
+  },
+  {
+    "component": "Checkbox",
+    "verdict": "conforme con condiciones",
+    "violations": [],
+    "incomplete": [],
+    "tickets": [
+      "SD-REM-012"
+    ],
+    "conditions": [
+      "Co-revisión nominal de Diseño de Sistemas y aceptación de condiciones.",
+      "Zoom nativo, tecnología asistiva y composición final pendientes.",
+      "Tipografía y escalas: SD-REM-009.",
+      "Adjudicar candidatos de recorte/desbordamiento, distinguiendo scroll intencionado."
+    ],
+    "cases": 16,
+    "interactiveStates": 8
+  },
+  {
+    "component": "Radio",
+    "verdict": "conforme con condiciones",
+    "violations": [],
+    "incomplete": [],
+    "tickets": [
+      "SD-REM-012"
+    ],
+    "conditions": [
+      "Co-revisión nominal de Diseño de Sistemas y aceptación de condiciones.",
+      "Zoom nativo, tecnología asistiva y composición final pendientes.",
+      "Tipografía y escalas: SD-REM-009.",
+      "Adjudicar candidatos de recorte/desbordamiento, distinguiendo scroll intencionado."
+    ],
+    "cases": 16,
+    "interactiveStates": 8
+  },
+  {
+    "component": "Toggle",
+    "verdict": "conforme con condiciones",
+    "violations": [],
+    "incomplete": [],
+    "tickets": [
+      "SD-REM-012"
+    ],
+    "conditions": [
+      "Co-revisión nominal de Diseño de Sistemas y aceptación de condiciones.",
+      "Zoom nativo, tecnología asistiva y composición final pendientes.",
+      "Tipografía y escalas: SD-REM-009.",
+      "Adjudicar candidatos de recorte/desbordamiento, distinguiendo scroll intencionado."
+    ],
+    "cases": 16,
+    "interactiveStates": 8
+  },
+  {
+    "component": "CredencialConductor",
+    "verdict": "conforme con condiciones",
+    "violations": [
+      "heading-order"
+    ],
+    "incomplete": [
+      "color-contrast"
+    ],
+    "tickets": [
+      "SD-REM-012"
+    ],
+    "conditions": [
+      "Co-revisión nominal de Diseño de Sistemas y aceptación de condiciones.",
+      "Zoom nativo, tecnología asistiva y composición final pendientes.",
+      "Tipografía y escalas: SD-REM-009.",
+      "Adjudicar incomplete de axe: color-contrast.",
+      "Resolver o justificar jerarquía de títulos en el consumidor.",
+      "Adjudicar candidatos de recorte/desbordamiento, distinguiendo scroll intencionado."
+    ],
+    "cases": 12,
+    "interactiveStates": 0
+  },
+  {
+    "component": "ReporteTraslado",
+    "verdict": "conforme con condiciones",
+    "violations": [],
+    "incomplete": [],
+    "tickets": [
+      "SD-REM-012"
+    ],
+    "conditions": [
+      "Co-revisión nominal de Diseño de Sistemas y aceptación de condiciones.",
+      "Zoom nativo, tecnología asistiva y composición final pendientes.",
+      "Tipografía y escalas: SD-REM-009.",
+      "Adjudicar candidatos de recorte/desbordamiento, distinguiendo scroll intencionado."
+    ],
+    "cases": 12,
+    "interactiveStates": 0
+  },
+  {
+    "component": "ActaEntrega",
+    "verdict": "conforme con condiciones",
+    "violations": [],
+    "incomplete": [],
+    "tickets": [
+      "SD-REM-012"
+    ],
+    "conditions": [
+      "Co-revisión nominal de Diseño de Sistemas y aceptación de condiciones.",
+      "Zoom nativo, tecnología asistiva y composición final pendientes.",
+      "Tipografía y escalas: SD-REM-009.",
+      "Adjudicar candidatos de recorte/desbordamiento, distinguiendo scroll intencionado."
+    ],
+    "cases": 12,
+    "interactiveStates": 0
+  },
+  {
+    "component": "EstadoPagoConductor",
+    "verdict": "conforme con condiciones",
+    "violations": [],
+    "incomplete": [],
+    "tickets": [
+      "SD-REM-012"
+    ],
+    "conditions": [
+      "Co-revisión nominal de Diseño de Sistemas y aceptación de condiciones.",
+      "Zoom nativo, tecnología asistiva y composición final pendientes.",
+      "Tipografía y escalas: SD-REM-009.",
+      "Adjudicar candidatos de recorte/desbordamiento, distinguiendo scroll intencionado."
+    ],
+    "cases": 12,
+    "interactiveStates": 0
+  },
+  {
+    "component": "DriverEarning",
+    "verdict": "conforme con condiciones",
+    "violations": [],
+    "incomplete": [],
+    "tickets": [
+      "SD-REM-012"
+    ],
+    "conditions": [
+      "Co-revisión nominal de Diseño de Sistemas y aceptación de condiciones.",
+      "Zoom nativo, tecnología asistiva y composición final pendientes.",
+      "Tipografía y escalas: SD-REM-009.",
+      "Adjudicar candidatos de recorte/desbordamiento, distinguiendo scroll intencionado."
+    ],
+    "cases": 26,
+    "interactiveStates": 0
+  },
+  {
+    "component": "EmptyState",
+    "verdict": "conforme con condiciones",
+    "violations": [
+      "heading-order"
+    ],
+    "incomplete": [],
+    "tickets": [
+      "SD-REM-012"
+    ],
+    "conditions": [
+      "Co-revisión nominal de Diseño de Sistemas y aceptación de condiciones.",
+      "Zoom nativo, tecnología asistiva y composición final pendientes.",
+      "Tipografía y escalas: SD-REM-009.",
+      "Resolver o justificar jerarquía de títulos en el consumidor.",
+      "Adjudicar candidatos de recorte/desbordamiento, distinguiendo scroll intencionado."
+    ],
+    "cases": 12,
+    "interactiveStates": 0
+  },
+  {
+    "component": "Skeleton",
+    "verdict": "conforme con condiciones",
+    "violations": [],
+    "incomplete": [],
+    "tickets": [
+      "SD-REM-012"
+    ],
+    "conditions": [
+      "Co-revisión nominal de Diseño de Sistemas y aceptación de condiciones.",
+      "Zoom nativo, tecnología asistiva y composición final pendientes.",
+      "Tipografía y escalas: SD-REM-009.",
+      "Adjudicar candidatos de recorte/desbordamiento, distinguiendo scroll intencionado."
+    ],
+    "cases": 16,
+    "interactiveStates": 0
+  },
+  {
+    "component": "EstadoBadge",
+    "verdict": "no conforme",
+    "violations": [],
+    "incomplete": [],
+    "tickets": [
+      "SD-REM-011"
+    ],
+    "conditions": [
+      "Co-revisión nominal de Diseño de Sistemas y aceptación de condiciones.",
+      "Zoom nativo, tecnología asistiva y composición final pendientes.",
+      "Tipografía y escalas: SD-REM-009."
+    ],
+    "cases": 24,
+    "interactiveStates": 0
+  },
+  {
+    "component": "MobileProgress",
+    "verdict": "no conforme",
+    "violations": [
+      "label-content-name-mismatch"
+    ],
+    "incomplete": [
+      "color-contrast"
+    ],
+    "tickets": [
+      "SD-REM-011"
+    ],
+    "conditions": [
+      "Co-revisión nominal de Diseño de Sistemas y aceptación de condiciones.",
+      "Zoom nativo, tecnología asistiva y composición final pendientes.",
+      "Tipografía y escalas: SD-REM-009.",
+      "Adjudicar incomplete de axe: color-contrast.",
+      "Adjudicar candidatos de recorte/desbordamiento, distinguiendo scroll intencionado."
+    ],
+    "cases": 18,
+    "interactiveStates": 8
+  },
+  {
+    "component": "DesktopStateStepper",
+    "verdict": "conforme con condiciones",
+    "violations": [],
+    "incomplete": [],
+    "tickets": [
+      "SD-REM-012"
+    ],
+    "conditions": [
+      "Co-revisión nominal de Diseño de Sistemas y aceptación de condiciones.",
+      "Zoom nativo, tecnología asistiva y composición final pendientes.",
+      "Tipografía y escalas: SD-REM-009.",
+      "Adjudicar candidatos de recorte/desbordamiento, distinguiendo scroll intencionado."
+    ],
+    "cases": 18,
+    "interactiveStates": 0
+  },
+  {
+    "component": "EstadoStepper",
+    "verdict": "no conforme",
+    "violations": [
+      "label-content-name-mismatch"
+    ],
+    "incomplete": [
+      "color-contrast"
+    ],
+    "tickets": [
+      "SD-REM-011"
+    ],
+    "conditions": [
+      "Co-revisión nominal de Diseño de Sistemas y aceptación de condiciones.",
+      "Zoom nativo, tecnología asistiva y composición final pendientes.",
+      "Tipografía y escalas: SD-REM-009.",
+      "Adjudicar incomplete de axe: color-contrast.",
+      "Adjudicar candidatos de recorte/desbordamiento, distinguiendo scroll intencionado."
+    ],
+    "cases": 18,
+    "interactiveStates": 8
+  },
+  {
+    "component": "EstatusBadgeEconomico",
+    "verdict": "conforme con condiciones",
+    "violations": [],
+    "incomplete": [],
+    "tickets": [
+      "SD-REM-012"
+    ],
+    "conditions": [
+      "Co-revisión nominal de Diseño de Sistemas y aceptación de condiciones.",
+      "Zoom nativo, tecnología asistiva y composición final pendientes.",
+      "Tipografía y escalas: SD-REM-009."
+    ],
+    "cases": 26,
+    "interactiveStates": 0
+  },
+  {
+    "component": "Field",
+    "verdict": "conforme con condiciones",
+    "violations": [],
+    "incomplete": [],
+    "tickets": [
+      "SD-REM-012"
+    ],
+    "conditions": [
+      "Co-revisión nominal de Diseño de Sistemas y aceptación de condiciones.",
+      "Zoom nativo, tecnología asistiva y composición final pendientes.",
+      "Tipografía y escalas: SD-REM-009.",
+      "Adjudicar candidatos de recorte/desbordamiento, distinguiendo scroll intencionado."
+    ],
+    "cases": 22,
+    "interactiveStates": 8
+  },
+  {
+    "component": "FinancialAmount",
+    "verdict": "conforme con condiciones",
+    "violations": [],
+    "incomplete": [],
+    "tickets": [
+      "SD-REM-012"
+    ],
+    "conditions": [
+      "Co-revisión nominal de Diseño de Sistemas y aceptación de condiciones.",
+      "Zoom nativo, tecnología asistiva y composición final pendientes.",
+      "Tipografía y escalas: SD-REM-009.",
+      "Adjudicar candidatos de recorte/desbordamiento, distinguiendo scroll intencionado."
+    ],
+    "cases": 26,
+    "interactiveStates": 0
+  },
+  {
+    "component": "Icono",
+    "verdict": "conforme con condiciones",
+    "violations": [],
+    "incomplete": [],
+    "tickets": [
+      "SD-REM-012"
+    ],
+    "conditions": [
+      "Co-revisión nominal de Diseño de Sistemas y aceptación de condiciones.",
+      "Zoom nativo, tecnología asistiva y composición final pendientes.",
+      "Tipografía y escalas: SD-REM-009."
+    ],
+    "cases": 12,
+    "interactiveStates": 0
+  },
+  {
+    "component": "SimboloVectorial",
+    "verdict": "conforme con condiciones",
+    "violations": [],
+    "incomplete": [
+      "color-contrast"
+    ],
+    "tickets": [
+      "SD-REM-012"
+    ],
+    "conditions": [
+      "Co-revisión nominal de Diseño de Sistemas y aceptación de condiciones.",
+      "Zoom nativo, tecnología asistiva y composición final pendientes.",
+      "Tipografía y escalas: SD-REM-009.",
+      "Adjudicar incomplete de axe: color-contrast."
+    ],
+    "cases": 12,
+    "interactiveStates": 0
+  },
+  {
+    "component": "LogoMarca",
+    "verdict": "conforme con condiciones",
+    "violations": [],
+    "incomplete": [
+      "color-contrast"
+    ],
+    "tickets": [
+      "SD-REM-012"
+    ],
+    "conditions": [
+      "Co-revisión nominal de Diseño de Sistemas y aceptación de condiciones.",
+      "Zoom nativo, tecnología asistiva y composición final pendientes.",
+      "Tipografía y escalas: SD-REM-009.",
+      "Adjudicar incomplete de axe: color-contrast.",
+      "Adjudicar candidatos de recorte/desbordamiento, distinguiendo scroll intencionado."
+    ],
+    "cases": 22,
+    "interactiveStates": 0
+  },
+  {
+    "component": "MapaEstatico",
+    "verdict": "conforme con condiciones",
+    "violations": [],
+    "incomplete": [],
+    "tickets": [
+      "SD-REM-012"
+    ],
+    "conditions": [
+      "Co-revisión nominal de Diseño de Sistemas y aceptación de condiciones.",
+      "Zoom nativo, tecnología asistiva y composición final pendientes.",
+      "Tipografía y escalas: SD-REM-009.",
+      "Adjudicar candidatos de recorte/desbordamiento, distinguiendo scroll intencionado."
+    ],
+    "cases": 12,
+    "interactiveStates": 0
+  },
+  {
+    "component": "MobileBadge",
+    "verdict": "conforme con condiciones",
+    "violations": [],
+    "incomplete": [],
+    "tickets": [
+      "SD-REM-012"
+    ],
+    "conditions": [
+      "Co-revisión nominal de Diseño de Sistemas y aceptación de condiciones.",
+      "Zoom nativo, tecnología asistiva y composición final pendientes.",
+      "Tipografía y escalas: SD-REM-009."
+    ],
+    "cases": 20,
+    "interactiveStates": 0
+  },
+  {
+    "component": "MobileButton",
+    "verdict": "no conforme",
+    "violations": [],
+    "incomplete": [],
+    "tickets": [
+      "SD-REM-003"
+    ],
+    "conditions": [
+      "Co-revisión nominal de Diseño de Sistemas y aceptación de condiciones.",
+      "Zoom nativo, tecnología asistiva y composición final pendientes.",
+      "Tipografía y escalas: SD-REM-009.",
+      "Adjudicar candidatos de recorte/desbordamiento, distinguiendo scroll intencionado."
+    ],
+    "cases": 22,
+    "interactiveStates": 8
+  },
+  {
+    "component": "MobileCard",
+    "verdict": "conforme con condiciones",
+    "violations": [],
+    "incomplete": [],
+    "tickets": [
+      "SD-REM-012"
+    ],
+    "conditions": [
+      "Co-revisión nominal de Diseño de Sistemas y aceptación de condiciones.",
+      "Zoom nativo, tecnología asistiva y composición final pendientes.",
+      "Tipografía y escalas: SD-REM-009.",
+      "Adjudicar candidatos de recorte/desbordamiento, distinguiendo scroll intencionado."
+    ],
+    "cases": 14,
+    "interactiveStates": 8
+  },
+  {
+    "component": "MobileHeader",
+    "verdict": "no conforme",
+    "violations": [],
+    "incomplete": [],
+    "tickets": [
+      "SD-REM-006"
+    ],
+    "conditions": [
+      "Co-revisión nominal de Diseño de Sistemas y aceptación de condiciones.",
+      "Zoom nativo, tecnología asistiva y composición final pendientes.",
+      "Tipografía y escalas: SD-REM-009.",
+      "Adjudicar candidatos de recorte/desbordamiento, distinguiendo scroll intencionado."
+    ],
+    "cases": 14,
+    "interactiveStates": 8
+  },
+  {
+    "component": "MobileRow",
+    "verdict": "no conforme",
+    "violations": [],
+    "incomplete": [],
+    "tickets": [
+      "SD-REM-007"
+    ],
+    "conditions": [
+      "Co-revisión nominal de Diseño de Sistemas y aceptación de condiciones.",
+      "Zoom nativo, tecnología asistiva y composición final pendientes.",
+      "Tipografía y escalas: SD-REM-009.",
+      "Adjudicar candidatos de recorte/desbordamiento, distinguiendo scroll intencionado."
+    ],
+    "cases": 20,
+    "interactiveStates": 8
+  },
+  {
+    "component": "MobileListGroup",
+    "verdict": "conforme con condiciones",
+    "violations": [],
+    "incomplete": [],
+    "tickets": [
+      "SD-REM-012"
+    ],
+    "conditions": [
+      "Co-revisión nominal de Diseño de Sistemas y aceptación de condiciones.",
+      "Zoom nativo, tecnología asistiva y composición final pendientes.",
+      "Tipografía y escalas: SD-REM-009.",
+      "Adjudicar candidatos de recorte/desbordamiento, distinguiendo scroll intencionado."
+    ],
+    "cases": 12,
+    "interactiveStates": 8
+  },
+  {
+    "component": "MobileShell",
+    "verdict": "conforme con condiciones",
+    "violations": [],
+    "incomplete": [
+      "color-contrast"
+    ],
+    "tickets": [
+      "SD-REM-012"
+    ],
+    "conditions": [
+      "Co-revisión nominal de Diseño de Sistemas y aceptación de condiciones.",
+      "Zoom nativo, tecnología asistiva y composición final pendientes.",
+      "Tipografía y escalas: SD-REM-009.",
+      "Adjudicar incomplete de axe: color-contrast.",
+      "Adjudicar candidatos de recorte/desbordamiento, distinguiendo scroll intencionado."
+    ],
+    "cases": 12,
+    "interactiveStates": 8
+  },
+  {
+    "component": "Modal",
+    "verdict": "no conforme",
+    "violations": [],
+    "incomplete": [
+      "color-contrast"
+    ],
+    "tickets": [
+      "SD-REM-002",
+      "SD-REM-006"
+    ],
+    "conditions": [
+      "Co-revisión nominal de Diseño de Sistemas y aceptación de condiciones.",
+      "Zoom nativo, tecnología asistiva y composición final pendientes.",
+      "Tipografía y escalas: SD-REM-009.",
+      "Adjudicar incomplete de axe: color-contrast.",
+      "Adjudicar candidatos de recorte/desbordamiento, distinguiendo scroll intencionado."
+    ],
+    "cases": 18,
+    "interactiveStates": 8
+  },
+  {
+    "component": "BottomNav",
+    "verdict": "conforme con condiciones",
+    "violations": [],
+    "incomplete": [],
+    "tickets": [
+      "SD-REM-012"
+    ],
+    "conditions": [
+      "Co-revisión nominal de Diseño de Sistemas y aceptación de condiciones.",
+      "Zoom nativo, tecnología asistiva y composición final pendientes.",
+      "Tipografía y escalas: SD-REM-009.",
+      "Adjudicar candidatos de recorte/desbordamiento, distinguiendo scroll intencionado."
+    ],
+    "cases": 12,
+    "interactiveStates": 8
+  },
+  {
+    "component": "Tabs",
+    "verdict": "no conforme",
+    "violations": [],
+    "incomplete": [
+      "color-contrast"
+    ],
+    "tickets": [
+      "SD-REM-005"
+    ],
+    "conditions": [
+      "Co-revisión nominal de Diseño de Sistemas y aceptación de condiciones.",
+      "Zoom nativo, tecnología asistiva y composición final pendientes.",
+      "Tipografía y escalas: SD-REM-009.",
+      "Adjudicar incomplete de axe: color-contrast.",
+      "Adjudicar candidatos de recorte/desbordamiento, distinguiendo scroll intencionado."
+    ],
+    "cases": 12,
+    "interactiveStates": 8
+  },
+  {
+    "component": "Sidebar",
+    "verdict": "conforme con condiciones",
+    "violations": [],
+    "incomplete": [
+      "color-contrast"
+    ],
+    "tickets": [
+      "SD-REM-012"
+    ],
+    "conditions": [
+      "Co-revisión nominal de Diseño de Sistemas y aceptación de condiciones.",
+      "Zoom nativo, tecnología asistiva y composición final pendientes.",
+      "Tipografía y escalas: SD-REM-009.",
+      "Adjudicar incomplete de axe: color-contrast.",
+      "Adjudicar candidatos de recorte/desbordamiento, distinguiendo scroll intencionado."
+    ],
+    "cases": 12,
+    "interactiveStates": 8
+  },
+  {
+    "component": "Avatar",
+    "verdict": "conforme con condiciones",
+    "violations": [],
+    "incomplete": [],
+    "tickets": [
+      "SD-REM-012"
+    ],
+    "conditions": [
+      "Co-revisión nominal de Diseño de Sistemas y aceptación de condiciones.",
+      "Zoom nativo, tecnología asistiva y composición final pendientes.",
+      "Tipografía y escalas: SD-REM-009."
+    ],
+    "cases": 14,
+    "interactiveStates": 0
+  },
+  {
+    "component": "NextOperationalAction",
+    "verdict": "no conforme",
+    "violations": [],
+    "incomplete": [
+      "color-contrast"
+    ],
+    "tickets": [
+      "SD-REM-007"
+    ],
+    "conditions": [
+      "Co-revisión nominal de Diseño de Sistemas y aceptación de condiciones.",
+      "Zoom nativo, tecnología asistiva y composición final pendientes.",
+      "Tipografía y escalas: SD-REM-009.",
+      "Adjudicar incomplete de axe: color-contrast.",
+      "Adjudicar candidatos de recorte/desbordamiento, distinguiendo scroll intencionado."
+    ],
+    "cases": 18,
+    "interactiveStates": 8
+  },
+  {
+    "component": "PassportCard",
+    "verdict": "conforme con condiciones",
+    "violations": [],
+    "incomplete": [
+      "color-contrast"
+    ],
+    "tickets": [
+      "SD-REM-012"
+    ],
+    "conditions": [
+      "Co-revisión nominal de Diseño de Sistemas y aceptación de condiciones.",
+      "Zoom nativo, tecnología asistiva y composición final pendientes.",
+      "Tipografía y escalas: SD-REM-009.",
+      "Adjudicar incomplete de axe: color-contrast.",
+      "Adjudicar candidatos de recorte/desbordamiento, distinguiendo scroll intencionado."
+    ],
+    "cases": 14,
+    "interactiveStates": 8
+  },
+  {
+    "component": "RuumHeader",
+    "verdict": "no conforme",
+    "violations": [
+      "label-content-name-mismatch"
+    ],
+    "incomplete": [],
+    "tickets": [
+      "SD-REM-011"
+    ],
+    "conditions": [
+      "Co-revisión nominal de Diseño de Sistemas y aceptación de condiciones.",
+      "Zoom nativo, tecnología asistiva y composición final pendientes.",
+      "Tipografía y escalas: SD-REM-009.",
+      "Adjudicar candidatos de recorte/desbordamiento, distinguiendo scroll intencionado."
+    ],
+    "cases": 12,
+    "interactiveStates": 8
+  },
+  {
+    "component": "SelloConductor",
+    "verdict": "conforme con condiciones",
+    "violations": [],
+    "incomplete": [
+      "color-contrast"
+    ],
+    "tickets": [
+      "SD-REM-012"
+    ],
+    "conditions": [
+      "Co-revisión nominal de Diseño de Sistemas y aceptación de condiciones.",
+      "Zoom nativo, tecnología asistiva y composición final pendientes.",
+      "Tipografía y escalas: SD-REM-009.",
+      "Adjudicar incomplete de axe: color-contrast."
+    ],
+    "cases": 14,
+    "interactiveStates": 0
+  },
+  {
+    "component": "StatusChip",
+    "verdict": "conforme con condiciones",
+    "violations": [],
+    "incomplete": [],
+    "tickets": [
+      "SD-REM-012"
+    ],
+    "conditions": [
+      "Co-revisión nominal de Diseño de Sistemas y aceptación de condiciones.",
+      "Zoom nativo, tecnología asistiva y composición final pendientes.",
+      "Tipografía y escalas: SD-REM-009."
+    ],
+    "cases": 34,
+    "interactiveStates": 0
+  },
+  {
+    "component": "StreetContainer",
+    "verdict": "conforme con condiciones",
+    "violations": [],
+    "incomplete": [
+      "color-contrast"
+    ],
+    "tickets": [
+      "SD-REM-012"
+    ],
+    "conditions": [
+      "Co-revisión nominal de Diseño de Sistemas y aceptación de condiciones.",
+      "Zoom nativo, tecnología asistiva y composición final pendientes.",
+      "Tipografía y escalas: SD-REM-009.",
+      "Adjudicar incomplete de axe: color-contrast.",
+      "Adjudicar candidatos de recorte/desbordamiento, distinguiendo scroll intencionado."
+    ],
+    "cases": 12,
+    "interactiveStates": 8
+  },
+  {
+    "component": "SafetyButton",
+    "verdict": "conforme con condiciones",
+    "violations": [],
+    "incomplete": [],
+    "tickets": [
+      "SD-REM-012"
+    ],
+    "conditions": [
+      "Co-revisión nominal de Diseño de Sistemas y aceptación de condiciones.",
+      "Zoom nativo, tecnología asistiva y composición final pendientes.",
+      "Tipografía y escalas: SD-REM-009."
+    ],
+    "cases": 12,
+    "interactiveStates": 8
+  },
+  {
+    "component": "TextInputUppercaseBridge",
+    "verdict": "conforme con condiciones",
+    "violations": [],
+    "incomplete": [],
+    "tickets": [
+      "SD-REM-012"
+    ],
+    "conditions": [
+      "Co-revisión nominal de Diseño de Sistemas y aceptación de condiciones.",
+      "Zoom nativo, tecnología asistiva y composición final pendientes.",
+      "Tipografía y escalas: SD-REM-009.",
+      "Adjudicar candidatos de recorte/desbordamiento, distinguiendo scroll intencionado."
+    ],
+    "cases": 12,
+    "interactiveStates": 8
+  }
+]

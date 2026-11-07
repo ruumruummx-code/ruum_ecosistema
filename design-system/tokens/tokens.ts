@@ -8,7 +8,7 @@ export const tokens = {
   color: {
     navy: "#0A2342",
     teal: "#00D1D1",
-    tealDeep: "#008B8B",
+    tealDeep: "#007575",
     blue: "#0066FF",
     action: "#0066FF",
     surface: "#E8EEF4",
@@ -31,7 +31,7 @@ export const tokens = {
     errorText: "#C23648",
   },
   gradient: {
-    cta: ["#008B8B", "#0066FF"] as const,
+    cta: ["#007575", "#0066FF"] as const,
     route: ["#00D1D1", "#0066FF"] as const,
   },
   font: {

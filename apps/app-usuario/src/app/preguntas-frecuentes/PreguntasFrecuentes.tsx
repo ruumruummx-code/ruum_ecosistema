@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
+import { InformacionSoporte } from "../soporte/InformacionSoporte";
 import { MobileHeader } from "@ruum/ui";
 import { MobileBottomSheet } from "../../components/MobileBottomSheet";
 import styles from "./faq.module.css";
@@ -224,7 +225,7 @@ const FAQS: FaqItemData[] = [
           <li>Selecciona <strong>&quot;Reportar daño o incidente&quot;</strong></li>
           <li>Adjunta fotografías y describe el problema</li>
         </ul>
-        <p className="mt-2">Nuestro equipo te contactará de inmediato. También puedes llamar a soporte 24/7 desde el botón flotante.</p>
+        <div className="mt-2"><InformacionSoporte /></div>
       </>
     ),
   },

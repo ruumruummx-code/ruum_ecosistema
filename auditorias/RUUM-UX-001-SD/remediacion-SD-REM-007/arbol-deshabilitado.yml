@@ -1,0 +1,14 @@
+- main:
+  - heading "SD-REM-007 · Navegación bloqueada" [level=1]
+  - button "Alternar disponibilidad"
+  - link "Cancelar traslado" [disabled]
+  - link "Confirmar con adaptador" [disabled]
+  - link "Pagar con alias" [disabled]
+  - button "Acción de fila" [disabled]
+  - region "Siguiente acción":
+    - heading "Siguiente acción" [level=2]
+    - paragraph: Comprueba la disponibilidad antes de continuar.
+    - link "Confirmar pago" [disabled]
+    - link "Cancelar operación" [disabled]
+  - button "Fin de recorrido"
+  - paragraph: Los controles se habilitan con «Alternar disponibilidad».

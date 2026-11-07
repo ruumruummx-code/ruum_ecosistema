@@ -118,5 +118,22 @@ describe("mobile ui components — MobileHeader & MobileButton", () => {
     expect(loading).toContain('aria-busy="true"');
     expect(loading).toContain("disabled");
     expect(loading).toContain("animate-spin");
+    expect(loading).toContain("Guardando...");
+    expect(loading).toContain('aria-hidden="true"');
+  });
+
+  it("conserva contenido React y respeta un nombre explícito durante la carga", () => {
+    const loading = renderToStaticMarkup(
+      h(MobileButton, {
+        loading: true,
+        "aria-label": "Confirmar traslado",
+        "aria-busy": false,
+        children: h("strong", null, "Confirmar traslado"),
+      })
+    );
+    expect(loading).toContain("<strong>Confirmar traslado</strong>");
+    expect(loading.match(/aria-label=/g)).toHaveLength(1);
+    expect(loading).toContain('aria-label="Confirmar traslado"');
+    expect(loading).toContain('aria-busy="true"');
   });
 });

@@ -22,7 +22,7 @@ describe("design-system v1.0 — tokens", () => {
 
   it("expone todos los tokens obligatorios", () => {
     expect(t.navy).toBe("#0A2342");
-    expect(t["teal-deep"]).toBe("#008B8B");
+    expect(t["teal-deep"]).toBe("#007575");
     expect(t.action).toBe("#0066FF");
     expect(tokens.size.touch).toBe(44);
     expect(tokens.size["touch-street"]).toBe(56);
@@ -35,10 +35,8 @@ describe("design-system v1.0 — tokens", () => {
     expect(contraste(t["warning-text"], t["warning-bg"])).toBeGreaterThanOrEqual(4.5);
     expect(contraste(t.error, t["error-bg"])).toBeGreaterThanOrEqual(4.5);
     expect(contraste(t["text-secondary"], "#FFFFFF")).toBeGreaterThanOrEqual(4.5);
-    // Discrepancia verificada: el Libro (cap. 13) declara teal-deep 4.87:1 sobre blanco,
-    // pero el cálculo WCAG da ~4.15:1. Se usa teal-deep solo para texto grande (≥24px o
-    // 18.66 bold, umbral 3:1) y elementos UI; el texto corrido usa navy/muted/action.
-    expect(contraste(t["teal-deep"], "#FFFFFF")).toBeGreaterThanOrEqual(3.0);
+    // SD-REM-001: teal-deep ajustado a #007575 para alcanzar 4.97:1 sobre blanco (≥4.5:1 WCAG AA texto normal).
+    expect(contraste(t["teal-deep"], "#FFFFFF")).toBeGreaterThanOrEqual(4.5);
     expect(contraste(t.action, "#FFFFFF")).toBeGreaterThanOrEqual(4.5);
   });
 

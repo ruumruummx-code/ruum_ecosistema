@@ -52,7 +52,7 @@
   --color-action-primary: var(--ruum-action-primary);
   --color-action-primary-hover: var(--ruum-action-primary-hover);
   --color-action-primary-active: var(--ruum-action-primary-active);
-  --color-route-action: var(--ruum-route);
+  --color-route-action: var(--ruum-route-action, var(--ruum-route));
   --color-route-action-hover: var(--ruum-route-hover);
   --color-route-action-active: var(--ruum-route-active);
   --color-success: var(--ruum-success);
@@ -144,7 +144,7 @@
   /* Design System v1.0 — Libro de Marca V2.1 cap. 13/26. Fuente: design-system/tokens/tokens.json */
   --ruum-navy: #0a2342;
   --ruum-teal: #00d1d1;
-  --ruum-teal-deep: #008b8b;
+  --ruum-teal-deep: #007575;
   --ruum-blue: #0066ff;
   --ruum-muted: #566889;
   --ruum-neutral-bg: #eef2f8;
@@ -161,7 +161,7 @@
   --ruum-emergency-text: #b3261e;
   --ruum-safety-button-bg: #b3261e;
   --ruum-safety-button-text: #ffffff;
-  --ruum-gradient-cta: linear-gradient(90deg, #008b8b 0%, #0066ff 100%);
+  --ruum-gradient-cta: linear-gradient(90deg, #007575 0%, #0066ff 100%);
   --ruum-gradient-route: linear-gradient(90deg, #00d1d1 0%, #0066ff 100%);
   --ruum-font-family: "Inter", Arial, Calibri, sans-serif;
   --ruum-font-display: 40px;
@@ -234,6 +234,7 @@
 
   /* Route & Status V2.1 */
   --ruum-route: #0066ff;
+  --ruum-route-action: #1461e0;
   --ruum-route-contrast: #0043a8;
   --ruum-route-hover: #0052cc;
   --ruum-route-active: #0043a8;
@@ -254,7 +255,7 @@
   --ruum-logo-rr: #0a2342;
   --ruum-logo-bg: #ffffff;
   --ruum-logo-text: #0a2342;
-  --ruum-logo-descriptor: #008b8b;
+  --ruum-logo-descriptor: #007575;
 
   /* Radios V2.1 */
   --ruum-radius-sm: 8px;
@@ -285,14 +286,14 @@
    * Documentos operativos siempre claros: usar .ruum-force-light. */
   --ruum-navy: #0a2342;
   --ruum-teal: #00d1d1;
-  --ruum-teal-deep: #00b3b3;
+  --ruum-teal-deep: #007575;
   --ruum-blue: #4d94ff;
   --ruum-action: #4d94ff;
   --ruum-action-hover: #6ba8ff;
   --ruum-action-active: #6ba8ff;
   --ruum-surface-brand: #0a2342;
   --ruum-muted: #a8b5cc;
-  --ruum-border-input: #2d4f73;
+  --ruum-border-input: #527ca8;
   --ruum-border: #1a3a5c;
 
   --ruum-neutral-bg: #1a2e4a;
@@ -353,13 +354,14 @@
   --ruum-focus-ring: rgba(77, 148, 255, 0.35);
 
   --ruum-route: #4d94ff;
+  --ruum-route-action: #4d94ff;
   --ruum-route-contrast: #6ba8ff;
   --ruum-route-hover: #6ba8ff;
   --ruum-route-active: #6ba8ff;
 
-  --ruum-danger: #ff6b7a;
-  --ruum-danger-hover: #ff6b7a;
-  --ruum-danger-active: #ff6b7a;
+  --ruum-danger: #c23648;
+  --ruum-danger-hover: #a32c3c;
+  --ruum-danger-active: #86232f;
   --ruum-info: #6ba8ff;
 
   --ruum-gradient-action: var(--ruum-gradient-cta);
@@ -437,9 +439,9 @@
   --ruum-emergency-text: #b3261e;
   --ruum-safety-button-bg: #b3261e;
   --ruum-safety-button-text: #ffffff;
-  --ruum-teal-deep: #008b8b;
+  --ruum-teal-deep: #007575;
   --ruum-focus: #0066ff;
-  --ruum-gradient-cta: linear-gradient(90deg, #008b8b 0%, #0066ff 100%);
+  --ruum-gradient-cta: linear-gradient(90deg, #007575 0%, #0066ff 100%);
   --ruum-gradient-action: var(--ruum-gradient-cta);
   --ruum-overlay: rgba(10, 35, 66, 0.6);
 }

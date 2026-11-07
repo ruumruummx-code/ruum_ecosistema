@@ -128,10 +128,18 @@ export function MobileRow({
     className,
   ].join(" ");
 
+  // SD-REM-007: el destino deshabilitado conserva semántica, sin navegación ni foco.
+  if (href && disabled) {
+    return <span role="link" aria-disabled="true" className={clasesFila}>{contenido}</span>;
+  }
+
   if (href) {
     const Componente = enlaceComponente || linkComponent || "a";
     return (
-      <Componente href={href} className={clasesFila}>
+      <Componente
+        href={href}
+        className={clasesFila}
+      >
         {contenido}
       </Componente>
     );
@@ -139,7 +147,7 @@ export function MobileRow({
 
   if (onClick) {
     return (
-      <button type="button" onClick={onClick} disabled={disabled} className={clasesFila}>
+      <button type="button" onClick={onClick} disabled={disabled} aria-disabled={disabled || undefined} className={clasesFila}>
         {contenido}
       </button>
     );

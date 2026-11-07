@@ -1,4 +1,6 @@
-import type { ReactNode } from "react";
+"use client";
+
+import { useId, type ReactNode } from "react";
 
 /** Controles de formulario V1.0: h 48, borde 7A8DAE, radio 12, foco azul + anillo, error C23648 + ícono. */
 const INPUT =
@@ -20,17 +22,20 @@ export function Input({
   error,
   ayuda,
   id,
+  "aria-describedby": describedBy,
   className = "",
   ...props
 }: React.InputHTMLAttributes<HTMLInputElement> & { etiqueta: string; error?: string; ayuda?: ReactNode }) {
-  const inputId = id ?? props.name ?? "input";
+  const generatedId = useId();
+  const inputId = id || generatedId;
+  const description = [describedBy, ayuda ? `${inputId}-help` : undefined, error ? `${inputId}-error` : undefined].filter(Boolean).join(" ") || undefined;
   return (
     <div className="flex flex-col gap-1.5">
       <label htmlFor={inputId} className="font-body text-[13px] font-semibold text-[var(--ruum-text)]">
         {etiqueta}
       </label>
-      <input id={inputId} className={`${INPUT} ${error ? "border-[var(--ruum-error)]" : ""} ${className}`} aria-invalid={Boolean(error)} aria-describedby={error ? `${inputId}-error` : undefined} {...props} />
-      {ayuda ? <p className="font-body text-sm text-[var(--ruum-text-secondary)]">{ayuda}</p> : null}
+      <input id={inputId} className={`${INPUT} ${error ? "border-[var(--ruum-error)]" : ""} ${className}`} aria-invalid={Boolean(error)} aria-describedby={description} {...props} />
+      {ayuda ? <p id={`${inputId}-help`} className="font-body text-sm text-[var(--ruum-text-secondary)]">{ayuda}</p> : null}
       {error ? <ErrorLine id={`${inputId}-error`} texto={error} /> : null}
     </div>
   );
@@ -39,20 +44,25 @@ export function Input({
 export function Select({
   etiqueta,
   error,
+  ayuda,
   children,
   id,
+  "aria-describedby": describedBy,
   className = "",
   ...props
-}: React.SelectHTMLAttributes<HTMLSelectElement> & { etiqueta: string; error?: string; children: ReactNode }) {
-  const inputId = id ?? props.name ?? "select";
+}: React.SelectHTMLAttributes<HTMLSelectElement> & { etiqueta: string; error?: string; ayuda?: ReactNode; children: ReactNode }) {
+  const generatedId = useId();
+  const inputId = id || generatedId;
+  const description = [describedBy, ayuda ? `${inputId}-help` : undefined, error ? `${inputId}-error` : undefined].filter(Boolean).join(" ") || undefined;
   return (
     <div className="flex flex-col gap-1.5">
       <label htmlFor={inputId} className="font-body text-[13px] font-semibold text-[var(--ruum-text)]">
         {etiqueta}
       </label>
-      <select id={inputId} className={`${INPUT} ${error ? "border-[var(--ruum-error)]" : ""} ${className}`} aria-invalid={Boolean(error)} {...props}>
+      <select id={inputId} className={`${INPUT} ${error ? "border-[var(--ruum-error)]" : ""} ${className}`} aria-invalid={Boolean(error)} aria-describedby={description} {...props}>
         {children}
       </select>
+      {ayuda ? <p id={`${inputId}-help`} className="font-body text-sm text-[var(--ruum-text-secondary)]">{ayuda}</p> : null}
       {error ? <ErrorLine id={`${inputId}-error`} texto={error} /> : null}
     </div>
   );
@@ -61,17 +71,22 @@ export function Select({
 export function Textarea({
   etiqueta,
   error,
+  ayuda,
   id,
+  "aria-describedby": describedBy,
   className = "",
   ...props
-}: React.TextareaHTMLAttributes<HTMLTextAreaElement> & { etiqueta: string; error?: string }) {
-  const inputId = id ?? props.name ?? "textarea";
+}: React.TextareaHTMLAttributes<HTMLTextAreaElement> & { etiqueta: string; error?: string; ayuda?: ReactNode }) {
+  const generatedId = useId();
+  const inputId = id || generatedId;
+  const description = [describedBy, ayuda ? `${inputId}-help` : undefined, error ? `${inputId}-error` : undefined].filter(Boolean).join(" ") || undefined;
   return (
     <div className="flex flex-col gap-1.5">
       <label htmlFor={inputId} className="font-body text-[13px] font-semibold text-[var(--ruum-text)]">
         {etiqueta}
       </label>
-      <textarea id={inputId} rows={4} className={`${INPUT} min-h-[112px] ${error ? "border-[var(--ruum-error)]" : ""} ${className}`} aria-invalid={Boolean(error)} {...props} />
+      <textarea id={inputId} rows={4} className={`${INPUT} min-h-[112px] ${error ? "border-[var(--ruum-error)]" : ""} ${className}`} aria-invalid={Boolean(error)} aria-describedby={description} {...props} />
+      {ayuda ? <p id={`${inputId}-help`} className="font-body text-sm text-[var(--ruum-text-secondary)]">{ayuda}</p> : null}
       {error ? <ErrorLine id={`${inputId}-error`} texto={error} /> : null}
     </div>
   );
