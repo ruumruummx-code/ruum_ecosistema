@@ -1,0 +1,38 @@
+{
+  "tickets": [
+    "SD-REM-004",
+    "SD-REM-007"
+  ],
+  "fechaRegistro": "2026-11-07",
+  "zonaHoraria": "America/Mexico_City",
+  "estado": "DEUDA PENDIENTE RECONOCIDA POR EL USUARIO; sesión no realizada",
+  "responsableInformado": "H Manuel — Administración e Innovación Digital",
+  "confirmacionUsuario": "no hay sesión NVDA deuda pendiente",
+  "sistemaDisponible": "Microsoft Windows 11 Home Single Language 10.0.26300",
+  "lector": null,
+  "versionLector": null,
+  "navegadorSesion": null,
+  "versionNavegadorSesion": null,
+  "transcripcionLiteral": null,
+  "intentosActivacionAT": null,
+  "tabShiftTabAT": null,
+  "rehabilitacionAT": null,
+  "resultado": "NO EJECUTADO: los resultados automáticos no sustituyen anuncios literales reales",
+  "protocolo": [
+    "Designar operador nominal y transcriptor distinto; registrar nombres y adjuntar respaldo verificable de audio/video/log de voz con ruta y SHA-256. No rellenar anuncios por inferencia del DOM.",
+    "Registrar sistema, lector, versión y navegador con versión; fecha y participante nominal.",
+    "En SD-REM-007 leer cada uno de los cinco destinos deshabilitados y registrar literalmente nombre/estado anunciado.",
+    "Intentar Enter y Space en modo lectura; registrar no activó o la navegación/acción observada.",
+    "Desde Alternar disponibilidad, Tab debe llegar a Fin de recorrido y Shift+Tab regresar; registrar no enfocó cada destino bloqueado.",
+    "Habilitar y repetir recorrido/Enter; volver a bloquear. Registrar destino habilitado y ausencia de activación tras bloqueo.",
+    "En SD-REM-004 recorrer Input, Select y Textarea con ID explícito y generado en cuatro estados de ayuda/error. Transcribir etiqueta y descripción; cambiar estado, insertar/retirar vecino y repetir.",
+    "Adjuntar transcripción, resultado y firma del revisor; regenerar y verificar manifiesto después."
+  ],
+  "operadorNominal": null,
+  "transcriptorNominal": null,
+  "respaldo": {
+    "ruta": null,
+    "sha256": null
+  },
+  "estadoGate": "APROBADOS CON CONDICIONES; P2-1 NO CERRADA"
+}

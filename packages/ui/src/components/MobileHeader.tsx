@@ -41,7 +41,7 @@ export function MobileHeader({
   const tieneAtras = Boolean(enlaceAtras || onAtras);
 
   const botonAtrasClases =
-    "flex size-10 shrink-0 items-center justify-center rounded-full border border-[#e2e8f0] bg-white shadow-xs transition hover:bg-[#f6f8fb] active:scale-95 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#0066ff] dark:border-[#2d4f73] dark:bg-[#0a2342] dark:hover:bg-[#0f2d52]";
+    "flex size-10 shrink-0 items-center justify-center rounded-full border border-[#e2e8f0] bg-white shadow-xs transition hover:bg-[#f6f8fb] active:scale-95 focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-[#0066ff] dark:border-[#2d4f73] dark:bg-[#0a2342] dark:hover:bg-[#0f2d52]";
 
   return (
     <header
@@ -77,11 +77,17 @@ export function MobileHeader({
         )}
 
         <div className="min-w-0 flex-1">
-          <h1 className="truncate text-[17px] font-bold tracking-tight text-[#0a2342] leading-tight dark:text-[#f6f8fb] sm:text-[18px]">
+          <h1
+            className="truncate text-[17px] font-bold tracking-tight text-[#0a2342] leading-tight dark:text-[#f6f8fb] sm:text-[18px]"
+            title={titulo}
+          >
             {titulo}
           </h1>
           {subtitulo && (
-            <p className="truncate text-[12px] font-medium text-[#4e5f80] dark:text-[#a8b5cc] mt-0.5">
+            <p
+              className="truncate text-[12px] font-medium text-[#4e5f80] dark:text-[#a8b5cc] mt-0.5"
+              title={subtitulo}
+            >
               {subtitulo}
             </p>
           )}

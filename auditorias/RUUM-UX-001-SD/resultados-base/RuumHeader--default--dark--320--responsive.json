@@ -21,8 +21,8 @@
       "orientationAngle": 0,
       "orientationType": "landscape-primary"
     },
-    "timestamp": "2026-11-07T05:54:31.791Z",
-    "url": "http://127.0.0.1:58522/showcase.html",
+    "timestamp": "2026-11-07T08:04:20.021Z",
+    "url": "http://127.0.0.1:49829/showcase.html",
     "toolOptions": {
       "reporter": "v1"
     },
@@ -671,6 +671,41 @@
         "nodes": []
       },
       {
+        "id": "image-alt",
+        "impact": null,
+        "tags": [
+          "cat.text-alternatives",
+          "wcag2a",
+          "wcag111",
+          "section508",
+          "section508.22.a",
+          "TTv5",
+          "TT7.a",
+          "TT7.b",
+          "EN-301-549",
+          "EN-9.1.1.1",
+          "ACT",
+          "RGAAv4",
+          "RGAA-1.1.1"
+        ],
+        "description": "Ensure <img> elements have alternative text or a role of none or presentation",
+        "help": "Images must have alternative text",
+        "helpUrl": "https://dequeuniversity.com/rules/axe/4.14/image-alt?application=axeAPI",
+        "nodes": []
+      },
+      {
+        "id": "image-redundant-alt",
+        "impact": null,
+        "tags": [
+          "cat.text-alternatives",
+          "best-practice"
+        ],
+        "description": "Ensure image alternative is not repeated as text",
+        "help": "Alternative text of images should not be repeated as text",
+        "helpUrl": "https://dequeuniversity.com/rules/axe/4.14/image-redundant-alt?application=axeAPI",
+        "nodes": []
+      },
+      {
         "id": "input-button-name",
         "impact": null,
         "tags": [
@@ -714,6 +749,23 @@
         "description": "Ensure <input type=\"image\"> elements have alternative text",
         "help": "Image buttons must have alternative text",
         "helpUrl": "https://dequeuniversity.com/rules/axe/4.14/input-image-alt?application=axeAPI",
+        "nodes": []
+      },
+      {
+        "id": "label-content-name-mismatch",
+        "impact": null,
+        "tags": [
+          "cat.semantics",
+          "wcag21a",
+          "wcag253",
+          "EN-301-549",
+          "EN-9.2.5.3",
+          "RGAAv4",
+          "RGAA-6.1.5"
+        ],
+        "description": "Ensure that elements labelled through their content must have their visible text as part of their accessible name",
+        "help": "Elements must have their visible text as part of their accessible name",
+        "helpUrl": "https://dequeuniversity.com/rules/axe/4.14/label-content-name-mismatch?application=axeAPI",
         "nodes": []
       },
       {
@@ -1312,46 +1364,6 @@
               }
             ],
             "impact": null,
-            "html": "<a class=\"ruum-header__logo flex shrink-0 items-center gap-2.5 rounded-xl transition duration-200 hover:opacity-90 focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-[#0066ff]\" aria-label=\"Ruum Ruum\" href=\"/\">",
-            "target": [
-              "a"
-            ]
-          },
-          {
-            "any": [],
-            "all": [
-              {
-                "id": "aria-allowed-attr",
-                "data": null,
-                "relatedNodes": [],
-                "impact": "critical",
-                "message": "ARIA attributes are used correctly for the defined role"
-              },
-              {
-                "id": "aria-allowed-attr-elm",
-                "data": null,
-                "relatedNodes": [],
-                "message": "ARIA attributes are allowed for this element",
-                "impact": "critical"
-              },
-              {
-                "id": "aria-no-deprecated-attr",
-                "data": null,
-                "relatedNodes": [],
-                "impact": "critical",
-                "message": "No deprecated ARIA attributes are used"
-              }
-            ],
-            "none": [
-              {
-                "id": "aria-unsupported-attr",
-                "data": null,
-                "relatedNodes": [],
-                "impact": "critical",
-                "message": "ARIA attribute is supported"
-              }
-            ],
-            "impact": null,
             "html": "<button type=\"button\" aria-label=\"Notificaciones (3 pe...\" class=\"ruum-header__action-...\">",
             "target": [
               ".text-\\[\\#00d1d1\\]"
@@ -1415,24 +1427,6 @@
         "help": "ARIA attributes must be used as specified for the element's role",
         "helpUrl": "https://dequeuniversity.com/rules/axe/4.14/aria-conditional-attr?application=axeAPI",
         "nodes": [
-          {
-            "any": [],
-            "all": [
-              {
-                "id": "aria-conditional-attr",
-                "data": null,
-                "relatedNodes": [],
-                "impact": "serious",
-                "message": "ARIA attribute is allowed"
-              }
-            ],
-            "none": [],
-            "impact": null,
-            "html": "<a class=\"ruum-header__logo flex shrink-0 items-center gap-2.5 rounded-xl transition duration-200 hover:opacity-90 focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-[#0066ff]\" aria-label=\"Ruum Ruum\" href=\"/\">",
-            "target": [
-              "a"
-            ]
-          },
           {
             "any": [],
             "all": [
@@ -1519,6 +1513,38 @@
             "html": "<div class=\"ruum-header__wave absolute top-0 right-0 w-[140px] h-[56px] shrink-0 bg-gradient-to-br from-[#00d1d1] to-[#0a2342] rounded-bl-[48px] opacity-90\" aria-hidden=\"true\"></div>",
             "target": [
               ".ruum-header__wave"
+            ]
+          },
+          {
+            "any": [],
+            "all": [
+              {
+                "id": "focusable-modal-open",
+                "data": null,
+                "relatedNodes": [],
+                "impact": "serious",
+                "message": "No focusable elements while a modal is open"
+              },
+              {
+                "id": "focusable-disabled",
+                "data": null,
+                "relatedNodes": [],
+                "impact": "serious",
+                "message": "No focusable elements contained within element"
+              },
+              {
+                "id": "focusable-not-tabbable",
+                "data": null,
+                "relatedNodes": [],
+                "impact": "serious",
+                "message": "No focusable elements contained within element"
+              }
+            ],
+            "none": [],
+            "impact": null,
+            "html": "<span aria-hidden=\"true\" class=\"shrink-0\">",
+            "target": [
+              "a > span[aria-hidden=\"true\"]"
             ]
           },
           {
@@ -1648,24 +1674,6 @@
               }
             ],
             "impact": null,
-            "html": "<a class=\"ruum-header__logo flex shrink-0 items-center gap-2.5 rounded-xl transition duration-200 hover:opacity-90 focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-[#0066ff]\" aria-label=\"Ruum Ruum\" href=\"/\">",
-            "target": [
-              "a"
-            ]
-          },
-          {
-            "any": [],
-            "all": [],
-            "none": [
-              {
-                "id": "aria-prohibited-attr",
-                "data": null,
-                "relatedNodes": [],
-                "impact": "serious",
-                "message": "ARIA attribute is allowed"
-              }
-            ],
-            "impact": null,
             "html": "<button type=\"button\" aria-label=\"Notificaciones (3 pe...\" class=\"ruum-header__action-...\">",
             "target": [
               ".text-\\[\\#00d1d1\\]"
@@ -1707,38 +1715,6 @@
         "help": "ARIA attributes must conform to valid values",
         "helpUrl": "https://dequeuniversity.com/rules/axe/4.14/aria-valid-attr-value?application=axeAPI",
         "nodes": [
-          {
-            "any": [],
-            "all": [
-              {
-                "id": "aria-valid-attr-value",
-                "data": null,
-                "relatedNodes": [],
-                "impact": "critical",
-                "message": "ARIA attribute values are valid"
-              },
-              {
-                "id": "aria-errormessage",
-                "data": null,
-                "relatedNodes": [],
-                "impact": "critical",
-                "message": "aria-errormessage exists and references elements visible to screen readers that use a supported aria-errormessage technique"
-              },
-              {
-                "id": "aria-level",
-                "data": null,
-                "relatedNodes": [],
-                "impact": "critical",
-                "message": "aria-level values are valid"
-              }
-            ],
-            "none": [],
-            "impact": null,
-            "html": "<a class=\"ruum-header__logo flex shrink-0 items-center gap-2.5 rounded-xl transition duration-200 hover:opacity-90 focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-[#0066ff]\" aria-label=\"Ruum Ruum\" href=\"/\">",
-            "target": [
-              "a"
-            ]
-          },
           {
             "any": [],
             "all": [
@@ -1821,24 +1797,6 @@
         "help": "ARIA attributes must conform to valid names",
         "helpUrl": "https://dequeuniversity.com/rules/axe/4.14/aria-valid-attr?application=axeAPI",
         "nodes": [
-          {
-            "any": [
-              {
-                "id": "aria-valid-attr",
-                "data": null,
-                "relatedNodes": [],
-                "impact": "critical",
-                "message": "ARIA attribute name is valid"
-              }
-            ],
-            "all": [],
-            "none": [],
-            "impact": null,
-            "html": "<a class=\"ruum-header__logo flex shrink-0 items-center gap-2.5 rounded-xl transition duration-200 hover:opacity-90 focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-[#0066ff]\" aria-label=\"Ruum Ruum\" href=\"/\">",
-            "target": [
-              "a"
-            ]
-          },
           {
             "any": [
               {
@@ -2022,87 +1980,6 @@
         ]
       },
       {
-        "id": "image-alt",
-        "impact": null,
-        "tags": [
-          "cat.text-alternatives",
-          "wcag2a",
-          "wcag111",
-          "section508",
-          "section508.22.a",
-          "TTv5",
-          "TT7.a",
-          "TT7.b",
-          "EN-301-549",
-          "EN-9.1.1.1",
-          "ACT",
-          "RGAAv4",
-          "RGAA-1.1.1"
-        ],
-        "description": "Ensure <img> elements have alternative text or a role of none or presentation",
-        "help": "Images must have alternative text",
-        "helpUrl": "https://dequeuniversity.com/rules/axe/4.14/image-alt?application=axeAPI",
-        "nodes": [
-          {
-            "any": [
-              {
-                "id": "has-alt",
-                "data": null,
-                "relatedNodes": [],
-                "impact": "critical",
-                "message": "Element has an alt attribute"
-              }
-            ],
-            "all": [],
-            "none": [
-              {
-                "id": "alt-space-value",
-                "data": null,
-                "relatedNodes": [],
-                "impact": "critical",
-                "message": "Element has a valid alt attribute value"
-              }
-            ],
-            "impact": null,
-            "html": "<img alt=\"Símbolo oficial Ruum Ruum — RR entrelazado con ruta y pin de entrega\" height=\"36\" width=\"36\" decoding=\"async\" class=\"ruum-logo-img block w-auto shrink-0 object-contain h-[36px] max-h-[36px] \" src=\"/imagenes/ruum-logo-simbolo.png\">",
-            "target": [
-              "img"
-            ]
-          }
-        ]
-      },
-      {
-        "id": "image-redundant-alt",
-        "impact": null,
-        "tags": [
-          "cat.text-alternatives",
-          "best-practice"
-        ],
-        "description": "Ensure image alternative is not repeated as text",
-        "help": "Alternative text of images should not be repeated as text",
-        "helpUrl": "https://dequeuniversity.com/rules/axe/4.14/image-redundant-alt?application=axeAPI",
-        "nodes": [
-          {
-            "any": [],
-            "all": [],
-            "none": [
-              {
-                "id": "duplicate-img-label",
-                "data": null,
-                "relatedNodes": [],
-                "impact": "minor",
-                "message": "Element does not duplicate existing text in <img> alt text"
-              }
-            ],
-            "impact": null,
-            "html": "<img alt=\"Símbolo oficial Ruum Ruum — RR entrelazado con ruta y pin de entrega\" height=\"36\" width=\"36\" decoding=\"async\" class=\"ruum-logo-img block w-auto shrink-0 object-contain h-[36px] max-h-[36px] \" src=\"/imagenes/ruum-logo-simbolo.png\">",
-            "target": [
-              "img"
-            ]
-          }
-        ]
-      },
-      {
         "id": "landmark-main-is-top-level",
         "impact": null,
         "tags": [
@@ -2269,13 +2146,6 @@
                 "relatedNodes": [],
                 "impact": "serious",
                 "message": "Element has text that is visible to screen readers"
-              },
-              {
-                "id": "aria-label",
-                "data": null,
-                "relatedNodes": [],
-                "impact": "serious",
-                "message": "aria-label attribute exists and is not empty"
               }
             ],
             "all": [],
@@ -2289,7 +2159,7 @@
               }
             ],
             "impact": null,
-            "html": "<a class=\"ruum-header__logo flex shrink-0 items-center gap-2.5 rounded-xl transition duration-200 hover:opacity-90 focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-[#0066ff]\" aria-label=\"Ruum Ruum\" href=\"/\">",
+            "html": "<a class=\"ruum-header__logo flex shrink-0 items-center gap-2.5 rounded-xl transition duration-200 hover:opacity-90 focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-[#0066ff]\" href=\"/\">",
             "target": [
               "a"
             ]
@@ -2314,24 +2184,6 @@
         "help": "Interactive controls must not be nested",
         "helpUrl": "https://dequeuniversity.com/rules/axe/4.14/nested-interactive?application=axeAPI",
         "nodes": [
-          {
-            "any": [
-              {
-                "id": "no-focusable-content",
-                "data": null,
-                "relatedNodes": [],
-                "impact": "serious",
-                "message": "Element does not have focusable descendants"
-              }
-            ],
-            "all": [],
-            "none": [],
-            "impact": null,
-            "html": "<img alt=\"Símbolo oficial Ruum Ruum — RR entrelazado con ruta y pin de entrega\" height=\"36\" width=\"36\" decoding=\"async\" class=\"ruum-logo-img block w-auto shrink-0 object-contain h-[36px] max-h-[36px] \" src=\"/imagenes/ruum-logo-simbolo.png\">",
-            "target": [
-              "img"
-            ]
-          },
           {
             "any": [
               {
@@ -2372,47 +2224,9 @@
       }
     ],
     "incomplete": [],
-    "violations": [
-      {
-        "id": "label-content-name-mismatch",
-        "impact": "serious",
-        "tags": [
-          "cat.semantics",
-          "wcag21a",
-          "wcag253",
-          "EN-301-549",
-          "EN-9.2.5.3",
-          "RGAAv4",
-          "RGAA-6.1.5"
-        ],
-        "description": "Ensure that elements labelled through their content must have their visible text as part of their accessible name",
-        "help": "Elements must have their visible text as part of their accessible name",
-        "helpUrl": "https://dequeuniversity.com/rules/axe/4.14/label-content-name-mismatch?application=axeAPI",
-        "nodes": [
-          {
-            "any": [
-              {
-                "id": "label-content-name-mismatch",
-                "data": null,
-                "relatedNodes": [],
-                "impact": "serious",
-                "message": "Text inside the element is not included in the accessible name"
-              }
-            ],
-            "all": [],
-            "none": [],
-            "impact": "serious",
-            "html": "<a class=\"ruum-header__logo flex shrink-0 items-center gap-2.5 rounded-xl transition duration-200 hover:opacity-90 focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-[#0066ff]\" aria-label=\"Ruum Ruum\" href=\"/\">",
-            "target": [
-              "a"
-            ],
-            "failureSummary": "Fix any of the following:\n  Text inside the element is not included in the accessible name"
-          }
-        ]
-      }
-    ]
+    "violations": []
   },
-  "tree": "- main:\n  - link \"Ruum Ruum\":\n    - /url: /\n    - img \"Símbolo oficial Ruum Ruum — RR entrelazado con ruta y pin de entrega\"\n    - text: Ruum Ruum Usuario\n  - button \"Notificaciones (3 pendientes)\": 3 notificaciones pendientes\n  - button \"Soporte y ayuda\"",
+  "tree": "- main:\n  - link \"Ruum Ruum Usuario\":\n    - /url: /\n  - button \"Notificaciones (3 pendientes)\": 3 notificaciones pendientes\n  - button \"Soporte y ayuda\"",
   "geometry": {
     "innerWidth": 320,
     "scrollWidth": 320,

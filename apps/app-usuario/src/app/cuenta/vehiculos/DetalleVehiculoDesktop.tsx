@@ -1,5 +1,7 @@
 "use client";
-import { useCallback, useRef, useState } from "react";
+
+import { Tabs } from "@ruum/ui";
+import { useCallback, useId, useRef, useState } from "react";
 import Link from "next/link";
 import { useDialogAccesible } from "@ruum/ui";
 import { ETIQUETA_ESTADO_TRASLADO } from "@ruum/shared/states";
@@ -92,6 +94,7 @@ export function DetalleVehiculoDesktop({
     ["Verificación vehicular", v.tiene_verificacion],
     ["Permiso especial vigente", v.permiso_especial_vigente],
   ] as const;
+  const tabsId = useId();
   function cambiarTab(value: string) {
     setTab(value);
     setMenu(false);
@@ -143,43 +146,11 @@ export function DetalleVehiculoDesktop({
         </p>
       </header>
       <AtributosVehiculo vehiculo={v} detalle />
-      <div className={s.tabs} role="tablist" aria-label="Vista del vehículo">
-        {["Información", "Documentos", "Historial"].map((t, i, all) => (
-          <button
-            key={t}
-            id={`vehiculo-tab-${t}`}
-            role="tab"
-            tabIndex={tab === t ? 0 : -1}
-            aria-selected={tab === t}
-            aria-controls="vehiculo-panel"
-            onClick={() => cambiarTab(t)}
-            onKeyDown={(e) => {
-              const n =
-                e.key === "ArrowRight"
-                  ? (i + 1) % 3
-                  : e.key === "ArrowLeft"
-                    ? (i + 2) % 3
-                    : e.key === "Home"
-                      ? 0
-                      : e.key === "End"
-                        ? 2
-                        : -1;
-              if (n >= 0) {
-                e.preventDefault();
-                cambiarTab(all[n]);
-                document.getElementById(`vehiculo-tab-${all[n]}`)?.focus();
-              }
-            }}
-          >
-            {t}
-          </button>
-        ))}
-      </div>
-      <div
+      <Tabs idPrefix={tabsId} tabs={["Información", "Documentos", "Historial"].map(id=>({id,etiqueta:id}))} value={tab} onSeleccion={cambiarTab} etiqueta="Vista del vehículo" renderPanel={()=>( <div
         className={s.detailContent}
-        id="vehiculo-panel"
-        role="tabpanel"
-        aria-labelledby={`vehiculo-tab-${tab}`}
+
+
+
       >
         {tab === "Información" ? (
           <dl className={s.specifications}>
@@ -261,13 +232,14 @@ export function DetalleVehiculoDesktop({
             </Link>
           </section>
         )}
-      </div>
+      </div> )} />
+
       <footer className={s.detailActions}>
         <button
           className={s.outline}
           onClick={() => {
             cambiarTab("Documentos");
-            document.getElementById("vehiculo-tab-Documentos")?.focus();
+            document.getElementById(`${tabsId}-tab-Documentos`)?.focus();
           }}
         >
           <Icon name="file" />

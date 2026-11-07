@@ -1,4 +1,6 @@
 "use client";
+
+import { Tabs } from "@ruum/ui";
 import { Fragment, useEffect, useMemo, useState, useTransition, type InputHTMLAttributes, type ReactNode } from "react";
 import Link from "next/link";
 import { Aviso, Button } from "@ruum/ui";
@@ -351,21 +353,7 @@ function AccionesEmpresa({
 
   return (
     <div className="mt-5 border-t border-ink/10 pt-5">
-      <div className="flex gap-1 overflow-x-auto border-b border-ink/10">
-        {TABS_EMPRESA.map((item) => (
-          <button
-            key={item.id}
-            type="button"
-            onClick={() => setTab(item.id)}
-            className={`shrink-0 rounded-t-lg px-4 py-2.5 font-body text-sm font-semibold transition-colors ${tab === item.id ? "border-b-2 border-signal bg-surface-primary text-ink shadow-sm" : "text-text-tertiary hover:bg-surface-primary/70 hover:text-ink"}`}
-          >
-            {item.etiqueta}
-          </button>
-        ))}
-      </div>
-
-      <div className="mt-5">
-        {tab === "resumen" && (
+      <Tabs etiqueta="Secciones administrativas de empresa" value={tab} onSeleccion={id=>setTab(id as typeof tab)} tabs={TABS_EMPRESA.map(t=>({id:t.id,etiqueta:t.etiqueta}))} renderPanel={()=><div className="pt-3">{tab === "resumen" && (
           <div className="grid gap-4">
             {cambiosPendientes.length > 0 && (
               <div className="rounded-lg border border-status-warning/35 bg-status-warning-soft p-4">
@@ -390,8 +378,7 @@ function AccionesEmpresa({
             </dl>
           </div>
         )}
-
-        {tab === "fiscal" && (
+{tab === "fiscal" && (
           <div className="grid gap-4">
             {cambiosPendientes.length > 0 && (
               <div className="rounded-lg border border-status-warning/30 bg-status-warning-soft p-4">
@@ -469,8 +456,7 @@ function AccionesEmpresa({
             </div>
           </div>
         )}
-
-        {tab === "usuarios" && (
+{tab === "usuarios" && (
           <div className="grid gap-4">
             <dl className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
               {usuarios.length === 0 ? (
@@ -501,8 +487,7 @@ function AccionesEmpresa({
             </div>
           </div>
         )}
-
-        {tab === "documentos" && (
+{tab === "documentos" && (
           <div className="grid gap-4">
             <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
               {documentos.length === 0 ? (
@@ -525,8 +510,7 @@ function AccionesEmpresa({
             </div>
           </div>
         )}
-
-        {tab === "riesgo" && (
+{tab === "riesgo" && (
           <div className="rounded-lg border border-status-error/35 bg-status-error-soft/25 p-4">
             <p className="font-body text-xs font-semibold uppercase tracking-wide text-status-error">Suspensión y reactivación</p>
             <p className="mt-1 font-body text-sm text-text-secondary">Acciones críticas para detener o reactivar la operación corporativa. Requieren motivo y confirmación.</p>
@@ -539,7 +523,18 @@ function AccionesEmpresa({
               <Button variant="quiet" disabled={pendiente || !motivoEstado.trim()} onClick={() => setAccionRiesgo("reactivar")}>Reactivar empresa</Button>
             </div>
           </div>
-        )}
+        )}</div>} />
+
+      <div className="mt-5">
+
+
+
+
+
+
+
+
+
       </div>
 
       <AdminDialog

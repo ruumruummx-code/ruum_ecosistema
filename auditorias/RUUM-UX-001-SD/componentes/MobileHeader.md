@@ -88,19 +88,3 @@ Condiciones:
 | default | light | 768 | responsive | [PNG](../capturas-base/MobileHeader--default--light--768--responsive.png) | [JSON](../resultados-base/MobileHeader--default--light--768--responsive.json) |
 | long-label | dark | 390 | base | [PNG](../capturas-base/MobileHeader--long-label--dark--390--base.png) | [JSON](../resultados-base/MobileHeader--long-label--dark--390--base.json) |
 | long-label | light | 390 | base | [PNG](../capturas-base/MobileHeader--long-label--light--390--base.png) | [JSON](../resultados-base/MobileHeader--long-label--light--390--base.json) |
-
-- dark · active: [captura](../capturas-base/estado-MobileHeader--dark--active.png), [reporte](../resultados-base/estado-MobileHeader--dark--active.json).
-
-- dark · focus-visible: [captura](../capturas-base/estado-MobileHeader--dark--focus-visible.png), [reporte](../resultados-base/estado-MobileHeader--dark--focus-visible.json).
-
-- dark · focus: [captura](../capturas-base/estado-MobileHeader--dark--focus.png), [reporte](../resultados-base/estado-MobileHeader--dark--focus.json).
-
-- dark · hover: [captura](../capturas-base/estado-MobileHeader--dark--hover.png), [reporte](../resultados-base/estado-MobileHeader--dark--hover.json).
-
-- light · active: [captura](../capturas-base/estado-MobileHeader--light--active.png), [reporte](../resultados-base/estado-MobileHeader--light--active.json).
-
-- light · focus-visible: [captura](../capturas-base/estado-MobileHeader--light--focus-visible.png), [reporte](../resultados-base/estado-MobileHeader--light--focus-visible.json).
-
-- light · focus: [captura](../capturas-base/estado-MobileHeader--light--focus.png), [reporte](../resultados-base/estado-MobileHeader--light--focus.json).
-
-- light · hover: [captura](../capturas-base/estado-MobileHeader--light--hover.png), [reporte](../resultados-base/estado-MobileHeader--light--hover.json).

@@ -233,35 +233,19 @@ export function MisViajesDesktop({
           </div>
           <div
             className={s.tabs}
-            role="tablist"
+            role="group"
             aria-label="Filtrar por estado del traslado"
           >
             {tabs.map((t, index) => (
               <button
                 key={t}
-                id={`tab-${t}`}
-                role="tab"
-                aria-selected={g.pestana === t}
-                aria-controls="tabla-traslados"
-                tabIndex={g.pestana === t ? 0 : -1}
+
+
+                aria-pressed={g.pestana === t}
+
+
                 onClick={() => cambiar(t)}
-                onKeyDown={(e) => {
-                  const next =
-                    e.key === "ArrowRight"
-                      ? (index + 1) % tabs.length
-                      : e.key === "ArrowLeft"
-                        ? (index + tabs.length - 1) % tabs.length
-                        : e.key === "Home"
-                          ? 0
-                          : e.key === "End"
-                            ? tabs.length - 1
-                            : -1;
-                  if (next >= 0) {
-                    e.preventDefault();
-                    cambiar(tabs[next]);
-                    document.getElementById(`tab-${tabs[next]}`)?.focus();
-                  }
-                }}
+
               >
                 {etiquetas[t]} ({g.conteos[t]})
               </button>
@@ -270,8 +254,8 @@ export function MisViajesDesktop({
           <div
             className={s.tableScroll}
             id="tabla-traslados"
-            role="tabpanel"
-            aria-labelledby={`tab-${g.pestana}`}
+            role="region" aria-label="Resultados del filtro"
+
             tabIndex={0}
           >
             <table className={s.table}>

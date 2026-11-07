@@ -1,0 +1,494 @@
+{
+  "algorithm": "SHA-256",
+  "phase": "pre-session",
+  "date": "2026-11-07",
+  "timezone": "America/Mexico_City",
+  "commitBase": "6e5d0934444a52c83f57834c845259c4d75741ea",
+  "workingTreeDirty": true,
+  "commitNote": "Commit base del repositorio; sources identifica bytes del workspace. No afirma que el cambio esté incluido en HEAD.",
+  "gate": "IMPLEMENTACION TECNICA VERIFICADA; GATE ASISTIVO Y FIRMAS PENDIENTES",
+  "scope": "auditorias/RUUM-UX-001-SD/remediacion-SD-REM-005",
+  "excludes": [
+    "MANIFIESTO-SHA256.json",
+    "MANIFIESTO-SHA256.sha256"
+  ],
+  "directoryHashDefinition": "SHA-256 de líneas UTF-8 ordenadas ordinalmente por ruta relativa al repositorio: <sha256> dos espacios <ruta> LF. Excluye manifiesto y sello para evitar autorreferencia.",
+  "directorySha256": "3e2751e7a0ba53e866ce58fce0d8957f15d65acf1ae4cd73005488828c12d3dc",
+  "sourcesSha256": "8e1348c158eb8ae7a9e29327a0b4044e9f081ef17bc7478ef3855edee2d12f52",
+  "files": [
+    {
+      "path": "auditorias/RUUM-UX-001-SD/remediacion-SD-REM-005/AC-0.md",
+      "bytes": 2171,
+      "sha256": "c541a03526d2146507f725a63c07f0b58541cdead0d5eb0f095373ad81000389"
+    },
+    {
+      "path": "auditorias/RUUM-UX-001-SD/remediacion-SD-REM-005/FIRMAS.md",
+      "bytes": 775,
+      "sha256": "63aa0d383ab8934d5674c58fa8c55e5e0debe01fd3fd6310ec0bc6564b298ec2"
+    },
+    {
+      "path": "auditorias/RUUM-UX-001-SD/remediacion-SD-REM-005/Navigation-original.txt",
+      "bytes": 7382,
+      "sha256": "f6993c09634560f56a0f3f72595b28dd951167dcb14d6974205e1b035108bf8d"
+    },
+    {
+      "path": "auditorias/RUUM-UX-001-SD/remediacion-SD-REM-005/README.md",
+      "bytes": 7384,
+      "sha256": "abd41c1cbe3c89a47bf599bb189af5c444af4d3a61fb30e0be7aa0dfdf8813d7"
+    },
+    {
+      "path": "auditorias/RUUM-UX-001-SD/remediacion-SD-REM-005/SESION-AT.md",
+      "bytes": 2327,
+      "sha256": "80950ecb29203288ce43f7e7576044cef086fbd7e11f895cdcfcbaefc1c4f870"
+    },
+    {
+      "path": "auditorias/RUUM-UX-001-SD/remediacion-SD-REM-005/arbol-dark.yml",
+      "bytes": 1643,
+      "sha256": "cc8397e608fd2dd418eac056ee78d6c9f66a09ce3ee4faa27935d76e46c28335"
+    },
+    {
+      "path": "auditorias/RUUM-UX-001-SD/remediacion-SD-REM-005/arbol-light.yml",
+      "bytes": 1643,
+      "sha256": "cc8397e608fd2dd418eac056ee78d6c9f66a09ce3ee4faa27935d76e46c28335"
+    },
+    {
+      "path": "auditorias/RUUM-UX-001-SD/remediacion-SD-REM-005/cliente.js",
+      "bytes": 1272563,
+      "sha256": "6b0f97241f8560825f5c261dcc796dda7cb06cf11102f4965fed4dc0159744fa"
+    },
+    {
+      "path": "auditorias/RUUM-UX-001-SD/remediacion-SD-REM-005/cliente.tsx",
+      "bytes": 195,
+      "sha256": "5056f1d198de2e85b22bfb705a29043524aa1c4056adc4a663236bc089fe69b2"
+    },
+    {
+      "path": "auditorias/RUUM-UX-001-SD/remediacion-SD-REM-005/comparativo-original.json",
+      "bytes": 8446,
+      "sha256": "ad94ebf73564ca449c9d1ff2929f78d28da12f737c7f42cc57f46d3646be1d45"
+    },
+    {
+      "path": "auditorias/RUUM-UX-001-SD/remediacion-SD-REM-005/consumidores.json",
+      "bytes": 6990,
+      "sha256": "789cf3cadc79d153a9d1b1de924bcf3bd2b3d2eba76f5c0dc588ef187a1b690e"
+    },
+    {
+      "path": "auditorias/RUUM-UX-001-SD/remediacion-SD-REM-005/estado-gate.json",
+      "bytes": 1061,
+      "sha256": "3ce261f1faca943a7d503ff463d9324bf5f1df7392c1d294a75db2cb229d4663"
+    },
+    {
+      "path": "auditorias/RUUM-UX-001-SD/remediacion-SD-REM-005/formulario.css",
+      "bytes": 89594,
+      "sha256": "9263ef6a0a2183990ca5e94c320128396df7defa721e3bc39db899ae50f6e498"
+    },
+    {
+      "path": "auditorias/RUUM-UX-001-SD/remediacion-SD-REM-005/formulario.html",
+      "bytes": 11006,
+      "sha256": "f6942a6a9ebdc43b2f94d3dde2663befa65a1a7fd297447efcbb923b72dd32af"
+    },
+    {
+      "path": "auditorias/RUUM-UX-001-SD/remediacion-SD-REM-005/formulario.tsx",
+      "bytes": 2486,
+      "sha256": "6120a713e5e23860bb6f6b10bdce7a0bdc1e521427c1ba0c5d08bb02efe08eba"
+    },
+    {
+      "path": "auditorias/RUUM-UX-001-SD/remediacion-SD-REM-005/inventariar.cjs",
+      "bytes": 4404,
+      "sha256": "23d921088d3ef4007233086e21aa07c078656c7cac106ea8369ba6058d990eae"
+    },
+    {
+      "path": "auditorias/RUUM-UX-001-SD/remediacion-SD-REM-005/pruebas-admin.json",
+      "bytes": 1017,
+      "sha256": "4ae2bca008c1cccf02245e3561e9a5d085ca657f5f2674e8aca631a1c824184f"
+    },
+    {
+      "path": "auditorias/RUUM-UX-001-SD/remediacion-SD-REM-005/pruebas-conductor.json",
+      "bytes": 27226,
+      "sha256": "35123c500918a381ef3efdcfdd6234db434464d3b7f0bd6e6ce80ff7163b6e7a"
+    },
+    {
+      "path": "auditorias/RUUM-UX-001-SD/remediacion-SD-REM-005/pruebas-consumidores-conductor.json",
+      "bytes": 1355,
+      "sha256": "75f0e3d37a068effc6148205dfb6c8087bf60da2c5e03d09eab0bb6b36b4ef00"
+    },
+    {
+      "path": "auditorias/RUUM-UX-001-SD/remediacion-SD-REM-005/pruebas-facturacion.json",
+      "bytes": 3370,
+      "sha256": "acdec107b5ca1a9714452254c4c3e929eef498a10e5bc120009e2b505b44eff9"
+    },
+    {
+      "path": "auditorias/RUUM-UX-001-SD/remediacion-SD-REM-005/pruebas-ui.json",
+      "bytes": 23680,
+      "sha256": "8d2c99865d1bd4af9ce7f9332d1fc3552baa81e2fde77957408ca06e48724741"
+    },
+    {
+      "path": "auditorias/RUUM-UX-001-SD/remediacion-SD-REM-005/pruebas-usuario.json",
+      "bytes": 20855,
+      "sha256": "4c6fc58486562504db23e5951a0078ffa2e06d9a09de73484d2984ca9e0e048d"
+    },
+    {
+      "path": "auditorias/RUUM-UX-001-SD/remediacion-SD-REM-005/resultados.json",
+      "bytes": 2373020,
+      "sha256": "6c5736b845e86da48e759d2d8e88eeba381b9dbf903b74d750061f44522b3c75"
+    },
+    {
+      "path": "auditorias/RUUM-UX-001-SD/remediacion-SD-REM-005/sellar-evidencia.cjs",
+      "bytes": 5278,
+      "sha256": "adcce1213942429d245ad34d6a3b5ddee2c0889fa18e194747972b76d3950fcf"
+    },
+    {
+      "path": "auditorias/RUUM-UX-001-SD/remediacion-SD-REM-005/ssr.cjs",
+      "bytes": 31477,
+      "sha256": "492084958910d42392294f8b4e95affe82a1abbd03ba9841f2b4b1fb3f59c829"
+    },
+    {
+      "path": "auditorias/RUUM-UX-001-SD/remediacion-SD-REM-005/tabs-dark.png",
+      "bytes": 63471,
+      "sha256": "79f5f85251a72300b2812056cc01eea651695d542017054bd41884cedfd55465"
+    },
+    {
+      "path": "auditorias/RUUM-UX-001-SD/remediacion-SD-REM-005/tabs-light.png",
+      "bytes": 62281,
+      "sha256": "db5f937a476fa5f9014e5f0fe5b6d7df2a48936f8d1f7bd0ab7e9cd5021d527f"
+    },
+    {
+      "path": "auditorias/RUUM-UX-001-SD/remediacion-SD-REM-005/validacion.json",
+      "bytes": 2258,
+      "sha256": "021f59fbcc5a563aff760c58f5716432a88afb5162db1f60b63c1fb033e25129"
+    },
+    {
+      "path": "auditorias/RUUM-UX-001-SD/remediacion-SD-REM-005/verificar.cjs",
+      "bytes": 10045,
+      "sha256": "8a24a215c328c1603063d2034fc13d8aa3b5bff6ba9b6d8dfbd4298f187e71fb"
+    }
+  ],
+  "sources": [
+    {
+      "path": "apps/app-conductor/src/app/cuenta/details.module.css",
+      "bytes": 17004,
+      "sha256": "0c2500bee1c85bfa31b18aa5920573e3d7706d6737d2760aab4b608e98ef7378"
+    },
+    {
+      "path": "apps/app-conductor/src/app/cuenta/perfil/DriverProfileView.tsx",
+      "bytes": 2769,
+      "sha256": "bfec92666f899867cc9095d96458938bf234d5a8ff6680bbd598332b60cf8f34"
+    },
+    {
+      "path": "apps/app-conductor/src/app/cuenta/preferencias/page.tsx",
+      "bytes": 17135,
+      "sha256": "b03eebd300c10947e24fcc905af8cd2b04a08868fa60a500b28d41547eab5bb6"
+    },
+    {
+      "path": "apps/app-conductor/src/app/ganancias/DriverEarningsView.tsx",
+      "bytes": 7819,
+      "sha256": "93b0a87c1d185b35f1f9037af9aab6d25f1a056229eac2a8d2211142a72deb1d"
+    },
+    {
+      "path": "apps/app-conductor/src/app/ganancias/EarningsTabs.tsx",
+      "bytes": 1257,
+      "sha256": "af9f1c23fdda155f39f0b58642d41f04f139a246cf318b9233612d8e5aa9b6a3"
+    },
+    {
+      "path": "apps/app-conductor/src/app/ganancias/earnings.module.css",
+      "bytes": 10142,
+      "sha256": "f76c7e38e565e8c978fc697ef2c8f1f01af5419068943094cd73da2dae4ab64f"
+    },
+    {
+      "path": "apps/app-conductor/src/app/viajes/DriverTrasladosView.tsx",
+      "bytes": 5974,
+      "sha256": "b8ce91bb20eb1ccc346f54028097ae19efb4e63f3111f1ff6b48c96d4c5d439c"
+    },
+    {
+      "path": "apps/app-conductor/src/app/viajes/[id]/SecondaryTripNavBar.tsx",
+      "bytes": 7347,
+      "sha256": "8648fcb48fbcbeea3914a9d3d6946f47b56368995ee4cdb8f789927a4686e63f"
+    },
+    {
+      "path": "apps/app-conductor/src/app/viajes/[id]/evidencia/page.tsx",
+      "bytes": 37543,
+      "sha256": "578fbbd77bffb9a25bd3014968c5046a8bfcf188147086d1546aa1a7c62f0911"
+    },
+    {
+      "path": "apps/app-conductor/src/app/viajes/traslados.module.css",
+      "bytes": 16983,
+      "sha256": "a836b0a7e5d70799c0c174cc99534c8593f5c840d6c0e4cf73109dcefb3d0d89"
+    },
+    {
+      "path": "apps/app-conductor/test/sd-rem-005-consumidores.test.tsx",
+      "bytes": 1854,
+      "sha256": "33c954e3d227b6a1dbfb806454b66033c12f7afc1d088f289f4094894feeb9ac"
+    },
+    {
+      "path": "apps/app-conductor/tests/e2e/driver-earnings.spec.ts",
+      "bytes": 8021,
+      "sha256": "8832ad116d2c0ce63a2a4834483bd7990221685ed9a4d1067d9df5b6508342cd"
+    },
+    {
+      "path": "apps/app-conductor/tests/e2e/driver-traslados.spec.ts",
+      "bytes": 16079,
+      "sha256": "7b6e2704535b3efa0b2216359d2ac255dabfb86323b9a02adc95e3bcbc7f5b9e"
+    },
+    {
+      "path": "apps/app-conductor/tests/e2e/flujo-oportunidades-y-traslados.spec.ts",
+      "bytes": 5985,
+      "sha256": "8436802a4f079c75b3b5fb158ead0b7b2e3930e7bf39431d0df88da7c65894bb"
+    },
+    {
+      "path": "apps/app-usuario/src/app/cuenta/DatosPersonales.tsx",
+      "bytes": 25293,
+      "sha256": "843e014efd29a562d45f01380aa734890545a2e8a2a9c24e6557663e1f03f528"
+    },
+    {
+      "path": "apps/app-usuario/src/app/cuenta/Facturacion.tsx",
+      "bytes": 51419,
+      "sha256": "fdc14326cd828471b551bf2c54b04d2c83436e56ccdbc36d72bab769642f0572"
+    },
+    {
+      "path": "apps/app-usuario/src/app/cuenta/datos-personales/DatosPersonales.test.tsx",
+      "bytes": 12322,
+      "sha256": "ceddba602839c731986ccd5fba60ccb465afc317c93bceba543350e0248c24e9"
+    },
+    {
+      "path": "apps/app-usuario/src/app/cuenta/vehiculos/DetalleVehiculoDesktop.tsx",
+      "bytes": 8724,
+      "sha256": "9869f436bbf7febec130053b0e07914d94730d0498fc51a407b7817a86035330"
+    },
+    {
+      "path": "apps/app-usuario/src/app/cuenta/vehiculos/VehiculosDesktop.test.tsx",
+      "bytes": 9462,
+      "sha256": "a9f94ece3d54a4722f872a7549ff57188e600dbbbcd04f70b9d3bb7dbe24c40d"
+    },
+    {
+      "path": "apps/app-usuario/src/app/cuenta/vehiculos/vehiculos-desktop.module.css",
+      "bytes": 27514,
+      "sha256": "3dde2068ee3d6d010bc36ffe75fa2dcb4a5a5195768f1d07c7ef55b59fdca22f"
+    },
+    {
+      "path": "apps/app-usuario/src/app/mis-viajes/DetalleTrasladoDesktop.tsx",
+      "bytes": 15008,
+      "sha256": "48314655a6d7961eab7943bad4733744eef87f4f286a507b966c79c7567a8085"
+    },
+    {
+      "path": "apps/app-usuario/src/app/mis-viajes/MisViajesDesktop.test.tsx",
+      "bytes": 7802,
+      "sha256": "b6debbd6008ec35e36e9198305678c082193fb3c7aa9dd9edc77370d135429bb"
+    },
+    {
+      "path": "apps/app-usuario/src/app/mis-viajes/MisViajesDesktop.tsx",
+      "bytes": 16026,
+      "sha256": "0c68da595b2b935dbfcc5094e6e0fcbbb929b1eba9c5f1c160f475628fd04251"
+    },
+    {
+      "path": "apps/app-usuario/src/app/mis-viajes/traslados-desktop.module.css",
+      "bytes": 15567,
+      "sha256": "36802fc3435cba7a1e5bd3737f1ed4f0128b4825d2933baac72661a6bfba4f4b"
+    },
+    {
+      "path": "apps/app-usuario/src/app/ubicaciones/UbicacionesDesktop.test.tsx",
+      "bytes": 11018,
+      "sha256": "afe26d968f693282d446752b3ffa29e0ab7b3fe4e830a2ca6b6295822cabf557"
+    },
+    {
+      "path": "apps/app-usuario/src/app/ubicaciones/UbicacionesDesktop.tsx",
+      "bytes": 24116,
+      "sha256": "e8683a45bccee3bc669ba81e674fb32e1893e11e00942f00bb5f8ca3a0ef453c"
+    },
+    {
+      "path": "apps/app-usuario/src/app/ubicaciones/ubicaciones-desktop.module.css",
+      "bytes": 21225,
+      "sha256": "c5283f62cd30348d23b46fe77ff21306b8db7d2a14fb926e034441beb64d5c5e"
+    },
+    {
+      "path": "apps/app-usuario/src/app/viajes/[id]/NavegacionPasaporte.tsx",
+      "bytes": 1050,
+      "sha256": "5c558e0c380c53e8197f94a28c25fbb502ee34d7dbdfddd0672ae638777df807"
+    },
+    {
+      "path": "apps/app-usuario/src/app/viajes/[id]/PasaporteDigitalSegmentado.test.tsx",
+      "bytes": 9073,
+      "sha256": "0094f0cf66637bd69689d71e8fc0dc31db1b55e7e94b936d86c5285e529e0f7d"
+    },
+    {
+      "path": "apps/app-usuario/src/app/viajes/[id]/PasaporteDigitalSegmentado.tsx",
+      "bytes": 8957,
+      "sha256": "2e0cf7657ffb334771b63d145e818bb1fdc4c7954f02143b1d5646b344d9b073"
+    },
+    {
+      "path": "apps/app-usuario/src/app/viajes/[id]/pasaporte.module.css",
+      "bytes": 4409,
+      "sha256": "93d15fb5b6f539d4304b37f0f0c605aa39237f89957e4b4a279e0f84b21e1ce9"
+    },
+    {
+      "path": "apps/app-usuario/src/app/viajes/nuevo/components/PasoPago.test.tsx",
+      "bytes": 5282,
+      "sha256": "1092cee159715437bcd455557c4b546e478c2f99ecb43e3b0748f55fba8e3a70"
+    },
+    {
+      "path": "apps/app-usuario/src/app/viajes/nuevo/components/PasoPago.tsx",
+      "bytes": 15527,
+      "sha256": "595b51b69ef6fa949b4fafd73ed694e91134bbffafb3ebf6b9c24ca167c5373a"
+    },
+    {
+      "path": "apps/app-usuario/src/app/viajes/nuevo/components/PasoRuta.test.tsx",
+      "bytes": 6223,
+      "sha256": "3a6d31b05d60cb2313aaa57e36ff0b318d7d439fd77b1d6a0d417388c03480ff"
+    },
+    {
+      "path": "apps/app-usuario/src/app/viajes/nuevo/components/PasoRuta.tsx",
+      "bytes": 22556,
+      "sha256": "ad4fcf48a55b8b6b25fda219e013733a3b959b75a76f06d97fbe382b3c4c1ef0"
+    },
+    {
+      "path": "apps/app-usuario/src/app/viajes/nuevo/components/cotizador.module.css",
+      "bytes": 11052,
+      "sha256": "fd311a4d66fb5442d460cbebe341ae8c2964ac30497a98f62a6e42acaec135f4"
+    },
+    {
+      "path": "apps/app-usuario/tests/e2e/mis-traslados-desktop.spec.ts",
+      "bytes": 4432,
+      "sha256": "8e065bb6460fadc406b4fe07293f49d983cf676df82f5ff86496466bb3755158"
+    },
+    {
+      "path": "apps/app-usuario/tests/e2e/vehiculos-desktop.spec.ts",
+      "bytes": 5757,
+      "sha256": "d380a56d2e272677949c5a5d62bac85e2dd7b1532690e58f93161e3b854fa5ec"
+    },
+    {
+      "path": "apps/panel-admin/src/app/admin-components.tsx",
+      "bytes": 15691,
+      "sha256": "35abf8e737cee74fc66fc65e56b009755d265a15394959a3d656a7f79a13eed3"
+    },
+    {
+      "path": "apps/panel-admin/src/app/admin-tabs.test.tsx",
+      "bytes": 1028,
+      "sha256": "c33df457a62262f8181d31f2eb0c9f6805d990cd483922a8791c200208fbaab9"
+    },
+    {
+      "path": "apps/panel-admin/src/app/configuracion/page.tsx",
+      "bytes": 58714,
+      "sha256": "2c23e1de22d73ce785f979156211d7cebf743a39b1a5f3db75c80dfb47270647"
+    },
+    {
+      "path": "apps/panel-admin/src/app/empresas/[id]/page.tsx",
+      "bytes": 37451,
+      "sha256": "b00d1cae3c2ec3adbb2b5e88db4eb7293592c04c17c602e365ea3d256a72db6f"
+    },
+    {
+      "path": "apps/panel-admin/src/app/empresas/page.tsx",
+      "bytes": 55533,
+      "sha256": "ba5c48f3c00c404f098ff843ca048de8a8eea1e01c176c4387dbb424ebdb5ac5"
+    },
+    {
+      "path": "apps/panel-admin/src/app/pagos/page.tsx",
+      "bytes": 15005,
+      "sha256": "bd526f6de24db1160c261eb0f10a6369835ade867cff00358cf64a07b27d3290"
+    },
+    {
+      "path": "apps/panel-admin/src/app/usuarios/[id]/page.tsx",
+      "bytes": 73922,
+      "sha256": "00d8a19f9bea8a2d13844495b4ae23a9261c3f1333047565a42fb6ddd9b4f9d9"
+    },
+    {
+      "path": "packages/ui/README.md",
+      "bytes": 22068,
+      "sha256": "248dc515c14b441e060c8473fda05c57333348469d0de0dc72fd3f67c3ab1bb3"
+    },
+    {
+      "path": "packages/ui/src/components/Chat.tsx",
+      "bytes": 6394,
+      "sha256": "b73f5774f26df8325263e6347932b29e4c158308c6a89aaa4527ee5bdf4fb4b2"
+    },
+    {
+      "path": "packages/ui/src/components/Controls.test.tsx",
+      "bytes": 1600,
+      "sha256": "a60bdc78f73021305bd81005fd9379f87197c20c6d4e5ea0026329581d075758"
+    },
+    {
+      "path": "packages/ui/src/components/Controls.tsx",
+      "bytes": 6861,
+      "sha256": "95326bd3ef8f24a6931b830100c5a51c8648002ce7c150398a1799d18a33c0d3"
+    },
+    {
+      "path": "packages/ui/src/components/MobileRow.tsx",
+      "bytes": 5441,
+      "sha256": "18612edc6b18604dda54cbd5c642ee7f3a189b86ccab412180cf73f8648ee302"
+    },
+    {
+      "path": "packages/ui/src/components/Navigation.tsx",
+      "bytes": 6158,
+      "sha256": "cfd2b29d31575a2d288af33158727300151e5ade9acd164c41ab7f091a7b743a"
+    },
+    {
+      "path": "packages/ui/src/components/NextOperationalAction.tsx",
+      "bytes": 4915,
+      "sha256": "f7e19fcd0cffaef8d900446f6d4534e23bd02296a80add0db1fcb10649816eaa"
+    },
+    {
+      "path": "packages/ui/src/components/Tabs.test.tsx",
+      "bytes": 2166,
+      "sha256": "f0ac38b3e1b373fba6569cb63b7324a591e093a16edb84f3e8539eb422d2ee49"
+    },
+    {
+      "path": "packages/ui/src/components/Tabs.tsx",
+      "bytes": 4994,
+      "sha256": "075b9ed8b9b5177726d28cb93c0cb1c833a205506257d41278fbaac536609461"
+    },
+    {
+      "path": "packages/ui/src/components/composition-contract.test.ts",
+      "bytes": 7650,
+      "sha256": "e78fc521edc9d27e9b496dc59bb9a3e3fdb5acfb43069873e67e58e71383d90c"
+    },
+    {
+      "path": "packages/ui/src/components/disabled-links.test.tsx",
+      "bytes": 2238,
+      "sha256": "053dd97c95506a45cd6c93076e280a38c1f0cb9995c72fefab9e9ce4debf5bbb"
+    },
+    {
+      "path": "packages/ui/src/components/label-in-name.test.tsx",
+      "bytes": 3126,
+      "sha256": "a24db71b02710b8a290118c30ca82c8b5678a33bc04e59507469594a8c84c21c"
+    },
+    {
+      "path": "packages/ui/src/components/sd-rem-006-008.test.tsx",
+      "bytes": 4191,
+      "sha256": "dec00264ca5366fc93de6565f8eae36f0ea8a6a8cd75bd308094f6f4fc6586ef"
+    },
+    {
+      "path": "packages/ui/src/styles/tokens.css",
+      "bytes": 22053,
+      "sha256": "6cb5fd2a0655bfa4c0fcfc6a220a75f492c394dd4ee1b865fe5fae972ce92f07"
+    }
+  ],
+  "references": [
+    {
+      "path": "auditorias/RUUM-UX-001-SD/componentes/Tabs.md",
+      "bytes": 5901,
+      "sha256": "4d6bf359e9b778127a3f8bdb7be491581738fe9c51c33c150cc85cbc486bd4db"
+    },
+    {
+      "path": "auditorias/RUUM-UX-001-SD/resultados-base/Tabs--default--light--390--base.json",
+      "bytes": 80913,
+      "sha256": "d2fabc686890e4d6426c7f2218df0579d65235a5ecf48706cf9923163c971702"
+    },
+    {
+      "path": "auditorias/RUUM-UX-001-SD/interacciones.json",
+      "bytes": 259255,
+      "sha256": "b2a297a0d7a1cd23ad43fb8c8e588fda883d9a3a5ddd67fcc6010642fdb44216"
+    },
+    {
+      "path": "auditorias/RUUM-UX-001-SD/remediacion-SD-REM-004/resultados.json",
+      "bytes": 681837,
+      "sha256": "f2c59c49913f528109f7821863d2b446e74ce9dbdf5beba5b216f67f400796af"
+    },
+    {
+      "path": "auditorias/RUUM-UX-001-SD/remediacion-SD-REM-007/resultados.json",
+      "bytes": 21370,
+      "sha256": "adf0440cd2cf44d5860cd597170491157559894b4de03396586a037ebc3168b3"
+    },
+    {
+      "path": "auditorias/RUUM-UX-001-SD/remediacion-SD-REM-007/sellos-pre-sesion/manifiesto-original.json",
+      "bytes": 10608,
+      "sha256": "6942df9a5635c9e5169f2b32708e9a015d43dc42f5e93dfe8bc8aa12e8a7fbee"
+    }
+  ]
+}

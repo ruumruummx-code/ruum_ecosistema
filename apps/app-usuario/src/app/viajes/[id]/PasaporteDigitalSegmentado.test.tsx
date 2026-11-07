@@ -131,6 +131,8 @@ describe("Pasaporte dashboard", () => {
         screen.getByRole("tab", { name: "En Ruta" }).focus();
         await user.keyboard("{ArrowRight}");
         expect(screen.getByRole("tab", { name: "Fotos" })).toHaveFocus();
+        expect(screen.getByRole("tabpanel")).toHaveAccessibleName("En Ruta");
+        await user.keyboard("{Enter}");
         expect(screen.getByRole("tabpanel")).toHaveAccessibleName("Fotos");
     });
 });

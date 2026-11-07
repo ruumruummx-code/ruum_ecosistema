@@ -56,7 +56,7 @@ export function ContactoRecepcionVehiculo({
     <div className="flex flex-col gap-4">
       <NextOperationalAction
         title="Registra el estado final del vehículo"
-        instruction="Confirma el contacto de recepción y prepara el registro final antes de entregar."
+        instruction={procesando ? "Estamos iniciando el registro. Espera a que termine antes de continuar." : !ambosConfirmados ? "Para iniciar el registro final, marca «Contacto de recepción confirmado» y «Vehículo confirmado»." : "Confirma el contacto de recepción y prepara el registro final antes de entregar."}
         context={
           <>
             {contactoNombre}

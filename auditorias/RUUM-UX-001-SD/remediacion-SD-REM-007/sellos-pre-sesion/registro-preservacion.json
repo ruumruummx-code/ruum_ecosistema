@@ -1,0 +1,18 @@
+{
+  "fase": "pre-sesion preservado",
+  "fechaRegistro": "2026-11-07",
+  "zonaHoraria": "America/Mexico_City",
+  "baseCommit": "6e5d0934444a52c83f57834c845259c4d75741ea",
+  "notaCommit": "HEAD es base de trabajo; los cambios finales pueden estar sin commit. Ver sources del manifiesto vigente.",
+  "manifiestoOriginal": {
+    "ruta": "sellos-pre-sesion/manifiesto-original.json",
+    "sha256": "6942df9a5635c9e5169f2b32708e9a015d43dc42f5e93dfe8bc8aa12e8a7fbee",
+    "selloOriginalSha256": "b8b75ba6049c2daffb2deaf99f9a94615d06f3b5d091d82aa6478a547b0d5112"
+  },
+  "manifiestoAntiguo004": {
+    "ruta": "sellos-pre-sesion/manifiesto-antiguo-004.json",
+    "sha256": "9dd8e72cf671e1eabc061cd5dd1274432c4cc593512dc54e1558ace9d99aab79",
+    "estado": "HISTORICO; no vigente, no acredita sesión"
+  },
+  "posterior": "No existe sello post-sesión: faltan sesión real, respaldo y firmas. --post-session no sobrescribe el sello pre-sesión."
+}

@@ -37,3 +37,14 @@ Revisión react-best-practices: ramas declarativas sin efectos ni listeners glob
 Servir con `node auditorias/RUUM-UX-001-SD/servidor.cjs` y abrir `/remediacion-SD-REM-007/formulario.html` en la URL emitida. Con NVDA/VoiceOver, recorrer los enlaces en modo lectura: comprobar etiqueta y anuncio deshabilitado, intentar activar y confirmar ausencia de acción. Validar Tab/Shift+Tab y rehabilitación. Registrar sistema, lector/versión, navegador y anuncios observados.
 
 Contrato de composición: no anidar controles interactivos en el contenido React de una fila; disponer las acciones independientes como filas separadas. No se certifican manejadores de activación añadidos por ancestros de consumidores externos.
+
+## Actualización de condiciones · 2026-11-07
+
+Ver `CONDICIONES-DE-CIERRE.md` para los ocho criterios actualizados. El reporte axe incluye explícitamente `aria-prohibited-attr`; regresión P1 final en `regresion-p1.json`. Decisión delegada del patrón A y responsable H Manuel registrados en `DECISION-Y-FIRMAS.md`. Sesión conjunta con SD-REM-004 reconocida por el usuario como deuda pendiente en `SESION-AT.json`; firmas de Frontend Plataforma/Accesibilidad pendientes.
+
+Integridad de ambos directorios: `manifiesto-sha256.json` y sello `manifiesto-sha256.sha256`; verificar con `node auditorias/RUUM-UX-001-SD/remediacion-SD-REM-007/sellar-evidencia.cjs --check`. Cualquier regeneración de resultados exige volver a sellar.
+
+
+## Estado vigente tras aprobación condicionada · 2026-11-07
+
+**APROBADOS CON CONDICIONES; P2-1 NO CERRADA.** Ver `ACTUALIZACION-CONDICIONES.md` y `estado-gate.json`: revisión/invalidación del expediente 004, preservación de manifiestos, alcance limitado a consumidores de app-conductor y protección estática del contrato. Pendientes sesión con operador/transcriptor distintos y respaldo, firmas de Frontend/Accesibilidad y co-revisión de Diseño del token `--ruum-on-primary`. Suite actual: 45 pruebas UI. El manifiesto vigente sigue siendo pre-sesión y registra commit base más hashes del workspace, sin atribuir cambios no commiteados a HEAD.

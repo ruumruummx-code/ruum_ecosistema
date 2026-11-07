@@ -19,3 +19,12 @@ Desde la raíz: `node auditorias/RUUM-UX-001-SD/remediacion-SD-REM-004/verificar
 **Pendiente sesión NVDA/VoiceOver**: no se realizó una escucha con lector de pantalla. No declarar cierre total. Ejecutar formulario servido con `node auditorias/RUUM-UX-001-SD/servidor.cjs` y abrir `/remediacion-SD-REM-004/formulario.html`; recorrer controles y cambiar estados. Registrar lector/versión, navegador, sistema y anuncios de etiqueta/ayuda/error.
 
 Alcance: controles nativos compartidos. No se certifican autocompletados de terceros ni toda la aplicación. IDs explícitos duplicados siguen siendo responsabilidad del consumidor; múltiples raíces React requieren prefijos coordinados en sus raíces. El harness usa el CSS ya generado del showcase.
+
+## Actualización 2026-11-07 · regresión conjunta
+
+Regresión final de contraste, foco y nombre junto con SD-REM-007: `../remediacion-SD-REM-007/regresion-p1.json` y `CONDICIONES-DE-CIERRE.md`. Integridad de este directorio incluida en `../remediacion-SD-REM-007/manifiesto-sha256.json`. Responsable informado: H Manuel, Administración e Innovación Digital. El usuario confirma que no existe sesión NVDA y queda como deuda pendiente; protocolo conjunto en `../remediacion-SD-REM-007/SESION-AT.json`. No se declara cerrado el gate AT.
+
+
+## Aprobación condicionada · 2026-11-07
+
+**APROBADO CON CONDICIONES; P2-1 NO CERRADA.** `SESION-ASISTIVA-SD-REM-004.md` está invalidado por falta de respaldo; `MANIFIESTO-SHA256.json` es histórico y está retirado como sello vigente según `ESTADO-MANIFIESTO-ANTIGUO.md`. Ver actualización conjunta en `../remediacion-SD-REM-007/ACTUALIZACION-CONDICIONES.md`. Sesión, firmas y co-revisión permanecen pendientes.

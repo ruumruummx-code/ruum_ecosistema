@@ -21,8 +21,8 @@
       "orientationAngle": 0,
       "orientationType": "landscape-primary"
     },
-    "timestamp": "2026-11-07T06:29:26.133Z",
-    "url": "http://127.0.0.1:64844/showcase.html",
+    "timestamp": "2026-11-07T08:14:36.357Z",
+    "url": "http://127.0.0.1:63206/showcase.html",
     "toolOptions": {
       "reporter": "v1"
     },
@@ -650,6 +650,23 @@
         "description": "Ensure <input type=\"image\"> elements have alternative text",
         "help": "Image buttons must have alternative text",
         "helpUrl": "https://dequeuniversity.com/rules/axe/4.14/input-image-alt?application=axeAPI",
+        "nodes": []
+      },
+      {
+        "id": "label-content-name-mismatch",
+        "impact": null,
+        "tags": [
+          "cat.semantics",
+          "wcag21a",
+          "wcag253",
+          "EN-301-549",
+          "EN-9.2.5.3",
+          "RGAAv4",
+          "RGAA-6.1.5"
+        ],
+        "description": "Ensure that elements labelled through their content must have their visible text as part of their accessible name",
+        "help": "Elements must have their visible text as part of their accessible name",
+        "helpUrl": "https://dequeuniversity.com/rules/axe/4.14/label-content-name-mismatch?application=axeAPI",
         "nodes": []
       },
       {
@@ -1330,49 +1347,9 @@
               }
             ],
             "impact": null,
-            "html": "<input disabled=\"\" aria-disabled=\"true\" aria-describedby=\"chat-deshabilitado-a...\" placeholder=\"Chat no disponible p...\" class=\"min-h-11 flex-1 roun...\" value=\"\">",
+            "html": "<input id=\"_r_4_\" disabled=\"\" aria-disabled=\"true\" aria-label=\"Chat no disponible p...\" aria-describedby=\"chat-deshabilitado-a...\" placeholder=\"Chat no disponible p...\" class=\"min-h-11 flex-1 roun...\" value=\"\">",
             "target": [
-              "input"
-            ]
-          },
-          {
-            "any": [],
-            "all": [
-              {
-                "id": "aria-allowed-attr",
-                "data": null,
-                "relatedNodes": [],
-                "impact": "critical",
-                "message": "ARIA attributes are used correctly for the defined role"
-              },
-              {
-                "id": "aria-allowed-attr-elm",
-                "data": null,
-                "relatedNodes": [],
-                "message": "ARIA attributes are allowed for this element",
-                "impact": "critical"
-              },
-              {
-                "id": "aria-no-deprecated-attr",
-                "data": null,
-                "relatedNodes": [],
-                "impact": "critical",
-                "message": "No deprecated ARIA attributes are used"
-              }
-            ],
-            "none": [
-              {
-                "id": "aria-unsupported-attr",
-                "data": null,
-                "relatedNodes": [],
-                "impact": "critical",
-                "message": "ARIA attribute is supported"
-              }
-            ],
-            "impact": null,
-            "html": "<button class=\"inline-flex min-h-[v...\" type=\"submit\" aria-label=\"Enviar mensaje\" disabled=\"\">",
-            "target": [
-              "button"
+              "#_r_4_"
             ]
           },
           {
@@ -1549,27 +1526,9 @@
             ],
             "none": [],
             "impact": null,
-            "html": "<input disabled=\"\" aria-disabled=\"true\" aria-describedby=\"chat-deshabilitado-a...\" placeholder=\"Chat no disponible p...\" class=\"min-h-11 flex-1 roun...\" value=\"\">",
+            "html": "<input id=\"_r_4_\" disabled=\"\" aria-disabled=\"true\" aria-label=\"Chat no disponible p...\" aria-describedby=\"chat-deshabilitado-a...\" placeholder=\"Chat no disponible p...\" class=\"min-h-11 flex-1 roun...\" value=\"\">",
             "target": [
-              "input"
-            ]
-          },
-          {
-            "any": [],
-            "all": [
-              {
-                "id": "aria-conditional-attr",
-                "data": null,
-                "relatedNodes": [],
-                "impact": "serious",
-                "message": "ARIA attribute is allowed"
-              }
-            ],
-            "none": [],
-            "impact": null,
-            "html": "<button class=\"inline-flex min-h-[v...\" type=\"submit\" aria-label=\"Enviar mensaje\" disabled=\"\">",
-            "target": [
-              "button"
+              "#_r_4_"
             ]
           },
           {
@@ -1781,27 +1740,9 @@
               }
             ],
             "impact": null,
-            "html": "<input disabled=\"\" aria-disabled=\"true\" aria-describedby=\"chat-deshabilitado-a...\" placeholder=\"Chat no disponible p...\" class=\"min-h-11 flex-1 roun...\" value=\"\">",
+            "html": "<input id=\"_r_4_\" disabled=\"\" aria-disabled=\"true\" aria-label=\"Chat no disponible p...\" aria-describedby=\"chat-deshabilitado-a...\" placeholder=\"Chat no disponible p...\" class=\"min-h-11 flex-1 roun...\" value=\"\">",
             "target": [
-              "input"
-            ]
-          },
-          {
-            "any": [],
-            "all": [],
-            "none": [
-              {
-                "id": "aria-prohibited-attr",
-                "data": null,
-                "relatedNodes": [],
-                "impact": "serious",
-                "message": "ARIA attribute is allowed"
-              }
-            ],
-            "impact": null,
-            "html": "<button class=\"inline-flex min-h-[v...\" type=\"submit\" aria-label=\"Enviar mensaje\" disabled=\"\">",
-            "target": [
-              "button"
+              "#_r_4_"
             ]
           },
           {
@@ -2117,41 +2058,9 @@
             ],
             "none": [],
             "impact": null,
-            "html": "<input disabled=\"\" aria-disabled=\"true\" aria-describedby=\"chat-deshabilitado-a...\" placeholder=\"Chat no disponible p...\" class=\"min-h-11 flex-1 roun...\" value=\"\">",
+            "html": "<input id=\"_r_4_\" disabled=\"\" aria-disabled=\"true\" aria-label=\"Chat no disponible p...\" aria-describedby=\"chat-deshabilitado-a...\" placeholder=\"Chat no disponible p...\" class=\"min-h-11 flex-1 roun...\" value=\"\">",
             "target": [
-              "input"
-            ]
-          },
-          {
-            "any": [],
-            "all": [
-              {
-                "id": "aria-valid-attr-value",
-                "data": null,
-                "relatedNodes": [],
-                "impact": "critical",
-                "message": "ARIA attribute values are valid"
-              },
-              {
-                "id": "aria-errormessage",
-                "data": null,
-                "relatedNodes": [],
-                "impact": "critical",
-                "message": "aria-errormessage exists and references elements visible to screen readers that use a supported aria-errormessage technique"
-              },
-              {
-                "id": "aria-level",
-                "data": null,
-                "relatedNodes": [],
-                "impact": "critical",
-                "message": "aria-level values are valid"
-              }
-            ],
-            "none": [],
-            "impact": null,
-            "html": "<button class=\"inline-flex min-h-[v...\" type=\"submit\" aria-label=\"Enviar mensaje\" disabled=\"\">",
-            "target": [
-              "button"
+              "#_r_4_"
             ]
           },
           {
@@ -2253,27 +2162,9 @@
             "all": [],
             "none": [],
             "impact": null,
-            "html": "<input disabled=\"\" aria-disabled=\"true\" aria-describedby=\"chat-deshabilitado-a...\" placeholder=\"Chat no disponible p...\" class=\"min-h-11 flex-1 roun...\" value=\"\">",
+            "html": "<input id=\"_r_4_\" disabled=\"\" aria-disabled=\"true\" aria-label=\"Chat no disponible p...\" aria-describedby=\"chat-deshabilitado-a...\" placeholder=\"Chat no disponible p...\" class=\"min-h-11 flex-1 roun...\" value=\"\">",
             "target": [
-              "input"
-            ]
-          },
-          {
-            "any": [
-              {
-                "id": "aria-valid-attr",
-                "data": null,
-                "relatedNodes": [],
-                "impact": "critical",
-                "message": "ARIA attribute name is valid"
-              }
-            ],
-            "all": [],
-            "none": [],
-            "impact": null,
-            "html": "<button class=\"inline-flex min-h-[v...\" type=\"submit\" aria-label=\"Enviar mensaje\" disabled=\"\">",
-            "target": [
-              "button"
+              "#_r_4_"
             ]
           },
           {
@@ -2325,19 +2216,12 @@
                 "relatedNodes": [],
                 "impact": "critical",
                 "message": "Element has inner text that is visible to screen readers"
-              },
-              {
-                "id": "aria-label",
-                "data": null,
-                "relatedNodes": [],
-                "impact": "critical",
-                "message": "aria-label attribute exists and is not empty"
               }
             ],
             "all": [],
             "none": [],
             "impact": null,
-            "html": "<button class=\"inline-flex min-h-[v...\" type=\"submit\" aria-label=\"Enviar mensaje\" disabled=\"\">",
+            "html": "<button class=\"inline-flex min-h-[v...\" type=\"submit\" disabled=\"\">",
             "target": [
               "button"
             ]
@@ -2532,45 +2416,40 @@
               }
             ],
             "impact": null,
-            "html": "<input disabled=\"\" aria-disabled=\"true\" aria-describedby=\"chat-deshabilitado-a...\" placeholder=\"Chat no disponible p...\" class=\"min-h-11 flex-1 roun...\" value=\"\">",
+            "html": "<input id=\"_r_4_\" disabled=\"\" aria-disabled=\"true\" aria-label=\"Chat no disponible p...\" aria-describedby=\"chat-deshabilitado-a...\" placeholder=\"Chat no disponible p...\" class=\"min-h-11 flex-1 roun...\" value=\"\">",
             "target": [
-              "input"
+              "#_r_4_"
             ]
           }
         ]
       },
       {
-        "id": "label-content-name-mismatch",
+        "id": "label-title-only",
         "impact": null,
         "tags": [
-          "cat.semantics",
-          "wcag21a",
-          "wcag253",
-          "EN-301-549",
-          "EN-9.2.5.3",
-          "RGAAv4",
-          "RGAA-6.1.5"
+          "cat.forms",
+          "best-practice"
         ],
-        "description": "Ensure that elements labelled through their content must have their visible text as part of their accessible name",
-        "help": "Elements must have their visible text as part of their accessible name",
-        "helpUrl": "https://dequeuniversity.com/rules/axe/4.14/label-content-name-mismatch?application=axeAPI",
+        "description": "Ensure that every form element has a visible label and is not solely labeled using hidden labels, or the title or aria-describedby attributes",
+        "help": "Form elements should have a visible label",
+        "helpUrl": "https://dequeuniversity.com/rules/axe/4.14/label-title-only?application=axeAPI",
         "nodes": [
           {
-            "any": [
+            "any": [],
+            "all": [],
+            "none": [
               {
-                "id": "label-content-name-mismatch",
+                "id": "title-only",
                 "data": null,
                 "relatedNodes": [],
                 "impact": "serious",
-                "message": "Element contains visible text as part of its accessible name"
+                "message": "Form element does not solely use title attribute for its label"
               }
             ],
-            "all": [],
-            "none": [],
             "impact": null,
-            "html": "<button class=\"inline-flex min-h-[v...\" type=\"submit\" aria-label=\"Enviar mensaje\" disabled=\"\">",
+            "html": "<input id=\"_r_4_\" disabled=\"\" aria-disabled=\"true\" aria-label=\"Chat no disponible p...\" aria-describedby=\"chat-deshabilitado-a...\" placeholder=\"Chat no disponible p...\" class=\"min-h-11 flex-1 roun...\" value=\"\">",
             "target": [
-              "button"
+              "#_r_4_"
             ]
           }
         ]
@@ -2599,6 +2478,13 @@
           {
             "any": [
               {
+                "id": "aria-label",
+                "data": null,
+                "relatedNodes": [],
+                "impact": "critical",
+                "message": "aria-label attribute exists and is not empty"
+              },
+              {
                 "id": "non-empty-placeholder",
                 "data": null,
                 "relatedNodes": [],
@@ -2617,9 +2503,9 @@
               }
             ],
             "impact": null,
-            "html": "<input disabled=\"\" aria-disabled=\"true\" aria-describedby=\"chat-deshabilitado-a...\" placeholder=\"Chat no disponible p...\" class=\"min-h-11 flex-1 roun...\" value=\"\">",
+            "html": "<input id=\"_r_4_\" disabled=\"\" aria-disabled=\"true\" aria-label=\"Chat no disponible p...\" aria-describedby=\"chat-deshabilitado-a...\" placeholder=\"Chat no disponible p...\" class=\"min-h-11 flex-1 roun...\" value=\"\">",
             "target": [
-              "input"
+              "#_r_4_"
             ]
           }
         ]
@@ -2753,7 +2639,7 @@
             "all": [],
             "none": [],
             "impact": null,
-            "html": "<button class=\"inline-flex min-h-[v...\" type=\"submit\" aria-label=\"Enviar mensaje\" disabled=\"\">",
+            "html": "<button class=\"inline-flex min-h-[v...\" type=\"submit\" disabled=\"\">",
             "target": [
               "button"
             ]
@@ -2762,42 +2648,9 @@
       }
     ],
     "incomplete": [],
-    "violations": [
-      {
-        "id": "label-title-only",
-        "impact": "serious",
-        "tags": [
-          "cat.forms",
-          "best-practice"
-        ],
-        "description": "Ensure that every form element has a visible label and is not solely labeled using hidden labels, or the title or aria-describedby attributes",
-        "help": "Form elements should have a visible label",
-        "helpUrl": "https://dequeuniversity.com/rules/axe/4.14/label-title-only?application=axeAPI",
-        "nodes": [
-          {
-            "any": [],
-            "all": [],
-            "none": [
-              {
-                "id": "title-only",
-                "data": null,
-                "relatedNodes": [],
-                "impact": "serious",
-                "message": "Only title used to generate label for form element"
-              }
-            ],
-            "impact": "serious",
-            "html": "<input disabled=\"\" aria-disabled=\"true\" aria-describedby=\"chat-deshabilitado-a...\" placeholder=\"Chat no disponible p...\" class=\"min-h-11 flex-1 roun...\" value=\"\">",
-            "target": [
-              "input"
-            ],
-            "failureSummary": "Fix all of the following:\n  Only title used to generate label for form element"
-          }
-        ]
-      }
-    ]
+    "violations": []
   },
-  "tree": "- main:\n  - log \"Mensajes del chat\":\n    - paragraph: Hola, necesito información del traslado.\n    - paragraph: 06:00 a.m.\n    - paragraph: El traslado sigue su ruta programada.\n    - paragraph: 06:01 a.m.\n  - status: \"Mensaje de conductor: El traslado sigue su ruta programada.\"\n  - textbox \"Chat no disponible para este traslado\" [disabled]\n  - button \"Enviar mensaje\" [disabled]: Enviar\n  - status: Chat no disponible para este traslado",
+  "tree": "- main:\n  - log \"Mensajes del chat\":\n    - paragraph: Hola, necesito información del traslado.\n    - paragraph: 06:00 a.m.\n    - paragraph: El traslado sigue su ruta programada.\n    - paragraph: 06:01 a.m.\n  - status: \"Mensaje de conductor: El traslado sigue su ruta programada.\"\n  - textbox \"Chat no disponible para este traslado\" [disabled]\n  - button \"Enviar\" [disabled]\n  - status: Chat no disponible para este traslado",
   "geometry": {
     "innerWidth": 390,
     "scrollWidth": 390,

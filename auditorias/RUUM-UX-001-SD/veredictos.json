@@ -229,9 +229,7 @@
   {
     "component": "Chat",
     "verdict": "no conforme",
-    "violations": [
-      "label-title-only"
-    ],
+    "violations": [],
     "incomplete": [
       "aria-prohibited-attr"
     ],
@@ -246,7 +244,7 @@
       "Adjudicar candidatos de recorte/desbordamiento, distinguiendo scroll intencionado."
     ],
     "cases": 20,
-    "interactiveStates": 8
+    "interactiveStates": 0
   },
   {
     "component": "Input",
@@ -510,9 +508,7 @@
   {
     "component": "MobileProgress",
     "verdict": "no conforme",
-    "violations": [
-      "label-content-name-mismatch"
-    ],
+    "violations": [],
     "incomplete": [
       "color-contrast"
     ],
@@ -527,7 +523,7 @@
       "Adjudicar candidatos de recorte/desbordamiento, distinguiendo scroll intencionado."
     ],
     "cases": 18,
-    "interactiveStates": 8
+    "interactiveStates": 0
   },
   {
     "component": "DesktopStateStepper",
@@ -549,9 +545,7 @@
   {
     "component": "EstadoStepper",
     "verdict": "no conforme",
-    "violations": [
-      "label-content-name-mismatch"
-    ],
+    "violations": [],
     "incomplete": [
       "color-contrast"
     ],
@@ -566,7 +560,7 @@
       "Adjudicar candidatos de recorte/desbordamiento, distinguiendo scroll intencionado."
     ],
     "cases": 18,
-    "interactiveStates": 8
+    "interactiveStates": 0
   },
   {
     "component": "EstatusBadgeEconomico",
@@ -755,7 +749,7 @@
       "Adjudicar candidatos de recorte/desbordamiento, distinguiendo scroll intencionado."
     ],
     "cases": 14,
-    "interactiveStates": 8
+    "interactiveStates": 0
   },
   {
     "component": "MobileRow",
@@ -850,26 +844,6 @@
     "interactiveStates": 8
   },
   {
-    "component": "Tabs",
-    "verdict": "no conforme",
-    "violations": [],
-    "incomplete": [
-      "color-contrast"
-    ],
-    "tickets": [
-      "SD-REM-005"
-    ],
-    "conditions": [
-      "Co-revisión nominal de Diseño de Sistemas y aceptación de condiciones.",
-      "Zoom nativo, tecnología asistiva y composición final pendientes.",
-      "Tipografía y escalas: SD-REM-009.",
-      "Adjudicar incomplete de axe: color-contrast.",
-      "Adjudicar candidatos de recorte/desbordamiento, distinguiendo scroll intencionado."
-    ],
-    "cases": 12,
-    "interactiveStates": 8
-  },
-  {
     "component": "Sidebar",
     "verdict": "conforme con condiciones",
     "violations": [],
@@ -948,9 +922,7 @@
   {
     "component": "RuumHeader",
     "verdict": "no conforme",
-    "violations": [
-      "label-content-name-mismatch"
-    ],
+    "violations": [],
     "incomplete": [],
     "tickets": [
       "SD-REM-011"
@@ -962,7 +934,7 @@
       "Adjudicar candidatos de recorte/desbordamiento, distinguiendo scroll intencionado."
     ],
     "cases": 12,
-    "interactiveStates": 8
+    "interactiveStates": 0
   },
   {
     "component": "SelloConductor",
@@ -1031,6 +1003,26 @@
       "Co-revisión nominal de Diseño de Sistemas y aceptación de condiciones.",
       "Zoom nativo, tecnología asistiva y composición final pendientes.",
       "Tipografía y escalas: SD-REM-009."
+    ],
+    "cases": 12,
+    "interactiveStates": 8
+  },
+  {
+    "component": "Tabs",
+    "verdict": "no conforme",
+    "violations": [],
+    "incomplete": [
+      "color-contrast"
+    ],
+    "tickets": [
+      "SD-REM-005"
+    ],
+    "conditions": [
+      "Co-revisión nominal de Diseño de Sistemas y aceptación de condiciones.",
+      "Zoom nativo, tecnología asistiva y composición final pendientes.",
+      "Tipografía y escalas: SD-REM-009.",
+      "Adjudicar incomplete de axe: color-contrast.",
+      "Adjudicar candidatos de recorte/desbordamiento, distinguiendo scroll intencionado."
     ],
     "cases": 12,
     "interactiveStates": 8

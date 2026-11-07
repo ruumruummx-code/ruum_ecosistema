@@ -35,10 +35,10 @@ export function DriverEarningsView({ data, summary, period, onPeriod, loading, e
       <Link href="/notificaciones" prefetch={false} className={styles.bell} aria-label="Notificaciones"><Icon name="bell" /><i aria-hidden="true" /></Link>
     </header>
     <div className={styles.heading}><h1>Mis ganancias</h1><p>Aquí puedes ver tus ingresos y pagos</p></div>
-    <div className={styles.tabs} role="tablist" aria-label="Periodo de ganancias">
-      {([['semana', 'Esta semana'], ['mes', 'Este mes']] as const).map(([id, label]) => <button key={id} id={`periodo-${id}`} type="button" role="tab" aria-selected={period === id} aria-controls="resumen-ganancias" onClick={() => onPeriod(id)}>{label}</button>)}
+    <div className={styles.tabs} role="group" aria-label="Periodo de ganancias">
+      {([['semana', 'Esta semana'], ['mes', 'Este mes']] as const).map(([id, label]) => <button key={id}  type="button"  aria-pressed={period === id}  onClick={() => onPeriod(id)}>{label}</button>)}
     </div>
-    <section id="resumen-ganancias" role="tabpanel" aria-labelledby={`periodo-${period}`} aria-busy={loading} className={styles.summary}>
+    <section id="resumen-ganancias" role="region" aria-label="Resultados del filtro"  aria-busy={loading} className={styles.summary}>
       <div className={styles.total}>
         <div><p>Ganancias totales</p><h2 data-testid="earnings-total">{ready ? `$${money(summary.amount)}` : "—"}<small>MXN</small></h2></div>
         <span className={styles.chart}><Icon name="chart" /></span>

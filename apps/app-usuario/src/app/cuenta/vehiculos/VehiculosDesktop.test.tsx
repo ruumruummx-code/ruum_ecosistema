@@ -164,8 +164,10 @@ describe("Mis vehículos desktop", () => {
     });
     expect(screen.getByRole("tab", { name: "Documentos" })).toHaveAttribute(
       "aria-selected",
-      "true",
+      "false",
     );
+    fireEvent.click(screen.getByRole("tab", { name: "Documentos" }));
+    expect(screen.getByRole("tabpanel", { name: "Documentos" })).toBeInTheDocument();
     expect(screen.getByRole("tab", { name: "Documentos" })).toHaveFocus();
   });
   it("filtra por transmisión y color desde Más filtros", () => {

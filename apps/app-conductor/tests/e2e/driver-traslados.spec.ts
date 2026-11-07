@@ -13,7 +13,7 @@ test.beforeEach(async ({ context, page }) => {
 async function openTrips(page: Page, offers = 0) {
   await page.goto("/viajes", { waitUntil: "domcontentloaded" });
   await expect(page.locator("[data-driver-traslados] [role=tabpanel]")).toHaveAttribute("aria-busy", "false", { timeout: 180_000 });
-  await expect(page.getByRole("tab", { name: `Ofertas (${offers})`, exact: true })).toBeVisible();
+  await expect(page.getByRole("button", { name: `Ofertas (${offers})`, exact: true })).toBeVisible();
   await expect(page.getByText("Información de los traslados", { exact: true })).toHaveCount(0);
   await page.locator("nextjs-portal").evaluateAll((nodes) => nodes.forEach((node) => (node as HTMLElement).style.setProperty("display", "none", "important")));
 }
@@ -35,7 +35,7 @@ for (const size of [{ width: 320, height: 568 }, { width: 375, height: 667 }, { 
     await page.route("**/rest/v1/traslados?*", route => route.fulfill({ headers: { "access-control-allow-origin": "*" }, json: [trip.traslado_id, "acbb6c28-0000-4000-8000-000000000012"].map(id => ({ ...trip, id, fecha_hora_programada: trip.creado_en })) }));
     await page.setViewportSize(size);
     await openTrips(page);
-    await page.getByRole("tab", { name: "Aceptados (2)", exact: true }).click();
+    await page.getByRole("button", { name: "Aceptados (2)", exact: true }).click();
     const card = page.locator("[data-accepted-card]");
     await expect(card).toContainText("PENDIENTE DE INICIO");
     await expect(card).toContainText("$531.45");
@@ -97,11 +97,11 @@ test("alterna pestañas, selecciona fechas y navega entre semanas", async ({ pag
   const today = page.getByRole("group", { name: "Días de la semana" }).getByRole("button", { name: /sábado.*17/ });
   await expect(today).toHaveAttribute("aria-pressed", "true");
   await expect(today).toHaveAttribute("aria-current", "date");
-  await page.getByRole("tab", { name: "Aceptados (0)" }).click();
-  await expect(page.getByRole("tab", { name: "Aceptados (0)" })).toHaveAttribute("aria-selected", "true");
+  await page.getByRole("button", { name: "Aceptados (0)" }).click();
+  await expect(page.getByRole("button", { name: "Aceptados (0)" })).toHaveAttribute("aria-pressed", "true");
   await expect(page.getByText(/No tienes traslados aceptados/)).toBeVisible();
   await page.getByRole("button", { name: "Buscar ofertas disponibles" }).click();
-  await expect(page.getByRole("tab", { name: "Ofertas (0)" })).toHaveAttribute("aria-selected", "true");
+  await expect(page.getByRole("button", { name: "Ofertas (0)" })).toHaveAttribute("aria-pressed", "true");
   await page.getByRole("group", { name: "Días de la semana" }).getByRole("button", { name: /domingo.*11/ }).click();
   await expect(page.locator("time")).toHaveText("DOM 11 DE OCT");
   await expect(page.getByText("HOY", { exact: true })).toHaveCount(0);
@@ -156,7 +156,7 @@ test("pagina ofertas reales del fixture, ordena y filtra sin perder el detalle",
   await expect(page.getByRole("link", { name: "Ver detalles de la oferta" })).toHaveAttribute("href", new RegExp(trips[0].traslado_id));
   await page.getByRole("button", { name: "Limpiar búsqueda" }).click();
   await expect(page.getByRole("searchbox")).toHaveValue("");
-  await expect(page.getByRole("tab", { name: "Ofertas (2)", exact: true })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Ofertas (2)", exact: true })).toBeVisible();
 });
 
 for (const size of [{ width: 320, height: 568 }, { width: 375, height: 667 }, { width: 390, height: 844 }, { width: 375, height: 500 }, { width: 667, height: 375 }]) {

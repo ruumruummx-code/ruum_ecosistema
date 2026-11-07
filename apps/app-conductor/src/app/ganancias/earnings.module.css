@@ -16,7 +16,7 @@
 .heading p { font-size: 15px; line-height: 1.4; color: var(--conductor-muted); margin-top: 5px; }
 .tabs { display: flex; flex-shrink: 0; gap: 10px; }
 .tabs button { flex: 1; min-height: 44px; border: 0; border-bottom: 3px solid #edf0f6; color: #697992; background: transparent; font-size: 14px; font-weight: 600; }
-.tabs button[aria-selected="true"] { color: #005bff; border-bottom-color: #0062ff; }
+.tabs button:is([aria-selected="true"], [aria-pressed="true"]) { color: #005bff; border-bottom-color: #0062ff; }
 .tabs button:hover { background: #edf4ff; }
 .summary { display: flex; flex-direction: column; gap: 12px; }
 .total { display: grid; grid-template-columns: minmax(0, 1fr) 45px; align-items: center; gap: 10px; border: 1px solid #e1e5ee; border-radius: 16px; background: white; padding: 18px; box-shadow: 0 2px 8px #0a244505; }

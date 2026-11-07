@@ -2,16 +2,14 @@
   "components": 58,
   "samples": 205,
   "baseCases": 1020,
-  "interactiveCases": 312,
-  "screenshots": 1332,
+  "interactiveCases": 272,
+  "screenshots": 1292,
   "tokens": 181,
   "verdicts": {
     "conforme con condiciones": 42,
     "no conforme": 16
   },
   "axeRules": {
-    "label-title-only": 2,
-    "heading-order": 24,
-    "label-content-name-mismatch": 60
+    "heading-order": 24
   }
 }

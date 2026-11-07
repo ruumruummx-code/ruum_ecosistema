@@ -54,7 +54,7 @@
 .tabs { display: flex; gap: 10px; flex-shrink: 0; }
 .tabs button { height: 40px; border: 1px solid #e1e9f5; background: #fff; border-radius: 13px; padding: 0 17px; white-space: nowrap; font-size: 12px; color: #42577c; }
 .tabs button:hover { background: #edf4ff; }
-.tabs button[aria-selected="true"] { color: #005cff; border-color: #3577ff; box-shadow: inset 0 -2px #005cff0d; }
+.tabs button:is([aria-selected="true"], [aria-pressed="true"]) { color: #005cff; border-color: #3577ff; box-shadow: inset 0 -2px #005cff0d; }
 .tableScroll { min-height: 0; flex: 1; overflow: auto; overscroll-behavior: contain; border: 1px solid #e0e8f4; border-radius: 9px; background: #fff; scrollbar-width: thin; scrollbar-color: #c7d5eb transparent; }
 .table { border-collapse: separate; border-spacing: 0; width: 100%; font-size: 12px; table-layout: fixed; }
 .table th { position: sticky; top: 0; z-index: 2; background: #f5f8fd; text-align: left; text-transform: uppercase; font-size: 9px; font-weight: 500; color: #53688d; height: 34px; padding: 0 10px; }
@@ -88,7 +88,7 @@
 .heroCar { width: 100px; height: 62px; object-fit: contain; flex-shrink: 0; } .detailHeading > button { position: absolute; right: 0; top: 0; color: #566d94; }
 .detailTabs { display: flex; flex: 0 0 auto; background: #f1f4f9; border-radius: 13px; padding: 2px; }
 .detailTabs button { flex: 1; height: 33px; border-radius: 11px; color: #3f557e; font-size: 12px; } .detailTabs button:hover { background: #e4edfc; }
-.detailTabs button[aria-selected="true"] { color: #005cff; background: white; box-shadow: 0 1px 4px #243d6520, inset 0 -2px #005cff; }
+.detailTabs button:is([aria-selected="true"], [aria-pressed="true"]) { color: #005cff; background: white; box-shadow: 0 1px 4px #243d6520, inset 0 -2px #005cff; }
 .detailContent { flex: 1 1 0; min-height: 0; min-width: 0; display: flex; flex-direction: column; gap: 14px; overflow: hidden; }
 .map { position: relative; flex: 1 1 0; min-height: 0; max-height: 220px; border-radius: 11px; overflow: hidden; background: #edf2f7; }
 .map > div { height: 100%; min-height: 0; }

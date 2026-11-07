@@ -231,11 +231,10 @@ describe("Mis ubicaciones desktop", () => {
       { target: { value: "perfil" } },
     );
     expect(screen.getAllByRole("listitem")).toHaveLength(1);
-    const todas = screen.getByRole("tab", { name: "Todas (2)" });
-    fireEvent.keyDown(todas, { key: "ArrowRight" });
+    fireEvent.click(screen.getByRole("button", { name: "Domicilio del perfil (1)" }));
     expect(
-      screen.getByRole("tab", { name: "Domicilio del perfil (1)" }),
-    ).toHaveAttribute("aria-selected", "true");
+      screen.getByRole("button", { name: "Domicilio del perfil (1)" }),
+    ).toHaveAttribute("aria-pressed", "true");
   });
   it("copia y notifica únicamente el resultado del portapapeles", async () => {
     render(<UbicacionesDesktop ubicaciones={lista()} />);

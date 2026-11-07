@@ -30,7 +30,7 @@
 .search > div > div + div { position: absolute; z-index: 2; top: 100%; right: 8px; padding: 4px; background: white; }
 .tabs { display: grid; grid-template-columns: 1fr 1fr; padding: 3px; flex-shrink: 0; border-radius: 15px; background: var(--conductor-surface-secondary); }
 .tabs button { min-height: 44px; border-radius: 12px; padding: 0 4px; color: #5c6e90; font-size: 15px; transition: background 150ms ease, color 150ms ease; }
-.tabs [aria-selected="true"] { background: var(--conductor-action); color: #082445; font-weight: 650; }
+.tabs :is([aria-selected="true"], [aria-pressed="true"]) { background: var(--conductor-action); color: #082445; font-weight: 650; }
 .calendar { display: grid; gap: 8px; flex-shrink: 0; }
 .week { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 2px; }
 .day { display: flex; flex-direction: column; align-items: center; gap: 4px; min-width: 0; padding: 0; }

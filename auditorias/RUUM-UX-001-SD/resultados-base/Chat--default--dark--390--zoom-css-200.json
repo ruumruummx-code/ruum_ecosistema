@@ -21,8 +21,8 @@
       "orientationAngle": 0,
       "orientationType": "landscape-primary"
     },
-    "timestamp": "2026-11-07T06:29:45.642Z",
-    "url": "http://127.0.0.1:64844/showcase.html",
+    "timestamp": "2026-11-07T08:14:46.494Z",
+    "url": "http://127.0.0.1:63206/showcase.html",
     "toolOptions": {
       "reporter": "v1"
     },
@@ -667,6 +667,23 @@
         "description": "Ensure <input type=\"image\"> elements have alternative text",
         "help": "Image buttons must have alternative text",
         "helpUrl": "https://dequeuniversity.com/rules/axe/4.14/input-image-alt?application=axeAPI",
+        "nodes": []
+      },
+      {
+        "id": "label-content-name-mismatch",
+        "impact": null,
+        "tags": [
+          "cat.semantics",
+          "wcag21a",
+          "wcag253",
+          "EN-301-549",
+          "EN-9.2.5.3",
+          "RGAAv4",
+          "RGAA-6.1.5"
+        ],
+        "description": "Ensure that elements labelled through their content must have their visible text as part of their accessible name",
+        "help": "Elements must have their visible text as part of their accessible name",
+        "helpUrl": "https://dequeuniversity.com/rules/axe/4.14/label-content-name-mismatch?application=axeAPI",
         "nodes": []
       },
       {
@@ -1347,49 +1364,9 @@
               }
             ],
             "impact": null,
-            "html": "<input aria-disabled=\"false\" placeholder=\"Escribe un mensaje\" class=\"min-h-11 flex-1 roun...\" value=\"\">",
+            "html": "<input id=\"_r_14_\" aria-disabled=\"false\" aria-label=\"Escribe un mensaje\" placeholder=\"Escribe un mensaje\" class=\"min-h-11 flex-1 roun...\" value=\"\">",
             "target": [
-              "input"
-            ]
-          },
-          {
-            "any": [],
-            "all": [
-              {
-                "id": "aria-allowed-attr",
-                "data": null,
-                "relatedNodes": [],
-                "impact": "critical",
-                "message": "ARIA attributes are used correctly for the defined role"
-              },
-              {
-                "id": "aria-allowed-attr-elm",
-                "data": null,
-                "relatedNodes": [],
-                "message": "ARIA attributes are allowed for this element",
-                "impact": "critical"
-              },
-              {
-                "id": "aria-no-deprecated-attr",
-                "data": null,
-                "relatedNodes": [],
-                "impact": "critical",
-                "message": "No deprecated ARIA attributes are used"
-              }
-            ],
-            "none": [
-              {
-                "id": "aria-unsupported-attr",
-                "data": null,
-                "relatedNodes": [],
-                "impact": "critical",
-                "message": "ARIA attribute is supported"
-              }
-            ],
-            "impact": null,
-            "html": "<button class=\"inline-flex min-h-[v...\" type=\"submit\" aria-label=\"Enviar mensaje\" disabled=\"\">",
-            "target": [
-              "button"
+              "#_r_14_"
             ]
           }
         ]
@@ -1508,27 +1485,9 @@
             ],
             "none": [],
             "impact": null,
-            "html": "<input aria-disabled=\"false\" placeholder=\"Escribe un mensaje\" class=\"min-h-11 flex-1 roun...\" value=\"\">",
+            "html": "<input id=\"_r_14_\" aria-disabled=\"false\" aria-label=\"Escribe un mensaje\" placeholder=\"Escribe un mensaje\" class=\"min-h-11 flex-1 roun...\" value=\"\">",
             "target": [
-              "input"
-            ]
-          },
-          {
-            "any": [],
-            "all": [
-              {
-                "id": "aria-conditional-attr",
-                "data": null,
-                "relatedNodes": [],
-                "impact": "serious",
-                "message": "ARIA attribute is allowed"
-              }
-            ],
-            "none": [],
-            "impact": null,
-            "html": "<button class=\"inline-flex min-h-[v...\" type=\"submit\" aria-label=\"Enviar mensaje\" disabled=\"\">",
-            "target": [
-              "button"
+              "#_r_14_"
             ]
           }
         ]
@@ -1704,27 +1663,9 @@
               }
             ],
             "impact": null,
-            "html": "<input aria-disabled=\"false\" placeholder=\"Escribe un mensaje\" class=\"min-h-11 flex-1 roun...\" value=\"\">",
+            "html": "<input id=\"_r_14_\" aria-disabled=\"false\" aria-label=\"Escribe un mensaje\" placeholder=\"Escribe un mensaje\" class=\"min-h-11 flex-1 roun...\" value=\"\">",
             "target": [
-              "input"
-            ]
-          },
-          {
-            "any": [],
-            "all": [],
-            "none": [
-              {
-                "id": "aria-prohibited-attr",
-                "data": null,
-                "relatedNodes": [],
-                "impact": "serious",
-                "message": "ARIA attribute is allowed"
-              }
-            ],
-            "impact": null,
-            "html": "<button class=\"inline-flex min-h-[v...\" type=\"submit\" aria-label=\"Enviar mensaje\" disabled=\"\">",
-            "target": [
-              "button"
+              "#_r_14_"
             ]
           }
         ]
@@ -1972,41 +1913,9 @@
             ],
             "none": [],
             "impact": null,
-            "html": "<input aria-disabled=\"false\" placeholder=\"Escribe un mensaje\" class=\"min-h-11 flex-1 roun...\" value=\"\">",
+            "html": "<input id=\"_r_14_\" aria-disabled=\"false\" aria-label=\"Escribe un mensaje\" placeholder=\"Escribe un mensaje\" class=\"min-h-11 flex-1 roun...\" value=\"\">",
             "target": [
-              "input"
-            ]
-          },
-          {
-            "any": [],
-            "all": [
-              {
-                "id": "aria-valid-attr-value",
-                "data": null,
-                "relatedNodes": [],
-                "impact": "critical",
-                "message": "ARIA attribute values are valid"
-              },
-              {
-                "id": "aria-errormessage",
-                "data": null,
-                "relatedNodes": [],
-                "impact": "critical",
-                "message": "aria-errormessage exists and references elements visible to screen readers that use a supported aria-errormessage technique"
-              },
-              {
-                "id": "aria-level",
-                "data": null,
-                "relatedNodes": [],
-                "impact": "critical",
-                "message": "aria-level values are valid"
-              }
-            ],
-            "none": [],
-            "impact": null,
-            "html": "<button class=\"inline-flex min-h-[v...\" type=\"submit\" aria-label=\"Enviar mensaje\" disabled=\"\">",
-            "target": [
-              "button"
+              "#_r_14_"
             ]
           }
         ]
@@ -2076,27 +1985,9 @@
             "all": [],
             "none": [],
             "impact": null,
-            "html": "<input aria-disabled=\"false\" placeholder=\"Escribe un mensaje\" class=\"min-h-11 flex-1 roun...\" value=\"\">",
+            "html": "<input id=\"_r_14_\" aria-disabled=\"false\" aria-label=\"Escribe un mensaje\" placeholder=\"Escribe un mensaje\" class=\"min-h-11 flex-1 roun...\" value=\"\">",
             "target": [
-              "input"
-            ]
-          },
-          {
-            "any": [
-              {
-                "id": "aria-valid-attr",
-                "data": null,
-                "relatedNodes": [],
-                "impact": "critical",
-                "message": "ARIA attribute name is valid"
-              }
-            ],
-            "all": [],
-            "none": [],
-            "impact": null,
-            "html": "<button class=\"inline-flex min-h-[v...\" type=\"submit\" aria-label=\"Enviar mensaje\" disabled=\"\">",
-            "target": [
-              "button"
+              "#_r_14_"
             ]
           }
         ]
@@ -2130,19 +2021,12 @@
                 "relatedNodes": [],
                 "impact": "critical",
                 "message": "Element has inner text that is visible to screen readers"
-              },
-              {
-                "id": "aria-label",
-                "data": null,
-                "relatedNodes": [],
-                "impact": "critical",
-                "message": "aria-label attribute exists and is not empty"
               }
             ],
             "all": [],
             "none": [],
             "impact": null,
-            "html": "<button class=\"inline-flex min-h-[v...\" type=\"submit\" aria-label=\"Enviar mensaje\" disabled=\"\">",
+            "html": "<button class=\"inline-flex min-h-[v...\" type=\"submit\" disabled=\"\">",
             "target": [
               "button"
             ]
@@ -2288,9 +2172,9 @@
             "all": [],
             "none": [],
             "impact": null,
-            "html": "<input aria-disabled=\"false\" placeholder=\"Escribe un mensaje\" class=\"min-h-11 flex-1 roun...\" value=\"\">",
+            "html": "<input id=\"_r_14_\" aria-disabled=\"false\" aria-label=\"Escribe un mensaje\" placeholder=\"Escribe un mensaje\" class=\"min-h-11 flex-1 roun...\" value=\"\">",
             "target": [
-              "input"
+              "#_r_14_"
             ]
           }
         ]
@@ -2326,45 +2210,9 @@
               }
             ],
             "impact": null,
-            "html": "<input aria-disabled=\"false\" placeholder=\"Escribe un mensaje\" class=\"min-h-11 flex-1 roun...\" value=\"\">",
+            "html": "<input id=\"_r_14_\" aria-disabled=\"false\" aria-label=\"Escribe un mensaje\" placeholder=\"Escribe un mensaje\" class=\"min-h-11 flex-1 roun...\" value=\"\">",
             "target": [
-              "input"
-            ]
-          }
-        ]
-      },
-      {
-        "id": "label-content-name-mismatch",
-        "impact": null,
-        "tags": [
-          "cat.semantics",
-          "wcag21a",
-          "wcag253",
-          "EN-301-549",
-          "EN-9.2.5.3",
-          "RGAAv4",
-          "RGAA-6.1.5"
-        ],
-        "description": "Ensure that elements labelled through their content must have their visible text as part of their accessible name",
-        "help": "Elements must have their visible text as part of their accessible name",
-        "helpUrl": "https://dequeuniversity.com/rules/axe/4.14/label-content-name-mismatch?application=axeAPI",
-        "nodes": [
-          {
-            "any": [
-              {
-                "id": "label-content-name-mismatch",
-                "data": null,
-                "relatedNodes": [],
-                "impact": "serious",
-                "message": "Element contains visible text as part of its accessible name"
-              }
-            ],
-            "all": [],
-            "none": [],
-            "impact": null,
-            "html": "<button class=\"inline-flex min-h-[v...\" type=\"submit\" aria-label=\"Enviar mensaje\" disabled=\"\">",
-            "target": [
-              "button"
+              "#_r_14_"
             ]
           }
         ]
@@ -2393,9 +2241,9 @@
               }
             ],
             "impact": null,
-            "html": "<input aria-disabled=\"false\" placeholder=\"Escribe un mensaje\" class=\"min-h-11 flex-1 roun...\" value=\"\">",
+            "html": "<input id=\"_r_14_\" aria-disabled=\"false\" aria-label=\"Escribe un mensaje\" placeholder=\"Escribe un mensaje\" class=\"min-h-11 flex-1 roun...\" value=\"\">",
             "target": [
-              "input"
+              "#_r_14_"
             ]
           }
         ]
@@ -2424,6 +2272,13 @@
           {
             "any": [
               {
+                "id": "aria-label",
+                "data": null,
+                "relatedNodes": [],
+                "impact": "critical",
+                "message": "aria-label attribute exists and is not empty"
+              },
+              {
                 "id": "non-empty-placeholder",
                 "data": null,
                 "relatedNodes": [],
@@ -2442,9 +2297,9 @@
               }
             ],
             "impact": null,
-            "html": "<input aria-disabled=\"false\" placeholder=\"Escribe un mensaje\" class=\"min-h-11 flex-1 roun...\" value=\"\">",
+            "html": "<input id=\"_r_14_\" aria-disabled=\"false\" aria-label=\"Escribe un mensaje\" placeholder=\"Escribe un mensaje\" class=\"min-h-11 flex-1 roun...\" value=\"\">",
             "target": [
-              "input"
+              "#_r_14_"
             ]
           }
         ]
@@ -2578,7 +2433,7 @@
             "all": [],
             "none": [],
             "impact": null,
-            "html": "<button class=\"inline-flex min-h-[v...\" type=\"submit\" aria-label=\"Enviar mensaje\" disabled=\"\">",
+            "html": "<button class=\"inline-flex min-h-[v...\" type=\"submit\" disabled=\"\">",
             "target": [
               "button"
             ]
@@ -2589,7 +2444,7 @@
     "incomplete": [],
     "violations": []
   },
-  "tree": "- main:\n  - log \"Mensajes del chat\":\n    - paragraph: Hola, necesito información del traslado.\n    - paragraph: 06:00 a.m.\n    - paragraph: El traslado sigue su ruta programada.\n    - paragraph: 06:01 a.m.\n  - status: \"Mensaje de conductor: El traslado sigue su ruta programada.\"\n  - textbox \"Escribe un mensaje\"\n  - button \"Enviar mensaje\" [disabled]: Enviar",
+  "tree": "- main:\n  - log \"Mensajes del chat\":\n    - paragraph: Hola, necesito información del traslado.\n    - paragraph: 06:00 a.m.\n    - paragraph: El traslado sigue su ruta programada.\n    - paragraph: 06:01 a.m.\n  - status: \"Mensaje de conductor: El traslado sigue su ruta programada.\"\n  - textbox \"Escribe un mensaje\"\n  - button \"Enviar\" [disabled]",
   "geometry": {
     "innerWidth": 390,
     "scrollWidth": 640,
@@ -2748,6 +2603,20 @@
           "right": 606,
           "bottom": 702,
           "left": 34
+        }
+      },
+      {
+        "tag": "DIV",
+        "text": "Enviar",
+        "rect": {
+          "x": 58,
+          "y": 574,
+          "width": 524,
+          "height": 104,
+          "top": 574,
+          "right": 582,
+          "bottom": 678,
+          "left": 58
         }
       },
       {

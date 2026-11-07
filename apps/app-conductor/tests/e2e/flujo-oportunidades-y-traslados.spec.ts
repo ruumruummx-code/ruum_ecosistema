@@ -32,12 +32,12 @@ test.describe("Cierre REPORTE_ERRORES_E2E — Flujo de oportunidades y traslados
     await page.goto("/viajes?vista=disponibles");
 
     // La pestaña "Ofertas" debe estar activa por defecto en esta vista.
-    const tabOfertas = page.getByRole("tab", { name: /^Ofertas/ });
-    await expect(tabOfertas).toHaveAttribute("aria-selected", "true");
+    const tabOfertas = page.getByRole("button", { name: /^Ofertas/ });
+    await expect(tabOfertas).toHaveAttribute("aria-pressed", "true");
 
     // Debe existir exactamente la oportunidad fixture, con su ruta real
     // (no un mensaje de estado vacío ni un placeholder).
-    await expect(page.getByRole("tab", { name: "Ofertas (1)", exact: true })).toBeVisible();
+    await expect(page.getByRole("button", { name: "Ofertas (1)", exact: true })).toBeVisible();
     await expect(page.getByText(/Plaza de la Constitución/i)).toBeVisible();
     await expect(page.getByText(/Santa Fe|Vasco de Quiroga/i)).toBeVisible();
 
@@ -66,8 +66,8 @@ test.describe("Cierre REPORTE_ERRORES_E2E — Flujo de oportunidades y traslados
 
     // Redirección real a "mis Traslados" tras aceptar.
     await page.waitForURL(/\/viajes\?vista=mis-Traslados/, { timeout: 10_000 });
-    const tabAceptados = page.getByRole("tab", { name: /^Aceptados/ });
-    await expect(tabAceptados).toHaveAttribute("aria-selected", "true");
+    const tabAceptados = page.getByRole("button", { name: /^Aceptados/ });
+    await expect(tabAceptados).toHaveAttribute("aria-pressed", "true");
 
     // El viaje recién aceptado ya no debe figurar como oportunidad disponible.
     await page.goto("/viajes?vista=disponibles");
@@ -78,8 +78,8 @@ test.describe("Cierre REPORTE_ERRORES_E2E — Flujo de oportunidades y traslados
   test("3. Lista 'mis Traslados' con el traslado asignado y navega a su detalle", async ({ page }) => {
     await page.goto("/viajes?vista=mis-Traslados");
 
-    const tabAceptados = page.getByRole("tab", { name: /^Aceptados/ });
-    await expect(tabAceptados).toHaveAttribute("aria-selected", "true");
+    const tabAceptados = page.getByRole("button", { name: /^Aceptados/ });
+    await expect(tabAceptados).toHaveAttribute("aria-pressed", "true");
 
     // El traslado fixture ya asignado (evidencia_inicial_en_proceso) debe
     // aparecer con el badge de estado correspondiente a esa etapa.

@@ -272,7 +272,7 @@
 .tabs button:hover {
   background: #edf5ff;
 }
-.tabs button[aria-selected="true"] {
+.tabs button:is([aria-selected="true"], [aria-pressed="true"]) {
   border-color: #0061ff;
   color: var(--user-on-light-link);
   background: #f7fbff;

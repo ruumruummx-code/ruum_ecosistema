@@ -1,4 +1,6 @@
 "use client";
+
+import { Tabs } from "@ruum/ui";
 import React, { lazy, memo, Suspense, useEffect, useState } from "react";
 import type { DatosCodigoPostal } from "@/lib/codigos-postales";
 import type { sugerirDireccionesAutocomplete } from "@/lib/mapbox";
@@ -137,52 +139,7 @@ function PasoRutaComponent({
   };
   return (
     <div className={styles.fields}>
-      <div
-        className={styles.segmented}
-        role="tablist"
-        aria-label="Datos de ruta"
-      >
-        {(["direcciones", "contactos"] as const).map((v) => (
-          <button
-            type="button"
-            id={`tab-${v}`}
-            key={v}
-            role="tab"
-            aria-selected={tab === v}
-            aria-controls="ruta-panel"
-            onClick={() => setTab(v)}
-            onKeyDown={(e) => {
-              if (e.key === "ArrowLeft" || e.key === "ArrowRight") {
-                e.preventDefault();
-                const next = v === "direcciones" ? "contactos" : "direcciones";
-                setTab(next);
-                document.getElementById(`tab-${next}`)?.focus();
-              }
-            }}
-            tabIndex={tab === v ? 0 : -1}
-            className="flex items-center justify-center gap-2"
-          >
-            {v === "direcciones" ? (
-              <>
-                <svg className="size-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                  <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" />
-                  <circle cx="12" cy="10" r="3" />
-                </svg>
-                <span>Direcciones</span>
-              </>
-            ) : (
-              <>
-                <svg className="size-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                  <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
-                  <circle cx="12" cy="7" r="4" />
-                </svg>
-                <span>Contactos</span>
-              </>
-            )}
-          </button>
-        ))}
-      </div>
-      <section id="ruta-panel" role="tabpanel" aria-labelledby={`tab-${tab}`}>
+      <Tabs tabs={[{id:"direcciones",etiqueta:"Direcciones"},{id:"contactos",etiqueta:"Contactos"}]} value={tab} onSeleccion={id=>setTab(id as typeof tab)} etiqueta="Datos de ruta" renderPanel={()=>( <section   >
         {tab === "direcciones" ? (
           <div className="grid gap-3">
             {/* Tarjeta de Origen */}
@@ -391,7 +348,8 @@ function PasoRutaComponent({
             ))}
           </div>
         )}
-      </section>
+      </section> )} />
+
       {tab === "direcciones" && (
         <button
           type="button"

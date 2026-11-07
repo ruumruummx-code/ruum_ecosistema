@@ -396,41 +396,22 @@ export function UbicacionesDesktop({
           </div>
           <div
             className={s.tabs}
-            role="tablist"
+            role="group"
             aria-label="Categorías de ubicaciones"
           >
             {tabs.map((t, i) => (
               <button
                 key={t.id}
-                role="tab"
-                id={`ubicaciones-tab-${t.id}`}
-                aria-controls="lista-ubicaciones"
-                aria-selected={tab === t.id}
-                tabIndex={tab === t.id ? 0 : -1}
+
+
+
+                aria-pressed={tab === t.id}
+
                 onClick={() => {
                   setTab(t.id);
                   volverInicio();
                 }}
-                onKeyDown={(e) => {
-                  const n =
-                    e.key === "ArrowRight"
-                      ? (i + 1) % tabs.length
-                      : e.key === "ArrowLeft"
-                        ? (i + tabs.length - 1) % tabs.length
-                        : e.key === "Home"
-                          ? 0
-                          : e.key === "End"
-                            ? tabs.length - 1
-                            : -1;
-                  if (n >= 0) {
-                    e.preventDefault();
-                    setTab(tabs[n].id);
-                    volverInicio();
-                    document
-                      .getElementById(`ubicaciones-tab-${tabs[n].id}`)
-                      ?.focus();
-                  }
-                }}
+
               >
                 {t.label} ({conteos[t.id]})
               </button>
@@ -439,8 +420,8 @@ export function UbicacionesDesktop({
           <div
             className={s.listScroll}
             id="lista-ubicaciones"
-            role="tabpanel"
-            aria-labelledby={`ubicaciones-tab-${tab}`}
+            role="region" aria-label="Resultados del filtro"
+
             tabIndex={0}
           >
             {filas.length ? (

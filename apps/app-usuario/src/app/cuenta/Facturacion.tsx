@@ -656,9 +656,10 @@ export function Facturacion({ usuario, empresa, facturasIniciales }: Facturacion
         </h2>
 
         {/* Pestañas de filtrado */}
-        <div className="mb-4 flex gap-1.5 rounded-full bg-[#f2f6fb] p-1.5">
+        <div role="group" aria-label="Filtrar facturas por estado" className="mb-4 flex gap-1.5 rounded-full bg-[#f2f6fb] p-1.5">
           <button
             type="button"
+            aria-pressed={tabActiva === "todas"}
             onClick={() => setTabActiva("todas")}
             className={[
               "flex-1 rounded-full py-2 text-center text-[13px] transition cursor-pointer font-semibold",
@@ -679,6 +680,7 @@ export function Facturacion({ usuario, empresa, facturasIniciales }: Facturacion
           </button>
           <button
             type="button"
+            aria-pressed={tabActiva === "emitidas"}
             onClick={() => setTabActiva("emitidas")}
             className={[
               "flex-1 rounded-full py-2 text-center text-[13px] transition cursor-pointer font-semibold",
@@ -691,6 +693,7 @@ export function Facturacion({ usuario, empresa, facturasIniciales }: Facturacion
           </button>
           <button
             type="button"
+            aria-pressed={tabActiva === "pendientes"}
             onClick={() => setTabActiva("pendientes")}
             className={[
               "flex-1 rounded-full py-2 text-center text-[13px] transition cursor-pointer font-semibold",

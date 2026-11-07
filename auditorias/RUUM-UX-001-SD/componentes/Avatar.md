@@ -6,7 +6,7 @@ Representar visualmente una identidad con nombre accesible.
 
 ## Props y contrato
 
-Fuente: [packages/ui/src/components/Navigation.tsx:140](../../../packages/ui/src/components/Navigation.tsx). Declaraciones extraídas del módulo; los atributos nativos heredados siguen React/HTML.
+Fuente: [packages/ui/src/components/Navigation.tsx:107](../../../packages/ui/src/components/Navigation.tsx). Declaraciones extraídas del módulo; los atributos nativos heredados siguen React/HTML.
 
 ```tsx
 export function Avatar({
@@ -31,13 +31,6 @@ export interface NavItem {
   href: string;
   activo?: boolean;
   icono: ReactNode;
-}
-
-export interface TabItem {
-  id: string;
-  etiqueta: string;
-  conteo?: number;
-  activo?: boolean;
 }
 
 export interface SidebarGrupo {

@@ -141,15 +141,15 @@ describe("PasoPago", () => {
   it("RUUM-USR-F6-001 (CA-7): métodos no implementados (OXXO, Google Pay) están deshabilitados con badge Próximamente", () => {
     render(<PasoPago {...propsBase} />);
 
-    const botonTarjeta = screen.getByRole("tab", { name: /Tarjeta/i });
+    const botonTarjeta = screen.getByRole("button", { name: /Tarjeta/i });
     expect(botonTarjeta).not.toBeDisabled();
-    expect(botonTarjeta).toHaveAttribute("aria-selected", "true");
+    expect(botonTarjeta).toHaveAttribute("aria-pressed", "true");
 
-    const botonOxxo = screen.getByRole("tab", { name: /OXXO/i });
+    const botonOxxo = screen.getByRole("button", { name: /OXXO/i });
     expect(botonOxxo).toBeDisabled();
     expect(botonOxxo).toHaveAttribute("aria-disabled", "true");
 
-    const botonGPay = screen.getByRole("tab", { name: /Google Pay/i });
+    const botonGPay = screen.getByRole("button", { name: /Google Pay/i });
     expect(botonGPay).toBeDisabled();
     expect(botonGPay).toHaveAttribute("aria-disabled", "true");
 

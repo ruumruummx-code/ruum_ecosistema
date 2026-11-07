@@ -21,8 +21,8 @@
       "orientationAngle": 0,
       "orientationType": "landscape-primary"
     },
-    "timestamp": "2026-11-07T06:26:01.010Z",
-    "url": "http://127.0.0.1:58553/showcase.html",
+    "timestamp": "2026-11-07T08:02:26.285Z",
+    "url": "http://127.0.0.1:63642/showcase.html",
     "toolOptions": {
       "reporter": "v1"
     },
@@ -1769,6 +1769,38 @@
             "html": "<span class=\"h-2 rounded-full transition-all duration-300 bg-surface-elevated border border-border/30\" title=\"Paso 7: Cierre\" aria-hidden=\"true\"></span>",
             "target": [
               "span[title=\"Paso 7: Cierre\"]"
+            ]
+          },
+          {
+            "any": [],
+            "all": [
+              {
+                "id": "focusable-modal-open",
+                "data": null,
+                "relatedNodes": [],
+                "impact": "serious",
+                "message": "No focusable elements while a modal is open"
+              },
+              {
+                "id": "focusable-disabled",
+                "data": null,
+                "relatedNodes": [],
+                "impact": "serious",
+                "message": "No focusable elements contained within element"
+              },
+              {
+                "id": "focusable-not-tabbable",
+                "data": null,
+                "relatedNodes": [],
+                "impact": "serious",
+                "message": "No focusable elements contained within element"
+              }
+            ],
+            "none": [],
+            "impact": null,
+            "html": "<span class=\"text-text-tertiary font-mono-ruum text-xs\" aria-hidden=\"true\">▼</span>",
+            "target": [
+              ".font-mono-ruum"
             ]
           },
           {

@@ -6,29 +6,33 @@ Seleccionar una pestaña o filtro.
 
 ## Props y contrato
 
-Fuente: [packages/ui/src/components/Navigation.tsx:66](../../../packages/ui/src/components/Navigation.tsx). Declaraciones extraídas del módulo; los atributos nativos heredados siguen React/HTML.
+Fuente: [packages/ui/src/components/Tabs.tsx:29](../../../packages/ui/src/components/Tabs.tsx). Declaraciones extraídas del módulo; los atributos nativos heredados siguen React/HTML.
 
 ```tsx
-export function Tabs({ tabs, onSeleccion, className = "" }: { tabs: TabItem[]; onSeleccion?: (id: string) => void; className?: string }) 
-
-export interface NavItem {
-  id: string;
-  etiqueta: string;
-  href: string;
-  activo?: boolean;
-  icono: ReactNode;
-}
+export function Tabs({ tabs, value, idPrefix, onSeleccion, etiqueta = "Pestañas", orientation = "horizontal", className = "", panelClassName = "", renderPanel, mantenerMontados = false }: TabsProps) 
 
 export interface TabItem {
   id: string;
-  etiqueta: string;
+  etiqueta: ReactNode;
   conteo?: number;
   activo?: boolean;
+  disabled?: boolean;
+  motivoDeshabilitado?: string;
+  contenido?: ReactNode;
 }
 
-export interface SidebarGrupo {
-  titulo: string;
-  items: { id: string; etiqueta: string; href: string; activo?: boolean; contador?: number }[];
+export interface TabsProps {
+  tabs: TabItem[];
+  value?: string;
+  idPrefix?: string;
+  onSeleccion?: (id: string) => void;
+  etiqueta?: string;
+  orientation?: "horizontal" | "vertical";
+  className?: string;
+  panelClassName?: string;
+  renderPanel?: (id: string) => ReactNode;
+  /** Conserva estado local; los paneles inactivos siguen ocultos y fuera del foco. */
+  mantenerMontados?: boolean;
 }
 ```
 

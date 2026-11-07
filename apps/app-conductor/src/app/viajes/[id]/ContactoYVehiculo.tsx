@@ -71,7 +71,7 @@ export function ContactoYVehiculo({
     <div className="flex flex-col gap-4">
       <NextOperationalAction
         title="Confirma que encontraste al contacto"
-        instruction="Habla con la persona de entrega y valida que el vehículo coincida antes de iniciar el registro."
+        instruction={procesando ? "Estamos iniciando el registro. Espera a que termine antes de continuar." : !ambosConfirmados ? "Para iniciar el registro, marca «Contacto encontrado» y «Vehículo localizado»." : "Habla con la persona de entrega y valida que el vehículo coincida antes de iniciar el registro."}
         context={
           <>
             {contactoNombre}

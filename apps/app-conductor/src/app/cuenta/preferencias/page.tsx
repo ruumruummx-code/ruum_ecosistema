@@ -8,7 +8,7 @@ import type { Database } from "@ruum/shared/types";
 import { crearClienteNavegador } from "@/lib/supabase-browser";
 import { CuentaHeader } from "../CuentaHeader";
 import { cargarConductorCuenta, type ConductorCuenta } from "../cuenta-utils";
-import { MobileRow } from "@ruum/ui";
+import { MobileRow, Tabs } from "@ruum/ui";
 
 type Preferencias = Database["public"]["Tables"]["preferencias_conductor"]["Row"];
 
@@ -206,26 +206,7 @@ export default function PaginaPreferenciasCuenta() {
       )}
 
       {/* Tabs / SegmentedControl */}
-      <div className="mx-4 mt-4 flex items-center justify-center">
-        <div className="inline-flex items-center rounded-xl border border-border/60 bg-surface/40 p-1">
-          {TABS.map((t) => (
-            <button
-              key={t.clave}
-              type="button"
-              onClick={() => setTabActiva(t.clave)}
-              className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-colors ${
-                tabActiva === t.clave
-                  ? "bg-signal text-white shadow-sm"
-                  : "text-text-tertiary hover:bg-surface/30"
-              }`}
-            >
-              {t.etiqueta}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {cargando ? (
+      <Tabs etiqueta="Preferencias del conductor" tabs={TABS.map(t=>({id:t.clave,etiqueta:t.etiqueta}))} value={tabActiva} onSeleccion={id=>setTabActiva(id as typeof tabActiva)} renderPanel={()=><>{cargando ? (
         <div className="mx-4 mt-8 text-center font-body text-sm text-text-secondary">
           Cargando tus preferencias…
         </div>
@@ -246,7 +227,7 @@ export default function PaginaPreferenciasCuenta() {
                         <MobileRow
                           key={opcion.clave}
                           titulo={opcion.titulo}
-                          subtitulo={estaActivo ? opcion.subtitulo : "Desactivado"}
+                          subtitulo={desactivable ? "Esta opción no se puede modificar desde esta pantalla." : !conductor ? "No hay un perfil de conductor disponible para guardar cambios." : guardandoAuto ? "Guardando preferencias. Espera a que termine." : estaActivo ? opcion.subtitulo : "Desactivado"}
                           icono={opcion.icono}
                           tonoIcono={estaActivo ? "azul" : "neutro"}
                           derecha={
@@ -266,7 +247,6 @@ export default function PaginaPreferenciasCuenta() {
                               />
                             </button>
                           }
-                          onClick={() => !desactivable && toggleTono(opcion.clave)}
                           disabled={!conductor || guardandoAuto || desactivable}
                         />
                       );
@@ -296,7 +276,7 @@ export default function PaginaPreferenciasCuenta() {
                     <MobileRow
                       key={opcion.clave}
                       titulo={opcion.titulo}
-                      subtitulo={estaActivo ? opcion.subtitulo : "Desactivado"}
+                      subtitulo={!conductor ? "No hay un perfil de conductor disponible para guardar cambios." : guardandoAuto ? "Guardando preferencias. Espera a que termine." : estaActivo ? opcion.subtitulo : "Desactivado"}
                       icono={opcion.icono}
                       tonoIcono={estaActivo ? "azul" : "neutro"}
                       derecha={
@@ -316,7 +296,6 @@ export default function PaginaPreferenciasCuenta() {
                           />
                         </button>
                       }
-                      onClick={() => toggleTono(opcion.clave)}
                       disabled={!conductor || guardandoAuto}
                     />
                   );
@@ -367,7 +346,9 @@ export default function PaginaPreferenciasCuenta() {
             </div>
           )}
         </div>
-      )}
+      )}</>} />
+
+
 
       {guardandoAuto && (
         <div className="mx-4 mt-2 flex items-center justify-center gap-1.5">

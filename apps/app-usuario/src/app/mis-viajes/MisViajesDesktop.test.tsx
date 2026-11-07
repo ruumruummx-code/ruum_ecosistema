@@ -152,18 +152,15 @@ describe("Mis traslados desktop", () => {
       screen.queryByRole("complementary", { name: /Detalle de/ }),
     ).not.toBeInTheDocument();
   });
-  it("navega pestañas con teclado y sincroniza el selector de estado", () => {
+  it("sincroniza filtros de estado con botones de selección", () => {
     render(<MisViajesDesktop traslados={[viaje("uno")]} />);
-    fireEvent.keyDown(screen.getByRole("tab", { name: "Todos (1)" }), {
-      key: "ArrowRight",
-    });
-    expect(screen.getByRole("tab", { name: "En curso (1)" })).toHaveFocus();
+    fireEvent.click(screen.getByRole("button", { name: "En curso (1)" }));
     expect(screen.getByLabelText("Filtrar por estado")).toHaveValue("activos");
     fireEvent.change(screen.getByLabelText("Filtrar por estado"), {
       target: { value: "cancelados" },
     });
-    expect(screen.getByRole("tab", { name: "Cancelados (0)" })).toHaveAttribute(
-      "aria-selected",
+    expect(screen.getByRole("button", { name: "Cancelados (0)" })).toHaveAttribute(
+      "aria-pressed",
       "true",
     );
     expect(screen.getByText("Mostrando 0 de 1 traslados")).toBeInTheDocument();

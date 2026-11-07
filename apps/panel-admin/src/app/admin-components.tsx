@@ -1,5 +1,7 @@
 "use client";
 
+import { Tabs } from "@ruum/ui";
+
 import {
   Children,
   cloneElement,
@@ -245,37 +247,11 @@ type AdminTabsProps<T extends string> = {
   value: T;
   onValueChange: (value: T) => void;
   label: string;
+  renderPanel: (id: string) => ReactNode;
 };
 
-export function AdminTabs<T extends string>({ items, value, onValueChange, label }: AdminTabsProps<T>) {
-  function mover(actual: T, direccion: 1 | -1) {
-    const disponibles = items.filter((item) => !item.disabled);
-    const indice = disponibles.findIndex((item) => item.value === actual);
-    const siguiente = disponibles[(indice + direccion + disponibles.length) % disponibles.length];
-    if (siguiente) onValueChange(siguiente.value);
-  }
-  return (
-    <div role="tablist" aria-label={label} className="flex gap-1 border-b border-ink/10">
-      {items.map((item) => (
-        <button
-          key={item.value}
-          type="button"
-          role="tab"
-          aria-selected={item.value === value}
-          disabled={item.disabled}
-          tabIndex={item.value === value ? 0 : -1}
-          onClick={() => onValueChange(item.value)}
-          onKeyDown={(evento: KeyboardEvent<HTMLButtonElement>) => {
-            if (evento.key === "ArrowRight") { evento.preventDefault(); mover(item.value, 1); }
-            if (evento.key === "ArrowLeft") { evento.preventDefault(); mover(item.value, -1); }
-          }}
-          className={unir("px-4 py-2.5 font-body text-admin-boton font-semibold transition-colors", item.value === value ? "border-b-2 border-signal text-ink" : "text-text-secondary hover:text-ink")}
-        >
-          {item.label}
-        </button>
-      ))}
-    </div>
-  );
+export function AdminTabs<T extends string>({ items, value, onValueChange, label, renderPanel }: AdminTabsProps<T>) {
+ return <Tabs tabs={items.map(item=>({id:item.value,etiqueta:item.label,disabled:item.disabled}))} value={value} onSeleccion={id=>onValueChange(id as T)} etiqueta={label} renderPanel={renderPanel} />;
 }
 
 export function AdminBadge({ children, tone = "neutral", className }: { children: ReactNode; tone?: TonoAdmin; className?: string }) {

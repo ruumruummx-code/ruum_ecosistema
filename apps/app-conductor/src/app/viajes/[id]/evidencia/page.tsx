@@ -1,5 +1,7 @@
 "use client";
 
+import { Tabs } from "@ruum/ui";
+
 import { useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
@@ -290,103 +292,7 @@ export default function PaginaEvidencia() {
         </section>
 
         {/* 3. MENÚ DE CONTROL POR PESTAÑAS (TABS DE SEGMENTACIÓN) */}
-        <nav
-          aria-label="Pestañas de captura de evidencias"
-          className="grid shrink-0 grid-cols-3 gap-2"
-        >
-          {/* Pestaña 1: FOTOS */}
-          <button
-            type="button"
-            onClick={() => setTabActiva("fotos")}
-            aria-current={tabActiva === "fotos" ? "page" : undefined}
-            className={`flex min-h-[40px] cursor-pointer items-center justify-center gap-1.5 rounded-xl px-2 py-2 text-center transition active:scale-[0.98] ${
-              tabActiva === "fotos"
-                ? "border border-[#8AB4F8] bg-[#E1EDFF] font-display text-xs font-black text-[#0057D9] shadow-2xs"
-                : "border border-transparent bg-[#F0F5FA] font-display text-xs font-bold text-[#5A6B87] hover:bg-[#E8EFF8]"
-            }`}
-          >
-            <svg
-              width="15"
-              height="15"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2.3"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              aria-hidden="true"
-              className="shrink-0"
-            >
-              <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
-              <circle cx="12" cy="13" r="4" />
-            </svg>
-            <span className="truncate">FOTOS ({fotosObligCapturadas}/5)</span>
-          </button>
-
-          {/* Pestaña 2: LLAVES */}
-          <button
-            type="button"
-            onClick={() => setTabActiva("llaves")}
-            aria-current={tabActiva === "llaves" ? "page" : undefined}
-            className={`flex min-h-[40px] cursor-pointer items-center justify-center gap-1.5 rounded-xl px-2 py-2 text-center transition active:scale-[0.98] ${
-              tabActiva === "llaves"
-                ? "border border-[#8AB4F8] bg-[#E1EDFF] font-display text-xs font-black text-[#0057D9] shadow-2xs"
-                : "border border-transparent bg-[#F0F5FA] font-display text-xs font-bold text-[#5A6B87] hover:bg-[#E8EFF8]"
-            }`}
-          >
-            <svg
-              width="15"
-              height="15"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2.3"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              aria-hidden="true"
-              className="shrink-0"
-            >
-              <circle cx="7.5" cy="15.5" r="5.5" />
-              <path d="m21 2-9.6 9.6" />
-              <path d="m15.5 9.5 3 3L22 9l-3-3z" />
-            </svg>
-            <span className="truncate">LLAVES</span>
-          </button>
-
-          {/* Pestaña 3: FORMULARIO */}
-          <button
-            type="button"
-            onClick={() => setTabActiva("formulario")}
-            aria-current={tabActiva === "formulario" ? "page" : undefined}
-            className={`flex min-h-[40px] cursor-pointer items-center justify-center gap-1.5 rounded-xl px-2 py-2 text-center transition active:scale-[0.98] ${
-              tabActiva === "formulario"
-                ? "border border-[#8AB4F8] bg-[#E1EDFF] font-display text-xs font-black text-[#0057D9] shadow-2xs"
-                : "border border-transparent bg-[#F0F5FA] font-display text-xs font-bold text-[#5A6B87] hover:bg-[#E8EFF8]"
-            }`}
-          >
-            <svg
-              width="15"
-              height="15"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2.3"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              aria-hidden="true"
-              className="shrink-0"
-            >
-              <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" />
-              <rect x="8" y="2" width="8" height="4" rx="1" ry="1" />
-              <path d="M9 12h6" />
-              <path d="M9 16h6" />
-            </svg>
-            <span className="truncate">FORMULARIO</span>
-          </button>
-        </nav>
-
-        {/* 4. CONTENIDO DE LA PESTAÑA ACTIVA */}
-        {tabActiva === "fotos" && (
+        <Tabs etiqueta="Captura de evidencias" value={tabActiva} onSeleccion={id=>setTabActiva(id as typeof tabActiva)} tabs={[{id:"fotos",etiqueta:<>FOTOS ({fotosObligCapturadas}/5)</>},{id:"llaves",etiqueta:"LLAVES"},{id:"formulario",etiqueta:"FORMULARIO"}]} renderPanel={()=><div className="pt-3">{tabActiva === "fotos" && (
           <section
             id="evid-fotos"
             aria-label="Fotos del vehículo"
@@ -562,9 +468,7 @@ export default function PaginaEvidencia() {
             </div>
           </section>
         )}
-
-        {/* PESTAÑA 2: LLAVES */}
-        {tabActiva === "llaves" && (
+{tabActiva === "llaves" && (
           <section
             aria-label="Llaves del vehículo"
             className="flex min-h-0 flex-1 flex-col justify-between rounded-2xl border border-[#DCE7F5] bg-white p-4 shadow-2xs"
@@ -628,9 +532,7 @@ export default function PaginaEvidencia() {
             </div>
           </section>
         )}
-
-        {/* PESTAÑA 3: FORMULARIO */}
-        {tabActiva === "formulario" && (
+{tabActiva === "formulario" && (
           <section
             id="evid-km"
             aria-label="Formulario de inspección"
@@ -772,7 +674,16 @@ export default function PaginaEvidencia() {
               </p>
             )}
           </section>
-        )}
+        )}</div>} />
+
+        {/* 4. CONTENIDO DE LA PESTAÑA ACTIVA */}
+
+
+        {/* PESTAÑA 2: LLAVES */}
+
+
+        {/* PESTAÑA 3: FORMULARIO */}
+
 
         {/* 6. FILA DE ACCIONES BASE (FIJOS ARRIBA DEL MENÚ) */}
         <section

@@ -21,8 +21,8 @@
       "orientationAngle": 0,
       "orientationType": "landscape-primary"
     },
-    "timestamp": "2026-11-07T06:00:26.459Z",
-    "url": "http://127.0.0.1:62725/showcase.html",
+    "timestamp": "2026-11-07T08:17:23.637Z",
+    "url": "http://127.0.0.1:55069/showcase.html",
     "toolOptions": {
       "reporter": "v1"
     },
@@ -1661,7 +1661,7 @@
             "all": [],
             "none": [],
             "impact": null,
-            "html": "<h1 class=\"truncate text-[17px] font-bold tracking-tight text-[#0a2342] leading-tight dark:text-[#f6f8fb] sm:text-[18px]\">Mis traslados</h1>",
+            "html": "<h1 class=\"truncate text-[17px] font-bold tracking-tight text-[#0a2342] leading-tight dark:text-[#f6f8fb] sm:text-[18px]\" title=\"Mis traslados\">Mis traslados</h1>",
             "target": [
               ".truncate"
             ]
@@ -1687,12 +1687,19 @@
                 "relatedNodes": [],
                 "impact": "minor",
                 "message": "Element has text that is visible to screen readers"
+              },
+              {
+                "id": "non-empty-title",
+                "data": null,
+                "relatedNodes": [],
+                "impact": "minor",
+                "message": "Element has a title attribute"
               }
             ],
             "all": [],
             "none": [],
             "impact": null,
-            "html": "<h1 class=\"truncate text-[17px] font-bold tracking-tight text-[#0a2342] leading-tight dark:text-[#f6f8fb] sm:text-[18px]\">Mis traslados</h1>",
+            "html": "<h1 class=\"truncate text-[17px] font-bold tracking-tight text-[#0a2342] leading-tight dark:text-[#f6f8fb] sm:text-[18px]\" title=\"Mis traslados\">Mis traslados</h1>",
             "target": [
               ".truncate"
             ]
@@ -1738,7 +1745,7 @@
             "all": [],
             "none": [],
             "impact": null,
-            "html": "<h1 class=\"truncate text-[17px] font-bold tracking-tight text-[#0a2342] leading-tight dark:text-[#f6f8fb] sm:text-[18px]\">Mis traslados</h1>",
+            "html": "<h1 class=\"truncate text-[17px] font-bold tracking-tight text-[#0a2342] leading-tight dark:text-[#f6f8fb] sm:text-[18px]\" title=\"Mis traslados\">Mis traslados</h1>",
             "target": [
               ".truncate"
             ]

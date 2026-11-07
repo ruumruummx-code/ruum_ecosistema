@@ -258,7 +258,7 @@
   color: #94a3b8;
 }
 .segmented button[aria-checked="true"],
-.segmented button[aria-selected="true"] {
+.segmented button:is([aria-selected="true"], [aria-pressed="true"]) {
   background: #0066FF;
   color: #ffffff;
   box-shadow: 0 2px 4px rgba(0, 102, 255, 0.2);

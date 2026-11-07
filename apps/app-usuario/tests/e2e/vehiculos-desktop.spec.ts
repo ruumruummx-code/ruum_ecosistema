@@ -56,7 +56,7 @@ test("Vehículos desktop: fidelidad, selección, filtros y scroll interno", asyn
         '[aria-label="Contenedor de vehículos con desplazamiento interno"]',
       )!;
       const panel = el.querySelector("aside")!;
-      const content = panel.querySelector('[role="tabpanel"]')!;
+      const content = panel.querySelector('[role="tabpanel"]:not([hidden]) > div')!;
       const shell = document.getElementById("desktopVehiclesMainContent")!;
       return {
         global: document.documentElement.scrollHeight - innerHeight,

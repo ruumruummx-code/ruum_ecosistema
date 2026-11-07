@@ -169,11 +169,7 @@ export default function PaginaPagosAdmin() {
       )}
 
       <div className="mt-6">
-        <AdminTabs items={TABS.map((t) => ({ value: t.value, label: t.label }))} value={tab} onValueChange={setTab} label="Secciones de pagos" />
-      </div>
-
-      <section className="mt-4 grid gap-6">
-        {tab === "usuarios" && (
+        <AdminTabs items={TABS.map((t) => ({ value: t.value, label: t.label }))} value={tab} onValueChange={setTab} label="Secciones de pagos" renderPanel={()=><div className="pt-5">{tab === "usuarios" && (
           <PassportCard>
             <h2 className="font-display text-xl font-semibold">Pagos de usuarios</h2>
             <div className="mt-4 overflow-x-auto">
@@ -212,8 +208,7 @@ export default function PaginaPagosAdmin() {
             </div>
           </PassportCard>
         )}
-
-        {tab === "conductores" && (
+{tab === "conductores" && (
           <PassportCard>
             <h2 className="font-display text-xl font-semibold">Pagos a conductores</h2>
             <div className="mt-4 overflow-x-auto">
@@ -249,8 +244,7 @@ export default function PaginaPagosAdmin() {
             </div>
           </PassportCard>
         )}
-
-        {tab === "bancarios" && (
+{tab === "bancarios" && (
           <PassportCard>
             <h2 className="font-display text-xl font-semibold">Datos bancarios de conductores</h2>
             <div className="mt-4 overflow-x-auto">
@@ -283,7 +277,15 @@ export default function PaginaPagosAdmin() {
               </table>
             </div>
           </PassportCard>
-        )}
+        )}</div>} />
+      </div>
+
+      <section className="mt-4 grid gap-6">
+
+
+
+
+
       </section>
     </main>
   );

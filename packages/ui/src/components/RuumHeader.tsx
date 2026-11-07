@@ -116,14 +116,15 @@ export function RuumHeader({
           <Link
             href={hrefLogo}
             className="ruum-header__logo flex shrink-0 items-center gap-2.5 rounded-xl transition duration-200 hover:opacity-90 focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-[#0066ff]"
-            aria-label="Ruum Ruum"
           >
-            <LogoMarca
-              variante="simbolo"
-              tamano={36}
-              tema="claro"
-              className="ruum-header__logo-img shrink-0"
-            />
+            <span aria-hidden="true" className="shrink-0">
+              <LogoMarca
+                variante="simbolo"
+                tamano={36}
+                tema="claro"
+                className="ruum-header__logo-img shrink-0"
+              />
+            </span>
             <div className="ruum-header__text min-w-0">
               <span className="ruum-header__title block truncate font-display text-[17px] font-black leading-none tracking-tight text-[#0a2342] dark:text-[#f6f8fb]">
                 Ruum Ruum

@@ -16,7 +16,7 @@ const TABS: { id: PeriodoActivo; label: string }[] = [
 export function EarningsTabs({ periodoActivo, onCambiarPeriodo }: EarningsTabsProps) {
   return (
     <div
-      role="tablist"
+      role="group"
       aria-label="Periodo de ganancias"
       className="flex w-full rounded-2xl border border-border/20 bg-surface-elevated p-1"
     >
@@ -24,8 +24,8 @@ export function EarningsTabs({ periodoActivo, onCambiarPeriodo }: EarningsTabsPr
         <button
           key={tab.id}
           type="button"
-          role="tab"
-          aria-selected={periodoActivo === tab.id}
+
+          aria-pressed={periodoActivo === tab.id}
           onClick={() => onCambiarPeriodo(tab.id)}
           className={[
             "flex-1 rounded-xl px-3 py-2.5 font-display text-xs sm:text-sm font-bold transition min-h-11 flex items-center justify-center",

@@ -357,10 +357,7 @@ export default function PaginaConfiguracionAdmin() {
             { value: "roles", label: "Roles y capacidades" },
             { value: "normativa", label: "Normativa activa" }
           ]}
-        />
-      </div>
-
-      {pestañaActiva === "roles" && (
+        renderPanel={()=><div className="pt-5">{pestañaActiva === "roles" && (
       <>
       <section className="mt-6 rounded-2xl border border-border-default bg-surface-primary p-5" aria-labelledby="roles-capacidades-direccion">
         <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
@@ -553,8 +550,7 @@ export default function PaginaConfiguracionAdmin() {
       </section>
       </>
       )}
-
-      {pestañaActiva === "normativa" && (
+{pestañaActiva === "normativa" && (
       <div id="normativa-operativa" className="scroll-mt-24">
       {ORDEN_CATEGORIAS.filter((categoria) => agrupados[categoria]?.length).map((categoria) => {
         const abierto = categoriasNormativaAbiertas[categoria] ?? false;
@@ -613,7 +609,12 @@ export default function PaginaConfiguracionAdmin() {
         );
       })}
       </div>
-      )}
+      )}</div>} />
+      </div>
+
+
+
+
 
       <AdminDialog
         open={dialogoAltaAdmin}

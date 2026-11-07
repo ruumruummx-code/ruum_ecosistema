@@ -43,7 +43,7 @@ const { resolve, start } = require('../servidor.cjs');
  assert.deepEqual(await page.evaluate(() => [window.actionClicks, window.adapterClicks]), [0, 0]);
  assert.equal(popups.length, 0);
  await page.addScriptTag({ path: resolve('axe-core/axe.min.js') });
- const axe = await page.evaluate(async () => window.axe.run(document.querySelector('main'), { runOnly: { type: 'rule', values: ['aria-allowed-attr', 'button-name', 'link-name'] } }));
+ const axe = await page.evaluate(async () => window.axe.run(document.querySelector('main'), { runOnly: { type: 'rule', values: ['aria-allowed-attr', 'aria-prohibited-attr', 'button-name', 'link-name'] } }));
  assert.equal(axe.violations.length, 0, JSON.stringify(axe.violations));
  fs.writeFileSync(__dirname + '/arbol-deshabilitado.yml', await page.locator('main').ariaSnapshot());
  for (const theme of ['light', 'dark']) {

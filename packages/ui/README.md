@@ -742,3 +742,26 @@ Al habilitar se vuelve a renderizar el enlace habitual, incluidos los adaptadore
 Las acciones sin navegación mantienen un botón nativo `disabled`.
 No colocar controles interactivos dentro de `titulo`, `subtitulo`, `badge` o `derecha`
 de una fila interactiva/deshabilitada; usar filas independientes para esas acciones.
+
+## Tabs · SD-REM-005
+
+`Tabs` implementa activación **manual**: flechas del eje, Home y End mueven el foco; Enter, Space o clic seleccionan. Tab entra en la selección actual y sale al panel activo. Mientras el foco recorre la lista, el roving tabindex sigue la pestaña enfocada; al salir vuelve a la selección, para que la siguiente entrada sea coherente. Flechas no llaman a `onSeleccion`.
+
+```tsx
+<Tabs
+  etiqueta="Secciones del expediente"
+  tabs={[
+    { id: "resumen", etiqueta: "Resumen", contenido: <Resumen /> },
+    { id: "documentos", etiqueta: "Documentos", contenido: <Documentos /> },
+    { id: "firma", etiqueta: "Firma", disabled: true, motivoDeshabilitado: "Requiere validación" },
+  ]}
+/>
+```
+
+Puede controlarse con `value`/`onSeleccion`. Los `activo` de TabItem se mantienen por compatibilidad y son controlados por el consumidor. Cada item necesita un id lógico único. `useId()` genera el namespace estable de la instancia para pestaña/panel. `idPrefix`, si se proporciona, debe ser único (preferir un `useId()` del padre). Un desmontaje real, otra raíz React sin namespace coordinado o un prefijo explícito duplicado no están cubiertos por la estabilidad entre renders.
+
+Los paneles siempre tienen una relación bidireccional; los inactivos usan `hidden` más `display:none`, sin foco ni presencia en el árbol accesible. Por defecto solo se monta el contenido activo. `mantenerMontados` conserva estado local bajo paneles ocultos; no elimina el costo de montar esos hijos. `renderPanel(id)` permite integrar contenido controlado; debe devolver el contenido correspondiente al id. En perfiles se mantiene el estado de campos; mapas/chat conservan sus guardas de actividad.
+
+Pestañas bloqueadas: patrón A de SD-REM-007, `span role="tab" aria-disabled="true"`, aria-selected=false, sin href, tabIndex o eventos; navegación las salta. Una razón visible puede darse con `motivoDeshabilitado`. No colocar controles interactivos dentro de `etiqueta`. Si no queda ninguna habilitada, ninguna recibe tabindex 0 ni hay panel activo.
+
+Foco, superficies y estado seleccionado usan tokens RUUM, incluido `--ruum-on-primary`. La regla/prueba de composición impide tablists locales y handlers de activación en ancestros. Un filtro de periodo/estado/categoría de un mismo resultado usa botones nativos con `aria-pressed`; no roles de pestaña sobre enlaces o botones desconectados de paneles.

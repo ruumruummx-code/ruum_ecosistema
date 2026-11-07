@@ -1,5 +1,7 @@
 "use client";
 
+import { Tabs } from "@ruum/ui";
+
 import { useRef, type ChangeEvent, type ReactNode } from "react";
 import Image from "next/image";
 import { DriverDetailsShell, DetailIcon } from "../DriverDetailsShell";
@@ -21,10 +23,8 @@ export function DriverProfileView(props: Props) {
       <button type="button" className={styles.photoButton} disabled={!props.photoEnabled || props.photoBusy || props.busy} onClick={() => file.current?.click()} aria-label="Editar fotografía de perfil"><DetailIcon name="camera" /><span>{props.photoBusy ? "Subiendo…" : "Editar"}</span></button>
       <input ref={file} type="file" accept="image/jpeg,image/png,image/webp" hidden onChange={props.onPhoto} disabled={!props.photoEnabled || props.photoBusy} aria-label="Fotografía de perfil" />
     </section>
-    <div role="tablist" aria-label="Secciones del perfil" className={styles.tabs}>
-      {([{ id: "identidad", text: "Identidad", icon: "user" }, { id: "documentacion", text: "Documentación", icon: "document" }, { id: "ubicacion", text: "Ubicación", icon: "pin" }] as const).map(item => <button key={item.id} type="button" role="tab" id={`profile-tab-${item.id}`} aria-controls="profile-fields" aria-selected={props.tab === item.id} onClick={() => props.onTab(item.id)}><DetailIcon name={item.icon} />{item.text}</button>)}
-    </div>
-    <div className={styles.fieldsArea} id="profile-fields" role="tabpanel" aria-labelledby={`profile-tab-${props.tab}`}>{props.children}</div>
+    <Tabs tabs={[{id:"identidad",etiqueta:"Identidad"},{id:"documentacion",etiqueta:"Documentación"},{id:"ubicacion",etiqueta:"Ubicación"}]} value={props.tab} onSeleccion={id=>props.onTab(id as typeof props.tab)} etiqueta="Secciones del perfil" renderPanel={()=>( <div className={styles.fieldsArea}   >{props.children}</div> )} />
+
     {props.feedback}
     <button type="button" className={styles.primary} onClick={props.onSave} disabled={props.saveDisabled} aria-busy={props.busy}>{props.busy ? "Guardando cambios…" : "Guardar cambios"}<span aria-hidden="true">→</span></button>
   </DriverDetailsShell>;

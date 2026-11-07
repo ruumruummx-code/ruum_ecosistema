@@ -55,40 +55,7 @@ export function BottomNav({ items, className = "" }: { items: NavItem[]; classNa
   );
 }
 
-/** Tabs — píldoras con conteo. Activa: fondo teal-deep texto blanco. Sin wrap. */
-export interface TabItem {
-  id: string;
-  etiqueta: string;
-  conteo?: number;
-  activo?: boolean;
-}
-
-export function Tabs({ tabs, onSeleccion, className = "" }: { tabs: TabItem[]; onSeleccion?: (id: string) => void; className?: string }) {
-  return (
-    <div role="tablist" aria-label="Filtros" className={`flex gap-2 overflow-x-auto pb-1 ${className}`}>
-      {tabs.map((t) => (
-        <button
-          key={t.id}
-          role="tab"
-          aria-selected={t.activo}
-          onClick={() => onSeleccion?.(t.id)}
-          className={`flex min-h-[var(--ruum-touch)] shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full px-4 py-2 font-body text-sm font-semibold focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-[var(--ruum-focus)] ${
-            t.activo
-              ? "bg-[var(--ruum-teal-deep)] text-white"
-              : "border border-[var(--ruum-border-input)] bg-[var(--ruum-surface)] text-[var(--ruum-text)]"
-          }`}
-        >
-          {t.etiqueta}
-          {typeof t.conteo === "number" ? (
-            <span className={`rounded-full px-1.5 py-0.5 text-xs tabular-nums ${t.activo ? "bg-white/20 text-white" : "bg-[var(--ruum-neutral-bg)] text-[var(--ruum-text-secondary)]"}`}>
-              {t.conteo}
-            </span>
-          ) : null}
-        </button>
-      ))}
-    </div>
-  );
-}
+export { Tabs, type TabItem, type TabsProps } from "./Tabs";
 
 /** Sidebar — navegación lateral por función con contadores. */
 export interface SidebarGrupo {

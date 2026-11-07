@@ -1,5 +1,7 @@
 "use client";
 
+import { Tabs } from "@ruum/ui";
+
 import { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
@@ -133,49 +135,10 @@ export function DetalleTrasladoDesktop({
         </button>
       </header>
       <SolicitudCalificacion key={id} trasladoId={id} conductorId={p.conductor_id} estado={p.estado} cerradoEn={p.cerrado_en ?? p.actualizado_en} />
-      <div
-        className={s.detailTabs}
-        role="tablist"
-        aria-label="Vista del traslado"
-      >
-        {["Seguimiento", "Detalles", "Historial"].map((t, i, all) => (
-          <button
-            key={t}
-            id={`detalle-tab-${t}`}
-            role="tab"
-            tabIndex={t === tab ? 0 : -1}
-            aria-selected={t === tab}
-            aria-controls="detalle-panel"
-            onClick={() => {
-              setTab(t);
-              setCancelar(false);
-            }}
-            onKeyDown={(e) => {
-              const n =
-                e.key === "ArrowRight"
-                  ? (i + 1) % 3
-                  : e.key === "ArrowLeft"
-                    ? (i + 2) % 3
-                    : e.key === "Home"
-                      ? 0
-                      : e.key === "End"
-                        ? 2
-                        : -1;
-              if (n >= 0) {
-                e.preventDefault();
-                setTab(all[n]);
-                document.getElementById(`detalle-tab-${all[n]}`)?.focus();
-              }
-            }}
-          >
-            {t}
-          </button>
-        ))}
-      </div>
-      <div
-        id="detalle-panel"
-        role="tabpanel"
-        aria-labelledby={`detalle-tab-${tab}`}
+      <Tabs tabs={["Seguimiento", "Detalles", "Historial"].map(id=>({id,etiqueta:id}))} value={tab} onSeleccion={id=>{setTab(id);setCancelar(false);}} etiqueta="Vista del traslado" renderPanel={()=>( <div
+
+
+
         className={s.detailContent}
         data-scroll={cancelar || tab !== "Seguimiento"}
       >
@@ -359,7 +322,8 @@ export function DetalleTrasladoDesktop({
             </Link>
           </div>
         )}
-      </div>
+      </div> )} />
+
       <section className={s.driver} aria-label="Conductor asignado">
         <h3>Conductor asignado</h3>
         <div className={s.driverBody}>

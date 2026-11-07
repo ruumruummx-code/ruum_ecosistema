@@ -1,0 +1,278 @@
+{
+  "scope": "apps, código fuente JS/TS/JSX/TSX; excluye dependencias, builds y pruebas",
+  "scannedFiles": 642,
+  "inventory": [
+    {
+      "file": "apps/app-conductor/src/app/cuenta/preferencias/page.tsx",
+      "component": "MobileRow",
+      "line": 246,
+      "props": [
+        {
+          "name": "key",
+          "value": "{opcion.clave}"
+        },
+        {
+          "name": "titulo",
+          "value": "{opcion.titulo}"
+        },
+        {
+          "name": "subtitulo",
+          "value": "{desactivable ? \"Esta opción no se puede modificar desde esta pantalla.\" : !conductor ? \"No hay un perfil de conductor disponible para guardar cambios.\" : guardandoAuto ? \"Guardando preferencias. Espera a que termine.\" : estaActivo ? opcion.subtitulo : \"Desactivado\"}"
+        },
+        {
+          "name": "icono",
+          "value": "{opcion.icono}"
+        },
+        {
+          "name": "tonoIcono",
+          "value": "{estaActivo ? \"azul\" : \"neutro\"}"
+        },
+        {
+          "name": "derecha",
+          "value": "{\r\n                            <button\r\n                              type=\"button\"\r\n                              role=\"switch\"\r\n                              aria-checked={estaActivo}\r\n                              aria-label={opcion.titulo}\r\n                              disabled={!conductor || guardandoAuto || desactivable}\r\n                              onClick={() => !desactivable && toggleTono(opcion.clave)}\r\n                              className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full border-2 p-0.5 transition-colors duration-200 ${estaActivo\r\n                                ? \"bg-signal border-signal\"\r\n                                : \"bg-surface-elevated border-border/80\"}`}\r\n                            >\r\n                              <span\r\n                                className={`pointer-events-none inline-block size-4 transform rounded-full bg-white shadow-sm ring-0 transition duration-200 ${estaActivo ? \"translate-x-6 bg-slate-950\" : \"translate-x-0 bg-text-secondary\"}`}\r\n                              />\r\n                            </button>\r\n                          }"
+        },
+        {
+          "name": "disabled",
+          "value": "{!conductor || guardandoAuto || desactivable}"
+        }
+      ],
+      "ancestors": [
+        {
+          "tag": "div",
+          "line": 241,
+          "attributes": []
+        },
+        {
+          "tag": "div",
+          "line": 236,
+          "attributes": []
+        },
+        {
+          "tag": "div",
+          "line": 232,
+          "attributes": []
+        },
+        {
+          "tag": "div",
+          "line": 189,
+          "attributes": []
+        }
+      ],
+      "activatingAncestor": false,
+      "sha256": "bc046bf36a19199449b314a8f876abc2cd223968bae9d74a6d09071a8f18b972"
+    },
+    {
+      "file": "apps/app-conductor/src/app/cuenta/preferencias/page.tsx",
+      "component": "MobileRow",
+      "line": 295,
+      "props": [
+        {
+          "name": "key",
+          "value": "{opcion.clave}"
+        },
+        {
+          "name": "titulo",
+          "value": "{opcion.titulo}"
+        },
+        {
+          "name": "subtitulo",
+          "value": "{!conductor ? \"No hay un perfil de conductor disponible para guardar cambios.\" : guardandoAuto ? \"Guardando preferencias. Espera a que termine.\" : estaActivo ? opcion.subtitulo : \"Desactivado\"}"
+        },
+        {
+          "name": "icono",
+          "value": "{opcion.icono}"
+        },
+        {
+          "name": "tonoIcono",
+          "value": "{estaActivo ? \"azul\" : \"neutro\"}"
+        },
+        {
+          "name": "derecha",
+          "value": "{\r\n                        <button\r\n                          type=\"button\"\r\n                          role=\"switch\"\r\n                          aria-checked={estaActivo}\r\n                          aria-label={opcion.titulo}\r\n                          disabled={!conductor || guardandoAuto}\r\n                          onClick={() => toggleTono(opcion.clave)}\r\n                          className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full border-2 p-0.5 transition-colors duration-200 ${estaActivo\r\n                            ? \"bg-signal border-signal\"\r\n                            : \"bg-surface-elevated border-border/80\"}`}\r\n                        >\r\n                          <span\r\n                            className={`pointer-events-none inline-block size-4 transform rounded-full bg-white shadow-sm ring-0 transition duration-200 ${estaActivo ? \"translate-x-6 bg-slate-950\" : \"translate-x-0 bg-text-secondary\"}`}\r\n                          />\r\n                        </button>\r\n                      }"
+        },
+        {
+          "name": "disabled",
+          "value": "{!conductor || guardandoAuto}"
+        }
+      ],
+      "ancestors": [
+        {
+          "tag": "div",
+          "line": 291,
+          "attributes": []
+        },
+        {
+          "tag": "div",
+          "line": 232,
+          "attributes": []
+        },
+        {
+          "tag": "div",
+          "line": 189,
+          "attributes": []
+        }
+      ],
+      "activatingAncestor": false,
+      "sha256": "bc046bf36a19199449b314a8f876abc2cd223968bae9d74a6d09071a8f18b972"
+    },
+    {
+      "file": "apps/app-conductor/src/app/viajes/[id]/ContactoRecepcionVehiculo.tsx",
+      "component": "NextOperationalAction",
+      "line": 57,
+      "props": [
+        {
+          "name": "title",
+          "value": "\"Registra el estado final del vehículo\""
+        },
+        {
+          "name": "instruction",
+          "value": "{procesando ? \"Estamos iniciando el registro. Espera a que termine antes de continuar.\" : !ambosConfirmados ? \"Para iniciar el registro final, marca «Contacto de recepción confirmado» y «Vehículo confirmado».\" : \"Confirma el contacto de recepción y prepara el registro final antes de entregar.\"}"
+        },
+        {
+          "name": "context",
+          "value": "{\r\n          <>\r\n            {contactoNombre}\r\n            <br />\r\n            <span className=\"font-normal text-text-secondary\">{contactoTelefono}</span>\r\n          </>\r\n        }"
+        },
+        {
+          "name": "eta",
+          "value": "\"Tiempo estimado: 3 a 5 minutos\""
+        },
+        {
+          "name": "primaryCta",
+          "value": "{{ label: primaryActionLabel, onClick: tomarEvidencias, disabled: !ambosConfirmados || procesando }}"
+        },
+        {
+          "name": "secondaryCta",
+          "value": "{{ label: \"Llamar contacto\", href: `tel:${contactoTelefono}` }}"
+        },
+        {
+          "name": "loading",
+          "value": "{procesando}"
+        },
+        {
+          "name": "error",
+          "value": "{error}"
+        },
+        {
+          "name": "nextStep",
+          "value": "\"Después confirmarás la entrega.\""
+        },
+        {
+          "name": "stageLabel",
+          "value": "\"Paso 6 de 7\""
+        }
+      ],
+      "ancestors": [
+        {
+          "tag": "div",
+          "line": 55,
+          "attributes": []
+        }
+      ],
+      "activatingAncestor": false,
+      "sha256": "b575ae8869aaba06c4ab0c8a4be07b3c09bf12ca3f3d235a68a61c7b01e40bdc"
+    },
+    {
+      "file": "apps/app-conductor/src/app/viajes/[id]/ContactoYVehiculo.tsx",
+      "component": "NextOperationalAction",
+      "line": 72,
+      "props": [
+        {
+          "name": "title",
+          "value": "\"Confirma que encontraste al contacto\""
+        },
+        {
+          "name": "instruction",
+          "value": "{procesando ? \"Estamos iniciando el registro. Espera a que termine antes de continuar.\" : !ambosConfirmados ? \"Para iniciar el registro, marca «Contacto encontrado» y «Vehículo localizado».\" : \"Habla con la persona de entrega y valida que el vehículo coincida antes de iniciar el registro.\"}"
+        },
+        {
+          "name": "context",
+          "value": "{\r\n          <>\r\n            {contactoNombre}\r\n            <br />\r\n            <span className=\"font-normal text-text-secondary\">{contactoTelefono}</span>\r\n          </>\r\n        }"
+        },
+        {
+          "name": "eta",
+          "value": "\"Tiempo estimado: 2 a 4 minutos\""
+        },
+        {
+          "name": "primaryCta",
+          "value": "{{ label: primaryActionLabel, onClick: tomarEvidencias, disabled: !ambosConfirmados || procesando }}"
+        },
+        {
+          "name": "secondaryCta",
+          "value": "{{ label: \"Llamar contacto\", href: `tel:${contactoTelefono}` }}"
+        },
+        {
+          "name": "loading",
+          "value": "{procesando}"
+        },
+        {
+          "name": "error",
+          "value": "{error}"
+        },
+        {
+          "name": "nextStep",
+          "value": "\"Después revisarás el vehículo antes de moverlo.\""
+        },
+        {
+          "name": "stageLabel",
+          "value": "\"Paso 2 de 7\""
+        }
+      ],
+      "ancestors": [
+        {
+          "tag": "div",
+          "line": 70,
+          "attributes": []
+        }
+      ],
+      "activatingAncestor": false,
+      "sha256": "3ab15c6d6958733b15b20bfbba3d486779a063965a2a12493bfce6f4ffa4dee6"
+    }
+  ],
+  "wrappers": [
+    {
+      "name": "ContactoYVehiculo",
+      "externalReferences": [],
+      "routing": "sin consumidores en apps; no se monta desde rutas actuales"
+    },
+    {
+      "name": "ContactoRecepcionVehiculo",
+      "externalReferences": [],
+      "routing": "sin consumidores en apps; no se monta desde rutas actuales"
+    }
+  ],
+  "checkedAncestors": [
+    {
+      "file": "apps/app-conductor/src/app/layout.tsx",
+      "sha256": "0696b10336526c291a8371d4dd5cb769df3185dfca81d5d2d309a461bdeac2a3",
+      "result": "Revisión de children: sin onClick/onKeyDown de activación en ancestros; botones de soporte/reset son ramas separadas"
+    },
+    {
+      "file": "apps/app-conductor/src/app/viajes/[id]/layout.tsx",
+      "sha256": "4f03e7b966987eee0c9640049f9a77703e35343bf9e7b3c18f6204e07abf9bf7",
+      "result": "Revisión de children: sin onClick/onKeyDown de activación en ancestros; botones de soporte/reset son ramas separadas"
+    },
+    {
+      "file": "apps/app-conductor/src/app/viajes/[id]/TripOperationalFrame.tsx",
+      "sha256": "494c8973b1319412d09cf7ed53b11c92220561d064d0ee88ce9f357c07943bd8",
+      "result": "Revisión de children: sin onClick/onKeyDown de activación en ancestros; botones de soporte/reset son ramas separadas"
+    },
+    {
+      "file": "apps/app-conductor/src/app/ViajeActivoContext.tsx",
+      "sha256": "4cac93db621f30a8c44384ddf0c98d7c7e263e70d8fd8ba789a819fde595b21b",
+      "result": "Revisión de children: sin onClick/onKeyDown de activación en ancestros; botones de soporte/reset son ramas separadas"
+    },
+    {
+      "file": "apps/app-conductor/src/components/LiveRegionProvider.tsx",
+      "sha256": "463aca00e9f0be02c9d9c55c6c79b76f915e9ce158f702eb2afae7ba908af203",
+      "result": "Revisión de children: sin onClick/onKeyDown de activación en ancestros; botones de soporte/reset son ramas separadas"
+    },
+    {
+      "file": "apps/app-conductor/src/components/ErrorBoundaryConductor.tsx",
+      "sha256": "5a69406dde26f994eb43a1bdda86181403f6b938bf2f60bcab28b03dd6748ddf",
+      "result": "Revisión de children: sin onClick/onKeyDown de activación en ancestros; botones de soporte/reset son ramas separadas"
+    }
+  ],
+  "appUsuarioUses": 0,
+  "exceptions": [],
+  "conclusion": "Ningún ancestro JSX de los cuatro sitios tiene handlers de activación ni spreads. Revisión de layouts/providers documentada. Filas de preferencias ahora pasivas: solo el switch hijo ejecuta cambios, sin botón anidado."
+}

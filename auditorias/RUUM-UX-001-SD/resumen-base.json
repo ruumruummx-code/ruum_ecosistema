@@ -2863,7 +2863,7 @@
       "snapshot": "capturas-base/Chat--default--dark--390--zoom-css-200.png",
       "violations": [],
       "incomplete": [],
-      "overflow": 15,
+      "overflow": 16,
       "truncated": 0
     },
     {
@@ -2941,7 +2941,7 @@
       "snapshot": "capturas-base/Chat--default--light--390--zoom-css-200.png",
       "violations": [],
       "incomplete": [],
-      "overflow": 15,
+      "overflow": 16,
       "truncated": 0
     },
     {
@@ -2965,13 +2965,7 @@
       "width": 390,
       "mode": "base",
       "snapshot": "capturas-base/Chat--disabled--dark--390--base.png",
-      "violations": [
-        {
-          "id": "label-title-only",
-          "impact": "serious",
-          "nodes": 1
-        }
-      ],
+      "violations": [],
       "incomplete": [],
       "overflow": 0,
       "truncated": 0
@@ -2984,13 +2978,7 @@
       "width": 390,
       "mode": "base",
       "snapshot": "capturas-base/Chat--disabled--light--390--base.png",
-      "violations": [
-        {
-          "id": "label-title-only",
-          "impact": "serious",
-          "nodes": 1
-        }
-      ],
+      "violations": [],
       "incomplete": [],
       "overflow": 0,
       "truncated": 0
@@ -4855,13 +4843,7 @@
       "width": 390,
       "mode": "base",
       "snapshot": "capturas-base/EstadoStepper--servicio_cancelado--dark--390--base.png",
-      "violations": [
-        {
-          "id": "label-content-name-mismatch",
-          "impact": "serious",
-          "nodes": 1
-        }
-      ],
+      "violations": [],
       "incomplete": [
         {
           "id": "color-contrast",
@@ -4879,13 +4861,7 @@
       "width": 390,
       "mode": "base",
       "snapshot": "capturas-base/EstadoStepper--servicio_cancelado--light--390--base.png",
-      "violations": [
-        {
-          "id": "label-content-name-mismatch",
-          "impact": "serious",
-          "nodes": 1
-        }
-      ],
+      "violations": [],
       "incomplete": [
         {
           "id": "color-contrast",
@@ -4903,13 +4879,7 @@
       "width": 390,
       "mode": "base",
       "snapshot": "capturas-base/EstadoStepper--servicio_cerrado--dark--390--base.png",
-      "violations": [
-        {
-          "id": "label-content-name-mismatch",
-          "impact": "serious",
-          "nodes": 1
-        }
-      ],
+      "violations": [],
       "incomplete": [
         {
           "id": "color-contrast",
@@ -4927,13 +4897,7 @@
       "width": 390,
       "mode": "base",
       "snapshot": "capturas-base/EstadoStepper--servicio_cerrado--light--390--base.png",
-      "violations": [
-        {
-          "id": "label-content-name-mismatch",
-          "impact": "serious",
-          "nodes": 1
-        }
-      ],
+      "violations": [],
       "incomplete": [
         {
           "id": "color-contrast",
@@ -4977,13 +4941,7 @@
       "width": 320,
       "mode": "responsive",
       "snapshot": "capturas-base/EstadoStepper--solicitud_creada--dark--320--responsive.png",
-      "violations": [
-        {
-          "id": "label-content-name-mismatch",
-          "impact": "serious",
-          "nodes": 1
-        }
-      ],
+      "violations": [],
       "incomplete": [
         {
           "id": "color-contrast",
@@ -5001,13 +4959,7 @@
       "width": 390,
       "mode": "base",
       "snapshot": "capturas-base/EstadoStepper--solicitud_creada--dark--390--base.png",
-      "violations": [
-        {
-          "id": "label-content-name-mismatch",
-          "impact": "serious",
-          "nodes": 1
-        }
-      ],
+      "violations": [],
       "incomplete": [
         {
           "id": "color-contrast",
@@ -5025,13 +4977,7 @@
       "width": 390,
       "mode": "zoom-css-200",
       "snapshot": "capturas-base/EstadoStepper--solicitud_creada--dark--390--zoom-css-200.png",
-      "violations": [
-        {
-          "id": "label-content-name-mismatch",
-          "impact": "serious",
-          "nodes": 1
-        }
-      ],
+      "violations": [],
       "incomplete": [
         {
           "id": "color-contrast",
@@ -5088,13 +5034,7 @@
       "width": 320,
       "mode": "responsive",
       "snapshot": "capturas-base/EstadoStepper--solicitud_creada--light--320--responsive.png",
-      "violations": [
-        {
-          "id": "label-content-name-mismatch",
-          "impact": "serious",
-          "nodes": 1
-        }
-      ],
+      "violations": [],
       "incomplete": [
         {
           "id": "color-contrast",
@@ -5112,13 +5052,7 @@
       "width": 390,
       "mode": "base",
       "snapshot": "capturas-base/EstadoStepper--solicitud_creada--light--390--base.png",
-      "violations": [
-        {
-          "id": "label-content-name-mismatch",
-          "impact": "serious",
-          "nodes": 1
-        }
-      ],
+      "violations": [],
       "incomplete": [
         {
           "id": "color-contrast",
@@ -5136,13 +5070,7 @@
       "width": 390,
       "mode": "zoom-css-200",
       "snapshot": "capturas-base/EstadoStepper--solicitud_creada--light--390--zoom-css-200.png",
-      "violations": [
-        {
-          "id": "label-content-name-mismatch",
-          "impact": "serious",
-          "nodes": 1
-        }
-      ],
+      "violations": [],
       "incomplete": [
         {
           "id": "color-contrast",
@@ -5173,13 +5101,7 @@
       "width": 390,
       "mode": "base",
       "snapshot": "capturas-base/EstadoStepper--traslado_en_curso--dark--390--base.png",
-      "violations": [
-        {
-          "id": "label-content-name-mismatch",
-          "impact": "serious",
-          "nodes": 1
-        }
-      ],
+      "violations": [],
       "incomplete": [
         {
           "id": "color-contrast",
@@ -5197,13 +5119,7 @@
       "width": 390,
       "mode": "base",
       "snapshot": "capturas-base/EstadoStepper--traslado_en_curso--light--390--base.png",
-      "violations": [
-        {
-          "id": "label-content-name-mismatch",
-          "impact": "serious",
-          "nodes": 1
-        }
-      ],
+      "violations": [],
       "incomplete": [
         {
           "id": "color-contrast",
@@ -8353,13 +8269,7 @@
       "width": 390,
       "mode": "base",
       "snapshot": "capturas-base/MobileProgress--servicio_cancelado--dark--390--base.png",
-      "violations": [
-        {
-          "id": "label-content-name-mismatch",
-          "impact": "serious",
-          "nodes": 1
-        }
-      ],
+      "violations": [],
       "incomplete": [
         {
           "id": "color-contrast",
@@ -8377,13 +8287,7 @@
       "width": 390,
       "mode": "base",
       "snapshot": "capturas-base/MobileProgress--servicio_cancelado--light--390--base.png",
-      "violations": [
-        {
-          "id": "label-content-name-mismatch",
-          "impact": "serious",
-          "nodes": 1
-        }
-      ],
+      "violations": [],
       "incomplete": [
         {
           "id": "color-contrast",
@@ -8401,13 +8305,7 @@
       "width": 390,
       "mode": "base",
       "snapshot": "capturas-base/MobileProgress--servicio_cerrado--dark--390--base.png",
-      "violations": [
-        {
-          "id": "label-content-name-mismatch",
-          "impact": "serious",
-          "nodes": 1
-        }
-      ],
+      "violations": [],
       "incomplete": [
         {
           "id": "color-contrast",
@@ -8425,13 +8323,7 @@
       "width": 390,
       "mode": "base",
       "snapshot": "capturas-base/MobileProgress--servicio_cerrado--light--390--base.png",
-      "violations": [
-        {
-          "id": "label-content-name-mismatch",
-          "impact": "serious",
-          "nodes": 1
-        }
-      ],
+      "violations": [],
       "incomplete": [
         {
           "id": "color-contrast",
@@ -8475,13 +8367,7 @@
       "width": 320,
       "mode": "responsive",
       "snapshot": "capturas-base/MobileProgress--solicitud_creada--dark--320--responsive.png",
-      "violations": [
-        {
-          "id": "label-content-name-mismatch",
-          "impact": "serious",
-          "nodes": 1
-        }
-      ],
+      "violations": [],
       "incomplete": [
         {
           "id": "color-contrast",
@@ -8499,13 +8385,7 @@
       "width": 390,
       "mode": "base",
       "snapshot": "capturas-base/MobileProgress--solicitud_creada--dark--390--base.png",
-      "violations": [
-        {
-          "id": "label-content-name-mismatch",
-          "impact": "serious",
-          "nodes": 1
-        }
-      ],
+      "violations": [],
       "incomplete": [
         {
           "id": "color-contrast",
@@ -8523,13 +8403,7 @@
       "width": 390,
       "mode": "zoom-css-200",
       "snapshot": "capturas-base/MobileProgress--solicitud_creada--dark--390--zoom-css-200.png",
-      "violations": [
-        {
-          "id": "label-content-name-mismatch",
-          "impact": "serious",
-          "nodes": 1
-        }
-      ],
+      "violations": [],
       "incomplete": [
         {
           "id": "color-contrast",
@@ -8586,13 +8460,7 @@
       "width": 320,
       "mode": "responsive",
       "snapshot": "capturas-base/MobileProgress--solicitud_creada--light--320--responsive.png",
-      "violations": [
-        {
-          "id": "label-content-name-mismatch",
-          "impact": "serious",
-          "nodes": 1
-        }
-      ],
+      "violations": [],
       "incomplete": [
         {
           "id": "color-contrast",
@@ -8610,13 +8478,7 @@
       "width": 390,
       "mode": "base",
       "snapshot": "capturas-base/MobileProgress--solicitud_creada--light--390--base.png",
-      "violations": [
-        {
-          "id": "label-content-name-mismatch",
-          "impact": "serious",
-          "nodes": 1
-        }
-      ],
+      "violations": [],
       "incomplete": [
         {
           "id": "color-contrast",
@@ -8634,13 +8496,7 @@
       "width": 390,
       "mode": "zoom-css-200",
       "snapshot": "capturas-base/MobileProgress--solicitud_creada--light--390--zoom-css-200.png",
-      "violations": [
-        {
-          "id": "label-content-name-mismatch",
-          "impact": "serious",
-          "nodes": 1
-        }
-      ],
+      "violations": [],
       "incomplete": [
         {
           "id": "color-contrast",
@@ -8671,13 +8527,7 @@
       "width": 390,
       "mode": "base",
       "snapshot": "capturas-base/MobileProgress--traslado_en_curso--dark--390--base.png",
-      "violations": [
-        {
-          "id": "label-content-name-mismatch",
-          "impact": "serious",
-          "nodes": 1
-        }
-      ],
+      "violations": [],
       "incomplete": [
         {
           "id": "color-contrast",
@@ -8695,13 +8545,7 @@
       "width": 390,
       "mode": "base",
       "snapshot": "capturas-base/MobileProgress--traslado_en_curso--light--390--base.png",
-      "violations": [
-        {
-          "id": "label-content-name-mismatch",
-          "impact": "serious",
-          "nodes": 1
-        }
-      ],
+      "violations": [],
       "incomplete": [
         {
           "id": "color-contrast",
@@ -10566,13 +10410,7 @@
       "width": 1440,
       "mode": "responsive",
       "snapshot": "capturas-base/RuumHeader--default--dark--1440--responsive.png",
-      "violations": [
-        {
-          "id": "label-content-name-mismatch",
-          "impact": "serious",
-          "nodes": 1
-        }
-      ],
+      "violations": [],
       "incomplete": [],
       "overflow": 0,
       "truncated": 0
@@ -10585,13 +10423,7 @@
       "width": 1440,
       "mode": "zoom-css-200",
       "snapshot": "capturas-base/RuumHeader--default--dark--1440--zoom-css-200.png",
-      "violations": [
-        {
-          "id": "label-content-name-mismatch",
-          "impact": "serious",
-          "nodes": 1
-        }
-      ],
+      "violations": [],
       "incomplete": [],
       "overflow": 0,
       "truncated": 0
@@ -10604,13 +10436,7 @@
       "width": 320,
       "mode": "responsive",
       "snapshot": "capturas-base/RuumHeader--default--dark--320--responsive.png",
-      "violations": [
-        {
-          "id": "label-content-name-mismatch",
-          "impact": "serious",
-          "nodes": 1
-        }
-      ],
+      "violations": [],
       "incomplete": [],
       "overflow": 0,
       "truncated": 0
@@ -10623,13 +10449,7 @@
       "width": 390,
       "mode": "base",
       "snapshot": "capturas-base/RuumHeader--default--dark--390--base.png",
-      "violations": [
-        {
-          "id": "label-content-name-mismatch",
-          "impact": "serious",
-          "nodes": 1
-        }
-      ],
+      "violations": [],
       "incomplete": [],
       "overflow": 0,
       "truncated": 0
@@ -10642,13 +10462,7 @@
       "width": 390,
       "mode": "zoom-css-200",
       "snapshot": "capturas-base/RuumHeader--default--dark--390--zoom-css-200.png",
-      "violations": [
-        {
-          "id": "label-content-name-mismatch",
-          "impact": "serious",
-          "nodes": 1
-        }
-      ],
+      "violations": [],
       "incomplete": [],
       "overflow": 16,
       "truncated": 0
@@ -10661,13 +10475,7 @@
       "width": 768,
       "mode": "responsive",
       "snapshot": "capturas-base/RuumHeader--default--dark--768--responsive.png",
-      "violations": [
-        {
-          "id": "label-content-name-mismatch",
-          "impact": "serious",
-          "nodes": 1
-        }
-      ],
+      "violations": [],
       "incomplete": [],
       "overflow": 0,
       "truncated": 0
@@ -10680,13 +10488,7 @@
       "width": 1440,
       "mode": "responsive",
       "snapshot": "capturas-base/RuumHeader--default--light--1440--responsive.png",
-      "violations": [
-        {
-          "id": "label-content-name-mismatch",
-          "impact": "serious",
-          "nodes": 1
-        }
-      ],
+      "violations": [],
       "incomplete": [],
       "overflow": 0,
       "truncated": 0
@@ -10699,13 +10501,7 @@
       "width": 1440,
       "mode": "zoom-css-200",
       "snapshot": "capturas-base/RuumHeader--default--light--1440--zoom-css-200.png",
-      "violations": [
-        {
-          "id": "label-content-name-mismatch",
-          "impact": "serious",
-          "nodes": 1
-        }
-      ],
+      "violations": [],
       "incomplete": [],
       "overflow": 0,
       "truncated": 0
@@ -10718,13 +10514,7 @@
       "width": 320,
       "mode": "responsive",
       "snapshot": "capturas-base/RuumHeader--default--light--320--responsive.png",
-      "violations": [
-        {
-          "id": "label-content-name-mismatch",
-          "impact": "serious",
-          "nodes": 1
-        }
-      ],
+      "violations": [],
       "incomplete": [],
       "overflow": 0,
       "truncated": 0
@@ -10737,13 +10527,7 @@
       "width": 390,
       "mode": "base",
       "snapshot": "capturas-base/RuumHeader--default--light--390--base.png",
-      "violations": [
-        {
-          "id": "label-content-name-mismatch",
-          "impact": "serious",
-          "nodes": 1
-        }
-      ],
+      "violations": [],
       "incomplete": [],
       "overflow": 0,
       "truncated": 0
@@ -10756,13 +10540,7 @@
       "width": 390,
       "mode": "zoom-css-200",
       "snapshot": "capturas-base/RuumHeader--default--light--390--zoom-css-200.png",
-      "violations": [
-        {
-          "id": "label-content-name-mismatch",
-          "impact": "serious",
-          "nodes": 1
-        }
-      ],
+      "violations": [],
       "incomplete": [],
       "overflow": 16,
       "truncated": 0
@@ -10775,13 +10553,7 @@
       "width": 768,
       "mode": "responsive",
       "snapshot": "capturas-base/RuumHeader--default--light--768--responsive.png",
-      "violations": [
-        {
-          "id": "label-content-name-mismatch",
-          "impact": "serious",
-          "nodes": 1
-        }
-      ],
+      "violations": [],
       "incomplete": [],
       "overflow": 0,
       "truncated": 0

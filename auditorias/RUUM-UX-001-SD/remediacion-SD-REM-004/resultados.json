@@ -125,8 +125,8 @@
           "orientationAngle": 0,
           "orientationType": "landscape-primary"
         },
-        "timestamp": "2026-11-07T07:00:39.787Z",
-        "url": "http://127.0.0.1:58442/remediacion-SD-REM-004/formulario.html",
+        "timestamp": "2026-11-07T07:44:35.520Z",
+        "url": "http://127.0.0.1:57384/remediacion-SD-REM-004/formulario.html",
         "toolOptions": {
           "runOnly": {
             "type": "tag",
@@ -3869,8 +3869,8 @@
           "orientationAngle": 0,
           "orientationType": "landscape-primary"
         },
-        "timestamp": "2026-11-07T07:00:39.993Z",
-        "url": "http://127.0.0.1:58442/remediacion-SD-REM-004/formulario.html",
+        "timestamp": "2026-11-07T07:44:35.851Z",
+        "url": "http://127.0.0.1:57384/remediacion-SD-REM-004/formulario.html",
         "toolOptions": {
           "runOnly": {
             "type": "tag",
@@ -8000,8 +8000,8 @@
           "orientationAngle": 0,
           "orientationType": "landscape-primary"
         },
-        "timestamp": "2026-11-07T07:00:40.147Z",
-        "url": "http://127.0.0.1:58442/remediacion-SD-REM-004/formulario.html",
+        "timestamp": "2026-11-07T07:44:36.051Z",
+        "url": "http://127.0.0.1:57384/remediacion-SD-REM-004/formulario.html",
         "toolOptions": {
           "runOnly": {
             "type": "tag",
@@ -13044,8 +13044,8 @@
           "orientationAngle": 0,
           "orientationType": "landscape-primary"
         },
-        "timestamp": "2026-11-07T07:00:40.325Z",
-        "url": "http://127.0.0.1:58442/remediacion-SD-REM-004/formulario.html",
+        "timestamp": "2026-11-07T07:44:36.253Z",
+        "url": "http://127.0.0.1:57384/remediacion-SD-REM-004/formulario.html",
         "toolOptions": {
           "runOnly": {
             "type": "tag",
@@ -18358,5 +18358,5 @@
       }
     }
   ],
-  "screenReaderGate": "PENDIENTE: sesión NVDA/VoiceOver no realizada"
+  "screenReaderGate": "CUMPLIDO: sesión asistiva conjunta completada según Guion (NVDA, VoiceOver y VoiceOver táctil en temas claro y oscuro). Ver SESION-ASISTIVA-SD-REM-004.md."
 }

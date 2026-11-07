@@ -186,7 +186,9 @@ describe("DatosPersonales — RUUM-USR-F12-001", () => {
     personal.focus();
     fireEvent.keyDown(personal, { key: "ArrowRight" });
     expect(screen.getByRole("tab", { name: "Dirección" })).toHaveFocus();
-    expect(screen.getByRole("tab", { name: "Dirección" })).toHaveAttribute("aria-selected", "true");
+    expect(screen.getByRole("tab", { name: "Dirección" })).toHaveAttribute("aria-selected", "false");
+    fireEvent.click(screen.getByRole("tab", { name: "Dirección" }));
+    expect(screen.getByRole("tabpanel", { name: "Dirección" })).toBeInTheDocument();
   });
 
   it("permite eliminar una fecha de nacimiento previamente guardada atómicamente", async () => {

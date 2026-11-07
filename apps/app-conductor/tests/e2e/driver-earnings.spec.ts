@@ -21,7 +21,7 @@ async function fixture(page: Page, empty = false, failure = false) {
 }
 async function open(page: Page) {
   await page.goto("/ganancias", { waitUntil: "domcontentloaded" });
-  await expect(page.getByRole("tabpanel")).toHaveAttribute("aria-busy", "false", { timeout: 180_000 });
+  await expect(page.getByRole("region", { name: "Resultados del filtro" })).toHaveAttribute("aria-busy", "false", { timeout: 180_000 });
   await page.locator("nextjs-portal").evaluateAll(nodes => nodes.forEach(node => (node as HTMLElement).style.setProperty("display", "none", "important")));
 }
 for (const size of [{ width: 320, height: 568 }, { width: 375, height: 667 }, { width: 390, height: 844 }, { width: 1280, height: 960 }]) {
@@ -42,9 +42,9 @@ test("cambia periodo y consulta programación con requisitos antes del clic", as
   await fixture(page); await open(page);
   await expect(page.getByText("↑ +12%", { exact: true })).toBeVisible();
   await expect(page.getByText("Pendiente", { exact: true })).toBeVisible();
-  await page.getByRole("tab", { name: "Este mes", exact: true }).click();
+  await page.getByRole("button", { name: "Este mes", exact: true }).click();
   await expect(page.getByTestId("earnings-total")).toContainText("$4,637.50");
-  await expect(page.getByRole("tab", { name: "Este mes", exact: true })).toHaveAttribute("aria-selected", "true");
+  await expect(page.getByRole("button", { name: "Este mes", exact: true })).toHaveAttribute("aria-pressed", "true");
   await expect(page.getByRole("link", { name: /Ver todos/ })).toHaveAttribute("href", "/ganancias/historial");
   const requirements = page.getByRole("region", { name: "Programación de pagos", exact: true });
   await expect(requirements).toContainText("saldo pendiente confirmado");

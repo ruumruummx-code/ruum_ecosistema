@@ -71,13 +71,14 @@
       "orientationAngle": 0,
       "orientationType": "landscape-primary"
     },
-    "timestamp": "2026-11-07T07:04:32.776Z",
-    "url": "http://127.0.0.1:59651/remediacion-SD-REM-007/formulario.html",
+    "timestamp": "2026-11-07T07:44:50.844Z",
+    "url": "http://127.0.0.1:65247/remediacion-SD-REM-007/formulario.html",
     "toolOptions": {
       "runOnly": {
         "type": "rule",
         "values": [
           "aria-allowed-attr",
+          "aria-prohibited-attr",
           "button-name",
           "link-name"
         ]
@@ -399,6 +400,150 @@
                 "relatedNodes": [],
                 "impact": "critical",
                 "message": "ARIA attribute is supported"
+              }
+            ],
+            "impact": null,
+            "html": "<span role=\"link\" aria-disabled=\"true\" class=\"inline-flex min-h-12...\">",
+            "target": [
+              ".inline-flex.min-h-12.min-w-12:nth-child(2)"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "aria-prohibited-attr",
+        "impact": null,
+        "tags": [
+          "cat.aria",
+          "wcag2a",
+          "wcag412",
+          "EN-301-549",
+          "EN-9.4.1.2",
+          "RGAAv4",
+          "RGAA-7.1.1"
+        ],
+        "description": "Ensure ARIA attributes are not prohibited for an element's role",
+        "help": "Elements must only use permitted ARIA attributes",
+        "helpUrl": "https://dequeuniversity.com/rules/axe/4.14/aria-prohibited-attr?application=axeAPI",
+        "nodes": [
+          {
+            "any": [],
+            "all": [],
+            "none": [
+              {
+                "id": "aria-prohibited-attr",
+                "data": null,
+                "relatedNodes": [],
+                "impact": "serious",
+                "message": "ARIA attribute is allowed"
+              }
+            ],
+            "impact": null,
+            "html": "<span role=\"link\" aria-disabled=\"true\" class=\"relative flex min-h-[54px] w-full items-center gap-3.5 px-4 py-3.5 text-left transition-colors  opacity-60 pointer-events-none \">",
+            "target": [
+              ".relative.flex.min-h-\\[54px\\]:nth-child(3)"
+            ]
+          },
+          {
+            "any": [],
+            "all": [],
+            "none": [
+              {
+                "id": "aria-prohibited-attr",
+                "data": null,
+                "relatedNodes": [],
+                "impact": "serious",
+                "message": "ARIA attribute is allowed"
+              }
+            ],
+            "impact": null,
+            "html": "<span role=\"link\" aria-disabled=\"true\" class=\"relative flex min-h-[54px] w-full items-center gap-3.5 px-4 py-3.5 text-left transition-colors  opacity-60 pointer-events-none \">",
+            "target": [
+              ".relative.flex.min-h-\\[54px\\]:nth-child(4)"
+            ]
+          },
+          {
+            "any": [],
+            "all": [],
+            "none": [
+              {
+                "id": "aria-prohibited-attr",
+                "data": null,
+                "relatedNodes": [],
+                "impact": "serious",
+                "message": "ARIA attribute is allowed"
+              }
+            ],
+            "impact": null,
+            "html": "<span role=\"link\" aria-disabled=\"true\" class=\"relative flex min-h-[54px] w-full items-center gap-3.5 px-4 py-3.5 text-left transition-colors  opacity-60 pointer-events-none \">",
+            "target": [
+              ".relative.flex.min-h-\\[54px\\]:nth-child(5)"
+            ]
+          },
+          {
+            "any": [],
+            "all": [],
+            "none": [
+              {
+                "id": "aria-prohibited-attr",
+                "data": null,
+                "relatedNodes": [],
+                "impact": "serious",
+                "message": "ARIA attribute is allowed"
+              }
+            ],
+            "impact": null,
+            "html": "<button type=\"button\" disabled=\"\" aria-disabled=\"true\" class=\"relative flex min-h-[54px] w-full items-center gap-3.5 px-4 py-3.5 text-left transition-colors  opacity-60 pointer-events-none \">",
+            "target": [
+              "button[type=\"button\"]"
+            ]
+          },
+          {
+            "any": [],
+            "all": [],
+            "none": [
+              {
+                "id": "aria-prohibited-attr",
+                "data": null,
+                "relatedNodes": [],
+                "impact": "serious",
+                "message": "ARIA attribute is allowed"
+              }
+            ],
+            "impact": null,
+            "html": "<section class=\"rounded-2xl border border-border-strong bg-surface-elevated p-4 text-text-primary shadow-2 sm:p-5 mx-auto w-full max-w-full overflow-hidden \" aria-labelledby=\"next-operational-action-title\">",
+            "target": [
+              "section"
+            ]
+          },
+          {
+            "any": [],
+            "all": [],
+            "none": [
+              {
+                "id": "aria-prohibited-attr",
+                "data": null,
+                "relatedNodes": [],
+                "impact": "serious",
+                "message": "ARIA attribute is allowed"
+              }
+            ],
+            "impact": null,
+            "html": "<span role=\"link\" aria-disabled=\"true\" class=\"inline-flex min-h-12...\">",
+            "target": [
+              ".inline-flex.min-h-12.min-w-12:nth-child(1)"
+            ]
+          },
+          {
+            "any": [],
+            "all": [],
+            "none": [
+              {
+                "id": "aria-prohibited-attr",
+                "data": null,
+                "relatedNodes": [],
+                "impact": "serious",
+                "message": "ARIA attribute is allowed"
               }
             ],
             "impact": null,

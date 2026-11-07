@@ -28,7 +28,11 @@ export function EstadoBadge({ estado, conTexto = true }: EstadoBadgeProps) {
         className={`size-1.5 rounded-full bg-current ${categoria === "activo" ? "animate-pulse" : ""}`}
         aria-hidden
       />
-      {conTexto && ETIQUETA_ESTADO_TRASLADO[estado]}
+      {conTexto ? (
+        ETIQUETA_ESTADO_TRASLADO[estado]
+      ) : (
+        <span className="sr-only">{ETIQUETA_ESTADO_TRASLADO[estado]}</span>
+      )}
     </span>
   );
 }

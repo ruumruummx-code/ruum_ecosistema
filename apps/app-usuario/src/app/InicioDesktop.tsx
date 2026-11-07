@@ -86,9 +86,9 @@ function Driver({ viaje, foto }: { viaje: Pasaporte; foto: string | null }) {
           <small>Comunicación segura en tu traslado</small>
         </div>
         <div className={styles.contacts}>
-          <button type="button" onClick={llamar} disabled={!disponible || llamando} aria-label={`Llamar a ${nombre}`}><span><Icon name="phone" /></span>{llamando ? "Conectando…" : "Llamar"}</button>
-          <a href={`${CONTACTOS_SOPORTE_USUARIO.soporte.whatsapp.href.split("?")[0]}?text=${encodeURIComponent("Hola, necesito ayuda con mi traslado " + (viaje.traslado_id ?? ""))}`} target="_blank" rel="noopener noreferrer" aria-label="Contactar soporte por WhatsApp" title="WhatsApp con soporte; el número del conductor es privado"><span className={styles.whatsapp}><Icon name="whatsapp" /></span>WhatsApp <small>soporte</small></a>
-          <Link href={`/viajes/${viaje.traslado_id}#chat-conductor`} aria-label={`Enviar mensaje a ${nombre}`}><span><Icon name="chat" /></span>Mensaje</Link>
+          <button type="button" onClick={llamar} disabled={!disponible || llamando} aria-label={llamando ? `Conectando con ${nombre}` : `Llamar a ${nombre}`}><span><Icon name="phone" /></span>{llamando ? "Conectando…" : "Llamar"}</button>
+          <a href={`${CONTACTOS_SOPORTE_USUARIO.soporte.whatsapp.href.split("?")[0]}?text=${encodeURIComponent("Hola, necesito ayuda con mi traslado " + (viaje.traslado_id ?? ""))}`} target="_blank" rel="noopener noreferrer" aria-label="WhatsApp soporte" title="WhatsApp con soporte; el número del conductor es privado"><span className={styles.whatsapp}><Icon name="whatsapp" /></span>WhatsApp <small>soporte</small></a>
+          <Link href={`/viajes/${viaje.traslado_id}#chat-conductor`} aria-label={`Mensaje a ${nombre}`}><span><Icon name="chat" /></span>Mensaje</Link>
         </div>
       </div>{error && <p role="alert" className={styles.callError}>{error}</p>}
     </> : <div className={styles.pendingDriver}><Icon name="user" /><p>Estamos buscando a tu conductor.<small>Sus datos y canales de contacto aparecerán aquí al ser asignado.</small></p></div>}

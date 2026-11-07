@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useId } from "react";
 import { Button } from "./Button";
 
 export interface MensajeChat {
@@ -28,8 +28,13 @@ export interface ChatProps {
 export function Chat({ propio, mensajes, onEnviar, deshabilitado, mensajeDeshabilitado }: ChatProps) {
   const [borrador, setBorrador] = useState("");
   const [enviando, setEnviando] = useState(false);
+  const [errorEnvio, setErrorEnvio] = useState<string | null>(null);
   const listaRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
   const ultimoIdRef = useRef<string | null>(null);
+  const reactId = useId();
+  const inputId = `chat-input-${reactId.replace(/[:]/g, "")}`;
+  const errorId = `chat-error-${reactId.replace(/[:]/g, "")}`;
 
   // C-06: auto-scroll al último mensaje y anuncio aria-live
   useEffect(() => {
@@ -45,14 +50,18 @@ export function Chat({ propio, mensajes, onEnviar, deshabilitado, mensajeDeshabi
     e.preventDefault();
     if (!borrador.trim() || deshabilitado) return;
     const texto = borrador.trim();
-    setBorrador("");
+    setErrorEnvio(null);
     setEnviando(true);
     try {
       await onEnviar(texto);
+      setBorrador("");
+    } catch {
+      // SD-REM-008: Si el envío es rechazado/falla, se preserva el borrador intacto y se anuncia el error
+      setErrorEnvio("No se pudo enviar el mensaje. Intenta de nuevo.");
     } finally {
       setEnviando(false);
-      // devolver foco al input para continuar conversando
-      (document.querySelector('input[placeholder="Escribe un mensaje"]') as HTMLInputElement | null)?.focus();
+      // SD-REM-008: devolver foco al input de ESTA instancia usando ref local (evita robar foco entre múltiples instancias)
+      inputRef.current?.focus();
     }
   }
 
@@ -99,19 +108,34 @@ export function Chat({ propio, mensajes, onEnviar, deshabilitado, mensajeDeshabi
         {mensajes.length > 0 ? `Mensaje de ${mensajes[mensajes.length - 1]?.remitente === propio ? "tú" : "conductor"}: ${mensajes[mensajes.length - 1]?.contenido.slice(0, 80)}` : ""}
       </span>
 
-      <form onSubmit={manejarEnvio} className="flex gap-2 border-t border-border bg-surface-elevated p-3">
-        <input
-          value={borrador}
-          onChange={(e) => setBorrador(e.target.value)}
-          disabled={deshabilitado}
-          aria-disabled={deshabilitado}
-          aria-describedby={deshabilitado ? "chat-deshabilitado-ayuda" : undefined}
-          placeholder={deshabilitado ? mensajeDeshabilitado ?? "Chat no disponible" : "Escribe un mensaje"}
-          className="min-h-11 flex-1 rounded-[10px] border border-border-strong bg-surface px-3 py-2 font-body text-base transition focus:border-route-action focus:outline-none focus:ring-[3px] focus:ring-route-action/20 disabled:cursor-not-allowed disabled:bg-surface-elevated disabled:text-disabled"
-        />
-        <Button type="submit" disabled={deshabilitado || enviando || !borrador.trim()} aria-label="Enviar mensaje">
-          {enviando ? "Enviando…" : "Enviar"}
-        </Button>
+      <form onSubmit={manejarEnvio} className="flex flex-col border-t border-border bg-surface-elevated p-3">
+        {errorEnvio && (
+          <p id={errorId} role="alert" className="pb-2 text-xs font-semibold text-rose-600 dark:text-rose-400">
+            {errorEnvio}
+          </p>
+        )}
+        <div className="flex gap-2">
+          <input
+            ref={inputRef}
+            id={inputId}
+            value={borrador}
+            onChange={(e) => setBorrador(e.target.value)}
+            disabled={deshabilitado}
+            aria-disabled={deshabilitado}
+            aria-label={deshabilitado ? mensajeDeshabilitado ?? "Chat no disponible" : "Escribe un mensaje"}
+            aria-describedby={[
+              deshabilitado ? "chat-deshabilitado-ayuda" : null,
+              errorEnvio ? errorId : null,
+            ]
+              .filter(Boolean)
+              .join(" ") || undefined}
+            placeholder={deshabilitado ? mensajeDeshabilitado ?? "Chat no disponible" : "Escribe un mensaje"}
+            className="min-h-11 flex-1 rounded-[10px] border border-border-strong bg-surface px-3 py-2 font-body text-base transition focus:border-route-action focus:outline-none focus:ring-[3px] focus:ring-route-action/20 disabled:cursor-not-allowed disabled:bg-surface-elevated disabled:text-disabled"
+          />
+          <Button type="submit" disabled={deshabilitado || enviando || !borrador.trim()}>
+            {enviando ? "Enviando…" : "Enviar"}
+          </Button>
+        </div>
       </form>
       {deshabilitado && mensajeDeshabilitado && (
         <p id="chat-deshabilitado-ayuda" className="sr-only" role="status" aria-live="polite">

@@ -6,7 +6,7 @@ Navegar por grupos y contadores.
 
 ## Props y contrato
 
-Fuente: [packages/ui/src/components/Navigation.tsx:99](../../../packages/ui/src/components/Navigation.tsx). Declaraciones extraídas del módulo; los atributos nativos heredados siguen React/HTML.
+Fuente: [packages/ui/src/components/Navigation.tsx:66](../../../packages/ui/src/components/Navigation.tsx). Declaraciones extraídas del módulo; los atributos nativos heredados siguen React/HTML.
 
 ```tsx
 export function Sidebar({ grupos, className = "" }: { grupos: SidebarGrupo[]; className?: string }) 
@@ -17,13 +17,6 @@ export interface NavItem {
   href: string;
   activo?: boolean;
   icono: ReactNode;
-}
-
-export interface TabItem {
-  id: string;
-  etiqueta: string;
-  conteo?: number;
-  activo?: boolean;
 }
 
 export interface SidebarGrupo {

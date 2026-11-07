@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
-import { Aviso } from "@ruum/ui";
+import { Aviso, Tabs } from "@ruum/ui";
 import type { Database } from "@ruum/shared/types";
 import { crearClienteNavegador, tieneSupabaseConfigurado } from "@/lib/supabase-browser";
 import { AdminBadge, AdminDialog, AdminDrawer } from "../../admin-components";
@@ -143,20 +143,7 @@ export default function PaginaDetalleUsuario() {
             </div>
           </div>
 
-          <div className="mt-6 flex gap-1 overflow-x-auto border-b border-ink/10">
-            {(Object.keys(TAB_ETIQUETAS) as Tab[]).map((t) => (
-              <button key={t} onClick={() => setTab(t)}
-                className={`inline-flex shrink-0 items-center gap-2 rounded-t-lg px-4 py-2.5 font-body text-sm font-semibold transition-colors ${
-                  tab === t ? "border-b-2 border-signal bg-surface-primary text-ink shadow-sm" : "text-text-tertiary hover:bg-surface-primary/70 hover:text-ink"
-                }`}
-              >
-                <span>{TAB_ETIQUETAS[t]}</span>
-                <ContadorTab valor={conteosTabs[t]} />
-              </button>
-            ))}
-          </div>
-
-          <div className="mt-6">
+          <Tabs etiqueta="Secciones del usuario" tabs={(Object.keys(TAB_ETIQUETAS) as Tab[]).map(id=>({id,etiqueta:TAB_ETIQUETAS[id],conteo:conteosTabs[id] ?? undefined}))} value={tab} onSeleccion={id=>setTab(id as Tab)} renderPanel={()=>(<div className="mt-6">
             {tab === "datos" && <TabDatos usuario={usuario} onActualizado={(u) => setUsuario(u)} onAviso={setAviso} />}
             {tab === "Traslados" && <TabTraslados usuarioId={usuario.id} />}
             {tab === "pagos" && <TabPagos usuarioId={usuario.id} />}
@@ -164,7 +151,9 @@ export default function PaginaDetalleUsuario() {
             {tab === "sesiones" && <TabSesiones usuarioId={usuario.id} />}
             {tab === "privacidad" && <TabPrivacidad usuario={usuario} onActualizado={() => void cargar()} />}
             {tab === "auditoria" && <TabAuditoria usuarioId={usuario.id} />}
-          </div>
+          </div>)} />
+
+
         </div>
       </div>
     </main>

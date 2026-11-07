@@ -1,0 +1,13 @@
+{
+  "timestamp": "2026-11-07T02:08:00-06:00",
+  "commit": "6e5d0934444a52c83f57834c845259c4d75741ea",
+  "directory": "evidencia-gate-rem011",
+  "files": {
+    "Chat--default.png": "1e77d93d84d8a76ead30f6b1d9bdfecac2d866f093e82c0d750aa7d20ef85d8b",
+    "DECISIONES-CASOS-ESPECIALES.md": "40257129ea0ef643d9d9aa2122909a93264e62cd03d62584fc5a7d568c6968df",
+    "EstadoStepper--solicitud_creada.png": "fcd71394a97bc065ba01df341fe74fe96c63d8ed396bae66c709da4db11a830e",
+    "MobileProgress--solicitud_creada.png": "eb2b1a0b172cbb7ddc1b93a46a56fbf494f16947d3920eb3437bdebdf17cc7d6",
+    "resultado-gate-rem011.json": "ba93b56405669161db36b8c3739da9f18184f1970fad1c944e043f170193c047",
+    "RuumHeader--default.png": "bbf0c460524f191a02fbe4ff58e6b76a4959677b7a5c1b70d2964b6050c12fef"
+  }
+}

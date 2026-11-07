@@ -15,7 +15,7 @@
 | [TripCard](componentes/TripCard.md) | conforme con condiciones | ninguna en las muestras | SD-REM-012 |
 | [FinancialCard](componentes/FinancialCard.md) | conforme con condiciones | ninguna en las muestras | SD-REM-012 |
 | [AlertCard](componentes/AlertCard.md) | conforme con condiciones | ninguna en las muestras | SD-REM-012 |
-| [Chat](componentes/Chat.md) | no conforme | label-title-only | SD-REM-008 |
+| [Chat](componentes/Chat.md) | no conforme | ninguna en las muestras | SD-REM-008 |
 | [Input](componentes/Input.md) | no conforme | ninguna en las muestras | SD-REM-004 |
 | [Select](componentes/Select.md) | no conforme | ninguna en las muestras | SD-REM-004 |
 | [Textarea](componentes/Textarea.md) | no conforme | ninguna en las muestras | SD-REM-004 |
@@ -30,9 +30,9 @@
 | [EmptyState](componentes/EmptyState.md) | conforme con condiciones | heading-order | SD-REM-012 |
 | [Skeleton](componentes/Skeleton.md) | conforme con condiciones | ninguna en las muestras | SD-REM-012 |
 | [EstadoBadge](componentes/EstadoBadge.md) | no conforme | ninguna en las muestras | SD-REM-011 |
-| [MobileProgress](componentes/MobileProgress.md) | no conforme | label-content-name-mismatch | SD-REM-011 |
+| [MobileProgress](componentes/MobileProgress.md) | no conforme | ninguna en las muestras | SD-REM-011 |
 | [DesktopStateStepper](componentes/DesktopStateStepper.md) | conforme con condiciones | ninguna en las muestras | SD-REM-012 |
-| [EstadoStepper](componentes/EstadoStepper.md) | no conforme | label-content-name-mismatch | SD-REM-011 |
+| [EstadoStepper](componentes/EstadoStepper.md) | no conforme | ninguna en las muestras | SD-REM-011 |
 | [EstatusBadgeEconomico](componentes/EstatusBadgeEconomico.md) | conforme con condiciones | ninguna en las muestras | SD-REM-012 |
 | [Field](componentes/Field.md) | conforme con condiciones | ninguna en las muestras | SD-REM-012 |
 | [FinancialAmount](componentes/FinancialAmount.md) | conforme con condiciones | ninguna en las muestras | SD-REM-012 |
@@ -49,14 +49,14 @@
 | [MobileShell](componentes/MobileShell.md) | conforme con condiciones | ninguna en las muestras | SD-REM-012 |
 | [Modal](componentes/Modal.md) | no conforme | ninguna en las muestras | SD-REM-002, SD-REM-006 |
 | [BottomNav](componentes/BottomNav.md) | conforme con condiciones | ninguna en las muestras | SD-REM-012 |
-| [Tabs](componentes/Tabs.md) | no conforme | ninguna en las muestras | SD-REM-005 |
 | [Sidebar](componentes/Sidebar.md) | conforme con condiciones | ninguna en las muestras | SD-REM-012 |
 | [Avatar](componentes/Avatar.md) | conforme con condiciones | ninguna en las muestras | SD-REM-012 |
 | [NextOperationalAction](componentes/NextOperationalAction.md) | no conforme | ninguna en las muestras | SD-REM-007 |
 | [PassportCard](componentes/PassportCard.md) | conforme con condiciones | ninguna en las muestras | SD-REM-012 |
-| [RuumHeader](componentes/RuumHeader.md) | no conforme | label-content-name-mismatch | SD-REM-011 |
+| [RuumHeader](componentes/RuumHeader.md) | no conforme | ninguna en las muestras | SD-REM-011 |
 | [SelloConductor](componentes/SelloConductor.md) | conforme con condiciones | ninguna en las muestras | SD-REM-012 |
 | [StatusChip](componentes/StatusChip.md) | conforme con condiciones | ninguna en las muestras | SD-REM-012 |
 | [StreetContainer](componentes/StreetContainer.md) | conforme con condiciones | ninguna en las muestras | SD-REM-012 |
 | [SafetyButton](componentes/SafetyButton.md) | conforme con condiciones | ninguna en las muestras | SD-REM-012 |
+| [Tabs](componentes/Tabs.md) | no conforme | ninguna en las muestras | SD-REM-005 |
 | [TextInputUppercaseBridge](componentes/TextInputUppercaseBridge.md) | conforme con condiciones | ninguna en las muestras | SD-REM-012 |

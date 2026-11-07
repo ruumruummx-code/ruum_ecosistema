@@ -6,7 +6,7 @@ Mostrar etapas en una franja de escritorio.
 
 ## Props y contrato
 
-Fuente: [packages/ui/src/components/EstadoStepper.tsx:120](../../../packages/ui/src/components/EstadoStepper.tsx). Declaraciones extraídas del módulo; los atributos nativos heredados siguen React/HTML.
+Fuente: [packages/ui/src/components/EstadoStepper.tsx:119](../../../packages/ui/src/components/EstadoStepper.tsx). Declaraciones extraídas del módulo; los atributos nativos heredados siguen React/HTML.
 
 ```tsx
 export function DesktopStateStepper({ estado, currentLabel }: EstadoStepperProps) 

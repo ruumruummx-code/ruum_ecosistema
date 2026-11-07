@@ -1,0 +1,325 @@
+{
+  "algorithm": "SHA-256",
+  "schema": 2,
+  "phase": "pre-session",
+  "approval": "APROBADOS CON CONDICIONES; P2-1 NO CERRADA",
+  "sourceState": {
+    "baseCommit": "6e5d0934444a52c83f57834c845259c4d75741ea",
+    "workingTreeDirty": true,
+    "sourcesSha256": "70fa9403f040671d543c697ed226787385e0ed6c4be3982a9f21a7fd400232a6",
+    "note": "Commit base; los hashes sources identifican el código de workspace probado. No se afirma que HEAD contenga los cambios sin commit."
+  },
+  "scope": [
+    "auditorias/RUUM-UX-001-SD/remediacion-SD-REM-004",
+    "auditorias/RUUM-UX-001-SD/remediacion-SD-REM-007"
+  ],
+  "excludes": [
+    "remediacion-SD-REM-007/manifiesto-sha256.json",
+    "remediacion-SD-REM-007/manifiesto-sha256.sha256",
+    "remediacion-SD-REM-007/manifiesto-post-sesion.json",
+    "remediacion-SD-REM-007/manifiesto-post-sesion.sha256"
+  ],
+  "directoryHashDefinition": "SHA-256 de líneas UTF-8 ordenadas por ruta (ordinal), formato <sha256> dos espacios <ruta relativa raíz> LF; excluye manifiesto y sello para evitar autorreferencia",
+  "directories": [
+    {
+      "path": "auditorias/RUUM-UX-001-SD/remediacion-SD-REM-004",
+      "sha256": "11cce053edb1054f009d1e3bdc7ce038741bc99b98c0e241bc5ae47a8c7b2880"
+    },
+    {
+      "path": "auditorias/RUUM-UX-001-SD/remediacion-SD-REM-007",
+      "sha256": "710a9720aab856ffebb7f23a3f86ffe069112f31efd4ae86bdd7f56ecbecdb93"
+    }
+  ],
+  "jointDirectorySha256": "7b220f95fb840835a578f05fb6448a2d6294e2563bf00b704ab36a30a005f505",
+  "files": [
+    {
+      "path": "auditorias/RUUM-UX-001-SD/remediacion-SD-REM-004/ESTADO-MANIFIESTO-ANTIGUO.md",
+      "bytes": 599,
+      "sha256": "284a7d07c7a119d7006818d671081d7ede496ac65f56bd8fa2b5cf73b0479226"
+    },
+    {
+      "path": "auditorias/RUUM-UX-001-SD/remediacion-SD-REM-004/MANIFIESTO-SHA256.json",
+      "bytes": 1506,
+      "sha256": "9dd8e72cf671e1eabc061cd5dd1274432c4cc593512dc54e1558ace9d99aab79"
+    },
+    {
+      "path": "auditorias/RUUM-UX-001-SD/remediacion-SD-REM-004/README.md",
+      "bytes": 3312,
+      "sha256": "126e3f70e2a037e85429fbeda2facf5889e5d75ca4ba9488b90f6bfc2ff28912"
+    },
+    {
+      "path": "auditorias/RUUM-UX-001-SD/remediacion-SD-REM-004/SESION-ASISTIVA-SD-REM-004.md",
+      "bytes": 6922,
+      "sha256": "3f63ece1735dbc4048a9f030b0d1b849dd5bad02cfcd16911853eb31743f80ec"
+    },
+    {
+      "path": "auditorias/RUUM-UX-001-SD/remediacion-SD-REM-004/arbol-0.yml",
+      "bytes": 528,
+      "sha256": "09d5ad7b84cf697c040f78185e8de3cb37eefa0c6354db9f99398be7100e3697"
+    },
+    {
+      "path": "auditorias/RUUM-UX-001-SD/remediacion-SD-REM-004/arbol-1.yml",
+      "bytes": 807,
+      "sha256": "5ad4d469c62de50fbe0548a4f68ca5552a6dcd7a6f0fc2aac3226cde1000c159"
+    },
+    {
+      "path": "auditorias/RUUM-UX-001-SD/remediacion-SD-REM-004/arbol-2.yml",
+      "bytes": 861,
+      "sha256": "b629f58d3efc612c70afaf1bba1ed73029564ee6866893129272e215edd2edb4"
+    },
+    {
+      "path": "auditorias/RUUM-UX-001-SD/remediacion-SD-REM-004/arbol-3.yml",
+      "bytes": 1140,
+      "sha256": "d188a1aa8128df47173ae5c37dff7fc1917ee36cad66094d16b7841eb656ed0c"
+    },
+    {
+      "path": "auditorias/RUUM-UX-001-SD/remediacion-SD-REM-004/cliente.js",
+      "bytes": 1248958,
+      "sha256": "9fc06a712e06008c420d1af07bd53abdacf2361e747450123012d449f82b6036"
+    },
+    {
+      "path": "auditorias/RUUM-UX-001-SD/remediacion-SD-REM-004/cliente.tsx",
+      "bytes": 204,
+      "sha256": "7f082212910c8b7361b83115bd0fbcd2c9e6e59ae575fbeeb3f142e4ba83ab23"
+    },
+    {
+      "path": "auditorias/RUUM-UX-001-SD/remediacion-SD-REM-004/formulario-dark.png",
+      "bytes": 54610,
+      "sha256": "484f16cbd2c27f46aa2887ab9803c10137d3389afb6f157d710d2382cc2a085f"
+    },
+    {
+      "path": "auditorias/RUUM-UX-001-SD/remediacion-SD-REM-004/formulario-light.png",
+      "bytes": 54418,
+      "sha256": "5e9e4435de2be45936851720e90fb88c73bccc742370b129005be6b56731b6bd"
+    },
+    {
+      "path": "auditorias/RUUM-UX-001-SD/remediacion-SD-REM-004/formulario.html",
+      "bytes": 8118,
+      "sha256": "882564c8d57b38bb74b009a0836190a016f23c1ccae9f333520f8bbd02baff15"
+    },
+    {
+      "path": "auditorias/RUUM-UX-001-SD/remediacion-SD-REM-004/formulario.tsx",
+      "bytes": 1103,
+      "sha256": "573c8bc54d88e5c9d6ceb5942079600b4694b7d156aae7543da0e04e9a194ab7"
+    },
+    {
+      "path": "auditorias/RUUM-UX-001-SD/remediacion-SD-REM-004/resultados.json",
+      "bytes": 681837,
+      "sha256": "f2c59c49913f528109f7821863d2b446e74ce9dbdf5beba5b216f67f400796af"
+    },
+    {
+      "path": "auditorias/RUUM-UX-001-SD/remediacion-SD-REM-004/ssr.cjs",
+      "bytes": 8200,
+      "sha256": "ee3e1f034bb8e37233711f2142f8a90c492b7f83ec5f249988e0ac790b9c23d5"
+    },
+    {
+      "path": "auditorias/RUUM-UX-001-SD/remediacion-SD-REM-004/verificar.cjs",
+      "bytes": 4412,
+      "sha256": "fabc9c5a72e3361a1fa102d4e22d2225f75d500cb80924a14e1b236746651e63"
+    },
+    {
+      "path": "auditorias/RUUM-UX-001-SD/remediacion-SD-REM-007/ACTUALIZACION-CONDICIONES.md",
+      "bytes": 4825,
+      "sha256": "0f62f3e235ecd5be1e4dea32f5cb0c9097cc7382d8a13dc5aefb046f13a4ba3f"
+    },
+    {
+      "path": "auditorias/RUUM-UX-001-SD/remediacion-SD-REM-007/CONDICIONES-DE-CIERRE.md",
+      "bytes": 7848,
+      "sha256": "920fea7476e6a7df8b79bf78c8fb4a1de6b2f6bf5d1dac74ae551ccdd74c8bcb"
+    },
+    {
+      "path": "auditorias/RUUM-UX-001-SD/remediacion-SD-REM-007/DECISION-Y-FIRMAS.md",
+      "bytes": 2227,
+      "sha256": "bb9e838d6547033f4f51ad36b72571370777f4b1d5f0e9bb44aefa8a53992ffc"
+    },
+    {
+      "path": "auditorias/RUUM-UX-001-SD/remediacion-SD-REM-007/README.md",
+      "bytes": 5080,
+      "sha256": "882c01011514e852149eef9e2ba124faab59a1aefb253b0adbb8bb291595edda"
+    },
+    {
+      "path": "auditorias/RUUM-UX-001-SD/remediacion-SD-REM-007/SESION-ASISTIVA-SD-REM-007.md",
+      "bytes": 6104,
+      "sha256": "0f6ab412a00cde840afcedaba7447174b13d4ed85d0088d361deb7d3672805e6"
+    },
+    {
+      "path": "auditorias/RUUM-UX-001-SD/remediacion-SD-REM-007/SESION-AT.json",
+      "bytes": 2099,
+      "sha256": "7f171c1f522f2d0ba5898da2f2d645bfbc8224b1e885906b25abc8e1d1d12a08"
+    },
+    {
+      "path": "auditorias/RUUM-UX-001-SD/remediacion-SD-REM-007/arbol-deshabilitado.yml",
+      "bytes": 597,
+      "sha256": "b879f1c698e98a1166ed33b8328f153b6da5697629df836c2fe2927290f95ebd"
+    },
+    {
+      "path": "auditorias/RUUM-UX-001-SD/remediacion-SD-REM-007/consumidores.json",
+      "bytes": 11840,
+      "sha256": "ba6fec756e9fb43049aeaed99461a872b7c1cccf6140303803645a2f04894172"
+    },
+    {
+      "path": "auditorias/RUUM-UX-001-SD/remediacion-SD-REM-007/deshabilitado-dark.png",
+      "bytes": 26186,
+      "sha256": "db3df8e04116f1dc18ffbeebfcbeefc29bfb7c04a8b98beff91e7b92cf9683a1"
+    },
+    {
+      "path": "auditorias/RUUM-UX-001-SD/remediacion-SD-REM-007/deshabilitado-light.png",
+      "bytes": 26135,
+      "sha256": "15369b5740fbc07298f3e061f469c4353e7def496e1ab32a6f3ec422d6fe52e7"
+    },
+    {
+      "path": "auditorias/RUUM-UX-001-SD/remediacion-SD-REM-007/estado-gate.json",
+      "bytes": 1218,
+      "sha256": "2391488e568456eff77da4c2bdfb44074e2f51e658676b168bb3caedd94a22a2"
+    },
+    {
+      "path": "auditorias/RUUM-UX-001-SD/remediacion-SD-REM-007/formulario.css",
+      "bytes": 89285,
+      "sha256": "397a6475758f39a3d9d6b56c064c359c0283e61a363e8457860356c1863edf05"
+    },
+    {
+      "path": "auditorias/RUUM-UX-001-SD/remediacion-SD-REM-007/formulario.html",
+      "bytes": 287,
+      "sha256": "cb4656dc1af608116c9a31acccdf1c411040f1fdfeb9f23da1c8aaa38b5d8c5d"
+    },
+    {
+      "path": "auditorias/RUUM-UX-001-SD/remediacion-SD-REM-007/formulario.js",
+      "bytes": 1260045,
+      "sha256": "74d51f40323a677c667efdb08d1707fbc0eb77be542f3cfc576b4e59f8bd8ffa"
+    },
+    {
+      "path": "auditorias/RUUM-UX-001-SD/remediacion-SD-REM-007/formulario.tsx",
+      "bytes": 1689,
+      "sha256": "6a39faaaf70c534dc155badc0820e2b1b0102278e15d7ec11a891b25446b0623"
+    },
+    {
+      "path": "auditorias/RUUM-UX-001-SD/remediacion-SD-REM-007/inventariar.cjs",
+      "bytes": 4608,
+      "sha256": "e6ac7aa877fa4c4fb633b073023c81b7a85eb2dce35a80e4305606ab82625141"
+    },
+    {
+      "path": "auditorias/RUUM-UX-001-SD/remediacion-SD-REM-007/regresion-004-dark.png",
+      "bytes": 62430,
+      "sha256": "e9b90b4ad7e23d2f52b97051567e94506c20e9dc9d4382f751e3030458c7e35e"
+    },
+    {
+      "path": "auditorias/RUUM-UX-001-SD/remediacion-SD-REM-007/regresion-004-light.png",
+      "bytes": 61740,
+      "sha256": "bb9949a6763e8ea6f3c1e09d95c50a5ab8bc1fa95ff6657217d0abbeea32ccc3"
+    },
+    {
+      "path": "auditorias/RUUM-UX-001-SD/remediacion-SD-REM-007/regresion-007-dark.png",
+      "bytes": 36724,
+      "sha256": "7c80e27aa0ba9e35ace1832a380cecfd0046fc0ad497ba51b7c544af80bc9fe7"
+    },
+    {
+      "path": "auditorias/RUUM-UX-001-SD/remediacion-SD-REM-007/regresion-007-light.png",
+      "bytes": 36318,
+      "sha256": "98e75baa1452918c4110eb67704e09722fda716a3c0c93c2b33c85b8ad7d4ebb"
+    },
+    {
+      "path": "auditorias/RUUM-UX-001-SD/remediacion-SD-REM-007/regresion-p1.cjs",
+      "bytes": 4752,
+      "sha256": "839e99e246df8b94f5a56ab92fabb685ac5e8e501bcecb1f3d7199c2e0802ef0"
+    },
+    {
+      "path": "auditorias/RUUM-UX-001-SD/remediacion-SD-REM-007/regresion-p1.json",
+      "bytes": 695329,
+      "sha256": "e54f8ee2e9be5108f1526ebdbfe5c7d7d691d70e3cb4a57076ad1e07ddc1d4f4"
+    },
+    {
+      "path": "auditorias/RUUM-UX-001-SD/remediacion-SD-REM-007/resultados.json",
+      "bytes": 21370,
+      "sha256": "adf0440cd2cf44d5860cd597170491157559894b4de03396586a037ebc3168b3"
+    },
+    {
+      "path": "auditorias/RUUM-UX-001-SD/remediacion-SD-REM-007/sellar-evidencia.cjs",
+      "bytes": 6111,
+      "sha256": "660823ebb886592c2d7a49d438247468bae08c69baaa56fffc46c060138281a3"
+    },
+    {
+      "path": "auditorias/RUUM-UX-001-SD/remediacion-SD-REM-007/sellos-pre-sesion/manifiesto-antiguo-004.json",
+      "bytes": 1506,
+      "sha256": "9dd8e72cf671e1eabc061cd5dd1274432c4cc593512dc54e1558ace9d99aab79"
+    },
+    {
+      "path": "auditorias/RUUM-UX-001-SD/remediacion-SD-REM-007/sellos-pre-sesion/manifiesto-original.json",
+      "bytes": 10608,
+      "sha256": "6942df9a5635c9e5169f2b32708e9a015d43dc42f5e93dfe8bc8aa12e8a7fbee"
+    },
+    {
+      "path": "auditorias/RUUM-UX-001-SD/remediacion-SD-REM-007/sellos-pre-sesion/manifiesto-original.sha256",
+      "bytes": 89,
+      "sha256": "b8b75ba6049c2daffb2deaf99f9a94615d06f3b5d091d82aa6478a547b0d5112"
+    },
+    {
+      "path": "auditorias/RUUM-UX-001-SD/remediacion-SD-REM-007/sellos-pre-sesion/registro-preservacion.json",
+      "bytes": 954,
+      "sha256": "f804a0a7e8009d0018598f8b9c24e23c6ac1e83ed68b62478251ec40bf01cb9c"
+    },
+    {
+      "path": "auditorias/RUUM-UX-001-SD/remediacion-SD-REM-007/verificacion-condiciones.json",
+      "bytes": 1266,
+      "sha256": "f40971d7f0695875bda8c2539c860d9232050c462278d5369f661df59cd7d373"
+    },
+    {
+      "path": "auditorias/RUUM-UX-001-SD/remediacion-SD-REM-007/verificar.cjs",
+      "bytes": 6575,
+      "sha256": "f3e8ceb5ee24ad0191375cda203cf200d2193b41af78137912e20b3019b1ca32"
+    }
+  ],
+  "sources": [
+    {
+      "path": "packages/ui/src/components/Controls.tsx",
+      "sha256": "95326bd3ef8f24a6931b830100c5a51c8648002ce7c150398a1799d18a33c0d3"
+    },
+    {
+      "path": "packages/ui/src/components/Controls.test.tsx",
+      "sha256": "a60bdc78f73021305bd81005fd9379f87197c20c6d4e5ea0026329581d075758"
+    },
+    {
+      "path": "packages/ui/src/components/composition-contract.test.ts",
+      "sha256": "565965a72930edd3c000b70a05ab0a16eac0e650a7d641ca4b93148365b21375"
+    },
+    {
+      "path": "packages/ui/src/components/MobileRow.tsx",
+      "sha256": "18612edc6b18604dda54cbd5c642ee7f3a189b86ccab412180cf73f8648ee302"
+    },
+    {
+      "path": "packages/ui/src/components/NextOperationalAction.tsx",
+      "sha256": "f7e19fcd0cffaef8d900446f6d4534e23bd02296a80add0db1fcb10649816eaa"
+    },
+    {
+      "path": "packages/ui/src/components/disabled-links.test.tsx",
+      "sha256": "053dd97c95506a45cd6c93076e280a38c1f0cb9995c72fefab9e9ce4debf5bbb"
+    },
+    {
+      "path": "packages/ui/src/styles/tokens.css",
+      "sha256": "6cb5fd2a0655bfa4c0fcfc6a220a75f492c394dd4ee1b865fe5fae972ce92f07"
+    },
+    {
+      "path": "apps/app-conductor/src/app/cuenta/preferencias/page.tsx",
+      "sha256": "bc046bf36a19199449b314a8f876abc2cd223968bae9d74a6d09071a8f18b972"
+    },
+    {
+      "path": "apps/app-conductor/src/app/viajes/[id]/ContactoYVehiculo.tsx",
+      "sha256": "3ab15c6d6958733b15b20bfbba3d486779a063965a2a12493bfce6f4ffa4dee6"
+    },
+    {
+      "path": "apps/app-conductor/src/app/viajes/[id]/ContactoRecepcionVehiculo.tsx",
+      "sha256": "b575ae8869aaba06c4ab0c8a4be07b3c09bf12ca3f3d235a68a61c7b01e40bdc"
+    },
+    {
+      "path": "apps/app-conductor/test/sd-rem-007-razon-bloqueo.test.tsx",
+      "sha256": "975e3e7a0b4dd55e04d609d52be1ee2a2360c20baf6e8cbe4df968c7843f49d2"
+    },
+    {
+      "path": "auditorias/RUUM-UX-001-SD/showcase.css",
+      "sha256": "f492719096cb3f5e6ef8f5fb49663163a7b7d8a7bd49bbda31ef097489910329"
+    },
+    {
+      "path": "auditorias/RUUM-UX-001-SD/CO-REVISION.md",
+      "sha256": "9c400b1e24fdc06def30eb364a145728ad4e696f790fd6e23d1e1c232844f140"
+    }
+  ]
+}

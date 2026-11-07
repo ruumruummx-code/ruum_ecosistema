@@ -196,13 +196,17 @@ export default function PaginaPasaporteEmpresarial() {
       </AdminPanel>
 
       <AdminPanel>
-        <AdminTabs items={TABS} value={tab} onValueChange={setTab} label="Secciones del Pasaporte Empresarial" />
+        <AdminTabs items={TABS} value={tab} onValueChange={setTab} label="Secciones del Pasaporte Empresarial" renderPanel={()=><div className="pt-5">{tab === "control" && <VistaControl empresa={empresa} usuarios={usuarios} alertas={alertas} cambios={cambiosSensibles} versionesCondiciones={versionesCondiciones} />}
+{tab === "flota" && <VistaFlota vehiculos={vehiculos} conductores={conductores} />}
+{tab === "rutas" && <VistaRutas origenes={origenes} destinos={destinos} />}
+{tab === "traslados" && <VistaTraslados traslados={traslados} />}
+{tab === "expediente" && <VistaExpediente documentos={documentos} versionesFiscales={versionesFiscales} versionesCondiciones={versionesCondiciones} cambios={cambiosSensibles} />}</div>} />
         <div className="pt-5">
-          {tab === "control" && <VistaControl empresa={empresa} usuarios={usuarios} alertas={alertas} cambios={cambiosSensibles} versionesCondiciones={versionesCondiciones} />}
-          {tab === "flota" && <VistaFlota vehiculos={vehiculos} conductores={conductores} />}
-          {tab === "rutas" && <VistaRutas origenes={origenes} destinos={destinos} />}
-          {tab === "traslados" && <VistaTraslados traslados={traslados} />}
-          {tab === "expediente" && <VistaExpediente documentos={documentos} versionesFiscales={versionesFiscales} versionesCondiciones={versionesCondiciones} cambios={cambiosSensibles} />}
+
+
+
+
+
         </div>
       </AdminPanel>
     </main>

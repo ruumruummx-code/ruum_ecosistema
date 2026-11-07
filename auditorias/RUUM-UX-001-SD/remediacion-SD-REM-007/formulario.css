@@ -1702,6 +1702,9 @@
   .text-\[var\(--ruum-neutral-text\)\] {
     color: var(--ruum-neutral-text);
   }
+  .text-\[var\(--ruum-on-primary\)\] {
+    color: var(--ruum-on-primary);
+  }
   .text-\[var\(--ruum-safety-button-text\)\] {
     color: var(--ruum-safety-button-text);
   }

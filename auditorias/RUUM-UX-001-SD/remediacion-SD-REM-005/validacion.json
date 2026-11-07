@@ -1,0 +1,96 @@
+{
+  "fecha": "2026-11-07",
+  "node": "24.13.0",
+  "reports": [
+    {
+      "file": "pruebas-ui.json",
+      "passed": 63,
+      "failed": 0,
+      "total": 63,
+      "success": true
+    },
+    {
+      "file": "pruebas-usuario.json",
+      "passed": 63,
+      "failed": 0,
+      "total": 63,
+      "success": true
+    },
+    {
+      "file": "pruebas-facturacion.json",
+      "passed": 8,
+      "failed": 0,
+      "total": 8,
+      "success": true
+    },
+    {
+      "file": "pruebas-conductor.json",
+      "passed": 4,
+      "failed": 0,
+      "total": 4,
+      "success": true
+    },
+    {
+      "file": "pruebas-consumidores-conductor.json",
+      "passed": 2,
+      "failed": 0,
+      "total": 2,
+      "success": true
+    },
+    {
+      "file": "pruebas-admin.json",
+      "passed": 1,
+      "failed": 0,
+      "total": 1,
+      "success": true
+    }
+  ],
+  "typechecks": [
+    {
+      "package": "@ruum/app-usuario",
+      "command": "pnpm --filter @ruum/app-usuario exec tsc --noEmit",
+      "exitCode": 0
+    },
+    {
+      "package": "@ruum/app-conductor",
+      "command": "pnpm --filter @ruum/app-conductor exec tsc --noEmit",
+      "exitCode": 0
+    },
+    {
+      "package": "@ruum/panel-admin",
+      "command": "pnpm --filter @ruum/panel-admin exec tsc --noEmit",
+      "exitCode": 0
+    }
+  ],
+  "uiBuild": {
+    "command": "pnpm --filter @ruum/ui build",
+    "exitCode": 0
+  },
+  "browser": {
+    "checks": 8,
+    "violations": 0,
+    "incomplete": [],
+    "ratios": [
+      {
+        "theme": "light",
+        "ratios": {
+          "text": 4.833643849926121,
+          "focus": 4.833643849926121,
+          "selectedBoundary": 4.833643849926121
+        }
+      },
+      {
+        "theme": "dark",
+        "ratios": {
+          "text": 6.098816149592488,
+          "focus": 6.098816149592488,
+          "selectedBoundary": 6.098816149592488
+        }
+      }
+    ],
+    "keyboard": "resultados.json",
+    "SSR": "IDs SSR=CSR; sin errores de hidratación"
+  },
+  "scope": "Harness de código real más pruebas de consumidor. No certifica rutas autenticadas completas, sesión AT ni firmas.",
+  "P2-1": "NO CERRADA; deudas anteriores conservadas"
+}

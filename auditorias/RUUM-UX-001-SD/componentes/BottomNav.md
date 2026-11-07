@@ -19,13 +19,6 @@ export interface NavItem {
   icono: ReactNode;
 }
 
-export interface TabItem {
-  id: string;
-  etiqueta: string;
-  conteo?: number;
-  activo?: boolean;
-}
-
 export interface SidebarGrupo {
   titulo: string;
   items: { id: string; etiqueta: string; href: string; activo?: boolean; contador?: number }[];

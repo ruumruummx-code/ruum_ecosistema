@@ -56,7 +56,7 @@ default, disabled, empty, long-message, pending.
 
 Hover/focus/focus-visible/active aplican cuando hay control visible. En contenedores, se ensayan sobre el hijo interactivo, no sobre la tarjeta. Disabled/loading/error solo aplican si el contrato los admite; no se inventan props para componentes estáticos.
 
-**Veredicto técnico: no conforme.** Axe con infracciones: label-title-only.
+**Veredicto técnico: no conforme.** Axe con infracciones: ninguna en las muestras.
 
 Acciones: [SD-REM-008](../remediaciones/SD-REM-008.md).
 
@@ -92,19 +92,3 @@ Condiciones:
 | long-message | light | 390 | base | [PNG](../capturas-base/Chat--long-message--light--390--base.png) | [JSON](../resultados-base/Chat--long-message--light--390--base.json) |
 | pending | dark | 390 | base | [PNG](../capturas-base/Chat--pending--dark--390--base.png) | [JSON](../resultados-base/Chat--pending--dark--390--base.json) |
 | pending | light | 390 | base | [PNG](../capturas-base/Chat--pending--light--390--base.png) | [JSON](../resultados-base/Chat--pending--light--390--base.json) |
-
-- dark · active: [captura](../capturas-base/estado-Chat--dark--active.png), [reporte](../resultados-base/estado-Chat--dark--active.json).
-
-- dark · focus-visible: [captura](../capturas-base/estado-Chat--dark--focus-visible.png), [reporte](../resultados-base/estado-Chat--dark--focus-visible.json).
-
-- dark · focus: [captura](../capturas-base/estado-Chat--dark--focus.png), [reporte](../resultados-base/estado-Chat--dark--focus.json).
-
-- dark · hover: [captura](../capturas-base/estado-Chat--dark--hover.png), [reporte](../resultados-base/estado-Chat--dark--hover.json).
-
-- light · active: [captura](../capturas-base/estado-Chat--light--active.png), [reporte](../resultados-base/estado-Chat--light--active.json).
-
-- light · focus-visible: [captura](../capturas-base/estado-Chat--light--focus-visible.png), [reporte](../resultados-base/estado-Chat--light--focus-visible.json).
-
-- light · focus: [captura](../capturas-base/estado-Chat--light--focus.png), [reporte](../resultados-base/estado-Chat--light--focus.json).
-
-- light · hover: [captura](../capturas-base/estado-Chat--light--hover.png), [reporte](../resultados-base/estado-Chat--light--hover.json).

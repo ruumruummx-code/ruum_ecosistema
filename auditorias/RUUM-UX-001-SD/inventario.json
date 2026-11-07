@@ -1,5 +1,5 @@
 {
-  "revision": "a851c21ec918eab3640697e5d812ecf4973f2282",
+  "revision": "6e5d0934444a52c83f57834c845259c4d75741ea",
   "node": "v24.13.0",
   "components": [
     {
@@ -208,14 +208,14 @@
     {
       "name": "DesktopStateStepper",
       "file": "packages/ui/src/components/EstadoStepper.tsx",
-      "line": 120,
+      "line": 119,
       "signature": "export function DesktopStateStepper({ estado, currentLabel }: EstadoStepperProps) ",
       "declarations": "export interface EstadoStepperProps {\n  estado: EstadoTraslado;\n  currentLabel?: string;\n}"
     },
     {
       "name": "EstadoStepper",
       "file": "packages/ui/src/components/EstadoStepper.tsx",
-      "line": 181,
+      "line": 180,
       "signature": "export function EstadoStepper({ estado, currentLabel }: EstadoStepperProps) ",
       "declarations": "export interface EstadoStepperProps {\n  estado: EstadoTraslado;\n  currentLabel?: string;\n}"
     },
@@ -329,28 +329,21 @@
       "file": "packages/ui/src/components/Navigation.tsx",
       "line": 35,
       "signature": "export function BottomNav({ items, className = \"\" }: { items: NavItem[]; className?: string }) ",
-      "declarations": "export interface NavItem {\n  id: string;\n  etiqueta: string;\n  href: string;\n  activo?: boolean;\n  icono: ReactNode;\n}\n\nexport interface TabItem {\n  id: string;\n  etiqueta: string;\n  conteo?: number;\n  activo?: boolean;\n}\n\nexport interface SidebarGrupo {\n  titulo: string;\n  items: { id: string; etiqueta: string; href: string; activo?: boolean; contador?: number }[];\n}"
-    },
-    {
-      "name": "Tabs",
-      "file": "packages/ui/src/components/Navigation.tsx",
-      "line": 66,
-      "signature": "export function Tabs({ tabs, onSeleccion, className = \"\" }: { tabs: TabItem[]; onSeleccion?: (id: string) => void; className?: string }) ",
-      "declarations": "export interface NavItem {\n  id: string;\n  etiqueta: string;\n  href: string;\n  activo?: boolean;\n  icono: ReactNode;\n}\n\nexport interface TabItem {\n  id: string;\n  etiqueta: string;\n  conteo?: number;\n  activo?: boolean;\n}\n\nexport interface SidebarGrupo {\n  titulo: string;\n  items: { id: string; etiqueta: string; href: string; activo?: boolean; contador?: number }[];\n}"
+      "declarations": "export interface NavItem {\r\n  id: string;\r\n  etiqueta: string;\r\n  href: string;\r\n  activo?: boolean;\r\n  icono: ReactNode;\r\n}\n\nexport interface SidebarGrupo {\r\n  titulo: string;\r\n  items: { id: string; etiqueta: string; href: string; activo?: boolean; contador?: number }[];\r\n}"
     },
     {
       "name": "Sidebar",
       "file": "packages/ui/src/components/Navigation.tsx",
-      "line": 99,
+      "line": 66,
       "signature": "export function Sidebar({ grupos, className = \"\" }: { grupos: SidebarGrupo[]; className?: string }) ",
-      "declarations": "export interface NavItem {\n  id: string;\n  etiqueta: string;\n  href: string;\n  activo?: boolean;\n  icono: ReactNode;\n}\n\nexport interface TabItem {\n  id: string;\n  etiqueta: string;\n  conteo?: number;\n  activo?: boolean;\n}\n\nexport interface SidebarGrupo {\n  titulo: string;\n  items: { id: string; etiqueta: string; href: string; activo?: boolean; contador?: number }[];\n}"
+      "declarations": "export interface NavItem {\r\n  id: string;\r\n  etiqueta: string;\r\n  href: string;\r\n  activo?: boolean;\r\n  icono: ReactNode;\r\n}\n\nexport interface SidebarGrupo {\r\n  titulo: string;\r\n  items: { id: string; etiqueta: string; href: string; activo?: boolean; contador?: number }[];\r\n}"
     },
     {
       "name": "Avatar",
       "file": "packages/ui/src/components/Navigation.tsx",
-      "line": 140,
-      "signature": "export function Avatar({\n  nombre,\n  src,\n  forma = \"circle\",\n  conEstado,\n  tamano = 40,\n  className = \"\",\n}: {\n  nombre: string;\n  src?: string;\n  forma?: \"circle\" | \"rounded\";\n  conEstado?: \"activo\" | \"inactivo\";\n  tamano?: number;\n  className?: string;\n}) ",
-      "declarations": "export interface NavItem {\n  id: string;\n  etiqueta: string;\n  href: string;\n  activo?: boolean;\n  icono: ReactNode;\n}\n\nexport interface TabItem {\n  id: string;\n  etiqueta: string;\n  conteo?: number;\n  activo?: boolean;\n}\n\nexport interface SidebarGrupo {\n  titulo: string;\n  items: { id: string; etiqueta: string; href: string; activo?: boolean; contador?: number }[];\n}"
+      "line": 107,
+      "signature": "export function Avatar({\r\n  nombre,\r\n  src,\r\n  forma = \"circle\",\r\n  conEstado,\r\n  tamano = 40,\r\n  className = \"\",\r\n}: {\r\n  nombre: string;\r\n  src?: string;\r\n  forma?: \"circle\" | \"rounded\";\r\n  conEstado?: \"activo\" | \"inactivo\";\r\n  tamano?: number;\r\n  className?: string;\r\n}) ",
+      "declarations": "export interface NavItem {\r\n  id: string;\r\n  etiqueta: string;\r\n  href: string;\r\n  activo?: boolean;\r\n  icono: ReactNode;\r\n}\n\nexport interface SidebarGrupo {\r\n  titulo: string;\r\n  items: { id: string; etiqueta: string; href: string; activo?: boolean; contador?: number }[];\r\n}"
     },
     {
       "name": "NextOperationalAction",
@@ -400,6 +393,13 @@
       "line": 39,
       "signature": "export function SafetyButton({\n  onActivar,\n  etiqueta = \"Seguridad\",\n  className = \"\",\n}: {\n  onActivar?: () => void;\n  etiqueta?: string;\n  className?: string;\n}) ",
       "declarations": ""
+    },
+    {
+      "name": "Tabs",
+      "file": "packages/ui/src/components/Tabs.tsx",
+      "line": 29,
+      "signature": "export function Tabs({ tabs, value, idPrefix, onSeleccion, etiqueta = \"Pestañas\", orientation = \"horizontal\", className = \"\", panelClassName = \"\", renderPanel, mantenerMontados = false }: TabsProps) ",
+      "declarations": "export interface TabItem {\r\n  id: string;\r\n  etiqueta: ReactNode;\r\n  conteo?: number;\r\n  activo?: boolean;\r\n  disabled?: boolean;\r\n  motivoDeshabilitado?: string;\r\n  contenido?: ReactNode;\r\n}\n\nexport interface TabsProps {\r\n  tabs: TabItem[];\r\n  value?: string;\r\n  idPrefix?: string;\r\n  onSeleccion?: (id: string) => void;\r\n  etiqueta?: string;\r\n  orientation?: \"horizontal\" | \"vertical\";\r\n  className?: string;\r\n  panelClassName?: string;\r\n  renderPanel?: (id: string) => ReactNode;\r\n  /** Conserva estado local; los paneles inactivos siguen ocultos y fuera del foco. */\r\n  mantenerMontados?: boolean;\r\n}"
     },
     {
       "name": "TextInputUppercaseBridge",
@@ -473,7 +473,7 @@
     },
     {
       "file": "packages/ui/src/components/Chat.tsx",
-      "sha256": "8a6b704b52bd5b9487c95222cd20c0aaa03bdf8eeabc883567326d5a208a2255"
+      "sha256": "b73f5774f26df8325263e6347932b29e4c158308c6a89aaa4527ee5bdf4fb4b2"
     },
     {
       "file": "packages/ui/src/components/Controls.tsx",
@@ -501,11 +501,11 @@
     },
     {
       "file": "packages/ui/src/components/EstadoBadge.tsx",
-      "sha256": "5692638b1db43301c6cd1ca7e3e2cfd2a4b5c6255f86ff7472f98bcdf2d4d9d9"
+      "sha256": "2bd0cea15e91c074d4adfa6d70bdcfbee7db4f9d43ebb77e475782a525fec40c"
     },
     {
       "file": "packages/ui/src/components/EstadoStepper.tsx",
-      "sha256": "177dc129ecb4cf7e3f90c4bd5129f82f91bbfe809c72719013b58bff18f69e4d"
+      "sha256": "439abf2ecf321e58a019d17cb3947f78ceecbb95ca127c0b40ab049faff12795"
     },
     {
       "file": "packages/ui/src/components/EstatusBadgeEconomico.tsx",
@@ -553,7 +553,7 @@
     },
     {
       "file": "packages/ui/src/components/MobileHeader.tsx",
-      "sha256": "121085e1c6cca938065bbf5a33012cc357382d75b89e99cd6e9a2f517d75b63b"
+      "sha256": "b05e383d916f5243bbf795f47109da3339089ed25baed2914f65ec6267f32a80"
     },
     {
       "file": "packages/ui/src/components/MobileRow.tsx",
@@ -569,11 +569,11 @@
     },
     {
       "file": "packages/ui/src/components/Navigation.tsx",
-      "sha256": "f6993c09634560f56a0f3f72595b28dd951167dcb14d6974205e1b035108bf8d"
+      "sha256": "cfd2b29d31575a2d288af33158727300151e5ade9acd164c41ab7f091a7b743a"
     },
     {
       "file": "packages/ui/src/components/NextOperationalAction.tsx",
-      "sha256": "27128b66877c14f3ae3c103de9c5ee1c0a00e417ba79de41d04cfd3790a5f428"
+      "sha256": "f7e19fcd0cffaef8d900446f6d4534e23bd02296a80add0db1fcb10649816eaa"
     },
     {
       "file": "packages/ui/src/components/PassportCard.tsx",
@@ -581,7 +581,7 @@
     },
     {
       "file": "packages/ui/src/components/RuumHeader.tsx",
-      "sha256": "13a98077e144b81cfe502717abd45cadd5f3d796be74a360235213d3804b21b0"
+      "sha256": "752b601fa22e501d7c2bdf4bf1e0d5ed76e1e2de336faefe9fd73418042ee94d"
     },
     {
       "file": "packages/ui/src/components/SelloConductor.tsx",
@@ -598,6 +598,10 @@
     {
       "file": "packages/ui/src/components/StreetMode.tsx",
       "sha256": "ee9f2251f819be2e7abcb7e347d8a8fb5ecfa18eef387733eb4c955f28674824"
+    },
+    {
+      "file": "packages/ui/src/components/Tabs.tsx",
+      "sha256": "075b9ed8b9b5177726d28cb93c0cb1c833a205506257d41278fbaac536609461"
     },
     {
       "file": "packages/ui/src/components/TextInputUppercaseBridge.tsx",

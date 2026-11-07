@@ -40,13 +40,13 @@ export function DriverTrasladosView(props: Props) {
         </div>
       </header>
       <TrasladosDateNavigator calendario={props.calendar} diaSeleccionado={props.selectedDay} diaHoy={props.today} onSelectDia={props.onSelectDay} />
-      <div className={styles.tabs} role="tablist" aria-label="Vistas de traslados">
-        <button type="button" role="tab" id="tab-ofertas" aria-controls="panel-traslados" aria-selected={props.showingOffers} onClick={() => props.onTab(true)}>Ofertas ({props.offers})</button>
-        <button type="button" role="tab" id="tab-aceptados" aria-controls="panel-traslados" aria-selected={!props.showingOffers} onClick={() => props.onTab(false)}>Aceptados ({props.accepted})</button>
+      <div className={styles.tabs} role="group" aria-label="Vistas de traslados">
+        <button type="button"    aria-pressed={props.showingOffers} onClick={() => props.onTab(true)}>Ofertas ({props.offers})</button>
+        <button type="button"    aria-pressed={!props.showingOffers} onClick={() => props.onTab(false)}>Aceptados ({props.accepted})</button>
       </div>
       <div className={styles.searchRow}><div className={styles.search}><TrasladosSearch placeholder={props.showingOffers ? "Buscar ofertas..." : "Buscar aceptados..."} /></div><button type="button" className={styles.filterButton} aria-label="Abrir filtros avanzados" aria-haspopup="dialog" onClick={() => setMenuOpen(true)}><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18" /><circle cx="8" cy="6" r="2" fill="currentColor" /><circle cx="16" cy="12" r="2" fill="currentColor" /><circle cx="9" cy="18" r="2" fill="currentColor" /></svg></button></div>
       {props.notice && <details className={styles.notice}><summary>Información de los traslados</summary><p role="status">{props.notice}</p></details>}
-      <section id="panel-traslados" role="tabpanel" aria-labelledby={props.showingOffers ? "tab-ofertas" : "tab-aceptados"} className={styles.content} aria-busy={props.loading}>
+      <section id="panel-traslados" role="region" aria-label="Resultados del filtro"  className={styles.content} aria-busy={props.loading}>
         {props.loading ? <output className={styles.loading}>Cargando traslados…</output> : props.children ?? <div className={styles.empty}>
           <TrasladosEmptyIllustration />
           <h2>{props.filtered ? "Sin resultados con estos filtros" : "Sin traslados para este día"}</h2>

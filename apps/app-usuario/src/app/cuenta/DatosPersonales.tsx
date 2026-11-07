@@ -1,5 +1,7 @@
 "use client";
 
+import { Tabs } from "@ruum/ui";
+
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import Image from "next/image";
 import Link from "next/link";
@@ -448,18 +450,10 @@ export function DatosPersonales({ usuario, fotoUrlInicial, correoRegistro, escri
         <h1>Editar Perfil</h1>
         <span aria-hidden="true" />
       </header>
-      <div role="tablist" aria-label="Secciones del perfil" className="user-profile-tabs">
-        {(["personal", "direccion"] as const).map((id, index) => <button key={id} id={`perfil-tab-${id}`} type="button" role="tab" aria-selected={pestana === id} aria-controls={`perfil-panel-${id}`} tabIndex={pestana === id ? 0 : -1} onClick={() => setPestana(id)} onKeyDown={(event) => {
-          if (["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) {
-            event.preventDefault();
-            const next = event.key === "Home" ? "personal" : event.key === "End" ? "direccion" : index === 0 ? "direccion" : "personal";
-            setPestana(next); document.getElementById(`perfil-tab-${next}`)?.focus();
-          }
-        }}>{id === "personal" ? "Personal" : "Dirección"}</button>)}
-      </div>
+
       <form id="editar-perfil-form" noValidate onSubmit={guardarCambios} className="user-profile-form">
         <fieldset disabled={guardando || subiendoFoto} className="contents">
-        <section id="perfil-panel-personal" role="tabpanel" aria-labelledby="perfil-tab-personal" hidden={pestana !== "personal"} className="user-profile-panel">
+        <Tabs etiqueta="Secciones del perfil" value={pestana} onSeleccion={id=>setPestana(id as typeof pestana)} mantenerMontados tabs={[{id:"personal",etiqueta:"Personal",contenido:(<section     className="user-profile-panel">
           <div className="user-profile-photo">
             {fotoUrl ? <Image src={fotoUrl} alt="Foto de perfil" width={48} height={48} unoptimized /> : <span aria-hidden="true">{iniciales(nombre, apellido)}</span>}
             <button type="button" onClick={() => fileInputRef.current?.click()} disabled={subiendoFoto || guardando} aria-label="Cambiar foto de perfil"><IconoCamara />{subiendoFoto ? "Subiendo foto…" : "Cambiar foto"}</button>
@@ -472,8 +466,7 @@ export function DatosPersonales({ usuario, fotoUrlInicial, correoRegistro, escri
             <CampoPerfil id="fecha-nacimiento" etiqueta="Fecha de nacimiento"><input id="fecha-nacimiento" type="date" autoComplete="bday" value={fechaNacimiento} onChange={(e) => setFechaNacimiento(e.target.value)} /></CampoPerfil>
             <CampoPerfil id="email" etiqueta="Correo electrónico" ancho><input id="email" type="email" value={correoRegistro ?? ""} disabled title="Para cambiar tu correo, contacta a soporte" /></CampoPerfil>
           </div>
-        </section>
-        <section id="perfil-panel-direccion" role="tabpanel" aria-labelledby="perfil-tab-direccion" hidden={pestana !== "direccion"} className="user-profile-panel">
+        </section>)},{id:"direccion",etiqueta:"Dirección",contenido:(<section     className="user-profile-panel">
           <div className="user-profile-grid">
             <CampoPerfil id="pais" etiqueta="País"><select id="pais" autoComplete="country-name" value={pais} onChange={(e) => { cpRequestRef.current++; setConsultandoCp(false); setColoniasCp([]); setAvisoCp(null); setPais(e.target.value); }}>{Array.from(new Set([pais, "México", "Estados Unidos", "Colombia", "Argentina", "España"])).filter(Boolean).map(valor => <option key={valor}>{valor}</option>)}</select></CampoPerfil>
             <CampoPerfil id="cp" etiqueta="Código postal"><input id="cp" autoComplete="postal-code" inputMode={pais === "México" ? "numeric" : "text"} maxLength={pais === "México" ? 5 : 12} value={codigoPostal} onChange={(e) => void consultarCodigoPostal(e.target.value, true)} /></CampoPerfil>
@@ -484,7 +477,8 @@ export function DatosPersonales({ usuario, fotoUrlInicial, correoRegistro, escri
             <CampoPerfil id="numero" etiqueta="Número"><input id="numero" autoComplete="address-line2" value={numero} onChange={(e) => setNumero(e.target.value)} /></CampoPerfil>
             <CampoPerfil id="referencias" etiqueta="Referencias" ancho><input id="referencias" value={referencias} onChange={(e) => setReferencias(e.target.value)} /></CampoPerfil>
           </div>
-        </section>
+        </section>)}]} />
+
         </fieldset>
       </form>
       <footer className="user-profile-actions">

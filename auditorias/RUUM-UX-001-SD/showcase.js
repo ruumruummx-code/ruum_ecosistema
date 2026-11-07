@@ -30110,7 +30110,7 @@
 
   // auditorias/RUUM-UX-001-SD/showcase.tsx
   init_define_process_env();
-  var import_react8 = __toESM(require_react());
+  var import_react10 = __toESM(require_react());
   var import_client = __toESM(require_client());
 
   // packages/ui/src/components/index.ts
@@ -31136,6 +31136,7 @@
 
   // packages/ui/src/components/Controls.tsx
   init_define_process_env();
+  var import_react4 = __toESM(require_react(), 1);
   var import_jsx_runtime11 = __toESM(require_jsx_runtime(), 1);
   var INPUT = "min-h-[var(--ruum-input-height)] w-full rounded-[12px] border border-[var(--ruum-border-input)] bg-[var(--ruum-surface)] px-3.5 py-2.5 font-body text-base text-[var(--ruum-text)] transition-[border-color,box-shadow] duration-[var(--ruum-motion-micro)] placeholder:text-[var(--ruum-text-disabled)] hover:border-[var(--ruum-text)] focus:border-[var(--ruum-focus)] focus:outline-none focus:ring-2 focus:ring-[var(--ruum-focus)] focus:ring-offset-2 disabled:cursor-not-allowed disabled:border-[var(--ruum-border)] disabled:bg-[var(--ruum-neutral-bg)] disabled:text-[var(--ruum-text-disabled)]";
   function ErrorLine({ id, texto }) {
@@ -31149,43 +31150,56 @@
     error,
     ayuda,
     id,
+    "aria-describedby": describedBy,
     className = "",
     ...props
   }) {
-    const inputId = id ?? props.name ?? "input";
+    const generatedId = (0, import_react4.useId)();
+    const inputId = id || generatedId;
+    const description = [describedBy, ayuda ? `${inputId}-help` : void 0, error ? `${inputId}-error` : void 0].filter(Boolean).join(" ") || void 0;
     return /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("div", { className: "flex flex-col gap-1.5", children: [
       /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("label", { htmlFor: inputId, className: "font-body text-[13px] font-semibold text-[var(--ruum-text)]", children: etiqueta }),
-      /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("input", { id: inputId, className: `${INPUT} ${error ? "border-[var(--ruum-error)]" : ""} ${className}`, "aria-invalid": Boolean(error), "aria-describedby": error ? `${inputId}-error` : void 0, ...props }),
-      ayuda ? /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("p", { className: "font-body text-sm text-[var(--ruum-text-secondary)]", children: ayuda }) : null,
+      /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("input", { id: inputId, className: `${INPUT} ${error ? "border-[var(--ruum-error)]" : ""} ${className}`, "aria-invalid": Boolean(error), "aria-describedby": description, ...props }),
+      ayuda ? /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("p", { id: `${inputId}-help`, className: "font-body text-sm text-[var(--ruum-text-secondary)]", children: ayuda }) : null,
       error ? /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(ErrorLine, { id: `${inputId}-error`, texto: error }) : null
     ] });
   }
   function Select({
     etiqueta,
     error,
+    ayuda,
     children,
     id,
+    "aria-describedby": describedBy,
     className = "",
     ...props
   }) {
-    const inputId = id ?? props.name ?? "select";
+    const generatedId = (0, import_react4.useId)();
+    const inputId = id || generatedId;
+    const description = [describedBy, ayuda ? `${inputId}-help` : void 0, error ? `${inputId}-error` : void 0].filter(Boolean).join(" ") || void 0;
     return /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("div", { className: "flex flex-col gap-1.5", children: [
       /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("label", { htmlFor: inputId, className: "font-body text-[13px] font-semibold text-[var(--ruum-text)]", children: etiqueta }),
-      /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("select", { id: inputId, className: `${INPUT} ${error ? "border-[var(--ruum-error)]" : ""} ${className}`, "aria-invalid": Boolean(error), ...props, children }),
+      /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("select", { id: inputId, className: `${INPUT} ${error ? "border-[var(--ruum-error)]" : ""} ${className}`, "aria-invalid": Boolean(error), "aria-describedby": description, ...props, children }),
+      ayuda ? /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("p", { id: `${inputId}-help`, className: "font-body text-sm text-[var(--ruum-text-secondary)]", children: ayuda }) : null,
       error ? /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(ErrorLine, { id: `${inputId}-error`, texto: error }) : null
     ] });
   }
   function Textarea({
     etiqueta,
     error,
+    ayuda,
     id,
+    "aria-describedby": describedBy,
     className = "",
     ...props
   }) {
-    const inputId = id ?? props.name ?? "textarea";
+    const generatedId = (0, import_react4.useId)();
+    const inputId = id || generatedId;
+    const description = [describedBy, ayuda ? `${inputId}-help` : void 0, error ? `${inputId}-error` : void 0].filter(Boolean).join(" ") || void 0;
     return /* @__PURE__ */ (0, import_jsx_runtime11.jsxs)("div", { className: "flex flex-col gap-1.5", children: [
       /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("label", { htmlFor: inputId, className: "font-body text-[13px] font-semibold text-[var(--ruum-text)]", children: etiqueta }),
-      /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("textarea", { id: inputId, rows: 4, className: `${INPUT} min-h-[112px] ${error ? "border-[var(--ruum-error)]" : ""} ${className}`, "aria-invalid": Boolean(error), ...props }),
+      /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("textarea", { id: inputId, rows: 4, className: `${INPUT} min-h-[112px] ${error ? "border-[var(--ruum-error)]" : ""} ${className}`, "aria-invalid": Boolean(error), "aria-describedby": description, ...props }),
+      ayuda ? /* @__PURE__ */ (0, import_jsx_runtime11.jsx)("p", { id: `${inputId}-help`, className: "font-body text-sm text-[var(--ruum-text-secondary)]", children: ayuda }) : null,
       error ? /* @__PURE__ */ (0, import_jsx_runtime11.jsx)(ErrorLine, { id: `${inputId}-error`, texto: error }) : null
     ] });
   }
@@ -31235,25 +31249,88 @@
 
   // packages/ui/src/components/Navigation.tsx
   init_define_process_env();
+
+  // packages/ui/src/components/Tabs.tsx
+  init_define_process_env();
+  var import_react5 = __toESM(require_react(), 1);
   var import_jsx_runtime12 = __toESM(require_jsx_runtime(), 1);
+  function Tabs({ tabs, value, idPrefix, onSeleccion, etiqueta = "Pesta\xF1as", orientation = "horizontal", className = "", panelClassName = "", renderPanel, mantenerMontados = false }) {
+    const generatedId = (0, import_react5.useId)();
+    const instanceId = idPrefix || generatedId;
+    const [internalValue, setInternalValue] = (0, import_react5.useState)();
+    const [focusedId, setFocusedId] = (0, import_react5.useState)(null);
+    const buttons = (0, import_react5.useRef)(/* @__PURE__ */ new Map());
+    const enabled = tabs.filter((t) => !t.disabled);
+    const requested = value ?? (tabs.some((t) => t.activo !== void 0) ? tabs.find((t) => t.activo)?.id : internalValue);
+    const selected = enabled.find((t) => t.id === requested)?.id ?? enabled[0]?.id;
+    const roving = enabled.some((t) => t.id === focusedId) ? focusedId : selected;
+    const tabId = (id) => `${instanceId}-tab-${encodeURIComponent(id)}`;
+    const panelId = (id) => `${instanceId}-panel-${encodeURIComponent(id)}`;
+    if (new Set(tabs.map((t) => t.id)).size !== tabs.length) throw new Error("Tabs: cada item requiere un id \xFAnico dentro de la instancia");
+    function select(id) {
+      if (!enabled.some((t) => t.id === id)) return;
+      setInternalValue(id);
+      onSeleccion?.(id);
+    }
+    function navigate(event, id) {
+      const forward = orientation === "vertical" ? "ArrowDown" : "ArrowRight";
+      const backward = orientation === "vertical" ? "ArrowUp" : "ArrowLeft";
+      const index = enabled.findIndex((t) => t.id === id);
+      const next = event.key === "Home" ? 0 : event.key === "End" ? enabled.length - 1 : event.key === forward ? (index + 1) % enabled.length : event.key === backward ? (index - 1 + enabled.length) % enabled.length : -1;
+      if (next < 0 || !enabled[next]) return;
+      event.preventDefault();
+      buttons.current.get(enabled[next].id)?.focus();
+    }
+    return /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)("div", { className: "contents", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(
+        "div",
+        {
+          role: "tablist",
+          "aria-label": etiqueta,
+          "aria-orientation": orientation,
+          className: `flex gap-2 overflow-x-auto p-2 ${orientation === "vertical" ? "flex-col" : ""} ${className}`,
+          onBlur: (event) => {
+            if (!event.currentTarget.contains(event.relatedTarget)) setFocusedId(null);
+          },
+          children: tabs.map((t) => {
+            const active = selected === t.id;
+            const classes = `flex min-h-[var(--ruum-touch)] shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full border px-4 py-2 font-body text-sm font-semibold focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-[var(--ruum-focus)] ${t.disabled ? "cursor-not-allowed border-[var(--ruum-border)] bg-[var(--ruum-neutral-bg)] text-[var(--ruum-text-disabled)]" : active ? "border-transparent bg-[var(--ruum-action)] text-[var(--ruum-on-primary)]" : "border-[var(--ruum-border-input)] bg-[var(--ruum-surface)] text-[var(--ruum-text)]"}`;
+            const content = /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)(import_jsx_runtime12.Fragment, { children: [
+              t.etiqueta,
+              typeof t.conteo === "number" && /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("span", { className: "rounded-full px-1.5 py-0.5 text-xs tabular-nums", children: t.conteo }),
+              t.disabled && t.motivoDeshabilitado && /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("span", { className: "text-xs", children: t.motivoDeshabilitado })
+            ] });
+            return t.disabled ? /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("span", { id: tabId(t.id), role: "tab", "aria-selected": false, "aria-disabled": "true", "aria-controls": panelId(t.id), className: classes, children: content }, t.id) : /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("button", { ref: (element) => {
+              if (element) buttons.current.set(t.id, element);
+              else buttons.current.delete(t.id);
+            }, id: tabId(t.id), type: "button", role: "tab", "aria-selected": active, "aria-controls": panelId(t.id), tabIndex: roving === t.id ? 0 : -1, onFocus: () => setFocusedId(t.id), onKeyDown: (event) => navigate(event, t.id), onClick: () => select(t.id), className: classes, children: content }, t.id);
+          })
+        }
+      ),
+      tabs.map((t) => /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("div", { id: panelId(t.id), role: "tabpanel", "aria-labelledby": tabId(t.id), hidden: selected !== t.id, style: selected !== t.id ? { display: "none" } : void 0, tabIndex: selected === t.id ? 0 : -1, className: panelClassName, children: mantenerMontados || selected === t.id ? renderPanel ? renderPanel(t.id) : t.contenido : null }, t.id))
+    ] });
+  }
+
+  // packages/ui/src/components/Navigation.tsx
+  var import_jsx_runtime13 = __toESM(require_jsx_runtime(), 1);
   function IconoBase({ children }) {
-    return /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("svg", { width: "24", height: "24", viewBox: "0 0 24 24", fill: "none", "aria-hidden": true, className: "size-6", children });
+    return /* @__PURE__ */ (0, import_jsx_runtime13.jsx)("svg", { width: "24", height: "24", viewBox: "0 0 24 24", fill: "none", "aria-hidden": true, className: "size-6", children });
   }
   var ICONOS_NAV = {
-    inicio: /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(IconoBase, { children: /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("path", { d: "M3 10.5 12 3l9 7.5V21H3ZM9 21v-6h6v6", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round" }) }),
-    traslados: /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(IconoBase, { children: /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("path", { d: "M5 17h14M7 17l1.5-5h7L17 17M7 17a2 2 0 1 0 0 .01M17 17a2 2 0 1 0 0 .01", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round" }) }),
-    ayuda: /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(IconoBase, { children: /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("path", { d: "M22 16.9v3a2 2 0 0 1-2.2 2A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.5c.9.3 1.8.6 2.8.7A2 2 0 0 1 22 16.9Z", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round" }) }),
-    cuenta: /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(IconoBase, { children: /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("path", { d: "M16 7a4 4 0 1 1-8 0 4 4 0 0 1 8 0ZM12 14a7 7 0 0 0-7 7h14a7 7 0 0 0-7-7Z", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round" }) })
+    inicio: /* @__PURE__ */ (0, import_jsx_runtime13.jsx)(IconoBase, { children: /* @__PURE__ */ (0, import_jsx_runtime13.jsx)("path", { d: "M3 10.5 12 3l9 7.5V21H3ZM9 21v-6h6v6", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round" }) }),
+    traslados: /* @__PURE__ */ (0, import_jsx_runtime13.jsx)(IconoBase, { children: /* @__PURE__ */ (0, import_jsx_runtime13.jsx)("path", { d: "M5 17h14M7 17l1.5-5h7L17 17M7 17a2 2 0 1 0 0 .01M17 17a2 2 0 1 0 0 .01", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round" }) }),
+    ayuda: /* @__PURE__ */ (0, import_jsx_runtime13.jsx)(IconoBase, { children: /* @__PURE__ */ (0, import_jsx_runtime13.jsx)("path", { d: "M22 16.9v3a2 2 0 0 1-2.2 2A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.5c.9.3 1.8.6 2.8.7A2 2 0 0 1 22 16.9Z", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round" }) }),
+    cuenta: /* @__PURE__ */ (0, import_jsx_runtime13.jsx)(IconoBase, { children: /* @__PURE__ */ (0, import_jsx_runtime13.jsx)("path", { d: "M16 7a4 4 0 1 1-8 0 4 4 0 0 1 8 0ZM12 14a7 7 0 0 0-7 7h14a7 7 0 0 0-7-7Z", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round" }) })
   };
   function BottomNav({ items: items2, className = "" }) {
-    return /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("nav", { "aria-label": "Navegaci\xF3n principal", className: `grid grid-cols-4 border-t border-[var(--ruum-border)] bg-[var(--ruum-surface)] ${className}`, children: items2.map((item) => /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)(
+    return /* @__PURE__ */ (0, import_jsx_runtime13.jsx)("nav", { "aria-label": "Navegaci\xF3n principal", className: `grid grid-cols-4 border-t border-[var(--ruum-border)] bg-[var(--ruum-surface)] ${className}`, children: items2.map((item) => /* @__PURE__ */ (0, import_jsx_runtime13.jsxs)(
       "a",
       {
         href: item.href,
         "aria-current": item.activo ? "page" : void 0,
         className: `relative flex min-h-[var(--ruum-touch)] flex-col items-center justify-center gap-1 py-2 font-body text-xs font-semibold ${item.activo ? "text-[var(--ruum-teal-deep)]" : "text-[var(--ruum-text-secondary)]"} focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-[var(--ruum-focus)]`,
         children: [
-          item.activo ? /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("span", { "aria-hidden": true, className: "absolute inset-x-8 top-0 h-[3px] rounded-b-full bg-[var(--ruum-teal-deep)]" }) : null,
+          item.activo ? /* @__PURE__ */ (0, import_jsx_runtime13.jsx)("span", { "aria-hidden": true, className: "absolute inset-x-8 top-0 h-[3px] rounded-b-full bg-[var(--ruum-teal-deep)]" }) : null,
           item.icono,
           item.etiqueta
         ]
@@ -31261,34 +31338,18 @@
       item.id
     )) });
   }
-  function Tabs({ tabs, onSeleccion, className = "" }) {
-    return /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("div", { role: "tablist", "aria-label": "Filtros", className: `flex gap-2 overflow-x-auto pb-1 ${className}`, children: tabs.map((t) => /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)(
-      "button",
-      {
-        role: "tab",
-        "aria-selected": t.activo,
-        onClick: () => onSeleccion?.(t.id),
-        className: `flex min-h-[var(--ruum-touch)] shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full px-4 py-2 font-body text-sm font-semibold focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-[var(--ruum-focus)] ${t.activo ? "bg-[var(--ruum-teal-deep)] text-white" : "border border-[var(--ruum-border-input)] bg-[var(--ruum-surface)] text-[var(--ruum-text)]"}`,
-        children: [
-          t.etiqueta,
-          typeof t.conteo === "number" ? /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("span", { className: `rounded-full px-1.5 py-0.5 text-xs tabular-nums ${t.activo ? "bg-white/20 text-white" : "bg-[var(--ruum-neutral-bg)] text-[var(--ruum-text-secondary)]"}`, children: t.conteo }) : null
-        ]
-      },
-      t.id
-    )) });
-  }
   function Sidebar({ grupos, className = "" }) {
-    return /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("nav", { "aria-label": "Navegaci\xF3n lateral", className: `flex flex-col gap-5 ${className}`, children: grupos.map((g) => /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)("div", { children: [
-      /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("p", { className: "mb-1.5 px-3 font-body text-xs font-semibold uppercase tracking-wider text-[var(--ruum-text-secondary)]", children: g.titulo }),
-      /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("ul", { className: "space-y-1", children: g.items.map((it) => /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("li", { children: /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)(
+    return /* @__PURE__ */ (0, import_jsx_runtime13.jsx)("nav", { "aria-label": "Navegaci\xF3n lateral", className: `flex flex-col gap-5 ${className}`, children: grupos.map((g) => /* @__PURE__ */ (0, import_jsx_runtime13.jsxs)("div", { children: [
+      /* @__PURE__ */ (0, import_jsx_runtime13.jsx)("p", { className: "mb-1.5 px-3 font-body text-xs font-semibold uppercase tracking-wider text-[var(--ruum-text-secondary)]", children: g.titulo }),
+      /* @__PURE__ */ (0, import_jsx_runtime13.jsx)("ul", { className: "space-y-1", children: g.items.map((it) => /* @__PURE__ */ (0, import_jsx_runtime13.jsx)("li", { children: /* @__PURE__ */ (0, import_jsx_runtime13.jsxs)(
         "a",
         {
           href: it.href,
           "aria-current": it.activo ? "page" : void 0,
           className: `flex min-h-[var(--ruum-touch)] items-center justify-between rounded-[12px] px-3 py-2 font-body text-sm font-medium focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-[var(--ruum-focus)] ${it.activo ? "bg-[var(--ruum-action-bg)] font-semibold text-[var(--ruum-text)]" : "text-[var(--ruum-text-secondary)] hover:bg-[var(--ruum-neutral-bg)]"}`,
           children: [
-            /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("span", { children: it.etiqueta }),
-            typeof it.contador === "number" && it.contador > 0 ? /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("span", { className: "rounded-full bg-[var(--ruum-teal-deep)] px-2 py-0.5 text-xs font-bold tabular-nums text-white", children: it.contador }) : null
+            /* @__PURE__ */ (0, import_jsx_runtime13.jsx)("span", { children: it.etiqueta }),
+            typeof it.contador === "number" && it.contador > 0 ? /* @__PURE__ */ (0, import_jsx_runtime13.jsx)("span", { className: "rounded-full bg-[var(--ruum-teal-deep)] px-2 py-0.5 text-xs font-bold tabular-nums text-white", children: it.contador }) : null
           ]
         }
       ) }, it.id)) })
@@ -31313,13 +31374,13 @@
   }) {
     const iniciales = nombre.split(" ").map((p) => p[0]).slice(0, 2).join("").toUpperCase();
     const claseTamano = CLASE_TAMANO_AVATAR[tamano] ?? "size-10";
-    return /* @__PURE__ */ (0, import_jsx_runtime12.jsxs)("span", { className: `relative inline-flex shrink-0 ${className}`, role: "img", "aria-label": `Avatar de ${nombre}`, children: [
+    return /* @__PURE__ */ (0, import_jsx_runtime13.jsxs)("span", { className: `relative inline-flex shrink-0 ${className}`, role: "img", "aria-label": `Avatar de ${nombre}`, children: [
       src ? (
         // <img> a propósito: avatar con URL firmada y tamaño inline; ver nota en
         // CredencialConductor (sin next/image para no exigir remotePatterns).
         // eslint-disable-next-line @next/next/no-img-element
-        /* @__PURE__ */ (0, import_jsx_runtime12.jsx)("img", { src, alt: "", width: tamano, height: tamano, className: `object-cover ${claseTamano} ${forma === "circle" ? "rounded-full" : "rounded-[24%]"}` })
-      ) : /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(
+        /* @__PURE__ */ (0, import_jsx_runtime13.jsx)("img", { src, alt: "", width: tamano, height: tamano, className: `object-cover ${claseTamano} ${forma === "circle" ? "rounded-full" : "rounded-[24%]"}` })
+      ) : /* @__PURE__ */ (0, import_jsx_runtime13.jsx)(
         "span",
         {
           "aria-hidden": true,
@@ -31327,7 +31388,7 @@
           children: iniciales
         }
       ),
-      conEstado ? /* @__PURE__ */ (0, import_jsx_runtime12.jsx)(
+      conEstado ? /* @__PURE__ */ (0, import_jsx_runtime13.jsx)(
         "span",
         {
           "aria-hidden": true,
@@ -31339,18 +31400,18 @@
 
   // packages/ui/src/components/StreetMode.tsx
   init_define_process_env();
-  var import_react4 = __toESM(require_react(), 1);
-  var import_jsx_runtime13 = __toESM(require_jsx_runtime(), 1);
+  var import_react6 = __toESM(require_react(), 1);
+  var import_jsx_runtime14 = __toESM(require_jsx_runtime(), 1);
   function useStreetMode(trasladoActivo) {
-    const [reducirMovimiento, setReducirMovimiento] = (0, import_react4.useState)(false);
-    (0, import_react4.useEffect)(() => {
+    const [reducirMovimiento, setReducirMovimiento] = (0, import_react6.useState)(false);
+    (0, import_react6.useEffect)(() => {
       const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
       setReducirMovimiento(mq.matches);
       const onChange = (e) => setReducirMovimiento(e.matches);
       mq.addEventListener("change", onChange);
       return () => mq.removeEventListener("change", onChange);
     }, []);
-    (0, import_react4.useEffect)(() => {
+    (0, import_react6.useEffect)(() => {
       document.documentElement.dataset.street = trasladoActivo ? "true" : "false";
       return () => {
         document.documentElement.dataset.street = "false";
@@ -31359,14 +31420,14 @@
     return { street: trasladoActivo, reducirMovimiento };
   }
   function StreetContainer({ activo, children, className = "" }) {
-    return /* @__PURE__ */ (0, import_jsx_runtime13.jsx)("div", { "data-street": activo ? "true" : "false", className: `${activo ? "ruum-street text-[17px]" : ""} ${className}`, children });
+    return /* @__PURE__ */ (0, import_jsx_runtime14.jsx)("div", { "data-street": activo ? "true" : "false", className: `${activo ? "ruum-street text-[17px]" : ""} ${className}`, children });
   }
   function SafetyButton({
     onActivar,
     etiqueta = "Seguridad",
     className = ""
   }) {
-    return /* @__PURE__ */ (0, import_jsx_runtime13.jsxs)(
+    return /* @__PURE__ */ (0, import_jsx_runtime14.jsxs)(
       "a",
       {
         href: "#emergencia",
@@ -31374,7 +31435,7 @@
         "aria-label": `${etiqueta} \u2014 canal de emergencia directo con soporte`,
         className: `fixed bottom-20 right-4 z-40 inline-flex min-h-[var(--ruum-button-height-street)] min-w-[var(--ruum-button-height-street)] items-center justify-center gap-2 rounded-full bg-[var(--ruum-safety-button-bg)] px-5 py-3 font-body text-[17px] font-bold text-[var(--ruum-safety-button-text)] shadow-[var(--ruum-elevation-2)] focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-[var(--ruum-focus)] ${className}`,
         children: [
-          /* @__PURE__ */ (0, import_jsx_runtime13.jsx)("svg", { width: "22", height: "22", viewBox: "0 0 24 24", fill: "none", "aria-hidden": true, className: "shrink-0", children: /* @__PURE__ */ (0, import_jsx_runtime13.jsx)("path", { d: "M12 3v4M5 5l2.5 2.5M19 5l-2.5 2.5M4 13h16a8 8 0 0 1-16 0ZM10 21h4", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round" }) }),
+          /* @__PURE__ */ (0, import_jsx_runtime14.jsx)("svg", { width: "22", height: "22", viewBox: "0 0 24 24", fill: "none", "aria-hidden": true, className: "shrink-0", children: /* @__PURE__ */ (0, import_jsx_runtime14.jsx)("path", { d: "M12 3v4M5 5l2.5 2.5M19 5l-2.5 2.5M4 13h16a8 8 0 0 1-16 0ZM10 21h4", stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round" }) }),
           etiqueta
         ]
       }
@@ -31383,66 +31444,66 @@
 
   // packages/ui/src/components/Documentos.tsx
   init_define_process_env();
-  var import_jsx_runtime14 = __toESM(require_jsx_runtime(), 1);
+  var import_jsx_runtime15 = __toESM(require_jsx_runtime(), 1);
   function Encabezado({ folio, titulo }) {
-    return /* @__PURE__ */ (0, import_jsx_runtime14.jsxs)("div", { className: "flex items-start justify-between gap-4 border-b border-[var(--ruum-border)] pb-4", children: [
-      /* @__PURE__ */ (0, import_jsx_runtime14.jsxs)("div", { children: [
-        /* @__PURE__ */ (0, import_jsx_runtime14.jsx)("p", { className: "font-body text-sm font-extrabold tracking-tight text-[var(--ruum-navy)]", children: "Ruum Ruum" }),
-        /* @__PURE__ */ (0, import_jsx_runtime14.jsx)("p", { className: "font-body text-xs font-medium uppercase tracking-wider text-[var(--ruum-teal-deep)]", children: "Conductores certificados" }),
-        /* @__PURE__ */ (0, import_jsx_runtime14.jsx)("h1", { className: "mt-2 font-body text-xl font-bold text-[var(--ruum-navy)]", children: titulo })
+    return /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)("div", { className: "flex items-start justify-between gap-4 border-b border-[var(--ruum-border)] pb-4", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)("div", { children: [
+        /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("p", { className: "font-body text-sm font-extrabold tracking-tight text-[var(--ruum-navy)]", children: "Ruum Ruum" }),
+        /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("p", { className: "font-body text-xs font-medium uppercase tracking-wider text-[var(--ruum-teal-deep)]", children: "Conductores certificados" }),
+        /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("h1", { className: "mt-2 font-body text-xl font-bold text-[var(--ruum-navy)]", children: titulo })
       ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime14.jsxs)("p", { className: "shrink-0 rounded-full border border-[var(--ruum-action)]/30 bg-[var(--ruum-action-bg)] px-3 py-1 font-body text-xs font-bold tabular-nums text-[var(--ruum-action-text)]", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)("p", { className: "shrink-0 rounded-full border border-[var(--ruum-action)]/30 bg-[var(--ruum-action-bg)] px-3 py-1 font-body text-xs font-bold tabular-nums text-[var(--ruum-action-text)]", children: [
         "Folio ",
         folio
       ] })
     ] });
   }
   function Pie() {
-    return /* @__PURE__ */ (0, import_jsx_runtime14.jsx)("p", { className: "mt-6 border-t border-[var(--ruum-border)] pt-3 text-center font-body text-xs text-[var(--ruum-muted)]", children: "Ruum Ruum by MoviliaX \xB7 Seguridad, evidencia y trazabilidad en cada viaje." });
+    return /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("p", { className: "mt-6 border-t border-[var(--ruum-border)] pt-3 text-center font-body text-xs text-[var(--ruum-muted)]", children: "Ruum Ruum by MoviliaX \xB7 Seguridad, evidencia y trazabilidad en cada viaje." });
   }
   function Dato({ etiqueta, valor }) {
-    return /* @__PURE__ */ (0, import_jsx_runtime14.jsxs)("div", { children: [
-      /* @__PURE__ */ (0, import_jsx_runtime14.jsx)("dt", { className: "font-body text-xs font-semibold uppercase tracking-wider text-[var(--ruum-teal-deep)]", children: etiqueta }),
-      /* @__PURE__ */ (0, import_jsx_runtime14.jsx)("dd", { className: "mt-0.5 font-body text-sm text-[var(--ruum-navy)] tabular-nums", children: valor })
+    return /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)("div", { children: [
+      /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("dt", { className: "font-body text-xs font-semibold uppercase tracking-wider text-[var(--ruum-teal-deep)]", children: etiqueta }),
+      /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("dd", { className: "mt-0.5 font-body text-sm text-[var(--ruum-navy)] tabular-nums", children: valor })
     ] });
   }
   function ReporteTraslado(props) {
-    return /* @__PURE__ */ (0, import_jsx_runtime14.jsxs)("article", { className: "ruum-force-light rounded-[20px] border border-[var(--ruum-border)] bg-white p-5 font-body shadow-[var(--ruum-elevation-1)] print:shadow-none", children: [
-      /* @__PURE__ */ (0, import_jsx_runtime14.jsx)(Encabezado, { folio: props.folio, titulo: "Reporte de traslado" }),
-      /* @__PURE__ */ (0, import_jsx_runtime14.jsx)("div", { className: "mt-4", children: /* @__PURE__ */ (0, import_jsx_runtime14.jsx)(StatusChip, { estado: props.estado }) }),
-      /* @__PURE__ */ (0, import_jsx_runtime14.jsxs)("dl", { className: "mt-4 grid grid-cols-2 gap-4", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime14.jsx)(Dato, { etiqueta: "Cliente", valor: props.cliente }),
-        /* @__PURE__ */ (0, import_jsx_runtime14.jsx)(Dato, { etiqueta: "Servicio", valor: props.servicio }),
-        /* @__PURE__ */ (0, import_jsx_runtime14.jsx)(Dato, { etiqueta: "Veh\xEDculo", valor: props.vehiculo }),
-        /* @__PURE__ */ (0, import_jsx_runtime14.jsx)(Dato, { etiqueta: "Ruta", valor: props.ruta }),
-        /* @__PURE__ */ (0, import_jsx_runtime14.jsx)(Dato, { etiqueta: "Conductor", valor: `${props.conductor} \xB7 ${props.nivel}` }),
-        props.tiempos ? /* @__PURE__ */ (0, import_jsx_runtime14.jsx)(Dato, { etiqueta: "Tiempos", valor: props.tiempos }) : null,
-        props.odometro ? /* @__PURE__ */ (0, import_jsx_runtime14.jsx)(Dato, { etiqueta: "Od\xF3metro", valor: props.odometro }) : null,
-        props.combustible ? /* @__PURE__ */ (0, import_jsx_runtime14.jsx)(Dato, { etiqueta: "Combustible", valor: props.combustible }) : null
+    return /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)("article", { className: "ruum-force-light rounded-[20px] border border-[var(--ruum-border)] bg-white p-5 font-body shadow-[var(--ruum-elevation-1)] print:shadow-none", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(Encabezado, { folio: props.folio, titulo: "Reporte de traslado" }),
+      /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("div", { className: "mt-4", children: /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(StatusChip, { estado: props.estado }) }),
+      /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)("dl", { className: "mt-4 grid grid-cols-2 gap-4", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(Dato, { etiqueta: "Cliente", valor: props.cliente }),
+        /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(Dato, { etiqueta: "Servicio", valor: props.servicio }),
+        /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(Dato, { etiqueta: "Veh\xEDculo", valor: props.vehiculo }),
+        /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(Dato, { etiqueta: "Ruta", valor: props.ruta }),
+        /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(Dato, { etiqueta: "Conductor", valor: `${props.conductor} \xB7 ${props.nivel}` }),
+        props.tiempos ? /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(Dato, { etiqueta: "Tiempos", valor: props.tiempos }) : null,
+        props.odometro ? /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(Dato, { etiqueta: "Od\xF3metro", valor: props.odometro }) : null,
+        props.combustible ? /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(Dato, { etiqueta: "Combustible", valor: props.combustible }) : null
       ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime14.jsx)(Pie, {})
+      /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(Pie, {})
     ] });
   }
   function ActaEntrega({ folio, vehiculo, origen, destino }) {
-    return /* @__PURE__ */ (0, import_jsx_runtime14.jsxs)("article", { className: "ruum-force-light rounded-[20px] border border-[var(--ruum-border)] bg-white p-5 font-body shadow-[var(--ruum-elevation-1)] print:shadow-none", children: [
-      /* @__PURE__ */ (0, import_jsx_runtime14.jsx)(Encabezado, { folio, titulo: "Acta de entrega-recepci\xF3n" }),
-      /* @__PURE__ */ (0, import_jsx_runtime14.jsxs)("dl", { className: "mt-4 grid grid-cols-2 gap-4", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime14.jsx)(Dato, { etiqueta: "Veh\xEDculo", valor: vehiculo }),
-        /* @__PURE__ */ (0, import_jsx_runtime14.jsx)(Dato, { etiqueta: "Origen", valor: origen }),
-        /* @__PURE__ */ (0, import_jsx_runtime14.jsx)(Dato, { etiqueta: "Destino", valor: destino }),
-        /* @__PURE__ */ (0, import_jsx_runtime14.jsx)(Dato, { etiqueta: "Estado", valor: "Se registra con fotos, od\xF3metro, combustible y firma al recoger y entregar." })
+    return /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)("article", { className: "ruum-force-light rounded-[20px] border border-[var(--ruum-border)] bg-white p-5 font-body shadow-[var(--ruum-elevation-1)] print:shadow-none", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(Encabezado, { folio, titulo: "Acta de entrega-recepci\xF3n" }),
+      /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)("dl", { className: "mt-4 grid grid-cols-2 gap-4", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(Dato, { etiqueta: "Veh\xEDculo", valor: vehiculo }),
+        /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(Dato, { etiqueta: "Origen", valor: origen }),
+        /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(Dato, { etiqueta: "Destino", valor: destino }),
+        /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(Dato, { etiqueta: "Estado", valor: "Se registra con fotos, od\xF3metro, combustible y firma al recoger y entregar." })
       ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime14.jsxs)("div", { className: "mt-6 grid grid-cols-2 gap-4", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime14.jsxs)("div", { className: "rounded-[12px] border border-[var(--ruum-border)] p-4", children: [
-          /* @__PURE__ */ (0, import_jsx_runtime14.jsx)("p", { className: "text-xs font-semibold uppercase tracking-wider text-[var(--ruum-teal-deep)]", children: "Quien entrega" }),
-          /* @__PURE__ */ (0, import_jsx_runtime14.jsx)("p", { className: "mt-6 border-t border-[var(--ruum-border-input)] pt-2 text-sm text-[var(--ruum-muted)]", children: "Nombre, identificaci\xF3n, hora y firma" })
+      /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)("div", { className: "mt-6 grid grid-cols-2 gap-4", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)("div", { className: "rounded-[12px] border border-[var(--ruum-border)] p-4", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("p", { className: "text-xs font-semibold uppercase tracking-wider text-[var(--ruum-teal-deep)]", children: "Quien entrega" }),
+          /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("p", { className: "mt-6 border-t border-[var(--ruum-border-input)] pt-2 text-sm text-[var(--ruum-muted)]", children: "Nombre, identificaci\xF3n, hora y firma" })
         ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime14.jsxs)("div", { className: "rounded-[12px] border border-[var(--ruum-border)] p-4", children: [
-          /* @__PURE__ */ (0, import_jsx_runtime14.jsx)("p", { className: "text-xs font-semibold uppercase tracking-wider text-[var(--ruum-teal-deep)]", children: "Quien recibe" }),
-          /* @__PURE__ */ (0, import_jsx_runtime14.jsx)("p", { className: "mt-6 border-t border-[var(--ruum-border-input)] pt-2 text-sm text-[var(--ruum-muted)]", children: "Nombre, identificaci\xF3n, hora y firma" })
+        /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)("div", { className: "rounded-[12px] border border-[var(--ruum-border)] p-4", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("p", { className: "text-xs font-semibold uppercase tracking-wider text-[var(--ruum-teal-deep)]", children: "Quien recibe" }),
+          /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("p", { className: "mt-6 border-t border-[var(--ruum-border-input)] pt-2 text-sm text-[var(--ruum-muted)]", children: "Nombre, identificaci\xF3n, hora y firma" })
         ] })
       ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime14.jsx)(Pie, {})
+      /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(Pie, {})
     ] });
   }
   function EstadoPagoConductor({
@@ -31453,24 +31514,24 @@
     estatus,
     causa
   }) {
-    return /* @__PURE__ */ (0, import_jsx_runtime14.jsxs)("article", { className: "ruum-force-light rounded-[20px] border border-[var(--ruum-border)] bg-white p-5 font-body shadow-[var(--ruum-elevation-1)] print:shadow-none", children: [
-      /* @__PURE__ */ (0, import_jsx_runtime14.jsx)(Encabezado, { folio, titulo: "Estado de pago" }),
-      /* @__PURE__ */ (0, import_jsx_runtime14.jsxs)("dl", { className: "mt-4 grid grid-cols-2 gap-4", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime14.jsx)(Dato, { etiqueta: "Pago base", valor: base2 }),
-        /* @__PURE__ */ (0, import_jsx_runtime14.jsx)(Dato, { etiqueta: "Gastos reembolsables", valor: reembolsables }),
-        /* @__PURE__ */ (0, import_jsx_runtime14.jsx)(Dato, { etiqueta: "Fecha estimada", valor: fechaEstimada }),
-        /* @__PURE__ */ (0, import_jsx_runtime14.jsx)(Dato, { etiqueta: "Estatus", valor: estatus })
+    return /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)("article", { className: "ruum-force-light rounded-[20px] border border-[var(--ruum-border)] bg-white p-5 font-body shadow-[var(--ruum-elevation-1)] print:shadow-none", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(Encabezado, { folio, titulo: "Estado de pago" }),
+      /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)("dl", { className: "mt-4 grid grid-cols-2 gap-4", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(Dato, { etiqueta: "Pago base", valor: base2 }),
+        /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(Dato, { etiqueta: "Gastos reembolsables", valor: reembolsables }),
+        /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(Dato, { etiqueta: "Fecha estimada", valor: fechaEstimada }),
+        /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(Dato, { etiqueta: "Estatus", valor: estatus })
       ] }),
-      causa ? /* @__PURE__ */ (0, import_jsx_runtime14.jsx)("p", { role: "status", className: "mt-4 rounded-[12px] bg-[var(--ruum-warning-bg)] px-3 py-2 text-sm text-[var(--ruum-warning-text)]", children: causa }) : null,
-      /* @__PURE__ */ (0, import_jsx_runtime14.jsx)(Pie, {})
+      causa ? /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("p", { role: "status", className: "mt-4 rounded-[12px] bg-[var(--ruum-warning-bg)] px-3 py-2 text-sm text-[var(--ruum-warning-text)]", children: causa }) : null,
+      /* @__PURE__ */ (0, import_jsx_runtime15.jsx)(Pie, {})
     ] });
   }
 
   // packages/ui/src/components/BannerDemo.tsx
   init_define_process_env();
-  var import_jsx_runtime15 = __toESM(require_jsx_runtime(), 1);
+  var import_jsx_runtime16 = __toESM(require_jsx_runtime(), 1);
   function BannerDemo({ hrefLogin = "/login" }) {
-    return /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("div", { className: "mx-auto mt-4 max-w-5xl px-6", children: /* @__PURE__ */ (0, import_jsx_runtime15.jsxs)(
+    return /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("div", { className: "mx-auto mt-4 max-w-5xl px-6", children: /* @__PURE__ */ (0, import_jsx_runtime16.jsxs)(
       "div",
       {
         role: "status",
@@ -31478,7 +31539,7 @@
         children: [
           "Est\xE1s viendo datos de ejemplo.",
           " ",
-          /* @__PURE__ */ (0, import_jsx_runtime15.jsx)("a", { href: hrefLogin, className: "font-semibold underline", children: "Inicia sesi\xF3n" }),
+          /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("a", { href: hrefLogin, className: "font-semibold underline", children: "Inicia sesi\xF3n" }),
           " ",
           "para ver los tuyos."
         ]
@@ -31488,9 +31549,9 @@
 
   // packages/ui/src/components/Field.tsx
   init_define_process_env();
-  var import_react5 = __toESM(require_react(), 1);
-  var import_jsx_runtime16 = __toESM(require_jsx_runtime(), 1);
-  var Field = (0, import_react5.forwardRef)(function Field2({
+  var import_react7 = __toESM(require_react(), 1);
+  var import_jsx_runtime17 = __toESM(require_jsx_runtime(), 1);
+  var Field = (0, import_react7.forwardRef)(function Field2({
     etiqueta,
     etiquetaClassName = "",
     passwordToggleClassName = "",
@@ -31501,12 +31562,12 @@
     type,
     ...props
   }, ref) {
-    const reactId = (0, import_react5.useId)();
+    const reactId = (0, import_react7.useId)();
     const inputId = id ?? props.name ?? `field-${reactId}`;
     const helpId = ayuda ? `${inputId}-help` : void 0;
     const errorId = error ? `${inputId}-error` : void 0;
     const describedBy = [helpId, errorId].filter(Boolean).join(" ") || void 0;
-    const [passwordVisible, setPasswordVisible] = (0, import_react5.useState)(false);
+    const [passwordVisible, setPasswordVisible] = (0, import_react7.useState)(false);
     const esPassword = type === "password";
     const inputType = esPassword && passwordVisible ? "text" : type;
     const inputClassName = [
@@ -31518,13 +31579,13 @@
       "disabled:cursor-not-allowed disabled:border-border disabled:bg-surface-elevated disabled:text-text-disabled",
       className
     ].join(" ");
-    return /* @__PURE__ */ (0, import_jsx_runtime16.jsxs)("div", { className: "flex flex-col gap-1.5", children: [
-      /* @__PURE__ */ (0, import_jsx_runtime16.jsxs)("div", { className: "flex items-baseline justify-between gap-2", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("label", { htmlFor: inputId, className: `font-body text-sm font-semibold text-text-primary ${etiquetaClassName}`, children: etiqueta }),
-        props.required ? /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("span", { className: "shrink-0 text-danger-action", "aria-hidden": true, title: "Obligatorio", children: "*" }) : null
+    return /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)("div", { className: "flex flex-col gap-1.5", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)("div", { className: "flex items-baseline justify-between gap-2", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime17.jsx)("label", { htmlFor: inputId, className: `font-body text-sm font-semibold text-text-primary ${etiquetaClassName}`, children: etiqueta }),
+        props.required ? /* @__PURE__ */ (0, import_jsx_runtime17.jsx)("span", { className: "shrink-0 text-danger-action", "aria-hidden": true, title: "Obligatorio", children: "*" }) : null
       ] }),
-      esPassword ? /* @__PURE__ */ (0, import_jsx_runtime16.jsxs)("div", { className: "relative flex items-center w-full", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime16.jsx)(
+      esPassword ? /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)("div", { className: "relative flex items-center w-full", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(
           "input",
           {
             ref,
@@ -31537,7 +31598,7 @@
             ...props
           }
         ),
-        /* @__PURE__ */ (0, import_jsx_runtime16.jsx)(
+        /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(
           "button",
           {
             type: "button",
@@ -31545,10 +31606,10 @@
             className: `absolute right-1.5 inset-y-0 my-auto flex h-9 w-9 items-center justify-center rounded-lg p-0 m-0 text-text-secondary transition-colors hover:bg-surface-elevated hover:text-text-primary focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-1 focus-visible:outline-route-action disabled:cursor-not-allowed disabled:text-text-disabled ${passwordToggleClassName}`,
             "aria-label": passwordVisible ? "Ocultar contrase\xF1a" : "Mostrar contrase\xF1a",
             disabled: props.disabled,
-            children: passwordVisible ? /* @__PURE__ */ (0, import_jsx_runtime16.jsx)(IconoOjoCerrado, {}) : /* @__PURE__ */ (0, import_jsx_runtime16.jsx)(IconoOjo, {})
+            children: passwordVisible ? /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(IconoOjoCerrado, {}) : /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(IconoOjo, {})
           }
         )
-      ] }) : /* @__PURE__ */ (0, import_jsx_runtime16.jsx)(
+      ] }) : /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(
         "input",
         {
           ref,
@@ -31561,13 +31622,13 @@
           ...props
         }
       ),
-      ayuda ? /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("p", { id: helpId, className: "font-body text-sm leading-5 text-text-secondary", children: ayuda }) : null,
-      error ? /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("p", { id: errorId, role: "alert", className: "font-body text-sm font-medium leading-5 text-danger-action", children: error }) : null
+      ayuda ? /* @__PURE__ */ (0, import_jsx_runtime17.jsx)("p", { id: helpId, className: "font-body text-sm leading-5 text-text-secondary", children: ayuda }) : null,
+      error ? /* @__PURE__ */ (0, import_jsx_runtime17.jsx)("p", { id: errorId, role: "alert", className: "font-body text-sm font-medium leading-5 text-danger-action", children: error }) : null
     ] });
   });
   function IconoOjo() {
-    return /* @__PURE__ */ (0, import_jsx_runtime16.jsxs)("svg", { viewBox: "0 0 20 20", className: "size-4", width: 16, height: 16, "aria-hidden": true, children: [
-      /* @__PURE__ */ (0, import_jsx_runtime16.jsx)(
+    return /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)("svg", { viewBox: "0 0 20 20", className: "size-4", width: 16, height: 16, "aria-hidden": true, children: [
+      /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(
         "path",
         {
           d: "M2.5 10s2.7-5 7.5-5 7.5 5 7.5 5-2.7 5-7.5 5-7.5-5-7.5-5Z",
@@ -31578,13 +31639,13 @@
           strokeWidth: "1.8"
         }
       ),
-      /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("circle", { cx: "10", cy: "10", r: "2.2", fill: "none", stroke: "currentColor", strokeWidth: "1.8" })
+      /* @__PURE__ */ (0, import_jsx_runtime17.jsx)("circle", { cx: "10", cy: "10", r: "2.2", fill: "none", stroke: "currentColor", strokeWidth: "1.8" })
     ] });
   }
   function IconoOjoCerrado() {
-    return /* @__PURE__ */ (0, import_jsx_runtime16.jsxs)("svg", { viewBox: "0 0 20 20", className: "size-4", width: 16, height: 16, "aria-hidden": true, children: [
-      /* @__PURE__ */ (0, import_jsx_runtime16.jsx)("path", { d: "M3 3 17 17", fill: "none", stroke: "currentColor", strokeLinecap: "round", strokeWidth: "1.8" }),
-      /* @__PURE__ */ (0, import_jsx_runtime16.jsx)(
+    return /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)("svg", { viewBox: "0 0 20 20", className: "size-4", width: 16, height: 16, "aria-hidden": true, children: [
+      /* @__PURE__ */ (0, import_jsx_runtime17.jsx)("path", { d: "M3 3 17 17", fill: "none", stroke: "currentColor", strokeLinecap: "round", strokeWidth: "1.8" }),
+      /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(
         "path",
         {
           d: "M7.4 5.5A7.2 7.2 0 0 1 10 5c4.8 0 7.5 5 7.5 5a11.2 11.2 0 0 1-2.2 2.7M12.2 14.6A7.4 7.4 0 0 1 10 15c-4.8 0-7.5-5-7.5-5a11 11 0 0 1 2.4-2.9",
@@ -31600,7 +31661,7 @@
 
   // packages/ui/src/components/TextInputUppercaseBridge.tsx
   init_define_process_env();
-  var import_react6 = __toESM(require_react(), 1);
+  var import_react8 = __toESM(require_react(), 1);
   var TIPOS_EXCLUIDOS = /* @__PURE__ */ new Set([
     "button",
     "checkbox",
@@ -31655,7 +31716,7 @@
   ];
   var PATRONES_ALFANUMERICOS_MAYUSCULAS = ["vin", "licencia", "license"];
   function TextInputUppercaseBridge() {
-    (0, import_react6.useEffect)(() => {
+    (0, import_react8.useEffect)(() => {
       function onInput(event) {
         if (event instanceof InputEvent && event.isTrusted === false) return;
         if (event instanceof InputEvent && event.isComposing) return;
@@ -31720,7 +31781,7 @@
 
   // packages/ui/src/components/Aviso.tsx
   init_define_process_env();
-  var import_jsx_runtime17 = __toESM(require_jsx_runtime(), 1);
+  var import_jsx_runtime18 = __toESM(require_jsx_runtime(), 1);
   var ESTILOS3 = {
     info: "border-[var(--ruum-action)]/30 bg-[var(--ruum-action-bg)] text-[var(--ruum-action-text)]",
     success: "border-[var(--ruum-success)]/30 bg-[var(--ruum-success-bg)] text-[var(--ruum-success-text)]",
@@ -31731,20 +31792,20 @@
   };
   function IconoAviso({ tono }) {
     const d = tono === "success" ? "M20 6 9 17l-5-5" : tono === "info" ? "M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20ZM12 11v5M12 7.5h.01" : "M10.3 3.6 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.6a2 2 0 0 0-3.4 0ZM12 9v4M12 17h.01";
-    return /* @__PURE__ */ (0, import_jsx_runtime17.jsx)("svg", { width: "18", height: "18", viewBox: "0 0 24 24", fill: "none", "aria-hidden": true, className: "size-[18px] shrink-0", children: /* @__PURE__ */ (0, import_jsx_runtime17.jsx)("path", { d, stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round" }) });
+    return /* @__PURE__ */ (0, import_jsx_runtime18.jsx)("svg", { width: "18", height: "18", viewBox: "0 0 24 24", fill: "none", "aria-hidden": true, className: "size-[18px] shrink-0", children: /* @__PURE__ */ (0, import_jsx_runtime18.jsx)("path", { d, stroke: "currentColor", strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round" }) });
   }
   function Aviso({ tono = "info", titulo, children, className = "" }) {
     const danger = tono === "danger" || tono === "error";
-    return /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)(
+    return /* @__PURE__ */ (0, import_jsx_runtime18.jsxs)(
       "div",
       {
         role: danger ? "alert" : "status",
         className: `flex gap-2.5 rounded-xl border px-4 py-3 font-body text-sm leading-5 shadow-1 ${ESTILOS3[tono]} ${className}`,
         children: [
-          /* @__PURE__ */ (0, import_jsx_runtime17.jsx)(IconoAviso, { tono }),
-          /* @__PURE__ */ (0, import_jsx_runtime17.jsxs)("div", { className: "min-w-0", children: [
-            titulo ? /* @__PURE__ */ (0, import_jsx_runtime17.jsx)("p", { className: "font-semibold", children: titulo }) : null,
-            /* @__PURE__ */ (0, import_jsx_runtime17.jsx)("div", { children })
+          /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(IconoAviso, { tono }),
+          /* @__PURE__ */ (0, import_jsx_runtime18.jsxs)("div", { className: "min-w-0", children: [
+            titulo ? /* @__PURE__ */ (0, import_jsx_runtime18.jsx)("p", { className: "font-semibold", children: titulo }) : null,
+            /* @__PURE__ */ (0, import_jsx_runtime18.jsx)("div", { children })
           ] })
         ]
       }
@@ -31876,7 +31937,7 @@
   };
 
   // packages/ui/src/components/EstadoBadge.tsx
-  var import_jsx_runtime18 = __toESM(require_jsx_runtime(), 1);
+  var import_jsx_runtime19 = __toESM(require_jsx_runtime(), 1);
   var ESTILO_POR_CATEGORIA = {
     inicial: "bg-[var(--ruum-neutral-bg)] text-[var(--ruum-neutral-text)] border-[var(--ruum-border)]",
     activo: "bg-[var(--ruum-action-bg)] text-[var(--ruum-action-text)] border-[var(--ruum-action)]/30",
@@ -31887,19 +31948,19 @@
   function EstadoBadge({ estado, conTexto = true }) {
     const categoria = CATEGORIA_POR_ESTADO[estado];
     const estilo = ESTILO_POR_CATEGORIA[categoria];
-    return /* @__PURE__ */ (0, import_jsx_runtime18.jsxs)(
+    return /* @__PURE__ */ (0, import_jsx_runtime19.jsxs)(
       "span",
       {
         className: `inline-flex min-h-7 items-center gap-1.5 rounded-full border px-2.5 py-1 font-body text-xs font-semibold ${estilo}`,
         children: [
-          /* @__PURE__ */ (0, import_jsx_runtime18.jsx)(
+          /* @__PURE__ */ (0, import_jsx_runtime19.jsx)(
             "span",
             {
               className: `size-1.5 rounded-full bg-current ${categoria === "activo" ? "animate-pulse" : ""}`,
               "aria-hidden": true
             }
           ),
-          conTexto && ETIQUETA_ESTADO_TRASLADO[estado]
+          conTexto ? ETIQUETA_ESTADO_TRASLADO[estado] : /* @__PURE__ */ (0, import_jsx_runtime19.jsx)("span", { className: "sr-only", children: ETIQUETA_ESTADO_TRASLADO[estado] })
         ]
       }
     );
@@ -31980,9 +32041,9 @@
   init_define_process_env();
 
   // packages/ui/src/components/EstatusBadgeEconomico.tsx
-  var import_jsx_runtime19 = __toESM(require_jsx_runtime(), 1);
+  var import_jsx_runtime20 = __toESM(require_jsx_runtime(), 1);
   function EstatusBadgeEconomico({ estatus, className = "" }) {
-    return /* @__PURE__ */ (0, import_jsx_runtime19.jsx)(
+    return /* @__PURE__ */ (0, import_jsx_runtime20.jsx)(
       "span",
       {
         className: [
@@ -31997,7 +32058,7 @@
 
   // packages/ui/src/components/FinancialAmount.tsx
   init_define_process_env();
-  var import_jsx_runtime20 = __toESM(require_jsx_runtime(), 1);
+  var import_jsx_runtime21 = __toESM(require_jsx_runtime(), 1);
   var STATUS_ALIAS = {
     sin_calcular: "sin_calcular",
     estimado: "estimado",
@@ -32048,10 +32109,10 @@
     const hayMonto = typeof amount === "number" && Number.isFinite(amount);
     const textoPrincipal = hayMonto ? formatearMoneda(amount, currency) : pendingText;
     const textoAuxiliar = auxiliaryText ?? TEXTO_AUXILIAR[estado];
-    return /* @__PURE__ */ (0, import_jsx_runtime20.jsxs)("div", { className: ["grid gap-1", className].join(" "), children: [
-      /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("p", { className: ["font-mono-ruum font-semibold tabular-nums text-text-primary", amountClassName].join(" "), children: textoPrincipal }),
-      /* @__PURE__ */ (0, import_jsx_runtime20.jsxs)("div", { className: "flex flex-wrap items-center gap-2", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime20.jsx)(
+    return /* @__PURE__ */ (0, import_jsx_runtime21.jsxs)("div", { className: ["grid gap-1", className].join(" "), children: [
+      /* @__PURE__ */ (0, import_jsx_runtime21.jsx)("p", { className: ["font-mono-ruum font-semibold tabular-nums text-text-primary", amountClassName].join(" "), children: textoPrincipal }),
+      /* @__PURE__ */ (0, import_jsx_runtime21.jsxs)("div", { className: "flex flex-wrap items-center gap-2", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime21.jsx)(
           "span",
           {
             className: [
@@ -32061,37 +32122,39 @@
             children: ETIQUETA_ESTATUS_ECONOMICO[estado]
           }
         ),
-        textoAuxiliar && /* @__PURE__ */ (0, import_jsx_runtime20.jsx)("span", { className: "font-body text-xs leading-5 text-text-secondary", children: textoAuxiliar })
+        textoAuxiliar && /* @__PURE__ */ (0, import_jsx_runtime21.jsx)("span", { className: "font-body text-xs leading-5 text-text-secondary", children: textoAuxiliar })
       ] })
     ] });
   }
 
   // packages/ui/src/components/DriverEarning.tsx
   init_define_process_env();
-  var import_jsx_runtime21 = __toESM(require_jsx_runtime(), 1);
+  var import_jsx_runtime22 = __toESM(require_jsx_runtime(), 1);
   function DriverEarning(props) {
-    return /* @__PURE__ */ (0, import_jsx_runtime21.jsx)(FinancialAmount, { pendingText: "Ganancia por confirmar", ...props });
+    return /* @__PURE__ */ (0, import_jsx_runtime22.jsx)(FinancialAmount, { pendingText: "Ganancia por confirmar", ...props });
   }
 
   // packages/ui/src/components/NextOperationalAction.tsx
   init_define_process_env();
-  var import_jsx_runtime22 = __toESM(require_jsx_runtime(), 1);
+  var import_jsx_runtime23 = __toESM(require_jsx_runtime(), 1);
   function CtaLink({ cta, primary = false }) {
     const variant = cta.variant ?? (primary ? "primary" : "secondary");
     const classes = [
       "inline-flex min-h-12 min-w-12 w-full items-center justify-center gap-2 rounded-xl px-5 py-3",
       "font-body text-sm font-semibold leading-5 transition-all duration-200",
       "focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-2",
-      variant === "primary" ? "border-transparent bg-[image:var(--ruum-gradient-action)] text-white shadow-xs hover:brightness-105 active:scale-[0.98] focus-visible:outline-route-action" : variant === "danger" || variant === "emergency" ? "border border-danger-action bg-danger-action text-white shadow-xs hover:brightness-105 active:scale-[0.98] focus-visible:outline-danger-action" : "border border-border-strong bg-surface text-primary shadow-xs hover:border-brand hover:bg-surface-elevated hover:text-primary active:scale-[0.98] focus-visible:outline-route-action"
+      cta.disabled ? "cursor-not-allowed border border-border bg-surface-elevated text-disabled" : variant === "primary" ? "border-transparent bg-[image:var(--ruum-gradient-action)] text-[var(--ruum-on-primary)] shadow-xs hover:brightness-105 active:scale-[0.98] focus-visible:outline-route-action" : variant === "danger" || variant === "emergency" ? "border border-danger-action bg-danger-action text-white shadow-xs hover:brightness-105 active:scale-[0.98] focus-visible:outline-danger-action" : "border border-border-strong bg-surface text-primary shadow-xs hover:border-brand hover:bg-surface-elevated hover:text-primary active:scale-[0.98] focus-visible:outline-route-action"
     ].join(" ");
-    return /* @__PURE__ */ (0, import_jsx_runtime22.jsx)(
+    if (cta.disabled) {
+      return /* @__PURE__ */ (0, import_jsx_runtime23.jsx)("span", { role: "link", "aria-disabled": "true", className: classes, children: cta.label });
+    }
+    return /* @__PURE__ */ (0, import_jsx_runtime23.jsx)(
       "a",
       {
         href: cta.href,
         target: cta.external ? "_blank" : void 0,
         rel: cta.external ? "noreferrer" : void 0,
-        "aria-disabled": cta.disabled || void 0,
-        className: cta.disabled ? `${classes} pointer-events-none border-border bg-surface-elevated text-disabled` : classes,
+        className: classes,
         children: cta.label
       }
     );
@@ -32101,14 +32164,15 @@
     loading = false,
     primary = false
   }) {
-    if (cta.href) return /* @__PURE__ */ (0, import_jsx_runtime22.jsx)(CtaLink, { cta, primary });
-    return /* @__PURE__ */ (0, import_jsx_runtime22.jsx)(
+    if (cta.href) return /* @__PURE__ */ (0, import_jsx_runtime23.jsx)(CtaLink, { cta, primary });
+    return /* @__PURE__ */ (0, import_jsx_runtime23.jsx)(
       Button,
       {
         className: "w-full",
         variant: cta.variant ?? (primary ? "primary" : "secondary"),
         onClick: cta.onClick,
         disabled: cta.disabled,
+        "aria-disabled": cta.disabled || void 0,
         loading,
         children: cta.label
       }
@@ -32127,7 +32191,7 @@
     stageLabel,
     className = ""
   }) {
-    return /* @__PURE__ */ (0, import_jsx_runtime22.jsxs)(
+    return /* @__PURE__ */ (0, import_jsx_runtime23.jsxs)(
       "section",
       {
         className: [
@@ -32137,21 +32201,21 @@
         ].join(" "),
         "aria-labelledby": "next-operational-action-title",
         children: [
-          /* @__PURE__ */ (0, import_jsx_runtime22.jsxs)("div", { className: "min-w-0", children: [
-            stageLabel && /* @__PURE__ */ (0, import_jsx_runtime22.jsx)("p", { className: "font-body text-sm font-semibold text-route-action", children: stageLabel }),
-            /* @__PURE__ */ (0, import_jsx_runtime22.jsx)("h2", { id: "next-operational-action-title", className: "mt-1 break-words font-display text-2xl font-semibold leading-7 text-text-primary", children: title }),
-            /* @__PURE__ */ (0, import_jsx_runtime22.jsx)("p", { className: "mt-2 break-words font-body text-base leading-7 text-text-secondary", children: instruction })
+          /* @__PURE__ */ (0, import_jsx_runtime23.jsxs)("div", { className: "min-w-0", children: [
+            stageLabel && /* @__PURE__ */ (0, import_jsx_runtime23.jsx)("p", { className: "font-body text-sm font-semibold text-route-action", children: stageLabel }),
+            /* @__PURE__ */ (0, import_jsx_runtime23.jsx)("h2", { id: "next-operational-action-title", className: "mt-1 break-words font-display text-2xl font-semibold leading-7 text-text-primary", children: title }),
+            /* @__PURE__ */ (0, import_jsx_runtime23.jsx)("p", { className: "mt-2 break-words font-body text-base leading-7 text-text-secondary", children: instruction })
           ] }),
-          (context || eta) && /* @__PURE__ */ (0, import_jsx_runtime22.jsxs)("div", { className: "mt-4 min-w-0 rounded-xl border border-border bg-surface px-3 py-3 font-body text-base text-text-secondary", children: [
-            context && /* @__PURE__ */ (0, import_jsx_runtime22.jsx)("div", { className: "break-words font-medium text-text-primary", children: context }),
-            eta && /* @__PURE__ */ (0, import_jsx_runtime22.jsx)("p", { className: "mt-1 break-words text-sm text-text-secondary", children: eta })
+          (context || eta) && /* @__PURE__ */ (0, import_jsx_runtime23.jsxs)("div", { className: "mt-4 min-w-0 rounded-xl border border-border bg-surface px-3 py-3 font-body text-base text-text-secondary", children: [
+            context && /* @__PURE__ */ (0, import_jsx_runtime23.jsx)("div", { className: "break-words font-medium text-text-primary", children: context }),
+            eta && /* @__PURE__ */ (0, import_jsx_runtime23.jsx)("p", { className: "mt-1 break-words text-sm text-text-secondary", children: eta })
           ] }),
-          error && /* @__PURE__ */ (0, import_jsx_runtime22.jsx)("div", { className: "mt-4", children: /* @__PURE__ */ (0, import_jsx_runtime22.jsx)(Aviso, { tono: "danger", children: error }) }),
-          /* @__PURE__ */ (0, import_jsx_runtime22.jsxs)("div", { className: "mt-4 grid w-full gap-2 sm:grid-cols-[minmax(0,1fr)_auto]", children: [
-            /* @__PURE__ */ (0, import_jsx_runtime22.jsx)(ActionButton, { cta: primaryCta, loading, primary: true }),
-            secondaryCta && /* @__PURE__ */ (0, import_jsx_runtime22.jsx)(ActionButton, { cta: secondaryCta })
+          error && /* @__PURE__ */ (0, import_jsx_runtime23.jsx)("div", { className: "mt-4", children: /* @__PURE__ */ (0, import_jsx_runtime23.jsx)(Aviso, { tono: "danger", children: error }) }),
+          /* @__PURE__ */ (0, import_jsx_runtime23.jsxs)("div", { className: "mt-4 grid w-full gap-2 sm:grid-cols-[minmax(0,1fr)_auto]", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime23.jsx)(ActionButton, { cta: primaryCta, loading, primary: true }),
+            secondaryCta && /* @__PURE__ */ (0, import_jsx_runtime23.jsx)(ActionButton, { cta: secondaryCta })
           ] }),
-          nextStep && /* @__PURE__ */ (0, import_jsx_runtime22.jsxs)("p", { className: "mt-3 break-words rounded-xl border border-warning bg-warn-soft px-3 py-2 font-body text-sm text-text-primary", children: [
+          nextStep && /* @__PURE__ */ (0, import_jsx_runtime23.jsxs)("p", { className: "mt-3 break-words rounded-xl border border-warning bg-warn-soft px-3 py-2 font-body text-sm text-text-primary", children: [
             "Despu\xE9s: ",
             nextStep
           ] })
@@ -32231,7 +32295,7 @@
   }
 
   // packages/ui/src/components/EstadoStepper.tsx
-  var import_jsx_runtime23 = __toESM(require_jsx_runtime(), 1);
+  var import_jsx_runtime24 = __toESM(require_jsx_runtime(), 1);
   function getProgressData(estado) {
     const esRamificado = ESTADOS_RAMIFICADOS.includes(estado);
     const indiceEncontrado = indiceEtapaActual(estado);
@@ -32244,22 +32308,22 @@
     const { esRamificado, indiceActual, total, etapaActual } = getProgressData(estado);
     const paso = indiceActual + 1;
     const nombre = currentLabel ?? (esRamificado ? "Revisi\xF3n operativa" : etapaActual.etiqueta);
-    return /* @__PURE__ */ (0, import_jsx_runtime23.jsxs)("section", { className: "md:hidden", "aria-labelledby": "mobile-progress-title", children: [
-      /* @__PURE__ */ (0, import_jsx_runtime23.jsxs)("div", { className: "flex items-center justify-between gap-2", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime23.jsxs)("span", { className: "inline-flex items-center gap-1.5 rounded-full bg-route-soft px-2.5 py-0.5 font-body text-xs font-semibold text-route-action", children: [
-          /* @__PURE__ */ (0, import_jsx_runtime23.jsx)("span", { className: "size-1.5 rounded-full bg-route-action animate-pulse", "aria-hidden": true }),
+    return /* @__PURE__ */ (0, import_jsx_runtime24.jsxs)("section", { className: "md:hidden", "aria-labelledby": "mobile-progress-title", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime24.jsxs)("div", { className: "flex items-center justify-between gap-2", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime24.jsxs)("span", { className: "inline-flex items-center gap-1.5 rounded-full bg-route-soft px-2.5 py-0.5 font-body text-xs font-semibold text-route-action", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime24.jsx)("span", { className: "size-1.5 rounded-full bg-route-action animate-pulse", "aria-hidden": true }),
           "Paso ",
           paso,
           " de ",
           total
         ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime23.jsxs)("span", { className: "font-body text-xs font-medium text-text-tertiary", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime24.jsxs)("span", { className: "font-body text-xs font-medium text-text-tertiary", children: [
           Math.round(paso / total * 100),
           "% completado"
         ] })
       ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime23.jsx)("p", { id: "mobile-progress-title", className: "mt-1.5 font-display text-base font-bold leading-tight text-text-primary", children: nombre }),
-      /* @__PURE__ */ (0, import_jsx_runtime23.jsx)(
+      /* @__PURE__ */ (0, import_jsx_runtime24.jsx)("p", { id: "mobile-progress-title", className: "mt-1.5 font-display text-base font-bold leading-tight text-text-primary", children: nombre }),
+      /* @__PURE__ */ (0, import_jsx_runtime24.jsx)(
         "div",
         {
           className: "mt-3 grid grid-cols-7 gap-1.5",
@@ -32273,7 +32337,7 @@
             const pasada = !esRamificado && i < indiceActual;
             const actual = !esRamificado && i === indiceActual;
             const activa = pasada || actual || esRamificado;
-            return /* @__PURE__ */ (0, import_jsx_runtime23.jsx)(
+            return /* @__PURE__ */ (0, import_jsx_runtime24.jsx)(
               "span",
               {
                 className: [
@@ -32288,34 +32352,33 @@
           })
         }
       ),
-      /* @__PURE__ */ (0, import_jsx_runtime23.jsxs)("details", { className: "mt-3 rounded-xl border border-border/80 bg-surface/80", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime23.jsxs)(
+      /* @__PURE__ */ (0, import_jsx_runtime24.jsxs)("details", { className: "mt-3 rounded-xl border border-border/80 bg-surface/80", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime24.jsxs)(
           "summary",
           {
             className: "flex min-h-[44px] cursor-pointer items-center justify-between px-3.5 py-2 font-body text-xs font-semibold text-route-action hover:text-route-action-hover",
-            "aria-label": "Ver todas las etapas del traslado",
             children: [
-              /* @__PURE__ */ (0, import_jsx_runtime23.jsxs)("span", { children: [
+              /* @__PURE__ */ (0, import_jsx_runtime24.jsxs)("span", { children: [
                 "Ver desglose de etapas (",
                 paso,
                 "/",
                 total,
                 ")"
               ] }),
-              /* @__PURE__ */ (0, import_jsx_runtime23.jsx)("span", { className: "text-text-tertiary font-mono-ruum text-xs", children: "\u25BC" })
+              /* @__PURE__ */ (0, import_jsx_runtime24.jsx)("span", { className: "text-text-tertiary font-mono-ruum text-xs", "aria-hidden": "true", children: "\u25BC" })
             ]
           }
         ),
-        /* @__PURE__ */ (0, import_jsx_runtime23.jsx)("ol", { className: "grid gap-2 border-t border-border/60 px-3.5 py-3", "aria-label": "Etapas del traslado", children: ETAPAS_TRASLADO.map((etapa, i) => {
+        /* @__PURE__ */ (0, import_jsx_runtime24.jsx)("ol", { className: "grid gap-2 border-t border-border/60 px-3.5 py-3", "aria-label": "Etapas del traslado", children: ETAPAS_TRASLADO.map((etapa, i) => {
           const actual = !esRamificado && i === indiceActual;
           const completa = esRamificado || i < indiceActual;
-          return /* @__PURE__ */ (0, import_jsx_runtime23.jsxs)(
+          return /* @__PURE__ */ (0, import_jsx_runtime24.jsxs)(
             "li",
             {
               "aria-current": actual ? "step" : void 0,
               className: "flex items-center gap-2.5 font-body text-xs text-text-secondary min-h-[32px]",
               children: [
-                /* @__PURE__ */ (0, import_jsx_runtime23.jsx)(
+                /* @__PURE__ */ (0, import_jsx_runtime24.jsx)(
                   "span",
                   {
                     className: [
@@ -32326,7 +32389,7 @@
                     children: completa && !actual ? "\u2713" : i + 1
                   }
                 ),
-                /* @__PURE__ */ (0, import_jsx_runtime23.jsxs)("span", { className: actual ? "font-bold text-text-primary" : completa ? "text-text-secondary" : "text-text-tertiary", children: [
+                /* @__PURE__ */ (0, import_jsx_runtime24.jsxs)("span", { className: actual ? "font-bold text-text-primary" : completa ? "text-text-secondary" : "text-text-tertiary", children: [
                   etapa.etiqueta,
                   actual ? " (Etapa actual)" : completa ? " (Completada)" : ""
                 ] })
@@ -32342,33 +32405,33 @@
     const { esRamificado, indiceActual, total, etapaActual } = getProgressData(estado);
     const paso = indiceActual + 1;
     const nombre = currentLabel ?? (esRamificado ? "Revisi\xF3n operativa" : etapaActual.etiqueta);
-    return /* @__PURE__ */ (0, import_jsx_runtime23.jsxs)("nav", { className: "hidden w-full md:block", "aria-label": "Progreso del traslado", children: [
-      /* @__PURE__ */ (0, import_jsx_runtime23.jsxs)("div", { className: "mb-3 flex items-center justify-between gap-4", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime23.jsxs)("div", { className: "flex items-center gap-2", children: [
-          /* @__PURE__ */ (0, import_jsx_runtime23.jsxs)("span", { className: "inline-flex items-center gap-1.5 rounded-full bg-route-soft px-2.5 py-0.5 font-body text-xs font-semibold text-route-action", children: [
-            /* @__PURE__ */ (0, import_jsx_runtime23.jsx)("span", { className: "size-1.5 rounded-full bg-route-action animate-pulse", "aria-hidden": true }),
+    return /* @__PURE__ */ (0, import_jsx_runtime24.jsxs)("nav", { className: "hidden w-full md:block", "aria-label": "Progreso del traslado", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime24.jsxs)("div", { className: "mb-3 flex items-center justify-between gap-4", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime24.jsxs)("div", { className: "flex items-center gap-2", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime24.jsxs)("span", { className: "inline-flex items-center gap-1.5 rounded-full bg-route-soft px-2.5 py-0.5 font-body text-xs font-semibold text-route-action", children: [
+            /* @__PURE__ */ (0, import_jsx_runtime24.jsx)("span", { className: "size-1.5 rounded-full bg-route-action animate-pulse", "aria-hidden": true }),
             "Paso ",
             paso,
             " de ",
             total
           ] }),
-          /* @__PURE__ */ (0, import_jsx_runtime23.jsx)("span", { className: "font-display text-sm font-bold text-text-primary", children: nombre })
+          /* @__PURE__ */ (0, import_jsx_runtime24.jsx)("span", { className: "font-display text-sm font-bold text-text-primary", children: nombre })
         ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime23.jsxs)("span", { className: "font-mono-ruum text-xs font-bold text-text-tertiary", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime24.jsxs)("span", { className: "font-mono-ruum text-xs font-bold text-text-tertiary", children: [
           Math.round(paso / total * 100),
           "%"
         ] })
       ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime23.jsx)("div", { role: "list", "aria-label": "Etapas completas del traslado", className: "flex w-full gap-1.5", children: ETAPAS_TRASLADO.map((etapa, i) => {
+      /* @__PURE__ */ (0, import_jsx_runtime24.jsx)("div", { role: "list", "aria-label": "Etapas completas del traslado", className: "flex w-full gap-1.5", children: ETAPAS_TRASLADO.map((etapa, i) => {
         const actual = etapa.id === estado;
         const sellada = i < indiceActual;
-        return /* @__PURE__ */ (0, import_jsx_runtime23.jsxs)(
+        return /* @__PURE__ */ (0, import_jsx_runtime24.jsxs)(
           "div",
           {
             role: "listitem",
             className: "flex min-w-0 flex-1 flex-col gap-1.5",
             children: [
-              /* @__PURE__ */ (0, import_jsx_runtime23.jsx)(
+              /* @__PURE__ */ (0, import_jsx_runtime24.jsx)(
                 "div",
                 {
                   role: "progressbar",
@@ -32382,7 +32445,7 @@
                   ].join(" ")
                 }
               ),
-              /* @__PURE__ */ (0, import_jsx_runtime23.jsxs)(
+              /* @__PURE__ */ (0, import_jsx_runtime24.jsxs)(
                 "p",
                 {
                   className: [
@@ -32405,15 +32468,15 @@
     ] });
   }
   function EstadoStepper({ estado, currentLabel }) {
-    return /* @__PURE__ */ (0, import_jsx_runtime23.jsxs)("div", { children: [
-      /* @__PURE__ */ (0, import_jsx_runtime23.jsx)(MobileProgress, { estado, currentLabel }),
-      /* @__PURE__ */ (0, import_jsx_runtime23.jsx)(DesktopStateStepper, { estado, currentLabel })
+    return /* @__PURE__ */ (0, import_jsx_runtime24.jsxs)("div", { children: [
+      /* @__PURE__ */ (0, import_jsx_runtime24.jsx)(MobileProgress, { estado, currentLabel }),
+      /* @__PURE__ */ (0, import_jsx_runtime24.jsx)(DesktopStateStepper, { estado, currentLabel })
     ] });
   }
 
   // packages/ui/src/components/Card.tsx
   init_define_process_env();
-  var import_jsx_runtime24 = __toESM(require_jsx_runtime(), 1);
+  var import_jsx_runtime25 = __toESM(require_jsx_runtime(), 1);
   var PADDING = {
     none: "",
     sm: "p-4",
@@ -32424,7 +32487,7 @@
     return classes.filter(Boolean).join(" ");
   }
   function Card({ children, className = "", padding = "md", elevated = false }) {
-    return /* @__PURE__ */ (0, import_jsx_runtime24.jsx)(
+    return /* @__PURE__ */ (0, import_jsx_runtime25.jsx)(
       "section",
       {
         className: joinClasses(
@@ -32438,7 +32501,7 @@
     );
   }
   function OperationalCard({ children, className = "", padding = "md" }) {
-    return /* @__PURE__ */ (0, import_jsx_runtime24.jsx)(
+    return /* @__PURE__ */ (0, import_jsx_runtime25.jsx)(
       "section",
       {
         className: joinClasses(
@@ -32451,7 +32514,7 @@
     );
   }
   function TripCard({ children, className = "", padding = "md", folio }) {
-    return /* @__PURE__ */ (0, import_jsx_runtime24.jsxs)(
+    return /* @__PURE__ */ (0, import_jsx_runtime25.jsxs)(
       "article",
       {
         className: joinClasses(
@@ -32461,7 +32524,7 @@
           className
         ),
         children: [
-          folio && /* @__PURE__ */ (0, import_jsx_runtime24.jsxs)("span", { className: "absolute right-3 top-3 rounded-full border border-route-action bg-route-soft px-2.5 py-1 font-body text-xs font-semibold text-route-action", children: [
+          folio && /* @__PURE__ */ (0, import_jsx_runtime25.jsxs)("span", { className: "absolute right-3 top-3 rounded-full border border-route-action bg-route-soft px-2.5 py-1 font-body text-xs font-semibold text-route-action", children: [
             "Folio ",
             folio
           ] }),
@@ -32471,7 +32534,7 @@
     );
   }
   function FinancialCard({ children, className = "", padding = "md" }) {
-    return /* @__PURE__ */ (0, import_jsx_runtime24.jsx)(
+    return /* @__PURE__ */ (0, import_jsx_runtime25.jsx)(
       "section",
       {
         className: joinClasses(
@@ -32484,7 +32547,7 @@
     );
   }
   function AlertCard({ children, className = "", padding = "md" }) {
-    return /* @__PURE__ */ (0, import_jsx_runtime24.jsx)(
+    return /* @__PURE__ */ (0, import_jsx_runtime25.jsx)(
       "section",
       {
         className: joinClasses(
@@ -32499,9 +32562,9 @@
 
   // packages/ui/src/components/PassportCard.tsx
   init_define_process_env();
-  var import_jsx_runtime25 = __toESM(require_jsx_runtime(), 1);
+  var import_jsx_runtime26 = __toESM(require_jsx_runtime(), 1);
   function PassportCard({ children, folio, acento = false, clip = true, className = "" }) {
-    return /* @__PURE__ */ (0, import_jsx_runtime25.jsxs)(
+    return /* @__PURE__ */ (0, import_jsx_runtime26.jsxs)(
       "div",
       {
         className: [
@@ -32512,14 +32575,14 @@
           className
         ].join(" "),
         children: [
-          /* @__PURE__ */ (0, import_jsx_runtime25.jsx)(
+          /* @__PURE__ */ (0, import_jsx_runtime26.jsx)(
             "svg",
             {
               "aria-hidden": true,
               className: "pointer-events-none absolute inset-x-0 top-0 h-40 w-full text-text-tertiary opacity-20",
               viewBox: "0 0 420 160",
               preserveAspectRatio: "none",
-              children: /* @__PURE__ */ (0, import_jsx_runtime25.jsx)(
+              children: /* @__PURE__ */ (0, import_jsx_runtime26.jsx)(
                 "path",
                 {
                   d: "M-20 112C38 58 82 58 140 112s102 54 160 0 102-54 160 0M-20 86C38 32 82 32 140 86s102 54 160 0 102-54 160 0M-20 138C38 84 82 84 140 138s102 54 160 0 102-54 160 0",
@@ -32530,16 +32593,16 @@
               )
             }
           ),
-          folio && /* @__PURE__ */ (0, import_jsx_runtime25.jsx)(
+          folio && /* @__PURE__ */ (0, import_jsx_runtime26.jsx)(
             "div",
             {
               className: "absolute right-0 top-0 flex h-10 w-10 items-start justify-end overflow-hidden",
               "aria-hidden": true,
-              children: /* @__PURE__ */ (0, import_jsx_runtime25.jsx)("div", { className: "absolute right-[-20px] top-[-20px] h-10 w-10 rotate-45 bg-action-primary" })
+              children: /* @__PURE__ */ (0, import_jsx_runtime26.jsx)("div", { className: "absolute right-[-20px] top-[-20px] h-10 w-10 rotate-45 bg-action-primary" })
             }
           ),
-          folio && /* @__PURE__ */ (0, import_jsx_runtime25.jsx)("span", { className: "absolute right-2.5 top-2.5 font-mono-ruum text-xs font-medium tracking-wide text-text-primary", children: folio }),
-          /* @__PURE__ */ (0, import_jsx_runtime25.jsx)("div", { className: "relative p-5 sm:p-6", children })
+          folio && /* @__PURE__ */ (0, import_jsx_runtime26.jsx)("span", { className: "absolute right-2.5 top-2.5 font-mono-ruum text-xs font-medium tracking-wide text-text-primary", children: folio }),
+          /* @__PURE__ */ (0, import_jsx_runtime26.jsx)("div", { className: "relative p-5 sm:p-6", children })
         ]
       }
     );
@@ -32547,14 +32610,18 @@
 
   // packages/ui/src/components/Chat.tsx
   init_define_process_env();
-  var import_react7 = __toESM(require_react(), 1);
-  var import_jsx_runtime26 = __toESM(require_jsx_runtime(), 1);
+  var import_react9 = __toESM(require_react(), 1);
+  var import_jsx_runtime27 = __toESM(require_jsx_runtime(), 1);
   function Chat({ propio, mensajes, onEnviar, deshabilitado, mensajeDeshabilitado }) {
-    const [borrador, setBorrador] = (0, import_react7.useState)("");
-    const [enviando, setEnviando] = (0, import_react7.useState)(false);
-    const listaRef = (0, import_react7.useRef)(null);
-    const ultimoIdRef = (0, import_react7.useRef)(null);
-    (0, import_react7.useEffect)(() => {
+    const [borrador, setBorrador] = (0, import_react9.useState)("");
+    const [enviando, setEnviando] = (0, import_react9.useState)(false);
+    const [errorEnvio, setErrorEnvio] = (0, import_react9.useState)(null);
+    const listaRef = (0, import_react9.useRef)(null);
+    const inputRef = (0, import_react9.useRef)(null);
+    const ultimoIdRef = (0, import_react9.useRef)(null);
+    const inputId = (0, import_react9.useId)();
+    const errorId = (0, import_react9.useId)();
+    (0, import_react9.useEffect)(() => {
       if (mensajes.length === 0) return;
       const ultimo = mensajes[mensajes.length - 1];
       if (!ultimo || ultimo.id === ultimoIdRef.current) return;
@@ -32565,17 +32632,20 @@
       e.preventDefault();
       if (!borrador.trim() || deshabilitado) return;
       const texto = borrador.trim();
-      setBorrador("");
+      setErrorEnvio(null);
       setEnviando(true);
       try {
         await onEnviar(texto);
+        setBorrador("");
+      } catch {
+        setErrorEnvio("No se pudo enviar el mensaje. Intenta de nuevo.");
       } finally {
         setEnviando(false);
-        document.querySelector('input[placeholder="Escribe un mensaje"]')?.focus();
+        inputRef.current?.focus();
       }
     }
-    return /* @__PURE__ */ (0, import_jsx_runtime26.jsxs)("div", { className: "flex flex-col overflow-hidden rounded-card border border-border bg-surface shadow-1", children: [
-      /* @__PURE__ */ (0, import_jsx_runtime26.jsx)(
+    return /* @__PURE__ */ (0, import_jsx_runtime27.jsxs)("div", { className: "flex flex-col overflow-hidden rounded-card border border-border bg-surface shadow-1", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime27.jsx)(
         "div",
         {
           ref: listaRef,
@@ -32585,10 +32655,10 @@
           "aria-relevant": "additions",
           "aria-label": "Mensajes del chat",
           className: "flex-1 space-y-3 overflow-y-auto p-4 max-h-[360px] min-h-[180px]",
-          children: mensajes.length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime26.jsx)("p", { className: "font-body text-sm text-text-secondary", children: "Todav\xEDa no hay mensajes." }) : mensajes.map((m) => {
+          children: mensajes.length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime27.jsx)("p", { className: "font-body text-sm text-text-secondary", children: "Todav\xEDa no hay mensajes." }) : mensajes.map((m) => {
             const esPropio = m.remitente === propio;
             const pendiente = Boolean(m.pendiente);
-            return /* @__PURE__ */ (0, import_jsx_runtime26.jsx)("div", { className: `flex ${esPropio ? "justify-end" : "justify-start"}`, children: /* @__PURE__ */ (0, import_jsx_runtime26.jsxs)(
+            return /* @__PURE__ */ (0, import_jsx_runtime27.jsx)("div", { className: `flex ${esPropio ? "justify-end" : "justify-start"}`, children: /* @__PURE__ */ (0, import_jsx_runtime27.jsxs)(
               "div",
               {
                 className: [
@@ -32598,10 +32668,10 @@
                 ].join(" "),
                 "aria-label": pendiente ? "Mensaje enviando" : void 0,
                 children: [
-                  /* @__PURE__ */ (0, import_jsx_runtime26.jsx)("p", { children: m.contenido }),
-                  /* @__PURE__ */ (0, import_jsx_runtime26.jsxs)("p", { className: `mt-1 flex items-center gap-1 text-xs ${esPropio ? "text-[#0a2342]/75" : "text-text-secondary"}`, children: [
-                    /* @__PURE__ */ (0, import_jsx_runtime26.jsx)("span", { children: new Date(m.enviado_en).toLocaleTimeString("es-MX", { hour: "2-digit", minute: "2-digit" }) }),
-                    pendiente && /* @__PURE__ */ (0, import_jsx_runtime26.jsx)("span", { "aria-hidden": "true", children: " \xB7 enviando\u2026" })
+                  /* @__PURE__ */ (0, import_jsx_runtime27.jsx)("p", { children: m.contenido }),
+                  /* @__PURE__ */ (0, import_jsx_runtime27.jsxs)("p", { className: `mt-1 flex items-center gap-1 text-xs ${esPropio ? "text-[#0a2342]/75" : "text-text-secondary"}`, children: [
+                    /* @__PURE__ */ (0, import_jsx_runtime27.jsx)("span", { children: new Date(m.enviado_en).toLocaleTimeString("es-MX", { hour: "2-digit", minute: "2-digit" }) }),
+                    pendiente && /* @__PURE__ */ (0, import_jsx_runtime27.jsx)("span", { "aria-hidden": "true", children: " \xB7 enviando\u2026" })
                   ] })
                 ]
               }
@@ -32609,23 +32679,32 @@
           })
         }
       ),
-      /* @__PURE__ */ (0, import_jsx_runtime26.jsx)("span", { className: "sr-only", role: "status", "aria-live": "polite", "aria-atomic": "true", children: mensajes.length > 0 ? `Mensaje de ${mensajes[mensajes.length - 1]?.remitente === propio ? "t\xFA" : "conductor"}: ${mensajes[mensajes.length - 1]?.contenido.slice(0, 80)}` : "" }),
-      /* @__PURE__ */ (0, import_jsx_runtime26.jsxs)("form", { onSubmit: manejarEnvio, className: "flex gap-2 border-t border-border bg-surface-elevated p-3", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime26.jsx)(
-          "input",
-          {
-            value: borrador,
-            onChange: (e) => setBorrador(e.target.value),
-            disabled: deshabilitado,
-            "aria-disabled": deshabilitado,
-            "aria-describedby": deshabilitado ? "chat-deshabilitado-ayuda" : void 0,
-            placeholder: deshabilitado ? mensajeDeshabilitado ?? "Chat no disponible" : "Escribe un mensaje",
-            className: "min-h-11 flex-1 rounded-[10px] border border-border-strong bg-surface px-3 py-2 font-body text-base transition focus:border-route-action focus:outline-none focus:ring-[3px] focus:ring-route-action/20 disabled:cursor-not-allowed disabled:bg-surface-elevated disabled:text-disabled"
-          }
-        ),
-        /* @__PURE__ */ (0, import_jsx_runtime26.jsx)(Button, { type: "submit", disabled: deshabilitado || enviando || !borrador.trim(), "aria-label": "Enviar mensaje", children: enviando ? "Enviando\u2026" : "Enviar" })
+      /* @__PURE__ */ (0, import_jsx_runtime27.jsx)("span", { className: "sr-only", role: "status", "aria-live": "polite", "aria-atomic": "true", children: mensajes.length > 0 ? `Mensaje de ${mensajes[mensajes.length - 1]?.remitente === propio ? "t\xFA" : "conductor"}: ${mensajes[mensajes.length - 1]?.contenido.slice(0, 80)}` : "" }),
+      /* @__PURE__ */ (0, import_jsx_runtime27.jsxs)("form", { onSubmit: manejarEnvio, className: "flex flex-col border-t border-border bg-surface-elevated p-3", children: [
+        errorEnvio && /* @__PURE__ */ (0, import_jsx_runtime27.jsx)("p", { id: errorId, role: "alert", className: "pb-2 text-xs font-semibold text-rose-600 dark:text-rose-400", children: errorEnvio }),
+        /* @__PURE__ */ (0, import_jsx_runtime27.jsxs)("div", { className: "flex gap-2", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime27.jsx)(
+            "input",
+            {
+              ref: inputRef,
+              id: inputId,
+              value: borrador,
+              onChange: (e) => setBorrador(e.target.value),
+              disabled: deshabilitado,
+              "aria-disabled": deshabilitado,
+              "aria-label": deshabilitado ? mensajeDeshabilitado ?? "Chat no disponible" : "Escribe un mensaje",
+              "aria-describedby": [
+                deshabilitado ? "chat-deshabilitado-ayuda" : null,
+                errorEnvio ? errorId : null
+              ].filter(Boolean).join(" ") || void 0,
+              placeholder: deshabilitado ? mensajeDeshabilitado ?? "Chat no disponible" : "Escribe un mensaje",
+              className: "min-h-11 flex-1 rounded-[10px] border border-border-strong bg-surface px-3 py-2 font-body text-base transition focus:border-route-action focus:outline-none focus:ring-[3px] focus:ring-route-action/20 disabled:cursor-not-allowed disabled:bg-surface-elevated disabled:text-disabled"
+            }
+          ),
+          /* @__PURE__ */ (0, import_jsx_runtime27.jsx)(Button, { type: "submit", disabled: deshabilitado || enviando || !borrador.trim(), children: enviando ? "Enviando\u2026" : "Enviar" })
+        ] })
       ] }),
-      deshabilitado && mensajeDeshabilitado && /* @__PURE__ */ (0, import_jsx_runtime26.jsx)("p", { id: "chat-deshabilitado-ayuda", className: "sr-only", role: "status", "aria-live": "polite", children: mensajeDeshabilitado })
+      deshabilitado && mensajeDeshabilitado && /* @__PURE__ */ (0, import_jsx_runtime27.jsx)("p", { id: "chat-deshabilitado-ayuda", className: "sr-only", role: "status", "aria-live": "polite", children: mensajeDeshabilitado })
     ] });
   }
 
@@ -32637,7 +32716,7 @@
   var import_image_component = __toESM(require_image_component());
 
   // packages/ui/src/components/MapaEstatico.tsx
-  var import_jsx_runtime27 = __toESM(require_jsx_runtime(), 1);
+  var import_jsx_runtime28 = __toESM(require_jsx_runtime(), 1);
   function MapaEstatico({
     src,
     alt,
@@ -32651,7 +32730,7 @@
   }) {
     const local = src.startsWith("blob:") || src.startsWith("data:");
     const fijo = width != null && height != null;
-    return /* @__PURE__ */ (0, import_jsx_runtime27.jsx)(
+    return /* @__PURE__ */ (0, import_jsx_runtime28.jsx)(
       import_image_component.Image,
       {
         src,
@@ -32670,7 +32749,7 @@
 
   // packages/ui/src/components/MobileBadge.tsx
   init_define_process_env();
-  var import_jsx_runtime28 = __toESM(require_jsx_runtime(), 1);
+  var import_jsx_runtime29 = __toESM(require_jsx_runtime(), 1);
   var ESTILOS_VARIANTE = {
     exito: {
       contenedor: "bg-[#e9f3ee] text-[#08705f] border-[#c8e6d8] dark:bg-[#0a2e1f] dark:text-[#4dd9a3] dark:border-[#135939]",
@@ -32706,7 +32785,7 @@
     className = ""
   }) {
     const estilo = ESTILOS_VARIANTE[variante] ?? ESTILOS_VARIANTE.neutro;
-    return /* @__PURE__ */ (0, import_jsx_runtime28.jsxs)(
+    return /* @__PURE__ */ (0, import_jsx_runtime29.jsxs)(
       "span",
       {
         className: [
@@ -32716,15 +32795,15 @@
           className
         ].join(" "),
         children: [
-          punto && /* @__PURE__ */ (0, import_jsx_runtime28.jsx)(
+          punto && /* @__PURE__ */ (0, import_jsx_runtime29.jsx)(
             "span",
             {
               className: ["size-1.5 rounded-full shrink-0", estilo.punto].join(" "),
               "aria-hidden": "true"
             }
           ),
-          icono && /* @__PURE__ */ (0, import_jsx_runtime28.jsx)("span", { className: "shrink-0", "aria-hidden": "true", children: icono }),
-          /* @__PURE__ */ (0, import_jsx_runtime28.jsx)("span", { children: texto })
+          icono && /* @__PURE__ */ (0, import_jsx_runtime29.jsx)("span", { className: "shrink-0", "aria-hidden": "true", children: icono }),
+          /* @__PURE__ */ (0, import_jsx_runtime29.jsx)("span", { children: texto })
         ]
       }
     );
@@ -32732,7 +32811,7 @@
 
   // packages/ui/src/components/MobileCard.tsx
   init_define_process_env();
-  var import_jsx_runtime29 = __toESM(require_jsx_runtime(), 1);
+  var import_jsx_runtime30 = __toESM(require_jsx_runtime(), 1);
   var PADDING2 = {
     none: "",
     sm: "p-3 sm:p-4",
@@ -32753,7 +32832,7 @@
     elevated = false,
     radius = "2xl"
   }) {
-    return /* @__PURE__ */ (0, import_jsx_runtime29.jsx)(
+    return /* @__PURE__ */ (0, import_jsx_runtime30.jsx)(
       Component,
       {
         className: [
@@ -32771,7 +32850,7 @@
 
   // packages/ui/src/components/MobileRow.tsx
   init_define_process_env();
-  var import_jsx_runtime30 = __toESM(require_jsx_runtime(), 1);
+  var import_jsx_runtime31 = __toESM(require_jsx_runtime(), 1);
   var TONO_ICONO_CLASES = {
     base: "bg-[#edf4fe] text-[#104ca0] dark:bg-[#0f2d52] dark:text-[#6ba8ff]",
     verde: "bg-[#e9f3ee] text-[#08705f] dark:bg-[#0a2e1f] dark:text-[#4dd9a3]",
@@ -32782,7 +32861,7 @@
     neutro: "bg-[#eff3f8] text-[#3b4c68] dark:bg-[#1a2e4a] dark:text-[#a8b5cc]"
   };
   function ChevronDerecha() {
-    return /* @__PURE__ */ (0, import_jsx_runtime30.jsx)(
+    return /* @__PURE__ */ (0, import_jsx_runtime31.jsx)(
       "svg",
       {
         className: "size-4 shrink-0 text-[#8b9bb0] dark:text-[#6b7a99]",
@@ -32793,7 +32872,7 @@
         strokeLinecap: "round",
         strokeLinejoin: "round",
         "aria-hidden": "true",
-        children: /* @__PURE__ */ (0, import_jsx_runtime30.jsx)("path", { d: "m9 18 6-6-6-6" })
+        children: /* @__PURE__ */ (0, import_jsx_runtime31.jsx)("path", { d: "m9 18 6-6-6-6" })
       }
     );
   }
@@ -32816,15 +32895,15 @@
   }) {
     const esInteractivo = Boolean(href || onClick) && !disabled;
     const debeMostrarChevron = mostrarChevron ?? esInteractivo;
-    const contenido = /* @__PURE__ */ (0, import_jsx_runtime30.jsxs)(import_jsx_runtime30.Fragment, { children: [
-      conDivisor && /* @__PURE__ */ (0, import_jsx_runtime30.jsx)(
+    const contenido = /* @__PURE__ */ (0, import_jsx_runtime31.jsxs)(import_jsx_runtime31.Fragment, { children: [
+      conDivisor && /* @__PURE__ */ (0, import_jsx_runtime31.jsx)(
         "span",
         {
           "aria-hidden": "true",
           className: "absolute left-[64px] right-4 top-0 h-px bg-[#eef2f7] dark:bg-[#1a3a5c]"
         }
       ),
-      icono && /* @__PURE__ */ (0, import_jsx_runtime30.jsx)(
+      icono && /* @__PURE__ */ (0, import_jsx_runtime31.jsx)(
         "span",
         {
           "aria-hidden": "true",
@@ -32835,8 +32914,8 @@
           children: icono
         }
       ),
-      /* @__PURE__ */ (0, import_jsx_runtime30.jsxs)("span", { className: "min-w-0 flex-1 py-1", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime30.jsx)(
+      /* @__PURE__ */ (0, import_jsx_runtime31.jsxs)("span", { className: "min-w-0 flex-1 py-1", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime31.jsx)(
           "span",
           {
             className: [
@@ -32846,11 +32925,11 @@
             children: titulo
           }
         ),
-        subtitulo && /* @__PURE__ */ (0, import_jsx_runtime30.jsx)("span", { className: "mt-0.5 block text-[12.5px] font-medium leading-normal text-[#4e5f80] dark:text-[#a8b5cc]", children: subtitulo })
+        subtitulo && /* @__PURE__ */ (0, import_jsx_runtime31.jsx)("span", { className: "mt-0.5 block text-[12.5px] font-medium leading-normal text-[#4e5f80] dark:text-[#a8b5cc]", children: subtitulo })
       ] }),
-      badge && /* @__PURE__ */ (0, import_jsx_runtime30.jsx)("span", { className: "shrink-0", children: badge }),
-      derecha && /* @__PURE__ */ (0, import_jsx_runtime30.jsx)("span", { className: "shrink-0", children: derecha }),
-      debeMostrarChevron && /* @__PURE__ */ (0, import_jsx_runtime30.jsx)(ChevronDerecha, {})
+      badge && /* @__PURE__ */ (0, import_jsx_runtime31.jsx)("span", { className: "shrink-0", children: badge }),
+      derecha && /* @__PURE__ */ (0, import_jsx_runtime31.jsx)("span", { className: "shrink-0", children: derecha }),
+      debeMostrarChevron && /* @__PURE__ */ (0, import_jsx_runtime31.jsx)(ChevronDerecha, {})
     ] });
     const clasesFila = [
       "relative flex min-h-[54px] w-full items-center gap-3.5 px-4 py-3.5 text-left transition-colors",
@@ -32858,24 +32937,24 @@
       disabled ? "opacity-60 pointer-events-none" : "",
       className
     ].join(" ");
+    if (href && disabled) {
+      return /* @__PURE__ */ (0, import_jsx_runtime31.jsx)("span", { role: "link", "aria-disabled": "true", className: clasesFila, children: contenido });
+    }
     if (href) {
       const Componente = enlaceComponente || linkComponent || "a";
-      return /* @__PURE__ */ (0, import_jsx_runtime30.jsx)(
+      return /* @__PURE__ */ (0, import_jsx_runtime31.jsx)(
         Componente,
         {
-          href: disabled ? void 0 : href,
-          "aria-disabled": disabled ? "true" : void 0,
-          tabIndex: disabled ? -1 : void 0,
-          onClick: disabled ? (e) => e.preventDefault() : void 0,
+          href,
           className: clasesFila,
           children: contenido
         }
       );
     }
     if (onClick) {
-      return /* @__PURE__ */ (0, import_jsx_runtime30.jsx)("button", { type: "button", onClick, disabled, className: clasesFila, children: contenido });
+      return /* @__PURE__ */ (0, import_jsx_runtime31.jsx)("button", { type: "button", onClick, disabled, "aria-disabled": disabled || void 0, className: clasesFila, children: contenido });
     }
-    return /* @__PURE__ */ (0, import_jsx_runtime30.jsx)("div", { className: clasesFila, children: contenido });
+    return /* @__PURE__ */ (0, import_jsx_runtime31.jsx)("div", { className: clasesFila, children: contenido });
   }
   function MobileListGroup({
     children,
@@ -32885,9 +32964,9 @@
     className = ""
   }) {
     const Contenedor = as === "nav" ? "nav" : "div";
-    return /* @__PURE__ */ (0, import_jsx_runtime30.jsxs)("div", { className, children: [
-      tituloSeccion && /* @__PURE__ */ (0, import_jsx_runtime30.jsx)("h2", { className: "mb-2 px-1 text-[12px] font-semibold uppercase tracking-wider text-[#4e5f80] dark:text-[#a8b5cc]", children: tituloSeccion }),
-      /* @__PURE__ */ (0, import_jsx_runtime30.jsx)(
+    return /* @__PURE__ */ (0, import_jsx_runtime31.jsxs)("div", { className, children: [
+      tituloSeccion && /* @__PURE__ */ (0, import_jsx_runtime31.jsx)("h2", { className: "mb-2 px-1 text-[12px] font-semibold uppercase tracking-wider text-[#4e5f80] dark:text-[#a8b5cc]", children: tituloSeccion }),
+      /* @__PURE__ */ (0, import_jsx_runtime31.jsx)(
         Contenedor,
         {
           ...as === "nav" ? { "aria-label": ariaLabel || tituloSeccion } : {},
@@ -32900,9 +32979,9 @@
 
   // packages/ui/src/components/MobileHeader.tsx
   init_define_process_env();
-  var import_jsx_runtime31 = __toESM(require_jsx_runtime(), 1);
+  var import_jsx_runtime32 = __toESM(require_jsx_runtime(), 1);
   function IconoFlechaAtras() {
-    return /* @__PURE__ */ (0, import_jsx_runtime31.jsx)(
+    return /* @__PURE__ */ (0, import_jsx_runtime32.jsx)(
       "svg",
       {
         className: "size-4.5 text-[#0a2342] dark:text-[#f6f8fb]",
@@ -32913,7 +32992,7 @@
         strokeLinecap: "round",
         strokeLinejoin: "round",
         "aria-hidden": "true",
-        children: /* @__PURE__ */ (0, import_jsx_runtime31.jsx)("path", { d: "m15 18-6-6 6-6" })
+        children: /* @__PURE__ */ (0, import_jsx_runtime32.jsx)("path", { d: "m15 18-6-6 6-6" })
       }
     );
   }
@@ -32928,8 +33007,8 @@
     className = ""
   }) {
     const tieneAtras = Boolean(enlaceAtras || onAtras);
-    const botonAtrasClases = "flex size-10 shrink-0 items-center justify-center rounded-full border border-[#e2e8f0] bg-white shadow-xs transition hover:bg-[#f6f8fb] active:scale-95 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#0066ff] dark:border-[#2d4f73] dark:bg-[#0a2342] dark:hover:bg-[#0f2d52]";
-    return /* @__PURE__ */ (0, import_jsx_runtime31.jsxs)(
+    const botonAtrasClases = "flex size-10 shrink-0 items-center justify-center rounded-full border border-[#e2e8f0] bg-white shadow-xs transition hover:bg-[#f6f8fb] active:scale-95 focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-[#0066ff] dark:border-[#2d4f73] dark:bg-[#0a2342] dark:hover:bg-[#0f2d52]";
+    return /* @__PURE__ */ (0, import_jsx_runtime32.jsxs)(
       "header",
       {
         className: [
@@ -32939,31 +33018,45 @@
           className
         ].join(" "),
         children: [
-          /* @__PURE__ */ (0, import_jsx_runtime31.jsxs)("div", { className: "flex min-w-0 flex-1 items-center gap-3", children: [
-            tieneAtras && /* @__PURE__ */ (0, import_jsx_runtime31.jsx)(import_jsx_runtime31.Fragment, { children: enlaceAtras ? /* @__PURE__ */ (0, import_jsx_runtime31.jsx)(
+          /* @__PURE__ */ (0, import_jsx_runtime32.jsxs)("div", { className: "flex min-w-0 flex-1 items-center gap-3", children: [
+            tieneAtras && /* @__PURE__ */ (0, import_jsx_runtime32.jsx)(import_jsx_runtime32.Fragment, { children: enlaceAtras ? /* @__PURE__ */ (0, import_jsx_runtime32.jsx)(
               "a",
               {
                 href: enlaceAtras,
                 className: botonAtrasClases,
                 "aria-label": etiquetaAtras,
-                children: /* @__PURE__ */ (0, import_jsx_runtime31.jsx)(IconoFlechaAtras, {})
+                children: /* @__PURE__ */ (0, import_jsx_runtime32.jsx)(IconoFlechaAtras, {})
               }
-            ) : /* @__PURE__ */ (0, import_jsx_runtime31.jsx)(
+            ) : /* @__PURE__ */ (0, import_jsx_runtime32.jsx)(
               "button",
               {
                 type: "button",
                 onClick: onAtras,
                 className: botonAtrasClases,
                 "aria-label": etiquetaAtras,
-                children: /* @__PURE__ */ (0, import_jsx_runtime31.jsx)(IconoFlechaAtras, {})
+                children: /* @__PURE__ */ (0, import_jsx_runtime32.jsx)(IconoFlechaAtras, {})
               }
             ) }),
-            /* @__PURE__ */ (0, import_jsx_runtime31.jsxs)("div", { className: "min-w-0 flex-1", children: [
-              /* @__PURE__ */ (0, import_jsx_runtime31.jsx)("h1", { className: "truncate text-[17px] font-bold tracking-tight text-[#0a2342] leading-tight dark:text-[#f6f8fb] sm:text-[18px]", children: titulo }),
-              subtitulo && /* @__PURE__ */ (0, import_jsx_runtime31.jsx)("p", { className: "truncate text-[12px] font-medium text-[#4e5f80] dark:text-[#a8b5cc] mt-0.5", children: subtitulo })
+            /* @__PURE__ */ (0, import_jsx_runtime32.jsxs)("div", { className: "min-w-0 flex-1", children: [
+              /* @__PURE__ */ (0, import_jsx_runtime32.jsx)(
+                "h1",
+                {
+                  className: "truncate text-[17px] font-bold tracking-tight text-[#0a2342] leading-tight dark:text-[#f6f8fb] sm:text-[18px]",
+                  title: titulo,
+                  children: titulo
+                }
+              ),
+              subtitulo && /* @__PURE__ */ (0, import_jsx_runtime32.jsx)(
+                "p",
+                {
+                  className: "truncate text-[12px] font-medium text-[#4e5f80] dark:text-[#a8b5cc] mt-0.5",
+                  title: subtitulo,
+                  children: subtitulo
+                }
+              )
             ] })
           ] }),
-          accionDerecha && /* @__PURE__ */ (0, import_jsx_runtime31.jsx)("div", { className: "shrink-0 flex items-center gap-2", children: accionDerecha })
+          accionDerecha && /* @__PURE__ */ (0, import_jsx_runtime32.jsx)("div", { className: "shrink-0 flex items-center gap-2", children: accionDerecha })
         ]
       }
     );
@@ -32971,7 +33064,7 @@
 
   // packages/ui/src/components/MobileButton.tsx
   init_define_process_env();
-  var import_jsx_runtime32 = __toESM(require_jsx_runtime(), 1);
+  var import_jsx_runtime33 = __toESM(require_jsx_runtime(), 1);
   var ESTILOS_VARIANTE2 = {
     primary: "bg-[#0a2342] text-white shadow-[0_12px_24px_-8px_rgba(10,35,66,0.35)] hover:bg-[#162c47] active:scale-[0.98] dark:bg-[#4d94ff] dark:text-[#061529] dark:hover:bg-[#6ba8ff]",
     secondary: "border border-[#d7e1ee] bg-white text-[#0a2342] hover:bg-[#f6f8fb] active:scale-[0.98] dark:border-[#2d4f73] dark:bg-[#0a2342] dark:text-[#f6f8fb] dark:hover:bg-[#0f2d52]",
@@ -32990,7 +33083,7 @@
     className = "",
     ...props
   }) {
-    const boton = /* @__PURE__ */ (0, import_jsx_runtime32.jsxs)(
+    const boton = /* @__PURE__ */ (0, import_jsx_runtime33.jsxs)(
       "button",
       {
         className: [
@@ -33005,28 +33098,28 @@
         disabled: disabled || loading,
         "aria-busy": loading ? "true" : props["aria-busy"],
         children: [
-          loading && /* @__PURE__ */ (0, import_jsx_runtime32.jsx)(
+          loading && /* @__PURE__ */ (0, import_jsx_runtime33.jsx)(
             "span",
             {
               className: "size-5 animate-spin rounded-full border-2 border-current border-t-transparent",
               "aria-hidden": "true"
             }
           ),
-          !loading && icon && /* @__PURE__ */ (0, import_jsx_runtime32.jsx)("span", { className: "shrink-0", "aria-hidden": "true", children: icon }),
-          /* @__PURE__ */ (0, import_jsx_runtime32.jsx)("span", { children }),
-          !loading && iconRight && /* @__PURE__ */ (0, import_jsx_runtime32.jsx)("span", { className: "shrink-0", "aria-hidden": "true", children: iconRight })
+          !loading && icon && /* @__PURE__ */ (0, import_jsx_runtime33.jsx)("span", { className: "shrink-0", "aria-hidden": "true", children: icon }),
+          /* @__PURE__ */ (0, import_jsx_runtime33.jsx)("span", { children }),
+          !loading && iconRight && /* @__PURE__ */ (0, import_jsx_runtime33.jsx)("span", { className: "shrink-0", "aria-hidden": "true", children: iconRight })
         ]
       }
     );
     if (!stickyBottom) {
       return boton;
     }
-    return /* @__PURE__ */ (0, import_jsx_runtime32.jsx)("div", { className: "sticky bottom-0 left-0 right-0 z-30 border-t border-[#eef2f7] bg-white/95 p-4 backdrop-blur-md transition-colors pb-[max(16px,env(safe-area-inset-bottom,16px))] dark:border-[#1a3a5c] dark:bg-[#0a2342]/95", children: boton });
+    return /* @__PURE__ */ (0, import_jsx_runtime33.jsx)("div", { className: "sticky bottom-0 left-0 right-0 z-30 border-t border-[#eef2f7] bg-white/95 p-4 backdrop-blur-md transition-colors pb-[max(16px,env(safe-area-inset-bottom,16px))] dark:border-[#1a3a5c] dark:bg-[#0a2342]/95", children: boton });
   }
 
   // packages/ui/src/components/MobileShell.tsx
   init_define_process_env();
-  var import_jsx_runtime33 = __toESM(require_jsx_runtime(), 1);
+  var import_jsx_runtime34 = __toESM(require_jsx_runtime(), 1);
   var ANCHO_VARIANTE = {
     compact: "max-w-[480px]",
     wide: "max-w-5xl"
@@ -33048,7 +33141,7 @@
     contentClassName = "",
     style
   }) {
-    return /* @__PURE__ */ (0, import_jsx_runtime33.jsx)(
+    return /* @__PURE__ */ (0, import_jsx_runtime34.jsx)(
       Component,
       {
         style,
@@ -33057,7 +33150,7 @@
           conFondoCanvas ? "bg-[var(--user-color-background,var(--ruum-canvas))] text-[var(--user-color-primary,var(--ruum-text-primary))]" : "",
           className
         ].join(" "),
-        children: /* @__PURE__ */ (0, import_jsx_runtime33.jsx)(
+        children: /* @__PURE__ */ (0, import_jsx_runtime34.jsx)(
           "div",
           {
             className: [
@@ -33077,9 +33170,9 @@
   // packages/ui/src/components/RuumHeader.tsx
   init_define_process_env();
   var import_link = __toESM(require_link2(), 1);
-  var import_jsx_runtime34 = __toESM(require_jsx_runtime(), 1);
+  var import_jsx_runtime35 = __toESM(require_jsx_runtime(), 1);
   function IconoCampana({ className = "size-5" }) {
-    return /* @__PURE__ */ (0, import_jsx_runtime34.jsxs)(
+    return /* @__PURE__ */ (0, import_jsx_runtime35.jsxs)(
       "svg",
       {
         className,
@@ -33091,14 +33184,14 @@
         strokeLinejoin: "round",
         "aria-hidden": "true",
         children: [
-          /* @__PURE__ */ (0, import_jsx_runtime34.jsx)("path", { d: "M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" }),
-          /* @__PURE__ */ (0, import_jsx_runtime34.jsx)("path", { d: "M10.3 21a1.94 1.94 0 0 0 3.4 0" })
+          /* @__PURE__ */ (0, import_jsx_runtime35.jsx)("path", { d: "M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" }),
+          /* @__PURE__ */ (0, import_jsx_runtime35.jsx)("path", { d: "M10.3 21a1.94 1.94 0 0 0 3.4 0" })
         ]
       }
     );
   }
   function IconoSoporte({ className = "size-5" }) {
-    return /* @__PURE__ */ (0, import_jsx_runtime34.jsxs)(
+    return /* @__PURE__ */ (0, import_jsx_runtime35.jsxs)(
       "svg",
       {
         className,
@@ -33110,9 +33203,9 @@
         strokeLinejoin: "round",
         "aria-hidden": "true",
         children: [
-          /* @__PURE__ */ (0, import_jsx_runtime34.jsx)("path", { d: "M4 13v-1a8 8 0 0 1 16 0v1" }),
-          /* @__PURE__ */ (0, import_jsx_runtime34.jsx)("path", { d: "M4 13a2 2 0 0 1 2-2h1v6H6a2 2 0 0 1-2-2v-2ZM20 13a2 2 0 0 0-2-2h-1v6h1a2 2 0 0 0 2-2v-2Z" }),
-          /* @__PURE__ */ (0, import_jsx_runtime34.jsx)("path", { d: "M17 17c0 2-1.8 3-4 3h-1" })
+          /* @__PURE__ */ (0, import_jsx_runtime35.jsx)("path", { d: "M4 13v-1a8 8 0 0 1 16 0v1" }),
+          /* @__PURE__ */ (0, import_jsx_runtime35.jsx)("path", { d: "M4 13a2 2 0 0 1 2-2h1v6H6a2 2 0 0 1-2-2v-2ZM20 13a2 2 0 0 0-2-2h-1v6h1a2 2 0 0 0 2-2v-2Z" }),
+          /* @__PURE__ */ (0, import_jsx_runtime35.jsx)("path", { d: "M17 17c0 2-1.8 3-4 3h-1" })
         ]
       }
     );
@@ -33130,7 +33223,7 @@
     const roleLabel = esConductor ? "conductor" : "Usuario";
     const tieneNotificaciones = notificacionesCount > 0;
     const ariaLabelNotificaciones = tieneNotificaciones ? `Notificaciones (${notificacionesCount} pendientes)` : "Notificaciones";
-    return /* @__PURE__ */ (0, import_jsx_runtime34.jsxs)(
+    return /* @__PURE__ */ (0, import_jsx_runtime35.jsxs)(
       "header",
       {
         className: [
@@ -33141,23 +33234,22 @@
           className
         ].join(" "),
         children: [
-          /* @__PURE__ */ (0, import_jsx_runtime34.jsx)(
+          /* @__PURE__ */ (0, import_jsx_runtime35.jsx)(
             "div",
             {
               className: "ruum-header__wave absolute top-0 right-0 w-[140px] h-[56px] shrink-0 bg-gradient-to-br from-[#00d1d1] to-[#0a2342] rounded-bl-[48px] opacity-90",
               "aria-hidden": "true"
             }
           ),
-          /* @__PURE__ */ (0, import_jsx_runtime34.jsxs)("div", { className: "ruum-header__inner flex w-full items-center justify-between gap-3", children: [
-            accionIzquierda && /* @__PURE__ */ (0, import_jsx_runtime34.jsx)("div", { className: "ruum-header__accion-izq flex shrink-0 items-center", children: accionIzquierda }),
-            /* @__PURE__ */ (0, import_jsx_runtime34.jsx)("div", { className: "ruum-header__branding flex shrink-0 items-center gap-2.5 min-w-0", children: /* @__PURE__ */ (0, import_jsx_runtime34.jsxs)(
+          /* @__PURE__ */ (0, import_jsx_runtime35.jsxs)("div", { className: "ruum-header__inner flex w-full items-center justify-between gap-3", children: [
+            accionIzquierda && /* @__PURE__ */ (0, import_jsx_runtime35.jsx)("div", { className: "ruum-header__accion-izq flex shrink-0 items-center", children: accionIzquierda }),
+            /* @__PURE__ */ (0, import_jsx_runtime35.jsx)("div", { className: "ruum-header__branding flex shrink-0 items-center gap-2.5 min-w-0", children: /* @__PURE__ */ (0, import_jsx_runtime35.jsxs)(
               import_link.default,
               {
                 href: hrefLogo,
                 className: "ruum-header__logo flex shrink-0 items-center gap-2.5 rounded-xl transition duration-200 hover:opacity-90 focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-[#0066ff]",
-                "aria-label": "Ruum Ruum",
                 children: [
-                  /* @__PURE__ */ (0, import_jsx_runtime34.jsx)(
+                  /* @__PURE__ */ (0, import_jsx_runtime35.jsx)("span", { "aria-hidden": "true", className: "shrink-0", children: /* @__PURE__ */ (0, import_jsx_runtime35.jsx)(
                     LogoMarca,
                     {
                       variante: "simbolo",
@@ -33165,16 +33257,16 @@
                       tema: "claro",
                       className: "ruum-header__logo-img shrink-0"
                     }
-                  ),
-                  /* @__PURE__ */ (0, import_jsx_runtime34.jsxs)("div", { className: "ruum-header__text min-w-0", children: [
-                    /* @__PURE__ */ (0, import_jsx_runtime34.jsx)("span", { className: "ruum-header__title block truncate font-display text-[17px] font-black leading-none tracking-tight text-[#0a2342] dark:text-[#f6f8fb]", children: "Ruum Ruum" }),
-                    /* @__PURE__ */ (0, import_jsx_runtime34.jsx)("span", { className: "ruum-header__role block truncate text-[11px] font-medium leading-none text-[#566889] dark:text-[#a8b5cc] uppercase tracking-wider", children: roleLabel })
+                  ) }),
+                  /* @__PURE__ */ (0, import_jsx_runtime35.jsxs)("div", { className: "ruum-header__text min-w-0", children: [
+                    /* @__PURE__ */ (0, import_jsx_runtime35.jsx)("span", { className: "ruum-header__title block truncate font-display text-[17px] font-black leading-none tracking-tight text-[#0a2342] dark:text-[#f6f8fb]", children: "Ruum Ruum" }),
+                    /* @__PURE__ */ (0, import_jsx_runtime35.jsx)("span", { className: "ruum-header__role block truncate text-[11px] font-medium leading-none text-[#566889] dark:text-[#a8b5cc] uppercase tracking-wider", children: roleLabel })
                   ] })
                 ]
               }
             ) }),
-            /* @__PURE__ */ (0, import_jsx_runtime34.jsxs)("div", { className: "ruum-header__actions flex shrink-0 items-center gap-2", children: [
-              onNotificaciones && /* @__PURE__ */ (0, import_jsx_runtime34.jsxs)(
+            /* @__PURE__ */ (0, import_jsx_runtime35.jsxs)("div", { className: "ruum-header__actions flex shrink-0 items-center gap-2", children: [
+              onNotificaciones && /* @__PURE__ */ (0, import_jsx_runtime35.jsxs)(
                 "button",
                 {
                   type: "button",
@@ -33186,13 +33278,13 @@
                     "dark:border-[#1a3a5c] dark:bg-[#0a2342] dark:text-[#a8b5cc]"
                   ].join(" "),
                   children: [
-                    /* @__PURE__ */ (0, import_jsx_runtime34.jsx)(IconoCampana, { className: "size-5" }),
-                    tieneNotificaciones && /* @__PURE__ */ (0, import_jsx_runtime34.jsx)("span", { className: "ruum-header__dot absolute top-[2px] right-[2px] size-2.5 rounded-full bg-[#00d0ff] border border-white", "aria-hidden": "true" }),
-                    /* @__PURE__ */ (0, import_jsx_runtime34.jsx)("span", { className: "sr-only", children: tieneNotificaciones ? `${notificacionesCount} notificaciones pendientes` : "Sin notificaciones pendientes" })
+                    /* @__PURE__ */ (0, import_jsx_runtime35.jsx)(IconoCampana, { className: "size-5" }),
+                    tieneNotificaciones && /* @__PURE__ */ (0, import_jsx_runtime35.jsx)("span", { className: "ruum-header__dot absolute top-[2px] right-[2px] size-2.5 rounded-full bg-[#00d0ff] border border-white", "aria-hidden": "true" }),
+                    /* @__PURE__ */ (0, import_jsx_runtime35.jsx)("span", { className: "sr-only", children: tieneNotificaciones ? `${notificacionesCount} notificaciones pendientes` : "Sin notificaciones pendientes" })
                   ]
                 }
               ),
-              onSoporte && /* @__PURE__ */ (0, import_jsx_runtime34.jsxs)(
+              onSoporte && /* @__PURE__ */ (0, import_jsx_runtime35.jsxs)(
                 "button",
                 {
                   type: "button",
@@ -33204,8 +33296,8 @@
                     "dark:border-[#1a3a5c] dark:bg-[#0a2342] dark:text-[#a8b5cc]"
                   ].join(" "),
                   children: [
-                    /* @__PURE__ */ (0, import_jsx_runtime34.jsx)(IconoSoporte, { className: "size-5" }),
-                    /* @__PURE__ */ (0, import_jsx_runtime34.jsx)("span", { className: "sr-only", children: "Soporte y ayuda" })
+                    /* @__PURE__ */ (0, import_jsx_runtime35.jsx)(IconoSoporte, { className: "size-5" }),
+                    /* @__PURE__ */ (0, import_jsx_runtime35.jsx)("span", { className: "sr-only", children: "Soporte y ayuda" })
                   ]
                 }
               )
@@ -33217,7 +33309,7 @@
   }
 
   // auditorias/RUUM-UX-001-SD/showcase.tsx
-  var import_jsx_runtime35 = __toESM(require_jsx_runtime());
+  var import_jsx_runtime36 = __toESM(require_jsx_runtime());
   var text = "Informaci\xF3n del traslado para revisi\xF3n del sistema de dise\xF1o.";
   var long = "Informaci\xF3n importante del traslado con una descripci\xF3n extensa que debe permanecer legible y operable al ampliar el texto y reducir el ancho de la pantalla.";
   var noop = () => {
@@ -33228,42 +33320,42 @@
   }
   function sample(name, state, props = {}, children = void 0) {
     const C = components_exports[name];
-    add(name, state, () => import_react8.default.createElement(C, props, children));
+    add(name, state, () => import_react10.default.createElement(C, props, children));
   }
   for (const variant of ["primary", "secondary", "quiet", "danger", "emergency"]) for (const state of ["default", "disabled", "loading"]) sample("Button", variant + "-" + state, { variant, disabled: state === "disabled", loading: state === "loading" }, "Continuar con el traslado");
   for (const n of ["ButtonPrimary", "ButtonSecondary", "ButtonText", "MobileButton"]) for (const s of ["default", "disabled", "loading"]) sample(n, s, { disabled: s === "disabled", loading: s === "loading" }, "Continuar con el traslado");
   for (const variant of ["secondary", "quiet", "danger"]) sample("MobileButton", variant, { variant }, "Continuar con el traslado");
-  for (const n of ["Input", "Field", "Textarea", "Select"]) for (const s of ["default", "disabled", "error", "help", "long-label"]) sample(n, s, { etiqueta: s === "long-label" ? long : "Nombre del contacto", disabled: s === "disabled", error: s === "error" ? "Revisa la informaci\xF3n del campo" : void 0, ...s === "help" && ["Input", "Field"].includes(n) ? { ayuda: "Escribe el nombre completo" } : {} }, n === "Select" ? /* @__PURE__ */ (0, import_jsx_runtime35.jsxs)(import_jsx_runtime35.Fragment, { children: [
-    /* @__PURE__ */ (0, import_jsx_runtime35.jsx)("option", { children: "Primera opci\xF3n" }),
-    /* @__PURE__ */ (0, import_jsx_runtime35.jsx)("option", { children: "Segunda opci\xF3n" })
+  for (const n of ["Input", "Field", "Textarea", "Select"]) for (const s of ["default", "disabled", "error", "help", "long-label"]) sample(n, s, { etiqueta: s === "long-label" ? long : "Nombre del contacto", disabled: s === "disabled", error: s === "error" ? "Revisa la informaci\xF3n del campo" : void 0, ...s === "help" && ["Input", "Field"].includes(n) ? { ayuda: "Escribe el nombre completo" } : {} }, n === "Select" ? /* @__PURE__ */ (0, import_jsx_runtime36.jsxs)(import_jsx_runtime36.Fragment, { children: [
+    /* @__PURE__ */ (0, import_jsx_runtime36.jsx)("option", { children: "Primera opci\xF3n" }),
+    /* @__PURE__ */ (0, import_jsx_runtime36.jsx)("option", { children: "Segunda opci\xF3n" })
   ] }) : void 0);
   sample("Field", "password", { etiqueta: "Contrase\xF1a", type: "password", defaultValue: "Ejemplo123", ayuda: "Al menos ocho caracteres" });
   for (const n of ["Input", "Select", "Textarea"]) {
     const C = components_exports[n];
-    add(n, "multiple-without-id", () => /* @__PURE__ */ (0, import_jsx_runtime35.jsxs)(import_jsx_runtime35.Fragment, { children: [
-      /* @__PURE__ */ (0, import_jsx_runtime35.jsx)(C, { etiqueta: "Primer campo", children: n === "Select" ? /* @__PURE__ */ (0, import_jsx_runtime35.jsx)("option", { children: "Primero" }) : void 0 }),
-      /* @__PURE__ */ (0, import_jsx_runtime35.jsx)(C, { etiqueta: "Segundo campo", children: n === "Select" ? /* @__PURE__ */ (0, import_jsx_runtime35.jsx)("option", { children: "Segundo" }) : void 0 })
+    add(n, "multiple-without-id", () => /* @__PURE__ */ (0, import_jsx_runtime36.jsxs)(import_jsx_runtime36.Fragment, { children: [
+      /* @__PURE__ */ (0, import_jsx_runtime36.jsx)(C, { etiqueta: "Primer campo", children: n === "Select" ? /* @__PURE__ */ (0, import_jsx_runtime36.jsx)("option", { children: "Primero" }) : void 0 }),
+      /* @__PURE__ */ (0, import_jsx_runtime36.jsx)(C, { etiqueta: "Segundo campo", children: n === "Select" ? /* @__PURE__ */ (0, import_jsx_runtime36.jsx)("option", { children: "Segundo" }) : void 0 })
     ] }));
   }
   for (const n of ["Checkbox", "Radio"]) for (const s of ["default", "checked", "disabled"]) sample(n, s, { etiqueta: "Acepto la informaci\xF3n del traslado", name: n, defaultChecked: s === "checked", disabled: s === "disabled" });
   function Switch({ disabled = false }) {
-    const [c, set] = (0, import_react8.useState)(false);
-    return /* @__PURE__ */ (0, import_jsx_runtime35.jsx)(Toggle, { etiqueta: "Notificaciones de traslado", checked: c, onCheckedChange: set, disabled });
+    const [c, set] = (0, import_react10.useState)(false);
+    return /* @__PURE__ */ (0, import_jsx_runtime36.jsx)(Toggle, { etiqueta: "Notificaciones de traslado", checked: c, onCheckedChange: set, disabled });
   }
-  add("Toggle", "default", () => /* @__PURE__ */ (0, import_jsx_runtime35.jsx)(Switch, {}));
-  add("Toggle", "disabled", () => /* @__PURE__ */ (0, import_jsx_runtime35.jsx)(Switch, { disabled: true }));
+  add("Toggle", "default", () => /* @__PURE__ */ (0, import_jsx_runtime36.jsx)(Switch, {}));
+  add("Toggle", "disabled", () => /* @__PURE__ */ (0, import_jsx_runtime36.jsx)(Switch, { disabled: true }));
   sample("Toggle", "checked", { etiqueta: "Notificaciones de traslado", checked: true, onCheckedChange: noop });
   for (const n of ["Alert", "Toast", "Aviso"]) for (const tono of n === "Aviso" ? ["info", "success", "atencion", "warning", "danger", "error"] : ["info", "success", "warning", "error"]) sample(n, tono, { tono, titulo: "Estado del traslado" }, text);
   for (const n of ["Card", "OperationalCard", "TripCard", "FinancialCard", "AlertCard", "PassportCard", "MobileCard"]) {
-    sample(n, "default", {}, /* @__PURE__ */ (0, import_jsx_runtime35.jsxs)(import_jsx_runtime35.Fragment, { children: [
-      /* @__PURE__ */ (0, import_jsx_runtime35.jsx)("h2", { children: "Resumen del traslado" }),
-      /* @__PURE__ */ (0, import_jsx_runtime35.jsx)("p", { children: text }),
-      /* @__PURE__ */ (0, import_jsx_runtime35.jsx)(Button, { variant: "secondary", children: "Ver detalle" })
+    sample(n, "default", {}, /* @__PURE__ */ (0, import_jsx_runtime36.jsxs)(import_jsx_runtime36.Fragment, { children: [
+      /* @__PURE__ */ (0, import_jsx_runtime36.jsx)("h2", { children: "Resumen del traslado" }),
+      /* @__PURE__ */ (0, import_jsx_runtime36.jsx)("p", { children: text }),
+      /* @__PURE__ */ (0, import_jsx_runtime36.jsx)(Button, { variant: "secondary", children: "Ver detalle" })
     ] }));
-    sample(n, "long-content", ["TripCard", "PassportCard"].includes(n) ? { folio: "RUUM-12345678" } : {}, /* @__PURE__ */ (0, import_jsx_runtime35.jsxs)(import_jsx_runtime35.Fragment, { children: [
-      /* @__PURE__ */ (0, import_jsx_runtime35.jsx)("h2", { children: long }),
-      /* @__PURE__ */ (0, import_jsx_runtime35.jsx)("p", { children: long }),
-      /* @__PURE__ */ (0, import_jsx_runtime35.jsx)(Button, { variant: "secondary", children: "Consultar informaci\xF3n del traslado" })
+    sample(n, "long-content", ["TripCard", "PassportCard"].includes(n) ? { folio: "RUUM-12345678" } : {}, /* @__PURE__ */ (0, import_jsx_runtime36.jsxs)(import_jsx_runtime36.Fragment, { children: [
+      /* @__PURE__ */ (0, import_jsx_runtime36.jsx)("h2", { children: long }),
+      /* @__PURE__ */ (0, import_jsx_runtime36.jsx)("p", { children: long }),
+      /* @__PURE__ */ (0, import_jsx_runtime36.jsx)(Button, { variant: "secondary", children: "Consultar informaci\xF3n del traslado" })
     ] }));
   }
   for (const estado of ["solicitado", "cotizacion-confirmada", "pendiente-conductor", "conductor-asignado", "evidencia-inicial-completa", "en-ruta", "entrega-confirmada", "cerrado", "evidencia-pendiente", "incidente-abierto", "cancelado", "pago-detenido"]) sample("StatusChip", estado, { estado });
@@ -33279,10 +33371,10 @@
   sample("BottomNav", "default", { items });
   sample("Sidebar", "default", { grupos: [{ titulo: "Cuenta", items: items.map((i) => ({ ...i, contador: 3 })) }] });
   function TabSample() {
-    const [a, set] = (0, import_react8.useState)("uno");
-    return /* @__PURE__ */ (0, import_jsx_runtime35.jsx)(Tabs, { tabs: [{ id: "uno", etiqueta: "Pr\xF3ximos", conteo: 4, activo: a === "uno" }, { id: "dos", etiqueta: "Completados", conteo: 12, activo: a === "dos" }], onSeleccion: set });
+    const [a, set] = (0, import_react10.useState)("uno");
+    return /* @__PURE__ */ (0, import_jsx_runtime36.jsx)(Tabs, { tabs: [{ id: "uno", etiqueta: "Pr\xF3ximos", conteo: 4, activo: a === "uno" }, { id: "dos", etiqueta: "Completados", conteo: 12, activo: a === "dos" }], onSeleccion: set });
   }
-  add("Tabs", "default", () => /* @__PURE__ */ (0, import_jsx_runtime35.jsx)(TabSample, {}));
+  add("Tabs", "default", () => /* @__PURE__ */ (0, import_jsx_runtime36.jsx)(TabSample, {}));
   sample("Avatar", "default", { nombre: "Mar\xEDa Gonz\xE1lez", conEstado: "activo" });
   sample("Avatar", "rounded", { nombre: "Mar\xEDa Gonz\xE1lez", forma: "rounded", tamano: 64 });
   sample("EmptyState", "default", { titulo: "Sin traslados", descripcion: "Aqu\xED aparecer\xE1n tus pr\xF3ximos traslados." });
@@ -33291,14 +33383,14 @@
   sample("MobileHeader", "long-label", { titulo: long, subtitulo: long, onAtras: noop });
   sample("RuumHeader", "default", { rol: "usuario", notificacionesCount: 3, onNotificaciones: noop, onSoporte: noop });
   for (const s of ["default", "disabled", "link", "disabled-link", "destructivo"]) sample("MobileRow", s, { titulo: "Consultar traslado", subtitulo: text, ...s.includes("link") ? { href: "#traslado" } : { onClick: noop }, disabled: s.startsWith("disabled"), destructivo: s === "destructivo" });
-  sample("MobileListGroup", "default", { as: "nav", tituloSeccion: "Mi cuenta" }, /* @__PURE__ */ (0, import_jsx_runtime35.jsxs)(import_jsx_runtime35.Fragment, { children: [
-    /* @__PURE__ */ (0, import_jsx_runtime35.jsx)(MobileRow, { titulo: "Preferencias", href: "#preferencias" }),
-    /* @__PURE__ */ (0, import_jsx_runtime35.jsx)(MobileRow, { titulo: "Soporte", href: "#soporte" })
+  sample("MobileListGroup", "default", { as: "nav", tituloSeccion: "Mi cuenta" }, /* @__PURE__ */ (0, import_jsx_runtime36.jsxs)(import_jsx_runtime36.Fragment, { children: [
+    /* @__PURE__ */ (0, import_jsx_runtime36.jsx)(MobileRow, { titulo: "Preferencias", href: "#preferencias" }),
+    /* @__PURE__ */ (0, import_jsx_runtime36.jsx)(MobileRow, { titulo: "Soporte", href: "#soporte" })
   ] }));
-  sample("MobileShell", "default", { navInferiorVisible: true }, /* @__PURE__ */ (0, import_jsx_runtime35.jsxs)(import_jsx_runtime35.Fragment, { children: [
-    /* @__PURE__ */ (0, import_jsx_runtime35.jsx)("h2", { children: "Contenido m\xF3vil" }),
-    /* @__PURE__ */ (0, import_jsx_runtime35.jsx)("p", { children: long }),
-    /* @__PURE__ */ (0, import_jsx_runtime35.jsx)(Button, { children: "Continuar" })
+  sample("MobileShell", "default", { navInferiorVisible: true }, /* @__PURE__ */ (0, import_jsx_runtime36.jsxs)(import_jsx_runtime36.Fragment, { children: [
+    /* @__PURE__ */ (0, import_jsx_runtime36.jsx)("h2", { children: "Contenido m\xF3vil" }),
+    /* @__PURE__ */ (0, import_jsx_runtime36.jsx)("p", { children: long }),
+    /* @__PURE__ */ (0, import_jsx_runtime36.jsx)(Button, { children: "Continuar" })
   ] }));
   for (const s of ["default", "loading", "error", "disabled-link"]) sample("NextOperationalAction", s, { title: "Siguiente acci\xF3n", instruction: long, primaryCta: { label: "Continuar", ...s === "disabled-link" ? { href: "#siguiente", disabled: true } : { onClick: noop } }, secondaryCta: { label: "Consultar informaci\xF3n", onClick: noop }, loading: s === "loading", error: s === "error" ? "No se pudo completar. Reintenta." : void 0 });
   var msgs = [{ id: "uno", remitente: "usuario", contenido: "Hola, necesito informaci\xF3n del traslado.", enviado_en: "2026-11-06T12:00:00Z" }, { id: "dos", remitente: "conductor", contenido: "El traslado sigue su ruta programada.", enviado_en: "2026-11-06T12:01:00Z" }];
@@ -33306,19 +33398,19 @@
     await new Promise((r2) => setTimeout(r2, 100));
   } });
   function ModalSample({ state }) {
-    const [open, set] = (0, import_react8.useState)(false), close = (0, import_react8.useCallback)(() => set(false), []);
-    return /* @__PURE__ */ (0, import_jsx_runtime35.jsxs)(import_jsx_runtime35.Fragment, { children: [
-      /* @__PURE__ */ (0, import_jsx_runtime35.jsx)("button", { "data-open": true, onClick: () => set(true), children: "Abrir di\xE1logo" }),
-      /* @__PURE__ */ (0, import_jsx_runtime35.jsxs)(Modal, { abierto: open, onCerrar: close, titulo: "Confirmar operaci\xF3n", estado: state === "loading" ? "loading" : state === "error" ? "error" : "default", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime35.jsx)("p", { children: long }),
-        state === "long-content" && Array.from({ length: 20 }, (_, i) => /* @__PURE__ */ (0, import_jsx_runtime35.jsx)("p", { children: long }, i)),
-        /* @__PURE__ */ (0, import_jsx_runtime35.jsx)(Button, { onClick: close, children: "Aceptar" }),
-        /* @__PURE__ */ (0, import_jsx_runtime35.jsx)(Button, { variant: "secondary", onClick: close, children: "Mantener" })
+    const [open, set] = (0, import_react10.useState)(false), close = (0, import_react10.useCallback)(() => set(false), []);
+    return /* @__PURE__ */ (0, import_jsx_runtime36.jsxs)(import_jsx_runtime36.Fragment, { children: [
+      /* @__PURE__ */ (0, import_jsx_runtime36.jsx)("button", { "data-open": true, onClick: () => set(true), children: "Abrir di\xE1logo" }),
+      /* @__PURE__ */ (0, import_jsx_runtime36.jsxs)(Modal, { abierto: open, onCerrar: close, titulo: "Confirmar operaci\xF3n", estado: state === "loading" ? "loading" : state === "error" ? "error" : "default", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime36.jsx)("p", { children: long }),
+        state === "long-content" && Array.from({ length: 20 }, (_, i) => /* @__PURE__ */ (0, import_jsx_runtime36.jsx)("p", { children: long }, i)),
+        /* @__PURE__ */ (0, import_jsx_runtime36.jsx)(Button, { onClick: close, children: "Aceptar" }),
+        /* @__PURE__ */ (0, import_jsx_runtime36.jsx)(Button, { variant: "secondary", onClick: close, children: "Mantener" })
       ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime35.jsx)("button", { "data-outside": true, children: "Acci\xF3n fuera del di\xE1logo" })
+      /* @__PURE__ */ (0, import_jsx_runtime36.jsx)("button", { "data-outside": true, children: "Acci\xF3n fuera del di\xE1logo" })
     ] });
   }
-  for (const state of ["default", "loading", "error", "long-content"]) add("Modal", state, () => /* @__PURE__ */ (0, import_jsx_runtime35.jsx)(ModalSample, { state }));
+  for (const state of ["default", "loading", "error", "long-content"]) add("Modal", state, () => /* @__PURE__ */ (0, import_jsx_runtime36.jsx)(ModalSample, { state }));
   sample("BannerDemo", "default");
   for (const variante of ["horizontal", "vertical", "simbolo", "avatar", "sello", "version-navy"]) sample("LogoMarca", variante, { variante });
   sample("SimboloVectorial", "default", { tamano: 72 });
@@ -33329,66 +33421,66 @@
   sample("ActaEntrega", "default", { folio: "TR-123", vehiculo: "Veh\xEDculo de prueba", origen: "Ciudad de M\xE9xico", destino: "Puebla" });
   sample("EstadoPagoConductor", "default", { folio: "TR-123", base: "$1,000", reembolsables: "$200", fechaEstimada: "8/11/2026", estatus: "Programado", causa: "Validaci\xF3n operativa" });
   sample("MapaEstatico", "default", { src: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='120'%3E%3Crect width='240' height='120' fill='%23e8eef4'/%3E%3C/svg%3E", alt: "Mapa del traslado de prueba", width: 240, height: 120 });
-  sample("StreetContainer", "default", { activo: true }, /* @__PURE__ */ (0, import_jsx_runtime35.jsxs)(import_jsx_runtime35.Fragment, { children: [
-    /* @__PURE__ */ (0, import_jsx_runtime35.jsx)("p", { children: long }),
-    /* @__PURE__ */ (0, import_jsx_runtime35.jsx)(Button, { children: "Continuar traslado" })
+  sample("StreetContainer", "default", { activo: true }, /* @__PURE__ */ (0, import_jsx_runtime36.jsxs)(import_jsx_runtime36.Fragment, { children: [
+    /* @__PURE__ */ (0, import_jsx_runtime36.jsx)("p", { children: long }),
+    /* @__PURE__ */ (0, import_jsx_runtime36.jsx)(Button, { children: "Continuar traslado" })
   ] }));
   sample("SafetyButton", "default", { onActivar: noop });
-  add("TextInputUppercaseBridge", "default", () => /* @__PURE__ */ (0, import_jsx_runtime35.jsxs)(import_jsx_runtime35.Fragment, { children: [
-    /* @__PURE__ */ (0, import_jsx_runtime35.jsx)(TextInputUppercaseBridge, {}),
-    /* @__PURE__ */ (0, import_jsx_runtime35.jsx)(Field, { etiqueta: "Nombre completo" }),
-    /* @__PURE__ */ (0, import_jsx_runtime35.jsx)(Field, { etiqueta: "Correo", type: "email" })
+  add("TextInputUppercaseBridge", "default", () => /* @__PURE__ */ (0, import_jsx_runtime36.jsxs)(import_jsx_runtime36.Fragment, { children: [
+    /* @__PURE__ */ (0, import_jsx_runtime36.jsx)(TextInputUppercaseBridge, {}),
+    /* @__PURE__ */ (0, import_jsx_runtime36.jsx)(Field, { etiqueta: "Nombre completo" }),
+    /* @__PURE__ */ (0, import_jsx_runtime36.jsx)(Field, { etiqueta: "Correo", type: "email" })
   ] }));
   function NativeDialog({ close }) {
     const ref = useDialogAccesible({ alCancelar: close });
-    return /* @__PURE__ */ (0, import_jsx_runtime35.jsxs)("dialog", { ref, "aria-label": "Di\xE1logo nativo de prueba", children: [
-      /* @__PURE__ */ (0, import_jsx_runtime35.jsx)("button", { onClick: close, children: "Cerrar" }),
-      /* @__PURE__ */ (0, import_jsx_runtime35.jsx)("button", { children: "Continuar" })
+    return /* @__PURE__ */ (0, import_jsx_runtime36.jsxs)("dialog", { ref, "aria-label": "Di\xE1logo nativo de prueba", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime36.jsx)("button", { onClick: close, children: "Cerrar" }),
+      /* @__PURE__ */ (0, import_jsx_runtime36.jsx)("button", { children: "Continuar" })
     ] });
   }
   function NativeSample() {
-    const [open, set] = (0, import_react8.useState)(false), close = (0, import_react8.useCallback)(() => set(false), []);
-    return /* @__PURE__ */ (0, import_jsx_runtime35.jsxs)(import_jsx_runtime35.Fragment, { children: [
-      /* @__PURE__ */ (0, import_jsx_runtime35.jsx)("button", { "data-open": true, onClick: () => set(true), children: "Abrir di\xE1logo nativo" }),
-      open && /* @__PURE__ */ (0, import_jsx_runtime35.jsx)(NativeDialog, { close }),
-      /* @__PURE__ */ (0, import_jsx_runtime35.jsx)("button", { "data-outside": true, children: "Acci\xF3n exterior" })
+    const [open, set] = (0, import_react10.useState)(false), close = (0, import_react10.useCallback)(() => set(false), []);
+    return /* @__PURE__ */ (0, import_jsx_runtime36.jsxs)(import_jsx_runtime36.Fragment, { children: [
+      /* @__PURE__ */ (0, import_jsx_runtime36.jsx)("button", { "data-open": true, onClick: () => set(true), children: "Abrir di\xE1logo nativo" }),
+      open && /* @__PURE__ */ (0, import_jsx_runtime36.jsx)(NativeDialog, { close }),
+      /* @__PURE__ */ (0, import_jsx_runtime36.jsx)("button", { "data-outside": true, children: "Acci\xF3n exterior" })
     ] });
   }
-  add("useDialogAccesible", "default", () => /* @__PURE__ */ (0, import_jsx_runtime35.jsx)(NativeSample, {}));
+  add("useDialogAccesible", "default", () => /* @__PURE__ */ (0, import_jsx_runtime36.jsx)(NativeSample, {}));
   function ThemeSample() {
     const { tema, modo, fijarModo } = useRuumTheme();
-    return /* @__PURE__ */ (0, import_jsx_runtime35.jsxs)(import_jsx_runtime35.Fragment, { children: [
-      /* @__PURE__ */ (0, import_jsx_runtime35.jsxs)("p", { children: [
+    return /* @__PURE__ */ (0, import_jsx_runtime36.jsxs)(import_jsx_runtime36.Fragment, { children: [
+      /* @__PURE__ */ (0, import_jsx_runtime36.jsxs)("p", { children: [
         modo,
         ": ",
         tema
       ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime35.jsx)("button", { onClick: () => fijarModo("light"), children: "Claro" }),
-      /* @__PURE__ */ (0, import_jsx_runtime35.jsx)("button", { onClick: () => fijarModo("dark"), children: "Oscuro" }),
-      /* @__PURE__ */ (0, import_jsx_runtime35.jsx)("button", { onClick: () => fijarModo("auto"), children: "Autom\xE1tico" })
+      /* @__PURE__ */ (0, import_jsx_runtime36.jsx)("button", { onClick: () => fijarModo("light"), children: "Claro" }),
+      /* @__PURE__ */ (0, import_jsx_runtime36.jsx)("button", { onClick: () => fijarModo("dark"), children: "Oscuro" }),
+      /* @__PURE__ */ (0, import_jsx_runtime36.jsx)("button", { onClick: () => fijarModo("auto"), children: "Autom\xE1tico" })
     ] });
   }
-  add("useRuumTheme", "default", () => /* @__PURE__ */ (0, import_jsx_runtime35.jsx)(ThemeSample, {}));
+  add("useRuumTheme", "default", () => /* @__PURE__ */ (0, import_jsx_runtime36.jsx)(ThemeSample, {}));
   function StreetSample() {
-    const [on, set] = (0, import_react8.useState)(false), state = useStreetMode(on);
-    return /* @__PURE__ */ (0, import_jsx_runtime35.jsxs)(import_jsx_runtime35.Fragment, { children: [
-      /* @__PURE__ */ (0, import_jsx_runtime35.jsx)("p", { children: JSON.stringify(state) }),
-      /* @__PURE__ */ (0, import_jsx_runtime35.jsx)("button", { onClick: () => set(!on), children: "Cambiar modo calle" })
+    const [on, set] = (0, import_react10.useState)(false), state = useStreetMode(on);
+    return /* @__PURE__ */ (0, import_jsx_runtime36.jsxs)(import_jsx_runtime36.Fragment, { children: [
+      /* @__PURE__ */ (0, import_jsx_runtime36.jsx)("p", { children: JSON.stringify(state) }),
+      /* @__PURE__ */ (0, import_jsx_runtime36.jsx)("button", { onClick: () => set(!on), children: "Cambiar modo calle" })
     ] });
   }
-  add("useStreetMode", "default", () => /* @__PURE__ */ (0, import_jsx_runtime35.jsx)(StreetSample, {}));
+  add("useStreetMode", "default", () => /* @__PURE__ */ (0, import_jsx_runtime36.jsx)(StreetSample, {}));
   var root = (0, import_client.createRoot)(document.getElementById("root"));
   window.auditRegistry = r.map(({ render, ...s }) => s);
   window.auditSelect = (id) => {
     const s = r.find((x) => x.id === id);
-    root.render(/* @__PURE__ */ (0, import_jsx_runtime35.jsxs)(import_react8.default.Fragment, { children: [
-      /* @__PURE__ */ (0, import_jsx_runtime35.jsx)("header", { id: "audit-heading", children: /* @__PURE__ */ (0, import_jsx_runtime35.jsxs)("h1", { children: [
+    root.render(/* @__PURE__ */ (0, import_jsx_runtime36.jsxs)(import_react10.default.Fragment, { children: [
+      /* @__PURE__ */ (0, import_jsx_runtime36.jsx)("header", { id: "audit-heading", children: /* @__PURE__ */ (0, import_jsx_runtime36.jsxs)("h1", { children: [
         s.component,
         " \xB7 ",
         s.state
       ] }) }),
-      /* @__PURE__ */ (0, import_jsx_runtime35.jsx)("main", { id: "sample", "data-audit-id": id, children: s.render() }),
-      /* @__PURE__ */ (0, import_jsx_runtime35.jsx)("footer", { id: "audit-footer", children: "Auditor\xEDa base de @ruum/ui" })
+      /* @__PURE__ */ (0, import_jsx_runtime36.jsx)("main", { id: "sample", "data-audit-id": id, children: s.render() }),
+      /* @__PURE__ */ (0, import_jsx_runtime36.jsx)("footer", { id: "audit-footer", children: "Auditor\xEDa base de @ruum/ui" })
     ] }, id));
   };
   window.auditSelect(r[0].id);

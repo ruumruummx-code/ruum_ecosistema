@@ -1,0 +1,37 @@
+{
+  "estado": "APROBADOS CON CONDICIONES",
+  "p2_1_cerrada": false,
+  "fecha": "2026-11-07",
+  "responsableCoordinacion": "H Manuel — Administración e Innovación Digital",
+  "decisionTecnica": {
+    "patron": "A",
+    "delegadaPor": "H Manuel",
+    "estado": "REGISTRADA; no equivale a co-revisión"
+  },
+  "frontendPlataforma": {
+    "estado": "PENDIENTE",
+    "nombre": null,
+    "fecha": null,
+    "evidencia": null
+  },
+  "accesibilidad": {
+    "estado": "PENDIENTE",
+    "nombre": null,
+    "fecha": null,
+    "evidencia": null
+  },
+  "disenoSistemas": {
+    "estado": "PENDIENTE",
+    "nombre": null,
+    "fecha": null,
+    "evidencia": null,
+    "objeto": "Revisar sustitución text-white por text-[var(--ruum-on-primary)] en NextOperationalAction, variantes habilitada/deshabilitada y ambos temas, junto con revisiones pendientes"
+  },
+  "sesionAsistiva": {
+    "estado": "PENDIENTE",
+    "operadorNominal": null,
+    "transcriptorNominal": null,
+    "respaldo": null
+  },
+  "alcance": "Consumidores fuente solo app-conductor; evidencia de componentes en harness y dos pruebas de consumidores, sin recorrido de ruta real de conductor ni consumidores en app-usuario."
+}

@@ -224,16 +224,16 @@ export const PasoPago = memo(function PasoPago({
         </div>
       </section>
 
-      {/* Tabs de métodos de pago (RUUM-USR-F6-001 CA-7 / T8: MVP solo admite Tarjeta vía Stripe; otros métodos deshabilitados con badge) */}
+      {/* Selección de método de pago (RUUM-USR-F6-001 CA-7 / T8: MVP solo admite Tarjeta vía Stripe; otros métodos deshabilitados con badge) */}
       <div
         className={styles.paymentMethodTabs}
-        role="tablist"
+        role="group"
         aria-label="Métodos de pago"
       >
         <button
           type="button"
-          role="tab"
-          aria-selected="true"
+
+          aria-pressed="true"
           className={`${styles.paymentTab} ${styles.paymentTabActive}`}
         >
           <svg
@@ -253,8 +253,8 @@ export const PasoPago = memo(function PasoPago({
         </button>
         <button
           type="button"
-          role="tab"
-          aria-selected="false"
+
+          aria-pressed="false"
           aria-disabled="true"
           disabled
           className={`${styles.paymentTab} opacity-60 cursor-not-allowed`}
@@ -278,8 +278,8 @@ export const PasoPago = memo(function PasoPago({
         </button>
         <button
           type="button"
-          role="tab"
-          aria-selected="false"
+
+          aria-pressed="false"
           aria-disabled="true"
           disabled
           className={`${styles.paymentTab} opacity-60 cursor-not-allowed`}

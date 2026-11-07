@@ -44,9 +44,9 @@ test("Mis traslados: tabla, selección, filtros y contención del scroll desktop
       main.getByRole("link", { name: "Contactar soporte", exact: true }),
     ).toBeInViewport({ ratio: 1 });
     const geometry = await main.evaluate((el) => {
-      const table = el.querySelector('[role="tabpanel"]')!;
+      const table = el.querySelector("#tabla-traslados")!;
       const panel = el.querySelector("aside")!;
-      const content = panel.querySelector('[role="tabpanel"]')!;
+      const content = panel.querySelector('[role="tabpanel"]:not([hidden]) > div')!;
       return {
         global: document.documentElement.scrollHeight - innerHeight,
         horizontal: document.documentElement.scrollWidth - innerWidth,
@@ -96,9 +96,9 @@ test("Mis traslados: tabla, selección, filtros y contención del scroll desktop
   await expect(main.getByText("Folio", { exact: true })).toBeVisible();
   await main.getByRole("button", { name: "Cerrar detalle" }).click();
   await expect(main.getByRole("complementary")).toHaveCount(0);
-  await main.getByRole("tab", { name: /^Cancelados/ }).click();
-  await expect(main.getByRole("tab", { name: /^Cancelados/ })).toHaveAttribute(
-    "aria-selected",
+  await main.getByRole("button", { name: /^Cancelados/ }).click();
+  await expect(main.getByRole("button", { name: /^Cancelados/ })).toHaveAttribute(
+    "aria-pressed",
     "true",
   );
   await main.getByRole("button", { name: "Limpiar filtros" }).click();

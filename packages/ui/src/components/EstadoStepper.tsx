@@ -72,10 +72,9 @@ export function MobileProgress({ estado, currentLabel }: EstadoStepperProps) {
       <details className="mt-3 rounded-xl border border-border/80 bg-surface/80">
         <summary
           className="flex min-h-[44px] cursor-pointer items-center justify-between px-3.5 py-2 font-body text-xs font-semibold text-route-action hover:text-route-action-hover"
-          aria-label="Ver todas las etapas del traslado"
         >
           <span>Ver desglose de etapas ({paso}/{total})</span>
-          <span className="text-text-tertiary font-mono-ruum text-xs">▼</span>
+          <span className="text-text-tertiary font-mono-ruum text-xs" aria-hidden="true">▼</span>
         </summary>
         <ol className="grid gap-2 border-t border-border/60 px-3.5 py-3" aria-label="Etapas del traslado">
           {ETAPAS_TRASLADO.map((etapa, i) => {

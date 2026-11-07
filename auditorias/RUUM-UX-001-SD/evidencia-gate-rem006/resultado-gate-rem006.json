@@ -1,0 +1,151 @@
+{
+  "viewports": [
+    {
+      "width": 320,
+      "theme": "light",
+      "snapshot": "MobileHeader-light-320px.png",
+      "metrics": {
+        "headerHeight": 61,
+        "headerWidth": 288,
+        "titleText": "Mis traslados",
+        "titleAttribute": "Mis traslados",
+        "subtitleText": null,
+        "subtitleAttribute": null,
+        "titleScrollWidth": 204,
+        "titleClientWidth": 204,
+        "isTruncated": false,
+        "backBtnAriaLabel": "Regresar"
+      }
+    },
+    {
+      "width": 320,
+      "theme": "dark",
+      "snapshot": "MobileHeader-dark-320px.png",
+      "metrics": {
+        "headerHeight": 61,
+        "headerWidth": 288,
+        "titleText": "Mis traslados",
+        "titleAttribute": "Mis traslados",
+        "subtitleText": null,
+        "subtitleAttribute": null,
+        "titleScrollWidth": 204,
+        "titleClientWidth": 204,
+        "isTruncated": false,
+        "backBtnAriaLabel": "Regresar"
+      }
+    },
+    {
+      "width": 390,
+      "theme": "light",
+      "snapshot": "MobileHeader-light-390px.png",
+      "metrics": {
+        "headerHeight": 61,
+        "headerWidth": 358,
+        "titleText": "Mis traslados",
+        "titleAttribute": "Mis traslados",
+        "subtitleText": null,
+        "subtitleAttribute": null,
+        "titleScrollWidth": 274,
+        "titleClientWidth": 274,
+        "isTruncated": false,
+        "backBtnAriaLabel": "Regresar"
+      }
+    },
+    {
+      "width": 390,
+      "theme": "dark",
+      "snapshot": "MobileHeader-dark-390px.png",
+      "metrics": {
+        "headerHeight": 61,
+        "headerWidth": 358,
+        "titleText": "Mis traslados",
+        "titleAttribute": "Mis traslados",
+        "subtitleText": null,
+        "subtitleAttribute": null,
+        "titleScrollWidth": 274,
+        "titleClientWidth": 274,
+        "isTruncated": false,
+        "backBtnAriaLabel": "Regresar"
+      }
+    },
+    {
+      "width": 768,
+      "theme": "light",
+      "snapshot": "MobileHeader-light-768px.png",
+      "metrics": {
+        "headerHeight": 61,
+        "headerWidth": 736,
+        "titleText": "Mis traslados",
+        "titleAttribute": "Mis traslados",
+        "subtitleText": null,
+        "subtitleAttribute": null,
+        "titleScrollWidth": 636,
+        "titleClientWidth": 636,
+        "isTruncated": false,
+        "backBtnAriaLabel": "Regresar"
+      }
+    },
+    {
+      "width": 768,
+      "theme": "dark",
+      "snapshot": "MobileHeader-dark-768px.png",
+      "metrics": {
+        "headerHeight": 61,
+        "headerWidth": 736,
+        "titleText": "Mis traslados",
+        "titleAttribute": "Mis traslados",
+        "subtitleText": null,
+        "subtitleAttribute": null,
+        "titleScrollWidth": 636,
+        "titleClientWidth": 636,
+        "isTruncated": false,
+        "backBtnAriaLabel": "Regresar"
+      }
+    },
+    {
+      "width": 1440,
+      "theme": "light",
+      "snapshot": "MobileHeader-light-1440px.png",
+      "metrics": {
+        "headerHeight": 61,
+        "headerWidth": 1408,
+        "titleText": "Mis traslados",
+        "titleAttribute": "Mis traslados",
+        "subtitleText": null,
+        "subtitleAttribute": null,
+        "titleScrollWidth": 1308,
+        "titleClientWidth": 1308,
+        "isTruncated": false,
+        "backBtnAriaLabel": "Regresar"
+      }
+    },
+    {
+      "width": 1440,
+      "theme": "dark",
+      "snapshot": "MobileHeader-dark-1440px.png",
+      "metrics": {
+        "headerHeight": 61,
+        "headerWidth": 1408,
+        "titleText": "Mis traslados",
+        "titleAttribute": "Mis traslados",
+        "subtitleText": null,
+        "subtitleAttribute": null,
+        "titleScrollWidth": 1308,
+        "titleClientWidth": 1308,
+        "isTruncated": false,
+        "backBtnAriaLabel": "Regresar"
+      }
+    }
+  ],
+  "modal": {
+    "dialogExists": true,
+    "dialogRole": "dialog",
+    "ariaModal": "true",
+    "closeBtnInViewport": true,
+    "closeBtnCoords": {
+      "top": 41,
+      "left": 907
+    }
+  },
+  "timestamp": "2026-11-07T08:23:58.916Z"
+}
