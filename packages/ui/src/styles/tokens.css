@@ -3,7 +3,7 @@
  * Fuente: design-system/tokens/tokens.json — Libro de Marca V2.1 cap. 13/26.
  *
  * Paleta oficial V1.0:
- *   Navy #0A2342 · Teal #00D1D1 · Teal Deep #008B8B · Action #0066FF
+ *   Navy #0A2342 · Teal #00D1D1 · Teal Deep #007575 · Action #0066FF
  *   Surface #E8EEF4 · White #FFFFFF · Muted #566889 · Border-Input #7A8DAE
  *   Warning #F5B400 · Success #16805A · Error #C23648 · Emergency #B3261E
  * Tipografía: Inter (Display, UI, Cuerpo). Respaldo Arial/Calibri.
@@ -286,7 +286,7 @@
    * Documentos operativos siempre claros: usar .ruum-force-light. */
   --ruum-navy: #0a2342;
   --ruum-teal: #00d1d1;
-  --ruum-teal-deep: #007575;
+  --ruum-teal-deep: #00b3b3;
   --ruum-blue: #4d94ff;
   --ruum-action: #4d94ff;
   --ruum-action-hover: #6ba8ff;
