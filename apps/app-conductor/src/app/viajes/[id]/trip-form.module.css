@@ -25,7 +25,7 @@
 .photoPlaceholder { display:flex; align-items:center; justify-content:center; min-height:90px; padding:12px; border-radius:12px; background:var(--conductor-surface-secondary); color:var(--conductor-muted); }
 .checklist { display:grid; gap:8px; margin:0; padding:0; list-style:none; font-size:14px; }
 .complete { white-space:pre-wrap; overflow-wrap:anywhere; }
-.signature { width:100%; height:140px; touch-action:none; background:#fff; color:#10213b; border:2px dashed var(--conductor-border); border-radius:12px; }
+.signature { width:100%; height:140px; touch-action:none; background:var(--conductor-surface); color:var(--conductor-primary); border:2px dashed var(--conductor-border); border-radius:12px; }
 .status { font-size:14px; color:var(--conductor-muted); }
 .steps { display:grid; gap:8px; }
 .steps button { min-height:48px; text-align:left; padding:12px; border:1px solid var(--conductor-border); border-radius:10px; font-size:16px; }

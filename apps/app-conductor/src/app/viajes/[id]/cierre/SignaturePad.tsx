@@ -8,7 +8,8 @@ export function SignaturePad({canvasRef,onChange,disabled=false}:{canvasRef:RefO
   const paint=()=>{
     const canvas=canvasRef.current;if(!canvas)return;const r=canvas.getBoundingClientRect();if(!r.width||!r.height)return;
     const ratio=devicePixelRatio||1;canvas.width=Math.round(r.width*ratio);canvas.height=Math.round(r.height*ratio);
-    const ctx=canvas.getContext("2d");if(!ctx)return;ctx.scale(ratio,ratio);ctx.strokeStyle="#10213b";ctx.lineWidth=2.4;ctx.lineCap="round";ctx.lineJoin="round";
+    const strokeColor = getComputedStyle(canvas).color || "var(--conductor-primary)";
+    const ctx=canvas.getContext("2d");if(!ctx)return;ctx.scale(ratio,ratio);ctx.strokeStyle=strokeColor;ctx.lineWidth=2.4;ctx.lineCap="round";ctx.lineJoin="round";
     for(const stroke of strokes.current){ctx.beginPath();stroke.forEach((p,i)=>{if(i===0)ctx.moveTo(p.x*r.width,p.y*r.height);else ctx.lineTo(p.x*r.width,p.y*r.height);});ctx.stroke();}
   };
   const repaint=useRef(paint);repaint.current=paint;
