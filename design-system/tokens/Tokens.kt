@@ -10,7 +10,7 @@ import androidx.compose.ui.unit.sp
 object RuumTokens {
     val Navy = Color(0xFF0A2342)
     val Teal = Color(0xFF00D1D1)
-    val TealDeep = Color(0xFF008B8B)
+    val TealDeep = Color(0xFF007575)
     val Action = Color(0xFF0066FF)
     val Surface = Color(0xFFE8EEF4)
     val White = Color(0xFFFFFFFF)

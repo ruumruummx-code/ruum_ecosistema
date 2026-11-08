@@ -117,10 +117,10 @@ export function SecondaryTripNavBar({
           <Link
             href={`/viajes/${trasladoId}/detalles`}
             aria-current={tabActiva === "detalles" ? "page" : undefined}
-            className={`flex min-h-[40px] cursor-pointer items-center justify-center gap-1.5 rounded-2xl px-2.5 py-1.5 font-body text-xs transition-all duration-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0057D9] ${
+            className={`flex min-h-[40px] cursor-pointer items-center justify-center gap-1.5 rounded-2xl px-2.5 py-1.5 font-body text-xs transition-all duration-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--conductor-focus)] ${
               tabActiva === "detalles"
-                ? "bg-[#DFECFC] font-extrabold text-[#0057D9] shadow-2xs"
-                : "font-semibold text-[#4A5B78] hover:bg-[#E8F0FA] hover:text-[#0A1E3C]"
+                ? "bg-[var(--conductor-action-soft)] font-extrabold text-[var(--conductor-action)] shadow-2xs"
+                : "font-semibold text-[var(--conductor-muted)] hover:bg-[var(--conductor-surface-secondary)] hover:text-[var(--conductor-primary)]"
             }`}
           >
             <svg className="size-4 shrink-0" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
@@ -135,10 +135,10 @@ export function SecondaryTripNavBar({
             onClick={() => setTabActiva("gastos")}
             aria-haspopup="dialog"
             aria-expanded={tabActiva === "gastos"}
-            className={`flex min-h-[40px] cursor-pointer items-center justify-center gap-1.5 rounded-2xl px-2.5 py-1.5 font-body text-xs transition-all duration-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0057D9] ${
+            className={`flex min-h-[40px] cursor-pointer items-center justify-center gap-1.5 rounded-2xl px-2.5 py-1.5 font-body text-xs transition-all duration-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--conductor-focus)] ${
               tabActiva === "gastos"
-                ? "bg-[#DFECFC] font-extrabold text-[#0057D9] shadow-2xs"
-                : "font-semibold text-[#4A5B78] hover:bg-[#E8F0FA] hover:text-[#0A1E3C]"
+                ? "bg-[var(--conductor-action-soft)] font-extrabold text-[var(--conductor-action)] shadow-2xs"
+                : "font-semibold text-[var(--conductor-muted)] hover:bg-[var(--conductor-surface-secondary)] hover:text-[var(--conductor-primary)]"
             }`}
           >
             <svg className="size-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.1" aria-hidden="true">
@@ -155,10 +155,10 @@ export function SecondaryTripNavBar({
             onClick={() => setTabActiva("incidencia")}
             aria-haspopup="dialog"
             aria-expanded={tabActiva === "incidencia"}
-            className={`flex min-h-[40px] cursor-pointer items-center justify-center gap-1.5 rounded-2xl px-2.5 py-1.5 font-body text-xs transition-all duration-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0057D9] ${
+            className={`flex min-h-[40px] cursor-pointer items-center justify-center gap-1.5 rounded-2xl px-2.5 py-1.5 font-body text-xs transition-all duration-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--conductor-focus)] ${
               tabActiva === "incidencia"
-                ? "bg-[#FEF3C7] font-extrabold text-[#B45309] shadow-2xs"
-                : "font-semibold text-[#4A5B78] hover:bg-[#E8F0FA] hover:text-[#0A1E3C]"
+                ? "bg-[var(--conductor-pending-soft)] font-extrabold text-[var(--conductor-pending)] shadow-2xs"
+                : "font-semibold text-[var(--conductor-muted)] hover:bg-[var(--conductor-surface-secondary)] hover:text-[var(--conductor-primary)]"
             }`}
           >
             <svg className="size-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.1" aria-hidden="true">

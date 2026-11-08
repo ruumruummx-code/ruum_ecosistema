@@ -47,8 +47,8 @@ export default function PaginaEvidencia() {
         <p>Foto {step+1} de 5. {photo.instruction}</p>
         {captured && fotoSrc(captured) ? <button type="button" className={styles.photoButton} onClick={()=>setPreview(true)} aria-label="Ampliar fotografía">
           {/* eslint-disable-next-line @next/next/no-img-element -- Vista previa de captura local o URL firmada. */}
-          <img className={styles.preview} src={fotoSrc(captured)!} alt={`Evidencia: ${photo.label}`} /><span>Ampliar fotografía</span>
-        </button> : <div className={styles.photoPlaceholder}>La fotografía aparecerá aquí</div>}
+          <img className={styles.preview} src={fotoSrc(captured)!} alt={`Evidencia: ${photo.label}`} /><span className={styles.photoBadge}><span aria-hidden="true">✓ </span>Ampliar fotografía</span>
+        </button> : <div className={styles.photoPlaceholder}><span aria-hidden="true" className={styles.photoPlaceholderIcon}>📷</span><span>La fotografía aparecerá aquí</span></div>}
         {captured && <p role="status">{captured.sincronizada ? "Sincronizada" : "Guardada en el dispositivo; pendiente de sincronización"}</p>}
 
       </>}

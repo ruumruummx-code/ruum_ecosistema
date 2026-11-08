@@ -6,7 +6,7 @@ import SwiftUI
 public extension Color {
     static let ruumNavy = Color(hex: "0A2342")
     static let ruumTeal = Color(hex: "00D1D1")
-    static let ruumTealDeep = Color(hex: "008B8B")
+    static let ruumTealDeep = Color(hex: "007575")
     static let ruumAction = Color(hex: "0066FF")
     static let ruumSurface = Color(hex: "E8EEF4")
     static let ruumMuted = Color(hex: "566889")

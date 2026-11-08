@@ -19,7 +19,27 @@ export function TripFormFrame({ id, title, step, total, stepLabel, onPrevious, o
         <p>{title}</p><button type="button" onClick={()=>setSupport(true)} aria-label="Soporte">Ayuda</button>
         <EmergencyPanel trasladoId={id} compact headerPill pillLabel="SOS" />
       </header>
-      {step != null && total != null && <div className={styles.progress}><p role="status">Paso {step+1} de {total} · {stepLabel}</p>{onSteps && <button type="button" onClick={onSteps}>Ver pasos</button>}</div>}
+      {step != null && total != null && (
+        <div className={styles.progressContainer}>
+          <div
+            className={styles.progressBar}
+            role="progressbar"
+            aria-valuenow={step + 1}
+            aria-valuemin={1}
+            aria-valuemax={total}
+            aria-label="Progreso del checklist"
+          >
+            <div
+              className={styles.progressFill}
+              style={{ width: `${Math.round(((step + 1) / total) * 100)}%` }}
+            />
+          </div>
+          <div className={styles.progress}>
+            <p role="status">Paso {step+1} de {total} · {stepLabel}</p>
+            {onSteps && <button type="button" onClick={onSteps}>Ver pasos</button>}
+          </div>
+        </div>
+      )}
     </>} footer={<section data-trip-primary className={styles.footer}>
       {error && <div role="alert" className={styles.error}><p>{error.length>130 ? "No se pudo completar la acción. Consulta el motivo." : error}</p>{error.length>130 && <button type="button" onClick={()=>setDetails(true)}>Ver motivo completo</button>}</div>}
       {notice && <button type="button" className={styles.notice} onClick={()=>setDetails(true)}>Ver estado del registro</button>}
