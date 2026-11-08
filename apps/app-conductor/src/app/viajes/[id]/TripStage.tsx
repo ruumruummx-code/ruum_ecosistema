@@ -19,11 +19,11 @@ export type TripStageProps = {
   destination?: boolean; primaryLabel: string; onPrimary?: () => void; primaryHref?: string;
   busy?: boolean; disabled?: boolean; error?: string | null; notice?: string | null;
   backHref?: string; readOnly?: boolean; onChat?: () => void; extraTools?: ReactNode;
-  children?: ReactNode; offer?: boolean;
+  children?: ReactNode; offer?: boolean; minimal?: boolean; onReject?: () => void;
 };
 
 /** Estado, punto actual y siguiente acción; el detalle completo se consulta a demanda. */
-export function TripStage({ pasaporte, title, instruction, stateLabel, destination = false, primaryLabel, onPrimary, primaryHref, busy = false, disabled = false, error, notice, backHref = "/viajes", readOnly = false, onChat, extraTools, children, offer = false }: TripStageProps) {
+export function TripStage({ pasaporte, title, instruction, stateLabel, destination = false, primaryLabel, onPrimary, primaryHref, busy = false, disabled = false, error, notice, backHref = "/viajes", readOnly = false, onChat, extraTools, children, offer = false, minimal = false, onReject }: TripStageProps) {
   const [dialog, setDialog] = useState<"details" | "point" | "navigation" | "error" | "chat" | null>(null);
   const [support, setSupport] = useState(false);
   const [navigation, setNavigation] = useState<NavigationOption[]>([]);
@@ -48,7 +48,7 @@ export function TripStage({ pasaporte, title, instruction, stateLabel, destinati
     {pasaporte.estado && chatDisponible(pasaporte.estado) && <button type="button" onClick={onChat || (() => setDialog("chat"))}>Abrir chat del traslado</button>}
   </section>;
 
-  return <div data-trip-stage>
+  return <div data-trip-stage className={minimal ? styles.minimal : undefined}>
     <ConductorScreen variant="operation" label="Resumen operativo del traslado" header={<header className={styles.safety} aria-label="Seguridad del traslado">
       <Link href={backHref} aria-label="Volver a Traslados" title="Volver a Traslados">←</Link>
       <p>Traslado<span>{id.slice(0, 8).toUpperCase()}</span></p>
@@ -69,10 +69,11 @@ export function TripStage({ pasaporte, title, instruction, stateLabel, destinati
           <span className={styles.address}>{offer ? `${pasaporte.origen_direccion || "Origen por confirmar"} → ${pasaporte.destino_direccion || "Destino por confirmar"}` : street || "Dirección por confirmar"}</span>
           <span className={styles.pointHint}>{offer ? "Ver ruta completa →" : "Ver dirección completa →"}</span>
         </button>
-        {offer ? <p className={styles.vehicle}>Ganancia: <strong>{money}</strong></p> : <p className={styles.vehicle}>{vehicle} · <strong>{pasaporte.vehiculo_placas || "Placas por confirmar"}</strong></p>}
+        {offer ? <p className={styles.vehicle}>Ganancia: <strong>{money}</strong></p> : <p className={styles.vehicle}>{vehicle} · <strong className={styles.plates}>{pasaporte.vehiculo_placas || "Placas por confirmar"}</strong></p>}
         <div className={styles.tools}>
           <button type="button" onClick={() => setDialog("details")} aria-haspopup="dialog">{readOnly ? "Ver detalle" : "Detalles y herramientas"}</button>
-          {!readOnly && <button type="button" onClick={openNavigation} disabled={!canNavigate} aria-haspopup="dialog">Navegar</button>}
+          {!readOnly && !offer && <button type="button" onClick={openNavigation} disabled={!canNavigate} aria-haspopup="dialog">Navegar</button>}
+          {offer && onReject && <button type="button" onClick={onReject} disabled={disabled} aria-haspopup="dialog">Rechazar oferta</button>}
         </div>
         {children}
       </div>

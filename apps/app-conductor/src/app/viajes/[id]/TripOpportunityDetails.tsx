@@ -1,6 +1,7 @@
 "use client";
 import { OpportunityDetailsView } from "./OpportunityDetailsView";
 import { TripDialog } from "./TripDialog";
+import styles from "./trip-stage.module.css";
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
@@ -206,7 +207,18 @@ export function TripOpportunityDetails({
       onAccept={() => void handleAceptar()} onReject={() => setMostrarModalRechazo(true)} />
     {mostrarModalRechazo && <TripDialog title="Motivo de rechazo" onClose={() => setMostrarModalRechazo(false)}>
       <p className="mb-3 text-sm">{nombreVehiculo(pasaporte)}</p>
-      <div className="grid gap-2">{MOTIVOS_RECHAZO.map(motivo => <button key={motivo} type="button" onClick={() => void handleConfirmarRechazo(motivo)} className="min-h-11 rounded-xl border border-border p-3 text-left text-sm">{motivo}</button>)}</div>
+      <div className={styles.rejectList}>
+        {MOTIVOS_RECHAZO.map(motivo => (
+          <button
+            key={motivo}
+            type="button"
+            onClick={() => void handleConfirmarRechazo(motivo)}
+            className={styles.rejectOption}
+          >
+            {motivo}
+          </button>
+        ))}
+      </div>
     </TripDialog>}
   </>;
 }

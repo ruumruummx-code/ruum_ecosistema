@@ -169,3 +169,29 @@ test("seguridad y navegación se abren sin perder el paso", async ({ page }) => 
   await emergency.getByRole("button", { name: "Cerrar", exact: true }).click(); await expect(trigger).toBeFocused();
   await hit(page.getByRole("button", { name: "Iniciar ruta", exact: true }));
 });
+test("oferta minimal: ruta como protagonista, ganancia oficial y rechazo con 6 motivos >= 56px", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto(`/viajes/${trip(0)}`);
+  await expect(page.locator("[data-conductor-screen=operation]:visible")).toHaveCount(1);
+  await expect(page.locator("[data-screen-body]:visible")).toContainText("Ganancia:");
+  const primaryBtn = page.locator("[data-trip-primary]:visible").locator("button,a").last();
+  await hit(primaryBtn);
+  const primaryBox = await primaryBtn.boundingBox();
+  expect(primaryBox!.height).toBeGreaterThanOrEqual(56);
+
+  const rejectBtn = page.getByRole("button", { name: "Rechazar oferta" });
+  await hit(rejectBtn);
+  const rejectBox = await rejectBtn.boundingBox();
+  expect(rejectBox!.height).toBeGreaterThanOrEqual(48);
+  expect(rejectBox!.width).toBeGreaterThanOrEqual(48);
+
+  await rejectBtn.click();
+  const dialog = page.getByRole("dialog", { name: "Motivo de rechazo" });
+  await expect(dialog).toBeVisible();
+  const reasonBtns = dialog.locator('[class*="rejectOption"]');
+  await expect(reasonBtns).toHaveCount(6);
+  for (const btn of await reasonBtns.all()) {
+    const box = await btn.boundingBox();
+    expect(box!.height).toBeGreaterThanOrEqual(56);
+  }
+});
