@@ -118,7 +118,7 @@ test("las rutas declaran una variante sin propietarios implícitos", async () =>
     const entries = await readdir(dir, { withFileTypes: true });
     return (await Promise.all(entries.map(entry => entry.isDirectory() ? walk(resolve(dir, entry.name)) : Promise.resolve(entry.name === "page.tsx" ? [resolve(dir, entry.name)] : [])))).flat();
   }
-  const routes = (await walk(root)).map(file => "/" + relative(root, file).replace(/\/?page\.tsx$/, ""));
+  const routes = (await walk(root)).map(file => ("/" + relative(root, file)).replace(/[\\/]page\.tsx$/, "").replace(/\\/g, "/") || "/");
   expect(routes.sort()).toEqual(Object.keys(CONDUCTOR_ROUTE_CONTRACT).sort());
   expect(conductorRouteContract(`/viajes/${trip(1)}/evidencia`).variant).toBe("form");
   expect(conductorRouteContract("/login").navigation).toBe(false);
