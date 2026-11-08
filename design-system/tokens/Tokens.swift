@@ -1,12 +1,12 @@
 // Ruum Ruum — Design Tokens v1.0 (Swift)
-// Fuente: design-system/tokens/tokens.json
+// GENERADO AUTOMÁTICAMENTE desde design-system/tokens/tokens.json — NO EDITAR A MANO
 // Uso: Text("Hola").font(.ruumBody).foregroundColor(.ruumNavy)
 import SwiftUI
 
 public extension Color {
     static let ruumNavy = Color(hex: "0A2342")
     static let ruumTeal = Color(hex: "00D1D1")
-    static let ruumTealDeep = Color(hex: "008B8B")
+    static let ruumTealDeep = Color(hex: "007575")
     static let ruumAction = Color(hex: "0066FF")
     static let ruumSurface = Color(hex: "E8EEF4")
     static let ruumMuted = Color(hex: "566889")
@@ -57,7 +57,7 @@ public extension Color {
     static let ruumDarkSurface = Color(hex: "0A2342")
     static let ruumDarkSurfaceElevated = Color(hex: "0F2D52")
     static let ruumDarkBorder = Color(hex: "1A3A5C")
-    static let ruumDarkBorderInput = Color(hex: "2D4F73")
+    static let ruumDarkBorderInput = Color(hex: "527CA8")
     static let ruumDarkTextPrimary = Color(hex: "F6F8FB")
     static let ruumDarkTextSecondary = Color(hex: "A8B5CC")
     static let ruumDarkTextMuted = Color(hex: "8293B0")
@@ -80,7 +80,7 @@ public extension Color {
     static let ruumDarkErrorText = Color(hex: "FF6B7A")
     static let ruumDarkIncident = Color(hex: "FF5C4D")
     static let ruumDarkIncidentBg = Color(hex: "3D0F0A")
-    static let ruumDarkIncidentText = Color(hex: "FF8A7A")
+    static let ruumDarkIncidentText = Color(hex: "FF5C4D")
     static let ruumDarkEmergency = Color(hex: "FF4D3D")
     static let ruumDarkEmergencyBg = Color(hex: "3D0A05")
     static let ruumDarkEmergencyText = Color(hex: "FF4D3D")

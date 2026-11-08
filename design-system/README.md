@@ -42,6 +42,16 @@ import { ButtonPrimary, StatusChip } from "@ruum/ui";
 <StatusChip estado="en-ruta" />
 ```
 
+## Regeneración de Tokens
+
+`tokens/tokens.json` es la fuente canónica de verdad. Para regenerar los tokens nativos Android (`Tokens.kt`), iOS (`Tokens.swift`) y TypeScript (`tokens.ts`):
+
+```bash
+pnpm tokens:generate
+```
+
+Los archivos generados llevan el encabezado `GENERADO AUTOMÁTICAMENTE desde design-system/tokens/tokens.json — NO EDITAR A MANO`.
+
 ## Versionado
 
 Nomenclatura: `AAAA-MM-DD_pieza_versión` (ej. `2026-09-25_button-primary_v1.0`).

@@ -1,5 +1,5 @@
 // Ruum Ruum — Design Tokens v1.0 (Kotlin)
-// Fuente: design-system/tokens/tokens.json
+// GENERADO AUTOMÁTICAMENTE desde design-system/tokens/tokens.json — NO EDITAR A MANO
 // package: com.ruum.designsystem
 package com.ruum.designsystem
 
@@ -10,7 +10,7 @@ import androidx.compose.ui.unit.sp
 object RuumTokens {
     val Navy = Color(0xFF0A2342)
     val Teal = Color(0xFF00D1D1)
-    val TealDeep = Color(0xFF008B8B)
+    val TealDeep = Color(0xFF007575)
     val Action = Color(0xFF0066FF)
     val Surface = Color(0xFFE8EEF4)
     val White = Color(0xFFFFFFFF)
@@ -53,7 +53,7 @@ object RuumTokens {
     val DarkSurface = Color(0xFF0A2342)
     val DarkSurfaceElevated = Color(0xFF0F2D52)
     val DarkBorder = Color(0xFF1A3A5C)
-    val DarkBorderInput = Color(0xFF2D4F73)
+    val DarkBorderInput = Color(0xFF527CA8)
     val DarkTextPrimary = Color(0xFFF6F8FB)
     val DarkTextSecondary = Color(0xFFA8B5CC)
     val DarkTextMuted = Color(0xFF8293B0)
@@ -76,7 +76,7 @@ object RuumTokens {
     val DarkErrorText = Color(0xFFFF6B7A)
     val DarkIncident = Color(0xFFFF5C4D)
     val DarkIncidentBg = Color(0xFF3D0F0A)
-    val DarkIncidentText = Color(0xFFFF8A7A)
+    val DarkIncidentText = Color(0xFFFF5C4D)
     val DarkEmergency = Color(0xFFFF4D3D)
     val DarkEmergencyBg = Color(0xFF3D0A05)
     val DarkEmergencyText = Color(0xFFFF4D3D)
