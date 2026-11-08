@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useState } from "react";
 import { Button, Aviso } from "@ruum/ui";
 import { TEXTOS_CARGANDO } from "@ruum/shared/constants";
 import { AccountStep } from "./AccountStep";
@@ -12,7 +13,7 @@ import { LicenseStep } from "./LicenseStep";
 import { OtpVerification } from "./OtpVerification";
 import { RegistrationProgress } from "./RegistrationProgress";
 import { RegistrationIcon } from "./RegistrationIcon";
-import { RegistrationShell } from "./RegistrationShell";
+import { RegistrationAction, RegistrationShell } from "./RegistrationShell";
 import { RegistrationNotice } from "./RegistrationNotice";
 import { LicenseConsentDetails } from "./LicenseConsentDetails";
 import styles from "./registration.module.css";
@@ -23,6 +24,7 @@ import { tieneSupabaseConfigurado } from "../../lib/supabase-browser";
 
 export default function PaginaRegistroConductor() {
   const r = useRegistroConductorLogic();
+  const [accountSection,setAccountSection]=useState<"contact"|"security">("contact");
 
   return (
     <RegistrationShell
@@ -127,20 +129,23 @@ export default function PaginaRegistroConductor() {
 
           <RegistrationProgress
             paso={r.paso}
-            onBack={() => r.paso === 0 ? r.router.push("/login") : r.volver()}
+            onBack={() => r.paso===0 ? accountSection==="security" ? setAccountSection("contact") : r.router.push("/login") : r.volver()}
             borradorLocalGuardado={r.borradorLocalGuardado}
             sesionAutenticada={r.sesionAutenticada}
             estadoGuardadoRemoto={r.estadoGuardadoRemoto}
             detalleGuardadoRemoto={r.detalleGuardadoRemoto}
           />
 
-          <form
+          <form id="conductor-registration-form"
             className={r.registroCompacto ? styles.form : "mt-6 grid gap-5"}
             noValidate
             inert={!r.registroListo}
             aria-busy={!r.registroListo || r.enviando}
             data-registration-ready={r.registroListo}
             onSubmit={(event) => {
+              if(r.paso===0&&!r.sesionAutenticada&&accountSection==="contact") {
+                event.preventDefault();if(r.validarTelefono("telefono",r.telefono,r.setTelefono)&&r.validarCampo("email",r.email))setAccountSection("security");return;
+              }
               if (r.paso < PASOS_REGISTRO.length - 1) {
                 event.preventDefault();
                 void r.avanzar();
@@ -152,10 +157,10 @@ export default function PaginaRegistroConductor() {
             {r.paso === 0 && (
               <>
                 <div className={styles.accountIntro}>
-                  <h1 id="titulo-registro-conductor">Crea tu cuenta</h1>
+                  <h1 id="titulo-registro-conductor">{r.sesionAutenticada || accountSection==="contact" ? "Datos de contacto" : "Protege tu cuenta"}</h1>
                   <p>Comienza a conducir con nosotros</p>
                 </div>
-                <AccountStep
+                <AccountStep section={r.sesionAutenticada ? "contact" : accountSection}
                   telefono={r.telefono}
                   setTelefono={r.setTelefono}
                   email={r.email}
@@ -173,7 +178,7 @@ export default function PaginaRegistroConductor() {
                   validarPassword={r.validarPassword}
                   validarConfirmacion={r.validarConfirmacion}
                 />
-                <label className={styles.accountLegal}>
+                {(r.sesionAutenticada || accountSection==="security") && <label className={styles.accountLegal}>
                   <input
                     type="checkbox"
                     required
@@ -189,7 +194,7 @@ export default function PaginaRegistroConductor() {
                   <span>
                     Acepto los <a href="/legal/terminos?volver=%2Fregistro" target="_blank" rel="noopener noreferrer">Términos y Condiciones</a> y el <a href="/legal/privacidad?volver=%2Fregistro" target="_blank" rel="noopener noreferrer">Aviso de Privacidad</a>.
                   </span>
-                </label>
+                </label>}
               </>
             )}
 
@@ -293,6 +298,13 @@ export default function PaginaRegistroConductor() {
               />
             )}
 
+                            {r.paso === 2 && (
+                  <p className={styles.microcopy}>
+                    Al continuar, declaras que tu licencia es válida y autorizas la verificación de antecedentes y datos biométricos. <a href="/legal/privacidad?volver=%2Fregistro" target="_blank" rel="noopener noreferrer">Privacidad</a> · <a href="/legal/terminos?volver=%2Fregistro" target="_blank" rel="noopener noreferrer">Términos</a>
+                    <button type="button" className={styles.legalTrigger} onClick={() => r.setMostrarDetalleConsentimiento(true)}>Ver declaración</button>
+                  </p>
+                )}
+
             {r.registroCompacto ? (
               <RegistrationNotice
                 message={
@@ -336,29 +348,34 @@ export default function PaginaRegistroConductor() {
               </Aviso>
             )}
 
-            {r.registroCompacto ? (
-              <footer className={styles.actionFooter}>
-                {r.paso === 2 && (
+                            {r.paso === 2 && (
                   <p className={styles.microcopy}>
                     Al continuar, declaras que tu licencia es válida y autorizas la verificación de antecedentes y datos biométricos. <a href="/legal/privacidad?volver=%2Fregistro" target="_blank" rel="noopener noreferrer">Privacidad</a> · <a href="/legal/terminos?volver=%2Fregistro" target="_blank" rel="noopener noreferrer">Términos</a>
                     <button type="button" className={styles.legalTrigger} onClick={() => r.setMostrarDetalleConsentimiento(true)}>Ver declaración</button>
                   </p>
                 )}
-                {r.paso === 3 && (
-                  <button className={styles.secondaryAction} type="button" onClick={r.volver}>
-                    Atrás
-                  </button>
+
+                {r.paso === 0 && (
+                  <p className={styles.accountLogin} hidden={accountSection==="security" && !r.sesionAutenticada}>
+                    ¿Ya tienes una cuenta? <Link href="/login">Entrar</Link>
+                  </p>
                 )}
+
+            {r.registroCompacto ? (
+              <RegistrationAction><footer className={styles.actionFooter}>
+
                 <button
                   className={styles.primary}
                   data-final-action={r.paso === 4 || undefined}
-                  type="submit"
+                  type={r.paso===0 && !r.sesionAutenticada && accountSection==="contact" ? "button" : "submit"}
+                  form="conductor-registration-form"
+                  onClick={r.paso===0 && !r.sesionAutenticada && accountSection==="contact" ? ()=>{ if(r.validarTelefono("telefono",r.telefono,r.setTelefono) && r.validarCampo("email",r.email))setAccountSection("security"); } : undefined}
                   aria-busy={r.enviando}
                   disabled={
                     !r.registroListo ||
                     r.enviando ||
                     !tieneSupabaseConfigurado() ||
-                    (r.paso === 0 && !r.cuentaCompleta) ||
+                    (r.paso === 0 && (accountSection==="contact" && !r.sesionAutenticada ? false : !r.cuentaCompleta)) ||
                     (r.paso === 1 && !r.domicilioYContactoCompletos) ||
                     (r.paso === 3 &&
                       !(
@@ -373,7 +390,7 @@ export default function PaginaRegistroConductor() {
                     : r.enviando
                     ? "Guardando…"
                     : r.paso === 0 && !r.sesionAutenticada
-                    ? "Crear cuenta y continuar"
+                    ? accountSection==="contact" ? "Continuar" : "Crear cuenta y continuar"
                     : r.paso === 1
                     ? "Guardar y continuar"
                     : r.paso === 4
@@ -381,12 +398,7 @@ export default function PaginaRegistroConductor() {
                     : "Continuar"}
                   {(r.paso < 2 || r.paso >= 3) && <RegistrationIcon name="arrow" />}
                 </button>
-                {r.paso === 0 && (
-                  <p className={styles.accountLogin}>
-                    ¿Ya tienes una cuenta? <Link href="/login">Entrar</Link>
-                  </p>
-                )}
-              </footer>
+              </footer></RegistrationAction>
             ) : (
               <div className="grid gap-3 sm:grid-cols-2">
                 {r.paso > 0 && (

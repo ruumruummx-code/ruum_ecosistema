@@ -1,0 +1,7 @@
+/workspace/ruum-fase2/apps/app-conductor/src/app/registro/DocumentsStep.tsx
+  30:46  warning  Generic Object Injection Sink  security/detect-object-injection
+
+/workspace/ruum-fase2/apps/app-conductor/src/app/registro/RegistrationProgress.tsx
+  22:45  warning  Generic Object Injection Sink  security/detect-object-injection
+
+✖ 2 problems (0 errors, 2 warnings)

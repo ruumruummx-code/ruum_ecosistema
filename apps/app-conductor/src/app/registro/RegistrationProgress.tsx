@@ -1,3 +1,4 @@
+import { RegistrationHeader } from "./RegistrationShell";
 import { RegistrationAccessHeader } from "./RegistrationAccessHeader";
 import { PASOS_REGISTRO, type EstadoGuardadoRemoto } from "./registration-types";
 import styles from "./registration.module.css";
@@ -16,12 +17,12 @@ export function RegistrationProgress({ paso, onBack, borradorLocalGuardado, sesi
   if (paso === 1) return <RegistrationAccessHeader step={2} onBack={onBack}>{estadoGuardado}</RegistrationAccessHeader>;
   if (paso >= 3) return <RegistrationAccessHeader step={paso + 1 as 4 | 5} onBack={onBack}>{estadoGuardado}</RegistrationAccessHeader>;
   return (
-    <header className={styles.appBar}>
+    <RegistrationHeader><header className={styles.appBar}>
       <button type="button" onClick={onBack} aria-label="Atrás">‹ Atrás</button>
         <h1 id="titulo-registro-conductor">{PASOS_REGISTRO[paso].shortTitle} ({paso + 1}/{PASOS_REGISTRO.length})</h1>
         <span aria-hidden="true" />
         <progress className={styles.progress} value={porcentaje} max={100} aria-label="Progreso de registro" />
       {estadoGuardado}
-    </header>
+    </header></RegistrationHeader>
   );
 }

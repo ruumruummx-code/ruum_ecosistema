@@ -5,6 +5,8 @@ const userId = "00000000-0000-4000-8000-000000000001";
 const token = `eyJhbGciOiJIUzI1NiJ9.${Buffer.from(JSON.stringify({ sub: userId, role: "authenticated", aud: "authenticated", exp: 2100000000 })).toString("base64url")}.e2e-signature`;
 const states = ["pendiente_de_conductor", "conductor_asignado", "conductor_en_camino_al_origen", "evidencia_inicial_en_proceso", "traslado_en_curso", "evidencia_final_completada", "conductor_asignado", "conductor_asignado"];
 Object.assign(states, { 11: "conductor_en_punto_de_recoleccion", 12: "verificacion_vehiculo_en_proceso", 13: "evidencia_inicial_completada", 14: "vehiculo_recibido", 15: "llegada_a_destino", 16: "evidencia_final_en_proceso", 17: "entrega_confirmada", 18: "servicio_cerrado", 19: "servicio_cancelado", 20: "traslado_fallido", 21: "disputa_abierta", 22: "incidencia_reportada", 23: "estado_desconocido", 24: "conductor_asignado", 25: "verificacion_vehiculo_en_proceso" });
+Object.assign(states,{50:"evidencia_inicial_en_proceso",51:"evidencia_final_en_proceso",52:"evidencia_final_en_proceso",53:"evidencia_final_completada",54:"evidencia_final_completada",55:"evidencia_final_completada",56:"evidencia_final_completada",57:"servicio_cerrado",58:"verificacion_vehiculo_en_proceso",59:"evidencia_final_completada",60:"entrega_confirmada"});
+const inspections=new Map();const receipts=new Set();
 const changes = new Map();
 const calls = [];
 let listMode = "empty";
@@ -14,11 +16,11 @@ const loadingRequests = [];
 createServer(async (request, response) => {
   response.setHeader("Access-Control-Allow-Origin", "*");
   response.setHeader("Access-Control-Allow-Headers", "*");
-  response.setHeader("Access-Control-Allow-Methods", "GET,POST,HEAD,OPTIONS");
+  response.setHeader("Access-Control-Allow-Methods", "GET,POST,PATCH,HEAD,OPTIONS");
   response.setHeader("Content-Type", "application/json");
   const url = new URL(request.url, "http://127.0.0.1");
   if (request.method === "OPTIONS") { response.writeHead(204).end(); return; }
-  if (url.pathname === "/qa/reset") { changes.clear(); calls.length = 0; listMode = "empty"; response.end("{}"); return; }
+  if (url.pathname === "/qa/reset") { changes.clear(); calls.length = 0; listMode = "empty"; inspections.clear(); receipts.clear(); response.end("{}"); return; }
   if (url.pathname === "/qa/list") { listMode = url.searchParams.get("mode") ?? "empty"; response.end("{}"); return; }
   if (url.pathname === "/qa/calls") { response.end(JSON.stringify(calls)); return; }
   if (url.pathname === "/health") { response.end("{}"); return; }
@@ -63,34 +65,38 @@ createServer(async (request, response) => {
     response.end(JSON.stringify(request.headers.accept?.includes("vnd.pgrst.object+json") ? trip : trip ? [trip] : [])); return;
   }
   if (url.pathname === "/rest/v1/evidencia_inspecciones") {
-    const id = url.searchParams.get("traslado_id")?.replace(/^eq\./, "");
-    const rows = id?.endsWith("005")
-      ? [
-          { traslado_id: id, tipo: "inicial", llaves_recibidas: "2", kilometraje: 12000, combustible: "1/2", notas: null },
-          { traslado_id: id, tipo: "final", llaves_recibidas: "2", kilometraje: 12062, combustible: "1/2", notas: null },
-        ]
-      : [];
-    response.end(JSON.stringify(request.headers.accept?.includes("vnd.pgrst.object+json") ? (rows[0] ?? null) : rows)); return;
+    if(request.method==="POST"){let raw="";for await(const chunk of request)raw+=chunk;const data=JSON.parse(raw);inspections.set(`${data.traslado_id}:${data.tipo}`,data);calls.push({rpc:"guardar_inspeccion",params:data});response.end("null");return;}
+    const id=url.searchParams.get("traslado_id")?.replace(/^eq\./,"");const index=Number(id?.slice(-3));
+    let rows=(index===5 || [51,52,53,54,55,56,59,60].includes(index)) ? ["inicial","final"].map(tipo=>({traslado_id:id,tipo,llaves_recibidas:index===54&&tipo==="final"?"1":"2",kilometraje:tipo==="inicial"?12000:12062,combustible:"1/2",notas:index===55?"Nota extensa de entrega. ".repeat(100):null,holograma_verificacion:true,tarjeta_circulacion:"si",talon_verificacion:"si",placa_delantera:"si",placa_trasera:"si"})) : [];
+    for(const tipo of ["inicial","final"]){const saved=inspections.get(`${id}:${tipo}`);if(saved)rows=[...rows.filter(r=>r.tipo!==tipo),saved];}
+    const type=url.searchParams.get("tipo")?.replace(/^eq\./,"");if(type)rows=rows.filter(r=>r.tipo===type);
+    response.end(JSON.stringify(request.headers.accept?.includes("vnd.pgrst.object+json") ? rows[0]??null:rows));return;
   }
   if (url.pathname === "/rest/v1/evidencia_fotos") {
     const id = url.searchParams.get("traslado_id")?.replace(/^eq\./, "");
-    const rows = id?.endsWith("005")
+    const index=Number(id?.slice(-3));
+    let rows = index===5 || [51,52,53,54,55,56,59,60].includes(index)
       ? ["inicial", "final"].flatMap(tipo =>
           ["frente", "lado_piloto", "lado_copiloto", "trasera", "tablero"].map(angulo => ({
+            id: `20000000-0000-4000-8000-${String((tipo==="inicial"?0:10)+["frente","lado_piloto","lado_copiloto","trasera","tablero"].indexOf(angulo)).padStart(12,"0")}`,
             traslado_id: id,
             tipo,
             angulo,
             sincronizada: true,
-            conflicto: false,
+            conflicto: index===55&&tipo==="final"&&angulo==="frente",
             url: `evidencia/${id}/${tipo}/${angulo}.jpg`,
           }))
         )
       : [];
+    if(index===52)rows=rows.filter(r=>r.angulo!=="tablero");
+    const type=url.searchParams.get("tipo")?.replace(/^eq\./,"");if(type)rows=rows.filter(r=>r.tipo===type);
     response.end(JSON.stringify(rows)); return;
   }
+  if(url.pathname.startsWith("/storage/v1/object/sign/")){response.end(JSON.stringify({signedURL:"/object/sign/evidencia/qa.png?token=qa-only"}));return;}
+  if(url.pathname.startsWith("/storage/v1/object/")){if(request.method==="POST"){calls.push({rpc:"storage_upload",params:{path:url.pathname}});response.end(JSON.stringify({Key:"qa-signature.png",Id:"qa"}));return;}response.setHeader("Content-Type","image/svg+xml");response.end('<svg xmlns="http://www.w3.org/2000/svg" width="180" height="110"><rect width="180" height="110" fill="#eee"/><text x="20" y="55">Evidencia de prueba</text></svg>');return;}
   if (url.pathname === "/rest/v1/custodia_eventos") {
     const id = url.searchParams.get("traslado_id")?.replace(/^eq\./, "");
-    const rows = id?.endsWith("005")
+    const rows = (id?.endsWith("005") || id?.endsWith("060") || receipts.has(id))
       ? [
           {
             id: "00000000-0000-4000-8000-000000000095",
@@ -109,8 +115,10 @@ createServer(async (request, response) => {
     let raw = ""; for await (const chunk of request) raw += chunk;
     const params = raw ? JSON.parse(raw) : {};
     calls.push({ rpc: url.pathname.split("/").at(-1), params });
+    if(url.pathname.endsWith("/registrar_evento_custodia")) {receipts.add(params.p_traslado_id);response.end('"30000000-0000-4000-8000-000000000001"');return;}
+    if(url.pathname.endsWith("/traslado_tiene_metodo_pago_registrado")){response.end("true");return;}
     if (url.pathname.endsWith("/conductor_avanza_traslado")) {
-      const target = { conductor_en_camino: "conductor_en_camino_al_origen", llegada_origen: "conductor_en_punto_de_recoleccion", iniciar_verificacion: "verificacion_vehiculo_en_proceso", iniciar_evidencia_inicial: "evidencia_inicial_en_proceso", vehiculo_recibido: "vehiculo_recibido", iniciar_traslado: "traslado_en_curso", iniciar_evidencia_final: "evidencia_final_en_proceso" }[params.p_evento];
+      const target = { conductor_en_camino: "conductor_en_camino_al_origen", llegada_origen: "conductor_en_punto_de_recoleccion", iniciar_verificacion: "verificacion_vehiculo_en_proceso", iniciar_evidencia_inicial: "evidencia_inicial_en_proceso", vehiculo_recibido: "vehiculo_recibido", iniciar_traslado: "traslado_en_curso", iniciar_evidencia_final: "evidencia_final_en_proceso",evidencia_inicial_completada:"evidencia_inicial_completada",evidencia_final_completada:"evidencia_final_completada",confirmar_entrega:"entrega_confirmada",cerrar_viaje:"servicio_cerrado" }[params.p_evento];
       if (target) changes.set(params.p_traslado_id, target);
       response.end(JSON.stringify(target ?? null)); return;
     }

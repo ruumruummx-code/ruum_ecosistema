@@ -80,7 +80,7 @@ test("llegada no inicia registro final y conserva datos de geocerca", async ({ p
 test("cierre resumido y terminales sin acciones de avance", async ({ page }) => {
   await page.goto(`/viajes/${trip(5)}`);
   await page.getByRole("link", { name: "Revisar y finalizar" }).click();
-  await expect(page).toHaveURL(/cierre=1/); await expect(page.locator("[data-trip-stage]")).toHaveCount(0);
+  await expect(page).toHaveURL(/cierre=1/); await expect(page.locator("[data-trip-form]")).toHaveCount(1);
   for (const i of [18, 19, 20, 21, 22, 23]) {
     await page.goto(`/viajes/${trip(i)}?cierre=1`);
     await expect(page.getByRole("link", { name: "Volver a Traslados", exact: true })).toHaveCount(2);
@@ -113,8 +113,8 @@ test("expediente con teclado y filtros completos conservan retorno", async ({ pa
   await page.locator("[data-screen-body]:visible").evaluate(n => n.scrollTop = n.scrollHeight); await hit(page.getByRole("link", { name: "Volver al traslado", exact: true }));
   await page.goto("/viajes"); await page.getByRole("button", { name: "Abrir filtros avanzados" }).click();
   const dialog = page.getByRole("dialog", { name: "Vista y filtros", exact: true }); await expect(dialog).toBeVisible();
-  await dialog.getByLabel("Elegir fecha").fill("2026-11-08"); await hit(dialog.getByRole("button", { name: "Ver resultados" }));
-  await dialog.getByRole("button", { name: "Ver resultados" }).click(); await expect(page).toHaveURL(/fecha=2026-11-08/);
+  await dialog.getByLabel("Elegir fecha").fill("2030-01-01"); await hit(dialog.getByRole("button", { name: "Ver resultados" }));
+  await dialog.getByRole("button", { name: "Ver resultados" }).click(); await expect(page).toHaveURL(/fecha=2030-01-01/);
   await page.getByRole("button", { name: "Ver todas las fechas", exact: true }).click(); await expect(page).not.toHaveURL(/fecha=/);
   await expect(page.getByRole("button", { name: "Recargar ofertas", exact: true })).toBeEnabled();
   await noRootScroll(page);

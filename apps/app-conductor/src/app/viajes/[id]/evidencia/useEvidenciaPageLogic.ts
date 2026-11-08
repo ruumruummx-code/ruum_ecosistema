@@ -44,6 +44,7 @@ export interface UseEvidenciaPageLogic {
   tipo: TipoEvidencia | null;
   soporteAbierto: boolean;
   setSoporteAbierto: (v: boolean) => void;
+  borradorLocalGuardado: boolean;
   cargando: boolean;
   error: string | null;
   aviso: string | null;
@@ -136,8 +137,8 @@ export function useEvidenciaPageLogic(id: string): UseEvidenciaPageLogic {
 
   // Inspeccion Form Values
   const [kilometraje, setKilometraje] = useState("");
-  const [gasolinaSegments, setGasolinaSegments] = useState(4); // default 4/8 (1/2)
-  const [llavesCount, setLlavesCount] = useState(2);
+  const [gasolinaSegments, setGasolinaSegments] = useState(-1); // Pendiente de observación.
+  const [llavesCount, setLlavesCount] = useState(-1);
   const [tarjetaCirculacion, setTarjetaCirculacion] = useState("");
   const [talonVerificacion, setTalonVerificacion] = useState("");
   const [hologramaVerificacion, setHologramaVerificacion] = useState("");
@@ -168,6 +169,7 @@ export function useEvidenciaPageLogic(id: string): UseEvidenciaPageLogic {
   const [aviso, setAviso] = useState<string | null>(null);
   const [avisoExito, setAvisoExito] = useState<string | null>(null);
   const [procesando, setProcesando] = useState(false);
+  const [borradorLocalGuardado,setBorradorLocalGuardado]=useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const {
@@ -196,17 +198,18 @@ export function useEvidenciaPageLogic(id: string): UseEvidenciaPageLogic {
       if (data.kilometraje !== null) {
         setKilometraje(data.kilometraje.toLocaleString("es-MX"));
       }
-      setLlavesCount(data.llaves_recibidas == null ? 2 : Number(data.llaves_recibidas));
-      setTarjetaCirculacion(data.tarjeta_circulacion || "no");
-      setTalonVerificacion(data.talon_verificacion || "no");
-      setHologramaVerificacion(data.holograma_verificacion ? "si" : "no");
-      setPlacaDelantera(data.placa_delantera || "no");
-      setPlacaTrasera(data.placa_trasera || "no");
+      setLlavesCount(data.llaves_recibidas == null ? -1 : Number(data.llaves_recibidas));
+      setTarjetaCirculacion(data.tarjeta_circulacion || "");
+      setTalonVerificacion(data.talon_verificacion || "");
+      setHologramaVerificacion(data.holograma_verificacion == null ? "" : data.holograma_verificacion ? "si" : "no");
+      setPlacaDelantera(data.placa_delantera || "");
+      setPlacaTrasera(data.placa_trasera || "");
       setNotas(data.notas || "");
 
       // Fuel map to segments
       if (data.combustible) {
-        if (data.combustible === "Lleno") setGasolinaSegments(8);
+        if (data.combustible === "Vacío") setGasolinaSegments(0);
+        else if (data.combustible === "Lleno") setGasolinaSegments(8);
         else if (data.combustible === "3/4") setGasolinaSegments(6);
         else if (data.combustible === "1/2") setGasolinaSegments(4);
         else if (data.combustible === "1/4") setGasolinaSegments(2);
@@ -241,25 +244,26 @@ export function useEvidenciaPageLogic(id: string): UseEvidenciaPageLogic {
         const cliente = crearClienteNavegador();
         const p = await obtenerPasaporteDigital(cliente, id);
         if (p) {
-          if (
-            p.estado === "conductor_en_punto_de_recoleccion" ||
-            p.estado === "verificacion_vehiculo_en_proceso"
-          ) {
-            try {
-              const resumenRepuve = await obtenerResumenVerificacionRepuve(cliente, id);
-              if (resumenRepuve && !resumenRepuve.valida_para_avanzar) {
-                router.push(`/viajes/${id}`);
-                return;
-              }
-            } catch {
-              // Continuar si el entorno no tiene el RPC disponible
-            }
+          if(p.estado!=="evidencia_inicial_en_proceso" && p.estado!=="evidencia_final_en_proceso") {
+            setPasaporte(p);setTipo(null);setAviso("Este traslado no está en una etapa de captura. Vuelve al resumen para continuar con el paso autorizado.");return;
           }
           setPasaporte(p);
           setEstadoActual(p.estado as EstadoTraslado);
-          const t = tipoEvidenciaPorEstado(p.estado as EstadoTraslado) || "inicial";
+          const t = tipoEvidenciaPorEstado(p.estado as EstadoTraslado)!;
           setTipo(t);
           await Promise.all([loadInspeccion(t), refrescarEvidencia(t)]);
+          try {
+            const raw=sessionStorage.getItem(`ruum-inspeccion-v1:${p.conductor_id}:${id}:${t}`);
+            if(raw){const d=JSON.parse(raw);if(d.version===1 && Date.now()-d.savedAt<7*86400000){
+              if(typeof d.kilometraje==="string")setKilometraje(d.kilometraje);
+              if(Number.isInteger(d.llavesCount)&&d.llavesCount>=-1)setLlavesCount(d.llavesCount);
+              if([-1,0,1,2,4,6,8].includes(d.gasolinaSegments))setGasolinaSegments(d.gasolinaSegments);
+              const valid=(v:unknown)=>v==="si"||v==="no"||v==="";
+              if(valid(d.tarjetaCirculacion))setTarjetaCirculacion(d.tarjetaCirculacion);if(valid(d.talonVerificacion))setTalonVerificacion(d.talonVerificacion);
+              if(valid(d.hologramaVerificacion))setHologramaVerificacion(d.hologramaVerificacion);if(valid(d.placaDelantera))setPlacaDelantera(d.placaDelantera);if(valid(d.placaTrasera))setPlacaTrasera(d.placaTrasera);
+              if(typeof d.notas==="string")setNotas(d.notas.slice(0,1000));setPresentaDanosNuevos(d.presentaDanosNuevos===true);
+            }}
+          }catch {setAviso("No pudimos recuperar el borrador local. Revisa los datos del servidor.");}
         }
       } catch (err) {
         setAviso(traducirErrorOperativo(err, "No pudimos cargar la información de evidencias."));
@@ -269,6 +273,12 @@ export function useEvidenciaPageLogic(id: string): UseEvidenciaPageLogic {
     }
     init();
   }, [id, loadInspeccion, refrescarEvidencia]);
+
+  useEffect(()=>{
+    if(cargando||!tipo||!pasaporte?.conductor_id)return;
+    try {sessionStorage.setItem(`ruum-inspeccion-v1:${pasaporte.conductor_id}:${id}:${tipo}`,JSON.stringify({version:1,savedAt:Date.now(),kilometraje,llavesCount,gasolinaSegments,tarjetaCirculacion,talonVerificacion,hologramaVerificacion,placaDelantera,placaTrasera,notas,presentaDanosNuevos}));setBorradorLocalGuardado(true);}
+    catch {setBorradorLocalGuardado(false);setAviso("No se pudo guardar el borrador en este dispositivo. Guarda en el servidor antes de salir.");}
+  },[cargando,tipo,pasaporte?.conductor_id,id,kilometraje,llavesCount,gasolinaSegments,tarjetaCirculacion,talonVerificacion,hologramaVerificacion,placaDelantera,placaTrasera,notas,presentaDanosNuevos]);
 
   // Handle local file selection
   async function registrarFotoLocal(angulo: AnguloEvidencia, dataUrl: string) {
@@ -364,27 +374,21 @@ export function useEvidenciaPageLogic(id: string): UseEvidenciaPageLogic {
   }
 
   async function procesarArchivoSeleccionado(archivo: File | undefined) {
-    const angulo = anguloArchivoRef.current;
-    if (!archivo || !angulo) return;
+    const angulo=anguloArchivoRef.current;
+    if(!archivo||!angulo)return;
+    setEnviando(angulo);setError(null);
     try {
-      const reader = new FileReader();
-      reader.onload = async () => {
-        if (reader.result) {
-          let dataUrl = String(reader.result);
-          try { dataUrl = await comprimirDataUrl(dataUrl, 1280, 0.72); } catch {}
-          await registrarFotoLocal(angulo, dataUrl);
-        }
-      };
-      reader.readAsDataURL(archivo);
-    } catch (err) {
-      setError("No se pudo leer el archivo seleccionado.");
-    } finally {
-      anguloArchivoRef.current = null;
-      if (inputArchivoRef.current) inputArchivoRef.current.value = "";
-    }
+      if(!archivo.type.startsWith("image/")||archivo.size>15*1024*1024){setError("Elige una imagen válida de hasta 15 MB.");return;}
+      const raw=await new Promise<string>((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(String(reader.result));reader.onerror=()=>reject(new Error("No se pudo leer la imagen. Reintenta."));reader.readAsDataURL(archivo);});
+      const dataUrl=await comprimirDataUrl(raw,1280,.72);
+      await registrarFotoLocal(angulo,dataUrl);
+    }catch(err){setError(traducirErrorOperativo(err,"No se pudo leer la fotografía. Reintenta sin perder las capturas anteriores."));}
+    finally {setEnviando(null);anguloArchivoRef.current=null;if(inputArchivoRef.current)inputArchivoRef.current.value="";}
   }
 
   function getFuelText(segments: number) {
+    if (segments<0)return "Por confirmar";
+    if (segments===0)return "Vacío";
     if (segments >= 8) return "Lleno";
     if (segments >= 6) return "3/4";
     if (segments >= 4) return "1/2";
@@ -406,14 +410,14 @@ export function useEvidenciaPageLogic(id: string): UseEvidenciaPageLogic {
       await guardarInspeccionTraslado(cliente, {
           traslado_id: id,
           tipo,
-          combustible: getFuelText(gasolinaSegments),
-          kilometraje: cleanKilometraje || null,
-          llaves_recibidas: String(llavesCount),
-          holograma_verificacion: hologramaVerificacion === "si",
-          talon_verificacion: talonVerificacion,
-          tarjeta_circulacion: tarjetaCirculacion,
-          placa_delantera: placaDelantera,
-          placa_trasera: placaTrasera,
+          combustible: gasolinaSegments<0 ? null : getFuelText(gasolinaSegments),
+          kilometraje: kilometraje.trim() ? cleanKilometraje : null,
+          llaves_recibidas: llavesCount<0 ? null : String(llavesCount),
+          holograma_verificacion: hologramaVerificacion ? hologramaVerificacion === "si" : null,
+          talon_verificacion: talonVerificacion || null,
+          tarjeta_circulacion: tarjetaCirculacion || null,
+          placa_delantera: placaDelantera || null,
+          placa_trasera: placaTrasera || null,
           notas: notas.trim() || null
         });
       setAvisoExito("Borrador guardado exitosamente.");
@@ -431,13 +435,16 @@ export function useEvidenciaPageLogic(id: string): UseEvidenciaPageLogic {
     setAviso(null);
     setAvisoExito(null);
 
+    if(!kilometraje.trim() || !Number.isInteger(llavesCount) || llavesCount<0 || gasolinaSegments<0 || [tarjetaCirculacion,talonVerificacion,hologramaVerificacion,placaDelantera,placaTrasera].some(v=>!v)) {
+      setError("Completa llaves, mediciones y las cinco comprobaciones de documentos antes de enviar.");setEnviando(null);return;
+    }
     const requiredAngles: AnguloEvidencia[] = ["frente", "lado_piloto", "lado_copiloto", "trasera", "tablero"];
     const missingPhotos = requiredAngles.filter(
       (angle) => !fotos.some((f) => f.angulo === angle)
     );
     const pendingSync = requiredAngles.filter(
       (angle) => {
-        const f = fotos.find((x) => x.angulo === angle);
+        const f = obtenerFoto(angle);
         return f && !f.sincronizada;
       }
     );
@@ -471,14 +478,14 @@ export function useEvidenciaPageLogic(id: string): UseEvidenciaPageLogic {
       await guardarInspeccionTraslado(cliente, {
           traslado_id: id,
           tipo,
-          combustible: getFuelText(gasolinaSegments),
-          kilometraje: cleanKilometraje || null,
-          llaves_recibidas: String(llavesCount),
-          holograma_verificacion: hologramaVerificacion === "si",
-          talon_verificacion: talonVerificacion,
-          tarjeta_circulacion: tarjetaCirculacion,
-          placa_delantera: placaDelantera,
-          placa_trasera: placaTrasera,
+          combustible: gasolinaSegments<0 ? null : getFuelText(gasolinaSegments),
+          kilometraje: kilometraje.trim() ? cleanKilometraje : null,
+          llaves_recibidas: llavesCount<0 ? null : String(llavesCount),
+          holograma_verificacion: hologramaVerificacion ? hologramaVerificacion === "si" : null,
+          talon_verificacion: talonVerificacion || null,
+          tarjeta_circulacion: tarjetaCirculacion || null,
+          placa_delantera: placaDelantera || null,
+          placa_trasera: placaTrasera || null,
           notas: notas.trim() || null
         });
 
@@ -533,7 +540,7 @@ export function useEvidenciaPageLogic(id: string): UseEvidenciaPageLogic {
   }
 
   function obtenerFoto(angulo: AnguloEvidencia) {
-    return fotos.find((f) => f.angulo === angulo);
+    return fotos.filter(f=>f.angulo===angulo).sort((a,b)=>(Date.parse(b.timestamp)||0)-(Date.parse(a.timestamp)||0))[0];
   }
 
   return {
@@ -543,6 +550,7 @@ export function useEvidenciaPageLogic(id: string): UseEvidenciaPageLogic {
     soporteAbierto,
     setSoporteAbierto,
     cargando,
+    borradorLocalGuardado,
     error,
     aviso,
     avisoExito,

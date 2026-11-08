@@ -1,0 +1,52 @@
+[WebServer] (node:24499) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:24508) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:24520) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] [@sentry/nextjs] Importing `withSentryConfig` from `@sentry/nextjs` is deprecated and will stop working in v11. Import it from `@sentry/nextjs/config` instead:
+[WebServer]   import { withSentryConfig } from '@sentry/nextjs/config';
+
+Running 37 tests using 1 worker
+
+(node:24539) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+  ✓   1 tests/interface/forms.spec.ts:15:6 › evidencia por pasos y borrador sin datos inventados 320 (3.4s)
+  ✓   2 tests/interface/forms.spec.ts:29:6 › fotografías existentes, pasos y teclado 320 (2.5s)
+  ✓   3 tests/interface/forms.spec.ts:36:6 › firma conserva trazos y entrega separada del cierre 320 (2.8s)
+  ✓   4 tests/interface/forms.spec.ts:49:6 › registro contacto, contraseña y OTP con acción fija 320 (1.9s)
+  ✓   5 tests/interface/forms.spec.ts:15:6 › evidencia por pasos y borrador sin datos inventados 390 (3.1s)
+  ✓   6 tests/interface/forms.spec.ts:29:6 › fotografías existentes, pasos y teclado 390 (2.5s)
+  ✓   7 tests/interface/forms.spec.ts:36:6 › firma conserva trazos y entrega separada del cierre 390 (2.4s)
+  ✓   8 tests/interface/forms.spec.ts:49:6 › registro contacto, contraseña y OTP con acción fija 390 (1.7s)
+  ✓   9 tests/interface/forms.spec.ts:57:5 › cierre bloquea llaves discordantes y fotos en conflicto (2.1s)
+  ✓  10 tests/interface/forms.spec.ts:58:5 › captura no disponible en estados cerrados o anteriores a verificación (1.9s)
+  ✓  11 tests/interface/forms.spec.ts:59:5 › cancelar cámara no borra capturas y archivo inválido no avanza (1.5s)
+  ✓  12 tests/interface/forms.spec.ts:60:5 › registro autenticado conserva identidad, licencia, documentos y revisión (3.8s)
+  ✓  13 tests/interface/forms.spec.ts:68:5 › fallo al guardar firma conserva el trazo y no avanza (1.7s)
+  ✓  14 tests/interface/forms.spec.ts:73:5 › fotografía offline conserva captura local tras recarga (2.5s)
+  ✓  15 tests/interface/shell.spec.ts:30:7 › marcos y retorno persistente 320 (6.0s)
+  ✓  16 tests/interface/shell.spec.ts:58:7 › diálogos nativos y foco 320 (2.8s)
+  ✓  17 tests/interface/shell.spec.ts:76:7 › navegación única y emergencia completa 320 (2.8s)
+  ✓  18 tests/interface/shell.spec.ts:30:7 › marcos y retorno persistente 390 (6.2s)
+  ✓  19 tests/interface/shell.spec.ts:58:7 › diálogos nativos y foco 390 (2.8s)
+  ✓  20 tests/interface/shell.spec.ts:76:7 › navegación única y emergencia completa 390 (2.8s)
+  ✓  21 tests/interface/shell.spec.ts:93:5 › banco: acción y contraste del marco con teclado y tema oscuro (1.9s)
+  ✓  22 tests/interface/shell.spec.ts:112:5 › las rutas declaran una variante sin propietarios implícitos (833ms)
+  ✓  23 tests/interface/shell.spec.ts:128:7 › resistencia a texto ampliado, referencias largas y diálogo con teclado 320 (2.2s)
+  ✓  24 tests/interface/shell.spec.ts:128:7 › resistencia a texto ampliado, referencias largas y diálogo con teclado 390 (2.1s)
+  ✓  25 tests/interface/stages.spec.ts:20:7 › etapas uniformes y acción visible 320 (11.9s)
+  ✓  26 tests/interface/stages.spec.ts:40:7 › datos completos, foco y texto ampliado 320 (2.0s)
+  ✓  27 tests/interface/stages.spec.ts:20:7 › etapas uniformes y acción visible 390 (11.6s)
+  ✓  28 tests/interface/stages.spec.ts:40:7 › datos completos, foco y texto ampliado 390 (2.0s)
+  ✓  29 tests/interface/stages.spec.ts:59:5 › recepción e inicio son dos decisiones y una RPC por pulsación (1.5s)
+  ✓  30 tests/interface/stages.spec.ts:70:5 › llegada no inicia registro final y conserva datos de geocerca (1.3s)
+  ✓  31 tests/interface/stages.spec.ts:80:5 › cierre resumido y terminales sin acciones de avance (3.9s)
+  ✓  32 tests/interface/stages.spec.ts:92:5 › REPUVE conserva bloqueo, requisitos y datos faltantes (2.0s)
+  ✓  33 tests/interface/stages.spec.ts:107:5 › expediente con teclado y filtros completos conservan retorno (2.1s)
+  ✓  34 tests/interface/stages.spec.ts:123:7 › lista poblada, búsqueda, paginación y cierre pendiente 320 (2.0s)
+  ✓  35 tests/interface/stages.spec.ts:123:7 › lista poblada, búsqueda, paginación y cierre pendiente 390 (2.1s)
+  ✓  36 tests/interface/stages.spec.ts:148:5 › fallo de red mantiene contexto, muestra motivo y permite reintentar (1.6s)
+  ✓  37 tests/interface/stages.spec.ts:157:5 › seguridad y navegación se abren sin perder el paso (1.6s)
+
+  37 passed (1.9m)

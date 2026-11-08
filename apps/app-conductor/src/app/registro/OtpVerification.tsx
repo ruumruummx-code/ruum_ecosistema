@@ -1,5 +1,6 @@
 import { useEffect, useRef, type FormEvent } from "react";
 import { soloDigitos } from "./registration-validation";
+import { RegistrationAction } from "./RegistrationShell";
 import { RegistrationAccessHeader } from "./RegistrationAccessHeader";
 import { RegistrationIcon } from "./RegistrationIcon";
 import styles from "./registration.module.css";
@@ -52,22 +53,17 @@ export function OtpVerification({
   return (
     <>
       <RegistrationAccessHeader step={2} onBack={onBack} />
-      <form className={`${styles.form} ${styles.otpForm}`} onSubmit={(event) => {
+      <form id="registration-otp" className={`${styles.form} ${styles.otpForm}`} onSubmit={(event) => {
         if (verificandoOtp || reenviandoOtp || bloqueado || codigoOtp.length !== codigoLongitud || !/^\d+$/.test(codigoOtp)) { event.preventDefault(); return; }
         onSubmit(event);
       }}>
         <div className={`${styles.accountIntro} ${styles.otpIntro}`}>
           <h1 id="titulo-registro-conductor">Confirma tu correo</h1>
-          <p>Enviamos un código de {codigoLongitud} dígitos a <strong>{email.trim().toLowerCase()}</strong></p>
-          <p>Escríbelo aquí para activar tu cuenta y subir tus documentos sin salir de la app.</p>
         </div>
 
         <div className={styles.otpEntry}>
           <label htmlFor="codigo-verificacion">Código de verificación <span aria-hidden="true">*</span></label>
           <div className={styles.otpCode} data-invalid={Boolean(errorOtp)}>
-            <div className={styles.otpSlots} aria-hidden="true">
-              {Array.from({ length: codigoLongitud }, (_, index) => <span key={index}>{codigoOtp[index] || "_"}</span>)}
-            </div>
             <input id="codigo-verificacion" name="codigo-verificacion" ref={inputRef}
               type="text" inputMode="numeric" pattern={`[0-9]{${codigoLongitud}}`} autoComplete="one-time-code"
               autoCapitalize="none" spellCheck={false} maxLength={codigoLongitud} value={codigoOtp}
@@ -83,6 +79,10 @@ export function OtpVerification({
           {!errorOtp && intentosFallidos > 0 && !bloqueado && <p className={styles.otpHelp}>Te quedan {restantes} intentos.</p>}
         </div>
 
+        <div className={styles.otpIntro}>
+          <p>Enviamos un código de {codigoLongitud} dígitos a <strong>{email.trim().toLowerCase()}</strong></p>
+          <p>Escríbelo aquí para activar tu cuenta y subir tus documentos sin salir de la app.</p>
+        </div>
         <div className={styles.otpResend}>
           <button
             type="button"
@@ -96,10 +96,6 @@ export function OtpVerification({
                 : "Reenviar código"}
           </button>
         </div>
-        <footer className={styles.actionFooter}>
-          <button type="submit" className={styles.primary} aria-busy={verificandoOtp} disabled={verificandoOtp || reenviandoOtp || codigoOtp.length !== codigoLongitud || bloqueado}>
-            {verificandoOtp ? "Verificando…" : "Confirmar y activar"}<RegistrationIcon name="arrow" />
-          </button>
           <button
             type="button"
             onClick={onAlreadyConfirmed}
@@ -108,7 +104,12 @@ export function OtpVerification({
           >
             Ya confirmé desde el enlace del correo
           </button>
-        </footer>
+        <RegistrationAction><footer className={styles.actionFooter}>
+          <button type="submit" form="registration-otp" className={styles.primary} aria-busy={verificandoOtp} disabled={verificandoOtp || reenviandoOtp || codigoOtp.length !== codigoLongitud || bloqueado}>
+            {verificandoOtp ? "Verificando…" : "Confirmar y activar"}<RegistrationIcon name="arrow" />
+          </button>
+
+        </footer></RegistrationAction>
       </form>
     </>
   );

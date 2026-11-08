@@ -8,6 +8,7 @@ import { RegistrationIcon } from "./RegistrationIcon";
 type FortalezaPassword = ReturnType<typeof fortalezaPassword>;
 
 export function AccountStep({
+  section = "contact",
   telefono,
   setTelefono,
   email,
@@ -24,6 +25,7 @@ export function AccountStep({
   validarPassword,
   validarConfirmacion
 }: {
+  section?: "contact" | "security";
   telefono: string;
   setTelefono: (valor: string) => void;
   email: string;
@@ -82,6 +84,7 @@ export function AccountStep({
   return (
     <fieldset className={[styles.fields, styles.account].join(" ")}>
       <legend className="sr-only">Datos de cuenta</legend>
+      {section === "contact" && <>
       <DenseField etiqueta="Teléfono" type="tel" inputMode="tel" placeholder="10 dígitos"
         leading={<span className={styles.countryPicker}>
           <svg width="27" height="18" viewBox="0 0 30 20" aria-hidden="true"><rect width="30" height="20" rx="2" fill="#fff" /><path d="M2 0h8v20H2a2 2 0 0 1-2-2V2a2 2 0 0 1 2-2Z" fill="#006847" /><path d="M20 0h8a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2h-8Z" fill="#ce1126" /><path d="m13 8 3-2 1 4-2 2-2-2m-2 2q4 6 8 0" fill="#916e35" stroke="#497446" strokeWidth="1" /></svg>
@@ -97,7 +100,8 @@ export function AccountStep({
         value={email} onChange={(e) => { setEmail(e.target.value); limpiarErrorCampo("email"); }}
         onBlur={() => validarCampo("email", email)} error={erroresCampos.email}
         required autoComplete="email" readOnly={sesionAutenticada} enterKeyHint="next" />
-      {!sesionAutenticada && <>
+      </>}
+      {!sesionAutenticada && section === "security" && <>
         <DenseField etiqueta="Contraseña" type={mostrarPassword ? "text" : "password"} value={password}
           aria-describedby="requisitos-password" autoCapitalize="none" autoCorrect="off" spellCheck={false}
           placeholder="Mínimo 8 caracteres" leading={<RegistrationIcon name="lock" />}
@@ -110,14 +114,14 @@ export function AccountStep({
           trailing={<button type="button" className={styles.passwordToggle} aria-label={mostrarConfirmacion ? "Ocultar confirmación de contraseña" : "Mostrar confirmación de contraseña"} aria-pressed={mostrarConfirmacion} onClick={() => setMostrarConfirmacion((actual) => !actual)}><RegistrationIcon name={mostrarConfirmacion ? "eye-off" : "eye"} /></button>}
           onChange={(e) => { setConfirmacionPassword(e.target.value); validarConfirmacion(e.target.value, password); }}
           error={erroresCampos.confirmacionPassword} required minLength={8} autoComplete="new-password" enterKeyHint="go" />
-        <div className={styles.passwordRequirements}>
-        <p>Tu contraseña debe:</p>
+        <details className={styles.passwordRequirements}>
+        <summary>Ver requisitos de contraseña</summary>
         <ul id="requisitos-password" className={styles.rules} aria-label="Requisitos de contraseña">
           {requisitosPassword.map((req) => <li key={req.label} data-met={req.cumplido}>
             <span className={styles.ruleIndicator} aria-hidden="true">{req.cumplido ? "✓" : ""}</span>{req.label}<span className="sr-only">{req.cumplido ? ": cumplido" : ": pendiente"}</span>
           </li>)}
         </ul>
-        </div>
+        </details>
       </>}
     </fieldset>
   );

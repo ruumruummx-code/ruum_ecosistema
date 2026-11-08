@@ -1,33 +1,13 @@
-import { useRef } from "react";
+"use client";
+import { createContext, useContext, useState, type ReactNode } from "react";
+import { createPortal } from "react-dom";
+import { ConductorScreen } from "../components/ConductorScreen";
 import styles from "./registration.module.css";
-import Image from "next/image";
-import { LogoMarca } from "@ruum/ui";
-
-export function RegistrationShell({ children, compact = false, account = false, identity = false, completion = false }: { children: React.ReactNode; compact?: boolean; account?: boolean; identity?: boolean; completion?: boolean }) {
-  const screenRef = useRef<HTMLDivElement>(null);
-  if (compact) return <div ref={screenRef} className={[styles.screen, account || identity ? styles.stepOne : "", identity ? styles.identity : "", completion ? styles.completionStep : ""].join(" ")} data-conductor-registration>{children}</div>;
-  return (
-    <div className="conductor-auth-shell flex items-center justify-center px-4 py-10 sm:px-6">
-      <section className="conductor-auth-card p-6 sm:p-8" aria-labelledby="titulo-registro-conductor">
-        <div className="-mx-2 -mt-2 mb-6 overflow-hidden rounded-xl border border-route-action bg-surface-strong">
-          <Image
-            src="/imagenes/registro-conductor.png"
-            alt="Vehículo con puntos de registro digital para la certificación de traslado"
-            width={1222}
-            height={1222}
-            priority
-            className="aspect-[16/9] w-full object-cover"
-          />
-        </div>
-
-        <div className="flex items-center gap-3">
-          <LogoMarca tamano={34} color="signal" mostrarRespaldo={false} subtitulo="Conductor" />
-        </div>
-        <p className="mt-2 font-body text-[11px] font-medium tracking-wide text-text-tertiary">Seguridad, evidencia y trazabilidad en cada viaje.</p>
-        <div className="conductor-ruta-divider mt-3" aria-hidden />
-
-        {children}
-      </section>
-    </div>
-  );
+const Slots=createContext<{header:HTMLElement|null;action:HTMLElement|null}|null>(null);
+export function RegistrationHeader({children}:{children:ReactNode}) { const slots=useContext(Slots);return slots?.header ? createPortal(children,slots.header) : null; }
+export function RegistrationAction({children}:{children:ReactNode}) { const slots=useContext(Slots);return slots?.action ? createPortal(children,slots.action) : null; }
+export function RegistrationShell({children,account=false,identity=false,completion=false}:{children:ReactNode;compact?:boolean;account?:boolean;identity?:boolean;completion?:boolean}) {
+  const [header,setHeader]=useState<HTMLDivElement|null>(null);const [action,setAction]=useState<HTMLDivElement|null>(null);
+  return <Slots.Provider value={{header,action}}><ConductorScreen variant="form" label="Registro de conductor" className={[styles.screen,account?styles.stepOne:"",identity?styles.identity:"",completion?styles.completionStep:""].join(" ")}
+    header={<div ref={setHeader} className={styles.headerSlot}/>} footer={<div ref={setAction} className={styles.actionSlot}/>}>{children}</ConductorScreen></Slots.Provider>;
 }

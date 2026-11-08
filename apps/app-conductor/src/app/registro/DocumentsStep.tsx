@@ -37,7 +37,7 @@ export function DocumentsStep({ sesionAutenticada, documentos, estadoDocumentos,
     <legend className="sr-only">Documentos</legend>
     <div className={styles.stepIntro}>
       <h1 id="titulo-registro-conductor">Documentos</h1>
-      <p>Sube los documentos requeridos</p>
+      <p>JPG, PNG, WEBP o PDF, hasta 5 MB. Imágenes legibles, sin reflejos.</p>
     </div>
     {!sesionAutenticada ? <p className={styles.documentAlert} role="alert">Primero confirma tu cuenta para cargar tus documentos.</p> : <div className={styles.documentRows} aria-label="Documentos requeridos">
       {ITEMS.map((item) => {
@@ -45,12 +45,10 @@ export function DocumentsStep({ sesionAutenticada, documentos, estadoDocumentos,
         const estado = estadoDocumentos[item.key];
         const listo = Boolean(archivo) || estado === "subido";
         return <section key={item.key} className={styles.documentCard} aria-labelledby={`${item.key}-titulo`}>
-          <DocumentoIlustracion kind={item.artwork} />
+
           <div className={styles.documentCopy}>
-            <strong id={`${item.key}-titulo`}>{item.title}</strong>
-            <span>{item.subtitle}</span>
-            <small>{listo ? archivo?.name ?? "Documento cargado" : "Formatos: JPG, PNG, WEBP, PDF"}</small>
-            {!listo && <small>Máximo 5 MB</small>}
+            <strong id={`${item.key}-titulo`}>{item.key==="licenciaFrente" ? "Licencia · Frente" : item.key==="licenciaReverso" ? "Licencia · Reverso" : "Identificación oficial"}</strong>
+            <small>{listo ? archivo?.name ?? "Documento cargado" : item.subtitle}</small>
             {erroresCampos[item.key] && <small className={styles.documentError} role="alert">{erroresCampos[item.key]}</small>}
           </div>
           <input ref={(element) => { inputs.current[item.key] = element; }} type="file" accept="image/jpeg,image/png,image/webp,application/pdf" capture="environment" className="sr-only" aria-label={`Subir ${item.title} ${item.subtitle}`} onChange={(event) => cambiar(item.key, event)} />
@@ -60,6 +58,6 @@ export function DocumentsStep({ sesionAutenticada, documentos, estadoDocumentos,
         </section>;
       })}
     </div>}
-    <aside className={styles.documentHint} role="note"><span aria-hidden="true">i</span><p>Asegúrate de que las imágenes sean claras, legibles y sin reflejos.</p></aside>
+
   </fieldset>;
 }

@@ -1,0 +1,70 @@
+{
+  "utc": "2026-11-08T09:23:29.890306+00:00",
+  "baseline": "f7b1469b35becfc354673c04ce9ad3cc649bc7e8",
+  "workspace": "/workspace/ruum-fase2",
+  "tests": {
+    "passed": 37,
+    "new_forms": 14,
+    "regression": 23,
+    "viewports": [
+      "320x568",
+      "390x844"
+    ]
+  },
+  "build": "passed",
+  "typescript": "passed",
+  "eslint": {
+    "errors": 0,
+    "warnings": 2
+  },
+  "limitations": [
+    "Backend y Storage simulados",
+    "Teclado simulado; sin cámara o biometría física",
+    "LCP, INP y CLS físicos pendientes de fase 6",
+    "Hook global con fallo preexistente por ausencia de tests en @ruum/ui"
+  ],
+  "source_sha256": {
+    "apps/app-conductor/src/app/registro/AccountStep.tsx": "4638fe19ed218a73027c3d6820bd112d126e32b07f526e285921533b261aae1b",
+    "apps/app-conductor/src/app/registro/DiditVerificationModal.tsx": "4f42c411f01e33f106139c5e436a5a9ff8d125edbe6ee1fcedfa52a75569541d",
+    "apps/app-conductor/src/app/registro/DocumentsStep.tsx": "da9af06ae5d059f750dc74706201c54be6a77aa323bb9f1a4f906d7c4df44f7e",
+    "apps/app-conductor/src/app/registro/DraftRecoveryModal.tsx": "d5ba22d0df7d1e9e583dde151bb99daca704c753ed88f5ce0b1af0ff198b5f37",
+    "apps/app-conductor/src/app/registro/OtpVerification.tsx": "78827de3dd891eb15e8f0932d62c5b2586a354a3893df694b7b86a407ac352c4",
+    "apps/app-conductor/src/app/registro/RegistrationAccessHeader.tsx": "26ada3c5dd14e437359a235211e3ca98373c3f1681b70bca94e016046061fa17",
+    "apps/app-conductor/src/app/registro/RegistrationNotice.tsx": "3c6f3877e96f41d7218ea6d3ef43331de5cfe2d732ce1f14c54982d6c8173160",
+    "apps/app-conductor/src/app/registro/RegistrationProgress.tsx": "e2e93e17c47333270cf18b4178a41538c53888c302ddd82609fe085880badf30",
+    "apps/app-conductor/src/app/registro/RegistrationSheet.tsx": "304cf4a54dc2c402e773be22d05c9ca7345975cf6f89b65cdd765e2f556b8e21",
+    "apps/app-conductor/src/app/registro/RegistrationShell.tsx": "689ed382cf69a152587c012ea43ec3d5465f1380c3de8ef42366ecc1866834cb",
+    "apps/app-conductor/src/app/registro/page.tsx": "1b5feb7d63d0ea4f2517852074c0dc676053bf9c4d7f7dc55f2bb0075d53d2fd",
+    "apps/app-conductor/src/app/registro/registration.module.css": "7b6d0e75891f2ccb840bb7b76d00bbb59a5dd32d3a76716591253d7a1d29f0f6",
+    "apps/app-conductor/src/app/viajes/[id]/CierreTrasladoDetails.tsx": "431722b7b4cb70f1f863ddb36a4f402d9d9b1d1e1b09264d8de6ca86925ef9d1",
+    "apps/app-conductor/src/app/viajes/[id]/TripFormFrame.tsx": "862a6a7874c889a6c1c6bc61a1db4c5c375fa73abcbf8e879fc22623759c2813",
+    "apps/app-conductor/src/app/viajes/[id]/cierre/CierreConfirmacionModal.tsx": "fbf3670817bdda281e695fe40fc10307400f40bb20a0f57761cb84cbeff1bb40",
+    "apps/app-conductor/src/app/viajes/[id]/cierre/SignaturePad.tsx": "fbba5893aaa0591104bacbf04073dff833789fe7ce0bc3d4cee0566f0a31638d",
+    "apps/app-conductor/src/app/viajes/[id]/evidencia/EvidenciaCsatSheet.tsx": "a77a0fab5ee6f2b0d0c068f7d40c2cc970338f10b675c2cd906d6c3bc22ffb44",
+    "apps/app-conductor/src/app/viajes/[id]/evidencia/page.tsx": "07f1941763786631ee955c7997defd50fcf704ad84af7eed9cc12b52a5cf2d9d",
+    "apps/app-conductor/src/app/viajes/[id]/evidencia/useEvidenciaPageLogic.ts": "3f668a0d75497bb1126c8f4e28ca04793e66a9b0f21f5b6bc74c7c91b685c102",
+    "apps/app-conductor/src/app/viajes/[id]/trip-form.module.css": "64f57bffc9ea83fd115d7378699b7bd70dd1ea337460d511bef376cb9d611165",
+    "apps/app-conductor/tests/interface/fixture.mjs": "95d2da63b3fd878f6b6c94f945e9611dd885e7ba23a66f18f429635cc8256840",
+    "apps/app-conductor/tests/interface/forms.spec.ts": "32da3929c33e577546947e4b502cee816c0338b56a657f616e7a1202758accc3",
+    "apps/app-conductor/tests/interface/stages.spec.ts": "4910b09705168b6915c4fb567ec8ffb91933b30d0d3bf8e44f984cfb43016100"
+  },
+  "artifact_sha256": {
+    "evidencia/browser.log": "84500588b667fd8eee3fcf6b36cf9f3cfd5a6dadedb6c9ccaaa214f0e51f3f59",
+    "evidencia/build.log": "05965fbb59a9fe3f0d9627a1a460d5294f769dff2b0a020f7b4b88284e2f183d",
+    "evidencia/evidencia-mediciones-320.png": "d8eb8b9f7949408f76cc2a50725946a29fbcf6e12eda8b5ea0fbf57af5cb6e1e",
+    "evidencia/evidencia-mediciones-390.png": "42b1c7317360b1c6fcfbdbc8ef2551bbbc10c23e014bf899d8f5d3c2836f24e4",
+    "evidencia/evidencia-revision-320.png": "8284d0fcd4a5d20cd535e93d7dbcdab3e3bd54c5410732d0e5a322bd35769842",
+    "evidencia/evidencia-revision-390.png": "1b3896b39c547eaa0a90db7ae399b390de50d74a249f06b5a5a26731f529121e",
+    "evidencia/firma-320.png": "a4a65f189fabe9952a3e4024ed04630579f68b2098572d1773dbbe1efb1ad0b7",
+    "evidencia/firma-390.png": "8bc03e11c8d0bd77293b3f751d70e96885a074135e5f62808a2851884bf9de86",
+    "evidencia/lint.log": "ef910da52519ea21855068f08b6159ce3cd7e8fb1a17ea524e571a36e68345bb",
+    "evidencia/registro-cuenta-320.png": "7d691df2e33662c4363605360b257f051875643c98798c69426968674490a0e3",
+    "evidencia/registro-cuenta-390.png": "e379e7bd1a47a659ebacef81461d028d95219d8f354afa5653bb4b028be50796",
+    "evidencia/registro-otp-320.png": "637ce0aa5c0a555eae08138a2c516a54cd9783890bc600a5b7e571d97cfc1d02",
+    "evidencia/registro-otp-390.png": "e5a8ae2526c965f48450d8b35b52acfe68b0b3c8e2c6901e33873a70fe7ffaf2",
+    "evidencia/registro-paso-3.png": "fdd3383e1d53916120eb16ec80a232f9b2293f1de6a628e954961a6ccaf0b5eb",
+    "evidencia/registro-paso-4.png": "8b23fef3f9ae3618ec5a2a4a2a989bcc64dc21cf186da2588349dc886e9eb4d0",
+    "evidencia/registro-paso-5.png": "2caaaea57307a50b1a8e15bae9efb7f6654737ea4861f8b7d74d6eaa1d60315e",
+    "evidencia/types.log": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b"
+  }
+}
