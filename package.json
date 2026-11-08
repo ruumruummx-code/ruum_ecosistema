@@ -42,6 +42,7 @@
     "check:supabase-security": "node scripts/check-supabase-security.mjs",
     "check:supabase-drift": "node scripts/check-supabase-drift.mjs",
     "check:rpc-casts": "node scripts/check-rpc-casts.mjs",
+    "tokens:generate": "node scripts/generate-native-tokens.mjs",
     "changelog": "node scripts/changelog.mjs",
     
     "// --- INTERFAZ GRÁFICA DE VITEST ---": "",

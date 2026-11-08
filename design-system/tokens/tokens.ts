@@ -1,6 +1,6 @@
 /**
  * Ruum Ruum — Design Tokens v1.0 para React Native / TypeScript
- * Fuente: design-system/tokens/tokens.json
+ * GENERADO AUTOMÁTICAMENTE desde design-system/tokens/tokens.json — NO EDITAR A MANO
  * Uso: import { tokens } from "./tokens"; StyleSheet.create({ btn: { height: tokens.size.buttonHeight } })
  */
 
@@ -69,7 +69,7 @@ export const tokens = {
       surface: "#0A2342",
       surfaceElevated: "#0F2D52",
       border: "#1A3A5C",
-      borderInput: "#2D4F73",
+      borderInput: "#527CA8",
       textPrimary: "#F6F8FB",
       textSecondary: "#A8B5CC",
       textMuted: "#8293B0",
@@ -89,7 +89,7 @@ export const tokens = {
       errorText: "#FF6B7A",
       incident: "#FF5C4D",
       incidentBg: "#3D0F0A",
-      incidentText: "#FF8A7A",
+      incidentText: "#FF5C4D",
       emergency: "#FF4D3D",
       emergencyBg: "#3D0A05",
       emergencyText: "#FF4D3D",
