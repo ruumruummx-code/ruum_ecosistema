@@ -27,7 +27,6 @@ export default async function PaginaUbicaciones() {
         cuenta.traslados ?? [],
       )}
       padding="ninguno"
-      fixedContent
       dashboardHeader
       classNameContenido={s.shellContent}
       idContenido="desktopLocationsMainContent"

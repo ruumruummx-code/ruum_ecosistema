@@ -1,8 +1,10 @@
 .main {
   display: flex;
   flex-direction: column;
-  gap: 20px;
-  padding: 22px 22px 16px 30px;
+  gap: 24px;
+  padding: 28px 36px 48px;
+  height: auto;
+  min-height: 100%;
   color: #0b1839;
   background: linear-gradient(120deg, #fbfdff, #f5f8fc);
   font-size: 13px;
@@ -19,8 +21,8 @@
 .primary { display: inline-flex; align-items: center; justify-content: center; gap: 12px; padding: 14px 20px; background: #005cff; border-radius: 9px; color: white; box-shadow: 0 3px 10px #005cff20; white-space: nowrap; font-size: 14px; font-weight: 600; }
 .primary:hover { background: #004ad1; }
 .primary svg { width: 23px; height: 23px; }
-.workspace { display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; flex: 1 1 0; min-height: 0; align-items: stretch; }
-.workspace[data-detail="true"] { grid-template-columns: minmax(0, 1fr) minmax(310px, 34.5%); }
+.workspace { display: grid; grid-template-columns: minmax(0, 1fr); gap: 24px; flex: 1 1 auto; min-height: 520px; height: auto; align-items: stretch; }
+.workspace[data-detail="true"] { grid-template-columns: minmax(0, 1fr) minmax(340px, 34.5%); }
 .list { display: flex; flex-direction: column; gap: 18px; min-height: 0; min-width: 0; }
 .metrics { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
 .metric { display: flex; align-items: center; gap: 12px; border: 1px solid #d5e4ff; background: #eef5ff; border-radius: 8px; padding: 13px 12px; min-height: 80px; }
@@ -55,7 +57,7 @@
 .tabs button { height: 40px; border: 1px solid #e1e9f5; background: #fff; border-radius: 13px; padding: 0 17px; white-space: nowrap; font-size: 12px; color: #42577c; }
 .tabs button:hover { background: #edf4ff; }
 .tabs button:is([aria-selected="true"], [aria-pressed="true"]) { color: #005cff; border-color: #3577ff; box-shadow: inset 0 -2px #005cff0d; }
-.tableScroll { min-height: 0; flex: 1; overflow: auto; overscroll-behavior: contain; border: 1px solid #e0e8f4; border-radius: 9px; background: #fff; scrollbar-width: thin; scrollbar-color: #c7d5eb transparent; }
+.tableScroll { min-height: 400px; flex: 1; overflow: auto; overscroll-behavior: contain; border: 1px solid #e0e8f4; border-radius: 9px; background: #fff; scrollbar-width: thin; scrollbar-color: #c7d5eb transparent; }
 .table { border-collapse: separate; border-spacing: 0; width: 100%; font-size: 12px; table-layout: fixed; }
 .table th { position: sticky; top: 0; z-index: 2; background: #f5f8fd; text-align: left; text-transform: uppercase; font-size: 9px; font-weight: 500; color: #53688d; height: 34px; padding: 0 10px; }
 .table th:nth-child(1) { width: 25%; } .table th:nth-child(2) { width: 16%; } .table th:nth-child(3) { width: 4%; padding: 0; } .table th:nth-child(4) { width: 17%; } .table th:nth-child(5) { width: 12%; } .table th:nth-child(6) { width: 15%; } .table th:nth-child(7) { width: 11%; }
@@ -81,7 +83,7 @@
 .ellipsis { padding: 0 7px; }
 .empty { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; min-height: 200px; padding: 24px; text-align: center; color: #667c9b; }
 .empty svg { width: 44px; height: 44px; color: #005cff; }
-.detail { display: flex; flex-direction: column; gap: 14px; min-height: 0; min-width: 0; height: 100%; max-height: 100%; overflow: hidden; padding: 16px; border: 1px solid #e1e8f3; border-radius: 15px; background: #ffffffed; }
+.detail { display: flex; flex-direction: column; gap: 18px; min-height: 520px; min-width: 0; height: auto; padding: 22px 24px; border: 1px solid #e1e8f3; border-radius: 16px; background: #ffffffed; }
 .detailHeading { display: flex; align-items: center; gap: 12px; position: relative; min-height: 58px; padding-right: 20px; flex: 0 0 auto; }
 .detailHeading h2 { font-size: 15px; line-height: 1.3; margin: 0 0 5px; font-weight: 750; letter-spacing: -0.3px; }
 .detailHeading > div > span { font-size: 12px; color: #596e92; margin-right: 8px; } .detailHeading > div .badge { color: var(--user-success-essential); font-size: 10px; padding: 4px 8px; }
@@ -140,14 +142,4 @@
   .detail { padding: 12px; gap: 12px; } .heroCar { width: 75px; } .detailHeading h2 { font-size: 13px; }
   .driverBody { gap: 6px; } .avatar { width: 35px; height: 35px; } .contacts { gap: 4px; }
   .contacts a, .contacts button { width: 27px; height: 27px; } .pagination { font-size: 10px; }
-}
-@media (max-height: 800px) {
-  .main { gap: 14px; padding-top: 14px; padding-bottom: 10px; }
-  .heading h1 { font-size: 30px; } .heading p { font-size: 12px; } .heading span { font-size: 12px; }
-  .metric { min-height: 65px; padding-top: 8px; padding-bottom: 8px; }
-  .list { gap: 12px; } .detail { gap: 10px; padding: 12px; }
-  .timeline li { min-height: 58px; padding-bottom: 8px; }
-  .step { width: 28px; height: 28px; } .driver { padding: 8px; } .detailActions { gap: 8px; }
-  /* Keep the tracking timeline usable in short viewports without overflowing the detail tabpanel. */
-  .timeline { flex: 1 1 0; min-height: 0; overflow-y: auto; overscroll-behavior: contain; }
 }

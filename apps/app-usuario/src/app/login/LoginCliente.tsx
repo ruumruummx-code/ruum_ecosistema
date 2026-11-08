@@ -449,11 +449,11 @@ export function LoginCliente({ motivo, siguiente, aviso }: LoginClienteProps) {
       </header>
 
       {/* Cuerpo principal (Grid 2 columnas en lg+, contenedor centrado en móvil) */}
-      <div className="flex-1 flex flex-col lg:flex-row w-full h-full overflow-hidden z-10">
+      <div className="flex-1 flex flex-col lg:flex-row w-full h-full lg:h-auto overflow-hidden lg:overflow-visible z-10">
         {/* Columna Izquierda: Brand & Hero Content (solo en lg+) */}
         <section
           aria-label="Información de bienvenida y propuesta de valor"
-          className="hidden lg:flex lg:w-1/2 xl:w-7/12 flex-col justify-between px-10 xl:px-16 py-3 xl:py-5 overflow-hidden"
+          className="hidden lg:flex lg:w-1/2 xl:w-7/12 flex-col justify-between px-10 xl:px-16 py-6 xl:py-8 overflow-visible"
         >
           {/* Header del Hero */}
           <div>

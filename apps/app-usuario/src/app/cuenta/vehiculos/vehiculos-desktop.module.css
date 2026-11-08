@@ -1,14 +1,15 @@
 .page {
-  height: 100%;
-  min-height: 0;
+  height: auto;
+  min-height: 100%;
   min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 14px;
-  padding: 18px;
+  gap: 24px;
+  padding: 28px 36px 48px;
   color: #101d3f;
   background: linear-gradient(115deg, #fbfdff, #f5f8fc);
-  font-size: 12px;
+  font-size: 13px;
+  overflow: visible;
 }
 .page svg {
   width: 19px;
@@ -351,12 +352,13 @@
 .workspace {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
-  gap: 16px;
-  min-height: 0;
-  flex: 1;
+  gap: 24px;
+  min-height: 520px;
+  height: auto;
+  flex: 1 1 auto;
 }
 .workspace[data-detail="true"] {
-  grid-template-columns: minmax(0, 1fr) minmax(285px, 34%);
+  grid-template-columns: minmax(0, 1fr) minmax(320px, 34%);
 }
 .listColumn {
   display: flex;
@@ -1296,205 +1298,6 @@
   .statusBadge {
     font-size: 10px;
     padding-inline: 8px;
-  }
-}
-@media (max-height: 800px) {
-  .page {
-    padding-top: 14px;
-    padding-bottom: 12px;
-    gap: 12px;
-  }
-  .heading h1 {
-    font-size: 30px;
-  }
-  .heading > div > span {
-    font-size: 12px;
-  }
-  .headingActions .primary,
-  .headingActions .outline {
-    min-height: 40px;
-    font-size: 11px;
-    padding: 9px 12px;
-  }
-  .metric {
-    min-height: 62px;
-    padding-block: 8px;
-    gap: 9px;
-  }
-  .metricIcon {
-    width: 34px;
-    height: 34px;
-  }
-  .metricIcon svg {
-    width: 21px;
-    height: 21px;
-  }
-  .metric strong {
-    font-size: 20px;
-  }
-  .metric small {
-    font-size: 10px;
-  }
-  .search,
-  .select,
-  .moreFilters > .outline {
-    height: 48px;
-  }
-  .page .select select,
-  .page
-    .search
-    input:not([type="checkbox"]):not([type="radio"]):not([type="file"]) {
-    font-size: 11px;
-  }
-  .detail {
-    gap: 6px;
-    padding: 10px;
-  }
-  .detailToolbar {
-    top: 10px;
-    left: 10px;
-    right: 10px;
-  }
-  .hero {
-    flex-basis: 75px;
-    min-height: 42px;
-    padding-top: 18px;
-  }
-  .detailIdentity h2 {
-    font-size: 17px;
-    margin-bottom: 3px;
-  }
-  .detailIdentity p {
-    font-size: 11px;
-  }
-  .quickAttributes {
-    padding: 0;
-  }
-  .quickAttributes p {
-    font-size: 9px;
-  }
-  .quickAttributes small {
-    font-size: 9px;
-    margin-top: 1px;
-  }
-  .quickAttributes > div > span {
-    width: 25px;
-    height: 25px;
-  }
-  .quickAttributes svg {
-    width: 15px;
-    height: 15px;
-  }
-  .tabs button {
-    height: 28px;
-    font-size: 10px;
-  }
-  .specifications {
-    gap: 4px;
-    padding: 2px;
-  }
-  .specifications > div {
-    min-height: 15px;
-  }
-  .specifications dt,
-  .specifications dd {
-    font-size: 10px;
-  }
-  .specifications dt {
-    gap: 6px;
-  }
-  .specifications svg {
-    width: 12px;
-    height: 12px;
-  }
-  .detailActions > .outline,
-  .detailActions > .primary {
-    min-height: 34px;
-    padding: 7px 3px;
-    font-size: 10px;
-  }
-  .documents {
-    gap: 6px;
-  }
-  .documents h3 {
-    font-size: 11px;
-  }
-  .documents > div {
-    padding-bottom: 5px;
-  }
-  .history {
-    gap: 7px;
-  }
-  .history strong {
-    font-size: 10px;
-  }
-  .history small {
-    font-size: 9px;
-  }
-}
-@media (max-height: 700px) {
-  .page {
-    padding: 12px 16px;
-    gap: 10px;
-  }
-  .heading p {
-    display: none;
-  }
-  .heading h1 {
-    font-size: 27px;
-  }
-  .heading > div > span {
-    font-size: 11px;
-  }
-  .headingActions {
-    gap: 7px;
-  }
-  .headingActions .primary,
-  .headingActions .outline {
-    min-height: 36px;
-    font-size: 10px;
-    padding: 8px;
-  }
-  .metrics {
-    gap: 8px;
-  }
-  .metric {
-    min-height: 54px;
-    padding: 7px 9px;
-    gap: 7px;
-  }
-  .metricIcon {
-    width: 30px;
-    height: 30px;
-  }
-  .metric strong {
-    font-size: 19px;
-  }
-  .metric small {
-    font-size: 9px;
-    margin-top: 2px;
-  }
-  .percent {
-    font-size: 10px;
-  }
-  .hero {
-    flex-basis: 52px;
-    min-height: 38px;
-  }
-  .detailIdentity h2 {
-    font-size: 16px;
-  }
-  .detail {
-    gap: 5px;
-  }
-  .documents > p {
-    font-size: 9px;
-  }
-  .documents strong {
-    font-size: 9px;
-  }
-  .history .historyAll {
-    font-size: 9px;
   }
 }
 @media (prefers-reduced-motion: reduce) {

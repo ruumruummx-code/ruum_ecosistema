@@ -1,15 +1,16 @@
 .page {
   --ruum-text-primary: var(--user-on-light-primary);
-  height: 100%;
-  min-height: 0;
+  height: auto;
+  min-height: 100%;
   min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  padding: 16px 18px;
+  gap: 24px;
+  padding: 28px 36px 48px;
   color: #101d42;
   background: linear-gradient(115deg, #fafcff, #f5f8fc);
-  font-size: 12px;
+  font-size: 13px;
+  overflow: visible;
 }
 .page svg,
 .dialog svg {
@@ -89,17 +90,18 @@
 .banners {
   display: grid;
   grid-template-columns: minmax(0, 1.95fr) minmax(0, 1fr);
-  gap: 14px;
-  height: 145px;
+  gap: 20px;
+  min-height: 165px;
+  height: auto;
   flex-shrink: 0;
 }
 .profile {
   display: flex;
   flex-direction: column;
   min-height: 0;
-  gap: 8px;
-  padding: 12px 14px;
-  border-radius: 12px;
+  gap: 12px;
+  padding: 20px 24px;
+  border-radius: 16px;
   color: white;
   background: linear-gradient(110deg, #001c36, #07345d);
   border: 1px solid #d7e5f4;
@@ -273,11 +275,11 @@
 .verifiedBanner {
   background: linear-gradient(130deg, #1046d4, #0868ff 60%, #1744d0);
   border: 1px solid #2a6af8;
-  border-radius: 12px;
+  border-radius: 16px;
   display: flex;
   align-items: center;
-  padding: 15px;
-  gap: 8px;
+  padding: 20px 24px;
+  gap: 12px;
   color: white;
   min-width: 0;
   overflow: hidden;
@@ -335,8 +337,9 @@
 .quickLinks {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 10px;
-  height: 58px;
+  gap: 14px;
+  min-height: 64px;
+  height: auto;
   flex-shrink: 0;
 }
 .quickLinks > a,
@@ -423,32 +426,29 @@
 .columns {
   display: grid;
   grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
-  gap: 16px;
+  gap: 24px;
   min-height: 0;
   flex: 1;
 }
 .leftColumn,
 .rightColumn {
-  display: grid;
-  grid-template-rows: minmax(0, 1.3fr) minmax(0, 1fr);
-  gap: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
   min-height: 0;
   min-width: 0;
 }
-.rightColumn {
-  grid-template-rows: minmax(0, 1.45fr) minmax(0, 1fr);
-}
 .card {
   border: 1px solid #e8edf7;
-  border-radius: 13px;
+  border-radius: 16px;
   background: #fff;
   box-shadow: 0 2px 5px #31587c03;
-  padding: 12px;
+  padding: 20px 24px;
   display: flex;
   flex-direction: column;
   min-height: 0;
   min-width: 0;
-  overflow: hidden;
+  overflow: visible;
 }
 .card > header {
   display: flex;
@@ -1473,412 +1473,6 @@
   }
   .securityRows small {
     margin-top: 2px;
-  }
-}
-@media (max-height: 800px) {
-  .page {
-    padding: 12px 16px;
-    gap: 10px;
-  }
-  .heading {
-    min-height: 66px;
-  }
-  .heading h1 {
-    font-size: 30px;
-  }
-  .heading p {
-    font-size: 11px;
-  }
-  .heading > div > span {
-    font-size: 12px;
-  }
-  .headerArt svg {
-    height: 60px;
-  }
-  .headerArt p {
-    font-size: 11px;
-  }
-  .banners {
-    height: 137px;
-    gap: 12px;
-  }
-  .profile {
-    padding: 10px 12px;
-    gap: 8px;
-  }
-  .avatar {
-    width: 58px;
-    height: 58px;
-    font-size: 23px;
-  }
-  .avatarMark {
-    width: 17px;
-    height: 17px;
-  }
-  .profileTop {
-    gap: 12px;
-  }
-  .profileIdentity h2 {
-    font-size: 13px;
-  }
-  .profileIdentity p {
-    font-size: 10px;
-  }
-  .verification {
-    font-size: 9px;
-    padding: 3px 6px;
-  }
-  .editProfile {
-    padding: 7px;
-    font-size: 10px;
-    gap: 5px;
-  }
-  .editProfile svg {
-    width: 13px;
-    height: 13px;
-  }
-  .stats {
-    padding-top: 7px;
-  }
-  .stats strong {
-    font-size: 16px;
-  }
-  .stats small {
-    font-size: 9px;
-  }
-  .stats > a {
-    gap: 6px;
-  }
-  .stats > a > svg {
-    width: 16px;
-    height: 16px;
-  }
-  .verifiedBanner {
-    padding: 13px;
-  }
-  .verifiedBanner h2 {
-    font-size: 14px;
-    margin-bottom: 6px;
-  }
-  .verifiedBanner p {
-    font-size: 10px;
-    line-height: 1.4;
-    margin-bottom: 9px;
-  }
-  .verifiedBanner button,
-  .verifiedBanner a {
-    font-size: 9px;
-    padding: 7px 8px;
-    gap: 5px;
-  }
-  .verifiedBanner .shieldArt {
-    width: 55px;
-    height: 75px;
-  }
-  .quickLinks {
-    height: 54px;
-    gap: 9px;
-  }
-  .quickLinks > a,
-  .quickLinks > button {
-    gap: 8px;
-    padding: 8px;
-  }
-  .quickIcon {
-    width: 32px;
-    height: 32px;
-  }
-  .quickIcon svg {
-    width: 19px;
-    height: 19px;
-  }
-  .quickLinks strong {
-    font-size: 10px;
-  }
-  .quickLinks small {
-    font-size: 9px;
-  }
-  .quickLinks > a > svg,
-  .quickLinks > button > svg {
-    width: 12px;
-    height: 12px;
-  }
-  .columns {
-    gap: 12px;
-  }
-  .leftColumn,
-  .rightColumn {
-    gap: 9px;
-  }
-  .card {
-    padding: 10px 12px;
-  }
-  .card h2 {
-    font-size: 13px;
-  }
-  .card > header {
-    min-height: 26px;
-    padding-bottom: 5px;
-  }
-  .personalFields dt,
-  .personalFields dd {
-    font-size: 10px;
-  }
-  .personalFields dt {
-    gap: 7px;
-  }
-  .personalFields dt svg {
-    width: 13px;
-    height: 13px;
-  }
-  .personalFields > div {
-    padding: 3px 0;
-  }
-  .edit,
-  .textLink {
-    font-size: 9px;
-  }
-  .edit {
-    padding: 4px 6px;
-  }
-  .edit svg {
-    width: 11px;
-    height: 11px;
-  }
-  .addressColumns {
-    gap: 7px;
-    padding-top: 6px;
-  }
-  .addressBlock {
-    padding: 7px;
-    gap: 7px;
-  }
-  .blockIcon {
-    width: 26px;
-    height: 26px;
-  }
-  .blockIcon svg {
-    width: 16px;
-    height: 16px;
-  }
-  .addressBlock h3 {
-    font-size: 9px;
-    margin-bottom: 5px;
-  }
-  .addressBlock p {
-    font-size: 9px;
-    line-height: 1.35;
-  }
-  .defaultBadge {
-    font-size: 7px;
-    padding: 3px 4px;
-  }
-  .defaultBadge svg {
-    width: 8px;
-    height: 8px;
-  }
-  .activity > li > a {
-    gap: 8px;
-    padding: 3px 0;
-  }
-  .activityIcon {
-    width: 27px;
-    height: 27px;
-  }
-  .activityIcon svg {
-    width: 16px;
-    height: 16px;
-  }
-  .activity > li:not(:last-child):before {
-    left: 13px;
-    top: 28px;
-  }
-  .activity strong {
-    font-size: 10px;
-  }
-  .activity time {
-    font-size: 9px;
-    margin-top: 2px;
-  }
-  .activityStatus {
-    font-size: 8px;
-    padding: 4px 5px;
-    gap: 3px;
-  }
-  .activityStatus svg {
-    width: 9px;
-    height: 9px;
-  }
-  .securityRows > div {
-    gap: 7px;
-    padding: 3px 0;
-  }
-  .securityRows > div > svg {
-    width: 15px;
-    height: 15px;
-  }
-  .securityRows > div > div {
-    display: block;
-  }
-  .securityRows strong {
-    font-size: 9px;
-  }
-  .securityRows small {
-    font-size: 8px;
-    margin-top: 2px;
-  }
-  .smallAction {
-    font-size: 9px;
-    padding: 4px 6px;
-    min-width: 55px;
-  }
-  .emptyActivity {
-    font-size: 10px;
-    gap: 6px;
-  }
-  .emptyActivity a {
-    font-size: 10px;
-  }
-}
-@media (max-height: 700px) {
-  .heading {
-    min-height: 58px;
-  }
-  .heading h1 {
-    font-size: 27px;
-  }
-  .heading p {
-    font-size: 10px;
-    margin-bottom: 3px;
-  }
-  .heading > div > span {
-    font-size: 11px;
-  }
-  .banners {
-    height: 122px;
-  }
-  .profile {
-    gap: 7px;
-    padding: 9px 11px;
-  }
-  .avatar {
-    width: 48px;
-    height: 48px;
-    font-size: 20px;
-  }
-  .profileIdentity h2 {
-    font-size: 12px;
-  }
-  .profileIdentity p {
-    font-size: 9px;
-    margin: 1px 0;
-  }
-  .profileIdentity > div {
-    margin-bottom: 2px;
-  }
-  .editProfile {
-    font-size: 9px;
-    padding: 6px;
-  }
-  .stats strong {
-    font-size: 15px;
-  }
-  .stats small {
-    font-size: 8px;
-    margin-top: 2px;
-  }
-  .stats > a > svg {
-    width: 14px;
-    height: 14px;
-  }
-  .verifiedBanner p {
-    font-size: 9px;
-  }
-  .verifiedBanner h2 {
-    font-size: 13px;
-  }
-  .quickLinks {
-    height: 49px;
-  }
-  .quickLinks small {
-    font-size: 8px;
-    margin-top: 2px;
-  }
-  .card {
-    padding: 8px 10px;
-  }
-  .card > header {
-    min-height: 24px;
-  }
-  .card h2 {
-    font-size: 12px;
-  }
-  .personalFields dt,
-  .personalFields dd {
-    font-size: 9px;
-  }
-  .personalFields > div {
-    padding: 2px 0;
-  }
-  .addressColumns {
-    gap: 6px;
-  }
-  .addressBlock {
-    padding: 6px;
-    gap: 6px;
-  }
-  .blockIcon {
-    width: 22px;
-    height: 22px;
-  }
-  .blockIcon svg {
-    width: 14px;
-    height: 14px;
-  }
-  .addressBlock h3 {
-    font-size: 8px;
-    margin-bottom: 4px;
-  }
-  .addressBlock p {
-    font-size: 8px;
-  }
-  .defaultBadge {
-    font-size: 7px;
-  }
-  .activity strong {
-    font-size: 9px;
-  }
-  .activity time {
-    font-size: 8px;
-  }
-  .activityIcon {
-    width: 23px;
-    height: 23px;
-  }
-  .activityIcon svg {
-    width: 14px;
-    height: 14px;
-  }
-  .activity > li:not(:last-child):before {
-    left: 11px;
-    top: 25px;
-  }
-  .activityStatus {
-    font-size: 7px;
-    padding: 3px 4px;
-  }
-  .securityRows strong {
-    font-size: 9px;
-  }
-  .securityRows small {
-    font-size: 8px;
-  }
-  .smallAction {
-    font-size: 8px;
-    min-width: 51px;
-  }
-  .securityRows > div {
-    padding: 2px 0;
   }
 }
 @media (prefers-reduced-motion: reduce) {

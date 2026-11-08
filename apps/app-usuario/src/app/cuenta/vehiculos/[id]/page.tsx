@@ -40,7 +40,7 @@ export default async function PaginaDetalleVehiculo({ params }: { params: Promis
     </div>;
     return <>
       <div className="lg:hidden"><NavegacionUsuario variante="claro" nombreUsuario={cuenta.usuario.nombre} /><MobileShell as="main" variant="compact" className="user-v2-scope user-vehicles-shell" contentClassName="user-vehicles-content">{detalle}</MobileShell></div>
-      <div className="hidden lg:flex h-full w-full overflow-hidden"><UserDashboardLayout usuario={cuenta.usuario} nombre={cuenta.usuario.nombre} correo={cuenta.correoRegistro} totalVehiculos={cuenta.vehiculos.length} notificaciones={construirNotificaciones(cuenta.usuario, cuenta.traslados ?? [])}>{detalle}</UserDashboardLayout></div>
+      <div className="hidden lg:flex h-full w-full"><UserDashboardLayout usuario={cuenta.usuario} nombre={cuenta.usuario.nombre} correo={cuenta.correoRegistro} totalVehiculos={cuenta.vehiculos.length} notificaciones={construirNotificaciones(cuenta.usuario, cuenta.traslados ?? [])}>{detalle}</UserDashboardLayout></div>
     </>;
   });
 }

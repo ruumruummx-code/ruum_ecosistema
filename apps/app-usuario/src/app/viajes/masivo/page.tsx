@@ -182,7 +182,7 @@ export default function PaginaViajesMasivo() {
       </div>
 
       {/* VISTA ESCRITORIO (>= 1024px): Gestión de carga masiva de alta fidelidad */}
-      <div className="hidden lg:flex h-full w-full overflow-hidden">
+      <div className="hidden lg:flex h-full w-full">
         <CargaMasivaDesktop nombreUsuario={nombreUsuario} />
       </div>
     </>

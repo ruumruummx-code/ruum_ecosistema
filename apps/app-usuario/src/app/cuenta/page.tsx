@@ -36,7 +36,7 @@ export default async function PaginaCuenta({ searchParams }: { searchParams?: Pr
       </div>
 
       {/* VISTA ESCRITORIO (>= 1024px): Gestión de cuenta de alta fidelidad */}
-      <div className="hidden lg:flex h-full w-full overflow-hidden">
+      <div className="hidden lg:flex h-full w-full">
         <CuentaDesktop
           cuenta={cuenta}
           seccionInicial={seccion}
