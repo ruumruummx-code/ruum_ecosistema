@@ -362,9 +362,14 @@ export default function PaginaTraslados() {
   const [paginaActual, setPaginaActual] = useState(0);
 
   const fechaFiltro = fechaUrl && /^\d{4}-\d{2}-\d{2}$/.test(fechaUrl) ? diaSeleccionado : null;
-  const rawListToRender = useMemo(() => listarViajesDeVista(
-    disponiblesVisibles, aceptados, detalles, vista, fechaFiltro
-  ), [disponiblesVisibles, aceptados, detalles, vista, fechaFiltro]);
+  const rawListToRender = useMemo(() => {
+    if (vista === "historial") {
+      return historial.map((viaje) => ({ viaje, tipo: "Historial" }));
+    }
+    return listarViajesDeVista(
+      disponiblesVisibles, aceptados, detalles, vista, fechaFiltro
+    );
+  }, [disponiblesVisibles, aceptados, historial, detalles, vista, fechaFiltro]);
 
   // Ciudades disponibles para el filtro
   const ciudadesDisponibles = useMemo(() => {
@@ -410,12 +415,12 @@ export default function PaginaTraslados() {
   return <>
     <DriverTrasladosView
       online={estaOnline} refreshing={refrescando} loading={cargando} notifications={notificacionesCount}
-      offers={disponiblesVisibles.length} accepted={aceptados.length} showingOffers={vista === "disponibles"}
+      offers={disponiblesVisibles.length} accepted={aceptados.length} history={historial.length} showingOffers={vista === "disponibles"} vista={vista}
       filtered={Boolean(searchQuery.trim()) || ciudadFiltro !== "todas"}
       calendar={calendario} selectedDay={diaSeleccionado} today={diaHoy}
       allDates={!fechaFiltro} onAllDates={() => actualizarUrl({ fecha: "" })}
       onSelectDay={(fecha) => { setDiaSeleccionado(fecha); actualizarUrl({ fecha }); }}
-      onTab={(ofertas) => actualizarUrl({ vista: ofertas ? "disponibles" : "mis-Traslados" })}
+      onTab={(tab) => actualizarUrl({ vista: typeof tab === "string" ? tab : tab ? "disponibles" : "mis-Traslados" })}
       onRefresh={() => { setRefrescando(true); setRefreshCount((prev) => prev + 1); }}
       onHelp={() => setSoporteAbierto(true)}
       onSort={() => { setOrden("mayor_ganancia"); actualizarUrl({ orden: "mayor_ganancia" }); }}

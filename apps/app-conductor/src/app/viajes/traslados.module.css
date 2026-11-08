@@ -24,8 +24,8 @@
 .search { flex-shrink: 0; position: relative; }
 .screen .search input { height: 48px; min-height: 0 !important; padding: 0 40px; border: 1px solid var(--conductor-border); border-radius: 14px; background: var(--conductor-surface); color: var(--conductor-primary); font-size: 16px; box-shadow: none; }
 .search > div > div + div { position: absolute; z-index: 2; top: 100%; right: 8px; padding: 4px; background: var(--conductor-surface); }
-.tabs { display: grid; grid-template-columns: 1fr 1fr; padding: 3px; flex-shrink: 0; border-radius: 15px; background: var(--conductor-surface-secondary); }
-.tabs button { min-height: 44px; border-radius: 12px; padding: 0 4px; color: var(--conductor-muted); font-size: 15px; transition: background 150ms ease, color 150ms ease; }
+.tabs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); padding: 3px; flex-shrink: 0; border-radius: 15px; background: var(--conductor-surface-secondary); }
+.tabs button { min-height: 48px; border-radius: 12px; padding: 0 2px; color: var(--conductor-muted); font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; transition: background 150ms ease, color 150ms ease; }
 .tabs :is([aria-selected="true"], [aria-pressed="true"]) { background: var(--conductor-action); color: var(--conductor-primary); font-weight: 650; }
 .calendar { display: grid; gap: 8px; flex-shrink: 0; }
 .week { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 2px; }
@@ -117,6 +117,11 @@
 .day > span { font-size:12px; }
 .day > strong { width:auto; height:24px; font-size:16px; }
 .applyFilters { min-height:48px; width:100%; padding:12px; border-radius:12px; background:var(--conductor-action); color:var(--ruum-on-primary); font-size:16px; }
+@media (max-height: 600px) {
+  .body { gap: 4px; }
+  .screen[data-conductor-screen] > [data-screen-body] { padding: 6px 8px; }
+  .tabs button { min-height: 44px; font-size: 12px; }
+}
 @media (min-height:700px) { .body { gap:12px; padding:16px; } }
 @media (prefers-reduced-motion: reduce) { .tabs button, .day strong { transition:none; } }
 
