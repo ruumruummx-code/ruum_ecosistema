@@ -43,36 +43,33 @@ export function CierreExitoPantalla({
         Has completado el traslado #{trasladoId.slice(0, 8).toUpperCase()} con trazabilidad certificada.
       </p>
 
-      <div className="bg-surface-elevated border border-border/20 rounded-3xl p-6 w-full shadow-lg relative overflow-hidden">
-        <span className="text-[10px] text-text-tertiary font-bold uppercase tracking-widest block text-center mb-1">
-          Ganancia Neta del Viaje
+      <div className="border-t border-b border-border/20 py-6 w-full text-center relative">
+        <span className="text-xs text-text-secondary font-medium tracking-wide block mb-1">
+          Depósito programado
         </span>
         <div className="text-center">
-          <span className="font-display text-4xl font-black text-text-primary tabular-nums">
+          <span className="font-mono text-4xl font-bold text-text-primary tabular-nums">
             ${gananciaTotal.toLocaleString("es-MX", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
           </span>
           <span className="text-xs text-text-secondary ml-1.5 font-bold uppercase">MXN</span>
         </div>
 
         {totalGastos > 0 && (
-          <div className="mt-4 pt-4 border-t border-border/15 flex justify-between items-center text-sm">
+          <div className="mt-4 pt-3 border-t border-border/15 flex justify-between items-center text-sm">
             <span className="text-text-secondary text-xs">Gastos registrados reembolsables</span>
-            <span className="font-bold text-route-action font-mono text-xs">
+            <span className="font-bold font-mono text-xs text-route-action">
               + ${totalGastos.toLocaleString("es-MX", { minimumFractionDigits: 2 })}
             </span>
           </div>
         )}
       </div>
 
-      <div className="mt-8 w-full flex flex-col gap-3">
-        <Link href="/viajes" className="conductor-button conductor-button-primary w-full">
-          VOLVER AL PANEL
-        </Link>
+      <div className="mt-8 w-full">
         <Link
-          href={`/viajes/${trasladoId}/detalles`}
-          className="text-text-tertiary hover:text-text-primary text-xs font-bold uppercase tracking-widest text-center py-2 transition-colors"
+          href="/viajes"
+          className="conductor-button conductor-button-primary w-full flex items-center justify-center text-center font-bold"
         >
-          Ver resumen completo
+          Volver a Traslados
         </Link>
       </div>
     </div>

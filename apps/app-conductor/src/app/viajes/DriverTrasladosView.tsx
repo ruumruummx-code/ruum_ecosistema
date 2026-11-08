@@ -13,10 +13,10 @@ import styles from "./traslados.module.css";
 
 type Props = {
   online: boolean; refreshing: boolean; loading: boolean; notifications: number;
-  offers: number; accepted: number; showingOffers: boolean; filtered: boolean; sortActive: boolean;
+  offers: number; accepted: number; history?: number; showingOffers: boolean; vista?: "disponibles" | "mis-Traslados" | "historial"; filtered: boolean; sortActive: boolean;
   calendar: DiaCalendario[]; selectedDay: string; today: string;
   allDates?: boolean; onAllDates?: () => void;
-  onSelectDay: (day: string) => void; onTab: (offers: boolean) => void;
+  onSelectDay: (day: string) => void; onTab: (tab: boolean | string) => void;
   onRefresh: () => void; onHelp: () => void; onSort: () => void; onClear: () => void;
   filters: ReactNode; children?: ReactNode; notice?: string | null;
 };
@@ -42,8 +42,9 @@ export function DriverTrasladosView(props: Props) {
       </header>
 
       <div className={styles.tabs} role="group" aria-label="Vistas de traslados">
-        <button type="button"    aria-pressed={props.showingOffers} onClick={() => props.onTab(true)}>Ofertas ({props.offers})</button>
-        <button type="button"    aria-pressed={!props.showingOffers} onClick={() => props.onTab(false)}>Aceptados ({props.accepted})</button>
+        <button type="button" aria-pressed={props.showingOffers} aria-label={`Ofertas (${props.offers})`} onClick={() => props.onTab(true)}>Disponibles ({props.offers})</button>
+        <button type="button" aria-pressed={!props.showingOffers && (!props.vista || props.vista === "mis-Traslados")} aria-label={`Aceptados (${props.accepted})`} onClick={() => props.onTab(false)}>Mis Traslados ({props.accepted})</button>
+        <button type="button" aria-pressed={props.vista === "historial"} aria-label={`Historial (${props.history ?? 0})`} onClick={() => props.onTab("historial")}>Historial ({props.history ?? 0})</button>
       </div>
       <div className={styles.searchRow}><div className={styles.search}><TrasladosSearch placeholder={props.showingOffers ? "Buscar ofertas..." : "Buscar aceptados..."} /></div><button type="button" className={styles.filterButton} aria-label="Abrir filtros avanzados" aria-haspopup="dialog" onClick={() => setMenuOpen(true)}><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18" /><circle cx="8" cy="6" r="2" fill="currentColor" /><circle cx="16" cy="12" r="2" fill="currentColor" /><circle cx="9" cy="18" r="2" fill="currentColor" /></svg></button></div>
       {props.notice && <details className={styles.notice}><summary>Información de los traslados</summary><p role="status">{props.notice}</p></details>}

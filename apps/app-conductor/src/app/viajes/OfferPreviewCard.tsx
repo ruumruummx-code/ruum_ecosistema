@@ -6,7 +6,7 @@ import { ConductorIcon } from "@/components/icons";
 import { claveDia, formatearDistancia, nombreVehiculo, type DetalleOperativo, type PasaporteRow } from "./trips-utils";
 import styles from "./offer-preview.module.css";
 
-export type AcceptedPreview = { label: string; tone: "pending" | "active" | "success"; onReject?: () => void; readOnly?: boolean };
+export type AcceptedPreview = { label: string; tone: "pending" | "active" | "success"; grupo?: string; onReject?: () => void; readOnly?: boolean };
 
 export function OfferPreviewCard({ viaje, detalle, hrefDetalle, mapPreview, accepted }: { viaje: PasaporteRow; detalle: DetalleOperativo; hrefDetalle: string; mapPreview?: ReactNode; accepted?: AcceptedPreview }) {
   const folio = viaje.traslado_id?.slice(0, 8).toUpperCase() ?? "SIN ID";
@@ -23,7 +23,13 @@ export function OfferPreviewCard({ viaje, detalle, hrefDetalle, mapPreview, acce
   const actionLabel = !accepted ? "Ver detalles de la oferta" : accepted.readOnly || accepted.tone === "success" ? "Ver traslado" : accepted.tone === "active" ? "Continuar traslado" : "Ver siguiente paso";
   const primaryAction = <Link href={hrefDetalle} className={styles.action} prefetch={false}>{actionLabel} <span aria-hidden="true">→</span></Link>;
   return <article className={styles.card} data-offer-card={!accepted || undefined} data-accepted-card={accepted ? true : undefined} aria-label={`${accepted ? "Traslado aceptado" : "Oferta"} ${folio}`}>
-    <div className={styles.top}><span className={styles.available} data-tone={accepted?.tone}><ConductorIcon name={accepted?.tone === "active" ? "truck" : "check"} />{accepted?.label ?? "Oferta disponible"}</span><span className={styles.folio}>ID {folio}</span></div>
+    <div className={styles.top}>
+      <div className={styles.topStatus}>
+        <span className={styles.available} data-tone={accepted?.tone}><ConductorIcon name={accepted?.tone === "active" ? "truck" : "check"} />{accepted?.label ?? "Oferta disponible"}</span>
+        {accepted?.grupo && <span className={styles.groupBadge}>{accepted.grupo}</span>}
+      </div>
+      <span className={styles.folio}>ID {folio}</span>
+    </div>
     <div className={styles.summary}>
       <div className={styles.priceBlock}><strong>{price == null ? "Por confirmar" : new Intl.NumberFormat("es-MX", { style: "currency", currency: "MXN" }).format(price)}</strong>{price != null && <span>MXN</span>}<p>{nombreVehiculo(viaje)}</p></div>
       {validDate && <div className={styles.schedule}><div><span>{day}</span><time dateTime={date.toISOString()}>{time}</time></div></div>}

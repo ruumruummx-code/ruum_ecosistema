@@ -21,7 +21,7 @@ export function IniciaTrayectoDetails({ pasaporte, volver }: { pasaporte: Pasapo
       router.refresh();
     } catch (err) { setError(traducirErrorOperativo(err, "No pudimos actualizar la recepción del vehículo.")); setProcesando(false); }
   }
-  return <TripStage pasaporte={pasaporte} backHref={volver} destination={received}
+  return <TripStage minimal pasaporte={pasaporte} backHref={volver} destination={received}
     title={received ? "Inicia el trayecto" : "Confirma la recepción"}
     instruction={received ? "Confirma cuando estés listo para salir." : "El registro inicial está completo."}
     stateLabel={received ? "Vehículo recibido" : "Registro inicial completo"}

@@ -12,11 +12,11 @@ export function OpportunityDetailsView({ oportunidad, pasaporte, volver, procesa
   const disabled = procesando || ofertaTomada || solicitudEnviada || !oportunidad || !oportunidad.elegible;
   const reason = oportunidad && !oportunidad.elegible
     ? `No disponible: ${(oportunidad.motivos ?? []).map(m => m.replaceAll("_", " ")).join(", ")}. Consulta a soporte.` : null;
-  return <TripStage pasaporte={pasaporte} backHref={volver} offer
+  return <TripStage pasaporte={pasaporte} backHref={volver} offer minimal
     title="Revisa la oferta" stateLabel={ofertaTomada ? "Oferta asignada" : solicitudEnviada ? "Solicitud registrada" : directed ? "Oferta dirigida" : "Oferta disponible"}
     instruction={ofertaTomada ? "Este traslado ya fue asignado a otro conductor." : reason || (directed ? "Revisa la ruta antes de aceptar." : "Solicita el traslado y espera la asignación.")}
     primaryLabel={solicitudEnviada ? "Solicitud registrada" : ofertaTomada ? "Oferta no disponible" : !oportunidad ? "Consultando disponibilidad…" : directed ? "Aceptar oferta dirigida" : "Solicitar traslado"}
-    onPrimary={onAccept} busy={procesando} disabled={disabled} error={error} notice={avisoExito}
+    onPrimary={onAccept} onReject={onReject} busy={procesando} disabled={disabled} error={error} notice={avisoExito}
     extraTools={<>
       <p>{directed ? "La aceptación confirma la asignación dirigida." : "La solicitud participa en la competencia; el servidor resuelve la asignación."}</p>
       {oportunidad?.expira_en && <p>Vigente hasta {new Date(oportunidad.expira_en).toLocaleString("es-MX")}</p>}

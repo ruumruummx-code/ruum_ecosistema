@@ -10,7 +10,7 @@ export function TripStatusSummary({ pasaporte, volver, closing = false }: { pasa
   const finished = ["servicio_cerrado", "pago_pendiente", "pago_completado"].includes(pasaporte.estado || "");
   const instruction = finished ? "La operación terminó. Consulta el expediente y los pagos." : stopped ? "Este traslado no continúa. Consulta el motivo o pide ayuda." : "Consulta el expediente y las indicaciones de soporte.";
   const delivered = pasaporte.estado === "entrega_confirmada";
-  return <TripStage pasaporte={pasaporte} backHref={volver} destination readOnly={!closing}
+  return <TripStage minimal pasaporte={pasaporte} backHref={volver} destination readOnly={!closing}
     stateLabel={closing ? delivered ? "Entrega confirmada" : "Registro final completo" : stateLabels.get(pasaporte.estado!) || "Estado por confirmar"}
     title={closing ? delivered ? "Finaliza el servicio" : "Confirma la entrega" : presentation.title}
     instruction={closing ? "Revisa el registro, la recepción y los requisitos de cierre." : instruction}

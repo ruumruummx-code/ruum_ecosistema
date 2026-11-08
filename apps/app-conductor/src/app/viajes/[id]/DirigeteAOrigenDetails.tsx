@@ -26,6 +26,6 @@ export function DirigeteAOrigenDetails({ pasaporte, volver }: { pasaporte: Pasap
     }
   }
 
-  return <TripStage pasaporte={pasaporte} backHref={volver} title="Ve al punto de recogida" instruction="Confirma la llegada cuando estés en el lugar." stateLabel="En camino al origen"
+  return <TripStage minimal pasaporte={pasaporte} backHref={volver} title="Ve al punto de recogida" instruction="Confirma la llegada cuando estés en el lugar." stateLabel="En camino al origen"
     primaryLabel="Confirmar llegada" onPrimary={() => void handleLlegueOrigen()} busy={procesando} error={error} />;
 }

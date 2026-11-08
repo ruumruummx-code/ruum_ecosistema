@@ -3,7 +3,7 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 import type { PasaporteRow, DetalleOperativo } from "./trips-utils";
-import { formatearDuracion, nombreVehiculo } from "./trips-utils";
+import { formatearDuracion, nombreVehiculo, clasificarMisTraslados } from "./trips-utils";
 import { TripPreviewCard } from "./TripPreviewCard";
 
 function getEstadoCardInfo(estado: string) {
@@ -91,7 +91,9 @@ export function AcceptedTripCard({
 }: AcceptedTripCardProps) {
   const cardInfo = getEstadoCardInfo(viaje.estado || "");
   const readOnly = !["conductor_asignado", "conductor_en_camino_al_origen", "conductor_en_punto_de_recoleccion", "verificacion_vehiculo_en_proceso", "evidencia_inicial_en_proceso", "evidencia_inicial_completada", "vehiculo_recibido", "traslado_en_curso", "llegada_a_destino", "evidencia_final_en_proceso", "evidencia_final_completada", "entrega_confirmada"].includes(viaje.estado || "");
-  if (compact) return <TripPreviewCard viaje={viaje} detalle={detalle} hrefDetalle={hrefDetalle} mapPreview={mapPreview} accepted={{ label: cardInfo.titulo, tone: cardInfo.status, readOnly, onReject: !readOnly ? () => onReject(viaje) : undefined }} />;
+  const grupo = viaje.estado ? clasificarMisTraslados(viaje) : null;
+  const grupoEtiqueta = grupo === "en-curso" ? "En curso" : grupo === "proximos" ? "Próximos" : grupo === "por-cerrar" ? "Por cerrar" : undefined;
+  if (compact) return <TripPreviewCard viaje={viaje} detalle={detalle} hrefDetalle={hrefDetalle} mapPreview={mapPreview} accepted={{ label: cardInfo.titulo, tone: cardInfo.status, grupo: grupoEtiqueta, readOnly, onReject: !readOnly ? () => onReject(viaje) : undefined }} />;
   const folio = viaje.traslado_id ? viaje.traslado_id.slice(0, 8).toUpperCase() : "POR CONFIRMAR";
   const ganancia = viaje.ganancia_conductor != null
     ? `$${viaje.ganancia_conductor.toLocaleString("es-MX", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
