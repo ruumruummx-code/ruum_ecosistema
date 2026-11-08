@@ -144,7 +144,7 @@ export default async function PaginaInicio({
         </div>
 
         {/* VISTA ESCRITORIO (>= 1024px): Dashboard enriquecido */}
-        <div className="hidden lg:flex h-full w-full overflow-hidden">
+        <div className="hidden lg:flex h-full w-full">
           <InicioDesktop
             errorVehiculos={errorVehiculos}
             usuario={usuario}

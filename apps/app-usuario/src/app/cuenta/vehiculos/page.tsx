@@ -55,7 +55,7 @@ export default async function PaginaVehiculos() {
       </div>
 
       {/* VISTA ESCRITORIO (>= 1024px): Shell unificado UserDashboardLayout */}
-      <div className="hidden lg:flex h-full w-full overflow-hidden">
+      <div className="hidden lg:flex h-full w-full">
         <UserDashboardLayout
           usuario={cuenta.usuario}
           nombre={cuenta.usuario?.nombre}
@@ -65,7 +65,6 @@ export default async function PaginaVehiculos() {
             cuenta.usuario,
             cuenta.traslados ?? [],
           )}
-          fixedContent
           dashboardHeader
           padding="ninguno"
           idContenido="desktopVehiclesMainContent"

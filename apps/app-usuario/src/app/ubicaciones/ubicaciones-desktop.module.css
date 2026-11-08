@@ -9,14 +9,15 @@
 }
 .page {
   --ruum-text-primary: var(--user-on-light-primary);
-  height: 100%;
-  min-height: 0;
+  height: auto;
+  min-height: 100%;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 24px;
   color: #091a38;
   position: relative;
   font-size: 13px;
+  overflow: visible;
 }
 .page svg,
 .dialog svg {
@@ -873,16 +874,17 @@
 }
 @media (min-width: 1024px) {
   .shellContent {
-    overflow: hidden !important;
+    overflow-y: auto !important;
+    overflow-x: hidden;
   }
   .mobile {
     display: none;
   }
   .desktop {
     display: block;
-    height: 100%;
-    min-height: 0;
-    padding: 22px 18px 15px;
+    height: auto;
+    min-height: 100%;
+    padding: 28px 36px 48px;
   }
 }
 @media (max-width: 1399px) {
@@ -1025,98 +1027,6 @@
   }
   .rows > li {
     min-height: 82px;
-  }
-}
-@media (max-height: 800px) and (min-width: 1024px) {
-  .desktop {
-    padding: 14px 16px 10px;
-  }
-  .page {
-    gap: 12px;
-  }
-  .heading h1 {
-    font-size: 29px;
-  }
-  .heading p {
-    font-size: 10px;
-  }
-  .heading span {
-    font-size: 11px;
-  }
-  .headingActions button {
-    min-height: 39px;
-    font-size: 11px;
-    padding: 9px 12px;
-  }
-  .listColumn {
-    gap: 10px;
-  }
-  .metrics > div {
-    padding: 10px;
-    gap: 10px;
-  }
-  .metrics > div > span {
-    width: 35px;
-    height: 35px;
-  }
-  .metrics strong {
-    font-size: 22px;
-  }
-  .metrics small {
-    font-size: 9px;
-  }
-  .filters .search {
-    height: 42px;
-  }
-  .filters .select,
-  .moreFilters > .outline {
-    height: 43px;
-  }
-  .tabs button {
-    min-height: 34px;
-    font-size: 10px;
-    padding: 7px 10px;
-  }
-  .detail {
-    gap: 10px;
-    padding: 12px;
-  }
-  .detailHeading h2 {
-    font-size: 13px;
-  }
-  .detailAddress {
-    font-size: 10px;
-  }
-  .quickActions span {
-    width: 38px;
-    height: 38px;
-  }
-  .quickActions > a,
-  .quickActions > button {
-    font-size: 8px;
-    gap: 5px;
-  }
-  .metadata {
-    gap: 8px;
-    margin: 2px 0;
-  }
-  .metadata > div {
-    font-size: 10px;
-  }
-  .metadata dt svg {
-    width: 15px;
-    height: 15px;
-  }
-  .editInformation {
-    min-height: 37px;
-    font-size: 11px;
-    padding: 7px;
-  }
-  .map {
-    min-height: 75px;
-  }
-  .pagination {
-    min-height: 29px;
   }
 }
 .mapMessage {

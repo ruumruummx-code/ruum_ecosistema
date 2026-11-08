@@ -195,3 +195,26 @@ test("oferta minimal: ruta como protagonista, ganancia oficial y rechazo con 6 m
     expect(box!.height).toBeGreaterThanOrEqual(56);
   }
 });
+test("en curso minimal: direccion como protagonista, boton confirmar llegada >= 56px y sin scroll de pagina", async ({ page }) => {
+  for (const width of [320, 390]) {
+    await page.setViewportSize({ width, height: width === 320 ? 568 : 844 });
+    await page.goto(`/viajes/${trip(4)}`);
+    await expect(page.locator("[data-conductor-screen=operation]:visible")).toHaveCount(1);
+    await expect(page.getByRole("heading", { name: "Conduce al destino" })).toBeVisible();
+
+    const primaryBtn = page.getByRole("button", { name: "Confirmar llegada a destino" });
+    await hit(primaryBtn);
+    const box = await primaryBtn.boundingBox();
+    expect(box!.height).toBeGreaterThanOrEqual(56);
+
+    const tools = page.locator('[class*="tools"] button:visible');
+    for (const tool of await tools.all()) {
+      const toolBox = await tool.boundingBox();
+      expect(toolBox!.height).toBeGreaterThanOrEqual(48);
+      expect(toolBox!.width).toBeGreaterThanOrEqual(48);
+    }
+
+    expect(await page.locator("[data-screen-body]:visible").evaluate(n => n.scrollHeight - n.clientHeight)).toBeLessThanOrEqual(1);
+    await noRootScroll(page);
+  }
+});

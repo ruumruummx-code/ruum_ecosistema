@@ -10,12 +10,14 @@ import { distanciaMetrosEntre, obtenerUbicacionActualConEstado } from "@/lib/ubi
 export function ConduceADestinoDetails({ pasaporte, volver }: { pasaporte: PasaporteRow; volver: string }) {
   const router = useRouter();
   const [procesando, setProcesando] = useState(false);
-  useEffect(() => { setProcesando(false); }, [pasaporte.estado]);
+  const [estadoLocal, setEstadoLocal] = useState(pasaporte.estado);
+  useEffect(() => { setEstadoLocal(pasaporte.estado); setProcesando(false); }, [pasaporte.estado]);
   const [error, setError] = useState<string | null>(null);
   const trasladoId = pasaporte.traslado_id!;
   const navigationTargetLat = pasaporte.destino_lat;
   const navigationTargetLng = pasaporte.destino_lng;
-  const recording = pasaporte.estado === "llegada_a_destino" || pasaporte.estado === "evidencia_final_en_proceso";
+  const estadoActual = estadoLocal || pasaporte.estado;
+  const recording = estadoActual === "llegada_a_destino" || estadoActual === "evidencia_final_en_proceso";
   async function handleLlegueDestino() {
     if (procesando) return;
     setProcesando(true);
@@ -25,7 +27,7 @@ export function ConduceADestinoDetails({ pasaporte, volver }: { pasaporte: Pasap
       const cliente = crearClienteNavegador();
 
       const pasaporteFresco = await obtenerPasaporteDigital(cliente, trasladoId);
-      const estadoDb = pasaporteFresco?.estado || pasaporte.estado;
+      const estadoDb = pasaporteFresco?.estado || estadoActual;
 
       if (!["traslado_en_curso", "llegada_a_destino", "evidencia_final_en_proceso"].includes(estadoDb || "")) {
         router.refresh(); setProcesando(false); return;
@@ -84,7 +86,10 @@ export function ConduceADestinoDetails({ pasaporte, volver }: { pasaporte: Pasap
           antiguedadS,
           motivoSinMedicion
         });
-        router.refresh(); return;
+        setEstadoLocal("llegada_a_destino");
+        setProcesando(false);
+        router.refresh();
+        return;
       }
 
       await avanzarEstadoTraslado(cliente, trasladoId, "llegada_a_destino");
@@ -95,7 +100,7 @@ export function ConduceADestinoDetails({ pasaporte, volver }: { pasaporte: Pasap
     }
   }
 
-  return <TripStage pasaporte={pasaporte} backHref={volver} destination
+  return <TripStage pasaporte={{ ...pasaporte, estado: estadoActual }} backHref={volver} destination minimal
     title={recording ? "Registra la entrega" : "Conduce al destino"}
     instruction={recording ? "Completa el registro final antes de entregar." : "Confirma la llegada al punto de entrega."}
     stateLabel={recording ? "En el destino" : "Trayecto en curso"}

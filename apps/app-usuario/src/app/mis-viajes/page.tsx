@@ -181,7 +181,7 @@ export default async function PaginaMisTraslados({
       </div>
 
       {/* VISTA ESCRITORIO (>= 1024px): Dashboard de Gestión con métricas confirmadas */}
-      <div className="hidden lg:flex h-full w-full overflow-hidden">
+      <div className="hidden lg:flex h-full w-full">
         <MisViajesDesktop
           traslados={Traslados}
           nombreUsuario={usuario?.nombre}

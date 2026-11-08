@@ -398,6 +398,80 @@ summary:focus-visible {
   }
 }
 
+/* ─────────────────────────────────────────────────────────────
+   Desktop: Desplazamiento scroll y descompresión visual.
+   La condición "no-scroll" / 100dvh estricto es exclusiva para móvil.
+   En pantallas desktop (min-width: 1024px), se habilita el desplazamiento scroll,
+   se libera la altura forzada y se otorga aire/espacio a los layouts.
+   ───────────────────────────────────────────────────────────── */
+@media (min-width: 1024px) {
+  html {
+    height: auto;
+    max-height: none;
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
+
+  body {
+    height: auto;
+    min-height: 100vh;
+    max-height: none;
+    overflow-y: auto;
+    overflow-x: hidden;
+    overscroll-behavior: auto;
+  }
+
+  #contenido-principal {
+    height: auto;
+    min-height: 100vh;
+    max-height: none;
+    overflow: visible;
+  }
+
+  #contenido-principal > main,
+  #contenido-principal > div {
+    min-height: auto;
+  }
+
+  #contenido-principal > main.ruum-screen,
+  #contenido-principal > div.ruum-screen,
+  #contenido-principal > main.user-v2-page,
+  #contenido-principal > main.app-page {
+    height: auto;
+    max-height: none;
+    min-height: 100vh;
+    overflow: visible;
+  }
+
+  .ruum-screen {
+    height: auto;
+    min-height: 100vh;
+    max-height: none;
+    overflow: visible;
+  }
+
+  .app-page,
+  .user-v2-page {
+    height: auto;
+    min-height: 100vh;
+    max-height: none;
+    overflow: visible;
+    padding-bottom: 48px;
+  }
+
+  .user-v2-content {
+    width: min(calc(100% - 48px), 1140px);
+    padding-block: 28px 64px;
+  }
+
+  .ruum-auth-shell {
+    height: auto;
+    min-height: 100vh;
+    max-height: none;
+    overflow-y: auto;
+  }
+}
+
 /* Scrollbar invisible pero accesible */
 .no-scrollbar {
   -ms-overflow-style: none;
