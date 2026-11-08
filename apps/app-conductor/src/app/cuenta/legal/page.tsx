@@ -62,7 +62,7 @@ export default function PaginaLegalCuenta() {
                         {doc.titulo}
                       </h3>
                       {/* 2. Control de Versiones e Indicadores de Transparencia */}
-                      <span className="rounded-md border border-emerald-500/40 bg-emerald-500/10 px-2 py-0.5 font-body text-[10px] font-extrabold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">
+                      <span className="rounded-md border border-control bg-control-soft px-2 py-0.5 font-body text-xs font-extrabold text-control uppercase tracking-wider">
                         {doc.version} • Vigente
                       </span>
                     </div>
@@ -72,7 +72,7 @@ export default function PaginaLegalCuenta() {
                     </p>
 
                     {/* 2. Fecha de última actualización explícita */}
-                    <p className="mt-1.5 font-body text-[11px] font-semibold text-text-tertiary/70">
+                    <p className="mt-1.5 font-body text-[11px] font-semibold text-text-tertiary">
                       Última actualización: {doc.actualizacion}
                     </p>
                   </div>
@@ -90,7 +90,7 @@ export default function PaginaLegalCuenta() {
 
                   <Link
                     href={doc.href}
-                    className="inline-flex items-center gap-1.5 rounded-xl bg-signal hover:bg-signal/85 text-slate-950 px-3.5 py-2 font-display text-xs font-black transition active:scale-95 shadow-xs"
+                    className="inline-flex items-center gap-1.5 rounded-xl bg-action-primary hover:bg-action-primary-hover text-on-primary px-3.5 py-2 font-display text-xs font-black transition active:scale-95 shadow-xs"
                   >
                     Ver completo →
                   </Link>
@@ -165,7 +165,7 @@ export default function PaginaLegalCuenta() {
               <button
                 type="button"
                 onClick={() => setDocAbierto(null)}
-                className="rounded-xl bg-signal px-4 py-2 font-display text-xs font-bold text-slate-950"
+                className="rounded-xl bg-action-primary px-4 py-2 font-display text-xs font-bold text-on-primary"
               >
                 Cerrar lectura rápida
               </button>

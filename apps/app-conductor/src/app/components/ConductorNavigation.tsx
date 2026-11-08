@@ -32,7 +32,7 @@ export function ConductorNavigation({ embedded = false, destinos = CONDUCTOR_DES
                     <div className="relative flex items-center justify-center p-1">
                       {Icono ? <Icono /> : <ConductorIcon name={icono} size={17} strokeWidth={1.8} />}
                     </div>
-                    <span className="max-w-full truncate tracking-tight text-xs leading-none">{destino.etiqueta}</span>
+                    <span className="max-w-full truncate tracking-tight text-sm leading-none">{destino.etiqueta}</span>
                   </Link>
                 );
               })}

@@ -1,0 +1,158 @@
+/* Fase 5: contrato visual local. No modifica los temas de Usuario o Administración. */
+:root,
+html[data-theme="light"] {
+  color-scheme: light;
+  --conductor-primary: #10243a;
+  --conductor-muted: #52637a;
+  --conductor-surface: #ffffff;
+  --conductor-surface-secondary: #f3f5f8;
+  --conductor-border: #ccd5e0;
+  --conductor-border-strong: #75849a;
+  --conductor-action: #0057d9;
+  --conductor-action-hover: #0046b0;
+  --conductor-action-active: #003989;
+  --conductor-on-action: #ffffff;
+  --conductor-action-soft: #eaf1ff;
+  --conductor-brand: #007575;
+  --conductor-success: #146b49;
+  --conductor-success-soft: #e8f5ee;
+  --conductor-pending: #795000;
+  --conductor-pending-soft: #fff4d6;
+  --conductor-error: #b32636;
+  --conductor-error-soft: #fdecef;
+  --conductor-emergency: #b32636;
+  --conductor-on-status: #ffffff;
+  --conductor-focus: #0057d9;
+  --conductor-focus-ring: rgb(0 87 217 / 20%);
+  --conductor-overlay: rgb(5 15 30 / 65%);
+  --conductor-shadow: 0 8px 24px rgb(5 15 30 / 12%);
+  --conductor-disabled: #59697e;
+  --conductor-disabled-surface: #e3e8ef;
+}
+html[data-theme="dark"] {
+  color-scheme: dark;
+  --conductor-primary: #f2f6fc;
+  --conductor-muted: #b7c5d8;
+  --conductor-surface: #101f33;
+  --conductor-surface-secondary: #1b304b;
+  --conductor-border: #435773;
+  --conductor-border-strong: #8d9fb8;
+  --conductor-action: #8dbbff;
+  --conductor-action-hover: #b3d2ff;
+  --conductor-action-active: #d1e4ff;
+  --conductor-on-action: #10243a;
+  --conductor-action-soft: #203a5c;
+  --conductor-brand: #5ce1d9;
+  --conductor-success: #78e0b2;
+  --conductor-success-soft: #193c32;
+  --conductor-pending: #ffda80;
+  --conductor-pending-soft: #443519;
+  --conductor-error: #ff9eac;
+  --conductor-error-soft: #482934;
+  --conductor-emergency: #ff9eac;
+  --conductor-on-status: #10243a;
+  --conductor-focus: #8dbbff;
+  --conductor-focus-ring: rgb(141 187 255 / 25%);
+  --conductor-overlay: rgb(0 0 0 / 75%);
+  --conductor-shadow: 0 8px 24px rgb(0 0 0 / 25%);
+  --conductor-disabled: #b7c5d8;
+  --conductor-disabled-surface: #2b3e57;
+}
+:root,
+html[data-theme="light"],
+html[data-theme="dark"] {
+  --conductor-action-primary: var(--conductor-action);
+  --conductor-gradient-action: linear-gradient(var(--conductor-action), var(--conductor-action));
+  --conductor-radius-control: 12px;
+  --conductor-radius-card: 16px;
+  --conductor-radius-dialog: 20px;
+  --font-display: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-body: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  --ruum-canvas: var(--conductor-surface-secondary);
+  --ruum-surface: var(--conductor-surface);
+  --ruum-surface-elevated: var(--conductor-surface-secondary);
+  --ruum-surface-subtle: var(--conductor-surface-secondary);
+  --ruum-surface-strong: var(--conductor-surface-secondary);
+  --ruum-border: var(--conductor-border);
+  --ruum-border-strong: var(--conductor-border-strong);
+  --ruum-text: var(--conductor-primary);
+  --ruum-text-primary: var(--conductor-primary);
+  --ruum-text-secondary: var(--conductor-muted);
+  --ruum-text-tertiary: var(--conductor-muted);
+  --ruum-text-disabled: var(--conductor-disabled);
+  --ruum-focus: var(--conductor-focus);
+  --ruum-focus-ring: var(--conductor-focus-ring);
+  --ruum-brand: var(--conductor-brand);
+  --ruum-action: var(--conductor-action);
+  --ruum-action-primary: var(--conductor-action);
+  --ruum-action-primary-hover: var(--conductor-action-hover);
+  --ruum-action-primary-active: var(--conductor-action-active);
+  --ruum-on-primary: var(--conductor-on-action);
+  --ruum-on-danger: var(--conductor-on-status);
+  --ruum-route: var(--conductor-action);
+  --ruum-route-action: var(--conductor-action);
+  --ruum-route-contrast: var(--conductor-action);
+  --ruum-route-hover: var(--conductor-action-hover);
+  --ruum-route-active: var(--conductor-action-active);
+  --ruum-gradient-action: var(--conductor-gradient-action);
+  --ruum-gradient-cta: var(--conductor-gradient-action);
+  --ruum-success: var(--conductor-success);
+  --ruum-warning: var(--conductor-pending);
+  --ruum-error: var(--conductor-error);
+  --ruum-danger: var(--conductor-error);
+  --ruum-danger-hover: var(--conductor-error);
+  --ruum-danger-active: var(--conductor-error);
+  --ruum-overlay: var(--conductor-overlay);
+  --ruum-neutral-bg: var(--conductor-surface-secondary);
+  --ruum-neutral-text: var(--conductor-muted);
+  --ruum-action-bg: var(--conductor-action-soft);
+  --ruum-action-text: var(--conductor-action);
+  --ruum-success-bg: var(--conductor-success-soft);
+  --ruum-success-text: var(--conductor-success);
+  --ruum-warning-bg: var(--conductor-pending-soft);
+  --ruum-warning-text: var(--conductor-pending);
+  --ruum-error-bg: var(--conductor-error-soft);
+  --ruum-error-text: var(--conductor-error);
+  --ruum-emergency: var(--conductor-emergency);
+  --ruum-emergency-bg: var(--conductor-error-soft);
+  --ruum-emergency-text: var(--conductor-error);
+  --ruum-radius-field: var(--conductor-radius-control);
+  --ruum-radius-card: var(--conductor-radius-card);
+  --ruum-radius-modal: var(--conductor-radius-dialog);
+  --color-ink: var(--conductor-primary);
+  --color-ink-soft: var(--conductor-muted);
+  --color-asphalt: var(--conductor-primary);
+  --color-steel: var(--conductor-muted);
+  --color-mist: var(--conductor-surface);
+  --color-mist-dim: var(--conductor-surface-secondary);
+  --color-route-dark: var(--conductor-primary);
+  --color-signal: var(--conductor-brand);
+  --color-route: var(--conductor-action);
+  --color-signal-soft: var(--conductor-action-soft);
+  --color-route-soft: var(--conductor-action-soft);
+  --color-control: var(--conductor-success);
+  --color-control-soft: var(--conductor-success-soft);
+  --color-warn: var(--conductor-pending);
+  --color-warn-soft: var(--conductor-pending-soft);
+  --color-danger: var(--conductor-error);
+  --color-danger-soft: var(--conductor-error-soft);
+}
+/* Lienzo liso; las superficies del tema se resuelven como un conjunto. */
+body.conductor-v2-shell,
+html[data-theme="dark"] body.conductor-v2-shell { background: var(--conductor-surface-secondary); color: var(--conductor-primary); }
+html .conductor-auth-card, html .ruum-card { color: var(--conductor-primary); }
+html :is(.bg-signal,.bg-control,.bg-danger,.bg-danger-action),
+html[data-theme="dark"] :is(.bg-signal,.bg-control,.bg-danger,.bg-danger-action) { color: var(--conductor-on-status); }
+:where(button,a,input,select,textarea,summary,[tabindex]):focus-visible { outline: 3px solid var(--conductor-focus); outline-offset: -3px; }
+:where(input,textarea)::placeholder { color: var(--conductor-muted); opacity: 1; }
+:where(input,select,textarea) { accent-color: var(--conductor-action); }
+/* Una acción deshabilitada mantiene un texto legible y una superficie estable. */
+.ruum-button-primary:disabled { background: var(--conductor-disabled-surface); color: var(--conductor-disabled); }
+
+html .conductor-auth-shell, html[data-theme="dark"] .conductor-auth-shell { background:var(--conductor-surface-secondary); }
+html .conductor-auth-card, html[data-theme="dark"] .conductor-auth-card { background:var(--conductor-surface); backdrop-filter:none; }
+
+/* Mismo archivo de marca y geometría; variante oficial clara sobre fondo oscuro.
+   CSS evita un cambio de src posterior a la hidratación o una segunda imagen en el DOM. */
+html[data-theme="dark"] img[src="/imagenes/ruum-logo.svg"] { content:url("/imagenes/ruum-logo-dark.svg"); }

@@ -116,7 +116,7 @@ function FormularioLogin() {
           <Image src="/imagenes/ruum-logo.svg" alt="Ruum Ruum" width={190} height={62} priority className={styles.logo} />
           <div className={styles.intro}>
             <h1 id="titulo-inicio-conductor">Iniciar sesión</h1>
-            <p>Ingresa para comenzar a conducir con nosotros</p>
+            <p>Accede a tu cuenta de conductor.</p>
           </div>
         </header>
         <form className={styles.form} onSubmit={iniciarSesion} noValidate>

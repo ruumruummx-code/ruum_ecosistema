@@ -31,10 +31,10 @@ export function PanelOpportunitiesCard({
       : "Sin traslados por ahora";
 
   const descripcionMovil = !disponible
-    ? "Activa tu estado para recibir solicitudes cercanas."
+    ? "Recibe solicitudes cercanas."
     : cantidad > 0
       ? `${primerViaje?.origen_ciudad || "Origen"} → ${primerViaje?.destino_ciudad || "Destino"}`
-      : "Te avisaremos con sonido cuando haya traslados.";
+      : "Te avisaremos si hay traslados.";
 
   const buscar = () => {
     onRecargar?.();
@@ -74,7 +74,7 @@ export function PanelOpportunitiesCard({
             <button
               type="button"
               onClick={onActivar}
-              className="mt-4 inline-flex min-h-12 w-full cursor-pointer items-center justify-center gap-2.5 rounded-2xl bg-[var(--conductor-action)] px-5 font-display text-[15px] font-bold text-[var(--ruum-on-primary)] shadow-none transition hover:bg-[#0052CC] active:scale-[0.98] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0066FF]"
+              className="mt-4 inline-flex min-h-12 w-full cursor-pointer items-center justify-center gap-2.5 rounded-2xl bg-[var(--conductor-action)] px-5 font-display text-[15px] font-bold text-[var(--ruum-on-primary)] shadow-none transition hover:bg-[var(--conductor-action-hover)] active:scale-[0.98] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--conductor-focus)]"
             >
               <span>Activarme ahora</span>
               <span aria-hidden="true" className="text-lg leading-none">→</span>
@@ -83,7 +83,7 @@ export function PanelOpportunitiesCard({
             <Link
               href="/viajes"
               onClick={buscar}
-              className="mt-4 inline-flex min-h-12 w-full cursor-pointer items-center justify-center gap-3 rounded-2xl bg-[var(--conductor-action)] px-5 font-display text-[15px] font-bold text-[var(--ruum-on-primary)] shadow-none transition hover:bg-[#0052CC] active:scale-[0.98] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0066FF]"
+              className="mt-4 inline-flex min-h-12 w-full cursor-pointer items-center justify-center gap-3 rounded-2xl bg-[var(--conductor-action)] px-5 font-display text-[15px] font-bold text-[var(--ruum-on-primary)] shadow-none transition hover:bg-[var(--conductor-action-hover)] active:scale-[0.98] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--conductor-focus)]"
             >
               <span>{refrescando ? "Buscando traslados…" : "Buscar traslados ahora"}</span>
               <span aria-hidden="true" className="text-lg leading-none">→</span>

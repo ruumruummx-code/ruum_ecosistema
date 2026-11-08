@@ -83,12 +83,12 @@ export default function PaginaPreferenciasCuenta() {
   const [cargando, setCargando] = useState(true);
   const [guardandoAuto, setGuardandoAuto] = useState(false);
   const [tabActiva, setTabActiva] = useState<"alertas" | "viajes" | "tema">("alertas");
-  const [temaSeleccionado, setTemaSeleccionado] = useState<"auto" | "light" | "dark">("light");
+  const [temaSeleccionado, setTemaSeleccionado] = useState<"light" | "dark">("light");
 
   useEffect(() => {
     if (typeof window !== "undefined") {
-      const stored = localStorage.getItem("ruum-theme") as "light" | "dark" | null;
-      if (stored) {
+      const stored = localStorage.getItem("ruum-tema") || localStorage.getItem("ruum-theme");
+      if (stored === "light" || stored === "dark") {
         setTemaSeleccionado(stored);
       } else {
         setTemaSeleccionado("light");
@@ -98,10 +98,11 @@ export default function PaginaPreferenciasCuenta() {
     }
   }, []);
 
-  const cambiarTema = (nuevoTema: "auto" | "light" | "dark") => {
+  const cambiarTema = (nuevoTema: "light" | "dark") => {
     setTemaSeleccionado(nuevoTema);
     if (typeof window !== "undefined") {
-      const valor = nuevoTema === "auto" ? "light" : nuevoTema;
+      const valor = nuevoTema;
+      localStorage.setItem("ruum-tema", valor);
       localStorage.setItem("ruum-theme", valor);
       document.documentElement.setAttribute("data-theme", valor);
       window.dispatchEvent(new Event("ruum:cambio-tema"));
@@ -316,26 +317,26 @@ export default function PaginaPreferenciasCuenta() {
           )}
 
           {tabActiva === "tema" && (
-            <div className="grid grid-cols-3 gap-2">
+            <div className="grid grid-cols-2 gap-2">
               {[
-                { valor: "auto", etiqueta: "💻 Automático", desc: "Sigue el sistema" },
-                { valor: "light", etiqueta: "☀️ Día", desc: "Alto contraste" },
-                { valor: "dark", etiqueta: "🌙 Noche", desc: "Ruta oscura" }
+                { valor: "light", etiqueta: "Día", desc: "Fondo claro" },
+                { valor: "dark", etiqueta: "Noche", desc: "Fondo oscuro" }
               ].map((opc) => {
                 const seleccionado = temaSeleccionado === opc.valor;
                 return (
                   <button
                     key={opc.valor}
                     type="button"
-                    onClick={() => cambiarTema(opc.valor as "auto" | "light" | "dark")}
+                    aria-pressed={seleccionado}
+                    onClick={() => cambiarTema(opc.valor as "light" | "dark")}
                     className={`flex flex-col items-center justify-center p-2 rounded-xl border text-center cursor-pointer transition-all focus-visible:ring-2 focus-visible:ring-route-action focus-visible:ring-offset-2 ${
                       seleccionado
                         ? "border-route-action bg-route-action/10 text-text-primary font-extrabold shadow-xs"
                         : "border-border/60 bg-surface-elevated/40 text-text-secondary hover:border-border"
                     }`}
                   >
-                    <span className="font-display text-[10px] font-bold">{opc.etiqueta}</span>
-                    <span className="font-body text-[9px] text-text-tertiary mt-0.5">{opc.desc}</span>
+                    <span className="font-display text-sm font-bold">{opc.etiqueta}</span>
+                    <span className="font-body text-sm text-text-secondary mt-0.5">{opc.desc}</span>
                   </button>
                 );
               })}

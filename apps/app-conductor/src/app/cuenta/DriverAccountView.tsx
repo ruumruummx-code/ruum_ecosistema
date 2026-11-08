@@ -7,11 +7,11 @@ import type { GlobalSyncSnapshot } from "../../lib/offline-sync-status";
 import { AccountIcon, type AccountIconName } from "./AccountIcon";
 import styles from "./account.module.css";
 
-const sections: { href: string; title: string; description: string; icon: AccountIconName }[] = [
-  { href: "/cuenta/perfil", title: "Perfil", description: "Tu información personal", icon: "user" },
-  { href: "/cuenta/documentos", title: "Documentos", description: "Carga y revisa tus documentos", icon: "document" },
-  { href: "/cuenta/certificacion", title: "Certificación", description: "Estado y detalles de tu certificación", icon: "medal" },
-  { href: "/cuenta/datos-bancarios", title: "Datos bancarios", description: "Administra tu cuenta de depósito", icon: "card" },
+const sections: { href: string; title: string; icon: AccountIconName }[] = [
+  { href: "/cuenta/perfil", title: "Perfil", icon: "user" },
+  { href: "/cuenta/documentos", title: "Documentos", icon: "document" },
+  { href: "/cuenta/certificacion", title: "Certificación", icon: "medal" },
+  { href: "/cuenta/datos-bancarios", title: "Datos bancarios", icon: "card" },
 ];
 type Props = { initials: string | null; unread: number; loading: boolean; sync: GlobalSyncSnapshot | null; loggingOut: boolean; logoutError: string | null; onLogout: () => void; onOpenLogout: () => void };
 
@@ -43,7 +43,7 @@ export function DriverAccountView(props: Props) {
       <nav className={styles.options} aria-label="Configuración de cuenta">
         {sections.map(section => <Link key={section.href} href={section.href} prefetch={false} className={styles.option}>
           <span className={styles.optionIcon} data-icon={section.icon}><AccountIcon name={section.icon} /></span>
-          <span className={styles.optionText}><strong>{section.title}</strong><span>{section.description}</span></span>
+          <span className={styles.optionText}><strong>{section.title}</strong></span>
           <span className={styles.chevron}><AccountIcon name="right" /></span>
         </Link>)}
       </nav>

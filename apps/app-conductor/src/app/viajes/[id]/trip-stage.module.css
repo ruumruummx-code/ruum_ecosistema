@@ -16,8 +16,8 @@
 .tools { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 .tools button { border: 1px solid var(--conductor-border); border-radius: 12px; background: var(--conductor-surface); color: var(--conductor-action); padding: 8px; font-size: 14px; line-height: 1.3; }
 .action[data-trip-primary] { padding: 0; display: flex; flex-direction: column; gap: 8px; }
-.action .primary { display: flex; align-items: center; justify-content: center; width: 100%; min-height: 52px; padding: 10px 12px; border-radius: 12px; background: var(--conductor-action); color: var(--ruum-on-primary); font-size: 16px; line-height: 1.35; font-weight: 600; text-align: center; overflow-wrap: anywhere; }
-.action .primary:disabled { opacity: .55; cursor: not-allowed; }
+.action .primary { display: flex; align-items: center; justify-content: center; width: 100%; min-height: 52px; padding: 10px 12px; border-radius:var(--conductor-radius-control); background: var(--conductor-action); color: var(--ruum-on-primary); font-size: 16px; line-height: 1.35; font-weight: 600; text-align: center; overflow-wrap: anywhere; }
+.action .primary:disabled { opacity:1; background:var(--conductor-disabled-surface); color:var(--conductor-disabled); cursor:not-allowed; }
 .action .error[role=alert] { max-height: none; overflow: visible; }
 .error p, .notice { margin: 0; font-size: 14px; line-height: 1.4; }
 .error { color: var(--conductor-error); }
@@ -32,7 +32,7 @@
 .completeText { white-space: pre-wrap; overflow-wrap: anywhere; }
 .verification { display: grid; gap: 16px; }
 .verification label { display: grid; gap: 6px; font-size: 14px; }
-.verification :is(input,select) { width: 100%; min-width: 0; min-height: 48px; padding: 8px; border: 1px solid var(--conductor-border); border-radius: 10px; background: var(--conductor-surface); color: var(--conductor-primary); font-size: 16px; }
+.verification :is(input,select) { width: 100%; min-width: 0; min-height: 48px; padding: 8px; border: 1px solid var(--conductor-border-strong); border-radius: 10px; background: var(--conductor-surface); color: var(--conductor-primary); font-size: 16px; }
 .verification button { padding: 10px; border-radius: 10px; background: var(--conductor-action); color: var(--ruum-on-primary); }
 @media (max-height: 600px) { .heading h1 { font-size: 22px; } .content { gap: 10px; } }
 

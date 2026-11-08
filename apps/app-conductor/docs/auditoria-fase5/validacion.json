@@ -1,0 +1,108 @@
+{
+  "utc": "2026-11-08T10:25:29.567786+00:00",
+  "baseline": "092f668dd63b89b6bb665c54a6c111c1e44d4cef",
+  "workspace": "/workspace/ruum-fase2",
+  "tests": {
+    "passed": 46,
+    "theme": 9,
+    "regression": 37,
+    "viewports": [
+      "320x568",
+      "390x844"
+    ],
+    "browser": "Chromium /usr/bin/chromium"
+  },
+  "build": "passed",
+  "typescript": "passed",
+  "eslint": {
+    "errors": 0,
+    "warnings": 1
+  },
+  "palette_contrast": {
+    "light": {
+      "primary/surface": 15.72,
+      "muted/surface-secondary": 5.61,
+      "action/surface": 6.24,
+      "on-action/action": 6.24,
+      "disabled/disabled-surface": 4.55,
+      "border-strong/surface": 3.8,
+      "success/success-soft": 5.8,
+      "pending/pending-soft": 6.47,
+      "error/error-soft": 5.67
+    },
+    "dark": {
+      "primary/surface": 15.3,
+      "muted/surface-secondary": 7.63,
+      "action/surface": 8.44,
+      "on-action/action": 8.0,
+      "disabled/disabled-surface": 6.22,
+      "border-strong/surface": 6.15,
+      "success/success-soft": 7.56,
+      "pending/pending-soft": 8.81,
+      "error/error-soft": 6.54
+    }
+  },
+  "limitations": [
+    "Backend y Storage simulados",
+    "Sin medición física Android/iOS, teclado nativo, cámara o biometría",
+    "Texto sobre imágenes y gradientes excluido de la sonda automática",
+    "LCP, INP y CLS físicos pendientes de fase 6",
+    "Hook global omitido por fallo preexistente de @ruum/ui sin tests"
+  ],
+  "source_sha256": {
+    "apps/app-conductor/src/app/components/ConductorNavigation.tsx": "774493212fba66deb7a4636c80379c990496bdee46037f3753f5af054879d733",
+    "apps/app-conductor/src/app/components/conductor-dialog.module.css": "75c45f77ae32f9a44c18a26b5e857e56ef569b8f589060fad47c0849b713f1b8",
+    "apps/app-conductor/src/app/conductor-theme.css": "7cd1e061e44a9af189fbdd79054b2f6444c7d5f53e94a48510489337b386fc97",
+    "apps/app-conductor/src/app/cuenta/AccountIcon.tsx": "3d8c852e93250bd8c4b03999bc7037e3a6a9e51c42a9a17d6ceb3151898c5f2e",
+    "apps/app-conductor/src/app/cuenta/DriverAccountView.tsx": "2151f2ae1b1e0fdb452d76a68caa895d870c3c6bff3af6bb2239d226bcbe7216",
+    "apps/app-conductor/src/app/cuenta/account.module.css": "3df068a20a254392efb15893c6e55fc1bc8441b7177a97dad7036dc0fa4e2251",
+    "apps/app-conductor/src/app/cuenta/certificacion/certification.module.css": "7d3e12f61e69511ff2b1d0e0eca630aa36f75d2cc3c98d8d70dec08f7ec881c9",
+    "apps/app-conductor/src/app/cuenta/datos-bancarios/bank.module.css": "45cf11ebbf15431d3a51475be6e3f4b6af4ab69f5152dd652c70f770315b69a6",
+    "apps/app-conductor/src/app/cuenta/details.module.css": "0f504d01544a2a7481cfb469b1a398c85fe693e3d9a266b7705bf6ea5ce10488",
+    "apps/app-conductor/src/app/cuenta/legal/page.tsx": "5171055e78c426eee1067a17252244d2e0a68ed714b63f0bd079829bdcd0d5cb",
+    "apps/app-conductor/src/app/cuenta/preferencias/page.tsx": "454cba790829a7ef584d7495aa3314c24418c5a1c2f7a6292c10cf6839417e7e",
+    "apps/app-conductor/src/app/cuenta/seguridad/page.tsx": "b8380317f3e1125871413466b1e659f4ce4e21bd8eea5973306821218c33dfdc",
+    "apps/app-conductor/src/app/cuenta/soporte/page.tsx": "80675df1cfb168308f677ecc18b5425cdc4a01c770de1295a808d3135a9189d4",
+    "apps/app-conductor/src/app/ganancias/DriverEarningsView.tsx": "8435722851971bee15a36ea6e78a2891bc8c4ee5391c6db754381a1f6b739658",
+    "apps/app-conductor/src/app/ganancias/earnings.module.css": "413690099dd98844140376ec43eff2fb0c6f31682d29de840fc64a6c6a25d8bd",
+    "apps/app-conductor/src/app/globals.css": "aa85f7f0d45aa25314de5a17a4bf37c8a8f48fc46c4082627319d91d62af8c47",
+    "apps/app-conductor/src/app/layout.tsx": "1c722ab44c2b16b0a17586a6934c3128ef431ba1e1cf248c06e366d7e58ec972",
+    "apps/app-conductor/src/app/legal/privacidad/page.tsx": "4326f5ae5c34797d929fa76d4debe9b1d56ea8cf3143db5e7b0a4070597c2a01",
+    "apps/app-conductor/src/app/legal/terminos/page.tsx": "27cff806eb0649964343852dfb3fae68108b4f4a655d129ac7954c59b70472e3",
+    "apps/app-conductor/src/app/login/login.module.css": "f1614775d039d6f559b1633dbf419a349f8eaa44b3e2b8e216b912c0f637caa3",
+    "apps/app-conductor/src/app/login/page.tsx": "2081e6fff8629d43599d806bd30592d9d40b3b87b04778532c7bbb1c335ccdf0",
+    "apps/app-conductor/src/app/notificaciones/notifications.module.css": "8352dae92d86b0dcf32e1b69fbe81fa5a9e59d729e1bdf26671f406c977ee079",
+    "apps/app-conductor/src/app/panel/PanelOpportunitiesCard.tsx": "6af09c42ae4b273f07a6ad5a5fb4a0e1b73707afb6b0101968ef737f1fd068e2",
+    "apps/app-conductor/src/app/panel/PanelStatusRow.tsx": "1b10cbed261697e587303cccd0c1faf0dec7690a033276215357980b1706a01d",
+    "apps/app-conductor/src/app/panel/page.tsx": "26c8b5866758ec872f13fba02faca6f626a4f0698b96e06c4a05f1682be9f57c",
+    "apps/app-conductor/src/app/panel/panel.module.css": "8d4188cc4bc95f74531c435c8e5b00a47c2d5e0fbba8dd9c5b59ddf0d2437327",
+    "apps/app-conductor/src/app/registro/registration.module.css": "6f448c7cf6ad6670cd0df30225afaf0e5c1e37ee14528ee8d731b191e61f9665",
+    "apps/app-conductor/src/app/viajes/[id]/EmergencyPanel.tsx": "87465ca4517c816f453898c53fc09c4633724b25bea29928f93c54c25f447130",
+    "apps/app-conductor/src/app/viajes/[id]/opportunity-details.module.css": "e5894274af39d6a558ebdec8ab88cd9d99395d2427a6f44dfdb55920b90b0819",
+    "apps/app-conductor/src/app/viajes/[id]/trip-form.module.css": "06c7e4360b2c0ad23475ca6e7b7ccc74dcbc5cb471a248c4b158abe902ac48c4",
+    "apps/app-conductor/src/app/viajes/[id]/trip-stage.module.css": "c0f80a53b20290f89c08da0ba8679eb80c70c0c9b77c4cdf7c8d727ed1a90da6",
+    "apps/app-conductor/src/app/viajes/traslados.module.css": "051fceb2f8c40ad0d2cd5291db3db2489c169f70d8a5bc7108aef0b41ca32c6e",
+    "apps/app-conductor/tests/interface/theme.spec.ts": "d5fb88bc9b1cdd9e703bb7172cc4ae0b35d911240259b0a51d4353875e57786a"
+  },
+  "artifact_sha256": {
+    "evidencia/browser.log": "a178a6cc130facebc962103c19a6bab78c953487af36abdefe7d1bc0bee2ba58",
+    "evidencia/build.log": "382f33b4693bbbf72225d7edd5eea3d3256ff9988063785ed1885ee08d60f358",
+    "evidencia/cuenta-dark-320.png": "a37a7ca7b9f57623e7c1b02718f9a5e7b80c922cf323e0810721855d2bdcf24c",
+    "evidencia/cuenta-light-320.png": "737d1521bb1ea8b27ee9474ebb840b0236c2670a5d41bdcc7eb02ec99de24302",
+    "evidencia/emergencia-dark.png": "872551625fe72a714c66dffe999c2eee6a8463f1e752c8b280e16b268f96d805",
+    "evidencia/emergencia-light.png": "338a869b8f3c6297caecb328a4dc43faea36fc36719b95f061b5e99537a18b23",
+    "evidencia/espera-operativa-inicial.zip": "086af49d3e453ae446ff2febc019af23021e1302a33269ca24f2163cb6a4e31b",
+    "evidencia/ganancias-dark-320.png": "dda71921a93a8d8ebb4060b4370e9e9ccb940478ef36fc1914b2305229e1af13",
+    "evidencia/ganancias-light-320.png": "3e9c31dfbc75996ccae6cf702834ce9cb0a4ed197cce6536db0b8bc4f33ddae6",
+    "evidencia/lint.log": "994a7c20f767e586832d301dac0a553fe1400ffd80a04867f7fd18da1dc06668",
+    "evidencia/login-dark.png": "7b37f02ca8dabb798877d60d5c8d9af18adeaaffbab8f0f7753607b3f02ea74a",
+    "evidencia/login-light.png": "7f280e78eb5e952411be0911190ef3e12ea90d6fc6228c7bfe2572a586c14cb2",
+    "evidencia/panel-dark-320.png": "54ef30cf19b3bb78c44b84e375ea6ac41f2a47463cceac8fd1ad8ddfeac88d38",
+    "evidencia/panel-light-320.png": "ecdbe80aff6e160fd4fa1b8f60c7cd5623518dcb4c62788b1701928e5cb88127",
+    "evidencia/registro-dark.png": "faea0468b7ab1ce09bb069aa312b362d9b9e88a00c4af3495c594166d5be19cd",
+    "evidencia/registro-light.png": "112ecc17c8dae2171726fbef82518db897bc19225a0919340d65ea760652226b",
+    "evidencia/types.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "evidencia/viajes-dark-320.png": "d9a85806fa610734e3e7945c300c233b858e54b507b3388d6f084eb477c5879a",
+    "evidencia/viajes-light-320.png": "7f496197dfd10b2e45ce3fb739c0b93ba0103046d31a7f43544da099cc778e74"
+  }
+}

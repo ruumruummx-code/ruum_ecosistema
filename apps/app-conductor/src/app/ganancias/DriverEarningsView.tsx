@@ -60,7 +60,7 @@ export function DriverEarningsView({ data, summary, period, onPeriod, loading, e
         </div>) : <p className={styles.message}>Aún no tienes pagos registrados.</p>}
       </div>
     </section>
-    <button type="button" className={styles.primary} aria-haspopup="dialog" disabled={loading || !!error} onClick={() => setRequestOpen(true)}>Consultar programación de pago <span aria-hidden="true">→</span></button>
+    <button type="button" className={styles.primary} aria-haspopup="dialog" disabled={loading || !!error} onClick={() => setRequestOpen(true)}>Ver programación de pago <span aria-hidden="true">→</span></button>
     <ConductorDialog open={requestOpen} title="Programación de pago" labelledBy="programacion-pago-dialogo" onClose={() => setRequestOpen(false)}>
     <section className={styles.paymentInfo} aria-labelledby="programacion-pago-titulo" id="condiciones-pago">
       <h2 id="programacion-pago-titulo">Programación de pagos</h2>

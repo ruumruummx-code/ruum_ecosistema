@@ -1,0 +1,205 @@
+[@sentry/nextjs] Importing `withSentryConfig` from `@sentry/nextjs` is deprecated and will stop working in v11. Import it from `@sentry/nextjs/config` instead:
+  import { withSentryConfig } from '@sentry/nextjs/config';
+   ▲ Next.js 15.5.28
+   - Experiments (use with caution):
+     · clientTraceMetadata
+     · optimizePackageImports
+
+   Creating an optimized production build ...
+ ✓ Compiled successfully in 14.1s
+   Linting and checking validity of types ...
+
+./src/app/cuenta/certificacion/DriverCertificationView.tsx
+52:27  Warning: Generic Object Injection Sink  security/detect-object-injection
+
+./src/app/cuenta/datos-bancarios/page.tsx
+27:12  Warning: Generic Object Injection Sink  security/detect-object-injection
+
+./src/app/cuenta/datos-sensibles.tsx
+56:17  Warning: Variable Assigned to Object Injection Sink  security/detect-object-injection
+79:17  Warning: Variable Assigned to Object Injection Sink  security/detect-object-injection
+
+./src/app/cuenta/documentos/document-checklist.ts
+21:19  Warning: Variable Assigned to Object Injection Sink  security/detect-object-injection
+
+./src/app/cuenta/perfil/page.tsx
+426:50  Warning: Generic Object Injection Sink  security/detect-object-injection
+428:22  Warning: Generic Object Injection Sink  security/detect-object-injection
+428:46  Warning: Generic Object Injection Sink  security/detect-object-injection
+430:41  Warning: Function Call Object Injection Sink  security/detect-object-injection
+430:174  Warning: Generic Object Injection Sink  security/detect-object-injection
+442:277  Warning: Generic Object Injection Sink  security/detect-object-injection
+445:28  Warning: Variable Assigned to Object Injection Sink  security/detect-object-injection
+448:99  Warning: Function Call Object Injection Sink  security/detect-object-injection
+456:48  Warning: Generic Object Injection Sink  security/detect-object-injection
+
+./src/app/cuenta/preferencias/page.tsx
+177:32  Warning: Generic Object Injection Sink  security/detect-object-injection
+
+./src/app/nueva-password/page.tsx
+74:5  Warning: Potential timing attack, left side: true  security/detect-possible-timing-attacks
+
+./src/app/page.tsx
+12:19  Warning: Variable Assigned to Object Injection Sink  security/detect-object-injection
+
+./src/app/panel/DriverAvailabilityControl.tsx
+36:18  Warning: Variable Assigned to Object Injection Sink  security/detect-object-injection
+119:24  Warning: Generic Object Injection Sink  security/detect-object-injection
+120:24  Warning: Generic Object Injection Sink  security/detect-object-injection
+
+./src/app/registro/DocumentUploadField.tsx
+11:10  Warning: Generic Object Injection Sink  security/detect-object-injection
+
+./src/app/registro/DocumentsStep.tsx
+30:46  Warning: Generic Object Injection Sink  security/detect-object-injection
+
+./src/app/registro/IdentityStep.tsx
+36:91  Warning: Function Call Object Injection Sink  security/detect-object-injection
+75:110  Warning: Function Call Object Injection Sink  security/detect-object-injection
+
+./src/app/registro/RegistrationProgress.tsx
+22:45  Warning: Generic Object Injection Sink  security/detect-object-injection
+
+./src/app/registro/useRegistrationDocuments.ts
+36:20  Warning: Generic Object Injection Sink  security/detect-object-injection
+36:63  Warning: Function Call Object Injection Sink  security/detect-object-injection
+63:48  Warning: Generic Object Injection Sink  security/detect-object-injection
+68:41  Warning: Generic Object Injection Sink  security/detect-object-injection
+73:99  Warning: Function Call Object Injection Sink  security/detect-object-injection
+77:25  Warning: Variable Assigned to Object Injection Sink  security/detect-object-injection
+78:58  Warning: Function Call Object Injection Sink  security/detect-object-injection
+83:27  Warning: Generic Object Injection Sink  security/detect-object-injection
+97:25  Warning: Variable Assigned to Object Injection Sink  security/detect-object-injection
+99:11  Warning: Generic Object Injection Sink  security/detect-object-injection
+101:11  Warning: Generic Object Injection Sink  security/detect-object-injection
+110:32  Warning: Generic Object Injection Sink  security/detect-object-injection
+111:27  Warning: Generic Object Injection Sink  security/detect-object-injection
+
+./src/app/registro/useRegistroConductorLogic.ts
+186:9  Warning: Generic Object Injection Sink  security/detect-object-injection
+964:50  Warning: Function Call Object Injection Sink  security/detect-object-injection
+
+./src/app/viajes/[id]/ContactActionBar.tsx
+85:78  Warning: Generic Object Injection Sink  security/detect-object-injection
+
+./src/app/viajes/[id]/evidencia/EvidenceComparisonDisplay.tsx
+150:36  Warning: Variable Assigned to Object Injection Sink  security/detect-object-injection
+151:34  Warning: Variable Assigned to Object Injection Sink  security/detect-object-injection
+212:36  Warning: Variable Assigned to Object Injection Sink  security/detect-object-injection
+213:34  Warning: Variable Assigned to Object Injection Sink  security/detect-object-injection
+
+./src/app/viajes/[id]/evidencia/EvidenceReview.tsx
+62:50  Warning: Generic Object Injection Sink  security/detect-object-injection
+
+./src/app/viajes/[id]/evidencia/evidence-requirements.ts
+45:10  Warning: Generic Object Injection Sink  security/detect-object-injection
+
+./src/app/viajes/[id]/evidencia/useEvidenceComparison.ts
+195:5  Warning: Generic Object Injection Sink  security/detect-object-injection
+196:5  Warning: Generic Object Injection Sink  security/detect-object-injection
+200:29  Warning: Generic Object Injection Sink  security/detect-object-injection
+200:59  Warning: Generic Object Injection Sink  security/detect-object-injection
+
+./src/app/viajes/page.tsx
+408:16  Warning: Variable Assigned to Object Injection Sink  security/detect-object-injection
+
+./src/components/Breadcrumbs.tsx
+72:21  Warning: Generic Object Injection Sink  security/detect-object-injection
+
+./src/components/GuidedTour.tsx
+109:15  Warning: Variable Assigned to Object Injection Sink  security/detect-object-injection
+167:5  Warning: Generic Object Injection Sink  security/detect-object-injection
+176:19  Warning: Generic Object Injection Sink  security/detect-object-injection
+177:22  Warning: Generic Object Injection Sink  security/detect-object-injection
+179:26  Warning: Generic Object Injection Sink  security/detect-object-injection
+234:19  Warning: Variable Assigned to Object Injection Sink  security/detect-object-injection
+240:17  Warning: Variable Assigned to Object Injection Sink  security/detect-object-injection
+
+./src/components/v2/ConductorUI.tsx
+29:31  Warning: Generic Object Injection Sink  security/detect-object-injection
+65:19  Warning: Variable Assigned to Object Injection Sink  security/detect-object-injection
+
+./src/lib/almacenamiento-seguro-local.ts
+50:5  Warning: Generic Object Injection Sink  security/detect-object-injection
+
+./src/lib/app-version.ts
+5:151  Warning: Generic Object Injection Sink  security/detect-object-injection
+5:162  Warning: Generic Object Injection Sink  security/detect-object-injection
+
+./src/lib/borrador-registro.ts
+65:25  Warning: Variable Assigned to Object Injection Sink  security/detect-object-injection
+67:7  Warning: Generic Object Injection Sink  security/detect-object-injection
+69:33  Warning: Generic Object Injection Sink  security/detect-object-injection
+
+./src/lib/camara.ts
+95:29  Warning: Generic Object Injection Sink  security/detect-object-injection
+96:11  Warning: Generic Object Injection Sink  security/detect-object-injection
+110:99  Warning: Generic Object Injection Sink  security/detect-object-injection
+
+./src/lib/cola-offline.ts
+286:5  Warning: Generic Object Injection Sink  security/detect-object-injection
+309:49  Warning: Generic Object Injection Sink  security/detect-object-injection
+533:7  Warning: Potential timing attack, right side: true  security/detect-possible-timing-attacks
+
+./src/lib/use-undo.ts
+55:22  Warning: Function Call Object Injection Sink  security/detect-object-injection
+64:22  Warning: Function Call Object Injection Sink  security/detect-object-injection
+
+info  - Need to disable some ESLint rules? Learn more here: https://nextjs.org/docs/app/api-reference/config/eslint#disabling-rules
+   Collecting page data ...
+   Generating static pages (0/31) ...
+   Generating static pages (7/31)
+   Generating static pages (15/31)
+   Generating static pages (23/31)
+ ✓ Generating static pages (31/31)
+   Finalizing page optimization ...
+   Collecting build traces ...
+
+Route (app)                                 Size  First Load JS
+┌ ƒ /                                      164 B         151 kB
+├ ƒ /_not-found                            164 B         151 kB
+├ ƒ /403                                 1.02 kB         155 kB
+├ ƒ /actualizacion-requerida               164 B         151 kB
+├ ƒ /api/csp-report                        164 B         151 kB
+├ ƒ /api/health                            164 B         151 kB
+├ ƒ /api/recovery/clear                    164 B         151 kB
+├ ƒ /api/recovery/verify                   164 B         151 kB
+├ ƒ /auth/callback                         164 B         151 kB
+├ ƒ /configuracion                         164 B         151 kB
+├ ƒ /cuenta                               4.5 kB         321 kB
+├ ƒ /cuenta/certificacion                6.25 kB         313 kB
+├ ƒ /cuenta/datos-bancarios              7.07 kB         307 kB
+├ ƒ /cuenta/documentos                   2.83 kB         303 kB
+├ ƒ /cuenta/legal                        3.26 kB         157 kB
+├ ƒ /cuenta/perfil                       8.02 kB         308 kB
+├ ƒ /cuenta/preferencias                 6.64 kB         297 kB
+├ ƒ /cuenta/seguridad                    2.85 kB         296 kB
+├ ƒ /cuenta/soporte                      3.44 kB         160 kB
+├ ƒ /documentos                            164 B         151 kB
+├ ƒ /ganancias                           1.46 kB         305 kB
+├ ƒ /ganancias/historial                 12.1 kB         305 kB
+├ ○ /icon.svg                                0 B            0 B
+├ ƒ /legal/privacidad                    2.05 kB         156 kB
+├ ƒ /legal/terminos                      2.05 kB         156 kB
+├ ƒ /login                               3.53 kB         241 kB
+├ ƒ /notificaciones                      4.37 kB         264 kB
+├ ƒ /nueva-password                      5.66 kB         234 kB
+├ ƒ /onboarding                          4.02 kB         163 kB
+├ ƒ /panel                               16.8 kB         342 kB
+├ ƒ /recuperar-password                  4.38 kB         233 kB
+├ ƒ /registro                            23.1 kB         327 kB
+├ ƒ /viajes                              18.5 kB         331 kB
+├ ƒ /viajes/[id]                         21.3 kB         335 kB
+├ ƒ /viajes/[id]/detalles                8.46 kB         269 kB
+├ ƒ /viajes/[id]/evidencia                 15 kB         323 kB
+└ ƒ /viajes/[id]/soporte                 1.85 kB         300 kB
++ First Load JS shared by all             151 kB
+  ├ chunks/5143b9e1-6d46db8807b1008d.js  54.2 kB
+  ├ chunks/7519-230fc0aaaa1212e0.js        93 kB
+  └ other shared chunks (total)          3.52 kB
+
+
+ƒ Middleware                              108 kB
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand

@@ -267,12 +267,12 @@ export function EmergencyPanel({
             onClick={abrirPanel}
             className={
               pillTone === "soft"
-                ? "inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-1.5 rounded-xl border border-[#FDA4AF]/60 bg-[#FEE2E2] px-3 py-1 font-display text-xs font-black text-[#DC2626] shadow-2xs transition hover:bg-[#FCD4D4] active:scale-95 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#DC2626]"
-                : "inline-flex min-h-[38px] cursor-pointer items-center justify-center gap-1.5 rounded-full bg-[#E11D38] px-3.5 py-1.5 font-display text-xs font-extrabold text-white shadow-[0_4px_12px_rgba(225,29,56,0.28)] transition hover:bg-[#BE123C] active:scale-95 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#E11D38]"
+                ? "inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-1.5 rounded-xl border border-[var(--conductor-error)] bg-[var(--conductor-error-soft)] px-3 py-1 font-display text-xs font-black text-[var(--conductor-error)] shadow-2xs transition hover:bg-[var(--conductor-error-soft)] active:scale-95 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--conductor-focus)]"
+                : "inline-flex min-h-[38px] cursor-pointer items-center justify-center gap-1.5 rounded-full bg-[var(--conductor-emergency)] px-3.5 py-1.5 font-display text-xs font-extrabold text-[var(--conductor-on-status)] shadow-none transition hover:bg-[var(--conductor-emergency)] active:scale-95 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--conductor-focus)]"
             }
           >
             {pillTone === "soft" ? (
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" className="shrink-0 text-[#DC2626]">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" className="shrink-0">
                 <path d="M12 2L1 21h22L12 2zm0 3.99L19.53 19H4.47L12 5.99zM11 10v4h2v-4h-2zm0 6v2h2v-2h-2z" />
               </svg>
             ) : (
@@ -329,7 +329,7 @@ export function EmergencyPanel({
                       "min-h-[var(--ruum-button-height-street)] rounded-xl border px-4 py-3 text-left text-[17px] transition disabled:cursor-wait disabled:text-disabled",
                       "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-danger-action",
                       es911
-                        ? "border-[var(--ruum-emergency)] bg-[var(--ruum-emergency)] text-white shadow-[0_10px_28px_rgba(179,38,38,0.24)]"
+                        ? "border-[var(--ruum-emergency)] bg-[var(--ruum-emergency)] text-[var(--conductor-on-status)] shadow-[0_10px_28px_rgba(179,38,38,0.24)]"
                         : "border-border bg-surface text-text-primary hover:border-route-action hover:bg-route-soft"
                     ].join(" ")}
                   >
@@ -349,7 +349,7 @@ export function EmergencyPanel({
                       </span>
                       {indice === 0 && <span className="font-body text-sm font-semibold">Primero</span>}
                     </span>
-                    <span className={["mt-1 block font-body text-sm leading-6", es911 ? "text-white/90" : "text-text-secondary"].join(" ")}>
+                    <span className={["mt-1 block font-body text-sm leading-6", es911 ? "text-[var(--conductor-on-status)]" : "text-text-secondary"].join(" ")}>
                       {es911 && confirmando911 ? "Toca de nuevo para confirmar la llamada." : opcion.descripcion}
                     </span>
                   </button>

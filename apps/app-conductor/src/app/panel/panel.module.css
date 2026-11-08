@@ -46,3 +46,17 @@
 
 .screen .content :global(.driver-active-trip-card) { display: flex; flex-direction: column; gap: 4px; padding: 12px; border: 1px solid var(--conductor-border); border-radius: 16px; background: var(--conductor-surface); }
 .screen .content :global(.conductor-active-trip-action) { display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 48px; margin-top: 8px; border-radius: 12px; background: var(--conductor-action); color: var(--ruum-on-primary); font-size: 14px; font-weight: 600; }
+
+.screen .content :global(.driver-health-row) button > span { font-size:14px; }
+.screen .content :global(.driver-opportunity-card) p { font-size:14px; }
+.screen .content :global(.driver-dashboard-welcome) p { font-size:14px; }
+.screen .content :global(.driver-metric-link) { font-size:14px; }
+.screen .content :global(.driver-metric-link) small { font-size:12px; }
+
+.screen .content :global(.driver-opportunity-card) a,
+.screen .content :global(.driver-opportunity-card) button { margin-top:8px; }
+.screen .content :global(.driver-metric-link) { min-height:64px; padding-block:6px; }
+
+.header { grid-template-columns:48px minmax(0,1fr) 96px; }
+.screen .header :is(a,button) { min-height:48px; min-width:48px; }
+.screen .content :global(.driver-availability-card) button[role="switch"] { min-height:48px; }

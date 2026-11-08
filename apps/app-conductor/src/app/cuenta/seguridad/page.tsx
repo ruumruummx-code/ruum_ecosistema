@@ -55,7 +55,7 @@ export default function PaginaSeguridadCuenta() {
 
               <Link
                 href="/recuperar-password"
-                className="inline-flex shrink-0 items-center justify-center gap-1.5 rounded-xl bg-signal px-5 py-2.5 font-display text-xs font-bold text-text-primary shadow-xs transition hover:bg-signal/90 active:scale-95"
+                className="inline-flex shrink-0 items-center justify-center gap-1.5 rounded-xl bg-action-primary px-5 py-2.5 font-display text-xs font-bold text-on-primary shadow-xs transition hover:bg-action-primary/90 active:scale-95"
               >
                 Cambiar contraseña →
               </Link>
@@ -84,20 +84,20 @@ export default function PaginaSeguridadCuenta() {
             </div>
 
             <div className="flex items-center gap-3">
-              <div className="flex size-10 shrink-0 items-center justify-center rounded-xl border border-border bg-surface text-lg text-emerald-500">
+              <div className="flex size-10 shrink-0 items-center justify-center rounded-xl border border-border bg-surface text-lg text-control">
                 🔒
               </div>
               <div>
                 <dt className="font-semibold uppercase tracking-wider text-text-tertiary text-[11px]">Estado de Protección</dt>
-                <dd className="font-bold text-emerald-600 dark:text-emerald-400 text-xs mt-0.5">Sesión Encriptada SSL</dd>
+                <dd className="font-bold text-control text-xs mt-0.5">Sesión Encriptada SSL</dd>
               </div>
             </div>
           </div>
         </Card>
 
         {/* 1. Sección Separada Independiente: Acción de Salida (Cerrar Sesión) */}
-        <Card className="border-red-500/20 bg-red-500/5">
-          <p className="font-body text-xs font-bold uppercase tracking-wider text-red-500 mb-1">
+        <Card className="border-danger/40 bg-danger-soft">
+          <p className="font-body text-xs font-bold uppercase tracking-wider text-danger mb-1">
             Salida de la Plataforma
           </p>
 
@@ -116,7 +116,7 @@ export default function PaginaSeguridadCuenta() {
               type="button"
               onClick={() => void cerrarSesion()}
               disabled={cerrandoSesion}
-              className="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl border border-red-500/40 bg-surface px-5 py-2.5 font-display text-xs font-bold text-red-500 shadow-2xs transition hover:border-red-500 hover:bg-red-500/10 active:scale-95 disabled:opacity-50"
+              className="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl border border-danger bg-surface px-5 py-2.5 font-display text-xs font-bold text-danger shadow-2xs transition hover:border-danger hover:bg-danger-soft active:scale-95 disabled:opacity-50"
             >
               {cerrandoSesion ? "Cerrando sesión..." : "🚪 Cerrar sesión"}
             </button>

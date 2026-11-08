@@ -92,14 +92,14 @@ export function PanelStatusRow({
       href: "/cuenta/documentos",
       type: "documentos" as const,
       label: "Documentos",
-      shortLabel: "Docu",
+      shortLabel: "Docs.",
       desktopValue: getDocumentoDesktopLabel(),
       detailValue:
         gpsUltimaSenal && !documentoBloqueante && !documentoPorVencer
           ? "Todo en orden"
           : getDocumentoDesktopLabel(),
       ok: docsOk && !documentoPorVencer,
-      dot: !docsOk ? "bg-danger" : documentoPorVencer ? "bg-amber-500" : "bg-[#10B981]",
+      dot: !docsOk ? "bg-danger" : documentoPorVencer ? "bg-warn" : "bg-[var(--conductor-success)]",
     },
     {
       href: "/cuenta/perfil",
@@ -109,7 +109,7 @@ export function PanelStatusRow({
       desktopValue: vehiculoHabilitado ? "Completo" : "En validación",
       detailValue: vehiculoHabilitado ? "Completo" : "En validación",
       ok: vehiculoHabilitado,
-      dot: vehiculoHabilitado ? "bg-[#10B981]" : "bg-amber-500",
+      dot: vehiculoHabilitado ? "bg-[var(--conductor-success)]" : "bg-warn",
     },
     {
       href: "/cuenta",
@@ -126,17 +126,17 @@ export function PanelStatusRow({
             ? "Inactivo"
             : "Activo",
       ok: gpsOk,
-      dot: gpsOk ? "bg-[#10B981]" : "bg-danger",
+      dot: gpsOk ? "bg-[var(--conductor-success)]" : "bg-danger",
     },
     {
       href: null as string | null,
       type: "conexion" as const,
       label: "Conexión",
-      shortLabel: "Conexión",
+      shortLabel: "Red",
       desktopValue: estaOnline ? "Estable" : "Sin conexión",
       detailValue: estaOnline ? "Estable" : "Sin conexión",
       ok: estaOnline,
-      dot: estaOnline ? "bg-[#10B981]" : "bg-danger",
+      dot: estaOnline ? "bg-[var(--conductor-success)]" : "bg-danger",
     },
   ];
 
@@ -146,7 +146,7 @@ export function PanelStatusRow({
   return (
     <>
       <div
-        className="driver-health-row grid grid-cols-4 gap-2 rounded-2xl bg-[#EFF4FA] p-2.5 sm:p-3"
+        className="driver-health-row grid grid-cols-4 gap-2 rounded-2xl bg-[var(--conductor-surface-secondary)] p-2.5 sm:p-3"
         role="status"
         aria-label="Salud operacional"
       >
@@ -155,16 +155,16 @@ export function PanelStatusRow({
             key={it.label}
             type="button"
             onClick={() => setSheetAbierto(true)}
-            className="group relative flex min-h-[84px] min-w-0 cursor-pointer flex-col items-center justify-center rounded-xl px-1 py-1.5 text-center transition hover:bg-[var(--conductor-surface)]/80 active:scale-[0.97] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#0066FF]"
+            className="group relative flex min-h-[84px] min-w-0 cursor-pointer flex-col items-center justify-center rounded-xl px-1 py-1.5 text-center transition hover:bg-[var(--conductor-surface)]/80 active:scale-[0.97] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--conductor-focus)]"
             aria-label={`${it.label}: ${it.desktopValue}`}
           >
-            <span className="relative flex size-12 sm:size-13 shrink-0 items-center justify-center rounded-2xl bg-[#D8F3E5] text-[#0D9668]">
+            <span className="relative flex size-12 sm:size-13 shrink-0 items-center justify-center rounded-2xl bg-[var(--conductor-success-soft)] text-[var(--conductor-success)]">
               <RequirementIcon type={it.type} />
               <span
-                className={`absolute -right-1 -top-1 flex size-5 items-center justify-center rounded-full border-2 border-white text-[10px] font-black text-[var(--ruum-on-primary)] shadow-2xs     ${it.dot}`}
+                className={`absolute -right-1 -top-1 flex size-5 items-center justify-center rounded-full border-2 border-surface text-[10px] font-black text-[var(--conductor-on-status)] shadow-2xs     ${it.dot}`}
                 aria-hidden="true"
               >
-                ✓
+                {it.dot === "bg-[var(--conductor-success)]" ? "✓" : "!"}
               </span>
             </span>
             <span className="mt-1.5 max-w-full truncate px-0.5 font-body text-[11px] sm:text-xs font-bold leading-tight text-[var(--conductor-primary)]">
@@ -184,7 +184,7 @@ export function PanelStatusRow({
       {sheetAbierto && (
         <ConductorDialog open={sheetAbierto} onClose={() => setSheetAbierto(false)} labelledBy="titulo-salud-sheet">
           <div className="bg-[var(--conductor-surface)]">
-            <div className="mx-auto mb-4 h-1 w-10 rounded-full bg-slate-200" aria-hidden="true" />
+            <div className="mx-auto mb-4 h-1 w-10 rounded-full bg-border" aria-hidden="true" />
             <h2 id="titulo-salud-sheet" className="font-display text-base font-black text-[var(--conductor-primary)]">
               Salud operacional
             </h2>
@@ -197,18 +197,18 @@ export function PanelStatusRow({
                     ? "GPS inactivo — verifica permisos"
                     : "Revisa tu conexión a internet"}
             </p>
-            <ul className="mt-4 divide-y divide-slate-100">
+            <ul className="mt-4 divide-y divide-border">
               {items.map((it) => {
                 const statusColor =
-                  it.dot === "bg-[#10B981]"
-                    ? "text-emerald-700"
+                  it.dot === "bg-[var(--conductor-success)]"
+                    ? "text-control"
                     : it.dot === "bg-danger"
-                      ? "text-red-600"
-                      : "text-amber-600";
+                      ? "text-danger"
+                      : "text-warn";
                 return (
                   <li key={it.label} className="flex min-h-[52px] items-center justify-between gap-3 px-2 py-3">
                     <div className="flex items-center gap-3">
-                      <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-[#EDF3FB] text-[var(--conductor-action)]">
+                      <span className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-[var(--conductor-action-soft)] text-[var(--conductor-action)]">
                         <RequirementIcon type={it.type} />
                       </span>
                       <div className="min-w-0 flex-1">
@@ -235,7 +235,7 @@ export function PanelStatusRow({
                     key={it.label}
                     href={it.href!}
                     onClick={() => setSheetAbierto(false)}
-                    className="inline-flex min-h-11 w-full cursor-pointer items-center justify-center rounded-xl border border-[#DCE8FC] bg-[#F5F9FF] px-4 py-2.5 font-display text-xs font-bold text-[var(--conductor-action)] transition hover:bg-[var(--conductor-surface-secondary)]"
+                    className="inline-flex min-h-11 w-full cursor-pointer items-center justify-center rounded-xl border border-[var(--conductor-border)] bg-[var(--conductor-surface-secondary)] px-4 py-2.5 font-display text-xs font-bold text-[var(--conductor-action)] transition hover:bg-[var(--conductor-surface-secondary)]"
                   >
                     Ver {it.label}
                   </Link>

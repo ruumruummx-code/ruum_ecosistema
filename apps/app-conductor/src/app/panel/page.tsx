@@ -23,18 +23,18 @@ import { useCerrarSesion } from "../../lib/use-cerrar-sesion";
 function PanelLoadingSkeleton() {
   return (
     <div className="flex w-full flex-col gap-4" aria-label="Cargando panel operativo" aria-busy="true">
-      <div className="h-16 w-full animate-pulse rounded-2xl bg-slate-200/70" />
-      <div className="h-24 w-full animate-pulse rounded-2xl bg-slate-200/70" />
+      <div className="h-16 w-full animate-pulse rounded-2xl bg-border/70" />
+      <div className="h-24 w-full animate-pulse rounded-2xl bg-border/70" />
       <div className="grid grid-cols-4 gap-2">
-        <div className="h-[88px] animate-pulse rounded-2xl bg-slate-200/70" />
-        <div className="h-[88px] animate-pulse rounded-2xl bg-slate-200/70" />
-        <div className="h-[88px] animate-pulse rounded-2xl bg-slate-200/70" />
-        <div className="h-[88px] animate-pulse rounded-2xl bg-slate-200/70" />
+        <div className="h-[88px] animate-pulse rounded-2xl bg-border/70" />
+        <div className="h-[88px] animate-pulse rounded-2xl bg-border/70" />
+        <div className="h-[88px] animate-pulse rounded-2xl bg-border/70" />
+        <div className="h-[88px] animate-pulse rounded-2xl bg-border/70" />
       </div>
-      <div className="h-[164px] animate-pulse rounded-2xl bg-slate-200/70" />
+      <div className="h-[164px] animate-pulse rounded-2xl bg-border/70" />
       <div className="grid grid-cols-2 gap-3">
-        <div className="h-[136px] animate-pulse rounded-2xl bg-slate-200/70" />
-        <div className="h-[136px] animate-pulse rounded-2xl bg-slate-200/70" />
+        <div className="h-[136px] animate-pulse rounded-2xl bg-border/70" />
+        <div className="h-[136px] animate-pulse rounded-2xl bg-border/70" />
       </div>
     </div>
   );
@@ -312,7 +312,7 @@ export default function PaginaPanel() {
           role="status"
           aria-live="polite"
         >
-          <span className="size-2 rounded-full bg-amber-500" aria-hidden="true" />
+          <span className="size-2 rounded-full bg-warn" aria-hidden="true" />
           <span className="font-body text-xs font-bold text-text-primary">Actualización pausada durante viaje</span>
           <span className="font-body text-[11px] text-text-tertiary">🔒 termina el traslado</span>
         </div>
@@ -333,7 +333,7 @@ export default function PaginaPanel() {
             type="button"
             onClick={() => setMenuAbierto(true)}
             aria-label="Abrir menú"
-            className="inline-flex min-h-11 min-w-11 cursor-pointer items-center justify-center rounded-full text-[var(--conductor-primary)] transition hover:bg-slate-100 active:scale-95 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#0066FF]"
+            className="inline-flex min-h-11 min-w-11 cursor-pointer items-center justify-center rounded-full text-[var(--conductor-primary)] transition hover:bg-surface-elevated active:scale-95 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--conductor-focus)]"
           >
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.1" strokeLinecap="round" aria-hidden="true">
               <path d="M4 7h16M4 12h16M4 17h16" />
@@ -347,7 +347,7 @@ export default function PaginaPanel() {
           <div className="flex items-center justify-end gap-0.5">
             <Link
               href="/notificaciones"
-              className="relative inline-flex min-h-11 min-w-11 cursor-pointer items-center justify-center rounded-full text-[var(--conductor-primary)] transition hover:bg-slate-100 active:scale-95 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#0066FF]"
+              className="relative inline-flex min-h-11 min-w-11 cursor-pointer items-center justify-center rounded-full text-[var(--conductor-primary)] transition hover:bg-surface-elevated active:scale-95 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--conductor-focus)]"
               aria-label={
                 notificacionesCount > 0
                   ? `Notificaciones (${notificacionesCount > 99 ? "99+" : notificacionesCount} sin leer)`
@@ -358,13 +358,13 @@ export default function PaginaPanel() {
                 <path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9" />
                 <path d="M10 21h4" />
               </svg>
-              {notificacionesCount > 0 && <span className="absolute right-2.5 top-2.5 size-2.5 rounded-full border-2 border-white bg-[#EF4444]" aria-hidden="true" />}
+              {notificacionesCount > 0 && <span className="absolute right-2.5 top-2.5 size-2.5 rounded-full border-2 border-surface bg-[var(--conductor-error)]" aria-hidden="true" />}
             </Link>
             <button
               type="button"
               onClick={() => setSoporteAbierto(true)}
               aria-label="Abrir soporte técnico"
-              className="inline-flex min-h-11 min-w-11 cursor-pointer items-center justify-center rounded-full text-[var(--conductor-primary)] transition hover:bg-slate-100 active:scale-95 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#0066FF]"
+              className="inline-flex min-h-11 min-w-11 cursor-pointer items-center justify-center rounded-full text-[var(--conductor-primary)] transition hover:bg-surface-elevated active:scale-95 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--conductor-focus)]"
             >
               <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                 <path d="M4 13v-1a8 8 0 0 1 16 0v1" />
@@ -447,9 +447,9 @@ export default function PaginaPanel() {
                     <span
                       className={`inline-flex size-13 shrink-0 items-center justify-center rounded-full text-[var(--ruum-on-primary)] shadow-sm  ${
                         disponibilidad === "en_viaje"
-                          ? "bg-amber-500"
+                          ? "bg-warn"
                           : esDisponible
-                            ? "bg-[#10B981]"
+                            ? "bg-[var(--conductor-success)]"
                             : "bg-slate-400"
                       }`}
                       aria-hidden="true"
@@ -477,11 +477,11 @@ export default function PaginaPanel() {
                         <span className="hidden">
                           {disponibilidad === "en_viaje" ? (
                             <>
-                              Estás <span className="text-amber-600">en viaje</span>
+                              Estás <span className="text-warn">en viaje</span>
                             </>
                           ) : esDisponible ? (
                             <>
-                              Estás <span className="text-[#10B981]">disponible</span>
+                              Estás <span className="text-[var(--conductor-success)]">disponible</span>
                             </>
                           ) : (
                             <>
@@ -516,10 +516,10 @@ export default function PaginaPanel() {
                       aria-label={esDisponible ? "Disponible: recibir traslados" : "No disponible: pausar traslados"}
                       onClick={alCambiarDisponibilidad}
                       disabled={disponibilidad === "en_viaje" || persistiendoDisponibilidad || !estaOnline}
-                      className={`relative inline-flex h-10 w-[68px] shrink-0 cursor-pointer items-center rounded-full border-2 p-1 transition-all duration-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0066FF] disabled:cursor-not-allowed disabled:opacity-50   ${
+                      className={`relative inline-flex h-10 w-[68px] shrink-0 cursor-pointer items-center rounded-full border-2 p-1 transition-all duration-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--conductor-focus)] disabled:cursor-not-allowed disabled:opacity-50   ${
                         esDisponible
                           ? "border-[var(--conductor-action)] bg-[var(--conductor-action)] shadow-none"
-                          : "border-slate-300 bg-slate-200"
+                          : "border-slate-300 bg-border"
                       }`}
                     >
                       <span
@@ -598,7 +598,7 @@ export default function PaginaPanel() {
                   className={`flex min-h-11 cursor-pointer items-center gap-3 rounded-xl px-3 font-body text-sm transition ${
                     item.active
                       ? "bg-[var(--conductor-surface-secondary)] font-extrabold text-[var(--conductor-action)]"
-                      : "font-semibold text-[var(--conductor-primary)] hover:bg-slate-100"
+                      : "font-semibold text-[var(--conductor-primary)] hover:bg-surface-elevated"
                   }`}
                 >
                   <SidebarMenuIcon name={item.icon} active={item.active} />

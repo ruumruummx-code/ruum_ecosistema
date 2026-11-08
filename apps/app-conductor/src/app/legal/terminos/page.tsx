@@ -15,7 +15,7 @@ export default function PaginaTerminosConductor() {
             <span className="font-body text-xs font-bold uppercase tracking-wider text-route-action">
               Documento Legal Oficial
             </span>
-            <span className="rounded-md border border-emerald-500/40 bg-emerald-500/10 px-2 py-0.5 font-body text-[10px] font-extrabold text-emerald-600 dark:text-emerald-400 uppercase">
+            <span className="rounded-md border border-control bg-control-soft px-2 py-0.5 font-body text-xs font-extrabold text-control uppercase">
               v{appVersion.version} • Vigente
             </span>
           </div>

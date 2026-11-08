@@ -3,6 +3,7 @@ import { headers } from "next/headers";
 import { TextInputUppercaseBridge } from "@ruum/ui";
 import "./globals.css";
 import "./shell-contract.css";
+import "./conductor-theme.css";
 import { ConductorShellBridge } from "./components/ConductorShellBridge";
 import { NavegacionConductor } from "./NavegacionConductor";
 import { ViajeActivoProvider } from "./ViajeActivoContext";

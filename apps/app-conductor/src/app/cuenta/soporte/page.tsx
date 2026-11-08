@@ -27,7 +27,7 @@ export default function PaginaSoporteCuenta() {
                 <h2 className="font-display text-base font-bold text-text-primary">
                   ¿Tienes un viaje en curso o alguna eventualidad?
                 </h2>
-                <p className="mt-0.5 font-body text-xs leading-5 text-text-tertiary">
+                <p className="mt-0.5 font-body text-sm leading-5 text-text-tertiary">
                   Accede al reporte prioritario para incidentes en ruta, ajuste de tarifa o contacto con el usuario.
                 </p>
               </div>
@@ -35,7 +35,7 @@ export default function PaginaSoporteCuenta() {
 
             <Link
               href="/viajes"
-              className="inline-flex w-full shrink-0 items-center justify-center gap-2 rounded-xl bg-signal px-5 py-3 font-display text-xs font-black text-slate-950 shadow-xs transition hover:bg-signal/90 active:scale-95 sm:w-auto"
+              className="inline-flex w-full shrink-0 items-center justify-center gap-2 rounded-xl bg-action-primary px-5 py-3 font-display text-sm font-black text-on-primary shadow-xs transition hover:bg-action-primary-hover active:scale-95 sm:w-auto"
             >
               Ayuda con mi viaje actual →
             </Link>
@@ -44,7 +44,7 @@ export default function PaginaSoporteCuenta() {
 
         {/* 1. Sección: Ayuda Inmediata (WhatsApp & Teléfono) */}
         <Card>
-          <p className="font-body text-xs font-bold uppercase tracking-wider text-text-tertiary mb-1">
+          <p className="font-body text-sm font-bold uppercase tracking-wider text-text-tertiary mb-1">
             Respuesta Rápida
           </p>
           <h2 className="font-display text-lg font-bold text-text-primary mb-4">
@@ -57,10 +57,10 @@ export default function PaginaSoporteCuenta() {
               href={whatsapp.href}
               target="_blank"
               rel="noopener noreferrer"
-              className="group flex w-full items-center justify-between gap-3 rounded-xl border border-emerald-500/30 bg-emerald-500/5 p-4 transition hover:border-emerald-500/60 hover:bg-emerald-500/10 active:scale-[0.99]"
+              className="group flex w-full items-center justify-between gap-3 rounded-xl border border-border bg-control-soft p-4 transition hover:border-control hover:bg-control-soft active:scale-[0.99]"
             >
               <div className="flex items-center gap-3 min-w-0">
-                <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-emerald-500/20 font-display text-lg text-emerald-500">
+                <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-control-soft font-display text-lg text-control">
                   💬
                 </div>
                 <div className="min-w-0">
@@ -68,7 +68,7 @@ export default function PaginaSoporteCuenta() {
                     {whatsapp.etiqueta}
                   </span>
                   {/* 3. Microcopy SLA */}
-                  <span className="block font-body text-xs text-emerald-600 dark:text-emerald-400 font-semibold">
+                  <span className="block font-body text-sm text-control font-semibold">
                     ⚡ Respuesta habitual &lt; 5 min
                   </span>
                 </div>
@@ -79,10 +79,10 @@ export default function PaginaSoporteCuenta() {
             {/* Teléfono */}
             <a
               href={telefono.href}
-              className="group flex w-full items-center justify-between gap-3 rounded-xl border border-sky-500/30 bg-sky-500/5 p-4 transition hover:border-sky-500/60 hover:bg-sky-500/10 active:scale-[0.99]"
+              className="group flex w-full items-center justify-between gap-3 rounded-xl border border-border bg-route-soft p-4 transition hover:border-route-action hover:bg-route-soft active:scale-[0.99]"
             >
               <div className="flex items-center gap-3 min-w-0">
-                <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-sky-500/20 font-display text-lg text-sky-500">
+                <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-route-soft font-display text-lg text-route-action">
                   📞
                 </div>
                 <div className="min-w-0">
@@ -90,7 +90,7 @@ export default function PaginaSoporteCuenta() {
                     {telefono.etiqueta}
                   </span>
                   {/* 3. Microcopy SLA */}
-                  <span className="block font-body text-xs text-sky-600 dark:text-sky-400 font-semibold">
+                  <span className="block font-body text-sm text-route-action font-semibold">
                     📞 Atención telefónica 24/7
                   </span>
                 </div>
@@ -102,7 +102,7 @@ export default function PaginaSoporteCuenta() {
 
         {/* 1. Sección: Ayuda Operativa y Consultas */}
         <Card>
-          <p className="font-body text-xs font-bold uppercase tracking-wider text-text-tertiary mb-1">
+          <p className="font-body text-sm font-bold uppercase tracking-wider text-text-tertiary mb-1">
             Asistencia en Servicio
           </p>
           <h2 className="font-display text-lg font-bold text-text-primary mb-4">
@@ -116,14 +116,14 @@ export default function PaginaSoporteCuenta() {
               className="group flex w-full items-center justify-between gap-3 rounded-xl border border-border/80 bg-surface-elevated/50 p-4 transition hover:border-signal hover:bg-surface-elevated active:scale-[0.99]"
             >
               <div className="flex items-center gap-3 min-w-0">
-                <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-amber-500/20 font-display text-lg text-amber-500">
+                <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-warn-soft font-display text-lg text-warn">
                   ⚠️
                 </div>
                 <div className="min-w-0">
                   <span className="block font-display text-sm font-bold text-text-primary">
                     Reportar problema en un viaje
                   </span>
-                  <span className="block font-body text-xs text-text-tertiary">
+                  <span className="block font-body text-sm text-text-tertiary">
                     Ajuste de tarifas, objetos olvidados o aclaraciones de ruta • Prioridad operativa
                   </span>
                 </div>
@@ -137,7 +137,7 @@ export default function PaginaSoporteCuenta() {
               className="group flex w-full items-center justify-between gap-3 rounded-xl border border-border/80 bg-surface-elevated/50 p-4 transition hover:border-route-action hover:bg-surface-elevated active:scale-[0.99]"
             >
               <div className="flex items-center gap-3 min-w-0">
-                <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-purple-500/20 font-display text-lg text-purple-400">
+                <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-route-soft font-display text-lg text-route-action">
                   ✉️
                 </div>
                 <div className="min-w-0">
@@ -145,7 +145,7 @@ export default function PaginaSoporteCuenta() {
                     {correo.etiqueta}
                   </span>
                   {/* 3. Microcopy SLA */}
-                  <span className="block font-body text-xs text-text-tertiary">
+                  <span className="block font-body text-sm text-text-tertiary">
                     Consultas formales y aclaraciones de cuenta • Respuesta en 24 a 48h
                   </span>
                 </div>
@@ -157,20 +157,20 @@ export default function PaginaSoporteCuenta() {
 
         {/* 1. Sección: Gestión de Cuenta y Acción Destructiva Separada */}
         <Card className="border-red-500/20 bg-red-500/5">
-          <p className="font-body text-xs font-bold uppercase tracking-wider text-red-500 mb-1">
+          <p className="font-body text-sm font-bold uppercase tracking-wider text-red-500 mb-1">
             Gestión Avanzada de Cuenta
           </p>
           <h2 className="font-display text-lg font-bold text-text-primary mb-2">
             Desactivación de Cuenta
           </h2>
-          <p className="font-body text-xs text-text-tertiary mb-4 leading-5">
+          <p className="font-body text-sm text-text-tertiary mb-4 leading-5">
             Si deseas darte de baja del servicio o suspender temporalmente tu perfil, puedes iniciar el proceso con soporte.
           </p>
 
           {/* Botón Destructivo Separado con Tratamiento de Peligro */}
           <a
             href={bajaCuenta.href}
-            className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-red-500/40 bg-surface px-4 py-3 font-display text-xs font-bold text-red-500 shadow-2xs transition hover:border-red-500 hover:bg-red-500/10 active:scale-95"
+            className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-red-500/40 bg-surface px-4 py-3 font-display text-sm font-bold text-red-500 shadow-2xs transition hover:border-red-500 hover:bg-red-500/10 active:scale-95"
           >
             ⚠️ {bajaCuenta.etiqueta}
           </a>

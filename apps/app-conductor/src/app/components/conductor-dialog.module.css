@@ -7,13 +7,13 @@
   margin: auto;
   padding: 0;
   border: 1px solid var(--conductor-border);
-  border-radius: 20px;
+  border-radius: var(--conductor-radius-dialog);
   background: var(--conductor-surface);
   color: var(--conductor-primary);
   overflow: hidden;
 }
 .dialog[open] { display: flex; flex-direction: column; }
-.dialog::backdrop { background: rgb(0 0 0 / 60%); }
+.dialog::backdrop { background: var(--conductor-overlay); }
 .closeRow { display: flex; justify-content: flex-end; flex-shrink: 0; padding: 4px 8px; border-bottom: 1px solid var(--conductor-border); }
 .closeRow button {
   display: inline-flex; align-items: center; justify-content: center;
