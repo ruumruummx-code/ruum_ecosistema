@@ -10,16 +10,13 @@ interface IncidenciaModalProps {
 
 export function IncidenciaModal({ trasladoId, onCerrar }: IncidenciaModalProps) {
   return (
-    <TripDialog title="Incidencia del traslado" onClose={onCerrar}>
+    <TripDialog title="Reportar un problema" onClose={onCerrar}>
       <div className="flex flex-col gap-4 text-left">
-
-        {/* Componente de reporte de Incidencia */}
         <ReportarIncidencia trasladoId={trasladoId} />
-
         <button
           type="button"
           onClick={onCerrar}
-          className="w-full py-2.5 rounded-xl bg-surface hover:bg-surface-elevated text-text-secondary font-display text-xs font-bold uppercase tracking-wider transition-all cursor-pointer mt-2 border border-border/20"
+          className="w-full min-h-[48px] rounded-xl border border-border bg-transparent text-text-secondary text-sm font-semibold hover:text-text-primary transition-colors cursor-pointer mt-2"
         >
           Volver a Detalles del Traslado
         </button>

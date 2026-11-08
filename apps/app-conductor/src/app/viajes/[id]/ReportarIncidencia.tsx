@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Aviso, Button, Field } from "@ruum/ui";
-import { TEXTOS_CARGANDO } from "@ruum/shared/constants";
+import { TEXTOS_CARGANDO, PRIORIDAD_POR_INCIDENCIA } from "@ruum/shared/constants";
 import type { Database } from "@ruum/shared/types";
 import { traducirErrorOperativo } from "@ruum/shared/utils";
 import { activarSoporteEmergenciaConductor, reportarIncidencia } from "@ruum/api/services";
@@ -20,7 +20,12 @@ type ProblemaVisible =
   | "danos"
   | "no_inicia"
   | "no_continuar"
-  | "emergencia";
+  | "emergencia"
+  | "emergencia_medica"
+  | "conductor_enfermo"
+  | "infraccion"
+  | "dano_no_reportado"
+  | "conflicto_evidencia";
 
 type OpcionProblema = {
   id: ProblemaVisible;
@@ -107,6 +112,56 @@ const OPCIONES: OpcionProblema[] = [
     placeholder: "Ej. Hubo una colisión leve; estoy en zona segura.",
     requiereEvidencia: true,
     urgente: true
+  },
+  {
+    id: "emergencia_medica",
+    etiqueta: "Emergencia médica del conductor.",
+    ayuda: "Requiere atención médica inmediata en ruta.",
+    tipo: "emergencia_medica_conductor",
+    momento: "durante_traslado",
+    pregunta: "¿Cuál es la situación médica y requieres ambulancia?",
+    placeholder: "Ej. Malestar severo; detenido en lugar seguro.",
+    urgente: true
+  },
+  {
+    id: "conductor_enfermo",
+    etiqueta: "Conductor indispuesto o enfermo.",
+    ayuda: "Condición de salud que impide conducir con seguridad.",
+    tipo: "conductor_enfermo",
+    momento: "durante_traslado",
+    pregunta: "¿Cuál es tu estado y requieres relevo?",
+    placeholder: "Ej. Fiebre y mareo, vehículo estacionado.",
+    urgente: true
+  },
+  {
+    id: "infraccion",
+    etiqueta: "Infracción por autoridad vial.",
+    ayuda: "Detención por autoridad vial o retención del vehículo.",
+    tipo: "infraccion_autoridad_vial",
+    momento: "durante_traslado",
+    pregunta: "¿Qué autoridad intervino y cuál es el motivo?",
+    placeholder: "Ej. Retén de tránsito en autopista.",
+    requiereEvidencia: true
+  },
+  {
+    id: "dano_no_reportado",
+    etiqueta: "Daño no reportado previamente.",
+    ayuda: "Daño observado que no consta en el inventario inicial.",
+    tipo: "dano_no_reportado",
+    momento: "entrega",
+    pregunta: "¿Qué daño detectaste al momento de la entrega?",
+    placeholder: "Ej. Raspón en moldura derecha no registrado.",
+    requiereEvidencia: true
+  },
+  {
+    id: "conflicto_evidencia",
+    etiqueta: "Conflicto de evidencia.",
+    ayuda: "Discrepancia entre la evidencia fotográfica y el estado real.",
+    tipo: "conflicto_evidencia",
+    momento: "entrega",
+    pregunta: "¿Qué diferencia existe con la evidencia original?",
+    placeholder: "Ej. Odómetro o combustible no coincide con la foto inicial.",
+    requiereEvidencia: true
   }
 ];
 
@@ -337,6 +392,7 @@ export function ReportarIncidencia({ trasladoId }: { trasladoId: string }) {
                 <div className="mt-3 grid gap-2">
                   {OPCIONES.map((opcionProblema) => {
                     const activo = problema === opcionProblema.id;
+                    const prioridad = PRIORIDAD_POR_INCIDENCIA[opcionProblema.tipo];
                     return (
                       <button
                         key={opcionProblema.id}
@@ -346,13 +402,18 @@ export function ReportarIncidencia({ trasladoId }: { trasladoId: string }) {
                           setMensaje(null);
                         }}
                         className={[
-                          "rounded-xl border px-3 py-3 text-left transition",
+                          "w-full rounded-xl border px-3 py-3 text-left transition min-h-[56px] flex flex-col justify-center",
                           activo ? "border-route-action bg-route-soft" : "border-border bg-surface-elevated hover:border-route-action",
                           opcionProblema.urgente ? "border-danger-action" : ""
-                        ].join(" ")}
+                        ].filter(Boolean).join(" ")}
                       >
-                        <span className="block font-body text-sm font-semibold text-text-primary">{opcionProblema.etiqueta}</span>
-                        <span className="mt-1 block font-body text-sm leading-6 text-text-secondary">{opcionProblema.ayuda}</span>
+                        <div className="flex items-center justify-between gap-2">
+                          <span className="block font-body text-sm font-semibold text-text-primary">{opcionProblema.etiqueta}</span>
+                          <span className="text-[11px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full border border-border text-text-tertiary">
+                            Prioridad {prioridad}
+                          </span>
+                        </div>
+                        <span className="mt-1 block font-body text-xs text-text-secondary">{opcionProblema.ayuda}</span>
                       </button>
                     );
                   })}
