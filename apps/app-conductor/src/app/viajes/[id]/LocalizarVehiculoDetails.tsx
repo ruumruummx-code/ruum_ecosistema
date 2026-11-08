@@ -226,7 +226,7 @@ export function LocalizarVehiculoDetails({
   const recording = estadoLocal === "evidencia_inicial_en_proceso";
   const action = blocked ? () => setSoporteAbierto(true) : needsVerification ? () => setVerificationOpen(true) : () => void handleIniciarInspeccion();
   return <>
-    <TripStage pasaporte={pasaporte} backHref={volver} stateLabel={recording ? "Registro inicial pendiente" : enPasoVerificacion ? "Verificación del vehículo" : "En el origen"}
+    <TripStage minimal pasaporte={pasaporte} backHref={volver} stateLabel={recording ? "Registro inicial pendiente" : enPasoVerificacion ? "Verificación del vehículo" : "En el origen"}
       title={recording ? "Registra la recogida" : enPasoVerificacion ? "Verifica el vehículo" : "Recibe el vehículo"}
       instruction={faltanDatosVehiculo ? "Faltan VIN o placas. Consulta a soporte." : recording ? "Continúa las fotos y los datos del vehículo." : enPasoVerificacion ? "Comprueba VIN, placas y consulta REPUVE." : "Comprueba los datos con el contacto."}
       primaryLabel={blocked ? "Contactar soporte" : needsVerification ? "Abrir verificación" : recording || enPasoVerificacion ? "Continuar registro inicial" : "Confirmar contacto y vehículo"}
@@ -234,11 +234,11 @@ export function LocalizarVehiculoDetails({
       extraTools={enPasoVerificacion && !faltanDatosVehiculo && <button type="button" onClick={() => setVerificationOpen(true)}>Revisar verificación REPUVE</button>} />
     {verificationOpen && <TripDialog title="Verificación del vehículo" onClose={() => setVerificationOpen(false)}>
       <div className={styles.verification} data-verificacion-repuve>
-        <p>VIN registrado: {vin}</p><p>Placas registradas: {placas}</p>
+        <p>VIN registrado: <strong className={styles.mono}>{vin}</strong></p><p>Placas registradas: <strong className={styles.mono}>{placas}</strong></p>
         <a href={URL_PORTAL_REPUVE} target="_blank" rel="noopener noreferrer">Abrir portal REPUVE</a>
         {repuveValidoEnServidor ? <p role="status">{estatusServidor === "autorizado_por_soporte" ? "Verificación autorizada por soporte" : "Verificación registrada y validada"}</p> : <>
-          <label>VIN físico en unidad<input value={vinFisico} onChange={e => setVinFisico(e.target.value.toUpperCase())} /></label>
-          <label>Placas físicas<input value={placasFisicas} onChange={e => setPlacasFisicas(e.target.value.toUpperCase())} /></label>
+          <label>VIN físico en unidad<input className={styles.mono} value={vinFisico} onChange={e => setVinFisico(e.target.value.toUpperCase())} /></label>
+          <label>Placas físicas<input className={styles.mono} value={placasFisicas} onChange={e => setPlacasFisicas(e.target.value.toUpperCase())} /></label>
           <label>Resultado en REPUVE<select value={resultadoRepuve} onChange={e => setResultadoRepuve(e.target.value as ResultadoVerificacionRepuveConductor)}>{OPCIONES_RESULTADO_REPUVE.map(option => <option key={option.valor} value={option.valor}>{option.etiqueta}</option>)}</select></label>
           <label>Captura de pantalla REPUVE<input type="file" accept="image/*" onChange={e => { setCapturaArchivo(e.target.files?.[0] ?? null); setCapturaPathSubida(null); }} /></label>
           {detectaBloqueoOperativo && <p role="alert">{evaluacionRepuve.motivoBloqueo || "La verificación requiere revisión de soporte."}</p>}

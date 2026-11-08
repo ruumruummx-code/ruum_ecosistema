@@ -125,6 +125,98 @@ button.rejectOption,
   border-color: var(--conductor-action);
 }
 
+.mono {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.05em;
+}
+
+.verification {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.verification p {
+  margin: 0;
+  font-size: 14px;
+  color: var(--conductor-primary);
+}
+.verification a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 48px;
+  color: var(--conductor-action);
+  font-weight: 600;
+  text-decoration: underline;
+}
+.verification label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--conductor-muted);
+}
+.verification input,
+.verification select {
+  min-height: 48px;
+  width: 100%;
+  padding: 8px 0;
+  border: none;
+  border-bottom: 2px solid var(--conductor-border-strong);
+  border-radius: 0;
+  background: transparent;
+  color: var(--conductor-primary);
+  font-size: 16px;
+}
+.verification input:focus-visible,
+.verification select:focus-visible {
+  outline: none;
+  border-bottom-color: var(--conductor-action);
+}
+.verification input[type="file"] {
+  border-bottom: none;
+  padding: 8px 0;
+  font-size: 14px;
+  color: var(--conductor-muted);
+}
+.verification [role="alert"] {
+  margin: 0;
+  padding: 8px 12px;
+  border-radius: var(--conductor-radius-control);
+  background: var(--conductor-surface-secondary);
+  color: var(--conductor-danger);
+  font-size: 13px;
+  font-weight: 500;
+}
+.verification [role="status"] {
+  margin: 0;
+  padding: 8px 12px;
+  border-radius: var(--conductor-radius-control);
+  background: var(--conductor-surface-secondary);
+  color: var(--conductor-action);
+  font-size: 13px;
+  font-weight: 600;
+}
+.verification button {
+  min-height: 56px;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: var(--conductor-radius-control);
+  background: var(--conductor-gradient-action);
+  color: var(--conductor-button-text);
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.verification button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 @media (max-height: 600px) { .heading h1 { font-size: 22px; } .content { gap: 10px; } }
 
 .content.readOnly { gap:6px; }
