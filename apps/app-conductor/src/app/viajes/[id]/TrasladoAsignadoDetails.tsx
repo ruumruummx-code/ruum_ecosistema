@@ -26,6 +26,6 @@ export function TrasladoAsignadoDetails({ pasaporte, volver }: { pasaporte: Pasa
     }
   }
 
-  return <TripStage pasaporte={pasaporte} backHref={volver} title="Prepara la recogida" instruction="Revisa el punto de origen antes de salir." stateLabel="Asignado"
+  return <TripStage minimal pasaporte={pasaporte} backHref={volver} title="Prepara la recogida" instruction="Revisa el punto de origen antes de salir." stateLabel="Asignado"
     primaryLabel="Iniciar ruta" onPrimary={() => void handleIniciarCamino()} busy={procesando} error={error} />;
 }
