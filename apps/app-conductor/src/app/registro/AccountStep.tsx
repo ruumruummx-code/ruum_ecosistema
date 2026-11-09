@@ -87,6 +87,7 @@ export function AccountStep({
       {section === "contact" && <>
       <DenseField etiqueta="Teléfono" type="tel" inputMode="tel" placeholder="10 dígitos"
         leading={<span className={styles.countryPicker}>
+          {/* Bandera de México: colores de identidad nacional, independientes del tema. */}
           <svg width="27" height="18" viewBox="0 0 30 20" aria-hidden="true"><rect width="30" height="20" rx="2" fill="#fff" /><path d="M2 0h8v20H2a2 2 0 0 1-2-2V2a2 2 0 0 1 2-2Z" fill="#006847" /><path d="M20 0h8a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2h-8Z" fill="#ce1126" /><path d="m13 8 3-2 1 4-2 2-2-2m-2 2q4 6 8 0" fill="#916e35" stroke="#497446" strokeWidth="1" /></svg>
           <span aria-hidden="true">⌄</span>
           <select className={styles.countryCode} aria-label="Código de país" defaultValue="+52"><option value="+52">México (+52)</option></select>
