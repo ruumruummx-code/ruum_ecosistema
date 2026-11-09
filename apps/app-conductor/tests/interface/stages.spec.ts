@@ -159,7 +159,8 @@ for (const width of [320, 390]) {
   });
 }
 test("fallo de red mantiene contexto, muestra motivo y permite reintentar", async ({ page }) => {
-  await page.goto(`/viajes/${trip(1)}`);
+  // Identidad propia: otras pruebas avanzan y reinician el viaje 1 en la fixture.
+  await page.goto(`/viajes/${trip(61)}`);
   await page.route("**/rest/v1/rpc/conductor_avanza_traslado", route => route.fulfill({ status: 500, contentType: "application/json", body: JSON.stringify({ message: "Servicio temporalmente no disponible" }) }));
   await page.getByRole("button", { name: "Iniciar ruta", exact: true }).click();
   await expect(page.locator("[data-trip-primary]").getByRole("alert")).toBeVisible(); await expect(page.getByRole("button", { name: "Iniciar ruta", exact: true })).toBeEnabled();
