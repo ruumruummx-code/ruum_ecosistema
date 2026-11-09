@@ -21,7 +21,7 @@ export function OfferPreviewCard({ viaje, detalle, hrefDetalle, mapPreview, acce
   const duration = minutes == null ? "Por confirmar" : `${Math.floor(minutes / 60) ? `${Math.floor(minutes / 60)} h ` : ""}${minutes % 60 || !Math.floor(minutes / 60) ? `${minutes % 60} min` : ""}`.trim();
   const price = viaje.ganancia_conductor ?? detalle.gananciaConductorOficial;
   const actionLabel = !accepted ? "Ver detalles de la oferta" : accepted.readOnly || accepted.tone === "success" ? "Ver traslado" : accepted.tone === "active" ? "Continuar traslado" : "Ver siguiente paso";
-  const primaryAction = <Link href={hrefDetalle} className={styles.action} prefetch={false}>{actionLabel} <span aria-hidden="true">→</span></Link>;
+  const primaryAction = <Link href={hrefDetalle} className={styles.action} prefetch={false} data-trip-primary="true">{actionLabel} <span aria-hidden="true">→</span></Link>;
   return <article className={styles.card} data-offer-card={!accepted || undefined} data-accepted-card={accepted ? true : undefined} aria-label={`${accepted ? "Traslado aceptado" : "Oferta"} ${folio}`}>
     <div className={styles.top}>
       <div className={styles.topStatus}>
@@ -43,6 +43,6 @@ export function OfferPreviewCard({ viaje, detalle, hrefDetalle, mapPreview, acce
       <span><ConductorIcon name="clock" /><span>{minutes == null ? duration : `Aprox. ${duration}`}</span></span>
     </div>
     {mapPreview ? <div className={styles.previewMap} data-offer-map>{mapPreview}</div> : null}
-    {accepted?.onReject ? <div className={styles.actionRow}>{primaryAction}<button type="button" className={styles.options} onClick={accepted.onReject} aria-label="Opciones de traslado" aria-haspopup="dialog">•••</button></div> : primaryAction}
+    {accepted?.onReject ? <div className={styles.actionRow}>{primaryAction}<button type="button" className={styles.options} onClick={accepted.onReject} aria-label="Opciones de traslado" aria-haspopup="dialog" data-trip-primary="true">•••</button></div> : primaryAction}
   </article>;
 }

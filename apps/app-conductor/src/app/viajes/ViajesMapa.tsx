@@ -82,8 +82,9 @@ export function TrasladosMapa({ Traslados, onSelect, vistaId, onReturnToList }: 
         TrasladosConCoords.forEach((viaje) => {
           const el = document.createElement("div");
           el.className = "ruum-map-pin";
+          // El marcador es un nodo DOM: puede heredar el contrato CSS del conductor.
           el.style.cssText =
-            "width:48px;height:48px;border-radius:50%;background:#FFC400;border:3px solid #0f172a;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:900;color:#0f172a;box-shadow:0 4px 12px rgba(0,0,0,0.25);cursor:pointer;transform:translate(-50%,-50%)";
+            "width:48px;height:48px;border-radius:50%;background:var(--conductor-pending-soft);border:3px solid var(--conductor-primary);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:900;color:var(--conductor-primary);box-shadow:var(--conductor-shadow);cursor:pointer;transform:translate(-50%,-50%)";
           el.textContent = "📍";
           el.setAttribute("role", "button");
           el.setAttribute("aria-label", `Ver oferta ${viaje.origen_ciudad ?? ""} — ${viaje.ganancia_conductor ? "$" + Math.round(viaje.ganancia_conductor) : ""}`);

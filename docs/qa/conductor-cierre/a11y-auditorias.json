@@ -1,0 +1,942 @@
+{
+  "audits": 104,
+  "violations": 0,
+  "reports": [
+    {
+      "combination": "operación accesible light 320",
+      "screen": "oferta.json",
+      "url": "http://localhost:3003/viajes/10000000-0000-4000-8000-000000000000",
+      "axeVersion": "4.14.0",
+      "violations": [],
+      "passes": 20,
+      "incomplete": 0
+    },
+    {
+      "combination": "operación accesible light 320",
+      "screen": "rechazo.json",
+      "url": "http://localhost:3003/viajes/10000000-0000-4000-8000-000000000000",
+      "axeVersion": "4.14.0",
+      "violations": [],
+      "passes": 14,
+      "incomplete": 0
+    },
+    {
+      "combination": "operación accesible light 320",
+      "screen": "prepara.json",
+      "url": "http://localhost:3003/viajes/10000000-0000-4000-8000-000000000001",
+      "axeVersion": "4.14.0",
+      "violations": [],
+      "passes": 20,
+      "incomplete": 0
+    },
+    {
+      "combination": "operación accesible light 320",
+      "screen": "recogida.json",
+      "url": "http://localhost:3003/viajes/10000000-0000-4000-8000-000000000002",
+      "axeVersion": "4.14.0",
+      "violations": [],
+      "passes": 20,
+      "incomplete": 0
+    },
+    {
+      "combination": "operación accesible light 320",
+      "screen": "verificacion.json",
+      "url": "http://localhost:3003/viajes/10000000-0000-4000-8000-000000000012",
+      "axeVersion": "4.14.0",
+      "violations": [],
+      "passes": 20,
+      "incomplete": 0
+    },
+    {
+      "combination": "operación accesible light 320",
+      "screen": "vin-placas.json",
+      "url": "http://localhost:3003/viajes/10000000-0000-4000-8000-000000000012",
+      "axeVersion": "4.14.0",
+      "violations": [],
+      "passes": 20,
+      "incomplete": 0
+    },
+    {
+      "combination": "operación accesible light 320",
+      "screen": "recepcion.json",
+      "url": "http://localhost:3003/viajes/10000000-0000-4000-8000-000000000013",
+      "axeVersion": "4.14.0",
+      "violations": [],
+      "passes": 20,
+      "incomplete": 0
+    },
+    {
+      "combination": "operación accesible light 320",
+      "screen": "inicio.json",
+      "url": "http://localhost:3003/viajes/10000000-0000-4000-8000-000000000014",
+      "axeVersion": "4.14.0",
+      "violations": [],
+      "passes": 20,
+      "incomplete": 0
+    },
+    {
+      "combination": "operación accesible light 320",
+      "screen": "en-curso.json",
+      "url": "http://localhost:3003/viajes/10000000-0000-4000-8000-000000000004",
+      "axeVersion": "4.14.0",
+      "violations": [],
+      "passes": 20,
+      "incomplete": 0
+    },
+    {
+      "combination": "operación accesible light 320",
+      "screen": "registra-entrega.json",
+      "url": "http://localhost:3003/viajes/10000000-0000-4000-8000-000000000015",
+      "axeVersion": "4.14.0",
+      "violations": [],
+      "passes": 20,
+      "incomplete": 0
+    },
+    {
+      "combination": "operación accesible light 320",
+      "screen": "entrega.json",
+      "url": "http://localhost:3003/viajes/10000000-0000-4000-8000-000000000053?cierre=1",
+      "axeVersion": "4.14.0",
+      "violations": [],
+      "passes": 23,
+      "incomplete": 0
+    },
+    {
+      "combination": "operación accesible light 320",
+      "screen": "cierre.json",
+      "url": "http://localhost:3003/viajes/10000000-0000-4000-8000-000000000060?cierre=1",
+      "axeVersion": "4.14.0",
+      "violations": [],
+      "passes": 23,
+      "incomplete": 0
+    },
+    {
+      "combination": "operación accesible light 320",
+      "screen": "problema.json",
+      "url": "http://localhost:3003/viajes/10000000-0000-4000-8000-000000000001/soporte",
+      "axeVersion": "4.14.0",
+      "violations": [],
+      "passes": 12,
+      "incomplete": 0
+    },
+    {
+      "combination": "operación accesible light 320",
+      "screen": "lista.json",
+      "url": "http://localhost:3003/viajes",
+      "axeVersion": "4.14.0",
+      "violations": [],
+      "passes": 23,
+      "incomplete": 0
+    },
+    {
+      "combination": "operación accesible light 320",
+      "screen": "evidencia-inicial.json",
+      "url": "http://localhost:3003/viajes/10000000-0000-4000-8000-000000000050/evidencia",
+      "axeVersion": "4.14.0",
+      "violations": [],
+      "passes": 21,
+      "incomplete": 0
+    },
+    {
+      "combination": "operación accesible light 320",
+      "screen": "evidencia-final.json",
+      "url": "http://localhost:3003/viajes/10000000-0000-4000-8000-000000000051/evidencia",
+      "axeVersion": "4.14.0",
+      "violations": [],
+      "passes": 22,
+      "incomplete": 0
+    },
+    {
+      "combination": "operación accesible light 320",
+      "screen": "50-6. Llaves.json",
+      "url": "http://localhost:3003/viajes/10000000-0000-4000-8000-000000000050/evidencia",
+      "axeVersion": "4.14.0",
+      "violations": [],
+      "passes": 23,
+      "incomplete": 0
+    },
+    {
+      "combination": "operación accesible light 320",
+      "screen": "50-7. Mediciones.json",
+      "url": "http://localhost:3003/viajes/10000000-0000-4000-8000-000000000050/evidencia",
+      "axeVersion": "4.14.0",
+      "violations": [],
+      "passes": 24,
+      "incomplete": 0
+    },
+    {
+      "combination": "operación accesible light 320",
+      "screen": "50-8. Documentos.json",
+      "url": "http://localhost:3003/viajes/10000000-0000-4000-8000-000000000050/evidencia",
+      "axeVersion": "4.14.0",
+      "violations": [],
+      "passes": 23,
+      "incomplete": 0
+    },
+    {
+      "combination": "operación accesible light 320",
+      "screen": "50-9. Observaciones.json",
+      "url": "http://localhost:3003/viajes/10000000-0000-4000-8000-000000000050/evidencia",
+      "axeVersion": "4.14.0",
+      "violations": [],
+      "passes": 23,
+      "incomplete": 0
+    },
+    {
+      "combination": "operación accesible light 320",
+      "screen": "50-10. Revisión.json",
+      "url": "http://localhost:3003/viajes/10000000-0000-4000-8000-000000000050/evidencia",
+      "axeVersion": "4.14.0",
+      "violations": [],
+      "passes": 23,
+      "incomplete": 0
+    },
+    {
+      "combination": "operación accesible light 320",
+      "screen": "51-6. Llaves.json",
+      "url": "http://localhost:3003/viajes/10000000-0000-4000-8000-000000000051/evidencia",
+      "axeVersion": "4.14.0",
+      "violations": [],
+      "passes": 23,
+      "incomplete": 0
+    },
+    {
+      "combination": "operación accesible light 320",
+      "screen": "51-7. Mediciones.json",
+      "url": "http://localhost:3003/viajes/10000000-0000-4000-8000-000000000051/evidencia",
+      "axeVersion": "4.14.0",
+      "violations": [],
+      "passes": 24,
+      "incomplete": 0
+    },
+    {
+      "combination": "operación accesible light 320",
+      "screen": "51-8. Documentos.json",
+      "url": "http://localhost:3003/viajes/10000000-0000-4000-8000-000000000051/evidencia",
+      "axeVersion": "4.14.0",
+      "violations": [],
+      "passes": 23,
+      "incomplete": 0
+    },
+    {
+      "combination": "operación accesible light 320",
+      "screen": "51-9. Observaciones.json",
+      "url": "http://localhost:3003/viajes/10000000-0000-4000-8000-000000000051/evidencia",
+      "axeVersion": "4.14.0",
+      "violations": [],
+      "passes": 24,
+      "incomplete": 0
+    },
+    {
+      "combination": "operación accesible light 320",
+      "screen": "51-10. Revisión.json",
+      "url": "http://localhost:3003/viajes/10000000-0000-4000-8000-000000000051/evidencia",
+      "axeVersion": "4.14.0",
+      "violations": [],
+      "passes": 23,
+      "incomplete": 0
+    },
+    {
+      "combination": "operación accesible light 390",
+      "screen": "oferta.json",
+      "url": "http://localhost:3003/viajes/10000000-0000-4000-8000-000000000000",
+      "axeVersion": "4.14.0",
+      "violations": [],
+      "passes": 20,
+      "incomplete": 0
+    },
+    {
+      "combination": "operación accesible light 390",
+      "screen": "rechazo.json",
+      "url": "http://localhost:3003/viajes/10000000-0000-4000-8000-000000000000",
+      "axeVersion": "4.14.0",
+      "violations": [],
+      "passes": 14,
+      "incomplete": 0
+    },
+    {
+      "combination": "operación accesible light 390",
+      "screen": "prepara.json",
+      "url": "http://localhost:3003/viajes/10000000-0000-4000-8000-000000000001",
+      "axeVersion": "4.14.0",
+      "violations": [],
+      "passes": 20,
+      "incomplete": 0
+    },
+    {
+      "combination": "operación accesible light 390",
+      "screen": "recogida.json",
+      "url": "http://localhost:3003/viajes/10000000-0000-4000-8000-000000000002",
+      "axeVersion": "4.14.0",
+      "violations": [],
+      "passes": 20,
+      "incomplete": 0
+    },
+    {
+      "combination": "operación accesible light 390",
+      "screen": "verificacion.json",
+      "url": "http://localhost:3003/viajes/10000000-0000-4000-8000-000000000012",
+      "axeVersion": "4.14.0",
+      "violations": [],
+      "passes": 20,
+      "incomplete": 0
+    },
+    {
+      "combination": "operación accesible light 390",
+      "screen": "vin-placas.json",
+      "url": "http://localhost:3003/viajes/10000000-0000-4000-8000-000000000012",
+      "axeVersion": "4.14.0",
+      "violations": [],
+      "passes": 19,
+      "incomplete": 0
+    },
+    {
+      "combination": "operación accesible light 390",
+      "screen": "recepcion.json",
+      "url": "http://localhost:3003/viajes/10000000-0000-4000-8000-000000000013",
+      "axeVersion": "4.14.0",
+      "violations": [],
+      "passes": 20,
+      "incomplete": 0
+    },
+    {
+      "combination": "operación accesible light 390",
+      "screen": "inicio.json",
+      "url": "http://localhost:3003/viajes/10000000-0000-4000-8000-000000000014",
+      "axeVersion": "4.14.0",
+      "violations": [],
+      "passes": 20,
+      "incomplete": 0
+    },
+    {
+      "combination": "operación accesible light 390",
+      "screen": "en-curso.json",
+      "url": "http://localhost:3003/viajes/10000000-0000-4000-8000-000000000004",
+      "axeVersion": "4.14.0",
+      "violations": [],
+      "passes": 20,
+      "incomplete": 0
+    },
+    {
+      "combination": "operación accesible light 390",
+      "screen": "registra-entrega.json",
+      "url": "http://localhost:3003/viajes/10000000-0000-4000-8000-000000000015",
+      "axeVersion": "4.14.0",
+      "violations": [],
+      "passes": 20,
+      "incomplete": 0
+    },
+    {
+      "combination": "operación accesible light 390",
+      "screen": "entrega.json",
+      "url": "http://localhost:3003/viajes/10000000-0000-4000-8000-000000000053?cierre=1",
+      "axeVersion": "4.14.0",
+      "violations": [],
+      "passes": 23,
+      "incomplete": 0
+    },
+    {
+      "combination": "operación accesible light 390",
+      "screen": "cierre.json",
+      "url": "http://localhost:3003/viajes/10000000-0000-4000-8000-000000000060?cierre=1",
+      "axeVersion": "4.14.0",
+      "violations": [],
+      "passes": 23,
+      "incomplete": 0
+    },
+    {
+      "combination": "operación accesible light 390",
+      "screen": "problema.json",
+      "url": "http://localhost:3003/viajes/10000000-0000-4000-8000-000000000001/soporte",
+      "axeVersion": "4.14.0",
+      "violations": [],
+      "passes": 12,
+      "incomplete": 0
+    },
+    {
+      "combination": "operación accesible light 390",
+      "screen": "lista.json",
+      "url": "http://localhost:3003/viajes",
+      "axeVersion": "4.14.0",
+      "violations": [],
+      "passes": 23,
+      "incomplete": 0
+    },
+    {
+      "combination": "operación accesible light 390",
+      "screen": "evidencia-inicial.json",
+      "url": "http://localhost:3003/viajes/10000000-0000-4000-8000-000000000050/evidencia",
+      "axeVersion": "4.14.0",
+      "violations": [],
+      "passes": 21,
+      "incomplete": 0
+    },
+    {
+      "combination": "operación accesible light 390",
+      "screen": "evidencia-final.json",
+      "url": "http://localhost:3003/viajes/10000000-0000-4000-8000-000000000051/evidencia",
+      "axeVersion": "4.14.0",
+      "violations": [],
+      "passes": 22,
+      "incomplete": 0
+    },
+    {
+      "combination": "operación accesible light 390",
+      "screen": "50-6. Llaves.json",
+      "url": "http://localhost:3003/viajes/10000000-0000-4000-8000-000000000050/evidencia",
+      "axeVersion": "4.14.0",
+      "violations": [],
+      "passes": 23,
+      "incomplete": 0
+    },
+    {
+      "combination": "operación accesible light 390",
+      "screen": "50-7. Mediciones.json",
+      "url": "http://localhost:3003/viajes/10000000-0000-4000-8000-000000000050/evidencia",
+      "axeVersion": "4.14.0",
+      "violations": [],
+      "passes": 24,
+      "incomplete": 0
+    },
+    {
+      "combination": "operación accesible light 390",
+      "screen": "50-8. Documentos.json",
+      "url": "http://localhost:3003/viajes/10000000-0000-4000-8000-000000000050/evidencia",
+      "axeVersion": "4.14.0",
+      "violations": [],
+      "passes": 23,
+      "incomplete": 0
+    },
+    {
+      "combination": "operación accesible light 390",
+      "screen": "50-9. Observaciones.json",
+      "url": "http://localhost:3003/viajes/10000000-0000-4000-8000-000000000050/evidencia",
+      "axeVersion": "4.14.0",
+      "violations": [],
+      "passes": 23,
+      "incomplete": 0
+    },
+    {
+      "combination": "operación accesible light 390",
+      "screen": "50-10. Revisión.json",
+      "url": "http://localhost:3003/viajes/10000000-0000-4000-8000-000000000050/evidencia",
+      "axeVersion": "4.14.0",
+      "violations": [],
+      "passes": 23,
+      "incomplete": 0
+    },
+    {
+      "combination": "operación accesible light 390",
+      "screen": "51-6. Llaves.json",
+      "url": "http://localhost:3003/viajes/10000000-0000-4000-8000-000000000051/evidencia",
+      "axeVersion": "4.14.0",
+      "violations": [],
+      "passes": 23,
+      "incomplete": 0
+    },
+    {
+      "combination": "operación accesible light 390",
+      "screen": "51-7. Mediciones.json",
+      "url": "http://localhost:3003/viajes/10000000-0000-4000-8000-000000000051/evidencia",
+      "axeVersion": "4.14.0",
+      "violations": [],
+      "passes": 24,
+      "incomplete": 0
+    },
+    {
+      "combination": "operación accesible light 390",
+      "screen": "51-8. Documentos.json",
+      "url": "http://localhost:3003/viajes/10000000-0000-4000-8000-000000000051/evidencia",
+      "axeVersion": "4.14.0",
+      "violations": [],
+      "passes": 23,
+      "incomplete": 0
+    },
+    {
+      "combination": "operación accesible light 390",
+      "screen": "51-9. Observaciones.json",
+      "url": "http://localhost:3003/viajes/10000000-0000-4000-8000-000000000051/evidencia",
+      "axeVersion": "4.14.0",
+      "violations": [],
+      "passes": 24,
+      "incomplete": 0
+    },
+    {
+      "combination": "operación accesible light 390",
+      "screen": "51-10. Revisión.json",
+      "url": "http://localhost:3003/viajes/10000000-0000-4000-8000-000000000051/evidencia",
+      "axeVersion": "4.14.0",
+      "violations": [],
+      "passes": 23,
+      "incomplete": 0
+    },
+    {
+      "combination": "operación accesible dark 320",
+      "screen": "oferta.json",
+      "url": "http://localhost:3003/viajes/10000000-0000-4000-8000-000000000000",
+      "axeVersion": "4.14.0",
+      "violations": [],
+      "passes": 20,
+      "incomplete": 0
+    },
+    {
+      "combination": "operación accesible dark 320",
+      "screen": "rechazo.json",
+      "url": "http://localhost:3003/viajes/10000000-0000-4000-8000-000000000000",
+      "axeVersion": "4.14.0",
+      "violations": [],
+      "passes": 14,
+      "incomplete": 0
+    },
+    {
+      "combination": "operación accesible dark 320",
+      "screen": "prepara.json",
+      "url": "http://localhost:3003/viajes/10000000-0000-4000-8000-000000000001",
+      "axeVersion": "4.14.0",
+      "violations": [],
+      "passes": 20,
+      "incomplete": 0
+    },
+    {
+      "combination": "operación accesible dark 320",
+      "screen": "recogida.json",
+      "url": "http://localhost:3003/viajes/10000000-0000-4000-8000-000000000002",
+      "axeVersion": "4.14.0",
+      "violations": [],
+      "passes": 20,
+      "incomplete": 0
+    },
+    {
+      "combination": "operación accesible dark 320",
+      "screen": "verificacion.json",
+      "url": "http://localhost:3003/viajes/10000000-0000-4000-8000-000000000012",
+      "axeVersion": "4.14.0",
+      "violations": [],
+      "passes": 20,
+      "incomplete": 0
+    },
+    {
+      "combination": "operación accesible dark 320",
+      "screen": "vin-placas.json",
+      "url": "http://localhost:3003/viajes/10000000-0000-4000-8000-000000000012",
+      "axeVersion": "4.14.0",
+      "violations": [],
+      "passes": 20,
+      "incomplete": 0
+    },
+    {
+      "combination": "operación accesible dark 320",
+      "screen": "recepcion.json",
+      "url": "http://localhost:3003/viajes/10000000-0000-4000-8000-000000000013",
+      "axeVersion": "4.14.0",
+      "violations": [],
+      "passes": 20,
+      "incomplete": 0
+    },
+    {
+      "combination": "operación accesible dark 320",
+      "screen": "inicio.json",
+      "url": "http://localhost:3003/viajes/10000000-0000-4000-8000-000000000014",
+      "axeVersion": "4.14.0",
+      "violations": [],
+      "passes": 20,
+      "incomplete": 0
+    },
+    {
+      "combination": "operación accesible dark 320",
+      "screen": "en-curso.json",
+      "url": "http://localhost:3003/viajes/10000000-0000-4000-8000-000000000004",
+      "axeVersion": "4.14.0",
+      "violations": [],
+      "passes": 20,
+      "incomplete": 0
+    },
+    {
+      "combination": "operación accesible dark 320",
+      "screen": "registra-entrega.json",
+      "url": "http://localhost:3003/viajes/10000000-0000-4000-8000-000000000015",
+      "axeVersion": "4.14.0",
+      "violations": [],
+      "passes": 20,
+      "incomplete": 0
+    },
+    {
+      "combination": "operación accesible dark 320",
+      "screen": "entrega.json",
+      "url": "http://localhost:3003/viajes/10000000-0000-4000-8000-000000000053?cierre=1",
+      "axeVersion": "4.14.0",
+      "violations": [],
+      "passes": 23,
+      "incomplete": 0
+    },
+    {
+      "combination": "operación accesible dark 320",
+      "screen": "cierre.json",
+      "url": "http://localhost:3003/viajes/10000000-0000-4000-8000-000000000060?cierre=1",
+      "axeVersion": "4.14.0",
+      "violations": [],
+      "passes": 23,
+      "incomplete": 0
+    },
+    {
+      "combination": "operación accesible dark 320",
+      "screen": "problema.json",
+      "url": "http://localhost:3003/viajes/10000000-0000-4000-8000-000000000001/soporte",
+      "axeVersion": "4.14.0",
+      "violations": [],
+      "passes": 12,
+      "incomplete": 0
+    },
+    {
+      "combination": "operación accesible dark 320",
+      "screen": "lista.json",
+      "url": "http://localhost:3003/viajes",
+      "axeVersion": "4.14.0",
+      "violations": [],
+      "passes": 23,
+      "incomplete": 0
+    },
+    {
+      "combination": "operación accesible dark 320",
+      "screen": "evidencia-inicial.json",
+      "url": "http://localhost:3003/viajes/10000000-0000-4000-8000-000000000050/evidencia",
+      "axeVersion": "4.14.0",
+      "violations": [],
+      "passes": 21,
+      "incomplete": 0
+    },
+    {
+      "combination": "operación accesible dark 320",
+      "screen": "evidencia-final.json",
+      "url": "http://localhost:3003/viajes/10000000-0000-4000-8000-000000000051/evidencia",
+      "axeVersion": "4.14.0",
+      "violations": [],
+      "passes": 22,
+      "incomplete": 0
+    },
+    {
+      "combination": "operación accesible dark 320",
+      "screen": "50-6. Llaves.json",
+      "url": "http://localhost:3003/viajes/10000000-0000-4000-8000-000000000050/evidencia",
+      "axeVersion": "4.14.0",
+      "violations": [],
+      "passes": 23,
+      "incomplete": 0
+    },
+    {
+      "combination": "operación accesible dark 320",
+      "screen": "50-7. Mediciones.json",
+      "url": "http://localhost:3003/viajes/10000000-0000-4000-8000-000000000050/evidencia",
+      "axeVersion": "4.14.0",
+      "violations": [],
+      "passes": 24,
+      "incomplete": 0
+    },
+    {
+      "combination": "operación accesible dark 320",
+      "screen": "50-8. Documentos.json",
+      "url": "http://localhost:3003/viajes/10000000-0000-4000-8000-000000000050/evidencia",
+      "axeVersion": "4.14.0",
+      "violations": [],
+      "passes": 23,
+      "incomplete": 0
+    },
+    {
+      "combination": "operación accesible dark 320",
+      "screen": "50-9. Observaciones.json",
+      "url": "http://localhost:3003/viajes/10000000-0000-4000-8000-000000000050/evidencia",
+      "axeVersion": "4.14.0",
+      "violations": [],
+      "passes": 23,
+      "incomplete": 0
+    },
+    {
+      "combination": "operación accesible dark 320",
+      "screen": "50-10. Revisión.json",
+      "url": "http://localhost:3003/viajes/10000000-0000-4000-8000-000000000050/evidencia",
+      "axeVersion": "4.14.0",
+      "violations": [],
+      "passes": 23,
+      "incomplete": 0
+    },
+    {
+      "combination": "operación accesible dark 320",
+      "screen": "51-6. Llaves.json",
+      "url": "http://localhost:3003/viajes/10000000-0000-4000-8000-000000000051/evidencia",
+      "axeVersion": "4.14.0",
+      "violations": [],
+      "passes": 23,
+      "incomplete": 0
+    },
+    {
+      "combination": "operación accesible dark 320",
+      "screen": "51-7. Mediciones.json",
+      "url": "http://localhost:3003/viajes/10000000-0000-4000-8000-000000000051/evidencia",
+      "axeVersion": "4.14.0",
+      "violations": [],
+      "passes": 24,
+      "incomplete": 0
+    },
+    {
+      "combination": "operación accesible dark 320",
+      "screen": "51-8. Documentos.json",
+      "url": "http://localhost:3003/viajes/10000000-0000-4000-8000-000000000051/evidencia",
+      "axeVersion": "4.14.0",
+      "violations": [],
+      "passes": 23,
+      "incomplete": 0
+    },
+    {
+      "combination": "operación accesible dark 320",
+      "screen": "51-9. Observaciones.json",
+      "url": "http://localhost:3003/viajes/10000000-0000-4000-8000-000000000051/evidencia",
+      "axeVersion": "4.14.0",
+      "violations": [],
+      "passes": 24,
+      "incomplete": 0
+    },
+    {
+      "combination": "operación accesible dark 320",
+      "screen": "51-10. Revisión.json",
+      "url": "http://localhost:3003/viajes/10000000-0000-4000-8000-000000000051/evidencia",
+      "axeVersion": "4.14.0",
+      "violations": [],
+      "passes": 23,
+      "incomplete": 0
+    },
+    {
+      "combination": "operación accesible dark 390",
+      "screen": "oferta.json",
+      "url": "http://localhost:3003/viajes/10000000-0000-4000-8000-000000000000",
+      "axeVersion": "4.14.0",
+      "violations": [],
+      "passes": 20,
+      "incomplete": 0
+    },
+    {
+      "combination": "operación accesible dark 390",
+      "screen": "rechazo.json",
+      "url": "http://localhost:3003/viajes/10000000-0000-4000-8000-000000000000",
+      "axeVersion": "4.14.0",
+      "violations": [],
+      "passes": 14,
+      "incomplete": 0
+    },
+    {
+      "combination": "operación accesible dark 390",
+      "screen": "prepara.json",
+      "url": "http://localhost:3003/viajes/10000000-0000-4000-8000-000000000001",
+      "axeVersion": "4.14.0",
+      "violations": [],
+      "passes": 20,
+      "incomplete": 0
+    },
+    {
+      "combination": "operación accesible dark 390",
+      "screen": "recogida.json",
+      "url": "http://localhost:3003/viajes/10000000-0000-4000-8000-000000000002",
+      "axeVersion": "4.14.0",
+      "violations": [],
+      "passes": 20,
+      "incomplete": 0
+    },
+    {
+      "combination": "operación accesible dark 390",
+      "screen": "verificacion.json",
+      "url": "http://localhost:3003/viajes/10000000-0000-4000-8000-000000000012",
+      "axeVersion": "4.14.0",
+      "violations": [],
+      "passes": 20,
+      "incomplete": 0
+    },
+    {
+      "combination": "operación accesible dark 390",
+      "screen": "vin-placas.json",
+      "url": "http://localhost:3003/viajes/10000000-0000-4000-8000-000000000012",
+      "axeVersion": "4.14.0",
+      "violations": [],
+      "passes": 19,
+      "incomplete": 0
+    },
+    {
+      "combination": "operación accesible dark 390",
+      "screen": "recepcion.json",
+      "url": "http://localhost:3003/viajes/10000000-0000-4000-8000-000000000013",
+      "axeVersion": "4.14.0",
+      "violations": [],
+      "passes": 20,
+      "incomplete": 0
+    },
+    {
+      "combination": "operación accesible dark 390",
+      "screen": "inicio.json",
+      "url": "http://localhost:3003/viajes/10000000-0000-4000-8000-000000000014",
+      "axeVersion": "4.14.0",
+      "violations": [],
+      "passes": 20,
+      "incomplete": 0
+    },
+    {
+      "combination": "operación accesible dark 390",
+      "screen": "en-curso.json",
+      "url": "http://localhost:3003/viajes/10000000-0000-4000-8000-000000000004",
+      "axeVersion": "4.14.0",
+      "violations": [],
+      "passes": 20,
+      "incomplete": 0
+    },
+    {
+      "combination": "operación accesible dark 390",
+      "screen": "registra-entrega.json",
+      "url": "http://localhost:3003/viajes/10000000-0000-4000-8000-000000000015",
+      "axeVersion": "4.14.0",
+      "violations": [],
+      "passes": 20,
+      "incomplete": 0
+    },
+    {
+      "combination": "operación accesible dark 390",
+      "screen": "entrega.json",
+      "url": "http://localhost:3003/viajes/10000000-0000-4000-8000-000000000053?cierre=1",
+      "axeVersion": "4.14.0",
+      "violations": [],
+      "passes": 23,
+      "incomplete": 0
+    },
+    {
+      "combination": "operación accesible dark 390",
+      "screen": "cierre.json",
+      "url": "http://localhost:3003/viajes/10000000-0000-4000-8000-000000000060?cierre=1",
+      "axeVersion": "4.14.0",
+      "violations": [],
+      "passes": 23,
+      "incomplete": 0
+    },
+    {
+      "combination": "operación accesible dark 390",
+      "screen": "problema.json",
+      "url": "http://localhost:3003/viajes/10000000-0000-4000-8000-000000000001/soporte",
+      "axeVersion": "4.14.0",
+      "violations": [],
+      "passes": 12,
+      "incomplete": 0
+    },
+    {
+      "combination": "operación accesible dark 390",
+      "screen": "lista.json",
+      "url": "http://localhost:3003/viajes",
+      "axeVersion": "4.14.0",
+      "violations": [],
+      "passes": 23,
+      "incomplete": 0
+    },
+    {
+      "combination": "operación accesible dark 390",
+      "screen": "evidencia-inicial.json",
+      "url": "http://localhost:3003/viajes/10000000-0000-4000-8000-000000000050/evidencia",
+      "axeVersion": "4.14.0",
+      "violations": [],
+      "passes": 21,
+      "incomplete": 0
+    },
+    {
+      "combination": "operación accesible dark 390",
+      "screen": "evidencia-final.json",
+      "url": "http://localhost:3003/viajes/10000000-0000-4000-8000-000000000051/evidencia",
+      "axeVersion": "4.14.0",
+      "violations": [],
+      "passes": 22,
+      "incomplete": 0
+    },
+    {
+      "combination": "operación accesible dark 390",
+      "screen": "50-6. Llaves.json",
+      "url": "http://localhost:3003/viajes/10000000-0000-4000-8000-000000000050/evidencia",
+      "axeVersion": "4.14.0",
+      "violations": [],
+      "passes": 23,
+      "incomplete": 0
+    },
+    {
+      "combination": "operación accesible dark 390",
+      "screen": "50-7. Mediciones.json",
+      "url": "http://localhost:3003/viajes/10000000-0000-4000-8000-000000000050/evidencia",
+      "axeVersion": "4.14.0",
+      "violations": [],
+      "passes": 24,
+      "incomplete": 0
+    },
+    {
+      "combination": "operación accesible dark 390",
+      "screen": "50-8. Documentos.json",
+      "url": "http://localhost:3003/viajes/10000000-0000-4000-8000-000000000050/evidencia",
+      "axeVersion": "4.14.0",
+      "violations": [],
+      "passes": 23,
+      "incomplete": 0
+    },
+    {
+      "combination": "operación accesible dark 390",
+      "screen": "50-9. Observaciones.json",
+      "url": "http://localhost:3003/viajes/10000000-0000-4000-8000-000000000050/evidencia",
+      "axeVersion": "4.14.0",
+      "violations": [],
+      "passes": 23,
+      "incomplete": 0
+    },
+    {
+      "combination": "operación accesible dark 390",
+      "screen": "50-10. Revisión.json",
+      "url": "http://localhost:3003/viajes/10000000-0000-4000-8000-000000000050/evidencia",
+      "axeVersion": "4.14.0",
+      "violations": [],
+      "passes": 23,
+      "incomplete": 0
+    },
+    {
+      "combination": "operación accesible dark 390",
+      "screen": "51-6. Llaves.json",
+      "url": "http://localhost:3003/viajes/10000000-0000-4000-8000-000000000051/evidencia",
+      "axeVersion": "4.14.0",
+      "violations": [],
+      "passes": 23,
+      "incomplete": 0
+    },
+    {
+      "combination": "operación accesible dark 390",
+      "screen": "51-7. Mediciones.json",
+      "url": "http://localhost:3003/viajes/10000000-0000-4000-8000-000000000051/evidencia",
+      "axeVersion": "4.14.0",
+      "violations": [],
+      "passes": 24,
+      "incomplete": 0
+    },
+    {
+      "combination": "operación accesible dark 390",
+      "screen": "51-8. Documentos.json",
+      "url": "http://localhost:3003/viajes/10000000-0000-4000-8000-000000000051/evidencia",
+      "axeVersion": "4.14.0",
+      "violations": [],
+      "passes": 23,
+      "incomplete": 0
+    },
+    {
+      "combination": "operación accesible dark 390",
+      "screen": "51-9. Observaciones.json",
+      "url": "http://localhost:3003/viajes/10000000-0000-4000-8000-000000000051/evidencia",
+      "axeVersion": "4.14.0",
+      "violations": [],
+      "passes": 24,
+      "incomplete": 0
+    },
+    {
+      "combination": "operación accesible dark 390",
+      "screen": "51-10. Revisión.json",
+      "url": "http://localhost:3003/viajes/10000000-0000-4000-8000-000000000051/evidencia",
+      "axeVersion": "4.14.0",
+      "violations": [],
+      "passes": 23,
+      "incomplete": 0
+    }
+  ]
+}

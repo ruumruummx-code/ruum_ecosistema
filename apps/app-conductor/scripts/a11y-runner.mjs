@@ -14,16 +14,11 @@
  */
 
 import { spawn, spawnSync } from 'node:child_process';
-import { closeSync, existsSync, mkdirSync, openSync, readFileSync, writeFileSync, unlinkSync } from 'node:fs';
-import { createServer } from 'node:net';
+import { existsSync, mkdirSync, writeFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { config } from 'dotenv';
 import { chromium } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
-import { createRequire } from 'node:module';
-
-const require = createRequire(import.meta.url);
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const projectRoot = resolve(__dirname, '..');
 
@@ -51,15 +46,6 @@ async function isServerReady(origin) {
     const response = await fetch(origin, { redirect: 'manual' });
     return response.status < 500;
   } catch { return false; }
-}
-
-async function waitForServer(origin, timeoutMs = 45_000) {
-  const startedAt = Date.now();
-  while (Date.now() - startedAt < timeoutMs) {
-    if (await isServerReady(origin)) return true;
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-  }
-  return false;
 }
 
 function commandForLocalBin(name) {
@@ -128,7 +114,7 @@ async function runPlaywrightA11y(args = []) {
   log('Ejecutando Playwright a11y...', 'info');
   try {
     await new Promise((resolve, reject) => {
-      const result = spawnSync(commandForLocalBin('playwright'), ['test', 'tests/a11y', ...args], {
+      const result = spawnSync(commandForLocalBin('playwright'), ['test', '--config', 'playwright.a11y.config.ts', ...args], {
         cwd: projectRoot, env: process.env, shell: process.platform === 'win32', stdio: 'inherit'
       });
       result.error ? reject(result.error) : (result.status === 0 ? resolve(true) : reject(new Error(`exit ${result.status}`)));
@@ -217,43 +203,8 @@ async function cmdRoute(route) {
 // ── Subcomando: playwright ──────────────────────────────────────────
 
 async function cmdPlaywright(args) {
-  const isCI = process.env.CI === 'true' || process.env.CI === '1';
-  const serverAlreadyRunning = await isServerReady(DEFAULT_ORIGIN);
-
-  if (!isCI && !serverAlreadyRunning) {
-    log('Iniciando servidor de desarrollo para Playwright...', 'info');
-    const serverUrl = new URL(DEFAULT_ORIGIN);
-    const serverPort = serverUrl.port || '3001';
-    const resultsDir = resolve(projectRoot, 'results');
-    if (!existsSync(resultsDir)) mkdirSync(resultsDir, { recursive: true });
-    const serverLogPath = resolve(resultsDir, 'a11y-dev-server.log');
-    const serverLog = openSync(serverLogPath, 'w');
-    const nextBin = require.resolve('next/dist/bin/next', { paths: [projectRoot] });
-
-    const serverProcess = spawn(process.execPath, [nextBin, 'start', '-p', serverPort], {
-      cwd: projectRoot, detached: true, stdio: ['ignore', serverLog, serverLog]
-    });
-
-    if (!(await waitForServer(DEFAULT_ORIGIN, 90_000))) {
-      const { stopProcessTree, closeSync } = await import('./a11y-runner-helpers.mjs');
-      stopProcessTree(serverProcess.pid);
-      closeSync(serverLog);
-      console.error(`No se pudo iniciar ${DEFAULT_ORIGIN}`);
-      process.exit(1);
-    }
-
-    const result = spawnSync(commandForLocalBin('playwright'), ['test', 'tests/a11y', ...args], {
-      cwd: projectRoot,
-      env: { ...process.env, A11Y_BASE_URL: DEFAULT_ORIGIN, PLAYWRIGHT_BASE_URL: DEFAULT_ORIGIN, PLAYWRIGHT_SKIP_WEBSERVER: '1' },
-      shell: process.platform === 'win32', stdio: 'inherit'
-    });
-    process.exit(result.status ?? 1);
-  } else {
-    const result = spawnSync(commandForLocalBin('playwright'), ['test', 'tests/a11y', ...args], {
-      cwd: projectRoot, env: process.env, shell: process.platform === 'win32', stdio: 'inherit'
-    });
-    process.exit(result.status ?? 1);
-  }
+  // Playwright administra tanto la fixture como Next desde su configuración.
+  process.exit(await runPlaywrightA11y(args) ? 0 : 1);
 }
 
 // ── Entrada ─────────────────────────────────────────────────────────

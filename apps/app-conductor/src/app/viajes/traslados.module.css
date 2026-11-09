@@ -107,6 +107,7 @@
 .empty h2 { font-size:18px; line-height:1.3; }
 .empty > p { font-size:14px; line-height:1.4; }
 .screen .primary, .screen .secondary, .pagination button { min-height:48px; font-size:14px; line-height:1.3; }
+.screen .primary { min-height:56px; }
 .notice { font-size:14px; }
 .results { flex:1 0 auto; overflow:visible; }
 .resultCard { overflow-wrap:anywhere; }
