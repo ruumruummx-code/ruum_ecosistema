@@ -10,6 +10,7 @@ const inspections=new Map();const receipts=new Set();
 const changes = new Map();
 const calls = [];
 let listMode = "empty";
+let arrivalState = "llegada_a_destino";
 let loadingReleased = false;
 const loadingRequests = [];
 
@@ -20,9 +21,10 @@ createServer(async (request, response) => {
   response.setHeader("Content-Type", "application/json");
   const url = new URL(request.url, "http://127.0.0.1");
   if (request.method === "OPTIONS") { response.writeHead(204).end(); return; }
-  if (url.pathname === "/qa/reset") { changes.clear(); calls.length = 0; listMode = "empty"; inspections.clear(); receipts.clear(); response.end("{}"); return; }
+  if (url.pathname === "/qa/reset") { changes.clear(); calls.length = 0; listMode = "empty"; arrivalState = "llegada_a_destino"; inspections.clear(); receipts.clear(); response.end("{}"); return; }
   if (url.pathname === "/qa/list") { listMode = url.searchParams.get("mode") ?? "empty"; response.end("{}"); return; }
   if (url.pathname === "/qa/calls") { response.end(JSON.stringify(calls)); return; }
+  if (url.pathname === "/qa/arrival-state") { arrivalState = url.searchParams.get("state") ?? "llegada_a_destino"; response.end("{}"); return; }
   if (url.pathname === "/health") { response.end("{}"); return; }
   if (url.pathname === "/qa/release-loading") {
     loadingReleased = true;
@@ -123,7 +125,7 @@ createServer(async (request, response) => {
       response.end(JSON.stringify(target ?? null)); return;
     }
     if (url.pathname.endsWith("/conductor_confirmar_llegada_destino")) {
-      changes.set(params.p_traslado_id, "llegada_a_destino"); response.end('"llegada_a_destino"'); return;
+      changes.set(params.p_traslado_id, arrivalState); response.end('"llegada_a_destino"'); return;
     }
     if (url.pathname.includes("avanzar_estado")) { response.writeHead(500).end('{"message":"No pudimos actualizar el traslado"}'); return; }
     if (url.pathname.endsWith("/rpc/consultar_oportunidad_asignacion")) {
