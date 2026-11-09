@@ -19,6 +19,7 @@
 .frame a { min-height: 48px; min-width: 48px; }
 /* La acción principal prevalece sobre la regla general de controles de 48px. */
 .frame[data-conductor-screen] [data-screen-action] [data-trip-primary] > :is(button, a) { min-height: 56px; }
+.frame[data-conductor-screen="list"] [data-screen-body] :is(button, a)[data-trip-primary] { min-height: 56px; min-width: 56px; }
 .header a, .footer a, .flow > a { display: inline-flex; align-items: center; }
 .frame :is(a, button, input, select, textarea):focus-visible, .body:focus-visible { outline: 3px solid var(--conductor-focus); outline-offset: -3px; }
 .pageHeader a { display: inline-flex; align-items: center; gap: 8px; font-size: 14px; color: var(--conductor-action); }

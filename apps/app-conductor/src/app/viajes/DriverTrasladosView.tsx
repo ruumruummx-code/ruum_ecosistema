@@ -54,7 +54,7 @@ export function DriverTrasladosView(props: Props) {
           <h2>{props.filtered ? "Sin resultados con estos filtros" : !props.allDates ? "Sin traslados para este día" : props.showingOffers ? "Sin ofertas disponibles" : "Sin traslados aceptados"}</h2>
           <p>{props.filtered ? "Ningún traslado coincide con tu búsqueda. Prueba otra fecha o limpia los filtros." : props.showingOffers ? "No hay ofertas en esta vista. Consulta todas las fechas o recarga para actualizar." : "No tienes traslados aceptados en esta vista. Acepta una oferta para verla aquí."}</p>
           <div className={styles.emptyActions}>
-            <button type="button" className={styles.primary} disabled={props.refreshing}
+            <button type="button" className={styles.primary} disabled={props.refreshing} data-trip-primary="true"
               onClick={props.filtered ? props.onClear : !props.showingOffers ? () => props.onTab(true) : !props.allDates ? props.onAllDates : props.onRefresh}>
               {props.filtered ? "Limpiar filtros" : !props.showingOffers ? "Buscar ofertas disponibles" : !props.allDates ? "Ver todas las fechas" : props.refreshing ? "Recargando…" : "Recargar ofertas"}
             </button>

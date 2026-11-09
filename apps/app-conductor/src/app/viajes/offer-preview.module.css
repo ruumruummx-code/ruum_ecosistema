@@ -20,8 +20,8 @@
 .stats svg { width:16px; height:16px; }
 .previewMap { height:150px; min-height:150px; overflow:hidden; border-radius:12px; }
 .previewMap > div { height:100%; }
-.action { display:flex; min-height:48px; align-items:center; justify-content:center; padding:8px; border-radius:12px; background:var(--conductor-action); color:var(--ruum-on-primary); font-size:16px; line-height:1.3; text-align:center; }
+.action { display:flex; min-height:56px; align-items:center; justify-content:center; padding:10px 12px; border-radius:12px; background:var(--conductor-action); color:var(--ruum-on-primary); font-size:16px; font-weight:600; line-height:1.2; text-align:center; }
 .actionRow { display:flex; gap:8px; }
 .actionRow > a { flex:1; }
-.options { min-height:48px; min-width:48px; border:1px solid var(--conductor-border); border-radius:12px; }
+.options { min-height:56px; min-width:56px; border:1px solid var(--conductor-border); border-radius:12px; }
 .card :is(a,button):focus-visible { outline:3px solid var(--conductor-focus); outline-offset:-3px; }

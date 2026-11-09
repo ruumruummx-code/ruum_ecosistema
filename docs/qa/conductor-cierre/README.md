@@ -56,7 +56,7 @@ evitar interferencias con las pruebas que avanzan y reinician el viaje base.
 | D1 · Validar el asistente con conductores reales | **Administración e Innovación Digital** · [#36](https://github.com/ruumruummx-code/ruum_ecosistema/issues/36) |
 | D2 · Confirmar botón sólido y revisión de diseño | **Desarrollo Digital** · [#37](https://github.com/ruumruummx-code/ruum_ecosistema/issues/37) |
 | Hook global sin pruebas en API y lint de builds locales | [#35](https://github.com/ruumruummx-code/ruum_ecosistema/issues/35) |
-| Acciones principales de la lista aún de 48 px | [#39](https://github.com/ruumruummx-code/ruum_ecosistema/issues/39) · seguimiento separado permitido por T4 |
+| Acciones principales de la lista de 48 px | [#39](https://github.com/ruumruummx-code/ruum_ecosistema/issues/39) · corregido en el seguimiento de esta rama |
 
 `pnpm typecheck` pasó en los seis paquetes. El lint de conductor no tiene
 errores y conserva 86 advertencias. El lint global sin exclusiones falla al
@@ -70,8 +70,18 @@ La asignación de responsables está confirmada por el solicitante. Siguen
 pendientes la validación de campo de D1 y la decisión/aprobación humana de D2;
 los resultados automatizados no las sustituyen.
 
-La revisión manual también encontró que la lista de viajes no usa
-`data-trip-primary` y mantiene acciones de 48 px. La comprobación automática
-de altura cubre las acciones de los marcos operativos y formularios; no se
-declara cumplido el mínimo de 56 px para la lista. El hallazgo queda en #39,
-como exige el documento para los problemas no corregidos en este ticket.
+## Seguimiento de #39
+
+Las tarjetas, sus opciones y la acción principal del estado vacío ahora
+exponen `data-trip-primary="true"` y miden como mínimo 56 px. La regla del
+marco de lista tiene prioridad suficiente para evitar que el mínimo general
+de 48 px sobrescriba el tamaño. El selector de QA admite acciones etiquetadas
+directamente y acciones dentro de contenedores operativos/formularios.
+
+Se conserva `aria-haspopup="dialog"` en Opciones de traslado porque abre un
+diálogo. No cambian navegación, callbacks, textos, servicios ni dependencias.
+El fix de #38 sigue usando `--conductor-on-action`, con su prueba de contraste.
+
+`resultados.json` y `a11y-auditorias.json` conservan la ejecución completa de
+la base `b0794b1b`. El seguimiento de lista aporta sus resultados y capturas
+actualizados en `lista-resultados.json`, sobre el nuevo build.

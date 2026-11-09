@@ -13,8 +13,10 @@ for (const mode of ["light", "dark"]) for (const street of [false, true]) for (c
       await expect(page.locator("html")).toHaveAttribute("data-theme", mode);
       // La matriz fuerza ambos estados sobre las fixtures, sin cambiar la lógica del producto.
       await page.evaluate(value => { document.documentElement.dataset.street = String(value); }, street);
-      const primary = page.locator("[data-trip-primary]:visible").locator("button:visible,a:visible").last();
-      if (await primary.count() && await page.getByRole("dialog").count() === 0) {
+      const actions = page.locator(":is(button,a)[data-trip-primary]:visible, [data-trip-primary] > :is(button,a):last-child:visible");
+      if (name === "lista") await expect(actions).toHaveCount(1);
+      for (const primary of await actions.all()) {
+        if (await page.getByRole("dialog").count()) continue;
         const disabled = await primary.isDisabled();
         if (!disabled) {
           await page.keyboard.press("Tab");
