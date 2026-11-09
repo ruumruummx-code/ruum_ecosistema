@@ -280,6 +280,9 @@
 }
 
 [data-theme="dark"] {
+  /* Colores canónicos de incidente, disponibles para consumidores del contrato v1. */
+  --ruum-incident-bg: #3D0F0A;
+  --ruum-incident-text: #FF5C4D;
   color-scheme: dark;
 
   /* Ruum Ruum — Dark Mode v1.0 (Extensión §2). Base navy profunda #061529, nunca negro puro.
