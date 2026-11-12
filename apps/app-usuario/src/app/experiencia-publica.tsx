@@ -49,7 +49,7 @@ export const etiquetaOscura = `font-body text-xs font-medium ${textoSecundarioPu
 export const botonAzul =
   `ruum-public-primary-button inline-flex min-h-11 w-full cursor-pointer items-center justify-center rounded-lg px-5 py-3 font-display text-sm font-bold text-[var(--ruum-navy)] outline-none transition duration-200 hover:-translate-y-0.5 hover:brightness-95 focus-visible:ring-2 ${focoAcentoPublico} focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-45`;
 export const botonContorno =
-  `inline-flex min-h-11 w-full items-center justify-center rounded-lg border border-border bg-transparent px-5 py-3 font-display text-sm font-bold text-text-primary outline-none transition hover:border-signal hover:bg-signal/10 focus-visible:ring-2 ${focoAcentoPublico} focus-visible:ring-offset-2`;
+  `inline-flex min-h-11 w-full items-center justify-center rounded-lg border border-white/30 bg-transparent px-5 py-3 font-display text-sm font-bold text-white outline-none transition hover:border-signal hover:bg-signal/10 focus-visible:ring-2 ${focoAcentoPublico} focus-visible:ring-offset-2`;
 
 /**
  * Campo de texto de la experiencia pública.
@@ -88,11 +88,11 @@ export const CampoOscuro = forwardRef<
         aria-describedby={ariaDescribedBy}
         aria-invalid={error ? true : props["aria-invalid"]}
         data-ruum-label={etiqueta}
-        className={`${campoOscuro} ${error ? "border-[var(--ruum-signal)]" : ""} ${props.className ?? ""}`}
+        className={`${campoOscuro} ${error ? "border-[var(--user-danger-content)]" : ""} ${props.className ?? ""}`}
       />
       {ayuda ? <span id={ayudaId} className={`font-body text-xs leading-5 ${textoFuncionalPublico}`}>{ayuda}</span> : null}
       {error ? (
-        <p id={errorId} role="alert" className="font-body text-xs leading-5 text-[var(--ruum-signal)]">
+        <p id={errorId} role="alert" className="font-body text-xs leading-5 text-[var(--user-danger-content)]">
           {error}
         </p>
       ) : null}

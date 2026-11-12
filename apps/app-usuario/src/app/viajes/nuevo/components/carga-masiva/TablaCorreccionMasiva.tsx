@@ -257,7 +257,7 @@ function FilaItem({
                           if (e.key === "Escape") onCancelar();
                         }}
                         onBlur={onConfirmar}
-                        className="min-w-0 flex-1 bg-transparent text-sm font-semibold outline-none"
+                        className="min-w-0 flex-1 rounded bg-transparent text-sm font-semibold outline-none focus-visible:ring-2 focus-visible:ring-[var(--user-color-action)]"
                         aria-label={`Editar ${etiqueta}`}
                         inputMode={tipo === "tel" ? "numeric" : undefined}
                       />

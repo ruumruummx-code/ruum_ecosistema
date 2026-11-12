@@ -93,7 +93,7 @@ function CampoClave({
           aria-label={`${visible ? "Ocultar" : "Mostrar"} ${titulo.toLowerCase()}`}
           aria-pressed={visible}
           onClick={() => setVisible(!visible)}
-          className="ml-2 flex size-8 shrink-0 items-center justify-center text-[#94a3b8] hover:text-[#0a2342] transition cursor-pointer dark:hover:text-white"
+          className="ml-2 flex size-8 shrink-0 items-center justify-center text-[#64748b] hover:text-[#0a2342] transition cursor-pointer dark:hover:text-white"
         >
           {visible ? <IconoOjoCerrado /> : <IconoOjo />}
         </button>

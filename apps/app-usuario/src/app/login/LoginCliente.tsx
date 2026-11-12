@@ -342,7 +342,14 @@ export function LoginCliente({ motivo, siguiente, aviso }: LoginClienteProps) {
       router.push(siguiente);
       router.refresh();
     } catch (err) {
-      setError(err instanceof Error ? err.message : traducirErrorAuth(err));
+      const nombre = err instanceof Error ? err.name : "";
+      if (nombre === "TimeoutError" || nombre === "AbortError") {
+        setError("El servidor tardó demasiado en responder. Revisa tu conexión e inténtalo de nuevo.");
+      } else if (err instanceof TypeError) {
+        setError("No pudimos conectar con el servidor. Revisa tu conexión e inténtalo de nuevo.");
+      } else {
+        setError(err instanceof Error ? err.message : traducirErrorAuth(err));
+      }
       registrarEventoUx("login_error", { reason: motivo });
     } finally {
       setEnviando(false);
@@ -449,7 +456,7 @@ export function LoginCliente({ motivo, siguiente, aviso }: LoginClienteProps) {
       </header>
 
       {/* Cuerpo principal (Grid 2 columnas en lg+, contenedor centrado en móvil) */}
-      <div className="flex-1 flex flex-col lg:flex-row w-full h-full lg:h-auto overflow-hidden lg:overflow-visible z-10">
+      <div className="flex-1 min-h-0 flex flex-col lg:flex-row w-full overflow-hidden z-10">
         {/* Columna Izquierda: Brand & Hero Content (solo en lg+) */}
         <section
           aria-label="Información de bienvenida y propuesta de valor"
@@ -511,10 +518,10 @@ export function LoginCliente({ motivo, siguiente, aviso }: LoginClienteProps) {
         {/* Columna Derecha: Tarjeta de Login (Centrada en móvil y en escritorio) */}
         <section
           aria-label="Formulario de inicio de sesión"
-          className="mx-auto flex h-full w-full max-w-[440px] lg:max-w-none lg:w-1/2 xl:w-5/12 flex-col justify-between lg:justify-center px-4 py-2 sm:px-6 sm:py-5 lg:p-6 xl:p-10 overflow-y-auto"
+          className="mx-auto flex h-full w-full max-w-[440px] lg:max-w-none lg:w-1/2 xl:w-5/12 flex-col justify-between lg:justify-start px-4 py-2 sm:px-6 sm:py-5 lg:p-6 xl:p-10 overflow-y-auto"
         >
           {/* Card Flotante */}
-          <div className="w-full max-w-[440px] mx-auto rounded-3xl lg:rounded-[2.2rem] border border-[#e2e8f0]/80 bg-white/95 p-5 sm:p-6 lg:p-7 shadow-[0_8px_30px_rgba(10,35,66,0.06)] lg:shadow-[0_20px_55px_-12px_rgba(10,35,66,0.16)] backdrop-blur-sm dark:border-[#1a3a5c] dark:bg-[#0a2342]/95">
+          <div className="w-full max-w-[440px] mx-auto lg:my-auto rounded-3xl lg:rounded-[2.2rem] border border-[#e2e8f0]/80 bg-white/95 p-5 sm:p-6 lg:p-7 shadow-[0_8px_30px_rgba(10,35,66,0.06)] lg:shadow-[0_20px_55px_-12px_rgba(10,35,66,0.16)] backdrop-blur-sm dark:border-[#1a3a5c] dark:bg-[#0a2342]/95">
             {/* Marca oficial y eslogan integrado */}
             <div className="flex flex-col items-center pt-0 text-center">
               <div
@@ -542,7 +549,6 @@ export function LoginCliente({ motivo, siguiente, aviso }: LoginClienteProps) {
             <div className="my-2.5 text-center sm:my-3">
               <h2 className="text-[19px] font-extrabold tracking-tight text-[#0a2342] dark:text-[#f6f8fb] sm:text-[21px]">
                 Inicia sesión
-                <span className="sr-only"> — Iniciar sesión | Bienvenido de nuevo</span>
               </h2>
               <p className="mt-0.5 text-[11.5px] font-medium text-[#566889] dark:text-[#a8b5cc] sm:text-[12px]">
                 Accede a tu cuenta para continuar
@@ -631,7 +637,7 @@ export function LoginCliente({ motivo, siguiente, aviso }: LoginClienteProps) {
                   </label>
                   <Link
                     href="/recuperar-password"
-                    className="text-[12px] font-bold user-essential-link hover:underline sm:text-[12.5px]"
+                    className="-my-3 inline-flex min-h-11 items-center px-1 text-[12px] font-bold user-essential-link hover:underline sm:text-[12.5px]"
                   >
                     ¿La olvidaste?
                   </Link>

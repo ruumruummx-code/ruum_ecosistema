@@ -38,7 +38,7 @@ function CtaLink({ cta, primary = false }: { cta: OperationalActionCta; primary?
       ? "border-transparent bg-[image:var(--ruum-gradient-action)] text-[var(--ruum-on-primary)] shadow-xs hover:brightness-105 active:scale-[0.98] focus-visible:outline-route-action"
       : variant === "danger" || variant === "emergency"
         ? "border border-danger-action bg-danger-action text-white shadow-xs hover:brightness-105 active:scale-[0.98] focus-visible:outline-danger-action"
-      : "border border-border-strong bg-surface text-primary shadow-xs hover:border-brand hover:bg-surface-elevated hover:text-primary active:scale-[0.98] focus-visible:outline-route-action"
+      : "border border-border-strong bg-surface text-primary shadow-xs hover:border-teal-deep hover:bg-surface-elevated hover:text-primary active:scale-[0.98] focus-visible:outline-route-action"
   ].join(" ");
 
   // SD-REM-007: no se monta un ancla ni un destino activable mientras está bloqueado.

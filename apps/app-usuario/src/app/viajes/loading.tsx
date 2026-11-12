@@ -27,8 +27,9 @@ export default function CargandoTraslados() {
 
         {/* Skeleton de detalle */}
         <div className="mt-6 app-card rounded-card p-6 space-y-4">
-          {[120, 90, 140, 80].map((w, i) => (
-            <div key={i} className="h-3 animate-pulse rounded bg-ink/8" style={{ width: `${w}px` }} />
+          {/* Anchos fijos por clase: la CSP de producción bloquea atributos style renderizados en servidor. */}
+          {["w-[120px]", "w-[90px]", "w-[140px]", "w-[80px]"].map((ancho) => (
+            <div key={ancho} className={`h-3 animate-pulse rounded bg-ink/8 ${ancho}`} />
           ))}
         </div>
       </div>

@@ -437,7 +437,7 @@ export function MisTrasladosCliente({
 
       {/* Buscador y botón de filtro */}
       <section aria-label="Buscar y filtrar traslados" className="flex flex-col gap-1.5">
-        <div className="flex items-center gap-2.5 rounded-2xl border border-[#e2e8f0] bg-white px-4 py-3 shadow-xs dark:border-[#1a3a5c] dark:bg-[#0a2342]">
+        <div className="flex items-center gap-2.5 rounded-2xl border border-[#e2e8f0] bg-white px-4 py-3 shadow-xs transition focus-within:border-[#0066FF] focus-within:ring-4 focus-within:ring-[#0066FF]/15 dark:border-[#1a3a5c] dark:bg-[#0a2342]">
           <IconoBuscar className="size-4.5 shrink-0 user-essential-muted" />
           <label htmlFor="buscar-traslado" className="sr-only">
             Buscar traslado

@@ -364,7 +364,7 @@ export const PasoPago = memo(function PasoPago({
             </Button>
             <Link
               href={`/viajes/${trasladoCreado.id}`}
-              className="inline-flex min-h-10 items-center justify-center rounded-xl bg-[var(--user-color-surface-soft)] px-3 text-xs font-semibold text-[var(--user-color-text)] hover:opacity-90"
+              className="inline-flex min-h-10 items-center justify-center rounded-xl bg-[var(--user-color-surface-soft)] px-3 text-xs font-semibold text-[var(--user-color-primary)] hover:opacity-90"
             >
               Ver pasaporte
             </Link>

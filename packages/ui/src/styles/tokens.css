@@ -73,9 +73,11 @@
   --color-ok: var(--color-control);
   --color-ok-soft: var(--color-control-soft);
 
-  --font-display: var(--font-body-loaded), "Inter", ui-sans-serif, system-ui, sans-serif;
-  --font-body: var(--font-body-loaded), "Inter", ui-sans-serif, system-ui, sans-serif;
-  --font-mono-ruum: var(--font-mono-loaded), "IBM Plex Mono", ui-monospace, monospace;
+  --font-display: var(--font-body-loaded, "Inter"), "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-body: var(--font-body-loaded, "Inter"), "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-mono-ruum: var(--font-mono-loaded, "IBM Plex Mono"), "IBM Plex Mono", ui-monospace, monospace;
+  /* font-sans de Tailwind apunta a la tipografía de marca (antes: pila del sistema). */
+  --font-sans: var(--font-body-loaded, "Inter"), "Inter", ui-sans-serif, system-ui, sans-serif;
 
   --radius-card: 1rem;
 
@@ -491,14 +493,21 @@ body {
   text-rendering: optimizeLegibility;
 }
 
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
-  font-family: var(--font-display);
-  letter-spacing: -0.015em;
+@layer base {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: var(--font-display);
+    letter-spacing: -0.015em;
+  }
+
+  a {
+    transition: color 160ms ease, background-color 160ms ease, border-color 160ms ease, box-shadow 160ms ease,
+      transform 160ms ease;
+  }
 }
 
 * {
@@ -512,16 +521,13 @@ h6 {
   color: var(--ruum-on-primary);
 }
 
-a {
-  transition: color 160ms ease, background-color 160ms ease, border-color 160ms ease, box-shadow 160ms ease,
-    transform 160ms ease;
-}
-
-button,
-input,
-select,
-textarea {
-  font: inherit;
+@layer base {
+  button,
+  input,
+  select,
+  textarea {
+    font: inherit;
+  }
 }
 
 [data-theme="light"] input,
@@ -557,27 +563,31 @@ summary:focus-visible {
   outline-offset: 2px;
 }
 
-input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),
-select,
-textarea {
-  min-height: 48px;
-  border-radius: var(--ruum-radius-field);
-  border: 1px solid var(--ruum-border-input);
-  background: var(--ruum-surface);
-  color: var(--ruum-text);
-  transition: border-color 160ms ease, box-shadow 160ms ease;
-}
+/* En @layer base: las utilidades de cada pantalla (border-0, bg-transparent,
+   rounded-*, focus:ring-*) deben poder sobrescribir el estilo nativo. */
+@layer base {
+  input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),
+  select,
+  textarea {
+    min-height: 48px;
+    border-radius: var(--ruum-radius-field);
+    border: 1px solid var(--ruum-border-input);
+    background: var(--ruum-surface);
+    color: var(--ruum-text);
+    transition: border-color 160ms ease, box-shadow 160ms ease;
+  }
 
-input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):focus,
-select:focus,
-textarea:focus {
-  border-color: var(--ruum-action);
-  box-shadow: 0 0 0 3px var(--ruum-focus-ring);
-  outline: none;
-}
+  input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):focus,
+  select:focus,
+  textarea:focus {
+    border-color: var(--ruum-action);
+    box-shadow: 0 0 0 3px var(--ruum-focus-ring);
+    outline: none;
+  }
 
-textarea {
-  min-height: 112px;
+  textarea {
+    min-height: 112px;
+  }
 }
 
 input[type="checkbox"],

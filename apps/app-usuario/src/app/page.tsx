@@ -164,13 +164,17 @@ export default async function PaginaInicio({
   }
 
   // Experiencia Pública / Landing (Libro de Marca V2.1 cap. 32)
+  /* La landing tiene paleta fija (hero navy + secciones blancas): se ancla a los
+     tokens claros para que el modo oscuro del usuario no invierta sus textos. */
   return (
-    <div className="min-h-dvh bg-[var(--ruum-navy)] text-white" data-claims-version={PUBLIC_CLAIMS_VERSION}>
+    <div className="min-h-dvh bg-[var(--ruum-navy)] text-white" data-theme="light" data-claims-version={PUBLIC_CLAIMS_VERSION}>
       {/* Barra de Navegación Pública */}
       <header className="sticky top-0 z-40 border-b border-white/10 bg-[var(--ruum-navy)]/95 pt-[env(safe-area-inset-top)] backdrop-blur-md">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3.5 sm:px-6">
-          <LogoMarca variante="horizontal" tema="oscuro" tamano={34} />
-          <div className="flex items-center gap-3">
+          {/* En móvil se omite la firma "DRIVEAWAY SERVICE": a 375px se solapaba con las acciones. */}
+          <LogoMarca variante="simbolo" tema="oscuro" tamano={36} className="sm:hidden" />
+          <LogoMarca variante="horizontal" tema="oscuro" tamano={34} className="max-sm:hidden" />
+          <div className="flex shrink-0 items-center gap-1.5 sm:gap-3">
             <Link
               href="#como-funciona"
               className="hidden sm:inline-flex rounded-lg px-3 py-2 font-body text-xs font-semibold text-[#A9BCD3] transition hover:text-white"
@@ -238,7 +242,7 @@ export default async function PaginaInicio({
             </Link>
           </div>
 
-          <div className="mt-10 flex items-center justify-center gap-2 font-mono-ruum text-xs uppercase tracking-widest text-[#5F6368]">
+          <div className="mt-10 flex items-center justify-center gap-2 font-mono-ruum text-xs uppercase tracking-widest text-[#8B98AD]">
             <span>by MoviliaX</span>
             <span>•</span>
             <span>{PUBLIC_CLAIMS.cobertura}</span>
@@ -425,7 +429,7 @@ export default async function PaginaInicio({
         <div className="mx-auto flex max-w-5xl flex-col items-center justify-between gap-4 text-center sm:flex-row sm:text-left">
           <div>
             <LogoMarca variante="horizontal" tema="oscuro" tamano={28} />
-            <p className="mt-2 font-body text-xs text-[#5F6368]">
+            <p className="mt-2 font-body text-xs text-[#8B98AD]">
               {IDENTIDAD_MARCA.lema}
             </p>
           </div>

@@ -105,6 +105,11 @@ export function TemaProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     if (modo !== "auto" || typeof window.matchMedia !== "function") return;
+    /* En el primer render `modo` aún vale "auto" aunque exista una selección
+       manual guardada: sin esta guarda, el tema del SO pisaba la preferencia
+       del usuario en cada carga. */
+    const guardado = obtenerModoAlmacenado() ?? obtenerTemaAlmacenado();
+    if (guardado && guardado !== "auto") return;
     const media = window.matchMedia("(prefers-color-scheme: dark)");
     const actualizar = () => { const t: Tema = media.matches ? "dark" : "light"; setTema(t); aplicarTema(t); };
     actualizar();

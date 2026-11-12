@@ -41,13 +41,13 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const nonce = (await headers()).get("x-nonce") ?? undefined;
 
   return (
-    <html lang="es-MX" dir="ltr" suppressHydrationWarning>
+    <html lang="es-MX" dir="ltr" className={inter.variable} suppressHydrationWarning>
       <head>
         <Script src="/theme-init.js" strategy="beforeInteractive" nonce={nonce} />
       </head>
       <body
         suppressHydrationWarning
-        className={`${inter.variable} min-h-dvh`}
+        className="min-h-dvh"
       >
         <a href="#contenido-principal" className="ruum-skip-link" aria-label="Saltar al contenido principal">
           Saltar al contenido principal

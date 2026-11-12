@@ -181,7 +181,7 @@ export function AccionesRapidasPasaporte({ trasladoId: _trasladoId, estado }: Pr
                   role="menuitem"
                   tabIndex={0}
                   onClick={(e) => irASeccion(e, item.href)}
-                  className="flex flex-col gap-0.5 px-3 py-2.5 text-left transition hover:bg-surface-soft focus:bg-surface-soft focus:outline-none focus-visible:bg-surface-soft"
+                  className="flex flex-col gap-0.5 px-3 py-2.5 text-left transition hover:bg-[var(--user-color-surface-soft)] focus:outline-none focus-visible:bg-[var(--user-color-surface-soft)] focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[var(--user-color-action)]"
                 >
                   <span className="font-body text-sm font-semibold leading-none text-text-primary">{item.label}</span>
                   <span className="font-body text-xs leading-none text-text-secondary">{item.descripcion}</span>
