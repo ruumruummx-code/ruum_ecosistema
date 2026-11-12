@@ -586,29 +586,27 @@
   outline-offset: 2px;
 }
 
-/* Modos oscuros semánticos */
-@media (prefers-color-scheme: dark) {
-  .home-greeting h1 {
-    color: #f6f8fb;
-  }
-  .home-greeting p {
-    color: #a8b5cc;
-  }
-  .home-quick-card,
-  .home-support {
-    background: #0c223c;
-    border-color: #1a3a5c;
-  }
-  .home-quick-card:hover,
-  .home-support:hover {
-    background: #102e52;
-  }
-  .home-module-copy strong {
-    color: #f6f8fb;
-  }
-  .home-module-copy > span {
-    color: #94a3b8;
-  }
+/* Modos oscuros semánticos: siguen el tema de la app (data-theme), no el del SO. */
+[data-theme="dark"] .home-greeting h1 {
+  color: #f6f8fb;
+}
+[data-theme="dark"] .home-greeting p {
+  color: #a8b5cc;
+}
+[data-theme="dark"] .home-quick-card,
+[data-theme="dark"] .home-support {
+  background: #0c223c;
+  border-color: #1a3a5c;
+}
+[data-theme="dark"] .home-quick-card:hover,
+[data-theme="dark"] .home-support:hover {
+  background: #102e52;
+}
+[data-theme="dark"] .home-module-copy strong {
+  color: #f6f8fb;
+}
+[data-theme="dark"] .home-module-copy > span {
+  color: #94a3b8;
 }
 
 /* Altura compacta como base; aumentar espacio cuando el dispositivo lo permite. */

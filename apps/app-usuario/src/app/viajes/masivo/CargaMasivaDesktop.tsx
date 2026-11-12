@@ -381,7 +381,7 @@ export function CargaMasivaDesktop({ nombreUsuario }: CargaMasivaDesktopProps) {
               <div className="rounded-3xl border border-slate-200/90 bg-white p-5 shadow-xs dark:border-[#1a3a5c] dark:bg-[#0a2342] flex items-center justify-between">
                 <div>
                   <p className="text-xs font-semibold text-slate-500 dark:text-slate-400">Total consolidado a pagar</p>
-                  <p className="text-[11px] text-slate-400">IVA y seguros de traslado incluidos</p>
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400">IVA y seguros de traslado incluidos</p>
                 </div>
                 <div className="text-right">
                   <p className="font-display text-2xl font-black text-slate-900 dark:text-white">
@@ -397,7 +397,7 @@ export function CargaMasivaDesktop({ nombreUsuario }: CargaMasivaDesktopProps) {
                 <h2 className="font-display text-sm font-bold text-slate-900 dark:text-white">
                   Pago seguro con Stripe
                 </h2>
-                <div className="flex items-center gap-2 text-[10px] text-slate-400">
+                <div className="flex items-center gap-2 text-[10px] text-slate-500 dark:text-slate-400">
                   <span>🔒 SSL 256-bit</span>
                 </div>
               </div>
@@ -426,12 +426,12 @@ export function CargaMasivaDesktop({ nombreUsuario }: CargaMasivaDesktopProps) {
                       : `Pagar $${totalFormateado} MXN`}
                   </button>
 
-                  <p className="text-center text-[11px] text-slate-400">
+                  <p className="text-center text-[11px] text-slate-500 dark:text-slate-400">
                     Tu pago es verificado directamente con Stripe sin almacenar datos bancarios.
                   </p>
                 </div>
               ) : (
-                <div className="py-8 text-center text-xs text-slate-400">
+                <div className="py-8 text-center text-xs text-slate-500 dark:text-slate-400">
                   Preparando sesión de pago...
                 </div>
               )}
@@ -517,7 +517,7 @@ export function CargaMasivaDesktop({ nombreUsuario }: CargaMasivaDesktopProps) {
               <p className="font-display text-3xl font-black text-slate-900 dark:text-white">
                 {filasVisibles.length}
               </p>
-              <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400 mt-0.5">
+              <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mt-0.5">
                 Total de traslados
               </p>
             </div>
@@ -535,12 +535,12 @@ export function CargaMasivaDesktop({ nombreUsuario }: CargaMasivaDesktopProps) {
                 : "border-slate-200 bg-white dark:border-[#1a3a5c] dark:bg-[#0a2342]"
             }`}>
               <p className={`font-display text-3xl font-black ${
-                filasConError.length > 0 ? "text-red-600 dark:text-red-400" : "text-slate-400"
+                filasConError.length > 0 ? "text-red-600 dark:text-red-400" : "text-slate-500"
               }`}>
                 {filasConError.length}
               </p>
               <p className={`text-[11px] font-bold uppercase tracking-wider mt-0.5 ${
-                filasConError.length > 0 ? "text-red-600 dark:text-red-400" : "text-slate-400"
+                filasConError.length > 0 ? "text-red-600 dark:text-red-400" : "text-slate-500"
               }`}>
                 Con incidencias
               </p>
@@ -631,7 +631,7 @@ export function CargaMasivaDesktop({ nombreUsuario }: CargaMasivaDesktopProps) {
           <div className="overflow-x-auto rounded-3xl border border-slate-200/90 bg-white shadow-xs dark:border-[#1a3a5c] dark:bg-[#0a2342]">
             <table className="w-full text-left border-collapse text-xs">
               <thead>
-                <tr className="border-b border-slate-100 text-[11px] font-bold text-slate-400 dark:border-slate-800 dark:text-slate-500">
+                <tr className="border-b border-slate-100 text-[11px] font-bold text-slate-500 dark:border-slate-800 dark:text-slate-500">
                   <th scope="col" className="py-3 px-3">#</th>
                   <th scope="col" className="py-3 px-3">Vehículo</th>
                   <th scope="col" className="py-3 px-3">Origen CP</th>
@@ -645,7 +645,7 @@ export function CargaMasivaDesktop({ nombreUsuario }: CargaMasivaDesktopProps) {
               <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
                 {filasFiltradas.length === 0 ? (
                   <tr>
-                    <td colSpan={8} className="py-8 text-center text-xs text-slate-400">
+                    <td colSpan={8} className="py-8 text-center text-xs text-slate-500 dark:text-slate-400">
                       No hay registros en esta vista.
                     </td>
                   </tr>
@@ -663,7 +663,7 @@ export function CargaMasivaDesktop({ nombreUsuario }: CargaMasivaDesktopProps) {
                             : "hover:bg-slate-50/70 dark:hover:bg-slate-800/40"
                         }`}
                       >
-                        <td className="py-3 px-3 font-mono text-[11px] text-slate-400">
+                        <td className="py-3 px-3 font-mono text-[11px] text-slate-500 dark:text-slate-400">
                           {fila.indice + 1}
                           <span className="block whitespace-nowrap text-[10px]">Fila Excel {numeroFilaExcel(fila)}</span>
                         </td>
@@ -1051,7 +1051,7 @@ export function CargaMasivaDesktop({ nombreUsuario }: CargaMasivaDesktopProps) {
                     o haz clic para seleccionar un archivo .xlsx
                   </button>
 
-                  <p className="mt-2 text-xs font-medium text-slate-400 dark:text-slate-500">
+                  <p className="mt-2 text-xs font-medium text-slate-500 dark:text-slate-500">
                     Máximo 100 traslados · Hasta 5 MB
                   </p>
 
@@ -1174,7 +1174,7 @@ export function CargaMasivaDesktop({ nombreUsuario }: CargaMasivaDesktopProps) {
               </span>
               <div>
                 <h3 className="font-display text-xs font-bold text-slate-900 dark:text-white">Rápido</h3>
-                <p className="text-[11px] font-medium text-slate-400">Procesa múltiples traslados en segundos</p>
+                <p className="text-[11px] font-medium text-slate-500 dark:text-slate-400">Procesa múltiples traslados en segundos</p>
               </div>
             </div>
 
@@ -1184,7 +1184,7 @@ export function CargaMasivaDesktop({ nombreUsuario }: CargaMasivaDesktopProps) {
               </span>
               <div>
                 <h3 className="font-display text-xs font-bold text-slate-900 dark:text-white">Seguro</h3>
-                <p className="text-[11px] font-medium text-slate-400">Tus datos están protegidos</p>
+                <p className="text-[11px] font-medium text-slate-500 dark:text-slate-400">Tus datos están protegidos</p>
               </div>
             </div>
 
@@ -1194,7 +1194,7 @@ export function CargaMasivaDesktop({ nombreUsuario }: CargaMasivaDesktopProps) {
               </span>
               <div>
                 <h3 className="font-display text-xs font-bold text-slate-900 dark:text-white">Sin errores</h3>
-                <p className="text-[11px] font-medium text-slate-400">Validaciones automáticas del archivo</p>
+                <p className="text-[11px] font-medium text-slate-500 dark:text-slate-400">Validaciones automáticas del archivo</p>
               </div>
             </div>
 
@@ -1204,7 +1204,7 @@ export function CargaMasivaDesktop({ nombreUsuario }: CargaMasivaDesktopProps) {
               </span>
               <div>
                 <h3 className="font-display text-xs font-bold text-slate-900 dark:text-white">Más control</h3>
-                <p className="text-[11px] font-medium text-slate-400">Consulta el historial de tus cargas</p>
+                <p className="text-[11px] font-medium text-slate-500 dark:text-slate-400">Consulta el historial de tus cargas</p>
               </div>
             </div>
           </section>
@@ -1237,7 +1237,7 @@ export function CargaMasivaDesktop({ nombreUsuario }: CargaMasivaDesktopProps) {
             <div className="overflow-x-auto mt-2">
               <table className="w-full text-left border-collapse">
                 <thead>
-                  <tr className="border-b border-slate-100 text-[11px] font-bold text-slate-400 dark:border-slate-800 dark:text-slate-500">
+                  <tr className="border-b border-slate-100 text-[11px] font-bold text-slate-500 dark:border-slate-800 dark:text-slate-500">
                     <th scope="col" className="py-3 px-3">Fecha y hora</th>
                     <th scope="col" className="py-3 px-3">Archivo</th>
                     <th scope="col" className="py-3 px-3">Traslados</th>
@@ -1248,7 +1248,7 @@ export function CargaMasivaDesktop({ nombreUsuario }: CargaMasivaDesktopProps) {
                 <tbody className="divide-y divide-slate-100 text-xs dark:divide-slate-800">
                   {cargasRecientes.length === 0 ? (
                     <tr>
-                      <td colSpan={5} className="py-8 text-center text-xs text-slate-400 dark:text-slate-500">
+                      <td colSpan={5} className="py-8 text-center text-xs text-slate-500 dark:text-slate-500">
                           {errorPendientes ? "No se pudieron consultar las cargas recientes." : cargandoPendientes ? "Consultando cargas recientes…" : "No hay cargas recientes. Arrastra o selecciona un archivo .xlsx para comenzar."}
                       </td>
                     </tr>
@@ -1308,7 +1308,7 @@ export function CargaMasivaDesktop({ nombreUsuario }: CargaMasivaDesktopProps) {
                                 onClick={() => toggleMenu(carga.id)}
                                 aria-label={`Opciones de carga ${carga.archivo}`}
                                 aria-haspopup="menu"
-                                className="flex size-7 items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-700 dark:hover:bg-slate-800 dark:hover:text-slate-200 cursor-pointer"
+                                className="flex size-7 items-center justify-center rounded-lg text-slate-500 dark:text-slate-400 hover:bg-slate-100 hover:text-slate-700 dark:hover:bg-slate-800 dark:hover:text-slate-200 cursor-pointer"
                               >
                                 <svg viewBox="0 0 24 24" fill="currentColor" className="size-4" aria-hidden="true">
                                   <circle cx="12" cy="5" r="1.5" />
@@ -1393,7 +1393,7 @@ export function CargaMasivaDesktop({ nombreUsuario }: CargaMasivaDesktopProps) {
 
             <Link
               href="/soporte"
-              className="relative z-10 inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-5 py-2.5 font-display text-xs font-bold text-slate-800 shadow-xs transition hover:bg-slate-50 active:scale-[0.98] dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:hover:bg-slate-750"
+              className="relative z-10 inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-5 py-2.5 font-display text-xs font-bold text-slate-800 shadow-xs transition hover:bg-slate-50 active:scale-[0.98] dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:hover:bg-slate-700"
             >
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="size-4" aria-hidden="true">
                 <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
@@ -1453,7 +1453,7 @@ export function CargaMasivaDesktop({ nombreUsuario }: CargaMasivaDesktopProps) {
                 type="button"
                 onClick={() => setGuiaModalAbierto(false)}
                 aria-label="Cerrar guía"
-                className="flex size-8 items-center justify-center rounded-full text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
+                className="flex size-8 items-center justify-center rounded-full text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
               >
                 ✕
               </button>
@@ -1501,7 +1501,7 @@ export function CargaMasivaDesktop({ nombreUsuario }: CargaMasivaDesktopProps) {
                 type="button"
                 onClick={cerrarDetalle}
                 aria-label="Cerrar modal de detalle"
-                className="flex size-7 items-center justify-center rounded-full text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
+                className="flex size-7 items-center justify-center rounded-full text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
               >
                 ✕
               </button>

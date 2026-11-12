@@ -73,7 +73,7 @@ export default async function PaginaPasaporte() {
     <>
       <UserResponsiveLayout nombre={usuario.nombre} mobileShell mobileNavigation mobileBottomNavigation>
         <div className="user-empty-passport flex min-h-[60vh] flex-col items-center justify-center p-6 text-center" aria-live="polite">
-          <div className="flex size-16 items-center justify-center rounded-full bg-[var(--user-color-card)] text-[var(--user-color-action)] shadow-sm border border-[var(--user-color-border)] mb-4">
+          <div className="flex size-16 items-center justify-center rounded-full bg-[var(--user-color-surface)] text-[var(--user-color-action)] shadow-sm border border-[var(--user-color-border)] mb-4">
             <Icono d="M9 12h6 M9 16h6 M5 21h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2Z" className="size-8" />
           </div>
           <h1 className="font-display text-xl font-bold text-[var(--user-color-primary)] sm:text-2xl">

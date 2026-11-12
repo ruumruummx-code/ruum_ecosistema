@@ -89,9 +89,9 @@ export default function PaginaViajesMasivo() {
   return (
     <>
       {/* VISTA MÓVIL (< 1024px): Preservada idéntica bajo enfoque mobile-first */}
-      <div className="lg:hidden flex flex-col h-full w-full">
+      <div className="lg:hidden flex h-dvh max-h-dvh w-full flex-col overflow-hidden">
         <NavegacionUsuario variante="claro" />
-        <div className="mx-auto flex min-h-screen max-w-3xl flex-col bg-[var(--user-color-bg)] px-4 pb-28 pt-6 text-[var(--user-color-fg)]">
+        <div className="scrollable-content mx-auto flex w-full max-w-3xl flex-col bg-[var(--user-color-background)] px-4 pb-28 pt-6 text-[var(--user-color-primary)]">
           {/* Encabezado con navegación */}
           <header className="mb-6 flex items-center justify-between border-b border-[var(--user-color-border)] pb-4">
             <div className="flex items-center gap-3">

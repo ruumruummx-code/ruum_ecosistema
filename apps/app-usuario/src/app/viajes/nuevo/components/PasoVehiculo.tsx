@@ -74,7 +74,7 @@ function PasoVehiculoComponent({
     <div className={styles.fields}>
       <div className="flex flex-col gap-3">
         {/* Marca */}
-        <div className="relative flex items-center rounded-2xl border border-[#e2e8f0] bg-white p-3 shadow-2xs transition focus-within:border-[#0066FF] dark:border-[#1a3a5c] dark:bg-[#0a2342]">
+        <div className="relative flex items-center rounded-2xl border border-[#e2e8f0] bg-white p-3 shadow-2xs transition focus-within:border-[#0066FF] focus-within:ring-4 focus-within:ring-[#0066FF]/15 dark:border-[#1a3a5c] dark:bg-[#0a2342]">
           <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-[#f1f5fa] text-[#64748b] dark:bg-[#0f2d52] dark:text-[#a8b5cc]" aria-hidden="true">
             <svg className="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2" />
@@ -117,7 +117,7 @@ function PasoVehiculoComponent({
         </div>
 
         {/* Modelo */}
-        <div className="relative flex items-center rounded-2xl border border-[#e2e8f0] bg-white p-3 shadow-2xs transition focus-within:border-[#0066FF] dark:border-[#1a3a5c] dark:bg-[#0a2342]">
+        <div className="relative flex items-center rounded-2xl border border-[#e2e8f0] bg-white p-3 shadow-2xs transition focus-within:border-[#0066FF] focus-within:ring-4 focus-within:ring-[#0066FF]/15 dark:border-[#1a3a5c] dark:bg-[#0a2342]">
           <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-[#f1f5fa] text-[#64748b] dark:bg-[#0f2d52] dark:text-[#a8b5cc]" aria-hidden="true">
             <svg className="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2" />
@@ -171,7 +171,7 @@ function PasoVehiculoComponent({
         </div>
 
         {/* Transmisión */}
-        <div className="relative flex items-center rounded-2xl border border-[#e2e8f0] bg-white p-3 shadow-2xs transition focus-within:border-[#0066FF] dark:border-[#1a3a5c] dark:bg-[#0a2342]">
+        <div className="relative flex items-center rounded-2xl border border-[#e2e8f0] bg-white p-3 shadow-2xs transition focus-within:border-[#0066FF] focus-within:ring-4 focus-within:ring-[#0066FF]/15 dark:border-[#1a3a5c] dark:bg-[#0a2342]">
           <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-[#f1f5fa] text-[#64748b] dark:bg-[#0f2d52] dark:text-[#a8b5cc]" aria-hidden="true">
             <svg className="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <circle cx="12" cy="12" r="3" />
@@ -207,7 +207,7 @@ function PasoVehiculoComponent({
         </div>
 
         {/* Año */}
-        <div className="relative flex items-center rounded-2xl border border-[#e2e8f0] bg-white p-3 shadow-2xs transition focus-within:border-[#0066FF] dark:border-[#1a3a5c] dark:bg-[#0a2342]">
+        <div className="relative flex items-center rounded-2xl border border-[#e2e8f0] bg-white p-3 shadow-2xs transition focus-within:border-[#0066FF] focus-within:ring-4 focus-within:ring-[#0066FF]/15 dark:border-[#1a3a5c] dark:bg-[#0a2342]">
           <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-[#f1f5fa] text-[#64748b] dark:bg-[#0f2d52] dark:text-[#a8b5cc]" aria-hidden="true">
             <svg className="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
@@ -243,7 +243,7 @@ function PasoVehiculoComponent({
         </div>
 
         {/* Condición */}
-        <div className="relative flex items-center rounded-2xl border border-[#e2e8f0] bg-white p-3 shadow-2xs transition focus-within:border-[#0066FF] dark:border-[#1a3a5c] dark:bg-[#0a2342]">
+        <div className="relative flex items-center rounded-2xl border border-[#e2e8f0] bg-white p-3 shadow-2xs transition focus-within:border-[#0066FF] focus-within:ring-4 focus-within:ring-[#0066FF]/15 dark:border-[#1a3a5c] dark:bg-[#0a2342]">
           <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-[#f1f5fa] text-[#64748b] dark:bg-[#0f2d52] dark:text-[#a8b5cc]" aria-hidden="true">
             <svg className="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />

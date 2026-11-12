@@ -63,7 +63,7 @@ export function ConsentimientoTerminosWall({
       aria-modal="true"
       aria-labelledby="consentimiento-titulo"
       aria-describedby="consentimiento-descripcion"
-      className="w-[calc(100vw-2rem)] max-w-md rounded-[20px] border border-white/15 bg-[var(--ruum-navy)] p-6 text-[var(--ruum-navy)] shadow-[var(--ruum-elevation-2)] backdrop:bg-[var(--ruum-overlay)]"
+      className="m-auto w-[calc(100vw-2rem)] max-w-md rounded-[20px] border border-white/15 bg-[var(--ruum-navy)] p-6 text-white shadow-[var(--ruum-elevation-2)] backdrop:bg-[var(--ruum-overlay)]"
     >
       <div>
         <h2 id="consentimiento-titulo" className="font-body text-lg font-bold text-white">Aceptación de Términos</h2>

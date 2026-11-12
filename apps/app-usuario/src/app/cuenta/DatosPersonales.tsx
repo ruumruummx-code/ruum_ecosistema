@@ -493,7 +493,7 @@ export function DatosPersonales({ usuario, fotoUrlInicial, correoRegistro, escri
                   type="button"
                   onClick={() => void sincronizarDatosFrescos()}
                   disabled={sincronizandoVersion}
-                  className="user-profile-sync-btn text-xs font-semibold text-ruum-primary underline hover:opacity-80"
+                  className="user-profile-sync-btn text-xs font-semibold text-[var(--user-color-action)] underline hover:opacity-80"
                 >
                   {sincronizandoVersion ? "Sincronizando…" : "Sincronizar versión más reciente y reintentar"}
                 </button>
