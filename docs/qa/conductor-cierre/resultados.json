@@ -1,0 +1,715 @@
+{
+  "checks": {
+    "node": "24.13.0",
+    "closure": "technical delivery; D1 field validation, D2 design approval and follow-ups remain pending",
+    "listPrimaryMinimum": "48px observed; separate follow-up #39; not asserted as compliant",
+    "conductorBuild": "passed",
+    "workspaceTypecheck": "passed: 6 packages",
+    "conductorTypecheck": "passed",
+    "conductorLint": {
+      "errors": 0,
+      "warnings": 86
+    },
+    "workspaceLint": "blocked locally by app-usuario .next-ux002* generated artifacts; issue #35",
+    "workspaceLintExcludingGeneratedBuilds": "passed: 3 consumers",
+    "stateSynchronizationUnitTest": "passed: 1 test",
+    "tokensRegeneration": "passed: clean diff",
+    "tokensParity": "passed",
+    "tokensNegativeChecks": "passed: parity and regeneration diff both rejected intentional drift with exit code 1"
+  },
+  "interface": {
+    "stats": {
+      "startTime": "2026-11-09T01:05:34.200Z",
+      "duration": 642779.68,
+      "expected": 57,
+      "skipped": 0,
+      "unexpected": 0,
+      "flaky": 0
+    },
+    "tests": [
+      {
+        "title": "capturas de cierre light calle-false 320",
+        "status": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "durationMs": 28182,
+            "errors": []
+          }
+        ]
+      },
+      {
+        "title": "capturas de cierre light calle-false 390",
+        "status": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "durationMs": 25038,
+            "errors": []
+          }
+        ]
+      },
+      {
+        "title": "capturas de cierre light calle-true 320",
+        "status": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "durationMs": 25942,
+            "errors": []
+          }
+        ]
+      },
+      {
+        "title": "capturas de cierre light calle-true 390",
+        "status": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "durationMs": 24708,
+            "errors": []
+          }
+        ]
+      },
+      {
+        "title": "capturas de cierre dark calle-false 320",
+        "status": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "durationMs": 23705,
+            "errors": []
+          }
+        ]
+      },
+      {
+        "title": "capturas de cierre dark calle-false 390",
+        "status": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "durationMs": 31039,
+            "errors": []
+          }
+        ]
+      },
+      {
+        "title": "capturas de cierre dark calle-true 320",
+        "status": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "durationMs": 38783,
+            "errors": []
+          }
+        ]
+      },
+      {
+        "title": "capturas de cierre dark calle-true 390",
+        "status": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "durationMs": 27278,
+            "errors": []
+          }
+        ]
+      },
+      {
+        "title": "evidencia por pasos y borrador sin datos inventados 320",
+        "status": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "durationMs": 8329,
+            "errors": []
+          }
+        ]
+      },
+      {
+        "title": "fotografías existentes, pasos y teclado 320",
+        "status": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "durationMs": 4405,
+            "errors": []
+          }
+        ]
+      },
+      {
+        "title": "firma conserva trazos y entrega separada del cierre 320",
+        "status": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "durationMs": 4489,
+            "errors": []
+          }
+        ]
+      },
+      {
+        "title": "registro contacto, contraseña y OTP con acción fija 320",
+        "status": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "durationMs": 3023,
+            "errors": []
+          }
+        ]
+      },
+      {
+        "title": "evidencia por pasos y borrador sin datos inventados 390",
+        "status": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "durationMs": 9394,
+            "errors": []
+          }
+        ]
+      },
+      {
+        "title": "fotografías existentes, pasos y teclado 390",
+        "status": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "durationMs": 6631,
+            "errors": []
+          }
+        ]
+      },
+      {
+        "title": "firma conserva trazos y entrega separada del cierre 390",
+        "status": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "durationMs": 4875,
+            "errors": []
+          }
+        ]
+      },
+      {
+        "title": "registro contacto, contraseña y OTP con acción fija 390",
+        "status": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "durationMs": 2429,
+            "errors": []
+          }
+        ]
+      },
+      {
+        "title": "cierre bloquea llaves discordantes y fotos en conflicto",
+        "status": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "durationMs": 3238,
+            "errors": []
+          }
+        ]
+      },
+      {
+        "title": "captura no disponible en estados cerrados o anteriores a verificación",
+        "status": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "durationMs": 2807,
+            "errors": []
+          }
+        ]
+      },
+      {
+        "title": "cancelar cámara no borra capturas y archivo inválido no avanza",
+        "status": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "durationMs": 1851,
+            "errors": []
+          }
+        ]
+      },
+      {
+        "title": "registro autenticado conserva identidad, licencia, documentos y revisión",
+        "status": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "durationMs": 6720,
+            "errors": []
+          }
+        ]
+      },
+      {
+        "title": "fallo al guardar firma conserva el trazo y no avanza",
+        "status": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "durationMs": 2292,
+            "errors": []
+          }
+        ]
+      },
+      {
+        "title": "fotografía offline conserva captura local tras recarga",
+        "status": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "durationMs": 4507,
+            "errors": []
+          }
+        ]
+      },
+      {
+        "title": "marcos y retorno persistente 320",
+        "status": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "durationMs": 12816,
+            "errors": []
+          }
+        ]
+      },
+      {
+        "title": "diálogos nativos y foco 320",
+        "status": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "durationMs": 5267,
+            "errors": []
+          }
+        ]
+      },
+      {
+        "title": "navegación única y emergencia completa 320",
+        "status": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "durationMs": 6288,
+            "errors": []
+          }
+        ]
+      },
+      {
+        "title": "marcos y retorno persistente 390",
+        "status": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "durationMs": 15223,
+            "errors": []
+          }
+        ]
+      },
+      {
+        "title": "diálogos nativos y foco 390",
+        "status": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "durationMs": 5870,
+            "errors": []
+          }
+        ]
+      },
+      {
+        "title": "navegación única y emergencia completa 390",
+        "status": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "durationMs": 6795,
+            "errors": []
+          }
+        ]
+      },
+      {
+        "title": "banco: acción y contraste del marco con teclado y tema oscuro",
+        "status": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "durationMs": 4563,
+            "errors": []
+          }
+        ]
+      },
+      {
+        "title": "las rutas declaran una variante sin propietarios implícitos",
+        "status": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "durationMs": 2038,
+            "errors": []
+          }
+        ]
+      },
+      {
+        "title": "resistencia a texto ampliado, referencias largas y diálogo con teclado 320",
+        "status": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "durationMs": 4409,
+            "errors": []
+          }
+        ]
+      },
+      {
+        "title": "resistencia a texto ampliado, referencias largas y diálogo con teclado 390",
+        "status": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "durationMs": 3590,
+            "errors": []
+          }
+        ]
+      },
+      {
+        "title": "etapas uniformes y acción visible 320",
+        "status": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "durationMs": 29442,
+            "errors": []
+          }
+        ]
+      },
+      {
+        "title": "datos completos, foco y texto ampliado 320",
+        "status": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "durationMs": 2750,
+            "errors": []
+          }
+        ]
+      },
+      {
+        "title": "etapas uniformes y acción visible 390",
+        "status": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "durationMs": 37248,
+            "errors": []
+          }
+        ]
+      },
+      {
+        "title": "datos completos, foco y texto ampliado 390",
+        "status": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "durationMs": 2642,
+            "errors": []
+          }
+        ]
+      },
+      {
+        "title": "recepción e inicio son dos decisiones y una RPC por pulsación",
+        "status": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "durationMs": 3145,
+            "errors": []
+          }
+        ]
+      },
+      {
+        "title": "llegada no inicia registro final y conserva datos de geocerca",
+        "status": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "durationMs": 2538,
+            "errors": []
+          }
+        ]
+      },
+      {
+        "title": "llegada se corrige con el estado autoritativo del servidor",
+        "status": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "durationMs": 1904,
+            "errors": []
+          }
+        ]
+      },
+      {
+        "title": "cierre resumido y terminales sin acciones de avance",
+        "status": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "durationMs": 9567,
+            "errors": []
+          }
+        ]
+      },
+      {
+        "title": "REPUVE conserva bloqueo, requisitos y datos faltantes",
+        "status": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "durationMs": 7445,
+            "errors": []
+          }
+        ]
+      },
+      {
+        "title": "expediente con teclado y filtros completos conservan retorno",
+        "status": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "durationMs": 4072,
+            "errors": []
+          }
+        ]
+      },
+      {
+        "title": "lista poblada, búsqueda, paginación y cierre pendiente 320",
+        "status": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "durationMs": 2934,
+            "errors": []
+          }
+        ]
+      },
+      {
+        "title": "lista poblada, búsqueda, paginación y cierre pendiente 390",
+        "status": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "durationMs": 3335,
+            "errors": []
+          }
+        ]
+      },
+      {
+        "title": "fallo de red mantiene contexto, muestra motivo y permite reintentar",
+        "status": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "durationMs": 1459,
+            "errors": []
+          }
+        ]
+      },
+      {
+        "title": "seguridad y navegación se abren sin perder el paso",
+        "status": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "durationMs": 1900,
+            "errors": []
+          }
+        ]
+      },
+      {
+        "title": "oferta minimal: ruta como protagonista, ganancia oficial y rechazo con 6 motivos >= 56px",
+        "status": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "durationMs": 1644,
+            "errors": []
+          }
+        ]
+      },
+      {
+        "title": "en curso minimal: direccion como protagonista, boton confirmar llegada >= 56px y sin scroll de pagina",
+        "status": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "durationMs": 2571,
+            "errors": []
+          }
+        ]
+      },
+      {
+        "title": "tema light: pantallas y contraste 320",
+        "status": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "durationMs": 16578,
+            "errors": []
+          }
+        ]
+      },
+      {
+        "title": "tema light: pantallas y contraste 390",
+        "status": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "durationMs": 21545,
+            "errors": []
+          }
+        ]
+      },
+      {
+        "title": "tema light: operación, formularios y emergencia",
+        "status": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "durationMs": 12744,
+            "errors": []
+          }
+        ]
+      },
+      {
+        "title": "tema light: acceso y campos",
+        "status": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "durationMs": 6730,
+            "errors": []
+          }
+        ]
+      },
+      {
+        "title": "tema dark: pantallas y contraste 320",
+        "status": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "durationMs": 25157,
+            "errors": []
+          }
+        ]
+      },
+      {
+        "title": "tema dark: pantallas y contraste 390",
+        "status": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "durationMs": 22141,
+            "errors": []
+          }
+        ]
+      },
+      {
+        "title": "tema dark: operación, formularios y emergencia",
+        "status": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "durationMs": 10855,
+            "errors": []
+          }
+        ]
+      },
+      {
+        "title": "tema dark: acceso y campos",
+        "status": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "durationMs": 12373,
+            "errors": []
+          }
+        ]
+      },
+      {
+        "title": "preferencia de tema persiste entre rutas y recarga con clave heredada",
+        "status": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "durationMs": 19743,
+            "errors": []
+          }
+        ]
+      }
+    ]
+  },
+  "a11y": {
+    "stats": {
+      "startTime": "2026-11-09T01:16:22.474Z",
+      "duration": 282614.289,
+      "expected": 4,
+      "skipped": 0,
+      "unexpected": 0,
+      "flaky": 0
+    },
+    "tests": [
+      {
+        "title": "operación accesible light 320",
+        "status": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "durationMs": 66145,
+            "errors": []
+          }
+        ]
+      },
+      {
+        "title": "operación accesible light 390",
+        "status": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "durationMs": 77587,
+            "errors": []
+          }
+        ]
+      },
+      {
+        "title": "operación accesible dark 320",
+        "status": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "durationMs": 65064,
+            "errors": []
+          }
+        ]
+      },
+      {
+        "title": "operación accesible dark 390",
+        "status": "expected",
+        "results": [
+          {
+            "status": "passed",
+            "durationMs": 55811,
+            "errors": []
+          }
+        ]
+      }
+    ]
+  }
+}

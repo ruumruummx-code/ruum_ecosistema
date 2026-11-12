@@ -207,7 +207,7 @@ button.rejectOption,
   border: none;
   border-radius: var(--conductor-radius-control);
   background: var(--conductor-gradient-action);
-  color: var(--conductor-button-text);
+  color: var(--conductor-on-action);
   font-size: 16px;
   font-weight: 700;
   cursor: pointer;
