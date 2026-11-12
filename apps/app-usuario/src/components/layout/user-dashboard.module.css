@@ -133,8 +133,8 @@
     background: linear-gradient(155deg, #00172b 5%, #002145 55%, #001326 100%);
   }
   .sidebarColapsada { width: var(--rr-sidebar-collapsed, 72px); }
-  .navScroll { overflow: visible; }
-  .navScroll nav { display: flex; flex-direction: column; height: 100%; }
+  .navScroll { padding-block: 6px; overscroll-behavior-y: contain; scrollbar-width: thin; }
+  .navScroll nav { display: flex; flex-direction: column; min-height: 100%; }
   .navGroup { flex: 4 1 auto; justify-content: space-between; }
   .navGroup:first-child { flex-grow: 5; }
 }
@@ -148,6 +148,10 @@
   .promoTitle { font-size: 16px; }
   .promoDescription { font-size: 12px; margin-top: 4px; }
   .promoAction { padding-block: 8px; margin-block: 8px; }
+}
+@media (min-width: 1024px) {
+  .navGroup { gap: clamp(6px, .5dvh, 10px); }
+  .navItem { min-height: 44px; }
 }
 @media (max-width: 767px) {
   .brandName { font-size: 18px; }

@@ -339,7 +339,6 @@ export function UserSidebar({
           )}
         </div>
 
-        {/* Navegación flexible sin scroll en escritorio */}
         <div className={estilos.navScroll}>
           <nav id="userDashboardSidebarNav" aria-label="Navegación del panel">
             <ul className={estilos.navGroup}>
