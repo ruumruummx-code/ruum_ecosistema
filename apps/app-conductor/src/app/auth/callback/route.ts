@@ -154,6 +154,7 @@ export async function GET(request: NextRequest) {
       <meta charset="utf-8">
       <title>Verificando cuenta...</title>
       <style>
+        /* Documento HTML autónomo sin hojas de estilo de Next; requiere colores locales. */
         body { font-family: system-ui, sans-serif; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; background: #0f172a; color: #f8fafc; }
         .card { text-align: center; padding: 2rem; border-radius: 1rem; background: #1e293b; max-width: 400px; }
       </style>

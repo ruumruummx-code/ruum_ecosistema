@@ -1,6 +1,29 @@
 # Ruum Ruum — Design System v1.0
 
 Fuente única de identidad visual (Libro de Marca V2.1, Parte II + III).
+
+## Verificación de tokens
+
+Después de modificar `tokens/tokens.json`, ejecutar `pnpm tokens:generate` y
+`pnpm tokens:check`, y versionar los archivos generados junto con la fuente.
+No editar a mano `Tokens.kt`, `Tokens.swift` ni `tokens.ts`.
+Los dos CSS siguen siendo mantenidos manualmente: actualizar sus colores con
+la fuente canónica y verificar ambos temas antes de enviar el cambio.
+
+`scripts/check-tokens-parity.mjs` contiene la tabla de equivalencias: el CSS de
+diseño usa `--teal-deep`, UI usa `--ruum-teal-deep` y Tailwind
+`--color-teal-deep`. Los nombres `action-bg-state` y `action-text-state`
+corresponden a `action-bg` y `action-text`. En UI claro, `bg` corresponde a
+`--ruum-surface-elevated`, mientras que el `surface-elevated` canónico v1
+corresponde a `--ruum-surface`: V2.1 asigna otra semántica al primer nombre.
+En oscuro `bg` corresponde a `--ruum-canvas`. Las extensiones V2.1 y el tema
+local del conductor conservan sus valores y no se comparan como alias v1.
+
+El workflow `.github/workflows/tokens.yml` regenera y exige un diff limpio,
+además de verificar paridad. Para comprobar el fallo, cambiar temporalmente
+un color de JSON por otro color existente, ejecutar `pnpm tokens:check`
+(debe devolver código 1) y restaurarlo; regenerar también debe producir un
+diff que el gate rechaza. No enviar la alteración temporal.
 Proporción: **60% Navy `0A2342` / 30% Blanco/Gris `FFFFFF`/`E8EEF4` / 8% Teal `00D1D1`/`008B8B` / 2% Estados**.
 
 ## Contenido

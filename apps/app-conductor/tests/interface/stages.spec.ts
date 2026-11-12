@@ -70,13 +70,26 @@ test("recepción e inicio son dos decisiones y una RPC por pulsación", async ({
 test("llegada no inicia registro final y conserva datos de geocerca", async ({ page, request, context }) => {
   await context.grantPermissions(["geolocation"]); await context.setGeolocation({ latitude: 19.4, longitude: -99.1, accuracy: 15 });
   await page.goto(`/viajes/${trip(4)}`);
+  await expect(page.getByRole("heading", { name: "Conduce al destino", exact: true })).toBeVisible();
   await page.getByRole("button", { name: "Confirmar llegada a destino" }).click();
+  await expect(page.getByRole("heading", { name: "Registra la entrega", exact: true })).toBeVisible();
   await expect(page.getByRole("button", { name: "Continuar registro final" })).toBeEnabled();
+  expect((await page.getByRole("button", { name: "Continuar registro final" }).boundingBox())!.height).toBeGreaterThanOrEqual(56);
   const calls = await (await request.get("http://127.0.0.1:54331/qa/calls")).json();
   expect(calls.filter((c: RpcCall) => c.rpc === "conductor_avanza_traslado")).toHaveLength(0);
   const arrival = calls.filter((c: RpcCall) => c.rpc === "conductor_confirmar_llegada_destino");
   expect(arrival).toHaveLength(1); expect(arrival[0].params).toMatchObject({ p_precision_m: 15, p_fuera_geocerca: false, p_motivo_sin_medicion: "destino_sin_coordenadas" });
 });
+test("llegada se corrige con el estado autoritativo del servidor", async ({ page, request, context }) => {
+  await context.grantPermissions(["geolocation"]);
+  await context.setGeolocation({ latitude: 19.4, longitude: -99.1 });
+  await request.get("http://127.0.0.1:54331/qa/arrival-state?state=evidencia_final_completada");
+  await page.goto(`/viajes/${trip(4)}`);
+  await page.getByRole("button", { name: "Confirmar llegada a destino" }).click();
+  await expect(page.getByRole("heading", { name: "Confirma la entrega", exact: true })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Continuar registro final" })).toHaveCount(0);
+});
+
 test("cierre resumido y terminales sin acciones de avance", async ({ page }) => {
   await page.goto(`/viajes/${trip(5)}`);
   await page.getByRole("link", { name: "Revisar y finalizar" }).click();
@@ -146,7 +159,8 @@ for (const width of [320, 390]) {
   });
 }
 test("fallo de red mantiene contexto, muestra motivo y permite reintentar", async ({ page }) => {
-  await page.goto(`/viajes/${trip(1)}`);
+  // Identidad propia: otras pruebas avanzan y reinician el viaje 1 en la fixture.
+  await page.goto(`/viajes/${trip(61)}`);
   await page.route("**/rest/v1/rpc/conductor_avanza_traslado", route => route.fulfill({ status: 500, contentType: "application/json", body: JSON.stringify({ message: "Servicio temporalmente no disponible" }) }));
   await page.getByRole("button", { name: "Iniciar ruta", exact: true }).click();
   await expect(page.locator("[data-trip-primary]").getByRole("alert")).toBeVisible(); await expect(page.getByRole("button", { name: "Iniciar ruta", exact: true })).toBeEnabled();

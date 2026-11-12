@@ -14,6 +14,8 @@ export default function GlobalError({
     Sentry.captureException(error);
   }, [error]);
 
+  // Error del layout raíz: puede renderizarse sin el CSS ni el tema del producto.
+  // Conservar estos colores autónomos para que el mensaje siga siendo legible.
   return (
     <html lang="es" data-theme="dark">
       <body className="min-h-screen bg-[#070B14] text-[#E8EDF6] flex flex-col items-center justify-center p-6 text-center">

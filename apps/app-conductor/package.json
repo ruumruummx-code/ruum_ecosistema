@@ -11,7 +11,7 @@
     "test": "vitest run",
     "test:coverage": "vitest run --coverage",
     "test:a11y": "node scripts/a11y-runner.mjs playwright",
-    "test:a11y:ui": "playwright test tests/a11y --ui",
+    "test:a11y:ui": "playwright test --config playwright.a11y.config.ts --ui",
     "test:lighthouse": "lhci autorun",
     "test:lighthouse:auth": "lhci autorun --config=lighthouserc.auth.js",
     "test:axe": "node scripts/a11y-runner.mjs axe http://localhost:3001",

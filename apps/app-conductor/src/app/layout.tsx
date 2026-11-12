@@ -31,6 +31,7 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 5,
   viewportFit: "cover",
+  // theme-color es metadato del navegador; no resuelve variables CSS.
   themeColor: [
     { media: "(prefers-color-scheme: dark)", color: "#08182E" },
     { media: "(prefers-color-scheme: light)", color: "#ffffff" }

@@ -61,7 +61,7 @@ export function MapaRutaConduccion({ origen, destino }: MapaRutaConduccionProps)
       <div className="h-44 w-full bg-surface-elevated/45 rounded-xl flex flex-col items-center justify-center border border-border/10 relative overflow-hidden">
         {/* Simple visual path fallback */}
         <svg width="100%" height="100%" className="absolute inset-0 select-none opacity-20 pointer-events-none" aria-hidden="true">
-          <path d="M 30 130 Q 120 40 210 120 T 370 50" fill="none" stroke="#00B4D8" strokeWidth="4" strokeDasharray="8, 8" />
+          <path d="M 30 130 Q 120 40 210 120 T 370 50" fill="none" stroke="var(--conductor-brand)" strokeWidth="4" strokeDasharray="8, 8" />
         </svg>
         <div className="w-10 h-10 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 text-lg z-10">
           📍
