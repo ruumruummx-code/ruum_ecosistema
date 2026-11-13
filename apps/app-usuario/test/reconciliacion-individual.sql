@@ -1,4 +1,4 @@
--- Ejecutar con psql -v ON_ERROR_STOP=1 únicamente en una base local desechable.
+-- Ejecutar con psql -U supabase_admin -v ON_ERROR_STOP=1 en una base local desechable.
 -- Se confirman las filas de prueba para que ambas conexiones puedan verlas.
 \set ON_ERROR_STOP on
 create extension if not exists dblink with schema extensions;
@@ -40,8 +40,7 @@ end $$;
 commit;
 
 -- Mantener abiertas las escrituras del procesador mientras otra sesión reconcilia.
--- La conexión TCP usa las credenciales predeterminadas de Supabase local.
-select extensions.dblink_connect('reconciliador', 'host=127.0.0.1 dbname=postgres user=postgres password=postgres');
+select extensions.dblink_connect('reconciliador', 'dbname=' || current_database() || ' user=postgres');
 select extensions.dblink_exec('reconciliador', 'set role service_role');
 select extensions.dblink_exec('reconciliador', 'set statement_timeout = ''5s''');
 begin;
