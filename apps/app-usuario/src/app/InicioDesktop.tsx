@@ -7,11 +7,11 @@ import Image from "next/image";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import type { Database } from "@ruum/shared/types";
-import { ETIQUETA_ESTADO_TRASLADO } from "@ruum/shared/states";
 import { chatDisponible } from "@ruum/shared/rules";
 import { crearLlamadaEnmascarada } from "@ruum/api/services";
 import { construirNotificaciones, obtenerViajeActivo, obtenerHistorial, progresoPorEstadoTraslado } from "../lib/inicio";
-import { TERMINOLOGIA_USUARIO } from "../lib/glosario";
+import { estadoVisibleTraslado, lineasVehiculo, placaVisible } from "../lib/traslado-presentacion";
+import { EstadoTrasladoBreve } from "../components/EstadoTrasladoBreve";
 import { CONTACTOS_SOPORTE_USUARIO } from "../lib/contactos-soporte";
 import { crearClienteNavegador } from "../lib/supabase-browser";
 import { obtenerFotoPerfilConductor } from "@ruum/api/drivers";
@@ -46,16 +46,6 @@ const tips = [
   { title: "Ten tus documentos a mano", text: "Completa los datos de tu vehículo para agilizar tu próxima solicitud." },
 ];
 function modelo(t: Pasaporte) { return [t.vehiculo_marca, t.vehiculo_modelo, t.vehiculo_anio].filter(Boolean).join(" ") || "Vehículo registrado"; }
-function estadoTexto(t: Pasaporte) {
-  if (t.estado === "traslado_en_curso") return "En tránsito";
-  if (["servicio_cerrado", "entrega_confirmada", "pago_completado"].includes(t.estado ?? "")) return "Completado";
-  return t.estado ? TERMINOLOGIA_USUARIO[t.estado] ?? ETIQUETA_ESTADO_TRASLADO[t.estado] : "Por confirmar"; }
-function tono(t: Pasaporte) {
-  if (t.estado === "traslado_en_curso") return "green";
-  if (["servicio_cerrado", "entrega_confirmada", "pago_completado"].includes(t.estado ?? "")) return "blue";
-  if (["traslado_fallido", "servicio_cancelado", "incidencia_reportada"].includes(t.estado ?? "")) return "red";
-  return "orange";
-}
 function VehicleImage({ traslado, vehiculos, hero = false, priority = false }: { traslado: Pasaporte; vehiculos: Vehiculo[]; hero?: boolean; priority?: boolean }) {
   const foto = vehiculos.find(v => v.id === traslado.vehiculo_id)?.fotos_urls?.find(url => /^https?:\/\//.test(url));
   const type = traslado.vehiculo_tipo === "suv" ? "suv" : traslado.vehiculo_tipo === "pick_up" ? "pickup" : "sedan";
@@ -106,9 +96,9 @@ function ActiveOverview({ viaje, vehiculos, foto, enabled }: { viaje: Pasaporte;
   const coordinates = [viaje.origen_lat, viaje.origen_lng, viaje.destino_lat, viaje.destino_lng].every(v => typeof v === "number" && Number.isFinite(v));
   return <section className={styles.overview} aria-label="Traslado activo y seguimiento">
     <article className={styles.activeCard} aria-label="Traslado activo">
-      <div className={styles.activeTop}><p className={styles.eyebrow}><i />TRASLADO ACTIVO</p><h2>{modelo(viaje)}</h2><div className={styles.plate}><strong>{viaje.vehiculo_placas || "Sin placas"}</strong><span>Placas: {viaje.vehiculo_placas || "Por confirmar"}</span></div><VehicleImage traslado={viaje} vehiculos={vehiculos} hero priority={enabled} /></div>
+      <div className={styles.activeTop}><p className={styles.eyebrow}><i />TRASLADO ACTIVO</p><h2>{modelo(viaje)}</h2><div className={styles.plate}><strong>{placaVisible(viaje.vehiculo_placas)}</strong></div><VehicleImage traslado={viaje} vehiculos={vehiculos} hero priority={enabled} /></div>
       <div className={styles.route}><Icon name="pin" /><div><strong>{viaje.origen_ciudad || "Origen por confirmar"}</strong><small>{viaje.origen_direccion || "Punto de recolección"}</small></div><span className={styles.routeLine}><Icon name="arrow" /></span><Icon name="pin" /><div><strong>{viaje.destino_ciudad || "Destino por confirmar"}</strong><small>{viaje.destino_direccion || "Punto de entrega"}</small></div></div>
-      <dl className={styles.metrics}><div><dt>ESTADO ACTUAL</dt><dd><span className={styles.status} data-tone={tono(viaje)}><Icon name="car" />{estadoTexto(viaje)}</span></dd></div><div><dt>TIEMPO RESTANTE</dt><dd><Icon name="clock" />{fresh && moving && eta !== null ? `${eta} min` : "Por confirmar"}</dd></div><div><dt>DISTANCIA RESTANTE</dt><dd><Icon name="route" />{fresh && moving && distance !== null ? `${distance} km` : "Por confirmar"}</dd></div></dl>
+      <dl className={styles.metrics}><div><dt>ESTADO ACTUAL</dt><dd><EstadoTrasladoBreve className={styles.status} estado={estadoVisibleTraslado(viaje)} /></dd></div><div><dt>TIEMPO RESTANTE</dt><dd><Icon name="clock" />{fresh && moving && eta !== null ? `${eta} min` : "Por confirmar"}</dd></div><div><dt>DISTANCIA RESTANTE</dt><dd><Icon name="route" />{fresh && moving && distance !== null ? `${distance} km` : "Por confirmar"}</dd></div></dl>
       <ol className={styles.timeline} aria-label="Progreso del traslado">{["Recolección", "En tránsito", "Entrega"].map((label, index) => {
         const done = progress >= 100 || index < current;
         const active = index === current && progress < 100;
@@ -172,7 +162,63 @@ export function InicioDesktop({ usuario, traslados, conductorFotoUrl = null, veh
       {viaje?.traslado_id ? <ActiveOverview key={viaje.traslado_id} viaje={viaje} vehiculos={vehiculos} foto={fotoDiferida} enabled={desktopVisible} /> : <section className={styles.emptyOverview} aria-label="Sin traslado activo"><div><p className={styles.eyebrow}><Icon name="car" />TU PRÓXIMO DESTINO EMPIEZA AQUÍ</p><h2>No tienes traslados activos</h2><p>Registra un nuevo traslado y sigue cada etapa de tu vehículo desde un solo lugar.</p><Link href="/viajes/nuevo" className={styles.primary}><Icon name="plus" />Registrar traslado</Link></div><Image src="/imagenes/dashboard-sedan.webp" width={720} height={400} alt="Ilustración de un sedán blanco" unoptimized priority={desktopVisible} /></section>}
       <nav className={styles.quickActions} aria-label="Acciones rápidas">{actions.map(action => <Link key={action.href} href={action.href} data-tone={action.tone}><span className={styles.actionIcon}><Icon name={action.icon} /></span><div><strong>{action.title}</strong><p>{action.description}</p></div><Icon name="chevron" /></Link>)}</nav>
       <div className={styles.bottomRow}>
-        <section className={`${styles.card} ${styles.recent}`} aria-label="Últimos traslados"><header className={styles.sectionHeading}><h2>Últimos traslados</h2><Link href="/mis-viajes">Ver todos</Link></header><div className={styles.recentScroll} tabIndex={0} aria-label="Tabla de últimos traslados"><table><thead><tr><th>VEHÍCULO</th><th>ORIGEN</th><th aria-label="Ruta" /><th>DESTINO</th><th>FECHA</th><th>ESTADO</th><th aria-label="Opciones" /></tr></thead><tbody>{historial.map(item => <tr key={item.traslado_id}><td><Link href={`/viajes/${item.traslado_id}`} className={styles.vehicleCell}><VehicleImage traslado={item} vehiculos={vehiculos} /><div><strong>{modelo(item)}</strong><small>{item.vehiculo_placas || "Sin placas"}</small></div></Link></td><td>{item.origen_ciudad || "Por confirmar"}</td><td><Icon name="arrow" /></td><td>{item.destino_ciudad || "Por confirmar"}</td><td>{item.creado_en && Number.isFinite(Date.parse(item.creado_en)) ? <time dateTime={item.creado_en}>{new Intl.DateTimeFormat("es-MX", { timeZone: "America/Mexico_City", day: "numeric", month: "short" }).format(new Date(item.creado_en))}<small>{new Intl.DateTimeFormat("es-MX", { timeZone: "America/Mexico_City", hour: "numeric", minute: "2-digit" }).format(new Date(item.creado_en))}</small></time> : "Sin fecha"}</td><td><span className={styles.status} data-tone={tono(item)}><i />{estadoTexto(item)}</span></td><td data-transfer-menu><button id={`opciones-${item.traslado_id}`} type="button" aria-label={`Opciones del traslado ${item.vehiculo_placas || item.traslado_id}`} aria-expanded={menuId === item.traslado_id} onClick={() => setMenuId(menuId === item.traslado_id ? null : item.traslado_id)}><Icon name="more" /></button>{menuId === item.traslado_id && <div className={styles.rowMenu}><Link href={`/viajes/${item.traslado_id}`}>Ver detalles</Link><Link href={`/soporte?traslado=${item.traslado_id}`}>Solicitar ayuda</Link></div>}</td></tr>)}</tbody></table>{!historial.length && <p className={styles.emptyHistory}>Aún no tienes traslados registrados. Aquí encontrarás tus próximos viajes.</p>}</div></section>
+        <section className={`${styles.card} ${styles.recent}`} aria-label="Últimos traslados">
+          <header className={styles.sectionHeading}><h2>Últimos traslados</h2><Link href="/mis-viajes">Ver todos</Link></header>
+          <div className={styles.recentScroll}>
+            <table>
+              <thead>
+                <tr><th>VEHÍCULO</th><th>ORIGEN</th><th aria-label="Ruta" /><th>DESTINO</th><th>FECHA</th><th>ESTADO</th><th aria-label="Opciones" /></tr>
+              </thead>
+              <tbody>
+                {historial.map(item => {
+                  const { marca, modelo } = lineasVehiculo(item);
+                  const fecha = item.creado_en && Number.isFinite(Date.parse(item.creado_en)) ? new Date(item.creado_en) : null;
+                  return (
+                    <tr key={item.traslado_id}>
+                      <td>
+                        <Link href={`/viajes/${item.traslado_id}`} className={styles.vehicleCell}>
+                          <VehicleImage traslado={item} vehiculos={vehiculos} />
+                          <div>
+                            {marca && <strong>{marca}</strong>}
+                            {modelo && <strong>{modelo}</strong>}
+                            <small>{placaVisible(item.vehiculo_placas)}</small>
+                          </div>
+                        </Link>
+                      </td>
+                      <td>{item.origen_ciudad || "Por confirmar"}</td>
+                      <td><Icon name="arrow" /></td>
+                      <td>{item.destino_ciudad || "Por confirmar"}</td>
+                      <td>
+                        {fecha ? (
+                          <time dateTime={fecha.toISOString()}>
+                            {new Intl.DateTimeFormat("es-MX", { timeZone: "America/Mexico_City", day: "numeric", month: "short" }).format(fecha)}
+                            <small>{new Intl.DateTimeFormat("es-MX", { timeZone: "America/Mexico_City", hour: "numeric", minute: "2-digit" }).format(fecha)}</small>
+                          </time>
+                        ) : "Sin fecha"}
+                      </td>
+                      <td><EstadoTrasladoBreve className={styles.status} estado={estadoVisibleTraslado(item)} /></td>
+                      <td data-transfer-menu>
+                        <button id={`opciones-${item.traslado_id}`} type="button"
+                          aria-label={`Opciones del traslado ${item.vehiculo_placas || item.traslado_id}`}
+                          aria-expanded={menuId === item.traslado_id}
+                          onClick={() => setMenuId(menuId === item.traslado_id ? null : item.traslado_id)}>
+                          <Icon name="more" />
+                        </button>
+                        {menuId === item.traslado_id && (
+                          <div className={styles.rowMenu}>
+                            <Link href={`/viajes/${item.traslado_id}`}>Ver detalles</Link>
+                            <Link href={`/soporte?traslado=${item.traslado_id}`}>Solicitar ayuda</Link>
+                          </div>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+            {!historial.length && <p className={styles.emptyHistory}>Aún no tienes traslados registrados. Aquí encontrarás tus próximos viajes.</p>}
+          </div>
+        </section>
         <aside className={styles.supportColumn} aria-label="Ayuda y consejos"><section className={styles.support}><span className={styles.supportIcon}><Icon name="support" /></span><div><h2>¿Necesitas ayuda?</h2><p>{PROMESA_SOPORTE.recepcion} {PROMESA_SOPORTE.atencion} {PROMESA_SOPORTE.respuesta} {PROMESA_SOPORTE.emergencia}</p><Link href="/soporte">Contactar soporte<Icon name="chevron" /></Link></div></section><section className={`${styles.card} ${styles.tips}`} aria-label="Tips Ruum Ruum"><header><h2><Icon name="bulb" />Tips Ruum Ruum</h2><div>{tips.map((item, index) => <button key={index} type="button" aria-label={`Ver tip ${index + 1}: ${item.title}`} aria-current={tip === index ? "true" : undefined} onClick={() => setTip(index)}><i /></button>)}</div></header><div className={styles.tipContent}><button type="button" aria-label="Tip anterior" onClick={() => setTip((tip + tips.length - 1) % tips.length)}><Icon name="chevron" /></button><div aria-live="polite"><h3>{tips[tip].title}</h3><p>{tips[tip].text}</p></div><button type="button" aria-label="Tip siguiente" onClick={() => setTip((tip + 1) % tips.length)}><Icon name="chevron" /></button></div></section></aside>
       </div>
     </div>

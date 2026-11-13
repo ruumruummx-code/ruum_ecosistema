@@ -1,0 +1,28 @@
+.contenedor { position: relative; display: inline-block; max-width: 100%; }
+.contenedor > button { max-width: 100%; cursor: help; }
+.tooltip {
+  position: absolute;
+  inset-inline-end: 0;
+  top: 100%;
+  z-index: 5;
+  width: max-content;
+  max-width: 11rem;
+  padding: 6px 8px;
+  border-radius: 6px;
+  background: #0a2342;
+  color: white;
+  font-size: 12px;
+  font-weight: 500;
+  white-space: normal;
+  text-align: start;
+  visibility: hidden;
+  opacity: 0;
+}
+.contenedor:not([data-suprimido="true"]):is(:hover, :focus-within, [data-abierto="true"]) .tooltip {
+  visibility: visible;
+  opacity: 1;
+}
+
+@media (max-width: 1023px) {
+  .tooltip { inset-inline: 0 auto; }
+}

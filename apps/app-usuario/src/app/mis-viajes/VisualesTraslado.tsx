@@ -1,24 +1,14 @@
 import Image from "next/image";
-import { pestañaDeViaje, type ViajeLista } from "./useGestionTraslados";
+import type { ViajeLista } from "./useGestionTraslados";
 import s from "./traslados-desktop.module.css";
+import { EstadoTrasladoBreve } from "../../components/EstadoTrasladoBreve";
+import { estadoVisibleTraslado } from "../../lib/traslado-presentacion";
+
 export function EstadoTraslado({ viaje }: { viaje: ViajeLista }) {
-  const tipo = pestañaDeViaje(viaje.pasaporte);
-  return (
-    <span className={s.badge} data-status={tipo}>
-      <i />
-      {tipo === "activos"
-        ? viaje.pasaporte.estado === "traslado_en_curso"
-          ? "En tránsito"
-          : "En curso"
-        : tipo === "finalizados"
-          ? viaje.pasaporte.estado === "disputa_abierta" ? "Finalizado · Disputa abierta" : "Completado"
-          : tipo === "programados"
-            ? "Programado"
-            : tipo === "en_revision"
-              ? "En revisión"
-              : "Cancelado"}
-    </span>
-  );
+  return <EstadoTrasladoBreve
+    className={s.badge}
+    estado={estadoVisibleTraslado(viaje.pasaporte, !viaje.pasaporte.traslado_id || !viaje.traslado)}
+  />;
 }
 export function VehiculoTraslado({
   viaje,
