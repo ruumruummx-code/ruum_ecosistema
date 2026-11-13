@@ -211,9 +211,11 @@ export function UserSidebar({
     onCollapseChange?.(!collapsed);
   };
 
-  // Divide los elementos en 2 grupos: Operativos (1-5) y Cuenta/Soporte (6-9)
+  // Conserva los grupos de navegación al ajustar los enlaces de escritorio.
   const itemsGrupoOperativo = items.slice(0, 5);
-  const itemsGrupoCuenta = items.slice(5);
+  const itemsGrupoCuenta = items.slice(5).filter(
+    (item) => mobileOpen || (item.id !== "perfil" && item.id !== "preferencias")
+  );
 
   const renderItem = (item: ItemNavegacionUsuario): ReactNode => {
     const Icono = item.icono;
