@@ -330,7 +330,7 @@ export function DetalleTrasladoDesktop({
         <h3>Conductor asignado</h3>
         <div className={s.driverBody}>
           <span className={s.avatar}>
-            {foto?.id === p.conductor_id ? (
+            {foto && foto.id === p.conductor_id ? (
               <Image
                 src={foto.url}
                 alt={`Foto de ${p.conductor_nombre || "conductor"}`}
