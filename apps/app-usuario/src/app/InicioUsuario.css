@@ -64,7 +64,7 @@
 }
 .user-dashboard-shell .user-dashboard-content {
   padding: 4px 16px calc(var(--user-mobile-nav-height, calc(68px + env(safe-area-inset-bottom))) + 8px);
-  overflow: hidden;
+  overflow-y: auto;
 }
 .user-dashboard-content > div {
   display: flex;
@@ -75,7 +75,7 @@
   --home-teal: var(--user-on-dark-accent);
   display: grid;
   grid-template-columns: minmax(0, 1fr);
-  grid-template-rows: auto minmax(0, 1fr) auto auto;
+  grid-template-rows: auto minmax(min-content, 1fr) auto auto;
   gap: clamp(8px, 1.4dvh, 14px);
   width: 100%;
   min-width: 0;
@@ -534,6 +534,18 @@
   font-size: 12px;
   font-weight: 500;
   color: #64748b;
+}
+@media (max-width: 374px) {
+  .home-quick-card {
+    padding-inline: 8px;
+    gap: 6px;
+  }
+  .home-quick-card .home-module-chevron {
+    display: none;
+  }
+  .home-quick-card .home-module-copy strong {
+    white-space: normal;
+  }
 }
 .home-module-chevron {
   display: flex;

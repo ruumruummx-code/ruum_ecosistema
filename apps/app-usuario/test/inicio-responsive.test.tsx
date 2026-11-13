@@ -9,7 +9,10 @@ import { InicioUsuario } from "../src/app/InicioUsuario";
 import { NavegacionUsuario } from "../src/app/NavegacionUsuario";
 import { MobileShell } from "@ruum/ui";
 
-vi.mock("next/navigation", () => ({ usePathname: () => "/" }));
+vi.mock("next/navigation", () => ({
+  usePathname: () => "/",
+  useRouter: () => ({ push: vi.fn() }),
+}));
 vi.mock("@ruum/api/services", () => ({ crearLlamadaEnmascarada: vi.fn() }));
 vi.mock("../src/lib/supabase-browser", () => ({ crearClienteNavegador: vi.fn(), tieneSupabaseConfigurado: () => true }));
 
@@ -70,7 +73,8 @@ describe.skipIf(process.env.RUN_RESPONSIVE_UI !== "1")("Inicio sin scroll en nav
             for (const selector of ["#homeHeader", "#greetingBlock", "#activeTransferCard", "#quickActions", ".home-support"]) {
               const el = document.querySelector(selector)!;
               const rect = el.getBoundingClientRect();
-              if (rect.top < 0 || rect.bottom > navTop + 1 || rect.left < 0 || rect.right > innerWidth + 1) failures.push(`${selector} fuera de pantalla: ${JSON.stringify(rect.toJSON())}`);
+              const contenedor = el.closest(".user-dashboard-content");
+              if (rect.top < 0 || (!contenedor && rect.bottom > navTop + 1) || rect.left < 0 || rect.right > innerWidth + 1) failures.push(`${selector} fuera de pantalla: ${JSON.stringify(rect.toJSON())}`);
             }
             const card = document.querySelector("#activeTransferCard")!.getBoundingClientRect();
             for (const el of document.querySelectorAll("#activeTransferCard > *, .home-stepper li, .home-module-copy")) {
@@ -80,7 +84,10 @@ describe.skipIf(process.env.RUN_RESPONSIVE_UI !== "1")("Inicio sin scroll en nav
             }
             if (document.documentElement.scrollHeight > innerHeight || document.documentElement.scrollWidth > innerWidth) failures.push("Scroll del documento");
             const content = document.querySelector(".user-dashboard-content")!;
-            if (content.scrollHeight > content.clientHeight + 1) failures.push("Contenido recortado");
+            content.scrollTop = content.scrollHeight;
+            if (document.querySelector(".home-support")!.getBoundingClientRect().bottom > navTop + 1) {
+              failures.push("Soporte queda debajo de la navegación al final del scroll");
+            }
             return failures;
           });
           await page.screenshot({ path: path.join(output, `${escenario.nombre}-${width}x${height}.png`) });

@@ -2,7 +2,7 @@ name: App Usuario
 on:
   pull_request:
   push:
-    branches: [main]
+    branches: [main, 'codex/app-usuario-rc']
 permissions:
   contents: read
 jobs:

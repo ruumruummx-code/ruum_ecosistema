@@ -406,7 +406,7 @@ export function MisTrasladosCliente({
             value={busquedaInput}
             onChange={(event) => setBusquedaInput(event.target.value)}
             placeholder="Buscar por vehículo, destino o # de traslado"
-            className="w-full border-0 bg-transparent p-0 text-[14px] font-medium text-[#0a2342] outline-none placeholder:text-[#64748b] dark:text-[#f6f8fb] dark:placeholder:text-[#a8b5cc]"
+            className="w-full min-w-0 border-0 bg-transparent p-0 text-[14px] font-medium text-[#0a2342] outline-none placeholder:text-[#64748b] dark:text-[#f6f8fb] dark:placeholder:text-[#a8b5cc]"
             aria-busy={buscando}
             aria-describedby="busqueda-ayuda"
           />

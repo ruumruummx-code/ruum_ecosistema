@@ -1979,7 +1979,7 @@ input::placeholder, textarea::placeholder {
 .user-transfers-nav .user-v2-nav-indicator { width: 64px; height: 4px; }
 .user-transfers-nav .user-v2-nav-link:active { transform: scale(.95); }
 .user-transfers-shell .user-transfers-content {
-  overflow: hidden;
+  overflow-y: auto;
   padding: 8px 16px calc(var(--user-mobile-nav-height, calc(66px + env(safe-area-inset-bottom))) + 12px);
 }
 .user-transfers-view { display: flex; flex: 1; flex-direction: column; min-height: 0; min-width: 0; gap: 10px; overflow: hidden; }

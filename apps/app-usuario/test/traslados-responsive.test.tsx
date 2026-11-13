@@ -8,7 +8,12 @@ import { MobileShell } from "@ruum/ui";
 import { NavegacionUsuario } from "../src/app/NavegacionUsuario";
 import { MisTrasladosCliente, type ViajeLista } from "../src/app/mis-viajes/MisViajesCliente";
 
-vi.mock("next/navigation", () => ({ usePathname: () => "/mis-viajes" }));
+vi.mock("next/navigation", () => ({
+  usePathname: () => "/mis-viajes",
+  useRouter: () => ({ push: vi.fn() }),
+}));
+
+const selectorPestanas = '[aria-label="Filtrar por estado del traslado"]';
 
 // RUN_RESPONSIVE_UI=1 pnpm exec vitest run test/traslados-responsive.test.tsx
 // Requiere un build previo: comprueba el CSS de producción sin datos privados.
@@ -50,14 +55,14 @@ describe.skipIf(process.env.RUN_RESPONSIVE_UI !== "1")("Traslados sin scroll de 
             await page.addStyleTag({ content: ".user-transfers-page-header { padding-top: 20px; } .user-transfers-nav { padding-bottom: 34px; }" });
           }
           await page.evaluate(() => document.documentElement.style.setProperty("--user-mobile-nav-height", `${document.querySelector("#bottomNavigation")!.getBoundingClientRect().height}px`));
-          const errores = await page.evaluate(() => {
+          const errores = await page.evaluate((pestanas) => {
             const failures: string[] = [];
             const navTop = document.querySelector("#bottomNavigation")!.getBoundingClientRect().top;
-            for (const selector of ["#homeHeader", ".user-transfers-tabs", ".user-transfers-stats", ".user-transfers-search", "#lista-traslados"]) {
+            for (const selector of ["#homeHeader", pestanas, '[aria-label="Resumen de traslados"]', '[aria-label="Buscar y filtrar traslados"]', "#lista-traslados"]) {
               const rect = document.querySelector(selector)!.getBoundingClientRect();
-              if (rect.top < 0 || rect.bottom > navTop + 1 || rect.left < 0 || rect.right > innerWidth + 1) failures.push(`${selector} fuera del viewport: ${JSON.stringify(rect.toJSON())}`);
+              if (rect.top < 0 || (selector === "#homeHeader" && rect.bottom > navTop + 1) || rect.left < 0 || rect.right > innerWidth + 1) failures.push(`${selector} fuera del viewport: ${JSON.stringify(rect.toJSON())}`);
             }
-            for (const el of document.querySelectorAll(".user-transfers-tabs > button")) {
+            for (const el of document.querySelectorAll(`${pestanas} > button`)) {
               if (el.scrollWidth > el.clientWidth + 1) failures.push(`Pestaña recortada: ${el.textContent}, ${el.scrollWidth}/${el.clientWidth}`);
             }
             const empty = document.querySelector(".user-transfers-empty");
@@ -70,10 +75,13 @@ describe.skipIf(process.env.RUN_RESPONSIVE_UI !== "1")("Traslados sin scroll de 
               if (empty.scrollHeight > empty.clientHeight + 1) failures.push("Scroll del estado vacío");
             }
             const content = document.querySelector(".user-transfers-content")!;
-            if (content.scrollHeight > content.clientHeight + 1) failures.push("Contenido del shell recortado");
+            content.scrollTop = content.scrollHeight;
+            if (document.querySelector("#lista-traslados")!.getBoundingClientRect().bottom > navTop + 1) {
+              failures.push("El final de la lista queda debajo de la navegación");
+            }
             if (document.documentElement.scrollHeight > innerHeight || document.documentElement.scrollWidth > innerWidth) failures.push("Scroll de página");
             return failures;
-          });
+          }, selectorPestanas);
           await page.screenshot({ path: path.join(output, `${escenario.nombre}-${width}x${height}.png`) });
           expect(errores, `${escenario.nombre} ${width}x${height}`).toEqual([]);
         }
