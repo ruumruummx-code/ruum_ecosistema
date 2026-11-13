@@ -1,5 +1,7 @@
 "use client";
 
+import { placaVisible } from "../../lib/traslado-presentacion";
+
 import { Tabs } from "@ruum/ui";
 
 import { useEffect, useState } from "react";
@@ -119,7 +121,7 @@ export function DetalleTrasladoDesktop({
         <VehiculoTraslado viaje={viaje} grande />
         <div>
           <h2>{vehiculoNombre(p)}</h2>
-          <span>{p.vehiculo_placas || "Placas pendientes"}</span>
+          <span>{placaVisible(p.vehiculo_placas)}</span>
           <EstadoTraslado viaje={viaje} />
         </div>
         <button aria-label="Cerrar detalle" onClick={cerrar}>
@@ -272,7 +274,7 @@ export function DetalleTrasladoDesktop({
             <dt>Vehículo</dt>
             <dd>{vehiculoNombre(p)}</dd>
             <dt>Placas</dt>
-            <dd>{p.vehiculo_placas || "Pendientes"}</dd>
+            <dd>{placaVisible(p.vehiculo_placas)}</dd>
             <dt>Origen</dt>
             <dd>{origen}</dd>
             <dt>Destino</dt>

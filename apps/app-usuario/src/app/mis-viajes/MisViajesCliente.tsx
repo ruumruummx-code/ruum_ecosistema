@@ -1,5 +1,8 @@
 "use client";
 
+import { EstadoTrasladoBreve } from "../../components/EstadoTrasladoBreve";
+import { estadoVisibleTraslado, lineasVehiculo, placaVisible } from "../../lib/traslado-presentacion";
+
 import { useMemo, useState, useEffect, useTransition, useRef } from "react";
 import Link from "next/link";
 import { ETIQUETA_TIPO_VEHICULO } from "@ruum/shared/constants";
@@ -13,7 +16,6 @@ import {
   type Traslado,
   type PestañaTraslados,
   pestañaDeViaje,
-  vehiculoNombre,
   vehiculoTipo,
   folioCorto,
   fechaProgramada,
@@ -128,50 +130,6 @@ const PILDORA_CLASE: Record<TonoPildora, string> = {
   cancelled: "bg-[#fdeaea] text-[#9a2637] border border-[#f6ccd2] dark:bg-[#3d0f1a] dark:text-[#ff6b7a] dark:border-[#661a29]",
   review: "bg-[#eef2ff] text-[#4338ca] border border-[#c7d2fe] dark:bg-[#1e1b4b] dark:text-[#a5b4fc] dark:border-[#3730a3]",
 };
-
-function estadoVisual(p: Pasaporte): { label: string } {
-  if (p.cerrado_en || p.estado_operativo === "closed") return { label: p.estado === "disputa_abierta" ? "Finalizado · Disputa abierta" : "Finalizado" };
-  switch (String(p.estado ?? "")) {
-    case "pendiente_de_conductor":
-      return { label: "Pendiente de conductor" };
-    case "cotizacion_aceptada":
-    case "pago_pendiente":
-      return { label: "Pago pendiente" };
-    case "servicio_confirmado":
-      return { label: "Confirmado" };
-    case "servicio_cerrado":
-    case "reclamo_resuelto":
-    case "disputa_resuelta":
-      return { label: "Completado" };
-    case "servicio_cancelado":
-    case "traslado_fallido":
-      return { label: "Cancelado" };
-    case "conductor_asignado":
-      return { label: "Conductor asignado" };
-    case "conductor_en_camino_al_origen":
-      return { label: "En camino al origen" };
-    case "conductor_en_punto_de_recoleccion":
-    case "verificacion_vehiculo_en_proceso":
-    case "evidencia_inicial_en_proceso":
-      return { label: "Check origen" };
-    case "evidencia_inicial_completada":
-      return { label: "Evidencia inicial lista" };
-    case "vehiculo_recibido":
-      return { label: "Vehículo recibido" };
-    case "traslado_en_curso":
-      return { label: "En camino al destino" };
-    case "llegada_a_destino":
-      return { label: "En punto de entrega" };
-    case "evidencia_final_en_proceso":
-      return { label: "Check final en curso" };
-    case "evidencia_final_completada":
-      return { label: "Evidencia final lista" };
-    case "entrega_confirmada":
-      return { label: "Entregado" };
-    default:
-      return { label: "En proceso" };
-  }
-}
 
 function SkeletonCard() {
   return (
@@ -556,15 +514,13 @@ export function MisTrasladosCliente({
             {filtrados.map(({ pasaporte, traslado }) => {
               const cat = pestañaDeViaje(pasaporte);
               const esHuerfano = !pasaporte.traslado_id || !traslado;
-              const { label } = esHuerfano
-                ? { label: "En verificación técnica" }
-                : estadoVisual(pasaporte);
+              const estado = estadoVisibleTraslado(pasaporte, esHuerfano);
               const { tono, borde } = PILDORA_POR_PESTAÑA[cat] ?? PILDORA_POR_PESTAÑA.en_revision;
               const folio = folioCorto(pasaporte.traslado_id);
               const urlViaje = esHuerfano || cat === "en_revision"
                 ? `/soporte?asunto=traslado_en_revision&folio=${pasaporte.traslado_id ?? pasaporte.creado_en ?? ""}`
                 : pasaporte.traslado_id ? `/viajes/${pasaporte.traslado_id}` : "/mis-viajes";
-              const nombreVehiculo = vehiculoNombre(pasaporte);
+              const { marca, modelo } = lineasVehiculo(pasaporte);
               const origenCiudad = pasaporte.origen_ciudad ?? traslado?.origen_ciudad ?? "Origen pendiente";
               const destinoCiudad = pasaporte.destino_ciudad ?? traslado?.destino_ciudad ?? "Destino pendiente";
               const esPagoPendiente = pasaporte.estado === "cotizacion_aceptada" || pasaporte.estado === "pago_pendiente";
@@ -594,10 +550,7 @@ export function MisTrasladosCliente({
                   ].join(" ")}
                 >
                   <div className="mb-3.5 flex items-start justify-between gap-3">
-                    <span className={["inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11.5px] font-bold tracking-tight", PILDORA_CLASE[tono]].join(" ")}>
-                      {esActiva && <span aria-hidden="true" className="size-1.5 animate-pulse rounded-full bg-emerald-500" />}
-                      {label}
-                    </span>
+                    <EstadoTrasladoBreve estado={estado} className={`inline-flex items-center rounded-full px-2.5 py-1 text-[11.5px] font-bold tracking-tight ${PILDORA_CLASE[estado.tono]}`} />
                     <span className="shrink-0 rounded-full bg-[#f2f6fb] px-2.5 py-1 text-[11.5px] font-mono font-bold text-[#4e5f80] dark:bg-[#1a3a5c] dark:text-[#a8b5cc]">
                       {folio}
                     </span>
@@ -608,10 +561,12 @@ export function MisTrasladosCliente({
                       <IconoCarroFrente className="size-5" />
                     </span>
                     <div className="min-w-0 flex-1">
-                      <h3 className="truncate text-[15px] font-bold text-[#0a2342] dark:text-[#f6f8fb]">
-                        {nombreVehiculo}
+                      <h3 className="[overflow-wrap:anywhere] text-[15px] font-bold text-[#0a2342] dark:text-[#f6f8fb]">
+                        <span className="block">{marca}</span>
+                        {modelo && <span className="block">{modelo}</span>}
                       </h3>
-                      <p className="truncate text-[12.5px] font-medium user-essential-muted">
+                      <p className="text-[12.5px] font-medium user-essential-muted">{placaVisible(pasaporte.vehiculo_placas)}</p>
+                      <p className="[overflow-wrap:anywhere] text-[12.5px] font-medium user-essential-muted">
                         {origenCiudad} → {destinoCiudad}
                       </p>
                     </div>

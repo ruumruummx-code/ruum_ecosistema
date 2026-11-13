@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { EstadoTraslado, VehiculoTraslado } from "./VisualesTraslado";
+import { lineasVehiculo, placaVisible } from "../../lib/traslado-presentacion";
 import { useRouter } from "next/navigation";
 import { UserDashboardLayout } from "../../components/layout/UserDashboardLayout";
 import type { NotificacionHeader } from "../../components/layout/UserHeader";
@@ -235,7 +236,7 @@ export function MisViajesDesktop({
             role="group"
             aria-label="Filtrar por estado del traslado"
           >
-            {tabs.map((t, index) => (
+            {tabs.map((t) => (
               <button
                 key={t}
 
@@ -278,6 +279,7 @@ export function MisViajesDesktop({
               <tbody>
                 {filas.map((v, i) => {
                   const p = v.pasaporte;
+                  const { marca, modelo } = lineasVehiculo(p);
                   const fecha = fechaProgramada(
                     v.traslado?.fecha_hora_programada ?? null,
                   );
@@ -295,9 +297,10 @@ export function MisViajesDesktop({
                         <div className={s.vehicle}>
                           <VehiculoTraslado viaje={v} />
                           <div>
-                            <strong>{vehiculoNombre(p)}</strong>
+                            {marca && <strong>{marca}</strong>}
+                            {modelo && <strong>{modelo}</strong>}
                             <small>
-                              {p.vehiculo_placas || "Placas pendientes"}
+                              {placaVisible(p.vehiculo_placas)}
                             </small>
                           </div>
                         </div>
