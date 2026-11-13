@@ -8,7 +8,7 @@ export const dynamic = "force-dynamic";
 
 /**
  * RUUM-USR-F6-001 (CB-2 / Bloque B): Consumidor periódico del reconciliador/compensador de la saga de traslados individuales.
- * Invocado periódicamente (cada 5 minutos) por Vercel Cron con CRON_SECRET.
+ * Endpoint manual. La ejecución periódica está en Supabase.
  */
 export async function GET(request: NextRequest) {
   const secreto = process.env.VIAJES_RECONCILIADOR_SECRET ?? process.env.MASIVOS_RECONCILIADOR_SECRET;

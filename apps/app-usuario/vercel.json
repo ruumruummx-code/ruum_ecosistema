@@ -2,9 +2,5 @@
   "framework": "nextjs",
   "buildCommand": "pnpm --filter @ruum/app-usuario build",
   "installCommand": "pnpm install --frozen-lockfile",
-  "outputDirectory": ".next",
-  "crons": [
-    { "path": "/api/internal/masivos/reconcile", "schedule": "* * * * *" },
-    { "path": "/api/internal/viajes/reconcile", "schedule": "*/5 * * * *" }
-  ]
+  "outputDirectory": ".next"
 }

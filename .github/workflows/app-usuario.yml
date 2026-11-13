@@ -39,7 +39,6 @@ jobs:
           TWILIO_VERIFY_SERVICE_SID: VA_localmock
           UPSTASH_REDIS_REST_URL: http://127.0.0.1:54400
           UPSTASH_REDIS_REST_TOKEN: e2e-redis-token
-          CRON_SECRET: reconcile-fixture-only
           RUUM_LOCAL_PRODUCTION: 'true'
       - run: pnpm --filter @ruum/app-usuario exec playwright install --with-deps chromium
       - run: pnpm --filter @ruum/app-usuario test:e2e
@@ -48,3 +47,9 @@ jobs:
           PLAYWRIGHT_DISABLE_AUTH_ARTIFACTS: '1'
       - run: pnpm --filter @ruum/app-usuario test:coverage
         if: ${{ !cancelled() }}
+      - uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: app-usuario-coverage
+          path: apps/app-usuario/coverage/
+          if-no-files-found: warn

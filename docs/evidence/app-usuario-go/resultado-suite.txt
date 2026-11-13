@@ -1,0 +1,28 @@
+ ✓ test/registro-redesign.test.ts (3 tests) 10ms
+ ↓ test/inicio-responsive.test.tsx (1 test | 1 skipped)
+ ↓ test/traslados-responsive.test.tsx (1 test | 1 skipped)
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/app/cuenta/facturacion/Facturacion.test.tsx > Facturación — Pantalla y flujos fiscales > permite abrir el modal de edición de datos fiscales y guardar cambios
+Error: Test timed out in 30000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ src/app/cuenta/facturacion/Facturacion.test.tsx:59:3
+     57|   });
+     58| 
+     59|   it("permite abrir el modal de edición de datos fiscales y guardar ca…
+       |   ^
+     60|     const user = userEvent.setup();
+     61|     render(<Facturacion usuario={mockUsuario as Usuario} facturasInici…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 166 passed | 2 skipped (169)
+      Tests  1 failed | 1150 passed | 2 skipped (1153)
+   Start at  23:16:44
+   Duration  858.01s (transform 126.29s, setup 412.54s, collect 517.70s, tests 977.10s, environment 992.20s, prepare 112.58s)
+
+C:\ruum_ecosistema-main\apps\app-usuario:
+ ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL  @ruum/app-usuario@1.0.0 test:coverage: `vitest run --coverage "--maxWorkers" "4"`
+Exit status 1

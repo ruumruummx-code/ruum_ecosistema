@@ -1,0 +1,10 @@
+
+ RUN  v3.2.6 C:/ruum_ecosistema-main/apps/app-usuario
+
+ ✓ test/carga-flujos-criticos.test.ts (5 tests) 557ms
+
+ Test Files  1 passed (1)
+      Tests  5 passed (5)
+   Start at  23:23:49
+   Duration  25.40s (transform 6.09s, setup 2.22s, collect 19.69s, tests 557ms, environment 0ms, prepare 1.17s)
+

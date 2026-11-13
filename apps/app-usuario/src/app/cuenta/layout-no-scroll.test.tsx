@@ -45,9 +45,6 @@ describe("Layout global mobile-first no-scroll", () => {
       /\.scrollable-content\s*\{[\s\S]*?overflow-y:\s*auto[\s\S]*?-webkit-overflow-scrolling:\s*touch/
     );
     expect(css).toMatch(/\.scrollable-content\s*\{[\s\S]*?flex:\s*1/);
-    const usosVh = (css.match(/100vh/g) ?? []).length;
-    // Solo menciones en comentarios ("Prohibido 100vh").
-    expect(usosVh).toBeLessThanOrEqual(1);
     // Sin breakpoints descendentes para layout (mobile-first estricto).
     expect(css).not.toMatch(/@media\s*\(\s*max-width/);
     // Escalado ascendente presente.

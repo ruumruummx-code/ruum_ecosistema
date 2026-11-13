@@ -70,7 +70,7 @@ function crearWebServers(): NonNullable<Parameters<typeof defineConfig>[0]['webS
     command: E2E_PRODUCCION ? `pnpm exec next start -p ${PORT}` : `pnpm exec next dev -p ${PORT}`,
     port: PORT,
     timeout: E2E_PRODUCCION ? 60_000 : 180_000,
-    reuseExistingServer: !process.env.CI,
+    reuseExistingServer: !process.env.CI && !E2E_PRODUCCION,
     env: E2E_SUPABASE_REAL
       ? {}
       : {

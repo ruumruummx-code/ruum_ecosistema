@@ -29,7 +29,7 @@ describe("UserSidebar — Componente de Navegación Lateral (RR-UI-001)", () => 
     expect(within(sidebar).getByText("Tu traslado, en orden")).toBeInTheDocument();
   });
 
-  it("muestra los 9 accesos autenticados oficiales del alcance funcional", () => {
+  it("muestra los accesos autenticados oficiales del alcance funcional", () => {
     render(<UserSidebar />);
 
     const nav = screen.getByRole("navigation", { name: "Navegación del panel" });
@@ -39,8 +39,8 @@ describe("UserSidebar — Componente de Navegación Lateral (RR-UI-001)", () => 
     expect(within(nav).getByRole("link", { name: "Mis ubicaciones" })).toHaveAttribute("href", "/ubicaciones");
     expect(within(nav).getByRole("link", { name: "Carga Masiva" })).toHaveAttribute("href", "/viajes/masivo");
     expect(within(nav).getByRole("link", { name: "Mi cuenta" })).toHaveAttribute("href", "/cuenta");
-    expect(within(nav).getByRole("link", { name: "Mi perfil" })).toHaveAttribute("href", "/cuenta?seccion=perfil");
-    expect(within(nav).getByRole("link", { name: "Mis preferencias" })).toHaveAttribute("href", "/cuenta/preferencias");
+    expect(within(nav).queryByRole("link", { name: "Mi perfil" })).not.toBeInTheDocument();
+    expect(within(nav).queryByRole("link", { name: "Mis preferencias" })).not.toBeInTheDocument();
     expect(within(nav).getByRole("link", { name: "Ayuda" })).toHaveAttribute("href", "/soporte");
   });
 

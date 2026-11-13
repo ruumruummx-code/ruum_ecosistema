@@ -51,6 +51,20 @@ vi.mock("next/navigation", () => ({
   useSearchParams: () => new URLSearchParams(),
 }));
 
+vi.mock("@/lib/ruta-solicitud-servidor", () => ({
+  resolverRutaSolicitudServidor: async () => ({
+    distanciaKm: 215.4, tiempoEstimadoHoras: 2.75, fuente: "mapbox",
+    origenLat: 19.4326, origenLng: -99.1332, destinoLat: 20.5888, destinoLng: -100.3899,
+    paradasCoords: [],
+  }),
+}));
+vi.mock("@/lib/cotizacion-individual-servidor", () => ({
+  cotizarSolicitudIndividual: async (_usuario: string, solicitud: { traslado: Record<string, unknown> }) => ({
+    ...solicitud,
+    traslado: { ...solicitud.traslado, snapshot_tarifa: { monto: 5000, nonce: "fixture-sql" } },
+  }),
+}));
+
 vi.mock("next/headers", () => ({
   cookies: vi.fn(async () => ({
     getAll: () => [],
@@ -755,7 +769,7 @@ describe("Integración de flujos críticos en @ruum/app-usuario (signup, login, 
       });
       const resCompleto = await postViajes(reqCompleto);
       expect(resCompleto.status).toBe(200);
-      expect(await resCompleto.json()).toEqual({ ok: true, pasoValidado: 4 });
+      expect(await resCompleto.json()).toMatchObject({ ok: true, pasoValidado: 4, recalculo: { precioCotizado: 5000 } });
 
       // Vehículo ajeno en la BD es rechazado con 403 aunque venga en vehiculosUsuarioIds
       entorno.listarVehiculosDeUsuarioMock.mockResolvedValueOnce([

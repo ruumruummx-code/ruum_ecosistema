@@ -10,7 +10,7 @@ import {
 
 export const dynamic = "force-dynamic";
 
-/** Consumidor periódico del workflow durable. Configurar como cron cada minuto. */
+/** Endpoint manual para el workflow durable. La programación está en Supabase. */
 export async function GET(request: NextRequest) {
   if (!autorizarCron(request, process.env.MASIVOS_RECONCILIADOR_SECRET)) {
     return NextResponse.json({ error: "No autorizado" }, { status: 401 });

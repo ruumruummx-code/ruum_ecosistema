@@ -22,6 +22,7 @@ export default defineConfig({
     setupFiles: ["./vitest.setup.ts"],
     coverage: {
       provider: "v8",
+      reportOnFailure: true,
       reporter: ["text", "lcov", "html"],
       // Gate de cobertura (lines ≥70, branches ≥60, functions ≥70, statements ≥70).
       // Si el gate queda en rojo, subir cobertura real antes de bajar el umbral.

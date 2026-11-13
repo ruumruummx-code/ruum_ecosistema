@@ -66,12 +66,12 @@ describe("MisTrasladosCliente", () => {
     render(<MisTrasladosCliente Traslados={[viaje("traslado_en_curso")]} pestanaInicial="activos" />);
     await user.type(screen.getByRole("searchbox"), "Toluca");
     await waitFor(() => expect(screen.getByRole("searchbox")).toHaveAttribute("aria-busy", "false"));
-    expect(await screen.findByText("Nissan Versa 2020")).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: /Nissan\s*Versa 2020/i })).toBeInTheDocument();
     await user.clear(screen.getByRole("searchbox"));
     await user.type(screen.getByRole("searchbox"), "inexistente");
     expect(await screen.findByText("No se encontraron traslados")).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "Limpiar filtros" }));
-    expect(await screen.findByText("Nissan Versa 2020")).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: /Nissan\s*Versa 2020/i })).toBeInTheDocument();
   });
 
   it("abre filtros en una hoja y permite cerrarla sin desplazar el lienzo", async () => {
@@ -85,8 +85,8 @@ describe("MisTrasladosCliente", () => {
     await user.click(within(panel).getByRole("button", { name: "Aplicar filtros" }));
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
     expect(screen.getByRole("button", { name: /filtro activo: Sedán/ })).toBeInTheDocument();
-    await waitFor(() => expect(screen.queryByText("Toyota RAV4 2020")).not.toBeInTheDocument());
-    expect(screen.getByText("Nissan Versa 2020")).toBeInTheDocument();
+    await waitFor(() => expect(screen.queryByRole("heading", { name: /Toyota\s*RAV4 2020/i })).not.toBeInTheDocument());
+    expect(screen.getByRole("heading", { name: /Nissan\s*Versa 2020/i })).toBeInTheDocument();
   });
 
   it("clasifica en programados y filtra por pestaña", async () => {
@@ -100,13 +100,13 @@ describe("MisTrasladosCliente", () => {
         pestanaInicial="programados"
       />
     );
-    expect(await screen.findByText(/Nissan Versa 2020/)).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: /Nissan\s*Versa 2020/i })).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: /finalizados/i }));
     // handlePestanaChange envuelve setPestana en startTransition: el render puede
     // no haberse aplicado aún tras el click. Sin waitFor la aserción lee la lista
     // anterior y flaquea bajo carga (falla 1 de cada N ejecuciones paralelas).
     await waitFor(() => {
-      expect(screen.queryByText(/Nissan Versa 2020/)).toBeNull();
+      expect(screen.queryByRole("heading", { name: /Nissan\s*Versa 2020/i })).toBeNull();
     });
   });
   it("permite navegar los filtros con teclado y buscar sin cambiar de categoría", async () => {
@@ -118,7 +118,7 @@ describe("MisTrasladosCliente", () => {
     expect(screen.getByRole("button", { name: /^Cancelados/ })).toHaveFocus();
     expect(screen.getByRole("button", { name: /^Cancelados/ })).toHaveAttribute("aria-pressed", "true");
     await user.keyboard("{ArrowLeft}");
-    expect(await screen.findByText("Toyota Corolla 2020")).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: /Toyota\s*Corolla 2020/i })).toBeInTheDocument();
     await user.type(screen.getByRole("searchbox", { name: "Buscar traslado" }), "inexistente");
     expect(await screen.findByText("No se encontraron traslados")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /^Finalizados/ })).toHaveAttribute("aria-pressed", "true");

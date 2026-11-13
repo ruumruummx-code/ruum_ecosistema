@@ -9,6 +9,24 @@ const mockSignUp = vi.fn();
 const mockVerifyOtp = vi.fn();
 const mockGetUser = vi.fn();
 
+vi.mock("@ruum/api/services", () => ({
+  registrarConsentimientoUsuario: vi.fn(async () => ({ ok: true })),
+}));
+
+vi.mock("@/lib/ruta-solicitud-servidor", () => ({
+  resolverRutaSolicitudServidor: async () => ({
+    distanciaKm: 215.4, tiempoEstimadoHoras: 2.75, fuente: "mapbox",
+    origenLat: 19.4326, origenLng: -99.1332, destinoLat: 20.5888, destinoLng: -100.3899,
+    paradasCoords: [],
+  }),
+}));
+vi.mock("@/lib/cotizacion-individual-servidor", () => ({
+  cotizarSolicitudIndividual: async (_usuario: string, solicitud: { traslado: Record<string, unknown> }) => ({
+    ...solicitud,
+    traslado: { ...solicitud.traslado, snapshot_tarifa: { monto: 5000, nonce: "fixture-sql" } },
+  }),
+}));
+
 vi.mock("next/headers", () => ({
   cookies: vi.fn(async () => ({
     getAll: () => [],
@@ -324,13 +342,35 @@ describe("Pruebas de carga (k6 / Artillery + Benchmark concurrente) — Signup, 
         vehiculosUsuarioIds: [],
       };
 
-      const tareas = Array.from({ length: CONCURRENCIA }, async (_, idx) => {
-        const inicio = performance.now();
-        const ip = `10.30.3.${idx + 1}`;
-        mockGetUser.mockResolvedValue({
+      // Calentar el handler para separar la transformación de módulos de Vitest
+      // del presupuesto de latencia de la ráfaga con proveedores simulados.
+      const warmupCsrf = await getCsrf(new NextRequest("http://localhost:3000/api/csrf"));
+      const { csrfToken: warmupToken } = await warmupCsrf.json();
+      const warmup = await postViajes(new NextRequest("http://localhost:3000/api/viajes", {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+          origin: "http://localhost:3000",
+          "x-forwarded-for": "10.30.4.1",
+          [HEADER_CSRF_TOKEN]: warmupToken,
+          cookie: `${COOKIE_CSRF_USUARIO}=${warmupToken}`,
+        },
+        body: JSON.stringify(payloadViajeValido),
+      }));
+      expect(warmup.status).toBe(200);
+      for (let idx = 0; idx < CONCURRENCIA; idx++) {
+        mockGetUser.mockResolvedValueOnce({
           data: { user: { id: `uid-cotizacion-${idx}` } },
           error: null,
         });
+        mockGetUser.mockResolvedValueOnce({
+          data: { user: { id: `uid-cotizacion-viaje-${idx}` } },
+          error: null,
+        });
+      }
+      const tareas = Array.from({ length: CONCURRENCIA }, async (_, idx) => {
+        const inicio = performance.now();
+        const ip = `10.30.3.${idx + 1}`;
 
         const resCsrf = await getCsrf(
           new NextRequest("http://localhost:3000/api/csrf", { method: "GET" })

@@ -85,15 +85,6 @@ if (hostedBuild && ["app-usuario", "workspace"].includes(app)) {
   if (process.env.VERCEL_ENV === "preview" && modoPrivado !== "test") {
     invalid.push("Stripe debe usar claves test en Vercel Preview");
   }
-  const cron = valor("CRON_SECRET");
-  const secretosExternos = process.env.VERCEL ? "" : valor("MASIVOS_RECONCILIADOR_SECRET");
-  if (cron.length < 16 && secretosExternos.length < 16) {
-    invalid.push("Se requiere CRON_SECRET de al menos 16 caracteres o el secreto del scheduler externo");
-  }
-  const secretoIndividual = valor("VIAJES_RECONCILIADOR_SECRET");
-  if (!cron && secretoIndividual && secretoIndividual.length < 16) {
-    invalid.push("VIAJES_RECONCILIADOR_SECRET debe tener al menos 16 caracteres");
-  }
   const redisUrl = valor("UPSTASH_REDIS_REST_TOKEN") && valor("UPSTASH_REDIS_REST_URL")
     ? valor("UPSTASH_REDIS_REST_URL")
     : valor("KV_REST_API_URL");

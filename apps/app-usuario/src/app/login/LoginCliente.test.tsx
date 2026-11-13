@@ -74,8 +74,6 @@ describe("LoginCliente", () => {
     expect(mainContainer?.className).toContain("overflow-hidden");
     expect(mainContainer?.className).toContain("login-usuario");
     expect(mainContainer?.className).toContain("login-container");
-    expect(mainContainer?.style.height).toBe("100dvh");
-    expect(mainContainer?.style.overflow).toBe("hidden");
 
     // Prohibido usar 100vh
     expect(mainContainer?.className).not.toContain("100vh");

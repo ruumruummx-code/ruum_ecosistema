@@ -1,6 +1,6 @@
 /** @vitest-environment jsdom */
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { render, screen, fireEvent, within } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { LoginCliente } from "./LoginCliente";
 
@@ -32,7 +32,7 @@ describe("LoginDesktop — Pantalla de Inicio de Sesión de Escritorio", () => {
     vi.stubGlobal("fetch", mocks.fetch);
   });
 
-  it("renderiza la barra de navegación superior de escritorio con logo, enlace, botón de registro y selector de idioma", () => {
+  it("renderiza la barra de navegación superior de escritorio con logo, enlace y botón de registro", () => {
     render(<LoginCliente motivo={null} siguiente="/" />);
 
     const navbar = screen.getByRole("banner", { name: "Barra superior de inicio de sesión" });
@@ -45,16 +45,7 @@ describe("LoginDesktop — Pantalla de Inicio de Sesión de Escritorio", () => {
     const btnRegistro = within(navbar).getByRole("link", { name: "Regístrate gratis" });
     expect(btnRegistro).toHaveAttribute("href", "/registro");
 
-    // Selector de idioma interactivo
-    const selectorIdioma = within(navbar).getByRole("button", { name: /seleccionar idioma/i });
-    expect(selectorIdioma).toHaveTextContent("ES");
-
-    // Abrir dropdown y cambiar a EN
-    fireEvent.click(selectorIdioma);
-    const opcionEN = within(navbar).getByRole("button", { name: "EN" });
-    expect(opcionEN).toBeInTheDocument();
-    fireEvent.click(opcionEN);
-    expect(selectorIdioma).toHaveTextContent("EN");
+    expect(within(navbar).queryByRole("button", { name: /seleccionar idioma/i })).not.toBeInTheDocument();
   });
 
   it("renderiza la columna izquierda con tagline, título principal, los 3 pilares y la ilustración", () => {

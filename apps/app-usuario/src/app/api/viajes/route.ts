@@ -1,3 +1,4 @@
+import { registrarConsentimientoUsuario } from "@ruum/api/services";
 import { normalizarDispositivo } from "@/lib/device-id";
 import { NextRequest, NextResponse } from "next/server";
 import { crearClienteServidor } from "@/lib/supabase-server";
@@ -187,14 +188,11 @@ export async function POST(request: NextRequest) {
     // CB-3 / T9 / CA-8: Consentimiento vía escritor canónico de F2
     if (parsed.data.aceptaPoliticas) {
       try {
-        const { registrarConsentimientoUsuario } = await import("@ruum/api/services");
-        if (typeof registrarConsentimientoUsuario === "function") {
-          await registrarConsentimientoUsuario(cliente, {
-            version: 1,
-            canal: "web",
-            versionApp: "1.0.0",
-          });
-        }
+        await registrarConsentimientoUsuario(cliente, {
+          version: 1,
+          canal: "web",
+          versionApp: "1.0.0",
+        });
       } catch (errConsent) {
         logStructuredWarn("api/viajes", "registro_consentimiento_canonico_nota", errConsent, {
           userIdHash: userHash,

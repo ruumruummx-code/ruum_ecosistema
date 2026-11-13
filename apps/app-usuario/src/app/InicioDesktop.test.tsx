@@ -29,7 +29,7 @@ describe("Inicio desktop", () => {
     expect(within(activo).queryByText("99 km")).not.toBeInTheDocument();
     expect(within(activo).getByRole("link", { name: /2. En tránsito/ })).toHaveAttribute("aria-current", "step");
     expect(within(activo).getByRole("link", { name: /Ver detalles/ })).toHaveAttribute("href", "/viajes/viaje-1");
-    expect(screen.getByRole("link", { name: "Enviar mensaje a Jorge Ramírez" })).toHaveAttribute("href", "/viajes/viaje-1#chat-conductor");
+    expect(screen.getByRole("link", { name: "Mensaje a Jorge Ramírez" })).toHaveAttribute("href", "/viajes/viaje-1#chat-conductor");
   });
   it("distingue preparación de circulación y no inventa un conductor", () => {
     render(<InicioDesktop usuario={null} traslados={[{ ...viaje, estado: "documentacion_pendiente", conductor_id: null, conductor_nombre: null }]} />);
