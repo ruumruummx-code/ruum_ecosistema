@@ -331,7 +331,7 @@ export function MisTrasladosCliente({
               data-pestana={id}
               tabIndex={activo ? 0 : -1}
               onClick={() => handlePestanaChange(id)}
-              className={`flex-1 min-w-[84px] py-2 px-3 text-[13px] font-bold rounded-full transition-all cursor-pointer text-center ${
+              className={`flex-1 min-w-max py-2 px-3 text-[13px] font-bold rounded-full transition-all cursor-pointer text-center ${
                 activo
                   ? "bg-[#0052cc] text-white shadow-sm"
                   : "user-essential-muted hover:text-[#0a2342] dark:hover:text-white"

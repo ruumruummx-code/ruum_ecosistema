@@ -40,7 +40,8 @@ describe.skipIf(process.env.RUN_RESPONSIVE_UI !== "1")("Inicio sin scroll en nav
       { nombre: "pendiente", traslados: [{ traslado_id: "pendiente", estado: "pago_pendiente" } as typeof activo] },
       { nombre: "vacio", traslados: [] },
     ];
-    const tamanos = [[320, 568], [360, 640], [375, 667], [390, 844], [430, 932], [768, 1024], [1024, 768], [1440, 900], [667, 375], [844, 390], [393, 852]];
+    // El layout de escritorio se valida con los specs de Playwright.
+    const tamanos = [[320, 568], [360, 640], [375, 667], [390, 844], [430, 932], [768, 1024], [1023, 768], [667, 375], [844, 390], [393, 852]];
     const browser = await chromium.launch();
     try {
       const page = await browser.newPage();
@@ -84,7 +85,7 @@ describe.skipIf(process.env.RUN_RESPONSIVE_UI !== "1")("Inicio sin scroll en nav
             }
             if (document.documentElement.scrollHeight > innerHeight || document.documentElement.scrollWidth > innerWidth) failures.push("Scroll del documento");
             const content = document.querySelector(".user-dashboard-content")!;
-            content.scrollTop = content.scrollHeight;
+            content.scrollTo({ top: content.scrollHeight, behavior: "instant" });
             if (document.querySelector(".home-support")!.getBoundingClientRect().bottom > navTop + 1) {
               failures.push("Soporte queda debajo de la navegación al final del scroll");
             }

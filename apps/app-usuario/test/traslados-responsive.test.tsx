@@ -18,7 +18,7 @@ const selectorPestanas = '[aria-label="Filtrar por estado del traslado"]';
 // RUN_RESPONSIVE_UI=1 pnpm exec vitest run test/traslados-responsive.test.tsx
 // Requiere un build previo: comprueba el CSS de producción sin datos privados.
 describe.skipIf(process.env.RUN_RESPONSIVE_UI !== "1")("Traslados sin scroll de página", () => {
-  it("conserva header, tabs, KPI, buscador, tarjeta y navegación en 11 tamaños", async () => {
+  it("conserva header, tabs, KPI, buscador, tarjeta y navegación en los tamaños del layout móvil", async () => {
     const { chromium } = await import("@playwright/test");
     const buildDir = process.env.RESPONSIVE_UI_BUILD_DIR ?? ".next";
     const manifest = readFileSync(path.resolve(buildDir, "server/app/mis-viajes/page_client-reference-manifest.js"), "utf8");
@@ -36,7 +36,7 @@ describe.skipIf(process.env.RUN_RESPONSIVE_UI !== "1")("Traslados sin scroll de 
       { nombre: "vacio", viajes: [] },
       { nombre: "con-resultados", viajes: Array.from({ length: 12 }, (_, i) => viaje(`activo-${i}`, "traslado_en_curso")) },
     ];
-    const tamanos = [[320, 568], [360, 640], [375, 667], [390, 844], [430, 932], [768, 1024], [1024, 768], [1440, 900], [667, 375], [844, 390], [393, 852]];
+    const tamanos = [[320, 568], [360, 640], [375, 667], [390, 844], [430, 932], [768, 1024], [1023, 768], [667, 375], [844, 390], [393, 852]];
     const browser = await chromium.launch();
     try {
       const page = await browser.newPage();
@@ -75,7 +75,7 @@ describe.skipIf(process.env.RUN_RESPONSIVE_UI !== "1")("Traslados sin scroll de 
               if (empty.scrollHeight > empty.clientHeight + 1) failures.push("Scroll del estado vacío");
             }
             const content = document.querySelector(".user-transfers-content")!;
-            content.scrollTop = content.scrollHeight;
+            content.scrollTo({ top: content.scrollHeight, behavior: "instant" });
             if (document.querySelector("#lista-traslados")!.getBoundingClientRect().bottom > navTop + 1) {
               failures.push("El final de la lista queda debajo de la navegación");
             }

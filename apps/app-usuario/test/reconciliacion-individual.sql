@@ -40,7 +40,8 @@ end $$;
 commit;
 
 -- Mantener abiertas las escrituras del procesador mientras otra sesión reconcilia.
-select extensions.dblink_connect('reconciliador', 'dbname=' || current_database());
+-- La conexión TCP usa las credenciales predeterminadas de Supabase local.
+select extensions.dblink_connect('reconciliador', 'host=127.0.0.1 dbname=postgres user=postgres password=postgres');
 select extensions.dblink_exec('reconciliador', 'set role service_role');
 select extensions.dblink_exec('reconciliador', 'set statement_timeout = ''5s''');
 begin;
