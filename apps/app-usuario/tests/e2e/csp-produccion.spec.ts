@@ -9,8 +9,16 @@ test.describe("CSP de producción", () => {
       if (renovar) await seedMockAuthSession(page, { expirada: true });
       await page.setExtraHTTPHeaders({ "content-security-policy": "script-src 'nonce-ajeno'", "x-nonce": "ajeno" });
       const violaciones: string[] = [];
+      const erroresHidratacion: string[] = [];
+      const registrarErrorDeHidratacion = (mensaje: string) => {
+        if (/hydrat|Minified React error #(418|419|421|422|423|424|425)\b/i.test(mensaje)) {
+          erroresHidratacion.push(mensaje);
+        }
+      };
+      page.on("pageerror", (error) => registrarErrorDeHidratacion(error.message));
       page.on("console", (msg) => {
         if (/violates.*script-src/i.test(msg.text())) violaciones.push(msg.text());
+        if (msg.type() === "error") registrarErrorDeHidratacion(msg.text());
       });
       const respuesta = await page.goto(renovar ? "/soporte" : "/login");
       expect(respuesta?.status()).toBe(200);
@@ -24,7 +32,6 @@ test.describe("CSP de producción", () => {
       );
       expect(bootstrap.length).toBeGreaterThan(0);
       expect([...new Set(bootstrap)]).toEqual([nonce]);
-      expect(violaciones).toEqual([]);
       if (renovar) {
         expect(new URL(page.url()).pathname).toBe("/soporte");
         const cookies = await respuesta?.headerValues("set-cookie");
@@ -48,6 +55,8 @@ test.describe("CSP de producción", () => {
         await mostrar.first().click();
         await expect(page.getByRole("button", { name: "Ocultar contraseña" }).filter({ visible: true }).first()).toBeVisible();
       }
+      expect(violaciones).toEqual([]);
+      expect(erroresHidratacion).toEqual([]);
     });
   }
 });
