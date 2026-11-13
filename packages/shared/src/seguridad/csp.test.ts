@@ -73,3 +73,19 @@ describe("CSP", () => {
     expect(PERMISSIONS_POLICY).toContain("geolocation=(self");
   });
 });
+
+
+it("permite Realtime solo en el origen Supabase configurado en producción", () => {
+  const anterior = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  process.env.NEXT_PUBLIC_SUPABASE_URL = "https://proyecto.supabase.co:8443/rest/v1";
+  try {
+    const csp = buildCsp({ nonce: "prueba", isProd: true });
+    const connect = csp.split(";").find((directiva) => directiva.trim().startsWith("connect-src"));
+    expect(connect?.trim().split(/\s+/)).toContain("wss://proyecto.supabase.co:8443");
+    expect(connect?.trim().split(/\s+/)).not.toContain("wss:");
+    expect(connect).not.toContain("wss://*");
+  } finally {
+    if (anterior === undefined) delete process.env.NEXT_PUBLIC_SUPABASE_URL;
+    else process.env.NEXT_PUBLIC_SUPABASE_URL = anterior;
+  }
+});

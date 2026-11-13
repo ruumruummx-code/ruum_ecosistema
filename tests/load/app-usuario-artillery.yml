@@ -1,0 +1,157 @@
+# Pruebas de carga Artillery — @ruum/app-usuario (Signup, Login, Cotización)
+# Ejecución:
+#   npx artillery run tests/load/app-usuario-artillery.yml
+#   TARGET_URL=https://staging-usuario.ruum.mx npx artillery run tests/load/app-usuario-artillery.yml
+
+config:
+  target: "{{ $processEnvironment.TARGET_URL || 'http://127.0.0.1:3000' }}"
+  phases:
+    - name: "Calentamiento (Warm-up)"
+      duration: 30
+      arrivalRate: 5
+    - name: "Rampa de carga sostenida"
+      duration: 60
+      arrivalRate: 5
+      rampTo: 25
+    - name: "Pico de tráfico (Spike)"
+      duration: 30
+      arrivalRate: 40
+  defaults:
+    headers:
+      Origin: "{{ $processEnvironment.TARGET_URL || 'http://127.0.0.1:3000' }}"
+  ensure:
+    thresholds:
+      - http.response_time.p95: 1000
+      - http.response_time.p99: 1800
+    conditions:
+      - expression: "vusers.failed == 0"
+        strict: false
+
+scenarios:
+  - name: "1. Flujo Signup (CSRF + OTP SMS + Alta de cuenta)"
+    weight: 25
+    flow:
+      - get:
+          url: "/api/csrf"
+          capture:
+            - json: "$.csrfToken"
+              as: "csrfToken"
+          expect:
+            - statusCode: 200
+      - post:
+          url: "/api/auth/phone-verify/send"
+          headers:
+            x-csrf-token: "{{ csrfToken }}"
+          json:
+            telefono: "5512345678"
+          expect:
+            - statusCode:
+                - 200
+                - 400
+                - 429
+      - post:
+          url: "/api/auth/phone-verify/verify"
+          headers:
+            x-csrf-token: "{{ csrfToken }}"
+          json:
+            telefono: "5512345678"
+            codigo: "123456"
+          expect:
+            - statusCode:
+                - 200
+                - 400
+                - 429
+      - post:
+          url: "/api/auth/signup"
+          headers:
+            x-csrf-token: "{{ csrfToken }}"
+          json:
+            nombre: "Usuario"
+            apellido: "Artillery"
+            telefono: "5512345678"
+            email: "artillery.signup.{{ $randomNumber(1000, 999999) }}@ruum-load.test"
+            password: "dummy-PasswordCarga99"
+            aceptaTerminos: true
+            tokenVerificacionTelefono: "mock-token-verificacion"
+          expect:
+            - statusCode:
+                - 200
+                - 400
+                - 429
+
+  - name: "2. Flujo Login (Middleware + SSR + OTP Verification)"
+    weight: 35
+    flow:
+      - get:
+          url: "/login?next=%2Fviajes%2Fnuevo"
+          expect:
+            - statusCode: 200
+            - hasHeader: "content-security-policy"
+      - get:
+          url: "/api/csrf"
+          capture:
+            - json: "$.csrfToken"
+              as: "csrfToken"
+      - post:
+          url: "/api/auth/verify-otp"
+          headers:
+            x-csrf-token: "{{ csrfToken }}"
+          json:
+            email: "artillery.login.{{ $randomNumber(1000, 999999) }}@ruum-load.test"
+            codigo: "123456"
+          expect:
+            - statusCode:
+                - 200
+                - 400
+                - 429
+
+  - name: "3. Flujo Cotización (Cálculo de ruta + Validación de traslado)"
+    weight: 40
+    flow:
+      - get:
+          url: "/api/csrf"
+          capture:
+            - json: "$.csrfToken"
+              as: "csrfToken"
+          expect:
+            - statusCode: 200
+      - post:
+          url: "/api/ruta"
+          headers:
+            x-csrf-token: "{{ csrfToken }}"
+          json:
+            origen:
+              lat: 19.4326
+              lng: -99.1332
+            destino:
+              lat: 20.5888
+              lng: -100.3899
+            paradas: []
+          expect:
+            - statusCode:
+                - 200
+                - 400
+                - 429
+      - post:
+          url: "/api/viajes"
+          headers:
+            x-csrf-token: "{{ csrfToken }}"
+          json:
+            paso: 4
+            marca: "Nissan"
+            modelo: "Versa"
+            anio: 2024
+            color: "Plata"
+            placas: "XYZ987B"
+            numeroSerie: "3N1CN7AP8EL812345"
+            modalidad: "rodando"
+            estadoOperativo: "funciona"
+            origenDireccion: "Av. Insurgentes Sur 1602, CDMX"
+            origenCodigoPostal: "03940"
+            destinoDireccion: "Av. Vallarta 2440, Guadalajara"
+            destinoCodigoPostal: "44130"
+          expect:
+            - statusCode:
+                - 200
+                - 401
+                - 429

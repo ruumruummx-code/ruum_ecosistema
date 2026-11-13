@@ -1,0 +1,39 @@
+import { expect, test } from "@playwright/test";
+import { seedMockAuthSession, nombreCookieSesion } from "./fixtures/sesion";
+
+test.describe("CSP de producción", () => {
+  test.skip(process.env.PLAYWRIGHT_E2E_PRODUCCION !== "1" || process.env.PLAYWRIGHT_E2E_SUPABASE_REAL === "1", "Requiere build de producción con Supabase local");
+
+  for (const renovar of [false, true]) {
+    test(`autoriza los scripts de Next con ${renovar ? "renovación de sesión" : "sesión anónima"}`, async ({ page }) => {
+      if (renovar) await seedMockAuthSession(page, { expirada: true });
+      await page.setExtraHTTPHeaders({ "content-security-policy": "script-src 'nonce-ajeno'", "x-nonce": "ajeno" });
+      const violaciones: string[] = [];
+      page.on("console", (msg) => {
+        if (/violates.*script-src/i.test(msg.text())) violaciones.push(msg.text());
+      });
+      const respuesta = await page.goto(renovar ? "/inicio" : "/login");
+      expect(respuesta?.status()).toBe(200);
+      const nonce = respuesta?.headers()["x-nonce"];
+      expect(nonce).toBeTruthy();
+      expect(nonce).not.toBe("ajeno");
+      expect(respuesta?.headers()["content-security-policy"]).toContain(`'nonce-${nonce}' 'strict-dynamic'`);
+      const bootstrap = await page.locator("script:not([src])").evaluateAll(
+        (nodos) => nodos.filter((nodo) => nodo.textContent?.includes("self.__next_f"))
+          .map((nodo) => (nodo as HTMLScriptElement).nonce)
+      );
+      expect(bootstrap.length).toBeGreaterThan(0);
+      expect([...new Set(bootstrap)]).toEqual([nonce]);
+      expect(violaciones).toEqual([]);
+      if (renovar) {
+        const cookies = await respuesta?.headerValues("set-cookie");
+        expect(cookies?.some((cookie) => cookie.startsWith(`${nombreCookieSesion()}=`))).toBe(true);
+        expect(new URL(page.url()).pathname).toBe("/inicio");
+      } else {
+        const mostrar = page.getByRole("button", { name: "Mostrar contraseña" }).filter({ visible: true });
+        await mostrar.first().click();
+        await expect(page.getByRole("button", { name: "Ocultar contraseña" }).filter({ visible: true }).first()).toBeVisible();
+      }
+    });
+  }
+});

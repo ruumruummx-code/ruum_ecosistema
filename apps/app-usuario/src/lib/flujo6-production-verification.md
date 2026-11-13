@@ -15,7 +15,7 @@ Las conclusiones de la auditoría estática externa ("el sistema es seguro", "la
 
 ### Hipótesis 1 (H1): Cierre Integral de Manipulación de Tarifa
 - **Enunciado**: El recálculo server-side de distancia, tiempo y fórmula tarifaria elimina el 100% de los intentos de manipulación de precio por clientes autenticados.
-- **Mecanismo de Detección**: Función `registrarDivergenciaTarifa` en [tarifa-snapshot.ts](file:///c:/ruum_ecosistema-main/apps/app-usuario/src/lib/tarifa-snapshot.ts) que audita diferencias entre valores del cliente y cómputo del servidor.
+- **Mecanismo de Detección**: Función `registrarDivergenciaTarifa` en [tarifa-snapshot.ts](./tarifa-snapshot.ts) que audita diferencias entre valores del cliente y cómputo del servidor.
 - **Métrica Clave**: Tasa de divergencias de tarifa no autorizadas que logran persistirse en BD.
 - **Criterio de Éxito**: $\text{Tasa de discrepancia permitida} = 0\%$. Toda solicitud creada en `traslados` tiene `precio_cotizado` idéntico al recálculo server-side.
 
@@ -57,13 +57,16 @@ Las conclusiones de la auditoría estática externa ("el sistema es seguro", "la
 
 ---
 
-## 3. Estado de Verificación Empírica en Staging (`asmzetwwwugaoowiukdv`)
+## 3. Validación pendiente en staging
 
-| Hipótesis | Estado Staging | Resultado Empírico Registrado | Referencia de Evidencia |
-| :--- | :---: | :--- | :--- |
-| **H1 (Manipulación de Tarifa)** | **Verificada** | $100\%$ de contención. Todo intento con $\Delta > 50\%$ o valores negativos fue bloqueado con `HTTP 400`; discrepancias menores fueron sobreescritas con el cálculo oficial. | [F6-staging-20261104.md §1](file:///c:/ruum_ecosistema-main/docs/evidence/F6-staging-20261104.md) |
-| **H2 (Caché Mapbox en Redis)** | **Verificada** | Latencia p95 reducida de $420\text{ ms}$ a $18\text{ ms}$ en hits. Cache hit ratio de $68.4\%$ en corredores de alta demanda. | [F6-staging-20261104.md §3](file:///c:/ruum_ecosistema-main/docs/evidence/F6-staging-20261104.md) |
-| **H3 (Snapshot HMAC y Anti-Replay)** | **Verificada** | Validación en tiempo constante sin fuga de longitud. $100\%$ de nonces consumidos rechazados en re-intento. | [F6-staging-20261104.md §2](file:///c:/ruum_ecosistema-main/docs/evidence/F6-staging-20261104.md) |
-| **H4 (Rate Limit en CGNAT)** | **Verificada** | 15 cuentas simultáneas operando bajo una misma IP pública (Telcel CGNAT) sin falsos positivos de bloqueo. | [F6-staging-20261104.md §4](file:///c:/ruum_ecosistema-main/docs/evidence/F6-staging-20261104.md) |
-| **H5 (Saga con Reconciliador F6)** | **Verificada** | Reconciliador `reconciliar_saga_traslados_individuales` transicionó pagos aprobados rezagados y compensó traslados impagos $>15\text{ min}$ a `servicio_cancelado`. | [F6-staging-20261104.md §7](file:///c:/ruum_ecosistema-main/docs/evidence/F6-staging-20261104.md) |
+Las cinco hipótesis requieren evidencia con fecha, commit, entorno, comandos y resultados. Registrar aquí el enlace al artefacto de la ejecución cuando esté disponible.
 
+Para ejecutar las pruebas locales de regresión, usar `pnpm --filter @ruum/app-usuario test:coverage` y el workflow de app-usuario. Para pagos usar una cuenta Stripe de sandbox y probar webhook demorado, entrega duplicada y cotización vencida sin pago. Verificar el resultado en `traslados`, `pagos` y `registro_auditoria`.
+
+En Vercel, configurar Root Directory en `apps/app-usuario` y establecer `CRON_SECRET`. El cron individual corre cada cinco minutos y el masivo cada minuto. Verificar ambos con una llamada sin cookies y otra sin Bearer. Configurar y comprobar alertas ante dos fallos consecutivos o falta de ejecuciones. La función Supabase `reconciliar-pagos-stripe` mantiene su propia programación y verifica los PaymentIntents contra Stripe.
+
+## 4. Evidencia local del cierre de auditoría
+
+- Ejecutar `node scripts/check-supabase-security.mjs` para comprobar los grants documentados. En Supabase local, una prueba dentro de una transacción con datos sintéticos verificó que anon y una cuenta ajena no podían leer la fila privada del conductor, y que su titular sí podía leerla. También se comprobó que los dos catálogos SAT eran legibles por anon y que solo service_role podía ejecutar la RPC individual. La transacción se revirtió. En otra transacción, el reconciliador confirmó un pago registrado, canceló una cotización vencida sin pago y conservó otra con pago pendiente. Repetir la RPC devolvió cero cambios. El escenario está en [reconciliacion-individual.sql](../../test/reconciliacion-individual.sql).
+- Ejecutar `pnpm --filter @ruum/app-usuario exec vitest run src/middleware.test.ts src/app/api/internal src/app/api/viajes/route.test.ts` para verificar el nonce, los jobs y el aislamiento del límite entre cuentas sin dispositivo.
+- Los resultados anteriores corresponden a una ejecución local del 12 de noviembre de 2026, sobre el árbol de trabajo posterior a 38d795bd. La matriz completa de roles, Realtime y proveedores queda pendiente en el entorno objetivo.

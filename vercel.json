@@ -3,9 +3,6 @@
   "buildCommand": "pnpm exec turbo run build",
   "installCommand": "pnpm install --frozen-lockfile",
   "regions": ["iad1"],
-  "crons": [
-    { "path": "/api/internal/masivos/reconcile", "schedule": "* * * * *" }
-  ],
   "headers": [
     {
       "source": "/(.*)",

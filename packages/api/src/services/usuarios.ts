@@ -507,6 +507,12 @@ export async function auditarAccesoDocumentoPii(
   if (error) throw error;
 }
 
+export function solicitarSesionDiditUsuario(cliente: Cliente) {
+  return cliente.functions.invoke<{ url?: string; sessionId?: string }>("iniciar-verificacion-didit", {
+    body: { tipo: "usuario" }
+  });
+}
+
 /**
  * Inicia una sesión de verificación de identidad con Didit (OCR + liveness + face match)
  * para el usuario/pasajero actual. Devuelve la URL del flujo hospedado por Didit.
@@ -515,9 +521,7 @@ export async function iniciarVerificacionDiditUsuario(cliente: Cliente): Promise
   const { data: sesion } = await cliente.auth.getUser();
   if (!sesion.user) throw new Error("Inicia sesión para continuar con la verificación.");
 
-  const { data, error } = await cliente.functions.invoke("iniciar-verificacion-didit", {
-    body: { tipo: "usuario" }
-  });
+  const { data, error } = await solicitarSesionDiditUsuario(cliente);
 
   if (error) {
     let mensaje = error.message;

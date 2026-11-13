@@ -1,0 +1,50 @@
+name: App Usuario
+on:
+  pull_request:
+  push:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  usuario:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    env:
+      NEXT_TELEMETRY_DISABLED: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: node scripts/check-supabase-security.mjs
+      - run: pnpm --filter @ruum/app-usuario lint
+      - run: pnpm --filter @ruum/app-usuario typecheck
+      - run: pnpm --filter @ruum/app-usuario build
+        env:
+          NODE_ENV: production
+          PLAYWRIGHT_E2E_PRODUCCION: '1'
+          NEXT_PUBLIC_SUPABASE_URL: http://127.0.0.1:54399
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: sb_publishable_local_mock
+          SUPABASE_SERVICE_ROLE_KEY: sb_secret_local_mock
+          NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN: pk.localmock
+          MAPBOX_SECRET_TOKEN: sk.localmock
+          PHONE_VERIFY_SECRET: phone-verification-local-fixture-32
+          NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: pk_test_localmock
+          STRIPE_SECRET_KEY: sk_test_localmock
+          TWILIO_ACCOUNT_SID: AC_localmock
+          TWILIO_AUTH_TOKEN: localmock
+          TWILIO_VERIFY_SERVICE_SID: VA_localmock
+          UPSTASH_REDIS_REST_URL: http://127.0.0.1:54400
+          UPSTASH_REDIS_REST_TOKEN: e2e-redis-token
+          CRON_SECRET: reconcile-fixture-only
+          RUUM_LOCAL_PRODUCTION: 'true'
+      - run: pnpm --filter @ruum/app-usuario exec playwright install --with-deps chromium
+      - run: pnpm --filter @ruum/app-usuario test:e2e
+        env:
+          PLAYWRIGHT_E2E_PRODUCCION: '1'
+          PLAYWRIGHT_DISABLE_AUTH_ARTIFACTS: '1'
+      - run: pnpm --filter @ruum/app-usuario test:coverage
+        if: ${{ !cancelled() }}

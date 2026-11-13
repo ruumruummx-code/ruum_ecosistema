@@ -77,6 +77,7 @@ function crearWebServers(): NonNullable<Parameters<typeof defineConfig>[0]['webS
           UPSTASH_REDIS_REST_URL: `http://127.0.0.1:${MOCK_REDIS_PUERTO}`,
           UPSTASH_REDIS_REST_TOKEN: 'e2e-redis-token',
           NEXT_PUBLIC_SUPABASE_URL: SUPABASE_URL,
+          CRON_SECRET: "reconcile-fixture-only",
           // La anon key del doble no valida nada (no hay backend real); solo hace
           // falta que exista para que createServerClient/crearClienteNavegador
           // no fallen y `tieneSupabaseConfigurado()` sea true.

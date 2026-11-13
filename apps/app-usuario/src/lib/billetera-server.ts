@@ -1,18 +1,16 @@
 import "server-only";
 import Stripe from "stripe";
 import { createHash } from "node:crypto";
-import { createClient } from "@supabase/supabase-js";
+import { crearClienteServicio } from "./supabase-servicio";
 import { obtenerClienteBilleteraServidor, vincularClienteBilleteraServidor } from "@ruum/api/services";
 
 export function serviciosBilletera() {
   const key = process.env.STRIPE_SECRET_KEY;
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const servicioKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  if (!key || !url || !servicioKey) throw new Error("La billetera no está disponible temporalmente.");
+  if (!key) throw new Error("La billetera no está disponible temporalmente.");
   const modo = /^(sk|rk)_test_/.test(key) ? "test" : "live";
   return {
     stripe: new Stripe(key, { timeout: 15000, maxNetworkRetries: 1 }),
-    servicio: createClient(url, servicioKey, { auth: { persistSession: false, autoRefreshToken: false } }),
+    servicio: crearClienteServicio(),
     modo: modo as "test" | "live",
   };
 }

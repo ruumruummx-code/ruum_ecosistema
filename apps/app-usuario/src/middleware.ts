@@ -73,10 +73,11 @@ export function buildCspUsuario(nonce: string, isProd: boolean, isStaging: boole
   return buildCspUsuarioCanonica(nonce, isProd, isStaging);
 }
 
-export function applySecurityHeadersUsuario(res: NextResponse, nonce: string, origen?: string): NextResponse {
+export function applySecurityHeadersUsuario(res: NextResponse, nonce: string, origen?: string, cspCanonica?: string): NextResponse {
   const isProd = process.env.NODE_ENV === "production";
   const isStaging = isProd && (process.env.NEXT_PUBLIC_RUUM_AMBIENTE === "staging" || process.env.CSP_REPORT_ONLY === "true" || process.env.NEXT_PUBLIC_CSP_REPORT_ONLY === "true");
-  const csp = buildCspUsuario(nonce, isProd, isStaging);
+  const csp = cspCanonica ?? buildCspUsuario(nonce, isProd, isStaging);
+  res.headers.set("Content-Security-Policy", csp);
 
   // Progressive CSP: En staging o Report-Only, emitir Content-Security-Policy-Report-Only
   /* M12: staging debe probar la CSP real. Antes la cabecera de bloqueo se
@@ -86,14 +87,11 @@ export function applySecurityHeadersUsuario(res: NextResponse, nonce: string, or
      es siempre la política estricta; el Report-Only sigue informando. */
   if (isStaging) {
     res.headers.set("Content-Security-Policy-Report-Only", csp + sufijoReporteCsp());
-    res.headers.set("Content-Security-Policy", buildCspUsuario(nonce, true, isStaging));
     // M13: definir el grupo `csp-endpoint` o la directiva report-to es no-op.
     if (origen) {
       const reportTo = cabeceraReportToCsp(origen);
       res.headers.set(reportTo.key, reportTo.value);
     }
-  } else {
-    res.headers.set("Content-Security-Policy", csp);
   }
 
   res.headers.set("x-nonce", nonce);
@@ -108,17 +106,23 @@ export function applySecurityHeadersUsuario(res: NextResponse, nonce: string, or
 export async function middleware(request: NextRequest) {
   const nonce = Buffer.from(crypto.randomUUID()).toString("base64");
   const traza = extraerOIniciarTraza(request.headers);
+  const esProduccion = process.env.NODE_ENV === "production";
+  const csp = buildCspUsuario(nonce, esProduccion, false);
+  const asegurarCabeceras = (res: NextResponse) =>
+    applySecurityHeadersUsuario(res, nonce, request.nextUrl.origin, csp);
 
   if (esMetodoMutacion(request.method)) {
     const rechazoCsrf = verificarCsrfORechazar(request);
     if (rechazoCsrf) {
       adjuntarHeadersTrazaRespuesta(rechazoCsrf, traza);
-      return applySecurityHeadersUsuario(rechazoCsrf, nonce, request.nextUrl.origin);
+      return asegurarCabeceras(rechazoCsrf);
     }
   }
 
   const requestHeaders = new Headers(request.headers);
   requestHeaders.set("x-nonce", nonce);
+  requestHeaders.set("Content-Security-Policy", csp);
+  requestHeaders.delete("Content-Security-Policy-Report-Only");
   requestHeaders.set(HEADER_TRACE_ID, traza.traceId);
   requestHeaders.set(HEADER_SPAN_ID, traza.spanId);
   requestHeaders.set(HEADER_SENTRY_TRACE, traza.sentryTrace);
@@ -133,17 +137,16 @@ export async function middleware(request: NextRequest) {
 
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-  const esProduccion = process.env.NODE_ENV === "production";
 
   if (esProduccion && (!url || !anonKey)) {
     console.error("[security] app-usuario bloqueado: Supabase no configurado en producción", {
       pathname: request.nextUrl.pathname
     });
-    return applySecurityHeadersUsuario(new NextResponse("Configuración de producción incompleta", { status: 503 }), nonce, request.nextUrl.origin);
+    return asegurarCabeceras(new NextResponse("Configuración de producción incompleta", { status: 503 }));
   }
 
   if (!url || !anonKey) {
-    return applySecurityHeadersUsuario(response, nonce, request.nextUrl.origin);
+    return asegurarCabeceras(response);
   }
 
   const supabase = crearClienteServidor(url, anonKey, {
@@ -152,7 +155,10 @@ export async function middleware(request: NextRequest) {
     },
     setAll(cookiesToSet) {
       cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
-      response = NextResponse.next({ request });
+      requestHeaders.set("cookie", request.cookies.toString());
+      const cookiesPrevias = response.cookies.getAll();
+      response = NextResponse.next({ request: { headers: requestHeaders } });
+      cookiesPrevias.forEach((cookie) => response.cookies.set(cookie));
       response.headers.set("x-nonce", nonce);
       adjuntarHeadersTrazaRespuesta(response, traza);
       if (request.method === "GET" || request.method === "HEAD") {
@@ -170,10 +176,16 @@ export async function middleware(request: NextRequest) {
      limit de Supabase Auth con peticiones estáticas. Solo hace falta cuando la
      ruta depende de la sesión. */
   if (!RUTAS_NECESITAN_SESION(pathname)) {
-    return applySecurityHeadersUsuario(response, nonce, request.nextUrl.origin);
+    return asegurarCabeceras(response);
   }
 
   const { data: { user } } = await supabase.auth.getUser();
+  const redirigir = (destino: URL) => {
+    const redirect = NextResponse.redirect(destino);
+    response.cookies.getAll().forEach((cookie) => redirect.cookies.set(cookie));
+    adjuntarHeadersTrazaRespuesta(redirect, traza);
+    return asegurarCabeceras(redirect);
+  };
 
   if (!user && esRutaProtegidaUsuario(pathname)) {
     const login = request.nextUrl.clone();
@@ -181,7 +193,7 @@ export async function middleware(request: NextRequest) {
     login.search = "";
     login.searchParams.set("next", pathname + request.nextUrl.search);
     login.searchParams.set("reason", "authentication_required");
-    return applySecurityHeadersUsuario(NextResponse.redirect(login), nonce, request.nextUrl.origin);
+    return redirigir(login);
   }
 
   /* FIX C1 (ticket seguridad Fase 2) + fronteras FASE 6: gate de rol en rutas
@@ -199,15 +211,15 @@ export async function middleware(request: NextRequest) {
       redirectUrl.pathname = "/403";
       redirectUrl.search = "";
       redirectUrl.searchParams.set("reason", "rol_conductor");
-      return applySecurityHeadersUsuario(NextResponse.redirect(redirectUrl), nonce, request.nextUrl.origin);
+      return redirigir(redirectUrl);
     }
   }
 
   if (user && (pathname === "/login" || pathname === "/registro")) {
-    return applySecurityHeadersUsuario(NextResponse.redirect(new URL("/", request.url)), nonce, request.nextUrl.origin);
+    return redirigir(new URL("/", request.url));
   }
 
-  return applySecurityHeadersUsuario(response, nonce, request.nextUrl.origin);
+  return asegurarCabeceras(response);
 }
 
 /* CORRECCIÓN (auditoría S-5): se excluyen también json/xml/txt/ico/woff para que los

@@ -1,5 +1,6 @@
 "use client";
 
+import { obtenerDispositivo } from "@/lib/device-id";
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
@@ -307,21 +308,12 @@ export function LoginCliente({ motivo, siguiente, aviso }: LoginClienteProps) {
 
     try {
       const emailNormalizado = normalizarCorreoRegistro(email);
-      let dispositivo = "";
-      try {
-        dispositivo = window.localStorage.getItem("ruum:login-device") ??
-          (typeof globalThis.crypto?.randomUUID === "function"
-            ? globalThis.crypto.randomUUID()
-            : `device-${Date.now()}`);
-        window.localStorage.setItem("ruum:login-device", dispositivo);
-      } catch {
-        dispositivo = "";
-      }
+      const dispositivo = obtenerDispositivo();
       const res = await fetch("/api/auth/login", {
         method: "POST",
         headers: obtenerHeadersCsrf({
           "Content-Type": "application/json",
-          "x-device-id": dispositivo,
+          ...(dispositivo ? { "x-device-id": dispositivo } : {}),
         }),
         body: JSON.stringify({
           email: emailNormalizado,

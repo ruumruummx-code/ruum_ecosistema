@@ -1,3 +1,4 @@
+import { solicitarSesionDiditUsuario } from "@ruum/api/services";
 import { NextRequest, NextResponse } from "next/server";
 import { crearClienteServidor } from "@/lib/supabase-server";
 import { obtenerIp, rateLimitConVentana } from "@/lib/csp-rate-limit";
@@ -98,12 +99,7 @@ export async function POST(request: NextRequest) {
 
   // 4. Invocar Edge Function iniciar-verificacion-didit
   try {
-    const { data, error } = await cliente.functions.invoke<{
-      url?: string;
-      sessionId?: string;
-    }>("iniciar-verificacion-didit", {
-      body: { tipo: "usuario" },
-    });
+    const { data, error } = await solicitarSesionDiditUsuario(cliente);
 
     if (error || !data?.url) {
       logStructuredWarn(

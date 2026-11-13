@@ -7,6 +7,7 @@ import {
 } from "./src/lib/csp";
 
 const nextConfig: NextConfig = {
+  distDir: process.env.PLAYWRIGHT_E2E_PRODUCCION === "1" ? ".next-e2e" : ".next",
   outputFileTracingIncludes: {
     "/api/viajes/masivos/*": ["./public/data/codigos-postales/*.json"],
   },

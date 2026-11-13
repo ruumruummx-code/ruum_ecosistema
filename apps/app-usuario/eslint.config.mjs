@@ -12,6 +12,7 @@ const eslintConfig = defineConfig([
   {
     ignores: [
       '.next/**',
+      '.next-*/**',
       '.turbo/**',
       'node_modules/**',
       'next-env.d.ts',
@@ -24,6 +25,7 @@ const eslintConfig = defineConfig([
   },
   {
     files: ["src/**/*.{ts,tsx}"],
+    ignores: ["**/*.test.{ts,tsx}"],
     rules: {
       // FASE 6 — Fronteras: avisa (el gate duro es pnpm check:fronteras).
       "no-restricted-syntax": ["warn",

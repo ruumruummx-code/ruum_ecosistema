@@ -77,3 +77,6 @@ yarn.lock
 # el diseño vive en design-system/assets, los docs en docs/.
 build_ruum_docs.py
 Logos ruum ruum
+
+# Salida aislada del build E2E de App Usuario
+/apps/app-usuario/.next-e2e/

@@ -17,7 +17,7 @@
     "test:e2e:ui": "playwright test tests/e2e --ui",
     "test:lighthouse": "lhci autorun",
     "predev": "node ../../scripts/validate-env.mjs app-usuario",
-    "prebuild": "node ../../scripts/validate-env.mjs app-usuario && node scripts/assert-csp.mjs",
+    "prebuild": "node ../../scripts/validate-env.mjs app-usuario --production && node scripts/assert-csp.mjs",
     "validate:env": "node ../../scripts/validate-env.mjs app-usuario",
     "assert:csp": "node scripts/assert-csp.mjs"
   },
@@ -48,6 +48,7 @@
     "@capacitor/cli": "^8.5.2",
     "@eslint/eslintrc": "^3.3.6",
     "@lhci/cli": "^0.15.1",
+    "@playwright/test": "1.64.1",
     "@tailwindcss/postcss": "^4.0.0",
     "@testing-library/jest-dom": "^7.0.1",
     "@testing-library/react": "^16.3.3",

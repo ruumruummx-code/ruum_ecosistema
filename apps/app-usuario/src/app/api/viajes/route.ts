@@ -1,3 +1,4 @@
+import { normalizarDispositivo } from "@/lib/device-id";
 import { NextRequest, NextResponse } from "next/server";
 import { crearClienteServidor } from "@/lib/supabase-server";
 import { esquemaSolicitudTraslado } from "@ruum/shared/validacion";
@@ -37,13 +38,14 @@ export async function POST(request: NextRequest) {
     // sobre Redis de F2 (IP + cuenta + dispositivo)
     const userHash = hashPseudonimoViajes(user.id);
     const ip = obtenerIp(request) || "127.0.0.1";
-    const deviceIdRaw = request.headers.get("x-device-id") || "";
-    const deviceHash = hashPseudonimoViajes(deviceIdRaw);
+    const dispositivo = normalizarDispositivo(request.headers.get("x-device-id"));
 
     const [rlIp, rlCuenta, rlDevice] = await Promise.all([
       rateLimitConVentana(ip, "viajes-crear-ip", VIAJES_CREAR_LIMITES.ip, VIAJES_CREAR_VENTANA_MS),
       rateLimitConVentana(userHash, "viajes-crear-cuenta", VIAJES_CREAR_LIMITES.cuenta, VIAJES_CREAR_VENTANA_MS),
-      rateLimitConVentana(deviceHash, "viajes-crear-device", VIAJES_CREAR_LIMITES.dispositivo, VIAJES_CREAR_VENTANA_MS),
+      dispositivo
+        ? rateLimitConVentana(hashPseudonimoViajes(dispositivo), "viajes-crear-device", VIAJES_CREAR_LIMITES.dispositivo, VIAJES_CREAR_VENTANA_MS)
+        : { allowed: true, retryAfterSec: undefined },
     ]);
 
     const bloqueado = !rlIp.allowed || !rlCuenta.allowed || !rlDevice.allowed;

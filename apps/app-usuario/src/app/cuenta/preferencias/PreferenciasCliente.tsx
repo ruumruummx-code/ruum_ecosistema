@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useId } from "react";
+import { useState, useEffect, useId, useCallback } from "react";
 import Link from "next/link";
 import { AVISO_IDIOMA, IDIOMA_DISPONIBLE } from "../../../lib/idioma-aplicacion";
 import { useTema } from "../../TemaProvider";
@@ -76,7 +76,7 @@ export function PreferenciasCliente({ cuenta }: PreferenciasClienteProps) {
     aplicarEfectosReales(p);
   }, [usuario]);
 
-  const handleGuardarCambios = async () => {
+  const handleGuardarCambios = useCallback(async () => {
     setGuardando(true);
     setEstadoGuardado("inactivo");
     setMensajeEstado("");
@@ -135,7 +135,11 @@ export function PreferenciasCliente({ cuenta }: PreferenciasClienteProps) {
       const msg = err instanceof Error ? err.message : String(err);
       setMensajeEstado(`Error inesperado al sincronizar: ${msg}`);
     }
-  };
+  }, [
+    usuario, idioma, zonaHoraria, unidades, modo, accesibilidad, usoDatos, alertasGenerales,
+    notifRecordatoriosEmail, notifRecordatoriosPush, notifCambiosEstadoEmail, notifCambiosEstadoPush,
+    notifPagosEmail, notifPagosPush, notifPromocionesEmail, notifPromocionesPush,
+  ]);
 
   // Reintento automático cuando se recupera la conexión a internet
   useEffect(() => {
@@ -146,24 +150,7 @@ export function PreferenciasCliente({ cuenta }: PreferenciasClienteProps) {
     };
     window.addEventListener("online", alRecuperarRed);
     return () => window.removeEventListener("online", alRecuperarRed);
-  }, [
-    estadoGuardado,
-    idioma,
-    zonaHoraria,
-    unidades,
-    accesibilidad,
-    usoDatos,
-    alertasGenerales,
-    notifRecordatoriosEmail,
-    notifRecordatoriosPush,
-    notifCambiosEstadoEmail,
-    notifCambiosEstadoPush,
-    notifPagosEmail,
-    notifPagosPush,
-    notifPromocionesEmail,
-    notifPromocionesPush,
-    modo,
-  ]);
+  }, [estadoGuardado, handleGuardarCambios]);
 
   const handleRestablecer = () => {
     const defecto = PREFERENCIAS_POR_DEFECTO;

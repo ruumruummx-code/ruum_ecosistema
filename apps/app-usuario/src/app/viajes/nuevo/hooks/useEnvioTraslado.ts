@@ -1,4 +1,5 @@
 "use client";
+import { obtenerDispositivo } from "@/lib/device-id";
 import { useCallback, useRef, type RefObject } from "react";
 import { useRouter } from "next/navigation";
 import * as Sentry from "@sentry/nextjs";
@@ -206,7 +207,7 @@ export function useEnvioTraslado(params: ParametrosEnvioTraslado) {
       } | null = null;
 
       try {
-        const deviceId = typeof window !== "undefined" ? window.localStorage.getItem("ruum:device-id") || "" : "";
+        const deviceId = obtenerDispositivo();
         const respPaso = await fetch("/api/viajes", {
           method: "POST",
           headers: obtenerHeadersCsrf({

@@ -1,0 +1,330 @@
+/** @vitest-environment jsdom */
+import { describe, expect, it, vi, beforeEach, afterEach } from "vitest";
+import { render, screen, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+
+// P1 (SENTRY_ALERTS: fallos de pago Stripe): el cobro estaba 100% mockeado
+// (PasoPago.test hace vi.mock("@/app/PagoStripe")). Estos tests ejercen el
+// componente real con Stripe Elements mockeado en el borde.
+
+const stripeMocks = vi.hoisted(() => ({
+  confirmPayment: vi.fn(),
+  loadStripe: vi.fn(),
+  Elements: vi.fn(({ children }: { children: React.ReactNode }) => (
+    <>{children}</>
+  )),
+  PaymentElement: vi.fn(() => <div data-testid="payment-element" />),
+}));
+
+vi.mock("@stripe/react-stripe-js", () => ({
+  Elements: stripeMocks.Elements,
+  PaymentElement: stripeMocks.PaymentElement,
+  useStripe: () => ({ confirmPayment: stripeMocks.confirmPayment }),
+  useElements: () => ({}),
+}));
+
+vi.mock("@stripe/stripe-js", () => ({
+  loadStripe: (...args: unknown[]) => stripeMocks.loadStripe(...args),
+}));
+vi.mock("../lib/csrf", () => ({ obtenerHeadersCsrfAsync: async (headers: Record<string, string>) => headers }));
+
+const supabaseMocks = vi.hoisted(() => ({
+  sesion: { access_token: "tok-test" } as unknown,
+  errorSesion: null as unknown,
+}));
+
+vi.mock("@/lib/supabase-browser", () => ({
+  crearClienteNavegador: vi.fn(() => ({
+    auth: {
+      getSession: vi.fn(async () => ({
+        data: { session: supabaseMocks.sesion },
+        error: supabaseMocks.errorSesion,
+      })),
+    },
+  })),
+}));
+
+function respuestaPaymentIntent(cuerpo: unknown, status = 200) {
+  return vi.fn(async () => new Response(JSON.stringify(cuerpo), { status }));
+}
+
+async function importarPagoStripe() {
+  const mod = await import("./PagoStripe");
+  return mod.PagoStripe;
+}
+
+describe("PagoStripe — cobro real con Elements mockeado en el borde", () => {
+  it("entrega a Elements la sesión verificada para reutilizar tarjetas", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValueOnce(Response.json({ clientSecret: "pi_propio_secret_seguro" }))
+      .mockResolvedValueOnce(Response.json({ customerSessionClientSecret: "sesion_verificada" })));
+    const PagoStripe = await importarPagoStripe();
+    render(<PagoStripe trasladoId="t-1" onPagado={vi.fn()} />);
+    await screen.findByTestId("payment-element");
+    expect(stripeMocks.Elements).toHaveBeenCalledWith(expect.objectContaining({ options: expect.objectContaining({ customerSessionClientSecret: "sesion_verificada" }) }), undefined);
+    expect(fetch).toHaveBeenNthCalledWith(2, "/api/cuenta/metodos-pago", expect.objectContaining({ body: JSON.stringify({ accion: "sesion", intentId: "pi_propio" }) }));
+  });
+  it("usa el secreto consolidado sin crear un cobro individual", async () => {
+    const PagoStripe = await importarPagoStripe();
+    render(<PagoStripe trasladoId="carga-1" clientSecretExterno="cs_masivo" returnPath="/mis-viajes?pago=masivo" onPagado={vi.fn()} />);
+    await screen.findByTestId("payment-element");
+    expect(fetch).not.toHaveBeenCalled();
+    expect(stripeMocks.Elements).toHaveBeenCalledWith(expect.objectContaining({ options: expect.objectContaining({ clientSecret: "cs_masivo" }) }), undefined);
+  });
+  beforeEach(() => {
+    vi.resetModules();
+    vi.stubEnv("NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY", "pk_test_123");
+    vi.stubEnv("NEXT_PUBLIC_SUPABASE_URL", "https://mock.supabase.co");
+    vi.stubEnv("NEXT_PUBLIC_SUPABASE_ANON_KEY", "anon-test");
+    stripeMocks.confirmPayment
+      .mockReset()
+      .mockResolvedValue({ paymentIntent: { status: "succeeded" } });
+    stripeMocks.loadStripe.mockReset().mockResolvedValue({ fake: "stripe" });
+    supabaseMocks.sesion = { access_token: "tok-test" } as unknown;
+    supabaseMocks.errorSesion = null;
+    vi.stubGlobal(
+      "fetch",
+      respuestaPaymentIntent({ clientSecret: "cs_test_123" }),
+    );
+  });
+
+  afterEach(() => {
+    vi.unstubAllEnvs();
+    vi.unstubAllGlobals();
+  });
+
+  it("rechaza monto no positivo sin llamar a la función de pago", async () => {
+    const PagoStripe = await importarPagoStripe();
+    const fetchMock = vi.mocked(fetch);
+    render(<PagoStripe trasladoId="t-1" monto={0} onPagado={vi.fn()} />);
+    expect(await screen.findByText(/tarifa no válida/i)).toBeInTheDocument();
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it("muestra mensaje amigable al usuario sin nombres técnicos si falta la clave pública (AC-6)", async () => {
+    vi.stubEnv("NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY", "");
+    const PagoStripe = await importarPagoStripe();
+    render(<PagoStripe trasladoId="t-1" monto={500} onPagado={vi.fn()} />);
+    expect(
+      await screen.findByText(/pasarela de pago seguro no está disponible temporalmente/i),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByText(/NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY/),
+    ).not.toBeInTheDocument();
+  });
+
+  it("reconcilia pago ya confirmado sin montar Elements y avisa una vez", async () => {
+    vi.stubGlobal("fetch", respuestaPaymentIntent({ pagoConfirmado: true }));
+    const PagoStripe = await importarPagoStripe();
+    const onPagado = vi.fn();
+    const vista = render(
+      <PagoStripe trasladoId="t-1" monto={500} onPagado={onPagado} />,
+    );
+    await waitFor(() => expect(onPagado).toHaveBeenCalledTimes(1));
+    expect(screen.queryByTestId("payment-element")).toBeNull();
+    vista.rerender(
+      <PagoStripe trasladoId="t-1" monto={500} onPagado={onPagado} />,
+    );
+    expect(onPagado).toHaveBeenCalledTimes(1);
+  });
+
+  it("monta Elements con el clientSecret devuelto", async () => {
+    const PagoStripe = await importarPagoStripe();
+    render(<PagoStripe trasladoId="t-1" monto={500} onPagado={vi.fn()} />);
+    expect(await screen.findByTestId("payment-element")).toBeInTheDocument();
+    expect(stripeMocks.loadStripe).toHaveBeenCalledWith("pk_test_123");
+  });
+
+  it("traduce 'Failed to load Stripe.js' a mensaje de adblocker/conexión", async () => {
+    stripeMocks.loadStripe.mockRejectedValueOnce(
+      new Error("Failed to load Stripe.js"),
+    );
+    const PagoStripe = await importarPagoStripe();
+    render(<PagoStripe trasladoId="t-1" monto={500} onPagado={vi.fn()} />);
+    expect(
+      await screen.findByText(/bloqueador de anuncios/i),
+    ).toBeInTheDocument();
+  });
+
+  it("falla si loadStripe resuelve null", async () => {
+    stripeMocks.loadStripe.mockResolvedValueOnce(null);
+    const PagoStripe = await importarPagoStripe();
+    render(<PagoStripe trasladoId="t-1" monto={500} onPagado={vi.fn()} />);
+    expect(
+      await screen.findByText(/no fue posible inicializar stripe/i),
+    ).toBeInTheDocument();
+  });
+
+  it("sesión expirada bloquea antes de llamar a la función de pago", async () => {
+    supabaseMocks.sesion = null;
+    const PagoStripe = await importarPagoStripe();
+    const fetchMock = vi.mocked(fetch);
+    render(<PagoStripe trasladoId="t-1" monto={500} onPagado={vi.fn()} />);
+    expect(await screen.findByText(/sesión expiró/i)).toBeInTheDocument();
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it("el botón fijo externo envía el mismo formulario seguro sin duplicar botones", async () => {
+    const PagoStripe = await importarPagoStripe();
+    const onPagado = vi.fn();
+    render(
+      <>
+        <PagoStripe
+          trasladoId="t-1"
+          monto={500}
+          onPagado={onPagado}
+          compacto
+          formId="checkout-fijo"
+        />
+        <button type="submit" form="checkout-fijo">
+          Pagar $500.00 MXN
+        </button>
+      </>,
+    );
+    await screen.findByTestId("payment-element");
+    expect(
+      screen.queryByRole("button", { name: /pagar y confirmar traslado/i }),
+    ).not.toBeInTheDocument();
+    await userEvent
+      .setup()
+      .click(screen.getByRole("button", { name: "Pagar $500.00 MXN" }));
+    await waitFor(() =>
+      expect(stripeMocks.confirmPayment).toHaveBeenCalledTimes(1),
+    );
+    expect(onPagado).toHaveBeenCalledTimes(1);
+  });
+
+  it("confirmPayment succeeded llama onPagado", async () => {
+    const PagoStripe = await importarPagoStripe();
+    const onPagado = vi.fn();
+    const user = userEvent.setup();
+    render(<PagoStripe trasladoId="t-1" monto={500} onPagado={onPagado} />);
+    await screen.findByTestId("payment-element");
+    await user.click(
+      screen.getByRole("button", { name: /pagar y confirmar traslado/i }),
+    );
+    await waitFor(() => expect(onPagado).toHaveBeenCalledTimes(1));
+    expect(stripeMocks.confirmPayment).toHaveBeenCalledWith(
+      expect.objectContaining({ redirect: "if_required" }),
+    );
+    expect(screen.queryByRole("button", { name: /pagar y confirmar traslado/i })).not.toBeInTheDocument();
+    expect(screen.getByRole("status")).toHaveTextContent("Stripe aprobó tu pago");
+  });
+
+  it("RC-06: paymentIntent 'processing' NO confirma el pago y muestra estado pendiente", async () => {
+    stripeMocks.confirmPayment.mockResolvedValueOnce({
+      paymentIntent: { status: "processing" },
+    });
+    const PagoStripe = await importarPagoStripe();
+    const onPagado = vi.fn();
+    const user = userEvent.setup();
+    render(<PagoStripe trasladoId="t-1" monto={500} onPagado={onPagado} />);
+    await screen.findByTestId("payment-element");
+    await user.click(
+      screen.getByRole("button", { name: /pagar y confirmar traslado/i }),
+    );
+    expect(
+      await screen.findByText(/en proceso de confirmación/i),
+    ).toBeInTheDocument();
+    expect(onPagado).not.toHaveBeenCalled();
+  });
+
+  it("error de confirmPayment muestra el mensaje y libera el botón", async () => {
+    stripeMocks.confirmPayment.mockResolvedValueOnce({
+      error: { message: "Tarjeta rechazada." },
+    });
+    const PagoStripe = await importarPagoStripe();
+    const onPagado = vi.fn();
+    const user = userEvent.setup();
+    render(<PagoStripe trasladoId="t-1" monto={500} onPagado={onPagado} />);
+    await screen.findByTestId("payment-element");
+    const boton = screen.getByRole("button", {
+      name: /pagar y confirmar traslado/i,
+    });
+    await user.click(boton);
+    expect(await screen.findByText(/tarjeta rechazada/i)).toBeInTheDocument();
+    expect(onPagado).not.toHaveBeenCalled();
+    expect(
+      screen.getByRole("button", { name: /pagar y confirmar traslado/i }),
+    ).toBeEnabled();
+  });
+
+  it("reintentar tras error vuelve a iniciar el cobro", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi
+        .fn()
+        .mockRejectedValueOnce(new Error("caída de red"))
+        .mockImplementation(
+          respuestaPaymentIntent({
+            clientSecret: "cs_test_123",
+          }).getMockImplementation()!,
+        ),
+    );
+    const PagoStripe = await importarPagoStripe();
+    const user = userEvent.setup();
+    render(<PagoStripe trasladoId="t-1" monto={500} onPagado={vi.fn()} />);
+    expect(await screen.findByText(/caída de red/i)).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: /reintentar/i }));
+    expect(await screen.findByTestId("payment-element")).toBeInTheDocument();
+  });
+
+  it("ofrece salida contextual completa ante agotamiento del plazo de espera (AC-1, AC-3)", async () => {
+    // Simular conexión estancada que nunca responde
+    vi.stubGlobal("fetch", vi.fn(() => new Promise(() => {})));
+    const PagoStripe = await importarPagoStripe();
+    render(<PagoStripe trasladoId="t-1" monto={500} timeoutMs={80} onPagado={vi.fn()} />);
+
+    // Durante la espera muestra mensaje útil (AC-2)
+    expect(screen.getByText(/conectando con la pasarela de pagos segura/i)).toBeInTheDocument();
+
+    // Al agotarse el plazo, muestra salida contextual (AC-3)
+    expect(await screen.findByText(/la conexión tardó más de lo esperado/i)).toBeInTheDocument();
+    expect(screen.getByText(/no se realizó ningún cargo a tu cuenta/i)).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /reintentar conexión/i })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /volver a mis traslados/i })).toHaveAttribute("href", "/mis-viajes");
+    expect(screen.getByRole("link", { name: /contactar a soporte/i })).toHaveAttribute("href", expect.stringContaining("/soporte?motivo=pago"));
+  });
+
+  it("consulta el estado previo antes de cobrar y confirma de inmediato si ya estaba pagado (AC-4, AC-5)", async () => {
+    const uuidTraslado = "10000000-0000-4000-8000-000000000001";
+    // El endpoint de estado responde que el traslado ya está pagado
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockImplementation((url: string) => {
+        if (url.includes("/api/viajes/")) {
+          return Promise.resolve(new Response(JSON.stringify({ pagado: true, monto: 500 })));
+        }
+        return Promise.resolve(new Response(JSON.stringify({ clientSecret: "cs_no_usado" })));
+      }),
+    );
+    const onPagado = vi.fn();
+    const PagoStripe = await importarPagoStripe();
+    render(<PagoStripe trasladoId={uuidTraslado} monto={500} onPagado={onPagado} />);
+
+    // Se detecta el pago previo y no se intenta crear un cobro duplicado
+    expect(await screen.findByText(/pago ya confirmado previamente/i)).toBeInTheDocument();
+    expect(screen.getByText(/no se realizó ningún cargo duplicado/i)).toBeInTheDocument();
+    expect(screen.getByText(new RegExp(uuidTraslado))).toBeInTheDocument();
+    expect(onPagado).not.toHaveBeenCalled();
+    expect(fetch).toHaveBeenCalledTimes(1);
+    expect(screen.queryByTestId("payment-element")).not.toBeInTheDocument();
+  });
+
+  it("muestra comprobante digital recuperable cuando el pago es aprobado (AC-9)", async () => {
+    const PagoStripe = await importarPagoStripe();
+    const onPagado = vi.fn();
+    const user = userEvent.setup();
+    render(<PagoStripe trasladoId="t-comprobante-123" monto={850} onPagado={onPagado} />);
+
+    await screen.findByTestId("payment-element");
+    await user.click(screen.getByRole("button", { name: /pagar y confirmar traslado/i }));
+
+    expect(await screen.findByRole("heading", { name: /stripe aprobó tu pago/i })).toBeInTheDocument();
+    expect(screen.getByText(/t-comprobante-123/)).toBeInTheDocument();
+    expect(screen.getByText(/\$850\.00 MXN/)).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /ver detalles del traslado/i })).toHaveAttribute(
+      "href",
+      "/viajes/t-comprobante-123?pago=exitoso",
+    );
+  });
+});

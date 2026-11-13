@@ -423,7 +423,7 @@ export function PagoStripe({
       if (timerTimeout) clearTimeout(timerTimeout);
       abortCtrl.abort();
     };
-  }, [trasladoId, reintento, monto, clientSecretExterno, timeoutMs]);
+  }, [trasladoId, reintento, monto, clientSecretExterno, timeoutMs, stripePublishableKey]);
 
   // Pantalla de comprobante recuperable cuando el pago ya está confirmado (AC-9)
   if (pagoYaConfirmado) {

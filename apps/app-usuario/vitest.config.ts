@@ -18,7 +18,7 @@ export default defineConfig({
     // márgenes NO relajan ninguna aserción; solo evitan falsos rojos por carga.
     testTimeout: 30_000,
     include: ["src/**/*.test.ts", "src/**/*.test.tsx", "test/**/*.test.ts", "test/**/*.test.tsx"],
-    exclude: ["tests/**", "**/*.spec.ts", "node_modules/**", ".next/**"],
+    exclude: ["tests/**", "**/*.spec.ts", "node_modules/**", ".next/**", ".next-*/**"],
     setupFiles: ["./vitest.setup.ts"],
     coverage: {
       provider: "v8",
@@ -36,6 +36,7 @@ export default defineConfig({
         "tests/**",
         "node_modules/**",
         ".next/**",
+        ".next-*/**",
         "coverage/**",
         "**/*.test.ts",
         "**/*.test.tsx",

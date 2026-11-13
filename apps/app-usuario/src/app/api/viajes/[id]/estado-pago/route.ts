@@ -1,13 +1,10 @@
 import {
   consultarTrasladoEstadoPago,
   consultarPagoCompletadoTraslado,
-  consultarEstadoTrasladoReconciliado,
 } from "@ruum/api/transfers";
-import { type NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { crearClienteServidor } from "@/lib/supabase-server";
 import { obtenerUsuarioIdPorAuth } from "@ruum/api/identity";
-import { reconciliarSagaTrasladosIndividualesServidor } from "@ruum/api/services";
-import { logStructuredInfo, logStructuredWarn } from "@/lib/logger";
 import { rateLimitConVentana } from "@/lib/csp-rate-limit";
 
 export const dynamic = "force-dynamic";
@@ -15,7 +12,7 @@ export const runtime = "nodejs";
 
 /**
  * Endpoint de resolución de estado de pago en tiempo real para Flujo 10 (CB-1 / CA-1, CA-2, CA-3).
- * Sustituye el temporizador ciego de la UI por verificación del sistema y activa el reconciliador durable de F6/F7.
+ * Sustituye el temporizador ciego de la UI por verificación del sistema y consulta el estado persistido por webhook o cron.
  * Protegido con rate limit de 30 req/min por usuario/traslado contra abusos de polling.
  */
 export async function GET(
@@ -90,7 +87,10 @@ export async function GET(
       "servicio_cerrado",
     ];
 
-    if (estadosConfirmados.includes(traslado.estado)) {
+    const estadoConfirmaPago = traslado.tipo_pago === "al_cierre"
+      ? traslado.estado === "pago_completado"
+      : estadosConfirmados.includes(traslado.estado);
+    if (estadoConfirmaPago) {
       return NextResponse.json({
         pagado: true,
         estadoTraslado: traslado.estado,
@@ -98,39 +98,14 @@ export async function GET(
       });
     }
 
-    // 3. CA-3: Dependencia declarada con reconciliador durable F6/F7
-    // Si el webhook está demorado, se invoca de forma oportuna la reconciliación del servidor
-    try {
-      const resultadoReconciliacion = await reconciliarSagaTrasladosIndividualesServidor(cliente, 10);
-      if (resultadoReconciliacion.confirmados > 0) {
-        logStructuredInfo("api/viajes/estado-pago", "pago_resuelto_por_reconciliador_durable", {
-          trasladoId: id,
-          confirmados: resultadoReconciliacion.confirmados,
-        });
-
-        // Reconsultar estado del traslado tras reconciliación
-        const { data: trasladoActualizado } = await consultarEstadoTrasladoReconciliado(cliente, id);
-
-        if (trasladoActualizado && estadosConfirmados.includes(trasladoActualizado.estado)) {
-          return NextResponse.json({
-            pagado: true,
-            estadoTraslado: trasladoActualizado.estado,
-            fuente: "reconciliador_durable",
-          });
-        }
-      }
-    } catch (errReconciliador) {
-      logStructuredWarn("api/viajes/estado-pago", "reconciliador_durable_ejecucion_fallida", errReconciliador, {
-        trasladoId: id,
-      });
-    }
-
-    // 4. Pago aún en proceso de confirmación (webhook demorado)
+    // El webhook y el cron actualizan el estado fuera de esta consulta.
     return NextResponse.json({
       pagado: false,
-      enProceso: true,
+      enProceso: traslado.estado !== "servicio_cancelado",
       estadoTraslado: traslado.estado,
-      mensaje: "El pago se encuentra en proceso de validación bancaria.",
+      mensaje: traslado.estado === "servicio_cancelado"
+        ? "El traslado fue cancelado."
+        : "El pago se encuentra en proceso de validación bancaria.",
     });
   } catch (error) {
     return NextResponse.json(

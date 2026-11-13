@@ -2,7 +2,7 @@ import "server-only";
 import { existsSync } from "node:fs";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
-import { createClient } from "@supabase/supabase-js";
+import { crearClienteServicio } from "./supabase-servicio";
 import { validarFila, type FilaValidada } from "./carga-masiva";
 import { clasificarVehiculoMasivo, eliminarCheckoutMasivoServidor, limpiarCheckoutsMasivosSinIntentServidor } from "@ruum/api/services";
 import { logStructuredError, logStructuredWarn } from "./logger";
@@ -20,10 +20,7 @@ function rutaCatalogoCP(prefijo: string): string {
 }
 
 export function clienteMasivoServicio() {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const key = process.env.SUPABASE_SERVICE_ROLE_KEY || (process.env.NODE_ENV !== "test" ? process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY : undefined);
-  if (!url || !key) throw new Error("El cobro masivo no está configurado en este entorno.");
-  return createClient(url, key, { auth: { persistSession: false, autoRefreshToken: false } });
+  return crearClienteServicio();
 }
 /** Las rutas comprueban la sesión antes de entrar. El catálogo es de lectura
  * administrativa: un cliente de usuario devolvería cero filas por RLS. */

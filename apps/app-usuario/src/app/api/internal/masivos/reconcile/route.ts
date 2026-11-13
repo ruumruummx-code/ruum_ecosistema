@@ -1,3 +1,4 @@
+import { autorizarCron } from "@/lib/autorizar-cron";
 import { NextRequest, NextResponse } from "next/server";
 import { clienteMasivoServicio, stripeMasivo } from "@/lib/carga-masiva-server";
 import {
@@ -11,8 +12,7 @@ export const dynamic = "force-dynamic";
 
 /** Consumidor periódico del workflow durable. Configurar como cron cada minuto. */
 export async function GET(request: NextRequest) {
-  const secreto = process.env.MASIVOS_RECONCILIADOR_SECRET;
-  if (!secreto || request.headers.get("authorization") !== `Bearer ${secreto}`) {
+  if (!autorizarCron(request, process.env.MASIVOS_RECONCILIADOR_SECRET)) {
     return NextResponse.json({ error: "No autorizado" }, { status: 401 });
   }
   const cliente = clienteMasivoServicio();
@@ -43,5 +43,5 @@ export async function GET(request: NextRequest) {
       );
     }
   }
-  return NextResponse.json({ reclamados: candidatos.length, confirmados, fallidos });
+  return NextResponse.json({ reclamados: candidatos.length, confirmados, fallidos }, { status: fallidos > 0 ? 500 : 200 });
 }
