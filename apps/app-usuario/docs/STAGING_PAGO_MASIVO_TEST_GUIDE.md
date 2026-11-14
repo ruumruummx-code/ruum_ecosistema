@@ -20,7 +20,7 @@ En Staging (o en local apuntando a Staging):
 ```bash
 STRIPE_SECRET_KEY=
 STRIPE_WEBHOOK_SECRET=
-NEXT_PUBLIC_SUPABASE_URL=https://asmzetwwwugaoowiukdv.supabase.co
+NEXT_PUBLIC_SUPABASE_URL=https://ytqhzrbmiczzwzzuzgbq.supabase.co
 SUPABASE_SERVICE_ROLE_KEY=
 ```
 
@@ -31,20 +31,20 @@ SUPABASE_SERVICE_ROLE_KEY=
 Se incluye un script autónomo que realiza el ciclo completo:
 
 ```bash
-node apps/app-usuario/scripts/verificar-pago-masivo-staging.mjs
+node --env-file=supabase/.env.staging apps/app-usuario/scripts/verificar-pago-masivo-staging.mjs
 ```
 
 ### Qué realiza el script:
 1. Crea un usuario temporal de prueba en Supabase Auth y su perfil en `public.usuarios`.
 2. Inserta un lote de prueba con 3 traslados cotizados en `checkout_traslados_masivos`.
 3. Crea un `PaymentIntent` en Stripe Test Mode por el monto exacto ($4,500.00 MXN) y lo confirma con `pm_card_visa`.
-4. Ejecuta la función RPC de conciliación `confirmar_checkout_masivo`.
+4. Obtiene el evento real de Stripe y lo entrega por HTTPS con firma al webhook desplegado en staging, que ejecuta `confirmar_checkout_masivo`. La entrega la inicia el script.
 5. Consulta directamente las tablas `checkout_traslados_masivos`, `traslados` y `pagos`:
    - Verifica `pagado_en IS NOT NULL`.
    - Verifica `COUNT(traslados) = 3`.
    - Verifica `COUNT(pagos) = 3` con `estado = 'completado'`.
-6. Simula una repetición idéntica del webhook (reintento por timeout) y comprueba que `traslados` y `pagos` permanezcan exactamente en 3.
-7. Purga los datos temporales del usuario de prueba.
+6. Reenvía el mismo evento al webhook y comprueba que `traslados` y `pagos` permanezcan exactamente en 3.
+7. Emite los identificadores del lote y del perfil. Conserva los datos de prueba en staging para ejecutar las cuatro consultas y guardar los resultados.
 
 ---
 
@@ -59,13 +59,13 @@ FROM public.checkout_traslados_masivos
 WHERE id = '<CHECKOUT_ID>';
 
 -- 2. Verificar traslados generados para el lote
-SELECT id, usuario_id, precio_cotizado, estado, tipo_pago, created_at
+SELECT id, usuario_id, precio_cotizado, estado, tipo_pago, creado_en
 FROM public.traslados
 WHERE usuario_id = '<USUARIO_ID>'
-ORDER BY created_at DESC;
+ORDER BY creado_en DESC;
 
 -- 3. Verificar pagos completados y trazabilidad
-SELECT id, traslado_id, monto, estado, metodo, checkout_masivo_id, created_at
+SELECT id, traslado_id, monto, estado, metodo, checkout_masivo_id, registrado_en
 FROM public.pagos
 WHERE checkout_masivo_id = '<CHECKOUT_ID>';
 
