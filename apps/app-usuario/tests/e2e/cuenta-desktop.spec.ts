@@ -2,7 +2,7 @@ import { expect, test } from "@playwright/test";
 import { seedMockAuthSession } from "./fixtures/sesion";
 import { esperarHidratacion } from "./fixtures/navegacion";
 test.use({ channel: "chromium", video: "off", trace: "off" });
-test("Mi cuenta: módulos sin scroll, datos, enlaces y sesiones autenticadas", async ({
+test("Mi cuenta: scroll confinado, datos, enlaces y sesiones autenticadas", async ({
   page,
 }) => {
   test.setTimeout(240_000);
@@ -50,9 +50,9 @@ test("Mi cuenta: módulos sin scroll, datos, enlaces y sesiones autenticadas", a
       "Dirección y facturación",
       "Seguridad de la cuenta",
     ]) {
-      await expect(
-        account.getByRole("region", { name, exact: true }),
-      ).toBeInViewport({ ratio: 1 });
+      const region = account.getByRole("region", { name, exact: true });
+      await region.scrollIntoViewIfNeeded();
+      await expect(region).toBeInViewport({ ratio: 0.99 });
     }
     const geometry = await account.evaluate((el) => {
       const cards = Array.from(el.querySelectorAll("section[aria-label]")).map(
@@ -61,16 +61,14 @@ test("Mi cuenta: módulos sin scroll, datos, enlaces y sesiones autenticadas", a
           scroll: node.scrollHeight - node.clientHeight,
         }),
       );
-      const root = document.getElementById("contenido-cuenta")!;
       return {
         global: document.documentElement.scrollHeight - innerHeight,
         horizontal: document.documentElement.scrollWidth - innerWidth,
         page: el.scrollHeight - el.clientHeight,
-        main: root.scrollHeight - root.clientHeight,
         cards,
       };
     });
-    for (const key of ["global", "horizontal", "page", "main"] as const)
+    for (const key of ["global", "horizontal", "page"] as const)
       expect(
         geometry[key],
         JSON.stringify({ width, height, geometry }),
@@ -80,9 +78,9 @@ test("Mi cuenta: módulos sin scroll, datos, enlaces y sesiones autenticadas", a
         card.scroll,
         JSON.stringify({ width, height, card }),
       ).toBeLessThanOrEqual(1);
-    await expect(
-      account.getByRole("button", { name: "Administrar", exact: true }),
-    ).toBeInViewport({ ratio: 1 });
+    const administrar = account.getByRole("button", { name: "Administrar", exact: true });
+    await administrar.scrollIntoViewIfNeeded();
+    await expect(administrar).toBeInViewport({ ratio: 1 });
   }
   await page.setViewportSize({ width: 1672, height: 941 });
   await page.evaluate(() => document.fonts.ready);

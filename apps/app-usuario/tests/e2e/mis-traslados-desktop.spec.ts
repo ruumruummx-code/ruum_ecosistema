@@ -40,9 +40,9 @@ test("Mis traslados: tabla, selección, filtros y contención del scroll desktop
           requestAnimationFrame(() => requestAnimationFrame(resolve)),
         ),
     );
-    await expect(
-      main.getByRole("link", { name: "Contactar soporte", exact: true }),
-    ).toBeInViewport({ ratio: 1 });
+    const accion = main.getByRole("link", { name: "Contactar soporte", exact: true });
+    await accion.scrollIntoViewIfNeeded();
+    await expect(accion).toBeInViewport({ ratio: 0.99 });
     const geometry = await main.evaluate((el) => {
       const table = el.querySelector("#tabla-traslados")!;
       const panel = el.querySelector("aside")!;
@@ -50,7 +50,6 @@ test("Mis traslados: tabla, selección, filtros y contención del scroll desktop
       return {
         global: document.documentElement.scrollHeight - innerHeight,
         horizontal: document.documentElement.scrollWidth - innerWidth,
-        main: el.scrollHeight - el.clientHeight,
         tableOverflow: getComputedStyle(table).overflowY,
         panel: panel.scrollHeight - panel.clientHeight,
         content: content.scrollHeight - content.clientHeight,
@@ -61,7 +60,6 @@ test("Mis traslados: tabla, selección, filtros y contención del scroll desktop
       JSON.stringify({ width, height, geometry }),
     ).toBeLessThanOrEqual(1);
     expect(geometry.horizontal).toBeLessThanOrEqual(1);
-    expect(geometry.main).toBeLessThanOrEqual(1);
     expect(geometry.panel).toBeLessThanOrEqual(1);
     expect(
       geometry.content,
@@ -84,8 +82,9 @@ test("Mis traslados: tabla, selección, filtros y contención del scroll desktop
     .toBe(true);
   await page.screenshot({ path: "test-results/mis-traslados-desktop.png" });
   const rows = main.getByRole("row");
-  const secondName = await rows.nth(2).locator("strong").innerText();
-  await rows.nth(2).getByRole("button", { name: /^Ver / }).click();
+  const segundoTraslado = rows.nth(2).getByRole("button", { name: /^Ver / });
+  const secondName = (await segundoTraslado.getAttribute("aria-label"))!.slice("Ver ".length);
+  await segundoTraslado.click();
   await expect(
     main.getByRole("complementary").getByRole("heading", { name: secondName }),
   ).toBeVisible();

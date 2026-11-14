@@ -282,6 +282,7 @@
 .listScroll {
   flex: 1;
   min-height: 0;
+  max-height: max(12rem, 48dvh);
   overflow-y: auto;
   overflow-x: hidden;
   scrollbar-width: thin;

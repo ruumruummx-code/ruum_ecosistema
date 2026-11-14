@@ -1032,7 +1032,7 @@
     font-size: 14px;
   }
   .banners {
-    height: 165px;
+    min-height: 165px;
   }
   .avatar {
     width: 72px;
@@ -1194,7 +1194,7 @@
     font-weight: 600;
   }
   .banners {
-    height: 184px;
+    min-height: 184px;
     gap: 15px;
     grid-template-columns: minmax(0, 1.95fr) minmax(0, 1fr);
   }

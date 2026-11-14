@@ -27,7 +27,7 @@ test.beforeEach(async ({ page }) => {
   });
 });
 
-test('Inicio desktop: datos, GPS, no scroll, contactos y navegación operativa', async ({ page }) => {
+test('Inicio desktop: datos, GPS, scroll confinado, contactos y navegación operativa', async ({ page }) => {
   test.setTimeout(360_000);
   page.setDefaultNavigationTimeout(120_000);
   await seedMockAuthSession(page, { token: 'mock_access_token_dashboard' });
@@ -44,13 +44,18 @@ test('Inicio desktop: datos, GPS, no scroll, contactos y navegación operativa',
   await expect(page.locator('#userDashboardSidebar').getByRole('link', { name: 'Inicio', exact: true })).toHaveAttribute('aria-current', 'page');
   for (const [width, height] of [[1024, 768], [1280, 640], [1366, 768], [1672, 941], [1920, 1080], [3840, 2160]]) {
     await page.setViewportSize({ width, height });
-    await expect(dashboard.getByRole('heading', { name: 'Tips Ruum Ruum' })).toBeInViewport({ ratio: 1 });
-    await expect(dashboard.getByRole('link', { name: 'Contactar soporte', exact: true })).toBeInViewport({ ratio: 1 });
+    for (const control of [
+      dashboard.getByRole('heading', { name: 'Tips Ruum Ruum' }),
+      dashboard.getByRole('link', { name: 'Contactar soporte', exact: true }),
+    ]) {
+      await control.scrollIntoViewIfNeeded();
+      await expect(control).toBeInViewport({ ratio: 1 });
+    }
     const geometry = await dashboard.evaluate(el => {
-      const main = document.getElementById('desktopMainContent')!;
-      const table = el.querySelector('[aria-label="Tabla de últimos traslados"]')!;
+      const main = document.documentElement;
+      const table = el.querySelector('[aria-label="Últimos traslados"] table')!.parentElement!;
       const modules = Array.from(el.children).map(child => child.getBoundingClientRect());
-      return { main: main.scrollHeight - main.clientHeight, dashboard: el.scrollHeight - el.clientHeight, width: document.documentElement.scrollWidth - innerWidth, tableScrolls: table.scrollHeight > table.clientHeight, tableOverflow: getComputedStyle(table).overflowY, overlap: modules.some((rect, i) => i > 0 && rect.top < modules[i - 1].bottom - 1) };
+      return { main: main.scrollHeight - innerHeight, dashboard: el.scrollHeight - el.clientHeight, width: document.documentElement.scrollWidth - innerWidth, tableScrolls: table.scrollHeight > table.clientHeight, tableOverflow: getComputedStyle(table).overflowY, overlap: modules.some((rect, i) => i > 0 && rect.top < modules[i - 1].bottom - 1) };
     });
     expect(geometry.main, `${width}x${height}`).toBeLessThanOrEqual(1);
     expect(geometry.dashboard, `${width}x${height}`).toBeLessThanOrEqual(1);
@@ -67,7 +72,7 @@ test('Inicio desktop: datos, GPS, no scroll, contactos y navegación operativa',
   await expect(dashboard.getByRole('heading', { name: 'Optimiza tus traslados' })).toBeVisible();
   await dashboard.getByRole('button', { name: 'Llamar a Jorge Ramírez' }).click();
   await expect(dashboard.getByRole('alert')).toBeVisible();
-  await expect(dashboard.getByRole('link', { name: 'Contactar soporte por WhatsApp' })).toHaveAttribute('href', /https:\/\/wa.me\//);
+  await expect(dashboard.getByRole('link', { name: 'WhatsApp soporte' })).toHaveAttribute('href', /https:\/\/wa\.me\//);
   await dashboard.getByRole('button', { name: 'Opciones del traslado PEM789', exact: true }).first().click();
   await expect(dashboard.getByRole('link', { name: 'Solicitar ayuda' })).toHaveAttribute('href', `/soporte?traslado=${id}`);
   await page.keyboard.press('Escape');
@@ -82,7 +87,7 @@ test('Inicio desktop: datos, GPS, no scroll, contactos y navegación operativa',
   await expect(page).toHaveURL(new RegExp(`/viajes/${id}#en-ruta$`));
   await expect(page.getByRole('tab', { name: /En Ruta/i })).toBeVisible();
   await page.goto('/', { waitUntil: 'domcontentloaded' });
-  await dashboard.getByRole('link', { name: 'Enviar mensaje a Jorge Ramírez' }).click();
+  await dashboard.getByRole('link', { name: 'Mensaje a Jorge Ramírez' }).click();
   await expect(page).toHaveURL(new RegExp(`/viajes/${id}#chat-conductor$`));
   await expect(page.getByRole('tab', { name: /Chat/ })).toHaveAttribute('aria-selected', 'true');
   await page.goto('/', { waitUntil: 'domcontentloaded' });

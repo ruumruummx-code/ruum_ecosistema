@@ -385,6 +385,7 @@
 }
 .listScroll {
   min-height: 0;
+  max-height: max(12rem, 48dvh);
   flex: 1;
   overflow: auto;
   overscroll-behavior: contain;
@@ -1399,6 +1400,32 @@
 }
 .hero {
   overflow: hidden;
+}
+@media (max-width: 1199px) {
+  .workspace[data-detail="true"] .cards > li {
+    grid-template-columns: 48px minmax(0, 1fr) 36px 24px;
+    gap: 5px;
+  }
+  .workspace[data-detail="true"] .cards > li > .statusBadge {
+    grid-column: 2;
+    grid-row: 2;
+    justify-self: start;
+  }
+  .workspace[data-detail="true"] .cards > li .attributes {
+    grid-column: 1 / -1;
+    grid-row: 3;
+    flex-wrap: wrap;
+    gap: 4px 8px;
+  }
+  .workspace[data-detail="true"] .cards > li .view {
+    grid-column: 3;
+  }
+  .workspace[data-detail="true"] .cards > li .rowMenu {
+    grid-column: 4;
+  }
+  .workspace[data-detail="true"] .cards > li .thumbnail {
+    width: 100%;
+  }
 }
 @media (min-width: 1450px) and (min-height: 801px) {
   .workspace {

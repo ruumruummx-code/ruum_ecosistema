@@ -2119,7 +2119,7 @@ input::placeholder, textarea::placeholder {
 .user-profile-editor { position: fixed; inset: 0 0 auto; display: flex; flex-direction: column; width: 100%; height: var(--profile-viewport-height, 100dvh); max-height: 100dvh; overflow: hidden; background: var(--user-color-background); color: var(--user-color-primary); }
 .user-profile-appbar { display: grid; grid-template-columns: 76px minmax(0, 1fr) 76px; align-items: center; flex-shrink: 0; min-height: 52px; padding: env(safe-area-inset-top) 12px 0; border-bottom: 1px solid var(--user-color-border); background: var(--user-color-surface); }
 .user-profile-appbar h1 { text-align: center; font-size: 18px; font-weight: 800; white-space: nowrap; color: var(--user-color-primary); }
-.user-profile-back { display: flex; align-items: center; gap: 4px; min-height: 44px; font-size: 14px; font-weight: 650; }
+.user-profile-back { color: var(--user-color-primary); display: flex; align-items: center; gap: 4px; min-height: 44px; font-size: 14px; font-weight: 650; }
 .user-profile-tabs { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); flex-shrink: 0; width: min(calc(100% - 24px), 456px); margin: 8px auto; padding: 2px; border-radius: 12px; background: var(--user-color-surface-soft); }
 .user-profile-tabs button { min-height: 44px; border-radius: 10px; font-size: 14px; font-weight: 700; }
 .user-profile-tabs button[aria-selected="true"] { background: var(--user-color-surface); box-shadow: 0 1px 4px rgb(7 22 38 / 10%); }

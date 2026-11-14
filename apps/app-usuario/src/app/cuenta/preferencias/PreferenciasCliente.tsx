@@ -374,7 +374,7 @@ export function PreferenciasCliente({ cuenta }: PreferenciasClienteProps) {
                         type="button"
                         aria-pressed="true"
                         aria-describedby={idiomaAvisoId}
-                        className={`text-xs px-4 py-1.5 rounded-lg font-medium transition ${
+                        className={`text-xs px-4 py-1.5 rounded-lg font-medium ${
                           idioma === "es"
                             ? "bg-[#0066FF] text-white shadow-2xs font-semibold"
                             : "text-slate-600 dark:text-slate-300 hover:text-slate-900"
@@ -488,7 +488,7 @@ export function PreferenciasCliente({ cuenta }: PreferenciasClienteProps) {
                       <button
                         type="button"
                         onClick={() => fijarModo("light")}
-                        className={`text-xs px-3.5 py-1.5 rounded-lg font-medium transition ${
+                        className={`text-xs px-3.5 py-1.5 rounded-lg font-medium ${
                           modo === "light"
                             ? "bg-[#0066FF] text-white shadow-2xs font-semibold"
                             : "text-slate-600 dark:text-slate-300 hover:text-slate-900"
@@ -499,7 +499,7 @@ export function PreferenciasCliente({ cuenta }: PreferenciasClienteProps) {
                       <button
                         type="button"
                         onClick={() => fijarModo("dark")}
-                        className={`text-xs px-3.5 py-1.5 rounded-lg font-medium transition ${
+                        className={`text-xs px-3.5 py-1.5 rounded-lg font-medium ${
                           modo === "dark"
                             ? "bg-[#0066FF] text-white shadow-2xs font-semibold"
                             : "text-slate-600 dark:text-slate-300 hover:text-slate-900"
@@ -510,7 +510,7 @@ export function PreferenciasCliente({ cuenta }: PreferenciasClienteProps) {
                       <button
                         type="button"
                         onClick={() => fijarModo("auto")}
-                        className={`text-xs px-3.5 py-1.5 rounded-lg font-medium transition ${
+                        className={`text-xs px-3.5 py-1.5 rounded-lg font-medium ${
                           modo === "auto"
                             ? "bg-[#0066FF] text-white shadow-2xs font-semibold"
                             : "text-slate-600 dark:text-slate-300 hover:text-slate-900"

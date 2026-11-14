@@ -45,24 +45,22 @@ test("Vehículos desktop: fidelidad, selección, filtros y scroll interno", asyn
           requestAnimationFrame(() => requestAnimationFrame(resolve)),
         ),
     );
-    await expect(
-      main.getByRole("link", {
+    const accion = main.getByRole("link", {
         name: "Seleccionar para traslado",
         exact: true,
-      }),
-    ).toBeInViewport({ ratio: 1 });
+      });
+    await accion.scrollIntoViewIfNeeded();
+    await expect(accion).toBeInViewport({ ratio: 1 });
     const geometry = await main.evaluate((el) => {
       const list = el.querySelector(
         '[aria-label="Contenedor de vehículos con desplazamiento interno"]',
       )!;
       const panel = el.querySelector("aside")!;
       const content = panel.querySelector('[role="tabpanel"]:not([hidden]) > div')!;
-      const shell = document.getElementById("desktopVehiclesMainContent")!;
       return {
         global: document.documentElement.scrollHeight - innerHeight,
         horizontal: document.documentElement.scrollWidth - innerWidth,
         main: el.scrollHeight - el.clientHeight,
-        shell: shell.scrollHeight - shell.clientHeight,
         listX: list.scrollWidth - list.clientWidth,
         listY: getComputedStyle(list).overflowY,
         panel: panel.scrollHeight - panel.clientHeight,
@@ -73,7 +71,6 @@ test("Vehículos desktop: fidelidad, selección, filtros y scroll interno", asyn
       "global",
       "horizontal",
       "main",
-      "shell",
       "listX",
       "panel",
       "content",

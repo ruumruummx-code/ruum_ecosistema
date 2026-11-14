@@ -47,7 +47,7 @@ it("bloquea duplicados durante el envío y después del éxito", async () => {
  expect(screen.getByRole("button", { name: "No, mantener" })).toBeDisabled();
  resolver({ monto_cargo: 0, porcentaje_cargo: 0 });
  await waitFor(() => expect(screen.getByRole("button", { name: "Cancelar viaje" })).toBeDisabled());
- expect(screen.getByText(/Traslado cancelado. Cargo registrado/).closest("[data-resultado]")).toHaveFocus();
+ await waitFor(() => expect(screen.getByText(/Traslado cancelado. Cargo registrado/).closest("[data-resultado]")).toHaveFocus());
 });
 it("anuncia errores, conserva la confirmación y permite reintentar", async () => {
  mocks.cancelar.mockRejectedValueOnce(new Error("No se pudo cancelar"));

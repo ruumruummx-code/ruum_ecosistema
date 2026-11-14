@@ -57,7 +57,7 @@
 .tabs button { height: 40px; border: 1px solid #e1e9f5; background: #fff; border-radius: 13px; padding: 0 17px; white-space: nowrap; font-size: 12px; color: #42577c; }
 .tabs button:hover { background: #edf4ff; }
 .tabs button:is([aria-selected="true"], [aria-pressed="true"]) { color: #005cff; border-color: #3577ff; box-shadow: inset 0 -2px #005cff0d; }
-.tableScroll { min-height: 400px; flex: 1; border: 1px solid #e0e8f4; border-radius: 9px; background: #fff; scrollbar-width: thin; scrollbar-color: #c7d5eb transparent; }
+.tableScroll { min-height: 0; max-height: max(12rem, 48dvh); flex: 1; overflow: auto; overscroll-behavior: contain; border: 1px solid #e0e8f4; border-radius: 9px; background: #fff; scrollbar-width: thin; scrollbar-color: #c7d5eb transparent; }
 .table { border-collapse: separate; border-spacing: 0; width: 100%; font-size: 12px; table-layout: fixed; }
 .table th { position: sticky; top: 0; z-index: 2; background: #f5f8fd; text-align: left; text-transform: uppercase; font-size: 9px; font-weight: 500; color: #53688d; height: 34px; padding: 0 10px; }
 .table th:nth-child(2), .table th:nth-child(4) { width: 16%; } .table th:nth-child(3) { width: 26px; padding: 0; } .table th:nth-child(5) { width: 13%; } .table th:nth-child(6) { width: 95px; } .table th:nth-child(7) { width: 88px; }
@@ -85,7 +85,7 @@
 .ellipsis { padding: 0 7px; }
 .empty { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; min-height: 200px; padding: 24px; text-align: center; color: #667c9b; }
 .empty svg { width: 44px; height: 44px; color: #005cff; }
-.detail { display: flex; flex-direction: column; gap: 18px; min-height: 520px; min-width: 0; height: auto; padding: 22px 24px; border: 1px solid #e1e8f3; border-radius: 16px; background: #ffffffed; }
+.detail { display: flex; flex-direction: column; align-self: start; gap: 18px; min-height: 520px; min-width: 0; padding: 22px 24px; border: 1px solid #e1e8f3; border-radius: 16px; background: #ffffffed; }
 .detailHeading { display: flex; align-items: center; gap: 12px; position: relative; min-height: 58px; padding-right: 20px; flex: 0 0 auto; }
 .detailHeading h2 { font-size: 15px; line-height: 1.3; margin: 0 0 5px; font-weight: 750; letter-spacing: -0.3px; }
 .detailHeading > div > span { font-size: 12px; color: #596e92; margin-right: 8px; } .detailHeading > div .badge { font-size: 10px; padding: 4px 8px; }
@@ -93,8 +93,8 @@
 .detailTabs { display: flex; flex: 0 0 auto; background: #f1f4f9; border-radius: 13px; padding: 2px; }
 .detailTabs button { flex: 1; height: 33px; border-radius: 11px; color: #3f557e; font-size: 12px; } .detailTabs button:hover { background: #e4edfc; }
 .detailTabs button:is([aria-selected="true"], [aria-pressed="true"]) { color: #005cff; background: white; box-shadow: 0 1px 4px #243d6520, inset 0 -2px #005cff; }
-.detailContent { flex: 1 1 0; min-height: 0; min-width: 0; display: flex; flex-direction: column; gap: 14px; overflow: hidden; }
-.map { position: relative; flex: 1 1 0; min-height: 0; max-height: 220px; border-radius: 11px; overflow: hidden; background: #edf2f7; }
+.detailContent { flex: 1 0 auto; min-width: 0; display: flex; flex-direction: column; gap: 14px; }
+.map { position: relative; flex: none; height: clamp(120px, 20dvh, 220px); border-radius: 11px; overflow: hidden; background: #edf2f7; }
 .map > div { height: 100%; min-height: 0; }
 .expand { position: absolute; top: 8px; right: 8px; display: flex; align-items: center; gap: 8px; background: white; border: 1px solid #d7e1f0; border-radius: 7px; color: #234878; font-size: 10px; padding: 6px 9px; z-index: 1; }
 .expand svg { width: 14px; height: 14px; }
@@ -149,7 +149,4 @@
 @media (max-height: 810px) {
   .main { gap: 12px; padding-block: 12px; }
   .workspace, .detail { min-height: 0; }
-  .workspace { flex-basis: 0; grid-template-rows: minmax(0, 1fr); }
-  .tableScroll { min-height: 0; overflow: auto; }
-  .detailContent { overflow-y: auto; }
 }

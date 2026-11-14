@@ -4,6 +4,7 @@ import path from 'node:path';
 import AxeBuilder from '@axe-core/playwright';
 import { seedMockAuthSession } from './fixtures/sesion';
 import { medirTextoTraslado } from './fixtures/contraste-traslado';
+import { esperarHidratacion } from './fixtures/navegacion';
 
 for (const theme of ['light', 'dark']) for (const width of [390, 1440]) {
  test(`UX-002 ${theme} ${width}`, async ({ page }, testInfo) => {
@@ -20,12 +21,13 @@ for (const theme of ['light', 'dark']) for (const width of [390, 1440]) {
    localStorage.setItem('ruum:pref:tema:00000000-0000-4000-8000-0000000000f1', accountTheme);
   }, theme);
   const report = [];
-  const evidence = path.resolve(__dirname, '../../../../docs/remediacion-ux002', theme + '-' + width);
+  const evidence = testInfo.outputPath('contraste');
   fs.mkdirSync(evidence, { recursive: true });
   for (const route of ['/login', '/', '/mis-viajes', '/cuenta', '/ubicaciones', '/cuenta/preferencias', '/registro', '/soporte']) {
    await page.context().clearCookies();
    if (!['/login', '/registro'].includes(route)) await seedMockAuthSession(page, { token: route.startsWith('/cuenta') ? 'mock_access_token_account' : route === '/ubicaciones' ? 'mock_access_token_locations' : 'mock_access_token_dashboard' });
    await page.goto(route, { waitUntil: 'domcontentloaded' });
+   await esperarHidratacion(page);
    expect(new URL(page.url()).pathname).toBe(route);
    await expect(page.locator('html')).toHaveAttribute('data-theme', theme, { timeout: 60_000 });
    const expectedContent: Record<string, RegExp> = {
@@ -50,7 +52,7 @@ for (const theme of ['light', 'dark']) for (const width of [390, 1440]) {
 
 // Revisar también las secciones inferiores del contenedor con scroll interno.
 for (const theme of ['light', 'dark'] as const) for (const width of [390, 1440]) {
- test(`UX-002 preferencias completas ${theme} ${width}`, async ({ page }) => {
+ test(`UX-002 preferencias completas ${theme} ${width}`, async ({ page }, testInfo) => {
   test.setTimeout(180_000);
   page.setDefaultNavigationTimeout(120_000);
   await page.setViewportSize({ width, height: 900 });
@@ -62,6 +64,7 @@ for (const theme of ['light', 'dark'] as const) for (const width of [390, 1440])
   }, theme);
   await seedMockAuthSession(page, { token: 'mock_access_token_account' });
   await page.goto('/cuenta/preferencias', { waitUntil: 'domcontentloaded' });
+  await esperarHidratacion(page);
   await expect(page.locator('body')).toContainText(/notificaciones/i, { timeout: 60_000 });
   await expect(page.locator('html')).toHaveAttribute('data-theme', theme);
   const scrolls = await page.evaluate(async () => {
@@ -72,7 +75,7 @@ for (const theme of ['light', 'dark'] as const) for (const width of [390, 1440])
   });
   const result = await new AxeBuilder({ page }).withRules(['color-contrast']).analyze();
   await expect(page.locator('html')).toHaveAttribute('data-theme', theme);
-  const evidence = path.resolve(__dirname, '../../../../docs/remediacion-ux002', theme + '-' + width);
+  const evidence = testInfo.outputPath('contraste');
   fs.mkdirSync(evidence, { recursive: true });
   fs.writeFileSync(path.join(evidence, 'preferencias-inferior.json'), JSON.stringify({ theme, width, scrolls, violations: result.violations, incomplete: result.incomplete }, null, 2));
   await page.screenshot({ path: path.join(evidence, '_cuenta_preferencias_inferior.png'), fullPage: true });

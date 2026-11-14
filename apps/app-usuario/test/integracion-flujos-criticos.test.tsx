@@ -35,6 +35,7 @@ const entorno = vi.hoisted(() => {
     aceptarCotizacionUsuarioMock: vi.fn(),
     obtenerUsuarioActualMock: vi.fn(),
     listarVehiculosDeUsuarioMock: vi.fn(),
+    registrarConsentimientoUsuarioMock: vi.fn(),
     stripeConfirmPaymentMock: vi.fn(),
     stripeLoadMock: vi.fn(),
     redisStore: new Map<string, unknown>(),
@@ -128,6 +129,8 @@ vi.mock("@ruum/api/services", async (importOriginal) => {
       entorno.obtenerUsuarioActualMock(...args),
     listarVehiculosDeUsuario: (...args: unknown[]) =>
       entorno.listarVehiculosDeUsuarioMock(...args),
+    registrarConsentimientoUsuario: (...args: unknown[]) =>
+      entorno.registrarConsentimientoUsuarioMock(...args),
   };
 });
 
@@ -259,6 +262,7 @@ describe("Integración de flujos críticos en @ruum/app-usuario (signup, login, 
     entorno.aceptarCotizacionUsuarioMock.mockReset();
     entorno.obtenerUsuarioActualMock.mockReset();
     entorno.listarVehiculosDeUsuarioMock.mockReset();
+    entorno.registrarConsentimientoUsuarioMock.mockReset();
     entorno.stripeConfirmPaymentMock.mockReset();
     entorno.stripeLoadMock.mockReset();
     entorno.redisStore.clear();
@@ -770,6 +774,10 @@ describe("Integración de flujos críticos en @ruum/app-usuario (signup, login, 
       const resCompleto = await postViajes(reqCompleto);
       expect(resCompleto.status).toBe(200);
       expect(await resCompleto.json()).toMatchObject({ ok: true, pasoValidado: 4, recalculo: { precioCotizado: 5000 } });
+      expect(entorno.registrarConsentimientoUsuarioMock).toHaveBeenCalledExactlyOnceWith(
+        expect.objectContaining({ auth: expect.any(Object) }),
+        { version: 1, canal: "web", versionApp: "1.0.0" },
+      );
 
       // Vehículo ajeno en la BD es rechazado con 403 aunque venga en vehiculosUsuarioIds
       entorno.listarVehiculosDeUsuarioMock.mockResolvedValueOnce([

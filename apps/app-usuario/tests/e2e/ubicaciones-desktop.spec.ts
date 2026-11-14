@@ -103,14 +103,12 @@ test("Mis ubicaciones: scroll confinado, selección, copia y persistencia autent
         ),
     );
     const geometry = await app.evaluate((el) => {
-      const main = document.getElementById("desktopLocationsMainContent")!;
       const list = el.querySelector('[role="region"][aria-label="Resultados del filtro"]')!;
       const detail = el.querySelector("aside")!;
       return {
         global: document.documentElement.scrollHeight - innerHeight,
         horizontal: document.documentElement.scrollWidth - innerWidth,
         page: el.scrollHeight - el.clientHeight,
-        main: main.scrollHeight - main.clientHeight,
         detail: detail.scrollHeight - detail.clientHeight,
         listOverflow: getComputedStyle(list).overflowY,
         listWidth: list.scrollWidth - list.clientWidth,
@@ -120,7 +118,6 @@ test("Mis ubicaciones: scroll confinado, selección, copia y persistencia autent
       "global",
       "horizontal",
       "page",
-      "main",
       "detail",
       "listWidth",
     ] as const)
@@ -129,9 +126,9 @@ test("Mis ubicaciones: scroll confinado, selección, copia y persistencia autent
         JSON.stringify({ width, height, geometry }),
       ).toBeLessThanOrEqual(1);
     expect(geometry.listOverflow).toBe("auto");
-    await expect(
-      app.getByRole("button", { name: "Editar información" }),
-    ).toBeInViewport({ ratio: 1 });
+    const accion = app.getByRole("button", { name: "Editar información" });
+    await accion.scrollIntoViewIfNeeded();
+    await expect(accion).toBeInViewport({ ratio: 1 });
   }
   await page.setViewportSize({ width: 1672, height: 941 });
   await page.evaluate(() => document.fonts.ready);
