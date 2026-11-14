@@ -63,13 +63,14 @@
   background: #ef4444;
 }
 .user-dashboard-shell .user-dashboard-content {
-  padding: 4px 16px calc(var(--user-mobile-nav-height, calc(68px + env(safe-area-inset-bottom))) + 8px);
+  margin-bottom: var(--user-mobile-nav-height, calc(68px + env(safe-area-inset-bottom)));
+  padding: 4px 16px 8px;
   overflow-y: auto;
 }
 .user-dashboard-content > div {
   display: flex;
   flex: 1;
-  min-height: 0;
+  min-height: min-content;
 }
 .user-dashboard {
   --home-teal: var(--user-on-dark-accent);

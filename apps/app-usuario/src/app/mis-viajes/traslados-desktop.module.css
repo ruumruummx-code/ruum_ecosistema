@@ -131,7 +131,7 @@
 .history a { display: flex; align-items: center; gap: 10px; color: #005cff; } .back { align-self: flex-start; color: #005cff; font-size: 12px; flex: 0 0 auto; }
 @media (max-width: 1399px) {
   .main { padding: 18px; gap: 16px; }
-  .workspace[data-detail="true"] { grid-template-columns: minmax(0, 1fr); }
+  .workspace[data-detail="true"] { grid-template-columns: minmax(0, 1fr) minmax(290px, 36%); }
   .metric { gap: 7px; padding: 10px 8px; min-height: 70px; }
   .metricIcon { width: 34px; height: 34px; } .metricIcon svg { width: 20px; height: 20px; }
   .metric strong { font-size: 20px; } .metric small { font-size: 9px; } .percent { font-size: 10px; }
@@ -144,4 +144,12 @@
   .detail { padding: 12px; gap: 12px; } .heroCar { width: 75px; } .detailHeading h2 { font-size: 13px; }
   .driverBody { gap: 6px; } .avatar { width: 35px; height: 35px; } .contacts { gap: 4px; }
   .contacts a, .contacts button { width: 27px; height: 27px; } .pagination { font-size: 10px; }
+}
+
+@media (max-height: 810px) {
+  .main { gap: 12px; padding-block: 12px; }
+  .workspace, .detail { min-height: 0; }
+  .workspace { flex-basis: 0; grid-template-rows: minmax(0, 1fr); }
+  .tableScroll { min-height: 0; overflow: auto; }
+  .detailContent { overflow-y: auto; }
 }

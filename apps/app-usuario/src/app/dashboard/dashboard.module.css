@@ -131,7 +131,7 @@
 .sectionHeading h2 { font-size: 16px; font-weight: 700; letter-spacing: -.3px; }
 .sectionHeading a { color: var(--user-on-light-link); font-size: 12px; }
 .sectionHeading a:hover { text-decoration: underline; }
-.recentScroll { min-height: 260px; }
+.recentScroll { min-height: 0; max-height: clamp(120px, 29dvh, 380px); overflow-y: auto; }
 .recent table { table-layout: fixed; width: 100%; border-collapse: collapse; text-align: left; }
 .recent th { position: sticky; top: 0; z-index: 1; font-size: 9px; color: #5e7199; background: #f4f7fc; padding: 10px 6px; font-weight: 600; }
 .recent th:nth-child(2), .recent th:nth-child(4) { width: 16%; }.recent th:nth-child(3) { width: 30px; }.recent th:nth-child(5) { width: 12%; }.recent th:nth-child(6) { width: 94px; }.recent th:nth-child(7) { width: 36px; }
@@ -245,5 +245,14 @@
   .vehicleCell small, .recent time small { font-size: 9px; }
   .support { gap: 8px; padding: 6px; }.supportIcon { width: 28px; height: 28px; }.support h2 { font-size: 12px; line-height: 1.15; }.support p { font-size: 9px; line-height: 1.15; margin-top: 2px; }.support a { min-width: 115px; font-size: 10px; line-height: 1.15; padding: 4px 7px; margin-top: 4px; }
   .tipContent { gap: 6px; padding-inline: 6px; }.tipContent p { max-width: 100%; font-size: 9px; }
+}
+@media (max-height: 810px) {
+  .dashboard { gap: 12px; padding-block: 14px; }
+  .overview, .activeCard { min-height: 270px; gap: 12px; }
+  .activeCard { padding-block: 12px; }
+  .quickActions > a { padding-block: 8px; }
+  .supportColumn { gap: 8px; }
+  .support { min-height: 0; padding-block: 10px; }
+  .tips { min-height: 110px; padding-bottom: 8px; }
 }
 @media(prefers-reduced-motion: reduce) { .dashboard a, .dashboard button { transition: none; }.liveBadge i { animation: none; } }
