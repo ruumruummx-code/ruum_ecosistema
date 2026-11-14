@@ -2,10 +2,25 @@ name: App Usuario
 on:
   pull_request:
   push:
-    branches: [main]
+    branches: [main, 'codex/app-usuario-rc']
 permissions:
   contents: read
 jobs:
+  reconciliacion-sql:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: supabase/setup-cli@v1
+        with:
+          version: 2.109.0
+      - name: Aplicar todas las migraciones a una base limpia
+        run: supabase db start
+      - name: Verificar reconciliación individual
+        run: |
+          docker exec -i supabase_db_ruum psql -X -U supabase_admin -d postgres -v ON_ERROR_STOP=1 \
+            < apps/app-usuario/test/reconciliacion-individual.sql
+
   usuario:
     runs-on: ubuntu-latest
     timeout-minutes: 35
@@ -41,7 +56,15 @@ jobs:
           UPSTASH_REDIS_REST_TOKEN: e2e-redis-token
           RUUM_LOCAL_PRODUCTION: 'true'
       - run: pnpm --filter @ruum/app-usuario exec playwright install --with-deps chromium
+        id: chromium
+      - name: Comprobar el diseño responsive con el CSS del build productivo
+        if: ${{ !cancelled() && steps.chromium.outcome == 'success' }}
+        run: pnpm --filter @ruum/app-usuario exec vitest run test/inicio-responsive.test.tsx test/traslados-responsive.test.tsx
+        env:
+          RUN_RESPONSIVE_UI: '1'
+          RESPONSIVE_UI_BUILD_DIR: .next-e2e
       - run: pnpm --filter @ruum/app-usuario test:e2e
+        if: ${{ !cancelled() && steps.chromium.outcome == 'success' }}
         env:
           PLAYWRIGHT_E2E_PRODUCCION: '1'
           PLAYWRIGHT_DISABLE_AUTH_ARTIFACTS: '1'

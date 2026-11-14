@@ -551,7 +551,7 @@ export default function PaginaRegistro() {
                     Teléfono celular
                   </label>
                   <div className="relative">
-                    <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 font-semibold text-[14.5px] user-essential-muted">
+                    <span className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 font-semibold text-[14.5px] text-[#4e5f80]">
                       <span aria-hidden="true">🇲🇽</span> +52 |
                     </span>
                     <input

@@ -153,6 +153,11 @@
   .navGroup { gap: clamp(6px, .5dvh, 10px); }
   .navItem { min-height: 44px; }
 }
+@media (min-width: 1024px) and (max-height: 740px) {
+  .navScroll { padding-block: 4px; }
+  .navGroup { gap: 2px; }
+  .navDivider { margin-block: 6px; }
+}
 @media (max-width: 767px) {
   .brandName { font-size: 18px; }
   .brandSymbol { width: 46px; }

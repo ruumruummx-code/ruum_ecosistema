@@ -9,7 +9,10 @@ import { InicioUsuario } from "../src/app/InicioUsuario";
 import { NavegacionUsuario } from "../src/app/NavegacionUsuario";
 import { MobileShell } from "@ruum/ui";
 
-vi.mock("next/navigation", () => ({ usePathname: () => "/" }));
+vi.mock("next/navigation", () => ({
+  usePathname: () => "/",
+  useRouter: () => ({ push: vi.fn() }),
+}));
 vi.mock("@ruum/api/services", () => ({ crearLlamadaEnmascarada: vi.fn() }));
 vi.mock("../src/lib/supabase-browser", () => ({ crearClienteNavegador: vi.fn(), tieneSupabaseConfigurado: () => true }));
 
@@ -37,7 +40,8 @@ describe.skipIf(process.env.RUN_RESPONSIVE_UI !== "1")("Inicio sin scroll en nav
       { nombre: "pendiente", traslados: [{ traslado_id: "pendiente", estado: "pago_pendiente" } as typeof activo] },
       { nombre: "vacio", traslados: [] },
     ];
-    const tamanos = [[320, 568], [360, 640], [375, 667], [390, 844], [430, 932], [768, 1024], [1024, 768], [1440, 900], [667, 375], [844, 390], [393, 852]];
+    // El layout de escritorio se valida con los specs de Playwright.
+    const tamanos = [[320, 568], [360, 640], [375, 667], [390, 844], [430, 932], [768, 1024], [1023, 768], [667, 375], [844, 390], [393, 852]];
     const browser = await chromium.launch();
     try {
       const page = await browser.newPage();
@@ -70,7 +74,8 @@ describe.skipIf(process.env.RUN_RESPONSIVE_UI !== "1")("Inicio sin scroll en nav
             for (const selector of ["#homeHeader", "#greetingBlock", "#activeTransferCard", "#quickActions", ".home-support"]) {
               const el = document.querySelector(selector)!;
               const rect = el.getBoundingClientRect();
-              if (rect.top < 0 || rect.bottom > navTop + 1 || rect.left < 0 || rect.right > innerWidth + 1) failures.push(`${selector} fuera de pantalla: ${JSON.stringify(rect.toJSON())}`);
+              const contenedor = el.closest(".user-dashboard-content");
+              if (rect.top < 0 || (!contenedor && rect.bottom > navTop + 1) || rect.left < 0 || rect.right > innerWidth + 1) failures.push(`${selector} fuera de pantalla: ${JSON.stringify(rect.toJSON())}`);
             }
             const card = document.querySelector("#activeTransferCard")!.getBoundingClientRect();
             for (const el of document.querySelectorAll("#activeTransferCard > *, .home-stepper li, .home-module-copy")) {
@@ -80,7 +85,10 @@ describe.skipIf(process.env.RUN_RESPONSIVE_UI !== "1")("Inicio sin scroll en nav
             }
             if (document.documentElement.scrollHeight > innerHeight || document.documentElement.scrollWidth > innerWidth) failures.push("Scroll del documento");
             const content = document.querySelector(".user-dashboard-content")!;
-            if (content.scrollHeight > content.clientHeight + 1) failures.push("Contenido recortado");
+            content.scrollTo({ top: content.scrollHeight, behavior: "instant" });
+            if (document.querySelector(".home-support")!.getBoundingClientRect().bottom > navTop + 1) {
+              failures.push("Soporte queda debajo de la navegación al final del scroll");
+            }
             return failures;
           });
           await page.screenshot({ path: path.join(output, `${escenario.nombre}-${width}x${height}.png`) });

@@ -1,6 +1,6 @@
 // Vitest ejecuta estas rutas de servidor fuera del compilador de Next.
 vi.mock("server-only", () => ({}));
-import { describe, it, expect, beforeEach, afterEach } from "vitest";
+import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import { NextRequest, NextResponse } from "next/server";
 import {
   COOKIE_CSRF_USUARIO,

@@ -104,7 +104,7 @@ test("Mis ubicaciones: scroll confinado, selección, copia y persistencia autent
     );
     const geometry = await app.evaluate((el) => {
       const main = document.getElementById("desktopLocationsMainContent")!;
-      const list = el.querySelector("[role=tabpanel]")!;
+      const list = el.querySelector('[role="region"][aria-label="Resultados del filtro"]')!;
       const detail = el.querySelector("aside")!;
       return {
         global: document.documentElement.scrollHeight - innerHeight,

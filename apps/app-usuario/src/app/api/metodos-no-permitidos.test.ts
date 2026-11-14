@@ -1,6 +1,6 @@
 // Vitest ejecuta estas rutas de servidor fuera del compilador de Next.
 vi.mock("server-only", () => ({}));
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { GET as getResend } from "./auth/resend/route";
 import { GET as getSignup } from "./auth/signup/route";
 import { GET as getVerifyOtp } from "./auth/verify-otp/route";

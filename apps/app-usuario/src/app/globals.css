@@ -1979,8 +1979,13 @@ input::placeholder, textarea::placeholder {
 .user-transfers-nav .user-v2-nav-indicator { width: 64px; height: 4px; }
 .user-transfers-nav .user-v2-nav-link:active { transform: scale(.95); }
 .user-transfers-shell .user-transfers-content {
-  overflow: hidden;
-  padding: 8px 16px calc(var(--user-mobile-nav-height, calc(66px + env(safe-area-inset-bottom))) + 12px);
+  overflow-y: auto;
+  margin-bottom: var(--user-mobile-nav-height, calc(66px + env(safe-area-inset-bottom)));
+  padding: 8px 16px 12px;
+}
+.user-transfers-content > .user-transfers-view {
+  flex: 1 0 auto;
+  overflow: visible;
 }
 .user-transfers-view { display: flex; flex: 1; flex-direction: column; min-height: 0; min-width: 0; gap: 10px; overflow: hidden; }
 .user-transfers-view > :not(.user-transfers-list) { flex-shrink: 0; }

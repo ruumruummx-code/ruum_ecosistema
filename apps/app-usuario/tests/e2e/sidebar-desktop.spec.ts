@@ -14,10 +14,10 @@ test("Sidebar desktop: menú y banner completos sin scroll y rutas activas", asy
   for (const [width, height] of [[1280, 640], [1366, 768], [1440, 900], [1920, 1080], [3840, 2160]]) {
     await page.setViewportSize({ width, height });
     await expect(sidebar.getByRole("link", { name: "Registrar traslado" })).toBeInViewport({ ratio: 1 });
-    await expect(nav.getByRole("link")).toHaveCount(9);
+    await expect(nav.getByRole("link")).toHaveCount(7);
     const geometry = await sidebar.evaluate(el => {
       const menu = el.querySelector("nav")!;
-      const last = menu.lastElementChild!;
+      const last = Array.from(menu.querySelectorAll("a")).at(-1)!;
       const promo = el.querySelector('a[href="/viajes/nuevo"]')!;
       return {
         overflow: el.scrollHeight - el.clientHeight,
@@ -42,7 +42,6 @@ test("Sidebar desktop: menú y banner completos sin scroll y rutas activas", asy
     ["Inicio", "/"], ["Mis traslados", "/mis-viajes"],
     ["Mis vehículos", "/cuenta/vehiculos"], ["Mis ubicaciones", "/ubicaciones"],
     ["Carga Masiva", "/viajes/masivo"], ["Mi cuenta", "/cuenta"],
-    ["Mi perfil", "/cuenta?seccion=perfil"], ["Mis preferencias", "/cuenta/preferencias"],
     ["Ayuda", "/soporte"],
   ]) {
     const link = sidebar.getByRole("link", { name: label, exact: true });

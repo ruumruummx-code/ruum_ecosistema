@@ -331,7 +331,7 @@ export function MisTrasladosCliente({
               data-pestana={id}
               tabIndex={activo ? 0 : -1}
               onClick={() => handlePestanaChange(id)}
-              className={`flex-1 min-w-[84px] py-2 px-3 text-[13px] font-bold rounded-full transition-all cursor-pointer text-center ${
+              className={`flex-1 min-w-max py-2 px-3 text-[13px] font-bold rounded-full transition-all cursor-pointer text-center ${
                 activo
                   ? "bg-[#0052cc] text-white shadow-sm"
                   : "user-essential-muted hover:text-[#0a2342] dark:hover:text-white"
@@ -406,7 +406,7 @@ export function MisTrasladosCliente({
             value={busquedaInput}
             onChange={(event) => setBusquedaInput(event.target.value)}
             placeholder="Buscar por vehículo, destino o # de traslado"
-            className="w-full border-0 bg-transparent p-0 text-[14px] font-medium text-[#0a2342] outline-none placeholder:text-[#64748b] dark:text-[#f6f8fb] dark:placeholder:text-[#a8b5cc]"
+            className="w-full min-w-0 border-0 bg-transparent p-0 text-[14px] font-medium text-[#0a2342] outline-none placeholder:text-[#64748b] dark:text-[#f6f8fb] dark:placeholder:text-[#a8b5cc]"
             aria-busy={buscando}
             aria-describedby="busqueda-ayuda"
           />
