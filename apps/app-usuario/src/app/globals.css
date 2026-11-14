@@ -1983,6 +1983,10 @@ input::placeholder, textarea::placeholder {
   margin-bottom: var(--user-mobile-nav-height, calc(66px + env(safe-area-inset-bottom)));
   padding: 8px 16px 12px;
 }
+.user-transfers-content > .user-transfers-view {
+  flex: 1 0 auto;
+  overflow: visible;
+}
 .user-transfers-view { display: flex; flex: 1; flex-direction: column; min-height: 0; min-width: 0; gap: 10px; overflow: hidden; }
 .user-transfers-view > :not(.user-transfers-list) { flex-shrink: 0; }
 .user-transfers-tabs {

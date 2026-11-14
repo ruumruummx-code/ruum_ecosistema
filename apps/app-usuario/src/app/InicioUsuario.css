@@ -535,6 +535,7 @@
   font-size: 12px;
   font-weight: 500;
   color: #64748b;
+  overflow-wrap: anywhere;
 }
 @media (max-width: 374px) {
   .home-quick-card {
