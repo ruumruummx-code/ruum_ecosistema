@@ -16,6 +16,8 @@ jobs:
           version: 2.109.0
       - name: Aplicar todas las migraciones a una base limpia
         run: supabase db start
+      - name: Verificar aislamiento RLS y concurrencia con pgTAP
+        run: supabase test db supabase/test
       - name: Verificar reconciliación individual
         run: |
           docker exec -i supabase_db_ruum psql -X -U supabase_admin -d postgres -v ON_ERROR_STOP=1 \
@@ -34,11 +36,18 @@ jobs:
           node-version-file: .nvmrc
           cache: pnpm
       - run: pnpm install --frozen-lockfile
+        id: dependencias
       - run: node scripts/check-supabase-security.mjs
+      - name: Comprobar fronteras de @ruum/api
+        if: ${{ !cancelled() && steps.dependencias.outcome == 'success' }}
+        run: pnpm check:fronteras
+      - name: Escanear secretos del repositorio
+        if: ${{ !cancelled() && steps.dependencias.outcome == 'success' }}
+        run: pnpm scan:secrets
       - run: pnpm --filter @ruum/app-usuario lint
       - run: pnpm --filter @ruum/app-usuario typecheck
       - run: pnpm --filter @ruum/app-usuario build
-        env:
+        env: &entorno-build-local
           NODE_ENV: production
           PLAYWRIGHT_E2E_PRODUCCION: '1'
           NEXT_PUBLIC_SUPABASE_URL: http://127.0.0.1:54399
@@ -75,4 +84,30 @@ jobs:
         with:
           name: app-usuario-coverage
           path: apps/app-usuario/coverage/
+          if-no-files-found: warn
+
+  lighthouse:
+    name: test:lighthouse
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      NEXT_TELEMETRY_DISABLED: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @ruum/app-usuario build
+        env: *entorno-build-local
+      - run: pnpm --filter @ruum/app-usuario test:lighthouse
+        env: *entorno-build-local
+      - uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: app-usuario-lighthouse
+          path: apps/app-usuario/.lighthouse-ci/
+          include-hidden-files: true
           if-no-files-found: warn

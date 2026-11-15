@@ -23,6 +23,7 @@ import { DASHBOARD_TOKEN, datosDashboard } from "./dashboard.mjs";
 import { VEHICLES_TOKEN, datosVehiculos } from "./vehicles.mjs";
 import { ACCOUNT_TOKEN, ACCOUNT_PROFILE, datosCuenta } from "./account.mjs";
 import { LOCATIONS_TOKEN, LOCATIONS_PROFILE, datosUbicaciones } from "./locations.mjs";
+import { datosPasaporte, ETAPAS_PASAPORTE } from "./pasaporte.mjs";
 import { createServer } from "node:http";
 import { pathToFileURL } from "node:url";
 
@@ -107,6 +108,9 @@ const SESIONES = new Map([
     nombre: "Usuario B"
   }]
 ]);
+for (const etapa of Object.keys(ETAPAS_PASAPORTE)) {
+  SESIONES.set(`mock_pasaporte_${etapa}`, { ...FILA_USUARIO_E2E });
+}
 const fotosPerfil = new Map();
 
 const CABECERAS_CORS = {
@@ -144,6 +148,7 @@ const recuperaciones = new Map();
 const servidor = createServer(async (req, res) => {
   const url = new URL(req.url ?? "/", `http://127.0.0.1:${MOCK_SUPABASE_PUERTO}`);
   const ruta = url.pathname;
+  const etapaPasaporte = Object.keys(ETAPAS_PASAPORTE).find(etapa => tokenDe(req) === `mock_pasaporte_${etapa}`);
 
   console.log(
     `[mock] ${req.method} ${ruta}${url.search} origin=${req.headers.origin ?? "-"} acrh=${req.headers["access-control-request-headers"] ?? "-"}`
@@ -302,6 +307,20 @@ const servidor = createServer(async (req, res) => {
       responder(res, 200, singular ? filas[0] ?? null : filas);
       return;
     }
+  }
+  if (etapaPasaporte && req.method === "GET") {
+    const filas = datosPasaporte(ruta, SESIONES.get(tokenDe(req)), etapaPasaporte);
+    if (filas) {
+      const filtradas = filas.filter(fila => [...url.searchParams].every(([campo, valor]) =>
+        !valor.startsWith("eq.") || String(fila[campo]) === valor.slice(3)));
+      const singular = (req.headers.accept ?? "").includes("vnd.pgrst.object");
+      responder(res, 200, singular ? filtradas[0] ?? null : filtradas);
+      return;
+    }
+  }
+  if (etapaPasaporte && req.method === "POST" && ruta.endsWith("/c2/frontal.png") && ruta.startsWith("/storage/v1/object/sign/")) {
+    responder(res, 200, { signedURL: "/object/sign/evidencia/c2/frontal.png?token=e2e" });
+    return;
   }
   if (ruta.startsWith("/rest/v1/")) {
     if (ruta.startsWith("/rest/v1/rpc/usuario_previsualizar_tarifa")) {

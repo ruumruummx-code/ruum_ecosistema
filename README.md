@@ -1,7 +1,7 @@
 # Ruum Ecosistema
 
-Monorepo (pnpm + Turborepo) con las apps web de Ruum, paquetes compartidos,
-Edge Functions de Supabase (Deno) y la app Android nativa del conductor.
+Monorepo (pnpm + Turborepo) con las apps web de Ruum, paquetes compartidos
+y Edge Functions de Supabase (Deno).
 
 ## Arranque local
 
@@ -31,12 +31,11 @@ sintético), `pnpm db:types` para regenerar
 | `apps/app-usuario` (`@ruum/app-usuario`, Next.js) | Web del pasajero: cotizar, pagar (Stripe), seguir traslados | 3000 |
 | `apps/app-conductor` (`@ruum/app-conductor`, Next.js) | Web del conductor: registro, Didit, documentos, viajes, cuenta | 3001 |
 | `apps/panel-admin` (`@ruum/panel-admin`, Next.js) | Torre de control: operaciones, verificación, finanzas, SLA | 3002 |
-| `apps/app-conductor-native` (`@ruum/app-conductor-native`) | Android nativo (Kotlin). Ver decisión abajo | — |
 | `packages/api` (`@ruum/api`) | **Única vía de acceso a datos** desde las apps (frontera arquitectónica) | — |
 | `packages/shared` (`@ruum/shared`) | Constantes, reglas, tipos Supabase, utils | — |
 | `packages/ui` (`@ruum/ui`) | Design system React | — |
-| `supabase/functions` | Edge Functions Deno: pagos, Didit, documentos, push, webhooks | — |
-| `supabase/migrations` + `test/` | Esquema y 53 pruebas pgTAP | — |
+| `supabase/functions` | 14 Edge Functions en Deno para pagos, Didit, documentos, push y webhooks | — |
+| `supabase/migrations` y `supabase/test/` | Esquema y suite pgTAP de aislamiento RLS y concurrencia | — |
 | `design-system/` | Tokens, assets (`design-system/assets`) y docs de diseño | — |
 | `docs/` | Runbooks (`docs/runbooks`) y QA (`docs/qa`) | — |
 | `scripts/` | Checks de CI: fronteras, secretos, env, CSP, drift | — |
@@ -46,20 +45,25 @@ sintético), `pnpm db:types` para regenerar
 ```bash
 pnpm build | lint | typecheck      # turbo por workspace
 pnpm test:unit                     # vitest en packages/*
-pnpm test:coverage                  # coverage por workspace (ui, panel-admin, conductor, usuario)
-pnpm test:sql                      # pgTAP: supabase test db test (53 archivos)
-pnpm test:sql:rls | test:sql:concurrencia   # subconjuntos
+pnpm --filter @ruum/app-usuario test:coverage  # ejemplo de cobertura por workspace
+pnpm test:sql                       # Suite pgTAP en supabase/test/
+pnpm test:sql:rls                   # Aislamiento y permisos por rol
+pnpm test:sql:concurrencia          # Conflicto de escritura entre operadores
 pnpm test:e2e:golden | test:piramide        # golden path / pirámide completa
 pnpm check:fronteras               # 0 accesos directos a Supabase en apps/*
 pnpm check:migrations              # convención de migraciones + sin datos de prueba
-pnpm check:native                  # controles estáticos de la app Android (sin SDK)
+pnpm test:load                     # carga k6 de los flujos críticos de app-usuario
+pnpm test:load:report              # misma prueba con reporte JSON en tests/load/resultados.json
 pnpm scan:secrets                  # escaneo de secretos (bloqueante en CI)
 pnpm audit:deps                    # pnpm audit --audit-level=high
 pnpm validate:env                  # valida variables del workspace
 pnpm check:supabase-security | check:supabase-drift
-deno task check:functions          # typecheck de las 9 Edge Functions
+deno task check:functions          # typecheck del subconjunto enumerado en deno.json
 deno task test:functions           # tests Deno (48)
 ```
+
+El script `test:coverage` se define por workspace. Está disponible en
+`@ruum/app-usuario`, `@ruum/app-conductor`, `@ruum/panel-admin` y `@ruum/ui`.
 
 ## Variables de entorno
 
@@ -80,28 +84,10 @@ deno task test:functions           # tests Deno (48)
 - Regla de incidentes: ningún dump con datos reales se versiona
   (`datos_locales.sql` está en `.gitignore`); ver `SECURITY.md`.
 
-## Decisión sobre la app nativa (`apps/app-conductor-native`)
-
-Conviven dos clientes del conductor y es deliberado:
-
-- **`apps/app-conductor` (web, Next.js + Capacitor)**: canal principal y el que
-  publica hoy. Comparte `@ruum/api`, `@ruum/shared` y `@ruum/ui` con el resto
-  del ecosistema.
-- **`apps/app-conductor-native` (Kotlin, Compose + `supabase-kt`)**: apuesta
-  nativa en construcción para push, telemetría y operación en campo.
-  Conserva el `applicationId` de release para migrar el canal de
-  distribución en el futuro; el variant `debug` usa sufijo `.native.debug`
-  para coexistir instalado junto a la app actual.
-
-Comandos: `pnpm android:native:build|lint|test`
-(delegan en `scripts/gradle.mjs` → Gradle wrapper; el caché `.gradle-temp/`
-está ignorado). Requiere Android SDK (`local.properties` a partir de
-`local.properties.example`). Detalle en `apps/app-conductor-native/README.md`.
-
 ## CI y despliegue
 
-- CI (`.github/workflows/ci.yml`): install frozen → lint → typecheck →
-  unit → fronteras → migrations → release → native → secrets → audit →
-  SQL (Supabase local) → Deno.
+- CI de App Usuario (`.github/workflows/app-usuario.yml`): controles de
+  seguridad y fronteras, lint, typecheck, build, E2E, cobertura, Lighthouse
+  y pruebas SQL en Supabase local.
 - Vercel: `vercel.json` raíz (headers + `turbo run build`) y uno por app
   (`apps/*/vercel.json`). La CSP la emite el `middleware.ts` de cada app.

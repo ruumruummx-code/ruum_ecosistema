@@ -21,13 +21,13 @@
     "db:reset": "supabase db reset",
     "db:push": "supabase db push",
     "db:types": "supabase gen types typescript --local > packages/shared/src/types/supabase.ts",
-    "test:sql": "supabase test db test",
-    "test:sql:rls": "supabase test db test/rt42_rls_admin_roles.test.sql",
-    "test:sql:concurrencia": "supabase test db test/rt43_concurrencia_operadores.test.sql",
+    "test:sql": "supabase test db supabase/test",
+    "test:sql:rls": "supabase test db supabase/test/rt42_rls_admin_roles.test.sql",
+    "test:sql:concurrencia": "supabase test db supabase/test/rt43_concurrencia_operadores.test.sql",
 
     "// --- PRUEBAS DE CARGA Y PERFORMANCE (K6 / ARTILLERY) ---": "",
-    "test:load": "k6 run tests/load/panel-admin-degradacion.js",
-    "test:load:report": "k6 run tests/load/panel-admin-degradacion.js --out json=tests/load/results/resultados.json",
+    "test:load": "pnpm test:load:usuario",
+    "test:load:report": "pnpm test:load:usuario --out json=tests/load/resultados.json",
     "test:load:usuario": "k6 run tests/load/app-usuario-flujos-criticos.js",
     "test:load:usuario:artillery": "artillery run tests/load/app-usuario-artillery.yml",
 

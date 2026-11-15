@@ -83,8 +83,8 @@ GROUP BY c.id, c.monto_centavos;
 
 ---
 
-## 5. Pruebas Automatizadas de Idempotencia en CI
+## 5. Pruebas automatizadas y evidencia de idempotencia
 
-En el repositorio se ejecutan dos suites complementarias que garantizan la integridad sin depender de credenciales vivas:
-1. **pgTAP SQL Test**: [`test/rr22_checkout_masivo_usuario.test.sql`](file:///c:/Users/hecto/ecosistema/ruum_ecosistema/test/rr22_checkout_masivo_usuario.test.sql) — Prueba transaccional en Postgres que ejecuta reintentos duplicados y verifica que `traslados` y `pagos` no se duplican.
-2. **Vitest Integration Suite**: [`apps/app-usuario/test/carga-masiva-webhook-idempotencia.test.ts`](file:///c:/Users/hecto/ecosistema/ruum_ecosistema/apps/app-usuario/test/carga-masiva-webhook-idempotencia.test.ts) — Prueba unitaria/integración de servicio que verifica parámetros, retornos y rechazo de montos/monedas anómalos.
+- Vitest comprueba los parámetros y las respuestas del webhook, incluidos los rechazos por monto o moneda. [Prueba de idempotencia del webhook](../test/carga-masiva-webhook-idempotencia.test.ts).
+- La corrida en staging reenvió el mismo evento firmado de Stripe y verificó que se conservaran tres traslados y tres pagos. [Evidencia de pago masivo](STAGING_PAGO_MASIVO_RESULTADO.md).
+- La suite pgTAP de CI comprueba el aislamiento RLS, incluida la visibilidad de los checkouts masivos. [Prueba de RLS](../../../supabase/test/rt42_rls_admin_roles.test.sql).
