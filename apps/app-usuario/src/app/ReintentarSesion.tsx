@@ -1,13 +1,7 @@
 "use client";
 
+import { Button } from "@ruum/ui/base";
+
 export function BotonReintentarSesion() {
-  return (
-    <button
-      type="button"
-      onClick={() => window.location.reload()}
-      className="user-v2-primary-button inline-flex items-center justify-center px-6"
-    >
-      Reintentar
-    </button>
-  );
+  return <Button onClick={() => window.location.reload()}>Reintentar</Button>;
 }

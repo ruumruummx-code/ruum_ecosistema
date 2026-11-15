@@ -47,3 +47,4 @@ Prototipos HTML en `docs/prototipos/` (`sistema-de-diseno-ruum.html`, `flujo-con
 | 06 | App usuario | Claude Code |
 | 07 | Panel admin | Claude Code |
 | 08 | Tokens nativos (Kotlin y Swift) | Claude Code |
+| 09 | Migrar una pantalla al sistema base v2 (`@ruum/ui/base`) | Claude Code, una pantalla por rama |

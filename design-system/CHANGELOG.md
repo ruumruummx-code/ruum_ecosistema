@@ -1,5 +1,14 @@
 # CHANGELOG — Design System Ruum Ruum
 
+## [v2.0] — 2026-11-15 — Sistema base v2 (`@ruum/ui/base`) + pantalla patrón Mis traslados
+- Motivo: las pantallas de la app usuario no compartían estilo (≈2,900 hex escritos a mano, 23 tamaños de letra, versiones móvil y escritorio separadas). Los tokens existían pero no se usaban.
+- Cambios:
+  - `packages/ui/src/styles/base.css`: capa semántica `ui-*` (fondo, tarjeta, texto, líneas, marca, estados, foco, sombras) derivada de `--ruum-*`, claro y oscuro. Sin colores de marca nuevos.
+  - `packages/ui/src/base/`: componentes patrón shadcn/ui (Button, Badge, Card, Input, InputConIcono, NativeSelect, Label, ChipGroup, Tabs [Radix], Sheet [`<dialog>` nativo, compatible con CSP], Stat/StatGroup, PageHeader, EmptyState, Skeleton, useMediaQuery, cn). Exportados como `@ruum/ui/base`. Iconos con `lucide-react`.
+  - `apps/app-usuario/src/app/mis-viajes`: `MisViajesCliente` + `MisViajesDesktop` + `DetalleTrasladoDesktop` (+ módulo CSS y 91 reglas de `globals.css`) sustituidos por un solo componente responsivo `MisTraslados` con panel de detalle desde 1280 px. Etiquetas unificadas (Todos, En curso, Programados, Completados, Cancelados, En revisión). 461 → 0 estilos sueltos.
+  - `scripts/check-estilos-ui.mjs` + `config/estilos-ui.json`: `pnpm check:estilos` en CI. Zonas migradas sin estilos sueltos; resto con trinquete sobre la línea base (6,244).
+  - Documentación: `design-system/docs/sistema-base-v2.md` y `docs/encargo-diseno/09-migrar-pantalla-a-base-v2.md`.
+
 ## [v1.2] — 2026-09-26 — Auditoría Libro de marca + claro/oscuro + logotipos
 - Autor: Design System / Opencode
 - Motivo: Verificar cumplimiento del Design System Integrado (claro + oscuro) contra `Libro de marca` y corregir desviaciones + actualizar logotipos.

@@ -358,16 +358,17 @@ test.describe("Flujos críticos de la aplicación", () => {
     await seedMockAuthSession(page, { variante: "verificada" });
 
     await page.goto("/mis-viajes", { waitUntil: "domcontentloaded" });
-    await expect(page.locator("h1")).toContainText("Mis traslados");
+    const main = page.locator("main:visible");
+    await expect(main.getByRole("heading", { level: 1, name: "Mis traslados" })).toBeVisible();
 
-    // filtros de estado ofrecidos por la interfaz de traslados
-    await expect(page.getByRole("button", { name: "Activos" })).toBeVisible();
-    await expect(page.getByRole("button", { name: "Programados" })).toBeVisible();
-    await expect(page.getByRole("button", { name: "Finalizados" })).toBeVisible();
-    await expect(page.getByRole("button", { name: "Cancelados" })).toBeVisible();
+    // filtros de estado (mismas etiquetas en móvil y escritorio)
+    for (const nombre of ["Todos", "En curso", "Programados", "Completados", "Cancelados"]) {
+      await expect(main.getByRole("button", { name: new RegExp(`^${nombre}`) })).toBeVisible();
+    }
 
-    // estado vacío legible
-    await expect(page.getByText("Sin traslados · En curso")).toBeVisible();
+    // estado vacío legible con una sola acción
+    await expect(main.getByText("Aún no tienes traslados")).toBeVisible();
+    await expect(main.getByRole("link", { name: "Crear traslado" })).toHaveCount(1);
   });
 
   test("soporte funciona para un usuario autenticado", async ({ page }) => {
@@ -414,7 +415,7 @@ test.describe("Flujos críticos de la aplicación", () => {
     await seedMockAuthSession(page, { variante: "verificada" });
 
     await page.goto("/mis-viajes", { waitUntil: "domcontentloaded" });
-    await expect(page.locator("h1")).toContainText("Mis traslados");
+    await expect(page.locator("main:visible").getByRole("heading", { level: 1, name: "Mis traslados" })).toBeVisible();
     expect(await rutaActual(page)).toBe("/mis-viajes");
   });
 });

@@ -37,6 +37,7 @@ Proporción: **60% Navy `0A2342` / 30% Blanco/Gris `FFFFFF`/`E8EEF4` / 8% Teal `
 | `tokens/Tokens.kt` | Object + Color Android → `/designsystem/Tokens.kt` |
 | `assets/logo/` | Logotipos oficiales del Libro de marca (horizontal, vertical, símbolo, avatar, sello, versión navy, maestro) |
 | `assets/ruum-logo-v2.png` | Compat: copia de `logo/logo-horizontal.png` (no usar fondo negro anterior) |
+| `docs/sistema-base-v2.md` | **Cómo se construyen las pantallas hoy:** tokens semánticos `ui-*`, componentes `@ruum/ui/base`, reglas y candado `pnpm check:estilos` |
 | `docs/design-system-v1.0.md` | Especificación de componentes y patrones por superficie |
 | `docs/verificacion-accesibilidad.md` | Checklist de contraste, teclado, lector, escala 200%, modo calle |
 | `whatsapp/` | Perfil, saludo, respuestas rápidas, catálogo (Fase 0) |

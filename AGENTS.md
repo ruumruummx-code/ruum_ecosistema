@@ -7,6 +7,11 @@ Este repositorio usa Turborepo para construir los paquetes y apps. Mantener la c
 - Ejecutar `pnpm install` cuando cambien dependencias.
 - Validar build por paquetes si Turbo falla por un problema de entorno del runner.
 
+## Reglas de interfaz (app usuario)
+- Pantallas nuevas o migradas: componentes de `@ruum/ui/base` y clases `*-ui-*`. Leer `design-system/docs/sistema-base-v2.md`.
+- Un componente responsivo por pantalla (sin `…Desktop.tsx` / `…Mobile.tsx`).
+- Sin hex, paleta de Tailwind, `text-[Npx]`, `rounded-[N]` ni `dark:`. `pnpm check:estilos` debe quedar en verde.
+
 <!-- BEGIN:turborepo-agent-rules -->
 
 # This is NOT the Turborepo you know

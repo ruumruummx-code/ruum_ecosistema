@@ -3,11 +3,12 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { UserDashboardLayout } from "../../components/layout/UserDashboardLayout";
 import { BotonReintentarSesion } from "../ReintentarSesion";
-import { Aviso, Button, MobileShell } from "@ruum/ui";
+import { CircleAlert } from "lucide-react";
+import { MobileShell } from "@ruum/ui";
+import { Button, EmptyState } from "@ruum/ui/base";
 import type { Database } from "@ruum/shared/types";
 import { NavegacionUsuario } from "../NavegacionUsuario";
-import { MisTrasladosCliente } from "./MisViajesCliente";
-import { MisViajesDesktop } from "./MisViajesDesktop";
+import { MisTraslados } from "./MisTraslados";
 import { construirNotificaciones, type NotificacionInicio } from "../../lib/inicio";
 import {
   obtenerListaTrasladosConsolidadaUsuario,
@@ -15,22 +16,14 @@ import {
   type ConteosTraslados,
   type OpcionesConsultaTraslados,
 } from "../../lib/traslados-consulta";
-import type { CategoriaPestana } from "../../lib/estados-traslado-policy";
+import type { PestañaFiltro } from "./useGestionTraslados";
 
 export const metadata: Metadata = {
   title: "Mis Traslados — Ruum Ruum",
   robots: { index: false, follow: false },
 };
 
-type PestañaTraslados = CategoriaPestana;
-
-const PESTANAS: { id: PestañaTraslados; etiqueta: string }[] = [
-  { id: "activos", etiqueta: "Activos" },
-  { id: "programados", etiqueta: "Programados" },
-  { id: "finalizados", etiqueta: "Finalizados" },
-  { id: "cancelados", etiqueta: "Cancelados" },
-  { id: "en_revision", etiqueta: "En revisión" },
-];
+const PESTANAS: PestañaFiltro[] = ["todos", "activos", "programados", "finalizados", "cancelados", "en_revision"];
 
 type UsuarioRow = Database["public"]["Tables"]["usuarios"]["Row"];
 
@@ -109,9 +102,7 @@ export default async function PaginaMisTraslados({
   const { tab, buscar, pagina, limite, snapshot_version } = await searchParams;
   const numPagina = Number(pagina) > 0 ? Number(pagina) : 1;
   const numLimite = Number(limite) > 0 ? Number(limite) : 10;
-  const pestañaActiva = PESTANAS.some((pestaña) => pestaña.id === tab)
-    ? (tab as PestañaTraslados)
-    : "activos";
+  const pestañaActiva: PestañaFiltro = PESTANAS.includes(tab as PestañaFiltro) ? (tab as PestañaFiltro) : "todos";
 
   const resultado = await obtenerTraslados({
     pagina: numPagina,
@@ -123,74 +114,71 @@ export default async function PaginaMisTraslados({
 
   if (resultado.estado === "error") {
     const aviso = (
-      <div className="space-y-5 p-6 text-center">
-        <Aviso tono="danger">
-          No pudimos cargar tus traslados en este momento. Inténtalo de nuevo en unos segundos.
-        </Aviso>
-        <div className="flex justify-center gap-3">
-          <BotonReintentarSesion />
-          <Link href="/soporte">
-            <Button>Reportar un problema</Button>
-          </Link>
-        </div>
+      <div className="min-h-full bg-ui-bg px-4 pt-6 sm:px-6 lg:px-8">
+        <EmptyState
+          icono={<CircleAlert />}
+          titulo="No pudimos cargar tus traslados"
+          descripcion="Inténtalo de nuevo en unos segundos."
+          accion={
+            <div className="flex flex-wrap justify-center gap-3">
+              <BotonReintentarSesion />
+              <Button asChild variant="outline">
+                <Link href="/soporte">Reportar un problema</Link>
+              </Button>
+            </div>
+          }
+        />
       </div>
     );
     return (
       <>
-        <div className="lg:hidden">
+        <div className="flex h-full w-full flex-col lg:hidden">
           <NavegacionUsuario variante="claro" />
-          <MobileShell as="main" variant="compact" navInferiorVisible={true}>
+          <MobileShell as="main" variant="wide" padding="none" conFondoCanvas={false} navInferiorVisible className="bg-ui-bg">
             {aviso}
           </MobileShell>
         </div>
-        <div className="hidden lg:flex">
-          <UserDashboardLayout>{aviso}</UserDashboardLayout>
+        <div className="hidden h-full w-full lg:flex">
+          <UserDashboardLayout padding="ninguno" classNameContenido="bg-ui-bg">{aviso}</UserDashboardLayout>
         </div>
       </>
     );
   }
 
   if (resultado.estado === "sin_sesion") redirect("/login");
-  const Traslados = resultado.estado === "ok" ? resultado.traslados : [];
+  const traslados = resultado.estado === "ok" ? resultado.traslados : [];
   const usuario = resultado.estado === "ok" ? resultado.usuario : null;
-  const gastoConfirmado = resultado.estado === "ok" ? resultado.gastoConfirmadoTotal : 0;
-  const snapshotVersion = resultado.estado === "ok" ? resultado.snapshotVersion : undefined;
+  const notificaciones = resultado.estado === "ok" ? resultado.notificaciones : [];
+  const contenido = (
+    <MisTraslados
+      traslados={traslados}
+      pestanaInicial={pestañaActiva}
+      busquedaInicial={typeof buscar === "string" ? buscar : ""}
+      gastoConfirmadoServidor={resultado.estado === "ok" ? resultado.gastoConfirmadoTotal : 0}
+    />
+  );
 
+  /* Una sola pantalla (MisTraslados) dentro del marco de navegación de cada
+     tamaño: barra inferior en móvil, barra lateral desde 1024px. */
   return (
     <>
-      {/* VISTA MÓVIL (< 1024px): Mobile-first con soporte de categorías y fail-closed */}
-      <div className="lg:hidden flex flex-col h-full w-full">
-        <NavegacionUsuario
-          variante="claro"
-          notificaciones={resultado.estado === "ok" ? resultado.notificaciones : []}
-        />
-        <MobileShell
-          as="main"
-          variant="compact"
-          navInferiorVisible={true}
-          className="user-v2-scope user-transfers-shell"
-          contentClassName="user-transfers-content"
-        >
-          <MisTrasladosCliente
-            Traslados={Traslados}
-            pestanaInicial={pestañaActiva}
-            gastoConfirmadoServidor={gastoConfirmado}
-            snapshotVersion={snapshotVersion}
-          />
+      <div className="flex h-full w-full flex-col lg:hidden">
+        <NavegacionUsuario variante="claro" notificaciones={notificaciones} />
+        <MobileShell as="main" variant="wide" padding="none" conFondoCanvas={false} navInferiorVisible className="bg-ui-bg">
+          {contenido}
         </MobileShell>
       </div>
-
-      {/* VISTA ESCRITORIO (>= 1024px): Dashboard de Gestión con métricas confirmadas */}
-      <div className="hidden lg:flex h-full w-full">
-        <MisViajesDesktop
-          traslados={Traslados}
-          nombreUsuario={usuario?.nombre}
-          pestanaInicial={PESTANAS.some((p) => p.id === tab) ? pestañaActiva : "todos"}
-          busquedaInicial={typeof buscar === "string" ? buscar : ""}
-          notificaciones={resultado.estado === "ok" ? resultado.notificaciones : []}
-          gastoConfirmadoServidor={gastoConfirmado}
-          snapshotVersion={snapshotVersion}
-        />
+      <div className="hidden h-full w-full lg:flex">
+        <UserDashboardLayout
+          idContenido="desktopMainContentTraslados"
+          nombre={usuario?.nombre}
+          notificaciones={notificaciones}
+          dashboardHeader
+          padding="ninguno"
+          classNameContenido="bg-ui-bg"
+        >
+          {contenido}
+        </UserDashboardLayout>
       </div>
     </>
   );
