@@ -19,16 +19,21 @@ export const buttonVariants = cva(
         outline: "border border-ui-line-strong bg-ui-card text-ui-fg hover:bg-ui-muted",
         ghost: "text-ui-fg-muted hover:bg-ui-muted hover:text-ui-fg",
         danger: "border border-ui-danger bg-ui-card text-ui-danger hover:bg-ui-danger-soft",
-        link: "h-auto px-0 text-ui-brand underline-offset-4 hover:underline active:scale-100",
+        link: "text-ui-brand underline-offset-4 hover:underline active:scale-100",
       },
       size: {
-        sm: "h-9 px-3 text-sm",
+        /* sm e icon-sm se ven de 36 px; el área táctil invisible llega a 44 px (regla de marca). */
+        sm: "relative h-9 px-3 text-sm before:absolute before:-inset-1",
         md: "h-11 px-4 text-sm",
         lg: "h-12 px-5 text-base",
         icon: "size-11",
-        "icon-sm": "size-9",
+        "icon-sm": "relative size-9 before:absolute before:-inset-1",
       },
     },
+    compoundVariants: [
+      /* Va después del tamaño para que `link` no herede altura ni relleno de botón. */
+      { variant: "link", class: "h-auto px-0" },
+    ],
     defaultVariants: { variant: "primary", size: "md" },
   },
 );

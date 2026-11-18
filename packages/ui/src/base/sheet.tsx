@@ -64,7 +64,7 @@ export function Sheet({
               type="button"
               onClick={onClose}
               aria-label={etiquetaCerrar}
-              className="-mr-2 inline-flex size-10 shrink-0 cursor-pointer items-center justify-center rounded-md text-ui-fg-muted hover:bg-ui-muted hover:text-ui-fg focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-ui-ring"
+              className="-mr-2 inline-flex size-11 shrink-0 cursor-pointer items-center justify-center rounded-md text-ui-fg-muted hover:bg-ui-muted hover:text-ui-fg focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-ui-ring"
             >
               <X className="size-5" aria-hidden="true" />
             </button>

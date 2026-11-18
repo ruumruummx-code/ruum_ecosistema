@@ -51,7 +51,7 @@ export function ChipGroup<T extends string>({
       role="group"
       aria-label={etiqueta}
       onKeyDown={teclado}
-      className={cn("-mx-1 flex gap-2 overflow-x-auto px-1 pb-1 [scrollbar-width:none]", className)}
+      className={cn("-mx-1 -mt-1 flex gap-2 overflow-x-auto p-1 [scrollbar-width:none]", className)}
     >
       {opciones.map(({ id, etiqueta: texto, conteo }) => {
         const activo = id === valor;
@@ -64,7 +64,7 @@ export function ChipGroup<T extends string>({
             tabIndex={activo ? 0 : -1}
             onClick={() => onCambio(id)}
             className={cn(
-              "inline-flex h-9 shrink-0 cursor-pointer items-center gap-1.5 rounded-full border px-3.5 text-sm font-medium transition-colors",
+              "relative inline-flex h-9 shrink-0 cursor-pointer before:absolute before:inset-x-0 before:-inset-y-1 items-center gap-1.5 rounded-full border px-3.5 text-sm font-medium transition-colors",
               "focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-ui-ring",
               activo
                 ? "border-ui-fg bg-ui-fg text-ui-card"

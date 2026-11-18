@@ -43,7 +43,7 @@ infracciones y el resto de la app no puede empeorar respecto a su línea base.
 | `bg-ui-muted` | Rellenos suaves, skeleton, hover | gris claro / navy elevado |
 | `text-ui-fg` · `text-ui-fg-muted` | Texto principal · secundario | navy · gris azulado |
 | `border-ui-line` · `border-ui-line-strong` | Bordes de tarjeta · separadores marcados | navy al 11 % · 22 % |
-| `border-ui-field` | Borde de campos (contraste ≥ 3:1) | `--ruum-border-strong` |
+| `border-ui-field` | Borde de campos (contraste ≥ 3:1) | `--ruum-border-strong` / `--ruum-border-input` |
 | `bg-ui-brand` · `text-ui-on-brand` | Acción principal | azul acción |
 | `bg-ui-brand-soft` · `text-ui-brand-soft-fg` | Acción secundaria, insignia informativa | azul tenue |
 | `ui-success` · `ui-warning` · `ui-danger` · `ui-neutral` (+ `-soft`) | Estados | tokens de estado de marca |

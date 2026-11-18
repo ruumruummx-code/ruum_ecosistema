@@ -57,7 +57,8 @@
   --ui-fg-muted: var(--ruum-text-secondary);
   --ui-line: color-mix(in oklab, var(--ruum-text-primary) 12%, transparent);
   --ui-line-strong: color-mix(in oklab, var(--ruum-text-primary) 24%, transparent);
-  --ui-field: var(--ruum-border-strong);
+  /* border-strong oscuro (#2d4f73) da 1.86:1 sobre la tarjeta; border-input llega a 3.6:1. */
+  --ui-field: var(--ruum-border-input);
 
   --ui-brand: var(--ruum-action);
   --ui-brand-hover: var(--ruum-action-hover);

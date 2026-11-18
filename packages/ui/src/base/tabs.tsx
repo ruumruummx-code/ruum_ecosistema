@@ -19,7 +19,7 @@ export function TabsTrigger({ className, ...props }: ComponentPropsWithoutRef<ty
   return (
     <TabsPrimitive.Trigger
       className={cn(
-        "inline-flex h-8 flex-1 cursor-pointer items-center justify-center rounded-sm px-3 text-sm font-medium text-ui-fg-muted transition-colors",
+        "relative inline-flex h-8 flex-1 cursor-pointer before:absolute before:inset-x-0 before:-inset-y-1.5 items-center justify-center rounded-sm px-3 text-sm font-medium text-ui-fg-muted transition-colors",
         "hover:text-ui-fg focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-ui-ring",
         "data-[state=active]:bg-ui-card data-[state=active]:text-ui-fg data-[state=active]:shadow-ui-sm",
         className,

@@ -12,5 +12,8 @@ export default defineConfig({
     // Solo unit tests colocalizados; tests/ (playwright) y test/ (node:test) tienen sus propios runners.
     include: ["src/**/*.test.ts", "src/**/*.test.tsx"],
     exclude: ["node_modules/**", ".next/**", "tests/**", "test/**"],
+    // Aún no hay pruebas en src/: sin esto `turbo run test` (y el pre-commit)
+    // falla con "No test files found".
+    passWithNoTests: true,
   },
 });
