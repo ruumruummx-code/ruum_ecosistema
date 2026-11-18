@@ -21,6 +21,7 @@ import {
   IMAGE_FORMATS,
 } from "../../../../packages/shared/src/seguridad/index";
 
+// Re-export everything for backward compatibility
 export {
   CSP_ORIGINS,
   CSP_PRESETS,
@@ -28,7 +29,7 @@ export {
   HSTS_HEADER,
   IMAGES_REMOTE_PATTERNS,
   IMAGE_FORMATS,
-};
+} from "../../../../packages/shared/src/seguridad/index";
 
 /**
  * Construye CSP dinámico con nonce (usado por middleware en runtime).

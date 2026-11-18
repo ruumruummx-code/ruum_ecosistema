@@ -1,0 +1,472 @@
+{
+  "phase": "after",
+  "width": 390,
+  "route": "/mis-viajes",
+  "violations": [],
+  "incomplete": [],
+  "lists": [
+    {
+      "label": "Resumen de traslados",
+      "html": "<dl class=\"grid divide-x divide-ui-line overflow-hidden rounded-lg border border-ui-line bg-ui-card shadow-ui-sm grid-cols-3\" aria-label=\"Resumen de traslados\"><div class=\"flex min-w-0 flex-col gap-1 px-3 py-3 sm:px-5 sm:py-4\"><dt class=\"flex items-center gap-1.5 truncate text-xs font-medium text-ui-fg-muted sm:text-sm\"><span aria-hidden=\"true\" class=\"hidden text-ui-fg-muted sm:inline-flex [&amp;_svg]:size-4\"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"lucide lucide-car-front\" aria-hidden=\"true\"><path d=\"m21 8-2 2-1.5-3.7A2 2 0 0 0 15.646 5H8.4a2 2 0 0 0-1.903 1.257L5 10 3 8\"></path><path d=\"M7 14h.01\"></path><path d=\"M17 14h.01\"></path><rect width=\"18\" height=\"8\" x=\"3\" y=\"10\" rx=\"2\"></rect><path d=\"M5 18v2\"></path><path d=\"M19 18v2\"></path></svg></span>Total</dt><dd class=\"truncate text-xl font-semibold tabular-nums tracking-tight text-ui-fg sm:text-2xl\">10</dd></div><div class=\"flex min-w-0 flex-col gap-1 px-3 py-3 sm:px-5 sm:py-4\"><dt class=\"flex items-center gap-1.5 truncate text-xs font-medium text-ui-fg-muted sm:text-sm\"><span aria-hidden=\"true\" class=\"hidden text-ui-fg-muted sm:inline-flex [&amp;_svg]:size-4\"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"lucide lucide-clock-3\" aria-hidden=\"true\"><circle cx=\"12\" cy=\"12\" r=\"10\"></circle><path d=\"M12 6v6h4\"></path></svg></span>En curso</dt><dd class=\"truncate text-xl font-semibold tabular-nums tracking-tight text-ui-fg sm:text-2xl\">2</dd></div><div class=\"flex min-w-0 flex-col gap-1 px-3 py-3 sm:px-5 sm:py-4\"><dt class=\"flex items-center gap-1.5 truncate text-xs font-medium text-ui-fg-muted sm:text-sm\"><span aria-hidden=\"true\" class=\"hidden text-ui-fg-muted sm:inline-flex [&amp;_svg]:size-4\"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"lucide lucide-circle-dollar-sign\" aria-hidden=\"true\"><circle cx=\"12\" cy=\"12\" r=\"10\"></circle><path d=\"M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8\"></path><path d=\"M12 18V6\"></path></svg></span>Gastado</dt><dd class=\"truncate text-xl font-semibold tabular-nums tracking-tight text-ui-fg sm:text-2xl\">$0</dd></div></dl>",
+      "groups": [
+        {
+          "tag": "DIV",
+          "children": [
+            "DT",
+            "DD"
+          ],
+          "text": "Total10"
+        },
+        {
+          "tag": "DIV",
+          "children": [
+            "DT",
+            "DD"
+          ],
+          "text": "En curso2"
+        },
+        {
+          "tag": "DIV",
+          "children": [
+            "DT",
+            "DD"
+          ],
+          "text": "Gastado$0"
+        }
+      ],
+      "metrics": [
+        {
+          "tag": "DT",
+          "text": "Total",
+          "x": 29,
+          "y": 153
+        },
+        {
+          "tag": "DD",
+          "text": "10",
+          "x": 29,
+          "y": 173
+        },
+        {
+          "tag": "DT",
+          "text": "En curso",
+          "x": 147.65625,
+          "y": 153
+        },
+        {
+          "tag": "DD",
+          "text": "2",
+          "x": 147.65625,
+          "y": 173
+        },
+        {
+          "tag": "DT",
+          "text": "Gastado",
+          "x": 266.328125,
+          "y": 153
+        },
+        {
+          "tag": "DD",
+          "text": "$0",
+          "x": 266.328125,
+          "y": 173
+        }
+      ]
+    },
+    {
+      "label": null,
+      "html": "<dl class=\"flex min-w-0 flex-wrap items-center gap-x-4 gap-y-1 text-xs text-ui-fg-muted\"><div class=\"flex items-center gap-1.5\"><dt><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"lucide lucide-calendar-days size-3.5\" aria-label=\"Fecha\"><path d=\"M8 2v3\"></path><path d=\"M16 2v3\"></path><rect x=\"3\" y=\"3\" width=\"18\" height=\"18\" rx=\"2\"></rect><path d=\"M3 9h18\"></path><path d=\"M8 13h.01\"></path><path d=\"M12 13h.01\"></path><path d=\"M16 13h.01\"></path><path d=\"M8 17h.01\"></path><path d=\"M12 17h.01\"></path><path d=\"M16 17h.01\"></path></svg></dt><dd>Fecha pendiente</dd></div><div class=\"flex items-center gap-1.5\"><dt><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"lucide lucide-user-round lucide-user-2 size-3.5\" aria-label=\"Conductor\"><circle cx=\"12\" cy=\"8\" r=\"5\"></circle><path d=\"M20 21a8 8 0 0 0-16 0\"></path></svg></dt><dd class=\"font-medium text-ui-fg\">Jorge</dd></div></dl>",
+      "groups": [
+        {
+          "tag": "DIV",
+          "children": [
+            "DT",
+            "DD"
+          ],
+          "text": "Fecha pendiente"
+        },
+        {
+          "tag": "DIV",
+          "children": [
+            "DT",
+            "DD"
+          ],
+          "text": "Jorge"
+        }
+      ],
+      "metrics": [
+        {
+          "tag": "DT",
+          "text": "",
+          "x": 33,
+          "y": 479
+        },
+        {
+          "tag": "DD",
+          "text": "Fecha pendiente",
+          "x": 53,
+          "y": 478
+        },
+        {
+          "tag": "DT",
+          "text": "",
+          "x": 163.25,
+          "y": 479
+        },
+        {
+          "tag": "DD",
+          "text": "Jorge",
+          "x": 183.25,
+          "y": 478
+        }
+      ]
+    },
+    {
+      "label": null,
+      "html": "<dl class=\"flex min-w-0 flex-wrap items-center gap-x-4 gap-y-1 text-xs text-ui-fg-muted\"><div class=\"flex items-center gap-1.5\"><dt><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"lucide lucide-calendar-days size-3.5\" aria-label=\"Fecha\"><path d=\"M8 2v3\"></path><path d=\"M16 2v3\"></path><rect x=\"3\" y=\"3\" width=\"18\" height=\"18\" rx=\"2\"></rect><path d=\"M3 9h18\"></path><path d=\"M8 13h.01\"></path><path d=\"M12 13h.01\"></path><path d=\"M16 13h.01\"></path><path d=\"M8 17h.01\"></path><path d=\"M12 17h.01\"></path><path d=\"M16 17h.01\"></path></svg></dt><dd>Fecha pendiente</dd></div><div class=\"flex items-center gap-1.5\"><dt><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"lucide lucide-user-round lucide-user-2 size-3.5\" aria-label=\"Conductor\"><circle cx=\"12\" cy=\"8\" r=\"5\"></circle><path d=\"M20 21a8 8 0 0 0-16 0\"></path></svg></dt><dd class=\"font-medium text-ui-fg\">Jorge</dd></div></dl>",
+      "groups": [
+        {
+          "tag": "DIV",
+          "children": [
+            "DT",
+            "DD"
+          ],
+          "text": "Fecha pendiente"
+        },
+        {
+          "tag": "DIV",
+          "children": [
+            "DT",
+            "DD"
+          ],
+          "text": "Jorge"
+        }
+      ],
+      "metrics": [
+        {
+          "tag": "DT",
+          "text": "",
+          "x": 33,
+          "y": 666
+        },
+        {
+          "tag": "DD",
+          "text": "Fecha pendiente",
+          "x": 53,
+          "y": 665
+        },
+        {
+          "tag": "DT",
+          "text": "",
+          "x": 163.25,
+          "y": 666
+        },
+        {
+          "tag": "DD",
+          "text": "Jorge",
+          "x": 183.25,
+          "y": 665
+        }
+      ]
+    },
+    {
+      "label": null,
+      "html": "<dl class=\"flex min-w-0 flex-wrap items-center gap-x-4 gap-y-1 text-xs text-ui-fg-muted\"><div class=\"flex items-center gap-1.5\"><dt><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"lucide lucide-calendar-days size-3.5\" aria-label=\"Fecha\"><path d=\"M8 2v3\"></path><path d=\"M16 2v3\"></path><rect x=\"3\" y=\"3\" width=\"18\" height=\"18\" rx=\"2\"></rect><path d=\"M3 9h18\"></path><path d=\"M8 13h.01\"></path><path d=\"M12 13h.01\"></path><path d=\"M16 13h.01\"></path><path d=\"M8 17h.01\"></path><path d=\"M12 17h.01\"></path><path d=\"M16 17h.01\"></path></svg></dt><dd>Fecha pendiente</dd></div><div class=\"flex items-center gap-1.5\"><dt><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"lucide lucide-user-round lucide-user-2 size-3.5\" aria-label=\"Conductor\"><circle cx=\"12\" cy=\"8\" r=\"5\"></circle><path d=\"M20 21a8 8 0 0 0-16 0\"></path></svg></dt><dd class=\"font-medium text-ui-fg\">Por asignar</dd></div></dl>",
+      "groups": [
+        {
+          "tag": "DIV",
+          "children": [
+            "DT",
+            "DD"
+          ],
+          "text": "Fecha pendiente"
+        },
+        {
+          "tag": "DIV",
+          "children": [
+            "DT",
+            "DD"
+          ],
+          "text": "Por asignar"
+        }
+      ],
+      "metrics": [
+        {
+          "tag": "DT",
+          "text": "",
+          "x": 33,
+          "y": 843
+        },
+        {
+          "tag": "DD",
+          "text": "Fecha pendiente",
+          "x": 53,
+          "y": 842
+        },
+        {
+          "tag": "DT",
+          "text": "",
+          "x": 33,
+          "y": 863
+        },
+        {
+          "tag": "DD",
+          "text": "Por asignar",
+          "x": 53,
+          "y": 862
+        }
+      ]
+    },
+    {
+      "label": null,
+      "html": "<dl class=\"flex min-w-0 flex-wrap items-center gap-x-4 gap-y-1 text-xs text-ui-fg-muted\"><div class=\"flex items-center gap-1.5\"><dt><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"lucide lucide-calendar-days size-3.5\" aria-label=\"Fecha\"><path d=\"M8 2v3\"></path><path d=\"M16 2v3\"></path><rect x=\"3\" y=\"3\" width=\"18\" height=\"18\" rx=\"2\"></rect><path d=\"M3 9h18\"></path><path d=\"M8 13h.01\"></path><path d=\"M12 13h.01\"></path><path d=\"M16 13h.01\"></path><path d=\"M8 17h.01\"></path><path d=\"M12 17h.01\"></path><path d=\"M16 17h.01\"></path></svg></dt><dd>Fecha pendiente</dd></div><div class=\"flex items-center gap-1.5\"><dt><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"lucide lucide-user-round lucide-user-2 size-3.5\" aria-label=\"Conductor\"><circle cx=\"12\" cy=\"8\" r=\"5\"></circle><path d=\"M20 21a8 8 0 0 0-16 0\"></path></svg></dt><dd class=\"font-medium text-ui-fg\">Jorge</dd></div></dl>",
+      "groups": [
+        {
+          "tag": "DIV",
+          "children": [
+            "DT",
+            "DD"
+          ],
+          "text": "Fecha pendiente"
+        },
+        {
+          "tag": "DIV",
+          "children": [
+            "DT",
+            "DD"
+          ],
+          "text": "Jorge"
+        }
+      ],
+      "metrics": [
+        {
+          "tag": "DT",
+          "text": "",
+          "x": 33,
+          "y": 1050
+        },
+        {
+          "tag": "DD",
+          "text": "Fecha pendiente",
+          "x": 53,
+          "y": 1049
+        },
+        {
+          "tag": "DT",
+          "text": "",
+          "x": 163.25,
+          "y": 1050
+        },
+        {
+          "tag": "DD",
+          "text": "Jorge",
+          "x": 183.25,
+          "y": 1049
+        }
+      ]
+    },
+    {
+      "label": null,
+      "html": "<dl class=\"flex min-w-0 flex-wrap items-center gap-x-4 gap-y-1 text-xs text-ui-fg-muted\"><div class=\"flex items-center gap-1.5\"><dt><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"lucide lucide-calendar-days size-3.5\" aria-label=\"Fecha\"><path d=\"M8 2v3\"></path><path d=\"M16 2v3\"></path><rect x=\"3\" y=\"3\" width=\"18\" height=\"18\" rx=\"2\"></rect><path d=\"M3 9h18\"></path><path d=\"M8 13h.01\"></path><path d=\"M12 13h.01\"></path><path d=\"M16 13h.01\"></path><path d=\"M8 17h.01\"></path><path d=\"M12 17h.01\"></path><path d=\"M16 17h.01\"></path></svg></dt><dd>Fecha pendiente</dd></div><div class=\"flex items-center gap-1.5\"><dt><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"lucide lucide-user-round lucide-user-2 size-3.5\" aria-label=\"Conductor\"><circle cx=\"12\" cy=\"8\" r=\"5\"></circle><path d=\"M20 21a8 8 0 0 0-16 0\"></path></svg></dt><dd class=\"font-medium text-ui-fg\">Jorge</dd></div></dl>",
+      "groups": [
+        {
+          "tag": "DIV",
+          "children": [
+            "DT",
+            "DD"
+          ],
+          "text": "Fecha pendiente"
+        },
+        {
+          "tag": "DIV",
+          "children": [
+            "DT",
+            "DD"
+          ],
+          "text": "Jorge"
+        }
+      ],
+      "metrics": [
+        {
+          "tag": "DT",
+          "text": "",
+          "x": 33,
+          "y": 1247
+        },
+        {
+          "tag": "DD",
+          "text": "Fecha pendiente",
+          "x": 53,
+          "y": 1246
+        },
+        {
+          "tag": "DT",
+          "text": "",
+          "x": 163.25,
+          "y": 1247
+        },
+        {
+          "tag": "DD",
+          "text": "Jorge",
+          "x": 183.25,
+          "y": 1246
+        }
+      ]
+    },
+    {
+      "label": null,
+      "html": "<dl class=\"flex min-w-0 flex-wrap items-center gap-x-4 gap-y-1 text-xs text-ui-fg-muted\"><div class=\"flex items-center gap-1.5\"><dt><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"lucide lucide-calendar-days size-3.5\" aria-label=\"Fecha\"><path d=\"M8 2v3\"></path><path d=\"M16 2v3\"></path><rect x=\"3\" y=\"3\" width=\"18\" height=\"18\" rx=\"2\"></rect><path d=\"M3 9h18\"></path><path d=\"M8 13h.01\"></path><path d=\"M12 13h.01\"></path><path d=\"M16 13h.01\"></path><path d=\"M8 17h.01\"></path><path d=\"M12 17h.01\"></path><path d=\"M16 17h.01\"></path></svg></dt><dd>Fecha pendiente</dd></div><div class=\"flex items-center gap-1.5\"><dt><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"lucide lucide-user-round lucide-user-2 size-3.5\" aria-label=\"Conductor\"><circle cx=\"12\" cy=\"8\" r=\"5\"></circle><path d=\"M20 21a8 8 0 0 0-16 0\"></path></svg></dt><dd class=\"font-medium text-ui-fg\">Jorge</dd></div></dl>",
+      "groups": [
+        {
+          "tag": "DIV",
+          "children": [
+            "DT",
+            "DD"
+          ],
+          "text": "Fecha pendiente"
+        },
+        {
+          "tag": "DIV",
+          "children": [
+            "DT",
+            "DD"
+          ],
+          "text": "Jorge"
+        }
+      ],
+      "metrics": [
+        {
+          "tag": "DT",
+          "text": "",
+          "x": 33,
+          "y": 1444
+        },
+        {
+          "tag": "DD",
+          "text": "Fecha pendiente",
+          "x": 53,
+          "y": 1443
+        },
+        {
+          "tag": "DT",
+          "text": "",
+          "x": 163.25,
+          "y": 1444
+        },
+        {
+          "tag": "DD",
+          "text": "Jorge",
+          "x": 183.25,
+          "y": 1443
+        }
+      ]
+    },
+    {
+      "label": null,
+      "html": "<dl class=\"flex min-w-0 flex-wrap items-center gap-x-4 gap-y-1 text-xs text-ui-fg-muted\"><div class=\"flex items-center gap-1.5\"><dt><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"lucide lucide-calendar-days size-3.5\" aria-label=\"Fecha\"><path d=\"M8 2v3\"></path><path d=\"M16 2v3\"></path><rect x=\"3\" y=\"3\" width=\"18\" height=\"18\" rx=\"2\"></rect><path d=\"M3 9h18\"></path><path d=\"M8 13h.01\"></path><path d=\"M12 13h.01\"></path><path d=\"M16 13h.01\"></path><path d=\"M8 17h.01\"></path><path d=\"M12 17h.01\"></path><path d=\"M16 17h.01\"></path></svg></dt><dd>Fecha pendiente</dd></div><div class=\"flex items-center gap-1.5\"><dt><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"lucide lucide-user-round lucide-user-2 size-3.5\" aria-label=\"Conductor\"><circle cx=\"12\" cy=\"8\" r=\"5\"></circle><path d=\"M20 21a8 8 0 0 0-16 0\"></path></svg></dt><dd class=\"font-medium text-ui-fg\">Jorge</dd></div></dl>",
+      "groups": [
+        {
+          "tag": "DIV",
+          "children": [
+            "DT",
+            "DD"
+          ],
+          "text": "Fecha pendiente"
+        },
+        {
+          "tag": "DIV",
+          "children": [
+            "DT",
+            "DD"
+          ],
+          "text": "Jorge"
+        }
+      ],
+      "metrics": [
+        {
+          "tag": "DT",
+          "text": "",
+          "x": 33,
+          "y": 1641
+        },
+        {
+          "tag": "DD",
+          "text": "Fecha pendiente",
+          "x": 53,
+          "y": 1640
+        },
+        {
+          "tag": "DT",
+          "text": "",
+          "x": 163.25,
+          "y": 1641
+        },
+        {
+          "tag": "DD",
+          "text": "Jorge",
+          "x": 183.25,
+          "y": 1640
+        }
+      ]
+    },
+    {
+      "label": null,
+      "html": "<dl class=\"flex min-w-0 flex-wrap items-center gap-x-4 gap-y-1 text-xs text-ui-fg-muted\"><div class=\"flex items-center gap-1.5\"><dt><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"lucide lucide-calendar-days size-3.5\" aria-label=\"Fecha\"><path d=\"M8 2v3\"></path><path d=\"M16 2v3\"></path><rect x=\"3\" y=\"3\" width=\"18\" height=\"18\" rx=\"2\"></rect><path d=\"M3 9h18\"></path><path d=\"M8 13h.01\"></path><path d=\"M12 13h.01\"></path><path d=\"M16 13h.01\"></path><path d=\"M8 17h.01\"></path><path d=\"M12 17h.01\"></path><path d=\"M16 17h.01\"></path></svg></dt><dd>Fecha pendiente</dd></div><div class=\"flex items-center gap-1.5\"><dt><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" class=\"lucide lucide-user-round lucide-user-2 size-3.5\" aria-label=\"Conductor\"><circle cx=\"12\" cy=\"8\" r=\"5\"></circle><path d=\"M20 21a8 8 0 0 0-16 0\"></path></svg></dt><dd class=\"font-medium text-ui-fg\">Jorge</dd></div></dl>",
+      "groups": [
+        {
+          "tag": "DIV",
+          "children": [
+            "DT",
+            "DD"
+          ],
+          "text": "Fecha pendiente"
+        },
+        {
+          "tag": "DIV",
+          "children": [
+            "DT",
+            "DD"
+          ],
+          "text": "Jorge"
+        }
+      ],
+      "metrics": [
+        {
+          "tag": "DT",
+          "text": "",
+          "x": 33,
+          "y": 1838
+        },
+        {
+          "tag": "DD",
+          "text": "Fecha pendiente",
+          "x": 53,
+          "y": 1837
+        },
+        {
+          "tag": "DT",
+          "text": "",
+          "x": 163.25,
+          "y": 1838
+        },
+        {
+          "tag": "DD",
+          "text": "Jorge",
+          "x": 183.25,
+          "y": 1837
+        }
+      ]
+    }
+  ],
+  "reading": [
+    "- term: Total\n- definition: \"10\"\n- term: En curso\n- definition: \"2\"\n- term: Gastado\n- definition: $0",
+    "- term:\n  - img \"Fecha\"\n- definition: Fecha pendiente\n- term:\n  - img \"Conductor\"\n- definition: Jorge",
+    "- term:\n  - img \"Fecha\"\n- definition: Fecha pendiente\n- term:\n  - img \"Conductor\"\n- definition: Jorge",
+    "- term:\n  - img \"Fecha\"\n- definition: Fecha pendiente\n- term:\n  - img \"Conductor\"\n- definition: Por asignar",
+    "- term:\n  - img \"Fecha\"\n- definition: Fecha pendiente\n- term:\n  - img \"Conductor\"\n- definition: Jorge",
+    "- term:\n  - img \"Fecha\"\n- definition: Fecha pendiente\n- term:\n  - img \"Conductor\"\n- definition: Jorge",
+    "- term:\n  - img \"Fecha\"\n- definition: Fecha pendiente\n- term:\n  - img \"Conductor\"\n- definition: Jorge",
+    "- term:\n  - img \"Fecha\"\n- definition: Fecha pendiente\n- term:\n  - img \"Conductor\"\n- definition: Jorge",
+    "- term:\n  - img \"Fecha\"\n- definition: Fecha pendiente\n- term:\n  - img \"Conductor\"\n- definition: Jorge"
+  ]
+}

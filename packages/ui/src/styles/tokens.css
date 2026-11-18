@@ -477,7 +477,8 @@
     --ruum-text-secondary: #c9d5e8;
     --ruum-text-muted: #a8b5cc;
     --ruum-border: #2d4f73;
-    --ruum-border-input: #4a6b8f;
+    /* Alto contraste debe subir el borde, no bajarlo (#4a6b8f daba 2.85:1). */
+    --ruum-border-input: #7a8dae;
   }
 }
 

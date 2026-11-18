@@ -80,3 +80,4 @@ Logos ruum ruum
 
 # Salida aislada del build E2E de App Usuario
 /apps/app-usuario/.next-e2e/
+.vercel

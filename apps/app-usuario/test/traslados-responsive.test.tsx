@@ -6,7 +6,8 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
 import { MobileShell } from "@ruum/ui";
 import { NavegacionUsuario } from "../src/app/NavegacionUsuario";
-import { MisTrasladosCliente, type ViajeLista } from "../src/app/mis-viajes/MisViajesCliente";
+import { MisTraslados } from "../src/app/mis-viajes/MisTraslados";
+import type { ViajeLista } from "../src/app/mis-viajes/useGestionTraslados";
 
 vi.mock("next/navigation", () => ({
   usePathname: () => "/mis-viajes",
@@ -14,6 +15,7 @@ vi.mock("next/navigation", () => ({
 }));
 
 const selectorPestanas = '[aria-label="Filtrar por estado del traslado"]';
+const LISTA = '[aria-label^="Lista de traslados"]';
 
 // RUN_RESPONSIVE_UI=1 pnpm exec vitest run test/traslados-responsive.test.tsx
 // Requiere un build previo: comprueba el CSS de producción sin datos privados.
@@ -43,8 +45,8 @@ describe.skipIf(process.env.RUN_RESPONSIVE_UI !== "1")("Traslados sin scroll de 
       for (const escenario of escenarios) {
         const html = renderToStaticMarkup(<div id="contenido-principal">
           <NavegacionUsuario notificaciones={[{ id: "demo", tono: "info", mensaje: "Tu cuenta está en proceso de verificación." }]} />
-          <MobileShell as="main" variant="compact" navInferiorVisible className="user-v2-scope user-transfers-shell" contentClassName="user-transfers-content">
-            <MisTrasladosCliente Traslados={escenario.viajes} pestanaInicial="activos" />
+          <MobileShell as="main" variant="wide" padding="none" conFondoCanvas={false} navInferiorVisible className="bg-ui-bg">
+            <MisTraslados traslados={escenario.viajes} autoActualizar={false} />
           </MobileShell>
         </div>);
         for (const [width, height] of tamanos) {
@@ -52,20 +54,19 @@ describe.skipIf(process.env.RUN_RESPONSIVE_UI !== "1")("Traslados sin scroll de 
           await page.setContent(`<!doctype html><html lang="es"><head><style>${css}</style></head><body>${html}</body></html>`);
           if (width === 393) {
             await page.evaluate(() => { document.documentElement.dataset.theme = "dark"; });
-            await page.addStyleTag({ content: ".user-transfers-page-header { padding-top: 20px; } .user-transfers-nav { padding-bottom: 34px; }" });
           }
           await page.evaluate(() => document.documentElement.style.setProperty("--user-mobile-nav-height", `${document.querySelector("#bottomNavigation")!.getBoundingClientRect().height}px`));
-          const errores = await page.evaluate((pestanas) => {
+          const errores = await page.evaluate(([pestanas, LISTA]) => {
             const failures: string[] = [];
             const navTop = document.querySelector("#bottomNavigation")!.getBoundingClientRect().top;
-            for (const selector of ["#homeHeader", pestanas, '[aria-label="Resumen de traslados"]', '[aria-label="Buscar y filtrar traslados"]', "#lista-traslados"]) {
+            for (const selector of ["#homeHeader", pestanas, '[aria-label="Resumen de traslados"]', '[aria-label="Buscar y filtrar traslados"]', LISTA]) {
               const rect = document.querySelector(selector)!.getBoundingClientRect();
               if (rect.top < 0 || (selector === "#homeHeader" && rect.bottom > navTop + 1) || rect.left < 0 || rect.right > innerWidth + 1) failures.push(`${selector} fuera del viewport: ${JSON.stringify(rect.toJSON())}`);
             }
             for (const el of document.querySelectorAll(`${pestanas} > button`)) {
               if (el.scrollWidth > el.clientWidth + 1) failures.push(`Pestaña recortada: ${el.textContent}, ${el.scrollWidth}/${el.clientWidth}`);
             }
-            const empty = document.querySelector(".user-transfers-empty");
+            const empty = document.querySelector("[data-empty-state]");
             if (empty) {
               const rect = empty.getBoundingClientRect();
               for (const el of empty.children) {
@@ -74,14 +75,14 @@ describe.skipIf(process.env.RUN_RESPONSIVE_UI !== "1")("Traslados sin scroll de 
               }
               if (empty.scrollHeight > empty.clientHeight + 1) failures.push("Scroll del estado vacío");
             }
-            const content = document.querySelector(".user-transfers-content")!;
+            const content = document.querySelector(".scrollable-content")!;
             content.scrollTo({ top: content.scrollHeight, behavior: "instant" });
-            if (document.querySelector("#lista-traslados")!.getBoundingClientRect().bottom > navTop + 1) {
+            if (document.querySelector(LISTA)!.getBoundingClientRect().bottom > navTop + 1) {
               failures.push("El final de la lista queda debajo de la navegación");
             }
             if (document.documentElement.scrollHeight > innerHeight || document.documentElement.scrollWidth > innerWidth) failures.push("Scroll de página");
             return failures;
-          }, selectorPestanas);
+          }, [selectorPestanas, LISTA] as const);
           await page.screenshot({ path: path.join(output, `${escenario.nombre}-${width}x${height}.png`) });
           expect(errores, `${escenario.nombre} ${width}x${height}`).toEqual([]);
         }

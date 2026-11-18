@@ -35,6 +35,7 @@
     "@supabase/supabase-js": "^2.47.0",
     "@upstash/redis": "^1.38.3",
     "exceljs": "4.4.0",
+    "lucide-react": "^1.73.0",
     "mapbox-gl": "^3.32.0",
     "next": "15.5.28",
     "pdf-lib": "1.17.1",

@@ -45,6 +45,7 @@ jobs:
         if: ${{ !cancelled() && steps.dependencias.outcome == 'success' }}
         run: pnpm scan:secrets
       - run: pnpm --filter @ruum/app-usuario lint
+      - run: pnpm check:estilos
       - run: pnpm --filter @ruum/app-usuario typecheck
       - run: pnpm --filter @ruum/app-usuario build
         env: &entorno-build-local

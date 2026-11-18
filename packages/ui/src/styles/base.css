@@ -1,0 +1,152 @@
+/*
+ * Ruum Ruum — Sistema base (v2)
+ *
+ * Capa SEMÁNTICA sobre los tokens de marca (tokens.css). Las pantallas nuevas
+ * o migradas usan SOLO estas clases de color: `*-ui-*`
+ * (bg-ui-card, text-ui-fg-muted, border-ui-line, bg-ui-brand…).
+ *
+ *  - Ningún valor nuevo de marca: todo deriva de las variables --ruum-*.
+ *  - Claro y oscuro se resuelven aquí; los componentes no usan `dark:`.
+ *  - Tipografía: escala por defecto de Tailwind (text-xs 12 · sm 14 · base 16 ·
+ *    lg 18 · xl 20 · 2xl 24 · 3xl 30). Prohibido text-[Npx].
+ *  - Radios: rounded-md (botones, campos) · rounded-lg (tarjetas) ·
+ *    rounded-xl (hojas, diálogos) · rounded-full (insignias). Prohibido rounded-[N].
+ *
+ * Documentación: design-system/docs/sistema-base-v2.md
+ */
+
+:root,
+[data-theme="light"] {
+  --ui-bg: color-mix(in oklab, var(--ruum-surface-subtle) 50%, var(--ruum-canvas));
+  --ui-card: var(--ruum-surface);
+  --ui-muted: color-mix(in oklab, var(--ruum-surface-subtle) 70%, var(--ruum-canvas));
+  --ui-fg: var(--ruum-text-primary);
+  --ui-fg-muted: var(--ruum-text-secondary);
+  --ui-line: color-mix(in oklab, var(--ruum-text-primary) 11%, transparent);
+  --ui-line-strong: color-mix(in oklab, var(--ruum-text-primary) 22%, transparent);
+  --ui-field: var(--ruum-border-strong);
+
+  --ui-brand: var(--ruum-action-hover);
+  --ui-brand-hover: var(--ruum-action-active);
+  --ui-on-brand: var(--ruum-white, var(--ruum-on-primary));
+  --ui-brand-soft: var(--ruum-action-bg);
+  --ui-brand-soft-fg: var(--ruum-action-text);
+  --ui-ring: var(--ruum-focus-ring);
+  --ui-focus: var(--ruum-focus);
+
+  --ui-success: var(--ruum-success-text);
+  --ui-success-soft: var(--ruum-success-bg);
+  --ui-warning: var(--ruum-warning-text);
+  --ui-warning-soft: var(--ruum-warning-bg);
+  --ui-danger: var(--ruum-error-text);
+  --ui-danger-soft: var(--ruum-error-bg);
+  --ui-neutral: var(--ruum-neutral-text);
+  --ui-neutral-soft: var(--ruum-neutral-bg);
+
+  --ui-overlay: var(--ruum-overlay);
+  --ui-shadow-sm: 0 1px 2px color-mix(in oklab, var(--ruum-navy) 6%, transparent);
+  --ui-shadow-md: 0 1px 2px color-mix(in oklab, var(--ruum-navy) 4%, transparent),
+    0 8px 24px color-mix(in oklab, var(--ruum-navy) 8%, transparent);
+}
+
+[data-theme="dark"] {
+  --ui-bg: var(--ruum-canvas);
+  --ui-card: var(--ruum-surface);
+  --ui-muted: var(--ruum-surface-elevated);
+  --ui-fg: var(--ruum-text-primary);
+  --ui-fg-muted: var(--ruum-text-secondary);
+  --ui-line: color-mix(in oklab, var(--ruum-text-primary) 12%, transparent);
+  --ui-line-strong: color-mix(in oklab, var(--ruum-text-primary) 24%, transparent);
+  /* border-strong oscuro (#2d4f73) da 1.86:1 sobre la tarjeta; border-input llega a 3.6:1. */
+  --ui-field: var(--ruum-border-input);
+
+  --ui-brand: var(--ruum-action);
+  --ui-brand-hover: var(--ruum-action-hover);
+  --ui-on-brand: var(--ruum-canvas);
+  --ui-brand-soft: var(--ruum-action-bg);
+  --ui-brand-soft-fg: var(--ruum-action-text);
+  --ui-ring: var(--ruum-focus-ring);
+  --ui-focus: var(--ruum-focus);
+
+  --ui-success: var(--ruum-success-text);
+  --ui-success-soft: var(--ruum-success-bg);
+  --ui-warning: var(--ruum-warning-text);
+  --ui-warning-soft: var(--ruum-warning-bg);
+  --ui-danger: var(--ruum-error-text);
+  --ui-danger-soft: var(--ruum-error-bg);
+  --ui-neutral: var(--ruum-neutral-text);
+  --ui-neutral-soft: var(--ruum-neutral-bg);
+
+  --ui-overlay: var(--ruum-overlay);
+  --ui-shadow-sm: 0 1px 2px rgb(0 0 0 / 0.3);
+  --ui-shadow-md: 0 8px 24px rgb(0 0 0 / 0.35);
+}
+
+@theme inline {
+  --color-ui-bg: var(--ui-bg);
+  --color-ui-card: var(--ui-card);
+  --color-ui-muted: var(--ui-muted);
+  --color-ui-fg: var(--ui-fg);
+  --color-ui-fg-muted: var(--ui-fg-muted);
+  --color-ui-line: var(--ui-line);
+  --color-ui-line-strong: var(--ui-line-strong);
+  --color-ui-field: var(--ui-field);
+  --color-ui-brand: var(--ui-brand);
+  --color-ui-brand-hover: var(--ui-brand-hover);
+  --color-ui-on-brand: var(--ui-on-brand);
+  --color-ui-brand-soft: var(--ui-brand-soft);
+  --color-ui-brand-soft-fg: var(--ui-brand-soft-fg);
+  --color-ui-ring: var(--ui-ring);
+  --color-ui-focus: var(--ui-focus);
+  --color-ui-success: var(--ui-success);
+  --color-ui-success-soft: var(--ui-success-soft);
+  --color-ui-warning: var(--ui-warning);
+  --color-ui-warning-soft: var(--ui-warning-soft);
+  --color-ui-danger: var(--ui-danger);
+  --color-ui-danger-soft: var(--ui-danger-soft);
+  --color-ui-neutral: var(--ui-neutral);
+  --color-ui-neutral-soft: var(--ui-neutral-soft);
+  --color-ui-overlay: var(--ui-overlay);
+  --shadow-ui-sm: var(--ui-shadow-sm);
+  --shadow-ui-md: var(--ui-shadow-md);
+}
+
+/* Hoja / diálogo nativo (<dialog>): sin estilos inyectados, compatible con la CSP. */
+.ui-sheet {
+  position: fixed;
+  inset: auto 0 0;
+  margin: 0 auto;
+  width: 100%;
+  max-width: 32rem;
+  max-height: 85dvh;
+  padding: 0;
+  border: 0;
+  overflow: hidden;
+}
+.ui-sheet::backdrop {
+  background: var(--ui-overlay);
+}
+.ui-sheet[open] {
+  animation: ui-sheet-in 220ms ease-out;
+}
+@media (min-width: 640px) {
+  .ui-sheet {
+    inset: 0;
+    margin: auto;
+    height: fit-content;
+  }
+  .ui-sheet[open] {
+    animation-name: ui-dialog-in;
+  }
+}
+@keyframes ui-sheet-in {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+@keyframes ui-dialog-in {
+  from { opacity: 0; transform: translateY(8px) scale(0.98); }
+  to { opacity: 1; transform: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ui-sheet[open] { animation: none; }
+}

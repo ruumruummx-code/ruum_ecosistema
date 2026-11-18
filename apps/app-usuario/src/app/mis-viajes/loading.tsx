@@ -1,19 +1,20 @@
 import { MobileShell } from "@ruum/ui";
+import { Skeleton } from "@ruum/ui/base";
 import { NavegacionUsuario } from "../NavegacionUsuario";
 
-function SkeletonCard() {
-  return <div className="animate-pulse rounded-xl border border-border bg-surface p-4" aria-hidden="true"><div className="h-4 w-28 rounded bg-surface-elevated" /><div className="mt-3 h-5 w-48 rounded bg-surface-elevated" /><div className="mt-2 h-3 w-32 rounded bg-surface-elevated/60" /><div className="mt-4 grid grid-cols-4 gap-3"><div className="h-10 rounded bg-surface-elevated/60" /><div className="h-10 rounded bg-surface-elevated/60" /><div className="h-10 rounded bg-surface-elevated/60" /><div className="h-10 rounded bg-surface-elevated/60" /></div></div>;
-}
 export default function Loading() {
   return (
     <>
       <NavegacionUsuario variante="claro" />
-      <MobileShell variant="compact" navInferiorVisible className="user-v2-scope user-transfers-shell" contentClassName="user-transfers-content">
-        <div className="user-transfers-view" role="status" aria-busy="true" aria-label="Cargando traslados">
-          <div className="h-12 rounded-full bg-surface-elevated animate-pulse" />
-          <div className="h-8 rounded-xl bg-surface-elevated animate-pulse" />
-          <div className="h-11 rounded-xl bg-surface-elevated animate-pulse" />
-          <div className="user-transfers-list" aria-hidden="true"><SkeletonCard /><SkeletonCard /><SkeletonCard /></div>
+      <MobileShell variant="wide" padding="none" conFondoCanvas={false} navInferiorVisible className="bg-ui-bg">
+        <div className="flex flex-col gap-4 px-4 pt-4 sm:px-6 sm:pt-6" role="status" aria-busy="true" aria-label="Cargando traslados">
+          <Skeleton className="h-8 w-48" />
+          <Skeleton className="h-20 rounded-lg" />
+          <Skeleton className="h-9 w-72 rounded-full" />
+          <Skeleton className="h-11" />
+          {[0, 1, 2].map((i) => (
+            <Skeleton key={i} className="h-36 rounded-lg" />
+          ))}
         </div>
       </MobileShell>
     </>
