@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { obtenerIp, rateLimitConVentana } from "@/lib/csp-rate-limit";
 import { soloDigitos } from "@/lib/registro-usuario";
-import { enviarCodigoTwilioVerify } from "@/lib/phone-verification";
+import { enviarCodigoTwilioVerify, verificacionTelefonoSuspendida } from "@/lib/phone-verification";
 import { verificarCsrfORechazar } from "@/lib/csrf";
 
 export const dynamic = "force-dynamic";
@@ -15,6 +15,10 @@ export async function POST(request: NextRequest) {
   try {
     const rechazoCsrf = verificarCsrfORechazar(request);
     if (rechazoCsrf) return rechazoCsrf;
+
+    if (verificacionTelefonoSuspendida()) {
+      return NextResponse.json({ error: "La verificación por SMS está suspendida temporalmente." }, { status: 503 });
+    }
 
     const body = (await request.json().catch(() => null)) as {
       telefono?: unknown;

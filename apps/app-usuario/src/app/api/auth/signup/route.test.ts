@@ -14,6 +14,7 @@ vi.mock("next/headers", () => ({
 
 import { POST } from "./route";
 import { generarTokenTelefono } from "@/lib/phone-verification";
+import * as rateLimit from "@/lib/csp-rate-limit";
 
 process.env.NEXT_PUBLIC_SUPABASE_URL ??= "http://localhost:54321";
 process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ??= "anon-test";
@@ -166,20 +167,28 @@ describe("POST /api/auth/signup — bypass OTP solo-dev", () => {
 
 
 describe("suspensión temporal de SMS en producción", () => {
-  it("rechaza sin token aunque la bandera histórica de suspensión esté activa", async () => {
+  it("registra el teléfono como no verificado y vuelve a exigir token al reactivar", async () => {
     vi.clearAllMocks();
+    const limite = vi.spyOn(rateLimit, "rateLimitConVentana").mockResolvedValue({ allowed: true });
     vi.stubEnv("NODE_ENV", "production");
     vi.stubEnv("PHONE_VERIFICATION_SUSPENDED", "true");
     try {
       mockSignUp.mockResolvedValue({data:{user:{id:"prod-suspendido"},session:null},error:null});
       const res = await POST(req("suspendido@ejemplo.com", ""));
-      expect(res.status).toBe(400);
-      expect(mockSignUp).not.toHaveBeenCalled();
+      expect(res.status).toBe(200);
+      expect(mockSignUp).toHaveBeenCalledWith(expect.objectContaining({
+        options: expect.objectContaining({
+          data: expect.objectContaining({ telefono_verificado: false, telefono_verificado_en: null }),
+        }),
+      }));
       vi.stubEnv("PHONE_VERIFICATION_SUSPENDED", "false");
       mockSignUp.mockClear();
       const reactivado = await POST(req("reactivado@ejemplo.com", ""));
       expect(reactivado.status).toBe(400);
       expect(mockSignUp).not.toHaveBeenCalled();
-    } finally { vi.unstubAllEnvs(); }
+    } finally {
+      limite.mockRestore();
+      vi.unstubAllEnvs();
+    }
   });
 });

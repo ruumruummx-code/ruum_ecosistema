@@ -174,9 +174,13 @@ function mockPermitido(): boolean {
   return process.env.NODE_ENV !== "production";
 }
 
-/** Suspensión explícita y reversible (activa por defecto temporalmente; usar "false" para reactivar). */
+export function verificacionTelefonoSuspendida(): boolean {
+  return process.env.PHONE_VERIFICATION_SUSPENDED === "true";
+}
+
 export function bypassVerificacionTelefonoPermitido(): boolean {
-  return process.env.PHONE_VERIFY_BYPASS === "true" && process.env.NODE_ENV !== "production";
+  return verificacionTelefonoSuspendida() ||
+    (process.env.PHONE_VERIFY_BYPASS === "true" && process.env.NODE_ENV !== "production");
 }
 
 const TWILIO_TIMEOUT_MS = 8_000;
