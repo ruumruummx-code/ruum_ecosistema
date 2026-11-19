@@ -94,12 +94,14 @@ export default async function PaginaMisTraslados({
   searchParams: Promise<{
     tab?: string;
     buscar?: string;
+    tipo?: string;
+    fecha?: string;
     pagina?: string;
     limite?: string;
     snapshot_version?: string;
   }>;
 }) {
-  const { tab, buscar, pagina, limite, snapshot_version } = await searchParams;
+  const { tab, buscar, tipo, fecha, pagina, limite, snapshot_version } = await searchParams;
   const numPagina = Number(pagina) > 0 ? Number(pagina) : 1;
   const numLimite = Number(limite) > 0 ? Number(limite) : 10;
   const pestañaActiva: PestañaFiltro = PESTANAS.includes(tab as PestañaFiltro) ? (tab as PestañaFiltro) : "todos";
@@ -107,8 +109,10 @@ export default async function PaginaMisTraslados({
   const resultado = await obtenerTraslados({
     pagina: numPagina,
     limite: numLimite,
-    tab,
+    tab: pestañaActiva,
     buscar,
+    tipo,
+    fecha,
     snapshotVersionCliente: snapshot_version,
   });
 
@@ -155,6 +159,15 @@ export default async function PaginaMisTraslados({
       pestanaInicial={pestañaActiva}
       busquedaInicial={typeof buscar === "string" ? buscar : ""}
       gastoConfirmadoServidor={resultado.estado === "ok" ? resultado.gastoConfirmadoTotal : 0}
+      servidor={resultado.estado === "ok" ? {
+        conteos: resultado.conteos,
+        totalItems: resultado.totalItems,
+        pagina: resultado.pagina,
+        totalPaginas: resultado.totalPaginas,
+        limite: resultado.limite,
+        tipo,
+        fecha,
+      } : undefined}
     />
   );
 

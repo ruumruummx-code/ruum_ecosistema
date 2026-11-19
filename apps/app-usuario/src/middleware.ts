@@ -208,7 +208,10 @@ export async function middleware(request: NextRequest) {
     }
   }
 
-  if (user && (pathname === "/login" || pathname === "/registro")) {
+  // `reason=cuenta_distinta` (auth/callback): el usuario conserva su sesión y
+  // ve el aviso para decidir si cambia de cuenta de forma explícita.
+  const avisoCuentaDistinta = pathname === "/login" && request.nextUrl.searchParams.get("reason") === "cuenta_distinta";
+  if (user && !avisoCuentaDistinta && (pathname === "/login" || pathname === "/registro")) {
     return redirigir(new URL("/", request.url));
   }
 

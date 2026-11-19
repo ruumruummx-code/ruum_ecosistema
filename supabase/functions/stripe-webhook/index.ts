@@ -1,9 +1,10 @@
 /// <reference lib="deno.ns" />
-import Stripe from "npm:stripe@23.0.0";
+import { crearStripe, type Stripe } from "../_shared/stripe.ts";
+import { procesarReembolsosPendientes } from "../_shared/reembolsos.ts";
 import { createClient } from "npm:@supabase/supabase-js@2.47.16";
 import { datosVerificacion, modoStripe, obtenerIntentoStripe, obtenerReembolsoCompletoStripe } from "../_shared/stripe-verificacion.ts";
 const clave = Deno.env.get("STRIPE_SECRET_KEY") ?? "";
-const stripe = new Stripe(clave, { apiVersion: "2026-09-30.endive", httpClient: Stripe.createFetchHttpClient() });
+const stripe = crearStripe(clave);
 const db = createClient(Deno.env.get("SUPABASE_URL") ?? "", Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "");
 Deno.serve(async (req: Request) => {
   if (req.method !== "POST") return new Response("Método no permitido", { status: 405 });
@@ -30,9 +31,22 @@ Deno.serve(async (req: Request) => {
       if (!chargeId) throw new Error("refund_charge_missing");
       const charge = await stripe.charges.retrieve(chargeId);
       if (charge.livemode !== modoStripe(clave)) throw new Error("stripe_environment_mismatch");
-      if (!charge.refunded) return new Response("Reembolso parcial: requiere conciliación financiera", { status: 200 });
       intentId = typeof charge.payment_intent === "string" ? charge.payment_intent : charge.payment_intent?.id ?? null;
       if (!intentId) throw new Error("refund_intent_missing");
+      if (!charge.refunded) {
+        // Reembolso parcial (p. ej. cancelación con penalización retenida): se
+        // registra y, si no coincide con lo que emitimos, entra a la cola de
+        // revisión de Finanzas. Antes respondía 200 sin guardar nada.
+        const parcial = await db.rpc("registrar_reembolso_parcial_stripe", {
+          p_evento_id: event.id, p_intent_id: intentId, p_charge_id: charge.id,
+          p_monto_reembolsado_centavos: charge.amount_refunded, p_monto_cargo_centavos: charge.amount, p_livemode: charge.livemode,
+        });
+        if (parcial.error) throw new Error("partial_refund_record_failed");
+        if (parcial.data?.requiere_revision) {
+          console.error("stripe_reembolso_parcial_requiere_revision", { event_id: event.id, intent_id: intentId, alerta: "finanzas" });
+        }
+        return new Response("ok", { status: 200 });
+      }
       const result = await db.rpc("procesar_pago_stripe", { p_stripe_event_id: event.id, p_stripe_payment_intent_id: intentId, p_estado_pago: "reembolsado" });
       if (result.error || result.data?.ok === false) throw new Error("refund_reconciliation_failed");
       return new Response("ok", { status: 200 });
@@ -59,6 +73,12 @@ Deno.serve(async (req: Request) => {
       const result = await db.rpc("aplicar_verificacion_pago_stripe", { p_datos: datosVerificacion(intent,modoStripe(clave),"webhook",event.id) });
       if (result.error) throw new Error("payment_verification_rejected");
       if (result.data?.requiere_revision) throw new Error("provider_state_requires_review");
+      if (result.data?.reembolso_encolado) {
+        // Cobro recibido sobre un traslado ya cancelado: reembolso inmediato
+        // (si falla, queda encolado para reconciliar-pagos-stripe).
+        const reembolsos = await procesarReembolsosPendientes(db, stripe, { trasladoId: intent.metadata.traslado_id });
+        if (reembolsos.fallidos.length) console.error("stripe_webhook_reembolso_pendiente", { event_id: event.id, fallidos: reembolsos.fallidos });
+      }
     }
     return new Response("ok", { status: 200 });
   } catch (error) {

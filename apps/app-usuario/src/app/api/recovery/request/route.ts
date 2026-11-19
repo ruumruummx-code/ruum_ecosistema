@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { cookies } from "next/headers";
 import { crearClienteServidor } from "@ruum/api/supabase";
 import { normalizarCorreoRegistro } from "@/lib/registro-usuario";
 import { obtenerIp, rateLimitConVentana } from "@/lib/csp-rate-limit";
@@ -145,9 +146,16 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Servicio no disponible temporalmente." }, { status: 503 });
     }
 
+    // PKCE: resetPasswordForEmail genera un code_verifier que debe llegar al
+    // navegador como cookie; /auth/callback lo necesita para canjear el
+    // `code`. Con setAll vacío el verificador se perdía y todo enlace caía en
+    // «otro_dispositivo».
+    const cookieStore = await cookies();
     const cliente = crearClienteServidor(url, anonKey, {
-      getAll: () => [],
-      setAll: () => {},
+      getAll: () => cookieStore.getAll(),
+      setAll: (cookiesToSet) => {
+        cookiesToSet.forEach(({ name, value, options }) => cookieStore.set(name, value, options));
+      },
     });
 
     const redirectTo = `${request.nextUrl.origin}/auth/callback?type=recovery&next=/nueva-password`;

@@ -23,6 +23,10 @@ vi.mock("@ruum/api/services", () => ({
   reportarIncidencia: (...args: unknown[]) => reportarIncidenciaMock(...args),
   cancelarTraslado: (...args: unknown[]) => cancelarTrasladoMock(...args),
   usuarioPuedeCancelar: (...args: unknown[]) => usuarioPuedeCancelarMock(...args),
+  previsualizarCancelacion: async () => ({
+    cancelable: true, porcentaje_cargo: 0, monto_cargo: 0, monto_pagado: 0, monto_reembolso: 0,
+    mensaje: "Cancelar ahora no genera cargo.",
+  }),
   crearCalificacion: (...args: unknown[]) => crearCalificacionMock(...args),
   abrirDisputa: (...args: unknown[]) => abrirDisputaMock(...args),
   aceptarCotizacionUsuario: (...args: unknown[]) => aceptarCotizacionUsuarioMock(...args),

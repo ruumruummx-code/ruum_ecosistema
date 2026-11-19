@@ -1,3 +1,5 @@
+import { randomUUID } from "node:crypto";
+import { respuestaErrorInterno } from "@/lib/errores-api";
 import { NextRequest, NextResponse } from "next/server";
 import { createHash } from "node:crypto";
 import { validarFila } from "@/lib/carga-masiva";
@@ -12,6 +14,8 @@ import { previsualizarTarifasMasivasUsuario, verificarUsuarioMasivo, guardarChec
 import { coordenadaPostalMasiva, ErrorServicioCotizacion } from "@/lib/mapbox-masivo";
 import { tipoSugeridoParaVehiculo } from "@ruum/shared/catalogos";
 import { obtenerRutaDirectionsMapboxConParadas } from "@ruum/shared/utils";
+const AVISO_UBICACION_APROXIMADA = "Ubicación aproximada (centro del código postal): guíate por la dirección escrita y confirma con el contacto.";
+
 export const dynamic = "force-dynamic";
 export const maxDuration = 300;
 const esquema = z.object({
@@ -59,7 +63,7 @@ export async function POST(request: NextRequest) {
     const filas = await validarFilasServidor(body.data.filas);
     if (!permitirParcial && filas.some(f => f.estado === "error")) return NextResponse.json({ filas });
     const token = process.env.MAPBOX_SECRET_TOKEN;
-    if (!token) return NextResponse.json({ error: "Servicio de mapas no configurado (falta MAPBOX_SECRET_TOKEN)." }, { status: 500 });
+    if (!token) return respuestaErrorInterno("api/viajes/masivos/cotizar", new Error("MAPBOX_SECRET_TOKEN ausente"), "El servicio de mapas no está disponible.", 503);
     const normalizadas: Record<string, string>[] = [];
     const cotizaciones = [];
     let centavos = 0;
@@ -222,7 +226,9 @@ export async function POST(request: NextRequest) {
         const n: Record<string, string> = {
           vehiculo_marca: d.marca, vehiculo_modelo: d.modelo, vehiculo_anio: d.anio,
           vehiculo_tipo: tipoSugeridoParaVehiculo(d.marca, d.modelo) ?? "sedan",
-          categoria_tarifa: tarifa.categoria_tarifa, gama: tarifa.gama, condicion: d.condicion,
+          categoria_tarifa: tarifa.categoria_tarifa, gama: tarifa.gama,
+          // Igual que la cotización individual: la condición declarada no abarata el servicio.
+          condicion: d.condicion === "rescate_mecanico" ? "rescate_mecanico" : "seminueva",
           contacto_entrega_nombre: d.entregaNombre, contacto_entrega_telefono: `+52${d.entregaTelefono}`,
           contacto_recepcion_nombre: d.recepcionNombre, contacto_recepcion_telefono: `+52${d.recepcionTelefono}`,
           origen_direccion: [d.origen_calle, d.origen_numero, d.origen_colonia, d.origenCodigoPostal].filter(Boolean).join(", "),
@@ -234,7 +240,10 @@ export async function POST(request: NextRequest) {
         };
         for (const key of ["referencia_externa", "vehiculo_placas", "vehiculo_vin", "vehiculo_color", "vehiculo_transmision", "estado_general_declarado", "origen_referencias", "destino_referencias", "fecha_hora_programada", "instrucciones_especiales"]) if (d[key]) n[key] = d[key]!;
         n.tipo_ruta = d.tipo_traslado || "local";
-        n.instrucciones_especiales = [n.instrucciones_especiales, ...["centro_costo", "orden_compra", "prioridad", "ventana_recoleccion", "ventana_recoleccion_horario", "ventana_entrega", "ventana_entrega_horario"].filter(k => d[k]).map(k => `${k}: ${d[k]}`)].filter(Boolean).join(" | ");
+        // Las coordenadas de carga masiva son el centroide del código postal
+        // (precio y ruta aproximados): se avisa al conductor que se guíe por la
+        // dirección escrita, no por el punto del mapa.
+        n.instrucciones_especiales = [AVISO_UBICACION_APROXIMADA, n.instrucciones_especiales, ...["centro_costo", "orden_compra", "prioridad", "ventana_recoleccion", "ventana_recoleccion_horario", "ventana_entrega", "ventana_entrega_horario"].filter(k => d[k]).map(k => `${k}: ${d[k]}`)].filter(Boolean).join(" | ");
         normalizadas.push(n);
         cotizaciones.push({ ...fila, tarifa: precio / 100, distanciaKm: ruta.distanciaKm });
     }
@@ -273,14 +282,32 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ id, clientSecret: intent.client_secret, totalMXN: guardado.monto_centavos / 100, cotizaciones: guardado.cotizaciones, filasConError: filasErroneas, filasPendientesCorreccion, parcial: permitirParcial && filasErroneas.length > 0 });
       }
       const customer = await obtenerClienteBilleteraServidor(servicio, user.id, /^(sk|rk)_test_/.test(process.env.STRIPE_SECRET_KEY ?? "") ? "test" : "live");
-      intent = await stripeMasivo("payment_intents", new URLSearchParams({ amount: String(guardado.monto_centavos), currency: "mxn", "automatic_payment_methods[enabled]": "true", "metadata[carga_masiva_id]": id, ...(customer ? { customer } : {}) }), `carga-masiva-${id}`);
+      // La reserva en base ya excluye peticiones concurrentes (409 en_progreso);
+      // la clave por reserva evita que Stripe devuelva un PI cancelado por una
+      // compensación anterior (Stripe cachea la respuesta 24 h por clave).
+      intent = await stripeMasivo("payment_intents", new URLSearchParams({ amount: String(guardado.monto_centavos), currency: "mxn", "allowed_payment_method_types[0]": "card", "metadata[carga_masiva_id]": id, ...(customer ? { customer } : {}) }), `carga-masiva-${id}-${randomUUID()}`);
       stripeCreado = true;
-      await vincularPagoMasivoServidor(servicio, id, user.id, intent.id);
+      // Reintento corto del vínculo antes de compensar.
+      let errorVinculo: unknown = null;
+      for (let intento = 0; intento < 3; intento++) {
+        try {
+          await vincularPagoMasivoServidor(servicio, id, user.id, intent.id);
+          errorVinculo = null;
+          break;
+        } catch (err) {
+          errorVinculo = err;
+          await new Promise((r) => setTimeout(r, 200 * (intento + 1)));
+        }
+      }
+      if (errorVinculo) throw errorVinculo;
     } catch (stripeErr) {
-      // Transacción de compensación: si falla Stripe al crear o vincular el PaymentIntent,
-      // eliminamos de inmediato el registro en base de datos para no dejar checkouts huérfanos sin pago.
+      // Compensación: si falla Stripe al crear o vincular el PaymentIntent, se
+      // cancela el PI huérfano (si llegó a crearse) y se elimina el checkout
+      // para que la carga no quede en en_progreso (409 al reintentar).
       try {
-        if (stripeCreado) throw stripeErr;
+        if (stripeCreado && intent?.id) {
+          await stripeMasivo(`payment_intents/${encodeURIComponent(intent.id)}/cancel`, new URLSearchParams({ cancellation_reason: "abandoned" }));
+        }
         await eliminarCheckoutMasivoServidor(servicio, id, user.id);
       } catch (compensacionErr) {
         logStructuredError("api/viajes/masivos/cotizar", "compensacion_checkout_fallida", compensacionErr, {
@@ -318,6 +345,6 @@ export async function POST(request: NextRequest) {
     if (err instanceof ErrorServicioCotizacion) return NextResponse.json({ error: err.message }, { status: err.status });
     if (err instanceof Error && err.message === "MASIVOS_CPU_BUDGET_EXCEEDED") return NextResponse.json({ error: "La carga excedió el tiempo máximo de procesamiento. Reduce el lote e intenta de nuevo." }, { status: 503, headers: { "Retry-After": "60" } });
     if (err && typeof err === "object" && "message" in err && String(err.message).includes("RATE_LIMITED")) return NextResponse.json({ error: "Alcanzaste el límite de cotizaciones masivas. Espera un minuto y reintenta." }, { status: 429, headers: { "Retry-After": "60" } });
-    return NextResponse.json({ error: err instanceof Error ? err.message : "No se pudo cotizar la carga." }, { status: 503 });
+    return respuestaErrorInterno("api/viajes/masivos/cotizar", err, "No se pudo cotizar la carga. Intenta de nuevo.", 503);
   }
 }

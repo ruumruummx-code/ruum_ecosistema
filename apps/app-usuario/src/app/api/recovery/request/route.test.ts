@@ -3,12 +3,21 @@ import { NextRequest } from "next/server";
 
 const resetPasswordForEmailMock = vi.fn();
 
+const cookieSetMock = vi.fn();
+vi.mock("next/headers", () => ({
+  cookies: vi.fn(async () => ({ getAll: () => [], set: (...args: unknown[]) => cookieSetMock(...args) })),
+}));
+
+let cookiesCliente: { setAll: (c: { name: string; value: string; options: object }[]) => void } | null = null;
 vi.mock("@ruum/api/supabase", () => ({
-  crearClienteServidor: vi.fn(() => ({
+  crearClienteServidor: vi.fn((_url: string, _key: string, metodos: typeof cookiesCliente) => {
+    cookiesCliente = metodos;
+    return {
     auth: {
       resetPasswordForEmail: (...args: unknown[]) => resetPasswordForEmailMock(...args),
     },
-  })),
+    };
+  }),
 }));
 
 const rateLimitMock = vi.fn();
@@ -42,6 +51,17 @@ describe("POST /api/recovery/request (RUUM-USR-F4-001)", () => {
     rateLimitMock.mockResolvedValue({ allowed: true, restantes: 10 });
     resetPasswordForEmailMock.mockResolvedValue({ error: null });
     captchaMock.mockResolvedValue({ aprobado: true, configurado: false, proveedorCaido: false });
+  });
+
+  it("persiste el code_verifier PKCE en cookies de la respuesta", async () => {
+    const req = new NextRequest("https://app.ruum.mx/api/recovery/request", {
+      method: "POST",
+      body: JSON.stringify({ email: "test@ruum.mx" }),
+    });
+    const res = await POST(req);
+    expect(res.status).toBe(200);
+    cookiesCliente?.setAll([{ name: "sb-x-auth-token-code-verifier", value: "verificador", options: {} }]);
+    expect(cookieSetMock).toHaveBeenCalledWith("sb-x-auth-token-code-verifier", "verificador", {});
   });
 
   it("rechaza peticiones con CSRF inválido", async () => {

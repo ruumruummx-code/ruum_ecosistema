@@ -24,6 +24,8 @@ vi.mock("@ruum/api/services", () => ({ listarHistorialTraslado: m.historial }));
 vi.mock("@ruum/api/custody", () => ({ listarEventosCustodia: m.custodia }));
 vi.mock("@/app/viajes/[id]/obtenerDatosTraslado", () => ({ obtenerDatos: m.datos }));
 vi.mock("@/lib/pasaporte-pdf", () => ({ generarPasaportePdf: m.pdf }));
+const rateLimit = vi.hoisted(() => vi.fn());
+vi.mock("@/lib/csp-rate-limit", () => ({ rateLimitConVentana: rateLimit, getRedis: () => null }));
 
 import { GET } from "./route";
 
@@ -34,6 +36,7 @@ beforeEach(() => {
   vi.resetAllMocks();
   vi.stubEnv("NEXT_PUBLIC_SUPABASE_URL", "https://project.supabase.co");
   semaforoPdfGlobal.resetParaPruebas(2);
+  rateLimit.mockResolvedValue({ allowed: true, restantes: 5 });
 
   m.user.mockResolvedValue({ data: { user: { id: "auth" } } });
   m.perfil.mockResolvedValue("titular");
@@ -179,4 +182,12 @@ it("entrega expedientes grandes por bloques sin truncar el adjunto", async () =>
   expect(total).toBe(5 * 1024 * 1024);
   expect(bloques).toBeGreaterThan(50);
   expect(ultimo).toBe(70);
+});
+
+it("limita por usuario la generación de PDF (Redis) con 429 y Retry-After", async () => {
+  rateLimit.mockResolvedValueOnce({ allowed: false, restantes: 0, retryAfterSec: 120 });
+  const res = await llamar();
+  expect(res.status).toBe(429);
+  expect(res.headers.get("Retry-After")).toBe("120");
+  expect(m.pdf).not.toHaveBeenCalled();
 });

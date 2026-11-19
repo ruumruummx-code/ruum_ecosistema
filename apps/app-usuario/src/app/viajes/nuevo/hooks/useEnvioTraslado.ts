@@ -209,7 +209,7 @@ export function useEnvioTraslado(params: ParametrosEnvioTraslado) {
 
       try {
         const deviceId = obtenerDispositivo();
-        const respPaso = await fetch("/api/viajes", {
+        const solicitarCotizacion = (confirmarUbicacionPin: boolean) => fetch("/api/viajes", {
           method: "POST",
           headers: obtenerHeadersCsrf({
             "Content-Type": "application/json",
@@ -224,10 +224,27 @@ export function useEnvioTraslado(params: ParametrosEnvioTraslado) {
             zonaHoraria: Intl.DateTimeFormat().resolvedOptions().timeZone,
             aceptaPoliticas: aceptaPoliticasPagoCancelacion,
             paradas: datos.paradas,
+            // Permite reutilizar la cotización vigente en reintentos.
+            claveIdempotencia,
+            confirmarUbicacionPin,
           }),
         });
+        let respPaso = await solicitarCotizacion(false);
+        if (respPaso.status === 409) {
+          // El pin del mapa difiere de la dirección escrita: el usuario decide.
+          const conflicto = await respPaso.clone().json().catch(() => null) as { error?: string; codigo?: string } | null;
+          if (conflicto?.codigo === "ubicacion_requiere_confirmacion" && typeof window !== "undefined"
+            && window.confirm(`${conflicto.error ?? "El pin del mapa difiere de la dirección."}
+
+¿Usar el punto marcado en el mapa?`)) {
+            respPaso = await solicitarCotizacion(true);
+          }
+        }
         if (!respPaso.ok) {
-          const j = await respPaso.json().catch(() => null) as { error?: string; detalles?: string[] } | null;
+          const j = await respPaso.json().catch(() => null) as { error?: string; detalles?: string[]; codigo?: string } | null;
+          if (j?.codigo === "telefono_no_verificado" && typeof window !== "undefined") {
+            window.location.assign("/cuenta/verificar-telefono");
+          }
           const detalles = Array.isArray(j?.detalles) && j.detalles.length ? ` ${j.detalles.join(" ")}` : "";
           const mensaje = j?.error
             ? `${j.error}${detalles}`

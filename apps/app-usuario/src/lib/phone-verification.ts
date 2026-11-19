@@ -155,6 +155,32 @@ export async function consumirTokenTelefono(
 }
 
 /**
+ * Libera un token consumido cuando el alta no se completó (rate limit,
+ * error de Auth o timeout), para que el usuario no tenga que volver a
+ * verificar por SMS. Solo restaura el nonce si la firma sigue siendo válida y
+ * con el TTL que le quedaba; nunca extiende la vigencia original.
+ */
+export async function liberarTokenTelefono(
+  telefonoDiezDigitos: string,
+  token: string | null | undefined
+): Promise<void> {
+  if (!token || !validarTokenTelefono(telefonoDiezDigitos, token).valido) return;
+  const [, timestampStr, nonce] = token.split(":");
+  const restanteMs = parseInt(timestampStr, 10) + EXPIRACION_TOKEN_MS - Date.now();
+  if (!nonce || restanteMs <= 1_000) return;
+  const redis = getRedis();
+  if (redis) {
+    try {
+      await redis.set(`phone-token:${nonce}`, "1", { nx: true, ex: Math.floor(restanteMs / 1000) });
+    } catch (error) {
+      logStructuredWarn("auth/phone-verification", "liberar_nonce_fallido", error);
+    }
+    return;
+  }
+  if (process.env.NODE_ENV !== "production") noncesLocales.set(nonce, Date.now() + restanteMs);
+}
+
+/**
  * Determina si las credenciales de Twilio Verify están presentes en el entorno.
  */
 export function tieneTwilioVerifyConfigurado(): boolean {
@@ -174,8 +200,24 @@ function mockPermitido(): boolean {
   return process.env.NODE_ENV !== "production";
 }
 
-export function verificacionTelefonoSuspendida(): boolean {
-  return process.env.PHONE_VERIFICATION_SUSPENDED === "true";
+/**
+ * Suspensión temporal de la verificación SMS (commit 896974fe, 2026-11-18).
+ *
+ * Solo tiene efecto mientras no haya vencido PHONE_VERIFICATION_SUSPENDED_UNTIL
+ * (fecha ISO obligatoria). Sin fecha, o con la fecha vencida, la verificación
+ * vuelve a exigirse automáticamente: una suspensión «temporal» no puede
+ * quedarse activa por olvido. Las cuentas creadas así quedan con
+ * telefono_verificado = false y no pueden solicitar su primer traslado hasta
+ * verificar el teléfono (ver usuario_crea_traslado).
+ */
+export function verificacionTelefonoSuspendida(ahora: Date = new Date()): boolean {
+  if (process.env.PHONE_VERIFICATION_SUSPENDED !== "true") return false;
+  const hasta = Date.parse(process.env.PHONE_VERIFICATION_SUSPENDED_UNTIL ?? "");
+  if (!Number.isFinite(hasta)) {
+    logStructuredWarn("auth/phone-verification", "suspension_sin_fecha_reactivacion", undefined);
+    return false;
+  }
+  return ahora.getTime() < hasta;
 }
 
 export function bypassVerificacionTelefonoPermitido(): boolean {

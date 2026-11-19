@@ -179,7 +179,6 @@ describe("traslados-consulta (RUUM-USR-F8-001 CB-1, CB-3)", () => {
     it("ejecuta paginación server-side acotada por range y detecta divergencia de snapshot", async () => {
       const { obtenerListaTrasladosConsolidadaUsuario } = await import("./traslados-consulta");
 
-      // Mock de cliente Supabase con inventario de 15 traslados
       const inventarioSimulado = Array.from({ length: 15 }, (_, i) => ({
         traslado_id: `t-${i + 1}`,
         estado: i % 2 === 0 ? "servicio_cerrado" : "traslado_en_curso",
@@ -189,47 +188,51 @@ describe("traslados-consulta (RUUM-USR-F8-001 CB-1, CB-3)", () => {
       }));
 
       let rangoSolicitado: [number, number] | null = null;
+      const filtrosPagina: string[] = [];
+
+      // Builder encadenable que registra filtros y resuelve según el tipo de consulta.
+      function builderPasaportes() {
+        const estado = { head: false, filtros: [] as string[], unico: false, rango: null as [number, number] | null };
+        const b: any = {
+          select: (_cols: string, opts?: { head?: boolean }) => { estado.head = Boolean(opts?.head); return b; },
+          eq: (c: string, v: unknown) => { estado.filtros.push(`eq:${c}=${v}`); return b; },
+          in: (c: string, v: string[]) => { estado.filtros.push(`in:${c}=${v.join("|")}`); return b; },
+          is: (c: string, v: unknown) => { estado.filtros.push(`is:${c}=${v}`); return b; },
+          not: (c: string) => { estado.filtros.push(`not:${c}`); return b; },
+          or: (f: string) => { estado.filtros.push(`or:${f}`); return b; },
+          order: () => b,
+          limit: () => b,
+          maybeSingle: () => { estado.unico = true; return b; },
+          range: (from: number, to: number) => { estado.rango = [from, to]; return b; },
+          then: (resolve: (v: unknown) => void) => {
+            const f = estado.filtros.join(" ");
+            if (estado.unico) return resolve({ data: { creado_en: inventarioSimulado[0].creado_en }, error: null });
+            const cerrados = inventarioSimulado.filter((x) => x.cerrado_en).length;
+            const abiertosEnCurso = inventarioSimulado.length - cerrados;
+            const conteo = f.includes("cerrado_en.not.is.null") ? cerrados
+              : f.includes("traslado_en_curso") ? abiertosEnCurso
+              : f.includes("in:estado") || f.includes("traslado_id.is.null") ? 0
+              : inventarioSimulado.length;
+            if (estado.head) return resolve({ count: conteo, data: null, error: null });
+            rangoSolicitado = estado.rango;
+            filtrosPagina.push(...estado.filtros);
+            const [from, to] = estado.rango ?? [0, 0];
+            const slice = inventarioSimulado.slice(from, to + 1).map((item) => ({
+              ...item, usuario_id: "u-1", vehiculo_marca: "Toyota", vehiculo_modelo: "Corolla", vehiculo_anio: 2022, monto_pagado: 1000,
+            }));
+            return resolve({ data: slice, count: inventarioSimulado.length, error: null });
+          },
+        };
+        return b;
+      }
 
       const mockCliente = {
         from: (tabla: string) => {
-          if (tabla === "pasaporte_digital") {
-            const builder: any = {
-              select: (cols: string) => {
-                // Si es la consulta liviana de inventario
-                if (cols.includes("traslado_id, estado")) {
-                  return {
-                    eq: () => ({
-                      order: () => Promise.resolve({ data: inventarioSimulado, error: null }),
-                    }),
-                  };
-                }
-                // Si es la consulta paginada completa
-                return {
-                  eq: () => ({
-                    order: () => ({
-                      range: (from: number, to: number) => {
-                        rangoSolicitado = [from, to];
-                        const slice = inventarioSimulado.slice(from, to + 1).map((item) => ({
-                          ...item,
-                          usuario_id: "u-1",
-                          vehiculo_marca: "Toyota",
-                          vehiculo_modelo: "Corolla",
-                          vehiculo_anio: 2022,
-                          monto_pagado: 1000,
-                        }));
-                        return Promise.resolve({ data: slice, error: null });
-                      },
-                    }),
-                  }),
-                };
-              },
-            };
-            return builder;
-          }
+          if (tabla === "pasaporte_digital") return builderPasaportes();
           if (tabla === "traslados") {
             return {
               select: () => ({
-                in: (col: string, ids: string[]) =>
+                in: (_col: string, ids: string[]) =>
                   Promise.resolve({
                     data: ids.map((id) => ({
                       id,
@@ -271,6 +274,26 @@ describe("traslados-consulta (RUUM-USR-F8-001 CB-1, CB-3)", () => {
       expect(res.totalPaginas).toBe(3);
       expect(res.snapshotDivergente).toBe(true);
       expect(res.snapshotVersion).toBe(inventarioSimulado[0].creado_en);
+      // Conteos exactos por pestaña, no derivados de la página.
+      expect(res.conteos.todos).toBe(15);
+      expect(res.conteos.finalizados).toBe(8);
+      expect(res.conteos.activos).toBe(7);
+      expect(res.conteos.cancelados).toBe(0);
+    });
+
+    it("aplica pestaña y búsqueda en la consulta del servidor", async () => {
+      const { obtenerListaTrasladosConsolidadaUsuario } = await import("./traslados-consulta");
+      const filtros: string[] = [];
+      const b: any = {};
+      for (const m of ["select", "eq", "in", "is", "not", "or", "order", "limit", "maybeSingle", "range"]) {
+        b[m] = (...args: unknown[]) => { filtros.push(`${m}:${JSON.stringify(args)}`); return b; };
+      }
+      b.then = (resolve: (v: unknown) => void) => resolve({ data: [], count: 0, error: null });
+      const cliente = { from: () => b };
+      await obtenerListaTrasladosConsolidadaUsuario(cliente as any, "u-1", { tab: "cancelados", buscar: "Toluca, (x)" });
+      const texto = filtros.join(" ");
+      expect(texto).toContain("servicio_cancelado");
+      expect(texto).toContain("destino_ciudad.ilike.*Toluca x*");
     });
   });
 });

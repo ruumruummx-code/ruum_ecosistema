@@ -1,5 +1,7 @@
 import { createClient } from "npm:@supabase/supabase-js@2.47.16";
 import { conciliarCheckouts } from "../_shared/stripe-checkouts.ts";
+import { crearStripe } from "../_shared/stripe.ts";
+import { cancelarIntentsPendientes, procesarReembolsosPendientes } from "../_shared/reembolsos.ts";
 import { datosVerificacion, modoStripe, obtenerIntentoStripe, obtenerReembolsoCompletoStripe } from "../_shared/stripe-verificacion.ts";
 
 const db = createClient(Deno.env.get("SUPABASE_URL") ?? "", Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "");
@@ -57,7 +59,22 @@ Deno.serve(async (req: Request) => {
     }
     const checkouts = await conciliarCheckouts(db, clave);
     errores.push(...checkouts.errores);
-    const resultado = { verificados, errores, livemode: modo, candidatos: filas.length, checkouts_confirmados: checkouts.confirmados, checkouts_expirados: checkouts.expirados };
+
+    // Traslados cancelados: PaymentIntents aún vivos y reembolsos encolados
+    // (cancelación sin respuesta de Stripe, cobros tardíos, fallos previos).
+    const stripe = crearStripe(clave);
+    const vivos = await db.from("pagos").select("stripe_payment_intent_id, traslados!inner(estado)")
+      .eq("estado", "pendiente").neq("metodo", "cargo_cancelacion").not("stripe_payment_intent_id", "is", null)
+      .eq("traslados.estado", "servicio_cancelado").limit(50);
+    if (vivos.error) errores.push({ intent_id: "-", codigo: "cancelled_intents_query_failed" });
+    const intentsVivos = (vivos.data ?? []).map((fila) => fila.stripe_payment_intent_id as string);
+    const noCancelados = await cancelarIntentsPendientes(stripe, intentsVivos);
+    for (const intentId of noCancelados) errores.push({ intent_id: intentId, codigo: "cancelled_transfer_intent_alive" });
+    const reembolsos = await procesarReembolsosPendientes(db, stripe, { limite: 50 });
+    for (const fallo of reembolsos.fallidos) errores.push({ intent_id: fallo.id, codigo: fallo.codigo });
+
+    const resultado = { verificados, errores, livemode: modo, candidatos: filas.length, checkouts_confirmados: checkouts.confirmados, checkouts_expirados: checkouts.expirados,
+      intents_cancelados: intentsVivos.length - noCancelados.length, reembolsos_completados: reembolsos.completados };
     const update = await db.from("stripe_conciliacion_ejecuciones").update({ estado: errores.length ? "fallida" : "completada", finalizada_en: new Date().toISOString(), resultado }).eq("id",id);
     if (update.error) throw new Error("reconciliation_result_write_failed");
     return Response.json(resultado, { status: errores.length ? 502 : 200 });

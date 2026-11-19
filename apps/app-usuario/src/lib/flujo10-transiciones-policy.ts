@@ -1,4 +1,4 @@
-import { logStructuredWarn, logStructuredInfo } from "@/lib/logger";
+import { logStructuredWarn } from "@/lib/logger";
 import { clasificarEstadoTraslado, puedeEjecutarAccionFlujo10 } from "./estados-traslado-policy";
 import { calcularCargoCancelacion } from "@ruum/shared/rules";
 import type { Database } from "@ruum/shared/types";
@@ -351,21 +351,3 @@ export function calcularPenalizacionCancelacionF10(
   };
 }
 
-/**
- * Payload estructurado de auditoría de acciones de traslado (CB-3 / T10 / CA-8).
- */
-export interface RegistroAuditoriaFlujo10 {
-  trasladoId: string;
-  usuarioId: string;
-  accion: AccionFlujo10;
-  estadoAnterior: string;
-  estadoNuevo: string;
-  timestamp: string;
-  metadata?: Record<string, unknown>;
-}
-
-export function registrarAuditoriaAccionF10(registro: RegistroAuditoriaFlujo10) {
-  logStructuredInfo("flujo10/auditoria", "accion_traslado_ejecutada", {
-    ...registro,
-  });
-}

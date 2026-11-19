@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { crearClienteServidor } from "@ruum/api/supabase";
 import { normalizarCorreoRegistro } from "@/lib/registro-usuario";
-import { obtenerIp, rateLimitConVentana } from "@/lib/csp-rate-limit";
+import { consultarFallos, obtenerIp, rateLimitConVentana, registrarFallo, reiniciarFallos } from "@/lib/csp-rate-limit";
 import { verificarCsrfORechazar } from "@/lib/csrf";
 import { logStructuredInfo, logStructuredWarn } from "@/lib/logger";
 import { hashIdentificador, LOGIN_LIMITES, LOGIN_VENTANA_MS, requiereCaptcha, verificarCaptchaAdaptativo } from "@/lib/login-policy";
@@ -37,12 +37,17 @@ export async function POST(request: NextRequest) {
 
   const ip = obtenerIp(request);
   const dispositivo = request.headers.get("x-device-id")?.trim().slice(0, 128) || null;
-  const dimensiones = await Promise.all([
+  const emailHash = hashIdentificador(correo);
+  // IP y dispositivo cuentan peticiones; el correo cuenta solo contraseñas
+  // rechazadas, para que un tercero no pueda bloquear una cuenta ajena con
+  // unas cuantas solicitudes.
+  const [porIp, porDispositivo, fallosEmail] = await Promise.all([
     rateLimitConVentana(ip, "auth-login-ip", LOGIN_LIMITES.ip, LOGIN_VENTANA_MS),
-    rateLimitConVentana(hashIdentificador(correo), "auth-login-email", LOGIN_LIMITES.email, LOGIN_VENTANA_MS),
     rateLimitConVentana(dispositivo ? hashIdentificador(dispositivo) : null, "auth-login-device", LOGIN_LIMITES.dispositivo, LOGIN_VENTANA_MS),
+    consultarFallos(emailHash, "auth-login-email-fallos", LOGIN_LIMITES.email),
   ]);
-  const [porIp, porEmail, porDispositivo] = dimensiones;
+  const porEmail = { allowed: !fallosEmail.bloqueado, restantes: fallosEmail.restantes, retryAfterSec: fallosEmail.retryAfterSec };
+  const dimensiones = [porIp, porEmail, porDispositivo];
   const retryAfter = Math.max(porIp.retryAfterSec ?? 0, porEmail.retryAfterSec ?? 0, porDispositivo.retryAfterSec ?? 0);
   if (dimensiones.some((dimension) => !dimension.allowed)) {
     logStructuredWarn("auth/login", "login_rate_limited", undefined, { dimensiones: ["ip", "email", "dispositivo"] });
@@ -72,9 +77,15 @@ export async function POST(request: NextRequest) {
     });
     const { data, error } = await conTimeout(cliente.auth.signInWithPassword({ email: correo, password }), 10_000);
     if (error || !data.session) {
+      const fallos = await registrarFallo(emailHash, "auth-login-email-fallos", LOGIN_VENTANA_MS);
+      if (fallos === LOGIN_LIMITES.email) {
+        // Evento de seguridad para alertar al equipo/titular (sin PII: hash).
+        logStructuredWarn("auth/login", "login_bloqueo_temporal_correo", undefined, { emailHash, fallos });
+      }
       logStructuredWarn("auth/login", "login_fallido", undefined, { motivo: "credenciales_rechazadas" });
       return NextResponse.json({ error: MENSAJE_NEUTRO }, { status: 401, headers: { "Cache-Control": "no-store" } });
     }
+    await reiniciarFallos(emailHash, "auth-login-email-fallos");
     logStructuredInfo("auth/login", "login_exitoso", { destinoProtegido: true });
     return NextResponse.json({ ok: true }, { headers: { "Cache-Control": "no-store" } });
   } catch (error) {

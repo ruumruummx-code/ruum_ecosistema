@@ -5,7 +5,7 @@ import { aceptarCotizacionUsuario } from "@ruum/api/services";
 import { Aviso, Button } from "@ruum/ui";
 import { crearClienteNavegador } from "@/lib/supabase-browser";
 import { useTrasladoRealtime } from "@/state/AppStateProvider";
-import { validarTransicionFlujo10, registrarAuditoriaAccionF10 } from "@/lib/flujo10-transiciones-policy";
+import { validarTransicionFlujo10 } from "@/lib/flujo10-transiciones-policy";
 
 export function AceptarCotizacion({
   trasladoId,
@@ -36,17 +36,8 @@ export function AceptarCotizacion({
     actualizar({ aceptandoCotizacion: true, errorAceptacion: null });
     try {
       await aceptarCotizacionUsuario(crearClienteNavegador(), trasladoId);
+      // La auditoría la escribe usuario_acepta_cotizacion en registro_auditoria.
       actualizar({ cotizacionAceptada: true, aceptandoCotizacion: false });
-
-      // CB-3 / T10 / CA-8: Registro de auditoría
-      registrarAuditoriaAccionF10({
-        trasladoId,
-        usuarioId: "cliente_sesion",
-        accion: "aceptar_cotizacion",
-        estadoAnterior: estadoActual ?? "cotizacion_generada",
-        estadoNuevo: tipoPago === "anticipado" ? "cotizacion_aceptada" : "servicio_confirmado",
-        timestamp: new Date().toISOString(),
-      });
 
       router.refresh();
     } catch (e) {

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Aviso, MobileShell, MobileCard } from "@ruum/ui";
@@ -8,6 +8,7 @@ import { TEXTOS_CARGANDO } from "@ruum/shared/constants";
 import { traducirErrorAuth } from "@ruum/shared/utils";
 import { registrarEventoUx } from "../../lib/analytics";
 import { obtenerHeadersCsrf } from "../../lib/csrf";
+import { VerificacionHumana } from "../../components/VerificacionHumana";
 
 function IconoCorreo({ className = "size-4 text-[#566889]" }: { className?: string }) {
   return (
@@ -88,6 +89,9 @@ export function FormularioRecuperarPassword({
   const [error, setError] = useState<string | null>(errorInicial);
   const [errorCampo, setErrorCampo] = useState<string | null>(null);
   const [segundosRestantes, setSegundosRestantes] = useState(30);
+  const [captchaRequerido, setCaptchaRequerido] = useState(false);
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const recibirToken = useCallback((token: string | null) => setCaptchaToken(token), []);
   const correoRef = useRef<HTMLInputElement>(null);
   const ultimoEnvioRef = useRef<number>(0);
 
@@ -150,12 +154,17 @@ export function FormularioRecuperarPassword({
           "Content-Type": "application/json",
           ...headersCsrf,
         },
-        body: JSON.stringify({ email: correo }),
+        body: JSON.stringify({ email: correo, captchaToken: captchaToken ?? undefined }),
       });
 
       const data = (await res.json().catch(() => ({}))) as { error?: string; captchaRequerido?: boolean };
 
       if (res.status === 428 && data.captchaRequerido) {
+        // Se muestra el widget; el token es de un solo uso y el límite de
+        // 30 s no aplica al reintento tras completar la verificación.
+        setCaptchaRequerido(true);
+        setCaptchaToken(null);
+        ultimoEnvioRef.current = 0;
         setError(data.error || "Por seguridad, confirma la verificación humana para continuar.");
         registrarEventoUx("recuperacion_error", { motivo: "captcha_requerido" });
         return;
@@ -165,6 +174,8 @@ export function FormularioRecuperarPassword({
         throw new Error(data.error || "No pudimos enviar el correo. Intenta de nuevo.");
       }
 
+      setCaptchaRequerido(false);
+      setCaptchaToken(null);
       setEnviado(true);
       registrarEventoUx("recuperacion_exitosa");
     } catch (err) {
@@ -346,6 +357,8 @@ export function FormularioRecuperarPassword({
                   )}
                 </div>
 
+                {captchaRequerido && <VerificacionHumana onToken={recibirToken} />}
+
                 {error && (
                   <div role="alert" aria-atomic="true">
                     <Aviso tono="danger">{error}</Aviso>
@@ -354,7 +367,7 @@ export function FormularioRecuperarPassword({
 
                 <button
                   type="submit"
-                  disabled={enviando}
+                  disabled={enviando || (captchaRequerido && !captchaToken)}
                   className="mt-2 flex h-[48px] w-full items-center justify-center gap-2 rounded-2xl bg-[#0066FF] px-5 text-[15px] font-bold text-white shadow-sm transition hover:bg-[#0052cc] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 dark:bg-[#0066FF] dark:hover:bg-[#1a75ff] sm:h-[50px]"
                 >
                   {enviando ? TEXTOS_CARGANDO.enviando : "Enviar enlace de recuperación"}

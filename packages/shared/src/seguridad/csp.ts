@@ -17,6 +17,8 @@ export const CSP_ORIGINS = {
   mapbox: ["https://*.mapbox.com", "https://api.mapbox.com", "https://events.mapbox.com"],
   sentry: ["https://*.sentry.io"],
   didit: ["https://verify.didit.me", "https://*.didit.me", "https://apx.didit.me"],
+  /** Cloudflare Turnstile (CAPTCHA adaptativo de login y recuperación). */
+  turnstile: ["https://challenges.cloudflare.com"],
   stripe: {
     script: ["https://js.stripe.com", "https://*.stripe.com"],
     connect: [
@@ -132,9 +134,9 @@ export function buildCspEstatico(
 export const CSP_PRESETS: Record<"conductor" | "usuario" | "panel", CspExtras> = {
   conductor: { script: CSP_ORIGINS.sentry },
   usuario: {
-    script: [...CSP_ORIGINS.sentry, ...CSP_ORIGINS.stripe.script],
-    connect: CSP_ORIGINS.stripe.connect,
-    frame: CSP_ORIGINS.stripe.frame,
+    script: [...CSP_ORIGINS.sentry, ...CSP_ORIGINS.stripe.script, ...CSP_ORIGINS.turnstile],
+    connect: [...CSP_ORIGINS.stripe.connect, ...CSP_ORIGINS.turnstile],
+    frame: [...CSP_ORIGINS.stripe.frame, ...CSP_ORIGINS.turnstile],
     img: CSP_ORIGINS.stripe.img,
   },
   panel: { script: CSP_ORIGINS.sentry },

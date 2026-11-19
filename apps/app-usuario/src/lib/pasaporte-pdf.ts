@@ -134,6 +134,22 @@ export async function generarPasaportePdf(
   if (datos.calificacion) { campo("Estrellas", `${datos.calificacion.estrellas}/5`); campo("Comentario", datos.calificacion.comentario); campo("Fecha", fecha(datos.calificacion.calificado_en)); }
   else linea("Sin evaluación registrada.");
 
+  // Descarga de evidencias en paralelo con un límite de 4 simultáneas (antes
+  // era secuencial: hasta 3.5 s por imagen contra un maxDuration de 60 s).
+  const fotosPorId = new Map<string, Uint8Array | null>();
+  const pendientes = datos.evidencia.filter((foto) => foto.url_visual);
+  let siguiente = 0;
+  await Promise.all(Array.from({ length: Math.min(4, pendientes.length) }, async () => {
+    while (siguiente < pendientes.length) {
+      const foto = pendientes[siguiente++];
+      try {
+        fotosPorId.set(foto.id, await cargarFoto(foto.url_visual!));
+      } catch {
+        fotosPorId.set(foto.id, null);
+      }
+    }
+  }));
+
   let incorporadas = 0;
   for (const foto of datos.evidencia) {
     nueva();
@@ -142,14 +158,7 @@ export async function generarPasaportePdf(
     campo("Sincronizada", foto.sincronizada ? "Sí" : "No");
     if (foto.conflicto) linea("Advertencia: evidencia marcada con conflicto.", true);
 
-    let bytes: Uint8Array | null = null;
-    if (foto.url_visual) {
-      try {
-        bytes = await cargarFoto(foto.url_visual);
-      } catch {
-        bytes = null;
-      }
-    }
+    const bytes = fotosPorId.get(foto.id) ?? null;
 
     let imagen = null;
     if (bytes && bytes.length > 0) {

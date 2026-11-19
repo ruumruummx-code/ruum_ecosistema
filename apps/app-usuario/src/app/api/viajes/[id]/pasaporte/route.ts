@@ -12,6 +12,9 @@ import {
   SemaforoPdfOcupadoError,
 } from "@/lib/pdf-concurrency-semaphore";
 import { logStructuredWarn } from "@/lib/logger";
+import { getRedis, rateLimitConVentana } from "@/lib/csp-rate-limit";
+import { respuestaErrorInterno } from "@/lib/errores-api";
+import { createHash } from "node:crypto";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -22,7 +25,7 @@ const MAX_BYTES_POR_IMAGEN = 5 * 1024 * 1024; // 5 MB
 const MAX_BYTES_TOTAL_IMAGENES = 30 * 1024 * 1024; // 30 MB
 const TIMEOUT_DESCARGA_MS = 3500; // 3.5 segundos
 
-export async function GET(_req: Request, { params }: { params: Promise<{ id: string }> }) {
+export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
 
   // Validación UUID sintáctica (anti-IDOR: rechaza formatos ajenos sin filtrar existencia)
@@ -36,6 +39,16 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
     return NextResponse.json({ error: "Inicia sesión para exportar." }, { status: 401 });
   }
 
+  // Rate limit por usuario en Redis (el semáforo es por instancia y no
+  // protege de un usuario que reparte peticiones entre instancias).
+  const limite = await rateLimitConVentana(`uid:${user.id}`, "pasaporte-pdf", 6, 10 * 60 * 1000);
+  if (!limite.allowed) {
+    return NextResponse.json(
+      { error: "Generaste varios PDF seguidos. Espera unos minutos antes de volver a intentarlo." },
+      { status: 429, headers: { "Retry-After": String(limite.retryAfterSec ?? 60), "Cache-Control": "private, no-store" } }
+    );
+  }
+
   try {
     // CB-3 / T9 / CA-7: Ownership/RLS estricto verificado contra sesión
     const perfil = await obtenerUsuarioIdPorAuth(cliente, user.id);
@@ -44,6 +57,57 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
     if (!perfil || !datos.pasaporte || datos.pasaporte.usuario_id !== perfil) {
       // Anti-IDOR: responde 404 unificado (no filtra si el registro existe para otro usuario)
       return NextResponse.json({ error: "Traslado no encontrado." }, { status: 404 });
+    }
+
+    // Caché por versión del traslado. El PDF contiene datos personales, así
+    // que la respuesta sigue siendo `no-store` en el navegador; la reutilización
+    // ocurre en el servidor (Redis, 10 min, solo PDF ≤ 900 KB) con la versión
+    // como clave: una descarga repetida no regenera ni vuelve a bajar fotos.
+    const etag = `"pp-${createHash("sha256").update(JSON.stringify([
+      id,
+      datos.pasaporte.actualizado_en,
+      datos.pasaporte.estado,
+      (datos.evidencia ?? []).map((e) => [e.id, e.sincronizada]),
+      datos.pagos?.length ?? 0,
+      datos.incidencias?.length ?? 0,
+      datos.disputas?.length ?? 0,
+      datos.calificacion?.calificado_en ?? null,
+    ])).digest("hex").slice(0, 32)}"`;
+    if (req.headers.get("if-none-match") === etag) {
+      return new Response(null, { status: 304, headers: { ETag: etag, "Cache-Control": "private, no-store" } });
+    }
+    const redis = getRedis();
+    const claveCache = `pasaporte-pdf:${perfil}:${etag.replaceAll('"', "")}`;
+    const respuestaPdf = (contenido: Uint8Array) => {
+      let offsetStream = 0;
+      const cuerpo = new ReadableStream<Uint8Array>({
+        pull(controller) {
+          if (offsetStream >= contenido.length) {
+            controller.close();
+            return;
+          }
+          const fin = Math.min(offsetStream + 64 * 1024, contenido.length);
+          controller.enqueue(contenido.subarray(offsetStream, fin));
+          offsetStream = fin;
+        },
+      });
+      return new Response(cuerpo, {
+        headers: {
+          "Content-Type": "application/pdf",
+          "Content-Disposition": `attachment; filename="pasaporte-${id}.pdf"`,
+          "Cache-Control": "private, no-store",
+          ETag: etag,
+          "X-Content-Type-Options": "nosniff",
+        },
+      });
+    };
+    if (redis) {
+      try {
+        const cacheado = await redis.get<string>(claveCache);
+        if (typeof cacheado === "string" && cacheado.length > 0) return respuestaPdf(Buffer.from(cacheado, "base64"));
+      } catch {
+        // La caché nunca bloquea la generación.
+      }
     }
 
     // CB-3 / T10 / CA-8: Verificación fail-closed de permisos de tarifa
@@ -155,30 +219,16 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
         { puedeVerTarifa }
       );
 
-      // CB-3 / T11 / CA-9: Si la generación concluye íntegramente, se transmite por streaming
-      // en bloques de 64 KB. Si hubiera fallado durante la construcción, se captura en el catch
-      // superior y devuelve JSON 503 sin emitir artefactos parciales corruptos ni PII.
-      let offsetStream = 0;
-      const cuerpo = new ReadableStream<Uint8Array>({
-        pull(controller) {
-          if (offsetStream >= bytes.length) {
-            controller.close();
-            return;
-          }
-          const fin = Math.min(offsetStream + 64 * 1024, bytes.length);
-          controller.enqueue(bytes.subarray(offsetStream, fin));
-          offsetStream = fin;
-        },
-      });
-
-      return new Response(cuerpo, {
-        headers: {
-          "Content-Type": "application/pdf",
-          "Content-Disposition": `attachment; filename="pasaporte-${id}.pdf"`,
-          "Cache-Control": "private, no-store",
-          "X-Content-Type-Options": "nosniff",
-        },
-      });
+      if (redis && bytes.length <= 900 * 1024) {
+        try {
+          await redis.set(claveCache, Buffer.from(bytes).toString("base64"), { ex: 600 });
+        } catch {
+          // best effort
+        }
+      }
+      // CB-3 / T11 / CA-9: se transmite por bloques de 64 KB solo si la
+      // generación concluyó íntegramente.
+      return respuestaPdf(bytes);
     });
   } catch (error) {
     if (error instanceof SemaforoPdfOcupadoError) {
@@ -194,14 +244,8 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
       );
     }
 
-    return NextResponse.json(
-      {
-        error: error instanceof Error ? error.message : "No pudimos generar el pasaporte completo.",
-      },
-      {
-        status: 503,
-        headers: { "Cache-Control": "private, no-store" },
-      }
-    );
+    return respuestaErrorInterno("api/viajes/pasaporte", error, "No pudimos generar el pasaporte completo.", 503, {
+      "Cache-Control": "private, no-store",
+    });
   }
 }

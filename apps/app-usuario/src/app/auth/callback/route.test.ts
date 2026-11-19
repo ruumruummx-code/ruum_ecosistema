@@ -14,6 +14,7 @@ vi.mock("next/headers", () => ({
 const getUserMock = vi.fn();
 const exchangeCodeForSessionMock = vi.fn();
 const verifyOtpMock = vi.fn();
+const signOutMock = vi.fn(async (..._args: unknown[]) => ({ error: null }));
 
 vi.mock("@ruum/api/supabase", () => ({
   crearClienteServidor: vi.fn((_url: string, _key: string, opts: { setAll: (c: Array<{ name: string; value: string; options: Record<string, unknown> }>) => void }) => {
@@ -23,6 +24,7 @@ vi.mock("@ruum/api/supabase", () => ({
         getUser: (...args: unknown[]) => getUserMock(...args),
         exchangeCodeForSession: (...args: unknown[]) => exchangeCodeForSessionMock(...args),
         verifyOtp: (...args: unknown[]) => verifyOtpMock(...args),
+        signOut: (...args: unknown[]) => signOutMock(...args),
       },
     };
   }),
@@ -35,6 +37,23 @@ describe("GET /auth/callback", () => {
     vi.clearAllMocks();
     process.env.NEXT_PUBLIC_SUPABASE_URL = "https://example.supabase.co";
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY = "anon-key";
+  });
+
+  it("no reemplaza en silencio la sesión abierta con un enlace de confirmación de otra cuenta (login CSRF)", async () => {
+    getUserMock.mockResolvedValueOnce({ data: { user: { id: "victima", email: "victima@ruum.mx" } } });
+    exchangeCodeForSessionMock.mockResolvedValueOnce({ data: { user: { id: "atacante" } }, error: null });
+
+    const res = await GET(new NextRequest("https://app.ruum.mx/auth/callback?code=pkce-code&next=%2F"));
+    expect(res.headers.get("location")).toBe("https://app.ruum.mx/login?reason=cuenta_distinta");
+    expect(signOutMock).toHaveBeenCalledWith({ scope: "local" });
+  });
+
+  it("confirma normalmente cuando el enlace es de la misma cuenta", async () => {
+    getUserMock.mockResolvedValueOnce({ data: { user: { id: "misma" } } });
+    exchangeCodeForSessionMock.mockResolvedValueOnce({ data: { user: { id: "misma" } }, error: null });
+    const res = await GET(new NextRequest("https://app.ruum.mx/auth/callback?code=pkce-code&next=%2F"));
+    expect(res.headers.get("location")).toBe("https://app.ruum.mx/");
+    expect(signOutMock).not.toHaveBeenCalled();
   });
 
   it("redirige a error cuando falta configuración de Supabase", async () => {

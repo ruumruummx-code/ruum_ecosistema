@@ -1,0 +1,212 @@
+[
+  {
+    "width": 390,
+    "route": "/login",
+    "status": 200,
+    "finalUrl": "https://www.usuario.ruumruum-moviliax.online/login",
+    "elapsedMs": 6403,
+    "title": "Ruum Ruum",
+    "h1": [
+      "Movilidad que conecta operaciones"
+    ],
+    "horizontalOverflow": false,
+    "inputs": [
+      {
+        "type": "email",
+        "name": "email",
+        "id": "login-email"
+      },
+      {
+        "type": "password",
+        "name": "password",
+        "id": "login-password"
+      },
+      {
+        "type": "checkbox",
+        "name": "",
+        "id": ""
+      }
+    ],
+    "errors": []
+  },
+  {
+    "width": 390,
+    "route": "/registro",
+    "status": 200,
+    "finalUrl": "https://www.usuario.ruumruum-moviliax.online/registro",
+    "elapsedMs": 1830,
+    "title": "Ruum Ruum",
+    "h1": [
+      "Crear cuenta"
+    ],
+    "horizontalOverflow": false,
+    "inputs": [
+      {
+        "type": "text",
+        "name": "",
+        "id": "nombre"
+      },
+      {
+        "type": "text",
+        "name": "",
+        "id": "apellido"
+      },
+      {
+        "type": "tel",
+        "name": "",
+        "id": "telefono"
+      }
+    ],
+    "errors": []
+  },
+  {
+    "width": 390,
+    "route": "/legal/privacidad",
+    "status": 200,
+    "finalUrl": "https://www.usuario.ruumruum-moviliax.online/legal/privacidad",
+    "elapsedMs": 1535,
+    "title": "Aviso de privacidad — Ruum Ruum",
+    "h1": [
+      "Aviso de privacidad",
+      "Aviso de privacidad"
+    ],
+    "horizontalOverflow": false,
+    "inputs": [],
+    "errors": []
+  },
+  {
+    "width": 390,
+    "route": "/viajes/nuevo",
+    "status": 200,
+    "finalUrl": "https://www.usuario.ruumruum-moviliax.online/login?next=%2Fviajes%2Fnuevo&reason=authentication_required",
+    "elapsedMs": 1692,
+    "title": "Ruum Ruum",
+    "h1": [
+      "Movilidad que conecta operaciones"
+    ],
+    "horizontalOverflow": false,
+    "inputs": [
+      {
+        "type": "email",
+        "name": "email",
+        "id": "login-email"
+      },
+      {
+        "type": "password",
+        "name": "password",
+        "id": "login-password"
+      },
+      {
+        "type": "checkbox",
+        "name": "",
+        "id": ""
+      }
+    ],
+    "errors": []
+  },
+  {
+    "width": 1440,
+    "route": "/login",
+    "status": 200,
+    "finalUrl": "https://www.usuario.ruumruum-moviliax.online/login",
+    "elapsedMs": 3470,
+    "title": "Ruum Ruum",
+    "h1": [
+      "Movilidad que conecta operaciones"
+    ],
+    "horizontalOverflow": false,
+    "inputs": [
+      {
+        "type": "email",
+        "name": "email",
+        "id": "login-email"
+      },
+      {
+        "type": "password",
+        "name": "password",
+        "id": "login-password"
+      },
+      {
+        "type": "checkbox",
+        "name": "",
+        "id": ""
+      }
+    ],
+    "errors": []
+  },
+  {
+    "width": 1440,
+    "route": "/registro",
+    "status": 200,
+    "finalUrl": "https://www.usuario.ruumruum-moviliax.online/registro",
+    "elapsedMs": 1601,
+    "title": "Ruum Ruum",
+    "h1": [
+      "Crear cuenta"
+    ],
+    "horizontalOverflow": false,
+    "inputs": [
+      {
+        "type": "text",
+        "name": "",
+        "id": "nombre"
+      },
+      {
+        "type": "text",
+        "name": "",
+        "id": "apellido"
+      },
+      {
+        "type": "tel",
+        "name": "",
+        "id": "telefono"
+      }
+    ],
+    "errors": []
+  },
+  {
+    "width": 1440,
+    "route": "/legal/privacidad",
+    "status": 200,
+    "finalUrl": "https://www.usuario.ruumruum-moviliax.online/legal/privacidad",
+    "elapsedMs": 1613,
+    "title": "Aviso de privacidad — Ruum Ruum",
+    "h1": [
+      "Aviso de privacidad",
+      "Aviso de privacidad"
+    ],
+    "horizontalOverflow": false,
+    "inputs": [],
+    "errors": []
+  },
+  {
+    "width": 1440,
+    "route": "/viajes/nuevo",
+    "status": 200,
+    "finalUrl": "https://www.usuario.ruumruum-moviliax.online/login?next=%2Fviajes%2Fnuevo&reason=authentication_required",
+    "elapsedMs": 1899,
+    "title": "Ruum Ruum",
+    "h1": [
+      "Movilidad que conecta operaciones"
+    ],
+    "horizontalOverflow": false,
+    "inputs": [
+      {
+        "type": "email",
+        "name": "email",
+        "id": "login-email"
+      },
+      {
+        "type": "password",
+        "name": "password",
+        "id": "login-password"
+      },
+      {
+        "type": "checkbox",
+        "name": "",
+        "id": ""
+      }
+    ],
+    "errors": []
+  }
+]

@@ -1,3 +1,4 @@
+import { respuestaErrorInterno } from "@/lib/errores-api";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { crearClienteServidor } from "@/lib/supabase-server";
@@ -74,7 +75,7 @@ export async function GET(request: NextRequest) {
         cargaId: idValidado.data,
         usuarioId: user.id,
       });
-      return NextResponse.json({ error: err instanceof Error ? err.message : "Error al consultar la carga pendiente." }, { status: 500 });
+      return respuestaErrorInterno("api/viajes/masivos/pendientes", err, "Error al consultar la carga pendiente.");
     }
   }
 
@@ -97,7 +98,7 @@ export async function GET(request: NextRequest) {
     logStructuredError("api/viajes/masivos/pendientes", "listar_cargas_pendientes_fallido", err, {
       usuarioId: user.id,
     });
-    return NextResponse.json({ error: err instanceof Error ? err.message : "Error al listar cargas pendientes." }, { status: 500 });
+    return respuestaErrorInterno("api/viajes/masivos/pendientes", err, "Error al listar cargas pendientes.");
   }
 }
 
@@ -153,6 +154,6 @@ export async function DELETE(request: NextRequest) {
       cargaId: idValidado.data,
       usuarioId: user.id,
     });
-    return NextResponse.json({ error: err instanceof Error ? err.message : "Error al descartar la carga." }, { status: 500 });
+    return respuestaErrorInterno("api/viajes/masivos/pendientes", err, "Error al descartar la carga.");
   }
 }

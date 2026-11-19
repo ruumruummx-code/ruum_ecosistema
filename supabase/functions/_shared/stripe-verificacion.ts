@@ -1,3 +1,4 @@
+import { STRIPE_API_VERSION } from "./stripe.ts";
 export interface IntentoStripe {
   id: string; status: string; amount: number; amount_received: number;
   currency: string; livemode: boolean; metadata: Record<string,string>;
@@ -8,7 +9,7 @@ export async function obtenerReembolsoCompletoStripe(clave: string, intent: Inte
   if (intent.status !== "succeeded" || !intent.latest_charge) return null;
   if (!/^ch_[a-zA-Z0-9]+$/.test(intent.latest_charge)) throw new Error("stripe_charge_id_invalid");
   const response = await fetch(`https://api.stripe.com/v1/charges/${intent.latest_charge}`, {
-    headers: { Authorization: `Bearer ${clave}`, "Stripe-Version": "2026-09-30.endive" }, signal: AbortSignal.timeout(20000)
+    headers: { Authorization: `Bearer ${clave}`, "Stripe-Version": STRIPE_API_VERSION }, signal: AbortSignal.timeout(20000)
   });
   if (!response.ok) throw new Error("stripe_charge_retrieve_failed");
   const charge = await response.json();
@@ -25,7 +26,7 @@ export function modoStripe(clave: string): boolean {
 export async function obtenerIntentoStripe(clave: string, id: string): Promise<IntentoStripe> {
   if (!/^pi_[a-zA-Z0-9]+$/.test(id)) throw new Error("stripe_intent_id_invalid");
   const res = await fetch(`https://api.stripe.com/v1/payment_intents/${id}`, {
-    headers: { Authorization: `Bearer ${clave}`, "Stripe-Version": "2026-09-30.endive" },
+    headers: { Authorization: `Bearer ${clave}`, "Stripe-Version": STRIPE_API_VERSION },
     signal: AbortSignal.timeout(20_000)
   });
   if (!res.ok) throw new Error(`stripe_retrieve_http_${res.status}`);

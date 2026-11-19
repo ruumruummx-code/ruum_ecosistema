@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useId, useRef, useState } from "react";
+import { ETIQUETA_TIPO_VEHICULO } from "@ruum/shared/constants";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { CarFront, ChevronLeft, ChevronRight, CircleDollarSign, Clock3, Plus, Search, SlidersHorizontal } from "lucide-react";
@@ -41,7 +42,24 @@ export interface MisTrasladosProps {
   gastoConfirmadoServidor?: number;
   /** Refresca los datos del servidor cada 30 s y al recuperar foco/red. */
   autoActualizar?: boolean;
+  /**
+   * Paginación y filtros resueltos en el servidor (/mis-viajes?tab=&buscar=&tipo=&fecha=&pagina=).
+   * Sin esta prop la pantalla filtra en cliente (pruebas y vistas embebidas).
+   */
+  servidor?: {
+    conteos: Record<PestañaFiltro, number>;
+    totalItems: number;
+    pagina: number;
+    totalPaginas: number;
+    limite: number;
+    tipo?: string;
+    fecha?: string;
+  };
 }
+
+const ETIQUETA_A_TIPO: Record<string, string> = Object.fromEntries(
+  Object.entries(ETIQUETA_TIPO_VEHICULO).map(([tipo, etiqueta]) => [etiqueta, tipo]),
+);
 
 /**
  * Mis traslados — una sola pantalla para móvil y escritorio (sistema base v2).
@@ -54,8 +72,18 @@ export function MisTraslados({
   busquedaInicial = "",
   gastoConfirmadoServidor,
   autoActualizar = true,
+  servidor,
 }: MisTrasladosProps) {
-  const g = useGestionTraslados<PestañaFiltro>({ traslados, pestanaInicial, busquedaInicial, gastoConfirmadoServidor });
+  const g = useGestionTraslados<PestañaFiltro>({
+    traslados,
+    pestanaInicial,
+    busquedaInicial,
+    gastoConfirmadoServidor,
+    filtradoEnServidor: Boolean(servidor),
+    conteosServidor: servidor?.conteos,
+    tipoInicial: servidor?.tipo ? (ETIQUETA_TIPO_VEHICULO as Record<string, string>)[servidor.tipo] ?? "" : "",
+    fechaInicial: servidor?.fecha ?? "todas",
+  });
   const router = useRouter();
   const conPanel = useMediaQuery(QUERY_PANEL);
   const raiz = useRef<HTMLDivElement>(null);
@@ -87,14 +115,39 @@ export function MisTraslados({
     setPanelCerrado(false);
   };
 
-  const paginas = Math.max(1, Math.ceil(g.filtrados.length / POR_PAGINA));
-  const actual = Math.min(pagina, paginas);
-  const filas = g.filtrados.slice((actual - 1) * POR_PAGINA, actual * POR_PAGINA);
+  // Modo servidor: cada cambio de pestaña, búsqueda (ya con debounce) o filtro
+  // vuelve a consultar con los parámetros en la URL, desde la página 1.
+  function navegar(paginaDestino: number) {
+    const params = new URLSearchParams();
+    if (g.pestana !== "todos") params.set("tab", g.pestana);
+    if (g.busqueda.trim()) params.set("buscar", g.busqueda.trim());
+    const tipo = ETIQUETA_A_TIPO[g.tipoVehiculoSeleccionado];
+    if (tipo) params.set("tipo", tipo);
+    if (g.filtroFecha !== "todas") params.set("fecha", g.filtroFecha);
+    if (paginaDestino > 1) params.set("pagina", String(paginaDestino));
+    const consulta = params.toString();
+    router.push(consulta ? `/mis-viajes?${consulta}` : "/mis-viajes", { scroll: false });
+  }
+  const huellaFiltros = `${g.pestana}|${g.busqueda.trim()}|${g.tipoVehiculoSeleccionado}|${g.filtroFecha}`;
+  const huellaInicial = useRef(huellaFiltros);
+  useEffect(() => {
+    if (!servidor || huellaInicial.current === huellaFiltros) return;
+    huellaInicial.current = huellaFiltros;
+    navegar(1);
+    // navegar solo depende de los valores que forman la huella.
+  }, [huellaFiltros, servidor]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const paginas = servidor ? servidor.totalPaginas : Math.max(1, Math.ceil(g.filtrados.length / POR_PAGINA));
+  const actual = servidor ? Math.min(servidor.pagina, paginas) : Math.min(pagina, paginas);
+  const porPagina = servidor ? servidor.limite : POR_PAGINA;
+  const totalResultados = servidor ? servidor.totalItems : g.filtrados.length;
+  const filas = servidor ? g.filtrados : g.filtrados.slice((actual - 1) * POR_PAGINA, actual * POR_PAGINA);
+  const irAPagina = (destino: number) => (servidor ? navegar(destino) : setPagina(destino));
   const elegido = filas.find((v) => v.pasaporte.traslado_id === seleccion) ?? filas[0];
   const mostrarPanel = conPanel && Boolean(elegido) && !panelCerrado;
 
   const filtrosActivos = Boolean(g.busqueda.trim() || g.tipoVehiculoSeleccionado || g.filtroFecha !== "todas");
-  const sinTraslados = traslados.length === 0;
+  const sinTraslados = servidor ? g.conteos.todos === 0 && !g.busqueda.trim() : traslados.length === 0;
   const opciones = ORDEN_PESTANAS.filter((id) => id !== "en_revision" || g.conteos.en_revision > 0 || g.pestana === "en_revision").map(
     (id) => ({ id, etiqueta: ETIQUETAS_PESTANA[id], conteo: g.conteos[id] }),
   );
@@ -250,7 +303,7 @@ export function MisTraslados({
                 </Button>
               )}
               <Button size="lg" onClick={() => g.setFiltroAbierto(false)}>
-                Ver {g.filtrados.length} {g.filtrados.length === 1 ? "traslado" : "traslados"}
+                Ver {totalResultados} {totalResultados === 1 ? "traslado" : "traslados"}
               </Button>
             </>
           }
@@ -262,7 +315,7 @@ export function MisTraslados({
 
         <div className={mostrarPanel ? "grid grid-cols-[minmax(0,1fr)_26rem] items-start gap-5 2xl:grid-cols-[minmax(0,1fr)_30rem]" : ""}>
           <section
-                        aria-label={`Lista de traslados ${ETIQUETAS_PESTANA[g.pestana].toLowerCase()}: ${g.filtrados.length} resultados`}
+                        aria-label={`Lista de traslados ${ETIQUETAS_PESTANA[g.pestana].toLowerCase()}: ${totalResultados} resultados`}
             aria-busy={g.buscando}
             className="flex min-w-0 flex-col gap-3"
           >
@@ -309,8 +362,8 @@ export function MisTraslados({
                 </ul>
                 <footer className="flex items-center justify-between gap-3 pt-1 text-sm text-ui-fg-muted">
                   <span role="status">
-                    Mostrando {(actual - 1) * POR_PAGINA + 1}–{Math.min(actual * POR_PAGINA, g.filtrados.length)} de{" "}
-                    {g.filtrados.length} traslados
+                    Mostrando {(actual - 1) * porPagina + 1}–{Math.min(actual * porPagina, totalResultados)} de{" "}
+                    {totalResultados} traslados
                   </span>
                   {paginas > 1 && (
                     <nav aria-label="Páginas de traslados" className="flex items-center gap-2">
@@ -319,7 +372,7 @@ export function MisTraslados({
                         size="icon-sm"
                         aria-label="Página anterior"
                         disabled={actual === 1}
-                        onClick={() => setPagina(actual - 1)}
+                        onClick={() => irAPagina(actual - 1)}
                       >
                         <ChevronLeft />
                       </Button>
@@ -331,7 +384,7 @@ export function MisTraslados({
                         size="icon-sm"
                         aria-label="Página siguiente"
                         disabled={actual === paginas}
-                        onClick={() => setPagina(actual + 1)}
+                        onClick={() => irAPagina(actual + 1)}
                       >
                         <ChevronRight />
                       </Button>

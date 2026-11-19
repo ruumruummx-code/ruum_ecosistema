@@ -1,3 +1,4 @@
+import { respuestaErrorInterno } from "@/lib/errores-api";
 import {
   consultarTrasladoEstadoPago,
   consultarPagoCompletadoTraslado,
@@ -108,9 +109,6 @@ export async function GET(
         : "El pago se encuentra en proceso de validación bancaria.",
     });
   } catch (error) {
-    return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Error al consultar estado de pago." },
-      { status: 500 }
-    );
+    return respuestaErrorInterno("api/viajes/estado-pago", error, "Error al consultar estado de pago.");
   }
 }

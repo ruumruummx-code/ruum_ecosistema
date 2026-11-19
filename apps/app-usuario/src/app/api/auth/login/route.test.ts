@@ -6,6 +6,9 @@ const mocks = vi.hoisted(() => ({
   rateLimit: vi.fn(),
   obtenerIp: vi.fn(() => "203.0.113.10"),
   captcha: vi.fn(),
+  consultarFallos: vi.fn(),
+  registrarFallo: vi.fn(),
+  reiniciarFallos: vi.fn(),
 }));
 
 vi.mock("next/headers", () => ({
@@ -17,6 +20,9 @@ vi.mock("@ruum/api/supabase", () => ({
 vi.mock("@/lib/csp-rate-limit", () => ({
   obtenerIp: mocks.obtenerIp,
   rateLimitConVentana: mocks.rateLimit,
+  consultarFallos: mocks.consultarFallos,
+  registrarFallo: mocks.registrarFallo,
+  reiniciarFallos: mocks.reiniciarFallos,
 }));
 vi.mock("@/lib/csrf", () => ({ verificarCsrfORechazar: vi.fn(() => null) }));
 vi.mock("@/lib/login-policy", () => ({
@@ -46,6 +52,9 @@ describe("POST /api/auth/login", () => {
     mocks.obtenerIp.mockReturnValue("203.0.113.10");
     mocks.captcha.mockResolvedValue({ aprobado: true, configurado: true, proveedorCaido: false });
     mocks.signIn.mockResolvedValue({ data: { session: { access_token: "token" } }, error: null });
+    mocks.consultarFallos.mockResolvedValue({ bloqueado: false, restantes: 8 });
+    mocks.registrarFallo.mockResolvedValue(1);
+    mocks.reiniciarFallos.mockResolvedValue(undefined);
   });
 
   it("normaliza correo y autentica sin crear perfil", async () => {
@@ -99,22 +108,27 @@ describe("POST /api/auth/login", () => {
     await POST(request({ email: "persona-dos@ejemplo.com", password: "secreta" }));
     expect(mocks.signIn).toHaveBeenCalledTimes(2);
     expect(llamadas.filter((value) => value === "203.0.113.10")).toHaveLength(2);
-    expect(new Set(llamadas.filter((value) => value.startsWith("hash:persona-"))).size).toBeGreaterThanOrEqual(2);
+    const correos = mocks.consultarFallos.mock.calls.map(([id]) => id as string);
+    expect(new Set(correos.filter((value) => value.startsWith("hash:persona-"))).size).toBe(2);
   });
 
   it("mantiene la política compuesta: una identidad agotada bloquea aunque la IP rote", async () => {
     mocks.obtenerIp.mockReturnValue("198.51.100.20");
-    const resultados = [
-      { allowed: true, restantes: 19 }, // IP rotada
-      { allowed: false, restantes: 0, retryAfterSec: 90 }, // correo
-      { allowed: true, restantes: 14 }, // dispositivo
-    ];
-    mocks.rateLimit.mockImplementation(async () => resultados.shift() ?? { allowed: true, restantes: 10 });
+    mocks.consultarFallos.mockResolvedValueOnce({ bloqueado: true, restantes: 0, retryAfterSec: 90 });
     const response = await POST(request({ email: "persona@ejemplo.com", password: "secreta" }));
     expect(response.status).toBe(429);
     expect(response.headers.get("retry-after")).toBe("90");
     expect(mocks.signIn).not.toHaveBeenCalled();
-    expect(mocks.rateLimit).toHaveBeenCalledTimes(3);
+    expect(mocks.rateLimit).toHaveBeenCalledTimes(2);
+  });
+
+  it("el bloqueo por correo cuenta solo contraseñas rechazadas, no peticiones", async () => {
+    await POST(request({ email: "persona@ejemplo.com", password: "secreta" }));
+    expect(mocks.registrarFallo).not.toHaveBeenCalled();
+    expect(mocks.reiniciarFallos).toHaveBeenCalledWith("hash:persona@ejemplo.com", "auth-login-email-fallos");
+    mocks.signIn.mockResolvedValueOnce({ data: { session: null }, error: new Error("invalid") });
+    await POST(request({ email: "persona@ejemplo.com", password: "incorrecta" }));
+    expect(mocks.registrarFallo).toHaveBeenCalledWith("hash:persona@ejemplo.com", "auth-login-email-fallos", 900000);
   });
 
   it("falla cerrado con 429 y Retry-After si Redis no está disponible en producción (CA-4 / CB-2)", async () => {

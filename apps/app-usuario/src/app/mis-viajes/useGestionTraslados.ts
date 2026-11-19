@@ -137,6 +137,14 @@ export interface UseGestionTrasladosOptions<T extends PestañaFiltro = PestañaF
   gastoConfirmadoServidor?: number;
   /** Estado de sincronización en segundo plano */
   sincronizando?: boolean;
+  /**
+   * Pestaña, búsqueda y filtros ya aplicados en la consulta del servidor:
+   * la lista recibida es la página filtrada y los conteos son globales exactos.
+   */
+  filtradoEnServidor?: boolean;
+  conteosServidor?: Record<PestañaFiltro, number>;
+  tipoInicial?: string;
+  fechaInicial?: string;
 }
 
 export function useGestionTraslados<T extends PestañaFiltro = PestañaFiltro>({
@@ -145,14 +153,18 @@ export function useGestionTraslados<T extends PestañaFiltro = PestañaFiltro>({
   busquedaInicial = "",
   gastoConfirmadoServidor,
   sincronizando = false,
+  filtradoEnServidor = false,
+  conteosServidor,
+  tipoInicial = "",
+  fechaInicial = "todas",
 }: UseGestionTrasladosOptions<T>) {
   const [pestana, setPestana] = useState<T>(pestanaInicial);
   const [busquedaInput, setBusquedaInput] = useState(busquedaInicial);
   const [busqueda, setBusqueda] = useState(busquedaInicial);
   const [buscando, setBuscando] = useState(false);
   const [filtroAbierto, setFiltroAbierto] = useState(false);
-  const [tipoVehiculoSeleccionado, setTipoVehiculoSeleccionado] = useState("");
-  const [filtroFecha, setFiltroFecha] = useState<string>("todas");
+  const [tipoVehiculoSeleccionado, setTipoVehiculoSeleccionado] = useState(tipoInicial);
+  const [filtroFecha, setFiltroFecha] = useState<string>(fechaInicial);
   const [filtroEstado, setFiltroEstado] = useState<string>("todos");
   const [, startTransition] = useTransition();
 
@@ -174,6 +186,7 @@ export function useGestionTraslados<T extends PestañaFiltro = PestañaFiltro>({
 
   // Conteos por estado (incluyendo 'en_revision')
   const conteos = useMemo(() => {
+    if (filtradoEnServidor && conteosServidor) return conteosServidor;
     const counts: Record<PestañaFiltro, number> = {
       todos: traslados.length,
       activos: 0,
@@ -187,14 +200,16 @@ export function useGestionTraslados<T extends PestañaFiltro = PestañaFiltro>({
       counts[p] = (counts[p] ?? 0) + 1;
     }
     return counts;
-  }, [traslados]);
+  }, [traslados, filtradoEnServidor, conteosServidor]);
 
   // Tipos de vehículo disponibles en el listado
   const tiposVehiculo = useMemo(() => {
+    // En modo servidor la página no contiene todos los tipos: se ofrece el catálogo.
+    if (filtradoEnServidor) return Object.values(ETIQUETA_TIPO_VEHICULO).sort((a, b) => a.localeCompare(b, "es"));
     return Array.from(new Set(traslados.map(({ pasaporte }) => vehiculoTipo(pasaporte)))).sort((a, b) =>
       a.localeCompare(b, "es")
     );
-  }, [traslados]);
+  }, [traslados, filtradoEnServidor]);
 
   // Gasto acumulado total confirmado (CB-1)
   const gastoTotal = useMemo(() => {
@@ -224,6 +239,7 @@ export function useGestionTraslados<T extends PestañaFiltro = PestañaFiltro>({
   // Lista filtrada
   const filtrados = useMemo(() => {
     let lista = traslados;
+    if (filtradoEnServidor) return lista;
 
     // Filtro por pestaña activa
     if ((pestana as string) !== "todos") {
@@ -281,7 +297,7 @@ export function useGestionTraslados<T extends PestañaFiltro = PestañaFiltro>({
     }
 
     return lista;
-  }, [traslados, pestana, filtroEstado, tipoVehiculoSeleccionado, filtroFecha, busqueda]);
+  }, [traslados, filtradoEnServidor, pestana, filtroEstado, tipoVehiculoSeleccionado, filtroFecha, busqueda]);
 
   function limpiarFiltros() {
     setBusquedaInput("");

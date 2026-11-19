@@ -3,6 +3,11 @@ import { NextRequest } from "next/server";
 import { __clearCspRateLimitForTest } from "@/lib/csp-rate-limit";
 
 const mockResend = vi.fn();
+const cookieSetMock = vi.fn();
+vi.mock("next/headers", () => ({
+  cookies: vi.fn(async () => ({ getAll: () => [], set: (...args: unknown[]) => cookieSetMock(...args) })),
+}));
+
 vi.mock("@ruum/api/supabase", () => ({
   crearClienteServidor: () => ({ auth: { resend: mockResend } }),
 }));

@@ -7,20 +7,11 @@ import { Aviso, Button, Field } from "@ruum/ui";
 import { MENSAJES_CLAVE_UX } from "@ruum/shared/constants";
 import { formatearPrecio } from "@ruum/shared/utils";
 import type { Database } from "@ruum/shared/types";
-import { cancelarTraslado, usuarioPuedeCancelar } from "@ruum/api/services";
+import { cancelarTraslado, previsualizarCancelacion, usuarioPuedeCancelar, type PrevisualizacionCancelacion } from "@ruum/api/services";
 import { crearClienteNavegador, tieneSupabaseConfigurado } from "@/lib/supabase-browser";
-import {
-  validarTransicionFlujo10,
-  calcularPenalizacionCancelacionF10,
-  registrarAuditoriaAccionF10,
-} from "@/lib/flujo10-transiciones-policy";
+import { validarTransicionFlujo10 } from "@/lib/flujo10-transiciones-policy";
 
 type EstadoTraslado = Database["public"]["Enums"]["estado_traslado"];
-
-function horasRestantes(fechaIso: string | null) {
-  if (!fechaIso) return Number.POSITIVE_INFINITY;
-  return Math.max(0, (new Date(fechaIso).getTime() - Date.now()) / (1000 * 60 * 60));
-}
 
 export function CancelarTraslado({
   trasladoId,
@@ -49,6 +40,21 @@ export function CancelarTraslado({
   const bloqueo = useRef(false);
   const restaurarFoco = useRef(false);
   const [cancelado, setCancelado] = useState(false);
+  // Penalización calculada por la base (la misma función que aplica el cargo).
+  const [previa, setPrevia] = useState<PrevisualizacionCancelacion | null>(null);
+  const [errorPrevia, setErrorPrevia] = useState(false);
+  const habilitado = !["servicio_cerrado", "servicio_cancelado", "traslado_fallido"].includes(estado) && !cerrado && usuarioPuedeCancelar(estado);
+
+  useEffect(() => {
+    if (!habilitado || !tieneSupabaseConfigurado()) return;
+    let activo = true;
+    setErrorPrevia(false);
+    previsualizarCancelacion(crearClienteNavegador(), trasladoId)
+      .then((resultado) => { if (activo) setPrevia(resultado); })
+      .catch(() => { if (activo) setErrorPrevia(true); });
+    return () => { activo = false; };
+    // precio/fecha/conductor cambian el cargo: se vuelve a consultar.
+  }, [habilitado, trasladoId, estado, precio, fechaProgramada, conductorAsignado]);
   const tituloId = useId();
   const consecuenciasId = useId();
 
@@ -88,12 +94,8 @@ export function CancelarTraslado({
     );
   }
 
-  const cargo = calcularPenalizacionCancelacionF10(
-    precio,
-    horasRestantes(fechaProgramada),
-    conductorAsignado,
-    estado === "conductor_en_punto_de_recoleccion"
-  );
+  const mensajeCargo = previa?.mensaje
+    ?? (errorPrevia ? "No pudimos calcular el cargo de cancelación; se aplicará la política vigente." : "Calculando el cargo de cancelación…");
 
   async function cancelar() {
     if (bloqueo.current) return;
@@ -106,28 +108,17 @@ export function CancelarTraslado({
         return;
       }
       const cliente = crearClienteNavegador();
+      // La auditoría la escribe la base (servidor_cancela_traslado).
       const resultado = await cancelarTraslado(cliente, trasladoId, motivo);
-
-      // CB-3 / T10 / CA-8: Registro de auditoría
-      registrarAuditoriaAccionF10({
-        trasladoId,
-        usuarioId: "cliente_sesion",
-        accion: "cancelar_traslado",
-        estadoAnterior: estado,
-        estadoNuevo: "servicio_cancelado",
-        timestamp: new Date().toISOString(),
-        metadata: {
-          motivo: motivo.trim(),
-          porcentajeCargo: resultado.porcentaje_cargo,
-          montoCargo: resultado.monto_cargo,
-        },
-      });
 
       setCancelado(true);
       setConfirmando(false);
+      const reembolso = resultado.monto_reembolso ?? 0;
       setMensaje({
         tono: "info",
-        texto: `Traslado cancelado. Cargo registrado: ${formatearPrecio(resultado.monto_cargo)}.`,
+        texto: reembolso > 0
+          ? `Traslado cancelado. Reembolsaremos ${formatearPrecio(reembolso)} a tu método de pago${resultado.reembolso_en_proceso ? "; el reembolso está en proceso" : ""}.`
+          : `Traslado cancelado. Cargo registrado: ${formatearPrecio(resultado.monto_cargo)}.`,
       });
       router.refresh();
     } catch (err) {
@@ -142,11 +133,11 @@ export function CancelarTraslado({
     <div ref={contenedor} aria-busy={procesando} className="mt-5 rounded-lg border border-danger/25 bg-danger-soft px-4 py-4">
       <p className="font-body text-sm font-semibold text-danger">Cancelar viaje</p>
       <p className="mt-1 font-body text-sm text-ink/65">
-        {MENSAJES_CLAVE_UX.cancelacion} {cargo.mensaje}
+        {MENSAJES_CLAVE_UX.cancelacion} {mensajeCargo}
       </p>
 
       <div role="status" aria-live="polite" aria-atomic="true">
-        {confirmando && <span className="sr-only">Confirmación de cancelación. {cargo.mensaje} Esta acción no se puede deshacer.</span>}
+        {confirmando && <span className="sr-only">Confirmación de cancelación. {mensajeCargo} Esta acción no se puede deshacer.</span>}
         {mensaje && <div className="mt-3" data-resultado tabIndex={-1}><Aviso tono={mensaje.tono}>{mensaje.texto}</Aviso></div>}
       </div>
 
@@ -157,7 +148,7 @@ export function CancelarTraslado({
             ¿Confirmar cancelación?
           </p>
           <p id={consecuenciasId} className="mt-1 font-body text-sm leading-5 text-ink/70">
-            {cargo.mensaje} Esta acción no se puede deshacer.
+            {mensajeCargo} Esta acción no se puede deshacer.
           </p>
           {motivo.trim() && (
             <p className="mt-1 font-body text-xs text-ink/50">

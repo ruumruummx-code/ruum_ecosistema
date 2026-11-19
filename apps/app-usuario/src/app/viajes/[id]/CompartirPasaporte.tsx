@@ -57,17 +57,11 @@ export function CompartirPasaporte({
   }
 
   async function compartir() {
+    // El enlace exige la sesión del titular: se copia para uso propio y no se
+    // ofrece la hoja de «Compartir» del sistema, que sugería enviarlo a terceros
+    // que solo verían el login o «no encontrado».
     const url = window.location.href;
-    const datos = {
-      title: `Pasaporte Digital de Traslado ${folio} · Ruum Ruum`,
-      text: `Seguimiento y evidencia del traslado ${folio}`,
-      url,
-    };
     try {
-      if (navigator.share) {
-        await navigator.share(datos);
-        return;
-      }
       await navigator.clipboard.writeText(url);
       cambiarEstado("copiado");
       programarRegresoAOcioso();
@@ -90,7 +84,7 @@ export function CompartirPasaporte({
       <button
         type="button"
         onClick={compartir}
-        aria-label={estado === "copiado" ? "Enlace copiado" : "Compartir pasaporte digital"}
+        aria-label={estado === "copiado" ? "Enlace copiado" : "Copiar enlace del pasaporte (solo lo abre tu cuenta)"}
         className="flex min-h-11 min-w-11 items-center justify-center rounded-full text-[#2e3a4b] transition-colors hover:bg-[#f2f6fc] focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-[#1677ff]"
       >
         <IconoCompartir />
@@ -108,7 +102,7 @@ export function CompartirPasaporte({
       className="flex min-h-[52px] flex-1 items-center justify-center gap-2 rounded-[16px] bg-[#0b1e33] px-4 text-[14px] font-bold text-[#fff] shadow-[0_8px_18px_-6px_rgba(11,30,51,0.3)] transition-transform active:scale-[0.98]"
     >
       <IconoCompartir />
-      {estado === "copiado" ? "¡Enlace copiado!" : estado === "error" ? "Reintentar" : "Compartir"}
+      {estado === "copiado" ? "¡Enlace copiado!" : estado === "error" ? "Reintentar" : "Copiar enlace"}
     </button>
   );
 }

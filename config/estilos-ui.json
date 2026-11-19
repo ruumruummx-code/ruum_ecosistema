@@ -9,7 +9,9 @@
     "apps/app-usuario/src/app/login",
     "apps/app-usuario/src/app/mis-viajes",
     "apps/app-usuario/src/app/viajes/nuevo/components/PasoTarifa.tsx",
-    "apps/app-usuario/src/app/viajes/nuevo/components/PasoDetalles.tsx"
+    "apps/app-usuario/src/app/viajes/nuevo/components/PasoDetalles.tsx",
+    "apps/app-usuario/src/app/cuenta/verificar-telefono",
+    "apps/app-usuario/src/components/VerificacionHumana.tsx"
   ],
   "excluir": [
     "packages/ui/src/styles/tokens.css",

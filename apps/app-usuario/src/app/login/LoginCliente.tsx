@@ -1,7 +1,7 @@
 "use client";
 
 import { obtenerDispositivo } from "@/lib/device-id";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ArrowRight, Bell, CarFront, ChevronDown, CreditCard, Eye, EyeOff, FileText, Globe, LockKeyhole, Mail } from "lucide-react";
@@ -13,6 +13,7 @@ import { normalizarCorreoRegistro } from "../../lib/registro-usuario";
 import { registrarEventoUx } from "../../lib/analytics";
 import { obtenerHeadersCsrf } from "../../lib/csrf";
 import { tieneSupabaseConfigurado } from "../../lib/supabase-browser";
+import { VerificacionHumana } from "../../components/VerificacionHumana";
 
 interface LoginClienteProps {
   motivo: string | null;
@@ -75,6 +76,9 @@ export function LoginCliente({ motivo, siguiente, aviso }: LoginClienteProps) {
   const [enviando, setEnviando] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [tocados, setTocados] = useState({ email: false, password: false });
+  const [captchaRequerido, setCaptchaRequerido] = useState(false);
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const recibirToken = useCallback((token: string | null) => setCaptchaToken(token), []);
   const correoRef = useRef<HTMLInputElement>(null);
   const passwordRef = useRef<HTMLInputElement>(null);
 
@@ -119,15 +123,19 @@ export function LoginCliente({ motivo, siguiente, aviso }: LoginClienteProps) {
         body: JSON.stringify({
           email: emailNormalizado,
           password,
-          captchaToken:
-            typeof window !== "undefined"
-              ? (window as Window & { __RUUM_TURNSTILE_TOKEN__?: string }).__RUUM_TURNSTILE_TOKEN__
-              : undefined,
+          captchaToken: captchaToken ?? undefined,
         }),
         signal: AbortSignal.timeout(12_000),
       });
-      const cuerpo = (await res.json().catch(() => null)) as { error?: string } | null;
+      const cuerpo = (await res.json().catch(() => null)) as { error?: string; captchaRequerido?: boolean } | null;
+      if (res.status === 428 && cuerpo?.captchaRequerido) {
+        // El token de Turnstile es de un solo uso: se pide uno nuevo.
+        setCaptchaRequerido(true);
+        setCaptchaToken(null);
+      }
       if (!res.ok) throw new Error(cuerpo?.error ?? "No pudimos iniciar sesión.");
+      setCaptchaRequerido(false);
+      setCaptchaToken(null);
       registrarEventoUx("login_exitoso", {
         reason: motivo,
         destino_protegido: siguiente !== "/",
@@ -205,6 +213,9 @@ export function LoginCliente({ motivo, siguiente, aviso }: LoginClienteProps) {
           {motivo === "email_confirmation" && (
             <div role="status"><Aviso tono="atencion">Para solicitar tu primer traslado debes confirmar tu correo e iniciar sesión.</Aviso></div>
           )}
+          {motivo === "cuenta_distinta" && (
+            <div role="status"><Aviso tono="atencion">El enlace que abriste pertenece a otra cuenta. Mantuvimos tu sesión actual; si quieres usar la otra cuenta, cierra sesión e ingresa con ella.</Aviso></div>
+          )}
           {motivo === "authentication_required" && (
             <div role="status"><Aviso tono="atencion">Inicia sesión para solicitar un traslado. Si acabas de registrarte, confirma primero tu correo.</Aviso></div>
           )}
@@ -269,8 +280,9 @@ export function LoginCliente({ motivo, siguiente, aviso }: LoginClienteProps) {
                 <Input type="checkbox" checked={recordar} onChange={(e) => actualizarPreferencia(e.target.checked)} className="size-5 cursor-pointer accent-ui-brand" />
                 Recordarme en este dispositivo
               </Label>
+              {captchaRequerido && <VerificacionHumana key={error ?? "captcha"} onToken={recibirToken} />}
               {error && <div role="alert"><Aviso tono="danger">{error}</Aviso></div>}
-              <Button type="submit" disabled={enviando} size="lg" className={styles.ingresar}>
+              <Button type="submit" disabled={enviando || (captchaRequerido && !captchaToken)} size="lg" className={styles.ingresar}>
                 {enviando ? "Iniciando sesión…" : "Ingresar"}
                 {!enviando && <ArrowRight aria-hidden="true" />}
               </Button>

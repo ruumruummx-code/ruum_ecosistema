@@ -23,7 +23,10 @@ vi.mock("@ruum/api/services", () => ({
 }));
 
 const mocksCotizacion = vi.hoisted(() => ({ ruta: vi.fn(), cotizar: vi.fn() }));
-vi.mock("@/lib/ruta-solicitud-servidor", () => ({ resolverRutaSolicitudServidor: mocksCotizacion.ruta }));
+vi.mock("@/lib/ruta-solicitud-servidor", () => ({
+  resolverRutaSolicitudServidor: mocksCotizacion.ruta,
+  UbicacionDivergenteError: class UbicacionDivergenteError extends Error {},
+}));
 vi.mock("@/lib/cotizacion-individual-servidor", () => ({ cotizarSolicitudIndividual: mocksCotizacion.cotizar }));
 
 let seq = 0;
@@ -199,6 +202,33 @@ describe("Sec3 POST /api/viajes — validación paso servidor", () => {
     expect([400, 500]).toContain(res.status);
     const json = await res.json() as { error: string };
     expect(json.error).not.toMatch(/NEXT_PUBLIC_/);
+  });
+
+  it("exige consentimiento registrado: si falla el registro responde 503 y no cotiza en vano", async () => {
+    const { POST } = await import("./route");
+    mocksServicios.registrarConsentimiento.mockRejectedValueOnce(new Error("rpc caída"));
+    const res = await POST(req(payloadValido()));
+    expect(res.status).toBe(503);
+    expect((await res.json()).snapshot).toBeUndefined();
+  });
+
+  it("bloquea el primer traslado si el teléfono no fue verificado", async () => {
+    const { POST } = await import("./route");
+    mockGetUser.mockResolvedValue({ data: { user: { id: `u-${seq}`, user_metadata: { telefono_verificado: false } } } });
+    const res = await POST(req(payloadValido()));
+    expect(res.status).toBe(403);
+    expect((await res.json()).codigo).toBe("telefono_no_verificado");
+    expect(mocksCotizacion.ruta).not.toHaveBeenCalled();
+  });
+
+  it("envía el pin del mapa y la confirmación al resolver la ruta", async () => {
+    const { POST } = await import("./route");
+    await POST(req(payloadValido({ origenLat: 19.4, origenLng: -99.1, confirmarUbicacionPin: true })));
+    expect(mocksCotizacion.ruta).toHaveBeenCalledWith(
+      expect.anything(),
+      { origen: { lat: 19.4, lng: -99.1 }, destino: null },
+      true
+    );
   });
 
   it("GET no permitido → 405", async () => {

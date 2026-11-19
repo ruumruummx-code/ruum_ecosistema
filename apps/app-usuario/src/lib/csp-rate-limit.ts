@@ -195,3 +195,88 @@ export function obtenerIp(request: { headers: Headers }): string | null {
     ultimaIpValida(request.headers.get("x-forwarded-for"))
   );
 }
+
+/**
+ * Contador de FALLOS (no de intentos) por identificador.
+ *
+ * El bloqueo por correo en login contaba cada petición: un tercero podía
+ * bloquear cualquier cuenta con unas pocas solicitudes. Ahora la dimensión
+ * de correo solo se incrementa cuando la contraseña es rechazada y se
+ * reinicia tras un acceso correcto.
+ */
+const fallosMemoria = new Map<string, { count: number; resetAt: number }>();
+
+export async function consultarFallos(
+  identificador: string,
+  clave: string,
+  maxFallos: number
+): Promise<{ bloqueado: boolean; restantes: number; retryAfterSec?: number }> {
+  const redis = getRedis();
+  if (redis) {
+    try {
+      const redisKey = `fallos:${clave}:${identificador}`;
+      const valor = Number((await redis.get(redisKey)) ?? 0);
+      if (valor >= maxFallos) {
+        const ttl = (await redis.ttl(redisKey)) as number;
+        return { bloqueado: true, restantes: 0, retryAfterSec: ttl > 0 ? ttl : 60 };
+      }
+      return { bloqueado: false, restantes: maxFallos - valor };
+    } catch (e) {
+      if (process.env.NODE_ENV === "production") {
+        console.error("[rate-limit-usuario] Redis no disponible en producción (fallos)", e);
+        return { bloqueado: true, restantes: 0, retryAfterSec: 60 };
+      }
+    }
+  } else if (process.env.NODE_ENV === "production") {
+    return { bloqueado: true, restantes: 0, retryAfterSec: 60 };
+  }
+  const entry = fallosMemoria.get(`${clave}:${identificador}`);
+  const now = Date.now();
+  if (!entry || now > entry.resetAt) return { bloqueado: false, restantes: maxFallos };
+  if (entry.count >= maxFallos) {
+    return { bloqueado: true, restantes: 0, retryAfterSec: Math.ceil((entry.resetAt - now) / 1000) };
+  }
+  return { bloqueado: false, restantes: maxFallos - entry.count };
+}
+
+/** Registra un fallo y devuelve el total acumulado en la ventana. */
+export async function registrarFallo(identificador: string, clave: string, ventanaMs: number): Promise<number> {
+  const redis = getRedis();
+  const ttlSec = Math.ceil(ventanaMs / 1000);
+  if (redis) {
+    try {
+      const redisKey = `fallos:${clave}:${identificador}`;
+      await redis.set(redisKey, "0", { nx: true, ex: ttlSec });
+      return (await redis.incr(redisKey)) as number;
+    } catch (e) {
+      if (process.env.NODE_ENV === "production") {
+        console.error("[rate-limit-usuario] no se pudo registrar el fallo", e);
+        return 0;
+      }
+    }
+  }
+  const now = Date.now();
+  const memoryKey = `${clave}:${identificador}`;
+  const entry = fallosMemoria.get(memoryKey);
+  if (!entry || now > entry.resetAt) {
+    fallosMemoria.set(memoryKey, { count: 1, resetAt: now + ventanaMs });
+    return 1;
+  }
+  entry.count += 1;
+  return entry.count;
+}
+
+export async function reiniciarFallos(identificador: string, clave: string): Promise<void> {
+  fallosMemoria.delete(`${clave}:${identificador}`);
+  const redis = getRedis();
+  if (!redis) return;
+  try {
+    await redis.del(`fallos:${clave}:${identificador}`);
+  } catch {
+    // best effort: el TTL de la ventana limpia el contador.
+  }
+}
+
+export function __clearFallosForTest() {
+  fallosMemoria.clear();
+}

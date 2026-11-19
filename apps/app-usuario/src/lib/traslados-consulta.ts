@@ -1,8 +1,12 @@
 import {
-  consultarInventarioPasaportesUsuario,
-  consultarPaginaPasaportesUsuario,
-  consultarTrasladosPaginaUsuario,
   consultarMontosPagosCompletados,
+  consultarPaginaPasaportesFiltrada,
+  consultarTrasladosPaginaUsuario,
+  consultarTrasladosProgramadosEnRango,
+  consultarUltimoPasaporteUsuario,
+  contarPasaportesUsuario,
+  type FiltroCategoriaPasaporte,
+  type FiltrosPasaportesUsuario,
 } from "@ruum/api/transfers";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@ruum/shared/types";
@@ -10,11 +14,13 @@ import {
   type CategoriaPestana,
   clasificarEstadoTraslado,
   evaluarConsistenciaPasaporte,
-  obtenerEtiquetaLegibleEstado,
+  MAPEO_ESTADOS_CANONICOS,
 } from "./estados-traslado-policy";
 import {
   obtenerPartesFechaLocal,
   perteneceAHoy,
+  perteneceAMes,
+  perteneceASemanaCalendario,
   ZONA_HORARIA_CANONICA,
 } from "./zona-horaria-traslados";
 import { logStructuredWarn } from "@/lib/logger";
@@ -106,7 +112,42 @@ export interface OpcionesConsultaTraslados {
   limite?: number;
   tab?: string;
   buscar?: string;
+  /** Tipo de vehículo (valor de enum, p. ej. "sedan"). */
+  tipo?: string;
+  /** "hoy" | "semana" | "mes" (zona horaria canónica). */
+  fecha?: string;
   snapshotVersionCliente?: string;
+}
+
+const CATEGORIAS: CategoriaPestana[] = ["activos", "programados", "finalizados", "cancelados", "en_revision"];
+const TIPOS_VEHICULO = new Set(["sedan", "suv", "pick_up", "van", "luxury", "coleccion"]);
+
+function estadosDe(categoria: CategoriaPestana) {
+  return Object.entries(MAPEO_ESTADOS_CANONICOS).filter(([, c]) => c === categoria).map(([estado]) => estado);
+}
+
+/** Traduce una pestaña a filtro de servidor con las mismas reglas que clasificarEstadoTraslado. */
+export function filtroCategoria(tab: string | undefined): FiltroCategoriaPasaporte {
+  if (!tab || tab === "todos" || !CATEGORIAS.includes(tab as CategoriaPestana)) return { modo: "todos" };
+  if (tab === "en_revision") return { modo: "revision", estadosConocidos: Object.keys(MAPEO_ESTADOS_CANONICOS) };
+  if (tab === "finalizados") return { modo: "cerrados", estados: estadosDe("finalizados") };
+  return { modo: "abiertos", estados: estadosDe(tab as CategoriaPestana) };
+}
+
+/** Resuelve el filtro de fecha a ids de traslado (null = sin filtro). */
+async function trasladosEnFecha(cliente: SupabaseClient<Database>, fecha: string | undefined): Promise<string[] | null> {
+  if (fecha !== "hoy" && fecha !== "semana" && fecha !== "mes") return null;
+  const ahora = Date.now();
+  const dias = fecha === "hoy" ? 2 : fecha === "semana" ? 8 : 32;
+  // Ventana UTC holgada; la pertenencia exacta se decide en la zona canónica.
+  const { data, error } = await consultarTrasladosProgramadosEnRango(
+    cliente,
+    new Date(ahora - dias * 86_400_000).toISOString(),
+    new Date(ahora + dias * 86_400_000).toISOString()
+  );
+  if (error) throw error;
+  const pertenece = fecha === "hoy" ? perteneceAHoy : fecha === "semana" ? perteneceASemanaCalendario : perteneceAMes;
+  return (data ?? []).filter((t) => pertenece(t.fecha_hora_programada)).map((t) => t.id);
 }
 
 /**
@@ -290,53 +331,58 @@ export async function obtenerListaTrasladosConsolidadaUsuario(
   const limite = Math.min(Math.max(1, Number(opciones?.limite) || 10), 50);
   const desplazamiento = (pagina - 1) * limite;
 
-  // 1. Inventario liviano para conteos globales y snapshotVersion (evita cargar miles de filas completas)
-  const { data: inventarioRaw, error: errInventario } = await consultarInventarioPasaportesUsuario(cliente, usuarioId);
+  // Pestaña, búsqueda y filtros se aplican EN LA CONSULTA (antes se filtraban
+  // en cliente solo los 10 elementos de la página mientras los conteos eran
+  // globales: «Cancelados (5)» podía mostrar 0).
+  const trasladoIds = await trasladosEnFecha(cliente, opciones?.fecha);
+  const filtrosBase: Omit<FiltrosPasaportesUsuario, "categoria"> = {
+    buscar: opciones?.buscar ?? null,
+    vehiculoTipo: opciones?.tipo && TIPOS_VEHICULO.has(opciones.tipo) ? opciones.tipo : null,
+    trasladoIds,
+  };
 
-  if (errInventario) {
-    throw errInventario;
-  }
+  // 1. Conteos exactos por pestaña (count: "exact", head: true), con los
+  //    mismos filtros de búsqueda: sin descargar filas ni el corte de 1,000.
+  const [ultimo, ...conteosRaw] = await Promise.all([
+    consultarUltimoPasaporteUsuario(cliente, usuarioId),
+    contarPasaportesUsuario(cliente, usuarioId, { ...filtrosBase, categoria: { modo: "todos" } }),
+    ...CATEGORIAS.map((categoria) => contarPasaportesUsuario(cliente, usuarioId, { ...filtrosBase, categoria: filtroCategoria(categoria) })),
+  ]);
+  const errorConteo = conteosRaw.find((r) => r.error)?.error;
+  if (errorConteo) throw errorConteo;
+  if (ultimo.error) throw ultimo.error;
 
-  const filasInventario = inventarioRaw ?? [];
-  const totalItems = filasInventario.length;
-  const totalPaginas = Math.max(1, Math.ceil(totalItems / limite));
-
-  // Snapshot versioning (CB-1)
-  const maxCreadoEn = filasInventario[0]?.creado_en ?? new Date().toISOString();
-  const snapshotVersion = maxCreadoEn;
-  const snapshotDivergente = Boolean(
-    opciones?.snapshotVersionCliente &&
-    opciones.snapshotVersionCliente !== snapshotVersion
-  );
-
-  // Conteos consistentes por categoría
   const conteos: ConteosTraslados = {
-    todos: totalItems,
+    todos: conteosRaw[0].count ?? 0,
     activos: 0,
     programados: 0,
     finalizados: 0,
     cancelados: 0,
     en_revision: 0,
   };
+  CATEGORIAS.forEach((categoria, i) => { conteos[categoria] = conteosRaw[i + 1].count ?? 0; });
 
-  for (const fila of filasInventario) {
-    const tieneTraslado = Boolean(fila.traslado_id);
-    const consistencia = evaluarConsistenciaPasaporte(
-      fila.traslado_id,
-      tieneTraslado,
-      fila.estado,
-      fila.estado_operativo,
-      fila.cerrado_en
-    );
-    conteos[consistencia.categoria]++;
-  }
+  // Snapshot versioning (CB-1)
+  const snapshotVersion = ultimo.data?.creado_en ?? new Date(0).toISOString();
+  const snapshotDivergente = Boolean(
+    opciones?.snapshotVersionCliente &&
+    opciones.snapshotVersionCliente !== snapshotVersion
+  );
 
-  // 2. Consulta paginada server-side: SOLO los registros del rango [desplazamiento, desplazamiento + limite - 1] (CA-1)
-  const { data: pasaportesPaginadosRaw, error: errPaginados } = await consultarPaginaPasaportesUsuario(cliente, usuarioId, desplazamiento, limite);
+  // 2. Página filtrada en servidor con el total exacto de coincidencias (CA-1)
+  const { data: pasaportesPaginadosRaw, error: errPaginados, count } = await consultarPaginaPasaportesFiltrada(
+    cliente,
+    usuarioId,
+    { ...filtrosBase, categoria: filtroCategoria(opciones?.tab) },
+    desplazamiento,
+    limite
+  );
 
   if (errPaginados) {
     throw errPaginados;
   }
+  const totalItems = count ?? 0;
+  const totalPaginas = Math.max(1, Math.ceil(totalItems / limite));
 
   const pasaportesPaginados = (pasaportesPaginadosRaw ?? []) as Pasaporte[];
   const idsPagina = pasaportesPaginados

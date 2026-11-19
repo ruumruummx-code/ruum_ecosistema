@@ -8,8 +8,13 @@ export function hashIdentificador(valor: string): string {
   return crypto.createHash("sha256").update(valor).digest("hex").slice(0, 32);
 }
 
+/**
+ * El CAPTCHA solo se exige si el servidor puede verificarlo (secret) Y la UI
+ * puede renderizar el widget (site key pública). Con solo una de las dos
+ * mitades el 428 sería permanente y nadie podría entrar.
+ */
 export function captchaConfigurado(): boolean {
-  return Boolean(process.env.TURNSTILE_SECRET_KEY?.trim());
+  return Boolean(process.env.TURNSTILE_SECRET_KEY?.trim() && process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY?.trim());
 }
 
 export function requiereCaptcha(riesgo: { ip?: number; email?: number; dispositivo?: number }): boolean {
@@ -20,7 +25,8 @@ export async function verificarCaptchaAdaptativo(
   token: string | null | undefined,
   ip: string | null
 ): Promise<{ aprobado: boolean; configurado: boolean; proveedorCaido: boolean }> {
-  if (!captchaConfigurado()) return { aprobado: false, configurado: false, proveedorCaido: false };
+  // Sin CAPTCHA configurado no se exige: el control queda en el rate limit.
+  if (!captchaConfigurado()) return { aprobado: true, configurado: false, proveedorCaido: false };
   if (!token) return { aprobado: false, configurado: true, proveedorCaido: false };
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), 3_000);

@@ -6,7 +6,7 @@ vi.mock("./ruta-cache", () => ({
   obtenerRutaRecalculadaServidor: mocks.ruta,
   RutaNoDisponibleError: class extends Error {},
 }));
-import { resolverRutaSolicitudServidor } from "./ruta-solicitud-servidor";
+import { elegirCoordenada, resolverRutaSolicitudServidor, UbicacionDivergenteError } from "./ruta-solicitud-servidor";
 import { RutaNoDisponibleError } from "./ruta-cache";
 const datos = {
   origenCalle: "Reforma", origenNumero: "100", origenColonia: "Juárez", origenCodigoPostal: "06600", origenCiudad: "CDMX", origenEstado: "CDMX",
@@ -30,5 +30,24 @@ describe("coordenadas autoritativas del servidor", () => {
   it("no inventa coordenadas si una dirección no se resuelve", async () => {
     vi.spyOn(globalThis, "fetch").mockResolvedValue(Response.json({ features: [] }));
     await expect(resolverRutaSolicitudServidor(datos)).rejects.toBeInstanceOf(RutaNoDisponibleError);
+  });
+});
+
+describe("pin del usuario frente a la geocodificación", () => {
+  const geo = { lat: 19.4326, lng: -99.1332 };
+  it("acepta el pin cercano (≤ 300 m) en lugar de sobrescribirlo", () => {
+    const pin = { lat: 19.4340, lng: -99.1340 };
+    expect(elegirCoordenada("origen", geo, pin, false)).toEqual(pin);
+  });
+  it("pide confirmación entre 300 m y 5 km y usa el pin al confirmar", () => {
+    const pin = { lat: 19.45, lng: -99.1332 };
+    expect(() => elegirCoordenada("origen", geo, pin, false)).toThrow(UbicacionDivergenteError);
+    expect(elegirCoordenada("origen", geo, pin, true)).toEqual(pin);
+  });
+  it("rechaza un pin incoherente aunque se confirme", () => {
+    expect(() => elegirCoordenada("destino", geo, { lat: 20.6, lng: -103.3 }, true)).toThrow(UbicacionDivergenteError);
+  });
+  it("sin pin usa la geocodificación", () => {
+    expect(elegirCoordenada("destino", geo, null, false)).toEqual(geo);
   });
 });

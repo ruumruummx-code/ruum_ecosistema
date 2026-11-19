@@ -3,7 +3,6 @@ import type { Database, Json, SolicitudAsignacionResultado } from "@ruum/shared/
 import { TRANSICIONES } from "@ruum/shared/states";
 import { esquemaPayloadCrearTraslado } from "@ruum/shared/validacion";
 import { rpcTipado, type FuncionesRpc } from "../supabase/funciones";
-import { registrarEvento } from "./auditoria";
 
 type Cliente = SupabaseClient<Database>;
 type PasaporteRow = Database["public"]["Views"]["pasaporte_digital"]["Row"];
@@ -418,7 +417,37 @@ export function usuarioPuedeCancelar(estado: EstadoTraslado): boolean {
 export interface CargoCancelacionAplicado {
   porcentaje_cargo: number;
   monto_cargo: number;
+  /** Monto ya cobrado (pagos completados) antes de cancelar. */
+  monto_pagado?: number;
+  /** Monto que se reembolsa: lo pagado menos la penalización. */
+  monto_reembolso?: number;
+  /** El reembolso quedó encolado y se reintentará automáticamente. */
+  reembolso_en_proceso?: boolean;
   mensaje: string;
+}
+
+export interface PrevisualizacionCancelacion {
+  cancelable: boolean;
+  porcentaje_cargo: number;
+  monto_cargo: number;
+  monto_pagado: number;
+  monto_reembolso: number;
+  mensaje: string;
+}
+
+/**
+ * Penalización calculada por la base (misma función que aplica la
+ * cancelación). Sustituye el cálculo en cliente, que podía diferir del cargo
+ * real.
+ */
+export async function previsualizarCancelacion(cliente: Cliente, trasladoId: string): Promise<PrevisualizacionCancelacion> {
+  const { data, error } = await rpcTipado(cliente, "usuario_previsualizar_cancelacion", { p_traslado_id: trasladoId });
+  if (error) throw error;
+  const previa = data as unknown as PrevisualizacionCancelacion | null;
+  if (!previa || typeof previa.porcentaje_cargo !== "number" || typeof previa.mensaje !== "string") {
+    throw new Error("No pudimos calcular el cargo de cancelación.");
+  }
+  return previa;
 }
 
 export async function cancelarTraslado(
@@ -447,39 +476,49 @@ export async function cancelarTraslado(
     throw new Error("No autorizado para cancelar este traslado: solo el titular puede cancelar.");
   }
 
-  // Pre-chequeo solo UX (defensa en profundidad): la fuente de verdad es la
-  // RPC, que revalida el estado y calcula el cargo bajo FOR UPDATE.
+  // Pre-chequeo solo UX: la fuente de verdad es la base (bajo FOR UPDATE).
   if (!usuarioPuedeCancelar(traslado.estado)) {
     throw new Error(
       "Este traslado ya no puede cancelarse: el vehículo ya está en verificación o en tránsito. Solicita una revisión o reporta un problema."
     );
   }
 
-  // FIX C3 (ticket seguridad Fase 2): no se envía ningún monto precalculado.
-  // La sobrecarga (uuid, text) calcula el cargo en la base de forma atómica
-  // y lo devuelve; la UI debe mostrar ese valor, no una estimación local.
-  const { data, error: rpcError } = await rpcTipado(cliente, "usuario_cancela_traslado", {
-    p_traslado_id: trasladoId,
-    p_motivo: motivo.trim() || "Cancelación solicitada por usuario"
-  });
-
-  if (rpcError) throw rpcError;
-  const cargo = data as unknown as CargoCancelacionAplicado;
+  // Auditoría 2026-11-19: la cancelación corre en la Edge Function, que
+  // reembolsa lo ya cobrado (menos penalización) y cancela los PaymentIntent
+  // pendientes. La RPC directa cancelaba traslados pagados sin reembolso.
+  const { data, error: errorFuncion } = await cliente.functions.invoke<CargoCancelacionAplicado & { error?: string }>(
+    "cancelar-traslado-usuario",
+    { body: { traslado_id: trasladoId, motivo: motivo.trim() || "Cancelación solicitada por usuario" } }
+  );
+  if (errorFuncion) {
+    const contexto = (errorFuncion as { context?: Response }).context;
+    const cuerpo = contexto && typeof contexto.json === "function"
+      ? ((await contexto.json().catch(() => null)) as { error?: string } | null)
+      : null;
+    throw new Error(cuerpo?.error ?? "No pudimos cancelar el traslado. Intenta de nuevo.");
+  }
   if (
-    !cargo ||
-    typeof cargo.porcentaje_cargo !== "number" ||
-    typeof cargo.monto_cargo !== "number" ||
-    typeof cargo.mensaje !== "string"
+    !data ||
+    typeof data.porcentaje_cargo !== "number" ||
+    typeof data.monto_cargo !== "number" ||
+    typeof data.mensaje !== "string"
   ) {
     throw new Error("La respuesta del servidor al cancelar el traslado es inválida.");
   }
-  return cargo;
+  return data;
 }
 
+/**
+ * Calificación del conductor. La escritura directa sobre
+ * calificaciones_traslado ya no está permitida: la RPC toma el conductor del
+ * propio traslado y exige servicio_cerrado, la ventana de 72 h y
+ * calificado_en = now(). `conductorId` se conserva por compatibilidad de
+ * firma pero ya no se envía.
+ */
 export async function crearCalificacion(
   cliente: Cliente,
   trasladoId: string,
-  conductorId: string,
+  _conductorId: string,
   estrellas: number,
   comentario?: string | null
 ) {
@@ -487,47 +526,12 @@ export async function crearCalificacion(
     throw new Error("La calificación debe estar entre 1 y 5 estrellas.");
   }
 
-  // CB-3 / T9 / CA-7: Ownership repetido en cada mutación
-  const usuarioId = await obtenerUsuarioIdActual(cliente);
-
-  const { data: traslado, error: errorTraslado } = await cliente
-    .from("traslados")
-    .select("id, usuario_id, estado, cerrado_en, actualizado_en")
-    .eq("id", trasladoId)
-    .maybeSingle();
-
-  if (errorTraslado) throw errorTraslado;
-  if (!traslado) throw new Error("No se encontró el traslado a calificar.");
-
-  if (traslado.usuario_id && traslado.usuario_id !== usuarioId) {
-    throw new Error("No autorizado para calificar este traslado: solo el titular del servicio puede calificar.");
-  }
-
-  if (traslado.estado !== "servicio_cerrado") {
-    throw new Error("Solo se puede calificar un traslado finalizado.");
-  }
-
-  // CB-3 / T8 / CA-6: Ventana de 72 horas con margen de gracia técnico de 15 minutos (72.25h)
-  const fechaRef = traslado.cerrado_en ?? traslado.actualizado_en;
-  const horasDesdeCierre = (Date.now() - new Date(fechaRef).getTime()) / (1000 * 60 * 60);
-  if (horasDesdeCierre > 72.25) {
-    throw new Error("El plazo de 72 horas para calificar este traslado ya venció.");
-  }
-
-  const { error } = await cliente.from("calificaciones_traslado").insert({
-    traslado_id: trasladoId,
-    conductor_id: conductorId,
-    estrellas,
-    comentario: comentario?.trim() || null
+  const { error } = await rpcTipado(cliente, "usuario_califica_traslado", {
+    p_traslado_id: trasladoId,
+    p_estrellas: estrellas,
+    p_comentario: comentario?.trim() || null
   });
-
   if (error) throw error;
-
-  await registrarEvento(cliente, "calificacion_conductor", "usuario", usuarioId, {
-    traslado_id: trasladoId,
-    conductor_id: conductorId,
-    estrellas
-  });
 }
 
 const EVENTO_CONDUCTOR_POR_ESTADO: Partial<Record<EstadoTraslado, EventoConductorTraslado>> = {

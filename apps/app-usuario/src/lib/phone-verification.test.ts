@@ -172,3 +172,16 @@ describe("phone-verification — integración Twilio Verify y mock dev", () => {
     );
   });
 });
+
+describe("suspensión temporal con fecha de reactivación", () => {
+  it("sin fecha o con fecha vencida vuelve a exigir verificación", async () => {
+    const { verificacionTelefonoSuspendida } = await import("./phone-verification");
+    vi.stubEnv("PHONE_VERIFICATION_SUSPENDED", "true");
+    vi.stubEnv("PHONE_VERIFICATION_SUSPENDED_UNTIL", "");
+    expect(verificacionTelefonoSuspendida()).toBe(false);
+    vi.stubEnv("PHONE_VERIFICATION_SUSPENDED_UNTIL", "2026-11-25T00:00:00-06:00");
+    expect(verificacionTelefonoSuspendida(new Date("2026-11-20T00:00:00-06:00"))).toBe(true);
+    expect(verificacionTelefonoSuspendida(new Date("2026-11-26T00:00:00-06:00"))).toBe(false);
+    vi.unstubAllEnvs();
+  });
+});

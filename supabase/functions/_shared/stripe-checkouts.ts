@@ -1,10 +1,10 @@
-import Stripe from "npm:stripe@23.0.0";
+import { crearStripe } from "./stripe.ts";
 import type { SupabaseClient } from "npm:@supabase/supabase-js@2.47.16";
 import { obtenerIntentoStripe } from "./stripe-verificacion.ts";
 
 /** Recover paid bulk checkouts, and expire only provider-confirmed old unpaid ones. */
 export async function conciliarCheckouts(db: SupabaseClient, clave: string) {
-  const stripe = new Stripe(clave, { apiVersion: "2026-09-30.endive", httpClient: Stripe.createFetchHttpClient() });
+  const stripe = crearStripe(clave);
   const { data, error } = await db.from("checkout_traslados_masivos")
     .select("id,stripe_payment_intent_id,monto_centavos,creado_en")
     .is("pagado_en", null).is("expirado_en", null).order("creado_en").limit(30);

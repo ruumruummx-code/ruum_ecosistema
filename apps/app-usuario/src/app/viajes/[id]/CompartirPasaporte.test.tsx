@@ -38,7 +38,7 @@ describe("CompartirPasaporte — temporizador de 'copiado'", () => {
     await act(async () => {
       vi.advanceTimersByTime(VENTANA_COPIADO_MS);
     });
-    expect(screen.getByRole("button", { name: /^compartir$/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /^copiar enlace/i })).toBeInTheDocument();
   });
 
   it("un segundo copiado reinicia la ventana en lugar de acumular temporizadores", async () => {
@@ -62,7 +62,7 @@ describe("CompartirPasaporte — temporizador de 'copiado'", () => {
     await act(async () => {
       vi.advanceTimersByTime(VENTANA_COPIADO_MS);
     });
-    expect(screen.getByRole("button", { name: /^compartir$/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /^copiar enlace/i })).toBeInTheDocument();
   });
 
   it("desmontar dentro de la ventana suelta el temporizador y no deja setState pendiente", async () => {

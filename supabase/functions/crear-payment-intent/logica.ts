@@ -11,15 +11,40 @@ export function montoAutorizadoParaCobro(traslado: TrasladoParaCobro): number | 
   return typeof monto === "number" && Number.isFinite(monto) ? monto : null;
 }
 
-export function validarRangoMontoCobro(monto: number | null): { valido: true } | { valido: false; error: string } {
+/**
+ * Ajuste de un PaymentIntent reutilizable cuyo monto ya no coincide con el
+ * precio vigente (precio_final ?? precio_cotizado). Antes se devolvía su
+ * client_secret sin comparar: se cobraba el monto viejo y el webhook dejaba el
+ * traslado en «requiere revisión».
+ * - Estados editables: se actualiza el monto (paymentIntents.update).
+ * - requires_action: se cancela y se crea otro con clave de idempotencia nueva.
+ * - processing / requires_capture: el cobro ya está en curso; no se toca.
+ */
+export type AjusteMonto = { accion: "ninguno" } | { accion: "actualizar" } | { accion: "reemplazar" } | { accion: "en_proceso" };
+
+export function decidirAjusteMonto(status: string, montoActualCentavos: number, montoVigenteCentavos: number): AjusteMonto {
+  if (montoActualCentavos === montoVigenteCentavos) return { accion: "ninguno" };
+  if (status === "requires_payment_method" || status === "requires_confirmation") return { accion: "actualizar" };
+  if (status === "requires_action") return { accion: "reemplazar" };
+  return { accion: "en_proceso" };
+}
+
+/**
+ * `piso` viene de tarifas_config.piso_cobro (RPC piso_cobro_traslado): el mismo
+ * valor que aplica calcular_tarifa_traslado. PISO_COBRO_MXN es solo respaldo.
+ */
+export function validarRangoMontoCobro(
+  monto: number | null,
+  piso: number = PISO_COBRO_MXN
+): { valido: true } | { valido: false; error: string } {
   if (monto === null || monto <= 0) {
     return { valido: false, error: "El traslado todavía no cuenta con una cotización válida." };
   }
 
-  if (monto < PISO_COBRO_MXN || monto > TECHO_COBRO_MXN) {
+  if (monto < piso || monto > TECHO_COBRO_MXN) {
     return {
       valido: false,
-      error: `El monto a cobrar ($${monto} MXN) está fuera del rango esperado ($${PISO_COBRO_MXN}-${TECHO_COBRO_MXN} MXN). Revísalo en panel-admin antes de cobrar.`
+      error: `El monto a cobrar ($${monto} MXN) está fuera del rango esperado ($${piso}-${TECHO_COBRO_MXN} MXN). Revísalo en panel-admin antes de cobrar.`
     };
   }
 
@@ -63,4 +88,13 @@ export function claveIdempotenciaStripe(trasladoId: string, intentReemplazadoId?
   return intentReemplazadoId
     ? `traslado-${trasladoId}-reemplazo-${intentReemplazadoId}`
     : `traslado-${trasladoId}`;
+}
+
+/**
+ * Clave para un PI nuevo cuando NO hay uno pendiente en base. Incluye el monto
+ * en centavos: si el precio cambió, Stripe no devuelve el PI cacheado (24 h)
+ * con el monto anterior.
+ */
+export function claveIdempotenciaCobro(trasladoId: string, montoCentavos: number, intentReemplazadoId?: string | null): string {
+  return `${claveIdempotenciaStripe(trasladoId, intentReemplazadoId)}-${montoCentavos}`;
 }

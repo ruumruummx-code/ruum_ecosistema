@@ -74,12 +74,15 @@ export async function validarFilasServidor(entradas: Record<string, string>[]): 
 }
 
 /** Stripe REST evita agregar otro SDK al bundle de la aplicación. */
+export const STRIPE_API_VERSION = "2026-09-30.endive";
+
 export async function stripeMasivo(endpoint: string, parametros?: URLSearchParams, idempotencia?: string) {
   const key = process.env.STRIPE_SECRET_KEY;
   if (!key) throw new Error("El cobro masivo no está configurado en este entorno.");
   const res = await fetch(`https://api.stripe.com/v1/${endpoint}`, {
     method: parametros ? "POST" : "GET",
-    headers: { Authorization: `Bearer ${key}`, ...(parametros ? { "Content-Type": "application/x-www-form-urlencoded" } : {}), ...(idempotencia ? { "Idempotency-Key": idempotencia } : {}) },
+    // Misma versión de API que las Edge Functions (supabase/functions/_shared/stripe.ts).
+    headers: { Authorization: `Bearer ${key}`, "Stripe-Version": STRIPE_API_VERSION, ...(parametros ? { "Content-Type": "application/x-www-form-urlencoded" } : {}), ...(idempotencia ? { "Idempotency-Key": idempotencia } : {}) },
     body: parametros, signal: AbortSignal.timeout(15000), cache: "no-store",
   });
   const data = await res.json();

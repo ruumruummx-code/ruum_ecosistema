@@ -63,6 +63,43 @@ function clearRecoveryCookie(cookieStore: Awaited<ReturnType<typeof cookies>>) {
   } catch {}
 }
 
+
+/**
+ * Login CSRF: en confirmación y magic link, un enlace de otra cuenta no debe
+ * reemplazar en silencio la sesión abierta. Si la cuenta del enlace difiere de
+ * la sesión previa, se revoca la sesión nueva, se restauran las cookies de la
+ * sesión anterior y se pide al usuario que confirme el cambio iniciando sesión
+ * explícitamente con la otra cuenta (mismo criterio que recovery).
+ */
+type CookieSesion = { name: string; value: string };
+
+function esCookieSesionSupabase(nombre: string) {
+  return nombre.startsWith("sb-") && nombre.includes("-auth-token") && !nombre.endsWith("-code-verifier");
+}
+
+async function revertirCambioDeCuenta(
+  cookieStore: Awaited<ReturnType<typeof cookies>>,
+  supabase: ReturnType<typeof crearClienteServidor>,
+  sesionPrevia: CookieSesion[]
+) {
+  try {
+    await supabase.auth.signOut({ scope: "local" });
+  } catch (err) {
+    logStructuredWarn("auth/callback", "revocar_sesion_enlace_ajeno_fallido", err);
+  }
+  try {
+    for (const cookie of cookieStore.getAll()) {
+      if (esCookieSesionSupabase(cookie.name)) cookieStore.delete(cookie.name);
+    }
+    const secure = process.env.NODE_ENV !== "development";
+    for (const cookie of sesionPrevia) {
+      cookieStore.set(cookie.name, cookie.value, { path: "/", sameSite: "lax", secure, httpOnly: false });
+    }
+  } catch (err) {
+    logStructuredWarn("auth/callback", "restaurar_sesion_previa_fallido", err);
+  }
+}
+
 export async function GET(request: NextRequest) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get("code");
@@ -147,6 +184,10 @@ function clasificarCausaError(error: unknown, searchParams: URLSearchParams): "e
   } catch {
     // Sin sesión previa activa
   }
+  const sesionPrevia: CookieSesion[] = usuarioPrevioId
+    ? cookieStore.getAll().filter((c) => esCookieSesionSupabase(c.name)).map(({ name, value }) => ({ name, value }))
+    : [];
+  const destinoCuentaDistinta = "/login?reason=cuenta_distinta";
 
   // 1. Flujo PKCE (autorización por código)
   if (code) {
@@ -166,6 +207,11 @@ function clasificarCausaError(error: unknown, searchParams: URLSearchParams): "e
         }
       } else {
         clearRecoveryCookie(cookieStore);
+        const nuevoUserId = dataAuth?.user?.id ?? null;
+        if (usuarioPrevioId && nuevoUserId && nuevoUserId !== usuarioPrevioId) {
+          await revertirCambioDeCuenta(cookieStore, supabase, sesionPrevia);
+          return NextResponse.redirect(`${origin}${destinoCuentaDistinta}`);
+        }
       }
       const destino = type === "recovery" ? `/nueva-password${queryMismatch}` : next;
       return NextResponse.redirect(`${origin}${destino}`);
@@ -200,6 +246,11 @@ function clasificarCausaError(error: unknown, searchParams: URLSearchParams): "e
         }
       } else {
         clearRecoveryCookie(cookieStore);
+        const nuevoUserId = dataAuth?.user?.id ?? null;
+        if (usuarioPrevioId && nuevoUserId && nuevoUserId !== usuarioPrevioId) {
+          await revertirCambioDeCuenta(cookieStore, supabase, sesionPrevia);
+          return NextResponse.redirect(`${origin}${destinoCuentaDistinta}`);
+        }
       }
       const destino = type === "recovery" ? `/nueva-password${queryMismatch}` : next;
       return NextResponse.redirect(`${origin}${destino}`);

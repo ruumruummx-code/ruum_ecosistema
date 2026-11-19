@@ -71,12 +71,13 @@ describe("cotización de 100 traslados", () => {
     expect(mocks.guardar).not.toHaveBeenCalled();
     expect(mocks.stripe).not.toHaveBeenCalled();
   });
-  it("falla con 500 si falta MAPBOX_SECRET_TOKEN", async () => {
+  it("responde 503 genérico sin exponer configuración si falta MAPBOX_SECRET_TOKEN", async () => {
     vi.stubEnv("MAPBOX_SECRET_TOKEN", "");
     const respuesta = await POST(peticion());
     const data = await respuesta.json();
-    expect(respuesta.status).toBe(500);
-    expect(data.error).toContain("MAPBOX_SECRET_TOKEN");
+    expect(respuesta.status).toBe(503);
+    expect(data.error).not.toContain("MAPBOX_SECRET_TOKEN");
+    expect(data.traza).toEqual(expect.any(String));
   });
   it("consolida las 100 filas en una llamada y conserva la suma exacta", async () => {
     const respuesta = await POST(peticion());

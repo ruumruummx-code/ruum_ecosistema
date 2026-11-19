@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { cookies } from "next/headers";
 import { crearClienteServidor } from "@ruum/api/supabase";
 import { obtenerIp, rateLimitConVentana } from "@/lib/csp-rate-limit";
 import { normalizarCorreoRegistro } from "@/lib/registro-usuario";
@@ -68,12 +69,17 @@ export async function POST(request: NextRequest) {
     // que Supabase ponía en el enlace legítimo → token_hash al atacante).
     const redirectTo = `${request.nextUrl.origin}/auth/callback?next=%2F`;
 
+    // PKCE: resend genera un code_verifier. Se persiste en cookies de la
+    // respuesta para que /auth/callback pueda canjear el `code` del enlace en
+    // este mismo navegador (antes se descartaba y el usuario veía un error
+    // aunque el correo sí quedaba confirmado).
+    const cookieStore = await cookies();
     const supabase = crearClienteServidor(url, anonKey, {
       getAll() {
-        return [];
+        return cookieStore.getAll();
       },
-      setAll() {
-        /* sin cookies: este endpoint no establece sesión */
+      setAll(cookiesToSet) {
+        cookiesToSet.forEach(({ name, value, options }) => cookieStore.set(name, value, options));
       },
     });
 

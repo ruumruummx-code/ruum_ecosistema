@@ -44,7 +44,8 @@ export function hashIdentificador(valor: string): string {
 }
 
 export function captchaConfigurado(): boolean {
-  return Boolean(process.env.TURNSTILE_SECRET_KEY?.trim());
+  // Igual que login: secret de servidor y site key pública, o no se exige.
+  return Boolean(process.env.TURNSTILE_SECRET_KEY?.trim() && process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY?.trim());
 }
 
 /**
@@ -69,8 +70,9 @@ export async function verificarCaptchaRecovery(
   token: string | null | undefined,
   ip: string | null
 ): Promise<{ aprobado: boolean; configurado: boolean; proveedorCaido: boolean }> {
+  // Sin CAPTCHA configurado (secret + site key) no se exige verificación.
   if (!captchaConfigurado()) {
-    return { aprobado: false, configurado: false, proveedorCaido: false };
+    return { aprobado: true, configurado: false, proveedorCaido: false };
   }
   if (!token) {
     return { aprobado: false, configurado: true, proveedorCaido: false };

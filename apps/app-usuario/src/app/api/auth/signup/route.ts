@@ -9,7 +9,12 @@ import {
   soloDigitos,
   telefonoMx,
 } from "@/lib/registro-usuario";
-import { consumirTokenTelefono, bypassVerificacionTelefonoPermitido } from "@/lib/phone-verification";
+import {
+  bypassVerificacionTelefonoPermitido,
+  consumirTokenTelefono,
+  liberarTokenTelefono,
+  validarTokenTelefono,
+} from "@/lib/phone-verification";
 import { passwordCumpleRequisitos } from "@ruum/shared/utils";
 import { verificarCsrfORechazar } from "@/lib/csrf";
 
@@ -44,6 +49,10 @@ async function conTimeout<T>(operacion: Promise<T>, milisegundos: number): Promi
  * el único camino es este endpoint (10/h por IP, 5/h por correo).
  */
 export async function POST(request: NextRequest) {
+  let tokenReservado = false;
+  let altaCompletada = false;
+  let telefonoParaLiberar = "";
+  let tokenParaLiberar = "";
   try {
     const rechazoCsrf = verificarCsrfORechazar(request);
     if (rechazoCsrf) return rechazoCsrf;
@@ -66,6 +75,8 @@ export async function POST(request: NextRequest) {
     const password = typeof body?.password === "string" ? body.password : "";
     const tokenTelefono =
       typeof body?.tokenVerificacionTelefono === "string" ? body.tokenVerificacionTelefono : "";
+    telefonoParaLiberar = telefonoDigitos;
+    tokenParaLiberar = tokenTelefono;
 
     if (!nombre) return NextResponse.json({ error: "Escribe tu nombre." }, { status: 400 });
     if (!apellido) return NextResponse.json({ error: "Escribe tu apellido." }, { status: 400 });
@@ -85,13 +96,16 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Acepta los términos para continuar." }, { status: 400 });
     }
 
-    // Validación de verificación telefónica por SMS.
+    // Validación de verificación telefónica por SMS (solo firma y vigencia):
+    // el token se consume DESPUÉS del rate limit y se libera si el alta falla,
+    // para no obligar al usuario a repetir el SMS por un error ajeno a él.
     // La suspensión explícita permite el alta sin acreditar la propiedad del teléfono.
-    if (!bypassVerificacionTelefonoPermitido()) {
-      const verificacionTelefono = await consumirTokenTelefono(telefonoDigitos, tokenTelefono);
-      if (!verificacionTelefono.valido) {
+    const exigeTelefono = !bypassVerificacionTelefonoPermitido();
+    if (exigeTelefono) {
+      const firmaTelefono = validarTokenTelefono(telefonoDigitos, tokenTelefono);
+      if (!firmaTelefono.valido) {
         return NextResponse.json(
-          { error: verificacionTelefono.error || "Debes verificar tu número de teléfono celular por SMS antes de continuar." },
+          { error: firmaTelefono.error || "Debes verificar tu número de teléfono celular por SMS antes de continuar." },
           { status: 400 }
         );
       }
@@ -118,6 +132,19 @@ export async function POST(request: NextRequest) {
     const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
     if (!url || !anonKey) {
       return NextResponse.json({ error: "Servicio no disponible." }, { status: 503 });
+    }
+
+    // Consumo de un solo uso (evita dos altas con el mismo SMS). A partir de
+    // aquí, cualquier salida sin cuenta creada libera el token.
+    if (exigeTelefono) {
+      const verificacionTelefono = await consumirTokenTelefono(telefonoDigitos, tokenTelefono);
+      if (!verificacionTelefono.valido) {
+        return NextResponse.json(
+          { error: verificacionTelefono.error || "Debes verificar tu número de teléfono celular por SMS antes de continuar." },
+          { status: 400 }
+        );
+      }
+      tokenReservado = true;
     }
 
     const cookieStore = await cookies();
@@ -191,10 +218,15 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: MENSAJE_REGISTRO_NO_COMPLETADO }, { status: 400 });
     }
 
+    altaCompletada = true;
     return NextResponse.json({ ok: true, requiereConfirmacion: !data.session, correo });
   } catch (e) {
     console.warn("[auth/signup] error inesperado", e);
     return NextResponse.json({ error: "No pudimos crear la cuenta." }, { status: 500 });
+  } finally {
+    if (tokenReservado && !altaCompletada) {
+      await liberarTokenTelefono(telefonoParaLiberar, tokenParaLiberar);
+    }
   }
 }
 

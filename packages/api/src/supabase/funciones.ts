@@ -44,10 +44,29 @@ export interface FuncionesRpc {
     args: { p_traslado_id: string };
     ret: Database["public"]["Enums"]["estado_traslado"];
   };
-  /** Sobrecarga vigente (Fase 2/C3): calcula el cargo en el servidor. */
+  /**
+   * @deprecated Ya no es ejecutable por `authenticated` (auditoría 2026-11-19):
+   * la cancelación pasa por la Edge Function `cancelar-traslado-usuario`, que
+   * reembolsa y cancela PaymentIntents. Se conserva el tipo para clientes viejos.
+   */
   usuario_cancela_traslado: {
     args: { p_traslado_id: string; p_motivo: string };
     ret: Json;
+  };
+  /** Penalización y reembolso que aplicaría una cancelación (solo lectura). */
+  usuario_previsualizar_cancelacion: {
+    args: { p_traslado_id: string };
+    ret: Json;
+  };
+  /** Única vía de escritura de calificaciones del usuario. */
+  usuario_califica_traslado: {
+    args: { p_traslado_id: string; p_estrellas: number; p_comentario?: string | null };
+    ret: Json;
+  };
+  /** Conteos por estado de los traslados del usuario (sin límite de 1,000 filas). */
+  usuario_conteo_traslados_por_estado: {
+    args: Record<string, never>;
+    ret: Array<{ estado: Database["public"]["Enums"]["estado_traslado"]; total: number }>;
   };
   conductor_solicita_asignacion: {
     args: { p_traslado_id: string; p_lat: number | null; p_lng: number | null };

@@ -4,6 +4,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { crearClienteServidor } from "@/lib/supabase-server";
 import { esquemaSolicitudTraslado } from "@ruum/shared/validacion";
 import { obtenerIp, rateLimitConVentana } from "@/lib/csp-rate-limit";
+import { logStructuredError } from "@/lib/logger";
 import { verificarCsrfORechazar } from "@/lib/csrf";
 import { logStructuredWarn } from "@/lib/logger";
 import {
@@ -11,8 +12,10 @@ import {
   VIAJES_CREAR_LIMITES,
   VIAJES_CREAR_VENTANA_MS,
 } from "@/lib/viajes-policy";
+import { createHash } from "node:crypto";
 import { RutaNoDisponibleError } from "@/lib/ruta-cache";
-import { resolverRutaSolicitudServidor } from "@/lib/ruta-solicitud-servidor";
+import { resolverRutaSolicitudServidor, UbicacionDivergenteError } from "@/lib/ruta-solicitud-servidor";
+import { getRedis } from "@/lib/csp-rate-limit";
 import { cotizarSolicitudIndividual } from "@/lib/cotizacion-individual-servidor";
 import { construirPayloadCreacion } from "@/app/viajes/nuevo/adapters";
 import type { DatosFormulario } from "@/app/viajes/nuevo/types";
@@ -43,10 +46,22 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "No autenticado" }, { status: 401 });
     }
 
+    // Cuentas creadas con la verificación SMS suspendida quedan con
+    // telefono_verificado = false: deben verificar antes del primer traslado
+    // (el teléfono se usa en llamadas enmascaradas y contacto operativo).
+    if (user.user_metadata?.telefono_verificado === false) {
+      return NextResponse.json(
+        { error: "Verifica tu número de teléfono antes de solicitar tu primer traslado.", codigo: "telefono_no_verificado" },
+        { status: 403 }
+      );
+    }
+
     // RUUM-USR-F6-001 (CA-9 / T10): Rate limit de creación con clave compuesta de F3
     // sobre Redis de F2 (IP + cuenta + dispositivo)
     const userHash = hashPseudonimoViajes(user.id);
-    const ip = obtenerIp(request) || "127.0.0.1";
+    // Sin IP confiable se omite esa dimensión (null), como en el resto de
+    // endpoints: "127.0.0.1" convertía la dimensión en un bucket global.
+    const ip = obtenerIp(request);
     const dispositivo = normalizarDispositivo(request.headers.get("x-device-id"));
 
     const [rlIp, rlCuenta, rlDevice] = await Promise.all([
@@ -158,6 +173,10 @@ export async function POST(request: NextRequest) {
     };
     const formulario: DatosFormulario = {
       ...parsed.data,
+      // La condición declarada no abarata el servicio: el usuario solo puede
+      // indicar rescate mecánico; el resto se cotiza como seminueva y solo
+      // Torre de Control cambia la condición registrada.
+      condicion: parsed.data.condicion === "rescate_mecanico" ? "rescate_mecanico" : "seminueva",
       tipo: tipo as DatosFormulario["tipo"],
       origenReferencias: textoOpcional("origenReferencias"),
       destinoReferencias: textoOpcional("destinoReferencias"),
@@ -166,7 +185,43 @@ export async function POST(request: NextRequest) {
       ventanaEntrega: textoOpcional("ventanaEntrega"),
       paradas: parsed.data.paradas.map((p, i) => ({ ...p, id: String(i), referencias: p.referencias ?? "" })),
     };
-    const rutaRecalculada = await resolverRutaSolicitudServidor(parsed.data);
+    // Reutiliza la cotización vigente ante reintentos de la misma solicitud
+    // (misma clave de idempotencia y mismo contenido): evita recotizar y
+    // repetir hasta 10 geocodificaciones de Mapbox por reintento.
+    const claveIdempotencia = typeof body.claveIdempotencia === "string" && /^[0-9a-f-]{36}$/i.test(body.claveIdempotencia)
+      ? body.claveIdempotencia
+      : null;
+    const huellaSolicitud = createHash("sha256")
+      .update(JSON.stringify({ ...body, paso: undefined, wizardPaso: undefined, step: undefined }))
+      .digest("hex")
+      .slice(0, 32);
+    const claveCotizacion = claveIdempotencia ? `cotizacion:v1:${userHash}:${claveIdempotencia}:${huellaSolicitud}` : null;
+    const redis = claveCotizacion ? getRedis() : null;
+    if (redis && claveCotizacion) {
+      try {
+        const previa = await redis.get<Record<string, unknown>>(claveCotizacion);
+        const expira = Date.parse(String((previa?.snapshot as { expiraEn?: string } | undefined)?.expiraEn ?? ""));
+        if (previa && Number.isFinite(expira) && expira - Date.now() > 60_000) {
+          return NextResponse.json({ ...previa, reutilizada: true }, { status: 200 });
+        }
+      } catch {
+        // La caché nunca bloquea la cotización.
+      }
+    }
+
+    const numeroOpcional = (campo: string) => {
+      const valor = (body as Record<string, unknown>)[campo];
+      return typeof valor === "number" && Number.isFinite(valor) ? valor : null;
+    };
+    const pin = (lat: number | null, lng: number | null) => (lat !== null && lng !== null ? { lat, lng } : null);
+    const rutaRecalculada = await resolverRutaSolicitudServidor(
+      parsed.data,
+      {
+        origen: pin(numeroOpcional("origenLat"), numeroOpcional("origenLng")),
+        destino: pin(numeroOpcional("destinoLat"), numeroOpcional("destinoLng")),
+      },
+      (body as Record<string, unknown>).confirmarUbicacionPin === true
+    );
     const payload = construirPayloadCreacion(
       formulario,
       parsed.data.vehiculoSeleccionadoId,
@@ -198,38 +253,59 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // CB-3 / T9 / CA-8: Consentimiento vía escritor canónico de F2
-    if (parsed.data.aceptaPoliticas) {
-      try {
-        await registrarConsentimientoUsuario(cliente, {
-          version: 1,
-          canal: "web",
-          versionApp: "1.0.0",
-        });
-      } catch (errConsent) {
-        logStructuredWarn("api/viajes", "registro_consentimiento_canonico_nota", errConsent, {
-          userIdHash: userHash,
-        });
-      }
+    // CB-3 / T9 / CA-8: Consentimiento vía escritor canónico de F2.
+    // Obligatorio: sin evidencia de aceptación de las políticas de pago y
+    // cancelación no se emite cotización (antes un fallo solo dejaba un aviso).
+    try {
+      await registrarConsentimientoUsuario(cliente, {
+        version: 1,
+        canal: "web",
+        versionApp: "1.0.0",
+      });
+    } catch (errConsent) {
+      logStructuredError("api/viajes", "registro_consentimiento_canonico_fallido", errConsent, {
+        userIdHash: userHash,
+      });
+      return NextResponse.json(
+        { error: "No pudimos registrar tu aceptación de las políticas de pago y cancelación. Intenta de nuevo en unos momentos." },
+        { status: 503, headers: { "Retry-After": "30" } }
+      );
     }
 
-    return NextResponse.json(
-      {
-        ok: true,
-        pasoValidado: pasoContador,
-        recalculo: {
-          distanciaKm: rutaRecalculada.distanciaKm,
-          tiempoEstimadoHoras: rutaRecalculada.tiempoEstimadoHoras,
-          precioCotizado: montoCalculado,
-          fuente: rutaRecalculada.fuente,
-        },
-        // El nonce solo autoriza el payload exacto guardado en la base de datos.
-        snapshot: solicitud.traslado.snapshot_tarifa,
-        solicitud,
+    const respuesta = {
+      ok: true,
+      pasoValidado: pasoContador,
+      recalculo: {
+        distanciaKm: rutaRecalculada.distanciaKm,
+        tiempoEstimadoHoras: rutaRecalculada.tiempoEstimadoHoras,
+        precioCotizado: montoCalculado,
+        fuente: rutaRecalculada.fuente,
       },
-      { status: 200 }
-    );
+      // El nonce solo autoriza el payload exacto guardado en la base de datos.
+      snapshot: solicitud.traslado.snapshot_tarifa,
+      solicitud,
+    };
+    if (redis && claveCotizacion) {
+      try {
+        // La cotización vive 15 min en la base; la caché nunca la sobrevive.
+        await redis.set(claveCotizacion, respuesta, { ex: 14 * 60 });
+      } catch {
+        // best effort
+      }
+    }
+    return NextResponse.json(respuesta, { status: 200 });
   } catch (err) {
+    if (err instanceof UbicacionDivergenteError) {
+      return NextResponse.json(
+        {
+          error: err.message,
+          codigo: err.confirmable ? "ubicacion_requiere_confirmacion" : "ubicacion_incoherente",
+          punto: err.punto,
+          distanciaM: Math.round(err.distanciaM),
+        },
+        { status: 409 }
+      );
+    }
     if (err instanceof RutaNoDisponibleError) {
       return NextResponse.json({ error: err.message }, { status: 503 });
     }

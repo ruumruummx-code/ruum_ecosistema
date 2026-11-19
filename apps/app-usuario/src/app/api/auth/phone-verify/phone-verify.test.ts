@@ -31,6 +31,7 @@ function reqVerify(telefono: unknown, codigo: unknown, headers: Record<string, s
 describe("POST /api/auth/phone-verify/send", () => {
   it("pausa el envío y la validación de códigos", async () => {
     vi.stubEnv("PHONE_VERIFICATION_SUSPENDED", "true");
+    vi.stubEnv("PHONE_VERIFICATION_SUSPENDED_UNTIL", "2999-01-01T00:00:00Z");
     try {
       expect((await postSend(reqSend("5512345678"))).status).toBe(503);
       expect((await postVerify(reqVerify("5512345678", "123456"))).status).toBe(503);

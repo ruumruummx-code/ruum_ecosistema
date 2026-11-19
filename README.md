@@ -71,9 +71,21 @@ El script `test:coverage` se define por workspace. Está disponible en
   (`scripts/validate-env.mjs`, corre en `predev`/`prebuild`):
   - *conductor*: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`,
     `NEXT_PUBLIC_APP_URL`, `NEXT_PUBLIC_APP_VERSION`, `NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN`
-  - *usuario*: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`,
-    `NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN`, `PHONE_VERIFY_SECRET` (privada, mínimo
-    32 caracteres en builds alojados)
+  - *usuario* (lista completa en `requiredByApp["app-usuario"]`):
+    - Públicas: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`,
+      `NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN`, `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`.
+    - Privadas de servidor (Vercel, nunca `NEXT_PUBLIC_`): `SUPABASE_SERVICE_ROLE_KEY`
+      (distinta de la anon key), `STRIPE_SECRET_KEY` (mismo modo test/live que la
+      publicable), `MAPBOX_SECRET_TOKEN` (`sk.`), `PHONE_VERIFY_SECRET` (mínimo 32
+      caracteres), `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, `TWILIO_VERIFY_SERVICE_SID`.
+    - En builds alojados además: Redis (`UPSTASH_REDIS_REST_URL` +
+      `UPSTASH_REDIS_REST_TOKEN`, o `KV_REST_API_URL` + `KV_REST_API_TOKEN`) y, en
+      producción de Vercel, `RUUM_STRIPE_MODE` (`live` por defecto).
+    - Opcionales: `TURNSTILE_SECRET_KEY` + `NEXT_PUBLIC_TURNSTILE_SITE_KEY` (el CAPTCHA
+      adaptativo de login/recuperación solo se exige con las dos), y la suspensión
+      temporal del SMS `PHONE_VERIFICATION_SUSPENDED=true` +
+      `PHONE_VERIFICATION_SUSPENDED_UNTIL` (fecha ISO; sin fecha o vencida, la
+      verificación vuelve a exigirse). Sus espejos `NEXT_PUBLIC_…` deben coincidir.
   - *admin*: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`
 - En Vercel, configurar estas variables en los entornos donde se construye
   `app-usuario`; `PHONE_VERIFY_SECRET` no debe llevar el prefijo `NEXT_PUBLIC_`.

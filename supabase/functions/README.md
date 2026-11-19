@@ -10,6 +10,9 @@ decisión de producto: **Twilio Proxy** (llamadas enmascaradas).
 |---|---|---|
 | `crear-payment-intent` | `app-usuario`: wizard de nuevo traslado (pago anticipado) y `/viajes/[id]` (pago al cierre) | Crea un PaymentIntent para el traslado y registra la fila `pagos` (estado `pendiente`) |
 | `stripe-webhook` | Stripe (servidor a servidor) | Recibe eventos de PaymentIntent y actualiza `pagos` y el estado del traslado asociado |
+| `cancelar-traslado-usuario` | `app-usuario`, `/viajes/[id]` (Cancelar viaje) | Cancela con `servidor_cancela_traslado`; si ya se cobró reembolsa (100 % menos penalización, idempotente por fila de `reembolsos_traslado`) y cancela los PaymentIntent pendientes. `verify_jwt = false`, autentica con `auth.getUser()` |
+
+Stripe: todas las funciones usan el SDK y la versión de API de `_shared/stripe.ts` (`stripe@23.0.0`, `2026-09-30.endive`). Los reembolsos que fallan quedan en `reembolsos_traslado` y los reintenta `reconciliar-pagos-stripe`; los reembolsos parciales no conciliados entran a `revision_financiera_stripe`.
 | `crear-llamada-enmascarada` | Ambas apps, pantalla de chat del traslado | Crea (o reutiliza) la sesión de Twilio Proxy del traslado y devuelve el número virtual al que el cliente abre un enlace `tel:` |
 | `validar-documento-conductor` | `app-conductor`, registro y correcciones | Valida el contenido real, sanea el archivo, lo guarda en el bucket privado y registra/reemplaza la versión mediante RPC |
 | `validar-documento-identidad` | `app-usuario`, verificación | Acepta JPEG, PNG o PDF por multipart limitado, detecta y valida bytes, sella la carga y registra el resultado mediante RPC |
