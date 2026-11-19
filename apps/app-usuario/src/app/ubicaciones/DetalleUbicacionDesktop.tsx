@@ -3,10 +3,12 @@ import { useCallback, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useDialogAccesible } from "@ruum/ui";
+import { Button } from "@ruum/ui/base";
 import {
   direccionCompleta,
   enlaceBuscarUbicacion,
   ETIQUETAS_UBICACION,
+  ladoHabitual,
   tipoUbicacion,
   type UbicacionUsuario,
 } from "./ubicaciones-usuario";
@@ -84,17 +86,19 @@ export function DetalleUbicacionDesktop({
     );
   }, []);
   const tipo = tipoUbicacion(u);
+  const lado = ladoHabitual(u);
+  const lados = [lado, lado === "origen" ? "destino" : "origen"] as const;
   const campos: [IconoUbicacionNombre, string, string][] = [
-    ["home", "Tipo de ubicación", ETIQUETAS_UBICACION[tipo]],
+    ["home", "Roles de la ubicación", u.fuentes.map(f => ETIQUETAS_UBICACION[f]).join(", ")],
     ["pin", "Ciudad", u.ciudad || "No registrada"],
     ["flag", "Estado", u.estado || "No registrado"],
     ["code", "Código postal", u.codigoPostal || "No registrado"],
     [
       "pin",
-      "Coordenadas",
+      "Punto en el mapa",
       coordenadasValidas(u.lat, u.lng)
         ? `${u.lat}, ${u.lng}`
-        : "No registradas",
+        : "El mapa estima el punto por dirección. Confirma el pin al cotizar.",
     ],
     ["note", "Referencia", u.referencia || "Sin referencia"],
   ];
@@ -143,12 +147,16 @@ export function DetalleUbicacionDesktop({
         </button>
       </div>
       <div className={s.quickActions}>
-        <Link href={enlaceBuscarUbicacion(u, "origen")}>
-          <span>
-            <Icon name="send" />
-          </span>
-          Usar en traslado
-        </Link>
+        {lados.map(campo => (
+          <Button key={campo} asChild variant="link" className="min-w-0 justify-start whitespace-normal leading-tight">
+            <Link href={enlaceBuscarUbicacion(u, campo)}>
+              <span>
+                <Icon name={campo === "origen" ? "send" : "pin"} />
+              </span>
+              Usar como {campo}
+            </Link>
+          </Button>
+        ))}
         <button onClick={copiar}>
           <span>
             <Icon name="copy" />
@@ -179,14 +187,6 @@ export function DetalleUbicacionDesktop({
           </div>
         ))}
       </dl>
-      <button
-        className={`${s.outline} ${s.editInformation}`}
-        disabled={ocupado}
-        onClick={editar}
-      >
-        <Icon name="edit" />
-        Editar información
-      </button>
       {ampliado && <MapaAmpliado ubicacion={u} cerrar={cerrarMapa} />}
     </aside>
   );

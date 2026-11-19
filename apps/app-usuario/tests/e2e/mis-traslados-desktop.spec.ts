@@ -40,10 +40,10 @@ test("Mis traslados: lista, panel de detalle, filtros y contención del scroll",
     expect(geometry.global, JSON.stringify({ width, height, geometry })).toBeLessThanOrEqual(1);
     expect(geometry.horizontal, JSON.stringify({ width, height, geometry })).toBeLessThanOrEqual(1);
     if (width >= 1280) {
-      // El panel es sticky: al desplazar la lista, sus acciones quedan siempre a la vista.
-      const accion = main.getByRole("complementary").getByRole("link", { name: "Contactar soporte", exact: true });
-      await accion.scrollIntoViewIfNeeded();
-      await expect(accion).toBeInViewport({ ratio: 0.99 });
+      const acciones = main.getByRole("group", { name: "Acciones del traslado" });
+      await expect(acciones.getByRole("link", { name: "Contactar soporte", exact: true })).toBeInViewport({ ratio: 0.99 });
+      await expect(acciones.getByRole("button", { name: "Exportar PDF" })).toBeInViewport({ ratio: 0.99 });
+      await expect(acciones.getByRole("button", { name: "Cancelar traslado" })).toBeInViewport({ ratio: 0.99 });
     } else {
       await expect(main.getByRole("complementary")).toHaveCount(0);
     }
@@ -52,9 +52,10 @@ test("Mis traslados: lista, panel de detalle, filtros y contención del scroll",
   await page.setViewportSize({ width: 1672, height: 941 });
   await page.screenshot({ path: "test-results/mis-traslados-desktop.png" });
   const segundo = main.getByRole("article").nth(1).getByRole("button", { name: /^Ver / });
-  const nombre = (await segundo.getAttribute("aria-label"))!.slice("Ver ".length);
+  const nombre = (await segundo.getAttribute("aria-label"))!.split(" · ")[1].replace(/ en el panel$/, "");
   await segundo.click();
-  await expect(main.getByRole("complementary").getByRole("heading", { name: nombre })).toBeVisible();
+  await expect(segundo).toHaveAttribute("aria-pressed", "true");
+  await expect(main.getByRole("complementary").getByRole("heading", { name: nombre, exact: true })).toBeVisible();
   await main.getByRole("complementary").getByRole("tab", { name: "Detalles" }).click();
   await expect(main.getByText("Folio", { exact: true })).toBeVisible();
   await main.getByRole("button", { name: "Cerrar detalle" }).click();

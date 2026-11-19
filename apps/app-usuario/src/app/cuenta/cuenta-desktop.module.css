@@ -234,7 +234,7 @@
   border-top: 1px solid #ffffff1c;
   padding-top: 8px;
 }
-.stats > a {
+.stats > :is(a, .fechaAlta) {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -245,13 +245,23 @@
   color: #d6e5f5;
   border-radius: 3px;
 }
-.stats > a:last-child {
+.stats > :last-child {
   border: 0;
 }
-.stats > a:hover {
-  background: #ffffff0b;
+.stats > a:hover,
+.stats > a:focus-visible {
+  background: color-mix(in srgb, currentColor 12%, transparent);
 }
-.stats > a > svg {
+.stats > a small {
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+.stats .fechaAlta strong {
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.stats > :is(a, .fechaAlta) > svg {
   width: 17px;
   height: 17px;
   align-self: flex-start;
@@ -342,8 +352,7 @@
   height: auto;
   flex-shrink: 0;
 }
-.quickLinks > a,
-.quickLinks > button {
+.quickLinks > a {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -357,7 +366,7 @@
   box-shadow: 0 1px 3px #204a6e04;
 }
 .quickLinks > a:hover,
-.quickLinks > button:hover {
+.quickLinks > a:focus-visible {
   border-color: #a5c4ff;
   box-shadow: 0 4px 12px #005cff0b;
 }
@@ -387,17 +396,13 @@
   line-height: 1.4;
   color: #617ba8;
   margin-top: 3px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  overflow-wrap: anywhere;
 }
-.quickLinks > a > div,
-.quickLinks > button > div {
+.quickLinks > a > div {
   flex: 1;
   min-width: 0;
 }
-.quickLinks > a > svg,
-.quickLinks > button > svg {
+.quickLinks > a > svg {
   width: 13px;
   height: 13px;
   color: #6b87b6;
@@ -563,7 +568,7 @@
   min-width: 0;
   overflow: hidden;
 }
-.addressBlock:hover {
+a.addressBlock:hover {
   background: #f7faff;
   border-color: #bfd5ff;
 }
@@ -1058,7 +1063,7 @@
   .stats small {
     font-size: 10px;
   }
-  .stats > a > svg {
+  .stats > :is(a, .fechaAlta) > svg {
     width: 20px;
     height: 20px;
   }
@@ -1168,8 +1173,7 @@
   .headerArt {
     display: flex;
     align-items: center;
-    gap: 25px;
-    flex: 0 1 650px;
+    flex: 0 1 360px;
     min-width: 0;
     max-width: 52%;
   }
@@ -1178,20 +1182,6 @@
     height: 82px;
     min-width: 0;
     flex: 1;
-  }
-  .headerArt p {
-    font-size: 13px;
-    line-height: 1.5;
-    flex: 0 0 220px;
-    max-width: 220px;
-    text-align: right;
-    color: #18345b;
-    margin: 0;
-  }
-  .headerArt strong {
-    color: #005cff;
-    text-decoration: underline;
-    font-weight: 600;
   }
   .banners {
     min-height: 184px;
@@ -1242,7 +1232,7 @@
   .stats {
     padding-top: 12px;
   }
-  .stats > a {
+  .stats > :is(a, .fechaAlta) {
     gap: 10px;
   }
   .stats strong {
@@ -1251,7 +1241,7 @@
   .stats small {
     font-size: 11px;
   }
-  .stats > a > svg {
+  .stats > :is(a, .fechaAlta) > svg {
     width: 22px;
     height: 22px;
   }
@@ -1282,8 +1272,7 @@
     gap: 13px;
     height: 74px;
   }
-  .quickLinks > a,
-  .quickLinks > button {
+  .quickLinks > a {
     padding: 12px;
     gap: 14px;
   }
@@ -1301,8 +1290,7 @@
   .quickLinks small {
     font-size: 11px;
   }
-  .quickLinks > a > svg,
-  .quickLinks > button > svg {
+  .quickLinks > a > svg {
     width: 16px;
     height: 16px;
   }
@@ -1424,11 +1412,6 @@
 @media (min-width: 1450px) and (max-width: 1630px) {
   .headerArt {
     max-width: 47%;
-    gap: 15px;
-  }
-  .headerArt p {
-    flex-basis: 180px;
-    font-size: 12px;
   }
   .heading > div > span {
     font-size: 14px;

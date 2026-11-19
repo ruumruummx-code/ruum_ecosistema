@@ -126,7 +126,7 @@ test("Mis ubicaciones: scroll confinado, selección, copia y persistencia autent
         JSON.stringify({ width, height, geometry }),
       ).toBeLessThanOrEqual(1);
     expect(geometry.listOverflow).toBe("auto");
-    const accion = app.getByRole("button", { name: "Editar información" });
+    const accion = app.getByRole("button", { name: "Editar", exact: true });
     await accion.scrollIntoViewIfNeeded();
     await expect(accion).toBeInViewport({ ratio: 1 });
   }
@@ -134,9 +134,9 @@ test("Mis ubicaciones: scroll confinado, selección, copia y persistencia autent
   await page.evaluate(() => document.fonts.ready);
   await expect(app.locator(".mapboxgl-marker")).toBeVisible({ timeout: 30000 });
   await page.screenshot({ path: "test-results/ubicaciones-desktop.png" });
-  await app.getByRole("button", { name: "Ver Oficina corporativa" }).click();
+  await app.getByRole("button", { name: "Ver Oficina Corporativa" }).click();
   let detalle = app.getByRole("complementary", {
-    name: "Detalle de Oficina corporativa",
+    name: "Detalle de Oficina Corporativa",
   });
   await expect(detalle.getByText("19.427, -99.167")).toBeVisible();
   await detalle.getByRole("button", { name: "Copiar dirección" }).click();
@@ -157,9 +157,9 @@ test("Mis ubicaciones: scroll confinado, selección, copia y persistencia autent
   await page.reload();
   await esperarHidratacion(page);
   await ocultarOverlay();
-  await app.getByRole("button", { name: "Ver Oficina corporativa" }).click();
+  await app.getByRole("button", { name: "Ver Oficina Corporativa" }).click();
   detalle = app.getByRole("complementary", {
-    name: "Detalle de Oficina corporativa",
+    name: "Detalle de Oficina Corporativa",
   });
   await expect(
     detalle.getByRole("button", {
@@ -170,7 +170,7 @@ test("Mis ubicaciones: scroll confinado, selección, copia y persistencia autent
     .getByRole("button", { name: "Nueva ubicación", exact: true })
     .click();
   let editor = page.getByRole("dialog", { name: "Nueva ubicación" });
-  await editor.getByLabel("Alias o nombre").fill("Oficina de prueba");
+  await editor.getByLabel("Alias o nombre").fill("Oficina de Prueba");
   await editor.getByLabel("Dirección", { exact: true }).fill("Reforma 123");
   await editor.getByLabel("Ciudad o municipio").fill("Toluca");
   await editor.getByLabel("Estado", { exact: true }).fill("Estado de México");
@@ -178,22 +178,22 @@ test("Mis ubicaciones: scroll confinado, selección, copia y persistencia autent
   await editor.getByRole("button", { name: "Guardar ubicación" }).click();
   await expect(editor).not.toBeVisible();
   await expect(
-    app.getByRole("complementary", { name: "Detalle de Oficina de prueba" }),
+    app.getByRole("complementary", { name: "Detalle de Oficina de Prueba" }),
   ).toBeVisible();
   await page.reload();
   await esperarHidratacion(page);
   await ocultarOverlay();
-  await app.getByRole("button", { name: "Ver Oficina de prueba" }).click();
+  await app.getByRole("button", { name: "Ver Oficina de Prueba" }).click();
   detalle = app.getByRole("complementary", {
-    name: "Detalle de Oficina de prueba",
+    name: "Detalle de Oficina de Prueba",
   });
-  await detalle.getByRole("button", { name: "Editar información" }).click();
+  await detalle.getByRole("button", { name: "Editar", exact: true }).click();
   editor = page.getByRole("dialog", { name: "Editar ubicación" });
-  await editor.getByLabel("Alias o nombre").fill("Oficina editada");
+  await editor.getByLabel("Alias o nombre").fill("Oficina Editada");
   await editor.getByRole("button", { name: "Guardar cambios" }).click();
   await expect(editor).not.toBeVisible();
   detalle = app.getByRole("complementary", {
-    name: "Detalle de Oficina editada",
+    name: "Detalle de Oficina Editada",
   });
   await detalle.getByRole("button", { name: "Eliminar", exact: true }).click();
   await page
@@ -207,7 +207,7 @@ test("Mis ubicaciones: scroll confinado, selección, copia y persistencia autent
   await esperarHidratacion(page);
   await ocultarOverlay();
   await expect(
-    app.getByRole("button", { name: "Ver Oficina editada" }),
+    app.getByRole("button", { name: "Ver Oficina Editada" }),
   ).toHaveCount(0);
   await app.getByRole("button", { name: "Página 2" }).click();
   await expect(

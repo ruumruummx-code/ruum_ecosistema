@@ -57,6 +57,11 @@ export function EtiquetaUbicacion({
   return (
     <span className={s.tag} data-type={tipo}>
       {ETIQUETAS_UBICACION[tipo]}
+      {ubicacion.fuentes.filter(f => f !== tipo).map(f => (
+        <span key={f} className="block" title={ETIQUETAS_UBICACION[f]}>
+          {f === "origen" ? "Origen" : f === "destino" ? "Destino" : ETIQUETAS_UBICACION[f]}
+        </span>
+      ))}
     </span>
   );
 }

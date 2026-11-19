@@ -8,7 +8,7 @@ import { Icono, SENDAS_ICONO, useDialogAccesible } from "@ruum/ui";
 import type { Database } from "@ruum/shared/types";
 import { crearClienteNavegador } from "../../lib/supabase-browser";
 import { logStructuredError } from "../../lib/logger";
-import { iniciales } from "./cuenta-utils";
+import { iniciales, nombreVisibleCuenta } from "./cuenta-utils";
 import { enmascararTelefono } from "@ruum/api/services";
 import type { RolEfectivoCuentaDTO } from "@ruum/api/services";
 
@@ -275,7 +275,7 @@ export function CuentaCliente({
   const [errorSesion, setErrorSesion] = useState<string | null>(null);
   const salidaRef = useRef(false);
   const cerrarHoja = useCallback(() => setSeccion(null), []);
-  const nombre = usuario?.nombre?.trim() || "Mi cuenta";
+  const nombre = nombreVisibleCuenta(usuario?.nombre) || "Mi cuenta";
   const correo = correoRegistro?.trim() || "Sin correo registrado";
   const telefono = usuario?.telefono?.trim() ? enmascararTelefono(usuario.telefono) : "Sin teléfono registrado";
 

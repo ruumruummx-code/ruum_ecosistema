@@ -30,6 +30,7 @@ test("Vehículos desktop: fidelidad, selección, filtros y scroll interno", asyn
       .locator("#userDashboardSidebar")
       .getByRole("link", { name: "Mis vehículos", exact: true }),
   ).toHaveAttribute("aria-current", "page");
+  await expect(page.locator("#userDashboardSidebar").getByRole("link", { name: "Registrar traslado" })).toHaveCount(0);
   for (const [width, height] of [
     [1024, 768],
     [1280, 640],
@@ -49,8 +50,8 @@ test("Vehículos desktop: fidelidad, selección, filtros y scroll interno", asyn
         name: "Seleccionar para traslado",
         exact: true,
       });
-    await accion.scrollIntoViewIfNeeded();
     await expect(accion).toBeInViewport({ ratio: 1 });
+    await expect(main.getByRole("button", { name: "Editar", exact: true })).toBeInViewport({ ratio: 1 });
     const geometry = await main.evaluate((el) => {
       const list = el.querySelector(
         '[aria-label="Contenedor de vehículos con desplazamiento interno"]',
@@ -108,7 +109,7 @@ test("Vehículos desktop: fidelidad, selección, filtros y scroll interno", asyn
   await expect(
     panel.getByRole("heading", { name: "Toyota RAV4 2023" }),
   ).toBeVisible();
-  await panel.getByRole("button", { name: "Ver documentos" }).click();
+  await panel.getByRole("tab", { name: "Documentos" }).click();
   await expect(
     panel.getByText("Tarjeta de circulación", { exact: true }),
   ).toBeVisible();
@@ -133,6 +134,7 @@ test("Vehículos desktop: fidelidad, selección, filtros y scroll interno", asyn
   await main.getByRole("button", { name: "Limpiar filtros" }).click();
   await main.getByRole("searchbox").fill("PEM-789");
   await expect(main.getByRole("listitem")).toHaveCount(1);
+  await expect(main.getByRole("navigation", { name: "Páginas de vehículos" })).toHaveCount(0);
   await expect(
     main.getByRole("link", { name: "Seleccionar para traslado" }),
   ).toHaveAttribute("href", `/viajes/nuevo?vehiculo=${firstId}`);

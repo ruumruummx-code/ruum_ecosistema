@@ -116,7 +116,7 @@ describe("MisTraslados (móvil)", () => {
     await user.type(buscador, "inexistente");
     expect(await screen.findByText("No se encontraron traslados")).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "Limpiar filtros" }));
-    expect(await screen.findByRole("heading", { name: /Nissan Versa 2020/ })).toBeInTheDocument();
+    expect(await screen.findByRole("button", { name: /Nissan Versa 2020/ })).toBeInTheDocument();
   });
 
   it("filtra por tipo de vehículo desde la hoja inferior", async () => {
@@ -130,7 +130,7 @@ describe("MisTraslados (móvil)", () => {
     await user.click(within(hoja).getByRole("button", { name: "Ver 1 traslado" }));
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
     expect(screen.getByRole("button", { name: /filtro activo: Sedán/ })).toBeInTheDocument();
-    expect(screen.queryByRole("heading", { name: /Toyota RAV4/ })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /Toyota RAV4/ })).not.toBeInTheDocument();
   });
 
   it("navega las categorías con teclado", async () => {
@@ -142,16 +142,16 @@ describe("MisTraslados (móvil)", () => {
     expect(screen.getByRole("button", { name: /^Cancelados/ })).toHaveAttribute("aria-pressed", "true");
     await user.keyboard("{ArrowLeft}");
     expect(screen.getByRole("button", { name: /^Completados/ })).toHaveAttribute("aria-pressed", "true");
-    expect(await screen.findByRole("heading", { name: /Toyota Corolla 2020/ })).toBeInTheDocument();
+    expect(await screen.findByRole("button", { name: /Toyota Corolla 2020/ })).toBeInTheDocument();
   });
 
   it("en móvil la tarjeta abre el expediente y no hay panel lateral", async () => {
     const user = userEvent.setup();
     render(<MisTraslados traslados={[viaje("traslado_en_curso", "abc")]} autoActualizar={false} />);
     expect(screen.queryByRole("complementary")).not.toBeInTheDocument();
-    await user.click(screen.getByRole("button", { name: "Ver Nissan Versa 2020" }));
+    await user.click(screen.getByRole("button", { name: /Ver #RR-ABC · Nissan Versa 2020/ }));
     expect(push).toHaveBeenCalledWith("/viajes/abc");
-    expect(screen.getByRole("link", { name: "Pasaporte" })).toHaveAttribute("href", "/viajes/abc");
+    expect(screen.getByRole("link", { name: /^Pasaporte de / })).toHaveAttribute("href", "/viajes/abc");
   });
 
   it("pagina de ocho en ocho", () => {
@@ -185,9 +185,9 @@ describe("MisTraslados (escritorio ≥1280px)", () => {
         autoActualizar={false}
       />,
     );
-    expect(screen.getByRole("complementary", { name: "Detalle de Toyota Corolla 2020" })).toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: "Ver Honda Civic 2020" }));
-    const panel = screen.getByRole("complementary", { name: "Detalle de Honda Civic 2020" });
+    expect(screen.getByRole("complementary", { name: /Detalle de Toyota Corolla 2020 · #RR-/ })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: /Ver #RR-DOS · Honda Civic 2020 en el panel/ }));
+    const panel = screen.getByRole("complementary", { name: /Detalle de Honda Civic 2020 · #RR-/ });
     expect(push).not.toHaveBeenCalled();
     expect(within(panel).getByText("Origen dos")).toBeInTheDocument();
     expect(within(panel).getByText("Conductor dos")).toBeInTheDocument();
@@ -199,6 +199,36 @@ describe("MisTraslados (escritorio ≥1280px)", () => {
     expect(within(panel).getByText("Solicitud registrada")).toBeInTheDocument();
     await user.click(within(panel).getByRole("button", { name: "Cerrar detalle" }));
     expect(screen.queryByRole("complementary")).not.toBeInTheDocument();
+  });
+
+  it("distingue por folio la ruta estimada y un servicio cancelado del mismo vehículo", () => {
+    simularAncho(true);
+    const pendiente = viaje("solicitud_creada", "120b");
+    Object.assign(pendiente.pasaporte, {
+      conductor_id: null, conductor_nombre: null, conductor_estado: null,
+      origen_lat: 16.75, origen_lng: -93.12, destino_lat: 19.27, destino_lng: -99.53,
+    });
+    const cancelado = viaje("servicio_cancelado", "ba60");
+    cancelado.pasaporte.vehiculo_placas = pendiente.pasaporte.vehiculo_placas;
+    cancelado.pasaporte.cerrado_en = "2026-01-02T18:00:00Z";
+    render(<MisTraslados traslados={[pendiente, cancelado]} autoActualizar={false} />);
+
+    const [primero, segundo] = screen.getAllByRole("article");
+    const panel = screen.getByRole("complementary");
+    expect(within(primero).getByText("Pendiente", { exact: true })).toBeVisible();
+    expect(within(panel).getByText("Pendiente", { exact: true })).toBeVisible();
+    expect(within(panel).queryByText(/En preparación/i)).not.toBeInTheDocument();
+    expect(within(panel).getByText(/Sujeta a confirmación de la recolección/)).toBeVisible();
+    expect(within(segundo).getByText(/Servicio cancelado · /)).toBeVisible();
+    expect(within(segundo).queryByText(/Fecha pendiente|Por asignar/)).not.toBeInTheDocument();
+    expect(within(segundo).getByRole("link", { name: "Ver ficha completa de #RR-BA60" })).toHaveAttribute("href", "/viajes/ba60");
+
+    const seleccionar = within(segundo).getByRole("button", { name: /#RR-BA60/ });
+    fireEvent.click(seleccionar);
+    expect(seleccionar).toHaveAttribute("aria-pressed", "true");
+    expect(within(primero).getByRole("button", { name: /#RR-120B/ })).toHaveAttribute("aria-pressed", "false");
+    expect(within(screen.getByRole("complementary")).getByText("El servicio fue cancelado.")).toBeVisible();
+    expect(within(screen.getByRole("complementary")).queryByRole("button", { name: "Cancelar traslado" })).not.toBeInTheDocument();
   });
 
   it("descarta la foto del conductor de una selección anterior", async () => {
@@ -213,7 +243,7 @@ describe("MisTraslados (escritorio ≥1280px)", () => {
       />,
     );
     await waitFor(() => expect(obtenerFoto).toHaveBeenCalledWith({}, "uno"));
-    fireEvent.click(screen.getByRole("button", { name: "Ver Honda Civic 2020" }));
+    fireEvent.click(screen.getByRole("button", { name: /Ver #RR-DOS · Honda Civic 2020 en el panel/ }));
     await waitFor(() => expect(screen.getByAltText("Foto de Conductor dos")).toHaveAttribute("src", "https://ejemplo.com/dos.png"));
     await act(async () => resolver("https://ejemplo.com/uno.png"));
     expect(screen.queryByAltText("Foto de Conductor uno")).not.toBeInTheDocument();
@@ -226,6 +256,6 @@ describe("MisTraslados (escritorio ≥1280px)", () => {
     fireEvent.change(fecha, { target: { value: "hoy" } });
     expect(screen.getByText("No se encontraron traslados")).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Limpiar filtros" }));
-    expect(screen.getByRole("complementary", { name: "Detalle de Nissan Versa 2020" })).toBeInTheDocument();
+    expect(screen.getByRole("complementary", { name: /Detalle de Nissan Versa 2020 · #RR-/ })).toBeInTheDocument();
   });
 });

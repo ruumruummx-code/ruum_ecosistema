@@ -214,6 +214,7 @@ export async function listarTrasladosDeUsuario(cliente: Cliente, usuarioId: stri
 export interface ResumenTrasladosUsuarioOpciones {
   limite?: number;
   desplazamiento?: number;
+  estados?: NonNullable<PasaporteRow["estado"]>[];
 }
 
 /** Resumen acotado para el dashboard. El historial completo usa otra ruta. */
@@ -224,15 +225,45 @@ export async function listarResumenTrasladosDeUsuario(
 ): Promise<PasaporteRow[]> {
   const limite = Math.min(Math.max(opciones.limite ?? 6, 1), 20);
   const desplazamiento = Math.max(opciones.desplazamiento ?? 0, 0);
-  const { data, error } = await cliente
+  const consulta = cliente
     .from("pasaporte_digital")
     .select("traslado_id,usuario_id,estado,estado_operativo,creado_en,cerrado_en,conductor_id,conductor_nombre,conductor_estado,conductor_calificacion,origen_ciudad,origen_direccion,destino_ciudad,destino_direccion,origen_lat,origen_lng,destino_lat,destino_lng,vehiculo_id,vehiculo_marca,vehiculo_modelo,vehiculo_anio,vehiculo_placas,vehiculo_tipo,tiempo_estimado_horas,distancia_km,monto_pagado,precio_cotizado,precio_final,tiene_incidencia_abierta,incidencias_abiertas,tipo_pago")
     .eq("usuario_id", usuarioId)
     .order("creado_en", { ascending: false })
+    .order("traslado_id")
     .range(desplazamiento, desplazamiento + limite - 1);
+
+  const { data, error } = await (opciones.estados?.length ? consulta.in("estado", opciones.estados) : consulta);
 
   if (error) throw error;
   return (data ?? []) as unknown as PasaporteRow[];
+}
+
+/** Conteos exactos del usuario, independientes del límite del resumen. */
+export async function contarTrasladosParaInicio(
+  cliente: Cliente,
+  usuarioId: string,
+  estadosFinalizados: readonly NonNullable<PasaporteRow["estado"]>[],
+  inicioMes: string,
+  finMes: string,
+) {
+  const [activos, completados] = await Promise.all([
+    cliente.from("pasaporte_digital")
+      .select("traslado_id", { count: "exact", head: true })
+      .eq("usuario_id", usuarioId)
+      .is("cerrado_en", null)
+      .or("estado_operativo.neq.closed,estado_operativo.is.null")
+      .not("estado", "in", `(${estadosFinalizados.join(",")})`),
+    cliente.from("pasaporte_digital")
+      .select("traslado_id", { count: "exact", head: true })
+      .eq("usuario_id", usuarioId)
+      .eq("estado", "servicio_cerrado")
+      .gte("cerrado_en", inicioMes)
+      .lt("cerrado_en", finMes),
+  ]);
+  if (activos.error) throw activos.error;
+  if (completados.error) throw completados.error;
+  return { totalActivos: activos.count, completadosMes: completados.count };
 }
 
 /** Lista los traslados del usuario necesarios para construir su historial de facturación. */

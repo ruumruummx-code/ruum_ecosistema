@@ -17,7 +17,7 @@ type EstadoTraslado = Database["public"]["Enums"]["estado_traslado"];
  * cuenta como cerrado: la parte operativa (mover el vehículo) ya terminó —
  * lo que sigue es un proceso de reclamo, no algo que se siga en el stepper.
  */
-const ESTADOS_TRASLADO_FINALIZADOS: EstadoTraslado[] = [
+export const ESTADOS_TRASLADO_FINALIZADOS: EstadoTraslado[] = [
   "servicio_cerrado",
   "servicio_cancelado",
   "traslado_fallido",

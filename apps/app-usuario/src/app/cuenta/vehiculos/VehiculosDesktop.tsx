@@ -1,6 +1,7 @@
 "use client";
 import { useMemo, useState, useTransition } from "react";
 import Link from "next/link";
+import { Button } from "@ruum/ui/base";
 import { useRouter } from "next/navigation";
 import { ETIQUETA_TIPO_VEHICULO } from "@ruum/shared/constants";
 import type { Vehiculo } from "../cuenta-ui";
@@ -102,15 +103,16 @@ export function VehiculosDesktop({
           </span>
         </div>
         <div className={s.headingActions}>
-          <button
-            className={s.outline}
+          <Button
+            variant="outline"
             aria-busy={actualizando}
             disabled={actualizando}
             onClick={() => actualizar(() => router.refresh())}
+            title="Vuelve a consultar los datos y el estado de los vehículos registrados"
           >
             <Icon name="refresh" />
-            Actualizar vehículos
-          </button>
+            {actualizando ? "Consultando flota…" : "Consultar estado de la flota"}
+          </Button>
           <Link className={s.primary} href="/cuenta/vehiculos/nuevo">
             <Icon name="plus" />
             Registrar nuevo vehículo
@@ -145,18 +147,13 @@ export function VehiculosDesktop({
                 ? Math.round((revision / vehiculos.length) * 100)
                 : 0,
             ],
-            ["documentos", "file", "—", "Con documentos por vencer", null],
+            ["documentos", "file", 0, "Alertas de vencimiento", null],
           ] as const
         ).map(([tone, icon, count, label, percent]) => (
           <div
             key={tone}
             className={s.metric}
             data-tone={tone}
-            title={
-              tone === "documentos"
-                ? "No hay fechas de vencimiento disponibles en el registro actual."
-                : undefined
-            }
           >
             <span className={s.metricIcon}>
               <Icon name={icon} />
@@ -164,6 +161,7 @@ export function VehiculosDesktop({
             <div>
               <strong>{count}</strong>
               <small>{label}</small>
+              {tone === "documentos" && <small>Sin fechas registradas</small>}
             </div>
             {percent != null && <span className={s.percent}>{percent}%</span>}
           </div>
@@ -396,60 +394,60 @@ export function VehiculosDesktop({
               </section>
             )}
           </div>
-          <footer className={s.pagination}>
-            <nav aria-label="Páginas de vehículos">
-              <button
-                aria-label="Página anterior"
-                disabled={actual === 1}
-                onClick={() => {
-                  setPagina(actual - 1);
-                  setMenu(null);
-                }}
-              >
-                <Icon name="chevron" className={s.previous} />
-              </button>
-              {Array.from(
-                new Set([
-                  1,
-                  ...Array.from({ length: 3 }, (_, i) => actual - 1 + i).filter(
-                    (n) => n > 1 && n < paginas,
-                  ),
-                  paginas,
-                ]),
-              )
-                .sort((a, b) => a - b)
-                .map((n, i, nums) => (
-                  <span key={n}>
-                    {i > 0 && n - nums[i - 1] > 1 && <span>…</span>}
-                    <button
-                      aria-label={`Página ${n}`}
-                      aria-current={actual === n ? "page" : undefined}
-                      onClick={() => {
-                        setPagina(n);
-                        setMenu(null);
-                      }}
-                    >
-                      {n}
-                    </button>
-                  </span>
-                ))}
-              <button
-                aria-label="Página siguiente"
-                disabled={actual === paginas}
-                onClick={() => {
-                  setPagina(actual + 1);
-                  setMenu(null);
-                }}
-              >
-                <Icon name="chevron" />
-              </button>
-            </nav>
-            <span>
-              {filtrados.length
-                ? `Mostrando ${(actual - 1) * 5 + 1}–${Math.min(actual * 5, filtrados.length)} de ${filtrados.length} vehículos`
-                : `Mostrando 0 de ${vehiculos.length} vehículos`}
-            </span>
-          </footer>
+          {paginas > 1 && (
+            <footer className={s.pagination}>
+              <nav aria-label="Páginas de vehículos">
+                <button
+                  aria-label="Página anterior"
+                  disabled={actual === 1}
+                  onClick={() => {
+                    setPagina(actual - 1);
+                    setMenu(null);
+                  }}
+                >
+                  <Icon name="chevron" className={s.previous} />
+                </button>
+                {Array.from(
+                  new Set([
+                    1,
+                    ...Array.from({ length: 3 }, (_, i) => actual - 1 + i).filter(
+                      (n) => n > 1 && n < paginas,
+                    ),
+                    paginas,
+                  ]),
+                )
+                  .sort((a, b) => a - b)
+                  .map((n, i, nums) => (
+                    <span key={n}>
+                      {i > 0 && n - nums[i - 1] > 1 && <span>…</span>}
+                      <button
+                        aria-label={`Página ${n}`}
+                        aria-current={actual === n ? "page" : undefined}
+                        onClick={() => {
+                          setPagina(n);
+                          setMenu(null);
+                        }}
+                      >
+                        {n}
+                      </button>
+                    </span>
+                  ))}
+                <button
+                  aria-label="Página siguiente"
+                  disabled={actual === paginas}
+                  onClick={() => {
+                    setPagina(actual + 1);
+                    setMenu(null);
+                  }}
+                >
+                  <Icon name="chevron" />
+                </button>
+              </nav>
+              <span>
+                Mostrando {(actual - 1) * 5 + 1}–{Math.min(actual * 5, filtrados.length)} de {filtrados.length} vehículos
+              </span>
+            </footer>
+          )}
         </section>
         {vehiculo && (
           <DetalleVehiculoDesktop

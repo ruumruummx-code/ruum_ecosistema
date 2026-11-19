@@ -297,11 +297,24 @@ const servidor = createServer(async (req, res) => {
     responder(res, 503, { error: "No pudimos conectar la llamada. Intenta de nuevo." });
     return;
   }
+  if (req.method === "HEAD" && ruta === "/rest/v1/pasaporte_digital") {
+    const filas = tokenDe(req) === DASHBOARD_TOKEN ? datosDashboard(ruta) : [];
+    const completados = url.searchParams.get("estado") === "eq.servicio_cerrado";
+    const count = completados
+      ? filas.filter(fila => fila.estado === "servicio_cerrado"
+        && fila.cerrado_en >= url.searchParams.getAll("cerrado_en")[0]?.slice(4)
+        && fila.cerrado_en < url.searchParams.getAll("cerrado_en")[1]?.slice(3)).length
+      : filas.filter(fila => !fila.cerrado_en && !["servicio_cerrado", "servicio_cancelado"].includes(fila.estado)).length;
+    res.setHeader("Content-Range", count ? `0-${count - 1}/${count}` : "*/0");
+    responder(res, 200, null);
+    return;
+  }
   if (req.method === "GET" && [DASHBOARD_TOKEN, VEHICLES_TOKEN, ACCOUNT_TOKEN, LOCATIONS_TOKEN].includes(tokenDe(req))) {
     let filas = tokenDe(req) === LOCATIONS_TOKEN ? datosUbicaciones(ruta) : tokenDe(req) === ACCOUNT_TOKEN ? datosCuenta(ruta) : tokenDe(req) === VEHICLES_TOKEN ? datosVehiculos(ruta) : datosDashboard(ruta);
     if (filas) {
       for (const [campo, valor] of url.searchParams) {
         if (valor.startsWith("eq.")) filas = filas.filter(fila => String(fila[campo]) === valor.slice(3));
+        if (valor.startsWith("in.(")) filas = filas.filter(fila => valor.slice(4, -1).split(",").includes(String(fila[campo])));
       }
       const singular = (req.headers.accept ?? "").includes("vnd.pgrst.object");
       responder(res, 200, singular ? filas[0] ?? null : filas);

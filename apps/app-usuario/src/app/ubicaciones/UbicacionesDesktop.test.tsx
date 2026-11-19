@@ -11,6 +11,7 @@ import type { Database } from "@ruum/shared/types";
 import { UbicacionesDesktop } from "./UbicacionesDesktop";
 import {
   construirUbicaciones,
+  direccionCompleta,
   enlaceBuscarUbicacion,
   type UbicacionUsuario,
 } from "./ubicaciones-usuario";
@@ -93,6 +94,25 @@ describe("Libreta de ubicaciones", () => {
     expect(l[1].usos).toBe(2);
     expect(l[1].lat).toBe(19.2);
   });
+  it("reutiliza el domicilio con distintos formatos sin confundir calles del mismo código postal", () => {
+    const perfil = {
+      calle: "LOS SERRANOS", numero: "225", colonia: "La Magdalena",
+      codigo_postal: "52104", ciudad: "San Mateo Atenco", estado: "México",
+    } as Usuario;
+    const historial = [{
+      origen_direccion: "Calle de los Serrano 225, La Magdalena, 52104",
+      origen_ciudad: "San Mateo Atenco",
+      destino_direccion: "LOS SERRANOS 225, LA MAGDALENA, 52104, ESTADO DE MÉXICO, SAN MATEO ATENCO",
+      destino_ciudad: "SAN MATEO ATENCO",
+      creado_en: "2026-10-27T12:00:00Z",
+    }] as Traslado[];
+    const [domicilio, otra] = construirUbicaciones(perfil, historial);
+    expect(domicilio.fuentes).toEqual(["perfil", "destino"]);
+    expect(domicilio.usos).toBe(1);
+    expect(direccionCompleta(domicilio)).toBe("Los Serranos 225, La Magdalena, 52104, San Mateo Atenco, Estado de México");
+    expect(otra.direccion).toMatch(/^Calle de los Serrano/);
+  });
+
   it("no inventa direcciones ni fechas", () => {
     expect(
       construirUbicaciones(
@@ -202,7 +222,7 @@ describe("Mis ubicaciones desktop", () => {
     });
     expect(within(detalle).getByText("19.2, -99.5")).toBeInTheDocument();
     expect(
-      within(detalle).getByRole("link", { name: "Usar en traslado" }),
+      within(detalle).getByRole("link", { name: "Usar como origen" }),
     ).toHaveAttribute("href", enlaceBuscarUbicacion(lista()[1], "origen"));
     fireEvent.click(
       within(detalle).getByRole("button", { name: "Cerrar detalle" }),
@@ -224,17 +244,23 @@ describe("Mis ubicaciones desktop", () => {
     );
     expect(screen.getAllByRole("listitem")).toHaveLength(2);
   });
-  it("filtra por tipo y permite navegar categorías con teclado", () => {
+  it("usa una sola clasificación y permite acceder a una dirección por cada rol", () => {
     render(<UbicacionesDesktop ubicaciones={lista()} />);
-    fireEvent.change(
-      screen.getByRole("combobox", { name: "Tipo de ubicación" }),
-      { target: { value: "perfil" } },
-    );
+    expect(screen.queryByRole("combobox", { name: "Tipo de ubicación" })).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Orígenes (2)" }));
+    expect(screen.getAllByRole("listitem")).toHaveLength(2);
+    fireEvent.click(screen.getByRole("button", { name: "Destinos (1)" }));
     expect(screen.getAllByRole("listitem")).toHaveLength(1);
-    fireEvent.click(screen.getByRole("button", { name: "Domicilio del perfil (1)" }));
-    expect(
-      screen.getByRole("button", { name: "Domicilio del perfil (1)" }),
-    ).toHaveAttribute("aria-pressed", "true");
+    expect(screen.getByRole("button", { name: "Destinos (1)" })).toHaveAttribute("aria-pressed", "true");
+  });
+  it("identifica de forma explícita el destino y ofrece ambos campos en el panel", () => {
+    const destino = { ...lista()[1], fuentes: ["destino"] } satisfies UbicacionUsuario;
+    render(<UbicacionesDesktop ubicaciones={[destino]} />);
+    const fila = within(screen.getByRole("listitem"));
+    const panel = within(screen.getByRole("complementary"));
+    expect(fila.getByRole("link", { name: "Usar como destino" })).toHaveAttribute("href", enlaceBuscarUbicacion(destino, "destino"));
+    expect(panel.getByRole("link", { name: "Usar como origen" })).toHaveAttribute("href", enlaceBuscarUbicacion(destino, "origen"));
+    expect(panel.getByRole("link", { name: "Usar como destino" })).toHaveAttribute("href", enlaceBuscarUbicacion(destino, "destino"));
   });
   it("copia y notifica únicamente el resultado del portapapeles", async () => {
     render(<UbicacionesDesktop ubicaciones={lista()} />);
@@ -299,7 +325,7 @@ describe("Mis ubicaciones desktop", () => {
   });
   it("abre el editor real del perfil y refresca la lista", () => {
     render(<UbicacionesDesktop ubicaciones={lista()} />);
-    fireEvent.click(screen.getByRole("button", { name: "Editar información" }));
+    fireEvent.click(screen.getByRole("button", { name: "Editar" }));
     expect(push).toHaveBeenCalledWith("/cuenta/datos-personales");
     fireEvent.click(
       screen.getByRole("button", { name: "Actualizar ubicaciones" }),

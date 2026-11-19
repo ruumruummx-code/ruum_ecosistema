@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { Card } from "@ruum/ui/base";
 import { PROMESA_SOPORTE } from "../lib/promesa-soporte";
 import Image from "next/image";
 import dynamic from "next/dynamic";
@@ -33,13 +34,10 @@ export interface InicioDesktopProps {
   conductorFotoUrl?: string | null;
   vehiculos?: Vehiculo[];
   errorVehiculos?: boolean;
+  historialReciente?: Pasaporte[];
+  totalActivos?: number | null;
+  completadosMes?: number | null;
 }
-const actions: { title: string; description: string; href: string; icon: DashboardIconName; tone: string }[] = [
-  { title: "Registrar nuevo traslado", description: "Moviliza un vehículo de forma segura.", href: "/viajes/nuevo", icon: "plus", tone: "blue" },
-  { title: "Carga masiva de traslados", description: "Registra varios traslados desde un archivo.", href: "/viajes/masivo", icon: "file", tone: "green" },
-  { title: "Mis vehículos registrados", description: "Administra tu flota de vehículos.", href: "/cuenta/vehiculos", icon: "car", tone: "purple" },
-  { title: "Ver historial de traslados", description: "Consulta tus traslados anteriores.", href: "/mis-viajes", icon: "clock", tone: "orange" },
-];
 const tips = [
   { title: "Optimiza tus traslados", text: "Registra varios vehículos en una carga masiva y ahorra tiempo." },
   { title: "Tu traslado, siempre a la vista", text: "Consulta la ruta y las actualizaciones desde tu Pasaporte Digital." },
@@ -66,8 +64,8 @@ function Driver({ viaje, foto }: { viaje: Pasaporte; foto: string | null }) {
     } catch { setError("No pudimos conectar la llamada. Intenta de nuevo."); }
     finally { setLlamando(false); }
   }
-  return <section className={`${styles.card} ${styles.driver}`} aria-label="Conductor asignado">
-    <h2 className={styles.cardHeading}><span className={styles.headingIcon}><Icon name="user" /></span>Conductor asignado</h2>
+  return <section className={`${styles.card} ${styles.driver}`} aria-label={viaje.conductor_id ? "Conductor asignado" : "Asignación de conductor"}>
+    <h2 className={styles.cardHeading}><span className={styles.headingIcon}><Icon name="user" /></span>{viaje.conductor_id ? "Conductor asignado" : "Asignación de conductor"}</h2>
     {viaje.conductor_id ? <>
       <div className={styles.driverBody}>
         <span className={styles.avatar}>{foto ? <Image src={foto} width={88} height={88} alt={`Foto de ${nombre}`} unoptimized /> : <Icon name="user" />}</span>
@@ -81,16 +79,28 @@ function Driver({ viaje, foto }: { viaje: Pasaporte; foto: string | null }) {
           <Link href={`/viajes/${viaje.traslado_id}#chat-conductor`} aria-label={`Mensaje a ${nombre}`}><span><Icon name="chat" /></span>Mensaje</Link>
         </div>
       </div>{error && <p role="alert" className={styles.callError}>{error}</p>}
-    </> : <div className={styles.pendingDriver}><Icon name="user" /><p>Estamos buscando a tu conductor.<small>Sus datos y canales de contacto aparecerán aquí al ser asignado.</small></p></div>}
+    </> : <div className={styles.pendingDriver}><span aria-hidden="true" className="size-3 shrink-0 rounded-full bg-ui-brand motion-safe:animate-pulse" /><div role="status"><p>Estamos buscando a tu conductor.</p><Link href="/cuenta/preferencias" className="mt-1 inline-block text-ui-brand underline underline-offset-2">Configurar avisos del traslado</Link></div></div>}
   </section>;
 }
 function ActiveOverview({ viaje, vehiculos, foto, enabled }: { viaje: Pasaporte; vehiculos: Vehiculo[]; foto: string | null; enabled: boolean }) {
-  const { ubicacion, actualizado, error, realtime, refrescar } = useDashboardTracking(viaje.traslado_id!, viaje.estado, enabled);
+  const enSeguimiento = Boolean(viaje.conductor_id) && progresoPorEstadoTraslado(viaje.estado) >= 40;
+  const { ubicacion, actualizado, error, realtime, refrescar } = useDashboardTracking(viaje.traslado_id!, viaje.estado, enabled && enSeguimiento);
   const [eta, setEta] = useState<number | null>(null);
   const [distance, setDistance] = useState<number | null>(null);
+  const [estimatedEta, setEstimatedEta] = useState<number | null>(null);
+  const [estimatedDistance, setEstimatedDistance] = useState<number | null>(null);
   const progress = progresoPorEstadoTraslado(viaje.estado);
   const current = progress >= 85 ? 2 : progress >= 65 ? 1 : 0;
-  const moving = viaje.estado === "traslado_en_curso" || viaje.estado === "incidencia_reportada";
+  const moving = enSeguimiento && progress === 65;
+  const plannedLabel = viaje.conductor_id ? "Ruta prevista" : "Ruta prevista (en espera de asignación)";
+  const mapTitle = enSeguimiento ? "Seguimiento en vivo" : "Ruta prevista";
+  const minutos = estimatedEta ?? (viaje.tiempo_estimado_horas && Math.round(viaje.tiempo_estimado_horas * 60));
+  const kilometros = estimatedDistance ?? viaje.distancia_km;
+  const format = new Intl.NumberFormat("es-MX", { maximumFractionDigits: 1 });
+  const tiempoEstimado = minutos && minutos > 0
+    ? minutos >= 60 ? `~${format.format(minutos / 60)} h` : `~${format.format(minutos)} min`
+    : "Por confirmar";
+  const distanciaEstimada = kilometros && kilometros > 0 ? `~${format.format(kilometros)} km` : "Por confirmar";
   const fresh = !error && actualizado && Date.now() - Date.parse(actualizado) < 90_000;
   const href = `/viajes/${viaje.traslado_id}`;
   const coordinates = [viaje.origen_lat, viaje.origen_lng, viaje.destino_lat, viaje.destino_lng].every(v => typeof v === "number" && Number.isFinite(v));
@@ -98,7 +108,20 @@ function ActiveOverview({ viaje, vehiculos, foto, enabled }: { viaje: Pasaporte;
     <article className={styles.activeCard} aria-label="Traslado activo">
       <div className={styles.activeTop}><p className={styles.eyebrow}><i />TRASLADO ACTIVO</p><h2>{modelo(viaje)}</h2><div className={styles.plate}><strong>{placaVisible(viaje.vehiculo_placas)}</strong></div><VehicleImage traslado={viaje} vehiculos={vehiculos} hero priority={enabled} /></div>
       <div className={styles.route}><Icon name="pin" /><div><strong>{viaje.origen_ciudad || "Origen por confirmar"}</strong><small>{viaje.origen_direccion || "Punto de recolección"}</small></div><span className={styles.routeLine}><Icon name="arrow" /></span><Icon name="pin" /><div><strong>{viaje.destino_ciudad || "Destino por confirmar"}</strong><small>{viaje.destino_direccion || "Punto de entrega"}</small></div></div>
-      <dl className={styles.metrics}><div><dt>ESTADO ACTUAL</dt><dd><EstadoTrasladoBreve className={styles.status} estado={estadoVisibleTraslado(viaje)} /></dd></div><div><dt>TIEMPO RESTANTE</dt><dd><Icon name="clock" />{fresh && moving && eta !== null ? `${eta} min` : "Por confirmar"}</dd></div><div><dt>DISTANCIA RESTANTE</dt><dd><Icon name="route" />{fresh && moving && distance !== null ? `${distance} km` : "Por confirmar"}</dd></div></dl>
+      <dl className={styles.metrics}>
+        <div>
+          <dt>ESTADO ACTUAL</dt>
+          <dd><EstadoTrasladoBreve className={styles.status} estado={estadoVisibleTraslado(viaje)} /></dd>
+        </div>
+        <div>
+          <dt>{moving ? "TIEMPO RESTANTE" : "TIEMPO ESTIMADO"}</dt>
+          <dd><Icon name="clock" />{moving ? (fresh && eta !== null ? `${eta} min` : "Por confirmar") : tiempoEstimado}</dd>
+        </div>
+        <div>
+          <dt>{moving ? "DISTANCIA RESTANTE" : "DISTANCIA ESTIMADA"}</dt>
+          <dd><Icon name="route" />{moving ? (fresh && distance !== null ? `${distance} km` : "Por confirmar") : distanciaEstimada}</dd>
+        </div>
+      </dl>
       <ol className={styles.timeline} aria-label="Progreso del traslado">{["Recolección", "En tránsito", "Entrega"].map((label, index) => {
         const done = progress >= 100 || index < current;
         const active = index === current && progress < 100;
@@ -107,15 +130,15 @@ function ActiveOverview({ viaje, vehiculos, foto, enabled }: { viaje: Pasaporte;
       <Link className={styles.detailsButton} href={href}><Icon name="arrow" />Ver detalles del traslado<Icon name="arrow" /></Link>
     </article>
     <div className={styles.trackingColumn}>
-      <section className={`${styles.card} ${styles.mapCard}`} aria-label="Seguimiento en vivo"><header className={styles.cardHeading}><span className={styles.headingIcon}><Icon name="car" /></span><h2>Seguimiento en vivo</h2><Link href={`${href}#en-ruta`}>Abrir en mapa<Icon name="expand" /></Link></header>
-        <div className={styles.mapArea}>{coordinates && enabled ? <LiveMap origen={{ lat: viaje.origen_lat, lng: viaje.origen_lng }} destino={{ lat: viaje.destino_lat, lng: viaje.destino_lng }} ubicacion={ubicacion} activo compact seguirUbicacion={Boolean(fresh && moving && ubicacion)} haciaOrigen={!moving && progress < 65} onEta={setEta} onDistance={setDistance} /> : <div className={styles.mapLoading}><Icon name="pin" /><p>Ruta por confirmar<small>El mapa aparecerá cuando se confirmen los puntos del traslado.</small></p></div>}
-          <button type="button" className={styles.liveBadge} onClick={refrescar} title="Actualizar ubicación" data-live={Boolean(fresh)}><Icon name="refresh" />{error ? "Reintentar seguimiento" : fresh && realtime ? "Actualización en tiempo real" : fresh ? "Ubicación actualizada" : "Esperando ubicación GPS"}<i /></button>
+      <section className={`${styles.card} ${styles.mapCard}`} aria-label={mapTitle}><header className={styles.cardHeading}><span className={styles.headingIcon}><Icon name="car" /></span><h2>{mapTitle}</h2><Link href={`${href}#en-ruta`}>Abrir en mapa<Icon name="expand" /></Link></header>
+        <div className={styles.mapArea}>{coordinates && enabled ? <LiveMap origen={{ lat: viaje.origen_lat, lng: viaje.origen_lng }} destino={{ lat: viaje.destino_lat, lng: viaje.destino_lng }} key={enSeguimiento ? "live" : "planned"} ubicacion={enSeguimiento ? ubicacion : null} activo={enSeguimiento} compact rutaPrevista={!enSeguimiento} estadoTexto={enSeguimiento ? estadoVisibleTraslado(viaje).etiqueta : plannedLabel} seguirUbicacion={Boolean(fresh && moving && ubicacion)} onEta={enSeguimiento ? setEta : setEstimatedEta} onDistance={enSeguimiento ? setDistance : setEstimatedDistance} /> : <div className={styles.mapLoading}><Icon name="pin" /><p>Ruta por confirmar<small>El mapa aparecerá cuando se confirmen los puntos del traslado.</small></p></div>}
+          {enSeguimiento ? <button type="button" className={styles.liveBadge} onClick={refrescar} title="Actualizar ubicación" data-live={Boolean(fresh)}><Icon name="refresh" />{error ? "Reintentar seguimiento" : fresh && realtime ? "Actualización en tiempo real" : fresh ? "Ubicación actualizada" : "Esperando ubicación GPS"}<i /></button> : coordinates && <p className={styles.liveBadge}>{plannedLabel}</p>}
         </div>
       </section><Driver viaje={viaje} foto={foto} />
     </div>
   </section>;
 }
-export function InicioDesktop({ usuario, traslados, conductorFotoUrl = null, vehiculos = [], errorVehiculos = false }: InicioDesktopProps) {
+export function InicioDesktop({ usuario, traslados, conductorFotoUrl = null, vehiculos = [], errorVehiculos = false, historialReciente, totalActivos, completadosMes }: InicioDesktopProps) {
   const router = useRouter();
   const [tip, setTip] = useState(0);
   const [desktopVisible, setDesktopVisible] = useState(false);
@@ -139,7 +162,15 @@ export function InicioDesktop({ usuario, traslados, conductorFotoUrl = null, veh
       .catch(() => { /* avatar fallback */ });
     return () => { activo = false; };
   }, [conductorFotoUrl, viaje?.conductor_id]);
-  const historial = obtenerHistorial(traslados).filter(t => t.traslado_id);
+  const historial = (historialReciente ?? obtenerHistorial(traslados)).filter(t =>
+    t.traslado_id && (t.estado === "servicio_cerrado" || t.estado === "servicio_cancelado")
+  );
+  const indicadores: { title: string; value: string; href: string; icon: DashboardIconName }[] = [
+    { title: "Traslados activos", value: String(totalActivos ?? "—"), href: "/mis-viajes", icon: "route" },
+    { title: "Vehículos registrados", value: errorVehiculos ? "—" : String(vehiculos.length), href: "/cuenta/vehiculos", icon: "car" },
+    { title: "Completados este mes", value: String(completadosMes ?? "—"), href: "/mis-viajes?tab=finalizados", icon: "check" },
+    { title: "Carga masiva", value: "Importar archivo", href: "/viajes/masivo", icon: "file" },
+  ];
   const nombre = usuario?.nombre?.trim().split(/\s+/)[0] || "Usuario";
   useEffect(() => {
     if (!desktopVisible) return;
@@ -155,12 +186,24 @@ export function InicioDesktop({ usuario, traslados, conductorFotoUrl = null, veh
     document.addEventListener("keydown", cerrar); document.addEventListener("click", fuera);
     return () => { document.removeEventListener("keydown", cerrar); document.removeEventListener("click", fuera); };
   }, [menuId]);
-  return <UserDashboardLayout usuario={usuario} nombre={usuario?.nombre} notificaciones={construirNotificaciones(usuario, traslados)} totalVehiculos={errorVehiculos ? undefined : vehiculos.length} idContenido="desktopMainContent" padding="ninguno" dashboardHeader>
+  return <UserDashboardLayout usuario={usuario} nombre={usuario?.nombre} notificaciones={construirNotificaciones(usuario, traslados)} totalVehiculos={errorVehiculos ? undefined : vehiculos.length} idContenido="desktopMainContent" padding="ninguno" showPromo={false} dashboardHeader>
     <div className={styles.dashboard} data-testid="desktop-dashboard">
       <header className={styles.welcome}><div><p>Bienvenido de nuevo, {nombre}</p><h1>Tu traslado, en orden.</h1><span>Gestiona, monitorea y da seguimiento a todos tus traslados de forma simple y segura.</span></div><Link href="/viajes/nuevo" className={styles.primary}><Icon name="plus" />Registrar nuevo traslado</Link></header>
       {errorVehiculos && <p role="alert" className={styles.loadError}>No pudimos cargar tus vehículos. <button onClick={() => router.refresh()}>Reintentar</button></p>}
-      {viaje?.traslado_id ? <ActiveOverview key={viaje.traslado_id} viaje={viaje} vehiculos={vehiculos} foto={fotoDiferida} enabled={desktopVisible} /> : <section className={styles.emptyOverview} aria-label="Sin traslado activo"><div><p className={styles.eyebrow}><Icon name="car" />TU PRÓXIMO DESTINO EMPIEZA AQUÍ</p><h2>No tienes traslados activos</h2><p>Registra un nuevo traslado y sigue cada etapa de tu vehículo desde un solo lugar.</p><Link href="/viajes/nuevo" className={styles.primary}><Icon name="plus" />Registrar traslado</Link></div><Image src="/imagenes/dashboard-sedan.webp" width={720} height={400} alt="Ilustración de un sedán blanco" unoptimized priority={desktopVisible} /></section>}
-      <nav className={styles.quickActions} aria-label="Acciones rápidas">{actions.map(action => <Link key={action.href} href={action.href} data-tone={action.tone}><span className={styles.actionIcon}><Icon name={action.icon} /></span><div><strong>{action.title}</strong><p>{action.description}</p></div><Icon name="chevron" /></Link>)}</nav>
+      {viaje?.traslado_id ? <ActiveOverview key={viaje.traslado_id} viaje={viaje} vehiculos={vehiculos} foto={fotoDiferida} enabled={desktopVisible} /> : <section className={styles.emptyOverview} aria-label="Sin traslado activo"><div><p className={styles.eyebrow}><Icon name="car" />TU PRÓXIMO DESTINO EMPIEZA AQUÍ</p><h2>No tienes traslados activos</h2><p>Registra un nuevo traslado y sigue cada etapa de tu vehículo desde un solo lugar.</p></div><Image src="/imagenes/dashboard-sedan.webp" width={720} height={400} alt="Ilustración de un sedán blanco" unoptimized priority={desktopVisible} /></section>}
+      <nav aria-label="Indicadores y carga masiva" className="grid grid-cols-4 gap-3">
+        {indicadores.map(({ title, value, href, icon }) => (
+          <Card key={href} className="min-w-0">
+            <Link href={href} className="flex h-full items-center gap-2 rounded-lg px-3 py-2 hover:bg-ui-muted focus-visible:outline-2 focus-visible:outline-ui-brand">
+              <span className="text-ui-brand"><Icon name={icon} /></span>
+              <div className="min-w-0">
+                <p className="text-xs text-ui-fg-muted">{title}</p>
+                <strong className="text-sm text-ui-fg">{value}</strong>
+              </div>
+            </Link>
+          </Card>
+        ))}
+      </nav>
       <div className={styles.bottomRow}>
         <section className={`${styles.card} ${styles.recent}`} aria-label="Últimos traslados">
           <header className={styles.sectionHeading}><h2>Últimos traslados</h2><Link href="/mis-viajes">Ver todos</Link></header>
@@ -216,7 +259,7 @@ export function InicioDesktop({ usuario, traslados, conductorFotoUrl = null, veh
                 })}
               </tbody>
             </table>
-            {!historial.length && <p className={styles.emptyHistory}>Aún no tienes traslados registrados. Aquí encontrarás tus próximos viajes.</p>}
+            {!historial.length && <p className={styles.emptyHistory}>Aún no hay traslados completados o cancelados.</p>}
           </div>
         </section>
         <aside className={styles.supportColumn} aria-label="Ayuda y consejos"><section className={styles.support}><span className={styles.supportIcon}><Icon name="support" /></span><div><h2>¿Necesitas ayuda?</h2><p>{PROMESA_SOPORTE.recepcion} {PROMESA_SOPORTE.atencion} {PROMESA_SOPORTE.respuesta} {PROMESA_SOPORTE.emergencia}</p><Link href="/soporte">Contactar soporte<Icon name="chevron" /></Link></div></section><section className={`${styles.card} ${styles.tips}`} aria-label="Tips Ruum Ruum"><header><h2><Icon name="bulb" />Tips Ruum Ruum</h2><div>{tips.map((item, index) => <button key={index} type="button" aria-label={`Ver tip ${index + 1}: ${item.title}`} aria-current={tip === index ? "true" : undefined} onClick={() => setTip(index)}><i /></button>)}</div></header><div className={styles.tipContent}><button type="button" aria-label="Tip anterior" onClick={() => setTip((tip + tips.length - 1) % tips.length)}><Icon name="chevron" /></button><div aria-live="polite"><h3>{tips[tip].title}</h3><p>{tips[tip].text}</p></div><button type="button" aria-label="Tip siguiente" onClick={() => setTip((tip + 1) % tips.length)}><Icon name="chevron" /></button></div></section></aside>

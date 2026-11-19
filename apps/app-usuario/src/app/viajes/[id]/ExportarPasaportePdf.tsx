@@ -1,7 +1,8 @@
 "use client";
 import { useState } from "react";
 import { Button } from "@ruum/ui";
-export function ExportarPasaportePdf({ trasladoId }: { trasladoId: string }) {
+import { Button as ButtonBase } from "@ruum/ui/base";
+export function ExportarPasaportePdf({ trasladoId, compacto = false }: { trasladoId: string; compacto?: boolean }) {
   const [ocupado,setOcupado] = useState(false);
   const [error,setError] = useState<string | null>(null);
   async function exportar() {
@@ -18,5 +19,19 @@ export function ExportarPasaportePdf({ trasladoId }: { trasladoId: string }) {
     } catch (err) { setError(err instanceof Error ? err.message : "No pudimos exportar el pasaporte."); }
     finally { setOcupado(false); }
   }
-  return <div><Button variant="secondary" disabled={ocupado || !trasladoId} onClick={() => void exportar()}>{ocupado ? "Preparando PDF…" : "Exportar pasaporte completo"}</Button>{error && <p role="alert" className="text-xs text-danger">{error}</p>}</div>;
+  const boton = { disabled: ocupado || !trasladoId, onClick: () => void exportar() };
+  return (
+    <div>
+      {compacto ? (
+        <ButtonBase variant="secondary" size="sm" {...boton}>
+          {ocupado ? "Preparando PDF…" : "Exportar PDF"}
+        </ButtonBase>
+      ) : (
+        <Button variant="secondary" {...boton}>
+          {ocupado ? "Preparando PDF…" : "Exportar pasaporte completo"}
+        </Button>
+      )}
+      {error && <p role="alert" className="text-xs text-ui-danger">{error}</p>}
+    </div>
+  );
 }

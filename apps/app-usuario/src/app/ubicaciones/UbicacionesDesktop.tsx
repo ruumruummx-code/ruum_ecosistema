@@ -13,8 +13,8 @@ import {
   aplicarLibreta,
   direccionCompleta,
   enlaceBuscarUbicacion,
-  ETIQUETAS_UBICACION,
   normalizarBusqueda,
+  ladoHabitual,
   tipoUbicacion,
   type FuenteUbicacion,
   type UbicacionUsuario,
@@ -35,7 +35,19 @@ import { DetalleUbicacionDesktop } from "./DetalleUbicacionDesktop";
 import { ConfirmarEliminarUbicacion, EditorUbicacion } from "./EditorUbicacion";
 import s from "./ubicaciones-desktop.module.css";
 const VACIA = libretaVacia();
-type Tab = "todas" | "perfil" | "frecuentes" | "trabajo" | "otros";
+type Tab = FuenteUbicacion | "todas" | "frecuentes";
+const CATEGORIAS: { id: Tab; label: string }[] = [
+  { id: "todas", label: "Todas" },
+  { id: "perfil", label: "Domicilio del perfil" },
+  { id: "frecuentes", label: "Frecuentes" },
+  { id: "trabajo", label: "Trabajo" },
+  { id: "origen", label: "Orígenes" },
+  { id: "destino", label: "Destinos" },
+  { id: "otro", label: "Otras" },
+];
+function perteneceACategoria(u: UbicacionUsuario, tab: Tab) {
+  return tab === "todas" || (tab === "frecuentes" ? Boolean(u.favorita) : u.fuentes.includes(tab));
+}
 function ordenar(lista: UbicacionUsuario[], orden: string): UbicacionUsuario[] {
   return [...lista].sort((a, b) =>
     orden === "nombre"
@@ -59,7 +71,6 @@ export function UbicacionesDesktop({
     [refrescando, refrescar] = useTransition();
   const [libreta, setLibreta] = useState(libretaInicial),
     [busqueda, setBusqueda] = useState(""),
-    [fuente, setFuente] = useState("todas"),
     [ciudad, setCiudad] = useState(""),
     [tab, setTab] = useState<Tab>("todas"),
     [orden, setOrden] = useState("recientes"),
@@ -90,15 +101,9 @@ export function UbicacionesDesktop({
     () => aplicarLibreta(ubicaciones, libreta),
     [ubicaciones, libreta],
   );
-  const conteos = {
-    todas: todas.length,
-    perfil: todas.filter((u) => u.fuentes.includes("perfil")).length,
-    frecuentes: todas.filter((u) => u.favorita).length,
-    trabajo: todas.filter((u) => tipoUbicacion(u) === "trabajo").length,
-    otros: todas.filter((u) =>
-      ["origen", "destino", "otro"].includes(tipoUbicacion(u)),
-    ).length,
-  };
+  const conteos = Object.fromEntries(
+    CATEGORIAS.map(({ id }) => [id, todas.filter(u => perteneceACategoria(u, id)).length]),
+  );
   const ciudades = [
     ...new Set(
       todas.flatMap((u) => [u.ciudad, u.estado ?? ""]).filter(Boolean),
@@ -109,16 +114,9 @@ export function UbicacionesDesktop({
       ordenar(
         todas.filter(
           (u) =>
-            (fuente === "todas" ||
-              u.fuentes.includes(fuente as FuenteUbicacion)) &&
             (!ciudad || u.ciudad === ciudad || u.estado === ciudad) &&
             (!soloUsadas || u.usos > 0) &&
-            (tab === "todas" ||
-              (tab === "perfil" && u.fuentes.includes("perfil")) ||
-              (tab === "frecuentes" && u.favorita) ||
-              (tab === "trabajo" && tipoUbicacion(u) === "trabajo") ||
-              (tab === "otros" &&
-                ["origen", "destino", "otro"].includes(tipoUbicacion(u)))) &&
+            perteneceACategoria(u, tab) &&
             normalizarBusqueda(
               [direccionCompleta(u), u.alias, u.referencia]
                 .filter(Boolean)
@@ -127,7 +125,7 @@ export function UbicacionesDesktop({
         ),
         orden,
       ),
-    [todas, fuente, ciudad, soloUsadas, tab, busqueda, orden],
+    [todas, ciudad, soloUsadas, tab, busqueda, orden],
   );
   const paginas = Math.max(1, Math.ceil(filtradas.length / 10)),
     actual = Math.min(pagina, paginas),
@@ -140,7 +138,6 @@ export function UbicacionesDesktop({
   };
   const limpiar = () => {
     setBusqueda("");
-    setFuente("todas");
     setCiudad("");
     setTab("todas");
     setOrden("recientes");
@@ -235,13 +232,6 @@ export function UbicacionesDesktop({
     cerrarModal();
     setToast({ texto: "Ubicación eliminada de tu libreta", error: false });
   }
-  const tabs: { id: Tab; label: string }[] = [
-    { id: "todas", label: "Todas" },
-    { id: "perfil", label: "Domicilio del perfil" },
-    { id: "frecuentes", label: "Frecuentes" },
-    { id: "trabajo", label: "Trabajo" },
-    { id: "otros", label: "Otros" },
-  ];
   return (
     <div className={s.page} data-testid="locations-desktop">
       <header className={s.heading}>
@@ -308,25 +298,6 @@ export function UbicacionesDesktop({
                   volverInicio();
                 }}
               />
-            </label>
-            <label className={s.select}>
-              <span>Tipo de ubicación</span>
-              <select
-                aria-label="Tipo de ubicación"
-                value={fuente}
-                onChange={(e) => {
-                  setFuente(e.target.value);
-                  volverInicio();
-                }}
-              >
-                <option value="todas">Todas</option>
-                {Object.entries(ETIQUETAS_UBICACION).map(([id, label]) => (
-                  <option key={id} value={id}>
-                    {label}
-                  </option>
-                ))}
-              </select>
-              <Icon name="down" />
             </label>
             <label className={s.select}>
               <span>Ciudad o estado</span>
@@ -399,19 +370,14 @@ export function UbicacionesDesktop({
             role="group"
             aria-label="Categorías de ubicaciones"
           >
-            {tabs.map((t, i) => (
+            {CATEGORIAS.map((t) => (
               <button
                 key={t.id}
-
-
-
                 aria-pressed={tab === t.id}
-
                 onClick={() => {
                   setTab(t.id);
                   volverInicio();
                 }}
-
               >
                 {t.label} ({conteos[t.id]})
               </button>
@@ -452,7 +418,9 @@ export function UbicacionesDesktop({
                       }}
                     >
                       <strong>{nombreUbicacion(u)}</strong>
-                      <span>{u.direccion.split(",")[0]}</span>
+                      {u.alias && u.alias !== u.direccion.split(",")[0] && (
+                        <span>{u.direccion.split(",")[0]}</span>
+                      )}
                       <small>
                         {[
                           u.direccion.split(",").slice(1).join(",").trim(),
@@ -461,7 +429,7 @@ export function UbicacionesDesktop({
                             ? u.codigoPostal
                             : "",
                           u.ciudad,
-                          u.estado,
+                          u.estado !== u.ciudad ? u.estado : "",
                         ]
                           .filter(Boolean)
                           .join(", ") || "Ciudad no registrada"}
@@ -483,11 +451,11 @@ export function UbicacionesDesktop({
                     </button>
                     <Link
                       className={s.use}
-                      href={enlaceBuscarUbicacion(u, "origen")}
+                      href={enlaceBuscarUbicacion(u, ladoHabitual(u))}
                       onClick={(e) => e.stopPropagation()}
                     >
                       <Icon name="send" />
-                      Usar
+                      Usar como {ladoHabitual(u)}
                     </Link>
                     <div className={s.rowMenu}>
                       <button
@@ -510,8 +478,8 @@ export function UbicacionesDesktop({
                           className={s.popover}
                           onClick={(e) => e.stopPropagation()}
                         >
-                          <Link href={enlaceBuscarUbicacion(u, "destino")}>
-                            Usar como destino
+                          <Link href={enlaceBuscarUbicacion(u, ladoHabitual(u) === "origen" ? "destino" : "origen")}>
+                            Usar como {ladoHabitual(u) === "origen" ? "destino" : "origen"}
                           </Link>
                           <button
                             onClick={() => {
@@ -620,7 +588,6 @@ export function UbicacionesDesktop({
             </span>
           </footer>
           {(busqueda ||
-            fuente !== "todas" ||
             ciudad ||
             tab !== "todas" ||
             soloUsadas) && (

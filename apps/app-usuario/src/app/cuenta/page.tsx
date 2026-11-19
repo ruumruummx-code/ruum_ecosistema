@@ -3,6 +3,7 @@ import { MobileShell } from "@ruum/ui";
 import { NavegacionUsuario } from "../NavegacionUsuario";
 import { CuentaCliente } from "./CuentaCliente";
 import { CuentaDesktop } from "./CuentaDesktop";
+import { nombreVisibleCuenta } from "./cuenta-utils";
 import { conCuenta } from "./cuenta-ui";
 
 export const metadata: Metadata = {
@@ -20,7 +21,7 @@ export default async function PaginaCuenta({ searchParams }: { searchParams?: Pr
     <>
       {/* VISTA MÓVIL (< 1024px): Preservada idéntica bajo enfoque mobile-first */}
       <div className="lg:hidden flex flex-col h-full w-full">
-        <NavegacionUsuario variante="claro" nombreUsuario={cuenta.usuario?.nombre} />
+        <NavegacionUsuario variante="claro" nombreUsuario={nombreVisibleCuenta(cuenta.usuario?.nombre)} />
         <MobileShell variant="compact" navInferiorVisible={true} as="main" className="user-v2-scope user-account-shell" contentClassName="user-account-content">
           <CuentaCliente
             seccionInicial={seccion === "perfil" || seccion === "soporte" || seccion === "legal" ? seccion : null}

@@ -154,10 +154,6 @@ export function CabeceraCuentaArte() {
           <circle cx="70" cy="33" r="5" fill="#183964" />
         </g>
       </svg>
-      <p>
-        Traslado vehicular con conductores certificados,{" "}
-        <strong>evidencia y seguimiento.</strong>
-      </p>
     </div>
   );
 }

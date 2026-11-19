@@ -34,11 +34,17 @@ export function MapaUbicacion({
   const [revision, setRevision] = useState(0);
   const direccion = direccionCompleta(ubicacion);
   useEffect(() => {
-    if (coordenadasValidas(ubicacion.lat, ubicacion.lng)) return;
+    const { lat, lng } = ubicacion;
+    if (coordenadasValidas(lat, lng)) {
+      setCoordenadas(actual => actual && actual.lat === lat && actual.lng === lng ? actual : { lat: lat!, lng: lng! });
+      return;
+    }
+    setCoordenadas(null);
     if (!tieneMapboxConfigurado()) {
       setEstado("error");
       return;
     }
+    setEstado("cargando");
     const abort = new AbortController();
     let vigente = true;
     void geocodificarDireccion(direccion, abort.signal)
@@ -140,7 +146,7 @@ export function MapaUbicacion({
       role="region"
       tabIndex={0}
       className={s.mapFrame}
-      aria-label={`Mapa de ubicación: ${direccion}`}
+      aria-label={`Mapa de ubicación${coordenadasValidas(ubicacion.lat, ubicacion.lng) ? "" : " aproximada"}: ${direccion}`}
     >
       <div ref={contenedor} className={s.mapCanvas} />
       {estado !== "listo" && (

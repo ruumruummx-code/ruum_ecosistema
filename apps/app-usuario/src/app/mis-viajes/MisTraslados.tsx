@@ -303,7 +303,7 @@ export function MisTraslados({
                 <ul className={mostrarPanel ? "grid gap-3" : "grid gap-3 md:grid-cols-2 lg:gap-4"}>
                   {filas.map((viaje, i) => (
                     <li key={viaje.pasaporte.traslado_id ?? `${viaje.pasaporte.creado_en}-${i}`} className="min-w-0">
-                      <TrasladoItem viaje={viaje} seleccionado={mostrarPanel && elegido === viaje} onAbrir={abrir} />
+                      <TrasladoItem viaje={viaje} conPanel={conPanel} seleccionado={mostrarPanel && elegido === viaje} onAbrir={abrir} />
                     </li>
                   ))}
                 </ul>

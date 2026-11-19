@@ -1,6 +1,7 @@
 "use client";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
+import { Button } from "@ruum/ui/base";
 import { useCuentaUsuario } from "./useCuentaUsuario";
 import type { CuentaReal } from "./cuenta-ui";
 import { enmascararRfc } from "@ruum/api/services";
@@ -9,7 +10,7 @@ import { construirUbicaciones } from "../ubicaciones/ubicaciones-usuario";
 import { UserDashboardLayout } from "../../components/layout/UserDashboardLayout";
 import {
   actividadCuenta,
-  antiguedadCuenta,
+  mesAltaCuenta,
   direccionCuenta,
   fechaCuenta,
 } from "./cuenta-desktop-model";
@@ -74,6 +75,13 @@ export function CuentaDesktop({ cuenta, seccionInicial }: CuentaDesktopProps) {
   const actividades = useMemo(() => actividadCuenta(cuenta), [cuenta]);
   const direccion = direccionCuenta(usuario);
   const fiscal = cuenta.empresa ?? usuario;
+  const faltanDatosFiscales = [fiscal.razon_social, fiscal.rfc, fiscal.regimen_fiscal, fiscal.codigo_postal_fiscal]
+    .some((dato) => !dato?.trim());
+  const estadoPago = usuario.metodo_pago_registrado === true
+    ? "Método de pago registrado"
+    : usuario.metodo_pago_registrado === false
+      ? "Sin método de pago registrado"
+      : "Consulta tus opciones de pago";
   useEffect(() => {
     if (window.innerWidth < 1024) return;
     if (seccionInicial === "perfil")
@@ -182,15 +190,14 @@ export function CuentaDesktop({ cuenta, seccionInicial }: CuentaDesktopProps) {
                   ["car", totalTraslados, "Traslados", "/mis-viajes"],
                   ["car", totalVehiculos, "Vehículos", "/cuenta/vehiculos"],
                   ["pin", ubicaciones.length, "Ubicaciones", "/ubicaciones"],
-                  [
-                    "calendar",
-                    antiguedadCuenta(usuario.creado_en),
-                    "Cliente desde",
-                    "/cuenta/datos-personales",
-                  ],
                 ] as const
               ).map(([icon, value, label, href]) => (
-                <Link key={label} href={href} aria-label={`${value} ${label}`}>
+                <Link
+                  key={label}
+                  href={href}
+                  aria-label={`${value} ${label}`}
+                  className="focus-visible:outline-2 focus-visible:outline-ui-ring"
+                >
                   <Icon name={icon} />
                   <div>
                     <strong>{value}</strong>
@@ -198,6 +205,13 @@ export function CuentaDesktop({ cuenta, seccionInicial }: CuentaDesktopProps) {
                   </div>
                 </Link>
               ))}
+              <div className={s.fechaAlta}>
+                <Icon name="calendar" />
+                <div>
+                  <strong>{mesAltaCuenta(usuario.creado_en)}</strong>
+                  <small>Cliente desde</small>
+                </div>
+              </div>
             </div>
           </section>
           <section
@@ -231,33 +245,33 @@ export function CuentaDesktop({ cuenta, seccionInicial }: CuentaDesktopProps) {
           </section>
         </div>
         <nav className={s.quickLinks} aria-label="Categorías de mi cuenta">
-          <Link href="/cuenta/datos-personales" data-tone="blue">
+          <a href="#informacion-personal-cuenta" data-tone="blue">
             <span className={s.quickIcon}>
               <Icon name="user" />
             </span>
             <div>
               <strong>Datos personales</strong>
-              <small>Consulta y actualiza tu información.</small>
+              <small>Ir a información personal.</small>
             </div>
             <Icon name="chevron" />
-          </Link>
-          <button onClick={() => abrirModal("seguridad")} data-tone="green">
+          </a>
+          <a href="#seguridad-de-la-cuenta" data-tone="green">
             <span className={s.quickIcon}>
               <Icon name="lock" />
             </span>
             <div>
               <strong>Seguridad</strong>
-              <small>Contraseña y verificación.</small>
+              <small>Ir a seguridad de la cuenta.</small>
             </div>
             <Icon name="chevron" />
-          </button>
+          </a>
           <Link href="/cuenta/metodos-pago" data-tone="purple">
             <span className={s.quickIcon}>
               <Icon name="card" />
             </span>
             <div>
               <strong>Métodos de pago</strong>
-              <small>Tarjetas y facturación.</small>
+              <small>{estadoPago}</small>
             </div>
             <Icon name="chevron" />
           </Link>
@@ -275,7 +289,7 @@ export function CuentaDesktop({ cuenta, seccionInicial }: CuentaDesktopProps) {
         <div className={s.columns}>
           <div className={s.leftColumn}>
             <section
-              className={s.card}
+              className={`${s.card} scroll-mt-4 focus-visible:outline-2 focus-visible:outline-ui-ring`}
               aria-label="Información personal"
               id="informacion-personal-cuenta"
               tabIndex={-1}
@@ -335,7 +349,7 @@ export function CuentaDesktop({ cuenta, seccionInicial }: CuentaDesktopProps) {
                     )}
                   </div>
                 </Link>
-                <Link className={s.addressBlock} href="/cuenta/facturacion">
+                <div className={s.addressBlock}>
                   <span className={s.blockIcon}>
                     <Icon name="file" />
                   </span>
@@ -345,7 +359,7 @@ export function CuentaDesktop({ cuenta, seccionInicial }: CuentaDesktopProps) {
                       {fiscal.razon_social?.trim() ||
                         "Nombre fiscal no registrado"}
                     </p>
-                    <p>RFC: {fiscal.rfc ? enmascararRfc(fiscal.rfc) : "No registrado"}</p>
+                    <p>RFC: {fiscal.rfc?.trim() ? enmascararRfc(fiscal.rfc) : "No registrado"}</p>
                     <p>
                       Régimen fiscal:{" "}
                       {fiscal.regimen_fiscal?.trim() || "No registrado"}
@@ -354,8 +368,13 @@ export function CuentaDesktop({ cuenta, seccionInicial }: CuentaDesktopProps) {
                       CP:{" "}
                       {fiscal.codigo_postal_fiscal?.trim() || "No registrado"}
                     </p>
+                    {faltanDatosFiscales && (
+                      <Button asChild variant="link" className="mt-2 whitespace-normal text-left text-xs">
+                        <Link href="/cuenta/facturacion">Completar datos fiscales</Link>
+                      </Button>
+                    )}
                   </div>
-                </Link>
+                </div>
               </div>
             </section>
           </div>
@@ -399,8 +418,10 @@ export function CuentaDesktop({ cuenta, seccionInicial }: CuentaDesktopProps) {
               )}
             </section>
             <section
-              className={`${s.card} ${s.securityCard}`}
+              className={`${s.card} ${s.securityCard} scroll-mt-4 focus-visible:outline-2 focus-visible:outline-ui-ring`}
               aria-label="Seguridad de la cuenta"
+              id="seguridad-de-la-cuenta"
+              tabIndex={-1}
             >
               <header>
                 <h2>Seguridad de la cuenta</h2>

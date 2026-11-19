@@ -119,7 +119,7 @@ export function AtributosVehiculo({
   const atributos = [
     ["car", ETIQUETA_TIPO_VEHICULO[vehiculo.tipo] || "No registrado", "Tipo"],
     ["gear", etiquetaTransmision(vehiculo), "Transmisión"],
-    ["fuel", "No registrado", "Combustible"],
+    ["fuel", "No especificado", "Combustible"],
   ] as const;
   return (
     <div className={detalle ? s.quickAttributes : s.attributes}>

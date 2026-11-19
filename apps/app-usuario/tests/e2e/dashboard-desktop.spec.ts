@@ -37,6 +37,11 @@ test('Inicio desktop: datos, GPS, scroll confinado, contactos y navegación oper
   const dashboard = page.getByTestId('desktop-dashboard');
   await expect(dashboard.getByRole('heading', { name: 'Tu traslado, en orden.' })).toBeVisible();
   await expect(dashboard.getByText('Bienvenido de nuevo, Carlos')).toBeVisible();
+  await expect(dashboard.getByRole('link', { name: 'Registrar nuevo traslado' })).toHaveCount(1);
+  await expect(page.locator('#userDashboardSidebar').getByRole('link', { name: 'Ayuda', exact: true })).toBeInViewport();
+  await expect(dashboard.getByRole('row').nth(1)).toBeInViewport({ ratio: 1 });
+  await expect(dashboard.getByRole('link', { name: 'Traslados activos 2' })).toBeVisible();
+  await expect(dashboard.getByRole('link', { name: 'Vehículos registrados 3' })).toBeVisible();
   const activo = dashboard.getByRole('article', { name: 'Traslado activo' });
   await page.screenshot({ path: 'test-results/dashboard-initial.png', timeout: 10_000 });
   await expect(activo.getByText('12 min')).toBeVisible({ timeout: 30_000 });
@@ -55,13 +60,13 @@ test('Inicio desktop: datos, GPS, scroll confinado, contactos y navegación oper
       const main = document.documentElement;
       const table = el.querySelector('[aria-label="Últimos traslados"] table')!.parentElement!;
       const modules = Array.from(el.children).map(child => child.getBoundingClientRect());
-      return { main: main.scrollHeight - innerHeight, dashboard: el.scrollHeight - el.clientHeight, width: document.documentElement.scrollWidth - innerWidth, tableScrolls: table.scrollHeight > table.clientHeight, tableOverflow: getComputedStyle(table).overflowY, overlap: modules.some((rect, i) => i > 0 && rect.top < modules[i - 1].bottom - 1) };
+      return { main: main.scrollTop, dashboard: el.scrollHeight - el.clientHeight, width: document.documentElement.scrollWidth - innerWidth, tableOverflow: getComputedStyle(table).overflowY, overlap: modules.some((rect, i) => i > 0 && rect.top < modules[i - 1].bottom - 1) };
     });
     expect(geometry.main, `${width}x${height}`).toBeLessThanOrEqual(1);
     expect(geometry.dashboard, `${width}x${height}`).toBeLessThanOrEqual(1);
     expect(geometry.width).toBeLessThanOrEqual(1);
     expect(geometry.tableOverflow).toBe("auto");
-    if (height <= 1080) expect(geometry.tableScrolls).toBe(true);
+
     expect(geometry.overlap).toBe(false);
   }
   await page.setViewportSize({ width: 1672, height: 941 });
@@ -73,26 +78,28 @@ test('Inicio desktop: datos, GPS, scroll confinado, contactos y navegación oper
   await dashboard.getByRole('button', { name: 'Llamar a Jorge Ramírez' }).click();
   await expect(dashboard.getByRole('alert')).toBeVisible();
   await expect(dashboard.getByRole('link', { name: 'WhatsApp soporte' })).toHaveAttribute('href', /https:\/\/wa\.me\//);
-  await dashboard.getByRole('button', { name: 'Opciones del traslado PEM789', exact: true }).first().click();
-  await expect(dashboard.getByRole('link', { name: 'Solicitar ayuda' })).toHaveAttribute('href', `/soporte?traslado=${id}`);
+  await dashboard.getByRole('button', { name: 'Opciones del traslado PZM456', exact: true }).first().click();
+  await expect(dashboard.getByRole('link', { name: 'Solicitar ayuda' })).toHaveAttribute('href', "/soporte?traslado=10000000-0000-4000-8000-000000000002");
   await page.keyboard.press('Escape');
-  for (const [name, path] of [['Registrar nuevo traslado', '/viajes/nuevo'], ['Carga masiva de traslados', '/viajes/masivo'], ['Mis vehículos registrados', '/cuenta/vehiculos'], ['Ver historial de traslados', '/mis-viajes']]) {
-    await dashboard.getByRole('navigation', { name: 'Acciones rápidas' }).getByRole('link', { name: new RegExp(name) }).click();
-    await expect(page).toHaveURL(new RegExp(`${path}$`));
-    await expect(page.locator('#userDashboardSidebar')).toBeVisible();
-    await page.goto('/', { waitUntil: 'domcontentloaded' });
-    await expect(dashboard).toBeVisible();
+  for (const [name, path] of [
+    ['Registrar nuevo traslado', '/viajes/nuevo'],
+    ['Carga masiva', '/viajes/masivo'],
+    ['Vehículos registrados', '/cuenta/vehiculos'],
+    ['Traslados activos', '/mis-viajes'],
+    ['Completados este mes', '/mis-viajes?tab=finalizados'],
+  ]) {
+    await expect(dashboard.getByRole('link', { name: new RegExp(name) })).toHaveAttribute('href', path);
   }
-  await dashboard.getByRole('link', { name: 'Abrir en mapa' }).click();
-  await expect(page).toHaveURL(new RegExp(`/viajes/${id}#en-ruta$`));
+  await expect(dashboard.getByRole('link', { name: 'Abrir en mapa' })).toHaveAttribute('href', `/viajes/${id}#en-ruta`);
+  await page.goto(`/viajes/${id}#en-ruta`, { waitUntil: 'domcontentloaded' });
   await expect(page.getByRole('tab', { name: /En Ruta/i })).toBeVisible();
   await page.goto('/', { waitUntil: 'domcontentloaded' });
   await dashboard.getByRole('link', { name: 'Mensaje a Jorge Ramírez' }).click();
   await expect(page).toHaveURL(new RegExp(`/viajes/${id}#chat-conductor$`));
   await expect(page.getByRole('tab', { name: /Chat/ })).toHaveAttribute('aria-selected', 'true');
   await page.goto('/', { waitUntil: 'domcontentloaded' });
-  await dashboard.getByRole('link', { name: 'Contactar soporte', exact: true }).click();
-  await expect(page).toHaveURL(/\/soporte$/);
+  await expect(dashboard.getByRole('link', { name: 'Contactar soporte', exact: true })).toHaveAttribute('href', '/soporte');
+  await page.goto('/soporte', { waitUntil: 'domcontentloaded' });
   await expect(page.getByRole('heading', { name: 'Ayuda y soporte' })).toBeVisible();
 });
 

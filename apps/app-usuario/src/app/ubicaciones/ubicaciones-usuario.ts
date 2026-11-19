@@ -52,6 +52,85 @@ export function normalizarBusqueda(valor: string): string {
     .replace(/\s+/g, " ")
     .trim();
 }
+const CONECTORES = new Set(["al", "de", "del", "la", "las", "el", "los", "y"]);
+
+function formatearUbicacion(texto: string): string {
+  return texto.trim().replace(/\s+/g, " ").replace(/\p{L}+/gu, (palabra, inicio: number, cadena: string) => {
+    const minusculas = palabra.toLocaleLowerCase("es-MX");
+    if (/^cdmx$/i.test(palabra)) return palabra.toUpperCase();
+    if (inicio > 0 && CONECTORES.has(minusculas) && !/,\s*$/.test(cadena.slice(0, inicio))) return minusculas;
+    return minusculas.charAt(0).toLocaleUpperCase("es-MX") + minusculas.slice(1);
+  });
+}
+
+function estadoVisible(estado?: string): string {
+  return ["mexico", "edomex"].includes(normalizarBusqueda(estado ?? ""))
+    ? "Estado de México"
+    : formatearUbicacion(estado ?? "");
+}
+
+function partesDireccion(u: UbicacionUsuario) {
+  const partes = u.direccion.split(",").map(p => p.trim()).filter(Boolean);
+  const [municipio, ...calificadores] = u.ciudad.split(",").map(p => p.trim());
+  const estadoExplicito = [...calificadores, ...partes.slice(1)].find(p =>
+    ["estado de mexico", "edomex", "cdmx"].includes(normalizarBusqueda(p)),
+  );
+  const estado = estadoVisible(u.estado || estadoExplicito);
+  const ciudad = calificadores.every(p => normalizarBusqueda(p) === normalizarBusqueda(estadoExplicito ?? ""))
+    ? municipio
+    : u.ciudad.trim();
+  const sufijos = [ciudad, estado, estadoExplicito ?? "", "México"].map(normalizarBusqueda).filter(Boolean);
+  while (partes.length > 1 && sufijos.includes(normalizarBusqueda(partes.at(-1)!))) partes.pop();
+  const direccion = partes.join(", ");
+  const postal = u.codigoPostal && !direccion.split(/\D+/).includes(u.codigoPostal) ? u.codigoPostal : "";
+  return { direccion, ciudad, estado, postal };
+}
+
+/** Coincidencia de calle, número, detalles postales y ciudad, sin aproximar nombres distintos. */
+function claveDomicilio({ direccion, ciudad, postal }: ReturnType<typeof partesDireccion>): string | null {
+  if (!ciudad || !/\d/.test(direccion)) return null;
+  return normalizarBusqueda([direccion, postal].join(" ").replace(/[,.;]+/g, " ")) + "|" + normalizarBusqueda(ciudad);
+}
+
+function agruparDomicilio(base: UbicacionUsuario[], libreta: LibretaUbicaciones): UbicacionUsuario[] {
+  const perfil = base.find(u => u.fuentes.includes("perfil"));
+  if (!perfil) return base.filter(u => !libreta.ocultas.includes(u.id));
+  const partesPerfil = partesDireccion(perfil);
+  const clave = claveDomicilio(partesPerfil);
+  if (!clave) return base.filter(u => !libreta.ocultas.includes(u.id));
+  const estadoPerfil = normalizarBusqueda(partesPerfil.estado);
+  const compatibles = base.filter(u => {
+    if (u.id === perfil.id || u.guardada) return false;
+    const partes = partesDireccion(u);
+    const estado = normalizarBusqueda(partes.estado);
+    return claveDomicilio(partes) === clave && (!estado || !estadoPerfil || estado === estadoPerfil);
+  });
+  const ids = new Set(compatibles.map(u => u.id));
+  const visibles = compatibles.filter(u => !libreta.ocultas.includes(u.id));
+  const conCoordenadas = coordenadasValidas(perfil.lat, perfil.lng)
+    ? perfil
+    : visibles.find(u => coordenadasValidas(u.lat, u.lng));
+  const domicilio = {
+    ...perfil,
+    fuentes: [...new Set([...perfil.fuentes, ...visibles.flatMap(u => u.fuentes)])],
+    usos: perfil.usos + visibles.reduce((total, u) => total + u.usos, 0),
+    ultimoUso: [perfil.ultimoUso, ...visibles.map(u => u.ultimoUso)]
+      .filter((fecha): fecha is string => Boolean(fecha))
+      .sort((a, b) => Date.parse(b) - Date.parse(a))[0] ?? null,
+    lat: conCoordenadas?.lat,
+    lng: conCoordenadas?.lng,
+    favorita: libreta.favoritos[perfil.id] ?? visibles.some(u => libreta.favoritos[u.id] === true),
+  };
+  return base.filter(u => !ids.has(u.id) && !libreta.ocultas.includes(u.id))
+    .map(u => u.id === perfil.id ? domicilio : u);
+}
+
+export function ladoHabitual(u: UbicacionUsuario): "origen" | "destino" {
+  return u.fuentes.includes("destino") && !u.fuentes.includes("origen") && !u.fuentes.includes("perfil")
+    ? "destino"
+    : "origen";
+}
+
 /** The original service addresses remain immutable; the address book is a separate account namespace. */
 export function construirUbicacionesBase(
   usuario: Usuario,
@@ -165,9 +244,19 @@ export function aplicarLibreta(
     version: e.version,
     creadoEn: e.creadoEn,
   }));
-  return [...base, ...entradas]
+  return [...agruparDomicilio(base, libreta), ...entradas]
     .filter((u) => !libreta.ocultas.includes(u.id))
-    .map((u) => ({ ...u, favorita: libreta.favoritos[u.id] === true }));
+    .map((u) => {
+      const partes = partesDireccion(u);
+      return {
+        ...u,
+        alias: u.fuentes.includes("perfil") ? ETIQUETAS_UBICACION.perfil : formatearUbicacion(u.alias ?? ""),
+        direccion: formatearUbicacion(partes.direccion),
+        ciudad: formatearUbicacion(partes.ciudad),
+        estado: partes.estado,
+        favorita: libreta.favoritos[u.id] ?? u.favorita ?? false,
+      };
+    });
 }
 export function construirUbicaciones(
   usuario: Usuario,
@@ -179,15 +268,9 @@ export function construirUbicaciones(
   );
 }
 export function direccionCompleta(u: UbicacionUsuario): string {
-  return [
-    u.direccion,
-    u.codigoPostal && !u.direccion.includes(u.codigoPostal)
-      ? u.codigoPostal
-      : "",
-    u.ciudad,
-    u.estado,
-  ]
-    .filter(Boolean)
+  const { direccion, ciudad, estado, postal } = partesDireccion(u);
+  return [formatearUbicacion(direccion), postal, formatearUbicacion(ciudad), estado]
+    .filter((parte, i, partes) => parte && partes.indexOf(parte) === i)
     .join(", ");
 }
 export function enlaceBuscarUbicacion(

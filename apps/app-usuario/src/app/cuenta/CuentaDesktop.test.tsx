@@ -9,7 +9,7 @@ import {
   cleanup,
 } from "@testing-library/react";
 import { CuentaDesktop } from "./CuentaDesktop";
-import { actividadCuenta, antiguedadCuenta } from "./cuenta-desktop-model";
+import { actividadCuenta, mesAltaCuenta } from "./cuenta-desktop-model";
 import type { CuentaReal } from "./cuenta-ui";
 const { replace, refresh, signOut } = vi.hoisted(() => ({
   replace: vi.fn(),
@@ -74,8 +74,10 @@ describe("Mi cuenta desktop", () => {
     );
     expect(nav.getByRole("link", { name: /Datos personales/ })).toHaveAttribute(
       "href",
-      "/cuenta/datos-personales",
+      "#informacion-personal-cuenta",
     );
+    expect(nav.getByRole("link", { name: /^Seguridad/ })).toHaveAttribute("href", "#seguridad-de-la-cuenta");
+    expect(nav.getByText("Sin método de pago registrado")).toBeVisible();
     expect(nav.getByRole("link", { name: /Preferencias/ })).toHaveAttribute(
       "href",
       "/cuenta/preferencias",
@@ -131,11 +133,26 @@ describe("Mi cuenta desktop", () => {
     );
     expect(direccion.getByText("Los Serranos 225")).toBeInTheDocument();
     expect(direccion.getByText("Empresa Real")).toBeInTheDocument();
+    expect(direccion.queryByRole("link", { name: "Completar datos fiscales" })).not.toBeInTheDocument();
     expect(direccion.getByText("RFC: EMP0••••••X1")).toBeInTheDocument();
     expect(direccion.getByRole("link", { name: "Editar" })).toHaveAttribute(
       "href",
       "/cuenta/facturacion",
     );
+  });
+  it("formatea el nombre de perfil y enlaza directamente los datos fiscales faltantes", () => {
+    render(<CuentaDesktop cuenta={{
+      ...cuenta,
+      usuario: { ...cuenta.usuario, nombre: "HÉCTOR MANUEL DE LA CRUZ", razon_social: "EMPRESA REAL", rfc: null },
+    }} />);
+    const perfil = within(screen.getByRole("region", { name: "Resumen de perfil" }));
+    const personal = within(screen.getByRole("region", { name: "Información personal" }));
+    const facturacion = within(screen.getByRole("region", { name: "Dirección y facturación" }));
+    expect(perfil.getByRole("heading", { name: "Héctor Manuel de la Cruz" })).toBeVisible();
+    expect(personal.getByText("Héctor Manuel de la Cruz")).toBeVisible();
+    expect(screen.getByRole("heading", { name: /Hola, Héctor/ })).toBeVisible();
+    expect(facturacion.getByText("EMPRESA REAL")).toBeVisible();
+    expect(facturacion.getByRole("link", { name: "Completar datos fiscales" })).toHaveAttribute("href", "/cuenta/facturacion");
   });
   it("usa las ubicaciones existentes y no inventa dispositivos ni fechas de seguridad", () => {
     render(<CuentaDesktop cuenta={cuenta} />);
@@ -150,13 +167,10 @@ describe("Mi cuenta desktop", () => {
     expect(
       screen.queryByText(/Última actualización: 12 ago/),
     ).not.toBeInTheDocument();
-    expect(
-      antiguedadCuenta(
-        "2024-01-01T12:00:00Z",
-        new Date("2026-10-27T12:00:00Z"),
-      ),
-    ).toBe("2 años");
-    expect(antiguedadCuenta(undefined)).toBe("—");
+    expect(perfil.getByRole("link", { name: "0 Traslados" })).toHaveAttribute("href", "/mis-viajes");
+    expect(perfil.getByRole("link", { name: "0 Vehículos" })).toHaveAttribute("href", "/cuenta/vehiculos");
+    expect(perfil.getByText("ene 2024")).toBeVisible();
+    expect(mesAltaCuenta(undefined)).toBe("—");
   });
   it("muestra el banner accesible de solicitud de conductor pendiente cuando aplica", () => {
     render(

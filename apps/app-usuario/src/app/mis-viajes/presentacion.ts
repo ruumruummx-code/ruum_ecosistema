@@ -42,12 +42,13 @@ export function presentarViaje(viaje: ViajeLista) {
       ? "Pasaporte"
       : esPagoPendiente
         ? "Completar pago"
-        : "Detalle";
+        : "Ver ficha completa";
 
   return {
     estado,
     tono: TONO_ESTADO[estado.tono],
     categoria,
+    cancelado: categoria === "cancelados" || estado.tono === "cancelled",
     url,
     accion,
     accionDestacada: esPagoPendiente && !enRevision,

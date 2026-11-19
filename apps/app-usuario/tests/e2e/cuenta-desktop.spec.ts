@@ -134,4 +134,15 @@ test("Mi cuenta: scroll confinado, datos, enlaces y sesiones autenticadas", asyn
       .getByRole("region", { name: "Actividad reciente" })
       .getByRole("link", { name: /Traslado Chrysler Cirrus/ }),
   ).toHaveAttribute("href", "/viajes/70000000-0000-4000-8000-000000000001");
+  const accesos = account.getByRole("navigation", { name: "Categorías de mi cuenta" });
+  for (const [label, titulo, hash] of [
+    ["Datos personales", "Información personal", "#informacion-personal-cuenta"],
+    ["Seguridad", "Seguridad de la cuenta", "#seguridad-de-la-cuenta"],
+  ]) {
+    await accesos.getByRole("link", { name: new RegExp(`^${label}`) }).click();
+    await expect(page).toHaveURL(new URL(hash, page.url()).href);
+    const seccion = account.getByRole("region", { name: titulo, exact: true });
+    await expect(seccion).toBeInViewport();
+    await expect(seccion).toBeFocused();
+  }
 });

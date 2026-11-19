@@ -33,6 +33,11 @@ describe("Inicio desktop", () => {
   });
   it("distingue preparación de circulación y no inventa un conductor", () => {
     render(<InicioDesktop usuario={null} traslados={[{ ...viaje, estado: "documentacion_pendiente", conductor_id: null, conductor_nombre: null }]} />);
+    expect(screen.getByText("Ruta prevista (en espera de asignación)")).toBeVisible();
+    expect(screen.getByText("~99 km")).toBeVisible();
+    expect(screen.getByText("~4 h")).toBeVisible();
+    expect(screen.queryByText("Esperando ubicación GPS")).not.toBeInTheDocument();
+    expect(useDashboardTracking).toHaveBeenCalledWith("viaje-1", "documentacion_pendiente", false);
     const timeline = screen.getByRole("list", { name: "Progreso del traslado" });
     expect(within(timeline).getAllByText("Pendiente")).toHaveLength(3);
     expect(screen.getByText("Estamos buscando a tu conductor.")).toBeVisible();
@@ -80,10 +85,12 @@ describe("Inicio desktop", () => {
     expect(screen.getByRole("heading", { name: "Tu traslado, siempre a la vista" })).toBeVisible();
   });
   it("el menú de una fila abre destinos del mismo traslado y cierra con Escape", async () => {
-    render(<InicioDesktop usuario={null} traslados={[viaje]} />);
-    const boton = screen.getByRole("button", { name: "Opciones del traslado PEM789" });
+    const cerrado = { ...viaje, traslado_id: "viaje-2", estado: "servicio_cerrado", vehiculo_placas: "PZM456" } as const;
+    render(<InicioDesktop usuario={null} traslados={[viaje, cerrado]} />);
+    expect(screen.queryByRole("button", { name: "Opciones del traslado PEM789" })).not.toBeInTheDocument();
+    const boton = screen.getByRole("button", { name: "Opciones del traslado PZM456" });
     await userEvent.click(boton);
-    expect(screen.getByRole("link", { name: "Solicitar ayuda" })).toHaveAttribute("href", "/soporte?traslado=viaje-1");
+    expect(screen.getByRole("link", { name: "Solicitar ayuda" })).toHaveAttribute("href", "/soporte?traslado=viaje-2");
     await userEvent.keyboard("{Escape}");
     expect(screen.queryByRole("link", { name: "Solicitar ayuda" })).not.toBeInTheDocument();
     expect(boton).toHaveFocus();

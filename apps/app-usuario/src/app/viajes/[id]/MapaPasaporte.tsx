@@ -39,6 +39,7 @@ export function MapaPasaporte({
     haciaOrigen = false,
     seguirUbicacion = false,
     compact = false,
+    rutaPrevista = false,
     onDistance,
     onEta,
     etiquetaAccesible,
@@ -56,6 +57,7 @@ export function MapaPasaporte({
     onEta: (minutes: number | null) => void;
     onDistance?: (km: number | null) => void;
     compact?: boolean;
+    rutaPrevista?: boolean;
     etiquetaAccesible?: string;
     origenCiudad?: string;
     destinoCiudad?: string;
@@ -137,9 +139,9 @@ export function MapaPasaporte({
             if (!route)
                 return;
             (map.current?.getSource("route") as GeoJSONSource | undefined)?.setData({ type: "Feature", properties: {}, geometry: route.geometry });
-            if (seguirUbicacion && ubicacion && Number.isFinite(route.duration))
+            if ((rutaPrevista || (seguirUbicacion && ubicacion)) && Number.isFinite(route.duration))
                 onEta(Math.max(1, Math.ceil(route.duration / 60)));
-            if (seguirUbicacion && ubicacion && Number.isFinite(route.distance))
+            if ((rutaPrevista || (seguirUbicacion && ubicacion)) && Number.isFinite(route.distance))
                 onDistance?.(Math.round(route.distance / 100) / 10);
         }).catch((err) => { if (!abort.signal.aborted) {
             logStructuredWarn("viajes/MapaPasaporte", "calculo_eta_fallido", err);
@@ -147,10 +149,10 @@ export function MapaPasaporte({
         onDistance?.(null);
         } });
         return () => abort.abort();
-    }, [ready, token, origen, destino, driverLat, driverLng, ubicacion, haciaOrigen, seguirUbicacion, onEta, onDistance]);
+    }, [ready, rutaPrevista, token, origen, destino, driverLat, driverLng, ubicacion, haciaOrigen, seguirUbicacion, onEta, onDistance]);
     const nombreMapa =
         etiquetaAccesible ||
-        (origenCiudad && destinoCiudad
+        (rutaPrevista ? "Mapa de la ruta prevista del traslado" : origenCiudad && destinoCiudad
             ? `Mapa de seguimiento en vivo del traslado de ${origenCiudad} a ${destinoCiudad}`
             : "Mapa de seguimiento en vivo de la ruta del traslado");
 
@@ -183,7 +185,7 @@ export function MapaPasaporte({
                 {/* Información textual de estado, ubicación y antigüedad (AC-4) */}
                 <div className="sr-only" role="status" aria-live="polite">
                     <p>
-                        {`Estado: ${estadoTexto || (activo ? "En curso" : "Programado")}. ${textoUbicacionConductor} ${textoDestino} Actualizado ${antiguedad}.`}
+                        {`Estado: ${estadoTexto || (activo ? "En curso" : "Programado")}. ${textoUbicacionConductor} ${textoDestino}${rutaPrevista ? "" : ` Actualizado ${antiguedad}.`}`}
                     </p>
                 </div>
             </div>

@@ -1,6 +1,7 @@
 "use client";
 
 import { Tabs } from "@ruum/ui";
+import { Button } from "@ruum/ui/base";
 import { useCallback, useId, useRef, useState } from "react";
 import Link from "next/link";
 import { useDialogAccesible } from "@ruum/ui";
@@ -101,42 +102,52 @@ export function DetalleVehiculoDesktop({
   }
   return (
     <aside className={s.detail} aria-label={`Detalle de ${nombre}`}>
-      <div className={s.detailToolbar}>
-        <EstadoVehiculo vehiculo={v} />
-        <div>
-          <button className={s.edit} onClick={() => setEditando(true)}>
-            <Icon name="edit" />
-            Editar
-          </button>
-          <div className={s.detailMenu}>
-            <button
-              aria-label="Más opciones del vehículo seleccionado"
-              aria-expanded={menu}
-              onClick={() => setMenu(!menu)}
-              onKeyDown={(e) => {
-                if (e.key === "Escape") setMenu(false);
-              }}
-            >
-              <Icon name="more" />
-            </button>
-            {menu && (
-              <div className={s.menuPopover}>
-                <Link href={`/cuenta/vehiculos/${v.id}`}>Abrir expediente</Link>
-                <button onClick={() => cambiarTab("Historial")}>
-                  Consultar historial
-                </button>
-                <Link
-                  href={`/soporte?${new URLSearchParams({ vehiculo: v.id })}`}
-                >
-                  Solicitar ayuda
-                </Link>
-              </div>
-            )}
-          </div>
-        </div>
+      <div className="flex shrink-0 flex-wrap items-center gap-2" role="group" aria-label="Acciones del vehículo">
+        <Button asChild size="sm">
+          <Link href={`/viajes/nuevo?${new URLSearchParams({ vehiculo: v.id })}`}>
+            <Icon name="car" />
+            Seleccionar para traslado
+          </Link>
+        </Button>
+        <Button size="sm" variant="outline" onClick={() => setEditando(true)}>
+          <Icon name="edit" />
+          Editar
+        </Button>
       </div>
       <div className={s.hero}>
-        <ImagenVehiculo vehiculo={v} grande />
+        <div className={s.detailToolbar}>
+          <EstadoVehiculo vehiculo={v} />
+          <div>
+            <div className={s.detailMenu}>
+              <button
+                aria-label="Más opciones del vehículo seleccionado"
+                aria-expanded={menu}
+                onClick={() => setMenu(!menu)}
+                onKeyDown={(e) => {
+                  if (e.key === "Escape") setMenu(false);
+                }}
+              >
+                <Icon name="more" />
+              </button>
+              {menu && (
+                <div className={s.menuPopover}>
+                  <Link href={`/cuenta/vehiculos/${v.id}`}>Abrir expediente</Link>
+                  <button onClick={() => cambiarTab("Historial")}>
+                    Consultar historial
+                  </button>
+                  <Link
+                    href={`/soporte?${new URLSearchParams({ vehiculo: v.id })}`}
+                  >
+                    Solicitar ayuda
+                  </Link>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+        <div className="flex size-full items-center justify-center overflow-hidden">
+          <ImagenVehiculo vehiculo={v} grande />
+        </div>
       </div>
       <header className={s.detailIdentity}>
         <h2>{nombre}</h2>
@@ -146,12 +157,7 @@ export function DetalleVehiculoDesktop({
         </p>
       </header>
       <AtributosVehiculo vehiculo={v} detalle />
-      <Tabs idPrefix={tabsId} tabs={["Información", "Documentos", "Historial"].map(id=>({id,etiqueta:id}))} value={tab} onSeleccion={cambiarTab} etiqueta="Vista del vehículo" renderPanel={()=>( <div
-        className={s.detailContent}
-
-
-
-      >
+      <Tabs idPrefix={tabsId} tabs={["Información", "Documentos", "Historial"].map(id=>({id,etiqueta:id}))} value={tab} onSeleccion={cambiarTab} etiqueta="Vista del vehículo" renderPanel={()=>( <div className={s.detailContent}>
         {tab === "Información" ? (
           <dl className={s.specifications}>
             {campos.map(([icon, label, value]) => (
@@ -170,6 +176,7 @@ export function DetalleVehiculoDesktop({
             aria-label={`Documentos de ${nombre}`}
           >
             <h3>Documentación declarada</h3>
+            <p>No hay archivos de documentos vinculados a este vehículo ni fechas registradas para calcular alertas de vencimiento.</p>
             {documentos.map(([label, value]) => (
               <div key={label}>
                 <Icon name="file" />
@@ -185,10 +192,6 @@ export function DetalleVehiculoDesktop({
                 </strong>
               </div>
             ))}
-            <p>
-              El registro actual no incluye archivos vinculados ni fechas de
-              vencimiento.
-            </p>
           </section>
         ) : (
           <section className={s.history} aria-label={`Historial de ${nombre}`}>
@@ -234,25 +237,6 @@ export function DetalleVehiculoDesktop({
         )}
       </div> )} />
 
-      <footer className={s.detailActions}>
-        <button
-          className={s.outline}
-          onClick={() => {
-            cambiarTab("Documentos");
-            document.getElementById(`${tabsId}-tab-Documentos`)?.focus();
-          }}
-        >
-          <Icon name="file" />
-          Ver documentos
-        </button>
-        <Link
-          className={s.primary}
-          href={`/viajes/nuevo?${new URLSearchParams({ vehiculo: v.id })}`}
-        >
-          <Icon name="car" />
-          Seleccionar para traslado
-        </Link>
-      </footer>
       {editando && <CorreccionVehiculo vehiculo={v} cerrar={cerrarEdicion} />}
     </aside>
   );

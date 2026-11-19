@@ -8,7 +8,7 @@ import { LogoMarca, SelloConductor, Icono, MobileShell } from "@ruum/ui";
 import { NavegacionUsuario } from "./NavegacionUsuario";
 import { InicioMobile, InicioDesktop } from "./InicioUsuario";
 import { BotonReintentarSesion } from "./ReintentarSesion";
-import { construirNotificaciones } from "../lib/inicio";
+import { construirNotificaciones, ESTADOS_TRASLADO_FINALIZADOS } from "../lib/inicio";
 import { logStructuredWarn } from "../lib/logger";
 import { botonAzul, botonContorno } from "./experiencia-publica";
 import { PUBLIC_CLAIMS, PUBLIC_CLAIMS_VERSION } from "../lib/public-claims";
@@ -27,6 +27,9 @@ interface ContextoSesion {
   conductorFotoUrl: string | null;
   error?: string | null;
   errorVehiculos?: boolean;
+  historialReciente?: PasaporteRow[];
+  totalActivos?: number | null;
+  completadosMes?: number | null;
 }
 
 async function obtenerContextoSesion(): Promise<ContextoSesion> {
@@ -36,7 +39,7 @@ async function obtenerContextoSesion(): Promise<ContextoSesion> {
 
   try {
     const { crearClienteServidor } = await import("../lib/supabase-server");
-    const { obtenerUsuarioActual, listarResumenTrasladosDeUsuario } = await import("@ruum/api/services");
+    const { obtenerUsuarioActual, listarResumenTrasladosDeUsuario, contarTrasladosParaInicio } = await import("@ruum/api/services");
     const { listarVehiculosDeUsuario } = await import("@ruum/api/vehicles");
 
     const cliente = await crearClienteServidor();
@@ -46,7 +49,11 @@ async function obtenerContextoSesion(): Promise<ContextoSesion> {
     if (!usuario) return { sesionActiva: true, usuario: null, traslados: [], vehiculos: [], conductorFotoUrl: null };
 
     let errorVehiculos = false;
-    const [traslados, vehiculos] = await Promise.all([
+    const [anio, mes] = new Intl.DateTimeFormat("sv-SE", {
+      year: "numeric", month: "2-digit", timeZone: "America/Mexico_City",
+    }).format(new Date()).split("-").map(Number);
+    const limiteMes = (offset: number) => new Date(Date.UTC(anio, mes - 1 + offset, 1, 6)).toISOString();
+    const [traslados, vehiculos, historialReciente, indicadores] = await Promise.all([
       listarResumenTrasladosDeUsuario(cliente, usuario.id, { limite: 6 }),
       listarVehiculosDeUsuario(cliente, usuario.id).catch((err) => {
         errorVehiculos = true;
@@ -55,10 +62,21 @@ async function obtenerContextoSesion(): Promise<ContextoSesion> {
         });
         return [];
       }),
+      listarResumenTrasladosDeUsuario(cliente, usuario.id, {
+        limite: 5, estados: ["servicio_cerrado", "servicio_cancelado"],
+      }).catch((err) => {
+        logStructuredWarn("obtenerContextoSesion", "historial_no_disponible", err, { usuarioId: usuario.id });
+        return undefined;
+      }),
+      contarTrasladosParaInicio(cliente, usuario.id, ESTADOS_TRASLADO_FINALIZADOS, limiteMes(0), limiteMes(1))
+        .catch((err) => {
+          logStructuredWarn("obtenerContextoSesion", "indicadores_no_disponibles", err, { usuarioId: usuario.id });
+          return {};
+        }),
     ]);
     // La foto del conductor se solicita de forma diferida desde el dashboard;
     // no debe bloquear el primer render del resumen.
-    return { sesionActiva: true, usuario, traslados, vehiculos, conductorFotoUrl: null, errorVehiculos, error: null };
+    return { sesionActiva: true, usuario, traslados, vehiculos, conductorFotoUrl: null, errorVehiculos, historialReciente, ...indicadores, error: null };
   } catch (err) {
     console.error("[app-usuario:obtenerContextoSesion] supabase_error", {
       message: err instanceof Error ? err.message : String(err),
@@ -73,7 +91,7 @@ export default async function PaginaInicio({
   searchParams?: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const params = (await searchParams) ?? {};
-  const { sesionActiva, usuario, traslados, vehiculos, conductorFotoUrl, error, errorVehiculos } = await obtenerContextoSesion();
+  const { sesionActiva, usuario, traslados, vehiculos, conductorFotoUrl, error, errorVehiculos, historialReciente, totalActivos, completadosMes } = await obtenerContextoSesion();
   const forzarLanding = params.landing === "true";
 
   // C-08: no silenciar error de Supabase — mostrar Aviso en lugar de landing/redirect confuso
@@ -146,6 +164,9 @@ export default async function PaginaInicio({
         <div className="hidden lg:flex h-full w-full">
           <InicioDesktop
             errorVehiculos={errorVehiculos}
+            historialReciente={historialReciente}
+            totalActivos={totalActivos}
+            completadosMes={completadosMes}
             usuario={usuario}
             traslados={traslados}
             conductorFotoUrl={conductorFotoUrl}

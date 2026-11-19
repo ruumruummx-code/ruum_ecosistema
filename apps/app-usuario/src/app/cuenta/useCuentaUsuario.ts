@@ -4,7 +4,7 @@ import { useCallback, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { crearClienteNavegador } from "../../lib/supabase-browser";
 import { logStructuredError } from "../../lib/logger";
-import { iniciales } from "./cuenta-utils";
+import { iniciales, nombreVisibleCuenta } from "./cuenta-utils";
 import { useTema } from "../TemaProvider";
 import { ETIQUETA_ESTADO_TRASLADO } from "@ruum/shared/states";
 import { TERMINOLOGIA_USUARIO } from "../../lib/glosario";
@@ -83,7 +83,7 @@ export function useCuentaUsuario(cuenta: CuentaReal) {
   const cerrarSesionGlobal = useCallback(() => cerrarSesion({ scope: "global" }), [cerrarSesion]);
 
   const usuario = cuenta.usuario;
-  const nombreCompleto = usuario?.nombre?.trim() || "Usuario";
+  const nombreCompleto = nombreVisibleCuenta(usuario?.nombre) || "Usuario";
   const primerNombre = nombreCompleto.split(/\s+/)[0] || "Usuario";
   const inicialesUsuario = iniciales(nombreCompleto, "US");
   const correo = cuenta.correoRegistro?.trim() || "Sin correo registrado";

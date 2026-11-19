@@ -19,25 +19,13 @@ export function fechaCuenta(valor: string): string {
     minute: "2-digit",
   }).format(new Date(valor));
 }
-export function antiguedadCuenta(
-  fecha: string | null | undefined,
-  ahora = new Date(),
-): string {
-  if (
-    !fecha ||
-    !Number.isFinite(Date.parse(fecha)) ||
-    Date.parse(fecha) > ahora.getTime()
-  )
-    return "—";
-  const inicio = new Date(fecha);
-  let anios = ahora.getUTCFullYear() - inicio.getUTCFullYear();
-  if (
-    ahora.getUTCMonth() < inicio.getUTCMonth() ||
-    (ahora.getUTCMonth() === inicio.getUTCMonth() &&
-      ahora.getUTCDate() < inicio.getUTCDate())
-  )
-    anios--;
-  return anios > 0 ? `${anios} ${anios === 1 ? "año" : "años"}` : "< 1 año";
+export function mesAltaCuenta(fecha: string | null | undefined): string {
+  if (!fecha || !Number.isFinite(Date.parse(fecha)) || Date.parse(fecha) > Date.now()) return "—";
+  return new Intl.DateTimeFormat("es-MX", {
+    timeZone: "America/Mexico_City",
+    month: "short",
+    year: "numeric",
+  }).format(new Date(fecha));
 }
 export function actividadCuenta(cuenta: CuentaReal): ActividadCuenta[] {
   const actividad: ActividadCuenta[] = [];

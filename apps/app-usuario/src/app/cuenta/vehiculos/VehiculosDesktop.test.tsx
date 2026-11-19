@@ -138,9 +138,10 @@ describe("Mis vehículos desktop", () => {
     expect(
       panel.getByRole("link", { name: "Seleccionar para traslado" }),
     ).toHaveAttribute("href", "/viajes/nuevo?vehiculo=b");
-    fireEvent.click(panel.getByRole("button", { name: "Ver documentos" }));
-    expect(panel.getByRole("tab", { name: "Documentos" })).toHaveFocus();
+    fireEvent.click(panel.getByRole("tab", { name: "Documentos" }));
+    expect(panel.getByRole("tab", { name: "Documentos" })).toHaveAttribute("aria-selected", "true");
     expect(panel.getByText("Tarjeta de circulación")).toBeInTheDocument();
+    expect(panel.getByText(/No hay archivos de documentos vinculados a este vehículo/)).toBeInTheDocument();
     fireEvent.click(panel.getByRole("tab", { name: "Historial" }));
     expect(panel.getByRole("link", { name: /Toluca/ })).toHaveAttribute(
       "href",
@@ -184,6 +185,13 @@ describe("Mis vehículos desktop", () => {
       screen.getByRole("button", { name: "Ver Nissan RAV4 2025" }),
     ).toBeInTheDocument();
   });
+  it("muestra el total sin paginación cuando el filtro deja una sola página", () => {
+    render(<VehiculosDesktop vehiculos={vehiculos} />);
+    fireEvent.change(screen.getByRole("searchbox"), { target: { value: "abca" } });
+    expect(screen.getByRole("status")).toHaveTextContent("Mostrando 1 de 2 vehículos");
+    expect(screen.queryByRole("navigation", { name: "Páginas de vehículos" })).not.toBeInTheDocument();
+    expect(screen.getAllByText("No especificado")).toHaveLength(2);
+  });
   it("pagina cinco tarjetas y actualiza el detalle al cambiar de página", () => {
     render(
       <VehiculosDesktop
@@ -221,16 +229,14 @@ describe("Mis vehículos desktop", () => {
     expect(
       screen.getByRole("heading", { name: "Sin vehículos registrados" }),
     ).toBeInTheDocument();
-    expect(
-      screen.getByTitle(
-        "No hay fechas de vencimiento disponibles en el registro actual.",
-      ),
-    ).toHaveTextContent("—");
+    const alertas = screen.getByText("Alertas de vencimiento").parentElement!;
+    expect(within(alertas).getByText("0")).toBeInTheDocument();
+    expect(within(alertas).getByText("Sin fechas registradas")).toBeInTheDocument();
     expect(
       screen.getByRole("link", { name: /Registrar primer vehículo/ }),
     ).toHaveAttribute("href", "/cuenta/vehiculos/nuevo");
     fireEvent.click(
-      screen.getByRole("button", { name: "Actualizar vehículos" }),
+      screen.getByRole("button", { name: "Consultar estado de la flota" }),
     );
     expect(refresh).toHaveBeenCalled();
   });

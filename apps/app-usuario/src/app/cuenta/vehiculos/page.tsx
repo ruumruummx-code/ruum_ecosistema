@@ -65,6 +65,7 @@ export default async function PaginaVehiculos() {
             cuenta.usuario,
             cuenta.traslados ?? [],
           )}
+          showPromo={false}
           dashboardHeader
           padding="ninguno"
           idContenido="desktopVehiclesMainContent"

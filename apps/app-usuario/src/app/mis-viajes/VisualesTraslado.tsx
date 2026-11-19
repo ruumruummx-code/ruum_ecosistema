@@ -6,10 +6,11 @@ import { presentarViaje } from "./presentacion";
 /** Insignia de estado con el detalle completo disponible para lectores y al pasar el cursor. */
 export function EstadoTraslado({ viaje, className }: { viaje: ViajeLista; className?: string }) {
   const { estado, tono } = presentarViaje(viaje);
+  const detalle = estado.etiqueta === "Pendiente" ? undefined : estado.detalle;
   return (
-    <Badge tone={tono} dot title={estado.detalle} className={className}>
+    <Badge tone={tono} dot title={detalle} className={className}>
       {estado.etiqueta}
-      {estado.detalle && <span className="sr-only">: {estado.detalle}</span>}
+      {detalle && <span className="sr-only">: {detalle}</span>}
     </Badge>
   );
 }
