@@ -29,6 +29,16 @@ function reqVerify(telefono: unknown, codigo: unknown, headers: Record<string, s
 }
 
 describe("POST /api/auth/phone-verify/send", () => {
+  it("pausa el envío y la validación de códigos", async () => {
+    vi.stubEnv("PHONE_VERIFICATION_SUSPENDED", "true");
+    try {
+      expect((await postSend(reqSend("5512345678"))).status).toBe(503);
+      expect((await postVerify(reqVerify("5512345678", "123456"))).status).toBe(503);
+    } finally {
+      vi.unstubAllEnvs();
+    }
+  });
+
   it("rechaza si el teléfono no tiene 10 dígitos", async () => {
     const res = await postSend(reqSend("55123"));
     expect(res.status).toBe(400);
