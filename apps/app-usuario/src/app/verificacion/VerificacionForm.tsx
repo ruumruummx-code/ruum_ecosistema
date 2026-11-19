@@ -20,8 +20,11 @@ import { esperarResultadoDidit } from "../../lib/didit-realtime";
 import { VerificationSheet } from "./VerificationSheet";
 import { DiditVerificationModal } from "./DiditVerificationModal";
 
-const TIPOS_ACEPTADOS = ["image/jpeg", "image/png", "application/pdf", "image/heic", "image/heif"];
-const EXTENSIONES_ACEPTADAS = [".jpg", ".jpeg", ".png", ".pdf", ".heic", ".heif"];
+/* El servidor (validar-documento-identidad) solo admite JPEG, PNG y PDF.
+   No se anuncia HEIC en `accept`: así iOS convierte la foto a JPG al
+   seleccionarla en lugar de entregar un HEIC que después sería rechazado. */
+const TIPOS_ACEPTADOS = ["image/jpeg", "image/png", "application/pdf"];
+const EXTENSIONES_ACEPTADAS = [".jpg", ".jpeg", ".png", ".pdf"];
 const TAMANO_MAXIMO_MB = 10;
 const TAMANO_MAXIMO_RETRATO_DIDIT_MB = 2;
 
@@ -42,6 +45,8 @@ function esErrorRed(error: unknown) {
     mensaje.includes("fetch") ||
     mensaje.includes("failed to fetch") ||
     mensaje.includes("load failed") ||
+    // FunctionsFetchError de supabase-js (red caída o respuesta bloqueada por CORS).
+    mensaje.includes("failed to send a request") ||
     mensaje.includes("timeout")
   );
 }
@@ -413,13 +418,13 @@ export function VerificacionForm({ fotoPerfilInicial, soloDidit = false, destino
     const formatoSoportado =
       TIPOS_ACEPTADOS.includes(archivo.type) || EXTENSIONES_ACEPTADAS.includes(extension);
 
-    // C-04: HEIC — no borrar selección; conservar archivo y ofrecer guía de conversión. iOS 17+ default HEIC.
+    // C-04: el servidor no acepta HEIC; se rechaza aquí con guía en lugar de fallar al enviar.
     if (esHeic) {
-      setDocumento(archivo);
+      setDocumento(null);
       setDocAviso(
-        "Detectamos formato HEIC (iPhone). Lo conservamos para que no pierdas la selección, pero para máxima compatibilidad conviértelo a JPG: en iPhone ve a Ajustes › Cámara › Formatos › Más compatible y vuelve a tomar la foto, o usa un conversor a JPG/PDF. Puedes intentar enviarlo; si el servidor lo rechaza, conviértelo e intenta de nuevo."
+        "Detectamos formato HEIC (iPhone), que no podemos recibir. Conviértelo a JPG: en iPhone ve a Ajustes › Cámara › Formatos › Más compatible y vuelve a tomar la foto, o compártela como JPG/PDF y selecciónala de nuevo."
       );
-      // No limpiar e.target.value para no perder archivo si el usuario decide reintentar tras convertir
+      e.target.value = "";
       return;
     }
     if (!formatoSoportado) {
@@ -434,14 +439,7 @@ export function VerificacionForm({ fotoPerfilInicial, soloDidit = false, destino
       e.target.value = "";
       return;
     }
-    // Advertencia para HEIC que llegó por tipo genérico pero con extensión permitida extendida
-    if (esHeic) {
-      setDocAviso(
-        "Archivo HEIC conservado. Si el envío falla, conviértelo a JPG antes de reintentar."
-      );
-    } else {
-      setDocAviso(null);
-    }
+    setDocAviso(null);
     setDocumento(archivo);
     setDocumentoSubidoExitoso(false);
     setFalloDomicilioParcial(false);
@@ -789,7 +787,7 @@ export function VerificacionForm({ fotoPerfilInicial, soloDidit = false, destino
                   INE, pasaporte vigente o licencia de conducir.
                 </p>
                 <p className="text-[12.5px] font-medium text-[#0a2342] dark:text-[#f6f8fb]">
-                  Formatos aceptados: JPG, PNG, PDF y HEIC (iPhone — se recomienda convertir a JPG). Tamaño máximo: {TAMANO_MAXIMO_MB} MB.
+                  Formatos aceptados: JPG, PNG y PDF. Tamaño máximo: {TAMANO_MAXIMO_MB} MB.
                 </p>
 
                 <label className="flex cursor-pointer flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-[#d7e1ee] p-6 text-center transition hover:border-[#0a2342] hover:bg-[#f8fafd] dark:border-[#1a3a5c] dark:hover:border-sky-400 dark:hover:bg-[#071930]">

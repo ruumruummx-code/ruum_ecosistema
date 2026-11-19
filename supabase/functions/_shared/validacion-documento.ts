@@ -53,10 +53,34 @@ function concatenar(partes: Uint8Array[]) {
   return salida;
 }
 
-function validarJpeg(bytes: Uint8Array) {
-  if (bytes.length < 16 || bytes[0] !== 0xff || bytes[1] !== 0xd8 || bytes.at(-2) !== 0xff || bytes.at(-1) !== 0xd9) {
+/** Posición justo después del EOI (FF D9) que cierra los datos de imagen a
+ * partir de `desde` (inicio del primer SOS), o -1 si no existe. Dentro de los
+ * datos comprimidos FF va seguido de 00 o de RSTn, así que el primer FF D9 es
+ * el fin real de la imagen. */
+function finImagenJpeg(bytes: Uint8Array, desde: number) {
+  let i = desde;
+  while (i < bytes.length - 1) {
+    if (bytes[i] !== 0xff) { i++; continue; }
+    const siguiente = bytes[i + 1];
+    if (siguiente === 0xd9) return i + 2;
+    if (siguiente === 0x00 || siguiente === 0xff || (siguiente >= 0xd0 && siguiente <= 0xd7)) { i++; continue; }
+    // Segmento con longitud entre escaneos (JPEG progresivo: DHT, SOS, …): se salta completo.
+    if (i + 4 > bytes.length) return -1;
+    const longitud = (bytes[i + 2] << 8) | bytes[i + 3];
+    if (longitud < 2) return -1;
+    i += 2 + longitud;
+  }
+  return -1;
+}
+
+function validarJpeg(original: Uint8Array) {
+  if (original.length < 16 || original[0] !== 0xff || original[1] !== 0xd8) {
     error("El archivo no contiene una imagen JPEG válida.");
   }
+  // Muchos teléfonos (Samsung, Pixel "Motion Photo", etc.) agregan datos
+  // después del EOI. Se recorta al fin real de la imagen: así se aceptan esas
+  // fotos y no se almacena el contenido anexo (video, metadatos del fabricante).
+  let bytes = original;
   const partes: Uint8Array[] = [bytes.slice(0, 2)];
   const marcadoresSof = new Set([0xc0,0xc1,0xc2,0xc3,0xc5,0xc6,0xc7,0xc9,0xca,0xcb,0xcd,0xce,0xcf]);
   let pos = 2, ancho = 0, alto = 0, tieneScan = false, exifEliminado = false;
@@ -69,6 +93,9 @@ function validarJpeg(bytes: Uint8Array) {
       if (pos + 2 > bytes.length) error("La imagen JPEG está truncada.");
       const longitud = (bytes[pos] << 8) | bytes[pos + 1];
       if (longitud < 2 || pos + longitud > bytes.length) error("La imagen JPEG está truncada.");
+      const fin = finImagenJpeg(bytes, pos + longitud);
+      if (fin < 0) error("La imagen JPEG está truncada.");
+      bytes = bytes.subarray(0, fin);
       partes.push(bytes.slice(inicio));
       tieneScan = true;
       break;

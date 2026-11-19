@@ -22,7 +22,9 @@ export function resolverOrigenPermitido(originHeader: string | null): string {
   if (
     permitidos.has(origenLimpio) ||
     /^https:\/\/ruum-[a-z0-9-]+-[a-z0-9-]+\.vercel\.app$/.test(origenLimpio) ||
-    /^https:\/\/[a-z0-9-]+\.ruum\.mx$/.test(origenLimpio)
+    /^https:\/\/[a-z0-9-]+\.ruum\.mx$/.test(origenLimpio) ||
+    // Dominio operativo actual de las apps (usuario, www.usuario, conductor, admin…).
+    /^https:\/\/([a-z0-9-]+\.)*ruumruum-moviliax\.online$/.test(origenLimpio)
   ) {
     return originHeader.trim();
   }
