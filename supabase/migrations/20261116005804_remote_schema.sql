@@ -2,17 +2,18 @@ SET local check_function_bodies = off;
 
 REVOKE ALL ON FUNCTION "public"."usuario_crea_traslado"(uuid, jsonb, jsonb, uuid, jsonb) FROM "anon";
 
-CREATE TABLE "private"."cotizaciones_individuales" (
+-- Una instalación desde cero ya crea esta tabla en 20261116003942.
+CREATE TABLE IF NOT EXISTS "private"."cotizaciones_individuales" (
   "id"                uuid                     NOT NULL DEFAULT gen_random_uuid(),
-  "usuario_id"        uuid                     NOT NULL,
-  "vehiculo_id"       uuid,
+  "usuario_id"        uuid                     NOT NULL REFERENCES public.usuarios(id),
+  "vehiculo_id"       uuid                     REFERENCES public.vehiculos(id),
   "vehiculo"          jsonb,
   "vehiculo_guardado" jsonb,
   "traslado"          jsonb                    NOT NULL,
   "paradas"           jsonb                    NOT NULL,
   "snapshot"          jsonb                    NOT NULL,
   "expira_en"         timestamp with time zone NOT NULL,
-  "traslado_id"       uuid,
+  "traslado_id"       uuid                     REFERENCES public.traslados(id),
   CONSTRAINT "cotizaciones_individuales_pkey" PRIMARY KEY (id),
   CONSTRAINT "cotizaciones_individuales_traslado_id_key" UNIQUE (traslado_id)
 );
@@ -327,18 +328,9 @@ begin
 end;
 $function$;
 
-ALTER TABLE "private"."cotizaciones_individuales"
-  ADD CONSTRAINT "cotizaciones_individuales_traslado_id_fkey" FOREIGN KEY (traslado_id) REFERENCES public.traslados(id);
+CREATE INDEX IF NOT EXISTS cotizaciones_individuales_usuario_expira_idx ON private.cotizaciones_individuales USING btree (usuario_id, expira_en);
 
-ALTER TABLE "private"."cotizaciones_individuales"
-  ADD CONSTRAINT "cotizaciones_individuales_usuario_id_fkey" FOREIGN KEY (usuario_id) REFERENCES public.usuarios(id);
-
-ALTER TABLE "private"."cotizaciones_individuales"
-  ADD CONSTRAINT "cotizaciones_individuales_vehiculo_id_fkey" FOREIGN KEY (vehiculo_id) REFERENCES public.vehiculos(id);
-
-CREATE INDEX cotizaciones_individuales_usuario_expira_idx ON private.cotizaciones_individuales USING btree (usuario_id, expira_en);
-
-CREATE INDEX cotizaciones_individuales_vehiculo_idx ON private.cotizaciones_individuales USING btree (vehiculo_id);
+CREATE INDEX IF NOT EXISTS cotizaciones_individuales_vehiculo_idx ON private.cotizaciones_individuales USING btree (vehiculo_id);
 
 REVOKE ALL ON FUNCTION "public"."servidor_cotizar_traslado_individual"(uuid, uuid, jsonb, jsonb, jsonb) FROM "postgres";
 

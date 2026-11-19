@@ -3,7 +3,8 @@
 -- No se aceptan precios, distancias ni clasificaciones como autoridad desde el navegador.
 create schema if not exists private;
 
-create table private.cotizaciones_individuales (
+-- Producción puede tener esta tabla por la migración 20261116005804.
+create table if not exists private.cotizaciones_individuales (
   id uuid primary key default gen_random_uuid(),
   usuario_id uuid not null references public.usuarios(id),
   vehiculo_id uuid references public.vehiculos(id),
@@ -17,8 +18,8 @@ create table private.cotizaciones_individuales (
 );
 alter table private.cotizaciones_individuales enable row level security;
 revoke all on private.cotizaciones_individuales from public, anon, authenticated, service_role;
-create index cotizaciones_individuales_usuario_expira_idx on private.cotizaciones_individuales(usuario_id, expira_en);
-create index cotizaciones_individuales_vehiculo_idx on private.cotizaciones_individuales(vehiculo_id);
+create index if not exists cotizaciones_individuales_usuario_expira_idx on private.cotizaciones_individuales(usuario_id, expira_en);
+create index if not exists cotizaciones_individuales_vehiculo_idx on private.cotizaciones_individuales(vehiculo_id);
 
 -- Únicamente la ruta autenticada de Next.js usa esta RPC con credenciales de servidor.
 create or replace function public.servidor_cotizar_traslado_individual(
