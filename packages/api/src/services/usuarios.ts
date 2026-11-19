@@ -415,8 +415,16 @@ export async function subirDocumentoIdentidad(
   cliente: Cliente,
   archivo: File
 ): Promise<ResultadoDocumentoIdentidad> {
+  // Igual que en documentos de cuenta: materializar antes del envío evita
+  // depender del archivo temporal del selector Android o de la nube.
+  let bytes: ArrayBuffer;
+  try {
+    bytes = await archivo.arrayBuffer();
+  } catch {
+    throw new Error("No pudimos leer el archivo. Descárgalo al dispositivo y vuelve a seleccionarlo.");
+  }
   const formulario = new FormData();
-  formulario.append("archivo", archivo);
+  formulario.append("archivo", new File([bytes], archivo.name, { type: archivo.type, lastModified: archivo.lastModified }));
   const { data, error } = await cliente.functions.invoke<ResultadoDocumentoIdentidad>(
     "validar-documento-identidad",
     { body: formulario }

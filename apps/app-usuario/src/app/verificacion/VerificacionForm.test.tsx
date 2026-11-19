@@ -130,7 +130,7 @@ describe("VerificacionForm", () => {
     expect(await screen.findByText("¡Identidad Verificada con Éxito!")).toBeInTheDocument();
   });
 
-  it("rechaza archivo no soportado, acepta HEIC con aviso y completa envío manual de documentos", async () => {
+  it("rechaza archivo no soportado y HEIC con guía, y completa envío manual de documentos", async () => {
     const user = userEvent.setup();
     actualizarPerfilUsuarioMock.mockResolvedValueOnce({});
     subirDocumentoIdentidadMock.mockResolvedValueOnce("docs/ine.jpg");
