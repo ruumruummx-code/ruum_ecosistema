@@ -21,9 +21,9 @@ test.describe("RR-UI-002 — Hardening de navegación premium y protección Mobi
     await expect(sidebar).toBeVisible();
     await expect(header).toBeVisible();
 
-    // Logotipo oficial con lema «Tu traslado, en orden»
+    // Logotipo oficial con lema «Tu traslado, tu control»
     await expect(sidebar.getByText("Ruum Ruum")).toBeVisible();
-    await expect(sidebar.getByText("Tu traslado, en orden")).toBeVisible();
+    await expect(sidebar.getByText("Tu traslado, tu control")).toBeVisible();
 
     // Navegación lateral hacia Mis traslados
     const linkTraslados = sidebar.getByRole("link", { name: "Mis traslados" });

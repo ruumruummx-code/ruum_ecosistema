@@ -112,7 +112,7 @@ test("el wizard confirma un pago de prueba con Stripe Payment Element", async ({
     await page.locator("#gate-marca").selectOption({ label: "Nissan" });
     await page.locator("#gate-modelo").selectOption({ label: "Versa" });
     await page.locator("#gate-condicion").selectOption("seminueva");
-    await page.getByRole("button", { name: /Continuar · Tarifa est\. \$500 MXN/ }).click({ timeout: 30_000 });
+    await page.getByRole("button", { name: "Cotizar traslado" }).click({ timeout: 30_000 });
 
     await page.locator("#anio").fill("2020");
     await page.locator("#transmision").selectOption("automatica");

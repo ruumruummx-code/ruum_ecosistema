@@ -1,8 +1,8 @@
 /** @vitest-environment jsdom */
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen } from "@testing-library/react";
-import { useEffect } from "react";
-import { NuevoTrasladoDesktop } from "./NuevoTrasladoDesktop";
+import { useEffect, useRef } from "react";
+import { CotizadorPortal } from "./components/CotizadorPortal";
 import { NuevoTrasladoForm } from "./NuevoTrasladoForm";
 import { VALORES_INICIALES } from "./constants";
 import type { useNuevoTraslado } from "./hooks/useNuevoTraslado";
@@ -20,6 +20,10 @@ vi.mock("./components/PasoPago", () => ({ PasoPago: ({ formId, onEstadoPago, pag
   return pagoConfirmado ? <p>Pago confirmado por servidor</p> : <form id={formId} onSubmit={e => { e.preventDefault(); pagoSubmit(); }}><p>Formulario seguro de pago</p></form>;
 } }));
 type Estado = ReturnType<typeof useNuevoTraslado>;
+function CotizadorPrueba({ t }: { t: Estado }) {
+  const headingRef = useRef<HTMLHeadingElement>(null);
+  return <CotizadorPortal t={t} headingRef={headingRef} />;
+}
 function estado(cambios: Partial<Estado> = {}): Estado {
   return {
     paso: 0, datos: { ...VALORES_INICIALES, marca: "Toyota", modelo: "Corolla", condicion: "seminueva", origenCodigoPostal: "06700", destinoCodigoPostal: "11560" },
@@ -36,49 +40,49 @@ function estado(cambios: Partial<Estado> = {}): Estado {
 afterEach(() => vi.unstubAllGlobals());
 beforeEach(() => vi.clearAllMocks());
 
-describe("Crear traslado desktop: flujo completo", () => {
+describe("Crear traslado: flujo compartido", () => {
   it.each([[0, "Conoce tu tarifa", "Formulario de tarifa"], [1, "Datos del vehículo", "Formulario de vehículo"], [2, "Origen y destino", "Formulario de ruta y contactos"], [3, "Detalles del servicio", "Formulario de detalles"]])("muestra el paso %s y sus controles reales", (paso, titulo, contenido) => {
-    render(<NuevoTrasladoDesktop t={estado({ paso: paso as number })} />);
+    render(<CotizadorPrueba t={estado({ paso: paso as number })} />);
     expect(screen.getByRole("heading", { name: String(titulo) })).toBeInTheDocument();
     expect(screen.getByText(String(contenido))).toBeInTheDocument();
   });
   it("avanza por la aceptación de tarifa y bloquea importes inexistentes", () => {
     const t = estado();
-    const { rerender } = render(<NuevoTrasladoDesktop t={t} />);
-    fireEvent.click(screen.getByRole("button", { name: /Continuar.*1,250/ }));
+    const { rerender } = render(<CotizadorPrueba t={t} />);
+    fireEvent.click(screen.getByRole("button", { name: "Cotizar traslado" }));
     expect(t.accionesTarifa.onContinuar).toHaveBeenCalledTimes(1);
-    rerender(<NuevoTrasladoDesktop t={{ ...t, previsualizacion: null }} />);
+    rerender(<CotizadorPrueba t={{ ...t, previsualizacion: null }} />);
     expect(screen.getByRole("button", { name: "Tarifa pendiente" })).toBeDisabled();
     expect(screen.queryByText(/870.52|4.8 km|13 min|San Mateo Atenco/)).not.toBeInTheDocument();
   });
   it("reenvía al paso de tarifa cuando cambia la cotización aceptada", () => {
     const t = estado({ paso: 2, tarifaPreviaAceptada: false });
-    render(<NuevoTrasladoDesktop t={t} />);
+    render(<CotizadorPrueba t={t} />);
     fireEvent.click(screen.getByRole("button", { name: "Revisar tarifa" }));
     expect(t.setPaso).toHaveBeenCalledWith(0);
   });
   it("crea la solicitud desde detalles y bloquea dobles clics mientras envía", () => {
     const t = estado({ paso: 3 });
-    const { rerender } = render(<NuevoTrasladoDesktop t={t} />);
+    const { rerender } = render(<CotizadorPrueba t={t} />);
     fireEvent.click(screen.getByRole("button", { name: /Continuar al pago/ }));
     expect(t.accionesDetalles.enviarSolicitud).toHaveBeenCalledTimes(1);
-    rerender(<NuevoTrasladoDesktop t={{ ...t, enviando: true }} />);
+    rerender(<CotizadorPrueba t={{ ...t, enviando: true }} />);
     expect(screen.getByRole("button", { name: "Preparando pago…" })).toBeDisabled();
   });
   it("asocia el botón de pago al formulario de la solicitud creada", () => {
-    render(<NuevoTrasladoDesktop t={estado({ paso: 4, trasladoCreado: { id: "traslado-1", precioCotizado: 1250, tipoPago: "anticipado" } })} />);
+    render(<CotizadorPrueba t={estado({ paso: 4, trasladoCreado: { id: "traslado-1", precioCotizado: 1250, tipoPago: "anticipado" } })} />);
     const pagar = screen.getByRole("button", { name: /Pagar.*1,250/ });
     expect(pagar).toHaveAttribute("form", "pago-traslado-traslado-1");
     fireEvent.click(pagar);
     expect(pagoSubmit).toHaveBeenCalledTimes(1);
   });
   it("no ofrece otro cobro durante la confirmación del pago", () => {
-    render(<NuevoTrasladoDesktop t={estado({ paso: 4, pagoEnProcesoConfirmacion: true, trasladoCreado: { id: "traslado-1", precioCotizado: 1250, tipoPago: "anticipado" } })} />);
+    render(<CotizadorPrueba t={estado({ paso: 4, pagoEnProcesoConfirmacion: true, trasladoCreado: { id: "traslado-1", precioCotizado: 1250, tipoPago: "anticipado" } })} />);
     expect(screen.queryByRole("button", { name: /Pagar/ })).not.toBeInTheDocument();
   });
   it("permite reintentar una cotización fallida con su motivo visible", () => {
     const t = estado({ previsualizacion: { disponible: false, motivo: "Servicio temporalmente no disponible" } });
-    render(<NuevoTrasladoDesktop t={t} />);
+    render(<CotizadorPrueba t={t} />);
     expect(screen.getByRole("alert")).toHaveTextContent("Servicio temporalmente no disponible");
     fireEvent.click(screen.getByRole("button", { name: "Reintentar cotización" }));
     expect(t.reintentarCotizacion).toHaveBeenCalledTimes(1);

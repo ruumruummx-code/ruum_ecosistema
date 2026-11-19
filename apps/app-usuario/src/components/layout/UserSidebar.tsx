@@ -307,7 +307,7 @@ export function UserSidebar({
                   Ruum Ruum
                 </span>
                 <span className={estilos.brandTagline}>
-                  Tu traslado, en orden
+                  Tu traslado, tu control
                 </span>
               </span>
             )}

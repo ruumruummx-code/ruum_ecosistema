@@ -36,7 +36,7 @@ test("Sidebar desktop: menú y banner completos sin scroll y rutas activas", asy
   }
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.screenshot({ path: "test-results/sidebar-desktop.png" });
-  const asset = await page.request.get("/imagenes/sidebar-traslado.webp");
+  const asset = await page.request.get("/imagenes/login-autoport.webp");
   expect(asset.ok()).toBe(true);
   for (const [label, route] of [
     ["Inicio", "/"], ["Mis traslados", "/mis-viajes"],

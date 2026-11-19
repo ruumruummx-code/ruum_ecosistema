@@ -153,6 +153,18 @@
   --ruum-login-cyan: #00d2ff;
   --ruum-login-night: #0a192f;
   --ruum-login-navy: #112240;
+  --ruum-control-gradient: linear-gradient(90deg, var(--ruum-login-blue), var(--ruum-login-blue-mid) 59%, var(--ruum-login-sky));
+  --ruum-quote-muted: #64748b;
+  --ruum-quote-field: #cbd5e1;
+  --ruum-quote-segment: #f1f5f9;
+  --ruum-quote-destination: #ff4d4f;
+  --ruum-quote-disabled: #e2e8f0;
+  --ruum-operations-surface: #f8fafc;
+  --ruum-operations-icon-bg: #e0f2fe;
+  --ruum-operations-ice: #f0f9ff;
+  --ruum-operations-ice-line: #bae6fd;
+  --ruum-operations-icon: #0284c7;
+  --ruum-operations-safe: #10b981;
   --ruum-navy: #0a2342;
   --ruum-teal: #00d1d1;
   --ruum-teal-deep: #007575;

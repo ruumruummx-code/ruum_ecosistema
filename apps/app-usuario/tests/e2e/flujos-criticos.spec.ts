@@ -192,7 +192,7 @@ test.describe("Flujos críticos de la aplicación", () => {
 
     // la cotización tarda: geocode (debounce 650 ms) → POST /api/ruta →
     // debounce de tarifa (600 ms) → RPC de previsualización
-    const botonCotizado = page.getByRole("button", { name: /Continuar · Tarifa est\. \$500 MXN/ });
+    const botonCotizado = page.getByRole("button", { name: "Cotizar traslado" });
     await expect(botonCotizado).toBeEnabled({ timeout: 30_000 });
 
     // el botón solo se activa cuando la tarifa existe: no es decorativo
@@ -218,7 +218,7 @@ test.describe("Flujos críticos de la aplicación", () => {
     await page.locator("#gate-modelo").selectOption({ label: "Versa" });
     await page.locator("#gate-condicion").selectOption("seminueva");
 
-    await expect(page.getByRole("button", { name: /Continuar · Tarifa est\. \$500 MXN/ })).toBeEnabled({ timeout: 30_000 });
+    await expect(page.getByRole("button", { name: "Cotizar traslado" })).toBeEnabled({ timeout: 30_000 });
 
     // si el backend de tarifas está roto, el botón no se activa
     await page.unroute("**/api/ruta");
@@ -246,8 +246,8 @@ test.describe("Flujos críticos de la aplicación", () => {
     await page.locator("#gate-modelo").selectOption({ label: "Versa" });
     await page.locator("#gate-condicion").selectOption("seminueva");
 
-    await expect(page.getByRole("button", { name: /Continuar · Tarifa est\. \$500 MXN/ })).toBeEnabled({ timeout: 30_000 });
-    await page.getByRole("button", { name: /Continuar · Tarifa est\. \$500 MXN/ }).click();
+    await expect(page.getByRole("button", { name: "Cotizar traslado" })).toBeEnabled({ timeout: 30_000 });
+    await page.getByRole("button", { name: "Cotizar traslado" }).click();
 
     // Paso 2 de 5: datos del vehículo
     await expect(page.getByText("Datos del vehículo")).toBeVisible({ timeout: 15_000 });

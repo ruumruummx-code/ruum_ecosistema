@@ -19,14 +19,14 @@ describe("UserSidebar — Componente de Navegación Lateral (RR-UI-001)", () => 
     vi.clearAllMocks();
   });
 
-  it("renderiza el logotipo oficial con lema «Tu traslado, en orden» sin alterar el isotipo", () => {
+  it("renderiza el logotipo oficial con lema «Tu traslado, tu control» sin alterar el isotipo", () => {
     render(<UserSidebar />);
 
     const sidebar = screen.getByLabelText("Menú principal de escritorio");
     expect(sidebar).toBeInTheDocument();
 
     expect(within(sidebar).getByText("Ruum Ruum")).toBeInTheDocument();
-    expect(within(sidebar).getByText("Tu traslado, en orden")).toBeInTheDocument();
+    expect(within(sidebar).getByText("Tu traslado, tu control")).toBeInTheDocument();
   });
 
   it("muestra los accesos autenticados oficiales del alcance funcional", () => {

@@ -7,7 +7,8 @@ import { useNuevoTraslado } from "./hooks/useNuevoTraslado";
 
 import { EstadoCreacion } from "./components/EstadoCreacion";
 import { CotizadorPortal } from "./components/CotizadorPortal";
-import { NuevoTrasladoDesktop } from "./NuevoTrasladoDesktop";
+import { UserDashboardLayout } from "@/components/layout/UserDashboardLayout";
+import styles from "./components/cotizador.module.css";
 import { SeleccionVehiculoInicial } from "./SeleccionVehiculoInicial";
 
 export function SeleccionUbicacionInicial({ t, lado, consulta }: { t: ReturnType<typeof useNuevoTraslado>; lado: "origen" | "destino"; consulta: string }) {
@@ -44,22 +45,6 @@ export function NuevoTrasladoForm({ busquedaOrigenInicial = "", busquedaDestinoI
   const avisoTarifaRef = useRef<HTMLDivElement>(null);
   const { setResultado } = t;
   const cerrarResultado = useCallback(() => setResultado(null), [setResultado]);
-  const [esEscritorio, setEsEscritorio] = useState(false);
-
-  useEffect(() => {
-    if (typeof window === "undefined" || !window.matchMedia) return;
-    const mq = window.matchMedia("(min-width: 1024px)");
-    setEsEscritorio(mq.matches);
-    const handler = (e: MediaQueryListEvent) => setEsEscritorio(e.matches);
-    mq.addEventListener?.("change", handler);
-    return () => mq.removeEventListener?.("change", handler);
-  }, []);
-
-  // Announce the new step without opening the mobile keyboard.
-  useEffect(() => {
-    encabezadoPasoRef.current?.focus();
-  }, [t.paso]);
-
   // C-02: cuando la tarifa se invalida en pasos >0, hacer scroll y foco al aviso para desbloquear al usuario
   useEffect(() => {
     if (!t.tarifaPreviaAceptada && t.tarifaPreviaSnapshot && t.paso > 0) {
@@ -123,7 +108,9 @@ export function NuevoTrasladoForm({ busquedaOrigenInicial = "", busquedaDestinoI
   return (
     <>
       {vehiculoIdInicial ? <SeleccionVehiculoInicial key={vehiculoIdInicial} t={t} vehiculoId={vehiculoIdInicial} /> : (busquedaOrigenInicial || busquedaDestinoInicial) ? <SeleccionUbicacionInicial key={busquedaOrigenInicial + "|" + busquedaDestinoInicial} t={t} lado={busquedaOrigenInicial ? "origen" : "destino"} consulta={busquedaOrigenInicial || busquedaDestinoInicial} /> : null}
-      {esEscritorio ? <NuevoTrasladoDesktop t={t} headingRef={encabezadoPasoRef} /> : <CotizadorPortal t={t} headingRef={encabezadoPasoRef} />}
+      <UserDashboardLayout idContenido="contenido-nuevo-traslado" totalVehiculos={t.vehiculosGuardados?.length} className={styles.marco} classNameContenido={styles.canvas}>
+        <CotizadorPortal t={t} headingRef={encabezadoPasoRef} enMarco />
+      </UserDashboardLayout>
     </>
   );
 }

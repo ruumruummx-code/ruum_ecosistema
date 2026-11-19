@@ -64,9 +64,10 @@ describe("cotizador en una vista fija", () => {
     } as Estado;
     view.rerender(<CotizadorPortal t={completo} headingRef={headingRef} />);
     const continuar = screen.getByRole("button", {
-      name: "Continuar · Tarifa est. $1,500 MXN",
+      name: "Cotizar traslado",
     });
     expect(continuar).toBeEnabled();
+    expect(continuar).toHaveAccessibleDescription('Tarifa estimada $1,500.00 MXN');
     await user.click(continuar);
     expect(t.accionesTarifa.onContinuar).toHaveBeenCalledOnce();
     view.rerender(

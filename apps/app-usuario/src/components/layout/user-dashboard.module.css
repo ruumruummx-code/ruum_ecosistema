@@ -116,13 +116,20 @@
 .navDivider { height: 1px; background: #577b9e; margin: clamp(8px, 1dvh, 16px) 6px; }
 .sidebarColapsada .navScroll { padding-inline: 8px; }
 .promo { flex-shrink: 0; padding: 8px 12px 12px; }
-.promoCard { overflow: hidden; border: 1px solid #007ed3; border-radius: 15px; background: linear-gradient(135deg, #002442, #00162d); }
-.promoArtwork { height: clamp(48px, 9dvh, 100px); background: url('/imagenes/sidebar-traslado.webp') center / cover no-repeat; }
+.promoCard {
+  overflow: hidden;
+  border: 1px solid var(--udb-border);
+  border-radius: 1rem;
+  background:
+    linear-gradient(180deg, color-mix(in oklab, var(--ruum-login-night) 32%, transparent), var(--ruum-login-night) 68%),
+    var(--ruum-login-night) url('/imagenes/login-autoport.webp') 15% 37% / cover no-repeat;
+}
+.promoArtwork { height: clamp(48px, 9dvh, 100px); }
 .promoCopy { padding: 0 20px; }
 .promoTitle { max-width: 195px; color: #fff; font-size: 18px; font-weight: 750; line-height: 1.05; }
 .promoDescription { margin-top: 6px; color: #b3cfee; font-size: 13px; line-height: 1.25; }
-.promoAction { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin: 10px 14px; padding: 12px 18px; min-height: 40px; border-radius: 11px; background: #0061ff; color: #fff; font-size: 14px; font-weight: 500; }
-.promoAction:hover { background: #1975ff; }
+.promoAction { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin: 10px 14px; padding: 12px 18px; min-height: 40px; border-radius: 11px; background: var(--ruum-control-gradient); color: var(--ruum-login-paper); font-size: 0.875rem; font-weight: 650; }
+.promoAction:hover { filter: brightness(0.94); }
 
 @media (min-width: 768px) {
   .sidebar {

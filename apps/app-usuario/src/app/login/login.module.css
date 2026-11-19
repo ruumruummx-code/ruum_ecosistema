@@ -106,7 +106,7 @@
   position: relative;
   min-height: 3.25rem;
   border-radius: 0.75rem;
-  background: linear-gradient(90deg, var(--ui-brand), var(--ruum-login-blue-mid) 59%, var(--ruum-login-sky));
+  background: var(--ruum-control-gradient);
   box-shadow: 0 0.4rem 0.9rem color-mix(in oklab, var(--ui-brand) 20%, transparent);
 }
 

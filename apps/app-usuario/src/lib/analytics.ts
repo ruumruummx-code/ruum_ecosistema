@@ -24,8 +24,6 @@ export type EventoUxUsuario =
   | "registro_confirmacion_enviada"
   | "registro_confirmacion_exitosa"
   | "registro_confirmacion_error"
-  | "onboarding_visto"
-  | "onboarding_completado"
   | "recuperacion_vista"
   | "recuperacion_enviada"
   | "recuperacion_exitosa"

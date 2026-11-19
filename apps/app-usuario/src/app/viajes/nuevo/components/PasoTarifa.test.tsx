@@ -48,16 +48,17 @@ describe("PasoTarifa — comparador sin identidad", () => {
 
   it("omite re-render ante cambios de datos irrelevantes para el paso", () => {
     const iniciales = propsIniciales();
-    const claseControl = vi.fn(() => "");
-    const conEspia = { ...iniciales, acciones: { ...iniciales.acciones, claseControl } };
-    const vista = render(<PasoTarifa {...conEspia} />);
-    const llamadasTrasMontaje = claseControl.mock.calls.length;
+    const modelosDisponibles = ["Corolla"];
+    const renderizarModelos = vi.spyOn(modelosDisponibles, "map");
+    const props = { ...iniciales, modelosDisponibles };
+    const vista = render(<PasoTarifa {...props} />);
+    const llamadasTrasMontaje = renderizarModelos.mock.calls.length;
     expect(llamadasTrasMontaje).toBeGreaterThan(0);
-    // El tipo de vehículo no lo pinta este paso: memo debe bloquear el re-render.
+
     vista.rerender(
-      <PasoTarifa {...conEspia} datos={{ ...conEspia.datos, tipo: "suv" as never }} />,
+      <PasoTarifa {...props} datos={{ ...props.datos, tipo: "suv" as never }} />,
     );
-    expect(claseControl.mock.calls.length).toBe(llamadasTrasMontaje);
+    expect(renderizarModelos).toHaveBeenCalledTimes(llamadasTrasMontaje);
   });
 
   it("al programar fecha rellena una hora por defecto y valida", async () => {
@@ -65,7 +66,7 @@ describe("PasoTarifa — comparador sin identidad", () => {
     const iniciales = propsIniciales();
     render(<PasoTarifa {...iniciales} />);
 
-    await user.click(screen.getByRole("radio", { name: /Programar fecha/ }));
+    await user.click(screen.getByRole("button", { name: /Programar fecha/ }));
 
     expect(screen.getByRole("dialog", { name: "Programar traslado" })).toBeInTheDocument();
     expect(iniciales.acciones.actualizar).toHaveBeenCalledWith("modalidadProgramacion", "programado");
@@ -83,7 +84,7 @@ describe("PasoTarifa — comparador sin identidad", () => {
       datos: { ...iniciales.datos, modalidadProgramacion: "programado", fechaHoraProgramada: "2027-01-15T10:30" },
     };
     render(<PasoTarifa {...conFecha} />);
-    await userEvent.setup().click(screen.getByRole("radio", { name: /Programar fecha/ }));
+    await userEvent.setup().click(screen.getByRole("button", { name: /Programar fecha/ }));
 
     // fireEvent nativo para type=date: userEvent no soporta pickers de fecha.
     // fireEvent.change lleva el valor ya completo, así que el handler debe
@@ -105,7 +106,7 @@ describe("PasoTarifa — comparador sin identidad", () => {
       />,
     );
 
-    await user.click(screen.getByRole("radio", { name: /Programar fecha/ }));
+    await user.click(screen.getByRole("button", { name: /Programar fecha/ }));
     await user.click(screen.getByLabelText("Fecha de recolección"));
     await user.tab();
 

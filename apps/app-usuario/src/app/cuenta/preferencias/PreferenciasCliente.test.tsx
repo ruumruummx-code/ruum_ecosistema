@@ -104,7 +104,7 @@ describe("PreferenciasCliente", () => {
     render(<PreferenciasCliente cuenta={mockCuenta} />);
 
     // Sidebar
-    expect(screen.getByText("Tu traslado, en orden")).toBeDefined();
+    expect(screen.getByText("Tu traslado, tu control")).toBeDefined();
     expect(screen.getAllByText("Mis traslados").length).toBeGreaterThanOrEqual(1);
     expect(screen.getAllByText("Mis vehículos").length).toBeGreaterThanOrEqual(1);
     expect(screen.getAllByText("Mis ubicaciones").length).toBeGreaterThanOrEqual(1);

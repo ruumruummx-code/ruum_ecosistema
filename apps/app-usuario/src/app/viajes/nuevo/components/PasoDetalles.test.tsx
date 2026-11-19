@@ -48,13 +48,13 @@ describe("PasoDetalles compacto", () => {
     render(<PasoDetalles {...props} />);
     expect(screen.queryByRole("checkbox")).not.toBeInTheDocument();
     expect(
-      screen.queryByRole("dialog", { name: "Desglose de la tarifa" }),
+      screen.queryByRole("region", { name: "Ver desglose completo de la tarifa" }),
     ).not.toBeInTheDocument();
     await userEvent
       .setup()
       .click(screen.getByRole("button", { name: /Ver desglose completo/ }));
     expect(
-      screen.getByRole("dialog", { name: "Desglose de la tarifa" }),
+      screen.getByRole("region", { name: "Ver desglose completo de la tarifa" }),
     ).toBeInTheDocument();
     expect(
       screen.getByText(props.politicaCancelacion.mensaje),
@@ -67,7 +67,7 @@ describe("PasoDetalles compacto", () => {
     const user = userEvent.setup();
     const props = propsIniciales();
     render(<PasoDetalles {...props} />);
-    await user.click(screen.getByRole("button", { name: /Entrega ▾/ }));
+    await user.click(screen.getByRole("button", { name: /^Entrega / }));
     await user.type(
       screen.getByLabelText("Especifica ventana de entrega"),
       "mismo día",
@@ -79,7 +79,7 @@ describe("PasoDetalles compacto", () => {
     );
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
   });
-  it("cambia el tipo de traslado con el control segmentado", async () => {
+  it("cambia el tipo de traslado con las tarjetas de selección", async () => {
     const props = propsIniciales();
     render(<PasoDetalles {...props} />);
     await userEvent

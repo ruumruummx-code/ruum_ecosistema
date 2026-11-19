@@ -9,6 +9,8 @@ import {
   type RefObject,
 } from "react";
 import Link from "next/link";
+import { ArrowLeft, ArrowRight, CircleHelp, LockKeyhole } from "lucide-react";
+import { Button, Card } from "@ruum/ui/base";
 import type { useNuevoTraslado } from "../hooks/useNuevoTraslado";
 import { codigoPostalCompleto } from "../tarifa-gate";
 import { MobileBottomSheet as BottomSheet } from "@/components/MobileBottomSheet";
@@ -24,11 +26,11 @@ import styles from "./cotizador.module.css";
 export function CotizadorPortal({
   t,
   headingRef,
-  escritorio = false,
+  enMarco = false,
 }: {
   t: ReturnType<typeof useNuevoTraslado>;
   headingRef: RefObject<HTMLHeadingElement | null>;
-  escritorio?: boolean;
+  enMarco?: boolean;
 }) {
   const formatearDistancia = useFormatoDistancia();
   const root = useRef<HTMLElement>(null);
@@ -49,10 +51,16 @@ export function CotizadorPortal({
     [],
   );
   useEffect(() => {
-    if (escritorio) return;
     const viewport = window.visualViewport;
     if (!viewport) return;
+    const desktop = enMarco ? window.matchMedia?.('(min-width: 1024px)') : undefined;
     const update = () => {
+      if (desktop?.matches) {
+        root.current?.style.removeProperty('--quote-height');
+        root.current?.style.removeProperty('--quote-top');
+        root.current?.removeAttribute('data-keyboard');
+        return;
+      }
       root.current?.style.setProperty("--quote-height", `${viewport.height}px`);
       root.current?.style.setProperty("--quote-top", `${viewport.offsetTop}px`);
       const active = document.activeElement;
@@ -78,6 +86,7 @@ export function CotizadorPortal({
       }
     };
     update();
+    desktop?.addEventListener?.("change", update);
     viewport.addEventListener("resize", update);
     viewport.addEventListener("scroll", update);
     let frame = 0;
@@ -88,13 +97,14 @@ export function CotizadorPortal({
     document.addEventListener("focusin", focusChanged);
     document.addEventListener("focusout", focusChanged);
     return () => {
+      desktop?.removeEventListener?.("change", update);
       viewport.removeEventListener("resize", update);
       viewport.removeEventListener("scroll", update);
       document.removeEventListener("focusin", focusChanged);
       document.removeEventListener("focusout", focusChanged);
       cancelAnimationFrame(frame);
     };
-  }, [escritorio]);
+  }, [enMarco]);
   useEffect(() => { headingRef.current?.focus(); }, [t.paso, headingRef]);
 
   const completos =
@@ -115,7 +125,7 @@ export function CotizadorPortal({
         ? "Tarifa pendiente"
       : !t.previsualizacion.disponible
         ? "Cotización especial requerida"
-        : `Continuar · Tarifa est. $${Number(t.previsualizacion.tarifa).toLocaleString("es-MX", { maximumFractionDigits: 2 })} MXN`;
+        : "Cotizar traslado";
   const montoTarifa = t.trasladoCreado?.precioCotizado ?? (t.previsualizacion?.disponible ? Number(t.previsualizacion.tarifa) : null);
   const tarifa = montoTarifa != null
     ? `$${montoTarifa.toLocaleString("es-MX", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} MXN`
@@ -184,47 +194,24 @@ export function CotizadorPortal({
         ? "Cambios guardados"
         : "Guardado automático disponible";
 
-  const Contenedor = escritorio ? "section" : "main";
+  const Contenedor = enMarco ? "section" : "main";
   return (
-    <Contenedor ref={root} aria-label="Crear un traslado" className={`user-v2-scope ${styles.portal} ${escritorio ? styles.desktop : ""}`}>
+    <Contenedor ref={root} aria-label="Crear un traslado" data-paso={t.paso} className={`user-v2-scope ${styles.portal} ${enMarco ? styles.enMarco : ""}`}>
       <header className={styles.appBar}>
         {t.paso === 0 ? (
-          <Link
-            href="/"
-            aria-label="Volver al inicio"
-            className="flex size-10 items-center justify-center rounded-full text-[#0a2342] transition hover:bg-[#f1f5fa] dark:text-white dark:hover:bg-[#0f2d52]"
-          >
-            <svg className="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-              <path d="M15 19l-7-7 7-7" />
-            </svg>
-          </Link>
+          <Button asChild variant="ghost">
+            <Link href="/" aria-label="Volver al inicio">
+              <ArrowLeft strokeWidth={1.5} aria-hidden="true" /> Volver
+            </Link>
+          </Button>
         ) : (
-          <button
-            type="button"
-            onClick={t.retrocederPaso}
-            disabled={ocupado || t.pagoConfirmado}
-            aria-label="Paso anterior"
-            className="flex size-10 items-center justify-center rounded-full text-[#0a2342] transition hover:bg-[#f1f5fa] dark:text-white dark:hover:bg-[#0f2d52]"
-          >
-            <svg className="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-              <path d="M15 19l-7-7 7-7" />
-            </svg>
-          </button>
+          <Button type="button" variant="ghost" size="icon" onClick={t.retrocederPaso} disabled={ocupado || t.pagoConfirmado} aria-label="Paso anterior">
+            <ArrowLeft strokeWidth={1.5} aria-hidden="true" />
+          </Button>
         )}
 
         {t.paso === 0 ? (
-          <div className="flex items-center gap-1.5">
-            <span className="sr-only">Paso 1 de 5</span>
-            <svg className="size-7" viewBox="0 0 32 32" fill="none" aria-hidden="true">
-              <rect width="32" height="32" rx="8" fill="#eaf2fe" />
-              <circle cx="11" cy="16" r="4.5" fill="#0066FF" />
-              <circle cx="21" cy="16" r="4.5" fill="#00D1D1" />
-              <path d="M11 16h10" stroke="#0066FF" strokeWidth="2.5" strokeLinecap="round" />
-            </svg>
-            <span className="font-display text-[17px] font-extrabold tracking-tight text-[#0a2342] dark:text-[#f6f8fb]">
-              Ruum Ruum
-            </span>
-          </div>
+          <span className="sr-only">Paso 1 de 5</span>
         ) : (
           <div className={styles.progressBarContainer}>
             <p className="text-center text-[12px] font-semibold text-[#64748b] dark:text-[#a8b5cc]">
@@ -250,17 +237,11 @@ export function CotizadorPortal({
             >
               {guardado}
             </span>
-            <Link
-              href="/soporte"
-              aria-label="Ayuda y soporte"
-              className="flex size-10 items-center justify-center rounded-full text-[#64748b] transition hover:bg-[#f1f5fa] dark:text-[#a8b5cc] dark:hover:bg-[#0f2d52]"
-            >
-              <svg className="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                <circle cx="12" cy="12" r="10" />
-                <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
-                <line x1="12" x2="12.01" y1="17" y2="17" />
-              </svg>
-            </Link>
+            <Button asChild variant="ghost" size="icon">
+              <Link href="/soporte" aria-label="Ayuda y soporte">
+                <CircleHelp strokeWidth={1.5} aria-hidden="true" />
+              </Link>
+            </Button>
           </div>
         ) : (
           <span
@@ -313,7 +294,7 @@ export function CotizadorPortal({
         <h1
           ref={headingRef}
           tabIndex={-1}
-          className={t.paso === 4 ? "sr-only" : styles.title}
+          className={t.paso === 4 ? "sr-only" : t.paso === 0 ? styles.tituloCotizacion : styles.title}
         >
           {t.paso === 0
             ? "Conoce tu tarifa"
@@ -326,7 +307,7 @@ export function CotizadorPortal({
                   : "Pago seguro"}
         </h1>
         {t.paso === 0 && (
-          <p className={styles.subtitle}>
+          <p className={styles.subtituloCotizacion}>
             Ingresa los datos de tu viaje y obtén el costo estimado en segundos.
           </p>
         )}
@@ -345,7 +326,15 @@ export function CotizadorPortal({
             Confirma los últimos detalles de tu traslado.
           </p>
         )}
-        {t.paso === 0 && !t.previsualizando && t.previsualizacion && !t.previsualizacion.disponible && <div className="mb-4 space-y-2 rounded-xl border border-amber-300 p-3 text-sm" role="alert"><p>{t.previsualizacion.motivo || "La cotización no está disponible en este momento."}</p><button type="button" onClick={t.reintentarCotizacion} className="text-blue-700 underline dark:text-blue-300">Reintentar cotización</button><Link href="/soporte" className="ml-4 text-blue-700 underline dark:text-blue-300">Contactar soporte</Link></div>}
+        {t.paso === 0 && !t.previsualizando && t.previsualizacion && !t.previsualizacion.disponible && (
+          <Card className="mb-4 space-y-2 border-ui-warning bg-ui-warning-soft p-3 text-sm" role="alert">
+            <p>{t.previsualizacion.motivo || "La cotización no está disponible en este momento."}</p>
+            <div className="flex flex-wrap gap-4">
+              <Button type="button" variant="link" onClick={t.reintentarCotizacion}>Reintentar cotización</Button>
+              <Button asChild variant="link"><Link href="/soporte">Contactar soporte</Link></Button>
+            </div>
+          </Card>
+        )}
         <fieldset
           disabled={Boolean(t.trasladoCreado)}
           className="min-w-0 border-0 p-0 m-0"
@@ -363,19 +352,12 @@ export function CotizadorPortal({
           )}
           {/* Paso 0 ofrece la carga masiva dentro del wizard. */}
           {t.paso === 0 && (
-            <div className="mt-2.5 rounded-2xl border border-[#d8e2ee] bg-[#f8fafc] px-3.5 py-2.5 text-center dark:border-[#1a3a5c] dark:bg-[#07192f]">
-              <p className="text-[12px] font-medium text-[#566889] dark:text-[#a8b5cc]">
-                ¿Requieres cotizar o trasladar un lote de vehículos?{" "}
-                <button
-                  type="button"
-                  onClick={() => setCargaMasivaAbierta(true)}
-                  aria-label="Abrir módulo de carga masiva de traslados"
-                  className="font-bold text-[#0066FF] hover:underline dark:text-[#4d94ff]"
-                >
-                  Abrir módulo de carga masiva de traslados →
-                </button>
-              </p>
-            </div>
+            <p className="mt-4 text-sm text-ui-fg-muted">
+              ¿Necesitas trasladar varios vehículos?{" "}
+              <Button type="button" variant="link" aria-label="Abrir módulo de carga masiva de traslados" onClick={() => setCargaMasivaAbierta(true)}>
+                Abrir carga masiva <ArrowRight aria-hidden="true" />
+              </Button>
+            </p>
           )}
           {t.paso === 1 && (
             <PasoVehiculo
@@ -480,10 +462,13 @@ export function CotizadorPortal({
             </div>
           )}
           {t.paso === 3 && (
-            <p className="mb-2 text-center text-[11px] leading-4 text-[var(--user-color-muted)]">
-              Al continuar, aceptas que el pago es electrónico anticipado y la
-              política de cancelación.
-            </p>
+            <div className="mb-3 grid gap-2 text-center text-xs text-ui-fg-muted">
+              <p className="flex items-center justify-center gap-1.5 font-medium">
+                <LockKeyhole className={styles.selloProteccion} strokeWidth={1.5} aria-hidden="true" />
+                Tus datos están protegidos
+              </p>
+              <p>Al continuar, aceptas que el pago es electrónico anticipado y la política de cancelación.</p>
+            </div>
           )}
           {t.paso === 4 && (
             <p className="mb-2 text-center text-[10px] leading-4 text-[var(--user-color-muted)]">
@@ -495,24 +480,28 @@ export function CotizadorPortal({
               </span>
             </p>
           )}
-          <button
+          {t.paso === 0 && listo && (
+            <p id="tarifa-estimada" className="mb-2 flex flex-wrap items-baseline justify-between gap-x-2 text-sm text-ui-fg-muted" role="status">
+              Tarifa estimada <strong className="font-semibold text-ui-fg">{tarifa}</strong>
+            </p>
+          )}
+          <Button
             type={t.paso === 4 ? "submit" : "button"}
             form={t.paso === 4 ? pagoFormId : undefined}
             onClick={t.paso === 4 ? undefined : continuar}
             disabled={deshabilitado}
-            className={`${styles.primary} ${t.paso === 4 ? styles.paymentButton : ""}`}
+            className={[0, 2, 3].includes(t.paso) ? styles.accionControl : [styles.primary, t.paso === 4 ? styles.paymentButton : ""].join(" ")}
+            aria-describedby={t.paso === 0 && listo ? "tarifa-estimada" : undefined}
             aria-live="polite"
             aria-busy={ocupado || (completos && t.previsualizando)}
           >
             <span className="inline-flex w-full items-center justify-center gap-2">
               <span>{etiquetaPaso}</span>
               {!etiquetaPaso.includes("→") && (
-                <svg className="size-4 shrink-0 transition-transform group-hover:translate-x-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                  <path d="M5 12h14M12 5l7 7-7 7" />
-                </svg>
+                <ArrowRight strokeWidth={1.5} aria-hidden="true" />
               )}
             </span>
-          </button>
+          </Button>
         </footer>
       )}
       <BottomSheet

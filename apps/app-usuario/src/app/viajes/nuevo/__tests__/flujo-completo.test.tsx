@@ -115,7 +115,7 @@ async function aceptarTarifa() {
   await user.selectOptions(screen.getByLabelText("Condición"), "seminueva");
   const continuar = await screen.findByRole(
     "button",
-    { name: "Continuar · Tarifa est. $500 MXN" },
+    { name: "Cotizar traslado" },
     { timeout: 8000 },
   );
   await waitFor(() => expect(continuar).toBeEnabled());

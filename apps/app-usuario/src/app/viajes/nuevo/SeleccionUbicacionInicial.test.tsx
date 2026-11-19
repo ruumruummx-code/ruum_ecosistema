@@ -5,7 +5,7 @@ import { NuevoTrasladoForm, SeleccionUbicacionInicial } from "./NuevoTrasladoFor
 import { useNuevoTraslado } from "./hooks/useNuevoTraslado";
 
 vi.mock("./hooks/useNuevoTraslado", () => ({ useNuevoTraslado: vi.fn() }));
-vi.mock("./NuevoTrasladoDesktop", () => ({ NuevoTrasladoDesktop: () => null }));
+vi.mock("@/components/layout/UserDashboardLayout", () => ({ UserDashboardLayout: () => null }));
 vi.mock("./components/CotizadorPortal", () => ({ CotizadorPortal: () => null }));
 vi.mock("./components/EstadoCreacion", () => ({ EstadoCreacion: () => null }));
 vi.mock("../../NavegacionUsuario", () => ({ NavegacionUsuario: () => null }));

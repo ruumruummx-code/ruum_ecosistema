@@ -1,6 +1,6 @@
 "use client";
 
-import { Tabs } from "@ruum/ui";
+import { Card, Input, Label, Tabs, TabsContent, TabsList, TabsTrigger } from "@ruum/ui/base";
 import React, { lazy, memo, Suspense, useEffect, useState } from "react";
 import type { DatosCodigoPostal } from "@/lib/codigos-postales";
 import type { sugerirDireccionesAutocomplete } from "@/lib/mapbox";
@@ -138,9 +138,13 @@ function PasoRutaComponent({
     setEditando(null);
   };
   return (
-    <div className={styles.fields}>
-      <Tabs tabs={[{id:"direcciones",etiqueta:"Direcciones"},{id:"contactos",etiqueta:"Contactos"}]} value={tab} onSeleccion={id=>setTab(id as typeof tab)} etiqueta="Datos de ruta" renderPanel={()=>( <section   >
-        {tab === "direcciones" ? (
+    <div className="grid gap-3">
+      <Tabs value={tab} onValueChange={(valor) => setTab(valor as typeof tab)}>
+        <TabsList aria-label="Datos de ruta" className={styles.tabsRuta}>
+          <TabsTrigger value="direcciones" className={styles.tabRuta}>Direcciones</TabsTrigger>
+          <TabsTrigger value="contactos" className={styles.tabRuta}>Contactos</TabsTrigger>
+        </TabsList>
+        <TabsContent value="direcciones" className="mt-3">
           <div className="grid gap-3">
             {/* Tarjeta de Origen */}
             <button
@@ -269,86 +273,61 @@ function PasoRutaComponent({
               </div>
             )}
           </div>
-        ) : (
-          <div className={styles.contacts}>
-            {(["entrega", "recepcion"] as const).map((p) => (
-              <fieldset key={p} className="min-w-0">
-                <legend className="mb-2 text-xs font-bold">
-                  {p === "entrega"
-                    ? "Quien entrega el vehículo"
-                    : "Quien recibe el vehículo"}
-                </legend>
-                <div className={styles.vehicle}>
-                  {(["Nombre", "Apellido", "Telefono"] as const).map(
-                    (suffix) => {
-                      const campo = `${p}${suffix}` as
-                        | "entregaNombre"
-                        | "entregaApellido"
-                        | "entregaTelefono"
-                        | "recepcionNombre"
-                        | "recepcionApellido"
-                        | "recepcionTelefono";
+        </TabsContent>
+        <TabsContent value="contactos" className="mt-3">
+          <div className={styles.contactosOperativos}>
+            {(["entrega", "recepcion"] as const).map((rol) => {
+              const origen = rol === "entrega";
+              const tituloId = `contacto-${rol}-titulo`;
+              return (
+                <Card key={rol} className={styles.tarjetaContacto}>
+                  <fieldset className="grid min-w-0 gap-3" aria-labelledby={tituloId}>
+                    <h2 id={tituloId} className="flex items-start gap-2 text-sm font-semibold text-ui-fg">
+                      <span className={origen ? styles.puntoOrigen : styles.puntoDestino} aria-hidden="true" />
+                      {origen ? "Quien entrega el vehículo (Origen)" : "Quien recibe el vehículo (Destino)"}
+                    </h2>
+                    {(["Nombre", "Apellido", "Telefono"] as const).map((sufijo) => {
+                      const campo = `${rol}${sufijo}` as const;
+                      const telefono = sufijo === "Telefono";
+                      const control = (
+                        <Input
+                          id={campo}
+                          name={campo}
+                          type={telefono ? "tel" : "text"}
+                          autoComplete={telefono ? "tel-national" : sufijo === "Nombre" ? "given-name" : "family-name"}
+                          inputMode={telefono ? "numeric" : undefined}
+                          maxLength={telefono ? 10 : 100}
+                          value={datos[campo]}
+                          onChange={(e) => telefono
+                            ? actualizarTelefono(`${rol}Telefono`, e.target.value)
+                            : actualizar(campo, e.target.value)}
+                          onBlur={() => validarCampo(campo)}
+                          className={telefono ? styles.numeroContacto : styles.controlCotizacion}
+                          aria-label={telefono ? `Teléfono de ${origen ? "entrega" : "recepción"}, 10 dígitos sin incluir +52` : undefined}
+                          aria-invalid={Boolean(errores[campo])}
+                          aria-describedby={errores[campo] ? `${campo}-error` : undefined}
+                        />
+                      );
                       return (
-                        <div
-                          key={campo}
-                          className={`${styles.field} ${suffix === "Telefono" ? styles.condition : ""}`}
-                        >
-                          <label htmlFor={campo} className={styles.label}>
-                            {suffix === "Telefono" ? "Teléfono · +52" : suffix}
-                          </label>
-                          <input
-                            id={campo}
-                            name={campo}
-                            type={suffix === "Telefono" ? "tel" : "text"}
-                            autoComplete={
-                              suffix === "Telefono"
-                                ? "tel-national"
-                                : suffix === "Nombre"
-                                  ? "given-name"
-                                  : "family-name"
-                            }
-                            inputMode={
-                              suffix === "Telefono" ? "numeric" : undefined
-                            }
-                            maxLength={suffix === "Telefono" ? 10 : 100}
-                            value={datos[campo]}
-                            onChange={(e) =>
-                              suffix === "Telefono"
-                                ? actualizarTelefono(
-                                    campo as
-                                      | "entregaTelefono"
-                                      | "recepcionTelefono",
-                                    e.target.value,
-                                  )
-                                : actualizar(campo, e.target.value)
-                            }
-                            onBlur={() => validarCampo(campo)}
-                            className={acciones.claseControl(campo)}
-                            aria-label={
-                              suffix === "Telefono"
-                                ? `Teléfono de ${p === "entrega" ? "entrega" : "recepción"}, 10 dígitos sin incluir +52`
-                                : undefined
-                            }
-                            aria-invalid={Boolean(errores[campo])}
-                            aria-describedby={
-                              errores[campo] ? `${campo}-error` : undefined
-                            }
-                          />
-                          {errores[campo] && (
-                            <p id={`${campo}-error`} className={styles.error}>
-                              {errores[campo]}
-                            </p>
-                          )}
+                        <div key={campo} className="grid min-w-0 gap-1.5">
+                          <Label htmlFor={campo} className="text-xs font-semibold">{telefono ? "Teléfono" : sufijo}</Label>
+                          {telefono ? (
+                            <div className={styles.telefonoContacto}>
+                              <span aria-hidden="true">+52</span>
+                              {control}
+                            </div>
+                          ) : control}
+                          {errores[campo] && <p id={`${campo}-error`} className="text-xs text-ui-danger">{errores[campo]}</p>}
                         </div>
                       );
-                    },
-                  )}
-                </div>
-              </fieldset>
-            ))}
+                    })}
+                  </fieldset>
+                </Card>
+              );
+            })}
           </div>
-        )}
-      </section> )} />
+        </TabsContent>
+      </Tabs>
 
       {tab === "direcciones" && (
         <button

@@ -43,6 +43,7 @@ export interface UserDashboardLayoutProps {
   onCerrarSesion?: () => void | Promise<void>;
   idContenido?: string;
   padding?: "amplio" | "compacto" | "ninguno";
+  className?: string;
   classNameContenido?: string;
   showPromo?: boolean;
   fixedContent?: boolean;
@@ -78,6 +79,7 @@ export function UserDashboardLayout({
   onCerrarSesion,
   idContenido,
   padding = "compacto",
+  className = "",
   classNameContenido = "",
   showPromo = true,
   fixedContent = false,
@@ -109,7 +111,7 @@ export function UserDashboardLayout({
 
   return (
     <div
-      className={estilos.shell}
+      className={[estilos.shell, className].filter(Boolean).join(" ")}
       data-layout="usuario-dashboard"
       data-hydrated={hidratado ? "true" : undefined}
     >

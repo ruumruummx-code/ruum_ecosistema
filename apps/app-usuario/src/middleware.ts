@@ -25,10 +25,6 @@ import {
 /* CORRECCIÓN (auditoría A-3): la ruta real es "/mis-viajes" (minúsculas). Con
    "/mis-Traslados" el predicado nunca casaba y los visitantes anónimos llegaban a
    la pantalla de traslados sin redirect a /login. */
-/* M6: "/onboarding" sale de la lista protegida. Es una intro pre-auth (sus
-   CTAs apuntan a /login y /registro y nadie la enlazaba): exigir sesión la
-   dejaba inalcanzable para su público — el usuario nuevo anónimo rebotaba a
-   /login antes de verla. */
 const RUTAS_PROTEGIDAS_USUARIO = [
   "/inicio",
   "/viajes",
@@ -45,9 +41,6 @@ export function esRutaProtegidaUsuario(pathname: string): boolean {
 }
 
 /** Rutas cuyo render depende de quién esté conectado. */
-/* M6: "/onboarding" tampoco pertenece aquí: su render (contenido estático +
-   localStorage) no depende de la sesión. Sacarlo evita el round-trip de
-   getUser en cada visita anónima. */
 const RUTAS_DEPENDIENTES_DE_SESION = new Set<string>([
   "/login",
   "/registro",
@@ -202,7 +195,7 @@ export async function middleware(request: NextRequest) {
      (este archivo no toca PostgREST directamente: check-fronteras exige 0
      `.from` en apps/*). Si es conductor en la app equivocada → 403.
      Si no existe en ninguna (alta en curso, trigger pendiente), se permite
-     el paso para no romper el onboarding: /inicio muestra un estado explícito
+     el paso para permitir que finalice el alta: /inicio muestra un estado explícito
      y ninguna lectura crea filas en usuarios. */
   if (user && esRutaProtegidaUsuario(pathname)) {
     const { clasificarRolApp } = await import("@ruum/api/identity");

@@ -118,9 +118,9 @@ describe("T07 — Certificación de Autenticación, Sesión y Middleware (app-us
       expect(new URL(resRegistro.headers.get("location")!).pathname).toBe("/");
     });
 
-    it("rutas públicas (/onboarding, assets) se sirven sin forzar verificación de sesión en GoTrue", async () => {
+    it("rutas públicas (/legal/terminos) se sirven sin forzar verificación de sesión en GoTrue", async () => {
       const { middleware } = await import("../src/middleware");
-      const res = await middleware(crearRequest("/onboarding"));
+      const res = await middleware(crearRequest("/legal/terminos"));
 
       expect(res.status).toBe(200);
       expect(mockGetUser).not.toHaveBeenCalled();
