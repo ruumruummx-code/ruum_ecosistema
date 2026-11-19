@@ -15,6 +15,7 @@ import {
   CAMPOS_PASO_VEHICULO_DETALLE,
   CAMPOS_RUTA_DESTINO_CONTACTOS,
   CAMPOS_RUTA_ORIGEN,
+  ErrorNegocioTraslado,
   mensajeAmigableErrorCreacion,
   pasoDeCampo
 } from "../constants";
@@ -226,8 +227,16 @@ export function useEnvioTraslado(params: ParametrosEnvioTraslado) {
           }),
         });
         if (!respPaso.ok) {
-          const j = await respPaso.json().catch(() => null) as { error?: string } | null;
-          throw new Error(j?.error || `No pudimos validar tu solicitud en el servidor (código ${respPaso.status}). Intenta de nuevo.`);
+          const j = await respPaso.json().catch(() => null) as { error?: string; detalles?: string[] } | null;
+          const detalles = Array.isArray(j?.detalles) && j.detalles.length ? ` ${j.detalles.join(" ")}` : "";
+          const mensaje = j?.error
+            ? `${j.error}${detalles}`
+            : `No pudimos validar tu solicitud en el servidor (código ${respPaso.status}). Intenta de nuevo.`;
+          // 4xx y 503 (ruta no disponible) traen un motivo pensado para el usuario.
+          if (j?.error && (respPaso.status < 500 || respPaso.status === 503)) {
+            throw new ErrorNegocioTraslado(mensaje);
+          }
+          throw new Error(mensaje);
         }
         datosValidacionServidor = await respPaso.json().catch(() => null);
       } catch (e) {

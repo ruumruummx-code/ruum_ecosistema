@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { construirPayloadCreacion } from "./adapters";
+import { construirPayloadCreacion, fechaLocalAIsoUtc } from "./adapters";
 import type { DatosFormulario } from "./types";
 
 describe("construirPayloadCreacion", () => {
@@ -16,5 +16,29 @@ describe("construirPayloadCreacion", () => {
     expect(traslado.distancia_km).toBe(18.42);
     expect(traslado.tiempo_estimado_horas).toBe(0.73);
     expect("precio_cotizado" in traslado).toBe(false);
+  });
+});
+
+describe("fechaLocalAIsoUtc", () => {
+  it("interpreta la hora capturada en la zona del usuario (CDMX, UTC-6)", () => {
+    expect(fechaLocalAIsoUtc("2026-11-19T09:00", "America/Mexico_City")).toBe("2026-11-19T15:00:00.000Z");
+  });
+
+  it("usa CDMX como zona predeterminada si falta o es inválida", () => {
+    expect(fechaLocalAIsoUtc("2026-11-19T09:00")).toBe("2026-11-19T15:00:00.000Z");
+    expect(fechaLocalAIsoUtc("2026-11-19T09:00", "Zona/Inexistente")).toBe("2026-11-19T15:00:00.000Z");
+  });
+
+  it("respeta otras zonas, incluido horario de verano", () => {
+    expect(fechaLocalAIsoUtc("2026-07-01T09:00", "America/Tijuana")).toBe("2026-07-01T16:00:00.000Z");
+  });
+
+  it("respeta fechas que ya traen zona explícita", () => {
+    expect(fechaLocalAIsoUtc("2026-11-19T15:00:00.000Z", "America/Mexico_City")).toBe("2026-11-19T15:00:00.000Z");
+  });
+
+  it("devuelve null para valores vacíos o inválidos", () => {
+    expect(fechaLocalAIsoUtc("", "America/Mexico_City")).toBeNull();
+    expect(fechaLocalAIsoUtc("mañana", "America/Mexico_City")).toBeNull();
   });
 });

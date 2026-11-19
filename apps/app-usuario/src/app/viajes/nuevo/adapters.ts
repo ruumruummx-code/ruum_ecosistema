@@ -34,7 +34,55 @@ function normalizarNoNegativo(valor: unknown): number | null {
   return valor >= 0 ? valor : null;
 }
 
-export function construirPayloadCreacion(datos: DatosFormulario, vehiculoSeleccionadoId: string, coords: CoordenadasTraslado & { paradasCoords?: CoordenadasParada[] }): {
+export const ZONA_HORARIA_PREDETERMINADA = "America/Mexico_City";
+
+function zonaValida(zona: string | undefined): string {
+  if (!zona) return ZONA_HORARIA_PREDETERMINADA;
+  try {
+    new Intl.DateTimeFormat("en-US", { timeZone: zona });
+    return zona;
+  } catch {
+    return ZONA_HORARIA_PREDETERMINADA;
+  }
+}
+
+/** Diferencia (ms) entre la hora de pared en `zona` y UTC para el instante dado. */
+function desfaseZonaMs(instanteMs: number, zona: string): number {
+  const partes = new Intl.DateTimeFormat("en-US", {
+    timeZone: zona, hourCycle: "h23",
+    year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", second: "2-digit",
+  }).formatToParts(new Date(instanteMs));
+  const v = (t: string) => Number(partes.find((p) => p.type === t)?.value ?? 0);
+  const comoUtc = Date.UTC(v("year"), v("month") - 1, v("day"), v("hour"), v("minute"), v("second"));
+  return comoUtc - Math.floor(instanteMs / 1000) * 1000;
+}
+
+/**
+ * Convierte la fecha/hora capturada en el formulario ("YYYY-MM-DDTHH:mm", hora
+ * local del usuario, sin zona) a ISO UTC usando la zona horaria del usuario.
+ * Antes se usaba `new Date(valor)`, que en el servidor (UTC) desplazaba la hora
+ * 6 h en CDMX y hacía fallar la anticipación mínima de 2 h en la cotización.
+ */
+export function fechaLocalAIsoUtc(valor: string, zonaHoraria?: string): string | null {
+  const texto = valor.trim();
+  if (!texto) return null;
+  // Si ya trae zona explícita (Z u offset), se respeta tal cual.
+  if (/(Z|[+-]\d{2}:?\d{2})$/i.test(texto)) {
+    const fecha = new Date(texto);
+    return Number.isNaN(fecha.getTime()) ? null : fecha.toISOString();
+  }
+  const m = texto.match(/^(\d{4})-(\d{2})-(\d{2})(?:[T ](\d{2}):(\d{2})(?::(\d{2}))?)?$/);
+  if (!m) return null;
+  const zona = zonaValida(zonaHoraria);
+  const [, a, mes, d, h = "0", min = "0", s = "0"] = m;
+  const paredComoUtc = Date.UTC(Number(a), Number(mes) - 1, Number(d), Number(h), Number(min), Number(s));
+  let instante = paredComoUtc - desfaseZonaMs(paredComoUtc, zona);
+  // Segundo ajuste por si el desfase cambia en ese instante (horario de verano).
+  instante = paredComoUtc - desfaseZonaMs(instante, zona);
+  return new Date(instante).toISOString();
+}
+
+export function construirPayloadCreacion(datos: DatosFormulario, vehiculoSeleccionadoId: string, coords: CoordenadasTraslado & { paradasCoords?: CoordenadasParada[] }, zonaHoraria?: string): {
   vehiculo: DatosVehiculoParaTraslado; traslado: DatosNuevoTraslado; paradas: DatosParadaParaTraslado[];
 } {
   const vehiculo: DatosVehiculoParaTraslado = vehiculoSeleccionadoId ? { vehiculoId: vehiculoSeleccionadoId } : { vehiculo: {
@@ -59,7 +107,7 @@ export function construirPayloadCreacion(datos: DatosFormulario, vehiculoSelecci
     origen_referencias: datos.origenReferencias || null, destino_lat: normalizarLatitud(coords.destinoLat), destino_lng: normalizarLongitud(coords.destinoLng),
     destino_direccion: direccion(datos.destinoCalle, datos.destinoNumero, datos.destinoColonia, datos.destinoCodigoPostal, datos.destinoEstado), destino_ciudad: datos.destinoCiudad,
     destino_referencias: datos.destinoReferencias || null, instrucciones_especiales: datos.instruccionesEspeciales,
-    modalidad_programacion: datos.modalidadProgramacion, fecha_hora_programada: datos.fechaHoraProgramada ? new Date(datos.fechaHoraProgramada).toISOString() : null,
+    modalidad_programacion: datos.modalidadProgramacion, fecha_hora_programada: datos.fechaHoraProgramada ? fechaLocalAIsoUtc(datos.fechaHoraProgramada, zonaHoraria) : null,
     tipo_ruta: datos.tipoRuta, ventana_recoleccion: datos.ventanaRecoleccion, ventana_entrega: datos.ventanaEntrega,
     distancia_km: normalizarNoNegativo(coords.distanciaKm), tiempo_estimado_horas: normalizarNoNegativo(coords.tiempoEstimadoHoras),
     snapshot_tarifa: coords.snapshotTarifa ?? null

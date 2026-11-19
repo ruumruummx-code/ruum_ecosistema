@@ -107,8 +107,31 @@ export function nombreCompleto(nombre: string, apellido: string) {
 
 export const PATRON_MENSAJE_DE_NEGOCIO = /vehículo|precio cotizado|usuario autenticado|sesión/i;
 
+/** Rechazo con un motivo que el usuario puede entender y corregir. */
+export class ErrorNegocioTraslado extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "ErrorNegocioTraslado";
+  }
+}
+
+/** RAISE EXCEPTION de PL/pgSQL (SQLSTATE P0001) devuelto por PostgREST/RPC. */
+function esErrorNegocioBase(err: unknown): err is { code: string; message: string } {
+  if (!err || typeof err !== "object") return false;
+  const { code, message } = err as { code?: unknown; message?: unknown };
+  return code === "P0001" && typeof message === "string" && message.trim().length > 0;
+}
+
 export function mensajeAmigableErrorCreacion(err: unknown): string {
+  if (err instanceof ErrorNegocioTraslado) return err.message;
+  if (esErrorNegocioBase(err)) {
+    if (/No hay tarifa configurada/i.test(err.message)) {
+      return "No pudimos calcular la tarifa automática porque falta una regla tarifaria. Nuestro equipo completará la tarifa para esta ruta y te avisará en minutos.";
+    }
+    return err.message.trim();
+  }
   if (err instanceof Error) {
+    if (/^Datos de traslado inválidos/i.test(err.message)) return err.message;
     if (/No hay tarifa configurada/i.test(err.message)) {
       return "No pudimos calcular la tarifa automática porque falta una regla tarifaria. Nuestro equipo completará la tarifa para esta ruta y te avisará en minutos.";
     }

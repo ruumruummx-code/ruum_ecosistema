@@ -20,6 +20,14 @@ import {
   registrarDivergenciaTarifa,
 } from "@/lib/tarifa-snapshot";
 
+/** Mensaje de un RAISE EXCEPTION de PL/pgSQL (SQLSTATE P0001), si lo es. */
+function mensajeErrorNegocioBase(err: unknown): string | null {
+  if (!err || typeof err !== "object") return null;
+  const { code, message } = err as { code?: unknown; message?: unknown };
+  if (code !== "P0001" || typeof message !== "string" || !message.trim()) return null;
+  return message.trim().slice(0, 300);
+}
+
 // Sec3: validación servidor del wizard — rechazar si paso < 4 (PASOS.length = 4)
 // El cliente no debe poder crear traslado enviando paso 0 como si fuera paso 5.
 const PASOS_REQUERIDOS = 4;
@@ -159,7 +167,12 @@ export async function POST(request: NextRequest) {
       paradas: parsed.data.paradas.map((p, i) => ({ ...p, id: String(i), referencias: p.referencias ?? "" })),
     };
     const rutaRecalculada = await resolverRutaSolicitudServidor(parsed.data);
-    const payload = construirPayloadCreacion(formulario, parsed.data.vehiculoSeleccionadoId, rutaRecalculada);
+    const payload = construirPayloadCreacion(
+      formulario,
+      parsed.data.vehiculoSeleccionadoId,
+      rutaRecalculada,
+      parsed.data.zonaHoraria
+    );
     const solicitud = await cotizarSolicitudIndividual(user.id, payload);
     const snapshot = solicitud.traslado.snapshot_tarifa as { monto: number };
     const montoCalculado = snapshot.monto;
@@ -219,6 +232,14 @@ export async function POST(request: NextRequest) {
   } catch (err) {
     if (err instanceof RutaNoDisponibleError) {
       return NextResponse.json({ error: err.message }, { status: 503 });
+    }
+    // Las validaciones de negocio de la base (RAISE EXCEPTION → código P0001)
+    // traen un mensaje pensado para el usuario: se devuelve tal cual con 422
+    // en vez de esconderlo detrás de un 500 genérico.
+    const mensajeNegocio = mensajeErrorNegocioBase(err);
+    if (mensajeNegocio) {
+      console.warn("[api/viajes] rechazo de negocio", mensajeNegocio);
+      return NextResponse.json({ error: mensajeNegocio }, { status: 422 });
     }
     console.warn("[api/viajes] error", err);
     return NextResponse.json({ error: "No se pudo procesar la solicitud. Intenta de nuevo más tarde." }, { status: 500 });
