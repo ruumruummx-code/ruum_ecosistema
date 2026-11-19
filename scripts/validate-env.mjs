@@ -79,8 +79,13 @@ if (hostedBuild && ["app-usuario", "workspace"].includes(app)) {
   if (!modoPublico || modoPublico !== modoPrivado) {
     invalid.push("Las claves Stripe pública y privada deben ser del mismo modo (test o live)");
   }
-  if (process.env.VERCEL_ENV === "production" && modoPrivado !== "live") {
-    invalid.push("Stripe debe usar claves live en producción de Vercel");
+  if (process.env.VERCEL_ENV === "production") {
+    const modoProduccion = valor("RUUM_STRIPE_MODE") || "live";
+    if (modoProduccion !== "test" && modoProduccion !== "live") {
+      invalid.push("RUUM_STRIPE_MODE debe ser test o live");
+    } else if (modoPrivado !== modoProduccion) {
+      invalid.push(`Stripe debe usar claves ${modoProduccion} en producción de Vercel. Para usar un sandbox, configura RUUM_STRIPE_MODE=test y las claves de ese sandbox.`);
+    }
   }
   if (process.env.VERCEL_ENV === "preview" && modoPrivado !== "test") {
     invalid.push("Stripe debe usar claves test en Vercel Preview");
