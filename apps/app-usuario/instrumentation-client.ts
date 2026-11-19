@@ -1,16 +1,11 @@
-import * as Sentry from "@sentry/nextjs";
-import {
-  resolverConfigSentryUsuario,
-  sanitizarEventoSentry,
-} from "./src/lib/sentry-alerts";
-/**
- * P1 — Sentry client para app-usuario (activado solo si NEXT_PUBLIC_SENTRY_DSN está definido).
- * Carga perezosa para no romper build cuando @sentry/nextjs aún no está instalado o en dev.
- */
-const config = resolverConfigSentryUsuario();
-if (config.enabled) {
-  import("@sentry/nextjs")
-    .then((Sentry) =>
+type CapturarTransicion = typeof import("@sentry/nextjs").captureRouterTransitionStart;
+
+let capturarTransicion: CapturarTransicion | undefined;
+
+if (process.env.NEXT_PUBLIC_SENTRY_DSN?.trim()) {
+  void Promise.all([import("@sentry/nextjs"), import("./src/lib/sentry-alerts")])
+    .then(([Sentry, { resolverConfigSentryUsuario, sanitizarEventoSentry }]) => {
+      const config = resolverConfigSentryUsuario();
       Sentry.init({
         dsn: config.dsn,
         environment: config.environment,
@@ -29,11 +24,14 @@ if (config.enabled) {
         beforeSend(event) {
           return sanitizarEventoSentry(event);
         },
-      })
-    )
+      });
+      capturarTransicion = Sentry.captureRouterTransitionStart;
+    })
     .catch(() => {
       // @sentry/nextjs no instalado o no-op — ignorar
     });
 }
 
-export const onRouterTransitionStart = Sentry.captureRouterTransitionStart;
+export function onRouterTransitionStart(...args: Parameters<CapturarTransicion>) {
+  capturarTransicion?.(...args);
+}

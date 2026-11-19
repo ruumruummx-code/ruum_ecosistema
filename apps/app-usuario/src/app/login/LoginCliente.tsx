@@ -45,7 +45,7 @@ function IconoCandado({ className = "size-4.5 text-[#566889] dark:text-[#8293b0]
 function IconoOjo() {
   return (
     <svg className="size-4.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <path d="M2.5 12s2.7-5.5 9.5-5.5 9.5 5.5 9.5 5.5-2.7 5.5-9.5 5.5-9.5-5.5Z" />
+      <path d="M2.5 12Q6 6.5 12 6.5T21.5 12Q18 17.5 12 17.5T2.5 12Z" />
       <circle cx="12" cy="12" r="2.4" />
     </svg>
   );
@@ -423,7 +423,6 @@ export function LoginCliente({ motivo, siguiente, aviso }: LoginClienteProps) {
             alt="Ruum Ruum"
             width={140}
             height={32}
-            priority
             className="h-8 w-auto dark:hidden"
           />
           <Image
@@ -431,7 +430,6 @@ export function LoginCliente({ motivo, siguiente, aviso }: LoginClienteProps) {
             alt="Ruum Ruum"
             width={140}
             height={32}
-            priority
             className="h-8 w-auto hidden dark:block"
           />
         </Link>
@@ -719,13 +717,13 @@ export function LoginCliente({ motivo, siguiente, aviso }: LoginClienteProps) {
             <div className="flex flex-col gap-1 text-center text-[12.5px] font-medium text-[#4e5f80] dark:text-[#a8b5cc] sm:gap-1.5 sm:text-[13px]">
               <p>
                 ¿No tienes cuenta?{" "}
-                <Link href="/registro" className="font-bold user-essential-link hover:underline">
+                <Link href="/registro" prefetch={false} className="font-bold user-essential-link hover:underline">
                   Regístrate gratis
                 </Link>
               </p>
               <p className="text-[12px] sm:text-[12.5px]">
                 ¿Primera vez aquí?{" "}
-                <Link href="/onboarding" className="font-bold user-essential-link hover:underline">
+                <Link href="/onboarding" prefetch={false} className="font-bold user-essential-link hover:underline">
                   Conoce cómo funciona Ruum
                 </Link>
               </p>
@@ -755,11 +753,11 @@ export function LoginCliente({ motivo, siguiente, aviso }: LoginClienteProps) {
           {/* Términos y privacidad */}
           <p className="mt-2.5 pb-0.5 text-center text-[10.5px] font-medium leading-relaxed user-essential-muted sm:text-[11px]">
             Al continuar, aceptas nuestros{" "}
-            <Link href="/legal/terminos" className="font-semibold user-essential-link hover:underline">
+            <Link href="/legal/terminos" prefetch={false} className="font-semibold user-essential-link hover:underline">
               Términos y condiciones
             </Link>{" "}
             y{" "}
-            <Link href="/legal/privacidad" className="font-semibold user-essential-link hover:underline">
+            <Link href="/legal/privacidad" prefetch={false} className="font-semibold user-essential-link hover:underline">
               Aviso de privacidad
             </Link>
           </p>

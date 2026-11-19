@@ -112,7 +112,7 @@ export function registrarEventoUx(evento: EventoUxUsuario, propiedades: Propieda
   // A3: antes leía window.Sentry, que no es un global del SDK (@sentry/nextjs
   // v10 no lo expone): siempre era no-op aunque Sentry estuviera inicializado.
   // Se usa el SDK directamente con import dinámico para no crecer el chunk inicial.
-  if (!process.env.VITEST) {
+  if (!process.env.VITEST && process.env.NEXT_PUBLIC_SENTRY_DSN?.trim()) {
     try {
       void import("@sentry/nextjs")
         .then((Sentry) => Sentry.addBreadcrumb?.({ category: "ux", message: evento, data: base, level: "info" }))
