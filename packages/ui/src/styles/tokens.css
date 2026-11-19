@@ -144,6 +144,15 @@
   color-scheme: light;
 
   /* Design System v1.0 — Libro de Marca V2.1 cap. 13/26. Fuente: design-system/tokens/tokens.json */
+  --ruum-login-canvas: #f4f7fa;
+  --ruum-login-paper: #ffffff;
+  --ruum-login-muted: #495d7d;
+  --ruum-login-blue: #0052d4;
+  --ruum-login-blue-mid: #0066a4;
+  --ruum-login-sky: #00a8ff;
+  --ruum-login-cyan: #00d2ff;
+  --ruum-login-night: #0a192f;
+  --ruum-login-navy: #112240;
   --ruum-navy: #0a2342;
   --ruum-teal: #00d1d1;
   --ruum-teal-deep: #007575;

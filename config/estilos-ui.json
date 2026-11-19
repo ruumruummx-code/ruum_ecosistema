@@ -6,6 +6,7 @@
   ],
   "migradas": [
     "packages/ui/src/base",
+    "apps/app-usuario/src/app/login",
     "apps/app-usuario/src/app/mis-viajes"
   ],
   "excluir": [
@@ -41,13 +42,12 @@
     "apps/app-usuario/src/app/error.tsx": 3,
     "apps/app-usuario/src/app/FormularioPropuestaEmpresa.tsx": 8,
     "apps/app-usuario/src/app/global-error.tsx": 6,
-    "apps/app-usuario/src/app/globals.css": 386,
+    "apps/app-usuario/src/app/globals.css": 364,
     "apps/app-usuario/src/app/InicioMobile.tsx": 18,
     "apps/app-usuario/src/app/InicioUsuario.css": 89,
     "apps/app-usuario/src/app/layout.tsx": 2,
     "apps/app-usuario/src/app/legal/privacidad/page.tsx": 57,
     "apps/app-usuario/src/app/legal/terminos/page.tsx": 25,
-    "apps/app-usuario/src/app/login/LoginCliente.tsx": 223,
     "apps/app-usuario/src/app/manifest.ts": 2,
     "apps/app-usuario/src/app/NavegacionUsuario.tsx": 40,
     "apps/app-usuario/src/app/nueva-password/page.tsx": 133,

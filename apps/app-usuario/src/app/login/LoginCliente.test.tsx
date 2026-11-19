@@ -1,6 +1,4 @@
 /** @vitest-environment jsdom */
-import fs from "node:fs";
-import path from "node:path";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { cleanup, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
@@ -16,6 +14,7 @@ vi.mock("../../lib/supabase-browser", () => ({
 describe("LoginCliente", () => {
   beforeEach(() => {
     cleanup();
+    localStorage.clear();
     vi.clearAllMocks();
     mocks.fetch.mockResolvedValue(new Response(JSON.stringify({ ok: true }), { status: 200 }));
     vi.stubGlobal("fetch", mocks.fetch);
@@ -25,7 +24,7 @@ describe("LoginCliente", () => {
     const user = userEvent.setup();
     render(<LoginCliente motivo={null} siguiente="/" />);
     const correo = screen.getByRole("textbox", { name: "Correo electrónico" });
-    await user.click(screen.getByRole("button", { name: "Iniciar sesión" }));
+    await user.click(screen.getByRole("button", { name: "Ingresar" }));
     expect(correo).toHaveFocus();
     expect(correo).toHaveAttribute("aria-invalid", "true");
     expect(mocks.fetch).not.toHaveBeenCalled();
@@ -35,7 +34,7 @@ describe("LoginCliente", () => {
     await user.type(correo, "Persona@ejemplo.com");
     expect(correo).toHaveAttribute("aria-invalid", "false");
     await user.type(screen.getByLabelText(/^Contraseña/, { selector: "input" }), "clave-existente");
-    await user.click(screen.getByRole("button", { name: "Iniciar sesión" }));
+    await user.click(screen.getByRole("button", { name: "Ingresar" }));
     await waitFor(() => expect(mocks.push).toHaveBeenCalledWith("/"));
     expect(mocks.fetch).toHaveBeenCalledWith("/api/auth/login", expect.objectContaining({ method: "POST" }));
     expect(JSON.parse(mocks.fetch.mock.calls[0][1].body)).toMatchObject({ email: "persona@ejemplo.com", password: "clave-existente" });
@@ -59,48 +58,39 @@ describe("LoginCliente", () => {
     render(<LoginCliente motivo="authentication_required" siguiente="/viajes/nuevo" />);
     await user.type(screen.getByRole("textbox", { name: "Correo electrónico" }), "usuario@ejemplo.com");
     await user.type(screen.getByLabelText(/^Contraseña/, { selector: "input" }), "clave-existente");
-    await user.click(screen.getByRole("button", { name: "Iniciar sesión" }));
+    await user.click(screen.getByRole("button", { name: "Ingresar" }));
     await waitFor(() => expect(mocks.push).toHaveBeenCalledWith("/viajes/nuevo"));
     expect(mocks.refresh).toHaveBeenCalled();
   });
 
-  it("cumple estrictamente con el enfoque mobile-first y no-scroll (100dvh y overflow: hidden)", () => {
-    const { container } = render(<LoginCliente motivo={null} siguiente="/" />);
-
-    // El contenedor principal debe implementar 100dvh (Dynamic Viewport Height) y overflow: hidden
-    const mainContainer = container.querySelector("main");
-    expect(mainContainer).not.toBeNull();
-    expect(mainContainer?.className).toContain("h-dvh");
-    expect(mainContainer?.className).toContain("overflow-hidden");
-    expect(mainContainer?.className).toContain("login-usuario");
-    expect(mainContainer?.className).toContain("login-container");
-
-    // Prohibido usar 100vh
-    expect(mainContainer?.className).not.toContain("100vh");
-    expect(mainContainer?.style.height).not.toBe("100vh");
-
-    // El logotipo debe definirse reducido por defecto en móvil (h-9 / 36px) y escalar en escritorio (md:h-16 / 64px)
-    const logoContainer = container.querySelector(".login-usuario__brand");
-    expect(logoContainer).not.toBeNull();
-    expect(logoContainer?.className).toContain("login-logo");
-    expect(logoContainer?.className).toContain("h-9");
-    expect(logoContainer?.className).toContain("md:h-16");
-    expect(logoContainer?.className).toContain("w-auto");
+  it("muestra Torre de Control y sus rutas de recuperación y acceso", () => {
+    render(<LoginCliente motivo={null} siguiente="/" />);
+    expect(screen.getByRole("heading", { name: "Movilidad que conecta operaciones" })).toBeInTheDocument();
+    for (const texto of ["Traslados", "Documentación", "Pagos", "Incidencias y alertas"]) {
+      expect(screen.getByText(texto)).toBeInTheDocument();
+    }
+    expect(screen.getByRole("heading", { name: "Bienvenido" })).toBeInTheDocument();
+    expect(screen.getByRole("combobox", { name: "Idioma" })).toHaveValue("es");
+    expect(screen.getByRole("link", { name: "¿Olvidaste tu contraseña?" })).toHaveAttribute("href", "/recuperar-password");
+    expect(screen.getByRole("link", { name: "Solicita acceso" })).toHaveAttribute("href", "/registro");
   });
 
-  it("valida que la hoja de estilos globals.css contenga las reglas base mobile-first y media query de escritorio", () => {
-    const cssPath = path.resolve(__dirname, "../globals.css");
-    const cssContent = fs.readFileSync(cssPath, "utf-8");
+  it("recuerda únicamente el correo y lo elimina al desmarcar la casilla", async () => {
+    const user = userEvent.setup();
+    const vista = render(<LoginCliente motivo={null} siguiente="/" />);
+    await user.type(screen.getByLabelText("Correo electrónico"), "Persona@ejemplo.com");
+    await user.type(screen.getByLabelText("Contraseña"), "clave-existente");
+    await user.click(screen.getByRole("checkbox", { name: "Recordarme en este dispositivo" }));
+    await user.click(screen.getByRole("button", { name: "Ingresar" }));
+    await waitFor(() => expect(mocks.push).toHaveBeenCalled());
+    vista.unmount();
 
-    // Contención 100dvh y overflow: hidden sin usar 100vh
-    expect(cssContent).toMatch(/\.login-usuario[\s\S]*?height:\s*100dvh;/);
-    expect(cssContent).toMatch(/\.login-usuario[\s\S]*?overflow:\s*hidden;/);
-    expect(cssContent).not.toMatch(/\.login-usuario[\s\S]*?height:\s*100vh;/);
-
-    // Enfoque Mobile-First obligatorio: estilos base con logo reducido por defecto (36px)
-    expect(cssContent).toMatch(/\.login-usuario__brand[\s\S]*?height:\s*36px/);
-
-    // Adaptación a Escritorio: media query incremental (min-width: 768px)
-    expect(cssContent).toMatch(/@media\s*\(\s*min-width:\s*768px\s*\)[\s\S]*?\.login-usuario__brand[\s\S]*?height:\s*64px/);
+    render(<LoginCliente motivo={null} siguiente="/" />);
+    expect(screen.getByLabelText("Correo electrónico")).toHaveValue("persona@ejemplo.com");
+    expect(screen.getByLabelText("Contraseña")).toHaveValue("");
+    const casilla = screen.getByRole("checkbox", { name: "Recordarme en este dispositivo" });
+    expect(casilla).toBeChecked();
+    await user.click(casilla);
+    expect(localStorage.getItem("ruum-login-correo")).toBeNull();
   });
 });

@@ -1,0 +1,330 @@
+.pagina {
+  --ui-bg: var(--ruum-login-canvas);
+  --ui-card: var(--ruum-login-paper);
+  --ui-fg: var(--ruum-navy);
+  --ui-fg-muted: var(--ruum-login-muted);
+  --ui-muted: color-mix(in oklab, var(--ui-bg) 80%, var(--ui-card));
+  --ui-brand: var(--ruum-login-blue);
+  --ui-on-brand: var(--ruum-login-paper);
+  --ui-line: color-mix(in oklab, var(--ui-fg) 19%, transparent);
+  --ui-field: color-mix(in oklab, var(--ui-fg) 42%, var(--ui-card));
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  overflow: clip;
+  color-scheme: light;
+  color: var(--ui-fg);
+  background: var(--ui-bg);
+}
+
+:global(#contenido-principal) > .pagina {
+  min-height: 100dvh;
+}
+
+.pagina input,
+.pagina select {
+  color-scheme: light;
+}
+
+.pagina input::placeholder {
+  color: var(--ui-fg-muted);
+}
+
+.pagina input[type="checkbox"] {
+  accent-color: var(--ui-brand);
+}
+
+.pagina::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  background:
+    radial-gradient(ellipse at 100% 100%, color-mix(in oklab, var(--ui-brand) 9%, transparent), transparent 53%),
+    radial-gradient(ellipse at 0% -15%, transparent 54%, color-mix(in oklab, var(--ui-brand) 6%, transparent) 54% 63%, transparent 74%);
+}
+
+.marca,
+.idioma,
+.pie {
+  display: none;
+}
+
+.panel {
+  position: relative;
+  display: grid;
+  align-items: center;
+  justify-items: center;
+  min-width: 0;
+  padding: 1rem;
+}
+
+.tarjeta {
+  display: grid;
+  gap: clamp(0.875rem, 2.25dvh, 1.5rem);
+  width: min(100%, 30rem);
+  padding: clamp(1.25rem, 4vw, 2.5rem);
+  border: 0;
+  border-radius: 1.5rem;
+  box-shadow: 0 1.25rem 2.5rem color-mix(in oklab, var(--ui-fg) 8%, transparent);
+}
+
+.logo,
+.logoTarjeta {
+  position: relative;
+  height: auto;
+  max-width: 100%;
+}
+
+.logo img,
+.logoTarjeta img {
+  width: 100%;
+  height: auto;
+}
+
+.logo span,
+.logoTarjeta span {
+  position: absolute;
+  top: 76%;
+  left: 41%;
+  white-space: nowrap;
+  font-size: clamp(0.75rem, 1.12vw, 0.82rem);
+  letter-spacing: 0.025em;
+}
+
+.logoTarjeta span {
+  color: var(--ui-fg-muted);
+}
+
+.logoTarjeta {
+  justify-self: center;
+  width: min(88%, 16.25rem);
+  margin-bottom: clamp(0.25rem, 1.5dvh, 1rem);
+}
+
+.ingresar {
+  position: relative;
+  min-height: 3.25rem;
+  border-radius: 0.75rem;
+  background: linear-gradient(90deg, var(--ui-brand), var(--ruum-login-blue-mid) 59%, var(--ruum-login-sky));
+  box-shadow: 0 0.4rem 0.9rem color-mix(in oklab, var(--ui-brand) 20%, transparent);
+}
+
+.ingresar:hover:not(:disabled) {
+  filter: brightness(0.92);
+}
+
+.ingresar svg {
+  position: absolute;
+  right: 1rem;
+}
+
+.separador {
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+  color: var(--ui-fg-muted);
+  font-size: 0.875rem;
+}
+
+.separador::before,
+.separador::after {
+  content: "";
+  flex: 1;
+  border-top: 1px solid var(--ui-line);
+}
+
+.acceso {
+  margin-top: clamp(0.5rem, 4dvh, 2.5rem);
+  text-align: center;
+  color: var(--ui-fg-muted);
+  font-size: 0.875rem;
+}
+
+.acceso a {
+  margin-inline-start: 0.375rem;
+}
+
+@media (min-width: 768px) {
+  .pagina {
+    grid-template-columns: 45% minmax(0, 1fr);
+  }
+
+  .marca {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 1.5rem;
+    padding: clamp(1.5rem, 6dvh, 4.5rem) 4vw clamp(1.5rem, 6dvh, 4.5rem) clamp(2rem, 6.25vw, 7rem);
+    color: var(--ui-on-brand);
+  }
+
+  .foto,
+  .conexiones {
+    position: absolute;
+    z-index: -1;
+    inset: 0 -26% 0 0;
+    clip-path: polygon(0 0, 100% 0, 55% 100%, 0 100%);
+    clip-path: shape(from 0 0, line to 94% 0, curve to 99% 6% with 99% 0 / 101% 2%, line to 59% 94%, curve to 47% 100% with 56% 99% / 51% 100%, line to 0 100%, close);
+  }
+
+  .foto {
+    background:
+      linear-gradient(110deg, color-mix(in oklab, var(--ruum-login-night) 87%, transparent), color-mix(in oklab, var(--ruum-login-navy) 60%, transparent)),
+      linear-gradient(0deg, var(--ruum-login-night), transparent 68%),
+      url("/imagenes/login-autoport.webp") 10% center / cover no-repeat;
+  }
+
+  .conexiones {
+    opacity: 0.45;
+    background:
+      radial-gradient(circle at 30% 77%, var(--ruum-login-cyan) 0 1px, transparent 8px),
+      radial-gradient(circle at 60% 65%, var(--ruum-login-cyan) 0 1px, transparent 7px),
+      radial-gradient(circle at 54% 84%, var(--ruum-login-cyan) 0 1px, transparent 6px),
+      linear-gradient(144deg, transparent 57%, color-mix(in oklab, var(--ruum-login-cyan) 26%, transparent) 57.1%, transparent 57.3%);
+  }
+
+  .logo {
+    width: clamp(10rem, 23vw, 15.375rem);
+  }
+
+  .propuesta h1 {
+    font-size: clamp(1.875rem, min(4.4vw, 6dvh), 3.75rem);
+    line-height: 1.045;
+    color: inherit;
+  }
+
+  .propuesta h1 span {
+    color: var(--ruum-login-cyan);
+  }
+
+  .propuesta > p {
+    margin-top: clamp(0.75rem, 2.2dvh, 1.5rem);
+    max-width: 22rem;
+    color: color-mix(in oklab, var(--ui-on-brand) 84%, transparent);
+    font-size: clamp(1rem, 2vw, 1.375rem);
+    line-height: 1.3;
+  }
+
+  .beneficios {
+    display: grid;
+    gap: clamp(0.5rem, 1.8dvh, 1.15rem);
+    margin-top: clamp(1rem, 4dvh, 3rem);
+  }
+
+  .beneficios li {
+    display: flex;
+    align-items: center;
+    gap: clamp(0.625rem, 2vw, 1.5rem);
+    line-height: 1.35;
+  }
+
+  .icono {
+    display: grid;
+    flex: none;
+    place-items: center;
+    width: clamp(2.25rem, 5.85dvh, 3.625rem);
+    aspect-ratio: 1;
+    border-radius: 50%;
+    background: color-mix(in oklab, var(--ruum-login-sky) 25%, transparent);
+  }
+
+  .icono svg {
+    width: 47%;
+    height: 47%;
+  }
+
+  .lema,
+  .pie {
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    line-height: 1.55;
+  }
+
+  .lema::before {
+    content: "";
+    display: block;
+    width: 4.75rem;
+    height: 0.2rem;
+    margin-bottom: 0.875rem;
+    border-radius: 0.1rem;
+    background: var(--ruum-login-cyan);
+  }
+
+  .panel {
+    grid-template-rows: auto 1fr auto;
+    padding: clamp(1rem, 3.25dvh, 2.75rem) clamp(1.25rem, 3.5vw, 5rem);
+    gap: clamp(0.75rem, 2dvh, 1.5rem);
+  }
+
+  .idioma {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-self: end;
+  }
+
+  .idioma select {
+    min-height: 2.5rem;
+    height: 2.5rem;
+    border-radius: 0.5rem;
+    font-size: 0.875rem;
+    box-shadow: none;
+  }
+
+  .idioma svg {
+    position: absolute;
+    pointer-events: none;
+  }
+
+  .idioma svg:first-child {
+    left: 0.45rem;
+  }
+
+  .idioma svg:last-child {
+    right: 0.35rem;
+  }
+
+  .pie {
+    display: block;
+    justify-self: end;
+    color: var(--ui-fg-muted);
+    text-align: right;
+  }
+}
+
+@media (min-width: 768px) and (max-height: 820px) {
+  .panel {
+    padding-block: 1rem;
+    gap: 0.5rem;
+  }
+
+  .tarjeta form {
+    gap: 0.75rem;
+  }
+  .tarjeta {
+    padding-block: 1.25rem;
+    gap: 0.875rem;
+  }
+
+  .acceso {
+    margin-top: 0.5rem;
+  }
+}
+@media (min-width: 960px) and (min-height: 940px) {
+  .tarjeta {
+    padding-block: 3.75rem;
+    gap: 1.875rem;
+  }
+
+  .acceso {
+    margin-top: 3rem;
+  }
+}
+@media (min-width: 768px) and (max-width: 959px) {
+  .lema {
+    max-width: 12rem;
+  }
+}
