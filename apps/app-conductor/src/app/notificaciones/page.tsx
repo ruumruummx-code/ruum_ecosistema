@@ -2,7 +2,6 @@
 import { ConductorScreen } from "../components/ConductorScreen";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { listarNotificacionesConductor, marcarNotificacionLeida, type NotificacionConductor } from "@ruum/api/drivers";
@@ -93,10 +92,7 @@ export default function CentroNotificaciones() {
 
   return (
     <ConductorScreen variant="list" label="Avisos del conductor" header={<>
-      <header className={styles.appBar}>
-        <Link href="/panel" aria-label="Ruum Ruum, inicio" className={styles.brand}><Image src="/imagenes/ruum-logo.svg" alt="Ruum Ruum" width={170} height={55} priority /></Link>
-        <Link href="/cuenta" className={styles.profile} aria-label="Abrir cuenta"><svg width="27" height="27" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round"><circle cx="12" cy="8" r="3.6" /><path d="M4.5 20c0-3.7 3.3-6.2 7.5-6.2s7.5 2.5 7.5 6.2" /></svg></Link>
-      </header>
+
 
 
         <section className={styles.heading} aria-labelledby="titulo-notificaciones">

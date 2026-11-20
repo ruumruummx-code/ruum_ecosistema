@@ -83,6 +83,7 @@
 }
 
 @theme inline {
+  --background-image-ui-header-wave: linear-gradient(to bottom right, var(--ruum-teal), var(--ruum-navy));
   --color-ui-bg: var(--ui-bg);
   --color-ui-card: var(--ui-card);
   --color-ui-muted: var(--ui-muted);

@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import Image from "next/image";
 import Link from "next/link";
 import type { DatosGananciasConductor } from "@ruum/api/services";
 import { CONTACTOS_SOPORTE_CONDUCTOR } from "../../lib/contactos-soporte";
@@ -28,11 +27,7 @@ export function DriverEarningsView({ data, summary, period, onPeriod, loading, e
   const bank = data?.datosBancarios;
   const bankStatus = bank ? bank.estado === "verificada" ? `Cuenta verificada: ${bank.banco} · terminación ${bank.clabe.slice(-4)}.` : bank.estado === "en_revision" ? "Tus datos bancarios están en revisión." : "Tus datos bancarios requieren corrección." : "Registra tus datos bancarios para recibir depósitos.";
   return <div className={styles.screen} data-driver-earnings>
-    <header className={styles.header}>
-      <Link href="/panel" prefetch={false}>‹ Atrás</Link>
-      <Image src="/imagenes/ruum-logo.svg" alt="Ruum Ruum" width={150} height={49} priority />
-      <Link href="/notificaciones" prefetch={false} className={styles.bell} aria-label="Notificaciones"><Icon name="bell" /><i aria-hidden="true" /></Link>
-    </header>
+    <Link href="/panel" prefetch={false} className="inline-flex min-h-11 items-center text-sm text-ui-fg">‹ Atrás</Link>
     <div className={styles.heading}><h1>Mis ganancias</h1><p>Aquí puedes ver tus ingresos y pagos</p></div>
     <div className={styles.tabs} role="group" aria-label="Periodo de ganancias">
       {([['semana', 'Esta semana'], ['mes', 'Este mes']] as const).map(([id, label]) => <button key={id}  type="button"  aria-pressed={period === id}  onClick={() => onPeriod(id)}>{label}</button>)}

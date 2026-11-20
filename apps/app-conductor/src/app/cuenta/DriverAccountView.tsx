@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import Image from "next/image";
 import Link from "next/link";
+import { Button } from "@ruum/ui/base";
 import type { GlobalSyncSnapshot } from "../../lib/offline-sync-status";
 import { AccountIcon, type AccountIconName } from "./AccountIcon";
 import styles from "./account.module.css";
@@ -27,14 +27,9 @@ export function DriverAccountView(props: Props) {
   const syncText = syncOK ? "Sincronizado — todo al día" : props.sync?.message ?? "Comprobando sincronización…";
   return <div className={styles.screen} data-driver-account>
     <div className={styles.body}>
-      <header className={styles.header}>
-        <Link href="/panel" prefetch={false} className={styles.brand} aria-label="Ruum Ruum Driver Service, inicio"><Image src="/imagenes/ruum-logo.svg" alt="Ruum Ruum" width={170} height={55} priority /><span>DRIVER SERVICE</span></Link>
-        <div className={styles.quickActions}>
-          <Link href="/notificaciones" prefetch={false} aria-label={props.unread ? `Notificaciones (${props.unread} sin leer)` : "Notificaciones"}><AccountIcon name="bell" />{props.unread > 0 && <i className={styles.notificationDot} aria-hidden="true" />}</Link>
-          <Link href="/cuenta/soporte" prefetch={false} aria-label="Soporte"><AccountIcon name="support" /></Link>
-          <button type="button" aria-label="Opciones de cuenta" aria-haspopup="dialog" aria-expanded={openDialog === "settings"} aria-busy={props.loading} onClick={() => setOpenDialog("settings")}>{props.initials ?? <AccountIcon name="user" />}</button>
-        </div>
-      </header>
+      <div className="flex justify-end">
+        <Button variant="outline" type="button" aria-label="Opciones de cuenta" aria-haspopup="dialog" aria-expanded={openDialog === "settings"} aria-busy={props.loading} onClick={() => setOpenDialog("settings")} className="min-h-11 rounded-full border border-ui-line bg-ui-card px-4 text-sm text-ui-fg">Ajustes de cuenta</Button>
+      </div>
       <div className={styles.heading}><h1>Cuenta</h1><p>Administra tu información y configuración</p></div>
       {props.sync?.status !== "accion_requerida" && <div className={styles.sync} role="status" aria-live="polite" aria-atomic="true" data-state={props.sync?.status ?? "loading"}>
         {syncOK ? <AccountIcon name="check" /> : <span aria-hidden="true">{props.sync ? "!" : "…"}</span>}<span>{syncText}</span>

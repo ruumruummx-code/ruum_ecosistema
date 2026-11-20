@@ -4,6 +4,8 @@ import { TextInputUppercaseBridge } from "@ruum/ui";
 import "./globals.css";
 import "./shell-contract.css";
 import "./conductor-theme.css";
+import "./header-shell.css";
+import { ConductorHeader } from "./components/ConductorHeader";
 import { ConductorShellBridge } from "./components/ConductorShellBridge";
 import { NavegacionConductor } from "./NavegacionConductor";
 import { ViajeActivoProvider } from "./ViajeActivoContext";
@@ -54,6 +56,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             <ViajeActivoProvider>
               <SincronizadorEvidenciaOffline />
               <ConductorShellBridge />
+              <ConductorHeader />
               <NavegacionConductor />
               <ModoCalleActivador />
               <EstadoSincronizacionGlobal />

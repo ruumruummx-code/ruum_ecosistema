@@ -34,10 +34,7 @@ export function DriverTrasladosView(props: Props) {
 
         </div>
         <div className={styles.quickActions}>
-          {viajeActivo ? <EmergencyPanel trasladoId={viajeActivo.trasladoId} compact headerPill pillLabel="SOS" /> : <>
-          <button type="button" aria-label="Ayuda y soporte rápido" onClick={props.onHelp}>?</button>
-          <Link href="/notificaciones" aria-label={props.notifications ? `Notificaciones (${props.notifications} sin leer)` : "Notificaciones"} prefetch={false}><TrasladosIcon name="bell" />{props.notifications > 0 && <span className={styles.notificationDot} />}</Link>
-          </>}
+          {viajeActivo && <EmergencyPanel trasladoId={viajeActivo.trasladoId} compact headerPill pillLabel="SOS" />}
         </div>
       </header>
 

@@ -1,0 +1,7 @@
+/* La marca queda fuera del scroll y del marco operativo. */
+:root { --conductor-shell-header-height: calc(61px + env(safe-area-inset-top)); }
+[data-conductor-header] { position: fixed; top: 0; inset-inline: 0; z-index: 40; background: var(--ui-card); }
+[data-conductor-header] > header { min-height: var(--conductor-shell-header-height); padding-inline: max(16px, env(safe-area-inset-left)) max(16px, env(safe-area-inset-right)); }
+body.conductor-v2-shell { padding-top: var(--conductor-shell-header-height); }
+.conductor-safe-content:has(> [data-driver-traslados], > [data-driver-account], > [data-driver-earnings], > .driver-dashboard) { height: calc(100dvh - var(--conductor-shell-header-height)); }
+@media (min-width: 640px) { [data-conductor-header] .ruum-header__inner { max-width: 72rem; margin-inline: auto; } }

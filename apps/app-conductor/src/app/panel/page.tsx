@@ -4,7 +4,6 @@ import { useState, useEffect } from "react";
 import styles from "./panel.module.css";
 import Link from "next/link";
 import { ConductorDialog } from "../components/ConductorDialog";
-import Image from "next/image";
 import { Aviso } from "@ruum/ui";
 import { ConfirmarDisponibilidad } from "../ConfirmarDisponibilidad";
 import { RegistroViajeActivo } from "../ViajeActivoContext";
@@ -144,7 +143,6 @@ export default function PaginaPanel() {
     errorDisponibilidad,
     documentoBloqueante,
     documentoPorVencer,
-    notificacionesCount = 0,
     gananciasHoy = 0,
     trasladosHoy = 0,
     gananciasHoyEstimadas = false,
@@ -324,11 +322,8 @@ export default function PaginaPanel() {
       )}
 
       <div className={styles.frame}>
-        {/* HEADER MÓVIL (< md) */}
-        <header
-          className={styles.header}
-          aria-label="Encabezado del conductor"
-        >
+        {/* Acceso local al menú; la marca pertenece al layout compartido. */}
+        <div className="flex items-center gap-2 px-4 py-2">
           <button
             type="button"
             onClick={() => setMenuAbierto(true)}
@@ -339,41 +334,8 @@ export default function PaginaPanel() {
               <path d="M4 7h16M4 12h16M4 17h16" />
             </svg>
           </button>
-
-          <Link href="/panel" className="cursor-pointer justify-self-center" aria-label="Ruum Ruum, inicio">
-            <Image src="/imagenes/ruum-logo.svg" alt="Ruum Ruum" width={132} height={43} priority className="h-9 w-auto" />
-          </Link>
-
-          <div className="flex items-center justify-end gap-0.5">
-            <Link
-              href="/notificaciones"
-              className="relative inline-flex min-h-11 min-w-11 cursor-pointer items-center justify-center rounded-full text-[var(--conductor-primary)] transition hover:bg-surface-elevated active:scale-95 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--conductor-focus)]"
-              aria-label={
-                notificacionesCount > 0
-                  ? `Notificaciones (${notificacionesCount > 99 ? "99+" : notificacionesCount} sin leer)`
-                  : "Notificaciones"
-              }
-            >
-              <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.1" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                <path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9" />
-                <path d="M10 21h4" />
-              </svg>
-              {notificacionesCount > 0 && <span className="absolute right-2.5 top-2.5 size-2.5 rounded-full border-2 border-surface bg-[var(--conductor-error)]" aria-hidden="true" />}
-            </Link>
-            <button
-              type="button"
-              onClick={() => setSoporteAbierto(true)}
-              aria-label="Abrir soporte técnico"
-              className="inline-flex min-h-11 min-w-11 cursor-pointer items-center justify-center rounded-full text-[var(--conductor-primary)] transition hover:bg-surface-elevated active:scale-95 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--conductor-focus)]"
-            >
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                <path d="M4 13v-1a8 8 0 0 1 16 0v1" />
-                <path d="M4 13a2 2 0 0 1 2-2h1v6H6a2 2 0 0 1-2-2v-2ZM20 13a2 2 0 0 0-2-2h-1v6h1a2 2 0 0 0 2-2v-2Z" />
-                <path d="M17 19c-1.1 1.2-2.7 2-5 2" />
-              </svg>
-            </button>
-          </div>
-        </header>
+          <span className="text-sm font-semibold text-ui-fg">Menú del conductor</span>
+        </div>
 
         <div className={styles.workspace}>
           {/* ÁREA DE CONTENIDO PRINCIPAL */}

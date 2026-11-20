@@ -1,5 +1,7 @@
 @import "tailwindcss";
 @import "@ruum/ui/styles/tokens.css";
+@import "@ruum/ui/styles/base.css";
+@source "../../../../packages/ui/src";
 
 /* En expedientes y legales, el scroll pertenece a la región, nunca a la raíz. */
 html:has([data-contained-view]), html:has([data-contained-view]) body { height: 100%; overflow: hidden; }
