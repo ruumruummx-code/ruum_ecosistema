@@ -1,44 +1,54 @@
 {
-  "$schema": "https://turborepo.dev",
+  "$schema": "https://turborepo.com/schema.json",
   "ui": "stream",
+  "globalDependencies": ["tsconfig.base.json", ".npmrc"],
+  "globalEnv": ["CI", "VERCEL*"],
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
-      "outputs": [".next/**", "!.next/cache/**"],
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        "!**/*.md",
+        "!**/docs/**",
+        "!**/*.png",
+        "!**/*.svg",
+        "!**/*.pdf",
+        "!**/*.docx",
+        "!**/*.log",
+        "!**/*.zip",
+        "!android/**",
+        "!**/*.jar"
+      ],
+      "outputs": [".next/**", "!.next/cache/**", ".next-e2e/**", "dist/**"],
       "env": [
-        "NODE_ENV",
-        "VERCEL*",
-        "CI",
-        "NEXT_PUBLIC_*",
-        "SENTRY_*",
-        "CSP_STRICT_STYLES"
+        "CI", "VERCEL*", "NODE_ENV", "CSP_STRICT_STYLES",
+        "NEXT_PUBLIC_*", "SENTRY_*",
+        "PLAYWRIGHT_E2E_PRODUCCION",
+        "MAPBOX_SECRET_TOKEN",
+        "SUPABASE_SERVICE_ROLE_KEY",
+        "STRIPE_SECRET_KEY",
+        "STRIPE_WEBHOOK_SECRET",
+        "UPSTASH_REDIS_REST_URL", "UPSTASH_REDIS_REST_TOKEN",
+        "KV_REST_API_URL", "KV_REST_API_TOKEN",
+        "RUUM_STRIPE_MODE",
+        "PHONE_VERIFY_SECRET"
       ]
     },
-    "dev": {
-      "cache": false,
-      "persistent": true
-    },
-    "lint": {
-      "outputs": []
-    },
-    "typecheck": {
-      "outputs": []
-    },
-    "test": {
-      "dependsOn": ["build"],
-      "outputs": []
-    },
-    "test:unit": {
-      "dependsOn": ["^build"],
-      "outputs": []
-    },
-    "test:e2e": {
-      "cache": false,
-      "dependsOn": ["build"]
-    },
-    "test:a11y": {
-      "dependsOn": ["build"],
-      "outputs": []
-    }
+    "dev": { "cache": false, "persistent": true },
+    "lint": { "outputs": [] },
+    "typecheck": { "outputs": [] },
+    "test": { "dependsOn": [], "outputs": [] },
+    "test:unit": { "dependsOn": [], "outputs": [] },
+    "test:coverage": { "dependsOn": [], "outputs": ["coverage/**"] },
+    "test:e2e": { "cache": false, "dependsOn": ["build"] },
+    "test:e2e:ui": { "cache": false, "dependsOn": ["build"] },
+    "test:e2e:operational": { "cache": false, "dependsOn": ["build"] },
+    "test:e2e:feedback": { "cache": false, "dependsOn": ["build"] },
+    "test:e2e:scroll": { "cache": false, "dependsOn": ["build"] },
+    "test:e2e:auth": { "cache": false, "dependsOn": ["build"] },
+    "test:e2e:critical": { "cache": false, "dependsOn": ["build"] },
+    "test:smoke": { "cache": false, "dependsOn": ["build"] },
+    "test:a11y": { "dependsOn": ["build"], "outputs": [] },
+    "test:lighthouse": { "cache": false, "dependsOn": ["build"] }
   }
 }

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
-import { crearClienteServidor } from "@ruum/api/supabase";
+import { crearClienteServidor } from "@ruum/api/supabase/server-client";
 import { obtenerConductorActual, obtenerSolicitudConductorActual } from "@ruum/api/services";
 import { COOKIE_RECOVERY_CONDUCTOR, MAX_AGE_RECOVERY_S, RUTA_COOKIE_RECOVERY } from "@ruum/shared/utils";
 

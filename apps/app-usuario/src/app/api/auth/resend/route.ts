@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
-import { crearClienteServidor } from "@ruum/api/supabase";
+import { crearClienteServidor } from "@ruum/api/supabase/server-client";
 import { obtenerIp, rateLimitConVentana } from "@/lib/csp-rate-limit";
 import { normalizarCorreoRegistro } from "@/lib/registro-usuario";
 import { verificarCsrfORechazar } from "@/lib/csrf";

@@ -1,4 +1,4 @@
-import { crearClienteNavegador as crearClienteBase } from "../supabase";
+import { crearClienteNavegador as crearClienteBase } from "../supabase/browser-client";
 
 export function tieneSupabaseConfigurado(): boolean {
   return Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY);

@@ -1,3 +1,5 @@
+import "server-only";
+
 import { createServerClient, type CookieMethodsServer } from "@supabase/ssr";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@ruum/shared/types";

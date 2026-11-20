@@ -1,5 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server";
-import { crearClienteServidor } from "@ruum/api/supabase";
+import { crearClienteServidor } from "@ruum/api/supabase/server-client";
 import {
   buildCspPanel,
   HSTS_HEADER,

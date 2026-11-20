@@ -1,5 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server";
-import { crearClienteServidor } from "@ruum/api/supabase";
+import { crearClienteServidor } from "@ruum/api/supabase/server-client";
 import { verificarRolConReintentos } from "./lib/role-verification-retry";
 import {
   buildCsp,

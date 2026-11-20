@@ -2,6 +2,7 @@
   "name": "@ruum/shared",
   "version": "0.0.1",
   "private": true,
+  "sideEffects": false,
   "type": "module",
   "exports": {
     ".": "./src/index.ts",

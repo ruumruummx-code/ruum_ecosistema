@@ -4,7 +4,7 @@
   "scripts": {
     "prepare": "husky",
     "dev": "turbo run dev",
-    "build": "pnpm -r --workspace-concurrency=1 run build",
+    "build": "turbo run build",
     "lint": "turbo run lint",
     "typecheck": "turbo run typecheck",
     "typecheck:android": "pnpm -r run typecheck",
@@ -51,7 +51,7 @@
     "test:ui": "vitest --ui"
   },
   "devDependencies": {
-    "@types/node": "^22.20.5",
+    "@types/node": "^24.0.0",
     "@vitest/ui": "3.2.6",
     "dotenv": "^16.6.1",
     "husky": "^9.1.7",
@@ -66,6 +66,10 @@
     "pnpm": ">=10 <11"
   },
   "pnpm": {
+    "onlyBuiltDependencies": [
+      "@sentry/cli", "chromedriver", "core-js-pure",
+      "esbuild", "sharp", "unrs-resolver"
+    ],
     "auditConfig": {
       "ignoreGhsas": [
         "GHSA-jmr9-qjv8-65gv",
@@ -74,6 +78,7 @@
       ]
     },
     "overrides": {
+      "mapbox-gl": "3.33.0",
       "postcss": "8.5.26",
       "nanoid@3": "3.3.18",
       "fast-uri": "3.1.7",
@@ -81,7 +86,7 @@
       "proxy-addr": "2.0.8",
       "tinypool": "2.1.2",
       "webpack-dev-middleware": "7.4.6",
-      "undici": ">=8.12.2",
+      "undici": "8.12.2",
       "brace-expansion@<1.1.20": "1.1.20",
       "brace-expansion@>=2.0.0 <2.1.6": "2.1.6",
       "brace-expansion@>=4.0.0 <5.0.11": "5.0.11",
@@ -98,12 +103,8 @@
       "ip-address": "10.3.1",
       "browserslist": "4.28.7",
       "@xmldom/xmldom": "0.9.12",
-      "body-parser": ">=1.20.9",
+      "body-parser": "1.20.9",
       "zod": "4.6.6"
     }
-  },
-  "dependencies": {
-    "mapbox-gl": "^3.33.0",
-    "react-map-gl": "^8.1.3"
   }
 }

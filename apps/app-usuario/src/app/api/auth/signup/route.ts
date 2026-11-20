@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 // Import estático, igual que el resto de rutas de API (verify-otp, recovery).
 import { cookies } from "next/headers";
-import { crearClienteServidor } from "@ruum/api/supabase";
+import { crearClienteServidor } from "@ruum/api/supabase/server-client";
 import { obtenerIp, rateLimitConVentana } from "@/lib/csp-rate-limit";
 import {
   normalizarCorreoRegistro,

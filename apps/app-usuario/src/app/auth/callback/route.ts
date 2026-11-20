@@ -8,7 +8,7 @@
  */
 import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
-import { crearClienteServidor } from "@ruum/api/supabase";
+import { crearClienteServidor } from "@ruum/api/supabase/server-client";
 import { COOKIE_RECOVERY_USUARIO, destinoSeguro, MAX_AGE_RECOVERY_S, RUTA_COOKIE_RECOVERY } from "@ruum/shared/utils";
 import { logStructuredWarn } from "@/lib/logger";
 

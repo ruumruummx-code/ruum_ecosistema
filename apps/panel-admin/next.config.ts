@@ -1,7 +1,6 @@
 import type { NextConfig } from "next";
 import { withSentryConfig } from "@sentry/nextjs";
 import {
-  buildCspEstaticoPanel,
   HSTS_HEADER,
   PERMISSIONS_POLICY,
   IMAGES_REMOTE_PATTERNS,
@@ -21,12 +20,8 @@ const nextConfig: NextConfig = {
   },
   async headers() {
     const isProd = process.env.NODE_ENV === "production";
-    // Fuente única @ruum/shared/seguridad vía ./src/lib/csp.
-    // next.config es fallback estático; src/middleware.ts es autoritativo (nonce).
-    // SEC-002: prod sin 'unsafe-inline'/'unsafe-eval' en script-src.
-    const csp = buildCspEstaticoPanel(isProd);
+    // ARQ-4: la CSP con nonce la emite exclusivamente src/middleware.ts.
     const headersList: { key: string; value: string }[] = [
-      { key: "Content-Security-Policy", value: csp },
       { key: "X-Frame-Options", value: "DENY" },
       { key: "X-Content-Type-Options", value: "nosniff" },
       { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },

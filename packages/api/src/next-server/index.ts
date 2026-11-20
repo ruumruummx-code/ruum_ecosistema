@@ -1,5 +1,6 @@
+import "server-only";
 import { cookies } from "next/headers";
-import { crearClienteServidor as crearClienteBase } from "../supabase";
+import { crearClienteServidor as crearClienteBase } from "../supabase/server-client";
 
 /**
  * Cliente Supabase para Server Components y Route Handlers, leyendo la

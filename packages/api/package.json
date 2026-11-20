@@ -2,6 +2,7 @@
   "name": "@ruum/api",
   "version": "0.0.1",
   "private": true,
+  "sideEffects": false,
   "type": "module",
   "exports": {
     "./supabase": "./src/supabase/index.ts",
@@ -26,7 +27,11 @@
     "./capacitor": "./src/capacitor/index.ts",
     "./ubicacion": "./src/ubicacion/index.ts",
     "./rate-limit": "./src/rate-limit/index.ts",
-    "./health": "./src/health/index.ts"
+    "./health": "./src/health/index.ts",
+    "./supabase/server-client": "./src/supabase/server-client.ts",
+     "./supabase/browser-client": "./src/supabase/browser-client.ts",
+    "./supabase/funciones": "./src/supabase/funciones.ts"
+   
   },
   "scripts": {
     "build": "tsc --noEmit",
@@ -35,6 +40,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "server-only": "0.0.1",
     "@supabase/supabase-js": "^2.47.0",
     "@supabase/ssr": "^0.5.2",
     "@ruum/shared": "workspace:*",

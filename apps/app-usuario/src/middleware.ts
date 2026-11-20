@@ -1,5 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server";
-import { crearClienteServidor } from "@ruum/api/supabase";
+import { crearClienteServidor } from "@ruum/api/supabase/server-client";
 import { buildCspUsuario as buildCspUsuarioCanonica, headersSeguridadEstaticos, cabeceraReportToCsp, sufijoReporteCsp } from "./lib/csp";
 import { asegurarCookieCsrf, esMetodoMutacion, verificarCsrfORechazar } from "./lib/csrf";
 import {

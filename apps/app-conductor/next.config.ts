@@ -33,13 +33,9 @@ const nextConfig: NextConfig = {
   async headers() {
     const isProd = process.env.NODE_ENV === "production";
     const isStaging = process.env.NEXT_PUBLIC_RUUM_AMBIENTE === "staging";
-    // P2 CSP — prod sin unsafe-eval, dev con unsafe-eval para HMR
-    // SEC-002 (P1): next.config es fallback para requests sin middleware (estáticos/_next).
-    // Middleware (src/middleware.ts) es autoritativo y genera nonce por request.
-    // Fuente única: @ruum/shared/seguridad (buildCsp/buildCspEstatico/CSP_PRESETS).
-    // Ver CSP_DEUDA_P2.md y scripts/assert-csp.mjs — CI bloquea si el fallback
-    // reintroduce unsafe-eval o unsafe-inline en script-src de prod.
-    // SEC-003: CSP_STRICT_STYLES=true elimina unsafe-inline de style-src (validación 2026-11-01)
+    // ARQ-4: la CSP con nonce la emite exclusivamente src/middleware.ts.
+    // Emitir aquí una CSP estática (sin nonce) rompe el bundle en producción.
+    // La política estática solo se conserva para Report-Only en staging.
     const cspProd = buildCspEstatico(true, CSP_PRESETS.conductor);
     // cspDev mantiene unsafe-inline/unsafe-eval para HMR (solo non-prod)
     const cspDev = buildCspEstatico(false, CSP_PRESETS.conductor);
@@ -50,7 +46,6 @@ const nextConfig: NextConfig = {
       { key: "X-Content-Type-Options", value: "nosniff" },
       { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
       { key: "Permissions-Policy", value: PERMISSIONS_POLICY },
-      { key: "Content-Security-Policy", value: csp }
     ];
     // Report-Only en staging para validar sin romper
     if (isStaging) {
