@@ -1,4 +1,5 @@
 "use client";
+import { Button as BaseButton } from "@ruum/ui/base";
 import { ConductorScreen, ConductorPageHeader } from "../../components/ConductorScreen";
 
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -9,7 +10,18 @@ import type { Database } from "@ruum/shared/types";
 import { crearClienteNavegador } from "@/lib/supabase-browser";
 import { CuentaHeader } from "../CuentaHeader";
 import { cargarConductorCuenta, type ConductorCuenta } from "../cuenta-utils";
-import { MobileRow, Tabs } from "@ruum/ui";
+import { Card, Tabs, TabsList, TabsTrigger, TabsContent } from "@ruum/ui/base";
+import type { ReactNode } from "react";
+
+function PreferenceRow({ titulo, subtitulo, icono, derecha, disabled }: {
+  titulo: ReactNode; subtitulo?: ReactNode; icono?: ReactNode; derecha?: ReactNode; disabled?: boolean;
+}) {
+  return <Card className="flex items-center gap-3 p-3" aria-disabled={disabled || undefined}>
+    <span aria-hidden="true" className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-ui-brand-soft text-ui-brand-soft-fg">{icono}</span>
+    <span className="min-w-0 flex-1"><span className="block text-sm font-semibold text-ui-fg">{titulo}</span><span className="mt-1 block text-xs text-ui-fg-muted">{subtitulo}</span></span>
+    <span className="shrink-0">{derecha}</span>
+  </Card>;
+}
 
 type Preferencias = Database["public"]["Tables"]["preferencias_conductor"]["Row"];
 
@@ -203,8 +215,12 @@ export default function PaginaPreferenciasCuenta() {
       )}
 
       {/* Tabs / SegmentedControl */}
-      <Tabs etiqueta="Preferencias del conductor" tabs={TABS.map(t=>({id:t.clave,etiqueta:t.etiqueta}))} value={tabActiva} onSeleccion={id=>setTabActiva(id as typeof tabActiva)} renderPanel={()=><>{cargando ? (
-        <div className="mx-4 mt-8 text-center font-body text-sm text-text-secondary">
+      <Tabs value={tabActiva} onValueChange={id => setTabActiva(id as typeof tabActiva)}>
+        <TabsList aria-label="Preferencias del conductor" className="h-auto min-h-14">
+          {TABS.map(tab => <TabsTrigger key={tab.clave} value={tab.clave} className="min-h-12">{tab.etiqueta}</TabsTrigger>)}
+        </TabsList>
+        <TabsContent value={tabActiva}>{cargando ? (
+        <div className="mx-4 mt-8 text-center font-body text-sm text-ui-fg-muted">
           Cargando tus preferencias…
         </div>
       ) : errorCarga ? null : (
@@ -213,7 +229,7 @@ export default function PaginaPreferenciasCuenta() {
             <>
               {SECCIONES_ALERTAS.map((seccion) => (
                 <div key={seccion.titulo} className="space-y-1.5">
-                  <h3 className="px-1 text-[11px] font-bold uppercase tracking-wider text-text-tertiary">
+                  <h3 className="px-1 text-xs font-bold uppercase tracking-wider text-ui-fg-muted">
                     {seccion.titulo}
                   </h3>
                   <div className="grid gap-1">
@@ -221,14 +237,13 @@ export default function PaginaPreferenciasCuenta() {
                       const estaActivo = Boolean(prefs[opcion.clave]);
                       const desactivable = opcion.clave === "notificaciones_push";
                       return (
-                        <MobileRow
+                        <PreferenceRow
                           key={opcion.clave}
                           titulo={opcion.titulo}
                           subtitulo={desactivable ? "Esta opción no se puede modificar desde esta pantalla." : !conductor ? "No hay un perfil de conductor disponible para guardar cambios." : guardandoAuto ? "Guardando preferencias. Espera a que termine." : estaActivo ? opcion.subtitulo : "Desactivado"}
                           icono={opcion.icono}
-                          tonoIcono={estaActivo ? "azul" : "neutro"}
                           derecha={
-                            <button
+                            <BaseButton variant="ghost"
                               type="button"
                               role="switch"
                               aria-checked={estaActivo}
@@ -236,13 +251,13 @@ export default function PaginaPreferenciasCuenta() {
                               disabled={!conductor || guardandoAuto || desactivable}
                               onClick={() => !desactivable && toggleTono(opcion.clave)}
                               className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full border-2 p-0.5 transition-colors duration-200 ${estaActivo
-                                ? "bg-signal border-signal"
-                                : "bg-surface-elevated border-border/80"}`}
+                                ? "bg-ui-brand border-ui-brand"
+                                : "bg-ui-muted border-ui-line/80"}`}
                             >
                               <span
-                                className={`pointer-events-none inline-block size-4 transform rounded-full bg-white shadow-sm ring-0 transition duration-200 ${estaActivo ? "translate-x-6 bg-slate-950" : "translate-x-0 bg-text-secondary"}`}
+                                className={`pointer-events-none inline-block size-4 transform rounded-full bg-ui-card shadow-sm ring-0 transition duration-200 ${estaActivo ? "translate-x-6 bg-ui-muted" : "translate-x-0 bg-ui-fg-muted"}`}
                               />
-                            </button>
+                            </BaseButton>
                           }
                           disabled={!conductor || guardandoAuto || desactivable}
                         />
@@ -253,9 +268,9 @@ export default function PaginaPreferenciasCuenta() {
               ))}
 
               {/* Protección operativa — texto reducido al pie de la pestaña Alertas */}
-              <div className="mt-4 px-3 py-2 rounded-xl border border-route-action/40 bg-route-action/5">
-                <p className="font-body text-[10px] leading-4 text-text-tertiary">
-                  <span className="block font-display text-[10px] font-bold text-route-action mb-0.5">
+              <div className="mt-4 px-3 py-2 rounded-xl border border-ui-brand/40 bg-ui-brand/5">
+                <p className="font-body text-xs leading-4 text-ui-fg-muted">
+                  <span className="block font-display text-xs font-bold text-ui-brand mb-0.5">
                     Protección operativa
                   </span>
                   Los avisos críticos de seguridad y rastreo GPS durante un viaje activo se mantienen siempre habilitados por política de protección al conductor.
@@ -270,14 +285,13 @@ export default function PaginaPreferenciasCuenta() {
                 {OPCIONES_VIAJES.map((opcion) => {
                   const estaActivo = Boolean(prefs[opcion.clave]);
                   return (
-                    <MobileRow
+                    <PreferenceRow
                       key={opcion.clave}
                       titulo={opcion.titulo}
                       subtitulo={!conductor ? "No hay un perfil de conductor disponible para guardar cambios." : guardandoAuto ? "Guardando preferencias. Espera a que termine." : estaActivo ? opcion.subtitulo : "Desactivado"}
                       icono={opcion.icono}
-                      tonoIcono={estaActivo ? "azul" : "neutro"}
                       derecha={
-                        <button
+                        <BaseButton variant="ghost"
                           type="button"
                           role="switch"
                           aria-checked={estaActivo}
@@ -285,13 +299,13 @@ export default function PaginaPreferenciasCuenta() {
                           disabled={!conductor || guardandoAuto}
                           onClick={() => toggleTono(opcion.clave)}
                           className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full border-2 p-0.5 transition-colors duration-200 ${estaActivo
-                            ? "bg-signal border-signal"
-                            : "bg-surface-elevated border-border/80"}`}
+                            ? "bg-ui-brand border-ui-brand"
+                            : "bg-ui-muted border-ui-line/80"}`}
                         >
                           <span
-                            className={`pointer-events-none inline-block size-4 transform rounded-full bg-white shadow-sm ring-0 transition duration-200 ${estaActivo ? "translate-x-6 bg-slate-950" : "translate-x-0 bg-text-secondary"}`}
+                            className={`pointer-events-none inline-block size-4 transform rounded-full bg-ui-card shadow-sm ring-0 transition duration-200 ${estaActivo ? "translate-x-6 bg-ui-muted" : "translate-x-0 bg-ui-fg-muted"}`}
                           />
-                        </button>
+                        </BaseButton>
                       }
                       disabled={!conductor || guardandoAuto}
                     />
@@ -301,12 +315,12 @@ export default function PaginaPreferenciasCuenta() {
 
               {preferenciasActivas.length > 0 && (
                 <div className="mt-3 px-1">
-                  <p className="font-body text-[10px] font-bold uppercase tracking-wider text-text-tertiary">
+                  <p className="font-body text-xs font-bold uppercase tracking-wider text-ui-fg-muted">
                     Modalidades activadas ({preferenciasActivas.length}):
                   </p>
                   <div className="flex flex-wrap gap-1.5">
                     {preferenciasActivas.map((pref) => (
-                      <span key={pref} className="inline-flex items-center gap-1 rounded-full border border-border/60 bg-surface-elevated px-2.5 py-1 font-body text-[10px] font-bold text-text-primary">
+                      <span key={pref} className="inline-flex items-center gap-1 rounded-full border border-ui-line/60 bg-ui-muted px-2.5 py-1 font-body text-xs font-bold text-ui-fg">
                         ✓ {pref}
                       </span>
                     ))}
@@ -324,32 +338,32 @@ export default function PaginaPreferenciasCuenta() {
               ].map((opc) => {
                 const seleccionado = temaSeleccionado === opc.valor;
                 return (
-                  <button
+                  <BaseButton variant="ghost"
                     key={opc.valor}
                     type="button"
                     aria-pressed={seleccionado}
                     onClick={() => cambiarTema(opc.valor as "light" | "dark")}
-                    className={`flex flex-col items-center justify-center p-2 rounded-xl border text-center cursor-pointer transition-all focus-visible:ring-2 focus-visible:ring-route-action focus-visible:ring-offset-2 ${
+                    className={`flex flex-col items-center justify-center p-2 rounded-xl border text-center cursor-pointer transition-all focus-visible:ring-2 focus-visible:ring-ui-brand focus-visible:ring-offset-2 ${
                       seleccionado
-                        ? "border-route-action bg-route-action/10 text-text-primary font-extrabold shadow-xs"
-                        : "border-border/60 bg-surface-elevated/40 text-text-secondary hover:border-border"
+                        ? "border-ui-brand bg-ui-brand/10 text-ui-fg font-extrabold shadow-xs"
+                        : "border-ui-line/60 bg-ui-muted/40 text-ui-fg-muted hover:border-ui-line"
                     }`}
                   >
                     <span className="font-display text-sm font-bold">{opc.etiqueta}</span>
-                    <span className="font-body text-sm text-text-secondary mt-0.5">{opc.desc}</span>
-                  </button>
+                    <span className="font-body text-sm text-ui-fg-muted mt-0.5">{opc.desc}</span>
+                  </BaseButton>
                 );
               })}
             </div>
           )}
         </div>
-      )}</>} />
+      )}</TabsContent></Tabs>
 
 
 
       {guardandoAuto && (
         <div className="mx-4 mt-2 flex items-center justify-center gap-1.5">
-          <span className="text-[10px] font-bold text-route-action animate-pulse">Sincronizando…</span>
+          <span className="text-xs font-bold text-ui-brand animate-pulse">Sincronizando…</span>
         </div>
       )}
     </ConductorScreen>

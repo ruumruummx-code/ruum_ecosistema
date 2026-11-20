@@ -9,25 +9,25 @@ export const metadata = {
 export default function PaginaPrivacidadConductor() {
   return (
     <ContainedScrollView label="Texto del aviso de privacidad" header={<ContextReturnLink fallback="/cuenta/legal" />}>
-      <article className="rounded-2xl border border-border/80 bg-surface px-6 py-8 text-text-primary shadow-md sm:px-10">
-        <header className="mb-8 border-b border-border/60 pb-6">
+      <article className="rounded-lg border border-ui-line/80 bg-ui-card px-6 py-8 text-ui-fg shadow-md sm:px-10">
+        <header className="mb-8 border-b border-ui-line/60 pb-6">
           <div className="flex items-center gap-2">
-            <span className="font-body text-xs font-bold uppercase tracking-wider text-route-action">
+            <span className="font-body text-xs font-bold uppercase tracking-wider text-ui-brand">
               Documento Legal Oficial
             </span>
-            <span className="rounded-md border border-control bg-control-soft px-2 py-0.5 font-body text-xs font-extrabold text-control uppercase">
+            <span className="rounded-md border border-ui-success bg-ui-success-soft px-2 py-0.5 font-body text-xs font-extrabold text-ui-success uppercase">
               v{appVersion.version} • Vigente
             </span>
           </div>
-          <h1 className="mt-2 font-display text-2xl font-bold text-text-primary sm:text-3xl">
+          <h1 className="mt-2 font-display text-2xl font-bold text-ui-fg sm:text-3xl">
             Aviso de Privacidad de Datos
           </h1>
-          <p className="mt-1.5 font-body text-xs text-text-tertiary">
+          <p className="mt-1.5 font-body text-xs text-ui-fg-muted">
             Ruum Ruum by Moviliax • Última actualización: 3 de julio de 2026 • App v{appVersion.version} (mín. {appVersion.minimumSupported})
           </p>
         </header>
 
-        <div className="space-y-6 font-body text-sm leading-7 text-text-secondary">
+        <div className="space-y-6 font-body text-sm leading-7 text-ui-fg-muted">
           <p>
             En cumplimiento con la Ley Federal de Protección de Datos Personales en Posesión de los Particulares
             (LFPDPPP), Moviliax S.A. de C.V. (&quot;Ruum Ruum&quot;) pone a su disposición el presente Aviso de
@@ -35,12 +35,12 @@ export default function PaginaPrivacidadConductor() {
           </p>
 
           <section>
-            <h2 className="mb-3 font-display text-base font-bold text-text-primary">1. Responsable del Tratamiento</h2>
+            <h2 className="mb-3 font-display text-base font-bold text-ui-fg">1. Responsable del Tratamiento</h2>
             <p>Moviliax S.A. de C.V., con domicilio en la Ciudad de México, es la entidad responsable del tratamiento de sus datos personales.</p>
           </section>
 
           <section>
-            <h2 className="mb-3 font-display text-base font-bold text-text-primary">2. Datos Personales Recabados</h2>
+            <h2 className="mb-3 font-display text-base font-bold text-ui-fg">2. Datos Personales Recabados</h2>
             <p>
               Para el registro como Conductor, Ruum Ruum recaba: nombre completo, CURP, correo electrónico, número
               de teléfono celular, domicilio completo, número y vigencia de licencia de conducir, imagen de la
@@ -50,7 +50,7 @@ export default function PaginaPrivacidadConductor() {
           </section>
 
           <section>
-            <h2 className="mb-3 font-display text-base font-bold text-text-primary">3. Finalidades del Tratamiento</h2>
+            <h2 className="mb-3 font-display text-base font-bold text-ui-fg">3. Finalidades del Tratamiento</h2>
             <p>Sus datos se utilizan para:</p>
             <ul className="mt-2 list-disc space-y-1 pl-5">
               <li>Verificar su identidad y elegibilidad para operar como Conductor certificado (CONCER).</li>
@@ -62,7 +62,7 @@ export default function PaginaPrivacidadConductor() {
           </section>
 
           <section>
-            <h2 className="mb-3 font-display text-base font-bold text-text-primary">4. Transferencia de Datos</h2>
+            <h2 className="mb-3 font-display text-base font-bold text-ui-fg">4. Transferencia de Datos</h2>
             <p>
               Ruum Ruum no comparte sus datos personales con terceros para fines comerciales. Su información puede
               compartirse con autoridades competentes cuando así lo requiera la verificación de antecedentes que
@@ -72,7 +72,7 @@ export default function PaginaPrivacidadConductor() {
           </section>
 
           <section>
-            <h2 className="mb-3 font-display text-base font-bold text-text-primary">5. Derechos ARCO</h2>
+            <h2 className="mb-3 font-display text-base font-bold text-ui-fg">5. Derechos ARCO</h2>
             <p>
               Tiene derecho a Acceder, Rectificar, Cancelar u Oponerse al tratamiento de sus datos personales. Para
               ejercer estos derechos, contacte a nuestro equipo de privacidad a través del Centro de ayuda dentro
@@ -81,11 +81,11 @@ export default function PaginaPrivacidadConductor() {
           </section>
         </div>
 
-        <div className="mt-8 border-t border-border/60 pt-6">
+        <div className="mt-8 border-t border-ui-line/60 pt-6">
           <a
             href="/docs-legales/aviso-de-privacidad-ruum-ruum.docx"
             download
-            className="inline-flex items-center gap-2 font-body text-xs font-bold text-route-action underline-offset-4 hover:underline"
+            className="inline-flex items-center gap-2 font-body text-xs font-bold text-ui-brand underline-offset-4 hover:underline"
           >
             📥 Descargar versión completa (.docx)
           </a>

@@ -2,7 +2,8 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Button, Field, Aviso, LogoMarca } from "@ruum/ui";
+import { Field, Aviso, LogoMarca } from "@ruum/ui";
+import { ConductorButton as Button } from "@/components/v2/ConductorUI";
 import { observarSesionRecuperacion, passwordCumpleRequisitos, requisitosPassword, traducirErrorAuth } from "@ruum/shared/utils";
 import { crearClienteNavegador, tieneSupabaseConfigurado } from "../../lib/supabase-browser";
 
@@ -98,23 +99,23 @@ export default function PaginaNuevaPasswordConductor() {
         <div className="flex items-center gap-3">
           <LogoMarca tamano={34} color="signal" mostrarRespaldo={false} subtitulo="Conductor" />
         </div>
-        <p className="mt-2 font-body text-[11px] font-medium tracking-wide text-text-tertiary">Seguridad, evidencia y trazabilidad</p>
+        <p className="mt-2 font-body text-xs font-medium tracking-wide text-ui-fg-muted">Seguridad, evidencia y trazabilidad</p>
         <div className="conductor-ruta-divider mt-3" aria-hidden />
 
-        <h1 id="titulo-nueva-pwd" className="mt-6 font-display text-2xl font-bold tracking-tight text-text-primary">
+        <h1 id="titulo-nueva-pwd" className="mt-6 font-display text-2xl font-bold tracking-tight text-ui-fg">
           Nueva contraseña
         </h1>
 
         {verificando ? (
-          <p className="mt-6 font-body text-sm text-text-tertiary/80">Verificando enlace…</p>
+          <p className="mt-6 font-body text-sm text-ui-fg-muted/80">Verificando enlace…</p>
         ) : listo ? (
           <div className="mt-6 grid gap-3 text-center">
-            <div className="mx-auto flex size-14 items-center justify-center rounded-full bg-control-soft text-success">
+            <div className="mx-auto flex size-14 items-center justify-center rounded-full bg-ui-success-soft text-ui-success">
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
                 stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"
                 aria-hidden="true"><path d="M20 6L9 17l-5-5" /></svg>
             </div>
-            <p className="font-body text-sm text-text-tertiary/80">Contraseña actualizada. Redirigiendo…</p>
+            <p className="font-body text-sm text-ui-fg-muted/80">Contraseña actualizada. Redirigiendo…</p>
           </div>
         ) : !sesionLista ? (
           <div className="mt-6 grid gap-4">
@@ -123,7 +124,7 @@ export default function PaginaNuevaPasswordConductor() {
               Los enlaces son válidos por 60 minutos y solo funcionan en el mismo teléfono/navegador.
               Si ya iniciaste sesión y quieres cambiar tu contraseña, hazlo desde <Link href="/cuenta/seguridad" className="underline">Seguridad y Sesión</Link>.
             </Aviso>
-            <Link href="/recuperar-password" className="inline-flex min-h-11 w-full items-center justify-center rounded-xl bg-signal font-display text-sm font-bold text-text-primary transition hover:bg-signal/90">
+            <Link href="/recuperar-password" className="inline-flex min-h-11 w-full items-center justify-center rounded-xl bg-ui-brand font-display text-sm font-bold text-ui-fg transition hover:bg-ui-brand/90">
               Solicitar un nuevo enlace
             </Link>
           </div>
@@ -142,7 +143,7 @@ export default function PaginaNuevaPasswordConductor() {
               />
 
               {/* Requisitos dinámicos de contraseña */}
-              <ul className="flex flex-col gap-1.5 rounded-xl border border-border bg-surface-elevated/70 p-3 text-xs font-body" aria-label="Requisitos de contraseña">
+              <ul className="flex flex-col gap-1.5 rounded-xl border border-ui-line bg-ui-muted/70 p-3 text-xs font-body" aria-label="Requisitos de contraseña">
                 {requisitosPassword(password).map((requisito) => {
                   const etiquetas: Record<string, string> = {
                     longitud: "Mínimo 8 caracteres",
@@ -153,10 +154,10 @@ export default function PaginaNuevaPasswordConductor() {
                   return (
                     <li
                       key={requisito.clave}
-                      className={`flex items-center gap-2 transition-all duration-150 ${requisito.cumplido ? "font-semibold text-emerald-600 dark:text-emerald-400" : "text-text-tertiary/80"}`}
+                      className={`flex items-center gap-2 transition-all duration-150 ${requisito.cumplido ? "font-semibold text-ui-success " : "text-ui-fg-muted/80"}`}
                     >
                       <span
-                        className={`flex size-4 shrink-0 items-center justify-center rounded-full text-[10px] font-bold transition-all ${requisito.cumplido ? "bg-emerald-600 text-white dark:bg-emerald-500 shadow-xs" : "bg-surface-elevated border border-border text-text-tertiary"}`}
+                        className={`flex size-4 shrink-0 items-center justify-center rounded-full text-xs font-bold transition-all ${requisito.cumplido ? "bg-ui-success text-ui-on-brand  shadow-xs" : "bg-ui-muted border border-ui-line text-ui-fg-muted"}`}
                         aria-hidden
                       >
                         {requisito.cumplido ? "✓" : "○"}

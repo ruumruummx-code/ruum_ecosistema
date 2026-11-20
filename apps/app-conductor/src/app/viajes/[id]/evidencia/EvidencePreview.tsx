@@ -1,4 +1,5 @@
-import { Button, MapaEstatico } from "@ruum/ui";
+import { MapaEstatico } from "@ruum/ui";
+import { ConductorButton as Button } from "@/components/v2/ConductorUI";
 import type { FotoEvidencia } from "@ruum/shared/types";
 import { fotoSrc } from "./evidence-requirements";
 
@@ -26,7 +27,7 @@ export function BadgeSincronizacion({ sincronizada }: { sincronizada: boolean })
       className={[
         "inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1",
         "font-body text-xs font-semibold",
-        sincronizada ? "border-success bg-control-soft text-success" : "border-warning bg-warn-soft text-warning"
+        sincronizada ? "border-ui-success bg-ui-success-soft text-ui-success" : "border-ui-warning bg-ui-warning-soft text-ui-warning"
       ].join(" ")}
     >
       {sincronizada ? <IconoCheck /> : <IconoReloj />}
@@ -48,7 +49,7 @@ export function EvidencePreview({
   if (!foto || !src) return null;
 
   return (
-    <div className="mt-4 overflow-hidden rounded-2xl border border-border/24 bg-[var(--ruum-surface-subtle)]">
+    <div className="mt-4 overflow-hidden rounded-lg border border-ui-line/24 bg-ui-muted">
       <div className="relative h-52 w-full">
         <MapaEstatico src={src} alt="Vista previa de la evidencia capturada" className="object-cover" />
       </div>

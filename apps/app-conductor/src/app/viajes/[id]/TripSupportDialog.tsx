@@ -8,9 +8,9 @@ export function TripSupportDialog({ onClose }: { onClose: () => void }) {
   return <TripDialog title="Soporte del traslado" onClose={onClose}>
     <p className="mb-3 text-sm">Contacta al equipo operativo sin salir de este paso.</p>
     <div className="grid gap-3">
-      <a href={whatsapp.href} target="_blank" rel="noreferrer" className="min-h-11 rounded-xl border border-border p-3">WhatsApp de soporte</a>
-      <a href={telefono.href} className="min-h-11 rounded-xl border border-border p-3">Llamar a soporte</a>
-      <a href={correo.href} className="min-h-11 rounded-xl border border-border p-3">Correo de soporte</a>
+      <a href={whatsapp.href} target="_blank" rel="noreferrer" className="min-h-11 rounded-xl border border-ui-line p-3">WhatsApp de soporte</a>
+      <a href={telefono.href} className="min-h-11 rounded-xl border border-ui-line p-3">Llamar a soporte</a>
+      <a href={correo.href} className="min-h-11 rounded-xl border border-ui-line p-3">Correo de soporte</a>
     </div>
   </TripDialog>;
 }

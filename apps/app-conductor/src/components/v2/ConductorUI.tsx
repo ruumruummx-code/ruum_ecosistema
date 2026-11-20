@@ -1,23 +1,14 @@
+import { Badge, Button as BaseButton, buttonVariants, cn } from "@ruum/ui/base";
+import { ConductorIcon, type ConductorIconName } from "../icons";
 import type { ButtonHTMLAttributes, ReactNode } from "react";
 
-export type ConductorButtonVariant = "primary" | "secondary" | "ghost" | "danger";
+export type ConductorButtonVariant = "primary" | "secondary" | "ghost" | "danger" | "quiet" | "emergency";
 export type ConductorStatus = "assigned" | "pending" | "active" | "success" | "error" | "neutral";
 
-const BUTTON_VARIANTS: Record<ConductorButtonVariant, string> = {
-  primary: "conductor-button-primary",
-  secondary: "conductor-button-secondary",
-  ghost: "conductor-button-ghost",
-  danger: "conductor-button-danger"
-};
-
-const STATUS_VARIANTS: Record<ConductorStatus, { icon: string; className: string }> = {
-  assigned: { icon: "•", className: "conductor-status-badge-pending" },
-  pending: { icon: "•", className: "conductor-status-badge-pending" },
-  active: { icon: "↗", className: "conductor-status-badge-active" },
-  success: { icon: "✓", className: "conductor-status-badge-success" },
-  error: { icon: "!", className: "conductor-status-badge-error" },
-  neutral: { icon: "i", className: "conductor-status-badge-neutral" }
-};
+function baseVariant(variant: ConductorButtonVariant) {
+  return variant === "secondary" ? "outline" : variant === "quiet" ? "ghost" : variant === "emergency" ? "danger" : variant;
+}
+const ICONS = { arrow: "right", check: "check", warning: "warning", phone: "phone", send: "right" } as const satisfies Record<string, ConductorIconName>;
 
 export function conductorButtonClasses({
   variant = "primary",
@@ -26,12 +17,13 @@ export function conductorButtonClasses({
   variant?: ConductorButtonVariant;
   className?: string;
 } = {}) {
-  return ["conductor-button", BUTTON_VARIANTS[variant], className].filter(Boolean).join(" ");
+  return cn(buttonVariants({ variant: baseVariant(variant) }), "min-h-12 whitespace-normal", className);
 }
 
 export function ConductorButton({
   variant = "primary",
   loading = false,
+  icon = "none",
   disabled,
   className = "",
   children,
@@ -39,17 +31,19 @@ export function ConductorButton({
 }: ButtonHTMLAttributes<HTMLButtonElement> & {
   variant?: ConductorButtonVariant;
   loading?: boolean;
+  icon?: "arrow" | "check" | "warning" | "phone" | "send" | "none";
 }) {
   return (
-    <button
+    <BaseButton variant={baseVariant(variant)}
       {...props}
       className={conductorButtonClasses({ variant, className })}
       aria-busy={loading || undefined}
       disabled={disabled || loading}
     >
-      {loading && <span className="conductor-button-spinner" aria-hidden />}
+      {loading && <span className="size-4 animate-spin rounded-full border-2 border-current border-t-transparent" aria-hidden />}
+      {!loading && icon !== "none" && <ConductorIcon name={ICONS[icon]} size={16} />}
       {children}
-    </button>
+    </BaseButton>
   );
 }
 
@@ -62,13 +56,10 @@ export function ConductorStatusBadge({
   label: string;
   className?: string;
 }) {
-  const variant = STATUS_VARIANTS[status];
+  const tone = { assigned: "info", pending: "warning", active: "info", success: "success", error: "danger", neutral: "neutral" } as const;
 
   return (
-    <span className={["conductor-status-badge", variant.className, className].filter(Boolean).join(" ")}>
-      <span aria-hidden className="conductor-status-badge-icon">{variant.icon}</span>
-      {label}
-    </span>
+    <Badge tone={tone[status]} dot className={className}>{label}</Badge>
   );
 }
 
@@ -81,7 +72,7 @@ export function ConductorOperationalCard({
   className?: string;
   as?: "article" | "section" | "div";
 }) {
-  return <Element className={["conductor-operational-card", className].filter(Boolean).join(" ")}>{children}</Element>;
+  return <Element className={cn("rounded-lg border border-ui-line bg-ui-card p-4 text-ui-fg shadow-ui-sm", className)}>{children}</Element>;
 }
 
 export function ConductorFeedback({
@@ -97,7 +88,7 @@ export function ConductorFeedback({
     <div
       role={tone === "error" ? "alert" : "status"}
       aria-live={tone === "error" ? "assertive" : "polite"}
-      className={["conductor-feedback", `conductor-feedback-${tone}`, className].filter(Boolean).join(" ")}
+      className={cn("rounded-lg border p-3 text-sm", { info: "border-ui-line bg-ui-brand-soft text-ui-brand-soft-fg", warning: "border-ui-warning bg-ui-warning-soft text-ui-warning", error: "border-ui-danger bg-ui-danger-soft text-ui-danger", success: "border-ui-success bg-ui-success-soft text-ui-success" }[tone], className)}
     >
       {children}
     </div>

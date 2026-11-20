@@ -1,5 +1,6 @@
 "use client";
 
+import { Button as BaseButton } from "@ruum/ui/base";
 import { useEffect, useState } from "react";
 import { ConductorScreen, ConductorPageHeader } from "../../../components/ConductorScreen";
 import styles from "./details-tabs.module.css";
@@ -158,7 +159,7 @@ export function TripDetailsTabs({ pasaporte }: { pasaporte: PasaporteRow }) {
           { id: "pago", label: "Pago" },
           { id: "operacion", label: "Operación" }
         ].map((tab) => (
-          <button
+          <BaseButton variant="ghost"
             key={tab.id}
             id={`tab-${tab.id}`} role="tab" aria-selected={activeTab === tab.id} aria-controls={`panel-${tab.id}`}
             tabIndex={activeTab === tab.id ? 0 : -1}
@@ -173,7 +174,7 @@ export function TripDetailsTabs({ pasaporte }: { pasaporte: PasaporteRow }) {
             onClick={() => setActiveTab(tab.id as TabId)}
           >
             {tab.label}
-          </button>
+          </BaseButton>
         ))}
       </div>
 

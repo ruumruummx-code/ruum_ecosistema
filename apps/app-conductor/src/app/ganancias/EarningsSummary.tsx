@@ -1,5 +1,6 @@
 "use client";
 
+import { Button as BaseButton } from "@ruum/ui/base";
 import Link from "next/link";
 import { Card, FinancialCard } from "@ruum/ui";
 import {
@@ -27,49 +28,49 @@ export function EarningsSummary({
     <section className="mt-5 grid gap-4" aria-label="Resumen financiero del periodo">
       {/* Fila 1: Traslados | Vehículos — mismo nivel, sin # */}
       <div className="grid grid-cols-2 gap-3 sm:gap-4">
-        <Card className="flex flex-col border-border/40" padding="none">
+        <Card className="flex flex-col border-ui-line/40" padding="none">
           <div className="p-4 sm:p-5">
-            <p className="font-body text-xs font-bold uppercase tracking-widest text-text-tertiary">Traslados</p>
-            <p className="mt-2 font-display text-3xl sm:text-4xl font-black tracking-tight text-text-primary tabular-nums">
+            <p className="font-body text-xs font-bold uppercase tracking-widest text-ui-fg-muted">Traslados</p>
+            <p className="mt-2 font-display text-3xl sm:text-4xl font-black tracking-tight text-ui-fg tabular-nums">
               {resumen.totalTraslados}
             </p>
-            <p className="mt-1 font-body text-xs font-semibold text-text-tertiary">Traslados realizados</p>
+            <p className="mt-1 font-body text-xs font-semibold text-ui-fg-muted">Traslados realizados</p>
           </div>
         </Card>
-        <Card className="flex flex-col border-border/40" padding="none">
+        <Card className="flex flex-col border-ui-line/40" padding="none">
           <div className="p-4 sm:p-5">
-            <p className="font-body text-xs font-bold uppercase tracking-widest text-text-tertiary">Vehículos</p>
-            <p className="mt-2 font-display text-3xl sm:text-4xl font-black tracking-tight text-text-primary tabular-nums">
+            <p className="font-body text-xs font-bold uppercase tracking-widest text-ui-fg-muted">Vehículos</p>
+            <p className="mt-2 font-display text-3xl sm:text-4xl font-black tracking-tight text-ui-fg tabular-nums">
               {resumen.totalVehiculos}
             </p>
-            <p className="mt-1 font-body text-xs font-semibold text-text-tertiary">vehículos trasladados</p>
+            <p className="mt-1 font-body text-xs font-semibold text-ui-fg-muted">vehículos trasladados</p>
           </div>
         </Card>
       </div>
 
       {/* Tarjeta única: Devengo del periodo + Desglose completo con tooltips */}
-      <FinancialCard className="overflow-hidden p-0 border-border/60" padding="none">
+      <FinancialCard className="overflow-hidden p-0 border-ui-line/60" padding="none">
         <div className="px-4 sm:px-6 pt-5 sm:pt-6">
-          <h2 className="font-display text-xl sm:text-2xl font-black tracking-tight text-text-primary">
+          <h2 className="font-display text-xl sm:text-2xl font-black tracking-tight text-ui-fg">
             Depósito acumulado
           </h2>
-          <p className="mt-2 font-display text-3xl sm:text-4xl font-black tracking-tight text-text-primary tabular-nums">
+          <p className="mt-2 font-display text-3xl sm:text-4xl font-black tracking-tight text-ui-fg tabular-nums">
             {formatearMoneda(resumen.depositoAcumulado)}
           </p>
-          <p className="mt-1.5 font-body text-xs font-semibold text-text-tertiary">
+          <p className="mt-1.5 font-body text-xs font-semibold text-ui-fg-muted">
             (Dispersión {fechaDispersion})
           </p>
         </div>
 
-        <div className="mt-4 mx-4 sm:mx-6 mb-5 sm:mb-6 rounded-2xl border border-border/40 bg-surface-elevated overflow-hidden">
-          <p className="px-4 pt-3 pb-1 font-body text-xs font-bold uppercase tracking-widest text-text-tertiary">
+        <div className="mt-4 mx-4 sm:mx-6 mb-5 sm:mb-6 rounded-lg border border-ui-line/40 bg-ui-muted overflow-hidden">
+          <p className="px-4 pt-3 pb-1 font-body text-xs font-bold uppercase tracking-widest text-ui-fg-muted">
             Desglose:
           </p>
-          <div className="grid divide-y divide-border/30">
+          <div className="grid divide-y divide-ui-line/30">
             <div className="flex items-center justify-between gap-3 px-4 py-3.5">
-              <span className="flex items-center gap-1.5 font-body text-sm font-semibold text-text-secondary">
+              <span className="flex items-center gap-1.5 font-body text-sm font-semibold text-ui-fg-muted">
                 Precio base
-                <button
+                <BaseButton variant="ghost"
                   type="button"
                   onClick={() =>
                     setInfoSheet({
@@ -78,19 +79,19 @@ export function EarningsSummary({
                     })
                   }
                   aria-label="Qué es el precio base, toca para ver explicación"
-                  className="flex min-h-11 min-w-11 items-center justify-center rounded-full border border-border bg-surface text-xs font-bold text-text-tertiary hover:border-signal/40 focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-route-action"
+                  className="flex min-h-11 min-w-11 items-center justify-center rounded-full border border-ui-line bg-ui-card text-xs font-bold text-ui-fg-muted hover:border-ui-brand/40 focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-ui-brand"
                 >
                   ?
-                </button>
+                </BaseButton>
               </span>
-              <span className="font-display text-sm font-bold text-text-primary tabular-nums">
+              <span className="font-display text-sm font-bold text-ui-fg tabular-nums">
                 {formatearMoneda(resumen.precioBase)}
               </span>
             </div>
             <div className="flex items-center justify-between gap-3 px-4 py-3.5">
-              <span className="flex items-center gap-1.5 font-body text-sm font-semibold text-text-secondary">
+              <span className="flex items-center gap-1.5 font-body text-sm font-semibold text-ui-fg-muted">
                 Bonos
-                <button
+                <BaseButton variant="ghost"
                   type="button"
                   onClick={() =>
                     setInfoSheet({
@@ -99,19 +100,19 @@ export function EarningsSummary({
                     })
                   }
                   aria-label="Qué son los bonos, toca para ver explicación"
-                  className="flex min-h-11 min-w-11 items-center justify-center rounded-full border border-border bg-surface text-xs font-bold text-text-tertiary hover:border-signal/40 focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-route-action"
+                  className="flex min-h-11 min-w-11 items-center justify-center rounded-full border border-ui-line bg-ui-card text-xs font-bold text-ui-fg-muted hover:border-ui-brand/40 focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-ui-brand"
                 >
                   ?
-                </button>
+                </BaseButton>
               </span>
-              <span className="font-display text-sm font-bold text-emerald-800 dark:text-emerald-300 tabular-nums">
+              <span className="font-display text-sm font-bold text-ui-success  tabular-nums">
                 {resumen.bonos !== null ? `+ ${formatearMoneda(resumen.bonos)}` : "Por calcular"}
               </span>
             </div>
             <div className="flex items-center justify-between gap-3 px-4 py-3.5">
-              <span className="flex items-center gap-1.5 font-body text-sm font-semibold text-text-secondary">
+              <span className="flex items-center gap-1.5 font-body text-sm font-semibold text-ui-fg-muted">
                 Ajustes
-                <button
+                <BaseButton variant="ghost"
                   type="button"
                   onClick={() =>
                     setInfoSheet({
@@ -120,19 +121,19 @@ export function EarningsSummary({
                     })
                   }
                   aria-label="Qué son los ajustes, toca para ver explicación"
-                  className="flex min-h-11 min-w-11 items-center justify-center rounded-full border border-border bg-surface text-xs font-bold text-text-tertiary hover:border-signal/40 focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-route-action"
+                  className="flex min-h-11 min-w-11 items-center justify-center rounded-full border border-ui-line bg-ui-card text-xs font-bold text-ui-fg-muted hover:border-ui-brand/40 focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-ui-brand"
                 >
                   ?
-                </button>
+                </BaseButton>
               </span>
-              <span className={`font-display text-sm font-bold tabular-nums ${resumen.ajuste < 0 ? "text-red-500" : "text-text-primary"}`}>
+              <span className={`font-display text-sm font-bold tabular-nums ${resumen.ajuste < 0 ? "text-ui-danger" : "text-ui-fg"}`}>
                 {resumen.ajuste >= 0 ? "+" : ""} {formatearMoneda(resumen.ajuste)}
               </span>
             </div>
-            <div className="flex items-center justify-between gap-3 px-4 py-3.5 bg-danger/5">
-              <span className="flex items-center gap-1.5 font-body text-sm font-semibold text-red-500">
+            <div className="flex items-center justify-between gap-3 px-4 py-3.5 bg-ui-danger/5">
+              <span className="flex items-center gap-1.5 font-body text-sm font-semibold text-ui-danger">
                 Tasa Ruum (–)
-                <button
+                <BaseButton variant="ghost"
                   type="button"
                   onClick={() =>
                     setInfoSheet({
@@ -141,19 +142,19 @@ export function EarningsSummary({
                     })
                   }
                   aria-label="Qué es la tasa Ruum, toca para ver explicación"
-                  className="flex min-h-11 min-w-11 items-center justify-center rounded-full border border-danger/30 bg-surface text-xs font-bold text-red-500 focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-route-action"
+                  className="flex min-h-11 min-w-11 items-center justify-center rounded-full border border-ui-danger/30 bg-ui-card text-xs font-bold text-ui-danger focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-ui-brand"
                 >
                   ?
-                </button>
+                </BaseButton>
               </span>
-              <span className="font-display text-sm font-bold text-red-500 tabular-nums">
+              <span className="font-display text-sm font-bold text-ui-danger tabular-nums">
                 {resumen.comisionRuum !== null ? `− ${formatearMoneda(resumen.comisionRuum)}` : "Por calcular"}
               </span>
             </div>
             <div className="flex items-center justify-between gap-3 px-4 py-3.5">
-              <span className="flex items-center gap-1.5 font-body text-sm font-semibold text-text-secondary">
+              <span className="flex items-center gap-1.5 font-body text-sm font-semibold text-ui-fg-muted">
                 Reembolso gastos (+)
-                <button
+                <BaseButton variant="ghost"
                   type="button"
                   onClick={() =>
                     setInfoSheet({
@@ -162,23 +163,23 @@ export function EarningsSummary({
                     })
                   }
                   aria-label="Qué es el reembolso de gastos, toca para ver explicación"
-                  className="flex min-h-11 min-w-11 items-center justify-center rounded-full border border-border bg-surface text-xs font-bold text-text-tertiary hover:border-signal/40 focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-route-action"
+                  className="flex min-h-11 min-w-11 items-center justify-center rounded-full border border-ui-line bg-ui-card text-xs font-bold text-ui-fg-muted hover:border-ui-brand/40 focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-ui-brand"
                 >
                   ?
-                </button>
+                </BaseButton>
               </span>
-              <span className="font-display text-sm font-bold text-text-primary tabular-nums">
+              <span className="font-display text-sm font-bold text-ui-fg tabular-nums">
                 {resumen.reembolsoGastos !== null ? `+ ${formatearMoneda(resumen.reembolsoGastos)}` : "Por calcular"}
               </span>
             </div>
           </div>
           {resumen.totalesIncompletos && (
-            <p className="px-4 py-2 font-body text-xs text-amber-800 dark:text-amber-300 bg-amber-500/10 border-t border-amber-500/30">
+            <p className="px-4 py-2 font-body text-xs text-ui-warning  bg-ui-warning/10 border-t border-ui-warning/30">
               ⚠️ <strong>Totales preliminares:</strong> El desglose de bonos o gastos está en conciliación operativa y no se asume en cero.
             </p>
           )}
           {resumen.retenciones > 0 && (
-            <p className="px-4 py-2 font-body text-xs text-amber-600 dark:text-amber-400 bg-amber-500/5 border-t border-amber-500/20">
+            <p className="px-4 py-2 font-body text-xs text-ui-warning  bg-ui-warning/5 border-t border-ui-warning/20">
               Retenciones en revisión descontadas: {formatearMoneda(resumen.retenciones)}
             </p>
           )}

@@ -66,20 +66,20 @@ export function estatusViaje(
 export function etiquetaEstadoUnica(estatus: EstadoEconomicoExplicito): { texto: string; clase: string } {
   switch (estatus) {
     case "pagado":
-      return { texto: "Pago transferido", clase: "inline-flex min-h-[28px] items-center gap-1.5 rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 font-body text-xs font-semibold text-emerald-900" };
+      return { texto: "Pago transferido", clase: "inline-flex min-h-[28px] items-center gap-1.5 rounded-full border border-ui-success bg-ui-success-soft px-2.5 py-1 font-body text-xs font-semibold text-ui-success" };
     case "programado":
-      return { texto: "Depósito programado", clase: "inline-flex min-h-[28px] items-center gap-1.5 rounded-full border border-amber-200 bg-amber-50 px-2.5 py-1 font-body text-xs font-semibold text-amber-900" };
+      return { texto: "Depósito programado", clase: "inline-flex min-h-[28px] items-center gap-1.5 rounded-full border border-ui-warning bg-ui-warning-soft px-2.5 py-1 font-body text-xs font-semibold text-ui-warning" };
     case "confirmado":
-      return { texto: "Viaje concluido", clase: "inline-flex min-h-[28px] items-center gap-1.5 rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 font-body text-xs font-semibold text-emerald-900" };
+      return { texto: "Viaje concluido", clase: "inline-flex min-h-[28px] items-center gap-1.5 rounded-full border border-ui-success bg-ui-success-soft px-2.5 py-1 font-body text-xs font-semibold text-ui-success" };
     case "en_validacion":
-      return { texto: "En validación", clase: "inline-flex min-h-[28px] items-center gap-1.5 rounded-full border border-amber-200 bg-amber-50 px-2.5 py-1 font-body text-xs font-semibold text-amber-900" };
+      return { texto: "En validación", clase: "inline-flex min-h-[28px] items-center gap-1.5 rounded-full border border-ui-warning bg-ui-warning-soft px-2.5 py-1 font-body text-xs font-semibold text-ui-warning" };
     case "estimado":
-      return { texto: "En curso / Estimado", clase: "inline-flex min-h-[28px] items-center gap-1.5 rounded-full border border-blue-200 bg-blue-50 px-2.5 py-1 font-body text-xs font-semibold text-blue-900" };
+      return { texto: "En curso / Estimado", clase: "inline-flex min-h-[28px] items-center gap-1.5 rounded-full border border-ui-brand bg-ui-brand-soft px-2.5 py-1 font-body text-xs font-semibold text-ui-brand" };
     case "rechazado":
     case "retenido":
-      return { texto: "En revisión / Retenido", clase: "inline-flex min-h-[28px] items-center gap-1.5 rounded-full border border-rose-200 bg-rose-50 px-2.5 py-1 font-body text-xs font-semibold text-rose-900" };
+      return { texto: "En revisión / Retenido", clase: "inline-flex min-h-[28px] items-center gap-1.5 rounded-full border border-ui-danger bg-ui-danger-soft px-2.5 py-1 font-body text-xs font-semibold text-ui-danger" };
     default:
-      return { texto: "Sin calcular", clase: "inline-flex min-h-[28px] items-center gap-1.5 rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 font-body text-xs font-semibold text-slate-900" };
+      return { texto: "Sin calcular", clase: "inline-flex min-h-[28px] items-center gap-1.5 rounded-full border border-ui-neutral bg-ui-neutral-soft px-2.5 py-1 font-body text-xs font-semibold text-ui-neutral" };
   }
 }
 

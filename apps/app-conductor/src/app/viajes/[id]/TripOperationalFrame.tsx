@@ -1,5 +1,6 @@
 "use client";
 
+import { Button as BaseButton } from "@ruum/ui/base";
 import { createContext, useContext, useLayoutEffect, useRef, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import Link from "next/link";
@@ -32,7 +33,7 @@ export function TripOperationalFrame({ children }: { children: ReactNode }) {
     <div data-trip-frame>
       <div data-trip-safety-bar>
         <Link href={returnPath ?? (pathname === `/viajes/${id}` ? "/viajes" : `/viajes/${id}`)} aria-label={pathname === `/viajes/${id}` ? "Volver a Traslados" : "Volver al traslado"}>← Volver</Link>
-        <button type="button" onClick={() => setSupport(true)} aria-haspopup="dialog" aria-expanded={support}>Soporte</button>
+        <BaseButton variant="ghost" type="button" onClick={() => setSupport(true)} aria-haspopup="dialog" aria-expanded={support}>Soporte</BaseButton>
         <EmergencyPanel trasladoId={id} compact />
       </div>
       {/* eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex -- El contenedor con scroll necesita foco para desplazarse con teclado. */}
@@ -52,8 +53,8 @@ export function TripDockPortal({ children, quick = false }: { children: ReactNod
 
 export function TripActionDock({ children, status, error }: { children: ReactNode; status: string; error?: string | null }) {
   return <TripDockPortal><section data-trip-primary aria-label="Acción principal del traslado">
-    <p role="status" className="text-xs font-bold text-text-secondary">{status}</p>
-    {error && <p role="alert" className="text-xs text-danger">{error}</p>}
+    <p role="status" className="text-xs font-bold text-ui-fg-muted">{status}</p>
+    {error && <p role="alert" className="text-xs text-ui-danger">{error}</p>}
     {children}
   </section></TripDockPortal>;
 }

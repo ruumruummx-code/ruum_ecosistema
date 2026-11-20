@@ -1,17 +1,13 @@
 import Link from "next/link";
+import { PageHeader } from "@ruum/ui/base";
 
 export function CuentaHeader({ titulo, descripcion }: { titulo: string; descripcion: string }) {
-  return (
-    <header className="flex flex-col gap-2">
-      <nav aria-label="Breadcrumb" className="font-body text-sm text-text-secondary">
-        <Link href="/panel" className="underline-offset-4 hover:underline">Panel</Link>
-        <span className="mx-2">/</span>
-        <Link href="/cuenta" className="underline-offset-4 hover:underline">Cuenta</Link>
-      </nav>
-      <h1 className="font-display text-3xl font-bold tracking-tight text-text-primary">{titulo}</h1>
-      <p className="font-body text-sm leading-6 text-text-secondary">{descripcion}</p>
-      <div className="conductor-ruta-divider mt-1 max-w-[320px]" aria-hidden />
-    </header>
-  );
+  return <div className="space-y-3">
+    <nav aria-label="Ubicación en la aplicación" className="flex gap-2 text-sm text-ui-fg-muted">
+      <Link href="/panel" className="underline-offset-4 hover:underline">Inicio</Link>
+      <span aria-hidden="true">/</span>
+      <Link href="/cuenta" className="underline-offset-4 hover:underline">Cuenta</Link>
+    </nav>
+    <PageHeader titulo={titulo} descripcion={descripcion} className="[&_h1]:text-2xl [&_p]:block" />
+  </div>;
 }
-

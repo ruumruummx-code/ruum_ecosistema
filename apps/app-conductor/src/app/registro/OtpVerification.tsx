@@ -1,3 +1,4 @@
+import { Input as BaseInput, Button as BaseButton } from "@ruum/ui/base";
 import { useEffect, useRef, type FormEvent } from "react";
 import { soloDigitos } from "./registration-validation";
 import { RegistrationAction } from "./RegistrationShell";
@@ -64,7 +65,7 @@ export function OtpVerification({
         <div className={styles.otpEntry}>
           <label htmlFor="codigo-verificacion">Código de verificación <span aria-hidden="true">*</span></label>
           <div className={styles.otpCode} data-invalid={Boolean(errorOtp)}>
-            <input id="codigo-verificacion" name="codigo-verificacion" ref={inputRef}
+            <BaseInput id="codigo-verificacion" name="codigo-verificacion" ref={inputRef}
               type="text" inputMode="numeric" pattern={`[0-9]{${codigoLongitud}}`} autoComplete="one-time-code"
               autoCapitalize="none" spellCheck={false} maxLength={codigoLongitud} value={codigoOtp}
               onChange={(event) => actualizarCodigo(event.target.value)}
@@ -84,7 +85,7 @@ export function OtpVerification({
           <p>Escríbelo aquí para activar tu cuenta y subir tus documentos sin salir de la app.</p>
         </div>
         <div className={styles.otpResend}>
-          <button
+          <BaseButton variant="ghost"
             type="button"
             onClick={onResend}
             disabled={esperaReenvioOtp > 0 || reenviandoOtp || verificandoOtp}
@@ -94,20 +95,20 @@ export function OtpVerification({
               : esperaReenvioOtp > 0
                 ? `Reenviar código (${esperaReenvioOtp}s)`
                 : "Reenviar código"}
-          </button>
+          </BaseButton>
         </div>
-          <button
+          <BaseButton variant="ghost"
             type="button"
             onClick={onAlreadyConfirmed}
             disabled={verificandoOtp}
             className={styles.otpAlreadyConfirmed}
           >
             Ya confirmé desde el enlace del correo
-          </button>
+          </BaseButton>
         <RegistrationAction><footer className={styles.actionFooter}>
-          <button type="submit" form="registration-otp" className={styles.primary} aria-busy={verificandoOtp} disabled={verificandoOtp || reenviandoOtp || codigoOtp.length !== codigoLongitud || bloqueado}>
+          <BaseButton variant="primary" type="submit" form="registration-otp" className={styles.primary} aria-busy={verificandoOtp} disabled={verificandoOtp || reenviandoOtp || codigoOtp.length !== codigoLongitud || bloqueado}>
             {verificandoOtp ? "Verificando…" : "Confirmar y activar"}<RegistrationIcon name="arrow" />
-          </button>
+          </BaseButton>
 
         </footer></RegistrationAction>
       </form>

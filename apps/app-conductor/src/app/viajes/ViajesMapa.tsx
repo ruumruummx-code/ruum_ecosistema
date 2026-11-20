@@ -1,5 +1,6 @@
 "use client";
 
+import { Button as BaseButton } from "@ruum/ui/base";
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { PasaporteRow } from "./trips-utils";
 import { tieneMapboxConfigurado } from "../../lib/mapbox-rutas";
@@ -84,7 +85,7 @@ export function TrasladosMapa({ Traslados, onSelect, vistaId, onReturnToList }: 
           el.className = "ruum-map-pin";
           // El marcador es un nodo DOM: puede heredar el contrato CSS del conductor.
           el.style.cssText =
-            "width:48px;height:48px;border-radius:50%;background:var(--conductor-pending-soft);border:3px solid var(--conductor-primary);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:900;color:var(--conductor-primary);box-shadow:var(--conductor-shadow);cursor:pointer;transform:translate(-50%,-50%)";
+            "width:48px;height:48px;border-radius:50%;background:var(--conductor-pending-soft);border:3px solid var(--conductor-primary);display:flex;align-items:center;justify-content:center;font-size:.875rem;font-weight:900;color:var(--conductor-primary);box-shadow:var(--conductor-shadow);cursor:pointer;transform:translate(-50%,-50%)";
           el.textContent = "📍";
           el.setAttribute("role", "button");
           el.setAttribute("aria-label", `Ver oferta ${viaje.origen_ciudad ?? ""} — ${viaje.ganancia_conductor ? "$" + Math.round(viaje.ganancia_conductor) : ""}`);
@@ -139,32 +140,32 @@ export function TrasladosMapa({ Traslados, onSelect, vistaId, onReturnToList }: 
     };
   }, [TrasladosConCoords, onSelect, vistaId]);
 
-  const fallback = (message: string) => <div className="flex h-full flex-col justify-center gap-2 rounded-xl border border-border bg-surface-elevated p-3 text-center">
+  const fallback = (message: string) => <div className="flex h-full flex-col justify-center gap-2 rounded-xl border border-ui-line bg-ui-muted p-3 text-center">
     <p className="text-sm">{message}</p>
-    {onReturnToList && <button type="button" className="min-h-12 rounded-xl border border-border p-2 text-sm" onClick={onReturnToList}>Volver a lista</button>}
+    {onReturnToList && <BaseButton variant="ghost" type="button" className="min-h-12 rounded-xl border border-ui-line p-2 text-sm" onClick={onReturnToList}>Volver a lista</BaseButton>}
   </div>;
   if (!tieneMapboxConfigurado()) return fallback("Mapa no disponible. Puedes revisar los traslados en la lista.");
   if (Traslados.length === 0) return null;
   if (TrasladosConCoords.length === 0) return fallback("Estos traslados aún no tienen coordenadas. Usa la lista para revisarlos.");
 
   return (
-    <div className="relative overflow-hidden rounded-2xl border border-border shadow-xs bg-surface" aria-label="Mapa de ofertas">
+    <div className="relative overflow-hidden rounded-lg border border-ui-line shadow-xs bg-ui-card" aria-label="Mapa de ofertas">
       {cargandoMapa && (
-        <div className="absolute inset-0 z-10 flex items-center justify-center bg-surface/70 backdrop-blur-sm">
+        <div className="absolute inset-0 z-10 flex items-center justify-center bg-ui-card/70 backdrop-blur-sm">
           <div className="flex flex-col items-center gap-2">
-            <div className="size-7 rounded-full border-3 border-border border-t-signal animate-spin" aria-hidden />
-            <span className="font-body text-sm font-semibold text-text-secondary">Cargando mapa…</span>
+            <div className="size-7 rounded-full border-3 border-ui-line border-t-signal animate-spin" aria-hidden />
+            <span className="font-body text-sm font-semibold text-ui-fg-muted">Cargando mapa…</span>
           </div>
         </div>
       )}
       {errorMapa && (
-        <div className="absolute top-3 left-3 right-3 z-10 rounded-xl border border-amber-500/30 bg-amber-500/10 px-3 py-2 font-body text-sm font-semibold text-amber-600">
+        <div className="absolute top-3 left-3 right-3 z-10 rounded-xl border border-ui-warning/30 bg-ui-warning/10 px-3 py-2 font-body text-sm font-semibold text-ui-warning">
           {errorMapa} — usa la lista
         </div>
       )}
       <div ref={containerRef} className="h-full min-h-[150px] w-full" role="application" aria-label="Mapa interactivo de ofertas, usa lista para accesibilidad" />
       <div className="absolute bottom-2 left-2 right-2 flex justify-center pointer-events-none">
-        <span className="rounded-full bg-surface-elevated/90 backdrop-blur border border-border/40 px-3 py-1.5 font-body text-sm font-semibold text-text-secondary shadow-sm">
+        <span className="rounded-full bg-ui-muted/90 backdrop-blur border border-ui-line/40 px-3 py-1.5 font-body text-sm font-semibold text-ui-fg-muted shadow-sm">
           {TrasladosConCoords.length} ofertas en mapa · Toca un pin para ver detalle
         </span>
       </div>

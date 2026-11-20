@@ -1,5 +1,6 @@
 "use client";
-import { Button, Aviso } from "@ruum/ui";
+import { Aviso } from "@ruum/ui";
+import { ConductorButton as Button } from "@/components/v2/ConductorUI";
 import { TEXTOS_CARGANDO, MENSAJE_EVIDENCIA_SINCRONIZANDO } from "@ruum/shared/constants";
 import { BadgeSincronizacion } from "./EvidencePreview";
 import { useEvidenceWizard } from "./EvidenceContext";
@@ -25,9 +26,9 @@ export function EvidenceReview() {
   const inspeccionCompletada = totalCamposInspeccionCompletados(inspeccion);
 
   return (
-    <section className="mt-5 rounded-2xl border border-border/28 bg-surface p-6 text-text-primary shadow-[0_18px_48px_rgba(0,0,0,0.45)]">
-      <p className="font-body text-sm font-semibold text-route-action">Revisión final</p>
-      <h2 className="mt-2 font-display text-2xl font-semibold text-text-primary">Confirma el registro completo</h2>
+    <section className="mt-5 rounded-lg border border-ui-line/28 bg-ui-card p-6 text-ui-fg shadow-ui-md">
+      <p className="font-body text-sm font-semibold text-ui-brand">Revisión final</p>
+      <h2 className="mt-2 font-display text-2xl font-semibold text-ui-fg">Confirma el registro completo</h2>
       <div className="mt-4">
         <EvidenceSyncStatusInline pendientesSubida={pendientesSubida} sincronizando={sincronizando} missing={etiquetasFaltantes} complete={registroCompleto} />
       </div>
@@ -36,30 +37,30 @@ export function EvidenceReview() {
           const foto = fotos.find((candidate) => candidate.angulo === item.angulo);
           const omitted = noAplica.has(item.angulo);
           return (
-            <div key={item.angulo} className="flex items-center justify-between gap-3 rounded-xl border border-border/24 bg-[var(--ruum-surface-subtle)] px-3 py-3">
+            <div key={item.angulo} className="flex items-center justify-between gap-3 rounded-xl border border-ui-line/24 bg-ui-muted px-3 py-3">
               <div>
-                <p className="font-body text-sm font-semibold text-text-primary">{item.titulo}</p>
-                <p className="font-body text-xs text-text-secondary">{item.obligatorio ? "Obligatoria" : "Opcional"}</p>
+                <p className="font-body text-sm font-semibold text-ui-fg">{item.titulo}</p>
+                <p className="font-body text-xs text-ui-fg-muted">{item.obligatorio ? "Obligatoria" : "Opcional"}</p>
               </div>
-              {foto ? <BadgeSincronizacion sincronizada={Boolean(foto.sincronizada)} /> : <span className="font-body text-xs text-text-secondary">{omitted ? "No aplica" : "Falta"}</span>}
+              {foto ? <BadgeSincronizacion sincronizada={Boolean(foto.sincronizada)} /> : <span className="font-body text-xs text-ui-fg-muted">{omitted ? "No aplica" : "Falta"}</span>}
             </div>
           );
         })}
       </div>
-      <section className="mt-5 rounded-xl border border-border/24 bg-[var(--ruum-surface-subtle)] p-4" aria-labelledby="revision-inspeccion-titulo">
+      <section className="mt-5 rounded-xl border border-ui-line/24 bg-ui-muted p-4" aria-labelledby="revision-inspeccion-titulo">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
-            <h3 id="revision-inspeccion-titulo" className="font-body text-sm font-semibold text-text-primary">Datos de inspección</h3>
-            <p className="mt-1 font-body text-xs text-text-secondary">
+            <h3 id="revision-inspeccion-titulo" className="font-body text-sm font-semibold text-ui-fg">Datos de inspección</h3>
+            <p className="mt-1 font-body text-xs text-ui-fg-muted">
               {inspeccionCompletada} de {CAMPOS_INSPECCION_OBLIGATORIOS.length} obligatorios
             </p>
           </div>
         </div>
-        <dl className="mt-3 grid gap-2 border-t border-border/18 pt-3 font-body text-sm sm:grid-cols-2">
+        <dl className="mt-3 grid gap-2 border-t border-ui-line/18 pt-3 font-body text-sm sm:grid-cols-2">
           {CAMPOS_INSPECCION.map(({ campo, etiqueta, obligatorio }) => (
             <div key={campo}>
-              <dt className="text-text-secondary">{etiqueta} {obligatorio ? "*" : "(opcional)"}</dt>
-              <dd className="text-text-primary">{inspeccion[campo] || (obligatorio ? "Sin capturar" : "Sin notas")}</dd>
+              <dt className="text-ui-fg-muted">{etiqueta} {obligatorio ? "*" : "(opcional)"}</dt>
+              <dd className="text-ui-fg">{inspeccion[campo] || (obligatorio ? "Sin capturar" : "Sin notas")}</dd>
             </div>
           ))}
         </dl>

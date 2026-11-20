@@ -1,5 +1,6 @@
 "use client";
 
+import { Button as BaseButton } from "@ruum/ui/base";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { MapaEstatico } from "@ruum/ui";
 import { validarDimensionesMinimasImagen } from "@ruum/shared/utils";
@@ -48,7 +49,7 @@ export function DocumentUploadField({
     };
   }, [previewUrl]);
 
-  const colorTexto = estado === "error" ? "text-danger-action" : estado === "subido" ? "text-success" : "text-text-tertiary/80";
+  const colorTexto = estado === "error" ? "text-ui-danger" : estado === "subido" ? "text-ui-success" : "text-ui-fg-muted/80";
 
   const abrirSelectorArchivo = () => {
     inputRef.current?.click();
@@ -99,7 +100,7 @@ export function DocumentUploadField({
   const IconoCamera = () => (
     <svg
       viewBox="0 0 24 24"
-      className="size-5 shrink-0 text-text-tertiary/80"
+      className="size-5 shrink-0 text-ui-fg-muted/80"
       fill="none"
       stroke="currentColor"
       strokeWidth="2"
@@ -117,7 +118,7 @@ export function DocumentUploadField({
   const IconoNube = () => (
     <svg
       viewBox="0 0 24 24"
-      className="size-5 shrink-0 text-text-tertiary/80"
+      className="size-5 shrink-0 text-ui-fg-muted/80"
       fill="none"
       stroke="currentColor"
       strokeWidth="2"
@@ -134,7 +135,7 @@ export function DocumentUploadField({
   const IconoCheck = () => (
     <svg
       viewBox="0 0 24 24"
-      className="size-4 shrink-0 text-success"
+      className="size-4 shrink-0 text-ui-success"
       fill="none"
       stroke="currentColor"
       strokeWidth="2"
@@ -148,13 +149,13 @@ export function DocumentUploadField({
 
   return (
     <div className="flex w-full max-w-full min-w-0 flex-col gap-1.5 overflow-hidden">
-      <label className="font-body text-sm font-semibold text-text-primary">
+      <label className="font-body text-sm font-semibold text-ui-fg">
         {etiqueta}
-        <span className="ml-1 text-danger-action" aria-hidden> *</span>
+        <span className="ml-1 text-ui-danger" aria-hidden> *</span>
       </label>
 
       {/* Especificaciones del archivo */}
-      <p className="font-body text-xs text-text-tertiary">
+      <p className="font-body text-xs text-ui-fg-muted">
         Formatos: {FORMATOS_PERMITIDOS.join(", ")} · Máximo 5 MB
       </p>
 
@@ -169,17 +170,17 @@ export function DocumentUploadField({
       />
 
       {archivo && estado !== "subido" ? (
-        <div className="flex w-full max-w-full min-w-0 flex-col gap-3 rounded-[10px] border border-dashed border-border-strong bg-surface-elevated/30 p-3 transition-all hover:border-route-action sm:flex-row sm:items-center">
+        <div className="flex w-full max-w-full min-w-0 flex-col gap-3 rounded-lg border border-dashed border-ui-field bg-ui-muted/30 p-3 transition-all hover:border-ui-brand sm:flex-row sm:items-center">
           <div className="flex min-w-0 flex-1 items-center gap-3">
             {previewUrl ? (
-              <MapaEstatico src={previewUrl} alt="" width={44} height={44} className="shrink-0 rounded-lg object-cover ring-1 ring-border" />
+              <MapaEstatico src={previewUrl} alt="" width={44} height={44} className="shrink-0 rounded-lg object-cover ring-1 ring-ui-line" />
             ) : (
-              <div className="flex size-11 shrink-0 items-center justify-center rounded-lg bg-surface-elevated font-body text-xs font-semibold text-text-tertiary" aria-hidden>
+              <div className="flex size-11 shrink-0 items-center justify-center rounded-lg bg-ui-muted font-body text-xs font-semibold text-ui-fg-muted" aria-hidden>
                 PDF
               </div>
             )}
             <div className="min-w-0 flex-1">
-              <p className="truncate font-body text-sm font-medium text-text-primary">{enmascararNombreArchivo(archivo.name)}</p>
+              <p className="truncate font-body text-sm font-medium text-ui-fg">{enmascararNombreArchivo(archivo.name)}</p>
               {estado !== "pendiente" && (
                 <p className={`truncate font-body text-xs font-medium leading-5 ${colorTexto}`}>
                   {textoEstadoDocumento(estado, archivo.name)}
@@ -187,25 +188,25 @@ export function DocumentUploadField({
               )}
               {/* Barra de progreso durante la subida */}
               {estado === "subiendo" && progreso === null && (
-                <div className="mt-1 h-1.5 w-full max-w-[120px] overflow-hidden rounded-full bg-surface-elevated">
-                  <div className="h-full w-1/2 animate-pulse bg-signal" />
+                <div className="mt-1 h-1.5 w-full max-w-[120px] overflow-hidden rounded-full bg-ui-muted">
+                  <div className="h-full w-1/2 animate-pulse bg-ui-brand" />
                 </div>
               )}
             </div>
           </div>
           <div className="flex shrink-0 items-center justify-end gap-1.5 self-end sm:self-center">
-            <button
+            <BaseButton variant="ghost"
               type="button"
               onClick={abrirSelectorArchivo}
-              className="inline-flex min-h-9 items-center justify-center rounded-lg px-2.5 py-1.5 font-body text-xs font-semibold text-text-secondary hover:bg-surface-elevated hover:text-text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-route-action"
+              className="inline-flex min-h-9 items-center justify-center rounded-lg px-2.5 py-1.5 font-body text-xs font-semibold text-ui-fg-muted hover:bg-ui-muted hover:text-ui-fg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ui-brand"
               aria-label="Reemplazar documento"
             >
               Reemplazar
-            </button>
-            <button
+            </BaseButton>
+            <BaseButton variant="ghost"
               type="button"
               onClick={handleEliminar}
-              className="inline-flex size-9 items-center justify-center rounded-lg p-1.5 text-text-secondary hover:bg-surface-elevated hover:text-danger-action focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-route-action"
+              className="inline-flex size-9 items-center justify-center rounded-lg p-1.5 text-ui-fg-muted hover:bg-ui-muted hover:text-ui-danger focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ui-brand"
               aria-label="Eliminar documento"
             >
               <svg
@@ -220,39 +221,39 @@ export function DocumentUploadField({
               >
                 <path d="M18 6L6 18M6 6l12 12" />
               </svg>
-            </button>
+            </BaseButton>
           </div>
         </div>
       ) : estado === "subido" ? (
-        <div className="w-full max-w-full min-w-0 rounded-[10px] border border-success bg-control-soft p-3.5">
+        <div className="w-full max-w-full min-w-0 rounded-lg border border-ui-success bg-ui-success-soft p-3.5">
           <div className="flex items-center gap-2">
             <IconoCheck />
-            <p className="font-body text-sm font-semibold text-success">Documento guardado en tu expediente</p>
+            <p className="font-body text-sm font-semibold text-ui-success">Documento guardado en tu expediente</p>
           </div>
-          <p className="mt-1 font-body text-xs text-text-secondary">
+          <p className="mt-1 font-body text-xs text-ui-fg-muted">
             No necesitas volver a cargarlo en este dispositivo.
           </p>
         </div>
       ) : (
-        <button
+        <BaseButton variant="ghost"
           type="button"
           onClick={abrirSelectorArchivo}
           className={[
-            "flex w-full max-w-full min-w-0 cursor-pointer items-center justify-center gap-2 rounded-[10px] border-2 border-dashed",
-            "border-border-strong bg-surface-elevated/30 px-3.5 py-3 text-center",
-            "font-body text-sm font-semibold text-text-secondary transition-all",
-            "hover:border-route-action hover:bg-surface hover:text-route-action",
-            "focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-route-action"
+            "flex w-full max-w-full min-w-0 cursor-pointer items-center justify-center gap-2 rounded-lg border-2 border-dashed",
+            "border-ui-field bg-ui-muted/30 px-3.5 py-3 text-center",
+            "font-body text-sm font-semibold text-ui-fg-muted transition-all",
+            "hover:border-ui-brand hover:bg-ui-card hover:text-ui-brand",
+            "focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-ui-brand"
           ].join(" ")}
           aria-label={`Seleccionar archivo para ${etiqueta}`}
         >
           <IconoNube />
           <span className="truncate">Elegir o tomar foto</span>
-        </button>
+        </BaseButton>
       )}
 
       {error || errorLocal ? (
-        <p role="alert" className="font-body text-sm font-medium leading-5 text-danger-action">
+        <p role="alert" className="font-body text-sm font-medium leading-5 text-ui-danger">
           {error || errorLocal}
         </p>
       ) : null}

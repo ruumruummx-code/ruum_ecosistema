@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { Button } from "@ruum/ui";
+import { ConductorButton as Button } from "@/components/v2/ConductorUI";
 
 interface ConfirmarDisponibilidadProps {
   abierto: boolean;
@@ -34,7 +34,7 @@ export function ConfirmarDisponibilidad({
     <dialog
       ref={dialogRef}
       aria-labelledby="confirmar-disponibilidad-titulo"
-      className="w-[min(92vw,420px)] rounded-2xl border border-border bg-surface p-0 text-text-primary shadow-[0_24px_80px_rgba(26,31,46,0.28)] backdrop:bg-surface-strong"
+      className="w-[min(92vw,420px)] rounded-lg border border-ui-line bg-ui-card p-0 text-ui-fg shadow-ui-md backdrop:bg-ui-muted"
       onCancel={(evento) => {
         evento.preventDefault();
         if (!persistiendo) onCancelar();
@@ -44,7 +44,7 @@ export function ConfirmarDisponibilidad({
         <h2 id="confirmar-disponibilidad-titulo" className="font-display text-xl font-semibold">
           ¿Pasas a no disponible?
         </h2>
-        <p className="mt-3 font-body text-sm leading-6 text-text-secondary">
+        <p className="mt-3 font-body text-sm leading-6 text-ui-fg-muted">
           Dejarás de recibir traslados nuevos hasta que reactives tu disponibilidad.
         </p>
         <div className="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">

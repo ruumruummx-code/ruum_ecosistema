@@ -1,4 +1,5 @@
 "use client";
+import { Button as BaseButton, Input as BaseInput, NativeSelect as BaseSelect } from "@ruum/ui/base";
 import { useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
@@ -45,18 +46,18 @@ export default function PaginaEvidencia() {
       <h1>{step<5 ? PHOTOS.at(step)!.label : STEPS.at(step)!}</h1>
       {step<5 && <>
         <p>Foto {step+1} de 5. {photo.instruction}</p>
-        {captured && fotoSrc(captured) ? <button type="button" className={styles.photoButton} onClick={()=>setPreview(true)} aria-label="Ampliar fotografía">
+        {captured && fotoSrc(captured) ? <BaseButton variant="ghost" type="button" className={styles.photoButton} onClick={()=>setPreview(true)} aria-label="Ampliar fotografía">
           {/* eslint-disable-next-line @next/next/no-img-element -- Vista previa de captura local o URL firmada. */}
           <img className={styles.preview} src={fotoSrc(captured)!} alt={`Evidencia: ${photo.label}`} /><span className={styles.photoBadge}><span aria-hidden="true">✓ </span>Ampliar fotografía</span>
-        </button> : <div className={styles.photoPlaceholder}><span aria-hidden="true" className={styles.photoPlaceholderIcon}>📷</span><span>La fotografía aparecerá aquí</span></div>}
+        </BaseButton> : <div className={styles.photoPlaceholder}><span aria-hidden="true" className={styles.photoPlaceholderIcon}>📷</span><span>La fotografía aparecerá aquí</span></div>}
         {captured && <p role="status">{captured.sincronizada ? "Sincronizada" : "Guardada en el dispositivo; pendiente de sincronización"}</p>}
 
       </>}
-      {step===5 && <><p>Registra las llaves físicas {final ? "entregadas" : "recibidas"}.</p><label>Cantidad de llaves<input type="number" inputMode="numeric" min={0} step={1} value={r.llavesCount<0 ? "" : r.llavesCount} onChange={e=>r.setLlavesCount(e.target.value==="" ? -1 : Number(e.target.value))} /></label><p>Cuenta las llaves con el contacto antes de continuar.</p></>}
-      {step===6 && <><label>Kilometraje actual<input inputMode="numeric" value={r.kilometraje} onChange={e=>r.setKilometraje(e.target.value.replace(/[^0-9]/g,""))} /></label>
-        <label>Nivel de combustible<select value={r.gasolinaSegments<0 ? "" : r.gasolinaSegments} onChange={e=>r.setGasolinaSegments(e.target.value==="" ? -1 : Number(e.target.value))}><option value="">Selecciona</option>{[[0,"Vacío"],[1,"Reserva"],[2,"1/4"],[4,"1/2"],[6,"3/4"],[8,"Lleno"]].map(([v,l])=><option key={v} value={v}>{l}</option>)}</select></label></>}
-      {step===7 && <><p>Comprobación {documents+1} de 5</p><label>{docFields.at(documents)!.label}<select value={docFields.at(documents)!.value} onChange={e=>docFields.at(documents)!.set(e.target.value)}><option value="">Selecciona</option><option value="si">Sí, presente</option><option value="no">No, ausente</option></select></label><p>Registra lo observado. Una ausencia queda sujeta a las reglas de operación.</p></>}
-      {step===8 && <><label>Observaciones (opcional)<textarea maxLength={1000} rows={3} value={r.notas} onChange={e=>r.setNotas(e.target.value)} /></label>{final && <><label>¿Hay daños nuevos?<select value={r.presentaDanosNuevos ? "si" : "no"} onChange={e=>r.setPresentaDanosNuevos(e.target.value==="si")}><option value="no">No</option><option value="si">Sí</option></select></label>{r.presentaDanosNuevos && <button type="button" onClick={()=>void r.capturar("dano_previo")} disabled={!!r.enviando}>{r.obtenerFoto("dano_previo") ? "Volver a capturar daño" : "Fotografiar daño nuevo"}</button>}</>}</>}
+      {step===5 && <><p>Registra las llaves físicas {final ? "entregadas" : "recibidas"}.</p><label>Cantidad de llaves<BaseInput type="number" inputMode="numeric" min={0} step={1} value={r.llavesCount<0 ? "" : r.llavesCount} onChange={e=>r.setLlavesCount(e.target.value==="" ? -1 : Number(e.target.value))} /></label><p>Cuenta las llaves con el contacto antes de continuar.</p></>}
+      {step===6 && <><label>Kilometraje actual<BaseInput inputMode="numeric" value={r.kilometraje} onChange={e=>r.setKilometraje(e.target.value.replace(/[^0-9]/g,""))} /></label>
+        <label>Nivel de combustible<BaseSelect value={r.gasolinaSegments<0 ? "" : r.gasolinaSegments} onChange={e=>r.setGasolinaSegments(e.target.value==="" ? -1 : Number(e.target.value))}><option value="">Selecciona</option>{[[0,"Vacío"],[1,"Reserva"],[2,"1/4"],[4,"1/2"],[6,"3/4"],[8,"Lleno"]].map(([v,l])=><option key={v} value={v}>{l}</option>)}</BaseSelect></label></>}
+      {step===7 && <><p>Comprobación {documents+1} de 5</p><label>{docFields.at(documents)!.label}<BaseSelect value={docFields.at(documents)!.value} onChange={e=>docFields.at(documents)!.set(e.target.value)}><option value="">Selecciona</option><option value="si">Sí, presente</option><option value="no">No, ausente</option></BaseSelect></label><p>Registra lo observado. Una ausencia queda sujeta a las reglas de operación.</p></>}
+      {step===8 && <><label>Observaciones (opcional)<textarea maxLength={1000} rows={3} value={r.notas} onChange={e=>r.setNotas(e.target.value)} /></label>{final && <><label>¿Hay daños nuevos?<BaseSelect value={r.presentaDanosNuevos ? "si" : "no"} onChange={e=>r.setPresentaDanosNuevos(e.target.value==="si")}><option value="no">No</option><option value="si">Sí</option></BaseSelect></label>{r.presentaDanosNuevos && <BaseButton variant="ghost" type="button" onClick={()=>void r.capturar("dano_previo")} disabled={!!r.enviando}>{r.obtenerFoto("dano_previo") ? "Volver a capturar daño" : "Fotografiar daño nuevo"}</BaseButton>}</>}</>}
       {step===9 && <><p role="status">{r.borradorLocalGuardado ? "Borrador local en esta pestaña" : "Borrador local no confirmado"}</p><p>El servidor validará los requisitos.</p><ul className={styles.checklist}>
         <li>Fotos capturadas: {r.fotosObligCapturadas}/5</li><li>Sincronizadas: {r.angulosObligatorios.filter(a=>r.obtenerFoto(a)?.sincronizada).length}/5</li>
         <li>Llaves: {r.llavesCount<0 ? "Pendiente" : r.llavesCount}</li><li>Odómetro: {r.kilometraje||"Pendiente"}</li><li>Combustible: {r.gasolinaSegments<0 ? "Pendiente" : r.getFuelText(r.gasolinaSegments)}</li><li>Documentos comprobados: {docFields.filter(d=>d.value).length}/5</li>
@@ -65,9 +66,9 @@ export default function PaginaEvidencia() {
     {preview && captured && <TripDialog title={`Fotografía: ${photo.label}`} onClose={()=>setPreview(false)}>
       {/* eslint-disable-next-line @next/next/no-img-element -- Revisión completa de evidencia, sin recorte. */}
       <img src={fotoSrc(captured)!} alt={`Evidencia completa: ${photo.label}`} className="h-auto w-full object-contain" />
-      <button type="button" className={styles.secondary} disabled={!!r.enviando} onClick={()=>{setPreview(false);void r.capturar(photo.angle);}}>Volver a tomar fotografía</button>
+      <BaseButton variant="outline" type="button" className={styles.secondary} disabled={!!r.enviando} onClick={()=>{setPreview(false);void r.capturar(photo.angle);}}>Volver a tomar fotografía</BaseButton>
     </TripDialog>}
-    {steps && <TripDialog title="Pasos del registro" onClose={()=>setSteps(false)}><div className={styles.steps}>{STEPS.map((s,i)=><button key={s} type="button" onClick={()=>{setStep(i);setSteps(false);}} aria-current={step===i ? "step" : undefined}>{i+1}. {s}</button>)}<button type="button" onClick={()=>{void r.guardarBorrador();setSteps(false);}}>Guardar borrador</button><button type="button" onClick={()=>{void r.drenarCola();setSteps(false);}}>Reintentar sincronización</button></div></TripDialog>}
+    {steps && <TripDialog title="Pasos del registro" onClose={()=>setSteps(false)}><div className={styles.steps}>{STEPS.map((s,i)=><BaseButton variant="ghost" key={s} type="button" onClick={()=>{setStep(i);setSteps(false);}} aria-current={step===i ? "step" : undefined}>{i+1}. {s}</BaseButton>)}<BaseButton variant="ghost" type="button" onClick={()=>{void r.guardarBorrador();setSteps(false);}}>Guardar borrador</BaseButton><BaseButton variant="ghost" type="button" onClick={()=>{void r.drenarCola();setSteps(false);}}>Reintentar sincronización</BaseButton></div></TripDialog>}
     <EvidenciaCsatSheet showCsatSheet={r.showCsatSheet} setShowCsatSheet={r.setShowCsatSheet} csatValor={r.csatValor} setCsatValor={r.setCsatValor} cesValor={r.cesValor} setCesValor={r.setCesValor} enviandoFeedback={r.enviandoFeedback} setEnviandoFeedback={r.setEnviandoFeedback} onEnviarFeedback={r.enviarFeedback} onOmitirFeedback={r.omitirFeedback} />
   </>;
 }

@@ -1,27 +1,27 @@
-.card { display:flex; flex-direction:column; gap:4px; padding:10px; min-width:0; border:1px solid var(--conductor-border); border-radius:16px; background:var(--conductor-surface); color:var(--conductor-primary); }
+.card { display:flex; flex-direction:column; gap:4px; padding:10px; min-width:0; border:1px solid var(--ui-line); border-radius: 0.5rem; background:var(--ui-card); color:var(--ui-fg); }
 .top { display:flex; align-items:center; gap:8px; justify-content:space-between; }
 .topStatus { display:flex; align-items:center; gap:6px; flex-wrap:wrap; }
-.groupBadge { font-size:12px; font-weight:600; padding:2px 8px; border-radius:999px; background:var(--conductor-surface-secondary); color:var(--conductor-action); border:1px solid var(--conductor-border); }
-.available { font-size:14px; line-height:1.3; color:var(--conductor-muted); }
+.groupBadge { font-size: 0.75rem; font-weight:600; padding:2px 8px; border-radius: 624.938rem; background:var(--ui-muted); color:var(--ui-brand); border:1px solid var(--ui-line); }
+.available { font-size: 0.875rem; line-height:1.3; color:var(--ui-fg-muted); }
 .available svg { display:none; }
-.folio { font-size:14px; color:var(--conductor-muted); }
+.folio { font-size: 0.875rem; color:var(--ui-fg-muted); }
 .summary { display:flex; align-items:center; justify-content:space-between; gap:8px; }
 .priceBlock { min-width:0; }
-.priceBlock strong { font-size:22px; line-height:1.2; font-weight:700; }
-.priceBlock > span { margin-left:4px; font-size:14px; }
-.priceBlock p { margin:0; font-size:14px; line-height:1.4; overflow-wrap:anywhere; }
-.schedule { font-size:14px; line-height:1.4; color:var(--conductor-muted); }
+.priceBlock strong { font-size: 1.25rem; line-height:1.2; font-weight:700; }
+.priceBlock > span { margin-left:4px; font-size: 0.875rem; }
+.priceBlock p { margin:0; font-size: 0.875rem; line-height:1.4; overflow-wrap:anywhere; }
+.schedule { font-size: 0.875rem; line-height:1.4; color:var(--ui-fg-muted); }
 .route { margin:0; display:grid; gap:6px; }
 .route > div { display:grid; grid-template-columns:54px minmax(0,1fr); gap:6px; }
-.route dt { font-size:14px; line-height:1.4; color:var(--conductor-muted); }
-.route dd { margin:0; font-size:14px; line-height:1.4; display:-webkit-box; -webkit-box-orient:vertical; -webkit-line-clamp:2; overflow:hidden; overflow-wrap:anywhere; }
-.stats { display:flex; flex-wrap:wrap; gap:8px; color:var(--conductor-muted); font-size:14px; line-height:1.4; }
+.route dt { font-size: 0.875rem; line-height:1.4; color:var(--ui-fg-muted); }
+.route dd { margin:0; font-size: 0.875rem; line-height:1.4; display:-webkit-box; -webkit-box-orient:vertical; -webkit-line-clamp:2; overflow:hidden; overflow-wrap:anywhere; }
+.stats { display:flex; flex-wrap:wrap; gap:8px; color:var(--ui-fg-muted); font-size: 0.875rem; line-height:1.4; }
 .stats > span { display:flex; align-items:center; gap:4px; }
 .stats svg { width:16px; height:16px; }
-.previewMap { height:150px; min-height:150px; overflow:hidden; border-radius:12px; }
+.previewMap { height:150px; min-height:150px; overflow:hidden; border-radius: 0.5rem; }
 .previewMap > div { height:100%; }
-.action { display:flex; min-height:56px; align-items:center; justify-content:center; padding:10px 12px; border-radius:12px; background:var(--conductor-action); color:var(--ruum-on-primary); font-size:16px; font-weight:600; line-height:1.2; text-align:center; }
+.action { display:flex; min-height:56px; align-items:center; justify-content:center; padding:10px 12px; border-radius: 0.5rem; background:var(--ui-brand); color:var(--ruum-on-primary); font-size: 1rem; font-weight:600; line-height:1.2; text-align:center; }
 .actionRow { display:flex; gap:8px; }
 .actionRow > a { flex:1; }
-.options { min-height:56px; min-width:56px; border:1px solid var(--conductor-border); border-radius:12px; }
-.card :is(a,button):focus-visible { outline:3px solid var(--conductor-focus); outline-offset:-3px; }
+.options { min-height:56px; min-width:56px; border:1px solid var(--ui-line); border-radius: 0.5rem; }
+.card :is(a,button):focus-visible { outline:3px solid var(--ui-focus); outline-offset:-3px; }

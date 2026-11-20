@@ -49,7 +49,7 @@ export function MapaRutaConduccion({ origen, destino }: MapaRutaConduccionProps)
 
   if (cargando) {
     return (
-      <div className="h-44 w-full animate-pulse rounded-xl bg-surface-elevated/45 border border-border/10 flex items-center justify-center text-text-tertiary font-body text-xs" aria-hidden>
+      <div className="h-44 w-full animate-pulse rounded-xl bg-ui-muted/45 border border-ui-line/10 flex items-center justify-center text-ui-fg-muted font-body text-xs" aria-hidden>
         Cargando mapa interactivo...
       </div>
     );
@@ -58,22 +58,22 @@ export function MapaRutaConduccion({ origen, destino }: MapaRutaConduccionProps)
   if (!urlMapa) {
     // OSM / Leaflet / or static fallback placeholder if Mapbox is not configured
     return (
-      <div className="h-44 w-full bg-surface-elevated/45 rounded-xl flex flex-col items-center justify-center border border-border/10 relative overflow-hidden">
+      <div className="h-44 w-full bg-ui-muted/45 rounded-xl flex flex-col items-center justify-center border border-ui-line/10 relative overflow-hidden">
         {/* Simple visual path fallback */}
         <svg width="100%" height="100%" className="absolute inset-0 select-none opacity-20 pointer-events-none" aria-hidden="true">
           <path d="M 30 130 Q 120 40 210 120 T 370 50" fill="none" stroke="var(--conductor-brand)" strokeWidth="4" strokeDasharray="8, 8" />
         </svg>
-        <div className="w-10 h-10 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 text-lg z-10">
+        <div className="w-10 h-10 rounded-full bg-ui-success/10 border border-ui-success/20 flex items-center justify-center text-ui-success text-lg z-10">
           📍
         </div>
-        <span className="font-display text-xs font-bold text-text-secondary mt-2 z-10">Ruta de conducción activa</span>
-        <span className="font-body text-[10px] text-text-tertiary z-10">{origen.lat.toFixed(4)}, {origen.lng.toFixed(4)} ➔ {destino.lat.toFixed(4)}, {destino.lng.toFixed(4)}</span>
+        <span className="font-display text-xs font-bold text-ui-fg-muted mt-2 z-10">Ruta de conducción activa</span>
+        <span className="font-body text-xs text-ui-fg-muted z-10">{origen.lat.toFixed(4)}, {origen.lng.toFixed(4)} ➔ {destino.lat.toFixed(4)}, {destino.lng.toFixed(4)}</span>
       </div>
     );
   }
 
   return (
-    <div className="h-44 w-full rounded-xl border border-border/30 overflow-hidden relative">
+    <div className="h-44 w-full rounded-xl border border-ui-line/30 overflow-hidden relative">
       <MapaEstatico
         src={urlMapa}
         alt="Mapa del trayecto desde origen hasta el destino del traslado"

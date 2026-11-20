@@ -1,7 +1,9 @@
 "use client";
 
+import { Button as BaseButton } from "@ruum/ui/base";
 import { useState } from "react";
-import { Aviso, Button } from "@ruum/ui";
+import { Aviso } from "@ruum/ui";
+import { ConductorButton as Button } from "@/components/v2/ConductorUI";
 import { TEXTOS_CARGANDO } from "@ruum/shared/constants";
 import { traducirErrorOperativo } from "@ruum/shared/utils";
 import { crearLlamadaEnmascarada, enviarMensaje } from "@ruum/api/services";
@@ -79,46 +81,46 @@ export function ContactActionBar({ trasladoId, role, name, phone }: ContactActio
   }
 
   return (
-    <section id="contacto" className="mt-4 rounded-xl border border-route-action bg-surface-elevated px-4 py-4">
+    <section id="contacto" className="mt-4 rounded-xl border border-ui-brand bg-ui-muted px-4 py-4">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div className="min-w-0">
-          <p className="font-body text-sm font-semibold text-text-tertiary">{ROLE_LABEL[role]}</p>
+          <p className="font-body text-sm font-semibold text-ui-fg-muted">{ROLE_LABEL[role]}</p>
           <p className="mt-1 break-words font-display text-lg font-semibold">{displayName}</p>
-          {displayPhone && <p className="mt-1 break-words font-body text-sm text-text-secondary">{displayPhone}</p>}
+          {displayPhone && <p className="mt-1 break-words font-body text-sm text-ui-fg-muted">{displayPhone}</p>}
         </div>
       </div>
 
       <div className="mt-4">
-        <p className="font-body text-xs font-semibold uppercase tracking-wide text-text-tertiary">
+        <p className="font-body text-xs font-semibold uppercase tracking-wide text-ui-fg-muted">
           {isSupport ? "Mensaje rápido a soporte (1 toque)" : "Mensaje rápido por Ruum (1 toque)"}
         </p>
         {/* Q10: chips 1-tap siempre visibles, scrolleables, 44dp */}
         <div className="mt-2 flex gap-2 overflow-x-auto pb-2 pt-1 scrollbar-none -mx-1 px-1">
           {MENSAJES_RAPIDOS_CONTACTO.slice(0, 3).map((quickMessage) => (
-            <button
+            <BaseButton variant="ghost"
               key={quickMessage}
               type="button"
               onClick={() => void sendQuickMessage(quickMessage)}
               disabled={busy !== null}
-              className="shrink-0 min-h-11 rounded-full border border-route-action bg-route-soft px-4 py-2 font-body text-sm font-bold text-route-action transition hover:bg-surface active:scale-[0.98] disabled:cursor-wait disabled:border-border disabled:bg-surface disabled:text-disabled whitespace-nowrap"
+              className="shrink-0 min-h-11 rounded-full border border-ui-brand bg-ui-brand-soft px-4 py-2 font-body text-sm font-bold text-ui-brand transition hover:bg-ui-card active:scale-[0.98] disabled:cursor-wait disabled:border-ui-line disabled:bg-ui-card disabled:text-disabled whitespace-nowrap"
             >
               {busy === quickMessage ? TEXTOS_CARGANDO.enviando : `💬 ${quickMessage}`}
-            </button>
+            </BaseButton>
           ))}
         </div>
         <details className="mt-1">
-          <summary className="cursor-pointer font-body text-xs font-semibold text-text-tertiary hover:text-text-primary select-none py-1">Ver más mensajes</summary>
+          <summary className="cursor-pointer font-body text-xs font-semibold text-ui-fg-muted hover:text-ui-fg select-none py-1">Ver más mensajes</summary>
           <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2">
             {MENSAJES_RAPIDOS_CONTACTO.slice(3).map((quickMessage) => (
-              <button
+              <BaseButton variant="ghost"
                 key={quickMessage}
                 type="button"
                 onClick={() => void sendQuickMessage(quickMessage)}
                 disabled={busy !== null}
-                className="min-h-11 rounded-lg border border-route-action bg-route-soft px-3 py-2 text-left font-body text-sm font-semibold text-route-action transition hover:bg-surface disabled:cursor-wait disabled:border-border disabled:bg-surface disabled:text-disabled"
+                className="min-h-11 rounded-lg border border-ui-brand bg-ui-brand-soft px-3 py-2 text-left font-body text-sm font-semibold text-ui-brand transition hover:bg-ui-card disabled:cursor-wait disabled:border-ui-line disabled:bg-ui-card disabled:text-disabled"
               >
                 {busy === quickMessage ? TEXTOS_CARGANDO.enviando : quickMessage}
-              </button>
+              </BaseButton>
             ))}
           </div>
         </details>

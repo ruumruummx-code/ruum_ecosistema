@@ -1,3 +1,5 @@
+import Image from "next/image";
+import { NativeSelect as BaseSelect, Button as BaseButton } from "@ruum/ui/base";
 import { DenseField } from "./DenseField";
 import styles from "./registration.module.css";
 import type { fortalezaPassword } from "@ruum/shared/utils";
@@ -88,9 +90,9 @@ export function AccountStep({
       <DenseField etiqueta="Teléfono" type="tel" inputMode="tel" placeholder="10 dígitos"
         leading={<span className={styles.countryPicker}>
           {/* Bandera de México: colores de identidad nacional, independientes del tema. */}
-          <svg width="27" height="18" viewBox="0 0 30 20" aria-hidden="true"><rect width="30" height="20" rx="2" fill="#fff" /><path d="M2 0h8v20H2a2 2 0 0 1-2-2V2a2 2 0 0 1 2-2Z" fill="#006847" /><path d="M20 0h8a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2h-8Z" fill="#ce1126" /><path d="m13 8 3-2 1 4-2 2-2-2m-2 2q4 6 8 0" fill="#916e35" stroke="#497446" strokeWidth="1" /></svg>
+          <Image src="/imagenes/bandera-mexico.svg" width={27} height={18} alt="" aria-hidden="true" />
           <span aria-hidden="true">⌄</span>
-          <select className={styles.countryCode} aria-label="Código de país" defaultValue="+52"><option value="+52">México (+52)</option></select>
+          <BaseSelect className={styles.countryCode} aria-label="Código de país" defaultValue="+52"><option value="+52">México (+52)</option></BaseSelect>
         </span>}
         trailing={<RegistrationIcon name="phone" />}
         value={formatoTelefonoNacional(telefono)} onChange={manejarCambioTelefono}
@@ -106,13 +108,13 @@ export function AccountStep({
         <DenseField etiqueta="Contraseña" type={mostrarPassword ? "text" : "password"} value={password}
           aria-describedby="requisitos-password" autoCapitalize="none" autoCorrect="off" spellCheck={false}
           placeholder="Mínimo 8 caracteres" leading={<RegistrationIcon name="lock" />}
-          trailing={<button type="button" className={styles.passwordToggle} aria-label={mostrarPassword ? "Ocultar contraseña" : "Mostrar contraseña"} aria-pressed={mostrarPassword} onClick={() => setMostrarPassword((actual) => !actual)}><RegistrationIcon name={mostrarPassword ? "eye-off" : "eye"} /></button>}
+          trailing={<BaseButton variant="ghost" type="button" className={styles.passwordToggle} aria-label={mostrarPassword ? "Ocultar contraseña" : "Mostrar contraseña"} aria-pressed={mostrarPassword} onClick={() => setMostrarPassword((actual) => !actual)}><RegistrationIcon name={mostrarPassword ? "eye-off" : "eye"} /></BaseButton>}
           onChange={(e) => { const valor = e.target.value; setPassword(valor); limpiarErrorCampo("password"); if (confirmacionPassword) validarConfirmacion(confirmacionPassword, valor); }}
           onBlur={() => validarPassword()} error={erroresCampos.password} required minLength={8} autoComplete="new-password" enterKeyHint="next" />
         <DenseField etiqueta="Confirmar contraseña" type={mostrarConfirmacion ? "text" : "password"} value={confirmacionPassword}
           aria-describedby="requisitos-password" autoCapitalize="none" autoCorrect="off" spellCheck={false}
           placeholder="Repite tu contraseña" leading={<RegistrationIcon name="lock" />}
-          trailing={<button type="button" className={styles.passwordToggle} aria-label={mostrarConfirmacion ? "Ocultar confirmación de contraseña" : "Mostrar confirmación de contraseña"} aria-pressed={mostrarConfirmacion} onClick={() => setMostrarConfirmacion((actual) => !actual)}><RegistrationIcon name={mostrarConfirmacion ? "eye-off" : "eye"} /></button>}
+          trailing={<BaseButton variant="ghost" type="button" className={styles.passwordToggle} aria-label={mostrarConfirmacion ? "Ocultar confirmación de contraseña" : "Mostrar confirmación de contraseña"} aria-pressed={mostrarConfirmacion} onClick={() => setMostrarConfirmacion((actual) => !actual)}><RegistrationIcon name={mostrarConfirmacion ? "eye-off" : "eye"} /></BaseButton>}
           onChange={(e) => { setConfirmacionPassword(e.target.value); validarConfirmacion(e.target.value, password); }}
           error={erroresCampos.confirmacionPassword} required minLength={8} autoComplete="new-password" enterKeyHint="go" />
         <details className={styles.passwordRequirements}>

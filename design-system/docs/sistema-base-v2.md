@@ -88,3 +88,26 @@ Iconos: `lucide-react` (no dibujar SVG a mano).
 ## Receta para migrar una pantalla
 
 Ver `docs/encargo-diseno/09-migrar-pantalla-a-base-v2.md`.
+
+
+## Aplicación conductor
+
+Conductor usa la misma capa `@ruum/ui/base`, los mismos tokens `ui-*` y la
+misma tipografía que Usuario. Su diseño es móvil: referencia de 390 px,
+compatibilidad con 320 px y un único marco de hasta 440 px incluso en ventanas
+amplias. Conserva la navegación inferior; no necesita pantallas ni una barra
+lateral de escritorio.
+
+- `ConductorScreen` reserva la cabecera, el teclado y la navegación; el contenido
+  se desplaza dentro de la pantalla. Los controles mantienen al menos 48 px de
+  altura y los campos de texto, 16 px. Las acciones en modo calle conservan 56 px.
+- Formularios y acciones usan `Input`, `NativeSelect` y `Button` de la base.
+  Los filtros de Traslados usan `ChipGroup`, con navegación por teclado, y los
+  estados vacíos usan `EmptyState`. Los títulos comparten `PageHeader`.
+- `Card asChild` permite conservar elementos como `article` al aplicar la tarjeta
+  compartida. Los estados de los adaptadores operativos usan `Badge` con texto.
+- `conductor-theme.css` contiene alias de compatibilidad hacia la base compartida.
+  No define una paleta ni sobrescribe los tokens `--ruum-*`.
+- `pnpm check:estilos` incluye Conductor. Las zonas de presentación migradas
+  tienen cero estilos sueltos; los colores de metadatos y respuestas HTML
+  independientes conservan su línea base explícita.

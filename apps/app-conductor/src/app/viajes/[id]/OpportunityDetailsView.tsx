@@ -1,4 +1,5 @@
 "use client";
+import { Button as BaseButton } from "@ruum/ui/base";
 import type { OportunidadAsignacion } from "@ruum/api/services";
 import type { PasaporteRow } from "../trips-utils";
 import { TripStage } from "./TripStage";
@@ -21,6 +22,6 @@ export function OpportunityDetailsView({ oportunidad, pasaporte, volver, procesa
       <p>{directed ? "La aceptación confirma la asignación dirigida." : "La solicitud participa en la competencia; el servidor resuelve la asignación."}</p>
       {oportunidad?.expira_en && <p>Vigente hasta {new Date(oportunidad.expira_en).toLocaleString("es-MX")}</p>}
       <p>El chat se habilita cuando el traslado se asigna a tu cuenta.</p>
-      <button type="button" onClick={onReject} disabled={disabled}>Rechazar oferta</button>
+      <BaseButton variant="ghost" type="button" onClick={onReject} disabled={disabled}>Rechazar oferta</BaseButton>
     </>} />;
 }

@@ -4,30 +4,30 @@
   width: min(440px, calc(100% - 16px));
   max-width: none;
   max-height: calc(var(--conductor-visible-height, 100dvh) - 16px - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
-  margin: auto;
+  margin: auto auto 0;
   padding: 0;
-  border: 1px solid var(--conductor-border);
-  border-radius: var(--conductor-radius-dialog);
-  background: var(--conductor-surface);
-  color: var(--conductor-primary);
+  border: 1px solid var(--ui-line);
+  border-radius: .75rem .75rem 0 0;
+  background: var(--ui-card);
+  color: var(--ui-fg);
   overflow: hidden;
 }
 .dialog[open] { display: flex; flex-direction: column; }
-.dialog::backdrop { background: var(--conductor-overlay); }
-.closeRow { display: flex; justify-content: flex-end; flex-shrink: 0; padding: 4px 8px; border-bottom: 1px solid var(--conductor-border); }
+.dialog::backdrop { background: var(--ui-overlay); }
+.closeRow { display: flex; justify-content: flex-end; flex-shrink: 0; padding: 4px 8px; border-bottom: 1px solid var(--ui-line); }
 .closeRow button {
   display: inline-flex; align-items: center; justify-content: center;
-  min-width: 48px; min-height: 48px; font-size: 24px;
-  border-radius: 12px; background: var(--conductor-surface); color: var(--conductor-primary);
+  min-width: 48px; min-height: 48px; font-size: 1.5rem;
+  border-radius: 0.5rem; background: var(--ui-card); color: var(--ui-fg);
 }
 .content { min-height: 0; overflow: auto; overscroll-behavior: contain; padding: 16px; overflow-wrap: anywhere; }
 .content :is(button, a) { min-height: 48px; min-width: 48px; }
 .content a { display: inline-flex; align-items: center; }
-.dialog :is(button, a):focus-visible { outline: 3px solid var(--conductor-focus); outline-offset: -3px; }
-.content:focus-visible { outline: 3px solid var(--conductor-focus); outline-offset: -3px; }
+.dialog :is(button, a):focus-visible { outline: 3px solid var(--ui-focus); outline-offset: -3px; }
+.content:focus-visible { outline: 3px solid var(--ui-focus); outline-offset: -3px; }
 .closeRow { align-items: center; gap: 8px; }
-.closeRow h2 { flex: 1; min-width: 0; margin: 0; font-size: 20px; line-height: 1.25; overflow-wrap: anywhere; }
-.footer { flex-shrink: 0; padding: 8px 16px; border-top: 1px solid var(--conductor-border); }
+.closeRow h2 { flex: 1; min-width: 0; margin: 0; font-size: 1.25rem; line-height: 1.25; overflow-wrap: anywhere; }
+.footer { flex-shrink: 0; padding: 8px 16px; border-top: 1px solid var(--ui-line); }
 .footer :is(button, a), .content :is(input, select) { min-width: 48px; min-height: 48px; }
-.content { font-size: 16px; line-height: 1.5; }
-.content :is(input, select, textarea) { font-size: 16px; }
+.content { font-size: 1rem; line-height: 1.5; }
+.content :is(input, select, textarea) { font-size: 1rem; }

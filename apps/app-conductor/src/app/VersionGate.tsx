@@ -24,7 +24,7 @@ export function VersionGate() {
 
   return (
     <aside
-      className="mx-auto mt-3 w-[min(100%-24px,1120px)] rounded-xl border border-warning/40 bg-warning/10 px-4 py-3 text-sm text-warning"
+      className="mx-auto mt-3 w-[min(100%-24px,1120px)] rounded-xl border border-ui-warning/40 bg-ui-warning/10 px-4 py-3 text-sm text-ui-warning"
       aria-live="polite"
     >
       Hay una actualización recomendada de Ruum Ruum Conductor.

@@ -1,8 +1,10 @@
 "use client";
 
+import { Button as BaseButton } from "@ruum/ui/base";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Aviso, Button, Field } from "@ruum/ui";
+import { Aviso, Field } from "@ruum/ui";
+import { ConductorButton as Button } from "@/components/v2/ConductorUI";
 import { TEXTOS_CARGANDO, PRIORIDAD_POR_INCIDENCIA } from "@ruum/shared/constants";
 import type { Database } from "@ruum/shared/types";
 import { traducirErrorOperativo } from "@ruum/shared/utils";
@@ -334,11 +336,11 @@ export function ReportarIncidencia({ trasladoId }: { trasladoId: string }) {
   }
 
   return (
-    <section id="reportar-problema" className="mt-6 rounded-lg border border-border bg-surface px-4 py-4">
+    <section id="reportar-problema" className="mt-6 rounded-lg border border-ui-line bg-ui-card px-4 py-4">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <p className="font-body text-sm font-semibold text-text-primary">Reportar un problema</p>
-          <p className="mt-1 font-body text-sm leading-6 text-text-secondary">
+          <p className="font-body text-sm font-semibold text-ui-fg">Reportar un problema</p>
+          <p className="mt-1 font-body text-sm leading-6 text-ui-fg-muted">
             Abre un reporte operativo cuando algo impide avanzar o requiere seguimiento.
           </p>
         </div>
@@ -354,30 +356,30 @@ export function ReportarIncidencia({ trasladoId }: { trasladoId: string }) {
       )}
 
       {abierto && (
-        <div className="fixed inset-0 z-50 flex items-end bg-black/60 px-3 pb-[max(12px,env(safe-area-inset-bottom))] pt-[max(12px,env(safe-area-inset-top))]">
+        <div className="fixed inset-0 z-50 flex items-end bg-ui-overlay/60 px-3 pb-[max(12px,env(safe-area-inset-bottom))] pt-[max(12px,env(safe-area-inset-top))]">
           <dialog
             ref={dialogRef}
             data-trip-dialog
             onCancel={event => { event.preventDefault(); cerrarSheet(); }}
             aria-modal="true"
             aria-labelledby="reportar-problema-titulo"
-            className="mx-auto flex max-h-[min(86dvh,720px)] w-full max-w-lg flex-col overflow-hidden rounded-t-2xl border border-border bg-surface shadow-[0_-18px_70px_rgba(26,31,46,0.28)] sm:rounded-2xl"
+            className="mx-auto flex max-h-[min(86dvh,720px)] w-full max-w-lg flex-col overflow-hidden rounded-t-2xl border border-ui-line bg-ui-card shadow-ui-md sm:rounded-lg"
           >
-            <div className="flex shrink-0 items-start justify-between gap-3 border-b border-border px-4 py-2">
+            <div className="flex shrink-0 items-start justify-between gap-3 border-b border-ui-line px-4 py-2">
               <div>
-                <p className="font-body text-sm font-semibold text-route-action">Reporte operativo</p>
-                <h2 id="reportar-problema-titulo" ref={tituloRef} tabIndex={-1} className="mt-1 font-display text-xl font-semibold text-text-primary">
+                <p className="font-body text-sm font-semibold text-ui-brand">Reporte operativo</p>
+                <h2 id="reportar-problema-titulo" ref={tituloRef} tabIndex={-1} className="mt-1 font-display text-xl font-semibold text-ui-fg">
                   ¿Qué está ocurriendo?
                 </h2>
               </div>
-              <button
+              <BaseButton variant="ghost"
                 type="button"
                 onClick={cerrarSheet}
                 disabled={procesando}
-                className="min-h-11 min-w-11 rounded-lg border border-border px-3 py-2 font-body text-sm font-semibold text-text-secondary disabled:text-disabled"
+                className="min-h-11 min-w-11 rounded-lg border border-ui-line px-3 py-2 font-body text-sm font-semibold text-ui-fg-muted disabled:text-disabled"
               >
                 Cerrar
-              </button>
+              </BaseButton>
             </div>
 
             <div data-trip-dialog-content className="overflow-y-auto px-4 pb-[max(16px,env(safe-area-inset-bottom))] pt-4">
@@ -394,7 +396,7 @@ export function ReportarIncidencia({ trasladoId }: { trasladoId: string }) {
                     const activo = problema === opcionProblema.id;
                     const prioridad = PRIORIDAD_POR_INCIDENCIA[opcionProblema.tipo];
                     return (
-                      <button
+                      <BaseButton variant="ghost"
                         key={opcionProblema.id}
                         type="button"
                         onClick={() => {
@@ -403,18 +405,18 @@ export function ReportarIncidencia({ trasladoId }: { trasladoId: string }) {
                         }}
                         className={[
                           "w-full rounded-xl border px-3 py-3 text-left transition min-h-[56px] flex flex-col justify-center",
-                          activo ? "border-route-action bg-route-soft" : "border-border bg-surface-elevated hover:border-route-action",
-                          opcionProblema.urgente ? "border-danger-action" : ""
+                          activo ? "border-ui-brand bg-ui-brand-soft" : "border-ui-line bg-ui-muted hover:border-ui-brand",
+                          opcionProblema.urgente ? "border-ui-danger" : ""
                         ].filter(Boolean).join(" ")}
                       >
                         <div className="flex items-center justify-between gap-2">
-                          <span className="block font-body text-sm font-semibold text-text-primary">{opcionProblema.etiqueta}</span>
-                          <span className="text-[11px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full border border-border text-text-tertiary">
+                          <span className="block font-body text-sm font-semibold text-ui-fg">{opcionProblema.etiqueta}</span>
+                          <span className="text-xs font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full border border-ui-line text-ui-fg-muted">
                             Prioridad {prioridad}
                           </span>
                         </div>
-                        <span className="mt-1 block font-body text-xs text-text-secondary">{opcionProblema.ayuda}</span>
-                      </button>
+                        <span className="mt-1 block font-body text-xs text-ui-fg-muted">{opcionProblema.ayuda}</span>
+                      </BaseButton>
                     );
                   })}
                 </div>
@@ -433,14 +435,14 @@ export function ReportarIncidencia({ trasladoId }: { trasladoId: string }) {
                   />
                   {opcion.requiereEvidencia && (
                     <label className="grid gap-1">
-                      <span className="font-body text-sm font-semibold text-text-tertiary">Evidencia</span>
+                      <span className="font-body text-sm font-semibold text-ui-fg-muted">Evidencia</span>
                       <input
                         type="file"
                         accept="image/*"
                         onChange={(event) => setAdjunto(event.target.files?.[0] ?? null)}
-                        className="rounded-lg border border-border bg-surface px-3 py-2 font-body text-base text-text-primary"
+                        className="rounded-lg border border-ui-line bg-ui-card px-3 py-2 font-body text-base text-ui-fg"
                       />
-                      <span className="font-body text-xs text-text-tertiary">
+                      <span className="font-body text-xs text-ui-fg-muted">
                         {adjunto ? `Adjunto listo: ${adjunto.name}` : "Adjunta una foto si te ayuda a explicar el problema."}
                       </span>
                     </label>

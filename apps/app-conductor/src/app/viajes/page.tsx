@@ -1,5 +1,6 @@
 "use client";
 
+import { Button as BaseButton } from "@ruum/ui/base";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import type { Conductor } from "@ruum/shared/types";
@@ -429,8 +430,8 @@ export default function PaginaTraslados() {
       notice={!estaOnline ? "Sin conexión. Conéctate a internet para actualizar las ofertas." : aviso}
       filters={<>
         <div role="group" aria-label="Vista Lista o Mapa" className={styles.modeSwitch}>
-          <button type="button" aria-pressed={modoMapa === "lista"} onClick={() => cambiarModo("lista")}>Lista</button>
-          <button type="button" aria-pressed={modoMapa === "mapa"} onClick={() => cambiarModo("mapa")}>Mapa</button>
+          <BaseButton variant="ghost" type="button" aria-pressed={modoMapa === "lista"} onClick={() => cambiarModo("lista")}>Lista</BaseButton>
+          <BaseButton variant="ghost" type="button" aria-pressed={modoMapa === "mapa"} onClick={() => cambiarModo("mapa")}>Mapa</BaseButton>
         </div>
         <TrasladosFilters orden={orden} onCambiarOrden={(valor) => { setOrden(valor); actualizarUrl({ orden: valor }); }} ciudadFiltro={ciudadFiltro}
         onCambiarCiudad={(valor) => { setCiudadFiltro(valor); actualizarUrl({ ciudad: valor }); }} ciudadesDisponibles={ciudadesDisponibles} /></>}
@@ -438,9 +439,9 @@ export default function PaginaTraslados() {
       {item ? <div className={styles.results}>
         <p className="sr-only">{listToRender.length} {vista === "disponibles" ? listToRender.length === 1 ? "oferta disponible" : "ofertas disponibles" : listToRender.length === 1 ? "traslado aceptado" : "traslados aceptados"}</p>
         {listToRender.length > 1 && <div className={styles.pagination} role="group" aria-label="Paginación de traslados">
-          <button type="button" disabled={indiceTarjeta === 0} onClick={() => setPaginaActual(indiceTarjeta - 1)}>Anterior</button>
+          <BaseButton variant="ghost" type="button" disabled={indiceTarjeta === 0} onClick={() => setPaginaActual(indiceTarjeta - 1)}>Anterior</BaseButton>
           <output aria-live="polite">{indiceTarjeta + 1} de {listToRender.length}</output>
-          <button type="button" disabled={indiceTarjeta === listToRender.length - 1} onClick={() => setPaginaActual(indiceTarjeta + 1)}>Siguiente</button>
+          <BaseButton variant="ghost" type="button" disabled={indiceTarjeta === listToRender.length - 1} onClick={() => setPaginaActual(indiceTarjeta + 1)}>Siguiente</BaseButton>
         </div>}
         <div key={item.viaje.traslado_id} className={styles.resultCard}>
           {vista === "disponibles" ? <OfertaCard compact viaje={item.viaje} detalle={detalles[item.viaje.traslado_id ?? ""] ?? detalleFallback(item.viaje)} hrefDetalle={hrefDetalle(item.viaje)} mapPreview={modoMapa === "mapa" ? <TrasladosMapa onReturnToList={() => cambiarModo("lista")} Traslados={listToRender.map((it) => it.viaje)} onSelect={(viaje) => router.push(hrefDetalle(viaje))} vistaId={rutaActual} /> : undefined} />

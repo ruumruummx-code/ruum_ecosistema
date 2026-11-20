@@ -1,4 +1,5 @@
 "use client";
+import { Button as BaseButton } from "@ruum/ui/base";
 import { ConductorScreen } from "../components/ConductorScreen";
 
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -103,13 +104,13 @@ export default function CentroNotificaciones() {
         <nav className={styles.tabs} aria-label="Filtros de notificaciones">
           {tabs.map((tab) => {
             const activa = filtro === tab.id;
-            return <button key={tab.id} type="button" onClick={() => setFiltro(tab.id)} aria-pressed={activa} className={activa ? styles.activeTab : undefined}><span>{tab.label}</span><strong>{contador(tab.id)}</strong></button>;
+            return <BaseButton variant="ghost" key={tab.id} type="button" onClick={() => setFiltro(tab.id)} aria-pressed={activa} className={activa ? styles.activeTab : undefined}><span>{tab.label}</span><strong>{contador(tab.id)}</strong></BaseButton>;
           })}
         </nav>
 
 
 </>}>
-        {errorCarga && <div className={styles.readError} role="alert"><p>{errorCarga}</p><button type="button" onClick={() => void cargar()}>Reintentar carga de avisos</button></div>}
+        {errorCarga && <div className={styles.readError} role="alert"><p>{errorCarga}</p><BaseButton variant="ghost" type="button" onClick={() => void cargar()}>Reintentar carga de avisos</BaseButton></div>}
 
         {esVacio ? (
           <section className={styles.empty} aria-live="polite">
@@ -122,14 +123,14 @@ export default function CentroNotificaciones() {
         ) : (
           <section className={styles.list} aria-label="Lista de notificaciones">
             {visibles.map((item) => <article key={item.id} className={styles.notice} data-notification-id={item.id} data-read={Boolean(item.leida_en)}>
-              <button type="button" onClick={() => void abrir(item)} disabled={Boolean(sincronizando)} aria-busy={sincronizando === item.id} aria-describedby={`lectura-${item.id}`} className={styles.item}>
+              <BaseButton variant="ghost" type="button" onClick={() => void abrir(item)} disabled={Boolean(sincronizando)} aria-busy={sincronizando === item.id} aria-describedby={`lectura-${item.id}`} className={styles.item}>
                 <span className={item.leida_en ? styles.readDot : styles.unreadDot} aria-hidden />
                 <span><strong>{item.titulo}</strong><small>{item.cuerpo}</small></span><span aria-hidden>›</span>
-              </button>
+              </BaseButton>
               <p id={`lectura-${item.id}`} role="status" className={styles.readStatus}>{sincronizando === item.id ? "Leída · sincronizando…" : item.leida_en ? "Leída" : "Sin leer"}</p>
               {erroresLectura.has(item.id) && <div className={styles.readError}>
                 <p role="alert">{erroresLectura.get(item.id)}</p>
-                <button type="button" disabled={Boolean(sincronizando)} onClick={() => void abrir(item)}>Reintentar guardar lectura</button>
+                <BaseButton variant="ghost" type="button" disabled={Boolean(sincronizando)} onClick={() => void abrir(item)}>Reintentar guardar lectura</BaseButton>
                 <Link href={item.destino}>Abrir aviso sin actualizar lectura</Link>
               </div>}
             </article>)}

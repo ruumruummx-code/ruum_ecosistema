@@ -1,5 +1,6 @@
 "use client";
 
+import { Button as BaseButton } from "@ruum/ui/base";
 import { useEffect, useRef, useState } from "react";
 import { Chat, type MensajeChat, Aviso } from "@ruum/ui";
 import { MENSAJES_CLAVE_UX } from "@ruum/shared/constants";
@@ -142,59 +143,59 @@ export function ChatViaje({ trasladoId, estado }: { trasladoId: string; estado: 
   }
 
   return (
-    <section id="chat-contacto" className="mt-6 rounded-lg border border-border bg-surface">
+    <section id="chat-contacto" className="mt-6 rounded-lg border border-ui-line bg-ui-card">
       {disponible && (
         <div className="px-4 py-4">
-          <p className="font-body text-sm font-semibold text-text-tertiary">Mensajes rápidos</p>
+          <p className="font-body text-sm font-semibold text-ui-fg-muted">Mensajes rápidos</p>
           <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
             {MENSAJES_RAPIDOS_CONTACTO.map((mensajeRapido) => (
-              <button
+              <BaseButton variant="ghost"
                 key={mensajeRapido}
                 type="button"
                 onClick={() => void enviarMensajeRapido(mensajeRapido)}
                 disabled={enviandoRapido !== null}
-                className="min-h-11 rounded-lg border border-border bg-surface-elevated px-3 py-2 text-left font-body text-sm font-semibold text-text-secondary transition hover:border-route-action hover:bg-route-soft hover:text-route-action disabled:cursor-not-allowed disabled:text-disabled"
+                className="min-h-11 rounded-lg border border-ui-line bg-ui-muted px-3 py-2 text-left font-body text-sm font-semibold text-ui-fg-muted transition hover:border-ui-brand hover:bg-ui-brand-soft hover:text-ui-brand disabled:cursor-not-allowed disabled:text-disabled"
               >
                 {enviandoRapido === mensajeRapido ? "Enviando..." : mensajeRapido}
-              </button>
+              </BaseButton>
             ))}
           </div>
         </div>
       )}
       <details
-        className={["group overflow-hidden", disponible ? "border-t border-border" : ""].join(" ")}
+        className={["group overflow-hidden", disponible ? "border-t border-ui-line" : ""].join(" ")}
         open={chatAbierto}
         onToggle={(evento) => setChatAbierto(evento.currentTarget.open)}
       >
-      <summary className="flex cursor-pointer list-none items-center justify-between gap-4 px-4 py-4 transition-colors hover:bg-signal-soft/35 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-route-action [&::-webkit-details-marker]:hidden">
+      <summary className="flex cursor-pointer list-none items-center justify-between gap-4 px-4 py-4 transition-colors hover:bg-ui-brand-soft/35 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ui-brand [&::-webkit-details-marker]:hidden">
         <div>
-          <p className="font-body text-sm font-semibold text-text-tertiary">Chat del viaje</p>
-          <p className="mt-1 font-body text-sm font-semibold text-text-primary">
+          <p className="font-body text-sm font-semibold text-ui-fg-muted">Chat del viaje</p>
+          <p className="mt-1 font-body text-sm font-semibold text-ui-fg">
             {disponible ? "Abrir conversación completa" : "Conversación cerrada"}
           </p>
         </div>
-        <span className="font-display text-lg leading-none text-text-tertiary transition-transform group-open:rotate-45" aria-hidden>
+        <span className="font-display text-lg leading-none text-ui-fg-muted transition-transform group-open:rotate-45" aria-hidden>
           +
         </span>
       </summary>
-      <div className="border-t border-border px-4 pb-4 pt-4">
+      <div className="border-t border-ui-line px-4 pb-4 pt-4">
         <div className="mb-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-2">
             {disponible && avisoVisto && (
               <div className="relative">
-                <button
+                <BaseButton variant="ghost"
                   type="button"
                   aria-label="Ver aviso de comunicación"
                   aria-expanded={popoverAvisoAbierto}
                   onClick={() => setPopoverAvisoAbierto((abierto) => !abierto)}
-                  className="flex size-11 items-center justify-center rounded-full border border-route-action bg-route-soft font-body text-sm font-semibold text-route-action transition hover:border-route-action focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-route-action"
+                  className="flex size-11 items-center justify-center rounded-full border border-ui-brand bg-ui-brand-soft font-body text-sm font-semibold text-ui-brand transition hover:border-ui-brand focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ui-brand"
                 >
                   i
-                </button>
+                </BaseButton>
                 {popoverAvisoAbierto && (
                   <dialog
                     aria-label="Aviso de comunicación"
-                    className="absolute left-0 z-20 mt-2 w-72 rounded-xl border border-route-action bg-surface p-3 font-body text-sm leading-5 text-route-action shadow-3"
+                    className="absolute left-0 z-20 mt-2 w-72 rounded-xl border border-ui-brand bg-ui-card p-3 font-body text-sm leading-5 text-ui-brand shadow-3"
                   >
                     {MENSAJES_CLAVE_UX.comunicacion}
                   </dialog>
@@ -213,13 +214,13 @@ export function ChatViaje({ trasladoId, estado }: { trasladoId: string; estado: 
             <Aviso tono="info">
               <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <span>{MENSAJES_CLAVE_UX.comunicacion}</span>
-                <button
+                <BaseButton variant="ghost"
                   type="button"
                   onClick={confirmarAvisoVisto}
-                  className="min-h-11 self-start rounded-lg border border-route-action bg-surface px-3 py-2 font-body text-sm font-semibold text-route-action transition hover:border-route-action hover:bg-route-soft sm:self-auto"
+                  className="min-h-11 self-start rounded-lg border border-ui-brand bg-ui-card px-3 py-2 font-body text-sm font-semibold text-ui-brand transition hover:border-ui-brand hover:bg-ui-brand-soft sm:self-auto"
                 >
                   Entendido
-                </button>
+                </BaseButton>
               </div>
             </Aviso>
           </div>

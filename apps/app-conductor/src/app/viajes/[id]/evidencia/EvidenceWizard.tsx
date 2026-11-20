@@ -1,6 +1,8 @@
 "use client";
+import { Input as BaseInput, NativeSelect as BaseSelect, Button as BaseButton } from "@ruum/ui/base";
 import { useState } from "react";
-import { Aviso, Button } from "@ruum/ui";
+import { Aviso } from "@ruum/ui";
+import { ConductorButton as Button } from "@/components/v2/ConductorUI";
 import { MENSAJES_CLAVE_UX } from "@ruum/shared/constants";
 import { RegistroViajeActivo } from "@/app/ViajeActivoContext";
 import { EvidenceCaptureStep } from "./EvidenceCaptureStep";
@@ -28,12 +30,12 @@ function CampoTexto({
 }) {
   return (
     <label className="grid gap-1">
-      <span className="font-body text-sm font-semibold text-text-tertiary">{etiqueta}</span>
-      <input
+      <span className="font-body text-sm font-semibold text-ui-fg-muted">{etiqueta}</span>
+      <BaseInput
         type={tipo}
         value={valor}
         onChange={(event) => onChange(event.target.value)}
-        className="min-h-11 rounded-lg border border-border bg-surface px-3 font-body text-base text-text-primary outline-none focus:border-signal"
+        className="min-h-11 rounded-lg border border-ui-line bg-ui-card px-3 font-body text-base text-ui-fg outline-none focus:border-ui-brand"
       />
     </label>
   );
@@ -50,16 +52,16 @@ function CampoSiNo({
 }) {
   return (
     <label className="grid gap-1">
-      <span className="font-body text-sm font-semibold text-text-tertiary">{etiqueta}</span>
-      <select
+      <span className="font-body text-sm font-semibold text-ui-fg-muted">{etiqueta}</span>
+      <BaseSelect
         value={valor}
         onChange={(event) => onChange(event.target.value as "" | "si" | "no")}
-        className="min-h-11 rounded-lg border border-border bg-surface px-3 font-body text-base text-text-primary outline-none focus:border-signal"
+        className="min-h-11 rounded-lg border border-ui-line bg-ui-card px-3 font-body text-base text-ui-fg outline-none focus:border-ui-brand"
       >
         <option value="">Selecciona</option>
         <option value="si">Sí</option>
         <option value="no">No</option>
-      </select>
+      </BaseSelect>
     </label>
   );
 }
@@ -77,11 +79,11 @@ function CampoSelect({
 }) {
   return (
     <label className="grid gap-1">
-      <span className="font-body text-sm font-semibold text-text-tertiary">{etiqueta}</span>
-      <select
+      <span className="font-body text-sm font-semibold text-ui-fg-muted">{etiqueta}</span>
+      <BaseSelect
         value={valor}
         onChange={(event) => onChange(event.target.value)}
-        className="min-h-11 rounded-lg border border-border bg-surface px-3 font-body text-base text-text-primary outline-none focus:border-signal"
+        className="min-h-11 rounded-lg border border-ui-line bg-ui-card px-3 font-body text-base text-ui-fg outline-none focus:border-ui-brand"
       >
         <option value="">Selecciona</option>
         {opciones.map((opcion) => {
@@ -93,7 +95,7 @@ function CampoSelect({
             </option>
           );
         })}
-      </select>
+      </BaseSelect>
     </label>
   );
 }
@@ -111,13 +113,13 @@ export function EvidenciaStepper() {
   return (
     <div className="flex items-start justify-between gap-4">
       <div>
-        <p className="font-body text-sm font-semibold text-route-action">
+        <p className="font-body text-sm font-semibold text-ui-brand">
           {progresoTotal} de {requisitosTotales}
         </p>
         <h1 className="mt-1 font-display text-2xl font-semibold">
           Registro {tipo === "inicial" ? "inicial" : "final"} del vehículo
         </h1>
-        <p className="mt-2 font-body text-sm text-text-secondary">
+        <p className="mt-2 font-body text-sm text-ui-fg-muted">
           {tipo === "inicial"
             ? `${MENSAJES_CLAVE_UX.evidencia_inicial} Sigue una foto a la vez.`
             : "Registra el estado del vehículo en el punto de entrega, una foto a la vez."}
@@ -144,11 +146,11 @@ export function EvidenciaInspeccion() {
   ].filter((v) => v === "si").length;
 
   return (
-    <section className="mt-6 rounded-xl border border-border bg-surface p-4" aria-labelledby="datos-inspeccion-titulo">
+    <section className="mt-6 rounded-xl border border-ui-line bg-ui-card p-4" aria-labelledby="datos-inspeccion-titulo">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h2 id="datos-inspeccion-titulo" className="font-body text-sm font-semibold text-text-primary">Datos de inspección</h2>
-          <p className="mt-1 font-body text-xs text-text-secondary">
+          <h2 id="datos-inspeccion-titulo" className="font-body text-sm font-semibold text-ui-fg">Datos de inspección</h2>
+          <p className="mt-1 font-body text-xs text-ui-fg-muted">
             {inspeccionCompletada} de {CAMPOS_INSPECCION_OBLIGATORIOS.length} obligatorios
             {camposInspeccionPendientes.length > 0 ? ` · faltan ${camposInspeccionPendientes.length}` : " · completos"}
           </p>
@@ -156,14 +158,14 @@ export function EvidenciaInspeccion() {
         <span className={[
           "rounded-full border px-2.5 py-1 font-body text-xs font-semibold",
           camposInspeccionPendientes.length > 0
-            ? "border-warning bg-warn-soft text-warning"
-            : "border-success bg-control-soft text-success"
+            ? "border-ui-warning bg-ui-warning-soft text-ui-warning"
+            : "border-ui-success bg-ui-success-soft text-ui-success"
         ].join(" ")}>
           {camposInspeccionPendientes.length > 0 ? "Pendiente" : "Listo"}
         </span>
       </div>
 
-      <div className="mt-4 grid gap-3 border-t border-border pt-4 sm:grid-cols-2">
+      <div className="mt-4 grid gap-3 border-t border-ui-line pt-4 sm:grid-cols-2">
         <CampoSelect
           etiqueta="Combustible *"
           valor={inspeccion.combustible}
@@ -185,28 +187,28 @@ export function EvidenciaInspeccion() {
       </div>
 
       {/* Acordeón: Documentos y Placas */}
-      <div className="mt-4 rounded-xl border border-border bg-surface-elevated/40 overflow-hidden">
-        <button
+      <div className="mt-4 rounded-xl border border-ui-line bg-ui-muted/40 overflow-hidden">
+        <BaseButton variant="ghost"
           type="button"
           onClick={() => setDocsAbierto(!docsAbierto)}
-          className="w-full flex items-center justify-between p-3.5 hover:bg-surface-elevated text-left cursor-pointer transition-colors"
+          className="w-full flex items-center justify-between p-3.5 hover:bg-ui-muted text-left cursor-pointer transition-colors"
           aria-expanded={docsAbierto}
         >
           <div className="flex items-center gap-2">
-            <span className="font-display text-xs font-bold uppercase tracking-wider text-text-primary">
+            <span className="font-display text-xs font-bold uppercase tracking-wider text-ui-fg">
               📄 Documentos y Placas
             </span>
-            <span className="font-body text-[11px] text-text-tertiary">
+            <span className="font-body text-xs text-ui-fg-muted">
               ({docsRevisados}/5 verificados)
             </span>
           </div>
-          <span className="font-display text-xs font-bold text-text-tertiary">
+          <span className="font-display text-xs font-bold text-ui-fg-muted">
             {docsAbierto ? "▲" : "▼"}
           </span>
-        </button>
+        </BaseButton>
 
         {docsAbierto && (
-          <div className="p-3.5 border-t border-border/40 grid gap-3 sm:grid-cols-2">
+          <div className="p-3.5 border-t border-ui-line/40 grid gap-3 sm:grid-cols-2">
             <CampoSiNo
               etiqueta="Holograma de verificación *"
               valor={inspeccion.hologramaVerificacion}
@@ -221,34 +223,34 @@ export function EvidenciaInspeccion() {
       </div>
 
       {/* Acordeón: Notas o Comentarios */}
-      <div className="mt-4 rounded-xl border border-border bg-surface-elevated/40 overflow-hidden">
-        <button
+      <div className="mt-4 rounded-xl border border-ui-line bg-ui-muted/40 overflow-hidden">
+        <BaseButton variant="ghost"
           type="button"
           onClick={() => setNotasAbierto(!notasAbierto)}
-          className="w-full flex items-center justify-between p-3.5 hover:bg-surface-elevated text-left cursor-pointer transition-colors"
+          className="w-full flex items-center justify-between p-3.5 hover:bg-ui-muted text-left cursor-pointer transition-colors"
           aria-expanded={notasAbierto}
         >
           <div className="flex items-center gap-2">
-            <span className="font-display text-xs font-bold uppercase tracking-wider text-text-primary">
+            <span className="font-display text-xs font-bold uppercase tracking-wider text-ui-fg">
               📝 Notas o Comentarios
             </span>
-            <span className="font-body text-[11px] text-text-tertiary">
+            <span className="font-body text-xs text-ui-fg-muted">
               {inspeccion.notas ? "(Capturado)" : "(Opcional)"}
             </span>
           </div>
-          <span className="font-display text-xs font-bold text-text-tertiary">
+          <span className="font-display text-xs font-bold text-ui-fg-muted">
             {notasAbierto ? "▲" : "▼"}
           </span>
-        </button>
+        </BaseButton>
 
         {notasAbierto && (
-          <div className="p-3.5 border-t border-border/40">
+          <div className="p-3.5 border-t border-ui-line/40">
             <textarea
               value={inspeccion.notas}
               onChange={(event) => setInspeccion((actual) => ({ ...actual, notas: event.target.value }))}
               rows={3}
               placeholder="Detalla cualquier observación o daño previo encontrado..."
-              className="w-full rounded-lg border border-border bg-surface px-3 py-2 font-body text-base text-text-primary outline-none focus:border-signal"
+              className="w-full rounded-lg border border-ui-line bg-ui-card px-3 py-2 font-body text-base text-ui-fg outline-none focus:border-ui-brand"
             />
           </div>
         )}

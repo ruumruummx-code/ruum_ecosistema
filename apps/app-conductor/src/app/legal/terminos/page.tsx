@@ -9,25 +9,25 @@ export const metadata = {
 export default function PaginaTerminosConductor() {
   return (
     <ContainedScrollView label="Texto de términos y condiciones" header={<ContextReturnLink fallback="/cuenta/legal" />}>
-      <article className="rounded-2xl border border-border/80 bg-surface px-6 py-8 text-text-primary shadow-md sm:px-10">
-        <header className="mb-8 border-b border-border/60 pb-6">
+      <article className="rounded-lg border border-ui-line/80 bg-ui-card px-6 py-8 text-ui-fg shadow-md sm:px-10">
+        <header className="mb-8 border-b border-ui-line/60 pb-6">
           <div className="flex items-center gap-2">
-            <span className="font-body text-xs font-bold uppercase tracking-wider text-route-action">
+            <span className="font-body text-xs font-bold uppercase tracking-wider text-ui-brand">
               Documento Legal Oficial
             </span>
-            <span className="rounded-md border border-control bg-control-soft px-2 py-0.5 font-body text-xs font-extrabold text-control uppercase">
+            <span className="rounded-md border border-ui-success bg-ui-success-soft px-2 py-0.5 font-body text-xs font-extrabold text-ui-success uppercase">
               v{appVersion.version} • Vigente
             </span>
           </div>
-          <h1 className="mt-2 font-display text-2xl font-bold text-text-primary sm:text-3xl">
+          <h1 className="mt-2 font-display text-2xl font-bold text-ui-fg sm:text-3xl">
             Términos y Condiciones de Uso
           </h1>
-          <p className="mt-1.5 font-body text-xs text-text-tertiary">
+          <p className="mt-1.5 font-body text-xs text-ui-fg-muted">
             Ruum Ruum by Moviliax • Última actualización: 3 de julio de 2026 • App v{appVersion.version} (mín. {appVersion.minimumSupported})
           </p>
         </header>
 
-        <div className="space-y-6 font-body text-sm leading-7 text-text-secondary">
+        <div className="space-y-6 font-body text-sm leading-7 text-ui-fg-muted">
           <p>
             El presente documento establece los términos y condiciones bajo los cuales Moviliax S.A. de C.V.
             (&quot;Ruum Ruum&quot;) presta el servicio de traslado vehicular con conductor certificado a través
@@ -35,7 +35,7 @@ export default function PaginaTerminosConductor() {
           </p>
 
           <section>
-            <h2 className="mb-3 font-display text-base font-bold text-text-primary">1. Definiciones</h2>
+            <h2 className="mb-3 font-display text-base font-bold text-ui-fg">1. Definiciones</h2>
             <p><strong>Plataforma:</strong> La aplicación móvil y web de Ruum Ruum disponible para usuarios registrados.</p>
             <p className="mt-2"><strong>Usuario:</strong> Persona física o moral que solicita el servicio de traslado vehicular a través de la Plataforma.</p>
             <p className="mt-2"><strong>Conductor:</strong> Persona física certificada por Ruum Ruum para realizar traslados vehiculares.</p>
@@ -43,7 +43,7 @@ export default function PaginaTerminosConductor() {
           </section>
 
           <section>
-            <h2 className="mb-3 font-display text-base font-bold text-text-primary">2. Registro y Certificación CONCER</h2>
+            <h2 className="mb-3 font-display text-base font-bold text-ui-fg">2. Registro y Certificación CONCER</h2>
             <p>
               Para operar como Conductor, la persona debe completar el registro con datos verídicos, cargar la
               documentación solicitada (identificación oficial, licencia vigente) y aprobar la revisión documental
@@ -53,7 +53,7 @@ export default function PaginaTerminosConductor() {
           </section>
 
           <section>
-            <h2 className="mb-3 font-display text-base font-bold text-text-primary">3. Obligaciones del Conductor</h2>
+            <h2 className="mb-3 font-display text-base font-bold text-ui-fg">3. Obligaciones del Conductor</h2>
             <p>
               El Conductor se compromete a mantener vigente su licencia de conducir y su documentación de
               identidad, a informar de inmediato cualquier suspensión, cancelación o proceso legal relacionado con
@@ -62,7 +62,7 @@ export default function PaginaTerminosConductor() {
           </section>
 
           <section>
-            <h2 className="mb-3 font-display text-base font-bold text-text-primary">4. Pagos y Cancelaciones</h2>
+            <h2 className="mb-3 font-display text-base font-bold text-ui-fg">4. Pagos y Cancelaciones</h2>
             <p>
               Ruum Ruum no acepta pagos en efectivo. Todos los traslados se liquidan a través de los métodos de
               pago registrados en la Plataforma. Las cancelaciones realizadas después de que el conductor haya
@@ -71,7 +71,7 @@ export default function PaginaTerminosConductor() {
           </section>
 
           <section>
-            <h2 className="mb-3 font-display text-base font-bold text-text-primary">5. Registro del Vehículo y Responsabilidad</h2>
+            <h2 className="mb-3 font-display text-base font-bold text-ui-fg">5. Registro del Vehículo y Responsabilidad</h2>
             <p>
               El Pasaporte Digital constituye registro del estado del vehículo al inicio y al final de cada
               traslado. Cualquier reclamación por daños debe realizarse dentro de las 24 horas siguientes a la
@@ -80,7 +80,7 @@ export default function PaginaTerminosConductor() {
           </section>
 
           <section>
-            <h2 className="mb-3 font-display text-base font-bold text-text-primary">6. Modificaciones</h2>
+            <h2 className="mb-3 font-display text-base font-bold text-ui-fg">6. Modificaciones</h2>
             <p>
               Ruum Ruum se reserva el derecho de modificar los presentes Términos. Las modificaciones serán
               notificadas a través de la Plataforma con al menos 15 días de anticipación. El uso continuado de la
@@ -89,11 +89,11 @@ export default function PaginaTerminosConductor() {
           </section>
         </div>
 
-        <div className="mt-8 border-t border-border/60 pt-6">
+        <div className="mt-8 border-t border-ui-line/60 pt-6">
           <a
             href="/docs-legales/terminos-y-condiciones-ruum-ruum.docx"
             download
-            className="inline-flex items-center gap-2 font-body text-xs font-bold text-route-action underline-offset-4 hover:underline"
+            className="inline-flex items-center gap-2 font-body text-xs font-bold text-ui-brand underline-offset-4 hover:underline"
           >
             📥 Descargar versión completa (.docx)
           </a>

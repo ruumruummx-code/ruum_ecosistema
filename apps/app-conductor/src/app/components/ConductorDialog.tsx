@@ -1,5 +1,6 @@
 "use client";
 
+import { Button as BaseButton } from "@ruum/ui/base";
 import { useEffect, useRef, type ReactNode } from "react";
 import styles from "./conductor-dialog.module.css";
 import { useVisibleViewport } from "./useVisibleViewport";
@@ -51,7 +52,7 @@ export function ConductorDialog({ open, onClose, labelledBy, children, className
     >
     <div className={styles.closeRow}>
       {title && <h2 id={labelledBy}>{title}</h2>}
-      <button type="button" data-dialog-close onClick={onClose} aria-label={closeLabel}>×</button>
+      <BaseButton variant="ghost" type="button" data-dialog-close onClick={onClose} aria-label={closeLabel}>×</BaseButton>
     </div>
     {/* eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex -- Región larga desplazable con teclado. */}
     <div className={styles.content} role="region" aria-label="Contenido del diálogo" tabIndex={0}>{children}</div>

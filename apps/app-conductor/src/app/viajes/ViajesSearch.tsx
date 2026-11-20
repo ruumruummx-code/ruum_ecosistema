@@ -1,5 +1,6 @@
 "use client";
 
+import { Input as BaseInput, Button as BaseButton } from "@ruum/ui/base";
 import { useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 
@@ -75,14 +76,14 @@ export function TrasladosSearch({ onSearch, placeholder = "Buscar Traslados..." 
           fill="none"
           stroke="currentColor"
           strokeWidth={2}
-          className="absolute left-4 top-1/2 -translate-y-1/2 text-text-tertiary pointer-events-none"
+          className="absolute left-4 top-1/2 -translate-y-1/2 text-ui-fg-muted pointer-events-none"
           aria-hidden="true"
         >
           <circle cx="11" cy="11" r="8" />
           <path d="m21 21-4.35-4.35" />
         </svg>
         
-        <input
+        <BaseInput
           ref={inputRef}
           type="search"
           value={query}
@@ -91,16 +92,16 @@ export function TrasladosSearch({ onSearch, placeholder = "Buscar Traslados..." 
           onBlur={() => setIsFocused(false)}
           onKeyDown={handleKeyDown}
           placeholder={placeholder}
-          className="w-full pl-11 pr-11 py-3 rounded-xl bg-surface border border-border/40 text-text-primary placeholder:text-text-tertiary font-body text-sm focus:outline-none focus:ring-2 focus:ring-route-action/20 focus:border-route-action/40 transition-colors"
+          className="w-full pl-11 pr-11 py-3 rounded-xl bg-ui-card border border-ui-line/40 text-ui-fg placeholder:text-ui-fg-muted font-body text-sm focus:outline-none focus:ring-2 focus:ring-ui-brand/20 focus:border-ui-brand/40 transition-colors"
           aria-label="Buscar Traslados por origen, destino o folio"
           enterKeyHint="search"
         />
         
         {query && (
-          <button
+          <BaseButton variant="ghost"
             type="button"
             onClick={handleClear}
-            className="absolute right-4 top-1/2 -translate-y-1/2 p-1 rounded-lg text-text-tertiary hover:text-text-primary hover:bg-surface-elevated transition-colors"
+            className="absolute right-4 top-1/2 -translate-y-1/2 p-1 rounded-lg text-ui-fg-muted hover:text-ui-fg hover:bg-ui-muted transition-colors"
             aria-label="Limpiar búsqueda"
           >
             <svg
@@ -115,15 +116,15 @@ export function TrasladosSearch({ onSearch, placeholder = "Buscar Traslados..." 
               <line x1="18" y1="6" x2="6" y2="18" />
               <line x1="6" y1="6" x2="18" y2="18" />
             </svg>
-          </button>
+          </BaseButton>
         )}
       </div>
       
       {/* Indicador de resultados - aparece cuando hay query */}
       {query && isFocused && (
         <div className="mt-1 flex items-center gap-2 px-1">
-          <span className="flex size-2 rounded-full bg-signal animate-pulse" aria-hidden />
-          <span className="font-body text-[11px] text-text-secondary">
+          <span className="flex size-2 rounded-full bg-ui-brand animate-pulse" aria-hidden />
+          <span className="font-body text-xs text-ui-fg-muted">
             Buscando en {searchParams.get("vista") === "mis-Traslados" ? "historial" : "ofertas"}...
           </span>
         </div>

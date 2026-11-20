@@ -1,5 +1,6 @@
 "use client";
 
+import { Button as BaseButton } from "@ruum/ui/base";
 import { useState, type ReactNode } from "react";
 import Link from "next/link";
 import { ConductorScreen } from "../../components/ConductorScreen";
@@ -45,35 +46,35 @@ export function TripStage({ pasaporte, title, instruction, stateLabel, destinati
   const contact = !readOnly && !offer && <section className={styles.detailsSection} aria-label="Contacto del punto actual">
     <h3>Contacto de {destination ? "recepción" : "origen"}</h3><p>{value(contactName)}</p>
     {phone ? <a href={`tel:${phone}`}>Llamar al contacto</a> : <p>Sin teléfono registrado</p>}
-    {pasaporte.estado && chatDisponible(pasaporte.estado) && <button type="button" onClick={onChat || (() => setDialog("chat"))}>Abrir chat del traslado</button>}
+    {pasaporte.estado && chatDisponible(pasaporte.estado) && <BaseButton variant="ghost" type="button" onClick={onChat || (() => setDialog("chat"))}>Abrir chat del traslado</BaseButton>}
   </section>;
 
   return <div data-trip-stage className={minimal ? styles.minimal : undefined}>
     <ConductorScreen variant="operation" label="Resumen operativo del traslado" header={<header className={styles.safety} aria-label="Seguridad del traslado">
       <Link href={backHref} aria-label="Volver a Traslados" title="Volver a Traslados">←</Link>
       <p>Traslado<span>{id.slice(0, 8).toUpperCase()}</span></p>
-      <button type="button" onClick={() => setSupport(true)} aria-label="Soporte" title="Soporte del traslado">Ayuda</button>
+      <BaseButton variant="ghost" type="button" onClick={() => setSupport(true)} aria-label="Soporte" title="Soporte del traslado">Ayuda</BaseButton>
       {!readOnly && <EmergencyPanel trasladoId={id} compact headerPill pillLabel="SOS" />}
     </header>} footer={<section data-trip-primary className={styles.action} aria-label="Acción principal del traslado">
-      {error && <div className={styles.error} role="alert"><p>{error.length <= 160 ? error : "No se pudo actualizar el traslado."}</p>{error.length > 160 && <button type="button" onClick={() => setDialog("error")}>Ver motivo completo</button>}</div>}
+      {error && <div className={styles.error} role="alert"><p>{error.length <= 160 ? error : "No se pudo actualizar el traslado."}</p>{error.length > 160 && <BaseButton variant="ghost" type="button" onClick={() => setDialog("error")}>Ver motivo completo</BaseButton>}</div>}
       {notice && <p role="status" className={styles.notice}>{notice}</p>}
-      {primaryHref ? <Link href={primaryHref} className={styles.primary}>{primaryLabel}</Link> : <button type="button" className={styles.primary} disabled={busy || disabled} aria-busy={busy} onClick={onPrimary}>{busy ? "Actualizando…" : primaryLabel}</button>}
+      {primaryHref ? <Link href={primaryHref} className={styles.primary}>{primaryLabel}</Link> : <BaseButton variant="primary" type="button" className={styles.primary} disabled={busy || disabled} aria-busy={busy} onClick={onPrimary}>{busy ? "Actualizando…" : primaryLabel}</BaseButton>}
     </section>}>
       <div className={`${styles.content} ${readOnly ? styles.readOnly : ""}`}>
         <section className={styles.heading} aria-label="Estado y siguiente paso">
           <p className={styles.state} role="status">{stateLabel}</p>
           <h1>{title}</h1><p>{instruction}</p>
         </section>
-        <button type="button" className={styles.point} aria-label={`Ver dirección completa de ${pointLabel.toLowerCase()}`} onClick={() => setDialog(offer ? "details" : "point")} aria-haspopup="dialog">
+        <BaseButton variant="ghost" type="button" className={styles.point} aria-label={`Ver dirección completa de ${pointLabel.toLowerCase()}`} onClick={() => setDialog(offer ? "details" : "point")} aria-haspopup="dialog">
           <span className={styles.pointLabel}>{offer ? `${pasaporte.origen_ciudad || "Origen por confirmar"} → ${pasaporte.destino_ciudad || "Destino por confirmar"}` : `${pointLabel} · ${city || "Ciudad por confirmar"}`}</span>
           <span className={styles.address}>{offer ? `${pasaporte.origen_direccion || "Origen por confirmar"} → ${pasaporte.destino_direccion || "Destino por confirmar"}` : street || "Dirección por confirmar"}</span>
           <span className={styles.pointHint}>{offer ? "Ver ruta completa →" : "Ver dirección completa →"}</span>
-        </button>
+        </BaseButton>
         {offer ? <p className={styles.vehicle}>Ganancia: <strong>{money}</strong></p> : <p className={styles.vehicle}>{vehicle} · <strong className={styles.plates}>{pasaporte.vehiculo_placas || "Placas por confirmar"}</strong></p>}
         <div className={styles.tools}>
-          <button type="button" onClick={() => setDialog("details")} aria-haspopup="dialog">{readOnly ? "Ver detalle" : "Detalles y herramientas"}</button>
-          {!readOnly && !offer && <button type="button" onClick={openNavigation} disabled={!canNavigate} aria-haspopup="dialog">Navegar</button>}
-          {offer && onReject && <button type="button" onClick={onReject} disabled={disabled} aria-haspopup="dialog">Rechazar oferta</button>}
+          <BaseButton variant="ghost" type="button" onClick={() => setDialog("details")} aria-haspopup="dialog">{readOnly ? "Ver detalle" : "Detalles y herramientas"}</BaseButton>
+          {!readOnly && !offer && <BaseButton variant="ghost" type="button" onClick={openNavigation} disabled={!canNavigate} aria-haspopup="dialog">Navegar</BaseButton>}
+          {offer && onReject && <BaseButton variant="ghost" type="button" onClick={onReject} disabled={disabled} aria-haspopup="dialog">Rechazar oferta</BaseButton>}
         </div>
         {children}
       </div>

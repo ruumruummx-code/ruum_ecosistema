@@ -2,7 +2,7 @@ import { readFileSync } from "node:fs";
 import path from "node:path";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
-import { Badge, Button, buttonVariants, ChipGroup, EmptyState, Input, Tabs, TabsList, TabsTrigger, cn } from "./index";
+import { Badge, Button, Card, buttonVariants, ChipGroup, EmptyState, Input, Tabs, TabsList, TabsTrigger, cn } from "./index";
 
 const clases = (html: string) => (html.match(/class="([^"]*)"/)?.[1] ?? "").split(/\s+/);
 
@@ -106,5 +106,16 @@ describe("tokens ui-*", () => {
   it("el borde de campo oscuro usa border-input (≥ 3:1 sobre la tarjeta)", () => {
     const oscuro = css.slice(css.indexOf('[data-theme="dark"]'));
     expect(oscuro).toMatch(/--ui-field:\s*var\(--ruum-border-input\)/);
+  });
+});
+
+
+describe("Card", () => {
+  it("asChild conserva la semántica y los atributos de la tarjeta sin añadir un contenedor", () => {
+    const html = renderToStaticMarkup(<Card asChild><article aria-label="Oferta de traslado">Oferta</article></Card>);
+    expect(html.startsWith("<article")).toBe(true);
+    expect(html).toContain('aria-label="Oferta de traslado"');
+    expect(html).not.toContain("<div");
+    expect(clases(html)).toContain("bg-ui-card");
   });
 });

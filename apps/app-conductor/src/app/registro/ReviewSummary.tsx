@@ -1,3 +1,4 @@
+import { Button as BaseButton } from "@ruum/ui/base";
 import styles from "./registration.module.css";
 
 export function ReviewSummary({ titulo, valores, icono, onEditar }: { titulo: string; valores: Array<string | undefined>; icono: "person" | "identity" | "license"; onEditar: () => void }) {
@@ -7,6 +8,6 @@ export function ReviewSummary({ titulo, valores, icono, onEditar }: { titulo: st
       <strong>{titulo}</strong>
       {valores.filter(Boolean).map((valor) => <span key={valor}>{valor}</span>)}
     </div>
-    <button type="button" className={styles.reviewEdit} onClick={onEditar} aria-label={`Editar ${titulo.toLowerCase()}`}>Editar</button>
+    <BaseButton variant="ghost" type="button" className={styles.reviewEdit} onClick={onEditar} aria-label={`Editar ${titulo.toLowerCase()}`}>Editar</BaseButton>
   </section>;
 }

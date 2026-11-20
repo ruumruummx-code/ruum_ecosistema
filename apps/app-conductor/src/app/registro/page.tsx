@@ -1,8 +1,10 @@
 "use client";
 
+import { Button as BaseButton } from "@ruum/ui/base";
 import Link from "next/link";
 import { useState } from "react";
-import { Button, Aviso } from "@ruum/ui";
+import { Aviso } from "@ruum/ui";
+import { ConductorButton as Button } from "@/components/v2/ConductorUI";
 import { TEXTOS_CARGANDO } from "@ruum/shared/constants";
 import { AccountStep } from "./AccountStep";
 import { DocumentsStep } from "./DocumentsStep";
@@ -71,26 +73,26 @@ export default function PaginaRegistroConductor() {
         />
       ) : r.enviado ? (
         <div className="py-8 text-center">
-          <div className="mx-auto flex size-12 items-center justify-center rounded-full bg-control-soft font-display text-xl font-bold text-success" aria-hidden>
+          <div className="mx-auto flex size-12 items-center justify-center rounded-full bg-ui-success-soft font-display text-xl font-bold text-ui-success" aria-hidden>
             ✓
           </div>
-          <h1 id="titulo-registro-conductor" className="mt-5 font-display text-2xl font-bold text-text-primary">
+          <h1 id="titulo-registro-conductor" className="mt-5 font-display text-2xl font-bold text-ui-fg">
             Solicitud en revisión
           </h1>
-          <p className="mt-3 font-body text-sm leading-6 text-text-tertiary/80">
+          <p className="mt-3 font-body text-sm leading-6 text-ui-fg-muted/80">
             Tu cuenta está pendiente de validación. Cuando la revisión esté completa, podrás consultar y aceptar Traslados.
           </p>
 
-          <div className="mt-6 rounded-2xl border border-route-action/30 bg-surface p-5 text-left shadow-sm">
+          <div className="mt-6 rounded-lg border border-ui-brand/30 bg-ui-card p-5 text-left shadow-sm">
             <div className="flex items-start gap-3.5">
-              <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-route-soft text-lg text-route-action">
+              <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-ui-brand-soft text-lg text-ui-brand">
                 🪪
               </div>
               <div className="min-w-0 flex-1">
-                <h3 className="font-display text-base font-bold text-text-primary">
+                <h3 className="font-display text-base font-bold text-ui-fg">
                   Verificación de identidad automática
                 </h3>
-                <p className="mt-1 font-body text-xs leading-5 text-text-secondary">
+                <p className="mt-1 font-body text-xs leading-5 text-ui-fg-muted">
                   Agiliza la validación de tu cuenta completando la prueba de vida y validación biométrica con Didit.
                 </p>
               </div>
@@ -301,7 +303,7 @@ export default function PaginaRegistroConductor() {
                             {r.paso === 2 && (
                   <p className={styles.microcopy}>
                     Al continuar, declaras que tu licencia es válida y autorizas la verificación de antecedentes y datos biométricos. <a href="/legal/privacidad?volver=%2Fregistro" target="_blank" rel="noopener noreferrer">Privacidad</a> · <a href="/legal/terminos?volver=%2Fregistro" target="_blank" rel="noopener noreferrer">Términos</a>
-                    <button type="button" className={styles.legalTrigger} onClick={() => r.setMostrarDetalleConsentimiento(true)}>Ver declaración</button>
+                    <BaseButton variant="ghost" type="button" className={styles.legalTrigger} onClick={() => r.setMostrarDetalleConsentimiento(true)}>Ver declaración</BaseButton>
                   </p>
                 )}
 
@@ -351,7 +353,7 @@ export default function PaginaRegistroConductor() {
                             {r.paso === 2 && (
                   <p className={styles.microcopy}>
                     Al continuar, declaras que tu licencia es válida y autorizas la verificación de antecedentes y datos biométricos. <a href="/legal/privacidad?volver=%2Fregistro" target="_blank" rel="noopener noreferrer">Privacidad</a> · <a href="/legal/terminos?volver=%2Fregistro" target="_blank" rel="noopener noreferrer">Términos</a>
-                    <button type="button" className={styles.legalTrigger} onClick={() => r.setMostrarDetalleConsentimiento(true)}>Ver declaración</button>
+                    <BaseButton variant="ghost" type="button" className={styles.legalTrigger} onClick={() => r.setMostrarDetalleConsentimiento(true)}>Ver declaración</BaseButton>
                   </p>
                 )}
 
@@ -364,7 +366,7 @@ export default function PaginaRegistroConductor() {
             {r.registroCompacto ? (
               <RegistrationAction><footer className={styles.actionFooter}>
 
-                <button
+                <BaseButton variant="primary"
                   className={styles.primary}
                   data-final-action={r.paso === 4 || undefined}
                   type={r.paso===0 && !r.sesionAutenticada && accountSection==="contact" ? "button" : "submit"}
@@ -397,7 +399,7 @@ export default function PaginaRegistroConductor() {
                     ? "Crear cuenta"
                     : "Continuar"}
                   {(r.paso < 2 || r.paso >= 3) && <RegistrationIcon name="arrow" />}
-                </button>
+                </BaseButton>
               </footer></RegistrationAction>
             ) : (
               <div className="grid gap-3 sm:grid-cols-2">
@@ -412,7 +414,7 @@ export default function PaginaRegistroConductor() {
                     className={[
                       "min-h-12 min-w-12 px-6 py-3.5 font-display text-base font-bold leading-6",
                       "shadow-sm hover:-translate-y-0.5 hover:shadow-md active:translate-y-0",
-                      "focus-visible:outline-route-action focus-visible:outline-[3px] focus-visible:outline-offset-2",
+                      "focus-visible:outline-ui-brand focus-visible:outline-[3px] focus-visible:outline-offset-2",
                       r.paso === 0 ? "sm:col-start-2 w-full" : "w-full",
                     ].join(" ")}
                     onClick={r.avanzar}
@@ -429,7 +431,7 @@ export default function PaginaRegistroConductor() {
                     className={[
                       "w-full min-h-12 px-6 py-3.5 font-display text-base font-bold leading-6",
                       "shadow-sm hover:-translate-y-0.5 hover:shadow-md active:translate-y-0",
-                      "focus-visible:outline-route-action focus-visible:outline-[3px] focus-visible:outline-offset-2",
+                      "focus-visible:outline-ui-brand focus-visible:outline-[3px] focus-visible:outline-offset-2",
                     ].join(" ")}
                   >
                     {r.enviando ? TEXTOS_CARGANDO.enviando : "Enviar registro"}

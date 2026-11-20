@@ -1,5 +1,6 @@
 "use client";
 
+import { Button as BaseButton } from "@ruum/ui/base";
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { crearClienteNavegador } from "@/lib/supabase-browser";
@@ -117,10 +118,10 @@ export function SecondaryTripNavBar({
           <Link
             href={`/viajes/${trasladoId}/detalles`}
             aria-current={tabActiva === "detalles" ? "page" : undefined}
-            className={`flex min-h-[40px] cursor-pointer items-center justify-center gap-1.5 rounded-2xl px-2.5 py-1.5 font-body text-xs transition-all duration-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--conductor-focus)] ${
+            className={`flex min-h-[40px] cursor-pointer items-center justify-center gap-1.5 rounded-lg px-2.5 py-1.5 font-body text-xs transition-all duration-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ui-focus ${
               tabActiva === "detalles"
-                ? "bg-[var(--conductor-action-soft)] font-extrabold text-[var(--conductor-action)] shadow-2xs"
-                : "font-semibold text-[var(--conductor-muted)] hover:bg-[var(--conductor-surface-secondary)] hover:text-[var(--conductor-primary)]"
+                ? "bg-ui-brand-soft font-extrabold text-ui-brand shadow-2xs"
+                : "font-semibold text-ui-fg-muted hover:bg-ui-muted hover:text-ui-fg"
             }`}
           >
             <svg className="size-4 shrink-0" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
@@ -130,15 +131,15 @@ export function SecondaryTripNavBar({
           </Link>
 
           {/* Pestaña 2: Gastos */}
-          <button
+          <BaseButton variant="ghost"
             type="button"
             onClick={() => setTabActiva("gastos")}
             aria-haspopup="dialog"
             aria-expanded={tabActiva === "gastos"}
-            className={`flex min-h-[40px] cursor-pointer items-center justify-center gap-1.5 rounded-2xl px-2.5 py-1.5 font-body text-xs transition-all duration-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--conductor-focus)] ${
+            className={`flex min-h-[40px] cursor-pointer items-center justify-center gap-1.5 rounded-lg px-2.5 py-1.5 font-body text-xs transition-all duration-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ui-focus ${
               tabActiva === "gastos"
-                ? "bg-[var(--conductor-action-soft)] font-extrabold text-[var(--conductor-action)] shadow-2xs"
-                : "font-semibold text-[var(--conductor-muted)] hover:bg-[var(--conductor-surface-secondary)] hover:text-[var(--conductor-primary)]"
+                ? "bg-ui-brand-soft font-extrabold text-ui-brand shadow-2xs"
+                : "font-semibold text-ui-fg-muted hover:bg-ui-muted hover:text-ui-fg"
             }`}
           >
             <svg className="size-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.1" aria-hidden="true">
@@ -147,25 +148,25 @@ export function SecondaryTripNavBar({
             <span className="truncate">
               Gastos {gastosList.length > 0 && `(${gastosList.length})`}
             </span>
-          </button>
+          </BaseButton>
 
           {/* Pestaña 3: Incidencias */}
-          <button
+          <BaseButton variant="ghost"
             type="button"
             onClick={() => setTabActiva("incidencia")}
             aria-haspopup="dialog"
             aria-expanded={tabActiva === "incidencia"}
-            className={`flex min-h-[40px] cursor-pointer items-center justify-center gap-1.5 rounded-2xl px-2.5 py-1.5 font-body text-xs transition-all duration-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--conductor-focus)] ${
+            className={`flex min-h-[40px] cursor-pointer items-center justify-center gap-1.5 rounded-lg px-2.5 py-1.5 font-body text-xs transition-all duration-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ui-focus ${
               tabActiva === "incidencia"
-                ? "bg-[var(--conductor-pending-soft)] font-extrabold text-[var(--conductor-pending)] shadow-2xs"
-                : "font-semibold text-[var(--conductor-muted)] hover:bg-[var(--conductor-surface-secondary)] hover:text-[var(--conductor-primary)]"
+                ? "bg-ui-warning-soft font-extrabold text-ui-warning shadow-2xs"
+                : "font-semibold text-ui-fg-muted hover:bg-ui-muted hover:text-ui-fg"
             }`}
           >
             <svg className="size-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.1" aria-hidden="true">
               <path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
             </svg>
             <span className="truncate">Incidencias</span>
-          </button>
+          </BaseButton>
         </div>
       </nav>
     </>

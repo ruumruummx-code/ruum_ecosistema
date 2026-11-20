@@ -26,13 +26,13 @@ export function ConductorNavigation({ embedded = false, destinos = CONDUCTOR_DES
                     aria-label={destino.etiqueta}
                     className={[
                       "relative flex flex-col items-center justify-center gap-0.5 rounded-xl px-0.5 py-1.5 min-h-[56px] font-body text-xs leading-none transition-colors duration-200 select-none",
-                      activo ? "conductor-nav-selected font-semibold" : "text-text-secondary hover:text-text-primary"
+                      activo ? "bg-ui-brand-soft text-ui-brand-soft-fg font-semibold" : "text-ui-fg-muted hover:text-ui-fg"
                     ].join(" ")}
                   >
                     <div className="relative flex items-center justify-center p-1">
                       {Icono ? <Icono /> : <ConductorIcon name={icono} size={17} strokeWidth={1.8} />}
                     </div>
-                    <span className="max-w-full truncate tracking-tight text-sm leading-none">{destino.etiqueta}</span>
+                    <span className="max-w-full truncate tracking-tight text-xs leading-none">{destino.etiqueta}</span>
                   </Link>
                 );
               })}

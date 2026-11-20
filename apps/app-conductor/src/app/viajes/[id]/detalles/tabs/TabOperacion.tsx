@@ -1,5 +1,6 @@
 "use client";
 
+import { Button as BaseButton } from "@ruum/ui/base";
 import { enlaceTel, enlaceWhatsApp } from "./detalles-utils";
 
 interface TabOperacionProps {
@@ -40,111 +41,111 @@ export function TabOperacion({
   setCopiado,
 }: TabOperacionProps) {
   return (
-    <div className="bg-surface-elevated rounded-3xl border border-border/20 p-5 shadow-sm relative flex flex-col gap-4">
+    <div className="bg-ui-muted rounded-xl border border-ui-line/20 p-5 shadow-sm relative flex flex-col gap-4">
       {/* Cabecera de Operación */}
       <div className="flex items-center justify-between">
         <div className="flex flex-col">
-          <span className="text-sm text-text-tertiary font-extrabold uppercase tracking-normal">
+          <span className="text-sm text-ui-fg-muted font-extrabold uppercase tracking-normal">
             Operación y Despacho
           </span>
-          <span className="font-display text-lg font-black text-text-primary mt-0.5">
+          <span className="font-display text-lg font-black text-ui-fg mt-0.5">
             #TR-{folio}
           </span>
         </div>
-        <span className="px-2.5 py-1 rounded-lg bg-surface border border-border/30 text-sm font-black text-route-action uppercase tracking-wider">
+        <span className="px-2.5 py-1 rounded-lg bg-ui-card border border-ui-line/30 text-sm font-black text-ui-brand uppercase tracking-wider">
           Certificado
         </span>
       </div>
 
       {/* Grid de tiempos y ventanas operativas */}
       <div className="grid grid-cols-2 gap-2.5 mt-1">
-        <div className="flex flex-col bg-surface p-3 rounded-xl border border-border/15">
-          <span className="text-sm text-text-tertiary font-bold uppercase tracking-normal">
+        <div className="flex flex-col bg-ui-card p-3 rounded-xl border border-ui-line/15">
+          <span className="text-sm text-ui-fg-muted font-bold uppercase tracking-normal">
             # Traslado
           </span>
-          <span className="font-mono text-sm font-black mt-0.5 text-text-primary">
+          <span className="font-mono text-sm font-black mt-0.5 text-ui-fg">
             #TR-{folio}
           </span>
         </div>
 
-        <div className="flex flex-col bg-surface p-3 rounded-xl border border-border/15">
-          <span className="text-sm text-text-tertiary font-bold uppercase tracking-normal">
+        <div className="flex flex-col bg-ui-card p-3 rounded-xl border border-ui-line/15">
+          <span className="text-sm text-ui-fg-muted font-bold uppercase tracking-normal">
             Fecha de Traslado
           </span>
-          <span className="font-semibold text-sm mt-0.5 text-text-primary capitalize">
+          <span className="font-semibold text-sm mt-0.5 text-ui-fg capitalize">
             {fecha}
           </span>
         </div>
 
-        <div className="flex flex-col bg-surface p-3 rounded-xl border border-border/15">
-          <span className="text-sm text-text-tertiary font-bold uppercase tracking-normal">
+        <div className="flex flex-col bg-ui-card p-3 rounded-xl border border-ui-line/15">
+          <span className="text-sm text-ui-fg-muted font-bold uppercase tracking-normal">
             Hora de Inicio
           </span>
-          <span className="font-semibold text-sm mt-0.5 text-text-primary tabular-nums">
+          <span className="font-semibold text-sm mt-0.5 text-ui-fg tabular-nums">
             {horaInicio}
           </span>
         </div>
 
-        <div className="flex flex-col bg-surface p-3 rounded-xl border border-border/15">
-          <span className="text-sm text-text-tertiary font-bold uppercase tracking-normal">
+        <div className="flex flex-col bg-ui-card p-3 rounded-xl border border-ui-line/15">
+          <span className="text-sm text-ui-fg-muted font-bold uppercase tracking-normal">
             Ventana de Recolección
           </span>
-          <span className="font-semibold text-sm mt-0.5 text-text-primary">
+          <span className="font-semibold text-sm mt-0.5 text-ui-fg">
             {ventanaRecoleccion ?? "No especificada"}
           </span>
-          <span className="font-body text-sm text-text-tertiary">
+          <span className="font-body text-sm text-ui-fg-muted">
             Según formulario de solicitud
           </span>
         </div>
 
-        <div className="flex flex-col col-span-2 bg-surface p-3 rounded-xl border border-border/15">
-          <span className="text-sm text-text-tertiary font-bold uppercase tracking-normal">
+        <div className="flex flex-col col-span-2 bg-ui-card p-3 rounded-xl border border-ui-line/15">
+          <span className="text-sm text-ui-fg-muted font-bold uppercase tracking-normal">
             Ventana de Entrega
           </span>
-          <span className="font-semibold text-sm mt-0.5 text-text-primary">
+          <span className="font-semibold text-sm mt-0.5 text-ui-fg">
             {ventanaEntrega ?? "No especificada"}
           </span>
-          <span className="font-body text-sm text-text-tertiary">
+          <span className="font-body text-sm text-ui-fg-muted">
             Según formulario de solicitud
           </span>
         </div>
       </div>
 
-      <div className="h-px w-full bg-border/20 my-1" />
+      <div className="h-px w-full bg-ui-line/20 my-1" />
 
       {/* Directorio de Contactos con Llamada y WhatsApp */}
       <div className="flex flex-col gap-3">
-        <span className="text-sm text-text-tertiary font-extrabold uppercase tracking-normal">
+        <span className="text-sm text-ui-fg-muted font-extrabold uppercase tracking-normal">
           Contactos Operativos
         </span>
 
         {/* 1. Solicitante */}
-        <div className="flex items-center justify-between bg-surface rounded-2xl p-3.5 border border-border/15">
+        <div className="flex items-center justify-between bg-ui-card rounded-lg p-3.5 border border-ui-line/15">
           <div className="flex items-center gap-3 min-w-0">
-            <div className="w-10 h-10 rounded-full bg-route-action/10 text-route-action flex items-center justify-center font-bold text-sm shrink-0">
+            <div className="w-10 h-10 rounded-full bg-ui-brand/10 text-ui-brand flex items-center justify-center font-bold text-sm shrink-0">
               {solicitanteNombre.charAt(0).toUpperCase()}
             </div>
             <div className="flex flex-col min-w-0">
-              <span className="text-sm text-route-action font-bold uppercase tracking-wider">
+              <span className="text-sm text-ui-brand font-bold uppercase tracking-wider">
                 Solicitante del Servicio
               </span>
-              <span className="font-bold text-sm text-text-primary break-words">
+              <span className="font-bold text-sm text-ui-fg break-words">
                 {solicitanteNombre}
               </span>
-              <span className="font-mono text-sm text-text-secondary flex items-center gap-1">
+              <span className="font-mono text-sm text-ui-fg-muted flex items-center gap-1">
                 {solicitanteTelefono || "Teléfono no disponible"}
                 {solicitanteTelefono && (
-                  <button
+                  <BaseButton variant="ghost"
                     type="button"
                     onClick={() => {
                       copiar(solicitanteTelefono);
                       setCopiado("sol");
                       setTimeout(() => setCopiado(null), 1200);
                     }}
-                    className="text-sm font-bold text-route-action hover:underline px-1"
+                    className="text-sm font-bold text-ui-brand hover:underline px-1"
                   >
                     {copiado === "sol" ? "Copiado" : "Copiar"}
-                  </button>
+                  </BaseButton>
                 )}
               </span>
             </div>
@@ -158,7 +159,7 @@ export function TabOperacion({
                 )}
                 target="_blank"
                 rel="noreferrer"
-                className="min-h-11 min-w-11 rounded-xl bg-emerald-500/15 text-emerald-400 flex items-center justify-center border border-emerald-500/30 active:scale-95 transition-transform hover:bg-emerald-500/25 focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-route-action"
+                className="min-h-11 min-w-11 rounded-xl bg-ui-success/15 text-ui-success flex items-center justify-center border border-ui-success/30 active:scale-95 transition-transform hover:bg-ui-success/25 focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-ui-brand"
                 aria-label={`WhatsApp a ${solicitanteNombre}`}
                 title="Enviar WhatsApp"
               >
@@ -168,7 +169,7 @@ export function TabOperacion({
               </a>
               <a
                 href={enlaceTel(solicitanteTelefono)}
-                className="min-h-11 min-w-11 rounded-xl bg-route-action/15 text-route-action flex items-center justify-center border border-route-action/30 active:scale-95 transition-transform hover:bg-route-action/25 focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-route-action"
+                className="min-h-11 min-w-11 rounded-xl bg-ui-brand/15 text-ui-brand flex items-center justify-center border border-ui-brand/30 active:scale-95 transition-transform hover:bg-ui-brand/25 focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-ui-brand"
                 aria-label={`Llamar a ${solicitanteNombre}`}
                 title="Llamar"
               >
@@ -181,32 +182,32 @@ export function TabOperacion({
         </div>
 
         {/* 2. Persona quien entrega */}
-        <div className="flex items-center justify-between bg-surface rounded-2xl p-3.5 border border-border/15">
+        <div className="flex items-center justify-between bg-ui-card rounded-lg p-3.5 border border-ui-line/15">
           <div className="flex items-center gap-3 min-w-0">
-            <div className="w-10 h-10 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center font-bold text-sm shrink-0">
+            <div className="w-10 h-10 rounded-full bg-ui-success/10 text-ui-success  flex items-center justify-center font-bold text-sm shrink-0">
               {entregaNombre.charAt(0).toUpperCase()}
             </div>
             <div className="flex flex-col min-w-0">
-              <span className="text-sm text-emerald-600 dark:text-emerald-400 font-bold uppercase tracking-wider">
+              <span className="text-sm text-ui-success  font-bold uppercase tracking-wider">
                 Persona quien Entrega (Origen)
               </span>
-              <span className="font-bold text-sm text-text-primary break-words">
+              <span className="font-bold text-sm text-ui-fg break-words">
                 {entregaNombre}
               </span>
-              <span className="font-mono text-sm text-text-secondary flex items-center gap-1">
+              <span className="font-mono text-sm text-ui-fg-muted flex items-center gap-1">
                 {entregaTelefono || "Teléfono no disponible"}
                 {entregaTelefono && (
-                  <button
+                  <BaseButton variant="ghost"
                     type="button"
                     onClick={() => {
                       copiar(entregaTelefono);
                       setCopiado("ent");
                       setTimeout(() => setCopiado(null), 1200);
                     }}
-                    className="text-sm font-bold text-route-action hover:underline px-1"
+                    className="text-sm font-bold text-ui-brand hover:underline px-1"
                   >
                     {copiado === "ent" ? "Copiado" : "Copiar"}
-                  </button>
+                  </BaseButton>
                 )}
               </span>
             </div>
@@ -220,7 +221,7 @@ export function TabOperacion({
                 )}
                 target="_blank"
                 rel="noreferrer"
-                className="min-h-11 min-w-11 rounded-xl bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 flex items-center justify-center border border-emerald-500/30 active:scale-95 transition-transform hover:bg-emerald-500/25 focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-route-action"
+                className="min-h-11 min-w-11 rounded-xl bg-ui-success/15 text-ui-success  flex items-center justify-center border border-ui-success/30 active:scale-95 transition-transform hover:bg-ui-success/25 focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-ui-brand"
                 aria-label={`WhatsApp a ${entregaNombre}`}
                 title="Enviar WhatsApp"
               >
@@ -230,7 +231,7 @@ export function TabOperacion({
               </a>
               <a
                 href={enlaceTel(entregaTelefono)}
-                className="min-h-11 min-w-11 rounded-xl bg-route-action/15 text-route-action flex items-center justify-center border border-route-action/30 active:scale-95 transition-transform hover:bg-route-action/25 focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-route-action"
+                className="min-h-11 min-w-11 rounded-xl bg-ui-brand/15 text-ui-brand flex items-center justify-center border border-ui-brand/30 active:scale-95 transition-transform hover:bg-ui-brand/25 focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-ui-brand"
                 aria-label={`Llamar a ${entregaNombre}`}
                 title="Llamar"
               >
@@ -243,32 +244,32 @@ export function TabOperacion({
         </div>
 
         {/* 3. Persona quien recibe */}
-        <div className="flex items-center justify-between bg-surface rounded-2xl p-3.5 border border-border/15">
+        <div className="flex items-center justify-between bg-ui-card rounded-lg p-3.5 border border-ui-line/15">
           <div className="flex items-center gap-3 min-w-0">
-            <div className="w-10 h-10 rounded-full bg-surface-elevated border border-border/60 text-text-primary flex items-center justify-center font-bold text-sm shrink-0">
+            <div className="w-10 h-10 rounded-full bg-ui-muted border border-ui-line/60 text-ui-fg flex items-center justify-center font-bold text-sm shrink-0">
               {recepcionNombre.charAt(0).toUpperCase()}
             </div>
             <div className="flex flex-col min-w-0">
-              <span className="text-sm text-text-secondary font-bold uppercase tracking-wider">
+              <span className="text-sm text-ui-fg-muted font-bold uppercase tracking-wider">
                 Persona quien Recibe (Destino)
               </span>
-              <span className="font-bold text-sm text-text-primary break-words">
+              <span className="font-bold text-sm text-ui-fg break-words">
                 {recepcionNombre}
               </span>
-              <span className="font-mono text-sm text-text-secondary flex items-center gap-1">
+              <span className="font-mono text-sm text-ui-fg-muted flex items-center gap-1">
                 {recepcionTelefono || "Teléfono no disponible"}
                 {recepcionTelefono && (
-                  <button
+                  <BaseButton variant="ghost"
                     type="button"
                     onClick={() => {
                       copiar(recepcionTelefono);
                       setCopiado("rec");
                       setTimeout(() => setCopiado(null), 1200);
                     }}
-                    className="text-sm font-bold text-route-action hover:underline px-1"
+                    className="text-sm font-bold text-ui-brand hover:underline px-1"
                   >
                     {copiado === "rec" ? "Copiado" : "Copiar"}
-                  </button>
+                  </BaseButton>
                 )}
               </span>
             </div>
@@ -282,7 +283,7 @@ export function TabOperacion({
                 )}
                 target="_blank"
                 rel="noreferrer"
-                className="min-h-11 min-w-11 rounded-xl bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 flex items-center justify-center border border-emerald-500/30 active:scale-95 transition-transform hover:bg-emerald-500/25 focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-route-action"
+                className="min-h-11 min-w-11 rounded-xl bg-ui-success/15 text-ui-success  flex items-center justify-center border border-ui-success/30 active:scale-95 transition-transform hover:bg-ui-success/25 focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-ui-brand"
                 aria-label={`WhatsApp a ${recepcionNombre}`}
                 title="Enviar WhatsApp"
               >
@@ -292,7 +293,7 @@ export function TabOperacion({
               </a>
               <a
                 href={enlaceTel(recepcionTelefono)}
-                className="min-h-11 min-w-11 rounded-xl bg-route-action/15 text-route-action flex items-center justify-center border border-route-action/30 active:scale-95 transition-transform hover:bg-route-action/25 focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-route-action"
+                className="min-h-11 min-w-11 rounded-xl bg-ui-brand/15 text-ui-brand flex items-center justify-center border border-ui-brand/30 active:scale-95 transition-transform hover:bg-ui-brand/25 focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-ui-brand"
                 aria-label={`Llamar a ${recepcionNombre}`}
                 title="Llamar"
               >
@@ -305,36 +306,36 @@ export function TabOperacion({
         </div>
       </div>
 
-      <div className="h-px w-full bg-border/20 my-1" />
+      <div className="h-px w-full bg-ui-line/20 my-1" />
 
       {/* Notas Operativas: Recogida y Entrega */}
       <div className="flex flex-col gap-3">
-        <span className="text-sm text-text-tertiary font-extrabold uppercase tracking-normal">
+        <span className="text-sm text-ui-fg-muted font-extrabold uppercase tracking-normal">
           Notas y Referencias
         </span>
 
         {/* Notas de recogida */}
-        <div className="flex flex-col bg-surface p-3.5 rounded-2xl border border-border/15">
+        <div className="flex flex-col bg-ui-card p-3.5 rounded-lg border border-ui-line/15">
           <div className="flex items-center gap-1.5 mb-1">
-            <span className="h-2 w-2 rounded-full bg-emerald-500" />
-            <span className="text-sm text-emerald-600 dark:text-emerald-400 font-bold uppercase tracking-normal">
+            <span className="h-2 w-2 rounded-full bg-ui-success" />
+            <span className="text-sm text-ui-success  font-bold uppercase tracking-normal">
               Notas de Recogida (Origen)
             </span>
           </div>
-          <span className="font-body text-sm text-text-secondary leading-relaxed whitespace-pre-wrap">
+          <span className="font-body text-sm text-ui-fg-muted leading-relaxed whitespace-pre-wrap">
             {notasRecogida}
           </span>
         </div>
 
         {/* Notas de entrega */}
-        <div className="flex flex-col bg-surface p-3.5 rounded-2xl border border-border/15">
+        <div className="flex flex-col bg-ui-card p-3.5 rounded-lg border border-ui-line/15">
           <div className="flex items-center gap-1.5 mb-1">
-            <span className="h-2 w-2 rounded-full bg-route-action" />
-            <span className="text-sm text-route-action font-bold uppercase tracking-normal">
+            <span className="h-2 w-2 rounded-full bg-ui-brand" />
+            <span className="text-sm text-ui-brand font-bold uppercase tracking-normal">
               Notas de Entrega (Destino)
             </span>
           </div>
-          <span className="font-body text-sm text-text-secondary leading-relaxed whitespace-pre-wrap">
+          <span className="font-body text-sm text-ui-fg-muted leading-relaxed whitespace-pre-wrap">
             {notasEntrega}
           </span>
         </div>

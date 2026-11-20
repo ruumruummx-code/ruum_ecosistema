@@ -2,6 +2,7 @@
 
 import type { ReactNode, Ref } from "react";
 import Link from "next/link";
+import { PageHeader } from "@ruum/ui/base";
 import styles from "./conductor-screen.module.css";
 
 export type ConductorScreenVariant = "access" | "overview" | "operation" | "form" | "detail" | "list" | "state";
@@ -27,7 +28,6 @@ export function ConductorPageHeader({ title, backHref = "/cuenta", backLabel = "
 }) {
   return <header className={styles.pageHeader}>
     <Link href={backHref} aria-label={backLabel} prefetch={false}><span aria-hidden>←</span> {backLabel}</Link>
-    <h1>{title}</h1>
-    {description && <p>{description}</p>}
+    <PageHeader titulo={title} descripcion={description} className="[&_h1]:text-2xl [&_p]:block" />
   </header>;
 }

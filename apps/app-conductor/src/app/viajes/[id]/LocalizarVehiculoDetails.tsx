@@ -1,4 +1,5 @@
 "use client";
+import { Button as BaseButton, Input as BaseInput, NativeSelect as BaseSelect } from "@ruum/ui/base";
 import { TripStage } from "./TripStage";
 import styles from "./trip-stage.module.css";
 
@@ -231,22 +232,22 @@ export function LocalizarVehiculoDetails({
       instruction={faltanDatosVehiculo ? "Faltan VIN o placas. Consulta a soporte." : recording ? "Continúa las fotos y los datos del vehículo." : enPasoVerificacion ? "Comprueba VIN, placas y consulta REPUVE." : "Comprueba los datos con el contacto."}
       primaryLabel={blocked ? "Contactar soporte" : needsVerification ? "Abrir verificación" : recording || enPasoVerificacion ? "Continuar registro inicial" : "Confirmar contacto y vehículo"}
       onPrimary={action} busy={procesando} error={error} notice={aviso}
-      extraTools={enPasoVerificacion && !faltanDatosVehiculo && <button type="button" onClick={() => setVerificationOpen(true)}>Revisar verificación REPUVE</button>} />
+      extraTools={enPasoVerificacion && !faltanDatosVehiculo && <BaseButton variant="ghost" type="button" onClick={() => setVerificationOpen(true)}>Revisar verificación REPUVE</BaseButton>} />
     {verificationOpen && <TripDialog title="Verificación del vehículo" onClose={() => setVerificationOpen(false)}>
       <div className={styles.verification} data-verificacion-repuve>
         <p>VIN registrado: <strong className={styles.mono}>{vin}</strong></p><p>Placas registradas: <strong className={styles.mono}>{placas}</strong></p>
         <a href={URL_PORTAL_REPUVE} target="_blank" rel="noopener noreferrer">Abrir portal REPUVE</a>
         {repuveValidoEnServidor ? <p role="status">{estatusServidor === "autorizado_por_soporte" ? "Verificación autorizada por soporte" : "Verificación registrada y validada"}</p> : <>
-          <label>VIN físico en unidad<input className={styles.mono} value={vinFisico} onChange={e => setVinFisico(e.target.value.toUpperCase())} /></label>
-          <label>Placas físicas<input className={styles.mono} value={placasFisicas} onChange={e => setPlacasFisicas(e.target.value.toUpperCase())} /></label>
-          <label>Resultado en REPUVE<select value={resultadoRepuve} onChange={e => setResultadoRepuve(e.target.value as ResultadoVerificacionRepuveConductor)}>{OPCIONES_RESULTADO_REPUVE.map(option => <option key={option.valor} value={option.valor}>{option.etiqueta}</option>)}</select></label>
+          <label>VIN físico en unidad<BaseInput className={styles.mono} value={vinFisico} onChange={e => setVinFisico(e.target.value.toUpperCase())} /></label>
+          <label>Placas físicas<BaseInput className={styles.mono} value={placasFisicas} onChange={e => setPlacasFisicas(e.target.value.toUpperCase())} /></label>
+          <label>Resultado en REPUVE<BaseSelect value={resultadoRepuve} onChange={e => setResultadoRepuve(e.target.value as ResultadoVerificacionRepuveConductor)}>{OPCIONES_RESULTADO_REPUVE.map(option => <option key={option.valor} value={option.valor}>{option.etiqueta}</option>)}</BaseSelect></label>
           <label>Captura de pantalla REPUVE<input type="file" accept="image/*" onChange={e => { setCapturaArchivo(e.target.files?.[0] ?? null); setCapturaPathSubida(null); }} /></label>
           {detectaBloqueoOperativo && <p role="alert">{evaluacionRepuve.motivoBloqueo || "La verificación requiere revisión de soporte."}</p>}
           {error && <p role="alert">{error}</p>}
           {detectaBloqueoOperativo ? <>
-            {!intentoBloqueadoGuardado && hayCamposIngresados && Boolean(capturaArchivo || capturaPathSubida) && <button type="button" disabled={procesando} onClick={() => void handleRegistrarVerificacionRepuve()}>Guardar evidencia de bloqueo</button>}
-            <button type="button" onClick={() => setSoporteAbierto(true)}>Contactar soporte</button>
-          </> : <button type="button" disabled={procesando} onClick={() => void handleRegistrarVerificacionRepuve()}>{procesando ? "Guardando…" : "Confirmar verificación"}</button>}
+            {!intentoBloqueadoGuardado && hayCamposIngresados && Boolean(capturaArchivo || capturaPathSubida) && <BaseButton variant="ghost" type="button" disabled={procesando} onClick={() => void handleRegistrarVerificacionRepuve()}>Guardar evidencia de bloqueo</BaseButton>}
+            <BaseButton variant="ghost" type="button" onClick={() => setSoporteAbierto(true)}>Contactar soporte</BaseButton>
+          </> : <BaseButton variant="ghost" type="button" disabled={procesando} onClick={() => void handleRegistrarVerificacionRepuve()}>{procesando ? "Guardando…" : "Confirmar verificación"}</BaseButton>}
         </>}
       </div>
     </TripDialog>}

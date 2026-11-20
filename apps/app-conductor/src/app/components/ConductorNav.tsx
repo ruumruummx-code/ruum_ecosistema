@@ -52,19 +52,19 @@ export function ConductorNav({
               <Link
                 href={`/viajes/${viajeActivo.trasladoId}`}
                 aria-label={`Abrir traslado activo ${viajeActivo.folio}: ${viajeActivo.etapa}`}
-                className="conductor-mobile-active-trip-card mx-auto grid grid-cols-[1fr_auto] items-center gap-3 rounded-2xl border border-border/40 bg-surface-elevated/95 px-4 py-2.5 shadow-lg backdrop-blur"
+                className="conductor-mobile-active-trip-card mx-auto grid grid-cols-[1fr_auto] items-center gap-3 rounded-lg border border-ui-line/40 bg-ui-muted/95 px-4 py-2.5 shadow-lg backdrop-blur"
               >
                 <span className="min-w-0">
                   <span className="flex min-w-0 items-center gap-2">
-                    <span className="truncate font-body text-xs font-bold uppercase text-route-action">
+                    <span className="truncate font-body text-xs font-bold uppercase text-ui-brand">
                       Traslado activo · {viajeActivo.folio}
                     </span>
                   </span>
-                  {viajeActivoSinActualizar && <span className="block text-sm text-warning">Información sin actualizar</span>}
-                  <span className="mt-1 block truncate font-body text-sm font-bold text-text-primary">{viajeActivo.etapa}</span>
-                  <span className="conductor-mobile-active-trip-destination mt-0.5 block truncate font-body text-xs text-text-secondary">{viajeActivo.destinoActual}</span>
+                  {viajeActivoSinActualizar && <span className="block text-sm text-ui-warning">Información sin actualizar</span>}
+                  <span className="mt-1 block truncate font-body text-sm font-bold text-ui-fg">{viajeActivo.etapa}</span>
+                  <span className="conductor-mobile-active-trip-destination mt-0.5 block truncate font-body text-xs text-ui-fg-muted">{viajeActivo.destinoActual}</span>
                 </span>
-                <span className="inline-flex min-h-10 items-center justify-center rounded-xl bg-signal px-3.5 font-display text-xs font-black uppercase" style={{ color: "var(--conductor-on-action)" }}>
+                <span className="inline-flex min-h-10 items-center justify-center rounded-xl bg-ui-brand px-3.5 font-display text-xs font-black uppercase" style={{ color: "var(--conductor-on-action)" }}>
                   Abrir
                 </span>
               </Link>

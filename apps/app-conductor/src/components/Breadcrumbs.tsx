@@ -91,7 +91,7 @@ export function Breadcrumbs() {
                 fill="none"
                 stroke="currentColor"
                 strokeWidth={2}
-                className="text-text-tertiary"
+                className="text-ui-fg-muted"
                 aria-hidden="true"
               >
                 <path d="M9 18l6-6-6-6" />
@@ -100,12 +100,12 @@ export function Breadcrumbs() {
             {item.href ? (
               <Link
                 href={item.href}
-                className="font-body text-sm font-medium text-route-action hover:underline focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-route-action"
+                className="font-body text-sm font-medium text-ui-brand hover:underline focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-ui-brand"
               >
                 {item.label}
               </Link>
             ) : (
-              <span className="font-body text-sm font-semibold text-text-primary">
+              <span className="font-body text-sm font-semibold text-ui-fg">
                 {item.label}
               </span>
             )}

@@ -1,5 +1,6 @@
 "use client";
 
+import { Button as BaseButton } from "@ruum/ui/base";
 import React from "react";
 import Link from "next/link";
 import { recordOperationalEvent } from "../lib/observability";
@@ -62,38 +63,38 @@ function FallbackConductor({ error, reset, scope }: { error: Error; reset: () =>
   const isDev = process.env.NODE_ENV === "development";
   return (
     <div className="mx-auto flex min-h-[50vh] w-full max-w-md flex-col items-center justify-center px-6 py-12 text-center" role="alert" aria-live="assertive">
-      <div className="rounded-2xl border border-border/40 bg-surface p-6 shadow-sm w-full">
-        <h1 className="font-display text-lg font-black text-text-primary">Algo salió mal{scope !== "global" ? ` en ${scope}` : ""}</h1>
-        <p className="mt-2 font-body text-sm leading-6 text-text-secondary">
+      <div className="rounded-lg border border-ui-line/40 bg-ui-card p-6 shadow-sm w-full">
+        <h1 className="font-display text-lg font-black text-ui-fg">Algo salió mal{scope !== "global" ? ` en ${scope}` : ""}</h1>
+        <p className="mt-2 font-body text-sm leading-6 text-ui-fg-muted">
           Ocurrió un error inesperado. No se perdió tu información — puedes reintentar o volver al panel.
         </p>
         {isDev && (
-          <pre className="mt-3 max-h-32 overflow-auto rounded-lg bg-surface-elevated p-3 text-left font-mono text-xs text-danger/80 border border-danger/20">
+          <pre className="mt-3 max-h-32 overflow-auto rounded-lg bg-ui-muted p-3 text-left font-mono text-xs text-ui-danger/80 border border-ui-danger/20">
             {error.message}
           </pre>
         )}
         <div className="mt-6 flex flex-wrap justify-center gap-3">
-          <button
+          <BaseButton variant="ghost"
             type="button"
             onClick={reset}
-            className="inline-flex min-h-11 items-center justify-center rounded-xl bg-signal px-5 py-2.5 font-display text-sm font-bold text-slate-950 hover:bg-signal/90 focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-signal"
+            className="inline-flex min-h-11 items-center justify-center rounded-xl bg-ui-brand px-5 py-2.5 font-display text-sm font-bold text-ui-fg-muted hover:bg-ui-brand/90 focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-ui-brand"
           >
             Reintentar
-          </button>
+          </BaseButton>
           <Link
             href="/panel"
-            className="inline-flex min-h-11 items-center justify-center rounded-xl border border-border bg-surface px-5 py-2.5 font-body text-sm font-medium text-text-primary hover:border-border-strong"
+            className="inline-flex min-h-11 items-center justify-center rounded-xl border border-ui-line bg-ui-card px-5 py-2.5 font-body text-sm font-medium text-ui-fg hover:border-ui-field"
           >
             Ir al panel
           </Link>
           <Link
             href="/viajes"
-            className="inline-flex min-h-11 items-center justify-center rounded-xl border border-border bg-surface px-5 py-2.5 font-body text-sm font-medium text-text-primary hover:border-border-strong"
+            className="inline-flex min-h-11 items-center justify-center rounded-xl border border-ui-line bg-ui-card px-5 py-2.5 font-body text-sm font-medium text-ui-fg hover:border-ui-field"
           >
             Ver Traslados
           </Link>
         </div>
-        <p className="mt-4 font-body text-xs text-text-tertiary">
+        <p className="mt-4 font-body text-xs text-ui-fg-muted">
           Si el problema persiste, contacta soporte desde el panel. Error registrado automáticamente.
         </p>
       </div>

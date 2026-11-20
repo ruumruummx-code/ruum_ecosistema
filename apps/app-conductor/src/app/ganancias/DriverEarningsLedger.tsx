@@ -1,4 +1,5 @@
 "use client";
+import { Button as BaseButton } from "@ruum/ui/base";
 import { ConductorScreen, ConductorPageHeader } from "../components/ConductorScreen";
 
 import { useState } from "react";
@@ -59,16 +60,16 @@ export default function PaginaGanancias() {
 
   return (
     <ConductorScreen variant="list" label="Historial de ganancias y pagos" header={<ConductorPageHeader title="Mis ganancias y pagos" backHref="/ganancias" backLabel="Volver a Mis ganancias" />}>
-      <div className="flex justify-end"><button
+      <div className="flex justify-end"><BaseButton variant="ghost"
             type="button"
             onClick={() => setSoporteAbierto(true)}
             aria-label="Ayuda y soporte operativo"
-            className="flex h-11 w-11 items-center justify-center rounded-full border border-border/20 bg-surface-elevated text-text-primary hover:text-signal hover:border-signal/30 transition-colors focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-route-action"
+            className="flex h-11 w-11 items-center justify-center rounded-full border border-ui-line/20 bg-ui-muted text-ui-fg hover:text-ui-brand hover:border-ui-brand/30 transition-colors focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-ui-brand"
           >
             <span className="font-display text-sm font-black" aria-hidden>
               ?
             </span>
-          </button></div>
+          </BaseButton></div>
       {error && (
         <div className="mt-6">
           <Aviso tono="danger">{error}</Aviso>
@@ -76,25 +77,25 @@ export default function PaginaGanancias() {
       )}
 
       {cargando && (
-        <div className="mt-6 rounded-xl border border-border bg-surface-elevated p-8">
-          <p className="font-body text-sm font-semibold text-text-secondary">Cargando expediente de ganancias...</p>
+        <div className="mt-6 rounded-xl border border-ui-line bg-ui-muted p-8">
+          <p className="font-body text-sm font-semibold text-ui-fg-muted">Cargando expediente de ganancias...</p>
           <div className="mt-4 grid gap-3 sm:grid-cols-4">
-            <div className="h-20 animate-pulse rounded-xl bg-surface-elevated" />
-            <div className="h-20 animate-pulse rounded-xl bg-surface-elevated" />
-            <div className="h-20 animate-pulse rounded-xl bg-surface-elevated" />
-            <div className="h-20 animate-pulse rounded-xl bg-surface-elevated" />
+            <div className="h-20 animate-pulse rounded-xl bg-ui-muted" />
+            <div className="h-20 animate-pulse rounded-xl bg-ui-muted" />
+            <div className="h-20 animate-pulse rounded-xl bg-ui-muted" />
+            <div className="h-20 animate-pulse rounded-xl bg-ui-muted" />
           </div>
         </div>
       )}
 
       {sinDatosTotales && (
-        <div className="mt-6 rounded-xl border-route-action/35 bg-surface-elevated p-8">
+        <div className="mt-6 rounded-xl border-ui-brand/35 bg-ui-muted p-8">
           <div className="mx-auto flex max-w-2xl flex-col items-center text-center">
-            <div className="flex size-14 items-center justify-center rounded-full border border-signal/40 bg-signal/10 font-display text-2xl text-signal" aria-hidden>
+            <div className="flex size-14 items-center justify-center rounded-full border border-ui-brand/40 bg-ui-brand/10 font-display text-2xl text-ui-brand" aria-hidden>
               💵
             </div>
-            <h2 className="mt-4 font-display text-2xl font-bold text-text-primary">Aún no hay ganancias registradas</h2>
-            <p className="mt-2 font-body text-sm leading-6 text-text-tertiary">
+            <h2 className="mt-4 font-display text-2xl font-bold text-ui-fg">Aún no hay ganancias registradas</h2>
+            <p className="mt-2 font-body text-sm leading-6 text-ui-fg-muted">
               Completa tu primer traslado para comenzar a acumular ganancias. Al finalizar cada viaje, verás aquí el desglose detallado y el estatus de tu depósito bancario.
             </p>
           </div>
@@ -118,33 +119,33 @@ export default function PaginaGanancias() {
           <div className="mt-6 flex flex-col gap-3">
             <EarningsTabs periodoActivo={periodoActivo} onCambiarPeriodo={cambiarPeriodoLocal} />
 
-            <div className="flex items-center justify-between gap-2 rounded-2xl border border-border/40 bg-surface px-3 py-2.5">
-              <button
+            <div className="flex items-center justify-between gap-2 rounded-lg border border-ui-line/40 bg-ui-card px-3 py-2.5">
+              <BaseButton variant="ghost"
                 type="button"
                 onClick={() => setOffsetPeriodo(offsetPeriodo - 1)}
                 aria-label="Periodo anterior"
-                className="flex h-11 w-11 items-center justify-center rounded-full border border-border bg-surface-elevated text-text-primary hover:border-signal/40 focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-route-action"
+                className="flex h-11 w-11 items-center justify-center rounded-full border border-ui-line bg-ui-muted text-ui-fg hover:border-ui-brand/40 focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-ui-brand"
               >
                 ‹
-              </button>
+              </BaseButton>
               <div className="text-center min-w-0">
-                <p className="font-display text-sm font-bold text-text-primary truncate capitalize">
+                <p className="font-display text-sm font-bold text-ui-fg truncate capitalize">
                   {formatearRango(periodoActivo, rangoActual.inicio, rangoActual.fin)}
                 </p>
-                <p className="font-body text-xs font-semibold text-text-tertiary">
+                <p className="font-body text-xs font-semibold text-ui-fg-muted">
                   {periodoActivo === "semana" ? "Dom – Sáb" : periodoActivo === "mes" ? "Mes completo" : "Año completo"} ·{" "}
                   {resumen.totalTraslados} viaje(s)
                 </p>
               </div>
-              <button
+              <BaseButton variant="ghost"
                 type="button"
                 onClick={() => setOffsetPeriodo(offsetPeriodo + 1)}
                 aria-label="Periodo siguiente"
                 disabled={offsetPeriodo >= 0 && obtenerRangoPeriodo(periodoActivo, hoy, offsetPeriodo + 1).inicio.getTime() > hoy.getTime()}
-                className="flex h-11 w-11 items-center justify-center rounded-full border border-border bg-surface-elevated text-text-primary hover:border-signal/40 disabled:opacity-40 disabled:cursor-not-allowed focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-route-action"
+                className="flex h-11 w-11 items-center justify-center rounded-full border border-ui-line bg-ui-muted text-ui-fg hover:border-ui-brand/40 disabled:opacity-40 disabled:cursor-not-allowed focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-ui-brand"
               >
                 ›
-              </button>
+              </BaseButton>
             </div>
           </div>
 
@@ -160,14 +161,14 @@ export default function PaginaGanancias() {
           {/* Desglose por viaje */}
           <section className="mt-6" aria-label="Desglose por viaje">
             <div className="flex items-center justify-between gap-2">
-              <h2 className="font-display text-base font-bold text-text-primary">Desglose por viaje</h2>
-              <span className="rounded-full bg-surface-elevated border border-border px-2.5 py-1 font-body text-xs font-bold text-text-tertiary tabular-nums">
+              <h2 className="font-display text-base font-bold text-ui-fg">Desglose por viaje</h2>
+              <span className="rounded-full bg-ui-muted border border-ui-line px-2.5 py-1 font-body text-xs font-bold text-ui-fg-muted tabular-nums">
                 {TrasladosFiltrados.length} traslado(s)
               </span>
             </div>
 
             {TrasladosFiltrados.length === 0 ? (
-              <div className="mt-3 rounded-2xl border border-border bg-surface p-8 text-center font-body text-sm text-text-tertiary">
+              <div className="mt-3 rounded-lg border border-ui-line bg-ui-card p-8 text-center font-body text-sm text-ui-fg-muted">
                 No hay traslados en este periodo ({formatearRango(periodoActivo, rangoActual.inicio, rangoActual.fin)}).
               </div>
             ) : (

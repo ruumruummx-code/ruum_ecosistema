@@ -2,7 +2,8 @@
   "descripcion": "Candado del sistema base v2. 'migradas' no admite estilos sueltos; el resto no puede empeorar respecto a 'lineaBase'. Ver design-system/docs/sistema-base-v2.md.",
   "raices": [
     "apps/app-usuario/src",
-    "packages/ui/src"
+    "packages/ui/src",
+    "apps/app-conductor/src"
   ],
   "migradas": [
     "packages/ui/src/base",
@@ -11,19 +12,36 @@
     "apps/app-usuario/src/app/viajes/nuevo/components/PasoTarifa.tsx",
     "apps/app-usuario/src/app/viajes/nuevo/components/PasoDetalles.tsx",
     "apps/app-usuario/src/app/cuenta/verificar-telefono",
-    "apps/app-usuario/src/components/VerificacionHumana.tsx"
+    "apps/app-usuario/src/components/VerificacionHumana.tsx",
+    "apps/app-conductor/src/app/conductor-theme.css",
+    "apps/app-conductor/src/app/login",
+    "apps/app-conductor/src/components",
+    "apps/app-conductor/src/app/components",
+    "apps/app-conductor/src/app/cuenta",
+    "apps/app-conductor/src/app/panel",
+    "apps/app-conductor/src/app/ganancias",
+    "apps/app-conductor/src/app/viajes",
+    "apps/app-conductor/src/app/registro",
+    "apps/app-conductor/src/app/notificaciones",
+    "apps/app-conductor/src/app/recuperar-password",
+    "apps/app-conductor/src/app/nueva-password",
+    "apps/app-conductor/src/app/onboarding",
+    "apps/app-conductor/src/app/globals.css",
+    "apps/app-conductor/src/app/shell-contract.css"
   ],
   "excluir": [
     "packages/ui/src/styles/tokens.css",
     "packages/ui/src/styles/base.css"
   ],
   "lineaBase": {
+    "apps/app-conductor/src/app/auth/callback/route.ts": 3,
+    "apps/app-conductor/src/app/layout.tsx": 2,
     "apps/app-usuario/src/app/auth/callback/route.ts": 5,
     "apps/app-usuario/src/app/components/SkeletonMapa.tsx": 1,
     "apps/app-usuario/src/app/ConductorAsignado.tsx": 16,
     "apps/app-usuario/src/app/contrast-tokens.css": 16,
     "apps/app-usuario/src/app/cuenta/cambiar-contrasena/CambiarContrasena.tsx": 124,
-    "apps/app-usuario/src/app/cuenta/cuenta-desktop.module.css": 270,
+    "apps/app-usuario/src/app/cuenta/cuenta-desktop.module.css": 266,
     "apps/app-usuario/src/app/cuenta/cuenta-ui.tsx": 24,
     "apps/app-usuario/src/app/cuenta/CuentaCliente.tsx": 149,
     "apps/app-usuario/src/app/cuenta/CuentaDesktop.tsx": 5,
@@ -40,8 +58,8 @@
     "apps/app-usuario/src/app/cuenta/vehiculos/[id]/page.tsx": 1,
     "apps/app-usuario/src/app/cuenta/vehiculos/nuevo/NuevoVehiculo.tsx": 3,
     "apps/app-usuario/src/app/cuenta/vehiculos/page.tsx": 1,
-    "apps/app-usuario/src/app/cuenta/vehiculos/vehiculos-desktop.module.css": 249,
-    "apps/app-usuario/src/app/dashboard/dashboard.module.css": 188,
+    "apps/app-usuario/src/app/cuenta/vehiculos/vehiculos-desktop.module.css": 246,
+    "apps/app-usuario/src/app/dashboard/dashboard.module.css": 170,
     "apps/app-usuario/src/app/error.tsx": 3,
     "apps/app-usuario/src/app/FormularioPropuestaEmpresa.tsx": 8,
     "apps/app-usuario/src/app/global-error.tsx": 6,
@@ -127,7 +145,6 @@
     "packages/ui/src/components/MobileRow.tsx": 76,
     "packages/ui/src/components/Modal.tsx": 3,
     "packages/ui/src/components/Navigation.tsx": 3,
-    "packages/ui/src/components/RuumHeader.tsx": 39,
     "packages/ui/src/components/SelloConductor.tsx": 6,
     "packages/ui/src/components/StreetMode.tsx": 2
   }

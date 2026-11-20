@@ -1,5 +1,6 @@
 "use client";
 
+import { Button as BaseButton } from "@ruum/ui/base";
 import { useRef, type ChangeEvent } from "react";
 import type { DocumentoKey, EstadoDocumento } from "./registration-types";
 import styles from "./registration.module.css";
@@ -52,9 +53,9 @@ export function DocumentsStep({ sesionAutenticada, documentos, estadoDocumentos,
             {erroresCampos[item.key] && <small className={styles.documentError} role="alert">{erroresCampos[item.key]}</small>}
           </div>
           <input ref={(element) => { inputs.current[item.key] = element; }} type="file" accept="image/jpeg,image/png,image/webp,application/pdf" capture="environment" className="sr-only" aria-label={`Subir ${item.title} ${item.subtitle}`} onChange={(event) => cambiar(item.key, event)} />
-          <button type="button" className={styles.uploadButton} onClick={() => seleccionar(item.key)} aria-label={`${listo ? "Cambiar" : "Subir"} ${item.title}, ${item.subtitle}`}>
+          <BaseButton variant="ghost" type="button" className={styles.uploadButton} onClick={() => seleccionar(item.key)} aria-label={`${listo ? "Cambiar" : "Subir"} ${item.title}, ${item.subtitle}`}>
             <CameraIcon /><span>{listo ? "Cambiar" : "Subir"}</span>
-          </button>
+          </BaseButton>
         </section>;
       })}
     </div>}

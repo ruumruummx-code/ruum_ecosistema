@@ -38,6 +38,7 @@ const eslintConfig = defineConfig([
   },
   {
     files: ['**/*.{ts,tsx}'],
+    settings: { 'jsx-a11y': { components: { BaseButton: 'button', BaseInput: 'input', BaseSelect: 'select' } } },
     plugins: {
       'jsx-a11y': jsxA11y,
       '@typescript-eslint': tsPlugin
@@ -68,7 +69,7 @@ const eslintConfig = defineConfig([
       'jsx-a11y/label-has-associated-control': ['error', {
         labelComponents: ['label'],
         labelAttributes: ['htmlFor'],
-        controlComponents: ['input', 'select', 'textarea'],
+        controlComponents: ['input', 'select', 'textarea', 'BaseInput', 'BaseSelect'],
         depth: 3
       }],
       'jsx-a11y/mouse-events-have-key-events': 'error',

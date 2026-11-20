@@ -1,5 +1,6 @@
 "use client";
 
+import { Button as BaseButton } from "@ruum/ui/base";
 import { useEffect, useRef, useState } from "react";
 import {
   consultarAcuseRecepcion,
@@ -204,19 +205,19 @@ export function CierreTrasladoDetails({
       disabled={cargando || (step===0&&(bloqueoEvidencia||bloqueoLlaves)) || (step===1&&bloqueoFirma) || (step===2&&bloqueoCierre)} busy={procesando||guardandoReporte} error={error} notice={avisoExito}>
       {step===0&&<><h1>Revisa los requisitos</h1><p>El cierre conserva el inventario y las fotografías originales.</p>
         <ul className={styles.checklist}><li>Fotos sincronizadas: origen {evidenciaCierre?.inicial??0}/5 · destino {evidenciaCierre?.final??0}/5</li><li>Llaves: origen {inspeccionInicial?.llaves_recibidas??"Sin captura"} · destino {inspeccionFinal?.llaves_recibidas??"Sin captura"}</li><li>{cargando ? "Consultando el servidor…" : bloqueoEvidencia ? "Fotografías pendientes o en conflicto" : "Fotografías completas"}</li><li>{bloqueoLlaves ? "Inventario pendiente de resolución" : "Inventario conciliado"}</li></ul>
-        <button type="button" onClick={()=>setDetails(true)}>Ver registro completo y pendientes</button>
+        <BaseButton variant="ghost" type="button" onClick={()=>setDetails(true)}>Ver registro completo y pendientes</BaseButton>
       </>}
       <section hidden={step!==1} className={styles.content} aria-label="Firma de conformidad"><h1>Firma del receptor</h1><p>{contactoNombre}</p>
         {acusePersistido ? <p role="status">Recepción y firma acreditadas por el servidor.</p> : <SignaturePad canvasRef={canvasRef} onChange={setTieneFirma} disabled={procesando||guardandoReporte} />}
-        {!acusePersistido && <button type="button" onClick={()=>void handleGuardarReporte()} disabled={!tieneFirma||procesando||guardandoReporte}>Guardar recepción y firma</button>}
+        {!acusePersistido && <BaseButton variant="ghost" type="button" onClick={()=>void handleGuardarReporte()} disabled={!tieneFirma||procesando||guardandoReporte}>Guardar recepción y firma</BaseButton>}
       </section>
-      {step===2&&<><h1>{delivery ? "Confirma la entrega" : "Finaliza el servicio"}</h1><p>{delivery ? "Confirmar la entrega registra la recepción del vehículo. Después podrás finalizar el servicio." : "Revisa el expediente antes de finalizar el servicio."}</p><p>Receptor: {contactoNombre}</p><p>Firma: {acusePersistido ? "Acreditada en servidor" : tieneFirma ? "Capturada; se guardará al confirmar" : "Pendiente"}</p><button type="button" onClick={()=>setDetails(true)}>Revisar registro completo</button></>}
+      {step===2&&<><h1>{delivery ? "Confirma la entrega" : "Finaliza el servicio"}</h1><p>{delivery ? "Confirmar la entrega registra la recepción del vehículo. Después podrás finalizar el servicio." : "Revisa el expediente antes de finalizar el servicio."}</p><p>Receptor: {contactoNombre}</p><p>Firma: {acusePersistido ? "Acreditada en servidor" : tieneFirma ? "Capturada; se guardará al confirmar" : "Pendiente"}</p><BaseButton variant="ghost" type="button" onClick={()=>setDetails(true)}>Revisar registro completo</BaseButton></>}
     </TripFormFrame>
     {details&&<TripDialog title="Registro y pendientes de entrega" onClose={()=>setDetails(false)}><div className={styles.content}><h3>Receptor</h3><p>{contactoNombre}</p>{telefonoLimpio&&<a href={`tel:${telefonoLimpio}`}>Llamar al receptor</a>}
       <p>Odómetro: {odometroTexto}</p><p>Combustible: {combustibleTexto}</p><p className={styles.complete}>Observaciones: {observacionesTexto}</p>
       {bloqueoEvidencia&&<p role="alert">Completa y sincroniza las fotografías obligatorias. {evidenciaCierre?.conflicto ? "Existe un conflicto: solicita revisión sin sustituir el registro original." : ""}</p>}
       {bloqueoLlaves&&<p role="alert">La falta de inventario o una diferencia de llaves requiere resolución administrativa. Conserva los registros y recarga después de resolver.</p>}
-      <Link href={`/viajes/${trasladoId}/evidencia`}>Revisar evidencias</Link><button type="button" onClick={()=>location.reload()}>Volver a comprobar requisitos</button><button type="button" onClick={()=>{setDetails(false);setSoporteAbierto(true);}}>Contactar soporte</button>
+      <Link href={`/viajes/${trasladoId}/evidencia`}>Revisar evidencias</Link><BaseButton variant="ghost" type="button" onClick={()=>location.reload()}>Volver a comprobar requisitos</BaseButton><BaseButton variant="ghost" type="button" onClick={()=>{setDetails(false);setSoporteAbierto(true);}}>Contactar soporte</BaseButton>
     </div></TripDialog>}
     {modalConfirmacionAbierto&&<CierreConfirmacionModal abierto onCerrar={()=>setModalConfirmacionAbierto(false)} onConfirmar={()=>{setModalConfirmacionAbierto(false);void handleFinalizarTraslado();}} procesando={procesando||cargando||bloqueoCierre} delivery={delivery} />}
     {soporteAbierto&&<TripSupportDialog onClose={()=>setSoporteAbierto(false)} />}

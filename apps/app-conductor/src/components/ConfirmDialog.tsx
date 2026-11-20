@@ -1,5 +1,6 @@
 "use client";
 
+import { Button as BaseButton } from "@ruum/ui/base";
 import { useEffect, useId, useRef } from "react";
 
 type ConfirmDialogProps = {
@@ -65,14 +66,14 @@ export function ConfirmDialog({
 
   return (
     <div className="fixed inset-0 z-[100] flex items-end justify-center p-4 sm:items-center">
-      <button
+      <BaseButton variant="ghost"
         type="button"
         aria-label="Cerrar diálogo"
         onClick={() => {
           if (!busy) onCancel();
         }}
         disabled={busy}
-        className="absolute inset-0 w-full h-full bg-black/70 backdrop-blur-xs border-none cursor-default disabled:cursor-not-allowed"
+        className="absolute inset-0 w-full h-full bg-ui-overlay/70 backdrop-blur-xs border-none cursor-default disabled:cursor-not-allowed"
       />
       <dialog
         ref={dialogRef}
@@ -81,43 +82,43 @@ export function ConfirmDialog({
         aria-modal="true"
         aria-labelledby={titleId}
         aria-describedby={descriptionId}
-        className="relative w-full max-w-lg rounded-2xl border border-border bg-surface p-5 shadow-2xl text-text-primary m-0 block z-10"
+        className="relative w-full max-w-lg rounded-lg border border-ui-line bg-ui-card p-5 shadow-2xl text-ui-fg m-0 block z-10"
       >
-        <h2 id={titleId} className="font-display text-xl font-bold text-text-primary">
+        <h2 id={titleId} className="font-display text-xl font-bold text-ui-fg">
           {title}
         </h2>
-        <p id={descriptionId} className="mt-2 font-body text-sm leading-6 text-text-secondary">
+        <p id={descriptionId} className="mt-2 font-body text-sm leading-6 text-ui-fg-muted">
           {consequence}
         </p>
         {maskedData.length > 0 && (
-          <ul className="mt-4 rounded-xl bg-surface-muted p-3 font-mono text-sm text-text-secondary">
+          <ul className="mt-4 rounded-xl bg-ui-muted p-3 font-mono text-sm text-ui-fg-muted">
             {maskedData.map((item) => (
               <li key={item}>{item}</li>
             ))}
           </ul>
         )}
         <div className="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
-          <button
+          <BaseButton variant="ghost"
             ref={cancelRef}
             type="button"
             disabled={busy}
             onClick={onCancel}
-            className="min-h-11 rounded-xl border border-border px-4 font-semibold text-text-primary hover:bg-surface-elevated focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus disabled:opacity-50"
+            className="min-h-11 rounded-xl border border-ui-line px-4 font-semibold text-ui-fg hover:bg-ui-muted focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ui-focus disabled:opacity-50"
           >
             {cancelLabel}
-          </button>
-          <button
+          </BaseButton>
+          <BaseButton variant="ghost"
             type="button"
             disabled={busy}
             onClick={onConfirm}
-            className={`min-h-11 rounded-xl px-4 font-semibold focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus disabled:opacity-50 ${
+            className={`min-h-11 rounded-xl px-4 font-semibold focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ui-focus disabled:opacity-50 ${
               destructive
-                ? "bg-danger-action text-on-danger hover:brightness-110"
-                : "bg-signal text-text-primary hover:brightness-110 font-bold"
+                ? "bg-ui-danger text-ui-on-brand hover:brightness-110"
+                : "bg-ui-brand text-ui-fg hover:brightness-110 font-bold"
             }`}
           >
             {busy ? "Procesando…" : confirmLabel}
-          </button>
+          </BaseButton>
         </div>
       </dialog>
     </div>

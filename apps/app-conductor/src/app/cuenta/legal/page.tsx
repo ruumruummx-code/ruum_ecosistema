@@ -1,5 +1,6 @@
 "use client";
 
+import { Button as BaseButton } from "@ruum/ui/base";
 import { useState } from "react";
 import Link from "next/link";
 import { Card } from "@ruum/ui";
@@ -37,10 +38,10 @@ export default function PaginaLegalCuenta() {
 
       <div className="mt-6 grid gap-6">
         <Card>
-          <p className="font-body text-xs font-bold uppercase tracking-wider text-text-tertiary mb-1">
+          <p className="font-body text-xs font-bold uppercase tracking-wider text-ui-fg-muted mb-1">
             Documentación Operativa Oficial
           </p>
-          <h2 className="font-display text-lg font-bold text-text-primary mb-4">
+          <h2 className="font-display text-lg font-bold text-ui-fg mb-4">
             Contratos y Políticas de la Plataforma
           </h2>
 
@@ -49,30 +50,30 @@ export default function PaginaLegalCuenta() {
             {DOCUMENTOS_LEGALES.map((doc) => (
               <div
                 key={doc.id}
-                className="group relative flex flex-col justify-between gap-4 rounded-2xl border border-border/80 bg-surface-elevated/40 p-4 transition-all duration-150 hover:border-signal hover:bg-surface-elevated hover:shadow-md sm:flex-row sm:items-center"
+                className="group relative flex flex-col justify-between gap-4 rounded-lg border border-ui-line/80 bg-ui-muted/40 p-4 transition-all duration-150 hover:border-ui-brand hover:bg-ui-muted hover:shadow-md sm:flex-row sm:items-center"
               >
                 <div className="flex items-start gap-3.5 min-w-0">
-                  <div className="flex size-11 shrink-0 items-center justify-center rounded-xl border border-border bg-surface font-display text-xl shadow-2xs">
+                  <div className="flex size-11 shrink-0 items-center justify-center rounded-xl border border-ui-line bg-ui-card font-display text-xl shadow-2xs">
                     {doc.icono}
                   </div>
 
                   <div className="min-w-0">
                     <div className="flex flex-wrap items-center gap-2">
-                      <h3 className="font-display text-base font-bold text-text-primary">
+                      <h3 className="font-display text-base font-bold text-ui-fg">
                         {doc.titulo}
                       </h3>
                       {/* 2. Control de Versiones e Indicadores de Transparencia */}
-                      <span className="rounded-md border border-control bg-control-soft px-2 py-0.5 font-body text-xs font-extrabold text-control uppercase tracking-wider">
+                      <span className="rounded-md border border-ui-success bg-ui-success-soft px-2 py-0.5 font-body text-xs font-extrabold text-ui-success uppercase tracking-wider">
                         {doc.version} • Vigente
                       </span>
                     </div>
 
-                    <p className="mt-1 font-body text-xs text-text-tertiary leading-5">
+                    <p className="mt-1 font-body text-xs text-ui-fg-muted leading-5">
                       {doc.descripcion}
                     </p>
 
                     {/* 2. Fecha de última actualización explícita */}
-                    <p className="mt-1.5 font-body text-[11px] font-semibold text-text-tertiary">
+                    <p className="mt-1.5 font-body text-xs font-semibold text-ui-fg-muted">
                       Última actualización: {doc.actualizacion}
                     </p>
                   </div>
@@ -80,17 +81,17 @@ export default function PaginaLegalCuenta() {
 
                 {/* 3. Lectura In-App Nativa + Navegación */}
                 <div className="flex items-center gap-2 shrink-0">
-                  <button
+                  <BaseButton variant="ghost"
                     type="button"
                     onClick={() => setDocAbierto(doc.id)}
-                    className="inline-flex items-center gap-1.5 rounded-xl border border-border bg-surface px-3.5 py-2 font-display text-xs font-bold text-route-action transition hover:border-route-action hover:bg-route-action/10 active:scale-95"
+                    className="inline-flex items-center gap-1.5 rounded-xl border border-ui-line bg-ui-card px-3.5 py-2 font-display text-xs font-bold text-ui-brand transition hover:border-ui-brand hover:bg-ui-brand/10 active:scale-95"
                   >
                     Lectura In-App 🔍
-                  </button>
+                  </BaseButton>
 
                   <Link
                     href={doc.href}
-                    className="inline-flex items-center gap-1.5 rounded-xl bg-action-primary hover:bg-action-primary-hover text-on-primary px-3.5 py-2 font-display text-xs font-black transition active:scale-95 shadow-xs"
+                    className="inline-flex items-center gap-1.5 rounded-xl bg-action-primary hover:bg-action-primary-hover text-ui-on-brand px-3.5 py-2 font-display text-xs font-black transition active:scale-95 shadow-xs"
                   >
                     Ver completo →
                   </Link>
@@ -103,72 +104,72 @@ export default function PaginaLegalCuenta() {
 
       {/* 3. Visualizador Modal In-App Nativo */}
       {docAbierto && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm">
-          <div className="relative flex max-h-[85vh] w-full max-w-2xl flex-col rounded-2xl border border-border bg-surface p-5 sm:p-6 shadow-2xl overflow-hidden">
-            <header className="flex items-center justify-between border-b border-border/60 pb-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-ui-overlay/70 p-4 backdrop-blur-sm">
+          <div className="relative flex max-h-[85vh] w-full max-w-2xl flex-col rounded-lg border border-ui-line bg-ui-card p-5 sm:p-6 shadow-2xl overflow-hidden">
+            <header className="flex items-center justify-between border-b border-ui-line/60 pb-4">
               <div>
-                <span className="font-body text-xs font-bold uppercase tracking-wider text-route-action">
+                <span className="font-body text-xs font-bold uppercase tracking-wider text-ui-brand">
                   Visualizador In-App Ruum Ruum
                 </span>
-                <h3 className="font-display text-lg font-bold text-text-primary">
+                <h3 className="font-display text-lg font-bold text-ui-fg">
                   {docAbierto === "terminos" ? "Términos y Condiciones de Uso" : "Aviso de Privacidad de Datos"}
                 </h3>
               </div>
-              <button
+              <BaseButton variant="ghost"
                 type="button"
                 onClick={() => setDocAbierto(null)}
-                className="flex size-9 items-center justify-center rounded-full border border-border bg-surface-elevated font-body text-sm font-bold text-text-primary hover:bg-surface-elevated/80"
+                className="flex size-9 items-center justify-center rounded-full border border-ui-line bg-ui-muted font-body text-sm font-bold text-ui-fg hover:bg-ui-muted/80"
                 aria-label="Cerrar visualizador in-app"
               >
                 ✕
-              </button>
+              </BaseButton>
             </header>
 
-            <div className="mt-4 flex-1 overflow-y-auto pr-2 font-body text-xs leading-6 text-text-secondary space-y-4">
+            <div className="mt-4 flex-1 overflow-y-auto pr-2 font-body text-xs leading-6 text-ui-fg-muted space-y-4">
               {docAbierto === "terminos" ? (
                 <>
-                  <p className="font-bold text-text-primary">
+                  <p className="font-bold text-ui-fg">
                     Versión 1.0 • Vigente desde el 3 de julio de 2026
                   </p>
                   <p>
                     Moviliax S.A. de C.V. (&quot;Ruum Ruum&quot;) presta el servicio de traslado vehicular con conductor certificado a través de su plataforma digital.
                   </p>
-                  <h4 className="font-bold text-text-primary text-sm mt-3">1. Registro y Certificación CONCER</h4>
+                  <h4 className="font-bold text-ui-fg text-sm mt-3">1. Registro y Certificación CONCER</h4>
                   <p>Para operar como Conductor, la persona debe completar el registro con datos verídicos, cargar documentación válida y aprobar la revisión documental y de antecedentes operacionales.</p>
-                  <h4 className="font-bold text-text-primary text-sm mt-3">2. Obligaciones del Conductor</h4>
+                  <h4 className="font-bold text-ui-fg text-sm mt-3">2. Obligaciones del Conductor</h4>
                   <p>El Conductor se compromete a mantener vigente su licencia de conducir, operar con los estándares de seguridad exigidos e informar de inmediato cualquier eventualidad.</p>
-                  <h4 className="font-bold text-text-primary text-sm mt-3">3. Pagos y Cobros Digitales</h4>
+                  <h4 className="font-bold text-ui-fg text-sm mt-3">3. Pagos y Cobros Digitales</h4>
                   <p>Todos los traslados se liquidan exclusivamente mediante métodos de pago digitales autorizados. Ruum Ruum no procesa pagos en efectivo en esta modalidad.</p>
                 </>
               ) : (
                 <>
-                  <p className="font-bold text-text-primary">
+                  <p className="font-bold text-ui-fg">
                     Versión 1.0 • Vigente desde el 3 de julio de 2026
                   </p>
                   <p>
                     En cumplimiento con la LFPDPPP, Moviliax S.A. de C.V. informa que es la entidad responsable del tratamiento de sus datos personales.
                   </p>
-                  <h4 className="font-bold text-text-primary text-sm mt-3">1. Datos Personales Recabados</h4>
+                  <h4 className="font-bold text-ui-fg text-sm mt-3">1. Datos Personales Recabados</h4>
                   <p>Recabamos nombre, CURP, licencia de conducir, identificación oficial, teléfono y datos de contacto de emergencia únicamente para fines de validación operativa.</p>
-                  <h4 className="font-bold text-text-primary text-sm mt-3">2. Finalidad del Tratamiento</h4>
+                  <h4 className="font-bold text-ui-fg text-sm mt-3">2. Finalidad del Tratamiento</h4>
                   <p>Verificación de identidad, certificación CONCER, gestión de traslados asignados, depósitos bancarios y protección de seguridad durante el servicio.</p>
-                  <h4 className="font-bold text-text-primary text-sm mt-3">3. Derechos ARCO</h4>
+                  <h4 className="font-bold text-ui-fg text-sm mt-3">3. Derechos ARCO</h4>
                   <p>Puede ejercitar sus derechos de Acceso, Rectificación, Cancelación u Oposición a través del Centro de Soporte oficial dentro de la plataforma.</p>
                 </>
               )}
             </div>
 
-            <footer className="mt-4 flex items-center justify-between border-t border-border/60 pt-3">
-              <span className="font-body text-[11px] text-text-tertiary">
+            <footer className="mt-4 flex items-center justify-between border-t border-ui-line/60 pt-3">
+              <span className="font-body text-xs text-ui-fg-muted">
                 Última actualización: 3 de julio de 2026
               </span>
-              <button
+              <BaseButton variant="ghost"
                 type="button"
                 onClick={() => setDocAbierto(null)}
-                className="rounded-xl bg-action-primary px-4 py-2 font-display text-xs font-bold text-on-primary"
+                className="rounded-xl bg-action-primary px-4 py-2 font-display text-xs font-bold text-ui-on-brand"
               >
                 Cerrar lectura rápida
-              </button>
+              </BaseButton>
             </footer>
           </div>
         </div>

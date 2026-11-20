@@ -89,7 +89,7 @@ export function EstadoTrackingGlobal() {
       mensaje = `${web.pendingCount} ubicación(es) en cola pendientes de sincronizar.`;
     }
     return (
-      <output className="mx-auto mt-3 block rounded-xl border border-amber-500/40 bg-amber-500/10 px-4 py-2 text-sm">
+      <output className="mx-auto mt-3 block rounded-xl border border-ui-warning/40 bg-ui-warning/10 px-4 py-2 text-sm">
         La web no garantiza GPS con pantalla bloqueada o en segundo plano. {mensaje} Para tracking continuo utiliza el cliente nativo validado.
       </output>
     );
@@ -106,8 +106,8 @@ export function EstadoTrackingGlobal() {
     <output
       className={`mx-auto mt-3 block w-[min(100%-24px,1120px)] rounded-xl border px-4 py-2 font-body text-sm font-semibold ${
         warning
-          ? "border-amber-500/40 bg-amber-500/10 text-amber-800 dark:border-amber-500/30 dark:bg-amber-950/40 dark:text-amber-300"
-          : "border-emerald-600/30 bg-emerald-50 text-emerald-800 dark:border-emerald-500/30 dark:bg-emerald-950/40 dark:text-emerald-300"
+          ? "border-ui-warning/40 bg-ui-warning/10 text-ui-warning   "
+          : "border-ui-success/30 bg-ui-success-soft text-ui-success   "
       }`}
     >
       {status ? etiqueta(status) : "Consultando seguimiento"}

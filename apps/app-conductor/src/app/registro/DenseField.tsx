@@ -1,3 +1,4 @@
+import { Input as BaseInput } from "@ruum/ui/base";
 import { useId, type InputHTMLAttributes, type ReactNode, type Ref } from "react";
 import styles from "./registration.module.css";
 
@@ -11,7 +12,7 @@ export function DenseField({ etiqueta, error, ref, leading, trailing, ...props }
       {leading}
       <div className={styles.fieldContent}>
       <label htmlFor={id}>{etiqueta}</label>
-      <input {...props} id={id} ref={ref} aria-invalid={Boolean(error)}
+      <BaseInput {...props} id={id} ref={ref} aria-invalid={Boolean(error)}
         aria-describedby={error ? `${id}-error` : props["aria-describedby"]} />
       {error && <span id={`${id}-error`} className="sr-only">{error}</span>}
       </div>

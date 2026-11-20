@@ -4,7 +4,7 @@
   gap: 6px;
   align-items: center;
   padding-bottom: 4px;
-  border-bottom: 1px solid var(--conductor-border);
+  border-bottom: 1px solid var(--ui-line);
 }
 .safety > :is(button, a) {
   display: flex;
@@ -12,22 +12,22 @@
   justify-content: center;
   min-height: 48px;
   min-width: 48px;
-  color: var(--conductor-action);
-  font-size: 14px;
+  color: var(--ui-brand);
+  font-size: 0.875rem;
 }
 .safety > p {
   margin: 0;
-  font-size: 14px;
+  font-size: 0.875rem;
   line-height: 1.3;
   font-weight: 600;
-  color: var(--conductor-primary);
+  color: var(--ui-fg);
 }
 .safety :global(#emergencia) > div:first-child > button {
   width: 64px;
   min-width: 48px;
   min-height: 48px;
   padding: 6px;
-  font-size: 14px;
+  font-size: 0.875rem;
 }
 
 .progressContainer {
@@ -37,14 +37,14 @@
 .progressBar {
   width: 100%;
   height: 4px;
-  border-radius: 2px;
-  background: var(--conductor-surface-secondary);
+  border-radius: 0.375rem;
+  background: var(--ui-muted);
   overflow: hidden;
 }
 .progressFill {
   height: 100%;
-  border-radius: 2px;
-  background: var(--conductor-gradient-route, var(--ruum-gradient-route, var(--conductor-action)));
+  border-radius: 0.375rem;
+  background: var(--conductor-gradient-route, var(--ruum-gradient-route, var(--ui-brand)));
   transition: width 0.2s ease;
 }
 
@@ -56,15 +56,15 @@
 }
 .progress p {
   margin: 0;
-  font-size: 13px;
+  font-size: 0.75rem;
   line-height: 1.4;
-  color: var(--conductor-muted);
+  color: var(--ui-fg-muted);
 }
 .progress button {
   min-height: 44px;
   min-width: 44px;
-  font-size: 13px;
-  color: var(--conductor-action);
+  font-size: 0.75rem;
+  color: var(--ui-brand);
   background: transparent;
   border: none;
   cursor: pointer;
@@ -76,44 +76,44 @@
 }
 .content h1 {
   margin: 0;
-  font-size: 22px;
+  font-size: 1.25rem;
   line-height: 1.2;
   font-weight: 700;
-  color: var(--conductor-primary);
+  color: var(--ui-fg);
 }
 .content h2 {
   margin: 0;
-  font-size: 18px;
+  font-size: 1.125rem;
   font-weight: 600;
-  color: var(--conductor-primary);
+  color: var(--ui-fg);
 }
 .content p {
   margin: 0;
-  font-size: 14px;
+  font-size: 0.875rem;
   line-height: 1.4;
-  color: var(--conductor-primary);
+  color: var(--ui-fg);
 }
 .content label {
   display: grid;
   gap: 6px;
-  font-size: 14px;
+  font-size: 0.875rem;
   font-weight: 500;
-  color: var(--conductor-muted);
+  color: var(--ui-fg-muted);
 }
 .content :is(input, select, textarea) {
   min-width: 0;
   width: 100%;
   padding: 10px 4px;
   border: none;
-  border-bottom: 2px solid var(--conductor-border-strong);
+  border-bottom: 2px solid var(--ui-field);
   border-radius: 0;
   background: transparent;
-  color: var(--conductor-primary);
-  font-size: 16px;
+  color: var(--ui-fg);
+  font-size: 1rem;
 }
 .content :is(input, select, textarea):focus-visible {
   outline: none;
-  border-bottom-color: var(--conductor-action);
+  border-bottom-color: var(--ui-brand);
 }
 .content input[inputmode="numeric"] {
   font-family: var(--font-mono);
@@ -123,7 +123,7 @@
   min-height: 48px;
 }
 .content textarea {
-  border: 1px solid var(--conductor-border-strong);
+  border: 1px solid var(--ui-field);
   border-radius: var(--conductor-radius-control);
   padding: 8px;
 }
@@ -132,11 +132,11 @@
   min-height: 48px;
   min-width: 48px;
   padding: 8px;
-  border: 1px solid var(--conductor-border);
-  border-radius: 10px;
-  font-size: 14px;
-  color: var(--conductor-action);
-  background: var(--conductor-surface);
+  border: 1px solid var(--ui-line);
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  color: var(--ui-brand);
+  background: var(--ui-card);
 }
 
 .row {
@@ -160,33 +160,33 @@
   border-radius: var(--conductor-radius-control);
   padding: 12px;
   border: none;
-  font-size: 16px;
+  font-size: 1rem;
   line-height: 1.3;
   font-weight: 600;
-  background: var(--conductor-gradient-action, var(--conductor-action));
+  background: var(--conductor-gradient-action, var(--ui-brand));
   color: var(--conductor-on-action, var(--ruum-on-primary));
   cursor: pointer;
 }
 .primary:disabled {
   opacity: 1;
-  background: var(--conductor-disabled-surface);
-  color: var(--conductor-disabled);
+  background: var(--ui-muted);
+  color: var(--ruum-text-disabled);
   cursor: not-allowed;
 }
 
 .error {
-  color: var(--conductor-error);
+  color: var(--ui-danger);
 }
 .error p {
   margin: 0;
-  font-size: 14px;
+  font-size: 0.875rem;
   line-height: 1.4;
 }
 .error button,
 .notice {
   min-height: 48px;
-  font-size: 14px;
-  color: var(--conductor-action);
+  font-size: 0.875rem;
+  color: var(--ui-brand);
   text-align: left;
   background: transparent;
   border: none;
@@ -196,10 +196,10 @@
 .preview {
   width: 100%;
   height: 80px;
-  border: 2px solid var(--conductor-action);
-  border-radius: 12px;
+  border: 2px solid var(--ui-brand);
+  border-radius: 0.5rem;
   object-fit: contain;
-  background: var(--conductor-action-soft, var(--conductor-surface-secondary));
+  background: var(--conductor-action-soft, var(--ui-muted));
 }
 .photoPlaceholder {
   display: flex;
@@ -209,13 +209,13 @@
   gap: 6px;
   min-height: 90px;
   padding: 12px;
-  border: 2px dashed var(--conductor-border);
-  border-radius: 12px;
-  background: var(--conductor-surface-secondary);
-  color: var(--conductor-muted);
+  border: 2px dashed var(--ui-line);
+  border-radius: 0.5rem;
+  background: var(--ui-muted);
+  color: var(--ui-fg-muted);
 }
 .photoPlaceholderIcon {
-  font-size: 20px;
+  font-size: 1.25rem;
 }
 
 .checklist {
@@ -224,7 +224,7 @@
   margin: 0;
   padding: 0;
   list-style: none;
-  font-size: 14px;
+  font-size: 0.875rem;
 }
 .complete {
   white-space: pre-wrap;
@@ -238,14 +238,14 @@
   width: 100%;
   height: 140px;
   touch-action: none;
-  background: var(--conductor-surface);
-  color: var(--conductor-primary);
-  border: 2px dashed var(--conductor-border);
-  border-radius: 12px;
+  background: var(--ui-card);
+  color: var(--ui-fg);
+  border: 2px dashed var(--ui-line);
+  border-radius: 0.5rem;
 }
 .status {
-  font-size: 14px;
-  color: var(--conductor-muted);
+  font-size: 0.875rem;
+  color: var(--ui-fg-muted);
 }
 .steps {
   display: grid;
@@ -255,11 +255,11 @@
   min-height: 48px;
   text-align: left;
   padding: 12px;
-  border: 1px solid var(--conductor-border);
-  border-radius: 10px;
-  font-size: 16px;
-  background: var(--conductor-surface);
-  color: var(--conductor-primary);
+  border: 1px solid var(--ui-line);
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  background: var(--ui-card);
+  color: var(--ui-fg);
 }
 
 @media (min-height: 700px) {
@@ -290,12 +290,12 @@
   align-items: center;
   justify-content: center;
   gap: 4px;
-  font-size: 14px;
+  font-size: 0.875rem;
   font-weight: 600;
-  color: var(--conductor-action);
+  color: var(--ui-brand);
 }
 
 .secondary.confirmation {
-  background: var(--conductor-action);
+  background: var(--ui-brand);
   color: var(--ruum-on-primary);
 }

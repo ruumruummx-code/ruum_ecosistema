@@ -18,8 +18,8 @@ export function NavigationLauncher({ target }: { target: NavigationTarget }) {
   const options = useMemo(() => createNavigationOptions(target), [target]);
 
   return (
-    <div className="mt-3 rounded-xl border border-border bg-surface px-3 py-3">
-      <p className="font-body text-xs font-semibold uppercase tracking-wide text-text-tertiary">Abrir navegación con</p>
+    <div className="mt-3 rounded-xl border border-ui-line bg-ui-card px-3 py-3">
+      <p className="font-body text-xs font-semibold uppercase tracking-wide text-ui-fg-muted">Abrir navegación con</p>
       <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-3">
         {options.map((option) => (
           <a
@@ -32,7 +32,7 @@ export function NavigationLauncher({ target }: { target: NavigationTarget }) {
               event.preventDefault();
               abrirNavegacion(option);
             }}
-            className="inline-flex min-h-11 items-center justify-center rounded-lg border border-route-action bg-route-soft px-3 py-2 text-center font-body text-sm font-semibold text-route-action transition hover:bg-surface"
+            className="inline-flex min-h-11 items-center justify-center rounded-lg border border-ui-brand bg-ui-brand-soft px-3 py-2 text-center font-body text-sm font-semibold text-ui-brand transition hover:bg-ui-card"
           >
             {option.label}
           </a>

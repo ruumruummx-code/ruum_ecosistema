@@ -1,5 +1,6 @@
 "use client";
 
+import { Button as BaseButton } from "@ruum/ui/base";
 import Link from "next/link";
 import type { PasaporteRow } from "./panel-utils";
 import type { Disponibilidad } from "./usePanelData";
@@ -42,14 +43,14 @@ export function PanelOpportunitiesCard({
 
   return (
     <section
-      className="driver-opportunity-card relative overflow-hidden rounded-2xl border border-[var(--conductor-border)] bg-[var(--conductor-surface)] p-4 shadow-[0_5px_20px_rgba(13,43,94,0.05)]"
+      className="driver-opportunity-card relative overflow-hidden rounded-lg border border-ui-line bg-ui-card p-4 shadow-ui-md"
       aria-labelledby="titulo-oportunidades"
     >
       <div className="flex flex-col">
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-3.5">
             <span
-              className="inline-flex size-16 shrink-0 items-center justify-center rounded-2xl bg-[var(--conductor-surface-secondary)] text-[var(--conductor-action)]"
+              className="inline-flex size-16 shrink-0 items-center justify-center rounded-lg bg-ui-muted text-ui-brand"
               aria-hidden="true"
             >
               <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
@@ -60,30 +61,30 @@ export function PanelOpportunitiesCard({
             <div className="min-w-0">
               <h2
                 id="titulo-oportunidades"
-                className="font-display text-lg font-black leading-tight text-[var(--conductor-primary)]"
+                className="font-display text-lg font-black leading-tight text-ui-fg"
               >
                 {titulo}
               </h2>
-              <p className="mt-1 font-body text-sm leading-5 text-[var(--conductor-muted)]">
+              <p className="mt-1 font-body text-sm leading-5 text-ui-fg-muted">
                 {descripcionMovil}
               </p>
             </div>
           </div>
 
           {!disponible ? (
-            <button
+            <BaseButton variant="ghost"
               type="button"
               onClick={onActivar}
-              className="mt-4 inline-flex min-h-12 w-full cursor-pointer items-center justify-center gap-2.5 rounded-2xl bg-[var(--conductor-action)] px-5 font-display text-[15px] font-bold text-[var(--ruum-on-primary)] shadow-none transition hover:bg-[var(--conductor-action-hover)] active:scale-[0.98] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--conductor-focus)]"
+              className="mt-4 inline-flex min-h-12 w-full cursor-pointer items-center justify-center gap-2.5 rounded-lg bg-ui-brand px-5 font-display text-sm font-bold text-ui-on-brand shadow-none transition hover:bg-ui-brand-hover active:scale-[0.98] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ui-focus"
             >
               <span>Activarme ahora</span>
               <span aria-hidden="true" className="text-lg leading-none">→</span>
-            </button>
+            </BaseButton>
           ) : (
             <Link
               href="/viajes"
               onClick={buscar}
-              className="mt-4 inline-flex min-h-12 w-full cursor-pointer items-center justify-center gap-3 rounded-2xl bg-[var(--conductor-action)] px-5 font-display text-[15px] font-bold text-[var(--ruum-on-primary)] shadow-none transition hover:bg-[var(--conductor-action-hover)] active:scale-[0.98] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--conductor-focus)]"
+              className="mt-4 inline-flex min-h-12 w-full cursor-pointer items-center justify-center gap-3 rounded-lg bg-ui-brand px-5 font-display text-sm font-bold text-ui-on-brand shadow-none transition hover:bg-ui-brand-hover active:scale-[0.98] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ui-focus"
             >
               <span>{refrescando ? "Buscando traslados…" : "Buscar traslados ahora"}</span>
               <span aria-hidden="true" className="text-lg leading-none">→</span>

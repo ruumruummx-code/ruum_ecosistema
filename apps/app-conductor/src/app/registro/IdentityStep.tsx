@@ -1,3 +1,4 @@
+import { Button as BaseButton } from "@ruum/ui/base";
 import { useEffect, useRef, useState } from "react";
 import { validarCampoRegistroConductor, type CampoRegistroConductor } from "@ruum/shared/validacion";
 import { consultarCodigoPostalMx } from "../../lib/codigos-postales";
@@ -100,20 +101,20 @@ export function IdentityStep(p: IdentityProps) {
       </div>
       <DenseField etiqueta="CURP" placeholder="Ej. ABCD123456HDFEFG01" value={p.curp} onChange={(e) => { p.setCurp(formatoCurpMask(e.target.value)); p.limpiarErrorCampo("curp"); }} onBlur={() => p.validarCurp()} error={p.erroresCampos.curp} required maxLength={18} autoComplete="off" autoCapitalize="characters" />
       <div className={styles.summaries}>
-        <button type="button" className={styles.summary} onClick={(event) => { event.currentTarget.focus(); open("address"); }} aria-haspopup="dialog" data-complete={completeAddress}>
+        <BaseButton variant="ghost" type="button" className={styles.summary} onClick={(event) => { event.currentTarget.focus(); open("address"); }} aria-haspopup="dialog" data-complete={completeAddress}>
           <RegistrationIcon name="pin" />
           <strong>Domicilio</strong>
           <span className={styles.identityAction}>{completeAddress ? "Editar" : "Agregar"}</span>
           <RegistrationIcon name="chevron" />
           {completeAddress && <span className="sr-only">{`${p.calle} ${p.numero}, ${p.colonia}. ${p.ciudad}, ${p.estado}, CP ${p.codigoPostal}`}</span>}
-        </button>
-        <button type="button" className={styles.summary} onClick={(event) => { event.currentTarget.focus(); open("contact"); }} aria-haspopup="dialog" data-complete={completeContact}>
+        </BaseButton>
+        <BaseButton variant="ghost" type="button" className={styles.summary} onClick={(event) => { event.currentTarget.focus(); open("contact"); }} aria-haspopup="dialog" data-complete={completeContact}>
           <RegistrationIcon name="phone" />
           <strong>Contacto de emergencia</strong>
           <span className={styles.identityAction}>{completeContact ? "Editar" : "Agregar"}</span>
           <RegistrationIcon name="chevron" />
           {completeContact && <span className="sr-only">{`${p.contactoEmergenciaNombre} · ${formatoTelefonoNacional(p.contactoEmergenciaTelefono)}`}</span>}
-        </button>
+        </BaseButton>
       </div>
       {sheet === "address" && <RegistrationSheet title="Domicilio" kind="address" onClose={close} onSave={saveAddress} saving={loadingCp}>
         <DenseField etiqueta="Código postal" inputMode="numeric" autoComplete="postal-code" value={address.codigoPostal} onChange={(e) => void changePostalCode(e.target.value)} maxLength={5} error={errors.codigoPostal} />

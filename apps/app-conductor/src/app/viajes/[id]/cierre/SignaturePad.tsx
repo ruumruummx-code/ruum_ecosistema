@@ -1,4 +1,5 @@
 "use client";
+import { Button as BaseButton } from "@ruum/ui/base";
 import { useEffect, useRef, type RefObject } from "react";
 import styles from "../trip-form.module.css";
 type Point={x:number;y:number};
@@ -20,6 +21,6 @@ export function SignaturePad({canvasRef,onChange,disabled=false}:{canvasRef:RefO
     onPointerDown={e=>{if(disabled)return;e.preventDefault();e.currentTarget.setPointerCapture(e.pointerId);drawing.current=true;strokes.current.push([point(e)]);}}
     onPointerMove={e=>{if(!drawing.current||disabled)return;const p=point(e);const last=strokes.current.at(-1)?.at(-1);if(last&&Math.hypot(p.x-last.x,p.y-last.y)<.01)return;strokes.current.at(-1)?.push(p);const canvas=e.currentTarget;const ctx=canvas.getContext("2d");const r=canvas.getBoundingClientRect();if(ctx&&last){ctx.beginPath();ctx.moveTo(last.x*r.width,last.y*r.height);ctx.lineTo(p.x*r.width,p.y*r.height);ctx.stroke();}}}
     onPointerUp={finish} onPointerCancel={finish} />
-    {!disabled&&<button type="button" onClick={()=>{strokes.current=[];paint();onChange(false);}}>Limpiar firma</button>}
+    {!disabled&&<BaseButton variant="ghost" type="button" onClick={()=>{strokes.current=[];paint();onChange(false);}}>Limpiar firma</BaseButton>}
     <p>Firma con el dedo o un puntero. Si el receptor no puede firmar, consulta a soporte; la firma no se sustituye por un nombre escrito.</p></>;
 }

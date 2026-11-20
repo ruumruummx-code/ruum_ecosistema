@@ -1,6 +1,8 @@
 "use client";
 
-import { Button, Aviso } from "@ruum/ui";
+import { Button as BaseButton } from "@ruum/ui/base";
+import { Aviso } from "@ruum/ui";
+import { ConductorButton as Button } from "@/components/v2/ConductorUI";
 import { ConductorDialog } from "../components/ConductorDialog";
 import styles from "./registration.module.css";
 import { useEffect, useRef } from "react";
@@ -90,7 +92,7 @@ export function DiditVerificationModal({
   return <ConductorDialog open title="Verificación de identidad" labelledBy="titulo-didit" onClose={onCerrar} closeLabel="Cerrar verificación" footer={urlValida && !cargando && !error ? <Button onClick={onFinalizar}>Ya completé la verificación</Button> : undefined}>
     <div className={styles.diditContent}>
       {cargando ? <p role="status">Iniciando verificación de identidad…</p> : error ? <><Aviso tono="danger">{error}</Aviso><Button onClick={onReintentar}>Reintentar verificación</Button></> : urlValida && url ? <>
-        <p>Prueba de vida y validación biométrica.</p><button type="button" onClick={abrirEnNuevaVentana}>Abrir en nueva ventana</button>
+        <p>Prueba de vida y validación biométrica.</p><BaseButton variant="ghost" type="button" onClick={abrirEnNuevaVentana}>Abrir en nueva ventana</BaseButton>
         <iframe ref={iframeRef} src={url} title="Verificación de identidad Didit" className={styles.diditFrame}
           allow="camera; microphone; geolocation; fullscreen; accelerometer; gyroscope; display-capture; autoplay"
           sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox allow-modals allow-top-navigation allow-top-navigation-by-user-activation"

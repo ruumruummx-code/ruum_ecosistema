@@ -1,5 +1,6 @@
 "use client";
 
+import { Button as BaseButton } from "@ruum/ui/base";
 import { useEffect, useState } from "react";
 import type { Database } from "@ruum/shared/types";
 import { puedeAscenderNivel } from "@ruum/shared/rules";
@@ -58,20 +59,20 @@ export function DriverCertificationView(props: Props) {
   ] as const;
   return <DriverDetailsShell kind="certification">
     <section className={`${shared.heading} ${styles.heading}`}><div><h1>Certificación Ruum</h1><span className={styles.badge} data-active={props.active}>{loading ? "Cargando" : error ? "Sin datos" : props.active ? "Activo" : "Pendiente"}</span></div><p>Completa los requisitos para conducir</p></section>
-    {error ? <><DetailsNotice message={error} error/><button className={shared.retry} onClick={props.onRetry}>Reintentar</button></> : <>
+    {error ? <><DetailsNotice message={error} error/><BaseButton variant="ghost" type="submit" className={shared.retry} onClick={props.onRetry}>Reintentar</BaseButton></> : <>
       <section className={styles.progressCard} aria-label="Avance de certificación" aria-busy={loading}>
         <div className={styles.ring} role="progressbar" aria-label="Requisitos completados" aria-valuemin={0} aria-valuemax={10} aria-valuenow={loading ? 0 : completed}>
           <svg viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="43"/><circle cx="50" cy="50" r="43" pathLength="100" strokeDasharray="100" strokeDashoffset={100 - (loading ? 0 : completed * 10)}/></svg><strong>{loading ? "…" : `${completed}/10`}</strong>
-        </div><div><p>{loading ? "Consultando tus requisitos…" : `${completed} de 10 requisitos completados`}</p><button type="button" onClick={() => setAllOpen(true)} disabled={loading}>Ver todos</button></div>
+        </div><div><p>{loading ? "Consultando tus requisitos…" : `${completed} de 10 requisitos completados`}</p><BaseButton variant="ghost" type="button" onClick={() => setAllOpen(true)} disabled={loading}>Ver todos</BaseButton></div>
       </section>
-      <section className={styles.nextAction}><span className={styles.play} aria-hidden="true">▶</span><div><p>SIGUIENTE ACCIÓN</p><h2>{loading ? "Cargando certificación…" : next?.etiqueta ?? "¡Requisitos completados!"}</h2><button type="button" disabled={loading || !next} onClick={props.onComplete}>{next ? "Completar" : "Completado"}</button></div></section>
+      <section className={styles.nextAction}><span className={styles.play} aria-hidden="true">▶</span><div><p>SIGUIENTE ACCIÓN</p><h2>{loading ? "Cargando certificación…" : next?.etiqueta ?? "¡Requisitos completados!"}</h2><BaseButton variant="ghost" type="button" disabled={loading || !next} onClick={props.onComplete}>{next ? "Completar" : "Completado"}</BaseButton></div></section>
     </>}
     <section className={styles.accordionList} aria-label="Información de certificación">
       {sections.map(section => <div className={styles.accordion} key={section.key} data-open={expanded === section.key}>
-        <button type="button" aria-expanded={expanded === section.key} aria-controls={`cert-${section.key}`} id={`cert-trigger-${section.key}`} onClick={() => { setExpanded(expanded === section.key ? null : section.key); setPage(0); }}><span className={styles.sectionIcon}><ServiceIcon name={section.icon}/></span><span>{section.title}</span><i aria-hidden="true">⌄</i></button>
+        <BaseButton variant="ghost" type="button" aria-expanded={expanded === section.key} aria-controls={`cert-${section.key}`} id={`cert-trigger-${section.key}`} onClick={() => { setExpanded(expanded === section.key ? null : section.key); setPage(0); }}><span className={styles.sectionIcon}><ServiceIcon name={section.icon}/></span><span>{section.title}</span><i aria-hidden="true">⌄</i></BaseButton>
         <div className={styles.collapse} inert={expanded !== section.key} id={`cert-${section.key}`} role="region" aria-labelledby={`cert-trigger-${section.key}`}><div><div className={styles.panel}>
           <p>{section.items[expanded === section.key ? Math.min(page, section.items.length - 1) : 0]}</p>
-          <div className={styles.pager}><button type="button" aria-label={`Anterior: ${section.title}`} disabled={page === 0} onClick={() => setPage(value => value - 1)}>‹</button><span aria-live="polite">{page + 1} de {section.items.length}</span><button type="button" aria-label={`Siguiente: ${section.title}`} disabled={page >= section.items.length - 1} onClick={() => setPage(value => value + 1)}>›</button></div>
+          <div className={styles.pager}><BaseButton variant="ghost" type="button" aria-label={`Anterior: ${section.title}`} disabled={page === 0} onClick={() => setPage(value => value - 1)}>‹</BaseButton><span aria-live="polite">{page + 1} de {section.items.length}</span><BaseButton variant="ghost" type="button" aria-label={`Siguiente: ${section.title}`} disabled={page >= section.items.length - 1} onClick={() => setPage(value => value + 1)}>›</BaseButton></div>
         </div></div></div>
       </div>)}
     </section>

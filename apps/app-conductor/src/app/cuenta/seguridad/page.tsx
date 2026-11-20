@@ -1,5 +1,6 @@
 "use client";
 
+import { Button as BaseButton } from "@ruum/ui/base";
 import Link from "next/link";
 import { Aviso, Card } from "@ruum/ui";
 import { ConductorScreen, ConductorPageHeader } from "../../components/ConductorScreen";
@@ -21,21 +22,21 @@ export default function PaginaSeguridadCuenta() {
       <div className="mt-6 grid gap-6">
         {/* 3. Tarjeta 1: Escalabilidad - Credenciales de Acceso */}
         <Card>
-          <p className="font-body text-xs font-bold uppercase tracking-wider text-text-tertiary mb-1">
+          <p className="font-body text-xs font-bold uppercase tracking-wider text-ui-fg-muted mb-1">
             Protección de la Cuenta
           </p>
-          <h2 className="font-display text-lg font-bold text-text-primary mb-4">
+          <h2 className="font-display text-lg font-bold text-ui-fg mb-4">
             Credenciales de Acceso
           </h2>
 
           <div className="grid gap-4">
             {/* 2. Rediseño del Callout Informativo de Seguridad (sin bordes de input, con ícono 🛡️) */}
-            <div className="flex items-start gap-3.5 rounded-xl border border-border/60 bg-surface-elevated/70 p-4">
-              <div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-route-action/15 font-display text-lg text-route-action">
+            <div className="flex items-start gap-3.5 rounded-xl border border-ui-line/60 bg-ui-muted/70 p-4">
+              <div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-ui-brand/15 font-display text-lg text-ui-brand">
                 🛡️
               </div>
-              <div className="font-body text-xs leading-5 text-text-secondary">
-                <strong className="block font-display text-sm font-bold text-text-primary mb-0.5">
+              <div className="font-body text-xs leading-5 text-ui-fg-muted">
+                <strong className="block font-display text-sm font-bold text-ui-fg mb-0.5">
                   Verificación de Seguridad por Correo
                 </strong>
                 Por protección operativa, cualquier cambio de contraseña requiere confirmación mediante un enlace seguro enviado a tu correo electrónico registrado.
@@ -43,19 +44,19 @@ export default function PaginaSeguridadCuenta() {
             </div>
 
             {/* Acción de Cambio de Contraseña */}
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between rounded-xl border border-border/50 bg-surface-elevated/30 p-4">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between rounded-xl border border-ui-line/50 bg-ui-muted/30 p-4">
               <div>
-                <span className="block font-display text-sm font-bold text-text-primary">
+                <span className="block font-display text-sm font-bold text-ui-fg">
                   Contraseña de inicio de sesión
                 </span>
-                <span className="block font-body text-xs text-text-tertiary">
+                <span className="block font-body text-xs text-ui-fg-muted">
                   Te enviaremos un enlace de restablecimiento seguro a tu correo
                 </span>
               </div>
 
               <Link
                 href="/recuperar-password"
-                className="inline-flex shrink-0 items-center justify-center gap-1.5 rounded-xl bg-action-primary px-5 py-2.5 font-display text-xs font-bold text-on-primary shadow-xs transition hover:bg-action-primary/90 active:scale-95"
+                className="inline-flex shrink-0 items-center justify-center gap-1.5 rounded-xl bg-action-primary px-5 py-2.5 font-display text-xs font-bold text-ui-on-brand shadow-xs transition hover:bg-action-primary/90 active:scale-95"
               >
                 Cambiar contraseña →
               </Link>
@@ -65,61 +66,61 @@ export default function PaginaSeguridadCuenta() {
 
         {/* 3. Tarjeta 2: Escalabilidad - Estado de Sesión y Dispositivos */}
         <Card>
-          <p className="font-body text-xs font-bold uppercase tracking-wider text-text-tertiary mb-1">
+          <p className="font-body text-xs font-bold uppercase tracking-wider text-ui-fg-muted mb-1">
             Conexión Activa
           </p>
-          <h2 className="font-display text-lg font-bold text-text-primary mb-4">
+          <h2 className="font-display text-lg font-bold text-ui-fg mb-4">
             Sesión y Dispositivo Registrado
           </h2>
 
-          <div className="grid gap-3 rounded-xl border border-border/40 bg-surface-elevated/40 p-4 font-body text-xs sm:grid-cols-2">
+          <div className="grid gap-3 rounded-xl border border-ui-line/40 bg-ui-muted/40 p-4 font-body text-xs sm:grid-cols-2">
             <div className="flex items-center gap-3">
-              <div className="flex size-10 shrink-0 items-center justify-center rounded-xl border border-border bg-surface text-lg">
+              <div className="flex size-10 shrink-0 items-center justify-center rounded-xl border border-ui-line bg-ui-card text-lg">
                 📱
               </div>
               <div>
-                <dt className="font-semibold uppercase tracking-wider text-text-tertiary text-[11px]">Dispositivo Activo</dt>
-                <dd className="font-bold text-text-primary text-xs mt-0.5">Aplicación Conductor Ruum</dd>
+                <dt className="font-semibold uppercase tracking-wider text-ui-fg-muted text-xs">Dispositivo Activo</dt>
+                <dd className="font-bold text-ui-fg text-xs mt-0.5">Aplicación Conductor Ruum</dd>
               </div>
             </div>
 
             <div className="flex items-center gap-3">
-              <div className="flex size-10 shrink-0 items-center justify-center rounded-xl border border-border bg-surface text-lg text-control">
+              <div className="flex size-10 shrink-0 items-center justify-center rounded-xl border border-ui-line bg-ui-card text-lg text-ui-success">
                 🔒
               </div>
               <div>
-                <dt className="font-semibold uppercase tracking-wider text-text-tertiary text-[11px]">Estado de Protección</dt>
-                <dd className="font-bold text-control text-xs mt-0.5">Sesión Encriptada SSL</dd>
+                <dt className="font-semibold uppercase tracking-wider text-ui-fg-muted text-xs">Estado de Protección</dt>
+                <dd className="font-bold text-ui-success text-xs mt-0.5">Sesión Encriptada SSL</dd>
               </div>
             </div>
           </div>
         </Card>
 
         {/* 1. Sección Separada Independiente: Acción de Salida (Cerrar Sesión) */}
-        <Card className="border-danger/40 bg-danger-soft">
-          <p className="font-body text-xs font-bold uppercase tracking-wider text-danger mb-1">
+        <Card className="border-ui-danger/40 bg-ui-danger-soft">
+          <p className="font-body text-xs font-bold uppercase tracking-wider text-ui-danger mb-1">
             Salida de la Plataforma
           </p>
 
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <h2 className="font-display text-base font-bold text-text-primary">
+              <h2 className="font-display text-base font-bold text-ui-fg">
                 Cerrar Sesión Activa
               </h2>
-              <p className="mt-0.5 font-body text-xs text-text-tertiary leading-5">
+              <p className="mt-0.5 font-body text-xs text-ui-fg-muted leading-5">
                 Saldrás de tu cuenta en este dispositivo. Para recibir o realizar traslados nuevamente deberás iniciar sesión.
               </p>
             </div>
 
             {/* 1. Botón de Salida con Tratamiento Destructivo Sutil (Previene toques accidentales) */}
-            <button
+            <BaseButton variant="ghost"
               type="button"
               onClick={() => void cerrarSesion()}
               disabled={cerrandoSesion}
-              className="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl border border-danger bg-surface px-5 py-2.5 font-display text-xs font-bold text-danger shadow-2xs transition hover:border-danger hover:bg-danger-soft active:scale-95 disabled:opacity-50"
+              className="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl border border-ui-danger bg-ui-card px-5 py-2.5 font-display text-xs font-bold text-ui-danger shadow-2xs transition hover:border-ui-danger hover:bg-ui-danger-soft active:scale-95 disabled:opacity-50"
             >
               {cerrandoSesion ? "Cerrando sesión..." : "🚪 Cerrar sesión"}
-            </button>
+            </BaseButton>
           </div>
         </Card>
       </div>

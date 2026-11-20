@@ -1,5 +1,6 @@
 "use client";
 
+import { Button as BaseButton } from "@ruum/ui/base";
 export type OrdenTraslados = "recientes" | "mayor_ganancia" | "menor_distancia";
 
 interface TrasladosFiltersProps {
@@ -50,21 +51,21 @@ export function TrasladosFilters({
     <div className="mt-3 flex flex-col gap-2.5 select-none">
       {/* Orden — chips horizontales scrolleables, 1-tap */}
       <div className="flex items-center gap-2">
-        <span className="font-body text-sm font-bold uppercase tracking-wider text-text-tertiary shrink-0">Orden:</span>
+        <span className="font-body text-sm font-bold uppercase tracking-wider text-ui-fg-muted shrink-0">Orden:</span>
         <div className="flex flex-wrap gap-2 flex-1 py-1" role="group" aria-label="Ordenar ofertas">
           {ORDENES.map((o) => (
-            <button
+            <BaseButton variant="ghost"
               key={o.valor}
               type="button"
               onClick={() => onCambiarOrden(o.valor)}
               aria-pressed={orden === o.valor}
-              className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-2 font-body text-sm font-bold transition-all min-h-12 focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-route-action ${
-                orden === o.valor ? "bg-route-action border-route-action text-white shadow-sm" : "bg-surface-elevated border-border/40 text-text-secondary hover:border-route-action/30 hover:text-text-primary"
+              className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-2 font-body text-sm font-bold transition-all min-h-12 focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-ui-brand ${
+                orden === o.valor ? "bg-ui-brand border-ui-brand text-ui-on-brand shadow-sm" : "bg-ui-muted border-ui-line/40 text-ui-fg-muted hover:border-ui-brand/30 hover:text-ui-fg"
               }`}
             >
               <IconOrden valor={o.valor} />
               {o.etiqueta}
-            </button>
+            </BaseButton>
           ))}
         </div>
       </div>
@@ -72,31 +73,31 @@ export function TrasladosFilters({
       {/* Ciudad — chips (solo si hay >1) */}
       {ciudadesDisponibles.length > 1 && (
         <div className="flex items-center gap-2">
-          <span className="font-body text-sm font-bold uppercase tracking-wider text-text-tertiary shrink-0">Ciudad:</span>
+          <span className="font-body text-sm font-bold uppercase tracking-wider text-ui-fg-muted shrink-0">Ciudad:</span>
           <div className="flex flex-wrap gap-2 flex-1 py-1" role="group" aria-label="Filtrar por ciudad">
-            <button
+            <BaseButton variant="ghost"
               type="button"
               onClick={() => onCambiarCiudad("todas")}
               aria-pressed={ciudadFiltro === "todas"}
-              className={`rounded-full border px-3 py-2 font-body text-sm font-bold transition-all min-h-12 focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-route-action ${
-                ciudadFiltro === "todas" ? "bg-surface border-text-primary text-text-primary" : "bg-surface-elevated border-border/40 text-text-tertiary hover:text-text-primary"
+              className={`rounded-full border px-3 py-2 font-body text-sm font-bold transition-all min-h-12 focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-ui-brand ${
+                ciudadFiltro === "todas" ? "bg-ui-card border-ui-fg text-ui-fg" : "bg-ui-muted border-ui-line/40 text-ui-fg-muted hover:text-ui-fg"
               }`}
             >
               Todas
-            </button>
+            </BaseButton>
             {ciudadesDisponibles.map((ciudad) => (
-              <button
+              <BaseButton variant="ghost"
                 key={ciudad}
                 type="button"
                 onClick={() => onCambiarCiudad(ciudad)}
                 aria-pressed={ciudadFiltro === ciudad}
-                className={`rounded-full border px-3 py-2 font-body text-sm font-bold transition-all min-h-12 max-w-full break-words focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-route-action ${
-                  ciudadFiltro === ciudad ? "bg-route-action border-route-action text-white shadow-sm" : "bg-surface-elevated border-border/40 text-text-secondary hover:border-route-action/30 hover:text-text-primary"
+                className={`rounded-full border px-3 py-2 font-body text-sm font-bold transition-all min-h-12 max-w-full break-words focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-ui-brand ${
+                  ciudadFiltro === ciudad ? "bg-ui-brand border-ui-brand text-ui-on-brand shadow-sm" : "bg-ui-muted border-ui-line/40 text-ui-fg-muted hover:border-ui-brand/30 hover:text-ui-fg"
                 }`}
                 title={ciudad}
               >
                 {ciudad}
-              </button>
+              </BaseButton>
             ))}
           </div>
         </div>

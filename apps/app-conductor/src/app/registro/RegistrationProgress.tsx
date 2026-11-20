@@ -1,3 +1,4 @@
+import { Button as BaseButton } from "@ruum/ui/base";
 import { RegistrationHeader } from "./RegistrationShell";
 import { RegistrationAccessHeader } from "./RegistrationAccessHeader";
 import { PASOS_REGISTRO, type EstadoGuardadoRemoto } from "./registration-types";
@@ -18,7 +19,7 @@ export function RegistrationProgress({ paso, onBack, borradorLocalGuardado, sesi
   if (paso >= 3) return <RegistrationAccessHeader step={paso + 1 as 4 | 5} onBack={onBack}>{estadoGuardado}</RegistrationAccessHeader>;
   return (
     <RegistrationHeader><header className={styles.appBar}>
-      <button type="button" onClick={onBack} aria-label="Atrás">‹ Atrás</button>
+      <BaseButton variant="ghost" type="button" onClick={onBack} aria-label="Atrás">‹ Atrás</BaseButton>
         <h1 id="titulo-registro-conductor">{PASOS_REGISTRO[paso].shortTitle} ({paso + 1}/{PASOS_REGISTRO.length})</h1>
         <span aria-hidden="true" />
         <progress className={styles.progress} value={porcentaje} max={100} aria-label="Progreso de registro" />

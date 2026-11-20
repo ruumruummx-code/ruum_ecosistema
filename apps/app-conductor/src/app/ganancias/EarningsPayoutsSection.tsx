@@ -27,46 +27,46 @@ export function EarningsPayoutsSection({
 }: EarningsPayoutsSectionProps) {
   return (
     <div className="mt-8">
-      <h3 className="font-display text-sm font-bold text-text-primary">Liquidaciones del periodo</h3>
+      <h3 className="font-display text-sm font-bold text-ui-fg">Liquidaciones del periodo</h3>
       <div className="mt-3 grid gap-3">
         {payoutsFiltrados.map((payout) => (
           <Card key={payout.id} className="p-4" padding="none">
             <div className="p-4 flex flex-col gap-3">
-              <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border/40 pb-3">
+              <div className="flex flex-wrap items-center justify-between gap-2 border-b border-ui-line/40 pb-3">
                 <div>
-                  <p className="font-body text-xs font-bold uppercase tracking-wider text-text-tertiary">
+                  <p className="font-body text-xs font-bold uppercase tracking-wider text-ui-fg-muted">
                     Periodo Operativo
                   </p>
-                  <h4 className="font-display text-sm font-bold text-text-primary">
+                  <h4 className="font-display text-sm font-bold text-ui-fg">
                     {formatearFecha(payout.periodo_inicio ?? "")} ➔ {formatearFecha(payout.periodo_fin ?? "")}
                   </h4>
                 </div>
-                <span className={`font-display text-xs font-bold ${estatusPayoutFn(payout) === "pagado" ? "text-emerald-600" : estatusPayoutFn(payout) === "programado" ? "text-amber-600" : "text-rose-600"}`}>
+                <span className={`font-display text-xs font-bold ${estatusPayoutFn(payout) === "pagado" ? "text-ui-success" : estatusPayoutFn(payout) === "programado" ? "text-ui-warning" : "text-ui-danger"}`}>
                   {estatusPayoutFn(payout)}
                 </span>
               </div>
               <div className="grid gap-2 sm:grid-cols-3 font-body text-xs">
-                <div className="rounded-xl border border-border/40 bg-surface-elevated p-3">
-                  <p className="text-text-tertiary font-semibold uppercase">Monto Bruto</p>
-                  <p className="mt-1 font-display text-sm font-bold text-text-primary">
+                <div className="rounded-xl border border-ui-line/40 bg-ui-muted p-3">
+                  <p className="text-ui-fg-muted font-semibold uppercase">Monto Bruto</p>
+                  <p className="mt-1 font-display text-sm font-bold text-ui-fg">
                     ${Number(payout.monto_bruto ?? 0).toLocaleString("es-MX", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                   </p>
                 </div>
-                <div className="rounded-xl border border-border/40 bg-surface-elevated p-3">
-                  <p className="text-text-tertiary font-semibold uppercase">Ajustes</p>
-                  <p className="mt-1 font-display text-sm font-bold text-text-primary">
+                <div className="rounded-xl border border-ui-line/40 bg-ui-muted p-3">
+                  <p className="text-ui-fg-muted font-semibold uppercase">Ajustes</p>
+                  <p className="mt-1 font-display text-sm font-bold text-ui-fg">
                     ${Number(payout.ajustes ?? 0).toLocaleString("es-MX", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                   </p>
                 </div>
-                <div className="rounded-xl border border-border/60 bg-surface-elevated p-3">
-                  <p className="text-text-primary font-bold uppercase text-xs">Monto Neto</p>
-                  <p className="mt-1 font-display text-sm font-black text-text-primary">
+                <div className="rounded-xl border border-ui-line/60 bg-ui-muted p-3">
+                  <p className="text-ui-fg font-bold uppercase text-xs">Monto Neto</p>
+                  <p className="mt-1 font-display text-sm font-black text-ui-fg">
                     ${Number(payout.monto_neto ?? 0).toLocaleString("es-MX", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                   </p>
                 </div>
               </div>
               {payout.referencia_pago && (
-                <p className="font-body text-xs text-text-tertiary">Referencia administrativa (no confirma transferencia): {payout.referencia_pago}</p>
+                <p className="font-body text-xs text-ui-fg-muted">Referencia administrativa (no confirma transferencia): {payout.referencia_pago}</p>
               )}
             </div>
           </Card>

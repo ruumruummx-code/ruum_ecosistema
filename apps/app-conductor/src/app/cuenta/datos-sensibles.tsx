@@ -1,5 +1,6 @@
 "use client";
 
+import { Button as BaseButton } from "@ruum/ui/base";
 import { useId, useState } from "react";
 import Link from "next/link";
 
@@ -55,14 +56,14 @@ export function enmascararNombreArchivo(nombre: string | null | undefined) {
 export function DatosSensiblesInfo({ tipo, compacto = false }: { tipo: TipoDatoSensible; compacto?: boolean }) {
   const texto = TEXTOS[tipo];
   return (
-    <div className={`rounded-xl border border-border/22 bg-surface ${compacto ? "px-3 py-3" : "px-4 py-4"}`}>
-      <p className="font-body text-sm font-semibold text-text-primary">{texto.titulo}</p>
-      <dl className="mt-2 grid gap-2 font-body text-sm leading-6 text-text-tertiary/80">
-        <div><dt className="font-semibold text-text-primary"> qué lo pedimos?</dt><dd>{texto.finalidad}</dd></div>
-        <div><dt className="font-semibold text-text-primary">¿Quién puede verlo?</dt><dd>{texto.acceso}</dd></div>
-        <div><dt className="font-semibold text-text-primary">¿Cómo se protege?</dt><dd>{texto.proteccion}</dd></div>
+    <div className={`rounded-xl border border-ui-line/22 bg-ui-card ${compacto ? "px-3 py-3" : "px-4 py-4"}`}>
+      <p className="font-body text-sm font-semibold text-ui-fg">{texto.titulo}</p>
+      <dl className="mt-2 grid gap-2 font-body text-sm leading-6 text-ui-fg-muted/80">
+        <div><dt className="font-semibold text-ui-fg"> qué lo pedimos?</dt><dd>{texto.finalidad}</dd></div>
+        <div><dt className="font-semibold text-ui-fg">¿Quién puede verlo?</dt><dd>{texto.acceso}</dd></div>
+        <div><dt className="font-semibold text-ui-fg">¿Cómo se protege?</dt><dd>{texto.proteccion}</dd></div>
       </dl>
-      <Link href="/legal/privacidad" target="_blank" className="mt-3 inline-flex font-body text-sm font-semibold text-route-action underline-offset-4 hover:underline">
+      <Link href="/legal/privacidad" target="_blank" className="mt-3 inline-flex font-body text-sm font-semibold text-ui-brand underline-offset-4 hover:underline">
         Ver aviso de privacidad
       </Link>
     </div>
@@ -82,7 +83,7 @@ export function DatosSensiblesTooltip({
 
   return (
     <span className="relative inline-flex">
-      <button
+      <BaseButton variant="ghost"
         type="button"
         aria-label={`Información sensible: ${texto.titulo}`}
         aria-expanded={abierto}
@@ -95,38 +96,38 @@ export function DatosSensiblesTooltip({
         onKeyDown={(evento) => {
           if (evento.key === "Escape") setAbierto(false);
         }}
-        className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-full border border-route-action/40 bg-surface-elevated font-body text-sm font-bold text-route-action shadow-sm transition hover:border-route-action hover:bg-surface focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-route-action"
+        className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-full border border-ui-brand/40 bg-ui-muted font-body text-sm font-bold text-ui-brand shadow-sm transition hover:border-ui-brand hover:bg-ui-card focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ui-brand"
       >
         i
-      </button>
+      </BaseButton>
 
       {abierto && (
         <span
           id={popoverId}
           role="tooltip"
            className={[
-             "fixed inset-x-4 bottom-[calc(1rem+env(safe-area-inset-bottom))] z-50 max-h-[70vh] overflow-auto rounded-xl border border-border/28 bg-surface p-4 text-left font-body text-sm leading-6 text-text-tertiary/80 shadow-[0_18px_48px_rgba(0,0,0,0.48)]",
+             "fixed inset-x-4 bottom-[calc(1rem+env(safe-area-inset-bottom))] z-50 max-h-[70vh] overflow-auto rounded-xl border border-ui-line/28 bg-ui-card p-4 text-left font-body text-sm leading-6 text-ui-fg-muted/80 shadow-ui-md",
             "sm:absolute sm:bottom-auto sm:inset-x-auto sm:top-full sm:mt-2 sm:w-80",
             align === "end" ? "sm:right-0" : "sm:left-0"
           ].join(" ")}
         >
-          <span className="block font-semibold text-text-primary">{texto.titulo}</span>
+          <span className="block font-semibold text-ui-fg">{texto.titulo}</span>
           <span className="mt-2 block">
-            <span className="font-semibold text-text-primary">¿Por qué lo pedimos?</span>
+            <span className="font-semibold text-ui-fg">¿Por qué lo pedimos?</span>
             <span className="block">{texto.finalidad}</span>
           </span>
           <span className="mt-2 block">
-            <span className="font-semibold text-text-primary">¿Quién puede verlo?</span>
+            <span className="font-semibold text-ui-fg">¿Quién puede verlo?</span>
             <span className="block">{texto.acceso}</span>
           </span>
           <span className="mt-2 block">
-            <span className="font-semibold text-text-primary">¿Cómo se protege?</span>
+            <span className="font-semibold text-ui-fg">¿Cómo se protege?</span>
             <span className="block">{texto.proteccion}</span>
           </span>
           <Link
             href="/legal/privacidad"
             target="_blank"
-            className="mt-3 inline-flex font-body text-sm font-semibold text-route-action underline-offset-4 hover:underline"
+            className="mt-3 inline-flex font-body text-sm font-semibold text-ui-brand underline-offset-4 hover:underline"
           >
             Ver aviso de privacidad
           </Link>

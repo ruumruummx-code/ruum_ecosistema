@@ -1,4 +1,5 @@
-import { Aviso, Button } from "@ruum/ui";
+import { Aviso } from "@ruum/ui";
+import { ConductorButton as Button } from "@/components/v2/ConductorUI";
 import type { ResultadosComparacion } from "./useEvidenceComparison";
 
 export interface EvidenceComparisonDisplayProps {
@@ -28,15 +29,15 @@ export function EvidenceComparisonDisplay({
 }: EvidenceComparisonDisplayProps) {
   if (estaCargando) {
     return (
-      <div className="rounded-xl border border-border bg-surface p-4" aria-busy="true">
-        <p className="font-body text-sm text-text-secondary">Cargando comparación de evidencia...</p>
+      <div className="rounded-xl border border-ui-line bg-ui-card p-4" aria-busy="true">
+        <p className="font-body text-sm text-ui-fg-muted">Cargando comparación de evidencia...</p>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="rounded-xl border border-warning bg-warn-soft p-4">
+      <div className="rounded-xl border border-ui-warning bg-ui-warning-soft p-4">
         <Aviso tono="atencion">{error}</Aviso>
         {onRefresh && (
           <Button variant="quiet" onClick={onRefresh} className="mt-3">
@@ -49,8 +50,8 @@ export function EvidenceComparisonDisplay({
 
   if (!resultados) {
     return (
-      <div className="rounded-xl border border-border bg-surface p-4">
-        <p className="font-body text-sm text-text-secondary">No hay datos de comparación disponibles.</p>
+      <div className="rounded-xl border border-ui-line bg-ui-card p-4">
+        <p className="font-body text-sm text-ui-fg-muted">No hay datos de comparación disponibles.</p>
       </div>
     );
   }
@@ -61,13 +62,13 @@ export function EvidenceComparisonDisplay({
   const soloInicial = kilometraje.final === null && kilometraje.inicial !== null;
 
   return (
-    <section className="rounded-xl border border-border bg-surface p-4" aria-labelledby="comparacion-evidencia-titulo">
+    <section className="rounded-xl border border-ui-line bg-ui-card p-4" aria-labelledby="comparacion-evidencia-titulo">
       <div className="flex items-start justify-between gap-4">
         <div>
-          <h2 id="comparacion-evidencia-titulo" className="font-body text-sm font-semibold text-text-primary">
+          <h2 id="comparacion-evidencia-titulo" className="font-body text-sm font-semibold text-ui-fg">
             {soloInicial ? "Datos de referencia (inicial)" : "Comparación: Inicial vs Final"}
           </h2>
-          <p className="mt-1 font-body text-xs text-text-secondary">
+          <p className="mt-1 font-body text-xs text-ui-fg-muted">
             {soloInicial 
               ? "Estos son los valores capturados al inicio del traslado"
               : "Valores capturados al inicio y final del traslado"
@@ -96,70 +97,70 @@ export function EvidenceComparisonDisplay({
       {/* Vista móvil - cards */}
       <div className="mt-4 grid gap-3 md:hidden">
         {/* Kilometraje */}
-        <div className="rounded-xl border border-border/20 bg-surface-elevated p-3">
-          <p className="font-body text-xs font-bold uppercase tracking-wide text-text-tertiary">Kilometraje</p>
+        <div className="rounded-xl border border-ui-line/20 bg-ui-muted p-3">
+          <p className="font-body text-xs font-bold uppercase tracking-wide text-ui-fg-muted">Kilometraje</p>
           <div className="mt-2 grid grid-cols-2 gap-3">
-            <div className="rounded-lg bg-surface p-2.5 text-center">
-              <p className="text-[11px] font-semibold uppercase text-text-tertiary">Inicial</p>
-              <p className="mt-1 font-body text-sm font-semibold text-text-primary">{kilometraje.inicial !== null ? `${kilometraje.inicial.toLocaleString()} km` : "-"}</p>
+            <div className="rounded-lg bg-ui-card p-2.5 text-center">
+              <p className="text-xs font-semibold uppercase text-ui-fg-muted">Inicial</p>
+              <p className="mt-1 font-body text-sm font-semibold text-ui-fg">{kilometraje.inicial !== null ? `${kilometraje.inicial.toLocaleString()} km` : "-"}</p>
             </div>
-            <div className={`rounded-lg p-2.5 text-center ${kilometraje.valido ? "bg-surface" : "bg-danger-soft border border-danger/20"}`}>
-              <p className="text-[11px] font-semibold uppercase text-text-tertiary">Final</p>
-              <p className={`mt-1 font-body text-sm font-semibold ${kilometraje.valido ? "text-text-primary" : "text-danger"}`}>{kilometraje.final !== null ? `${kilometraje.final.toLocaleString()} km` : "-"}</p>
+            <div className={`rounded-lg p-2.5 text-center ${kilometraje.valido ? "bg-ui-card" : "bg-ui-danger-soft border border-ui-danger/20"}`}>
+              <p className="text-xs font-semibold uppercase text-ui-fg-muted">Final</p>
+              <p className={`mt-1 font-body text-sm font-semibold ${kilometraje.valido ? "text-ui-fg" : "text-ui-danger"}`}>{kilometraje.final !== null ? `${kilometraje.final.toLocaleString()} km` : "-"}</p>
             </div>
           </div>
           {kilometraje.diferencia !== null && (
-            <p className="mt-2 text-center font-body text-xs font-semibold text-text-secondary">
+            <p className="mt-2 text-center font-body text-xs font-semibold text-ui-fg-muted">
               Diferencia: {kilometraje.diferencia >= 0 ? `+${kilometraje.diferencia.toLocaleString()}` : `${kilometraje.diferencia.toLocaleString()}`} km
             </p>
           )}
         </div>
         {/* Llaves */}
-        <div className="rounded-xl border border-border/20 bg-surface-elevated p-3">
-          <p className="font-body text-xs font-bold uppercase tracking-wide text-text-tertiary">Llaves</p>
+        <div className="rounded-xl border border-ui-line/20 bg-ui-muted p-3">
+          <p className="font-body text-xs font-bold uppercase tracking-wide text-ui-fg-muted">Llaves</p>
           <div className="mt-2 grid grid-cols-2 gap-3">
-            <div className="rounded-lg bg-surface p-2.5 text-center">
-              <p className="text-[11px] font-semibold uppercase text-text-tertiary">Inicial</p>
-              <p className="mt-1 font-body text-sm font-semibold text-text-primary">{llaves.inicial ?? "-"}</p>
+            <div className="rounded-lg bg-ui-card p-2.5 text-center">
+              <p className="text-xs font-semibold uppercase text-ui-fg-muted">Inicial</p>
+              <p className="mt-1 font-body text-sm font-semibold text-ui-fg">{llaves.inicial ?? "-"}</p>
             </div>
-            <div className={`rounded-lg p-2.5 text-center ${llaves.coincide ? "bg-surface" : "bg-danger-soft border border-danger/20"}`}>
-              <p className="text-[11px] font-semibold uppercase text-text-tertiary">Final</p>
-              <p className={`mt-1 font-body text-sm font-semibold ${llaves.coincide ? "text-text-primary" : "text-danger"}`}>{llaves.final ?? "-"}</p>
+            <div className={`rounded-lg p-2.5 text-center ${llaves.coincide ? "bg-ui-card" : "bg-ui-danger-soft border border-ui-danger/20"}`}>
+              <p className="text-xs font-semibold uppercase text-ui-fg-muted">Final</p>
+              <p className={`mt-1 font-body text-sm font-semibold ${llaves.coincide ? "text-ui-fg" : "text-ui-danger"}`}>{llaves.final ?? "-"}</p>
             </div>
           </div>
         </div>
         {/* Combustible */}
-        <div className="rounded-xl border border-border/20 bg-surface-elevated p-3">
-          <p className="font-body text-xs font-bold uppercase tracking-wide text-text-tertiary">Combustible</p>
+        <div className="rounded-xl border border-ui-line/20 bg-ui-muted p-3">
+          <p className="font-body text-xs font-bold uppercase tracking-wide text-ui-fg-muted">Combustible</p>
           <div className="mt-2 grid grid-cols-2 gap-3">
-            <div className="rounded-lg bg-surface p-2.5 text-center">
-              <p className="text-[11px] font-semibold uppercase text-text-tertiary">Inicial</p>
-              <p className="mt-1 font-body text-sm font-semibold text-text-primary">{combustible.inicial ?? "-"}</p>
+            <div className="rounded-lg bg-ui-card p-2.5 text-center">
+              <p className="text-xs font-semibold uppercase text-ui-fg-muted">Inicial</p>
+              <p className="mt-1 font-body text-sm font-semibold text-ui-fg">{combustible.inicial ?? "-"}</p>
             </div>
-            <div className={`rounded-lg p-2.5 text-center ${combustible.coincide ? "bg-surface" : "bg-warn-soft border border-warning/20"}`}>
-              <p className="text-[11px] font-semibold uppercase text-text-tertiary">Final</p>
-              <p className={`mt-1 font-body text-sm font-semibold ${combustible.coincide ? "text-text-primary" : "text-warning"}`}>{combustible.final ?? "-"}</p>
+            <div className={`rounded-lg p-2.5 text-center ${combustible.coincide ? "bg-ui-card" : "bg-ui-warning-soft border border-ui-warning/20"}`}>
+              <p className="text-xs font-semibold uppercase text-ui-fg-muted">Final</p>
+              <p className={`mt-1 font-body text-sm font-semibold ${combustible.coincide ? "text-ui-fg" : "text-ui-warning"}`}>{combustible.final ?? "-"}</p>
             </div>
           </div>
         </div>
         {/* Documentos - móvil */}
-        <div className="rounded-xl border border-border/20 bg-surface-elevated p-3">
-          <p className="font-body text-xs font-bold uppercase tracking-wide text-text-tertiary">Documentos</p>
+        <div className="rounded-xl border border-ui-line/20 bg-ui-muted p-3">
+          <p className="font-body text-xs font-bold uppercase tracking-wide text-ui-fg-muted">Documentos</p>
           <div className="mt-2 grid gap-2">
             {documentosClave.map((doc) => {
               const tieneInicial = documentos.inicial[doc];
               const tieneFinal = documentos.final[doc];
               const hayCambio = tieneInicial !== tieneFinal;
               return (
-                <div key={doc} className="flex items-center justify-between gap-2 rounded-lg bg-surface px-3 py-2.5">
-                  <span className="font-body text-xs font-medium text-text-primary min-w-0 flex-1">{doc}</span>
+                <div key={doc} className="flex items-center justify-between gap-2 rounded-lg bg-ui-card px-3 py-2.5">
+                  <span className="font-body text-xs font-medium text-ui-fg min-w-0 flex-1">{doc}</span>
                   <span className="flex items-center gap-3 shrink-0">
                     <span className="text-center min-w-[32px]">
-                      <span className="block text-[10px] font-bold uppercase text-text-tertiary">Ini</span>
+                      <span className="block text-xs font-bold uppercase text-ui-fg-muted">Ini</span>
                       <span className="block text-sm">{tieneInicial ? "✓" : "✗"}</span>
                     </span>
-                    <span className={`text-center min-w-[32px] ${hayCambio ? "text-danger font-bold" : ""}`}>
-                      <span className="block text-[10px] font-bold uppercase text-text-tertiary">Fin</span>
+                    <span className={`text-center min-w-[32px] ${hayCambio ? "text-ui-danger font-bold" : ""}`}>
+                      <span className="block text-xs font-bold uppercase text-ui-fg-muted">Fin</span>
                       <span className="block text-sm">{tieneFinal ? "✓" : "✗"}</span>
                     </span>
                   </span>
@@ -174,49 +175,49 @@ export function EvidenceComparisonDisplay({
       <div className="mt-4 hidden md:block overflow-x-auto -mx-1">
         <table className="w-full min-w-[420px] table-fixed border-collapse font-body text-sm">
           <thead>
-            <tr className="border-b border-border/22">
-              <th className="w-1/3 px-2 py-2 text-left font-semibold text-text-tertiary"></th>
-              <th className="w-1/3 px-2 py-2 text-center font-semibold text-text-tertiary">Inicial</th>
-              <th className="w-1/3 px-2 py-2 text-center font-semibold text-text-tertiary">Final</th>
+            <tr className="border-b border-ui-line/22">
+              <th className="w-1/3 px-2 py-2 text-left font-semibold text-ui-fg-muted"></th>
+              <th className="w-1/3 px-2 py-2 text-center font-semibold text-ui-fg-muted">Inicial</th>
+              <th className="w-1/3 px-2 py-2 text-center font-semibold text-ui-fg-muted">Final</th>
             </tr>
           </thead>
           <tbody>
-            <tr className="border-b border-border/22">
-              <td className="px-2 py-2 font-body text-text-primary">Kilometraje</td>
-              <td className="px-2 py-2 text-center text-text-primary">
+            <tr className="border-b border-ui-line/22">
+              <td className="px-2 py-2 font-body text-ui-fg">Kilometraje</td>
+              <td className="px-2 py-2 text-center text-ui-fg">
                 {kilometraje.inicial !== null ? `${kilometraje.inicial.toLocaleString()} km` : "-"}
               </td>
-              <td className={`px-2 py-2 text-center ${kilometraje.valido ? "text-text-primary" : "text-danger font-semibold"}`}>
+              <td className={`px-2 py-2 text-center ${kilometraje.valido ? "text-ui-fg" : "text-ui-danger font-semibold"}`}>
                 {kilometraje.final !== null ? `${kilometraje.final.toLocaleString()} km` : "-"}
               </td>
             </tr>
             {kilometraje.diferencia !== null && (
-              <tr className="border-b border-border/22">
-                <td className="px-2 py-2 font-body text-text-secondary" colSpan={1}>Diferencia</td>
-                <td className="px-2 py-2 text-center text-text-secondary" colSpan={2}>
+              <tr className="border-b border-ui-line/22">
+                <td className="px-2 py-2 font-body text-ui-fg-muted" colSpan={1}>Diferencia</td>
+                <td className="px-2 py-2 text-center text-ui-fg-muted" colSpan={2}>
                   {kilometraje.diferencia >= 0 ? `+${kilometraje.diferencia.toLocaleString()}` : `${kilometraje.diferencia.toLocaleString()}`} km
                 </td>
               </tr>
             )}
-            <tr className="border-b border-border/22">
-              <td className="px-2 py-2 font-body text-text-primary">Llaves</td>
-              <td className="px-2 py-2 text-center text-text-primary">{llaves.inicial ?? "-"}</td>
-              <td className={`px-2 py-2 text-center ${llaves.coincide ? "text-text-primary" : "text-danger font-semibold"}`}>{llaves.final ?? "-"}</td>
+            <tr className="border-b border-ui-line/22">
+              <td className="px-2 py-2 font-body text-ui-fg">Llaves</td>
+              <td className="px-2 py-2 text-center text-ui-fg">{llaves.inicial ?? "-"}</td>
+              <td className={`px-2 py-2 text-center ${llaves.coincide ? "text-ui-fg" : "text-ui-danger font-semibold"}`}>{llaves.final ?? "-"}</td>
             </tr>
-            <tr className="border-b border-border/22">
-              <td className="px-2 py-2 font-body text-text-primary">Combustible</td>
-              <td className="px-2 py-2 text-center text-text-primary">{combustible.inicial ?? "-"}</td>
-              <td className={`px-2 py-2 text-center ${combustible.coincide ? "text-text-primary" : "text-warning font-semibold"}`}>{combustible.final ?? "-"}</td>
+            <tr className="border-b border-ui-line/22">
+              <td className="px-2 py-2 font-body text-ui-fg">Combustible</td>
+              <td className="px-2 py-2 text-center text-ui-fg">{combustible.inicial ?? "-"}</td>
+              <td className={`px-2 py-2 text-center ${combustible.coincide ? "text-ui-fg" : "text-ui-warning font-semibold"}`}>{combustible.final ?? "-"}</td>
             </tr>
             {documentosClave.map((doc) => {
               const tieneInicial = documentos.inicial[doc];
               const tieneFinal = documentos.final[doc];
               const hayCambio = tieneInicial !== tieneFinal;
               return (
-                <tr key={doc} className="border-b border-border/22">
-                  <td className="px-2 py-2 font-body text-text-primary">{doc}</td>
-                  <td className="px-2 py-2 text-center text-text-primary">{tieneInicial ? "✓" : "✗"}</td>
-                  <td className={`px-2 py-2 text-center ${hayCambio ? "text-danger font-semibold" : "text-text-primary"}`}>{tieneFinal ? "✓" : "✗"}</td>
+                <tr key={doc} className="border-b border-ui-line/22">
+                  <td className="px-2 py-2 font-body text-ui-fg">{doc}</td>
+                  <td className="px-2 py-2 text-center text-ui-fg">{tieneInicial ? "✓" : "✗"}</td>
+                  <td className={`px-2 py-2 text-center ${hayCambio ? "text-ui-danger font-semibold" : "text-ui-fg"}`}>{tieneFinal ? "✓" : "✗"}</td>
                 </tr>
               );
             })}
@@ -225,7 +226,7 @@ export function EvidenceComparisonDisplay({
       </div>
 
       {/* Nota sobre la evidencia */}
-      <p className="mt-4 text-xs text-text-tertiary">
+      <p className="mt-4 text-xs text-ui-fg-muted">
         {soloInicial 
           ? "* Los valores finales se mostrarán una vez capturados"
           : "* Comparación generada automáticamente al completar ambos registros"

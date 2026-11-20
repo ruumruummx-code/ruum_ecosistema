@@ -1,5 +1,6 @@
 "use client";
 
+import { Button as BaseButton } from "@ruum/ui/base";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -77,7 +78,7 @@ export function EstadoSincronizacionGlobal() {
         <div
           role="alert"
           aria-live="assertive"
-          className="mx-auto mt-3 flex w-[min(100%-24px,1120px)] flex-col gap-2 rounded-xl border border-[var(--ruum-error)]/40 bg-[var(--ruum-error-bg)] p-3 font-body text-sm text-[var(--ruum-error-text)]"
+          className="mx-auto mt-3 flex w-[min(100%-24px,1120px)] flex-col gap-2 rounded-xl border border-ui-danger/40 bg-ui-danger-soft p-3 font-body text-sm text-[var(--ruum-error-text)]"
         >
           <div className="flex items-center justify-between font-bold">
             <span className="flex items-center gap-1.5">
@@ -88,7 +89,7 @@ export function EstadoSincronizacionGlobal() {
           </div>
           <div className="flex flex-col gap-1.5 text-xs">
             {evidenciasDescartadas.map((ev) => (
-              <div key={ev.localId} className="flex flex-wrap items-center justify-between gap-2 rounded-lg bg-black/10 px-2.5 py-1.5">
+              <div key={ev.localId} className="flex flex-wrap items-center justify-between gap-2 rounded-lg bg-ui-overlay/10 px-2.5 py-1.5">
                 <span>
                   Traslado <strong>#{ev.trasladoId.slice(0, 8)}</strong> · Ángulo: <strong>{ev.angulo || "General"}</strong> ({ev.razon === "ttl_expirado" ? "Expiró tras 7 días sin red" : "Superó 15 reintentos"})
                 </span>
@@ -99,16 +100,16 @@ export function EstadoSincronizacionGlobal() {
                   >
                     Ver viaje
                   </Link>
-                  <button
+                  <BaseButton variant="ghost"
                     type="button"
                     onClick={async () => {
                       await resolverEvidenciaDescartada(ev.localId);
                       setEvidenciasDescartadas((prev) => prev.filter((d) => d.localId !== ev.localId));
                     }}
-                    className="rounded bg-black/20 px-2 py-0.5 text-xs font-semibold hover:bg-black/30"
+                    className="rounded bg-ui-overlay/20 px-2 py-0.5 text-xs font-semibold hover:bg-ui-overlay/30"
                   >
                     Descartar aviso
-                  </button>
+                  </BaseButton>
                 </div>
               </div>
             ))}

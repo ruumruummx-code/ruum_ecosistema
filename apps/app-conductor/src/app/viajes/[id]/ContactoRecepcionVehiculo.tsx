@@ -61,7 +61,7 @@ export function ContactoRecepcionVehiculo({
           <>
             {contactoNombre}
             <br />
-            <span className="font-normal text-text-secondary">{contactoTelefono}</span>
+            <span className="font-normal text-ui-fg-muted">{contactoTelefono}</span>
           </>
         }
         eta="Tiempo estimado: 3 a 5 minutos"
@@ -72,14 +72,14 @@ export function ContactoRecepcionVehiculo({
         nextStep="Después confirmarás la entrega."
         stageLabel="Paso 6 de 7"
       />
-      <fieldset className="rounded-xl border border-border bg-surface-elevated p-4">
-        <legend className="font-body text-sm font-semibold text-text-tertiary">Confirmaciones</legend>
-        <label className="mt-3 flex min-h-11 items-center gap-3 rounded-lg border border-border bg-surface px-3 py-2 font-body text-sm font-semibold">
-          <input type="checkbox" checked={contactoConfirmado} onChange={(e) => setContactoConfirmado(e.target.checked)} className="size-4 accent-route" />
+      <fieldset className="rounded-xl border border-ui-line bg-ui-muted p-4">
+        <legend className="font-body text-sm font-semibold text-ui-fg-muted">Confirmaciones</legend>
+        <label className="mt-3 flex min-h-11 items-center gap-3 rounded-lg border border-ui-line bg-ui-card px-3 py-2 font-body text-sm font-semibold">
+          <input type="checkbox" checked={contactoConfirmado} onChange={(e) => setContactoConfirmado(e.target.checked)} className="size-4 accent-ui-brand" />
           Contacto de recepción confirmado
         </label>
-        <label className="mt-2 flex min-h-11 items-center gap-3 rounded-lg border border-border bg-surface px-3 py-2 font-body text-sm font-semibold">
-          <input type="checkbox" checked={vehiculoConfirmado} onChange={(e) => setVehiculoConfirmado(e.target.checked)} className="size-4 accent-route" />
+        <label className="mt-2 flex min-h-11 items-center gap-3 rounded-lg border border-ui-line bg-ui-card px-3 py-2 font-body text-sm font-semibold">
+          <input type="checkbox" checked={vehiculoConfirmado} onChange={(e) => setVehiculoConfirmado(e.target.checked)} className="size-4 accent-ui-brand" />
           Vehículo confirmado
         </label>
       </fieldset>

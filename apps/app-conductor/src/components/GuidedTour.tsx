@@ -1,5 +1,6 @@
 "use client";
 
+import { Button as BaseButton } from "@ruum/ui/base";
 import { useCallback, useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 
@@ -31,12 +32,12 @@ interface GuidedTourProps {
 
 // Estilos CSS-in-JS para el tooltip
 const tooltipStyles = {
-  base: "fixed z-50 max-w-xs p-5 rounded-2xl border border-border/40 bg-surface-elevated shadow-2xl",
-  title: "font-display text-sm font-bold text-text-primary mb-2",
-  description: "font-body text-xs text-text-secondary leading-relaxed",
-  arrow: "absolute w-4 h-4 bg-surface-elevated border border-border/40",
-  button: "inline-flex min-h-10 items-center justify-center gap-2 rounded-xl border border-border bg-surface px-4 py-2 font-display text-xs font-bold text-text-primary hover:bg-surface-elevated transition-colors",
-  buttonPrimary: "inline-flex min-h-10 items-center justify-center gap-2 rounded-xl bg-signal px-4 py-2 font-display text-xs font-bold text-slate-950 hover:bg-signal/90 transition-colors",
+  base: "fixed z-50 max-w-xs p-5 rounded-lg border border-ui-line/40 bg-ui-muted shadow-2xl",
+  title: "font-display text-sm font-bold text-ui-fg mb-2",
+  description: "font-body text-xs text-ui-fg-muted leading-relaxed",
+  arrow: "absolute w-4 h-4 bg-ui-muted border border-ui-line/40",
+  button: "inline-flex min-h-10 items-center justify-center gap-2 rounded-xl border border-ui-line bg-ui-card px-4 py-2 font-display text-xs font-bold text-ui-fg hover:bg-ui-muted transition-colors",
+  buttonPrimary: "inline-flex min-h-10 items-center justify-center gap-2 rounded-xl bg-ui-brand px-4 py-2 font-display text-xs font-bold text-ui-fg-muted hover:bg-ui-brand/90 transition-colors",
 } as const;
 
 const arrowPositions = {
@@ -79,7 +80,7 @@ function SpotlightOverlay({ targetElement }: { targetElement: HTMLElement | null
     bottom: 0,
     zIndex: 40,
     pointerEvents: "none",
-    backgroundColor: "rgba(0, 0, 0, 0.7)",
+    backgroundColor: "var(--ui-overlay)",
     clipPath: `path('M0,0 L${window.innerWidth},0 L${window.innerWidth},${window.innerHeight} L0,${window.innerHeight} L0,0 Z M${rect.left + window.scrollX},${rect.top + window.scrollY} L${rect.left + rect.width + window.scrollX},${rect.top + window.scrollY} L${rect.left + rect.width + window.scrollX},${rect.top + rect.height + window.scrollY} L${rect.left + window.scrollX},${rect.top + rect.height + window.scrollY} Z')`,
   };
 
@@ -115,30 +116,30 @@ function TourTooltip({
         <p className={tooltipStyles.description}>{description}</p>
         <div className="mt-4 flex gap-2 justify-end">
           {!isFirst && (
-            <button
+            <BaseButton variant="ghost"
               type="button"
               onClick={onPrev}
               className={tooltipStyles.button}
             >
               ← Anterior
-            </button>
+            </BaseButton>
           )}
           {isLast ? (
-            <button
+            <BaseButton variant="ghost"
               type="button"
               onClick={onClose}
               className={tooltipStyles.buttonPrimary}
             >
               Terminar
-            </button>
+            </BaseButton>
           ) : (
-            <button
+            <BaseButton variant="ghost"
               type="button"
               onClick={onNext}
               className={tooltipStyles.buttonPrimary}
             >
               Siguiente →
-            </button>
+            </BaseButton>
           )}
         </div>
       </div>

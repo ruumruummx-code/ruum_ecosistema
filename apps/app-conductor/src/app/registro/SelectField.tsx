@@ -1,3 +1,4 @@
+import { NativeSelect as BaseSelect } from "@ruum/ui/base";
 import { useId } from "react";
 import styles from "./registration.module.css";
 
@@ -36,11 +37,11 @@ export function SelectField({
 
   return (
     <div className={dense ? styles.field : "flex flex-col gap-1.5"} data-invalid={Boolean(error)}>
-      <label htmlFor={id} className="font-body text-sm font-semibold text-text-primary">
+      <label htmlFor={id} className="font-body text-sm font-semibold text-ui-fg">
         {etiqueta}
-        {required && !dense ? <span className="ml-1 text-danger-action" aria-hidden> *</span> : null}
+        {required && !dense ? <span className="ml-1 text-ui-danger" aria-hidden> *</span> : null}
       </label>
-      <select
+      <BaseSelect
         id={id}
         value={value}
         onChange={(e) => onChange(e.target.value)}
@@ -49,10 +50,10 @@ export function SelectField({
         aria-invalid={Boolean(error)}
         aria-describedby={error ? `${id}-error` : undefined}
         className={[
-          "w-full min-h-12 rounded-[10px] border bg-surface px-3.5 py-2.5 font-body text-base text-text-primary shadow-[inset_0_1px_0_rgba(26,31,46,0.02)]",
-          "transition-[border-color,box-shadow,background-color] duration-150 hover:border-border-strong focus:border-route-action focus:outline-none focus:ring-[3px] focus:ring-route-action/20",
-          error ? "border-danger-action bg-danger-soft/20 focus:border-danger-action focus:ring-danger/15" : "border-border-strong",
-          "disabled:cursor-not-allowed disabled:border-border disabled:bg-surface-elevated disabled:text-text-tertiary"
+          "w-full min-h-12 rounded-lg border bg-ui-card px-3.5 py-2.5 font-body text-base text-ui-fg shadow-ui-md",
+          "transition-[border-color,box-shadow,background-color] duration-150 hover:border-ui-field focus:border-ui-brand focus:outline-none focus:ring-[3px] focus:ring-ui-brand/20",
+          error ? "border-ui-danger bg-ui-danger-soft/20 focus:border-ui-danger focus:ring-ui-danger/15" : "border-ui-field",
+          "disabled:cursor-not-allowed disabled:border-ui-line disabled:bg-ui-muted disabled:text-ui-fg-muted"
         ].join(" ")}
       >
         <option value="">{placeholder}</option>
@@ -106,8 +107,8 @@ export function SelectField({
             );
           })
         )}
-      </select>
-      {error ? <p id={`${id}-error`} role={dense ? undefined : "alert"} className={dense ? "sr-only" : "font-body text-sm font-medium leading-5 text-danger-action"}>{error}</p> : null}
+      </BaseSelect>
+      {error ? <p id={`${id}-error`} role={dense ? undefined : "alert"} className={dense ? "sr-only" : "font-body text-sm font-medium leading-5 text-ui-danger"}>{error}</p> : null}
     </div>
   );
 }

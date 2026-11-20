@@ -76,7 +76,7 @@ export function ContactoYVehiculo({
           <>
             {contactoNombre}
             <br />
-            <span className="font-normal text-text-secondary">{contactoTelefono}</span>
+            <span className="font-normal text-ui-fg-muted">{contactoTelefono}</span>
           </>
         }
         eta="Tiempo estimado: 2 a 4 minutos"
@@ -87,14 +87,14 @@ export function ContactoYVehiculo({
         nextStep="Después revisarás el vehículo antes de moverlo."
         stageLabel="Paso 2 de 7"
       />
-      <fieldset className="rounded-xl border border-border bg-surface-elevated p-4">
-        <legend className="font-body text-sm font-semibold text-text-tertiary">Confirmaciones</legend>
-        <label className="mt-3 flex min-h-11 items-center gap-3 rounded-lg border border-border bg-surface px-3 py-2 font-body text-sm font-semibold">
-          <input type="checkbox" checked={contactoConfirmado} onChange={(e) => setContactoConfirmado(e.target.checked)} className="size-4 accent-route" />
+      <fieldset className="rounded-xl border border-ui-line bg-ui-muted p-4">
+        <legend className="font-body text-sm font-semibold text-ui-fg-muted">Confirmaciones</legend>
+        <label className="mt-3 flex min-h-11 items-center gap-3 rounded-lg border border-ui-line bg-ui-card px-3 py-2 font-body text-sm font-semibold">
+          <input type="checkbox" checked={contactoConfirmado} onChange={(e) => setContactoConfirmado(e.target.checked)} className="size-4 accent-ui-brand" />
           Contacto encontrado
         </label>
-        <label className="mt-2 flex min-h-11 items-center gap-3 rounded-lg border border-border bg-surface px-3 py-2 font-body text-sm font-semibold">
-          <input type="checkbox" checked={vehiculoLocalizado} onChange={(e) => setVehiculoLocalizado(e.target.checked)} className="size-4 accent-route" />
+        <label className="mt-2 flex min-h-11 items-center gap-3 rounded-lg border border-ui-line bg-ui-card px-3 py-2 font-body text-sm font-semibold">
+          <input type="checkbox" checked={vehiculoLocalizado} onChange={(e) => setVehiculoLocalizado(e.target.checked)} className="size-4 accent-ui-brand" />
           Vehículo localizado
         </label>
       </fieldset>

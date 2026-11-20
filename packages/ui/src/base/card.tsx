@@ -1,8 +1,10 @@
+import { Slot } from "@radix-ui/react-slot";
 import type { HTMLAttributes } from "react";
 import { cn } from "./cn";
 
-export function Card({ className, ...props }: HTMLAttributes<HTMLDivElement>) {
-  return <div className={cn("rounded-lg border border-ui-line bg-ui-card text-ui-fg shadow-ui-sm", className)} {...props} />;
+export function Card({ className, asChild = false, ...props }: HTMLAttributes<HTMLDivElement> & { asChild?: boolean }) {
+  const Comp = asChild ? Slot : "div";
+  return <Comp className={cn("rounded-lg border border-ui-line bg-ui-card text-ui-fg shadow-ui-sm", className)} {...props} />;
 }
 export function CardHeader({ className, ...props }: HTMLAttributes<HTMLDivElement>) {
   return <div className={cn("flex flex-col gap-1 p-4 sm:p-5", className)} {...props} />;

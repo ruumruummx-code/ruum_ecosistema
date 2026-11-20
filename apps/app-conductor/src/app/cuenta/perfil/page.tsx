@@ -1,5 +1,6 @@
 "use client";
 
+import { Button as BaseButton, NativeSelect as BaseSelect, Input as BaseInput } from "@ruum/ui/base";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
 
 import { ChangeEvent, useEffect, useState } from "react";
@@ -438,8 +439,8 @@ export default function PaginaPerfilCuenta() {
       photoBusy={subiendoFoto} photoEnabled={!!conductor} tab={pestanaActiva} onTab={tab => { setPestanaActiva(tab); setGrupoUbicacion(0); }} onPhoto={event => { void subirFotoPerfil(event); }}
       busy={guardando} saveDisabled={!conductor || !hayCambiosReales || guardando || invalidos || subiendoFoto} onSave={() => { void guardarPerfil(); }}
       feedback={aviso ? <DetailsNotice message={aviso} error={!!errorCarga || notificacion?.tipo === "error"} /> : undefined}>
-      {cargando ? <output className={styles.loading}>Cargando perfil…</output> : errorCarga ? <button type="button" className={styles.retry} onClick={() => { setCargando(true); void cargar(); }}>Reintentar carga</button> : <>
-        {pestanaActiva === "ubicacion" && <div className={styles.groupPager} role="group" aria-label="Grupos de ubicación"><button type="button" disabled={grupoUbicacion === 0} aria-label="Grupo anterior" onClick={() => setGrupoUbicacion(value => value - 1)}>‹</button><span>{["Domicilio", "Dirección", "Contacto de emergencia"][grupoUbicacion]} · {grupoUbicacion + 1} de 3</span><button type="button" disabled={grupoUbicacion === 2} aria-label="Grupo siguiente" onClick={() => setGrupoUbicacion(value => value + 1)}>›</button></div>}
+      {cargando ? <output className={styles.loading}>Cargando perfil…</output> : errorCarga ? <BaseButton variant="ghost" type="button" className={styles.retry} onClick={() => { setCargando(true); void cargar(); }}>Reintentar carga</BaseButton> : <>
+        {pestanaActiva === "ubicacion" && <div className={styles.groupPager} role="group" aria-label="Grupos de ubicación"><BaseButton variant="ghost" type="button" disabled={grupoUbicacion === 0} aria-label="Grupo anterior" onClick={() => setGrupoUbicacion(value => value - 1)}>‹</BaseButton><span>{["Domicilio", "Dirección", "Contacto de emergencia"][grupoUbicacion]} · {grupoUbicacion + 1} de 3</span><BaseButton variant="ghost" type="button" disabled={grupoUbicacion === 2} aria-label="Grupo siguiente" onClick={() => setGrupoUbicacion(value => value + 1)}>›</BaseButton></div>}
         <div className={styles.fields} data-tab={pestanaActiva} aria-busy={guardando}>
           {campos.map(key => {
             const config = CAMPO_CONFIG[key];
@@ -451,7 +452,7 @@ export default function PaginaPerfilCuenta() {
             return <div key={key} className={styles.field} data-half={half} data-invalid={validation.esValido === false}>
               <DetailIcon name={icono(key)} />
               <div className={styles.fieldText}><label htmlFor={inputId}>{config.etiqueta}</label>
-                {key === "colonia" && coloniasDisponibles.length > 0 ? <select id={inputId} value={perfil.colonia} onChange={event => setPerfil(current => ({ ...current, colonia: event.target.value }))}>{coloniasDisponibles.map(col => <option key={col} value={col}>{col}</option>)}</select> : <input
+                {key === "colonia" && coloniasDisponibles.length > 0 ? <BaseSelect id={inputId} value={perfil.colonia} onChange={event => setPerfil(current => ({ ...current, colonia: event.target.value }))}>{coloniasDisponibles.map(col => <option key={col} value={col}>{col}</option>)}</BaseSelect> : <BaseInput
                   id={inputId} type={key.includes("telefono") ? "tel" : config.tipo ?? "text"} inputMode={key === "codigo_postal" ? "numeric" : undefined}
                   value={protectedField ? "" : perfil[key]} placeholder={protectedField ? placeholderSensible(key) : config.placeholder}
                   readOnly={readOnly} aria-readonly={readOnly || undefined} disabled={guardando}
@@ -466,7 +467,7 @@ export default function PaginaPerfilCuenta() {
                   }} />}
                 {validation.esValido === false && <span className={styles.fieldError} id={`${inputId}-error`}>{validation.mensaje ?? "Revisa este dato"}</span>}
               </div>
-              {protectedField && <button type="button" className={styles.unlock} aria-label={`Editar ${config.etiqueta}`} title="Dato protegido. Los cambios se envían a revisión." onClick={() => { setSensiblesEditados(current => new Set(current).add(key as CampoSensiblePerfil)); setPerfil(current => ({ ...current, [key]: "" })); }}>✎</button>}
+              {protectedField && <BaseButton variant="ghost" type="button" className={styles.unlock} aria-label={`Editar ${config.etiqueta}`} title="Dato protegido. Los cambios se envían a revisión." onClick={() => { setSensiblesEditados(current => new Set(current).add(key as CampoSensiblePerfil)); setPerfil(current => ({ ...current, [key]: "" })); }}>✎</BaseButton>}
             </div>;
           })}
         </div>

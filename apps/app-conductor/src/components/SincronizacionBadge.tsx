@@ -49,7 +49,7 @@ export function SincronizacionBadge() {
 
   if (total === 0) {
     return (
-      <span className="inline-flex items-center gap-1 bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 text-[10px] font-extrabold px-2.5 py-0.5 rounded-full border border-emerald-500/25">
+      <span className="inline-flex items-center gap-1 bg-ui-success/15 text-ui-success  text-xs font-extrabold px-2.5 py-0.5 rounded-full border border-ui-success/25">
         <ConductorIcon name="check" size={12} className="shrink-0" />
         Todo sincronizado
       </span>
@@ -67,7 +67,7 @@ export function SincronizacionBadge() {
   }
 
   return (
-    <div className="w-full bg-amber-500/10 border border-amber-500/20 text-amber-600 dark:text-amber-400 px-4 py-2 rounded-xl text-xs font-semibold leading-normal flex items-center justify-center gap-2 text-center">
+    <div className="w-full bg-ui-warning/10 border border-ui-warning/20 text-ui-warning  px-4 py-2 rounded-xl text-xs font-semibold leading-normal flex items-center justify-center gap-2 text-center">
       {showAlert && (
         <ConductorIcon name="warning" size={14} className="shrink-0" />
       )}

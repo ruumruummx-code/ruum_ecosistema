@@ -1,5 +1,6 @@
 "use client";
 
+import { Button as BaseButton, NativeSelect as BaseSelect, Input as BaseInput } from "@ruum/ui/base";
 import { useState, useEffect, useRef } from "react";
 import { TripDialog } from "../TripDialog";
 import Image from "next/image";
@@ -199,21 +200,21 @@ export function GastosModal({
   const totalGastos = gastosList.reduce((sum, g) => sum + (g.monto || 0), 0);
 
   return (
-    <TripDialog title="Gastos del traslado" onClose={onCerrar} footer={<button type="submit" form="trip-expense-form" disabled={guardandoGasto} className="w-full min-h-11 rounded-xl bg-signal p-2 text-sm font-bold text-slate-950 disabled:opacity-50">{guardandoGasto ? "Guardando y subiendo…" : "+ Registrar gasto"}</button>}>
+    <TripDialog title="Gastos del traslado" onClose={onCerrar} footer={<BaseButton variant="ghost" type="submit" form="trip-expense-form" disabled={guardandoGasto} className="w-full min-h-11 rounded-xl bg-ui-brand p-2 text-sm font-bold text-ui-fg-muted disabled:opacity-50">{guardandoGasto ? "Guardando y subiendo…" : "+ Registrar gasto"}</BaseButton>}>
       <div className="flex flex-col gap-4 text-left">
 
         {/* Formulario para agregar gasto */}
         <form id="trip-expense-form" onSubmit={handleAgregarGasto} className="flex flex-col gap-3.5">
           <div className="grid grid-cols-2 gap-3">
             <div className="flex flex-col gap-1">
-              <label htmlFor="tipo-gasto" className="text-[10px] font-bold text-text-tertiary uppercase tracking-wider">
+              <label htmlFor="tipo-gasto" className="text-xs font-bold text-ui-fg-muted uppercase tracking-wider">
                 Tipo de gasto
               </label>
-              <select
+              <BaseSelect
                 id="tipo-gasto"
                 value={tipoGasto}
                 onChange={(e) => setTipoGasto(e.target.value as GastoTipoDb)}
-                className="bg-surface border border-border/30 rounded-xl px-3 py-2.5 text-xs text-text-primary focus:outline-none focus:border-route-action"
+                className="bg-ui-card border border-ui-line/30 rounded-xl px-3 py-2.5 text-xs text-ui-fg focus:outline-none focus:border-ui-brand"
               >
                 <option value="combustible">⛽ Combustible</option>
                 <option value="caseta">🛣️ Casetas / Peaje</option>
@@ -221,23 +222,23 @@ export function GastosModal({
                 <option value="estadia">⏱️ Estadía / Espera</option>
                 <option value="penalizacion">⚠️ Penalización</option>
                 <option value="otro">📝 Estacionamiento / Otro</option>
-              </select>
+              </BaseSelect>
             </div>
 
             <div className="flex flex-col gap-1">
-              <label htmlFor="monto-gasto" className="text-[10px] font-bold text-text-tertiary uppercase tracking-wider">
+              <label htmlFor="monto-gasto" className="text-xs font-bold text-ui-fg-muted uppercase tracking-wider">
                 Monto (MXN) *
               </label>
               <div className="relative">
-                <span className="absolute left-3 top-2.5 text-xs font-bold text-text-tertiary">$</span>
-                <input
+                <span className="absolute left-3 top-2.5 text-xs font-bold text-ui-fg-muted">$</span>
+                <BaseInput
                   id="monto-gasto"
                   type="number"
                   step="0.01"
                   placeholder="0.00"
                   value={monto}
                   onChange={(e) => setMonto(e.target.value)}
-                  className="w-full bg-surface border border-border/30 rounded-xl pl-7 pr-3 py-2.5 text-xs font-mono font-bold text-text-primary focus:outline-none focus:border-route-action"
+                  className="w-full bg-ui-card border border-ui-line/30 rounded-xl pl-7 pr-3 py-2.5 text-xs font-mono font-bold text-ui-fg focus:outline-none focus:border-ui-brand"
                   required
                 />
               </div>
@@ -245,27 +246,27 @@ export function GastosModal({
           </div>
 
           <div className="flex flex-col gap-1">
-            <label htmlFor="notas-gasto" className="text-[10px] font-bold text-text-tertiary uppercase tracking-wider">
+            <label htmlFor="notas-gasto" className="text-xs font-bold text-ui-fg-muted uppercase tracking-wider">
               Notas / Especificaciones (opcional)
             </label>
-            <input
+            <BaseInput
               id="notas-gasto"
               type="text"
               placeholder="Ej. Ticket Gasolinera Pemex #4820"
               value={notas}
               onChange={(e) => setNotas(e.target.value)}
-              className="bg-surface border border-border/30 rounded-xl px-3 py-2 text-xs text-text-primary focus:outline-none focus:border-route-action"
+              className="bg-ui-card border border-ui-line/30 rounded-xl px-3 py-2 text-xs text-ui-fg focus:outline-none focus:border-ui-brand"
             />
           </div>
 
           {/* Sección de Comprobante / Fotografía */}
-          <div className="flex flex-col gap-2 bg-surface/60 border border-border/20 rounded-2xl p-3">
+          <div className="flex flex-col gap-2 bg-ui-card/60 border border-ui-line/20 rounded-lg p-3">
             <div className="flex items-center justify-between">
-              <span className="text-[10px] font-bold text-text-tertiary uppercase tracking-wider">
+              <span className="text-xs font-bold text-ui-fg-muted uppercase tracking-wider">
                 Comprobante o Ticket
               </span>
               {archivoComprobante && (
-                <span className="text-[10px] text-signal font-semibold">
+                <span className="text-xs text-ui-brand font-semibold">
                   Listo para adjuntar
                 </span>
               )}
@@ -290,33 +291,33 @@ export function GastosModal({
 
             {!archivoComprobante ? (
               <div className="grid grid-cols-2 gap-2">
-                <button
+                <BaseButton variant="ghost"
                   type="button"
                   onClick={() => camaraInputRef.current?.click()}
-                  className="flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl bg-surface border border-border/30 hover:border-route-action/50 text-text-primary text-xs font-bold transition-all cursor-pointer hover:bg-surface-elevated active:scale-95"
+                  className="flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl bg-ui-card border border-ui-line/30 hover:border-ui-brand/50 text-ui-fg text-xs font-bold transition-all cursor-pointer hover:bg-ui-muted active:scale-95"
                 >
-                  <svg className="w-4 h-4 text-route-action shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <svg className="w-4 h-4 text-ui-brand shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                     <path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z" />
                     <circle cx="12" cy="13" r="4" />
                   </svg>
                   <span>Tomar foto</span>
-                </button>
+                </BaseButton>
 
-                <button
+                <BaseButton variant="ghost"
                   type="button"
                   onClick={() => archivoInputRef.current?.click()}
-                  className="flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl bg-surface border border-border/30 hover:border-route-action/50 text-text-primary text-xs font-bold transition-all cursor-pointer hover:bg-surface-elevated active:scale-95"
+                  className="flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl bg-ui-card border border-ui-line/30 hover:border-ui-brand/50 text-ui-fg text-xs font-bold transition-all cursor-pointer hover:bg-ui-muted active:scale-95"
                 >
-                  <svg className="w-4 h-4 text-route-action shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <svg className="w-4 h-4 text-ui-brand shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                     <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" />
                     <polyline points="17 8 12 3 7 8" />
                     <line x1="12" y1="3" x2="12" y2="15" />
                   </svg>
                   <span>Subir archivo</span>
-                </button>
+                </BaseButton>
               </div>
             ) : (
-              <div className="flex items-center justify-between bg-surface-elevated rounded-xl p-2.5 border border-border/30">
+              <div className="flex items-center justify-between bg-ui-muted rounded-xl p-2.5 border border-ui-line/30">
                 <div className="flex items-center gap-2.5 overflow-hidden">
                   {previewUrl ? (
                     <Image
@@ -325,10 +326,10 @@ export function GastosModal({
                       width={40}
                       height={40}
                       unoptimized
-                      className="w-10 h-10 object-cover rounded-lg border border-border/30 shrink-0"
+                      className="w-10 h-10 object-cover rounded-lg border border-ui-line/30 shrink-0"
                     />
                   ) : (
-                    <div className="w-10 h-10 rounded-lg bg-surface flex items-center justify-center text-text-tertiary shrink-0 border border-border/20">
+                    <div className="w-10 h-10 rounded-lg bg-ui-card flex items-center justify-center text-ui-fg-muted shrink-0 border border-ui-line/20">
                       <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                         <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
                         <polyline points="14 2 14 8 20 8" />
@@ -336,26 +337,26 @@ export function GastosModal({
                     </div>
                   )}
                   <div className="flex flex-col overflow-hidden">
-                    <span className="text-xs font-semibold text-text-primary truncate">
+                    <span className="text-xs font-semibold text-ui-fg truncate">
                       {archivoComprobante.name}
                     </span>
-                    <span className="text-[10px] text-text-tertiary">
+                    <span className="text-xs text-ui-fg-muted">
                       {(archivoComprobante.size / 1024).toFixed(1)} KB
                     </span>
                   </div>
                 </div>
 
-                <button
+                <BaseButton variant="ghost"
                   type="button"
                   onClick={handleQuitarComprobante}
-                  className="p-1.5 text-danger hover:text-danger/80 rounded-lg hover:bg-danger/10 transition-colors cursor-pointer shrink-0"
+                  className="p-1.5 text-ui-danger hover:text-ui-danger/80 rounded-lg hover:bg-ui-danger/10 transition-colors cursor-pointer shrink-0"
                   title="Quitar comprobante"
                 >
                   <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                     <line x1="18" y1="6" x2="6" y2="18" />
                     <line x1="6" y1="6" x2="18" y2="18" />
                   </svg>
-                </button>
+                </BaseButton>
               </div>
             )}
           </div>
@@ -366,18 +367,18 @@ export function GastosModal({
         </form>
 
         {/* Listado de Gastos Registrados */}
-        <div className="flex flex-col gap-2 border-t border-border/15 pt-3">
+        <div className="flex flex-col gap-2 border-t border-ui-line/15 pt-3">
           <div className="flex items-center justify-between text-xs">
-            <span className="font-display font-bold text-text-tertiary uppercase tracking-wider text-[10px]">
+            <span className="font-display font-bold text-ui-fg-muted uppercase tracking-wider text-xs">
               Gastos Registrados ({gastosList.length})
             </span>
-            <span className="font-display font-black text-text-primary text-sm tabular-nums">
+            <span className="font-display font-black text-ui-fg text-sm tabular-nums">
               Total: ${totalGastos.toFixed(2)} MXN
             </span>
           </div>
 
           {gastosList.length === 0 ? (
-            <p className="text-xs text-text-tertiary italic text-center py-4">
+            <p className="text-xs text-ui-fg-muted italic text-center py-4">
               No has registrado gastos en este traslado aún.
             </p>
           ) : (
@@ -385,19 +386,19 @@ export function GastosModal({
               {gastosList.map((g) => (
                 <div
                   key={g.id}
-                  className="flex items-center justify-between bg-surface border border-border/20 rounded-xl p-2.5 text-xs gap-2"
+                  className="flex items-center justify-between bg-ui-card border border-ui-line/20 rounded-xl p-2.5 text-xs gap-2"
                 >
                   <div className="flex flex-col flex-1 min-w-0">
                     <div className="flex items-center gap-1.5">
-                      <span className="font-bold text-text-primary">
+                      <span className="font-bold text-ui-fg">
                         {obtenerEtiquetaGasto(g.tipo)}
                       </span>
                       {g.comprobante_ruta && (
-                        <button
+                        <BaseButton variant="ghost"
                           type="button"
                           onClick={() => handleVerComprobante(g.id, g.comprobante_ruta!)}
                           disabled={resolviendoGastoId === g.id}
-                          className="inline-flex items-center gap-1 text-[10px] text-route-action font-semibold hover:underline cursor-pointer bg-transparent border-0 p-0 disabled:opacity-50"
+                          className="inline-flex items-center gap-1 text-xs text-ui-brand font-semibold hover:underline cursor-pointer bg-transparent border-0 p-0 disabled:opacity-50"
                           title="Ver comprobante adjunto (genera enlace seguro temporal)"
                         >
                           <svg className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -405,23 +406,23 @@ export function GastosModal({
                             <path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71" />
                           </svg>
                           <span>{resolviendoGastoId === g.id ? "Cargando…" : "Ticket"}</span>
-                        </button>
+                        </BaseButton>
                       )}
                     </div>
                     {g.descripcion && (
-                      <span className="text-[10px] text-text-tertiary mt-0.5 truncate">{g.descripcion}</span>
+                      <span className="text-xs text-ui-fg-muted mt-0.5 truncate">{g.descripcion}</span>
                     )}
                   </div>
 
                   <div className="flex items-center gap-2 shrink-0">
-                    <span className="font-mono font-bold text-text-primary tabular-nums">
+                    <span className="font-mono font-bold text-ui-fg tabular-nums">
                       ${g.monto.toFixed(2)}
                     </span>
-                    <button
+                    <BaseButton variant="ghost"
                       type="button"
                       onClick={() => handleEliminarGasto(g.id)}
                       disabled={eliminandoId === g.id}
-                      className="min-h-11 min-w-11 p-2 flex items-center justify-center text-text-tertiary hover:text-danger rounded-md hover:bg-surface-elevated transition-colors cursor-pointer disabled:opacity-40"
+                      className="min-h-11 min-w-11 p-2 flex items-center justify-center text-ui-fg-muted hover:text-ui-danger rounded-md hover:bg-ui-muted transition-colors cursor-pointer disabled:opacity-40"
                       title="Eliminar gasto"
                       aria-label="Eliminar gasto"
                     >
@@ -429,7 +430,7 @@ export function GastosModal({
                         <polyline points="3 6 5 6 21 6" />
                         <path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2" />
                       </svg>
-                    </button>
+                    </BaseButton>
                   </div>
                 </div>
               ))}
@@ -437,13 +438,13 @@ export function GastosModal({
           )}
         </div>
 
-        <button
+        <BaseButton variant="ghost"
           type="button"
           onClick={onCerrar}
-          className="w-full py-2.5 rounded-xl bg-surface hover:bg-surface-elevated text-text-secondary font-display text-xs font-bold uppercase tracking-wider transition-all cursor-pointer mt-2 border border-border/20"
+          className="w-full py-2.5 rounded-xl bg-ui-card hover:bg-ui-muted text-ui-fg-muted font-display text-xs font-bold uppercase tracking-wider transition-all cursor-pointer mt-2 border border-ui-line/20"
         >
           Volver a Detalles del Traslado
-        </button>
+        </BaseButton>
       </div>
     </TripDialog>
   );

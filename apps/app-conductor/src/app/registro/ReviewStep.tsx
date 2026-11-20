@@ -1,3 +1,4 @@
+import { Button as BaseButton } from "@ruum/ui/base";
 import Link from "next/link";
 import { enmascararUltimos } from "../cuenta/datos-sensibles";
 import { formatoTelefonoNacional } from "./registration-validation";
@@ -34,7 +35,7 @@ export function ReviewStep({ telefono, email, nombreCompleto, curp, calle, numer
           <strong>Documentos</strong>
           <div className={styles.documentChecks}>{docs.map(([label, ready]) => <span key={label} data-ready={ready}><b aria-hidden="true">{ready ? "✓" : "!"}</b>{label}</span>)}</div>
         </div>
-        <button type="button" className={styles.reviewEdit} onClick={() => onEditar(3)} aria-label="Editar documentos">Editar</button>
+        <BaseButton variant="ghost" type="button" className={styles.reviewEdit} onClick={() => onEditar(3)} aria-label="Editar documentos">Editar</BaseButton>
       </section>
     </div>
     <label className={styles.reviewConsent}>

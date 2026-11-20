@@ -42,7 +42,7 @@ export function MapaRutaOrigen({ destino }: MapaRutaOrigenProps) {
   }, [destino.lat, destino.lng]);
 
   if (cargando) {
-    return <div className="h-40 w-full animate-pulse rounded-xl bg-surface-elevated" aria-hidden />;
+    return <div className="h-40 w-full animate-pulse rounded-xl bg-ui-muted" aria-hidden />;
   }
 
   if (!urlMapa) {
@@ -50,7 +50,7 @@ export function MapaRutaOrigen({ destino }: MapaRutaOrigenProps) {
   }
 
   return (
-    <div className="relative h-40 w-full overflow-hidden rounded-xl border border-border">
+    <div className="relative h-40 w-full overflow-hidden rounded-xl border border-ui-line">
       <MapaEstatico
         src={urlMapa}
         alt="Mapa de la ruta hacia el punto de recolección"

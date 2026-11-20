@@ -1,5 +1,7 @@
 "use client";
+import { PageHeader } from "@ruum/ui/base";
 
+import { Button as BaseButton } from "@ruum/ui/base";
 import { useState } from "react";
 import Link from "next/link";
 import type { DatosGananciasConductor } from "@ruum/api/services";
@@ -28,9 +30,9 @@ export function DriverEarningsView({ data, summary, period, onPeriod, loading, e
   const bankStatus = bank ? bank.estado === "verificada" ? `Cuenta verificada: ${bank.banco} · terminación ${bank.clabe.slice(-4)}.` : bank.estado === "en_revision" ? "Tus datos bancarios están en revisión." : "Tus datos bancarios requieren corrección." : "Registra tus datos bancarios para recibir depósitos.";
   return <div className={styles.screen} data-driver-earnings>
     <Link href="/panel" prefetch={false} className="inline-flex min-h-11 items-center text-sm text-ui-fg">‹ Atrás</Link>
-    <div className={styles.heading}><h1>Mis ganancias</h1><p>Aquí puedes ver tus ingresos y pagos</p></div>
+    <PageHeader titulo="Mis ganancias" descripcion="Aquí puedes ver tus ingresos y pagos" className="[&_h1]:text-2xl [&_p]:block" />
     <div className={styles.tabs} role="group" aria-label="Periodo de ganancias">
-      {([['semana', 'Esta semana'], ['mes', 'Este mes']] as const).map(([id, label]) => <button key={id}  type="button"  aria-pressed={period === id}  onClick={() => onPeriod(id)}>{label}</button>)}
+      {([['semana', 'Esta semana'], ['mes', 'Este mes']] as const).map(([id, label]) => <BaseButton variant="ghost" key={id}  type="button"  aria-pressed={period === id}  onClick={() => onPeriod(id)}>{label}</BaseButton>)}
     </div>
     <section id="resumen-ganancias" aria-label="Resultados del filtro"  aria-busy={loading} className={styles.summary}>
       <div className={styles.total}>
@@ -55,7 +57,7 @@ export function DriverEarningsView({ data, summary, period, onPeriod, loading, e
         </div>) : <p className={styles.message}>Aún no tienes pagos registrados.</p>}
       </div>
     </section>
-    <button type="button" className={styles.primary} aria-haspopup="dialog" disabled={loading || !!error} onClick={() => setRequestOpen(true)}>Ver programación de pago <span aria-hidden="true">→</span></button>
+    <BaseButton variant="primary" type="button" className={styles.primary} aria-haspopup="dialog" disabled={loading || !!error} onClick={() => setRequestOpen(true)}>Ver programación de pago <span aria-hidden="true">→</span></BaseButton>
     <ConductorDialog open={requestOpen} title="Programación de pago" labelledBy="programacion-pago-dialogo" onClose={() => setRequestOpen(false)}>
     <section className={styles.paymentInfo} aria-labelledby="programacion-pago-titulo" id="condiciones-pago">
       <h2 id="programacion-pago-titulo">Programación de pagos</h2>

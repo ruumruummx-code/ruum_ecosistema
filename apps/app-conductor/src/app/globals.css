@@ -20,8 +20,8 @@ html:has([data-trip-frame]) .conductor-safe-content { padding: 0; min-height: 0;
   background: var(--conductor-surface); color: var(--conductor-primary);
 }
 [data-trip-safety-bar] { display: flex; align-items: center; justify-content: space-between; gap: 4px; padding: 4px 8px; flex-shrink: 0; border-bottom: 1px solid var(--conductor-border); }
-[data-trip-safety-bar] > a, [data-trip-safety-bar] > button { min-height: 44px; display: inline-flex; align-items: center; padding-inline: 8px; font-size: 12px; font-weight: 700; }
-[data-trip-safety-bar] #emergencia > div > button { min-height: 44px; font-size: 12px; padding: 8px; }
+[data-trip-safety-bar] > a, [data-trip-safety-bar] > button { min-height: 44px; display: inline-flex; align-items: center; padding-inline: 8px; font-size: 0.75rem; font-weight: 700; }
+[data-trip-safety-bar] #emergencia > div > button { min-height: 44px; font-size: 0.75rem; padding: 8px; }
 [data-trip-scroll] { flex: 1; min-height: 0; overflow: auto; overscroll-behavior: contain; scroll-padding: 12px 0 16px; }
 [data-trip-scroll] > * { min-height: 0; }
 [data-trip-scroll] nav[aria-label="Pasos de evidencia"] { top: 0; }
@@ -31,18 +31,18 @@ html[data-trip-keyboard="true"] [data-trip-scroll] nav[aria-label="Pasos de evid
 [data-trip-dock]:not(:has([data-trip-primary], [role="toolbar"])) { display: none; }
 [data-trip-primary] { padding: 6px 12px 8px; display: grid; gap: 4px; }
 [data-trip-primary] > [role="alert"] { max-height: 44px; overflow: auto; }
-[data-trip-primary] button { min-height: 44px; font-size: 12px; line-height: 16px; padding-block: 8px; }
+[data-trip-primary] button { min-height: 44px; font-size: 0.75rem; line-height: 16px; padding-block: 8px; }
 [data-trip-dialog], [data-trip-emergency-dialog] {
   position: fixed; inset: auto 0;
   top: calc(var(--trip-visible-top, 0px) + 8px);
   max-height: calc(var(--trip-visible-height, 100dvh) - 16px);
   width: min(calc(100% - 16px), 440px); margin: 0 auto;
-  border: 1px solid var(--conductor-border); border-radius: 16px;
+  border: 1px solid var(--conductor-border); border-radius: .5rem;
   background: var(--conductor-surface); color: var(--conductor-primary);
   padding: 0; overflow: hidden;
 }
 [data-trip-dialog][open] { display: flex; flex-direction: column; }
-[data-trip-dialog]::backdrop, [data-trip-emergency-dialog]::backdrop { background: #0a2342b8; }
+[data-trip-dialog]::backdrop, [data-trip-emergency-dialog]::backdrop { background: var(--ui-overlay); }
 [data-trip-dialog] > header { display: flex; flex-shrink: 0; align-items: center; justify-content: space-between; gap: 8px; padding: 8px 12px; border-bottom: 1px solid var(--conductor-border); }
 [data-trip-dialog] > header button { min-width: 44px; min-height: 44px; }
 [data-trip-dialog] > div:first-child button { flex-shrink: 0; white-space: nowrap; }
@@ -67,14 +67,14 @@ html:has([data-opportunity-detail]) [data-trip-safety-bar] > :is(a, button),
 html:has([data-opportunity-detail]) [data-trip-safety-bar] #emergencia > div > button {
   min-height: 30px;
   padding: 3px 6px;
-  font-size: 11px;
+  font-size: 0.75rem;
   line-height: 16px;
 }
 html:has([data-opportunity-detail]) [data-trip-primary] { padding: 8px 12px 4px; gap: 7px; }
-html:has([data-opportunity-detail]) [data-trip-primary] > [role="status"] { font-size: 11px; line-height: 14px; }
+html:has([data-opportunity-detail]) [data-trip-primary] > [role="status"] { font-size: 0.75rem; line-height: 14px; }
 @media (max-height: 500px) {
   html:has([data-opportunity-detail]) [data-trip-primary] { padding: 4px 10px 2px; gap: 4px; }
-  html:has([data-opportunity-detail]) [data-trip-primary] > [role="status"] { font-size: 10px; line-height: 12px; }
+  html:has([data-opportunity-detail]) [data-trip-primary] > [role="status"] { font-size: 0.75rem; line-height: 12px; }
 }
 
 /* Pantallas Mobile-First de Traslado Activo (Asignado, En Camino al Origen, Recibe el Vehículo, Inspección/Evidencia, Inicia el Trayecto, En Traslado y Cierre de Traslado): 100vh sin scroll vertical. */
@@ -94,7 +94,7 @@ html:has([data-assigned-trip], [data-en-camino-origen], [data-recibe-vehiculo], 
   height: 100vh;
   max-height: 100dvh;
   overflow: hidden;
-  background: #F4F8FD;
+  background: var(--ui-bg);
 }
 html[data-trip-keyboard="true"]:has([data-assigned-trip], [data-en-camino-origen], [data-recibe-vehiculo], [data-inspeccion-evidencia], [data-inicia-trayecto], [data-en-traslado], [data-cierre-traslado]) [data-trip-frame] {
   bottom: var(--trip-keyboard-inset, 0px);
@@ -224,19 +224,19 @@ html:has([data-assigned-trip], [data-en-camino-origen], [data-recibe-vehiculo], 
 }
 
 @theme {
-  --color-ruum-blue: #0066FF;
-  --color-ruum-bg: #F4F7FC;
-  --color-ruum-card: #FFFFFF;
-  --color-ruum-text: #1A1A1A;
-  --color-ruum-muted: #667085;
-  --color-ruum-success: #00B365;
-  --color-ruum-successBg: rgba(0, 179, 101, 0.1);
+  --color-ruum-blue: var(--ui-brand);
+  --color-ruum-bg: var(--ui-bg);
+  --color-ruum-card: var(--ui-card);
+  --color-ruum-text: var(--ui-fg);
+  --color-ruum-muted: var(--ui-fg-muted);
+  --color-ruum-success: var(--ui-success);
+  --color-ruum-successBg: var(--ui-success-soft);
 }
 
 /* Modo calle: botones ≥56px, texto ≥17px, una acción por pantalla (cap. 23). */
 .ruum-street,
 [data-street="true"] {
-  font-size: 17px;
+  font-size: 1.0rem;
 }
 .ruum-street :is(button, a, input, select, [role="button"]),
 [data-street="true"] :is(button, a, input, select, [role="button"]) {
@@ -362,26 +362,26 @@ html:has([data-conductor-mobile-nav]) .conductor-safe-content:has(> .driver-dash
 
 .conductor-status-panel {
   border: 1px solid color-mix(in srgb, var(--color-route) 22%, white);
-  border-radius: 12px;
+  border-radius: .5rem;
   background: var(--color-route-soft);
 }
 /* Sello de trazabilidad: línea de ruta amarilla (Brand Book p.22) */
 .conductor-ruta-divider {
   height: 2px;
   background: linear-gradient(90deg, var(--color-signal) 0 40px, transparent 40px 48px, var(--color-route) 48px 100%);
-  border-radius: 999px;
+  border-radius: 999rem;
 }
 
 .conductor-auth-shell {
   min-height: 100vh;
   background:
-    radial-gradient(circle at 90% 10%, rgba(245, 166, 35, 0.14), transparent 30%),
+    radial-gradient(circle at 90% 10%, var(--ui-brand-soft), transparent 30%),
     var(--ruum-surface-strong);
 }
 
 .conductor-auth-card {
   width: min(100% - 32px, 448px);
-  border: 1px solid rgba(214, 218, 227, 0.18);
+  border: 1px solid var(--ui-line);
   border-radius: var(--ruum-radius-modal);
   background: var(--ruum-surface);
   color: var(--ruum-text);
@@ -501,13 +501,13 @@ html:has([data-conductor-mobile-nav]) .conductor-safe-content:has(> .driver-dash
 
   /* Evitar que textos muy pequeños se vuelvan ilegibles */
   .conductor-page :where(.text-\[8px\]) {
-    font-size: 10px !important;
+    font-size: 0.75rem !important;
   }
   .conductor-page :where(.text-\[9px\]) {
-    font-size: 10px !important;
+    font-size: 0.75rem !important;
   }
   .conductor-page :where(.text-\[10px\]) {
-    font-size: 11px !important;
+    font-size: 0.75rem !important;
   }
 
   /* Scrollbar invisible pero accesible - mantener indicador sutil */
@@ -556,9 +556,9 @@ html:has([data-conductor-mobile-nav]) .conductor-safe-content:has(> .driver-dash
   background: var(--ruum-surface);
   color: var(--ruum-route-contrast);
   border: 2px solid var(--ruum-route-contrast);
-  border-radius: 8px;
+  border-radius: .5rem;
   font-family: var(--font-body);
-  font-size: 14px;
+  font-size: 0.875rem;
   font-weight: 500;
   text-decoration: none;
   transition: top 150ms ease;
@@ -610,157 +610,6 @@ html:has([data-conductor-mobile-nav]) .conductor-safe-content:has(> .driver-dash
  *
  * Easing functions unificadas (DS-003)
  */
-:root {
-  --ruum-ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
-  --ruum-ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
-  --admin-sidebar-width: 15rem;
-  
-  /* Border radius canónico (px, DS): sm 8 / md 12 / lg 16 / xl 24 */
-  --ruum-radius-xs: 8px;
-  --ruum-radius-sm: 12px;
-  --ruum-radius-md: 16px;
-  --ruum-radius-lg: 20px;
-  --ruum-radius-xl: 24px;
-  --ruum-radius-2xl: 24px;
-  --ruum-radius-3xl: 999px;
-  
-  /* Escala de sombras (una sola capa navy, DS canónico) */
-  --ruum-shadow-2xs: 0 2px 10px rgba(13, 43, 94, 0.05);
-  --ruum-shadow-xs: 0 2px 10px rgba(13, 43, 94, 0.05);
-  --ruum-shadow-sm: 0 8px 24px rgba(13, 43, 94, 0.10);
-  --ruum-shadow-md: 0 8px 24px rgba(13, 43, 94, 0.10);
-  --ruum-shadow-lg: 0 20px 48px rgba(13, 43, 94, 0.14);
-  --ruum-shadow-xl: 0 20px 48px rgba(13, 43, 94, 0.14);
-  
-  /* Feedback canónico DS (no sobrescribir con Tailwind genérico) */
-  --ruum-success: #16805a;
-  --ruum-warning: #f5b400;
-  --ruum-error: #c23648;
-  --ruum-info: #0066ff;
-}
-
-/* =========================================================================
- * TEMA CLARO — app-conductor (Texto 100% negro en modo claro)
- * ========================================================================= */
-html:not([data-theme="dark"]) body,
-html[data-theme="light"] body {
-  color: var(--ruum-text);
-}
-
-html:not([data-theme="dark"]) .conductor-auth-card,
-html[data-theme="light"] .conductor-auth-card {
-  color: #000000;
-}
-
-html:not([data-theme="dark"]) .ruum-card,
-html[data-theme="light"] .ruum-card {
-  color: #000000;
-}
-
-/* =========================================================================
- * DARK MODE V2 — app-conductor
- *
- * El tema se activa explícitamente con <html data-theme="dark">.
- * Los tokens semánticos viven en @ruum/ui; aquí solo quedan ajustes visuales
- * locales acordes al Brand Book V2 Dark Mode (#08182E / #0D2340 / #22D3C5 / #4D9AFF).
- * ========================================================================= */
-
-/* Lienzo Dark Mode V2: Deep Navy #08182E como lienzo, acentos sutiles de ruta y marca. */
-html[data-theme="dark"] body {
-  background:
-    radial-gradient(circle at 12% 0%, rgba(77, 154, 255, 0.08), transparent 44%),
-    radial-gradient(circle at 95% 100%, rgba(34, 211, 197, 0.05), transparent 40%),
-    var(--ruum-canvas);
-  background-attachment: fixed;
-}
-
-html[data-theme="dark"] ::selection {
-  background: var(--ruum-brand);
-  color: #08182E;
-}
-
-/* --- Correcciones de contraste para superficies de marca sobre tema oscuro. */
-html[data-theme="dark"] .bg-signal { color: #08182E; }
-html[data-theme="dark"] .bg-route-dark { color: #F5F9FF; }
-html[data-theme="dark"] .bg-control { color: #08182E; }
-html[data-theme="dark"] .bg-danger { color: #F5F9FF; }
-html[data-theme="dark"] .bg-danger-action { color: #08182E; }
-/* Folio del PassportCard */
-html[data-theme="dark"] .rounded-card > span.font-mono-ruum.absolute { color: #08182E; }
-
-/* --- Superficies locales del conductor en clave Dark Mode V2 --- */
-html[data-theme="dark"] .conductor-status-panel {
-  border-color: var(--ruum-border-strong);
-  background: rgba(77, 154, 255, 0.10);
-}
-
-html[data-theme="dark"] .conductor-auth-shell {
-  background:
-    radial-gradient(circle at 18% 12%, rgba(34, 211, 197, 0.08), transparent 38%),
-    radial-gradient(circle at 88% 82%, rgba(77, 154, 255, 0.12), transparent 42%),
-    linear-gradient(180deg, rgba(8, 24, 46, 0.72) 0%, rgba(13, 35, 64, 0.94) 62%, var(--ruum-canvas) 100%),
-    url("/imagenes/onboarding-paso2.webp") center / cover no-repeat,
-    var(--ruum-canvas);
-}
-
-html[data-theme="dark"] .conductor-auth-card {
-  background: rgba(13, 35, 64, 0.92);
-  border-color: var(--ruum-border);
-  color: var(--ruum-text);
-  backdrop-filter: blur(6px);
-}
-
-html[data-theme="dark"] .ruum-skip-link {
-  background: var(--ruum-surface);
-  color: var(--ruum-route-contrast);
-  border-color: var(--ruum-route-contrast);
-}
-
-html[data-theme="dark"] input,
-html[data-theme="dark"] select,
-html[data-theme="dark"] textarea {
-  color-scheme: dark;
-}
-
-html[data-theme="dark"] input::placeholder,
-html[data-theme="dark"] textarea::placeholder {
-  color: var(--ruum-text-disabled);
-}
-
-/* Visibilidad de campos en tarjeta de autenticación (Dark Mode V2) */
-html[data-theme="dark"] .conductor-auth-card input,
-html[data-theme="dark"] .conductor-auth-card select,
-html[data-theme="dark"] .conductor-auth-card textarea {
-  border-color: var(--ruum-border);
-  background-color: var(--ruum-surface);
-  color: var(--ruum-text);
-}
-
-html[data-theme="dark"] .conductor-auth-card input:hover,
-html[data-theme="dark"] .conductor-auth-card select:hover,
-html[data-theme="dark"] .conductor-auth-card textarea:hover {
-  border-color: var(--ruum-border-strong);
-}
-
-html[data-theme="dark"] .conductor-auth-card input:focus,
-html[data-theme="dark"] .conductor-auth-card select:focus,
-html[data-theme="dark"] .conductor-auth-card textarea:focus {
-  border-color: var(--ruum-action);
-  box-shadow: 0 0 0 3px var(--ruum-focus-ring);
-  outline: none;
-}
-
-/* Checkbox en tarjeta de autenticación */
-html[data-theme="dark"] .conductor-auth-card input[type="checkbox"] {
-  border-color: var(--ruum-border-strong);
-  background-color: var(--ruum-surface);
-}
-
-html[data-theme="dark"] .conductor-auth-card input[type="checkbox"]:focus-visible {
-  outline: 3px solid var(--ruum-focus);
-  outline-offset: 2px;
-}
-
 /* P2 CSP — animaciones antes inline via dangerouslySetInnerHTML (TripDetailsClient/CierreTrasladoDetails/evidencia) */
 @keyframes fadeIn {
   from { opacity: 0; }
@@ -799,17 +648,6 @@ html[data-theme="light"] .conductor-page :where(h1, h2, h3, h4) {
   color: var(--conductor-primary);
 }
 
-html[data-theme="light"] .conductor-page :where(input, select, textarea) {
-  border-color: var(--conductor-border);
-  background: var(--conductor-surface);
-}
-
-html[data-theme="light"] .conductor-page :where(input, select, textarea):focus {
-  border-color: var(--conductor-action);
-  box-shadow: 0 0 0 3px var(--ruum-focus-ring);
-  outline: none;
-}
-
 /* CSP-safe visual states: keep dynamic values in data attributes instead of
    React style attributes, which are blocked by style-src nonce policies. */
 .conductor-refresh-bar {
@@ -824,12 +662,7 @@ html[data-theme="light"] .conductor-page :where(input, select, textarea):focus {
   width: calc(attr(data-progress type(<number>)) * 1%);
 }
 
-.conductor-onboarding-shell {
-  background:
-    radial-gradient(circle at 12% 8%, rgba(30, 136, 229, 0.1), transparent 42%),
-    radial-gradient(circle at 92% 88%, rgba(255, 196, 0, 0.06), transparent 38%),
-    var(--ruum-canvas);
-}
+.conductor-onboarding-shell { background: var(--ui-bg); }
 
 /* El dashboard participa en el flujo del shell global. */
 .driver-dashboard-content {
@@ -845,20 +678,20 @@ html[data-theme="light"] .conductor-page :where(input, select, textarea):focus {
   align-items: center;
   gap: 12px;
   padding: 16px 20px;
-  border-radius: 12px;
-  background: #0d5fd4;
-  color: #fff;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  border-radius: .5rem;
+  background: var(--ui-brand);
+  color: var(--ui-on-brand);
+  box-shadow: var(--ui-shadow-md);
   font-family: var(--font-body);
-  font-size: 14px;
+  font-size: 0.875rem;
 }
 
 .conductor-pwa-update-action {
   padding: 8px 16px;
   border: 0;
-  border-radius: 8px;
-  background: #fff;
-  color: #0d5fd4;
+  border-radius: .5rem;
+  background: var(--ui-on-brand);
+  color: var(--ui-brand);
   font-family: var(--font-body);
   font-weight: 600;
   cursor: pointer;
@@ -867,8 +700,8 @@ html[data-theme="light"] .conductor-page :where(input, select, textarea):focus {
 .conductor-pwa-dismiss-action {
   border: 0;
   background: transparent;
-  color: #fff;
-  font-size: 20px;
+  color: var(--ui-on-brand);
+  font-size: 1.25rem;
   line-height: 1;
   cursor: pointer;
 }
@@ -892,35 +725,35 @@ html[data-theme="light"] .conductor-page :where(input, select, textarea):focus {
 }
 
 .conductor-map-popup__eyebrow {
-  color: #64748b;
-  font-size: 11px;
+  color: var(--ui-fg-muted);
+  font-size: 0.75rem;
   font-weight: 800;
   letter-spacing: 0.04em;
 }
 
 .conductor-map-popup__route {
-  color: #0f172a;
-  font-size: 14px;
+  color: var(--ui-fg);
+  font-size: 0.875rem;
   font-weight: 900;
 }
 
 .conductor-map-popup__meta {
   margin-top: 2px;
-  color: #334155;
-  font-size: 12px;
+  color: var(--ui-fg-muted);
+  font-size: 0.75rem;
 }
 
 .conductor-map-popup__action {
   margin-top: 8px;
-  color: #1e88e5;
-  font-size: 12px;
+  color: var(--ui-brand);
+  font-size: 0.75rem;
   font-weight: 800;
 }
 
 /* Escritorio: conservar el marco operativo mobile first y la navegación inferior. */
 @media (min-width: 1024px) {
   body.conductor-v2-shell:has([data-conductor-mobile-nav]) {
-    background: #eef2f7;
+    background: var(--ui-bg);
   }
 
   html:has([data-conductor-mobile-nav]) .conductor-safe-content,
@@ -930,3 +763,10 @@ html[data-theme="light"] .conductor-page :where(input, select, textarea):focus {
     margin-inline: auto;
   }
 }
+
+/* Controles de lectura y tacto uniformes, también en teléfonos estrechos. */
+body.conductor-v2-shell main.conductor-page :is(input:not([type=checkbox]):not([type=radio]):not([type=file]):not([type=hidden]):not([type=range]), select, textarea) { font-size: 1rem; }
+body.conductor-v2-shell main.conductor-page :is(button, input:not([type=checkbox]):not([type=radio]):not([type=file]):not([type=hidden]):not([type=range]), select) { min-height: 48px; }
+
+/* Los controles deshabilitados mantienen etiquetas legibles. */
+body.conductor-v2-shell main.conductor-page :is(button, input, select):disabled { opacity: 1; color: var(--ui-fg-muted); background: var(--ui-muted); }

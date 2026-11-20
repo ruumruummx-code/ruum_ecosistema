@@ -1,4 +1,5 @@
 "use client";
+import { Button as BaseButton } from "@ruum/ui/base";
 import { OpportunityDetailsView } from "./OpportunityDetailsView";
 import { TripDialog } from "./TripDialog";
 import styles from "./trip-stage.module.css";
@@ -209,14 +210,14 @@ export function TripOpportunityDetails({
       <p className="mb-3 text-sm">{nombreVehiculo(pasaporte)}</p>
       <div className={styles.rejectList}>
         {MOTIVOS_RECHAZO.map(motivo => (
-          <button
+          <BaseButton variant="ghost"
             key={motivo}
             type="button"
             onClick={() => void handleConfirmarRechazo(motivo)}
             className={styles.rejectOption}
           >
             {motivo}
-          </button>
+          </BaseButton>
         ))}
       </div>
     </TripDialog>}

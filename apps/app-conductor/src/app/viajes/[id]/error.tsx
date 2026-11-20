@@ -1,5 +1,6 @@
 "use client";
 
+import { Button as BaseButton } from "@ruum/ui/base";
 import { useEffect } from "react";
 import Link from "next/link";
 import { recordOperationalEvent } from "@/lib/observability";
@@ -18,21 +19,21 @@ export default function ErrorDetalleViaje({ error, reset }: { error: Error & { d
   return (
     <div className="conductor-content flex min-h-[50vh] flex-col items-center justify-center text-center" role="alert">
       <h1 className="font-display text-xl font-semibold">Error al cargar este viaje</h1>
-      <p className="mt-2 font-body text-sm leading-6 text-text-secondary">
+      <p className="mt-2 font-body text-sm leading-6 text-ui-fg-muted">
         No pudimos obtener los datos del traslado. Puede ser una falla temporal de conexión.
       </p>
       {process.env.NODE_ENV === "development" && (
-        <pre className="mt-3 max-h-24 overflow-auto rounded-lg bg-surface-elevated p-3 text-left font-mono text-xs text-danger/80 border border-danger/20">{error.message}</pre>
+        <pre className="mt-3 max-h-24 overflow-auto rounded-lg bg-ui-muted p-3 text-left font-mono text-xs text-ui-danger/80 border border-ui-danger/20">{error.message}</pre>
       )}
       <TripActionDock status="No se pudo cargar el traslado">
       <div className="flex flex-wrap justify-center gap-2">
-        <button onClick={reset} className="inline-flex min-h-11 items-center justify-center rounded-xl border border-border bg-surface px-5 py-2.5 font-body text-sm font-medium text-text-primary transition hover:border-border-strong">
+        <BaseButton variant="ghost" type="submit" onClick={reset} className="inline-flex min-h-11 items-center justify-center rounded-xl border border-ui-line bg-ui-card px-5 py-2.5 font-body text-sm font-medium text-ui-fg transition hover:border-ui-field">
           Reintentar
-        </button>
-        <Link href="/viajes" className="inline-flex min-h-11 items-center justify-center rounded-xl bg-signal px-5 py-2.5 font-display text-sm font-bold text-text-primary transition hover:bg-signal/90">
+        </BaseButton>
+        <Link href="/viajes" className="inline-flex min-h-11 items-center justify-center rounded-xl bg-ui-brand px-5 py-2.5 font-display text-sm font-bold text-ui-fg transition hover:bg-ui-brand/90">
           Ver mis Traslados
         </Link>
-        <Link href="/panel" className="inline-flex min-h-11 items-center justify-center rounded-xl border border-border bg-surface px-5 py-2.5 font-body text-sm font-medium text-text-primary">
+        <Link href="/panel" className="inline-flex min-h-11 items-center justify-center rounded-xl border border-ui-line bg-ui-card px-5 py-2.5 font-body text-sm font-medium text-ui-fg">
           Ir al panel
         </Link>
       </div>

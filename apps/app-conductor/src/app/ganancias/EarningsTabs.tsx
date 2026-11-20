@@ -1,5 +1,6 @@
 "use client";
 
+import { Button as BaseButton } from "@ruum/ui/base";
 import { PeriodoActivo } from "./useEarningsLedger";
 
 interface EarningsTabsProps {
@@ -18,10 +19,10 @@ export function EarningsTabs({ periodoActivo, onCambiarPeriodo }: EarningsTabsPr
     <div
       role="group"
       aria-label="Periodo de ganancias"
-      className="flex w-full rounded-2xl border border-border/20 bg-surface-elevated p-1"
+      className="flex w-full rounded-lg border border-ui-line/20 bg-ui-muted p-1"
     >
       {TABS.map((tab) => (
-        <button
+        <BaseButton variant="ghost"
           key={tab.id}
           type="button"
 
@@ -30,12 +31,12 @@ export function EarningsTabs({ periodoActivo, onCambiarPeriodo }: EarningsTabsPr
           className={[
             "flex-1 rounded-xl px-3 py-2.5 font-display text-xs sm:text-sm font-bold transition min-h-11 flex items-center justify-center",
             periodoActivo === tab.id
-              ? "bg-signal text-slate-950 shadow-md"
-              : "text-text-secondary hover:text-text-primary"
+              ? "bg-ui-brand text-ui-fg-muted shadow-md"
+              : "text-ui-fg-muted hover:text-ui-fg"
           ].join(" ")}
         >
           {tab.label}
-        </button>
+        </BaseButton>
       ))}
     </div>
   );

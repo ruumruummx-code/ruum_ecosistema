@@ -1,5 +1,6 @@
 "use client";
 
+import { Button as BaseButton } from "@ruum/ui/base";
 import { useState, useEffect } from "react";
 import styles from "./panel.module.css";
 import Link from "next/link";
@@ -22,18 +23,18 @@ import { useCerrarSesion } from "../../lib/use-cerrar-sesion";
 function PanelLoadingSkeleton() {
   return (
     <div className="flex w-full flex-col gap-4" aria-label="Cargando panel operativo" aria-busy="true">
-      <div className="h-16 w-full animate-pulse rounded-2xl bg-border/70" />
-      <div className="h-24 w-full animate-pulse rounded-2xl bg-border/70" />
+      <div className="h-16 w-full animate-pulse rounded-lg bg-ui-line/70" />
+      <div className="h-24 w-full animate-pulse rounded-lg bg-ui-line/70" />
       <div className="grid grid-cols-4 gap-2">
-        <div className="h-[88px] animate-pulse rounded-2xl bg-border/70" />
-        <div className="h-[88px] animate-pulse rounded-2xl bg-border/70" />
-        <div className="h-[88px] animate-pulse rounded-2xl bg-border/70" />
-        <div className="h-[88px] animate-pulse rounded-2xl bg-border/70" />
+        <div className="h-[88px] animate-pulse rounded-lg bg-ui-line/70" />
+        <div className="h-[88px] animate-pulse rounded-lg bg-ui-line/70" />
+        <div className="h-[88px] animate-pulse rounded-lg bg-ui-line/70" />
+        <div className="h-[88px] animate-pulse rounded-lg bg-ui-line/70" />
       </div>
-      <div className="h-[164px] animate-pulse rounded-2xl bg-border/70" />
+      <div className="h-[164px] animate-pulse rounded-lg bg-ui-line/70" />
       <div className="grid grid-cols-2 gap-3">
-        <div className="h-[136px] animate-pulse rounded-2xl bg-border/70" />
-        <div className="h-[136px] animate-pulse rounded-2xl bg-border/70" />
+        <div className="h-[136px] animate-pulse rounded-lg bg-ui-line/70" />
+        <div className="h-[136px] animate-pulse rounded-lg bg-ui-line/70" />
       </div>
     </div>
   );
@@ -295,45 +296,45 @@ export default function PaginaPanel() {
       {/* Indicador pull-to-refresh */}
       {pullOffset > 0 && (
         <div
-          className="pointer-events-none fixed left-1/2 top-3 z-50 flex -translate-x-1/2 items-center gap-2 rounded-full border border-border bg-surface-elevated px-3 py-1.5 shadow-md"
+          className="pointer-events-none fixed left-1/2 top-3 z-50 flex -translate-x-1/2 items-center gap-2 rounded-full border border-ui-line bg-ui-muted px-3 py-1.5 shadow-md"
           aria-hidden="true"
         >
-          <span className={`size-2 rounded-full ${pullOffset > 48 ? "bg-signal" : "bg-text-tertiary"}`} />
-          <span className="font-body text-xs font-bold text-text-secondary">
+          <span className={`size-2 rounded-full ${pullOffset > 48 ? "bg-ui-brand" : "bg-ui-fg-muted"}`} />
+          <span className="font-body text-xs font-bold text-ui-fg-muted">
             {pullOffset > 48 ? "Suelta para actualizar" : "Desliza para actualizar"}
           </span>
         </div>
       )}
       {avisoPullBloqueado && (
         <div
-          className="pointer-events-none fixed left-1/2 top-3 z-50 flex -translate-x-1/2 animate-fadeIn items-center gap-2 rounded-full border border-amber-500/30 bg-surface-elevated px-3 py-1.5 shadow-md"
+          className="pointer-events-none fixed left-1/2 top-3 z-50 flex -translate-x-1/2 animate-fadeIn items-center gap-2 rounded-full border border-ui-warning/30 bg-ui-muted px-3 py-1.5 shadow-md"
           role="status"
           aria-live="polite"
         >
-          <span className="size-2 rounded-full bg-warn" aria-hidden="true" />
-          <span className="font-body text-xs font-bold text-text-primary">Actualización pausada durante viaje</span>
-          <span className="font-body text-[11px] text-text-tertiary">🔒 termina el traslado</span>
+          <span className="size-2 rounded-full bg-ui-warning" aria-hidden="true" />
+          <span className="font-body text-xs font-bold text-ui-fg">Actualización pausada durante viaje</span>
+          <span className="font-body text-xs text-ui-fg-muted">🔒 termina el traslado</span>
         </div>
       )}
       {refrescando && (
-        <div className="pointer-events-none fixed left-0 right-0 top-0 z-50 h-1 bg-signal/20" aria-hidden="true">
-          <div className="conductor-refresh-bar h-full w-1/3 animate-pulse bg-signal" />
+        <div className="pointer-events-none fixed left-0 right-0 top-0 z-50 h-1 bg-ui-brand/20" aria-hidden="true">
+          <div className="conductor-refresh-bar h-full w-1/3 animate-pulse bg-ui-brand" />
         </div>
       )}
 
       <div className={styles.frame}>
         {/* Acceso local al menú; la marca pertenece al layout compartido. */}
         <div className="flex items-center gap-2 px-4 py-2">
-          <button
+          <BaseButton variant="ghost"
             type="button"
             onClick={() => setMenuAbierto(true)}
             aria-label="Abrir menú"
-            className="inline-flex min-h-11 min-w-11 cursor-pointer items-center justify-center rounded-full text-[var(--conductor-primary)] transition hover:bg-surface-elevated active:scale-95 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--conductor-focus)]"
+            className="inline-flex min-h-11 min-w-11 cursor-pointer items-center justify-center rounded-full text-ui-fg transition hover:bg-ui-muted active:scale-95 focus-visible:outline focus-visible:outline-2 focus-visible:outline-ui-focus"
           >
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.1" strokeLinecap="round" aria-hidden="true">
               <path d="M4 7h16M4 12h16M4 17h16" />
             </svg>
-          </button>
+          </BaseButton>
           <span className="text-sm font-semibold text-ui-fg">Menú del conductor</span>
         </div>
 
@@ -344,20 +345,20 @@ export default function PaginaPanel() {
             {!estaOnline && (
               <div className="mb-3">
                 <div
-                  className="flex items-center justify-between gap-3 rounded-xl border border-danger/40 bg-danger-soft/20 px-3 py-2 shadow-sm"
+                  className="flex items-center justify-between gap-3 rounded-xl border border-ui-danger/40 bg-ui-danger-soft/20 px-3 py-2 shadow-sm"
                   role="alert"
                   aria-live="assertive"
                 >
-                  <p className="font-body text-sm leading-5 text-danger">
+                  <p className="font-body text-sm leading-5 text-ui-danger">
                     <span className="font-bold">⚠️ Sin conexión:</span> Ves datos guardados.
                   </p>
-                  <button
+                  <BaseButton variant="ghost"
                     type="button"
                     onClick={() => void recargar()}
-                    className="inline-flex min-h-9 shrink-0 cursor-pointer items-center rounded-lg border border-danger/40 bg-surface px-2.5 py-1 font-body text-[11px] font-bold text-danger hover:bg-surface-elevated focus-visible:outline-none"
+                    className="inline-flex min-h-9 shrink-0 cursor-pointer items-center rounded-lg border border-ui-danger/40 bg-ui-card px-2.5 py-1 font-body text-xs font-bold text-ui-danger hover:bg-ui-muted focus-visible:outline-none"
                   >
                     Reintentar
-                  </button>
+                  </BaseButton>
                 </div>
               </div>
             )}
@@ -372,7 +373,7 @@ export default function PaginaPanel() {
                   aria-labelledby="titulo-bienvenida"
                 >
                   <span
-                    className="inline-flex size-[58px] shrink-0 items-center justify-center rounded-full bg-[var(--conductor-surface-secondary)] text-[var(--conductor-action)]"
+                    className="inline-flex size-[58px] shrink-0 items-center justify-center rounded-full bg-ui-muted text-ui-brand"
                     aria-hidden="true"
                   >
                     <svg className="size-8" viewBox="0 0 24 24" fill="currentColor">
@@ -383,14 +384,14 @@ export default function PaginaPanel() {
                   <div className="min-w-0">
                     <h1
                       id="titulo-bienvenida"
-                      className="font-display text-[28px] font-black leading-none tracking-tight text-[var(--conductor-primary)]"
+                      className="font-display text-3xl font-black leading-none tracking-tight text-ui-fg"
                     >
                       ¡Hola, {primerNombre}!
                     </h1>
-                    <p className="mt-1.5 font-body text-base leading-none text-[var(--conductor-muted)]">
+                    <p className="mt-1.5 font-body text-base leading-none text-ui-fg-muted">
                       Conduce, gana y avanza
                     </p>
-                    <p className="mt-2 hidden font-body text-lg leading-none text-[var(--conductor-muted)]">
+                    <p className="mt-2 hidden font-body text-lg leading-none text-ui-fg-muted">
                       Hoy es un gran día para conducir 🚀
                     </p>
                   </div>
@@ -398,21 +399,21 @@ export default function PaginaPanel() {
 
                 {/* 2. Fila de Estado (Switch de Disponibilidad) */}
                 <section
-                  className={`driver-availability-card rounded-2xl border p-4 shadow-[0_5px_20px_rgba(13,43,94,0.05)] transition-colors    ${
+                  className={`driver-availability-card rounded-lg border p-4 shadow-ui-md transition-colors    ${
                     esDisponible
-                      ? "border-[var(--conductor-border)] bg-[var(--conductor-surface)]  "
-                      : "border-[var(--conductor-border)] bg-[var(--conductor-surface)]"
+                      ? "border-ui-line bg-ui-card  "
+                      : "border-ui-line bg-ui-card"
                   }`}
                   aria-labelledby="titulo-estado-conductor"
                 >
                   <div className="flex items-center gap-3.5">
                     <span
-                      className={`inline-flex size-13 shrink-0 items-center justify-center rounded-full text-[var(--ruum-on-primary)] shadow-sm  ${
+                      className={`inline-flex size-13 shrink-0 items-center justify-center rounded-full text-ui-on-brand shadow-sm  ${
                         disponibilidad === "en_viaje"
-                          ? "bg-warn"
+                          ? "bg-ui-warning"
                           : esDisponible
-                            ? "bg-[var(--conductor-success)]"
-                            : "bg-slate-400"
+                            ? "bg-ui-success"
+                            : "bg-ui-muted"
                       }`}
                       aria-hidden="true"
                     >
@@ -422,12 +423,12 @@ export default function PaginaPanel() {
                     </span>
 
                     <div className="min-w-0 flex-1">
-                      <p className="font-body text-xs font-semibold leading-none text-[var(--conductor-muted)]">
+                      <p className="font-body text-xs font-semibold leading-none text-ui-fg-muted">
                         Estado
                       </p>
                       <h2
                         id="titulo-estado-conductor"
-                        className="mt-1 font-display text-[22px] font-black leading-none text-[var(--conductor-primary)]"
+                        className="mt-1 font-display text-xl font-black leading-none text-ui-fg"
                       >
                         <span className="">
                           {disponibilidad === "en_viaje"
@@ -439,20 +440,20 @@ export default function PaginaPanel() {
                         <span className="hidden">
                           {disponibilidad === "en_viaje" ? (
                             <>
-                              Estás <span className="text-warn">en viaje</span>
+                              Estás <span className="text-ui-warning">en viaje</span>
                             </>
                           ) : esDisponible ? (
                             <>
-                              Estás <span className="text-[var(--conductor-success)]">disponible</span>
+                              Estás <span className="text-ui-success">disponible</span>
                             </>
                           ) : (
                             <>
-                              Estás <span className="text-slate-500">no disponible</span>
+                              Estás <span className="text-ui-fg-muted">no disponible</span>
                             </>
                           )}
                         </span>
                       </h2>
-                      <p className="mt-1 font-body text-xs sm:text-sm leading-none text-[var(--conductor-muted)]">
+                      <p className="mt-1 font-body text-xs sm:text-sm leading-none text-ui-fg-muted">
                         <span className="">
                           {disponibilidad === "en_viaje"
                             ? "Traslado activo"
@@ -470,7 +471,7 @@ export default function PaginaPanel() {
                       </p>
                     </div>
 
-                    <button
+                    <BaseButton variant="ghost"
                       type="button"
                       role="switch"
                       aria-checked={esDisponible}
@@ -478,22 +479,22 @@ export default function PaginaPanel() {
                       aria-label={esDisponible ? "Disponible: recibir traslados" : "No disponible: pausar traslados"}
                       onClick={alCambiarDisponibilidad}
                       disabled={disponibilidad === "en_viaje" || persistiendoDisponibilidad || !estaOnline}
-                      className={`relative inline-flex h-10 w-[68px] shrink-0 cursor-pointer items-center rounded-full border-2 p-1 transition-all duration-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--conductor-focus)] disabled:cursor-not-allowed disabled:opacity-50   ${
+                      className={`relative inline-flex h-10 w-[68px] shrink-0 cursor-pointer items-center rounded-full border-2 p-1 transition-all duration-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ui-focus disabled:cursor-not-allowed disabled:opacity-50   ${
                         esDisponible
-                          ? "border-[var(--conductor-action)] bg-[var(--conductor-action)] shadow-none"
-                          : "border-slate-300 bg-border"
+                          ? "border-ui-brand bg-ui-brand shadow-none"
+                          : "border-ui-line bg-ui-line"
                       }`}
                     >
                       <span
-                        className={`inline-block size-7 transform rounded-full bg-[var(--conductor-surface)] shadow-sm transition-transform duration-300  ${
+                        className={`inline-block size-7 transform rounded-full bg-ui-card shadow-sm transition-transform duration-300  ${
                           esDisponible ? "translate-x-7 " : "translate-x-0"
                         }`}
                         aria-hidden="true"
                       />
-                    </button>
+                    </BaseButton>
                   </div>
                   {persistiendoDisponibilidad && (
-                    <p className="mt-1 font-body text-[11px] text-[var(--conductor-muted)]" aria-live="polite">
+                    <p className="mt-1 font-body text-xs text-ui-fg-muted" aria-live="polite">
                       Actualizando estado…
                     </p>
                   )}
@@ -545,9 +546,9 @@ export default function PaginaPanel() {
       {/* Menú Hamburguesa Móvil */}
       {menuAbierto && (
         <ConductorDialog open={menuAbierto} onClose={() => setMenuAbierto(false)} labelledBy="titulo-menu-panel">
-          <section className="bg-[var(--conductor-surface)]">
+          <section className="bg-ui-card">
             <div className="flex items-center justify-between gap-3">
-              <h2 id="titulo-menu-panel" className="font-display text-lg font-black text-[var(--conductor-primary)]">
+              <h2 id="titulo-menu-panel" className="font-display text-lg font-black text-ui-fg">
                 Menú
               </h2>
             </div>
@@ -559,8 +560,8 @@ export default function PaginaPanel() {
                   onClick={() => setMenuAbierto(false)}
                   className={`flex min-h-11 cursor-pointer items-center gap-3 rounded-xl px-3 font-body text-sm transition ${
                     item.active
-                      ? "bg-[var(--conductor-surface-secondary)] font-extrabold text-[var(--conductor-action)]"
-                      : "font-semibold text-[var(--conductor-primary)] hover:bg-surface-elevated"
+                      ? "bg-ui-muted font-extrabold text-ui-brand"
+                      : "font-semibold text-ui-fg hover:bg-ui-muted"
                   }`}
                 >
                   <SidebarMenuIcon name={item.icon} active={item.active} />
@@ -568,30 +569,30 @@ export default function PaginaPanel() {
                 </Link>
               ))}
             </nav>
-            <div className="mt-4 flex flex-col gap-1.5 border-t border-slate-100 pt-3 px-2">
+            <div className="mt-4 flex flex-col gap-1.5 border-t border-ui-line pt-3 px-2">
               <Link
                 href="/legal/terminos"
                 onClick={() => setMenuAbierto(false)}
-                className="cursor-pointer font-body text-[12px] font-medium text-[var(--conductor-muted)] hover:text-[var(--conductor-action)]"
+                className="cursor-pointer font-body text-xs font-medium text-ui-fg-muted hover:text-ui-brand"
               >
                 Términos y condiciones
               </Link>
               <Link
                 href="/legal/privacidad"
                 onClick={() => setMenuAbierto(false)}
-                className="cursor-pointer font-body text-[12px] font-medium text-[var(--conductor-muted)] hover:text-[var(--conductor-action)]"
+                className="cursor-pointer font-body text-xs font-medium text-ui-fg-muted hover:text-ui-brand"
               >
                 Política de privacidad
               </Link>
             </div>
-            <button
+            <BaseButton variant="ghost"
               type="button"
               onClick={() => void cerrarSesion()}
               disabled={cerrandoSesion}
-              className="mt-4 inline-flex min-h-11 w-full cursor-pointer items-center justify-center rounded-xl border border-danger/30 px-3 font-body text-sm font-bold text-danger transition hover:bg-danger-soft/30 disabled:opacity-50"
+              className="mt-4 inline-flex min-h-11 w-full cursor-pointer items-center justify-center rounded-xl border border-ui-danger/30 px-3 font-body text-sm font-bold text-ui-danger transition hover:bg-ui-danger-soft/30 disabled:opacity-50"
             >
               {cerrandoSesion ? "Cerrando sesión…" : "Cerrar sesión"}
-            </button>
+            </BaseButton>
           </section>
         </ConductorDialog>
       )}

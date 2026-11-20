@@ -1,7 +1,9 @@
 "use client";
 
+import { Button as BaseButton } from "@ruum/ui/base";
 import { useEffect, useRef, useState } from "react";
-import { Aviso, Button } from "@ruum/ui";
+import { Aviso } from "@ruum/ui";
+import { ConductorButton as Button } from "@/components/v2/ConductorUI";
 import { TEXTOS_CARGANDO } from "@ruum/shared/constants";
 import { createLogger, errorCode, traducirErrorOperativo } from "@ruum/shared/utils";
 import {
@@ -250,16 +252,16 @@ export function EmergencyPanel({
   }
 
   return (
-    <section id="emergencia" aria-label="Seguridad" className={compact ? "contents" : "mt-6 rounded-[20px] border border-[var(--ruum-emergency)]/40 bg-[var(--ruum-emergency-bg)] px-4 py-4"}>
+    <section id="emergencia" aria-label="Seguridad" className={compact ? "contents" : "mt-6 rounded-xl border border-ui-danger/40 bg-ui-danger-soft px-4 py-4"}>
       <div className={compact ? "contents" : "flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"}>
         <div hidden={compact}>
           <p className="font-body text-sm font-semibold text-[var(--ruum-emergency-text)]">Seguridad</p>
-          <p className="mt-1 font-body text-[17px] leading-6 text-[var(--ruum-navy)]">
+          <p className="mt-1 font-body text-base leading-6 text-[var(--ruum-navy)]">
             Al enviar, soporte recibe tu ubicación, se abre un folio y te responde una persona.
           </p>
         </div>
         {headerPill ? (
-          <button
+          <BaseButton variant="ghost"
             type="button"
             aria-label="Abrir emergencia"
             aria-haspopup="dialog"
@@ -267,8 +269,8 @@ export function EmergencyPanel({
             onClick={abrirPanel}
             className={
               pillTone === "soft"
-                ? "inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-1.5 rounded-xl border border-[var(--conductor-error)] bg-[var(--conductor-error-soft)] px-3 py-1 font-display text-xs font-black text-[var(--conductor-error)] shadow-2xs transition hover:bg-[var(--conductor-error-soft)] active:scale-95 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--conductor-focus)]"
-                : "inline-flex min-h-[38px] cursor-pointer items-center justify-center gap-1.5 rounded-full bg-[var(--conductor-emergency)] px-3.5 py-1.5 font-display text-xs font-extrabold text-[var(--conductor-on-status)] shadow-none transition hover:bg-[var(--conductor-emergency)] active:scale-95 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--conductor-focus)]"
+                ? "inline-flex min-h-[36px] cursor-pointer items-center justify-center gap-1.5 rounded-xl border border-ui-danger bg-ui-danger-soft px-3 py-1 font-display text-xs font-black text-ui-danger shadow-2xs transition hover:bg-ui-danger-soft active:scale-95 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ui-focus"
+                : "inline-flex min-h-[38px] cursor-pointer items-center justify-center gap-1.5 rounded-full bg-ui-danger px-3.5 py-1.5 font-display text-xs font-extrabold text-ui-on-brand shadow-none transition hover:bg-ui-danger active:scale-95 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ui-focus"
             }
           >
             {pillTone === "soft" ? (
@@ -281,37 +283,37 @@ export function EmergencyPanel({
               </svg>
             )}
             <span>{pillLabel || "Emergencia"}</span>
-          </button>
+          </BaseButton>
         ) : (
-          <Button variant="emergency" aria-label="Abrir emergencia" aria-haspopup="dialog" aria-expanded={abierto} className={compact ? "min-h-11 px-2 text-xs" : "min-h-[var(--ruum-button-height-street)] w-full text-[17px] sm:w-auto"} onClick={abrirPanel}>
+          <Button variant="emergency" aria-label="Abrir emergencia" aria-haspopup="dialog" aria-expanded={abierto} className={compact ? "min-h-11 px-2 text-xs" : "min-h-[var(--ruum-button-height-street)] w-full text-base sm:w-auto"} onClick={abrirPanel}>
             {compact ? "Emergencia" : "Abrir emergencia"}
           </Button>
         )}
       </div>
 
       {abierto && (
-        <div className="fixed inset-0 z-50 bg-black/60 px-3 py-[max(12px,env(safe-area-inset-top))]">
+        <div className="fixed inset-0 z-50 bg-ui-overlay/60 px-3 py-[max(12px,env(safe-area-inset-top))]">
           <dialog
             ref={dialogRef}
             data-trip-emergency-dialog
             aria-modal="true"
             aria-labelledby="emergency-panel-title"
-            className="mx-auto flex max-h-[calc(100dvh_-_24px_-_env(safe-area-inset-top)_-_env(safe-area-inset-bottom))] w-full max-w-md flex-col overflow-hidden rounded-2xl border border-border bg-surface shadow-[0_24px_80px_rgba(26,31,46,0.34)] conductor-emergency-panel"
+            className="mx-auto flex max-h-[calc(100dvh_-_24px_-_env(safe-area-inset-top)_-_env(safe-area-inset-bottom))] w-full max-w-md flex-col overflow-hidden rounded-lg border border-ui-line bg-ui-card shadow-ui-md conductor-emergency-panel"
           >
-            <div className="flex items-start justify-between gap-3 border-b border-border px-4 py-4">
+            <div className="flex items-start justify-between gap-3 border-b border-ui-line px-4 py-4">
               <div>
-                <p className="font-body text-sm font-semibold text-danger-action">Panel de emergencia</p>
-                <h2 id="emergency-panel-title" ref={tituloRef} tabIndex={-1} className="mt-1 font-display text-xl font-semibold text-text-primary">
+                <p className="font-body text-sm font-semibold text-ui-danger">Panel de emergencia</p>
+                <h2 id="emergency-panel-title" ref={tituloRef} tabIndex={-1} className="mt-1 font-display text-xl font-semibold text-ui-fg">
                   ¿Qué necesitas?
                 </h2>
               </div>
-              <button
+              <BaseButton variant="ghost"
                 type="button"
                 onClick={cerrarPanel}
-                className="min-h-11 min-w-11 rounded-lg border border-border px-3 py-2 font-body text-sm font-semibold text-text-secondary"
+                className="min-h-11 min-w-11 rounded-lg border border-ui-line px-3 py-2 font-body text-sm font-semibold text-ui-fg-muted"
               >
                 Cerrar
-              </button>
+              </BaseButton>
             </div>
 
             <div className="grid gap-2 overflow-y-auto px-4 py-4 pb-[max(16px,env(safe-area-inset-bottom))]">
@@ -320,17 +322,17 @@ export function EmergencyPanel({
                 const es911 = opcion.id === "llamar_911";
                 const cargando = procesando === opcion.id;
                 return (
-                  <button
+                  <BaseButton variant="ghost"
                     key={opcion.id}
                     type="button"
                     onClick={() => void seleccionar(opcion.id)}
                     disabled={Boolean(procesando)}
                     className={[
-                      "min-h-[var(--ruum-button-height-street)] rounded-xl border px-4 py-3 text-left text-[17px] transition disabled:cursor-wait disabled:text-disabled",
-                      "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-danger-action",
+                      "min-h-[var(--ruum-button-height-street)] rounded-xl border px-4 py-3 text-left text-base transition disabled:cursor-wait disabled:text-disabled",
+                      "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ui-danger",
                       es911
-                        ? "border-[var(--ruum-emergency)] bg-[var(--ruum-emergency)] text-[var(--conductor-on-status)] shadow-[0_10px_28px_rgba(179,38,38,0.24)]"
-                        : "border-border bg-surface text-text-primary hover:border-route-action hover:bg-route-soft"
+                        ? "border-ui-danger bg-ui-danger text-ui-on-brand shadow-ui-md"
+                        : "border-ui-line bg-ui-card text-ui-fg hover:border-ui-brand hover:bg-ui-brand-soft"
                     ].join(" ")}
                   >
                     <span className="flex items-center justify-between gap-3">
@@ -349,10 +351,10 @@ export function EmergencyPanel({
                       </span>
                       {indice === 0 && <span className="font-body text-sm font-semibold">Primero</span>}
                     </span>
-                    <span className={["mt-1 block font-body text-sm leading-6", es911 ? "text-[var(--conductor-on-status)]" : "text-text-secondary"].join(" ")}>
+                    <span className={["mt-1 block font-body text-sm leading-6", es911 ? "text-ui-on-brand" : "text-ui-fg-muted"].join(" ")}>
                       {es911 && confirmando911 ? "Toca de nuevo para confirmar la llamada." : opcion.descripcion}
                     </span>
-                  </button>
+                  </BaseButton>
                 );
               })}
             </div>

@@ -1,5 +1,6 @@
 "use client";
 
+import { Button as BaseButton } from "@ruum/ui/base";
 import { useState } from "react";
 import { TripDockPortal } from "./TripOperationalFrame";
 import { TripDialog } from "./TripDialog";
@@ -32,7 +33,7 @@ export function StickyTripActions({
 
   return (
     <>
-      <TripDockPortal quick><div className="border-t border-border/20 bg-surface" role="toolbar" aria-label="Acciones rápidas del traslado">
+      <TripDockPortal quick><div className="border-t border-ui-line/20 bg-ui-card" role="toolbar" aria-label="Acciones rápidas del traslado">
         <div className="mx-auto max-w-md px-3 py-1 flex items-center gap-2">
           {/* Navegar — primario signal */}
           {primaryNav && (
@@ -46,7 +47,7 @@ export function StickyTripActions({
                 abrirNavegacion(primaryNav);
                 if (typeof navigator !== "undefined" && "vibrate" in navigator) navigator.vibrate(12);
               }}
-              className="flex-1 min-h-11 inline-flex items-center justify-center gap-1.5 rounded-xl bg-signal px-3 py-2.5 font-display text-xs font-black tracking-wide text-slate-950 shadow-md hover:bg-signal/90 active:scale-[0.98] transition-all"
+              className="flex-1 min-h-11 inline-flex items-center justify-center gap-1.5 rounded-xl bg-ui-brand px-3 py-2.5 font-display text-xs font-black tracking-wide text-ui-fg-muted shadow-md hover:bg-ui-brand/90 active:scale-[0.98] transition-all"
             >
               <span aria-hidden>🧭</span> Navegar
             </a>
@@ -57,20 +58,20 @@ export function StickyTripActions({
             onClick={() => {
               if (typeof navigator !== "undefined" && "vibrate" in navigator) navigator.vibrate(12);
             }}
-            className={`flex-1 min-h-11 inline-flex items-center justify-center gap-1.5 rounded-xl border px-3 py-2.5 font-display text-xs font-bold transition-all active:scale-[0.98] ${phone ? "border-route-action bg-route-soft text-route-action hover:bg-route-soft/80" : "border-border bg-surface-elevated text-text-tertiary"}`}
+            className={`flex-1 min-h-11 inline-flex items-center justify-center gap-1.5 rounded-xl border px-3 py-2.5 font-display text-xs font-bold transition-all active:scale-[0.98] ${phone ? "border-ui-brand bg-ui-brand-soft text-ui-brand hover:bg-ui-brand-soft/80" : "border-ui-line bg-ui-muted text-ui-fg-muted"}`}
           >
             <span aria-hidden>📞</span> Llamar
           </a>}
           {/* Chat rápido — abre sheet */}
-          <button
+          <BaseButton variant="ghost"
             type="button"
             onClick={() => setSheetAbierto(true)}
             aria-label="Mensaje rápido"
-            className="min-h-11 min-w-11 flex items-center justify-center rounded-xl border border-border bg-surface-elevated text-text-primary hover:bg-surface active:scale-[0.98] transition-all px-3"
+            className="min-h-11 min-w-11 flex items-center justify-center rounded-xl border border-ui-line bg-ui-muted text-ui-fg hover:bg-ui-card active:scale-[0.98] transition-all px-3"
           >
             <span aria-hidden>💬</span>
             <span className="ml-1 font-display text-xs font-bold hidden sm:inline">Chat</span>
-          </button>
+          </BaseButton>
         </div>
       </div></TripDockPortal>
 
@@ -78,12 +79,12 @@ export function StickyTripActions({
       {sheetAbierto && (
         <TripDialog title="Mensajes rápidos" onClose={() => setSheetAbierto(false)}>
           <div className="flex flex-col gap-3">
-            <div className="mx-auto h-1.5 w-12 rounded-full bg-border/40" aria-hidden />
-            <h3 className="font-display text-sm font-black text-text-primary">Mensaje rápido</h3>
-            <p className="font-body text-xs text-text-secondary">Envía sin escribir, se registra en el traslado {trasladoId.slice(0, 8).toUpperCase()}.</p>
+            <div className="mx-auto h-1.5 w-12 rounded-full bg-ui-line/40" aria-hidden />
+            <h3 className="font-display text-sm font-black text-ui-fg">Mensaje rápido</h3>
+            <p className="font-body text-xs text-ui-fg-muted">Envía sin escribir, se registra en el traslado {trasladoId.slice(0, 8).toUpperCase()}.</p>
             <div className="grid gap-2">
               {mensajesRapidos.map((m) => (
-                <button
+                <BaseButton variant="ghost"
                   key={m}
                   type="button"
                   onClick={() => {
@@ -91,15 +92,15 @@ export function StickyTripActions({
                     setSheetAbierto(false);
                     if (typeof navigator !== "undefined" && "vibrate" in navigator) navigator.vibrate(12);
                   }}
-                  className="min-h-11 rounded-xl border border-route-action/30 bg-route-soft px-4 py-3 text-left font-body text-sm font-bold text-route-action hover:bg-route-soft/70"
+                  className="min-h-11 rounded-xl border border-ui-brand/30 bg-ui-brand-soft px-4 py-3 text-left font-body text-sm font-bold text-ui-brand hover:bg-ui-brand-soft/70"
                 >
                   {m}
-                </button>
+                </BaseButton>
               ))}
             </div>
-            <button type="button" onClick={() => setSheetAbierto(false)} className="w-full min-h-11 rounded-xl bg-surface border border-border font-display text-sm font-bold text-text-primary">
+            <BaseButton variant="ghost" type="button" onClick={() => setSheetAbierto(false)} className="w-full min-h-11 rounded-xl bg-ui-card border border-ui-line font-display text-sm font-bold text-ui-fg">
               Cancelar
-            </button>
+            </BaseButton>
           </div>
         </TripDialog>
       )}

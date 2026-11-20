@@ -1,5 +1,6 @@
 "use client";
 
+import { Button as BaseButton } from "@ruum/ui/base";
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { ConductorIcon } from "@/components/icons";
@@ -43,6 +44,6 @@ export function OfferPreviewCard({ viaje, detalle, hrefDetalle, mapPreview, acce
       <span><ConductorIcon name="clock" /><span>{minutes == null ? duration : `Aprox. ${duration}`}</span></span>
     </div>
     {mapPreview ? <div className={styles.previewMap} data-offer-map>{mapPreview}</div> : null}
-    {accepted?.onReject ? <div className={styles.actionRow}>{primaryAction}<button type="button" className={styles.options} onClick={accepted.onReject} aria-label="Opciones de traslado" aria-haspopup="dialog" data-trip-primary="true">•••</button></div> : primaryAction}
+    {accepted?.onReject ? <div className={styles.actionRow}>{primaryAction}<BaseButton variant="primary" type="button" className={styles.options} onClick={accepted.onReject} aria-label="Opciones de traslado" aria-haspopup="dialog" data-trip-primary="true">•••</BaseButton></div> : primaryAction}
   </article>;
 }

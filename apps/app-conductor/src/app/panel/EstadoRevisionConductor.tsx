@@ -1,9 +1,11 @@
 "use client";
 
+import { Button as BaseButton } from "@ruum/ui/base";
 import { useRef, useState, useCallback, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Button, Aviso, LogoMarca } from "@ruum/ui";
+import { Aviso, LogoMarca } from "@ruum/ui";
+import { ConductorButton as Button } from "@/components/v2/ConductorUI";
 import type { Database } from "@ruum/shared/types";
 import { traducirErrorOperativo } from "@ruum/shared/utils";
 import { crearClienteNavegador, tieneSupabaseConfigurado } from "../../lib/supabase-browser";
@@ -23,12 +25,12 @@ type DocumentoConductorRow = Database["public"]["Tables"]["documentos_conductor"
 // CSS / Estructura: height: 100dvh; overflow: hidden;
 
 const ESTADO_DOCUMENTO: Record<string, { texto: string; clase: string }> = {
-  pendiente: { texto: "Pendiente de carga", clase: "border-border bg-surface-elevated text-text-tertiary/80" },
-  en_revision: { texto: "En revisión", clase: "border-warning/30 bg-warning/10 text-warning" },
-  aprobado: { texto: "Aprobado", clase: "border-success bg-control-soft text-success" },
-  rechazado: { texto: "Rechazado", clase: "border-danger-action bg-danger-soft text-danger-action" },
-  reemplazado: { texto: "Reemplazado", clase: "border-border bg-surface-elevated text-text-tertiary/80" },
-  vencido: { texto: "Vencido", clase: "border-danger-action bg-danger-soft text-danger-action" },
+  pendiente: { texto: "Pendiente de carga", clase: "border-ui-line bg-ui-muted text-ui-fg-muted/80" },
+  en_revision: { texto: "En revisión", clase: "border-ui-warning/30 bg-ui-warning/10 text-ui-warning" },
+  aprobado: { texto: "Aprobado", clase: "border-ui-success bg-ui-success-soft text-ui-success" },
+  rechazado: { texto: "Rechazado", clase: "border-ui-danger bg-ui-danger-soft text-ui-danger" },
+  reemplazado: { texto: "Reemplazado", clase: "border-ui-line bg-ui-muted text-ui-fg-muted/80" },
+  vencido: { texto: "Vencido", clase: "border-ui-danger bg-ui-danger-soft text-ui-danger" },
 };
 
 const TIPOS_DOCUMENTO: { valor: TipoDocumentoConductor; etiqueta: string }[] = [
@@ -224,14 +226,14 @@ export function EstadoRevisionConductor({ conductorId, solicitudId, nombre, docu
 
   return (
     <div
-      className="relative flex h-[100dvh] max-h-[100dvh] w-full flex-col overflow-hidden bg-[var(--ruum-navy)] text-white"
+      className="relative flex h-[100dvh] max-h-[100dvh] w-full flex-col overflow-hidden bg-[var(--ruum-navy)] text-ui-on-brand"
       style={{ height: "100dvh", overflow: "hidden" }}
     >
       {/* App Bar minimalista */}
       <header className="flex shrink-0 items-center justify-between px-4 py-3">
         <div className="flex items-center gap-2">
           <LogoMarca tamano={28} color="signal" />
-          <span className="font-display text-lg font-extrabold tracking-tight text-white">
+          <span className="font-display text-lg font-extrabold tracking-tight text-ui-on-brand">
             Ruum
           </span>
         </div>
@@ -239,7 +241,7 @@ export function EstadoRevisionConductor({ conductorId, solicitudId, nombre, docu
           <Link
             href="/cuenta/soporte"
             aria-label="Soporte"
-            className="flex min-h-11 min-w-11 items-center justify-center rounded-full text-white/80 transition hover:bg-white/10 hover:text-white focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-white"
+            className="flex min-h-11 min-w-11 items-center justify-center rounded-full text-ui-on-brand/80 transition hover:bg-ui-card/10 hover:text-ui-on-brand focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-white"
           >
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
               <path d="M4 13v-1a8 8 0 0 1 16 0v1" />
@@ -249,7 +251,7 @@ export function EstadoRevisionConductor({ conductorId, solicitudId, nombre, docu
           <Link
             href="/cuenta"
             aria-label="Perfil"
-            className="flex min-h-11 min-w-11 items-center justify-center rounded-full text-white/80 transition hover:bg-white/10 hover:text-white focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-white"
+            className="flex min-h-11 min-w-11 items-center justify-center rounded-full text-ui-on-brand/80 transition hover:bg-ui-card/10 hover:text-ui-on-brand focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-white"
           >
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
               <circle cx="12" cy="8" r="4" />
@@ -261,15 +263,15 @@ export function EstadoRevisionConductor({ conductorId, solicitudId, nombre, docu
 
       <main className="flex min-h-0 flex-1 flex-col gap-3 px-4 pb-4">
         {/* Status Header */}
-        <section className="shrink-0 rounded-2xl bg-white/95 p-4 text-slate-900 shadow-lg" aria-labelledby="titulo-estado-revision">
-          <p className="font-body text-sm font-semibold text-slate-900">¡Hola, {nombre}! 👋</p>
-          <p className="mt-1 font-display text-lg font-bold text-slate-900">🟡 Tu solicitud está en revisión</p>
-          <p className="mt-1 font-body text-xs text-slate-500">Tiempo est: 24-48 hrs hábiles</p>
+        <section className="shrink-0 rounded-lg bg-ui-card/95 p-4 text-ui-fg-muted shadow-lg" aria-labelledby="titulo-estado-revision">
+          <p className="font-body text-sm font-semibold text-ui-fg-muted">¡Hola, {nombre}! 👋</p>
+          <p className="mt-1 font-display text-lg font-bold text-ui-fg-muted">🟡 Tu solicitud está en revisión</p>
+          <p className="mt-1 font-body text-xs text-ui-fg-muted">Tiempo est: 24-48 hrs hábiles</p>
           <div className="mt-3">
-            <div className="h-2 overflow-hidden rounded-full bg-slate-200" aria-hidden>
-              <div className="h-full rounded-full bg-signal transition-all duration-300" style={{ width: `${porcentaje}%` }} />
+            <div className="h-2 overflow-hidden rounded-full bg-ui-muted" aria-hidden>
+              <div className="h-full rounded-full bg-ui-brand transition-all duration-300" style={{ width: `${porcentaje}%` }} />
             </div>
-            <p className="mt-1 font-body text-xs font-medium text-slate-600">{requisitosListos}/{totalRequisitos} listos</p>
+            <p className="mt-1 font-body text-xs font-medium text-ui-fg-muted">{requisitosListos}/{totalRequisitos} listos</p>
           </div>
         </section>
 
@@ -292,41 +294,41 @@ export function EstadoRevisionConductor({ conductorId, solicitudId, nombre, docu
         )}
 
         {/* Lista densa de requisitos */}
-        <section className="min-h-0 flex-1 overflow-hidden rounded-2xl bg-white/95 p-3 text-slate-900 shadow-lg" aria-label="Estado documental">
+        <section className="min-h-0 flex-1 overflow-hidden rounded-lg bg-ui-card/95 p-3 text-ui-fg-muted shadow-lg" aria-label="Estado documental">
           <ul className="flex flex-col gap-2 overflow-hidden">
             <li>
-              <button
+              <BaseButton variant="ghost"
                 type="button"
                 onClick={() => setDocumentoSeleccionado({ tipo: "cuenta", etiqueta: "Cuenta" })}
-                className="flex w-full items-center justify-between gap-2 rounded-xl border border-slate-200 px-3 py-2 text-left transition hover:bg-slate-50"
+                className="flex w-full items-center justify-between gap-2 rounded-xl border border-ui-line px-3 py-2 text-left transition hover:bg-ui-card"
               >
-                <span className="flex items-center gap-2 font-body text-sm font-semibold text-slate-900">
+                <span className="flex items-center gap-2 font-body text-sm font-semibold text-ui-fg-muted">
                   <span aria-hidden>👤</span>
                   Cuenta
                 </span>
-                <span className={`rounded-full border px-2.5 py-0.5 font-body text-xs font-medium ${cuentaAprobada ? "border-success bg-control-soft text-success" : "border-border bg-surface-elevated text-text-tertiary/80"}`}>
+                <span className={`rounded-full border px-2.5 py-0.5 font-body text-xs font-medium ${cuentaAprobada ? "border-ui-success bg-ui-success-soft text-ui-success" : "border-ui-line bg-ui-muted text-ui-fg-muted/80"}`}>
                   {cuentaAprobada ? "Correo confirmado" : "Pendiente"}
                 </span>
-              </button>
+              </BaseButton>
             </li>
             {documentosRequeridos.map((t) => {
               const doc = documentoDe(t.valor);
               const estadoInfo = ESTADO_DOCUMENTO[doc?.estado ?? "pendiente"];
               return (
                 <li key={t.valor}>
-                  <button
+                  <BaseButton variant="ghost"
                     type="button"
                     onClick={() => setDocumentoSeleccionado({ tipo: t.valor, etiqueta: t.etiqueta, doc })}
-                    className="flex w-full items-center justify-between gap-2 rounded-xl border border-slate-200 px-3 py-2 text-left transition hover:bg-slate-50"
+                    className="flex w-full items-center justify-between gap-2 rounded-xl border border-ui-line px-3 py-2 text-left transition hover:bg-ui-card"
                   >
-                    <span className="flex items-center gap-2 font-body text-sm font-semibold text-slate-900">
+                    <span className="flex items-center gap-2 font-body text-sm font-semibold text-ui-fg-muted">
                       <span aria-hidden>📄</span>
                       {t.etiqueta}
                     </span>
                     <span className={`rounded-full border px-2.5 py-0.5 font-body text-xs font-medium ${estadoInfo.clase}`}>
                       {estadoInfo.texto}
                     </span>
-                  </button>
+                  </BaseButton>
                 </li>
               );
             })}
@@ -334,13 +336,13 @@ export function EstadoRevisionConductor({ conductorId, solicitudId, nombre, docu
         </section>
 
         {/* Switch minimalista de notificaciones WhatsApp */}
-        <label className="flex shrink-0 items-center justify-between gap-3 rounded-xl bg-white/10 px-3 py-2 text-xs text-white/90">
+        <label className="flex shrink-0 items-center justify-between gap-3 rounded-xl bg-ui-card/10 px-3 py-2 text-xs text-ui-on-brand/90">
           <span>Activar notificaciones por WhatsApp</span>
           <input
             type="checkbox"
             checked={notificacionesActivas}
             onChange={(e) => setNotificacionesActivas(e.target.checked)}
-            className="size-4 accent-route"
+            className="size-4 accent-ui-brand"
           />
         </label>
       </main>
@@ -348,19 +350,19 @@ export function EstadoRevisionConductor({ conductorId, solicitudId, nombre, docu
       {/* BottomSheet / Bottom Sheet de revisión de documento (slide-up) */}
       {documentoSeleccionado && (
         <div className="fixed inset-0 z-50 flex items-end justify-center" role="dialog" aria-modal="true" aria-labelledby="titulo-sheet-documento">
-          <button type="button" className="absolute inset-0 bg-black/60 backdrop-blur-sm animate-fadeIn" onClick={() => setDocumentoSeleccionado(null)} aria-label="Cerrar panel" />
-          <div className="relative w-full max-w-md rounded-t-2xl border-t border-border/40 bg-surface-elevated p-5 shadow-2xl animate-slideUp" data-animation="slide-up">
+          <BaseButton variant="ghost" type="button" className="absolute inset-0 bg-ui-overlay/60 backdrop-blur-sm animate-fadeIn" onClick={() => setDocumentoSeleccionado(null)} aria-label="Cerrar panel" />
+          <div className="relative w-full max-w-md rounded-t-2xl border-t border-ui-line/40 bg-ui-muted p-5 shadow-2xl animate-slideUp" data-animation="slide-up">
             <div className="mb-3 flex items-center justify-between">
-              <h2 id="titulo-sheet-documento" className="font-display text-base font-bold text-text-primary">
+              <h2 id="titulo-sheet-documento" className="font-display text-base font-bold text-ui-fg">
                 {documentoSeleccionado.etiqueta}
               </h2>
-              <button type="button" onClick={() => setDocumentoSeleccionado(null)} className="min-h-9 min-w-9 rounded-full border border-border bg-surface text-text-secondary" aria-label="Cerrar">
+              <BaseButton variant="ghost" type="button" onClick={() => setDocumentoSeleccionado(null)} className="min-h-9 min-w-9 rounded-full border border-ui-line bg-ui-card text-ui-fg-muted" aria-label="Cerrar">
                 ✕
-              </button>
+              </BaseButton>
             </div>
 
             {documentoSeleccionado.tipo !== "cuenta" && seleccionadoDoc?.url && (
-              <div className="mb-3 overflow-hidden rounded-xl border border-border bg-surface">
+              <div className="mb-3 overflow-hidden rounded-xl border border-ui-line bg-ui-card">
                 <Image
                   src={seleccionadoDoc.url}
                   alt={`Vista previa de ${documentoSeleccionado.etiqueta}`}
@@ -372,11 +374,11 @@ export function EstadoRevisionConductor({ conductorId, solicitudId, nombre, docu
               </div>
             )}
             {documentoSeleccionado.tipo !== "cuenta" && !seleccionadoDoc?.url && (
-              <p className="mb-3 font-body text-xs text-text-tertiary">Sin vista previa disponible.</p>
+              <p className="mb-3 font-body text-xs text-ui-fg-muted">Sin vista previa disponible.</p>
             )}
 
             {documentoSeleccionado.tipo !== "cuenta" && (seleccionadoDoc?.motivo_rechazo || seleccionadoDoc?.notas_admin) && (
-              <p className="mb-3 rounded-lg bg-warn-soft px-3 py-2 font-body text-sm text-warning">
+              <p className="mb-3 rounded-lg bg-ui-warning-soft px-3 py-2 font-body text-sm text-ui-warning">
                 Motivo: {seleccionadoDoc?.motivo_rechazo ?? seleccionadoDoc?.notas_admin}
               </p>
             )}

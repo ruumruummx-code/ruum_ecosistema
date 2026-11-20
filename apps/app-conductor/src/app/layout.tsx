@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { Inter } from "next/font/google";
 import { headers } from "next/headers";
 import { TextInputUppercaseBridge } from "@ruum/ui";
 import "./globals.css";
@@ -20,6 +21,8 @@ import { EstadoTrackingGlobal } from "./EstadoTrackingGlobal";
 import { PushNotificationsBootstrap } from "./PushNotificationsBootstrap";
 import { OfflineShell } from "./OfflineShell";
 import { PWABootstrap } from "./PWABootstrap";
+
+const inter = Inter({ subsets: ["latin"], variable: "--font-body-loaded", display: "swap" });
 
 export const metadata: Metadata = {
   title: "Ruum Conductor",
@@ -43,7 +46,7 @@ export const viewport: Viewport = {
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const nonce = (await headers()).get("x-nonce") ?? "";
   return (
-    <html lang="es" data-scroll-behavior="smooth" suppressHydrationWarning>
+    <html lang="es" className={inter.variable} data-scroll-behavior="smooth" suppressHydrationWarning>
       <head suppressHydrationWarning>
         <meta property="csp-nonce" content={nonce} />
         {/* eslint-disable-next-line @next/next/no-sync-scripts */}

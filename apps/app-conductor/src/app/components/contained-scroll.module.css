@@ -2,11 +2,11 @@
   position: fixed; top: max(env(safe-area-inset-top, 0px), var(--conductor-visible-top, 0px)); bottom: max(var(--conductor-shell-bottom-height, 0px), var(--conductor-visible-bottom, 0px));
   left: 50%; transform: translateX(-50%); width: 100%; max-width: 440px;
   max-height: var(--conductor-visible-height, 100dvh);
-  overflow: hidden; display: flex; flex-direction: column; background: var(--conductor-surface); color: var(--conductor-primary);
+  overflow: hidden; display: flex; flex-direction: column; background: var(--ui-card); color: var(--ui-fg);
 }
 .layout { display: flex; flex: 1; min-height: 0; flex-direction: column; }
-.header { flex-shrink: 0; padding: 8px 16px; border-bottom: 1px solid var(--conductor-border); background: var(--conductor-surface); }
-.frame[data-contained-view] .header a { display: inline-flex; align-items: center; min-height: 48px; color: var(--conductor-action); font-size: 14px; font-weight: 600; }
+.header { flex-shrink: 0; padding: 8px 16px; border-bottom: 1px solid var(--ui-line); background: var(--ui-card); }
+.frame[data-contained-view] .header a { display: inline-flex; align-items: center; min-height: 48px; color: var(--ui-brand); font-size: 0.875rem; font-weight: 600; }
 .content[data-contained-scroll] {
   flex: 1; min-height: 0; overflow-y: auto; overflow-x: hidden; overscroll-behavior: contain;
   padding: 16px; scroll-padding-block: 16px; scrollbar-gutter: stable;
@@ -16,5 +16,5 @@
 .flow > section { flex: 0 0 auto; }
 .frame[data-contained-view] [data-contained-scroll] button { min-height: 48px; }
 .flow a[download] { display: inline-flex; min-height: 48px; align-items: center; }
-.content:focus-visible, .header a:focus-visible { outline: 3px solid var(--conductor-focus); outline-offset: -3px; }
+.content:focus-visible, .header a:focus-visible { outline: 3px solid var(--ui-focus); outline-offset: -3px; }
 @media (max-height: 620px) { .content[data-contained-scroll] { padding: 12px 16px; } .flow { gap: 12px; } }

@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { Button, type ButtonVariant } from "@ruum/ui";
+import { type ButtonVariant } from "@ruum/ui";
+import { ConductorButton as Button } from "@/components/v2/ConductorUI";
 
 interface AccionError {
   etiqueta: string;
@@ -20,7 +21,7 @@ export function EstadoError({ codigo, titulo, descripcion, acciones, detalle }: 
   return (
     <div className="conductor-page">
       <div className="mx-auto flex min-h-[60vh] w-full max-w-md flex-col items-center justify-center px-6 py-16 text-center">
-        <div className="flex size-14 items-center justify-center rounded-full border border-danger-action bg-danger-soft text-danger-action">
+        <div className="flex size-14 items-center justify-center rounded-full border border-ui-danger bg-ui-danger-soft text-ui-danger">
           <svg
             width="24"
             height="24"
@@ -36,17 +37,17 @@ export function EstadoError({ codigo, titulo, descripcion, acciones, detalle }: 
             <path d="M12 8v4m0 4h.01" />
           </svg>
         </div>
-        {codigo && <p className="mt-5 font-mono-ruum text-xs font-medium uppercase tracking-widest text-text-disabled">{codigo}</p>}
+        {codigo && <p className="mt-5 font-mono-ruum text-xs font-medium uppercase tracking-widest text-ui-fg-muted">{codigo}</p>}
         <h1 className="mt-4 font-display text-2xl font-semibold leading-tight">{titulo}</h1>
-        <p className="mt-3 font-body text-sm leading-6 text-text-secondary">{descripcion}</p>
-        {detalle && <p className="mt-4 max-w-full break-words font-body text-sm text-danger-action">{detalle}</p>}
+        <p className="mt-3 font-body text-sm leading-6 text-ui-fg-muted">{descripcion}</p>
+        {detalle && <p className="mt-4 max-w-full break-words font-body text-sm text-ui-danger">{detalle}</p>}
         <div className="mt-8 grid w-full gap-3">
           {acciones.map((accion) =>
             accion.href ? (
               <Link
                 key={accion.etiqueta}
                 href={accion.href}
-                className="inline-flex min-h-12 w-full items-center justify-center rounded-[14px] bg-[var(--ruum-action-primary)] px-4 py-3 font-body text-base font-semibold text-white transition hover:brightness-95 focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-[var(--ruum-focus)]"
+                className="inline-flex min-h-12 w-full items-center justify-center rounded-lg bg-ui-brand px-4 py-3 font-body text-base font-semibold text-ui-on-brand transition hover:brightness-95 focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-ui-focus"
               >
                 {accion.etiqueta}
               </Link>
