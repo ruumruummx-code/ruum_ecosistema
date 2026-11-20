@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { Stat, StatGroup } from "@ruum/ui/base";
 
 export interface PanelMetricsProps {
   gananciasHoy: number | null;
@@ -47,18 +48,17 @@ export function PanelMetrics({
       ? "Bono disponible"
       : `Faltan ${restantes} para bono`;
 
-  return (
-    <section className="driver-metrics grid grid-cols-2 gap-2" aria-label="Resumen del día">
-      <Link href="/ganancias" className="driver-metric-link" aria-label={`Ver balance: ${gananciasTexto}. ${subtextoGanancias}${gananciasEstimadas ? ". Importe estimado" : ""}`}>
-        <span>Ganancias de hoy</span>
-        <strong>{gananciasTexto}</strong>
-        <small>{gananciasEstimadas ? "Estimado · " : ""}{subtextoGanancias}</small>
-      </Link>
-      <Link href="/viajes" className="driver-metric-link" aria-label={`Ver detalle: ${trasladosTexto} traslados. ${subtextoTraslados}`}>
-        <span>Traslados hoy</span>
-        <strong>{trasladosTexto}</strong>
-        <small>{subtextoTraslados}</small>
-      </Link>
-    </section>
-  );
+  return <section aria-labelledby="actividad-hoy" className="space-y-3">
+    <h2 id="actividad-hoy" className="text-base font-semibold text-ui-fg">Tu actividad de hoy</h2>
+    <StatGroup className="grid-cols-2">
+      <Stat etiqueta="Ganancias" valor={<Link href="/ganancias" className="block min-h-12 rounded-md focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-ui-ring" aria-label={`Ver balance: ${gananciasTexto}. ${subtextoGanancias}${gananciasEstimadas ? ". Importe estimado" : ""}`}>
+        <span className="block">{gananciasTexto}</span>
+        <span className="mt-1 block whitespace-normal text-xs font-normal leading-5 text-ui-fg-muted">{gananciasEstimadas ? "Estimado · " : ""}{subtextoGanancias}</span>
+      </Link>} />
+      <Stat etiqueta="Traslados" valor={<Link href="/viajes" className="block min-h-12 rounded-md focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-ui-ring" aria-label={`Ver detalle: ${trasladosTexto} traslados. ${subtextoTraslados}`}>
+        <span className="block">{trasladosTexto}</span>
+        <span className="mt-1 block whitespace-normal text-xs font-normal leading-5 text-ui-fg-muted">{subtextoTraslados}</span>
+      </Link>} />
+    </StatGroup>
+  </section>;
 }

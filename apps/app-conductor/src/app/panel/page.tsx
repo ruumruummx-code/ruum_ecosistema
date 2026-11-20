@@ -1,7 +1,9 @@
 "use client";
 
-import { Button as BaseButton } from "@ruum/ui/base";
-import { useState, useEffect } from "react";
+import { Button as BaseButton, PageHeader, Skeleton } from "@ruum/ui/base";
+import { ConductorIcon } from "@/components/icons";
+import { PanelAvailabilityCard } from "./PanelAvailabilityCard";
+import { useState, useEffect, useRef } from "react";
 import styles from "./panel.module.css";
 import Link from "next/link";
 import { ConductorDialog } from "../components/ConductorDialog";
@@ -21,23 +23,9 @@ import { getBatteryState, intervaloTrackingMs } from "../../lib/battery";
 import { useCerrarSesion } from "../../lib/use-cerrar-sesion";
 
 function PanelLoadingSkeleton() {
-  return (
-    <div className="flex w-full flex-col gap-4" aria-label="Cargando panel operativo" aria-busy="true">
-      <div className="h-16 w-full animate-pulse rounded-lg bg-ui-line/70" />
-      <div className="h-24 w-full animate-pulse rounded-lg bg-ui-line/70" />
-      <div className="grid grid-cols-4 gap-2">
-        <div className="h-[88px] animate-pulse rounded-lg bg-ui-line/70" />
-        <div className="h-[88px] animate-pulse rounded-lg bg-ui-line/70" />
-        <div className="h-[88px] animate-pulse rounded-lg bg-ui-line/70" />
-        <div className="h-[88px] animate-pulse rounded-lg bg-ui-line/70" />
-      </div>
-      <div className="h-[164px] animate-pulse rounded-lg bg-ui-line/70" />
-      <div className="grid grid-cols-2 gap-3">
-        <div className="h-[136px] animate-pulse rounded-lg bg-ui-line/70" />
-        <div className="h-[136px] animate-pulse rounded-lg bg-ui-line/70" />
-      </div>
-    </div>
-  );
+  return <div className="space-y-4" role="status" aria-label="Cargando panel operativo" aria-busy="true">
+    <Skeleton className="h-32 w-full" /><Skeleton className="h-24 w-full" /><Skeleton className="h-48 w-full" />
+  </div>;
 }
 
 function SidebarMenuIcon({ name, active = false }: { name: string; active?: boolean }) {
@@ -110,6 +98,7 @@ const MENU_LATERAL = [
 ] as const;
 
 export default function PaginaPanel() {
+  const scrollRef = useRef<HTMLDivElement>(null);
   const { cerrarSesion, cerrandoSesion, errorCerrarSesion } = useCerrarSesion();
   const [soporteAbierto, setSoporteAbierto] = useState(false);
   const [menuAbierto, setMenuAbierto] = useState(false);
@@ -155,7 +144,7 @@ export default function PaginaPanel() {
     recargar,
   } = usePanelData();
 
-  const primerNombre = conductor?.nombre?.trim().split(/\s+/)[0] || "Héctor";
+  const primerNombre = conductor?.nombre?.trim().split(/\s+/)[0] || "Conductor";
   const esDisponible = disponibilidad === "disponible";
 
   const alCambiarDisponibilidad = () => {
@@ -172,7 +161,7 @@ export default function PaginaPanel() {
     let pulling = false;
     let bloqueadoNotificado = false;
     const onTouchStart = (e: TouchEvent) => {
-      if (window.scrollY === 0) {
+      if (scrollRef.current?.contains(e.target as Node) && scrollRef.current.scrollTop <= 0) {
         startY = e.touches[0].clientY;
         pulling = true;
         bloqueadoNotificado = false;
@@ -193,8 +182,8 @@ export default function PaginaPanel() {
         return;
       }
       const diff = e.touches[0].clientY - startY;
-      if (diff > 0 && diff < 96) {
-        setPullOffset(diff * 0.5);
+      if (diff > 0) {
+        setPullOffset(Math.min(diff * 0.5, 64));
       }
     };
     const onTouchEnd = () => {
@@ -323,24 +312,9 @@ export default function PaginaPanel() {
       )}
 
       <div className={styles.frame}>
-        {/* Acceso local al menú; la marca pertenece al layout compartido. */}
-        <div className="flex items-center gap-2 px-4 py-2">
-          <BaseButton variant="ghost"
-            type="button"
-            onClick={() => setMenuAbierto(true)}
-            aria-label="Abrir menú"
-            className="inline-flex min-h-11 min-w-11 cursor-pointer items-center justify-center rounded-full text-ui-fg transition hover:bg-ui-muted active:scale-95 focus-visible:outline focus-visible:outline-2 focus-visible:outline-ui-focus"
-          >
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.1" strokeLinecap="round" aria-hidden="true">
-              <path d="M4 7h16M4 12h16M4 17h16" />
-            </svg>
-          </BaseButton>
-          <span className="text-sm font-semibold text-ui-fg">Menú del conductor</span>
-        </div>
-
         <div className={styles.workspace}>
           {/* ÁREA DE CONTENIDO PRINCIPAL */}
-          <div className={styles.main}>
+          <div ref={scrollRef} className={styles.main}>
             {/* Aviso Modo Offline — compacto */}
             {!estaOnline && (
               <div className="mb-3">
@@ -366,158 +340,28 @@ export default function PaginaPanel() {
             {cargando ? (
               <PanelLoadingSkeleton />
             ) : (
-              <div className={`${styles.content} driver-dashboard-content`}>
-                {/* 1. Saludo y Avatar */}
-                <section
-                  className="driver-dashboard-welcome flex items-center gap-3.5 pt-1"
-                  aria-labelledby="titulo-bienvenida"
-                >
-                  <span
-                    className="inline-flex size-[58px] shrink-0 items-center justify-center rounded-full bg-ui-muted text-ui-brand"
-                    aria-hidden="true"
-                  >
-                    <svg className="size-8" viewBox="0 0 24 24" fill="currentColor">
-                      <circle cx="12" cy="8" r="3.8" />
-                      <path d="M4 20c0-3.7 3.3-6.4 8-6.4s8 2.7 8 6.4" />
-                    </svg>
-                  </span>
-                  <div className="min-w-0">
-                    <h1
-                      id="titulo-bienvenida"
-                      className="font-display text-3xl font-black leading-none tracking-tight text-ui-fg"
-                    >
-                      ¡Hola, {primerNombre}!
-                    </h1>
-                    <p className="mt-1.5 font-body text-base leading-none text-ui-fg-muted">
-                      Conduce, gana y avanza
-                    </p>
-                    <p className="mt-2 hidden font-body text-lg leading-none text-ui-fg-muted">
-                      Hoy es un gran día para conducir 🚀
-                    </p>
-                  </div>
-                </section>
-
-                {/* 2. Fila de Estado (Switch de Disponibilidad) */}
-                <section
-                  className={`driver-availability-card rounded-lg border p-4 shadow-ui-md transition-colors    ${
-                    esDisponible
-                      ? "border-ui-line bg-ui-card  "
-                      : "border-ui-line bg-ui-card"
-                  }`}
-                  aria-labelledby="titulo-estado-conductor"
-                >
-                  <div className="flex items-center gap-3.5">
-                    <span
-                      className={`inline-flex size-13 shrink-0 items-center justify-center rounded-full text-ui-on-brand shadow-sm  ${
-                        disponibilidad === "en_viaje"
-                          ? "bg-ui-warning"
-                          : esDisponible
-                            ? "bg-ui-success"
-                            : "bg-ui-muted"
-                      }`}
-                      aria-hidden="true"
-                    >
-                      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="m5 12 4 4L19 6" />
-                      </svg>
-                    </span>
-
-                    <div className="min-w-0 flex-1">
-                      <p className="font-body text-xs font-semibold leading-none text-ui-fg-muted">
-                        Estado
-                      </p>
-                      <h2
-                        id="titulo-estado-conductor"
-                        className="mt-1 font-display text-xl font-black leading-none text-ui-fg"
-                      >
-                        <span className="">
-                          {disponibilidad === "en_viaje"
-                            ? "En viaje"
-                            : esDisponible
-                              ? "Disponible"
-                              : "No disponible"}
-                        </span>
-                        <span className="hidden">
-                          {disponibilidad === "en_viaje" ? (
-                            <>
-                              Estás <span className="text-ui-warning">en viaje</span>
-                            </>
-                          ) : esDisponible ? (
-                            <>
-                              Estás <span className="text-ui-success">disponible</span>
-                            </>
-                          ) : (
-                            <>
-                              Estás <span className="text-ui-fg-muted">no disponible</span>
-                            </>
-                          )}
-                        </span>
-                      </h2>
-                      <p className="mt-1 font-body text-xs sm:text-sm leading-none text-ui-fg-muted">
-                        <span className="">
-                          {disponibilidad === "en_viaje"
-                            ? "Traslado activo"
-                            : esDisponible
-                              ? "Recibiendo solicitudes"
-                              : "Solicitudes pausadas"}
-                        </span>
-                        <span className="hidden">
-                          {disponibilidad === "en_viaje"
-                            ? "Traslado activo en curso"
-                            : esDisponible
-                              ? "Recibiendo solicitudes de traslado"
-                              : "Solicitudes de traslado pausadas"}
-                        </span>
-                      </p>
-                    </div>
-
-                    <BaseButton variant="ghost"
-                      type="button"
-                      role="switch"
-                      aria-checked={esDisponible}
-                      aria-labelledby="titulo-estado-conductor"
-                      aria-label={esDisponible ? "Disponible: recibir traslados" : "No disponible: pausar traslados"}
-                      onClick={alCambiarDisponibilidad}
-                      disabled={disponibilidad === "en_viaje" || persistiendoDisponibilidad || !estaOnline}
-                      className={`relative inline-flex h-10 w-[68px] shrink-0 cursor-pointer items-center rounded-full border-2 p-1 transition-all duration-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ui-focus disabled:cursor-not-allowed disabled:opacity-50   ${
-                        esDisponible
-                          ? "border-ui-brand bg-ui-brand shadow-none"
-                          : "border-ui-line bg-ui-line"
-                      }`}
-                    >
-                      <span
-                        className={`inline-block size-7 transform rounded-full bg-ui-card shadow-sm transition-transform duration-300  ${
-                          esDisponible ? "translate-x-7 " : "translate-x-0"
-                        }`}
-                        aria-hidden="true"
-                      />
-                    </BaseButton>
-                  </div>
-                  {persistiendoDisponibilidad && (
-                    <p className="mt-1 font-body text-xs text-ui-fg-muted" aria-live="polite">
-                      Actualizando estado…
-                    </p>
-                  )}
-                </section>
-
-                {/* 3. Traslado activo (sticky si existe) */}
+              <div className={styles.content}>
+                <PageHeader titulo="Inicio" descripcion={`Hola, ${primerNombre}. Gestiona tu jornada desde aquí.`}
+                  className="[&_h1]:text-2xl [&_p]:block"
+                  acciones={<BaseButton variant="outline" size="icon" className="size-12" aria-label="Abrir menú" onClick={() => setMenuAbierto(true)}><ConductorIcon name="menu" /></BaseButton>} />
+                <PanelAvailabilityCard disponibilidad={disponibilidad} guardando={persistiendoDisponibilidad}
+                  online={estaOnline} onCambiar={alCambiarDisponibilidad} />
+                {/* El traslado en curso conserva prioridad sobre el resto de la jornada. */}
                 {viajeActivoPrincipal && (
-                  <div className="sticky top-[64px] z-10">
+                  <div>
                     <PanelActiveTripCard viaje={viajeActivoPrincipal} />
                   </div>
                 )}
 
-                {/* 4. Grid de Requisitos (4 columnas: Documentos/Docu, Perfil, GPS, Conexión) */}
-                <PanelStatusRow
-                  gpsActivo={gpsActivo}
-                  gpsUltimaSenal={gpsUltimaSenal}
-                  estaOnline={estaOnline}
-                  documentoBloqueante={documentoBloqueante}
-                  documentoPorVencer={documentoPorVencer}
-                  conductorEstado={conductor?.estado}
+                {/* Indicadores agrupados del sistema base. */}
+                <PanelMetrics
+                  gananciasHoy={gananciasHoy}
+                  trasladosHoy={trasladosHoy}
+                  gananciasEstimadas={gananciasHoyEstimadas}
+                  gananciasIncompletas={gananciasHoyIncompletas}
+                  gananciasDesconocidas={gananciasHoyDesconocidas}
                 />
-
-                {/* 5. Sección Central — Banner de búsqueda de traslados */}
+                {/* Próxima acción de la jornada. */}
                 {!viajeActivoPrincipal && (
                   <PanelOpportunitiesCard
                     disponibilidad={disponibilidad}
@@ -529,14 +373,17 @@ export default function PaginaPanel() {
                   />
                 )}
 
-                {/* 6. Tarjetas de Métricas (Footer) */}
-                <PanelMetrics
-                  gananciasHoy={gananciasHoy}
-                  trasladosHoy={trasladosHoy}
-                  gananciasEstimadas={gananciasHoyEstimadas}
-                  gananciasIncompletas={gananciasHoyIncompletas}
-                  gananciasDesconocidas={gananciasHoyDesconocidas}
+                {/* Estado operativo con etiquetas visibles en todos los tamaños. */}
+                <PanelStatusRow
+                  gpsActivo={gpsActivo}
+                  gpsUltimaSenal={gpsUltimaSenal}
+                  estaOnline={estaOnline}
+                  documentoBloqueante={documentoBloqueante}
+                  documentoPorVencer={documentoPorVencer}
+                  conductorEstado={conductor?.estado}
                 />
+
+
               </div>
             )}
           </div>

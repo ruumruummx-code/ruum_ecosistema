@@ -1,6 +1,6 @@
 "use client";
 
-import { Button as BaseButton } from "@ruum/ui/base";
+import { Button as BaseButton, Card, Badge } from "@ruum/ui/base";
 import Link from "next/link";
 import { folioViaje, type PasaporteRow } from "./panel-utils";
 
@@ -75,9 +75,9 @@ export function PanelActiveTripCard({ viaje }: PanelActiveTripCardProps) {
   if (!viaje.estado) return null;
 
   return (
-    <article className="driver-active-trip-card" aria-label="Traslado activo">
+    <Card asChild><article className="space-y-3 p-4" aria-label="Traslado activo">
       <div className="flex items-center justify-between gap-2">
-        <span className="font-body text-xs font-semibold text-ui-brand">Traslado activo</span>
+        <Badge tone="info" dot>Traslado activo</Badge>
         <BaseButton variant="ghost" type="button" onClick={() => {
           if (navigator.clipboard) void navigator.clipboard.writeText(folioViaje(viaje));
         }} className="min-h-11 px-2 font-mono text-sm font-semibold" aria-label={`Copiar folio ${folioViaje(viaje)}`}>
@@ -86,9 +86,9 @@ export function PanelActiveTripCard({ viaje }: PanelActiveTripCardProps) {
       </div>
       <p className="font-display text-base font-semibold">{getPasoActualLabel(viaje.estado)}</p>
       <p className="font-body text-xs text-ui-fg-muted">{getPasoActualDescription(viaje.estado)}</p>
-      <Link href={getContinuarTrasladoHref(viaje)} className="conductor-active-trip-action">
+      <BaseButton asChild className="min-h-14 w-full"><Link href={getContinuarTrasladoHref(viaje)}>
         Continuar traslado <span aria-hidden="true">→</span>
-      </Link>
-    </article>
+      </Link></BaseButton>
+    </article></Card>
   );
 }

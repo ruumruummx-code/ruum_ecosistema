@@ -3,8 +3,8 @@
 import { Button as BaseButton } from "@ruum/ui/base";
 import { useRef, useState, useCallback, useEffect } from "react";
 import Image from "next/image";
-import Link from "next/link";
-import { Aviso, LogoMarca } from "@ruum/ui";
+import { Aviso } from "@ruum/ui";
+import { Card, PageHeader } from "@ruum/ui/base";
 import { ConductorButton as Button } from "@/components/v2/ConductorUI";
 import type { Database } from "@ruum/shared/types";
 import { traducirErrorOperativo } from "@ruum/shared/utils";
@@ -225,47 +225,14 @@ export function EstadoRevisionConductor({ conductorId, solicitudId, nombre, docu
     : undefined;
 
   return (
-    <div
-      className="relative flex h-[100dvh] max-h-[100dvh] w-full flex-col overflow-hidden bg-[var(--ruum-navy)] text-ui-on-brand"
-      style={{ height: "100dvh", overflow: "hidden" }}
-    >
-      {/* App Bar minimalista */}
-      <header className="flex shrink-0 items-center justify-between px-4 py-3">
-        <div className="flex items-center gap-2">
-          <LogoMarca tamano={28} color="signal" />
-          <span className="font-display text-lg font-extrabold tracking-tight text-ui-on-brand">
-            Ruum
-          </span>
-        </div>
-        <div className="flex items-center gap-1">
-          <Link
-            href="/cuenta/soporte"
-            aria-label="Soporte"
-            className="flex min-h-11 min-w-11 items-center justify-center rounded-full text-ui-on-brand/80 transition hover:bg-ui-card/10 hover:text-ui-on-brand focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-white"
-          >
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-              <path d="M4 13v-1a8 8 0 0 1 16 0v1" />
-              <path d="M4 13a2 2 0 0 1 2-2h1v6H6a2 2 0 0 1-2-2v-2ZM20 13a2 2 0 0 0-2-2h-1v6h1a2 2 0 0 0 2-2v-2Z" />
-            </svg>
-          </Link>
-          <Link
-            href="/cuenta"
-            aria-label="Perfil"
-            className="flex min-h-11 min-w-11 items-center justify-center rounded-full text-ui-on-brand/80 transition hover:bg-ui-card/10 hover:text-ui-on-brand focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-white"
-          >
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-              <circle cx="12" cy="8" r="4" />
-              <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" />
-            </svg>
-          </Link>
-        </div>
-      </header>
-
-      <main className="flex min-h-0 flex-1 flex-col gap-3 px-4 pb-4">
+    <div className="driver-dashboard relative flex min-h-0 w-full flex-1 flex-col bg-ui-bg text-ui-fg">
+      <PageHeader titulo="Inicio" descripcion={`Hola, ${nombre}. Revisa el estado de tu registro.`}
+        className="shrink-0 p-4 [&_h1]:text-2xl [&_p]:block"
+        acciones={<BaseButton variant="outline" onClick={onSalir}>Salir</BaseButton>} />
+      <div className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto px-4 pb-4">
         {/* Status Header */}
-        <section className="shrink-0 rounded-lg bg-ui-card/95 p-4 text-ui-fg-muted shadow-lg" aria-labelledby="titulo-estado-revision">
-          <p className="font-body text-sm font-semibold text-ui-fg-muted">¡Hola, {nombre}! 👋</p>
-          <p className="mt-1 font-display text-lg font-bold text-ui-fg-muted">🟡 Tu solicitud está en revisión</p>
+        <Card asChild><section className="shrink-0 p-4" aria-labelledby="titulo-estado-revision">
+          <h2 id="titulo-estado-revision" className="text-base font-semibold text-ui-fg">Tu solicitud está en revisión</h2>
           <p className="mt-1 font-body text-xs text-ui-fg-muted">Tiempo est: 24-48 hrs hábiles</p>
           <div className="mt-3">
             <div className="h-2 overflow-hidden rounded-full bg-ui-muted" aria-hidden>
@@ -273,7 +240,7 @@ export function EstadoRevisionConductor({ conductorId, solicitudId, nombre, docu
             </div>
             <p className="mt-1 font-body text-xs font-medium text-ui-fg-muted">{requisitosListos}/{totalRequisitos} listos</p>
           </div>
-        </section>
+        </section></Card>
 
         {/* Acción crítica */}
         {estadoActual === "en_revision" && solicitudId && (
@@ -294,7 +261,7 @@ export function EstadoRevisionConductor({ conductorId, solicitudId, nombre, docu
         )}
 
         {/* Lista densa de requisitos */}
-        <section className="min-h-0 flex-1 overflow-hidden rounded-lg bg-ui-card/95 p-3 text-ui-fg-muted shadow-lg" aria-label="Estado documental">
+        <Card asChild><section className="shrink-0 p-3" aria-label="Estado documental">
           <ul className="flex flex-col gap-2 overflow-hidden">
             <li>
               <BaseButton variant="ghost"
@@ -333,10 +300,10 @@ export function EstadoRevisionConductor({ conductorId, solicitudId, nombre, docu
               );
             })}
           </ul>
-        </section>
+        </section></Card>
 
         {/* Switch minimalista de notificaciones WhatsApp */}
-        <label className="flex shrink-0 items-center justify-between gap-3 rounded-xl bg-ui-card/10 px-3 py-2 text-xs text-ui-on-brand/90">
+        <label className="flex shrink-0 items-center justify-between gap-3 rounded-lg border border-ui-line bg-ui-card px-3 py-2 text-xs text-ui-fg-muted">
           <span>Activar notificaciones por WhatsApp</span>
           <input
             type="checkbox"
@@ -345,7 +312,7 @@ export function EstadoRevisionConductor({ conductorId, solicitudId, nombre, docu
             className="size-4 accent-ui-brand"
           />
         </label>
-      </main>
+      </div>
 
       {/* BottomSheet / Bottom Sheet de revisión de documento (slide-up) */}
       {documentoSeleccionado && (
