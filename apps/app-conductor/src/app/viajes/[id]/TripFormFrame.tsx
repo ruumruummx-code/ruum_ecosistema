@@ -5,14 +5,13 @@ import Link from "next/link";
 import { ConductorScreen } from "../../components/ConductorScreen";
 import { EmergencyPanel } from "./EmergencyPanel";
 import { TripSupportDialog } from "./TripSupportDialog";
-import { TripDialog } from "./TripDialog";
 import styles from "./trip-form.module.css";
 
 export function TripFormFrame({ id, title, step, total, stepLabel, onPrevious, onSteps, primary, onPrimary, disabled, busy, error, notice, tools, children }: {
   id:string; title:string; step?:number; total?:number; stepLabel?:string; onPrevious?:()=>void; onSteps?:()=>void;
   primary:string; onPrimary?:()=>void; disabled?:boolean; busy?:boolean; error?:string|null; notice?:string|null; tools?:ReactNode; children:ReactNode;
 }) {
-  const [support,setSupport]=useState(false); const [details,setDetails]=useState(false);
+  const [support,setSupport]=useState(false);
   return <div data-trip-stage data-trip-form>
     <ConductorScreen variant="form" label={title} header={<>
       <header className={styles.safety}>
@@ -42,11 +41,11 @@ export function TripFormFrame({ id, title, step, total, stepLabel, onPrevious, o
         </div>
       )}
     </>} footer={<section data-trip-primary className={styles.footer}>
-      {error && <div role="alert" className={styles.error}><p>{error.length>130 ? "No se pudo completar la acción. Consulta el motivo." : error}</p>{error.length>130 && <BaseButton variant="ghost" type="button" onClick={()=>setDetails(true)}>Ver motivo completo</BaseButton>}</div>}
-      {notice && <BaseButton variant="ghost" type="button" className={styles.notice} onClick={()=>setDetails(true)}>Ver estado del registro</BaseButton>}
+      {/* Errores y avisos siempre visibles y completos: el conductor no debe abrir nada para saber qué pasó. */}
+      {error && <div role="alert" className={styles.error}><p>{error}</p></div>}
+      {!error && notice && <p role="status" className={styles.noticeText}>{notice}</p>}
       <BaseButton variant="primary" type="button" className={styles.primary} disabled={disabled||busy} aria-busy={busy} onClick={onPrimary}>{busy ? "Procesando…" : primary}</BaseButton>
     </section>}><div className={styles.content}>{children}{tools}</div></ConductorScreen>
     {support && <TripSupportDialog onClose={()=>setSupport(false)} />}
-    {details && <TripDialog title="Estado del registro" onClose={()=>setDetails(false)}><p className={styles.complete}>{error||notice}</p></TripDialog>}
   </div>;
 }

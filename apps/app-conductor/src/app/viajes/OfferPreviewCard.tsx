@@ -44,6 +44,6 @@ export function OfferPreviewCard({ viaje, detalle, hrefDetalle, mapPreview, acce
       <span><ConductorIcon name="clock" /><span>{minutes == null ? duration : `Aprox. ${duration}`}</span></span>
     </div>
     {mapPreview ? <div className={styles.previewMap} data-offer-map>{mapPreview}</div> : null}
-    {accepted?.onReject ? <div className={styles.actionRow}>{primaryAction}<BaseButton variant="primary" type="button" className={styles.options} onClick={accepted.onReject} aria-label="Opciones de traslado" aria-haspopup="dialog" data-trip-primary="true">•••</BaseButton></div> : primaryAction}
+    {accepted?.onReject ? <div className={styles.actionRow}>{primaryAction}<BaseButton variant="outline" type="button" className={styles.options} onClick={accepted.onReject} aria-label="Liberar traslado" aria-haspopup="dialog">Liberar</BaseButton></div> : primaryAction}
   </article>;
 }

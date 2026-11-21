@@ -22,10 +22,8 @@ import { AcceptedTripCard } from "./AcceptedTripCard";
 import { DriverTrasladosView } from "./DriverTrasladosView";
 import styles from "./traslados.module.css";
 import { TrasladosFilters, type OrdenTraslados } from "./ViajesFilters";
-import { UndoRechazoToast } from "./UndoRechazoToast";
 import { TrasladosMapa } from "./ViajesMapa";
 import { filterTrasladosBySearch } from "./ViajesSearch";
-import { PanelSupportSheet } from "../panel/PanelSupportSheet";
 import {
   claveDia,
   crearCalendario,
@@ -37,29 +35,23 @@ import {
   type PasaporteRow
 } from "./trips-utils";
 
-type RechazoPendiente = {
-  viaje: PasaporteRow;
-  motivo: MotivoRechazo;
-};
-
 export default function PaginaTraslados() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [diaSeleccionado, setDiaSeleccionado] = useState("");
   const [diaHoy, setDiaHoy] = useState("");
   const [disponibles, setDisponibles] = useState<PasaporteRow[]>([]);
-  const [rechazados, setRechazados] = useState<string[]>([]);
   const [aceptados, setAceptados] = useState<PasaporteRow[]>([]);
   const [historial, setHistorial] = useState<PasaporteRow[]>([]);
   const [detalles, setDetalles] = useState<Record<string, DetalleOperativo>>({});
   const [cargando, setCargando] = useState(true);
   const [refrescando, setRefrescando] = useState(false);
   const [aviso, setAviso] = useState<string | null>(null);
+  const [errorCarga, setErrorCarga] = useState<string | null>(null);
   const [conductor, setConductor] = useState<Conductor | null>(null);
   const [viajeParaRechazar, setViajeParaRechazar] = useState<PasaporteRow | null>(null);
-  const [rechazoPendiente, setRechazoPendiente] = useState<RechazoPendiente | null>(null);
+  const [enviandoLiberacion, setEnviandoLiberacion] = useState(false);
   const [refreshCount, setRefreshCount] = useState(0);
-  const [soporteAbierto, setSoporteAbierto] = useState(false);
   const [notificacionesCount, setNotificacionesCount] = useState(0);
   const [orden, setOrden] = useState<OrdenTraslados>(() => {
     const v = searchParams.get("orden") as OrdenTraslados | null;
@@ -69,7 +61,6 @@ export default function PaginaTraslados() {
   const [modoMapa, setModoMapa] = useState<"lista" | "mapa">("lista");
   const [estaOnline, setEstaOnline] = useState(true);
 
-  const timeoutRechazoRef = useRef<number | null>(null);
   const recargaDebounceRef = useRef<NodeJS.Timeout | null>(null);
 
   const vista = normalizarVista(searchParams.get("vista"));
@@ -170,19 +161,11 @@ export default function PaginaTraslados() {
     return () => window.clearTimeout(timer);
   }, [fechaUrl]);
 
-  useEffect(() => {
-    return () => {
-      if (timeoutRechazoRef.current) {
-        window.clearTimeout(timeoutRechazoRef.current);
-      }
-    };
-  }, []);
-
   // Carga principal de datos
   useEffect(() => {
     async function cargar() {
       if (!tieneSupabaseConfigurado()) {
-        setAviso("No pudimos consultar los traslados. Inténtalo más tarde.");
+        setErrorCarga("No pudimos consultar los traslados. Inténtalo más tarde.");
         setCargando(false);
         setRefrescando(false);
         return;
@@ -219,9 +202,18 @@ export default function PaginaTraslados() {
         const listaDisponibles = resultados[0].status === "fulfilled" ? resultados[0].value : [];
         const listaAceptados = resultados[1].status === "fulfilled" ? resultados[1].value : [];
         const historialTraslados = resultados[2].status === "fulfilled" ? resultados[2].value : [];
-        if (resultados.some((r) => r.status === "rejected")) {
+        const fallidos = resultados.filter((r) => r.status === "rejected").length;
+        if (fallidos > 0) {
           console.warn("Algunos listados fallaron, mostrando datos parciales", resultados);
         }
+        // Una consulta fallida nunca debe parecer una lista vacía.
+        setErrorCarga(
+          fallidos === resultados.length
+            ? "No pudimos cargar los traslados. Revisa tu conexión e inténtalo de nuevo."
+            : fallidos > 0
+              ? "No pudimos cargar todos los traslados. Lo que ves puede estar incompleto."
+              : null
+        );
 
         const todos = [...listaDisponibles, ...listaAceptados];
         if (todos.length > 0) {
@@ -259,7 +251,7 @@ export default function PaginaTraslados() {
           setAviso("Inicia sesión como conductor para aceptar y ver tus traslados.");
         }
       } catch (err) {
-        setAviso(traducirErrorOperativo(err, "No pudimos cargar los traslados."));
+        setErrorCarga(traducirErrorOperativo(err, "No pudimos cargar los traslados."));
       } finally {
         setCargando(false);
         setRefrescando(false);
@@ -305,62 +297,39 @@ export default function PaginaTraslados() {
     };
   }, []);
 
-  async function persistirRechazo(pendiente: RechazoPendiente) {
-    if (!conductor) throw new Error("Inicia sesión como conductor para registrar el rechazo.");
-    if (!pendiente.viaje.traslado_id) throw new Error("No se pudo identificar el traslado.");
-    const cliente = crearClienteNavegador();
-    await registrarEvento(cliente, "modificacion_traslado_activo", "conductor", conductor.id, {
-      traslado_id: pendiente.viaje.traslado_id,
-      accion: "rechazo_oferta_conductor",
-      motivo: pendiente.motivo
-    });
-    setRechazoPendiente(null);
-    setAviso("Rechazo registrado.");
-  }
-
-  function confirmarRechazo(motivo: MotivoRechazo) {
-    if (!viajeParaRechazar || rechazoPendiente) return;
-    if (!viajeParaRechazar.traslado_id) {
-      setAviso("No se pudo identificar el traslado para rechazarlo.");
+  async function confirmarLiberacion(motivo: MotivoRechazo) {
+    if (!viajeParaRechazar || enviandoLiberacion) return;
+    const trasladoId = viajeParaRechazar.traslado_id;
+    if (!conductor || !trasladoId) {
+      setAviso("No pudimos identificar el traslado. Recarga la lista e inténtalo de nuevo.");
       setViajeParaRechazar(null);
       return;
     }
 
-    const trasladoId = viajeParaRechazar.traslado_id;
-    const pendiente = { viaje: viajeParaRechazar, motivo };
-    setViajeParaRechazar(null);
-    setRechazados((prev) => [...prev, trasladoId]);
-    setDisponibles((prev) => prev.filter((viaje) => viaje.traslado_id !== trasladoId));
-    setRechazoPendiente(pendiente);
-    setAviso(null);
-
-    timeoutRechazoRef.current = window.setTimeout(() => {
-      void persistirRechazo(pendiente).catch((err) => {
-        setAviso(traducirErrorOperativo(err, "No pudimos registrar el rechazo."));
+    // Se envía al momento: el conductor no puede desasignarse solo, así que
+    // operación recibe la solicitud y el traslado sigue en "Mis traslados".
+    setEnviandoLiberacion(true);
+    try {
+      await registrarEvento(crearClienteNavegador(), "modificacion_traslado_activo", "conductor", conductor.id, {
+        traslado_id: trasladoId,
+        accion: "rechazo_oferta_conductor",
+        motivo
       });
-    }, 8000);
-  }
-
-  function deshacerRechazo() {
-    if (!rechazoPendiente) return;
-    if (timeoutRechazoRef.current) {
-      window.clearTimeout(timeoutRechazoRef.current);
-      timeoutRechazoRef.current = null;
+      setViajeParaRechazar(null);
+      setAviso("Solicitud de liberación enviada. Operación te confirmará; mientras tanto, el traslado sigue asignado a ti.");
+    } catch (err) {
+      setViajeParaRechazar(null);
+      setAviso(traducirErrorOperativo(err, "No pudimos enviar la solicitud de liberación. Inténtalo de nuevo o contacta a soporte."));
+    } finally {
+      setEnviandoLiberacion(false);
     }
-
-    const { viaje } = rechazoPendiente;
-    setDisponibles((prev) => (prev.some((item) => item.traslado_id === viaje.traslado_id) ? prev : [viaje, ...prev]));
-    setRechazados((prev) => prev.filter((id) => id !== viaje.traslado_id));
-    setRechazoPendiente(null);
-    setAviso("Rechazo deshecho. El traslado volvió a estar disponible.");
   }
 
   const disponiblesVisibles = useMemo(
-    () => disponibles.filter((viaje) => viaje.traslado_id && !rechazados.includes(viaje.traslado_id)),
-    [disponibles, rechazados]
+    () => disponibles.filter((viaje) => Boolean(viaje.traslado_id)),
+    [disponibles]
   );
   const calendario = useMemo(() => diaSeleccionado ? crearCalendario(disponiblesVisibles, aceptados, detalles, new Date(`${diaSeleccionado}T12:00:00Z`)) : [], [disponiblesVisibles, aceptados, detalles, diaSeleccionado]);
-  const [paginaActual, setPaginaActual] = useState(0);
 
   const fechaFiltro = fechaUrl && /^\d{4}-\d{2}-\d{2}$/.test(fechaUrl) ? diaSeleccionado : null;
   const rawListToRender = useMemo(() => {
@@ -409,9 +378,6 @@ export default function PaginaTraslados() {
     return result;
   }, [rawListToRender, ciudadFiltro, orden, searchQuery]);
 
-  useEffect(() => { setPaginaActual(0); }, [vista, ciudadFiltro, orden, diaSeleccionado, searchQuery]);
-  const indiceTarjeta = Math.min(paginaActual, Math.max(0, listToRender.length - 1));
-  const item = listToRender[indiceTarjeta];
 
   return <>
     <DriverTrasladosView
@@ -423,11 +389,11 @@ export default function PaginaTraslados() {
       onSelectDay={(fecha) => { setDiaSeleccionado(fecha); actualizarUrl({ fecha }); }}
       onTab={(tab) => actualizarUrl({ vista: typeof tab === "string" ? tab : tab ? "disponibles" : "mis-Traslados" })}
       onRefresh={() => { setRefrescando(true); setRefreshCount((prev) => prev + 1); }}
-      onHelp={() => setSoporteAbierto(true)}
       onSort={() => { setOrden("mayor_ganancia"); actualizarUrl({ orden: "mayor_ganancia" }); }}
       sortActive={orden === "mayor_ganancia"}
       onClear={() => { setCiudadFiltro("todas"); setOrden("recientes"); actualizarUrl({ ciudad: "todas", orden: "recientes", q: "" }); }}
       notice={!estaOnline ? "Sin conexión. Conéctate a internet para actualizar las ofertas." : aviso}
+      error={errorCarga}
       filters={<>
         <div role="group" aria-label="Vista Lista o Mapa" className={styles.modeSwitch}>
           <BaseButton variant="ghost" type="button" aria-pressed={modoMapa === "lista"} onClick={() => cambiarModo("lista")}>Lista</BaseButton>
@@ -436,21 +402,19 @@ export default function PaginaTraslados() {
         <TrasladosFilters orden={orden} onCambiarOrden={(valor) => { setOrden(valor); actualizarUrl({ orden: valor }); }} ciudadFiltro={ciudadFiltro}
         onCambiarCiudad={(valor) => { setCiudadFiltro(valor); actualizarUrl({ ciudad: valor }); }} ciudadesDisponibles={ciudadesDisponibles} /></>}
     >
-      {item ? <div className={styles.results}>
-        <p className="sr-only">{listToRender.length} {vista === "disponibles" ? listToRender.length === 1 ? "oferta disponible" : "ofertas disponibles" : listToRender.length === 1 ? "traslado aceptado" : "traslados aceptados"}</p>
-        {listToRender.length > 1 && <div className={styles.pagination} role="group" aria-label="Paginación de traslados">
-          <BaseButton variant="ghost" type="button" disabled={indiceTarjeta === 0} onClick={() => setPaginaActual(indiceTarjeta - 1)}>Anterior</BaseButton>
-          <output aria-live="polite">{indiceTarjeta + 1} de {listToRender.length}</output>
-          <BaseButton variant="ghost" type="button" disabled={indiceTarjeta === listToRender.length - 1} onClick={() => setPaginaActual(indiceTarjeta + 1)}>Siguiente</BaseButton>
-        </div>}
-        <div key={item.viaje.traslado_id} className={styles.resultCard}>
-          {vista === "disponibles" ? <OfertaCard compact viaje={item.viaje} detalle={detalles[item.viaje.traslado_id ?? ""] ?? detalleFallback(item.viaje)} hrefDetalle={hrefDetalle(item.viaje)} mapPreview={modoMapa === "mapa" ? <TrasladosMapa onReturnToList={() => cambiarModo("lista")} Traslados={listToRender.map((it) => it.viaje)} onSelect={(viaje) => router.push(hrefDetalle(viaje))} vistaId={rutaActual} /> : undefined} />
-            : <AcceptedTripCard compact viaje={item.viaje} detalle={detalles[item.viaje.traslado_id ?? ""] ?? detalleFallback(item.viaje)} hrefDetalle={hrefDetalle(item.viaje)} onReject={setViajeParaRechazar} mapPreview={modoMapa === "mapa" ? <TrasladosMapa onReturnToList={() => cambiarModo("lista")} Traslados={listToRender.map((it) => it.viaje)} onSelect={(viaje) => router.push(hrefDetalle(viaje))} vistaId={rutaActual} /> : undefined} />}
-        </div>
+      {listToRender.length > 0 ? <div className={styles.results}>
+        <p className={styles.resultsCount} aria-live="polite">{listToRender.length} {vista === "disponibles" ? listToRender.length === 1 ? "oferta disponible" : "ofertas disponibles" : vista === "historial" ? listToRender.length === 1 ? "traslado en el historial" : "traslados en el historial" : listToRender.length === 1 ? "traslado aceptado" : "traslados aceptados"}</p>
+        {/* Todas las tarjetas a la vista para poder comparar ofertas; el mapa acompaña a la primera. */}
+        {listToRender.map((item, indice) => {
+          const mapa = indice === 0 && modoMapa === "mapa" ? <TrasladosMapa onReturnToList={() => cambiarModo("lista")} Traslados={listToRender.map((it) => it.viaje)} onSelect={(viaje) => router.push(hrefDetalle(viaje))} vistaId={rutaActual} /> : undefined;
+          const detalle = detalles[item.viaje.traslado_id ?? ""] ?? detalleFallback(item.viaje);
+          return <div key={item.viaje.traslado_id ?? indice} className={styles.resultCard}>
+            {vista === "disponibles" ? <OfertaCard compact viaje={item.viaje} detalle={detalle} hrefDetalle={hrefDetalle(item.viaje)} mapPreview={mapa} />
+              : <AcceptedTripCard compact viaje={item.viaje} detalle={detalle} hrefDetalle={hrefDetalle(item.viaje)} onReject={setViajeParaRechazar} mapPreview={mapa} />}
+          </div>;
+        })}
       </div> : undefined}
     </DriverTrasladosView>
-    {rechazoPendiente && <UndoRechazoToast viaje={rechazoPendiente.viaje} motivo={rechazoPendiente.motivo} onDeshacer={deshacerRechazo} />}
-    <RejectTripDialog viaje={viajeParaRechazar} onClose={() => setViajeParaRechazar(null)} onConfirm={confirmarRechazo} />
-    <PanelSupportSheet abierto={soporteAbierto} onCerrar={() => setSoporteAbierto(false)} />
+    <RejectTripDialog viaje={viajeParaRechazar} enviando={enviandoLiberacion} onClose={() => setViajeParaRechazar(null)} onConfirm={(motivo) => void confirmarLiberacion(motivo)} />
   </>;
 }

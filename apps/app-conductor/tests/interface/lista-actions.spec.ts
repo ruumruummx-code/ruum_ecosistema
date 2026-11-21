@@ -40,7 +40,7 @@ for (const mode of ["light", "dark"]) for (const street of [false, true]) for (c
     await expect(offer).toHaveAttribute("href", /\/viajes\//);
     await check("oferta-lista", 1);
     await page.getByRole("button", { name: "Aceptados (3)", exact: true }).click();
-    const options = page.getByRole("button", { name: "Opciones de traslado", exact: true });
+    const options = page.getByRole("button", { name: "Liberar traslado", exact: true });
     await expect(options).toHaveAttribute("aria-haspopup", "dialog");
     await check("aceptado-lista", 2);
     await options.click();

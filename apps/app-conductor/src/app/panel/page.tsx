@@ -17,7 +17,6 @@ import { PanelActiveTripCard } from "./PanelActiveTripCard";
 import { PanelOpportunitiesCard } from "./PanelOpportunitiesCard";
 import { PanelMetrics } from "./PanelMetrics";
 import { PanelStatusRow } from "./PanelStatusRow";
-import { PanelSupportSheet } from "./PanelSupportSheet";
 import { soportaTrackingNativo, obtenerEstadoTrackingNativo } from "../../lib/background-tracking";
 import { getBatteryState, intervaloTrackingMs } from "../../lib/battery";
 import { useCerrarSesion } from "../../lib/use-cerrar-sesion";
@@ -28,40 +27,8 @@ function PanelLoadingSkeleton() {
   </div>;
 }
 
-function SidebarMenuIcon({ name, active = false }: { name: string; active?: boolean }) {
+function SidebarMenuIcon({ name }: { name: string }) {
   switch (name) {
-    case "inicio":
-      return active ? (
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-          <path d="M11.3 2.5a1.1 1.1 0 0 1 1.4 0l8 6.8c.2.2.3.5.3.8V20a1.5 1.5 0 0 1-1.5 1.5h-4.8v-6.2h-5.4v6.2H4.5A1.5 1.5 0 0 1 3 20V10.1c0-.3.1-.6.3-.8l8-6.8Z" />
-        </svg>
-      ) : (
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-          <path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V10Z" />
-          <path d="M9 21v-7h6v7" />
-        </svg>
-      );
-    case "traslados":
-      return (
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-          <path d="M4 9h16l-3.5-3.5" />
-          <path d="M20 15H4l3.5 3.5" />
-        </svg>
-      );
-    case "ganancias":
-      return (
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-          <path d="M4 6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v2h1a1 1 0 0 1 1 1v6a1 1 0 0 1-1 1h-1v2a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6Z" />
-          <rect x="15" y="10" width="6" height="4" rx="1" />
-        </svg>
-      );
-    case "cuenta":
-      return (
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-          <circle cx="12" cy="8" r="4" />
-          <path d="M4 20c0-3.8 3.6-6.5 8-6.5s8 2.7 8 6.5" />
-        </svg>
-      );
     case "preferencias":
       return (
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -87,20 +54,17 @@ function SidebarMenuIcon({ name, active = false }: { name: string; active?: bool
   }
 }
 
+// Inicio, Traslados, Ganancias y Cuenta viven en la barra inferior; el menú solo
+// agrega lo que no está ahí, para no duplicar la navegación principal.
 const MENU_LATERAL = [
-  { href: "/panel", label: "Inicio", icon: "inicio", active: true },
-  { href: "/viajes", label: "Traslados", icon: "traslados", active: false },
-  { href: "/ganancias", label: "Ganancias", icon: "ganancias", active: false },
-  { href: "/cuenta", label: "Cuenta", icon: "cuenta", active: false },
-  { href: "/cuenta/preferencias", label: "Preferencias", icon: "preferencias", active: false },
-  { href: "/notificaciones", label: "Notificaciones", icon: "notificaciones", active: false },
-  { href: "/cuenta/soporte", label: "Soporte", icon: "soporte", active: false },
+  { href: "/notificaciones", label: "Notificaciones", icon: "notificaciones" },
+  { href: "/cuenta/preferencias", label: "Preferencias", icon: "preferencias" },
+  { href: "/cuenta/soporte", label: "Soporte", icon: "soporte" },
 ] as const;
 
 export default function PaginaPanel() {
   const scrollRef = useRef<HTMLDivElement>(null);
   const { cerrarSesion, cerrandoSesion, errorCerrarSesion } = useCerrarSesion();
-  const [soporteAbierto, setSoporteAbierto] = useState(false);
   const [menuAbierto, setMenuAbierto] = useState(false);
   const [gpsActivo, setGpsActivo] = useState<boolean | null>(null);
   const [gpsUltimaSenal, setGpsUltimaSenal] = useState<Date | null>(null);
@@ -405,13 +369,9 @@ export default function PaginaPanel() {
                   key={item.href}
                   href={item.href}
                   onClick={() => setMenuAbierto(false)}
-                  className={`flex min-h-11 cursor-pointer items-center gap-3 rounded-xl px-3 font-body text-sm transition ${
-                    item.active
-                      ? "bg-ui-muted font-extrabold text-ui-brand"
-                      : "font-semibold text-ui-fg hover:bg-ui-muted"
-                  }`}
+                  className="flex min-h-11 cursor-pointer items-center gap-3 rounded-xl px-3 font-body text-sm font-semibold text-ui-fg transition hover:bg-ui-muted"
                 >
-                  <SidebarMenuIcon name={item.icon} active={item.active} />
+                  <SidebarMenuIcon name={item.icon} />
                   <span>{item.label}</span>
                 </Link>
               ))}
@@ -454,8 +414,6 @@ export default function PaginaPanel() {
         onConfirmar={() => void persistirDisponibilidad("no_disponible")}
       />
 
-      {/* Sheet de Soporte */}
-      <PanelSupportSheet abierto={soporteAbierto} onCerrar={() => setSoporteAbierto(false)} />
 
       {/* Toasts no intrusivos */}
       {(errorCerrarSesion || errorDisponibilidad) && (

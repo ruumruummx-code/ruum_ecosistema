@@ -5,14 +5,14 @@ import { ConductorIcon } from "@/components/icons";
 import type { NavDestination } from "./ConductorNav";
 
 export const CONDUCTOR_DESTINATIONS: NavDestination[] = [
-  { href: "/panel", etiqueta: "Inicio" }, { href: "/viajes", etiqueta: "Traslados" }, { href: "/cuenta", etiqueta: "Cuenta" },
+  { href: "/panel", etiqueta: "Inicio" }, { href: "/viajes", etiqueta: "Traslados" }, { href: "/ganancias", etiqueta: "Ganancias" }, { href: "/cuenta", etiqueta: "Cuenta" },
 ];
-const ICONOS = { "/panel": "home", "/viajes": "truck", "/cuenta": "user" } as const;
+const ICONOS = { "/panel": "home", "/viajes": "truck", "/ganancias": "chart", "/cuenta": "user" } as const;
 export function ConductorNavigation({ embedded = false, destinos = CONDUCTOR_DESTINATIONS }: { embedded?: boolean; destinos?: NavDestination[] }) {
   const pathname = usePathname();
   const esActivo = (href: string) => pathname === href || (href !== "/panel" && pathname.startsWith(`${href}/`));
   const navigation = <nav aria-label="Navegación principal móvil" className="w-full px-1 max-w-md mx-auto">
-            <div className="grid grid-cols-3 gap-0.5">
+            <div className="grid grid-cols-4 gap-0.5">
               {destinos.map((destino) => {
                 const Icono = destino.Icono;
                 const icono = ICONOS[destino.href as keyof typeof ICONOS] ?? "home";
