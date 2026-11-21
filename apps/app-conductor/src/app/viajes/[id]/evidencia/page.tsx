@@ -11,6 +11,7 @@ import { fotoSrc } from "./evidence-requirements";
 import { EvidenciaCsatSheet } from "./EvidenciaCsatSheet";
 import styles from "../trip-form.module.css";
 
+import { ConductorIcon } from "@/components/icons";
 const PHOTOS: {angle:AnguloEvidencia; label:string; instruction:string}[] = [
   {angle:"frente",label:"Frente",instruction:"Incluye el frente completo y la placa."},
   {angle:"trasera",label:"Parte trasera",instruction:"Incluye la parte trasera completa y la placa."},
@@ -61,7 +62,7 @@ export default function PaginaEvidencia() {
         {captured && fotoSrc(captured) ? <BaseButton variant="ghost" type="button" className={styles.photoButton} onClick={()=>setPreview(true)} aria-label="Ampliar fotografía">
           {/* eslint-disable-next-line @next/next/no-img-element -- Vista previa de captura local o URL firmada. */}
           <img className={styles.preview} src={fotoSrc(captured)!} alt={`Evidencia: ${photo.label}`} /><span className={styles.photoBadge}><span aria-hidden="true">✓ </span>Ampliar fotografía</span>
-        </BaseButton> : <div className={styles.photoPlaceholder}><span aria-hidden="true" className={styles.photoPlaceholderIcon}>📷</span><span>La fotografía aparecerá aquí</span></div>}
+        </BaseButton> : <div className={styles.photoPlaceholder}><span aria-hidden="true" className={styles.photoPlaceholderIcon}><ConductorIcon name="camera" /></span><span>La fotografía aparecerá aquí</span></div>}
         {captured && <p role="status">{captured.sincronizada ? "Sincronizada" : "Guardada en el dispositivo; pendiente de sincronización"}</p>}
 
       </>}

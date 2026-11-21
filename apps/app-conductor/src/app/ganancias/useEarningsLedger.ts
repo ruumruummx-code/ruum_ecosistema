@@ -70,7 +70,7 @@ export function etiquetaEstadoUnica(estatus: EstadoEconomicoExplicito): { texto:
     case "programado":
       return { texto: "Depósito programado", clase: "inline-flex min-h-[28px] items-center gap-1.5 rounded-full border border-ui-warning bg-ui-warning-soft px-2.5 py-1 font-body text-xs font-semibold text-ui-warning" };
     case "confirmado":
-      return { texto: "Viaje concluido", clase: "inline-flex min-h-[28px] items-center gap-1.5 rounded-full border border-ui-success bg-ui-success-soft px-2.5 py-1 font-body text-xs font-semibold text-ui-success" };
+      return { texto: "Traslado concluido", clase: "inline-flex min-h-[28px] items-center gap-1.5 rounded-full border border-ui-success bg-ui-success-soft px-2.5 py-1 font-body text-xs font-semibold text-ui-success" };
     case "en_validacion":
       return { texto: "En validación", clase: "inline-flex min-h-[28px] items-center gap-1.5 rounded-full border border-ui-warning bg-ui-warning-soft px-2.5 py-1 font-body text-xs font-semibold text-ui-warning" };
     case "estimado":

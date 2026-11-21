@@ -12,6 +12,7 @@ export default function GananciasConductorPage() {
   const [loading, setLoading] = useState(true);
   const [period, setPeriod] = useState<EarningsPeriod>("semana");
   const [now, setNow] = useState<Date | null>(null);
+  const [intento, setIntento] = useState(0);
   useEffect(() => {
     let active = true;
     let inFlight = false;
@@ -19,14 +20,15 @@ export default function GananciasConductorPage() {
       if (inFlight || !active) return;
       inFlight = true;
       try {
-        if (!tieneSupabaseConfigurado()) throw new Error("Las ganancias no están disponibles en este momento. Intenta más tarde.");
+        // Cada causa conserva su propio mensaje; solo los fallos inesperados usan el genérico.
+        if (!tieneSupabaseConfigurado()) { if (active) setError("Las ganancias no están disponibles en este momento. Intenta más tarde."); return; }
         const client = crearClienteNavegador();
         const driver = await obtenerConductorActual(client);
-        if (!driver) throw new Error("Inicia sesión como conductor para consultar tus ganancias.");
+        if (!driver) { if (active) setError("No encontramos tu perfil de conductor. Cierra sesión y vuelve a entrar."); return; }
         const result = await obtenerGananciasConductor(client, driver.id);
         if (active) { setData(result); setNow(new Date()); setError(null); }
       } catch {
-        if (active) setError("No pudimos cargar tus ganancias. Intenta de nuevo más tarde.");
+        if (active) setError(navigator.onLine ? "No pudimos cargar tus ganancias. Inténtalo de nuevo." : "Sin conexión. Conéctate a internet para ver tus ganancias.");
       } finally { inFlight = false; if (active) setLoading(false); }
     }
     void load();
@@ -42,7 +44,7 @@ export default function GananciasConductorPage() {
       window.removeEventListener("online", refresh);
       document.removeEventListener("visibilitychange", refresh);
     };
-  }, []);
+  }, [intento]);
   const summary = useMemo(() => data && now ? summarizeEarnings(data.traslados, now, period) : null, [data, now, period]);
-  return <DriverEarningsView data={data} summary={summary} period={period} onPeriod={setPeriod} loading={loading} error={error} />;
+  return <DriverEarningsView data={data} summary={summary} period={period} onPeriod={setPeriod} loading={loading} error={error} onRetry={() => { setLoading(true); setIntento(valor => valor + 1); }} />;
 }

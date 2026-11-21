@@ -3,6 +3,7 @@
 import { NativeSelect as BaseSelect, Input as BaseInput, Button as BaseButton } from "@ruum/ui/base";
 import { labelGasto, type GastoData } from "./cierre-types";
 
+import { ConductorIcon } from "@/components/icons";
 interface CierreGastosSectionProps {
   writable: boolean;
   gastos: GastoData[];
@@ -58,7 +59,7 @@ export function CierreGastosSection({
           className="bg-ui-muted border border-ui-line/25 shadow-md rounded-lg p-4.5 flex flex-col gap-3.5"
         >
           <div className="flex items-center gap-1.5 border-b border-ui-line/15 pb-2">
-            <span className="text-sm">💵</span>
+            <span className="text-sm"><ConductorIcon name="bank" /></span>
             <span className="font-display text-xs font-bold text-ui-fg">Registrar Nuevo Gasto</span>
           </div>
 
@@ -142,7 +143,7 @@ export function CierreGastosSection({
                 id="comprobante_upload"
               />
               <div className="flex items-center gap-2">
-                <span className="text-xl">📷</span>
+                <span className="text-xl"><ConductorIcon name="camera" /></span>
                 <span className="font-bold text-xs">
                   {comprobanteArchivo
                     ? `✓ ${comprobanteArchivo.name.slice(0, 26)}...`
@@ -206,7 +207,7 @@ export function CierreGastosSection({
                         className="inline-flex items-center gap-0.5 text-xs text-ui-brand font-semibold hover:underline cursor-pointer bg-transparent border-0 p-0 shrink-0"
                         title="Ver ticket adjunto (enlace seguro temporal)"
                       >
-                        <span>{resolviendoGastoId === g.id ? "⏳" : "📎 Ticket"}</span>
+                        <span>{resolviendoGastoId === g.id ? "Abriendo…" : "Ver ticket"}</span>
                       </BaseButton>
                     )}
                   </div>

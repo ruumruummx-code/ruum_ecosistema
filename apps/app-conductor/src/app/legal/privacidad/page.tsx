@@ -87,7 +87,7 @@ export default function PaginaPrivacidadConductor() {
             download
             className="inline-flex items-center gap-2 font-body text-xs font-bold text-ui-brand underline-offset-4 hover:underline"
           >
-            📥 Descargar versión completa (.docx)
+            Descargar versión completa (.docx)
           </a>
         </div>
       </article>

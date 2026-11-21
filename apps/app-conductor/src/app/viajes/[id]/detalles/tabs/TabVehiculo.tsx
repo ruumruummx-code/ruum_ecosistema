@@ -1,6 +1,7 @@
 "use client";
 
 import { Button as BaseButton } from "@ruum/ui/base";
+import { ConductorIcon } from "@/components/icons";
 interface TabVehiculoProps {
   vehiculo: string;
   placas: string;
@@ -196,7 +197,7 @@ export function TabVehiculo({
                   : "bg-ui-warning/15 text-ui-warning border border-ui-warning/30"
               }`}
             >
-              <span>{estadoRecepcionTono === "success" ? "✓" : "⏳"}</span>
+              <ConductorIcon name={estadoRecepcionTono === "success" ? "check" : "clock"} size={14} />
               <span>{estadoRecepcionTexto}</span>
             </span>
           </div>
@@ -210,7 +211,7 @@ export function TabVehiculo({
           Garantía de Evidencia Ruum Ruum
         </span>
         <div className="p-3 bg-ui-card rounded-xl border border-ui-line/15 flex items-center gap-2.5">
-          <span className="text-base">🛡️</span>
+          <span className="text-base"><ConductorIcon name="shield" /></span>
           <span className="text-sm text-ui-fg-muted leading-snug">
             Inspección 360° fotográfica obligatoria antes de iniciar y al concluir la entrega documentada.
           </span>

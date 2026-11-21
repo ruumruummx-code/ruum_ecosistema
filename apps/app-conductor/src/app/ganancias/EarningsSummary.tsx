@@ -175,7 +175,7 @@ export function EarningsSummary({
           </div>
           {resumen.totalesIncompletos && (
             <p className="px-4 py-2 font-body text-xs text-ui-warning  bg-ui-warning/10 border-t border-ui-warning/30">
-              ⚠️ <strong>Totales preliminares:</strong> El desglose de bonos o gastos está en conciliación operativa y no se asume en cero.
+              <strong>Totales preliminares:</strong> El desglose de bonos o gastos está en conciliación operativa y no se asume en cero.
             </p>
           )}
           {resumen.retenciones > 0 && (

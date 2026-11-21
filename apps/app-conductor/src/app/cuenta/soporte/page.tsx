@@ -5,6 +5,7 @@ import { Card } from "@ruum/ui";
 import { CONTACTOS_SOPORTE_CONDUCTOR } from "@/lib/contactos-soporte";
 import { ConductorScreen, ConductorPageHeader } from "../../components/ConductorScreen";
 
+import { ConductorIcon } from "@/components/icons";
 export default function PaginaSoporteCuenta() {
   const whatsapp = CONTACTOS_SOPORTE_CONDUCTOR.soporte.whatsapp;
   const telefono = CONTACTOS_SOPORTE_CONDUCTOR.soporte.telefono;
@@ -21,11 +22,11 @@ export default function PaginaSoporteCuenta() {
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-start gap-3.5">
               <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-ui-card border border-ui-line/80 font-display text-xl font-bold text-ui-fg shadow-2xs">
-                🚨
+                <ConductorIcon name="warning" />
               </div>
               <div>
                 <h2 className="font-display text-base font-bold text-ui-fg">
-                  ¿Tienes un viaje en curso o alguna eventualidad?
+                  ¿Tienes un traslado en curso o alguna eventualidad?
                 </h2>
                 <p className="mt-0.5 font-body text-sm leading-5 text-ui-fg-muted">
                   Accede al reporte prioritario para incidentes en ruta, ajuste de tarifa o contacto con el usuario.
@@ -37,7 +38,7 @@ export default function PaginaSoporteCuenta() {
               href="/viajes"
               className="inline-flex w-full shrink-0 items-center justify-center gap-2 rounded-xl bg-action-primary px-5 py-3 font-display text-sm font-black text-ui-on-brand shadow-xs transition hover:bg-action-primary-hover active:scale-95 sm:w-auto"
             >
-              Ayuda con mi viaje actual →
+              Ayuda con mi traslado actual →
             </Link>
           </div>
         </div>
@@ -61,7 +62,7 @@ export default function PaginaSoporteCuenta() {
             >
               <div className="flex items-center gap-3 min-w-0">
                 <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-ui-success-soft font-display text-lg text-ui-success">
-                  💬
+                  <ConductorIcon name="support" />
                 </div>
                 <div className="min-w-0">
                   <span className="block font-display text-sm font-bold text-ui-fg truncate">
@@ -69,7 +70,7 @@ export default function PaginaSoporteCuenta() {
                   </span>
                   {/* 3. Microcopy SLA */}
                   <span className="block font-body text-sm text-ui-success font-semibold">
-                    ⚡ Respuesta habitual &lt; 5 min
+                    Respuesta habitual &lt; 5 min
                   </span>
                 </div>
               </div>
@@ -83,7 +84,7 @@ export default function PaginaSoporteCuenta() {
             >
               <div className="flex items-center gap-3 min-w-0">
                 <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-ui-brand-soft font-display text-lg text-ui-brand">
-                  📞
+                  <ConductorIcon name="phone" />
                 </div>
                 <div className="min-w-0">
                   <span className="block font-display text-sm font-bold text-ui-fg truncate">
@@ -91,7 +92,7 @@ export default function PaginaSoporteCuenta() {
                   </span>
                   {/* 3. Microcopy SLA */}
                   <span className="block font-body text-sm text-ui-brand font-semibold">
-                    📞 Atención telefónica 24/7
+                    Atención telefónica 24/7
                   </span>
                 </div>
               </div>
@@ -117,11 +118,11 @@ export default function PaginaSoporteCuenta() {
             >
               <div className="flex items-center gap-3 min-w-0">
                 <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-ui-warning-soft font-display text-lg text-ui-warning">
-                  ⚠️
+                  <ConductorIcon name="warning" />
                 </div>
                 <div className="min-w-0">
                   <span className="block font-display text-sm font-bold text-ui-fg">
-                    Reportar problema en un viaje
+                    Reportar problema en un traslado
                   </span>
                   <span className="block font-body text-sm text-ui-fg-muted">
                     Ajuste de tarifas, objetos olvidados o aclaraciones de ruta • Prioridad operativa
@@ -138,7 +139,7 @@ export default function PaginaSoporteCuenta() {
             >
               <div className="flex items-center gap-3 min-w-0">
                 <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-ui-brand-soft font-display text-lg text-ui-brand">
-                  ✉️
+                  <ConductorIcon name="mail" />
                 </div>
                 <div className="min-w-0">
                   <span className="block font-display text-sm font-bold text-ui-fg">
@@ -172,7 +173,7 @@ export default function PaginaSoporteCuenta() {
             href={bajaCuenta.href}
             className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-ui-danger/40 bg-ui-card px-4 py-3 font-display text-sm font-bold text-ui-danger shadow-2xs transition hover:border-ui-danger hover:bg-ui-danger/10 active:scale-95"
           >
-            ⚠️ {bajaCuenta.etiqueta}
+            {bajaCuenta.etiqueta}
           </a>
         </Card>
       </div>

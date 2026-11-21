@@ -311,7 +311,7 @@ export function useEvidenciaPageLogic(id: string): UseEvidenciaPageLogic {
 
       const offline = typeof navigator !== "undefined" && !navigator.onLine;
       if (offline) {
-        setAviso("⚠️ Sin conexión. Guardamos la fotografía en la caché local del dispositivo de forma segura.");
+        setAviso("Sin conexión. Guardamos la fotografía en la caché local del dispositivo de forma segura.");
         announce(`Foto ${angulo} guardada sin conexión, se sincronizará`);
       } else {
         setAvisoExito(`Fotografía "${angulo}" registrada localmente.`);

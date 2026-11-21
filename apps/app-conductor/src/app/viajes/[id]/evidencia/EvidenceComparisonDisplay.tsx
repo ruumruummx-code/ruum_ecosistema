@@ -2,6 +2,7 @@ import { Aviso } from "@ruum/ui";
 import { ConductorButton as Button } from "@/components/v2/ConductorUI";
 import type { ResultadosComparacion } from "./useEvidenceComparison";
 
+import { ConductorIcon } from "@/components/icons";
 export interface EvidenceComparisonDisplayProps {
   resultados: ResultadosComparacion | null;
   estaCargando: boolean;
@@ -10,10 +11,10 @@ export interface EvidenceComparisonDisplayProps {
 }
 
 const ICONO_ALERTA = {
-  critico: "⚠️",
-  advertencia: "⚠️",
-  info: "ℹ️"
-};
+  critico: "warning",
+  advertencia: "warning",
+  info: "alert"
+} as const;
 
 const COLOR_ALERTA = {
   critico: "danger",
@@ -84,7 +85,7 @@ export function EvidenceComparisonDisplay({
             <div key={index} className="flex items-start gap-2">
               <Aviso tono={COLOR_ALERTA[alerta.tipo]}>
                 <span className="flex items-start gap-2">
-                  <span aria-hidden="true">{ICONO_ALERTA[alerta.tipo]}</span>
+                  <span aria-hidden="true"><ConductorIcon name={ICONO_ALERTA[alerta.tipo]} /></span>
                   <span>{alerta.mensaje}</span>
                 </span>
               </Aviso>

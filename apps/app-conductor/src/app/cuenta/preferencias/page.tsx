@@ -13,11 +13,12 @@ import { cargarConductorCuenta, type ConductorCuenta } from "../cuenta-utils";
 import { Card, Tabs, TabsList, TabsTrigger, TabsContent } from "@ruum/ui/base";
 import type { ReactNode } from "react";
 
+import { ConductorIcon, type ConductorIconName } from "@/components/icons";
 function PreferenceRow({ titulo, subtitulo, icono, derecha, disabled }: {
   titulo: ReactNode; subtitulo?: ReactNode; icono?: ReactNode; derecha?: ReactNode; disabled?: boolean;
 }) {
   return <Card className="flex items-center gap-3 p-3" aria-disabled={disabled || undefined}>
-    <span aria-hidden="true" className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-ui-brand-soft text-ui-brand-soft-fg">{icono}</span>
+    <span aria-hidden="true" className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-ui-brand-soft text-ui-brand-soft-fg">{typeof icono === "string" ? <ConductorIcon name={icono as ConductorIconName} /> : icono}</span>
     <span className="min-w-0 flex-1"><span className="block text-sm font-semibold text-ui-fg">{titulo}</span><span className="mt-1 block text-xs text-ui-fg-muted">{subtitulo}</span></span>
     <span className="shrink-0">{derecha}</span>
   </Card>;
@@ -56,34 +57,34 @@ const SECCIONES_ALERTAS: { titulo: string; opciones: OpcionConfig[] }[] = [
   {
     titulo: "Operativas y de Servicio",
     opciones: [
-      { clave: "notificaciones_push", titulo: "Push en este dispositivo", subtitulo: "Alertas visuales y sonoras en tiempo real", icono: "📲" },
-      { clave: "modo_no_molestar", titulo: "Horario silencioso (22:00 - 07:00)", subtitulo: "Silencia avisos fuera de servicio o turno", icono: "🌙" },
-      { clave: "notificar_traslados_asignados", titulo: "Traslados asignados", subtitulo: "Confirmación inmediata de servicios asignados", icono: "🚘" },
-      { clave: "notificar_cambios_operativos", titulo: "Cambios operativos", subtitulo: "Modificaciones en rutas, puntos o tiempos", icono: "⚡" },
-      { clave: "notificar_documentos", titulo: "Alertas de documentos", subtitulo: "Avisos sobre licencias o expedientes por vencer", icono: "📄" }
+      { clave: "notificaciones_push", titulo: "Push en este dispositivo", subtitulo: "Alertas visuales y sonoras en tiempo real", icono: "phone" },
+      { clave: "modo_no_molestar", titulo: "Horario silencioso (22:00 - 07:00)", subtitulo: "Silencia avisos fuera de servicio o turno", icono: "clock" },
+      { clave: "notificar_traslados_asignados", titulo: "Traslados asignados", subtitulo: "Confirmación inmediata de servicios asignados", icono: "car" },
+      { clave: "notificar_cambios_operativos", titulo: "Cambios operativos", subtitulo: "Modificaciones en rutas, puntos o tiempos", icono: "warning" },
+      { clave: "notificar_documentos", titulo: "Alertas de documentos", subtitulo: "Avisos sobre licencias o expedientes por vencer", icono: "document" }
     ]
   },
   {
     titulo: "Comerciales y Opcionales",
     opciones: [
-      { clave: "notificar_oportunidades", titulo: "Nuevas oportunidades", subtitulo: "Avisos de servicios disponibles cercanos", icono: "🎯" },
-      { clave: "notificar_ganancias", titulo: "Ganancias y pagos", subtitulo: "Resumen de corte semanal y depósitos", icono: "💵" },
-      { clave: "notificar_promociones", titulo: "Promociones y beneficios", subtitulo: "Bonos operativos y campañas exclusivas", icono: "🎁" }
+      { clave: "notificar_oportunidades", titulo: "Nuevas oportunidades", subtitulo: "Avisos de servicios disponibles cercanos", icono: "truck" },
+      { clave: "notificar_ganancias", titulo: "Ganancias y pagos", subtitulo: "Resumen de corte semanal y depósitos", icono: "bank" },
+      { clave: "notificar_promociones", titulo: "Promociones y beneficios", subtitulo: "Bonos operativos y campañas exclusivas", icono: "card" }
     ]
   }
 ];
 
 const OPCIONES_VIAJES: OpcionConfig[] = [
-  { clave: "traslados_locales", titulo: "Traslados locales", subtitulo: "Dentro de la zona metropolitana primaria", icono: "🏙️" },
-  { clave: "traslados_foraneos", titulo: "Traslados foráneos", subtitulo: "Interurbanos y trayectos de larga distancia", icono: "🛣️" },
-  { clave: "traslados_nocturnos", titulo: "Servicios nocturnos (22:00 a 06:00)", subtitulo: "Requiere activación voluntaria", icono: "🌌" },
-  { clave: "traslados_empresariales", titulo: "Traslados corporativos", subtitulo: "Servicios ejecutivos para cuentas de empresa", icono: "🏢" },
-  { clave: "traslados_personales", titulo: "Traslados personales", subtitulo: "Reservados directamente por particulares", icono: "👤" }
+  { clave: "traslados_locales", titulo: "Traslados locales", subtitulo: "Dentro de la zona metropolitana primaria", icono: "pin" },
+  { clave: "traslados_foraneos", titulo: "Traslados foráneos", subtitulo: "Interurbanos y trayectos de larga distancia", icono: "truck" },
+  { clave: "traslados_nocturnos", titulo: "Servicios nocturnos (22:00 a 06:00)", subtitulo: "Requiere activación voluntaria", icono: "clock" },
+  { clave: "traslados_empresariales", titulo: "Traslados corporativos", subtitulo: "Servicios ejecutivos para cuentas de empresa", icono: "home" },
+  { clave: "traslados_personales", titulo: "Traslados personales", subtitulo: "Reservados directamente por particulares", icono: "user" }
 ];
 
 const TABS: { clave: "alertas" | "viajes" | "tema"; etiqueta: string }[] = [
   { clave: "alertas", etiqueta: "Alertas" },
-  { clave: "viajes", etiqueta: "Viajes" },
+  { clave: "viajes", etiqueta: "Traslados" },
   { clave: "tema", etiqueta: "Tema" }
 ];
 
@@ -273,7 +274,7 @@ export default function PaginaPreferenciasCuenta() {
                   <span className="block font-display text-xs font-bold text-ui-brand mb-0.5">
                     Protección operativa
                   </span>
-                  Los avisos críticos de seguridad y rastreo GPS durante un viaje activo se mantienen siempre habilitados por política de protección al conductor.
+                  Los avisos críticos de seguridad y rastreo GPS durante un traslado activo se mantienen siempre habilitados por política de protección al conductor.
                 </p>
               </div>
             </>

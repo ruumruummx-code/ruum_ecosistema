@@ -104,7 +104,7 @@ export function ContactActionBar({ trasladoId, role, name, phone }: ContactActio
               disabled={busy !== null}
               className="shrink-0 min-h-11 rounded-full border border-ui-brand bg-ui-brand-soft px-4 py-2 font-body text-sm font-bold text-ui-brand transition hover:bg-ui-card active:scale-[0.98] disabled:cursor-wait disabled:border-ui-line disabled:bg-ui-card disabled:text-disabled whitespace-nowrap"
             >
-              {busy === quickMessage ? TEXTOS_CARGANDO.enviando : `💬 ${quickMessage}`}
+              {busy === quickMessage ? TEXTOS_CARGANDO.enviando : quickMessage}
             </BaseButton>
           ))}
         </div>
@@ -128,7 +128,7 @@ export function ContactActionBar({ trasladoId, role, name, phone }: ContactActio
 
       <div className="mt-3">
         <Button variant="secondary" className="w-full sm:w-auto min-h-11" onClick={callContact} disabled={busy !== null || (!isSupport && !phone)}>
-          {busy === "call" ? TEXTOS_CARGANDO.conectando : "📞 Llamar"}
+          {busy === "call" ? TEXTOS_CARGANDO.conectando : "Llamar"}
         </Button>
       </div>
 

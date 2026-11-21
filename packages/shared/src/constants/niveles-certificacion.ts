@@ -70,7 +70,7 @@ export const CARTA_DERECHOS_CONDUCTOR: string[] = [
   "Recibir soporte humano.",
   "Activar protocolos de seguridad.",
   "Reportar corrupción sin represalias.",
-  "Consultar historial de viajes y pagos.",
+  "Consultar historial de traslados y pagos.",
 ];
 
 // 11.7 — Compromisos (contrapartida visible y auditable).

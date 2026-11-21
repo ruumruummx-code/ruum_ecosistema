@@ -12,7 +12,9 @@ export default function PaginaOnboarding() {
   const finalizar = useCallback(
     async (destino: "/registro" | "/login") => {
       await marcarOnboardingVisto();
-      router.replace(destino);
+      // Si se llegó aquí desde un enlace protegido, el acceso devuelve al conductor a ese destino.
+      const next = destino === "/login" ? new URLSearchParams(window.location.search).get("next") : null;
+      router.replace(next ? `/login?next=${encodeURIComponent(next)}` : destino);
     },
     [router]
   );

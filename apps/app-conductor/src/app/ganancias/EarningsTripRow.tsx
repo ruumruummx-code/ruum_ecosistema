@@ -2,6 +2,7 @@
 
 import { Button as BaseButton } from "@ruum/ui/base";
 import Link from "next/link";
+import { ConductorIcon } from "@/components/icons";
 import type { EstadoEconomicoExplicito } from "@ruum/shared/constants";
 import { etiquetaEstadoUnica, formatearFecha, formatearFechaCorta, formatearMoneda } from "./useEarningsLedger";
 
@@ -56,7 +57,7 @@ export function EarningsTripRow({
         className="w-full flex items-center gap-3 p-4 text-left focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-2 focus-visible:outline-ui-brand"
       >
         <div className="flex size-11 shrink-0 items-center justify-center rounded-xl border border-ui-line bg-ui-muted text-ui-brand text-xl">
-          🚘
+          <ConductorIcon name="car" size={22} />
         </div>
         <div className="min-w-0 flex-1">
           <h3 className="font-display text-sm font-bold text-ui-fg truncate">{viaje.vehiculo}</h3>
@@ -183,7 +184,7 @@ export function EarningsTripRow({
                 </div>
               </div>
               <div className="flex items-center justify-between gap-2 rounded-lg bg-ui-muted border border-ui-line px-3 py-2">
-                <span className="font-body text-xs font-bold text-ui-fg-muted">Ganancia del viaje</span>
+                <span className="font-body text-xs font-bold text-ui-fg-muted">Ganancia del traslado</span>
                 <span className="font-display text-xs font-black text-ui-fg tabular-nums">
                   {formatearMoneda(viaje.montoGanado)}
                 </span>

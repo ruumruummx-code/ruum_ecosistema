@@ -5,6 +5,7 @@ import { ConductorScreen, ConductorPageHeader } from "../components/ConductorScr
 import { useState } from "react";
 import Link from "next/link";
 import { Aviso } from "@ruum/ui";
+import { ConductorIcon } from "@/components/icons";
 import { useEarningsLedger } from "./useEarningsLedger";
 import { EarningsTimeline } from "./EarningsTimeline";
 import { EarningsTabs } from "./EarningsTabs";
@@ -78,7 +79,7 @@ export default function PaginaGanancias() {
 
       {cargando && (
         <div className="mt-6 rounded-xl border border-ui-line bg-ui-muted p-8">
-          <p className="font-body text-sm font-semibold text-ui-fg-muted">Cargando expediente de ganancias...</p>
+          <p className="font-body text-sm font-semibold text-ui-fg-muted">Cargando tus ganancias…</p>
           <div className="mt-4 grid gap-3 sm:grid-cols-4">
             <div className="h-20 animate-pulse rounded-xl bg-ui-muted" />
             <div className="h-20 animate-pulse rounded-xl bg-ui-muted" />
@@ -92,11 +93,11 @@ export default function PaginaGanancias() {
         <div className="mt-6 rounded-xl border-ui-brand/35 bg-ui-muted p-8">
           <div className="mx-auto flex max-w-2xl flex-col items-center text-center">
             <div className="flex size-14 items-center justify-center rounded-full border border-ui-brand/40 bg-ui-brand/10 font-display text-2xl text-ui-brand" aria-hidden>
-              💵
+              <ConductorIcon name="chart" size={24} />
             </div>
             <h2 className="mt-4 font-display text-2xl font-bold text-ui-fg">Aún no hay ganancias registradas</h2>
             <p className="mt-2 font-body text-sm leading-6 text-ui-fg-muted">
-              Completa tu primer traslado para comenzar a acumular ganancias. Al finalizar cada viaje, verás aquí el desglose detallado y el estatus de tu depósito bancario.
+              Completa tu primer traslado para comenzar a acumular ganancias. Al finalizar cada traslado, verás aquí el desglose detallado y el estatus de tu depósito bancario.
             </p>
           </div>
         </div>
@@ -134,7 +135,7 @@ export default function PaginaGanancias() {
                 </p>
                 <p className="font-body text-xs font-semibold text-ui-fg-muted">
                   {periodoActivo === "semana" ? "Dom – Sáb" : periodoActivo === "mes" ? "Mes completo" : "Año completo"} ·{" "}
-                  {resumen.totalTraslados} viaje(s)
+                  {resumen.totalTraslados} {resumen.totalTraslados === 1 ? "traslado" : "traslados"}
                 </p>
               </div>
               <BaseButton variant="ghost"
@@ -158,10 +159,10 @@ export default function PaginaGanancias() {
             setInfoSheet={setInfoSheetLocal}
           />
 
-          {/* Desglose por viaje */}
-          <section className="mt-6" aria-label="Desglose por viaje">
+          {/* Desglose por traslado */}
+          <section className="mt-6" aria-label="Desglose por traslado">
             <div className="flex items-center justify-between gap-2">
-              <h2 className="font-display text-base font-bold text-ui-fg">Desglose por viaje</h2>
+              <h2 className="font-display text-base font-bold text-ui-fg">Desglose por traslado</h2>
               <span className="rounded-full bg-ui-muted border border-ui-line px-2.5 py-1 font-body text-xs font-bold text-ui-fg-muted tabular-nums">
                 {TrasladosFiltrados.length} traslado(s)
               </span>

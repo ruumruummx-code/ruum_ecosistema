@@ -6,6 +6,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { calcularSyncSnapshot, obtenerUltimoSyncSnapshot, publicarSyncSnapshot, SYNC_STATUS_EVENT, type GlobalSyncSnapshot } from "../lib/offline-sync-status";
 import { recordOperationalEvent } from "../lib/observability";
+import { ConductorIcon } from "@/components/icons";
 import {
   leerEvidenciasDescartadas,
   registrarEvidenciaDescartada,
@@ -82,7 +83,7 @@ export function EstadoSincronizacionGlobal() {
         >
           <div className="flex items-center justify-between font-bold">
             <span className="flex items-center gap-1.5">
-              <span aria-hidden="true">⚠️</span>
+              <span aria-hidden="true"><ConductorIcon name="warning" /></span>
               <span>Evidencia fotográfica descartada ({evidenciasDescartadas.length})</span>
             </span>
             <span className="text-xs uppercase tracking-wider opacity-80">Atención requerida</span>
@@ -98,7 +99,7 @@ export function EstadoSincronizacionGlobal() {
                     href={`/viajes/${ev.trasladoId}`}
                     className="font-bold underline hover:opacity-80"
                   >
-                    Ver viaje
+                    Ver traslado
                   </Link>
                   <BaseButton variant="ghost"
                     type="button"

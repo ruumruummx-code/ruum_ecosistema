@@ -216,12 +216,12 @@ export function GastosModal({
                 onChange={(e) => setTipoGasto(e.target.value as GastoTipoDb)}
                 className="bg-ui-card border border-ui-line/30 rounded-xl px-3 py-2.5 text-xs text-ui-fg focus:outline-none focus:border-ui-brand"
               >
-                <option value="combustible">⛽ Combustible</option>
-                <option value="caseta">🛣️ Casetas / Peaje</option>
-                <option value="maniobra">🔄 Maniobra / Carga</option>
+                <option value="combustible">Combustible</option>
+                <option value="caseta">Casetas / Peaje</option>
+                <option value="maniobra">Maniobra / Carga</option>
                 <option value="estadia">⏱️ Estadía / Espera</option>
-                <option value="penalizacion">⚠️ Penalización</option>
-                <option value="otro">📝 Estacionamiento / Otro</option>
+                <option value="penalizacion">Penalización</option>
+                <option value="otro">Estacionamiento / Otro</option>
               </BaseSelect>
             </div>
 
