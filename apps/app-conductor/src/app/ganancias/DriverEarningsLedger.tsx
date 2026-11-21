@@ -135,7 +135,7 @@ export default function PaginaGanancias() {
                 </p>
                 <p className="font-body text-xs font-semibold text-ui-fg-muted">
                   {periodoActivo === "semana" ? "Dom – Sáb" : periodoActivo === "mes" ? "Mes completo" : "Año completo"} ·{" "}
-                  {resumen.totalTraslados} viaje(s)
+                  {resumen.totalTraslados} {resumen.totalTraslados === 1 ? "traslado" : "traslados"}
                 </p>
               </div>
               <BaseButton variant="ghost"

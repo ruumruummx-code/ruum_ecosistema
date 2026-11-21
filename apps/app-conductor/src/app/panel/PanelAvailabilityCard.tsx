@@ -11,7 +11,7 @@ export function PanelAvailabilityCard({ disponibilidad, guardando, online, onCam
   return <Card>
     <CardHeader className="flex-row items-center justify-between gap-3 pb-3">
       <CardTitle>Disponibilidad</CardTitle>
-      <Badge tone={enViaje ? "info" : disponible ? "success" : "neutral"} dot>{enViaje ? "En viaje" : disponible ? "Disponible" : "No disponible"}</Badge>
+      <Badge tone={enViaje ? "info" : disponible ? "success" : "neutral"} dot>{enViaje ? "En traslado" : disponible ? "Disponible" : "No disponible"}</Badge>
     </CardHeader>
     <CardContent className="space-y-4">
       <p className="text-sm leading-6 text-ui-fg-muted">{enViaje ? "Tienes un traslado en curso. Tu disponibilidad se actualizará al terminar." : disponible ? "Estás recibiendo solicitudes de traslado." : "Activa tu disponibilidad cuando estés listo para recibir solicitudes."}</p>

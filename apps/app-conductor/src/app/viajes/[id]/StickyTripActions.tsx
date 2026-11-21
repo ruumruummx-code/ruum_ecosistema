@@ -6,6 +6,7 @@ import { TripDockPortal } from "./TripOperationalFrame";
 import { TripDialog } from "./TripDialog";
 import { createNavigationOptions, type NavigationTarget, type NavigationOption } from "@/lib/navigation-launcher";
 
+import { ConductorIcon } from "@/components/icons";
 function abrirNavegacion(option: NavigationOption) {
   if (!option.nativeHref || typeof window === "undefined") return;
   window.location.href = option.nativeHref;
@@ -49,7 +50,7 @@ export function StickyTripActions({
               }}
               className="flex-1 min-h-11 inline-flex items-center justify-center gap-1.5 rounded-xl bg-ui-brand px-3 py-2.5 font-display text-xs font-black tracking-wide text-ui-fg-muted shadow-md hover:bg-ui-brand/90 active:scale-[0.98] transition-all"
             >
-              <span aria-hidden>🧭</span> Navegar
+              <span aria-hidden><ConductorIcon name="pin" /></span> Navegar
             </a>
           )}
           {/* Llamar — secundario */}
@@ -60,7 +61,7 @@ export function StickyTripActions({
             }}
             className={`flex-1 min-h-11 inline-flex items-center justify-center gap-1.5 rounded-xl border px-3 py-2.5 font-display text-xs font-bold transition-all active:scale-[0.98] ${phone ? "border-ui-brand bg-ui-brand-soft text-ui-brand hover:bg-ui-brand-soft/80" : "border-ui-line bg-ui-muted text-ui-fg-muted"}`}
           >
-            <span aria-hidden>📞</span> Llamar
+            <span aria-hidden><ConductorIcon name="phone" /></span> Llamar
           </a>}
           {/* Chat rápido — abre sheet */}
           <BaseButton variant="ghost"
@@ -69,7 +70,7 @@ export function StickyTripActions({
             aria-label="Mensaje rápido"
             className="min-h-11 min-w-11 flex items-center justify-center rounded-xl border border-ui-line bg-ui-muted text-ui-fg hover:bg-ui-card active:scale-[0.98] transition-all px-3"
           >
-            <span aria-hidden>💬</span>
+            <span aria-hidden><ConductorIcon name="support" /></span>
             <span className="ml-1 font-display text-xs font-bold hidden sm:inline">Chat</span>
           </BaseButton>
         </div>

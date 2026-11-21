@@ -32,7 +32,7 @@ export default async function DetallesTrasladoPage({
   if (!pasaporte) {
     return (
       <EstadoError
-        titulo="No encontramos ese viaje"
+        titulo="No encontramos ese traslado"
         descripcion="Revisa el enlace o vuelve a tu lista de Traslados para continuar."
         acciones={[
           { etiqueta: "Ver mis traslados", href: "/viajes", variant: "primary" },

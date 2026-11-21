@@ -43,21 +43,21 @@ const PESTANAS: { id: IdPestana; titulo: string; icono: string; descripcion: str
   {
     id: "identidad",
     titulo: "Identidad",
-    icono: "👤",
+    icono: "user",
     descripcion: "Fotografía, datos personales, correo y teléfono de contacto",
     campos: ["nombre", "email", "telefono", "curp"]
   },
   {
     id: "documentacion",
     titulo: "Documentación",
-    icono: "📄",
+    icono: "document",
     descripcion: "Licencia de conducir y vigencia operativa",
     campos: ["licencia_numero", "licencia_tipo", "licencia_vigencia"]
   },
   {
     id: "ubicacion",
     titulo: "Ubicación y emergencia",
-    icono: "📍",
+    icono: "pin",
     descripcion: "Domicilio particular y contacto de emergencia",
     campos: [
       "codigo_postal",

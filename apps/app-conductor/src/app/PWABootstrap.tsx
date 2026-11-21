@@ -80,7 +80,7 @@ function showUpdateNotification() {
   updateBanner.id = "ruum-pwa-update-banner";
   updateBanner.innerHTML = `
     <div class="conductor-pwa-update-card">
-      <span>📦 Nueva versión disponible</span>
+      <span>Nueva versión disponible</span>
       <button type="button" class="conductor-pwa-update-action">Actualizar</button>
       <button type="button" class="conductor-pwa-dismiss-action" aria-label="Cerrar aviso de actualización">×</button>
     </div>

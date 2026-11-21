@@ -51,7 +51,7 @@ export default async function PaginaDetalleViaje({
   if (!pasaporte) {
     return (
       <EstadoError
-        titulo="No encontramos ese viaje"
+        titulo="No encontramos ese traslado"
         descripcion="Revisa el enlace o vuelve a tu lista de Traslados para continuar."
         acciones={[
           { etiqueta: "Ver mis traslados", href: "/viajes", variant: "primary" },
@@ -64,7 +64,7 @@ export default async function PaginaDetalleViaje({
   if (!pasaporte.estado || !pasaporte.traslado_id) {
     return (
       <EstadoError
-        titulo="No pudimos cargar el viaje completo"
+        titulo="No pudimos cargar el traslado completo"
         descripcion="Vuelve a intentarlo o contacta a soporte si el problema continúa."
         acciones={[
           { etiqueta: "Ver mis traslados", href: "/viajes", variant: "primary" },

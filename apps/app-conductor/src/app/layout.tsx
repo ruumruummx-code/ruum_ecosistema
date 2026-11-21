@@ -26,7 +26,7 @@ const inter = Inter({ subsets: ["latin"], variable: "--font-body-loaded", displa
 
 export const metadata: Metadata = {
   title: "Ruum Conductor",
-  description: "Conductores certificados, registro operativo del vehículo y trazabilidad en cada viaje.",
+  description: "Conductores certificados, registro operativo del vehículo y trazabilidad en cada traslado.",
   appleWebApp: { capable: true, statusBarStyle: "black-translucent", title: "Ruum Conductor" },
   formatDetection: { telephone: true, date: false, address: false, email: false }
 };

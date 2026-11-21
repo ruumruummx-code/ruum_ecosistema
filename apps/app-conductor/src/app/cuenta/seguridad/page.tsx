@@ -6,6 +6,7 @@ import { Aviso, Card } from "@ruum/ui";
 import { ConductorScreen, ConductorPageHeader } from "../../components/ConductorScreen";
 import { useCerrarSesion } from "@/lib/use-cerrar-sesion";
 
+import { ConductorIcon } from "@/components/icons";
 export default function PaginaSeguridadCuenta() {
   const { cerrarSesion, cerrandoSesion, errorCerrarSesion } = useCerrarSesion();
 
@@ -30,10 +31,10 @@ export default function PaginaSeguridadCuenta() {
           </h2>
 
           <div className="grid gap-4">
-            {/* 2. Rediseño del Callout Informativo de Seguridad (sin bordes de input, con ícono 🛡️) */}
+            {/* 2. Rediseño del Callout Informativo de Seguridad (sin bordes de input, con ícono de escudo) */}
             <div className="flex items-start gap-3.5 rounded-xl border border-ui-line/60 bg-ui-muted/70 p-4">
               <div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-ui-brand/15 font-display text-lg text-ui-brand">
-                🛡️
+                <ConductorIcon name="shield" />
               </div>
               <div className="font-body text-xs leading-5 text-ui-fg-muted">
                 <strong className="block font-display text-sm font-bold text-ui-fg mb-0.5">
@@ -76,7 +77,7 @@ export default function PaginaSeguridadCuenta() {
           <div className="grid gap-3 rounded-xl border border-ui-line/40 bg-ui-muted/40 p-4 font-body text-xs sm:grid-cols-2">
             <div className="flex items-center gap-3">
               <div className="flex size-10 shrink-0 items-center justify-center rounded-xl border border-ui-line bg-ui-card text-lg">
-                📱
+                <ConductorIcon name="phone" />
               </div>
               <div>
                 <dt className="font-semibold uppercase tracking-wider text-ui-fg-muted text-xs">Dispositivo Activo</dt>
@@ -86,7 +87,7 @@ export default function PaginaSeguridadCuenta() {
 
             <div className="flex items-center gap-3">
               <div className="flex size-10 shrink-0 items-center justify-center rounded-xl border border-ui-line bg-ui-card text-lg text-ui-success">
-                🔒
+                <ConductorIcon name="lock" />
               </div>
               <div>
                 <dt className="font-semibold uppercase tracking-wider text-ui-fg-muted text-xs">Estado de Protección</dt>
@@ -119,7 +120,7 @@ export default function PaginaSeguridadCuenta() {
               disabled={cerrandoSesion}
               className="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl border border-ui-danger bg-ui-card px-5 py-2.5 font-display text-xs font-bold text-ui-danger shadow-2xs transition hover:border-ui-danger hover:bg-ui-danger-soft active:scale-95 disabled:opacity-50"
             >
-              {cerrandoSesion ? "Cerrando sesión..." : "🚪 Cerrar sesión"}
+              {cerrandoSesion ? "Cerrando sesión..." : "Cerrar sesión"}
             </BaseButton>
           </div>
         </Card>

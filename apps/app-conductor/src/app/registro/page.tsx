@@ -24,6 +24,7 @@ import { PASOS_REGISTRO } from "./registration-types";
 import { useRegistroConductorLogic } from "./useRegistroConductorLogic";
 import { tieneSupabaseConfigurado } from "../../lib/supabase-browser";
 
+import { ConductorIcon } from "@/components/icons";
 export default function PaginaRegistroConductor() {
   const r = useRegistroConductorLogic();
   const [accountSection,setAccountSection]=useState<"contact"|"security">("contact");
@@ -86,7 +87,7 @@ export default function PaginaRegistroConductor() {
           <div className="mt-6 rounded-lg border border-ui-brand/30 bg-ui-card p-5 text-left shadow-sm">
             <div className="flex items-start gap-3.5">
               <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-ui-brand-soft text-lg text-ui-brand">
-                🪪
+                <ConductorIcon name="card" />
               </div>
               <div className="min-w-0 flex-1">
                 <h3 className="font-display text-base font-bold text-ui-fg">

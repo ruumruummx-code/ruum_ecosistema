@@ -38,7 +38,7 @@ export default function ErrorEvidencia({ error, reset }: { error: Error & { dige
             Reintentar
           </BaseButton>
           <Link href={`/viajes/${id}`} className="inline-flex min-h-11 items-center justify-center rounded-xl border border-ui-line bg-ui-card px-5 py-2.5 font-body text-sm font-medium text-ui-fg">
-            Volver al viaje
+            Volver al traslado
           </Link>
           <Link href="/viajes" className="inline-flex min-h-11 items-center justify-center rounded-xl border border-ui-line bg-ui-card px-5 py-2.5 font-body text-sm font-medium text-ui-fg">
             Ver traslados

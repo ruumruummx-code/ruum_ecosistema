@@ -18,17 +18,17 @@ export interface GastoRegistro {
 export function obtenerEtiquetaGasto(tipo: GastoTipoDb): string {
   switch (tipo) {
     case "combustible":
-      return "⛽ Combustible / Gasolina";
+      return "Combustible / Gasolina";
     case "caseta":
-      return "🛣️ Casetas / Peaje";
+      return "Casetas / Peaje";
     case "maniobra":
-      return "🔄 Maniobra / Carga";
+      return "Maniobra / Carga";
     case "estadia":
       return "⏱️ Estadía / Espera";
     case "penalizacion":
-      return "⚠️ Penalización";
+      return "Penalización";
     case "otro":
     default:
-      return "📝 Estacionamiento / Lavado / Otro";
+      return "Estacionamiento / Lavado / Otro";
   }
 }

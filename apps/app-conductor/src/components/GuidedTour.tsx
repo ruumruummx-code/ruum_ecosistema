@@ -359,8 +359,8 @@ export const ONBOARDING_TOUR_STEPS: TourStep[] = [
   {
     id: "active-trip",
     target: () => document.querySelector(".conductor-mobile-active-trip-card") as HTMLElement,
-    title: "Viaje Activo",
-    description: "Cuando tengas un viaje asignado, aparecerá aquí para acceso rápido.",
+    title: "Traslado activo",
+    description: "Cuando tengas un traslado asignado, aparecerá aquí para acceso rápido.",
     position: "top",
   },
   {
@@ -386,8 +386,8 @@ export const PANEL_TOUR_STEPS: TourStep[] = [
   {
     id: "trip-card",
     target: () => document.querySelector("[class*='PanelActiveTripCard']") as HTMLElement,
-    title: "Tarjeta de Viaje Activo",
-    description: "Cuando tengas un viaje asignado, aquí verás toda la información importante y podrás continuar con el traslado.",
+    title: "Tarjeta de traslado activo",
+    description: "Cuando tengas un traslado asignado, aquí verás toda la información importante y podrás continuar con el traslado.",
     position: "top",
   },
   {

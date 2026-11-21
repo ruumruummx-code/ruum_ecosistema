@@ -196,7 +196,7 @@ export function EvidenciaInspeccion() {
         >
           <div className="flex items-center gap-2">
             <span className="font-display text-xs font-bold uppercase tracking-wider text-ui-fg">
-              📄 Documentos y Placas
+              Documentos y Placas
             </span>
             <span className="font-body text-xs text-ui-fg-muted">
               ({docsRevisados}/5 verificados)
@@ -232,7 +232,7 @@ export function EvidenciaInspeccion() {
         >
           <div className="flex items-center gap-2">
             <span className="font-display text-xs font-bold uppercase tracking-wider text-ui-fg">
-              📝 Notas o Comentarios
+              Notas o Comentarios
             </span>
             <span className="font-body text-xs text-ui-fg-muted">
               {inspeccion.notas ? "(Capturado)" : "(Opcional)"}

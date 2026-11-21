@@ -18,7 +18,7 @@ export default function ErrorDetalleViaje({ error, reset }: { error: Error & { d
 
   return (
     <div className="conductor-content flex min-h-[50vh] flex-col items-center justify-center text-center" role="alert">
-      <h1 className="font-display text-xl font-semibold">Error al cargar este viaje</h1>
+      <h1 className="font-display text-xl font-semibold">No pudimos cargar este traslado</h1>
       <p className="mt-2 font-body text-sm leading-6 text-ui-fg-muted">
         No pudimos obtener los datos del traslado. Puede ser una falla temporal de conexión.
       </p>
