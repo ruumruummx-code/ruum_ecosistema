@@ -4,7 +4,7 @@ import { useLiveRegion } from "../components/LiveRegionProvider";
 import { recordOperationalEvent } from "../lib/observability";
 
 const POLITE_EVENTS: Record<string,string> = {
-  "ruum:viaje-aceptado":"Viaje aceptado.", "ruum:estado-viaje-actualizado":"Estado del viaje actualizado.",
+  "ruum:viaje-aceptado":"Traslado aceptado.", "ruum:estado-viaje-actualizado":"Estado del traslado actualizado.",
   "ruum:evidencia-pendiente":"Evidencia agregada. Pendiente de sincronizar.", "ruum:evidencia-sincronizada":"Evidencia sincronizada.",
   "ruum:rechazo-deshacer":"Rechazo deshecho.", "ruum:permiso-requerido":"Se requiere un permiso para continuar."
 };

@@ -86,7 +86,8 @@ export function TrasladosMapa({ Traslados, onSelect, vistaId, onReturnToList }: 
           // El marcador es un nodo DOM: puede heredar el contrato CSS del conductor.
           el.style.cssText =
             "width:48px;height:48px;border-radius:50%;background:var(--conductor-pending-soft);border:3px solid var(--conductor-primary);display:flex;align-items:center;justify-content:center;font-size:.875rem;font-weight:900;color:var(--conductor-primary);box-shadow:var(--conductor-shadow);cursor:pointer;transform:translate(-50%,-50%)";
-          el.textContent = "📍";
+          // Pin dibujado con el mismo trazo que los íconos de la app (sin emoji).
+          el.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>';
           el.setAttribute("role", "button");
           el.setAttribute("aria-label", `Ver oferta ${viaje.origen_ciudad ?? ""} — ${viaje.ganancia_conductor ? "$" + Math.round(viaje.ganancia_conductor) : ""}`);
           el.tabIndex = 0;

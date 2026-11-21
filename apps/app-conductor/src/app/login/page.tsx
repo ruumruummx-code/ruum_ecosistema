@@ -11,6 +11,8 @@ import { esEmailLoginValido, validarCredencialesLogin } from "./login-validation
 
 import styles from "./login.module.css";
 
+const MENSAJE_CORREO_INVALIDO = "Revisa tu correo; parece incompleto. Ejemplo: tu@correo.com";
+
 function LoginSkeleton() {
   return (
     <div className={styles.loading} aria-busy="true">
@@ -31,7 +33,9 @@ function FormularioLogin() {
     onboardingVisto()
       .then((visto) => {
         if (activo && !visto) {
-          router.replace("/onboarding");
+          // Conserva el destino original (por ejemplo, un enlace a un traslado) al pasar por la bienvenida.
+          const next = searchParams.get("next");
+          router.replace(next ? `/onboarding?next=${encodeURIComponent(next)}` : "/onboarding");
           return;
         }
         if (activo) setCheckingOnboarding(false);
@@ -42,7 +46,7 @@ function FormularioLogin() {
     return () => {
       activo = false;
     };
-  }, [router]);
+  }, [router, searchParams]);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [enviando, setEnviando] = useState(false);
@@ -50,42 +54,30 @@ function FormularioLogin() {
   const [emailError, setEmailError] = useState<string | null>(null);
   const [mostrarContrasena, setMostrarContrasena] = useState(false);
 
-  const validarEmail = (value: string) => {
-    if (!value) {
-      setEmailError(null);
-      return;
-    }
-    if (!esEmailLoginValido(value)) {
-      setEmailError("Formato de correo inválido");
-    } else {
-      setEmailError(null);
-    }
-  };
-
+  // El correo se valida al salir del campo o al enviar, no mientras se escribe;
+  // al escribir solo se retira el error cuando el correo ya es válido.
   const manejarCambioEmail = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setEmail(value);
-    validarEmail(value);
+    if (emailError && (!value || esEmailLoginValido(value))) setEmailError(null);
   };
 
   const manejarBlurEmail = () => {
-    if (email && !emailError) {
-      validarEmail(email);
-    }
+    setEmailError(email && !esEmailLoginValido(email) ? MENSAJE_CORREO_INVALIDO : null);
   };
 
   async function iniciarSesion(e: React.FormEvent) {
     e.preventDefault();
     const credencialInvalida = validarCredencialesLogin(email, password);
     if (credencialInvalida === "email") {
-      setEmailError("Formato de correo inválido");
+      setEmailError(MENSAJE_CORREO_INVALIDO);
       return;
     }
     if (credencialInvalida === "password") {
       setError("Ingresa tu contraseña para continuar.");
       return;
     }
-    if (emailError) return;
+    setEmailError(null);
 
     setEnviando(true);
     setError(null);
@@ -131,6 +123,7 @@ function FormularioLogin() {
             <label htmlFor="password-conductor">Contraseña</label>
             <BaseInput id="password-conductor" name="password" type={mostrarContrasena ? "text" : "password"} value={password}
               onChange={(e) => setPassword(e.target.value)} required
+              aria-invalid={Boolean(error)} aria-describedby={error ? "login-status" : undefined}
               autoComplete="current-password" enterKeyHint="go" disabled={supabaseNoConfigurado} placeholder="Ingresa tu contraseña" />
             <BaseButton variant="ghost" type="button" className={styles.visibility} onClick={() => setMostrarContrasena((visible) => !visible)} aria-label={mostrarContrasena ? "Ocultar contraseña" : "Mostrar contraseña"}>
               <svg width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Z" /><circle cx="12" cy="12" r="2.7" />{!mostrarContrasena && <path d="M3 3l18 18" />}</svg>
@@ -138,12 +131,12 @@ function FormularioLogin() {
           </div>
           <Link className={styles.recovery} href="/recuperar-password">¿Olvidaste tu contraseña?</Link>
           {(supabaseNoConfigurado || emailError || error) && (
-            <p id="login-status" className={styles.status} role="status" aria-atomic="true">
+            <p id="login-status" className={styles.status} role={supabaseNoConfigurado ? "status" : "alert"} aria-atomic="true">
               {supabaseNoConfigurado ? "Acceso no disponible. Contacta a soporte." : emailError || error}
             </p>
           )}
           <BaseButton variant="primary" type="submit" aria-busy={enviando}
-            disabled={enviando || supabaseNoConfigurado || Boolean(emailError)} className={styles.submit}>
+            disabled={enviando || supabaseNoConfigurado} className={styles.submit}>
             {enviando ? "Entrando…" : "Entrar"}
           </BaseButton>
           <p className={styles.legal}>

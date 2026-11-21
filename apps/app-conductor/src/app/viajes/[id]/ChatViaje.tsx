@@ -169,7 +169,7 @@ export function ChatViaje({ trasladoId, estado }: { trasladoId: string; estado: 
       >
       <summary className="flex cursor-pointer list-none items-center justify-between gap-4 px-4 py-4 transition-colors hover:bg-ui-brand-soft/35 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ui-brand [&::-webkit-details-marker]:hidden">
         <div>
-          <p className="font-body text-sm font-semibold text-ui-fg-muted">Chat del viaje</p>
+          <p className="font-body text-sm font-semibold text-ui-fg-muted">Chat del traslado</p>
           <p className="mt-1 font-body text-sm font-semibold text-ui-fg">
             {disponible ? "Abrir conversación completa" : "Conversación cerrada"}
           </p>

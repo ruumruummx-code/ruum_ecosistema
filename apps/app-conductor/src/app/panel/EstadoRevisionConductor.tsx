@@ -20,6 +20,7 @@ import {
 import { enmascararNombreArchivo } from "../cuenta/datos-sensibles";
 import { DiditVerificationModal } from "../registro/DiditVerificationModal";
 
+import { ConductorIcon } from "@/components/icons";
 type DocumentoConductorRow = Database["public"]["Tables"]["documentos_conductor"]["Row"];
 
 // CSS / Estructura: height: 100dvh; overflow: hidden;
@@ -245,7 +246,7 @@ export function EstadoRevisionConductor({ conductorId, solicitudId, nombre, docu
         {/* Acción crítica */}
         {estadoActual === "en_revision" && solicitudId && (
           <Button className="w-full shrink-0" onClick={iniciarVerificacion} disabled={verificando}>
-            {verificando ? "Abriendo verificación…" : "📸 Verificar identidad ahora"}
+            {verificando ? "Abriendo verificación…" : "Verificar identidad ahora"}
           </Button>
         )}
 
@@ -270,7 +271,7 @@ export function EstadoRevisionConductor({ conductorId, solicitudId, nombre, docu
                 className="flex w-full items-center justify-between gap-2 rounded-xl border border-ui-line px-3 py-2 text-left transition hover:bg-ui-card"
               >
                 <span className="flex items-center gap-2 font-body text-sm font-semibold text-ui-fg-muted">
-                  <span aria-hidden>👤</span>
+                  <span aria-hidden><ConductorIcon name="user" /></span>
                   Cuenta
                 </span>
                 <span className={`rounded-full border px-2.5 py-0.5 font-body text-xs font-medium ${cuentaAprobada ? "border-ui-success bg-ui-success-soft text-ui-success" : "border-ui-line bg-ui-muted text-ui-fg-muted/80"}`}>
@@ -289,7 +290,7 @@ export function EstadoRevisionConductor({ conductorId, solicitudId, nombre, docu
                     className="flex w-full items-center justify-between gap-2 rounded-xl border border-ui-line px-3 py-2 text-left transition hover:bg-ui-card"
                   >
                     <span className="flex items-center gap-2 font-body text-sm font-semibold text-ui-fg-muted">
-                      <span aria-hidden>📄</span>
+                      <span aria-hidden><ConductorIcon name="document" /></span>
                       {t.etiqueta}
                     </span>
                     <span className={`rounded-full border px-2.5 py-0.5 font-body text-xs font-medium ${estadoInfo.clase}`}>

@@ -255,8 +255,8 @@ export function usePanelData() {
         // H09: NO actualizar ultimaActualizacion si todo falló
       } else if (numFallos > 0) {
         const nombres: string[] = [];
-        if (fallos.aceptados) nombres.push("viajes activos");
-        if (fallos.disponibles) nombres.push("viajes disponibles");
+        if (fallos.aceptados) nombres.push("traslados activos");
+        if (fallos.disponibles) nombres.push("traslados disponibles");
         if (fallos.disponibilidad) nombres.push("disponibilidad");
         if (fallos.notificaciones) nombres.push("notificaciones");
         if (fallos.ganancias) nombres.push("ganancias de hoy");

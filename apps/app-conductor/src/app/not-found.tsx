@@ -5,10 +5,10 @@ export default function PaginaNoEncontradaConductor() {
     <EstadoError
       codigo="404"
       titulo="Página no encontrada"
-      descripcion="La sección que buscas no existe. Revisa tus Traslados o vuelve al panel."
+      descripcion="La sección que buscas no existe. Revisa tus traslados o vuelve al panel."
       acciones={[
-        { etiqueta: "Ver mis Traslados", href: "/viajes", variant: "primary" },
-        { etiqueta: "Volver al panel", href: "/", variant: "quiet" }
+        { etiqueta: "Ver mis traslados", href: "/viajes", variant: "primary" },
+        { etiqueta: "Volver al panel", href: "/panel", variant: "quiet" }
       ]}
     />
   );

@@ -8,6 +8,7 @@ import type { PasaporteRow, DetalleOperativo } from "./trips-utils";
 import { formatearDuracion, nombreVehiculo, clasificarMisTraslados } from "./trips-utils";
 import { TripPreviewCard } from "./TripPreviewCard";
 
+import { ConductorIcon } from "@/components/icons";
 function getEstadoCardInfo(estado: string) {
   switch (estado) {
     case "conductor_asignado":
@@ -164,7 +165,7 @@ export function AcceptedTripCard({
       {/* Vehículo */}
       {autoNombre !== "Vehículo" && (
         <div className="flex items-center gap-2 text-xs font-bold text-ui-fg">
-          <span>🚗</span>
+          <span><ConductorIcon name="car" /></span>
           <span className="truncate">{autoNombre}</span>
         </div>
       )}

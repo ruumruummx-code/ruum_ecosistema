@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { type ButtonVariant } from "@ruum/ui";
-import { ConductorButton as Button } from "@/components/v2/ConductorUI";
+import { ConductorButton as Button, conductorButtonClasses, type ConductorButtonVariant } from "@/components/v2/ConductorUI";
 
 interface AccionError {
   etiqueta: string;
@@ -47,7 +47,8 @@ export function EstadoError({ codigo, titulo, descripcion, acciones, detalle }: 
               <Link
                 key={accion.etiqueta}
                 href={accion.href}
-                className="inline-flex min-h-12 w-full items-center justify-center rounded-lg bg-ui-brand px-4 py-3 font-body text-base font-semibold text-ui-on-brand transition hover:brightness-95 focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-ui-focus"
+                // Los enlaces respetan su variante: solo la acción principal se ve como principal.
+                className={conductorButtonClasses({ variant: (accion.variant ?? "primary") as ConductorButtonVariant, className: "w-full" })}
               >
                 {accion.etiqueta}
               </Link>

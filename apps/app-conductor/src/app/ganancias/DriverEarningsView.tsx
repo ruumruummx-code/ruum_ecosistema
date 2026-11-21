@@ -20,12 +20,15 @@ const paymentDate = (value: string) => {
   const date = new Date(value);
   return Number.isFinite(date.getTime()) ? new Intl.DateTimeFormat("es-MX", { day: "numeric", month: "short", year: "numeric", timeZone: "America/Mexico_City" }).format(date) : "Fecha no disponible";
 };
-type Props = { data: DatosGananciasConductor | null; summary: ReturnType<typeof summarizeEarnings> | null; period: EarningsPeriod; onPeriod: (period: EarningsPeriod) => void; loading: boolean; error: string | null };
+type Props = { data: DatosGananciasConductor | null; summary: ReturnType<typeof summarizeEarnings> | null; period: EarningsPeriod; onPeriod: (period: EarningsPeriod) => void; loading: boolean; error: string | null; onRetry?: () => void };
 
-export function DriverEarningsView({ data, summary, period, onPeriod, loading, error }: Props) {
+export function DriverEarningsView({ data, summary, period, onPeriod, loading, error, onRetry }: Props) {
   const [requestOpen, setRequestOpen] = useState(false);
   const payments = [...(data?.payouts ?? [])].sort((a, b) => (b.procesado_en ?? b.creado_en).localeCompare(a.procesado_en ?? a.creado_en)).slice(0, 2);
   const ready = !loading && !error && summary;
+  // Monto real en pagos aún no depositados (reemplaza un indicador sin datos).
+  const pendientes = (data?.payouts ?? []).filter(payout => payout.estado === "pendiente");
+  const montoPorDepositar = pendientes.reduce((total, payout) => total + Number(payout.monto_neto || 0), 0);
   const bank = data?.datosBancarios;
   const bankStatus = bank ? bank.estado === "verificada" ? `Cuenta verificada: ${bank.banco} · terminación ${bank.clabe.slice(-4)}.` : bank.estado === "en_revision" ? "Tus datos bancarios están en revisión." : "Tus datos bancarios requieren corrección." : "Registra tus datos bancarios para recibir depósitos.";
   return <div className={styles.screen} data-driver-earnings>
@@ -44,13 +47,13 @@ export function DriverEarningsView({ data, summary, period, onPeriod, loading, e
       </div>
       <div className={styles.metrics}>
         <div className={styles.metric}><span className={styles.metricIcon}><Icon name="car" /></span><div><h2>Traslados completados</h2><strong data-testid="earnings-trips" title="Completados en el periodo seleccionado">{ready ? summary.count : "—"}</strong><p data-testid="earnings-trips-total">{ready ? `${summary.totalCompleted} acumulados` : "—"}</p><p className={styles.difference} data-negative={ready ? summary.tripDifference < 0 : undefined}>{ready ? `${summary.tripDifference > 0 ? '+' : ''}${summary.tripDifference} ${summary.tripDifference < 0 ? '↓' : '↑'}` : "—"}</p></div></div>
-        <div className={styles.metric}><span className={styles.metricIcon}><Icon name="clock" /></span><div><h2>Horas en línea</h2><strong>—</strong><p>Sin registro</p></div></div>
+        <div className={styles.metric}><span className={styles.metricIcon}><Icon name="bank" /></span><div><h2>Por depositar</h2><strong data-testid="earnings-pending">{ready ? `$${money(montoPorDepositar)}` : "—"}</strong><p>{ready ? pendientes.length === 0 ? "Sin pagos pendientes" : pendientes.length === 1 ? "1 pago pendiente" : `${pendientes.length} pagos pendientes` : "—"}</p></div></div>
       </div>
     </section>
     <section className={styles.payments} aria-labelledby="ultimos-pagos">
       <div className={styles.sectionHeading}><h2 id="ultimos-pagos">Últimos pagos</h2><Link href="/ganancias/historial" prefetch={false}>Ver todos <span aria-hidden="true">›</span></Link></div>
       <div className={styles.paymentList}>
-        {loading ? <p className={styles.message} role="status">Cargando pagos…</p> : error ? <p className={styles.message} role="alert">{error}</p> : payments.length ? payments.map(payment => <div key={payment.id} className={styles.payment}>
+        {loading ? <p className={styles.message} role="status">Cargando pagos…</p> : error ? <div className={styles.message} role="alert"><p>{error}</p>{onRetry && <BaseButton variant="outline" type="button" className="mt-2 min-h-11" onClick={onRetry}>Reintentar</BaseButton>}</div> : payments.length ? payments.map(payment => <div key={payment.id} className={styles.payment}>
           <span className={styles.bank}><Icon name="bank" /></span>
           <div className={styles.paymentLabel}><h3>Transferencia bancaria</h3><time dateTime={payment.procesado_en ?? payment.creado_en}>{paymentDate(payment.procesado_en ?? payment.creado_en)}</time></div>
           <div className={styles.paymentAmount} data-status={payment.estado}><strong>{payment.estado === "procesado" ? "+ " : ""}${money(Number(payment.monto_neto))}</strong><span>{payment.estado === "procesado" ? "Completado" : payment.estado === "pendiente" ? "Pendiente" : "Fallido"}</span></div>

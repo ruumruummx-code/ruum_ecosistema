@@ -4,6 +4,7 @@ import { Button as BaseButton } from "@ruum/ui/base";
 import { useEffect, useRef, useState } from "react";
 import { CONTACTOS_SOPORTE_CONDUCTOR } from "../../lib/contactos-soporte";
 
+import { ConductorIcon } from "@/components/icons";
 interface PanelSupportSheetProps {
   abierto: boolean;
   onCerrar: () => void;
@@ -92,7 +93,7 @@ export function PanelSupportSheet({ abierto, onCerrar }: PanelSupportSheetProps)
         <div className="absolute top-2 left-1/2 -translate-x-1/2 w-10 h-1.5 rounded-full bg-ui-line/60" aria-hidden />
         <div className="flex justify-between items-center pb-2 border-b border-ui-line/20">
           <h2 id="titulo-soporte" className="font-display text-lg font-bold text-ui-fg flex items-center gap-2">
-            <span>💬</span> Soporte Operativo Ruum
+            <span><ConductorIcon name="support" /></span> Soporte Operativo Ruum
           </h2>
           <BaseButton variant="ghost"
             type="button"
@@ -115,7 +116,7 @@ export function PanelSupportSheet({ abierto, onCerrar }: PanelSupportSheetProps)
             rel="noopener noreferrer"
             className="flex items-center gap-3.5 p-4 bg-ui-success/10 border border-ui-success/25 rounded-lg hover:bg-ui-success/20 transition-colors min-h-[60px]"
           >
-            <span className="text-2xl">💬</span>
+            <span className="text-2xl"><ConductorIcon name="support" /></span>
             <div className="flex flex-col items-start text-left">
               <span className="font-display text-sm font-bold text-ui-success">WhatsApp de Soporte</span>
               <span className="font-body text-xs text-ui-fg-muted">Mensajería instantánea y respuesta inmediata</span>
@@ -126,7 +127,7 @@ export function PanelSupportSheet({ abierto, onCerrar }: PanelSupportSheetProps)
             href={CONTACTOS_SOPORTE_CONDUCTOR.soporte.telefono.href}
             className="flex items-center gap-3.5 p-4 bg-ui-brand-soft border border-ui-brand/25 rounded-lg hover:bg-ui-brand-soft/70 transition-colors min-h-[60px]"
           >
-            <span className="text-2xl">📞</span>
+            <span className="text-2xl"><ConductorIcon name="phone" /></span>
             <div className="flex flex-col items-start text-left">
               <span className="font-display text-sm font-bold text-ui-brand">Llamar a Soporte</span>
               <span className="font-body text-xs text-ui-fg-muted">Habla directamente con un operador en turno</span>
@@ -137,7 +138,7 @@ export function PanelSupportSheet({ abierto, onCerrar }: PanelSupportSheetProps)
             href={CONTACTOS_SOPORTE_CONDUCTOR.soporte.correo.href}
             className="flex items-center gap-3.5 p-4 bg-ui-card rounded-lg border border-ui-line/40 hover:bg-ui-muted transition-colors min-h-[60px]"
           >
-            <span className="text-2xl">✉️</span>
+            <span className="text-2xl"><ConductorIcon name="mail" /></span>
             <div className="flex flex-col items-start text-left">
               <span className="font-display text-sm font-bold text-ui-fg">Correo Electrónico</span>
               <span className="font-body text-xs text-ui-fg-muted">Reportar incidencias técnicas no urgentes</span>

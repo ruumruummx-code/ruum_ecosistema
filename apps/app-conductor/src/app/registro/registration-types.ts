@@ -2,35 +2,35 @@ export const PASOS_REGISTRO = [
   {
     titulo: "Cuenta",
     shortTitle: "Cuenta",
-    icono: "👤",
+    icono: "user",
     objetivo: "Crea tu cuenta para poder iniciar sesión.",
     tiempo: "2 min"
   },
   {
     titulo: "Identidad y domicilio",
     shortTitle: "Identidad",
-    icono: "🪪",
+    icono: "card",
     objetivo: "Deja que verifiquemos tu identidad y domicilio.",
     tiempo: "4 min"
   },
   {
     titulo: "Licencia",
     shortTitle: "Licencia",
-    icono: "🚗",
+    icono: "car",
     objetivo: "Registra tu licencia vigente.",
     tiempo: "3 min"
   },
   {
     titulo: "Documentos",
     shortTitle: "Documentos",
-    icono: "📄",
+    icono: "document",
     objetivo: "Carga tus archivos.",
     tiempo: "3 min"
   },
   {
     titulo: "Revisión y envío",
     shortTitle: "Confirmación",
-    icono: "📋",
+    icono: "document",
     objetivo: "Revisa tus datos antes de enviarlo",
     tiempo: "2 min"
   }

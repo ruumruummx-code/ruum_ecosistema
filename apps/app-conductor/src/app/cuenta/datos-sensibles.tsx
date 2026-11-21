@@ -21,7 +21,7 @@ const TEXTOS: Record<TipoDatoSensible, { titulo: string; finalidad: string; acce
   },
   cuenta_bancaria: {
     titulo: "Cuenta bancaria",
-    finalidad: "Permite programar depósitos por tus Traslados confirmados.",
+    finalidad: "Permite programar depósitos por tus traslados confirmados.",
     acceso: "Solo operación financiera y sistemas de pago autorizados.",
     proteccion: "Los cambios requieren confirmar tu sesión y vuelven a revisión antes de usarse."
   },

@@ -3,6 +3,7 @@
 import { Button as BaseButton } from "@ruum/ui/base";
 import { useEffect, useRef, useState } from "react";
 
+import { ConductorIcon, type ConductorIconName } from "@/components/icons";
 export type DriverAvailability = "disponible" | "no_disponible" | "en_viaje";
 
 type AvailabilityOption = Exclude<DriverAvailability, "en_viaje">;
@@ -13,18 +14,18 @@ interface DriverAvailabilityControlProps {
   onChange: (value: AvailabilityOption) => void;
 }
 
-const ESTADOS: Record<DriverAvailability, { label: string; icono: string }> = {
+const ESTADOS: Record<DriverAvailability, { label: string; icono: ConductorIconName }> = {
   disponible: {
     label: "Disponible",
-    icono: "🟢"
+    icono: "check"
   },
   no_disponible: {
     label: "No disponible",
-    icono: "⚪"
+    icono: "clock"
   },
   en_viaje: {
-    label: "En viaje activo",
-    icono: "🚘"
+    label: "En traslado activo",
+    icono: "car"
   }
 };
 
@@ -64,7 +65,7 @@ export function DriverAvailabilityControl({ value, saving, onChange }: DriverAva
           aria-live="polite"
           className="conductor-toast-bottom fixed right-4 z-50 max-w-[calc(100vw-2rem)] rounded-xl border border-ui-success/40 bg-ui-success/20 px-4 py-3 font-body text-sm font-bold text-ui-success shadow-2xl sm:right-6 sm:max-w-sm"
         >
-          ✨ {feedback}
+          {feedback}
         </output>
       )}
 
@@ -87,7 +88,7 @@ export function DriverAvailabilityControl({ value, saving, onChange }: DriverAva
               Disponibilidad Operativa
             </p>
             <h2 id="driver-availability-title" className="font-display text-base font-bold text-ui-fg flex items-center gap-1.5 mt-0.5">
-              <span>{estado.icono}</span>
+              <span><ConductorIcon name={estado.icono} /></span>
               <span>{saving ? "Actualizando estado..." : estado.label}</span>
             </h2>
           </div>
@@ -117,7 +118,7 @@ export function DriverAvailabilityControl({ value, saving, onChange }: DriverAva
                   disabled || active ? "disabled:cursor-not-allowed" : ""
                 ].join(" ")}
               >
-                <span>{ESTADOS[option].icono}</span>
+                <span><ConductorIcon name={ESTADOS[option].icono} /></span>
                 <span>{ESTADOS[option].label}</span>
               </BaseButton>
             );
@@ -127,7 +128,7 @@ export function DriverAvailabilityControl({ value, saving, onChange }: DriverAva
 
       {value === "en_viaje" && (
         <p className="mt-3 rounded-xl border border-ui-brand/40 bg-ui-brand-soft px-4 py-2.5 font-body text-xs font-bold text-ui-brand flex items-center gap-2">
-          <span>🔒</span>
+          <span><ConductorIcon name="lock" /></span>
           <span>Cambio bloqueado: te encuentras realizando un traslado activo.</span>
         </p>
       )}

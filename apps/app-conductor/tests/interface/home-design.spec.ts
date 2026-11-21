@@ -6,6 +6,8 @@ for (const mode of ["light", "dark"]) {
     test(`inicio base: ${mode} ${width}`, async ({ page, context, request }, info) => {
       await request.get("http://127.0.0.1:54331/qa/reset");
       await session(page, context, mode);
+      // Con GPS concedido el panel puede declararse listo para conducir.
+      await context.grantPermissions(["geolocation"]); await context.setGeolocation({ latitude: 19.4326, longitude: -99.1332 });
       await page.setViewportSize({ width, height: width === 320 ? 568 : 844 });
       const errors: string[] = [];
       page.on("pageerror", error => errors.push(error.message));
@@ -14,14 +16,14 @@ for (const mode of ["light", "dark"]) {
       await expect(page.getByRole("heading", { name: "Tu actividad de hoy" })).toBeVisible();
       await expect(page.getByRole("heading", { name: "Listo para conducir" })).toBeVisible();
       await expect(page.getByRole("link", { name: "Buscar traslados ahora" })).toHaveAttribute("href", "/viajes");
-      const availability = page.getByRole("switch");
-      await expect(availability).toHaveAttribute("aria-checked", "true");
+      const availability = page.getByRole("button", { name: "Pausar solicitudes", exact: true });
+      await expect(availability).toBeVisible();
       await availability.click();
       const confirm = page.getByRole("dialog", { name: "¿Pasas a no disponible?" });
       await expect(confirm).toBeVisible();
       await confirm.getByRole("button", { name: "Cancelar" }).click();
       await expect(confirm).not.toBeVisible();
-      await expect(availability).toHaveAttribute("aria-checked", "true");
+      await expect(availability).toBeVisible();
       await page.screenshot({ path: info.outputPath(`inicio-${mode}-${width}.png`) });
       const documents = page.getByRole("button", { name: /^Documentos:.*Ver estado operativo$/ });
       await documents.scrollIntoViewIfNeeded();

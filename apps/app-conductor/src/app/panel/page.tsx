@@ -265,8 +265,8 @@ export default function PaginaPanel() {
           aria-live="polite"
         >
           <span className="size-2 rounded-full bg-ui-warning" aria-hidden="true" />
-          <span className="font-body text-xs font-bold text-ui-fg">Actualización pausada durante viaje</span>
-          <span className="font-body text-xs text-ui-fg-muted">🔒 termina el traslado</span>
+          <span className="font-body text-xs font-bold text-ui-fg">Actualización pausada durante el traslado</span>
+          <span className="font-body text-xs text-ui-fg-muted">Disponible al terminarlo</span>
         </div>
       )}
       {refrescando && (
@@ -288,7 +288,7 @@ export default function PaginaPanel() {
                   aria-live="assertive"
                 >
                   <p className="font-body text-sm leading-5 text-ui-danger">
-                    <span className="font-bold">⚠️ Sin conexión:</span> Ves datos guardados.
+                    <span className="font-bold">Sin conexión:</span> Ves datos guardados.
                   </p>
                   <BaseButton variant="ghost"
                     type="button"

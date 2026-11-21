@@ -6,6 +6,7 @@ import Link from "next/link";
 import { Card } from "@ruum/ui";
 import { ConductorScreen, ConductorPageHeader } from "../../components/ConductorScreen";
 
+import { ConductorIcon, type ConductorIconName } from "@/components/icons";
 type DocumentoLegalId = "terminos" | "privacidad";
 
 const DOCUMENTOS_LEGALES = [
@@ -13,7 +14,7 @@ const DOCUMENTOS_LEGALES = [
     id: "terminos" as DocumentoLegalId,
     titulo: "Términos y Condiciones de Uso",
     descripcion: "Normativa de servicio, obligaciones del conductor y políticas de asignación y cancelación.",
-    icono: "📄",
+    icono: "document",
     actualizacion: "3 de julio de 2026",
     version: "v1.0",
     href: "/legal/terminos"
@@ -22,7 +23,7 @@ const DOCUMENTOS_LEGALES = [
     id: "privacidad" as DocumentoLegalId,
     titulo: "Aviso de Privacidad de Datos",
     descripcion: "Protección de datos personales, finalidades del tratamiento operativo y derechos ARCO.",
-    icono: "🛡️",
+    icono: "shield",
     actualizacion: "3 de julio de 2026",
     version: "v1.0",
     href: "/legal/privacidad"
@@ -54,7 +55,7 @@ export default function PaginaLegalCuenta() {
               >
                 <div className="flex items-start gap-3.5 min-w-0">
                   <div className="flex size-11 shrink-0 items-center justify-center rounded-xl border border-ui-line bg-ui-card font-display text-xl shadow-2xs">
-                    {doc.icono}
+                    <ConductorIcon name={doc.icono as ConductorIconName} />
                   </div>
 
                   <div className="min-w-0">
@@ -86,7 +87,7 @@ export default function PaginaLegalCuenta() {
                     onClick={() => setDocAbierto(doc.id)}
                     className="inline-flex items-center gap-1.5 rounded-xl border border-ui-line bg-ui-card px-3.5 py-2 font-display text-xs font-bold text-ui-brand transition hover:border-ui-brand hover:bg-ui-brand/10 active:scale-95"
                   >
-                    Lectura In-App 🔍
+                    Lectura en la app
                   </BaseButton>
 
                   <Link

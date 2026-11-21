@@ -179,7 +179,7 @@ export function getTripPresentation(estado: EstadoTraslado, incidentStatus: Trip
         "Confirma la entrega",
         "Valida con la persona de recepción que el vehículo fue entregado y cierra la operación cuando corresponda.",
         estado === "evidencia_final_completada" ? "confirm_delivery" : "close_trip",
-        estado === "evidencia_final_completada" ? "Confirmar entrega" : "Cerrar viaje",
+        estado === "evidencia_final_completada" ? "Confirmar entrega" : "Cerrar traslado",
         "El cierre enviará el traslado a validación operativa."
       );
 
