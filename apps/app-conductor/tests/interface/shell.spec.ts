@@ -37,7 +37,7 @@ for (const size of sizes) {
         await expect(frame).toHaveCount(1);
         await expect.poll(() => frame.evaluate(n => n.getBoundingClientRect().width)).toBeLessThanOrEqual(440);
         const nav = page.getByRole("navigation", { name: "Navegación principal móvil", exact: true });
-        await expect(nav).toBeVisible(); await expect(nav.getByRole("link")).toHaveText(["Inicio", "Traslados", "Cuenta"]);
+        await expect(nav).toBeVisible(); await expect(nav.getByRole("link")).toHaveText(["Inicio", "Traslados", "Ganancias", "Cuenta"]);
         const returnLink = frame.locator(":scope > div:first-child").getByRole("link").first();
         await hit(returnLink);
         await frame.locator("[data-screen-body]").evaluate(n => { n.scrollTop = n.scrollHeight; });
@@ -80,7 +80,7 @@ for (const size of sizes) {
       await expect(page.locator("h1").first()).toBeVisible();
       const nav = page.getByRole("navigation", { name: "Navegación principal móvil", exact: true });
       await expect(nav.filter({ visible: true })).toHaveCount(1);
-      await expect(nav.filter({ visible: true }).getByRole("link")).toHaveText(["Inicio", "Traslados", "Cuenta"]);
+      await expect(nav.filter({ visible: true }).getByRole("link")).toHaveText(["Inicio", "Traslados", "Ganancias", "Cuenta"]);
       const emergency = page.getByRole("button", { name: "Abrir emergencia", exact: true });
       await hit(emergency);
       const rect = await emergency.boundingBox(); expect(rect!.height).toBeGreaterThanOrEqual(48); expect(rect!.width).toBeGreaterThanOrEqual(48);

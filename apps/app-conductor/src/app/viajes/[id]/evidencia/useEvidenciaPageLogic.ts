@@ -464,8 +464,10 @@ export function useEvidenciaPageLogic(id: string): UseEvidenciaPageLogic {
       void drenarCola();
       return;
     }
-    if (tipo === "final" && presentaDanosNuevos && !fotos.some((f) => f.angulo === "dano_previo")) {
-      const msg = "Marcaste que hay daños nuevos: captura la foto de \"Daño previo\" para documentarlos.";
+    if (presentaDanosNuevos && !fotos.some((f) => f.angulo === "dano_previo")) {
+      const msg = tipo === "final"
+        ? "Marcaste que hay daños nuevos: fotografía el daño para documentarlo."
+        : "Marcaste que el vehículo tiene daños previos: fotografía el daño para documentarlo.";
       setError(msg);
       anunciarUrgente(msg);
       setEnviando(null);

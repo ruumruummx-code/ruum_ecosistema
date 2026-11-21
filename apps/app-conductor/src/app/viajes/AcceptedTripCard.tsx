@@ -140,14 +140,11 @@ export function AcceptedTripCard({
               e.stopPropagation();
               onReject(viaje);
             }}
-            className="p-2 min-h-11 min-w-11 flex items-center justify-center text-ui-fg-muted hover:text-ui-fg transition-colors shrink-0 cursor-pointer rounded-lg hover:bg-ui-card"
-            aria-label="Opciones de traslado"
+            className="px-3 min-h-11 min-w-11 flex items-center justify-center font-body text-xs font-semibold text-ui-fg-muted hover:text-ui-fg transition-colors shrink-0 cursor-pointer rounded-lg border border-ui-line/40 hover:bg-ui-card"
+            aria-label="Liberar traslado"
+            aria-haspopup="dialog"
           >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-              <circle cx="12" cy="5" r="1.5" />
-              <circle cx="12" cy="12" r="1.5" />
-              <circle cx="12" cy="19" r="1.5" />
-            </svg>
+            Liberar
           </BaseButton>
         </div>
       </div>

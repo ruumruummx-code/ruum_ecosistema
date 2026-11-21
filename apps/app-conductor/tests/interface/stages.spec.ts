@@ -133,22 +133,22 @@ test("expediente con teclado y filtros completos conservan retorno", async ({ pa
   await noRootScroll(page);
 });
 for (const width of [320, 390]) {
-  test(`lista poblada, búsqueda, paginación y cierre pendiente ${width}`, async ({ page, request }, info) => {
+  test(`lista poblada, búsqueda, lista completa y cierre pendiente ${width}`, async ({ page, request }, info) => {
     await request.get("http://127.0.0.1:54331/qa/list?mode=populated");
     await page.setViewportSize({ width, height: width === 320 ? 568 : 844 });
-    await page.goto("/viajes"); await expect(page.locator("[data-offer-card]")).toHaveCount(1);
+    // Todas las ofertas visibles en una sola lista con scroll del cuerpo, sin paginación.
+    await page.goto("/viajes"); await expect(page.locator("[data-offer-card]")).toHaveCount(3);
+    await expect(page.getByText("3 ofertas disponibles", { exact: true })).toBeVisible();
     await expect(page.getByRole("link", { name: /canal de emergencia directo/ })).toHaveCount(0);
     await hit(page.getByRole("button", { name: "Abrir emergencia", exact: true }));
-    await hit(page.getByRole("link", { name: "Ver detalles de la oferta" }));
-    expect(await page.locator("[data-screen-body]:visible").evaluate(n => n.scrollHeight - n.clientHeight)).toBeLessThanOrEqual(1);
-    await page.getByRole("button", { name: "Siguiente", exact: true }).click();
-    await expect(page.getByRole("group", { name: "Paginación de traslados" })).toContainText("2 de 3");
+    await hit(page.getByRole("link", { name: "Ver detalles de la oferta" }).first());
+    await expect(page.getByRole("group", { name: "Paginación de traslados" })).toHaveCount(0);
     const search = page.getByRole("searchbox"); await search.fill("no existe");
     await expect(page.getByRole("heading", { name: "Sin resultados con estos filtros" })).toBeVisible();
-    await page.getByRole("button", { name: "Limpiar filtros", exact: true }).click(); await expect(page.locator("[data-offer-card]")).toHaveCount(1);
+    await page.getByRole("button", { name: "Limpiar filtros", exact: true }).click(); await expect(page.locator("[data-offer-card]")).toHaveCount(3);
     await page.getByRole("button", { name: "Aceptados (3)", exact: true }).click();
     await expect(page.locator("[data-accepted-card]")).toContainText("CIERRE PENDIENTE");
-    await hit(page.getByRole("link", { name: "Continuar traslado" }));
+    await hit(page.getByRole("link", { name: "Continuar traslado" }).first());
     await noRootScroll(page); await page.screenshot({ path: info.outputPath(`lista-${width}.png`) });
     await page.getByRole("button", { name: "Abrir filtros avanzados" }).click();
     const filters = page.getByRole("dialog", { name: "Vista y filtros", exact: true });
