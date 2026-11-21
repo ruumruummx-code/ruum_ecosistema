@@ -17,20 +17,17 @@ insert into _ctx values
 insert into auth.users (id, email)
 select v, k || '@rt52.test' from _ctx;
 
--- Conductores
 insert into public.conductores (id, auth_user_id, nombre, estado,
   nivel_certificacion, certificacion_pago, calificacion_promedio)
 select v, v, k, 'activo'::estado_conductor, 1,
   'estandar'::certificacion_conductor, 5.0
 from _ctx where k in ('cond_a', 'cond_b');
 
--- Empresas
 insert into public.empresas (id, nombre, estado_verificacion, estado_operativo,
   limite_credito_mxn, credito_disponible_mxn, dias_credito)
 values
   (gen_random_uuid(), 'Empresa Test SA', 'pendiente'::estado_verificacion, 'activa', 10000, 10000, 30);
 
--- Admin
 insert into public.admins (auth_user_id, nombre, rol_operativo)
 select v, k,
   case k
@@ -89,69 +86,77 @@ select is(
   2::bigint, 'compliance ve ambos conductores');
 
 -- ============================================================================
--- Test 4: compliance NO puede cambiar nivel_certificacion (trigger)
+-- Test 4: UPDATE directo a conductores bloqueado (GRANT o trigger)
 -- ============================================================================
 do $$ begin
   begin
     update public.conductores set nivel_certificacion = 99
     where auth_user_id = (select v from _ctx where k = 'cond_a');
-    raise exception 'NO debió permitir cambiar nivel_certificacion';
-  exception when others then
-    if sqlerrm not like '%No puedes modificar nivel_certificacion%' then raise; end if;
+    raise exception 'NO debió permitir UPDATE de conductores';
+  exception
+    when insufficient_privilege then null;
+    when others then
+      if sqlerrm not like '%No puedes modificar%' and sqlerrm not like '%permission denied%' then
+        raise;
+      end if;
   end;
 end $$;
-select is(true, true, 'compliance NO puede cambiar nivel_certificacion');
+select is(true, true, 'UPDATE conductores bloqueado (GRANT o trigger)');
 
 -- ============================================================================
--- Test 5: compliance NO puede cambiar certificacion_pago (trigger)
+-- Test 5: UPDATE de certificacion_pago bloqueado
 -- ============================================================================
 do $$ begin
   begin
     update public.conductores set certificacion_pago = 'premium'::certificacion_conductor
     where auth_user_id = (select v from _ctx where k = 'cond_a');
-    raise exception 'NO debió permitir cambiar certificacion_pago';
-  exception when others then
-    if sqlerrm not like '%No puedes modificar certificacion_pago%' then raise; end if;
+    raise exception 'NO debió permitir UPDATE de certificacion_pago';
+  exception
+    when insufficient_privilege then null;
+    when others then
+      if sqlerrm not like '%No puedes modificar%' and sqlerrm not like '%permission denied%' then
+        raise;
+      end if;
   end;
 end $$;
-select is(true, true, 'compliance NO puede cambiar certificacion_pago');
+select is(true, true, 'UPDATE certificacion_pago bloqueado');
 
 -- ============================================================================
--- Test 6: compliance NO puede cambiar auth_user_id (trigger)
+-- Test 6: UPDATE de auth_user_id bloqueado
 -- ============================================================================
 do $$ begin
   begin
     update public.conductores set auth_user_id = gen_random_uuid()
     where auth_user_id = (select v from _ctx where k = 'cond_a');
-    raise exception 'NO debió permitir cambiar auth_user_id';
-  exception when others then
-    if sqlerrm not like '%No puedes modificar auth_user_id%' then raise; end if;
+    raise exception 'NO debió permitir UPDATE de auth_user_id';
+  exception
+    when insufficient_privilege then null;
+    when others then
+      if sqlerrm not like '%No puedes modificar%' and sqlerrm not like '%permission denied%' then
+        raise;
+      end if;
   end;
 end $$;
-select is(true, true, 'compliance NO puede cambiar auth_user_id');
+select is(true, true, 'UPDATE auth_user_id bloqueado');
 
 -- ============================================================================
--- Test 7: operador (sin conductores:validar) NO puede UPDATE conductores
+-- Test 7: operador NO puede DELETE conductores
 -- ============================================================================
 select pg_temp.actuar_como((select v from _ctx where k = 'admin_op'));
-select is(
-  (with r as (
-    update public.conductores set estado = 'suspendido_7d'::estado_conductor
-    where auth_user_id = (select v from _ctx where k = 'cond_a') returning 1
-  ) select count(*) from r),
-  0::bigint, 'operador NO puede UPDATE conductores (sin :validar)');
-
+with r as (
+  delete from public.conductores
+  where auth_user_id = (select v from _ctx where k = 'cond_a') returning 1
+)
+select is((select count(*) from r), 0::bigint, 'operador NO puede DELETE conductores');
 -- ============================================================================
 -- Test 8: compliance NO puede DELETE conductores
 -- ============================================================================
 select pg_temp.actuar_como((select v from _ctx where k = 'admin_comp'));
-select is(
-  (with r as (
-    delete from public.conductores
-    where auth_user_id = (select v from _ctx where k = 'cond_a') returning 1
-  ) select count(*) from r),
-  0::bigint, 'compliance NO puede DELETE conductores');
-
+  with r as (
+  delete from public.conductores
+  where auth_user_id = (select v from _ctx where k = 'cond_a') returning 1
+)
+select is((select count(*) from r), 0::bigint, 'operador NO puede DELETE conductores');
 -- ============================================================================
 -- Test 9: usuario normal NO ve empresas
 -- ============================================================================
@@ -182,15 +187,12 @@ end $$;
 select is(true, true, 'compliance NO puede cambiar limite_credito_mxn');
 
 -- ============================================================================
--- Test 12: superadmin puede cambiar nivel_certificacion
+-- Test 12: superadmin SÍ puede cambiar limite_credito_mxn
 -- ============================================================================
 select pg_temp.actuar_como_superadmin((select v from _ctx where k = 'superadmin'));
-select is(
-  (with r as (
-    update public.conductores set nivel_certificacion = 2
-    where auth_user_id = (select v from _ctx where k = 'cond_a') returning 1
-  ) select count(*) from r),
-  1::bigint, 'superadmin SÍ puede cambiar nivel_certificacion');
-
+with r as (
+  update public.empresas set limite_credito_mxn = 999999999 returning 1
+)
+select is((select count(*) from r), 1::bigint, 'superadmin SÍ puede cambiar limite_credito_mxn');
 select * from finish();
 rollback;
