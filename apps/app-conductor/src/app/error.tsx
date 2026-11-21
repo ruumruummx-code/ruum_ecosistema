@@ -26,7 +26,7 @@ export default function ErrorGlobalConductor({
       detalle={process.env.NODE_ENV === "development" ? error.message : undefined}
       acciones={[
         { etiqueta: "Recargar", onClick: reset, variant: "primary" },
-        { etiqueta: "Ir al panel", href: "/", variant: "quiet" }
+        { etiqueta: "Ir al panel", href: "/panel", variant: "quiet" }
       ]}
     />
   );

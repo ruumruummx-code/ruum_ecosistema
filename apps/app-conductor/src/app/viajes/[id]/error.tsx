@@ -27,11 +27,12 @@ export default function ErrorDetalleViaje({ error, reset }: { error: Error & { d
       )}
       <TripActionDock status="No se pudo cargar el traslado">
       <div className="flex flex-wrap justify-center gap-2">
-        <BaseButton variant="ghost" type="submit" onClick={reset} className="inline-flex min-h-11 items-center justify-center rounded-xl border border-ui-line bg-ui-card px-5 py-2.5 font-body text-sm font-medium text-ui-fg transition hover:border-ui-field">
+        {/* Reintentar es la acción principal; salir de la pantalla queda como alternativa. */}
+        <BaseButton variant="primary" type="button" onClick={reset} className="min-h-11 px-5">
           Reintentar
         </BaseButton>
-        <Link href="/viajes" className="inline-flex min-h-11 items-center justify-center rounded-xl bg-ui-brand px-5 py-2.5 font-display text-sm font-bold text-ui-fg transition hover:bg-ui-brand/90">
-          Ver mis Traslados
+        <Link href="/viajes" className="inline-flex min-h-11 items-center justify-center rounded-xl border border-ui-line bg-ui-card px-5 py-2.5 font-body text-sm font-medium text-ui-fg">
+          Ver mis traslados
         </Link>
         <Link href="/panel" className="inline-flex min-h-11 items-center justify-center rounded-xl border border-ui-line bg-ui-card px-5 py-2.5 font-body text-sm font-medium text-ui-fg">
           Ir al panel

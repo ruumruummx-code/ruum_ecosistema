@@ -35,8 +35,8 @@ export default async function DetallesTrasladoPage({
         titulo="No encontramos ese viaje"
         descripcion="Revisa el enlace o vuelve a tu lista de Traslados para continuar."
         acciones={[
-          { etiqueta: "Ver mis Traslados", href: "/viajes", variant: "primary" },
-          { etiqueta: "Volver al panel", href: "/", variant: "quiet" }
+          { etiqueta: "Ver mis traslados", href: "/viajes", variant: "primary" },
+          { etiqueta: "Volver al panel", href: "/panel", variant: "quiet" }
         ]}
       />
     );
