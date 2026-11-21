@@ -19,6 +19,7 @@ export type InspeccionPendientes = {
 export type ResultadoLimpiezaSesion = {
   ok: boolean;
   blocked: boolean;
+  authSignedOut: boolean;
   errorCount: number;
   pendingEvidence: number;
   pendingTelemetry: number;
@@ -112,7 +113,7 @@ export async function limpiarSesionIntegral(options: { force?: boolean; autoriza
   const isBlocked = hasPending || pendientes.inspectionError;
 
   if (!options.force && isBlocked) {
-    return { ok: false, blocked: true, errorCount: 0, ...pendientes };
+    return { ok: false, blocked: true, authSignedOut: false, errorCount: 0, ...pendientes };
   }
 
   if (options.force && isBlocked) {
@@ -139,7 +140,23 @@ export async function limpiarSesionIntegral(options: { force?: boolean; autoriza
     try { await limpiarCredencialesTrackingNativo(); } catch (e) { errores.push(e); }
   }
   try { await desactivarPushDelDispositivo(); } catch (e) { errores.push(e); }
-  try { await crearClienteNavegador().auth.signOut({ scope: "local" }); } catch (e) { errores.push(e); }
+  let authSignedOut = false;
+  try {
+    const cliente = crearClienteNavegador();
+    const { error } = await cliente.auth.signOut({ scope: "local" });
+    if (error) {
+      errores.push(error);
+      const { data, error: sessionError } = await cliente.auth.getSession();
+      authSignedOut = !sessionError && !data.session;
+    } else {
+      authSignedOut = true;
+    }
+  } catch (error) {
+    errores.push(error);
+  }
+  if (!authSignedOut) {
+    return { ok: false, blocked: false, authSignedOut, errorCount: errores.length, ...pendientes };
+  }
   try { await limpiarCacheViajeActivo(); } catch (e) { errores.push(e); }
 
   // Evidencia: limpieza por propietario (H02)
@@ -179,5 +196,5 @@ export async function limpiarSesionIntegral(options: { force?: boolean; autoriza
     sessionStorage.clear();
     window.dispatchEvent(new CustomEvent("ruum:session-cleared"));
   }
-  return { ok: errores.length === 0, blocked: false, errorCount: errores.length, ...pendientes };
+  return { ok: errores.length === 0, blocked: false, authSignedOut, errorCount: errores.length, ...pendientes };
 }

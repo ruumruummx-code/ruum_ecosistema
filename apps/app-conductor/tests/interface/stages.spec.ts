@@ -56,7 +56,7 @@ for (const width of [320, 390]) {
     await noRootScroll(page);
   });
 }
-test("recepción e inicio son dos decisiones y una RPC por pulsación", async ({ page, request }) => {
+test("recepción e inicio son dos decisiones y una RPC por pulsación", { tag: "@critico" }, async ({ page, request }) => {
   await page.goto(`/viajes/${trip(13)}`);
   await page.getByRole("button", { name: "Confirmar recepción", exact: true }).click();
   await expect(page.getByRole("button", { name: "Iniciar traslado", exact: true })).toBeEnabled();
@@ -67,7 +67,7 @@ test("recepción e inicio son dos decisiones y una RPC por pulsación", async ({
   calls = await (await request.get("http://127.0.0.1:54331/qa/calls")).json();
   expect(calls.filter((c: RpcCall) => c.rpc === "conductor_avanza_traslado").map((c: RpcCall) => c.params.p_evento)).toEqual(["vehiculo_recibido", "iniciar_traslado"]);
 });
-test("llegada no inicia registro final y conserva datos de geocerca", async ({ page, request, context }) => {
+test("llegada no inicia registro final y conserva datos de geocerca", { tag: "@critico" }, async ({ page, request, context }) => {
   await context.grantPermissions(["geolocation"]); await context.setGeolocation({ latitude: 19.4, longitude: -99.1, accuracy: 15 });
   await page.goto(`/viajes/${trip(4)}`);
   await expect(page.getByRole("heading", { name: "Conduce al destino", exact: true })).toBeVisible();
@@ -80,7 +80,7 @@ test("llegada no inicia registro final y conserva datos de geocerca", async ({ p
   const arrival = calls.filter((c: RpcCall) => c.rpc === "conductor_confirmar_llegada_destino");
   expect(arrival).toHaveLength(1); expect(arrival[0].params).toMatchObject({ p_precision_m: 15, p_fuera_geocerca: false, p_motivo_sin_medicion: "destino_sin_coordenadas" });
 });
-test("llegada se corrige con el estado autoritativo del servidor", async ({ page, request, context }) => {
+test("llegada se corrige con el estado autoritativo del servidor", { tag: "@critico" }, async ({ page, request, context }) => {
   await context.grantPermissions(["geolocation"]);
   await context.setGeolocation({ latitude: 19.4, longitude: -99.1 });
   await request.get("http://127.0.0.1:54331/qa/arrival-state?state=evidencia_final_completada");
@@ -90,7 +90,7 @@ test("llegada se corrige con el estado autoritativo del servidor", async ({ page
   await expect(page.getByRole("button", { name: "Continuar registro final" })).toHaveCount(0);
 });
 
-test("cierre resumido y terminales sin acciones de avance", async ({ page }) => {
+test("cierre resumido y terminales sin acciones de avance", { tag: "@critico" }, async ({ page }) => {
   await page.goto(`/viajes/${trip(5)}`);
   await page.getByRole("link", { name: "Revisar y finalizar" }).click();
   await expect(page).toHaveURL(/cierre=1/); await expect(page.locator("[data-trip-form]")).toHaveCount(1);
@@ -102,7 +102,7 @@ test("cierre resumido y terminales sin acciones de avance", async ({ page }) => 
     await expect(page.getByRole("dialog")).toBeVisible(); await expect(page.getByRole("dialog").getByRole("link", { name: /Registrar gasto|Reportar/ })).toHaveCount(0);
   }
 });
-test("REPUVE conserva bloqueo, requisitos y datos faltantes", async ({ page, request }) => {
+test("REPUVE conserva bloqueo, requisitos y datos faltantes", { tag: "@critico" }, async ({ page, request }) => {
   await page.goto(`/viajes/${trip(12)}`); await page.getByRole("button", { name: "Abrir verificación", exact: true }).click();
   const dialog = page.getByRole("dialog");
   await dialog.getByRole("button", { name: "Confirmar verificación", exact: true }).click();

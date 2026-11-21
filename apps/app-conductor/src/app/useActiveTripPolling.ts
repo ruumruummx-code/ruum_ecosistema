@@ -50,6 +50,7 @@ export function useActiveTripPolling(pathname: string) {
   const [viajeActivo, setViajeActivo] = useState<ViajeActivo | null>(null);
   const [viajeActivoSinActualizar, setViajeActivoSinActualizar] = useState(false);
   const [pasaporteActivo, setPasaporteActivo] = useState<Awaited<ReturnType<typeof listarTrasladosAceptados>>[number] | null>(null);
+  const [sinViajeConfirmado, setSinViajeConfirmado] = useState(false);
   const rutaSinViajeActivo = RUTAS_SIN_VIAJE_ACTIVO.has(pathname);
   const registrarViajeActivo = useCallback((viaje: RegistroViajeActivoInput | null) => {
     setViajeActivo((previo) => (viaje ? normalizarViajeActivo(viaje, previo) : null));
@@ -61,13 +62,17 @@ export function useActiveTripPolling(pathname: string) {
     if (rutaSinViajeActivo) return;
 
     let cancelado = false;
+    let solicitud = 0;
 
     async function cargarViajeActivo() {
+      const actual = ++solicitud;
+      const vigente = () => !cancelado && actual === solicitud;
       try {
         const cliente = crearClienteNavegador();
-        const conductor = await obtenerConductorActual(cliente);
+        const conductor = await obtenerConductorActual(cliente, { propagarErrorAuth: true });
         if (!conductor) {
-          if (!cancelado) {
+          if (vigente()) {
+            setSinViajeConfirmado(true);
             setViajeActivo(null);
             setPasaporteActivo(null);
             setViajeActivoSinActualizar(false);
@@ -77,13 +82,16 @@ export function useActiveTripPolling(pathname: string) {
 
         const Traslados = await listarTrasladosAceptados(cliente, conductor.id);
         const activo = Traslados.find((viaje) => viajeActivoDesdePasaporte(viaje) !== null);
-        if (!cancelado) {
+        if (vigente()) {
+          setSinViajeConfirmado(!activo);
           setViajeActivo(activo ? viajeActivoDesdePasaporte(activo) : null);
           setPasaporteActivo(activo ?? null);
           setViajeActivoSinActualizar(false);
         }
       } catch (error) {
-        const cache = await leerCacheViajeActivo();
+        if (!vigente()) return;
+        setSinViajeConfirmado(false);
+        setViajeActivoSinActualizar(true);
         logger.warn(
           "active_trip_refresh_failed",
           {
@@ -92,20 +100,21 @@ export function useActiveTripPolling(pathname: string) {
           },
           "connectivity"
         );
-        if (!cancelado) {
-          if (cache) {
-            setViajeActivo(normalizarViajeActivo({
-              trasladoId: cache.trasladoId,
-              estado: cache.estado,
-              cerradoEn: cache.cerradoEn,
-              estadoOperativo: cache.estadoOperativo,
-              folio: cache.folio,
-              etapa: cache.siguienteAccion.label,
-              destinoActual: cache.siguienteAccion.nextStep ?? cache.siguienteAccion.instruction
-            }));
-          }
-          setViajeActivoSinActualizar(true);
-        }
+        const cache = await leerCacheViajeActivo().catch((cacheError: unknown) => {
+          logger.warn("active_trip_cache_read_failed", { errorCode: errorCode(cacheError) });
+          return null;
+        });
+        if (!vigente() || !cache) return;
+
+        setViajeActivo((previo) => previo ?? normalizarViajeActivo({
+          trasladoId: cache.trasladoId,
+          estado: cache.estado,
+          cerradoEn: cache.cerradoEn,
+          estadoOperativo: cache.estadoOperativo,
+          folio: cache.folio,
+          etapa: cache.siguienteAccion.label,
+          destinoActual: cache.siguienteAccion.nextStep ?? cache.siguienteAccion.instruction
+        }));
       }
     }
 
@@ -140,6 +149,7 @@ export function useActiveTripPolling(pathname: string) {
   return {
     viajeActivo: rutaSinViajeActivo ? null : viajeActivo,
     viajeActivoSinActualizar: rutaSinViajeActivo ? false : viajeActivoSinActualizar,
+    sinViajeConfirmado: !rutaSinViajeActivo && sinViajeConfirmado,
     pasaporteActivo: rutaSinViajeActivo ? null : pasaporteActivo,
     registrarViajeActivo
   };

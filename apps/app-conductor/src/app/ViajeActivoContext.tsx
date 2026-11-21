@@ -1,5 +1,5 @@
 "use client";
-import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { usePathname } from "next/navigation";
 import { useActiveTripPolling } from "./useActiveTripPolling";
 import { useDriverLocationTracking } from "./useDriverLocationTracking";
@@ -22,13 +22,8 @@ export { viajeEsOperacionActiva, viajePermiteEmergencia };
 
 export function ViajeActivoProvider({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const { viajeActivo, viajeActivoSinActualizar, pasaporteActivo, registrarViajeActivo } = useActiveTripPolling(pathname);
+  const { viajeActivo, viajeActivoSinActualizar, pasaporteActivo, registrarViajeActivo, sinViajeConfirmado } = useActiveTripPolling(pathname);
   const [cacheViajeActivo, setCacheViajeActivo] = useState<OfflineActiveTripCache | null>(null);
-  // Ref para evitar limpiar el caché offline durante el montaje inicial mientras la
-  // promesa del servidor aún está pendiente. Solo se permite limpiar después de que
-  // la primera carga de useActiveTripPolling haya resuelto (HTTP 200 confirmando
-  // que el viaje existe o no existe).
-  const primeraCargaCompletada = useRef(false);
   useDriverLocationTracking(viajeActivo);
 
   useEffect(() => { void leerCacheViajeActivo().then(setCacheViajeActivo); }, []);
@@ -41,21 +36,13 @@ export function ViajeActivoProvider({ children }: { children: React.ReactNode })
   }, []);
 
   useEffect(() => {
-    // Durante el montaje inicial (primera ejecución del efecto) no se limpia el caché
-    // aunque pasaporteActivo y viajeActivo sean null: la promesa del servidor aún está
-    // pendiente y limpiar ahora borraría el viaje en caché sin confirmación del servidor.
-    if (!primeraCargaCompletada.current) {
-      primeraCargaCompletada.current = true;
-      return;
-    }
-
     if (pasaporteActivo) {
       void cachearPasaporteActivo(pasaporteActivo);
-    } else if (!viajeActivoSinActualizar && !viajeActivo) {
+    } else if (sinViajeConfirmado && !viajeActivo) {
       // El servidor respondió (HTTP 200) que no hay viaje activo: seguro limpiar caché.
       void limpiarCacheViajeActivo().then(() => setCacheViajeActivo(null));
     }
-  }, [cachearPasaporteActivo, pasaporteActivo, viajeActivo, viajeActivoSinActualizar]);
+  }, [cachearPasaporteActivo, pasaporteActivo, sinViajeConfirmado, viajeActivo]);
 
   const limpiarViajeActivoGlobal = useCallback(async () => {
     registrarViajeActivo(null);

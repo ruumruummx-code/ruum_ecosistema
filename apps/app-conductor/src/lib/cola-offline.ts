@@ -2,8 +2,7 @@ import {
   descargarArchivoEvidenciaStorage,
   registrarConflictoEvidencia,
   guardarFotoEvidenciaSincronizada,
-  subirArchivoEvidenciaStorage,
-  type ResultadoGuardadoEvidencia
+  subirArchivoEvidenciaStorage
 } from "@ruum/api/custody";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@ruum/shared/types";
@@ -55,6 +54,7 @@ export interface ItemColaEvidencia {
   retryCount: number;
   lastAttemptAt?: string;
   lastErrorCode?: string;
+  conflictoCustodia?: true;
 }
 
 export interface EvidenceQueueStorage {
@@ -317,12 +317,12 @@ export async function calcularSha256(dataUrl: string): Promise<string | null> {
 }
 
 /** El objeto ya existe en Storage (subida parcial previa): no es un error. */
-function esObjetoYaExistente(error: unknown): boolean {
+function esObjetoExistente(error: unknown): boolean {
   if (!error || typeof error !== "object") return false;
-  const info = error as { statusCode?: number; status?: number; code?: string; message?: string };
+  const info = error as { statusCode?: number | string; status?: number | string; code?: string; error?: string; message?: string };
   const estado = info.statusCode ?? info.status;
-  if (estado === 409) return true;
-  const texto = `${info.code ?? ""} ${info.message ?? ""}`.toLowerCase();
+  if (String(estado) === "409") return true;
+  const texto = `${info.code ?? ""} ${info.error ?? ""} ${info.message ?? ""}`.toLowerCase();
   return texto.includes("already exists") || texto.includes("duplicate");
 }
 
@@ -359,7 +359,7 @@ function esItemValidoYTolerable(item: ItemColaEvidencia, ahoraMs = Date.now()): 
     }
   }
 
-  if (typeof item.retryCount === "number" && item.retryCount > MAX_REINTENTOS_EVIDENCIA) {
+  if (item.conflictoCustodia !== true && typeof item.retryCount === "number" && item.retryCount > MAX_REINTENTOS_EVIDENCIA) {
     logger.warn("evidence_item_purged_max_retries", { localId: item.localId, tripId: item.trasladoId, retryCount: item.retryCount });
     void recordOperationalEvent("evidence_stuck", {
       localId: item.localId,
@@ -423,7 +423,7 @@ function puedeReintentarse(item: ItemColaEvidencia, ahoraMs = Date.now()) {
   return ahoraMs - ultimoIntentoMs >= backoffMsParaIntentos(item.retryCount);
 }
 
-async function registrarIntentoFallido(item: ItemColaEvidencia, error: unknown) {
+async function registrarIntentoFallido(item: ItemColaEvidencia, error: unknown, conflicto: boolean) {
   const colaCompleta = await leerColaEvidenciaCompleta();
   const codigo = errorCode(error);
   const ahora = new Date().toISOString();
@@ -434,7 +434,8 @@ async function registrarIntentoFallido(item: ItemColaEvidencia, error: unknown) 
             ...existente,
             retryCount: existente.retryCount + 1,
             lastAttemptAt: ahora,
-            lastErrorCode: codigo
+            lastErrorCode: codigo,
+            ...(conflicto ? { conflictoCustodia: true as const } : {})
           }
         : existente
     )
@@ -479,71 +480,63 @@ async function sincronizarColaEvidenciaInterna(
     onItemSincronizado?: (item: ItemColaEvidencia) => void | Promise<void>;
   } = {}
 ) {
-  const { data: sesionActual } = await cliente.auth.getUser();
-  if (!sesionActual.user) throw new Error("No hay sesión para subir evidencia.");
-  const cola = await leerColaEvidencia(undefined, sesionActual.user.id);
-  const itemsBase = opciones.trasladoId ? cola.filter((item) => item.trasladoId === opciones.trasladoId) : cola;
-  const items = opciones.ignoreBackoff ? itemsBase : itemsBase.filter((item) => puedeReintentarse(item));
-  let sincronizadas = 0;
+  const { data: sesionActual, error } = await cliente.auth.getUser();
+  if (error) throw error;
+  const authUserId = sesionActual.user?.id;
+  if (!authUserId) throw new Error("No hay sesión para subir evidencia.");
 
-  // Validar sesión UNA sola vez por ciclo de sync (no por item) para evitar
-  // N round-trips de Auth en redes lentas (3G). authUserId se reusa para todos los items.
-  const authUserId = sesionActual.user.id;
-  if (!authUserId) {
-    const error = new Error("No hay sesión para subir evidencia.");
-    // Registrar intento fallido para cada item pendiente
-    for (const item of items) {
-      const actualizado = await registrarIntentoFallido(item, error);
-      logEvidenceSyncFailed(actualizado, "auth", error, itemsBase.length);
-    }
-    throw error;
-  }
+  const cola = (await leerColaEvidenciaCompleta()).filter((item) =>
+    item.usuarioId === authUserId && (!opciones.trasladoId || item.trasladoId === opciones.trasladoId)
+  );
+  const items = cola.filter((item) =>
+    item.conflictoCustodia !== true && (opciones.ignoreBackoff || puedeReintentarse(item))
+  );
+  let sincronizadas = 0;
+  let primerError: { causa: unknown } | undefined;
 
   for (const item of items) {
-    let blob: Blob;
-    let dataUrlEfectivo: string;
-    try {
-      dataUrlEfectivo = await obtenerDataUrlParaItem(item);
-      blob = blobDesdeDataUrl(dataUrlEfectivo);
-    } catch (error) {
-      const actualizado = await registrarIntentoFallido(item, error);
-      logEvidenceSyncFailed(actualizado, "local_payload", error, itemsBase.length);
-      throw error;
-    }
+    let stage: Parameters<typeof logEvidenceSyncFailed>[1] = "local_payload";
+    let conflicto = false;
 
-    const hash = await hashBlob(blob);
-    if (item.sha256 && item.sha256 !== hash) throw new Error("evidence_local_hash_conflict");
-    const extension = extensionDesdeDataUrl(dataUrlEfectivo);
-    const ruta = `${authUserId}/${item.trasladoId}/${item.tipo}/${item.localId}-${item.angulo}.${extension}`;
-    // La huella del archivo define la identidad de la evidencia en la cadena de
-    // custodia: es lo que permite distinguir un reintento idempotente de un
-    // intento de sobrescribir.
-    const { error: uploadError } = await withTimeout(
-      subirArchivoEvidenciaStorage(cliente, ruta, blob, {
-        upsert: false,
-        contentType: blob.type || "image/jpeg",
-      }) as Promise<{ error: unknown | null }>,
-      TIMEOUT_UPLOAD_MS,
-      `storage_upload:${item.localId}`
-    );
-    if (uploadError && esObjetoExistente(uploadError)) {
-      const { data: existente, error: descargaError } = await descargarArchivoEvidenciaStorage(cliente, ruta);
-      if (descargaError || !existente) throw descargaError ?? new Error("evidence_existing_object_unverified");
-      const hashExistente = await hashBlob(existente);
-      if (hashExistente !== hash) {
-        await registrarConflictoEvidencia(cliente, { captura_id: item.localId, traslado_id: item.trasladoId, ruta, sha256_esperado: hash, sha256_observado: hashExistente });
-        throw new Error("evidence_storage_hash_conflict: conserva la captura y solicita revisión de operación");
+    try {
+      const dataUrl = await obtenerDataUrlParaItem(item);
+      const blob = blobDesdeDataUrl(dataUrl);
+      const hash = await hashBlob(blob);
+      if (item.sha256 && item.sha256 !== hash) {
+        conflicto = true;
+        throw new Error("evidence_local_hash_conflict");
       }
-    } else if (uploadError) {
-      const actualizado = await registrarIntentoFallido(item, uploadError);
-      logEvidenceSyncFailed(actualizado, "storage_upload", uploadError, itemsBase.length);
-      throw uploadError;
-    }
 
-    let evidenciaError: unknown | null = null;
-    let resultado: ResultadoGuardadoEvidencia | null = null;
-    try {
-      resultado = await withTimeout(
+      stage = "storage_upload";
+      const extension = extensionDesdeDataUrl(dataUrl);
+      const ruta = `${authUserId}/${item.trasladoId}/${item.tipo}/${item.localId}-${item.angulo}.${extension}`;
+      const { error: uploadError } = await withTimeout(
+        subirArchivoEvidenciaStorage(cliente, ruta, blob, { upsert: false, contentType: blob.type || "image/jpeg" }),
+        TIMEOUT_UPLOAD_MS,
+        `storage_upload:${item.localId}`
+      );
+      if (uploadError) {
+        if (!esObjetoExistente(uploadError)) throw uploadError;
+        const { data: existente, error: descargaError } = await withTimeout(
+          descargarArchivoEvidenciaStorage(cliente, ruta),
+          TIMEOUT_UPLOAD_MS,
+          `storage_download:${item.localId}`
+        );
+        if (descargaError || !existente) throw descargaError ?? new Error("evidence_existing_object_unverified");
+        const hashExistente = await hashBlob(existente);
+        if (hashExistente !== hash) {
+          conflicto = true;
+          await withTimeout(
+            registrarConflictoEvidencia(cliente, { captura_id: item.localId, traslado_id: item.trasladoId, ruta, sha256_esperado: hash, sha256_observado: hashExistente }),
+            TIMEOUT_UPSERT_MS,
+            `evidence_conflict:${item.localId}`
+          );
+          throw new Error("evidence_storage_hash_conflict");
+        }
+      }
+
+      stage = "evidence_insert";
+      const resultado = await withTimeout(
         guardarFotoEvidenciaSincronizada(cliente, {
           id: item.localId,
           traslado_id: item.trasladoId,
@@ -560,56 +553,46 @@ async function sincronizarColaEvidenciaInterna(
         TIMEOUT_UPSERT_MS,
         `evidence_insert:${item.localId}`
       );
+      if (resultado.estado === "conflicto") {
+        conflicto = true;
+        throw new Error("evidence_checksum_conflict");
+      }
+
+      await quitarDeColaEvidenciaInterna(item.localId);
     } catch (error) {
-      evidenciaError = error;
-    }
-
-    if (evidenciaError) {
-      const actualizado = await registrarIntentoFallido(item, evidenciaError);
-      logEvidenceSyncFailed(actualizado, "evidence_insert", evidenciaError, itemsBase.length);
-      throw evidenciaError;
-    }
-
-    if (resultado && resultado.estado === "conflicto") {
-      // Conflicto de cadena de custodia: el archivo no coincide con el ya
-      // registrado. No se reintenta (reintentar no lo resuelve) y la evidencia
-      // queda marcada en conflicto en el servidor; se conserva su captura local.
-      logger.error(
-        "evidence_checksum_conflict",
-        {
-          tripId: item.trasladoId,
-          evidenceType: item.tipo,
-          angle: item.angulo,
+      const actualizado = await registrarIntentoFallido(item, error, conflicto);
+      logEvidenceSyncFailed(actualizado, stage, error, cola.length);
+      if (conflicto) {
+        void recordOperationalEvent("evidence_stuck", {
           localId: item.localId,
-          sha256Registrado: resultado.sha256Registrado,
-          sha256Recibido: resultado.sha256Recibido,
-          queueSize: itemsBase.length
-        },
-        "security_event"
-      );
-      void recordOperationalEvent("evidence_stuck", {
-        localId: item.localId,
-        trasladoId: item.trasladoId,
-        scope: "evidencia|custodia",
-        razon: "conflicto_sha256"
-      }, "error");
-      if (typeof window !== "undefined") {
-        window.dispatchEvent(new CustomEvent("ruum:evidencia-conflicto", {
-          detail: { localId: item.localId, trasladoId: item.trasladoId }
-        }));
+          trasladoId: item.trasladoId,
+          scope: "evidencia|custodia",
+          razon: "conflicto_sha256"
+        }, "error");
+        if (typeof window !== "undefined") {
+          window.dispatchEvent(new CustomEvent("ruum:evidencia-conflicto", {
+            detail: { localId: item.localId, trasladoId: item.trasladoId }
+          }));
+        }
+      } else {
+        primerError ??= { causa: error };
       }
       continue;
     }
 
-    await quitarDeColaEvidenciaInterna(item.localId);
     sincronizadas += 1;
-    await opciones.onItemSincronizado?.(item);
+    try {
+      await opciones.onItemSincronizado?.(item);
+    } catch (error) {
+      logger.warn("evidence_sync_notification_failed", { errorCode: errorCode(error), localId: item.localId });
+    }
   }
 
   if (sincronizadas > 0 && typeof window !== "undefined") {
     window.dispatchEvent(new CustomEvent("ruum:evidencia-sincronizada"));
   }
 
+  if (primerError && sincronizadas === 0) throw primerError.causa;
   return sincronizadas;
 }
 
@@ -636,7 +619,3 @@ export function encolarEvidencia(...args: Parameters<typeof encolarEvidenciaInte
 export function sincronizarColaEvidencia(...args: Parameters<typeof sincronizarColaEvidenciaInterna>) { return serializar(() => conLockNavegador(() => sincronizarColaEvidenciaInterna(...args))); }
 export function quitarDeColaEvidencia(...args: Parameters<typeof quitarDeColaEvidenciaInterna>) { return serializar(() => conLockNavegador(() => quitarDeColaEvidenciaInterna(...args))); }
 export async function hashBlob(blob: Blob): Promise<string> { return Array.from(new Uint8Array(await crypto.subtle.digest("SHA-256", await blob.arrayBuffer()))).map((n) => n.toString(16).padStart(2,"0")).join(""); }
-function esObjetoExistente(error: unknown): boolean {
-  const e = error as { statusCode?: string | number; error?: string; message?: string };
-  return String(e?.statusCode) === "409" || e?.error === "Duplicate" || e?.message === "The resource already exists";
-}

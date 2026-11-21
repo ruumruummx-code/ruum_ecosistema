@@ -27,7 +27,7 @@
     "test:e2e:scroll": "playwright test --config playwright.scroll.config.ts",
     "test:android:native": "node scripts/android-native-qa.mjs",
     "test:e2e:auth": "playwright test --config playwright.auth.config.ts",
-    "test:e2e:critical": "playwright test tests/e2e/sprint-c5-critical-flows.spec.ts",
+    "test:e2e:critical": "playwright test --config playwright.interface.config.ts --grep @critico",
     "predev": "node ../../scripts/validate-env.mjs app-conductor",
     "prebuild": "node ../../scripts/validate-env.mjs app-conductor && node scripts/assert-csp.mjs",
     "validate:env": "node ../../scripts/validate-env.mjs app-conductor",

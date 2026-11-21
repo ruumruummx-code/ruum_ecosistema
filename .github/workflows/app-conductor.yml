@@ -1,0 +1,31 @@
+name: App Conductor
+on:
+  pull_request:
+  push:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  conductor:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    env:
+      NEXT_TELEMETRY_DISABLED: '1'
+      NEXT_PUBLIC_SUPABASE_URL: http://127.0.0.1:54331
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: sb_publishable_e2e_only
+      RUUM_LOCAL_PRODUCTION: 'true'
+      NEXT_PUBLIC_RUUM_AMBIENTE: development
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @ruum/app-conductor lint
+      - run: pnpm --filter @ruum/app-conductor typecheck
+      - run: pnpm --filter @ruum/app-conductor test
+      - run: pnpm --filter @ruum/app-conductor exec playwright install --with-deps chromium
+      - run: pnpm --filter @ruum/app-conductor exec next build
+      - run: pnpm --filter @ruum/app-conductor test:e2e:critical

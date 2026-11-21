@@ -146,7 +146,6 @@ export default defineConfig({
         "src/app/layout.tsx",
         "src/app/not-found.tsx",
         "src/app/page.tsx",
-        "src/app/useActiveTripPolling.ts",
 
         // (3) Cuenta del conductor: la lógica vive en src/lib (medida) y las
         //     vistas son de presentación; falta unitario del perfil completo.
@@ -205,7 +204,6 @@ export default defineConfig({
         "src/app/viajes/loading.tsx",
         "src/app/viajes/*/ChatViaje.tsx",
         "src/app/viajes/*/CierreTrasladoDetails.tsx",
-        "src/app/viajes/*/ConduceADestinoDetails.tsx",
         "src/app/viajes/*/ContactActionBar.tsx",
         "src/app/viajes/*/ContactoRecepcionVehiculo.tsx",
         "src/app/viajes/*/ContactoYVehiculo.tsx",

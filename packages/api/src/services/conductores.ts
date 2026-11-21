@@ -1,4 +1,4 @@
-import type { SupabaseClient } from "@supabase/supabase-js";
+import { isAuthSessionMissingError, type SupabaseClient } from "@supabase/supabase-js";
 import type { Database, Json } from "@ruum/shared/types";
 import { registrarEvento } from "./auditoria";
 
@@ -66,8 +66,15 @@ export function telefonoONull(valor: string | null | undefined) {
 }
 
 /** Conductor asociado a la sesión de Supabase Auth actual, si existe. */
-export async function obtenerConductorActual(cliente: Cliente): Promise<ConductorRow | null> {
-  const { data: sesion } = await cliente.auth.getUser();
+export async function obtenerConductorActual(
+  cliente: Cliente,
+  opciones: { propagarErrorAuth?: boolean } = {}
+): Promise<ConductorRow | null> {
+  const { data: sesion, error: errorAuth } = await cliente.auth.getUser();
+  if (opciones.propagarErrorAuth && errorAuth) {
+    if (isAuthSessionMissingError(errorAuth) || errorAuth.status === 401 || errorAuth.status === 403) return null;
+    throw errorAuth;
+  }
   if (!sesion.user) return null;
 
   const { data, error } = await cliente

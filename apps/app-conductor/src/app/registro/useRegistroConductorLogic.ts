@@ -17,7 +17,6 @@ import {
   obtenerEstadoVerificacionDiditConductor,
   obtenerSolicitudConductorActual,
   registrarConsentimientosConductor,
-  type ExpedienteSolicitudConductorV2,
 } from "@ruum/api/services";
 import {
   listarConsentimientosSolicitud,
@@ -25,7 +24,6 @@ import {
   obtenerBorradorSolicitud,
 } from "@ruum/api/drivers";
 import { crearClienteNavegador, tieneSupabaseConfigurado, obtenerOriginApp } from "../../lib/supabase-browser";
-import type { Json } from "@ruum/shared/types";
 import { consultarCodigoPostalMx } from "../../lib/codigos-postales";
 import { limpiarBorradorRegistroLocal } from "../../lib/borrador-registro";
 import {
@@ -33,7 +31,7 @@ import {
   type EstadoGuardadoRemoto,
 } from "./registration-types";
 import {
-  fusionarJsonExpediente,
+  combinarExpedienteConRemoto,
   limpiarTexto,
   objetoJson,
   soloDigitos,
@@ -63,26 +61,6 @@ function canalRegistro(): "web" | "android" | "ios" {
   if (/android/i.test(navigator.userAgent)) return "android";
   if (/iPad|iPhone|iPod/i.test(navigator.userAgent)) return "ios";
   return "web";
-}
-
-type SolicitudConductorResumen = {
-  datos_personales?: Json | null;
-  domicilio?: Json | null;
-  licencia?: Json | null;
-  contacto_emergencia?: Json | null;
-};
-
-function combinarExpedienteConRemoto(
-  expediente: ExpedienteSolicitudConductorV2,
-  remoto: SolicitudConductorResumen | null
-) {
-  if (!remoto) return expediente;
-  return {
-    datosPersonales: fusionarJsonExpediente(expediente.datosPersonales, remoto.datos_personales),
-    domicilio: fusionarJsonExpediente(expediente.domicilio, remoto.domicilio),
-    licencia: fusionarJsonExpediente(expediente.licencia, remoto.licencia),
-    contactoEmergencia: fusionarJsonExpediente(expediente.contactoEmergencia, remoto.contacto_emergencia),
-  };
 }
 
 export function useRegistroConductorLogic() {

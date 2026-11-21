@@ -25,7 +25,12 @@ export function useCerrarSesion() {
         setErrorCerrarSesion(mensajePendientesLogout(resultado));
         return resultado;
       }
-      if (!resultado.ok) setErrorCerrarSesion("La sesión se cerró parcialmente. Reabre la app antes de iniciar con otra cuenta.");
+      if (!resultado.ok) {
+        setErrorCerrarSesion(resultado.authSignedOut
+          ? "La sesión se cerró parcialmente. Reabre la app antes de iniciar con otra cuenta."
+          : "No pudimos confirmar el cierre de sesión. Intenta nuevamente.");
+        return resultado;
+      }
       router.replace("/onboarding");
       router.refresh();
       return resultado;
