@@ -1,7 +1,7 @@
 import { respuestaErrorInterno } from "@/lib/errores-api";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
-import { crearClienteServidor } from "@/lib/supabase-server";
+import { validarSesionYRolUsuario } from "@/lib/guardia-rol-usuario";
 import { clienteMasivoServicio, stripeMasivo } from "@/lib/carga-masiva-server";
 import {
   listarCheckoutsMasivosPendientesUsuario,
@@ -17,9 +17,9 @@ import { verificarCsrfORechazar } from "@/lib/csrf";
 export const dynamic = "force-dynamic";
 
 export async function GET(request: NextRequest) {
-  const cliente = await crearClienteServidor();
-  const { data: { user } } = await cliente.auth.getUser();
-  if (!user) return NextResponse.json({ error: "No autenticado" }, { status: 401 });
+  const auth = await validarSesionYRolUsuario();
+  if (!auth.ok) return auth.errorResponse;
+  const { user } = auth;
 
   const limite = await rateLimitMasivo(request, user.id, "masivos-pendientes-get", 60);
   if (!limite.allowed) return NextResponse.json({ error: "Demasiadas consultas. Espera un momento." }, { status: 429, headers: { "Retry-After": String(limite.retryAfterSec) } });
@@ -105,9 +105,9 @@ export async function GET(request: NextRequest) {
 export async function DELETE(request: NextRequest) {
   const rechazoCsrf = verificarCsrfORechazar(request);
   if (rechazoCsrf) return rechazoCsrf;
-  const cliente = await crearClienteServidor();
-  const { data: { user } } = await cliente.auth.getUser();
-  if (!user) return NextResponse.json({ error: "No autenticado" }, { status: 401 });
+  const auth = await validarSesionYRolUsuario();
+  if (!auth.ok) return auth.errorResponse;
+  const { user } = auth;
 
   const idParam = request.nextUrl.searchParams.get("id");
   const idValidado = z.string().uuid().safeParse(idParam);

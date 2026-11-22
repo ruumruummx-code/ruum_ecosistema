@@ -30,6 +30,7 @@
     "test:e2e:critical": "playwright test --config playwright.interface.config.ts --grep @critico",
     "predev": "node ../../scripts/validate-env.mjs app-conductor",
     "prebuild": "node ../../scripts/validate-env.mjs app-conductor && node scripts/assert-csp.mjs",
+    "cap:sync": "cap sync android",
     "validate:env": "node ../../scripts/validate-env.mjs app-conductor",
     "assert:csp": "node scripts/assert-csp.mjs",
     "analyze": "node scripts/analyze.mjs",

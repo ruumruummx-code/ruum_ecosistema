@@ -82,6 +82,22 @@ export const RUTA_A_CAPACIDAD: Record<string, PermisoAdmin> = {
   "/alertas-sla": "Traslados:leer",
 };
 
+export const MAPA_API_A_RUTA_BASE: Record<string, string> = {
+  "/api/auditoria": "/auditoria",
+  "/api/admin-auth/invitar-admin": "/capacidades",
+  "/api/admin-auth/invitar-conductor": "/conductores",
+  "/api/admin-auth/invitar-usuario": "/usuarios",
+  "/api/admin-auth/correo-conductor": "/conductores",
+  "/api/admin-auth/estado-acceso": "/usuarios",
+  "/api/exportaciones/metricas-registro": "/metricas-registro",
+  "/api/exportaciones/pagos": "/pagos",
+  "/api/exportaciones/vehiculos": "/vehiculos",
+  "/api/plantillas/traslados-masivos": "/masivos",
+  "/api/codigos-postales": "/",
+  "/api/observabilidad": "/",
+  "/api/csp-report": "/",
+};
+
 export function normalizarRolAdmin(valor: unknown): RolAdminOperativo {
   return valor === "supervisor" ||
     valor === "finanzas" ||
@@ -96,9 +112,22 @@ export function rutaBaseAdmin(href: string) {
   return href.split("?")[0] ?? href;
 }
 
-export function puedeVerRuta(rol: RolAdminOperativo, href: string) {
+export function puedeVerRuta(rol: RolAdminOperativo, href: string): boolean {
   const ruta = rutaBaseAdmin(href);
   if (ruta === "/sin-permiso" || rol === "direccion") return true;
+
+  if (ruta.startsWith("/api/")) {
+    const ordenadas = Object.keys(MAPA_API_A_RUTA_BASE).sort((a, b) => b.length - a.length);
+    for (const apiPrefijo of ordenadas) {
+      if (ruta === apiPrefijo || ruta.startsWith(`${apiPrefijo}/`)) {
+        const seccion = MAPA_API_A_RUTA_BASE[apiPrefijo];
+        return seccion === "/" ? true : puedeVerRuta(rol, seccion);
+      }
+    }
+    if (ruta.startsWith("/api/admin-auth")) return false;
+    return false;
+  }
+
   return CONFIG_ROL_ADMIN[rol].rutasPermitidas.some(
     (permitida) => permitida === "/" ? ruta === "/" : ruta === permitida || ruta.startsWith(`${permitida}/`)
   );
@@ -107,9 +136,22 @@ export function puedeVerRuta(rol: RolAdminOperativo, href: string) {
 export function obtenerCapacidadParaRuta(href: string): PermisoAdmin | null {
   const ruta = rutaBaseAdmin(href);
   if (ruta === "/" || ruta === "/sin-permiso") return null;
+
+  let rutaEvaluada = ruta;
+  if (ruta.startsWith("/api/")) {
+    const ordenadasApi = Object.keys(MAPA_API_A_RUTA_BASE).sort((a, b) => b.length - a.length);
+    for (const apiPrefijo of ordenadasApi) {
+      if (ruta === apiPrefijo || ruta.startsWith(`${apiPrefijo}/`)) {
+        rutaEvaluada = MAPA_API_A_RUTA_BASE[apiPrefijo];
+        break;
+      }
+    }
+  }
+
+  if (rutaEvaluada === "/" || rutaEvaluada === "/sin-permiso") return null;
   const ordenada = Object.keys(RUTA_A_CAPACIDAD).sort((a, b) => b.split("/").length - a.split("/").length);
   for (const prefijo of ordenada) {
-    if (ruta === prefijo || ruta.startsWith(`${prefijo}/`)) return RUTA_A_CAPACIDAD[prefijo];
+    if (rutaEvaluada === prefijo || rutaEvaluada.startsWith(`${prefijo}/`)) return RUTA_A_CAPACIDAD[prefijo];
   }
   return null;
 }

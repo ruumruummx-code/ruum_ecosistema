@@ -1,6 +1,7 @@
 "use client";
 
 import { Tabs } from "@ruum/ui";
+import { Badge, Button, Skeleton, cn } from "@ruum/ui/base";
 
 import {
   Children,
@@ -18,25 +19,15 @@ import {
   type RefObject
 } from "react";
 
-function unir(...clases: Array<string | false | null | undefined>) {
-  return clases.filter(Boolean).join(" ");
-}
+const unir = cn;
 
-type TonoAdmin = "neutral" | "info" | "success" | "warning" | "danger";
 
-const tonoBadge: Record<TonoAdmin, string> = {
-  neutral: "border-ink/15 bg-ink/[0.04] text-text-secondary",
-  info: "border-status-info/30 bg-status-info-soft text-status-info",
-  success: "border-status-success/30 bg-status-success-soft text-status-success",
-  warning: "border-status-warning/35 bg-status-warning-soft text-status-warning",
-  danger: "border-status-error/30 bg-status-error-soft text-status-error"
-};
-
+/** Variantes del panel → variantes de @ruum/ui/base. */
 const botonVariante = {
-  primary: "admin-button-primary border-transparent text-white hover:brightness-95",
-  secondary: "admin-button-secondary border-border-default bg-surface-primary text-ink hover:bg-surface-secondary",
-  quiet: "admin-button-quiet border-transparent bg-transparent text-text-secondary hover:bg-surface-secondary hover:text-ink",
-  danger: "admin-button-danger border-status-error/30 bg-status-error-soft text-status-error hover:bg-status-error hover:text-white"
+  primary: "primary",
+  secondary: "outline",
+  quiet: "ghost",
+  danger: "danger"
 } as const;
 
 type AdminButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
@@ -44,24 +35,22 @@ type AdminButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
   loading?: boolean;
 };
 
-export function AdminButton({ variant = "primary", loading = false, disabled, className, children, ...props }: AdminButtonProps) {
+export function AdminButton({ variant = "primary", loading = false, disabled, className, children, type = "button", ...props }: AdminButtonProps) {
   return (
-    <button
+    <Button
       {...props}
+      type={type}
+      variant={botonVariante[variant]}
       disabled={disabled || loading}
       aria-busy={loading || undefined}
       aria-disabled={disabled || loading || undefined}
-      className={unir(
-        "admin-button inline-flex min-h-11 min-w-11 items-center justify-center gap-2 rounded-lg border px-4 py-2 font-body text-admin-boton font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-60",
-        botonVariante[variant],
-        className
-      )}
+      className={className}
     >
       {loading && (
         <span aria-hidden="true" className="size-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
       )}
       {loading ? "Procesando..." : children}
-    </button>
+    </Button>
   );
 }
 
@@ -72,7 +61,7 @@ type AdminIconButtonProps = Omit<AdminButtonProps, "children"> & {
 
 export function AdminIconButton({ icon, className, variant = "quiet", ...props }: AdminIconButtonProps) {
   return (
-    <AdminButton {...props} variant={variant} className={unir("size-11 px-0 py-0", className)}>
+    <AdminButton {...props} variant={variant} className={unir("size-11 px-0", className)}>
       <span aria-hidden="true" className="flex items-center justify-center">
         {icon}
       </span>
@@ -105,16 +94,17 @@ function CampoMarco({ label, htmlFor, description, error, descriptionId, errorId
   children: ReactNode;
 }) {
   return (
-    <label className={unir("block font-body text-sm font-medium text-ink", className)} htmlFor={htmlFor}>
+    <label className={unir("block text-sm font-medium text-ui-fg", className)} htmlFor={htmlFor}>
       <span className="block">{label}</span>
-      {description && <span id={descriptionId} className="mt-1 block text-admin-secundario text-text-tertiary">{description}</span>}
+      {description && <span id={descriptionId} className="mt-1 block text-xs text-ui-fg-muted">{description}</span>}
       <span className="mt-1.5 block">{children}</span>
-      {error && <span id={errorId} className="mt-1 block text-admin-secundario text-status-error">{error}</span>}
+      {error && <span id={errorId} className="mt-1 block text-xs text-ui-danger">{error}</span>}
     </label>
   );
 }
 
-const campoClase = "w-full rounded-lg border border-ink/20 bg-surface-primary px-3.5 py-2.5 font-body text-sm text-ink placeholder:text-text-tertiary focus:border-focus-default focus:outline-none focus:ring-2 focus:ring-focus-default/20 disabled:cursor-not-allowed disabled:opacity-60";
+/* Misma geometría que Input/NativeSelect de @ruum/ui/base (borde de campo con contraste ≥ 3:1). */
+const campoClase = "w-full rounded-md border border-ui-field bg-ui-card px-3 py-2.5 text-sm text-ui-fg placeholder:text-ui-fg-muted focus:border-ui-focus focus:outline-none focus:ring-4 focus:ring-ui-ring disabled:cursor-not-allowed disabled:opacity-60";
 
 export function AdminInput({ label, description, error, className, controlClassName, id: idProp, ...props }: CampoBaseProps & ComponentPropsWithoutRef<"input">) {
   const { id, descripcionId, errorId } = useCampoIds(idProp);
@@ -209,14 +199,14 @@ export function AdminDialog({ open, title, description, onOpenChange, children, 
   useCapaModal(open, () => onOpenChange(false), dialogRef, finalFocusRef);
   if (!open) return null;
   return (
-    <div className="admin-modal-backdrop fixed inset-0 z-50 flex items-center justify-center px-4 backdrop-blur-sm" role="presentation">
-      <section ref={dialogRef} role="dialog" aria-modal="true" aria-labelledby={titleId} aria-describedby={description ? descriptionId : undefined} className="w-full max-w-lg overflow-hidden rounded-2xl border border-ink/20 bg-surface-primary shadow-[var(--ruum-shadow-4)]">
-        <header className="border-b border-border-default px-6 py-5">
-          <h2 id={titleId} className="font-display text-xl font-semibold text-ink">{title}</h2>
-          {description && <p id={descriptionId} className="mt-1 font-body text-sm text-text-secondary">{description}</p>}
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-ui-overlay px-4" role="presentation">
+      <section ref={dialogRef} role="dialog" aria-modal="true" aria-labelledby={titleId} aria-describedby={description ? descriptionId : undefined} className="w-full max-w-lg overflow-hidden rounded-xl border border-ui-line bg-ui-card shadow-ui-md">
+        <header className="border-b border-ui-line px-6 py-5">
+          <h2 id={titleId} className="text-lg font-semibold text-ui-fg">{title}</h2>
+          {description && <p id={descriptionId} className="mt-1 text-sm text-ui-fg-muted">{description}</p>}
         </header>
         <div className="px-6 py-5">{children}</div>
-        {footer && <footer className="flex flex-wrap justify-end gap-3 border-t border-border-default px-6 py-4">{footer}</footer>}
+        {footer && <footer className="flex flex-wrap justify-end gap-3 border-t border-ui-line px-6 py-4">{footer}</footer>}
       </section>
     </div>
   );
@@ -229,14 +219,14 @@ export function AdminDrawer({ open, title, description, onOpenChange, children, 
   useCapaModal(open, () => onOpenChange(false), drawerRef, finalFocusRef);
   if (!open) return null;
   return (
-    <div className="admin-modal-backdrop fixed inset-0 z-50 flex justify-end backdrop-blur-sm" role="presentation">
-      <aside ref={drawerRef} role="dialog" aria-modal="true" aria-labelledby={titleId} aria-describedby={description ? descriptionId : undefined} className="flex h-full w-full max-w-md flex-col border-l border-border-default bg-surface-primary shadow-[var(--ruum-shadow-4)]">
-        <header className="border-b border-border-default px-6 py-5">
-          <h2 id={titleId} className="font-display text-xl font-semibold text-ink">{title}</h2>
-          {description && <p id={descriptionId} className="mt-1 font-body text-sm text-text-secondary">{description}</p>}
+    <div className="fixed inset-0 z-50 flex justify-end bg-ui-overlay" role="presentation">
+      <aside ref={drawerRef} role="dialog" aria-modal="true" aria-labelledby={titleId} aria-describedby={description ? descriptionId : undefined} className="flex h-full w-full max-w-md flex-col border-l border-ui-line bg-ui-card shadow-ui-md">
+        <header className="border-b border-ui-line px-6 py-5">
+          <h2 id={titleId} className="text-lg font-semibold text-ui-fg">{title}</h2>
+          {description && <p id={descriptionId} className="mt-1 text-sm text-ui-fg-muted">{description}</p>}
         </header>
         <div className="flex-1 overflow-y-auto px-6 py-5">{children}</div>
-        {footer && <footer className="flex flex-wrap justify-end gap-3 border-t border-border-default px-6 py-4">{footer}</footer>}
+        {footer && <footer className="flex flex-wrap justify-end gap-3 border-t border-ui-line px-6 py-4">{footer}</footer>}
       </aside>
     </div>
   );
@@ -254,8 +244,12 @@ export function AdminTabs<T extends string>({ items, value, onValueChange, label
  return <Tabs tabs={items.map(item=>({id:item.value,etiqueta:item.label,disabled:item.disabled}))} value={value} onSeleccion={id=>onValueChange(id as T)} etiqueta={label} renderPanel={renderPanel} />;
 }
 
+const tonoBadge = { neutral: "neutral", info: "info", success: "success", warning: "warning", danger: "danger" } as const;
+type TonoAdmin = keyof typeof tonoBadge;
+
+/** Insignia de estado: siempre con texto (Badge de @ruum/ui/base). */
 export function AdminBadge({ children, tone = "neutral", className }: { children: ReactNode; tone?: TonoAdmin; className?: string }) {
-  return <span className={unir("inline-flex min-h-7 items-center rounded-full border px-3 py-1 font-body text-admin-secundario font-semibold", tonoBadge[tone], className)}>{children}</span>;
+  return <Badge tone={tonoBadge[tone]} className={className}>{children}</Badge>;
 }
 
 export function AdminTooltip({ label, children }: { label: string; children: ReactElement }) {
@@ -277,7 +271,7 @@ export function AdminTooltip({ label, children }: { label: string; children: Rea
   return (
     <span className="relative inline-flex">
       {child}
-      {abierto && <span id={id} role="tooltip" className="absolute bottom-full left-1/2 z-50 mb-2 max-w-64 -translate-x-1/2 whitespace-normal break-words rounded-md bg-surface-strong px-2.5 py-1.5 font-body text-admin-secundario text-text-main shadow-[var(--ruum-shadow-3)]">{label}</span>}
+      {abierto && <span id={id} role="tooltip" className="absolute bottom-full left-1/2 z-50 mb-2 max-w-64 -translate-x-1/2 whitespace-normal break-words rounded-md bg-ui-fg px-2.5 py-1.5 text-xs text-ui-bg shadow-ui-md">{label}</span>}
     </span>
   );
 }
@@ -286,12 +280,12 @@ export function AdminEmptyState({ title, description, action }: { title: string;
   const titleId = useId();
   const descriptionId = useId();
   return (
-    <section className="admin-empty-state rounded-card border border-dashed border-border-default px-6 py-10 text-center" aria-live="polite" aria-labelledby={titleId} aria-describedby={description ? descriptionId : undefined}>
-      <span className="admin-empty-state__icon mx-auto mb-4 grid size-12 place-items-center rounded-full" aria-hidden="true">
+    <section data-empty-state className="flex flex-col items-center rounded-lg border border-dashed border-ui-line-strong bg-ui-card px-6 py-10 text-center" aria-live="polite" aria-labelledby={titleId} aria-describedby={description ? descriptionId : undefined}>
+      <span className="mb-4 grid size-12 place-items-center rounded-full bg-ui-brand-soft text-ui-brand-soft-fg" aria-hidden="true">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M8 6h13M8 12h13M8 18h13"/><path d="M3 6h.01M3 12h.01M3 18h.01"/></svg>
       </span>
-      <h2 id={titleId} className="font-display text-lg font-semibold text-ink">{title}</h2>
-      {description && <p id={descriptionId} className="mx-auto mt-2 max-w-md font-body text-sm text-text-secondary">{description}</p>}
+      <h2 id={titleId} className="text-base font-semibold text-ui-fg">{title}</h2>
+      {description && <p id={descriptionId} className="mt-1 max-w-md text-sm text-ui-fg-muted">{description}</p>}
       {action && <div className="mt-5 flex justify-center">{action}</div>}
     </section>
   );
@@ -299,9 +293,9 @@ export function AdminEmptyState({ title, description, action }: { title: string;
 
 export function AdminErrorState({ title = "No pudimos cargar esta información", description, action }: { title?: string; description?: string; action?: ReactNode }) {
   return (
-    <section className="rounded-card border border-status-error/30 bg-status-error-soft px-6 py-6" role="alert">
-      <h2 className="font-display text-lg font-semibold text-status-error">{title}</h2>
-      {description && <p className="mt-2 font-body text-sm text-text-secondary">{description}</p>}
+    <section className="rounded-lg border border-ui-danger/30 bg-ui-danger-soft px-6 py-6" role="alert">
+      <h2 className="text-base font-semibold text-ui-danger">{title}</h2>
+      {description && <p className="mt-2 text-sm text-ui-fg">{description}</p>}
       {action && <div className="mt-5">{action}</div>}
     </section>
   );
@@ -309,21 +303,21 @@ export function AdminErrorState({ title = "No pudimos cargar esta información",
 
 export function AdminLoadingState({ label = "Cargando información" }: { label?: string }) {
   return (
-    <div className="rounded-card border border-border-default p-5" aria-label={label} aria-busy="true">
-      <div className="h-4 w-40 animate-pulse rounded bg-ink/8" />
+    <div className="rounded-lg border border-ui-line bg-ui-card p-5" aria-label={label} aria-busy="true">
+      <Skeleton className="h-4 w-40" />
       <div className="mt-4 grid gap-3">
-        <div className="h-10 animate-pulse rounded bg-ink/6" />
-        <div className="h-10 animate-pulse rounded bg-ink/6" />
+        <Skeleton className="h-10" />
+        <Skeleton className="h-10" />
       </div>
     </div>
   );
 }
 
 export function AdminLastUpdated({ value, label = "Última actualización" }: { value?: string | Date | null; label?: string }) {
-  if (!value) return <span className="font-body text-admin-secundario text-text-tertiary">{label}: sin fecha</span>;
+  if (!value) return <span className="text-xs text-ui-fg-muted">{label}: sin fecha</span>;
   const fecha = value instanceof Date ? value : new Date(value);
   return (
-    <time dateTime={fecha.toISOString()} className="font-body text-admin-secundario text-text-tertiary">
+    <time dateTime={fecha.toISOString()} className="text-xs text-ui-fg-muted">
       {label}: {new Intl.DateTimeFormat("es-MX", { dateStyle: "medium", timeStyle: "short" }).format(fecha)}
     </time>
   );

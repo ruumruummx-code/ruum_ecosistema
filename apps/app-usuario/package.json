@@ -18,6 +18,7 @@
     "test:lighthouse": "lhci autorun",
     "predev": "node ../../scripts/validate-env.mjs app-usuario",
     "prebuild": "node ../../scripts/validate-env.mjs app-usuario --production && node scripts/assert-csp.mjs",
+    "cap:sync": "cap sync android",
     "validate:env": "node ../../scripts/validate-env.mjs app-usuario",
     "assert:csp": "node scripts/assert-csp.mjs"
   },

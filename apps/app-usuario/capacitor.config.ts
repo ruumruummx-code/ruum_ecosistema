@@ -35,7 +35,7 @@ const config: CapacitorConfig = {
     backgroundColor: "#070b14",
     allowMixedContent: false,
     captureInput: true,
-    webContentsDebuggingEnabled: !ES_PRODUCCION
+    webContentsDebuggingEnabled: false
   },
   ios: {
     backgroundColor: "#070b14",

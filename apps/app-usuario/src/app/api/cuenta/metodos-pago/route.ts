@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
-import { crearClienteServidor } from "@/lib/supabase-server";
+import { validarSesionYRolUsuario } from "@/lib/guardia-rol-usuario";
 import { verificarCsrfORechazar } from "@/lib/csrf";
 import { rateLimitConVentana } from "@/lib/csp-rate-limit";
 import { iniciarAltaTarjeta, listarTarjetasBilletera, modificarTarjetaBilletera, sesionBilleteraCheckout } from "@/lib/billetera-server";
@@ -19,9 +19,9 @@ async function manejar(request: NextRequest, mutacion: boolean) {
     if (rechazo) return rechazo;
   }
   try {
-    const cliente = await crearClienteServidor();
-    const { data: { user }, error } = await cliente.auth.getUser();
-    if (error || !user) return json({ error: "Inicia sesión para gestionar tus tarjetas." }, 401);
+    const auth = await validarSesionYRolUsuario();
+    if (!auth.ok) return auth.errorResponse;
+    const { user } = auth;
     const limite = await rateLimitConVentana(`uid:${user.id}`, "billetera", 30, 60000);
     if (!limite.allowed) return json({ error: "Espera antes de volver a intentarlo." }, 429);
     if (!mutacion) return json(await listarTarjetasBilletera(user.id));

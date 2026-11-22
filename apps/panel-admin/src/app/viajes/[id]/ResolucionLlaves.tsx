@@ -36,7 +36,7 @@ export function ResolucionLlaves({ trasladoId }: { trasladoId: string }) {
 
   if (error && !inventario) return <p role="alert">{error}</p>;
   if (!inventario || inventario.inicial === null || inventario.final === null || Number(inventario.inicial) === Number(inventario.final)) return null;
-  return <section className="mt-6 rounded-xl border border-amber-500 p-4" aria-label="Resolución de llaves">
+  return <section className="mt-6 rounded-xl border border-ui-warning p-4" aria-label="Resolución de llaves">
     <h2 className="font-bold">{resolucion ? "Diferencia de llaves · resolución documentada" : "Diferencia de llaves · cierre bloqueado hasta resolución"}</h2>
     <p>Origen: {inventario.inicial}. Destino: {inventario.final}.</p>
     {resolucion ? <p role="status">Autorizado por {resolucion.responsable} el {new Date(resolucion.resuelta_en).toLocaleString("es-MX")}. Motivo: {resolucion.motivo}. Se conserva el inventario original.</p> : <form onSubmit={resolver}>

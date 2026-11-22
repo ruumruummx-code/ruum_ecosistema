@@ -50,10 +50,10 @@ function badgeSla(disputa: Disputa) {
 }
 
 function claseSla(etiqueta: string) {
-  if (etiqueta === "SLA vencido") return "border-status-error/25 bg-status-error-soft text-status-error";
-  if (etiqueta === "Por vencer") return "border-status-warning/40 bg-status-warning-soft text-status-warning";
-  if (etiqueta === "Resuelta") return "border-status-success/30 bg-status-success-soft text-status-success";
-  return "border-status-info/30 bg-status-info-soft text-status-info";
+  if (etiqueta === "SLA vencido") return "border-ui-danger/25 bg-ui-danger-soft text-ui-danger";
+  if (etiqueta === "Por vencer") return "border-ui-warning/40 bg-ui-warning-soft text-ui-warning";
+  if (etiqueta === "Resuelta") return "border-ui-success/30 bg-ui-success-soft text-ui-success";
+  return "border-ui-brand/30 bg-ui-brand-soft text-ui-brand-soft-fg";
 }
 
 function AccionDisputa({ disputa, onActualizada }: { disputa: Disputa; onActualizada: () => void }) {
@@ -82,20 +82,20 @@ function AccionDisputa({ disputa, onActualizada }: { disputa: Disputa; onActuali
   }
 
   return (
-    <div className="mt-5 grid gap-3 border-t border-ink/10 pt-4 md:grid-cols-[1fr_1fr_1.5fr_auto]">
-      <select value={estado} onChange={(evento) => setEstado(evento.target.value as EstadoDisputa)} className="rounded-lg border border-ink/50 bg-surface-primary px-3 py-2 font-body text-sm">
+    <div className="mt-5 grid gap-3 border-t border-ui-line pt-4 md:grid-cols-[1fr_1fr_1.5fr_auto]">
+      <select value={estado} onChange={(evento) => setEstado(evento.target.value as EstadoDisputa)} className="rounded-lg border border-ui-field bg-ui-card px-3 py-2 font-body text-sm">
         {["abierta", "en_revision", "resuelta", "escalada", "resuelta_senior"].map((valor) => (
           <option key={valor} value={valor}>{valor.replaceAll("_", " ")}</option>
         ))}
       </select>
-      <select value={resolucion} onChange={(evento) => setResolucion(evento.target.value as ResolucionDisputa)} className="rounded-lg border border-ink/50 bg-surface-primary px-3 py-2 font-body text-sm">
+      <select value={resolucion} onChange={(evento) => setResolucion(evento.target.value as ResolucionDisputa)} className="rounded-lg border border-ui-field bg-ui-card px-3 py-2 font-body text-sm">
         {["favor_reclamante", "en_contra", "solucion_parcial"].map((valor) => (
           <option key={valor} value={valor}>{valor.replaceAll("_", " ")}</option>
         ))}
       </select>
-      <input value={detalle} onChange={(evento) => setDetalle(evento.target.value)} className="rounded-lg border border-ink/50 bg-surface-primary px-3 py-2 font-body text-sm" placeholder="Detalle de resolución" />
+      <input value={detalle} onChange={(evento) => setDetalle(evento.target.value)} className="rounded-lg border border-ui-field bg-ui-card px-3 py-2 font-body text-sm" placeholder="Detalle de resolución" />
       <Button onClick={guardar} disabled={pendiente}>{pendiente ? "Guardando..." : "Guardar"}</Button>
-      {mensaje && <p className="md:col-span-4 font-body text-sm text-text-secondary">{mensaje}</p>}
+      {mensaje && <p className="md:col-span-4 font-body text-sm text-ui-fg-muted">{mensaje}</p>}
     </div>
   );
 }
@@ -207,19 +207,19 @@ export default function PaginaDisputasAdmin() {
               <PassportCard key={disputa.id}>
                 <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                   <div>
-                    <p className="font-mono-ruum text-xs uppercase tracking-wide text-text-tertiary">{disputa.id}</p>
+                    <p className="font-mono-ruum text-xs uppercase tracking-wide text-ui-fg-muted">{disputa.id}</p>
                     <h2 className="mt-1 font-display text-xl font-semibold">{ETIQUETA_TIPO_DISPUTA[disputa.tipo]}</h2>
-                    <p className="mt-2 font-body text-sm text-text-secondary">{disputa.descripcion}</p>
+                    <p className="mt-2 font-body text-sm text-ui-fg-muted">{disputa.descripcion}</p>
                   </div>
                   <span className={`rounded-full border px-3 py-1.5 font-body text-xs font-semibold ${claseSla(sla)}`}>{sla}</span>
                 </div>
                 <dl className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                  <div><dt className="font-body text-xs uppercase tracking-wide text-text-tertiary">Traslado</dt><dd className="mt-1 font-body text-sm font-medium"><Link href={`/viajes/${disputa.traslado_id}`} className="text-status-info">{disputa.traslado_id.slice(0, 8).toUpperCase()}</Link></dd></div>
-                  <div><dt className="font-body text-xs uppercase tracking-wide text-text-tertiary">Abierta por</dt><dd className="mt-1 font-body text-sm font-medium">{disputa.abierta_por}</dd></div>
-                  <div><dt className="font-body text-xs uppercase tracking-wide text-text-tertiary">Estado</dt><dd className="mt-1 font-body text-sm font-medium">{disputa.estado.replaceAll("_", " ")}</dd></div>
-                  <div><dt className="font-body text-xs uppercase tracking-wide text-text-tertiary">Apertura</dt><dd className="mt-1 font-body text-sm font-medium">{new Date(disputa.abierta_en).toLocaleString("es-MX")}</dd></div>
-                  <div className="sm:col-span-2"><dt className="font-body text-xs uppercase tracking-wide text-text-tertiary">Vehículo</dt><dd className="mt-1 font-body text-sm font-medium">{pasaporte ? `${pasaporte.vehiculo_marca ?? ""} ${pasaporte.vehiculo_modelo ?? ""}`.trim() : "Sin pasaporte cargado"}</dd></div>
-                  <div className="sm:col-span-2"><dt className="font-body text-xs uppercase tracking-wide text-text-tertiary">Resolución</dt><dd className="mt-1 font-body text-sm font-medium">{disputa.resolucion ? `${disputa.resolucion.replaceAll("_", " ")} · ${disputa.resolucion_detalle ?? ""}` : "Pendiente"}</dd></div>
+                  <div><dt className="font-body text-xs uppercase tracking-wide text-ui-fg-muted">Traslado</dt><dd className="mt-1 font-body text-sm font-medium"><Link href={`/viajes/${disputa.traslado_id}`} className="text-ui-brand-soft-fg">{disputa.traslado_id.slice(0, 8).toUpperCase()}</Link></dd></div>
+                  <div><dt className="font-body text-xs uppercase tracking-wide text-ui-fg-muted">Abierta por</dt><dd className="mt-1 font-body text-sm font-medium">{disputa.abierta_por}</dd></div>
+                  <div><dt className="font-body text-xs uppercase tracking-wide text-ui-fg-muted">Estado</dt><dd className="mt-1 font-body text-sm font-medium">{disputa.estado.replaceAll("_", " ")}</dd></div>
+                  <div><dt className="font-body text-xs uppercase tracking-wide text-ui-fg-muted">Apertura</dt><dd className="mt-1 font-body text-sm font-medium">{new Date(disputa.abierta_en).toLocaleString("es-MX")}</dd></div>
+                  <div className="sm:col-span-2"><dt className="font-body text-xs uppercase tracking-wide text-ui-fg-muted">Vehículo</dt><dd className="mt-1 font-body text-sm font-medium">{pasaporte ? `${pasaporte.vehiculo_marca ?? ""} ${pasaporte.vehiculo_modelo ?? ""}`.trim() : "Sin pasaporte cargado"}</dd></div>
+                  <div className="sm:col-span-2"><dt className="font-body text-xs uppercase tracking-wide text-ui-fg-muted">Resolución</dt><dd className="mt-1 font-body text-sm font-medium">{disputa.resolucion ? `${disputa.resolucion.replaceAll("_", " ")} · ${disputa.resolucion_detalle ?? ""}` : "Pendiente"}</dd></div>
                 </dl>
                 <AccionDisputa disputa={disputa} onActualizada={cargar} />
               </PassportCard>

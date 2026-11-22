@@ -2,6 +2,7 @@
 /// <reference lib="dom" />
 
 import { createClient } from "npm:@supabase/supabase-js@2.47.16";
+import { timingSafeEqual } from "../_shared/timing-safe.ts";
 
 function json(body: Record<string, unknown>, status = 200) {
   return new Response(JSON.stringify(body), {
@@ -38,9 +39,9 @@ Deno.serve(async (req) => {
   const authHeader = req.headers.get("Authorization") ?? "";
   const secretHeader = req.headers.get("x-reconciler-secret") ?? "";
   const esAutorizado =
-    authHeader === `Bearer ${serviceKey}` ||
-    authHeader === `Bearer ${reconcilerSecret}` ||
-    secretHeader === reconcilerSecret;
+    timingSafeEqual(authHeader, `Bearer ${serviceKey}`) ||
+    timingSafeEqual(authHeader, `Bearer ${reconcilerSecret}`) ||
+    timingSafeEqual(secretHeader, reconcilerSecret);
 
   if (!esAutorizado) {
     console.warn("reconciliar-verificaciones-didit: intento no autorizado bloqueado (fail-closed)");

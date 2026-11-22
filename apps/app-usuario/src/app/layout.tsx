@@ -8,6 +8,7 @@ import { PreferenciasAplicacion } from "./PreferenciasAplicacion";
 import { LiveRegionProvider } from "../components/LiveRegionProvider";
 import { PuertaConsentimiento } from "../components/PuertaConsentimiento";
 import { OperationalAccessibilityBridge } from "./OperationalAccessibilityBridge";
+import { DeepLinksBootstrap } from "./DeepLinksBootstrap";
 import { AppStateProvider } from "../state/AppStateProvider";
 import "./globals.css";
 
@@ -53,6 +54,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           Saltar al contenido principal
         </a>
         <LiveRegionProvider>
+          <DeepLinksBootstrap />
           <OperationalAccessibilityBridge />
           <TextInputUppercaseBridge />
           <TemaProvider>

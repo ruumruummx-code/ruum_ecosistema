@@ -60,11 +60,11 @@ function iniciales(nombre: string) {
 
 function BadgeEstadoDocumento({ estado }: { estado: EstadoVisual }) {
   const dot = {
-    warning: "bg-status-warning",
-    info: "bg-status-info",
-    success: "bg-status-success",
-    danger: "bg-status-error",
-    neutral: "bg-text-tertiary"
+    warning: "bg-ui-warning",
+    info: "bg-ui-brand",
+    success: "bg-ui-success",
+    danger: "bg-ui-danger",
+    neutral: "bg-ui-fg-muted"
   }[estado.tono];
 
   return (
@@ -73,7 +73,7 @@ function BadgeEstadoDocumento({ estado }: { estado: EstadoVisual }) {
         <span className={`h-2 w-2 rounded-full ${dot}`} aria-hidden="true" />
         {estado.etiqueta}
       </AdminBadge>
-      <span className="font-body text-admin-secundario text-text-tertiary">- {estado.motivo}</span>
+      <span className="font-body text-xs text-ui-fg-muted">- {estado.motivo}</span>
     </div>
   );
 }
@@ -83,10 +83,10 @@ function ChipFiltro({ activo, etiqueta, total, onClick }: { activo: boolean; eti
     <button
       type="button"
       onClick={onClick}
-      className={`rounded-full border px-3 py-1.5 font-body text-admin-secundario font-semibold transition-colors ${
+      className={`rounded-full border px-3 py-1.5 font-body text-xs font-semibold transition-colors ${
         activo
-          ? "border-signal/50 bg-signal/10 text-ink"
-          : "border-border-default bg-surface-primary text-text-secondary hover:border-signal/35 hover:text-ink"
+          ? "border-ui-brand/50 bg-ui-brand-soft text-ui-fg"
+          : "border-ui-line bg-ui-card text-ui-fg-muted hover:border-ui-brand/35 hover:text-ui-fg"
       }`}
     >
       {etiqueta} <span className="font-mono-ruum">{total.toLocaleString("es-MX")}</span>
@@ -108,31 +108,31 @@ function DocumentoCard({
   onRecordatorio: () => void;
 }) {
   return (
-    <article className="rounded-lg border border-white/[0.08] bg-surface-primary px-4 py-4 transition-opacity">
+    <article className="rounded-lg border border-ui-line bg-ui-card px-4 py-4 transition-opacity">
       <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
         <div className="flex min-w-0 gap-3">
           <input
             type="checkbox"
             checked={seleccionado}
             onChange={(event) => onSeleccionar(event.target.checked)}
-            className="mt-3 h-4 w-4 rounded border-border-default text-signal focus:ring-signal/30"
+            className="mt-3 h-4 w-4 rounded border-ui-line text-ui-brand focus:ring-ui-brand/30"
             aria-label={`Seleccionar ${item.nombre}`}
           />
-          <div className="grid h-11 w-11 shrink-0 place-items-center rounded-full border border-border-default bg-surface-secondary font-mono-ruum text-sm font-semibold text-ink">
+          <div className="grid h-11 w-11 shrink-0 place-items-center rounded-full border border-ui-line bg-ui-muted font-mono-ruum text-sm font-semibold text-ui-fg">
             {iniciales(item.nombre)}
           </div>
           <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-2">
-              <h3 className="font-body text-sm font-semibold text-ink">{item.nombre}</h3>
-              <span className="font-mono-ruum text-admin-secundario text-text-tertiary">{item.folio}</span>
+              <h3 className="font-body text-sm font-semibold text-ui-fg">{item.nombre}</h3>
+              <span className="font-mono-ruum text-xs text-ui-fg-muted">{item.folio}</span>
             </div>
-            <p className="mt-1 font-body text-sm text-text-secondary">Documento: {item.documento}</p>
+            <p className="mt-1 font-body text-sm text-ui-fg-muted">Documento: {item.documento}</p>
             <div className="mt-2">
               <BadgeEstadoDocumento estado={item.estado} />
             </div>
-            <div className="mt-3 flex flex-wrap gap-3 font-body text-admin-secundario text-text-tertiary">
-              <span className="inline-flex items-center gap-1.5"><span aria-hidden="true">Tel.</span><span className="font-mono-ruum text-text-secondary">{formatearTelefono(item.telefono)}</span></span>
-              <span className="inline-flex items-center gap-1.5"><span aria-hidden="true">Cuenta</span><span className="text-text-secondary">{item.empresa}</span></span>
+            <div className="mt-3 flex flex-wrap gap-3 font-body text-xs text-ui-fg-muted">
+              <span className="inline-flex items-center gap-1.5"><span aria-hidden="true">Tel.</span><span className="font-mono-ruum text-ui-fg-muted">{formatearTelefono(item.telefono)}</span></span>
+              <span className="inline-flex items-center gap-1.5"><span aria-hidden="true">Cuenta</span><span className="text-ui-fg-muted">{item.empresa}</span></span>
               <span>Actualizado {fechaRelativa(item.actualizadoEn)}</span>
             </div>
           </div>
@@ -183,7 +183,7 @@ function EstadoVacioDocumentos({ tipo }: { tipo: "conductores" | "usuarios" }) {
       title={tipo === "conductores" ? "No hay conductores con documentos pendientes" : "No hay usuarios con documentos pendientes"}
       description={tipo === "conductores" ? "Los expedientes pendientes o vencidos aparecerán aquí cuando requieran intervención." : "Las cuentas por validar aparecerán aquí cuando haya documentos nuevos."}
       action={
-        <a href={tipo === "conductores" ? "/conductores" : "/usuarios"} className="rounded-lg border border-border-default px-3 py-2 font-body text-sm font-semibold text-text-secondary hover:border-signal/40 hover:text-ink">
+        <a href={tipo === "conductores" ? "/conductores" : "/usuarios"} className="rounded-lg border border-ui-line px-3 py-2 font-body text-sm font-semibold text-ui-fg-muted hover:border-ui-brand/40 hover:text-ui-fg">
           {tipo === "conductores" ? "Ver todos los conductores" : "Ver todos los usuarios"}
         </a>
       }
@@ -353,8 +353,8 @@ export default function PaginaDocumentosAdmin() {
             <ChipFiltro activo={filtro === "usuarios"} etiqueta="Usuarios por validar" total={conteos.usuarios} onClick={() => cambiarFiltro("usuarios")} />
           </div>
           {seleccionados.size > 0 && (
-            <div className="flex flex-wrap items-center gap-2 rounded-full border border-border-default bg-surface-primary px-3 py-2 shadow-[var(--ruum-shadow-2)]">
-              <span className="font-mono-ruum text-admin-secundario text-ink">{seleccionados.size.toLocaleString("es-MX")} seleccionados</span>
+            <div className="flex flex-wrap items-center gap-2 rounded-full border border-ui-line bg-ui-card px-3 py-2 shadow-ui-md">
+              <span className="font-mono-ruum text-xs text-ui-fg">{seleccionados.size.toLocaleString("es-MX")} seleccionados</span>
               <Button variant="secondary" onClick={() => recordatorio(seleccionados.size)}>Enviar recordatorio a todos</Button>
             </div>
           )}
@@ -363,7 +363,7 @@ export default function PaginaDocumentosAdmin() {
         <PassportCard className="mt-4">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <h2 className="font-display text-xl font-semibold">Expedientes documentales</h2>
-            <p className="font-body text-admin-secundario text-text-tertiary">Folio, teléfono y datos operativos usan lectura compacta.</p>
+            <p className="font-body text-xs text-ui-fg-muted">Folio, teléfono y datos operativos usan lectura compacta.</p>
           </div>
           <div className="mt-4 grid gap-3">
             {itemsVisibles.length === 0 ? (

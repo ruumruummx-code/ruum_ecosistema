@@ -1,0 +1,12 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.moviliax.ruumruum.conductor",
+      "sha256_cert_fingerprints": [
+        "14:6D:E9:7D:0F:52:AB:E0:85:41:CA:B2:4C:CE:3A:83:B3:68:57:38:09:A6:49:EE:4B:92:28:AE:52:FD:B3:9E"
+      ]
+    }
+  }
+]

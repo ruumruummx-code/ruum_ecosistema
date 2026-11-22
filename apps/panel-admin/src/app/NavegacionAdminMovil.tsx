@@ -91,16 +91,16 @@ export function NavegacionAdminMovil() {
     .filter((destino): destino is SeccionNavegacionAdmin => Boolean(destino));
 
   return (
-    <header className="sticky top-0 z-40 border-b border-ink/10 bg-surface-primary/95 backdrop-blur supports-[backdrop-filter]:bg-surface-primary/85 lg:hidden">
+    <header className="sticky top-0 z-40 border-b border-ui-line bg-ui-card backdrop-blur supports-[backdrop-filter]:bg-ui-card lg:hidden">
       <div className="ruum-container flex min-h-14 items-center justify-between gap-3 py-2">
         <Link href="/" className="flex min-w-0 items-center gap-2.5 rounded-lg" aria-label="Ir a la Torre de Control">
           <LogoMarca variante="horizontal" tamano={28} color="signal" mostrarDescriptor={false} mostrarRespaldo={false} />
-          <span className="font-mono-ruum text-admin-secundario uppercase tracking-[0.12em] text-text-tertiary">Control</span>
+          <span className="font-mono-ruum text-xs uppercase tracking-[0.12em] text-ui-fg-muted">Control</span>
         </Link>
         <button
           type="button"
           onClick={() => setAbierto(true)}
-          className="inline-flex min-h-11 items-center rounded-lg border border-ink/15 bg-surface-primary px-3 py-1.5 font-body text-admin-boton font-bold text-ink shadow-sm"
+          className="inline-flex min-h-11 items-center rounded-lg border border-ui-line bg-ui-card px-3 py-1.5 font-body text-sm font-bold text-ui-fg shadow-sm"
           aria-haspopup="dialog"
           aria-expanded={abierto}
           aria-controls="menu-movil-panel"
@@ -121,7 +121,7 @@ export function NavegacionAdminMovil() {
               aria-label={destino.etiqueta}
               className={[
                 "relative inline-flex min-h-11 min-w-0 flex-col items-center justify-center gap-0.5 rounded-lg px-1 py-1 font-body text-xs font-semibold",
-                activo ? "bg-signal text-ink" : "border border-ink/10 bg-surface-primary text-text-secondary"
+                activo ? "bg-ui-brand text-ui-fg" : "border border-ui-line bg-ui-card text-ui-fg-muted"
               ].join(" ")}
             >
               <Icono nombre={destino.icono} />
@@ -134,7 +134,7 @@ export function NavegacionAdminMovil() {
 
       {abierto && (
         <div
-          className="fixed inset-0 z-50 flex items-end bg-ink/45"
+          className="fixed inset-0 z-50 flex items-end bg-ui-brand"
           role="presentation"
           onMouseDown={(evento) => {
             if (evento.target === evento.currentTarget) setAbierto(false);
@@ -146,7 +146,7 @@ export function NavegacionAdminMovil() {
             role="dialog"
             aria-modal="true"
             aria-labelledby="menu-movil-titulo"
-            className="max-h-[88vh] w-full overflow-hidden rounded-t-2xl border border-border-default bg-surface-primary shadow-[var(--ruum-shadow-4)]"
+            className="max-h-[88vh] w-full overflow-hidden rounded-t-2xl border border-ui-line bg-ui-card shadow-ui-md"
             onTouchStart={(evento) => {
               inicioToqueRef.current = evento.touches[0]?.clientY ?? null;
             }}
@@ -157,21 +157,21 @@ export function NavegacionAdminMovil() {
               inicioToqueRef.current = null;
             }}
           >
-            <div className="flex items-center justify-between border-b border-border-default px-4 py-3">
+            <div className="flex items-center justify-between border-b border-ui-line px-4 py-3">
               <div>
-                <h2 id="menu-movil-titulo" className="font-display text-lg font-semibold text-ink">Secciones</h2>
-                <p className="font-body text-admin-secundario text-text-tertiary">Todos los módulos del panel</p>
+                <h2 id="menu-movil-titulo" className="font-display text-lg font-semibold text-ui-fg">Secciones</h2>
+                <p className="font-body text-xs text-ui-fg-muted">Todos los módulos del panel</p>
               </div>
               <button
                 type="button"
                 onClick={() => setAbierto(false)}
-                className="inline-flex size-10 items-center justify-center rounded-lg border border-ink/15 text-ink"
+                className="inline-flex size-10 items-center justify-center rounded-lg border border-ui-line text-ui-fg"
                 aria-label="Cerrar menú de secciones"
               >
                 ×
               </button>
             </div>
-            <div className="border-b border-border-default px-4 py-3">
+            <div className="border-b border-ui-line px-4 py-3">
               <label className="sr-only" htmlFor="buscar-secciones-admin">Buscar secciones</label>
               <input
                 id="buscar-secciones-admin"
@@ -179,14 +179,14 @@ export function NavegacionAdminMovil() {
                 value={busqueda}
                 onChange={(evento) => setBusqueda(evento.target.value)}
                 placeholder="Buscar sección..."
-                className="w-full rounded-lg border border-ink/20 bg-surface-primary px-3.5 py-2.5 font-body text-sm text-ink placeholder:text-text-tertiary"
+                className="w-full rounded-lg border border-ui-line-strong bg-ui-card px-3.5 py-2.5 font-body text-sm text-ui-fg placeholder:text-ui-fg-muted"
               />
             </div>
             <nav className="max-h-[62vh] overflow-y-auto px-4 py-4" aria-label="Todas las secciones del panel">
               <div className="grid gap-5">
                 {destinosFiltrados.map((grupo) => (
                   <section key={grupo.titulo} aria-label={grupo.titulo}>
-                    <p className="mb-2 font-mono-ruum text-admin-secundario uppercase tracking-widest text-text-tertiary">{grupo.titulo}</p>
+                    <p className="mb-2 font-mono-ruum text-xs uppercase tracking-widest text-ui-fg-muted">{grupo.titulo}</p>
                     <div className="grid gap-2">
                       {grupo.secciones.map((seccion) => {
                         const activo = esActivo(pathname, seccion.href);
@@ -199,10 +199,10 @@ export function NavegacionAdminMovil() {
                             aria-current={activo ? "page" : undefined}
                             className={[
                               "relative flex min-h-11 items-center gap-3 rounded-lg border px-3 py-2 font-body text-sm font-semibold",
-                              activo ? "border-signal bg-signal-soft text-ink" : "border-ink/10 text-text-secondary"
+                              activo ? "border-ui-brand bg-ui-brand-soft text-ui-fg" : "border-ui-line text-ui-fg-muted"
                             ].join(" ")}
                           >
-                            <span className="flex size-8 items-center justify-center rounded-md bg-ink/[0.04]"><Icono nombre={seccion.icono} /></span>
+                            <span className="flex size-8 items-center justify-center rounded-md bg-ui-brand/[0.04]"><Icono nombre={seccion.icono} /></span>
                             <span className="min-w-0 flex-1">{seccion.etiqueta}</span>
                             <BadgeContador contador={contador} colapsada={false} cargando={cargando} />
                           </Link>

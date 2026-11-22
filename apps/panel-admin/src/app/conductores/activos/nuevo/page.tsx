@@ -188,15 +188,15 @@ export default function PaginaNuevoConductor() {
 
   return (
     <main className="mx-auto max-w-4xl px-6 py-8 sm:px-8 sm:py-10">
-      <Link href="/conductores/activos" className="font-body text-sm text-text-tertiary hover:text-ink">&larr; Volver a conductores</Link>
+      <Link href="/conductores/activos" className="font-body text-sm text-ui-fg-muted hover:text-ui-fg">&larr; Volver a conductores</Link>
 
       <h1 className="mt-6 font-display text-2xl font-semibold">Nuevo conductor</h1>
-      <p className="mt-1 font-body text-sm text-text-secondary">Crea la cuenta operativa y envía una contraseña temporal al correo del conductor.</p>
+      <p className="mt-1 font-body text-sm text-ui-fg-muted">Crea la cuenta operativa y envía una contraseña temporal al correo del conductor.</p>
 
       {error && <div className="mt-4"><Aviso tono="danger">{error}</Aviso></div>}
 
       <form onSubmit={(e) => { e.preventDefault(); void crear(); }} className="mt-6 space-y-7">
-        <fieldset className="rounded-lg border border-ink/10 bg-surface-primary p-5">
+        <fieldset className="rounded-lg border border-ui-line bg-ui-card p-5">
           <legend className="px-1 font-display text-lg font-semibold">Cuenta</legend>
           <div className="mt-4 grid gap-4 sm:grid-cols-2">
             <Campo label="Correo electrónico" value={datos.correo} onChange={(v) => cambio("correo", v)} error={erroresCampos.email} type="email" autoComplete="email" required />
@@ -204,7 +204,7 @@ export default function PaginaNuevoConductor() {
           </div>
         </fieldset>
 
-        <fieldset className="rounded-lg border border-ink/10 bg-surface-primary p-5">
+        <fieldset className="rounded-lg border border-ui-line bg-ui-card p-5">
           <legend className="px-1 font-display text-lg font-semibold">Identidad y domicilio</legend>
           <div className="mt-4 grid gap-4 sm:grid-cols-2">
             <Campo label="Nombre (s)" value={datos.nombre} onChange={(v) => cambio("nombre", v)} error={erroresCampos.nombre} autoComplete="given-name" required />
@@ -242,7 +242,7 @@ export default function PaginaNuevoConductor() {
           </div>
         </fieldset>
 
-        <fieldset className="rounded-lg border border-ink/10 bg-surface-primary p-5">
+        <fieldset className="rounded-lg border border-ui-line bg-ui-card p-5">
           <legend className="px-1 font-display text-lg font-semibold">Licencia y contacto</legend>
           <div className="mt-4 grid gap-4 sm:grid-cols-2">
             <Campo label="Número de licencia" value={formatoLicenciaMask(datos.licencia_numero)} onChange={(v) => cambio("licencia_numero", soloAlfanumericoMayusculas(v))} error={erroresCampos.numeroLicencia} required />
@@ -253,18 +253,18 @@ export default function PaginaNuevoConductor() {
           </div>
         </fieldset>
 
-        <fieldset className="rounded-lg border border-ink/10 bg-surface-primary p-5">
+        <fieldset className="rounded-lg border border-ui-line bg-ui-card p-5">
           <legend className="px-1 font-display text-lg font-semibold">Declaraciones</legend>
           <div className="mt-4 grid gap-3">
             <CheckboxCampo checked={datos.autoriza_verificacion_antecedentes} onChange={(v) => cambio("autoriza_verificacion_antecedentes", v)} label="El conductor autorizó la verificación de antecedentes y de historial de manejo." />
             <CheckboxCampo checked={datos.declara_sin_suspensiones} onChange={(v) => cambio("declara_sin_suspensiones", v)} label="El conductor declara no tener suspensiones vigentes ni procesos legales activos relacionados con manejo." />
-            {erroresCampos.declaraciones && <p className="font-body text-sm font-medium text-status-error">{erroresCampos.declaraciones}</p>}
+            {erroresCampos.declaraciones && <p className="font-body text-sm font-medium text-ui-danger">{erroresCampos.declaraciones}</p>}
           </div>
         </fieldset>
 
         <div className="flex flex-wrap justify-end gap-2">
-          <Link href="/conductores/activos" className="rounded-lg border border-ink/20 px-4 py-2 font-body text-sm font-medium hover:bg-ink/5">Cancelar</Link>
-          <Button type="submit" disabled={procesando} className="rounded-lg bg-ink px-4 py-2 font-body text-sm font-semibold text-surface-primary hover:bg-ink/90 disabled:opacity-50">
+          <Link href="/conductores/activos" className="rounded-lg border border-ui-line-strong px-4 py-2 font-body text-sm font-medium hover:bg-ui-muted">Cancelar</Link>
+          <Button type="submit" disabled={procesando} className="rounded-lg bg-ui-brand px-4 py-2 font-body text-sm font-semibold text-ui-on-brand hover:bg-ui-brand-hover disabled:opacity-50">
             {procesando ? "Creando..." : "Crear cuenta y enviar contraseña temporal"}
           </Button>
         </div>
@@ -304,7 +304,7 @@ function Campo({
 }) {
   return (
     <label className="flex flex-col gap-1">
-      <span className="font-body text-xs font-medium text-text-secondary">{label}{required ? " *" : ""}</span>
+      <span className="font-body text-xs font-medium text-ui-fg-muted">{label}{required ? " *" : ""}</span>
       <input
         type={type}
         value={value}
@@ -316,10 +316,10 @@ function Campo({
         inputMode={inputMode}
         autoComplete={autoComplete}
         data-ruum-label={label}
-        className="rounded-lg border border-ink/20 bg-surface-primary px-3 py-2 font-body text-sm focus:border-focus-default focus:outline-none focus:ring-2 focus:ring-focus-default/20 disabled:bg-ink/5 disabled:text-text-tertiary"
+        className="rounded-lg border border-ui-line-strong bg-ui-card px-3 py-2 font-body text-sm focus:border-ui-focus focus:outline-none focus:ring-2 focus:ring-ui-ring disabled:bg-ui-muted disabled:text-ui-fg-muted"
       />
-      {ayuda && !error && <span className="font-body text-xs text-text-tertiary">{ayuda}</span>}
-      {error && <span className="font-body text-xs font-medium text-status-error">{error}</span>}
+      {ayuda && !error && <span className="font-body text-xs text-ui-fg-muted">{ayuda}</span>}
+      {error && <span className="font-body text-xs font-medium text-ui-danger">{error}</span>}
     </label>
   );
 }
@@ -327,26 +327,26 @@ function Campo({
 function SelectCampo({ label, value, onChange, opciones, error, disabled, required }: { label: string; value: string; onChange: (valor: string) => void; opciones: string[]; error?: string; disabled?: boolean; required?: boolean }) {
   return (
     <label className="flex flex-col gap-1">
-      <span className="font-body text-xs font-medium text-text-secondary">{label}{required ? " *" : ""}</span>
+      <span className="font-body text-xs font-medium text-ui-fg-muted">{label}{required ? " *" : ""}</span>
       <select
         value={value}
         onChange={(e) => onChange(e.target.value)}
         disabled={disabled}
         data-ruum-label={label}
-        className="rounded-lg border border-ink/20 bg-surface-primary px-3 py-2 font-body text-sm focus:border-focus-default focus:outline-none focus:ring-2 focus:ring-focus-default/20 disabled:bg-ink/5 disabled:text-text-tertiary"
+        className="rounded-lg border border-ui-line-strong bg-ui-card px-3 py-2 font-body text-sm focus:border-ui-focus focus:outline-none focus:ring-2 focus:ring-ui-ring disabled:bg-ui-muted disabled:text-ui-fg-muted"
       >
         <option value="">{disabled ? "Completa el dato previo" : "Selecciona una opción"}</option>
         {opciones.map((opcion) => <option key={opcion} value={opcion}>{opcion}</option>)}
       </select>
-      {error && <span className="font-body text-xs font-medium text-status-error">{error}</span>}
+      {error && <span className="font-body text-xs font-medium text-ui-danger">{error}</span>}
     </label>
   );
 }
 
 function CheckboxCampo({ checked, onChange, label }: { checked: boolean; onChange: (valor: boolean) => void; label: string }) {
   return (
-    <label className="flex gap-3 rounded-lg border border-ink/10 bg-ink/[0.02] p-4 font-body text-sm leading-6 text-text-secondary">
-      <input type="checkbox" checked={checked} onChange={(e) => onChange(e.target.checked)} className="mt-1 size-4 accent-ink" />
+    <label className="flex gap-3 rounded-lg border border-ui-line bg-ui-brand/[0.02] p-4 font-body text-sm leading-6 text-ui-fg-muted">
+      <input type="checkbox" checked={checked} onChange={(e) => onChange(e.target.checked)} className="mt-1 size-4 accent-ui-brand" />
       <span>{label}</span>
     </label>
   );

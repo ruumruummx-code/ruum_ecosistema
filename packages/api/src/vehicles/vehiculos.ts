@@ -36,11 +36,18 @@ export interface DatosVehiculosAdminPaginados extends DatosVehiculosAdmin {
   paginacion: PaginacionAdmin;
 }
 
-export async function listarVehiculosAdmin(cliente: Cliente): Promise<DatosVehiculosAdmin> {
+export async function listarVehiculosAdmin(
+  cliente: Cliente,
+  opciones?: { limite?: number; offset?: number }
+): Promise<DatosVehiculosAdmin> {
   await assertAdminPermission(cliente, "vehiculos:leer");
+  const limite = Math.min(Math.max(opciones?.limite ?? 50, 1), 500);
+  const offset = Math.max(opciones?.offset ?? 0, 0);
+  const hasta = offset + limite - 1;
+
   const [vehiculos, usuarios] = await Promise.all([
-    cliente.from("vehiculos").select("*").order("creado_en", { ascending: false }),
-    cliente.from("usuarios").select("*").order("creado_en", { ascending: false })
+    cliente.from("vehiculos").select("*").order("creado_en", { ascending: false }).range(offset, hasta),
+    cliente.from("usuarios").select("*").order("creado_en", { ascending: false }).range(offset, hasta)
   ]);
 
   for (const resultado of [vehiculos, usuarios]) {
@@ -299,8 +306,11 @@ export async function subirDocumentoVehiculoAdmin(
   const { error: errUp } = await cliente.storage.from("documentos-vehiculo").upload(path, archivo, { upsert: true, contentType: archivo.type });
   if (errUp) throw errUp;
 
-  const { data: urlData } = cliente.storage.from("documentos-vehiculo").getPublicUrl(path);
-  const url = `${urlData.publicUrl}?v=${Date.now()}`;
+  const { data: signData, error: errSign } = await cliente.storage
+    .from("documentos-vehiculo")
+    .createSignedUrl(path, 3600);
+  if (errSign) throw errSign;
+  const url = signData?.signedUrl ?? path;
 
   const { data, error } = await (cliente as unknown as { from: (t: string) => any }).from("documentos_vehiculo").insert({
     vehiculo_id: vehiculoId,

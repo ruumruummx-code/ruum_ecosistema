@@ -96,15 +96,15 @@ export default function PaginaUsuariosAdmin() {
 
   return (
     <main className="mx-auto max-w-6xl px-6 py-8 sm:px-8 sm:py-10">
-      <div className="flex flex-col gap-4 border-b border-border-default pb-5 sm:flex-row sm:items-end sm:justify-between">
+      <div className="flex flex-col gap-4 border-b border-ui-line pb-5 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <nav className="font-body text-admin-secundario text-text-tertiary" aria-label="Breadcrumb">
-            <Link href="/" className="hover:text-ink">Dashboard</Link>
+          <nav className="font-body text-xs text-ui-fg-muted" aria-label="Breadcrumb">
+            <Link href="/" className="hover:text-ui-fg">Dashboard</Link>
             <span className="mx-2">/</span>
-            <span className="text-text-secondary">Usuarios</span>
+            <span className="text-ui-fg-muted">Usuarios</span>
           </nav>
-          <h1 className="mt-2 font-display text-2xl font-semibold text-ink">Usuarios</h1>
-          <p className="mt-1 font-body text-sm text-text-secondary">Gestión de cuentas y permisos de la torre de control.</p>
+          <h1 className="mt-2 font-display text-2xl font-semibold text-ui-fg">Usuarios</h1>
+          <p className="mt-1 font-body text-sm text-ui-fg-muted">Gestión de cuentas y permisos de la torre de control.</p>
         </div>
         <AdminButton onClick={() => setMostrarInvitar(true)} className="sticky top-3 z-10 self-start shadow-sm sm:static sm:self-auto">
           <span aria-hidden="true" className="text-base leading-none">+</span>
@@ -112,11 +112,11 @@ export default function PaginaUsuariosAdmin() {
         </AdminButton>
       </div>
 
-      <div className="mt-6 rounded-card border border-ink/10 bg-surface-primary p-4">
+      <div className="mt-6 rounded-lg border border-ui-line bg-ui-card p-4">
         <div className="grid gap-3 lg:grid-cols-[minmax(240px,1fr)_180px_200px_180px_auto]">
           <label className="flex flex-col gap-1">
-            <span className="font-body text-xs font-semibold text-text-secondary">Buscar usuarios</span>
-            <input id="buscar-usuarios" type="search" value={busqueda} onChange={(e) => { setBusqueda(e.target.value); setPagina(1); }} placeholder="Buscar por nombre, correo o rol" className="rounded-lg border border-ink/20 bg-surface-primary px-3.5 py-2.5 font-body text-sm text-ink placeholder:text-text-tertiary focus:border-focus-default focus:outline-none focus:ring-2 focus:ring-focus-default/20" />
+            <span className="font-body text-xs font-semibold text-ui-fg-muted">Buscar usuarios</span>
+            <input id="buscar-usuarios" type="search" value={busqueda} onChange={(e) => { setBusqueda(e.target.value); setPagina(1); }} placeholder="Buscar por nombre, correo o rol" className="rounded-lg border border-ui-line-strong bg-ui-card px-3.5 py-2.5 font-body text-sm text-ui-fg placeholder:text-ui-fg-muted focus:border-ui-focus focus:outline-none focus:ring-2 focus:ring-ui-ring" />
           </label>
           <FiltroSelect label="Estado de cuenta" value={filtroCuenta} onChange={setFiltroCuenta} options={[["todos", "Todas"], ["activa", "Activa"], ["inactiva", "Inactiva"]]} />
           <FiltroSelect label="Rol" value={filtroRol} onChange={setFiltroRol} options={[["todos", "Todos"], ["personal", "Personal"], ["titular_empresa", "Titular empresa / Admin"], ["usuario_autorizado", "Usuario autorizado"]]} />
@@ -125,7 +125,7 @@ export default function PaginaUsuariosAdmin() {
             {(busqueda || hayFiltrosLocales) && <AdminButton variant="quiet" onClick={() => { setBusqueda(""); setFiltroCuenta("todos"); setFiltroRol("todos"); setFiltroVerificacion("todos"); setPagina(1); }} aria-label="Limpiar búsqueda">Limpiar</AdminButton>}
           </div>
         </div>
-        <p className="mt-3 font-body text-sm text-text-secondary">{usuariosFiltrados.length} usuario{usuariosFiltrados.length === 1 ? "" : "s"} encontrado{usuariosFiltrados.length === 1 ? "" : "s"}</p>
+        <p className="mt-3 font-body text-sm text-ui-fg-muted">{usuariosFiltrados.length} usuario{usuariosFiltrados.length === 1 ? "" : "s"} encontrado{usuariosFiltrados.length === 1 ? "" : "s"}</p>
       </div>
 
       {error && <div className="mt-3"><Aviso tono="danger">{error}</Aviso></div>}
@@ -135,8 +135,8 @@ export default function PaginaUsuariosAdmin() {
         <table className="w-full min-w-[980px] font-body text-sm">
           <caption className="sr-only">Lista de usuarios registrados</caption>
           <thead>
-            <tr className="border-b border-ink/10 text-left text-xs uppercase tracking-wide text-text-tertiary">
-              <th className="left-0 z-10 bg-surface-primary px-4 py-3 sm:sticky">Nombre</th>
+            <tr className="border-b border-ui-line text-left text-xs uppercase tracking-wide text-ui-fg-muted">
+              <th className="left-0 z-10 bg-ui-card px-4 py-3 sm:sticky">Nombre</th>
               <th className="px-4 py-3">Tipo de cuenta</th>
               <th className="px-4 py-3">Rol</th>
               <th className="px-4 py-3">Estado verificación</th>
@@ -148,7 +148,7 @@ export default function PaginaUsuariosAdmin() {
           </thead>
           <tbody>
             {cargando ? (
-              <tr><td colSpan={8} className="px-4 py-6 text-center text-text-tertiary">Cargando…</td></tr>
+              <tr><td colSpan={8} className="px-4 py-6 text-center text-ui-fg-muted">Cargando…</td></tr>
             ) : usuariosFiltrados.length === 0 ? (
               <tr><td colSpan={8} className="px-4 py-8">
                 <AdminEmptyState
@@ -159,9 +159,9 @@ export default function PaginaUsuariosAdmin() {
               </td></tr>
             ) : (
               usuariosFiltrados.map((u, indice) => (
-                <tr key={u.id} className={`border-b border-ink/5 last:border-0 ${indice % 2 === 1 ? "bg-surface-secondary/45" : "bg-surface-primary"}`}>
-                  <td data-label="Nombre" className={`left-0 z-[1] px-4 py-4 font-medium sm:sticky ${indice % 2 === 1 ? "bg-surface-secondary" : "bg-surface-primary"}`}>
-                    <Link href={`/usuarios/${u.id}`} className="hover:text-focus-default hover:underline">{u.nombre ?? <span className="text-text-tertiary">Sin nombre</span>}</Link>
+                <tr key={u.id} className={`border-b border-ui-line last:border-0 ${indice % 2 === 1 ? "bg-ui-muted" : "bg-ui-card"}`}>
+                  <td data-label="Nombre" className={`left-0 z-[1] px-4 py-4 font-medium sm:sticky ${indice % 2 === 1 ? "bg-ui-muted" : "bg-ui-card"}`}>
+                    <Link href={`/usuarios/${u.id}`} className="hover:text-ui-brand hover:underline">{u.nombre ?? <span className="text-ui-fg-muted">Sin nombre</span>}</Link>
                   </td>
                   <td data-label="Tipo de cuenta" className="px-4 py-4">
                     <div className="flex flex-wrap items-center gap-2">
@@ -173,7 +173,7 @@ export default function PaginaUsuariosAdmin() {
                   <td data-label="Estado verificación" className="px-4 py-4"><BadgeVerificacion estado={u.estado_verificacion} /></td>
                   <td data-label="Traslados realizados" className="px-4 py-4 text-right font-mono-ruum">
                     <AdminTooltip label={u.traslados_completados_sin_incidencia === 0 ? "Aún no ha completado un traslado." : "Traslados completados sin incidencia."}>
-                      <span tabIndex={0} className="inline-flex rounded-md px-2 py-1 outline-none focus:ring-2 focus:ring-focus-default/30">{u.traslados_completados_sin_incidencia}</span>
+                      <span tabIndex={0} className="inline-flex rounded-md px-2 py-1 outline-none focus:ring-2 focus:ring-ui-ring">{u.traslados_completados_sin_incidencia}</span>
                     </AdminTooltip>
                   </td>
                   <td data-label="Estado de pago" className="px-4 py-4 text-center">
@@ -183,12 +183,12 @@ export default function PaginaUsuariosAdmin() {
                       </span>
                     </AdminTooltip>
                   </td>
-                  <td data-label="Fecha de registro" className="px-4 py-4 text-text-secondary">{new Date(u.creado_en).toLocaleDateString("es-MX")}</td>
+                  <td data-label="Fecha de registro" className="px-4 py-4 text-ui-fg-muted">{new Date(u.creado_en).toLocaleDateString("es-MX")}</td>
                   <td data-label="Acciones" className="px-4 py-4">
                     <div className="flex justify-end gap-2">
-                      <Link href={`/usuarios/${u.id}`} className="inline-flex items-center gap-1 rounded-md border border-ink/20 px-3 py-1.5 font-body text-xs font-semibold text-ink hover:bg-ink/5"><span aria-hidden="true">✎</span> Gestionar</Link>
+                      <Link href={`/usuarios/${u.id}`} className="inline-flex items-center gap-1 rounded-md border border-ui-line-strong px-3 py-1.5 font-body text-xs font-semibold text-ui-fg hover:bg-ui-muted"><span aria-hidden="true">✎</span> Gestionar</Link>
                       <AdminTooltip label="Próximamente: reset contraseña, desactivar usuario, reenviar verificación.">
-                        <button type="button" className="rounded-md border border-ink/20 px-2.5 py-1.5 font-body text-xs font-semibold text-text-secondary hover:bg-ink/5" aria-label={`Acciones rápidas para ${u.nombre ?? "usuario"}`}>...</button>
+                        <button type="button" className="rounded-md border border-ui-line-strong px-2.5 py-1.5 font-body text-xs font-semibold text-ui-fg-muted hover:bg-ui-muted" aria-label={`Acciones rápidas para ${u.nombre ?? "usuario"}`}>...</button>
                       </AdminTooltip>
                     </div>
                   </td>
@@ -201,13 +201,13 @@ export default function PaginaUsuariosAdmin() {
       </div>
 
       {totalPaginas > 1 && (
-        <div className="mt-4 flex items-center justify-between font-body text-sm text-text-secondary">
+        <div className="mt-4 flex items-center justify-between font-body text-sm text-ui-fg-muted">
           <span>{totalResultados} resultado{(totalResultados !== 1) ? "s" : ""}</span>
           <div className="flex items-center gap-3">
             <span>Página {pagina} de {totalPaginas}</span>
             <div className="flex gap-1">
-              <button onClick={() => irAPagina(pagina - 1)} disabled={pagina <= 1} className="rounded-md border border-ink/20 px-3 py-1.5 text-xs disabled:opacity-30">&larr; Anterior</button>
-              <button onClick={() => irAPagina(pagina + 1)} disabled={pagina >= totalPaginas} className="rounded-md border border-ink/20 px-3 py-1.5 text-xs disabled:opacity-30">Siguiente &rarr;</button>
+              <button onClick={() => irAPagina(pagina - 1)} disabled={pagina <= 1} className="rounded-md border border-ui-line-strong px-3 py-1.5 text-xs disabled:opacity-30">&larr; Anterior</button>
+              <button onClick={() => irAPagina(pagina + 1)} disabled={pagina >= totalPaginas} className="rounded-md border border-ui-line-strong px-3 py-1.5 text-xs disabled:opacity-30">Siguiente &rarr;</button>
             </div>
           </div>
         </div>
@@ -223,8 +223,8 @@ export default function PaginaUsuariosAdmin() {
 function FiltroSelect({ label, value, onChange, options }: { label: string; value: string; onChange: (value: string) => void; options: Array<[string, string]> }) {
   return (
     <label className="flex flex-col gap-1">
-      <span className="font-body text-xs font-semibold text-text-secondary">{label}</span>
-      <select value={value} onChange={(evento) => onChange(evento.target.value)} className="rounded-lg border border-ink/20 bg-surface-primary px-3.5 py-2.5 font-body text-sm text-ink focus:border-focus-default focus:outline-none focus:ring-2 focus:ring-focus-default/20">
+      <span className="font-body text-xs font-semibold text-ui-fg-muted">{label}</span>
+      <select value={value} onChange={(evento) => onChange(evento.target.value)} className="rounded-lg border border-ui-line-strong bg-ui-card px-3.5 py-2.5 font-body text-sm text-ui-fg focus:border-ui-focus focus:outline-none focus:ring-2 focus:ring-ui-ring">
         {options.map(([opcion, etiqueta]) => <option key={opcion} value={opcion}>{etiqueta}</option>)}
       </select>
     </label>
@@ -289,12 +289,12 @@ function InvitarUsuarioDialog({ onCerrar, onCreado }: { onCerrar: () => void; on
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-ink/40">
-      <div role="dialog" aria-modal="true" aria-labelledby="invitar-usuario-titulo" className="relative w-full max-w-md rounded-card bg-surface-primary p-6 shadow-xl">
-        <button type="button" onClick={onCerrar} disabled={procesando} className="absolute right-4 top-4 grid size-8 place-items-center rounded-full border border-ink/15 font-body text-sm font-semibold text-text-secondary hover:bg-surface-secondary hover:text-ink disabled:opacity-50" aria-label="Cerrar invitación">X</button>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-ui-brand">
+      <div role="dialog" aria-modal="true" aria-labelledby="invitar-usuario-titulo" className="relative w-full max-w-md rounded-lg bg-ui-card p-6 shadow-xl">
+        <button type="button" onClick={onCerrar} disabled={procesando} className="absolute right-4 top-4 grid size-8 place-items-center rounded-full border border-ui-line font-body text-sm font-semibold text-ui-fg-muted hover:bg-ui-muted hover:text-ui-fg disabled:opacity-50" aria-label="Cerrar invitación">X</button>
         <h2 id="invitar-usuario-titulo" className="font-display text-lg font-semibold">Invitar usuario</h2>
-        <p className="mt-1 pr-8 font-body text-sm text-text-secondary">Se registrará una cuenta pendiente para seguimiento operativo.</p>
-        <p className="mt-3 rounded-lg border border-status-info/25 bg-status-info-soft px-3 py-2 font-body text-xs text-status-info">
+        <p className="mt-1 pr-8 font-body text-sm text-ui-fg-muted">Se registrará una cuenta pendiente para seguimiento operativo.</p>
+        <p className="mt-3 rounded-lg border border-ui-brand/25 bg-ui-brand-soft px-3 py-2 font-body text-xs text-ui-brand-soft-fg">
           Se enviará un correo con la invitación y enlace de activación al destinatario.
         </p>
 
@@ -302,37 +302,37 @@ function InvitarUsuarioDialog({ onCerrar, onCreado }: { onCerrar: () => void; on
 
         <div className="mt-4 flex flex-col gap-3">
           <label className="flex flex-col gap-1">
-            <span className="font-body text-xs font-medium text-text-secondary">Correo electrónico <span className="text-status-error">*</span></span>
-            <input type="email" value={correo} onChange={(e) => setCorreo(e.target.value)} placeholder="usuario@ejemplo.com" className="rounded-lg border border-ink/20 px-3 py-2 font-body text-sm focus:border-focus-default focus:outline-none focus:ring-2 focus:ring-focus-default/20" />
+            <span className="font-body text-xs font-medium text-ui-fg-muted">Correo electrónico <span className="text-ui-danger">*</span></span>
+            <input type="email" value={correo} onChange={(e) => setCorreo(e.target.value)} placeholder="usuario@ejemplo.com" className="rounded-lg border border-ui-line-strong px-3 py-2 font-body text-sm focus:border-ui-focus focus:outline-none focus:ring-2 focus:ring-ui-ring" />
           </label>
           <label className="flex flex-col gap-1">
-            <span className="font-body text-xs font-medium text-text-secondary">Nombre completo</span>
-            <input type="text" value={nombre} onChange={(e) => setNombre(e.target.value)} placeholder="Nombre del usuario" className="rounded-lg border border-ink/20 px-3 py-2 font-body text-sm focus:border-focus-default focus:outline-none focus:ring-2 focus:ring-focus-default/20" />
+            <span className="font-body text-xs font-medium text-ui-fg-muted">Nombre completo</span>
+            <input type="text" value={nombre} onChange={(e) => setNombre(e.target.value)} placeholder="Nombre del usuario" className="rounded-lg border border-ui-line-strong px-3 py-2 font-body text-sm focus:border-ui-focus focus:outline-none focus:ring-2 focus:ring-ui-ring" />
           </label>
           <label className="flex flex-col gap-1">
-            <span className="font-body text-xs font-medium text-text-secondary">Tipo de cuenta</span>
-            <select value={tipoCuenta} onChange={(e) => setTipoCuenta(e.target.value as "personal" | "empresa")} className="rounded-lg border border-ink/20 px-3 py-2 font-body text-sm capitalize focus:border-focus-default focus:outline-none focus:ring-2 focus:ring-focus-default/20">
+            <span className="font-body text-xs font-medium text-ui-fg-muted">Tipo de cuenta</span>
+            <select value={tipoCuenta} onChange={(e) => setTipoCuenta(e.target.value as "personal" | "empresa")} className="rounded-lg border border-ui-line-strong px-3 py-2 font-body text-sm capitalize focus:border-ui-focus focus:outline-none focus:ring-2 focus:ring-ui-ring">
               <option value="personal">Personal</option>
               <option value="empresa">Empresa</option>
             </select>
           </label>
           {tipoCuenta === "empresa" && (
             <label className="flex flex-col gap-1">
-              <span className="font-body text-xs font-medium text-text-secondary">Rol / permisos iniciales</span>
-              <select value={perfilEmpresa} onChange={(e) => setPerfilEmpresa(e.target.value as "administrador_flota" | "usuario_final" | "finanzas")} className="rounded-lg border border-ink/20 px-3 py-2 font-body text-sm focus:border-focus-default focus:outline-none focus:ring-2 focus:ring-focus-default/20">
+              <span className="font-body text-xs font-medium text-ui-fg-muted">Rol / permisos iniciales</span>
+              <select value={perfilEmpresa} onChange={(e) => setPerfilEmpresa(e.target.value as "administrador_flota" | "usuario_final" | "finanzas")} className="rounded-lg border border-ui-line-strong px-3 py-2 font-body text-sm focus:border-ui-focus focus:outline-none focus:ring-2 focus:ring-ui-ring">
                 <option value="administrador_flota">Administrador de flota</option>
                 <option value="usuario_final">Usuario final</option>
                 <option value="finanzas">Finanzas</option>
               </select>
-              <span className="font-body text-xs text-text-tertiary">El perfil se registra con la invitación; los permisos finos se gestionan desde Capacidades.</span>
+              <span className="font-body text-xs text-ui-fg-muted">El perfil se registra con la invitación; los permisos finos se gestionan desde Capacidades.</span>
             </label>
           )}
         </div>
 
         <div className="mt-6 flex justify-end gap-2">
-          <button onClick={onCerrar} disabled={procesando} className="rounded-lg border border-ink/20 px-4 py-2 font-body text-sm font-medium hover:bg-ink/5">Cancelar</button>
-          <button onClick={invitar} disabled={procesando || !correo.trim()} className="inline-flex min-w-24 items-center justify-center gap-2 rounded-lg bg-focus-default px-4 py-2 font-body text-sm font-semibold text-surface-primary shadow-sm hover:bg-focus-default/90 disabled:opacity-50">
-            {procesando && <span className="size-3 rounded-full border-2 border-surface-primary/40 border-t-surface-primary animate-spin" aria-hidden="true" />}
+          <button onClick={onCerrar} disabled={procesando} className="rounded-lg border border-ui-line-strong px-4 py-2 font-body text-sm font-medium hover:bg-ui-muted">Cancelar</button>
+          <button onClick={invitar} disabled={procesando || !correo.trim()} className="inline-flex min-w-24 items-center justify-center gap-2 rounded-lg bg-ui-brand px-4 py-2 font-body text-sm font-semibold text-ui-on-brand shadow-sm hover:bg-ui-brand disabled:opacity-50">
+            {procesando && <span className="size-3 rounded-full border-2 border-ui-card border-t-ui-card animate-spin" aria-hidden="true" />}
             {procesando ? "Enviando..." : "Invitar"}
           </button>
         </div>

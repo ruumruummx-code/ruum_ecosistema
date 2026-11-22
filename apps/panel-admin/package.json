@@ -13,7 +13,7 @@
     "test:lighthouse": "lhci autorun",
     "typecheck": "tsc --noEmit",
     "predev": "node ../../scripts/validate-env.mjs panel-admin",
-    "prebuild": "node ../../scripts/validate-env.mjs panel-admin && node scripts/assert-csp.mjs",
+    "prebuild": "node ../../scripts/validate-env.mjs panel-admin --production && node scripts/assert-csp.mjs",
     "validate:env": "node ../../scripts/validate-env.mjs panel-admin",
     "assert:csp": "node scripts/assert-csp.mjs",
     "analyze:bundle": "ANALYZE=true next build"
@@ -24,6 +24,7 @@
     "@ruum/ui": "workspace:*",
     "@sentry/nextjs": "^10.75.2",
     "@supabase/supabase-js": "^2.47.0",
+    "lucide-react": "^1.73.0",
     "mapbox-gl": "^3.33.0",
     "next": "15.5.28",
     "react": "^19.0.0",

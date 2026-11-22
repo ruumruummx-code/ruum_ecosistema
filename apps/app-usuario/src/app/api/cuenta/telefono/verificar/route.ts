@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { crearClienteServidor } from "@/lib/supabase-server";
+import { validarSesionYRolUsuario } from "@/lib/guardia-rol-usuario";
 import { crearClienteServicio } from "@/lib/supabase-servicio";
 import { verificarCsrfORechazar } from "@/lib/csrf";
 import { consumirTokenTelefono } from "@/lib/phone-verification";
@@ -20,9 +20,9 @@ export async function POST(request: NextRequest) {
   const rechazoCsrf = verificarCsrfORechazar(request);
   if (rechazoCsrf) return rechazoCsrf;
 
-  const cliente = await crearClienteServidor();
-  const { data: { user } } = await cliente.auth.getUser();
-  if (!user) return NextResponse.json({ error: "No autenticado" }, { status: 401 });
+  const auth = await validarSesionYRolUsuario();
+  if (!auth.ok) return auth.errorResponse;
+  const { user } = auth;
 
   const body = (await request.json().catch(() => null)) as { token?: unknown } | null;
   const token = typeof body?.token === "string" ? body.token : "";

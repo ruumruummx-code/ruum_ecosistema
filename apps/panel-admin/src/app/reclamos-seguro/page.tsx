@@ -32,9 +32,9 @@ function etiquetaCobertura(pasaporte: Pasaporte | undefined) {
 }
 
 function claseCobertura(etiqueta: string) {
-  if (etiqueta === "Dentro de cobertura") return "border-status-success/30 bg-status-success-soft text-status-success";
-  if (etiqueta === "Fuera de ventana") return "border-status-warning/40 bg-status-warning-soft text-status-warning";
-  return "border-ink/15 bg-ink/[0.04] text-text-secondary";
+  if (etiqueta === "Dentro de cobertura") return "border-ui-success/30 bg-ui-success-soft text-ui-success";
+  if (etiqueta === "Fuera de ventana") return "border-ui-warning/40 bg-ui-warning-soft text-ui-warning";
+  return "border-ui-line bg-ui-brand/[0.04] text-ui-fg-muted";
 }
 
 function AccionReclamo({ reclamo, onActualizado }: { reclamo: Reclamo; onActualizado: () => void }) {
@@ -69,20 +69,20 @@ function AccionReclamo({ reclamo, onActualizado }: { reclamo: Reclamo; onActuali
   }
 
   return (
-    <div className="mt-5 grid gap-3 border-t border-ink/10 pt-4 md:grid-cols-[1fr_1fr_1.5fr_auto]">
-      <select value={estado} onChange={(evento) => setEstado(evento.target.value as EstadoReclamo)} className="rounded-lg border border-ink/50 bg-surface-primary px-3 py-2 font-body text-sm">
+    <div className="mt-5 grid gap-3 border-t border-ui-line pt-4 md:grid-cols-[1fr_1fr_1.5fr_auto]">
+      <select value={estado} onChange={(evento) => setEstado(evento.target.value as EstadoReclamo)} className="rounded-lg border border-ui-field bg-ui-card px-3 py-2 font-body text-sm">
         {["abierto", "en_revision", "resuelto"].map((valor) => (
           <option key={valor} value={valor}>{valor.replaceAll("_", " ")}</option>
         ))}
       </select>
-      <select value={responsable} onChange={(evento) => setResponsable(evento.target.value as ResponsablePago | "")} className="rounded-lg border border-ink/50 bg-surface-primary px-3 py-2 font-body text-sm">
+      <select value={responsable} onChange={(evento) => setResponsable(evento.target.value as ResponsablePago | "")} className="rounded-lg border border-ui-field bg-ui-card px-3 py-2 font-body text-sm">
         <option value="">Responsable pendiente</option>
         <option value="aplicacion">Aplicación</option>
         <option value="conductor">Conductor</option>
       </select>
-      <input value={notas} onChange={(evento) => setNotas(evento.target.value)} className="rounded-lg border border-ink/50 bg-surface-primary px-3 py-2 font-body text-sm" placeholder="Notas internas" />
+      <input value={notas} onChange={(evento) => setNotas(evento.target.value)} className="rounded-lg border border-ui-field bg-ui-card px-3 py-2 font-body text-sm" placeholder="Notas internas" />
       <Button onClick={guardar} disabled={pendiente}>{pendiente ? "Guardando..." : "Guardar"}</Button>
-      {mensaje && <p className="md:col-span-4 font-body text-sm text-text-secondary">{mensaje}</p>}
+      {mensaje && <p className="md:col-span-4 font-body text-sm text-ui-fg-muted">{mensaje}</p>}
     </div>
   );
 }
@@ -138,9 +138,9 @@ export default function PaginaReclamosSeguroAdmin() {
   return (
     <main className="mx-auto max-w-6xl px-6 py-8 sm:px-8 sm:py-10">
       <h1 className="font-display text-2xl font-semibold">Reclamos de seguro</h1>
-      <p className="mt-1 font-body text-sm text-text-secondary">Seguimiento administrativo de reclamos, responsable de pago y resolución.</p>
+      <p className="mt-1 font-body text-sm text-ui-fg-muted">Seguimiento administrativo de reclamos, responsable de pago y resolución.</p>
       {esDemo && <div className="mt-4"><Aviso tono="info">Vista con datos de ejemplo.</Aviso></div>}
-      {cargando ? <p className="mt-8 font-body text-sm text-text-tertiary">Cargando...</p> : (
+      {cargando ? <p className="mt-8 font-body text-sm text-ui-fg-muted">Cargando...</p> : (
         <section className="mt-6 grid gap-4">
           {reclamos.map((reclamo) => {
             const pasaporte = pasaportePorId.get(reclamo.traslado_id);
@@ -149,19 +149,19 @@ export default function PaginaReclamosSeguroAdmin() {
               <PassportCard key={reclamo.id}>
                 <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                   <div>
-                    <p className="font-mono-ruum text-xs uppercase tracking-wide text-text-tertiary">{reclamo.id}</p>
+                    <p className="font-mono-ruum text-xs uppercase tracking-wide text-ui-fg-muted">{reclamo.id}</p>
                     <h2 className="mt-1 font-display text-xl font-semibold">Reclamo {reclamo.estado.replaceAll("_", " ")}</h2>
-                    <p className="mt-2 font-body text-sm text-text-secondary">{reclamo.notas_admin ?? "Sin notas internas registradas."}</p>
+                    <p className="mt-2 font-body text-sm text-ui-fg-muted">{reclamo.notas_admin ?? "Sin notas internas registradas."}</p>
                   </div>
                   <span className={`rounded-full border px-3 py-1.5 font-body text-xs font-semibold ${claseCobertura(cobertura)}`}>{cobertura}</span>
                 </div>
                 <dl className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                  <div><dt className="font-body text-xs uppercase tracking-wide text-text-tertiary">Traslado</dt><dd className="mt-1 font-body text-sm font-medium"><Link href={`/viajes/${reclamo.traslado_id}`} className="text-status-info">{reclamo.traslado_id.slice(0, 8).toUpperCase()}</Link></dd></div>
-                  <div><dt className="font-body text-xs uppercase tracking-wide text-text-tertiary">Estado</dt><dd className="mt-1 font-body text-sm font-medium">{reclamo.estado.replaceAll("_", " ")}</dd></div>
-                  <div><dt className="font-body text-xs uppercase tracking-wide text-text-tertiary">Abierto</dt><dd className="mt-1 font-body text-sm font-medium">{new Date(reclamo.abierto_en).toLocaleString("es-MX")}</dd></div>
-                  <div><dt className="font-body text-xs uppercase tracking-wide text-text-tertiary">Responsable</dt><dd className="mt-1 font-body text-sm font-medium">{reclamo.responsable_pago ?? "Pendiente"}</dd></div>
-                  <div className="sm:col-span-2"><dt className="font-body text-xs uppercase tracking-wide text-text-tertiary">Vehículo</dt><dd className="mt-1 font-body text-sm font-medium">{pasaporte ? `${pasaporte.vehiculo_marca ?? ""} ${pasaporte.vehiculo_modelo ?? ""}`.trim() : "Sin pasaporte cargado"}</dd></div>
-                  <div className="sm:col-span-2"><dt className="font-body text-xs uppercase tracking-wide text-text-tertiary">Estatus de cobertura</dt><dd className="mt-1 font-body text-sm font-medium">{cobertura}</dd></div>
+                  <div><dt className="font-body text-xs uppercase tracking-wide text-ui-fg-muted">Traslado</dt><dd className="mt-1 font-body text-sm font-medium"><Link href={`/viajes/${reclamo.traslado_id}`} className="text-ui-brand-soft-fg">{reclamo.traslado_id.slice(0, 8).toUpperCase()}</Link></dd></div>
+                  <div><dt className="font-body text-xs uppercase tracking-wide text-ui-fg-muted">Estado</dt><dd className="mt-1 font-body text-sm font-medium">{reclamo.estado.replaceAll("_", " ")}</dd></div>
+                  <div><dt className="font-body text-xs uppercase tracking-wide text-ui-fg-muted">Abierto</dt><dd className="mt-1 font-body text-sm font-medium">{new Date(reclamo.abierto_en).toLocaleString("es-MX")}</dd></div>
+                  <div><dt className="font-body text-xs uppercase tracking-wide text-ui-fg-muted">Responsable</dt><dd className="mt-1 font-body text-sm font-medium">{reclamo.responsable_pago ?? "Pendiente"}</dd></div>
+                  <div className="sm:col-span-2"><dt className="font-body text-xs uppercase tracking-wide text-ui-fg-muted">Vehículo</dt><dd className="mt-1 font-body text-sm font-medium">{pasaporte ? `${pasaporte.vehiculo_marca ?? ""} ${pasaporte.vehiculo_modelo ?? ""}`.trim() : "Sin pasaporte cargado"}</dd></div>
+                  <div className="sm:col-span-2"><dt className="font-body text-xs uppercase tracking-wide text-ui-fg-muted">Estatus de cobertura</dt><dd className="mt-1 font-body text-sm font-medium">{cobertura}</dd></div>
                 </dl>
                 <AccionReclamo reclamo={reclamo} onActualizado={cargar} />
               </PassportCard>

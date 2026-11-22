@@ -46,9 +46,9 @@ const ORDEN_CATEGORIAS: CategoriaExcepcionCritica[] = [
 ];
 
 const CLASE_SEVERIDAD: Record<SeveridadExcepcionCritica, string> = {
-  critica: "border-status-error/35 bg-status-error-soft text-status-error",
-  alta: "border-status-warning/45 bg-status-warning-soft text-status-warning",
-  media: "border-status-info/35 bg-status-info-soft text-status-info"
+  critica: "border-ui-danger/35 bg-ui-danger-soft text-ui-danger",
+  alta: "border-ui-warning/45 bg-ui-warning-soft text-ui-warning",
+  media: "border-ui-brand/35 bg-ui-brand-soft text-ui-brand-soft-fg"
 };
 
 type EstadoConexionCritica = "datos_en_vivo" | "actualizando" | "reconectando" | "sin_conexion" | "desactualizado";
@@ -88,37 +88,37 @@ function TarjetaExcepcion({
   const cerrable = excepcion.estado === "resuelta";
 
   return (
-    <article className="rounded-xl border border-border-default bg-surface-primary p-4 shadow-sm">
+    <article className="rounded-xl border border-ui-line bg-ui-card p-4 shadow-sm">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-2">
-            <span className={`rounded-full border px-2.5 py-1 font-body text-admin-secundario font-semibold ${CLASE_SEVERIDAD[excepcion.severidad]}`}>
+            <span className={`rounded-full border px-2.5 py-1 font-body text-xs font-semibold ${CLASE_SEVERIDAD[excepcion.severidad]}`}>
               {excepcion.severidad}
             </span>
-            <span className="rounded-full border border-border-default bg-surface-secondary px-2.5 py-1 font-body text-admin-secundario font-semibold text-text-secondary">
+            <span className="rounded-full border border-ui-line bg-ui-muted px-2.5 py-1 font-body text-xs font-semibold text-ui-fg-muted">
               {excepcion.estado}
             </span>
-            <span className="font-mono-ruum text-admin-secundario uppercase tracking-wide text-text-tertiary">
+            <span className="font-mono-ruum text-xs uppercase tracking-wide text-ui-fg-muted">
               {ETIQUETA_CATEGORIA[excepcion.categoria]}
             </span>
           </div>
-          <h2 className="mt-2 font-display text-base font-semibold text-ink">{excepcion.folioOEntidad}</h2>
-          <p className="mt-1 font-body text-sm leading-6 text-text-secondary">{excepcion.descripcion}</p>
+          <h2 className="mt-2 font-display text-base font-semibold text-ui-fg">{excepcion.folioOEntidad}</h2>
+          <p className="mt-1 font-body text-sm leading-6 text-ui-fg-muted">{excepcion.descripcion}</p>
         </div>
         <div className="shrink-0 text-left sm:text-right">
-          <p className="font-mono-ruum text-xs uppercase tracking-wide text-text-tertiary">Transcurrido</p>
-          <p className="font-display text-xl font-semibold text-ink">{tiempoRelativo(excepcion.creadoEn)}</p>
+          <p className="font-mono-ruum text-xs uppercase tracking-wide text-ui-fg-muted">Transcurrido</p>
+          <p className="font-display text-xl font-semibold text-ui-fg">{tiempoRelativo(excepcion.creadoEn)}</p>
         </div>
       </div>
 
-      <dl className="mt-4 grid gap-3 border-t border-border-default pt-4 text-sm sm:grid-cols-3">
+      <dl className="mt-4 grid gap-3 border-t border-ui-line pt-4 text-sm sm:grid-cols-3">
         <div>
-          <dt className="font-body text-admin-secundario uppercase tracking-wide text-text-tertiary">Responsable</dt>
+          <dt className="font-body text-xs uppercase tracking-wide text-ui-fg-muted">Responsable</dt>
           <dd className="mt-1">
             <select
               value={excepcion.responsable ?? ""}
               onChange={(evento) => void onAsignar(excepcion.id, evento.target.value)}
-              className="w-full rounded-lg border border-ink/20 bg-surface-primary px-2.5 py-2 font-body text-sm text-ink"
+              className="w-full rounded-lg border border-ui-line-strong bg-ui-card px-2.5 py-2 font-body text-sm text-ui-fg"
               aria-label={`Asignar responsable para ${excepcion.folioOEntidad}`}
             >
               <option value="">Asignar responsable</option>
@@ -129,16 +129,16 @@ function TarjetaExcepcion({
           </dd>
         </div>
         <div>
-          <dt className="font-body text-admin-secundario uppercase tracking-wide text-text-tertiary">SLA restante</dt>
-          <dd className={excepcion.slaRestanteHoras != null && excepcion.slaRestanteHoras <= 0 ? "mt-1 font-semibold text-status-error" : "mt-1 text-ink"}>
+          <dt className="font-body text-xs uppercase tracking-wide text-ui-fg-muted">SLA restante</dt>
+          <dd className={excepcion.slaRestanteHoras != null && excepcion.slaRestanteHoras <= 0 ? "mt-1 font-semibold text-ui-danger" : "mt-1 text-ui-fg"}>
             {textoSlaRestante(excepcion.slaRestanteHoras)}
           </dd>
-          <dd className="mt-1 font-body text-xs text-text-tertiary">{excepcion.porcentajeConsumido ?? 0}% consumido</dd>
+          <dd className="mt-1 font-body text-xs text-ui-fg-muted">{excepcion.porcentajeConsumido ?? 0}% consumido</dd>
         </div>
         <div>
-          <dt className="font-body text-admin-secundario uppercase tracking-wide text-text-tertiary">Vence</dt>
-          <dd className="mt-1 text-ink">{fechaAdministrativaOpcional(excepcion.venceEn)}</dd>
-          <dd className="mt-1 font-body text-xs text-text-tertiary">Actualizado {fechaAdministrativa(excepcion.actualizadoEn)}</dd>
+          <dt className="font-body text-xs uppercase tracking-wide text-ui-fg-muted">Vence</dt>
+          <dd className="mt-1 text-ui-fg">{fechaAdministrativaOpcional(excepcion.venceEn)}</dd>
+          <dd className="mt-1 font-body text-xs text-ui-fg-muted">Actualizado {fechaAdministrativa(excepcion.actualizadoEn)}</dd>
         </div>
       </dl>
 
@@ -150,34 +150,34 @@ function TarjetaExcepcion({
         <div className="mt-4 flex flex-col gap-2 sm:flex-row">
           <Link
             href={excepcion.accionPrincipal.href}
-            className="inline-flex min-h-11 flex-1 items-center justify-center rounded-lg bg-signal px-4 py-2.5 font-body text-sm font-bold text-ink shadow-sm transition-colors hover:bg-signal/90"
+            className="inline-flex min-h-11 flex-1 items-center justify-center rounded-lg bg-ui-brand px-4 py-2.5 font-body text-sm font-bold text-ui-fg shadow-sm transition-colors hover:bg-ui-brand-hover"
           >
             {excepcion.accionPrincipal.etiqueta}
           </Link>
           <Link
             href={excepcion.accionEscalamiento.href}
-            className="inline-flex min-h-11 flex-1 items-center justify-center rounded-lg border border-ink/20 bg-surface-primary px-4 py-2.5 font-body text-sm font-semibold text-text-secondary transition-colors hover:border-status-error/40 hover:text-status-error"
+            className="inline-flex min-h-11 flex-1 items-center justify-center rounded-lg border border-ui-line-strong bg-ui-card px-4 py-2.5 font-body text-sm font-semibold text-ui-fg-muted transition-colors hover:border-ui-danger/40 hover:text-ui-danger"
           >
             Ver origen
           </Link>
           <button
             type="button"
             onClick={() => void onAccion(excepcion.id, "acuse")}
-            className="inline-flex min-h-11 flex-1 items-center justify-center rounded-lg border border-ink/20 bg-surface-primary px-4 py-2.5 font-body text-sm font-semibold text-text-secondary transition-colors hover:border-status-info/40 hover:text-status-info"
+            className="inline-flex min-h-11 flex-1 items-center justify-center rounded-lg border border-ui-line-strong bg-ui-card px-4 py-2.5 font-body text-sm font-semibold text-ui-fg-muted transition-colors hover:border-ui-brand/40 hover:text-ui-brand-soft-fg"
           >
             Acusar
           </button>
           <button
             type="button"
             onClick={() => void onAccion(excepcion.id, "escalar")}
-            className="inline-flex min-h-11 flex-1 items-center justify-center rounded-lg border border-status-error/30 bg-status-error-soft px-4 py-2.5 font-body text-sm font-semibold text-status-error transition-colors hover:border-status-error/60"
+            className="inline-flex min-h-11 flex-1 items-center justify-center rounded-lg border border-ui-danger/30 bg-ui-danger-soft px-4 py-2.5 font-body text-sm font-semibold text-ui-danger transition-colors hover:border-ui-danger/60"
           >
             Escalar
           </button>
           <button
             type="button"
             onClick={() => void onAccion(excepcion.id, "resolver")}
-            className="inline-flex min-h-11 flex-1 items-center justify-center rounded-lg border border-status-success/30 bg-status-success-soft px-4 py-2.5 font-body text-sm font-semibold text-status-success transition-colors hover:border-status-success/60"
+            className="inline-flex min-h-11 flex-1 items-center justify-center rounded-lg border border-ui-success/30 bg-ui-success-soft px-4 py-2.5 font-body text-sm font-semibold text-ui-success transition-colors hover:border-ui-success/60"
           >
             Resolver
           </button>
@@ -185,7 +185,7 @@ function TarjetaExcepcion({
             type="button"
             disabled={!cerrable}
             onClick={() => void onAccion(excepcion.id, "cerrar")}
-            className="inline-flex min-h-11 flex-1 items-center justify-center rounded-lg border border-ink/20 bg-surface-primary px-4 py-2.5 font-body text-sm font-semibold text-text-secondary transition-colors hover:border-ink/40 disabled:cursor-not-allowed disabled:opacity-50"
+            className="inline-flex min-h-11 flex-1 items-center justify-center rounded-lg border border-ui-line-strong bg-ui-card px-4 py-2.5 font-body text-sm font-semibold text-ui-fg-muted transition-colors hover:border-ui-field disabled:cursor-not-allowed disabled:opacity-50"
           >
             Cerrar
           </button>
@@ -314,20 +314,20 @@ export default function PaginaExcepcionesCriticas() {
       <section className="mt-6">
         <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
           <div>
-            <p className="font-body text-xs uppercase tracking-wide text-status-error">Emergencias</p>
-            <p className="mt-1 font-body text-sm text-text-secondary">Canal separado de avisos informativos y operativos.</p>
+            <p className="font-body text-xs uppercase tracking-wide text-ui-danger">Emergencias</p>
+            <p className="mt-1 font-body text-sm text-ui-fg-muted">Canal separado de avisos informativos y operativos.</p>
           </div>
-          <span className="rounded-full border border-status-error/30 bg-status-error-soft px-3 py-1 font-body text-sm font-semibold text-status-error">
+          <span className="rounded-full border border-ui-danger/30 bg-ui-danger-soft px-3 py-1 font-body text-sm font-semibold text-ui-danger">
             {emergencias.length} activas
           </span>
         </div>
         {cargando ? (
           <AdminPanel>
-            <p className="font-body text-sm text-text-tertiary">Cargando excepciones...</p>
+            <p className="font-body text-sm text-ui-fg-muted">Cargando excepciones...</p>
           </AdminPanel>
         ) : emergencias.length === 0 ? (
           <AdminPanel>
-            <p className="font-body text-sm text-text-tertiary">Sin emergencias activas.</p>
+            <p className="font-body text-sm text-ui-fg-muted">Sin emergencias activas.</p>
           </AdminPanel>
         ) : (
           <div className="grid gap-3 xl:grid-cols-2">
@@ -347,7 +347,7 @@ export default function PaginaExcepcionesCriticas() {
         <div className="mb-4 flex flex-wrap items-center gap-2">
           <button
             onClick={() => setCategoria("todas")}
-            className={`rounded-full border px-3 py-1.5 font-body text-sm font-semibold ${categoria === "todas" ? "border-signal bg-signal text-ink" : "border-border-default bg-surface-primary text-text-secondary"}`}
+            className={`rounded-full border px-3 py-1.5 font-body text-sm font-semibold ${categoria === "todas" ? "border-ui-brand bg-ui-brand text-ui-fg" : "border-ui-line bg-ui-card text-ui-fg-muted"}`}
           >
             Todas ({operativas.length})
           </button>
@@ -355,7 +355,7 @@ export default function PaginaExcepcionesCriticas() {
             <button
               key={item}
               onClick={() => setCategoria(item)}
-              className={`rounded-full border px-3 py-1.5 font-body text-sm font-semibold ${categoria === item ? "border-signal bg-signal text-ink" : "border-border-default bg-surface-primary text-text-secondary"}`}
+              className={`rounded-full border px-3 py-1.5 font-body text-sm font-semibold ${categoria === item ? "border-ui-brand bg-ui-brand text-ui-fg" : "border-ui-line bg-ui-card text-ui-fg-muted"}`}
             >
               {ETIQUETA_CATEGORIA[item]} ({conteos.get(item) ?? 0})
             </button>
@@ -364,11 +364,11 @@ export default function PaginaExcepcionesCriticas() {
 
         {cargando ? (
           <AdminPanel>
-            <p className="font-body text-sm text-text-tertiary">Cargando excepciones...</p>
+            <p className="font-body text-sm text-ui-fg-muted">Cargando excepciones...</p>
           </AdminPanel>
         ) : visibles.length === 0 ? (
           <AdminPanel>
-            <p className="font-body text-sm text-text-tertiary">No hay excepciones operativas para este filtro.</p>
+            <p className="font-body text-sm text-ui-fg-muted">No hay excepciones operativas para este filtro.</p>
           </AdminPanel>
         ) : (
           <div className="grid gap-3 xl:grid-cols-2">

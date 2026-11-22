@@ -1,0 +1,38 @@
+name: Panel Admin
+on:
+  pull_request:
+  push:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  admin:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      NEXT_TELEMETRY_DISABLED: '1'
+      NEXT_PUBLIC_SUPABASE_URL: http://127.0.0.1:54321
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: sb_publishable_e2e_only
+      SUPABASE_SERVICE_ROLE_KEY: sb_secret_service_role_local_mock
+      NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN: pk.localmock
+      NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: pk_test_mock_ci
+      STRIPE_SECRET_KEY: sk_test_mock_ci
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - name: Cache Turbo
+        uses: actions/cache@v4
+        with:
+          path: .turbo
+          key: ${{ runner.os }}-turbo-panel-admin-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-turbo-panel-admin-
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @ruum/panel-admin lint
+      - run: pnpm --filter @ruum/panel-admin typecheck
+      - run: pnpm --filter @ruum/panel-admin build
+      - run: pnpm --filter @ruum/panel-admin test

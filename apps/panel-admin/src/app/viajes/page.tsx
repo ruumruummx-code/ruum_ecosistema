@@ -125,7 +125,7 @@ const FILTROS_INICIALES: FiltrosAvanzados = {
   proximos: false
 };
 
-const CLASE_CONTROL_FILTRO = "w-full rounded-lg border border-border-default bg-surface-secondary px-3 py-2 font-body text-sm text-ink placeholder:text-text-tertiary transition-colors focus:border-focus-default focus:outline-none focus:ring-2 focus:ring-focus-default/20";
+const CLASE_CONTROL_FILTRO = "w-full rounded-lg border border-ui-line bg-ui-muted px-3 py-2 font-body text-sm text-ui-fg placeholder:text-ui-fg-muted transition-colors focus:border-ui-focus focus:outline-none focus:ring-2 focus:ring-ui-ring";
 
 const COLUMNAS_OPERATIVAS_INICIALES = [
   "folio",
@@ -583,10 +583,10 @@ export default function PaginaTrasladosAdmin() {
       header: "Folio",
       sortValue: (v) => v.traslado_id ?? "",
       cell: (v) => v.traslado_id ? (
-        <Link href={`/viajes/${v.traslado_id}`} className="font-mono-ruum text-admin-tabla text-status-info hover:underline">
+        <Link href={`/viajes/${v.traslado_id}`} className="font-mono-ruum text-sm text-ui-brand-soft-fg hover:underline">
           {v.traslado_id.slice(0, 8).toUpperCase()}
         </Link>
-      ) : <span className="text-text-tertiary">Sin folio</span>
+      ) : <span className="text-ui-fg-muted">Sin folio</span>
     },
     {
       id: "inicio_programado",
@@ -602,10 +602,10 @@ export default function PaginaTrasladosAdmin() {
         const trazabilidad = v.traslado_id ? trazabilidadPorTraslado.get(v.traslado_id) : null;
         return (
           <div className="grid min-w-56 gap-1">
-            <span className="font-body text-sm font-semibold text-ink">{v.origen_ciudad ?? v.origen_direccion ?? "Origen sin dato"}</span>
-            <span className="font-body text-xs text-text-secondary">a {v.destino_ciudad ?? v.destino_direccion ?? "Destino sin dato"}</span>
+            <span className="font-body text-sm font-semibold text-ui-fg">{v.origen_ciudad ?? v.origen_direccion ?? "Origen sin dato"}</span>
+            <span className="font-body text-xs text-ui-fg-muted">a {v.destino_ciudad ?? v.destino_direccion ?? "Destino sin dato"}</span>
             {trazabilidad && (
-              <span className="w-fit rounded-full border border-route-dark/25 bg-route-soft px-2.5 py-1 font-body text-xs font-semibold text-route-dark">
+              <span className="w-fit rounded-full border border-ui-brand/25 bg-ui-brand-soft px-2.5 py-1 font-body text-xs font-semibold text-ui-brand">
                 Masivo · {trazabilidad.fila.referencia_externa ?? trazabilidad.carga.nombre_archivo}
               </span>
             )}
@@ -623,7 +623,7 @@ export default function PaginaTrasladosAdmin() {
       id: "conductor",
       header: "Conductor",
       sortValue: (v) => v.conductor_nombre ?? "",
-      cell: (v) => v.conductor_nombre ?? <span className="font-body text-sm font-semibold text-status-warning">Sin asignar</span>
+      cell: (v) => v.conductor_nombre ?? <span className="font-body text-sm font-semibold text-ui-warning">Sin asignar</span>
     },
     {
       id: "sla",
@@ -653,7 +653,7 @@ export default function PaginaTrasladosAdmin() {
       id: "responsable",
       header: "Responsable",
       sortValue: (v) => responsableOperativo(v),
-      cell: (v) => <span className="font-body text-sm font-semibold text-text-secondary">{responsableOperativo(v)}</span>
+      cell: (v) => <span className="font-body text-sm font-semibold text-ui-fg-muted">{responsableOperativo(v)}</span>
     }
   ], [trazabilidadPorTraslado]);
 
@@ -843,7 +843,7 @@ export default function PaginaTrasladosAdmin() {
             type="button"
             onClick={() => void cargar(true)}
             disabled={actualizandoManual}
-            className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg border border-signal bg-signal px-4 py-2 font-body text-admin-boton font-semibold text-ink shadow-[var(--ruum-shadow-1)] transition-colors hover:bg-signal/90 disabled:cursor-wait disabled:opacity-70"
+            className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg border border-ui-brand bg-ui-brand px-4 py-2 font-body text-sm font-semibold text-ui-fg shadow-ui-sm transition-colors hover:bg-ui-brand-hover disabled:cursor-wait disabled:opacity-70"
           >
             <span aria-hidden="true">↻</span>
             {actualizandoManual ? "Reconectando" : "Actualizar"}
@@ -851,7 +851,7 @@ export default function PaginaTrasladosAdmin() {
         )}
       />
 
-      <div className="mt-6 flex gap-1 overflow-x-auto border-b border-ink/10" role="group" aria-label="Filtrar traslados por estado">
+      <div className="mt-6 flex gap-1 overflow-x-auto border-b border-ui-line" role="group" aria-label="Filtrar traslados por estado">
         {PESTANAS.map((p) => (
           <button
             key={p.id}
@@ -864,7 +864,7 @@ export default function PaginaTrasladosAdmin() {
             }}
             className={[
               "inline-flex min-h-11 shrink-0 items-center gap-2 px-4 py-2.5 font-body text-sm font-semibold transition-colors",
-              pestana === p.id ? "border-b-2 border-signal bg-signal-soft/50 text-ink" : "text-text-secondary hover:bg-surface-secondary hover:text-ink"
+              pestana === p.id ? "border-b-2 border-ui-brand bg-ui-brand-soft text-ui-fg" : "text-ui-fg-muted hover:bg-ui-muted hover:text-ui-fg"
             ].join(" ")}
           >
             {p.etiqueta}
@@ -884,9 +884,9 @@ export default function PaginaTrasladosAdmin() {
       )}
 
       {accionOperativa && (
-        <div className="mt-4 rounded-lg border border-signal/35 bg-signal-soft px-4 py-3">
-          <p className="font-body text-sm font-semibold text-ink">{ETIQUETA_ACCION_OPERATIVA[accionOperativa]}</p>
-          <p className="mt-1 font-body text-xs text-text-secondary">
+        <div className="mt-4 rounded-lg border border-ui-brand/35 bg-ui-brand-soft px-4 py-3">
+          <p className="font-body text-sm font-semibold text-ui-fg">{ETIQUETA_ACCION_OPERATIVA[accionOperativa]}</p>
+          <p className="mt-1 font-body text-xs text-ui-fg-muted">
             {accionOperativa === "asignar_conductor"
               ? "Abre el folio sin conductor y usa el bloque de asignación del pasaporte."
               : "Abre el folio activo y registra la incidencia desde su seguimiento operativo."}
@@ -901,7 +901,7 @@ export default function PaginaTrasladosAdmin() {
         <KpiOperativo etiqueta="Con incidencia" valor={metricasOperativas.incidencia} detalle={`${metricasOperativas.sinUbicacion} sin ubicación completa`} tono="critico" onClick={() => setFiltros((actual) => ({ ...actual, incidencia: true }))} />
       </section>
 
-      <section className="mt-4 rounded-card border border-border-default bg-surface-primary/95 p-3 shadow-[var(--ruum-shadow-1)]" aria-label="Filtros de traslados">
+      <section className="mt-4 rounded-lg border border-ui-line bg-ui-card p-3 shadow-ui-sm" aria-label="Filtros de traslados">
         <div className="flex flex-col gap-3 xl:flex-row xl:items-end">
           <div className="min-w-72 flex-1">
             <CampoFiltro etiqueta="Buscar traslado">
@@ -923,8 +923,8 @@ export default function PaginaTrasladosAdmin() {
           </div>
 
           <div className="min-w-0 flex-[1.4]">
-            <p className="mb-1 font-body text-admin-secundario font-semibold uppercase tracking-wide text-text-tertiary">Filtros inteligentes</p>
-            <div className="flex overflow-x-auto rounded-full border border-border-default bg-surface-secondary p-1">
+            <p className="mb-1 font-body text-xs font-semibold uppercase tracking-wide text-ui-fg-muted">Filtros inteligentes</p>
+            <div className="flex overflow-x-auto rounded-full border border-ui-line bg-ui-muted p-1">
               <FiltroInteligente activo={filtros.sla === "en_riesgo"} etiqueta="En riesgo" conteo={metricasOperativas.riesgo} onClick={() => setFiltros((actual) => ({ ...actual, sla: actual.sla === "en_riesgo" ? "todos" : "en_riesgo" }))} />
               <FiltroInteligente activo={filtros.sinAsignacion} etiqueta="Sin conductor" conteo={metricasOperativas.sinConductor} onClick={() => setFiltros((actual) => ({ ...actual, sinAsignacion: !actual.sinAsignacion }))} />
               <FiltroInteligente activo={filtros.proximos} etiqueta="Inician 60" conteo={metricasOperativas.inician60} onClick={() => setFiltros((actual) => ({ ...actual, proximos: !actual.proximos }))} />
@@ -937,7 +937,7 @@ export default function PaginaTrasladosAdmin() {
             <button
               type="button"
               onClick={() => setFiltrosAvanzadosAbiertos((abierto) => !abierto)}
-              className="rounded-full border border-border-default bg-surface-secondary px-3 py-2 font-body text-sm font-semibold text-ink hover:border-signal/40"
+              className="rounded-full border border-ui-line bg-ui-muted px-3 py-2 font-body text-sm font-semibold text-ui-fg hover:border-ui-brand/40"
               aria-expanded={filtrosAvanzadosAbiertos}
               aria-controls="filtros-avanzados-Traslados"
             >
@@ -946,7 +946,7 @@ export default function PaginaTrasladosAdmin() {
             <button
               type="button"
               onClick={() => void navigator.clipboard?.writeText(window.location.href)}
-              className="rounded-full border border-status-info/30 px-3 py-1.5 font-body text-sm font-semibold text-status-info hover:bg-status-info-soft"
+              className="rounded-full border border-ui-brand/30 px-3 py-1.5 font-body text-sm font-semibold text-ui-brand-soft-fg hover:bg-ui-brand-soft"
             >
               Copiar enlace
             </button>
@@ -954,7 +954,7 @@ export default function PaginaTrasladosAdmin() {
               <button
                 type="button"
                 onClick={limpiarFiltrosVista}
-                className="rounded-full border border-ink/20 px-3 py-1.5 font-body text-sm font-semibold text-text-secondary hover:border-status-error/40 hover:text-status-error"
+                className="rounded-full border border-ui-line-strong px-3 py-1.5 font-body text-sm font-semibold text-ui-fg-muted hover:border-ui-danger/40 hover:text-ui-danger"
               >
                 Limpiar todos
               </button>
@@ -963,7 +963,7 @@ export default function PaginaTrasladosAdmin() {
         </div>
 
         {filtrosAvanzadosAbiertos && (
-          <div id="filtros-avanzados-Traslados" className="mt-3 grid gap-3 border-t border-border-default pt-3 md:grid-cols-2 xl:grid-cols-4">
+          <div id="filtros-avanzados-Traslados" className="mt-3 grid gap-3 border-t border-ui-line pt-3 md:grid-cols-2 xl:grid-cols-4">
             <CampoFiltro etiqueta="SLA">
               <select value={filtros.sla} onChange={(e) => setFiltros((actual) => ({ ...actual, sla: e.target.value as FiltroSla }))} className={CLASE_CONTROL_FILTRO}>
                 <option value="todos">Todos</option>
@@ -1015,40 +1015,40 @@ export default function PaginaTrasladosAdmin() {
         )}
       </section>
 
-      <section className="mt-4 rounded-card border border-border-default bg-surface-primary p-4" aria-label="Vistas guardadas de traslados">
+      <section className="mt-4 rounded-lg border border-ui-line bg-ui-card p-4" aria-label="Vistas guardadas de traslados">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
-            <p className="font-body text-admin-secundario font-semibold uppercase tracking-wide text-text-tertiary">Vistas guardadas</p>
-            <h2 className="mt-1 font-display text-lg font-semibold text-ink">Filtros, columnas y orden</h2>
+            <p className="font-body text-xs font-semibold uppercase tracking-wide text-ui-fg-muted">Vistas guardadas</p>
+            <h2 className="mt-1 font-display text-lg font-semibold text-ui-fg">Filtros, columnas y orden</h2>
           </div>
           <div className="flex flex-wrap gap-2">
             <input
               value={nombreVista}
               onChange={(event) => setNombreVista(event.target.value)}
               placeholder="Nombre de la vista"
-              className="min-h-10 rounded-lg border border-ink/20 bg-surface-primary px-3 font-body text-sm"
+              className="min-h-10 rounded-lg border border-ui-line-strong bg-ui-card px-3 font-body text-sm"
             />
-            <select value={alcanceVista} onChange={(event) => setAlcanceVista(event.target.value as AlcanceVistaGuardada)} className="min-h-10 rounded-lg border border-ink/20 bg-surface-primary px-3 font-body text-sm">
+            <select value={alcanceVista} onChange={(event) => setAlcanceVista(event.target.value as AlcanceVistaGuardada)} className="min-h-10 rounded-lg border border-ui-line-strong bg-ui-card px-3 font-body text-sm">
               <option value="privada">Privada</option>
               <option value="compartida">Compartida</option>
             </select>
-            <button type="button" onClick={() => guardarVistaActual(false)} className="rounded-lg border border-signal/40 px-3 py-2 font-body text-sm font-semibold text-ink hover:bg-signal-soft">
+            <button type="button" onClick={() => guardarVistaActual(false)} className="rounded-lg border border-ui-brand/40 px-3 py-2 font-body text-sm font-semibold text-ui-fg hover:bg-ui-brand-soft">
               Guardar vista
             </button>
-            <button type="button" onClick={() => guardarVistaActual(true)} className="rounded-lg border border-ink/20 px-3 py-2 font-body text-sm font-semibold text-text-secondary hover:border-signal/40">
+            <button type="button" onClick={() => guardarVistaActual(true)} className="rounded-lg border border-ui-line-strong px-3 py-2 font-body text-sm font-semibold text-ui-fg-muted hover:border-ui-brand/40">
               Guardar como predeterminada
             </button>
           </div>
         </div>
         <div className="mt-3 flex flex-wrap gap-2">
           {vistasDisponibles.map((vista) => (
-            <span key={vista.id} className="inline-flex items-center gap-2 rounded-full border border-ink/15 bg-surface-secondary px-3 py-1.5">
-              <button type="button" onClick={() => aplicarVista(vista)} className="font-body text-sm font-semibold text-text-secondary hover:text-ink">
+            <span key={vista.id} className="inline-flex items-center gap-2 rounded-full border border-ui-line bg-ui-muted px-3 py-1.5">
+              <button type="button" onClick={() => aplicarVista(vista)} className="font-body text-sm font-semibold text-ui-fg-muted hover:text-ui-fg">
                 {vista.nombre}
               </button>
-              <span className="font-body text-xs text-text-tertiary">{vista.alcance}{vista.esPredeterminada ? " · predeterminada" : ""}</span>
+              <span className="font-body text-xs text-ui-fg-muted">{vista.alcance}{vista.esPredeterminada ? " · predeterminada" : ""}</span>
               {!VISTAS_PREDEFINIDAS.some((predefinida) => predefinida.id === vista.id) && (
-                <button type="button" onClick={() => establecerPredeterminada(vista.id)} className="font-body text-xs font-semibold text-status-info hover:underline">
+                <button type="button" onClick={() => establecerPredeterminada(vista.id)} className="font-body text-xs font-semibold text-ui-brand-soft-fg hover:underline">
                   Pred.
                 </button>
               )}
@@ -1057,12 +1057,12 @@ export default function PaginaTrasladosAdmin() {
         </div>
       </section>
 
-      <section className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-card border border-border-default bg-surface-primary px-4 py-3" aria-label="Modo de visualización">
+      <section className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-ui-line bg-ui-card px-4 py-3" aria-label="Modo de visualización">
         <div>
-          <p className="font-body text-admin-secundario font-semibold uppercase tracking-wide text-text-tertiary">Vista operativa</p>
-          <p className="mt-1 font-body text-sm text-text-secondary">Alterna entre tabla densa, tablero de atención y acceso al mapa operativo real.</p>
+          <p className="font-body text-xs font-semibold uppercase tracking-wide text-ui-fg-muted">Vista operativa</p>
+          <p className="mt-1 font-body text-sm text-ui-fg-muted">Alterna entre tabla densa, tablero de atención y acceso al mapa operativo real.</p>
         </div>
-        <div className="inline-flex rounded-full border border-border-default bg-surface-secondary p-1">
+        <div className="inline-flex rounded-full border border-ui-line bg-ui-muted p-1">
           {([
             ["lista", "Lista"],
             ["kanban", "Kanban"],
@@ -1072,7 +1072,7 @@ export default function PaginaTrasladosAdmin() {
               key={modo}
               type="button"
               onClick={() => setModoVista(modo)}
-              className={`rounded-full px-4 py-2 font-body text-sm font-semibold transition ${modoVista === modo ? "bg-surface-strong text-text-main shadow-[var(--ruum-shadow-1)]" : "text-text-secondary hover:text-ink"}`}
+              className={`rounded-full px-4 py-2 font-body text-sm font-semibold transition ${modoVista === modo ? "bg-ui-card text-ui-fg shadow-ui-sm" : "text-ui-fg-muted hover:text-ui-fg"}`}
             >
               {etiqueta}
             </button>
@@ -1092,7 +1092,7 @@ export default function PaginaTrasladosAdmin() {
             <button
               type="button"
               onClick={limpiarFiltrosVista}
-              className="mx-auto rounded-lg border border-status-info/35 px-3 py-2 font-body text-admin-boton font-semibold text-status-info hover:bg-status-info-soft"
+              className="mx-auto rounded-lg border border-ui-brand/35 px-3 py-2 font-body text-sm font-semibold text-ui-brand-soft-fg hover:bg-ui-brand-soft"
             >
               Limpiar filtros
             </button>
@@ -1128,11 +1128,11 @@ export default function PaginaTrasladosAdmin() {
         <VistaMapaTraslados traslados={trasladosFiltrados} onAbrirDetalle={abrirDetalleRapido} />
       )}
 
-      {modoVista === "lista" && <div className="mt-2 flex flex-wrap items-center justify-between gap-3 rounded-card border border-border-default bg-surface-primary px-4 py-3">
-        <label className="font-body text-sm text-text-secondary">
+      {modoVista === "lista" && <div className="mt-2 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-ui-line bg-ui-card px-4 py-3">
+        <label className="font-body text-sm text-ui-fg-muted">
           Filas por página
           <select
-            className="ml-2 rounded-lg border border-border-default bg-surface-secondary px-2 py-1 text-ink"
+            className="ml-2 rounded-lg border border-ui-line bg-ui-muted px-2 py-1 text-ui-fg"
             value={tamanoPagina}
             onChange={(e) => {
               setTamanoPagina(Number(e.target.value));
@@ -1149,7 +1149,7 @@ export default function PaginaTrasladosAdmin() {
         <div className="flex items-center gap-2">
           <button
             type="button"
-            className="rounded-lg border border-border-default bg-surface-secondary px-3 py-1.5 text-sm text-ink disabled:opacity-50"
+            className="rounded-lg border border-ui-line bg-ui-muted px-3 py-1.5 text-sm text-ui-fg disabled:opacity-50"
             disabled={pagina <= 1 || cargando}
             onClick={() => {
               const sig = Math.max(1, pagina - 1);
@@ -1160,12 +1160,12 @@ export default function PaginaTrasladosAdmin() {
           >
             Anterior
           </button>
-          <span className="font-body text-sm text-text-secondary">
+          <span className="font-body text-sm text-ui-fg-muted">
             Página {totalResultados > 0 ? pagina : 1} de {Math.max(1, totalPaginas)} · {totalResultados.toLocaleString("es-MX")} resultados
           </span>
           <button
             type="button"
-            className="rounded-lg border border-border-default bg-surface-secondary px-3 py-1.5 text-sm text-ink disabled:opacity-50"
+            className="rounded-lg border border-ui-line bg-ui-muted px-3 py-1.5 text-sm text-ui-fg disabled:opacity-50"
             disabled={totalPaginas <= 1 || pagina >= totalPaginas || cargando}
             onClick={() => {
               const sig = Math.min(totalPaginas, pagina + 1);
@@ -1180,22 +1180,22 @@ export default function PaginaTrasladosAdmin() {
       </div>}
 
       {auditoriaMasiva.length > 0 && (
-        <section className="mt-4 rounded-card border border-border-default bg-surface-primary p-4" aria-label="Auditoría de acciones masivas">
+        <section className="mt-4 rounded-lg border border-ui-line bg-ui-card p-4" aria-label="Auditoría de acciones masivas">
           <div className="flex items-center justify-between gap-3">
             <div>
-              <p className="font-body text-admin-secundario font-semibold uppercase tracking-wide text-text-tertiary">Auditoría operativa</p>
-              <h2 className="mt-1 font-display text-lg font-semibold text-ink">Últimas acciones masivas</h2>
+              <p className="font-body text-xs font-semibold uppercase tracking-wide text-ui-fg-muted">Auditoría operativa</p>
+              <h2 className="mt-1 font-display text-lg font-semibold text-ui-fg">Últimas acciones masivas</h2>
             </div>
-            <span className="font-body text-sm text-text-tertiary">{auditoriaMasiva.length} registros</span>
+            <span className="font-body text-sm text-ui-fg-muted">{auditoriaMasiva.length} registros</span>
           </div>
           <div className="mt-3 grid gap-2">
             {auditoriaMasiva.slice(0, 5).map((evento) => (
-              <div key={evento.id} className="rounded-lg border border-ink/10 bg-surface-secondary p-3">
+              <div key={evento.id} className="rounded-lg border border-ui-line bg-ui-muted p-3">
                 <div className="flex flex-wrap items-center justify-between gap-2">
-                  <p className="font-body text-sm font-semibold text-ink">{evento.accion}</p>
-                  <span className="font-body text-xs text-text-tertiary">{formatoFechaAbsoluta(evento.timestamp)}</span>
+                  <p className="font-body text-sm font-semibold text-ui-fg">{evento.accion}</p>
+                  <span className="font-body text-xs text-ui-fg-muted">{formatoFechaAbsoluta(evento.timestamp)}</span>
                 </div>
-                <p className="mt-1 font-body text-xs text-text-secondary">
+                <p className="mt-1 font-body text-xs text-ui-fg-muted">
                   {evento.afectados} afectados · {evento.exitosos} aplicados · {evento.omitidos} omitidos · {evento.bloqueados} bloqueados
                 </p>
               </div>
@@ -1358,7 +1358,7 @@ function estadoSla(v: PasaporteRow) {
       etiqueta: "Vencido",
       detalle: horas >= 1 ? `${Math.round(horas)} h sin resolver` : "Atención inmediata",
       prioridad: 3,
-      clases: "border-status-error/35 bg-status-error-soft text-status-error",
+      clases: "border-ui-danger/35 bg-ui-danger-soft text-ui-danger",
       icono: "!"
     };
   }
@@ -1367,7 +1367,7 @@ function estadoSla(v: PasaporteRow) {
       etiqueta: "En riesgo",
       detalle: iniciaEn60Min(obtenerInicioProgramado(v)) ? "Inicia en 60 min" : "Revisar operación",
       prioridad: 2,
-      clases: "border-status-warning/35 bg-status-warning-soft text-status-warning",
+      clases: "border-ui-warning/35 bg-ui-warning-soft text-ui-warning",
       icono: "!"
     };
   }
@@ -1375,7 +1375,7 @@ function estadoSla(v: PasaporteRow) {
     etiqueta: "En tiempo",
     detalle: "Sin alerta crítica",
     prioridad: 1,
-    clases: "border-status-success/30 bg-status-success-soft text-status-success",
+    clases: "border-ui-success/30 bg-ui-success-soft text-ui-success",
     icono: "OK"
   };
 }
@@ -1392,8 +1392,8 @@ function FechaOperativa({ fechaIso, compacta = false }: { fechaIso: string | nul
   const relativo = textoRelativo(fechaIso);
   return (
     <span className="grid min-w-36 gap-0.5">
-      <span className="font-body text-sm font-semibold text-ink">{formatoFechaAbsoluta(fechaIso)}</span>
-      {!compacta || relativo ? <span className="font-body text-xs text-text-tertiary">{relativo ?? "Sin referencia relativa"}</span> : null}
+      <span className="font-body text-sm font-semibold text-ui-fg">{formatoFechaAbsoluta(fechaIso)}</span>
+      {!compacta || relativo ? <span className="font-body text-xs text-ui-fg-muted">{relativo ?? "Sin referencia relativa"}</span> : null}
     </span>
   );
 }
@@ -1403,27 +1403,27 @@ function VehiculoOperativo({ traslado }: { traslado: PasaporteRow }) {
   const nombre = [traslado.vehiculo_marca, traslado.vehiculo_modelo].filter(Boolean).join(" ");
   return (
     <span className="grid min-w-40 gap-0.5">
-      <span className="font-body text-sm font-semibold text-ink">{nombre || "Vehículo sin dato"}</span>
-      <span className="font-body text-xs text-text-secondary">{tipo ?? "Tipo no definido"}{traslado.vehiculo_placas ? ` · ${traslado.vehiculo_placas}` : ""}</span>
+      <span className="font-body text-sm font-semibold text-ui-fg">{nombre || "Vehículo sin dato"}</span>
+      <span className="font-body text-xs text-ui-fg-muted">{tipo ?? "Tipo no definido"}{traslado.vehiculo_placas ? ` · ${traslado.vehiculo_placas}` : ""}</span>
     </span>
   );
 }
 
 function KpiOperativo({ etiqueta, valor, detalle, tono, onClick }: { etiqueta: string; valor: number; detalle: string; tono: "riesgo" | "atencion" | "info" | "critico"; onClick: () => void }) {
   const clases = {
-    riesgo: "border-[var(--ruum-error)]/25 bg-[var(--ruum-error-bg)] text-[var(--ruum-error-text)]",
-    atencion: "border-[var(--ruum-warning)]/25 bg-[var(--ruum-warning-bg)] text-[var(--ruum-warning-text)]",
-    info: "border-status-info/25 bg-status-info-soft text-status-info",
-    critico: "border-[var(--ruum-emergency)]/25 bg-[var(--ruum-emergency-bg)] text-[var(--ruum-emergency-text)]"
+    riesgo: "border-ui-danger/25 bg-ui-danger-soft text-ui-danger",
+    atencion: "border-ui-warning/25 bg-ui-warning-soft text-ui-warning",
+    info: "border-ui-brand/25 bg-ui-brand-soft text-ui-brand-soft-fg",
+    critico: "border-ui-danger/25 bg-ui-danger-soft text-ui-danger"
   }[tono];
   return (
-    <button type="button" onClick={onClick} className="rounded-lg border border-border-default bg-surface-primary p-4 text-left shadow-[var(--ruum-shadow-1)] transition hover:border-status-info/35 hover:bg-surface-secondary">
+    <button type="button" onClick={onClick} className="rounded-lg border border-ui-line bg-ui-card p-4 text-left shadow-ui-sm transition hover:border-ui-brand/35 hover:bg-ui-muted">
       <div className="flex items-start justify-between gap-3">
-        <p className="font-body text-sm font-semibold text-text-secondary">{etiqueta}</p>
+        <p className="font-body text-sm font-semibold text-ui-fg-muted">{etiqueta}</p>
         <span className={`rounded-full border px-2.5 py-1 font-body text-xs font-semibold ${clases}`}>Activo</span>
       </div>
-      <p className="mt-3 font-mono-ruum text-3xl font-semibold text-ink">{valor.toLocaleString("es-MX")}</p>
-      <p className="mt-1 font-body text-xs text-text-tertiary">{detalle}</p>
+      <p className="mt-3 font-mono-ruum text-3xl font-semibold text-ui-fg">{valor.toLocaleString("es-MX")}</p>
+      <p className="mt-1 font-body text-xs text-ui-fg-muted">{detalle}</p>
     </button>
   );
 }
@@ -1434,7 +1434,7 @@ function FiltroInteligente({ activo, etiqueta, conteo, onClick }: { activo: bool
       type="button"
       aria-pressed={activo}
       onClick={onClick}
-      className={`whitespace-nowrap rounded-full px-3 py-1.5 font-body text-sm font-semibold transition ${activo ? "bg-surface-strong text-text-main shadow-[var(--ruum-shadow-1)]" : "text-text-secondary hover:bg-surface-primary hover:text-ink"}`}
+      className={`whitespace-nowrap rounded-full px-3 py-1.5 font-body text-sm font-semibold transition ${activo ? "bg-ui-card text-ui-fg shadow-ui-sm" : "text-ui-fg-muted hover:bg-ui-card hover:text-ui-fg"}`}
     >
       {etiqueta} <span className="ml-1 font-mono-ruum text-xs opacity-75">({conteo.toLocaleString("es-MX")})</span>
     </button>
@@ -1455,10 +1455,10 @@ function SlaOperativo({ traslado }: { traslado: PasaporteRow }) {
 }
 
 function EstadoOperativo({ estado }: { estado: EstadoTraslado | null }) {
-  if (!estado) return <span className="text-text-tertiary">Sin estado</span>;
+  if (!estado) return <span className="text-ui-fg-muted">Sin estado</span>;
   const critico = estado === "pendiente_de_conductor" || estado === "incidencia_reportada" || estado === "traslado_fallido" || estado === "servicio_cancelado";
   return (
-    <span className={critico ? "inline-flex items-center gap-2 rounded-full border border-[var(--ruum-error)]/25 bg-[var(--ruum-error-bg)] px-2 py-1 text-[var(--ruum-error-text)]" : "inline-flex items-center gap-2"}>
+    <span className={critico ? "inline-flex items-center gap-2 rounded-full border border-ui-danger/25 bg-ui-danger-soft px-2 py-1 text-ui-danger" : "inline-flex items-center gap-2"}>
       {critico && <span aria-hidden="true" className="size-1.5 rounded-full bg-current" />}
       <EstadoBadge estado={estado} />
     </span>
@@ -1470,14 +1470,14 @@ function IncidenciaOperativa({ traslado }: { traslado: PasaporteRow }) {
   const tieneIncidencia = Boolean(traslado.tiene_incidencia_abierta) || abiertas > 0;
   if (!tieneIncidencia) {
     return (
-      <span className="inline-flex items-center gap-2 rounded-full border border-status-success/30 bg-status-success-soft px-2.5 py-1 font-body text-xs font-semibold text-status-success">
+      <span className="inline-flex items-center gap-2 rounded-full border border-ui-success/30 bg-ui-success-soft px-2.5 py-1 font-body text-xs font-semibold text-ui-success">
         <span aria-hidden="true" className="size-1.5 rounded-full bg-current" />
         Sin incidencia
       </span>
     );
   }
   return (
-    <span className="inline-flex items-center gap-2 rounded-full border border-status-error/30 bg-status-error-soft px-2.5 py-1 font-body text-xs font-semibold text-status-error">
+    <span className="inline-flex items-center gap-2 rounded-full border border-ui-danger/30 bg-ui-danger-soft px-2.5 py-1 font-body text-xs font-semibold text-ui-danger">
       <span aria-hidden="true" className="size-1.5 rounded-full bg-current" />
       {abiertas > 1 ? `${abiertas} abiertas` : "Abierta"}
     </span>
@@ -1488,26 +1488,26 @@ function VistaKanbanTraslados({ columnas, onAbrirDetalle }: { columnas: Array<{ 
   return (
     <section className="mt-4 grid gap-4 xl:grid-cols-4" aria-label="Vista Kanban de traslados">
       {columnas.map((columna) => (
-        <div key={columna.id} className="min-h-96 rounded-lg border border-border-default bg-surface-primary">
-          <header className="border-b border-ink/10 px-4 py-3">
+        <div key={columna.id} className="min-h-96 rounded-lg border border-ui-line bg-ui-card">
+          <header className="border-b border-ui-line px-4 py-3">
             <div className="flex items-center justify-between gap-3">
-              <h2 className="font-display text-base font-semibold text-ink">{columna.titulo}</h2>
-              <span className="rounded-full border border-ink/10 bg-surface-secondary px-2 py-0.5 font-mono-ruum text-xs text-text-secondary">{columna.filas.length}</span>
+              <h2 className="font-display text-base font-semibold text-ui-fg">{columna.titulo}</h2>
+              <span className="rounded-full border border-ui-line bg-ui-muted px-2 py-0.5 font-mono-ruum text-xs text-ui-fg-muted">{columna.filas.length}</span>
             </div>
-            <p className="mt-1 font-body text-xs text-text-tertiary">{columna.descripcion}</p>
+            <p className="mt-1 font-body text-xs text-ui-fg-muted">{columna.descripcion}</p>
           </header>
           <div className="grid max-h-[68vh] gap-3 overflow-auto p-3">
             {columna.filas.slice(0, 30).map((traslado) => (
-              <button key={idTrasladoOperativo(traslado)} type="button" onClick={() => onAbrirDetalle(traslado)} className="rounded-lg border border-ink/10 bg-surface-secondary p-3 text-left transition hover:border-status-info/35 hover:bg-status-info-soft">
+              <button key={idTrasladoOperativo(traslado)} type="button" onClick={() => onAbrirDetalle(traslado)} className="rounded-lg border border-ui-line bg-ui-muted p-3 text-left transition hover:border-ui-brand/35 hover:bg-ui-brand-soft">
                 <div className="flex items-start justify-between gap-2">
-                  <span className="font-mono-ruum text-xs font-semibold text-status-info">{folioCorto(traslado)}</span>
+                  <span className="font-mono-ruum text-xs font-semibold text-ui-brand-soft-fg">{folioCorto(traslado)}</span>
                   <SlaOperativo traslado={traslado} />
                 </div>
-                <p className="mt-2 font-body text-sm font-semibold text-ink">{traslado.origen_ciudad ?? "Origen"} → {traslado.destino_ciudad ?? "Destino"}</p>
-                <p className="mt-1 font-body text-xs text-text-secondary">{traslado.conductor_nombre ?? "Sin conductor"} · {responsableOperativo(traslado)}</p>
+                <p className="mt-2 font-body text-sm font-semibold text-ui-fg">{traslado.origen_ciudad ?? "Origen"} → {traslado.destino_ciudad ?? "Destino"}</p>
+                <p className="mt-1 font-body text-xs text-ui-fg-muted">{traslado.conductor_nombre ?? "Sin conductor"} · {responsableOperativo(traslado)}</p>
               </button>
             ))}
-            {columna.filas.length === 0 && <p className="px-2 py-6 text-center font-body text-sm text-text-tertiary">Sin traslados en esta columna.</p>}
+            {columna.filas.length === 0 && <p className="px-2 py-6 text-center font-body text-sm text-ui-fg-muted">Sin traslados en esta columna.</p>}
           </div>
         </div>
       ))}
@@ -1520,29 +1520,29 @@ function VistaMapaTraslados({ traslados, onAbrirDetalle }: { traslados: Pasaport
   const sinUbicacion = traslados.length - conCoordenadas.length;
   return (
     <section className="mt-4 grid gap-4 xl:grid-cols-[minmax(0,1fr)_380px]" aria-label="Vista mapa de traslados">
-      <div className="grid min-h-[460px] place-items-center rounded-lg border border-border-default bg-surface-strong p-6 text-text-main">
+      <div className="grid min-h-[460px] place-items-center rounded-lg border border-ui-line bg-ui-card p-6 text-ui-fg">
         <div className="max-w-xl text-center">
-          <p className="font-mono-ruum text-xs uppercase tracking-wide text-signal">Mapa operativo real</p>
+          <p className="font-mono-ruum text-xs uppercase tracking-wide text-ui-brand">Mapa operativo real</p>
           <h2 className="mt-2 font-display text-2xl font-semibold">Usar módulo Mapa para GPS y tráfico</h2>
-          <p className="mt-2 font-body text-sm text-text-main/75">
+          <p className="mt-2 font-body text-sm text-ui-fg">
             Esta bandeja no inventa posiciones. {conCoordenadas.length.toLocaleString("es-MX")} traslados tienen coordenadas completas y {sinUbicacion.toLocaleString("es-MX")} requieren completar ubicación.
           </p>
-          <Link href="/mapa" className="mt-5 inline-flex rounded-lg border border-signal bg-signal px-4 py-2 font-body text-sm font-semibold text-ink hover:bg-signal/90">
+          <Link href="/mapa" className="mt-5 inline-flex rounded-lg border border-ui-brand bg-ui-brand px-4 py-2 font-body text-sm font-semibold text-ui-fg hover:bg-ui-brand-hover">
             Abrir mapa operativo
           </Link>
         </div>
       </div>
-      <aside className="rounded-lg border border-border-default bg-surface-primary p-4">
-        <h2 className="font-display text-base font-semibold text-ink">Traslados georreferenciables</h2>
+      <aside className="rounded-lg border border-ui-line bg-ui-card p-4">
+        <h2 className="font-display text-base font-semibold text-ui-fg">Traslados georreferenciables</h2>
         <div className="mt-3 grid max-h-[430px] gap-2 overflow-auto">
           {conCoordenadas.slice(0, 25).map((traslado) => (
-            <button key={idTrasladoOperativo(traslado)} type="button" onClick={() => onAbrirDetalle(traslado)} className="rounded-lg border border-ink/10 bg-surface-secondary p-3 text-left hover:border-status-info/35">
-              <p className="font-mono-ruum text-xs font-semibold text-status-info">{folioCorto(traslado)}</p>
-              <p className="mt-1 font-body text-sm text-ink">{traslado.origen_ciudad} → {traslado.destino_ciudad}</p>
-              <p className="mt-1 font-body text-xs text-text-secondary">{traslado.conductor_nombre ?? "Sin conductor"}</p>
+            <button key={idTrasladoOperativo(traslado)} type="button" onClick={() => onAbrirDetalle(traslado)} className="rounded-lg border border-ui-line bg-ui-muted p-3 text-left hover:border-ui-brand/35">
+              <p className="font-mono-ruum text-xs font-semibold text-ui-brand-soft-fg">{folioCorto(traslado)}</p>
+              <p className="mt-1 font-body text-sm text-ui-fg">{traslado.origen_ciudad} → {traslado.destino_ciudad}</p>
+              <p className="mt-1 font-body text-xs text-ui-fg-muted">{traslado.conductor_nombre ?? "Sin conductor"}</p>
             </button>
           ))}
-          {conCoordenadas.length === 0 && <p className="font-body text-sm text-text-tertiary">No hay traslados con coordenadas completas en esta selección.</p>}
+          {conCoordenadas.length === 0 && <p className="font-body text-sm text-ui-fg-muted">No hay traslados con coordenadas completas en esta selección.</p>}
         </div>
       </aside>
     </section>
@@ -1585,12 +1585,12 @@ function AccionMasivaDialog({
   const requiereConfirmacion = Boolean(accion.requiereConfirmacion || accion.destructiva);
   const puedeEjecutar = total > 0 && (!requiereConfirmacion || confirmacion);
   return (
-    <div className="fixed inset-0 z-50 grid place-items-center bg-ink/35 p-4" role="dialog" aria-modal="true" aria-labelledby="accion-masiva-titulo">
-      <section className="w-full max-w-2xl rounded-card border border-border-default bg-surface-primary shadow-[var(--ruum-shadow-2)]">
-        <div className="border-b border-ink/10 p-4">
-          <p className="font-body text-admin-secundario font-semibold uppercase tracking-wide text-text-tertiary">Acción masiva</p>
-          <h2 id="accion-masiva-titulo" className="mt-1 font-display text-xl font-semibold text-ink">{accion.etiqueta}</h2>
-          <p className="mt-1 font-body text-sm text-text-secondary">{accion.descripcion}</p>
+    <div className="fixed inset-0 z-50 grid place-items-center bg-ui-brand p-4" role="dialog" aria-modal="true" aria-labelledby="accion-masiva-titulo">
+      <section className="w-full max-w-2xl rounded-lg border border-ui-line bg-ui-card shadow-ui-md">
+        <div className="border-b border-ui-line p-4">
+          <p className="font-body text-xs font-semibold uppercase tracking-wide text-ui-fg-muted">Acción masiva</p>
+          <h2 id="accion-masiva-titulo" className="mt-1 font-display text-xl font-semibold text-ui-fg">{accion.etiqueta}</h2>
+          <p className="mt-1 font-body text-sm text-ui-fg-muted">{accion.descripcion}</p>
         </div>
         <div className="grid gap-4 p-4">
           <Aviso tono={accion.destructiva ? "atencion" : "info"}>
@@ -1598,7 +1598,7 @@ function AccionMasivaDialog({
           </Aviso>
           {accion.id === "asignar_responsable" && (
             <CampoFiltro etiqueta="Responsable">
-              <select value={responsable} onChange={(event) => onResponsableChange(event.target.value)} className="w-full rounded-lg border border-ink/20 bg-surface-primary px-3 py-2 font-body text-sm">
+              <select value={responsable} onChange={(event) => onResponsableChange(event.target.value)} className="w-full rounded-lg border border-ui-line-strong bg-ui-card px-3 py-2 font-body text-sm">
                 <option>Asignación</option>
                 <option>Supervisor</option>
                 <option>Incidencias</option>
@@ -1609,7 +1609,7 @@ function AccionMasivaDialog({
           )}
           {accion.id === "cambiar_prioridad" && (
             <CampoFiltro etiqueta="Prioridad">
-              <select value={prioridad} onChange={(event) => onPrioridadChange(event.target.value as PrioridadOperativa)} className="w-full rounded-lg border border-ink/20 bg-surface-primary px-3 py-2 font-body text-sm">
+              <select value={prioridad} onChange={(event) => onPrioridadChange(event.target.value as PrioridadOperativa)} className="w-full rounded-lg border border-ui-line-strong bg-ui-card px-3 py-2 font-body text-sm">
                 <option value="baja">Baja</option>
                 <option value="media">Media</option>
                 <option value="alta">Alta</option>
@@ -1619,24 +1619,24 @@ function AccionMasivaDialog({
           )}
           {accion.id === "etiquetar" && (
             <CampoFiltro etiqueta="Etiqueta">
-              <input value={etiqueta} onChange={(event) => onEtiquetaChange(event.target.value)} className="w-full rounded-lg border border-ink/20 bg-surface-primary px-3 py-2 font-body text-sm" />
+              <input value={etiqueta} onChange={(event) => onEtiquetaChange(event.target.value)} className="w-full rounded-lg border border-ui-line-strong bg-ui-card px-3 py-2 font-body text-sm" />
             </CampoFiltro>
           )}
           {requiereConfirmacion && (
-            <label className="flex items-start gap-3 rounded-lg border border-status-warning/25 bg-status-warning-soft p-3 font-body text-sm text-status-warning">
+            <label className="flex items-start gap-3 rounded-lg border border-ui-warning/25 bg-ui-warning-soft p-3 font-body text-sm text-ui-warning">
               <input type="checkbox" checked={confirmacion} onChange={(event) => onConfirmacionChange(event.target.checked)} className="mt-1" />
               Confirmo que revisé la selección y entiendo que la operación puede cambiar la prioridad operativa o escalar atención.
             </label>
           )}
           {resultados.length > 0 && (
-            <div className="max-h-72 overflow-auto rounded-lg border border-ink/10">
-              <div className="border-b border-ink/10 bg-surface-secondary px-3 py-2 font-body text-sm font-semibold text-ink">
+            <div className="max-h-72 overflow-auto rounded-lg border border-ui-line">
+              <div className="border-b border-ui-line bg-ui-muted px-3 py-2 font-body text-sm font-semibold text-ui-fg">
                 Resultado {estado}: {resultados.filter((item) => item.estado === "aplicado").length} aplicados, {resultados.filter((item) => item.estado === "omitido").length} omitidos, {resultados.filter((item) => item.estado === "bloqueado").length} bloqueados
               </div>
               {resultados.map((resultado) => (
-                <div key={`${resultado.trasladoId}-${resultado.detalle}`} className="grid gap-1 border-b border-ink/10 px-3 py-2 last:border-b-0">
-                  <span className="font-mono-ruum text-xs font-semibold text-ink">{resultado.folio}</span>
-                  <span className={resultado.estado === "aplicado" ? "font-body text-sm text-status-success" : resultado.estado === "bloqueado" ? "font-body text-sm text-status-error" : "font-body text-sm text-status-warning"}>
+                <div key={`${resultado.trasladoId}-${resultado.detalle}`} className="grid gap-1 border-b border-ui-line px-3 py-2 last:border-b-0">
+                  <span className="font-mono-ruum text-xs font-semibold text-ui-fg">{resultado.folio}</span>
+                  <span className={resultado.estado === "aplicado" ? "font-body text-sm text-ui-success" : resultado.estado === "bloqueado" ? "font-body text-sm text-ui-danger" : "font-body text-sm text-ui-warning"}>
                     {resultado.estado}: {resultado.detalle}
                   </span>
                 </div>
@@ -1644,9 +1644,9 @@ function AccionMasivaDialog({
             </div>
           )}
         </div>
-        <div className="flex flex-wrap justify-end gap-2 border-t border-ink/10 p-4">
-          <button type="button" onClick={onCerrar} className="rounded-lg border border-ink/20 px-4 py-2 font-body text-sm font-semibold text-text-secondary">Cerrar</button>
-          <button type="button" disabled={!puedeEjecutar || procesando} onClick={onEjecutar} className="rounded-lg border border-signal/40 bg-signal px-4 py-2 font-body text-sm font-semibold text-ink disabled:opacity-50">
+        <div className="flex flex-wrap justify-end gap-2 border-t border-ui-line p-4">
+          <button type="button" onClick={onCerrar} className="rounded-lg border border-ui-line-strong px-4 py-2 font-body text-sm font-semibold text-ui-fg-muted">Cerrar</button>
+          <button type="button" disabled={!puedeEjecutar || procesando} onClick={onEjecutar} className="rounded-lg border border-ui-brand/40 bg-ui-brand px-4 py-2 font-body text-sm font-semibold text-ui-fg disabled:opacity-50">
             {procesando ? "Procesando..." : "Ejecutar"}
           </button>
         </div>
@@ -1671,14 +1671,14 @@ function DetalleRapidoTraslado({
   const sla = estadoSla(traslado);
   const folio = folioCorto(traslado);
   return (
-    <aside className="fixed inset-y-0 right-0 z-40 flex w-full max-w-xl flex-col border-l border-border-default bg-surface-primary shadow-[var(--ruum-shadow-2)]" role="dialog" aria-modal="true" aria-labelledby="detalle-rapido-titulo">
-      <div className="flex items-start justify-between gap-4 border-b border-ink/10 p-5">
+    <aside className="fixed inset-y-0 right-0 z-40 flex w-full max-w-xl flex-col border-l border-ui-line bg-ui-card shadow-ui-md" role="dialog" aria-modal="true" aria-labelledby="detalle-rapido-titulo">
+      <div className="flex items-start justify-between gap-4 border-b border-ui-line p-5">
         <div>
-          <p className="font-body text-admin-secundario font-semibold uppercase tracking-wide text-text-tertiary">Detalle rápido</p>
-          <h2 id="detalle-rapido-titulo" className="mt-1 font-display text-xl font-semibold text-ink">{folio}</h2>
-          <p className="mt-1 font-body text-sm text-text-secondary">Revisión sin abandonar el listado</p>
+          <p className="font-body text-xs font-semibold uppercase tracking-wide text-ui-fg-muted">Detalle rápido</p>
+          <h2 id="detalle-rapido-titulo" className="mt-1 font-display text-xl font-semibold text-ui-fg">{folio}</h2>
+          <p className="mt-1 font-body text-sm text-ui-fg-muted">Revisión sin abandonar el listado</p>
         </div>
-        <button ref={botonCerrarRef} type="button" onClick={onCerrar} className="rounded-lg border border-ink/20 px-3 py-2 font-body text-sm font-semibold text-text-secondary">
+        <button ref={botonCerrarRef} type="button" onClick={onCerrar} className="rounded-lg border border-ui-line-strong px-3 py-2 font-body text-sm font-semibold text-ui-fg-muted">
           Cerrar
         </button>
       </div>
@@ -1716,11 +1716,11 @@ function DetalleRapidoTraslado({
           <DatoRapido etiqueta="Referencia" valor={trazabilidad?.fila.referencia_externa ?? "Sin referencia externa"} />
         </DetalleSeccion>
       </div>
-      <div className="flex flex-wrap justify-between gap-2 border-t border-ink/10 p-5">
-        <button type="button" onClick={onAsignar} className="rounded-lg border border-signal/40 bg-signal px-4 py-2 font-body text-sm font-semibold text-ink">
+      <div className="flex flex-wrap justify-between gap-2 border-t border-ui-line p-5">
+        <button type="button" onClick={onAsignar} className="rounded-lg border border-ui-brand/40 bg-ui-brand px-4 py-2 font-body text-sm font-semibold text-ui-fg">
           Asignar conductor
         </button>
-        <Link href={traslado.traslado_id ? `/viajes/${traslado.traslado_id}` : "/viajes"} className="rounded-lg border border-ink/20 px-4 py-2 font-body text-sm font-semibold text-text-secondary">
+        <Link href={traslado.traslado_id ? `/viajes/${traslado.traslado_id}` : "/viajes"} className="rounded-lg border border-ui-line-strong px-4 py-2 font-body text-sm font-semibold text-ui-fg-muted">
           Expediente completo
         </Link>
       </div>
@@ -1730,8 +1730,8 @@ function DetalleRapidoTraslado({
 
 function DetalleSeccion({ titulo, children }: { titulo: string; children: ReactNode }) {
   return (
-    <section className="rounded-lg border border-ink/10 bg-surface-secondary p-4">
-      <h3 className="font-body text-sm font-semibold uppercase tracking-wide text-text-tertiary">{titulo}</h3>
+    <section className="rounded-lg border border-ui-line bg-ui-muted p-4">
+      <h3 className="font-body text-sm font-semibold uppercase tracking-wide text-ui-fg-muted">{titulo}</h3>
       <div className="mt-3 grid gap-2">{children}</div>
     </section>
   );
@@ -1740,16 +1740,16 @@ function DetalleSeccion({ titulo, children }: { titulo: string; children: ReactN
 function DatoRapido({ etiqueta, valor }: { etiqueta: string; valor: string }) {
   return (
     <div className="grid gap-0.5">
-      <dt className="font-body text-xs font-semibold uppercase tracking-wide text-text-tertiary">{etiqueta}</dt>
-      <dd className="font-body text-sm text-ink">{valor}</dd>
+      <dt className="font-body text-xs font-semibold uppercase tracking-wide text-ui-fg-muted">{etiqueta}</dt>
+      <dd className="font-body text-sm text-ui-fg">{valor}</dd>
     </div>
   );
 }
 
 function CampoFiltro({ etiqueta, children }: { etiqueta: string; children: ReactNode }) {
   return (
-    <label className="grid gap-1 font-body text-sm text-text-secondary">
-      <span className="font-body text-admin-secundario font-semibold uppercase tracking-wide text-text-tertiary">{etiqueta}</span>
+    <label className="grid gap-1 font-body text-sm text-ui-fg-muted">
+      <span className="font-body text-xs font-semibold uppercase tracking-wide text-ui-fg-muted">{etiqueta}</span>
       {children}
     </label>
   );
@@ -1761,7 +1761,7 @@ function FiltroToggle({ activo, onClick, children }: { activo: boolean; onClick:
       type="button"
       aria-pressed={activo}
       onClick={onClick}
-      className={`rounded-full border px-3 py-1.5 font-body text-sm font-semibold ${activo ? "border-signal bg-signal text-ink" : "border-ink/20 bg-surface-primary text-text-secondary hover:border-signal/40"}`}
+      className={`rounded-full border px-3 py-1.5 font-body text-sm font-semibold ${activo ? "border-ui-brand bg-ui-brand text-ui-fg" : "border-ui-line-strong bg-ui-card text-ui-fg-muted hover:border-ui-brand/40"}`}
     >
       {children}
     </button>
@@ -1770,9 +1770,9 @@ function FiltroToggle({ activo, onClick, children }: { activo: boolean; onClick:
 
 function ChipFiltro({ etiqueta, onRemove }: { etiqueta: string; onRemove: () => void }) {
   return (
-    <span className="inline-flex items-center gap-2 rounded-full border border-ink/15 bg-surface-secondary px-3 py-1.5 font-body text-sm text-text-secondary">
+    <span className="inline-flex items-center gap-2 rounded-full border border-ui-line bg-ui-muted px-3 py-1.5 font-body text-sm text-ui-fg-muted">
       {etiqueta}
-      <button type="button" onClick={onRemove} className="font-bold text-text-tertiary hover:text-status-error" aria-label={`Quitar filtro ${etiqueta}`}>
+      <button type="button" onClick={onRemove} className="font-bold text-ui-fg-muted hover:text-ui-danger" aria-label={`Quitar filtro ${etiqueta}`}>
         ×
       </button>
     </span>

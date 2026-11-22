@@ -28,7 +28,12 @@ if (!process.env.NEXT_PUBLIC_APP_VERSION) {
 }
 
 const requiredByApp = {
-  "panel-admin": ["NEXT_PUBLIC_SUPABASE_URL", "NEXT_PUBLIC_SUPABASE_ANON_KEY"],
+  "panel-admin": [
+    "NEXT_PUBLIC_SUPABASE_URL",
+    "NEXT_PUBLIC_SUPABASE_ANON_KEY",
+    "SUPABASE_SERVICE_ROLE_KEY",
+    "NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN"
+  ],
   "app-conductor": [
     "NEXT_PUBLIC_SUPABASE_URL",
     "NEXT_PUBLIC_SUPABASE_ANON_KEY",
@@ -42,6 +47,7 @@ const requiredByApp = {
     "NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN",
     "MAPBOX_SECRET_TOKEN",
     "PHONE_VERIFY_SECRET",
+    "TARIFA_SNAPSHOT_SECRET",
     "SUPABASE_SERVICE_ROLE_KEY",
     "NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY",
     "STRIPE_SECRET_KEY",
@@ -69,7 +75,7 @@ if (hostedBuild && ["app-conductor", "app-usuario", "workspace"].includes(app)) 
     invalid.push("se requiere Redis para rate-limit distribuido: UPSTASH_REDIS_REST_URL y UPSTASH_REDIS_REST_TOKEN (o KV_REST_API_URL y KV_REST_API_TOKEN)");
   }
 }
-if (hostedBuild && ["app-usuario", "workspace"].includes(app)) {
+if (hostedBuild && ["app-usuario", "panel-admin", "workspace"].includes(app)) {
   const valor = (nombre) => process.env[nombre]?.trim() ?? "";
   if (valor("SUPABASE_SERVICE_ROLE_KEY") && valor("SUPABASE_SERVICE_ROLE_KEY") === valor("NEXT_PUBLIC_SUPABASE_ANON_KEY")) {
     invalid.push("SUPABASE_SERVICE_ROLE_KEY debe ser distinta de la clave pública");
@@ -126,6 +132,10 @@ if (hostedBuild) {
     const phoneSecret = process.env.PHONE_VERIFY_SECRET;
     if (phoneSecret && phoneSecret.trim().length < 32) {
       invalid.push("PHONE_VERIFY_SECRET debe tener al menos 32 caracteres");
+    }
+    const tarifaSecret = process.env.TARIFA_SNAPSHOT_SECRET;
+    if (tarifaSecret && tarifaSecret.trim().length < 32) {
+      invalid.push("TARIFA_SNAPSHOT_SECRET debe tener al menos 32 caracteres");
     }
   }
 }

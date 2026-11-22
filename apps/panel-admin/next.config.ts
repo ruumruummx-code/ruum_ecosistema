@@ -8,9 +8,14 @@ import {
 } from "./src/lib/csp";
 
 const nextConfig: NextConfig = {
+  poweredByHeader: false,
+  compress: true,
   transpilePackages: ["@ruum/shared", "@ruum/ui", "@ruum/api"],
+  experimental: {
+    optimizePackageImports: ["lucide-react", "@ruum/ui", "@ruum/shared"],
+  },
   outputFileTracingIncludes: {
-    "/api/plantillas/viajes-masivos": ["./public/data/codigos-postales/**/*.json"],
+    "/api/plantillas/traslados-masivos": ["./public/data/codigos-postales/**/*.json"],
     "/api/codigos-postales/[prefijo]": ["./public/data/codigos-postales/**/*.json"]
   },
   typescript: { ignoreBuildErrors: false },

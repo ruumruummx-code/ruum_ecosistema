@@ -1,10 +1,13 @@
 import { NextRequest } from "next/server";
 import { afterEach, describe, expect, it, vi } from "vitest";
+
+vi.mock("server-only", () => ({}));
+
 import { esRutaProtegidaUsuario, middleware } from "./middleware";
 
 const estado = vi.hoisted(() => ({ renovar: false }));
 
-vi.mock("@ruum/api/supabase", () => ({
+vi.mock("@ruum/api/supabase/server-client", () => ({
   crearClienteServidor: (_url: string, _clave: string, cookies: {
     setAll: (valores: { name: string; value: string; options: { path: string } }[]) => void;
   }) => ({

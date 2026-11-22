@@ -23,13 +23,19 @@ export interface PaginacionTraslados {
 }
 
 /** PRD §17.4 — lista de Traslados con paginación de servidor. */
-export async function listarTrasladosAdmin(cliente: Cliente, filtro: EstadoTraslado | "todos"): Promise<PasaporteRow[]> {
+export async function listarTrasladosAdmin(
+  cliente: Cliente,
+  filtro: EstadoTraslado | "todos",
+  opciones?: { limite?: number; offset?: number }
+): Promise<PasaporteRow[]> {
   await assertAdminPermission(cliente, "Traslados:leer");
+  const limite = Math.min(Math.max(opciones?.limite ?? 50, 1), 500);
+  const offset = Math.max(opciones?.offset ?? 0, 0);
   let query = cliente.from("pasaporte_digital").select("*").order("creado_en", { ascending: false });
   if (filtro !== "todos") {
     query = query.eq("estado", filtro);
   }
-  const { data, error } = await query;
+  const { data, error } = await query.range(offset, offset + limite - 1);
   if (error) throw error;
   return data ?? [];
 }

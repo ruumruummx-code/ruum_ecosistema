@@ -329,19 +329,19 @@ export default function PaginaConfiguracionAdmin() {
       />
 
       {resultado && (
-        <div role={resultado.tipo === "error" ? "alert" : "status"} className={`mt-5 rounded-xl border px-4 py-3 font-body text-sm ${resultado.tipo === "error" ? "border-status-error/30 bg-status-error-soft text-status-error" : "border-status-success/30 bg-status-success-soft text-status-success"}`}>
+        <div role={resultado.tipo === "error" ? "alert" : "status"} className={`mt-5 rounded-xl border px-4 py-3 font-body text-sm ${resultado.tipo === "error" ? "border-ui-danger/30 bg-ui-danger-soft text-ui-danger" : "border-ui-success/30 bg-ui-success-soft text-ui-success"}`}>
           {resultado.mensaje}
         </div>
       )}
 
-      <section className="mt-6 rounded-2xl border border-status-info/25 bg-status-info-soft p-5" aria-label="Contexto de configuración">
+      <section className="mt-6 rounded-2xl border border-ui-brand/25 bg-ui-brand-soft p-5" aria-label="Contexto de configuración">
         <div className="flex items-start gap-3">
-          <span className="mt-1 grid size-8 shrink-0 place-items-center rounded-full border border-status-info/40 text-status-info" aria-hidden="true">
+          <span className="mt-1 grid size-8 shrink-0 place-items-center rounded-full border border-ui-brand/40 text-ui-brand-soft-fg" aria-hidden="true">
             <span className="size-2 rounded-full bg-current" />
           </span>
           <div>
-            <h2 className="font-display text-lg font-semibold text-ink">Cerebro normativo de Ruum Ruum</h2>
-            <p className="mt-1 max-w-3xl font-body text-sm text-text-secondary">
+            <h2 className="font-display text-lg font-semibold text-ui-fg">Cerebro normativo de Ruum Ruum</h2>
+            <p className="mt-1 max-w-3xl font-body text-sm text-ui-fg-muted">
               Parámetros efectivos de operación, comunicación, finanzas y seguridad. Los cambios sensibles requieren motivo y quedan auditados.
             </p>
           </div>
@@ -359,12 +359,12 @@ export default function PaginaConfiguracionAdmin() {
           ]}
         renderPanel={()=><div className="pt-5">{pestañaActiva === "roles" && (
       <>
-      <section className="mt-6 rounded-2xl border border-border-default bg-surface-primary p-5" aria-labelledby="roles-capacidades-direccion">
+      <section className="mt-6 rounded-2xl border border-ui-line bg-ui-card p-5" aria-labelledby="roles-capacidades-direccion">
         <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
           <div>
             <AdminBadge tone="warning">Solo Dirección</AdminBadge>
-            <h2 id="roles-capacidades-direccion" className="mt-3 font-display text-xl font-semibold text-ink">Roles y capacidades por colaborador</h2>
-            <p className="mt-1 max-w-3xl font-body text-sm text-text-secondary">
+            <h2 id="roles-capacidades-direccion" className="mt-3 font-display text-xl font-semibold text-ui-fg">Roles y capacidades por colaborador</h2>
+            <p className="mt-1 max-w-3xl font-body text-sm text-ui-fg-muted">
               Configura el rol operativo base y los permisos efectivos de un colaborador de Torre de Control. Cada cambio exige motivo y se ejecuta por RPC auditado.
             </p>
           </div>
@@ -400,11 +400,11 @@ export default function PaginaConfiguracionAdmin() {
               </AdminSelect>
 
               {colaboradorSeleccionado && (
-                <div className="rounded-xl border border-border-default bg-surface-secondary p-4">
+                <div className="rounded-xl border border-ui-line bg-ui-muted p-4">
                   <div className="flex items-center justify-between gap-3">
                     <div>
-                      <h3 className="font-display text-lg font-semibold text-ink">{colaboradorSeleccionado.nombre}</h3>
-                      <p className="mt-1 font-body text-xs text-text-tertiary">Alta {formatearFecha(colaboradorSeleccionado.creado_en)}</p>
+                      <h3 className="font-display text-lg font-semibold text-ui-fg">{colaboradorSeleccionado.nombre}</h3>
+                      <p className="mt-1 font-body text-xs text-ui-fg-muted">Alta {formatearFecha(colaboradorSeleccionado.creado_en)}</p>
                     </div>
                     <AdminBadge tone={colaboradorSeleccionado.rol_operativo === "direccion" ? "warning" : "neutral"}>{colaboradorSeleccionado.rol_operativo}</AdminBadge>
                   </div>
@@ -433,7 +433,7 @@ export default function PaginaConfiguracionAdmin() {
               />
               <div className="flex items-center justify-between gap-3">
                 <AdminBadge tone="warning">Cambio crítico</AdminBadge>
-                <span className={`font-mono-ruum text-xs ${motivoRol.trim().length >= 10 ? "text-status-success" : "text-status-warning"}`}>
+                <span className={`font-mono-ruum text-xs ${motivoRol.trim().length >= 10 ? "text-ui-success" : "text-ui-warning"}`}>
                   {motivoRol.trim().length}/10
                 </span>
               </div>
@@ -446,18 +446,18 @@ export default function PaginaConfiguracionAdmin() {
                 Preparar cambio de rol
               </AdminButton>
 
-              <div className="rounded-xl border border-border-default p-4">
-                <h3 className="font-body text-sm font-semibold text-ink">Rol seleccionado</h3>
-                <p className="mt-1 font-body text-sm text-text-secondary">{rolBase.descripcion}</p>
-                <p className="mt-3 font-body text-xs text-text-tertiary">{rolBase.rutasPermitidas.length} rutas base · {rolBase.indicadores.length} indicadores visibles</p>
+              <div className="rounded-xl border border-ui-line p-4">
+                <h3 className="font-body text-sm font-semibold text-ui-fg">Rol seleccionado</h3>
+                <p className="mt-1 font-body text-sm text-ui-fg-muted">{rolBase.descripcion}</p>
+                <p className="mt-3 font-body text-xs text-ui-fg-muted">{rolBase.rutasPermitidas.length} rutas base · {rolBase.indicadores.length} indicadores visibles</p>
               </div>
             </aside>
 
             <section>
               <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <div>
-                  <h3 className="font-display text-lg font-semibold text-ink">Capacidades efectivas</h3>
-                  <p className="mt-1 font-body text-sm text-text-secondary">El origen indica si la capacidad viene del rol base o de un override individual.</p>
+                  <h3 className="font-display text-lg font-semibold text-ui-fg">Capacidades efectivas</h3>
+                  <p className="mt-1 font-body text-sm text-ui-fg-muted">El origen indica si la capacidad viene del rol base o de un override individual.</p>
                 </div>
                 <AdminButton variant="secondary" onClick={() => abrirDialogoCapacidad()} disabled={!colaboradorSeleccionado}>
                   Configurar capacidad
@@ -477,30 +477,30 @@ export default function PaginaConfiguracionAdmin() {
                   const items = capacidadesPorCategoria[categoria] ?? [];
                   if (items.length === 0) return null;
                   return (
-                    <section key={categoria} className="rounded-xl border border-border-default bg-surface-secondary/40 p-4">
+                    <section key={categoria} className="rounded-xl border border-ui-line bg-ui-muted p-4">
                       <div className="flex items-center justify-between gap-3">
-                        <h4 className="font-body text-sm font-semibold text-ink">{categoria}</h4>
+                        <h4 className="font-body text-sm font-semibold text-ui-fg">{categoria}</h4>
                         <AdminBadge tone="neutral">{items.length}</AdminBadge>
                       </div>
                       <div className="mt-3 grid gap-2">
                         {items.map((capacidad) => (
-                          <article key={capacidad.capacidad} className="rounded-lg border border-ink/10 bg-surface-primary px-3 py-3">
+                          <article key={capacidad.capacidad} className="rounded-lg border border-ui-line bg-ui-card px-3 py-3">
                             <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                               <div className="min-w-0">
                                 <div className="flex flex-wrap items-center gap-2">
                                   <span className={`grid size-7 place-items-center rounded-full border ${claseTipoCapacidad(capacidad.capacidad)}`} aria-hidden="true">
                                     <span className="size-1.5 rounded-full bg-current" />
                                   </span>
-                                  <p className="font-mono-ruum text-xs font-semibold text-ink">{capacidad.capacidad}</p>
+                                  <p className="font-mono-ruum text-xs font-semibold text-ui-fg">{capacidad.capacidad}</p>
                                   <AdminBadge tone={capacidad.origen === "override" ? "warning" : "neutral"}>{capacidad.origen === "override" ? "Override individual" : "Rol base"}</AdminBadge>
                                   <AdminBadge tone={capacidad.concedida ? "success" : "danger"}>{capacidad.concedida ? "Concedida" : "Revocada"}</AdminBadge>
                                 </div>
-                                <p className="mt-2 font-body text-xs text-text-secondary">{capacidad.motivo ?? "Sin motivo individual"}</p>
+                                <p className="mt-2 font-body text-xs text-ui-fg-muted">{capacidad.motivo ?? "Sin motivo individual"}</p>
                               </div>
                               <button
                                 type="button"
                                 onClick={() => abrirDialogoCapacidad(capacidad.capacidad, capacidad.concedida ? "revocar" : "conceder")}
-                                className={`font-body text-xs font-semibold hover:underline ${capacidad.concedida ? "text-status-error" : "text-status-info"}`}
+                                className={`font-body text-xs font-semibold hover:underline ${capacidad.concedida ? "text-ui-danger" : "text-ui-brand-soft-fg"}`}
                               >
                                 {capacidad.concedida ? "Revocar" : "Conceder"}
                               </button>
@@ -512,36 +512,36 @@ export default function PaginaConfiguracionAdmin() {
                   );
                 })}
                 {capacidades.length === 0 && (
-                  <p className="rounded-xl border border-dashed border-border-default px-4 py-8 text-center font-body text-sm text-text-secondary">Selecciona un colaborador para revisar sus capacidades.</p>
+                  <p className="rounded-xl border border-dashed border-ui-line px-4 py-8 text-center font-body text-sm text-ui-fg-muted">Selecciona un colaborador para revisar sus capacidades.</p>
                 )}
                 {capacidades.length > 0 && capacidadesFiltradas.length === 0 && (
-                  <p className="rounded-xl border border-dashed border-border-default px-4 py-8 text-center font-body text-sm text-text-secondary">No hay capacidades que coincidan con la búsqueda.</p>
+                  <p className="rounded-xl border border-dashed border-ui-line px-4 py-8 text-center font-body text-sm text-ui-fg-muted">No hay capacidades que coincidan con la búsqueda.</p>
                 )}
               </div>
             </section>
           </div>
         )}
       </section>
-      <section className="mt-8 rounded-2xl border border-border-default bg-surface-primary p-5">
-        <h2 className="font-display text-xl font-semibold text-ink">Matriz efectiva de roles</h2>
-        <p className="mt-1 font-body text-sm text-text-secondary">Esta vista se genera desde la misma definición de roles que controla la navegación del panel.</p>
+      <section className="mt-8 rounded-2xl border border-ui-line bg-ui-card p-5">
+        <h2 className="font-display text-xl font-semibold text-ui-fg">Matriz efectiva de roles</h2>
+        <p className="mt-1 font-body text-sm text-ui-fg-muted">Esta vista se genera desde la misma definición de roles que controla la navegación del panel.</p>
         <div className="mt-5 grid gap-4">
           {Object.entries(CONFIG_ROL_ADMIN).map(([clave, rol]) => {
             const porcentaje = Math.max(8, Math.round((rol.rutasPermitidas.length / CONFIG_ROL_ADMIN.direccion.rutasPermitidas.length) * 100));
             return (
-              <article key={clave} className="rounded-xl border border-border-default p-4">
+              <article key={clave} className="rounded-xl border border-ui-line p-4">
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                   <div className="min-w-0">
                     <div className="flex items-center gap-2">
-                      <h3 className="font-body text-sm font-semibold text-ink">{rol.etiqueta}</h3>
+                      <h3 className="font-body text-sm font-semibold text-ui-fg">{rol.etiqueta}</h3>
                       <AdminBadge tone={clave === "direccion" ? "warning" : "neutral"}>{clave}</AdminBadge>
                     </div>
-                    <p className="mt-1 font-body text-xs text-text-secondary">{rol.descripcion}</p>
+                    <p className="mt-1 font-body text-xs text-ui-fg-muted">{rol.descripcion}</p>
                   </div>
-                  <p className="font-mono-ruum text-xs text-text-tertiary">{rol.rutasPermitidas.length} rutas base</p>
+                  <p className="font-mono-ruum text-xs text-ui-fg-muted">{rol.rutasPermitidas.length} rutas base</p>
                 </div>
-                <div className="mt-3 h-2 rounded-full bg-surface-secondary" title={rol.descripcion}>
-                  <div className="h-2 rounded-full bg-signal" style={{ width: `${porcentaje}%` }} />
+                <div className="mt-3 h-2 rounded-full bg-ui-muted" title={rol.descripcion}>
+                  <div className="h-2 rounded-full bg-ui-brand" style={{ width: `${porcentaje}%` }} />
                 </div>
               </article>
             );
@@ -556,7 +556,7 @@ export default function PaginaConfiguracionAdmin() {
         const abierto = categoriasNormativaAbiertas[categoria] ?? false;
         const registrosCategoria = agrupados[categoria] ?? [];
         return (
-          <section key={categoria} className="mt-6 rounded-2xl border border-border-default bg-surface-primary" aria-labelledby={`categoria-${categoria}`}>
+          <section key={categoria} className="mt-6 rounded-2xl border border-ui-line bg-ui-card" aria-labelledby={`categoria-${categoria}`}>
             <button
               type="button"
               onClick={() => setCategoriasNormativaAbiertas((actual) => ({ ...actual, [categoria]: !abierto }))}
@@ -564,40 +564,40 @@ export default function PaginaConfiguracionAdmin() {
               aria-expanded={abierto}
             >
               <div>
-                <p className="font-mono-ruum text-admin-secundario uppercase tracking-wide text-text-tertiary">Normativa activa</p>
-                <h2 id={`categoria-${categoria}`} className="font-display text-xl font-semibold text-ink">{CATEGORIAS[categoria] ?? categoria}</h2>
+                <p className="font-mono-ruum text-xs uppercase tracking-wide text-ui-fg-muted">Normativa activa</p>
+                <h2 id={`categoria-${categoria}`} className="font-display text-xl font-semibold text-ui-fg">{CATEGORIAS[categoria] ?? categoria}</h2>
               </div>
               <div className="flex items-center gap-2">
                 <AdminBadge tone="success">{registrosCategoria.length} vigente(s)</AdminBadge>
-                <span className="font-mono-ruum text-sm text-text-tertiary">{abierto ? "−" : "+"}</span>
+                <span className="font-mono-ruum text-sm text-ui-fg-muted">{abierto ? "−" : "+"}</span>
               </div>
             </button>
             {abierto && (
-              <div className="grid gap-4 border-t border-border-default p-5 lg:grid-cols-2">
+              <div className="grid gap-4 border-t border-ui-line p-5 lg:grid-cols-2">
                 {registrosCategoria.map((registro) => (
-                  <article key={registro.clave} className="rounded-xl border border-border-default bg-surface-secondary/45 p-4">
+                  <article key={registro.clave} className="rounded-xl border border-ui-line bg-ui-muted p-4">
                     <div className="flex items-start justify-between gap-4">
                       <div>
-                        <h3 className="font-display text-lg font-semibold text-ink">{registro.nombre}</h3>
-                        <p className="mt-1 font-body text-sm text-text-secondary">{registro.descripcion}</p>
+                        <h3 className="font-display text-lg font-semibold text-ui-fg">{registro.nombre}</h3>
+                        <p className="mt-1 font-body text-sm text-ui-fg-muted">{registro.descripcion}</p>
                       </div>
                       <AdminBadge tone={estadoNorma(registro).tone}>{estadoNorma(registro).label}</AdminBadge>
                     </div>
-                    <div className="mt-4 rounded-lg bg-surface-primary px-4 py-3">
+                    <div className="mt-4 rounded-lg bg-ui-card px-4 py-3">
                       <div className="flex flex-wrap items-center justify-between gap-3">
                         <ResumenNormativo claveConfig={registro.clave} valor={registro.valor} />
                         <AdminBadge tone="neutral">v{registro.version}</AdminBadge>
                       </div>
-                      <p className="mt-2 font-body text-xs text-text-tertiary">Actualizado {formatearFecha(registro.actualizada_en)}</p>
+                      <p className="mt-2 font-body text-xs text-ui-fg-muted">Actualizado {formatearFecha(registro.actualizada_en)}</p>
                     </div>
-                    <div className="mt-4 rounded-lg border border-ink/10 bg-surface-primary px-3 py-3">
-                      <p className="font-body text-xs font-semibold uppercase tracking-wide text-text-tertiary">Historial reciente</p>
-                      <p className="mt-1 font-body text-sm text-text-secondary">v{registro.version} · Actualización vigente · {formatearFecha(registro.actualizada_en)}</p>
-                      <p className="mt-1 font-body text-xs text-text-tertiary">Para últimos 3 cambios completos, consultar auditoría por clave normativa.</p>
+                    <div className="mt-4 rounded-lg border border-ui-line bg-ui-card px-3 py-3">
+                      <p className="font-body text-xs font-semibold uppercase tracking-wide text-ui-fg-muted">Historial reciente</p>
+                      <p className="mt-1 font-body text-sm text-ui-fg-muted">v{registro.version} · Actualización vigente · {formatearFecha(registro.actualizada_en)}</p>
+                      <p className="mt-1 font-body text-xs text-ui-fg-muted">Para últimos 3 cambios completos, consultar auditoría por clave normativa.</p>
                     </div>
                     <div className="mt-4 flex flex-wrap justify-end gap-2">
                       <AdminButton variant="secondary" onClick={() => abrirEditor(registro)}>Editar norma</AdminButton>
-                      <a href={`/auditoria?recurso=configuracion_normativa&clave=${encodeURIComponent(registro.clave)}`} className="inline-flex min-h-10 items-center rounded-lg border border-border-default px-4 py-2 font-body text-admin-boton font-semibold text-text-secondary hover:border-signal/45 hover:text-ink">
+                      <a href={`/auditoria?recurso=configuracion_normativa&clave=${encodeURIComponent(registro.clave)}`} className="inline-flex min-h-10 items-center rounded-lg border border-ui-line px-4 py-2 font-body text-sm font-semibold text-ui-fg-muted hover:border-ui-brand/45 hover:text-ui-fg">
                         Ver auditoría
                       </a>
                     </div>
@@ -693,12 +693,12 @@ export default function PaginaConfiguracionAdmin() {
         </>}
       >
         <div className="space-y-4">
-          <div className="rounded-xl border border-status-warning/30 bg-status-warning-soft px-4 py-3">
+          <div className="rounded-xl border border-ui-warning/30 bg-ui-warning-soft px-4 py-3">
             <div className="flex items-center gap-2">
               <AdminBadge tone="warning">Cambio crítico</AdminBadge>
-              <p className="font-body text-sm font-semibold text-ink">{colaboradorSeleccionado?.rol_operativo ?? "rol actual"} → {rolSeleccionado}</p>
+              <p className="font-body text-sm font-semibold text-ui-fg">{colaboradorSeleccionado?.rol_operativo ?? "rol actual"} → {rolSeleccionado}</p>
             </div>
-            <p className="mt-2 font-body text-sm text-text-secondary">La fricción intencional protege cambios de acceso y deja evidencia auditada.</p>
+            <p className="mt-2 font-body text-sm text-ui-fg-muted">La fricción intencional protege cambios de acceso y deja evidencia auditada.</p>
           </div>
           <AdminTextarea
             label="Motivo obligatorio"
@@ -741,14 +741,14 @@ export default function PaginaConfiguracionAdmin() {
             <option value="capacidades:administrar" disabled>capacidades:administrar (no auto-asignable)</option>
           </AdminSelect>
           <div>
-            <span className="block font-body text-sm font-medium text-ink">Acción</span>
+            <span className="block font-body text-sm font-medium text-ui-fg">Acción</span>
             <div className="mt-2 flex flex-wrap gap-3">
-              <label className="inline-flex items-center gap-2 font-body text-sm text-ink">
-                <input type="radio" checked={accionCapacidad === "conceder"} onChange={() => setAccionCapacidad("conceder")} className="accent-signal" />
+              <label className="inline-flex items-center gap-2 font-body text-sm text-ui-fg">
+                <input type="radio" checked={accionCapacidad === "conceder"} onChange={() => setAccionCapacidad("conceder")} className="accent-ui-brand" />
                 Conceder
               </label>
-              <label className="inline-flex items-center gap-2 font-body text-sm text-ink">
-                <input type="radio" checked={accionCapacidad === "revocar"} onChange={() => setAccionCapacidad("revocar")} className="accent-signal" />
+              <label className="inline-flex items-center gap-2 font-body text-sm text-ui-fg">
+                <input type="radio" checked={accionCapacidad === "revocar"} onChange={() => setAccionCapacidad("revocar")} className="accent-ui-brand" />
                 Revocar
               </label>
             </div>
@@ -800,31 +800,31 @@ export default function PaginaConfiguracionAdmin() {
 function ResumenNormativo({ claveConfig, valor }: { claveConfig: string; valor: unknown }) {
   const config = objeto(valor);
   if (claveConfig === "metodos_pago") {
-    return <p className="font-body text-sm font-semibold text-ink">{lista(config.habilitados).length} métodos activos · Pasarela {texto(config.proveedor_pasarela, "sin proveedor")}</p>;
+    return <p className="font-body text-sm font-semibold text-ui-fg">{lista(config.habilitados).length} métodos activos · Pasarela {texto(config.proveedor_pasarela, "sin proveedor")}</p>;
   }
   if (claveConfig === "datos_fiscales") {
     const ruum = objeto(config.ruum);
     const requisitos = objeto(config.requisitos_cliente);
-    return <p className="font-body text-sm font-semibold text-ink">Emisor {texto(ruum.rfc, "pendiente")} · {Object.keys(requisitos).length || 1} reglas fiscales de cliente</p>;
+    return <p className="font-body text-sm font-semibold text-ui-fg">Emisor {texto(ruum.rfc, "pendiente")} · {Object.keys(requisitos).length || 1} reglas fiscales de cliente</p>;
   }
   if (claveConfig === "seguridad") {
-    return <p className="font-body text-sm font-semibold text-ink">Sesión {numero(config.sesion_minutos, 60)} min · Motivo mínimo {numero(config.motivo_minimo_caracteres, 10)} caracteres</p>;
+    return <p className="font-body text-sm font-semibold text-ui-fg">Sesión {numero(config.sesion_minutos, 60)} min · Motivo mínimo {numero(config.motivo_minimo_caracteres, 10)} caracteres</p>;
   }
   if (claveConfig === "plantillas_notificacion") {
-    return <p className="font-body text-sm font-semibold text-ink">{lista(config.canales).join(", ") || "Sin canales"} · Recordatorio {numero(config.recordatorio_minutos_antes, 60)} min</p>;
+    return <p className="font-body text-sm font-semibold text-ui-fg">{lista(config.canales).join(", ") || "Sin canales"} · Recordatorio {numero(config.recordatorio_minutos_antes, 60)} min</p>;
   }
   if (claveConfig === "zonas_operacion") {
-    return <p className="font-body text-sm font-semibold text-ink">{zonas(config).length} zona(s) · Fuera de cobertura {booleano(config.permitir_fuera_cobertura) ? "permitido" : "bloqueado"}</p>;
+    return <p className="font-body text-sm font-semibold text-ui-fg">{zonas(config).length} zona(s) · Fuera de cobertura {booleano(config.permitir_fuera_cobertura) ? "permitido" : "bloqueado"}</p>;
   }
   if (claveConfig === "tipos_servicio_vehiculo") {
-    return <p className="font-body text-sm font-semibold text-ink">{lista(config.servicios).length} servicios · {lista(config.vehiculos).length} tipos de vehículo</p>;
+    return <p className="font-body text-sm font-semibold text-ui-fg">{lista(config.servicios).length} servicios · {lista(config.vehiculos).length} tipos de vehículo</p>;
   }
   if (claveConfig === "reglas_evidencia") {
     const inicio = objeto(config.inicio);
     const entrega = objeto(config.entrega);
-    return <p className="font-body text-sm font-semibold text-ink">Inicio {numero(inicio.fotos_minimas, 0)} fotos · Entrega {numero(entrega.fotos_minimas, 0)} fotos</p>;
+    return <p className="font-body text-sm font-semibold text-ui-fg">Inicio {numero(inicio.fotos_minimas, 0)} fotos · Entrega {numero(entrega.fotos_minimas, 0)} fotos</p>;
   }
-  return <p className="font-body text-sm font-semibold text-ink">{resumenValor(valor)}</p>;
+  return <p className="font-body text-sm font-semibold text-ui-fg">{resumenValor(valor)}</p>;
 }
 
 function categoriaCapacidad(capacidad: string) {
@@ -837,9 +837,9 @@ function categoriaCapacidad(capacidad: string) {
 }
 
 function claseTipoCapacidad(capacidad: string) {
-  if (/capacidades:administrar|configuracion:editar|auditoria|aprobaciones/i.test(capacidad)) return "border-status-error/35 text-status-error";
-  if (/pagos|tarifas|reclamos|disputas/i.test(capacidad)) return "border-status-warning/40 text-status-warning";
-  return "border-status-info/35 text-status-info";
+  if (/capacidades:administrar|configuracion:editar|auditoria|aprobaciones/i.test(capacidad)) return "border-ui-danger/35 text-ui-danger";
+  if (/pagos|tarifas|reclamos|disputas/i.test(capacidad)) return "border-ui-warning/40 text-ui-warning";
+  return "border-ui-brand/35 text-ui-brand-soft-fg";
 }
 
 function estadoNorma(registro: ConfiguracionAdmin): { label: string; tone: "success" | "warning" | "danger" | "neutral" } {
@@ -907,13 +907,13 @@ function EditorNormativo({ registro, json, onChange, error }: {
     const entrega = objeto(config.entrega);
     return (
       <div className="grid gap-4 md:grid-cols-2">
-        <fieldset className="rounded-xl border border-border-default p-4">
-          <legend className="px-1 font-body text-sm font-semibold text-ink">Inicio de traslado</legend>
+        <fieldset className="rounded-xl border border-ui-line p-4">
+          <legend className="px-1 font-body text-sm font-semibold text-ui-fg">Inicio de traslado</legend>
           <AdminInput label="Fotos mínimas" type="number" min={0} value={numero(inicio.fotos_minimas, 4)} onChange={(e) => setObjeto("inicio", "fotos_minimas", Number(e.target.value))} />
           <CheckNormativo label="Requiere odómetro" checked={booleano(inicio.requiere_odometro)} onChange={(valor) => setObjeto("inicio", "requiere_odometro", valor)} />
         </fieldset>
-        <fieldset className="rounded-xl border border-border-default p-4">
-          <legend className="px-1 font-body text-sm font-semibold text-ink">Entrega</legend>
+        <fieldset className="rounded-xl border border-ui-line p-4">
+          <legend className="px-1 font-body text-sm font-semibold text-ui-fg">Entrega</legend>
           <AdminInput label="Fotos mínimas" type="number" min={0} value={numero(entrega.fotos_minimas, 4)} onChange={(e) => setObjeto("entrega", "fotos_minimas", Number(e.target.value))} />
           <CheckNormativo label="Requiere firma" checked={booleano(entrega.requiere_firma)} onChange={(valor) => setObjeto("entrega", "requiere_firma", valor)} />
         </fieldset>
@@ -973,16 +973,16 @@ function EditorNormativo({ registro, json, onChange, error }: {
     const requisitos = objeto(config.requisitos_cliente);
     return (
       <div className="grid gap-5 lg:grid-cols-2">
-        <fieldset className="space-y-3 rounded-xl border border-border-default p-4">
-          <legend className="px-1 font-body text-sm font-semibold text-ink">Datos fiscales de Ruum Ruum</legend>
+        <fieldset className="space-y-3 rounded-xl border border-ui-line p-4">
+          <legend className="px-1 font-body text-sm font-semibold text-ui-fg">Datos fiscales de Ruum Ruum</legend>
           <AdminInput label="RFC emisor" value={texto(ruum.rfc)} onChange={(e) => setObjeto("ruum", "rfc", e.target.value.toUpperCase())} />
           <AdminInput label="Razón social" value={texto(ruum.razon_social)} onChange={(e) => setObjeto("ruum", "razon_social", e.target.value)} />
           <AdminInput label="Régimen fiscal" value={texto(ruum.regimen_fiscal)} onChange={(e) => setObjeto("ruum", "regimen_fiscal", e.target.value)} />
           <AdminInput label="Código postal fiscal" value={texto(ruum.codigo_postal_fiscal)} onChange={(e) => setObjeto("ruum", "codigo_postal_fiscal", e.target.value)} />
           <AdminInput label="Correo de facturación" type="email" value={texto(ruum.correo_facturacion)} onChange={(e) => setObjeto("ruum", "correo_facturacion", e.target.value)} />
         </fieldset>
-        <fieldset className="space-y-3 rounded-xl border border-border-default p-4">
-          <legend className="px-1 font-body text-sm font-semibold text-ink">Requisitos fiscales para clientes</legend>
+        <fieldset className="space-y-3 rounded-xl border border-ui-line p-4">
+          <legend className="px-1 font-body text-sm font-semibold text-ui-fg">Requisitos fiscales para clientes</legend>
           <CheckNormativo label="Persona física: RFC obligatorio" checked={booleano(objeto(requisitos.persona_fisica).rfc_obligatorio, true)} onChange={(valor) => setObjetoAnidado(config, cambiar, ["requisitos_cliente", "persona_fisica", "rfc_obligatorio"], valor)} />
           <CheckNormativo label="Persona física: constancia fiscal" checked={booleano(objeto(requisitos.persona_fisica).constancia_obligatoria)} onChange={(valor) => setObjetoAnidado(config, cambiar, ["requisitos_cliente", "persona_fisica", "constancia_obligatoria"], valor)} />
           <CheckNormativo label="Persona moral: razón social obligatoria" checked={booleano(objeto(requisitos.persona_moral).razon_social_obligatoria, true)} onChange={(valor) => setObjetoAnidado(config, cambiar, ["requisitos_cliente", "persona_moral", "razon_social_obligatoria"], valor)} />
@@ -1022,8 +1022,8 @@ function EditorNormativo({ registro, json, onChange, error }: {
 
 function CheckNormativo({ label, checked, onChange }: { label: string; checked: boolean; onChange: (valor: boolean) => void }) {
   return (
-    <label className="flex items-start gap-2 rounded-lg border border-border-default bg-surface-primary px-3 py-2 font-body text-sm text-ink">
-      <input type="checkbox" checked={checked} onChange={(e) => onChange(e.target.checked)} className="mt-1 accent-signal" />
+    <label className="flex items-start gap-2 rounded-lg border border-ui-line bg-ui-card px-3 py-2 font-body text-sm text-ui-fg">
+      <input type="checkbox" checked={checked} onChange={(e) => onChange(e.target.checked)} className="mt-1 accent-ui-brand" />
       <span>{label}</span>
     </label>
   );
@@ -1032,8 +1032,8 @@ function CheckNormativo({ label, checked, onChange }: { label: string; checked: 
 function OpcionesChecklist({ label, opciones, seleccionadas, onChange }: { label: string; opciones: string[]; seleccionadas: string[]; onChange: (valor: string[]) => void }) {
   const actuales = new Set(seleccionadas);
   return (
-    <fieldset className="rounded-xl border border-border-default p-4">
-      <legend className="px-1 font-body text-sm font-semibold text-ink">{label}</legend>
+    <fieldset className="rounded-xl border border-ui-line p-4">
+      <legend className="px-1 font-body text-sm font-semibold text-ui-fg">{label}</legend>
       <div className="grid gap-2 sm:grid-cols-2">
         {opciones.map((opcion) => (
           <CheckNormativo

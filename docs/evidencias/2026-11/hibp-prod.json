@@ -1,0 +1,19 @@
+{
+  "project_ref": "asmzetwwwugaoowiukdv",
+  "project_name": "ruum_ecosistema_prod",
+  "environment": "production",
+  "audit_date": "2026-11-27T10:15:00Z",
+  "auth_configuration": {
+    "leaked_password_protection_enabled": true,
+    "provider_email_enabled": true,
+    "mfa_totp_enroll_enabled": true,
+    "mfa_totp_verify_enabled": true,
+    "mfa_max_enrolled_factors": 10
+  },
+  "security_advisor": {
+    "check": "auth_leaked_password_protection",
+    "status": "PASS",
+    "warnings_count": 0,
+    "detail": "HaveIBeenPwned API check is active on email/password signups and logins."
+  }
+}

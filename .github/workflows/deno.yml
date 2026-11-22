@@ -1,0 +1,20 @@
+name: Edge Functions (Deno)
+on:
+  pull_request:
+  push:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  deno:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+      - name: Verificar tipos de las 15 Edge Functions
+        run: deno task check:functions
+      - name: Ejecutar pruebas unitarias de Edge Functions
+        run: deno task test:functions

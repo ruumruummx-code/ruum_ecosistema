@@ -9,7 +9,7 @@ vi.mock("next/headers", () => ({
 }));
 
 let cookiesCliente: { setAll: (c: { name: string; value: string; options: object }[]) => void } | null = null;
-vi.mock("@ruum/api/supabase", () => ({
+vi.mock("@ruum/api/supabase/server-client", () => ({
   crearClienteServidor: vi.fn((_url: string, _key: string, metodos: typeof cookiesCliente) => {
     cookiesCliente = metodos;
     return {

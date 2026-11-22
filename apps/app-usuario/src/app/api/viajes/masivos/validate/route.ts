@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
-import { crearClienteServidor } from "@/lib/supabase-server";
+import { validarSesionYRolUsuario } from "@/lib/guardia-rol-usuario";
 import { rateLimitMasivo } from "@/lib/rate-limit-masivos";
 import { validarFilasServidor } from "@/lib/carga-masiva-server";
 import { logStructuredError } from "@/lib/logger";
@@ -12,9 +12,9 @@ const esquemaCarga = z.object({ filas: z.array(z.record(z.string(), z.string().m
 export async function POST(request: NextRequest) {
   const rechazoCsrf = verificarCsrfORechazar(request);
   if (rechazoCsrf) return rechazoCsrf;
-  const cliente = await crearClienteServidor();
-  const { data: { user } } = await cliente.auth.getUser();
-  if (!user) return NextResponse.json({ error: "No autenticado" }, { status: 401 });
+  const auth = await validarSesionYRolUsuario();
+  if (!auth.ok) return auth.errorResponse;
+  const { user } = auth;
   const limite = await rateLimitMasivo(request, user.id, "masivos-validar", 20);
   if (!limite.allowed) return NextResponse.json({ error: "Espera un momento antes de validar otra carga." }, { status: 429, headers: { "Retry-After": String(limite.retryAfterSec) } });
   const body = esquemaCarga.safeParse(await request.json().catch(() => null));
