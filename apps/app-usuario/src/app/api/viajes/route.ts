@@ -1,4 +1,5 @@
 import { registrarConsentimientoUsuario } from "@ruum/api/services";
+import { verificacionTelefonoSuspendida } from "@/lib/phone-verification";
 import { normalizarDispositivo } from "@/lib/device-id";
 import { NextRequest, NextResponse } from "next/server";
 import { crearClienteServidor } from "@/lib/supabase-server";
@@ -46,10 +47,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "No autenticado" }, { status: 401 });
     }
 
-    // Cuentas creadas con la verificación SMS suspendida quedan con
-    // telefono_verificado = false: deben verificar antes del primer traslado
-    // (el teléfono se usa en llamadas enmascaradas y contacto operativo).
-    if (user.user_metadata?.telefono_verificado === false) {
+    if (!verificacionTelefonoSuspendida() && user.user_metadata?.telefono_verificado === false) {
       return NextResponse.json(
         { error: "Verifica tu número de teléfono antes de solicitar tu primer traslado.", codigo: "telefono_no_verificado" },
         { status: 403 }

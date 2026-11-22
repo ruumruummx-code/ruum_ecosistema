@@ -212,13 +212,26 @@ describe("Sec3 POST /api/viajes — validación paso servidor", () => {
     expect((await res.json()).snapshot).toBeUndefined();
   });
 
-  it("bloquea el primer traslado si el teléfono no fue verificado", async () => {
+  it.each([
+    { suspendida: "false", estado: 403 },
+    { suspendida: "true", estado: 200 },
+  ])("con SMS suspendido=$suspendida responde $estado si el teléfono está pendiente", async ({ suspendida, estado }) => {
     const { POST } = await import("./route");
-    mockGetUser.mockResolvedValue({ data: { user: { id: `u-${seq}`, user_metadata: { telefono_verificado: false } } } });
-    const res = await POST(req(payloadValido()));
-    expect(res.status).toBe(403);
-    expect((await res.json()).codigo).toBe("telefono_no_verificado");
-    expect(mocksCotizacion.ruta).not.toHaveBeenCalled();
+    vi.stubEnv("PHONE_VERIFICATION_SUSPENDED", suspendida);
+    try {
+      mockGetUser.mockResolvedValue({ data: { user: { id: `u-${seq}`, user_metadata: { telefono_verificado: false } } } });
+      const res = await POST(req(payloadValido()));
+      expect(res.status).toBe(estado);
+      const json = await res.json();
+      if (estado === 200) {
+        expect(json.snapshot).toBeDefined();
+      } else {
+        expect(json.codigo).toBe("telefono_no_verificado");
+        expect(mocksCotizacion.ruta).not.toHaveBeenCalled();
+      }
+    } finally {
+      vi.unstubAllEnvs();
+    }
   });
 
   it("envía el pin del mapa y la confirmación al resolver la ruta", async () => {
