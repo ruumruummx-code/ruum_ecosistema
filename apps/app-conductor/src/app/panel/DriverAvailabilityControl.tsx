@@ -44,7 +44,7 @@ export function DriverAvailabilityControl({ value, saving, onChange }: DriverAva
 
     if (acabaDeGuardar && value === "disponible") {
       wasSaving.current = false;
-      setFeedback("Disponibilidad activada. Estás listo para recibir Traslados.");
+      setFeedback("Disponibilidad activada. Estás listo para recibir traslados.");
       const id = window.setTimeout(() => setFeedback(null), 3200);
       return () => window.clearTimeout(id);
     }
