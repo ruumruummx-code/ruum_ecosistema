@@ -3,7 +3,7 @@ import { NextRequest } from "next/server";
 
 const mockSignUp = vi.fn();
 
-vi.mock("@ruum/api/supabase", () => ({
+vi.mock("@ruum/api/supabase/server-client", () => ({
   // Síncrono como el real: la ruta no lo espera con await.
   crearClienteServidor: vi.fn(() => ({ auth: { signUp: mockSignUp } })),
 }));
@@ -172,7 +172,6 @@ describe("suspensión temporal de SMS en producción", () => {
     const limite = vi.spyOn(rateLimit, "rateLimitConVentana").mockResolvedValue({ allowed: true });
     vi.stubEnv("NODE_ENV", "production");
     vi.stubEnv("PHONE_VERIFICATION_SUSPENDED", "true");
-    vi.stubEnv("PHONE_VERIFICATION_SUSPENDED_UNTIL", "2999-01-01T00:00:00Z");
     try {
       mockSignUp.mockResolvedValue({data:{user:{id:"prod-suspendido"},session:null},error:null});
       const res = await POST(req("suspendido@ejemplo.com", ""));

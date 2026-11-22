@@ -82,10 +82,10 @@ El script `test:coverage` se define por workspace. Está disponible en
       `UPSTASH_REDIS_REST_TOKEN`, o `KV_REST_API_URL` + `KV_REST_API_TOKEN`) y, en
       producción de Vercel, `RUUM_STRIPE_MODE` (`live` por defecto).
     - Opcionales: `TURNSTILE_SECRET_KEY` + `NEXT_PUBLIC_TURNSTILE_SITE_KEY` (el CAPTCHA
-      adaptativo de login/recuperación solo se exige con las dos), y la suspensión
-      temporal del SMS `PHONE_VERIFICATION_SUSPENDED=true` +
-      `PHONE_VERIFICATION_SUSPENDED_UNTIL` (fecha ISO; sin fecha o vencida, la
-      verificación vuelve a exigirse). Sus espejos `NEXT_PUBLIC_…` deben coincidir.
+      adaptativo de login/recuperación solo se exige con las dos). El SMS queda
+      suspendido con `PHONE_VERIFICATION_SUSPENDED=true` y
+      `NEXT_PUBLIC_PHONE_VERIFICATION_SUSPENDED=true`. Para reactivarlo, establecer
+      ambas en `false` y redesplegar la app.
   - *admin*: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`
 - En Vercel, configurar estas variables en los entornos donde se construye
   `app-usuario`; `PHONE_VERIFY_SECRET` no debe llevar el prefijo `NEXT_PUBLIC_`.

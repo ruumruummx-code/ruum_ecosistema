@@ -247,7 +247,6 @@ describe("registro — accesibilidad de errores y flujo de verificación telefó
   it("suspende el paso SMS en producción sin enviar códigos", async () => {
     vi.stubEnv("NODE_ENV", "production");
     vi.stubEnv("NEXT_PUBLIC_PHONE_VERIFICATION_SUSPENDED", "true");
-    vi.stubEnv("NEXT_PUBLIC_PHONE_VERIFICATION_SUSPENDED_UNTIL", "2999-01-01T00:00:00Z");
     try {
       const user = userEvent.setup();
       render(<PaginaRegistro />);

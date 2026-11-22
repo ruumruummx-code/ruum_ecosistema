@@ -29,11 +29,7 @@ import {
 export default function PaginaRegistro() {
   const router = useRouter();
 
-  // Misma regla que el servidor: la suspensión solo vale con fecha de
-  // reactivación vigente (NEXT_PUBLIC_PHONE_VERIFICATION_SUSPENDED_UNTIL).
-  const suspensionHasta = Date.parse(process.env.NEXT_PUBLIC_PHONE_VERIFICATION_SUSPENDED_UNTIL ?? "");
-  const smsSuspendido =
-    process.env.NEXT_PUBLIC_PHONE_VERIFICATION_SUSPENDED === "true" && Number.isFinite(suspensionHasta) && Date.now() < suspensionHasta;
+  const smsSuspendido = process.env.NEXT_PUBLIC_PHONE_VERIFICATION_SUSPENDED === "true";
   const bypassOtp = smsSuspendido || (process.env.NODE_ENV !== "production" && process.env.NEXT_PUBLIC_PHONE_VERIFY_BYPASS === "true");
 
   /* Paso 1: datos básicos */
