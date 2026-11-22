@@ -2,6 +2,7 @@ import { registrarConsentimientoUsuario } from "@ruum/api/services";
 import { verificacionTelefonoSuspendida } from "@/lib/phone-verification";
 import { normalizarDispositivo } from "@/lib/device-id";
 import { NextRequest, NextResponse } from "next/server";
+import { validarSesionYRolUsuario } from "@/lib/guardia-rol-usuario";
 import { crearClienteServidor } from "@/lib/supabase-server";
 import { esquemaSolicitudTraslado } from "@ruum/shared/validacion";
 import { obtenerIp, rateLimitConVentana } from "@/lib/csp-rate-limit";
@@ -42,10 +43,9 @@ export async function POST(request: NextRequest) {
     if (rechazoCsrf) return rechazoCsrf;
 
     const cliente = await crearClienteServidor();
-    const { data: { user } } = await cliente.auth.getUser();
-    if (!user) {
-      return NextResponse.json({ error: "No autenticado" }, { status: 401 });
-    }
+    const auth = await validarSesionYRolUsuario(cliente);
+    if (!auth.ok) return auth.errorResponse;
+    const { user } = auth;
 
     if (!verificacionTelefonoSuspendida() && user.user_metadata?.telefono_verificado === false) {
       return NextResponse.json(

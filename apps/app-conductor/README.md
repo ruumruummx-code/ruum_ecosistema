@@ -140,7 +140,7 @@ ganancias del conductor.
 ## Capacitor y limitacion del shell remoto
 
 - Android esta agregado en `apps/app-conductor/android`.
-- La WebView carga `https://www.concer.ruumruum-moviliax.online` salvo override `RUUM_CAPACITOR_SERVER_URL`.
+- La WebView carga `https://concer.ruumruum-moviliax.online` salvo override `RUUM_CAPACITOR_SERVER_URL`.
 - Permisos declarados: `CAMERA`, `ACCESS_FINE_LOCATION`, `ACCESS_COARSE_LOCATION`.
 - Backup Android esta deshabilitado con `android:allowBackup="false"` y reglas defensivas en `res/xml`.
 - iOS no esta agregado; requiere macOS/Xcode.
@@ -219,7 +219,7 @@ En desarrollo o sin variables configuradas, se degrada al almacén seguro en mem
 
 Para garantizar la correcta ejecución del flujo de recuperación de contraseña y autenticación de la App Conductor en ambientes de Staging y Producción, verificar obligatoriamente en el **Supabase Dashboard** (`Authentication -> URL Configuration`):
 
-1. **Site URL**: `https://www.concer.ruumruum-moviliax.online`
+1. **Site URL**: `https://concer.ruumruum-moviliax.online`
 2. **Redirect URLs** (dar de alta las variaciones con y sin `www`):
    - `https://www.concer.ruumruum-moviliax.online/auth/callback`
    - `https://www.concer.ruumruum-moviliax.online/nueva-password`

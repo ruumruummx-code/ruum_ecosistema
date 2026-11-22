@@ -1,3 +1,4 @@
+import "server-only";
 import { createHash, createHmac, timingSafeEqual, randomUUID } from "node:crypto";
 import { getRedis } from "@/lib/csp-rate-limit";
 import { logStructuredWarn } from "@/lib/logger";
@@ -36,12 +37,21 @@ export interface SnapshotTarifaFirmado extends SnapshotTarifaPayload {
 }
 
 export function obtenerSecretoSnapshot(): string {
-  const secreto =
-    process.env.TARIFA_SNAPSHOT_SECRET ||
-    process.env.SUPABASE_SERVICE_ROLE_KEY ||
-    process.env.NEXTAUTH_SECRET ||
-    "ruum-secret-snapshot-fallback-dev-only";
-  return secreto;
+  const secreto = process.env.TARIFA_SNAPSHOT_SECRET?.trim();
+  const esProd = process.env.NODE_ENV === "production";
+
+  if (esProd && (!secreto || secreto.length < 32)) {
+    throw new Error(
+      "[FATAL SECURITY] TARIFA_SNAPSHOT_SECRET es obligatoria en producción y debe contener al menos 32 caracteres para garantizar la integridad de las firmas de cotizaciones."
+    );
+  }
+
+  if (secreto) {
+    return secreto;
+  }
+
+  // En entornos de desarrollo/test locales exclusivamente: fallback controlado si no se definió la variable
+  return "ruum-dev-snapshot-secret-local-32chars";
 }
 
 /**

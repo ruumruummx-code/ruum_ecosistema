@@ -161,8 +161,8 @@ export default function PaginaPasaporteEmpresarial() {
           <section>
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div>
-                <h2 className="font-display text-xl font-semibold text-ink">Identidad corporativa</h2>
-                <p className="mt-1 font-body text-sm text-text-secondary">{empresa.razon_social ?? "Razón social pendiente"}</p>
+                <h2 className="font-display text-xl font-semibold text-ui-fg">Identidad corporativa</h2>
+                <p className="mt-1 font-body text-sm text-ui-fg-muted">{empresa.razon_social ?? "Razón social pendiente"}</p>
               </div>
               <div className="flex flex-wrap gap-2">
                 <AdminBadge tone={tonoEstadoEmpresa(empresa.estado_operativo)}>{etiqueta(empresa.estado_operativo)}</AdminBadge>
@@ -181,12 +181,12 @@ export default function PaginaPasaporteEmpresarial() {
               <Dato etiqueta="Titular" valor={titular?.nombre ?? "Sin titular"} />
             </dl>
           </section>
-          <section className="border-t border-border-default pt-5 lg:border-l lg:border-t-0 lg:pl-5 lg:pt-0">
-            <h3 className="font-display text-lg font-semibold text-ink">Semaforo de control</h3>
+          <section className="border-t border-ui-line pt-5 lg:border-l lg:border-t-0 lg:pl-5 lg:pt-0">
+            <h3 className="font-display text-lg font-semibold text-ui-fg">Semaforo de control</h3>
             <ul className="mt-4 space-y-3">
               {resumenControl(pasaporte).map((item) => (
-                <li key={item.etiqueta} className="flex items-start justify-between gap-3 border-b border-ink/10 pb-3 last:border-b-0">
-                  <span className="font-body text-sm font-medium text-ink">{item.etiqueta}</span>
+                <li key={item.etiqueta} className="flex items-start justify-between gap-3 border-b border-ui-line pb-3 last:border-b-0">
+                  <span className="font-body text-sm font-medium text-ui-fg">{item.etiqueta}</span>
                   <AdminBadge tone={item.tono}>{item.valor}</AdminBadge>
                 </li>
               ))}
@@ -304,11 +304,11 @@ function VistaControl({ empresa, usuarios, alertas, cambios, versionesCondicione
   return (
     <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_380px]">
       <section>
-        <h2 className="font-display text-lg font-semibold text-ink">Autorizacion corporativa</h2>
+        <h2 className="font-display text-lg font-semibold text-ui-fg">Autorizacion corporativa</h2>
         <div className="mt-4 overflow-x-auto">
           <table className="w-full min-w-[720px] font-body text-sm">
             <thead>
-              <tr className="border-b border-ink/10 text-left text-xs uppercase tracking-wide text-text-tertiary">
+              <tr className="border-b border-ui-line text-left text-xs uppercase tracking-wide text-ui-fg-muted">
                 <th className="py-3 pr-4">Usuario</th>
                 <th className="px-4 py-3">Rol</th>
                 <th className="px-4 py-3">Verificacion</th>
@@ -318,25 +318,25 @@ function VistaControl({ empresa, usuarios, alertas, cambios, versionesCondicione
             </thead>
             <tbody>
               {usuarios.map((usuario) => (
-                <tr key={usuario.id} className="border-b border-ink/5">
-                  <td className="py-3 pr-4 font-medium text-ink">{usuario.nombre}</td>
+                <tr key={usuario.id} className="border-b border-ui-line">
+                  <td className="py-3 pr-4 font-medium text-ui-fg">{usuario.nombre}</td>
                   <td className="px-4 py-3">{etiqueta(usuario.rol)}</td>
                   <td className="px-4 py-3"><AdminBadge tone={tonoVerificacion(usuario.estado_verificacion)}>{etiqueta(usuario.estado_verificacion)}</AdminBadge></td>
                   <td className="px-4 py-3">{usuario.metodo_pago_registrado ? "Registrado" : "Pendiente"}</td>
-                  <td className="py-3 pl-4 text-text-secondary">{usuario.correo_facturacion ?? usuario.telefono ?? "Sin contacto"}</td>
+                  <td className="py-3 pl-4 text-ui-fg-muted">{usuario.correo_facturacion ?? usuario.telefono ?? "Sin contacto"}</td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
       </section>
-      <section className="border-t border-border-default pt-5 lg:border-l lg:border-t-0 lg:pl-5 lg:pt-0">
-        <h2 className="font-display text-lg font-semibold text-ink">Riesgos y pendientes</h2>
+      <section className="border-t border-ui-line pt-5 lg:border-l lg:border-t-0 lg:pl-5 lg:pt-0">
+        <h2 className="font-display text-lg font-semibold text-ui-fg">Riesgos y pendientes</h2>
         {alertas.length === 0 ? (
-          <p className="mt-3 font-body text-sm text-text-secondary">Sin alertas operativas con los datos actuales.</p>
+          <p className="mt-3 font-body text-sm text-ui-fg-muted">Sin alertas operativas con los datos actuales.</p>
         ) : (
           <ul className="mt-3 space-y-2">
-            {alertas.map((alerta) => <li key={alerta} className="rounded-lg border border-status-warning/30 bg-status-warning-soft px-3 py-2 font-body text-sm text-status-warning">{alerta}</li>)}
+            {alertas.map((alerta) => <li key={alerta} className="rounded-lg border border-ui-warning/30 bg-ui-warning-soft px-3 py-2 font-body text-sm text-ui-warning">{alerta}</li>)}
           </ul>
         )}
         <dl className="mt-5 grid gap-3">
@@ -358,11 +358,11 @@ function VistaFlota({ vehiculos, conductores }: { vehiculos: Vehiculo[]; conduct
   return (
     <div className="grid gap-6 xl:grid-cols-2">
       <section>
-        <h2 className="font-display text-lg font-semibold text-ink">Vehiculos</h2>
+        <h2 className="font-display text-lg font-semibold text-ui-fg">Vehiculos</h2>
         <div className="mt-4 overflow-x-auto">
           <table className="w-full min-w-[760px] font-body text-sm">
             <thead>
-              <tr className="border-b border-ink/10 text-left text-xs uppercase tracking-wide text-text-tertiary">
+              <tr className="border-b border-ui-line text-left text-xs uppercase tracking-wide text-ui-fg-muted">
                 <th className="py-3 pr-4">Unidad</th>
                 <th className="px-4 py-3">Placas / VIN</th>
                 <th className="px-4 py-3">Condicion</th>
@@ -373,10 +373,10 @@ function VistaFlota({ vehiculos, conductores }: { vehiculos: Vehiculo[]; conduct
             <tbody>
               {vehiculos.map((vehiculo) => {
                 return (
-                  <tr key={vehiculo.id} className="border-b border-ink/5 align-top">
+                  <tr key={vehiculo.id} className="border-b border-ui-line align-top">
                     <td className="py-3 pr-4">
-                      <p className="font-medium text-ink">{vehiculo.marca} {vehiculo.modelo} {vehiculo.anio}</p>
-                      <p className="text-xs text-text-secondary">{etiqueta(vehiculo.tipo)} · {vehiculo.gama ? etiqueta(vehiculo.gama) : "Sin gama"}</p>
+                      <p className="font-medium text-ui-fg">{vehiculo.marca} {vehiculo.modelo} {vehiculo.anio}</p>
+                      <p className="text-xs text-ui-fg-muted">{etiqueta(vehiculo.tipo)} · {vehiculo.gama ? etiqueta(vehiculo.gama) : "Sin gama"}</p>
                     </td>
                     <td className="px-4 py-3 font-mono-ruum text-xs">{vehiculo.placas ?? "Sin placas"}<br />{vehiculo.vin ?? "Sin VIN"}</td>
                     <td className="px-4 py-3">{vehiculo.condicion ? etiqueta(vehiculo.condicion) : vehiculo.estado_general_declarado ?? "Sin declaracion"}</td>
@@ -394,11 +394,11 @@ function VistaFlota({ vehiculos, conductores }: { vehiculos: Vehiculo[]; conduct
         </div>
       </section>
       <section>
-        <h2 className="font-display text-lg font-semibold text-ink">Conductores</h2>
+        <h2 className="font-display text-lg font-semibold text-ui-fg">Conductores</h2>
         <div className="mt-4 overflow-x-auto">
           <table className="w-full min-w-[700px] font-body text-sm">
             <thead>
-              <tr className="border-b border-ink/10 text-left text-xs uppercase tracking-wide text-text-tertiary">
+              <tr className="border-b border-ui-line text-left text-xs uppercase tracking-wide text-ui-fg-muted">
                 <th className="py-3 pr-4">Conductor</th>
                 <th className="px-4 py-3">Estado</th>
                 <th className="px-4 py-3">Licencia</th>
@@ -407,18 +407,18 @@ function VistaFlota({ vehiculos, conductores }: { vehiculos: Vehiculo[]; conduct
             </thead>
             <tbody>
               {conductores.map((conductor) => (
-                <tr key={conductor.id} className="border-b border-ink/5 align-top">
+                <tr key={conductor.id} className="border-b border-ui-line align-top">
                   <td className="py-3 pr-4">
-                    <Link href={`/conductores/activos/${conductor.id}`} className="font-semibold text-focus-default hover:underline">{conductor.nombre}</Link>
-                    <p className="mt-1 text-xs text-text-secondary">{conductor.telefono ?? "Sin telefono"}</p>
+                    <Link href={`/conductores/activos/${conductor.id}`} className="font-semibold text-ui-brand hover:underline">{conductor.nombre}</Link>
+                    <p className="mt-1 text-xs text-ui-fg-muted">{conductor.telefono ?? "Sin telefono"}</p>
                   </td>
                   <td className="px-4 py-3">
                     <AdminBadge tone={conductor.estado === "activo" ? "success" : "warning"}>{etiqueta(conductor.estado)}</AdminBadge>
-                    <p className="mt-1 text-xs text-text-secondary">{etiqueta(conductor.estado_expediente)}</p>
+                    <p className="mt-1 text-xs text-ui-fg-muted">{etiqueta(conductor.estado_expediente)}</p>
                   </td>
                   <td className="px-4 py-3">
                     <p>{conductor.licencia_tipo ?? "Sin tipo"}</p>
-                    <p className="text-xs text-text-secondary">{conductor.licencia_vigencia ? fecha(conductor.licencia_vigencia) : "Sin vigencia"}</p>
+                    <p className="text-xs text-ui-fg-muted">{conductor.licencia_vigencia ? fecha(conductor.licencia_vigencia) : "Sin vigencia"}</p>
                   </td>
                   <td className="py-3 pl-4">
                     <Checklist items={[["Docs", conductor.documentos_vigentes], ["Antecedentes", conductor.autoriza_verificacion_antecedentes], ["Sin susp.", conductor.declara_sin_suspensiones]]} />
@@ -446,13 +446,13 @@ function VistaTraslados({ traslados }: { traslados: Traslado[] }) {
   return (
     <section>
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <h2 className="font-display text-lg font-semibold text-ink">Historial operativo</h2>
-        <span className="font-body text-sm text-text-secondary">{traslados.length.toLocaleString("es-MX")} traslados vinculados</span>
+        <h2 className="font-display text-lg font-semibold text-ui-fg">Historial operativo</h2>
+        <span className="font-body text-sm text-ui-fg-muted">{traslados.length.toLocaleString("es-MX")} traslados vinculados</span>
       </div>
       <div className="mt-4 overflow-x-auto">
         <table className="w-full min-w-[960px] font-body text-sm">
           <thead>
-            <tr className="border-b border-ink/10 text-left text-xs uppercase tracking-wide text-text-tertiary">
+            <tr className="border-b border-ui-line text-left text-xs uppercase tracking-wide text-ui-fg-muted">
               <th className="py-3 pr-4">Traslado</th>
               <th className="px-4 py-3">Ruta</th>
               <th className="px-4 py-3">Estado</th>
@@ -463,14 +463,14 @@ function VistaTraslados({ traslados }: { traslados: Traslado[] }) {
           </thead>
           <tbody>
             {traslados.slice(0, 60).map((traslado) => (
-              <tr key={traslado.id} className="border-b border-ink/5 align-top">
+              <tr key={traslado.id} className="border-b border-ui-line align-top">
                 <td className="py-3 pr-4">
-                  <Link href={`/viajes/${traslado.id}`} className="font-mono-ruum text-xs font-semibold text-focus-default hover:underline">{traslado.id.slice(0, 8).toUpperCase()}</Link>
-                  <p className="mt-1 text-xs text-text-secondary">{fecha(traslado.creado_en)}</p>
+                  <Link href={`/viajes/${traslado.id}`} className="font-mono-ruum text-xs font-semibold text-ui-brand hover:underline">{traslado.id.slice(0, 8).toUpperCase()}</Link>
+                  <p className="mt-1 text-xs text-ui-fg-muted">{fecha(traslado.creado_en)}</p>
                 </td>
                 <td className="px-4 py-3">
-                  <p className="font-medium text-ink">{traslado.origen_ciudad} {"->"} {traslado.destino_ciudad}</p>
-                  <p className="mt-1 text-xs text-text-secondary">{traslado.origen_direccion} / {traslado.destino_direccion}</p>
+                  <p className="font-medium text-ui-fg">{traslado.origen_ciudad} {"->"} {traslado.destino_ciudad}</p>
+                  <p className="mt-1 text-xs text-ui-fg-muted">{traslado.origen_direccion} / {traslado.destino_direccion}</p>
                 </td>
                 <td className="px-4 py-3"><AdminBadge tone={ESTADOS_TERMINALES.has(traslado.estado) ? "neutral" : "info"}>{etiqueta(traslado.estado)}</AdminBadge></td>
                 <td className="px-4 py-3">{traslado.fecha_hora_programada ? fecha(traslado.fecha_hora_programada) : "Sin programar"}</td>
@@ -494,11 +494,11 @@ function VistaExpediente({ documentos, versionesFiscales, versionesCondiciones, 
   return (
     <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_420px]">
       <section>
-        <h2 className="font-display text-lg font-semibold text-ink">Documentos empresariales</h2>
+        <h2 className="font-display text-lg font-semibold text-ui-fg">Documentos empresariales</h2>
         <div className="mt-4 overflow-x-auto">
           <table className="w-full min-w-[760px] font-body text-sm">
             <thead>
-              <tr className="border-b border-ink/10 text-left text-xs uppercase tracking-wide text-text-tertiary">
+              <tr className="border-b border-ui-line text-left text-xs uppercase tracking-wide text-ui-fg-muted">
                 <th className="py-3 pr-4">Documento</th>
                 <th className="px-4 py-3">Estado</th>
                 <th className="px-4 py-3">Vigencia</th>
@@ -507,14 +507,14 @@ function VistaExpediente({ documentos, versionesFiscales, versionesCondiciones, 
             </thead>
             <tbody>
               {documentos.map((documento) => (
-                <tr key={documento.id} className="border-b border-ink/5">
+                <tr key={documento.id} className="border-b border-ui-line">
                   <td className="py-3 pr-4">
-                    <p className="font-medium text-ink">{documento.nombre}</p>
-                    <p className="text-xs text-text-secondary">{etiqueta(documento.tipo)} · {documento.folio ?? "Sin folio"}</p>
+                    <p className="font-medium text-ui-fg">{documento.nombre}</p>
+                    <p className="text-xs text-ui-fg-muted">{etiqueta(documento.tipo)} · {documento.folio ?? "Sin folio"}</p>
                   </td>
                   <td className="px-4 py-3"><AdminBadge tone={tonoDocumento(documento.estado)}>{etiqueta(documento.estado)}</AdminBadge></td>
                   <td className="px-4 py-3">{periodo(documento.vigente_desde, documento.vigente_hasta)}</td>
-                  <td className="py-3 pl-4">{documento.url ? <a href={documento.url} target="_blank" rel="noreferrer" className="font-semibold text-focus-default hover:underline">Abrir archivo</a> : "Sin archivo"}</td>
+                  <td className="py-3 pl-4">{documento.url ? <a href={documento.url} target="_blank" rel="noreferrer" className="font-semibold text-ui-brand hover:underline">Abrir archivo</a> : "Sin archivo"}</td>
                 </tr>
               ))}
             </tbody>
@@ -525,18 +525,18 @@ function VistaExpediente({ documentos, versionesFiscales, versionesCondiciones, 
         <ListaVersiones titulo="Datos fiscales" versiones={versionesFiscales.map((version) => ({ id: version.id, version: version.version, vigenteHasta: version.vigente_hasta, fecha: version.creado_en, detalle: version.rfc ?? version.razon_social ?? "Sin RFC" }))} />
         <ListaVersiones titulo="Condiciones comerciales" versiones={versionesCondiciones.map((version) => ({ id: version.id, version: version.version, vigenteHasta: version.vigente_hasta, fecha: version.creado_en, detalle: `${moneda(version.limite_credito_mxn)} · ${version.dias_credito ?? 0} dias` }))} />
         <section>
-          <h3 className="font-display text-base font-semibold text-ink">Cambios sensibles</h3>
+          <h3 className="font-display text-base font-semibold text-ui-fg">Cambios sensibles</h3>
           <ul className="mt-3 space-y-2">
             {cambios.slice(0, 8).map((cambio) => (
-              <li key={cambio.id} className="border-b border-ink/10 pb-2 last:border-b-0">
+              <li key={cambio.id} className="border-b border-ui-line pb-2 last:border-b-0">
                 <div className="flex items-center justify-between gap-2">
-                  <span className="font-body text-sm font-medium text-ink">{etiqueta(cambio.tipo)}</span>
+                  <span className="font-body text-sm font-medium text-ui-fg">{etiqueta(cambio.tipo)}</span>
                   <AdminBadge tone={cambio.estado === "pendiente" ? "warning" : "neutral"}>{etiqueta(cambio.estado)}</AdminBadge>
                 </div>
-                <p className="mt-1 font-body text-xs text-text-secondary">{fecha(cambio.solicitado_en)} · {cambio.motivo ?? "Sin motivo"}</p>
+                <p className="mt-1 font-body text-xs text-ui-fg-muted">{fecha(cambio.solicitado_en)} · {cambio.motivo ?? "Sin motivo"}</p>
               </li>
             ))}
-            {cambios.length === 0 && <li className="font-body text-sm text-text-secondary">Sin cambios sensibles registrados.</li>}
+            {cambios.length === 0 && <li className="font-body text-sm text-ui-fg-muted">Sin cambios sensibles registrados.</li>}
           </ul>
         </section>
       </section>
@@ -547,11 +547,11 @@ function VistaExpediente({ documentos, versionesFiscales, versionesCondiciones, 
 function TablaLugares({ titulo, lugares }: { titulo: string; lugares: ReturnType<typeof agruparLugares> }) {
   return (
     <section>
-      <h2 className="font-display text-lg font-semibold text-ink">{titulo}</h2>
+      <h2 className="font-display text-lg font-semibold text-ui-fg">{titulo}</h2>
       <div className="mt-4 overflow-x-auto">
         <table className="w-full min-w-[720px] font-body text-sm">
           <thead>
-            <tr className="border-b border-ink/10 text-left text-xs uppercase tracking-wide text-text-tertiary">
+            <tr className="border-b border-ui-line text-left text-xs uppercase tracking-wide text-ui-fg-muted">
               <th className="py-3 pr-4">Lugar</th>
               <th className="px-4 py-3">Contacto</th>
               <th className="px-4 py-3 text-right">Traslados</th>
@@ -561,20 +561,20 @@ function TablaLugares({ titulo, lugares }: { titulo: string; lugares: ReturnType
           </thead>
           <tbody>
             {lugares.map((lugar) => (
-              <tr key={`${lugar.ciudad}-${lugar.direccion}-${lugar.referencias ?? ""}`} className="border-b border-ink/5 align-top">
+              <tr key={`${lugar.ciudad}-${lugar.direccion}-${lugar.referencias ?? ""}`} className="border-b border-ui-line align-top">
                 <td className="py-3 pr-4">
-                  <p className="font-medium text-ink">{lugar.ciudad}</p>
-                  <p className="mt-1 text-xs text-text-secondary">{lugar.direccion}</p>
-                  {lugar.referencias && <p className="mt-1 text-xs text-text-tertiary">{lugar.referencias}</p>}
+                  <p className="font-medium text-ui-fg">{lugar.ciudad}</p>
+                  <p className="mt-1 text-xs text-ui-fg-muted">{lugar.direccion}</p>
+                  {lugar.referencias && <p className="mt-1 text-xs text-ui-fg-muted">{lugar.referencias}</p>}
                 </td>
-                <td className="px-4 py-3">{lugar.contacto}<br /><span className="text-xs text-text-secondary">{lugar.telefono}</span></td>
+                <td className="px-4 py-3">{lugar.contacto}<br /><span className="text-xs text-ui-fg-muted">{lugar.telefono}</span></td>
                 <td className="px-4 py-3 text-right font-mono-ruum">{lugar.total}</td>
                 <td className="px-4 py-3">{fecha(lugar.ultimo)}</td>
                 <td className="py-3 pl-4 font-mono-ruum text-xs">{lugar.lat !== null && lugar.lng !== null ? `${lugar.lat.toFixed(5)}, ${lugar.lng.toFixed(5)}` : "Sin coordenadas"}</td>
               </tr>
             ))}
             {lugares.length === 0 && (
-              <tr><td colSpan={5} className="py-6 text-center text-text-secondary">Sin lugares registrados en traslados de esta empresa.</td></tr>
+              <tr><td colSpan={5} className="py-6 text-center text-ui-fg-muted">Sin lugares registrados en traslados de esta empresa.</td></tr>
             )}
           </tbody>
         </table>
@@ -585,13 +585,13 @@ function TablaLugares({ titulo, lugares }: { titulo: string; lugares: ReturnType
 
 function Kpi({ etiqueta, valor, detalle, tono }: { etiqueta: string; valor: ReactNode; detalle: string; tono: TonoBadge }) {
   return (
-    <section className="rounded-lg border border-border-default bg-surface-primary p-4">
+    <section className="rounded-lg border border-ui-line bg-ui-card p-4">
       <div className="flex items-start justify-between gap-3">
-        <p className="font-body text-sm font-medium text-text-secondary">{etiqueta}</p>
+        <p className="font-body text-sm font-medium text-ui-fg-muted">{etiqueta}</p>
         <AdminBadge tone={tono}>Hoy</AdminBadge>
       </div>
-      <p className="mt-3 font-display text-2xl font-semibold text-ink">{valor}</p>
-      <p className="mt-1 font-body text-xs text-text-tertiary">{detalle}</p>
+      <p className="mt-3 font-display text-2xl font-semibold text-ui-fg">{valor}</p>
+      <p className="mt-1 font-body text-xs text-ui-fg-muted">{detalle}</p>
     </section>
   );
 }
@@ -599,8 +599,8 @@ function Kpi({ etiqueta, valor, detalle, tono }: { etiqueta: string; valor: Reac
 function Dato({ etiqueta, valor, mono = false }: { etiqueta: string; valor?: ReactNode | null; mono?: boolean }) {
   return (
     <div>
-      <dt className="font-body text-xs font-semibold uppercase tracking-wide text-text-tertiary">{etiqueta}</dt>
-      <dd className={`mt-1 text-sm text-ink ${mono ? "font-mono-ruum" : "font-body"}`}>{valor ?? "Pendiente"}</dd>
+      <dt className="font-body text-xs font-semibold uppercase tracking-wide text-ui-fg-muted">{etiqueta}</dt>
+      <dd className={`mt-1 text-sm text-ui-fg ${mono ? "font-mono-ruum" : "font-body"}`}>{valor ?? "Pendiente"}</dd>
     </div>
   );
 }
@@ -618,18 +618,18 @@ function Checklist({ items }: { items: Array<[string, boolean]> }) {
 function ListaVersiones({ titulo, versiones }: { titulo: string; versiones: Array<{ id: string; version: number; vigenteHasta: string | null; fecha: string; detalle: string }> }) {
   return (
     <section>
-      <h3 className="font-display text-base font-semibold text-ink">{titulo}</h3>
+      <h3 className="font-display text-base font-semibold text-ui-fg">{titulo}</h3>
       <ul className="mt-3 space-y-2">
         {versiones.slice(0, 5).map((version) => (
-          <li key={version.id} className="border-b border-ink/10 pb-2 last:border-b-0">
+          <li key={version.id} className="border-b border-ui-line pb-2 last:border-b-0">
             <div className="flex items-center justify-between gap-2">
-              <span className="font-body text-sm font-medium text-ink">Version {version.version}</span>
+              <span className="font-body text-sm font-medium text-ui-fg">Version {version.version}</span>
               <AdminBadge tone={version.vigenteHasta ? "neutral" : "success"}>{version.vigenteHasta ? "Historica" : "Vigente"}</AdminBadge>
             </div>
-            <p className="mt-1 font-body text-xs text-text-secondary">{version.detalle} · {fecha(version.fecha)}</p>
+            <p className="mt-1 font-body text-xs text-ui-fg-muted">{version.detalle} · {fecha(version.fecha)}</p>
           </li>
         ))}
-        {versiones.length === 0 && <li className="font-body text-sm text-text-secondary">Sin versiones registradas.</li>}
+        {versiones.length === 0 && <li className="font-body text-sm text-ui-fg-muted">Sin versiones registradas.</li>}
       </ul>
     </section>
   );

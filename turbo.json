@@ -1,7 +1,7 @@
 {
   "$schema": "https://turborepo.com/schema.json",
   "ui": "stream",
-  "globalDependencies": ["tsconfig.base.json", ".npmrc"],
+  "globalDependencies": ["tsconfig.json", ".npmrc"],
   "globalEnv": ["CI", "VERCEL*"],
   "tasks": {
     "build": {

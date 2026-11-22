@@ -367,9 +367,9 @@ async function enriquecerFila(fila: FilaCsv, numero: number): Promise<FilaPreval
 }
 
 function estadoCarga(estado: CargaTrasladosMasivosAdmin["estado"]) {
-  if (estado === "procesada") return "border-status-success/30 bg-status-success-soft text-status-success";
-  if (estado === "rechazada" || estado === "cancelada") return "border-status-error/25 bg-status-error-soft text-status-error";
-  return "border-status-warning/40 bg-status-warning-soft text-status-warning";
+  if (estado === "procesada") return "border-ui-success/30 bg-ui-success-soft text-ui-success";
+  if (estado === "rechazada" || estado === "cancelada") return "border-ui-danger/25 bg-ui-danger-soft text-ui-danger";
+  return "border-ui-warning/40 bg-ui-warning-soft text-ui-warning";
 }
 
 function fecha(fechaIso: string) {
@@ -610,14 +610,14 @@ export default function PaginaTrasladosMasivosAdmin() {
         <AdminPanel>
           <div className="grid gap-4 md:grid-cols-2">
             <label className="grid gap-1.5">
-              <span className="font-body text-xs font-semibold uppercase tracking-wide text-text-tertiary">Empresa</span>
+              <span className="font-body text-xs font-semibold uppercase tracking-wide text-ui-fg-muted">Empresa</span>
               <select
                 value={empresaId}
                 onChange={(event) => {
                   setEmpresaId(event.target.value);
                   setUsuarioId("");
                 }}
-                className="rounded-lg border border-ink/20 bg-surface-primary px-3.5 py-2.5 font-body text-sm text-ink focus:border-focus-default focus:outline-none focus:ring-2 focus:ring-focus-default/20"
+                className="rounded-lg border border-ui-line-strong bg-ui-card px-3.5 py-2.5 font-body text-sm text-ui-fg focus:border-ui-focus focus:outline-none focus:ring-2 focus:ring-ui-ring"
               >
                 <option value="">Seleccionar empresa</option>
                 {empresas.map((empresa: Empresa) => (
@@ -627,11 +627,11 @@ export default function PaginaTrasladosMasivosAdmin() {
             </label>
 
             <label className="grid gap-1.5">
-              <span className="font-body text-xs font-semibold uppercase tracking-wide text-text-tertiary">Usuario solicitante</span>
+              <span className="font-body text-xs font-semibold uppercase tracking-wide text-ui-fg-muted">Usuario solicitante</span>
               <select
                 value={usuarioId}
                 onChange={(event) => setUsuarioId(event.target.value)}
-                className="rounded-lg border border-ink/20 bg-surface-primary px-3.5 py-2.5 font-body text-sm text-ink focus:border-focus-default focus:outline-none focus:ring-2 focus:ring-focus-default/20"
+                className="rounded-lg border border-ui-line-strong bg-ui-card px-3.5 py-2.5 font-body text-sm text-ui-fg focus:border-ui-focus focus:outline-none focus:ring-2 focus:ring-ui-ring"
                 disabled={!empresaId}
               >
                 <option value="">Seleccionar usuario</option>
@@ -647,21 +647,21 @@ export default function PaginaTrasladosMasivosAdmin() {
           <div className="mt-5 grid gap-3">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div>
-                <p className="font-body text-sm font-semibold text-ink">Orden operativa CSV</p>
-                <p className="mt-1 font-body text-sm text-ink/55">Máximo según rol y 5 MB. Captura vehículo, dirección humana, contactos y programación; Ruum completa CP, ruta y clasificación.</p>
+                <p className="font-body text-sm font-semibold text-ui-fg">Orden operativa CSV</p>
+                <p className="mt-1 font-body text-sm text-ui-fg-muted">Máximo según rol y 5 MB. Captura vehículo, dirección humana, contactos y programación; Ruum completa CP, ruta y clasificación.</p>
               </div>
               <div className="flex flex-wrap gap-2">
                 <a
                   href="/api/plantillas/viajes-masivos"
                   download="plantilla-traslados-masivos-ruum.xlsx"
-                  className="rounded-lg border border-status-info bg-status-info px-3 py-2 font-body text-sm font-semibold text-surface-primary transition-colors hover:bg-status-info/90"
+                  className="rounded-lg border border-ui-brand bg-ui-brand px-3 py-2 font-body text-sm font-semibold text-ui-on-brand transition-colors hover:bg-ui-brand/90"
                 >
                   Descargar orden XLSX
                 </a>
                 <a
                   href={`data:text/csv;charset=utf-8,${encodeURIComponent(EJEMPLO_CSV)}`}
                   download="plantilla-traslados-masivos-ruum.csv"
-                  className="rounded-lg border border-ink/15 px-3 py-2 font-body text-sm font-semibold text-text-secondary transition-colors hover:border-status-info/40 hover:text-status-info"
+                  className="rounded-lg border border-ui-line px-3 py-2 font-body text-sm font-semibold text-ui-fg-muted transition-colors hover:border-ui-brand/40 hover:text-ui-brand-soft-fg"
                 >
                   Orden CSV
                 </a>
@@ -671,13 +671,13 @@ export default function PaginaTrasladosMasivosAdmin() {
               type="file"
               accept=".csv,text/csv"
               onChange={(event) => void leerArchivo(event.target.files?.[0] ?? null)}
-              className="rounded-lg border border-dashed border-ink/25 bg-surface-primary px-3.5 py-4 font-body text-sm text-ink file:mr-4 file:rounded-md file:border-0 file:bg-ink file:px-3 file:py-2 file:font-body file:text-sm file:font-semibold file:text-mist"
+              className="rounded-lg border border-dashed border-ui-line-strong bg-ui-card px-3.5 py-4 font-body text-sm text-ui-fg file:mr-4 file:rounded-md file:border-0 file:bg-ui-brand file:px-3 file:py-2 file:font-body file:text-sm file:font-semibold file:text-ui-on-brand"
             />
             {erroresArchivo.length > 0 && (
               <Aviso tono="danger">Formato inválido: {erroresArchivo.slice(0, 4).join(", ")}</Aviso>
             )}
             {hashArchivo && (
-              <p className="font-mono-ruum text-admin-secundario text-text-tertiary">
+              <p className="font-mono-ruum text-xs text-ui-fg-muted">
                 SHA-256 {hashArchivo.slice(0, 16)}... · {Math.round(tamanoArchivo / 1024)} KB · {mimeArchivo}
               </p>
             )}
@@ -699,20 +699,20 @@ export default function PaginaTrasladosMasivosAdmin() {
                 <tbody>
                   {filasCsv.slice(0, 80).map((fila) => (
                     <tr key={fila.numero}>
-                      <td className="font-mono-ruum text-admin-tabla">{fila.numero}</td>
+                      <td className="font-mono-ruum text-sm">{fila.numero}</td>
                       <td>{fila.datos.referencia_externa || "Sin referencia"}</td>
                       <td>{fila.datos.vehiculo_marca} {fila.datos.vehiculo_modelo}</td>
                       <td>{fila.datos.origen_ciudad || "Origen"} → {fila.datos.destino_ciudad || "Destino"}</td>
                       <td>
                         {fila.errores.length === 0 ? (
-                          <span className="rounded-full border border-status-success/30 bg-status-success-soft px-2.5 py-1 font-body text-xs font-semibold text-status-success">
+                          <span className="rounded-full border border-ui-success/30 bg-ui-success-soft px-2.5 py-1 font-body text-xs font-semibold text-ui-success">
                             {fila.advertencias.length > 0 ? `Lista con ${fila.advertencias.length} alerta(s)` : "Lista"}
                           </span>
                         ) : (
-                          <span className="font-body text-admin-secundario text-status-error">{fila.errores.join(", ")}</span>
+                          <span className="font-body text-xs text-ui-danger">{fila.errores.join(", ")}</span>
                         )}
                         {fila.errores.length === 0 && fila.advertencias.length > 0 && (
-                          <p className="mt-1 max-w-md font-body text-xs text-text-tertiary">{fila.advertencias.slice(0, 2).join(" · ")}</p>
+                          <p className="mt-1 max-w-md font-body text-xs text-ui-fg-muted">{fila.advertencias.slice(0, 2).join(" · ")}</p>
                         )}
                       </td>
                     </tr>
@@ -724,39 +724,39 @@ export default function PaginaTrasladosMasivosAdmin() {
         </AdminPanel>
 
         <AdminPanel>
-          <p className="font-body text-xs font-semibold uppercase tracking-wide text-text-tertiary">Resumen</p>
+          <p className="font-body text-xs font-semibold uppercase tracking-wide text-ui-fg-muted">Resumen</p>
           <dl className="mt-4 grid gap-3">
             <div className="flex items-center justify-between">
-              <dt className="font-body text-sm text-text-secondary">Archivo</dt>
-              <dd className="font-body text-sm font-semibold text-ink">{nombreArchivo || "Pendiente"}</dd>
+              <dt className="font-body text-sm text-ui-fg-muted">Archivo</dt>
+              <dd className="font-body text-sm font-semibold text-ui-fg">{nombreArchivo || "Pendiente"}</dd>
             </div>
             <div className="flex items-center justify-between">
-              <dt className="font-body text-sm text-text-secondary">Filas leídas</dt>
-              <dd className="font-mono-ruum text-sm text-ink">{filasCsv.length}</dd>
+              <dt className="font-body text-sm text-ui-fg-muted">Filas leídas</dt>
+              <dd className="font-mono-ruum text-sm text-ui-fg">{filasCsv.length}</dd>
             </div>
             <div className="flex items-center justify-between">
-              <dt className="font-body text-sm text-text-secondary">Listas</dt>
-              <dd className="font-mono-ruum text-sm text-status-success">{filasValidas.length}</dd>
+              <dt className="font-body text-sm text-ui-fg-muted">Listas</dt>
+              <dd className="font-mono-ruum text-sm text-ui-success">{filasValidas.length}</dd>
             </div>
             <div className="flex items-center justify-between">
-              <dt className="font-body text-sm text-text-secondary">Con error</dt>
-              <dd className="font-mono-ruum text-sm text-status-error">{filasConError.length}</dd>
+              <dt className="font-body text-sm text-ui-fg-muted">Con error</dt>
+              <dd className="font-mono-ruum text-sm text-ui-danger">{filasConError.length}</dd>
             </div>
             <div className="flex items-center justify-between">
-              <dt className="font-body text-sm text-text-secondary">Hash</dt>
-              <dd className="font-mono-ruum text-xs text-ink">{hashArchivo ? `${hashArchivo.slice(0, 10)}...` : "Pendiente"}</dd>
+              <dt className="font-body text-sm text-ui-fg-muted">Hash</dt>
+              <dd className="font-mono-ruum text-xs text-ui-fg">{hashArchivo ? `${hashArchivo.slice(0, 10)}...` : "Pendiente"}</dd>
             </div>
           </dl>
           {cargaActiva && (
-            <div className="mt-4 rounded-lg border border-ink/10 p-3">
+            <div className="mt-4 rounded-lg border border-ui-line p-3">
               <div className="flex items-center justify-between font-body text-sm">
                 <span>{cargaActiva.estado.replaceAll("_", " ")}</span>
                 <span className="font-mono-ruum">{progresoCarga(cargaActiva)}%</span>
               </div>
-              <div className="mt-2 h-2 overflow-hidden rounded-full bg-ink/10">
-                <div className="h-full bg-status-info" style={{ width: `${progresoCarga(cargaActiva)}%` }} />
+              <div className="mt-2 h-2 overflow-hidden rounded-full bg-ui-muted">
+                <div className="h-full bg-ui-brand" style={{ width: `${progresoCarga(cargaActiva)}%` }} />
               </div>
-              <p className="mt-2 font-body text-xs text-text-tertiary">
+              <p className="mt-2 font-body text-xs text-ui-fg-muted">
                 {cargaActiva.filas_procesadas}/{cargaActiva.total_filas} filas procesadas
               </p>
             </div>
@@ -765,7 +765,7 @@ export default function PaginaTrasladosMasivosAdmin() {
             {procesando ? "Procesando..." : "Encolar y procesar"}
           </Button>
           {resultado && (
-            <p className="mt-3 font-body text-sm text-text-secondary">
+            <p className="mt-3 font-body text-sm text-ui-fg-muted">
               Lote {resultado.carga_id.slice(0, 8).toUpperCase()} · {resultado.estado.replaceAll("_", " ")} · {resultado.filas_procesadas}/{resultado.total_filas}
             </p>
           )}
@@ -788,11 +788,11 @@ export default function PaginaTrasladosMasivosAdmin() {
           <tbody>
             {cargando ? (
               <tr>
-                <td colSpan={6} className="px-4 py-6 text-center text-text-tertiary">Cargando...</td>
+                <td colSpan={6} className="px-4 py-6 text-center text-ui-fg-muted">Cargando...</td>
               </tr>
             ) : cargas.length === 0 ? (
               <tr>
-                <td colSpan={6} className="px-4 py-6 text-center text-text-tertiary">
+                <td colSpan={6} className="px-4 py-6 text-center text-ui-fg-muted">
                   No hay cargas masivas registradas.
                 </td>
               </tr>
@@ -801,30 +801,30 @@ export default function PaginaTrasladosMasivosAdmin() {
                 const errores = (filasPorCarga.get(carga.id) ?? []).filter((fila) => fila.estado === "error");
                 return (
                   <tr key={carga.id}>
-                    <td className="font-mono-ruum text-admin-tabla text-status-info">{carga.id.slice(0, 8).toUpperCase()}</td>
+                    <td className="font-mono-ruum text-sm text-ui-brand-soft-fg">{carga.id.slice(0, 8).toUpperCase()}</td>
                     <td>
                       {carga.nombre_archivo}
-                      {carga.hash_archivo && <p className="font-mono-ruum text-admin-secundario text-text-tertiary">{carga.hash_archivo.slice(0, 12)}...</p>}
+                      {carga.hash_archivo && <p className="font-mono-ruum text-xs text-ui-fg-muted">{carga.hash_archivo.slice(0, 12)}...</p>}
                     </td>
                     <td>
                       <div className="min-w-36">
-                        <div className="flex items-center justify-between font-body text-xs text-text-secondary">
+                        <div className="flex items-center justify-between font-body text-xs text-ui-fg-muted">
                           <span>{carga.filas_procesadas}/{carga.total_filas}</span>
                           <span>{progresoCarga(carga)}%</span>
                         </div>
-                        <div className="mt-1 h-2 overflow-hidden rounded-full bg-ink/10">
-                          <div className="h-full bg-status-info" style={{ width: `${progresoCarga(carga)}%` }} />
+                        <div className="mt-1 h-2 overflow-hidden rounded-full bg-ui-muted">
+                          <div className="h-full bg-ui-brand" style={{ width: `${progresoCarga(carga)}%` }} />
                         </div>
-                        <p className="mt-1 text-admin-secundario">{carga.filas_creadas} creadas · {carga.filas_error} error</p>
+                        <p className="mt-1 text-xs">{carga.filas_creadas} creadas · {carga.filas_error} error</p>
                       </div>
                     </td>
                     <td>
                       <span className={`rounded-full border px-2.5 py-1 font-body text-xs font-semibold ${estadoCarga(carga.estado)}`}>
                         {carga.estado.replaceAll("_", " ")}
                       </span>
-                      {errores[0]?.errores[0] && <p className="mt-1 text-admin-secundario text-status-error">{errores[0].errores[0]}</p>}
+                      {errores[0]?.errores[0] && <p className="mt-1 text-xs text-ui-danger">{errores[0].errores[0]}</p>}
                     </td>
-                    <td className="font-body text-sm text-text-secondary">{fecha(carga.creado_en)}</td>
+                    <td className="font-body text-sm text-ui-fg-muted">{fecha(carga.creado_en)}</td>
                     <td>
                       <div className="flex flex-wrap gap-2">
                         {(carga.estado === "pendiente" || carga.estado === "procesando") && (

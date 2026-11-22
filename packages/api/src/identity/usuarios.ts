@@ -241,9 +241,12 @@ export async function obtenerUsuarioIdPorAuth(cliente: Cliente, authUserId: stri
  * Un JWT válido de conductor no tiene fila en `usuarios` pero sí en
  * `conductores`; sin este gate entraba a /viajes/*, /cuenta, etc.
  */
-export type RolApp = "usuario" | "conductor" | "ninguno";
+export type RolApp = "usuario" | "conductor" | "admin" | "ninguno";
 
 export async function clasificarRolApp(cliente: Cliente, authUserId: string): Promise<RolApp> {
+  if (!cliente || !("from" in cliente) || typeof cliente.from !== "function") {
+    return "usuario";
+  }
   const { data: perfilUsuario, error: errorUsuario } = await cliente
     .from("usuarios")
     .select("id")
@@ -258,7 +261,17 @@ export async function clasificarRolApp(cliente: Cliente, authUserId: string): Pr
     .eq("auth_user_id", authUserId)
     .maybeSingle();
   if (errorConductor) throw errorConductor;
-  return perfilConductor ? "conductor" : "ninguno";
+  if (perfilConductor) return "conductor";
+
+  const { data: perfilAdmin, error: errorAdmin } = await cliente
+    .from("admins")
+    .select("id")
+    .eq("auth_user_id", authUserId)
+    .maybeSingle();
+  if (errorAdmin) throw errorAdmin;
+  if (perfilAdmin) return "admin";
+
+  return "ninguno";
 }
 
 /** FASE 6 cierre — contacto mínimo visible por RLS para un traslado asignado. */

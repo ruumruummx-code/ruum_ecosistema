@@ -287,7 +287,7 @@ El proyecto usa Capacitor con una configuracion especial:
   webDir: "cap-shell",
   server: {
     androidScheme: "https",
-    url: process.env.RUUM_CAPACITOR_SERVER_URL || "https://www.concer.ruumruum-moviliax.online"
+    url: process.env.RUUM_CAPACITOR_SERVER_URL || "https://concer.ruumruum-moviliax.online"
   }
 }
 ```

@@ -156,18 +156,18 @@ export function AdminDataTable<T>({
 
   return (
     <section className="admin-table-card mt-3" aria-busy={loading}>
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-ink/10 px-4 py-3">
-        <div aria-live="polite" className="font-body text-sm text-text-secondary">
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-ui-line px-4 py-3">
+        <div aria-live="polite" className="font-body text-sm text-ui-fg-muted">
           {loading ? "Cargando resultados" : `${sortedRows.length.toLocaleString("es-MX")} resultados · ${selectedIds.size} seleccionados`}
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <details className="relative">
-            <summary className="cursor-pointer rounded-lg border border-ink/20 px-3 py-2 font-body text-admin-boton font-semibold text-text-secondary">
+            <summary className="cursor-pointer rounded-lg border border-ui-line-strong px-3 py-2 font-body text-sm font-semibold text-ui-fg-muted">
               Columnas
             </summary>
-            <div className="absolute right-0 z-20 mt-2 min-w-56 rounded-lg border border-border-default bg-surface-primary p-3 shadow-[var(--ruum-shadow-2)]">
+            <div className="absolute right-0 z-20 mt-2 min-w-56 rounded-lg border border-ui-line bg-ui-card p-3 shadow-ui-md">
               {columns.map((column) => (
-                <label key={column.id} className="flex items-center gap-2 py-1 font-body text-sm text-text-secondary">
+                <label key={column.id} className="flex items-center gap-2 py-1 font-body text-sm text-ui-fg-muted">
                   <input type="checkbox" checked={visibleColumns.has(column.id)} onChange={() => toggleColumn(column.id)} />
                   {column.header}
                 </label>
@@ -177,7 +177,7 @@ export function AdminDataTable<T>({
         </div>
       </div>
       {partialError && (
-        <div className="border-b border-status-warning/25 bg-status-warning-soft px-4 py-3 font-body text-sm text-status-warning">
+        <div className="border-b border-ui-warning/25 bg-ui-warning-soft px-4 py-3 font-body text-sm text-ui-warning">
           {partialError}
         </div>
       )}
@@ -206,15 +206,15 @@ export function AdminDataTable<T>({
         </thead>
         <tbody>
           {loading ? (
-            <tr><td colSpan={totalColumnas} className="px-4 py-8 text-center text-text-secondary">Cargando registros…</td></tr>
+            <tr><td colSpan={totalColumnas} className="px-4 py-8 text-center text-ui-fg-muted">Cargando registros…</td></tr>
           ) : pageRows.length === 0 ? (
             <tr>
-              <td colSpan={totalColumnas} className="px-4 py-10 text-center text-text-secondary">
+              <td colSpan={totalColumnas} className="px-4 py-10 text-center text-ui-fg-muted">
                 <div className="mx-auto grid max-w-md gap-3">
-                  <div className="mx-auto flex size-12 items-center justify-center rounded-full border border-status-info/25 bg-status-info-soft font-display text-lg font-semibold text-status-info" aria-hidden="true">
+                  <div className="mx-auto flex size-12 items-center justify-center rounded-full border border-ui-brand/25 bg-ui-brand-soft font-display text-lg font-semibold text-ui-brand-soft-fg" aria-hidden="true">
                     0
                   </div>
-                  <div className="font-body text-sm text-text-secondary">{emptyMessage}</div>
+                  <div className="font-body text-sm text-ui-fg-muted">{emptyMessage}</div>
                   {emptyAction}
                 </div>
               </td>
@@ -235,18 +235,18 @@ export function AdminDataTable<T>({
                   <td className="px-4 py-3 text-right" data-label="Acciones">
                     <details className="group relative inline-flex">
                       <summary
-                        className="grid size-11 cursor-pointer list-none place-items-center rounded-full border border-ink/15 bg-surface-primary font-mono-ruum text-lg leading-none text-text-secondary transition hover:border-status-info/35 hover:bg-status-info-soft hover:text-status-info focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-1 focus-visible:outline-[var(--ruum-focus)] group-open:border-status-info/35 group-open:bg-status-info-soft group-open:text-status-info"
+                        className="grid size-11 cursor-pointer list-none place-items-center rounded-full border border-ui-line bg-ui-card font-mono-ruum text-lg leading-none text-ui-fg-muted transition hover:border-ui-brand/35 hover:bg-ui-brand-soft hover:text-ui-brand-soft-fg focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-1 focus-visible:outline-ui-focus group-open:border-ui-brand/35 group-open:bg-ui-brand-soft group-open:text-ui-brand-soft-fg"
                         aria-label={`Abrir acciones de ${rowId}`}
                       >
                         ⋮
                       </summary>
-                      <div className="absolute right-0 top-10 z-30 min-w-44 overflow-hidden rounded-lg border border-border-default bg-surface-primary py-1 text-left shadow-[var(--ruum-shadow-3)]">
+                      <div className="absolute right-0 top-10 z-30 min-w-44 overflow-hidden rounded-lg border border-ui-line bg-ui-card py-1 text-left shadow-ui-md">
                         {rowActions.map((action) => action.href ? (
-                          <Link key={action.label} href={action.href(row)} className="block px-3 py-2 font-body text-sm font-semibold text-text-secondary hover:bg-surface-secondary hover:text-ink">
+                          <Link key={action.label} href={action.href(row)} className="block px-3 py-2 font-body text-sm font-semibold text-ui-fg-muted hover:bg-ui-muted hover:text-ui-fg">
                             {action.label}
                           </Link>
                         ) : (
-                          <button key={action.label} type="button" onClick={() => action.onClick?.(row)} className="block w-full px-3 py-2 text-left font-body text-sm font-semibold text-text-secondary hover:bg-surface-secondary hover:text-ink">
+                          <button key={action.label} type="button" onClick={() => action.onClick?.(row)} className="block w-full px-3 py-2 text-left font-body text-sm font-semibold text-ui-fg-muted hover:bg-ui-muted hover:text-ui-fg">
                             {action.label}
                           </button>
                         ))}
@@ -261,24 +261,24 @@ export function AdminDataTable<T>({
       </table>
       </div>
       {!hidePagination && (
-      <div className="flex flex-wrap items-center justify-between gap-3 border-t border-ink/10 px-4 py-3">
-        <label className="font-body text-sm text-text-secondary">
+      <div className="flex flex-wrap items-center justify-between gap-3 border-t border-ui-line px-4 py-3">
+        <label className="font-body text-sm text-ui-fg-muted">
           Filas
-          <select className="ml-2 rounded-lg border border-ink/20 bg-surface-primary px-2 py-1" value={pageSize} onChange={(event) => setPageSize(Number(event.target.value))}>
+          <select className="ml-2 rounded-lg border border-ui-line-strong bg-ui-card px-2 py-1" value={pageSize} onChange={(event) => setPageSize(Number(event.target.value))}>
             {pageSizeOptions.map((option) => <option key={option} value={option}>{option}</option>)}
           </select>
         </label>
         <div className="flex items-center gap-2">
-          <button type="button" aria-label="Página anterior" className="min-h-11 rounded-lg border border-ink/20 px-3 py-1.5 text-sm disabled:opacity-50" disabled={pageSafe <= 1} onClick={() => setPage((value) => Math.max(1, value - 1))}>Anterior</button>
-          <span className="font-body text-sm text-text-secondary" role="status" aria-live="polite">Página {pageSafe} de {totalPages}</span>
-          <button type="button" aria-label="Página siguiente" className="min-h-11 rounded-lg border border-ink/20 px-3 py-1.5 text-sm disabled:opacity-50" disabled={pageSafe >= totalPages} onClick={() => setPage((value) => Math.min(totalPages, value + 1))}>Siguiente</button>
+          <button type="button" aria-label="Página anterior" className="min-h-11 rounded-lg border border-ui-line-strong px-3 py-1.5 text-sm disabled:opacity-50" disabled={pageSafe <= 1} onClick={() => setPage((value) => Math.max(1, value - 1))}>Anterior</button>
+          <span className="font-body text-sm text-ui-fg-muted" role="status" aria-live="polite">Página {pageSafe} de {totalPages}</span>
+          <button type="button" aria-label="Página siguiente" className="min-h-11 rounded-lg border border-ui-line-strong px-3 py-1.5 text-sm disabled:opacity-50" disabled={pageSafe >= totalPages} onClick={() => setPage((value) => Math.min(totalPages, value + 1))}>Siguiente</button>
         </div>
       </div>
       )}
       {bulkActions.length > 0 && selectedRows.length > 0 && (
-        <div className="fixed inset-x-4 bottom-4 z-40 mx-auto flex max-w-4xl flex-wrap items-center justify-between gap-3 rounded-xl border border-ink/10 bg-surface-strong px-4 py-3 text-text-main shadow-[var(--ruum-shadow-4)]">
+        <div className="fixed inset-x-4 bottom-4 z-40 mx-auto flex max-w-4xl flex-wrap items-center justify-between gap-3 rounded-xl border border-ui-line bg-ui-card px-4 py-3 text-ui-fg shadow-ui-md">
           <p className="font-body text-sm font-semibold">
-            <span className="font-mono-ruum text-signal">{selectedRows.length.toLocaleString("es-MX")}</span> seleccionado{selectedRows.length === 1 ? "" : "s"}
+            <span className="font-mono-ruum text-ui-brand">{selectedRows.length.toLocaleString("es-MX")}</span> seleccionado{selectedRows.length === 1 ? "" : "s"}
           </p>
           <div className="flex flex-wrap items-center gap-2">
             {bulkActions.map((action) => (
@@ -287,17 +287,17 @@ export function AdminDataTable<T>({
                 type="button"
                 onClick={() => action.onClick(selectedRows)}
                 className={[
-                  "rounded-lg border px-3 py-2 font-body text-admin-boton font-semibold transition-colors",
+                  "rounded-lg border px-3 py-2 font-body text-sm font-semibold transition-colors",
                   action.destructive || action.requiresConfirmation
-                    ? "border-status-warning/50 text-status-warning hover:bg-status-warning-soft"
-                    : "border-text-main/15 text-text-main hover:border-signal/50 hover:bg-text-main/10"
+                    ? "border-ui-warning/50 text-ui-warning hover:bg-ui-warning-soft"
+                    : "border-ui-fg text-ui-fg hover:border-ui-brand/50 hover:bg-ui-fg"
                 ].join(" ")}
                 title={`${action.label}: afectará ${selectedRows.length.toLocaleString("es-MX")} registro${selectedRows.length === 1 ? "" : "s"}.`}
               >
                 {action.label}
               </button>
             ))}
-            <button type="button" onClick={() => onSelectionChange(new Set())} className="rounded-lg border border-transparent px-3 py-2 font-body text-admin-boton font-semibold text-text-main/70 hover:bg-text-main/10">
+            <button type="button" onClick={() => onSelectionChange(new Set())} className="rounded-lg border border-transparent px-3 py-2 font-body text-sm font-semibold text-ui-fg hover:bg-ui-fg">
               Limpiar
             </button>
           </div>

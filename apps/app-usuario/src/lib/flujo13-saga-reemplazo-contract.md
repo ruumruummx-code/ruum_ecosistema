@@ -97,7 +97,7 @@ Para garantizar que el outbox no sea meramente nominal y cuente con un ejecutor 
    - **Implementación:** [`supabase/functions/limpiar-documentos-cuenta-obsoletos/index.ts`](file:///c:/ruum_ecosistema-main/supabase/functions/limpiar-documentos-cuenta-obsoletos/index.ts)
 2. **Autenticación y Modo Fail-Closed**:
    - Requiere cabecera: `Authorization: Bearer <STORAGE_CLEANUP_SECRET>` o `x-cleanup-secret`.
-   - **Fail-Closed:** Si el secreto está ausente, no coincide o las variables `SUPABASE_URL` / `SUPABASE_SERVICE_ROLE_KEY` faltan, el endpoint rechaza inmediatamente con `401 Unauthorized` o `500 Internal Error` sin procesar ninguna fila.
+   - **Fail-Closed:** Si el secreto está ausente, no coincide o las variables `SUPABASE_URL` / credencial de rol de servicio faltan, el endpoint rechaza inmediatamente con `401 Unauthorized` o `500 Internal Error` sin procesar ninguna fila.
 3. **Frecuencia de Ejecución (Cron)**:
    - Programado cada 10 minutos (`*/10 * * * *`) vía `pg_cron` en PostgreSQL o Vercel Cron.
 4. **Concurrencia y Bloqueo Atómico**:

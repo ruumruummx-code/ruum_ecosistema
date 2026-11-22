@@ -95,23 +95,23 @@ export default function PaginaMetricasRegistro() {
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <h1 className="font-display text-2xl font-semibold">Métricas de registro</h1>
-          <p className="mt-1 font-body text-sm text-text-secondary">Abandono, errores, tiempos y rechazo documental del alta de conductores.</p>
+          <p className="mt-1 font-body text-sm text-ui-fg-muted">Abandono, errores, tiempos y rechazo documental del alta de conductores.</p>
         </div>
         <div className="flex flex-wrap gap-3 font-body text-sm">
-          <label className="grid gap-1 text-text-secondary">Desde
-            <input type="date" value={desde} max={hasta||undefined} onChange={(e)=>cambiarDesde(e.target.value)} className="rounded-lg border border-ink/15 bg-white px-3 py-2 text-ink" />
+          <label className="grid gap-1 text-ui-fg-muted">Desde
+            <input type="date" value={desde} max={hasta||undefined} onChange={(e)=>cambiarDesde(e.target.value)} className="rounded-lg border border-ui-field bg-ui-card px-3 py-2 text-ui-fg" />
           </label>
-          <label className="grid gap-1 text-text-secondary">Hasta
-            <input type="date" value={hasta} min={desde||undefined} onChange={(e)=>cambiarHasta(e.target.value)} className="rounded-lg border border-ink/15 bg-white px-3 py-2 text-ink" />
+          <label className="grid gap-1 text-ui-fg-muted">Hasta
+            <input type="date" value={hasta} min={desde||undefined} onChange={(e)=>cambiarHasta(e.target.value)} className="rounded-lg border border-ui-field bg-ui-card px-3 py-2 text-ui-fg" />
           </label>
-          <label className="grid gap-1 text-text-secondary">Zona
-            <input value={zona} onChange={(e)=>{setCargando(true);setError(null);setZona(e.target.value);}} placeholder="sin_zona" className="rounded-lg border border-ink/15 bg-white px-3 py-2 text-ink" />
+          <label className="grid gap-1 text-ui-fg-muted">Zona
+            <input value={zona} onChange={(e)=>{setCargando(true);setError(null);setZona(e.target.value);}} placeholder="sin_zona" className="rounded-lg border border-ui-field bg-ui-card px-3 py-2 text-ui-fg" />
           </label>
-          <label className="grid gap-1 text-text-secondary">Fuente
-            <input value={fuente} onChange={(e)=>{setCargando(true);setError(null);setFuente(e.target.value);}} placeholder="v2_minimo" className="rounded-lg border border-ink/15 bg-white px-3 py-2 text-ink" />
+          <label className="grid gap-1 text-ui-fg-muted">Fuente
+            <input value={fuente} onChange={(e)=>{setCargando(true);setError(null);setFuente(e.target.value);}} placeholder="v2_minimo" className="rounded-lg border border-ui-field bg-ui-card px-3 py-2 text-ui-fg" />
           </label>
-          <label className="grid gap-1 text-text-secondary">Empresa
-            <input value={empresaId} onChange={(e)=>{setCargando(true);setError(null);setEmpresaId(e.target.value);}} placeholder="UUID" className="rounded-lg border border-ink/15 bg-white px-3 py-2 text-ink" />
+          <label className="grid gap-1 text-ui-fg-muted">Empresa
+            <input value={empresaId} onChange={(e)=>{setCargando(true);setError(null);setEmpresaId(e.target.value);}} placeholder="UUID" className="rounded-lg border border-ui-field bg-ui-card px-3 py-2 text-ui-fg" />
           </label>
           {metricas&&(
             <Link href={exportHref} className="self-end">
@@ -122,7 +122,7 @@ export default function PaginaMetricasRegistro() {
       </div>
 
       {error&&<div className="mt-5"><Aviso tono="danger">{error}</Aviso></div>}
-      {cargando&&<p className="mt-5 font-body text-sm text-text-tertiary">Actualizando indicadores…</p>}
+      {cargando&&<p className="mt-5 font-body text-sm text-ui-fg-muted">Actualizando indicadores…</p>}
 
       {metricas?.alertas.length ? (
         <div className="mt-5 grid gap-2">
@@ -137,10 +137,10 @@ export default function PaginaMetricasRegistro() {
       <section className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4" aria-label="Resumen del periodo">
         {tarjetas.map(([etiqueta,valor,clave])=>(
           <PassportCard key={etiqueta}>
-            <p className="font-body text-xs uppercase tracking-wide text-text-tertiary">{etiqueta}</p>
+            <p className="font-body text-xs uppercase tracking-wide text-ui-fg-muted">{etiqueta}</p>
             <p className="mt-2 font-display text-2xl font-semibold">{valor}</p>
             {metricas&&clave&&(
-              <p className="mt-1 font-body text-xs text-text-tertiary">
+              <p className="mt-1 font-body text-xs text-ui-fg-muted">
                 Periodo anterior: {formatoComparacion(metricas.comparacion.metricas[String(clave)])}
               </p>
             )}
@@ -152,11 +152,11 @@ export default function PaginaMetricasRegistro() {
         <section className="mt-6 grid gap-4 lg:grid-cols-2">
           <PassportCard>
             <h2 className="font-display text-xl font-semibold">Abandono por paso</h2>
-            <p className="mt-1 font-body text-xs text-text-tertiary">Expedientes sin actividad durante al menos 24 horas.</p>
+            <p className="mt-1 font-body text-xs text-ui-fg-muted">Expedientes sin actividad durante al menos 24 horas.</p>
             <div className="mt-4 grid gap-2">
-              {metricas.abandonoPorPaso.length===0&&<p className="font-body text-sm text-text-tertiary">Sin abandonos en el periodo.</p>}
+              {metricas.abandonoPorPaso.length===0&&<p className="font-body text-sm text-ui-fg-muted">Sin abandonos en el periodo.</p>}
               {metricas.abandonoPorPaso.map((fila)=>(
-                <div key={fila.paso} className="flex items-center justify-between rounded-lg border border-ink/10 px-4 py-3 font-body text-sm">
+                <div key={fila.paso} className="flex items-center justify-between rounded-lg border border-ui-line px-4 py-3 font-body text-sm">
                   <span>Paso {fila.paso}: {NOMBRES_PASO[fila.paso-1]??"Sin identificar"}</span>
                   <strong>{fila.total}</strong>
                 </div>
@@ -166,11 +166,11 @@ export default function PaginaMetricasRegistro() {
 
           <PassportCard>
             <h2 className="font-display text-xl font-semibold">Documentos rechazados</h2>
-            <p className="mt-1 font-body text-xs text-text-tertiary">Decisiones de rechazo, agrupadas por tipo documental.</p>
+            <p className="mt-1 font-body text-xs text-ui-fg-muted">Decisiones de rechazo, agrupadas por tipo documental.</p>
             <div className="mt-4 grid gap-2">
-              {metricas.documentosRechazadosPorTipo.length===0&&<p className="font-body text-sm text-text-tertiary">Sin rechazos en el periodo.</p>}
+              {metricas.documentosRechazadosPorTipo.length===0&&<p className="font-body text-sm text-ui-fg-muted">Sin rechazos en el periodo.</p>}
               {metricas.documentosRechazadosPorTipo.map((fila)=>(
-                <div key={fila.tipo} className="flex items-center justify-between rounded-lg border border-ink/10 px-4 py-3 font-body text-sm">
+                <div key={fila.tipo} className="flex items-center justify-between rounded-lg border border-ui-line px-4 py-3 font-body text-sm">
                   <span>{NOMBRES_DOCUMENTO[fila.tipo]??fila.tipo}</span>
                   <strong>{fila.total}</strong>
                 </div>
@@ -202,21 +202,21 @@ export default function PaginaMetricasRegistro() {
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div>
                   <h2 className="font-display text-xl font-semibold">Detalle y fórmula oficial</h2>
-                  <p className="mt-1 font-body text-xs text-text-tertiary">Cada cifra declara fórmula y consulta SQL de referencia.</p>
+                  <p className="mt-1 font-body text-xs text-ui-fg-muted">Cada cifra declara fórmula y consulta SQL de referencia.</p>
                 </div>
-                <div className="font-body text-xs text-text-tertiary">
+                <div className="font-body text-xs text-ui-fg-muted">
                   Datos tardíos: {metricas.calidadDatos.eventosTardios} · duplicados: {metricas.calidadDatos.eventosDuplicados}
                 </div>
               </div>
               <div className="mt-4 overflow-x-auto">
                 <table className="w-full min-w-[760px] text-left font-body text-sm">
-                  <thead className="border-b border-ink/10 text-xs uppercase tracking-wide text-text-tertiary">
+                  <thead className="border-b border-ui-line text-xs uppercase tracking-wide text-ui-fg-muted">
                     <tr><th className="py-2 pr-3">Métrica</th><th className="py-2 pr-3">Valor</th><th className="py-2 pr-3">Fórmula</th><th className="py-2 pr-3">Referencia</th><th className="py-2 pr-3">Meta</th></tr>
                   </thead>
                   <tbody>
                     {metricas.detalle.map((fila)=>(
-                      <tr key={fila.clave} className="border-b border-ink/5 last:border-0">
-                        <td className="py-3 pr-3 font-semibold text-ink">{fila.nombre}<p className="font-normal text-text-tertiary">{fila.explicacion}</p></td>
+                      <tr key={fila.clave} className="border-b border-ui-line last:border-0">
+                        <td className="py-3 pr-3 font-semibold text-ui-fg">{fila.nombre}<p className="font-normal text-ui-fg-muted">{fila.explicacion}</p></td>
                         <td className="py-3 pr-3">{fila.valor??"Sin datos"}</td>
                         <td className="py-3 pr-3 font-mono-ruum text-xs">{fila.formula}</td>
                         <td className="py-3 pr-3">{fila.consultaReferencia}</td>
@@ -226,7 +226,7 @@ export default function PaginaMetricasRegistro() {
                   </tbody>
                 </table>
               </div>
-              <p className="mt-4 font-body text-xs text-text-tertiary">{metricas.calidadDatos.nota}</p>
+              <p className="mt-4 font-body text-xs text-ui-fg-muted">{metricas.calidadDatos.nota}</p>
             </PassportCard>
           </section>
         </>
@@ -240,16 +240,16 @@ function formatoComparacion(valor:number|undefined) {
 }
 
 function ListaSegmentos({filas}:{filas:MetricasRegistroConductor["segmentos"]["zona"]}) {
-  if (!filas.length) return <p className="mt-3 font-body text-sm text-text-tertiary">Sin datos para el periodo.</p>;
+  if (!filas.length) return <p className="mt-3 font-body text-sm text-ui-fg-muted">Sin datos para el periodo.</p>;
   return (
     <div className="mt-3 grid gap-2">
       {filas.slice(0,6).map((fila)=>(
-        <div key={fila.segmento} className="rounded-lg border border-ink/10 px-3 py-2 font-body text-sm">
+        <div key={fila.segmento} className="rounded-lg border border-ui-line px-3 py-2 font-body text-sm">
           <div className="flex items-center justify-between gap-3">
             <span className="truncate">{fila.segmento}</span>
             <strong>{fila.iniciadas}</strong>
           </div>
-          <p className="mt-1 text-xs text-text-tertiary">{fila.enviadas} enviadas · {fila.conversionEnvioPct.toFixed(1)}% conversión</p>
+          <p className="mt-1 text-xs text-ui-fg-muted">{fila.enviadas} enviadas · {fila.conversionEnvioPct.toFixed(1)}% conversión</p>
         </div>
       ))}
     </div>

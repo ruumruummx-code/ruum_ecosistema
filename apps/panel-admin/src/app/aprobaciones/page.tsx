@@ -158,15 +158,15 @@ export default function PaginaAprobaciones() {
       />
 
       {solicitudes.length > 0 && (
-        <section className="mt-5 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border-default bg-surface-primary p-3" aria-label="Filtros de aprobaciones">
+        <section className="mt-5 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-ui-line bg-ui-card p-3" aria-label="Filtros de aprobaciones">
           <div className="flex flex-wrap items-center gap-2" role="group" aria-label="Filtrar por tipo">
             {(["todas", "finanzas", "sancion", "tarifas"] as const).map((tipo) => (
-              <button key={tipo} type="button" aria-pressed={filtroTipo === tipo} onClick={() => setFiltroTipo(tipo)} className={`min-h-10 rounded-lg border px-3 py-2 font-body text-sm font-semibold transition-colors ${filtroTipo === tipo ? "border-status-info/40 bg-status-info-soft text-ink" : "border-transparent text-text-secondary hover:bg-surface-secondary"}`}>
+              <button key={tipo} type="button" aria-pressed={filtroTipo === tipo} onClick={() => setFiltroTipo(tipo)} className={`min-h-10 rounded-lg border px-3 py-2 font-body text-sm font-semibold transition-colors ${filtroTipo === tipo ? "border-ui-brand/40 bg-ui-brand-soft text-ui-fg" : "border-transparent text-ui-fg-muted hover:bg-ui-muted"}`}>
                 {tipo === "todas" ? "Todas" : tipo === "finanzas" ? "Finanzas" : tipo === "sancion" ? "Sanciones" : "Tarifas"}
               </button>
             ))}
           </div>
-          <label className="flex min-h-10 items-center gap-2 rounded-lg px-2 font-body text-sm font-medium text-text-secondary">
+          <label className="flex min-h-10 items-center gap-2 rounded-lg px-2 font-body text-sm font-medium text-ui-fg-muted">
             <input type="checkbox" checked={soloPorVencer} onChange={(event) => setSoloPorVencer(event.target.checked)} />
             Vencidas o por vencer en 24 h
           </label>
@@ -179,7 +179,7 @@ export default function PaginaAprobaciones() {
         </div>
       ) : solicitudesVisibles.length === 0 ? (
         <div className="mt-6">
-          <AdminEmptyState title="No hay solicitudes en esta vista" description="Cambia el tipo de solicitud o desactiva el filtro de vencimiento para ver otras solicitudes." action={<button type="button" onClick={() => { setFiltroTipo("todas"); setSoloPorVencer(false); }} className="min-h-11 rounded-lg border border-status-info/35 px-4 py-2 font-body text-sm font-semibold text-status-info hover:bg-status-info-soft">Quitar filtros</button>} />
+          <AdminEmptyState title="No hay solicitudes en esta vista" description="Cambia el tipo de solicitud o desactiva el filtro de vencimiento para ver otras solicitudes." action={<button type="button" onClick={() => { setFiltroTipo("todas"); setSoloPorVencer(false); }} className="min-h-11 rounded-lg border border-ui-brand/35 px-4 py-2 font-body text-sm font-semibold text-ui-brand-soft-fg hover:bg-ui-brand-soft">Quitar filtros</button>} />
         </div>
       ) : (
         <section className="mt-6 grid gap-4">
@@ -188,30 +188,30 @@ export default function PaginaAprobaciones() {
             const esSolicitudPropia = Boolean(adminActualId && s.solicitada_por === adminActualId);
             const vencimiento = estadoVencimiento(s.expira_en);
             return (
-              <article key={s.id} className="rounded-card border border-border-default bg-surface-primary p-5 shadow-[var(--ruum-shadow-1)]">
+              <article key={s.id} className="rounded-lg border border-ui-line bg-ui-card p-5 shadow-ui-sm">
                 <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                   <div className="min-w-0">
                     <div className="flex flex-wrap items-center gap-2">
-                      <p className="font-mono-ruum text-xs uppercase tracking-wide text-text-tertiary">{s.id.slice(0, 8).toUpperCase()}</p>
+                      <p className="font-mono-ruum text-xs uppercase tracking-wide text-ui-fg-muted">{s.id.slice(0, 8).toUpperCase()}</p>
                       <AdminBadge tone={s.tipo === "finanzas" ? "warning" : "danger"}>{s.tipo}</AdminBadge>
                     </div>
-                    <h2 className="mt-1 font-display text-lg font-semibold text-ink">{s.accion}</h2>
-                    <p className="mt-1 font-body text-sm text-text-secondary">Recurso: {s.recurso} · Capacidad requerida: {s.capacidad_requerida}</p>
+                    <h2 className="mt-1 font-display text-lg font-semibold text-ui-fg">{s.accion}</h2>
+                    <p className="mt-1 font-body text-sm text-ui-fg-muted">Recurso: {s.recurso} · Capacidad requerida: {s.capacidad_requerida}</p>
                     {payloadStr !== "{}" && (
                       <details className="mt-2">
-                        <summary className="cursor-pointer font-body text-xs font-semibold text-status-info hover:underline">Ver payload</summary>
-                        <pre className="mt-2 max-h-32 overflow-auto rounded-lg bg-ink/[0.04] p-3 font-mono-ruum text-admin-secundario text-text-secondary">{payloadStr}</pre>
+                        <summary className="cursor-pointer font-body text-xs font-semibold text-ui-brand-soft-fg hover:underline">Ver payload</summary>
+                        <pre className="mt-2 max-h-32 overflow-auto rounded-lg bg-ui-brand/[0.04] p-3 font-mono-ruum text-xs text-ui-fg-muted">{payloadStr}</pre>
                       </details>
                     )}
                   </div>
                   <div className="flex shrink-0 flex-col items-end gap-2">
-                    <span className="rounded-full border border-ink/10 bg-surface-secondary px-3 py-1 font-body text-xs font-semibold text-text-secondary">{s.estado}</span>
+                    <span className="rounded-full border border-ui-line bg-ui-muted px-3 py-1 font-body text-xs font-semibold text-ui-fg-muted">{s.estado}</span>
                     <AdminBadge tone={vencimiento.tono}>{vencimiento.etiqueta}</AdminBadge>
-                    <p className="font-body text-sm font-medium text-text-secondary">Creada {fecha(s.creada_en)}</p>
-                    <p className="font-body text-sm font-semibold text-ink">Expira {fecha(s.expira_en)}</p>
+                    <p className="font-body text-sm font-medium text-ui-fg-muted">Creada {fecha(s.creada_en)}</p>
+                    <p className="font-body text-sm font-semibold text-ui-fg">Expira {fecha(s.expira_en)}</p>
                   </div>
                 </div>
-                <div className="mt-4 flex flex-wrap gap-2 border-t border-ink/10 pt-4">
+                <div className="mt-4 flex flex-wrap gap-2 border-t border-ui-line pt-4">
                   <Button
                     variant="secondary"
                     disabled={esSolicitudPropia}
@@ -227,7 +227,7 @@ export default function PaginaAprobaciones() {
                     Rechazar
                   </Button>
                   {esSolicitudPropia && (
-                    <p className="self-center font-body text-sm font-medium text-text-secondary">Requiere aprobación de otro administrador.</p>
+                    <p className="self-center font-body text-sm font-medium text-ui-fg-muted">Requiere aprobación de otro administrador.</p>
                   )}
                 </div>
               </article>
@@ -245,15 +245,15 @@ export default function PaginaAprobaciones() {
         onOpenChange={(abierto) => { if (!abierto) setDecision(null); }}
         footer={
           decision?.aprobar
-            ? <><button type="button" onClick={() => setDecision(null)} className="rounded-lg border border-ink/20 px-4 py-2 font-body text-admin-boton font-semibold text-ink hover:bg-surface-secondary">Cancelar</button><button type="button" onClick={ejecutarDecision} disabled={pendiente} className="rounded-lg bg-signal px-4 py-2 font-body text-admin-boton font-semibold text-ink hover:bg-signal/90">{pendiente ? "Procesando..." : "Confirmar aprobación"}</button></>
-            : <><button type="button" onClick={() => setDecision(null)} className="rounded-lg border border-ink/20 px-4 py-2 font-body text-admin-boton font-semibold text-ink hover:bg-surface-secondary">Cancelar</button><button type="button" onClick={ejecutarDecision} disabled={pendiente || motivo.length < 10} className="rounded-lg border border-status-error/30 bg-status-error-soft px-4 py-2 font-body text-admin-boton font-semibold text-status-error hover:bg-status-error hover:text-background-main">{pendiente ? "Procesando..." : "Confirmar rechazo"}</button></>
+            ? <><button type="button" onClick={() => setDecision(null)} className="rounded-lg border border-ui-line-strong px-4 py-2 font-body text-sm font-semibold text-ui-fg hover:bg-ui-muted">Cancelar</button><button type="button" onClick={ejecutarDecision} disabled={pendiente} className="rounded-lg bg-ui-brand px-4 py-2 font-body text-sm font-semibold text-ui-fg hover:bg-ui-brand-hover">{pendiente ? "Procesando..." : "Confirmar aprobación"}</button></>
+            : <><button type="button" onClick={() => setDecision(null)} className="rounded-lg border border-ui-line-strong px-4 py-2 font-body text-sm font-semibold text-ui-fg hover:bg-ui-muted">Cancelar</button><button type="button" onClick={ejecutarDecision} disabled={pendiente || motivo.length < 10} className="rounded-lg border border-ui-danger/30 bg-ui-danger-soft px-4 py-2 font-body text-sm font-semibold text-ui-danger hover:bg-ui-danger hover:text-ui-on-brand">{pendiente ? "Procesando..." : "Confirmar rechazo"}</button></>
         }
       >
         {!decision?.aprobar && (
           <textarea
             value={motivo}
             onChange={(e) => setMotivo(e.target.value)}
-            className="w-full rounded-lg border border-ink/20 bg-surface-primary px-3 py-2 font-body text-sm text-ink"
+            className="w-full rounded-lg border border-ui-line-strong bg-ui-card px-3 py-2 font-body text-sm text-ui-fg"
             placeholder="Motivo del rechazo (mín. 10 caracteres)"
             rows={3}
           />
@@ -262,7 +262,7 @@ export default function PaginaAprobaciones() {
 
       {mensaje && (
         <div className="mt-4" role="status" aria-live="polite">
-          <p className="font-body text-sm text-text-secondary">{mensaje}</p>
+          <p className="font-body text-sm text-ui-fg-muted">{mensaje}</p>
         </div>
       )}
     </main>

@@ -2,6 +2,7 @@
 
 import * as Sentry from "@sentry/nextjs";
 import { useEffect } from "react";
+import "./globals.css";
 
 export default function GlobalError({
   error,
@@ -15,17 +16,17 @@ export default function GlobalError({
   }, [error]);
 
   return (
-    <html lang="es" data-theme="dark">
-      <body className="min-h-screen bg-[#070B14] text-[#E8EDF6] flex flex-col items-center justify-center p-6 text-center">
-        <h2 className="font-display text-2xl font-bold mb-4 text-[#FF6B6B]">
+    <html lang="es">
+      <body className="flex min-h-dvh flex-col items-center justify-center bg-ui-bg p-6 text-center text-ui-fg">
+        <h2 className="mb-2 text-2xl font-semibold text-ui-fg">
           Ha ocurrido un error crítico
         </h2>
-        <p className="font-body text-sm text-[#B7C2D4] max-w-md mb-6">
+        <p className="mb-6 max-w-md text-sm text-ui-fg-muted">
           La aplicación experimentó un problema inesperado. Por favor, intenta recargar la pantalla.
         </p>
         <button
           onClick={() => reset()}
-          className="min-h-11 px-6 py-2.5 rounded-xl bg-[#F5A623] text-[#070B14] font-display font-bold text-sm hover:opacity-90 transition-opacity cursor-pointer"
+          className="h-11 cursor-pointer rounded-md bg-ui-brand px-5 text-sm font-semibold text-ui-on-brand hover:bg-ui-brand-hover"
         >
           Reintentar
         </button>

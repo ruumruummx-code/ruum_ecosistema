@@ -3,6 +3,8 @@
 import { useEffect, useMemo, useRef, useState, useCallback } from "react";
 import Link from "next/link";
 import { Aviso } from "@ruum/ui";
+import { Badge, Button, Card, EmptyState } from "@ruum/ui/base";
+import { AlertTriangle, ArrowRight, CheckCircle2, Clock, FileText, MapPinOff, Plus, RefreshCw, TrendingUp, Truck } from "lucide-react";
 import { crearClienteNavegador, tieneSupabaseConfigurado } from "../lib/supabase-browser";
 import {
   obtenerIndicadoresAccionablesDashboard,
@@ -35,13 +37,6 @@ export type DashboardInitialData = {
 
 function etiquetaTipoIncidencia(tipo: string) {
   return tipo.replaceAll("_", " ");
-}
-
-function iconoKpi(tono: string) {
-  if (tono === "azul") return "↗";
-  if (tono === "ambar") return "◷";
-  if (tono === "rojo") return "!";
-  return "▤";
 }
 
 function proyectarUbicaciones(traslados: TrasladoMapa[]) {
@@ -215,46 +210,170 @@ export default function DashboardCliente({ inicial }: { inicial: DashboardInitia
   const nombreDia = (ahora ?? new Date()).toLocaleDateString("es-MX", { weekday: "long", day: "numeric", month: "long", timeZone: "America/Mexico_City" });
 
   return (
-    <main className="admin-page-shell dashboard-home">
-      <header className="dashboard-home__header">
-        <div><p className="dashboard-home__eyebrow">Torre de Control</p><h1>Buen día</h1><p className="dashboard-home__subline">Resumen de la operación · <span className="capitalize">{nombreDia}</span></p></div>
-        <div className="dashboard-home__header-actions"><span className={`dashboard-home__live ${conexionGlobal.clase}`}><i className={conexionGlobal.punto} />{conexionGlobal.etiqueta}{actualizacionGlobal ? ` · ${textoActualizadoHace(actualizacionGlobal, ahora)}` : ""}</span><button type="button" className="dashboard-home__refresh" onClick={() => void cargarDashboard(true, true)} disabled={actualizandoManual} aria-label="Actualizar información">{actualizandoManual ? "Actualizando…" : "↻ Actualizar"}</button>{puedeVerRuta(rolAdmin, "/masivos") ? <Link href="/masivos" className="dashboard-home__primary">＋ Programar traslados</Link> : <Link href="/viajes" className="dashboard-home__primary">Ver traslados <span aria-hidden="true">→</span></Link>}</div>
+    <main className="admin-page-shell">
+      <header className="flex flex-wrap items-end justify-between gap-x-6 gap-y-4">
+        <div className="min-w-0">
+          <p className="font-mono-ruum text-xs font-medium uppercase tracking-widest text-ui-brand">Torre de Control</p>
+          <h1 className="mt-1 text-2xl font-semibold tracking-tight text-ui-fg xl:text-3xl">Buen día</h1>
+          <p className="mt-1 text-sm text-ui-fg-muted">Resumen de la operación · <span className="capitalize">{nombreDia}</span></p>
+        </div>
+        <div className="flex flex-wrap items-center justify-end gap-2">
+          <Badge tone={conexionGlobal.tono} dot className="h-8 px-3">
+            {conexionGlobal.etiqueta}{actualizacionGlobal ? ` · ${textoActualizadoHace(actualizacionGlobal, ahora)}` : ""}
+          </Badge>
+          <Button variant="outline" onClick={() => void cargarDashboard(true, true)} disabled={actualizandoManual} aria-label="Actualizar información">
+            <RefreshCw className={actualizandoManual ? "motion-safe:animate-spin" : undefined} />
+            {actualizandoManual ? "Actualizando…" : "Actualizar"}
+          </Button>
+          {puedeVerRuta(rolAdmin, "/masivos")
+            ? <Button asChild><Link href="/masivos"><Plus />Programar traslados</Link></Button>
+            : <Button asChild><Link href="/viajes">Ver traslados <ArrowRight /></Link></Button>}
+        </div>
       </header>
 
-      {errorOperacional && <div className="dashboard-home__notice"><Aviso tono="atencion">{errorOperacional}</Aviso></div>}
-      {seccionesDesactualizadas.length > 0 && <div className="dashboard-home__notice"><Aviso tono="atencion">Datos que podrían estar desactualizados: {seccionesDesactualizadas.join(", ")}.</Aviso></div>}
+      {errorOperacional && <div className="mt-4"><Aviso tono="atencion">{errorOperacional}</Aviso></div>}
+      {seccionesDesactualizadas.length > 0 && <div className="mt-4"><Aviso tono="atencion">Datos que podrían estar desactualizados: {seccionesDesactualizadas.join(", ")}.</Aviso></div>}
 
-      <section className="dashboard-home__kpis" aria-label="Indicadores principales">
-        {kpisInicio.map((kpi) => <Link key={kpi.etiqueta} href={kpi.href} className={`dashboard-home__kpi dashboard-home__kpi--${kpi.tono}`}><span className="dashboard-home__kpi-icon" aria-hidden="true">{iconoKpi(kpi.tono)}</span><span className="dashboard-home__kpi-title">{kpi.etiqueta}</span><strong>{cargando ? "—" : kpi.valor}</strong><small>{kpi.detalle}</small><span className="dashboard-home__kpi-link">Ver detalle <span aria-hidden="true">→</span></span></Link>)}
+      <section className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4" aria-label="Indicadores principales">
+        {kpisInicio.map((kpi) => {
+          const Icon = ICONO_KPI[kpi.tono];
+          return (
+            <Card asChild key={kpi.etiqueta} className="group flex flex-col gap-1 p-5 transition-colors hover:border-ui-line-strong hover:bg-ui-muted">
+              <Link href={kpi.href}>
+                <span className="flex items-center justify-between gap-2">
+                  <span className="text-sm font-medium text-ui-fg-muted">{kpi.etiqueta}</span>
+                  <span aria-hidden="true" className={`grid size-8 place-items-center rounded-md ${CLASE_TONO_KPI[kpi.tono]}`}><Icon className="size-4" /></span>
+                </span>
+                <strong className="mt-2 text-3xl font-semibold tabular-nums tracking-tight text-ui-fg">{cargando ? "—" : kpi.valor}</strong>
+                <span className="text-xs text-ui-fg-muted">{kpi.detalle}</span>
+                <span className="mt-3 inline-flex items-center gap-1 text-sm font-semibold text-ui-brand group-hover:underline">Ver detalle <ArrowRight className="size-4" aria-hidden="true" /></span>
+              </Link>
+            </Card>
+          );
+        })}
       </section>
 
-      <section className="dashboard-home__workarea" aria-label="Vista de operación">
-        <div className="dashboard-home__panel dashboard-home__trips">
-          <div className="dashboard-home__panel-heading"><div><h2>Traslados activos</h2><p>Seguimiento de los servicios en curso</p></div><Link href="/viajes?filtro=activos">Ver todos <span aria-hidden="true">→</span></Link></div>
-          {trasladosActivos.length > 0 ? <div className="dashboard-home__table-wrap"><table className="dashboard-home__table"><thead><tr><th>Traslado</th><th>Ruta</th><th>Conductor</th><th>Estado</th></tr></thead><tbody>{trasladosActivos.slice(0, 5).map((traslado) => <tr key={traslado.traslado_id}><td><Link href={`/viajes/${traslado.traslado_id}`}>#{traslado.traslado_id.slice(0, 8).toUpperCase()}</Link>{traslado.tiene_incidencia_abierta && <span className="dashboard-home__incident-flag">Incidencia</span>}</td><td>{traslado.origen_ciudad || "Origen"}<span className="dashboard-home__route-arrow">→</span>{traslado.destino_ciudad || "Destino"}</td><td>{traslado.conductor_nombre ?? "Por asignar"}</td><td><span className="dashboard-home__status">{traslado.estado.replaceAll("_", " ")}</span></td></tr>)}</tbody></table></div> : <div className="dashboard-home__empty"><span aria-hidden="true">↗</span><strong>{cargando ? "Cargando traslados…" : puedeVerMapa ? "Sin traslados activos" : "Seguimiento de traslados"}</strong><p>{puedeVerMapa ? "Cuando haya servicios en curso, aparecerán aquí." : "El resumen de ubicación está limitado para tu perfil."}</p></div>}
-        </div>
+      <section className="mt-6 grid gap-4 xl:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)]" aria-label="Vista de operación">
+        <Card className="flex min-w-0 flex-col overflow-hidden">
+          <EncabezadoPanel titulo="Traslados activos" descripcion="Seguimiento de los servicios en curso" href="/viajes?filtro=activos" accion="Ver todos" />
+          {trasladosActivos.length > 0 ? (
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead className="bg-ui-muted text-left text-xs text-ui-fg-muted">
+                  <tr>
+                    <th scope="col" className="px-5 py-2.5 font-medium">Traslado</th>
+                    <th scope="col" className="px-5 py-2.5 font-medium">Ruta</th>
+                    <th scope="col" className="px-5 py-2.5 font-medium">Conductor</th>
+                    <th scope="col" className="px-5 py-2.5 font-medium">Estado</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-ui-line">
+                  {trasladosActivos.slice(0, 5).map((traslado) => (
+                    <tr key={traslado.traslado_id} className="hover:bg-ui-muted">
+                      <td className="px-5 py-3">
+                        <Link href={`/viajes/${traslado.traslado_id}`} className="font-mono-ruum font-medium text-ui-brand hover:underline">#{traslado.traslado_id.slice(0, 8).toUpperCase()}</Link>
+                        {traslado.tiene_incidencia_abierta && <Badge tone="danger" className="ml-2">Incidencia</Badge>}
+                      </td>
+                      <td className="px-5 py-3 text-ui-fg">{traslado.origen_ciudad || "Origen"}<span aria-hidden="true" className="px-1.5 text-ui-fg-muted">→</span><span className="sr-only"> a </span>{traslado.destino_ciudad || "Destino"}</td>
+                      <td className="px-5 py-3 text-ui-fg">{traslado.conductor_nombre ?? <Badge tone="warning">Por asignar</Badge>}</td>
+                      <td className="px-5 py-3"><Badge tone="info" className="capitalize">{traslado.estado.replaceAll("_", " ")}</Badge></td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            <EmptyState
+              className="m-5 mt-0 flex-1 justify-center"
+              icono={<Truck />}
+              titulo={cargando ? "Cargando traslados…" : puedeVerMapa ? "Sin traslados activos" : "Seguimiento de traslados"}
+              descripcion={puedeVerMapa ? "Cuando haya servicios en curso, aparecerán aquí." : "El resumen de ubicación está limitado para tu perfil."}
+            />
+          )}
+        </Card>
 
-        <div className="dashboard-home__panel dashboard-home__map-panel">
-          <div className="dashboard-home__panel-heading"><div><h2>Mapa operativo</h2><p>{puedeVerMapa ? `${trasladosActivos.length} traslados activos` : "Vista de operación"}</p></div>{puedeVerMapa && <Link href="/mapa" aria-label="Abrir mapa operativo">Abrir <span aria-hidden="true">↗</span></Link>}</div>
-          {puedeVerMapa ? <Link href="/mapa" className="dashboard-home__map" aria-label="Abrir mapa en vivo">
-            <svg viewBox="0 0 520 250" role="img" aria-label={rutasMapa.length ? "Resumen de rutas activas" : "Mapa de operación"}>
-              <rect width="520" height="250" fill="#edf4f3"/><g className="dashboard-home__map-streets"><path d="M-15 34 535 34M-15 96 535 96M-15 164 535 164M-15 220 535 220M52-10 52 260M143-10 143 260M248-10 248 260M355-10 355 260M459-10 459 260"/><path d="m-12 72 545 91M69-10l230 270M418-10 205 260"/></g>
-              {rutasMapa.map((ruta) => <g key={ruta.traslado.traslado_id}><path d={`M${ruta.origen.x} ${ruta.origen.y} L${ruta.destino.x} ${ruta.destino.y}`} className="dashboard-home__map-route"/><circle cx={ruta.origen.x} cy={ruta.origen.y} r="7" className="dashboard-home__map-pin"/><circle cx={ruta.destino.x} cy={ruta.destino.y} r="5" className="dashboard-home__map-destination"/></g>)}
-              {rutasMapa.length === 0 && <g className="dashboard-home__map-empty-mark"><circle cx="260" cy="116" r="25"/><path d="M260 102c-8 0-14 6-14 14 0 10 14 23 14 23s14-13 14-23c0-8-6-14-14-14Zm0 19a5 5 0 1 1 0-10 5 5 0 0 1 0 10Z"/></g>}
-              <rect x="18" y="18" width="104" height="28" rx="14" className="dashboard-home__map-badge"/><circle cx="34" cy="32" r="4"/><text x="45" y="36">{rutasMapa.length ? `${rutasMapa.length} rutas` : "Vista operativa"}</text>
-            </svg>
-          </Link> : <div className="dashboard-home__map dashboard-home__map--restricted"><span aria-hidden="true">⌖</span><strong>El mapa no está disponible para este perfil</strong><small>Las ubicaciones se muestran según los permisos operativos.</small></div>}
-          <div className="dashboard-home__map-footer"><span><i /> En curso</span><span>{puedeVerMapa ? "Ubicaciones según permisos" : "Ubicaciones restringidas"}</span></div>
-        </div>
+        <Card className="flex min-w-0 flex-col overflow-hidden">
+          <EncabezadoPanel titulo="Mapa operativo" descripcion={puedeVerMapa ? `${trasladosActivos.length} traslados activos` : "Vista de operación"} href={puedeVerMapa ? "/mapa" : undefined} accion="Abrir" etiquetaAccion="Abrir mapa operativo" />
+          {puedeVerMapa ? (
+            <Link href="/mapa" className="mx-5 block overflow-hidden rounded-md border border-ui-line" aria-label="Abrir mapa en vivo">
+              <svg viewBox="0 0 520 250" role="img" aria-label={rutasMapa.length ? "Resumen de rutas activas" : "Mapa de operación"} className="block h-auto w-full">
+                <rect width="520" height="250" className="fill-ui-muted" />
+                <g className="fill-none stroke-ui-line-strong" strokeWidth="1.5"><path d="M-15 34 535 34M-15 96 535 96M-15 164 535 164M-15 220 535 220M52-10 52 260M143-10 143 260M248-10 248 260M355-10 355 260M459-10 459 260" /><path d="m-12 72 545 91M69-10l230 270M418-10 205 260" /></g>
+                {rutasMapa.map((ruta) => (
+                  <g key={ruta.traslado.traslado_id}>
+                    <path d={`M${ruta.origen.x} ${ruta.origen.y} L${ruta.destino.x} ${ruta.destino.y}`} className="fill-none stroke-ui-brand" strokeWidth="3" strokeLinecap="round" />
+                    <circle cx={ruta.origen.x} cy={ruta.origen.y} r="7" className="fill-ui-brand stroke-ui-card" strokeWidth="3" />
+                    <circle cx={ruta.destino.x} cy={ruta.destino.y} r="5" className="fill-ui-card stroke-ui-brand" strokeWidth="3" />
+                  </g>
+                ))}
+                {rutasMapa.length === 0 && <g className="fill-ui-fg-muted"><path d="M260 102c-8 0-14 6-14 14 0 10 14 23 14 23s14-13 14-23c0-8-6-14-14-14Zm0 19a5 5 0 1 1 0-10 5 5 0 0 1 0 10Z" /></g>}
+              </svg>
+            </Link>
+          ) : (
+            <EmptyState className="m-5 mt-0 flex-1 justify-center" icono={<MapPinOff />} titulo="El mapa no está disponible para este perfil" descripcion="Las ubicaciones se muestran según los permisos operativos." />
+          )}
+          <div className="mt-auto flex items-center justify-between gap-3 px-5 py-3 text-xs text-ui-fg-muted">
+            <span className="inline-flex items-center gap-1.5"><span aria-hidden="true" className="size-2 rounded-full bg-ui-brand" />En curso{rutasMapa.length ? ` · ${rutasMapa.length} rutas` : ""}</span>
+            <span>{puedeVerMapa ? "Ubicaciones según permisos" : "Ubicaciones restringidas"}</span>
+          </div>
+        </Card>
       </section>
 
-      <section className="dashboard-home__attention" aria-label="Requiere atención">
-        <div className="dashboard-home__panel-heading"><div><h2>Requiere atención</h2><p>Prioridades para mantener la operación en movimiento</p></div><Link href="/incidencias?filtro=abiertas">Ver bandeja <span aria-hidden="true">→</span></Link></div>
-        {atenciones.length ? <div className="dashboard-home__attention-grid">{atenciones.map((item) => <Link key={item.id} href={item.href} className={`dashboard-home__attention-card dashboard-home__attention-card--${item.tono}`}><span className="dashboard-home__attention-icon" aria-hidden="true">{item.tono === "rojo" ? "!" : "◷"}</span><span className="dashboard-home__attention-copy"><strong>{item.titulo}</strong><small>{item.detalle}</small><em>Atender <span aria-hidden="true">→</span></em></span></Link>)}</div> : <div className="dashboard-home__all-clear"><span aria-hidden="true">✓</span><div><strong>Todo en orden</strong><p>No hay alertas operativas pendientes para revisar.</p></div></div>}
-      </section>
+      <Card asChild className="mt-6 overflow-hidden">
+        <section aria-label="Requiere atención">
+          <EncabezadoPanel titulo="Requiere atención" descripcion="Prioridades para mantener la operación en movimiento" href="/incidencias?filtro=abiertas" accion="Ver bandeja" />
+          {atenciones.length ? (
+            <ul className="grid gap-3 px-5 pb-5 md:grid-cols-2 xl:grid-cols-3">
+              {atenciones.map((item) => (
+                <li key={item.id}>
+                  <Link href={item.href} className="group flex h-full items-start gap-3 rounded-md border border-ui-line p-4 transition-colors hover:border-ui-line-strong hover:bg-ui-muted">
+                    <span aria-hidden="true" className={`grid size-9 shrink-0 place-items-center rounded-md ${item.tono === "rojo" ? "bg-ui-danger-soft text-ui-danger" : "bg-ui-warning-soft text-ui-warning"}`}>
+                      {item.tono === "rojo" ? <AlertTriangle className="size-4" /> : <Clock className="size-4" />}
+                    </span>
+                    <span className="min-w-0 flex-1">
+                      <strong className="block text-sm font-semibold text-ui-fg">{item.titulo}</strong>
+                      <small className="block truncate text-xs text-ui-fg-muted">{item.detalle}</small>
+                      <Badge tone={item.tono === "rojo" ? "danger" : "warning"} className="mt-2">{item.tono === "rojo" ? "Prioridad alta" : "Seguimiento"}</Badge>
+                    </span>
+                    <span className="self-center text-sm font-semibold text-ui-brand group-hover:underline">Atender<span aria-hidden="true"> →</span></span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <div className="mx-5 mb-5 flex items-center gap-3 rounded-md bg-ui-success-soft p-4 text-ui-success">
+              <CheckCircle2 className="size-5 shrink-0" aria-hidden="true" />
+              <div><strong className="block text-sm font-semibold">Todo en orden</strong><p className="text-sm">No hay alertas operativas pendientes para revisar.</p></div>
+            </div>
+          )}
+        </section>
+      </Card>
 
-      <footer className="dashboard-home__footer"><span>Rol operativo: {configuracionRol.etiqueta} · Turno {turno}</span><span>Última actualización: {actualizacionGlobal ? formatoHoraCorta(actualizacionGlobal) : "Sin datos recientes"}</span></footer>
+      <footer className="mt-6 flex flex-wrap justify-between gap-2 text-xs text-ui-fg-muted">
+        <span>Rol operativo: {configuracionRol.etiqueta} · Turno {turno}</span>
+        <span>Última actualización: {actualizacionGlobal ? formatoHoraCorta(actualizacionGlobal) : "Sin datos recientes"}</span>
+      </footer>
     </main>
+  );
+}
+
+const ICONO_KPI = { azul: TrendingUp, ambar: Clock, rojo: AlertTriangle, turquesa: FileText } as const;
+const CLASE_TONO_KPI = {
+  azul: "bg-ui-brand-soft text-ui-brand-soft-fg",
+  ambar: "bg-ui-warning-soft text-ui-warning",
+  rojo: "bg-ui-danger-soft text-ui-danger",
+  turquesa: "bg-ui-neutral-soft text-ui-neutral",
+} as const;
+
+function EncabezadoPanel({ titulo, descripcion, href, accion, etiquetaAccion }: { titulo: string; descripcion: string; href?: string; accion: string; etiquetaAccion?: string }) {
+  return (
+    <div className="flex items-start justify-between gap-4 p-5">
+      <div className="min-w-0">
+        <h2 className="text-base font-semibold text-ui-fg">{titulo}</h2>
+        <p className="text-sm text-ui-fg-muted">{descripcion}</p>
+      </div>
+      {href && <Button asChild variant="ghost" size="sm"><Link href={href} aria-label={etiquetaAccion}>{accion} <ArrowRight /></Link></Button>}
+    </div>
   );
 }
 
@@ -264,21 +383,18 @@ function estadoConexionGlobal(estado: EstadoConexionDashboard, actualizacion: Da
   if (estado === "sin_conexion" || estado === "desactualizado" || minutos >= 5) {
     return {
       etiqueta: estado === "sin_conexion" ? "Sin conexión" : "Revisar conexión",
-      clase: "border-status-error/30 bg-status-error-soft text-status-error",
-      punto: "bg-status-error"
+      tono: "danger" as const
     };
   }
   if (estado === "actualizando" || estado === "reconectando" || minutos >= 3) {
     return {
       etiqueta: estado === "reconectando" ? "Reconectando" : "Sincronizando",
-      clase: "border-status-warning/35 bg-status-warning-soft text-status-warning",
-      punto: "bg-status-warning"
+      tono: "warning" as const
     };
   }
   return {
     etiqueta: "Conectado",
-    clase: "border-status-success/30 bg-status-success-soft text-status-success",
-    punto: "bg-status-success"
+    tono: "success" as const
   };
 }
 

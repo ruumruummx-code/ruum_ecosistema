@@ -96,14 +96,14 @@ export function ColaVerificacionesRepuve() {
   return (
     <section
       aria-label="Cola de verificaciones REPUVE"
-      className="mt-5 rounded-xl border border-border-default bg-surface-primary p-5"
+      className="mt-5 rounded-xl border border-ui-line bg-ui-card p-5"
     >
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h2 className="text-lg font-semibold">
             Verificaciones REPUVE · Excepciones y Auditoría por Muestreo
           </h2>
-          <p className="text-sm text-text-secondary">
+          <p className="text-sm text-ui-fg-muted">
             Atiende discrepancias de VIN/placas, reportes en REPUVE y revisiones aleatorias de soporte.
           </p>
         </div>
@@ -115,8 +115,8 @@ export function ColaVerificacionesRepuve() {
             aria-pressed={filtro === "excepciones"}
             className={`rounded-lg border px-3 py-1.5 text-xs font-semibold ${
               filtro === "excepciones"
-                ? "border-ink bg-signal text-ink"
-                : "border-border-default bg-surface-primary text-text-secondary"
+                ? "border-ui-field bg-ui-brand text-ui-fg"
+                : "border-ui-line bg-ui-card text-ui-fg-muted"
             }`}
           >
             Cola de excepciones
@@ -127,8 +127,8 @@ export function ColaVerificacionesRepuve() {
             aria-pressed={filtro === "auditoria"}
             className={`rounded-lg border px-3 py-1.5 text-xs font-semibold ${
               filtro === "auditoria"
-                ? "border-ink bg-signal text-ink"
-                : "border-border-default bg-surface-primary text-text-secondary"
+                ? "border-ui-field bg-ui-brand text-ui-fg"
+                : "border-ui-line bg-ui-card text-ui-fg-muted"
             }`}
           >
             Auditoría por muestreo
@@ -139,8 +139,8 @@ export function ColaVerificacionesRepuve() {
             aria-pressed={filtro === "todas"}
             className={`rounded-lg border px-3 py-1.5 text-xs font-semibold ${
               filtro === "todas"
-                ? "border-ink bg-signal text-ink"
-                : "border-border-default bg-surface-primary text-text-secondary"
+                ? "border-ui-field bg-ui-brand text-ui-fg"
+                : "border-ui-line bg-ui-card text-ui-fg-muted"
             }`}
           >
             Historial reciente
@@ -157,7 +157,7 @@ export function ColaVerificacionesRepuve() {
       </div>
 
       {error && (
-        <p role="alert" className="mt-3 text-sm text-status-error">
+        <p role="alert" className="mt-3 text-sm text-ui-danger">
           {error}
         </p>
       )}
@@ -167,7 +167,7 @@ export function ColaVerificacionesRepuve() {
           Cargando verificaciones REPUVE…
         </p>
       ) : items.length === 0 ? (
-        <p className="mt-3 text-sm text-text-secondary">
+        <p className="mt-3 text-sm text-ui-fg-muted">
           No hay verificaciones REPUVE pendientes en esta vista.
         </p>
       ) : (
@@ -175,7 +175,7 @@ export function ColaVerificacionesRepuve() {
           {items.map((item) => (
             <li
               key={item.id}
-              className="rounded-lg border border-border-default p-3.5 text-sm"
+              className="rounded-lg border border-ui-line p-3.5 text-sm"
             >
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <div className="flex flex-wrap items-center gap-2">
@@ -185,14 +185,14 @@ export function ColaVerificacionesRepuve() {
                   <span
                     className={`rounded px-2 py-0.5 text-xs font-semibold ${
                       item.coincide
-                        ? "bg-emerald-100 text-emerald-900"
-                        : "bg-red-100 text-red-900"
+                        ? "bg-ui-success-soft text-ui-success"
+                        : "bg-ui-danger-soft text-ui-danger"
                     }`}
                   >
                     {item.coincide ? "VIN y placas coinciden" : "Discrepancia VIN/placas"}
                   </span>
                   {item.requiere_auditoria && (
-                    <span className="rounded bg-amber-100 px-2 py-0.5 text-xs font-semibold text-amber-900">
+                    <span className="rounded bg-ui-warning-soft px-2 py-0.5 text-xs font-semibold text-ui-warning">
                       Muestreo: {item.auditoria_dictamen ?? "pendiente"}
                     </span>
                   )}
@@ -208,13 +208,13 @@ export function ColaVerificacionesRepuve() {
 
               <div className="mt-2 grid gap-2 text-xs sm:grid-cols-2">
                 <p>
-                  <span className="text-text-tertiary">VIN esperado / físico: </span>
+                  <span className="text-ui-fg-muted">VIN esperado / físico: </span>
                   <strong className="font-mono-ruum">
                     {item.vin_esperado} / {item.vin_fisico}
                   </strong>
                 </p>
                 <p>
-                  <span className="text-text-tertiary">Placas esperadas / físicas: </span>
+                  <span className="text-ui-fg-muted">Placas esperadas / físicas: </span>
                   <strong className="font-mono-ruum">
                     {item.placas_esperadas ?? "S/P"} / {item.placas_fisicas ?? "S/P"}
                   </strong>
@@ -222,7 +222,7 @@ export function ColaVerificacionesRepuve() {
               </div>
 
               <div className="mt-2 flex flex-wrap items-center gap-4 text-xs">
-                <span className="text-text-tertiary">
+                <span className="text-ui-fg-muted">
                   Registrado: {new Date(item.creado_en).toLocaleString("es-MX")}
                 </span>
                 {item.url_captura_firmada && (
@@ -239,7 +239,7 @@ export function ColaVerificacionesRepuve() {
 
               {!item.es_override_admin &&
                 (!item.coincide || item.resultado !== "limpio") && (
-                  <div className="mt-3 flex flex-wrap items-center gap-2 border-t border-border-default pt-2.5">
+                  <div className="mt-3 flex flex-wrap items-center gap-2 border-t border-ui-line pt-2.5">
                     <input
                       type="text"
                       aria-label={`Motivo de override para ${item.id}`}
@@ -251,7 +251,7 @@ export function ColaVerificacionesRepuve() {
                           [item.id]: e.target.value,
                         }))
                       }
-                      className="flex-1 rounded border border-border-default px-2.5 py-1 text-xs"
+                      className="flex-1 rounded border border-ui-line px-2.5 py-1 text-xs"
                     />
                     <button
                       type="button"
@@ -260,7 +260,7 @@ export function ColaVerificacionesRepuve() {
                         (motivosOverride[item.id] ?? "").trim().length < 10
                       }
                       onClick={() => void autorizarOverride(item)}
-                      className="rounded border border-ink bg-signal px-3 py-1 text-xs font-semibold text-ink disabled:opacity-50"
+                      className="rounded border border-ui-field bg-ui-brand px-3 py-1 text-xs font-semibold text-ui-fg disabled:opacity-50"
                     >
                       {ocupadoId === item.id ? "Autorizando…" : "Autorizar override"}
                     </button>
@@ -270,7 +270,7 @@ export function ColaVerificacionesRepuve() {
               {item.requiere_auditoria &&
                 (!item.auditoria_dictamen ||
                   item.auditoria_dictamen === "pendiente") && (
-                  <div className="mt-3 flex flex-wrap items-center gap-2 border-t border-border-default pt-2.5">
+                  <div className="mt-3 flex flex-wrap items-center gap-2 border-t border-ui-line pt-2.5">
                     <input
                       type="text"
                       aria-label={`Notas de auditoría para ${item.id}`}
@@ -282,13 +282,13 @@ export function ColaVerificacionesRepuve() {
                           [item.id]: e.target.value,
                         }))
                       }
-                      className="flex-1 rounded border border-border-default px-2.5 py-1 text-xs"
+                      className="flex-1 rounded border border-ui-line px-2.5 py-1 text-xs"
                     />
                     <button
                       type="button"
                       disabled={Boolean(ocupadoId)}
                       onClick={() => void dictaminarMuestreo(item, "aprobada")}
-                      className="rounded border border-emerald-700 px-2.5 py-1 text-xs font-semibold text-emerald-800"
+                      className="rounded border border-ui-success px-2.5 py-1 text-xs font-semibold text-ui-success"
                     >
                       Aprobar muestreo
                     </button>
@@ -296,7 +296,7 @@ export function ColaVerificacionesRepuve() {
                       type="button"
                       disabled={Boolean(ocupadoId)}
                       onClick={() => void dictaminarMuestreo(item, "observada")}
-                      className="rounded border border-red-700 px-2.5 py-1 text-xs font-semibold text-red-800"
+                      className="rounded border border-ui-danger px-2.5 py-1 text-xs font-semibold text-ui-danger"
                     >
                       Observar muestreo
                     </button>

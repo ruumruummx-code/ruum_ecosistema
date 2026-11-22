@@ -20,7 +20,7 @@ export const TTL_ROL_APP_SEGUNDOS = 300;
 /** Evento de métrica/alerta emitido cuando falla la verificación del rol. */
 export const EVENTO_FALLO_VERIFICACION_ROL = "conductor_role_verification_failed";
 
-export type RolAppFirmable = "usuario" | "conductor" | "ninguno";
+export type RolAppFirmable = "usuario" | "conductor" | "admin" | "ninguno";
 
 export interface RolAppFirmado {
   rol: RolAppFirmable;
@@ -29,7 +29,7 @@ export interface RolAppFirmado {
   expiraEn: number;
 }
 
-const ROLES_VALIDOS: readonly RolAppFirmable[] = ["usuario", "conductor", "ninguno"];
+const ROLES_VALIDOS: readonly RolAppFirmable[] = ["usuario", "conductor", "admin", "ninguno"];
 
 function bytesABase64Url(bytes: Uint8Array): string {
   let binario = "";

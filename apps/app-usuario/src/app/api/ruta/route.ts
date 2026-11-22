@@ -9,7 +9,7 @@ import { obtenerRutaDirectionsMapboxConParadas } from "@ruum/shared/utils";
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
-const MAX_POR_MINUTO = 20;
+const MAX_POR_MINUTO = 10;
 const VENTANA_MS = 60_000;
 const CACHE_TTL_SEG = 86_400; // 24 horas
 
@@ -44,26 +44,27 @@ export async function POST(request: NextRequest) {
     const rechazoCsrf = verificarCsrfORechazar(request);
     if (rechazoCsrf) return rechazoCsrf;
 
-    // 1. Identificar al solicitante: uid de sesión autenticada o IP
-    let identificador: string | null = null;
-    try {
-      const cliente = await crearClienteServidor();
-      const {
-        data: { user }
-      } = await cliente.auth.getUser();
-      if (user?.id) {
-        identificador = `uid:${user.id}`;
-      }
-    } catch (err) {
-      // Sin sesión activa o error leyendo cookies
-      logStructuredWarn("api/ruta", "sesion_lectura_omitida", err);
+    // 1. Identificar al solicitante: se exige sesión de usuario autenticado (RUUM-SEC-006 / F0.2)
+    const cliente = await crearClienteServidor();
+    const {
+      data: { user },
+      error: errorAuth
+    } = await cliente.auth.getUser();
+
+    if (errorAuth || !user) {
+      logStructuredWarn("api/ruta", "acceso_no_autenticado_rechazado", errorAuth, {
+        ip: obtenerIp(request),
+        metodo: request.method
+      });
+      return NextResponse.json(
+        { error: "Inicia sesión para calcular rutas." },
+        { status: 401, headers: { "Cache-Control": "no-store" } }
+      );
     }
 
-    if (!identificador) {
-      identificador = obtenerIp(request);
-    }
+    const identificador = `uid:${user.id}`;
 
-    // 2. Aplicar rate limit (20 req / 60s)
+    // 2. Aplicar rate limit (10 req / 60s por usuario autenticado)
     const limit = await rateLimitConVentana(identificador, "ruta", MAX_POR_MINUTO, VENTANA_MS);
     if (!limit.allowed) {
       return NextResponse.json(

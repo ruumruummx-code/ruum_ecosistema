@@ -12,9 +12,18 @@ type ConductorRow = Database["public"]["Tables"]["conductores"]["Row"];
 type UsuarioRow = Database["public"]["Tables"]["usuarios"]["Row"];
 type EstadoConductor = Database["public"]["Enums"]["estado_conductor"];
 
-export async function listarConductoresAdmin(cliente: Cliente): Promise<ConductorRow[]> {
+export async function listarConductoresAdmin(
+  cliente: Cliente,
+  opciones?: { limite?: number; offset?: number }
+): Promise<ConductorRow[]> {
   await assertAdminPermission(cliente, "conductores:leer");
-  const { data, error } = await cliente.from("conductores").select("*").order("creado_en", { ascending: false });
+  const limite = Math.min(Math.max(opciones?.limite ?? 50, 1), 500);
+  const offset = Math.max(opciones?.offset ?? 0, 0);
+  const { data, error } = await cliente
+    .from("conductores")
+    .select("*")
+    .order("creado_en", { ascending: false })
+    .range(offset, offset + limite - 1);
   if (error) throw error;
   return data ?? [];
 }

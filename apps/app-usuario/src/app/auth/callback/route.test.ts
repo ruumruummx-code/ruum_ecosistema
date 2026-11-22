@@ -16,7 +16,7 @@ const exchangeCodeForSessionMock = vi.fn();
 const verifyOtpMock = vi.fn();
 const signOutMock = vi.fn(async (..._args: unknown[]) => ({ error: null }));
 
-vi.mock("@ruum/api/supabase", () => ({
+vi.mock("@ruum/api/supabase/server-client", () => ({
   crearClienteServidor: vi.fn((_url: string, _key: string, opts: { setAll: (c: Array<{ name: string; value: string; options: Record<string, unknown> }>) => void }) => {
     opts.setAll([{ name: "sb-token", value: "val", options: {} }]);
     return {

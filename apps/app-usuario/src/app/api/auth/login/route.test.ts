@@ -14,7 +14,7 @@ const mocks = vi.hoisted(() => ({
 vi.mock("next/headers", () => ({
   cookies: vi.fn(async () => ({ getAll: () => [], set: vi.fn() })),
 }));
-vi.mock("@ruum/api/supabase", () => ({
+vi.mock("@ruum/api/supabase/server-client", () => ({
   crearClienteServidor: vi.fn(() => ({ auth: { signInWithPassword: mocks.signIn } })),
 }));
 vi.mock("@/lib/csp-rate-limit", () => ({

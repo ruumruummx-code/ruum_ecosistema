@@ -18,49 +18,48 @@
 import { createClient } from "npm:@supabase/supabase-js@2.47.16";
 import { crearStripe } from "../_shared/stripe.ts";
 import { cancelarIntentsPendientes, procesarReembolsosPendientes } from "../_shared/reembolsos.ts";
+import { construirCabecerasCors, manejarCors } from "../_shared/cors-documentos.ts";
 
-const CABECERAS_CORS = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, apikey, content-type, x-client-info",
-  "Access-Control-Allow-Methods": "POST, OPTIONS",
-};
-
-function respuestaJson(body: Record<string, unknown>, status = 200) {
-  return new Response(JSON.stringify(body), { status, headers: { ...CABECERAS_CORS, "Content-Type": "application/json" } });
+function respuestaJson(req: Request, body: Record<string, unknown>, status = 200) {
+  return new Response(JSON.stringify(body), {
+    status,
+    headers: { ...construirCabecerasCors(req), "Content-Type": "application/json" }
+  });
 }
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 Deno.serve(async (req) => {
-  if (req.method === "OPTIONS") return new Response(null, { headers: CABECERAS_CORS });
-  if (req.method !== "POST") return respuestaJson({ error: "Método no permitido" }, 405);
+  const rechazoCors = manejarCors(req);
+  if (rechazoCors) return rechazoCors;
+  if (req.method !== "POST") return respuestaJson(req, { error: "Método no permitido" }, 405);
 
   const traza = crypto.randomUUID();
   const autorizacion = req.headers.get("Authorization");
-  if (!autorizacion) return respuestaJson({ error: "Falta sesión" }, 401);
+  if (!autorizacion) return respuestaJson(req, { error: "Falta sesión" }, 401);
 
   const url = Deno.env.get("SUPABASE_URL") ?? "";
   const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
   const stripeKey = Deno.env.get("STRIPE_SECRET_KEY") ?? "";
   if (!url || !serviceKey || !stripeKey) {
     console.error("cancelar_traslado_config_incompleta", { traza });
-    return respuestaJson({ error: "Servicio no disponible temporalmente.", traza }, 503);
+    return respuestaJson(req, { error: "Servicio no disponible temporalmente.", traza }, 503);
   }
 
   const clienteUsuario = createClient(url, Deno.env.get("SUPABASE_ANON_KEY") ?? "", {
     global: { headers: { Authorization: autorizacion } },
   });
   const { data: sesion, error: errorSesion } = await clienteUsuario.auth.getUser();
-  if (errorSesion || !sesion.user) return respuestaJson({ error: "Sesión inválida" }, 401);
+  if (errorSesion || !sesion.user) return respuestaJson(req, { error: "Sesión inválida" }, 401);
 
   let payload: { traslado_id?: unknown; motivo?: unknown };
   try {
     payload = await req.json();
   } catch {
-    return respuestaJson({ error: "JSON inválido" }, 400);
+    return respuestaJson(req, { error: "JSON inválido" }, 400);
   }
   const trasladoId = typeof payload.traslado_id === "string" ? payload.traslado_id : "";
-  if (!UUID.test(trasladoId)) return respuestaJson({ error: "Falta traslado_id" }, 400);
+  if (!UUID.test(trasladoId)) return respuestaJson(req, { error: "Falta traslado_id" }, 400);
   const motivo = typeof payload.motivo === "string" && payload.motivo.trim()
     ? payload.motivo.trim().slice(0, 500)
     : "Cancelación solicitada por usuario";
@@ -74,9 +73,9 @@ Deno.serve(async (req) => {
   if (error) {
     // Los RAISE de negocio (P0001/23514) traen un mensaje para el usuario;
     // cualquier otro error se oculta tras un id de traza.
-    if (error.code === "P0001" || error.code === "23514") return respuestaJson({ error: error.message }, 422);
+    if (error.code === "P0001" || error.code === "23514") return respuestaJson(req, { error: error.message }, 422);
     console.error("cancelar_traslado_rpc_fallida", { traza, code: error.code });
-    return respuestaJson({ error: "No pudimos cancelar el traslado. Intenta de nuevo.", traza }, 500);
+    return respuestaJson(req, { error: "No pudimos cancelar el traslado. Intenta de nuevo.", traza }, 500);
   }
 
   const stripe = crearStripe(stripeKey);
@@ -96,7 +95,7 @@ Deno.serve(async (req) => {
   }
   if (intentsVivos.length) console.error("cancelar_traslado_intents_vivos", { traza, intents: intentsVivos });
 
-  return respuestaJson({
+  return respuestaJson(req, {
     porcentaje_cargo: Number(resultado?.porcentaje_cargo ?? 0),
     monto_cargo: Number(resultado?.monto_cargo ?? 0),
     monto_pagado: Number(resultado?.monto_pagado ?? 0),

@@ -1,3 +1,4 @@
+import "server-only";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { normalizarFilaPlantilla } from "./carga-masiva";
 

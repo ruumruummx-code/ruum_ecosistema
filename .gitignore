@@ -5,6 +5,7 @@ dist
 # Environment files
 .env
 .env.*
+env.txt
 !.env.example
 !.env.*.example
 supabase/.branches

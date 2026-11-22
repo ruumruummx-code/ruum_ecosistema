@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { Aviso } from "@ruum/ui";
+import { Button, Card, InputConIcono, Label, NativeSelect } from "@ruum/ui/base";
 import { traducirErrorAuth, validarDestinoSeguro } from "@ruum/shared/utils";
 import { crearClienteNavegador, tieneSupabaseConfigurado } from "../../lib/supabase-browser";
 
@@ -90,55 +91,96 @@ function FormularioLoginAdmin() {
   }
 
   return (
-    <main className="login-screen">
-      <section className="login-brand" aria-label="Ruum Ruum, movilidad que conecta operaciones">
-        <div className="login-brand__photo" />
-        <div className="login-brand__shade" />
-        <div className="login-brand__content">
-          <Link href="/" className="login-brand__logo" aria-label="Ruum Ruum, inicio">
-          <Image src="/imagenes/ruum-logo-dark.svg" alt="Ruum Ruum" width={186} height={40} className="login-brand__mark" />
-            <span className="login-brand__tagline">Tu traslado, tu control</span>
+    <main className="grid min-h-dvh bg-ui-bg text-ui-fg lg:grid-cols-[minmax(0,1.1fr)_minmax(28rem,1fr)]">
+      {/* Panel de marca: siempre en la variante oscura del sistema base. */}
+      <section data-theme="dark" className="relative hidden overflow-hidden bg-ui-bg text-ui-fg lg:flex" aria-label="Ruum Ruum, movilidad que conecta operaciones">
+        <Image src="/imagenes/torre-control-flota.webp" alt="" aria-hidden="true" fill priority sizes="55vw" className="object-cover opacity-30" />
+        <div className="absolute inset-0 bg-ui-header-wave opacity-80" aria-hidden="true" />
+        <div className="relative flex w-full flex-col justify-between gap-10 p-12 xl:p-16">
+          <Link href="/" className="flex w-fit flex-col gap-2 rounded-md" aria-label="Ruum Ruum, inicio">
+            <Image src="/imagenes/ruum-logo-dark.svg" alt="Ruum Ruum" width={186} height={40} />
+            <span className="text-sm text-ui-fg-muted">Tu traslado, tu control</span>
           </Link>
-          <div className="login-brand__intro">
-            <h1>Movilidad<br />que conecta<br /><span>operaciones</span></h1>
-            <p>Seguridad, evidencia y trazabilidad<br className="desktop-break" /> en cada traslado.</p>
+          <div className="max-w-lg">
+            <h1 className="text-3xl font-semibold tracking-tight xl:text-4xl">Movilidad que conecta operaciones</h1>
+            <p className="mt-3 text-base text-ui-fg-muted">Seguridad, evidencia y trazabilidad en cada traslado.</p>
           </div>
-          <ul className="login-features">
+          <ul className="grid max-w-xl grid-cols-2 gap-3">
             {caracteristicas.map(([icono, titulo, detalle]) => (
-              <li key={titulo}><span className="login-feature__icon"><Icono tipo={icono} /></span><span><strong>{titulo}</strong><small>{detalle}</small></span></li>
+              <li key={titulo} className="flex items-start gap-3 rounded-lg border border-ui-line bg-ui-card/60 p-4">
+                <span className="grid size-10 shrink-0 place-items-center rounded-md bg-ui-brand-soft text-ui-brand-soft-fg"><Icono tipo={icono} className="size-5" /></span>
+                <span className="min-w-0"><strong className="block text-sm font-semibold">{titulo}</strong><small className="block text-xs text-ui-fg-muted">{detalle}</small></span>
+              </li>
             ))}
           </ul>
-          <footer className="login-brand__footer"><span />CONDUCIENDO OPERACIONES MÁS INTELIGENTES</footer>
+          <p className="font-mono-ruum text-xs uppercase tracking-widest text-ui-fg-muted">Conduciendo operaciones más inteligentes</p>
         </div>
       </section>
 
-      <section className="login-access" aria-label="Acceso a la Torre de Control">
-        <div className="login-language"><Icono tipo="globe" /><select aria-label="Idioma" defaultValue="es"><option value="es">ES</option><option value="en">EN</option></select><span aria-hidden="true">⌄</span></div>
-        <div className="login-card-wrap">
-          <section className="login-card" aria-labelledby="titulo-acceso-admin">
-            <div className="login-card__brand"><Image src="/imagenes/ruum-logo-navy.svg" alt="Ruum Ruum" width={186} height={40} /><span>Tu traslado, tu control</span></div>
-            <h2 id="titulo-acceso-admin">Bienvenido</h2>
-            <p className="login-card__lead">Ingresa a la Torre de Control para gestionar tus operaciones.</p>
-            <form onSubmit={iniciarSesion} className="login-form">
-              <label className="login-label" htmlFor="login-email">Correo electrónico</label>
-              <div className="login-input-wrap"><Icono tipo="mail" /><input id="login-email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="ruum.ruum.mx@gmail.com" required autoComplete="email" /></div>
-              <div className="login-password-label"><label className="login-label" htmlFor="login-password">Contraseña</label><button type="button" className="login-text-link" onClick={recuperarPassword}>¿Olvidaste tu contraseña?</button></div>
-              <div className="login-input-wrap"><Icono tipo="lock" /><input id="login-password" type={mostrarPassword ? "text" : "password"} value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Ingresa tu contraseña" required autoComplete="current-password" /><button type="button" className="login-eye" onClick={() => setMostrarPassword((visible) => !visible)} aria-label={mostrarPassword ? "Ocultar contraseña" : "Mostrar contraseña"} aria-pressed={mostrarPassword}><Icono tipo="eye" /></button></div>
-              <label className="login-remember"><input type="checkbox" checked={recordarme} onChange={(e) => setRecordarme(e.target.checked)} /><span>Recordarme en este dispositivo</span></label>
-              {error && <div role="status" aria-live="polite"><Aviso tono="danger">{error}</Aviso></div>}
-              {mensaje && <div role="status" aria-live="polite"><Aviso tono="info">{mensaje}</Aviso></div>}
-              <button type="submit" disabled={enviando} className="login-submit">{enviando ? "Ingresando…" : <>Ingresar <Icono tipo="arrow" /></>}</button>
-            </form>
-            <div className="login-divider"><span />o<span /></div>
-            <p className="login-request">¿No tienes una cuenta? <a href="mailto:soporte@ruumruum.mx?subject=Solicitud%20de%20acceso%20a%20Torre%20de%20Control">Solicita acceso</a></p>
-          </section>
+      <section className="flex flex-col px-4 py-6 sm:px-8" aria-label="Acceso a la Torre de Control">
+        <div className="flex items-center justify-end gap-2 text-ui-fg-muted">
+          <Icono tipo="globe" className="size-4" />
+          <NativeSelect aria-label="Idioma" defaultValue="es" className="h-9 w-20 text-sm"><option value="es">ES</option><option value="en">EN</option></NativeSelect>
         </div>
-        <footer className="login-access__footer">RUUM RUUM<br />TORRE DE CONTROL</footer>
+        <div className="flex flex-1 items-center justify-center py-10">
+          <Card asChild className="w-full max-w-md p-6 shadow-ui-md sm:p-8">
+            <section aria-labelledby="titulo-acceso-admin">
+              <div className="mb-6 flex flex-col gap-1 lg:hidden">
+                <Image src="/imagenes/ruum-logo-navy.svg" alt="Ruum Ruum" width={160} height={34} className="ruum-logo-navy" />
+                <span className="text-sm text-ui-fg-muted">Tu traslado, tu control</span>
+              </div>
+              <p className="font-mono-ruum text-xs font-medium uppercase tracking-widest text-ui-brand">Torre de Control</p>
+              <h2 id="titulo-acceso-admin" className="mt-1 text-2xl font-semibold tracking-tight">Bienvenido</h2>
+              <p className="mt-1 text-sm text-ui-fg-muted">Ingresa a la Torre de Control para gestionar tus operaciones.</p>
+              <form onSubmit={iniciarSesion} className="mt-6 flex flex-col gap-4">
+                <div className="flex flex-col gap-1.5">
+                  <Label htmlFor="login-email">Correo electrónico</Label>
+                  <InputConIcono id="login-email" icono={<Icono tipo="mail" />} type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="nombre@empresa.mx" required autoComplete="email" />
+                </div>
+                <div className="flex flex-col gap-1.5">
+                  <div className="flex items-center justify-between gap-2">
+                    <Label htmlFor="login-password">Contraseña</Label>
+                    <Button type="button" variant="link" size="sm" onClick={recuperarPassword}>¿Olvidaste tu contraseña?</Button>
+                  </div>
+                  <InputConIcono
+                    id="login-password"
+                    icono={<Icono tipo="lock" />}
+                    type={mostrarPassword ? "text" : "password"}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="Ingresa tu contraseña"
+                    required
+                    autoComplete="current-password"
+                    accion={
+                      <Button type="button" variant="ghost" size="icon-sm" onClick={() => setMostrarPassword((visible) => !visible)} aria-label={mostrarPassword ? "Ocultar contraseña" : "Mostrar contraseña"} aria-pressed={mostrarPassword}>
+                        <Icono tipo="eye" />
+                      </Button>
+                    }
+                  />
+                </div>
+                <label className="flex min-h-11 items-center gap-2 text-sm text-ui-fg">
+                  <input type="checkbox" className="size-4 accent-ui-brand" checked={recordarme} onChange={(e) => setRecordarme(e.target.checked)} />
+                  <span>Recordarme en este dispositivo</span>
+                </label>
+                {error && <div role="status" aria-live="polite"><Aviso tono="danger">{error}</Aviso></div>}
+                {mensaje && <div role="status" aria-live="polite"><Aviso tono="info">{mensaje}</Aviso></div>}
+                <Button type="submit" size="lg" disabled={enviando} className="w-full">
+                  {enviando ? "Ingresando…" : <>Ingresar <Icono tipo="arrow" /></>}
+                </Button>
+              </form>
+              <p className="mt-6 border-t border-ui-line pt-5 text-center text-sm text-ui-fg-muted">
+                ¿No tienes una cuenta?{" "}
+                <a className="font-semibold text-ui-brand underline-offset-4 hover:underline" href="mailto:soporte@ruumruum.mx?subject=Solicitud%20de%20acceso%20a%20Torre%20de%20Control">Solicita acceso</a>
+              </p>
+            </section>
+          </Card>
+        </div>
+        <p className="text-center font-mono-ruum text-xs uppercase tracking-widest text-ui-fg-muted">Ruum Ruum · Torre de Control</p>
       </section>
     </main>
   );
 }
 
 export default function PaginaLogin() {
-  return <Suspense fallback={<main className="login-screen login-screen--loading"><div className="login-loading">Cargando acceso…</div></main>}><FormularioLoginAdmin /></Suspense>;
+  return <Suspense fallback={<main className="grid min-h-dvh place-items-center bg-ui-bg text-sm text-ui-fg-muted" role="status">Cargando acceso…</main>}><FormularioLoginAdmin /></Suspense>;
 }

@@ -158,7 +158,7 @@ export async function middleware(request: NextRequest) {
     const secretoRol = process.env.RUUM_ROLE_COOKIE_SECRET?.trim() ?? "";
     const cacheable = secretoRol.length >= 32;
     let valorCookieRol: string | null = null;
-    let rol: "usuario" | "conductor" | "ninguno" | null = null;
+    let rol: "usuario" | "conductor" | "admin" | "ninguno" | null = null;
 
     if (cacheable) {
       const verificado = await verificarRolAppFirmado(
@@ -212,11 +212,20 @@ export async function middleware(request: NextRequest) {
       }
     }
 
-    if (rol === "usuario") {
+    if (rol === "usuario" || rol === "admin") {
+      if (pathname.startsWith("/api/")) {
+        return applyCspHeaders(
+          NextResponse.json(
+            { error: "Acceso denegado: cuenta no autorizada para operar en la app de conductores." },
+            { status: 403, headers: { "Cache-Control": "no-store" } }
+          ),
+          nonce
+        );
+      }
       const redirectUrl = request.nextUrl.clone();
       redirectUrl.pathname = "/403";
       redirectUrl.search = "";
-      redirectUrl.searchParams.set("reason", "rol_usuario");
+      redirectUrl.searchParams.set("reason", rol === "usuario" ? "rol_usuario" : "rol_admin");
       const redirectResponse = NextResponse.redirect(redirectUrl);
       if (valorCookieRol) {
         redirectResponse.cookies.set(COOKIE_ROL_APP, valorCookieRol, opcionesCookieRolApp());

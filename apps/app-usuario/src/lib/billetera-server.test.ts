@@ -1,3 +1,4 @@
+import "server-only";
 import { beforeEach, expect, it, vi } from "vitest";
 const m = vi.hoisted(() => ({ obtener: vi.fn(), vincular: vi.fn(),
   customer: { retrieve: vi.fn(), create: vi.fn(), update: vi.fn(), listPaymentMethods: vi.fn() },

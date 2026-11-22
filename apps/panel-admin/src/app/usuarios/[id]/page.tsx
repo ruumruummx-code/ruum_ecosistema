@@ -109,18 +109,18 @@ export default function PaginaDetalleUsuario() {
     return () => { cancelado = true; };
   }, [usuario]);
 
-  if (cargando) return <main className="mx-auto max-w-5xl px-6 py-8"><p className="font-body text-text-tertiary">Cargando...</p></main>;
+  if (cargando) return <main className="mx-auto max-w-5xl px-6 py-8"><p className="font-body text-ui-fg-muted">Cargando...</p></main>;
   if (!usuario) return (
     <main className="mx-auto max-w-5xl px-6 py-8">
       <Aviso tono="danger">No se encontró el usuario.</Aviso>
-      <Link href="/usuarios" className="mt-4 inline-block font-body text-sm text-focus-default hover:underline">Volver a usuarios</Link>
+      <Link href="/usuarios" className="mt-4 inline-block font-body text-sm text-ui-brand hover:underline">Volver a usuarios</Link>
     </main>
   );
 
   return (
     <main className="mx-auto max-w-7xl px-6 py-8 sm:px-8 sm:py-10">
-      <div className="sticky top-0 z-20 -mx-6 border-b border-border-default bg-background-main/95 px-6 py-3 backdrop-blur sm:-mx-8 sm:px-8">
-        <Link href="/usuarios" className="inline-flex items-center gap-2 rounded-lg border border-ink/15 bg-surface-primary px-3 py-2 font-body text-sm font-semibold text-ink hover:bg-surface-secondary">
+      <div className="sticky top-0 z-20 -mx-6 border-b border-ui-line bg-ui-bg px-6 py-3 backdrop-blur sm:-mx-8 sm:px-8">
+        <Link href="/usuarios" className="inline-flex items-center gap-2 rounded-lg border border-ui-line bg-ui-card px-3 py-2 font-body text-sm font-semibold text-ui-fg hover:bg-ui-muted">
           <span aria-hidden="true">&larr;</span>
           Volver a lista de usuarios
         </Link>
@@ -132,12 +132,12 @@ export default function PaginaDetalleUsuario() {
         <ResumenUsuarioSticky usuario={usuario} />
 
         <div className="min-w-0">
-          <div className="rounded-card border border-ink/10 bg-surface-primary p-5">
+          <div className="rounded-lg border border-ui-line bg-ui-card p-5">
             <div className="flex flex-col gap-5 xl:flex-row xl:items-start xl:justify-between">
               <div>
-                <p className="font-body text-xs font-semibold uppercase tracking-[0.16em] text-text-tertiary">Perfil de usuario</p>
-                <h1 className="mt-1 font-display text-2xl font-semibold text-text-main">{aTitleCase(usuario.nombre) || "Usuario sin nombre"}</h1>
-                <p className="mt-1 font-body text-sm text-text-secondary">{usuario.correo_facturacion ?? "Sin correo registrado"}</p>
+                <p className="font-body text-xs font-semibold uppercase tracking-[0.16em] text-ui-fg-muted">Perfil de usuario</p>
+                <h1 className="mt-1 font-display text-2xl font-semibold text-ui-fg">{aTitleCase(usuario.nombre) || "Usuario sin nombre"}</h1>
+                <p className="mt-1 font-body text-sm text-ui-fg-muted">{usuario.correo_facturacion ?? "Sin correo registrado"}</p>
               </div>
               <ResumenActividad conteos={conteosTabs} onSeleccionarTab={setTab} />
             </div>
@@ -167,13 +167,13 @@ function TabDatos({ usuario, onActualizado, onAviso }: { usuario: UsuarioRow; on
   return (
     <>
       {inconsistenciaTerminos && (
-        <div className="mb-6 rounded-card border border-status-warning/40 bg-status-warning-soft p-4">
+        <div className="mb-6 rounded-lg border border-ui-warning/40 bg-ui-warning-soft p-4">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
             <div className="flex gap-3">
-              <span className="grid size-9 shrink-0 place-items-center rounded-full bg-status-warning/15 font-body text-base font-bold text-status-warning" aria-hidden="true">!</span>
+              <span className="grid size-9 shrink-0 place-items-center rounded-full bg-ui-warning/15 font-body text-base font-bold text-ui-warning" aria-hidden="true">!</span>
               <div>
-                <h2 className="font-display text-base font-semibold text-status-warning">Inconsistencia de verificación</h2>
-                <p className="mt-1 font-body text-sm leading-6 text-text-secondary">
+                <h2 className="font-display text-base font-semibold text-ui-warning">Inconsistencia de verificación</h2>
+                <p className="mt-1 font-body text-sm leading-6 text-ui-fg-muted">
                   La cuenta aparece verificada sin aceptación de términos. Regulariza el estado antes de aprobar nuevas acciones sensibles.
                 </p>
               </div>
@@ -181,7 +181,7 @@ function TabDatos({ usuario, onActualizado, onAviso }: { usuario: UsuarioRow; on
             <button
               type="button"
               onClick={() => document.getElementById("verificacion-documentos")?.scrollIntoView({ behavior: "smooth", block: "start" })}
-              className="rounded-lg border border-status-warning/45 bg-surface-primary px-3 py-2 font-body text-sm font-semibold text-status-warning hover:bg-status-warning-soft/70"
+              className="rounded-lg border border-ui-warning/45 bg-ui-card px-3 py-2 font-body text-sm font-semibold text-ui-warning hover:bg-ui-warning-soft"
             >
               Ver detalles
             </button>
@@ -193,7 +193,7 @@ function TabDatos({ usuario, onActualizado, onAviso }: { usuario: UsuarioRow; on
         <Seccion
           titulo="Datos personales"
           consistente
-          action={!editando && <button onClick={() => setEditando(true)} className="rounded-lg border border-signal bg-signal px-3 py-1.5 font-body text-xs font-semibold text-ink hover:bg-signal/90">Editar datos</button>}
+          action={!editando && <button onClick={() => setEditando(true)} className="rounded-lg border border-ui-brand bg-ui-brand px-3 py-1.5 font-body text-xs font-semibold text-ui-fg hover:bg-ui-brand-hover">Editar datos</button>}
         >
           <Dato etiqueta="Nombre" valor={aTitleCase(usuario.nombre)} />
           <Dato etiqueta="Teléfono" valor={formatearTelefono(usuario.telefono)} />
@@ -206,7 +206,7 @@ function TabDatos({ usuario, onActualizado, onAviso }: { usuario: UsuarioRow; on
         <Seccion
           titulo="Dirección"
           consistente
-          action={!editando && <button onClick={() => setEditando(true)} className="rounded-lg border border-ink/20 px-3 py-1.5 font-body text-xs font-semibold text-text-secondary hover:bg-surface-secondary hover:text-ink">{direccionVacia ? "+ Agregar dirección" : "Editar dirección"}</button>}
+          action={!editando && <button onClick={() => setEditando(true)} className="rounded-lg border border-ui-line-strong px-3 py-1.5 font-body text-xs font-semibold text-ui-fg-muted hover:bg-ui-muted hover:text-ui-fg">{direccionVacia ? "+ Agregar dirección" : "Editar dirección"}</button>}
         >
           <Dato etiqueta="Calle" valor={usuario.calle} />
           <Dato etiqueta="Número" valor={usuario.numero} />
@@ -246,15 +246,15 @@ function TabDatos({ usuario, onActualizado, onAviso }: { usuario: UsuarioRow; on
       )}
 
       <div id="verificacion-documentos" className="mt-10 scroll-mt-24">
-        <h2 className="font-display text-lg font-semibold text-text-main">Verificación y documentos</h2>
-        <div className="mt-3 rounded-card border border-ink/10 bg-surface-primary p-4">
+        <h2 className="font-display text-lg font-semibold text-ui-fg">Verificación y documentos</h2>
+        <div className="mt-3 rounded-lg border border-ui-line bg-ui-card p-4">
           <AccionesVerificacion usuario={usuario} onActualizado={() => window.location.reload()} />
         </div>
       </div>
 
-      <div className="mt-10 rounded-card border border-status-error/35 bg-status-error-soft/25 p-5">
-        <h2 className="font-display text-lg font-semibold text-status-error">Zona de riesgo</h2>
-        <p className="mt-1 font-body text-sm text-text-secondary">Estas acciones afectan la cuenta del usuario de forma permanente o temporal.</p>
+      <div className="mt-10 rounded-lg border border-ui-danger/35 bg-ui-danger-soft p-5">
+        <h2 className="font-display text-lg font-semibold text-ui-danger">Zona de riesgo</h2>
+        <p className="mt-1 font-body text-sm text-ui-fg-muted">Estas acciones afectan la cuenta del usuario de forma permanente o temporal.</p>
         <div className="mt-4 grid gap-3 sm:grid-cols-2">
           {(usuario.estado_cuenta ?? "activa") !== "suspendida" && (
             <SuspenderCuenta usuarioId={usuario.id} onCompletado={() => { window.location.reload(); }} />
@@ -282,14 +282,14 @@ function ResumenUsuarioSticky({ usuario }: { usuario: UsuarioRow }) {
 
   return (
     <aside className="lg:sticky lg:top-20">
-      <div className="rounded-card border border-ink/10 bg-surface-primary p-5 shadow-[var(--ruum-shadow-1)]">
+      <div className="rounded-lg border border-ui-line bg-ui-card p-5 shadow-ui-sm">
         <div className="flex items-start gap-3">
-          <div className="grid size-14 shrink-0 place-items-center rounded-full bg-ink text-lg font-display font-semibold text-surface-primary">
+          <div className="grid size-14 shrink-0 place-items-center rounded-full bg-ui-brand text-lg font-display font-semibold text-ui-on-brand">
             {iniciales || "U"}
           </div>
           <div className="min-w-0">
-            <h2 className="truncate font-display text-lg font-semibold text-text-main">{aTitleCase(usuario.nombre) || "Usuario sin nombre"}</h2>
-            <p className="mt-1 truncate font-body text-sm text-text-secondary">{usuario.correo_facturacion ?? "No registrado"}</p>
+            <h2 className="truncate font-display text-lg font-semibold text-ui-fg">{aTitleCase(usuario.nombre) || "Usuario sin nombre"}</h2>
+            <p className="mt-1 truncate font-body text-sm text-ui-fg-muted">{usuario.correo_facturacion ?? "No registrado"}</p>
           </div>
         </div>
         <div className="mt-4 flex flex-wrap gap-2">
@@ -309,9 +309,9 @@ function ResumenUsuarioSticky({ usuario }: { usuario: UsuarioRow }) {
 
 function ResumenStickyDato({ etiqueta, valor }: { etiqueta: string; valor: string | null | undefined }) {
   return (
-    <div className="rounded-lg border border-border-default bg-surface-secondary/70 px-3 py-2">
-      <p className="font-body text-xs font-medium text-text-tertiary">{etiqueta}</p>
-      <p className="mt-1 truncate font-body text-sm font-semibold text-text-main">{valor || "No registrado"}</p>
+    <div className="rounded-lg border border-ui-line bg-ui-muted px-3 py-2">
+      <p className="font-body text-xs font-medium text-ui-fg-muted">{etiqueta}</p>
+      <p className="mt-1 truncate font-body text-sm font-semibold text-ui-fg">{valor || "No registrado"}</p>
     </div>
   );
 }
@@ -319,7 +319,7 @@ function ResumenStickyDato({ etiqueta, valor }: { etiqueta: string; valor: strin
 function ContadorTab({ valor }: { valor: number | null | undefined }) {
   if (valor == null) return null;
   return (
-    <span className={`rounded-full border px-2 py-0.5 font-mono-ruum text-[11px] ${valor === 0 ? "border-ink/10 text-text-tertiary opacity-55" : "border-signal/40 bg-signal/10 text-ink"}`}>
+    <span className={`rounded-full border px-2 py-0.5 font-mono-ruum text-xs ${valor === 0 ? "border-ui-line text-ui-fg-muted opacity-55" : "border-ui-brand/40 bg-ui-brand-soft text-ui-fg"}`}>
       {valor}
     </span>
   );
@@ -335,14 +335,14 @@ function ResumenActividad({ conteos, onSeleccionarTab }: { conteos: ConteosTabs;
             key={tarjeta.tab}
             type="button"
             onClick={() => onSeleccionarTab(tarjeta.tab)}
-            className={`rounded-lg border border-ink/10 bg-surface-secondary px-3 py-3 text-left transition hover:border-focus-default/35 hover:bg-surface-primary hover:shadow-[var(--ruum-shadow-1)] ${valor === 0 ? "opacity-65" : ""}`}
+            className={`rounded-lg border border-ui-line bg-ui-muted px-3 py-3 text-left transition hover:border-ui-focus/35 hover:bg-ui-card hover:shadow-ui-sm ${valor === 0 ? "opacity-65" : ""}`}
           >
             <div className="flex items-center justify-between gap-2">
-              <span className="grid size-6 place-items-center rounded-full bg-ink/10 font-body text-xs font-bold text-text-secondary" aria-hidden="true">{tarjeta.icono}</span>
-              <span className="font-mono-ruum text-2xl font-semibold text-text-main">{valor ?? "..."}</span>
+              <span className="grid size-6 place-items-center rounded-full bg-ui-muted font-body text-xs font-bold text-ui-fg-muted" aria-hidden="true">{tarjeta.icono}</span>
+              <span className="font-mono-ruum text-2xl font-semibold text-ui-fg">{valor ?? "..."}</span>
             </div>
-            <p className="mt-1 font-body text-xs text-text-secondary">{tarjeta.etiqueta}</p>
-            <p className="mt-1 font-body text-[11px] font-medium text-focus-default">Ver módulo</p>
+            <p className="mt-1 font-body text-xs text-ui-fg-muted">{tarjeta.etiqueta}</p>
+            <p className="mt-1 font-body text-xs font-medium text-ui-brand">Ver módulo</p>
           </button>
         );
       })}
@@ -386,21 +386,21 @@ function ActividadReciente({ usuarioId }: { usuarioId: string }) {
 
   const conActividad = actividad.some((item) => item.valor);
   return (
-    <div className="mt-6 rounded-card border border-ink/10 bg-surface-primary p-4">
-      <h3 className="font-display text-base font-semibold text-text-main">Actividad reciente</h3>
+    <div className="mt-6 rounded-lg border border-ui-line bg-ui-card p-4">
+      <h3 className="font-display text-base font-semibold text-ui-fg">Actividad reciente</h3>
       {cargando ? (
-        <p className="mt-2 font-body text-sm text-text-tertiary">Cargando actividad...</p>
+        <p className="mt-2 font-body text-sm text-ui-fg-muted">Cargando actividad...</p>
       ) : conActividad ? (
         <div className="mt-3 grid gap-3 sm:grid-cols-2">
           {actividad.map((item) => (
-            <div key={item.etiqueta} className="rounded-lg border border-border-default px-3 py-2">
-              <p className="font-body text-xs text-text-tertiary">{item.etiqueta}</p>
-              <p className="mt-1 font-body text-sm font-semibold text-text-main">{item.valor ?? <ValorVacio />}</p>
+            <div key={item.etiqueta} className="rounded-lg border border-ui-line px-3 py-2">
+              <p className="font-body text-xs text-ui-fg-muted">{item.etiqueta}</p>
+              <p className="mt-1 font-body text-sm font-semibold text-ui-fg">{item.valor ?? <ValorVacio />}</p>
             </div>
           ))}
         </div>
       ) : (
-        <p className="mt-2 font-body text-sm text-text-tertiary">Sin actividad registrada.</p>
+        <p className="mt-2 font-body text-sm text-ui-fg-muted">Sin actividad registrada.</p>
       )}
     </div>
   );
@@ -451,38 +451,38 @@ function TabTraslados({ usuarioId }: { usuarioId: string }) {
     await navigator.clipboard.writeText(folio);
   }
 
-  if (cargando) return <p className="font-body text-text-tertiary">Cargando traslados...</p>;
-  if (!Traslados?.length) return <p className="font-body text-text-tertiary">Sin traslados registrados.</p>;
+  if (cargando) return <p className="font-body text-ui-fg-muted">Cargando traslados...</p>;
+  if (!Traslados?.length) return <p className="font-body text-ui-fg-muted">Sin traslados registrados.</p>;
 
   return (
     <div className="space-y-4">
-      <div className="rounded-card border border-ink/10 bg-surface-primary p-4">
+      <div className="rounded-lg border border-ui-line bg-ui-card p-4">
         <div className="grid gap-3 lg:grid-cols-[minmax(180px,1fr)_180px_160px_160px]">
           <label className="flex flex-col gap-1">
-            <span className="font-body text-xs font-medium text-text-secondary">Buscar por folio</span>
-            <input type="search" value={busqueda} onChange={(evento) => setBusqueda(evento.target.value)} placeholder="Ej. 8f2a1c3b" className="rounded-lg border border-ink/20 px-3 py-2 font-body text-sm focus:border-focus-default focus:outline-none focus:ring-2 focus:ring-focus-default/20" />
+            <span className="font-body text-xs font-medium text-ui-fg-muted">Buscar por folio</span>
+            <input type="search" value={busqueda} onChange={(evento) => setBusqueda(evento.target.value)} placeholder="Ej. 8f2a1c3b" className="rounded-lg border border-ui-line-strong px-3 py-2 font-body text-sm focus:border-ui-focus focus:outline-none focus:ring-2 focus:ring-ui-ring" />
           </label>
           <label className="flex flex-col gap-1">
-            <span className="font-body text-xs font-medium text-text-secondary">Estado</span>
-            <select value={estadoFiltro} onChange={(evento) => setEstadoFiltro(evento.target.value)} className="rounded-lg border border-ink/20 px-3 py-2 font-body text-sm focus:border-focus-default focus:outline-none focus:ring-2 focus:ring-focus-default/20">
+            <span className="font-body text-xs font-medium text-ui-fg-muted">Estado</span>
+            <select value={estadoFiltro} onChange={(evento) => setEstadoFiltro(evento.target.value)} className="rounded-lg border border-ui-line-strong px-3 py-2 font-body text-sm focus:border-ui-focus focus:outline-none focus:ring-2 focus:ring-ui-ring">
               <option value="todos">Todos</option>
               {estados.map((estado) => <option key={estado} value={estado}>{etiquetaEstadoTraslado(estado)}</option>)}
             </select>
           </label>
           <label className="flex flex-col gap-1">
-            <span className="font-body text-xs font-medium text-text-secondary">Desde</span>
-            <input type="date" value={fechaDesde} onChange={(evento) => setFechaDesde(evento.target.value)} className="rounded-lg border border-ink/20 px-3 py-2 font-body text-sm focus:border-focus-default focus:outline-none focus:ring-2 focus:ring-focus-default/20" />
+            <span className="font-body text-xs font-medium text-ui-fg-muted">Desde</span>
+            <input type="date" value={fechaDesde} onChange={(evento) => setFechaDesde(evento.target.value)} className="rounded-lg border border-ui-line-strong px-3 py-2 font-body text-sm focus:border-ui-focus focus:outline-none focus:ring-2 focus:ring-ui-ring" />
           </label>
           <label className="flex flex-col gap-1">
-            <span className="font-body text-xs font-medium text-text-secondary">Hasta</span>
-            <input type="date" value={fechaHasta} onChange={(evento) => setFechaHasta(evento.target.value)} className="rounded-lg border border-ink/20 px-3 py-2 font-body text-sm focus:border-focus-default focus:outline-none focus:ring-2 focus:ring-focus-default/20" />
+            <span className="font-body text-xs font-medium text-ui-fg-muted">Hasta</span>
+            <input type="date" value={fechaHasta} onChange={(evento) => setFechaHasta(evento.target.value)} className="rounded-lg border border-ui-line-strong px-3 py-2 font-body text-sm focus:border-ui-focus focus:outline-none focus:ring-2 focus:ring-ui-ring" />
           </label>
         </div>
       </div>
 
-      <div className="overflow-hidden rounded-card border border-ink/10 bg-surface-primary">
+      <div className="overflow-hidden rounded-lg border border-ui-line bg-ui-card">
         <table className="w-full font-body text-sm">
-          <thead><tr className="border-b border-ink/10 text-left text-xs uppercase tracking-wide text-text-tertiary">
+          <thead><tr className="border-b border-ui-line text-left text-xs uppercase tracking-wide text-ui-fg-muted">
             <th className="px-4 py-3">Folio</th>
             <th className="px-4 py-3">Estado</th>
             <th className="px-4 py-3">Origen</th>
@@ -492,32 +492,32 @@ function TabTraslados({ usuarioId }: { usuarioId: string }) {
           </tr></thead>
           <tbody>
             {TrasladosPagina.map((viaje) => (
-              <tr key={viaje.traslado_id} onClick={() => setSeleccionado(viaje)} className="group cursor-pointer border-b border-ink/5 transition-colors last:border-0 hover:bg-surface-secondary/70">
+              <tr key={viaje.traslado_id} onClick={() => setSeleccionado(viaje)} className="group cursor-pointer border-b border-ui-line transition-colors last:border-0 hover:bg-ui-muted">
                 <td className="px-4 py-3">
-                  <span className="font-mono-ruum text-sm font-semibold text-ink">{folioCorto(viaje.traslado_id)}</span>
-                  <span className="ml-2 font-body text-xs text-text-tertiary opacity-0 transition-opacity group-hover:opacity-100">clic para detalle</span>
+                  <span className="font-mono-ruum text-sm font-semibold text-ui-fg">{folioCorto(viaje.traslado_id)}</span>
+                  <span className="ml-2 font-body text-xs text-ui-fg-muted opacity-0 transition-opacity group-hover:opacity-100">clic para detalle</span>
                 </td>
                 <td className="px-4 py-3"><BadgeEstadoTraslado viaje={viaje} /></td>
-                <td className="px-4 py-3 text-text-secondary">{viaje.origen_direccion || viaje.origen_ciudad || <ValorVacio />}</td>
-                <td className="px-4 py-3 text-text-secondary">{viaje.destino_direccion || viaje.destino_ciudad || <ValorVacio />}</td>
-                <td className="px-4 py-3 text-text-secondary">{formatearFechaOperativa(viaje.creado_en)}</td>
+                <td className="px-4 py-3 text-ui-fg-muted">{viaje.origen_direccion || viaje.origen_ciudad || <ValorVacio />}</td>
+                <td className="px-4 py-3 text-ui-fg-muted">{viaje.destino_direccion || viaje.destino_ciudad || <ValorVacio />}</td>
+                <td className="px-4 py-3 text-ui-fg-muted">{formatearFechaOperativa(viaje.creado_en)}</td>
                 <td className="px-4 py-3">
                   <div className="flex justify-end gap-2 opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100">
-                    <button type="button" onClick={(evento) => copiarFolio(evento, viaje.traslado_id)} className="rounded-md border border-ink/20 px-2.5 py-1 font-body text-xs font-semibold text-text-secondary hover:border-focus-default hover:text-focus-default">Copiar folio</button>
-                    <button type="button" onClick={(evento) => { evento.stopPropagation(); setSeleccionado(viaje); }} className="rounded-md border border-ink/20 px-2.5 py-1 font-body text-xs font-semibold text-text-secondary hover:border-focus-default hover:text-focus-default">Ver detalle</button>
+                    <button type="button" onClick={(evento) => copiarFolio(evento, viaje.traslado_id)} className="rounded-md border border-ui-line-strong px-2.5 py-1 font-body text-xs font-semibold text-ui-fg-muted hover:border-ui-focus hover:text-ui-brand">Copiar folio</button>
+                    <button type="button" onClick={(evento) => { evento.stopPropagation(); setSeleccionado(viaje); }} className="rounded-md border border-ui-line-strong px-2.5 py-1 font-body text-xs font-semibold text-ui-fg-muted hover:border-ui-focus hover:text-ui-brand">Ver detalle</button>
                   </div>
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
-        {!TrasladosPagina.length && <p className="px-4 py-8 text-center font-body text-sm text-text-tertiary">Sin traslados para los filtros seleccionados.</p>}
-        <div className="flex flex-wrap items-center justify-between gap-3 border-t border-ink/10 px-4 py-3">
-          <p className="font-body text-sm text-text-secondary">Mostrando {TrasladosPagina.length} de {TrasladosFiltrados.length} traslados</p>
+        {!TrasladosPagina.length && <p className="px-4 py-8 text-center font-body text-sm text-ui-fg-muted">Sin traslados para los filtros seleccionados.</p>}
+        <div className="flex flex-wrap items-center justify-between gap-3 border-t border-ui-line px-4 py-3">
+          <p className="font-body text-sm text-ui-fg-muted">Mostrando {TrasladosPagina.length} de {TrasladosFiltrados.length} traslados</p>
           <div className="flex gap-2">
-            <button type="button" onClick={() => setPagina((valor) => Math.max(1, valor - 1))} disabled={paginaActual === 1} className="rounded-lg border border-ink/20 px-3 py-1.5 font-body text-sm font-semibold text-text-secondary disabled:opacity-50">Anterior</button>
-            <span className="rounded-lg bg-ink/5 px-3 py-1.5 font-body text-sm text-text-secondary">Página {paginaActual} de {totalPaginas}</span>
-            <button type="button" onClick={() => setPagina((valor) => Math.min(totalPaginas, valor + 1))} disabled={paginaActual === totalPaginas} className="rounded-lg border border-ink/20 px-3 py-1.5 font-body text-sm font-semibold text-text-secondary disabled:opacity-50">Siguiente</button>
+            <button type="button" onClick={() => setPagina((valor) => Math.max(1, valor - 1))} disabled={paginaActual === 1} className="rounded-lg border border-ui-line-strong px-3 py-1.5 font-body text-sm font-semibold text-ui-fg-muted disabled:opacity-50">Anterior</button>
+            <span className="rounded-lg bg-ui-muted px-3 py-1.5 font-body text-sm text-ui-fg-muted">Página {paginaActual} de {totalPaginas}</span>
+            <button type="button" onClick={() => setPagina((valor) => Math.min(totalPaginas, valor + 1))} disabled={paginaActual === totalPaginas} className="rounded-lg border border-ui-line-strong px-3 py-1.5 font-body text-sm font-semibold text-ui-fg-muted disabled:opacity-50">Siguiente</button>
           </div>
         </div>
       </div>
@@ -540,7 +540,7 @@ function DetalleViajeDrawer({ viaje, onCerrar }: { viaje: ViajeRow | null; onCer
       title={viaje ? `Traslado ${folioCorto(viaje.traslado_id)}` : "Detalle de traslado"}
       description={viaje ? `${etiquetaEstadoTraslado(viaje.tiene_incidencia_abierta ? "incidencia" : viaje.estado)} · ${formatearFechaOperativa(viaje.creado_en)}` : undefined}
       onOpenChange={(open) => { if (!open) onCerrar(); }}
-      footer={viaje && <Link href={`/viajes/${viaje.traslado_id}`} className="rounded-lg border border-ink/20 px-4 py-2 font-body text-sm font-semibold text-ink hover:bg-surface-secondary">Abrir página completa</Link>}
+      footer={viaje && <Link href={`/viajes/${viaje.traslado_id}`} className="rounded-lg border border-ui-line-strong px-4 py-2 font-body text-sm font-semibold text-ui-fg hover:bg-ui-muted">Abrir página completa</Link>}
     >
       {viaje && (
         <div className="space-y-5">
@@ -633,13 +633,13 @@ function TabPagos({ usuarioId }: { usuarioId: string }) {
     listarPagosDeUsuario(cliente, usuarioId).then(setPagos).catch(() => setPagos([])).finally(() => setCargando(false));
   }, [usuarioId]);
 
-  if (cargando) return <p className="font-body text-text-tertiary">Cargando pagos...</p>;
-  if (!pagos?.length) return <p className="font-body text-text-tertiary">Sin pagos registrados.</p>;
+  if (cargando) return <p className="font-body text-ui-fg-muted">Cargando pagos...</p>;
+  if (!pagos?.length) return <p className="font-body text-ui-fg-muted">Sin pagos registrados.</p>;
 
   return (
-    <div className="overflow-hidden rounded-card border border-ink/10 bg-surface-primary">
+    <div className="overflow-hidden rounded-lg border border-ui-line bg-ui-card">
       <table className="w-full font-body text-sm">
-        <thead><tr className="border-b border-ink/10 text-left text-xs uppercase tracking-wide text-text-tertiary">
+        <thead><tr className="border-b border-ui-line text-left text-xs uppercase tracking-wide text-ui-fg-muted">
           <th className="px-4 py-3">Monto</th>
           <th className="px-4 py-3">Estado</th>
           <th className="px-4 py-3">Método</th>
@@ -647,11 +647,11 @@ function TabPagos({ usuarioId }: { usuarioId: string }) {
         </tr></thead>
         <tbody>
           {pagos.map((p) => (
-            <tr key={p.id} className="border-b border-ink/5 last:border-0">
+            <tr key={p.id} className="border-b border-ui-line last:border-0">
               <td className="px-4 py-3 font-mono-ruum">${(p.monto ?? 0).toFixed(2)}</td>
               <td className="px-4 py-3 capitalize">{p.estado?.replaceAll("_", " ")}</td>
-              <td className="px-4 py-3 text-text-secondary">{p.metodo || <ValorVacio />}</td>
-              <td className="px-4 py-3 text-text-secondary">{new Date(p.registrado_en).toLocaleDateString("es-MX")}</td>
+              <td className="px-4 py-3 text-ui-fg-muted">{p.metodo || <ValorVacio />}</td>
+              <td className="px-4 py-3 text-ui-fg-muted">{new Date(p.registrado_en).toLocaleDateString("es-MX")}</td>
             </tr>
           ))}
         </tbody>
@@ -668,23 +668,23 @@ function TabIncidencias({ usuarioId }: { usuarioId: string }) {
     listarIncidenciasDeUsuario(cliente, usuarioId).then(setIncidencias).catch(() => setIncidencias([])).finally(() => setCargando(false));
   }, [usuarioId]);
 
-  if (cargando) return <p className="font-body text-text-tertiary">Cargando incidencias...</p>;
-  if (!incidencias?.length) return <p className="font-body text-text-tertiary">Sin incidencias registradas.</p>;
+  if (cargando) return <p className="font-body text-ui-fg-muted">Cargando incidencias...</p>;
+  if (!incidencias?.length) return <p className="font-body text-ui-fg-muted">Sin incidencias registradas.</p>;
 
   return (
-    <div className="overflow-hidden rounded-card border border-ink/10 bg-surface-primary">
+    <div className="overflow-hidden rounded-lg border border-ui-line bg-ui-card">
       <table className="w-full font-body text-sm">
-        <thead><tr className="border-b border-ink/10 text-left text-xs uppercase tracking-wide text-text-tertiary">
+        <thead><tr className="border-b border-ui-line text-left text-xs uppercase tracking-wide text-ui-fg-muted">
           <th className="px-4 py-3">Tipo</th>
           <th className="px-4 py-3">Estado</th>
           <th className="px-4 py-3">Fecha</th>
         </tr></thead>
         <tbody>
           {incidencias.map((inc) => (
-            <tr key={inc.id} className="border-b border-ink/5 last:border-0">
+            <tr key={inc.id} className="border-b border-ui-line last:border-0">
               <td className="px-4 py-3 capitalize">{inc.tipo?.replaceAll("_", " ")}</td>
               <td className="px-4 py-3 capitalize">{inc.resuelta ? "Resuelta" : "Abierta"}</td>
-              <td className="px-4 py-3 text-text-secondary">{new Date(inc.creada_en).toLocaleDateString("es-MX")}</td>
+              <td className="px-4 py-3 text-ui-fg-muted">{new Date(inc.creada_en).toLocaleDateString("es-MX")}</td>
             </tr>
           ))}
         </tbody>
@@ -715,13 +715,13 @@ function TabSesiones({ usuarioId }: { usuarioId: string }) {
     finally { setRevocando(null); }
   }
 
-  if (cargando) return <p className="font-body text-text-tertiary">Cargando sesiones...</p>;
-  if (!sesiones?.length) return <p className="font-body text-text-tertiary">Sin sesiones activas.</p>;
+  if (cargando) return <p className="font-body text-ui-fg-muted">Cargando sesiones...</p>;
+  if (!sesiones?.length) return <p className="font-body text-ui-fg-muted">Sin sesiones activas.</p>;
 
   return (
-    <div className="overflow-hidden rounded-card border border-ink/10 bg-surface-primary">
+    <div className="overflow-hidden rounded-lg border border-ui-line bg-ui-card">
       <table className="w-full font-body text-sm">
-        <thead><tr className="border-b border-ink/10 text-left text-xs uppercase tracking-wide text-text-tertiary">
+        <thead><tr className="border-b border-ui-line text-left text-xs uppercase tracking-wide text-ui-fg-muted">
           <th className="px-4 py-3">Dispositivo</th>
           <th className="px-4 py-3">IP</th>
           <th className="px-4 py-3">Último acceso</th>
@@ -730,17 +730,17 @@ function TabSesiones({ usuarioId }: { usuarioId: string }) {
         </tr></thead>
         <tbody>
           {sesiones.map((s) => (
-            <tr key={s.id} className="border-b border-ink/5 last:border-0">
+            <tr key={s.id} className="border-b border-ui-line last:border-0">
               <td className="px-4 py-3 font-body text-sm">{s.agente_usuario?.slice(0, 60) || <ValorVacio />}</td>
               <td className="px-4 py-3 font-mono-ruum text-xs">{s.direccion_ip || <ValorVacio />}</td>
-              <td className="px-4 py-3 text-text-secondary">{s.ultimo_acceso ? new Date(s.ultimo_acceso).toLocaleString("es-MX") : <ValorVacio />}</td>
+              <td className="px-4 py-3 text-ui-fg-muted">{s.ultimo_acceso ? new Date(s.ultimo_acceso).toLocaleString("es-MX") : <ValorVacio />}</td>
               <td className="px-4 py-3">
                 <AdminBadge tone={s.activa ? "success" : "danger"}>{s.activa ? "Activa" : "Revocada"}</AdminBadge>
               </td>
               <td className="px-4 py-3">
                 {s.activa && (
                   <button onClick={() => revocar(s.id)} disabled={revocando === s.id}
-                    className="rounded-md border border-status-error/40 px-3 py-1 font-body text-xs text-status-error hover:bg-status-error/10 disabled:opacity-50"
+                    className="rounded-md border border-ui-danger/40 px-3 py-1 font-body text-xs text-ui-danger hover:bg-ui-danger/10 disabled:opacity-50"
                   >{revocando === s.id ? "Revocando..." : "Revocar"}</button>
                 )}
               </td>
@@ -810,40 +810,40 @@ function TabPrivacidad({ usuario, onActualizado }: { usuario: UsuarioRow; onActu
     <div className="space-y-6">
       {aviso && <Aviso tono="info">{aviso}</Aviso>}
 
-      <div className="rounded-card border border-ink/10 bg-surface-primary p-4">
-        <h3 className="font-display text-sm font-semibold uppercase tracking-wide text-text-tertiary">Exportar datos</h3>
-        <p className="mt-1 font-body text-sm text-text-secondary">Descarga información del usuario, traslados y pagos para migración o solicitudes de derechos de datos.</p>
+      <div className="rounded-lg border border-ui-line bg-ui-card p-4">
+        <h3 className="font-display text-sm font-semibold uppercase tracking-wide text-ui-fg-muted">Exportar datos</h3>
+        <p className="mt-1 font-body text-sm text-ui-fg-muted">Descarga información del usuario, traslados y pagos para migración o solicitudes de derechos de datos.</p>
         <div className="mt-4 grid gap-3 sm:grid-cols-[minmax(0,1fr)_auto]">
           <label className="flex flex-col gap-1">
-            <span className="font-body text-xs font-medium text-text-secondary">Formato de exportación</span>
-            <select value={formatoExportacion} onChange={(evento) => setFormatoExportacion(evento.target.value as FormatoExportacionPrivacidad)} className="rounded-lg border border-ink/20 px-3 py-2 font-body text-sm focus:border-focus-default focus:outline-none focus:ring-2 focus:ring-focus-default/20">
+            <span className="font-body text-xs font-medium text-ui-fg-muted">Formato de exportación</span>
+            <select value={formatoExportacion} onChange={(evento) => setFormatoExportacion(evento.target.value as FormatoExportacionPrivacidad)} className="rounded-lg border border-ui-line-strong px-3 py-2 font-body text-sm focus:border-ui-focus focus:outline-none focus:ring-2 focus:ring-ui-ring">
               <option value="json">JSON - desarrolladores / migraciones</option>
               <option value="pdf">PDF - solicitudes ARCO / GDPR / Ley de datos</option>
               <option value="csv">CSV - revisión tabular</option>
             </select>
           </label>
           <button onClick={exportarDatos} disabled={exportando}
-            className="self-end rounded-lg border border-ink/20 px-4 py-2 font-body text-sm font-semibold hover:bg-ink/5 disabled:opacity-50"
+            className="self-end rounded-lg border border-ui-line-strong px-4 py-2 font-body text-sm font-semibold hover:bg-ui-muted disabled:opacity-50"
           >{exportando ? "Exportando..." : "Exportar datos"}</button>
         </div>
       </div>
 
-      <div className="rounded-card border border-status-error/35 bg-status-error-soft p-4">
+      <div className="rounded-lg border border-ui-danger/35 bg-ui-danger-soft p-4">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
             <AdminBadge tone="danger">Zona de seguridad</AdminBadge>
-            <h3 className="mt-3 font-display text-sm font-semibold uppercase tracking-wide text-status-error">Anonimizar datos personales</h3>
-            <p className="mt-1 font-body text-sm text-text-secondary">Reemplaza datos personales con valores anonimizados. Los traslados e historial se conservan para referencia operativa y obligaciones aplicables.</p>
+            <h3 className="mt-3 font-display text-sm font-semibold uppercase tracking-wide text-ui-danger">Anonimizar datos personales</h3>
+            <p className="mt-1 font-body text-sm text-ui-fg-muted">Reemplaza datos personales con valores anonimizados. Los traslados e historial se conservan para referencia operativa y obligaciones aplicables.</p>
           </div>
           <button onClick={() => setConfirmandoAnonimizacion(true)} disabled={anonimizando}
-            className="rounded-lg border border-status-error bg-surface-primary px-4 py-2 font-body text-sm font-semibold text-status-error hover:bg-status-error hover:text-surface-primary disabled:opacity-50"
+            className="rounded-lg border border-ui-danger bg-ui-card px-4 py-2 font-body text-sm font-semibold text-ui-danger hover:bg-ui-danger hover:text-ui-on-brand disabled:opacity-50"
           >Anonimizar datos</button>
         </div>
       </div>
 
-      <div className="rounded-card border border-ink/10 bg-surface-primary p-4">
-        <h3 className="font-display text-sm font-semibold uppercase tracking-wide text-text-tertiary">Minimización de datos</h3>
-        <p className="mt-1 font-body text-sm text-text-secondary">El sistema solo conserva los datos estrictamente necesarios para la operación. Los documentos de identidad antiguos se eliminan automáticamente tras 90 días.</p>
+      <div className="rounded-lg border border-ui-line bg-ui-card p-4">
+        <h3 className="font-display text-sm font-semibold uppercase tracking-wide text-ui-fg-muted">Minimización de datos</h3>
+        <p className="mt-1 font-body text-sm text-ui-fg-muted">El sistema solo conserva los datos estrictamente necesarios para la operación. Los documentos de identidad antiguos se eliminan automáticamente tras 90 días.</p>
         <div className="mt-4 grid gap-3">
           <MinimizacionItem estado="Activo" tono="info" titulo="Datos personales básicos" detalle="Nombre, teléfono y correo necesarios para atención operativa." />
           <MinimizacionItem estado="Fiscal" tono="warning" titulo="Dirección fiscal" detalle="Conservada para facturación y obligaciones administrativas." />
@@ -852,19 +852,19 @@ function TabPrivacidad({ usuario, onActualizado }: { usuario: UsuarioRow; onActu
         </div>
       </div>
 
-      <div className="rounded-card border border-ink/10 bg-surface-primary p-4">
-        <h3 className="font-display text-sm font-semibold uppercase tracking-wide text-text-tertiary">Bitácora de solicitudes</h3>
+      <div className="rounded-lg border border-ui-line bg-ui-card p-4">
+        <h3 className="font-display text-sm font-semibold uppercase tracking-wide text-ui-fg-muted">Bitácora de solicitudes</h3>
         {bitacora.length ? (
           <div className="mt-3 space-y-2">
             {bitacora.map((evento) => (
-              <div key={`${evento.tipo}-${evento.fecha}`} className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-ink/10 px-3 py-2">
-                <span className="font-body text-sm text-ink">{evento.detalle}</span>
-                <span className="font-mono-ruum text-xs text-text-tertiary">{formatearFechaOperativa(evento.fecha)}</span>
+              <div key={`${evento.tipo}-${evento.fecha}`} className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-ui-line px-3 py-2">
+                <span className="font-body text-sm text-ui-fg">{evento.detalle}</span>
+                <span className="font-mono-ruum text-xs text-ui-fg-muted">{formatearFechaOperativa(evento.fecha)}</span>
               </div>
             ))}
           </div>
         ) : (
-          <p className="mt-2 font-body text-sm text-text-tertiary">Sin solicitudes registradas en esta sesión.</p>
+          <p className="mt-2 font-body text-sm text-ui-fg-muted">Sin solicitudes registradas en esta sesión.</p>
         )}
       </div>
 
@@ -874,13 +874,13 @@ function TabPrivacidad({ usuario, onActualizado }: { usuario: UsuarioRow; onActu
         description="Esta acción no se puede deshacer desde el panel. Escribe ANONIMIZAR para continuar."
         onOpenChange={(open) => { if (!anonimizando) setConfirmandoAnonimizacion(open); }}
         footer={<>
-          <button type="button" onClick={() => setConfirmandoAnonimizacion(false)} disabled={anonimizando} className="rounded-lg border border-ink/20 px-4 py-2 font-body text-sm font-semibold text-ink hover:bg-surface-secondary">Cancelar</button>
-          <button type="button" onClick={anonimizarDatos} disabled={anonimizando || confirmacionAnonimizacion !== "ANONIMIZAR"} className="rounded-lg bg-status-error px-4 py-2 font-body text-sm font-semibold text-surface-primary disabled:opacity-50">{anonimizando ? "Anonimizando..." : "Anonimizar definitivamente"}</button>
+          <button type="button" onClick={() => setConfirmandoAnonimizacion(false)} disabled={anonimizando} className="rounded-lg border border-ui-line-strong px-4 py-2 font-body text-sm font-semibold text-ui-fg hover:bg-ui-muted">Cancelar</button>
+          <button type="button" onClick={anonimizarDatos} disabled={anonimizando || confirmacionAnonimizacion !== "ANONIMIZAR"} className="rounded-lg bg-ui-danger px-4 py-2 font-body text-sm font-semibold text-ui-on-brand disabled:opacity-50">{anonimizando ? "Anonimizando..." : "Anonimizar definitivamente"}</button>
         </>}
       >
         <label className="flex flex-col gap-1">
-          <span className="font-body text-xs font-medium text-text-secondary">Confirmación requerida</span>
-          <input value={confirmacionAnonimizacion} onChange={(evento) => setConfirmacionAnonimizacion(evento.target.value)} className="rounded-lg border border-status-error/30 px-3 py-2 font-body text-sm focus:border-status-error focus:outline-none focus:ring-2 focus:ring-status-error/20" />
+          <span className="font-body text-xs font-medium text-ui-fg-muted">Confirmación requerida</span>
+          <input value={confirmacionAnonimizacion} onChange={(evento) => setConfirmacionAnonimizacion(evento.target.value)} className="rounded-lg border border-ui-danger/30 px-3 py-2 font-body text-sm focus:border-ui-danger focus:outline-none focus:ring-2 focus:ring-ui-danger/20" />
         </label>
       </AdminDialog>
     </div>
@@ -889,10 +889,10 @@ function TabPrivacidad({ usuario, onActualizado }: { usuario: UsuarioRow; onActu
 
 function MinimizacionItem({ estado, tono, titulo, detalle }: { estado: string; tono: "neutral" | "info" | "success" | "warning" | "danger"; titulo: string; detalle: string }) {
   return (
-    <div className="flex flex-wrap items-start justify-between gap-3 rounded-lg border border-ink/10 px-3 py-3">
+    <div className="flex flex-wrap items-start justify-between gap-3 rounded-lg border border-ui-line px-3 py-3">
       <div>
-        <p className="font-body text-sm font-semibold text-ink">{titulo}</p>
-        <p className="mt-1 font-body text-sm text-text-secondary">{detalle}</p>
+        <p className="font-body text-sm font-semibold text-ui-fg">{titulo}</p>
+        <p className="mt-1 font-body text-sm text-ui-fg-muted">{detalle}</p>
       </div>
       <AdminBadge tone={tono}>{estado}</AdminBadge>
     </div>
@@ -996,23 +996,23 @@ function TabAuditoria({ usuarioId }: { usuarioId: string }) {
     obtenerAuditoriaUsuario(cliente, usuarioId).then(setEventos).catch(() => setEventos([])).finally(() => setCargando(false));
   }, [usuarioId]);
 
-  if (cargando) return <p className="font-body text-text-tertiary">Cargando auditoría...</p>;
-  if (!eventos?.length) return <p className="font-body text-text-tertiary">Sin eventos de auditoría.</p>;
+  if (cargando) return <p className="font-body text-ui-fg-muted">Cargando auditoría...</p>;
+  if (!eventos?.length) return <p className="font-body text-ui-fg-muted">Sin eventos de auditoría.</p>;
 
   return (
-    <div className="overflow-hidden rounded-card border border-ink/10 bg-surface-primary">
+    <div className="overflow-hidden rounded-lg border border-ui-line bg-ui-card">
       <table className="w-full font-body text-sm">
-        <thead><tr className="border-b border-ink/10 text-left text-xs uppercase tracking-wide text-text-tertiary">
+        <thead><tr className="border-b border-ui-line text-left text-xs uppercase tracking-wide text-ui-fg-muted">
           <th className="px-4 py-3">Evento</th>
           <th className="px-4 py-3">Fecha</th>
           <th className="px-4 py-3">Detalle</th>
         </tr></thead>
         <tbody>
           {eventos.map((e, i) => (
-            <tr key={i} className="border-b border-ink/5 last:border-0">
+            <tr key={i} className="border-b border-ui-line last:border-0">
               <td className="px-4 py-3 font-medium capitalize">{e.evento.replaceAll("_", " ")}</td>
-              <td className="px-4 py-3 text-text-secondary">{new Date(e.creado_en).toLocaleString("es-MX")}</td>
-              <td className="px-4 py-3 font-mono-ruum text-xs text-text-tertiary">{e.datos ? JSON.stringify(e.datos).slice(0, 120) : <ValorVacio />}</td>
+              <td className="px-4 py-3 text-ui-fg-muted">{new Date(e.creado_en).toLocaleString("es-MX")}</td>
+              <td className="px-4 py-3 font-mono-ruum text-xs text-ui-fg-muted">{e.datos ? JSON.stringify(e.datos).slice(0, 120) : <ValorVacio />}</td>
             </tr>
           ))}
         </tbody>
@@ -1023,13 +1023,13 @@ function TabAuditoria({ usuarioId }: { usuarioId: string }) {
 
 function ToastAviso({ aviso, onCerrar }: { aviso: { tono: "info" | "danger"; texto: string }; onCerrar: () => void }) {
   const estilos = aviso.tono === "danger"
-    ? "border-status-error/35 bg-status-error-soft text-status-error"
-    : "border-status-success/35 bg-status-success-soft text-status-success";
+    ? "border-ui-danger/35 bg-ui-danger-soft text-ui-danger"
+    : "border-ui-success/35 bg-ui-success-soft text-ui-success";
   return (
     <div className="fixed right-5 top-5 z-50 w-[min(360px,calc(100vw-2.5rem))]">
-      <div role="status" aria-live="polite" className={`flex items-start justify-between gap-3 rounded-card border px-4 py-3 shadow-[var(--ruum-shadow-3)] ${estilos}`}>
+      <div role="status" aria-live="polite" className={`flex items-start justify-between gap-3 rounded-lg border px-4 py-3 shadow-ui-md ${estilos}`}>
         <p className="font-body text-sm font-semibold">{aviso.texto}</p>
-        <button type="button" onClick={onCerrar} className="grid size-6 shrink-0 place-items-center rounded-full border border-current/25 font-body text-xs font-bold hover:bg-surface-primary/20" aria-label="Cerrar notificación">X</button>
+        <button type="button" onClick={onCerrar} className="grid size-6 shrink-0 place-items-center rounded-full border border-current/25 font-body text-xs font-bold hover:bg-ui-card" aria-label="Cerrar notificación">X</button>
       </div>
     </div>
   );
@@ -1037,9 +1037,9 @@ function ToastAviso({ aviso, onCerrar }: { aviso: { tono: "info" | "danger"; tex
 
 function Seccion({ titulo, children, action, consistente = false }: { titulo: string; children: React.ReactNode; action?: React.ReactNode; consistente?: boolean }) {
   return (
-    <div className={`flex h-full flex-col rounded-card border border-ink/10 bg-surface-primary p-4 ${consistente ? "min-h-[248px]" : ""}`}>
+    <div className={`flex h-full flex-col rounded-lg border border-ui-line bg-ui-card p-4 ${consistente ? "min-h-[248px]" : ""}`}>
       <div className="flex items-center justify-between gap-3">
-        <h3 className="font-display text-sm font-semibold uppercase tracking-wide text-text-main">{titulo}</h3>
+        <h3 className="font-display text-sm font-semibold uppercase tracking-wide text-ui-fg">{titulo}</h3>
         {action}
       </div>
       <div className="mt-4 grid gap-3 sm:grid-cols-2">{children}</div>
@@ -1049,15 +1049,15 @@ function Seccion({ titulo, children, action, consistente = false }: { titulo: st
 
 function Dato({ etiqueta, valor }: { etiqueta: string; valor: string | null | undefined }) {
   return (
-    <div className="min-w-0 rounded-lg border border-border-default bg-surface-secondary/55 px-3 py-2.5 font-body text-sm">
-      <span className="block text-xs font-normal text-text-tertiary">{etiqueta}</span>
-      <span className="mt-1 block truncate font-semibold text-text-main" title={typeof valor === "string" ? valor : undefined}>{valor || <ValorVacio />}</span>
+    <div className="min-w-0 rounded-lg border border-ui-line bg-ui-muted px-3 py-2.5 font-body text-sm">
+      <span className="block text-xs font-normal text-ui-fg-muted">{etiqueta}</span>
+      <span className="mt-1 block truncate font-semibold text-ui-fg" title={typeof valor === "string" ? valor : undefined}>{valor || <ValorVacio />}</span>
     </div>
   );
 }
 
 function ValorVacio({ texto = "Sin dato" }: { texto?: string }) {
-  return <span className="font-normal text-text-tertiary">{texto}</span>;
+  return <span className="font-normal text-ui-fg-muted">{texto}</span>;
 }
 
 function BadgeVerificacion({ estado }: { estado: string }) {
@@ -1141,8 +1141,8 @@ function EditarUsuario({ usuario, onActualizado, onCancelar }: { usuario: Usuari
   }
 
   return (
-    <div id="editar-datos-usuario" className="rounded-card border border-ink/10 bg-surface-primary p-5">
-      <h2 className="font-display text-lg font-semibold text-text-main">Editar datos</h2>
+    <div id="editar-datos-usuario" className="rounded-lg border border-ui-line bg-ui-card p-5">
+      <h2 className="font-display text-lg font-semibold text-ui-fg">Editar datos</h2>
       {error && <div className="mt-2"><Aviso tono="danger">{error}</Aviso></div>}
       <div className="mt-4 grid gap-4 sm:grid-cols-2">
         <Campo label="Nombre" value={nombre} onChange={setNombre} />
@@ -1157,10 +1157,10 @@ function EditarUsuario({ usuario, onActualizado, onCancelar }: { usuario: Usuari
         <Campo label="Código postal" value={codigoPostal} onChange={setCodigoPostal} />
       </div>
       <div className="mt-4 flex gap-2">
-        <button onClick={guardar} disabled={procesando} className="rounded-lg bg-ink px-4 py-2 font-body text-sm font-semibold text-surface-primary hover:bg-ink/90 disabled:opacity-50">
+        <button onClick={guardar} disabled={procesando} className="rounded-lg bg-ui-brand px-4 py-2 font-body text-sm font-semibold text-ui-on-brand hover:bg-ui-brand-hover disabled:opacity-50">
           {procesando ? "Guardando..." : "Guardar cambios"}
         </button>
-        <button onClick={onCancelar} disabled={procesando} className="rounded-lg border border-ink/20 px-4 py-2 font-body text-sm font-medium hover:bg-ink/5">Cancelar</button>
+        <button onClick={onCancelar} disabled={procesando} className="rounded-lg border border-ui-line-strong px-4 py-2 font-body text-sm font-medium hover:bg-ui-muted">Cancelar</button>
       </div>
     </div>
   );
@@ -1169,8 +1169,8 @@ function EditarUsuario({ usuario, onActualizado, onCancelar }: { usuario: Usuari
 function Campo({ label, value, onChange }: { label: string; value: string; onChange: (v: string) => void }) {
   return (
     <label className="flex flex-col gap-1">
-      <span className="font-body text-xs font-medium text-text-secondary">{label}</span>
-      <input type="text" value={value} onChange={(e) => onChange(e.target.value)} className="rounded-lg border border-ink/20 px-3 py-2 font-body text-sm focus:border-focus-default focus:outline-none focus:ring-2 focus:ring-focus-default/20" />
+      <span className="font-body text-xs font-medium text-ui-fg-muted">{label}</span>
+      <input type="text" value={value} onChange={(e) => onChange(e.target.value)} className="rounded-lg border border-ui-line-strong px-3 py-2 font-body text-sm focus:border-ui-focus focus:outline-none focus:ring-2 focus:ring-ui-ring" />
     </label>
   );
 }
@@ -1190,10 +1190,10 @@ function SuspenderCuenta({ usuarioId, onCompletado }: { usuarioId: string; onCom
   }
   return (
     <>
-      <div className="rounded-lg border border-status-warning/35 bg-status-warning-soft/40 p-4">
-        <p className="font-body text-sm font-semibold text-status-warning">Suspender cuenta</p>
-        <p className="mt-1 font-body text-xs text-text-secondary">Pausa el acceso sin cerrar el expediente del usuario.</p>
-        <button onClick={() => setAbierto(true)} className="mt-3 rounded-lg border border-status-warning bg-status-warning px-4 py-2 font-body text-sm font-semibold text-surface-primary shadow-sm hover:bg-status-warning/90">Suspender cuenta</button>
+      <div className="rounded-lg border border-ui-warning/35 bg-ui-warning-soft p-4">
+        <p className="font-body text-sm font-semibold text-ui-warning">Suspender cuenta</p>
+        <p className="mt-1 font-body text-xs text-ui-fg-muted">Pausa el acceso sin cerrar el expediente del usuario.</p>
+        <button onClick={() => setAbierto(true)} className="mt-3 rounded-lg border border-ui-warning bg-ui-warning px-4 py-2 font-body text-sm font-semibold text-ui-on-brand shadow-sm hover:bg-ui-warning/90">Suspender cuenta</button>
       </div>
       <AdminDialog
         open={abierto}
@@ -1201,21 +1201,21 @@ function SuspenderCuenta({ usuarioId, onCompletado }: { usuarioId: string; onCom
         description="El usuario no podrá acceder hasta que un administrador reactive la cuenta."
         onOpenChange={(open) => { if (!procesando) setAbierto(open); }}
         footer={<>
-          <button onClick={() => setAbierto(false)} disabled={procesando} className="rounded-lg border border-ink/20 px-4 py-2 font-body text-sm font-medium">Cancelar</button>
-          <button onClick={ejecutar} disabled={procesando || !motivo.trim() || !confirmado} className="rounded-lg bg-status-error px-4 py-2 font-body text-sm font-semibold text-surface-primary disabled:opacity-50">{procesando ? "Suspendiendo..." : "Confirmar suspensión"}</button>
+          <button onClick={() => setAbierto(false)} disabled={procesando} className="rounded-lg border border-ui-line-strong px-4 py-2 font-body text-sm font-medium">Cancelar</button>
+          <button onClick={ejecutar} disabled={procesando || !motivo.trim() || !confirmado} className="rounded-lg bg-ui-danger px-4 py-2 font-body text-sm font-semibold text-ui-on-brand disabled:opacity-50">{procesando ? "Suspendiendo..." : "Confirmar suspensión"}</button>
         </>}
       >
         <div className="space-y-3">
           {error && <Aviso tono="danger">{error}</Aviso>}
-          <div className="rounded-lg border border-status-warning/25 bg-status-warning-soft/35 p-3 font-body text-sm text-text-secondary">
-            <p className="font-semibold text-status-warning">Impacto de la suspensión</p>
+          <div className="rounded-lg border border-ui-warning/25 bg-ui-warning-soft p-3 font-body text-sm text-ui-fg-muted">
+            <p className="font-semibold text-ui-warning">Impacto de la suspensión</p>
             <p className="mt-1">Se bloquea el acceso. Los traslados, pagos e historial se conservan para seguimiento operativo.</p>
           </div>
           <label className="flex flex-col gap-1">
-            <span className="font-body text-xs font-medium text-text-secondary">Motivo de la suspensión</span>
-            <textarea value={motivo} onChange={(e) => setMotivo(e.target.value)} className="min-h-[88px] rounded-lg border border-ink/20 px-3 py-2 font-body text-sm" rows={3} />
+            <span className="font-body text-xs font-medium text-ui-fg-muted">Motivo de la suspensión</span>
+            <textarea value={motivo} onChange={(e) => setMotivo(e.target.value)} className="min-h-[88px] rounded-lg border border-ui-line-strong px-3 py-2 font-body text-sm" rows={3} />
           </label>
-          <label className="flex gap-2 rounded-lg border border-status-error/25 bg-status-error-soft/30 p-3 font-body text-sm text-text-secondary">
+          <label className="flex gap-2 rounded-lg border border-ui-danger/25 bg-ui-danger-soft p-3 font-body text-sm text-ui-fg-muted">
             <input type="checkbox" checked={confirmado} onChange={(e) => setConfirmado(e.target.checked)} className="mt-1" />
             Confirmo que revisé el expediente y entiendo que esta acción bloquea el acceso del usuario.
           </label>
@@ -1229,19 +1229,19 @@ function ReactivarCuenta({ usuarioId, onCompletado }: { usuarioId: string; onCom
   const [abierto, setAbierto] = useState(false);
   const [motivo, setMotivo] = useState("");
   const [procesando, setProcesando] = useState(false);
-  if (!abierto) return <button onClick={() => setAbierto(true)} className="rounded-lg border border-status-success/40 bg-status-success/10 px-4 py-2 font-body text-sm font-medium text-status-success hover:bg-status-success/20">Reactivar cuenta</button>;
+  if (!abierto) return <button onClick={() => setAbierto(true)} className="rounded-lg border border-ui-success/40 bg-ui-success/10 px-4 py-2 font-body text-sm font-medium text-ui-success hover:bg-ui-success/20">Reactivar cuenta</button>;
   async function ejecutar() {
     if (!motivo.trim()) return; setProcesando(true);
     try { const cliente = crearClienteNavegador(); await reactivarUsuarioAdmin(cliente, usuarioId, motivo.trim()); setAbierto(false); onCompletado(); } catch { /* */ }
     finally { setProcesando(false); }
   }
   return (
-    <div className="rounded-lg border border-status-success/30 bg-status-success-soft/20 p-4">
-      <p className="font-body text-sm font-semibold text-status-success">Reactivar cuenta</p>
-      <textarea value={motivo} onChange={(e) => setMotivo(e.target.value)} placeholder="Motivo de la reactivación" className="mt-3 w-full rounded-lg border border-ink/20 px-3 py-2 font-body text-sm" rows={2} />
+    <div className="rounded-lg border border-ui-success/30 bg-ui-success-soft p-4">
+      <p className="font-body text-sm font-semibold text-ui-success">Reactivar cuenta</p>
+      <textarea value={motivo} onChange={(e) => setMotivo(e.target.value)} placeholder="Motivo de la reactivación" className="mt-3 w-full rounded-lg border border-ui-line-strong px-3 py-2 font-body text-sm" rows={2} />
       <div className="mt-3 flex gap-2">
-        <button onClick={ejecutar} disabled={procesando || !motivo.trim()} className="rounded-lg bg-status-success px-4 py-2 font-body text-sm font-semibold text-surface-primary disabled:opacity-50">{procesando ? "Reactivando..." : "Confirmar reactivación"}</button>
-        <button onClick={() => setAbierto(false)} disabled={procesando} className="rounded-lg border border-ink/20 px-4 py-2 font-body text-sm font-medium">Cancelar</button>
+        <button onClick={ejecutar} disabled={procesando || !motivo.trim()} className="rounded-lg bg-ui-success px-4 py-2 font-body text-sm font-semibold text-ui-on-brand disabled:opacity-50">{procesando ? "Reactivando..." : "Confirmar reactivación"}</button>
+        <button onClick={() => setAbierto(false)} disabled={procesando} className="rounded-lg border border-ui-line-strong px-4 py-2 font-body text-sm font-medium">Cancelar</button>
       </div>
     </div>
   );
@@ -1259,10 +1259,10 @@ function CerrarCuenta({ usuarioId, onCompletado }: { usuarioId: string; onComple
   }
   return (
     <>
-      <div className="rounded-lg border border-status-error/35 bg-status-error-soft/40 p-4">
-        <p className="font-body text-sm font-semibold text-status-error">Cerrar cuenta</p>
-        <p className="mt-1 font-body text-xs text-text-secondary">Cierre definitivo con confirmación escrita obligatoria.</p>
-        <button onClick={() => setAbierto(true)} className="mt-3 rounded-lg border border-status-error bg-status-error px-4 py-2 font-body text-sm font-semibold text-surface-primary shadow-sm hover:bg-status-error/90">Cerrar cuenta</button>
+      <div className="rounded-lg border border-ui-danger/35 bg-ui-danger-soft p-4">
+        <p className="font-body text-sm font-semibold text-ui-danger">Cerrar cuenta</p>
+        <p className="mt-1 font-body text-xs text-ui-fg-muted">Cierre definitivo con confirmación escrita obligatoria.</p>
+        <button onClick={() => setAbierto(true)} className="mt-3 rounded-lg border border-ui-danger bg-ui-danger px-4 py-2 font-body text-sm font-semibold text-ui-on-brand shadow-sm hover:bg-ui-danger/90">Cerrar cuenta</button>
       </div>
       <AdminDialog
         open={abierto}
@@ -1270,22 +1270,22 @@ function CerrarCuenta({ usuarioId, onCompletado }: { usuarioId: string; onComple
         description="Esta acción no se puede deshacer y debe quedar justificada para auditoría."
         onOpenChange={(open) => { if (!procesando) setAbierto(open); }}
         footer={<>
-          <button onClick={() => setAbierto(false)} disabled={procesando} className="rounded-lg border border-ink/20 px-4 py-2 font-body text-sm font-medium">Cancelar</button>
-          <button onClick={ejecutar} disabled={procesando || !motivo.trim() || confirmacion !== "CERRAR"} className="rounded-lg bg-status-error px-4 py-2 font-body text-sm font-semibold text-surface-primary disabled:opacity-50">{procesando ? "Cerrando..." : "Cerrar cuenta definitivamente"}</button>
+          <button onClick={() => setAbierto(false)} disabled={procesando} className="rounded-lg border border-ui-line-strong px-4 py-2 font-body text-sm font-medium">Cancelar</button>
+          <button onClick={ejecutar} disabled={procesando || !motivo.trim() || confirmacion !== "CERRAR"} className="rounded-lg bg-ui-danger px-4 py-2 font-body text-sm font-semibold text-ui-on-brand disabled:opacity-50">{procesando ? "Cerrando..." : "Cerrar cuenta definitivamente"}</button>
         </>}
       >
         <div className="space-y-3">
-          <div className="rounded-lg border border-status-error/25 bg-status-error-soft/40 p-3 font-body text-sm text-text-secondary">
-            <p className="font-semibold text-status-error">Impacto del cierre</p>
+          <div className="rounded-lg border border-ui-danger/25 bg-ui-danger-soft p-3 font-body text-sm text-ui-fg-muted">
+            <p className="font-semibold text-ui-danger">Impacto del cierre</p>
             <p className="mt-1">Se bloquea el acceso de forma definitiva. Traslados, pagos y auditoría se conservan para trazabilidad.</p>
           </div>
           <label className="flex flex-col gap-1">
-            <span className="font-body text-xs font-medium text-text-secondary">Motivo del cierre</span>
-            <textarea value={motivo} onChange={(e) => setMotivo(e.target.value)} className="min-h-[88px] rounded-lg border border-ink/20 px-3 py-2 font-body text-sm" rows={3} />
+            <span className="font-body text-xs font-medium text-ui-fg-muted">Motivo del cierre</span>
+            <textarea value={motivo} onChange={(e) => setMotivo(e.target.value)} className="min-h-[88px] rounded-lg border border-ui-line-strong px-3 py-2 font-body text-sm" rows={3} />
           </label>
-          <label className="flex flex-col gap-1 rounded-lg border border-status-error/25 bg-status-error-soft/30 p-3">
-            <span className="font-body text-xs font-medium text-status-error">Escribe CERRAR para confirmar</span>
-            <input type="text" value={confirmacion} onChange={(e) => setConfirmacion(e.target.value)} className="rounded-lg border border-status-error/30 px-3 py-2 font-body text-sm" />
+          <label className="flex flex-col gap-1 rounded-lg border border-ui-danger/25 bg-ui-danger-soft p-3">
+            <span className="font-body text-xs font-medium text-ui-danger">Escribe CERRAR para confirmar</span>
+            <input type="text" value={confirmacion} onChange={(e) => setConfirmacion(e.target.value)} className="rounded-lg border border-ui-danger/30 px-3 py-2 font-body text-sm" />
           </label>
         </div>
       </AdminDialog>

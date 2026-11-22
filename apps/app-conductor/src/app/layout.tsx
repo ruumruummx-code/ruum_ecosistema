@@ -19,6 +19,7 @@ import { SincronizadorEvidenciaOffline } from "./SincronizadorEvidenciaOffline";
 import { EstadoSincronizacionGlobal } from "./EstadoSincronizacionGlobal";
 import { EstadoTrackingGlobal } from "./EstadoTrackingGlobal";
 import { PushNotificationsBootstrap } from "./PushNotificationsBootstrap";
+import { DeepLinksBootstrap } from "./DeepLinksBootstrap";
 import { OfflineShell } from "./OfflineShell";
 import { PWABootstrap } from "./PWABootstrap";
 
@@ -65,6 +66,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
               <EstadoSincronizacionGlobal />
               <EstadoTrackingGlobal />
               <PushNotificationsBootstrap />
+              <DeepLinksBootstrap />
               <VersionGate />
               <OperationalAccessibilityBridge />
               <TextInputUppercaseBridge />

@@ -17,11 +17,11 @@ function fechaCorta(iso: string | null | undefined) {
 
 function EventoItem({ evento }: { evento: EventoCustodia }) {
   return (
-    <li className="rounded-lg border border-border-default bg-surface-primary p-4">
-      <p className="font-body text-sm font-semibold text-ink">
+    <li className="rounded-lg border border-ui-line bg-ui-card p-4">
+      <p className="font-body text-sm font-semibold text-ui-fg">
         {evento.tipo} — <time dateTime={evento.ocurrido_en}>{fechaCorta(evento.ocurrido_en)}</time>
       </p>
-      <p className="mt-1 font-body text-xs text-text-secondary">
+      <p className="mt-1 font-body text-xs text-ui-fg-muted">
         Quién: {evento.actor_tipo}
         {evento.actor_id ? ` (${evento.actor_id.slice(0, 8)}…)` : ""} · Cuándo: {fechaCorta(evento.ocurrido_en)} · Dónde:{" "}
         {evento.lat != null && evento.lng != null ? `${evento.lat}, ${evento.lng}` : "sin GPS"}
@@ -30,15 +30,15 @@ function EventoItem({ evento }: { evento: EventoCustodia }) {
         {evento.pin_verificado ? " · PIN verificado" : ""}
         {evento.firma_metodo ? ` · Firma: ${evento.firma_metodo}` : ""}
       </p>
-      {evento.notas ? <p className="mt-2 font-body text-sm text-text-primary">{evento.notas}</p> : null}
+      {evento.notas ? <p className="mt-2 font-body text-sm text-ui-fg">{evento.notas}</p> : null}
       {evento.fotos.length > 0 ? (
         <ul className="mt-2 grid gap-1">
           {evento.fotos.map((foto) => (
-            <li key={foto.id} className="font-body text-xs text-text-secondary">
+            <li key={foto.id} className="font-body text-xs text-ui-fg-muted">
               {foto.angulo} ({foto.tipo}){foto.url ? (
                 <>
                   {" — "}
-                  <a href={foto.url} target="_blank" rel="noreferrer" className="font-semibold text-status-info underline underline-offset-2">ver foto</a>
+                  <a href={foto.url} target="_blank" rel="noreferrer" className="font-semibold text-ui-brand-soft-fg underline underline-offset-2">ver foto</a>
                 </>
               ) : (
                 " — sin URL"
@@ -48,9 +48,9 @@ function EventoItem({ evento }: { evento: EventoCustodia }) {
           ))}
         </ul>
       ) : (
-        <p className="mt-2 font-body text-xs text-text-tertiary">Sin evidencia fotográfica enlazada.</p>
+        <p className="mt-2 font-body text-xs text-ui-fg-muted">Sin evidencia fotográfica enlazada.</p>
       )}
-      <p className="mt-2 font-mono-ruum text-xs text-text-tertiary">hash {evento.hash_cadena.slice(0, 12)}…</p>
+      <p className="mt-2 font-mono-ruum text-xs text-ui-fg-muted">hash {evento.hash_cadena.slice(0, 12)}…</p>
     </li>
   );
 }
@@ -121,7 +121,7 @@ export default function PaginaCustodiaTraslado() {
       ) : null}
 
       <section aria-labelledby="custodia-vehiculo" className="admin-panel mt-4 p-5">
-        <h2 id="custodia-vehiculo" className="font-display text-lg font-semibold text-ink">Vehículo</h2>
+        <h2 id="custodia-vehiculo" className="font-display text-lg font-semibold text-ui-fg">Vehículo</h2>
         {reporte.vehiculo ? (
           <p>
             {reporte.vehiculo.marca ?? "—"} {reporte.vehiculo.modelo ?? ""} · Placas {reporte.vehiculo.placas ?? "—"} ·
@@ -133,7 +133,7 @@ export default function PaginaCustodiaTraslado() {
       </section>
 
       <section aria-labelledby="custodia-timeline" className="admin-panel mt-4 p-5">
-        <h2 id="custodia-timeline" className="font-display text-lg font-semibold text-ink">Movimientos ({reporte.eventos.length})</h2>
+        <h2 id="custodia-timeline" className="font-display text-lg font-semibold text-ui-fg">Movimientos ({reporte.eventos.length})</h2>
         {reporte.eventos.length === 0 ? (
           <AdminEmptyState title="Sin eventos" description="Aún no hay movimientos de custodia registrados." />
         ) : (
@@ -146,7 +146,7 @@ export default function PaginaCustodiaTraslado() {
       </section>
 
       <section aria-labelledby="custodia-reporte" className="admin-panel mt-4 p-5">
-        <h2 id="custodia-reporte" className="font-display text-lg font-semibold text-ink">Reporte</h2>
+        <h2 id="custodia-reporte" className="font-display text-lg font-semibold text-ui-fg">Reporte</h2>
         <p>Generado {fechaCorta(reporte.generado_en)} · Estructura lista para futuro PDF.</p>
         <Button onClick={descargarReporte}>Descargar JSON</Button>
       </section>

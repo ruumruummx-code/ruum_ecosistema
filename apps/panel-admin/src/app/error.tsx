@@ -16,7 +16,7 @@ export default function ErrorGlobalAdmin({
 
   return (
     <div className="flex min-h-[60vh] flex-col items-center justify-center px-6 py-20 text-center">
-      <div className="mb-6 flex size-16 items-center justify-center rounded-full bg-status-error-soft text-status-error">
+      <div className="mb-6 flex size-16 items-center justify-center rounded-full bg-ui-danger-soft text-ui-danger">
         <svg width="28" height="28" viewBox="0 0 24 24" fill="none"
           stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"
           aria-hidden="true">
@@ -24,11 +24,11 @@ export default function ErrorGlobalAdmin({
         </svg>
       </div>
       <h1 className="font-display text-2xl font-semibold">Algo salió mal</h1>
-      <p className="mt-3 max-w-sm font-body text-sm leading-6 text-text-secondary">
+      <p className="mt-3 max-w-sm font-body text-sm leading-6 text-ui-fg-muted">
         Ocurrió un error inesperado en el panel. Puedes reintentar o volver al dashboard.
       </p>
       {process.env.NODE_ENV === "development" && error.message && (
-        <p className="mt-4 max-w-lg font-mono text-admin-secundario text-status-error opacity-70">{error.message}</p>
+        <p className="mt-4 max-w-lg font-mono text-xs text-ui-danger opacity-70">{error.message}</p>
       )}
       <div className="mt-8 flex flex-wrap justify-center gap-3">
         <AdminButton variant="secondary" onClick={reset}>
@@ -36,7 +36,7 @@ export default function ErrorGlobalAdmin({
         </AdminButton>
         <Link
           href="/"
-          className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg border border-signal bg-signal px-4 py-2 font-body text-admin-boton font-semibold text-ink transition-colors hover:bg-signal/90"
+          className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg border border-ui-brand bg-ui-brand px-4 py-2 font-body text-sm font-semibold text-ui-fg transition-colors hover:bg-ui-brand-hover"
         >
           Ir al dashboard
         </Link>

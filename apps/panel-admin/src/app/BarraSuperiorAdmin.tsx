@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LogoMarca } from "@ruum/ui";
+import { Button } from "@ruum/ui/base";
+import { Bell, ChevronRight, Settings } from "lucide-react";
 import { SelectorTemaAdmin } from "./TemaAdmin";
 
 const TITULOS_RUTA: Array<[string, string]> = [
@@ -41,18 +42,24 @@ export function BarraSuperiorAdmin() {
   if (pathname === "/login") return null;
 
   return (
-    <header className="admin-topbar" aria-label="Contexto de la Torre de Control">
-      <Link href="/" className="admin-topbar__logo" aria-label="Ir al dashboard de la Torre de Control">
-        <LogoMarca tamano={30} color="signal" mostrarDescriptor={false} mostrarRespaldo={false} />
-      </Link>
-      <div className="admin-topbar__context">
-        <span className="admin-topbar__brand">Torre de Control</span>
-        <span className="admin-topbar__separator" aria-hidden="true">/</span>
-        <span className="admin-topbar__module" aria-current="page">{tituloDeRuta(pathname)}</span>
-      </div>
-      <nav className="admin-topbar__actions" aria-label="Acciones globales">
-        <Link href="/alertas-sla?filtro=vencidas" className="admin-topbar__link">Alertas</Link>
-        <Link href="/configuracion" className="admin-topbar__link">Configuración</Link>
+    <header
+      className="sticky top-0 z-30 hidden h-16 items-center justify-between gap-6 border-b border-ui-line bg-ui-card/90 px-8 backdrop-blur lg:flex"
+      aria-label="Contexto de la Torre de Control"
+    >
+      <nav aria-label="Ubicación" className="min-w-0">
+        <ol className="flex min-w-0 items-center gap-2 text-sm">
+          <li><Link href="/" className="rounded-md font-medium text-ui-fg-muted hover:text-ui-fg">Torre de Control</Link></li>
+          <li aria-hidden="true" className="text-ui-fg-muted"><ChevronRight className="size-4" /></li>
+          <li className="truncate font-semibold text-ui-fg" aria-current="page">{tituloDeRuta(pathname)}</li>
+        </ol>
+      </nav>
+      <nav className="flex shrink-0 items-center gap-1" aria-label="Acciones globales">
+        <Button asChild variant="ghost" size="sm">
+          <Link href="/alertas-sla?filtro=vencidas"><Bell />Alertas</Link>
+        </Button>
+        <Button asChild variant="ghost" size="sm">
+          <Link href="/configuracion"><Settings />Configuración</Link>
+        </Button>
         <SelectorTemaAdmin />
       </nav>
     </header>

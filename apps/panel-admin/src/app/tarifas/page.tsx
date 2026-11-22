@@ -84,9 +84,9 @@ function fechaInputAIso(valor: string) {
 }
 
 function claseEstado(estado: string) {
-  if (estado === "vigente") return "border-status-success/30 bg-status-success-soft text-status-success";
-  if (estado === "borrador") return "border-focus-default/30 bg-status-info-soft text-status-info";
-  return "border-ink/15 bg-ink/5 text-text-secondary";
+  if (estado === "vigente") return "border-ui-success/30 bg-ui-success-soft text-ui-success";
+  if (estado === "borrador") return "border-ui-focus/30 bg-ui-brand-soft text-ui-brand-soft-fg";
+  return "border-ui-line bg-ui-muted text-ui-fg-muted";
 }
 
 function CampoBorrador({
@@ -101,17 +101,17 @@ function CampoBorrador({
   onCambiar: (valor: string) => void;
 }) {
   return (
-    <label className="block min-w-0 font-body text-sm font-medium text-text-main">
+    <label className="block min-w-0 font-body text-sm font-medium text-ui-fg">
       <span className="block">{etiqueta}</span>
       <span className="relative mt-1.5 block">
         <input
           value={valor}
           onChange={(e) => onCambiar(e.target.value)}
           inputMode="decimal"
-          className="block w-full rounded-lg border border-ink/20 bg-surface-primary px-3 py-2 pr-16 font-body text-sm text-ink shadow-sm transition-colors hover:border-ink/35 focus:border-focus-default focus:outline-none focus:ring-2 focus:ring-focus-default/20"
+          className="block w-full rounded-lg border border-ui-line-strong bg-ui-card px-3 py-2 pr-16 font-body text-sm text-ui-fg shadow-sm transition-colors hover:border-ui-field focus:border-ui-focus focus:outline-none focus:ring-2 focus:ring-ui-ring"
         />
         {sufijo && (
-          <span className="pointer-events-none absolute inset-y-0 right-3 flex items-center border-l border-ink/10 pl-3 font-mono-ruum text-xs font-medium text-text-tertiary">
+          <span className="pointer-events-none absolute inset-y-0 right-3 flex items-center border-l border-ui-line pl-3 font-mono-ruum text-xs font-medium text-ui-fg-muted">
             {sufijo}
           </span>
         )}
@@ -191,7 +191,7 @@ export default function PaginaTarifasAdmin() {
         title="Descartar cambios sin guardar"
         description="Hay modificaciones sin guardar. Al cambiar de sección se descartará el borrador actual."
         onOpenChange={(abierto) => { if (!abierto) setSeccionPendiente(null); }}
-        footer={<><button type="button" onClick={() => setSeccionPendiente(null)} className="rounded-lg border border-ink/20 px-4 py-2 font-body text-admin-boton font-semibold text-ink hover:bg-surface-secondary">Cancelar</button><button type="button" onClick={confirmarCambioSeccion} className="rounded-lg border border-status-error/30 bg-status-error-soft px-4 py-2 font-body text-admin-boton font-semibold text-status-error hover:bg-status-error hover:text-background-main">Continuar</button></>}
+        footer={<><button type="button" onClick={() => setSeccionPendiente(null)} className="rounded-lg border border-ui-line-strong px-4 py-2 font-body text-sm font-semibold text-ui-fg hover:bg-ui-muted">Cancelar</button><button type="button" onClick={confirmarCambioSeccion} className="rounded-lg border border-ui-danger/30 bg-ui-danger-soft px-4 py-2 font-body text-sm font-semibold text-ui-danger hover:bg-ui-danger hover:text-ui-on-brand">Continuar</button></>}
       ><span /></AdminDialog>
       <AdminPageHeader
         etiqueta="Administración"
@@ -212,10 +212,10 @@ export default function PaginaTarifasAdmin() {
       {cargando ? (
         <div className="mt-6 grid gap-6" aria-label="Cargando política tarifaria" aria-busy="true">
           {[1, 2, 3].map((item) => (
-            <div key={item} className="rounded-card border border-ink/10 bg-surface-primary p-6">
-              <div className="h-5 w-48 animate-pulse rounded bg-ink/10" />
+            <div key={item} className="rounded-lg border border-ui-line bg-ui-card p-6">
+              <div className="h-5 w-48 animate-pulse rounded bg-ui-muted" />
               <div className="mt-5 grid gap-3 sm:grid-cols-3">
-                {[1, 2, 3].map((campo) => <div key={campo} className="h-12 animate-pulse rounded-lg bg-ink/5" />)}
+                {[1, 2, 3].map((campo) => <div key={campo} className="h-12 animate-pulse rounded-lg bg-ui-muted" />)}
               </div>
             </div>
           ))}
@@ -223,7 +223,7 @@ export default function PaginaTarifasAdmin() {
       ) : (
         <div className="mt-6 grid gap-6">
           <ResumenVigente datos={datos} modo={modoActual} hayCambios={hayCambiosSinGuardar} />
-          <nav className="sticky top-0 z-30 -mx-2 rounded-lg border border-border-default bg-surface-primary/95 px-2 py-2 shadow-[var(--ruum-shadow-2)] backdrop-blur" aria-label="Secciones de tarifas">
+          <nav className="sticky top-0 z-30 -mx-2 rounded-lg border border-ui-line bg-ui-card px-2 py-2 shadow-ui-md backdrop-blur" aria-label="Secciones de tarifas">
             <div className="flex gap-1 overflow-x-auto">
               {SECCIONES_TARIFAS.map((seccion) => (
                 <button
@@ -233,7 +233,7 @@ export default function PaginaTarifasAdmin() {
                   aria-current={seccionActiva === seccion.id ? "page" : undefined}
                   className={[
                     "shrink-0 rounded-lg px-4 py-2.5 font-body text-sm font-semibold transition-colors",
-                    seccionActiva === seccion.id ? "bg-signal text-ink" : "text-text-secondary hover:bg-surface-secondary hover:text-ink"
+                    seccionActiva === seccion.id ? "bg-ui-brand text-ui-fg" : "text-ui-fg-muted hover:bg-ui-muted hover:text-ui-fg"
                   ].join(" ")}
                 >
                   {seccion.etiqueta}
@@ -290,24 +290,24 @@ export default function PaginaTarifasAdmin() {
 function ResumenVigente({ datos, modo, hayCambios }: { datos: ConfiguracionTarifas; modo: string; hayCambios: boolean }) {
   const config = datos.config;
   return (
-    <section className="sticky top-16 z-20 rounded-card border border-focus-default/25 bg-surface-primary/95 p-4 shadow-[var(--ruum-shadow-2)] backdrop-blur" aria-label="Versión vigente y modo actual">
+    <section className="sticky top-16 z-20 rounded-lg border border-ui-focus/25 bg-ui-card p-4 shadow-ui-md backdrop-blur" aria-label="Versión vigente y modo actual">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <p className="font-body text-xs font-semibold uppercase tracking-wide text-text-tertiary">Versión vigente siempre visible</p>
-          <h2 className="mt-1 font-display text-lg font-semibold text-ink">{config?.nombre_version ?? "Sin versión configurada"}</h2>
+          <p className="font-body text-xs font-semibold uppercase tracking-wide text-ui-fg-muted">Versión vigente siempre visible</p>
+          <h2 className="mt-1 font-display text-lg font-semibold text-ui-fg">{config?.nombre_version ?? "Sin versión configurada"}</h2>
           <div className="mt-2 flex flex-wrap gap-2 font-body text-xs">
             <span className={`rounded-full border px-3 py-1 font-semibold ${claseEstado(config?.estado ?? "borrador")}`}>
               {ETIQUETA_ESTADO[config?.estado ?? "borrador"] ?? config?.estado ?? "Sin estado"}
             </span>
-            <span className="rounded-full border border-ink/10 bg-surface-primary px-3 py-1 text-text-secondary">
+            <span className="rounded-full border border-ui-line bg-ui-card px-3 py-1 text-ui-fg-muted">
               Vigente desde {formatoFecha(config?.vigente_desde)}
             </span>
           </div>
         </div>
         <div className="text-right">
-          <p className="font-body text-xs font-semibold uppercase tracking-wide text-text-tertiary">Modo</p>
-          <p className="mt-1 font-display text-lg font-semibold text-ink">{modo}</p>
-          {hayCambios && <p className="mt-1 font-body text-xs font-semibold text-status-warning">Cambios sin guardar</p>}
+          <p className="font-body text-xs font-semibold uppercase tracking-wide text-ui-fg-muted">Modo</p>
+          <p className="mt-1 font-display text-lg font-semibold text-ui-fg">{modo}</p>
+          {hayCambios && <p className="mt-1 font-body text-xs font-semibold text-ui-warning">Cambios sin guardar</p>}
         </div>
       </div>
     </section>
@@ -319,9 +319,9 @@ function PrincipiosTarifarios() {
     <PassportCard acento>
       <div className="grid gap-4 lg:grid-cols-[1fr_1.1fr] lg:items-start">
         <div>
-          <p className="font-body text-xs uppercase tracking-wide text-text-tertiary">Principio rector</p>
+          <p className="font-body text-xs uppercase tracking-wide text-ui-fg-muted">Principio rector</p>
           <h2 className="mt-1 font-display text-xl font-semibold">La operación aplica tarifas; no las negocia.</h2>
-          <p className="mt-2 font-body text-sm leading-6 text-text-secondary">
+          <p className="mt-2 font-body text-sm leading-6 text-ui-fg-muted">
             Todo precio debe salir de una política tarifaria vigente, aprobada y trazable. Si existe un acuerdo extraordinario, se convierte en regla, convenio o política con vigencia.
           </p>
         </div>
@@ -332,7 +332,7 @@ function PrincipiosTarifarios() {
             "Sin precios libres en operación",
             "Historial visible para dirección"
           ].map((texto) => (
-            <div key={texto} className="rounded-lg border border-ink/10 bg-ink/[0.03] px-4 py-3 font-body text-sm text-text-secondary">
+            <div key={texto} className="rounded-lg border border-ui-line bg-ui-brand/[0.03] px-4 py-3 font-body text-sm text-ui-fg-muted">
               {texto}
             </div>
           ))}
@@ -419,10 +419,10 @@ function PoliticaVigente({
             <span className={`rounded-full border px-3 py-1 font-semibold ${claseEstado(config.estado)}`}>
               {ETIQUETA_ESTADO[config.estado]}
             </span>
-            <span className="rounded-full border border-ink/10 bg-surface-primary px-3 py-1 text-text-secondary">
+            <span className="rounded-full border border-ui-line bg-ui-card px-3 py-1 text-ui-fg-muted">
               Vigente desde {formatoFecha(config.vigente_desde)}
             </span>
-            <span className="rounded-full border border-ink/10 bg-surface-primary px-3 py-1 text-text-secondary">
+            <span className="rounded-full border border-ui-line bg-ui-card px-3 py-1 text-ui-fg-muted">
               Última modificación: {datos.adminActualizacion?.nombre ?? "Admin no identificado"} · {formatoFecha(config.actualizado_en)}
             </span>
           </div>
@@ -430,33 +430,33 @@ function PoliticaVigente({
       </div>
 
       <div className="mt-5 grid gap-4 lg:grid-cols-[1fr_180px_220px]">
-        <label className="font-body text-sm font-medium text-text-main">
+        <label className="font-body text-sm font-medium text-ui-fg">
           Nombre de versión
-          <input value={nombre} onChange={(e) => setNombre(e.target.value)} className="mt-1 w-full rounded-lg border border-ink/25 bg-surface-primary px-3 py-2 text-sm" />
+          <input value={nombre} onChange={(e) => setNombre(e.target.value)} className="mt-1 w-full rounded-lg border border-ui-line-strong bg-ui-card px-3 py-2 text-sm" />
         </label>
-        <label className="font-body text-sm font-medium text-text-main">
+        <label className="font-body text-sm font-medium text-ui-fg">
           Estado
-          <select value={estado} onChange={(e) => setEstado(e.target.value as typeof estado)} className="mt-1 w-full rounded-lg border border-ink/25 bg-surface-primary px-3 py-2 text-sm">
+          <select value={estado} onChange={(e) => setEstado(e.target.value as typeof estado)} className="mt-1 w-full rounded-lg border border-ui-line-strong bg-ui-card px-3 py-2 text-sm">
             <option value="borrador">Borrador</option>
             <option value="vigente">Vigente</option>
             <option value="archivada">Archivada</option>
           </select>
         </label>
-        <label className="font-body text-sm font-medium text-text-main">
+        <label className="font-body text-sm font-medium text-ui-fg">
           Fecha de vigencia
-          <input type="datetime-local" value={vigenteDesde} onChange={(e) => setVigenteDesde(e.target.value)} className="mt-1 w-full rounded-lg border border-ink/25 bg-surface-primary px-3 py-2 text-sm" />
+          <input type="datetime-local" value={vigenteDesde} onChange={(e) => setVigenteDesde(e.target.value)} className="mt-1 w-full rounded-lg border border-ui-line-strong bg-ui-card px-3 py-2 text-sm" />
         </label>
       </div>
       <div className="mt-4 flex items-center gap-3">
         <Button onClick={guardar} disabled={pendiente || !hayCambios}>Guardar política</Button>
-        {mensaje && <span className="font-body text-xs text-text-secondary">{mensaje}</span>}
+        {mensaje && <span className="font-body text-xs text-ui-fg-muted">{mensaje}</span>}
       </div>
       <AdminDialog
         open={confirmando}
         title={`Publicar versión ${datos.config?.nombre_version ?? "tarifaria"}`}
         description="Esta acción reemplaza la versión vigente para cálculos futuros. Los traslados con precio ya cotizado conservarán su tarifa original."
         onOpenChange={(abierto) => { if (!abierto) setConfirmando(false); }}
-        footer={<><button type="button" onClick={() => setConfirmando(false)} className="rounded-lg border border-ink/20 px-4 py-2 font-body text-admin-boton font-semibold text-ink hover:bg-surface-secondary">Cancelar</button><button type="button" onClick={() => { setConfirmando(false); guardarConfirmado(); }} className="rounded-lg bg-signal px-4 py-2 font-body text-admin-boton font-semibold text-ink hover:bg-signal/90">Publicar versión</button></>}
+        footer={<><button type="button" onClick={() => setConfirmando(false)} className="rounded-lg border border-ui-line-strong px-4 py-2 font-body text-sm font-semibold text-ui-fg hover:bg-ui-muted">Cancelar</button><button type="button" onClick={() => { setConfirmando(false); guardarConfirmado(); }} className="rounded-lg bg-ui-brand px-4 py-2 font-body text-sm font-semibold text-ui-fg hover:bg-ui-brand-hover">Publicar versión</button></>}
       ><span /></AdminDialog>
     </PassportCard>
   );
@@ -472,32 +472,32 @@ function PasoFormula({
   children: ReactNode;
 }) {
   return (
-    <div className="flex flex-col gap-2 border-b border-ink/10 px-4 py-3 last:border-b-0 sm:flex-row sm:items-center sm:gap-4">
+    <div className="flex flex-col gap-2 border-b border-ui-line px-4 py-3 last:border-b-0 sm:flex-row sm:items-center sm:gap-4">
       <div className="flex shrink-0 items-center gap-2 sm:w-40">
-        <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-status-info font-body text-xs font-semibold text-background-main">
+        <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-ui-brand font-body text-xs font-semibold text-ui-on-brand">
           {numero}
         </span>
-        <span className="font-body text-xs font-semibold uppercase tracking-wide text-text-secondary">{etiqueta}</span>
+        <span className="font-body text-xs font-semibold uppercase tracking-wide text-ui-fg-muted">{etiqueta}</span>
       </div>
-      <code className="font-mono-ruum text-sm leading-7 text-ink sm:text-[0.95rem]">{children}</code>
+      <code className="font-mono-ruum text-sm leading-7 text-ui-fg sm:text-base">{children}</code>
     </div>
   );
 }
 
 function Var({ children }: { children: ReactNode }) {
-  return <span className="font-semibold text-status-info">{children}</span>;
+  return <span className="font-semibold text-ui-brand-soft-fg">{children}</span>;
 }
 
 function Op({ children }: { children: ReactNode }) {
-  return <span className="text-text-tertiary">{children}</span>;
+  return <span className="text-ui-fg-muted">{children}</span>;
 }
 
 function FormulaVigente({ datos }: { datos: ConfiguracionTarifas }) {
   return (
     <PassportCard>
       <h2 className="font-display text-xl font-semibold">Fórmula vigente</h2>
-      <p className="mt-1 font-body text-sm text-text-secondary">Así se calcula la tarifa final que ve el usuario, paso por paso.</p>
-      <div className="mt-4 overflow-hidden rounded-lg border border-ink/10 bg-surface-secondary">
+      <p className="mt-1 font-body text-sm text-ui-fg-muted">Así se calcula la tarifa final que ve el usuario, paso por paso.</p>
+      <div className="mt-4 overflow-hidden rounded-lg border border-ui-line bg-ui-muted">
         <PasoFormula numero="1" etiqueta="Base por categoría">
           <Var>Base_categoría</Var> <Op>=</Op> BaseVehículo(rango) <Op>×</Op> <Var>F_gama</Var>
         </PasoFormula>
@@ -696,14 +696,14 @@ function ParametrosNormativos({
 
   return (
     <div className="grid gap-6">
-      <div className="sticky top-3 z-20 -mx-2 rounded-lg border border-focus-default/20 bg-surface-primary/95 px-4 py-3 shadow-[var(--ruum-shadow-2)] backdrop-blur">
+      <div className="sticky top-3 z-20 -mx-2 rounded-lg border border-ui-focus/20 bg-ui-card px-4 py-3 shadow-ui-md backdrop-blur">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
-            <p className="font-body text-sm font-semibold text-ink">Borrador tarifario</p>
-            <p className="mt-1 font-body text-xs text-text-secondary">
+            <p className="font-body text-sm font-semibold text-ui-fg">Borrador tarifario</p>
+            <p className="mt-1 font-body text-xs text-ui-fg-muted">
               Autor: admin actual · Creado: {formatoFecha(borradorCreadoEn)} · Estado: {hayCambios ? "En edición" : "Sin cambios"}
             </p>
-            {mensaje && <p className="mt-1 font-body text-xs text-text-secondary">{mensaje}</p>}
+            {mensaje && <p className="mt-1 font-body text-xs text-ui-fg-muted">{mensaje}</p>}
           </div>
           <div className="flex flex-wrap gap-2">
             <Button variant="quiet" onClick={crearBorradorDesdeVigente}>Crear borrador</Button>
@@ -750,7 +750,7 @@ function ParametrosNormativos({
         title={`Publicar versión ${datos.config?.nombre_version ?? "tarifaria"}`}
         description="Esta acción reemplaza la versión vigente para cálculos futuros. Los traslados con precio ya cotizado conservarán su tarifa original."
         onOpenChange={(abierto) => { if (!abierto) setConfirmando(false); }}
-        footer={<><button type="button" onClick={() => setConfirmando(false)} className="rounded-lg border border-ink/20 px-4 py-2 font-body text-admin-boton font-semibold text-ink hover:bg-surface-secondary">Cancelar</button><button type="button" onClick={() => { setConfirmando(false); guardarConfirmado(); }} className="rounded-lg bg-signal px-4 py-2 font-body text-admin-boton font-semibold text-ink hover:bg-signal/90">Publicar versión</button></>}
+        footer={<><button type="button" onClick={() => setConfirmando(false)} className="rounded-lg border border-ui-line-strong px-4 py-2 font-body text-sm font-semibold text-ui-fg hover:bg-ui-muted">Cancelar</button><button type="button" onClick={() => { setConfirmando(false); guardarConfirmado(); }} className="rounded-lg bg-ui-brand px-4 py-2 font-body text-sm font-semibold text-ui-fg hover:bg-ui-brand-hover">Publicar versión</button></>}
       ><span /></AdminDialog>
     </div>
   );
@@ -856,13 +856,13 @@ function ComparadorVersiones({ datos, borrador }: { datos: ConfiguracionTarifas;
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <h2 className="font-display text-xl font-semibold">Comparador de versiones</h2>
-          <p className="mt-1 font-body text-sm text-text-secondary">Revisión previa: vigente contra propuesto, variación absoluta y variación porcentual.</p>
+          <p className="mt-1 font-body text-sm text-ui-fg-muted">Revisión previa: vigente contra propuesto, variación absoluta y variación porcentual.</p>
         </div>
         <Button variant="quiet" onClick={descargarResumen} disabled={cambios.length === 0}>Descargar resumen</Button>
       </div>
       <div className="mt-4 overflow-x-auto">
         <table className="w-full text-left font-body text-sm">
-          <thead className="border-b border-ink/10 text-xs uppercase tracking-wide text-text-tertiary">
+          <thead className="border-b border-ui-line text-xs uppercase tracking-wide text-ui-fg-muted">
             <tr>
               <th className="px-3 py-2">Entidad afectada</th>
               <th className="px-3 py-2">Vigente</th>
@@ -873,16 +873,16 @@ function ComparadorVersiones({ datos, borrador }: { datos: ConfiguracionTarifas;
           </thead>
           <tbody>
             {cambios.length === 0 ? (
-              <tr><td colSpan={5} className="px-3 py-6 text-center text-text-tertiary">Crea un borrador o modifica valores para comparar versiones.</td></tr>
+              <tr><td colSpan={5} className="px-3 py-6 text-center text-ui-fg-muted">Crea un borrador o modifica valores para comparar versiones.</td></tr>
             ) : cambios.map((cambio) => (
-              <tr key={`${cambio.entidad}-${cambio.campo}`} className="border-b border-ink/10">
-                <td className="px-3 py-3"><span className="font-semibold text-ink">{cambio.entidad}</span><span className="block text-xs text-text-tertiary">{cambio.campo}</span></td>
+              <tr key={`${cambio.entidad}-${cambio.campo}`} className="border-b border-ui-line">
+                <td className="px-3 py-3"><span className="font-semibold text-ui-fg">{cambio.entidad}</span><span className="block text-xs text-ui-fg-muted">{cambio.campo}</span></td>
                 <td className="px-3 py-3 font-mono-ruum">{cambio.vigente.toLocaleString("es-MX")}</td>
                 <td className="px-3 py-3 font-mono-ruum">{cambio.propuesto.toLocaleString("es-MX")}</td>
-                <td className={`px-3 py-3 font-mono-ruum font-semibold ${cambio.delta >= 0 ? "text-status-warning" : "text-status-success"}`}>
+                <td className={`px-3 py-3 font-mono-ruum font-semibold ${cambio.delta >= 0 ? "text-ui-warning" : "text-ui-success"}`}>
                   {cambio.delta >= 0 ? "+" : ""}{cambio.delta.toLocaleString("es-MX")} · {cambio.porcentaje.toFixed(1)}%
                 </td>
-                <td className="px-3 py-3 text-text-secondary">{formatoFecha(datos.config?.vigente_desde)}</td>
+                <td className="px-3 py-3 text-ui-fg-muted">{formatoFecha(datos.config?.vigente_desde)}</td>
               </tr>
             ))}
           </tbody>
@@ -913,14 +913,14 @@ function ImpactoTarifario({ datos, borrador }: { datos: ConfiguracionTarifas; bo
   return (
     <PassportCard>
       <h2 className="font-display text-xl font-semibold">Simulación de impacto</h2>
-      <p className="mt-1 font-body text-sm text-text-secondary">Estimación sin modificar datos reales. Los traslados ya cotizados conservan su tarifa original.</p>
+      <p className="mt-1 font-body text-sm text-ui-fg-muted">Estimación sin modificar datos reales. Los traslados ya cotizados conservan su tarifa original.</p>
       <div className="mt-4 grid gap-3 lg:grid-cols-2">
         {filas.map((fila) => (
-          <div key={fila.nombre} className="rounded-lg border border-ink/10 bg-surface-secondary px-4 py-3">
-            <p className="font-body text-sm font-semibold text-ink">{fila.nombre}</p>
-            <p className="mt-1 font-body text-xs text-text-tertiary">{ETIQUETA_CATEGORIA[fila.categoria] ?? fila.categoria} · {fila.distanciaKm} km · {fila.tiempoHoras} h</p>
+          <div key={fila.nombre} className="rounded-lg border border-ui-line bg-ui-muted px-4 py-3">
+            <p className="font-body text-sm font-semibold text-ui-fg">{fila.nombre}</p>
+            <p className="mt-1 font-body text-xs text-ui-fg-muted">{ETIQUETA_CATEGORIA[fila.categoria] ?? fila.categoria} · {fila.distanciaKm} km · {fila.tiempoHoras} h</p>
             {fila.vigente == null ? (
-              <p className="mt-3 text-sm text-status-warning">No hay datos suficientes para estimar este escenario.</p>
+              <p className="mt-3 text-sm text-ui-warning">No hay datos suficientes para estimar este escenario.</p>
             ) : (
               <div className="mt-3 grid grid-cols-3 gap-2 text-sm">
                 <DatoSim etiqueta="Vigente" valor={`$${fila.vigente.toLocaleString("es-MX")}`} />
@@ -957,18 +957,18 @@ function AuditoriaTarifaria({ datos }: { datos: ConfiguracionTarifas }) {
   return (
     <PassportCard>
       <h2 className="font-display text-xl font-semibold">Auditoría</h2>
-      <p className="mt-1 font-body text-sm text-text-secondary">
+      <p className="mt-1 font-body text-sm text-ui-fg-muted">
         Historial operativo disponible desde la configuración actual. El registro inmutable completo requiere persistencia de versiones en backend antes de considerar cerrado ADM-UX-32.
       </p>
-      <div className="mt-4 divide-y divide-ink/10 rounded-lg border border-ink/10">
+      <div className="mt-4 divide-y divide-ui-line rounded-lg border border-ui-line">
         {eventos.map((evento) => (
           <div key={`${evento.titulo}-${evento.fecha ?? "sin-fecha"}`} className="grid gap-2 px-4 py-3 md:grid-cols-[1fr_180px_180px_120px] md:items-center">
             <div>
-              <p className="font-body text-sm font-semibold text-ink">{evento.titulo}</p>
-              <p className="font-body text-xs text-text-tertiary">{evento.detalle}</p>
+              <p className="font-body text-sm font-semibold text-ui-fg">{evento.titulo}</p>
+              <p className="font-body text-xs text-ui-fg-muted">{evento.detalle}</p>
             </div>
-            <p className="font-body text-sm text-text-secondary">{formatoFecha(evento.fecha)}</p>
-            <p className="font-body text-sm text-text-secondary">{evento.responsable}</p>
+            <p className="font-body text-sm text-ui-fg-muted">{formatoFecha(evento.fecha)}</p>
+            <p className="font-body text-sm text-ui-fg-muted">{evento.responsable}</p>
             <span className={`w-fit rounded-full border px-3 py-1 font-body text-xs font-semibold ${claseEstado(evento.estado)}`}>
               {ETIQUETA_ESTADO[evento.estado] ?? evento.estado}
             </span>
@@ -1007,18 +1007,18 @@ function TarifasBaseFijas({
   return (
     <PassportCard acento>
       <h2 className="font-display text-xl font-semibold">Tarifas base fijas</h2>
-      <p className="mt-1 font-body text-sm text-text-secondary">Importes de partida y costo por kilómetro según categoría y rango.</p>
+      <p className="mt-1 font-body text-sm text-ui-fg-muted">Importes de partida y costo por kilómetro según categoría y rango.</p>
       <div className="mt-5 grid gap-x-6 gap-y-8 xl:grid-cols-2">
         {Array.from(porCategoria.entries()).map(([categoria, filas]) => (
           <section key={categoria}>
-            <div className="flex items-center gap-2 border-b border-signal/30 pb-2">
-              <span className="size-2 rounded-full bg-signal" aria-hidden="true" />
-              <h3 className="font-display text-sm font-semibold text-ink">{ETIQUETA_CATEGORIA[categoria] ?? categoria}</h3>
+            <div className="flex items-center gap-2 border-b border-ui-brand/30 pb-2">
+              <span className="size-2 rounded-full bg-ui-brand" aria-hidden="true" />
+              <h3 className="font-display text-sm font-semibold text-ui-fg">{ETIQUETA_CATEGORIA[categoria] ?? categoria}</h3>
             </div>
-            <div className="divide-y divide-ink/10">
+            <div className="divide-y divide-ui-line">
               {filas.map((fila) => (
                 <div key={fila.id} className="grid gap-3 py-4 lg:grid-cols-[minmax(150px,1fr)_minmax(120px,150px)_minmax(120px,150px)]">
-                  <p className="self-center font-body text-sm font-medium leading-5 text-text-secondary">{ETIQUETA_RANGO[fila.rango] ?? fila.rango}</p>
+                  <p className="self-center font-body text-sm font-medium leading-5 text-ui-fg-muted">{ETIQUETA_RANGO[fila.rango] ?? fila.rango}</p>
                   <CampoBorrador
                     etiqueta="Base"
                     valor={borrador.vehiculo[fila.id]?.base ?? ""}
@@ -1078,25 +1078,25 @@ function SimuladorNormativo({ datos }: { datos: ConfiguracionTarifas }) {
         <SelectSim<CondicionTarifa> etiqueta="Condición" valor={condicion} onChange={setCondicion} opciones={datos.condicion.map((v) => v.condicion)} />
         <SelectSim<HorarioTarifa> etiqueta="Horario" valor={horario} onChange={setHorario} opciones={datos.horario.map((v) => v.horario)} />
         <SelectSim<DiaTarifa> etiqueta="Día" valor={dia} onChange={setDia} opciones={datos.dia.map((v) => v.dia)} />
-        <label className="font-body text-sm font-medium text-text-main">
+        <label className="font-body text-sm font-medium text-ui-fg">
           Distancia km
-          <input value={distanciaKm} onChange={(e) => setDistanciaKm(e.target.value)} inputMode="decimal" className="mt-1 w-full rounded-lg border border-ink/25 bg-surface-primary px-3 py-2 text-sm" />
+          <input value={distanciaKm} onChange={(e) => setDistanciaKm(e.target.value)} inputMode="decimal" className="mt-1 w-full rounded-lg border border-ui-line-strong bg-ui-card px-3 py-2 text-sm" />
         </label>
-        <label className="font-body text-sm font-medium text-text-main">
+        <label className="font-body text-sm font-medium text-ui-fg">
           Tiempo horas
-          <input value={tiempoHoras} onChange={(e) => setTiempoHoras(e.target.value)} inputMode="decimal" className="mt-1 w-full rounded-lg border border-ink/25 bg-surface-primary px-3 py-2 text-sm" />
+          <input value={tiempoHoras} onChange={(e) => setTiempoHoras(e.target.value)} inputMode="decimal" className="mt-1 w-full rounded-lg border border-ui-line-strong bg-ui-card px-3 py-2 text-sm" />
         </label>
       </div>
-      <div className="mt-5 overflow-hidden rounded-lg border border-focus-default/20 bg-status-info-soft/40 px-4 py-4">
+      <div className="mt-5 overflow-hidden rounded-lg border border-ui-focus/20 bg-ui-brand-soft px-4 py-4">
         {resultado.ok ? (
-          <div className="grid gap-2 font-body text-sm text-text-secondary sm:grid-cols-4">
+          <div className="grid gap-2 font-body text-sm text-ui-fg-muted sm:grid-cols-4">
             <DatoSim etiqueta="Rango" valor={ETIQUETA_RANGO[resultado.valor.rango] ?? resultado.valor.rango} />
             <DatoSim etiqueta="Base categoría" valor={`$${resultado.valor.baseCategoria.toLocaleString("es-MX")}`} />
             <DatoSim etiqueta="Subtotal" valor={`$${resultado.valor.subtotal.toLocaleString("es-MX")}`} />
             <DatoSim etiqueta="Factor variable" valor={`${resultado.valor.factorVariable.toFixed(2)}x`} />
             <div className="sm:col-span-4">
-              <p className="font-body text-xs uppercase tracking-wide text-text-tertiary">Tarifa final normativa</p>
-              <p className="mt-1 font-display text-3xl font-semibold text-ink">${resultado.valor.tarifa.toLocaleString("es-MX")}</p>
+              <p className="font-body text-xs uppercase tracking-wide text-ui-fg-muted">Tarifa final normativa</p>
+              <p className="mt-1 font-display text-3xl font-semibold text-ui-fg">${resultado.valor.tarifa.toLocaleString("es-MX")}</p>
             </div>
           </div>
         ) : (
@@ -1122,9 +1122,9 @@ function SelectSim<T extends string>({
 }) {
   const unicas = [...new Set(opciones)];
   return (
-    <label className="font-body text-sm font-medium text-text-main">
+    <label className="font-body text-sm font-medium text-ui-fg">
       {etiqueta}
-      <select value={valor} onChange={(e) => onChange(e.target.value as T)} className="mt-1 w-full rounded-lg border border-ink/25 bg-surface-primary px-3 py-2 text-sm">
+      <select value={valor} onChange={(e) => onChange(e.target.value as T)} className="mt-1 w-full rounded-lg border border-ui-line-strong bg-ui-card px-3 py-2 text-sm">
         {unicas.map((opcion) => <option key={opcion} value={opcion}>{etiquetas?.[opcion] ?? opcion.replaceAll("_", " ")}</option>)}
       </select>
     </label>
@@ -1134,8 +1134,8 @@ function SelectSim<T extends string>({
 function DatoSim({ etiqueta, valor }: { etiqueta: string; valor: string }) {
   return (
     <div>
-      <p className="font-body text-xs uppercase tracking-wide text-text-tertiary">{etiqueta}</p>
-      <p className="mt-1 font-semibold text-ink">{valor}</p>
+      <p className="font-body text-xs uppercase tracking-wide text-ui-fg-muted">{etiqueta}</p>
+      <p className="mt-1 font-semibold text-ui-fg">{valor}</p>
     </div>
   );
 }

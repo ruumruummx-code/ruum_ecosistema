@@ -111,3 +111,31 @@ lateral de escritorio.
 - `pnpm check:estilos` incluye Conductor. Las zonas de presentación migradas
   tienen cero estilos sueltos; los colores de metadatos y respuestas HTML
   independientes conservan su línea base explícita.
+
+
+## Panel admin (Torre de Control)
+
+El panel usa la misma capa `@ruum/ui/base`, los tokens `ui-*` y la tipografía
+Inter (IBM Plex Mono para folios, placas y VIN) de Usuario y Conductor. Su
+diseño es de **escritorio**: referencia de 1280 a 1920 px, contenedor
+`.admin-page-shell` de hasta 1600 px y sin versión móvil propia (por debajo de
+1024 px queda la navegación compacta existente).
+
+- Marco: barra lateral fija y colapsable (`BarraLateral`, superficie
+  `bg-ui-card`; el ítem activo se marca con `bg-ui-brand-soft` y peso
+  semibold), barra superior con ruta de navegación y acciones globales
+  (`BarraSuperiorAdmin`) y contenido con desplazamiento de la ventana.
+- `globals.css` no define paleta: importa `tokens.css` y `base.css` y solo
+  conserva el contenedor de página y las clases estructurales de tabla
+  (`.admin-table-card`, `.admin-table-scroll`). Claro y oscuro los resuelve la
+  capa `ui-*` a partir de `data-theme`.
+- Los envoltorios del panel delegan en la base: `AdminButton` → `Button`
+  (`secondary` → `outline`, `quiet` → `ghost`), `AdminBadge` → `Badge`,
+  `AdminPanel` → `Card`, `AdminLoadingState` → `Skeleton`. Las pantallas nuevas
+  importan directamente de `@ruum/ui/base` e iconos de `lucide-react`.
+- Un panel que debe verse oscuro en ambos temas (p. ej. el panel de marca del
+  acceso) usa `data-theme="dark"` en su contenedor en lugar de colores fijos.
+- El mapa (Mapbox) lee los colores de `--ui-success`, `--ui-brand`,
+  `--ui-danger`, `--ui-fg-muted`, `--ui-fg` y `--ui-card` en tiempo de ejecución.
+- `pnpm check:estilos` incluye `apps/panel-admin/src` como zona migrada
+  completa: cero hex, paleta de Tailwind, `text-[N]`, `rounded-[N]` y `dark:`.

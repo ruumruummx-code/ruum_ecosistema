@@ -150,9 +150,9 @@ function moneda(valor: number | null | undefined) {
 }
 
 function badgeEstado(estado: EstadoVerificacion | string) {
-  if (estado === "verificado" || estado === "activa" || estado === "aprobado") return "border-status-success/30 bg-status-success-soft text-status-success";
-  if (estado === "rechazado" || estado === "suspendida") return "border-status-error/25 bg-status-error-soft text-status-error";
-  return "border-status-warning/40 bg-status-warning-soft text-status-warning";
+  if (estado === "verificado" || estado === "activa" || estado === "aprobado") return "border-ui-success/30 bg-ui-success-soft text-ui-success";
+  if (estado === "rechazado" || estado === "suspendida") return "border-ui-danger/25 bg-ui-danger-soft text-ui-danger";
+  return "border-ui-warning/40 bg-ui-warning-soft text-ui-warning";
 }
 
 function Badge({ estado, texto }: { estado: EstadoVerificacion | string; texto?: string }) {
@@ -165,9 +165,9 @@ function textoEstadoOperativo(estado: string | null | undefined) {
 
 function Dato({ etiqueta, valor }: { etiqueta: string; valor: string | number | null | undefined }) {
   return (
-    <div className="rounded-lg border border-border-default bg-surface-secondary/55 px-3 py-3">
-      <dt className="font-body text-xs font-medium text-text-tertiary">{etiqueta}</dt>
-      <dd className="mt-1 truncate font-body text-sm font-semibold text-ink" title={typeof valor === "string" ? valor : undefined}>{valor || "No registrado"}</dd>
+    <div className="rounded-lg border border-ui-line bg-ui-muted px-3 py-3">
+      <dt className="font-body text-xs font-medium text-ui-fg-muted">{etiqueta}</dt>
+      <dd className="mt-1 truncate font-body text-sm font-semibold text-ui-fg" title={typeof valor === "string" ? valor : undefined}>{valor || "No registrado"}</dd>
     </div>
   );
 }
@@ -189,13 +189,13 @@ function CampoTexto({
 }) {
   return (
     <label className="flex flex-col gap-1.5">
-      <span className="font-body text-xs font-semibold text-text-secondary">{label}</span>
+      <span className="font-body text-xs font-semibold text-ui-fg-muted">{label}</span>
       <input
         type={type}
         min={min}
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="rounded-lg border border-ink/20 bg-surface-primary px-3 py-2 font-body text-sm text-ink focus:border-focus-default focus:outline-none focus:ring-2 focus:ring-focus-default/20"
+        className="rounded-lg border border-ui-line-strong bg-ui-card px-3 py-2 font-body text-sm text-ui-fg focus:border-ui-focus focus:outline-none focus:ring-2 focus:ring-ui-ring"
         placeholder={placeholder}
       />
     </label>
@@ -204,8 +204,8 @@ function CampoTexto({
 
 function SeccionAlta({ titulo, children }: { titulo: string; children: ReactNode }) {
   return (
-    <section className="rounded-lg border border-border-default bg-surface-secondary/35 p-4">
-      <h3 className="font-body text-xs font-semibold uppercase tracking-wide text-text-secondary">{titulo}</h3>
+    <section className="rounded-lg border border-ui-line bg-ui-muted p-4">
+      <h3 className="font-body text-xs font-semibold uppercase tracking-wide text-ui-fg-muted">{titulo}</h3>
       <div className="mt-3 grid gap-3 md:grid-cols-6">{children}</div>
     </section>
   );
@@ -238,7 +238,7 @@ function CampoAlta({
 }) {
   return (
     <label className={`flex flex-col gap-1.5 ${className}`}>
-      <span className="font-body text-xs font-semibold text-text-secondary">{label}</span>
+      <span className="font-body text-xs font-semibold text-ui-fg-muted">{label}</span>
       <input
         type={type}
         value={value}
@@ -247,22 +247,22 @@ function CampoAlta({
         autoComplete={autoComplete}
         list={list}
         placeholder={placeholder}
-        className="h-10 rounded-lg border border-ink/30 bg-surface-primary px-3 font-body text-sm text-ink placeholder:text-text-secondary/80 focus:border-focus-default focus:outline-none focus:ring-2 focus:ring-focus-default/35"
+        className="h-10 rounded-lg border border-ui-line-strong bg-ui-card px-3 font-body text-sm text-ui-fg placeholder:text-ui-fg-muted focus:border-ui-focus focus:outline-none focus:ring-2 focus:ring-ui-ring"
       />
-      {(error || ayuda) && <span className={`font-body text-[11px] ${error ? "text-status-error" : "text-text-tertiary"}`}>{error ?? ayuda}</span>}
+      {(error || ayuda) && <span className={`font-body text-xs ${error ? "text-ui-danger" : "text-ui-fg-muted"}`}>{error ?? ayuda}</span>}
     </label>
   );
 }
 
 function KpiEmpresa({ icono, etiqueta, valor, detalle }: { icono: string; etiqueta: string; valor: string; detalle?: string }) {
   return (
-    <div className="rounded-lg border border-ink/10 bg-surface-secondary/70 px-4 py-3">
+    <div className="rounded-lg border border-ui-line bg-ui-muted px-4 py-3">
       <div className="flex items-center justify-between gap-3">
-        <span className="grid size-8 place-items-center rounded-full bg-ink/10 font-body text-sm font-bold text-text-secondary" aria-hidden="true">{icono}</span>
-        <span className="font-mono-ruum text-xl font-semibold text-ink">{valor}</span>
+        <span className="grid size-8 place-items-center rounded-full bg-ui-muted font-body text-sm font-bold text-ui-fg-muted" aria-hidden="true">{icono}</span>
+        <span className="font-mono-ruum text-xl font-semibold text-ui-fg">{valor}</span>
       </div>
-      <p className="mt-2 font-body text-xs font-semibold text-text-secondary">{etiqueta}</p>
-      {detalle && <p className="mt-1 truncate font-body text-[11px] text-text-tertiary">{detalle}</p>}
+      <p className="mt-2 font-body text-xs font-semibold text-ui-fg-muted">{etiqueta}</p>
+      {detalle && <p className="mt-1 truncate font-body text-xs text-ui-fg-muted">{detalle}</p>}
     </div>
   );
 }
@@ -352,13 +352,13 @@ function AccionesEmpresa({
   }
 
   return (
-    <div className="mt-5 border-t border-ink/10 pt-5">
+    <div className="mt-5 border-t border-ui-line pt-5">
       <Tabs etiqueta="Secciones administrativas de empresa" value={tab} onSeleccion={id=>setTab(id as typeof tab)} tabs={TABS_EMPRESA.map(t=>({id:t.id,etiqueta:t.etiqueta}))} renderPanel={()=><div className="pt-3">{tab === "resumen" && (
           <div className="grid gap-4">
             {cambiosPendientes.length > 0 && (
-              <div className="rounded-lg border border-status-warning/35 bg-status-warning-soft p-4">
-                <p className="font-body text-sm font-semibold text-status-warning">Cambios pendientes de aprobación</p>
-                <p className="mt-1 font-body text-sm text-text-secondary">La empresa está activa, pero tiene ajustes fiscales o comerciales esperando revisión.</p>
+              <div className="rounded-lg border border-ui-warning/35 bg-ui-warning-soft p-4">
+                <p className="font-body text-sm font-semibold text-ui-warning">Cambios pendientes de aprobación</p>
+                <p className="mt-1 font-body text-sm text-ui-fg-muted">La empresa está activa, pero tiene ajustes fiscales o comerciales esperando revisión.</p>
               </div>
             )}
             <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
@@ -381,11 +381,11 @@ function AccionesEmpresa({
 {tab === "fiscal" && (
           <div className="grid gap-4">
             {cambiosPendientes.length > 0 && (
-              <div className="rounded-lg border border-status-warning/30 bg-status-warning-soft p-4">
-                <p className="font-body text-xs font-semibold uppercase tracking-wide text-status-warning">Revisión fiscal pendiente</p>
+              <div className="rounded-lg border border-ui-warning/30 bg-ui-warning-soft p-4">
+                <p className="font-body text-xs font-semibold uppercase tracking-wide text-ui-warning">Revisión fiscal pendiente</p>
                 <div className="mt-3 grid gap-2">
                   {cambiosPendientes.map((cambio) => (
-                    <div key={cambio.id} className="flex flex-col gap-2 rounded-lg bg-surface-primary p-3 font-body text-sm sm:flex-row sm:items-center sm:justify-between">
+                    <div key={cambio.id} className="flex flex-col gap-2 rounded-lg bg-ui-card p-3 font-body text-sm sm:flex-row sm:items-center sm:justify-between">
                       <span>{cambio.tipo.replaceAll("_", " ")} · {cambio.motivo}</span>
                       <span className="flex flex-wrap gap-2">
                         <Button variant="quiet" disabled={pendiente} onClick={() => ejecutar(() => resolverCambioEmpresaAdmin(crearClienteNavegador(), cambio.id, true, "Aprobado desde Empresas").then(() => undefined), "Cambio sensible aprobado.")}>Aprobar</Button>
@@ -396,9 +396,9 @@ function AccionesEmpresa({
                 </div>
               </div>
             )}
-            <div className="grid gap-3 rounded-lg border border-ink/10 p-4">
+            <div className="grid gap-3 rounded-lg border border-ui-line p-4">
               <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                <p className="font-body text-xs font-semibold uppercase tracking-wide text-text-tertiary">Edición fiscal y facturación</p>
+                <p className="font-body text-xs font-semibold uppercase tracking-wide text-ui-fg-muted">Edición fiscal y facturación</p>
                 <Badge estado={rfcValido ? "verificado" : "rechazado"} texto={rfcValido ? "RFC formal válido" : "RFC inválido"} />
               </div>
               <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
@@ -415,7 +415,7 @@ function AccionesEmpresa({
                 <CampoTexto label="Días de crédito" value={form.dias_credito} onChange={(valor) => setForm({ ...form, dias_credito: valor })} type="number" min="0" />
               </div>
               <label className="flex items-center gap-2 font-body text-sm">
-                <input type="checkbox" checked={form.requiere_orden_compra} onChange={(e) => setForm({ ...form, requiere_orden_compra: e.target.checked })} className="size-4 rounded border-ink/30" />
+                <input type="checkbox" checked={form.requiere_orden_compra} onChange={(e) => setForm({ ...form, requiere_orden_compra: e.target.checked })} className="size-4 rounded border-ui-line-strong" />
                 Requiere orden de compra
               </label>
               <CampoTexto label="Motivo del cambio" value={form.motivo} onChange={(valor) => setForm({ ...form, motivo: valor })} placeholder="Justificación para auditoría" />
@@ -446,10 +446,10 @@ function AccionesEmpresa({
                 <Button variant="quiet" disabled={pendiente} onClick={() => ejecutar(() => validarDocumentoEmpresa(crearClienteNavegador(), empresa.id, "rechazado", "").then(() => undefined), "Empresa rechazada.")}>Rechazar</Button>
               </div>
             </div>
-            <div className="rounded-lg border border-ink/10 p-4">
-              <p className="font-body text-xs font-semibold uppercase tracking-wide text-text-tertiary">Versiones fiscales</p>
+            <div className="rounded-lg border border-ui-line p-4">
+              <p className="font-body text-xs font-semibold uppercase tracking-wide text-ui-fg-muted">Versiones fiscales</p>
               <div className="mt-3 grid gap-2 font-body text-sm">
-                {versionesFiscales.length === 0 ? <span className="text-text-secondary">Sin versiones registradas</span> : versionesFiscales.map((version) => (
+                {versionesFiscales.length === 0 ? <span className="text-ui-fg-muted">Sin versiones registradas</span> : versionesFiscales.map((version) => (
                   <span key={version.id}>v{version.version} · {version.rfc} · desde {fecha(version.vigente_desde)}</span>
                 ))}
               </div>
@@ -465,12 +465,12 @@ function AccionesEmpresa({
                 <Dato key={item.id} etiqueta={item.rol === "titular_empresa" ? "Titular" : "Usuario autorizado"} valor={item.nombre ?? item.correo_facturacion} />
               ))}
             </dl>
-            <div className="grid gap-3 rounded-lg border border-ink/10 p-4">
-              <p className="font-body text-xs font-semibold uppercase tracking-wide text-text-tertiary">Agregar o actualizar usuario empresarial</p>
+            <div className="grid gap-3 rounded-lg border border-ui-line p-4">
+              <p className="font-body text-xs font-semibold uppercase tracking-wide text-ui-fg-muted">Agregar o actualizar usuario empresarial</p>
               <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
                 <label className="flex flex-col gap-1.5">
-                  <span className="font-body text-xs font-semibold text-text-secondary">Rol</span>
-                  <select value={usuario.rol} onChange={(e) => setUsuario({ ...usuario, rol: e.target.value as "titular_empresa" | "usuario_autorizado" })} className="rounded-lg border border-ink/20 bg-surface-primary px-3 py-2 font-body text-sm">
+                  <span className="font-body text-xs font-semibold text-ui-fg-muted">Rol</span>
+                  <select value={usuario.rol} onChange={(e) => setUsuario({ ...usuario, rol: e.target.value as "titular_empresa" | "usuario_autorizado" })} className="rounded-lg border border-ui-line-strong bg-ui-card px-3 py-2 font-body text-sm">
                     <option value="titular_empresa">Titular empresa</option>
                     <option value="usuario_autorizado">Usuario autorizado</option>
                   </select>
@@ -480,7 +480,7 @@ function AccionesEmpresa({
                 <CampoTexto label="Teléfono" value={usuario.telefono} onChange={(valor) => setUsuario({ ...usuario, telefono: valor })} placeholder="10 dígitos" />
               </div>
               <label className="flex items-center gap-2 font-body text-sm">
-                <input type="checkbox" checked={usuario.metodo_pago_registrado} onChange={(e) => setUsuario({ ...usuario, metodo_pago_registrado: e.target.checked })} className="size-4 rounded border-ink/30" />
+                <input type="checkbox" checked={usuario.metodo_pago_registrado} onChange={(e) => setUsuario({ ...usuario, metodo_pago_registrado: e.target.checked })} className="size-4 rounded border-ui-line-strong" />
                 Puede operar pago corporativo
               </label>
               <Button disabled={pendiente} onClick={() => ejecutar(() => guardarUsuarioEmpresaAdmin(crearClienteNavegador(), empresa.id, usuario).then(() => undefined), "Usuario empresarial guardado.")}>Guardar usuario</Button>
@@ -496,8 +496,8 @@ function AccionesEmpresa({
                 <Dato key={doc.id} etiqueta={doc.tipo} valor={`${doc.nombre} · vence ${fecha(doc.vigente_hasta)}`} />
               ))}
             </div>
-            <div className="grid gap-3 rounded-lg border border-ink/10 p-4">
-              <p className="font-body text-xs font-semibold uppercase tracking-wide text-text-tertiary">Registrar contrato o documento</p>
+            <div className="grid gap-3 rounded-lg border border-ui-line p-4">
+              <p className="font-body text-xs font-semibold uppercase tracking-wide text-ui-fg-muted">Registrar contrato o documento</p>
               <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
                 <CampoTexto label="Tipo de documento" value={documento.tipo} onChange={(valor) => setDocumento({ ...documento, tipo: valor })} placeholder="Contrato, NDA, anexo" />
                 <CampoTexto label="Nombre del documento" value={documento.nombre} onChange={(valor) => setDocumento({ ...documento, nombre: valor })} placeholder="Contrato marco" />
@@ -511,12 +511,12 @@ function AccionesEmpresa({
           </div>
         )}
 {tab === "riesgo" && (
-          <div className="rounded-lg border border-status-error/35 bg-status-error-soft/25 p-4">
-            <p className="font-body text-xs font-semibold uppercase tracking-wide text-status-error">Suspensión y reactivación</p>
-            <p className="mt-1 font-body text-sm text-text-secondary">Acciones críticas para detener o reactivar la operación corporativa. Requieren motivo y confirmación.</p>
+          <div className="rounded-lg border border-ui-danger/35 bg-ui-danger-soft p-4">
+            <p className="font-body text-xs font-semibold uppercase tracking-wide text-ui-danger">Suspensión y reactivación</p>
+            <p className="mt-1 font-body text-sm text-ui-fg-muted">Acciones críticas para detener o reactivar la operación corporativa. Requieren motivo y confirmación.</p>
             <label className="mt-4 flex flex-col gap-1.5">
-              <span className="font-body text-xs font-semibold text-text-secondary">Motivo obligatorio</span>
-              <textarea value={motivoEstado} onChange={(e) => setMotivoEstado(e.target.value)} className="min-h-24 rounded-lg border border-status-error/25 bg-surface-primary px-3 py-2 font-body text-sm" placeholder="Describe la razón operativa o de cumplimiento." />
+              <span className="font-body text-xs font-semibold text-ui-fg-muted">Motivo obligatorio</span>
+              <textarea value={motivoEstado} onChange={(e) => setMotivoEstado(e.target.value)} className="min-h-24 rounded-lg border border-ui-danger/25 bg-ui-card px-3 py-2 font-body text-sm" placeholder="Describe la razón operativa o de cumplimiento." />
             </label>
             <div className="mt-4 flex flex-wrap gap-2">
               <Button variant="quiet" disabled={pendiente || !motivoEstado.trim()} onClick={() => setAccionRiesgo("suspender")}>Suspender empresa</Button>
@@ -551,13 +551,13 @@ function AccionesEmpresa({
           </>
         }
       >
-        <div className="rounded-lg border border-status-error/25 bg-status-error-soft/35 p-3 font-body text-sm text-text-secondary">
-          <p className="font-semibold text-status-error">Motivo registrado</p>
+        <div className="rounded-lg border border-ui-danger/25 bg-ui-danger-soft p-3 font-body text-sm text-ui-fg-muted">
+          <p className="font-semibold text-ui-danger">Motivo registrado</p>
           <p className="mt-1">{motivoEstado || "Sin motivo capturado."}</p>
         </div>
       </AdminDialog>
 
-      {mensaje && <p className="font-body text-sm text-text-secondary">{mensaje}</p>}
+      {mensaje && <p className="font-body text-sm text-ui-fg-muted">{mensaje}</p>}
     </div>
   );
 }
@@ -783,9 +783,9 @@ export default function PaginaEmpresasAdmin() {
           <div className="grid gap-5">
             <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
               <div>
-                <p className="font-body text-xs uppercase tracking-wide text-text-tertiary">Alta corporativa</p>
-                <h2 className="mt-1 font-display text-lg font-semibold text-ink">Crear empresa</h2>
-                <p className="mt-1 max-w-3xl font-body text-sm text-text-secondary">
+                <p className="font-body text-xs uppercase tracking-wide text-ui-fg-muted">Alta corporativa</p>
+                <h2 className="mt-1 font-display text-lg font-semibold text-ui-fg">Crear empresa</h2>
+                <p className="mt-1 max-w-3xl font-body text-sm text-ui-fg-muted">
                   Captura fiscal controlada para evitar errores administrativos antes de solicitar aprobación.
                 </p>
               </div>
@@ -837,8 +837,8 @@ export default function PaginaEmpresasAdmin() {
             </SeccionAlta>
 
             <div className="flex flex-wrap items-center justify-between gap-3">
-              <label className="flex items-center gap-2 font-body text-sm text-ink">
-                <input type="checkbox" checked={formulario.requiere_orden_compra} onChange={(e) => actualizarCampo("requiere_orden_compra", e.target.checked)} className="size-4 rounded border-ink/30" />
+              <label className="flex items-center gap-2 font-body text-sm text-ui-fg">
+                <input type="checkbox" checked={formulario.requiere_orden_compra} onChange={(e) => actualizarCampo("requiere_orden_compra", e.target.checked)} className="size-4 rounded border-ui-line-strong" />
                 Requiere orden de compra
               </label>
               <div className="flex flex-wrap gap-2">
@@ -863,8 +863,8 @@ export default function PaginaEmpresasAdmin() {
                 <table className="w-full min-w-[1120px] font-body text-sm">
                   <caption className="sr-only">Lista de empresas registradas</caption>
                   <thead>
-                    <tr className="border-b border-ink/10 text-left text-xs uppercase tracking-wide text-text-tertiary">
-                      <th className="left-0 z-10 bg-surface-primary px-4 py-3 sm:sticky">Empresa</th>
+                    <tr className="border-b border-ui-line text-left text-xs uppercase tracking-wide text-ui-fg-muted">
+                      <th className="left-0 z-10 bg-ui-card px-4 py-3 sm:sticky">Empresa</th>
                       <th className="px-4 py-3">RFC</th>
                       <th className="px-4 py-3">Estado</th>
                       <th className="px-4 py-3">Titular</th>
@@ -889,22 +889,22 @@ export default function PaginaEmpresasAdmin() {
                       const cambiosPendientes = cambios.filter((cambio) => cambio.estado === "pendiente");
                       const titular = usuarios.find((usuario) => usuario.rol === "titular_empresa");
                       const abierta = empresaAbiertaId === empresa.id;
-                      const fondoFila = indice % 2 === 1 ? "bg-surface-secondary/45" : "bg-surface-primary";
-                      const fondoSticky = indice % 2 === 1 ? "bg-surface-secondary" : "bg-surface-primary";
+                      const fondoFila = indice % 2 === 1 ? "bg-ui-muted" : "bg-ui-card";
+                      const fondoSticky = indice % 2 === 1 ? "bg-ui-muted" : "bg-ui-card";
                       return (
                         <Fragment key={empresa.id}>
-                          <tr className={`border-b border-ink/5 ${fondoFila}`}>
+                          <tr className={`border-b border-ui-line ${fondoFila}`}>
                             <td data-label="Empresa" className={`left-0 z-[1] px-4 py-4 sm:sticky ${fondoSticky}`}>
                               <button
                                 type="button"
                                 onClick={() => setEmpresaAbiertaId((actual) => actual === empresa.id ? null : empresa.id)}
-                                className="text-left font-semibold text-ink hover:text-focus-default hover:underline"
+                                className="text-left font-semibold text-ui-fg hover:text-ui-brand hover:underline"
                               >
                                 {empresa.nombre}
                               </button>
-                              <p className="mt-1 max-w-[280px] truncate text-xs text-text-secondary" title={empresa.razon_social ?? empresa.nombre}>{empresa.razon_social ?? "Sin razón social"}</p>
+                              <p className="mt-1 max-w-[280px] truncate text-xs text-ui-fg-muted" title={empresa.razon_social ?? empresa.nombre}>{empresa.razon_social ?? "Sin razón social"}</p>
                             </td>
-                            <td data-label="RFC" className="px-4 py-4 font-mono-ruum text-xs text-text-secondary">{empresa.rfc ?? "Pendiente"}</td>
+                            <td data-label="RFC" className="px-4 py-4 font-mono-ruum text-xs text-ui-fg-muted">{empresa.rfc ?? "Pendiente"}</td>
                             <td data-label="Estado" className="px-4 py-4">
                               <div className="flex flex-wrap gap-2">
                                 <Badge estado={empresa.estado_operativo} texto={textoEstadoOperativo(empresa.estado_operativo)} />
@@ -916,8 +916,8 @@ export default function PaginaEmpresasAdmin() {
                               </div>
                             </td>
                             <td data-label="Titular" className="px-4 py-4">
-                              <p className="font-medium text-ink">{titular?.nombre ?? "No registrado"}</p>
-                              <p className="mt-1 max-w-[220px] truncate text-xs text-text-secondary" title={titular?.correo_facturacion ?? undefined}>{titular?.correo_facturacion ?? "Sin correo"}</p>
+                              <p className="font-medium text-ui-fg">{titular?.nombre ?? "No registrado"}</p>
+                              <p className="mt-1 max-w-[220px] truncate text-xs text-ui-fg-muted" title={titular?.correo_facturacion ?? undefined}>{titular?.correo_facturacion ?? "Sin correo"}</p>
                             </td>
                             <td data-label="Usuarios" className="px-4 py-4 text-center font-mono-ruum">{usuarios.length}</td>
                             <td data-label="Flota" className="px-4 py-4 text-center font-mono-ruum">{vehiculos.length}</td>
@@ -925,37 +925,37 @@ export default function PaginaEmpresasAdmin() {
                             <td data-label="Traslados" className="px-4 py-4 text-right font-mono-ruum">{Traslados.length}</td>
                             <td data-label="Crédito" className="px-4 py-4 text-right">
                               <p className="font-mono-ruum font-semibold">{moneda(empresa.limite_credito_mxn)}</p>
-                              <p className="mt-1 text-xs text-text-tertiary">{empresa.dias_credito ?? 0} días</p>
+                              <p className="mt-1 text-xs text-ui-fg-muted">{empresa.dias_credito ?? 0} días</p>
                             </td>
                             <td data-label="Acciones" className="px-4 py-4">
                               <div className="flex justify-end gap-2">
                                 <Link
                                   href={`/empresas/${empresa.id}`}
-                                  className="inline-flex min-h-8 items-center rounded-md border border-focus-default/35 bg-status-info-soft px-3 py-1.5 font-body text-xs font-semibold text-status-info hover:bg-status-info hover:text-background-main"
+                                  className="inline-flex min-h-8 items-center rounded-md border border-ui-focus/35 bg-ui-brand-soft px-3 py-1.5 font-body text-xs font-semibold text-ui-brand-soft-fg hover:bg-ui-brand hover:text-ui-on-brand"
                                 >
                                   Pasaporte
                                 </Link>
                                 <button
                                   type="button"
                                   onClick={() => setEmpresaAbiertaId((actual) => actual === empresa.id ? null : empresa.id)}
-                                  className="inline-flex items-center gap-1 rounded-md border border-ink/20 px-3 py-1.5 font-body text-xs font-semibold text-ink hover:bg-ink/5"
+                                  className="inline-flex items-center gap-1 rounded-md border border-ui-line-strong px-3 py-1.5 font-body text-xs font-semibold text-ui-fg hover:bg-ui-muted"
                                   aria-expanded={abierta}
                                   aria-controls={`detalle-empresa-${empresa.id}`}
                                 >
                                   <span aria-hidden="true">✎</span> {abierta ? "Ocultar" : "Gestionar"}
                                 </button>
-                                <button type="button" className="rounded-md border border-ink/20 px-2.5 py-1.5 font-body text-xs font-semibold text-text-secondary opacity-60" aria-label={`Acciones rápidas para ${empresa.nombre}`}>...</button>
+                                <button type="button" className="rounded-md border border-ui-line-strong px-2.5 py-1.5 font-body text-xs font-semibold text-ui-fg-muted opacity-60" aria-label={`Acciones rápidas para ${empresa.nombre}`}>...</button>
                               </div>
                             </td>
                           </tr>
                           {abierta && (
-                            <tr className="border-b border-ink/10 bg-surface-primary">
+                            <tr className="border-b border-ui-line bg-ui-card">
                               <td colSpan={10} className="px-4 py-5">
-                                <div id={`detalle-empresa-${empresa.id}`} className="rounded-lg border border-border-default bg-surface-primary p-5">
+                                <div id={`detalle-empresa-${empresa.id}`} className="rounded-lg border border-ui-line bg-ui-card p-5">
                                   {cambiosPendientes.length > 0 && (
-                                    <div className="mb-4 rounded-lg border border-status-warning/35 bg-status-warning-soft px-4 py-3">
-                                      <p className="font-body text-sm font-semibold text-status-warning">Cambios pendientes de aprobación</p>
-                                      <p className="mt-1 font-body text-sm text-text-secondary">Estado operativo principal: {textoEstadoOperativo(empresa.estado_operativo)}. Los cambios fiscales se revisan en la pestaña Fiscal y facturación.</p>
+                                    <div className="mb-4 rounded-lg border border-ui-warning/35 bg-ui-warning-soft px-4 py-3">
+                                      <p className="font-body text-sm font-semibold text-ui-warning">Cambios pendientes de aprobación</p>
+                                      <p className="mt-1 font-body text-sm text-ui-fg-muted">Estado operativo principal: {textoEstadoOperativo(empresa.estado_operativo)}. Los cambios fiscales se revisan en la pestaña Fiscal y facturación.</p>
                                     </div>
                                   )}
                                   <AccionesEmpresa
