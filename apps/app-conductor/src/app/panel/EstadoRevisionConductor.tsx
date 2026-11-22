@@ -234,7 +234,7 @@ export function EstadoRevisionConductor({ conductorId, solicitudId, nombre, docu
         {/* Status Header */}
         <Card asChild><section className="shrink-0 p-4" aria-labelledby="titulo-estado-revision">
           <h2 id="titulo-estado-revision" className="text-base font-semibold text-ui-fg">Tu solicitud está en revisión</h2>
-          <p className="mt-1 font-body text-xs text-ui-fg-muted">Tiempo est: 24-48 hrs hábiles</p>
+          <p className="mt-1 font-body text-xs text-ui-fg-muted">Tiempo estimado: de 24 a 48 horas hábiles</p>
           <div className="mt-3">
             <div className="h-2 overflow-hidden rounded-full bg-ui-muted" aria-hidden>
               <div className="h-full rounded-full bg-ui-brand transition-all duration-300" style={{ width: `${porcentaje}%` }} />

@@ -81,7 +81,7 @@ export default function PaginaRegistroConductor() {
             Solicitud en revisión
           </h1>
           <p className="mt-3 font-body text-sm leading-6 text-ui-fg-muted/80">
-            Tu cuenta está pendiente de validación. Cuando la revisión esté completa, podrás consultar y aceptar Traslados.
+            Tu cuenta está pendiente de validación. Cuando la revisión esté completa, podrás consultar y aceptar traslados.
           </p>
 
           <div className="mt-6 rounded-lg border border-ui-brand/30 bg-ui-card p-5 text-left shadow-sm">

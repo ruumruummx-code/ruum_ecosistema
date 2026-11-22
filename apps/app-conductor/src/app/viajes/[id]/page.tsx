@@ -52,7 +52,7 @@ export default async function PaginaDetalleViaje({
     return (
       <EstadoError
         titulo="No encontramos ese traslado"
-        descripcion="Revisa el enlace o vuelve a tu lista de Traslados para continuar."
+        descripcion="Revisa el enlace o vuelve a tu lista de traslados para continuar."
         acciones={[
           { etiqueta: "Ver mis traslados", href: "/viajes", variant: "primary" },
           { etiqueta: "Volver al panel", href: "/panel", variant: "quiet" }

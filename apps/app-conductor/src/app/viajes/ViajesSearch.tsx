@@ -14,7 +14,7 @@ interface TrasladosSearchProps {
   placeholder?: string;
 }
 
-export function TrasladosSearch({ onSearch, placeholder = "Buscar Traslados..." }: TrasladosSearchProps) {
+export function TrasladosSearch({ onSearch, placeholder = "Buscar traslados…" }: TrasladosSearchProps) {
   const searchParams = useSearchParams();
   const [query, setQuery] = useState("");
   const [isFocused, setIsFocused] = useState(false);
@@ -93,7 +93,7 @@ export function TrasladosSearch({ onSearch, placeholder = "Buscar Traslados..." 
           onKeyDown={handleKeyDown}
           placeholder={placeholder}
           className="w-full pl-11 pr-11 py-3 rounded-xl bg-ui-card border border-ui-line/40 text-ui-fg placeholder:text-ui-fg-muted font-body text-sm focus:outline-none focus:ring-2 focus:ring-ui-brand/20 focus:border-ui-brand/40 transition-colors"
-          aria-label="Buscar Traslados por origen, destino o folio"
+          aria-label="Buscar traslados por origen, destino o folio"
           enterKeyHint="search"
         />
         

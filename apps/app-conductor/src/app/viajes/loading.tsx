@@ -1,6 +1,6 @@
 export default function CargandoTraslados() {
   return (
-    <output className="conductor-content" aria-label="Cargando Traslados" aria-busy="true">
+    <output className="conductor-content" aria-label="Cargando traslados" aria-busy="true">
       {/* Skeleton pestañas */}
       <div className="flex gap-2 border-b border-ui-line pb-0">
         {["w-[100px]", "w-[110px]"].map((widthClass) => (
