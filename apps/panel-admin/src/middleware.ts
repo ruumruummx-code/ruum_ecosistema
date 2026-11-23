@@ -128,12 +128,18 @@ export async function middleware(request: NextRequest) {
     return applySecurityHeadersPanel(response, nonce);
   }
 
-  // Ruta protegida sin sesión -> a login.
+  // Ruta protegida sin sesión -> a login (o 401 JSON si es /api/*).
   if (!user) {
+    if (pathname.startsWith("/api/")) {
+      return applySecurityHeadersPanel(
+        NextResponse.json({ error: "No autenticado" }, { status: 401, headers: { "Cache-Control": "no-store" } }),
+        nonce
+      );
+    }
     return applySecurityHeadersPanel(NextResponse.redirect(new URL("/login", request.url)), nonce);
   }
 
-  // Ruta protegida con sesión pero SIN fila en admins -> no autorizado.
+  // Ruta protegida con sesión pero SIN fila en admins -> no autorizado (o 403 JSON si es /api/*).
   let admin: { id: string; rol_operativo: string | null } | null;
   try {
     admin = await obtenerAdminSesion(supabase, user.id);
@@ -144,6 +150,12 @@ export async function middleware(request: NextRequest) {
   if (!admin) {
     // Cerrar la sesión no-admin para no dejarla colgando en el panel.
     await supabase.auth.signOut();
+    if (pathname.startsWith("/api/")) {
+      return applySecurityHeadersPanel(
+        NextResponse.json({ error: "Acceso denegado: no es administrador." }, { status: 403, headers: { "Cache-Control": "no-store" } }),
+        nonce
+      );
+    }
     const destino = new URL("/login", request.url);
     destino.searchParams.set("error", "no_autorizado");
     return applySecurityHeadersPanel(NextResponse.redirect(destino), nonce);
@@ -162,6 +174,12 @@ export async function middleware(request: NextRequest) {
       metodo: request.method,
       motivo: "ruta_no_permitida"
     }).catch(() => undefined);
+    if (pathname.startsWith("/api/")) {
+      return applySecurityHeadersPanel(
+        NextResponse.json({ error: "Acceso denegado: rol sin permiso para este recurso." }, { status: 403, headers: { "Cache-Control": "no-store" } }),
+        nonce
+      );
+    }
     const destino = new URL("/sin-permiso", request.url);
     destino.searchParams.set("ruta", pathname);
     return applySecurityHeadersPanel(NextResponse.redirect(destino), nonce);
@@ -184,6 +202,12 @@ export async function middleware(request: NextRequest) {
         metodo: request.method,
         motivo: `capacidad_insuficiente:${permisoRequerido}`
       }).catch(() => undefined);
+      if (pathname.startsWith("/api/")) {
+        return applySecurityHeadersPanel(
+          NextResponse.json({ error: `Acceso denegado: falta capacidad ${permisoRequerido}.` }, { status: 403, headers: { "Cache-Control": "no-store" } }),
+          nonce
+        );
+      }
       const destino = new URL("/sin-permiso", request.url);
       destino.searchParams.set("ruta", pathname);
       return applySecurityHeadersPanel(NextResponse.redirect(destino), nonce);

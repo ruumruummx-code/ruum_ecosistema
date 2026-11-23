@@ -114,11 +114,11 @@ export default function PaginaCapacidades() {
       />
 
       <section className="mt-6">
-        <label className="font-body text-sm font-semibold text-text-secondary">Administrador</label>
+        <label className="font-body text-sm font-semibold text-ui-fg-muted">Administrador</label>
         <select
           value={adminSeleccionado}
           onChange={(e) => setAdminSeleccionado(e.target.value)}
-          className="mt-1 block w-full max-w-md rounded-lg border border-ink/20 bg-surface-primary px-3 py-2 font-body text-sm text-ink"
+          className="mt-1 block w-full max-w-md rounded-lg border border-ui-line-strong bg-ui-card px-3 py-2 font-body text-sm text-ui-fg"
         >
           <option value="">Seleccionar administrador</option>
           {admins.map((a) => (
@@ -130,9 +130,9 @@ export default function PaginaCapacidades() {
       {adminSelObj && (
         <section className="mt-6">
           <div className="flex items-center justify-between">
-            <h2 className="font-display text-lg font-semibold text-ink">
+            <h2 className="font-display text-lg font-semibold text-ui-fg">
               Capacidades de {adminSelObj.nombre}
-              <span className="ml-2 font-body text-sm font-normal text-text-tertiary">({adminSelObj.rol_operativo})</span>
+              <span className="ml-2 font-body text-sm font-normal text-ui-fg-muted">({adminSelObj.rol_operativo})</span>
             </h2>
             <Button variant="quiet" onClick={() => { setShowForm(true); setFormConceder(true); setFormCapacidad(""); setFormMotivo(""); }}>
               Conceder capacidad
@@ -142,32 +142,32 @@ export default function PaginaCapacidades() {
           <div className="mt-4 overflow-x-auto">
             <table className="w-full min-w-[600px] font-body text-sm">
               <thead>
-                <tr className="text-left text-xs uppercase tracking-wide text-text-tertiary">
-                  <th className="border-b border-ink/10 px-3 py-2">Capacidad</th>
-                  <th className="border-b border-ink/10 px-3 py-2">Estado</th>
-                  <th className="border-b border-ink/10 px-3 py-2">Origen</th>
-                  <th className="border-b border-ink/10 px-3 py-2">Motivo</th>
-                  <th className="border-b border-ink/10 px-3 py-2">Acciones</th>
+                <tr className="text-left text-xs uppercase tracking-wide text-ui-fg-muted">
+                  <th className="border-b border-ui-line px-3 py-2">Capacidad</th>
+                  <th className="border-b border-ui-line px-3 py-2">Estado</th>
+                  <th className="border-b border-ui-line px-3 py-2">Origen</th>
+                  <th className="border-b border-ui-line px-3 py-2">Motivo</th>
+                  <th className="border-b border-ui-line px-3 py-2">Acciones</th>
                 </tr>
               </thead>
               <tbody>
                 {capacidades.map((c) => (
                   <tr key={c.capacidad} className="align-top">
-                    <td className="border-b border-ink/10 px-3 py-3 font-mono-ruum text-admin-secundario text-ink">
+                    <td className="border-b border-ui-line px-3 py-3 font-mono-ruum text-xs text-ui-fg">
                       {c.capacidad}
                     </td>
-                    <td className="border-b border-ink/10 px-3 py-3">
+                    <td className="border-b border-ui-line px-3 py-3">
                       <AdminBadge tone={c.concedida ? "success" : "danger"}>
                         {c.concedida ? "Concedido" : "Denegado"}
                       </AdminBadge>
                     </td>
-                    <td className="border-b border-ink/10 px-3 py-3 text-text-secondary">
+                    <td className="border-b border-ui-line px-3 py-3 text-ui-fg-muted">
                       {c.origen === "override" ? "Override" : "Rol base"}
                     </td>
-                    <td className="border-b border-ink/10 px-3 py-3 text-text-secondary">
+                    <td className="border-b border-ui-line px-3 py-3 text-ui-fg-muted">
                       {c.motivo ?? "—"}
                     </td>
-                    <td className="border-b border-ink/10 px-3 py-3">
+                    <td className="border-b border-ui-line px-3 py-3">
                       {c.origen === "override" && (
                         <button
                           onClick={() => {
@@ -177,7 +177,7 @@ export default function PaginaCapacidades() {
                             setFormMotivo("");
                             setShowForm(true);
                           }}
-                          className="font-body text-xs font-semibold text-status-info hover:underline"
+                          className="font-body text-xs font-semibold text-ui-brand-soft-fg hover:underline"
                         >
                           {c.concedida ? "Revocar" : "Conceder"}
                         </button>
@@ -198,8 +198,8 @@ export default function PaginaCapacidades() {
         onOpenChange={(abierto) => { if (!abierto) setShowForm(false); }}
         footer={
           <>
-            <button type="button" onClick={() => setShowForm(false)} className="rounded-lg border border-ink/20 px-4 py-2 font-body text-admin-boton font-semibold text-ink hover:bg-surface-secondary">Cancelar</button>
-            <button type="button" onClick={ejecutarConcesion} disabled={pendiente || !formCapacidad || formMotivo.trim().length < 10} className={`rounded-lg px-4 py-2 font-body text-admin-boton font-semibold ${formConceder ? "bg-signal text-ink hover:bg-signal/90" : "border border-status-error/30 bg-status-error-soft text-status-error hover:bg-status-error hover:text-background-main"}`}>
+            <button type="button" onClick={() => setShowForm(false)} className="rounded-lg border border-ui-line-strong px-4 py-2 font-body text-sm font-semibold text-ui-fg hover:bg-ui-muted">Cancelar</button>
+            <button type="button" onClick={ejecutarConcesion} disabled={pendiente || !formCapacidad || formMotivo.trim().length < 10} className={`rounded-lg px-4 py-2 font-body text-sm font-semibold ${formConceder ? "bg-ui-brand text-ui-fg hover:bg-ui-brand-hover" : "border border-ui-danger/30 bg-ui-danger-soft text-ui-danger hover:bg-ui-danger hover:text-ui-on-brand"}`}>
               {pendiente ? "Procesando..." : formConceder ? "Confirmar concesión" : "Confirmar revocación"}
             </button>
           </>
@@ -207,11 +207,11 @@ export default function PaginaCapacidades() {
       >
         <div className="flex flex-col gap-4">
           <div>
-            <label className="font-body text-sm font-semibold text-text-secondary">Capacidad</label>
+            <label className="font-body text-sm font-semibold text-ui-fg-muted">Capacidad</label>
             <select
               value={formCapacidad}
               onChange={(e) => setFormCapacidad(e.target.value)}
-              className="mt-1 block w-full rounded-lg border border-ink/20 bg-surface-primary px-3 py-2 font-body text-sm text-ink"
+              className="mt-1 block w-full rounded-lg border border-ui-line-strong bg-ui-card px-3 py-2 font-body text-sm text-ui-fg"
             >
               <option value="">Seleccionar capacidad</option>
               {catalogo
@@ -223,24 +223,24 @@ export default function PaginaCapacidades() {
             </select>
           </div>
           <div>
-            <label className="font-body text-sm font-semibold text-text-secondary">Acción</label>
+            <label className="font-body text-sm font-semibold text-ui-fg-muted">Acción</label>
             <div className="mt-1 flex gap-4">
-              <label className="flex items-center gap-2 font-body text-sm text-ink">
-                <input type="radio" checked={formConceder} onChange={() => setFormConceder(true)} className="accent-signal" />
+              <label className="flex items-center gap-2 font-body text-sm text-ui-fg">
+                <input type="radio" checked={formConceder} onChange={() => setFormConceder(true)} className="accent-ui-brand" />
                 Conceder
               </label>
-              <label className="flex items-center gap-2 font-body text-sm text-ink">
-                <input type="radio" checked={!formConceder} onChange={() => setFormConceder(false)} className="accent-signal" />
+              <label className="flex items-center gap-2 font-body text-sm text-ui-fg">
+                <input type="radio" checked={!formConceder} onChange={() => setFormConceder(false)} className="accent-ui-brand" />
                 Revocar
               </label>
             </div>
           </div>
           <div>
-            <label className="font-body text-sm font-semibold text-text-secondary">Motivo *</label>
+            <label className="font-body text-sm font-semibold text-ui-fg-muted">Motivo *</label>
             <textarea
               value={formMotivo}
               onChange={(e) => setFormMotivo(e.target.value)}
-              className="mt-1 block w-full rounded-lg border border-ink/20 bg-surface-primary px-3 py-2 font-body text-sm text-ink"
+              className="mt-1 block w-full rounded-lg border border-ui-line-strong bg-ui-card px-3 py-2 font-body text-sm text-ui-fg"
               placeholder="Motivo obligatorio (mín. 10 caracteres)"
               rows={3}
             />
@@ -250,7 +250,7 @@ export default function PaginaCapacidades() {
 
       {mensaje && (
         <div className="mt-4" role="status" aria-live="polite">
-          <p className="font-body text-sm text-text-secondary">{mensaje}</p>
+          <p className="font-body text-sm text-ui-fg-muted">{mensaje}</p>
         </div>
       )}
     </main>

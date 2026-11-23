@@ -199,11 +199,12 @@ export async function middleware(request: NextRequest) {
      y ninguna lectura crea filas en usuarios. */
   if (user && esRutaProtegidaUsuario(pathname)) {
     const { clasificarRolApp } = await import("@ruum/api/identity");
-    if ((await clasificarRolApp(supabase, user.id)) === "conductor") {
+    const rol = await clasificarRolApp(supabase, user.id);
+    if (rol === "conductor" || rol === "admin") {
       const redirectUrl = request.nextUrl.clone();
       redirectUrl.pathname = "/403";
       redirectUrl.search = "";
-      redirectUrl.searchParams.set("reason", "rol_conductor");
+      redirectUrl.searchParams.set("reason", rol === "conductor" ? "rol_conductor" : "rol_admin");
       return redirigir(redirectUrl);
     }
   }

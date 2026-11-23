@@ -200,10 +200,14 @@ export function enmascarar(texto) {
 export function debeInspeccionarArchivo(nombreArchivo) {
   if (ARCHIVOS_EXCLUIDOS.has(nombreArchivo)) return false;
 
+  const nombreLower = nombreArchivo.toLowerCase();
+  // Excluir archivos de entorno locales gitignored (.env.local, .env.*.local, .env.staging)
+  if (nombreLower.endsWith(".local") || nombreLower === ".env.staging") {
+    return false;
+  }
+
   const ext = extname(nombreArchivo).toLowerCase();
   if (EXTENSIONES_BINARIAS.has(ext)) return false;
-
-  const nombreLower = nombreArchivo.toLowerCase();
 
   // Inspeccionar Dockerfile y sus variantes (Dockerfile, Dockerfile.dev, Dockerfile.prod, etc.)
   if (nombreLower.startsWith("dockerfile")) {
@@ -436,7 +440,7 @@ export function scanDir(dir, options = {}) {
 
       if (stats.isDirectory()) {
         // Excluir carpetas ignoradas
-        if (DIRS_EXCLUIDOS.has(entry)) continue;
+        if (DIRS_EXCLUIDOS.has(entry) || entry.startsWith(".next")) continue;
         if (excludeFixtures && entry === "fixtures") continue;
         hallazgos = hallazgos.concat(scanDir(fullPath, options));
       } else if (stats.isFile()) {

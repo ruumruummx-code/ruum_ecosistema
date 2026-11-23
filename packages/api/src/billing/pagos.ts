@@ -29,14 +29,23 @@ export interface FinanzasTrasladoAdmin {
   corteEn: string;
 }
 
-export async function listarPagosAdmin(cliente: Cliente): Promise<DatosPagosAdmin> {
+export interface OpcionesListarPagosAdmin {
+  limite?: number;
+  offset?: number;
+}
+
+export async function listarPagosAdmin(cliente: Cliente, opciones?: OpcionesListarPagosAdmin): Promise<DatosPagosAdmin> {
   await assertAdminPermission(cliente, "pagos:leer");
+  const limite = Math.min(Math.max(opciones?.limite ?? 50, 1), 500);
+  const offset = Math.max(opciones?.offset ?? 0, 0);
+  const hasta = offset + limite - 1;
+
   const [pagos, pasaportes, payouts, datosBancarios, conductores] = await Promise.all([
-    cliente.from("pagos").select("*").order("registrado_en", { ascending: false }),
-    cliente.from("pasaporte_digital").select("*").order("creado_en", { ascending: false }),
-    cliente.from("payouts_conductor").select("*").order("periodo_inicio", { ascending: false }),
-    cliente.from("datos_bancarios_conductor").select("*").order("actualizado_en", { ascending: false }),
-    cliente.from("conductores").select("*").order("creado_en", { ascending: false })
+    cliente.from("pagos").select("*").order("registrado_en", { ascending: false }).range(offset, hasta),
+    cliente.from("pasaporte_digital").select("*").order("creado_en", { ascending: false }).range(offset, hasta),
+    cliente.from("payouts_conductor").select("*").order("periodo_inicio", { ascending: false }).range(offset, hasta),
+    cliente.from("datos_bancarios_conductor").select("*").order("actualizado_en", { ascending: false }).range(offset, hasta),
+    cliente.from("conductores").select("*").order("creado_en", { ascending: false }).range(offset, hasta)
   ]);
 
   for (const resultado of [pagos, pasaportes, payouts, datosBancarios, conductores]) {

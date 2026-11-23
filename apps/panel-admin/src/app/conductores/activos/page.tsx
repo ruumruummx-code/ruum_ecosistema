@@ -27,14 +27,14 @@ const ETIQUETA_ESTADO: Record<EstadoConductor, string> = {
 };
 
 const ESTADO_CLASE: Record<EstadoConductor, string> = {
-  pendiente_verificacion: "bg-status-warning/20 text-status-warning border-status-warning/30",
-  activo: "bg-status-success/20 text-status-success border-status-success/30",
-  suspendido_7d: "bg-status-error/20 text-status-error border-status-error/30",
-  suspendido_14d: "bg-status-error/20 text-status-error border-status-error/30",
-  suspendido_30d: "bg-status-error/20 text-status-error border-status-error/30",
-  suspendido_indefinido: "bg-status-error/20 text-status-error border-status-error/30",
-  bloqueado_permanente: "bg-ink/10 text-text-tertiary border-ink/20",
-  modo_prueba_supervisada: "bg-status-warning/20 text-status-warning border-status-warning/30"
+  pendiente_verificacion: "bg-ui-warning/20 text-ui-warning border-ui-warning/30",
+  activo: "bg-ui-success/20 text-ui-success border-ui-success/30",
+  suspendido_7d: "bg-ui-danger/20 text-ui-danger border-ui-danger/30",
+  suspendido_14d: "bg-ui-danger/20 text-ui-danger border-ui-danger/30",
+  suspendido_30d: "bg-ui-danger/20 text-ui-danger border-ui-danger/30",
+  suspendido_indefinido: "bg-ui-danger/20 text-ui-danger border-ui-danger/30",
+  bloqueado_permanente: "bg-ui-muted text-ui-fg-muted border-ui-line-strong",
+  modo_prueba_supervisada: "bg-ui-warning/20 text-ui-warning border-ui-warning/30"
 };
 
 export default function PaginaConductoresActivos() {
@@ -101,7 +101,7 @@ export default function PaginaConductoresActivos() {
         estadoConexion={conductores.length > 0 ? "datos_en_vivo" : "sin_conexion"}
         contadorResultados={conductores.length}
         accion={(
-          <Link href="/conductores/activos/nuevo" className="rounded-lg border border-ink/20 bg-surface-primary px-4 py-2 font-body text-sm font-medium hover:bg-ink/5">
+          <Link href="/conductores/activos/nuevo" className="rounded-lg border border-ui-line-strong bg-ui-card px-4 py-2 font-body text-sm font-medium hover:bg-ui-muted">
             Nuevo conductor
           </Link>
         )}
@@ -115,12 +115,12 @@ export default function PaginaConductoresActivos() {
           value={busqueda}
           onChange={(e) => { setBusqueda(e.target.value); setPagina(1); }}
           placeholder="Buscar por nombre, CURP, licencia, teléfono…"
-          className="flex-1 min-w-[250px] rounded-lg border border-ink/20 bg-surface-primary px-3.5 py-2.5 font-body text-sm text-ink placeholder:text-text-tertiary focus:border-focus-default focus:outline-none focus:ring-2 focus:ring-focus-default/20"
+          className="flex-1 min-w-[250px] rounded-lg border border-ui-line-strong bg-ui-card px-3.5 py-2.5 font-body text-sm text-ui-fg placeholder:text-ui-fg-muted focus:border-ui-focus focus:outline-none focus:ring-2 focus:ring-ui-ring"
         />
         <select
           value={estadoFiltro}
           onChange={(e) => { setEstadoFiltro(e.target.value as "todos" | EstadoConductor); setPagina(1); }}
-          className="rounded-lg border border-ink/20 bg-surface-primary px-3 py-2 font-body text-sm focus:border-focus-default focus:outline-none focus:ring-2 focus:ring-focus-default/20"
+          className="rounded-lg border border-ui-line-strong bg-ui-card px-3 py-2 font-body text-sm focus:border-ui-focus focus:outline-none focus:ring-2 focus:ring-ui-ring"
         >
           <option value="todos">Todos los estados</option>
           <option value="activo">Activo</option>
@@ -133,10 +133,10 @@ export default function PaginaConductoresActivos() {
         </select>
       </div>
 
-      <div className="mt-4 overflow-hidden rounded-card border border-ink/10 bg-surface-primary">
+      <div className="mt-4 overflow-hidden rounded-lg border border-ui-line bg-ui-card">
         <table className="w-full font-body text-sm">
           <thead>
-            <tr className="border-b border-ink/10 text-left text-xs uppercase tracking-wide text-text-tertiary">
+            <tr className="border-b border-ui-line text-left text-xs uppercase tracking-wide text-ui-fg-muted">
               <th className="px-4 py-3">Conductor</th>
               <th className="px-4 py-3">CURP</th>
               <th className="px-4 py-3">Licencia</th>
@@ -148,27 +148,27 @@ export default function PaginaConductoresActivos() {
           <tbody>
             {cargando ? (
               <tr>
-                <td colSpan={6} className="px-4 py-8 text-center text-text-tertiary">Cargando…</td>
+                <td colSpan={6} className="px-4 py-8 text-center text-ui-fg-muted">Cargando…</td>
               </tr>
             ) : conductores.length === 0 ? (
               <tr>
-                <td colSpan={6} className="px-4 py-8 text-center text-text-tertiary">Sin conductores.</td>
+                <td colSpan={6} className="px-4 py-8 text-center text-ui-fg-muted">Sin conductores.</td>
               </tr>
             ) : (
               conductores.map((c) => (
-                <tr key={c.id} className="border-b border-ink/5 last:border-0">
+                <tr key={c.id} className="border-b border-ui-line last:border-0">
                   <td className="px-4 py-3 font-medium">
-                    {c.nombre ?? <span className="text-text-tertiary">Sin nombre</span>}
+                    {c.nombre ?? <span className="text-ui-fg-muted">Sin nombre</span>}
                   </td>
                   <td className="px-4 py-3 font-mono-ruum text-xs">{c.curp ?? "—"}</td>
                   <td className="px-4 py-3 font-mono-ruum text-xs">{c.licencia_numero ?? "—"}</td>
-                  <td className="px-4 py-3 text-text-secondary">{c.telefono ?? "—"}</td>
+                  <td className="px-4 py-3 text-ui-fg-muted">{c.telefono ?? "—"}</td>
                   <td className="px-4 py-3">
                     <span className={`rounded-full border px-2 py-1 font-body text-xs font-medium ${ESTADO_CLASE[c.estado]}`}>
                       {ETIQUETA_ESTADO[c.estado]}
                     </span>
                   </td>
-                  <td className="px-4 py-3 text-text-secondary">{new Date(c.creado_en).toLocaleDateString("es-MX")}</td>
+                  <td className="px-4 py-3 text-ui-fg-muted">{new Date(c.creado_en).toLocaleDateString("es-MX")}</td>
                 </tr>
               ))
             )}
@@ -177,13 +177,13 @@ export default function PaginaConductoresActivos() {
       </div>
 
       {totalPaginas > 1 && (
-        <div className="mt-4 flex items-center justify-between font-body text-sm text-text-secondary">
+        <div className="mt-4 flex items-center justify-between font-body text-sm text-ui-fg-muted">
           <span>{total} resultado{total !== 1 ? "s" : ""}</span>
           <div className="flex items-center gap-3">
             <span>Página {pagina} de {totalPaginas}</span>
             <div className="flex gap-1">
-              <button onClick={() => irPagina(pagina - 1)} disabled={pagina <= 1} className="rounded-md border border-ink/20 px-3 py-1.5 text-xs disabled:opacity-30">&larr; Anterior</button>
-              <button onClick={() => irPagina(pagina + 1)} disabled={pagina >= totalPaginas} className="rounded-md border border-ink/20 px-3 py-1.5 text-xs disabled:opacity-30">Siguiente &rarr;</button>
+              <button onClick={() => irPagina(pagina - 1)} disabled={pagina <= 1} className="rounded-md border border-ui-line-strong px-3 py-1.5 text-xs disabled:opacity-30">&larr; Anterior</button>
+              <button onClick={() => irPagina(pagina + 1)} disabled={pagina >= totalPaginas} className="rounded-md border border-ui-line-strong px-3 py-1.5 text-xs disabled:opacity-30">Siguiente &rarr;</button>
             </div>
           </div>
         </div>

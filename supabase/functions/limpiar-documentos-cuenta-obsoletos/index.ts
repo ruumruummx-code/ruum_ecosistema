@@ -2,6 +2,7 @@
 /// <reference lib="dom" />
 
 import { createClient } from "npm:@supabase/supabase-js@2";
+import { timingSafeEqual } from "../_shared/timing-safe.ts";
 
 const LIMITE_RECLAMO_LIMPIEZA = 25;
 
@@ -37,10 +38,11 @@ Deno.serve(async (req) => {
   }
 
   const authHeader = req.headers.get("Authorization") ?? "";
+  const secretHeader = req.headers.get("x-cleanup-secret") ?? "";
   const esAutorizado =
-    authHeader === `Bearer ${serviceKey}` ||
-    authHeader === `Bearer ${cleanupSecret}` ||
-    req.headers.get("x-cleanup-secret") === cleanupSecret;
+    timingSafeEqual(authHeader, `Bearer ${serviceKey}`) ||
+    timingSafeEqual(authHeader, `Bearer ${cleanupSecret}`) ||
+    timingSafeEqual(secretHeader, cleanupSecret);
 
   if (!esAutorizado) {
     console.warn("limpiar-documentos-cuenta-obsoletos: intento no autorizado bloqueado (fail-closed)");

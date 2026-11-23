@@ -15,44 +15,33 @@ import {
   PISO_COBRO_MXN,
   validarRangoMontoCobro
 } from "./logica.ts";
+import { construirCabecerasCors, manejarCors } from "../_shared/cors-documentos.ts";
 
-const CABECERAS_CORS = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, apikey, content-type, x-client-info",
-  "Access-Control-Allow-Methods": "POST, OPTIONS"
-};
-
-function respuestaJson(body: Record<string, unknown>, status = 200) {
+function respuestaJson(body: Record<string, unknown>, status = 200, req?: Request) {
   return new Response(JSON.stringify(body), {
     status,
-    headers: { ...CABECERAS_CORS, "Content-Type": "application/json" }
+    headers: { ...construirCabecerasCors(req), "Content-Type": "application/json" }
   });
 }
 
 /** Error interno: el detalle va al log con un id de traza, nunca al cliente. */
-function errorInterno(traza: string, codigo: string, detalle: unknown, mensaje = "No pudimos iniciar el pago. Intenta de nuevo.") {
+function errorInterno(traza: string, codigo: string, detalle: unknown, mensaje = "No pudimos iniciar el pago. Intenta de nuevo.", req?: Request) {
   console.error("crear_payment_intent_error", {
     traza,
     codigo,
     detalle: detalle instanceof Error ? detalle.message.slice(0, 200) : (detalle as { code?: string } | null)?.code ?? null
   });
-  return respuestaJson({ error: mensaje, traza }, 500);
+  return respuestaJson({ error: mensaje, traza }, 500, req);
 }
 
 Deno.serve(async (req) => {
-  if (req.method === "OPTIONS") {
-    return new Response(null, {
-      headers: {
-        ...CABECERAS_CORS,
-        "Access-Control-Allow-Headers": req.headers.get("Access-Control-Request-Headers") ?? CABECERAS_CORS["Access-Control-Allow-Headers"]
-      }
-    });
-  }
+  const rechazoCors = manejarCors(req);
+  if (rechazoCors) return rechazoCors;
 
   const traza = crypto.randomUUID();
   const autorizacion = req.headers.get("Authorization");
   if (!autorizacion) {
-    return respuestaJson({ error: "Falta sesión" }, 401);
+    return respuestaJson({ error: "Falta sesión" }, 401, req);
   }
 
   const stripeSecretKey = Deno.env.get("STRIPE_SECRET_KEY");

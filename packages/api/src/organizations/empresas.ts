@@ -62,23 +62,33 @@ export interface ResultadoAltaEmpresaCorporativa {
 const RFC_MEXICO_FORMAL = /^([A-Z&Ñ]{3}|[A-Z&Ñ]{4})\d{2}(0[1-9]|1[0-2])(0[1-9]|[12]\d|3[01])[A-Z0-9]{3}$/;
 const CORREO_BASICO = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-export async function listarEmpresasAdmin(cliente: Cliente): Promise<DatosEmpresasAdmin> {
+export interface OpcionesListarEmpresasAdmin {
+  limite?: number;
+  offset?: number;
+}
+
+export async function listarEmpresasAdmin(cliente: Cliente, opciones?: OpcionesListarEmpresasAdmin): Promise<DatosEmpresasAdmin> {
   await assertAdminPermission(cliente, "empresas:leer");
+  const limite = Math.min(Math.max(opciones?.limite ?? 50, 1), 500);
+  const offset = Math.max(opciones?.offset ?? 0, 0);
+  const hasta = offset + limite - 1;
+
   const [empresas, usuarios, traslados, vehiculos, conductores, documentos, versionesFiscales, versionesCondiciones, cambiosSensibles] = await Promise.all([
-    cliente.from("empresas").select("*").order("creado_en", { ascending: false }),
+    cliente.from("empresas").select("*").order("creado_en", { ascending: false }).range(offset, hasta),
     cliente
       .from("usuarios")
       .select("*")
       .not("empresa_id", "is", null)
       .in("rol", ["titular_empresa", "usuario_autorizado"])
-      .order("creado_en", { ascending: false }),
-    cliente.from("traslados").select("*").order("creado_en", { ascending: false }),
-    cliente.from("vehiculos").select("*").not("empresa_id", "is", null).order("creado_en", { ascending: false }),
-    cliente.from("conductores").select("*").not("empresa_id", "is", null).order("creado_en", { ascending: false }),
-    cliente.from("empresas_documentos").select("*").order("creado_en", { ascending: false }),
-    cliente.from("empresas_datos_fiscales_versiones").select("*").order("version", { ascending: false }),
-    cliente.from("empresas_condiciones_comerciales_versiones").select("*").order("version", { ascending: false }),
-    cliente.from("empresas_cambios_sensibles").select("*").order("solicitado_en", { ascending: false })
+      .order("creado_en", { ascending: false })
+      .range(offset, hasta),
+    cliente.from("traslados").select("*").order("creado_en", { ascending: false }).range(offset, hasta),
+    cliente.from("vehiculos").select("*").not("empresa_id", "is", null).order("creado_en", { ascending: false }).range(offset, hasta),
+    cliente.from("conductores").select("*").not("empresa_id", "is", null).order("creado_en", { ascending: false }).range(offset, hasta),
+    cliente.from("empresas_documentos").select("*").order("creado_en", { ascending: false }).range(offset, hasta),
+    cliente.from("empresas_datos_fiscales_versiones").select("*").order("version", { ascending: false }).range(offset, hasta),
+    cliente.from("empresas_condiciones_comerciales_versiones").select("*").order("version", { ascending: false }).range(offset, hasta),
+    cliente.from("empresas_cambios_sensibles").select("*").order("solicitado_en", { ascending: false }).range(offset, hasta)
   ]);
 
   for (const resultado of [empresas, usuarios, traslados]) {

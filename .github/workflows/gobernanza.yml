@@ -1,0 +1,43 @@
+name: Gobernanza y Calidad
+on:
+  pull_request:
+  push:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  gobernanza:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - name: Cache Turbo
+        uses: actions/cache@v4
+        with:
+          path: .turbo
+          key: ${{ runner.os }}-turbo-gobernanza-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-turbo-gobernanza-
+      - name: Verificar instalación limpia y engines
+        run: pnpm ci:clean
+      - name: Instalar dependencias
+        run: pnpm install --frozen-lockfile
+      - name: Validar configuración de entorno
+        run: pnpm validate:env
+      - name: Validar migraciones declarativas y convenciones
+        run: pnpm check:migrations
+      - name: Validar conversiones RPC (RPC Casts)
+        run: pnpm check:rpc-casts
+      - name: Auditar dependencias
+        run: pnpm audit:deps
+      - name: Comprobar fronteras arquitectónicas (@ruum/api)
+        run: pnpm check:fronteras
+      - name: Escanear secretos en código
+        run: pnpm scan:secrets
+      - name: Validar paridad y estilos de diseño
+        run: pnpm check:estilos

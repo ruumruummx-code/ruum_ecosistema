@@ -131,17 +131,17 @@ export default function PaginaAuditoria() {
       />
 
       <section className="mt-6 grid gap-3 sm:grid-cols-3" aria-label="Resumen de auditoría">
-        <div className="rounded-card border border-border-default bg-surface-primary p-4">
-          <p className="font-body text-xs uppercase tracking-wide text-text-tertiary">Eventos totales</p>
-          <p className="mt-1 font-display text-2xl font-semibold text-ink">{paginas.total}</p>
+        <div className="rounded-lg border border-ui-line bg-ui-card p-4">
+          <p className="font-body text-xs uppercase tracking-wide text-ui-fg-muted">Eventos totales</p>
+          <p className="mt-1 font-display text-2xl font-semibold text-ui-fg">{paginas.total}</p>
         </div>
-        <div className="rounded-card border border-border-default bg-surface-primary p-4">
-          <p className="font-body text-xs uppercase tracking-wide text-text-tertiary">Denegaciones</p>
-          <p className="mt-1 font-display text-2xl font-semibold text-status-error">{denegados}</p>
+        <div className="rounded-lg border border-ui-line bg-ui-card p-4">
+          <p className="font-body text-xs uppercase tracking-wide text-ui-fg-muted">Denegaciones</p>
+          <p className="mt-1 font-display text-2xl font-semibold text-ui-danger">{denegados}</p>
         </div>
-        <div className="rounded-card border border-border-default bg-surface-primary p-4">
-          <p className="font-body text-xs uppercase tracking-wide text-text-tertiary">Mutaciones</p>
-          <p className="mt-1 font-display text-2xl font-semibold text-status-warning">{mutaciones}</p>
+        <div className="rounded-lg border border-ui-line bg-ui-card p-4">
+          <p className="font-body text-xs uppercase tracking-wide text-ui-fg-muted">Mutaciones</p>
+          <p className="mt-1 font-display text-2xl font-semibold text-ui-warning">{mutaciones}</p>
         </div>
       </section>
 
@@ -169,38 +169,38 @@ export default function PaginaAuditoria() {
       </section>
 
       <section className="mt-6">
-        <h2 className="font-display text-lg font-semibold text-ink">Eventos</h2>
+        <h2 className="font-display text-lg font-semibold text-ui-fg">Eventos</h2>
         {eventos.length === 0 ? (
           <div className="mt-3">
             <AdminEmptyState title="Sin eventos" description="No hay eventos que coincidan con los filtros seleccionados." />
           </div>
         ) : (
           <>
-            <div className="mt-3 overflow-x-auto rounded-card border border-border-default">
+            <div className="mt-3 overflow-x-auto rounded-lg border border-ui-line">
               <table className="w-full min-w-[700px] border-separate border-spacing-0 font-body text-sm">
                 <caption className="sr-only">Eventos administrativos</caption>
                 <thead>
                   <tr>
                     {["Fecha", "Tipo", "Recurso", "Acción", "Rol / motivo", "Datos"].map((col) => (
-                      <th key={col} className="border-b border-ink/10 px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-text-tertiary">{col}</th>
+                      <th key={col} className="border-b border-ui-line px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-ui-fg-muted">{col}</th>
                     ))}
                   </tr>
                 </thead>
                 <tbody>
                   {eventos.map((e) => (
-                    <tr key={e.id} className="border-b border-ink/10 last:border-b-0 hover:bg-ink/[0.02]">
-                      <td className="whitespace-nowrap px-4 py-3 text-text-secondary">{fecha(e.creado_en)}</td>
+                    <tr key={e.id} className="border-b border-ui-line last:border-b-0 hover:bg-ui-brand-hover/[0.02]">
+                      <td className="whitespace-nowrap px-4 py-3 text-ui-fg-muted">{fecha(e.creado_en)}</td>
                       <td className="px-4 py-3">
                         <AdminBadge tone={e.tipo.includes("denegado") ? "danger" : e.tipo === "mutacion" ? "warning" : "neutral"}>{e.tipo}</AdminBadge>
                       </td>
-                      <td className="px-4 py-3 font-medium text-ink">{e.recurso}</td>
-                      <td className="px-4 py-3 text-text-secondary">{e.accion ?? "—"}</td>
-                      <td className="px-4 py-3 text-text-secondary">{e.rol ?? "—"}{e.motivo ? ` · ${e.motivo}` : ""}</td>
+                      <td className="px-4 py-3 font-medium text-ui-fg">{e.recurso}</td>
+                      <td className="px-4 py-3 text-ui-fg-muted">{e.accion ?? "—"}</td>
+                      <td className="px-4 py-3 text-ui-fg-muted">{e.rol ?? "—"}{e.motivo ? ` · ${e.motivo}` : ""}</td>
                       <td className="px-4 py-3">
                         {e.datos && JSON.stringify(e.datos) !== "{}" ? (
                           <details>
-                            <summary className="cursor-pointer font-body text-xs font-semibold text-status-info hover:underline">Ver</summary>
-                            <pre className="mt-1 max-h-24 overflow-auto rounded bg-ink/[0.04] p-2 font-mono-ruum text-admin-secundario text-text-secondary">{JSON.stringify(sanitizarDatosVisibles(e.datos), null, 2)}</pre>
+                            <summary className="cursor-pointer font-body text-xs font-semibold text-ui-brand-soft-fg hover:underline">Ver</summary>
+                            <pre className="mt-1 max-h-24 overflow-auto rounded bg-ui-brand/[0.04] p-2 font-mono-ruum text-xs text-ui-fg-muted">{JSON.stringify(sanitizarDatosVisibles(e.datos), null, 2)}</pre>
                           </details>
                         ) : "—"}
                       </td>
@@ -210,19 +210,19 @@ export default function PaginaAuditoria() {
               </table>
             </div>
             <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
-              <p className="font-body text-sm text-text-tertiary">
+              <p className="font-body text-sm text-ui-fg-muted">
                 Página {paginas.page} de {paginas.totalPages} ({paginas.total} eventos)
               </p>
               <div className="flex gap-2">
                 <button
-                  className="inline-flex min-h-12 min-w-12 items-center justify-center gap-2 rounded-xl px-5 py-3 font-display text-sm font-bold leading-5 transition-[background-color,border-color,box-shadow,transform] duration-150 border border-border-strong bg-surface text-text-primary shadow-sm hover:-translate-y-0.5 hover:border-route-action hover:bg-surface-elevated hover:shadow-md active:translate-y-0 active:bg-surface-elevated focus-visible:outline-route-action disabled:cursor-not-allowed disabled:transform-none disabled:border-border disabled:bg-surface-elevated disabled:text-disabled disabled:shadow-none"
+                  className="inline-flex min-h-12 min-w-12 items-center justify-center gap-2 rounded-xl px-5 py-3 font-display text-sm font-bold leading-5 transition-[background-color,border-color,box-shadow,transform] duration-150 border border-ui-line-strong bg-ui-card text-ui-fg shadow-sm hover:-translate-y-0.5 hover:border-ui-brand hover:bg-ui-muted hover:shadow-md active:translate-y-0 active:bg-ui-muted focus-visible:outline-ui-focus disabled:cursor-not-allowed disabled:transform-none disabled:border-ui-line disabled:bg-ui-muted disabled:text-ui-fg-muted disabled:shadow-none"
                   disabled={pagina <= 1}
                   onClick={() => setPagina((p) => Math.max(1, p - 1))}
                 >
                   Anterior
                 </button>
                 <button
-                  className="inline-flex min-h-12 min-w-12 items-center justify-center gap-2 rounded-xl px-5 py-3 font-display text-sm font-bold leading-5 transition-[background-color,border-color,box-shadow,transform] duration-150 border border-border-strong bg-surface text-text-primary shadow-sm hover:-translate-y-0.5 hover:border-route-action hover:bg-surface-elevated hover:shadow-md active:translate-y-0 active:bg-surface-elevated focus-visible:outline-route-action disabled:cursor-not-allowed disabled:transform-none disabled:border-border disabled:bg-surface-elevated disabled:text-disabled disabled:shadow-none"
+                  className="inline-flex min-h-12 min-w-12 items-center justify-center gap-2 rounded-xl px-5 py-3 font-display text-sm font-bold leading-5 transition-[background-color,border-color,box-shadow,transform] duration-150 border border-ui-line-strong bg-ui-card text-ui-fg shadow-sm hover:-translate-y-0.5 hover:border-ui-brand hover:bg-ui-muted hover:shadow-md active:translate-y-0 active:bg-ui-muted focus-visible:outline-ui-focus disabled:cursor-not-allowed disabled:transform-none disabled:border-ui-line disabled:bg-ui-muted disabled:text-ui-fg-muted disabled:shadow-none"
                   disabled={pagina >= paginas.totalPages}
                   onClick={() => setPagina((p) => p + 1)}
                 >
@@ -235,33 +235,33 @@ export default function PaginaAuditoria() {
       </section>
 
       <section className="mt-8">
-        <h2 className="font-display text-lg font-semibold text-ink">Exportaciones</h2>
+        <h2 className="font-display text-lg font-semibold text-ui-fg">Exportaciones</h2>
         {exportaciones.length === 0 ? (
           <div className="mt-3">
             <AdminEmptyState title="Sin exportaciones" description="No hay exportaciones administrativas registradas." />
           </div>
         ) : (
-          <div className="mt-3 overflow-x-auto rounded-card border border-border-default">
+          <div className="mt-3 overflow-x-auto rounded-lg border border-ui-line">
             <table className="w-full min-w-[600px] border-separate border-spacing-0 font-body text-sm">
               <caption className="sr-only">Exportaciones administrativas</caption>
               <thead>
                 <tr>
                   {["Fecha", "Recurso", "Formato", "Filas", "Estado", "Huella"].map((col) => (
-                    <th key={col} className="border-b border-ink/10 px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-text-tertiary">{col}</th>
+                    <th key={col} className="border-b border-ui-line px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-ui-fg-muted">{col}</th>
                   ))}
                 </tr>
               </thead>
               <tbody>
                 {exportaciones.map((e) => (
-                  <tr key={e.id} className="border-b border-ink/10 last:border-b-0 hover:bg-ink/[0.02]">
-                    <td className="whitespace-nowrap px-4 py-3 text-text-secondary">{fecha(e.creada_en)}</td>
-                    <td className="px-4 py-3 font-medium text-ink">{e.recurso}</td>
+                  <tr key={e.id} className="border-b border-ui-line last:border-b-0 hover:bg-ui-brand-hover/[0.02]">
+                    <td className="whitespace-nowrap px-4 py-3 text-ui-fg-muted">{fecha(e.creada_en)}</td>
+                    <td className="px-4 py-3 font-medium text-ui-fg">{e.recurso}</td>
                     <td className="px-4 py-3">
                       <AdminBadge>{e.formato}</AdminBadge>
                     </td>
-                    <td className="px-4 py-3 font-mono-ruum text-text-secondary">{e.filas.toLocaleString("es-MX")}</td>
+                    <td className="px-4 py-3 font-mono-ruum text-ui-fg-muted">{e.filas.toLocaleString("es-MX")}</td>
                     <td className="px-4 py-3"><AdminBadge tone={e.estado === "completado" ? "success" : e.estado === "error" ? "danger" : "warning"}>{e.estado}</AdminBadge></td>
-                    <td className="max-w-[120px] truncate px-4 py-3 font-mono-ruum text-admin-secundario text-text-tertiary">{e.hash_sha256?.slice(0, 16) ?? "—"}</td>
+                    <td className="max-w-[120px] truncate px-4 py-3 font-mono-ruum text-xs text-ui-fg-muted">{e.hash_sha256?.slice(0, 16) ?? "—"}</td>
                   </tr>
                 ))}
               </tbody>

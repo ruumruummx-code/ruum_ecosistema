@@ -16,21 +16,6 @@
     "paths": {
       "@/*": [
         "./src/*"
-      ],
-      // FIX C2 (ticket arquitectura Fase 4): SIN mapeos físicos a
-      // ../../packages/api/src/*. La app solo importa por los puntos de
-      // entrada públicos (@ruum/api/services, /transfers, /supabase, …),
-      // resueltos vía `exports` de packages/api/package.json a través del
-      // symlink del workspace. Así un refactor interno del paquete no rompe
-      // a las apps en silencio.
-      "@ruum/shared": [
-        "../../packages/shared/src/index.ts"
-      ],
-      "@ruum/shared/*": [
-        "../../packages/shared/src/*/index.ts"
-      ],
-      "@ruum/ui": [
-        "../../packages/ui/src/components/index.ts"
       ]
     },
     "allowJs": true,

@@ -412,7 +412,7 @@ export default function PaginaDetalleViajeAdmin() {
         <AdminEmptyState
           title="No encontramos ese traslado"
           description="El traslado que buscas no existe o no está disponible."
-          action={<Link href="/viajes" className="admin-button-primary inline-flex min-h-10 items-center justify-center rounded-lg bg-signal px-4 py-2 font-body text-admin-boton font-semibold text-ink">← Volver a traslados</Link>}
+          action={<Link href="/viajes" className="inline-flex min-h-10 items-center justify-center rounded-lg bg-ui-brand px-4 py-2 font-body text-sm font-semibold text-ui-fg">← Volver a traslados</Link>}
         />
       </main>
     );
@@ -424,7 +424,7 @@ export default function PaginaDetalleViajeAdmin() {
         <AdminErrorState
           title="No pudimos cargar el estado del traslado"
           description="El registro no incluye folio o estado operativo suficiente para administrarlo."
-          action={<Link href="/viajes" className="admin-button-primary inline-flex min-h-10 items-center justify-center rounded-lg bg-signal px-4 py-2 font-body text-admin-boton font-semibold text-ink">← Volver a traslados</Link>}
+          action={<Link href="/viajes" className="inline-flex min-h-10 items-center justify-center rounded-lg bg-ui-brand px-4 py-2 font-body text-sm font-semibold text-ui-fg">← Volver a traslados</Link>}
         />
       </main>
     );
@@ -449,8 +449,8 @@ export default function PaginaDetalleViajeAdmin() {
         accion={
           <>
             <EstadoBadge estado={pasaporte.estado} />
-            <Link href={`/viajes/${pasaporte.traslado_id}/custodia`} className="admin-button-primary inline-flex min-h-10 items-center justify-center rounded-lg bg-signal px-4 py-2 font-body text-admin-boton font-semibold text-ink">Cadena de custodia</Link>
-            <Link href={`/viajes/${pasaporte.traslado_id}/tracking`} className="admin-button-primary inline-flex min-h-10 items-center justify-center rounded-lg bg-signal px-4 py-2 font-body text-admin-boton font-semibold text-ink">Tracking GPS</Link>
+            <Link href={`/viajes/${pasaporte.traslado_id}/custodia`} className="inline-flex min-h-10 items-center justify-center rounded-lg bg-ui-brand px-4 py-2 font-body text-sm font-semibold text-ui-fg">Cadena de custodia</Link>
+            <Link href={`/viajes/${pasaporte.traslado_id}/tracking`} className="inline-flex min-h-10 items-center justify-center rounded-lg bg-ui-brand px-4 py-2 font-body text-sm font-semibold text-ui-fg">Tracking GPS</Link>
           </>
         }
       />
@@ -479,34 +479,34 @@ export default function PaginaDetalleViajeAdmin() {
           <PassportCard>
             <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
               <div>
-                <p className="font-body text-xs uppercase tracking-wide text-text-tertiary">Origen corporativo</p>
-                <h2 className="mt-1 font-display text-lg font-semibold text-ink">Carga masiva</h2>
-                <p className="mt-1 font-body text-sm text-text-secondary">
+                <p className="font-body text-xs uppercase tracking-wide text-ui-fg-muted">Origen corporativo</p>
+                <h2 className="mt-1 font-display text-lg font-semibold text-ui-fg">Carga masiva</h2>
+                <p className="mt-1 font-body text-sm text-ui-fg-muted">
                   Archivo {trazabilidadMasiva.carga.nombre_archivo} · fila {trazabilidadMasiva.fila.numero_fila}
                 </p>
               </div>
-              <span className="w-fit rounded-full border border-route-dark/25 bg-route-soft px-3 py-1.5 font-body text-xs font-semibold text-route-dark">
+              <span className="w-fit rounded-full border border-ui-brand/25 bg-ui-brand-soft px-3 py-1.5 font-body text-xs font-semibold text-ui-brand">
                 Corporativo
               </span>
             </div>
             <dl className="mt-4 grid gap-3 font-body text-sm sm:grid-cols-2">
               <div>
-                <dt className="text-text-tertiary">Referencia externa</dt>
-                <dd className="mt-1 font-mono-ruum text-xs text-ink">{trazabilidadMasiva.fila.referencia_externa ?? "Sin referencia"}</dd>
+                <dt className="text-ui-fg-muted">Referencia externa</dt>
+                <dd className="mt-1 font-mono-ruum text-xs text-ui-fg">{trazabilidadMasiva.fila.referencia_externa ?? "Sin referencia"}</dd>
               </div>
               <div>
-                <dt className="text-text-tertiary">Lote</dt>
-                <dd className="mt-1 font-mono-ruum text-xs text-ink">{trazabilidadMasiva.carga.id.slice(0, 8).toUpperCase()}</dd>
+                <dt className="text-ui-fg-muted">Lote</dt>
+                <dd className="mt-1 font-mono-ruum text-xs text-ui-fg">{trazabilidadMasiva.carga.id.slice(0, 8).toUpperCase()}</dd>
               </div>
               <div>
-                <dt className="text-text-tertiary">Resultado del lote</dt>
-                <dd className="mt-1 text-ink">
+                <dt className="text-ui-fg-muted">Resultado del lote</dt>
+                <dd className="mt-1 text-ui-fg">
                   {trazabilidadMasiva.carga.filas_creadas} creadas · {trazabilidadMasiva.carga.filas_error} error
                 </dd>
               </div>
               <div>
-                <dt className="text-text-tertiary">Procesado</dt>
-                <dd className="mt-1 text-ink">{fechaAdministrativa(trazabilidadMasiva.carga.creado_en)}</dd>
+                <dt className="text-ui-fg-muted">Procesado</dt>
+                <dd className="mt-1 text-ui-fg">{fechaAdministrativa(trazabilidadMasiva.carga.creado_en)}</dd>
               </div>
             </dl>
           </PassportCard>
@@ -516,76 +516,76 @@ export default function PaginaDetalleViajeAdmin() {
       <div className="mt-8 grid grid-cols-1 gap-6 xl:grid-cols-2">
         {/* Bloque 1 — Resumen + Bloque 2 — Vehículo */}
         <PassportCard>
-          <p className="font-body text-xs uppercase tracking-wide text-text-tertiary">Resumen</p>
+          <p className="font-body text-xs uppercase tracking-wide text-ui-fg-muted">Resumen</p>
           <dl className="mt-3 space-y-2 font-body text-sm">
             <div className="flex justify-between">
-              <dt className="text-text-tertiary">Tipo de servicio</dt>
+              <dt className="text-ui-fg-muted">Tipo de servicio</dt>
               <dd className="capitalize">{pasaporte.tipo_pago?.replaceAll("_", " ") ?? "—"}</dd>
             </div>
             <div className="flex justify-between">
-              <dt className="text-text-tertiary">Creado</dt>
+              <dt className="text-ui-fg-muted">Creado</dt>
               <dd>{fechaAdministrativa(pasaporte.creado_en)}</dd>
             </div>
             <div className="flex justify-between">
-              <dt className="text-text-tertiary">Conductor</dt>
+              <dt className="text-ui-fg-muted">Conductor</dt>
               <dd>{pasaporte.conductor_nombre ?? "Sin asignar"}</dd>
             </div>
           </dl>
         </PassportCard>
 
         <PassportCard>
-          <p className="font-body text-xs uppercase tracking-wide text-text-tertiary">Finanzas</p>
+          <p className="font-body text-xs uppercase tracking-wide text-ui-fg-muted">Finanzas</p>
           {finanzas ? (
             <dl className="mt-3 space-y-2 font-body text-sm">
               <div className="flex justify-between">
-                <dt className="text-text-tertiary">Precio operativo</dt>
+                <dt className="text-ui-fg-muted">Precio operativo</dt>
                 <dd>{dinero(finanzas.precioOperativo)}</dd>
               </div>
               <div className="flex justify-between">
-                <dt className="text-text-tertiary">Pagos cobrados</dt>
+                <dt className="text-ui-fg-muted">Pagos cobrados</dt>
                 <dd>{dinero(finanzas.ingresosCobrados)}</dd>
               </div>
               <div className="flex justify-between">
-                <dt className="text-text-tertiary">Gastos</dt>
+                <dt className="text-ui-fg-muted">Gastos</dt>
                 <dd>{dinero(finanzas.gastosOperativos)}</dd>
               </div>
               <div className="flex justify-between">
-                <dt className="text-text-tertiary">Pago conductor</dt>
+                <dt className="text-ui-fg-muted">Pago conductor</dt>
                 <dd>{dinero(finanzas.pagoConductor)}</dd>
               </div>
-              <div className="flex justify-between border-t border-ink/10 pt-2 font-semibold">
+              <div className="flex justify-between border-t border-ui-line pt-2 font-semibold">
                 <dt>Margen estimado</dt>
-                <dd className={finanzas.margenEstimado < 0 ? "text-status-error" : "text-status-success"}>{dinero(finanzas.margenEstimado)}</dd>
+                <dd className={finanzas.margenEstimado < 0 ? "text-ui-danger" : "text-ui-success"}>{dinero(finanzas.margenEstimado)}</dd>
               </div>
               <div className="flex justify-between text-xs">
-                <dt className="text-text-tertiary">Corte</dt>
+                <dt className="text-ui-fg-muted">Corte</dt>
                 <dd>{fechaAdministrativa(finanzas.corteEn)}</dd>
               </div>
             </dl>
           ) : (
-            <p className="mt-3 font-body text-sm text-text-tertiary">Finanzas no disponibles para este rol o entorno.</p>
+            <p className="mt-3 font-body text-sm text-ui-fg-muted">Finanzas no disponibles para este rol o entorno.</p>
           )}
         </PassportCard>
 
         <PassportCard>
-          <p className="font-body text-xs uppercase tracking-wide text-text-tertiary">Vehículo</p>
+          <p className="font-body text-xs uppercase tracking-wide text-ui-fg-muted">Vehículo</p>
           <dl className="mt-3 space-y-2 font-body text-sm">
             <div className="flex justify-between">
-              <dt className="text-text-tertiary">Marca / modelo</dt>
+              <dt className="text-ui-fg-muted">Marca / modelo</dt>
               <dd>
                 {pasaporte.vehiculo_marca} {pasaporte.vehiculo_modelo}
               </dd>
             </div>
             <div className="flex justify-between">
-              <dt className="text-text-tertiary">Año</dt>
+              <dt className="text-ui-fg-muted">Año</dt>
               <dd>{pasaporte.vehiculo_anio}</dd>
             </div>
             <div className="flex justify-between">
-              <dt className="text-text-tertiary">Tipo</dt>
+              <dt className="text-ui-fg-muted">Tipo</dt>
               <dd>{pasaporte.vehiculo_tipo ? ETIQUETA_TIPO_VEHICULO[pasaporte.vehiculo_tipo] : "—"}</dd>
             </div>
             <div className="flex justify-between gap-4">
-              <dt className="text-text-tertiary">Clasificación catálogo</dt>
+              <dt className="text-ui-fg-muted">Clasificación catálogo</dt>
               <dd className="text-right">{clasificacionCatalogo ?? "Sin coincidencia"}</dd>
             </div>
           </dl>
@@ -593,14 +593,14 @@ export default function PaginaDetalleViajeAdmin() {
 
         {/* Bloque 4 — Evidencia */}
         <PassportCard>
-          <p className="font-body text-xs uppercase tracking-wide text-text-tertiary">Evidencia</p>
+          <p className="font-body text-xs uppercase tracking-wide text-ui-fg-muted">Evidencia</p>
           <dl className="mt-3 space-y-2 font-body text-sm">
             <div className="flex justify-between">
-              <dt className="text-text-tertiary">Inicial</dt>
+              <dt className="text-ui-fg-muted">Inicial</dt>
               <dd className="font-mono-ruum">{pasaporte.evidencia_inicial_fotos_sincronizadas} / 5 fotos</dd>
             </div>
             <div className="flex justify-between">
-              <dt className="text-text-tertiary">Final</dt>
+              <dt className="text-ui-fg-muted">Final</dt>
               <dd className="font-mono-ruum">{pasaporte.evidencia_final_fotos_sincronizadas} / 5 fotos</dd>
             </div>
           </dl>
@@ -613,22 +613,22 @@ export default function PaginaDetalleViajeAdmin() {
 
         {/* Bloque 5 — Pagos */}
         <PassportCard>
-          <p className="font-body text-xs uppercase tracking-wide text-text-tertiary">Pagos</p>
+          <p className="font-body text-xs uppercase tracking-wide text-ui-fg-muted">Pagos</p>
           <dl className="mt-3 space-y-2 font-body text-sm">
             <div className="flex justify-between">
-              <dt className="text-text-tertiary">Tarifa cotizada</dt>
+              <dt className="text-ui-fg-muted">Tarifa cotizada</dt>
               <dd className="font-mono-ruum">${pasaporte.precio_cotizado?.toLocaleString("es-MX") ?? "—"}</dd>
             </div>
             <div className="flex justify-between">
-              <dt className="text-text-tertiary">Tarifa final</dt>
+              <dt className="text-ui-fg-muted">Tarifa final</dt>
               <dd className="font-mono-ruum">${pasaporte.precio_final?.toLocaleString("es-MX") ?? "—"}</dd>
             </div>
             <div className="flex justify-between">
-              <dt className="text-text-tertiary">Monto pagado</dt>
+              <dt className="text-ui-fg-muted">Monto pagado</dt>
               <dd className="font-mono-ruum">${pasaporte.monto_pagado?.toLocaleString("es-MX") ?? "0"}</dd>
             </div>
           </dl>
-          <p className="mt-3 font-body text-xs text-text-tertiary">
+          <p className="mt-3 font-body text-xs text-ui-fg-muted">
            Pago al conductor, gastos y margen estimado: pendiente (ver &quot;Pagos&quot; en la barra lateral, próximamente).
          </p>
         </PassportCard>
@@ -637,12 +637,12 @@ export default function PaginaDetalleViajeAdmin() {
       {/* Acciones administrativas */}
       <div className="mt-8 grid grid-cols-1 gap-6 xl:grid-cols-2">
         <PassportCard>
-          <p className="font-body text-xs uppercase tracking-wide text-text-tertiary">Asignar / cambiar conductor</p>
+          <p className="font-body text-xs uppercase tracking-wide text-ui-fg-muted">Asignar / cambiar conductor</p>
           <div className="mt-3 flex gap-2">
             <select
               value={conductorSeleccionado}
               onChange={(e) => setConductorSeleccionado(e.target.value)}
-              className="flex-1 rounded-lg border border-ink/50 bg-surface-primary px-3 py-2 font-body text-sm"
+              className="flex-1 rounded-lg border border-ui-field bg-ui-card px-3 py-2 font-body text-sm"
             >
               <option value="">Selecciona un conductor</option>
               {conductores.map((c) => (
@@ -658,13 +658,13 @@ export default function PaginaDetalleViajeAdmin() {
         </PassportCard>
 
         <PassportCard>
-          <p className="font-body text-xs uppercase tracking-wide text-text-tertiary">Cambiar estatus</p>
+          <p className="font-body text-xs uppercase tracking-wide text-ui-fg-muted">Cambiar estatus</p>
           {pasaporte.estado === "disputa_abierta" && <p className="mt-2 text-sm">Para registrar una resolución, abre <Link href="/disputas" className="underline">Disputas</Link>. El resumen se actualizará al resolver todos los casos pendientes.</p>}
           <div className="mt-3 flex gap-2">
             <select
               value={estadoSeleccionado}
               onChange={(e) => setEstadoSeleccionado(e.target.value as EstadoTraslado)}
-              className="flex-1 rounded-lg border border-ink/50 bg-surface-primary px-3 py-2 font-body text-sm"
+              className="flex-1 rounded-lg border border-ui-field bg-ui-card px-3 py-2 font-body text-sm"
               disabled={siguientesEstados.length === 0}
             >
               <option value="">{siguientesEstados.length === 0 ? "Sin transiciones disponibles" : "Selecciona el nuevo estatus"}</option>
@@ -686,8 +686,8 @@ export default function PaginaDetalleViajeAdmin() {
           categoría más barata. */}
       <div className="mt-6">
         <PassportCard>
-          <p className="font-body text-xs uppercase tracking-wide text-text-tertiary">Clasificación de tarifa del vehículo</p>
-          <p className="mt-1 font-body text-xs text-text-tertiary">
+          <p className="font-body text-xs uppercase tracking-wide text-ui-fg-muted">Clasificación de tarifa del vehículo</p>
+          <p className="mt-1 font-body text-xs text-ui-fg-muted">
             Actual: {pasaporte.vehiculo_categoria_tarifa ?? "sin asignar"} · {pasaporte.vehiculo_gama ?? "sin asignar"} ·{" "}
             {pasaporte.vehiculo_condicion ?? "sin asignar"}
           </p>
@@ -695,7 +695,7 @@ export default function PaginaDetalleViajeAdmin() {
             <select
               value={categoriaTarifaInput}
               onChange={(e) => setCategoriaTarifaInput(e.target.value as typeof categoriaTarifaInput)}
-              className="min-h-12 rounded-[10px] border border-ink/30 bg-surface-primary px-3 font-body text-sm text-ink"
+              className="min-h-12 rounded-md border border-ui-field bg-ui-card px-3 font-body text-sm text-ui-fg"
             >
               <option value="">Categoría…</option>
               <option value="ligero_a">Ligero A</option>
@@ -706,7 +706,7 @@ export default function PaginaDetalleViajeAdmin() {
             <select
               value={gamaInput}
               onChange={(e) => setGamaInput(e.target.value as typeof gamaInput)}
-              className="min-h-12 rounded-[10px] border border-ink/30 bg-surface-primary px-3 font-body text-sm text-ink"
+              className="min-h-12 rounded-md border border-ui-field bg-ui-card px-3 font-body text-sm text-ui-fg"
             >
               <option value="">Gama…</option>
               <option value="entrada">Entrada</option>
@@ -717,7 +717,7 @@ export default function PaginaDetalleViajeAdmin() {
             <select
               value={condicionInput}
               onChange={(e) => setCondicionInput(e.target.value as typeof condicionInput)}
-              className="min-h-12 rounded-[10px] border border-ink/30 bg-surface-primary px-3 font-body text-sm text-ink"
+              className="min-h-12 rounded-md border border-ui-field bg-ui-card px-3 font-body text-sm text-ui-fg"
             >
               <option value="">Condición…</option>
               <option value="nueva">Nueva</option>
@@ -734,8 +734,8 @@ export default function PaginaDetalleViajeAdmin() {
       {/* Aplicación de política tarifaria autorizada */}
       <div className="mt-6">
         <PassportCard>
-          <p className="font-body text-xs uppercase tracking-wide text-text-tertiary">Tarifa normativa</p>
-          <p className="mt-1 font-body text-xs text-text-tertiary">
+          <p className="font-body text-xs uppercase tracking-wide text-ui-fg-muted">Tarifa normativa</p>
+          <p className="mt-1 font-body text-xs text-ui-fg-muted">
             El precio sale de la política vigente en Tarifas. Operación no captura montos libres; sólo aplica el cálculo autorizado y auditable.
           </p>
           <div className="mt-3">
@@ -743,15 +743,15 @@ export default function PaginaDetalleViajeAdmin() {
               {procesando === "sugerencia" ? "Calculando tarifa…" : "Calcular tarifa normativa"}
             </Button>
             {pasaporte.distancia_km != null && pasaporte.tiempo_estimado_horas != null && (
-              <span className="ml-3 font-body text-xs text-text-tertiary">
+              <span className="ml-3 font-body text-xs text-ui-fg-muted">
                 Última ruta calculada: {pasaporte.distancia_km} km, {pasaporte.tiempo_estimado_horas} h
               </span>
             )}
           </div>
-          <div className="mt-3 flex flex-wrap items-center gap-3 rounded-lg border border-ink/10 bg-ink/[0.03] px-4 py-3">
+          <div className="mt-3 flex flex-wrap items-center gap-3 rounded-lg border border-ui-line bg-ui-brand/[0.03] px-4 py-3">
             <div>
-              <p className="font-body text-xs text-text-tertiary">Tarifa calculada</p>
-              <p className="font-mono-ruum text-lg font-semibold text-ink">
+              <p className="font-body text-xs text-ui-fg-muted">Tarifa calculada</p>
+              <p className="font-mono-ruum text-lg font-semibold text-ui-fg">
                 {precioFinalInput ? `$${Number(precioFinalInput).toLocaleString("es-MX")}` : "Pendiente"}
               </p>
             </div>
@@ -764,15 +764,15 @@ export default function PaginaDetalleViajeAdmin() {
 
       <div className="mt-6">
         <PassportCard>
-          <p className="font-body text-xs uppercase tracking-wide text-text-tertiary">Traslado fallido</p>
-          <p className="mt-1 font-body text-xs text-text-tertiary">
+          <p className="font-body text-xs uppercase tracking-wide text-ui-fg-muted">Traslado fallido</p>
+          <p className="mt-1 font-body text-xs text-ui-fg-muted">
             Usa esta acción cuando el traslado no puede continuar. Se calcula cargo, reagendamiento y descuento con la regla PRD §4.11.
           </p>
           <div className="mt-3 flex flex-col gap-3 sm:flex-row sm:items-end">
             <select
               value={causaFallido}
               onChange={(e) => setCausaFallido(e.target.value as CausaFallido)}
-              className="rounded-lg border border-ink/50 bg-surface-primary px-3 py-2 font-body text-sm"
+              className="rounded-lg border border-ui-field bg-ui-card px-3 py-2 font-body text-sm"
             >
               {CAUSAS_FALLIDO.map((causa) => (
                 <option key={causa.valor} value={causa.valor}>
@@ -790,7 +790,7 @@ export default function PaginaDetalleViajeAdmin() {
       {/* Bloque 7 — Notas internas */}
       <div className="mt-6">
         <PassportCard>
-          <p className="font-body text-xs uppercase tracking-wide text-text-tertiary">Notas internas</p>
+          <p className="font-body text-xs uppercase tracking-wide text-ui-fg-muted">Notas internas</p>
           <div className="mt-3 flex items-end gap-2">
             <div className="flex-1">
               <Field
@@ -804,14 +804,14 @@ export default function PaginaDetalleViajeAdmin() {
               {procesando === "nota" ? "…" : "Agregar"}
             </Button>
           </div>
-          <div className="mt-4 space-y-3 border-t border-ink/10 pt-4">
+          <div className="mt-4 space-y-3 border-t border-ui-line pt-4">
             {notas.length === 0 ? (
-              <p className="font-body text-sm text-text-tertiary">Sin notas todavía.</p>
+              <p className="font-body text-sm text-ui-fg-muted">Sin notas todavía.</p>
             ) : (
               notas.map((n) => (
                 <div key={n.id} className="font-body text-sm">
                   <p>{n.contenido}</p>
-                  <p className="mt-0.5 font-mono-ruum text-admin-secundario uppercase tracking-wide text-text-tertiary">
+                  <p className="mt-0.5 font-mono-ruum text-xs uppercase tracking-wide text-ui-fg-muted">
                     {fechaAdministrativa(n.creada_en)}
                   </p>
                 </div>
@@ -824,36 +824,36 @@ export default function PaginaDetalleViajeAdmin() {
       {/* Bloque 6 — Línea de tiempo */}
       <div className="mt-6">
         <PassportCard>
-          <p className="font-body text-xs uppercase tracking-wide text-text-tertiary">Línea de tiempo</p>
+          <p className="font-body text-xs uppercase tracking-wide text-ui-fg-muted">Línea de tiempo</p>
           <h2 className="mt-1 font-display text-lg font-semibold">Registro de auditoría</h2>
           <div className="mt-4 space-y-0">
             {auditoria.length === 0 ? (
-              <p className="font-body text-sm text-text-tertiary">Sin eventos registrados todavía.</p>
+              <p className="font-body text-sm text-ui-fg-muted">Sin eventos registrados todavía.</p>
             ) : (
               <div className="relative">
-                <div className="absolute left-[11px] top-2 h-[calc(100%-16px)] w-0.5 bg-ink/10" aria-hidden="true" />
+                <div className="absolute left-[11px] top-2 h-[calc(100%-16px)] w-0.5 bg-ui-muted" aria-hidden="true" />
                 {auditoria.map((evento, indice) => {
                   const eventoLabel = evento.evento.replaceAll("_", " ");
                   const eventoData = JSON.stringify(evento.datos, null, 2);
                   return (
                     <div key={evento.id} className="relative flex gap-4 pb-5 last:pb-0">
-                      <div className={`relative mt-1.5 size-[23px] shrink-0 rounded-full border-2 ${indice === 0 ? "border-signal bg-signal" : "border-ink/20 bg-surface-primary"}`} aria-hidden="true">
-                        {indice === 0 && <span className="absolute inset-0 flex items-center justify-center text-[10px] text-ink">●</span>}
+                      <div className={`relative mt-1.5 size-[23px] shrink-0 rounded-full border-2 ${indice === 0 ? "border-ui-brand bg-ui-brand" : "border-ui-line-strong bg-ui-card"}`} aria-hidden="true">
+                        {indice === 0 && <span className="absolute inset-0 flex items-center justify-center text-xs text-ui-fg">●</span>}
                       </div>
                       <div className="min-w-0 flex-1">
                         <div className="flex flex-col gap-1 sm:flex-row sm:items-start sm:justify-between">
                           <p className="font-body text-sm font-semibold capitalize">{eventoLabel}</p>
-                          <p className="whitespace-nowrap font-mono-ruum text-admin-secundario uppercase tracking-wide text-text-tertiary">
+                          <p className="whitespace-nowrap font-mono-ruum text-xs uppercase tracking-wide text-ui-fg-muted">
                             {fechaAdministrativa(evento.timestamp)}
                           </p>
                         </div>
-                        <p className="mt-0.5 font-body text-xs text-text-tertiary">
+                        <p className="mt-0.5 font-body text-xs text-ui-fg-muted">
                           Actor: {evento.actor} · {evento.actor_id}
                         </p>
                         {eventoData !== "{}" && (
                           <details className="mt-2">
-                            <summary className="cursor-pointer font-body text-xs font-semibold text-status-info hover:underline">Ver datos</summary>
-                            <pre className="mt-2 max-h-32 overflow-auto rounded-lg bg-ink/[0.04] p-3 font-mono-ruum text-admin-secundario text-text-secondary">
+                            <summary className="cursor-pointer font-body text-xs font-semibold text-ui-brand-soft-fg hover:underline">Ver datos</summary>
+                            <pre className="mt-2 max-h-32 overflow-auto rounded-lg bg-ui-brand/[0.04] p-3 font-mono-ruum text-xs text-ui-fg-muted">
                               {eventoData}
                             </pre>
                           </details>

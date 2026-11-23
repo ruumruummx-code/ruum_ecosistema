@@ -3,7 +3,7 @@ import groovy.json.JsonSlurper
 apply plugin: 'com.android.application'
 
 def rumVersion = new JsonSlurper().parse(file('../../../../config/app-version.json'))
-def rumRemoteUrl = providers.gradleProperty('rumRemoteUrl').orElse(System.getenv('RUUM_REMOTE_URL') ?: 'https://www.concer.ruumruum-moviliax.online').get()
+def rumRemoteUrl = providers.gradleProperty('rumRemoteUrl').orElse(System.getenv('RUUM_REMOTE_URL') ?: 'https://concer.ruumruum-moviliax.online').get()
 if (!rumRemoteUrl.startsWith('https://')) throw new GradleException('RUUM_REMOTE_URL must use https://')
 
 android {

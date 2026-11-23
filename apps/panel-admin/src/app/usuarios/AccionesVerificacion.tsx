@@ -36,7 +36,7 @@ export function AccionesVerificacion({ usuario, onActualizado }: Props) {
             Inconsistencia del sistema: la cuenta aparece verificada sin aceptación de términos. No se permiten nuevas verificaciones hasta regularizar la aceptación.
           </Aviso>
         )}
-        <p className="font-body text-xs text-text-tertiary">
+        <p className="font-body text-xs text-ui-fg-muted">
           {usuario.estado_verificacion === "verificado"
             ? "Todos los documentos fueron verificados. No hay tareas pendientes para este usuario."
             : "La documentación fue rechazada. El usuario deberá corregirla antes de una nueva revisión."}
@@ -95,7 +95,7 @@ export function AccionesVerificacion({ usuario, onActualizado }: Props) {
             href={urlDocumento}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 font-body text-sm text-status-info underline-offset-2 hover:underline"
+            className="inline-flex items-center gap-2 font-body text-sm text-ui-brand-soft-fg underline-offset-2 hover:underline"
           >
             Abrir identificación (enlace válido 30 min)
           </a>
@@ -105,14 +105,14 @@ export function AccionesVerificacion({ usuario, onActualizado }: Props) {
           </Button>
         )
       ) : (
-        <p className="font-body text-xs text-status-warning/80">El usuario aún no ha subido su documento de identidad.</p>
+        <p className="font-body text-xs text-ui-warning/80">El usuario aún no ha subido su documento de identidad.</p>
       )}
 
       {/* Confirmación inline de Aprobar */}
       {confirmando === "aprobar" ? (
-        <div className="rounded-lg border border-ink/15 bg-surface-primary p-3">
-          <p className="font-body text-sm font-semibold text-ink">¿Aprobar esta cuenta?</p>
-          <p className="mt-1 font-body text-xs text-text-secondary">
+        <div className="rounded-lg border border-ui-line bg-ui-card p-3">
+          <p className="font-body text-sm font-semibold text-ui-fg">¿Aprobar esta cuenta?</p>
+          <p className="mt-1 font-body text-xs text-ui-fg-muted">
             El usuario quedará habilitado para solicitar traslados inmediatamente.
           </p>
           <div className="mt-3 flex gap-2">
@@ -126,24 +126,24 @@ export function AccionesVerificacion({ usuario, onActualizado }: Props) {
         </div>
       ) : confirmando === "rechazar" ? (
         /* Confirmación inline de Rechazar con motivo */
-        <div className="rounded-lg border border-status-error/25 bg-status-error-soft/40 p-3">
-          <p className="font-body text-sm font-semibold text-status-error">Rechazar documentación</p>
-          <p className="mt-1 font-body text-xs text-text-secondary">
+        <div className="rounded-lg border border-ui-danger/25 bg-ui-danger-soft p-3">
+          <p className="font-body text-sm font-semibold text-ui-danger">Rechazar documentación</p>
+          <p className="mt-1 font-body text-xs text-ui-fg-muted">
             El usuario recibirá una notificación con el motivo. Puede subir documentación nueva.
           </p>
           <label className="mt-3 flex flex-col gap-1.5">
-            <span className="font-body text-xs font-medium text-text-secondary">
-              Motivo del rechazo <span className="text-status-error">*</span>
+            <span className="font-body text-xs font-medium text-ui-fg-muted">
+              Motivo del rechazo <span className="text-ui-danger">*</span>
             </span>
             <textarea
               value={motivoRechazo}
               onChange={(e) => setMotivoRechazo(e.target.value)}
               placeholder="Ej. La foto está borrosa o el documento no coincide con los datos del perfil."
-              className="min-h-[72px] resize-none rounded-lg border border-status-error/30 bg-surface-primary px-3 py-2 font-body text-sm text-ink focus:border-status-error focus:outline-none focus:ring-2 focus:ring-status-error/20"
+              className="min-h-[72px] resize-none rounded-lg border border-ui-danger/30 bg-ui-card px-3 py-2 font-body text-sm text-ui-fg focus:border-ui-danger focus:outline-none focus:ring-2 focus:ring-ui-danger/20"
               maxLength={500}
               aria-label="Motivo del rechazo"
             />
-            <span className="text-right font-body text-admin-secundario text-text-tertiary">{motivoRechazo.length}/500</span>
+            <span className="text-right font-body text-xs text-ui-fg-muted">{motivoRechazo.length}/500</span>
           </label>
           <div className="mt-3 flex gap-2">
             <Button

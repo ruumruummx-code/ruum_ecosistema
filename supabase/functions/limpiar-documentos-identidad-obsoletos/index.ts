@@ -2,6 +2,7 @@
 /// <reference lib="dom" />
 
 import { createClient } from "npm:@supabase/supabase-js@2";
+import { timingSafeEqual } from "../_shared/timing-safe.ts";
 import {
   BUCKET_DOCUMENTOS_IDENTIDAD,
   LIMITE_RECLAMO_LIMPIEZA,
@@ -20,7 +21,7 @@ Deno.serve(async (req) => {
   const url = Deno.env.get("SUPABASE_URL") ?? "";
   const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
   if (!url || !serviceKey) return json({ error: "Servicio no configurado." }, 500);
-  if (req.headers.get("Authorization") !== `Bearer ${serviceKey}`) return json({ error: "No autorizado." }, 401);
+  if (!timingSafeEqual(req.headers.get("Authorization"), `Bearer ${serviceKey}`)) return json({ error: "No autorizado." }, 401);
 
   const servicio = createClient(url, serviceKey, { auth: { persistSession: false } });
   const { data: pendientes, error: errorReclamo } = await servicio

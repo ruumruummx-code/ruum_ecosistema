@@ -154,13 +154,13 @@ const INCIDENCIAS_DEMO: Incidencia[] = [
 
 const CLASE_BADGE = {
   estado: {
-    abierta: "border-status-warning/35 bg-status-warning-soft text-status-warning",
-    resuelta: "border-status-success/30 bg-status-success-soft text-status-success"
+    abierta: "border-ui-warning/35 bg-ui-warning-soft text-ui-warning",
+    resuelta: "border-ui-success/30 bg-ui-success-soft text-ui-success"
   },
   gravedad: {
-    leve: "border-status-info/30 bg-status-info-soft text-status-info",
-    media: "border-status-warning/35 bg-status-warning-soft text-status-warning",
-    grave: "border-status-error/30 bg-status-error-soft text-status-error"
+    leve: "border-ui-brand/30 bg-ui-brand-soft text-ui-brand-soft-fg",
+    media: "border-ui-warning/35 bg-ui-warning-soft text-ui-warning",
+    grave: "border-ui-danger/30 bg-ui-danger-soft text-ui-danger"
   }
 } as const;
 
@@ -244,15 +244,15 @@ function fechaCompleta(fecha: Date) {
 
 function KpiIncidencia({ etiqueta, valor, detalle, tono = "neutral" }: { etiqueta: string; valor: number | string; detalle: string; tono?: "neutral" | "alerta" | "exito" }) {
   const clase = tono === "alerta"
-    ? "border-status-error/25 bg-status-error-soft"
+    ? "border-ui-danger/25 bg-ui-danger-soft"
     : tono === "exito"
-      ? "border-status-success/25 bg-status-success-soft"
-      : "border-border-default bg-surface-primary";
+      ? "border-ui-success/25 bg-ui-success-soft"
+      : "border-ui-line bg-ui-card";
   return (
     <AdminPanel className={`p-4 ${clase}`}>
-      <p className="font-body text-xs font-semibold uppercase tracking-wide text-text-tertiary">{etiqueta}</p>
-      <p className="mt-2 font-display text-2xl font-semibold text-ink">{valor}</p>
-      <p className="mt-1 font-body text-xs text-[#536982] dark:text-[#c1cedd]">{detalle}</p>
+      <p className="font-body text-xs font-semibold uppercase tracking-wide text-ui-fg-muted">{etiqueta}</p>
+      <p className="mt-2 font-display text-2xl font-semibold text-ui-fg">{valor}</p>
+      <p className="mt-1 font-body text-xs text-ui-fg-muted">{detalle}</p>
     </AdminPanel>
   );
 }
@@ -273,24 +273,24 @@ function ChipFiltroIncidencia({ activo, etiqueta, contador, onClick }: { activo:
       onClick={onClick}
       aria-pressed={activo}
       className={[
-        "inline-flex min-h-10 items-center gap-2 rounded-full border px-3.5 py-2 font-body text-admin-boton font-semibold transition-colors",
-        activo ? "border-signal bg-signal-soft text-ink shadow-[inset_0_0_0_1px_rgba(216,167,74,0.18)]" : "border-border-default bg-surface-primary text-text-secondary hover:border-signal/45 hover:text-ink"
+        "inline-flex min-h-10 items-center gap-2 rounded-full border px-3.5 py-2 font-body text-sm font-semibold transition-colors",
+        activo ? "border-ui-brand bg-ui-brand-soft text-ui-fg ring-1 ring-inset ring-ui-warning/20" : "border-ui-line bg-ui-card text-ui-fg-muted hover:border-ui-brand/45 hover:text-ui-fg"
       ].join(" ")}
     >
       <span>{etiqueta}</span>
-      <span className="rounded-full bg-ink/10 px-2 py-0.5 font-mono-ruum text-[11px] text-ink">{contador}</span>
+      <span className="rounded-full bg-ui-muted px-2 py-0.5 font-mono-ruum text-xs text-ui-fg">{contador}</span>
     </button>
   );
 }
 
 function EmptyIncidencias({ onLimpiar, onHistorial }: { onLimpiar: () => void; onHistorial: () => void }) {
   return (
-    <section className="rounded-card border border-dashed border-border-default bg-surface-primary px-6 py-10 text-center" aria-live="polite">
-      <div className="mx-auto flex size-12 items-center justify-center rounded-full border border-signal/25 bg-signal-soft">
-        <span className="block size-3 rounded-full bg-signal" aria-hidden="true" />
+    <section className="rounded-lg border border-dashed border-ui-line bg-ui-card px-6 py-10 text-center" aria-live="polite">
+      <div className="mx-auto flex size-12 items-center justify-center rounded-full border border-ui-brand/25 bg-ui-brand-soft">
+        <span className="block size-3 rounded-full bg-ui-brand" aria-hidden="true" />
       </div>
-      <h2 className="mt-4 font-display text-lg font-semibold text-ink">No hay incidencias abiertas bajo este criterio.</h2>
-      <p className="mx-auto mt-2 max-w-md font-body text-sm text-text-secondary">La bandeja queda limpia para este segmento operativo.</p>
+      <h2 className="mt-4 font-display text-lg font-semibold text-ui-fg">No hay incidencias abiertas bajo este criterio.</h2>
+      <p className="mx-auto mt-2 max-w-md font-body text-sm text-ui-fg-muted">La bandeja queda limpia para este segmento operativo.</p>
       <div className="mt-5 flex flex-wrap justify-center gap-2">
         <AdminButton variant="secondary" onClick={onLimpiar}>Limpiar filtros</AdminButton>
         <AdminButton onClick={onHistorial}>Ver historial completo</AdminButton>
@@ -311,12 +311,12 @@ function FiltroSelect<T extends string>({
   onChange: (value: T) => void;
 }) {
   return (
-    <label className="flex min-w-56 flex-col gap-1 font-body text-xs font-semibold uppercase tracking-wide text-text-tertiary">
+    <label className="flex min-w-56 flex-col gap-1 font-body text-xs font-semibold uppercase tracking-wide text-ui-fg-muted">
       {label}
       <select
         value={value}
         onChange={(event) => onChange(event.target.value as T)}
-        className="min-h-10 rounded-lg border border-border-default bg-surface-primary px-3 py-2 font-body text-sm font-semibold normal-case tracking-normal text-ink outline-none transition-colors focus:border-signal"
+        className="min-h-10 rounded-lg border border-ui-line bg-ui-card px-3 py-2 font-body text-sm font-semibold normal-case tracking-normal text-ui-fg outline-none transition-colors focus:border-ui-focus"
       >
         {opciones.map((item) => (
           <option key={item.valor} value={item.valor}>{item.etiqueta}</option>
@@ -461,11 +461,11 @@ function IncidenciaCard({
     <AdminPanel className="p-5 sm:p-6">
       <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
         <div>
-          <p className="font-mono-ruum text-xs uppercase tracking-wide text-text-tertiary">Caso {incidencia.id.slice(0, 16).toUpperCase()}</p>
-          <h2 className="mt-1 font-display text-xl font-semibold capitalize text-ink">{etiquetaTipo(incidencia.tipo)}</h2>
-          <p className="mt-2 max-w-3xl font-body text-sm text-text-secondary whitespace-pre-line">{textoLimpio || incidencia.descripcion}</p>
+          <p className="font-mono-ruum text-xs uppercase tracking-wide text-ui-fg-muted">Caso {incidencia.id.slice(0, 16).toUpperCase()}</p>
+          <h2 className="mt-1 font-display text-xl font-semibold capitalize text-ui-fg">{etiquetaTipo(incidencia.tipo)}</h2>
+          <p className="mt-2 max-w-3xl font-body text-sm text-ui-fg-muted whitespace-pre-line">{textoLimpio || incidencia.descripcion}</p>
           {evidenciaNombre && (
-            <p className="mt-1 font-body text-xs text-text-tertiary">📎 Evidencia: {evidenciaNombre}</p>
+            <p className="mt-1 font-body text-xs text-ui-fg-muted">📎 Evidencia: {evidenciaNombre}</p>
           )}
         </div>
         <div className="flex flex-wrap gap-2 lg:justify-end">
@@ -473,11 +473,11 @@ function IncidenciaCard({
             {ETIQUETA_ESTADO_INCIDENCIA[estado] ?? estado}
           </BadgeIncidencia>
           <BadgeIncidencia className={CLASE_BADGE.gravedad[gravedad]}>{gravedad}</BadgeIncidencia>
-          <BadgeIncidencia className="border-border-default bg-surface-primary text-text-secondary">
+          <BadgeIncidencia className="border-ui-line bg-ui-card text-ui-fg-muted">
             Sev. {ETIQUETA_SEVERIDAD_INCIDENCIA[severidad] ?? severidad}
           </BadgeIncidencia>
           {incidencia.nivel_escalamiento > 0 ? (
-            <BadgeIncidencia className="border-status-error/30 bg-status-error-soft text-status-error">
+            <BadgeIncidencia className="border-ui-danger/30 bg-ui-danger-soft text-ui-danger">
               Escalada N{incidencia.nivel_escalamiento}
             </BadgeIncidencia>
           ) : null}
@@ -486,44 +486,44 @@ function IncidenciaCard({
 
       <dl className="mt-5 grid gap-4 sm:grid-cols-2 xl:grid-cols-6">
         <div>
-          <dt className="font-body text-xs uppercase tracking-wide text-text-tertiary">Origen</dt>
+          <dt className="font-body text-xs uppercase tracking-wide text-ui-fg-muted">Origen</dt>
           <dd className="mt-1 font-body text-sm font-medium">{etiquetaOrigen(origen)}</dd>
         </div>
         <div>
-          <dt className="font-body text-xs uppercase tracking-wide text-text-tertiary">Creación</dt>
+          <dt className="font-body text-xs uppercase tracking-wide text-ui-fg-muted">Creación</dt>
           <dd className="mt-1 font-body text-sm font-medium">{new Date(incidencia.creada_en).toLocaleString("es-MX")}</dd>
         </div>
         <div>
-          <dt className="font-body text-xs uppercase tracking-wide text-text-tertiary">Transcurrido</dt>
+          <dt className="font-body text-xs uppercase tracking-wide text-ui-fg-muted">Transcurrido</dt>
           <dd className="mt-1 font-mono-ruum text-sm font-medium">{formatoDuracion(horasTranscurridas(incidencia.creada_en, ahora))}</dd>
         </div>
         <div>
-          <dt className="font-body text-xs uppercase tracking-wide text-text-tertiary">SLA</dt>
-          <dd className={`mt-1 font-body text-sm font-semibold ${sla.vencido || sla.enRiesgo ? "text-status-error" : "text-status-success"}`}>{sla.texto}</dd>
+          <dt className="font-body text-xs uppercase tracking-wide text-ui-fg-muted">SLA</dt>
+          <dd className={`mt-1 font-body text-sm font-semibold ${sla.vencido || sla.enRiesgo ? "text-ui-danger" : "text-ui-success"}`}>{sla.texto}</dd>
         </div>
         <div>
-          <dt className="font-body text-xs uppercase tracking-wide text-text-tertiary">Responsable Torre</dt>
+          <dt className="font-body text-xs uppercase tracking-wide text-ui-fg-muted">Responsable Torre</dt>
           <dd className="mt-1 font-body text-sm font-medium">
             {incidencia.responsable_admin_id ? `Admin ${incidencia.responsable_admin_id.slice(0, 8)}…` : "Sin asignar"}
           </dd>
         </div>
         <div>
-          <dt className="font-body text-xs uppercase tracking-wide text-text-tertiary">Reportada por</dt>
+          <dt className="font-body text-xs uppercase tracking-wide text-ui-fg-muted">Reportada por</dt>
           <dd className="mt-1 font-body text-sm font-medium capitalize">{incidencia.reportada_por}</dd>
         </div>
         <div>
-          <dt className="font-body text-xs uppercase tracking-wide text-text-tertiary">Momento</dt>
+          <dt className="font-body text-xs uppercase tracking-wide text-ui-fg-muted">Momento</dt>
           <dd className="mt-1 font-body text-sm font-medium capitalize">{incidencia.momento.replaceAll("_", " ")}</dd>
         </div>
       </dl>
 
       <div className="mt-5 grid gap-3 lg:grid-cols-[minmax(220px,280px)_1fr] lg:items-end">
-        <label className="flex flex-col gap-1 font-body text-xs font-semibold uppercase tracking-wide text-text-tertiary">
+        <label className="flex flex-col gap-1 font-body text-xs font-semibold uppercase tracking-wide text-ui-fg-muted">
           Responsable
           <select
             value={responsable}
             onChange={(event) => onResponsable(event.target.value as Exclude<FiltroResponsable, "todos">)}
-            className="min-h-10 rounded-lg border border-border-default bg-surface-primary px-3 py-2 font-body text-sm font-semibold normal-case tracking-normal text-ink outline-none transition-colors focus:border-signal"
+            className="min-h-10 rounded-lg border border-ui-line bg-ui-card px-3 py-2 font-body text-sm font-semibold normal-case tracking-normal text-ui-fg outline-none transition-colors focus:border-ui-focus"
           >
             <option value="">Seleccionar operador</option>
             {RESPONSABLES_ASIGNABLES.map((item) => (
@@ -533,7 +533,7 @@ function IncidenciaCard({
         </label>
 
         <div className="flex flex-wrap gap-2 lg:justify-end">
-          <Link href={trasladoHref} className="inline-flex min-h-10 items-center justify-center rounded-lg border border-border-default px-4 py-2 font-body text-admin-boton font-semibold text-text-secondary transition-colors hover:border-signal/50 hover:text-ink">
+          <Link href={trasladoHref} className="inline-flex min-h-10 items-center justify-center rounded-lg border border-ui-line px-4 py-2 font-body text-sm font-semibold text-ui-fg-muted transition-colors hover:border-ui-brand/50 hover:text-ui-fg">
             Ver origen
           </Link>
           <AdminButton variant="quiet" type="button" onClick={() => void asignarme()} disabled={procesando || cerrada}>
@@ -568,23 +568,23 @@ function IncidenciaCard({
       </div>
 
       {!responsable && (
-        <p className="mt-3 font-body text-xs text-text-tertiary">
+        <p className="mt-3 font-body text-xs text-ui-fg-muted">
           Responsable sugerido: {etiquetaResponsable(responsableSugerido(incidencia))}. La asignación rápida queda visible para operar sin abrir el detalle.
         </p>
       )}
 
       {mostrarHistorial && (
         <div className="mt-5">
-          <h3 className="font-body text-xs font-semibold uppercase tracking-wide text-text-tertiary">Historial</h3>
+          <h3 className="font-body text-xs font-semibold uppercase tracking-wide text-ui-fg-muted">Historial</h3>
           {cargandoHistorial ? (
-            <p className="mt-2 font-body text-sm text-text-secondary">Cargando historial…</p>
+            <p className="mt-2 font-body text-sm text-ui-fg-muted">Cargando historial…</p>
           ) : historial === null || historial.length === 0 ? (
-            <p className="mt-2 font-body text-sm text-text-secondary">Sin movimientos registrados.</p>
+            <p className="mt-2 font-body text-sm text-ui-fg-muted">Sin movimientos registrados.</p>
           ) : (
             <ul className="mt-2 space-y-2">
               {historial.map((movimiento) => (
-                <li key={movimiento.id} className="font-body text-sm text-text-secondary">
-                  <strong className="text-ink">{movimiento.accion}</strong>
+                <li key={movimiento.id} className="font-body text-sm text-ui-fg-muted">
+                  <strong className="text-ui-fg">{movimiento.accion}</strong>
                   {movimiento.estado_anterior || movimiento.estado_nuevo
                     ? ` · ${movimiento.estado_anterior ?? "?"} → ${movimiento.estado_nuevo ?? "?"}`
                     : null}{" "}
@@ -607,12 +607,12 @@ function IncidenciaCard({
         onOpenChange={(abierto) => { if (!abierto) { setDialogo(null); setMotivo(""); } }}
         footer={
           <>
-            <button type="button" onClick={() => { setDialogo(null); setMotivo(""); }} className="rounded-lg border border-ink/20 px-4 py-2 font-body text-admin-boton font-semibold text-ink hover:bg-surface-secondary">Cancelar</button>
+            <button type="button" onClick={() => { setDialogo(null); setMotivo(""); }} className="rounded-lg border border-ui-line-strong px-4 py-2 font-body text-sm font-semibold text-ui-fg hover:bg-ui-muted">Cancelar</button>
             <button
               type="button"
               onClick={() => void ejecutarDialogo()}
               disabled={procesando || (dialogo === "escalar" && motivo.trim().length < 5)}
-              className="rounded-lg bg-signal px-4 py-2 font-body text-admin-boton font-semibold text-ink hover:bg-signal/90"
+              className="rounded-lg bg-ui-brand px-4 py-2 font-body text-sm font-semibold text-ui-fg hover:bg-ui-brand-hover"
             >
               {procesando ? "Procesando…" : "Confirmar"}
             </button>
@@ -621,13 +621,13 @@ function IncidenciaCard({
       >
         <div className="flex flex-col gap-4">
           <div>
-            <label className="font-body text-sm font-semibold text-text-secondary">
+            <label className="font-body text-sm font-semibold text-ui-fg-muted">
               Motivo {dialogo === "escalar" ? "*" : "(opcional)"}
             </label>
             <textarea
               value={motivo}
               onChange={(e) => setMotivo(e.target.value)}
-              className="mt-1 block w-full rounded-lg border border-ink/20 bg-surface-primary px-3 py-2 font-body text-sm text-ink"
+              className="mt-1 block w-full rounded-lg border border-ui-line-strong bg-ui-card px-3 py-2 font-body text-sm text-ui-fg"
               placeholder={dialogo === "escalar" ? "Motivo obligatorio (mín. 5 caracteres)" : "Motivo de resolución"}
               rows={3}
             />
@@ -798,7 +798,7 @@ export default function PaginaIncidenciasAdmin() {
           <div className="flex flex-wrap items-center gap-2">
             {ultimaActualizacion && (
               <AdminTooltip label={fechaCompleta(ultimaActualizacion)}>
-                <span className="inline-flex min-h-10 items-center rounded-lg border border-border-default bg-surface-primary px-3 py-2 font-body text-xs font-semibold text-text-secondary">
+                <span className="inline-flex min-h-10 items-center rounded-lg border border-ui-line bg-ui-card px-3 py-2 font-body text-xs font-semibold text-ui-fg-muted">
                   Actualizado: {fechaCompacta(ultimaActualizacion)}
                 </span>
               </AdminTooltip>
@@ -848,8 +848,8 @@ export default function PaginaIncidenciasAdmin() {
         <AdminPanel className="p-5">
           <div className="flex flex-col gap-4">
             <div>
-              <p className="font-body text-xs font-semibold uppercase tracking-wide text-text-tertiary">Bandeja de casos</p>
-              <p className="mt-1 font-body text-sm text-text-secondary">{contextoFiltro()}</p>
+              <p className="font-body text-xs font-semibold uppercase tracking-wide text-ui-fg-muted">Bandeja de casos</p>
+              <p className="mt-1 font-body text-sm text-ui-fg-muted">{contextoFiltro()}</p>
             </div>
 
             <div className="flex flex-wrap gap-2" role="group" aria-label="Filtros por tipo de incidencia">
@@ -877,8 +877,8 @@ export default function PaginaIncidenciasAdmin() {
 
       <section className="mt-6" aria-label="Resultados de incidencias">
         <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-          <h2 className="font-display text-base font-semibold text-ink">Casos priorizados por vencimiento de SLA</h2>
-          <span className="font-body text-sm font-medium text-[#536982] dark:text-[#c1cedd]" aria-live="polite">{visibles.length} caso{visibles.length === 1 ? "" : "s"} en esta vista</span>
+          <h2 className="font-display text-base font-semibold text-ui-fg">Casos priorizados por vencimiento de SLA</h2>
+          <span className="font-body text-sm font-medium text-ui-fg-muted" aria-live="polite">{visibles.length} caso{visibles.length === 1 ? "" : "s"} en esta vista</span>
         </div>
         <div className="grid gap-4">
         {cargando && <AdminLoadingState label="Cargando incidencias" />}

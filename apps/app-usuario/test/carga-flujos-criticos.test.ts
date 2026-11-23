@@ -45,6 +45,16 @@ vi.mock("@ruum/api/supabase", () => ({
   })),
 }));
 
+vi.mock("@ruum/api/supabase/server-client", () => ({
+  crearClienteServidor: vi.fn(() => ({
+    auth: {
+      signUp: (...args: unknown[]) => mockSignUp(...args),
+      verifyOtp: (...args: unknown[]) => mockVerifyOtp(...args),
+      getUser: (...args: unknown[]) => mockGetUser(...args),
+    },
+  })),
+}));
+
 vi.mock("@/lib/supabase-server", () => ({
   crearClienteServidor: vi.fn(async () => ({
     auth: {

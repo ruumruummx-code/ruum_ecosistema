@@ -8,7 +8,7 @@ vi.mock("next/headers", () => ({
   cookies: vi.fn(async () => ({ getAll: () => [], set: (...args: unknown[]) => cookieSetMock(...args) })),
 }));
 
-vi.mock("@ruum/api/supabase", () => ({
+vi.mock("@ruum/api/supabase/server-client", () => ({
   crearClienteServidor: () => ({ auth: { resend: mockResend } }),
 }));
 

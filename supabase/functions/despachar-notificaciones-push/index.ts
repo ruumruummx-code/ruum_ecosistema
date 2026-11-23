@@ -1,4 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { timingSafeEqual } from "../_shared/timing-safe.ts";
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
@@ -43,7 +44,7 @@ function enHorarioSilencioso(tipo: string, prefs: Record<string, unknown> | null
 }
 
 Deno.serve(async (request) => {
-  if (request.headers.get("authorization") !== `Bearer ${SERVICE_ROLE_KEY}`) return new Response("Unauthorized",{status:401});
+  if (!timingSafeEqual(request.headers.get("authorization"), `Bearer ${SERVICE_ROLE_KEY}`)) return new Response("Unauthorized",{status:401});
   const { data: pendientes, error } = await db.from("notificaciones_conductor").select("*").in("estado",["pendiente","fallida"]).order("creado_en").limit(50);
   if (error) return Response.json({error:error.message},{status:500});
   const token = await accessToken();

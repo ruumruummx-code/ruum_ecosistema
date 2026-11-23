@@ -83,23 +83,23 @@ const ETIQUETA_DECISION: Record<string, string> = {
 };
 
 const ESTADO_DOCUMENTO: Record<string, { texto: string; clase: string }> = {
-  en_revision: { texto: "En revisión", clase: "border-status-warning/35 bg-status-warning-soft text-status-warning" },
-  aprobado: { texto: "Aprobado", clase: "border-status-success/30 bg-status-success-soft text-status-success" },
-  rechazado: { texto: "Solicitar corrección", clase: "border-status-error/25 bg-status-error-soft text-status-error" },
-  vencido: { texto: "Vencido", clase: "border-status-error/25 bg-status-error-soft text-status-error" }
+  en_revision: { texto: "En revisión", clase: "border-ui-warning/35 bg-ui-warning-soft text-ui-warning" },
+  aprobado: { texto: "Aprobado", clase: "border-ui-success/30 bg-ui-success-soft text-ui-success" },
+  rechazado: { texto: "Solicitar corrección", clase: "border-ui-danger/25 bg-ui-danger-soft text-ui-danger" },
+  vencido: { texto: "Vencido", clase: "border-ui-danger/25 bg-ui-danger-soft text-ui-danger" }
 };
 
 const ESTADO_SOLICITUD_CLASE: Record<EstadoSolicitud, string> = {
-  borrador: "border-ink/15 bg-ink/[0.04] text-text-secondary",
-  correo_pendiente: "border-status-warning/35 bg-status-warning-soft text-status-warning",
-  datos_incompletos: "border-status-warning/35 bg-status-warning-soft text-status-warning",
-  documentos_pendientes: "border-status-warning/35 bg-status-warning-soft text-status-warning",
-  listo_para_enviar: "border-status-info/30 bg-status-info-soft text-status-info",
-  en_revision: "border-status-warning/35 bg-status-warning-soft text-status-warning",
-  requiere_correccion: "border-status-error/25 bg-status-error-soft text-status-error",
-  aprobado: "border-status-success/30 bg-status-success-soft text-status-success",
-  rechazado: "border-status-error/25 bg-status-error-soft text-status-error",
-  suspendido: "border-ink/30 bg-ink/10 text-text-tertiary"
+  borrador: "border-ui-line bg-ui-brand/[0.04] text-ui-fg-muted",
+  correo_pendiente: "border-ui-warning/35 bg-ui-warning-soft text-ui-warning",
+  datos_incompletos: "border-ui-warning/35 bg-ui-warning-soft text-ui-warning",
+  documentos_pendientes: "border-ui-warning/35 bg-ui-warning-soft text-ui-warning",
+  listo_para_enviar: "border-ui-brand/30 bg-ui-brand-soft text-ui-brand-soft-fg",
+  en_revision: "border-ui-warning/35 bg-ui-warning-soft text-ui-warning",
+  requiere_correccion: "border-ui-danger/25 bg-ui-danger-soft text-ui-danger",
+  aprobado: "border-ui-success/30 bg-ui-success-soft text-ui-success",
+  rechazado: "border-ui-danger/25 bg-ui-danger-soft text-ui-danger",
+  suspendido: "border-ui-line-strong bg-ui-muted text-ui-fg-muted"
 };
 
 function textoJson(valor: Json, ...llaves: string[]) {
@@ -131,35 +131,35 @@ function diasParaVencer(fechaIso: string | null) {
 function estadoVigencia(dias: number | null) {
   if (dias === null) {
     return {
-      clase: "border-ink/15 bg-ink/[0.04] text-text-secondary",
-      punto: "bg-text-tertiary",
+      clase: "border-ui-line bg-ui-brand/[0.04] text-ui-fg-muted",
+      punto: "bg-ui-fg-muted",
       etiqueta: "Sin fecha"
     };
   }
   if (dias < 0) {
     return {
-      clase: "border-status-error/30 bg-status-error-soft text-status-error",
-      punto: "bg-status-error",
+      clase: "border-ui-danger/30 bg-ui-danger-soft text-ui-danger",
+      punto: "bg-ui-danger",
       etiqueta: "Vencida"
     };
   }
   if (dias <= 30) {
     return {
-      clase: "border-status-warning/35 bg-status-warning-soft text-status-warning",
-      punto: "bg-status-warning",
+      clase: "border-ui-warning/35 bg-ui-warning-soft text-ui-warning",
+      punto: "bg-ui-warning",
       etiqueta: "Por vencer"
     };
   }
   if (dias > 180) {
     return {
-      clase: "border-status-success/30 bg-status-success-soft text-status-success",
-      punto: "bg-status-success",
+      clase: "border-ui-success/30 bg-ui-success-soft text-ui-success",
+      punto: "bg-ui-success",
       etiqueta: "Vigente"
     };
   }
   return {
-    clase: "border-status-info/30 bg-status-info-soft text-status-info",
-    punto: "bg-status-info",
+    clase: "border-ui-brand/30 bg-ui-brand-soft text-ui-brand-soft-fg",
+    punto: "bg-ui-brand",
     etiqueta: "Vigente"
   };
 }
@@ -254,7 +254,7 @@ function esDocumentoVisible(documento: DocumentoRow) {
 
 function BadgeEstadoSolicitud({ estado }: { estado: EstadoSolicitud }) {
   return (
-    <span className={`rounded-full border px-3 py-1 font-body text-admin-secundario font-semibold ${ESTADO_SOLICITUD_CLASE[estado]}`}>
+    <span className={`rounded-full border px-3 py-1 font-body text-xs font-semibold ${ESTADO_SOLICITUD_CLASE[estado]}`}>
       {ETIQUETA_ESTADO[estado]}
     </span>
   );
@@ -262,19 +262,19 @@ function BadgeEstadoSolicitud({ estado }: { estado: EstadoSolicitud }) {
 
 function Dato({ etiqueta, valor, destacado = false }: { etiqueta: string; valor: ReactNode; destacado?: boolean }) {
   return (
-    <div className="min-w-0 rounded-lg border border-border-default bg-surface-primary px-3 py-2.5">
-      <dt className="font-body text-admin-secundario text-text-tertiary">{etiqueta}</dt>
-      <dd className={`mt-1 break-words font-body text-sm ${destacado ? "font-semibold text-ink" : "font-medium text-text-secondary"}`}>{valor || <span className="text-text-tertiary">-</span>}</dd>
+    <div className="min-w-0 rounded-lg border border-ui-line bg-ui-card px-3 py-2.5">
+      <dt className="font-body text-xs text-ui-fg-muted">{etiqueta}</dt>
+      <dd className={`mt-1 break-words font-body text-sm ${destacado ? "font-semibold text-ui-fg" : "font-medium text-ui-fg-muted"}`}>{valor || <span className="text-ui-fg-muted">-</span>}</dd>
     </div>
   );
 }
 
 function IndicadorChecklist({ etiqueta, valor, completo }: { etiqueta: string; valor: string; completo: boolean }) {
   return (
-    <div className="flex items-center justify-between gap-3 rounded-lg border border-border-default bg-surface-primary px-3 py-2">
-      <span className="font-body text-sm text-text-secondary">{etiqueta}</span>
-      <span className={`inline-flex items-center gap-1.5 font-body text-sm font-semibold ${completo ? "text-status-success" : "text-status-error"}`}>
-        <span className={`size-2 rounded-full ${completo ? "bg-status-success" : "bg-status-error"}`} aria-hidden="true" />
+    <div className="flex items-center justify-between gap-3 rounded-lg border border-ui-line bg-ui-card px-3 py-2">
+      <span className="font-body text-sm text-ui-fg-muted">{etiqueta}</span>
+      <span className={`inline-flex items-center gap-1.5 font-body text-sm font-semibold ${completo ? "text-ui-success" : "text-ui-danger"}`}>
+        <span className={`size-2 rounded-full ${completo ? "bg-ui-success" : "bg-ui-danger"}`} aria-hidden="true" />
         {valor}
       </span>
     </div>
@@ -287,7 +287,7 @@ function VigenciaLicencia({ fechaIso, dias }: { fechaIso: string | null; dias: n
     <span className={`inline-flex max-w-full flex-wrap items-center gap-2 rounded-full border px-2.5 py-1 font-body text-sm font-semibold ${estado.clase}`}>
       <span className={`size-2 rounded-full ${estado.punto}`} aria-hidden="true" />
       <span>{fechaIso ?? "-"}</span>
-      <span className="text-admin-secundario">{estado.etiqueta}</span>
+      <span className="text-xs">{estado.etiqueta}</span>
     </span>
   );
 }
@@ -313,7 +313,7 @@ function QuickActionsBar({
       <a
         href={telefonoLimpio ? `tel:${telefonoLimpio}` : undefined}
         aria-disabled={!telefonoLimpio}
-        className={`inline-flex h-9 items-center justify-center rounded-md border px-3 font-body text-admin-secundario font-semibold transition ${telefonoLimpio ? "border-border-default bg-surface-primary text-text-secondary hover:bg-surface-secondary" : "pointer-events-none border-border-default bg-ink/[0.04] text-text-disabled"}`}
+        className={`inline-flex h-9 items-center justify-center rounded-md border px-3 font-body text-xs font-semibold transition ${telefonoLimpio ? "border-ui-line bg-ui-card text-ui-fg-muted hover:bg-ui-muted" : "pointer-events-none border-ui-line bg-ui-brand/[0.04] text-ui-fg-muted"}`}
         title={telefonoLimpio ? "Llamar al conductor" : "Teléfono no registrado"}
       >
         Tel
@@ -323,7 +323,7 @@ function QuickActionsBar({
         target="_blank"
         rel="noreferrer"
         aria-disabled={!whatsapp}
-        className={`inline-flex h-9 items-center justify-center rounded-md border px-3 font-body text-admin-secundario font-semibold transition ${whatsapp ? "border-status-success/30 bg-status-success-soft text-status-success hover:bg-status-success-soft/80" : "pointer-events-none border-border-default bg-ink/[0.04] text-text-disabled"}`}
+        className={`inline-flex h-9 items-center justify-center rounded-md border px-3 font-body text-xs font-semibold transition ${whatsapp ? "border-ui-success/30 bg-ui-success-soft text-ui-success hover:bg-ui-success-soft" : "pointer-events-none border-ui-line bg-ui-brand/[0.04] text-ui-fg-muted"}`}
         title={whatsapp ? "Abrir WhatsApp con plantilla" : "Teléfono no disponible para WhatsApp"}
       >
         WhatsApp
@@ -331,7 +331,7 @@ function QuickActionsBar({
       <a
         href={correoValido ? `mailto:${correoValido}?subject=${encodeURIComponent("Pasaporte digital CONCER")}` : undefined}
         aria-disabled={!correoValido}
-        className={`inline-flex h-9 items-center justify-center rounded-md border px-3 font-body text-admin-secundario font-semibold transition ${correoValido ? "border-border-default bg-surface-primary text-text-secondary hover:bg-surface-secondary" : "pointer-events-none border-border-default bg-ink/[0.04] text-text-disabled"}`}
+        className={`inline-flex h-9 items-center justify-center rounded-md border px-3 font-body text-xs font-semibold transition ${correoValido ? "border-ui-line bg-ui-card text-ui-fg-muted hover:bg-ui-muted" : "pointer-events-none border-ui-line bg-ui-brand/[0.04] text-ui-fg-muted"}`}
         title={correoValido ? "Enviar correo" : "Correo no registrado"}
       >
         Email
@@ -339,11 +339,11 @@ function QuickActionsBar({
       <button
         type="button"
         onClick={onChat}
-        className="inline-flex h-9 items-center justify-center gap-2 rounded-md border border-status-info/25 bg-status-info-soft px-3 font-body text-admin-secundario font-semibold text-status-info hover:bg-status-info-soft/80"
+        className="inline-flex h-9 items-center justify-center gap-2 rounded-md border border-ui-brand/25 bg-ui-brand-soft px-3 font-body text-xs font-semibold text-ui-brand-soft-fg hover:bg-ui-brand-soft"
         title="Abrir chat interno del expediente"
       >
         Chat interno
-        <span className="rounded-full bg-surface-primary px-1.5 py-0.5 font-mono-ruum text-[10px]">0</span>
+        <span className="rounded-full bg-ui-card px-1.5 py-0.5 font-mono-ruum text-xs">0</span>
       </button>
     </div>
   );
@@ -351,23 +351,23 @@ function QuickActionsBar({
 
 function KpiCard({ etiqueta, valor, detalle, tono = "neutral" }: { etiqueta: string; valor: ReactNode; detalle: string; tono?: "neutral" | "success" | "warning" | "danger" }) {
   const tonoClase = {
-    neutral: "border-border-default bg-surface-primary",
-    success: "border-status-success/25 bg-status-success-soft/40",
-    warning: "border-status-warning/30 bg-status-warning-soft/45",
-    danger: "border-status-error/25 bg-status-error-soft/45"
+    neutral: "border-ui-line bg-ui-card",
+    success: "border-ui-success/25 bg-ui-success-soft",
+    warning: "border-ui-warning/30 bg-ui-warning-soft",
+    danger: "border-ui-danger/25 bg-ui-danger-soft"
   }[tono];
   return (
     <div className={`min-w-0 rounded-lg border px-3 py-3 ${tonoClase}`}>
-      <p className="font-body text-admin-secundario font-semibold uppercase tracking-[0.08em] text-text-tertiary">{etiqueta}</p>
-      <div className="mt-2 font-display text-xl font-semibold text-ink">{valor}</div>
-      <p className="mt-1 line-clamp-2 font-body text-admin-secundario text-text-secondary" title={detalle}>{detalle}</p>
+      <p className="font-body text-xs font-semibold uppercase tracking-[0.08em] text-ui-fg-muted">{etiqueta}</p>
+      <div className="mt-2 font-display text-xl font-semibold text-ui-fg">{valor}</div>
+      <p className="mt-1 line-clamp-2 font-body text-xs text-ui-fg-muted" title={detalle}>{detalle}</p>
     </div>
   );
 }
 
 function BadgeNeutro({ children }: { children: ReactNode }) {
   return (
-    <span className="inline-flex rounded-full border border-ink/15 bg-ink/[0.04] px-2.5 py-1 font-body text-admin-secundario font-semibold text-text-secondary">
+    <span className="inline-flex rounded-full border border-ui-line bg-ui-brand/[0.04] px-2.5 py-1 font-body text-xs font-semibold text-ui-fg-muted">
       {children}
     </span>
   );
@@ -375,15 +375,15 @@ function BadgeNeutro({ children }: { children: ReactNode }) {
 
 function SeccionAcordeon({ titulo, distintivo, children }: { titulo: string; distintivo?: ReactNode; children: ReactNode }) {
   return (
-    <details className="rounded-lg border border-border-default bg-surface-primary p-4 shadow-[var(--ruum-shadow-1)]">
+    <details className="rounded-lg border border-ui-line bg-ui-card p-4 shadow-ui-sm">
       <summary className="flex cursor-pointer list-none items-center justify-between gap-3">
         <span className="flex min-w-0 items-center gap-2">
-          <span className="inline-flex size-6 shrink-0 items-center justify-center rounded-full border border-status-info/25 bg-status-info-soft font-body text-xs font-bold text-status-info" aria-hidden="true">⌄</span>
+          <span className="inline-flex size-6 shrink-0 items-center justify-center rounded-full border border-ui-brand/25 bg-ui-brand-soft font-body text-xs font-bold text-ui-brand-soft-fg" aria-hidden="true">⌄</span>
           <h2 className="font-display text-lg font-semibold">{titulo}</h2>
         </span>
         {distintivo && <span className="shrink-0">{distintivo}</span>}
       </summary>
-      <div className="mt-4 border-t border-border-default pt-4">
+      <div className="mt-4 border-t border-ui-line pt-4">
         {children}
       </div>
     </details>
@@ -411,17 +411,17 @@ function DesempenoScore({
     ? (conductor.traslados_completados / totalEventosOperativos) * 100
     : null;
   const tonoElegibilidad = elegibilidad.tono === "success"
-    ? "border-status-success/30 bg-status-success-soft text-status-success"
+    ? "border-ui-success/30 bg-ui-success-soft text-ui-success"
     : elegibilidad.tono === "danger"
-      ? "border-status-error/30 bg-status-error-soft text-status-error"
-      : "border-status-warning/35 bg-status-warning-soft text-status-warning";
+      ? "border-ui-danger/30 bg-ui-danger-soft text-ui-danger"
+      : "border-ui-warning/35 bg-ui-warning-soft text-ui-warning";
 
   return (
-    <SeccionAcordeon titulo="Desempeño y Score" distintivo={<span className={`rounded-full border px-3 py-1 font-body text-admin-secundario font-semibold ${tonoElegibilidad}`}>{elegibilidad.texto}</span>}>
+    <SeccionAcordeon titulo="Desempeño y Score" distintivo={<span className={`rounded-full border px-3 py-1 font-body text-xs font-semibold ${tonoElegibilidad}`}>{elegibilidad.texto}</span>}>
       <div className={`mt-4 rounded-lg border px-3 py-3 ${tonoElegibilidad}`}>
         <div className="flex flex-wrap items-center justify-between gap-3">
           <p className="font-body text-sm font-semibold">{elegibilidad.texto} · {elegibilidad.detalle}</p>
-          <span className="rounded-full border border-current/20 px-2.5 py-1 font-body text-admin-secundario font-semibold">
+          <span className="rounded-full border border-current/20 px-2.5 py-1 font-body text-xs font-semibold">
             {textoEstadoConductor(conductor?.estado)}
           </span>
         </div>
@@ -536,18 +536,18 @@ function AccionesCriticasPasaporte({
   const motivos = accion === "baja" ? MOTIVOS_BAJA : MOTIVOS_SUSPENSION;
 
   return (
-    <div className="mt-4 rounded-lg border border-border-default bg-surface-secondary p-4">
+    <div className="mt-4 rounded-lg border border-ui-line bg-ui-muted p-4">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h3 className="font-body text-sm font-semibold text-ink">Acciones operativas</h3>
-          <p className="mt-1 font-body text-sm text-text-secondary">Suspender impide nuevos Traslados hasta reactivación; baja definitiva bloquea la cuenta operativa.</p>
+          <h3 className="font-body text-sm font-semibold text-ui-fg">Acciones operativas</h3>
+          <p className="mt-1 font-body text-sm text-ui-fg-muted">Suspender impide nuevos Traslados hasta reactivación; baja definitiva bloquea la cuenta operativa.</p>
         </div>
         <div className="flex flex-wrap gap-2">
           <button
             type="button"
             onClick={() => setAccion("suspender")}
             disabled={!conductor || procesando}
-            className="inline-flex min-h-11 items-center justify-center gap-2 rounded-lg border border-ink/20 bg-surface-primary px-4 py-2 font-body text-sm font-semibold text-ink hover:bg-ink/5 disabled:cursor-not-allowed disabled:opacity-50"
+            className="inline-flex min-h-11 items-center justify-center gap-2 rounded-lg border border-ui-line-strong bg-ui-card px-4 py-2 font-body text-sm font-semibold text-ui-fg hover:bg-ui-muted disabled:cursor-not-allowed disabled:opacity-50"
           >
             <IconoPausa /> Suspender
           </button>
@@ -555,26 +555,26 @@ function AccionesCriticasPasaporte({
             type="button"
             onClick={() => setAccion("baja")}
             disabled={!conductor || procesando}
-            className="inline-flex min-h-11 items-center justify-center gap-2 rounded-lg border border-status-error/40 bg-status-error/10 px-4 py-2 font-body text-sm font-semibold text-status-error hover:bg-status-error/20 disabled:cursor-not-allowed disabled:opacity-50"
+            className="inline-flex min-h-11 items-center justify-center gap-2 rounded-lg border border-ui-danger/40 bg-ui-danger/10 px-4 py-2 font-body text-sm font-semibold text-ui-danger hover:bg-ui-danger/20 disabled:cursor-not-allowed disabled:opacity-50"
           >
             <IconoBaja /> Baja definitiva
           </button>
         </div>
       </div>
-      {!conductor && <p className="mt-3 font-body text-sm text-text-tertiary">Disponible cuando la solicitud tenga conductor asociado.</p>}
+      {!conductor && <p className="mt-3 font-body text-sm text-ui-fg-muted">Disponible cuando la solicitud tenga conductor asociado.</p>}
       {accion && conductor && (
-        <div role="dialog" aria-modal="true" aria-labelledby="accion-critica-pasaporte" className="mt-4 rounded-lg border border-border-default bg-surface-primary p-4">
-          <p id="accion-critica-pasaporte" className={`flex items-center gap-2 font-body text-sm font-semibold ${accion === "baja" ? "text-status-error" : "text-status-warning"}`}>
+        <div role="dialog" aria-modal="true" aria-labelledby="accion-critica-pasaporte" className="mt-4 rounded-lg border border-ui-line bg-ui-card p-4">
+          <p id="accion-critica-pasaporte" className={`flex items-center gap-2 font-body text-sm font-semibold ${accion === "baja" ? "text-ui-danger" : "text-ui-warning"}`}>
             {accion === "baja" ? <IconoBaja /> : <IconoPausa />} {titulo}
           </p>
-          <div className="mt-3 rounded-lg border border-ink/10 bg-surface-secondary px-3 py-2 font-body text-sm text-text-secondary">
-            <p><span className="font-semibold text-ink">Conductor:</span> {conductor.nombre}</p>
-            <p><span className="font-semibold text-ink">Estado actual:</span> {textoEstadoConductor(conductor.estado)}</p>
-            <p><span className="font-semibold text-ink">Efecto:</span> {efecto}</p>
+          <div className="mt-3 rounded-lg border border-ui-line bg-ui-muted px-3 py-2 font-body text-sm text-ui-fg-muted">
+            <p><span className="font-semibold text-ui-fg">Conductor:</span> {conductor.nombre}</p>
+            <p><span className="font-semibold text-ui-fg">Estado actual:</span> {textoEstadoConductor(conductor.estado)}</p>
+            <p><span className="font-semibold text-ui-fg">Efecto:</span> {efecto}</p>
           </div>
           {error && <div className="mt-3"><Aviso tono="danger">{error}</Aviso></div>}
-          <details className="mt-3 rounded-lg border border-border-default bg-surface-secondary p-3">
-            <summary className="cursor-pointer list-none font-body text-sm font-semibold text-ink">
+          <details className="mt-3 rounded-lg border border-ui-line bg-ui-muted p-3">
+            <summary className="cursor-pointer list-none font-body text-sm font-semibold text-ui-fg">
               Motivos principales
             </summary>
             <div className="mt-3 grid gap-2">
@@ -583,7 +583,7 @@ function AccionesCriticasPasaporte({
                   key={opcion}
                   type="button"
                   onClick={() => setMotivo(opcion)}
-                  className={`min-h-11 rounded-lg border px-3 py-2 text-left font-body text-sm font-medium transition ${motivo === opcion ? "border-status-info bg-status-info-soft text-status-info" : "border-border-default bg-surface-primary text-text-secondary hover:bg-surface-secondary"}`}
+                  className={`min-h-11 rounded-lg border px-3 py-2 text-left font-body text-sm font-medium transition ${motivo === opcion ? "border-ui-brand bg-ui-brand-soft text-ui-brand-soft-fg" : "border-ui-line bg-ui-card text-ui-fg-muted hover:bg-ui-muted"}`}
                 >
                   {opcion}
                 </button>
@@ -591,22 +591,22 @@ function AccionesCriticasPasaporte({
             </div>
           </details>
           <label className="mt-3 flex flex-col gap-1">
-            <span className="font-body text-xs font-medium text-text-secondary">Motivo</span>
+            <span className="font-body text-xs font-medium text-ui-fg-muted">Motivo</span>
             <textarea
               value={motivo}
               onChange={(event) => setMotivo(event.target.value)}
-              className="min-h-[88px] rounded-lg border border-ink/20 px-3 py-2 font-body text-sm focus:border-focus-default focus:outline-none focus:ring-2 focus:ring-focus-default/20"
+              className="min-h-[88px] rounded-lg border border-ui-line-strong px-3 py-2 font-body text-sm focus:border-ui-focus focus:outline-none focus:ring-2 focus:ring-ui-ring"
               placeholder={accion === "baja" ? "Motivo de la baja definitiva" : "Motivo de la suspensión"}
             />
           </label>
           {accion === "baja" && (
             <label className="mt-3 flex flex-col gap-1">
-              <span className="font-body text-xs font-medium text-text-secondary">Escribe BAJA para confirmar</span>
+              <span className="font-body text-xs font-medium text-ui-fg-muted">Escribe BAJA para confirmar</span>
               <input
                 type="text"
                 value={confirmacion}
                 onChange={(event) => setConfirmacion(event.target.value)}
-                className="min-h-11 rounded-lg border border-ink/20 px-3 py-2 font-body text-sm focus:border-focus-default focus:outline-none focus:ring-2 focus:ring-focus-default/20"
+                className="min-h-11 rounded-lg border border-ui-line-strong px-3 py-2 font-body text-sm focus:border-ui-focus focus:outline-none focus:ring-2 focus:ring-ui-ring"
               />
             </label>
           )}
@@ -615,12 +615,12 @@ function AccionesCriticasPasaporte({
               type="button"
               onClick={() => void ejecutar()}
               disabled={procesando || !motivo.trim() || (accion === "baja" && confirmacion !== "BAJA")}
-              className={`inline-flex min-h-11 items-center justify-center gap-2 rounded-lg px-4 py-2 font-body text-sm font-semibold text-surface-primary disabled:cursor-not-allowed disabled:opacity-50 ${accion === "baja" ? "bg-status-error hover:bg-status-error/90" : "bg-status-warning hover:bg-status-warning/90"}`}
+              className={`inline-flex min-h-11 items-center justify-center gap-2 rounded-lg px-4 py-2 font-body text-sm font-semibold text-ui-on-brand disabled:cursor-not-allowed disabled:opacity-50 ${accion === "baja" ? "bg-ui-danger hover:bg-ui-danger/90" : "bg-ui-warning hover:bg-ui-warning/90"}`}
             >
               {accion === "baja" ? <IconoBaja /> : <IconoPausa />}
               {procesando ? "Procesando..." : accion === "baja" ? "Confirmar baja" : "Confirmar suspensión"}
             </button>
-            <button type="button" onClick={cerrar} disabled={procesando} className="min-h-11 rounded-lg border border-ink/20 px-4 py-2 font-body text-sm font-medium hover:bg-ink/5 disabled:opacity-50">
+            <button type="button" onClick={cerrar} disabled={procesando} className="min-h-11 rounded-lg border border-ui-line-strong px-4 py-2 font-body text-sm font-medium hover:bg-ui-muted disabled:opacity-50">
               Cancelar
             </button>
           </div>
@@ -645,14 +645,14 @@ function CampoEditable({
 }) {
   return (
     <label className="flex flex-col gap-1">
-      <span className="font-body text-xs font-medium text-text-secondary">{label}</span>
+      <span className="font-body text-xs font-medium text-ui-fg-muted">{label}</span>
       <input
         type="text"
         inputMode={inputMode}
         value={value}
         readOnly={readOnly}
         onChange={(event) => onChange(event.target.value)}
-        className={`min-h-11 rounded-lg border border-ink/20 px-3 py-2 font-body text-sm text-ink focus:border-focus-default focus:outline-none focus:ring-2 focus:ring-focus-default/20 ${readOnly ? "bg-ink/[0.04] text-text-tertiary" : "bg-surface-primary"}`}
+        className={`min-h-11 rounded-lg border border-ui-line-strong px-3 py-2 font-body text-sm text-ui-fg focus:border-ui-focus focus:outline-none focus:ring-2 focus:ring-ui-ring ${readOnly ? "bg-ui-brand/[0.04] text-ui-fg-muted" : "bg-ui-card"}`}
       />
     </label>
   );
@@ -725,13 +725,13 @@ function DomicilioContactoEditable({
   return (
     <SeccionAcordeon
       titulo="Domicilio y contacto de emergencia"
-      distintivo={<span className="font-body text-admin-secundario text-text-tertiary">Editable</span>}
+      distintivo={<span className="font-body text-xs text-ui-fg-muted">Editable</span>}
     >
       <div className="space-y-4">
         {avisoLocal && <Aviso tono={avisoLocal.tono}>{avisoLocal.texto}</Aviso>}
-        <div className="rounded-lg border border-border-default bg-surface-secondary p-3">
-          <p className="font-body text-sm font-semibold text-ink">Domicilio formateado</p>
-          <p className="mt-1 font-body text-sm text-text-secondary">
+        <div className="rounded-lg border border-ui-line bg-ui-muted p-3">
+          <p className="font-body text-sm font-semibold text-ui-fg">Domicilio formateado</p>
+          <p className="mt-1 font-body text-sm text-ui-fg-muted">
             {[
               [datos.calle, datos.numero].filter(Boolean).join(" "),
               datos.colonia,
@@ -746,14 +746,14 @@ function DomicilioContactoEditable({
               target="_blank"
               rel="noreferrer"
               aria-disabled={!mapa}
-              className={`inline-flex min-h-11 items-center justify-center rounded-lg border px-4 py-2 font-body text-sm font-semibold ${mapa ? "border-status-info/40 bg-status-info/10 text-status-info hover:bg-status-info/20" : "pointer-events-none border-border-default bg-ink/[0.04] text-text-disabled"}`}
+              className={`inline-flex min-h-11 items-center justify-center rounded-lg border px-4 py-2 font-body text-sm font-semibold ${mapa ? "border-ui-brand/40 bg-ui-brand/10 text-ui-brand-soft-fg hover:bg-ui-brand/20" : "pointer-events-none border-ui-line bg-ui-brand/[0.04] text-ui-fg-muted"}`}
             >
               Ver mapa
             </a>
             <a
               href={llamadaEmergencia ?? undefined}
               aria-disabled={!llamadaEmergencia}
-              className={`inline-flex min-h-11 items-center justify-center rounded-lg border px-4 py-2 font-body text-sm font-semibold ${llamadaEmergencia ? "border-status-success/40 bg-status-success/10 text-status-success hover:bg-status-success/20" : "pointer-events-none border-border-default bg-ink/[0.04] text-text-disabled"}`}
+              className={`inline-flex min-h-11 items-center justify-center rounded-lg border px-4 py-2 font-body text-sm font-semibold ${llamadaEmergencia ? "border-ui-success/40 bg-ui-success/10 text-ui-success hover:bg-ui-success/20" : "pointer-events-none border-ui-line bg-ui-brand/[0.04] text-ui-fg-muted"}`}
             >
               Llamar emergencia
             </a>
@@ -776,7 +776,7 @@ function DomicilioContactoEditable({
             type="button"
             onClick={() => void guardar()}
             disabled={procesando || !conductor}
-            className="inline-flex min-h-11 items-center justify-center rounded-lg bg-ink px-4 py-2 font-body text-sm font-semibold text-surface-primary hover:bg-ink/90 disabled:cursor-not-allowed disabled:opacity-50"
+            className="inline-flex min-h-11 items-center justify-center rounded-lg bg-ui-brand px-4 py-2 font-body text-sm font-semibold text-ui-on-brand hover:bg-ui-brand-hover disabled:cursor-not-allowed disabled:opacity-50"
           >
             {procesando ? "Guardando..." : "Guardar datos"}
           </button>
@@ -788,13 +788,13 @@ function DomicilioContactoEditable({
 
 function ConsentimientosAcordeon({ consentimientos }: { consentimientos: DetalleSolicitudConductorAdmin["consentimientos"] }) {
   return (
-    <details className="rounded-lg border border-border-default bg-surface-primary px-3 py-2">
+    <details className="rounded-lg border border-ui-line bg-ui-card px-3 py-2">
       <summary className="flex cursor-pointer list-none items-center justify-between gap-3">
-        <span className="font-body text-sm font-semibold text-ink">Términos, privacidad y declaraciones</span>
-        <span className="font-body text-admin-secundario text-text-tertiary">{consentimientos.length}/4</span>
+        <span className="font-body text-sm font-semibold text-ui-fg">Términos, privacidad y declaraciones</span>
+        <span className="font-body text-xs text-ui-fg-muted">{consentimientos.length}/4</span>
       </summary>
-      <div className="mt-3 space-y-2 border-t border-border-default pt-3">
-        {consentimientos.length === 0 ? <p className="font-body text-sm text-text-tertiary">Sin consentimientos registrados.</p> : consentimientos.map((consentimiento) => (
+      <div className="mt-3 space-y-2 border-t border-ui-line pt-3">
+        {consentimientos.length === 0 ? <p className="font-body text-sm text-ui-fg-muted">Sin consentimientos registrados.</p> : consentimientos.map((consentimiento) => (
           <ConsentimientoItem key={consentimiento.id} consentimiento={consentimiento} />
         ))}
       </div>
@@ -805,27 +805,27 @@ function ConsentimientosAcordeon({ consentimientos }: { consentimientos: Detalle
 function HistorialAcordeon({ historial }: { historial: DetalleSolicitudConductorAdmin["historial"] }) {
   const ultimo = historial[0] ?? null;
   return (
-    <details className="rounded-lg border border-border-default bg-surface-primary p-4 shadow-[var(--ruum-shadow-1)]">
+    <details className="rounded-lg border border-ui-line bg-ui-card p-4 shadow-ui-sm">
       <summary className="cursor-pointer list-none">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <h2 className="font-display text-lg font-semibold">Historial de estados y decisiones</h2>
-          {ultimo && <span className="rounded-full border border-status-info/30 bg-status-info-soft px-3 py-1 font-body text-admin-secundario font-semibold text-status-info">{ETIQUETA_DECISION[ultimo.decision] ?? ultimo.decision}</span>}
+          {ultimo && <span className="rounded-full border border-ui-brand/30 bg-ui-brand-soft px-3 py-1 font-body text-xs font-semibold text-ui-brand-soft-fg">{ETIQUETA_DECISION[ultimo.decision] ?? ultimo.decision}</span>}
         </div>
         {ultimo ? (
-          <p className="mt-2 font-body text-sm text-text-secondary">{ETIQUETA_ESTADO[ultimo.estado_anterior]} - {ETIQUETA_ESTADO[ultimo.estado_nuevo]} · {fecha(ultimo.revisado_en)}</p>
+          <p className="mt-2 font-body text-sm text-ui-fg-muted">{ETIQUETA_ESTADO[ultimo.estado_anterior]} - {ETIQUETA_ESTADO[ultimo.estado_nuevo]} · {fecha(ultimo.revisado_en)}</p>
         ) : (
-          <p className="mt-2 font-body text-sm text-text-tertiary">Sin pasos registrados.</p>
+          <p className="mt-2 font-body text-sm text-ui-fg-muted">Sin pasos registrados.</p>
         )}
       </summary>
-      <ol className="mt-4 space-y-4 border-t border-border-default pt-4">
+      <ol className="mt-4 space-y-4 border-t border-ui-line pt-4">
         {historial.map((evento) => (
-          <li key={evento.id} className="border-l-2 border-status-info/25 pl-4 font-body text-sm">
+          <li key={evento.id} className="border-l-2 border-ui-brand/25 pl-4 font-body text-sm">
             <div className="flex flex-wrap items-center justify-between gap-2">
               <p className="font-semibold">{ETIQUETA_DECISION[evento.decision] ?? evento.decision}</p>
-              <time className="text-admin-secundario text-text-tertiary">{fecha(evento.revisado_en)}</time>
+              <time className="text-xs text-ui-fg-muted">{fecha(evento.revisado_en)}</time>
             </div>
-            <p className="mt-1 text-admin-secundario text-text-tertiary">{ETIQUETA_ESTADO[evento.estado_anterior]} - {ETIQUETA_ESTADO[evento.estado_nuevo]} · {evento.revisor_nombre ?? "Sistema/conductor"}</p>
-            {evento.motivo && <p className="mt-1 text-text-secondary">{evento.motivo}</p>}
+            <p className="mt-1 text-xs text-ui-fg-muted">{ETIQUETA_ESTADO[evento.estado_anterior]} - {ETIQUETA_ESTADO[evento.estado_nuevo]} · {evento.revisor_nombre ?? "Sistema/conductor"}</p>
+            {evento.motivo && <p className="mt-1 text-ui-fg-muted">{evento.motivo}</p>}
           </li>
         ))}
       </ol>
@@ -864,52 +864,52 @@ function ChatInternoDrawer({
   }
 
   return (
-    <div className="fixed inset-0 z-50 bg-ink/30" role="dialog" aria-modal="true" aria-label="Chat interno">
-      <div className="ml-auto flex h-full w-full max-w-md flex-col border-l border-border-default bg-surface-primary shadow-[var(--ruum-shadow-3)]">
-        <div className="flex items-start justify-between gap-3 border-b border-border-default px-5 py-4">
+    <div className="fixed inset-0 z-50 bg-ui-brand" role="dialog" aria-modal="true" aria-label="Chat interno">
+      <div className="ml-auto flex h-full w-full max-w-md flex-col border-l border-ui-line bg-ui-card shadow-ui-md">
+        <div className="flex items-start justify-between gap-3 border-b border-ui-line px-5 py-4">
           <div>
-            <p className="font-body text-admin-secundario font-semibold uppercase tracking-[0.12em] text-text-tertiary">Chat interno</p>
-            <h2 className="mt-1 font-display text-lg font-semibold text-ink">{nombre}</h2>
+            <p className="font-body text-xs font-semibold uppercase tracking-[0.12em] text-ui-fg-muted">Chat interno</p>
+            <h2 className="mt-1 font-display text-lg font-semibold text-ui-fg">{nombre}</h2>
           </div>
-          <button type="button" onClick={onClose} className="min-h-10 rounded-md border border-border-default px-3 py-2 font-body text-admin-secundario font-semibold text-text-secondary hover:bg-surface-secondary">
+          <button type="button" onClick={onClose} className="min-h-10 rounded-md border border-ui-line px-3 py-2 font-body text-xs font-semibold text-ui-fg-muted hover:bg-ui-muted">
             Cerrar
           </button>
         </div>
         <div className="flex-1 space-y-3 overflow-y-auto px-5 py-4">
           {notas.length === 0 ? (
-            <div className="rounded-lg border border-dashed border-border-default bg-surface-secondary p-4 text-center">
-              <p className="font-body text-sm font-semibold text-ink">Sin notas internas</p>
-              <p className="mt-1 font-body text-sm text-text-tertiary">Registra contexto operativo para Torre de Control. No será visible para el conductor.</p>
+            <div className="rounded-lg border border-dashed border-ui-line bg-ui-muted p-4 text-center">
+              <p className="font-body text-sm font-semibold text-ui-fg">Sin notas internas</p>
+              <p className="mt-1 font-body text-sm text-ui-fg-muted">Registra contexto operativo para Torre de Control. No será visible para el conductor.</p>
             </div>
           ) : notas.map((nota) => (
-            <article key={nota.id} className="rounded-lg border border-border-default bg-surface-secondary p-3">
+            <article key={nota.id} className="rounded-lg border border-ui-line bg-ui-muted p-3">
               <div className="flex items-center justify-between gap-3">
-                <p className="font-body text-sm font-semibold text-ink">{nota.admin_nombre ?? "Administrador"}</p>
-                <time className="font-body text-admin-secundario text-text-tertiary">{fecha(nota.creado_en)}</time>
+                <p className="font-body text-sm font-semibold text-ui-fg">{nota.admin_nombre ?? "Administrador"}</p>
+                <time className="font-body text-xs text-ui-fg-muted">{fecha(nota.creado_en)}</time>
               </div>
-              <p className="mt-2 whitespace-pre-wrap font-body text-sm text-text-secondary">{nota.mensaje}</p>
+              <p className="mt-2 whitespace-pre-wrap font-body text-sm text-ui-fg-muted">{nota.mensaje}</p>
             </article>
           ))}
         </div>
-        <form onSubmit={enviar} className="border-t border-border-default bg-surface-primary px-5 py-4">
+        <form onSubmit={enviar} className="border-t border-ui-line bg-ui-card px-5 py-4">
           {error && <div className="mb-3"><Aviso tono="danger">{error}</Aviso></div>}
           <label className="flex flex-col gap-1">
-            <span className="font-body text-xs font-medium text-text-secondary">Mensaje interno</span>
+            <span className="font-body text-xs font-medium text-ui-fg-muted">Mensaje interno</span>
             <textarea
               value={mensaje}
               onChange={(event) => setMensaje(event.target.value)}
               rows={3}
               maxLength={1000}
-              className="min-h-[96px] rounded-lg border border-ink/20 px-3 py-2 font-body text-sm focus:border-focus-default focus:outline-none focus:ring-2 focus:ring-focus-default/20"
+              className="min-h-[96px] rounded-lg border border-ui-line-strong px-3 py-2 font-body text-sm focus:border-ui-focus focus:outline-none focus:ring-2 focus:ring-ui-ring"
               placeholder="Escribe una nota para el expediente"
             />
           </label>
           <div className="mt-3 flex items-center justify-between gap-3">
-            <span className="font-body text-admin-secundario text-text-tertiary">{mensaje.length}/1000</span>
+            <span className="font-body text-xs text-ui-fg-muted">{mensaje.length}/1000</span>
             <button
               type="submit"
               disabled={enviando || !mensaje.trim()}
-              className="inline-flex min-h-11 items-center justify-center rounded-lg bg-ink px-4 py-2 font-body text-sm font-semibold text-surface-primary hover:bg-ink/90 disabled:cursor-not-allowed disabled:opacity-50"
+              className="inline-flex min-h-11 items-center justify-center rounded-lg bg-ui-brand px-4 py-2 font-body text-sm font-semibold text-ui-on-brand hover:bg-ui-brand-hover disabled:cursor-not-allowed disabled:opacity-50"
             >
               {enviando ? "Enviando..." : "Enviar"}
             </button>
@@ -930,17 +930,17 @@ function ConsentimientoItem({ consentimiento }: { consentimiento: DetalleSolicit
   }
 
   return (
-    <details className="rounded-lg border border-border-default bg-surface-primary px-3 py-2 font-body text-sm">
+    <details className="rounded-lg border border-ui-line bg-ui-card px-3 py-2 font-body text-sm">
       <summary className="cursor-pointer list-none">
         <span className="flex items-center justify-between gap-3">
-          <span className="font-medium text-ink">{ETIQUETA_CONSENTIMIENTO[consentimiento.tipo_documento] ?? consentimiento.tipo_documento}</span>
+          <span className="font-medium text-ui-fg">{ETIQUETA_CONSENTIMIENTO[consentimiento.tipo_documento] ?? consentimiento.tipo_documento}</span>
           <AdminBadge tone="success">Consentido</AdminBadge>
         </span>
-        <span className="mt-1 block text-admin-secundario text-text-tertiary">Versión {consentimiento.version} · {fecha(consentimiento.aceptado_en)} · {consentimiento.canal}</span>
+        <span className="mt-1 block text-xs text-ui-fg-muted">Versión {consentimiento.version} · {fecha(consentimiento.aceptado_en)} · {consentimiento.canal}</span>
       </summary>
-      <div className="mt-3 flex flex-wrap items-center gap-2 border-t border-border-default pt-3">
-        <span className="font-mono-ruum text-admin-secundario text-text-tertiary">Hash {truncarHash(consentimiento.hash_documento)}</span>
-        <button type="button" onClick={copiarHash} className="rounded-md border border-border-default px-2 py-1 font-body text-admin-secundario font-semibold text-text-secondary hover:bg-surface-secondary">
+      <div className="mt-3 flex flex-wrap items-center gap-2 border-t border-ui-line pt-3">
+        <span className="font-mono-ruum text-xs text-ui-fg-muted">Hash {truncarHash(consentimiento.hash_documento)}</span>
+        <button type="button" onClick={copiarHash} className="rounded-md border border-ui-line px-2 py-1 font-body text-xs font-semibold text-ui-fg-muted hover:bg-ui-muted">
           {copiado ? "Copiado" : "Copiar"}
         </button>
       </div>
@@ -992,16 +992,16 @@ function FilaDocumento({
   }
 
   return (
-    <article className={`rounded-lg border p-4 transition ${seleccionado ? "border-2 border-status-info bg-status-info-soft/40 shadow-[var(--ruum-shadow-2)]" : "border-border-default bg-surface-primary"}`}>
+    <article className={`rounded-lg border p-4 transition ${seleccionado ? "border-2 border-ui-brand bg-ui-brand-soft shadow-ui-md" : "border-ui-line bg-ui-card"}`}>
       <div className="flex flex-wrap items-start justify-between gap-3">
         <button type="button" onClick={seleccionar} className="min-w-0 text-left" disabled={procesando}>
-          <p className="font-body text-sm font-semibold text-ink">{ETIQUETA_DOCUMENTO[documento.tipo] ?? documento.tipo}</p>
-          <p className="mt-0.5 truncate font-body text-admin-secundario text-text-tertiary">Versión {documento.version} · {documento.nombre_archivo}</p>
+          <p className="font-body text-sm font-semibold text-ui-fg">{ETIQUETA_DOCUMENTO[documento.tipo] ?? documento.tipo}</p>
+          <p className="mt-0.5 truncate font-body text-xs text-ui-fg-muted">Versión {documento.version} · {documento.nombre_archivo}</p>
         </button>
-        <span className={`rounded-full border px-2.5 py-1 font-body text-admin-secundario font-semibold ${estado.clase}`}>{estado.texto}</span>
+        <span className={`rounded-full border px-2.5 py-1 font-body text-xs font-semibold ${estado.clase}`}>{estado.texto}</span>
       </div>
       {(documento.motivo_rechazo || documento.notas_admin) && (
-        <p className="mt-3 rounded-lg bg-status-warning-soft px-3 py-2 font-body text-admin-secundario text-status-warning">{documento.motivo_rechazo ?? documento.notas_admin}</p>
+        <p className="mt-3 rounded-lg bg-ui-warning-soft px-3 py-2 font-body text-xs text-ui-warning">{documento.motivo_rechazo ?? documento.notas_admin}</p>
       )}
       {error && <div className="mt-3"><Aviso tono="danger">{error}</Aviso></div>}
       <div className="mt-3 flex flex-wrap gap-2">
@@ -1014,14 +1014,14 @@ function FilaDocumento({
         )}
       </div>
       {rechazando && (
-        <div className="mt-3 rounded-lg border border-status-warning/30 bg-status-warning-soft/40 p-3">
-          <label className="font-body text-admin-secundario font-semibold text-ink" htmlFor={`motivo-${documento.id}`}>Motivo para el conductor</label>
+        <div className="mt-3 rounded-lg border border-ui-warning/30 bg-ui-warning-soft p-3">
+          <label className="font-body text-xs font-semibold text-ui-fg" htmlFor={`motivo-${documento.id}`}>Motivo para el conductor</label>
           <textarea
             id={`motivo-${documento.id}`}
             value={motivo}
             onChange={(event) => setMotivo(event.target.value)}
             maxLength={500}
-            className="mt-2 min-h-20 w-full rounded-lg border border-ink/20 bg-surface-primary px-3 py-2 font-body text-sm focus:border-focus-default focus:outline-none"
+            className="mt-2 min-h-20 w-full rounded-lg border border-ui-line-strong bg-ui-card px-3 py-2 font-body text-sm focus:border-ui-focus focus:outline-none"
             placeholder="Indica exactamente qué debe corregir."
           />
           <div className="mt-2 flex gap-2">
@@ -1077,8 +1077,8 @@ function VisorDocumento({
 
   if (!documento) {
     return (
-      <div className="flex min-h-[420px] flex-1 items-center justify-center rounded-lg border border-dashed border-border-default bg-surface-secondary px-6 text-center xl:min-h-0">
-        <p className="font-body text-sm text-text-tertiary">Selecciona un documento para validarlo.</p>
+      <div className="flex min-h-[420px] flex-1 items-center justify-center rounded-lg border border-dashed border-ui-line bg-ui-muted px-6 text-center xl:min-h-0">
+        <p className="font-body text-sm text-ui-fg-muted">Selecciona un documento para validarlo.</p>
       </div>
     );
   }
@@ -1087,21 +1087,21 @@ function VisorDocumento({
   const transformacion = `scale(${zoom}) rotate(${rotacion}deg)`;
 
   return (
-    <div className="flex min-h-[520px] flex-1 flex-col overflow-hidden rounded-lg border border-border-default bg-surface-primary xl:min-h-0">
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border-default px-4 py-3">
+    <div className="flex min-h-[520px] flex-1 flex-col overflow-hidden rounded-lg border border-ui-line bg-ui-card xl:min-h-0">
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-ui-line px-4 py-3">
         <div className="min-w-0">
-          <p className="font-body text-sm font-semibold text-ink">{ETIQUETA_DOCUMENTO[documento.tipo] ?? documento.tipo}</p>
-          <p className="truncate font-body text-admin-secundario text-text-tertiary">{documento.nombre_archivo}</p>
+          <p className="font-body text-sm font-semibold text-ui-fg">{ETIQUETA_DOCUMENTO[documento.tipo] ?? documento.tipo}</p>
+          <p className="truncate font-body text-xs text-ui-fg-muted">{documento.nombre_archivo}</p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          <button type="button" onClick={() => setZoom((valor) => Math.min(2.5, Number((valor + 0.15).toFixed(2))))} className="rounded-lg border border-border-default px-3 py-1.5 font-body text-admin-secundario font-semibold text-text-secondary hover:bg-surface-secondary">Zoom +</button>
-          <button type="button" onClick={() => setZoom((valor) => Math.max(0.5, Number((valor - 0.15).toFixed(2))))} className="rounded-lg border border-border-default px-3 py-1.5 font-body text-admin-secundario font-semibold text-text-secondary hover:bg-surface-secondary">Zoom -</button>
-          <button type="button" onClick={() => setRotacion((valor) => (valor + 90) % 360)} className="rounded-lg border border-border-default px-3 py-1.5 font-body text-admin-secundario font-semibold text-text-secondary hover:bg-surface-secondary">Rotar</button>
-          {url && <a href={url} target="_blank" rel="noreferrer" className="rounded-lg border border-border-default px-3 py-1.5 font-body text-admin-secundario font-semibold text-status-info hover:bg-surface-secondary">Abrir</a>}
-          <button type="button" onClick={onCerrar} className="rounded-lg border border-border-default px-3 py-1.5 font-body text-admin-secundario font-semibold text-text-secondary hover:bg-surface-secondary">Cerrar</button>
+          <button type="button" onClick={() => setZoom((valor) => Math.min(2.5, Number((valor + 0.15).toFixed(2))))} className="rounded-lg border border-ui-line px-3 py-1.5 font-body text-xs font-semibold text-ui-fg-muted hover:bg-ui-muted">Zoom +</button>
+          <button type="button" onClick={() => setZoom((valor) => Math.max(0.5, Number((valor - 0.15).toFixed(2))))} className="rounded-lg border border-ui-line px-3 py-1.5 font-body text-xs font-semibold text-ui-fg-muted hover:bg-ui-muted">Zoom -</button>
+          <button type="button" onClick={() => setRotacion((valor) => (valor + 90) % 360)} className="rounded-lg border border-ui-line px-3 py-1.5 font-body text-xs font-semibold text-ui-fg-muted hover:bg-ui-muted">Rotar</button>
+          {url && <a href={url} target="_blank" rel="noreferrer" className="rounded-lg border border-ui-line px-3 py-1.5 font-body text-xs font-semibold text-ui-brand-soft-fg hover:bg-ui-muted">Abrir</a>}
+          <button type="button" onClick={onCerrar} className="rounded-lg border border-ui-line px-3 py-1.5 font-body text-xs font-semibold text-ui-fg-muted hover:bg-ui-muted">Cerrar</button>
         </div>
       </div>
-      <div className="flex min-h-0 flex-1 items-center justify-center overflow-auto bg-surface-secondary p-4">
+      <div className="flex min-h-0 flex-1 items-center justify-center overflow-auto bg-ui-muted p-4">
         {url ? (
           esDocumentoVisible(documento) ? (
             esImagen ? (
@@ -1115,22 +1115,22 @@ function VisorDocumento({
               <iframe
                 title={`Visor de ${ETIQUETA_DOCUMENTO[documento.tipo] ?? documento.tipo}`}
                 src={url}
-                className="h-full min-h-[420px] w-full origin-center bg-surface-secondary transition-transform xl:min-h-0"
+                className="h-full min-h-[420px] w-full origin-center bg-ui-muted transition-transform xl:min-h-0"
                 style={{ transform: transformacion }}
               />
             )
           ) : (
             <div className="flex min-h-[320px] items-center justify-center px-6 text-center">
-              <p className="font-body text-sm text-text-tertiary">Este formato no se puede previsualizar aquí. Usa “Abrir” para revisarlo.</p>
+              <p className="font-body text-sm text-ui-fg-muted">Este formato no se puede previsualizar aquí. Usa “Abrir” para revisarlo.</p>
             </div>
           )
         ) : (
           <div className="flex min-h-[320px] items-center justify-center px-6 text-center">
-            <p className="font-body text-sm text-text-tertiary">Generando URL segura de lectura...</p>
+            <p className="font-body text-sm text-ui-fg-muted">Generando URL segura de lectura...</p>
           </div>
         )}
       </div>
-      <div className="border-t border-border-default bg-surface-primary px-4 py-3">
+      <div className="border-t border-ui-line bg-ui-card px-4 py-3">
         {error && <div className="mb-3"><Aviso tono="danger">{error}</Aviso></div>}
         {documento.estado === "en_revision" ? (
           <div className="flex flex-wrap items-center gap-2">
@@ -1138,17 +1138,17 @@ function VisorDocumento({
             <AdminButton variant="danger" onClick={() => setRechazando(true)} disabled={procesando}>Solicitar corrección</AdminButton>
           </div>
         ) : (
-          <p className="font-body text-sm text-text-tertiary">Este documento ya tiene decisión administrativa.</p>
+          <p className="font-body text-sm text-ui-fg-muted">Este documento ya tiene decisión administrativa.</p>
         )}
         {rechazando && (
-          <div className="mt-3 rounded-lg border border-status-warning/30 bg-status-warning-soft/40 p-3">
-            <label className="font-body text-admin-secundario font-semibold text-ink" htmlFor={`motivo-visor-${documento.id}`}>Motivo para el conductor</label>
+          <div className="mt-3 rounded-lg border border-ui-warning/30 bg-ui-warning-soft p-3">
+            <label className="font-body text-xs font-semibold text-ui-fg" htmlFor={`motivo-visor-${documento.id}`}>Motivo para el conductor</label>
             <textarea
               id={`motivo-visor-${documento.id}`}
               value={motivo}
               onChange={(event) => setMotivo(event.target.value)}
               maxLength={500}
-              className="mt-2 min-h-20 w-full rounded-lg border border-ink/20 bg-surface-primary px-3 py-2 font-body text-sm focus:border-focus-default focus:outline-none"
+              className="mt-2 min-h-20 w-full rounded-lg border border-ui-line-strong bg-ui-card px-3 py-2 font-body text-sm focus:border-ui-focus focus:outline-none"
               placeholder="Indica exactamente qué debe corregir."
             />
             <div className="mt-2 flex flex-wrap gap-2">
@@ -1293,7 +1293,7 @@ export default function PaginaDetalleSolicitudConductorAdmin() {
     }
   }
 
-  if (cargando) return <main className="admin-page-shell"><p className="font-body text-sm text-text-tertiary">Cargando...</p></main>;
+  if (cargando) return <main className="admin-page-shell"><p className="font-body text-sm text-ui-fg-muted">Cargando...</p></main>;
   if (!detalle) return (
     <main className="admin-page-shell">
       <AdminPageHeader
@@ -1302,7 +1302,7 @@ export default function PaginaDetalleSolicitudConductorAdmin() {
         breadcrumb={[{ label: "Conductores", href: "/conductores" }, { label: "Revisión" }]}
       />
       {aviso && <div className="mt-4"><Aviso tono={aviso.tono}>{aviso.texto}</Aviso></div>}
-      <Link href="/conductores" className="mt-4 inline-block font-body text-sm text-status-info hover:underline">Volver a la bandeja</Link>
+      <Link href="/conductores" className="mt-4 inline-block font-body text-sm text-ui-brand-soft-fg hover:underline">Volver a la bandeja</Link>
     </main>
   );
 
@@ -1336,12 +1336,12 @@ export default function PaginaDetalleSolicitudConductorAdmin() {
         tipoDatos="administrativos"
         accion={(
           <div className="flex flex-wrap justify-end gap-2">
-            <Link href="/conductores" className="inline-flex min-h-10 items-center rounded-lg border border-status-info bg-status-info px-4 py-2 font-body text-sm font-semibold text-surface-primary shadow-sm hover:bg-status-info/90">
+            <Link href="/conductores" className="inline-flex min-h-10 items-center rounded-lg border border-ui-brand bg-ui-brand px-4 py-2 font-body text-sm font-semibold text-ui-on-brand shadow-sm hover:bg-ui-brand/90">
               Regresar
             </Link>
             <AdminButton
               variant="secondary"
-              className={puedeAprobarLote ? "border-status-success bg-status-success text-surface-primary hover:bg-status-success/90" : "border-border-default bg-surface-primary text-text-secondary"}
+              className={puedeAprobarLote ? "border-ui-success bg-ui-success text-ui-on-brand hover:bg-ui-success/90" : "border-ui-line bg-ui-card text-ui-fg-muted"}
               loading={procesando && !accion}
               disabled={!puedeAprobarLote || procesando}
               onClick={() => void aprobarTodosDocumentos(documentosLote)}
@@ -1365,10 +1365,10 @@ export default function PaginaDetalleSolicitudConductorAdmin() {
 
       <div className="mt-5 grid gap-6 xl:h-[calc(100vh-10rem)] xl:grid-cols-[minmax(340px,0.35fr)_minmax(560px,0.65fr)] xl:overflow-hidden">
         <aside className="space-y-5 xl:min-h-0 xl:overflow-y-auto xl:pr-1">
-          <section className="rounded-lg border border-border-default bg-surface-primary p-4 shadow-[var(--ruum-shadow-1)]">
+          <section className="rounded-lg border border-ui-line bg-ui-card p-4 shadow-ui-sm">
             <div className="flex flex-wrap items-start justify-between gap-4">
               <div className="min-w-0">
-                <p className="font-body text-admin-secundario font-semibold uppercase tracking-[0.14em] text-text-tertiary">Ficha rápida</p>
+                <p className="font-body text-xs font-semibold uppercase tracking-[0.14em] text-ui-fg-muted">Ficha rápida</p>
                 <QuickActionsBar
                   nombre={nombre}
                   telefono={telefonoContacto}
@@ -1411,9 +1411,9 @@ export default function PaginaDetalleSolicitudConductorAdmin() {
             </div>
           </PassportCard>
 
-          <SeccionAcordeon titulo="Documentos vigentes" distintivo={<span className="font-body text-admin-secundario text-text-tertiary">{documentos.length} documento(s)</span>}>
+          <SeccionAcordeon titulo="Documentos vigentes" distintivo={<span className="font-body text-xs text-ui-fg-muted">{documentos.length} documento(s)</span>}>
             <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-1">
-              {documentos.length === 0 ? <p className="font-body text-sm text-text-tertiary">No hay documentos vigentes.</p> : documentos.map((documento) => (
+              {documentos.length === 0 ? <p className="font-body text-sm text-ui-fg-muted">No hay documentos vigentes.</p> : documentos.map((documento) => (
                 <FilaDocumento
                   key={documento.id}
                   documento={documento}
@@ -1425,7 +1425,7 @@ export default function PaginaDetalleSolicitudConductorAdmin() {
             </div>
           </SeccionAcordeon>
 
-          <section className="sticky bottom-4 z-20 rounded-lg border border-border-default bg-surface-primary p-4 shadow-[var(--ruum-shadow-3)]">
+          <section className="sticky bottom-4 z-20 rounded-lg border border-ui-line bg-ui-card p-4 shadow-ui-md">
             <h2 className="font-display text-lg font-semibold">Decisión administrativa</h2>
             {solicitud.estado === "en_revision" ? (
               <>
@@ -1437,23 +1437,23 @@ export default function PaginaDetalleSolicitudConductorAdmin() {
                   <div className="mt-3 space-y-2">
                     <IndicadorChecklist etiqueta="Documentos aprobados" valor={`${documentosAprobadosCount}/3`} completo={documentosAprobados} />
                     <IndicadorChecklist etiqueta="Consentimientos registrados" valor={`${consentimientosRegistradosCount}/4`} completo={consentimientosCompletos} />
-                    <p className="font-body text-admin-secundario text-text-tertiary">Aprobar solicitud se habilita cuando los documentos requeridos y consentimientos estén completos.</p>
+                    <p className="font-body text-xs text-ui-fg-muted">Aprobar solicitud se habilita cuando los documentos requeridos y consentimientos estén completos.</p>
                   </div>
                 )}
               </>
             ) : (
-              <p className="mt-3 font-body text-sm text-text-tertiary">La solicitud no admite una decisión final en su estado actual.</p>
+              <p className="mt-3 font-body text-sm text-ui-fg-muted">La solicitud no admite una decisión final en su estado actual.</p>
             )}
             {accion && (
-              <div className="mt-4 rounded-lg border border-border-default bg-surface-secondary p-4">
-                <label className="font-body text-sm font-medium" htmlFor="motivo-decision">Motivo de la decisión {accion === "rechazar" && <span className="text-status-error">*</span>}</label>
+              <div className="mt-4 rounded-lg border border-ui-line bg-ui-muted p-4">
+                <label className="font-body text-sm font-medium" htmlFor="motivo-decision">Motivo de la decisión {accion === "rechazar" && <span className="text-ui-danger">*</span>}</label>
                 <textarea
                   id="motivo-decision"
                   value={motivo}
                   onChange={(event) => setMotivo(event.target.value)}
                   maxLength={800}
                   placeholder={accion === "aprobar" ? "Opcional: observaciones de la aprobación." : "Explica el motivo del rechazo."}
-                  className="mt-2 min-h-24 w-full rounded-lg border border-ink/20 bg-surface-primary px-3 py-2 font-body text-sm focus:border-focus-default focus:outline-none"
+                  className="mt-2 min-h-24 w-full rounded-lg border border-ui-line-strong bg-ui-card px-3 py-2 font-body text-sm focus:border-ui-focus focus:outline-none"
                 />
                 <div className="mt-3 flex flex-wrap gap-2">
                   <AdminButton variant={accion === "rechazar" ? "danger" : "primary"} onClick={decidir} loading={procesando} disabled={accion === "rechazar" && motivo.trim().length < 5}>
@@ -1468,7 +1468,7 @@ export default function PaginaDetalleSolicitudConductorAdmin() {
           <HistorialAcordeon historial={historial} />
 
           <div className="flex justify-end">
-            <span className="inline-flex min-h-10 items-center rounded-lg border border-border-default bg-ink/[0.04] px-4 py-2 font-body text-sm font-semibold text-text-disabled">
+            <span className="inline-flex min-h-10 items-center rounded-lg border border-ui-line bg-ui-brand/[0.04] px-4 py-2 font-body text-sm font-semibold text-ui-fg-muted">
               Detalle operativo centralizado en este expediente
             </span>
           </div>

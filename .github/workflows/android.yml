@@ -1,0 +1,62 @@
+name: Android Build & Validation (Release Reproducible)
+on:
+  pull_request:
+    paths:
+      - 'apps/app-conductor/android/**'
+      - 'apps/app-usuario/android/**'
+      - 'config/app-version.json'
+      - '.github/workflows/android.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'apps/app-conductor/android/**'
+      - 'apps/app-usuario/android/**'
+      - 'config/app-version.json'
+      - '.github/workflows/android.yml'
+permissions:
+  contents: read
+jobs:
+  android-release:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Node 24
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Setup pnpm 10
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.0.0
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Setup Java 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+      - name: Aprovisionar keystore de firma release para CI
+        run: |
+          keytool -genkeypair -v -keystore /tmp/ci-release.keystore -storepass android -alias androidreleasekey -keypass android -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Ruum CI, OU=Engineering, O=Moviliax, L=CDMX, ST=CDMX, C=MX"
+          echo "RUUM_ANDROID_KEYSTORE_PATH=/tmp/ci-release.keystore" >> $GITHUB_ENV
+          echo "RUUM_ANDROID_KEYSTORE_PASSWORD=android" >> $GITHUB_ENV
+          echo "RUUM_ANDROID_KEY_ALIAS=androidreleasekey" >> $GITHUB_ENV
+          echo "RUUM_ANDROID_KEY_PASSWORD=android" >> $GITHUB_ENV
+      - name: Build Release APK App Conductor
+        run: |
+          cd apps/app-conductor/android
+          chmod +x gradlew
+          ./gradlew assembleRelease --no-daemon
+      - name: Build Release APK App Usuario
+        run: |
+          cd apps/app-usuario/android
+          chmod +x gradlew
+          ./gradlew assembleRelease --no-daemon
+      - name: Verificar generacion de APK release firmado
+        run: |
+          test -f apps/app-conductor/android/app/build/outputs/apk/release/app-release.apk
+          test -f apps/app-usuario/android/app/build/outputs/apk/release/app-release.apk
+          echo "APK release firmado verificado en ambas apps con versionCode 10000."

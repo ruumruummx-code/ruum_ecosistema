@@ -1,9 +1,13 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
+
+vi.mock("server-only", () => ({}));
+
 import {
   generarHashInputsTarifa,
   generarSnapshotFirmado,
   verificarSnapshotFirmado,
   registrarDivergenciaTarifa,
+  obtenerSecretoSnapshot,
   type InputsTarifaSnapshot,
 } from "./tarifa-snapshot";
 
@@ -170,6 +174,41 @@ describe("tarifa-snapshot — RUUM-USR-F6-001 (CB-1)", () => {
       expect(evalMontoInvalido.esDivergente).toBe(true);
       expect(evalMontoInvalido.accionOperativa).toBe("rechazo_bloqueo");
       expect(evalMontoInvalido.motivo).toBe("monto_cliente_negativo_o_cero");
+    });
+  });
+
+  describe("obtenerSecretoSnapshot — RUUM-SEC-003 (F0.3)", () => {
+    it("falla con throw si NODE_ENV === 'production' y falta TARIFA_SNAPSHOT_SECRET", () => {
+      vi.stubEnv("NODE_ENV", "production");
+      vi.stubEnv("TARIFA_SNAPSHOT_SECRET", "");
+
+      expect(() => obtenerSecretoSnapshot()).toThrow(
+        /TARIFA_SNAPSHOT_SECRET es obligatoria en producción/i
+      );
+    });
+
+    it("falla con throw si NODE_ENV === 'production' y TARIFA_SNAPSHOT_SECRET tiene menos de 32 caracteres", () => {
+      vi.stubEnv("NODE_ENV", "production");
+      vi.stubEnv("TARIFA_SNAPSHOT_SECRET", "secreto-corto-inseguro-12345");
+
+      expect(() => obtenerSecretoSnapshot()).toThrow(
+        /debe contener al menos 32 caracteres/i
+      );
+    });
+
+    it("retorna el secreto configurado en producción si es válido (>= 32 chars)", () => {
+      const secretoValido = "un-secreto-de-produccion-muy-largo-y-robusto-de-mas-de-32-chars";
+      vi.stubEnv("NODE_ENV", "production");
+      vi.stubEnv("TARIFA_SNAPSHOT_SECRET", secretoValido);
+
+      expect(obtenerSecretoSnapshot()).toBe(secretoValido);
+    });
+
+    it("en desarrollo retorna fallback local seguro si no está definida la variable", () => {
+      vi.stubEnv("NODE_ENV", "development");
+      vi.stubEnv("TARIFA_SNAPSHOT_SECRET", "");
+
+      expect(obtenerSecretoSnapshot()).toBe("ruum-dev-snapshot-secret-local-32chars");
     });
   });
 });

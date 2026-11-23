@@ -111,16 +111,16 @@ export function VerificacionRepuveAdmin({ trasladoId }: { trasladoId: string }) 
       aria-label="Verificación REPUVE del traslado"
       className={`mt-6 rounded-xl border p-5 ${
         requiereAtencionExcepcion
-          ? "border-amber-500 bg-amber-50/40"
-          : "border-border-default bg-surface-primary"
+          ? "border-ui-warning bg-ui-warning-soft"
+          : "border-ui-line bg-ui-card"
       }`}
     >
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div>
-          <p className="font-body text-xs uppercase tracking-wide text-text-tertiary">
+          <p className="font-body text-xs uppercase tracking-wide text-ui-fg-muted">
             Control de legalidad e identidad en origen
           </p>
-          <h2 className="mt-0.5 font-display text-lg font-semibold text-ink">
+          <h2 className="mt-0.5 font-display text-lg font-semibold text-ui-fg">
             Verificación REPUVE y cotejo de VIN / Placas
           </h2>
         </div>
@@ -128,10 +128,10 @@ export function VerificacionRepuveAdmin({ trasladoId }: { trasladoId: string }) 
         <span
           className={`rounded-full px-3 py-1 font-body text-xs font-semibold ${
             verificacionValida
-              ? "bg-emerald-100 text-emerald-900"
+              ? "bg-ui-success-soft text-ui-success"
               : ultima
-              ? "bg-amber-200 text-amber-950"
-              : "bg-slate-200 text-slate-800"
+              ? "bg-ui-warning-soft text-ui-warning"
+              : "bg-ui-neutral-soft text-ui-neutral"
           }`}
         >
           {tieneOverrideActivo
@@ -145,13 +145,13 @@ export function VerificacionRepuveAdmin({ trasladoId }: { trasladoId: string }) 
       </div>
 
       {error && (
-        <p role="alert" className="mt-2 font-body text-sm text-status-error">
+        <p role="alert" className="mt-2 font-body text-sm text-ui-danger">
           {error}
         </p>
       )}
 
       {verificaciones.length === 0 ? (
-        <p className="mt-3 font-body text-sm text-text-secondary">
+        <p className="mt-3 font-body text-sm text-ui-fg-muted">
           Aún no se han registrado consultas REPUVE para este traslado.
         </p>
       ) : (
@@ -159,27 +159,27 @@ export function VerificacionRepuveAdmin({ trasladoId }: { trasladoId: string }) 
           {verificaciones.map((v) => (
             <li
               key={v.id}
-              className="rounded-lg border border-border-default bg-surface-primary p-3.5 text-sm"
+              className="rounded-lg border border-ui-line bg-ui-card p-3.5 text-sm"
             >
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <span className="font-semibold">
                   {ETIQUETA_RESULTADO[v.resultado] ?? v.resultado}
                 </span>
-                <span className="font-mono-ruum text-xs text-text-tertiary">
+                <span className="font-mono-ruum text-xs text-ui-fg-muted">
                   {new Date(v.creado_en).toLocaleString("es-MX")} · Actor: {v.actor_rol}
                 </span>
               </div>
 
               <div className="mt-2 grid gap-2 text-xs sm:grid-cols-2">
                 <div>
-                  <span className="text-text-tertiary">VIN esperado vs físico: </span>
+                  <span className="text-ui-fg-muted">VIN esperado vs físico: </span>
                   <span className="font-mono-ruum font-semibold">
                     {v.vin_esperado} / {v.vin_fisico}
                   </span>{" "}
                   <span>({v.coincide_vin ? "Coincide" : "Discrepancia"})</span>
                 </div>
                 <div>
-                  <span className="text-text-tertiary">Placas esperadas vs físicas: </span>
+                  <span className="text-ui-fg-muted">Placas esperadas vs físicas: </span>
                   <span className="font-mono-ruum font-semibold">
                     {v.placas_esperadas ?? "S/P"} / {v.placas_fisicas ?? "S/P"}
                   </span>{" "}
@@ -188,7 +188,7 @@ export function VerificacionRepuveAdmin({ trasladoId }: { trasladoId: string }) 
               </div>
 
               {v.es_override_admin && v.motivo_override && (
-                <p className="mt-2 rounded bg-emerald-50 p-2 text-xs text-emerald-950">
+                <p className="mt-2 rounded bg-ui-success-soft p-2 text-xs text-ui-success">
                   <strong>Motivo de override autorizado:</strong> {v.motivo_override}
                 </p>
               )}
@@ -199,18 +199,18 @@ export function VerificacionRepuveAdmin({ trasladoId }: { trasladoId: string }) 
                     href={v.url_captura_firmada}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="font-semibold text-status-info underline"
+                    className="font-semibold text-ui-brand-soft-fg underline"
                   >
                     Ver captura de pantalla REPUVE
                   </a>
                 ) : v.captura_path ? (
-                  <span className="font-mono-ruum text-text-tertiary">
+                  <span className="font-mono-ruum text-ui-fg-muted">
                     Ruta: {v.captura_path}
                   </span>
                 ) : null}
 
                 {v.requiere_auditoria && (
-                  <span className="rounded bg-amber-100 px-2 py-0.5 font-semibold text-amber-900">
+                  <span className="rounded bg-ui-warning-soft px-2 py-0.5 font-semibold text-ui-warning">
                     Muestreo de auditoría: {v.auditoria_dictamen ?? "pendiente"}
                   </span>
                 )}
@@ -218,7 +218,7 @@ export function VerificacionRepuveAdmin({ trasladoId }: { trasladoId: string }) 
 
               {v.requiere_auditoria &&
                 (!v.auditoria_dictamen || v.auditoria_dictamen === "pendiente") && (
-                  <div className="mt-3 flex flex-wrap items-center gap-2 border-t border-border-default pt-2.5">
+                  <div className="mt-3 flex flex-wrap items-center gap-2 border-t border-ui-line pt-2.5">
                     <input
                       type="text"
                       placeholder="Notas de auditoría (obligatorio si se observa)"
@@ -226,13 +226,13 @@ export function VerificacionRepuveAdmin({ trasladoId }: { trasladoId: string }) 
                       onChange={(e) =>
                         setNotasAuditoria((prev) => ({ ...prev, [v.id]: e.target.value }))
                       }
-                      className="flex-1 rounded border border-border-default px-2.5 py-1 text-xs"
+                      className="flex-1 rounded border border-ui-line px-2.5 py-1 text-xs"
                     />
                     <button
                       type="button"
                       disabled={guardando}
                       onClick={() => void manejarDictamen(v.id, "aprobada")}
-                      className="rounded border border-emerald-600 px-2.5 py-1 text-xs font-semibold text-emerald-800"
+                      className="rounded border border-ui-success px-2.5 py-1 text-xs font-semibold text-ui-success"
                     >
                       Aprobar muestreo
                     </button>
@@ -240,7 +240,7 @@ export function VerificacionRepuveAdmin({ trasladoId }: { trasladoId: string }) 
                       type="button"
                       disabled={guardando}
                       onClick={() => void manejarDictamen(v.id, "observada")}
-                      className="rounded border border-red-600 px-2.5 py-1 text-xs font-semibold text-red-800"
+                      className="rounded border border-ui-danger px-2.5 py-1 text-xs font-semibold text-ui-danger"
                     >
                       Marcar observada
                     </button>
@@ -252,7 +252,7 @@ export function VerificacionRepuveAdmin({ trasladoId }: { trasladoId: string }) 
       )}
 
       {!verificacionValida && (
-        <form onSubmit={manejarOverride} className="mt-4 border-t border-border-default pt-4">
+        <form onSubmit={manejarOverride} className="mt-4 border-t border-ui-line pt-4">
           <label htmlFor="motivo-override-repuve" className="block text-xs font-semibold">
             Autorizar excepción REPUVE (Override con motivo y auditoría)
           </label>
@@ -264,12 +264,12 @@ export function VerificacionRepuveAdmin({ trasladoId }: { trasladoId: string }) 
             placeholder="Documenta la validación documental o jurídica realizada por soporte (mínimo 10 caracteres)..."
             value={motivoOverride}
             onChange={(e) => setMotivoOverride(e.target.value)}
-            className="mt-1.5 block w-full rounded-lg border border-border-default bg-surface-primary p-2 text-sm"
+            className="mt-1.5 block w-full rounded-lg border border-ui-line bg-ui-card p-2 text-sm"
           />
           <button
             type="submit"
             disabled={guardando || motivoOverride.trim().length < 10}
-            className="mt-2 rounded-lg border border-ink bg-signal px-4 py-1.5 font-body text-xs font-semibold text-ink disabled:opacity-50"
+            className="mt-2 rounded-lg border border-ui-field bg-ui-brand px-4 py-1.5 font-body text-xs font-semibold text-ui-fg disabled:opacity-50"
           >
             {guardando ? "Autorizando…" : "Autorizar avance por excepción REPUVE"}
           </button>

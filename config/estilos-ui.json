@@ -3,7 +3,8 @@
   "raices": [
     "apps/app-usuario/src",
     "packages/ui/src",
-    "apps/app-conductor/src"
+    "apps/app-conductor/src",
+    "apps/panel-admin/src"
   ],
   "migradas": [
     "packages/ui/src/base",
@@ -27,7 +28,8 @@
     "apps/app-conductor/src/app/nueva-password",
     "apps/app-conductor/src/app/onboarding",
     "apps/app-conductor/src/app/globals.css",
-    "apps/app-conductor/src/app/shell-contract.css"
+    "apps/app-conductor/src/app/shell-contract.css",
+    "apps/panel-admin/src"
   ],
   "excluir": [
     "packages/ui/src/styles/tokens.css",

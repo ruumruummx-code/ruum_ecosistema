@@ -19,16 +19,12 @@
 // dos números reales.
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { validarTelefonos, determinarRolLlamador, debeReutilizarSesion } from "./logica.ts";
+import { construirCabecerasCors, manejarCors } from "../_shared/cors-documentos.ts";
 
-const CABECERAS_CORS = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, content-type"
-};
-
-function respuestaJson(body: Record<string, unknown>, status = 200) {
+function respuestaJson(body: Record<string, unknown>, status = 200, req?: Request) {
   return new Response(JSON.stringify(body), {
     status,
-    headers: { ...CABECERAS_CORS, "Content-Type": "application/json" }
+    headers: { ...construirCabecerasCors(req), "Content-Type": "application/json" }
   });
 }
 
@@ -58,9 +54,8 @@ async function llamarTwilio(ruta: string, cuerpo: Record<string, string>) {
 }
 
 Deno.serve(async (req) => {
-  if (req.method === "OPTIONS") {
-    return new Response(null, { headers: CABECERAS_CORS });
-  }
+  const rechazoCors = manejarCors(req);
+  if (rechazoCors) return rechazoCors;
 
   try {
     const autorizacion = req.headers.get("Authorization");
@@ -188,6 +183,6 @@ Deno.serve(async (req) => {
     return respuestaJson({ numeroProxy: numeroVirtual });
   } catch (error) {
     console.error("Error creando llamada enmascarada:", error);
-    return respuestaJson({ error: error instanceof Error ? error.message : "Error interno" }, 500);
+    return respuestaJson({ error: "No fue posible iniciar la llamada enmascarada. Intenta de nuevo." }, 500, req);
   }
 });

@@ -9,6 +9,7 @@
 //   donde se relaja el genérico de supabase-js, documentado in situ).
 // - Resto del monorepo: el total no puede crecer respecto a la línea base
 //   (ratchet). Cada migración futura debe BAJAR esta constante, nunca subirla.
+// - F3.1: trinquete sobre los `as unknown as` (baseline 192 que solo baja).
 import { readFileSync, readdirSync, statSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -18,7 +19,7 @@ const DIRS = ["packages/api/src", "packages/shared/src", "packages/ui/src"];
 
 // Línea base 2026-10-15 (tras migrar traslados.ts + tarifas.ts a rpcTipado).
 const BASELINE_TOTAL = 46;
-// Línea base Fase 3 — Consistencia tipada (as unknown as en packages/).
+// Línea base F3.1 (2026-11-22): 192 `as unknown as` registrados en packages/* (solo baja).
 const BASELINE_UNKNOWN_AS = 192;
 
 const TOLERANCIA_CERO = [
@@ -52,7 +53,7 @@ function* archivosTs(dir) {
   }
 }
 
-function contar(raiz, rel) {
+function contarNeverAny(raiz, rel) {
   const contenido = sinComentarios(readFileSync(join(raiz, rel), "utf8"));
   return (contenido.match(/\bas\s+(never|any)\b/g) ?? []).length;
 }
@@ -63,36 +64,36 @@ function contarUnknownAs(raiz, rel) {
 }
 
 let fallos = 0;
-let total = 0;
+let totalNeverAny = 0;
 let totalUnknownAs = 0;
-const porArchivo = new Map();
+const porArchivoNeverAny = new Map();
 const porArchivoUnknownAs = new Map();
 
 for (const dir of DIRS) {
   for (const ruta of archivosTs(join(RAIZ, dir))) {
     const rel = ruta.substring(RAIZ.length + 1).replace(/\\/g, "/");
-    const n = contar(RAIZ, rel);
-    if (n > 0) {
-      total += n;
-      porArchivo.set(rel, n);
+    const nNeverAny = contarNeverAny(RAIZ, rel);
+    if (nNeverAny > 0) {
+      totalNeverAny += nNeverAny;
+      porArchivoNeverAny.set(rel, nNeverAny);
     }
-    const nU = contarUnknownAs(RAIZ, rel);
-    if (nU > 0) {
-      totalUnknownAs += nU;
-      porArchivoUnknownAs.set(rel, nU);
+    const nUnknownAs = contarUnknownAs(RAIZ, rel);
+    if (nUnknownAs > 0) {
+      totalUnknownAs += nUnknownAs;
+      porArchivoUnknownAs.set(rel, nUnknownAs);
     }
   }
 }
 
 for (const rel of TOLERANCIA_CERO) {
-  const n = porArchivo.get(rel) ?? 0;
+  const n = porArchivoNeverAny.get(rel) ?? 0;
   if (n > 0) {
     console.error(`[rpc-casts] PROHIBIDO: ${rel} tiene ${n} cast(s) 'as never/as any' (tolerancia cero, usar rpcTipado).`);
     fallos++;
   }
 }
 
-const nFunciones = porArchivo.get(PRESUPUESTO_FUNCIONES.archivo) ?? 0;
+const nFunciones = porArchivoNeverAny.get(PRESUPUESTO_FUNCIONES.archivo) ?? 0;
 if (nFunciones > PRESUPUESTO_FUNCIONES.maximo) {
   console.error(
     `[rpc-casts] ${PRESUPUESTO_FUNCIONES.archivo} tiene ${nFunciones} casts (máximo documentado: ${PRESUPUESTO_FUNCIONES.maximo}).`
@@ -100,16 +101,16 @@ if (nFunciones > PRESUPUESTO_FUNCIONES.maximo) {
   fallos++;
 }
 
-if (total > BASELINE_TOTAL) {
-  console.error(`[rpc-casts] Total ${total} supera la línea base ${BASELINE_TOTAL}: no se puede añadir 'as never/as any' nuevo; migrar a rpcTipado y bajar la base.`);
-  for (const [rel, n] of [...porArchivo.entries()].sort((a, b) => b[1] - a[1]).slice(0, 10)) {
+if (totalNeverAny > BASELINE_TOTAL) {
+  console.error(`[rpc-casts] Total 'as never/any' ${totalNeverAny} supera la línea base ${BASELINE_TOTAL}: no se puede añadir 'as never/as any' nuevo; migrar a rpcTipado y bajar la base.`);
+  for (const [rel, n] of [...porArchivoNeverAny.entries()].sort((a, b) => b[1] - a[1]).slice(0, 10)) {
     console.error(`  ${n}  ${rel}`);
   }
   fallos++;
 }
 
 if (totalUnknownAs > BASELINE_UNKNOWN_AS) {
-  console.error(`[rpc-casts] Total 'as unknown as' (${totalUnknownAs}) supera la línea base (${BASELINE_UNKNOWN_AS}): no se permite añadir casts sin tipado.`);
+  console.error(`[rpc-casts] Total 'as unknown as' ${totalUnknownAs} supera la línea base ${BASELINE_UNKNOWN_AS}: trinquete activo, no se puede añadir 'as unknown as'; debe mantenerse o descender.`);
   for (const [rel, n] of [...porArchivoUnknownAs.entries()].sort((a, b) => b[1] - a[1]).slice(0, 10)) {
     console.error(`  ${n}  ${rel}`);
   }
@@ -117,4 +118,4 @@ if (totalUnknownAs > BASELINE_UNKNOWN_AS) {
 }
 
 if (fallos > 0) process.exit(1);
-console.log(`[rpc-casts] OK: never/any total ${total} (base ${BASELINE_TOTAL}), unknown as total ${totalUnknownAs} (base ${BASELINE_UNKNOWN_AS}), archivos migrados sin casts.`);
+console.log(`[rpc-casts] OK: never/any total ${totalNeverAny} (base ${BASELINE_TOTAL}), unknown as total ${totalUnknownAs} (base ${BASELINE_UNKNOWN_AS}), tolerancia cero y funciones en presupuesto.`);

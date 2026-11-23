@@ -9,9 +9,18 @@ type EstadoDisputa = Database["public"]["Enums"]["estado_disputa"];
 type ResolucionDisputa = Database["public"]["Enums"]["resolucion_disputa"];
 type EstadoReclamoSeguro = Database["public"]["Enums"]["estado_reclamo_seguro"];
 
-export async function listarDisputasAdmin(cliente: Cliente): Promise<DisputaRow[]> {
+export async function listarDisputasAdmin(
+  cliente: Cliente,
+  opciones?: { limite?: number; offset?: number }
+): Promise<DisputaRow[]> {
   await assertAdminPermission(cliente, "disputas:leer");
-  const { data, error } = await cliente.from("disputas").select("*").order("abierta_en", { ascending: false });
+  const limite = Math.min(Math.max(opciones?.limite ?? 50, 1), 500);
+  const offset = Math.max(opciones?.offset ?? 0, 0);
+  const { data, error } = await cliente
+    .from("disputas")
+    .select("*")
+    .order("abierta_en", { ascending: false })
+    .range(offset, offset + limite - 1);
   if (error) throw error;
   return data ?? [];
 }
@@ -41,9 +50,18 @@ export async function resolverDisputaAdmin(
   if (error) throw error;
 }
 
-export async function listarReclamosSeguroAdmin(cliente: Cliente): Promise<ReclamoSeguroRow[]> {
+export async function listarReclamosSeguroAdmin(
+  cliente: Cliente,
+  opciones?: { limite?: number; offset?: number }
+): Promise<ReclamoSeguroRow[]> {
   await assertAdminPermission(cliente, "reclamos_seguro:leer");
-  const { data, error } = await cliente.from("reclamos_seguro").select("*").order("abierto_en", { ascending: false });
+  const limite = Math.min(Math.max(opciones?.limite ?? 50, 1), 500);
+  const offset = Math.max(opciones?.offset ?? 0, 0);
+  const { data, error } = await cliente
+    .from("reclamos_seguro")
+    .select("*")
+    .order("abierto_en", { ascending: false })
+    .range(offset, offset + limite - 1);
   if (error) throw error;
   return data ?? [];
 }

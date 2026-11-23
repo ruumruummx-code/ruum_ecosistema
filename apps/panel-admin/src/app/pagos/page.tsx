@@ -178,28 +178,28 @@ export default function PaginaPagosAdmin() {
                 <thead>
                   <tr>
                     {["Traslado", "Vehículo", "Tarifa", "Método", "Estatus", "PaymentIntent", "Evento Stripe", "Fecha"].map((col) => (
-                      <th key={col} className="border-b border-ink/10 px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-text-tertiary">{col}</th>
+                      <th key={col} className="border-b border-ui-line px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-ui-fg-muted">{col}</th>
                     ))}
                   </tr>
                 </thead>
                 <tbody>
                   {pagos.length === 0 ? (
-                    <tr><td colSpan={8} className="px-3 py-6 text-center text-text-tertiary">No hay pagos registrados.</td></tr>
+                    <tr><td colSpan={8} className="px-3 py-6 text-center text-ui-fg-muted">No hay pagos registrados.</td></tr>
                   ) : pagos.map((pago: Pago) => {
                     const pasaporte = pago.traslado_id ? pasaportePorId.get(pago.traslado_id) : null;
                     const vehiculo = pasaporte ? [pasaporte.vehiculo_marca, pasaporte.vehiculo_modelo].filter(Boolean).join(" ") : "Sin pasaporte";
                     return (
                       <tr key={pago.id} className="align-top">
-                        <td className="border-b border-ink/10 px-3 py-3" data-label="Traslado">
-                          {pago.traslado_id ? <Link href={`/viajes/${pago.traslado_id}`} className="text-status-info">{pago.traslado_id.slice(0, 8).toUpperCase()}</Link> : <span className="text-text-tertiary">Sin traslado</span>}
+                        <td className="border-b border-ui-line px-3 py-3" data-label="Traslado">
+                          {pago.traslado_id ? <Link href={`/viajes/${pago.traslado_id}`} className="text-ui-brand-soft-fg">{pago.traslado_id.slice(0, 8).toUpperCase()}</Link> : <span className="text-ui-fg-muted">Sin traslado</span>}
                         </td>
-                        <td className="border-b border-ink/10 px-3 py-3 text-text-secondary" data-label="Vehículo">{vehiculo}</td>
-                        <td className="border-b border-ink/10 px-3 py-3 font-mono-ruum" data-label="Tarifa">{moneda(pago.monto)}</td>
-                        <td className="border-b border-ink/10 px-3 py-3 text-text-secondary" data-label="Método">{pago.metodo} · {pago.momento.replaceAll("_", " ")}</td>
-                        <td className="border-b border-ink/10 px-3 py-3" data-label="Estatus"><AdminBadge tone={pago.estado === "pendiente" ? "warning" : pago.estado === "fallido" ? "danger" : "success"}>{pago.estado}</AdminBadge></td>
-                        <td className="border-b border-ink/10 px-3 py-3 font-mono-ruum text-admin-tabla text-text-secondary" data-label="PaymentIntent">{pago.stripe_payment_intent_id ?? "Pendiente"}</td>
-                        <td className="border-b border-ink/10 px-3 py-3 font-mono-ruum text-admin-tabla text-text-secondary" data-label="Evento">{pago.stripe_event_id ?? "Sin evento"}</td>
-                        <td className="border-b border-ink/10 px-3 py-3 text-text-secondary" data-label="Fecha">{fecha(pago.registrado_en)}</td>
+                        <td className="border-b border-ui-line px-3 py-3 text-ui-fg-muted" data-label="Vehículo">{vehiculo}</td>
+                        <td className="border-b border-ui-line px-3 py-3 font-mono-ruum" data-label="Tarifa">{moneda(pago.monto)}</td>
+                        <td className="border-b border-ui-line px-3 py-3 text-ui-fg-muted" data-label="Método">{pago.metodo} · {pago.momento.replaceAll("_", " ")}</td>
+                        <td className="border-b border-ui-line px-3 py-3" data-label="Estatus"><AdminBadge tone={pago.estado === "pendiente" ? "warning" : pago.estado === "fallido" ? "danger" : "success"}>{pago.estado}</AdminBadge></td>
+                        <td className="border-b border-ui-line px-3 py-3 font-mono-ruum text-sm text-ui-fg-muted" data-label="PaymentIntent">{pago.stripe_payment_intent_id ?? "Pendiente"}</td>
+                        <td className="border-b border-ui-line px-3 py-3 font-mono-ruum text-sm text-ui-fg-muted" data-label="Evento">{pago.stripe_event_id ?? "Sin evento"}</td>
+                        <td className="border-b border-ui-line px-3 py-3 text-ui-fg-muted" data-label="Fecha">{fecha(pago.registrado_en)}</td>
                       </tr>
                     );
                   })}
@@ -217,25 +217,25 @@ export default function PaginaPagosAdmin() {
                 <thead>
                   <tr>
                     {["Conductor", "Periodo", "Bruto", "Ajustes", "Depósito neto", "Estatus", "Referencia", "Procesado"].map((col) => (
-                      <th key={col} className="border-b border-ink/10 px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-text-tertiary">{col}</th>
+                      <th key={col} className="border-b border-ui-line px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-ui-fg-muted">{col}</th>
                     ))}
                   </tr>
                 </thead>
                 <tbody>
                   {payouts.length === 0 ? (
-                    <tr><td colSpan={8} className="px-3 py-6 text-center text-text-tertiary">No hay payouts registrados.</td></tr>
+                    <tr><td colSpan={8} className="px-3 py-6 text-center text-ui-fg-muted">No hay payouts registrados.</td></tr>
                   ) : payouts.map((payout: Payout) => {
                     const conductor = conductorPorId.get(payout.conductor_id);
                     return (
                       <tr key={payout.id} className="align-top">
-                        <td className="border-b border-ink/10 px-3 py-3 text-text-secondary" data-label="Conductor">{conductor?.nombre ?? payout.conductor_id.slice(0, 8)}</td>
-                        <td className="border-b border-ink/10 px-3 py-3 text-text-secondary" data-label="Periodo">{payout.periodo_inicio} → {payout.periodo_fin}</td>
-                        <td className="border-b border-ink/10 px-3 py-3 font-mono-ruum" data-label="Bruto">{moneda(payout.monto_bruto)}</td>
-                        <td className="border-b border-ink/10 px-3 py-3 font-mono-ruum" data-label="Ajustes">{moneda(payout.ajustes)}</td>
-                        <td className="border-b border-ink/10 px-3 py-3 font-mono-ruum" data-label="Depósito neto">{moneda(payout.monto_neto)}</td>
-                        <td className="border-b border-ink/10 px-3 py-3" data-label="Estatus"><AdminBadge tone={payout.estado === "pendiente" ? "warning" : payout.estado === "fallido" ? "danger" : "success"}>{payout.estado}</AdminBadge></td>
-                        <td className="border-b border-ink/10 px-3 py-3 font-mono-ruum text-admin-tabla text-text-secondary" data-label="Referencia">{payout.referencia_pago ?? "Pendiente"}</td>
-                        <td className="border-b border-ink/10 px-3 py-3 text-text-secondary" data-label="Procesado">{fecha(payout.procesado_en)}</td>
+                        <td className="border-b border-ui-line px-3 py-3 text-ui-fg-muted" data-label="Conductor">{conductor?.nombre ?? payout.conductor_id.slice(0, 8)}</td>
+                        <td className="border-b border-ui-line px-3 py-3 text-ui-fg-muted" data-label="Periodo">{payout.periodo_inicio} → {payout.periodo_fin}</td>
+                        <td className="border-b border-ui-line px-3 py-3 font-mono-ruum" data-label="Bruto">{moneda(payout.monto_bruto)}</td>
+                        <td className="border-b border-ui-line px-3 py-3 font-mono-ruum" data-label="Ajustes">{moneda(payout.ajustes)}</td>
+                        <td className="border-b border-ui-line px-3 py-3 font-mono-ruum" data-label="Depósito neto">{moneda(payout.monto_neto)}</td>
+                        <td className="border-b border-ui-line px-3 py-3" data-label="Estatus"><AdminBadge tone={payout.estado === "pendiente" ? "warning" : payout.estado === "fallido" ? "danger" : "success"}>{payout.estado}</AdminBadge></td>
+                        <td className="border-b border-ui-line px-3 py-3 font-mono-ruum text-sm text-ui-fg-muted" data-label="Referencia">{payout.referencia_pago ?? "Pendiente"}</td>
+                        <td className="border-b border-ui-line px-3 py-3 text-ui-fg-muted" data-label="Procesado">{fecha(payout.procesado_en)}</td>
                       </tr>
                     );
                   })}
@@ -253,23 +253,23 @@ export default function PaginaPagosAdmin() {
                 <thead>
                   <tr>
                     {["Conductor", "Banco", "CLABE", "Tarjeta", "Estado", "Actualizado"].map((col) => (
-                      <th key={col} className="border-b border-ink/10 px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-text-tertiary">{col}</th>
+                      <th key={col} className="border-b border-ui-line px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-ui-fg-muted">{col}</th>
                     ))}
                   </tr>
                 </thead>
                 <tbody>
                   {datos.datosBancariosConductores.length === 0 ? (
-                    <tr><td colSpan={6} className="px-3 py-6 text-center text-text-tertiary">No hay datos bancarios registrados.</td></tr>
+                    <tr><td colSpan={6} className="px-3 py-6 text-center text-ui-fg-muted">No hay datos bancarios registrados.</td></tr>
                   ) : datos.datosBancariosConductores.map((cuenta) => {
                     const conductor = conductorPorId.get(cuenta.conductor_id);
                     return (
                       <tr key={cuenta.id} className="align-top">
-                        <td className="border-b border-ink/10 px-3 py-3 text-text-secondary" data-label="Conductor">{conductor?.nombre ?? cuenta.conductor_id.slice(0, 8)}</td>
-                        <td className="border-b border-ink/10 px-3 py-3 text-text-secondary" data-label="Banco">{cuenta.banco}</td>
-                        <td className="border-b border-ink/10 px-3 py-3 font-mono-ruum text-admin-tabla text-text-secondary" data-label="CLABE">{ultimos4(cuenta.clabe)}</td>
-                        <td className="border-b border-ink/10 px-3 py-3 font-mono-ruum text-admin-tabla text-text-secondary" data-label="Tarjeta">{ultimos4(cuenta.numero_tarjeta)}</td>
-                        <td className="border-b border-ink/10 px-3 py-3" data-label="Estado"><AdminBadge>{cuenta.estado.replaceAll("_", " ")}</AdminBadge></td>
-                        <td className="border-b border-ink/10 px-3 py-3 text-text-secondary" data-label="Actualizado">{fecha(cuenta.actualizado_en)}</td>
+                        <td className="border-b border-ui-line px-3 py-3 text-ui-fg-muted" data-label="Conductor">{conductor?.nombre ?? cuenta.conductor_id.slice(0, 8)}</td>
+                        <td className="border-b border-ui-line px-3 py-3 text-ui-fg-muted" data-label="Banco">{cuenta.banco}</td>
+                        <td className="border-b border-ui-line px-3 py-3 font-mono-ruum text-sm text-ui-fg-muted" data-label="CLABE">{ultimos4(cuenta.clabe)}</td>
+                        <td className="border-b border-ui-line px-3 py-3 font-mono-ruum text-sm text-ui-fg-muted" data-label="Tarjeta">{ultimos4(cuenta.numero_tarjeta)}</td>
+                        <td className="border-b border-ui-line px-3 py-3" data-label="Estado"><AdminBadge>{cuenta.estado.replaceAll("_", " ")}</AdminBadge></td>
+                        <td className="border-b border-ui-line px-3 py-3 text-ui-fg-muted" data-label="Actualizado">{fecha(cuenta.actualizado_en)}</td>
                       </tr>
                     );
                   })}

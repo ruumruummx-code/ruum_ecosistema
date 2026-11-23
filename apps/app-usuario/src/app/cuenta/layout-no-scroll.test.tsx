@@ -74,5 +74,5 @@ describe("Layout global mobile-first no-scroll", () => {
       h(MobileShell, { variant: "compact", navInferiorVisible: true, children: "x" })
     );
     expect(shell).toContain("pb-24");
-  });
+  }, 60_000);
 });

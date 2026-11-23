@@ -56,7 +56,7 @@ export function GuardRutaRol({ children }: { children: ReactNode }) {
   if (!listo) {
     return (
       <div className="flex min-h-[40vh] items-center justify-center px-6" role="status" aria-live="polite">
-        <p className="font-body text-sm text-text-secondary">Verificando acceso…</p>
+        <p className="font-body text-sm text-ui-fg-muted">Verificando acceso…</p>
       </div>
     );
   }

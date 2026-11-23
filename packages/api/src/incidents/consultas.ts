@@ -37,9 +37,18 @@ const esquemaGestion = z.object({
   p_severidad: z.enum(["low", "medium", "high", "critical"]).nullable().optional()
 });
 
-export async function listarIncidenciasAdmin(cliente: Cliente): Promise<IncidenciaRow[]> {
+export async function listarIncidenciasAdmin(
+  cliente: Cliente,
+  opciones?: { limite?: number; offset?: number }
+): Promise<IncidenciaRow[]> {
   await assertAdminPermission(cliente, "incidencias:leer");
-  const { data, error } = await cliente.from("incidencias").select("*").order("creada_en", { ascending: false });
+  const limite = Math.min(Math.max(opciones?.limite ?? 50, 1), 500);
+  const offset = Math.max(opciones?.offset ?? 0, 0);
+  const { data, error } = await cliente
+    .from("incidencias")
+    .select("*")
+    .order("creada_en", { ascending: false })
+    .range(offset, offset + limite - 1);
   if (error) throw error;
   return data ?? [];
 }

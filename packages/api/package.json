@@ -30,12 +30,15 @@
     "./health": "./src/health/index.ts",
     "./supabase/server-client": "./src/supabase/server-client.ts",
      "./supabase/browser-client": "./src/supabase/browser-client.ts",
-    "./supabase/funciones": "./src/supabase/funciones.ts"
+    "./supabase/funciones": "./src/supabase/funciones.ts",
+    "./supabase/service-role": "./src/supabase/service-role.ts"
    
   },
   "scripts": {
     "build": "tsc --noEmit",
+    "lint": "tsc --noEmit",
     "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit"
   },

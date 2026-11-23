@@ -118,17 +118,25 @@ export interface DatosTrasladosMasivosAdmin {
   filas: FilaCargaTrasladosMasivosAdmin[];
 }
 
-export async function listarCargasTrasladosMasivosAdmin(cliente: Cliente): Promise<DatosTrasladosMasivosAdmin> {
+export async function listarCargasTrasladosMasivosAdmin(
+  cliente: Cliente,
+  opciones?: { limite?: number; offset?: number }
+): Promise<DatosTrasladosMasivosAdmin> {
   await assertAdminPermission(cliente, "masivos:gestionar");
+  const limite = Math.min(Math.max(opciones?.limite ?? 50, 1), 500);
+  const offset = Math.max(opciones?.offset ?? 0, 0);
+  const hasta = offset + limite - 1;
   type ConsultaLibre<T> = {
     select: (columnas: string) => {
-      order: (columna: string, opciones?: { ascending?: boolean }) => Promise<{ data: T[] | null; error: Error | null }>;
+      order: (columna: string, opciones?: { ascending?: boolean }) => {
+        range: (desde: number, hasta: number) => Promise<{ data: T[] | null; error: Error | null }>;
+      };
     };
   };
   const clienteLibre = cliente as unknown as { from: <T>(tabla: string) => ConsultaLibre<T> };
   const [cargas, filas] = await Promise.all([
-    clienteLibre.from<CargaTrasladosMasivosAdmin>("cargas_traslados_masivos").select("*").order("creado_en", { ascending: false }),
-    clienteLibre.from<FilaCargaTrasladosMasivosAdmin>("filas_carga_traslados_masivos").select("*").order("creado_en", { ascending: false })
+    clienteLibre.from<CargaTrasladosMasivosAdmin>("cargas_traslados_masivos").select("*").order("creado_en", { ascending: false }).range(offset, hasta),
+    clienteLibre.from<FilaCargaTrasladosMasivosAdmin>("filas_carga_traslados_masivos").select("*").order("creado_en", { ascending: false }).range(offset, hasta)
   ]);
 
   if (cargas.error) throw cargas.error;

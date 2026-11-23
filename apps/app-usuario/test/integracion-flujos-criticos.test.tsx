@@ -82,6 +82,15 @@ vi.mock("@ruum/api/supabase", () => ({
   })),
 }));
 
+vi.mock("@ruum/api/supabase/server-client", () => ({
+  crearClienteServidor: vi.fn(() => ({
+    auth: {
+      signUp: (...args: unknown[]) => entorno.signUpServerMock(...args),
+      getUser: (...args: unknown[]) => entorno.getUserServerMock(...args),
+    },
+  })),
+}));
+
 vi.mock("@/lib/supabase-server", () => ({
   crearClienteServidor: vi.fn(async () => ({
     auth: {
@@ -532,7 +541,7 @@ describe("Integración de flujos críticos en @ruum/app-usuario (signup, login, 
         "MiClaveSegura123",
       );
       await user.click(
-        screen.getByRole("button", { name: /iniciar sesión/i }),
+        screen.getByRole("button", { name: /iniciar sesión|ingresar/i }),
       );
 
       await waitFor(() => expect(entorno.loginFetchMock).toHaveBeenCalled());
@@ -572,7 +581,7 @@ describe("Integración de flujos críticos en @ruum/app-usuario (signup, login, 
       );
       await user.type(screen.getByLabelText(/^contraseña$/i), "Incorrecta123");
       await user.click(
-        screen.getByRole("button", { name: /iniciar sesión/i }),
+        screen.getByRole("button", { name: /iniciar sesión|ingresar/i }),
       );
 
       expect(
@@ -584,7 +593,7 @@ describe("Integración de flujos críticos en @ruum/app-usuario (signup, login, 
       await user.clear(screen.getByLabelText(/^contraseña$/i));
       await user.type(screen.getByLabelText(/^contraseña$/i), "Correcta123");
       await user.click(
-        screen.getByRole("button", { name: /iniciar sesión/i }),
+        screen.getByRole("button", { name: /iniciar sesión|ingresar/i }),
       );
 
       await waitFor(() => {

@@ -15,20 +15,15 @@ import {
   urlSesionDidit,
 } from "../_shared/didit-session.ts";
 import { consumirRateLimit } from "../_shared/rate-limit.ts";
+import { construirCabecerasCors, manejarCors } from "../_shared/cors-documentos.ts";
 
-const CORS = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers":
-    "authorization, apikey, content-type, x-client-info",
-  "Access-Control-Allow-Methods": "POST, OPTIONS",
-};
 const UUID =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
-function json(body: Record<string, unknown>, status = 200, extraHeaders: Record<string, string> = {}) {
+function json(body: Record<string, unknown>, status = 200, extraHeaders: Record<string, string> = {}, req?: Request) {
   return new Response(JSON.stringify(body), {
     status,
-    headers: { ...CORS, ...extraHeaders, "Content-Type": "application/json" },
+    headers: { ...construirCabecerasCors(req), ...extraHeaders, "Content-Type": "application/json" },
   });
 }
 
@@ -43,14 +38,13 @@ function esCallbackValido(valor: string): boolean {
 }
 
 Deno.serve(async (req) => {
-  if (req.method === "OPTIONS") {
-    return new Response(null, { status: 204, headers: CORS });
-  }
-  if (req.method !== "POST") return json({ error: "Método no permitido" }, 405);
+  const rechazoCors = manejarCors(req);
+  if (rechazoCors) return rechazoCors;
+  if (req.method !== "POST") return json({ error: "Método no permitido" }, 405, {}, req);
 
   const authorization = req.headers.get("Authorization");
   if (!authorization) {
-    return json({ error: "Inicia sesión para continuar." }, 401);
+    return json({ error: "Inicia sesión para continuar." }, 401, {}, req);
   }
 
   const url = Deno.env.get("SUPABASE_URL") ?? "";

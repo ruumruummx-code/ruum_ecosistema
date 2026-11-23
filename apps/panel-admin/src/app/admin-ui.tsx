@@ -1,14 +1,6 @@
-import Image from "next/image";
 import Link from "next/link";
 import type { ReactNode } from "react";
-
-type AdminHeroProps = {
-  titulo: string;
-  subtitulo: string;
-  imagen?: string;
-  accion?: ReactNode;
-  children?: ReactNode;
-};
+import { Badge, Button, Card, cn } from "@ruum/ui/base";
 
 type AdminPageHeaderProps = {
   etiqueta?: string;
@@ -29,36 +21,6 @@ type AdminPanelProps = {
   className?: string;
 };
 
-function unir(...classes: Array<string | false | undefined>) {
-  return classes.filter(Boolean).join(" ");
-}
-
-export function AdminHero({ titulo, subtitulo, imagen = "/imagenes/torre-control-flota.webp", accion, children }: AdminHeroProps) {
-  return (
-    <section className="admin-hero">
-      <Image
-        src={imagen}
-        alt=""
-        aria-hidden="true"
-        fill
-        priority
-        sizes="(min-width: 1024px) 960px, 100vw"
-        className="scale-105 object-cover object-[60%_35%]"
-      />
-      <div className="admin-hero__overlay" />
-      <div className="admin-hero__content">
-        <div className="min-w-0">
-          <p className="font-mono-ruum text-xs font-medium uppercase tracking-[0.18em] text-signal">Torre de Control</p>
-          <h1 className="mt-2 font-display text-2xl font-bold text-ink sm:text-3xl">{titulo}</h1>
-          <p className="mt-2 max-w-2xl font-body text-sm leading-6 text-text-secondary">{subtitulo}</p>
-        </div>
-        {accion && <div className="shrink-0">{accion}</div>}
-      </div>
-      {children && <div className="admin-hero__footer">{children}</div>}
-    </section>
-  );
-}
-
 function textoConexion(estado: NonNullable<AdminPageHeaderProps["estadoConexion"]>) {
   if (estado === "conectado" || estado === "datos_en_vivo") return "Datos en vivo";
   if (estado === "actualizando") return "Actualizando";
@@ -68,12 +30,11 @@ function textoConexion(estado: NonNullable<AdminPageHeaderProps["estadoConexion"
   return "Sin conexión";
 }
 
-function claseConexion(estado: NonNullable<AdminPageHeaderProps["estadoConexion"]>) {
-  if (estado === "conectado" || estado === "datos_en_vivo") return "border-status-success/30 bg-status-success-soft text-status-success";
-  if (estado === "actualizando" || estado === "reconectando") return "border-status-info/30 bg-status-info-soft text-status-info";
-  if (estado === "demo") return "border-status-warning/35 bg-status-warning-soft text-status-warning";
-  if (estado === "desactualizado") return "border-status-warning/35 bg-status-warning-soft text-status-warning";
-  return "border-status-error/30 bg-status-error-soft text-status-error";
+function tonoConexion(estado: NonNullable<AdminPageHeaderProps["estadoConexion"]>) {
+  if (estado === "conectado" || estado === "datos_en_vivo") return "success" as const;
+  if (estado === "actualizando" || estado === "reconectando") return "info" as const;
+  if (estado === "demo" || estado === "desactualizado") return "warning" as const;
+  return "danger" as const;
 }
 
 function textoTipoDatos(tipo: NonNullable<AdminPageHeaderProps["tipoDatos"]>) {
@@ -107,43 +68,37 @@ export function AdminPageHeader({
   contadorResultados
 }: AdminPageHeaderProps) {
   return (
-    <header className="admin-page-header">
+    <header className="flex flex-wrap items-start justify-between gap-x-6 gap-y-4">
       <div className="min-w-0">
         {breadcrumb && breadcrumb.length > 0 && (
-          <nav className="mb-2 font-body text-admin-secundario text-text-tertiary" aria-label="Ruta de navegación">
+          <nav className="mb-2 text-xs text-ui-fg-muted" aria-label="Ruta de navegación">
             <ol className="flex flex-wrap items-center gap-1.5">
               {breadcrumb.map((item, indice) => (
                 <li key={`${item.label}-${indice}`} className="flex items-center gap-1.5">
                   {indice > 0 && <span aria-hidden="true">/</span>}
-                  {item.href ? <Link href={item.href} className="rounded hover:text-ink focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-1 focus-visible:outline-[var(--ruum-focus)]">{item.label}</Link> : <span aria-current={indice === breadcrumb.length - 1 ? "page" : undefined}>{item.label}</span>}
+                  {item.href ? <Link href={item.href} className="rounded-sm hover:text-ui-fg">{item.label}</Link> : <span aria-current={indice === breadcrumb.length - 1 ? "page" : undefined}>{item.label}</span>}
                 </li>
               ))}
             </ol>
           </nav>
         )}
-        {etiqueta && <p className="font-mono-ruum text-xs font-medium uppercase tracking-[0.16em] text-signal">{etiqueta}</p>}
-        <h1 className="mt-1 font-display text-2xl font-semibold text-ink">{titulo}</h1>
-        {descripcion && <p className="admin-page-description mt-1 max-w-2xl font-body text-sm leading-6 text-text-secondary">{descripcion}</p>}
-        <div className="admin-page-meta mt-3 flex flex-wrap items-center gap-2">
-          {estadoConexion && (
-            <span className={`admin-page-meta__badge rounded-full border px-3 py-1 font-body font-semibold ${claseConexion(estadoConexion)}`}>
-              {textoConexion(estadoConexion)}
-            </span>
-          )}
-          {ultimaActualizacion && (
-            <time dateTime={Number.isNaN((ultimaActualizacion instanceof Date ? ultimaActualizacion : new Date(ultimaActualizacion)).getTime()) ? undefined : (ultimaActualizacion instanceof Date ? ultimaActualizacion : new Date(ultimaActualizacion)).toISOString()} className="admin-page-meta__text font-body">
-              {formatoActualizacionRelativa(ultimaActualizacion)} · {formatoActualizacion(ultimaActualizacion)}
-            </time>
-          )}
-          {tipoDatos && (
-            <span className="admin-page-meta__text font-body">{textoTipoDatos(tipoDatos)}</span>
-          )}
-          {typeof contadorResultados === "number" && (
-            <span className="admin-page-meta__text font-body">{contadorResultados.toLocaleString("es-MX")} resultados</span>
-          )}
-        </div>
+        {etiqueta && <p className="font-mono-ruum text-xs font-medium uppercase tracking-widest text-ui-brand">{etiqueta}</p>}
+        <h1 className="mt-1 text-2xl font-semibold tracking-tight text-ui-fg xl:text-3xl">{titulo}</h1>
+        {descripcion && <p className="mt-1 max-w-3xl text-sm text-ui-fg-muted">{descripcion}</p>}
+        {(estadoConexion || ultimaActualizacion || tipoDatos || typeof contadorResultados === "number") && (
+          <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-2 text-xs text-ui-fg-muted">
+            {estadoConexion && <Badge tone={tonoConexion(estadoConexion)} dot>{textoConexion(estadoConexion)}</Badge>}
+            {ultimaActualizacion && (
+              <time dateTime={Number.isNaN((ultimaActualizacion instanceof Date ? ultimaActualizacion : new Date(ultimaActualizacion)).getTime()) ? undefined : (ultimaActualizacion instanceof Date ? ultimaActualizacion : new Date(ultimaActualizacion)).toISOString()}>
+                {formatoActualizacionRelativa(ultimaActualizacion)} · {formatoActualizacion(ultimaActualizacion)}
+              </time>
+            )}
+            {tipoDatos && <span>{textoTipoDatos(tipoDatos)}</span>}
+            {typeof contadorResultados === "number" && <span>{contadorResultados.toLocaleString("es-MX")} resultados</span>}
+          </div>
+        )}
         {seccionesDesactualizadas.length > 0 && (
-          <p className="mt-2 font-body text-admin-secundario text-status-warning">
+          <p className="mt-2 text-xs text-ui-warning">
             Pueden estar desactualizadas: {seccionesDesactualizadas.join(", ")}.
           </p>
         )}
@@ -159,7 +114,7 @@ export function AdminPageHeader({
 }
 
 export function AdminPanel({ children, className = "" }: AdminPanelProps) {
-  return <section className={unir("admin-panel", className)}>{children}</section>;
+  return <Card asChild className={className}><section>{children}</section></Card>;
 }
 
 type AdminFiltroActivoProps = {
@@ -178,20 +133,11 @@ export function AdminFiltroActivo({
 }: AdminFiltroActivoProps) {
   return (
     <div
-      className={unir(
-        "mt-4 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-status-info/25 bg-status-info-soft px-4 py-3",
-        className
-      )}
+      className={cn("mt-4 flex flex-wrap items-center justify-between gap-3 rounded-lg bg-ui-brand-soft px-4 py-2", className)}
       role="status"
     >
-      <p className="font-body text-sm font-semibold text-status-info">Filtro activo: {etiqueta}</p>
-      <button
-        type="button"
-        onClick={onLimpiar}
-        className="font-body text-sm font-semibold text-status-info hover:underline"
-      >
-        {limpiarLabel}
-      </button>
+      <p className="text-sm font-semibold text-ui-brand-soft-fg">Filtro activo: {etiqueta}</p>
+      <Button variant="link" size="sm" onClick={onLimpiar}>{limpiarLabel}</Button>
     </div>
   );
 }

@@ -1,4 +1,5 @@
 import { createClient } from "npm:@supabase/supabase-js@2.47.16";
+import { timingSafeEqual } from "../_shared/timing-safe.ts";
 import { conciliarCheckouts } from "../_shared/stripe-checkouts.ts";
 import { crearStripe } from "../_shared/stripe.ts";
 import { cancelarIntentsPendientes, procesarReembolsosPendientes } from "../_shared/reembolsos.ts";
@@ -11,7 +12,7 @@ Deno.serve(async (req: Request) => {
   let autorizado = false;
   try {
     const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
-    if (serviceKey && req.headers.get("Authorization") === `Bearer ${serviceKey}`) {
+    if (serviceKey && timingSafeEqual(req.headers.get("Authorization"), `Bearer ${serviceKey}`)) {
       id = crypto.randomUUID();
       const result = await db.from("stripe_conciliacion_ejecuciones").insert({ id, nonce_hash: "manual_service_role", estado: "procesando" });
       if (result.error) throw new Error("reconciliation_result_create_failed");

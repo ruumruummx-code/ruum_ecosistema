@@ -6,26 +6,19 @@
 
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { validarFirmaWebhookDidit } from "../_shared/didit-webhook.ts";
+import { construirCabecerasCors, manejarCors } from "../_shared/cors-documentos.ts";
 
-const CORS = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers":
-    "authorization, apikey, content-type, x-client-info, x-signature, x-signature-v2, x-signature-simple, x-timestamp",
-  "Access-Control-Allow-Methods": "POST, OPTIONS",
-};
-
-function json(body: Record<string, unknown>, status = 200) {
+function json(body: Record<string, unknown>, status = 200, req?: Request) {
   return new Response(JSON.stringify(body), {
     status,
-    headers: { ...CORS, "Content-Type": "application/json" },
+    headers: { ...construirCabecerasCors(req), "Content-Type": "application/json" },
   });
 }
 
 Deno.serve(async (req) => {
-  if (req.method === "OPTIONS") {
-    return new Response(null, { status: 204, headers: CORS });
-  }
-  if (req.method !== "POST") return json({ error: "Método no permitido" }, 405);
+  const rechazoCors = manejarCors(req);
+  if (rechazoCors) return rechazoCors;
+  if (req.method !== "POST") return json({ error: "Método no permitido" }, 405, req);
 
   const url = Deno.env.get("SUPABASE_URL") ?? "";
   const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";

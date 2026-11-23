@@ -4,7 +4,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createHash } from "node:crypto";
 import { validarFila } from "@/lib/carga-masiva";
 import { z } from "zod";
-import { crearClienteServidor } from "@/lib/supabase-server";
+import { validarSesionYRolUsuario } from "@/lib/guardia-rol-usuario";
 import { rateLimitMasivo } from "@/lib/rate-limit-masivos";
 import { logStructuredError, logStructuredWarn } from "@/lib/logger";
 import { registrarMetricaCotizacion } from "@/lib/carga-masiva-telemetria";
@@ -40,9 +40,9 @@ function hashRuta(filas: Record<string, string>[]): string {
 export async function POST(request: NextRequest) {
   const rechazoCsrf = verificarCsrfORechazar(request);
   if (rechazoCsrf) return rechazoCsrf;
-  const cliente = await crearClienteServidor();
-  const { data: { user } } = await cliente.auth.getUser();
-  if (!user) return NextResponse.json({ error: "No autenticado" }, { status: 401 });
+  const auth = await validarSesionYRolUsuario();
+  if (!auth.ok) return auth.errorResponse;
+  const { user, cliente } = auth;
   const limite = await rateLimitMasivo(request, user.id, "masivos-cotizar", 5);
   if (!limite.allowed) return NextResponse.json({ error: "Espera antes de cotizar otra carga." }, { status: 429, headers: { "Retry-After": String(limite.retryAfterSec) } });
   const raw = await request.text().catch(() => "");

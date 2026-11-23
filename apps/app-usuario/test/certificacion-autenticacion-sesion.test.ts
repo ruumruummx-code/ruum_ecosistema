@@ -12,6 +12,14 @@ vi.mock("@ruum/api/supabase", () => ({
   })),
 }));
 
+vi.mock("@ruum/api/supabase/server-client", () => ({
+  crearClienteServidor: vi.fn(() => ({
+    auth: {
+      getUser: mockGetUser,
+    },
+  })),
+}));
+
 vi.mock("@ruum/api/identity", () => ({
   clasificarRolApp: (...args: unknown[]) => mockClasificarRolApp(...args),
 }));
