@@ -90,7 +90,18 @@ export function useRegistrationDocuments({
       }
     });
 
-    let huboError = false;
+    // La decisión de detener el envío no puede depender de cuándo React
+    // ejecute el actualizador de estado (puede diferirlo o repetirlo).
+    const huboError = resultados.some((resultado) => resultado.status === "rejected");
+    resultados.forEach((resultado, indice) => {
+      const [campo] = pendientes[indice];
+      if (resultado.status === "rejected") {
+        const detalle = resultado.reason instanceof Error ? resultado.reason.message : "Intenta cargarlo nuevamente.";
+        setCampoError(campo, detalle);
+      } else {
+        limpiarErrorCampo(campo);
+      }
+    });
     setEstadoDocumentos((prev) => {
       const siguiente = { ...prev };
       resultados.forEach((resultado, indice) => {
@@ -99,7 +110,6 @@ export function useRegistrationDocuments({
           siguiente[campo] = "subido";
         } else {
           siguiente[campo] = "error";
-          huboError = true;
         }
       });
       return siguiente;
@@ -110,7 +120,8 @@ export function useRegistrationDocuments({
         .filter((_, indice) => resultados[indice].status === "rejected")
         .map(([campo]) => ETIQUETA_DOCUMENTO[campo])
         .join(", ");
-      throw new Error(`No pudimos subir: ${camposConError}. Podrás reintentar desde Configuración.`);
+      const detalles = resultados.flatMap((resultado) => resultado.status === "rejected" && resultado.reason instanceof Error ? [resultado.reason.message] : []);
+      throw new Error(`No pudimos subir: ${camposConError}. ${[...new Set(detalles)].join(" ")} Revisa los documentos y reintenta; los que ya se guardaron se conservan.`);
     }
   }
 
