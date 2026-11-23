@@ -46,8 +46,8 @@ insert into _ctx values
 insert into auth.users (id, email)
 select v, k || '@rt45.test' from _ctx;
 
-insert into public.usuarios (id, auth_user_id, tipo_cuenta, rol, nombre, telefono_verificado)
-select v, v, 'personal', 'personal'::rol_usuario, k, true from _ctx
+insert into public.usuarios (id, auth_user_id, tipo_cuenta, rol, nombre)
+select v, v, 'personal', 'personal'::rol_usuario, k from _ctx
 where k = 'user_test';
 
 insert into public.conductores (id, auth_user_id, nombre, estado)

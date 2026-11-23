@@ -8,9 +8,7 @@ declare
     'calcular_pago_conductor',
     'calcular_pago_conductor_traslado',
     'conductor_acepta_viaje',
-    'conductor_operativamente_aprobado',
     'determinar_tipo_pago_usuario',
-    'empresa_tiene_permiso',
     'expediente_conductor_tiene_datos',
     'listar_traslados_admin_paginados',
     'metricas_registro_conductor_segmento',
@@ -18,8 +16,7 @@ declare
     'notificar_torre_incidencia',
     'obs_registrar_auditoria',
     'obs_registrar_error_edge',
-    'obs_resolver_correlation',
-    'usuario_ids_de_traslados_asignados_conductor'
+    'obs_resolver_correlation'
   ];
 begin
   for r in
@@ -46,9 +43,12 @@ begin
         'auth_es_conductor_de_traslado_activo',
         'auth_es_usuario_de_traslado',
         'conductor_id_actual',
+        'conductor_operativamente_aprobado',
         'empresa_id_del_titular_actual',
+        'empresa_tiene_permiso',
         'titular_es_dueno_de_empresa_de_usuario',
-        'usuario_id_actual'
+        'usuario_id_actual',
+        'usuario_ids_de_traslados_asignados_conductor'
       )
   loop
     execute format('revoke execute on function %s from public, anon;', r.proc_name);
