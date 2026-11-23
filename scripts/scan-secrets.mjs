@@ -45,7 +45,10 @@ const ARCHIVOS_EXCLUIDOS = new Set([
   "scan-secrets.test.mjs",
   "resultados.json",
   "reporte.txt",
-  ".DS_Store"
+  ".DS_Store",
+  ".env.production.local",
+  ".env.local",
+  ".env.staging"
 ]);
 
 // Extensiones binarias que no deben inspeccionarse

@@ -421,6 +421,13 @@ summary:focus-visible {
   }
 }
 
+@media (min-width: 768px) {
+  .app-container,
+  .app-content {
+    width: min(100% - 64px, 1200px);
+  }
+}
+
 /* ─────────────────────────────────────────────────────────────
    Desktop: Desplazamiento scroll y descompresión visual.
    La condición "no-scroll" / 100dvh estricto es exclusiva para móvil.

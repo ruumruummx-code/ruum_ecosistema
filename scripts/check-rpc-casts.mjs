@@ -18,6 +18,8 @@ const DIRS = ["packages/api/src", "packages/shared/src", "packages/ui/src"];
 
 // Línea base 2026-10-15 (tras migrar traslados.ts + tarifas.ts a rpcTipado).
 const BASELINE_TOTAL = 46;
+// Línea base Fase 3 — Consistencia tipada (as unknown as en packages/).
+const BASELINE_UNKNOWN_AS = 192;
 
 const TOLERANCIA_CERO = [
   "packages/api/src/services/traslados.ts",
@@ -55,9 +57,16 @@ function contar(raiz, rel) {
   return (contenido.match(/\bas\s+(never|any)\b/g) ?? []).length;
 }
 
+function contarUnknownAs(raiz, rel) {
+  const contenido = sinComentarios(readFileSync(join(raiz, rel), "utf8"));
+  return (contenido.match(/\bas\s+unknown\s+as\b/g) ?? []).length;
+}
+
 let fallos = 0;
 let total = 0;
+let totalUnknownAs = 0;
 const porArchivo = new Map();
+const porArchivoUnknownAs = new Map();
 
 for (const dir of DIRS) {
   for (const ruta of archivosTs(join(RAIZ, dir))) {
@@ -66,6 +75,11 @@ for (const dir of DIRS) {
     if (n > 0) {
       total += n;
       porArchivo.set(rel, n);
+    }
+    const nU = contarUnknownAs(RAIZ, rel);
+    if (nU > 0) {
+      totalUnknownAs += nU;
+      porArchivoUnknownAs.set(rel, nU);
     }
   }
 }
@@ -94,5 +108,13 @@ if (total > BASELINE_TOTAL) {
   fallos++;
 }
 
+if (totalUnknownAs > BASELINE_UNKNOWN_AS) {
+  console.error(`[rpc-casts] Total 'as unknown as' (${totalUnknownAs}) supera la línea base (${BASELINE_UNKNOWN_AS}): no se permite añadir casts sin tipado.`);
+  for (const [rel, n] of [...porArchivoUnknownAs.entries()].sort((a, b) => b[1] - a[1]).slice(0, 10)) {
+    console.error(`  ${n}  ${rel}`);
+  }
+  fallos++;
+}
+
 if (fallos > 0) process.exit(1);
-console.log(`[rpc-casts] OK: total ${total} (base ${BASELINE_TOTAL}), archivos migrados sin casts.`);
+console.log(`[rpc-casts] OK: never/any total ${total} (base ${BASELINE_TOTAL}), unknown as total ${totalUnknownAs} (base ${BASELINE_UNKNOWN_AS}), archivos migrados sin casts.`);
