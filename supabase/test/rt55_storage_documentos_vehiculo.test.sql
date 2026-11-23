@@ -63,26 +63,28 @@ set local role authenticated;
 -- 2. Usuario común NO puede insertar en documentos_vehiculo
 select pg_temp.actuar_como((select v from _ctx where k = 'user_a'));
 
-insert into public.documentos_vehiculo (vehiculo_id, tipo, url, nombre_archivo)
-select id, 'tarjeta_circulacion', 'https://ejemplo.com/doc.pdf', 'tarjeta.pdf'
-from public.vehiculos limit 1;
-
-select is(
-  (select count(*) from public.documentos_vehiculo),
-  0::bigint,
+select throws_ok(
+  $$
+  insert into public.documentos_vehiculo (vehiculo_id, tipo, url, nombre_archivo)
+  select id, 'tarjeta_circulacion', 'https://ejemplo.com/doc.pdf', 'tarjeta.pdf'
+  from public.vehiculos limit 1;
+  $$,
+  '42501',
+  null,
   'Usuario normal NO puede insertar en documentos_vehiculo por RLS'
 );
 
 -- 3. Conductor NO puede insertar en documentos_vehiculo
 select pg_temp.actuar_como((select v from _ctx where k = 'cond_a'));
 
-insert into public.documentos_vehiculo (vehiculo_id, tipo, url, nombre_archivo)
-select id, 'seguro', 'https://ejemplo.com/seguro.pdf', 'seguro.pdf'
-from public.vehiculos limit 1;
-
-select is(
-  (select count(*) from public.documentos_vehiculo),
-  0::bigint,
+select throws_ok(
+  $$
+  insert into public.documentos_vehiculo (vehiculo_id, tipo, url, nombre_archivo)
+  select id, 'seguro', 'https://ejemplo.com/seguro.pdf', 'seguro.pdf'
+  from public.vehiculos limit 1;
+  $$,
+  '42501',
+  null,
   'Conductor NO puede insertar en documentos_vehiculo por RLS'
 );
 
@@ -109,12 +111,13 @@ select is(
 );
 
 -- 6. Storage RLS: Usuario común NO puede insertar en bucket documentos-vehiculo
-insert into storage.objects (id, bucket_id, name, owner)
-values (gen_random_uuid(), 'documentos-vehiculo', 'test/tarjeta.pdf', (select v from _ctx where k = 'user_a'));
-
-select is(
-  (select count(*) from storage.objects where bucket_id = 'documentos-vehiculo'),
-  0::bigint,
+select throws_ok(
+  $$
+  insert into storage.objects (id, bucket_id, name, owner)
+  values (gen_random_uuid(), 'documentos-vehiculo', 'test/tarjeta.pdf', (select v from _ctx where k = 'user_a'));
+  $$,
+  '42501',
+  null,
   'Usuario normal NO puede insertar objetos en storage.objects para documentos-vehiculo'
 );
 

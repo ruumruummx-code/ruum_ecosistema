@@ -66,7 +66,7 @@ insert into public.traslados (
   origen_direccion, origen_ciudad, destino_direccion, destino_ciudad
 )
 select
-  gen_random_uuid(), u.id, v.id, gen_random_uuid(), 'solicitado'::estado_traslado, 850.00, 850.00,
+  gen_random_uuid(), u.id, v.id, gen_random_uuid(), 'solicitud_creada'::estado_traslado, 850.00, 850.00,
   'Entrega', '5511111111', 'Recepción', '5522222222',
   'Origen CDMX', 'CDMX', 'Destino Toluca', 'Toluca'
 from public.usuarios u

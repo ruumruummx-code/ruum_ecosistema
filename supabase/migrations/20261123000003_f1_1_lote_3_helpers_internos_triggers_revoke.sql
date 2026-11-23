@@ -12,7 +12,6 @@ declare
     'expediente_conductor_tiene_datos',
     'listar_traslados_admin_paginados',
     'metricas_registro_conductor_segmento',
-    'mis_empresas_miembro',
     'notificar_torre_incidencia',
     'obs_registrar_auditoria',
     'obs_registrar_error_edge',
@@ -46,6 +45,7 @@ begin
         'conductor_operativamente_aprobado',
         'empresa_id_del_titular_actual',
         'empresa_tiene_permiso',
+        'mis_empresas_miembro',
         'titular_es_dueno_de_empresa_de_usuario',
         'usuario_id_actual',
         'usuario_ids_de_traslados_asignados_conductor'
