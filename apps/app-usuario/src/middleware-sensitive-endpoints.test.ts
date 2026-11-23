@@ -80,8 +80,8 @@ describe("RUUM-SEC-010 (F1.2) — Transición de allowlist temporal a RBAC defin
 
     const res = await validarSesionYRolUsuario();
     expect(res.ok).toBe(false);
-    expect(res.errorResponse.status).toBe(403);
-    const body = await res.errorResponse.json();
+    expect(res.errorResponse!.status).toBe(403);
+    const body = await res.errorResponse!.json();
     expect(body.error).toMatch(/Acceso denegado/i);
   });
 });

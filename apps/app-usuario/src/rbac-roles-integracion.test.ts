@@ -90,8 +90,8 @@ describe("F1.2 — RBAC Definitivo Integración: app-usuario por Rol", () => {
       mocks.getUser.mockResolvedValueOnce({ data: { user: null }, error: null });
       const resultado = await validarSesionYRolUsuario();
       expect(resultado.ok).toBe(false);
-      expect(resultado.errorResponse.status).toBe(401);
-      const json = await resultado.errorResponse.json();
+      expect(resultado.errorResponse!.status).toBe(401);
+      const json = await resultado.errorResponse!.json();
       expect(json.error).toMatch(/Inicia sesión/i);
     });
 
@@ -108,8 +108,8 @@ describe("F1.2 — RBAC Definitivo Integración: app-usuario por Rol", () => {
       mocks.clasificarRolApp.mockResolvedValue("conductor");
       const resultado = await validarSesionYRolUsuario();
       expect(resultado.ok).toBe(false);
-      expect(resultado.errorResponse.status).toBe(403);
-      const json = await resultado.errorResponse.json();
+      expect(resultado.errorResponse!.status).toBe(403);
+      const json = await resultado.errorResponse!.json();
       expect(json.error).toMatch(/Acceso denegado/i);
     });
 
@@ -120,8 +120,8 @@ describe("F1.2 — RBAC Definitivo Integración: app-usuario por Rol", () => {
         mocks.clasificarRolApp.mockResolvedValue("admin");
         const resultado = await validarSesionYRolUsuario();
         expect(resultado.ok).toBe(false);
-        expect(resultado.errorResponse.status).toBe(403);
-        const json = await resultado.errorResponse.json();
+        expect(resultado.errorResponse!.status).toBe(403);
+        const json = await resultado.errorResponse!.json();
         expect(json.error).toMatch(/Acceso denegado/i);
       }
     );

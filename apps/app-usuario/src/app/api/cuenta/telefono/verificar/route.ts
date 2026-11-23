@@ -22,7 +22,7 @@ export async function POST(request: NextRequest) {
 
   const auth = await validarSesionYRolUsuario();
   if (!auth.ok) return auth.errorResponse;
-  const { user } = auth;
+  const { user, cliente } = auth;
 
   const body = (await request.json().catch(() => null)) as { token?: unknown } | null;
   const token = typeof body?.token === "string" ? body.token : "";

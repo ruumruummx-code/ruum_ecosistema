@@ -37,7 +37,6 @@ declare
     'traslado_tiene_verificacion_repuve_valida',
     'usuario_acepta_cotizacion',
     'usuario_actualiza_perfil_transaccional',
-    'usuario_cancela_traslado',
     'usuario_crea_traslados_masivos',
     'usuario_procesa_carga_traslados_masivos'
   ];

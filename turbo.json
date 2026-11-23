@@ -31,7 +31,8 @@
         "UPSTASH_REDIS_REST_URL", "UPSTASH_REDIS_REST_TOKEN",
         "KV_REST_API_URL", "KV_REST_API_TOKEN",
         "RUUM_STRIPE_MODE",
-        "PHONE_VERIFY_SECRET"
+        "PHONE_VERIFY_SECRET",
+        "TARIFA_SNAPSHOT_SECRET"
       ]
     },
     "dev": { "cache": false, "persistent": true },

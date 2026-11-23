@@ -57,6 +57,7 @@ jobs:
           NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN: pk.localmock
           MAPBOX_SECRET_TOKEN: sk.localmock
           PHONE_VERIFY_SECRET: phone-verification-local-fixture-32
+          TARIFA_SNAPSHOT_SECRET: mock-tarifa-snapshot-secret-32-chars-ok
           NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: pk_test_localmock
           STRIPE_SECRET_KEY: sk_test_localmock
           TWILIO_ACCOUNT_SID: AC_localmock

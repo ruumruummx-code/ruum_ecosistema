@@ -21,12 +21,12 @@ select is(
 -- 2. calcular_tarifa_traslado respeta el piso de cobro
 select cmp_ok(
   public.calcular_tarifa_traslado(
-    'sedan'::categoria_tarifa_vehiculo,
-    'local'::rango_distancia,
-    'estandar'::gama_vehiculo,
+    'ligero_a'::categoria_tarifa_vehiculo,
+    'rango_1'::rango_distancia,
+    'entrada'::gama_vehiculo,
     'seminueva'::condicion_vehiculo,
     'diurno'::horario_traslado,
-    'habil'::dia_traslado,
+    'entre_semana'::dia_traslado,
     1.0, -- distancia mínima (1 km)
     0.2  -- tiempo mínimo (12 min)
   ),
