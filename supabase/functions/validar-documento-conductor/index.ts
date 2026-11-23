@@ -7,7 +7,8 @@ import { leerFormularioLimitado } from "../_shared/multipart-limitado.ts";
 import { consumirRateLimit } from "../_shared/rate-limit.ts";
 
 const BUCKET="documentos-conductor";
-import { construirCabecerasCors, manejarCors } from "../_shared/cors-documentos.ts";
+import { manejarCors } from "../_shared/cors-documentos.ts";
+import { crearRespuestaJson } from "./respuesta.ts";
 
 const TIPOS=new Set(["licencia_frente","licencia_reverso","identificacion_oficial","constancia_situacion_fiscal","documento_operativo"]);
 const UUID=/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -21,16 +22,13 @@ function codigoSeguro(error:unknown) {
   return "desconocido";
 }
 
-function json(body:Record<string,unknown>,status=200,extraHeaders:Record<string,string>={},req?:Request) {
-  return new Response(JSON.stringify(body),{status,headers:{...construirCabecerasCors(req),...extraHeaders,"Content-Type":"application/json"}});
-}
-
 Deno.serve(async(req)=>{
   const rechazoCors = manejarCors(req);
   if (rechazoCors) return rechazoCors;
-  if(req.method!=="POST") return json({error:"Método no permitido"},405,{},req);
+  const json = crearRespuestaJson(req);
+  if(req.method!=="POST") return json({error:"Método no permitido"},405);
   const authorization=req.headers.get("Authorization");
-  if(!authorization) return json({error:"Inicia sesión para subir documentos."},401,{},req);
+  if(!authorization) return json({error:"Inicia sesión para subir documentos."},401);
   const url=Deno.env.get("SUPABASE_URL")??"";
   const anon=Deno.env.get("SUPABASE_ANON_KEY")??"";
   if(!url||!anon) {
