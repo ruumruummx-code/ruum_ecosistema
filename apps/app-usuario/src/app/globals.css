@@ -646,7 +646,7 @@ summary:focus-visible {
  * Conductor y Admin no dependen de este scope.
  * ========================================================================= */
 /* Los tokens se publican también en :root para que componentes fuera del
-   scope (layout, modales portaleados, ConductorAsignado…) no reciban
+   scope (layout, modales portaleados…) no reciban
    variables indefinidas. */
 :root,
 .user-v2-scope {
@@ -1526,8 +1526,10 @@ input::placeholder, textarea::placeholder {
   --user-color-pending-soft: #3d2e00;
 }
 /* RR-2026-001: the home canvas owns its vertical budget; lists scroll sideways. */
-/* RR-2026-001: el dashboard define su layout responsivo en InicioUsuario.css
-   para que el CSS de layout global permanezca mobile-first (RC-14). */
+/* Barra inferior en Inicio (antes en InicioUsuario.css): mismo ancho que la
+   columna móvil e indicador en teal de marca. */
+.home-tab-navigation .user-v2-shell-nav-inner { width: min(100%, 480px); }
+.home-tab-navigation .user-v2-nav-indicator { bottom: 2px; width: 26px; background: var(--ruum-teal); }
 /* RR-2026-002: one fixed canvas; only the results region scrolls vertically. */
 .user-transfer-fab {
   position: fixed;

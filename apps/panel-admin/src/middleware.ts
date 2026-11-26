@@ -72,6 +72,8 @@ export async function middleware(request: NextRequest) {
   let response = NextResponse.next({ request: { headers: requestHeaders } });
   response.headers.set("x-nonce", nonce);
 
+  const { pathname } = request.nextUrl;
+
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
@@ -91,6 +93,15 @@ export async function middleware(request: NextRequest) {
   // Demo solo se permite explícitamente fuera de producción.
   if (!url || !anonKey) {
     if (!modoDemo) return applySecurityHeadersPanel(new NextResponse("Supabase no está configurado", { status: 503 }), nonce);
+    const rolDemo = request.cookies.get("ruum_smoke_rol")?.value;
+    if (rolDemo && !esRutaPublica(pathname) && pathname !== "/sin-permiso") {
+      const rol = normalizarRolAdmin(rolDemo);
+      if (!puedeVerRuta(rol, pathname)) {
+        const destino = new URL("/sin-permiso", request.url);
+        destino.searchParams.set("ruta", pathname);
+        return applySecurityHeadersPanel(NextResponse.redirect(destino), nonce);
+      }
+    }
     return applySecurityHeadersPanel(response, nonce);
   }
 
@@ -113,8 +124,6 @@ export async function middleware(request: NextRequest) {
   const {
     data: { user }
   } = await supabase.auth.getUser();
-
-  const { pathname } = request.nextUrl;
 
   // Rutas públicas: no exigen sesión. Si un admin ya autenticado abre /login,
   // se le manda al dashboard para no mostrarle el formulario de nuevo.

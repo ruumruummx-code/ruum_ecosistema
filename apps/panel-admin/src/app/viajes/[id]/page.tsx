@@ -1,13 +1,11 @@
 "use client";
+
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
-import { Button, Field, Aviso, EstadoBadge, EstadoStepper, PassportCard } from "@ruum/ui";
+import { Aviso, EstadoBadge, EstadoStepper } from "@ruum/ui";
 import { AdminPageHeader } from "../../admin-ui";
 import { AdminLoadingState, AdminEmptyState, AdminErrorState } from "../../admin-components";
-import { ETIQUETA_TIPO_VEHICULO, ETIQUETA_NIVEL_CONCER } from "@ruum/shared/constants";
-import { resumenClasificacionVehiculo } from "@ruum/shared/catalogos";
-import { ETIQUETA_ESTADO_TRASLADO, TRANSICIONES } from "@ruum/shared/states";
 import { suscribirCanalSeguro } from "@ruum/shared/utils";
 import type { Database } from "@ruum/shared/types";
 import { crearClienteNavegador, tieneSupabaseConfigurado } from "@/lib/supabase-browser";
@@ -34,6 +32,9 @@ import { obtenerRutaMapbox, tieneMapboxConfigurado } from "@/lib/mapbox-rutas";
 import { obtenerVersionTraslado } from "@ruum/api/transfers";
 import { ResolucionLlaves } from "./ResolucionLlaves";
 import { VerificacionRepuveAdmin } from "./VerificacionRepuveAdmin";
+import { ViajeDetalleCards } from "./ViajeDetalleCards";
+import { ViajeDetalleOperaciones } from "./ViajeDetalleOperaciones";
+import { ViajeDetalleNotasAuditoria } from "./ViajeDetalleNotasAuditoria";
 
 type PasaporteRow = Database["public"]["Views"]["pasaporte_digital"]["Row"];
 type ConductorRow = Database["public"]["Tables"]["conductores"]["Row"];
@@ -41,22 +42,6 @@ type NotaRow = Database["public"]["Tables"]["notas_internas_traslado"]["Row"];
 type AuditoriaRow = Database["public"]["Tables"]["registro_auditoria"]["Row"];
 type EstadoTraslado = Database["public"]["Enums"]["estado_traslado"];
 type CausaFallido = Database["public"]["Enums"]["causa_fallido"];
-
-const CAUSAS_FALLIDO: { valor: CausaFallido; etiqueta: string }[] = [
-  { valor: "imputable_cliente", etiqueta: "Imputable al cliente" },
-  { valor: "operativo", etiqueta: "Operativo" },
-  { valor: "fuerza_mayor", etiqueta: "Fuerza mayor" },
-  { valor: "documentacion", etiqueta: "Documentación" },
-  { valor: "vehiculo_no_circulable", etiqueta: "Vehículo no circulable" }
-];
-
-function fechaAdministrativa(fechaIso: string | null | undefined) {
-  return fechaIso ? new Date(fechaIso).toLocaleString("es-MX") : "Pendiente";
-}
-
-function dinero(valor: number | null | undefined) {
-  return (valor ?? 0).toLocaleString("es-MX", { style: "currency", currency: "MXN" });
-}
 
 export default function PaginaDetalleViajeAdmin() {
   const { id } = useParams<{ id: string }>();
@@ -70,18 +55,14 @@ export default function PaginaDetalleViajeAdmin() {
   const [finanzas, setFinanzas] = useState<FinanzasTrasladoAdmin | null>(null);
   const [cargando, setCargando] = useState(true);
 
-  const [conductorSeleccionado, setConductorSeleccionado] = useState("");
-  const [estadoSeleccionado, setEstadoSeleccionado] = useState<EstadoTraslado | "">("");
   const [precioFinalInput, setPrecioFinalInput] = useState("");
-  const [causaFallido, setCausaFallido] = useState<CausaFallido>("operativo");
-  const [notaNueva, setNotaNueva] = useState("");
   const [procesando, setProcesando] = useState<"conductor" | "estado" | "precio" | "nota" | "fallido" | "sugerencia" | null>(null);
   const [aviso, setAviso] = useState<{ tono: "info" | "danger"; texto: string } | null>(null);
   const [adminId, setAdminId] = useState<string | null>(null);
   const avisoRef = useRef<HTMLDivElement>(null);
 
-  function mostrarAviso(aviso: { tono: "info" | "danger"; texto: string }) {
-    setAviso(aviso);
+  function mostrarAviso(nuevoAviso: { tono: "info" | "danger"; texto: string }) {
+    setAviso(nuevoAviso);
     setTimeout(() => avisoRef.current?.focus(), 50);
   }
 
@@ -165,8 +146,8 @@ export default function PaginaDetalleViajeAdmin() {
     };
   }, [recargar, id]);
 
-  async function asignar() {
-    if (!pasaporte || !conductorSeleccionado) return;
+  async function asignar(conductorId: string) {
+    if (!pasaporte || !conductorId) return;
     if (!pasaporte.traslado_id || !pasaporte.estado) {
       mostrarAviso({ tono: "danger", texto: "El traslado no tiene folio o estado operativo suficiente para asignar conductor." });
       return;
@@ -178,7 +159,7 @@ export default function PaginaDetalleViajeAdmin() {
 
     try {
       const cliente = crearClienteNavegador();
-      await asignarConductorAdmin(cliente, trasladoId, conductorSeleccionado, estadoActual);
+      await asignarConductorAdmin(cliente, trasladoId, conductorId, estadoActual);
       mostrarAviso({ tono: "info", texto: "Conductor asignado." });
       setPasaporte(await obtenerPasaporteDigital(cliente, trasladoId));
       setAuditoria(await obtenerAuditoriaTraslado(cliente, trasladoId));
@@ -189,8 +170,8 @@ export default function PaginaDetalleViajeAdmin() {
     }
   }
 
-  async function cambiarEstatus() {
-    if (!pasaporte || !estadoSeleccionado) return;
+  async function cambiarEstatus(nuevoEstado: EstadoTraslado) {
+    if (!pasaporte || !nuevoEstado) return;
     if (!pasaporte.traslado_id || !pasaporte.estado) {
       mostrarAviso({ tono: "danger", texto: "El traslado no tiene folio o estado operativo suficiente para cambiar estatus." });
       return;
@@ -202,7 +183,7 @@ export default function PaginaDetalleViajeAdmin() {
 
     try {
       const cliente = crearClienteNavegador();
-      await cambiarEstatusAdmin(cliente, trasladoId, estadoActual, estadoSeleccionado, undefined, version);
+      await cambiarEstatusAdmin(cliente, trasladoId, estadoActual, nuevoEstado, undefined, version);
       mostrarAviso({ tono: "info", texto: "Estatus actualizado." });
       const [nuevoP, nuevoV] = await Promise.all([
         obtenerPasaporteDigital(cliente, trasladoId),
@@ -211,7 +192,6 @@ export default function PaginaDetalleViajeAdmin() {
       setPasaporte(nuevoP);
       setVersion(nuevoV ?? undefined);
       setAuditoria(await obtenerAuditoriaTraslado(cliente, trasladoId));
-      setEstadoSeleccionado("");
     } catch (err) {
       const message = err instanceof Error ? err.message : "";
       if (message.includes("CONCURRENCY_CONFLICT")) {
@@ -224,25 +204,21 @@ export default function PaginaDetalleViajeAdmin() {
     }
   }
 
-  const [categoriaTarifaInput, setCategoriaTarifaInput] = useState<Database["public"]["Enums"]["categoria_tarifa_vehiculo"] | "">("");
-  const [gamaInput, setGamaInput] = useState<Database["public"]["Enums"]["gama_vehiculo"] | "">("");
-  const [condicionInput, setCondicionInput] = useState<Database["public"]["Enums"]["condicion_vehiculo"] | "">("");
-
-  async function guardarClasificacionVehiculo() {
+  async function guardarClasificacionVehiculo(
+    categoria: Database["public"]["Enums"]["categoria_tarifa_vehiculo"],
+    gama: Database["public"]["Enums"]["gama_vehiculo"],
+    condicion: Database["public"]["Enums"]["condicion_vehiculo"]
+  ) {
     if (!pasaporte || !pasaporte.vehiculo_id || !pasaporte.traslado_id) return;
     const trasladoId = pasaporte.traslado_id;
-    if (!categoriaTarifaInput || !gamaInput || !condicionInput) {
-      mostrarAviso({ tono: "danger", texto: "Selecciona categoría, gama y condición." });
-      return;
-    }
     setProcesando("sugerencia");
     setAviso(null);
     try {
       const cliente = crearClienteNavegador();
       await clasificarVehiculoParaTarifa(cliente, pasaporte.vehiculo_id, {
-        categoria_tarifa: categoriaTarifaInput,
-        gama: gamaInput,
-        condicion: condicionInput
+        categoria_tarifa: categoria,
+        gama,
+        condicion
       });
       setPasaporte(await obtenerPasaporteDigital(cliente, trasladoId));
       mostrarAviso({ tono: "info", texto: "Clasificación del vehículo guardada." });
@@ -254,7 +230,7 @@ export default function PaginaDetalleViajeAdmin() {
   }
 
   async function calcularTarifaNormativa() {
-    if (!pasaporte) return;
+    if (!pasaporte) return null;
     if (!pasaporte.traslado_id) {
       mostrarAviso({ tono: "danger", texto: "El traslado no tiene folio suficiente para calcular tarifa." });
       return null;
@@ -347,7 +323,7 @@ export default function PaginaDetalleViajeAdmin() {
     }
   }
 
-  async function marcarFallido() {
+  async function marcarFallido(causa: CausaFallido) {
     if (!pasaporte) return;
     if (!pasaporte.traslado_id) {
       mostrarAviso({ tono: "danger", texto: "El traslado no tiene folio suficiente para marcarlo como fallido." });
@@ -359,7 +335,7 @@ export default function PaginaDetalleViajeAdmin() {
 
     try {
       const cliente = crearClienteNavegador();
-      const resultado = await marcarTrasladoFallido(cliente, trasladoId, causaFallido);
+      const resultado = await marcarTrasladoFallido(cliente, trasladoId, causa);
       mostrarAviso({ tono: "info", texto: resultado.mensaje });
       setPasaporte(await obtenerPasaporteDigital(cliente, trasladoId));
       setAuditoria(await obtenerAuditoriaTraslado(cliente, trasladoId));
@@ -370,8 +346,8 @@ export default function PaginaDetalleViajeAdmin() {
     }
   }
 
-  async function agregarNota() {
-    if (!pasaporte || !notaNueva.trim()) return;
+  async function agregarNota(contenido: string) {
+    if (!pasaporte || !contenido.trim()) return;
     if (!pasaporte.traslado_id) {
       mostrarAviso({ tono: "danger", texto: "El traslado no tiene folio suficiente para agregar notas." });
       return;
@@ -388,9 +364,8 @@ export default function PaginaDetalleViajeAdmin() {
 
     try {
       const cliente = crearClienteNavegador();
-      await agregarNotaInterna(cliente, trasladoId, adminId, notaNueva);
+      await agregarNotaInterna(cliente, trasladoId, adminId, contenido);
       setNotas(await obtenerNotasInternas(cliente, trasladoId));
-      setNotaNueva("");
     } catch (err) {
       mostrarAviso({ tono: "danger", texto: err instanceof Error ? err.message : "No pudimos guardar la nota." });
     } finally {
@@ -430,12 +405,6 @@ export default function PaginaDetalleViajeAdmin() {
     );
   }
 
-  const siguientesEstados = (TRANSICIONES[pasaporte.estado] ?? []).filter(estado => estado !== "disputa_resuelta");
-  const clasificacionCatalogo = resumenClasificacionVehiculo(
-    pasaporte.vehiculo_marca ?? "",
-    pasaporte.vehiculo_modelo ?? "",
-  );
-
   return (
     <main className="admin-page-shell">
       <AdminPageHeader
@@ -474,399 +443,31 @@ export default function PaginaDetalleViajeAdmin() {
       <ResolucionLlaves trasladoId={id} />
       <VerificacionRepuveAdmin trasladoId={id} />
 
-      {trazabilidadMasiva && (
-        <div className="mt-6">
-          <PassportCard>
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-              <div>
-                <p className="font-body text-xs uppercase tracking-wide text-ui-fg-muted">Origen corporativo</p>
-                <h2 className="mt-1 font-display text-lg font-semibold text-ui-fg">Carga masiva</h2>
-                <p className="mt-1 font-body text-sm text-ui-fg-muted">
-                  Archivo {trazabilidadMasiva.carga.nombre_archivo} · fila {trazabilidadMasiva.fila.numero_fila}
-                </p>
-              </div>
-              <span className="w-fit rounded-full border border-ui-brand/25 bg-ui-brand-soft px-3 py-1.5 font-body text-xs font-semibold text-ui-brand">
-                Corporativo
-              </span>
-            </div>
-            <dl className="mt-4 grid gap-3 font-body text-sm sm:grid-cols-2">
-              <div>
-                <dt className="text-ui-fg-muted">Referencia externa</dt>
-                <dd className="mt-1 font-mono-ruum text-xs text-ui-fg">{trazabilidadMasiva.fila.referencia_externa ?? "Sin referencia"}</dd>
-              </div>
-              <div>
-                <dt className="text-ui-fg-muted">Lote</dt>
-                <dd className="mt-1 font-mono-ruum text-xs text-ui-fg">{trazabilidadMasiva.carga.id.slice(0, 8).toUpperCase()}</dd>
-              </div>
-              <div>
-                <dt className="text-ui-fg-muted">Resultado del lote</dt>
-                <dd className="mt-1 text-ui-fg">
-                  {trazabilidadMasiva.carga.filas_creadas} creadas · {trazabilidadMasiva.carga.filas_error} error
-                </dd>
-              </div>
-              <div>
-                <dt className="text-ui-fg-muted">Procesado</dt>
-                <dd className="mt-1 text-ui-fg">{fechaAdministrativa(trazabilidadMasiva.carga.creado_en)}</dd>
-              </div>
-            </dl>
-          </PassportCard>
-        </div>
-      )}
+      <ViajeDetalleCards
+        pasaporte={pasaporte}
+        finanzas={finanzas}
+        trazabilidadMasiva={trazabilidadMasiva}
+      />
 
-      <div className="mt-8 grid grid-cols-1 gap-6 xl:grid-cols-2">
-        {/* Bloque 1 — Resumen + Bloque 2 — Vehículo */}
-        <PassportCard>
-          <p className="font-body text-xs uppercase tracking-wide text-ui-fg-muted">Resumen</p>
-          <dl className="mt-3 space-y-2 font-body text-sm">
-            <div className="flex justify-between">
-              <dt className="text-ui-fg-muted">Tipo de servicio</dt>
-              <dd className="capitalize">{pasaporte.tipo_pago?.replaceAll("_", " ") ?? "—"}</dd>
-            </div>
-            <div className="flex justify-between">
-              <dt className="text-ui-fg-muted">Creado</dt>
-              <dd>{fechaAdministrativa(pasaporte.creado_en)}</dd>
-            </div>
-            <div className="flex justify-between">
-              <dt className="text-ui-fg-muted">Conductor</dt>
-              <dd>{pasaporte.conductor_nombre ?? "Sin asignar"}</dd>
-            </div>
-          </dl>
-        </PassportCard>
+      <ViajeDetalleOperaciones
+        pasaporte={pasaporte}
+        conductores={conductores}
+        procesando={procesando}
+        precioFinalInput={precioFinalInput}
+        onAsignarConductor={asignar}
+        onCambiarEstatus={cambiarEstatus}
+        onGuardarClasificacion={guardarClasificacionVehiculo}
+        onCalcularTarifa={calcularTarifaNormativa}
+        onAplicarTarifa={aplicarTarifaNormativa}
+        onMarcarFallido={marcarFallido}
+      />
 
-        <PassportCard>
-          <p className="font-body text-xs uppercase tracking-wide text-ui-fg-muted">Finanzas</p>
-          {finanzas ? (
-            <dl className="mt-3 space-y-2 font-body text-sm">
-              <div className="flex justify-between">
-                <dt className="text-ui-fg-muted">Precio operativo</dt>
-                <dd>{dinero(finanzas.precioOperativo)}</dd>
-              </div>
-              <div className="flex justify-between">
-                <dt className="text-ui-fg-muted">Pagos cobrados</dt>
-                <dd>{dinero(finanzas.ingresosCobrados)}</dd>
-              </div>
-              <div className="flex justify-between">
-                <dt className="text-ui-fg-muted">Gastos</dt>
-                <dd>{dinero(finanzas.gastosOperativos)}</dd>
-              </div>
-              <div className="flex justify-between">
-                <dt className="text-ui-fg-muted">Pago conductor</dt>
-                <dd>{dinero(finanzas.pagoConductor)}</dd>
-              </div>
-              <div className="flex justify-between border-t border-ui-line pt-2 font-semibold">
-                <dt>Margen estimado</dt>
-                <dd className={finanzas.margenEstimado < 0 ? "text-ui-danger" : "text-ui-success"}>{dinero(finanzas.margenEstimado)}</dd>
-              </div>
-              <div className="flex justify-between text-xs">
-                <dt className="text-ui-fg-muted">Corte</dt>
-                <dd>{fechaAdministrativa(finanzas.corteEn)}</dd>
-              </div>
-            </dl>
-          ) : (
-            <p className="mt-3 font-body text-sm text-ui-fg-muted">Finanzas no disponibles para este rol o entorno.</p>
-          )}
-        </PassportCard>
-
-        <PassportCard>
-          <p className="font-body text-xs uppercase tracking-wide text-ui-fg-muted">Vehículo</p>
-          <dl className="mt-3 space-y-2 font-body text-sm">
-            <div className="flex justify-between">
-              <dt className="text-ui-fg-muted">Marca / modelo</dt>
-              <dd>
-                {pasaporte.vehiculo_marca} {pasaporte.vehiculo_modelo}
-              </dd>
-            </div>
-            <div className="flex justify-between">
-              <dt className="text-ui-fg-muted">Año</dt>
-              <dd>{pasaporte.vehiculo_anio}</dd>
-            </div>
-            <div className="flex justify-between">
-              <dt className="text-ui-fg-muted">Tipo</dt>
-              <dd>{pasaporte.vehiculo_tipo ? ETIQUETA_TIPO_VEHICULO[pasaporte.vehiculo_tipo] : "—"}</dd>
-            </div>
-            <div className="flex justify-between gap-4">
-              <dt className="text-ui-fg-muted">Clasificación catálogo</dt>
-              <dd className="text-right">{clasificacionCatalogo ?? "Sin coincidencia"}</dd>
-            </div>
-          </dl>
-        </PassportCard>
-
-        {/* Bloque 4 — Evidencia */}
-        <PassportCard>
-          <p className="font-body text-xs uppercase tracking-wide text-ui-fg-muted">Evidencia</p>
-          <dl className="mt-3 space-y-2 font-body text-sm">
-            <div className="flex justify-between">
-              <dt className="text-ui-fg-muted">Inicial</dt>
-              <dd className="font-mono-ruum">{pasaporte.evidencia_inicial_fotos_sincronizadas} / 5 fotos</dd>
-            </div>
-            <div className="flex justify-between">
-              <dt className="text-ui-fg-muted">Final</dt>
-              <dd className="font-mono-ruum">{pasaporte.evidencia_final_fotos_sincronizadas} / 5 fotos</dd>
-            </div>
-          </dl>
-          {pasaporte.tiene_incidencia_abierta && (
-            <div className="mt-3">
-              <Aviso tono="atencion">Incidencia abierta en este traslado.</Aviso>
-            </div>
-          )}
-        </PassportCard>
-
-        {/* Bloque 5 — Pagos */}
-        <PassportCard>
-          <p className="font-body text-xs uppercase tracking-wide text-ui-fg-muted">Pagos</p>
-          <dl className="mt-3 space-y-2 font-body text-sm">
-            <div className="flex justify-between">
-              <dt className="text-ui-fg-muted">Tarifa cotizada</dt>
-              <dd className="font-mono-ruum">${pasaporte.precio_cotizado?.toLocaleString("es-MX") ?? "—"}</dd>
-            </div>
-            <div className="flex justify-between">
-              <dt className="text-ui-fg-muted">Tarifa final</dt>
-              <dd className="font-mono-ruum">${pasaporte.precio_final?.toLocaleString("es-MX") ?? "—"}</dd>
-            </div>
-            <div className="flex justify-between">
-              <dt className="text-ui-fg-muted">Monto pagado</dt>
-              <dd className="font-mono-ruum">${pasaporte.monto_pagado?.toLocaleString("es-MX") ?? "0"}</dd>
-            </div>
-          </dl>
-          <p className="mt-3 font-body text-xs text-ui-fg-muted">
-           Pago al conductor, gastos y margen estimado: pendiente (ver &quot;Pagos&quot; en la barra lateral, próximamente).
-         </p>
-        </PassportCard>
-      </div>
-
-      {/* Acciones administrativas */}
-      <div className="mt-8 grid grid-cols-1 gap-6 xl:grid-cols-2">
-        <PassportCard>
-          <p className="font-body text-xs uppercase tracking-wide text-ui-fg-muted">Asignar / cambiar conductor</p>
-          <div className="mt-3 flex gap-2">
-            <select
-              value={conductorSeleccionado}
-              onChange={(e) => setConductorSeleccionado(e.target.value)}
-              className="flex-1 rounded-lg border border-ui-field bg-ui-card px-3 py-2 font-body text-sm"
-            >
-              <option value="">Selecciona un conductor</option>
-              {conductores.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.nombre} · {c.nivel_operativo_vigente ? ETIQUETA_NIVEL_CONCER[c.nivel_operativo_vigente] : "Nivel pendiente"}
-                </option>
-              ))}
-            </select>
-            <Button onClick={asignar} disabled={!conductorSeleccionado || procesando === "conductor"}>
-              {procesando === "conductor" ? "…" : "Asignar"}
-            </Button>
-          </div>
-        </PassportCard>
-
-        <PassportCard>
-          <p className="font-body text-xs uppercase tracking-wide text-ui-fg-muted">Cambiar estatus</p>
-          {pasaporte.estado === "disputa_abierta" && <p className="mt-2 text-sm">Para registrar una resolución, abre <Link href="/disputas" className="underline">Disputas</Link>. El resumen se actualizará al resolver todos los casos pendientes.</p>}
-          <div className="mt-3 flex gap-2">
-            <select
-              value={estadoSeleccionado}
-              onChange={(e) => setEstadoSeleccionado(e.target.value as EstadoTraslado)}
-              className="flex-1 rounded-lg border border-ui-field bg-ui-card px-3 py-2 font-body text-sm"
-              disabled={siguientesEstados.length === 0}
-            >
-              <option value="">{siguientesEstados.length === 0 ? "Sin transiciones disponibles" : "Selecciona el nuevo estatus"}</option>
-              {siguientesEstados.map((e) => (
-                <option key={e} value={e}>
-                  {ETIQUETA_ESTADO_TRASLADO[e]}
-                </option>
-              ))}
-            </select>
-            <Button onClick={cambiarEstatus} disabled={!estadoSeleccionado || procesando === "estado"}>
-              {procesando === "estado" ? "…" : "Cambiar"}
-            </Button>
-          </div>
-        </PassportCard>
-      </div>
-
-      {/* Clasificación del vehículo para tarifa (RT-12) — la asigna Torre de
-          Control, no el usuario, para que no pueda autoasignarse la
-          categoría más barata. */}
-      <div className="mt-6">
-        <PassportCard>
-          <p className="font-body text-xs uppercase tracking-wide text-ui-fg-muted">Clasificación de tarifa del vehículo</p>
-          <p className="mt-1 font-body text-xs text-ui-fg-muted">
-            Actual: {pasaporte.vehiculo_categoria_tarifa ?? "sin asignar"} · {pasaporte.vehiculo_gama ?? "sin asignar"} ·{" "}
-            {pasaporte.vehiculo_condicion ?? "sin asignar"}
-          </p>
-          <div className="mt-3 flex flex-wrap items-end gap-2">
-            <select
-              value={categoriaTarifaInput}
-              onChange={(e) => setCategoriaTarifaInput(e.target.value as typeof categoriaTarifaInput)}
-              className="min-h-12 rounded-md border border-ui-field bg-ui-card px-3 font-body text-sm text-ui-fg"
-            >
-              <option value="">Categoría…</option>
-              <option value="ligero_a">Ligero A</option>
-              <option value="ligero_b">Ligero B</option>
-              <option value="mediano">Mediano</option>
-              <option value="camion">Camión</option>
-            </select>
-            <select
-              value={gamaInput}
-              onChange={(e) => setGamaInput(e.target.value as typeof gamaInput)}
-              className="min-h-12 rounded-md border border-ui-field bg-ui-card px-3 font-body text-sm text-ui-fg"
-            >
-              <option value="">Gama…</option>
-              <option value="entrada">Entrada</option>
-              <option value="media">Media</option>
-              <option value="alta">Alta</option>
-              <option value="premium">Premium</option>
-            </select>
-            <select
-              value={condicionInput}
-              onChange={(e) => setCondicionInput(e.target.value as typeof condicionInput)}
-              className="min-h-12 rounded-md border border-ui-field bg-ui-card px-3 font-body text-sm text-ui-fg"
-            >
-              <option value="">Condición…</option>
-              <option value="nueva">Nueva</option>
-              <option value="seminueva">Seminueva</option>
-              <option value="rescate_mecanico">Rescate mecánico</option>
-            </select>
-            <Button variant="quiet" onClick={guardarClasificacionVehiculo} disabled={procesando === "sugerencia"}>
-              Guardar clasificación
-            </Button>
-          </div>
-        </PassportCard>
-      </div>
-
-      {/* Aplicación de política tarifaria autorizada */}
-      <div className="mt-6">
-        <PassportCard>
-          <p className="font-body text-xs uppercase tracking-wide text-ui-fg-muted">Tarifa normativa</p>
-          <p className="mt-1 font-body text-xs text-ui-fg-muted">
-            El precio sale de la política vigente en Tarifas. Operación no captura montos libres; sólo aplica el cálculo autorizado y auditable.
-          </p>
-          <div className="mt-3">
-            <Button variant="quiet" onClick={calcularTarifaNormativa} disabled={procesando === "sugerencia"}>
-              {procesando === "sugerencia" ? "Calculando tarifa…" : "Calcular tarifa normativa"}
-            </Button>
-            {pasaporte.distancia_km != null && pasaporte.tiempo_estimado_horas != null && (
-              <span className="ml-3 font-body text-xs text-ui-fg-muted">
-                Última ruta calculada: {pasaporte.distancia_km} km, {pasaporte.tiempo_estimado_horas} h
-              </span>
-            )}
-          </div>
-          <div className="mt-3 flex flex-wrap items-center gap-3 rounded-lg border border-ui-line bg-ui-brand/[0.03] px-4 py-3">
-            <div>
-              <p className="font-body text-xs text-ui-fg-muted">Tarifa calculada</p>
-              <p className="font-mono-ruum text-lg font-semibold text-ui-fg">
-                {precioFinalInput ? `$${Number(precioFinalInput).toLocaleString("es-MX")}` : "Pendiente"}
-              </p>
-            </div>
-            <Button onClick={aplicarTarifaNormativa} disabled={procesando === "precio"}>
-              {procesando === "precio" ? "…" : "Aplicar tarifa normativa"}
-            </Button>
-          </div>
-        </PassportCard>
-      </div>
-
-      <div className="mt-6">
-        <PassportCard>
-          <p className="font-body text-xs uppercase tracking-wide text-ui-fg-muted">Traslado fallido</p>
-          <p className="mt-1 font-body text-xs text-ui-fg-muted">
-            Usa esta acción cuando el traslado no puede continuar. Se calcula cargo, reagendamiento y descuento con la regla PRD §4.11.
-          </p>
-          <div className="mt-3 flex flex-col gap-3 sm:flex-row sm:items-end">
-            <select
-              value={causaFallido}
-              onChange={(e) => setCausaFallido(e.target.value as CausaFallido)}
-              className="rounded-lg border border-ui-field bg-ui-card px-3 py-2 font-body text-sm"
-            >
-              {CAUSAS_FALLIDO.map((causa) => (
-                <option key={causa.valor} value={causa.valor}>
-                  {causa.etiqueta}
-                </option>
-              ))}
-            </select>
-            <Button onClick={marcarFallido} disabled={procesando === "fallido" || pasaporte.estado === "traslado_fallido"}>
-              {procesando === "fallido" ? "…" : "Marcar fallido"}
-            </Button>
-          </div>
-        </PassportCard>
-      </div>
-
-      {/* Bloque 7 — Notas internas */}
-      <div className="mt-6">
-        <PassportCard>
-          <p className="font-body text-xs uppercase tracking-wide text-ui-fg-muted">Notas internas</p>
-          <div className="mt-3 flex items-end gap-2">
-            <div className="flex-1">
-              <Field
-                etiqueta="Nueva nota"
-                placeholder="Visible solo para el equipo de operación"
-                value={notaNueva}
-                onChange={(e) => setNotaNueva(e.target.value)}
-              />
-            </div>
-            <Button onClick={agregarNota} disabled={!notaNueva.trim() || procesando === "nota"}>
-              {procesando === "nota" ? "…" : "Agregar"}
-            </Button>
-          </div>
-          <div className="mt-4 space-y-3 border-t border-ui-line pt-4">
-            {notas.length === 0 ? (
-              <p className="font-body text-sm text-ui-fg-muted">Sin notas todavía.</p>
-            ) : (
-              notas.map((n) => (
-                <div key={n.id} className="font-body text-sm">
-                  <p>{n.contenido}</p>
-                  <p className="mt-0.5 font-mono-ruum text-xs uppercase tracking-wide text-ui-fg-muted">
-                    {fechaAdministrativa(n.creada_en)}
-                  </p>
-                </div>
-              ))
-            )}
-          </div>
-        </PassportCard>
-      </div>
-
-      {/* Bloque 6 — Línea de tiempo */}
-      <div className="mt-6">
-        <PassportCard>
-          <p className="font-body text-xs uppercase tracking-wide text-ui-fg-muted">Línea de tiempo</p>
-          <h2 className="mt-1 font-display text-lg font-semibold">Registro de auditoría</h2>
-          <div className="mt-4 space-y-0">
-            {auditoria.length === 0 ? (
-              <p className="font-body text-sm text-ui-fg-muted">Sin eventos registrados todavía.</p>
-            ) : (
-              <div className="relative">
-                <div className="absolute left-[11px] top-2 h-[calc(100%-16px)] w-0.5 bg-ui-muted" aria-hidden="true" />
-                {auditoria.map((evento, indice) => {
-                  const eventoLabel = evento.evento.replaceAll("_", " ");
-                  const eventoData = JSON.stringify(evento.datos, null, 2);
-                  return (
-                    <div key={evento.id} className="relative flex gap-4 pb-5 last:pb-0">
-                      <div className={`relative mt-1.5 size-[23px] shrink-0 rounded-full border-2 ${indice === 0 ? "border-ui-brand bg-ui-brand" : "border-ui-line-strong bg-ui-card"}`} aria-hidden="true">
-                        {indice === 0 && <span className="absolute inset-0 flex items-center justify-center text-xs text-ui-fg">●</span>}
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <div className="flex flex-col gap-1 sm:flex-row sm:items-start sm:justify-between">
-                          <p className="font-body text-sm font-semibold capitalize">{eventoLabel}</p>
-                          <p className="whitespace-nowrap font-mono-ruum text-xs uppercase tracking-wide text-ui-fg-muted">
-                            {fechaAdministrativa(evento.timestamp)}
-                          </p>
-                        </div>
-                        <p className="mt-0.5 font-body text-xs text-ui-fg-muted">
-                          Actor: {evento.actor} · {evento.actor_id}
-                        </p>
-                        {eventoData !== "{}" && (
-                          <details className="mt-2">
-                            <summary className="cursor-pointer font-body text-xs font-semibold text-ui-brand-soft-fg hover:underline">Ver datos</summary>
-                            <pre className="mt-2 max-h-32 overflow-auto rounded-lg bg-ui-brand/[0.04] p-3 font-mono-ruum text-xs text-ui-fg-muted">
-                              {eventoData}
-                            </pre>
-                          </details>
-                        )}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-          </div>
-        </PassportCard>
-      </div>
+      <ViajeDetalleNotasAuditoria
+        notas={notas}
+        auditoria={auditoria}
+        procesando={procesando}
+        onAgregarNota={agregarNota}
+      />
     </main>
   );
 }

@@ -54,6 +54,15 @@ la lee de ahí si no está en el entorno; ver `scripts/validate-env.mjs`).
 - `pnpm audit --audit-level=high` corre en CI (`pnpm audit:deps`); los
   `overrides` de seguridad viven en `package.json` → `pnpm.overrides` con
   comentario de alcance.
+- Excepciones vigentes en `pnpm.auditConfig.ignoreGhsas` (revisadas el
+  2026-11-26; revisar cada trimestre y retirarlas en cuanto haya parche):
+
+  | GHSA | Paquete | Motivo |
+  | ---- | ------- | ------ |
+  | GHSA-jmr9-qjv8-65gv | `extract-zip` ≤ 2.0.1 | Sin versión corregida. Solo llega vía `@lhci/cli` → `lighthouse` → `puppeteer-core` (devDependency de Lighthouse CI); no entra en ningún bundle. |
+  | GHSA-7pqw-9j4j-h8q3 | `extract-zip` ≤ 2.0.1 | Mismo caso y misma ruta que el anterior. |
+
+  GHSA-vfj7-8cjw-p6xm se retiró el 2026-11-26: ya no aparece en el árbol.
 - El package manager es **pnpm** (`pnpm-lock.yaml` + `--frozen-lockfile` en
   CI y Docker). `package-lock.json`/`yarn.lock` están prohibidos por
   `.gitignore`.

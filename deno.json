@@ -6,6 +6,6 @@
   },
   "tasks": {
     "check:functions": "deno check supabase/functions/cancelar-traslado-usuario/index.ts supabase/functions/crear-llamada-enmascarada/index.ts supabase/functions/crear-payment-intent/index.ts supabase/functions/despachar-notificaciones-push/index.ts supabase/functions/documentos-cuenta-usuario/index.ts supabase/functions/iniciar-verificacion-didit/index.ts supabase/functions/limpiar-documentos-cuenta-obsoletos/index.ts supabase/functions/limpiar-documentos-identidad-obsoletos/index.ts supabase/functions/reconciliar-pagos-stripe/index.ts supabase/functions/reconciliar-usuario/index.ts supabase/functions/reconciliar-verificaciones-didit/index.ts supabase/functions/stripe-webhook/index.ts supabase/functions/validar-documento-conductor/index.ts supabase/functions/validar-documento-identidad/index.ts supabase/functions/webhook-didit/index.ts",
-    "test:functions": "deno test supabase/functions/_shared/cors-documentos.test.ts supabase/functions/_shared/timing-safe.test.ts"
+    "test:functions": "deno test \"supabase/functions/**/*.test.ts\""
   }
 }

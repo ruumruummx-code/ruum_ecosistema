@@ -14,7 +14,7 @@ export const ETIQUETAS_PESTANA: Record<PestañaFiltro, string> = {
 
 export const ORDEN_PESTANAS: PestañaFiltro[] = ["todos", "activos", "programados", "finalizados", "cancelados", "en_revision"];
 
-const TONO_ESTADO: Record<ReturnType<typeof estadoVisibleTraslado>["tono"], NonNullable<BadgeProps["tone"]>> = {
+export const TONO_ESTADO: Record<ReturnType<typeof estadoVisibleTraslado>["tono"], NonNullable<BadgeProps["tone"]>> = {
   active: "info",
   scheduled: "neutral",
   completed: "success",

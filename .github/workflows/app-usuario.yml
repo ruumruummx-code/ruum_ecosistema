@@ -2,7 +2,7 @@ name: App Usuario
 on:
   pull_request:
   push:
-    branches: [main, 'codex/app-usuario-rc']
+    branches: [main]
 permissions:
   contents: read
 jobs:
@@ -13,7 +13,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: supabase/setup-cli@v1
         with:
-          version: 2.109.0
+          version: 2.122.0 # mantener igual a devDependencies.supabase (pnpm-lock.yaml)
       - name: Aplicar todas las migraciones a una base limpia
         run: supabase db start
       - name: Verificar aislamiento RLS y concurrencia con pgTAP

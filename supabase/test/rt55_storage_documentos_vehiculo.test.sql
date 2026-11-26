@@ -25,10 +25,11 @@ create temp table _ctx (k text primary key, v uuid);
 insert into _ctx values
   ('user_a',    gen_random_uuid()),
   ('cond_a',    gen_random_uuid()),
-  ('admin_sup', gen_random_uuid());
+  ('admin_sup', gen_random_uuid()),
+  ('vehiculo',  gen_random_uuid());
 
 insert into auth.users (id, email)
-select v, k || '@rt55.test' from _ctx;
+select v, k || '@rt55.test' from _ctx where k <> 'vehiculo';
 
 insert into public.usuarios (id, auth_user_id, tipo_cuenta, rol, nombre)
 select v, v, 'personal', 'personal'::rol_usuario, k from _ctx
@@ -43,7 +44,7 @@ select v, k, 'supervisor'::rol_admin_operativo from _ctx
 where k = 'admin_sup';
 
 insert into public.vehiculos (id, usuario_id, tipo, marca, modelo, anio)
-select gen_random_uuid(), u.id, 'sedan'::tipo_vehiculo, 'Nissan', 'Versa', 2024
+select (select v from _ctx where k = 'vehiculo'), u.id, 'sedan'::tipo_vehiculo, 'Nissan', 'Versa', 2024
 from public.usuarios u
 where u.auth_user_id = (select v from _ctx where k = 'user_a');
 
@@ -66,8 +67,7 @@ select pg_temp.actuar_como((select v from _ctx where k = 'user_a'));
 select throws_ok(
   $$
   insert into public.documentos_vehiculo (vehiculo_id, tipo, url, nombre_archivo)
-  select id, 'tarjeta_circulacion', 'https://ejemplo.com/doc.pdf', 'tarjeta.pdf'
-  from public.vehiculos limit 1;
+  values ((select v from _ctx where k = 'vehiculo'), 'tarjeta_circulacion', 'https://ejemplo.com/doc.pdf', 'tarjeta.pdf');
   $$,
   '42501',
   null,
@@ -80,8 +80,7 @@ select pg_temp.actuar_como((select v from _ctx where k = 'cond_a'));
 select throws_ok(
   $$
   insert into public.documentos_vehiculo (vehiculo_id, tipo, url, nombre_archivo)
-  select id, 'seguro', 'https://ejemplo.com/seguro.pdf', 'seguro.pdf'
-  from public.vehiculos limit 1;
+  values ((select v from _ctx where k = 'vehiculo'), 'seguro', 'https://ejemplo.com/seguro.pdf', 'seguro.pdf');
   $$,
   '42501',
   null,
@@ -92,8 +91,7 @@ select throws_ok(
 select pg_temp.actuar_como((select v from _ctx where k = 'admin_sup'));
 
 insert into public.documentos_vehiculo (vehiculo_id, tipo, url, nombre_archivo)
-select id, 'tarjeta_circulacion', 'https://ejemplo.com/doc.pdf', 'tarjeta.pdf'
-from public.vehiculos limit 1;
+values ((select v from _ctx where k = 'vehiculo'), 'tarjeta_circulacion', 'https://ejemplo.com/doc.pdf', 'tarjeta.pdf');
 
 select is(
   (select count(*) from public.documentos_vehiculo),

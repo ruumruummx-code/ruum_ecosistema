@@ -34,15 +34,14 @@ test('Inicio desktop: datos, GPS, scroll confinado, contactos y navegación oper
   await page.setViewportSize({ width: 1672, height: 941 });
   await page.goto('/', { waitUntil: 'domcontentloaded' });
   await esperarHidratacion(page);
-  const dashboard = page.getByTestId('desktop-dashboard');
-  await expect(dashboard.getByRole('heading', { name: 'Tu traslado, en orden.' })).toBeVisible();
-  await expect(dashboard.getByText('Bienvenido de nuevo, Carlos')).toBeVisible();
-  await expect(dashboard.getByRole('link', { name: 'Registrar nuevo traslado' })).toHaveCount(1);
+  const dashboard = page.getByTestId('inicio-escritorio');
+  await expect(dashboard.getByRole('heading', { level: 1, name: 'Hola, Carlos' })).toBeVisible();
+  await expect(dashboard.getByRole('link', { name: 'Solicitar traslado' })).toHaveCount(1);
   await expect(page.locator('#userDashboardSidebar').getByRole('link', { name: 'Ayuda', exact: true })).toBeInViewport();
   await expect(dashboard.getByRole('row').nth(1)).toBeInViewport({ ratio: 1 });
   await expect(dashboard.getByRole('link', { name: 'Traslados activos 2' })).toBeVisible();
-  await expect(dashboard.getByRole('link', { name: 'Vehículos registrados 3' })).toBeVisible();
-  const activo = dashboard.getByRole('article', { name: 'Traslado activo' });
+  await expect(dashboard.getByRole('link', { name: 'Mis vehículos 3 registrados' })).toBeVisible();
+  const activo = dashboard.getByRole('region', { name: /^Traslado Activo #/ });
   await page.screenshot({ path: 'test-results/dashboard-initial.png', timeout: 10_000 });
   await expect(activo.getByText('12 min')).toBeVisible({ timeout: 30_000 });
   await expect(activo.getByText('8.4 km')).toBeVisible();
@@ -82,9 +81,9 @@ test('Inicio desktop: datos, GPS, scroll confinado, contactos y navegación oper
   await expect(dashboard.getByRole('link', { name: 'Solicitar ayuda' })).toHaveAttribute('href', "/soporte?traslado=10000000-0000-4000-8000-000000000002");
   await page.keyboard.press('Escape');
   for (const [name, path] of [
-    ['Registrar nuevo traslado', '/viajes/nuevo'],
+    ['Solicitar traslado', '/viajes/nuevo'],
     ['Carga masiva', '/viajes/masivo'],
-    ['Vehículos registrados', '/cuenta/vehiculos'],
+    ['Mis vehículos', '/cuenta/vehiculos'],
     ['Traslados activos', '/mis-viajes'],
     ['Completados este mes', '/mis-viajes?tab=finalizados'],
   ]) {
@@ -103,15 +102,19 @@ test('Inicio desktop: datos, GPS, scroll confinado, contactos y navegación oper
   await expect(page.getByRole('heading', { name: 'Ayuda y soporte' })).toBeVisible();
 });
 
-test('Inicio desktop: cuenta sin traslados y vista móvil preservada', async ({ page }) => {
+test('Inicio: cuenta sin traslados en escritorio y la misma pantalla en móvil', async ({ page }) => {
   await seedMockAuthSession(page, { variante: 'verificada' });
   await page.setViewportSize({ width: 1366, height: 768 });
   await page.goto('/', { waitUntil: 'domcontentloaded' });
-  const dashboard = page.getByTestId('desktop-dashboard');
+  const dashboard = page.getByTestId('inicio-escritorio');
   await expect(dashboard.getByText('No tienes traslados activos')).toBeVisible();
   await expect(dashboard.getByText('Chrysler Cirrus 2024')).toHaveCount(0);
   await page.setViewportSize({ width: 390, height: 844 });
   await expect(dashboard).toBeHidden();
   await expect(page.locator('#userDashboardSidebar')).toBeHidden();
+  const movil = page.getByTestId('inicio-movil');
+  await expect(movil.getByText('No tienes traslados activos')).toBeVisible();
+  await expect(movil.getByRole('link', { name: 'Contactar soporte' })).toBeVisible();
+  await expect(movil.getByRole('region', { name: 'Últimos traslados' })).toBeHidden();
   expect(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth)).toBe(false);
 });

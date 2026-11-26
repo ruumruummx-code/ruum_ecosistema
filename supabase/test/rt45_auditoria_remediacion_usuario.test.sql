@@ -41,7 +41,8 @@ select cmp_ok(
 create temp table _ctx (k text primary key, v uuid);
 insert into _ctx values
   ('user_test', gen_random_uuid()),
-  ('cond_test', gen_random_uuid());
+  ('cond_test', gen_random_uuid()),
+  ('traslado_test', gen_random_uuid());
 
 insert into auth.users (id, email)
 select v, k || '@rt45.test' from _ctx;
@@ -66,7 +67,7 @@ insert into public.traslados (
   origen_direccion, origen_ciudad, destino_direccion, destino_ciudad
 )
 select
-  gen_random_uuid(), u.id, v.id, gen_random_uuid(), 'solicitud_creada'::estado_traslado, 850.00, 850.00,
+  (select v from _ctx where k = 'traslado_test'), u.id, v.id, gen_random_uuid(), 'solicitud_creada'::estado_traslado, 850.00, 850.00,
   'Entrega', '5511111111', 'Recepción', '5522222222',
   'Origen CDMX', 'CDMX', 'Destino Toluca', 'Toluca'
 from public.usuarios u
@@ -74,33 +75,40 @@ join public.vehiculos v on v.usuario_id = u.id
 where u.auth_user_id = (select v from _ctx where k = 'user_test');
 
 -- 3. servidor_cancela_traslado: 0% cargo si no hay conductor asignado
+grant select on _ctx to service_role, authenticated;
+set local role service_role;
+set local request.jwt.claims = '{"role":"service_role"}';
 select is(
-  (
-    select (public.servidor_cancela_traslado(
-      (select v from _ctx where k = 'user_test'),
-      (select id from public.traslados limit 1),
-      'Cancelación de prueba previa a asignación'
-    )).porcentaje_cargo
-  ),
+  (public.servidor_cancela_traslado(
+    (select v from _ctx where k = 'user_test'),
+    (select v from _ctx where k = 'traslado_test'),
+    'Cancelación de prueba previa a asignación'
+  )->>'porcentaje_cargo')::numeric,
   0::numeric,
   'servidor_cancela_traslado aplica 0% de cargo cuando no hay conductor asignado'
 );
+reset role;
 
 -- 4. El estado del traslado cambia a cancelado tras la ejecución
 select is(
-  (select estado::text from public.traslados limit 1),
-  'cancelado',
+  (select estado::text from public.traslados where id = (select v from _ctx where k = 'traslado_test')),
+  'servicio_cancelado',
   'El traslado transiciona a cancelado correctamente'
 );
 
 -- 5. Tabla registro_auditoria registra eventos del sistema
 select is(
-  (select count(*) >= 0 from public.registro_auditoria),
-  true,
-  'Tabla registro_auditoria es consultable y válida'
+  (select count(*) from public.registro_auditoria
+   where evento = 'cancelacion_traslado' and traslado_id = (select v from _ctx where k = 'traslado_test')),
+  1::bigint,
+  'La cancelación registra un evento de auditoría'
 );
 
 -- 6. RPC puede_ver_tarifa_traslado valida visibilidad
+set local role authenticated;
+select set_config('request.jwt.claims', jsonb_build_object(
+  'role', 'authenticated', 'sub', (select v from _ctx where k = 'user_test')
+)::text, true);
 select is(
   public.puede_ver_tarifa_traslado((select v from _ctx where k = 'user_test')),
   true,

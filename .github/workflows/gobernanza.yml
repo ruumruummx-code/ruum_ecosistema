@@ -31,6 +31,8 @@ jobs:
         run: pnpm validate:env
       - name: Validar migraciones declarativas y convenciones
         run: pnpm check:migrations
+      - name: Verificar seguridad de Supabase
+        run: pnpm check:supabase-security
       - name: Validar conversiones RPC (RPC Casts)
         run: pnpm check:rpc-casts
       - name: Auditar dependencias

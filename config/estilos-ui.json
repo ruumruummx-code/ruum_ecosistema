@@ -29,7 +29,9 @@
     "apps/app-conductor/src/app/onboarding",
     "apps/app-conductor/src/app/globals.css",
     "apps/app-conductor/src/app/shell-contract.css",
-    "apps/panel-admin/src"
+    "apps/panel-admin/src",
+    "apps/app-usuario/src/app/InicioUsuario.tsx",
+    "apps/app-usuario/src/app/dashboard"
   ],
   "excluir": [
     "packages/ui/src/styles/tokens.css",
@@ -40,7 +42,6 @@
     "apps/app-conductor/src/app/layout.tsx": 2,
     "apps/app-usuario/src/app/auth/callback/route.ts": 5,
     "apps/app-usuario/src/app/components/SkeletonMapa.tsx": 1,
-    "apps/app-usuario/src/app/ConductorAsignado.tsx": 16,
     "apps/app-usuario/src/app/contrast-tokens.css": 16,
     "apps/app-usuario/src/app/cuenta/cambiar-contrasena/CambiarContrasena.tsx": 124,
     "apps/app-usuario/src/app/cuenta/cuenta-desktop.module.css": 266,
@@ -61,13 +62,10 @@
     "apps/app-usuario/src/app/cuenta/vehiculos/nuevo/NuevoVehiculo.tsx": 3,
     "apps/app-usuario/src/app/cuenta/vehiculos/page.tsx": 1,
     "apps/app-usuario/src/app/cuenta/vehiculos/vehiculos-desktop.module.css": 246,
-    "apps/app-usuario/src/app/dashboard/dashboard.module.css": 170,
     "apps/app-usuario/src/app/error.tsx": 3,
     "apps/app-usuario/src/app/FormularioPropuestaEmpresa.tsx": 8,
     "apps/app-usuario/src/app/global-error.tsx": 6,
     "apps/app-usuario/src/app/globals.css": 335,
-    "apps/app-usuario/src/app/InicioMobile.tsx": 18,
-    "apps/app-usuario/src/app/InicioUsuario.css": 89,
     "apps/app-usuario/src/app/layout.tsx": 2,
     "apps/app-usuario/src/app/legal/privacidad/page.tsx": 57,
     "apps/app-usuario/src/app/legal/terminos/page.tsx": 25,

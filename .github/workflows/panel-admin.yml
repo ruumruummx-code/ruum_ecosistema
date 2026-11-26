@@ -36,3 +36,5 @@ jobs:
       - run: pnpm --filter @ruum/panel-admin typecheck
       - run: pnpm --filter @ruum/panel-admin build
       - run: pnpm --filter @ruum/panel-admin test
+      - run: pnpm --filter @ruum/panel-admin exec playwright install --with-deps chromium
+      - run: pnpm --filter @ruum/panel-admin test:smoke

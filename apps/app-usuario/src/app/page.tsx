@@ -6,14 +6,13 @@ import type { Database } from "@ruum/shared/types";
 import { IDENTIDAD_MARCA } from "@ruum/shared/constants";
 import { LogoMarca, SelloConductor, Icono, MobileShell } from "@ruum/ui";
 import { NavegacionUsuario } from "./NavegacionUsuario";
-import { InicioMobile, InicioDesktop } from "./InicioUsuario";
+import { InicioUsuario } from "./InicioUsuario";
+import { UserDashboardLayout } from "../components/layout/UserDashboardLayout";
 import { BotonReintentarSesion } from "./ReintentarSesion";
 import { construirNotificaciones, ESTADOS_TRASLADO_FINALIZADOS } from "../lib/inicio";
 import { logStructuredWarn } from "../lib/logger";
 import { botonAzul, botonContorno } from "./experiencia-publica";
 import { PUBLIC_CLAIMS, PUBLIC_CLAIMS_VERSION } from "../lib/public-claims";
-// RC-14: estilos responsivos del dashboard (ver InicioUsuario.css).
-import "./InicioUsuario.css";
 
 type UsuarioRow = Database["public"]["Tables"]["usuarios"]["Row"];
 type PasaporteRow = Database["public"]["Views"]["pasaporte_digital"]["Row"];
@@ -132,46 +131,41 @@ export default async function PaginaInicio({
   }
 
   if (usuario && !forzarLanding) {
-    const notificacionesCount = construirNotificaciones(usuario, traslados).length;
+    const notificaciones = construirNotificaciones(usuario, traslados);
+    const datos = {
+      usuario,
+      traslados,
+      conductorFotoUrl,
+      vehiculos,
+      errorVehiculos,
+      historialReciente,
+      totalActivos,
+      completadosMes,
+    };
+    /* Una sola pantalla (InicioUsuario) dentro del marco de navegación de cada
+       tamaño: barra inferior en móvil, barra lateral desde 1024px. */
     return (
       <>
-        {/* VISTA MÓVIL (< 1024px): Preservada idéntica bajo enfoque mobile-first */}
-        <div className="lg:hidden flex flex-col h-full w-full">
-          <NavegacionUsuario
-            variante="claro"
-            nombreUsuario={usuario.nombre}
-            notificacionesCount={notificacionesCount}
-          />
-          <MobileShell
-            as="main"
-            variant="compact"
-            navInferiorVisible={true}
-            className="user-v2-scope user-dashboard-shell"
-            contentClassName="user-dashboard-content"
-          >
-            <div aria-live="polite">
-              <InicioMobile
-                usuario={usuario}
-                traslados={traslados}
-                conductorFotoUrl={conductorFotoUrl}
-                vehiculos={vehiculos}
-              />
-            </div>
+        <div className="flex h-full w-full flex-col lg:hidden">
+          <NavegacionUsuario variante="claro" nombreUsuario={usuario.nombre} notificacionesCount={notificaciones.length} />
+          <MobileShell as="main" variant="wide" padding="none" conFondoCanvas={false} navInferiorVisible className="bg-ui-bg">
+            <InicioUsuario {...datos} marco="movil" />
           </MobileShell>
         </div>
-
-        {/* VISTA ESCRITORIO (>= 1024px): Dashboard enriquecido */}
-        <div className="hidden lg:flex h-full w-full">
-          <InicioDesktop
-            errorVehiculos={errorVehiculos}
-            historialReciente={historialReciente}
-            totalActivos={totalActivos}
-            completadosMes={completadosMes}
+        <div className="hidden h-full w-full lg:flex">
+          <UserDashboardLayout
             usuario={usuario}
-            traslados={traslados}
-            conductorFotoUrl={conductorFotoUrl}
-            vehiculos={vehiculos}
-          />
+            nombre={usuario.nombre}
+            notificaciones={notificaciones}
+            totalVehiculos={errorVehiculos ? undefined : vehiculos.length}
+            idContenido="desktopMainContent"
+            padding="ninguno"
+            classNameContenido="bg-ui-bg"
+            showPromo={false}
+            dashboardHeader
+          >
+            <InicioUsuario {...datos} marco="escritorio" />
+          </UserDashboardLayout>
         </div>
       </>
     );

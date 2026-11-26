@@ -34,7 +34,7 @@ sintético), `pnpm db:types` para regenerar
 | `packages/api` (`@ruum/api`) | **Única vía de acceso a datos** desde las apps (frontera arquitectónica) | — |
 | `packages/shared` (`@ruum/shared`) | Constantes, reglas, tipos Supabase, utils | — |
 | `packages/ui` (`@ruum/ui`) | Design system React | — |
-| `supabase/functions` | 14 Edge Functions en Deno para pagos, Didit, documentos, push y webhooks | — |
+| `supabase/functions` | 15 Edge Functions en Deno para pagos, Didit, documentos, push y webhooks | — |
 | `supabase/migrations` y `supabase/test/` | Esquema y suite pgTAP de aislamiento RLS y concurrencia | — |
 | `design-system/` | Tokens, assets (`design-system/assets`) y docs de diseño | — |
 | `docs/` | Runbooks (`docs/runbooks`) y QA (`docs/qa`) | — |
@@ -49,7 +49,6 @@ pnpm --filter @ruum/app-usuario test:coverage  # ejemplo de cobertura por worksp
 pnpm test:sql                       # Suite pgTAP en supabase/test/
 pnpm test:sql:rls                   # Aislamiento y permisos por rol
 pnpm test:sql:concurrencia          # Conflicto de escritura entre operadores
-pnpm test:e2e:golden | test:piramide        # golden path / pirámide completa
 pnpm check:fronteras               # 0 accesos directos a Supabase en apps/*
 pnpm check:migrations              # convención de migraciones + sin datos de prueba
 pnpm test:load                     # carga k6 de los flujos críticos de app-usuario
@@ -58,8 +57,8 @@ pnpm scan:secrets                  # escaneo de secretos (bloqueante en CI)
 pnpm audit:deps                    # pnpm audit --audit-level=high
 pnpm validate:env                  # valida variables del workspace
 pnpm check:supabase-security | check:supabase-drift
-deno task check:functions          # typecheck del subconjunto enumerado en deno.json
-deno task test:functions           # tests Deno (48)
+deno task check:functions          # typecheck de las 15 funciones enumeradas en deno.json
+deno task test:functions           # tests Deno de _shared/ (10 casos en 2 archivos)
 ```
 
 El script `test:coverage` se define por workspace. Está disponible en

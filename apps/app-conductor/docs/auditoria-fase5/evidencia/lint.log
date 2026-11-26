@@ -1,4 +1,0 @@
-/workspace/ruum-fase2/apps/app-conductor/src/app/cuenta/preferencias/page.tsx
-  177:32  warning  Generic Object Injection Sink  security/detect-object-injection
-
-✖ 1 problem (0 errors, 1 warning)

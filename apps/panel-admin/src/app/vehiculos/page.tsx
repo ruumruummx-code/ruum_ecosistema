@@ -1,69 +1,30 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import Image from "next/image";
 import { Aviso } from "@ruum/ui";
 import { ETIQUETA_TIPO_VEHICULO } from "@ruum/shared/constants";
-import type { Database } from "@ruum/shared/types";
-import { listarVehiculosAdminPaginados, obtenerEvidenciaVehiculo, actualizarVehiculoAdmin, resolverUrlEvidencia, type DatosVehiculosAdmin, type EvidenciaVehiculoTraslado, type VehiculoActualizarAdmin } from "@ruum/api/services";
+import {
+  listarVehiculosAdminPaginados,
+  obtenerEvidenciaVehiculo,
+  actualizarVehiculoAdmin,
+  resolverUrlEvidencia,
+  type DatosVehiculosAdmin,
+  type EvidenciaVehiculoTraslado,
+  type VehiculoActualizarAdmin
+} from "@ruum/api/services";
 import { crearClienteNavegador, tieneSupabaseConfigurado } from "../../lib/supabase-browser";
 import { AdminPageHeader, AdminPanel } from "../admin-ui";
 import { AdminButton, AdminEmptyState, AdminErrorState, AdminLoadingState } from "../admin-components";
-
-type Vehiculo = Database["public"]["Tables"]["vehiculos"]["Row"];
-type Usuario = Database["public"]["Tables"]["usuarios"]["Row"];
-type CategoriaTarifa = Database["public"]["Enums"]["categoria_tarifa_vehiculo"];
-type GamaVehiculo = Database["public"]["Enums"]["gama_vehiculo"];
-type CondicionVehiculo = Database["public"]["Enums"]["condicion_vehiculo"];
-
-const ETIQUETA_CATEGORIA: Record<CategoriaTarifa, string> = {
-  ligero_a: "Ligero A",
-  ligero_b: "Ligero B",
-  mediano: "Mediano",
-  camion: "Camión"
-};
-
-const ETIQUETA_GAMA: Record<GamaVehiculo, string> = {
-  entrada: "Entrada",
-  media: "Media",
-  alta: "Alta",
-  premium: "Premium"
-};
-
-const ETIQUETA_CONDICION: Record<CondicionVehiculo, string> = {
-  nueva: "Nueva",
-  seminueva: "Seminueva",
-  rescate_mecanico: "Rescate mecánico"
-};
-
-const ETIQUETA_ANGULO: Record<string, string> = {
-  frente: "Frente",
-  lado_piloto: "Lado piloto",
-  lado_copiloto: "Lado copiloto",
-  trasera: "Trasera",
-  tablero: "Tablero",
-  dano_previo: "Daño previo",
-  adicional: "Adicional"
-};
-
-const ETIQUETA_TIPO_EVIDENCIA: Record<string, string> = {
-  inicial: "Registro inicial",
-  final: "Registro final"
-};
-
-function estadoDocumental(vehiculo: Vehiculo) {
-  const completo = vehiculo.tiene_placas && vehiculo.tiene_tarjeta_circulacion && vehiculo.tiene_verificacion && vehiculo.puede_circular_rodando;
-  if (completo) return { texto: "Listo", clase: "border-ui-success/30 bg-ui-success-soft text-ui-success" };
-  return { texto: "Revisión", clase: "border-ui-warning/30 bg-ui-warning-soft text-ui-warning" };
-}
-
-function fechaCorta(fechaIso: string | null | undefined) {
-  return fechaIso ? new Date(fechaIso).toLocaleDateString("es-MX", { dateStyle: "medium" }) : "—";
-}
-
-function fechaHora(fechaIso: string | null | undefined) {
-  return fechaIso ? new Date(fechaIso).toLocaleString("es-MX") : "—";
-}
+import {
+  ETIQUETA_CATEGORIA,
+  ETIQUETA_CONDICION,
+  ETIQUETA_GAMA,
+  estadoDocumental,
+  fechaCorta,
+  type Vehiculo
+} from "./VehiculosTipos";
+import { ModalDetalleVehiculo } from "./ModalDetalleVehiculo";
+import { ModalEditarVehiculo } from "./ModalEditarVehiculo";
 
 type EstadoConexionVista = "datos_en_vivo" | "actualizando" | "sin_conexion" | "desactualizado";
 const TAMANO_PAGINA = 25;
@@ -94,37 +55,47 @@ export default function PaginaVehiculosAdmin() {
   const [errorEdicion, setErrorEdicion] = useState<string | null>(null);
   const [avisoGuardado, setAvisoGuardado] = useState<string | null>(null);
 
-  const cargar = useCallback(async (manual = false, paginaSolicitada = pagina) => {
-    if (manual) setActualizandoManual(true);
-    else setCargando(true);
+  const cargar = useCallback(
+    async (manual = false, paginaSolicitada = pagina) => {
+      if (manual) setActualizandoManual(true);
+      else setCargando(true);
 
-    if (!tieneSupabaseConfigurado()) {
-      setDatos({ vehiculos: [], usuarios: [] });
-      setError("Supabase no configurado.");
-      setEstadoConexion("sin_conexion");
-      setUltimaActualizacion(new Date());
-      setCargando(false);
-      setActualizandoManual(false);
-      return;
-    }
+      if (!tieneSupabaseConfigurado()) {
+        setDatos({ vehiculos: [], usuarios: [] });
+        setError("Supabase no configurado.");
+        setEstadoConexion("sin_conexion");
+        setUltimaActualizacion(new Date());
+        setCargando(false);
+        setActualizandoManual(false);
+        return;
+      }
 
-    try {
-      setError(null);
-      const respuesta = await listarVehiculosAdminPaginados(crearClienteNavegador(), paginaSolicitada, TAMANO_PAGINA, busqueda);
-      setDatos({ vehiculos: respuesta.vehiculos, usuarios: respuesta.usuarios });
-      setPagina(respuesta.paginacion.pagina);
-      setTotalResultados(respuesta.paginacion.total);
-      setTotalPaginas(respuesta.paginacion.total_paginas);
-      setEstadoConexion("datos_en_vivo");
-      setUltimaActualizacion(new Date());
-    } catch {
-      setError("No pudimos cargar el inventario de vehículos.");
-      setEstadoConexion((estadoAnterior) => estadoAnterior === "datos_en_vivo" ? "desactualizado" : "sin_conexion");
-    } finally {
-      setCargando(false);
-      setActualizandoManual(false);
-    }
-  }, [busqueda, pagina]);
+      try {
+        setError(null);
+        const respuesta = await listarVehiculosAdminPaginados(
+          crearClienteNavegador(),
+          paginaSolicitada,
+          TAMANO_PAGINA,
+          busqueda
+        );
+        setDatos({ vehiculos: respuesta.vehiculos, usuarios: respuesta.usuarios });
+        setPagina(respuesta.paginacion.pagina);
+        setTotalResultados(respuesta.paginacion.total);
+        setTotalPaginas(respuesta.paginacion.total_paginas);
+        setEstadoConexion("datos_en_vivo");
+        setUltimaActualizacion(new Date());
+      } catch {
+        setError("No pudimos cargar el inventario de vehículos.");
+        setEstadoConexion((estadoAnterior) =>
+          estadoAnterior === "datos_en_vivo" ? "desactualizado" : "sin_conexion"
+        );
+      } finally {
+        setCargando(false);
+        setActualizandoManual(false);
+      }
+    },
+    [busqueda, pagina]
+  );
 
   useEffect(() => {
     void cargar();
@@ -138,7 +109,10 @@ export default function PaginaVehiculosAdmin() {
     return () => window.clearTimeout(timer);
   }, [busquedaInput]);
 
-  const usuarioPorId = useMemo(() => new Map(datos.usuarios.map((usuario) => [usuario.id, usuario])), [datos.usuarios]);
+  const usuarioPorId = useMemo(
+    () => new Map(datos.usuarios.map((usuario) => [usuario.id, usuario])),
+    [datos.usuarios]
+  );
   const vehiculosFiltrados = datos.vehiculos;
 
   async function abrirDetalle(vehiculoId: string) {
@@ -215,7 +189,7 @@ export default function PaginaVehiculosAdmin() {
         }
       }
       const cliente = crearClienteNavegador();
-      await actualizarVehiculoAdmin(cliente, editando, datosLimpios, versionEditando)
+      await actualizarVehiculoAdmin(cliente, editando, datosLimpios, versionEditando);
       setAvisoGuardado("Vehículo actualizado correctamente.");
       setEditando(null);
       void cargar(true, pagina);
@@ -230,7 +204,6 @@ export default function PaginaVehiculosAdmin() {
     () => vehiculosFiltrados.find((v) => v.id === detalleVehiculoId) ?? null,
     [detalleVehiculoId, vehiculosFiltrados]
   );
-  // Editar es una acción independiente: no requiere abrir Evidencia primero.
   const vehiculoEdicion = datos.vehiculos.find((v) => v.id === editando) ?? null;
   const exportHref = `/api/exportaciones/vehiculos${busqueda ? `?busqueda=${encodeURIComponent(busqueda)}` : ""}`;
 
@@ -244,16 +217,19 @@ export default function PaginaVehiculosAdmin() {
         ultimaActualizacion={ultimaActualizacion}
         tipoDatos="administrativos"
         contadorResultados={totalResultados}
-        accion={(
+        accion={
           <div className="flex flex-wrap gap-2">
-            <a className="inline-flex items-center rounded-lg border border-ui-line-strong px-4 py-2 font-body text-sm font-semibold text-ui-fg transition hover:bg-ui-muted" href={exportHref}>
+            <a
+              className="inline-flex items-center rounded-lg border border-ui-line-strong px-4 py-2 font-body text-sm font-semibold text-ui-fg transition hover:bg-ui-muted"
+              href={exportHref}
+            >
               Exportar CSV
             </a>
             <AdminButton variant="secondary" loading={actualizandoManual} onClick={() => void cargar(true, pagina)}>
               Actualizar
             </AdminButton>
           </div>
-        )}
+        }
       />
 
       {avisoGuardado && <Aviso tono="info">{avisoGuardado}</Aviso>}
@@ -261,17 +237,19 @@ export default function PaginaVehiculosAdmin() {
         <div className="mt-4">
           <AdminErrorState
             description={error}
-            action={(
+            action={
               <AdminButton variant="secondary" onClick={() => void cargar(true)}>
                 Reintentar
               </AdminButton>
-            )}
+            }
           />
         </div>
       )}
 
       <div className="mt-4 flex items-center gap-3">
-        <label className="sr-only" htmlFor="buscar-vehiculos">Buscar vehículos</label>
+        <label className="sr-only" htmlFor="buscar-vehiculos">
+          Buscar vehículos
+        </label>
         <input
           id="buscar-vehiculos"
           type="search"
@@ -281,7 +259,15 @@ export default function PaginaVehiculosAdmin() {
           className="flex-1 rounded-lg border border-ui-line-strong bg-ui-card px-3.5 py-2.5 font-body text-sm text-ui-fg placeholder:text-ui-fg-muted focus:border-ui-focus focus:outline-none focus:ring-2 focus:ring-ui-ring"
         />
         {(busquedaInput || busqueda) && (
-          <AdminButton variant="quiet" onClick={() => { setBusquedaInput(""); setBusqueda(""); setPagina(1); }} aria-label="Limpiar búsqueda">
+          <AdminButton
+            variant="quiet"
+            onClick={() => {
+              setBusquedaInput("");
+              setBusqueda("");
+              setPagina(1);
+            }}
+            aria-label="Limpiar búsqueda"
+          >
             Limpiar
           </AdminButton>
         )}
@@ -295,12 +281,25 @@ export default function PaginaVehiculosAdmin() {
         <div className="mt-4">
           <AdminEmptyState
             title={busqueda.trim() ? "Sin resultados" : "Sin vehículos"}
-            description={busqueda.trim() ? "No encontramos vehículos con esa búsqueda." : "No hay vehículos registrados."}
-            action={busqueda.trim() ? (
-              <AdminButton variant="secondary" onClick={() => { setBusquedaInput(""); setBusqueda(""); setPagina(1); }}>
-                Limpiar búsqueda
-              </AdminButton>
-            ) : undefined}
+            description={
+              busqueda.trim()
+                ? "No encontramos vehículos con esa búsqueda."
+                : "No hay vehículos registrados."
+            }
+            action={
+              busqueda.trim() ? (
+                <AdminButton
+                  variant="secondary"
+                  onClick={() => {
+                    setBusquedaInput("");
+                    setBusqueda("");
+                    setPagina(1);
+                  }}
+                >
+                  Limpiar búsqueda
+                </AdminButton>
+              ) : undefined
+            }
           />
         </div>
       ) : (
@@ -325,27 +324,47 @@ export default function PaginaVehiculosAdmin() {
                 return (
                   <tr key={vehiculo.id}>
                     <td data-label="Vehículo">
-                      <p className="font-body font-semibold text-ui-fg">{vehiculo.marca} {vehiculo.modelo} {vehiculo.anio}</p>
-                      <p className="mt-1 text-xs text-ui-fg-muted">{ETIQUETA_TIPO_VEHICULO[vehiculo.tipo]}{vehiculo.color ? ` · ${vehiculo.color}` : ""}</p>
+                      <p className="font-body font-semibold text-ui-fg">
+                        {vehiculo.marca} {vehiculo.modelo} {vehiculo.anio}
+                      </p>
+                      <p className="mt-1 text-xs text-ui-fg-muted">
+                        {ETIQUETA_TIPO_VEHICULO[vehiculo.tipo]}
+                        {vehiculo.color ? ` · ${vehiculo.color}` : ""}
+                      </p>
                     </td>
                     <td data-label="Usuario">
-                      <p className="font-body text-sm text-ui-fg">{usuario?.nombre ?? usuario?.razon_social ?? "Usuario sin nombre"}</p>
-                      <p className="mt-1 font-mono-ruum text-sm text-ui-fg-muted">{usuario?.correo_facturacion ?? vehiculo.usuario_id.slice(0, 8).toUpperCase()}</p>
+                      <p className="font-body text-sm text-ui-fg">
+                        {usuario?.nombre ?? usuario?.razon_social ?? "Usuario sin nombre"}
+                      </p>
+                      <p className="mt-1 font-mono-ruum text-sm text-ui-fg-muted">
+                        {usuario?.correo_facturacion ?? vehiculo.usuario_id.slice(0, 8).toUpperCase()}
+                      </p>
                     </td>
                     <td data-label="Placas / VIN">
                       <p className="font-mono-ruum text-xs text-ui-fg">{vehiculo.placas ?? "Sin placas"}</p>
                       <p className="mt-1 font-mono-ruum text-sm text-ui-fg-muted">{vehiculo.vin ?? "VIN pendiente"}</p>
                     </td>
                     <td data-label="Documentación">
-                      <span className={`rounded-full border px-2.5 py-1 font-body text-xs font-semibold ${documental.clase}`}>{documental.texto}</span>
+                      <span className={`rounded-full border px-2.5 py-1 font-body text-xs font-semibold ${documental.clase}`}>
+                        {documental.texto}
+                      </span>
                     </td>
                     <td data-label="Tarifa">
-                      <p className="font-body text-sm text-ui-fg">{vehiculo.categoria_tarifa ? ETIQUETA_CATEGORIA[vehiculo.categoria_tarifa] : "Sin categoría"}</p>
+                      <p className="font-body text-sm text-ui-fg">
+                        {vehiculo.categoria_tarifa ? ETIQUETA_CATEGORIA[vehiculo.categoria_tarifa] : "Sin categoría"}
+                      </p>
                       <p className="mt-1 text-xs text-ui-fg-muted">
-                        {[vehiculo.gama ? ETIQUETA_GAMA[vehiculo.gama] : null, vehiculo.condicion ? ETIQUETA_CONDICION[vehiculo.condicion] : null].filter(Boolean).join(" · ") || "Pendiente"}
+                        {[
+                          vehiculo.gama ? ETIQUETA_GAMA[vehiculo.gama] : null,
+                          vehiculo.condicion ? ETIQUETA_CONDICION[vehiculo.condicion] : null
+                        ]
+                          .filter(Boolean)
+                          .join(" · ") || "Pendiente"}
                       </p>
                     </td>
-                    <td className="font-body text-sm text-ui-fg-muted" data-label="Alta">{fechaCorta(vehiculo.creado_en)}</td>
+                    <td className="font-body text-sm text-ui-fg-muted" data-label="Alta">
+                      {fechaCorta(vehiculo.creado_en)}
+                    </td>
                     <td data-label="Acciones">
                       <div className="flex gap-2">
                         <AdminButton variant="quiet" onClick={() => void abrirDetalle(vehiculo.id)}>
@@ -392,184 +411,32 @@ export default function PaginaVehiculosAdmin() {
       )}
 
       {detalleVehiculoId && vehiculoDetalle && (
-        <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-ui-overlay pt-10">
-          <div className="mx-4 mb-10 w-full max-w-3xl rounded-lg border border-ui-line bg-ui-card shadow-xl">
-            <div className="flex items-center justify-between border-b border-ui-line px-6 py-4">
-              <div>
-                <h2 className="font-display text-lg font-semibold text-ui-fg">
-                  {vehiculoDetalle.marca} {vehiculoDetalle.modelo} {vehiculoDetalle.anio}
-                </h2>
-                <p className="font-body text-sm text-ui-fg-muted">
-                  {vehiculoDetalle.placas ?? "Sin placas"} · VIN: {vehiculoDetalle.vin ?? "Pendiente"}
-                </p>
-              </div>
-              <button
-                type="button"
-                onClick={cerrarDetalle}
-                className="rounded-lg p-2 text-ui-fg-muted hover:bg-ui-muted hover:text-ui-fg"
-                aria-label="Cerrar detalle"
-              >
-                ✕
-              </button>
-            </div>
-
-            <div className="space-y-6 p-6">
-              {errorEvidencia && (
-                <Aviso tono="atencion">{errorEvidencia}</Aviso>
-              )}
-
-              {cargandoEvidencia ? (
-                <AdminLoadingState label="Cargando evidencia del vehículo" />
-              ) : evidencia.length === 0 ? (
-                <div className="rounded-lg border border-ui-line bg-ui-muted p-6 text-center">
-                  <p className="font-body text-sm text-ui-fg-muted">Este vehículo no tiene traslados con evidencia registrada.</p>
-                </div>
-              ) : (
-                evidencia.map((traslado) => (
-                  <div key={traslado.traslado_id} className="rounded-lg border border-ui-line bg-ui-muted p-4">
-                    <div className="mb-3 flex items-center justify-between">
-                      <p className="font-body text-sm font-semibold text-ui-fg">
-                        Traslado: {traslado.traslado_id.slice(0, 8).toUpperCase()}
-                      </p>
-                      <span className="rounded-full border border-ui-line-strong px-2.5 py-0.5 font-body text-xs font-semibold text-ui-fg-muted">
-                        {traslado.traslado_estado}
-                      </span>
-                    </div>
-                    {traslado.fotos.length === 0 ? (
-                      <p className="font-body text-xs text-ui-fg-muted">Sin fotos en este traslado.</p>
-                    ) : (
-                      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
-                        {traslado.fotos.map((foto) => {
-                          const url = urlsFirmadas.get(foto.id);
-                          return (
-                            <div key={foto.id} className="group relative rounded-lg border border-ui-line bg-ui-card p-2">
-                              {url ? (
-                                <a href={url} target="_blank" rel="noopener noreferrer">
-                                  <Image
-                                    src={url}
-                                    alt={`${ETIQUETA_TIPO_EVIDENCIA[foto.tipo] ?? foto.tipo} - ${ETIQUETA_ANGULO[foto.angulo] ?? foto.angulo}`}
-                                    width={320}
-                                    height={180}
-                                    unoptimized
-                                    className="h-24 w-full rounded object-cover"
-                                  />
-                                </a>
-                              ) : (
-                                <div className="flex h-24 items-center justify-center rounded bg-ui-muted text-xs text-ui-fg-muted">
-                                  {foto.sincronizada ? "Sin URL" : "No sincronizada"}
-                                </div>
-                              )}
-                              <div className="mt-1 text-center">
-                                <p className="truncate font-body text-xs font-semibold text-ui-fg">
-                                  {ETIQUETA_ANGULO[foto.angulo] ?? foto.angulo}
-                                </p>
-                                <p className="font-body text-xs text-ui-fg-muted">
-                                  {ETIQUETA_TIPO_EVIDENCIA[foto.tipo] ?? foto.tipo}
-                                </p>
-                                <p className="font-body text-xs text-ui-fg-muted">{fechaHora(foto.capturada_en)}</p>
-                              </div>
-                              <span className={`absolute right-3 top-3 h-2 w-2 rounded-full ${foto.sincronizada ? "bg-ui-success" : "bg-ui-warning"}`} title={foto.sincronizada ? "Sincronizada" : "Pendiente"} />
-                            </div>
-                          );
-                        })}
-                      </div>
-                    )}
-                  </div>
-                ))
-              )}
-            </div>
-          </div>
-        </div>
+        <ModalDetalleVehiculo
+          vehiculo={vehiculoDetalle}
+          evidencia={evidencia}
+          cargandoEvidencia={cargandoEvidencia}
+          errorEvidencia={errorEvidencia}
+          urlsFirmadas={urlsFirmadas}
+          onCerrar={cerrarDetalle}
+        />
       )}
 
       {editando && vehiculoEdicion && (
-        <div role="dialog" aria-modal="true" aria-labelledby="editar-vehiculo-titulo" className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-ui-overlay pt-10">
-          <div className="mx-4 mb-10 w-full max-w-2xl rounded-lg border border-ui-line bg-ui-card shadow-xl">
-            <div className="flex items-center justify-between border-b border-ui-line px-6 py-4">
-              <div>
-                <h2 id="editar-vehiculo-titulo" className="font-display text-lg font-semibold text-ui-fg">Editar vehículo · {vehiculoEdicion.marca} {vehiculoEdicion.modelo}</h2>
-                <p className="font-body text-sm text-ui-fg-muted">v{versionEditando} · Los cambios se auditan automáticamente</p>
-              </div>
-              <button
-                type="button"
-                onClick={() => { setEditando(null); setErrorEdicion(null); setAvisoGuardado(null); }}
-                className="rounded-lg p-2 text-ui-fg-muted hover:bg-ui-muted hover:text-ui-fg"
-                aria-label="Cerrar edición"
-              >
-                ✕
-              </button>
-            </div>
-
-            <div className="space-y-4 p-6">
-              {errorEdicion && (
-                <Aviso tono="danger">{errorEdicion}</Aviso>
-              )}
-              {avisoGuardado && (
-                <Aviso tono="info">{avisoGuardado}</Aviso>
-              )}
-
-              <div className="grid grid-cols-2 gap-4">
-                <CampoEdicion label="Marca">
-                  <input data-ruum-label="Marca" value={editForm.marca ?? ""} onChange={(e) => setEditForm((prev) => ({ ...prev, marca: e.target.value }))} className="w-full rounded-lg border border-ui-line-strong bg-ui-card px-3 py-2 font-body text-sm" />
-                </CampoEdicion>
-                <CampoEdicion label="Modelo">
-                  <input data-ruum-label="Modelo" value={editForm.modelo ?? ""} onChange={(e) => setEditForm((prev) => ({ ...prev, modelo: e.target.value }))} className="w-full rounded-lg border border-ui-line-strong bg-ui-card px-3 py-2 font-body text-sm" />
-                </CampoEdicion>
-                <CampoEdicion label="Año">
-                  <input type="number" value={editForm.anio ?? ""} onChange={(e) => setEditForm((prev) => ({ ...prev, anio: Number(e.target.value) }))} className="w-full rounded-lg border border-ui-line-strong bg-ui-card px-3 py-2 font-body text-sm" />
-                </CampoEdicion>
-                <CampoEdicion label="Color">
-                  <input data-ruum-label="Color" value={editForm.color ?? ""} onChange={(e) => setEditForm((prev) => ({ ...prev, color: e.target.value }))} className="w-full rounded-lg border border-ui-line-strong bg-ui-card px-3 py-2 font-body text-sm" />
-                </CampoEdicion>
-                <CampoEdicion label="Placas">
-                  <input data-ruum-label="Placas" data-ruum-uppercase="off" value={editForm.placas ?? ""} onChange={(e) => setEditForm((prev) => ({ ...prev, placas: e.target.value }))} className="w-full rounded-lg border border-ui-line-strong bg-ui-card px-3 py-2 font-body text-sm" />
-                </CampoEdicion>
-                <CampoEdicion label="VIN">
-                  <input data-ruum-label="VIN" data-ruum-uppercase="on" value={editForm.vin ?? ""} onChange={(e) => setEditForm((prev) => ({ ...prev, vin: e.target.value.toLocaleUpperCase("es-MX") }))} className="w-full rounded-lg border border-ui-line-strong bg-ui-card px-3 py-2 font-body text-sm" />
-                </CampoEdicion>
-              </div>
-
-              <div className="border-t border-ui-line pt-4">
-                <p className="mb-3 font-body text-sm font-semibold text-ui-fg">Documentación</p>
-                <div className="grid grid-cols-2 gap-3">
-                  <CheckboxField label="Tarjeta de circulación" checked={editForm.tiene_tarjeta_circulacion ?? false} onChange={(v) => setEditForm((prev) => ({ ...prev, tiene_tarjeta_circulacion: v }))} />
-                  <CheckboxField label="Verificación" checked={editForm.tiene_verificacion ?? false} onChange={(v) => setEditForm((prev) => ({ ...prev, tiene_verificacion: v }))} />
-                  <CheckboxField label="Placas" checked={editForm.tiene_placas ?? false} onChange={(v) => setEditForm((prev) => ({ ...prev, tiene_placas: v }))} />
-                  <CheckboxField label="Puede circular rodando" checked={editForm.puede_circular_rodando ?? false} onChange={(v) => setEditForm((prev) => ({ ...prev, puede_circular_rodando: v }))} />
-                </div>
-              </div>
-
-              <div className="flex items-center justify-between border-t border-ui-line pt-4">
-                <p className="font-body text-xs text-ui-fg-muted">
-                  Versión actual: {versionEditando} · Se incrementará al guardar
-                </p>
-                <div className="flex gap-2">
-                  <AdminButton variant="secondary" onClick={() => { setEditando(null); setErrorEdicion(null); }}>Cancelar</AdminButton>
-                  <AdminButton loading={guardando} onClick={() => void guardarEdicion()}>Guardar cambios</AdminButton>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+        <ModalEditarVehiculo
+          vehiculo={vehiculoEdicion}
+          editForm={editForm}
+          setEditForm={setEditForm}
+          versionEditando={versionEditando}
+          guardando={guardando}
+          errorEdicion={errorEdicion}
+          avisoGuardado={avisoGuardado}
+          onCancelar={() => {
+            setEditando(null);
+            setErrorEdicion(null);
+          }}
+          onGuardar={() => void guardarEdicion()}
+        />
       )}
     </main>
-  );
-}
-
-function CampoEdicion({ label, children }: { label: string; children: React.ReactNode }) {
-  return (
-    <label className="block">
-      <span className="mb-1 block font-body text-xs font-semibold text-ui-fg-muted">{label}</span>
-      {children}
-    </label>
-  );
-}
-
-function CheckboxField({ label, checked, onChange }: { label: string; checked: boolean; onChange: (v: boolean) => void }) {
-  return (
-    <label className="flex items-center gap-2 rounded-lg border border-ui-line-strong px-3 py-2.5 hover:bg-ui-muted">
-      <input type="checkbox" checked={checked} onChange={(e) => onChange(e.target.checked)} className="h-4 w-4 rounded border-ui-line-strong text-ui-brand focus:ring-ui-brand/30" />
-      <span className="font-body text-sm text-ui-fg">{label}</span>
-    </label>
   );
 }

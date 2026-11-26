@@ -8,21 +8,44 @@ import { normalizarRolAdmin, puedeVerRuta } from "../lib/roles-admin";
 
 /**
  * Guard de navegación por rol operativo.
- * Solo aplica con sesión admin real (Supabase configurado + fila en admins).
- * En modo demo (sin Supabase) no restringe — los smokes y la exploración local
- * siguen pudiendo abrir todas las rutas.
+ * Solo aplica con sesión admin real (Supabase configurado + fila en admins),
+ * o en smoke tests con rol simulado via cookie / global.
  * La autoridad de datos sigue en `es_admin()` / RLS; esto es coherencia UX.
  */
 export function GuardRutaRol({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
-  const [listo, setListo] = useState(() => !tieneSupabaseConfigurado() || pathname === "/login");
+  const [listo, setListo] = useState(() => {
+    if (pathname === "/login" || pathname === "/sin-permiso") return true;
+    return false;
+  });
 
   useEffect(() => {
     let activo = true;
 
     async function resolver() {
-      if (!tieneSupabaseConfigurado() || pathname === "/login") {
+      if (pathname === "/login" || pathname === "/sin-permiso") {
+        if (activo) setListo(true);
+        return;
+      }
+
+      // Soporte para smoke tests E2E y pruebas por rol
+      const cookieRol = typeof document !== "undefined"
+        ? document.cookie.split("; ").find((r) => r.startsWith("ruum_smoke_rol="))?.split("=")[1]
+        : null;
+      const rolSimulado = cookieRol ?? (typeof window !== "undefined" ? (window as unknown as { __RUUM_SMOKE_ROL__?: string }).__RUUM_SMOKE_ROL__ : null);
+
+      if (rolSimulado) {
+        const rol = normalizarRolAdmin(rolSimulado);
+        if (!puedeVerRuta(rol, pathname)) {
+          router.replace(`/sin-permiso?ruta=${encodeURIComponent(pathname)}`);
+          return;
+        }
+        if (activo) setListo(true);
+        return;
+      }
+
+      if (!tieneSupabaseConfigurado()) {
         if (activo) setListo(true);
         return;
       }
@@ -38,7 +61,7 @@ export function GuardRutaRol({ children }: { children: ReactNode }) {
         }
         const rolActual = normalizarRolAdmin(admin.rol_operativo);
         if (!puedeVerRuta(rolActual, pathname)) {
-          router.replace("/?error=rol_sin_acceso");
+          router.replace(`/sin-permiso?ruta=${encodeURIComponent(pathname)}`);
           return;
         }
         setListo(true);

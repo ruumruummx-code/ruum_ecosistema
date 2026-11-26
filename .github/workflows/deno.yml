@@ -16,5 +16,5 @@ jobs:
           deno-version: v2.x
       - name: Verificar tipos de las 15 Edge Functions
         run: deno task check:functions
-      - name: Ejecutar pruebas unitarias de Edge Functions
+      - name: Ejecutar todos los archivos de pruebas de Edge Functions
         run: deno task test:functions

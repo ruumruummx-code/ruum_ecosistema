@@ -3,7 +3,7 @@
 set search_path = public, extensions;
 
 begin;
-select plan(17);
+select plan(25);
 
 insert into auth.users (id, email, raw_user_meta_data) values
   ('44000000-0000-4000-8000-000000000001', 'rt44-usuario@example.test', '{}'::jsonb),
@@ -75,6 +75,14 @@ select is((public.aplicar_verificacion_pago_stripe(jsonb_build_object(
   true, 'Un cobro sobre traslado cancelado encola su reembolso');
 select is((select estado::text from public.traslados where id = '44000000-0000-4000-8000-000000000032'),
           'servicio_cancelado', 'El cobro tardío no reactiva el traslado');
+select is((public.aplicar_verificacion_pago_stripe(jsonb_build_object(
+  'id','evt_rt44_tarde','origen','webhook','intent_id','pi_rt44pendiente','traslado_id','44000000-0000-4000-8000-000000000032',
+  'estado_proveedor','succeeded','monto_centavos',90000,'monto_recibido',90000,'moneda','mxn','livemode',false,'modo_esperado',false))->>'duplicado')::boolean,
+  true, 'La reentrega del evento se reconoce por el ID de Stripe');
+select is((select count(*)::int from public.reembolsos_traslado where pago_id = '44000000-0000-4000-8000-000000000042'),
+          1, 'La reentrega del cobro no encola otro reembolso');
+select is((select count(*)::int from public.registro_auditoria where datos->>'stripe_event_id' = 'evt_rt44_tarde'),
+          1, 'La reentrega del cobro no duplica la auditoría');
 
 -- Reclamo y resultado de reembolsos.
 select is((select count(*)::int from public.reclamar_reembolsos_traslado(10, '44000000-0000-4000-8000-000000000031')),
@@ -86,8 +94,23 @@ select lives_ok($$ select public.registrar_resultado_reembolso(
 -- Reembolso parcial no conciliado → cola de revisión financiera.
 select is((public.registrar_reembolso_parcial_stripe('evt_rt44_parcial', 'pi_rt44pagado', 'ch_rt44', 12345, 100000, false)->>'requiere_revision')::boolean,
           true, 'Un reembolso parcial que no coincide queda en revisión');
+select is((public.registrar_reembolso_parcial_stripe('evt_rt44_parcial', 'pi_rt44pagado', 'ch_rt44', 12345, 100000, false)->>'duplicado')::boolean,
+          true, 'La reentrega del reembolso parcial se reconoce por el ID de Stripe');
+select is((select monto_centavos from public.stripe_verificaciones where id = 'evt_rt44_parcial'),
+          12345::bigint, 'La verificación registra exclusivamente los centavos reembolsados');
 select is((select count(*)::int from public.revision_financiera_stripe where stripe_evento_id = 'evt_rt44_parcial'),
           1, 'Finanzas recibe el reembolso parcial en su cola');
+
+-- Un reembolso parcial por el importe ya emitido queda conciliado.
+insert into public.reembolsos_traslado (traslado_id, pago_id, stripe_payment_intent_id, monto, motivo, estado, stripe_refund_id)
+values ('44000000-0000-4000-8000-000000000032', '44000000-0000-4000-8000-000000000042', 'pi_rt44pendiente',
+        234.56, 'cancelacion_usuario', 'completado', 're_rt44_parcial');
+select is(public.registrar_reembolso_parcial_stripe('evt_rt44_conciliado', 'pi_rt44pendiente', 'ch_rt44_parcial', 23456, 90000, false)->>'requiere_revision',
+          'false', 'Stripe confirma exactamente el reembolso parcial emitido');
+select is((select estado::text from public.pagos where stripe_payment_intent_id = 'pi_rt44pendiente'),
+          'completado', 'El reembolso parcial conserva el estado del pago');
+select is((select count(*)::int from public.revision_financiera_stripe where stripe_evento_id = 'evt_rt44_conciliado'),
+          0, 'El reembolso conciliado no llega a la cola de revisión');
 
 reset role;
 

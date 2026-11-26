@@ -1,1 +1,3 @@
-pnpm test
+# Solo tests de los workspaces con cambios (staged o no) respecto a HEAD y de sus dependientes.
+# CI sigue ejecutando la suite completa.
+pnpm turbo run test --filter='...[HEAD]'
