@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 import { MobileShell } from "@ruum/ui";
 import { NavegacionUsuario } from "../NavegacionUsuario";
-import { CuentaCliente } from "./CuentaCliente";
-import { CuentaDesktop } from "./CuentaDesktop";
+import { UserDashboardLayout } from "../../components/layout/UserDashboardLayout";
+import { construirNotificaciones } from "../../lib/inicio";
+import { Cuenta } from "./Cuenta";
 import { nombreVisibleCuenta } from "./cuenta-utils";
 import { conCuenta } from "./cuenta-ui";
 
@@ -11,38 +12,37 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
+/* Una sola pantalla (Cuenta) dentro del marco de navegación de cada tamaño:
+   barra inferior en móvil, barra lateral desde 1024 px.
+   A-4 (auditoría): conCuenta distingue "sin sesión", "Supabase caído" y cuenta real. */
 export default async function PaginaCuenta({ searchParams }: { searchParams?: Promise<{ seccion?: string }> }) {
   const seccion = (await searchParams)?.seccion;
-  /* A-4 (auditoría): antes `cuenta?.usuario ?? null` collapsaba "sin sesión" y
-     "Supabase caído" en el mismo caso, y CuentaCliente pintaba "Sin correo
-     registrado" como si la cuenta estuviera vacía. Ahora los tres estados se
-     distinguen. */
-  return conCuenta((cuenta) => (
-    <>
-      {/* VISTA MÓVIL (< 1024px): Preservada idéntica bajo enfoque mobile-first */}
-      <div className="lg:hidden flex flex-col h-full w-full">
-        <NavegacionUsuario variante="claro" nombreUsuario={nombreVisibleCuenta(cuenta.usuario?.nombre)} />
-        <MobileShell variant="compact" navInferiorVisible={true} as="main" className="user-v2-scope user-account-shell" contentClassName="user-account-content">
-          <CuentaCliente
-            seccionInicial={seccion === "perfil" || seccion === "soporte" || seccion === "legal" ? seccion : null}
-            correoRegistro={cuenta.correoRegistro}
+  return conCuenta((cuenta) => {
+    const nombre = nombreVisibleCuenta(cuenta.usuario?.nombre);
+    const notificaciones = construirNotificaciones(cuenta.usuario, cuenta.traslados ?? []);
+    return (
+      <>
+        <div className="flex h-full w-full flex-col lg:hidden" data-marco="movil">
+          <NavegacionUsuario variante="claro" nombreUsuario={nombre} notificaciones={notificaciones} />
+          <MobileShell as="main" variant="wide" padding="none" conFondoCanvas={false} navInferiorVisible className="bg-ui-bg">
+            <Cuenta cuenta={cuenta} seccionInicial={seccion} marco="movil" />
+          </MobileShell>
+        </div>
+        <div className="hidden h-full w-full lg:flex" data-marco="escritorio">
+          <UserDashboardLayout
             usuario={cuenta.usuario}
-            fotoUrl={cuenta.fotoPerfilUrl}
+            nombre={nombre}
+            correo={cuenta.correoRegistro}
             totalVehiculos={cuenta.vehiculos.length}
-            incidenciasAbiertas={cuenta.incidenciasAbiertas}
-            totalTraslados={cuenta.totalTraslados}
-            rolInfo={cuenta.rolInfo}
-          />
-        </MobileShell>
-      </div>
-
-      {/* VISTA ESCRITORIO (>= 1024px): Gestión de cuenta de alta fidelidad */}
-      <div className="hidden lg:flex h-full w-full">
-        <CuentaDesktop
-          cuenta={cuenta}
-          seccionInicial={seccion}
-        />
-      </div>
-    </>
-  ));
+            notificaciones={notificaciones}
+            padding="ninguno"
+            classNameContenido="bg-ui-bg"
+            idContenido="contenido-cuenta"
+          >
+            <Cuenta cuenta={cuenta} seccionInicial={seccion} marco="escritorio" />
+          </UserDashboardLayout>
+        </div>
+      </>
+    );
+  });
 }
