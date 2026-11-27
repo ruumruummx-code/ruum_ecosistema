@@ -62,7 +62,7 @@ HTMLDialogElement.prototype.close ??= function (this: HTMLDialogElement) {
 };
 function simularAncho(ancho: number) {
   window.matchMedia = vi.fn((query: string) => ({
-    matches: Number(/min-width:s*(d+)px/.exec(query)?.[1] ?? 0) <= ancho,
+    matches: Number(/min-width:\s*(\d+)px/.exec(query)?.[1] ?? 0) <= ancho,
     media: query,
     onchange: null,
     addEventListener: vi.fn(),

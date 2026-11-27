@@ -11,6 +11,7 @@ import { cookies } from "next/headers";
 import { crearClienteServidor } from "@ruum/api/supabase/server-client";
 import { COOKIE_RECOVERY_USUARIO, destinoSeguro, MAX_AGE_RECOVERY_S, RUTA_COOKIE_RECOVERY } from "@ruum/shared/utils";
 import { logStructuredWarn } from "@/lib/logger";
+import { registrarConsentimientoPostAuth } from "@/lib/consentimiento-usuario";
 
 type TipoOtpSanitizado = "signup" | "recovery" | "magiclink" | "email";
 
@@ -212,6 +213,9 @@ function clasificarCausaError(error: unknown, searchParams: URLSearchParams): "e
           await revertirCambioDeCuenta(cookieStore, supabase, sesionPrevia);
           return NextResponse.redirect(`${origin}${destinoCuentaDistinta}`);
         }
+        if (type === "signup") {
+          await registrarConsentimientoPostAuth(supabase, request.headers.get("user-agent"));
+        }
       }
       const destino = type === "recovery" ? `/nueva-password${queryMismatch}` : next;
       return NextResponse.redirect(`${origin}${destino}`);
@@ -250,6 +254,9 @@ function clasificarCausaError(error: unknown, searchParams: URLSearchParams): "e
         if (usuarioPrevioId && nuevoUserId && nuevoUserId !== usuarioPrevioId) {
           await revertirCambioDeCuenta(cookieStore, supabase, sesionPrevia);
           return NextResponse.redirect(`${origin}${destinoCuentaDistinta}`);
+        }
+        if (type === "signup") {
+          await registrarConsentimientoPostAuth(supabase, request.headers.get("user-agent"));
         }
       }
       const destino = type === "recovery" ? `/nueva-password${queryMismatch}` : next;

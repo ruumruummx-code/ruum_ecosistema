@@ -15,7 +15,7 @@ import {
 import { CONTACTOS_SOPORTE_USUARIO } from "@/lib/contactos-soporte";
 
 const COOLDOWN_SEGUNDOS = 60;
-const EXPIRACION_SEGUNDOS = 300; // 5 minutos
+const EXPIRACION_SEGUNDOS = 3600; // 60 minutos (alineado con supabase/config.toml otp_expiry = 3600)
 
 function correoInicial(): string {
   if (typeof window === "undefined") return "";
@@ -180,7 +180,7 @@ function ContenidoConfirmaCorreo() {
   const emailFromUrl = normalizarCorreoRegistro(searchParams.get("email") || "");
   const hayCooldown = cooldownRestante > 0;
 
-  const [correo] = useState(() => {
+  const [correo, setCorreo] = useState(() => {
     if (typeof window === "undefined") return emailFromUrl;
     try {
       return correoInicial() || emailFromUrl;
@@ -188,6 +188,8 @@ function ContenidoConfirmaCorreo() {
       return emailFromUrl;
     }
   });
+  const [correoManual, setCorreoManual] = useState("");
+  const [errorCorreoManual, setErrorCorreoManual] = useState<string | null>(null);
 
   useEffect(() => {
     registrarEventoUx("registro_confirmacion_vista");
@@ -204,20 +206,22 @@ function ContenidoConfirmaCorreo() {
     }
   }, []);
 
-  // Temporizador de expiración (5 min)
+  // Temporizador de expiración (60 min, alineado con Supabase Auth).
+  // Depende de `hayTiempoRestante` para reiniciarse correctamente tras reenviar.
+  const hayTiempoRestante = tiempoRestante > 0;
   useEffect(() => {
+    if (!hayTiempoRestante) return;
     const timer = window.setInterval(() => {
       setTiempoRestante((prev) => {
         if (prev <= 1) {
-          window.clearInterval(timer);
-          setError("El código ha expirado. Solicita uno nuevo.");
+          setError("El código podría haber expirado. Si no funciona, solicita uno nuevo.");
           return 0;
         }
         return prev - 1;
       });
     }, 1000);
     return () => window.clearInterval(timer);
-  }, []);
+  }, [hayTiempoRestante]);
 
   // Temporizador de cooldown de reenvío
   useEffect(() => {
@@ -405,19 +409,9 @@ function ContenidoConfirmaCorreo() {
   if (!correo) {
     return (
       <div className="flex min-h-dvh items-center justify-center bg-[#eef2f7] p-3 font-sans">
-        <div className="relative flex h-[800px] max-h-[calc(100dvh-2rem)] w-full max-w-[420px] flex-col overflow-hidden rounded-[36px] border border-[#e9eef3] bg-white shadow-[0_25px_60px_rgba(0,0,0,0.15),0_0_0_1px_rgba(0,0,0,0.02)]">
-          {/* Status bar */}
-          <div className="flex items-center justify-between border-b border-[#f0f2f5] bg-white px-6 py-3.5 text-sm font-semibold text-[#1c1e21] shrink-0">
-            <span>9:41</span>
-            <span className="flex items-center gap-1.5 text-[#2e3a4b]">
-              <IconoSignal className="size-3.5" />
-              <IconoWifi className="size-3.5" />
-              <IconoBateria className="size-4" />
-            </span>
-          </div>
-
+        <div className="relative flex max-h-[calc(100dvh-2rem)] w-full max-w-[420px] flex-col overflow-hidden rounded-[36px] border border-[#e9eef3] bg-white shadow-[0_25px_60px_rgba(0,0,0,0.15),0_0_0_1px_rgba(0,0,0,0.02)]">
           {/* Header */}
-          <header className="flex items-center border-b border-[#f0f4fa] bg-white px-5 py-3 shrink-0">
+          <header className="flex items-center border-b border-[#f0f4fa] bg-white px-5 py-3.5 shrink-0">
             <Link
               href="/registro"
               aria-label="Volver"
@@ -430,7 +424,7 @@ function ContenidoConfirmaCorreo() {
                 Confirmar email
               </h1>
               <p className="text-[11.5px] font-medium text-[#6b7c94] mt-0.5">
-                Paso 2 de 3 · Verificación
+                Paso 3 de 3 · Verificación
               </p>
             </div>
           </header>
@@ -439,15 +433,62 @@ function ContenidoConfirmaCorreo() {
             <div className="mb-4 flex size-16 items-center justify-center rounded-2xl bg-[#f0f5fe] text-[#2e5a88]">
               <IconoCorreoAbierto className="size-8" />
             </div>
-            <h2 className="text-xl font-extrabold text-[#0b1e33]">No encontramos tu correo</h2>
+            <h2 className="text-xl font-extrabold text-[#0b1e33]">Ingresa tu correo para confirmar</h2>
             <p className="mt-2 text-sm text-[#6b7c94]">
-              El correo electrónico no está disponible. Puedes volver a la página de registro para intentarlo de nuevo.
+              Si cerraste la pestaña o abriste esta pantalla en otro navegador, escribe el correo con el que te registraste para ingresar tu código o solicitar uno nuevo.
             </p>
-            <Link
-              href="/registro"
-              className="mt-6 flex w-full items-center justify-center gap-2 rounded-[18px] bg-[#0b1e33] py-4 px-5 text-[15px] font-bold text-white shadow-[0_14px_28px_-10px_rgba(11,30,51,0.45)] transition hover:bg-[#143560] active:scale-[0.98]"
+            <form
+              className="mt-5 flex w-full flex-col gap-3 text-left"
+              noValidate
+              onSubmit={(e) => {
+                e.preventDefault();
+                const limpio = normalizarCorreoRegistro(correoManual);
+                if (!limpio || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(limpio)) {
+                  setErrorCorreoManual("Escribe un correo electrónico válido.");
+                  return;
+                }
+                setErrorCorreoManual(null);
+                try {
+                  window.sessionStorage.setItem(CLAVE_CORREO_CONFIRMACION, limpio);
+                } catch {
+                  /* storage bloqueado */
+                }
+                setCorreo(limpio);
+              }}
             >
-              Volver a registrarme
+              <label htmlFor="correo-recuperacion" className="text-xs font-bold text-ui-fg-muted">
+                Correo electrónico
+              </label>
+              <input
+                id="correo-recuperacion"
+                type="email"
+                inputMode="email"
+                autoComplete="email"
+                placeholder="correo@ejemplo.com"
+                value={correoManual}
+                onChange={(e) => {
+                  setCorreoManual(e.target.value);
+                  if (errorCorreoManual) setErrorCorreoManual(null);
+                }}
+                className="min-h-12 w-full rounded-2xl border border-ui-border bg-ui-surface px-4 py-3 text-sm font-medium text-ui-fg outline-none focus:border-ui-brand focus:bg-ui-card"
+              />
+              {errorCorreoManual && (
+                <p role="alert" className="text-xs font-semibold text-ui-danger">
+                  {errorCorreoManual}
+                </p>
+              )}
+              <button
+                type="submit"
+                className="mt-1 flex w-full cursor-pointer items-center justify-center gap-2 rounded-2xl bg-ui-brand py-3.5 px-5 text-base font-bold text-ui-brand-fg shadow-md transition hover:opacity-95 active:scale-[0.98]"
+              >
+                Continuar con verificación
+              </button>
+            </form>
+            <Link
+              href="/login"
+              className="mt-4 text-xs font-bold text-ui-brand hover:underline"
+            >
+              ¿Ya confirmaste tu cuenta? Inicia sesión
             </Link>
           </div>
         </div>
@@ -470,19 +511,9 @@ function ContenidoConfirmaCorreo() {
           `,
         }}
       />
-      <div className="relative flex h-[800px] max-h-[calc(100dvh-2rem)] w-full max-w-[420px] flex-col overflow-hidden rounded-[36px] border border-[#e9eef3] bg-white shadow-[0_25px_60px_rgba(0,0,0,0.15),0_0_0_1px_rgba(0,0,0,0.02)]">
-        {/* Status bar */}
-        <div className="flex items-center justify-between border-b border-[#f0f2f5] bg-white px-6 py-3.5 text-sm font-semibold text-[#1c1e21] shrink-0">
-          <span>9:41</span>
-          <span className="flex items-center gap-1.5 text-[#2e3a4b]">
-            <IconoSignal className="size-3.5" />
-            <IconoWifi className="size-3.5" />
-            <IconoBateria className="size-4" />
-          </span>
-        </div>
-
+      <div className="relative flex max-h-[calc(100dvh-2rem)] w-full max-w-[420px] flex-col overflow-hidden rounded-[36px] border border-[#e9eef3] bg-white shadow-[0_25px_60px_rgba(0,0,0,0.15),0_0_0_1px_rgba(0,0,0,0.02)]">
         {/* Header con botón atrás */}
-        <header className="flex items-center border-b border-[#f0f4fa] bg-white px-5 py-3 shrink-0">
+        <header className="flex items-center border-b border-[#f0f4fa] bg-white px-5 py-3.5 shrink-0">
           <button
             type="button"
             onClick={() => router.back()}
@@ -496,7 +527,7 @@ function ContenidoConfirmaCorreo() {
               Confirmar email
             </h1>
             <p className="text-[11.5px] font-medium text-[#6b7c94] mt-0.5">
-              Paso 2 de 3 · Verificación
+              Paso 3 de 3 · Verificación
             </p>
           </div>
         </header>
@@ -579,7 +610,7 @@ function ContenidoConfirmaCorreo() {
             <button
               type="submit"
               id="btnVerify"
-              disabled={codigoCompleto.length !== 6 || verificando || verificadoExito || tiempoRestante <= 0}
+              disabled={codigoCompleto.length !== 6 || verificando || verificadoExito}
               className="w-full bg-[#0b1e33] text-white border-0 py-[19px] px-[22px] rounded-[18px] font-bold text-[16.5px] flex items-center justify-center gap-2.5 shadow-[0_14px_28px_-10px_rgba(11,30,51,0.45)] cursor-pointer tracking-[-0.2px] mb-4 transition-all hover:bg-[#143560] active:scale-[0.98] disabled:bg-[#cbd5e1] disabled:shadow-none disabled:cursor-not-allowed disabled:opacity-70"
             >
               <IconoCheckCirculo className="size-[18px]" />

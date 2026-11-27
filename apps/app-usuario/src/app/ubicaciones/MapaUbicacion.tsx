@@ -10,8 +10,8 @@ import {
   direccionCompleta,
   type UbicacionUsuario,
 } from "./ubicaciones-usuario";
-import { IconoUbicacion as Icon } from "./UbicacionVisual";
-import s from "./ubicaciones-desktop.module.css";
+import { MapPin } from "lucide-react";
+import { Button } from "@ruum/ui/base";
 export function MapaUbicacion({
   ubicacion,
   ampliado = false,
@@ -84,7 +84,7 @@ export function MapaUbicacion({
         });
         mapa.scrollZoom.disable();
         const pin = document.createElement("span");
-        pin.className = s.mapPin;
+        pin.className = "block text-ui-brand drop-shadow-md";
         const svg = document.createElementNS(
           "http://www.w3.org/2000/svg",
           "svg",
@@ -100,8 +100,8 @@ export function MapaUbicacion({
           "d",
           "M16 1A15 15 0 0 0 1 16c0 10 15 25 15 25s15-15 15-25A15 15 0 0 0 16 1Z",
         );
-        path.setAttribute("fill", "#0063ff");
-        path.setAttribute("stroke", "white");
+        path.setAttribute("fill", "currentColor");
+        path.setAttribute("stroke", "var(--color-ui-card)");
         path.setAttribute("stroke-width", "2");
         svg.appendChild(path);
         const dot = document.createElementNS(
@@ -111,7 +111,7 @@ export function MapaUbicacion({
         dot.setAttribute("cx", "16");
         dot.setAttribute("cy", "16");
         dot.setAttribute("r", "5");
-        dot.setAttribute("fill", "white");
+        dot.setAttribute("fill", "var(--color-ui-card)");
         svg.appendChild(dot);
         pin.appendChild(svg);
         marcador = new mb.Marker({ element: pin, anchor: "bottom" })
@@ -145,27 +145,29 @@ export function MapaUbicacion({
     <div
       role="region"
       tabIndex={0}
-      className={s.mapFrame}
+      className="relative size-full min-h-0 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-ui-ring"
       aria-label={`Mapa de ubicación${coordenadasValidas(ubicacion.lat, ubicacion.lng) ? "" : " aproximada"}: ${direccion}`}
     >
-      <div ref={contenedor} className={s.mapCanvas} />
+      <div ref={contenedor} className="relative size-full min-h-0" />
       {estado !== "listo" && (
-        <div className={s.mapMessage} role="status">
-          <Icon name="pin" />
+        <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-2 bg-ui-muted p-4 text-center text-sm text-ui-fg-muted" role="status">
+          <MapPin aria-hidden="true" className="size-5" />
           <span>
             {estado === "cargando"
               ? "Cargando mapa…"
               : "No pudimos cargar esta ubicación en el mapa."}
           </span>
           {estado === "error" && (
-            <button
+            <Button
+              variant="outline"
+              size="sm"
               onClick={() => {
                 setEstado("cargando");
                 setRevision((v) => v + 1);
               }}
             >
               Reintentar
-            </button>
+            </Button>
           )}
         </div>
       )}

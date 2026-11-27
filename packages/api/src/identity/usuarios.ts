@@ -249,11 +249,11 @@ export async function clasificarRolApp(cliente: Cliente, authUserId: string): Pr
   }
   const { data: perfilUsuario, error: errorUsuario } = await cliente
     .from("usuarios")
-    .select("id")
+    .select("id, rol")
     .eq("auth_user_id", authUserId)
     .maybeSingle();
   if (errorUsuario) throw errorUsuario;
-  if (perfilUsuario) return "usuario";
+  if (perfilUsuario && perfilUsuario.rol !== "sin_rol") return "usuario";
 
   const { data: perfilConductor, error: errorConductor } = await cliente
     .from("conductores")
@@ -263,6 +263,15 @@ export async function clasificarRolApp(cliente: Cliente, authUserId: string): Pr
   if (errorConductor) throw errorConductor;
   if (perfilConductor) return "conductor";
 
+  const { data: solicitudConductor, error: errorSolicitud } = await cliente
+    .from("solicitudes_conductor")
+    .select("id")
+    .eq("auth_user_id", authUserId)
+    .limit(1)
+    .maybeSingle();
+  if (errorSolicitud) throw errorSolicitud;
+  if (solicitudConductor) return "conductor";
+
   const { data: perfilAdmin, error: errorAdmin } = await cliente
     .from("admins")
     .select("id")
@@ -270,6 +279,8 @@ export async function clasificarRolApp(cliente: Cliente, authUserId: string): Pr
     .maybeSingle();
   if (errorAdmin) throw errorAdmin;
   if (perfilAdmin) return "admin";
+
+  if (perfilUsuario) return "usuario";
 
   return "ninguno";
 }

@@ -78,7 +78,7 @@ test("Mis ubicaciones: scroll confinado, selección, copia y persistencia autent
     );
   await ocultarOverlay();
   await page.request.get("/api/ubicaciones", { timeout: 120000 });
-  const app = page.getByTestId("locations-desktop");
+  const app = page.getByTestId("ubicaciones");
   await expect(
     app.getByRole("heading", { name: "Mis ubicaciones", exact: true }),
   ).toBeVisible();
@@ -109,7 +109,9 @@ test("Mis ubicaciones: scroll confinado, selección, copia y persistencia autent
         global: document.documentElement.scrollHeight - innerHeight,
         horizontal: document.documentElement.scrollWidth - innerWidth,
         page: el.scrollHeight - el.clientHeight,
-        detail: detail.scrollHeight - detail.clientHeight,
+        /* El panel de detalle se desplaza por dentro cuando no cabe completo. */
+        detailOverflow: getComputedStyle(detail).overflowY,
+        detailWidth: detail.scrollWidth - detail.clientWidth,
         listOverflow: getComputedStyle(list).overflowY,
         listWidth: list.scrollWidth - list.clientWidth,
       };
@@ -118,7 +120,7 @@ test("Mis ubicaciones: scroll confinado, selección, copia y persistencia autent
       "global",
       "horizontal",
       "page",
-      "detail",
+      "detailWidth",
       "listWidth",
     ] as const)
       expect(
@@ -126,6 +128,7 @@ test("Mis ubicaciones: scroll confinado, selección, copia y persistencia autent
         JSON.stringify({ width, height, geometry }),
       ).toBeLessThanOrEqual(1);
     expect(geometry.listOverflow).toBe("auto");
+    expect(geometry.detailOverflow).toBe("auto");
     const accion = app.getByRole("button", { name: "Editar", exact: true });
     await accion.scrollIntoViewIfNeeded();
     await expect(accion).toBeInViewport({ ratio: 1 });
