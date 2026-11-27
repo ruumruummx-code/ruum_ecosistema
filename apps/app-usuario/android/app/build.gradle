@@ -33,8 +33,9 @@ android {
     }
     buildTypes {
         release {
+            debuggable false
             minifyEnabled true
-            shrinkResources false
+            shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
             if (System.getenv("RUUM_ANDROID_KEYSTORE_PATH")) {
                 signingConfig signingConfigs.release
