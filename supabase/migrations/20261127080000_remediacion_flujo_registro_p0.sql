@@ -125,26 +125,49 @@ revoke all on function public.reconciliar_registro_saga_auth(integer) from publi
 grant execute on function public.reconciliar_registro_saga_auth(integer) to service_role;
 
 -- ---------------------------------------------------------------------------
--- 3. Limpieza idempotente de filas contaminadas por el trigger anterior
+-- 3. RPC administrativa idempotente para limpiar filas contaminadas por el trigger anterior
+--    (sin DELETE top-level en migraciones; ejecutable bajo demanda con service_role)
 -- ---------------------------------------------------------------------------
-delete from public.registro_saga_auth s
-using auth.users au
-where au.id = s.auth_user_id
-  and coalesce(au.raw_user_meta_data->>'tipo_registro', '') <> 'usuario';
+create or replace function public.limpiar_filas_fantasma_registro_conductor()
+returns jsonb
+language plpgsql
+security definer
+set search_path = public, auth, pg_temp
+as $$
+declare
+  v_saga_eliminados integer := 0;
+  v_usuarios_eliminados integer := 0;
+begin
+  delete from public.registro_saga_auth s
+  using auth.users au
+  where au.id = s.auth_user_id
+    and coalesce(au.raw_user_meta_data->>'tipo_registro', '') <> 'usuario';
+  get diagnostics v_saga_eliminados = row_count;
 
-delete from public.usuarios u
-where u.rol = 'sin_rol'::public.rol_usuario
-  and exists (
-    select 1 from auth.users au
-    where au.id = u.auth_user_id
-      and coalesce(au.raw_user_meta_data->>'tipo_registro', '') = 'conductor'
-  )
-  and (
-    exists (select 1 from public.solicitudes_conductor sc where sc.auth_user_id = u.auth_user_id)
-    or exists (select 1 from public.conductores c where c.auth_user_id = u.auth_user_id)
-  )
-  and not exists (select 1 from public.traslados t where t.usuario_id = u.id)
-  and not exists (select 1 from public.vehiculos v where v.usuario_id = u.id);
+  delete from public.usuarios u
+  where u.rol = 'sin_rol'::public.rol_usuario
+    and exists (
+      select 1 from auth.users au
+      where au.id = u.auth_user_id
+        and coalesce(au.raw_user_meta_data->>'tipo_registro', '') = 'conductor'
+    )
+    and (
+      exists (select 1 from public.solicitudes_conductor sc where sc.auth_user_id = u.auth_user_id)
+      or exists (select 1 from public.conductores c where c.auth_user_id = u.auth_user_id)
+    )
+    and not exists (select 1 from public.traslados t where t.usuario_id = u.id)
+    and not exists (select 1 from public.vehiculos v where v.usuario_id = u.id);
+  get diagnostics v_usuarios_eliminados = row_count;
+
+  return jsonb_build_object(
+    'saga_eliminados', v_saga_eliminados,
+    'usuarios_eliminados', v_usuarios_eliminados
+  );
+end;
+$$;
+
+revoke all on function public.limpiar_filas_fantasma_registro_conductor() from public, anon, authenticated;
+grant execute on function public.limpiar_filas_fantasma_registro_conductor() to service_role;
 
 -- ---------------------------------------------------------------------------
 -- 4. Aislamiento de rol en iniciar_solicitud_conductor()

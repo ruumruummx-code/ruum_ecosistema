@@ -375,7 +375,8 @@ describe("DetallesPasaporte y acciones operativas", () => {
       />
     );
     await user.click(screen.getByRole("button", { name: "Simular Pago Stripe" }));
-    expect(actualizarRealtimeMock).toHaveBeenCalledWith({ pagoConfirmado: true });
+    expect(screen.getByText(/confirmando pago con el banco/i)).toBeInTheDocument();
+    expect(actualizarRealtimeMock).not.toHaveBeenCalledWith({ pagoConfirmado: true });
 
     // PagoTraslado confirmado
     estadoRealtimeMock = { ...estadoRealtimeMock, pagoConfirmado: true };

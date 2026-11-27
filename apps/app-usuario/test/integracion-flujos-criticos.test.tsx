@@ -856,10 +856,22 @@ describe("Integración de flujos críticos en @ruum/app-usuario (signup, login, 
 
   describe("4. Flujo de integración de Pago (PagoTraslado + PagoRecuperable + PasoPago + PagoStripe + AppStateProvider + resumen-pago)", () => {
     it("ejecuta el cobro completo en PagoTraslado + PagoStripe, actualiza el estado realtime y concilia el recibo del pasaporte", async () => {
-      const fetchEnProceso = crearFetchEnProceso((payload) => ({
+      const fetchBase = crearFetchEnProceso((payload) => ({
         status: 200,
         body: { clientSecret: `cs_test_${payload.traslado_id}` },
       }));
+      const fetchEnProceso = vi.fn(
+        async (input: string | URL | Request, init?: RequestInit) => {
+          const url = typeof input === "string" ? input : input instanceof URL ? input.toString() : input.url;
+          if (url.includes("/api/viajes/traslado-pago-100/estado-pago")) {
+            return new Response(
+              JSON.stringify({ pagado: true, estado: "servicio_confirmado" }),
+              { status: 200, headers: { "content-type": "application/json" } },
+            );
+          }
+          return fetchBase(input, init);
+        },
+      );
       vi.stubGlobal("fetch", fetchEnProceso);
 
       const user = userEvent.setup({ delay: null });
@@ -879,9 +891,9 @@ describe("Integración de flujos críticos en @ruum/app-usuario (signup, login, 
         screen.getByRole("button", { name: /pagar y confirmar traslado/i }),
       );
 
-      // PagoTraslado reacciona al cambio en AppStateProvider (pagoConfirmado: true)
+      // PagoTraslado verifica contra /api/viajes/[id]/estado-pago y actualiza AppStateProvider
       expect(
-        await screen.findByText(/pago procesado correctamente/i),
+        await screen.findByText(/pago procesado correctamente/i, {}, { timeout: 5000 }),
       ).toBeInTheDocument();
 
       // El resumen de pasaporte refleja el estado pagado y saldo $0
