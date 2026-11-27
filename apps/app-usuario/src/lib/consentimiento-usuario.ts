@@ -1,3 +1,4 @@
+import { registrarConsentimientoUsuario } from "@ruum/api/services";
 import { logStructuredWarn } from "./logger";
 
 const VERSION_TERMINOS_VIGENTE = 1;
@@ -18,26 +19,19 @@ export async function registrarConsentimientoPostAuth(
   supabase: unknown,
   userAgent: string | null
 ): Promise<void> {
-  const cliente = supabase as {
-    rpc?: (
-      fn: string,
-      args: Record<string, unknown>
-    ) => Promise<{ error: unknown }>;
-  } | null;
-
-  if (!cliente || typeof cliente.rpc !== "function") return;
+  if (!supabase || typeof (supabase as { rpc?: unknown }).rpc !== "function") return;
 
   try {
     const versionApp = process.env.NEXT_PUBLIC_APP_VERSION?.trim() || "1.0.0";
-    const { error } = await cliente.rpc("registrar_consentimiento_usuario", {
-      p_version: VERSION_TERMINOS_VIGENTE,
-      p_canal: detectarCanalDesdeUserAgent(userAgent),
-      p_version_app: versionApp.slice(0, 40),
-    });
-    if (error) {
-      logStructuredWarn("auth/consentimiento", "registrar_consentimiento_usuario_fallido", error);
-    }
+    await registrarConsentimientoUsuario(
+      supabase as Parameters<typeof registrarConsentimientoUsuario>[0],
+      {
+        version: VERSION_TERMINOS_VIGENTE,
+        canal: detectarCanalDesdeUserAgent(userAgent),
+        versionApp: versionApp.slice(0, 40),
+      },
+    );
   } catch (error) {
-    logStructuredWarn("auth/consentimiento", "registrar_consentimiento_usuario_excepcion", error);
+    logStructuredWarn("auth/consentimiento", "registrar_consentimiento_usuario_fallido", error);
   }
 }
