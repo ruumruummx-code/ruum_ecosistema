@@ -7,6 +7,7 @@ import { esOrigenDiditValido, interpretarMensajeDidit } from "../../lib/didit";
 interface Props {
   isOpen: boolean;
   url: string | null;
+  sandbox?: boolean;
   cargando: boolean;
   error: string | null;
   onCerrar: () => void;
@@ -33,6 +34,7 @@ function esUrlDiditValida(url: string | null | undefined): url is string {
 export function DiditVerificationModal({
   isOpen,
   url,
+  sandbox = false,
   cargando,
   error,
   onCerrar,
@@ -121,6 +123,12 @@ export function DiditVerificationModal({
         <p id="didit-permisos-nota" className="sr-only">
           El siguiente iframe es de verify.didit.me y solicitará permiso de cámara, micrófono y ubicación para la prueba de vida. Puedes permitir o denegar desde el diálogo del navegador.
         </p>
+
+        {sandbox && (
+          <div className="px-6 pt-4">
+            <Aviso tono="atencion">Modo de prueba. Usa datos de prueba. El resultado no cambiará el estado de tu cuenta.</Aviso>
+          </div>
+        )}
 
         {/* Contenido según estado */}
         {cargando ? (

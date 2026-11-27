@@ -229,3 +229,26 @@ Deno.test("iniciar-verificacion-didit registra una sesión real para otro conduc
     },
   );
 });
+
+Deno.test("iniciar-verificacion-didit abre Sandbox para usuarios sin guardar resultados reales", async () => {
+  const workflow = "11000000-0000-4000-8000-000000000003";
+  await conFetchSimulado(
+    rutasInicio({
+      [crearSesion]: ({ body, headers }) => {
+        assertEquals(headers.get("x-api-key"), "clave-sandbox");
+        assertEquals(JSON.parse(body), { workflow_id: workflow, language: "es" });
+        return { session_id: sessionId, url: urlVerificacion };
+      },
+    }),
+    async (solicitudes) => {
+      const respuesta = await manejarInicioDidit(solicitud(), entornoDePrueba({
+        DIDIT_SANDBOX_USUARIO_ENABLED: "true",
+        DIDIT_SANDBOX_API_KEY: "clave-sandbox",
+        DIDIT_SANDBOX_WORKFLOW_ID: workflow,
+      }));
+      assertEquals(respuesta.status, 201);
+      assertEquals(await respuesta.json(), { url: urlVerificacion, sandbox: true });
+      assertEquals(solicitudes.some(({ ruta }) => [guardarSesion, expirarSesiones].includes(ruta)), false);
+    },
+  );
+});

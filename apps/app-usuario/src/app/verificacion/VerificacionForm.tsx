@@ -121,6 +121,7 @@ export function VerificacionForm({ fotoPerfilInicial, soloDidit = false, destino
   const [mostrarDiditModal, setMostrarDiditModal] = useState(false);
   const [urlDidit, setUrlDidit] = useState<string | null>(null);
   const [sessionIdDidit, setSessionIdDidit] = useState<string | null>(null);
+  const [sandboxDidit, setSandboxDidit] = useState(false);
   const [cargandoDidit, setCargandoDidit] = useState(false);
   const [errorDidit, setErrorDidit] = useState<string | null>(null);
   const [fotoPerfilUrl, setFotoPerfilUrl] = useState(fotoPerfilInicial ?? "");
@@ -192,6 +193,7 @@ export function VerificacionForm({ fotoPerfilInicial, soloDidit = false, destino
   async function iniciarDidit() {
     if (cargandoDidit) return;
     setCargandoDidit(true);
+    setSandboxDidit(false);
     setErrorDidit(null);
     setUrlDidit(null);
     setSessionIdDidit(null);
@@ -211,7 +213,8 @@ export function VerificacionForm({ fotoPerfilInicial, soloDidit = false, destino
           },
         });
         if (res.ok) {
-          const datos = (await res.json()) as { url: string; sessionId?: string };
+          const datos = (await res.json()) as { url: string; sessionId?: string; sandbox?: boolean };
+          setSandboxDidit(datos.sandbox === true);
           setUrlDidit(datos.url);
           setSessionIdDidit(datos.sessionId ?? null);
           sesionIniciada = true;
@@ -228,7 +231,8 @@ export function VerificacionForm({ fotoPerfilInicial, soloDidit = false, destino
       if (!sesionIniciada) {
         // Respaldo de llamada directa si el endpoint de aplicación no está disponible
         const cliente = crearClienteNavegador();
-        const { url, sessionId } = await iniciarVerificacionDiditUsuario(cliente);
+        const { url, sessionId, sandbox } = await iniciarVerificacionDiditUsuario(cliente);
+        setSandboxDidit(sandbox === true);
         setUrlDidit(url);
         setSessionIdDidit(sessionId ?? null);
       }
@@ -323,6 +327,10 @@ export function VerificacionForm({ fotoPerfilInicial, soloDidit = false, destino
 
   async function finalizarDidit() {
     if (cargandoDidit) return;
+    if (sandboxDidit) {
+      cerrarDidit();
+      return;
+    }
     /* CORRECCIÓN stale-session: sin sessionId el lookup devolvía la última
        verificación del usuario (podía ser de un intento anterior) y marcar
        éxito/rechazo equivocado. Se captura el id al inicio y se exige para
@@ -635,6 +643,7 @@ export function VerificacionForm({ fotoPerfilInicial, soloDidit = false, destino
       <DiditVerificationModal
         isOpen={mostrarDiditModal}
         url={urlDidit}
+        sandbox={sandboxDidit}
         cargando={cargandoDidit}
         error={errorDidit}
         onCerrar={cerrarDidit}

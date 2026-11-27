@@ -123,7 +123,8 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(
       {
         url: data.url,
-        sessionId: data.sessionId ?? null,
+        sessionId: data.sessionId ?? data.session_id ?? null,
+        ...(data.sandbox === true ? { sandbox: true } : {}),
       },
       { status: 200, headers: { "Cache-Control": "no-store" } }
     );
