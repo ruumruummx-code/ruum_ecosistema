@@ -16,6 +16,17 @@ vi.mock("next/navigation", () => ({
 vi.mock("@ruum/api/services", () => ({ crearLlamadaEnmascarada: vi.fn() }));
 vi.mock("../src/lib/supabase-browser", () => ({ crearClienteNavegador: vi.fn(), tieneSupabaseConfigurado: () => true }));
 
+// Selectores semánticos del rediseño de Inicio (sistema base v2): la pantalla ya
+// no expone ids propios por módulo, así que se localizan por estructura y ARIA.
+const SELECTORES = {
+  cabecera: "#homeHeader",
+  saludo: '[data-testid="inicio"] > header',
+  // Traslado activo o estado vacío: ambos son la tarjeta oscura principal.
+  tarjeta: '[data-testid="inicio"] section[data-theme="dark"]',
+  accesos: '[data-testid="inicio"] > nav',
+  soporte: 'section[aria-label="Ayuda y soporte"]',
+};
+
 // Opt-in: usa Chromium y el CSS real de un build previo, sin sesión ni datos privados.
 // RUN_RESPONSIVE_UI=1 pnpm exec vitest run test/inicio-responsive.test.tsx
 describe.skipIf(process.env.RUN_RESPONSIVE_UI !== "1")("Inicio sin scroll en navegador", () => {
@@ -68,29 +79,32 @@ describe.skipIf(process.env.RUN_RESPONSIVE_UI !== "1")("Inicio sin scroll en nav
           }
           // Equivale a la medición de ResizeObserver que realiza la navegación al hidratar.
           await page.evaluate(() => document.documentElement.style.setProperty("--user-mobile-nav-height", `${document.querySelector("#bottomNavigation")!.getBoundingClientRect().height}px`));
-          const errores = await page.evaluate(() => {
+          const errores = await page.evaluate((sel) => {
             const failures: string[] = [];
             const navTop = document.querySelector("#bottomNavigation")!.getBoundingClientRect().top;
-            for (const selector of ["#homeHeader", "#greetingBlock", "#activeTransferCard", "#quickActions", ".home-support"]) {
-              const el = document.querySelector(selector)!;
+            for (const selector of [sel.cabecera, sel.saludo, sel.tarjeta, sel.accesos, sel.soporte]) {
+              const el = document.querySelector(selector);
+              if (!el) { failures.push(`${selector} no existe`); continue; }
               const rect = el.getBoundingClientRect();
               const contenedor = el.closest(".user-dashboard-content");
               if (rect.top < 0 || (!contenedor && rect.bottom > navTop + 1) || rect.left < 0 || rect.right > innerWidth + 1) failures.push(`${selector} fuera de pantalla: ${JSON.stringify(rect.toJSON())}`);
             }
-            const card = document.querySelector("#activeTransferCard")!.getBoundingClientRect();
-            for (const el of document.querySelectorAll("#activeTransferCard > *, .home-stepper li, .home-module-copy")) {
-              const rect = el.getBoundingClientRect();
-              if (el.closest("#activeTransferCard") && (rect.bottom > card.bottom || rect.top < card.top)) failures.push(`${el.className} fuera de la tarjeta: ${rect.bottom} / ${card.bottom}`);
-              if (el.scrollWidth > el.clientWidth + 1 && el.classList.contains("home-module-copy")) failures.push(`Texto de acceso rápido desbordado: ${el.textContent}, ${el.scrollWidth} / ${el.clientWidth}`);
+            const card = document.querySelector(sel.tarjeta)?.getBoundingClientRect();
+            if (card) {
+              for (const el of document.querySelectorAll(`${sel.tarjeta} > *, ${sel.tarjeta} ol li`)) {
+                const rect = el.getBoundingClientRect();
+                if (rect.height > 0 && (rect.bottom > card.bottom || rect.top < card.top)) failures.push(`${el.tagName.toLowerCase()} fuera de la tarjeta: ${rect.bottom} / ${card.bottom}`);
+              }
             }
-            if (document.documentElement.scrollHeight > innerHeight || document.documentElement.scrollWidth > innerWidth) failures.push("Scroll del documento");
+            if (document.documentElement.scrollHeight > innerHeight || document.documentElement.scrollWidth > innerWidth) failures.push(`Scroll del documento: ${document.documentElement.scrollWidth}x${document.documentElement.scrollHeight} / ${innerWidth}x${innerHeight}`);
             const content = document.querySelector(".user-dashboard-content")!;
             content.scrollTo({ top: content.scrollHeight, behavior: "instant" });
-            if (document.querySelector(".home-support")!.getBoundingClientRect().bottom > navTop + 1) {
+            const soporte = document.querySelector(sel.soporte);
+            if (soporte && soporte.getBoundingClientRect().bottom > navTop + 1) {
               failures.push("Soporte queda debajo de la navegación al final del scroll");
             }
             return failures;
-          });
+          }, SELECTORES);
           await page.screenshot({ path: path.join(output, `${escenario.nombre}-${width}x${height}.png`) });
           expect(errores, `${escenario.nombre} ${width}x${height}`).toEqual([]);
         }

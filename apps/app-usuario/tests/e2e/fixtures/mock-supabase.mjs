@@ -315,7 +315,24 @@ const servidor = createServer(async (req, res) => {
       for (const [campo, valor] of url.searchParams) {
         if (valor.startsWith("eq.")) filas = filas.filter(fila => String(fila[campo]) === valor.slice(3));
         if (valor.startsWith("in.(")) filas = filas.filter(fila => valor.slice(4, -1).split(",").includes(String(fila[campo])));
+        // Búsqueda de Mis traslados: `or=(campo.ilike.*texto*,…)`. Otros `or`
+        // (pestañas por estado) no se modelan y dejan pasar todas las filas.
+        const terminos = campo === "or" ? valor.slice(1, -1).split(",") : [];
+        if (terminos.length && terminos.every(t => /^\w+\.ilike\.\*.*\*$/.test(t))) {
+          filas = filas.filter(fila => terminos.some(t => {
+            const [col, patron] = t.split(".ilike.");
+            return String(fila[col] ?? "").toLowerCase().includes(patron.slice(1, -1).toLowerCase());
+          }));
+        }
       }
+      // PostgREST pagina con `offset`/`limit` (`.range()`, `.limit()`) e informa
+      // el total en Content-Range. Sin esto `.limit(1).maybeSingle()` recibe
+      // varias filas y supabase-js responde PGRST116.
+      const total = filas.length;
+      const desde = Number(url.searchParams.get("offset") ?? 0);
+      const limite = url.searchParams.get("limit");
+      filas = filas.slice(desde, limite === null ? undefined : desde + Number(limite));
+      res.setHeader("Content-Range", filas.length ? `${desde}-${desde + filas.length - 1}/${total}` : `*/${total}`);
       const singular = (req.headers.accept ?? "").includes("vnd.pgrst.object");
       responder(res, 200, singular ? filas[0] ?? null : filas);
       return;

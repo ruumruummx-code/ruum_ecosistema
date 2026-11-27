@@ -31,7 +31,7 @@ for (const theme of ['light', 'dark']) for (const width of [390, 1440]) {
    expect(new URL(page.url()).pathname).toBe(route);
    await expect(page.locator('html')).toHaveAttribute('data-theme', theme, { timeout: 60_000 });
    const expectedContent: Record<string, RegExp> = {
-    '/login': /Al continuar/, '/': /Chrysler Cirrus/, '/mis-viajes': /Chrysler Cirrus/,
+    '/login': /Bienvenido/, '/': /Chrysler Cirrus/, '/mis-viajes': /Chrysler Cirrus/,
     '/cuenta': /Carlos/, '/ubicaciones': /ubicaciones/i, '/cuenta/preferencias': /notificaciones/i,
     '/registro': /Crear cuenta/, '/soporte': /soporte/i,
    };

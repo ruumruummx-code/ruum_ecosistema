@@ -746,7 +746,7 @@ export function InicioUsuario({
   return (
     <div
       data-testid={marco ? `inicio-${marco}` : "inicio"}
-      className="flex min-h-full flex-col gap-4 bg-ui-bg px-4 pt-4 pb-[calc(var(--user-mobile-nav-height,5rem)+1.5rem)] text-ui-fg sm:px-6 lg:gap-5 lg:px-8 lg:pt-5 lg:pb-8">
+      className="relative flex min-h-full flex-col gap-4 bg-ui-bg px-4 pt-4 pb-[calc(var(--user-mobile-nav-height,5rem)+1.5rem)] text-ui-fg sm:px-6 lg:gap-5 lg:px-8 lg:pt-5 lg:pb-8">
       <header className="flex items-end justify-between gap-4">
         <div className="min-w-0">
           <h1 className="text-2xl font-semibold tracking-tight lg:text-3xl">{nombre ? `Hola, ${nombre}` : "Hola"}</h1>

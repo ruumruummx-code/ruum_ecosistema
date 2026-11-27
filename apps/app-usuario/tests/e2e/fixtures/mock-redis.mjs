@@ -17,6 +17,9 @@ function ejecutar([nombre, clave, valor, ...opciones]) {
     keys.set(clave, entrada);
     return { result: entrada.valor };
   }
+  // Contador de fallos de login (`consultarFallos` / `reiniciarFallos`).
+  if (comando === "get") return { result: keys.has(clave) ? String(keys.get(clave).valor) : null };
+  if (comando === "del") return { result: keys.delete(clave) ? 1 : 0 };
   if (comando === "ttl") return { result: keys.has(clave) ? Math.ceil((keys.get(clave).expira - now) / 1000) : -2 };
   return { error: "Comando no implementado: " + nombre };
 }

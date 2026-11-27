@@ -84,7 +84,7 @@ for (const width of [390, 1440]) {
   await page.setViewportSize({ width, height: 900 });
   const response = await page.goto('/login', { waitUntil: 'domcontentloaded', timeout: 240_000 });
   expect((await response!.text()).match(/<html[^>]*lang="([^"]+)"/)?.[1]).toBe('es-MX');
-  await expect(page.locator('body')).toContainText('Inicia sesión', { timeout: 60_000 });
+  await expect(page.locator('body')).toContainText('Bienvenido', { timeout: 60_000 });
   await expect(page.locator('html')).toHaveAttribute('lang', 'es-MX');
   await expect(page.getByRole('button', { name: /^(EN|English)$/ })).toHaveCount(0);
   await expect(page.getByRole('radio', { name: /English/ })).toHaveCount(0);
