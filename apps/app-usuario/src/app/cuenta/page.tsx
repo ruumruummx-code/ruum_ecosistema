@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
-import { MobileShell } from "@ruum/ui";
 import { NavegacionUsuario } from "../NavegacionUsuario";
 import { UserDashboardLayout } from "../../components/layout/UserDashboardLayout";
 import { construirNotificaciones } from "../../lib/inicio";
 import { Cuenta } from "./Cuenta";
 import { nombreVisibleCuenta } from "./cuenta-utils";
 import { conCuenta } from "./cuenta-ui";
+import { MarcoPantalla } from "@ruum/ui/base";
 
 export const metadata: Metadata = {
   title: "Mi cuenta — Ruum Ruum",
@@ -24,9 +24,9 @@ export default async function PaginaCuenta({ searchParams }: { searchParams?: Pr
       <>
         <div className="flex h-full w-full flex-col lg:hidden" data-marco="movil">
           <NavegacionUsuario variante="claro" nombreUsuario={nombre} notificaciones={notificaciones} />
-          <MobileShell as="main" variant="wide" padding="none" conFondoCanvas={false} navInferiorVisible className="bg-ui-bg">
+          <MarcoPantalla as="main" variant="wide" padding="none" conFondoCanvas={false} navInferiorVisible className="bg-ui-bg">
             <Cuenta cuenta={cuenta} seccionInicial={seccion} marco="movil" />
-          </MobileShell>
+          </MarcoPantalla>
         </div>
         <div className="hidden h-full w-full lg:flex" data-marco="escritorio">
           <UserDashboardLayout

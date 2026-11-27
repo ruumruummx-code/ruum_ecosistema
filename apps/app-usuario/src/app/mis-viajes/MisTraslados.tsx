@@ -214,7 +214,7 @@ export function MisTraslados({
   return (
     <div ref={raiz} className="min-h-full bg-ui-bg text-ui-fg">
       {/* La holgura de la barra inferior va en el contenido: el contenedor flex con
-          scroll de MobileShell no respeta su propio padding-bottom al final. */}
+          scroll de MarcoPantalla no respeta su propio padding-bottom al final. */}
       <div className="mx-auto flex w-full max-w-screen-2xl flex-col gap-4 px-4 pt-4 pb-[calc(var(--user-mobile-nav-height,5rem)+1.5rem)] sm:gap-5 sm:px-6 sm:pt-6 lg:px-8 lg:pb-8">
         <PageHeader
           titulo="Mis traslados"

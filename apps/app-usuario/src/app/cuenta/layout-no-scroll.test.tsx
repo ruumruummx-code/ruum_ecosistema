@@ -4,7 +4,7 @@ import path from "node:path";
 import { describe, expect, it, vi } from "vitest";
 import { renderToStaticMarkup } from "react-dom/server";
 import { createElement as h } from "react";
-import { MobileShell } from "@ruum/ui";
+import { MarcoPantalla } from "@ruum/ui/base";
 
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ push: vi.fn(), refresh: vi.fn() }),
@@ -22,9 +22,9 @@ function leerCss(ruta: string): string {
 }
 
 describe("Layout global mobile-first no-scroll", () => {
-  it("MobileShell es raíz 100dvh con overflow hidden y contenido con scroll interno", () => {
+  it("MarcoPantalla es raíz 100dvh con overflow hidden y contenido con scroll interno", () => {
     const html = renderToStaticMarkup(
-      h(MobileShell, { variant: "compact", children: "Contenido" })
+      h(MarcoPantalla, { variant: "compact", children: "Contenido" })
     );
     expect(html).toContain("100dvh");
     expect(html).not.toContain("100vh");
@@ -61,17 +61,17 @@ describe("Layout global mobile-first no-scroll", () => {
     expect(css).not.toMatch(/@media\s*\(\s*max-width/);
   });
 
-  it("Garaje / Rastreo / Ajustes usan MobileShell con contención no-scroll", async () => {
+  it("Garaje / Rastreo / Ajustes usan MarcoPantalla con contención no-scroll", async () => {
     const { default: PaginaVehiculos } = await import("../cuenta/vehiculos/page");
     expect(typeof PaginaVehiculos).toBe("function");
     const { default: PaginaTraslado } = await import("../viajes/[id]/page");
     expect(typeof PaginaTraslado).toBe("function");
     const { default: PaginaPreferencias } = await import("../cuenta/preferencias/page");
     expect(typeof PaginaPreferencias).toBe("function");
-    // La contención la provee MobileShell (verificado arriba); las páginas
+    // La contención la provee MarcoPantalla (verificado arriba); las páginas
     // deben componer header fijo + contenido con scroll interno.
     const shell = renderToStaticMarkup(
-      h(MobileShell, { variant: "compact", navInferiorVisible: true, children: "x" })
+      h(MarcoPantalla, { variant: "compact", navInferiorVisible: true, children: "x" })
     );
     expect(shell).toContain("pb-24");
   }, 60_000);

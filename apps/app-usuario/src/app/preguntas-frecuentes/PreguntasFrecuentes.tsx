@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import { InformacionSoporte } from "../soporte/InformacionSoporte";
-import { MobileHeader } from "@ruum/ui";
+import { EncabezadoRegreso } from "../../components/EncabezadoRegreso";
 import { MobileBottomSheet } from "../../components/MobileBottomSheet";
 import styles from "./faq.module.css";
 
@@ -438,7 +438,7 @@ export function PreguntasFrecuentes() {
   const faqs = useMemo(() => FAQS.filter(f => (categoriaActiva === "all" || f.categoria === categoriaActiva) && f.pregunta.toLocaleLowerCase("es").includes(terminoBusqueda.toLocaleLowerCase("es").trim())), [categoriaActiva, terminoBusqueda]);
   const paginas = Math.ceil(faqs.length / 4);
   return <div className={styles.screen}>
-    <MobileHeader titulo="Preguntas frecuentes" enlaceAtras="/cuenta" etiquetaAtras="Volver a mi cuenta" conBorde={false} />
+    <EncabezadoRegreso titulo="Preguntas frecuentes" enlaceAtras="/cuenta" etiquetaAtras="Volver a mi cuenta" />
     <input className={styles.search} type="search" aria-label="Buscar en preguntas frecuentes" placeholder="¿En qué podemos ayudarte?" value={terminoBusqueda} onChange={e => { setTerminoBusqueda(e.target.value); setPagina(0); }} />
     <div className={styles.categories} role="group" aria-label="Categorías de preguntas">{CATEGORIAS.map(c => <button key={c.id} type="button" aria-pressed={categoriaActiva === c.id} onClick={() => { setCategoriaActiva(c.id); setPagina(0); }}><IconoFaqSvg tipo={c.icono} />{c.label}</button>)}</div>
     <section className={styles.results} aria-label="Preguntas frecuentes">

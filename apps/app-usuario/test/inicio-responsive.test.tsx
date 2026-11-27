@@ -7,7 +7,7 @@ import { describe, expect, it, vi } from "vitest";
 import type { InicioUsuarioProps } from "../src/app/InicioUsuario";
 import { InicioUsuario } from "../src/app/InicioUsuario";
 import { NavegacionUsuario } from "../src/app/NavegacionUsuario";
-import { MobileShell } from "@ruum/ui";
+import { MarcoPantalla } from "@ruum/ui/base";
 
 vi.mock("next/navigation", () => ({
   usePathname: () => "/",
@@ -54,9 +54,9 @@ describe.skipIf(process.env.RUN_RESPONSIVE_UI !== "1")("Inicio sin scroll en nav
       for (const escenario of escenarios) {
         const html = renderToStaticMarkup(<div id="contenido-principal">
           <NavegacionUsuario nombreUsuario={usuario?.nombre} notificacionesCount={1} />
-          <MobileShell as="main" variant="compact" navInferiorVisible className="user-v2-scope user-dashboard-shell" contentClassName="user-dashboard-content">
+          <MarcoPantalla as="main" variant="compact" navInferiorVisible className="user-v2-scope user-dashboard-shell" contentClassName="user-dashboard-content">
             <div><InicioUsuario usuario={usuario} traslados={escenario.traslados} /></div>
-          </MobileShell>
+          </MarcoPantalla>
         </div>);
         for (const [width, height] of tamanos) {
           await page.setViewportSize({ width, height });

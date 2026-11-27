@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Aviso, MobileButton, MobileCard } from "@ruum/ui";
+import { Aviso } from "@ruum/ui";
 import { crearClienteNavegador } from "../../lib/supabase-browser";
 import {
   subirDocumentoIdentidad,
@@ -19,6 +19,8 @@ import { logStructuredWarn } from "../../lib/logger";
 import { esperarResultadoDidit } from "../../lib/didit-realtime";
 import { VerificationSheet } from "./VerificationSheet";
 import { DiditVerificationModal } from "./DiditVerificationModal";
+import { Button, Card } from "@ruum/ui/base";
+import { Loader2 } from "lucide-react";
 
 /* El servidor (validar-documento-identidad) solo admite JPEG, PNG y PDF.
    No se anuncia HEIC en `accept`: así iOS convierte la foto a JPG al
@@ -55,7 +57,7 @@ function esErrorRed(error: unknown) {
 function ConfirmacionEnRevision() {
   return (
     <div className="flex flex-col gap-5">
-      <MobileCard padding="lg" elevated className="text-center">
+      <Card className="p-5 text-center shadow-ui-md sm:p-6">
         <div className="mx-auto flex size-16 items-center justify-center rounded-full bg-[#e9f3ee] text-[#08705f] dark:bg-[#0a2e1f] dark:text-[#4dd9a3]">
           <svg
             className="size-8"
@@ -98,7 +100,7 @@ function ConfirmacionEnRevision() {
             Ir al inicio
           </Link>
         </div>
-      </MobileCard>
+      </Card>
     </div>
   );
 }
@@ -544,7 +546,7 @@ export function VerificacionForm({ fotoPerfilInicial, soloDidit = false, destino
 
   if (verificacionCompletada) {
     return (
-      <MobileCard padding="lg" elevated className="text-center space-y-4 border-[#c8e6d8] bg-[#e9f3ee]/40 dark:border-[#135939] dark:bg-[#0a2e1f]/40">
+      <Card className="p-5 shadow-ui-md sm:p-6 text-center space-y-4 border-[#c8e6d8] bg-[#e9f3ee]/40 dark:border-[#135939] dark:bg-[#0a2e1f]/40">
         <div className="mx-auto flex size-16 items-center justify-center rounded-full bg-[#e9f3ee] text-[#08705f] dark:bg-[#0a2e1f] dark:text-[#4dd9a3]">
           <svg className="size-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
             <path d="M20 6L9 17l-5-5" />
@@ -564,7 +566,7 @@ export function VerificacionForm({ fotoPerfilInicial, soloDidit = false, destino
             Solicitar mi primer traslado
           </Link>
         </div>
-      </MobileCard>
+      </Card>
     );
   }
 
@@ -589,7 +591,7 @@ export function VerificacionForm({ fotoPerfilInicial, soloDidit = false, destino
             <span>Confirmando verificación con Didit en segundo plano…</span>
           </div>
         )}
-        <MobileButton type="button" onClick={() => fotoPerfilUrl ? void iniciarDidit() : setMostrarFoto(true)} disabled={cargandoDidit || subiendoFotoPerfil || pollingDiditActivo} loading={cargandoDidit || subiendoFotoPerfil || pollingDiditActivo} className="w-full">Iniciar verificación con Didit</MobileButton>
+        <Button type="button" onClick={() => fotoPerfilUrl ? void iniciarDidit() : setMostrarFoto(true)} size="lg" disabled={cargandoDidit || subiendoFotoPerfil || pollingDiditActivo} aria-busy={cargandoDidit || subiendoFotoPerfil || pollingDiditActivo} className="w-full">{(cargandoDidit || subiendoFotoPerfil || pollingDiditActivo) && <Loader2 aria-hidden="true" className="animate-spin" />}Iniciar verificación con Didit</Button>
         <p className="flex items-center justify-center gap-1 text-[11px] leading-4 text-[#4e5f80] dark:text-[#a8b5cc]">
           <svg className="size-3 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><rect x="5" y="10" width="14" height="11" rx="2"/><path d="M8 10V6a4 4 0 0 1 8 0v4"/></svg>
           Tus datos se encriptan bajo estándares bancarios.
@@ -626,7 +628,7 @@ export function VerificacionForm({ fotoPerfilInicial, soloDidit = false, destino
         )}
 
         {errorDidit && <Aviso tono="danger">{errorDidit}</Aviso>}
-        <MobileButton type="button" className="mt-4 w-full" disabled={!fotoPerfilUrl || subiendoFotoPerfil} onClick={() => { setMostrarFoto(false); void iniciarDidit(); }}>Continuar con Didit</MobileButton>
+        <Button type="button" size="lg" className="mt-4 w-full" disabled={!fotoPerfilUrl || subiendoFotoPerfil} onClick={() => { setMostrarFoto(false); void iniciarDidit(); }}>Continuar con Didit</Button>
       </VerificationSheet>
 
       {/* Modal Didit */}
@@ -646,7 +648,7 @@ export function VerificacionForm({ fotoPerfilInicial, soloDidit = false, destino
           <VerificationSheet open={mostrarFormularioManual} onClose={() => setMostrarFormularioManual(false)} title="Carga manual de documentos">
             <p className="mb-4 text-sm text-[#4e5f80] dark:text-[#a8b5cc]">Completa tu domicilio y adjunta tu identificación. La revisión toma 24–48 horas hábiles.</p>
             <form id="formulario-verificacion-manual" onSubmit={enviarManual}>
-              <MobileCard padding="lg" elevated className="flex flex-col gap-6">
+              <Card className="flex flex-col gap-6 p-5 shadow-ui-md sm:p-6">
               {/* ── Domicilio ── */}
               <fieldset className="flex flex-col gap-4 border-none p-0 m-0">
                 <legend className="text-[12px] font-bold uppercase tracking-wider text-[#4e5f80] dark:text-[#a8b5cc]">
@@ -846,17 +848,19 @@ export function VerificacionForm({ fotoPerfilInicial, soloDidit = false, destino
                 </div>
               )}
 
-              <MobileButton
+              <Button
                 type="submit"
+                size="lg"
                 disabled={enviando}
-                loading={enviando}
+                aria-busy={enviando}
                 className="w-full"
               >
+                {enviando && <Loader2 aria-hidden="true" className="animate-spin" />}
                 {falloDomicilioParcial
                   ? "Reintentar guardar domicilio"
                   : "Enviar para revisión manual"}
-              </MobileButton>
-            </MobileCard>
+              </Button>
+            </Card>
           </form>
           </VerificationSheet>
         </>

@@ -5,7 +5,7 @@ import Link from "next/link";
 import { AVISO_IDIOMA, IDIOMA_DISPONIBLE } from "../../../lib/idioma-aplicacion";
 import { useTema } from "../../TemaProvider";
 import { BotonTema } from "../../TemaProvider";
-import { PassportCard, MobileShell } from "@ruum/ui";
+import { PassportCard } from "@ruum/ui";
 import { NavegacionUsuario } from "../../NavegacionUsuario";
 import { Preferencias as SeccionPreferencias } from "../Preferencias";
 import type { CuentaReal, Usuario } from "../cuenta-ui";
@@ -22,6 +22,7 @@ import {
   PREFERENCIAS_POR_DEFECTO,
   type PreferenciasUsuarioContrato,
 } from "../../../lib/preferencias-contrato";
+import { MarcoPantalla } from "@ruum/ui/base";
 
 interface PreferenciasClienteProps {
   cuenta: CuentaReal;
@@ -197,7 +198,7 @@ export function PreferenciasCliente({ cuenta }: PreferenciasClienteProps) {
          ───────────────────────────────────────────────────────────── */}
       <div className="block lg:hidden">
         <NavegacionUsuario variante="claro" nombreUsuario={cuenta.usuario.nombre} />
-        <MobileShell as="main" variant="compact" navInferiorVisible={false} className="user-v2-scope user-preferences-shell" contentClassName="user-preferences-content">
+        <MarcoPantalla as="main" variant="compact" navInferiorVisible={false} className="user-v2-scope user-preferences-shell" contentClassName="user-preferences-content">
           <PassportCard>
             <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
               <div>
@@ -212,7 +213,7 @@ export function PreferenciasCliente({ cuenta }: PreferenciasClienteProps) {
           <div className="mt-4">
             <SeccionPreferencias usuario={cuenta.usuario} />
           </div>
-        </MobileShell>
+        </MarcoPantalla>
       </div>
 
       {/* ─────────────────────────────────────────────────────────────

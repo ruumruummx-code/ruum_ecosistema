@@ -1,8 +1,8 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { MobileShell } from "@ruum/ui";
 import { crearClienteServidor } from "../../lib/supabase-server";
 import { obtenerUsuarioActual } from "@ruum/api/services";
+import { MarcoPantalla } from "@ruum/ui/base";
 
 /**
  * Entrada protegida del dashboard. El dashboard histórico sigue viviendo en
@@ -19,7 +19,7 @@ export default async function PaginaInicioProtegido() {
   if (usuario) redirect("/");
 
   return (
-    <MobileShell as="main" variant="compact" navInferiorVisible={false}>
+    <MarcoPantalla as="main" variant="compact" navInferiorVisible={false}>
       <section className="mx-auto max-w-xl p-6 text-center" role="alert">
         <h1 className="text-xl font-bold">Estamos preparando tu cuenta</h1>
         <p className="mt-3 text-sm text-[var(--user-color-muted)]">
@@ -31,6 +31,6 @@ export default async function PaginaInicioProtegido() {
           <Link href="/soporte" className="user-v2-secondary-button px-5 py-3">Soporte público</Link>
         </div>
       </section>
-    </MobileShell>
+    </MarcoPantalla>
   );
 }

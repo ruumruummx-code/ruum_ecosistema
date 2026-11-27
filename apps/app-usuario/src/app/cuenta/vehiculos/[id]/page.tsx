@@ -2,13 +2,13 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
 import { notFound } from "next/navigation";
-import { MobileShell } from "@ruum/ui";
 import { ETIQUETA_TIPO_VEHICULO } from "@ruum/shared/constants";
 import { NavegacionUsuario } from "../../../NavegacionUsuario";
 import { conCuenta } from "../../cuenta-ui";
 import { nombreVehiculo } from "../VehicleListItem";
 import { UserDashboardLayout } from "../../../../components/layout/UserDashboardLayout";
 import { construirNotificaciones } from "../../../../lib/inicio";
+import { MarcoPantalla } from "@ruum/ui/base";
 
 export const metadata: Metadata = { title: "Detalle del vehículo — Ruum Ruum" };
 
@@ -39,7 +39,7 @@ export default async function PaginaDetalleVehiculo({ params }: { params: Promis
       </section>
     </div>;
     return <>
-      <div className="lg:hidden"><NavegacionUsuario variante="claro" nombreUsuario={cuenta.usuario.nombre} /><MobileShell as="main" variant="compact" className="user-v2-scope user-vehicles-shell" contentClassName="user-vehicles-content">{detalle}</MobileShell></div>
+      <div className="lg:hidden"><NavegacionUsuario variante="claro" nombreUsuario={cuenta.usuario.nombre} /><MarcoPantalla as="main" variant="compact" className="user-v2-scope user-vehicles-shell" contentClassName="user-vehicles-content">{detalle}</MarcoPantalla></div>
       <div className="hidden lg:flex h-full w-full"><UserDashboardLayout usuario={cuenta.usuario} nombre={cuenta.usuario.nombre} correo={cuenta.correoRegistro} totalVehiculos={cuenta.vehiculos.length} notificaciones={construirNotificaciones(cuenta.usuario, cuenta.traslados ?? [])}>{detalle}</UserDashboardLayout></div>
     </>;
   });

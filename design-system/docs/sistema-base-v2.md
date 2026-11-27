@@ -66,6 +66,7 @@ su alias aquí. Nunca un hex en una pantalla.
 | `Sheet` | Hoja inferior en móvil y diálogo centrado desde 640 px, sobre `<dialog>` nativo (compatible con la CSP: no inyecta estilos). |
 | `StatGroup`, `Stat` | Indicadores en una sola tarjeta con divisores. |
 | `PageHeader` | Título de pantalla + acciones, igual en todos los tamaños. |
+| `MarcoPantalla` | Marco a alto completo con scroll interno (sustituye a `MobileShell`). `variant` `compact`/`wide`, `navInferiorVisible` deja hueco a la barra inferior. |
 | `EmptyState`, `Skeleton` | Vacíos y carga. |
 | `useMediaQuery` | Solo para comportamiento (p. ej. abrir panel vs. navegar). El aspecto se resuelve con CSS. |
 | `cn` | Combinar clases resolviendo conflictos. |
@@ -78,7 +79,7 @@ Iconos: `lucide-react` (no dibujar SVG a mano).
   superan a cualquier utilidad. Ejemplos: `input { font-size: 16px }` y su propio `.sr-only`
   (rompe `lg:not-sr-only`). Si una clase "no aplica", busca primero en `globals.css`. Al
   migrar una pantalla, borra sus reglas de `globals.css`.
-- **El scroll de `MobileShell` no respeta su `padding-bottom`.** La holgura para la barra
+- **El scroll de `MarcoPantalla` no respeta su `padding-bottom`.** La holgura para la barra
   inferior va dentro del contenido:
   `pb-[calc(var(--user-mobile-nav-height,5rem)+1.5rem)] lg:pb-8`.
 - **La página monta el contenido dos veces** (marco móvil oculto en `lg`, marco de escritorio

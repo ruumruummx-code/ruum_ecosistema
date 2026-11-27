@@ -4,7 +4,7 @@ import Image from "next/image";
 import { redirect } from "next/navigation";
 import type { Database } from "@ruum/shared/types";
 import { IDENTIDAD_MARCA } from "@ruum/shared/constants";
-import { LogoMarca, SelloConductor, Icono, MobileShell } from "@ruum/ui";
+import { LogoMarca, SelloConductor, Icono } from "@ruum/ui";
 import { NavegacionUsuario } from "./NavegacionUsuario";
 import { InicioUsuario } from "./InicioUsuario";
 import { UserDashboardLayout } from "../components/layout/UserDashboardLayout";
@@ -13,6 +13,7 @@ import { construirNotificaciones, ESTADOS_TRASLADO_FINALIZADOS } from "../lib/in
 import { logStructuredWarn } from "../lib/logger";
 import { botonAzul, botonContorno } from "./experiencia-publica";
 import { PUBLIC_CLAIMS, PUBLIC_CLAIMS_VERSION } from "../lib/public-claims";
+import { MarcoPantalla } from "@ruum/ui/base";
 
 type UsuarioRow = Database["public"]["Tables"]["usuarios"]["Row"];
 type PasaporteRow = Database["public"]["Views"]["pasaporte_digital"]["Row"];
@@ -99,7 +100,7 @@ export default async function PaginaInicio({
     return (
       <>
         <NavegacionUsuario variante="claro" />
-        <MobileShell variant="compact" navInferiorVisible={true}>
+        <MarcoPantalla variant="compact" navInferiorVisible={true}>
           <div className="user-v2-card p-6 text-center" role="alert" aria-live="assertive">
             <p className="font-display text-xs font-bold uppercase tracking-widest text-[var(--user-color-error)]">
               {esConfigError ? "Servicio no configurado" : "No pudimos verificar tu sesión"}
@@ -125,7 +126,7 @@ export default async function PaginaInicio({
               Si el problema persiste, <Link href="/soporte" className="underline hover:text-[var(--user-color-primary)]">contacta a soporte</Link>.
             </p>
           </div>
-        </MobileShell>
+        </MarcoPantalla>
       </>
     );
   }
@@ -148,9 +149,9 @@ export default async function PaginaInicio({
       <>
         <div className="flex h-full w-full flex-col lg:hidden">
           <NavegacionUsuario variante="claro" nombreUsuario={usuario.nombre} notificacionesCount={notificaciones.length} />
-          <MobileShell as="main" variant="wide" padding="none" conFondoCanvas={false} navInferiorVisible className="bg-ui-bg">
+          <MarcoPantalla as="main" variant="wide" padding="none" conFondoCanvas={false} navInferiorVisible className="bg-ui-bg">
             <InicioUsuario {...datos} marco="movil" />
-          </MobileShell>
+          </MarcoPantalla>
         </div>
         <div className="hidden h-full w-full lg:flex">
           <UserDashboardLayout

@@ -3,13 +3,15 @@ import { useRef, useState } from "react";
 import { obtenerHeadersCsrfAsync } from "../../lib/csrf";
 import { RESUMEN_SOPORTE } from "../../lib/promesa-soporte";
 import { InformacionSoporte } from "./InformacionSoporte";
-import { Aviso, MobileButton } from "@ruum/ui";
+import { Aviso } from "@ruum/ui";
 import { reportarIncidencia } from "@ruum/api/services";
 import { ETIQUETA_TIPO_INCIDENCIA } from "@ruum/shared/constants";
 import type { MomentoIncidencia, TipoIncidencia } from "@ruum/shared/types";
 import { crearClienteNavegador, tieneSupabaseConfigurado } from "../../lib/supabase-browser";
 import { registrarEventoUx } from "../../lib/analytics";
 import { CONTACTOS_SOPORTE_USUARIO } from "../../lib/contactos-soporte";
+import { Button } from "@ruum/ui/base";
+import { Loader2 } from "lucide-react";
 
 type Props = {
   traslados: { id: string; label: string }[];
@@ -205,14 +207,16 @@ export function FormularioSoporte({ traslados, preseleccionado, emailUsuario, mo
       </label>
 
       <div className="sm:col-span-2">
-        <MobileButton
+        <Button
           type="submit"
+          size="lg"
           disabled={enviando || descripcion.trim().length < 10}
-          loading={enviando}
+          aria-busy={enviando}
           className="w-full sm:w-auto"
         >
+          {enviando && <Loader2 aria-hidden="true" className="animate-spin" />}
           {enviando ? "Enviando…" : "Enviar a soporte"}
-        </MobileButton>
+        </Button>
 
         {/* Mensaje de éxito con folio destacado */}
         {resultado && (

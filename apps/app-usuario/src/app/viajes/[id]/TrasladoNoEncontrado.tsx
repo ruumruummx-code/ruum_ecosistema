@@ -1,6 +1,6 @@
 import Link from "next/link";
-import { MobileShell } from "@ruum/ui";
 import { NavegacionUsuario } from "../../NavegacionUsuario";
+import { MarcoPantalla } from "@ruum/ui/base";
 
 const DESCRIPCION_ESTANDAR =
   "Revisa el enlace o el folio. Si recién lo creaste, puede tardar unos segundos en sincronizarse con la plataforma.";
@@ -53,7 +53,7 @@ export function TrasladoNoEncontrado({
   return (
     <>
       <NavegacionUsuario variante="claro" />
-      <MobileShell variant="compact" navInferiorVisible={true} as="main">
+      <MarcoPantalla variant="compact" navInferiorVisible={true} as="main">
         <div className="w-full max-w-md mx-auto py-16 px-4 text-center">
           <p className="font-display text-xs font-bold uppercase tracking-widest text-[#765100] dark:text-[#ffc933]">
             {kicker}
@@ -69,7 +69,7 @@ export function TrasladoNoEncontrado({
             </div>
           )}
         </div>
-      </MobileShell>
+      </MarcoPantalla>
     </>
   );
 }

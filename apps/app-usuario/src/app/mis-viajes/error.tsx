@@ -3,8 +3,7 @@
 import { useEffect } from "react";
 import Link from "next/link";
 import { CircleAlert } from "lucide-react";
-import { MobileShell } from "@ruum/ui";
-import { Button, EmptyState } from "@ruum/ui/base";
+import { Button, EmptyState, MarcoPantalla } from "@ruum/ui/base";
 import { NavegacionUsuario } from "../NavegacionUsuario";
 import { reportarErrorBoundary } from "../../lib/reportar-error-boundary";
 
@@ -22,7 +21,7 @@ export default function ErrorMisTraslados({
   return (
     <>
       <NavegacionUsuario variante="claro" />
-      <MobileShell variant="wide" padding="none" conFondoCanvas={false} navInferiorVisible className="bg-ui-bg">
+      <MarcoPantalla variant="wide" padding="none" conFondoCanvas={false} navInferiorVisible className="bg-ui-bg">
         <div className="px-4 pt-6 sm:px-6">
           <EmptyState
             icono={<CircleAlert />}
@@ -38,7 +37,7 @@ export default function ErrorMisTraslados({
             }
           />
         </div>
-      </MobileShell>
+      </MarcoPantalla>
     </>
   );
 }

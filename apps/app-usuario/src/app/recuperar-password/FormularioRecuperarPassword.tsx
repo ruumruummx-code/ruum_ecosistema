@@ -3,13 +3,14 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Aviso, MobileShell, MobileCard } from "@ruum/ui";
+import { Aviso } from "@ruum/ui";
 import { TEXTOS_CARGANDO } from "@ruum/shared/constants";
 import { traducirErrorAuth } from "@ruum/shared/utils";
 import { registrarEventoUx } from "../../lib/analytics";
 import { obtenerHeadersCsrf } from "../../lib/csrf";
 import { obtenerDispositivo } from "../../lib/device-id";
 import { VerificacionHumana } from "../../components/VerificacionHumana";
+import { MarcoPantalla, Card } from "@ruum/ui/base";
 
 function IconoCorreo({ className = "size-4 text-[#566889]" }: { className?: string }) {
   return (
@@ -200,7 +201,7 @@ export function FormularioRecuperarPassword({
   }
 
   return (
-    <MobileShell variant="compact" className="min-h-dvh bg-[#f4f7fb] dark:bg-[#061529]">
+    <MarcoPantalla variant="compact" className="min-h-dvh bg-[#f4f7fb] dark:bg-[#061529]">
       <div className="mx-auto flex min-h-dvh w-full max-w-[440px] flex-col justify-between px-4 py-4 sm:justify-center sm:gap-4 sm:px-6 sm:py-6">
         <div>
           {/* Enlace superior de retorno accesible */}
@@ -236,7 +237,7 @@ export function FormularioRecuperarPassword({
         </div>
 
         {/* Tarjeta de Contenido */}
-        <MobileCard elevated className="border border-[#e2e8f0]/80 bg-white/95 p-5 shadow-[0_8px_30px_rgba(10,35,66,0.06)] backdrop-blur-sm dark:border-[#1a3a5c] dark:bg-[#0a2342]/95 sm:p-7">
+        <Card className="border border-[#e2e8f0]/80 bg-white/95 p-5 shadow-[0_8px_30px_rgba(10,35,66,0.06)] backdrop-blur-sm dark:border-[#1a3a5c] dark:bg-[#0a2342]/95 sm:p-7">
           {enviado ? (
             /* Estado de éxito: Pantalla Correo Enviado */
             <div className="flex flex-col items-center text-center">
@@ -381,7 +382,7 @@ export function FormularioRecuperarPassword({
               </form>
             </>
           )}
-        </MobileCard>
+        </Card>
 
         {/* Enlace inferior de soporte y ayuda */}
         <div className="mt-4 flex justify-center pb-2">
@@ -394,6 +395,6 @@ export function FormularioRecuperarPassword({
           </Link>
         </div>
       </div>
-    </MobileShell>
+    </MarcoPantalla>
   );
 }
