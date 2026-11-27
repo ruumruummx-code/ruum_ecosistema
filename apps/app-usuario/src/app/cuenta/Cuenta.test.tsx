@@ -8,8 +8,8 @@ import {
   waitFor,
   cleanup,
 } from "@testing-library/react";
-import { CuentaDesktop } from "./CuentaDesktop";
-import { actividadCuenta, mesAltaCuenta } from "./cuenta-desktop-model";
+import { Cuenta } from "./Cuenta";
+import { actividadCuenta, mesAltaCuenta } from "./cuenta-model";
 import type { CuentaReal } from "./cuenta-ui";
 const { replace, refresh, signOut } = vi.hoisted(() => ({
   replace: vi.fn(),
@@ -53,19 +53,34 @@ const cuenta: CuentaReal = {
   incidenciasAbiertas: 0,
   traslados: [],
 };
+/* jsdom no implementa <dialog> modal; Sheet lo usa. */
+HTMLDialogElement.prototype.showModal ??= function (this: HTMLDialogElement) {
+  this.setAttribute("open", "");
+};
+HTMLDialogElement.prototype.close ??= function (this: HTMLDialogElement) {
+  this.removeAttribute("open");
+};
+function simularAncho(ancho: number) {
+  window.matchMedia = vi.fn((query: string) => ({
+    matches: Number(/min-width:s*(d+)px/.exec(query)?.[1] ?? 0) <= ancho,
+    media: query,
+    onchange: null,
+    addEventListener: vi.fn(),
+    removeEventListener: vi.fn(),
+    addListener: vi.fn(),
+    removeListener: vi.fn(),
+    dispatchEvent: vi.fn(),
+  })) as unknown as typeof window.matchMedia;
+}
 beforeEach(() => {
   vi.clearAllMocks();
+  simularAncho(1280);
   signOut.mockResolvedValue({ error: null });
 });
 afterEach(cleanup);
-describe("Mi cuenta desktop", () => {
+describe("Mi cuenta", () => {
   it("muestra la cuenta activa, el saludo y los accesos funcionales", () => {
-    render(<CuentaDesktop cuenta={cuenta} />);
-    expect(
-      within(
-        screen.getByRole("navigation", { name: "Navegación del panel" }),
-      ).getByRole("link", { name: "Mi cuenta" }),
-    ).toHaveAttribute("aria-current", "page");
+    render(<Cuenta cuenta={cuenta} />);
     expect(
       screen.getByRole("heading", { name: /Hola, Carlos/ }),
     ).toBeInTheDocument();
@@ -88,7 +103,7 @@ describe("Mi cuenta desktop", () => {
     "conserva el estado real de verificación: %s",
     (estado) => {
       render(
-        <CuentaDesktop
+        <Cuenta
           cuenta={{
             ...cuenta,
             usuario: {
@@ -109,7 +124,7 @@ describe("Mi cuenta desktop", () => {
   );
   it("muestra información y facturación reales, incluidos los datos de empresa", () => {
     render(
-      <CuentaDesktop
+      <Cuenta
         cuenta={{
           ...cuenta,
           empresa: {
@@ -141,7 +156,7 @@ describe("Mi cuenta desktop", () => {
     );
   });
   it("formatea el nombre de perfil y enlaza directamente los datos fiscales faltantes", () => {
-    render(<CuentaDesktop cuenta={{
+    render(<Cuenta cuenta={{
       ...cuenta,
       usuario: { ...cuenta.usuario, nombre: "HÉCTOR MANUEL DE LA CRUZ", razon_social: "EMPRESA REAL", rfc: null },
     }} />);
@@ -155,7 +170,7 @@ describe("Mi cuenta desktop", () => {
     expect(facturacion.getByRole("link", { name: "Completar datos fiscales" })).toHaveAttribute("href", "/cuenta/facturacion");
   });
   it("usa las ubicaciones existentes y no inventa dispositivos ni fechas de seguridad", () => {
-    render(<CuentaDesktop cuenta={cuenta} />);
+    render(<Cuenta cuenta={cuenta} />);
     const perfil = within(screen.getByLabelText("Resumen de perfil"));
     expect(perfil.getByRole("link", { name: "1 Ubicaciones" })).toHaveAttribute(
       "href",
@@ -174,7 +189,7 @@ describe("Mi cuenta desktop", () => {
   });
   it("muestra el banner accesible de solicitud de conductor pendiente cuando aplica", () => {
     render(
-      <CuentaDesktop
+      <Cuenta
         cuenta={{
           ...cuenta,
           rolInfo: {
@@ -230,7 +245,7 @@ describe("Mi cuenta desktop", () => {
       ] as CuentaReal["traslados"],
     };
     const orden = datos.traslados!.map((t) => t.traslado_id);
-    render(<CuentaDesktop cuenta={datos} />);
+    render(<Cuenta cuenta={datos} />);
     const actividad = within(
       screen.getByRole("region", { name: "Actividad reciente" }),
     );
@@ -246,7 +261,7 @@ describe("Mi cuenta desktop", () => {
     expect(datos.traslados!.map((t) => t.traslado_id)).toEqual(orden);
   });
   it("abre consejos, cierra con Escape nativo y restaura el foco", async () => {
-    render(<CuentaDesktop cuenta={cuenta} />);
+    render(<Cuenta cuenta={cuenta} />);
     const abrir = screen.getByRole("button", {
       name: "Ver consejos de seguridad",
     });
@@ -263,7 +278,7 @@ describe("Mi cuenta desktop", () => {
     await waitFor(() => expect(abrir).toHaveFocus());
   });
   it("consulta la disponibilidad de dos pasos sin fingir una activación", () => {
-    render(<CuentaDesktop cuenta={cuenta} />);
+    render(<Cuenta cuenta={cuenta} />);
     fireEvent.click(screen.getByRole("button", { name: "Activar" }));
     const dialog = within(
       screen.getByRole("dialog", { name: "Verificación en dos pasos" }),
@@ -275,7 +290,7 @@ describe("Mi cuenta desktop", () => {
     expect(signOut).not.toHaveBeenCalled();
   });
   it("cierra otras sesiones únicamente tras confirmar y conserva la sesión actual", async () => {
-    render(<CuentaDesktop cuenta={cuenta} />);
+    render(<Cuenta cuenta={cuenta} />);
     fireEvent.click(screen.getByRole("button", { name: "Administrar" }));
     const dialog = within(
       screen.getByRole("dialog", { name: "Dispositivos y sesiones" }),
@@ -295,7 +310,7 @@ describe("Mi cuenta desktop", () => {
   });
   it("permite reintentar el cierre de otras sesiones después de un error", async () => {
     signOut.mockResolvedValueOnce({ error: new Error("sin red") });
-    render(<CuentaDesktop cuenta={cuenta} />);
+    render(<Cuenta cuenta={cuenta} />);
     fireEvent.click(screen.getByRole("button", { name: "Administrar" }));
     const dialog = within(screen.getByRole("dialog"));
     fireEvent.click(
@@ -312,7 +327,7 @@ describe("Mi cuenta desktop", () => {
   });
   it("muestra los fallos de cierre de cuenta dentro del diálogo y permite reintentar", async () => {
     signOut.mockResolvedValueOnce({ error: new Error("sin red") });
-    render(<CuentaDesktop cuenta={cuenta} seccionInicial="sesiones" />);
+    render(<Cuenta cuenta={cuenta} seccionInicial="sesiones" />);
     const dialog = within(screen.getByRole("dialog"));
     fireEvent.click(dialog.getByRole("button", { name: "Cerrar sesión en este dispositivo" }));
     expect(await dialog.findByRole("alert")).toHaveTextContent(
@@ -323,7 +338,7 @@ describe("Mi cuenta desktop", () => {
   });
   it("muestra iniciales al fallar la foto y enfoca perfil sin desplazar la pantalla", () => {
     render(
-      <CuentaDesktop
+      <Cuenta
         cuenta={{ ...cuenta, fotoPerfilUrl: "https://ejemplo.com/avatar.webp" }}
         seccionInicial="perfil"
       />,
@@ -338,7 +353,7 @@ describe("Mi cuenta desktop", () => {
   });
   it("presenta estados vacíos con datos incompletos y sin identidad ficticia", () => {
     render(
-      <CuentaDesktop
+      <Cuenta
         cuenta={{
           ...cuenta,
           correoRegistro: null,
@@ -363,5 +378,57 @@ describe("Mi cuenta desktop", () => {
     expect(
       screen.getByText("No hay actividad registrada."),
     ).toBeInTheDocument();
+  });
+
+  it("cierra sesión desde Más opciones con scope local y redirige al Login", async () => {
+    render(<Cuenta cuenta={cuenta} />);
+    fireEvent.click(within(screen.getByRole("region", { name: "Más opciones" })).getByRole("button", { name: "Cerrar sesión" }));
+    await waitFor(() => expect(signOut).toHaveBeenCalledWith({ scope: "local" }));
+    await waitFor(() => expect(replace).toHaveBeenCalledWith("/login"));
+    expect(refresh).toHaveBeenCalledTimes(1);
+  });
+  it("avisa si el cierre de sesión falla y permite reintentar sin redirigir", async () => {
+    signOut.mockResolvedValueOnce({ error: new Error("sin red") });
+    render(<Cuenta cuenta={cuenta} />);
+    const opciones = within(screen.getByRole("region", { name: "Más opciones" }));
+    fireEvent.click(opciones.getByRole("button", { name: "Cerrar sesión" }));
+    expect(await screen.findByRole("alert")).toHaveTextContent("No pudimos cerrar tu sesión");
+    expect(replace).not.toHaveBeenCalled();
+    expect(opciones.getByRole("button", { name: "Cerrar sesión" })).toBeEnabled();
+  });
+  it.each([
+    ["Ayuda y soporte", "Ayuda de tu cuenta", [["Contactar soporte", "/soporte"], ["Centro de ayuda", "/preguntas-frecuentes"], ["Reportar problema", "/soporte?motivo=problema_traslado"], ["Ayuda con evidencia", "/soporte?motivo=ayuda_evidencia"]]],
+    ["Legal y cuenta", "Legal y cuenta", [["Términos y condiciones", "/legal/terminos"], ["Aviso de privacidad", "/legal/privacidad"], ["Eliminar cuenta", "/soporte?motivo=eliminar_cuenta"]]],
+  ] as const)("abre %s en un diálogo con sus enlaces y restaura el foco", async (boton, titulo, enlaces) => {
+    render(<Cuenta cuenta={cuenta} />);
+    const abrir = screen.getByRole("button", { name: new RegExp("^" + boton) });
+    abrir.focus();
+    fireEvent.click(abrir);
+    const dialogo = within(screen.getByRole("dialog", { name: titulo }));
+    for (const [nombre, href] of enlaces) expect(dialogo.getByRole("link", { name: new RegExp(nombre) })).toHaveAttribute("href", href);
+    fireEvent.click(dialogo.getByRole("button", { name: "Cerrar diálogo de cuenta" }));
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+    await waitFor(() => expect(abrir).toHaveFocus());
+  });
+  it("enlaza verificación con su estado y las cargas masivas pendientes", () => {
+    render(<Cuenta cuenta={cuenta} />);
+    const opciones = within(screen.getByRole("region", { name: "Más opciones" }));
+    expect(opciones.getByRole("link", { name: /Verificación y documentos/ })).toHaveAttribute("href", "/cuenta/verificacion-documentos");
+    expect(opciones.getByText("Verificado")).toBeInTheDocument();
+    expect(opciones.getByRole("link", { name: /Cargas masivas pendientes/ })).toHaveAttribute("href", "/viajes/masivo");
+  });
+  it("abre la sección inicial solo en la copia del marco visible", () => {
+    simularAncho(390);
+    render(
+      <>
+        <Cuenta cuenta={cuenta} seccionInicial="legal" marco="movil" />
+        <Cuenta cuenta={cuenta} seccionInicial="legal" marco="escritorio" />
+      </>,
+    );
+    expect(screen.getAllByRole("dialog", { name: "Legal y cuenta" })).toHaveLength(1);
+    const accesos = screen.getAllByRole("navigation", { name: "Categorías de mi cuenta" });
+    expect(within(accesos[0]).getByRole("link", { name: /Datos personales/ })).toHaveAttribute("href", "#informacion-personal-cuenta-movil");
+    expect(within(accesos[1]).getByRole("link", { name: /Datos personales/ })).toHaveAttribute("href", "#informacion-personal-cuenta");
+    expect(document.getElementById("informacion-personal-cuenta-movil")).not.toBeNull();
   });
 });
