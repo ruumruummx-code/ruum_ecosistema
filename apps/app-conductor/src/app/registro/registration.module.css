@@ -314,14 +314,16 @@
 .completionStep .documentCopy strong { color: var(--ui-fg); font-size: 0.875rem; line-height: 19px; }
 .completionStep .documentCopy > span { color: var(--ui-fg-muted); font-size: 0.875rem; line-height: 18px; }
 .completionStep .documentCopy small { overflow: hidden; color: var(--ui-fg-muted); font-size: 0.75rem; line-height: 15px; text-overflow: ellipsis; white-space: nowrap; }
-.completionStep .documentCopy .documentError { color: var(--ui-danger); }
-.completionStep .uploadButton {
-  display: grid; width: 96px; min-width: 44px; height: 88px; flex: 0 0 96px; place-content: center; gap: 5px;
-  border: 1px solid var(--ui-line); border-radius: 0.5rem; background: var(--ui-brand-soft); color: var(--ui-brand); font-size: 0.875rem; font-weight: 700;
+.completionStep .documentCopy .documentError { color: var(--ui-danger); white-space: normal; }
+.completionStep .documentActions { display: grid; grid-auto-flow: column; gap: 8px; }
+.completionStep .documentActions button { min-width: 0; min-height: 48px; padding-inline: 12px; font-size: 0.875rem; white-space: normal; }
+.completionStep .documentActions svg {
+  width: 20px; height: 20px; flex-shrink: 0; fill: none; stroke: currentColor; stroke-width: 2;
 }
-.completionStep .uploadButton svg { width: 26px; height: 26px; margin: auto; fill: none; stroke: currentColor; stroke-width: 2.25; }
-.completionStep .uploadButton:hover { background: var(--ui-brand-soft); }
-.completionStep .uploadButton:active { background: var(--ui-brand-soft); transform: scale(.98); }
+@media (max-width: 520px) {
+  .completionStep .documentCard { align-items: stretch; flex-direction: column; }
+  .completionStep .documentActions { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
 .completionStep .documentHint { display: flex; align-items: center; gap: 14px; margin: 4px 0 0; padding: 14px 16px; border-radius: 0.5rem; background: var(--ui-brand-soft); color: var(--ui-brand); }
 .completionStep .documentHint > span { display: grid; width: 34px; height: 34px; flex: 0 0 34px; place-items: center; border: 2px solid currentColor; border-radius: 50%; font-family: Georgia, serif; font-size: 1.5rem; font-weight: 700; }
 .completionStep .documentHint p { margin: 0; font-size: 0.875rem; line-height: 20px; }
@@ -396,6 +398,10 @@
 .diditContent { display:grid; gap:12px; font-size: 1rem; line-height:1.5; }
 .diditFrame { width:100%; height: min(52dvh,440px); min-height:200px; border:0; }
 .diditContent button { min-height:48px; padding:8px; border:1px solid var(--ui-line); border-radius: 0.5rem; }
+.documentVideo {
+  display: block; width: 100%; max-height: min(52dvh, 440px); object-fit: contain;
+  border-radius: var(--conductor-radius-control); background: var(--ui-muted);
+}
 
 .screen .passwordRequirements summary { min-height:48px; font-size: 0.875rem; color:var(--ui-brand); cursor:pointer; display:flex; align-items:center; }
 .screen .passwordRequirements { margin:0; }
@@ -404,7 +410,6 @@
 
 .screen.identity .fields > .row { grid-template-columns:minmax(0,1fr) minmax(0,1fr); }
 .screen .documentCopy small { font-size: 0.875rem; line-height:1.4; overflow-wrap:anywhere; }
-.screen .uploadButton { min-width:48px; min-height:48px; font-size: 0.875rem; }
 
 .headerSlot { min-height:48px; }
 .actionSlot { min-height:52px; }
