@@ -44,8 +44,14 @@ Deno.test("iniciar-verificacion-didit registra la sesión del usuario antes de e
       [expirarSesiones]: () => new Response(null, { status: 204 }),
     }),
     async (solicitudes) => {
-      const respuesta = await manejarInicioDidit(solicitud(), entorno);
+      const peticion = solicitud();
+      const origen = "https://www.usuario.ruumruum-moviliax.online";
+      peticion.headers.set("Origin", origen);
+      const respuesta = await manejarInicioDidit(peticion, entornoDePrueba({
+        DIDIT_SANDBOX_CONDUCTOR_AUTH_USER_ID: USUARIO,
+      }));
       assertEquals(respuesta.status, 201);
+      assertEquals(respuesta.headers.get("Access-Control-Allow-Origin"), origen);
       assertEquals(await respuesta.json(), {
         session_id: sessionId,
         url: urlVerificacion,
@@ -126,6 +132,100 @@ Deno.test("iniciar-verificacion-didit conserva la verificación anterior al reci
         (await manejarInicioDidit(solicitud(), entorno)).status,
         502,
       );
+    },
+  );
+});
+
+Deno.test("iniciar-verificacion-didit informa falta de disponibilidad al conductor si Didit no tiene créditos", async () => {
+  await conFetchSimulado(
+    rutasInicio({
+      [`GET ${rest}/solicitudes_conductor`]: [{
+        id: USUARIO,
+        estado: "en_revision",
+      }],
+      [crearSesion]: () =>
+        Response.json({
+          detail: "You don't have enough credits to perform this request.",
+        }, { status: 400 }),
+    }),
+    async (solicitudes) => {
+      const peticion = solicitud({ solicitud_id: USUARIO });
+      const origen = "https://www.concer.ruumruum-moviliax.online";
+      peticion.headers.set("Origin", origen);
+      const respuesta = await manejarInicioDidit(peticion, entorno);
+
+      assertEquals(respuesta.status, 503);
+      assertEquals(respuesta.headers.get("Access-Control-Allow-Origin"), origen);
+      assertEquals(await respuesta.json(), {
+        error: "La verificación de identidad no está disponible en este momento. Intenta más tarde.",
+      });
+      assertEquals(
+        solicitudes.filter(({ ruta }) =>
+          [crearSesion, guardarSesion, expirarSesiones].includes(ruta)
+        ).map(({ ruta }) => ruta),
+        [crearSesion],
+      );
+    },
+  );
+});
+
+Deno.test("iniciar-verificacion-didit abre Sandbox solo para la cuenta de conductor configurada", async () => {
+  const workflowSandbox = "11000000-0000-4000-8000-000000000003";
+  const claveSandbox = "didit-sandbox-de-prueba";
+  const entornoSandbox = entornoDePrueba({
+    DIDIT_API_KEY: "",
+    DIDIT_CALLBACK_URL: "",
+    DIDIT_SANDBOX_CONDUCTOR_AUTH_USER_ID: USUARIO,
+    DIDIT_SANDBOX_API_KEY: claveSandbox,
+    DIDIT_SANDBOX_WORKFLOW_ID: workflowSandbox,
+  });
+
+  await conFetchSimulado(
+    rutasInicio({
+      [`GET ${rest}/solicitudes_conductor`]: [{ id: USUARIO, estado: "en_revision" }],
+      [crearSesion]: ({ body, headers }) => {
+        assertEquals(headers.get("x-api-key"), claveSandbox);
+        assertEquals(JSON.parse(body), { workflow_id: workflowSandbox, language: "es" });
+        return { session_id: sessionId, url: urlVerificacion };
+      },
+    }),
+    async () => {
+      const respuesta = await manejarInicioDidit(
+        solicitud({ solicitud_id: USUARIO }),
+        entornoSandbox,
+      );
+      assertEquals(respuesta.status, 201);
+      assertEquals(await respuesta.json(), {
+        session_id: sessionId,
+        url: urlVerificacion,
+      });
+    },
+  );
+});
+
+Deno.test("iniciar-verificacion-didit registra una sesión real para otro conductor", async () => {
+  const entornoOtraCuenta = entornoDePrueba({
+    DIDIT_SANDBOX_CONDUCTOR_AUTH_USER_ID: "11000000-0000-4000-8000-000000000004",
+  });
+
+  await conFetchSimulado(
+    rutasInicio({
+      [`GET ${rest}/solicitudes_conductor`]: [{ id: USUARIO, estado: "en_revision" }],
+      [crearSesion]: ({ body, headers }) => {
+        assertEquals(headers.get("x-api-key"), entorno.get("DIDIT_API_KEY"));
+        assertEquals(JSON.parse(body).vendor_data, USUARIO);
+        return { session_id: sessionId, url: urlVerificacion };
+      },
+      [guardarSesion]: { creado_en: "2026-11-27T10:00:00Z" },
+      [expirarSesiones]: () => new Response(null, { status: 204 }),
+    }),
+    async (solicitudes) => {
+      const respuesta = await manejarInicioDidit(
+        solicitud({ solicitud_id: USUARIO, sandbox: true }),
+        entornoOtraCuenta,
+      );
+      assertEquals(respuesta.status, 201);
+      assertEquals(solicitudes.some(({ ruta }) => ruta === guardarSesion), true);
     },
   );
 });

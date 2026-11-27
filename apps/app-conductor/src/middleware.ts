@@ -35,6 +35,8 @@ const RUTAS_PUBLICAS_CONDUCTOR = [
 ];
 
 function esRutaPublicaConductor(pathname: string): boolean {
+  if (pathname === "/") return true;
+
   return RUTAS_PUBLICAS_CONDUCTOR.some((ruta) => {
     if (ruta.startsWith("/api/") || ruta.includes(".")) {
       return pathname === ruta;
