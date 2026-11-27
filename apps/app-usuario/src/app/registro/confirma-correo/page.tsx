@@ -3,42 +3,28 @@
 import { Suspense, useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
+import { Input } from "@ruum/ui/base";
 import { traducirErrorAuth } from "@ruum/shared/utils";
 import { registrarEventoUx } from "@/lib/analytics";
 import { obtenerHeadersCsrf } from "@/lib/csrf";
 import {
   CLAVE_CORREO_CONFIRMACION,
+  CLAVE_CORREO_ENVIADO_EN,
   CLAVE_REENVIO_CONFIRMACION_HASTA,
+  ESPERA_REENVIO_SEGUNDOS,
+  guardarCorreoConfirmacion,
   normalizarCorreoRegistro,
   soloDigitos,
 } from "@/lib/registro-usuario";
 import { CONTACTOS_SOPORTE_USUARIO } from "@/lib/contactos-soporte";
 
-const COOLDOWN_SEGUNDOS = 60;
-const EXPIRACION_SEGUNDOS = 3600; // 60 minutos (alineado con supabase/config.toml otp_expiry = 3600)
-
-function correoInicial(): string {
-  if (typeof window === "undefined") return "";
-  try {
-    return normalizarCorreoRegistro(window.sessionStorage.getItem(CLAVE_CORREO_CONFIRMACION) ?? "");
-  } catch {
-    return "";
-  }
-}
-
-function restanteInicial(): number {
-  if (typeof window === "undefined") return 0;
-  try {
-    const hasta = Number(window.localStorage.getItem(CLAVE_REENVIO_CONFIRMACION_HASTA) ?? 0);
-    return Math.max(0, Math.ceil((hasta - Date.now()) / 1000));
-  } catch {
-    return 0;
-  }
-}
+const VIGENCIA_CODIGO_MS = 3600 * 1000; // supabase/config.toml: otp_expiry
 
 function limpiarMarcadoresConfirmacion() {
   try {
     window.sessionStorage.removeItem(CLAVE_CORREO_CONFIRMACION);
+    window.sessionStorage.removeItem(CLAVE_CORREO_ENVIADO_EN);
+    window.sessionStorage.removeItem(CLAVE_REENVIO_CONFIRMACION_HASTA);
     window.localStorage.removeItem(CLAVE_REENVIO_CONFIRMACION_HASTA);
   } catch {
     /* El navegador puede bloquear storage; la pantalla funciona igual. */
@@ -158,8 +144,9 @@ function ContenidoConfirmaCorreo() {
   const [digitos, setDigitos] = useState<string[]>(["", "", "", "", "", ""]);
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
-  const [cooldownRestante, setCooldownRestante] = useState(restanteInicial);
-  const [tiempoRestante, setTiempoRestante] = useState(EXPIRACION_SEGUNDOS);
+  const [reloj, setReloj] = useState(0);
+  const [venceEn, setVenceEn] = useState<number | null>(null);
+  const [reenvioHasta, setReenvioHasta] = useState(0);
   const [verificando, setVerificando] = useState(false);
   const [verificadoExito, setVerificadoExito] = useState(false);
   const [reenviando, setReenviando] = useState(false);
@@ -178,16 +165,11 @@ function ContenidoConfirmaCorreo() {
   }, []);
 
   const emailFromUrl = normalizarCorreoRegistro(searchParams.get("email") || "");
+  const cooldownRestante = Math.max(0, Math.ceil((reenvioHasta - reloj) / 1000));
+  const tiempoRestante = venceEn === null ? null : Math.max(0, Math.ceil((venceEn - reloj) / 1000));
   const hayCooldown = cooldownRestante > 0;
 
-  const [correo, setCorreo] = useState(() => {
-    if (typeof window === "undefined") return emailFromUrl;
-    try {
-      return correoInicial() || emailFromUrl;
-    } catch {
-      return emailFromUrl;
-    }
-  });
+  const [correo, setCorreo] = useState(emailFromUrl);
   const [correoManual, setCorreoManual] = useState("");
   const [errorCorreoManual, setErrorCorreoManual] = useState<string | null>(null);
 
@@ -199,54 +181,41 @@ function ContenidoConfirmaCorreo() {
     }
   }, [emailFromUrl]);
 
-  // Enfocar el primer input al cargar
   useEffect(() => {
-    if (inputRefs.current[0]) {
-      inputRefs.current[0]?.focus();
+    setReloj(Date.now());
+    try {
+      const storage = window.sessionStorage;
+      const guardado = normalizarCorreoRegistro(storage.getItem(CLAVE_CORREO_CONFIRMACION) ?? "");
+      if (!guardado) return;
+      setCorreo(guardado);
+      const enviadoEn = Number(storage.getItem(CLAVE_CORREO_ENVIADO_EN));
+      const hasta = Number(storage.getItem(CLAVE_REENVIO_CONFIRMACION_HASTA));
+      if (Number.isFinite(enviadoEn) && enviadoEn > 0) setVenceEn(enviadoEn + VIGENCIA_CODIGO_MS);
+      if (Number.isFinite(hasta)) setReenvioHasta(hasta);
+    } catch {
+      // El formulario manual sigue disponible.
     }
   }, []);
 
-  // Temporizador de expiración (60 min, alineado con Supabase Auth).
-  // Depende de `hayTiempoRestante` para reiniciarse correctamente tras reenviar.
-  const hayTiempoRestante = tiempoRestante > 0;
   useEffect(() => {
-    if (!hayTiempoRestante) return;
-    const timer = window.setInterval(() => {
-      setTiempoRestante((prev) => {
-        if (prev <= 1) {
-          setError("El código podría haber expirado. Si no funciona, solicita uno nuevo.");
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-    return () => window.clearInterval(timer);
-  }, [hayTiempoRestante]);
+    if (correo) inputRefs.current[0]?.focus();
+  }, [correo]);
 
-  // Temporizador de cooldown de reenvío
+  const hayTemporizador = hayCooldown || (tiempoRestante !== null && tiempoRestante > 0);
   useEffect(() => {
-    if (!hayCooldown) return;
-    const timer = window.setInterval(() => {
-      setCooldownRestante((valor) => Math.max(0, valor - 1));
-    }, 1000);
+    if (!hayTemporizador) return;
+    const timer = window.setInterval(() => setReloj(Date.now()), 1000);
     return () => window.clearInterval(timer);
-  }, [hayCooldown]);
+  }, [hayTemporizador]);
 
   const distribuirDigitos = useCallback((str: string, desde: number) => {
-    const chars = str.split("");
+    const chars = str.slice(0, 6 - desde).split("");
     setDigitos((prev) => {
       const next = [...prev];
-      let ultimoIdx = desde;
-      for (let i = 0; i < chars.length && desde + i < 6; i++) {
-        next[desde + i] = chars[i];
-        ultimoIdx = desde + i;
-      }
-      setTimeout(() => {
-        const focoTarget = Math.min(5, ultimoIdx < 5 ? ultimoIdx + 1 : 5);
-        inputRefs.current[focoTarget]?.focus();
-      }, 0);
+      chars.forEach((digito, indice) => { next[desde + indice] = digito; });
       return next;
     });
+    inputRefs.current[Math.min(5, desde + chars.length)]?.focus();
     setErrorShake(false);
   }, []);
 
@@ -321,6 +290,7 @@ function ContenidoConfirmaCorreo() {
 
   async function verificarCodigo(e?: React.FormEvent) {
     if (e) e.preventDefault();
+    if (verificando || reenviando || verificadoExito) return;
     const codigoLimpio = soloDigitos(codigoCompleto, 6);
     if (codigoLimpio.length !== 6) {
       setError("Ingresa los 6 dígitos del código.");
@@ -366,7 +336,7 @@ function ContenidoConfirmaCorreo() {
   }
 
   async function reenviarCodigo() {
-    if (!correo || hayCooldown || reenviando) return;
+    if (!correo || hayCooldown || reenviando || verificando || verificadoExito) return;
     setReenviando(true);
     setMensajeExito(null);
     setError(null);
@@ -381,6 +351,20 @@ function ContenidoConfirmaCorreo() {
       });
       const cuerpo = (await res.json().catch(() => null)) as { error?: string } | null;
       if (!res.ok) {
+        if (res.status === 429) {
+          const recibido = Number(res.headers.get("Retry-After"));
+          const segundos = Number.isFinite(recibido) && recibido > 0 ? recibido : ESPERA_REENVIO_SEGUNDOS;
+          const ahora = Date.now();
+          const hasta = ahora + segundos * 1000;
+          setReloj(ahora);
+          setReenvioHasta(hasta);
+          try {
+            window.sessionStorage.setItem(CLAVE_CORREO_CONFIRMACION, correo);
+            window.sessionStorage.setItem(CLAVE_REENVIO_CONFIRMACION_HASTA, String(hasta));
+          } catch {
+            // La espera sigue vigente mientras la pantalla esté abierta.
+          }
+        }
         setError(
           cuerpo?.error ??
             (res.status === 429
@@ -389,15 +373,13 @@ function ContenidoConfirmaCorreo() {
         );
         return;
       }
-      const hasta = Date.now() + COOLDOWN_SEGUNDOS * 1000;
-      window.localStorage.setItem(CLAVE_REENVIO_CONFIRMACION_HASTA, String(hasta));
-      try {
-        window.sessionStorage.setItem(CLAVE_CORREO_CONFIRMACION, correo);
-      } catch {
-        /* storage bloqueado */
-      }
-      setCooldownRestante(COOLDOWN_SEGUNDOS);
-      setTiempoRestante(EXPIRACION_SEGUNDOS);
+      const ahora = Date.now();
+      guardarCorreoConfirmacion(correo, ahora);
+      setReloj(ahora);
+      setReenvioHasta(ahora + ESPERA_REENVIO_SEGUNDOS * 1000);
+      setVenceEn(ahora + VIGENCIA_CODIGO_MS);
+      setDigitos(["", "", "", "", "", ""]);
+      inputRefs.current[0]?.focus();
       setMensajeExito("Si el correo corresponde a una cuenta pendiente, enviamos un nuevo código de confirmación.");
     } catch (err) {
       setError(traducirErrorAuth(err, "No pudimos reenviar el correo. Espera un momento e intenta nuevamente."));
@@ -448,11 +430,7 @@ function ContenidoConfirmaCorreo() {
                   return;
                 }
                 setErrorCorreoManual(null);
-                try {
-                  window.sessionStorage.setItem(CLAVE_CORREO_CONFIRMACION, limpio);
-                } catch {
-                  /* storage bloqueado */
-                }
+                guardarCorreoConfirmacion(limpio);
                 setCorreo(limpio);
               }}
             >
@@ -549,8 +527,8 @@ function ContenidoConfirmaCorreo() {
             Revisa tu correo
           </h2>
           <p className="text-[13.5px] text-[#6b7c94] font-medium text-center leading-[1.55] mb-7">
-            Enviamos un código de 6 dígitos a<br />
-            <strong className="text-[#0b1e33] font-bold">{correo}</strong>
+            Ingresa el código de 6 dígitos que recibiste en<br />
+            <strong className="break-all font-bold text-ui-fg">{correo}</strong>
           </p>
 
           {/* Formulario e inputs de código - 6 dígitos */}
@@ -559,12 +537,12 @@ function ContenidoConfirmaCorreo() {
               Código de verificación
             </label>
             <div
-              className="flex justify-center gap-2 mb-[22px]"
+              className="mx-auto mb-5 grid w-full max-w-xs grid-cols-6 justify-items-center gap-1.5 sm:gap-2"
               role="group"
               aria-label="Casillas de código"
             >
               {digitos.map((digito, idx) => (
-                <input
+                <Input
                   key={idx}
                   ref={(el) => {
                     inputRefs.current[idx] = el;
@@ -577,40 +555,41 @@ function ContenidoConfirmaCorreo() {
                   autoComplete={idx === 0 ? "one-time-code" : "off"}
                   aria-label={idx === 0 ? undefined : `Dígito ${idx + 1}`}
                   value={digito}
+                  aria-invalid={errorShake || undefined}
                   disabled={verificando || verificadoExito}
                   onChange={(e) => handleInput(e, idx)}
                   onKeyDown={(e) => handleKeyDown(e, idx)}
                   onPaste={idx === 0 ? handlePaste : undefined}
                   onFocus={(e) => e.target.select()}
                   className={[
-                    "w-[46px] h-[58px] border-2 rounded-[14px] text-center text-[22px] font-[800] text-[#0b1e33] outline-none transition-all caret-[#0b1e33]",
+                    "h-14 max-w-12 px-0 text-center text-xl font-bold",
                     errorShake
-                      ? "border-[#e84a3e] bg-[#fef5f5] animate-[shake_0.4s_ease]"
+                      ? "border-ui-danger bg-ui-danger-soft animate-[shake_0.4s_ease]"
                       : digito
-                      ? "border-[#0b1e33] bg-white"
-                      : "border-[#e6edf6] bg-[#fafcfe]",
-                    "focus:border-[#0b1e33] focus:bg-white focus:ring-4 focus:ring-[#0b1e33]/10 focus:-translate-y-0.5",
+                        ? "border-ui-line-strong"
+                        : "bg-ui-muted",
                   ].join(" ")}
                 />
               ))}
             </div>
 
             {/* Temporizador */}
-            <div className="flex justify-center items-center gap-2 mb-[26px] text-[13px] font-semibold text-[#6b7c94]">
-              <IconoReloj className="size-3.5 text-[#2e5a88]" />
-              <span>
-                El código expira en{" "}
-                <span className="font-[800] text-[#0b1e33]" id="timer">
-                  {formatearTiempo(tiempoRestante)}
-                </span>
-              </span>
+            <div className="mb-6 flex items-center justify-center gap-2 text-sm font-semibold text-ui-fg-muted">
+              <IconoReloj className="size-3.5 text-ui-brand" />
+              {tiempoRestante === null ? (
+                <span>El código tiene una vigencia de 60 minutos.</span>
+              ) : tiempoRestante === 0 ? (
+                <span>El código puede haber expirado. Puedes solicitar otro.</span>
+              ) : (
+                <span>El código expira en <strong className="text-ui-fg" id="timer">{formatearTiempo(tiempoRestante)}</strong></span>
+              )}
             </div>
 
             {/* Botón verificar */}
             <button
               type="submit"
               id="btnVerify"
-              disabled={codigoCompleto.length !== 6 || verificando || verificadoExito}
+              disabled={codigoCompleto.length !== 6 || verificando || reenviando || verificadoExito}
               className="w-full bg-[#0b1e33] text-white border-0 py-[19px] px-[22px] rounded-[18px] font-bold text-[16.5px] flex items-center justify-center gap-2.5 shadow-[0_14px_28px_-10px_rgba(11,30,51,0.45)] cursor-pointer tracking-[-0.2px] mb-4 transition-all hover:bg-[#143560] active:scale-[0.98] disabled:bg-[#cbd5e1] disabled:shadow-none disabled:cursor-not-allowed disabled:opacity-70"
             >
               <IconoCheckCirculo className="size-[18px]" />
@@ -625,9 +604,9 @@ function ContenidoConfirmaCorreo() {
               type="button"
               id="resendLink"
               onClick={reenviarCodigo}
-              disabled={hayCooldown || reenviando || verificando}
+              disabled={hayCooldown || reenviando || verificando || verificadoExito}
               className={`font-bold ml-1 transition cursor-pointer ${
-                hayCooldown || reenviando || verificando
+                hayCooldown || reenviando || verificando || verificadoExito
                   ? "text-[#b0bfd0] cursor-not-allowed"
                   : "text-[#2e5a88] hover:underline"
               }`}

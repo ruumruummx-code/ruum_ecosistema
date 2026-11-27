@@ -1,4 +1,5 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
+import { Redis } from "@upstash/redis";
 import { NextRequest } from "next/server";
 
 const mockSignUp = vi.fn();
@@ -14,6 +15,7 @@ vi.mock("next/headers", () => ({
 
 import { POST } from "./route";
 import { generarTokenTelefono } from "@/lib/phone-verification";
+import { VERIFICACION_TELEFONO_REQUERIDA } from "@/lib/registro-usuario";
 import * as rateLimit from "@/lib/csp-rate-limit";
 
 process.env.NEXT_PUBLIC_SUPABASE_URL ??= "http://localhost:54321";
@@ -59,9 +61,28 @@ describe("POST /api/auth/signup — validaciones y duplicados", () => {
   it("rechaza registro sin token de verificación telefónica válido", async () => {
     const res = await POST(req("nuevo@ejemplo.com", "token-invalido"));
     expect(res.status).toBe(400);
-    const json = (await res.json()) as { error: string };
-    expect(json.error).toMatch(/token/i);
+    expect(await res.json()).toMatchObject({
+      codigo: VERIFICACION_TELEFONO_REQUERIDA,
+      error: expect.stringMatching(/token/i),
+    });
     expect(mockSignUp).not.toHaveBeenCalled();
+  });
+
+  it("conserva la verificación al informar una caída temporal de Redis", async () => {
+    const solicitud = req("redis-no-disponible@ejemplo.com");
+    const clienteRedis = new Redis({ url: "http://127.0.0.1:54417", token: "test" });
+    vi.spyOn(clienteRedis, "getdel").mockRejectedValue(new Error("Redis no disponible"));
+    const redis = vi.spyOn(rateLimit, "getRedis").mockReturnValue(clienteRedis);
+    try {
+      const res = await POST(solicitud);
+      expect(res.status).toBe(503);
+      expect(await res.json()).toEqual({
+        error: "Servicio de verificación no disponible. Intenta más tarde.",
+      });
+      expect(mockSignUp).not.toHaveBeenCalled();
+    } finally {
+      redis.mockRestore();
+    }
   });
 
   it("422 User already registered → mensaje neutro de duplicado", async () => {

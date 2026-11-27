@@ -2,7 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { crearClienteServidor } from "../../lib/supabase-server";
 import { obtenerUsuarioActual } from "@ruum/api/services";
-import { MarcoPantalla } from "@ruum/ui/base";
+import { Button, MarcoPantalla } from "@ruum/ui/base";
 
 /**
  * Entrada protegida del dashboard. El dashboard histórico sigue viviendo en
@@ -22,13 +22,12 @@ export default async function PaginaInicioProtegido() {
     <MarcoPantalla as="main" variant="compact" navInferiorVisible={false}>
       <section className="mx-auto max-w-xl p-6 text-center" role="alert">
         <h1 className="text-xl font-bold">Estamos preparando tu cuenta</h1>
-        <p className="mt-3 text-sm text-[var(--user-color-muted)]">
-          Tu sesión es válida, pero todavía no encontramos el perfil asociado.
-          No se creó ningún perfil automáticamente durante esta lectura.
+        <p className="mt-3 text-sm text-ui-fg-muted">
+          Estamos terminando de preparar tu perfil. Intenta de nuevo en unos segundos o contacta a soporte si el problema persiste.
         </p>
-        <div className="mt-6 flex justify-center gap-3">
-          <Link href="/" className="user-v2-primary-button px-5 py-3">Reintentar</Link>
-          <Link href="/soporte" className="user-v2-secondary-button px-5 py-3">Soporte público</Link>
+        <div className="mt-6 flex flex-wrap justify-center gap-3">
+          <Button asChild><Link href="/">Reintentar</Link></Button>
+          <Button asChild variant="secondary"><Link href="/soporte">Ir a soporte</Link></Button>
         </div>
       </section>
     </MarcoPantalla>

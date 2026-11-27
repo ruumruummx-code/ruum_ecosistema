@@ -8,6 +8,7 @@ import {
   nombreCompleto,
   soloDigitos,
   telefonoMx,
+  VERIFICACION_TELEFONO_REQUERIDA,
 } from "@/lib/registro-usuario";
 import {
   bypassVerificacionTelefonoPermitido,
@@ -106,7 +107,10 @@ export async function POST(request: NextRequest) {
       const firmaTelefono = validarTokenTelefono(telefonoDigitos, tokenTelefono);
       if (!firmaTelefono.valido) {
         return NextResponse.json(
-          { error: firmaTelefono.error || "Debes verificar tu número de teléfono celular por SMS antes de continuar." },
+          {
+            error: firmaTelefono.error || "Debes verificar tu número de teléfono celular por SMS antes de continuar.",
+            codigo: VERIFICACION_TELEFONO_REQUERIDA,
+          },
           { status: 400 }
         );
       }
@@ -140,8 +144,14 @@ export async function POST(request: NextRequest) {
     if (exigeTelefono) {
       const verificacionTelefono = await consumirTokenTelefono(telefonoDigitos, tokenTelefono);
       if (!verificacionTelefono.valido) {
+        if (verificacionTelefono.servicioNoDisponible) {
+          return NextResponse.json({ error: verificacionTelefono.error }, { status: 503 });
+        }
         return NextResponse.json(
-          { error: verificacionTelefono.error || "Debes verificar tu número de teléfono celular por SMS antes de continuar." },
+          {
+            error: verificacionTelefono.error || "Debes verificar tu número de teléfono celular por SMS antes de continuar.",
+            codigo: VERIFICACION_TELEFONO_REQUERIDA,
+          },
           { status: 400 }
         );
       }

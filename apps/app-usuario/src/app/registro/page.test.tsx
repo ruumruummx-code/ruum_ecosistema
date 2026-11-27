@@ -24,6 +24,7 @@ vi.mock("../../lib/analytics", () => ({
 }));
 
 import PaginaRegistro from "./page";
+import { VERIFICACION_TELEFONO_REQUERIDA } from "../../lib/registro-usuario";
 
 describe("registro — accesibilidad de errores y flujo de verificación telefónica SMS", () => {
   beforeEach(() => {
@@ -243,6 +244,31 @@ describe("registro — accesibilidad de errores y flujo de verificación telefó
     expect(screen.queryByText("Tipo de cuenta")).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: /personal|particular/i })).not.toBeInTheDocument();
     expect(screen.getByLabelText(/^nombre$/i)).toBeInTheDocument();
+  });
+
+  it("permite volver a verificar el teléfono sin perder los datos cuando vence el token", async () => {
+    const fetchOriginal = mocks.fetchMock.getMockImplementation()!;
+    mocks.fetchMock.mockImplementation(async (url) => url === "/api/auth/signup"
+      ? new Response(JSON.stringify({ codigo: VERIFICACION_TELEFONO_REQUERIDA }), { status: 400 })
+      : fetchOriginal(url));
+    const user = userEvent.setup();
+    render(<PaginaRegistro />);
+    await completarPaso1ConOtp(user);
+
+    await user.type(await screen.findByLabelText(/^correo electrónico$/i), "ana@ejemplo.com");
+    await user.type(screen.getByLabelText(/^contraseña$/i), "Secreto123");
+    await user.type(screen.getByLabelText(/confirmar contraseña/i), "Secreto123");
+    await user.click(screen.getByRole("checkbox"));
+    await user.click(screen.getByRole("button", { name: /crear cuenta/i }));
+
+    expect(await screen.findByText(/Vuelve a verificar tu teléfono/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/^nombre$/i)).toHaveValue("Carlos");
+    expect(screen.getByLabelText(/teléfono celular/i)).toHaveValue("55 1234 5678");
+    await user.click(screen.getByRole("button", { name: /continuar/i }));
+    await waitFor(() => expect(mocks.fetchMock.mock.calls.filter(([url]) => url === "/api/auth/phone-verify/send")).toHaveLength(2));
+    await user.type(await screen.findByLabelText(/código de verificación sms/i), "123456");
+    await user.click(screen.getByRole("button", { name: /verificar y continuar/i }));
+    expect(await screen.findByLabelText(/^correo electrónico$/i)).toHaveValue("ana@ejemplo.com");
   });
   it("suspende el paso SMS en producción sin enviar códigos", async () => {
     vi.stubEnv("NODE_ENV", "production");

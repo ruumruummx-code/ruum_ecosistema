@@ -135,7 +135,7 @@ export function validarTokenTelefono(
 export async function consumirTokenTelefono(
   telefonoDiezDigitos: string,
   token: string | null | undefined
-): Promise<{ valido: boolean; error?: string }> {
+): Promise<{ valido: boolean; error?: string; servicioNoDisponible?: true }> {
   const validacion = validarTokenTelefono(telefonoDiezDigitos, token);
   if (!validacion.valido || !token) return validacion;
   const nonce = token.split(":")[2];
@@ -146,11 +146,11 @@ export async function consumirTokenTelefono(
       return consumido ? { valido: true } : { valido: false, error: "El token ya fue utilizado o expiró." };
     } catch (error) {
       logStructuredWarn("auth/phone-verification", "nonce_redis_fallido", error);
-      return { valido: false, error: "Servicio de verificación no disponible. Intenta más tarde." };
+      return { valido: false, error: "Servicio de verificación no disponible. Intenta más tarde.", servicioNoDisponible: true };
     }
   }
   if (process.env.NODE_ENV === "production") {
-    return { valido: false, error: "Servicio de verificación no disponible. Intenta más tarde." };
+    return { valido: false, error: "Servicio de verificación no disponible. Intenta más tarde.", servicioNoDisponible: true };
   }
   const expira = noncesLocales.get(nonce);
   noncesLocales.delete(nonce);

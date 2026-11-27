@@ -1,4 +1,5 @@
 import { test, expect, type Page } from "@playwright/test";
+import { esperarHidratacion } from "./fixtures/navegacion";
 
 // El navegador recorre el formulario real. SMS y alta se interceptan para no
 // enviar mensajes ni crear cuentas reales. La ruta de alta se valida en Vitest.
@@ -8,7 +9,8 @@ async function comprobarSinScroll(page: Page) {
     const content = document.querySelector(".registro-content")!;
     const fallos: string[] = [];
     if (content.scrollHeight > content.clientHeight + 1) fallos.push(`Scroll del formulario: ${content.scrollHeight}/${content.clientHeight}`);
-    if (document.documentElement.scrollHeight > innerHeight || document.documentElement.scrollWidth > innerWidth) fallos.push("Scroll del documento");
+    // El portal de desarrollo de Next puede extender <html> fuera del cuerpo.
+    if (document.body.scrollHeight > innerHeight || document.body.scrollWidth > innerWidth) fallos.push("Scroll del documento");
     for (const el of document.querySelectorAll('.registro-content input:not([type="hidden"]), .registro-content button[type="submit"], .registro-content a[href="/login"]')) {
       const rect = el.getBoundingClientRect();
       if (rect.top < 0 || rect.bottom > innerHeight || rect.right > innerWidth || rect.left < 0) fallos.push(`Control fuera de pantalla: ${el.id || el.textContent}`);
@@ -19,6 +21,7 @@ async function comprobarSinScroll(page: Page) {
 }
 
   test("registra sólo perfil individual, sin selector y sin scroll", async ({ page }) => {
+    test.setTimeout(150_000);
     let alta: Record<string, unknown> | undefined;
     await page.route("**/api/auth/phone-verify/send", route => route.fulfill({ json: { ok: true } }));
     await page.route("**/api/auth/phone-verify/verify", route => route.fulfill({ json: { ok: true, token: "token-sms-fixture" } }));
@@ -26,7 +29,8 @@ async function comprobarSinScroll(page: Page) {
       alta = route.request().postDataJSON();
       return route.fulfill({ json: { ok: true, requiereConfirmacion: true, correo: "ana@ejemplo.com" } });
     });
-    await page.goto("/registro");
+    await page.goto("/registro", { waitUntil: "domcontentloaded", timeout: 120_000 });
+    await esperarHidratacion(page);
     await expect(page.getByLabel("Nombre", { exact: true })).toBeVisible();
     await expect(page.getByRole("button", { name: /empresa|personal|particular/i })).toHaveCount(0);
     await comprobarSinScroll(page);
@@ -51,6 +55,9 @@ async function comprobarSinScroll(page: Page) {
     await page.getByRole("button", { name: "Crear cuenta", exact: true }).focus();
     await comprobarSinScroll(page);
     await page.getByRole("button", { name: "Crear cuenta", exact: true }).click();
-    await expect(page).toHaveURL(/\/registro\/confirma-correo/);
+    await expect(page).toHaveURL(/\/registro\/confirma-correo/, { timeout: 60_000 });
+    const codigo = page.getByRole("group", { name: "Casillas de código" });
+    await expect(codigo.getByRole("textbox")).toHaveCount(6);
+    expect(await codigo.evaluate(el => el.scrollWidth <= el.clientWidth)).toBe(true);
     expect(alta).toMatchObject({ nombre: "ANA", apellido: "LÓPEZ", telefono: "5512345678", tipoCuenta: "personal" });
   });

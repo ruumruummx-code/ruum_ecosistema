@@ -12,10 +12,11 @@ import { tieneSupabaseConfigurado } from "../../lib/supabase-browser";
 import { OtpModal } from "./OtpModal";
 import "./registro.css";
 import {
-  CLAVE_CORREO_CONFIRMACION,
+  guardarCorreoConfirmacion,
   normalizarCorreoRegistro,
   soloDigitos,
   telefonoLocalMx,
+  VERIFICACION_TELEFONO_REQUERIDA,
 } from "../../lib/registro-usuario";
 
 /* ─────────────────────────────────────────────────────────────
@@ -295,6 +296,17 @@ export default function PaginaRegistro() {
   }
 
   /* Crear cuenta (Paso 2) */
+  function volverAVerificarTelefono() {
+    setTelefonoVerificado(false);
+    setTelefonoVerificadoValor("");
+    setTokenVerificacionTelefono(null);
+    ultimoTelefonoOtpRef.current = "";
+    setSegundosReenvio(0);
+    setPaso(1);
+    setError("Vuelve a verificar tu teléfono por SMS. Conservamos los datos que ya capturaste.");
+    requestAnimationFrame(() => continuarRef.current?.focus());
+  }
+
   async function crearCuenta(e: React.FormEvent) {
     e.preventDefault();
     const err = validarPaso2();
@@ -302,8 +314,7 @@ export default function PaginaRegistro() {
 
     const digitos = soloDigitos(telefono, 10);
     if (!bypassOtp && (!telefonoVerificado || !tokenVerificacionTelefono || telefonoVerificadoValor !== digitos)) {
-      setError("Debes verificar tu número de teléfono celular por SMS antes de crear tu cuenta.");
-      setPaso(1);
+      volverAVerificarTelefono();
       return;
     }
 
@@ -332,12 +343,17 @@ export default function PaginaRegistro() {
       const cuerpo = (await res.json().catch(() => null)) as {
         ok?: boolean;
         error?: string;
+        codigo?: string;
         requiereConfirmacion?: boolean;
         correo?: string;
       } | null;
 
-      if (!res.ok) {
-        setError(cuerpo?.error ?? "No pudimos crear la cuenta. Intenta de nuevo.");
+      if (!res.ok || !cuerpo?.ok) {
+        if (cuerpo?.codigo === VERIFICACION_TELEFONO_REQUERIDA && !bypassOtp) {
+          volverAVerificarTelefono();
+        } else {
+          setError(cuerpo?.error ?? "No pudimos crear la cuenta. Intenta de nuevo.");
+        }
         registrarEventoUx("registro_error", { tipo_cuenta: "personal" });
         return;
       }
@@ -347,11 +363,7 @@ export default function PaginaRegistro() {
         router.push("/");
         router.refresh();
       } else {
-        try {
-          window.sessionStorage.setItem(CLAVE_CORREO_CONFIRMACION, cuerpo.correo ?? correo);
-        } catch {
-          // ignore
-        }
+        guardarCorreoConfirmacion(cuerpo.correo ?? correo, Date.now());
         registrarEventoUx("registro_exitoso", { tipo_cuenta: "personal", requiere_confirmacion: true });
         router.push("/registro/confirma-correo");
       }

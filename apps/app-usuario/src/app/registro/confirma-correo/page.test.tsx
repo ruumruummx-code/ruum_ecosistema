@@ -14,6 +14,7 @@ vi.mock("next/navigation", () => ({
 }));
 
 import PaginaConfirmaCorreo from "./page";
+import { guardarCorreoConfirmacion } from "@/lib/registro-usuario";
 
 /**
  * La verificación del OTP y el reenvío ahora pasan por el servidor
@@ -110,5 +111,43 @@ describe("pantalla de confirmación de correo", () => {
     await waitFor(() => expect(mocks.push).toHaveBeenCalledWith("/"));
     expect(window.sessionStorage.getItem("ruum:correo-confirmacion")).toBeNull();
     expect(window.localStorage.getItem("ruum:reenvio-confirmacion-hasta")).toBeNull();
+  });
+
+  it("recupera la vigencia y el intervalo de reenvío al recargar", () => {
+    guardarCorreoConfirmacion("ana@ejemplo.com", Date.now() - 30_000);
+    render(<PaginaConfirmaCorreo />);
+
+    expect(screen.getByText(/^59:[23]\d$/)).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /reenviar \(\d+s\)/i })).toBeDisabled();
+  });
+
+  it("respeta Retry-After cuando el servidor limita el reenvío", async () => {
+    vi.stubGlobal("fetch", vi.fn(async () => new Response(
+      JSON.stringify({ error: "Espera antes de reenviar." }),
+      { status: 429, headers: { "Retry-After": "120" } }
+    )));
+
+    const user = userEvent.setup();
+    render(<PaginaConfirmaCorreo />);
+    await user.click(screen.getByRole("button", { name: /^Reenviar$/i }));
+
+    expect(await screen.findByText("Espera antes de reenviar.")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /reenviar \((11\d|120)s\)/i })).toBeDisabled();
+  });
+
+  it("muestra el reenvío exitoso aunque el navegador deniegue el almacenamiento", async () => {
+    vi.stubGlobal("fetch", mockFetchOk());
+    const almacenamiento = vi.spyOn(Storage.prototype, "setItem").mockImplementation(() => {
+      throw new DOMException("Storage bloqueado", "SecurityError");
+    });
+    try {
+      render(<PaginaConfirmaCorreo />);
+      await userEvent.setup().click(screen.getByRole("button", { name: /^Reenviar$/i }));
+
+      expect(await screen.findByText(/enviamos un nuevo código/i)).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: /reenviar \(\d+s\)/i })).toBeDisabled();
+    } finally {
+      almacenamiento.mockRestore();
+    }
   });
 });
