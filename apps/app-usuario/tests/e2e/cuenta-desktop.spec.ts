@@ -19,7 +19,7 @@ test("Mi cuenta: scroll confinado, datos, enlaces y sesiones autenticadas", asyn
       .querySelector<HTMLElement>("script[data-nextjs-dev-overlay]")
       ?.style.setProperty("display", "none", "important"),
   );
-  const account = page.getByTestId("account-desktop");
+  const account = page.locator('[data-marco="escritorio"]').getByTestId("cuenta");
   await expect(
     account.getByRole("heading", { name: /Hola, Carlos/ }),
   ).toBeVisible();

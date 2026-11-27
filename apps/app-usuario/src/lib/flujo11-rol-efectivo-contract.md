@@ -49,10 +49,10 @@ flowchart TD
 ## 3. Visibilidad Explícita de `solicitud_conductor_pendiente` (CA-6)
 
 - Cuando `estadoConductor === "solicitud_pendiente"`:
-  - En la vista móvil (`CuentaCliente.tsx`): Se renderiza una tarjeta accesible destacada (`role="region"` con `aria-label="Estado de solicitud de conductor"`):
+  - En la vista móvil (`Cuenta.tsx`, marco móvil): Se renderiza una tarjeta accesible destacada (`role="region"` con `aria-label="Estado de solicitud de conductor"`):
     > **Solicitud de conductor en revisión**  
     > Tu postulación como conductor está en validación. Te notificaremos cuando se complete.
-  - En la vista de escritorio (`CuentaDesktop.tsx`): Se ubica un banner corporativo accesible con icono protector y resumen de estado previo a las secciones de configuración.
+  - En la vista de escritorio (`Cuenta.tsx`, marco de escritorio): Se ubica un banner corporativo accesible con icono protector y resumen de estado previo a las secciones de configuración.
   - **Prohibición:** Bajo ninguna circunstancia la UI debe ocultar el trámite pendiente ni tratar al usuario como un solicitante nuevo.
 
 ---

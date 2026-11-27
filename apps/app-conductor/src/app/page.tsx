@@ -25,5 +25,5 @@ export default async function PaginaInicioConductor({
     redirect(`/auth/callback?${query.toString()}`);
   }
 
-  redirect("/onboarding");
+  redirect("/onboarding?desde=inicio");
 }
