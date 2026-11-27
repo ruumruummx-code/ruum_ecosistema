@@ -31,7 +31,8 @@
     "apps/app-conductor/src/app/shell-contract.css",
     "apps/panel-admin/src",
     "apps/app-usuario/src/app/InicioUsuario.tsx",
-    "apps/app-usuario/src/app/dashboard"
+    "apps/app-usuario/src/app/dashboard",
+    "apps/app-usuario/src/app/viajes/masivo"
   ],
   "excluir": [
     "packages/ui/src/styles/tokens.css",
@@ -102,8 +103,6 @@
     "apps/app-usuario/src/app/viajes/[id]/piezas-pasaporte.tsx": 53,
     "apps/app-usuario/src/app/viajes/[id]/SolicitudCalificacion.tsx": 4,
     "apps/app-usuario/src/app/viajes/[id]/TrasladoNoEncontrado.tsx": 24,
-    "apps/app-usuario/src/app/viajes/masivo/CargaMasivaDesktop.tsx": 799,
-    "apps/app-usuario/src/app/viajes/masivo/page.tsx": 4,
     "apps/app-usuario/src/app/viajes/nuevo/components/carga-masiva/BottomSheetCargaMasiva.tsx": 22,
     "apps/app-usuario/src/app/viajes/nuevo/components/carga-masiva/CheckoutMasivo.tsx": 25,
     "apps/app-usuario/src/app/viajes/nuevo/components/carga-masiva/TablaCorreccionMasiva.tsx": 73,
