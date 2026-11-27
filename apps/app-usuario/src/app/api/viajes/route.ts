@@ -251,14 +251,28 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    if (body.aceptaPoliticas !== true) {
+      return NextResponse.json(
+        { error: "Debes aceptar las políticas de pago y cancelación antes de continuar." },
+        { status: 400 }
+      );
+    }
+
     // CB-3 / T9 / CA-8: Consentimiento vía escritor canónico de F2.
     // Obligatorio: sin evidencia de aceptación de las políticas de pago y
     // cancelación no se emite cotización (antes un fallo solo dejaba un aviso).
+    const ua = request.headers.get("user-agent") ?? "";
+    const canalConsentimiento: "web" | "android" | "ios" = /android/i.test(ua)
+      ? "android"
+      : /iPad|iPhone|iPod/i.test(ua)
+      ? "ios"
+      : "web";
+    const versionApp = process.env.NEXT_PUBLIC_APP_VERSION?.trim().slice(0, 40) || "1.0.0";
     try {
       await registrarConsentimientoUsuario(cliente, {
         version: 1,
-        canal: "web",
-        versionApp: "1.0.0",
+        canal: canalConsentimiento,
+        versionApp,
       });
     } catch (errConsent) {
       logStructuredError("api/viajes", "registro_consentimiento_canonico_fallido", errConsent, {

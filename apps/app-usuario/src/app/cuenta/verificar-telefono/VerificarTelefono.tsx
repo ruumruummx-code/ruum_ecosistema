@@ -4,10 +4,12 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Aviso } from "@ruum/ui";
 import { Button, Card, CardContent, Input, Label, PageHeader } from "@ruum/ui/base";
-import { obtenerHeadersCsrf } from "@/lib/csrf";
+import { obtenerHeadersCsrfAsync } from "@/lib/csrf";
 import { crearClienteNavegador, tieneSupabaseConfigurado } from "@/lib/supabase-browser";
 
 type Etapa = "inicial" | "codigo_enviado" | "verificado";
+
+const COOLDOWN_REENVIO_SEG = 60;
 
 /**
  * Verificación del teléfono para cuentas creadas mientras el SMS estuvo
@@ -16,25 +18,51 @@ type Etapa = "inicial" | "codigo_enviado" | "verificado";
  * primer traslado.
  */
 export function VerificarTelefono() {
+  const [cargando, setCargando] = useState(true);
   const [telefono, setTelefono] = useState<string | null>(null);
   const [codigo, setCodigo] = useState("");
   const [etapa, setEtapa] = useState<Etapa>("inicial");
   const [enviando, setEnviando] = useState(false);
+  const [esperaReenvio, setEsperaReenvio] = useState(0);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!tieneSupabaseConfigurado()) return;
-    crearClienteNavegador().auth.getUser().then(({ data }) => {
-      const digitos = String(data.user?.user_metadata?.telefono ?? "").replace(/\D/g, "").slice(-10);
-      setTelefono(digitos.length === 10 ? digitos : null);
-      if (data.user?.user_metadata?.telefono_verificado !== false) setEtapa("verificado");
-    });
+    if (!tieneSupabaseConfigurado()) {
+      setCargando(false);
+      return;
+    }
+    let activo = true;
+    crearClienteNavegador()
+      .auth.getUser()
+      .then(({ data }) => {
+        if (!activo) return;
+        const digitos = String(data.user?.user_metadata?.telefono ?? "").replace(/\D/g, "").slice(-10);
+        setTelefono(digitos.length === 10 ? digitos : null);
+        if (data.user?.user_metadata?.telefono_verificado !== false) setEtapa("verificado");
+      })
+      .catch(() => {
+        if (activo) setError("No pudimos cargar los datos de tu cuenta. Intenta recargar la página.");
+      })
+      .finally(() => {
+        if (activo) setCargando(false);
+      });
+    return () => {
+      activo = false;
+    };
   }, []);
+
+  useEffect(() => {
+    if (esperaReenvio <= 0) return;
+    const timer = setInterval(() => {
+      setEsperaReenvio((prev) => (prev <= 1 ? 0 : prev - 1));
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [esperaReenvio]);
 
   async function llamar(url: string, cuerpo: Record<string, unknown>) {
     const res = await fetch(url, {
       method: "POST",
-      headers: obtenerHeadersCsrf({ "Content-Type": "application/json" }),
+      headers: await obtenerHeadersCsrfAsync({ "Content-Type": "application/json" }),
       body: JSON.stringify(cuerpo),
     });
     const datos = (await res.json().catch(() => ({}))) as { error?: string; token?: string };
@@ -43,12 +71,13 @@ export function VerificarTelefono() {
   }
 
   async function enviarCodigo() {
-    if (!telefono) return;
+    if (!telefono || enviando || esperaReenvio > 0) return;
     setEnviando(true);
     setError(null);
     try {
       await llamar("/api/auth/phone-verify/send", { telefono });
       setEtapa("codigo_enviado");
+      setEsperaReenvio(COOLDOWN_REENVIO_SEG);
     } catch (err) {
       setError(err instanceof Error ? err.message : "No pudimos enviar el código.");
     } finally {
@@ -58,7 +87,7 @@ export function VerificarTelefono() {
 
   async function confirmarCodigo(e: React.FormEvent) {
     e.preventDefault();
-    if (!telefono) return;
+    if (!telefono || enviando) return;
     setEnviando(true);
     setError(null);
     try {
@@ -80,7 +109,9 @@ export function VerificarTelefono() {
       />
       <Card>
         <CardContent className="grid gap-4 p-4">
-          {etapa === "verificado" ? (
+          {cargando ? (
+            <p role="status" className="text-sm text-ui-fg-muted">Cargando información de tu teléfono…</p>
+          ) : etapa === "verificado" ? (
             <>
               <div role="status"><Aviso tono="success">Tu teléfono está verificado.</Aviso></div>
               <Button asChild>
@@ -110,7 +141,9 @@ export function VerificarTelefono() {
                 />
               </div>
               <Button type="submit" disabled={enviando || codigo.length !== 6}>{enviando ? "Verificando…" : "Verificar"}</Button>
-              <Button type="button" variant="ghost" onClick={enviarCodigo} disabled={enviando}>Reenviar código</Button>
+              <Button type="button" variant="ghost" onClick={enviarCodigo} disabled={enviando || esperaReenvio > 0}>
+                {esperaReenvio > 0 ? `Reenviar código en ${esperaReenvio} s` : "Reenviar código"}
+              </Button>
             </form>
           )}
           {error && <div role="alert"><Aviso tono="danger">{error}</Aviso></div>}

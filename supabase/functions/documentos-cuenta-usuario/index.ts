@@ -9,11 +9,16 @@ import { construirCabecerasCors } from "../_shared/cors-documentos.ts";
 const BUCKET = "documentos-cuenta";
 const TIPOS = new Set(["comprobante", "constancia"]);
 
-function respuestaJson(req: Request, body: unknown, status = 200) {
+function respuestaJson(
+  req: Request,
+  body: unknown,
+  status = 200,
+  extraHeaders?: Record<string, string>,
+) {
   const cors = construirCabecerasCors(req);
   return new Response(JSON.stringify(body), {
     status,
-    headers: { ...cors, "Content-Type": "application/json" },
+    headers: { ...cors, "Content-Type": "application/json", ...extraHeaders },
   });
 }
 
@@ -78,7 +83,12 @@ Deno.serve(async (req) => {
     // 2. Operación de mutación (subida/reemplazo)
     const limite = await consumirRateLimit(servicio, "documentos-cuenta-usuario", sesion.user.id, 10, 600);
     if (!limite.permitido) {
-      return respuestaJson(req, { error: "Demasiados intentos. Espera unos minutos." }, 429);
+      return respuestaJson(
+        req,
+        { error: "Demasiados intentos. Espera unos minutos." },
+        429,
+        { "Retry-After": String(limite.reintentarEn) },
+      );
     }
 
     const form = await leerFormularioLimitado(req, TAMANO_MAXIMO);
@@ -103,16 +113,23 @@ Deno.serve(async (req) => {
       );
     }
 
-    // SAGA PASO 1: Identificar ruta anterior (si existe)
+    // SAGA PASO 1: Identificar ruta y estado anterior (si existe)
     const { data: anterior, error: errorAnterior } = await servicio
       .from("documentos_cuenta_usuario")
-      .select("ruta")
+      .select("ruta,estado")
       .eq("usuario_id", perfil.id)
       .eq("tipo", tipo)
       .maybeSingle();
 
     if (errorAnterior) {
       return respuestaJson(req, { error: "No pudimos consultar el documento anterior." }, 503);
+    }
+    if (anterior?.estado === "verificado") {
+      return respuestaJson(
+        req,
+        { error: "Este documento ya está verificado. Contacta a Soporte si necesitas actualizarlo." },
+        409,
+      );
     }
 
     // SAGA PASO 2: Subir archivo nuevo con ruta inmutable versionada
@@ -140,11 +157,12 @@ Deno.serve(async (req) => {
           estado: "recibido",
           subido_en,
           motivo_rechazo: null,
+          expira_en: null,
           actualizado_en: subido_en,
         },
         { onConflict: "usuario_id,tipo" }
       )
-      .select("tipo,ruta,estado,subido_en")
+      .select("id,tipo,ruta,estado,subido_en")
       .single();
 
     // SAGA PASO 3.1: Compensación inmediata y durable si falla la DB
@@ -169,10 +187,10 @@ Deno.serve(async (req) => {
     // Registrar en historial de estados de documentos
     try {
       await servicio.from("historial_estados_documentos_cuenta").insert({
-        documento_id: (documento as { id?: string }).id,
+        documento_id: documento.id,
         usuario_id: perfil.id,
         tipo,
-        estado_anterior: anterior?.ruta ? "reemplazado" : "sin_cargar",
+        estado_anterior: anterior?.estado ?? "sin_cargar",
         estado_nuevo: "recibido",
         actor: "usuario",
         actor_id: perfil.id,
@@ -199,7 +217,16 @@ Deno.serve(async (req) => {
       }
     }
 
-    return respuestaJson(req, documento, 201);
+    return respuestaJson(
+      req,
+      {
+        tipo: documento.tipo,
+        ruta: documento.ruta,
+        estado: documento.estado,
+        subido_en: documento.subido_en,
+      },
+      201,
+    );
   } catch {
     return respuestaJson(req, { error: "No pudimos procesar la solicitud. Inténtalo de nuevo." }, 503);
   }

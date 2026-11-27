@@ -16,39 +16,58 @@ import {
   validarRangoMontoCobro
 } from "./logica.ts";
 import { construirCabecerasCors, manejarCors } from "../_shared/cors-documentos.ts";
+import { consumirRateLimit } from "../_shared/rate-limit.ts";
 
-function respuestaJson(body: Record<string, unknown>, status = 200, req?: Request) {
+function respuestaJson(
+  req: Request,
+  body: Record<string, unknown>,
+  status = 200,
+  extraHeaders?: Record<string, string>,
+) {
   return new Response(JSON.stringify(body), {
     status,
-    headers: { ...construirCabecerasCors(req), "Content-Type": "application/json" }
+    headers: {
+      ...construirCabecerasCors(req),
+      "Content-Type": "application/json",
+      ...extraHeaders,
+    },
   });
 }
 
 /** Error interno: el detalle va al log con un id de traza, nunca al cliente. */
-function errorInterno(traza: string, codigo: string, detalle: unknown, mensaje = "No pudimos iniciar el pago. Intenta de nuevo.", req?: Request) {
+function errorInterno(
+  req: Request,
+  traza: string,
+  codigo: string,
+  detalle: unknown,
+  mensaje = "No pudimos iniciar el pago. Intenta de nuevo.",
+) {
   console.error("crear_payment_intent_error", {
     traza,
     codigo,
     detalle: detalle instanceof Error ? detalle.message.slice(0, 200) : (detalle as { code?: string } | null)?.code ?? null
   });
-  return respuestaJson({ error: mensaje, traza }, 500, req);
+  return respuestaJson(req, { error: mensaje, traza }, 500);
 }
 
 export async function manejarCrearPaymentIntent(req: Request, entorno: Pick<typeof Deno.env, "get"> = Deno.env) {
   const rechazoCors = manejarCors(req);
   if (rechazoCors) return rechazoCors;
+  if (req.method !== "POST") {
+    return respuestaJson(req, { error: "Método no permitido" }, 405);
+  }
 
   const traza = crypto.randomUUID();
   const autorizacion = req.headers.get("Authorization");
   if (!autorizacion) {
-    return respuestaJson({ error: "Falta sesión" }, 401, req);
+    return respuestaJson(req, { error: "Falta sesión" }, 401);
   }
 
   const stripeSecretKey = entorno.get("STRIPE_SECRET_KEY");
   const serviceKey = entorno.get("SUPABASE_SERVICE_ROLE_KEY");
   if (!stripeSecretKey || !serviceKey) {
     console.error("crear_payment_intent_config_incompleta", { traza });
-    return respuestaJson({ error: "El servicio de pagos no está disponible temporalmente.", traza }, 503);
+    return respuestaJson(req, { error: "El servicio de pagos no está disponible temporalmente.", traza }, 503);
   }
 
   // Cliente "como el usuario" (respeta RLS) — confirma que la sesión es real
@@ -60,7 +79,33 @@ export async function manejarCrearPaymentIntent(req: Request, entorno: Pick<type
 
   const { data: sesion, error: errorSesion } = await clienteUsuario.auth.getUser();
   if (errorSesion || !sesion.user) {
-    return respuestaJson({ error: "Sesión inválida" }, 401);
+    return respuestaJson(req, { error: "Sesión inválida" }, 401);
+  }
+
+  const clienteServicio = createClient(supabaseUrl, serviceKey);
+
+  try {
+    const limite = await consumirRateLimit(
+      clienteServicio,
+      "crear-payment-intent",
+      sesion.user.id,
+      15,
+      300,
+    );
+    if (!limite.permitido) {
+      return respuestaJson(
+        req,
+        { error: "Demasiados intentos de pago. Intenta nuevamente en unos minutos." },
+        429,
+        { "Retry-After": String(limite.reintentarEn) },
+      );
+    }
+  } catch (errorLimite) {
+    console.error("crear_payment_intent_rate_limit", {
+      traza,
+      detalle: errorLimite instanceof Error ? errorLimite.message.slice(0, 120) : null,
+    });
+    return respuestaJson(req, { error: "El servicio de pagos no está disponible temporalmente.", traza }, 503);
   }
 
   const { data: usuarioActual, error: errorUsuarioActual } = await clienteUsuario
@@ -70,19 +115,19 @@ export async function manejarCrearPaymentIntent(req: Request, entorno: Pick<type
     .single();
 
   if (errorUsuarioActual || !usuarioActual) {
-    return respuestaJson({ error: "Usuario no encontrado" }, 404);
+    return respuestaJson(req, { error: "Usuario no encontrado" }, 404);
   }
 
   let payload: { traslado_id?: string | number };
   try {
     payload = (await req.json()) as { traslado_id?: string | number };
   } catch {
-    return respuestaJson({ error: "JSON inválido" }, 400);
+    return respuestaJson(req, { error: "JSON inválido" }, 400);
   }
 
   const { traslado_id } = payload;
   if (!traslado_id) {
-    return respuestaJson({ error: "Falta traslado_id" }, 400);
+    return respuestaJson(req, { error: "Falta traslado_id" }, 400);
   }
 
   const { data: traslado, error: errorTraslado } = await clienteUsuario
@@ -93,7 +138,7 @@ export async function manejarCrearPaymentIntent(req: Request, entorno: Pick<type
 
   if (errorTraslado || !traslado) {
     // RLS ya filtró esto: si no es tuyo, no existe para esta consulta.
-    return respuestaJson({ error: "Traslado no encontrado" }, 404);
+    return respuestaJson(req, { error: "Traslado no encontrado" }, 404);
   }
 
   const { data: solicitante, error: errorSolicitante } = await clienteUsuario
@@ -103,7 +148,7 @@ export async function manejarCrearPaymentIntent(req: Request, entorno: Pick<type
     .single();
 
   if (errorSolicitante || !solicitante) {
-    return respuestaJson({ error: "No se pudo validar la cuenta que solicitó el traslado" }, 403);
+    return respuestaJson(req, { error: "No se pudo validar la cuenta que solicitó el traslado" }, 403);
   }
 
   const esTrasladoEmpresa =
@@ -112,28 +157,27 @@ export async function manejarCrearPaymentIntent(req: Request, entorno: Pick<type
 
   if (esTrasladoEmpresa && usuarioActual.rol !== "titular_empresa") {
     return respuestaJson(
+      req,
       { error: "Necesitas autorización del titular de la empresa para iniciar este pago." },
       403
     );
   }
 
-  const clienteServicio = createClient(supabaseUrl, serviceKey);
-
   // PRD §4.6 — si ya hay un precio_final (ajustado al cierre), ese es el monto
   // a cobrar; si no, la cotización original.
   const montoACobrar = montoAutorizadoParaCobro(traslado);
   if (montoACobrar === null) {
-    return respuestaJson({ error: "El traslado todavía no cuenta con una cotización válida." }, 422);
+    return respuestaJson(req, { error: "El traslado todavía no cuenta con una cotización válida." }, 422);
   }
   // Mismo piso que calcular_tarifa_traslado (tarifas_config.piso_cobro).
   const { data: pisoConfigurado } = await clienteServicio.rpc("piso_cobro_traslado");
   const piso = pisoConfigurado == null ? PISO_COBRO_MXN : Number(pisoConfigurado);
   const validacionMonto = validarRangoMontoCobro(montoACobrar, Number.isFinite(piso) ? piso : PISO_COBRO_MXN);
   if (!validacionMonto.valido) {
-    return respuestaJson({ error: validacionMonto.error }, 422);
+    return respuestaJson(req, { error: validacionMonto.error }, 422);
   }
   if (traslado.cotizacion_expira_en && new Date(traslado.cotizacion_expira_en).getTime() <= Date.now()) {
-    return respuestaJson({ error: "La cotización ha vencido. Solicita una actualización antes de pagar." }, 422);
+    return respuestaJson(req, { error: "La cotización ha vencido. Solicita una actualización antes de pagar." }, 422);
   }
   const montoCentavos = Math.round(montoACobrar * 100);
 
@@ -144,6 +188,7 @@ export async function manejarCrearPaymentIntent(req: Request, entorno: Pick<type
 
   if (!esCobroAnticipadoValido && !esCobroAlCierreValido) {
     return respuestaJson(
+      req,
       {
         error:
           traslado.tipo_pago === "al_cierre"
@@ -172,10 +217,10 @@ export async function manejarCrearPaymentIntent(req: Request, entorno: Pick<type
     .maybeSingle();
 
   if (errorConsultaPago) {
-    return errorInterno(traza, "consulta_pago", errorConsultaPago);
+    return errorInterno(req, traza, "consulta_pago", errorConsultaPago);
   }
   if (pagoExistente?.estado === "completado") {
-    return respuestaJson({ pagoConfirmado: true });
+    return respuestaJson(req, { pagoConfirmado: true });
   }
 
   // RC-05: clave de idempotencia estable por operación de cobro (incluye el
@@ -188,7 +233,7 @@ export async function manejarCrearPaymentIntent(req: Request, entorno: Pick<type
       intentExistente = await stripe.paymentIntents.retrieve(pagoExistente.stripe_payment_intent_id);
     } catch (error) {
       console.error("crear_payment_intent_retrieve", { traza, code: error instanceof Error ? error.message.slice(0, 120) : null });
-      return respuestaJson({ error: "No se pudo recuperar el intento de pago", traza }, 502);
+      return respuestaJson(req, { error: "No se pudo recuperar el intento de pago", traza }, 502);
     }
 
     const decision = decidirIntentExistente(intentExistente.status);
@@ -205,9 +250,9 @@ export async function manejarCrearPaymentIntent(req: Request, entorno: Pick<type
         if (error) throw error;
         if (data?.requiere_revision) throw new Error("provider_state_requires_review");
       } catch (error) {
-        return errorInterno(traza, "conciliacion_fallida", error, "Tu pago ya se procesó pero no pudimos reflejarlo. Intenta de nuevo en unos minutos.");
+        return errorInterno(req, traza, "conciliacion_fallida", error, "Tu pago ya se procesó pero no pudimos reflejarlo. Intenta de nuevo en unos minutos.");
       }
-      return respuestaJson({ pagoConfirmado: true });
+      return respuestaJson(req, { pagoConfirmado: true });
     }
 
     let reemplazar = decision.accion === "reemplazar";
@@ -216,7 +261,7 @@ export async function manejarCrearPaymentIntent(req: Request, entorno: Pick<type
       // El precio vigente puede haber cambiado desde que se creó el PI.
       const ajuste = decidirAjusteMonto(intentExistente.status, intentExistente.amount, montoCentavos);
       if (ajuste.accion === "en_proceso") {
-        return respuestaJson({ error: "Tu pago anterior se está procesando. Espera unos minutos antes de intentarlo de nuevo." }, 409);
+        return respuestaJson(req, { error: "Tu pago anterior se está procesando. Espera unos minutos antes de intentarlo de nuevo." }, 409);
       }
       if (ajuste.accion === "actualizar") {
         try {
@@ -225,19 +270,19 @@ export async function manejarCrearPaymentIntent(req: Request, entorno: Pick<type
             .eq("id", pagoExistente.id).eq("estado", "pendiente");
           if (error) throw error;
         } catch (error) {
-          return errorInterno(traza, "actualizar_monto_fallido", error);
+          return errorInterno(req, traza, "actualizar_monto_fallido", error);
         }
       }
       if (ajuste.accion === "reemplazar") {
         try {
           await stripe.paymentIntents.cancel(intentExistente.id, { cancellation_reason: "abandoned" });
         } catch (error) {
-          return errorInterno(traza, "cancelar_intent_monto_viejo", error);
+          return errorInterno(req, traza, "cancelar_intent_monto_viejo", error);
         }
         reemplazar = true;
       }
       if (!reemplazar) {
-        return respuestaJson({ clientSecret: intentExistente.client_secret });
+        return respuestaJson(req, { clientSecret: intentExistente.client_secret });
       }
     }
 
@@ -249,7 +294,7 @@ export async function manejarCrearPaymentIntent(req: Request, entorno: Pick<type
       .eq("stripe_payment_intent_id", intentExistente.id)
       .eq("estado", "pendiente");
     if (errorCierre) {
-      return errorInterno(traza, "cerrar_intent_fallido", errorCierre);
+      return errorInterno(req, traza, "cerrar_intent_fallido", errorCierre);
     }
     idempotencyKey = claveIdempotenciaCobro(traslado.id, montoCentavos, intentExistente.id);
   }
@@ -273,7 +318,7 @@ export async function manejarCrearPaymentIntent(req: Request, entorno: Pick<type
     });
   } catch (error) {
     console.error("crear_payment_intent_create", { traza, code: error instanceof Error ? error.message.slice(0, 120) : null });
-    return respuestaJson({ error: "No se pudo crear el intento de pago", traza }, 502);
+    return respuestaJson(req, { error: "No se pudo crear el intento de pago", traza }, 502);
   }
 
   // service_role: pagos no tiene política de INSERT para usuarios.
@@ -289,10 +334,10 @@ export async function manejarCrearPaymentIntent(req: Request, entorno: Pick<type
   if (errorPago) {
     // RC-05: carrera. Otra petición concurrente ya registró este mismo PI.
     if ((errorPago as { code?: string }).code === "23505") {
-      return respuestaJson({ clientSecret: intent.client_secret });
+      return respuestaJson(req, { clientSecret: intent.client_secret });
     }
-    return errorInterno(traza, "registrar_pago_fallido", errorPago);
+    return errorInterno(req, traza, "registrar_pago_fallido", errorPago);
   }
 
-  return respuestaJson({ clientSecret: intent.client_secret });
+  return respuestaJson(req, { clientSecret: intent.client_secret });
 }

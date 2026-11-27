@@ -33,7 +33,7 @@ export default async function PaginaCuenta({ searchParams }: { searchParams?: Pr
             usuario={cuenta.usuario}
             nombre={nombre}
             correo={cuenta.correoRegistro}
-            totalVehiculos={cuenta.vehiculos.length}
+            totalVehiculos={cuenta.datosAuxiliaresCargados === false ? undefined : cuenta.vehiculos.length}
             notificaciones={notificaciones}
             padding="ninguno"
             classNameContenido="bg-ui-bg"

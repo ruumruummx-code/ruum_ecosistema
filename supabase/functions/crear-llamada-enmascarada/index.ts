@@ -20,11 +20,12 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
 import { validarTelefonos, determinarRolLlamador, debeReutilizarSesion } from "./logica.ts";
 import { construirCabecerasCors, manejarCors } from "../_shared/cors-documentos.ts";
+import { consumirRateLimit } from "../_shared/rate-limit.ts";
 
-function respuestaJson(body: Record<string, unknown>, status = 200, req?: Request) {
+function respuestaJson(req: Request, body: Record<string, unknown>, status = 200, extraHeaders: Record<string, string> = {}) {
   return new Response(JSON.stringify(body), {
     status,
-    headers: { ...construirCabecerasCors(req), "Content-Type": "application/json" }
+    headers: { ...construirCabecerasCors(req), ...extraHeaders, "Content-Type": "application/json" }
   });
 }
 
@@ -45,7 +46,8 @@ async function llamarTwilio(ruta: string, cuerpo: Record<string, string>) {
       Authorization: autenticacionTwilio(),
       "Content-Type": "application/x-www-form-urlencoded"
     },
-    body: new URLSearchParams(cuerpo)
+    body: new URLSearchParams(cuerpo),
+    signal: AbortSignal.timeout(8000)
   });
   if (!respuesta.ok) {
     throw new Error(`Twilio respondió ${respuesta.status}: ${await respuesta.text()}`);
@@ -56,23 +58,24 @@ async function llamarTwilio(ruta: string, cuerpo: Record<string, string>) {
 Deno.serve(async (req) => {
   const rechazoCors = manejarCors(req);
   if (rechazoCors) return rechazoCors;
+  if (req.method !== "POST") return respuestaJson(req, { error: "Método no permitido" }, 405);
 
   try {
     const autorizacion = req.headers.get("Authorization");
     if (!autorizacion) {
-      return respuestaJson({ error: "Falta sesión" }, 401);
+      return respuestaJson(req, { error: "Falta sesión" }, 401);
     }
 
     let payload: { traslado_id?: string };
     try {
       payload = (await req.json()) as { traslado_id?: string };
     } catch {
-      return respuestaJson({ error: "JSON inválido" }, 400);
+      return respuestaJson(req, { error: "JSON inválido" }, 400);
     }
 
     const { traslado_id } = payload;
     if (!traslado_id) {
-      return respuestaJson({ error: "Falta traslado_id" }, 400);
+      return respuestaJson(req, { error: "Falta traslado_id" }, 400);
     }
 
     const supabaseUrl = envRequerida("SUPABASE_URL");
@@ -85,7 +88,24 @@ Deno.serve(async (req) => {
 
     const { data: sesionAuth, error: errorSesion } = await clienteSesion.auth.getUser();
     if (errorSesion || !sesionAuth.user) {
-      return respuestaJson({ error: "Sesión inválida" }, 401);
+      return respuestaJson(req, { error: "Sesión inválida" }, 401);
+    }
+
+    const clienteServicio = createClient(supabaseUrl, serviceRoleKey);
+
+    try {
+      const limite = await consumirRateLimit(clienteServicio, "crear-llamada-enmascarada", sesionAuth.user.id, 10, 600);
+      if (!limite.permitido) {
+        return respuestaJson(
+          req,
+          { error: "Demasiados intentos de llamada. Espera unos minutos e intenta de nuevo." },
+          429,
+          { "Retry-After": String(limite.reintentarEn) }
+        );
+      }
+    } catch (errorRate) {
+      console.error("crear-llamada-enmascarada: rate limit no disponible", errorRate);
+      return respuestaJson(req, { error: "Servicio temporalmente no disponible." }, 503);
     }
 
     // RLS ya filtra esto: si el traslado no es suyo (como usuario o como
@@ -98,15 +118,13 @@ Deno.serve(async (req) => {
     if (errorTraslado) throw errorTraslado;
 
     if (!traslado) {
-      return respuestaJson({ error: "Traslado no encontrado" }, 404);
+      return respuestaJson(req, { error: "Traslado no encontrado" }, 404);
     }
-
-    const clienteServicio = createClient(supabaseUrl, serviceRoleKey);
 
     const { data: chatDisp, error: errorChat } = await clienteServicio.rpc("chat_disponible", { p_estado: traslado.estado });
     if (errorChat) throw errorChat;
     if (!chatDisp) {
-      return respuestaJson({ error: "La comunicación para este traslado ya no está disponible" }, 422);
+      return respuestaJson(req, { error: "La comunicación para este traslado ya no está disponible" }, 422);
     }
 
     const { data: usuario, error: errorUsuario } = await clienteServicio.from("usuarios").select("id, telefono").eq("id", traslado.usuario_id).single();
@@ -126,12 +144,12 @@ Deno.serve(async (req) => {
 
     const rol = determinarRolLlamador(traslado.usuario_id, traslado.conductor_id, miUsuario?.id ?? null, miConductor?.id ?? null);
     if (!rol) {
-      return respuestaJson({ error: "No formas parte de este traslado" }, 403);
+      return respuestaJson(req, { error: "No formas parte de este traslado" }, 403);
     }
 
     const validacion = validarTelefonos(usuario?.telefono ?? null, conductor?.telefono ?? null);
     if (!validacion.valido) {
-      return respuestaJson({ error: validacion.motivo }, 422);
+      return respuestaJson(req, { error: validacion.motivo }, 422);
     }
 
     const { data: sesionExistente, error: errorSesionExistente } = await clienteServicio
@@ -170,7 +188,22 @@ Deno.serve(async (req) => {
         participante_usuario_sid: participanteUsuario.sid,
         participante_conductor_sid: participanteConductor.sid
       });
-      if (errorInsertSesion) throw errorInsertSesion;
+      if (errorInsertSesion) {
+        if ((errorInsertSesion as { code?: string }).code === "23505") {
+          const { data: concurrente } = await clienteServicio
+            .from("sesiones_proxy_traslado")
+            .select("numero_virtual")
+            .eq("traslado_id", traslado_id)
+            .maybeSingle();
+          if (concurrente?.numero_virtual) {
+            numeroVirtual = concurrente.numero_virtual;
+          } else {
+            throw errorInsertSesion;
+          }
+        } else {
+          throw errorInsertSesion;
+        }
+      }
     }
 
     const { error: errorInsertLlamada } = await clienteServicio.from("llamadas_enmascaradas").insert({
@@ -180,9 +213,9 @@ Deno.serve(async (req) => {
     });
     if (errorInsertLlamada) throw errorInsertLlamada;
 
-    return respuestaJson({ numeroProxy: numeroVirtual });
+    return respuestaJson(req, { numeroProxy: numeroVirtual });
   } catch (error) {
     console.error("Error creando llamada enmascarada:", error);
-    return respuestaJson({ error: "No fue posible iniciar la llamada enmascarada. Intenta de nuevo." }, 500, req);
+    return respuestaJson(req, { error: "No fue posible iniciar la llamada enmascarada. Intenta de nuevo." }, 500);
   }
 });

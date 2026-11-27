@@ -54,7 +54,7 @@ const LINKS_PREFERENCIAS = [
 ];
 
 const LINKS_LEGAL = [
-  { href: "/cuenta/legal", inicial: "D", titulo: "Legal", descripcion: "Documentos, términos y aviso de privacidad." },
+  { href: "/legal/terminos", inicial: "D", titulo: "Legal", descripcion: "Documentos, términos y aviso de privacidad." },
 ];
 
 const DOCUMENTOS_LEGALES = {
@@ -117,7 +117,6 @@ export async function obtenerCuenta({ carga = "completa" }: OpcionesCuenta = {})
 
     let fotoPerfilNoDisponible = false;
     const fotoPerfilUrl = carga === "preferencias" ? null : await obtenerUrlFotoPerfilUsuario(cliente, usuario.foto_url).catch(error => {
-      if (carga === "completa") throw error;
       fotoPerfilNoDisponible = true;
       console.warn("[cuenta] no se pudo cargar la foto de perfil", error);
       return null;
@@ -167,6 +166,7 @@ export async function obtenerCuenta({ carga = "completa" }: OpcionesCuenta = {})
         usuario,
         correoRegistro: auth.user.email ?? null,
         fotoPerfilUrl,
+        fotoPerfilNoDisponible,
         vehiculos,
         empresa,
         totalTraslados: trasladosPropios.length,

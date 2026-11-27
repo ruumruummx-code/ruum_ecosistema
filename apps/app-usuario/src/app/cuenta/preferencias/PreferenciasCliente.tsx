@@ -183,9 +183,17 @@ export function PreferenciasCliente({ cuenta }: PreferenciasClienteProps) {
     aplicarEfectosReales(defecto);
     setEstadoGuardado("inactivo");
     setMensajeEstado("");
+    void sincronizarPreferenciasRemotas(crearClienteNavegador(), usuario, defecto).catch(() => undefined);
   };
 
-  const nombreUsuario = usuario?.nombre ? usuario.nombre.split(" ")[0].toUpperCase() : "HECTOR";
+  useEffect(() => {
+    if (!modalSesionesAbierto) return;
+    const alTecla = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setModalSesionesAbierto(false);
+    };
+    window.addEventListener("keydown", alTecla);
+    return () => window.removeEventListener("keydown", alTecla);
+  }, [modalSesionesAbierto]);
 
   // Texto amigable para el tema en la tarjeta de resumen
   const textoTemaResumen = modo === "light" ? "Claro" : modo === "dark" ? "Oscuro" : "Automático";
@@ -210,7 +218,7 @@ export function PreferenciasCliente({ cuenta }: PreferenciasClienteProps) {
             </div>
           </PassportCard>
           <div className="mt-4">
-            <SeccionPreferencias usuario={cuenta.usuario} />
+            <SeccionPreferencias usuario={cuenta.usuario} sincronizarDom={false} />
           </div>
         </MobileShell>
       </div>
@@ -963,7 +971,12 @@ export function PreferenciasCliente({ cuenta }: PreferenciasClienteProps) {
 
       {/* ── MODAL DE SESIONES ACTIVAS ── */}
       {modalSesionesAbierto && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4">
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="modal-sesiones-titulo"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4"
+        >
           <div className="bg-white dark:bg-[#0A1325] border border-slate-200 dark:border-[#16253B] rounded-2xl p-6 max-w-md w-full shadow-2xl">
             <div className="flex items-center justify-between pb-4 border-b border-slate-100 dark:border-slate-800">
               <div className="flex items-center gap-2.5">
@@ -974,12 +987,13 @@ export function PreferenciasCliente({ cuenta }: PreferenciasClienteProps) {
                     <line x1="12" y1="17" x2="12" y2="21" />
                   </svg>
                 </div>
-                <h3 className="font-display font-bold text-base text-slate-900 dark:text-white">
+                <h3 id="modal-sesiones-titulo" className="font-display font-bold text-base text-slate-900 dark:text-white">
                   Sesiones activas
                 </h3>
               </div>
               <button
                 type="button"
+                aria-label="Cerrar modal de sesiones"
                 onClick={() => setModalSesionesAbierto(false)}
                 className="user-essential-muted hover:text-slate-600 dark:hover:text-white p-1 rounded-lg"
               >
@@ -1006,7 +1020,13 @@ export function PreferenciasCliente({ cuenta }: PreferenciasClienteProps) {
               </div>
             </div>
 
-            <div className="pt-3 border-t border-slate-100 dark:border-slate-800 flex justify-end">
+            <div className="pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between gap-2">
+              <Link
+                href="/cuenta?seccion=sesiones"
+                className="text-xs font-semibold user-essential-link hover:underline"
+              >
+                Administrar otras sesiones
+              </Link>
               <button
                 type="button"
                 onClick={() => setModalSesionesAbierto(false)}

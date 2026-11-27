@@ -93,7 +93,7 @@ export function SeguimientoTrasladoTiempoReal({
 
   useEffect(() => {
     inicializar(ubicacionInicial);
-    if (!tieneSupabaseConfigurado()) return;
+    if (cerrado || !tieneSupabaseConfigurado()) return;
 
     const cliente = crearClienteNavegador();
     let canalEstado: ReturnType<typeof suscribirEstadoTraslado> | null = null;
@@ -173,7 +173,7 @@ export function SeguimientoTrasladoTiempoReal({
       // Cleanup resiliente garantizado con limpiarCanalesSeguros
       void limpiarCanalesSeguros(cliente, [canalEstado, canalUbicacion]);
     };
-  }, [actualizar, inicializar, limpiar, trasladoId, ubicacionInicial]);
+  }, [actualizar, cerrado, inicializar, limpiar, trasladoId, ubicacionInicial]);
 
   async function refrescar() {
     if (!tieneSupabaseConfigurado()) return;

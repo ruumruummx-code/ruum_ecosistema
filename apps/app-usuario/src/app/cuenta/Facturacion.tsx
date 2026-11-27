@@ -380,13 +380,6 @@ export function Facturacion({ usuario, empresa, facturasIniciales }: Facturacion
     const cpLimpio = formCpFiscal.replace(/\D/g, "").slice(0, 5);
     const correoLimpio = formCorreo.trim();
 
-    setRfc(rfcLimpio);
-    setRazonSocial(razonLimpia);
-    setRegimenFiscal(formRegimenFiscal);
-    setCodigoPostalFiscal(cpLimpio);
-    setUsoCfdi(formUsoCfdi);
-    setCorreoFacturacion(correoLimpio);
-
     if (tieneSupabaseConfigurado()) {
       try {
         const cliente = crearClienteNavegador();
@@ -400,8 +393,18 @@ export function Facturacion({ usuario, empresa, facturasIniciales }: Facturacion
         });
       } catch (err) {
         console.warn("[facturacion] Error guardando datos en Supabase:", err);
+        setGuardandoFiscal(false);
+        setToastNotificacion(err instanceof Error ? err.message : "No pudimos guardar tus datos fiscales. Intenta nuevamente.");
+        return;
       }
     }
+
+    setRfc(rfcLimpio);
+    setRazonSocial(razonLimpia);
+    setRegimenFiscal(formRegimenFiscal);
+    setCodigoPostalFiscal(cpLimpio);
+    setUsoCfdi(formUsoCfdi);
+    setCorreoFacturacion(correoLimpio);
 
     setExitoGuardar(true);
     setTimeout(() => {

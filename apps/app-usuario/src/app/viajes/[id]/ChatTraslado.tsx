@@ -20,6 +20,15 @@ export function ChatTraslado({ trasladoId, estado, conservarEstado = false }: { 
   // D-1: rate limit local (UX inmediata antes del error del servicio):
   // máx 5 mensajes / 30s y al menos 1.5s entre envíos.
   const enviosRef = useRef<number[]>([]);
+  const timersPendienteRef = useRef<Set<ReturnType<typeof setTimeout>>>(new Set());
+
+  useEffect(() => {
+    const timers = timersPendienteRef.current;
+    return () => {
+      for (const timer of timers) clearTimeout(timer);
+      timers.clear();
+    };
+  }, []);
 
   const disponible = chatDisponible(estado);
 
@@ -134,22 +143,19 @@ export function ChatTraslado({ trasladoId, estado, conservarEstado = false }: { 
     actualizar({ errorChat: null });
     try {
       await enviarMensaje(clienteRef.current, trasladoId, texto);
-      // Éxito: quitar opacidad pendiente en ~800ms si Realtime no dedupeó aún
-      setTimeout(() => {
+      // Éxito: quitar opacidad pendiente en ~800ms si Realtime no dedupeó aún.
+      // No se elimina idTemp sin llegada del mensaje real para evitar desaparición
+      // silenciosa si Realtime está degradado; el dedupe al llegar el real lo reemplaza.
+      const timer = setTimeout(() => {
+        timersPendienteRef.current.delete(timer);
         const actual = mensajesRef.current;
         const idx = actual.findIndex((m) => m.id === idTemp);
         if (idx >= 0) {
           const sinPendiente = actual.map((m) => (m.id === idTemp ? { ...m, pendiente: false } : m));
           actualizar({ mensajes: sinPendiente });
-          // Limpieza final si ya llegó el real duplicado (el efecto dedupe lo quitará)
-          setTimeout(() => {
-            const cur = mensajesRef.current;
-            if (cur.some((m) => m.id === idTemp)) {
-              actualizar({ mensajes: cur.filter((m) => m.id !== idTemp) });
-            }
-          }, 2500);
         }
       }, 800);
+      timersPendienteRef.current.add(timer);
     } catch (err) {
       actualizar({
         mensajes: mensajesRef.current.filter((m) => m.id !== idTemp),
