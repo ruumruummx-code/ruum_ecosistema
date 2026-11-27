@@ -1,5 +1,7 @@
+import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 const PARAMETROS_CONFIRMACION_CORREO = ["code", "token_hash", "token", "confirmation_token"] as const;
+const COOKIE_ONBOARDING_CONDUCTOR = "ruum_conductor_onboarding_visto";
 
 export default async function PaginaInicioConductor({
   searchParams
@@ -23,6 +25,11 @@ export default async function PaginaInicioConductor({
       }
     }
     redirect(`/auth/callback?${query.toString()}`);
+  }
+
+  const cookieStore = await cookies();
+  if (cookieStore.get(COOKIE_ONBOARDING_CONDUCTOR)?.value === "1") {
+    redirect("/login");
   }
 
   redirect("/onboarding?desde=inicio");

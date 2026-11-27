@@ -200,7 +200,7 @@ function clasificarCausaError(error: unknown, searchParams: URLSearchParams): "e
         await setRecoveryCookie(cookieStore, supabase, nuevoUser);
         try {
           if (usuarioPrevioId && nuevoUser && nuevoUser.id !== usuarioPrevioId) {
-            queryMismatch = `?cuenta_distinta=1&anterior=${encodeURIComponent(usuarioPrevioEmail || "")}&nueva=${encodeURIComponent(nuevoUser.email || "")}`;
+            queryMismatch = "?cuenta_distinta=1";
           }
         } catch (err) {
           logStructuredWarn("auth/callback", "verificacion_cambio_cuenta_pkce_omitida", err);
@@ -239,7 +239,7 @@ function clasificarCausaError(error: unknown, searchParams: URLSearchParams): "e
         await setRecoveryCookie(cookieStore, supabase, nuevoUser);
         try {
           if (usuarioPrevioId && nuevoUser && nuevoUser.id !== usuarioPrevioId) {
-            queryMismatch = `?cuenta_distinta=1&anterior=${encodeURIComponent(usuarioPrevioEmail || "")}&nueva=${encodeURIComponent(nuevoUser.email || "")}`;
+            queryMismatch = "?cuenta_distinta=1";
           }
         } catch (err) {
           logStructuredWarn("auth/callback", "verificacion_cambio_cuenta_pkce_omitida", err);

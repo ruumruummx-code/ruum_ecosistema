@@ -1,7 +1,7 @@
 "use client";
 
 import { Button as BaseButton } from "@ruum/ui/base";
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { marcarOnboardingVisto, onboardingVisto } from "../../lib/onboarding-visto";
@@ -9,14 +9,27 @@ import { marcarOnboardingVisto, onboardingVisto } from "../../lib/onboarding-vis
 export default function PaginaOnboarding() {
   const router = useRouter();
   const eligioDestino = useRef(false);
+  const [verificandoInicio, setVerificandoInicio] = useState(true);
 
   useEffect(() => {
-    if (new URLSearchParams(window.location.search).get("desde") !== "inicio") return;
+    if (new URLSearchParams(window.location.search).get("desde") !== "inicio") {
+      setVerificandoInicio(false);
+      return;
+    }
 
     let activo = true;
-    void onboardingVisto().then((visto) => {
-      if (activo && visto && !eligioDestino.current) router.replace("/login");
-    });
+    void onboardingVisto()
+      .then((visto) => {
+        if (!activo) return;
+        if (visto && !eligioDestino.current) {
+          router.replace("/login");
+          return;
+        }
+        setVerificandoInicio(false);
+      })
+      .catch(() => {
+        if (activo) setVerificandoInicio(false);
+      });
     return () => {
       activo = false;
     };
@@ -32,6 +45,17 @@ export default function PaginaOnboarding() {
     },
     [router]
   );
+
+  if (verificandoInicio) {
+    return (
+      <div
+        className="flex h-[var(--conductor-visible-height,100dvh)] items-center justify-center text-ui-fg-muted conductor-onboarding-shell"
+        aria-busy="true"
+      >
+        <output className="font-body text-sm">Cargando…</output>
+      </div>
+    );
+  }
 
   return (
     <div

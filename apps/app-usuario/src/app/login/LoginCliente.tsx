@@ -20,6 +20,8 @@ interface LoginClienteProps {
   siguiente: string;
   /** Mensaje de éxito a mostrar (p. ej. tras restablecer la contraseña). */
   aviso?: string | null;
+  /** Mensaje clasificado cuando un enlace de confirmación falla (expirado, otro dispositivo, etc.). */
+  errorEnlace?: string | null;
 }
 
 const beneficios = [
@@ -44,7 +46,7 @@ function MarcaLogin({ clara = false }: { clara?: boolean }) {
   );
 }
 
-export function LoginCliente({ motivo, siguiente, aviso }: LoginClienteProps) {
+export function LoginCliente({ motivo, siguiente, aviso, errorEnlace }: LoginClienteProps) {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [recordar, setRecordar] = useState(false);
@@ -210,7 +212,17 @@ export function LoginCliente({ motivo, siguiente, aviso }: LoginClienteProps) {
           </header>
 
           {aviso && <div role="status"><Aviso tono="success">{aviso}</Aviso></div>}
-          {motivo === "email_confirmation" && (
+          {errorEnlace && (
+            <div role="alert">
+              <Aviso tono="atencion">
+                {errorEnlace}{" "}
+                <Link href="/registro/confirma-correo" prefetch={false} className={enlace}>
+                  Confirmar correo
+                </Link>
+              </Aviso>
+            </div>
+          )}
+          {!errorEnlace && motivo === "email_confirmation" && (
             <div role="status"><Aviso tono="atencion">Para solicitar tu primer traslado debes confirmar tu correo e iniciar sesión.</Aviso></div>
           )}
           {motivo === "cuenta_distinta" && (
@@ -236,7 +248,7 @@ export function LoginCliente({ motivo, siguiente, aviso }: LoginClienteProps) {
                   aria-invalid={Boolean(mostrarErrorCorreo)}
                   aria-describedby={mostrarErrorCorreo ? "login-email-error" : undefined}
                   autoComplete="username"
-                  placeholder="ruum.ruum.mx@gmail.com"
+                  placeholder="correo@ejemplo.com"
                   required
                   className={campo}
                 />

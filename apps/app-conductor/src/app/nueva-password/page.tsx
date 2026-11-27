@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Field, Aviso, LogoMarca } from "@ruum/ui";
@@ -16,6 +16,13 @@ export default function PaginaNuevaPasswordConductor() {
   const [error, setError] = useState<string | null>(null);
   const [sesionLista, setSesionLista] = useState(false);
   const [verificando, setVerificando] = useState(true);
+  const timerRedireccionRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (timerRedireccionRef.current) clearTimeout(timerRedireccionRef.current);
+    };
+  }, []);
 
   useEffect(() => {
     if (!tieneSupabaseConfigurado()) {
@@ -83,8 +90,12 @@ export default function PaginaNuevaPasswordConductor() {
       try {
         await fetch("/api/recovery/clear", { method: "POST", cache: "no-store", credentials: "same-origin" });
       } catch {}
+      // P0-2: revocar sesiones activas en otros dispositivos tras cambiar contraseña
+      try {
+        await cliente.auth.signOut({ scope: "others" });
+      } catch {}
       setListo(true);
-      setTimeout(() => router.push("/panel"), 2000);
+      timerRedireccionRef.current = setTimeout(() => router.push("/panel"), 2000);
     } catch (err) {
       setError(traducirErrorAuth(err, "No pudimos actualizar la contraseña."));
     } finally {

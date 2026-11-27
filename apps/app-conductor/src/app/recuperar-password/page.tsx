@@ -2,17 +2,21 @@
 import { Button as BaseButton } from "@ruum/ui/base";
 import { ConductorScreen, ConductorPageHeader } from "../components/ConductorScreen";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Field, Aviso } from "@ruum/ui";
 import { ConductorButton as Button } from "@/components/v2/ConductorUI";
-import { crearClienteNavegador, tieneSupabaseConfigurado, obtenerOriginApp } from "../../lib/supabase-browser";
+import { tieneSupabaseConfigurado } from "../../lib/supabase-browser";
 import { traducirErrorAuth } from "@ruum/shared/utils";
+
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export default function PaginaRecuperarPasswordConductor() {
   const [email, setEmail] = useState("");
   const [enviando, setEnviando] = useState(false);
   const [enviado, setEnviado] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [segundosEspera, setSegundosEspera] = useState(0);
+  const ultimoEnvioRef = useRef(0);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -23,22 +27,46 @@ export default function PaginaRecuperarPasswordConductor() {
     }
   }, []);
 
+  const hayEspera = segundosEspera > 0;
+  useEffect(() => {
+    if (!hayEspera) return;
+    const timer = window.setInterval(() => {
+      setSegundosEspera((prev) => (prev <= 1 ? 0 : prev - 1));
+    }, 1000);
+    return () => window.clearInterval(timer);
+  }, [hayEspera]);
+
   async function enviar(e: React.FormEvent) {
     e.preventDefault();
-    if (!email.trim()) { setError("Escribe tu correo electrónico."); return; }
+    if (enviando) return;
+    const correo = email.trim().toLowerCase();
+    if (!correo || !EMAIL_REGEX.test(correo)) {
+      setError("Escribe un correo electrónico válido, como tu@correo.com.");
+      return;
+    }
+    if (Date.now() - ultimoEnvioRef.current < 30_000) {
+      setError("Ya enviamos un enlace hace unos segundos. Espera un momento antes de solicitar otro.");
+      return;
+    }
     setEnviando(true);
     setError(null);
     try {
       if (!tieneSupabaseConfigurado()) throw new Error("Supabase no está configurado.");
-      const cliente = crearClienteNavegador();
-      const { error: errorAuth } = await cliente.auth.resetPasswordForEmail(
-        email.trim(),
-        { redirectTo: `${obtenerOriginApp()}/auth/callback?type=recovery&next=/nueva-password` }
-      );
-      if (errorAuth) throw errorAuth;
+      const res = await fetch("/api/recovery/request", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: correo }),
+        signal: AbortSignal.timeout(12_000),
+      });
+      const cuerpo = (await res.json().catch(() => null)) as { error?: string } | null;
+      if (!res.ok) {
+        throw new Error(cuerpo?.error || "No pudimos enviar el correo. Intenta de nuevo.");
+      }
+      ultimoEnvioRef.current = Date.now();
+      setSegundosEspera(30);
       setEnviado(true);
     } catch (err) {
-      setError(traducirErrorAuth(err, "No pudimos enviar el correo. Intenta de nuevo."));
+      setError(err instanceof Error ? err.message : traducirErrorAuth(err, "No pudimos enviar el correo. Intenta de nuevo."));
     } finally {
       setEnviando(false);
     }
@@ -66,10 +94,11 @@ export default function PaginaRecuperarPasswordConductor() {
             </p>
             <BaseButton variant="ghost"
               type="button"
-              onClick={() => { setEnviado(false); setEmail(""); }}
-              className="font-body text-sm font-semibold text-ui-brand underline-offset-2 hover:underline"
+              disabled={segundosEspera > 0 || enviando}
+              onClick={() => { setEnviado(false); setError(null); }}
+              className="font-body text-sm font-semibold text-ui-brand underline-offset-2 hover:underline disabled:opacity-50"
             >
-              Solicitar otro enlace
+              {segundosEspera > 0 ? `Solicitar otro enlace (${segundosEspera}s)` : "Solicitar otro enlace"}
             </BaseButton>
           </div>
         ) : (
