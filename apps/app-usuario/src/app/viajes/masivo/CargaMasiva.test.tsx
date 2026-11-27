@@ -2,20 +2,47 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { render, screen, waitFor, fireEvent, within, act } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { CargaMasivaDesktop } from "./CargaMasivaDesktop";
+import { CargaMasiva } from "./CargaMasiva";
+import PaginaViajesMasivo from "./page";
 import {
   descargarReporteDetallado,
   descargarResumenLote,
   copiarResumenLote,
-} from "./useCargaMasivaDesktop";
+} from "./useCargaMasivaPantalla";
 
-async function renderizarDesktop(nombre = "Alex") {
+async function renderizarDesktop() {
   let view!: ReturnType<typeof render>;
   await act(async () => {
-    view = render(<CargaMasivaDesktop nombreUsuario={nombre} />);
+    view = render(<CargaMasiva />);
   });
   return view;
 }
+
+function simularAncho(ancho: number) {
+  Object.defineProperty(window, "matchMedia", {
+    configurable: true,
+    writable: true,
+    value: (query: string) => {
+      const minimo = Number(/min-width:\s*(\d+)px/.exec(query)?.[1] ?? 0);
+      return {
+        matches: ancho >= minimo,
+        media: query,
+        onchange: null,
+        addEventListener: () => {},
+        removeEventListener: () => {},
+        addListener: () => {},
+        removeListener: () => {},
+        dispatchEvent: () => false,
+      };
+    },
+  });
+}
+
+vi.mock("../../../lib/supabase-browser", () => ({
+  crearClienteNavegador: () => ({
+    auth: { getUser: async () => ({ data: { user: { user_metadata: { nombre: "Alex" } } } }) },
+  }),
+}));
 
 const pushMock = vi.fn();
 const backMock = vi.fn();
@@ -123,7 +150,7 @@ vi.mock("../nuevo/hooks/useCargaMasiva", () => ({
   useCargaMasiva: () => mockHookReturn,
 }));
 
-describe("CargaMasivaDesktop — Pantalla de Carga Masiva de Escritorio", () => {
+describe("CargaMasiva — pantalla responsiva de carga masiva", () => {
   it("permite recuperar un pago en conciliación sin ofrecer otro cobro", async () => {
     mockHookReturn.estado = "checkout";
     mockHookReturn.cargaId = "carga-test-123";
@@ -148,6 +175,13 @@ describe("CargaMasivaDesktop — Pantalla de Carga Masiva de Escritorio", () => 
   });
   beforeEach(() => {
     vi.clearAllMocks();
+    // jsdom no implementa <dialog>.showModal/close (lo usa Sheet).
+    HTMLDialogElement.prototype.showModal = function (this: HTMLDialogElement) {
+      this.setAttribute("open", "");
+    };
+    HTMLDialogElement.prototype.close = function (this: HTMLDialogElement) {
+      this.removeAttribute("open");
+    };
     mockHookReturn.estado = "idle";
     mockHookReturn.error = null;
     mockHookReturn.filasVisibles = [];
@@ -164,8 +198,16 @@ describe("CargaMasivaDesktop — Pantalla de Carga Masiva de Escritorio", () => 
     consultarCargasPendientesMock.mockResolvedValue(cargasPendientesServidorDefault);
   });
 
-  it("renderiza el sidebar con la opción Carga Masiva activa y la tarjeta inferior Traslados sin límites", async () => {
-    await renderizarDesktop("Alex");
+  it("la página monta la pantalla una sola vez, en el marco de escritorio, con Carga Masiva activa en la barra lateral", async () => {
+    simularAncho(1280);
+    await act(async () => {
+      render(<PaginaViajesMasivo />);
+    });
+
+    expect(await screen.findAllByRole("heading", { name: "Carga masiva de traslados" })).toHaveLength(1);
+    await waitFor(() => expect(consultarCargasPendientesMock).toHaveBeenCalledTimes(1));
+    const contenido = document.getElementById("contenido-carga-masiva");
+    expect(contenido).toContainElement(screen.getByRole("heading", { name: "Carga masiva de traslados" }));
 
     const navPanel = screen.getByRole("navigation", { name: "Navegación del panel" });
     const enlaceCarga = within(navPanel).getByRole("link", { name: /^Carga Masiva/ });
@@ -176,14 +218,24 @@ describe("CargaMasivaDesktop — Pantalla de Carga Masiva de Escritorio", () => 
     expect(within(navPanel).getByRole("link", { name: /Mis traslados/ })).toHaveAttribute("href", "/mis-viajes");
     expect(within(navPanel).getByRole("link", { name: /Mi cuenta/ })).toHaveAttribute("href", "/cuenta");
 
-    // Card inferior
-    expect(screen.getByText("Mueve tu auto sin salir de casa")).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: /Registrar traslado/ })).toBeInTheDocument();
   });
 
-  it("renderiza la barra superior con migas de pan (Breadcrumbs), notificaciones y dropdown de usuario", async () => {
+  it("en móvil la página monta la pantalla una sola vez, fuera del marco de escritorio", async () => {
+    simularAncho(390);
+    await act(async () => {
+      render(<PaginaViajesMasivo />);
+    });
+
+    expect(await screen.findAllByRole("heading", { name: "Carga masiva de traslados" })).toHaveLength(1);
+    await waitFor(() => expect(consultarCargasPendientesMock).toHaveBeenCalledTimes(1));
+    expect(document.getElementById("contenido-carga-masiva")).not.toContainElement(
+      screen.getByRole("heading", { name: "Carga masiva de traslados" }),
+    );
+  });
+
+  it("renderiza las migas de pan con Volver y el enlace a Traslados", async () => {
     const user = userEvent.setup();
-    await renderizarDesktop("Alex");
+    await renderizarDesktop();
 
     // Breadcrumbs
     const breadcrumbs = screen.getByRole("navigation", { name: "Migas de pan" });
@@ -193,14 +245,10 @@ describe("CargaMasivaDesktop — Pantalla de Carga Masiva de Escritorio", () => 
 
     await user.click(within(breadcrumbs).getByRole("button", { name: /Volver/ }));
     expect(backMock).toHaveBeenCalledTimes(1);
-
-    // Usuario
-    expect(screen.getByText("Hola, Alex")).toBeInTheDocument();
-    expect(screen.getByText("AL")).toBeInTheDocument();
   });
 
   it("renderiza el header de la sección con título, subtítulo y botón Mis viajes", async () => {
-    await renderizarDesktop("Alex");
+    await renderizarDesktop();
 
     expect(screen.getByRole("heading", { name: "Carga masiva de traslados" })).toBeInTheDocument();
     expect(screen.getByText(/Cotiza y procesa múltiples traslados desde un archivo/)).toBeInTheDocument();
@@ -208,7 +256,7 @@ describe("CargaMasivaDesktop — Pantalla de Carga Masiva de Escritorio", () => 
   });
 
   it("renderiza la zona de Dropzone con arrastrar y soltar y botón Seleccionar archivo", async () => {
-    await renderizarDesktop("Alex");
+    await renderizarDesktop();
 
     expect(screen.getByText("Arrastra y suelta tu archivo aquí")).toBeInTheDocument();
     expect(screen.getByText("o haz clic para seleccionar un archivo .xlsx")).toBeInTheDocument();
@@ -217,7 +265,7 @@ describe("CargaMasivaDesktop — Pantalla de Carga Masiva de Escritorio", () => 
   });
 
   it("valida y rechaza archivos que no sean .xlsx mostrando un toast de error", async () => {
-    await renderizarDesktop("Alex");
+    await renderizarDesktop();
 
     const input = screen.getByLabelText("Cargar archivo Excel .xlsx");
     const archivoInvalido = new File(["dummy content"], "traslados.pdf", { type: "application/pdf" });
@@ -231,7 +279,7 @@ describe("CargaMasivaDesktop — Pantalla de Carga Masiva de Escritorio", () => 
   });
 
   it("valida y rechaza archivos mayores a 5 MB mostrando un toast de error", async () => {
-    await renderizarDesktop("Alex");
+    await renderizarDesktop();
 
     const input = screen.getByLabelText("Cargar archivo Excel .xlsx");
     // Archivo de 6 MB
@@ -249,7 +297,7 @@ describe("CargaMasivaDesktop — Pantalla de Carga Masiva de Escritorio", () => 
 
   it("acepta archivos .xlsx válidos y ejecuta la carga", async () => {
     cargarArchivoMock.mockResolvedValueOnce(undefined);
-    await renderizarDesktop("Alex");
+    await renderizarDesktop();
 
     const input = screen.getByLabelText("Cargar archivo Excel .xlsx");
     const archivoValido = new File(["contenido excel"], "flota_central.xlsx", {
@@ -264,7 +312,7 @@ describe("CargaMasivaDesktop — Pantalla de Carga Masiva de Escritorio", () => 
   });
 
   it("renderiza el panel instructivo con 4 pasos y botón de descarga de plantilla oficial", async () => {
-    await renderizarDesktop("Alex");
+    await renderizarDesktop();
 
     expect(screen.getByRole("heading", { name: "¿Cómo funciona?" })).toBeInTheDocument();
     expect(screen.getByText("Descarga la plantilla oficial")).toBeInTheDocument();
@@ -279,7 +327,7 @@ describe("CargaMasivaDesktop — Pantalla de Carga Masiva de Escritorio", () => 
 
   it("permite abrir y cerrar el modal de guía de uso", async () => {
     const user = userEvent.setup();
-    await renderizarDesktop("Alex");
+    await renderizarDesktop();
 
     const botonGuia = screen.getByRole("button", { name: /Ver guía de uso/ });
     await user.click(botonGuia);
@@ -294,7 +342,7 @@ describe("CargaMasivaDesktop — Pantalla de Carga Masiva de Escritorio", () => 
   });
 
   it("renderiza la cinta de 4 beneficios con iconos y descripciones", async () => {
-    await renderizarDesktop("Alex");
+    await renderizarDesktop();
 
     expect(screen.getByText("Rápido")).toBeInTheDocument();
     expect(screen.getByText("Procesa múltiples traslados en segundos")).toBeInTheDocument();
@@ -311,7 +359,7 @@ describe("CargaMasivaDesktop — Pantalla de Carga Masiva de Escritorio", () => 
 
   it("renderiza la tabla de cargas recientes con badges de estatus coloreados y acciones", async () => {
     const user = userEvent.setup();
-    await renderizarDesktop("Alex");
+    await renderizarDesktop();
 
     expect(screen.getByRole("heading", { name: "Cargas recientes" })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: /Ver todas/ })).toHaveAttribute("href", "/mis-viajes");
@@ -341,7 +389,7 @@ describe("CargaMasivaDesktop — Pantalla de Carga Masiva de Escritorio", () => 
 
   it("abre el menú contextual de tres puntos en una fila y ejecuta acciones", async () => {
     const user = userEvent.setup();
-    await renderizarDesktop("Alex");
+    await renderizarDesktop();
 
     const botonMenu = await screen.findByRole("button", { name: "Opciones de carga traslados_octubre.xlsx" });
     await user.click(botonMenu);
@@ -356,7 +404,7 @@ describe("CargaMasivaDesktop — Pantalla de Carga Masiva de Escritorio", () => 
   });
 
   it("renderiza el banner de soporte inferior con enlace a contactar soporte", async () => {
-    await renderizarDesktop("Alex");
+    await renderizarDesktop();
 
     const footerSoporte = screen.getByRole("contentinfo", { name: "Ayuda de carga masiva" });
     expect(within(footerSoporte).getByRole("heading", { name: "¿Necesitas ayuda?" })).toBeInTheDocument();
@@ -448,7 +496,7 @@ describe("CargaMasivaDesktop — Pantalla de Carga Masiva de Escritorio", () => 
     mockHookReturn.filasCorrectas = [filaValidaMock];
     mockHookReturn.filasConError = [filaInvalidaMock];
 
-    await renderizarDesktop("Alex");
+    await renderizarDesktop();
 
     expect(screen.getByRole("heading", { name: "Validación de archivo" })).toBeInTheDocument();
     expect(screen.getByText("Total de traslados")).toBeInTheDocument();
@@ -504,7 +552,7 @@ describe("CargaMasivaDesktop — Pantalla de Carga Masiva de Escritorio", () => 
     mockHookReturn.estado = "geocodificando";
     mockHookReturn.progreso = 60;
 
-    await renderizarDesktop("Alex");
+    await renderizarDesktop();
 
     expect(
       screen.getByText("Calculando rutas y distancias...")
@@ -523,7 +571,7 @@ describe("CargaMasivaDesktop — Pantalla de Carga Masiva de Escritorio", () => 
     mockHookReturn.filasConError = [filaInvalidaMock];
     mockHookReturn.stripeClientSecret = "pi_secret_test";
 
-    await renderizarDesktop("Alex");
+    await renderizarDesktop();
 
     expect(
       screen.getByRole("heading", { name: "Revisión consolidada y Checkout masivo" })
@@ -558,7 +606,7 @@ describe("CargaMasivaDesktop — Pantalla de Carga Masiva de Escritorio", () => 
     mockHookReturn.totalMXN = 2600;
     mockHookReturn.filasCorrectas = [filaValidaMock, { ...filaValidaMock, indice: 1 }];
 
-    await renderizarDesktop("Alex");
+    await renderizarDesktop();
 
     expect(screen.getByText("¡Carga masiva procesada y confirmada!")).toBeInTheDocument();
     expect(screen.getByText("$2,600.00 MXN")).toBeInTheDocument();
@@ -581,7 +629,7 @@ describe("CargaMasivaDesktop — Pantalla de Carga Masiva de Escritorio", () => 
     };
     consultarCargasPendientesMock.mockResolvedValueOnce([cargaPendiente]);
 
-    await renderizarDesktop("Alex");
+    await renderizarDesktop();
 
     expect(
       await screen.findByRole("heading", { name: "Cargas pendientes de pago (1)" })

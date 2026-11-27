@@ -219,7 +219,7 @@ export async function copiarResumenLote(carga: CargaRecienteItem): Promise<boole
   }
 }
 
-export function useCargaMasivaDesktop() {
+export function useCargaMasivaPantalla() {
   const cargaMasiva = useCargaMasiva();
   const [nombreArchivo, setNombreArchivo] = useState<string | null>(null);
   const [arrastrando, setArrastrando] = useState(false);

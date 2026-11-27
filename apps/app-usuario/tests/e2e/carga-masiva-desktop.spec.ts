@@ -399,7 +399,7 @@ test.describe("RR-CM-001 — Flujo operativo Carga Masiva Desktop", () => {
     await expect(page.getByRole("heading", { name: "Validación de archivo" })).toBeVisible({ timeout: 15000 });
 
     // La fila aparece con incidencia y mensaje claro, sin tarifa asignada
-    await expect(page.getByText("✕ Con incidencia")).toBeVisible();
+    await expect(page.getByText("Con incidencia", { exact: true })).toBeVisible();
     await expect(page.getByText("Toyota Hilux")).toBeVisible();
     await expect(
       page.getByText("No se encontró ruta terrestre entre los códigos postales origen y destino.")
