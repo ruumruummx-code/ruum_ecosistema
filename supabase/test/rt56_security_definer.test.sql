@@ -1,7 +1,7 @@
 set search_path = public, extensions;
 
 begin;
-select plan(3);
+select plan(6);
 
 select is_empty($$
   select p.oid::regprocedure
@@ -37,6 +37,28 @@ select is_empty($$
     and (has_function_privilege('anon', p.oid, 'EXECUTE')
       or has_function_privilege('authenticated', p.oid, 'EXECUTE'))
 $$, 'Los triggers de protección no dan EXECUTE a los roles de cliente');
+
+select ok(
+  has_function_privilege('authenticated', 'public.empresa_id_del_titular_actual()', 'EXECUTE')
+    and not has_function_privilege('anon', 'public.empresa_id_del_titular_actual()', 'EXECUTE'),
+  'La política para titulares puede consultar su empresa con una sesión autenticada'
+);
+
+select ok(
+  has_function_privilege('authenticated', 'public.usuario_ids_de_traslados_asignados_conductor()', 'EXECUTE')
+    and not has_function_privilege('anon', 'public.usuario_ids_de_traslados_asignados_conductor()', 'EXECUTE'),
+  'La política para conductores puede consultar sus solicitantes con una sesión autenticada'
+);
+
+set local role authenticated;
+set local request.jwt.claims = '{"sub":"56000000-0000-4000-8000-000000000001","role":"authenticated"}';
+
+select lives_ok(
+  $$select id from public.usuarios where auth_user_id = (select auth.uid())$$,
+  'La comprobación de rol puede consultar usuarios para una cuenta sin perfil de usuario'
+);
+
+reset role;
 
 select * from finish();
 rollback;

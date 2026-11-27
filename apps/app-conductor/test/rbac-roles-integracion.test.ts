@@ -34,6 +34,17 @@ describe("F1.2 — RBAC Definitivo Integración: app-conductor por Rol", () => {
   });
 
   describe("Peticiones no autenticadas", () => {
+    it.each(["/", "/?code=confirmacion-de-prueba&type=signup"])(
+      "deja la entrada %s a cargo de su página pública",
+      async (ruta) => {
+        const req = new NextRequest(`https://conductor.ruum.mx${ruta}`);
+        const res = await middleware(req);
+
+        expect(res.headers.get("x-middleware-next")).toBe("1");
+        expect(mocks.getUser).not.toHaveBeenCalled();
+      }
+    );
+
     it("devuelve 401 JSON en endpoints /api/* protegidos", async () => {
       mocks.getUser.mockResolvedValueOnce({ data: { user: null }, error: null });
       const req = new NextRequest("https://conductor.ruum.mx/api/perfil/documentos");

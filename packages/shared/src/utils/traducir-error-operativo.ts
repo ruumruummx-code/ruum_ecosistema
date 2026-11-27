@@ -6,6 +6,7 @@ const REGLAS: Array<[RegExp,string]> = [
   [/todav[ií]a no est[aá] lista para env[ií]o/i,"Tu solicitud aún no está lista para envío. Completa todos los pasos anteriores."],
   [/no encontramos una solicitud activa|primero inicia la solicitud/i,"No encontramos una solicitud activa. Vuelve a iniciar el registro."],
   [/ya no admite consentimientos|ya no admite cambios/i,"Tu solicitud ya fue enviada. Puedes continuar con la verificación de identidad."],
+  [/verificaci[oó]n de identidad no est[aá] disponible en este momento/i,"La verificación de identidad no está disponible en este momento. Intenta más tarde."],
   [/versi[oó]n .* no est[aá] vigente/i,"La versión del documento legal no está vigente. Recarga la página e inténtalo de nuevo."],
   [/conductor_duplicado:curp|solicitudes_conductor_curp|conductores_curp|\bcurp\b.*(duplicate|duplicad)/i,"Este CURP ya está asociado a otra solicitud."],
   [/conductor_duplicado:telefono|telefono.*(duplicate|duplicad)/i,"Este teléfono ya está asociado a otra cuenta."],
